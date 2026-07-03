@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 func TestPlayTurnAffectsOnlyActingEmpire(t *testing.T) {
 	cfg := DefaultConfig()
@@ -79,5 +82,17 @@ func TestDailyMaintenanceCullsDead(t *testing.T) {
 	w.DailyMaintenance("2026-07-03")
 	if w.FindByOwner("gone").Alive {
 		t.Error("empire with 0 land should be marked dead")
+	}
+}
+
+func TestDailyMaintenanceHandlesMalformedDate(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.LastMaintDate = "2026-07-0" // malformed, lexicographically < today
+	done := make(chan struct{})
+	go func() { w.DailyMaintenance("2026-07-03"); close(done) }()
+	select {
+	case <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("DailyMaintenance hung on a malformed LastMaintDate")
 	}
 }

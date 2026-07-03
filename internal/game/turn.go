@@ -38,7 +38,11 @@ func (w *World) DailyMaintenance(today string) {
 			}
 		}
 		w.GameDay++
-		w.LastMaintDate = w.nextDate(w.LastMaintDate)
+		next := w.nextDate(w.LastMaintDate)
+		if next == w.LastMaintDate {
+			break // malformed date; avoid an infinite loop
+		}
+		w.LastMaintDate = next
 	}
 }
 
