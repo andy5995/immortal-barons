@@ -361,50 +361,49 @@ func gooieKablooie(s session.Session, w *game.World) Result {
 	return Stay
 }
 
+// empireStatus prints a compact, multi-item status screen (BRE-style),
+// packing values across lines instead of one dot-leader row each.
 func empireStatus(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, p.Name, ansi.Reset)
-	fmt.Fprintf(s, "  Gold ........ %d\n", p.Gold)
-	fmt.Fprintf(s, "  Bank ........ %d\n", p.Bank)
-	fmt.Fprintf(s, "  Debt ........ %d\n", p.Debt)
-	fmt.Fprintf(s, "  Food ........ %d\n", p.Food)
-	fmt.Fprintf(s, "  Land ........ %d regions (%s)\n", p.Land, regionBreakdown(p))
-	fmt.Fprintf(s, "  People ...... %d\n", p.People)
-	fmt.Fprintf(s, "  Troopers .... %d\n", p.Troopers)
-	fmt.Fprintf(s, "  Jets ........ %d\n", p.Jets)
-	fmt.Fprintf(s, "  Turrets ..... %d\n", p.Turrets)
-	fmt.Fprintf(s, "  Tanks ....... %d\n", p.Tanks)
-	fmt.Fprintf(s, "  Bombers ..... %d\n", p.Bombers)
-	fmt.Fprintf(s, "  Carriers .... %d\n", p.Carriers)
-	fmt.Fprintf(s, "  Agents ...... %d\n", p.Agents)
-	fmt.Fprintf(s, "  Tax rate .... %d%%\n", p.Tax)
-	fmt.Fprintf(s, "  Popular Support . %d%%\n", p.Support)
-	fmt.Fprintf(s, "  SDI ......... %d%%\n", p.SDI)
-	switch {
-	case p.HQ == 0:
-		fmt.Fprintf(s, "  HeadQuarters . None\n")
-	case p.HQ >= 100:
-		fmt.Fprintf(s, "  HeadQuarters . Complete\n")
-	default:
-		fmt.Fprintf(s, "  HeadQuarters . %d%% Complete\n", p.HQ)
-	}
-	fmt.Fprintf(s, "  Offense ..... %d\n", p.Offense())
-	fmt.Fprintf(s, "  Defense ..... %d\n", p.Defense())
-	fmt.Fprintf(s, "  Net worth ... %d\n", w.NetWorth(p))
+	c, r := ansi.FgBrightCyan, ansi.Reset
+	fmt.Fprintf(s, "\n%s-*%s*-%s\n", c, p.Name, r)
+	fmt.Fprintf(s, "Turns left: %d    Net worth: %d\n", p.TurnsLeft, w.NetWorth(p))
+	fmt.Fprintf(s, "Gold: %d    Bank: %d    Debt: %d\n", p.Gold, p.Bank, p.Debt)
+	fmt.Fprintf(s, "Population: %d (Tax %d%%)    Support: %d%%\n", p.People, p.Tax, p.Support)
+	fmt.Fprintf(s, "Food: %d    HeadQuarters: %s    SDI: %d%%\n", p.Food, hqStatus(p), p.SDI)
+	fmt.Fprintf(s, "Offense: %d    Defense: %d\n", p.Offense(), p.Defense())
+	fmt.Fprintf(s, "Military: [%d Troopers] [%d Jets] [%d Turrets] [%d Tanks] [%d Bombers] [%d Carriers] [%d Agents]\n",
+		p.Troopers, p.Jets, p.Turrets, p.Tanks, p.Bombers, p.Carriers, p.Agents)
+	fmt.Fprintf(s, "Regions: %s\n", regionBreakdown(p))
+	fmt.Fprintf(s, "Protection: %d turns left\n", p.Protection)
 	pause(s)
 	return Stay
 }
 
-// regionBreakdown formats the non-zero region counts of p, e.g.
-// "Coastal 40, Agricultural 25, Urban 10".
+func hqStatus(p *game.Empire) string {
+	switch {
+	case p.HQ == 0:
+		return "None"
+	case p.HQ >= 100:
+		return "Complete"
+	default:
+		return fmt.Sprintf("%d%%", p.HQ)
+	}
+}
+
+// regionBreakdown formats the non-zero region counts of p as bracketed
+// items, e.g. "[40 Coastal] [25 Agricultural] [10 Urban]".
 func regionBreakdown(p *game.Empire) string {
 	var parts []string
 	for i, name := range regionTypeNames {
 		if n := *regionField(p, i); n > 0 {
-			parts = append(parts, fmt.Sprintf("%s %d", name, n))
+			parts = append(parts, fmt.Sprintf("[%d %s]", n, name))
 		}
 	}
-	return strings.Join(parts, ", ")
+	if len(parts) == 0 {
+		return fmt.Sprintf("%d regions", p.Land)
+	}
+	return strings.Join(parts, " ")
 }
 
 func seeScores(s session.Session, w *game.World) Result {
