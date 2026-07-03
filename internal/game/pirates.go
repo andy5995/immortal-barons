@@ -90,8 +90,9 @@ func (w *World) pirateRaidVictim(p *PirateFaction, v *Empire) {
 	p.LootTanks += tookK
 	p.Forces += tookT + tookJ*2 + tookK*4
 	p.Land += w.rng.Intn(PirateRaidLandMax) + 1 // game-granted, not stolen from v
-	if tookT+tookJ+tookK > 0 {
-		v.Events = append(v.Events, fmt.Sprintf(
+	// Only humans read the notice; the raid itself still hits AI victims.
+	if tookT+tookJ+tookK > 0 && v.Owner != "" {
+		v.PirateRaids = append(v.PirateRaids, fmt.Sprintf(
 			"The %s pirates raided you, carrying off %d troopers, %d jets, and %d tanks!",
 			p.Name, tookT, tookJ, tookK))
 	}

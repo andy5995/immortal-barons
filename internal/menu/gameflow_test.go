@@ -58,6 +58,22 @@ func TestRunTurnNoTurnsLeftReturnsImmediately(t *testing.T) {
 	}
 }
 
+func TestIncomeReportSurfacesAndClearsPirateRaids(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")} // one key for the pause
+	w := newWorld()
+	p := w.Active
+	p.PirateRaids = []string{"The Sharks pirates raided you, carrying off 40 troopers, 0 jets, and 5 tanks!"}
+
+	incomeReport(f, w, p)
+
+	if !strings.Contains(f.out.String(), "Sharks pirates raided you") {
+		t.Error("income report should show the pirate raid notice")
+	}
+	if len(p.PirateRaids) != 0 {
+		t.Error("income report should clear the raid notice after showing it")
+	}
+}
+
 func TestPaymentStageAutoPays(t *testing.T) {
 	f := &fakeSession{}
 	w := newWorld()

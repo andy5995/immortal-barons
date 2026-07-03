@@ -39,8 +39,26 @@ func TestPirateRaidTakesUnitsAndGrantsLand(t *testing.T) {
 	if p.Land <= landBefore {
 		t.Errorf("faction should be granted regions by the game, land %d -> %d", landBefore, p.Land)
 	}
-	if len(v.Events) == 0 {
-		t.Error("victim should get a raid event")
+	if len(v.PirateRaids) == 0 {
+		t.Error("human victim should get a raid notice")
+	}
+}
+
+func TestPirateRaidOnAIRecordsNoNotice(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 1
+	w := NewWorldSeed(cfg, 1)
+	ai := w.Empires[0] // seeded AI empire (Owner == "")
+	ai.Tanks = 100
+	p := &w.Pirates[0]
+
+	w.pirateRaidVictim(p, ai)
+
+	if ai.Tanks != 100-100*PirateRaidUnitPct/100 {
+		t.Errorf("AI victim should still lose units, got %d tanks", ai.Tanks)
+	}
+	if len(ai.PirateRaids) != 0 {
+		t.Errorf("AI victim should not accumulate raid notices, got %d", len(ai.PirateRaids))
 	}
 }
 

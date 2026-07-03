@@ -71,6 +71,10 @@ func incomeReport(s session.Session, w *game.World, p *game.Empire) {
 	fmt.Fprintf(s, "  %d gold by Solar Power.\n", solar)
 	fmt.Fprintf(s, "  %d gold from Rivers.\n", rivers)
 	fmt.Fprintf(s, "  %d food units grown.\n", food)
+	for _, r := range p.PirateRaids {
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, r, ansi.Reset)
+	}
+	p.PirateRaids = nil
 	pause(s)
 }
 

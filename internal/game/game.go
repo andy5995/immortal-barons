@@ -40,11 +40,12 @@ type Empire struct {
 	HQ      int // 0 = none/not started; 1-100 = percent complete
 	Support int // 0-100, popular support; erodes with high tax, slashes Coastal income when low
 
-	TurnsLeft  int
-	Protection int
-	LastPlayed string
-	Events     []string
-	Mail       []string
+	TurnsLeft   int
+	Protection  int
+	LastPlayed  string
+	Events      []string
+	Mail        []string
+	PirateRaids []string // raids suffered since last play; shown in the income report
 
 	AllianceOffers []string
 
