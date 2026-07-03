@@ -127,6 +127,41 @@ func attackPirates(s session.Session, w *game.World) Result {
 	return Stay
 }
 
+func sdiProgram(s session.Session, w *game.World) Result {
+	p := w.Player()
+	fmt.Fprintf(s, "\n%sSDI Program — current defense: %d%%%s\n", ansi.FgBrightCyan, p.SDI, ansi.Reset)
+	gold := promptInt(s, "Fund SDI — gold to spend (10000 per +1%%, max 75%%)?")
+	if gold <= 0 {
+		return Stay
+	}
+	level, err := w.FundSDI(p, gold)
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	ok(s, "SDI is now %d%%.", level)
+	return Stay
+}
+
+func gooieKablooie(s session.Session, w *game.World) Result {
+	if w.Player().Protection > 0 {
+		ok(s, "You are under New Realm Protection and cannot attack yet.")
+		return Stay
+	}
+	answer := promptInt(s, fmt.Sprintf("A Gooie Kablooie costs %d gold. Launch? (1 = yes)", game.GooieCost))
+	if answer != 1 {
+		return Stay
+	}
+	report, err := w.GooieKablooie(w.Player())
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s\n", report)
+	pause(s)
+	return Stay
+}
+
 func empireStatus(s session.Session, w *game.World) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, p.Name, ansi.Reset)
@@ -143,6 +178,7 @@ func empireStatus(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "  Carriers .... %d\n", p.Carriers)
 	fmt.Fprintf(s, "  Agents ...... %d\n", p.Agents)
 	fmt.Fprintf(s, "  Tax rate .... %d%%\n", p.Tax)
+	fmt.Fprintf(s, "  SDI ......... %d%%\n", p.SDI)
 	fmt.Fprintf(s, "  Offense ..... %d\n", p.Offense())
 	fmt.Fprintf(s, "  Defense ..... %d\n", p.Defense())
 	fmt.Fprintf(s, "  Net worth ... %d\n", w.NetWorth(p))

@@ -276,6 +276,9 @@ Now matching this reference (as of v0.2.0):
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and 2-billion money cap
 - Nuclear / chemical / biological strikes and pirate raids
+- Gooie Kablooie and SDI defense (v1 simplification: Gooie is an instant
+  planet-wide strike rather than the original's multi-day build/decay, and
+  SDI is a flat percentage damage-reducer)
 - Covert agents with spying and sabotage (success scales with agent count)
 - Player mail and a planetary bulletin
 - Multiple turns per day, new-realm protection, and daily maintenance
@@ -285,8 +288,8 @@ Still missing against the reference:
 
 - Region types (we still model land as one flat resource) and a food market
 - Diplomacy (treaties) and trading between empires
-- Gooie Kablooie and SDI; the remaining covert ops (Spy on Relations, Spy
-  Database, Bribery) pending the diplomacy/database subsystems
+- The remaining covert ops (Spy on Relations, Spy Database, Bribery) pending
+  the diplomacy/database subsystems
 - Leagues that end and reset with a Planetary Master
 - The InterBBS (interplanetary) layer
 

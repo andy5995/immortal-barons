@@ -29,6 +29,7 @@ type Empire struct {
 	Agents   int
 
 	Tax int
+	SDI int // 0-75, percentage reduction of incoming strike damage
 
 	TurnsLeft  int
 	Protection int

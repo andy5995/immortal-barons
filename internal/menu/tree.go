@@ -83,8 +83,8 @@ func Build() *Menu {
 		{Key: 'G', Label: "Create Group Attack", Do: stubbed("Create Group Attack")},
 		{Key: 'J', Label: "Join Group Attack", Do: stubbed("Join Group Attack")},
 		{Key: 'T', Label: "Terrorist Ops", Do: stubbed("Terrorist Ops")},
-		{Key: 'K', Label: "Gooie Kablooie Ops", Do: stubbed("Gooie Kablooie Ops")},
-		{Key: 'S', Label: "SDI Program", Do: stubbed("SDI Program")},
+		{Key: 'K', Label: "Gooie Kablooie Ops", Do: gooieKablooie},
+		{Key: 'S', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'V', Label: "Travel Times", Do: stubbed("Travel Times")},
 		{Key: 'X', Label: "Return", Do: back},
 	}
