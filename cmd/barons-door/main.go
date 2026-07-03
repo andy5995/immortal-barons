@@ -1,6 +1,12 @@
 // Command barons-door runs Immortal Barons as a native BBS door. Normal
 // mode reads the caller's dropfile and plays over stdio. With -maint it runs
 // daily maintenance non-interactively (for the sysop's nightly event).
+//
+// Configure your BBS to run it with the dropfile path, e.g.:
+//
+//	barons-door -dropfile /path/to/node/DOOR32.SYS
+//
+// With no -dropfile it looks for DOOR32.SYS or DOOR.SYS in the working directory.
 package main
 
 import (

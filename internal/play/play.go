@@ -47,6 +47,7 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) error {
 
 	showEvents(s, e)
 
+	// io.EOF means the caller dropped the connection; still persist state below.
 	if err := menu.Run(s, w, menu.Build()); err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
@@ -84,7 +85,7 @@ func showEvents(s session.Session, e *game.Empire) {
 	}
 	e.Events = nil
 	fmt.Fprintf(s, "\n%sPress any key...%s", ansi.FgWhite, ansi.Reset)
-	s.ReadKey()
+	s.ReadKey() // intentional wait-for-keypress; result unused
 }
 
 func alnum(s string) int {

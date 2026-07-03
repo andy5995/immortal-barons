@@ -113,7 +113,7 @@ func printScores(s session.Session, w *game.World) {
 			name += " (dead)"
 		}
 		mark := "  "
-		if r.e.Owner != "" {
+		if r.e == w.Player() {
 			mark = "->"
 		}
 		fmt.Fprintf(s, "%s%2d %-18s %-8d %-10d\n", mark, i+1, name, r.e.Land, r.nw)

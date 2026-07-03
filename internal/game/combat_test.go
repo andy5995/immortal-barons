@@ -22,4 +22,7 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 	if !strings.Contains(d.Events[len(d.Events)-1], a.Name) {
 		t.Errorf("event should name the attacker: %q", d.Events[len(d.Events)-1])
 	}
+	if !strings.Contains(d.Events[len(d.Events)-1], "attacked you") {
+		t.Errorf("event should be victim-perspective: %q", d.Events[len(d.Events)-1])
+	}
 }

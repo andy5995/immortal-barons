@@ -95,4 +95,7 @@ func TestDailyMaintenanceHandlesMalformedDate(t *testing.T) {
 	case <-time.After(2 * time.Second):
 		t.Fatal("DailyMaintenance hung on a malformed LastMaintDate")
 	}
+	if w.LastMaintDate != "2026-07-03" {
+		t.Errorf("LastMaintDate = %q, want snapped to today", w.LastMaintDate)
+	}
 }

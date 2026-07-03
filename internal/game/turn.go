@@ -33,6 +33,11 @@ func (w *World) DailyMaintenance(today string) {
 		}
 		w.aiPlay(w.LastMaintDate)
 		for _, e := range w.Empires {
+			if e.Owner == "" {
+				e.Events = nil
+			}
+		}
+		for _, e := range w.Empires {
 			if e.Alive && (e.Land <= 0 || e.People <= 0) {
 				e.Alive = false
 			}
@@ -40,7 +45,8 @@ func (w *World) DailyMaintenance(today string) {
 		w.GameDay++
 		next := w.nextDate(w.LastMaintDate)
 		if next == w.LastMaintDate {
-			break // malformed date; avoid an infinite loop
+			w.LastMaintDate = today // malformed date; snap to today to stop repeating
+			break
 		}
 		w.LastMaintDate = next
 	}
