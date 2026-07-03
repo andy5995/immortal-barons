@@ -114,9 +114,9 @@ func Build() *Menu {
 	}
 
 	messages.Items = []Item{
-		{Key: 'R', Label: "Read Messages", Do: stubbed("Read Messages")},
-		{Key: 'S', Label: "Send Message", Do: stubbed("Send Message")},
-		{Key: 'P', Label: "Planetary Post", Do: stubbed("Planetary Post")},
+		{Key: 'R', Label: "Read Messages", Do: readMessages},
+		{Key: 'S', Label: "Send Message", Do: sendMessage},
+		{Key: 'P', Label: "Planetary Post", Do: planetaryPost},
 		{Key: 'X', Label: "Return", Do: back},
 	}
 

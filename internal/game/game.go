@@ -33,6 +33,7 @@ type Empire struct {
 	Protection int
 	LastPlayed string
 	Events     []string
+	Mail       []string
 }
 
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }
@@ -61,6 +62,7 @@ type World struct {
 	Config        Config
 	GameDay       int
 	LastMaintDate string
+	Bulletin      []string
 
 	Coordinator bool
 

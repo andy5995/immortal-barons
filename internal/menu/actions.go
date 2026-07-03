@@ -168,6 +168,66 @@ func printScores(s session.Session, w *game.World) {
 	}
 }
 
+func readMessages(s session.Session, w *game.World) Result {
+	p := w.Player()
+	if len(p.Mail) == 0 {
+		ok(s, "You have no messages.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%sMessages:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for _, m := range p.Mail {
+		fmt.Fprintf(s, "  %s\n", m)
+	}
+	p.Mail = nil
+	if len(w.Bulletin) > 0 {
+		fmt.Fprintf(s, "\n%sPlanetary Bulletin:%s\n", ansi.FgBrightCyan, ansi.Reset)
+		for _, m := range w.Bulletin {
+			fmt.Fprintf(s, "  %s\n", m)
+		}
+	}
+	pause(s)
+	return Stay
+}
+
+func sendMessage(s session.Session, w *game.World) Result {
+	p := w.Player()
+	var recipients []*game.Empire
+	for _, e := range w.Empires {
+		if e.Alive && e != p {
+			recipients = append(recipients, e)
+		}
+	}
+	if len(recipients) == 0 {
+		ok(s, "There is no one to message.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%sChoose a recipient:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for i, e := range recipients {
+		fmt.Fprintf(s, "  %d) %s\n", i+1, e.Name)
+	}
+	i := promptInt(s, "Message which empire (0 to cancel)?")
+	if i < 1 || i > len(recipients) {
+		return Stay
+	}
+	text := prompt(s, "Message:")
+	if text == "" {
+		return Stay
+	}
+	w.SendMail(p, recipients[i-1], text)
+	ok(s, "Message sent.")
+	return Stay
+}
+
+func planetaryPost(s session.Session, w *game.World) Result {
+	text := prompt(s, "Post to the planet:")
+	if text == "" {
+		return Stay
+	}
+	w.PostBulletin(w.Player(), text)
+	ok(s, "Posted.")
+	return Stay
+}
+
 func nextTurn(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if p.TurnsLeft <= 0 {
