@@ -140,7 +140,7 @@ func (w *World) GooieKablooie(a *Empire) (string, error) {
 	}
 	a.Gold -= GooieCost
 	var b strings.Builder
-	fmt.Fprintf(&b, "Your Gooie Kablooie detonates across the planet!\n")
+	b.WriteString("Your Gooie Kablooie detonates across the planet!\n")
 	for _, d := range w.Empires {
 		if d == a || !d.Alive {
 			continue

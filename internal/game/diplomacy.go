@@ -57,6 +57,23 @@ func (w *World) AcceptAlliance(me *Empire, fromName string) bool {
 		}
 	}
 	w.Alliances = append(w.Alliances, k)
+
+	// If the proposer had also sent me.Name a reverse offer, clear it too
+	// so it doesn't linger as a phantom pending offer.
+	for _, e := range w.Empires {
+		if e.Name != fromName {
+			continue
+		}
+		kept := e.AllianceOffers[:0]
+		for _, o := range e.AllianceOffers {
+			if o != me.Name {
+				kept = append(kept, o)
+			}
+		}
+		e.AllianceOffers = kept
+		break
+	}
+
 	return true
 }
 

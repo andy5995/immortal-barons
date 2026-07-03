@@ -20,13 +20,17 @@ type Packet struct {
 	Scores  []Score
 }
 
-// Write saves a packet as JSON to path.
+// Write saves a packet as JSON to path atomically (temp file + rename).
 func Write(path string, p Packet) error {
 	data, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(path, data, 0o644)
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, data, 0o644); err != nil {
+		return err
+	}
+	return os.Rename(tmp, path)
 }
 
 // Read loads a packet from path.

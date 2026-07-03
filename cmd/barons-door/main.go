@@ -211,7 +211,7 @@ func askInt(r *bufio.Reader, label string, cur int) int {
 	if line == "" {
 		return cur
 	}
-	if n, err := strconv.Atoi(line); err == nil {
+	if n, err := strconv.Atoi(line); err == nil && n >= 0 {
 		return n
 	}
 	return cur

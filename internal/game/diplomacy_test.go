@@ -49,6 +49,29 @@ func TestAcceptAllianceFormsMutualAllianceAndConsumesOffer(t *testing.T) {
 	}
 }
 
+func TestAcceptAllianceClearsReciprocalOffer(t *testing.T) {
+	cfg := DefaultConfig()
+	w := NewWorldSeed(cfg, 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+
+	w.ProposeAlliance(a, b)
+	w.ProposeAlliance(b, a)
+
+	if ok := w.AcceptAlliance(a, "Beta"); !ok {
+		t.Fatal("want AcceptAlliance to succeed")
+	}
+
+	if !w.AreAllied(a, b) {
+		t.Error("want AreAllied(a, b)")
+	}
+	for _, o := range b.AllianceOffers {
+		if o == a.Name {
+			t.Errorf("want B's offer from %q cleared, got %v", a.Name, b.AllianceOffers)
+		}
+	}
+}
+
 func TestAcceptAllianceWithNoOfferFails(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 1)

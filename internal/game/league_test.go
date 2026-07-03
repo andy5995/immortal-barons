@@ -66,4 +66,22 @@ func TestEndGame(t *testing.T) {
 	if w.Alliances != nil {
 		t.Errorf("expected Alliances reset to nil, got %v", w.Alliances)
 	}
+	if w.Active != nil {
+		t.Errorf("expected Active reset to nil, got %v", w.Active)
+	}
+}
+
+func TestEndGameCrownsSoleSurvivorWithNegativeNetWorth(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	survivor := w.AddHuman("s", "Survivor")
+	survivor.Land = 1
+	survivor.Debt = 1_000_000_000
+
+	w.endGame()
+
+	if w.LastMaster != survivor.Name {
+		t.Errorf("expected LastMaster %q, got %q", survivor.Name, w.LastMaster)
+	}
 }

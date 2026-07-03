@@ -4,16 +4,18 @@ package game
 // and resets the world for a fresh game.
 func (w *World) endGame() {
 	best := ""
-	bestNW := -1
+	bestNW := 0
+	found := false
 	for _, e := range w.Empires {
 		if e.Alive {
-			if nw := w.NetWorth(e); nw > bestNW {
+			if nw := w.NetWorth(e); !found || nw > bestNW {
 				bestNW = nw
 				best = e.Name
+				found = true
 			}
 		}
 	}
-	if best != "" {
+	if found {
 		w.LastMaster = best
 	}
 	w.resetForNewGame()
@@ -25,5 +27,7 @@ func (w *World) resetForNewGame() {
 	w.Empires = nil
 	w.Alliances = nil
 	w.GameDay = 0
+	// The next session re-resolves Active after maintenance.
+	w.Active = nil
 	w.seedAIEmpires()
 }
