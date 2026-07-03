@@ -17,7 +17,7 @@ settings from a real league, so they are defaults, not fixed rules.
 |------|---------|---------|-------|
 | Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. Helps defend vs. "Sabre" attacks. |
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). SDI cuts jet strength 25–30%. Targeted by the "Bomb Airbases" op. |
-| Turret | **0** | 2 | Defense only. Cannot be destroyed by terrorist ops. Helps defend vs. nuclear missiles. |
+| Turret | **0** | 2 | Defense only — the defensive **counterpart to jets**: it shoots down attacking jets (and blows up tanks / kills troops). Also helps intercept nuclear missiles. Cannot be destroyed by terrorist ops. |
 | Tank | 4 | 4 | Best all-round. Low upkeep, high buy cost. Strength scales with HQ and morale. Helps defend vs. chemical missiles. |
 | Bomber | 0 | 0 | Carries bombs / special-ops; destroys enemy *grounded* jets when sent in an attack. |
 | Carrier | 0 | 0 | Support: moves jets to battle and goods for trade. |
@@ -31,6 +31,11 @@ Base"** rather than a "Turret" (same defensive role: it shoots down jets,
 destroys tanks, and kills troops). **Commanders** are a support unit —
 you need roughly **1 commander per 50 troops** (100 per 5,000) to keep
 troops effective.
+
+Guides sometimes mix in Solar Realms Elite's space theme. The unit map is:
+region↔planet, trooper↔soldier, jet↔fighter, tank↔heavy cruiser,
+turret↔defense station, commander↔general, agent↔covert agent. Same roles,
+different names.
 
 ### Costs, maintenance, and net-worth values
 
@@ -69,6 +74,7 @@ Net-worth value contributed per unit (from the guide's net-worth table):
 - **Attack pirates** — raid pirates to gain military equipment and land.
   Retaliating after a pirate hits you gains more regions (about 8–16+)
   than striking first (about 1–5), so it is usually better to wait.
+  Military parked in the Trading Market is safe from pirate raids.
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
 
@@ -115,11 +121,14 @@ Land is bought from a market (config: 3000 starting units, 4000–5000 new
 units created per day). There are eight region types, each with a
 different economic role:
 
-- **Coastal** — tourism income; swings with public support.
-- **Mountain** — steady mining income; helps industrial output.
-- **Desert** — solar income; fluctuates.
-- **River** — highest average income (hydroelectric); can switch to fishing
-  for food.
+- **Coastal** — highest tourism income, but it collapses with low public
+  support (under ~300/region at 0% support; about equal to mountains at
+  37% support).
+- **Mountain** — lowest income of the money regions, but the most stable
+  (never fails); also boosts industrial output.
+- **Desert** — solar income; swings widely (~1,900–3,000 per region).
+- **River** — highest income on a cash turn (hydroelectric), but every so
+  often it produces food instead — never rely on it for either alone.
 - **Agriculture** — grows food; food self-sufficiency.
 - **Urban** — more population, tax revenue, and trade capacity.
 - **Technology** — long-term efficiency: cheaper units, lower maintenance,
@@ -163,6 +172,10 @@ league ran tax 85%, interest 75%).
   less useful for this). Our clone currently uses 5% per turn — this
   should be ~1%.
 - **Interest cap: 1,599,999,999.** Gold above this does not earn interest.
+  At the cap, interest is roughly 25–35 million per turn.
+- **Absolute money cap: 2,000,000,000.** You cannot hold more than 2 billion
+  coins at once (in the bank or on hand) — a separate, higher ceiling than
+  the interest cap.
 - **Food market:** you buy and sell food against a shared market whose
   price moves with supply. Guide values: sell for ~6 coins/unit, buy back
   for ~3 coins/unit. A new empire starts with about 30,000 food.
@@ -265,3 +278,5 @@ These are the slices that would move it closer to the real game.
     money strategy): faqs/1573
   - "Hints and Tips" by Crystal Palace / CPalace (start-up gifts,
     commanders, tax cap, pirate retaliation, trade-deal tactics): faqs/1571
+  - "Cash-On-Wheels FAQ" by Anonymous (interest/money caps, region income
+    figures, investment cycling, pirate evasion via the Trading Market)
