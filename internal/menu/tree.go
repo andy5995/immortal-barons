@@ -62,7 +62,7 @@ func BuildMenus() *Menus {
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: 'F', Label: "Buy Food",
 			Do: buy2("Buy Food", func(w *game.World) int { return game.FoodBuyPrice }, (*game.World).BuyFoodMarket)},
-		{Key: '?', Label: "Help", Do: stubbed("Help")},
+		{Key: '?', Label: "Help", Do: helpDatabase},
 		{Key: '0', Label: "Return", Do: back},
 	}
 
@@ -195,7 +195,7 @@ func BuildMenus() *Menus {
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: 'W', Label: "Write Macros", Do: stubbed("Write Macros")},
 		{Key: '1', Label: "Set Industries", Do: setIndustries},
-		{Key: '2', Label: "Show Instructions", Do: stubbed("Show Instructions")},
+		{Key: '2', Label: "Show Instructions", Do: helpDatabase},
 		{Key: '3', Label: "Specialize Industry", Do: specializeIndustry},
 		{Key: 'Y', Label: "Sysop / Coordinator", Do: gotoMenu(coord),
 			Hidden: func(w *game.World) bool { return !w.Coordinator }},
@@ -214,7 +214,7 @@ func BuildMenus() *Menus {
 		{Key: '7', Label: "Send Message", Do: sendMessage},
 		{Key: '8', Label: "Game Bulletins", Do: showBulletin},
 		{Key: 'A', Label: "Instructions", Do: stubbed("Instructions")},
-		{Key: 'B', Label: "Help Database", Do: stubbed("Help Database")},
+		{Key: 'B', Label: "Help Database", Do: helpDatabase},
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
 		{Key: '0', Label: "Quit", Do: quit},
 	}
