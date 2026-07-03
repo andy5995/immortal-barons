@@ -49,11 +49,11 @@ func TestEndOfTurnStatsWritesNonEmpty(t *testing.T) {
 }
 
 func TestRunTurnNoTurnsLeftReturnsImmediately(t *testing.T) {
-	f := &fakeSession{keys: []rune(" ")} // pause keypress inside ok()
+	f := &fakeSession{keys: []rune("  ")} // pause keypress inside ok(), then seeScores' pause
 	w := newWorld()
 	w.Active.TurnsLeft = 0
 	runTurn(f, w)
-	if !strings.Contains(f.out.String(), "no turns left") {
+	if !strings.Contains(f.out.String(), "used all of your turns today") {
 		t.Error("expected the no-turns-left message")
 	}
 }

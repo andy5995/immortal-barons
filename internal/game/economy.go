@@ -174,6 +174,44 @@ func (w *World) RecruitAgents(e *Empire, n int) error {
 	return nil
 }
 
+// sellUnit sells n of a unit back to the market for half its buy price,
+// clamped to what's owned (*stock).
+func sellUnit(stock *int, n, price int, e *Empire) error {
+	if n <= 0 {
+		return nil
+	}
+	if n > *stock {
+		n = *stock
+	}
+	*stock -= n
+	e.Gold += n * price / 2
+	return nil
+}
+
+func (w *World) SellTroopers(e *Empire, n int) error {
+	return sellUnit(&e.Troopers, n, w.Prices.Trooper, e)
+}
+
+func (w *World) SellJets(e *Empire, n int) error {
+	return sellUnit(&e.Jets, n, w.Prices.Jet, e)
+}
+
+func (w *World) SellTurrets(e *Empire, n int) error {
+	return sellUnit(&e.Turrets, n, w.Prices.Turret, e)
+}
+
+func (w *World) SellTanks(e *Empire, n int) error {
+	return sellUnit(&e.Tanks, n, w.Prices.Tank, e)
+}
+
+func (w *World) SellCarriers(e *Empire, n int) error {
+	return sellUnit(&e.Carriers, n, w.Prices.Carrier, e)
+}
+
+func (w *World) SellAgents(e *Empire, n int) error {
+	return sellUnit(&e.Agents, n, w.Prices.Agent, e)
+}
+
 // SellRegions returns regions of the type pointed to by field for half
 // their current market price per region. n is clamped to *field.
 func (w *World) SellRegions(e *Empire, field *int, n int) error {

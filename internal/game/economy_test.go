@@ -214,6 +214,39 @@ func TestStartHQCantAfford(t *testing.T) {
 	}
 }
 
+func TestSellUnitsHalfPrice(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	e.Troopers = 10
+	e.Gold = 0
+
+	// Clamped to owned: selling more than owned only sells what's owned.
+	if err := w.SellTroopers(e, 15); err != nil {
+		t.Fatalf("SellTroopers: %v", err)
+	}
+	if e.Troopers != 0 {
+		t.Errorf("Troopers: want 0, got %d", e.Troopers)
+	}
+	wantGold := 10 * w.Prices.Trooper / 2
+	if e.Gold != wantGold {
+		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
+	}
+
+	// Selling a partial amount only removes n and pays n*price/2.
+	e.Jets = 8
+	e.Gold = 0
+	if err := w.SellJets(e, 3); err != nil {
+		t.Fatalf("SellJets: %v", err)
+	}
+	if e.Jets != 5 {
+		t.Errorf("Jets: want 5, got %d", e.Jets)
+	}
+	wantGold = 3 * w.Prices.Jet / 2
+	if e.Gold != wantGold {
+		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
+	}
+}
+
 func TestFoodNeededNextTurn(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")

@@ -108,6 +108,12 @@ func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
 	if p.MadeCarriers > 0 {
 		fmt.Fprintf(s, "  %d Carriers were manufactured by Industrial Zones.\n", p.MadeCarriers)
 	}
+	if p.LastGoldPaid > 0 {
+		fmt.Fprintf(s, "  %d Gold paid.\n", p.LastGoldPaid)
+	}
+	if p.LastFoodConsumed > 0 {
+		fmt.Fprintf(s, "  %d units of Food consumed.\n", p.LastFoodConsumed)
+	}
 	fmt.Fprintf(s, "  Turns left today: %d\n", p.TurnsLeft)
 	pause(s)
 }
@@ -120,7 +126,8 @@ func runTurn(s session.Session, w *game.World) Result {
 	for {
 		p := w.Player()
 		if p.TurnsLeft <= 0 {
-			ok(s, "You have no turns left today.")
+			ok(s, "Sorry, you have used all of your turns today.")
+			seeScores(s, w)
 			return Stay
 		}
 

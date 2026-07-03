@@ -54,16 +54,18 @@ type Empire struct {
 	Specialized  string // "" = none, else a unit type name; specialization concentrates output
 
 	// Transient per-turn stats for the end-of-turn report; not persisted.
-	LastSpoiled   int  `json:"-"`
-	LastPopGrowth int  `json:"-"`
-	LastRiot      bool `json:"-"`
-	MadeTroopers  int  `json:"-"`
-	MadeJets      int  `json:"-"`
-	MadeTurrets   int  `json:"-"`
-	MadeBombers   int  `json:"-"`
-	MadeTanks     int  `json:"-"`
-	MadeCarriers  int  `json:"-"`
-	IndustryGold  int  `json:"-"`
+	LastSpoiled      int  `json:"-"`
+	LastPopGrowth    int  `json:"-"`
+	LastRiot         bool `json:"-"`
+	MadeTroopers     int  `json:"-"`
+	MadeJets         int  `json:"-"`
+	MadeTurrets      int  `json:"-"`
+	MadeBombers      int  `json:"-"`
+	MadeTanks        int  `json:"-"`
+	MadeCarriers     int  `json:"-"`
+	IndustryGold     int  `json:"-"`
+	LastGoldPaid     int  `json:"-"`
+	LastFoodConsumed int  `json:"-"`
 }
 
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }

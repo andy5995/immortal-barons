@@ -102,7 +102,8 @@ func (w *World) processEconomy(e *Empire) {
 		e.Debt += e.Debt * 10 / 100
 	}
 
-	e.Food += e.Regions.foodProduced() - (e.People + e.Troopers + e.Jets*2 + e.Tanks*2)
+	e.LastFoodConsumed = e.People + e.Troopers + e.Jets*2 + e.Tanks*2
+	e.Food += e.Regions.foodProduced() - e.LastFoodConsumed
 	if e.Food < 0 {
 		e.People -= (-e.Food)/10 + 1
 		if e.People < 0 {
@@ -125,7 +126,9 @@ func (w *World) processEconomy(e *Empire) {
 	maint := e.Troopers*6 + e.Jets*12 + e.Turrets*9 + e.Tanks*6 + e.Carriers*1
 	if e.Gold >= maint {
 		e.Gold -= maint
+		e.LastGoldPaid = maint
 	} else {
+		e.LastGoldPaid = e.Gold
 		e.Gold = 0
 		e.Troopers -= e.Troopers / 10
 	}

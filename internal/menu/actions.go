@@ -33,6 +33,25 @@ func buy2(label string, unit func(*game.World) int, apply func(*game.World, *gam
 	}
 }
 
+// sellUnit2 wraps a "prompt for quantity, sell, report" unit-selling action.
+// The max offered is what the empire currently owns.
+func sellUnit2(label string, owned func(*game.Empire) int, apply func(*game.World, *game.Empire, int) error) Action {
+	return func(s session.Session, w *game.World) Result {
+		p := w.Player()
+		max := owned(p)
+		n := promptSuggested(s, fmt.Sprintf("%s (half price)?", label), 0, max)
+		if n <= 0 {
+			return Stay
+		}
+		if err := apply(w, p, n); err != nil {
+			fail(s, err)
+		} else {
+			ok(s, "Sold %d. Gold: %d", n, p.Gold)
+		}
+		return Stay
+	}
+}
+
 // buildHQ starts HeadQuarters construction for the acting empire.
 func buildHQ(s session.Session, w *game.World) Result {
 	p := w.Player()
@@ -237,7 +256,20 @@ func specialOps(s session.Session, w *game.World) Result {
 }
 
 func attackPirates(s session.Session, w *game.World) Result {
-	fmt.Fprintf(s, "\n%s\n", w.RaidPirates(w.Player()))
+	fmt.Fprintf(s, "\n%sChoose a pirate faction to raid:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for i, name := range game.PirateFactions {
+		fmt.Fprintf(s, "  %d) %s\n", i+1, name)
+	}
+	f := promptInt(s, "Raid which faction (0 to cancel)?")
+	if f < 1 || f > len(game.PirateFactions) {
+		return Stay
+	}
+	p := w.Player()
+	troopers := promptSuggested(s, "Commit how many Troopers?", 0, p.Troopers)
+	jets := promptSuggested(s, "Commit how many Jets?", 0, p.Jets)
+	tanks := promptSuggested(s, "Commit how many Tanks?", 0, p.Tanks)
+
+	fmt.Fprintf(s, "\n%s\n", w.RaidFaction(p, f-1, troopers, jets, tanks))
 	pause(s)
 	return Stay
 }

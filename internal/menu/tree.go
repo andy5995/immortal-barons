@@ -11,6 +11,7 @@ import (
 // without re-parsing the tree.
 type Menus struct {
 	Spending  *Menu // the "Spending Menu" (formerly "buy")
+	Sell      *Menu
 	Bank      *Menu
 	Attack    *Menu
 	Covert    *Menu
@@ -27,6 +28,7 @@ type Menus struct {
 // offer "Visit Bank").
 func BuildMenus() *Menus {
 	buy := &Menu{Title: "Spending Menu"}
+	sell := &Menu{Title: "Sell Menu"}
 	bank := &Menu{Title: "Bank"}
 	attack := &Menu{Title: "War / Attack"}
 	covert := &Menu{Title: "Covert Operations"}
@@ -52,13 +54,31 @@ func BuildMenus() *Menus {
 			Do: buy2("Build Tanks", func(w *game.World) int { return w.Prices.Tank }, (*game.World).BuildTanks)},
 		{Key: 'C', Label: "Build Carriers (move jets to attack)",
 			Do: buy2("Build Carriers", func(w *game.World) int { return w.Prices.Carrier }, (*game.World).BuildCarriers)},
-		{Key: 'S', Label: "Sell Land", Do: sellLand},
+		{Key: 'S', Label: "Sell", Do: gotoMenu(sell)},
 		{Key: 'G', Label: "Recruit Agents",
 			Do: buy2("Recruit Agents", func(w *game.World) int { return w.Prices.Agent }, (*game.World).RecruitAgents)},
 		{Key: 'O', Label: "Build Bombers", Do: stubbed("Build Bombers")},
 		{Key: 'H', Label: "Build HeadQuarters", Do: buildHQ},
 		{Key: 'B', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '*', Label: "System Menu", Do: gotoMenu(system)},
+		{Key: 'R', Label: "Return", Do: back},
+	}
+
+	sell.Items = []Item{
+		{Key: 'B', Label: "Buy", Do: back},
+		{Key: 'T', Label: "Sell Troopers",
+			Do: sellUnit2("Sell Troopers", func(p *game.Empire) int { return p.Troopers }, (*game.World).SellTroopers)},
+		{Key: 'J', Label: "Sell Jets",
+			Do: sellUnit2("Sell Jets", func(p *game.Empire) int { return p.Jets }, (*game.World).SellJets)},
+		{Key: 'U', Label: "Sell Turrets",
+			Do: sellUnit2("Sell Turrets", func(p *game.Empire) int { return p.Turrets }, (*game.World).SellTurrets)},
+		{Key: 'A', Label: "Sell Tanks",
+			Do: sellUnit2("Sell Tanks", func(p *game.Empire) int { return p.Tanks }, (*game.World).SellTanks)},
+		{Key: 'C', Label: "Sell Carriers",
+			Do: sellUnit2("Sell Carriers", func(p *game.Empire) int { return p.Carriers }, (*game.World).SellCarriers)},
+		{Key: 'G', Label: "Sell Covert Agents",
+			Do: sellUnit2("Sell Covert Agents", func(p *game.Empire) int { return p.Agents }, (*game.World).SellAgents)},
+		{Key: 'L', Label: "Sell Regions", Do: sellLand},
 		{Key: 'R', Label: "Return", Do: back},
 	}
 
@@ -187,6 +207,7 @@ func BuildMenus() *Menus {
 
 	return &Menus{
 		Spending:  buy,
+		Sell:      sell,
 		Bank:      bank,
 		Attack:    attack,
 		Covert:    covert,

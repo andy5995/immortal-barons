@@ -114,16 +114,37 @@ func TestBiologicalStrike(t *testing.T) {
 	}
 }
 
-func TestRaidPirates(t *testing.T) {
+func TestRaidFactionWinLose(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
-	a.Troopers = 1000
+
+	// An overwhelming force against the easiest faction (Humans, index 0)
+	// wins and gains land; the Land/Regions invariant must still hold.
+	a.Troopers = 1_000_000
+	a.Jets = 0
+	a.Tanks = 0
 	beforeLand := a.Land
 
-	report := w.RaidPirates(a)
+	report := w.RaidFaction(a, 0, 1_000_000, 0, 0)
 	if report == "" {
 		t.Error("expected a non-empty report")
 	}
-	if a.Land == beforeLand {
-		t.Errorf("expected land to change (net raid effect), stayed at %d", beforeLand)
+	if a.Land <= beforeLand {
+		t.Errorf("expected land gained on a win, before=%d after=%d", beforeLand, a.Land)
+	}
+	if a.Land != a.Regions.Total() {
+		t.Errorf("Land/Regions invariant broken: Land=%d Regions.Total()=%d", a.Land, a.Regions.Total())
+	}
+
+	// A token force against the hardest faction (Spacians, index 8) loses
+	// and the committed troopers drop.
+	a.Troopers = 10
+	beforeTroopers := a.Troopers
+
+	report = w.RaidFaction(a, 8, 10, 0, 0)
+	if report == "" {
+		t.Error("expected a non-empty report")
+	}
+	if a.Troopers >= beforeTroopers {
+		t.Errorf("expected troopers lost on a loss, before=%d after=%d", beforeTroopers, a.Troopers)
 	}
 }

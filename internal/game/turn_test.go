@@ -34,6 +34,26 @@ func TestPlayTurnAffectsOnlyActingEmpire(t *testing.T) {
 	}
 }
 
+func TestProcessEconomyTracksPaidAndConsumed(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	// newEmpire already has Troopers=150, Carriers=1, so maintenance > 0.
+	wantFood := e.People + e.Troopers + e.Jets*2 + e.Tanks*2
+
+	w.PlayTurn(e, "2026-07-03")
+
+	wantMaint := 150*6 + 0*12 + 0*9 + 0*6 + 1*1
+	if e.LastGoldPaid != wantMaint {
+		t.Errorf("LastGoldPaid: want %d, got %d", wantMaint, e.LastGoldPaid)
+	}
+	if e.LastGoldPaid <= 0 {
+		t.Error("expected LastGoldPaid > 0")
+	}
+	if e.LastFoodConsumed != wantFood {
+		t.Errorf("LastFoodConsumed: want %d, got %d", wantFood, e.LastFoodConsumed)
+	}
+}
+
 func TestDailyMaintenanceInitialisesDate(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.DailyMaintenance("2026-07-03")
