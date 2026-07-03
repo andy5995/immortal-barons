@@ -50,7 +50,7 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) error {
 	showEvents(s, e)
 
 	// io.EOF means the caller dropped the connection; still persist state below.
-	if err := menu.Run(s, w, menu.Build()); err != nil && !errors.Is(err, io.EOF) {
+	if err := menu.GameLoop(s, w); err != nil && !errors.Is(err, io.EOF) {
 		return err
 	}
 	return store.Save(w, cfg)

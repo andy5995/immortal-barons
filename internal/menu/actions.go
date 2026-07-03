@@ -502,13 +502,15 @@ func viewDiplomacy(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func nextTurn(s session.Session, w *game.World) Result {
+func setTaxRate(s session.Session, w *game.World) Result {
 	p := w.Player()
-	if p.TurnsLeft <= 0 {
-		ok(s, "You are out of turns for today. Come back after the next maintenance.")
+	fmt.Fprintf(s, "\n%sCurrent tax rate: %d%%%s\n", ansi.FgBrightCyan, p.Tax, ansi.Reset)
+	rate := promptInt(s, "New tax rate (0-100)?")
+	if rate < 0 || rate > 100 {
+		fail(s, fmt.Errorf("tax rate must be between 0 and 100"))
 		return Stay
 	}
-	w.PlayTurn(p, w.Today)
-	ok(s, "Turn complete. Turns left: %d", p.TurnsLeft)
+	p.Tax = rate
+	ok(s, "Tax rate set to %d%%.", rate)
 	return Stay
 }

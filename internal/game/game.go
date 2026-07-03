@@ -111,6 +111,9 @@ type World struct {
 	DepositEndTurn bool
 	AutoPayMaint   bool
 	AutoFeed       bool
+	VisitCovert    bool
+	VisitTrading   bool
+	VisitMessage   bool
 
 	Active *Empire `json:"-"` // the empire playing this session
 	Today  string  `json:"-"` // ISO date for this session
@@ -122,9 +125,12 @@ func NewWorld(cfg Config) *World { return NewWorldSeed(cfg, time.Now().UnixNano(
 
 func NewWorldSeed(cfg Config, seed int64) *World {
 	w := &World{
-		Prices: Prices{Land: 100, Food: 2, Trooper: 50, Jet: 60, Turret: 60, Tank: 350, Carrier: 40, Agent: 100},
-		Config: cfg,
-		rng:    rand.New(rand.NewSource(seed)),
+		Prices:       Prices{Land: 100, Food: 2, Trooper: 50, Jet: 60, Turret: 60, Tank: 350, Carrier: 40, Agent: 100},
+		Config:       cfg,
+		rng:          rand.New(rand.NewSource(seed)),
+		VisitCovert:  true,
+		VisitTrading: true,
+		VisitMessage: true,
 	}
 	w.seedAIEmpires()
 	return w

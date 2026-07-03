@@ -6,39 +6,36 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// Build constructs the full BRE menu tree and returns the main menu.
-// Menus are created first, then wired, so submenus can reference each
-// other (e.g. several menus offer "Visit Bank").
-func Build() *Menu {
-	main := &Menu{Title: "Immortal Barons — Main Menu"}
-	buy := &Menu{Title: "Buy / Sell"}
+// Menus holds every top-level and sub menu built by BuildMenus, so the
+// outer game flow (gameflow.go) can drive them as turn-pipeline stages
+// without re-parsing the tree.
+type Menus struct {
+	Spending  *Menu // the "Spending Menu" (formerly "buy")
+	Bank      *Menu
+	Attack    *Menu
+	Covert    *Menu
+	Trading   *Menu
+	Diplomacy *Menu
+	Messages  *Menu
+	System    *Menu
+	Game      *Menu
+}
+
+// BuildMenus constructs the full BRE menu tree. Menus are created first,
+// then wired, so submenus can reference each other (e.g. several menus
+// offer "Visit Bank").
+func BuildMenus() *Menus {
+	buy := &Menu{Title: "Spending Menu"}
 	bank := &Menu{Title: "Bank"}
 	attack := &Menu{Title: "War / Attack"}
 	covert := &Menu{Title: "Covert Operations"}
 	trading := &Menu{Title: "Trading"}
 	diplomacy := &Menu{Title: "Diplomacy"}
 	messages := &Menu{Title: "Messages"}
-	display := &Menu{Title: "Display / Info"}
 	prefs := &Menu{Title: "Preferences"}
 	coord := &Menu{Title: "Sysop / Coordinator"}
-
-	main.Status = statusBar
-	main.Items = []Item{
-		{Key: 'B', Label: "Buy / Sell", Do: gotoMenu(buy)},
-		{Key: 'K', Label: "Bank", Do: gotoMenu(bank)},
-		{Key: 'W', Label: "War / Attack", Do: gotoMenu(attack)},
-		{Key: 'C', Label: "Covert Operations", Do: gotoMenu(covert)},
-		{Key: 'T', Label: "Trading", Do: gotoMenu(trading)},
-		{Key: 'R', Label: "Diplomacy (Relations)", Do: gotoMenu(diplomacy)},
-		{Key: 'M', Label: "Messages", Do: gotoMenu(messages)},
-		{Key: 'D', Label: "Display / Info", Do: gotoMenu(display)},
-		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
-		{Key: 'Y', Label: "Sysop / Coordinator", Do: gotoMenu(coord),
-			Hidden: func(w *game.World) bool { return !w.Coordinator }},
-		{Key: 'N', Label: "Next Turn (end turn)", Do: nextTurn},
-		{Key: '?', Label: "Show Instructions", Do: stubbed("Instructions")},
-		{Key: 'Q', Label: "Quit", Do: quit},
-	}
+	system := &Menu{Title: "System Menu"}
+	food := &Menu{Title: "Food Market"}
 
 	buy.Items = []Item{
 		{Key: 'L', Label: "Buy Land / Regions", Do: buyLand},
@@ -60,6 +57,7 @@ func Build() *Menu {
 		{Key: 'O', Label: "Build Bombers", Do: stubbed("Build Bombers")},
 		{Key: 'H', Label: "Build HeadQuarters", Do: stubbed("Build HeadQuarters")},
 		{Key: 'B', Label: "Visit Bank", Do: gotoMenu(bank)},
+		{Key: '*', Label: "System Menu", Do: gotoMenu(system)},
 		{Key: 'R', Label: "Return", Do: back},
 	}
 
@@ -120,17 +118,6 @@ func Build() *Menu {
 		{Key: 'X', Label: "Return", Do: back},
 	}
 
-	display.Items = []Item{
-		{Key: 'E', Label: "Empire Status", Do: empireStatus},
-		{Key: 'S', Label: "See Scores", Do: seeScores},
-		{Key: 'A', Label: "Visit Advisors", Do: stubbed("Visit Advisors")},
-		{Key: 'I', Label: "InterBBS Scores", Do: interbbsScores},
-		{Key: 'D', Label: "Spy Database", Do: stubbed("Spy Database")},
-		{Key: 'L', Label: "Diplomacy List", Do: stubbed("Diplomacy List")},
-		{Key: 'T', Label: "Travel Times", Do: stubbed("Travel Times")},
-		{Key: 'R', Label: "Return", Do: back},
-	}
-
 	prefs.Items = []Item{
 		{Key: 'E', LabelFn: onOff("Enter exits Buy menu", func(w *game.World) *bool { return &w.EnterExitsBuy }),
 			Do: toggle(func(w *game.World) *bool { return &w.EnterExitsBuy })},
@@ -140,6 +127,12 @@ func Build() *Menu {
 			Do: toggle(func(w *game.World) *bool { return &w.AutoPayMaint })},
 		{Key: 'F', LabelFn: onOff("Auto-feed people & army", func(w *game.World) *bool { return &w.AutoFeed }),
 			Do: toggle(func(w *game.World) *bool { return &w.AutoFeed })},
+		{Key: 'C', LabelFn: onOff("Visit Covert Menu", func(w *game.World) *bool { return &w.VisitCovert }),
+			Do: toggle(func(w *game.World) *bool { return &w.VisitCovert })},
+		{Key: 'T', LabelFn: onOff("Visit Trading Menu", func(w *game.World) *bool { return &w.VisitTrading }),
+			Do: toggle(func(w *game.World) *bool { return &w.VisitTrading })},
+		{Key: 'G', LabelFn: onOff("Visit Message Menu", func(w *game.World) *bool { return &w.VisitMessage }),
+			Do: toggle(func(w *game.World) *bool { return &w.VisitMessage })},
 		{Key: 'R', Label: "Return", Do: back},
 	}
 
@@ -150,7 +143,56 @@ func Build() *Menu {
 		{Key: 'R', Label: "Return", Do: back},
 	}
 
-	return main
+	food.Items = []Item{
+		{Key: 'B', Label: "Buy Food",
+			Do: buy2("Buy Food", func(w *game.World) int { return w.Prices.Food }, (*game.World).BuyFood)},
+		{Key: 'K', Label: "Visit Bank", Do: gotoMenu(bank)},
+		{Key: 'R', Label: "Return", Do: back},
+	}
+
+	system.Items = []Item{
+		{Key: 'E', Label: "Empire Status", Do: empireStatus},
+		{Key: 'S', Label: "See Scores", Do: seeScores},
+		{Key: 'V', Label: "Advisors", Do: stubbed("Advisors")},
+		{Key: 'I', Label: "Set Industries", Do: stubbed("Set Industries")},
+		{Key: 'Z', Label: "Specialize", Do: stubbed("Specialize")},
+		{Key: 'U', Label: "Game Setup", Do: stubbed("Game Setup")},
+		{Key: 'D', Label: "Diplomacy", Do: gotoMenu(diplomacy)},
+		{Key: 'T', Label: "Trading", Do: gotoMenu(trading)},
+		{Key: 'M', Label: "Messages", Do: gotoMenu(messages)},
+		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
+		{Key: 'K', Label: "Visit Bank", Do: gotoMenu(bank)},
+		{Key: 'X', Label: "Set Tax Rate", Do: setTaxRate},
+		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
+		{Key: 'Y', Label: "Sysop / Coordinator", Do: gotoMenu(coord),
+			Hidden: func(w *game.World) bool { return !w.Coordinator }},
+		{Key: 'R', Label: "Return", Do: back},
+		{Key: 'Q', Label: "Quit", Do: quit},
+	}
+
+	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Status: statusBar}
+	gameMenu.Items = []Item{
+		{Key: '1', Label: "Play Game", Do: runTurn},
+		{Key: '2', Label: "See Status", Do: empireStatus},
+		{Key: '3', Label: "See Scores", Do: seeScores},
+		{Key: '6', Label: "Read Messages", Do: readMessages},
+		{Key: '7', Label: "Send Message", Do: sendMessage},
+		{Key: '8', Label: "Game Bulletins", Do: showBulletin},
+		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
+		{Key: 'Q', Label: "Quit", Do: quit},
+	}
+
+	return &Menus{
+		Spending:  buy,
+		Bank:      bank,
+		Attack:    attack,
+		Covert:    covert,
+		Trading:   trading,
+		Diplomacy: diplomacy,
+		Messages:  messages,
+		System:    system,
+		Game:      gameMenu,
+	}
 }
 
 func statusBar(w *game.World) string {
