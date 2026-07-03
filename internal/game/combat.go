@@ -42,6 +42,7 @@ func (w *World) Attack(a, d *Empire) string {
 		fmt.Fprintf(&b, "Defeat! Your forces returned exhausted.\n")
 		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
 	}
+	d.Events = append(d.Events, "While you were away: "+b.String())
 	return b.String()
 }
 
