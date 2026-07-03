@@ -27,6 +27,7 @@ type Empire struct {
 	Turrets  int
 	Tanks    int
 	Carriers int
+	Bombers  int
 	Agents   int
 
 	Tax     int
@@ -42,10 +43,27 @@ type Empire struct {
 
 	AllianceOffers []string
 
+	// Production percentages (should sum to ~100) for what Industrial
+	// regions build. See manufacture() in turn.go.
+	ProdTroopers int
+	ProdJets     int
+	ProdTurrets  int
+	ProdBombers  int
+	ProdTanks    int
+	ProdCarriers int
+	Specialized  string // "" = none, else a unit type name; specialization concentrates output
+
 	// Transient per-turn stats for the end-of-turn report; not persisted.
 	LastSpoiled   int  `json:"-"`
 	LastPopGrowth int  `json:"-"`
 	LastRiot      bool `json:"-"`
+	MadeTroopers  int  `json:"-"`
+	MadeJets      int  `json:"-"`
+	MadeTurrets   int  `json:"-"`
+	MadeBombers   int  `json:"-"`
+	MadeTanks     int  `json:"-"`
+	MadeCarriers  int  `json:"-"`
+	IndustryGold  int  `json:"-"`
 }
 
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }
@@ -71,6 +89,14 @@ func (e *Empire) EnsureRegions() {
 func (e *Empire) EnsureSupport() {
 	if e.Support == 0 {
 		e.Support = 100
+	}
+}
+
+// EnsureProduction repairs the production percentages after loading a save
+// that predates industrial production (all Prod* fields zero).
+func (e *Empire) EnsureProduction() {
+	if e.ProdTroopers+e.ProdJets+e.ProdTurrets+e.ProdBombers+e.ProdTanks+e.ProdCarriers == 0 {
+		e.ProdTroopers, e.ProdJets, e.ProdTurrets, e.ProdBombers, e.ProdTanks, e.ProdCarriers = 30, 20, 15, 5, 20, 10
 	}
 }
 
@@ -170,6 +196,7 @@ func newEmpire(name, owner string, cfg Config) *Empire {
 		Regions:  regions,
 		Troopers: 150, Carriers: 1, Tax: 15, Support: 100,
 		TurnsLeft: cfg.TurnsPerDay, Protection: cfg.ProtectionTurns,
+		ProdTroopers: 30, ProdJets: 20, ProdTurrets: 15, ProdBombers: 5, ProdTanks: 20, ProdCarriers: 10,
 	}
 }
 

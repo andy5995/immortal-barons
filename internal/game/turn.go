@@ -7,6 +7,7 @@ import "time"
 // plays) never call this, so they stagnate.
 func (w *World) PlayTurn(e *Empire, today string) {
 	w.processEconomy(e)
+	w.manufacture(e)
 	if e.HQ > 0 && e.HQ < 100 {
 		e.HQ += 5
 		if e.HQ > 100 {
@@ -169,4 +170,68 @@ func (w *World) processEconomy(e *Empire) {
 	if e.Bank > MoneyCap {
 		e.Bank = MoneyCap
 	}
+}
+
+// Industrial production tuning (v1, tunable — see docs/mechanics-reference.md).
+const (
+	IndustryPointsPerRegion = 10  // production points each Industrial region yields per turn
+	IndustryGoldPerRegion   = 250 // gold each Industrial region yields per turn
+)
+
+// Point cost to manufacture one of each unit type; cheaper units convert
+// from more of the same points.
+const (
+	CostTrooper = 1
+	CostJet     = 2
+	CostTurret  = 2
+	CostCarrier = 1
+	CostTank    = 4
+	CostBomber  = 5
+)
+
+// manufacture converts e's Industrial regions into production points and
+// gold, then spends the points on units per e.ProdXxx percentages (or, if
+// e.Specialized is set, entirely on that one unit type).
+func (w *World) manufacture(e *Empire) {
+	e.IndustryGold = e.Regions.Industrial * IndustryGoldPerRegion
+	e.Gold += e.IndustryGold
+
+	pts := e.Regions.Industrial * IndustryPointsPerRegion
+	e.MadeTroopers, e.MadeJets, e.MadeTurrets = 0, 0, 0
+	e.MadeBombers, e.MadeTanks, e.MadeCarriers = 0, 0, 0
+	if pts <= 0 {
+		return
+	}
+
+	if e.Specialized != "" {
+		switch e.Specialized {
+		case "Troopers":
+			e.MadeTroopers = pts / CostTrooper
+		case "Jets":
+			e.MadeJets = pts / CostJet
+		case "Turrets":
+			e.MadeTurrets = pts / CostTurret
+		case "Bombers":
+			e.MadeBombers = pts / CostBomber
+		case "Tanks":
+			e.MadeTanks = pts / CostTank
+		case "Carriers":
+			e.MadeCarriers = pts / CostCarrier
+		}
+	} else {
+		made := func(pct, cost int) int { return (pts * pct / 100) / cost }
+		e.MadeTroopers = made(e.ProdTroopers, CostTrooper)
+		e.MadeJets = made(e.ProdJets, CostJet)
+		e.MadeTurrets = made(e.ProdTurrets, CostTurret)
+		e.MadeBombers = made(e.ProdBombers, CostBomber)
+		e.MadeTanks = made(e.ProdTanks, CostTank)
+		e.MadeCarriers = made(e.ProdCarriers, CostCarrier)
+	}
+
+	e.Troopers += e.MadeTroopers
+	e.Jets += e.MadeJets
+	e.Turrets += e.MadeTurrets
+	e.Bombers += e.MadeBombers
+	e.Tanks += e.MadeTanks
+	e.Carriers += e.MadeCarriers
 }

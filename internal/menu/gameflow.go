@@ -87,6 +87,27 @@ func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
 	if p.LastRiot {
 		fmt.Fprintf(s, "  %sRiots have broken out due to high tax rates!%s\n", ansi.FgRed, ansi.Reset)
 	}
+	if p.IndustryGold > 0 {
+		fmt.Fprintf(s, "  %d gold was produced by your Industry.\n", p.IndustryGold)
+	}
+	if p.MadeTroopers > 0 {
+		fmt.Fprintf(s, "  %d Troopers were trained by Industrial Zones.\n", p.MadeTroopers)
+	}
+	if p.MadeJets > 0 {
+		fmt.Fprintf(s, "  %d Jets were manufactured by Industrial Zones.\n", p.MadeJets)
+	}
+	if p.MadeTurrets > 0 {
+		fmt.Fprintf(s, "  %d Turrets were manufactured by Industrial Zones.\n", p.MadeTurrets)
+	}
+	if p.MadeBombers > 0 {
+		fmt.Fprintf(s, "  %d Bombers were manufactured by Industrial Zones.\n", p.MadeBombers)
+	}
+	if p.MadeTanks > 0 {
+		fmt.Fprintf(s, "  %d Tanks were manufactured by Industrial Zones.\n", p.MadeTanks)
+	}
+	if p.MadeCarriers > 0 {
+		fmt.Fprintf(s, "  %d Carriers were manufactured by Industrial Zones.\n", p.MadeCarriers)
+	}
 	fmt.Fprintf(s, "  Turns left today: %d\n", p.TurnsLeft)
 	pause(s)
 }

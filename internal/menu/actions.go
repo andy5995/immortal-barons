@@ -290,6 +290,7 @@ func empireStatus(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "  Jets ........ %d\n", p.Jets)
 	fmt.Fprintf(s, "  Turrets ..... %d\n", p.Turrets)
 	fmt.Fprintf(s, "  Tanks ....... %d\n", p.Tanks)
+	fmt.Fprintf(s, "  Bombers ..... %d\n", p.Bombers)
 	fmt.Fprintf(s, "  Carriers .... %d\n", p.Carriers)
 	fmt.Fprintf(s, "  Agents ...... %d\n", p.Agents)
 	fmt.Fprintf(s, "  Tax rate .... %d%%\n", p.Tax)
@@ -555,6 +556,59 @@ func viewDiplomacy(s session.Session, w *game.World) Result {
 		}
 	}
 	pause(s)
+	return Stay
+}
+
+// prodTypeNames and prodField describe the 6 unit types Industrial regions
+// can be set to build, in the order shown to the player.
+var prodTypeNames = []string{"Troopers", "Jets", "Turrets", "Bombers", "Tanks", "Carriers"}
+
+func prodField(p *game.Empire, idx int) *int {
+	fields := []*int{
+		&p.ProdTroopers, &p.ProdJets, &p.ProdTurrets, &p.ProdBombers, &p.ProdTanks, &p.ProdCarriers,
+	}
+	return fields[idx]
+}
+
+// setIndustries lets the player set the percentage of Industrial production
+// points spent on each unit type. Percentages need not sum to 100; the
+// manufacturing split uses the raw percentages, so if they sum to less than
+// 100 some production points go unused (v1 choice — no normalization).
+func setIndustries(s session.Session, w *game.World) Result {
+	p := w.Player()
+	if p.Specialized != "" {
+		ok(s, "Your industry is specialized in %s and can no longer be split.", p.Specialized)
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%sSet Industries — percentage of production spent on each unit:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for i, name := range prodTypeNames {
+		cur := *prodField(p, i)
+		n := promptSuggested(s, name+" %", cur, 100)
+		*prodField(p, i) = n
+	}
+	ok(s, "Industry production percentages updated.")
+	return Stay
+}
+
+// specializeIndustry lets the player concentrate all Industrial production
+// into a single unit type. This is permanent, matching the original BRE's
+// one-way specialization; once set it cannot be undone.
+func specializeIndustry(s session.Session, w *game.World) Result {
+	p := w.Player()
+	if p.Specialized != "" {
+		ok(s, "Your industry is already specialized in %s.", p.Specialized)
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%sSpecialize Industry — choose a unit type. This is PERMANENT:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for i, name := range prodTypeNames {
+		fmt.Fprintf(s, "  %d) %s\n", i+1, name)
+	}
+	t := promptInt(s, "Specialize in which unit (0 to cancel)?")
+	if t < 1 || t > len(prodTypeNames) {
+		return Stay
+	}
+	p.Specialized = prodTypeNames[t-1]
+	ok(s, "Your industry is now permanently specialized in %s.", p.Specialized)
 	return Stay
 }
 
