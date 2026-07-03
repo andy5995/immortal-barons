@@ -12,11 +12,15 @@ func (w *World) SendGold(from, to *Empire, amount int) error {
 	if from.Gold < amount {
 		return ErrCantAfford
 	}
-	from.Gold -= amount
-	to.Gold += amount
-	if to.Gold > MoneyCap {
-		to.Gold = MoneyCap
+	received := amount
+	if to.Gold+received > MoneyCap {
+		received = MoneyCap - to.Gold
 	}
-	to.Mail = append(to.Mail, fmt.Sprintf("%s sent you %d gold in a trade deal.", from.Name, amount))
+	if received <= 0 {
+		return nil // recipient is already at the money cap
+	}
+	from.Gold -= received
+	to.Gold += received
+	to.Mail = append(to.Mail, fmt.Sprintf("%s sent you %d gold in a trade deal.", from.Name, received))
 	return nil
 }
