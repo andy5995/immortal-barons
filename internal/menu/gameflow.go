@@ -78,6 +78,12 @@ func incomeReport(s session.Session, w *game.World, p *game.Empire) {
 func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
 	fmt.Fprintf(s, "\n%sEnd of Turn Statistics:%s\n", ansi.FgBrightCyan, ansi.Reset)
 	fmt.Fprintf(s, "  The people of %s go about their business.\n", p.Name)
+	if p.LastPopGrowth > 0 {
+		fmt.Fprintf(s, "  Your dominion gained %d people.\n", p.LastPopGrowth)
+	}
+	if p.LastSpoiled > 0 {
+		fmt.Fprintf(s, "  %d units of food spoiled.\n", p.LastSpoiled)
+	}
 	fmt.Fprintf(s, "  Turns left today: %d\n", p.TurnsLeft)
 	pause(s)
 }

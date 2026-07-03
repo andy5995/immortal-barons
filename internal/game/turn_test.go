@@ -99,3 +99,65 @@ func TestDailyMaintenanceHandlesMalformedDate(t *testing.T) {
 		t.Errorf("LastMaintDate = %q, want snapped to today", w.LastMaintDate)
 	}
 }
+
+func TestHQAdvancesEachTurn(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Gold = HQCost
+	if err := w.StartHQ(e); err != nil {
+		t.Fatalf("StartHQ: %v", err)
+	}
+	if e.HQ != 5 {
+		t.Fatalf("HQ after start: want 5, got %d", e.HQ)
+	}
+
+	want := []int{10, 15, 20}
+	for _, w2 := range want {
+		w.PlayTurn(e, "2026-07-03")
+		if e.HQ != w2 {
+			t.Errorf("HQ after turn: want %d, got %d", w2, e.HQ)
+		}
+	}
+
+	e.HQ = 100
+	w.PlayTurn(e, "2026-07-03")
+	if e.HQ != 100 {
+		t.Errorf("HQ should cap at 100, got %d", e.HQ)
+	}
+}
+
+func TestFoodSpoilageAboveBuffer(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.People = 0
+	e.Troopers = 0
+	e.Jets = 0
+	e.Tanks = 0
+	e.Regions = RegionMix{}
+	e.Land = 0
+	e.Food = 100000
+
+	w.PlayTurn(e, "2026-07-03")
+
+	if e.LastSpoiled <= 0 {
+		t.Errorf("expect food spoilage above buffer, got LastSpoiled=%d", e.LastSpoiled)
+	}
+}
+
+func TestFoodNoSpoilageBelowBuffer(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.People = 100
+	e.Troopers = 10
+	e.Jets = 0
+	e.Tanks = 0
+	e.Regions = RegionMix{}
+	e.Land = 0
+	e.Food = 150 // consumption (110) leaves 40, well below the buffer (220)
+
+	w.PlayTurn(e, "2026-07-03")
+
+	if e.LastSpoiled != 0 {
+		t.Errorf("expect no spoilage below buffer, got LastSpoiled=%d", e.LastSpoiled)
+	}
+}

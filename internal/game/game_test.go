@@ -59,3 +59,33 @@ func TestTargetsExcludeSelfAndProtected(t *testing.T) {
 		t.Errorf("want 1 targetable empire, got %d", len(got))
 	}
 }
+
+func TestHQBoostsTanks(t *testing.T) {
+	w := testWorld()
+	e := w.AddHuman("tester", "Testland")
+	e.Tanks = 10
+
+	e.HQ = 0
+	baseOffense := e.Offense()
+	baseDefense := e.Defense()
+
+	e.HQ = 100
+	boostedOffense := e.Offense()
+	boostedDefense := e.Defense()
+
+	if boostedOffense <= baseOffense {
+		t.Errorf("Offense should rise with HQ=100: base=%d boosted=%d", baseOffense, boostedOffense)
+	}
+	if boostedDefense <= baseDefense {
+		t.Errorf("Defense should rise with HQ=100: base=%d boosted=%d", baseDefense, boostedDefense)
+	}
+
+	wantOffenseDelta := e.Tanks * 4
+	if boostedOffense-baseOffense != wantOffenseDelta {
+		t.Errorf("Offense delta: want %d (tanks doubled), got %d", wantOffenseDelta, boostedOffense-baseOffense)
+	}
+	wantDefenseDelta := e.Tanks * 4
+	if boostedDefense-baseDefense != wantDefenseDelta {
+		t.Errorf("Defense delta: want %d (tanks doubled), got %d", wantDefenseDelta, boostedDefense-baseDefense)
+	}
+}

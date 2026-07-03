@@ -31,6 +31,7 @@ type Empire struct {
 
 	Tax int
 	SDI int // 0-75, percentage reduction of incoming strike damage
+	HQ  int // 0 = none/not started; 1-100 = percent complete
 
 	TurnsLeft  int
 	Protection int
@@ -39,6 +40,10 @@ type Empire struct {
 	Mail       []string
 
 	AllianceOffers []string
+
+	// Transient per-turn stats for the end-of-turn report; not persisted.
+	LastSpoiled   int `json:"-"`
+	LastPopGrowth int `json:"-"`
 }
 
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }
@@ -60,11 +65,11 @@ func (e *Empire) EnsureRegions() {
 
 func (e *Empire) Offense() int {
 	usableJets := min(e.Jets, e.Carriers*100)
-	return e.Troopers + usableJets*2 + e.Tanks*4
+	return e.Troopers + usableJets*2 + e.Tanks*4*(100+e.HQ)/100
 }
 
 func (e *Empire) Defense() int {
-	return e.Troopers + e.Turrets*2 + e.Tanks*4
+	return e.Troopers + e.Turrets*2 + e.Tanks*4*(100+e.HQ)/100
 }
 
 type Prices struct {

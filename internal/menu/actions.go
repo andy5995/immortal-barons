@@ -33,6 +33,17 @@ func buy2(label string, unit func(*game.World) int, apply func(*game.World, *gam
 	}
 }
 
+// buildHQ starts HeadQuarters construction for the acting empire.
+func buildHQ(s session.Session, w *game.World) Result {
+	p := w.Player()
+	if err := w.StartHQ(p); err != nil {
+		fail(s, err)
+	} else {
+		ok(s, "You have started work on your HeadQuarters.")
+	}
+	return Stay
+}
+
 // regionTypeNames and regionTypeHints describe the 8 region types in the
 // stable order RegionMix.fields()/e.Regions' own field order uses.
 var regionTypeNames = []string{
@@ -283,6 +294,14 @@ func empireStatus(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "  Agents ...... %d\n", p.Agents)
 	fmt.Fprintf(s, "  Tax rate .... %d%%\n", p.Tax)
 	fmt.Fprintf(s, "  SDI ......... %d%%\n", p.SDI)
+	switch {
+	case p.HQ == 0:
+		fmt.Fprintf(s, "  HeadQuarters . None\n")
+	case p.HQ >= 100:
+		fmt.Fprintf(s, "  HeadQuarters . Complete\n")
+	default:
+		fmt.Fprintf(s, "  HeadQuarters . %d%% Complete\n", p.HQ)
+	}
 	fmt.Fprintf(s, "  Offense ..... %d\n", p.Offense())
 	fmt.Fprintf(s, "  Defense ..... %d\n", p.Defense())
 	fmt.Fprintf(s, "  Net worth ... %d\n", w.NetWorth(p))

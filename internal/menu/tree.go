@@ -56,7 +56,7 @@ func BuildMenus() *Menus {
 		{Key: 'G', Label: "Recruit Agents",
 			Do: buy2("Recruit Agents", func(w *game.World) int { return w.Prices.Agent }, (*game.World).RecruitAgents)},
 		{Key: 'O', Label: "Build Bombers", Do: stubbed("Build Bombers")},
-		{Key: 'H', Label: "Build HeadQuarters", Do: stubbed("Build HeadQuarters")},
+		{Key: 'H', Label: "Build HeadQuarters", Do: buildHQ},
 		{Key: 'B', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '*', Label: "System Menu", Do: gotoMenu(system)},
 		{Key: 'R', Label: "Return", Do: back},

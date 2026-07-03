@@ -7,7 +7,25 @@ var (
 	ErrNoBank     = errors.New("You do not have that much in the bank.")
 	ErrNoDebt     = errors.New("You do not owe that much.")
 	ErrNoAgents   = errors.New("You have no agents for that operation.")
+	ErrHQExists   = errors.New("Your HeadQuarters is already under construction or built.")
 )
+
+// HQCost is the gold price to start HeadQuarters construction.
+const HQCost = 5000
+
+// StartHQ begins HeadQuarters construction (5% the first turn); it then
+// advances during daily play. Errors if already started/built or unaffordable.
+func (w *World) StartHQ(e *Empire) error {
+	if e.HQ > 0 {
+		return ErrHQExists
+	}
+	if e.Gold < HQCost {
+		return ErrCantAfford
+	}
+	e.Gold -= HQCost
+	e.HQ = 5
+	return nil
+}
 
 // spend deducts gold for buying n units at unit cost, returning an error
 // if the empire can't afford it. n <= 0 is a no-op.

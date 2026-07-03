@@ -7,6 +7,12 @@ import "time"
 // plays) never call this, so they stagnate.
 func (w *World) PlayTurn(e *Empire, today string) {
 	w.processEconomy(e)
+	if e.HQ > 0 && e.HQ < 100 {
+		e.HQ += 5
+		if e.HQ > 100 {
+			e.HQ = 100
+		}
+	}
 	if e.TurnsLeft > 0 {
 		e.TurnsLeft--
 	}
@@ -94,6 +100,17 @@ func (w *World) processEconomy(e *Empire) {
 		e.Food = 0
 	}
 
+	// Hoarded food spoils beyond a two-turn buffer (v1 tunable — a modest
+	// buffer is safe; it's why players sell surplus at the food market).
+	buffer := (e.People + e.Troopers + e.Jets*2 + e.Tanks*2) * 2
+	if e.Food > buffer {
+		spoiled := (e.Food - buffer) / 25
+		e.Food -= spoiled
+		e.LastSpoiled = spoiled
+	} else {
+		e.LastSpoiled = 0
+	}
+
 	maint := e.Troopers*6 + e.Jets*12 + e.Turrets*9 + e.Tanks*6 + e.Carriers*1
 	if e.Gold >= maint {
 		e.Gold -= maint
@@ -102,9 +119,11 @@ func (w *World) processEconomy(e *Empire) {
 		e.Troopers -= e.Troopers / 10
 	}
 
+	e.LastPopGrowth = 0
 	if e.Food > 0 {
 		if g := e.People * (10 - e.Tax/5) / 100; g > 0 {
 			e.People += g
+			e.LastPopGrowth = g
 		}
 	}
 	e.People += e.Regions.Urban * 10 // urban regions draw settlers
