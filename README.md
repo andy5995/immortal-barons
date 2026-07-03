@@ -83,7 +83,8 @@ front-end later without changing the game rules.
 ## Heritage
 
 Immortal Barons is a tribute to *Barren Realms Elite*, created by Mehul
-Patel and later maintained by John Dailey. This project shares that game's
+Patel and later maintained by [John Dailey](https://www.johndaileysoftware.com/).
+This project shares that game's
 ideas and feel, but it does not use any of its code, text, or artwork.
 Game rules and mechanics are not covered by copyright, so this is a fresh
 implementation of the concept. It is not affiliated with, or endorsed by,
