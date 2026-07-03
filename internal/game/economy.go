@@ -23,11 +23,31 @@ func (e *Empire) spend(n, unit int) error {
 	return nil
 }
 
+// LandPriceStep controls how fast land gets more expensive as an empire
+// grows (v1 balance knob — tune freely). Each region you own raises the
+// next region's price by Prices.Land/LandPriceStep.
+const LandPriceStep = 50
+
+// LandPrice is the current gold cost of the next region for empire e.
+func (w *World) LandPrice(e *Empire) int {
+	return w.Prices.Land + e.Land*w.Prices.Land/LandPriceStep
+}
+
 func (w *World) BuyLand(e *Empire, n int) error {
-	if err := e.spend(n, w.Prices.Land); err != nil {
-		return err
+	if n <= 0 {
+		return nil
 	}
-	e.Land += n
+	if e.Gold < w.LandPrice(e) {
+		return ErrCantAfford // can't afford even one
+	}
+	for i := 0; i < n; i++ {
+		price := w.LandPrice(e)
+		if e.Gold < price {
+			break // bought as many as affordable
+		}
+		e.Gold -= price
+		e.Land++
+	}
 	return nil
 }
 
@@ -87,7 +107,7 @@ func (w *World) RecruitAgents(e *Empire, n int) error {
 	return nil
 }
 
-// Sell returns land for half its purchase price.
+// SellLand returns land for half its current market price per region.
 func (w *World) SellLand(e *Empire, n int) error {
 	if n <= 0 {
 		return nil
@@ -95,8 +115,10 @@ func (w *World) SellLand(e *Empire, n int) error {
 	if n > e.Land {
 		n = e.Land
 	}
-	e.Land -= n
-	e.Gold += n * w.Prices.Land / 2
+	for i := 0; i < n; i++ {
+		e.Land--
+		e.Gold += w.LandPrice(e) / 2
+	}
 	return nil
 }
 
