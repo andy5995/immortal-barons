@@ -1,5 +1,6 @@
-// Package store persists the game world to disk and guards it with an
-// exclusive lock so only one session mutates it at a time.
+// Package store persists the game world to disk. Save writes the world
+// atomically (temp file + rename); Load reads it back, or returns a fresh
+// world when no save exists yet.
 package store
 
 import (
