@@ -43,27 +43,25 @@ func BuildMenus() *Menus {
 
 	buy.Items = []Item{
 		{Key: '*', Label: "System Menu", Do: gotoMenu(system)},
-		{Key: '1', Label: "Recruit Troopers",
-			Do: buy2("Recruit Troopers", func(w *game.World) int { return w.Prices.Trooper }, (*game.World).Recruit)},
-		{Key: '2', Label: "Build Jets",
-			Do: buy2("Build Jets", func(w *game.World) int { return w.Prices.Jet }, (*game.World).BuildJets)},
-		{Key: '3', Label: "Build Turrets (defense; shoots down jets)",
-			Do: buy2("Build Turrets", func(w *game.World) int { return w.Prices.Turret }, (*game.World).BuildTurrets)},
-		{Key: '4', Label: "Build Bombers", Do: stubbed("Build Bombers")},
-		{Key: '5', Label: "Build HeadQuarters", Do: buildHQ},
-		{Key: '6', Label: "Buy Land / Regions", Do: buyLand},
-		{Key: '7', Label: "Recruit Agents",
-			Do: buy2("Recruit Agents", func(w *game.World) int { return w.Prices.Agent }, (*game.World).RecruitAgents)},
-		{Key: '8', Label: "Build Tanks",
-			Do: buy2("Build Tanks", func(w *game.World) int { return w.Prices.Tank }, (*game.World).BuildTanks)},
-		{Key: '9', Label: "Build Carriers (move jets to attack)",
-			Do: buy2("Build Carriers", func(w *game.World) int { return w.Prices.Carrier }, (*game.World).BuildCarriers)},
+		{Key: '1', Label: "Troopers",
+			Do: buy2("Troopers", func(w *game.World) int { return w.Prices.Trooper }, (*game.World).Recruit)},
+		{Key: '2', Label: "Jets",
+			Do: buy2("Jets", func(w *game.World) int { return w.Prices.Jet }, (*game.World).BuildJets)},
+		{Key: '3', Label: "Turrets",
+			Do: buy2("Turrets", func(w *game.World) int { return w.Prices.Turret }, (*game.World).BuildTurrets)},
+		{Key: '4', Label: "Bombers", Do: stubbed("Bombers")},
+		{Key: '5', Label: "HeadQuarters", Do: buildHQ},
+		{Key: '6', Label: "Regions", Do: buyLand},
+		{Key: '7', Label: "Covert Agents",
+			Do: buy2("Covert Agents", func(w *game.World) int { return w.Prices.Agent }, (*game.World).RecruitAgents)},
+		{Key: '8', Label: "Tanks",
+			Do: buy2("Tanks", func(w *game.World) int { return w.Prices.Tank }, (*game.World).BuildTanks)},
+		{Key: '9', Label: "Carriers",
+			Do: buy2("Carriers", func(w *game.World) int { return w.Prices.Carrier }, (*game.World).BuildCarriers)},
 		{Key: 'S', Label: "Sell", Do: gotoMenu(sell)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: 'F', Label: "Buy Food",
-			Do: buy2("Buy Food", func(w *game.World) int { return game.FoodBuyPrice }, (*game.World).BuyFoodMarket)},
 		{Key: '?', Label: "Help", Do: helpDatabase},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Proceed with Turn", Do: back},
 	}
 
 	sell.Items = []Item{
@@ -111,7 +109,7 @@ func BuildMenus() *Menus {
 		{Key: 'J', Label: "Join Group Attack", Do: stubbed("Join Group Attack")},
 		{Key: 'T', Label: "Terrorist Ops", Do: stubbed("Terrorist Ops")},
 		{Key: 'X', Label: "Travel Times", Do: stubbed("Travel Times")},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Proceed with Turn", Do: back},
 	}
 
 	covert.Items = []Item{
@@ -121,7 +119,7 @@ func BuildMenus() *Menus {
 		{Key: 'B', Label: "Bribery", Do: stubbed("Bribery")},
 		{Key: 'O', Label: "Special Operations", Do: specialOps},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Proceed with Turn", Do: back},
 	}
 
 	trading.Items = []Item{
@@ -130,7 +128,7 @@ func BuildMenus() *Menus {
 		{Key: '2', Label: "View IPScores", Do: interbbsScores},
 		{Key: 'B', Label: "Buy / Sell", Do: gotoMenu(buy)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Proceed with Turn", Do: back},
 	}
 
 	diplomacy.Items = []Item{
