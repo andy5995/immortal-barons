@@ -309,12 +309,14 @@ func specialOps(s session.Session, w *game.World) Result {
 }
 
 func attackPirates(s session.Session, w *game.World) Result {
-	fmt.Fprintf(s, "\n%sChoose a pirate faction to raid:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	for i, name := range game.PirateFactions {
-		fmt.Fprintf(s, "  %d) %s\n", i+1, name)
+	fmt.Fprintf(s, "\n%sPirate factions (strength is random; fat ones just raided someone):%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "  %-3s %-12s %-8s %-6s %s\n", "#", "Faction", "Forces", "Land", "Loot T/J/K")
+	for i, p := range w.Pirates {
+		fmt.Fprintf(s, "  %d)  %-12s %-8d %-6d %d/%d/%d\n",
+			i+1, p.Name, p.Forces, p.Land, p.LootTroopers, p.LootJets, p.LootTanks)
 	}
 	f := promptInt(s, "Raid which faction (0 to cancel)?")
-	if f < 1 || f > len(game.PirateFactions) {
+	if f < 1 || f > len(w.Pirates) {
 		return Stay
 	}
 	p := w.Player()

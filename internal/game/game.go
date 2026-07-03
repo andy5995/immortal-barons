@@ -190,6 +190,7 @@ type World struct {
 	Alliances     []string
 	LastMaster    string
 	RemoteBoards  []RemoteBoard
+	Pirates       []PirateFaction
 
 	Coordinator bool
 
@@ -222,6 +223,7 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 		InvestRate:   DefaultInvestRate,
 	}
 	w.seedAIEmpires()
+	w.seedPirates()
 	return w
 }
 

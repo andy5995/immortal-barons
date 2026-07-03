@@ -39,6 +39,7 @@ func (w *World) DailyMaintenance(today string) {
 			}
 		}
 		w.aiPlay(w.LastMaintDate)
+		w.piratesRaid()
 		for _, e := range w.Empires {
 			if e.Owner == "" {
 				e.Events = nil

@@ -116,61 +116,6 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 	return report, nil
 }
 
-// PirateFactions lists the raidable pirate factions, weakest first.
-var PirateFactions = []string{
-	"Humans", "Barbarians", "Solarians", "Sharks", "Mechanoids",
-	"Rexxogans", "Xandorians", "Monitorians", "Spacians",
-}
-
-// pirateFactionBaseDefense is the v1 defense model: base 200, scaling up
-// 50% per faction index so Humans (0) are easiest and Spacians (8) are
-// hardest (tunable — see docs/mechanics-reference.md).
-const pirateFactionBaseDefense = 200
-
-// pirateRaidLossPct is the fraction of committed force lost on a failed
-// raid (v1 tunable).
-const pirateRaidLossPct = 15
-
-// RaidFaction resolves a pirate raid against the given faction index
-// (0-based, into PirateFactions). The attacker commits troopers/jets/tanks
-// (each clamped to what it owns); harder factions have stronger defense.
-// On success the attacker gains land (and a little plundered military); on
-// failure it loses a fraction of the committed force. Returns a report
-// string.
-func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) string {
-	name := "Unknown"
-	if faction >= 0 && faction < len(PirateFactions) {
-		name = PirateFactions[faction]
-	}
-
-	troopers = clamp(a.Troopers, troopers)
-	jets = clamp(a.Jets, jets)
-	tanks = clamp(a.Tanks, tanks)
-
-	offense := w.jitter(troopers + jets*2 + tanks*4)
-	defense := w.jitter(pirateFactionBaseDefense * (2 + faction) / 2)
-
-	if offense > defense {
-		land := w.rng.Intn(8) + 3
-		troopsGained := w.rng.Intn(100)
-
-		a.Regions.Coastal += land
-		a.syncLand()
-		a.Troopers += troopsGained
-
-		return fmt.Sprintf("You raided the %s and won! Gained %d regions and %d troopers.", name, land, troopsGained)
-	}
-
-	tLost := troopers * pirateRaidLossPct / 100
-	jLost := jets * pirateRaidLossPct / 100
-	kLost := tanks * pirateRaidLossPct / 100
-	a.Troopers -= tLost
-	a.Jets -= jLost
-	a.Tanks -= kLost
-
-	return fmt.Sprintf("You could not successfully raid the %s. You lost %d Troopers, %d Jets, and %d Tanks.", name, tLost, jLost, kLost)
-}
-
 // GooieKablooie is a planet-wide superweapon: for a very high cost it
 // destroys ~10% of EVERY other living empire's land at once (reduced by each
 // target's SDI). v1 simplification of the original's multi-day build/decay.

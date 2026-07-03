@@ -35,7 +35,7 @@ var helpTopics = []struct{ Name, Text string }{
 	{"Nuclear", "A costly strike that reduces some of the target's regions to waste, scaled down by their SDI defense."},
 	{"Chemical", "A costly strike that kills people and Troopers and destroys a smaller share of regions, scaled down by the target's SDI."},
 	{"Biological", "A costly strike that kills people and Troopers but leaves land untouched, scaled down by the target's SDI."},
-	{"Attack Pirates", "Raid one of nine independent pirate factions (easiest to hardest) by committing Troopers, Jets, and Tanks; winning gains you regions and stray Troopers, losing costs you a share of the committed force."},
+	{"Attack Pirates", "Raid one of nine pirate factions by committing Troopers, Jets, and Tanks. Their strength is random, not a fixed order. Pirates raid players and hoard the units they carry off, growing over time; a winning raid reclaims a portion of a faction's loot and regions, so it takes several hits to drain a fat one. Losing costs you a share of the committed force."},
 	{"Gooie Kablooie", "An extremely expensive superweapon that strikes every living rival empire at once, stripping a share of each one's land, reduced by their SDI."},
 	{"SDI Program", "Spend gold in fixed increments to raise your SDI level, which reduces the damage you take from Nuclear, Chemical, Biological, and Gooie Kablooie strikes, up to a cap."},
 

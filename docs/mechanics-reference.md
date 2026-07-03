@@ -71,9 +71,14 @@ Net-worth value contributed per unit (from the guide's net-worth table):
 - **Chemical attack** — damages fewer regions but kills a lot of people
   (and troopers).
 - **Biological attack** — hurts people and troopers, but not land.
-- **Attack pirates** — raid pirates to gain military equipment and land.
-  Retaliating after a pirate hits you gains more regions (about 8–16+)
-  than striking first (about 1–5), so it is usually better to wait.
+- **Attack pirates** — the nine pirate factions are living bands, not a
+  fixed difficulty ladder: their strength is random (any faction can be the
+  strongest). Pirates raid players at random, carrying off a small share of
+  the victim's units (they do not take the victim's regions); the game grants
+  a raiding pirate new regions, so a pirate that just raided is fatter and
+  holds more land. Beating a pirate reclaims only a portion of its held loot
+  and regions per hit — it takes several hits (~4-5) to fully recover your
+  goods. Ignored pirates grow into mini-empires owning thousands of regions.
   Military parked in the Trading Market is safe from pirate raids.
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
