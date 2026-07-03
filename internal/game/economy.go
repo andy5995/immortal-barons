@@ -33,7 +33,11 @@ func (w *World) LandPrice(e *Empire) int {
 	return w.Prices.Land + e.Land*w.Prices.Land/LandPriceStep
 }
 
-func (w *World) BuyLand(e *Empire, n int) error {
+// BuyRegions buys n regions of the type pointed to by field (a pointer into
+// e.Regions, e.g. &e.Regions.Coastal), using the same rising-price formula
+// as before region types existed. All-or-nothing: either the whole
+// purchase is affordable or nothing happens.
+func (w *World) BuyRegions(e *Empire, field *int, n int) error {
 	if n <= 0 {
 		return nil
 	}
@@ -45,8 +49,15 @@ func (w *World) BuyLand(e *Empire, n int) error {
 		return ErrCantAfford // must afford the whole purchase
 	}
 	e.Gold -= total
-	e.Land += n
+	*field += n
+	e.syncLand()
 	return nil
+}
+
+// BuyLand is a thin wrapper over BuyRegions that buys Coastal regions, kept
+// for callers that don't care about region type.
+func (w *World) BuyLand(e *Empire, n int) error {
+	return w.BuyRegions(e, &e.Regions.Coastal, n)
 }
 
 func (w *World) BuyFood(e *Empire, n int) error {
@@ -105,19 +116,27 @@ func (w *World) RecruitAgents(e *Empire, n int) error {
 	return nil
 }
 
-// SellLand returns land for half its current market price per region.
-func (w *World) SellLand(e *Empire, n int) error {
+// SellRegions returns regions of the type pointed to by field for half
+// their current market price per region. n is clamped to *field.
+func (w *World) SellRegions(e *Empire, field *int, n int) error {
 	if n <= 0 {
 		return nil
 	}
-	if n > e.Land {
-		n = e.Land
+	if n > *field {
+		n = *field
 	}
 	for i := 0; i < n; i++ {
-		e.Land--
+		*field--
+		e.syncLand()
 		e.Gold += w.LandPrice(e) / 2
 	}
 	return nil
+}
+
+// SellLand is a thin wrapper over SellRegions that sells Coastal regions,
+// kept for callers that don't care about region type.
+func (w *World) SellLand(e *Empire, n int) error {
+	return w.SellRegions(e, &e.Regions.Coastal, n)
 }
 
 func (w *World) Deposit(e *Empire, n int) error {

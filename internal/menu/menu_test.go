@@ -91,14 +91,18 @@ func TestCoordinatorReachableWhenFlagged(t *testing.T) {
 }
 
 func TestBuyLandThroughMenu(t *testing.T) {
-	f := &fakeSession{keys: []rune("BL5\r ")}
+	f := &fakeSession{keys: []rune("BL1\r5\r ")} // Buy -> Buy Land -> type 1 (Coastal) -> qty 5
 	w := game.NewWorldSeed(game.DefaultConfig(), 1)
 	w.Active = w.AddHuman("tester", "Testland")
 	w.Today = "2026-07-03"
 	before := w.Active.Land
+	beforeCoastal := w.Active.Regions.Coastal
 	Run(f, w, Build())
 	if w.Active.Land != before+5 {
 		t.Errorf("expected land %d, got %d", before+5, w.Active.Land)
+	}
+	if w.Active.Regions.Coastal != beforeCoastal+5 {
+		t.Errorf("expected Coastal regions %d, got %d", beforeCoastal+5, w.Active.Regions.Coastal)
 	}
 }
 

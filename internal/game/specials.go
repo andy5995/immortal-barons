@@ -44,7 +44,8 @@ func (w *World) NuclearStrike(a, d *Empire) (string, error) {
 	if regions > d.Land {
 		regions = d.Land
 	}
-	d.Land -= regions
+	d.Regions.remove(regions)
+	d.syncLand()
 	if d.Land <= 0 || d.People <= 0 {
 		d.Alive = false
 	}
@@ -72,7 +73,8 @@ func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 	people, troops, regions = clamp(d.People, people), clamp(d.Troopers, troops), clamp(d.Land, regions)
 	d.People -= people
 	d.Troopers -= troops
-	d.Land -= regions
+	d.Regions.remove(regions)
+	d.syncLand()
 
 	if d.Land <= 0 || d.People <= 0 {
 		d.Alive = false
@@ -121,7 +123,8 @@ func (w *World) RaidPirates(a *Empire) string {
 	troops := w.rng.Intn(200)
 	lost := a.Troopers / 20
 
-	a.Land += land
+	a.Regions.Coastal += land
+	a.syncLand()
 	a.Troopers += troops
 	a.Troopers -= lost
 
@@ -149,7 +152,8 @@ func (w *World) GooieKablooie(a *Empire) (string, error) {
 		if regions > d.Land {
 			regions = d.Land
 		}
-		d.Land -= regions
+		d.Regions.remove(regions)
+		d.syncLand()
 		if d.Land <= 0 || d.People <= 0 {
 			d.Alive = false
 		}

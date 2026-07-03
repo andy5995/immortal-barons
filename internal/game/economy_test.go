@@ -6,6 +6,7 @@ func TestLandPriceRisesWithHoldings(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
 
+	e.Regions = RegionMix{}
 	e.Land = 0
 	base := w.LandPrice(e)
 	if base != w.Prices.Land {
@@ -25,6 +26,7 @@ func TestBuyLandIncremental(t *testing.T) {
 
 	// Land=0, Prices.Land=100, LandPriceStep=50: price(Land) = 100 + 2*Land,
 	// so buying 5 regions costs 100+102+104+106+108 = 520 exactly.
+	e.Regions = RegionMix{}
 	e.Land = 0
 	e.Gold = 1000
 	startGold := e.Gold
@@ -50,6 +52,7 @@ func TestBuyLandRejectsWhenBroke(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
 
+	e.Regions = RegionMix{}
 	e.Land = 0
 
 	const n = 5
@@ -75,6 +78,7 @@ func TestSellLandRefundsHalf(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
 
+	e.Regions = RegionMix{}
 	e.Land = 0
 	e.Gold = 10000
 	startGold := e.Gold

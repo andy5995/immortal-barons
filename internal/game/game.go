@@ -14,11 +14,12 @@ type Empire struct {
 	Owner string // normalized BBS handle; "" for AI
 	Alive bool
 
-	Gold int
-	Bank int
-	Debt int
-	Food int
-	Land int
+	Gold    int
+	Bank    int
+	Debt    int
+	Food    int
+	Land    int
+	Regions RegionMix
 
 	People   int
 	Troopers int
@@ -41,6 +42,10 @@ type Empire struct {
 }
 
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }
+
+// syncLand resyncs the authoritative Land total from Regions. Every place
+// that changes an empire's regions must call this afterward.
+func (e *Empire) syncLand() { e.Land = e.Regions.Total() }
 
 func (e *Empire) Offense() int {
 	usableJets := min(e.Jets, e.Carriers*100)
@@ -108,9 +113,14 @@ func (w *World) seedAIEmpires() {
 }
 
 func newEmpire(name, owner string, cfg Config) *Empire {
+	regions := RegionMix{
+		Coastal: 40, Agricultural: 25, Urban: 10,
+		Mountain: 10, Desert: 5, River: 10,
+	}
 	return &Empire{
 		Name: name, Owner: owner, Alive: true,
-		Gold: 10000, Food: 20000, Land: 100, People: 2000,
+		Gold: 10000, Food: 20000, Land: regions.Total(), People: 2000,
+		Regions:  regions,
 		Troopers: 150, Carriers: 1, Tax: 15,
 		TurnsLeft: cfg.TurnsPerDay, Protection: cfg.ProtectionTurns,
 	}

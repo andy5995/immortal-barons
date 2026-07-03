@@ -41,8 +41,7 @@ func Build() *Menu {
 	}
 
 	buy.Items = []Item{
-		{Key: 'L', Label: "Buy Land / Regions",
-			Do: buy2("Buy Land", func(w *game.World) int { return w.LandPrice(w.Player()) }, (*game.World).BuyLand)},
+		{Key: 'L', Label: "Buy Land / Regions", Do: buyLand},
 		{Key: 'F', Label: "Buy Food",
 			Do: buy2("Buy Food", func(w *game.World) int { return w.Prices.Food }, (*game.World).BuyFood)},
 		{Key: 'T', Label: "Recruit Troopers",
@@ -55,8 +54,7 @@ func Build() *Menu {
 			Do: buy2("Build Tanks", func(w *game.World) int { return w.Prices.Tank }, (*game.World).BuildTanks)},
 		{Key: 'C', Label: "Build Carriers (move jets to attack)",
 			Do: buy2("Build Carriers", func(w *game.World) int { return w.Prices.Carrier }, (*game.World).BuildCarriers)},
-		{Key: 'S', Label: "Sell Land",
-			Do: buy2("Sell Land", func(w *game.World) int { return w.LandPrice(w.Player()) / 2 }, (*game.World).SellLand)},
+		{Key: 'S', Label: "Sell Land", Do: sellLand},
 		{Key: 'G', Label: "Recruit Agents",
 			Do: buy2("Recruit Agents", func(w *game.World) int { return w.Prices.Agent }, (*game.World).RecruitAgents)},
 		{Key: 'O', Label: "Build Bombers", Do: stubbed("Build Bombers")},

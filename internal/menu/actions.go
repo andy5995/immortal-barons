@@ -27,6 +27,74 @@ func buy2(label string, unit func(*game.World) int, apply func(*game.World, *gam
 	}
 }
 
+// regionTypeNames and regionTypeHints describe the 8 region types in the
+// stable order RegionMix.fields()/e.Regions' own field order uses.
+var regionTypeNames = []string{
+	"Coastal", "Mountain", "Desert", "River",
+	"Agricultural", "Urban", "Industrial", "Technology",
+}
+
+var regionTypeHints = []string{
+	"gold", "gold, stable", "gold", "gold",
+	"food", "people", "gold", "gold",
+}
+
+// regionField returns a pointer to the idx'th (0-based) field of p.Regions,
+// in the same order as regionTypeNames.
+func regionField(p *game.Empire, idx int) *int {
+	fields := []*int{
+		&p.Regions.Coastal, &p.Regions.Mountain, &p.Regions.Desert, &p.Regions.River,
+		&p.Regions.Agricultural, &p.Regions.Urban, &p.Regions.Industrial, &p.Regions.Technology,
+	}
+	return fields[idx]
+}
+
+func printRegionTypes(s session.Session) {
+	for i, name := range regionTypeNames {
+		fmt.Fprintf(s, "  %d) %s (%s)\n", i+1, name, regionTypeHints[i])
+	}
+}
+
+func buyLand(s session.Session, w *game.World) Result {
+	p := w.Player()
+	fmt.Fprintf(s, "\n%sBuy Regions — %d gold each. Choose a type:%s\n", ansi.FgBrightCyan, w.LandPrice(p), ansi.Reset)
+	printRegionTypes(s)
+	t := promptInt(s, "Region type (0 to cancel)?")
+	if t < 1 || t > len(regionTypeNames) {
+		return Stay
+	}
+	n := promptInt(s, "How many?")
+	if n <= 0 {
+		return Stay
+	}
+	if err := w.BuyRegions(p, regionField(p, t-1), n); err != nil {
+		fail(s, err)
+	} else {
+		ok(s, "Bought %d regions. Gold: %d", n, p.Gold)
+	}
+	return Stay
+}
+
+func sellLand(s session.Session, w *game.World) Result {
+	p := w.Player()
+	fmt.Fprintf(s, "\n%sSell Regions — choose a type:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	printRegionTypes(s)
+	t := promptInt(s, "Region type (0 to cancel)?")
+	if t < 1 || t > len(regionTypeNames) {
+		return Stay
+	}
+	n := promptInt(s, "How many?")
+	if n <= 0 {
+		return Stay
+	}
+	if err := w.SellRegions(p, regionField(p, t-1), n); err != nil {
+		fail(s, err)
+	} else {
+		ok(s, "Sold %d regions. Gold: %d", n, p.Gold)
+	}
+	return Stay
+}
+
 // money wraps a bank action that moves a gold amount.
 func money(label string, apply func(*game.World, *game.Empire, int) error) Action {
 	return func(s session.Session, w *game.World) Result {
@@ -169,7 +237,7 @@ func empireStatus(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "  Bank ........ %d\n", p.Bank)
 	fmt.Fprintf(s, "  Debt ........ %d\n", p.Debt)
 	fmt.Fprintf(s, "  Food ........ %d\n", p.Food)
-	fmt.Fprintf(s, "  Land ........ %d regions\n", p.Land)
+	fmt.Fprintf(s, "  Land ........ %d regions (%s)\n", p.Land, regionBreakdown(p))
 	fmt.Fprintf(s, "  People ...... %d\n", p.People)
 	fmt.Fprintf(s, "  Troopers .... %d\n", p.Troopers)
 	fmt.Fprintf(s, "  Jets ........ %d\n", p.Jets)
@@ -184,6 +252,18 @@ func empireStatus(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "  Net worth ... %d\n", w.NetWorth(p))
 	pause(s)
 	return Stay
+}
+
+// regionBreakdown formats the non-zero region counts of p, e.g.
+// "Coastal 40, Agricultural 25, Urban 10".
+func regionBreakdown(p *game.Empire) string {
+	var parts []string
+	for i, name := range regionTypeNames {
+		if n := *regionField(p, i); n > 0 {
+			parts = append(parts, fmt.Sprintf("%s %d", name, n))
+		}
+	}
+	return strings.Join(parts, ", ")
 }
 
 func seeScores(s session.Session, w *game.World) Result {

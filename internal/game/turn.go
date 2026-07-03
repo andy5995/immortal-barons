@@ -78,14 +78,14 @@ func (w *World) aiPlay(today string) {
 }
 
 func (w *World) processEconomy(e *Empire) {
-	e.Gold += e.People*e.Tax/100*8 + e.Land*20
+	e.Gold += e.People*e.Tax/100*8 + e.Regions.income()
 
 	e.Bank += min(e.Bank, InterestCap) / 100
 	if e.Debt > 0 {
 		e.Debt += e.Debt * 10 / 100
 	}
 
-	e.Food += e.Land*100 - (e.People + e.Troopers + e.Jets*2 + e.Tanks*2)
+	e.Food += e.Regions.foodProduced() - (e.People + e.Troopers + e.Jets*2 + e.Tanks*2)
 	if e.Food < 0 {
 		e.People -= (-e.Food)/10 + 1
 		if e.People < 0 {
@@ -107,6 +107,7 @@ func (w *World) processEconomy(e *Empire) {
 			e.People += g
 		}
 	}
+	e.People += e.Regions.Urban * 10 // urban regions draw settlers
 
 	if e.Gold > MoneyCap {
 		e.Gold = MoneyCap

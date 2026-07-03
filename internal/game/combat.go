@@ -22,8 +22,10 @@ func (w *World) Attack(a, d *Empire) string {
 			captured = d.Land
 		}
 		plunder := d.Gold / 4
-		d.Land -= captured
-		a.Land += captured
+		lost := d.Regions.remove(captured)
+		d.syncLand()
+		a.Regions.addMix(lost)
+		a.syncLand()
 		d.Gold -= plunder
 		a.Gold += plunder
 
