@@ -180,6 +180,9 @@ func printScores(s session.Session, w *game.World) {
 		}
 		fmt.Fprintf(s, "%s%2d %-18s %-8d %-10d\n", mark, i+1, name, r.e.Land, r.nw)
 	}
+	if w.LastMaster != "" {
+		fmt.Fprintf(s, "\nLast Planetary Master: %s\n", w.LastMaster)
+	}
 }
 
 func readMessages(s session.Session, w *game.World) Result {

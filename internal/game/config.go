@@ -5,6 +5,7 @@ type Config struct {
 	ProtectionTurns int
 	AICount         int
 	DataDir         string
+	GameLength      int // days before the league ends and resets; 0 = endless
 }
 
 func DefaultConfig() Config {
@@ -13,5 +14,6 @@ func DefaultConfig() Config {
 		ProtectionTurns: 20,
 		AICount:         0,
 		DataDir:         "./data",
+		GameLength:      0,
 	}
 }

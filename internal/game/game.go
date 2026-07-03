@@ -67,6 +67,7 @@ type World struct {
 	LastMaintDate string
 	Bulletin      []string
 	Alliances     []string
+	LastMaster    string
 
 	Coordinator bool
 
@@ -91,13 +92,18 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 		Config: cfg,
 		rng:    rand.New(rand.NewSource(seed)),
 	}
+	w.seedAIEmpires()
+	return w
+}
+
+// seedAIEmpires appends Config.AICount AI empires to the world.
+func (w *World) seedAIEmpires() {
 	names := []string{"Crimson Horde", "Iron Dominion", "Ashfall Clan", "Storm Reavers", "Dust Kings"}
-	for i := 0; i < cfg.AICount && i < len(names); i++ {
-		w.Empires = append(w.Empires, newEmpire(names[i], "", cfg))
+	for i := 0; i < w.Config.AICount && i < len(names); i++ {
+		w.Empires = append(w.Empires, newEmpire(names[i], "", w.Config))
 		w.Empires[len(w.Empires)-1].Jets = 5
 		w.Empires[len(w.Empires)-1].Turrets = 40
 	}
-	return w
 }
 
 func newEmpire(name, owner string, cfg Config) *Empire {

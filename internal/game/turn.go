@@ -43,6 +43,9 @@ func (w *World) DailyMaintenance(today string) {
 			}
 		}
 		w.GameDay++
+		if w.Config.GameLength > 0 && w.GameDay >= w.Config.GameLength {
+			w.endGame()
+		}
 		next := w.nextDate(w.LastMaintDate)
 		if next == w.LastMaintDate {
 			w.LastMaintDate = today // malformed date; snap to today to stop repeating
