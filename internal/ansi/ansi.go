@@ -25,4 +25,7 @@ const (
 	FgBrightMagenta = esc + "95m"
 	FgBrightCyan    = esc + "96m"
 	FgBrightWhite   = esc + "97m"
+
+	BgBlue  = esc + "44m"
+	BgBlack = esc + "40m"
 )

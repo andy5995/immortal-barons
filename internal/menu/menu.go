@@ -5,6 +5,7 @@ package menu
 
 import (
 	"fmt"
+	"strings"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -135,8 +136,39 @@ func Run(s session.Session, g *game.World, root *Menu) error {
 
 const rule = "────────────────────────────────────────────────────────────"
 
+// barWidth is the fixed status-bar width (classic 80-column door screen).
+const barWidth = 80
+
+// topBar renders BRE's top bar: a blue band with "LOCAL", the game
+// title/version, and the player's realm right-aligned. No absolute cursor
+// positioning — it's printed as the first line so it works over a plain
+// byte stream (door socket or local tty) without assuming screen height.
+func topBar(g *game.World) string {
+	realm := ""
+	if p := g.Player(); p != nil {
+		realm = p.Name
+	}
+	left := " LOCAL "
+	mid := "Immortal Barons v" + game.Version
+	right := realm + " "
+
+	row := []rune(strings.Repeat(" ", barWidth))
+	overlay := func(text string, at int) {
+		for i, r := range text {
+			if at+i >= 0 && at+i < barWidth {
+				row[at+i] = r
+			}
+		}
+	}
+	overlay(left, 0)
+	overlay(mid, (barWidth-len([]rune(mid)))/2)
+	overlay(right, barWidth-len([]rune(right)))
+	return ansi.BgBlue + ansi.FgBrightWhite + string(row) + ansi.Reset
+}
+
 func draw(s session.Session, g *game.World, m *Menu) {
 	fmt.Fprint(s, ansi.Clear)
+	fmt.Fprintf(s, "%s\n", topBar(g))
 	col := m.Color
 	if col == "" {
 		col = ansi.FgBrightCyan
