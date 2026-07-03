@@ -44,7 +44,11 @@ func money(label string, apply func(*game.World, *game.Empire, int) error) Actio
 }
 
 func regularAttack(s session.Session, w *game.World) Result {
-	targets := w.Rivals()
+	if w.Player().Protection > 0 {
+		ok(s, "You are under New Realm Protection and cannot attack yet.")
+		return Stay
+	}
+	targets := w.Targets(w.Player())
 	if len(targets) == 0 {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
@@ -109,7 +113,7 @@ func printScores(s session.Session, w *game.World) {
 			name += " (dead)"
 		}
 		mark := "  "
-		if r.e.Human {
+		if r.e.Owner != "" {
 			mark = "->"
 		}
 		fmt.Fprintf(s, "%s%2d %-18s %-8d %-10d\n", mark, i+1, name, r.e.Land, r.nw)
@@ -117,36 +121,12 @@ func printScores(s session.Session, w *game.World) {
 }
 
 func nextTurn(s session.Session, w *game.World) Result {
-	// Optional end-of-turn conveniences.
 	p := w.Player()
-	if w.DepositEndTurn && p.Gold > 0 {
-		w.Deposit(p, p.Gold)
+	if p.TurnsLeft <= 0 {
+		ok(s, "You are out of turns for today. Come back after the next maintenance.")
+		return Stay
 	}
-	log := w.EndTurn()
-
-	fmt.Fprintf(s, "\n%sDaily maintenance complete.%s\n", ansi.FgBrightCyan, ansi.Reset)
-	for _, l := range log {
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgYellow, l, ansi.Reset)
-	}
-	if w.GameOver() {
-		showFinal(s, w)
-		return Quit
-	}
-	pause(s)
+	w.PlayTurn(p, w.Today)
+	ok(s, "Turn complete. Turns left: %d", p.TurnsLeft)
 	return Stay
-}
-
-func showFinal(s session.Session, w *game.World) {
-	fmt.Fprintf(s, "\n%s=== The game has ended ===%s\n", ansi.FgBrightYellow, ansi.Reset)
-	printScores(s, w)
-	p := w.Player()
-	switch {
-	case p == nil || !p.Alive:
-		fmt.Fprintf(s, "\n%sYour empire has fallen.%s\n", ansi.FgRed, ansi.Reset)
-	case len(w.Rivals()) == 0:
-		fmt.Fprintf(s, "\n%sYou have conquered the realm!%s\n", ansi.FgGreen, ansi.Reset)
-	default:
-		fmt.Fprintf(s, "\n%sThe turns are spent. Final standings above.%s\n", ansi.FgGreen, ansi.Reset)
-	}
-	pause(s)
 }

@@ -155,6 +155,6 @@ func Build() *Menu {
 
 func statusBar(w *game.World) string {
 	p := w.Player()
-	return fmt.Sprintf("%s | Gold %d  Bank %d  Food %d  Land %d  People %d  Army %d | Turn %d/%d",
-		p.Name, p.Gold, p.Bank, p.Food, p.Land, p.People, p.Army(), w.Turn+1, w.MaxTurns)
+	return fmt.Sprintf("%s | Gold %d  Food %d  Land %d  Army %d | Turns left %d | Day %d",
+		p.Name, p.Gold, p.Food, p.Land, p.Army(), p.TurnsLeft, w.GameDay)
 }

@@ -30,8 +30,12 @@ func (f *fakeSession) Write(p []byte) (int, error) { return f.out.Write(p) }
 func run(t *testing.T, keys string) (*fakeSession, error) {
 	t.Helper()
 	f := &fakeSession{keys: []rune(keys)}
-	err := Run(f, game.NewSeed(1), Build())
-	return f, err
+	cfg := game.DefaultConfig()
+	cfg.AICount = 1
+	w := game.NewWorldSeed(cfg, 1)
+	w.Active = w.AddHuman("tester", "Testland")
+	w.Today = "2026-07-03"
+	return f, Run(f, w, Build())
 }
 
 func TestQuitFromMain(t *testing.T) {
@@ -74,7 +78,9 @@ func TestHiddenCoordinatorNotSelectable(t *testing.T) {
 
 func TestCoordinatorReachableWhenFlagged(t *testing.T) {
 	f := &fakeSession{keys: []rune("YRQ")}
-	w := game.NewSeed(1)
+	w := game.NewWorldSeed(game.DefaultConfig(), 1)
+	w.Active = w.AddHuman("tester", "Testland")
+	w.Today = "2026-07-03"
 	w.Coordinator = true
 	if err := Run(f, w, Build()); err != nil {
 		t.Fatalf("got %v", err)
@@ -85,21 +91,38 @@ func TestCoordinatorReachableWhenFlagged(t *testing.T) {
 }
 
 func TestBuyLandThroughMenu(t *testing.T) {
-	// Main -> Buy -> Buy Land -> "5" Enter -> ... then Quit.
 	f := &fakeSession{keys: []rune("BL5\r ")}
-	w := game.NewSeed(1)
-	before := w.Player().Land
-	Run(f, w, Build()) // ends on EOF after the scripted keys
-	if got := w.Player().Land; got != before+5 {
-		t.Errorf("expected land %d, got %d", before+5, got)
+	w := game.NewWorldSeed(game.DefaultConfig(), 1)
+	w.Active = w.AddHuman("tester", "Testland")
+	w.Today = "2026-07-03"
+	before := w.Active.Land
+	Run(f, w, Build())
+	if w.Active.Land != before+5 {
+		t.Errorf("expected land %d, got %d", before+5, w.Active.Land)
 	}
 }
 
-func TestNextTurnAdvances(t *testing.T) {
+func TestPreferenceToggle(t *testing.T) {
+	f := &fakeSession{keys: []rune("PF")}
+	w := game.NewWorldSeed(game.DefaultConfig(), 1)
+	w.Active = w.AddHuman("tester", "Testland")
+	w.Today = "2026-07-03"
+	if err := Run(f, w, Build()); err != io.EOF {
+		t.Fatalf("expected EOF after script, got %v", err)
+	}
+	if !w.AutoFeed {
+		t.Error("Auto-feed should be ON after toggling")
+	}
+}
+
+func TestNextTurnConsumesATurn(t *testing.T) {
 	f := &fakeSession{keys: []rune("N ")}
-	w := game.NewSeed(1)
+	w := game.NewWorldSeed(game.DefaultConfig(), 1)
+	w.Active = w.AddHuman("tester", "Testland")
+	w.Today = "2026-07-03"
+	left := w.Active.TurnsLeft
 	Run(f, w, Build())
-	if w.Turn != 1 {
-		t.Errorf("expected turn 1 after one Next Turn, got %d", w.Turn)
+	if w.Active.TurnsLeft != left-1 {
+		t.Errorf("Next Turn should consume a turn: want %d, got %d", left-1, w.Active.TurnsLeft)
 	}
 }
