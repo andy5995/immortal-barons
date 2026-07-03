@@ -57,6 +57,8 @@ func Build() *Menu {
 			Do: buy2("Build Carriers", func(w *game.World) int { return w.Prices.Carrier }, (*game.World).BuildCarriers)},
 		{Key: 'S', Label: "Sell Land",
 			Do: buy2("Sell Land", func(w *game.World) int { return w.Prices.Land / 2 }, (*game.World).SellLand)},
+		{Key: 'G', Label: "Recruit Agents",
+			Do: buy2("Recruit Agents", func(w *game.World) int { return w.Prices.Agent }, (*game.World).RecruitAgents)},
 		{Key: 'O', Label: "Build Bombers", Do: stubbed("Build Bombers")},
 		{Key: 'H', Label: "Build HeadQuarters", Do: stubbed("Build HeadQuarters")},
 		{Key: 'B', Label: "Visit Bank", Do: gotoMenu(bank)},
@@ -88,11 +90,11 @@ func Build() *Menu {
 	}
 
 	covert.Items = []Item{
-		{Key: 'S', Label: "Send Spy", Do: stubbed("Send Spy")},
+		{Key: 'S', Label: "Send Spy", Do: sendSpy},
 		{Key: 'P', Label: "Spy on Relations", Do: stubbed("Spy on Relations")},
 		{Key: 'D', Label: "Spy Database", Do: stubbed("Spy Database")},
 		{Key: 'B', Label: "Bribery", Do: stubbed("Bribery")},
-		{Key: 'O', Label: "Special Operations", Do: stubbed("Special Operations")},
+		{Key: 'O', Label: "Special Operations", Do: specialOps},
 		{Key: 'K', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: 'R', Label: "Return", Do: back},
 	}

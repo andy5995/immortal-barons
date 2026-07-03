@@ -6,6 +6,7 @@ var (
 	ErrCantAfford = errors.New("You cannot afford that.")
 	ErrNoBank     = errors.New("You do not have that much in the bank.")
 	ErrNoDebt     = errors.New("You do not owe that much.")
+	ErrNoAgents   = errors.New("You have no agents for that operation.")
 )
 
 // spend deducts gold for buying n units at unit cost, returning an error
@@ -75,6 +76,14 @@ func (w *World) BuildTanks(e *Empire, n int) error {
 		return err
 	}
 	e.Tanks += n
+	return nil
+}
+
+func (w *World) RecruitAgents(e *Empire, n int) error {
+	if err := e.spend(n, w.Prices.Agent); err != nil {
+		return err
+	}
+	e.Agents += n
 	return nil
 }
 

@@ -109,6 +109,14 @@ func biologicalAttack(s session.Session, w *game.World) Result {
 	return specialAttack(s, w, "Biological", game.BioCost, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
 }
 
+func sendSpy(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Send Spy", 0, func(a, d *game.Empire) (string, error) { return w.SendSpy(a, d) })
+}
+
+func specialOps(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Special Operations", 0, func(a, d *game.Empire) (string, error) { return w.Sabotage(a, d) })
+}
+
 func attackPirates(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "\n%s\n", w.RaidPirates(w.Player()))
 	pause(s)
@@ -129,6 +137,7 @@ func empireStatus(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "  Turrets ..... %d\n", p.Turrets)
 	fmt.Fprintf(s, "  Tanks ....... %d\n", p.Tanks)
 	fmt.Fprintf(s, "  Carriers .... %d\n", p.Carriers)
+	fmt.Fprintf(s, "  Agents ...... %d\n", p.Agents)
 	fmt.Fprintf(s, "  Tax rate .... %d%%\n", p.Tax)
 	fmt.Fprintf(s, "  Offense ..... %d\n", p.Offense())
 	fmt.Fprintf(s, "  Defense ..... %d\n", p.Defense())
