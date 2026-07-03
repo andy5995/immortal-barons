@@ -109,9 +109,9 @@ func Build() *Menu {
 	}
 
 	diplomacy.Items = []Item{
-		{Key: 'M', Label: "Modify Diplomacy", Do: stubbed("Modify Diplomacy")},
-		{Key: 'V', Label: "View Diplomacy", Do: stubbed("View Diplomacy")},
-		{Key: 'L', Label: "Diplomacy List", Do: stubbed("Diplomacy List")},
+		{Key: 'M', Label: "Modify Diplomacy", Do: modifyDiplomacy},
+		{Key: 'V', Label: "View Diplomacy", Do: viewDiplomacy},
+		{Key: 'L', Label: "Diplomacy List", Do: viewDiplomacy},
 		{Key: 'R', Label: "Return", Do: back},
 	}
 

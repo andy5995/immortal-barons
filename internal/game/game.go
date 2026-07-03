@@ -35,6 +35,8 @@ type Empire struct {
 	LastPlayed string
 	Events     []string
 	Mail       []string
+
+	AllianceOffers []string
 }
 
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }
@@ -64,6 +66,7 @@ type World struct {
 	GameDay       int
 	LastMaintDate string
 	Bulletin      []string
+	Alliances     []string
 
 	Coordinator bool
 
@@ -138,7 +141,7 @@ func (w *World) AIEmpires() []*Empire {
 func (w *World) Targets(attacker *Empire) []*Empire {
 	var r []*Empire
 	for _, e := range w.Empires {
-		if e != attacker && e.Alive && e.Protection == 0 {
+		if e != attacker && e.Alive && e.Protection == 0 && !w.AreAllied(attacker, e) {
 			r = append(r, e)
 		}
 	}

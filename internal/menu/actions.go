@@ -275,6 +275,95 @@ func planetaryPost(s session.Session, w *game.World) Result {
 	return Stay
 }
 
+func modifyDiplomacy(s session.Session, w *game.World) Result {
+	p := w.Player()
+	var others []*game.Empire
+	for _, e := range w.Empires {
+		if e.Alive && e != p {
+			others = append(others, e)
+		}
+	}
+	if len(others) == 0 {
+		ok(s, "There is no one to negotiate with.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%sChoose an empire:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for i, e := range others {
+		status := ""
+		switch {
+		case w.AreAllied(p, e):
+			status = " (allied)"
+		case inList(p.AllianceOffers, e.Name):
+			status = " (offered you)"
+		case inList(e.AllianceOffers, p.Name):
+			status = " (proposal sent)"
+		}
+		fmt.Fprintf(s, "  %d) %s%s\n", i+1, e.Name, status)
+	}
+	i := promptInt(s, "Negotiate with which empire (0 to cancel)?")
+	if i < 1 || i > len(others) {
+		return Stay
+	}
+	e := others[i-1]
+	switch {
+	case w.AreAllied(p, e):
+		w.BreakAlliance(p, e)
+		ok(s, "Alliance with %s broken.", e.Name)
+	case inList(p.AllianceOffers, e.Name):
+		w.AcceptAlliance(p, e.Name)
+		ok(s, "You are now allied with %s.", e.Name)
+	default:
+		w.ProposeAlliance(p, e)
+		ok(s, "Alliance proposed to %s.", e.Name)
+	}
+	return Stay
+}
+
+func inList(list []string, name string) bool {
+	for _, x := range list {
+		if x == name {
+			return true
+		}
+	}
+	return false
+}
+
+func viewDiplomacy(s session.Session, w *game.World) Result {
+	p := w.Player()
+	fmt.Fprintf(s, "\n%sYour allies:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	found := false
+	for _, k := range w.Alliances {
+		names := strings.SplitN(k, "\x00", 2)
+		if len(names) != 2 {
+			continue
+		}
+		var other string
+		switch p.Name {
+		case names[0]:
+			other = names[1]
+		case names[1]:
+			other = names[0]
+		default:
+			continue
+		}
+		fmt.Fprintf(s, "  %s\n", other)
+		found = true
+	}
+	if !found {
+		fmt.Fprint(s, "  (none)\n")
+	}
+	fmt.Fprintf(s, "\n%sPending offers received:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	if len(p.AllianceOffers) == 0 {
+		fmt.Fprint(s, "  (none)\n")
+	} else {
+		for _, o := range p.AllianceOffers {
+			fmt.Fprintf(s, "  %s\n", o)
+		}
+	}
+	pause(s)
+	return Stay
+}
+
 func nextTurn(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if p.TurnsLeft <= 0 {
