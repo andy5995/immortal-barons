@@ -1,24 +1,24 @@
-// Package game holds the BRE world: the player's empire, rival empires,
-// the economy, the turn engine, and combat. The menu system reads and
-// mutates a *World through these methods.
+// Package game holds the BRE world: empires, economy, turn engine, and
+// combat. The world is persistent and shared; one session is active at a
+// time (Active), and dates flow in as ISO strings for testability.
 package game
 
 import (
 	"math/rand"
+	"strings"
 	"time"
 )
 
-// Empire is one barony in the world — the human player or a rival.
 type Empire struct {
 	Name  string
-	Human bool
+	Owner string // normalized BBS handle; "" for AI
 	Alive bool
 
 	Gold int
 	Bank int
 	Debt int
 	Food int
-	Land int // regions
+	Land int
 
 	People   int
 	Troopers int
@@ -27,121 +27,124 @@ type Empire struct {
 	Tanks    int
 	Carriers int
 
-	Tax int // percent
+	Tax int
+
+	TurnsLeft  int
+	Protection int
+	LastPlayed string
+	Events     []string
 }
 
-// Army counts all combat units.
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }
 
-// Offense is attack strength. Per the reference, trooper=1, jet=2, tank=4;
-// turrets are defense-only. Jets can only attack if carriers are available
-// to move them (1 carrier moves 100 jets), so uncarried jets don't count.
 func (e *Empire) Offense() int {
 	usableJets := min(e.Jets, e.Carriers*100)
 	return e.Troopers + usableJets*2 + e.Tanks*4
 }
 
-// Defense is defensive strength: trooper=1, turret=2, tank=4; jets=0.
 func (e *Empire) Defense() int {
 	return e.Troopers + e.Turrets*2 + e.Tanks*4
 }
 
-// Prices are the world's current unit costs, in gold.
 type Prices struct {
-	Land    int
-	Food    int
-	Trooper int
-	Jet     int
-	Turret  int
-	Tank    int
-	Carrier int
+	Land, Food, Trooper, Jet, Turret, Tank, Carrier int
 }
 
-// Money caps from the reference: gold above InterestCap earns no interest,
-// and no empire can hold more than MoneyCap coins at once.
 const (
 	InterestCap = 1_599_999_999
 	MoneyCap    = 2_000_000_000
 )
 
-// World is the whole game state.
 type World struct {
-	Empires  []*Empire
-	Turn     int
-	MaxTurns int
-	Prices   Prices
+	Empires       []*Empire
+	Prices        Prices
+	Config        Config
+	GameDay       int
+	LastMaintDate string
 
-	// Coordinator gates the Sysop/Coordinator menu (league admin).
 	Coordinator bool
 
-	// Player preferences (toggled from the Preferences menu).
+	// Player preferences (kept on the world for now; per-empire is a later
+	// refinement). Referenced by the Preferences menu.
 	EnterExitsBuy  bool
 	DepositEndTurn bool
 	AutoPayMaint   bool
 	AutoFeed       bool
 
+	Active *Empire `json:"-"` // the empire playing this session
+	Today  string  `json:"-"` // ISO date for this session
+
 	rng *rand.Rand
 }
 
-// New builds a fresh world seeded from the clock.
-func New() *World { return NewSeed(time.Now().UnixNano()) }
+func NewWorld(cfg Config) *World { return NewWorldSeed(cfg, time.Now().UnixNano()) }
 
-// NewSeed builds a world with a fixed RNG seed (deterministic — used by tests).
-func NewSeed(seed int64) *World {
+func NewWorldSeed(cfg Config, seed int64) *World {
 	w := &World{
-		MaxTurns: 20,
-		Prices:   Prices{Land: 100, Food: 2, Trooper: 50, Jet: 60, Turret: 60, Tank: 350, Carrier: 40},
-		rng:      rand.New(rand.NewSource(seed)),
+		Prices: Prices{Land: 100, Food: 2, Trooper: 50, Jet: 60, Turret: 60, Tank: 350, Carrier: 40},
+		Config: cfg,
+		rng:    rand.New(rand.NewSource(seed)),
 	}
-	w.Empires = append(w.Empires, &Empire{
-		Name: "New Barony", Human: true, Alive: true,
-		Gold: 10000, Food: 20000, Land: 100, People: 2000,
-		Troopers: 150, Carriers: 1, Tax: 15,
-	})
-	for _, n := range []string{"Crimson Horde", "Iron Dominion", "Ashfall Clan"} {
-		w.Empires = append(w.Empires, &Empire{
-			Name: n, Alive: true,
-			Gold: 8000, Food: 18000, Land: 90, People: 1800,
-			Troopers: 120, Jets: 5, Turrets: 40, Carriers: 1, Tax: 18,
-		})
+	names := []string{"Crimson Horde", "Iron Dominion", "Ashfall Clan", "Storm Reavers", "Dust Kings"}
+	for i := 0; i < cfg.AICount && i < len(names); i++ {
+		w.Empires = append(w.Empires, newEmpire(names[i], "", cfg))
+		w.Empires[len(w.Empires)-1].Jets = 5
+		w.Empires[len(w.Empires)-1].Turrets = 40
 	}
 	return w
 }
 
-// Player returns the human empire.
-func (w *World) Player() *Empire {
+func newEmpire(name, owner string, cfg Config) *Empire {
+	return &Empire{
+		Name: name, Owner: owner, Alive: true,
+		Gold: 10000, Food: 20000, Land: 100, People: 2000,
+		Troopers: 150, Carriers: 1, Tax: 15,
+		TurnsLeft: cfg.TurnsPerDay, Protection: cfg.ProtectionTurns,
+	}
+}
+
+// AddHuman creates and registers a human empire keyed by handle.
+func (w *World) AddHuman(handle, realm string) *Empire {
+	e := newEmpire(realm, strings.ToLower(strings.TrimSpace(handle)), w.Config)
+	w.Empires = append(w.Empires, e)
+	return e
+}
+
+func (w *World) Player() *Empire { return w.Active }
+
+func (w *World) FindByOwner(handle string) *Empire {
+	h := strings.ToLower(strings.TrimSpace(handle))
 	for _, e := range w.Empires {
-		if e.Human {
+		if e.Owner == h {
 			return e
 		}
 	}
 	return nil
 }
 
-// Rivals returns the living non-human empires.
-func (w *World) Rivals() []*Empire {
+func (w *World) AIEmpires() []*Empire {
 	var r []*Empire
 	for _, e := range w.Empires {
-		if !e.Human && e.Alive {
+		if e.Owner == "" && e.Alive {
 			r = append(r, e)
 		}
 	}
 	return r
 }
 
-// NetWorth values everything an empire holds, minus debt. Unit weights are
-// the reference net-worth values (×1000 to stay in whole coins): region
-// 12500, tank 1250, carrier 1000, turret 425, jet 325, trooper 250.
+func (w *World) Targets(attacker *Empire) []*Empire {
+	var r []*Empire
+	for _, e := range w.Empires {
+		if e != attacker && e.Alive && e.Protection == 0 {
+			r = append(r, e)
+		}
+	}
+	return r
+}
+
 func (w *World) NetWorth(e *Empire) int {
 	return e.Gold + e.Bank - e.Debt +
 		e.Land*12500 + e.Food*w.Prices.Food +
 		e.Troopers*250 + e.Jets*325 + e.Turrets*425 + e.Tanks*1250 + e.Carriers*1000 +
 		e.People*5
-}
-
-// GameOver reports whether the game has ended (turns exhausted or the
-// player is the last empire standing / has fallen).
-func (w *World) GameOver() bool {
-	p := w.Player()
-	return w.Turn >= w.MaxTurns || p == nil || !p.Alive || len(w.Rivals()) == 0
 }
