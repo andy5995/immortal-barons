@@ -10,9 +10,13 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/door"
@@ -26,11 +30,23 @@ func main() {
 	dropPath := flag.String("dropfile", "", "path to the BBS dropfile (DOOR32.SYS or DOOR.SYS)")
 	dataDir := flag.String("data", "./data", "game data directory")
 	maint := flag.Bool("maint", false, "run daily maintenance and exit")
+	setup := flag.Bool("setup", false, "interactively configure the game and exit")
 	flag.Parse()
 
-	cfg := game.DefaultConfig()
-	cfg.DataDir = *dataDir
+	cfg, err := store.LoadConfig(*dataDir)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config:", err)
+		os.Exit(1)
+	}
 	today := time.Now().Format("2006-01-02")
+
+	if *setup {
+		if err := runSetup(cfg); err != nil {
+			fmt.Fprintln(os.Stderr, "barons-door -setup:", err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	if *maint {
 		if err := runMaint(cfg, today); err != nil {
@@ -89,6 +105,35 @@ func runMaint(cfg game.Config, today string) error {
 	}
 	w.DailyMaintenance(today)
 	return store.Save(w, cfg)
+}
+
+// runSetup interactively prompts the sysop for game rules and saves them to
+// config.json.
+func runSetup(cfg game.Config) error {
+	r := bufio.NewReader(os.Stdin)
+	cfg.TurnsPerDay = askInt(r, "Turns per day", cfg.TurnsPerDay)
+	cfg.ProtectionTurns = askInt(r, "New-realm protection turns", cfg.ProtectionTurns)
+	cfg.AICount = askInt(r, "Number of AI barons (0 = human only)", cfg.AICount)
+	cfg.GameLength = askInt(r, "Game length in days (0 = endless)", cfg.GameLength)
+	if err := store.SaveConfig(cfg); err != nil {
+		return err
+	}
+	fmt.Printf("Saved configuration to %s\n", filepath.Join(cfg.DataDir, "config.json"))
+	return nil
+}
+
+// askInt prompts with the current value in brackets; empty input keeps it.
+func askInt(r *bufio.Reader, label string, cur int) int {
+	fmt.Printf("%s [%d]: ", label, cur)
+	line, _ := r.ReadString('\n')
+	line = strings.TrimSpace(line)
+	if line == "" {
+		return cur
+	}
+	if n, err := strconv.Atoi(line); err == nil {
+		return n
+	}
+	return cur
 }
 
 func findDropfile() string {

@@ -9,9 +9,9 @@ import (
 	"os/user"
 	"time"
 
-	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/play"
 	"github.com/andy5995/immortal-barons/internal/session"
+	"github.com/andy5995/immortal-barons/internal/store"
 )
 
 const version = "0.2.0"
@@ -21,8 +21,11 @@ func main() {
 	dataDir := flag.String("data", "./data", "game data directory")
 	flag.Parse()
 
-	cfg := game.DefaultConfig()
-	cfg.DataDir = *dataDir
+	cfg, err := store.LoadConfig(*dataDir)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "config:", err)
+		os.Exit(1)
+	}
 	today := time.Now().Format("2006-01-02")
 
 	c := session.NewConsole()
