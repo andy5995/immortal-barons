@@ -106,11 +106,31 @@ func (e *Empire) EnsureProduction() {
 
 func (e *Empire) Offense() int {
 	usableJets := min(e.Jets, e.Carriers*100)
-	return e.Troopers + usableJets*2 + e.Tanks*4*(100+e.HQ)/100
+	sum := e.Troopers + usableJets*2 + e.Tanks*4*(100+e.HQ)/100
+	return sum * (100 + e.techFactor()) / 100
 }
 
 func (e *Empire) Defense() int {
-	return e.Troopers + e.Turrets*2 + e.Tanks*4*(100+e.HQ)/100
+	sum := e.Troopers + e.Turrets*2 + e.Tanks*4*(100+e.HQ)/100
+	return sum * (100 + e.techFactor()) / 100
+}
+
+// TechFactorCap is the maximum percent bonus/reduction Technology regions
+// can grant (see techFactor).
+const TechFactorCap = 40
+
+// techFactor is the Technology bonus percent: the share of land that is
+// Technology regions, capped. Bigger empires need proportionally more
+// Technology to get the same factor (it's a share, not a raw count).
+func (e *Empire) techFactor() int {
+	if e.Land <= 0 {
+		return 0
+	}
+	f := e.Regions.Technology * 100 / e.Land
+	if f > TechFactorCap {
+		f = TechFactorCap
+	}
+	return f
 }
 
 type Prices struct {

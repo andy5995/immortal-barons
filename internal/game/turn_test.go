@@ -181,3 +181,28 @@ func TestFoodNoSpoilageBelowBuffer(t *testing.T) {
 		t.Errorf("expect no spoilage below buffer, got LastSpoiled=%d", e.LastSpoiled)
 	}
 }
+
+func TestTechCutsSpoilage(t *testing.T) {
+	setup := func(regions RegionMix) (*World, *Empire) {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		e := w.AddHuman("me", "Mine")
+		e.People, e.Troopers, e.Jets, e.Tanks = 0, 0, 0, 0
+		e.Regions = regions
+		e.syncLand()
+		e.Food = 100000
+		return w, e
+	}
+
+	wBase, base := setup(RegionMix{Coastal: 100})
+	wTech, tech := setup(RegionMix{Coastal: 60, Technology: 40})
+
+	wBase.PlayTurn(base, "2026-07-03")
+	wTech.PlayTurn(tech, "2026-07-03")
+
+	if base.LastSpoiled <= 0 {
+		t.Fatalf("expect spoilage in base case, got %d", base.LastSpoiled)
+	}
+	if tech.LastSpoiled >= base.LastSpoiled {
+		t.Errorf("Technology regions should reduce spoilage: base=%d tech=%d", base.LastSpoiled, tech.LastSpoiled)
+	}
+}

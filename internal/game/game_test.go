@@ -89,3 +89,34 @@ func TestHQBoostsTanks(t *testing.T) {
 		t.Errorf("Defense delta: want %d (tanks doubled), got %d", wantDefenseDelta, boostedDefense-baseDefense)
 	}
 }
+
+func TestTechFactor(t *testing.T) {
+	e := &Empire{Land: 100, Regions: RegionMix{Coastal: 100}}
+	if got := e.techFactor(); got != 0 {
+		t.Errorf("no Technology regions: want 0, got %d", got)
+	}
+
+	e = &Empire{Land: 100, Regions: RegionMix{Coastal: 80, Technology: 20}}
+	if got := e.techFactor(); got != 20 {
+		t.Errorf("20%% Technology: want 20, got %d", got)
+	}
+
+	e = &Empire{Land: 100, Regions: RegionMix{Technology: 100}}
+	if got := e.techFactor(); got != TechFactorCap {
+		t.Errorf("all-Technology empire should be capped at %d, got %d", TechFactorCap, got)
+	}
+}
+
+func TestTechBoostsMilitary(t *testing.T) {
+	base := &Empire{Land: 100, Regions: RegionMix{Coastal: 100},
+		Troopers: 100, Jets: 20, Carriers: 1, Turrets: 30, Tanks: 10}
+	tech := &Empire{Land: 100, Regions: RegionMix{Technology: 40},
+		Troopers: 100, Jets: 20, Carriers: 1, Turrets: 30, Tanks: 10}
+
+	if tech.Offense() <= base.Offense() {
+		t.Errorf("Offense should rise with Technology regions: base=%d tech=%d", base.Offense(), tech.Offense())
+	}
+	if tech.Defense() <= base.Defense() {
+		t.Errorf("Defense should rise with Technology regions: base=%d tech=%d", base.Defense(), tech.Defense())
+	}
+}

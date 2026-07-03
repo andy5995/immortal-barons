@@ -247,6 +247,33 @@ func TestSellUnitsHalfPrice(t *testing.T) {
 	}
 }
 
+func TestTechBoostsIncomeAndCutsMaintenance(t *testing.T) {
+	cfg := DefaultConfig()
+
+	setup := func(regions RegionMix) (*World, *Empire) {
+		w := NewWorldSeed(cfg, 1)
+		e := w.AddHuman("me", "Mine")
+		e.Regions = regions
+		e.syncLand()
+		e.Gold = 0
+		e.Troopers, e.Jets, e.Turrets, e.Tanks, e.Carriers = 100, 20, 30, 10, 5
+		return w, e
+	}
+
+	wBase, base := setup(RegionMix{Coastal: 100})
+	wTech, tech := setup(RegionMix{Coastal: 60, Technology: 40})
+
+	wBase.processEconomy(base)
+	wTech.processEconomy(tech)
+
+	if tech.Gold <= base.Gold {
+		t.Errorf("Technology empire should net more gold: base=%d tech=%d", base.Gold, tech.Gold)
+	}
+	if tech.LastGoldPaid >= base.LastGoldPaid {
+		t.Errorf("Technology empire should pay less maintenance: base=%d tech=%d", base.LastGoldPaid, tech.LastGoldPaid)
+	}
+}
+
 func TestFoodNeededNextTurn(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")

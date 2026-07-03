@@ -98,10 +98,14 @@ const (
 )
 
 func (w *World) processEconomy(e *Empire) {
+	tf := e.techFactor()
+
 	base := e.Regions.income()
 	coastal := e.Regions.Coastal * 25
 	income := base - coastal + coastal*e.Support/100 // low support slashes tourism
-	e.Gold += e.People*e.Tax/100*8 + income
+	income = income * (100 + tf) / 100
+	tax := e.People * e.Tax / 100 * 8 * (100 + tf) / 100
+	e.Gold += tax + income
 
 	e.Bank += min(e.Bank, InterestCap) / 100
 	if e.Debt > 0 {
@@ -122,14 +126,14 @@ func (w *World) processEconomy(e *Empire) {
 	// buffer is safe; it's why players sell surplus at the food market).
 	buffer := (e.People + e.Troopers + e.Jets*2 + e.Tanks*2) * 2
 	if e.Food > buffer {
-		spoiled := (e.Food - buffer) / 25
+		spoiled := (e.Food - buffer) / 25 * (100 - tf) / 100
 		e.Food -= spoiled
 		e.LastSpoiled = spoiled
 	} else {
 		e.LastSpoiled = 0
 	}
 
-	maint := e.Troopers*6 + e.Jets*12 + e.Turrets*9 + e.Tanks*6 + e.Carriers*1
+	maint := (e.Troopers*6 + e.Jets*12 + e.Turrets*9 + e.Tanks*6 + e.Carriers*1) * (100 - tf) / 100
 	if e.Gold >= maint {
 		e.Gold -= maint
 		e.LastGoldPaid = maint
