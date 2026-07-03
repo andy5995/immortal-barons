@@ -68,6 +68,46 @@ func (w *World) BuyFood(e *Empire, n int) error {
 	return nil
 }
 
+// Food market prices (v1): the market sells food to you dearer than it buys.
+const (
+	FoodBuyPrice  = 20 // gold per unit to buy from the market
+	FoodSellPrice = 7  // gold per unit the market pays you
+)
+
+// BuyFoodMarket buys n units of food at FoodBuyPrice. This is the canonical
+// way to buy food; the Spending Menu's "Buy Food" item routes here too.
+func (w *World) BuyFoodMarket(e *Empire, n int) error {
+	if n <= 0 {
+		return nil
+	}
+	cost := n * FoodBuyPrice
+	if e.Gold < cost {
+		return ErrCantAfford
+	}
+	e.Gold -= cost
+	e.Food += n
+	return nil
+}
+
+// SellFood sells n units of food at FoodSellPrice, clamped to what e owns.
+func (w *World) SellFood(e *Empire, n int) error {
+	if n <= 0 {
+		return nil
+	}
+	if n > e.Food {
+		n = e.Food
+	}
+	e.Food -= n
+	e.Gold += n * FoodSellPrice
+	return nil
+}
+
+// FoodNeededNextTurn estimates the empire's next-turn food consumption
+// (so the sell prompt can suggest keeping enough on hand).
+func (w *World) FoodNeededNextTurn(e *Empire) int {
+	return e.People + e.Troopers + e.Jets*2 + e.Tanks*2
+}
+
 func (w *World) Recruit(e *Empire, n int) error {
 	if err := e.spend(n, w.Prices.Trooper); err != nil {
 		return err

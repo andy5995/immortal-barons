@@ -10,11 +10,17 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-// buy2 wraps a "prompt for quantity, apply, report" economy action.
+// buy2 wraps a "prompt for quantity, apply, report" economy action. The
+// max offered is what the empire can currently afford at unit's price.
 func buy2(label string, unit func(*game.World) int, apply func(*game.World, *game.Empire, int) error) Action {
 	return func(s session.Session, w *game.World) Result {
 		p := w.Player()
-		n := promptInt(s, fmt.Sprintf("%s — %d gold each. How many?", label, unit(w)))
+		price := unit(w)
+		max := 0
+		if price > 0 {
+			max = p.Gold / price
+		}
+		n := promptSuggested(s, fmt.Sprintf("%s — %d gold each. How many?", label, price), 0, max)
 		if n <= 0 {
 			return Stay
 		}
@@ -95,11 +101,12 @@ func sellLand(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-// money wraps a bank action that moves a gold amount.
-func money(label string, apply func(*game.World, *game.Empire, int) error) Action {
+// money wraps a bank action that moves a gold amount, offering max as the
+// largest sensible value for that action (e.g. Withdraw's max is p.Bank).
+func money(label string, max func(*game.Empire) int, apply func(*game.World, *game.Empire, int) error) Action {
 	return func(s session.Session, w *game.World) Result {
 		p := w.Player()
-		n := promptInt(s, label+" how much gold?")
+		n := promptSuggested(s, label+" how much gold?", 0, max(p))
 		if n <= 0 {
 			return Stay
 		}
@@ -110,6 +117,35 @@ func money(label string, apply func(*game.World, *game.Empire, int) error) Actio
 		}
 		return Stay
 	}
+}
+
+func buyFoodMarket(s session.Session, w *game.World) Result {
+	p := w.Player()
+	n := promptSuggested(s, "How much food to buy?", 0, p.Gold/game.FoodBuyPrice)
+	if n <= 0 {
+		return Stay
+	}
+	if err := w.BuyFoodMarket(p, n); err != nil {
+		fail(s, err)
+	} else {
+		ok(s, "Bought %d food. Gold: %d", n, p.Gold)
+	}
+	return Stay
+}
+
+func sellFoodMarket(s session.Session, w *game.World) Result {
+	p := w.Player()
+	suggested := max(0, p.Food-w.FoodNeededNextTurn(p))
+	n := promptSuggested(s, "How much food to sell?", suggested, p.Food)
+	if n <= 0 {
+		return Stay
+	}
+	if err := w.SellFood(p, n); err != nil {
+		fail(s, err)
+	} else {
+		ok(s, "Sold %d food. Gold: %d", n, p.Gold)
+	}
+	return Stay
 }
 
 func regularAttack(s session.Session, w *game.World) Result {

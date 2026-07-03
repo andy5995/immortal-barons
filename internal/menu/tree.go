@@ -19,6 +19,7 @@ type Menus struct {
 	Messages  *Menu
 	System    *Menu
 	Game      *Menu
+	Food      *Menu
 }
 
 // BuildMenus constructs the full BRE menu tree. Menus are created first,
@@ -40,7 +41,7 @@ func BuildMenus() *Menus {
 	buy.Items = []Item{
 		{Key: 'L', Label: "Buy Land / Regions", Do: buyLand},
 		{Key: 'F', Label: "Buy Food",
-			Do: buy2("Buy Food", func(w *game.World) int { return w.Prices.Food }, (*game.World).BuyFood)},
+			Do: buy2("Buy Food", func(w *game.World) int { return game.FoodBuyPrice }, (*game.World).BuyFoodMarket)},
 		{Key: 'T', Label: "Recruit Troopers",
 			Do: buy2("Recruit Troopers", func(w *game.World) int { return w.Prices.Trooper }, (*game.World).Recruit)},
 		{Key: 'J', Label: "Build Jets",
@@ -62,11 +63,12 @@ func BuildMenus() *Menus {
 	}
 
 	bank.Items = []Item{
-		{Key: 'D', Label: "Deposit", Do: money("Deposit", (*game.World).Deposit)},
-		{Key: 'W', Label: "Withdraw", Do: money("Withdraw", (*game.World).Withdraw)},
-		{Key: 'L', Label: "Take Loan", Do: money("Borrow", (*game.World).Loan)},
-		{Key: 'P', Label: "Repay Loan", Do: money("Repay", (*game.World).Repay)},
-		{Key: 'I', Label: "Invest", Do: money("Invest", (*game.World).Deposit)},
+		{Key: 'D', Label: "Deposit", Do: money("Deposit", func(p *game.Empire) int { return p.Gold }, (*game.World).Deposit)},
+		{Key: 'W', Label: "Withdraw", Do: money("Withdraw", func(p *game.Empire) int { return p.Bank }, (*game.World).Withdraw)},
+		// Loan cap is a v1 balance knob: 100 gold of credit per region owned.
+		{Key: 'L', Label: "Take Loan", Do: money("Borrow", func(p *game.Empire) int { return p.Land * 100 }, (*game.World).Loan)},
+		{Key: 'P', Label: "Repay Loan", Do: money("Repay", func(p *game.Empire) int { return min(p.Gold, p.Debt) }, (*game.World).Repay)},
+		{Key: 'I', Label: "Invest", Do: money("Invest", func(p *game.Empire) int { return p.Gold }, (*game.World).Deposit)},
 		{Key: 'R', Label: "Return", Do: back},
 	}
 
@@ -96,7 +98,7 @@ func BuildMenus() *Menus {
 	}
 
 	trading.Items = []Item{
-		{Key: 'F', Label: "Food Market", Do: stubbed("Food Market")},
+		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
 		{Key: 'S', Label: "Send Trade Deal", Do: sendTradeDeal},
 		{Key: 'V', Label: "View IPScores", Do: interbbsScores},
 		{Key: 'B', Label: "Buy / Sell", Do: gotoMenu(buy)},
@@ -144,8 +146,9 @@ func BuildMenus() *Menus {
 	}
 
 	food.Items = []Item{
-		{Key: 'B', Label: "Buy Food",
-			Do: buy2("Buy Food", func(w *game.World) int { return w.Prices.Food }, (*game.World).BuyFood)},
+		{Label: fmt.Sprintf("The market buys food for %d and sells for %d.", game.FoodSellPrice, game.FoodBuyPrice)},
+		{Key: 'B', Label: "Buy Food", Do: buyFoodMarket},
+		{Key: 'S', Label: "Sell Food", Do: sellFoodMarket},
 		{Key: 'K', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: 'R', Label: "Return", Do: back},
 	}
@@ -192,6 +195,7 @@ func BuildMenus() *Menus {
 		Messages:  messages,
 		System:    system,
 		Game:      gameMenu,
+		Food:      food,
 	}
 }
 

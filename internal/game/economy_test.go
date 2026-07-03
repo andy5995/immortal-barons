@@ -100,3 +100,82 @@ func TestSellLandRefundsHalf(t *testing.T) {
 		t.Errorf("buy-then-sell should lose money: start=%d end=%d", startGold, e.Gold)
 	}
 }
+
+func TestBuyFoodMarket(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	e.Gold = 1000
+	e.Food = 0
+
+	if err := w.BuyFoodMarket(e, 10); err != nil {
+		t.Fatalf("BuyFoodMarket: %v", err)
+	}
+	if e.Gold != 1000-10*FoodBuyPrice {
+		t.Errorf("Gold: want %d, got %d", 1000-10*FoodBuyPrice, e.Gold)
+	}
+	if e.Food != 10 {
+		t.Errorf("Food: want 10, got %d", e.Food)
+	}
+}
+
+func TestBuyFoodMarketCantAfford(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	e.Gold = 5
+	e.Food = 3
+
+	if err := w.BuyFoodMarket(e, 10); err != ErrCantAfford {
+		t.Fatalf("BuyFoodMarket: want ErrCantAfford, got %v", err)
+	}
+	if e.Gold != 5 || e.Food != 3 {
+		t.Errorf("state should not mutate on failed buy: gold=%d food=%d", e.Gold, e.Food)
+	}
+}
+
+func TestSellFood(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	e.Gold = 0
+	e.Food = 100
+
+	if err := w.SellFood(e, 30); err != nil {
+		t.Fatalf("SellFood: %v", err)
+	}
+	if e.Gold != 30*FoodSellPrice {
+		t.Errorf("Gold: want %d, got %d", 30*FoodSellPrice, e.Gold)
+	}
+	if e.Food != 70 {
+		t.Errorf("Food: want 70, got %d", e.Food)
+	}
+}
+
+func TestSellFoodClampedToOwned(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	e.Gold = 0
+	e.Food = 5
+
+	if err := w.SellFood(e, 100); err != nil {
+		t.Fatalf("SellFood: %v", err)
+	}
+	if e.Food != 0 {
+		t.Errorf("Food: want 0, got %d", e.Food)
+	}
+	if e.Gold != 5*FoodSellPrice {
+		t.Errorf("Gold: want %d, got %d", 5*FoodSellPrice, e.Gold)
+	}
+}
+
+func TestFoodNeededNextTurn(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	e.People = 100
+	e.Troopers = 10
+	e.Jets = 5
+	e.Tanks = 3
+
+	want := 100 + 10 + 5*2 + 3*2
+	if got := w.FoodNeededNextTurn(e); got != want {
+		t.Errorf("FoodNeededNextTurn: want %d, got %d", want, got)
+	}
+}

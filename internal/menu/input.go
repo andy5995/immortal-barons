@@ -53,17 +53,52 @@ func promptInt(s session.Session, msg string) int {
 	return parseAmount(line, 1<<62)
 }
 
-// promptAmount shows "msg (max: MAX) " and returns the parsed amount,
-// supporting >, m, and k shortcuts. Values above max are clamped to max.
-func promptAmount(s session.Session, msg string, max int) int {
-	fmt.Fprintf(s, "\n%s%s (max %d, > = max):%s ", ansi.FgBrightWhite, msg, max, ansi.Reset)
-	line, _ := session.ReadLine(s)
-	n := parseAmount(line, max)
-	if n > max {
-		n = max
+// promptSuggested shows "<msg> (<suggested>; <max>): " and returns a value.
+// Empty input returns suggested; typing `>` first fills the field with max
+// (still editable); otherwise the typed number (k/m shortcuts) is used.
+// The result is clamped to [0, max].
+func promptSuggested(s session.Session, msg string, suggested, max int) int {
+	fmt.Fprintf(s, "\n%s%s (%d; %d):%s ", ansi.FgBrightWhite, msg, suggested, max, ansi.Reset)
+	var b []rune
+	for {
+		r, err := s.ReadKey()
+		if err != nil {
+			break
+		}
+		switch {
+		case r == '\r' || r == '\n':
+			fmt.Fprint(s, "\n")
+			if len(b) == 0 {
+				return clampAmt(suggested, max)
+			}
+			return clampAmt(parseAmount(string(b), max), max)
+		case r == '>' && len(b) == 0:
+			str := strconv.Itoa(max)
+			for _, c := range str {
+				b = append(b, c)
+			}
+			fmt.Fprint(s, str) // echo the prefilled max, still editable
+		case r == 127 || r == 8: // backspace
+			if len(b) > 0 {
+				b = b[:len(b)-1]
+				fmt.Fprint(s, "\b \b")
+			}
+		default:
+			if r >= 32 {
+				b = append(b, r)
+				fmt.Fprintf(s, "%c", r)
+			}
+		}
 	}
+	return clampAmt(suggested, max)
+}
+
+func clampAmt(n, max int) int {
 	if n < 0 {
-		n = 0
+		return 0
+	}
+	if n > max {
+		return max
 	}
 	return n
 }

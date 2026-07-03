@@ -28,3 +28,48 @@ func TestParseAmount(t *testing.T) {
 		})
 	}
 }
+
+func TestClampAmt(t *testing.T) {
+	cases := []struct {
+		name string
+		n    int
+		max  int
+		want int
+	}{
+		{"below zero clamps to 0", -5, 100, 0},
+		{"above max clamps to max", 500, 100, 100},
+		{"in range unchanged", 42, 100, 42},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			if got := clampAmt(c.n, c.max); got != c.want {
+				t.Errorf("clampAmt(%d, %d) = %d, want %d", c.n, c.max, got, c.want)
+			}
+		})
+	}
+}
+
+func TestPromptSuggested(t *testing.T) {
+	cases := []struct {
+		name      string
+		keys      string
+		suggested int
+		max       int
+		want      int
+	}{
+		{"empty enter returns suggested", "\r", 7, 100, 7},
+		{"> prefills max, enter accepts it", ">\r", 7, 100, 100},
+		{"typed number is used", "5\r", 7, 100, 5},
+		{"> then backspace edits back to nothing, enter returns suggested", ">\r", 0, 42, 42},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			f := &fakeSession{keys: []rune(c.keys)}
+			got := promptSuggested(f, "How much?", c.suggested, c.max)
+			if got != c.want {
+				t.Errorf("promptSuggested(%q, suggested=%d, max=%d) = %d, want %d",
+					c.keys, c.suggested, c.max, got, c.want)
+			}
+		})
+	}
+}
