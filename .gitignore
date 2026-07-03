@@ -1,0 +1,7 @@
+# Built binary
+/barons
+
+# Go test and profiling output
+*.test
+*.out
+*.prof
