@@ -79,7 +79,11 @@ func specialAttack(s session.Session, w *game.World, label string, cost int, str
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s%s Attack — %d gold. Choose a target:%s\n", ansi.FgBrightCyan, label, cost, ansi.Reset)
+	if cost > 0 {
+		fmt.Fprintf(s, "\n%s%s — %d gold. Choose a target:%s\n", ansi.FgBrightCyan, label, cost, ansi.Reset)
+	} else {
+		fmt.Fprintf(s, "\n%s%s — choose a target:%s\n", ansi.FgBrightCyan, label, ansi.Reset)
+	}
 	for i, e := range targets {
 		fmt.Fprintf(s, "  %d) %-16s Land %-5d Army %-7d\n", i+1, e.Name, e.Land, e.Army())
 	}
@@ -98,15 +102,15 @@ func specialAttack(s session.Session, w *game.World, label string, cost int, str
 }
 
 func nuclearAttack(s session.Session, w *game.World) Result {
-	return specialAttack(s, w, "Nuclear", game.NukeCost, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
+	return specialAttack(s, w, "Nuclear Attack", game.NukeCost, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
 }
 
 func chemicalAttack(s session.Session, w *game.World) Result {
-	return specialAttack(s, w, "Chemical", game.ChemCost, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
+	return specialAttack(s, w, "Chemical Attack", game.ChemCost, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
 }
 
 func biologicalAttack(s session.Session, w *game.World) Result {
-	return specialAttack(s, w, "Biological", game.BioCost, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
+	return specialAttack(s, w, "Biological Attack", game.BioCost, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
 }
 
 func sendSpy(s session.Session, w *game.World) Result {
