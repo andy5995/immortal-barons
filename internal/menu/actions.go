@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -171,18 +172,18 @@ func printScores(s session.Session, w *game.World) {
 func readMessages(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if len(p.Mail) == 0 {
-		ok(s, "You have no messages.")
-		return Stay
+		fmt.Fprint(s, "\nYou have no messages.\n")
+	} else {
+		fmt.Fprintf(s, "\n%sYour messages:%s\n", ansi.FgBrightCyan, ansi.Reset)
+		for _, m := range p.Mail {
+			fmt.Fprintf(s, "  %s\n", m)
+		}
+		p.Mail = nil
 	}
-	fmt.Fprintf(s, "\n%sMessages:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	for _, m := range p.Mail {
-		fmt.Fprintf(s, "  %s\n", m)
-	}
-	p.Mail = nil
 	if len(w.Bulletin) > 0 {
 		fmt.Fprintf(s, "\n%sPlanetary Bulletin:%s\n", ansi.FgBrightCyan, ansi.Reset)
-		for _, m := range w.Bulletin {
-			fmt.Fprintf(s, "  %s\n", m)
+		for _, b := range w.Bulletin {
+			fmt.Fprintf(s, "  %s\n", b)
 		}
 	}
 	pause(s)
@@ -209,7 +210,7 @@ func sendMessage(s session.Session, w *game.World) Result {
 	if i < 1 || i > len(recipients) {
 		return Stay
 	}
-	text := prompt(s, "Message:")
+	text := strings.TrimSpace(prompt(s, "Message:"))
 	if text == "" {
 		return Stay
 	}
@@ -219,7 +220,7 @@ func sendMessage(s session.Session, w *game.World) Result {
 }
 
 func planetaryPost(s session.Session, w *game.World) Result {
-	text := prompt(s, "Post to the planet:")
+	text := strings.TrimSpace(prompt(s, "Post to the planet:"))
 	if text == "" {
 		return Stay
 	}
