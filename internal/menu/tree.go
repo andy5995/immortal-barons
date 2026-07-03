@@ -101,7 +101,7 @@ func Build() *Menu {
 
 	trading.Items = []Item{
 		{Key: 'F', Label: "Food Market", Do: stubbed("Food Market")},
-		{Key: 'S', Label: "Send Trade Deal", Do: stubbed("Send Trade Deal")},
+		{Key: 'S', Label: "Send Trade Deal", Do: sendTradeDeal},
 		{Key: 'V', Label: "View IPScores", Do: stubbed("View IPScores")},
 		{Key: 'B', Label: "Buy / Sell", Do: gotoMenu(buy)},
 		{Key: 'K', Label: "Visit Bank", Do: gotoMenu(bank)},

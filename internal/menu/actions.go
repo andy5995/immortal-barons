@@ -232,6 +232,39 @@ func sendMessage(s session.Session, w *game.World) Result {
 	return Stay
 }
 
+func sendTradeDeal(s session.Session, w *game.World) Result {
+	p := w.Player()
+	var recipients []*game.Empire
+	for _, e := range w.Empires {
+		if e.Alive && e != p {
+			recipients = append(recipients, e)
+		}
+	}
+	if len(recipients) == 0 {
+		ok(s, "There is no one to trade with.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%sChoose a recipient:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for i, e := range recipients {
+		fmt.Fprintf(s, "  %d) %s\n", i+1, e.Name)
+	}
+	i := promptInt(s, "Trade with which empire (0 to cancel)?")
+	if i < 1 || i > len(recipients) {
+		return Stay
+	}
+	recipient := recipients[i-1]
+	amount := promptInt(s, "How much gold?")
+	if amount <= 0 {
+		return Stay
+	}
+	if err := w.SendGold(p, recipient, amount); err != nil {
+		fail(s, err)
+	} else {
+		ok(s, "Sent %d gold to %s.", amount, recipient.Name)
+	}
+	return Stay
+}
+
 func planetaryPost(s session.Session, w *game.World) Result {
 	text := strings.TrimSpace(prompt(s, "Post to the planet:"))
 	if text == "" {
