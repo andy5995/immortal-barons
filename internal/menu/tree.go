@@ -88,7 +88,9 @@ func BuildMenus() *Menus {
 		// Loan cap is a v1 balance knob: 100 gold of credit per region owned.
 		{Key: 'L', Label: "Take Loan", Do: money("Borrow", func(p *game.Empire) int { return p.Land * 100 }, (*game.World).Loan)},
 		{Key: 'P', Label: "Repay Loan", Do: money("Repay", func(p *game.Empire) int { return min(p.Gold, p.Debt) }, (*game.World).Repay)},
-		{Key: 'I', Label: "Invest", Do: money("Invest", func(p *game.Empire) int { return p.Gold }, (*game.World).Deposit)},
+		{Key: 'I', Label: "Invest", Do: investFunds},
+		{Key: 'V', Label: "List Investments", Do: listInvestments},
+		{Key: 'K', Label: "View Bank Rates", Do: bankRates},
 		{Key: 'R', Label: "Return", Do: back},
 	}
 

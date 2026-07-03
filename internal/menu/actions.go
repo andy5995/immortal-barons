@@ -149,6 +149,58 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 	}
 }
 
+// investFunds prompts for a term (days) and amount, shows the expected
+// return, and locks the gold via w.Invest.
+func investFunds(s session.Session, w *game.World) Result {
+	p := w.Player()
+	fmt.Fprintf(s, "\nCurrent investment rate: %d%% per day.\n", w.InvestRate)
+	days := promptInt(s, "Invest for how many days?")
+	if days < game.MinInvestDays {
+		days = game.MinInvestDays
+	}
+	amount := promptSuggested(s, "How much to invest?", 0, p.Gold)
+	if amount <= 0 {
+		return Stay
+	}
+	expected := amount + amount*w.InvestRate*days/100
+	fmt.Fprintf(s, "\n  Expected return: ~%d\n", expected)
+	ret, err := w.Invest(p, amount, days)
+	if err != nil {
+		fail(s, err)
+	} else {
+		ok(s, "Invested %d for %d days; ~%d returns on day %d.", amount, days, ret, w.GameDay+days)
+	}
+	return Stay
+}
+
+// listInvestments shows the player's pending investments and any debt.
+func listInvestments(s session.Session, w *game.World) Result {
+	p := w.Player()
+	if len(p.Investments) == 0 && p.Debt == 0 {
+		fmt.Fprint(s, "\nYou have no active investments or loans.\n")
+		pause(s)
+		return Stay
+	}
+	if len(p.Investments) > 0 {
+		fmt.Fprint(s, "\n  Amount      Return    Matures Day\n")
+		for _, inv := range p.Investments {
+			fmt.Fprintf(s, "  %-10d  %-8d  %d\n", inv.Amount, inv.Return, inv.MaturesDay)
+		}
+	}
+	if p.Debt > 0 {
+		fmt.Fprintf(s, "\n  Debt owed: %d\n", p.Debt)
+	}
+	pause(s)
+	return Stay
+}
+
+// bankRates shows the current savings and investment rates.
+func bankRates(s session.Session, w *game.World) Result {
+	fmt.Fprintf(s, "\n  Savings interest: ~1%% per turn.\n  Investment rate: %d%% per day.\n", w.InvestRate)
+	pause(s)
+	return Stay
+}
+
 func buyFoodMarket(s session.Session, w *game.World) Result {
 	p := w.Player()
 	n := promptSuggested(s, "How much food to buy?", 0, p.Gold/game.FoodBuyPrice)

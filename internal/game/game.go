@@ -43,6 +43,8 @@ type Empire struct {
 
 	AllianceOffers []string
 
+	Investments []Investment
+
 	// Production percentages (should sum to ~100) for what Industrial
 	// regions build. See manufacture() in turn.go.
 	ProdTroopers int
@@ -120,6 +122,22 @@ const (
 	MoneyCap    = 2_000_000_000
 )
 
+// Investment is a term deposit: an amount locked until MaturesDay, paying
+// out Return (principal + interest at the rate in effect when invested).
+type Investment struct {
+	Amount     int // principal locked
+	Return     int // total paid out at maturity (principal + interest)
+	MaturesDay int // GameDay at/after which it pays out
+}
+
+// Investment tuning (v1, tunable — see docs/mechanics-reference.md).
+const (
+	MinInvestDays     = 1
+	DefaultInvestRate = 5 // % per day
+	MinInvestRate     = 1
+	MaxInvestRate     = 25
+)
+
 // RemoteScore is one empire's score as reported by another board's
 // exported inter-BBS packet.
 type RemoteScore struct {
@@ -141,6 +159,7 @@ type World struct {
 	Prices        Prices
 	Config        Config
 	GameDay       int
+	InvestRate    int // percent per day, floats each daily maintenance
 	LastMaintDate string
 	Bulletin      []string
 	Alliances     []string
@@ -175,9 +194,18 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 		VisitCovert:  true,
 		VisitTrading: true,
 		VisitMessage: true,
+		InvestRate:   DefaultInvestRate,
 	}
 	w.seedAIEmpires()
 	return w
+}
+
+// EnsureInvestRate repairs InvestRate after loading a save that predates
+// investments (InvestRate zero).
+func (w *World) EnsureInvestRate() {
+	if w.InvestRate == 0 {
+		w.InvestRate = DefaultInvestRate
+	}
 }
 
 // seedAIEmpires appends Config.AICount AI empires to the world.

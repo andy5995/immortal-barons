@@ -31,6 +31,7 @@ func Load(cfg game.Config) (*game.World, error) {
 		e.EnsureSupport()
 		e.EnsureProduction()
 	}
+	w.EnsureInvestRate()
 	w.Config = cfg
 	return w, nil
 }

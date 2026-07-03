@@ -50,6 +50,12 @@ func (w *World) DailyMaintenance(today string) {
 			}
 		}
 		w.GameDay++
+		for _, e := range w.Empires {
+			if e.Alive {
+				w.matureInvestments(e)
+			}
+		}
+		w.adjustInvestRate()
 		if w.Config.GameLength > 0 && w.GameDay >= w.Config.GameLength {
 			w.endGame()
 		}
