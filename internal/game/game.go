@@ -9,6 +9,11 @@ import (
 	"time"
 )
 
+// Version is the single source of truth for the game's version string,
+// displayed in the status bar and reported by the front-ends. Stays at
+// 0.0.1 until the first release.
+const Version = "0.0.1"
+
 type Empire struct {
 	Name  string
 	Owner string // normalized BBS handle; "" for AI

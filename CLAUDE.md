@@ -56,7 +56,7 @@ Combat uses a split offense/defense model (trooper 1/1, jet 2/0, turret
 0/2, tank 4/4); jets need carriers to attack. Bank interest is ~1%/turn
 with the 1.599-billion interest cap and 2-billion money cap.
 
-## Status (v0.2.0)
+## Status (v0.0.1)
 
 Persistent, multi-user door game. One shared JSON world guarded by an
 exclusive flock; per-caller empires keyed by BBS handle; per-turn economy

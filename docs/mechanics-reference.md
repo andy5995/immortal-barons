@@ -298,11 +298,14 @@ path to winning large InterBBS games.
 
 ## How Immortal Barons differs right now
 
-Now matching this reference (as of v0.2.0):
+Now matching this reference (as of v0.0.1):
 
 - Offense/defense split in combat, with the correct unit values
   (trooper 1/1, jet 2/0, turret 0/2, tank 4/4)
 - Turrets (defense-only) and carriers (jets can only attack if carried)
+- Bomber airfield strikes: a regular attack sends the attacker's bombers to
+  destroy the defender's grounded jets first, resisted by turrets (anti-air)
+  and SDI
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and 2-billion money cap
 - Nuclear / chemical / biological strikes and pirate raids
