@@ -268,24 +268,26 @@ path to winning large InterBBS games.
 
 ## How Immortal Barons differs right now
 
-Our current build is a simplified single-player game.
-
-Now matching this reference (as of v0.0.1):
+Now matching this reference (as of v0.2.0):
 
 - Offense/defense split in combat, with the correct unit values
   (trooper 1/1, jet 2/0, turret 0/2, tank 4/4)
 - Turrets (defense-only) and carriers (jets can only attack if carried)
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and 2-billion money cap
+- Nuclear / chemical / biological strikes and pirate raids
+- Covert agents with spying and sabotage (success scales with agent count)
+- Player mail and a planetary bulletin
+- Multiple turns per day, new-realm protection, and daily maintenance
+- A rising land-market price (expansion is self-limiting)
 
 Still missing against the reference:
 
-- Region types (we model land as one flat resource) and a land/food market
-  with moving prices — so buying land currently beats fighting for it
-- Nuclear / chemical / biological / pirate attacks, Gooie Kablooie, SDI
-  (stubbed)
-- Covert operations, diplomacy, trading, messages (stubbed)
-- Multiple turns per day and protection turns
+- Region types (we still model land as one flat resource) and a food market
+- Diplomacy (treaties) and trading between empires
+- Gooie Kablooie and SDI; the remaining covert ops (Spy on Relations, Spy
+  Database, Bribery) pending the diplomacy/database subsystems
+- Leagues that end and reset with a Planetary Master
 - The InterBBS (interplanetary) layer
 
 These are the slices that would move it closer to the real game.

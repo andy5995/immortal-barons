@@ -10,25 +10,36 @@ The game is written in Go. It is an independent remake, inspired by the
 
 ## Status
 
-Version 0.0.1 — the first playable cut. You can play a full single-player
-game against three computer empires from start to finish.
+Version 0.2.0 — a persistent, multi-user BBS door game. Each caller has a
+lasting empire in one shared world; you play your turns, and other barons
+(and any AI) act on their own turns. The game runs locally or as a native
+door under Synchronet or Mystic.
 
 **Works now:**
 
 - Full menu system with single-key commands
-- Economy: buy and sell land, buy food, recruit troopers, build jets and tanks
-- Bank: deposit, withdraw, take a loan, repay, invest
-- War: attack a rival empire, with plunder and captured land
-- Turn engine: taxes, food, army upkeep, population growth, bank interest
-- Three computer empires that grow and attack
-- Scores, net worth, and win/lose endings
+- Persistent shared world: your empire is saved between calls, keyed by your
+  BBS handle; one player at a time (exclusive lock); a daily maintenance step
+- Per-turn economy (idle empires stagnate); turns-per-day and new-realm
+  protection
+- Economy: buy and sell land at a **rising market price**, buy food, recruit
+  troopers, build jets/turrets/tanks/carriers, recruit covert agents
+- Bank: deposit, withdraw, take a loan, repay, invest (about 1%/turn)
+- War: conventional attack (offense vs. defense), plus **nuclear, chemical,
+  and biological** strikes and **pirate raids**
+- Covert ops: send a spy for intel, run sabotage (agent-count decides success)
+- Messages: player-to-player mail and a planetary bulletin
+- "While you were away" event log for asynchronous play
+- Scores and net worth
 
 **Planned (not built yet):**
 
-- Nuclear, chemical, and biological attacks
-- Covert operations, trading, diplomacy, and messages
+- Region types (coastal, mountain, river, …) and a food market
+- Diplomacy and trading between empires
+- Leagues that run for a set time, then reset and crown a winner
+- Sysop setup screen (game rules are read from a config file for now)
 - Inter-BBS (IBBS) play: sending game data between servers
-- A BBS "door" front-end and a web (browser) front-end
+- A web (browser) front-end
 
 ## Build and run
 

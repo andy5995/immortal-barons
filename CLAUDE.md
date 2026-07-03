@@ -56,14 +56,27 @@ Combat uses a split offense/defense model (trooper 1/1, jet 2/0, turret
 0/2, tank 4/4); jets need carriers to attack. Bank interest is ~1%/turn
 with the 1.599-billion interest cap and 2-billion money cap.
 
-## Status (v0.0.1)
+## Status (v0.2.0)
 
-Playable single-player game vs. three AI empires: economy, banking, combat,
-turn engine, scoring, win/lose, startup realm naming. Stubbed for later:
-nuclear/chemical/biological/Gooie Kablooie attacks, covert ops, diplomacy,
-trading, messages, region types, and the land/food markets with moving
-prices (currently land is a flat-priced single resource, which makes buying
-land outperform fighting — a known gap pending the market slice).
+Persistent, multi-user door game. One shared JSON world guarded by an
+exclusive flock; per-caller empires keyed by BBS handle; per-turn economy
+(idle empires stagnate) split from a daily maintenance step; turns-per-day
+and new-realm protection; an event log for asynchronous play. Front-ends:
+`cmd/barons` (local) and `cmd/barons-door` (native BBS door, `+ -maint`).
+Persistence design/plan: `docs/superpowers/{specs,plans}/2026-07-03-door-*`.
+
+Implemented gameplay: conventional combat (offense/defense, turrets, carriers,
+jets), nuclear/chemical/biological strikes, pirate raids, covert agents
+(spy + sabotage), player mail + planetary bulletin, banking, and a rising
+land-market price (expansion is now self-limiting; the flat-land exploit is
+fixed). Key gameplay knobs (unit values, maintenance, prices, `LandPriceStep`)
+are constants — tune freely; keep them matching `docs/mechanics-reference.md`.
+
+Stubbed / not built: region types + food market, diplomacy, trading, leagues
++ reset + Planetary Master, Gooie Kablooie, SDI, the sysop config screen
+(rules come from a config file with defaults), and IBBS inter-BBS play. Some
+covert-menu items (Spy on Relations, Spy Database, Bribery) remain stubs
+pending the diplomacy/database subsystems.
 
 ## Primary goal: run as a BBS door
 
