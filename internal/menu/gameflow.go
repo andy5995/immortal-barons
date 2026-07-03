@@ -84,6 +84,9 @@ func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
 	if p.LastSpoiled > 0 {
 		fmt.Fprintf(s, "  %d units of food spoiled.\n", p.LastSpoiled)
 	}
+	if p.LastRiot {
+		fmt.Fprintf(s, "  %sRiots have broken out due to high tax rates!%s\n", ansi.FgRed, ansi.Reset)
+	}
 	fmt.Fprintf(s, "  Turns left today: %d\n", p.TurnsLeft)
 	pause(s)
 }

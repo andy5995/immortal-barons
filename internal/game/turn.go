@@ -83,8 +83,18 @@ func (w *World) aiPlay(today string) {
 	}
 }
 
+// Support tuning (v1, tunable — see docs/mechanics-reference.md).
+const (
+	SupportStableTax = 15 // tax rate at which support holds at 100
+	SupportDrift     = 3  // points support moves toward its target per turn
+	RiotTaxFloor     = 20 // no riots at/below this tax rate
+)
+
 func (w *World) processEconomy(e *Empire) {
-	e.Gold += e.People*e.Tax/100*8 + e.Regions.income()
+	base := e.Regions.income()
+	coastal := e.Regions.Coastal * 25
+	income := base - coastal + coastal*e.Support/100 // low support slashes tourism
+	e.Gold += e.People*e.Tax/100*8 + income
 
 	e.Bank += min(e.Bank, InterestCap) / 100
 	if e.Debt > 0 {
@@ -127,6 +137,31 @@ func (w *World) processEconomy(e *Empire) {
 		}
 	}
 	e.People += e.Regions.Urban * 10 // urban regions draw settlers
+
+	// Support drifts toward a tax-based target (higher tax => lower target).
+	target := 100 - (e.Tax-SupportStableTax)*3
+	if target > 100 {
+		target = 100
+	}
+	if target < 0 {
+		target = 0
+	}
+	if e.Support < target {
+		e.Support += min(SupportDrift, target-e.Support)
+	} else if e.Support > target {
+		e.Support -= min(SupportDrift, e.Support-target)
+	}
+
+	// Riots: chance rises with tax above the floor.
+	e.LastRiot = false
+	if e.Tax > RiotTaxFloor && w.rng.Intn(100) < (e.Tax-SupportStableTax)*2 {
+		e.LastRiot = true
+		e.Support -= 15
+		if e.Support < 0 {
+			e.Support = 0
+		}
+		e.People -= e.People / 10 // a tenth flee in the unrest
+	}
 
 	if e.Gold > MoneyCap {
 		e.Gold = MoneyCap

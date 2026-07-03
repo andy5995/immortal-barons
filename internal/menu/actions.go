@@ -293,6 +293,7 @@ func empireStatus(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "  Carriers .... %d\n", p.Carriers)
 	fmt.Fprintf(s, "  Agents ...... %d\n", p.Agents)
 	fmt.Fprintf(s, "  Tax rate .... %d%%\n", p.Tax)
+	fmt.Fprintf(s, "  Popular Support . %d%%\n", p.Support)
 	fmt.Fprintf(s, "  SDI ......... %d%%\n", p.SDI)
 	switch {
 	case p.HQ == 0:

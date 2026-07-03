@@ -29,9 +29,10 @@ type Empire struct {
 	Carriers int
 	Agents   int
 
-	Tax int
-	SDI int // 0-75, percentage reduction of incoming strike damage
-	HQ  int // 0 = none/not started; 1-100 = percent complete
+	Tax     int
+	SDI     int // 0-75, percentage reduction of incoming strike damage
+	HQ      int // 0 = none/not started; 1-100 = percent complete
+	Support int // 0-100, popular support; erodes with high tax, slashes Coastal income when low
 
 	TurnsLeft  int
 	Protection int
@@ -42,8 +43,9 @@ type Empire struct {
 	AllianceOffers []string
 
 	// Transient per-turn stats for the end-of-turn report; not persisted.
-	LastSpoiled   int `json:"-"`
-	LastPopGrowth int `json:"-"`
+	LastSpoiled   int  `json:"-"`
+	LastPopGrowth int  `json:"-"`
+	LastRiot      bool `json:"-"`
 }
 
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }
@@ -61,6 +63,15 @@ func (e *Empire) EnsureRegions() {
 	}
 	e.Regions = defaultRegionMix(e.Land)
 	e.syncLand() // Land now equals the rebuilt total (defaultRegionMix sums to Land, so Land is unchanged)
+}
+
+// EnsureSupport repairs Support after loading a save that predates the
+// Support field (Support zero). v1 choice: a legitimately-0-support empire
+// is effectively collapsing anyway, so treating 0 as "unset" is safe.
+func (e *Empire) EnsureSupport() {
+	if e.Support == 0 {
+		e.Support = 100
+	}
 }
 
 func (e *Empire) Offense() int {
@@ -157,7 +168,7 @@ func newEmpire(name, owner string, cfg Config) *Empire {
 		Name: name, Owner: owner, Alive: true,
 		Gold: 10000, Food: 20000, Land: regions.Total(), People: 2000,
 		Regions:  regions,
-		Troopers: 150, Carriers: 1, Tax: 15,
+		Troopers: 150, Carriers: 1, Tax: 15, Support: 100,
 		TurnsLeft: cfg.TurnsPerDay, Protection: cfg.ProtectionTurns,
 	}
 }

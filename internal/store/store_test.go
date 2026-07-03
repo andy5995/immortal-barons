@@ -76,6 +76,28 @@ func TestLoadMigratesPreRegionTypesSave(t *testing.T) {
 	}
 }
 
+func TestSupportMigration(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	w := game.NewWorldSeed(cfg, 1)
+	e := w.AddHuman("khan", "Khan's Realm")
+	e.Support = 0 // simulate a save written before Support existed
+
+	if err := Save(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ge := got.FindByOwner("khan")
+	if ge == nil {
+		t.Fatal("empire not found after load")
+	}
+	if ge.Support != 100 {
+		t.Errorf("Support=%d, want migrated default 100", ge.Support)
+	}
+}
+
 func TestSaveIsAtomic(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	w := game.NewWorldSeed(cfg, 1)
