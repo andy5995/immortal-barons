@@ -78,6 +78,22 @@ Net-worth value contributed per unit (from the guide's net-worth table):
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
 
+**Gooie Kablooie** — the ultimate weapon, aimed at an entire enemy
+planet/BBS rather than one empire. It is community-funded (all members of
+the attacking board contribute; funding scales with the target's size) and
+only one can exist at a time. After funding it takes a few days to build,
+then launches. On arrival it destroys 10% of *all* regions on the target
+planet, then 5% more per day. After 5 days it exhausts itself — so the
+defenders must send jets to shoot it down before then. It can also be
+dismantled by its owner. The original's turn log and prompts confirm the
+lifecycle: begin construction → fund (millions of gold) → complete →
+awaiting launch → inbound processing.
+
+**SDI Defense** — a funded anti-missile/anti-jet shield (spend up to ~2
+billion; percent-complete scales with your region count, and Technology
+regions lower its upkeep). When complete it destroys about half of incoming
+missiles and cuts attacking jets' effectiveness by ~25–30%.
+
 Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
 "Lost" attacking forces return after 3 days (config).
 
@@ -207,6 +223,16 @@ league ran tax 85%, interest 75%).
   "discoveries"): lower maintenance on regions/military/SDI and rising
   economic and military efficiency over time.
 
+## New-player start
+
+A new player sees `Welcome to <board>` / `Barren Realms Elite`, then the
+new-player intro text (`NEWPLAY.TXT`), then the naming step titled "Name
+Your Empire" with the prompt `Name your Realm:`. A name must have at least
+3 letters/numbers and must not match another player; otherwise: "Your
+empire name is invalid…". The player is then asked "Would you like
+Instructions?" (`BREINS.TXT`). Our clone reproduces the naming prompt and
+its validation rule.
+
 ## Turn structure
 
 Turns per day: 15 (config). New players get protection turns at the start
@@ -242,17 +268,24 @@ path to winning large InterBBS games.
 
 ## How Immortal Barons differs right now
 
-Our current build is a simplified single-player game. Against this
-reference it is missing:
+Our current build is a simplified single-player game.
 
-- Turrets (defense-only unit) and a proper offense/defense split in combat
-- Correct unit values (jet = offense only, tank ≈ 4 troopers)
-- Region types (we model land as one flat resource)
-- Nuclear / chemical / biological / pirate attacks (stubbed)
+Now matching this reference (as of v0.0.1):
+
+- Offense/defense split in combat, with the correct unit values
+  (trooper 1/1, jet 2/0, turret 0/2, tank 4/4)
+- Turrets (defense-only) and carriers (jets can only attack if carried)
+- Reference net-worth values and per-unit maintenance
+- Bank interest ~1% per turn, with the interest cap and 2-billion money cap
+
+Still missing against the reference:
+
+- Region types (we model land as one flat resource) and a land/food market
+  with moving prices — so buying land currently beats fighting for it
+- Nuclear / chemical / biological / pirate attacks, Gooie Kablooie, SDI
+  (stubbed)
 - Covert operations, diplomacy, trading, messages (stubbed)
 - Multiple turns per day and protection turns
-- A food market and a land market with moving prices (we use fixed prices)
-- Correct bank interest (~1% per turn, with the ~1.6-billion interest cap)
 - The InterBBS (interplanetary) layer
 
 These are the slices that would move it closer to the real game.

@@ -10,8 +10,8 @@ The game is written in Go. It is an independent remake, inspired by the
 
 ## Status
 
-Early, but playable. You can play a full single-player game against three
-computer empires from start to finish.
+Version 0.0.1 — the first playable cut. You can play a full single-player
+game against three computer empires from start to finish.
 
 **Works now:**
 
