@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -481,64 +482,102 @@ func readMessages(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func sendMessage(s session.Session, w *game.World) Result {
-	p := w.Player()
-	var recipients []*game.Empire
+// recipients lists the living empires other than the player.
+func recipients(w *game.World) []*game.Empire {
+	var r []*game.Empire
 	for _, e := range w.Empires {
-		if e.Alive && e != p {
-			recipients = append(recipients, e)
+		if e.Alive && e != w.Player() {
+			r = append(r, e)
 		}
 	}
-	if len(recipients) == 0 {
-		ok(s, "There is no one to message.")
-		return Stay
+	return r
+}
+
+// recipientIndex maps an uppercased letter key ('A'..) to an index into a
+// recipient list of length n, capped at 25 entries (A..Y). Returns -1 for
+// keys with no match.
+func recipientIndex(r rune, n int) int {
+	idx := int(unicode.ToUpper(r) - 'A')
+	if idx < 0 || idx >= n || idx >= 25 {
+		return -1
 	}
-	fmt.Fprintf(s, "\n%sChoose a recipient:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	for i, e := range recipients {
-		fmt.Fprintf(s, "  %d) %s\n", i+1, e.Name)
+	return idx
+}
+
+// pickRecipient shows a lettered columns table (Id / Empire / Land / Score /
+// Net Worth) and reads a SINGLE keypress: a letter A.. selects that empire;
+// '0' cancels (returns nil, false). If allowAll, 'Z' returns (nil, true)
+// meaning "all". Returns (empire, all).
+func pickRecipient(s session.Session, w *game.World, prompt string, allowAll bool) (*game.Empire, bool) {
+	rs := recipients(w)
+	if len(rs) == 0 {
+		ok(s, "There is no one to reach.")
+		return nil, false
 	}
-	i := promptInt(s, "Message which empire (0 to cancel)?")
-	if i < 1 || i > len(recipients) {
+	fmt.Fprintf(s, "\n%s%-4s %-20s %-6s %-6s %s%s\n", ansi.FgBrightCyan, "Id", "Empire", "Land", "Score", "Net Worth", ansi.Reset)
+	for i, e := range rs {
+		if i >= 25 { // A..Y
+			break
+		}
+		fmt.Fprintf(s, "(%c) %-20s %-6d %-6d %d\n", 'A'+i, e.Name, e.Land, e.Land, w.NetWorth(e))
+	}
+	extra := ""
+	if allowAll {
+		extra = ", Z=All"
+	}
+	fmt.Fprintf(s, "\n%s(A-%c%s, 0=cancel) %s%s ", ansi.FgBrightWhite, 'A'+min(len(rs), 25)-1, extra, prompt, ansi.Reset)
+	r, err := s.ReadKey()
+	if err != nil {
+		return nil, false
+	}
+	if allowAll && (r == 'z' || r == 'Z') {
+		fmt.Fprint(s, "All\n")
+		return nil, true
+	}
+	idx := recipientIndex(r, len(rs))
+	if idx < 0 {
+		fmt.Fprint(s, "\n")
+		return nil, false
+	}
+	fmt.Fprintf(s, "%s\n", rs[idx].Name)
+	return rs[idx], false
+}
+
+func sendMessage(s session.Session, w *game.World) Result {
+	p := w.Player()
+	to, all := pickRecipient(s, w, "Send to:", true)
+	if !all && to == nil {
 		return Stay
 	}
 	text := strings.TrimSpace(prompt(s, "Message:"))
 	if text == "" {
 		return Stay
 	}
-	w.SendMail(p, recipients[i-1], text)
+	if all {
+		for _, e := range recipients(w) {
+			w.SendMail(p, e, text)
+		}
+	} else {
+		w.SendMail(p, to, text)
+	}
 	ok(s, "Message sent.")
 	return Stay
 }
 
 func sendTradeDeal(s session.Session, w *game.World) Result {
 	p := w.Player()
-	var recipients []*game.Empire
-	for _, e := range w.Empires {
-		if e.Alive && e != p {
-			recipients = append(recipients, e)
-		}
-	}
-	if len(recipients) == 0 {
-		ok(s, "There is no one to trade with.")
+	to, _ := pickRecipient(s, w, "Trade with:", false)
+	if to == nil {
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%sChoose a recipient:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	for i, e := range recipients {
-		fmt.Fprintf(s, "  %d) %s\n", i+1, e.Name)
-	}
-	i := promptInt(s, "Trade with which empire (0 to cancel)?")
-	if i < 1 || i > len(recipients) {
-		return Stay
-	}
-	recipient := recipients[i-1]
 	amount := promptInt(s, "How much gold?")
 	if amount <= 0 {
 		return Stay
 	}
-	if err := w.SendGold(p, recipient, amount); err != nil {
+	if err := w.SendGold(p, to, amount); err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Sent %d gold to %s.", amount, recipient.Name)
+		ok(s, "Sent %d gold to %s.", amount, to.Name)
 	}
 	return Stay
 }
