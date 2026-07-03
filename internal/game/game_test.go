@@ -75,6 +75,59 @@ func TestAttackChangesLand(t *testing.T) {
 	}
 }
 
+func TestOffenseDefenseValues(t *testing.T) {
+	e := &Empire{Troopers: 10, Jets: 10, Turrets: 10, Tanks: 10, Carriers: 1}
+	// offense: 10 + min(10,100)*2 + 10*4 = 70; defense: 10 + 10*2 + 10*4 = 70
+	if o := e.Offense(); o != 70 {
+		t.Errorf("offense: want 70, got %d", o)
+	}
+	if d := e.Defense(); d != 70 {
+		t.Errorf("defense: want 70, got %d", d)
+	}
+}
+
+func TestJetsNeedCarriers(t *testing.T) {
+	e := &Empire{Jets: 500, Carriers: 1} // 1 carrier moves 100 jets
+	if o := e.Offense(); o != 200 {
+		t.Errorf("uncarried jets should not count: want 200, got %d", o)
+	}
+	e.Carriers = 5
+	if o := e.Offense(); o != 1000 {
+		t.Errorf("with carriers for all jets: want 1000, got %d", o)
+	}
+}
+
+func TestBankInterestIsOnePercent(t *testing.T) {
+	w := NewSeed(1)
+	p := w.Player()
+	p.Bank = 100000
+	w.EndTurn() // bank changes only through interest
+	if p.Bank != 101000 {
+		t.Errorf("1%% interest: want 101000, got %d", p.Bank)
+	}
+}
+
+func TestInterestStopsAtCap(t *testing.T) {
+	w := NewSeed(1)
+	p := w.Player()
+	p.Bank = InterestCap + 100_000_000 // above the interest cap, below money cap
+	w.EndTurn()
+	want := InterestCap + 100_000_000 + InterestCap/100
+	if p.Bank != want {
+		t.Errorf("interest should be capped: want %d, got %d", want, p.Bank)
+	}
+}
+
+func TestMoneyCapClamps(t *testing.T) {
+	w := NewSeed(1)
+	p := w.Player()
+	p.Gold = MoneyCap + 1_000_000
+	w.EndTurn()
+	if p.Gold != MoneyCap {
+		t.Errorf("gold should clamp to money cap: want %d, got %d", MoneyCap, p.Gold)
+	}
+}
+
 func TestGameOverAtMaxTurns(t *testing.T) {
 	w := NewSeed(1)
 	w.Turn = w.MaxTurns

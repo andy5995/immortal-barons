@@ -54,6 +54,22 @@ func (w *World) BuildJets(e *Empire, n int) error {
 	return nil
 }
 
+func (w *World) BuildTurrets(e *Empire, n int) error {
+	if err := e.spend(n, w.Prices.Turret); err != nil {
+		return err
+	}
+	e.Turrets += n
+	return nil
+}
+
+func (w *World) BuildCarriers(e *Empire, n int) error {
+	if err := e.spend(n, w.Prices.Carrier); err != nil {
+		return err
+	}
+	e.Carriers += n
+	return nil
+}
+
 func (w *World) BuildTanks(e *Empire, n int) error {
 	if err := e.spend(n, w.Prices.Tank); err != nil {
 		return err

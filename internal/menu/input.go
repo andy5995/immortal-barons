@@ -13,29 +13,8 @@ import (
 // echoing keystrokes since the console runs in no-echo mode.
 func prompt(s session.Session, msg string) string {
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, msg, ansi.Reset)
-	var b []rune
-	for {
-		r, err := s.ReadKey()
-		if err != nil {
-			break
-		}
-		switch r {
-		case '\r', '\n':
-			fmt.Fprint(s, "\n")
-			return string(b)
-		case 127, 8: // DEL / backspace
-			if len(b) > 0 {
-				b = b[:len(b)-1]
-				fmt.Fprint(s, "\b \b")
-			}
-		default:
-			if r >= 32 {
-				b = append(b, r)
-				fmt.Fprintf(s, "%c", r)
-			}
-		}
-	}
-	return string(b)
+	line, _ := session.ReadLine(s)
+	return line
 }
 
 func promptInt(s session.Session, msg string) int {

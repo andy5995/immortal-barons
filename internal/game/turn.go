@@ -25,8 +25,9 @@ func (w *World) processEconomy(e *Empire) {
 	// Taxes and land revenue.
 	e.Gold += e.People*e.Tax/100*8 + e.Land*20
 
-	// Interest: the bank pays, debt costs.
-	e.Bank += e.Bank * 5 / 100
+	// Interest: the bank pays ~1% per turn, but only on gold up to the
+	// interest cap. Debt costs 10% per turn.
+	e.Bank += min(e.Bank, InterestCap) / 100
 	if e.Debt > 0 {
 		e.Debt += e.Debt * 10 / 100
 	}
@@ -41,8 +42,9 @@ func (w *World) processEconomy(e *Empire) {
 		e.Food = 0
 	}
 
-	// Maintenance: unpaid armies desert.
-	maint := e.Troopers*2 + e.Jets*10 + e.Tanks*20
+	// Maintenance (reference ratios: tanks cheap, jets/turrets dear).
+	// Unpaid armies desert.
+	maint := e.Troopers*6 + e.Jets*12 + e.Turrets*9 + e.Tanks*6 + e.Carriers*1
 	if e.Gold >= maint {
 		e.Gold -= maint
 	} else {
@@ -56,6 +58,14 @@ func (w *World) processEconomy(e *Empire) {
 			e.People += g
 		}
 	}
+
+	// No empire can hold more than the money cap.
+	if e.Gold > MoneyCap {
+		e.Gold = MoneyCap
+	}
+	if e.Bank > MoneyCap {
+		e.Bank = MoneyCap
+	}
 }
 
 // aiActions is a deliberately simple rival AI: reinvest spare gold into
@@ -68,7 +78,7 @@ func (w *World) aiActions() {
 			e.Troopers += n
 			e.Gold -= n * w.Prices.Trooper
 		}
-		if p != nil && p.Alive && e.Power() > p.Power()*2 && w.rng.Intn(100) < 10 {
+		if p != nil && p.Alive && e.Offense() > p.Defense()*2 && w.rng.Intn(100) < 10 {
 			w.Attack(e, p)
 		}
 	}

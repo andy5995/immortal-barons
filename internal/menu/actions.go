@@ -73,8 +73,12 @@ func empireStatus(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "  People ...... %d\n", p.People)
 	fmt.Fprintf(s, "  Troopers .... %d\n", p.Troopers)
 	fmt.Fprintf(s, "  Jets ........ %d\n", p.Jets)
+	fmt.Fprintf(s, "  Turrets ..... %d\n", p.Turrets)
 	fmt.Fprintf(s, "  Tanks ....... %d\n", p.Tanks)
+	fmt.Fprintf(s, "  Carriers .... %d\n", p.Carriers)
 	fmt.Fprintf(s, "  Tax rate .... %d%%\n", p.Tax)
+	fmt.Fprintf(s, "  Offense ..... %d\n", p.Offense())
+	fmt.Fprintf(s, "  Defense ..... %d\n", p.Defense())
 	fmt.Fprintf(s, "  Net worth ... %d\n", w.NetWorth(p))
 	pause(s)
 	return Stay
