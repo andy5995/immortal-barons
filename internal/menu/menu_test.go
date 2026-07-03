@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
@@ -186,6 +187,29 @@ func TestReadChoiceSelectsOnSingleKeypress(t *testing.T) {
 	}
 	if it == nil || it.Label != "Carriers" {
 		t.Fatalf("expected Carriers on single keypress, got %v", it)
+	}
+}
+
+func TestMenuColorRendersTitleAndHotkeys(t *testing.T) {
+	m := &Menu{
+		Title: "Colorful Menu",
+		Color: ansi.FgBrightMagenta,
+		Items: []Item{
+			{Key: '0', Label: "Return", Do: back},
+		},
+	}
+	f := &fakeSession{keys: []rune("0")}
+	g := newWorld()
+	if err := Run(f, g, m); err != nil {
+		t.Fatalf("got %v", err)
+	}
+	out := f.out.String()
+	wantTitle := ansi.FgBrightMagenta + "[Colorful Menu]" + ansi.Reset
+	if !strings.Contains(out, wantTitle) {
+		t.Errorf("expected bracketed colored title %q in output, got:\n%s", wantTitle, out)
+	}
+	if !strings.Contains(out, ansi.FgBrightMagenta) {
+		t.Error("expected menu color code in drawn output")
 	}
 }
 

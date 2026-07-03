@@ -60,6 +60,7 @@ func (it *Item) label(g *game.World) string {
 
 type Menu struct {
 	Title  string
+	Color  string // ansi color escape for the title and item hotkeys; "" uses a default
 	Items  []Item
 	Status func(*game.World) string // optional status bar under the menu
 }
@@ -136,7 +137,11 @@ const rule = "──────────────────────
 
 func draw(s session.Session, g *game.World, m *Menu) {
 	fmt.Fprint(s, ansi.Clear)
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightCyan, m.Title, ansi.Reset)
+	col := m.Color
+	if col == "" {
+		col = ansi.FgBrightCyan
+	}
+	fmt.Fprintf(s, "%s[%s]%s\n", col, m.Title, ansi.Reset)
 	fmt.Fprintf(s, "%s\n", rule)
 	for i := range m.Items {
 		it := &m.Items[i]
@@ -147,8 +152,8 @@ func draw(s session.Session, g *game.World, m *Menu) {
 			fmt.Fprintf(s, "  %s\n", it.label(g))
 			continue
 		}
-		fmt.Fprintf(s, "  %s(%c)%s %s\n",
-			ansi.FgBrightYellow, it.Key, ansi.Reset, it.label(g))
+		fmt.Fprintf(s, "  %s(%c)%s %s%s%s\n",
+			col, it.Key, ansi.Reset, ansi.FgWhite, it.label(g), ansi.Reset)
 	}
 	if m.Status != nil {
 		fmt.Fprintf(s, "%s\n%s%s%s\n", rule, ansi.FgGreen, m.Status(g), ansi.Reset)

@@ -10,14 +10,19 @@ const (
 	Dim   = esc + "2m"
 	Clear = esc + "2J" + esc + "H" // clear screen, cursor home
 
-	FgRed    = esc + "31m"
-	FgGreen  = esc + "32m"
-	FgYellow = esc + "33m"
-	FgBlue   = esc + "34m"
-	FgCyan   = esc + "36m"
-	FgWhite  = esc + "37m"
+	FgRed     = esc + "31m"
+	FgGreen   = esc + "32m"
+	FgYellow  = esc + "33m"
+	FgBlue    = esc + "34m"
+	FgMagenta = esc + "35m"
+	FgCyan    = esc + "36m"
+	FgWhite   = esc + "37m"
 
-	FgBrightYellow = esc + "93m"
-	FgBrightCyan   = esc + "96m"
-	FgBrightWhite  = esc + "97m"
+	FgBrightRed     = esc + "91m"
+	FgBrightGreen   = esc + "92m"
+	FgBrightYellow  = esc + "93m"
+	FgBrightBlue    = esc + "94m"
+	FgBrightMagenta = esc + "95m"
+	FgBrightCyan    = esc + "96m"
+	FgBrightWhite   = esc + "97m"
 )

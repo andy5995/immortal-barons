@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
@@ -27,18 +28,18 @@ type Menus struct {
 // then wired, so submenus can reference each other (e.g. several menus
 // offer "Visit Bank").
 func BuildMenus() *Menus {
-	buy := &Menu{Title: "Spending Menu"}
-	sell := &Menu{Title: "Sell Menu"}
-	bank := &Menu{Title: "Bank"}
-	attack := &Menu{Title: "War / Attack"}
-	covert := &Menu{Title: "Covert Operations"}
-	trading := &Menu{Title: "Trading"}
-	diplomacy := &Menu{Title: "Diplomacy"}
-	messages := &Menu{Title: "Messages"}
-	prefs := &Menu{Title: "Preferences"}
-	coord := &Menu{Title: "Sysop / Coordinator"}
-	system := &Menu{Title: "System Menu"}
-	food := &Menu{Title: "Food Market"}
+	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed}
+	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
+	bank := &Menu{Title: "Bank", Color: ansi.FgBrightCyan}
+	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta}
+	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightMagenta}
+	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed}
+	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
+	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
+	prefs := &Menu{Title: "Preferences", Color: ansi.FgBrightCyan}
+	coord := &Menu{Title: "Sysop / Coordinator", Color: ansi.FgBrightBlue}
+	system := &Menu{Title: "System Menu", Color: ansi.FgBrightBlue}
+	food := &Menu{Title: "Food Market", Color: ansi.FgBrightCyan}
 
 	buy.Items = []Item{
 		{Key: '*', Label: "System Menu", Do: gotoMenu(system)},
@@ -202,7 +203,7 @@ func BuildMenus() *Menus {
 		{Key: 'Q', Label: "Quit", Do: quit},
 	}
 
-	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Status: statusBar}
+	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Color: ansi.FgBrightMagenta, Status: statusBar}
 	gameMenu.Items = []Item{
 		{Key: '1', Label: "Play Game", Do: runTurn},
 		{Key: '2', Label: "See Status", Do: empireStatus},
