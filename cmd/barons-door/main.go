@@ -1,14 +1,6 @@
-// Command barons-door runs Immortal Barons as a native BBS door. The BBS
-// writes a dropfile (DOOR32.SYS or DOOR.SYS) and launches this program with
-// the caller's connection on stdin/stdout. It reads the dropfile to learn
-// who the caller is and how much time they have, then runs the game.
-//
-// Configure your BBS to run it with the dropfile path, e.g.:
-//
-//	barons-door -dropfile /path/to/node/DOOR32.SYS
-//
-// With no -dropfile, it looks for DOOR32.SYS or DOOR.SYS in the working
-// directory.
+// Command barons-door runs Immortal Barons as a native BBS door. Normal
+// mode reads the caller's dropfile and plays over stdio. With -maint it runs
+// daily maintenance non-interactively (for the sysop's nightly event).
 package main
 
 import (
@@ -17,16 +9,30 @@ import (
 	"os"
 	"time"
 
-	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/door"
 	"github.com/andy5995/immortal-barons/internal/game"
-	"github.com/andy5995/immortal-barons/internal/menu"
+	"github.com/andy5995/immortal-barons/internal/play"
 	"github.com/andy5995/immortal-barons/internal/session"
+	"github.com/andy5995/immortal-barons/internal/store"
 )
 
 func main() {
 	dropPath := flag.String("dropfile", "", "path to the BBS dropfile (DOOR32.SYS or DOOR.SYS)")
+	dataDir := flag.String("data", "./data", "game data directory")
+	maint := flag.Bool("maint", false, "run daily maintenance and exit")
 	flag.Parse()
+
+	cfg := game.DefaultConfig()
+	cfg.DataDir = *dataDir
+	today := time.Now().Format("2006-01-02")
+
+	if *maint {
+		if err := runMaint(cfg, today); err != nil {
+			fmt.Fprintln(os.Stderr, "barons-door -maint:", err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	path := *dropPath
 	if path == "" && flag.NArg() > 0 {
@@ -39,7 +45,6 @@ func main() {
 		fmt.Fprintln(os.Stderr, "barons-door: no dropfile found; pass -dropfile PATH")
 		os.Exit(2)
 	}
-
 	caller, err := door.ParseDropfile(path)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "barons-door:", err)
@@ -47,31 +52,37 @@ func main() {
 	}
 
 	s := session.NewStdio()
-
-	// Honor the caller's remaining BBS time with a hard cutoff.
 	if caller.SecondsLeft > 0 {
 		go func() {
 			time.Sleep(time.Duration(caller.SecondsLeft) * time.Second)
-			fmt.Fprintf(s, "\n\n%sYour BBS time is up. Farewell, Baron!%s\n", ansi.FgBrightYellow, ansi.Reset)
+			fmt.Fprint(s, "\r\n\r\nYour BBS time is up. Farewell, Baron!\r\n")
 			os.Exit(0)
 		}()
 	}
-
-	name := caller.Handle
-	if name == "" {
-		name = "Baron"
+	handle := caller.Handle
+	if handle == "" {
+		handle = fmt.Sprintf("node%d", caller.Node)
 	}
-	fmt.Fprintf(s, "%s%sIMMORTAL BARONS%s\n", ansi.Clear, ansi.FgBrightYellow, ansi.Reset)
-	fmt.Fprintf(s, "Welcome, %s (node %d).\n\n", name, caller.Node)
-
-	// Until persistence lands, each call is a fresh game named for the caller.
-	g := game.New()
-	if caller.Handle != "" {
-		g.Player().Name = caller.Handle
+	if err := play.Run(s, play.Identity{Handle: handle}, cfg, today); err != nil {
+		fmt.Fprintln(os.Stderr, "barons-door:", err)
+		os.Exit(1)
 	}
-	menu.Run(s, g, menu.Build())
+}
 
-	fmt.Fprintf(s, "%s\nUntil next turn, Baron.\n", ansi.Reset)
+// runMaint blocks on the lock (waits for any active player) then advances
+// the world.
+func runMaint(cfg game.Config, today string) error {
+	lock, err := store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	defer lock.Release()
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	w.DailyMaintenance(today)
+	return store.Save(w, cfg)
 }
 
 func findDropfile() string {
