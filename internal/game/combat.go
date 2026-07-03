@@ -5,16 +5,53 @@ import (
 	"strings"
 )
 
+// Bombing-run tuning: each bomber that survives the defender's anti-air
+// destroys up to BomberJetKills of the defender's grounded jets; the
+// defender shoots down one bomber per TurretsPerBomberDown turrets, and SDI
+// blunts the raid by its percentage.
+const (
+	BomberJetKills       = 3
+	TurretsPerBomberDown = 25
+)
+
+// bombingRun sends a's bombers against d's airfields before the ground
+// clash. It destroys grounded jets (which don't defend anyway, so this
+// only weakens d's future offense and net worth) and costs a some bombers
+// to anti-air. It mutates both empires and returns (jetsDestroyed,
+// bombersLost).
+func (w *World) bombingRun(a, d *Empire) (int, int) {
+	if a.Bombers <= 0 || d.Jets <= 0 {
+		return 0, 0
+	}
+	lost := min(a.Bombers, d.Turrets/TurretsPerBomberDown)
+	survivors := a.Bombers - lost
+	kills := survivors * BomberJetKills * (100 - d.SDI) / 100
+	if kills > d.Jets {
+		kills = d.Jets
+	}
+	d.Jets -= kills
+	a.Bombers -= lost
+	return kills, lost
+}
+
 // Attack resolves a battle between attacker a and defender d, mutating
 // both empires, and returns a battle report. The attacker commits its
 // offense; the defender fights with its defense plus a home bonus from its
 // land. Both sides apply a random factor.
 func (w *World) Attack(a, d *Empire) string {
-	ap := w.jitter(a.Offense())
-	dp := w.jitter(d.Defense() + d.Land*2)
-
 	var b strings.Builder
 	fmt.Fprintf(&b, "%s attacks %s!\n\n", a.Name, d.Name)
+
+	if kills, lost := w.bombingRun(a, d); kills > 0 || lost > 0 {
+		fmt.Fprintf(&b, "Your bombers hit the airfields: %d enemy jets destroyed", kills)
+		if lost > 0 {
+			fmt.Fprintf(&b, ", %d bombers lost to anti-air", lost)
+		}
+		fmt.Fprint(&b, ".\n\n")
+	}
+
+	ap := w.jitter(a.Offense())
+	dp := w.jitter(d.Defense() + d.Land*2)
 
 	if ap > dp {
 		captured := d.Land/5 + 1
