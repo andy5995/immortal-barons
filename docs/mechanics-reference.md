@@ -223,6 +223,36 @@ league ran tax 85%, interest 75%).
   "discoveries"): lower maintenance on regions/military/SDI and rising
   economic and military efficiency over time.
 
+### Banking and investments (from the binary strings)
+
+The bank has three actions plus two views: **Deposit Funds** (savings),
+**Withdraw Funds**, **Investments**, **List Investments / Loans**, and
+**View Bank Rates**.
+
+- **Savings** earn the *Bank/Savings Interest Rate* per turn on gold in the
+  bank (about 1%/turn; see the caps above).
+- **Investments** are term deposits (like bonds): you choose an **amount**
+  and a **number of days** (there is a **minimum term**), the gold is
+  **locked**, and it **matures on a future date**, returning principal plus
+  interest at the current **Investment Rate**. Before confirming, the bank
+  shows "Returns expected to be approximately N." The list view shows
+  columns: Date / Investments / Loans Due.
+- **The Investment Rate floats** — each daily maintenance updates it:
+  - Supply/demand: heavy investing pushes rates **down**; weak investing
+    pushes them **up**.
+  - The bank nudges rates by 0.5% to stop them collapsing or skyrocketing.
+  - Random events: the Queen occasionally raises/lowers investment rates by
+    ~1% (inflation flavor).
+  - The sysop configures a **Standard** and a **Steady** investment rate.
+- **Loans**: you borrow gold at a stated loan interest rate ("The loan rate
+  will be N% interest overall"); loans appear in the list with a due date.
+- **Undermine Investments** is a covert op that damages a rival's pending
+  investments.
+
+Longer terms and higher rates mean bigger returns, but the gold is locked
+until maturity — the strategy guides exploit this heavily (invest in
+staggered tranches so one matures each day).
+
 ## New-player start
 
 A new player sees `Welcome to <board>` / `Barren Realms Elite`, then the
