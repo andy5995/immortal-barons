@@ -74,10 +74,10 @@ func Build() *Menu {
 
 	attack.Items = []Item{
 		{Key: 'R', Label: "Regular Attack", Do: regularAttack},
-		{Key: 'N', Label: "Nuclear Attack", Do: stubbed("Nuclear Attack")},
-		{Key: 'C', Label: "Chemical Attack", Do: stubbed("Chemical Attack")},
-		{Key: 'B', Label: "Biological Attack", Do: stubbed("Biological Attack")},
-		{Key: 'P', Label: "Attack Pirates", Do: stubbed("Attack Pirates")},
+		{Key: 'N', Label: "Nuclear Attack", Do: nuclearAttack},
+		{Key: 'C', Label: "Chemical Attack", Do: chemicalAttack},
+		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack},
+		{Key: 'P', Label: "Attack Pirates", Do: attackPirates},
 		{Key: 'G', Label: "Create Group Attack", Do: stubbed("Create Group Attack")},
 		{Key: 'J', Label: "Join Group Attack", Do: stubbed("Join Group Attack")},
 		{Key: 'T', Label: "Terrorist Ops", Do: stubbed("Terrorist Ops")},

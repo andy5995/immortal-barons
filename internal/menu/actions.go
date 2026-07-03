@@ -66,6 +66,54 @@ func regularAttack(s session.Session, w *game.World) Result {
 	return Stay
 }
 
+// specialAttack shares the target-selection loop used by the nuclear,
+// chemical, and biological attacks.
+func specialAttack(s session.Session, w *game.World, label string, cost int, strike func(a, d *game.Empire) (string, error)) Result {
+	if w.Player().Protection > 0 {
+		ok(s, "You are under New Realm Protection and cannot attack yet.")
+		return Stay
+	}
+	targets := w.Targets(w.Player())
+	if len(targets) == 0 {
+		ok(s, "There are no rival empires left to attack.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s Attack — %d gold. Choose a target:%s\n", ansi.FgBrightCyan, label, cost, ansi.Reset)
+	for i, e := range targets {
+		fmt.Fprintf(s, "  %d) %-16s Land %-5d Army %-7d\n", i+1, e.Name, e.Land, e.Army())
+	}
+	i := promptInt(s, "Attack which empire (0 to cancel)?")
+	if i < 1 || i > len(targets) {
+		return Stay
+	}
+	report, err := strike(w.Player(), targets[i-1])
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s\n", report)
+	pause(s)
+	return Stay
+}
+
+func nuclearAttack(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Nuclear", game.NukeCost, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
+}
+
+func chemicalAttack(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Chemical", game.ChemCost, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
+}
+
+func biologicalAttack(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Biological", game.BioCost, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
+}
+
+func attackPirates(s session.Session, w *game.World) Result {
+	fmt.Fprintf(s, "\n%s\n", w.RaidPirates(w.Player()))
+	pause(s)
+	return Stay
+}
+
 func empireStatus(s session.Session, w *game.World) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, p.Name, ansi.Reset)
