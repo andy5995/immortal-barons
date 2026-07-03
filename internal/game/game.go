@@ -76,6 +76,22 @@ const (
 	MoneyCap    = 2_000_000_000
 )
 
+// RemoteScore is one empire's score as reported by another board's
+// exported inter-BBS packet.
+type RemoteScore struct {
+	Empire   string
+	NetWorth int
+	Land     int
+}
+
+// RemoteBoard is a snapshot of another board's scores, imported via an
+// inter-BBS packet.
+type RemoteBoard struct {
+	BoardID string
+	Date    string
+	Scores  []RemoteScore
+}
+
 type World struct {
 	Empires       []*Empire
 	Prices        Prices
@@ -85,6 +101,7 @@ type World struct {
 	Bulletin      []string
 	Alliances     []string
 	LastMaster    string
+	RemoteBoards  []RemoteBoard
 
 	Coordinator bool
 
@@ -171,6 +188,18 @@ func (w *World) Targets(attacker *Empire) []*Empire {
 		}
 	}
 	return r
+}
+
+// ImportBoard records b's scores, replacing any existing entry for the
+// same BoardID so re-importing updates rather than duplicates.
+func (w *World) ImportBoard(b RemoteBoard) {
+	for i, existing := range w.RemoteBoards {
+		if existing.BoardID == b.BoardID {
+			w.RemoteBoards[i] = b
+			return
+		}
+	}
+	w.RemoteBoards = append(w.RemoteBoards, b)
 }
 
 func (w *World) NetWorth(e *Empire) int {

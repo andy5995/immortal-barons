@@ -5,7 +5,8 @@ type Config struct {
 	ProtectionTurns int
 	AICount         int
 	DataDir         string
-	GameLength      int // days before the league ends and resets; 0 = endless
+	GameLength      int    // days before the league ends and resets; 0 = endless
+	BoardID         string // name of this board in exported inter-BBS packets
 }
 
 func DefaultConfig() Config {
@@ -15,5 +16,6 @@ func DefaultConfig() Config {
 		AICount:         0,
 		DataDir:         "./data",
 		GameLength:      0,
+		BoardID:         "local",
 	}
 }

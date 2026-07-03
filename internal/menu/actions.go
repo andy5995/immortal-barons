@@ -301,6 +301,25 @@ func printScores(s session.Session, w *game.World) {
 	}
 }
 
+// interbbsScores displays scores imported from other boards via inter-BBS
+// packets (see internal/ibbs). v1 covers only score/news sharing.
+func interbbsScores(s session.Session, w *game.World) Result {
+	if len(w.RemoteBoards) == 0 {
+		ok(s, "No inter-BBS scores have been imported yet.")
+		return Stay
+	}
+	for _, b := range w.RemoteBoards {
+		fmt.Fprintf(s, "\n%sBoard: %s (%s)%s\n", ansi.FgBrightCyan, b.BoardID, b.Date, ansi.Reset)
+		scores := append([]game.RemoteScore(nil), b.Scores...)
+		sort.Slice(scores, func(i, j int) bool { return scores[i].NetWorth > scores[j].NetWorth })
+		for _, sc := range scores {
+			fmt.Fprintf(s, "  %-18s %-8d %-10d\n", sc.Empire, sc.Land, sc.NetWorth)
+		}
+	}
+	pause(s)
+	return Stay
+}
+
 func readMessages(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if len(p.Mail) == 0 {

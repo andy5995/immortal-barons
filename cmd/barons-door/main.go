@@ -21,6 +21,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/door"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/ibbs"
 	"github.com/andy5995/immortal-barons/internal/play"
 	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
@@ -31,6 +32,8 @@ func main() {
 	dataDir := flag.String("data", "./data", "game data directory")
 	maint := flag.Bool("maint", false, "run daily maintenance and exit")
 	setup := flag.Bool("setup", false, "interactively configure the game and exit")
+	export := flag.String("export", "", "write this board's score packet to FILE and exit")
+	imp := flag.String("import", "", "import a score packet from FILE and exit")
 	flag.Parse()
 
 	cfg, err := store.LoadConfig(*dataDir)
@@ -39,6 +42,22 @@ func main() {
 		os.Exit(1)
 	}
 	today := time.Now().Format("2006-01-02")
+
+	if *export != "" {
+		if err := runExport(cfg, *export, today); err != nil {
+			fmt.Fprintln(os.Stderr, "barons-door -export:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if *imp != "" {
+		if err := runImport(cfg, *imp); err != nil {
+			fmt.Fprintln(os.Stderr, "barons-door -import:", err)
+			os.Exit(1)
+		}
+		return
+	}
 
 	if *setup {
 		if err := runSetup(cfg); err != nil {
@@ -105,6 +124,68 @@ func runMaint(cfg game.Config, today string) error {
 	}
 	w.DailyMaintenance(today)
 	return store.Save(w, cfg)
+}
+
+// runExport writes this board's alive-empire scores to path as an inter-BBS
+// packet, for a sysop's mailer to carry to another board.
+func runExport(cfg game.Config, path, today string) error {
+	lock, err := store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	defer lock.Release()
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	packet := ibbs.Packet{BoardID: cfg.BoardID, Date: today}
+	for _, e := range w.Empires {
+		if !e.Alive {
+			continue
+		}
+		packet.Scores = append(packet.Scores, ibbs.Score{
+			Empire:   e.Name,
+			NetWorth: w.NetWorth(e),
+			Land:     e.Land,
+		})
+	}
+	if err := ibbs.Write(path, packet); err != nil {
+		return err
+	}
+	fmt.Printf("Exported %d scores to %s\n", len(packet.Scores), path)
+	return nil
+}
+
+// runImport reads an inter-BBS packet from path and records it as a
+// RemoteBoard in this board's world.
+func runImport(cfg game.Config, path string) error {
+	packet, err := ibbs.Read(path)
+	if err != nil {
+		return err
+	}
+	lock, err := store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	defer lock.Release()
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	board := game.RemoteBoard{BoardID: packet.BoardID, Date: packet.Date}
+	for _, sc := range packet.Scores {
+		board.Scores = append(board.Scores, game.RemoteScore{
+			Empire:   sc.Empire,
+			NetWorth: sc.NetWorth,
+			Land:     sc.Land,
+		})
+	}
+	w.ImportBoard(board)
+	if err := store.Save(w, cfg); err != nil {
+		return err
+	}
+	fmt.Printf("Imported board %s (%d scores)\n", board.BoardID, len(board.Scores))
+	return nil
 }
 
 // runSetup interactively prompts the sysop for game rules and saves them to
