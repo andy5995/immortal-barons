@@ -162,7 +162,7 @@ func investFunds(s session.Session, w *game.World) Result {
 	if amount <= 0 {
 		return Stay
 	}
-	expected := amount + amount*w.InvestRate*days/100
+	expected := game.ExpectedReturn(amount, w.InvestRate, days)
 	fmt.Fprintf(s, "\n  Expected return: ~%d\n", expected)
 	ret, err := w.Invest(p, amount, days)
 	if err != nil {
@@ -196,7 +196,7 @@ func listInvestments(s session.Session, w *game.World) Result {
 
 // bankRates shows the current savings and investment rates.
 func bankRates(s session.Session, w *game.World) Result {
-	fmt.Fprintf(s, "\n  Savings interest: ~1%% per turn.\n  Investment rate: %d%% per day.\n", w.InvestRate)
+	fmt.Fprintf(s, "\n  Savings interest: ~1%% per game day.\n  Investment rate: %d%% per day.\n", w.InvestRate)
 	pause(s)
 	return Stay
 }

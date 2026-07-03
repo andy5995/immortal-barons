@@ -13,10 +13,16 @@ func (w *World) Invest(e *Empire, amount, days int) (int, error) {
 	if e.Gold < amount {
 		return 0, ErrCantAfford
 	}
-	ret := amount + amount*w.InvestRate*days/100
+	ret := ExpectedReturn(amount, w.InvestRate, days)
 	e.Gold -= amount
 	e.Investments = append(e.Investments, Investment{Amount: amount, Return: ret, MaturesDay: w.GameDay + days})
 	return ret, nil
+}
+
+// ExpectedReturn is the total payout for investing `amount` for `days` days
+// at investment rate `rate` (percent per day, simple interest).
+func ExpectedReturn(amount, rate, days int) int {
+	return amount + amount*rate*days/100
 }
 
 // PendingInvested is the total principal an empire has locked in investments.
@@ -36,11 +42,12 @@ func (w *World) matureInvestments(e *Empire) int {
 	var remaining []Investment
 	for _, inv := range e.Investments {
 		if w.GameDay >= inv.MaturesDay {
+			before := e.Gold
 			e.Gold += inv.Return
 			if e.Gold > MoneyCap {
 				e.Gold = MoneyCap
 			}
-			paid += inv.Return
+			paid += e.Gold - before
 		} else {
 			remaining = append(remaining, inv)
 		}
@@ -60,7 +67,9 @@ const investRateHeavyThreshold = 5_000_000
 func (w *World) adjustInvestRate() {
 	total := 0
 	for _, e := range w.Empires {
-		total += w.PendingInvested(e)
+		if e.Alive {
+			total += w.PendingInvested(e)
+		}
 	}
 	if total > investRateHeavyThreshold {
 		w.InvestRate--
