@@ -306,6 +306,11 @@ Now matching this reference (as of v0.0.1):
 - Bomber airfield strikes: a regular attack sends the attacker's bombers to
   destroy the defender's grounded jets first, resisted by turrets (anti-air)
   and SDI
+- Interactive maintenance stage at turn start: pay armed-forces upkeep and
+  region maintenance ("how much will you give?"), with underpayment causing
+  desertion / revolts, plus an optional popular-support boost. Auto-Pay
+  Maintenance pays it silently when affordable. (SDI upkeep, waste
+  decontamination, and military morale are not yet modelled.)
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and 2-billion money cap
 - Nuclear / chemical / biological strikes and pirate raids

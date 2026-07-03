@@ -269,8 +269,8 @@ func TestTechBoostsIncomeAndCutsMaintenance(t *testing.T) {
 	if tech.Gold <= base.Gold {
 		t.Errorf("Technology empire should net more gold: base=%d tech=%d", base.Gold, tech.Gold)
 	}
-	if tech.LastGoldPaid >= base.LastGoldPaid {
-		t.Errorf("Technology empire should pay less maintenance: base=%d tech=%d", base.LastGoldPaid, tech.LastGoldPaid)
+	if tech.ForcesUpkeep() >= base.ForcesUpkeep() {
+		t.Errorf("Technology empire should have lower upkeep: base=%d tech=%d", base.ForcesUpkeep(), tech.ForcesUpkeep())
 	}
 }
 

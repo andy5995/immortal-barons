@@ -85,6 +85,9 @@ func (w *World) aiPlay(today string) {
 				e.Troopers += n
 				e.Gold -= n * w.Prices.Trooper
 			}
+			e.LastGoldPaid = 0
+			w.PayForces(e, e.ForcesUpkeep())
+			w.PayRegions(e, e.RegionUpkeep())
 			w.PlayTurn(e, today)
 		}
 	}
@@ -131,16 +134,6 @@ func (w *World) processEconomy(e *Empire) {
 		e.LastSpoiled = spoiled
 	} else {
 		e.LastSpoiled = 0
-	}
-
-	maint := (e.Troopers*6 + e.Jets*12 + e.Turrets*9 + e.Tanks*6 + e.Carriers*1) * (100 - tf) / 100
-	if e.Gold >= maint {
-		e.Gold -= maint
-		e.LastGoldPaid = maint
-	} else {
-		e.LastGoldPaid = e.Gold
-		e.Gold = 0
-		e.Troopers -= e.Troopers / 10
 	}
 
 	e.LastPopGrowth = 0

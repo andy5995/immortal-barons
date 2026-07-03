@@ -118,6 +118,45 @@ func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
 	pause(s)
 }
 
+// paymentStage runs BRE's start-of-turn maintenance prompts. With Auto-Pay
+// Maintenance on and enough gold, everything is paid silently. Otherwise
+// (pref off, or can't afford a required cost) the player is prompted for
+// each obligation: armed-forces upkeep and region maintenance (required,
+// underpayment causes desertion/revolt), then an optional support boost.
+func paymentStage(s session.Session, w *game.World, p *game.Empire) {
+	p.LastGoldPaid = 0
+	forces := p.ForcesUpkeep()
+	regions := p.RegionUpkeep()
+
+	if w.AutoPayMaint && p.Gold >= forces+regions {
+		w.PayForces(p, forces)
+		w.PayRegions(p, regions)
+		fmt.Fprintf(s, "\nMaintenance paid: %d gold to your forces, %d to your regions.\n", forces, regions)
+		return
+	}
+
+	fmt.Fprintf(s, "\n%sMaintenance:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	if w.AutoPayMaint {
+		fmt.Fprintf(s, "%sYou cannot cover all your maintenance this turn.%s\n", ansi.FgYellow, ansi.Reset)
+	}
+
+	fmt.Fprintf(s, "\nYour armed forces require %d gold.\n", forces)
+	if lost := w.PayForces(p, promptSuggested(s, "How much will you give?", min(forces, p.Gold), p.Gold)); lost > 0 {
+		fmt.Fprintf(s, "%s%d units deserted for lack of pay.%s\n", ansi.FgRed, lost, ansi.Reset)
+	}
+
+	fmt.Fprintf(s, "\n%d gold is required to maintain your regions.\n", regions)
+	if lost := w.PayRegions(p, promptSuggested(s, "How much will you give?", min(regions, p.Gold), p.Gold)); lost > 0 {
+		fmt.Fprintf(s, "%s%d regions revolted for lack of upkeep.%s\n", ansi.FgRed, lost, ansi.Reset)
+	}
+
+	if p.Support < 100 && p.Gold > 0 && askYesNo(s, "Spend gold to boost popular support?") {
+		if pts := w.BoostSupport(p, promptSuggested(s, "How much will you give?", 0, p.Gold)); pts > 0 {
+			fmt.Fprintf(s, "Popular support rose %d points.\n", pts)
+		}
+	}
+}
+
 // runTurn is the "Play Game" action: it walks the turn pipeline (event
 // log, income report, status, spending/attack/covert/trading/message
 // stages, then end-of-turn) for as many turns as the player wants to play.
@@ -135,11 +174,7 @@ func runTurn(s session.Session, w *game.World) Result {
 		incomeReport(s, w, p)
 		empireStatus(s, w)
 
-		if w.AutoPayMaint {
-			fmt.Fprint(s, "\nMaintenance paid automatically.\n")
-		} else {
-			fmt.Fprint(s, "\nMaintenance will be paid at end of turn.\n")
-		}
+		paymentStage(s, w, p)
 
 		if err := Run(s, w, menus.Spending); err != nil {
 			return Stay
