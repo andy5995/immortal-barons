@@ -63,7 +63,7 @@ func TestRunTurnNoTurnsLeftReturnsImmediately(t *testing.T) {
 // Attack's Return key (X), decline the message prompt, the end-of-turn
 // pause, then decline "continue" to stop after one turn.
 func TestRunTurnConsumesATurn(t *testing.T) {
-	keys := "  RXRRn\r n\r"
+	keys := "  R\rX\rR\rR\rn\r n\r"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	left := w.Active.TurnsLeft

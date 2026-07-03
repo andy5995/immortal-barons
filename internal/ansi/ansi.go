@@ -7,6 +7,7 @@ const esc = "\x1b["
 
 const (
 	Reset = esc + "0m"
+	Dim   = esc + "2m"
 	Clear = esc + "2J" + esc + "H" // clear screen, cursor home
 
 	FgRed    = esc + "31m"
