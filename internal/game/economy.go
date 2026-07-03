@@ -37,17 +37,15 @@ func (w *World) BuyLand(e *Empire, n int) error {
 	if n <= 0 {
 		return nil
 	}
-	if e.Gold < w.LandPrice(e) {
-		return ErrCantAfford // can't afford even one
-	}
+	total := 0
 	for i := 0; i < n; i++ {
-		price := w.LandPrice(e)
-		if e.Gold < price {
-			break // bought as many as affordable
-		}
-		e.Gold -= price
-		e.Land++
+		total += w.Prices.Land + (e.Land+i)*w.Prices.Land/LandPriceStep
 	}
+	if e.Gold < total {
+		return ErrCantAfford // must afford the whole purchase
+	}
+	e.Gold -= total
+	e.Land += n
 	return nil
 }
 
