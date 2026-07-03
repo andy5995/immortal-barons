@@ -47,21 +47,21 @@ func run(t *testing.T, keys string, root *Menu) (*fakeSession, *game.World, erro
 
 func TestQuitFromGameMenu(t *testing.T) {
 	menus := BuildMenus()
-	if _, _, err := run(t, "Q\r", menus.Game); err != nil {
+	if _, _, err := run(t, "0", menus.Game); err != nil {
 		t.Fatalf("Quit should return nil, got %v", err)
 	}
 }
 
 func TestQuitIsCaseInsensitive(t *testing.T) {
 	menus := BuildMenus()
-	if _, _, err := run(t, "q\r", menus.Game); err != nil {
+	if _, _, err := run(t, "0", menus.Game); err != nil {
 		t.Fatalf("lowercase quit should work, got %v", err)
 	}
 }
 
 func TestEnterAndLeaveSpendingMenu(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "R\r", menus.Spending) // Return immediately
+	f, _, err := run(t, "0", menus.Spending) // Return immediately
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -72,14 +72,14 @@ func TestEnterAndLeaveSpendingMenu(t *testing.T) {
 
 func TestUnknownKeyIgnored(t *testing.T) {
 	menus := BuildMenus()
-	if _, _, err := run(t, "z\rQ\r", menus.Game); err != nil {
+	if _, _, err := run(t, "z0", menus.Game); err != nil {
 		t.Fatalf("unknown key should be ignored, got %v", err)
 	}
 }
 
 func TestHiddenCoordinatorNotSelectable(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "Y\rR\r", menus.System)
+	f, _, err := run(t, "Y0", menus.System)
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -90,7 +90,7 @@ func TestHiddenCoordinatorNotSelectable(t *testing.T) {
 
 func TestCoordinatorReachableWhenFlagged(t *testing.T) {
 	menus := BuildMenus()
-	f := &fakeSession{keys: []rune("Y\rR\rR\r")}
+	f := &fakeSession{keys: []rune("Y00")}
 	w := newWorld()
 	w.Coordinator = true
 	if err := Run(f, w, menus.System); err != nil {
@@ -103,7 +103,7 @@ func TestCoordinatorReachableWhenFlagged(t *testing.T) {
 
 func TestBuyLandThroughSpendingMenu(t *testing.T) {
 	menus := BuildMenus()
-	f := &fakeSession{keys: []rune("L\r1\r5\r ")} // Buy Land -> type 1 (Coastal) -> qty 5
+	f := &fakeSession{keys: []rune("61\r5\r ")} // Buy Land -> type 1 (Coastal) -> qty 5
 	w := newWorld()
 	before := w.Active.Land
 	beforeCoastal := w.Active.Regions.Coastal
@@ -118,7 +118,7 @@ func TestBuyLandThroughSpendingMenu(t *testing.T) {
 
 func TestReachSystemMenuFromSpending(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "*\rR\rR\r", menus.Spending) // '*' -> System Menu -> Return -> Return
+	f, _, err := run(t, "*00", menus.Spending) // '*' -> System Menu -> Return -> Return
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -129,7 +129,7 @@ func TestReachSystemMenuFromSpending(t *testing.T) {
 
 func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 	menus := BuildMenus()
-	f := &fakeSession{keys: []rune("P\rF\r")}
+	f := &fakeSession{keys: []rune("PF")}
 	w := newWorld()
 	if err := Run(f, w, menus.System); err != io.EOF {
 		t.Fatalf("expected EOF after script, got %v", err)
@@ -139,9 +139,9 @@ func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 	}
 }
 
-// testResolveMenu builds a small menu exercising hotkey match, unique and
-// ambiguous label-prefix match, a heading (unselectable), and a hidden item.
-func testResolveMenu() *Menu {
+// testByKeyMenu builds a small menu exercising hotkey match, a heading
+// (unselectable), and a hidden item.
+func testByKeyMenu() *Menu {
 	noop := func(session.Session, *game.World) Result { return Back }
 	return &Menu{Items: []Item{
 		{Key: 'C', Label: "Carriers", Do: noop},
@@ -151,69 +151,47 @@ func testResolveMenu() *Menu {
 	}}
 }
 
-func TestResolveHotkeyMatch(t *testing.T) {
-	m := testResolveMenu()
+func TestByKeyHotkeyMatch(t *testing.T) {
+	m := testByKeyMenu()
 	g := newWorld()
-	it := m.resolve("c", g)
+	it := m.byKey('c', g)
 	if it == nil || it.Label != "Carriers" {
 		t.Fatalf("expected hotkey match on Carriers, got %v", it)
 	}
 }
 
-func TestResolveUniqueLabelPrefixMatch(t *testing.T) {
-	m := testResolveMenu()
+func TestByKeyHiddenItemNotMatched(t *testing.T) {
+	m := testByKeyMenu()
 	g := newWorld()
-	it := m.resolve("Carr", g)
-	if it == nil || it.Label != "Carriers" {
-		t.Fatalf("expected unique prefix match on Carriers, got %v", it)
-	}
-}
-
-func TestResolveAmbiguousPrefixReturnsNil(t *testing.T) {
-	m := testResolveMenu()
-	g := newWorld()
-	if it := m.resolve("Car", g); it != nil {
-		t.Fatalf("expected ambiguous prefix to resolve to nil, got %v", it)
-	}
-}
-
-func TestResolveHiddenItemNotMatched(t *testing.T) {
-	m := testResolveMenu()
-	g := newWorld()
-	if it := m.resolve("H", g); it != nil {
+	if it := m.byKey('H', g); it != nil {
 		t.Fatalf("expected hidden item to not match, got %v", it)
 	}
-	if it := m.resolve("Hidden", g); it != nil {
-		t.Fatalf("expected hidden item label prefix to not match, got %v", it)
+}
+
+func TestByKeyUnknownKeyNotMatched(t *testing.T) {
+	m := testByKeyMenu()
+	g := newWorld()
+	if it := m.byKey('Z', g); it != nil {
+		t.Fatalf("expected unknown key to not match, got %v", it)
 	}
 }
 
-func TestResolveHeadingNotMatched(t *testing.T) {
-	m := testResolveMenu()
+func TestReadChoiceSelectsOnSingleKeypress(t *testing.T) {
+	m := testByKeyMenu()
 	g := newWorld()
-	if it := m.resolve("--", g); it != nil {
-		t.Fatalf("expected heading to not match, got %v", it)
-	}
-}
-
-func TestReadChoiceBackspaceEditsBuffer(t *testing.T) {
-	m := testResolveMenu()
-	g := newWorld()
-	// Type "X" (would match Card readers via hotkey), backspace it out,
-	// then type "C" and Enter -> should select Carriers, not Card readers.
-	f := &fakeSession{keys: []rune("X\x7fC\r")}
+	f := &fakeSession{keys: []rune("C")}
 	it, err := m.readChoice(f, g)
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
 	if it == nil || it.Label != "Carriers" {
-		t.Fatalf("expected Carriers after backspace-edit, got %v", it)
+		t.Fatalf("expected Carriers on single keypress, got %v", it)
 	}
 }
 
 func TestSetTaxRateViaSystemMenu(t *testing.T) {
 	menus := BuildMenus()
-	f := &fakeSession{keys: []rune("X\r50\r ")}
+	f := &fakeSession{keys: []rune("R50\r ")}
 	w := newWorld()
 	Run(f, w, menus.System)
 	if w.Active.Tax != 50 {

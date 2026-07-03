@@ -59,11 +59,11 @@ func TestRunTurnNoTurnsLeftReturnsImmediately(t *testing.T) {
 }
 
 // TestRunTurnConsumesATurn scripts a full pass through the pipeline for one
-// turn: income/status pauses, Return out of Spending and Covert/Trading,
-// Attack's Return key (X), decline the message prompt, the end-of-turn
-// pause, then decline "continue" to stop after one turn.
+// turn: income/status pauses, Return ('0') out of Spending, Attack, Covert,
+// and Trading, decline the message prompt, the end-of-turn pause, then
+// decline "continue" to stop after one turn.
 func TestRunTurnConsumesATurn(t *testing.T) {
-	keys := "  R\rX\rR\rR\rn\r n\r"
+	keys := "  0000n\r n\r"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	left := w.Active.TurnsLeft

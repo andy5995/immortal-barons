@@ -5,7 +5,6 @@ package menu
 
 import (
 	"fmt"
-	"strings"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -71,14 +70,9 @@ func (it *Item) selectable(g *game.World) bool {
 	return it.Do != nil && !it.hidden(g)
 }
 
-// hotkeyMatch returns the selectable item whose Key case-insensitively
-// equals buf, when buf is exactly one rune.
-func (m *Menu) hotkeyMatch(buf string, g *game.World) *Item {
-	runes := []rune(buf)
-	if len(runes) != 1 {
-		return nil
-	}
-	key := unicode.ToUpper(runes[0])
+// byKey returns the selectable item whose Key case-insensitively equals r.
+func (m *Menu) byKey(r rune, g *game.World) *Item {
+	key := unicode.ToUpper(r)
 	for i := range m.Items {
 		it := &m.Items[i]
 		if it.selectable(g) && it.Key != 0 && unicode.ToUpper(it.Key) == key {
@@ -88,115 +82,29 @@ func (m *Menu) hotkeyMatch(buf string, g *game.World) *Item {
 	return nil
 }
 
-// labelPrefixMatch returns the selectable item whose Label is the unique
-// case-insensitive match for the prefix buf, or nil if zero or more than
-// one item matches.
-func (m *Menu) labelPrefixMatch(buf string, g *game.World) *Item {
-	lower := strings.ToLower(buf)
-	var match *Item
-	count := 0
-	for i := range m.Items {
-		it := &m.Items[i]
-		if !it.selectable(g) {
-			continue
-		}
-		if strings.HasPrefix(strings.ToLower(it.label(g)), lower) {
-			match = it
-			count++
-		}
-	}
-	if count == 1 {
-		return match
-	}
-	return nil
-}
-
-// resolve turns a typed buffer into the item it selects: an exact hotkey
-// (single char) first, then a unique label prefix. Returns nil if buf is
-// empty or matches nothing (or matches ambiguously).
-func (m *Menu) resolve(buf string, g *game.World) *Item {
-	if buf == "" {
-		return nil
-	}
-	if it := m.hotkeyMatch(buf, g); it != nil {
-		return it
-	}
-	return m.labelPrefixMatch(buf, g)
-}
-
-// showPreview prints the dim autocomplete completion for buf (the
-// remaining characters of the uniquely-matched item's label), then backs
-// the cursor up over it so the next keystroke overwrites it. Returns how
-// many runes were printed, for clearPreview to erase later.
-func (m *Menu) showPreview(s session.Session, g *game.World, buf []rune) int {
-	if len(buf) == 0 {
-		return 0
-	}
-	it := m.labelPrefixMatch(string(buf), g)
-	if it == nil {
-		return 0
-	}
-	label := []rune(it.label(g))
-	if len(label) <= len(buf) {
-		return 0
-	}
-	remaining := label[len(buf):]
-	fmt.Fprintf(s, "%s%s%s", ansi.Dim, string(remaining), ansi.Reset)
-	fmt.Fprint(s, strings.Repeat("\b", len(remaining)))
-	return len(remaining)
-}
-
-// clearPreview erases n previously-printed preview runes and returns the
-// cursor to where it was before showPreview was called.
-func (m *Menu) clearPreview(s session.Session, n int) {
-	if n == 0 {
-		return
-	}
-	fmt.Fprint(s, strings.Repeat(" ", n))
-	fmt.Fprint(s, strings.Repeat("\b", n))
-}
-
-// readChoice presents the "Choice> " prompt and returns the selected item,
-// or (nil, nil) to redraw. Supports hotkey-or-name typing with autocomplete
-// preview, Enter to select, Backspace to edit.
+// readChoice prints "Choice> ", reads ONE keypress, and returns the matching
+// menu item immediately (no Enter). It echoes the chosen item's label. Keys
+// that match no visible selectable item are ignored (return nil -> redraw).
 func (m *Menu) readChoice(s session.Session, g *game.World) (*Item, error) {
 	fmt.Fprintf(s, "%sChoice>%s ", ansi.FgBrightWhite, ansi.Reset)
-	var b []rune
-	preview := 0
-	for {
-		r, err := s.ReadKey()
-		if err != nil {
-			return nil, err
-		}
-		switch {
-		case r == '\r' || r == '\n':
-			m.clearPreview(s, preview)
-			fmt.Fprint(s, "\n")
-			return m.resolve(string(b), g), nil
-		case r == 127 || r == 8:
-			m.clearPreview(s, preview)
-			preview = 0
-			if len(b) > 0 {
-				b = b[:len(b)-1]
-				fmt.Fprint(s, "\b \b")
-			}
-			preview = m.showPreview(s, g, b)
-		default:
-			if r >= 32 {
-				m.clearPreview(s, preview)
-				b = append(b, r)
-				fmt.Fprintf(s, "%c", r)
-				preview = m.showPreview(s, g, b)
-			}
-		}
+	r, err := s.ReadKey()
+	if err != nil {
+		return nil, err
 	}
+	it := m.byKey(r, g)
+	if it == nil {
+		fmt.Fprint(s, "\n")
+		return nil, nil
+	}
+	fmt.Fprintf(s, "%s\n", it.label(g))
+	return it, nil
 }
 
 // Run drives the menu loop against a Session. It keeps a stack of menus:
-// draw the top, read a typed choice (hotkey or name, Enter to confirm),
-// dispatch, then push/pop/quit/redraw. The loop is flat (no recursion),
-// which keeps it easy to test with a scripted Session. Returns nil on a
-// clean Quit, or the ReadKey error otherwise.
+// draw the top, read a single keypress hotkey, dispatch, then
+// push/pop/quit/redraw. The loop is flat (no recursion), which keeps it
+// easy to test with a scripted Session. Returns nil on a clean Quit, or the
+// ReadKey error otherwise.
 func Run(s session.Session, g *game.World, root *Menu) error {
 	stack := []*Menu{root}
 	for len(stack) > 0 {
