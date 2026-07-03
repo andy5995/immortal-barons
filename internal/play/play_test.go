@@ -34,8 +34,8 @@ func cfgIn(dir string) game.Config {
 
 func TestOnboardsThenPersists(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	// realm name "Khanate" then Quit
-	f := &fakeSession{keys: []rune("Khanate\rQ")}
+	// splash dismiss, then realm name "Khanate", then Quit
+	f := &fakeSession{keys: []rune(" Khanate\rQ")}
 	if err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
@@ -51,9 +51,9 @@ func TestOnboardsThenPersists(t *testing.T) {
 
 func TestReturningPlayerResumes(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	f1 := &fakeSession{keys: []rune("Khanate\rQ")}
+	f1 := &fakeSession{keys: []rune(" Khanate\rQ")}
 	Run(f1, Identity{Handle: "Khan"}, cfg, "2026-07-03")
-	f2 := &fakeSession{keys: []rune("Q")} // no naming prompt second time
+	f2 := &fakeSession{keys: []rune(" Q")} // no naming prompt second time
 	Run(f2, Identity{Handle: "Khan"}, cfg, "2026-07-03")
 	if strings.Contains(f2.out.String(), "Name your Realm") {
 		t.Error("returning player should not be asked to name a realm")
@@ -84,7 +84,7 @@ func TestEventsShownThenCleared(t *testing.T) {
 	e.Events = []string{"Enemy raided you!"}
 	store.Save(w, cfg)
 
-	f := &fakeSession{keys: []rune("Q")}
+	f := &fakeSession{keys: []rune(" Q")}
 	Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03")
 	if !strings.Contains(f.out.String(), "raided") {
 		t.Error("pending event should be shown on login")

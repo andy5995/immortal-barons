@@ -17,8 +17,54 @@ func prompt(s session.Session, msg string) string {
 	return line
 }
 
+// parseAmount interprets a numeric input with BRE-style shortcuts:
+//
+//	">"        -> max
+//	"<n>m"     -> n * 1_000_000
+//	"<n>k"     -> n * 1_000
+//	"<n>"      -> n
+//
+// Empty or unparseable -> 0. A magnitude suffix on ">" is ignored.
+func parseAmount(input string, max int) int {
+	s := strings.TrimSpace(strings.ToLower(input))
+	if s == ">" {
+		return max
+	}
+	mult := 1
+	if strings.HasSuffix(s, "m") {
+		mult, s = 1_000_000, strings.TrimSuffix(s, "m")
+	} else if strings.HasSuffix(s, "k") {
+		mult, s = 1_000, strings.TrimSuffix(s, "k")
+	}
+	s = strings.TrimSpace(s)
+	if s == ">" {
+		return max
+	}
+	n, err := strconv.Atoi(s)
+	if err != nil {
+		return 0
+	}
+	return n * mult
+}
+
 func promptInt(s session.Session, msg string) int {
-	n, _ := strconv.Atoi(strings.TrimSpace(prompt(s, msg)))
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, msg, ansi.Reset)
+	line, _ := session.ReadLine(s)
+	return parseAmount(line, 1<<62)
+}
+
+// promptAmount shows "msg (max: MAX) " and returns the parsed amount,
+// supporting >, m, and k shortcuts. Values above max are clamped to max.
+func promptAmount(s session.Session, msg string, max int) int {
+	fmt.Fprintf(s, "\n%s%s (max %d, > = max):%s ", ansi.FgBrightWhite, msg, max, ansi.Reset)
+	line, _ := session.ReadLine(s)
+	n := parseAmount(line, max)
+	if n > max {
+		n = max
+	}
+	if n < 0 {
+		n = 0
+	}
 	return n
 }
 

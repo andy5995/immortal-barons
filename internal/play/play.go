@@ -38,6 +38,8 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) error {
 	w.Today = today
 	w.DailyMaintenance(today)
 
+	menu.Splash(s)
+
 	e := w.FindByOwner(id.Handle)
 	if e == nil {
 		realm := onboard(s, w, id.Handle)

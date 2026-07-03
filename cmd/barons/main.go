@@ -31,7 +31,6 @@ func main() {
 	c := session.NewConsole()
 	defer c.Close()
 
-	fmt.Fprintf(c, "\n      IMMORTAL BARONS  v%s\n\n", version)
 	if err := play.Run(c, play.Identity{Handle: *name}, cfg, today); err != nil {
 		fmt.Fprintln(os.Stderr, "barons:", err)
 	}
