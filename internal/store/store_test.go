@@ -51,6 +51,31 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	}
 }
 
+func TestLoadMigratesPreRegionTypesSave(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	w := game.NewWorldSeed(cfg, 1)
+	e := w.AddHuman("khan", "Khan's Realm")
+	e.Regions = game.RegionMix{} // simulate a save written before region types
+
+	if err := Save(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ge := got.FindByOwner("khan")
+	if ge == nil {
+		t.Fatal("empire not found after load")
+	}
+	if ge.Regions.Total() != ge.Land {
+		t.Errorf("Regions.Total()=%d, Land=%d: migration did not run", ge.Regions.Total(), ge.Land)
+	}
+	if ge.Land != 100 {
+		t.Errorf("Land=%d, want 100", ge.Land)
+	}
+}
+
 func TestSaveIsAtomic(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	w := game.NewWorldSeed(cfg, 1)

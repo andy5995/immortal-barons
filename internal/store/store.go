@@ -26,6 +26,9 @@ func Load(cfg game.Config) (*game.World, error) {
 	if err := json.Unmarshal(data, w); err != nil {
 		return nil, err
 	}
+	for _, e := range w.Empires {
+		e.EnsureRegions()
+	}
 	w.Config = cfg
 	return w, nil
 }

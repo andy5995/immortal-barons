@@ -101,3 +101,22 @@ func (r *RegionMix) addMix(m RegionMix) {
 		*rf[i] += *mf[i]
 	}
 }
+
+// defaultRegionMix distributes `land` regions across types using the same
+// proportions a new empire starts with (Coastal 40%, Agricultural 25%,
+// Urban 10%, Mountain 10%, Desert 5%, River 10%), giving any rounding
+// remainder to Coastal so the total is exactly `land`.
+func defaultRegionMix(land int) RegionMix {
+	if land <= 0 {
+		return RegionMix{}
+	}
+	m := RegionMix{
+		Mountain:     land * 10 / 100,
+		Desert:       land * 5 / 100,
+		River:        land * 10 / 100,
+		Agricultural: land * 25 / 100,
+		Urban:        land * 10 / 100,
+	}
+	m.Coastal = land - (m.Mountain + m.Desert + m.River + m.Agricultural + m.Urban) // remainder -> Coastal
+	return m
+}

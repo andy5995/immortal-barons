@@ -55,6 +55,40 @@ func TestRegionMixAddMix(t *testing.T) {
 	}
 }
 
+func TestDefaultRegionMixSumsToLand(t *testing.T) {
+	for _, land := range []int{0, 100, 137} {
+		m := defaultRegionMix(land)
+		if got := m.Total(); got != land {
+			t.Errorf("land=%d: Total()=%d, want %d", land, got, land)
+		}
+		for _, f := range (&m).fields() {
+			if *f < 0 {
+				t.Errorf("land=%d: negative field in %+v", land, m)
+			}
+		}
+	}
+}
+
+func TestEnsureRegionsRepairsLegacy(t *testing.T) {
+	e := &Empire{Land: 100, Regions: RegionMix{}}
+	e.EnsureRegions()
+	if e.Regions.Total() != 100 {
+		t.Errorf("Regions.Total()=%d, want 100", e.Regions.Total())
+	}
+	if e.Land != 100 {
+		t.Errorf("Land=%d, want 100", e.Land)
+	}
+
+	consistent := &Empire{Land: 50, Regions: RegionMix{Coastal: 50}}
+	consistent.EnsureRegions()
+	if consistent.Regions != (RegionMix{Coastal: 50}) {
+		t.Errorf("already-consistent empire changed: %+v", consistent.Regions)
+	}
+	if consistent.Land != 50 {
+		t.Errorf("Land changed: %d", consistent.Land)
+	}
+}
+
 func assertRegionInvariant(t *testing.T, label string, e *Empire) {
 	t.Helper()
 	if e.Land != e.Regions.Total() {
