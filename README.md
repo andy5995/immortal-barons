@@ -45,6 +45,31 @@ Or run it directly:
 go run ./cmd/barons
 ```
 
+## Running as a BBS door
+
+Immortal Barons can run as a native door under modern BBS software
+(Synchronet, Mystic) on Linux — no DOSBox or DOSEMU needed. Build the door
+front-end:
+
+```
+go build -o barons-door ./cmd/barons-door
+```
+
+The BBS writes a dropfile when a caller starts the door. Configure your BBS
+to run `barons-door` and pass the dropfile path:
+
+```
+barons-door -dropfile /path/to/node/DOOR32.SYS
+```
+
+It reads `DOOR32.SYS` (preferred) or `DOOR.SYS` to learn the caller's name,
+node, time left, and whether their terminal supports ANSI. The BBS connects
+the caller to the door over standard input and output. With no `-dropfile`,
+it looks for `DOOR32.SYS` or `DOOR.SYS` in the working directory.
+
+This first version runs a single game per call. Persistent empires shared
+across calls are the next step.
+
 ## How to play
 
 The game uses single keypresses. You do not press Enter to choose a menu

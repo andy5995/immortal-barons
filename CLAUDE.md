@@ -71,10 +71,12 @@ The main goal is to run as a native door game under modern BBS software
 (Synchronet, Mystic) on Linux. Native means no DOSBox/DOSEMU. The stage
 decomposes into:
 
-1. **Dropfile + stdio front-end** (`cmd/barons-door`) — parse `DOOR32.SYS`
-   (primary; both BBSes write it) and `DOOR.SYS` (fallback), run the game
-   over stdio, honor the ANSI flag and time-left limit, identify the caller
-   by BBS handle. On Unix both BBSes run native doors over stdio.
+1. **Dropfile + stdio front-end** (`cmd/barons-door`) — DONE. Parses
+   `DOOR32.SYS`/`DOOR.SYS` (`internal/door`), runs the game over a stdio
+   `Session` (`session.Stdio`, which adds `\r\n`), honors the ANSI flag and
+   a hard time-left cutoff, and names the realm from the caller's handle.
+   Socket I/O (Synchronet `COM0:SOCKETn` / Mystic telnet) is parsed but not
+   yet used as a backend — stdio covers native Unix doors.
 2. **Persistence / multi-user** — a persistent empire per caller in a shared
    world, keyed by BBS identity + node, with turns-per-day and daily
    maintenance. This is the heart of a door game.
