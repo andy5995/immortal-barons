@@ -227,16 +227,6 @@ func draw(s session.Session, g *game.World, m *Menu) {
 	fmt.Fprint(s, "\n")
 }
 
-// stubbed prints a "not yet implemented" notice and waits for a keypress.
-func stubbed(name string) Action {
-	return func(s session.Session, g *game.World) Result {
-		fmt.Fprintf(s, "\n  %s[%s — not yet implemented]%s\n  Press any key...",
-			ansi.FgYellow, name, ansi.Reset)
-		s.ReadKey()
-		return Stay
-	}
-}
-
 func gotoMenu(m *Menu) Action {
 	return func(session.Session, *game.World) Result { return Goto(m) }
 }
