@@ -1,0 +1,1380 @@
+# SOME DESCRIPTIVE TITLE
+# Copyright (C) YEAR Free Software Foundation, Inc.
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2026-07-04 10:00-0500\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. type: Title #
+#: internal/help/content/controls/interface.md:1
+#: internal/help/content/controls/interface.md:8
+#, markdown-text, no-wrap
+msgid "Moving Through the Menus"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:12
+#, markdown-text
+msgid ""
+"Press one key to choose. You do not press Enter to pick a menu item. Each "
+"item shows its key in brackets, like `(1)`. Press that key and it runs at "
+"once."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:16
+#, markdown-text
+msgid ""
+"\"Quit\" (the `0` key) leaves a turn menu (Spending, Attack, Covert, "
+"Trading) and moves you to the next step of your turn. You cannot go back to "
+"that menu until your next turn."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:19
+#, markdown-text
+msgid ""
+"\"Return\" (the `0` key) leaves a side menu (like the Bank or the System "
+"Menu) and takes you back to where you were."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:22
+#, markdown-text
+msgid ""
+"The System Menu opens with the `*` key from the Spending menu. It holds "
+"extra options like Preferences, Set Tax Rate, and Show Instructions."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:25
+#, markdown-text
+msgid ""
+"If you turn on \"Enter exits Buy menu\" in Preferences, pressing Enter at a "
+"turn menu chooses Quit for you."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:26
+#, markdown-text
+msgid "Press `?` at a menu to open this help."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/controls/numbers.md:1
+#: internal/help/content/controls/numbers.md:8
+#, markdown-text, no-wrap
+msgid "Entering Numbers"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/numbers.md:12
+#, markdown-text
+msgid ""
+"When the game asks for an amount, it shows two numbers in brackets, like "
+"`How many? (0; 40):`."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/controls/numbers.md:18
+#, markdown-text
+msgid "The left number is a suggested value. Press Enter to accept it."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/controls/numbers.md:18
+#, markdown-text
+msgid ""
+"The right number is the most you can pick. Type `>` to fill the box with "
+"that maximum. You can still edit it."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/controls/numbers.md:18
+#, markdown-text
+msgid "`k` adds three zeros as you type. Press `1` then `k` and you see `1000`."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/controls/numbers.md:18
+#, markdown-text
+msgid "`m` adds six zeros. Press `2` then `m` and you see `2000000`."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/numbers.md:20
+#, markdown-text
+msgid ""
+"If you type a number larger than the maximum, the game lowers it to the "
+"maximum when you press Enter."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/controls/turns.md:1
+#: internal/help/content/controls/turns.md:8
+#, markdown-text, no-wrap
+msgid "Turns and Protection"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/turns.md:12
+#, markdown-text
+msgid ""
+"You get a set number of turns each day. When you use them all, come back the "
+"next day for more."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/turns.md:15
+#, markdown-text
+msgid ""
+"New players get New Realm Protection: a number of turns during which you "
+"cannot attack or be attacked. It only ticks down on turns you actually play, "
+"so you are safe while you learn the game."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/diplomacy/treaties.md:1
+#: internal/help/content/diplomacy/treaties.md:8
+#, markdown-text, no-wrap
+msgid "Treaties and Alliances"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:12
+#, markdown-text
+msgid ""
+"You can send agreements to other rulers. A treaty starts when the other side "
+"accepts it. These are the main agreements."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/diplomacy/treaties.md:13
+#, markdown-text, no-wrap
+msgid "Tariff Trade Agreement"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:17
+#, markdown-text
+msgid ""
+"Trade between two realms, with a tax on goods that cross the border. Both "
+"sides earn extra income based on population. This is good if you have many "
+"people."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/diplomacy/treaties.md:18
+#, markdown-text, no-wrap
+msgid "Protective Trade"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:22
+#, markdown-text
+msgid ""
+"Guards along the trade routes. This stops enemies from bombing your trade "
+"deals, and makes trade deals cheaper to send and to keep."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/diplomacy/treaties.md:23
+#, markdown-text, no-wrap
+msgid "Free Trade Agreement"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:28
+#, markdown-text
+msgid ""
+"People and goods move freely, with no border tax. You earn a lot from income "
+"taxes. But people mixing across borders can spread low morale and low "
+"support, so watch it."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/diplomacy/treaties.md:29
+#, markdown-text, no-wrap
+msgid "Terrorist Prevention"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:33
+#, markdown-text
+msgid ""
+"The two realms' intelligence agencies help each other find and stop covert "
+"and terrorist attacks."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/diplomacy/treaties.md:34
+#, markdown-text, no-wrap
+msgid "Intelligence Alliance"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:38
+#, markdown-text
+msgid ""
+"The two realms give each other covert help in operations, both at home and "
+"between planets."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/diplomacy/treaties.md:39
+#, markdown-text, no-wrap
+msgid "Technology Agreement"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:42
+#, markdown-text
+msgid ""
+"The two realms share science. Each side gains some of the other's "
+"technology."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/diplomacy/treaties.md:43
+#, markdown-text, no-wrap
+msgid "Full Defense Alliance"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:47
+#, markdown-text
+msgid ""
+"The strongest alliance. You commit a large part of your forces to defend an "
+"ally in need. This works only in local (single-board) games."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/diplomacy/treaties.md:48
+#, markdown-text, no-wrap
+msgid "Declaration of War"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:52
+#, markdown-text
+msgid ""
+"Ends an agreement without causing trouble at home. The treaty is not truly "
+"broken until the other realm is told."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/diplomacy/treaties.md:53
+#, markdown-text, no-wrap
+msgid "View Treaties"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:55
+#, markdown-text
+msgid "Shows your relations with the other rulers in the game."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/banking.md:1
+#: internal/help/content/economy/banking.md:8
+#, markdown-text, no-wrap
+msgid "Banking"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:12
+#, markdown-text
+msgid ""
+"The bank keeps your gold safe and earns interest. Gold in the bank cannot be "
+"taken by pirates or raids."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/banking.md:18
+#, markdown-text
+msgid "Deposit — move gold from your treasury into the bank."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/banking.md:18
+#, markdown-text
+msgid "Withdraw — move gold from the bank back to your treasury."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/banking.md:18
+#, markdown-text
+msgid ""
+"Take Loan — borrow gold, up to a limit based on how much land you own. A "
+"loan grows over time until you repay it, so pay it back before it becomes a "
+"burden."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/banking.md:18
+#, markdown-text
+msgid "Repay Loan — pay back what you borrowed."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/banking.md:19
+#, markdown-text, no-wrap
+msgid "Investments"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:23
+#, markdown-text
+msgid ""
+"You can lock gold away as an investment for a number of days. It pays back "
+"your gold plus interest when it matures. The interest rate floats — it rises "
+"and falls with how much everyone is investing — so check the rate before you "
+"commit."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/food.md:1
+#: internal/help/content/economy/food.md:8
+#, markdown-text, no-wrap
+msgid "Food Market and Spoilage"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/food.md:12
+#, markdown-text
+msgid ""
+"Your people and army eat food every turn. Agricultural regions grow food, "
+"and you can buy more at the Food Market."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/food.md:15
+#, markdown-text
+msgid ""
+"The market sells food to you for more than it pays to buy it back. So it is "
+"not a place to store extra food for profit."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/food.md:17
+#, markdown-text
+msgid ""
+"Food you hold beyond about two turns' worth of eating spoils each turn. A "
+"high technology level slows spoilage. Use or sell surplus food rather than "
+"hoard it."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/industry.md:1
+#: internal/help/content/economy/industry.md:8
+#, markdown-text, no-wrap
+msgid "Industry"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/industry.md:12
+#, markdown-text
+msgid ""
+"Each Industrial region makes gold and production points every turn. The "
+"points are built into units."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/industry.md:15
+#, markdown-text
+msgid ""
+"Use Set Industries to split your production across unit types by "
+"percentage. Or use Specialize to send all of your production into one unit "
+"type. Specializing cannot be undone, so choose with care."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/net-worth.md:1
+#: internal/help/content/economy/net-worth.md:8
+#, markdown-text, no-wrap
+msgid "Net Worth"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/net-worth.md:11
+#, markdown-text
+msgid "Net Worth is your overall score. It ranks every empire (see Scores)."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/net-worth.md:14
+#, markdown-text
+msgid ""
+"It counts mostly your land and your military strength, minus your "
+"debt. Gold, food, and people are not counted directly. So a rich empire with "
+"little land or army still scores low. To climb the ranks, hold land and a "
+"strong army."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/regions.md:1
+#: internal/help/content/economy/regions.md:8
+#, markdown-text, no-wrap
+msgid "Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/regions.md:12
+#, markdown-text
+msgid ""
+"Land is made of regions. You buy regions from a market, and the price rises "
+"as you buy more. There are eight region types, each with a different job."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/regions.md:13
+#, markdown-text, no-wrap
+msgid "Coastal"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/regions.md:17
+#, markdown-text
+msgid ""
+"Best for tourism income. In good times it makes the most gold. But with low "
+"public support, your people lose interest and tourism drops sharply."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/regions.md:18
+#, markdown-text, no-wrap
+msgid "Mountain"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/regions.md:22
+#, markdown-text
+msgid ""
+"Mines natural resources. Income is lower on average, but steady — few things "
+"change it. Mountains also boost how much your Industrial regions produce."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/regions.md:23
+#, markdown-text, no-wrap
+msgid "Desert"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/regions.md:27
+#, markdown-text
+msgid ""
+"Good for solar power. Income swings with conditions, but on average it beats "
+"mountains and trails good Coastal land."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/regions.md:28
+#, markdown-text, no-wrap
+msgid "River"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/regions.md:31
+#, markdown-text
+msgid "Provides a steady river income."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/regions.md:32
+#, markdown-text, no-wrap
+msgid "Agricultural"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/regions.md:35
+#, markdown-text
+msgid "Grows food. This is your main source of food if you are not buying it."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/regions.md:36
+#, markdown-text, no-wrap
+msgid "Urban"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/regions.md:40
+#, markdown-text
+msgid ""
+"Home to your people. More urban regions means more people can live in your "
+"empire."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/regions.md:41
+#, markdown-text, no-wrap
+msgid "Industrial"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/regions.md:45
+#, markdown-text
+msgid ""
+"Builds military each turn. In some games this is your only way to get new "
+"units.  A good base of Mountain regions makes your industry produce more."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/regions.md:46
+#, markdown-text, no-wrap
+msgid "Technology"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/regions.md:50
+#, markdown-text
+msgid ""
+"Raises your efficiency. A larger share of Technology regions boosts your "
+"income and your army and lowers some upkeep. Bigger empires need more "
+"Technology to get the same benefit."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/taxes.md:1
+#: internal/help/content/economy/taxes.md:8
+#, markdown-text, no-wrap
+msgid "Taxes, Support, and Riots"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:12
+#, markdown-text
+msgid ""
+"Your tax rate sets how much gold you collect from your people, and it shapes "
+"their mood."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:16
+#, markdown-text
+msgid ""
+"Popular Support drifts each turn toward a target set by your tax rate. A "
+"steady, moderate tax rate keeps Support near its highest. High taxes push "
+"Support down.  Low Support badly cuts your Coastal (tourism) income."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:18
+#, markdown-text
+msgid ""
+"Riots grow more likely as your tax rate climbs past a safe level. A riot "
+"crashes your Support and drives off part of your population. Raise taxes "
+"with care."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/trading.md:1
+#: internal/help/content/economy/trading.md:8
+#, markdown-text, no-wrap
+msgid "Trading"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:12
+#, markdown-text
+msgid ""
+"From the Trading menu you can send gold directly to another empire as a "
+"trade deal, with no strings attached. Use it to help an ally, or to move "
+"gold to a friend on your board."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/interbbs/leagues.md:1
+#: internal/help/content/interbbs/leagues.md:8
+#, markdown-text, no-wrap
+msgid "Leagues and Inter-BBS Play"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/leagues.md:13
+#, markdown-text
+msgid ""
+"Some games link many boards together into one world. Your goal grows from "
+"beating the local rulers to helping your board beat other boards. Teamwork "
+"matters."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/leagues.md:17
+#, markdown-text
+msgid ""
+"Group Attack — several rulers on your board join one strike against a "
+"distant enemy. The gains are shared among those who take part."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/leagues.md:17
+#, markdown-text
+msgid "IP Scores — see how the boards rank against each other."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/leagues.md:20
+#, markdown-text
+msgid ""
+"A league game has a set length. When it ends, the world resets and a new "
+"game begins."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/leagues.md:21
+#, markdown-text
+msgid ""
+"These features appear only when the game is set up for inter-BBS or league "
+"play."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/interbbs/sysop.md:1
+#: internal/help/content/interbbs/sysop.md:8
+#, markdown-text, no-wrap
+msgid "Sysop Guide — Running Immortal Barons"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:13
+#, markdown-text
+msgid ""
+"This guide is for the BBS operator (the sysop). It explains how to set up "
+"the game on your board, and how to join an inter-BBS league. Players do not "
+"need to read this."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:14
+#, markdown-text, no-wrap
+msgid "What you need"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:18
+#, markdown-text
+msgid ""
+"The game is one program: `barons-door`. It runs as a native door under "
+"modern BBS software such as Synchronet or Mystic. You do not need DOSBox or "
+"DOSEMU."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:21
+#, markdown-text
+msgid ""
+"The game keeps all its files in one data directory (default `./data`). Point "
+"the `-data` option at it."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:22
+#, markdown-text, no-wrap
+msgid "First-time setup"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:25
+#, markdown-text
+msgid "Run the setup once to create the config file:"
+msgstr ""
+
+#. type: Fenced code block
+#: internal/help/content/interbbs/sysop.md:26
+#, no-wrap
+msgid "barons-door -setup -data /path/to/data\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:32
+#, markdown-text
+msgid ""
+"It asks a few questions (turns per day, protection turns, number of AI "
+"barons, game length) and writes `config.json`."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:33
+#, markdown-text, no-wrap
+msgid "Registering the door"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:38
+#, markdown-text
+msgid ""
+"Set up the game as an external program (a \"door\") in your BBS "
+"software. Your BBS writes a dropfile when a caller runs the door. The game "
+"reads it to learn who is playing and how much time they have."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/sysop.md:43
+#, markdown-text
+msgid ""
+"The game reads **DOOR32.SYS** (both Synchronet and Mystic write it) or "
+"**DOOR.SYS**. Point the game at it with `-dropfile`, or let it search the "
+"current directory."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/sysop.md:43
+#, markdown-text
+msgid "The caller's handle from the dropfile becomes the name of their realm."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:45
+#, markdown-text
+msgid "A typical command line:"
+msgstr ""
+
+#. type: Fenced code block
+#: internal/help/content/interbbs/sysop.md:46
+#, no-wrap
+msgid "barons-door -dropfile /path/to/DOOR32.SYS -data /path/to/data\n"
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:50
+#, markdown-text, no-wrap
+msgid "Daily maintenance"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:53
+#, markdown-text
+msgid "Run maintenance once a day (a nightly event is the usual place):"
+msgstr ""
+
+#. type: Fenced code block
+#: internal/help/content/interbbs/sysop.md:54
+#, no-wrap
+msgid "barons-door -maint -data /path/to/data\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:60
+#, markdown-text
+msgid ""
+"This advances the game one day for every day that passed, lets the AI barons "
+"take their turns, and refreshes each player's turns."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:61
+#, markdown-text, no-wrap
+msgid "Inter-BBS (league) play"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:65
+#, markdown-text
+msgid ""
+"A league is a group of boards whose players compete against each other. To "
+"join one, turn on inter-BBS play and give your board a name."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:67
+#, markdown-text
+msgid "Edit `config.json` and set:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/sysop.md:73
+#, markdown-text
+msgid "`\"IBBS\": true` — turn on the inter-BBS menus."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/sysop.md:73
+#, markdown-text
+msgid "`\"BoardID\"` — a short unique name for your board (your \"planet\")."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/sysop.md:73
+#, markdown-text
+msgid "`\"InboundDir\"` — the directory where packets from other boards arrive."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/sysop.md:73
+#, markdown-text
+msgid ""
+"`\"OutboundDir\"` — the directory where the game writes packets for other "
+"boards."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:76
+#, markdown-text
+msgid ""
+"Ask your League Coordinator for the node list and add it to your data "
+"directory as **`ibnodes.dat`** (see the format below)."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:77
+#, markdown-text, no-wrap
+msgid "How packets move (you choose the schedule)"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:82
+#, markdown-text
+msgid ""
+"The game never moves files between boards. It only reads and writes packet "
+"files in your inbound and outbound directories. Moving the files between "
+"boards is your job, and you choose how often it happens."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:84
+#, markdown-text
+msgid "The inter-BBS step is:"
+msgstr ""
+
+#. type: Fenced code block
+#: internal/help/content/interbbs/sysop.md:85
+#, no-wrap
+msgid "barons-door -planetary -data /path/to/data\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:92
+#, markdown-text
+msgid ""
+"It reads every packet in your inbound directory, applies it, and writes new "
+"packets to your outbound directory. It also runs automatically inside "
+"`-maint` when inter-BBS play is on."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:94
+#, markdown-text
+msgid "A common setup:"
+msgstr ""
+
+#. type: Bullet: '1. '
+#: internal/help/content/interbbs/sysop.md:101
+#, markdown-text
+msgid "A caller plays the game."
+msgstr ""
+
+#. type: Bullet: '2. '
+#: internal/help/content/interbbs/sysop.md:101
+#, markdown-text
+msgid "After the caller exits, or on a schedule you pick, run `-planetary`."
+msgstr ""
+
+#. type: Bullet: '3. '
+#: internal/help/content/interbbs/sysop.md:101
+#, markdown-text
+msgid ""
+"Your transport script copies each file from your outbound directory to the "
+"inbound directory of every other board (over FidoNet, a sync tool, scp, a "
+"shared mount — whatever you use)."
+msgstr ""
+
+#. type: Bullet: '4. '
+#: internal/help/content/interbbs/sysop.md:101
+#, markdown-text
+msgid "The next `-planetary` run on each board reads and applies those files."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:105
+#, markdown-text
+msgid ""
+"Run it as often as you like. More often means shorter travel times between "
+"planets. The in-game \"Travel Times\" screen shows players how recently "
+"packets have arrived, so they know how fast operations move."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:106
+#, markdown-text, no-wrap
+msgid "The node list: `ibnodes.dat`"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:111
+#, markdown-text
+msgid ""
+"The node list names every board in the league. It uses the same simple "
+"layout as the original BRE `BRNODES.DAT`. Each board is six lines, and a "
+"blank line separates boards:"
+msgstr ""
+
+#. type: Fenced code block
+#: internal/help/content/interbbs/sysop.md:112
+#, no-wrap
+msgid ""
+"1\n"
+"Avalon\n"
+"363/277\n"
+"Orlando\n"
+"FL\n"
+"USA\n"
+"\n"
+"2\n"
+"Pier 7\n"
+"106/477\n"
+"Houston\n"
+"TX\n"
+"USA\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:130
+#, markdown-text
+msgid ""
+"The six lines are: node number, board (planet) name, network address, city, "
+"state or province, and country. Board number 1 is the League Coordinator."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:131
+#, markdown-text, no-wrap
+msgid "The Coordinator"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:134
+#, markdown-text
+msgid ""
+"There are two different \"coordinator\" ideas, and they are not the same "
+"thing:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/sysop.md:139
+#, markdown-text
+msgid ""
+"**League Coordinator** — the sysop of board number 1. This person keeps the "
+"node list and hands it out to the other boards."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/sysop.md:139
+#, markdown-text
+msgid ""
+"**BBS Coordinator** — a *player* your board elects. Players vote in the "
+"System menu, and the player with the most votes gets the Coordinator menu.  "
+"Votes can change at any time."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/military/headquarters.md:1
+#: internal/help/content/military/headquarters.md:8
+#: internal/help/content/military/units.md:53
+#, markdown-text, no-wrap
+msgid "HeadQuarters"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/headquarters.md:12
+#, markdown-text
+msgid ""
+"Your HeadQuarters coordinates your army. It is a one-time building project "
+"that advances a little each turn until it is complete."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/headquarters.md:15
+#, markdown-text
+msgid ""
+"While it is being built — and more so once finished — it raises how much "
+"your Tanks add to both attack and defense. Enemies can bomb your HQ with "
+"covert operations to weaken your tanks."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/units.md:1
+#: internal/help/content/military/units.md:8
+#, markdown-text, no-wrap
+msgid "Units"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/units.md:11
+#, markdown-text
+msgid "Your army is built from these units. Each one has a job."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/military/units.md:12
+#, markdown-text, no-wrap
+msgid "Troopers"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/units.md:17
+#, markdown-text
+msgid ""
+"Troopers fight on both attack and defense, but they are weak at each. They "
+"are cheap to buy and cheap to keep. They eat more food than other "
+"units. They help you defend against Sabre missile attacks."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/military/units.md:18
+#, markdown-text, no-wrap
+msgid "Jets"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/units.md:24
+#, markdown-text
+msgid ""
+"Jets attack only. They cannot defend. One jet is about twice as strong on "
+"attack as a trooper. Jets are cheap to buy but cost a lot to keep. They need "
+"carriers to reach a battle: one carrier moves 100 jets. An enemy SDI shield "
+"cuts your jets' strength by about a quarter."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/military/units.md:25
+#, markdown-text, no-wrap
+msgid "Turrets"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/units.md:30
+#, markdown-text
+msgid ""
+"Turrets defend only. One turret is about twice as strong on defense as a "
+"trooper. They shoot down attacking jets, destroy tanks, and kill "
+"troops. They also help stop incoming missiles. Covert operations cannot "
+"destroy them."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/military/units.md:31
+#, markdown-text, no-wrap
+msgid "Tanks"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/units.md:36
+#, markdown-text
+msgid ""
+"Tanks are the best all-around unit. They are strong on both attack and "
+"defense.  They cost a lot to buy but little to keep. A strong HeadQuarters "
+"and good morale make your tanks even stronger. Tanks help you defend against "
+"chemical attacks."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/military/units.md:37
+#, markdown-text, no-wrap
+msgid "Bombers"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/units.md:42
+#, markdown-text
+msgid ""
+"Bombers have no attack or defense strength of their own. They carry "
+"payloads.  Missiles and interplanetary bombings need bombers to deliver "
+"them. In a regular attack, your bombers destroy the enemy jets that are "
+"sitting on the ground."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/military/units.md:43
+#, markdown-text, no-wrap
+msgid "Carriers"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/units.md:47
+#, markdown-text
+msgid ""
+"Carriers move your jets to a battle and carry goods for trade. One carrier "
+"moves up to 100 jets."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/military/units.md:48
+#, markdown-text, no-wrap
+msgid "Covert Agents"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/units.md:52
+#, markdown-text
+msgid ""
+"Agents run covert operations, such as spying and sabotage. Having many "
+"agents also helps defend you against enemy covert operations."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/units.md:56
+#, markdown-text
+msgid ""
+"A HeadQuarters coordinates your army. A strong HQ makes your tanks much more "
+"effective. Enemies can bomb your HQ to weaken your tanks."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/warfare/attacks.md:1
+#: internal/help/content/warfare/attacks.md:8
+#, markdown-text, no-wrap
+msgid "Attacks"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attacks.md:11
+#, markdown-text
+msgid "You can strike other empires in several ways."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/attacks.md:12
+#, markdown-text, no-wrap
+msgid "Regular Attack"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attacks.md:17
+#, markdown-text
+msgid ""
+"A direct assault with your army. Your attack strength is compared to the "
+"enemy's defense. If you win, you capture some of their regions and take some "
+"gold. Your bombers first destroy the enemy jets that are on the ground."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/attacks.md:18
+#, markdown-text, no-wrap
+msgid "Nuclear Attack"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attacks.md:23
+#, markdown-text
+msgid ""
+"Turns some of the enemy's regions into waste. It costs a lot, and the cost "
+"grows with the size of the target. Large numbers of enemy turrets can shoot "
+"down some of the missiles."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/attacks.md:24
+#, markdown-text, no-wrap
+msgid "Chemical Attack"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attacks.md:28
+#, markdown-text
+msgid ""
+"Kills many of the enemy's people and troopers, but harms fewer "
+"regions. Enemy tanks help defend against it."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/attacks.md:29
+#, markdown-text, no-wrap
+msgid "Biological Attack"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attacks.md:32
+#, markdown-text
+msgid "Harms the enemy's people and troopers, but not their land."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/attacks.md:33
+#, markdown-text, no-wrap
+msgid "Gooie Kablooie"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attacks.md:39
+#, markdown-text
+msgid ""
+"The ultimate weapon, aimed at a whole enemy planet rather than one "
+"empire. The whole board funds it, and only one can exist at a time. It takes "
+"a few days to build, then strikes every empire on the target "
+"planet. Defenders can send jets to shoot it down before it finishes."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/attacks.md:40
+#, markdown-text, no-wrap
+msgid "SDI Program"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attacks.md:44
+#, markdown-text
+msgid ""
+"A shield you fund. When it is complete, it destroys about half of the "
+"missiles fired at you and cuts attacking jets' strength by about a "
+"quarter. Technology regions lower its upkeep."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/warfare/covert.md:1
+#: internal/help/content/warfare/covert.md:8
+#, markdown-text, no-wrap
+msgid "Covert Operations"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/covert.md:13
+#, markdown-text
+msgid ""
+"Covert operations are secret missions run by your agents. Success depends on "
+"how many agents you have compared to the target. More agents means a better "
+"chance.  Keeping many agents also defends you against enemy covert "
+"operations."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/covert.md:15
+#, markdown-text
+msgid "Common operations:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/warfare/covert.md:29
+#, markdown-text
+msgid "Send Spy — read the enemy's defensive strength."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/warfare/covert.md:29
+#, markdown-text
+msgid "Spy on Relations — reveal all of the enemy's treaties (useful before a war)."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/warfare/covert.md:29
+#, markdown-text
+msgid ""
+"Special Operations — sabotage the enemy army, destroying a share of their "
+"troopers."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/warfare/covert.md:29
+#, markdown-text
+msgid ""
+"Bomb Intelligence — kill enemy agents, so your later missions land more "
+"easily. Use this one first."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/warfare/covert.md:29
+#, markdown-text
+msgid ""
+"Stir Revolts — spread propaganda that lowers the enemy's public support, "
+"which weakens their troopers and their economy."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/warfare/covert.md:29
+#, markdown-text
+msgid "Bomb Airbases — destroy enemy jets that are on the ground."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/warfare/covert.md:29
+#, markdown-text
+msgid "Bomb Food Stores — destroy much of the enemy's food reserve."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/warfare/covert.md:29
+#, markdown-text
+msgid ""
+"Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less "
+"effective."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/warfare/covert.md:29
+#, markdown-text
+msgid ""
+"Bribery — buy off an agent inside the enemy, so that their covert operations "
+"against you fail from then on."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/covert.md:31
+#, markdown-text
+msgid ""
+"An Intelligence Alliance adds half of an ally's agents to your covert "
+"strength.  A Terrorist Prevention treaty adds half an ally's agents to your "
+"defense."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/warfare/pirates.md:1
+#: internal/help/content/warfare/pirates.md:8
+#, markdown-text, no-wrap
+msgid "Pirates"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/pirates.md:12
+#, markdown-text
+msgid ""
+"Nine pirate factions live in the world. Their strength is random. Any "
+"faction can be the strongest, so do not assume the last one on the list is "
+"the hardest."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/pirates.md:16
+#, markdown-text
+msgid ""
+"Pirates raid players at random. When they raid you, they carry off some of "
+"your troopers, jets, turrets, tanks, agents, and gold. They never take "
+"bombers, carriers, or your regions. A single raid takes at most 24,999 of "
+"any one thing."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/pirates.md:19
+#, markdown-text
+msgid ""
+"When a pirate raids, the game gives it new regions. So a pirate that just "
+"raided someone is fatter and holds more land. If no one fights them, pirates "
+"grow."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/pirates.md:24
+#, markdown-text
+msgid ""
+"You can attack a pirate faction to take goods back. A win gives you back "
+"about a fifth of what that faction holds — its stolen units, its gold, and "
+"some of its regions. It takes several hits to drain a fat faction. A loss "
+"costs you a share of the forces you sent."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/pirates.md:25
+#, markdown-text
+msgid "Tip: military parked in the Trading Market is safe from pirate raids."
+msgstr ""
