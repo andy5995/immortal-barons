@@ -543,9 +543,11 @@ func gooieKablooie(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-// empireStatus prints a compact, multi-item status screen (BRE-style),
-// packing values across lines instead of one dot-leader row each.
-func empireStatus(s session.Session, w *game.World) Result {
+// renderEmpireStatus prints the BRE-style status screen with NO pause, so the
+// turn pipeline can append the maintenance results below it and pause once —
+// otherwise the maintenance line prints after the pause and the next menu's
+// clear-screen wipes it before the player sees it.
+func renderEmpireStatus(s session.Session, w *game.World) {
 	p := w.Player()
 	c, wht, r := ansi.FgBrightCyan, ansi.FgWhite, ansi.Reset
 	num := func(n int) string { return c + comma(n) + r }
@@ -578,6 +580,11 @@ func empireStatus(s session.Session, w *game.World) Result {
 		fmt.Fprintf(s, "%sYou have %s%s turns of Protection Left.%s\n", wht, num(p.Protection), wht, r)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBlue, rule, r)
+}
+
+// empireStatus is the standalone status action (System menu): render + pause.
+func empireStatus(s session.Session, w *game.World) Result {
+	renderEmpireStatus(s, w)
 	pause(s)
 	return Stay
 }

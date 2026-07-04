@@ -185,9 +185,13 @@ func runTurn(s session.Session, w *game.World) Result {
 		w.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
 		showTurnEvents(s, p)
 		incomeReport(s, w, p)
-		empireStatus(s, w)
 
+		// Status and the maintenance results share one screen with a single
+		// pause. If maintenance printed after the pause, the next menu's
+		// clear-screen would wipe it before the player could read it.
+		renderEmpireStatus(s, w)
 		paymentStage(s, w, p)
+		pause(s)
 
 		if err := Run(s, w, menus.Spending); err != nil {
 			return Stay
