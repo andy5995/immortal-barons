@@ -1040,18 +1040,18 @@ msgstr "Штаб управляет армией. Сильный штаб дел
 #: internal/help/content/warfare/attacks.md:8
 #, no-wrap
 msgid "Attacks"
-msgstr ""
+msgstr "Атаки"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:11
 msgid "You can strike other empires in several ways."
-msgstr ""
+msgstr "Атаковать другие империи можно несколькими способами."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:12
 #, no-wrap
 msgid "Regular Attack"
-msgstr ""
+msgstr "Обычная атака"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:17
@@ -1059,13 +1059,13 @@ msgid ""
 "A direct assault with your army. Your attack strength is compared to the "
 "enemy's defense. If you win, you capture some of their regions and take some "
 "gold. Your bombers first destroy the enemy jets that are on the ground."
-msgstr ""
+msgstr "Прямой удар вашей армией. Ваша сила атаки сравнивается с защитой врага. При победе вы отнимаете у него землю."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:18
 #, no-wrap
 msgid "Nuclear Attack"
-msgstr ""
+msgstr "Ядерная атака"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:23
@@ -1073,37 +1073,37 @@ msgid ""
 "Turns some of the enemy's regions into waste. It costs a lot, and the cost "
 "grows with the size of the target. Large numbers of enemy turrets can shoot "
 "down some of the missiles."
-msgstr ""
+msgstr "Превращает часть регионов врага в пустошь. Стоит дорого, и цена растёт с размером цели."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:24
 #, no-wrap
 msgid "Chemical Attack"
-msgstr ""
+msgstr "Химическая атака"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:28
 msgid ""
 "Kills many of the enemy's people and troopers, but harms fewer regions. "
 "Enemy tanks help defend against it."
-msgstr ""
+msgstr "Убивает много людей и пехоты врага, но вредит меньшему числу регионов. Танки врага помогают защищаться от неё."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:29
 #, no-wrap
 msgid "Biological Attack"
-msgstr ""
+msgstr "Биологическая атака"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:32
 msgid "Harms the enemy's people and troopers, but not their land."
-msgstr ""
+msgstr "Наносит вред людям и пехоте врага, но не его земле."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:33
 #, no-wrap
 msgid "Gooie Kablooie"
-msgstr ""
+msgstr "Gooie Kablooie"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:39
@@ -1112,13 +1112,13 @@ msgid ""
 "The whole board funds it, and only one can exist at a time. It takes a few "
 "days to build, then strikes every empire on the target planet. Defenders can "
 "send jets to shoot it down before it finishes."
-msgstr ""
+msgstr "Абсолютное оружие, нацеленное на целую вражескую планету, а не на одну империю. Его финансирует вся планета, а урон огромен."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:40
 #, no-wrap
 msgid "SDI Program"
-msgstr ""
+msgstr "Программа СОИ"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:44
@@ -1126,14 +1126,14 @@ msgid ""
 "A shield you fund. When it is complete, it destroys about half of the "
 "missiles fired at you and cuts attacking jets' strength by about a quarter. "
 "Technology regions lower its upkeep."
-msgstr ""
+msgstr "Щит, который вы финансируете. По завершении он уничтожает около половины выпущенных по вам ракет и ослабляет вражеские истребители и бомбардировщики."
 
 #. type: Title #
 #: internal/help/content/warfare/covert.md:1
 #: internal/help/content/warfare/covert.md:8
 #, no-wrap
 msgid "Covert Operations"
-msgstr ""
+msgstr "Тайные операции"
 
 #. type: Plain text
 #: internal/help/content/warfare/covert.md:13
@@ -1142,67 +1142,67 @@ msgid ""
 "how many agents you have compared to the target. More agents means a better "
 "chance.  Keeping many agents also defends you against enemy covert "
 "operations."
-msgstr ""
+msgstr "Тайные операции — это секретные миссии ваших агентов. Успех зависит от того, сколько у вас агентов по сравнению с целью. Больше агентов — выше шанс. Множество агентов также защищает вас от вражеских тайных операций."
 
 #. type: Plain text
 #: internal/help/content/warfare/covert.md:15
 msgid "Common operations:"
-msgstr ""
+msgstr "Основные операции:"
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid "Send Spy — read the enemy's defensive strength."
-msgstr ""
+msgstr "Послать шпиона — узнать оборонительную силу врага."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Spy on Relations — reveal all of the enemy's treaties (useful before a war)."
-msgstr ""
+msgstr "Шпионить за отношениями — раскрыть все договоры врага (полезно перед войной)."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Special Operations — sabotage the enemy army, destroying a share of their "
 "troopers."
-msgstr ""
+msgstr "Спецоперации — саботировать армию врага, уничтожив часть его пехоты."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Bomb Intelligence — kill enemy agents, so your later missions land more "
 "easily. Use this one first."
-msgstr ""
+msgstr "Разбомбить разведку — убить агентов врага, чтобы ваши последующие миссии удавались легче. Применяйте её первой."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Stir Revolts — spread propaganda that lowers the enemy's public support, "
 "which weakens their troopers and their economy."
-msgstr ""
+msgstr "Разжечь бунты — распространить пропаганду, снижающую поддержку врага, что ослабляет его пехоту и экономику."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid "Bomb Airbases — destroy enemy jets that are on the ground."
-msgstr ""
+msgstr "Разбомбить аэродромы — уничтожить истребители врага на земле."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid "Bomb Food Stores — destroy much of the enemy's food reserve."
-msgstr ""
+msgstr "Разбомбить склады еды — уничтожить большую часть продовольственного запаса врага."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less effective."
-msgstr ""
+msgstr "Разбомбить штаб — ослабить штаб врага, из-за чего его танки станут менее эффективны."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Bribery — buy off an agent inside the enemy, so that their covert operations "
 "against you fail from then on."
-msgstr ""
+msgstr "Подкуп — купить агента внутри вражеского государства, чтобы его тайные операции против вас впредь проваливались."
 
 #. type: Plain text
 #: internal/help/content/warfare/covert.md:31
@@ -1210,14 +1210,14 @@ msgid ""
 "An Intelligence Alliance adds half of an ally's agents to your covert "
 "strength.  A Terrorist Prevention treaty adds half an ally's agents to your "
 "defense."
-msgstr ""
+msgstr "Разведывательный союз добавляет к вашей тайной силе половину агентов союзника. Договор о противодействии терроризму добавляет к вашей защите половину агентов союзника."
 
 #. type: Title #
 #: internal/help/content/warfare/pirates.md:1
 #: internal/help/content/warfare/pirates.md:8
 #, no-wrap
 msgid "Pirates"
-msgstr ""
+msgstr "Пираты"
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:12
@@ -1225,7 +1225,7 @@ msgid ""
 "Nine pirate factions live in the world. Their strength is random. Any "
 "faction can be the strongest, so do not assume the last one on the list is "
 "the hardest."
-msgstr ""
+msgstr "В мире живут девять пиратских группировок. Их сила случайна. Сильнейшей может быть любая, поэтому проверяйте, прежде чем нападать."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:16
@@ -1234,7 +1234,7 @@ msgid ""
 "your troopers, jets, turrets, tanks, agents, and gold. They never take "
 "bombers, carriers, or your regions. A single raid takes at most 24,999 of "
 "any one thing."
-msgstr ""
+msgstr "Пираты"
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:19
@@ -1242,7 +1242,7 @@ msgid ""
 "When a pirate raids, the game gives it new regions. So a pirate that just "
 "raided someone is fatter and holds more land. If no one fights them, pirates "
 "grow."
-msgstr ""
+msgstr "Когда пират совершает набег, игра даёт ему новые регионы. Так пират, только что кого-то ограбивший, толще и является лучшей целью."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:24
@@ -1251,9 +1251,9 @@ msgid ""
 "about a fifth of what that faction holds — its stolen units, its gold, and "
 "some of its regions. It takes several hits to drain a fat faction. A loss "
 "costs you a share of the forces you sent."
-msgstr ""
+msgstr "Можно напасть на пиратскую группировку, чтобы вернуть добро. Победа возвращает вам около пятой части того, чем владеет эта группировка."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:25
 msgid "Tip: military parked in the Trading Market is safe from pirate raids."
-msgstr ""
+msgstr "Совет: войска, оставленные на Торговом рынке, защищены от пиратских набегов."

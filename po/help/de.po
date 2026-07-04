@@ -1039,18 +1039,18 @@ msgstr "Ein Hauptquartier koordiniert Ihre Armee. Ein starkes HQ macht Ihre Panz
 #: internal/help/content/warfare/attacks.md:8
 #, no-wrap
 msgid "Attacks"
-msgstr ""
+msgstr "Angriffe"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:11
 msgid "You can strike other empires in several ways."
-msgstr ""
+msgstr "Sie können andere Imperien auf mehrere Arten angreifen."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:12
 #, no-wrap
 msgid "Regular Attack"
-msgstr ""
+msgstr "Regulärer Angriff"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:17
@@ -1058,13 +1058,13 @@ msgid ""
 "A direct assault with your army. Your attack strength is compared to the "
 "enemy's defense. If you win, you capture some of their regions and take some "
 "gold. Your bombers first destroy the enemy jets that are on the ground."
-msgstr ""
+msgstr "Ein direkter Angriff mit Ihrer Armee. Ihre Angriffsstärke wird mit der Verteidigung des Feindes verglichen. Wenn Sie gewinnen, nehmen Sie ihm Land ab."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:18
 #, no-wrap
 msgid "Nuclear Attack"
-msgstr ""
+msgstr "Atomangriff"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:23
@@ -1072,37 +1072,37 @@ msgid ""
 "Turns some of the enemy's regions into waste. It costs a lot, and the cost "
 "grows with the size of the target. Large numbers of enemy turrets can shoot "
 "down some of the missiles."
-msgstr ""
+msgstr "Verwandelt einige Gebiete des Feindes in Ödland. Er kostet viel, und die Kosten steigen mit der Größe des Ziels."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:24
 #, no-wrap
 msgid "Chemical Attack"
-msgstr ""
+msgstr "Chemischer Angriff"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:28
 msgid ""
 "Kills many of the enemy's people and troopers, but harms fewer regions. "
 "Enemy tanks help defend against it."
-msgstr ""
+msgstr "Tötet viele Menschen und Soldaten des Feindes, schädigt aber weniger Gebiete. Feindliche Panzer helfen bei der Verteidigung dagegen."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:29
 #, no-wrap
 msgid "Biological Attack"
-msgstr ""
+msgstr "Biologischer Angriff"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:32
 msgid "Harms the enemy's people and troopers, but not their land."
-msgstr ""
+msgstr "Schädigt das Volk und die Soldaten des Feindes, aber nicht sein Land."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:33
 #, no-wrap
 msgid "Gooie Kablooie"
-msgstr ""
+msgstr "Gooie Kablooie"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:39
@@ -1111,13 +1111,13 @@ msgid ""
 "The whole board funds it, and only one can exist at a time. It takes a few "
 "days to build, then strikes every empire on the target planet. Defenders can "
 "send jets to shoot it down before it finishes."
-msgstr ""
+msgstr "Die ultimative Waffe, die auf einen ganzen feindlichen Planeten zielt statt auf ein einzelnes Imperium. Der ganze Planet finanziert sie, und der Schaden ist gewaltig."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:40
 #, no-wrap
 msgid "SDI Program"
-msgstr ""
+msgstr "SDI-Programm"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:44
@@ -1125,14 +1125,14 @@ msgid ""
 "A shield you fund. When it is complete, it destroys about half of the "
 "missiles fired at you and cuts attacking jets' strength by about a quarter. "
 "Technology regions lower its upkeep."
-msgstr ""
+msgstr "Ein Schild, den Sie finanzieren. Wenn er fertig ist, zerstört er etwa die Hälfte der auf Sie abgefeuerten Raketen und schwächt feindliche Jets und Bomber."
 
 #. type: Title #
 #: internal/help/content/warfare/covert.md:1
 #: internal/help/content/warfare/covert.md:8
 #, no-wrap
 msgid "Covert Operations"
-msgstr ""
+msgstr "Verdeckte Operationen"
 
 #. type: Plain text
 #: internal/help/content/warfare/covert.md:13
@@ -1141,67 +1141,67 @@ msgid ""
 "how many agents you have compared to the target. More agents means a better "
 "chance.  Keeping many agents also defends you against enemy covert "
 "operations."
-msgstr ""
+msgstr "Verdeckte Operationen sind geheime Missionen Ihrer Agenten. Der Erfolg hängt davon ab, wie viele Agenten Sie im Vergleich zum Ziel haben. Mehr Agenten bedeuten bessere Chancen. Viele Agenten verteidigen Sie auch gegen feindliche verdeckte Operationen."
 
 #. type: Plain text
 #: internal/help/content/warfare/covert.md:15
 msgid "Common operations:"
-msgstr ""
+msgstr "Häufige Operationen:"
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid "Send Spy — read the enemy's defensive strength."
-msgstr ""
+msgstr "Spion senden — die Verteidigungsstärke des Feindes ausspähen."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Spy on Relations — reveal all of the enemy's treaties (useful before a war)."
-msgstr ""
+msgstr "Beziehungen ausspähen — alle Verträge des Feindes aufdecken (nützlich vor einem Krieg)."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Special Operations — sabotage the enemy army, destroying a share of their "
 "troopers."
-msgstr ""
+msgstr "Spezialoperationen — die feindliche Armee sabotieren und einen Teil ihrer Soldaten vernichten."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Bomb Intelligence — kill enemy agents, so your later missions land more "
 "easily. Use this one first."
-msgstr ""
+msgstr "Geheimdienst bombardieren — feindliche Agenten töten, damit Ihre späteren Missionen leichter gelingen. Setzen Sie diese zuerst ein."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Stir Revolts — spread propaganda that lowers the enemy's public support, "
 "which weakens their troopers and their economy."
-msgstr ""
+msgstr "Aufstände schüren — Propaganda verbreiten, die die öffentliche Zustimmung des Feindes senkt, was seine Soldaten und seine Wirtschaft schwächt."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid "Bomb Airbases — destroy enemy jets that are on the ground."
-msgstr ""
+msgstr "Flugplätze bombardieren — feindliche Jets am Boden zerstören."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid "Bomb Food Stores — destroy much of the enemy's food reserve."
-msgstr ""
+msgstr "Nahrungslager bombardieren — einen großen Teil der Nahrungsreserve des Feindes vernichten."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less effective."
-msgstr ""
+msgstr "HQ bombardieren — das Hauptquartier des Feindes schwächen, was seine Panzer weniger wirksam macht."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Bribery — buy off an agent inside the enemy, so that their covert operations "
 "against you fail from then on."
-msgstr ""
+msgstr "Bestechung — einen Agenten im Inneren des Feindes kaufen, sodass dessen verdeckte Operationen gegen Sie von da an scheitern."
 
 #. type: Plain text
 #: internal/help/content/warfare/covert.md:31
@@ -1209,14 +1209,14 @@ msgid ""
 "An Intelligence Alliance adds half of an ally's agents to your covert "
 "strength.  A Terrorist Prevention treaty adds half an ally's agents to your "
 "defense."
-msgstr ""
+msgstr "Ein Geheimdienstbündnis fügt Ihrer verdeckten Stärke die Hälfte der Agenten eines Verbündeten hinzu. Ein Terrorabwehr-Vertrag fügt Ihrer Verteidigung die Hälfte der Agenten eines Verbündeten hinzu."
 
 #. type: Title #
 #: internal/help/content/warfare/pirates.md:1
 #: internal/help/content/warfare/pirates.md:8
 #, no-wrap
 msgid "Pirates"
-msgstr ""
+msgstr "Piraten"
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:12
@@ -1224,7 +1224,7 @@ msgid ""
 "Nine pirate factions live in the world. Their strength is random. Any "
 "faction can be the strongest, so do not assume the last one on the list is "
 "the hardest."
-msgstr ""
+msgstr "Neun Piratenfraktionen leben in der Welt. Ihre Stärke ist zufällig. Jede Fraktion kann die stärkste sein, also prüfen Sie erst, bevor Sie angreifen."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:16
@@ -1233,7 +1233,7 @@ msgid ""
 "your troopers, jets, turrets, tanks, agents, and gold. They never take "
 "bombers, carriers, or your regions. A single raid takes at most 24,999 of "
 "any one thing."
-msgstr ""
+msgstr "Piraten"
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:19
@@ -1241,7 +1241,7 @@ msgid ""
 "When a pirate raids, the game gives it new regions. So a pirate that just "
 "raided someone is fatter and holds more land. If no one fights them, pirates "
 "grow."
-msgstr ""
+msgstr "Wenn ein Pirat überfällt, gibt ihm das Spiel neue Gebiete. Ein Pirat, der gerade jemanden überfallen hat, ist also fetter und ein besseres Ziel."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:24
@@ -1250,9 +1250,9 @@ msgid ""
 "about a fifth of what that faction holds — its stolen units, its gold, and "
 "some of its regions. It takes several hits to drain a fat faction. A loss "
 "costs you a share of the forces you sent."
-msgstr ""
+msgstr "Sie können eine Piratenfraktion angreifen, um Güter zurückzuholen. Ein Sieg gibt Ihnen etwa ein Fünftel dessen zurück, was diese Fraktion besitzt."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:25
 msgid "Tip: military parked in the Trading Market is safe from pirate raids."
-msgstr ""
+msgstr "Tipp: Militär, das im Handelsmarkt geparkt ist, ist vor Piratenüberfällen sicher."
