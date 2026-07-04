@@ -18,8 +18,8 @@ Common operations:
   troopers.
 - Bomb Intelligence — kill enemy agents, so your later missions land more
   easily. Use this one first.
-- Cause Dissensions — lower the enemy's public support, which weakens their
-  troopers and their economy.
+- Stir Revolts — spread propaganda that lowers the enemy's public support,
+  which weakens their troopers and their economy.
 - Bomb Airbases — destroy enemy jets that are on the ground.
 - Bomb Food Stores — destroy much of the enemy's food reserve.
 - Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less effective.

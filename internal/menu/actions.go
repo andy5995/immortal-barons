@@ -313,8 +313,8 @@ func bombIntel(s session.Session, w *game.World) Result {
 	return specialAttack(s, w, "Bomb Intelligence", 0, func(a, d *game.Empire) (string, error) { return w.BombIntelligence(a, d) })
 }
 
-func causeDissensions(s session.Session, w *game.World) Result {
-	return specialAttack(s, w, "Cause Dissensions", 0, func(a, d *game.Empire) (string, error) { return w.CauseDissensions(a, d) })
+func stirRevolts(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Stir Revolts", 0, func(a, d *game.Empire) (string, error) { return w.StirRevolts(a, d) })
 }
 
 func bombAirbases(s session.Session, w *game.World) Result {

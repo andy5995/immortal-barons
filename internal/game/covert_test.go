@@ -155,10 +155,10 @@ func TestBombHQWeakensAndClamps(t *testing.T) {
 	}
 }
 
-func TestCauseDissensionsLowersSupport(t *testing.T) {
+func TestStirRevoltsLowersSupport(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Support = 50, 0, 100
-	if _, err := w.CauseDissensions(a, d); err != nil {
+	if _, err := w.StirRevolts(a, d); err != nil {
 		t.Fatal(err)
 	}
 	if d.Support != 85 {

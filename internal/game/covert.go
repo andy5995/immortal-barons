@@ -62,16 +62,19 @@ func (w *World) BombIntelligence(a, d *Empire) (string, error) {
 	return "The operation failed and your agent was lost.", nil
 }
 
-// CauseDissensions lowers d's popular support, weakening its economy and its
-// troopers. On failure the agent is lost.
-func (w *World) CauseDissensions(a, d *Empire) (string, error) {
+// StirRevolts spreads propaganda that lowers d's popular support (rioting and
+// revolt), weakening its economy and its troopers. The manual's name for this
+// op; not to be confused with "Support Dissensions", which is the
+// troopers-flee sabotage op (our Special Operations). On failure the agent is
+// lost.
+func (w *World) StirRevolts(a, d *Empire) (string, error) {
 	if a.Agents < 1 {
 		return "", ErrNoAgents
 	}
 	if w.covertSuccess(a, d) {
 		d.adjustSupport(-15)
-		d.Events = append(d.Events, "Agitators stirred unrest — your popular support fell.")
-		return fmt.Sprintf("You stirred dissent in %s, lowering its popular support.", d.Name), nil
+		d.Events = append(d.Events, "Agitators stirred revolts — your popular support fell.")
+		return fmt.Sprintf("You stirred revolts in %s, lowering its popular support.", d.Name), nil
 	}
 	a.Agents--
 	d.Events = append(d.Events, "Your security foiled an enemy agitation attempt.")
