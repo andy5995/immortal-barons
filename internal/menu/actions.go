@@ -114,23 +114,7 @@ func buyLand(s session.Session, w *game.World) Result {
 }
 
 func sellLand(s session.Session, w *game.World) Result {
-	p := w.Player()
-	fmt.Fprintf(s, "\n%sSell Regions — choose a type:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	printRegionTypes(s)
-	t := promptInt(s, "Region type (0 to cancel)?")
-	if t < 1 || t > len(regionTypeNames) {
-		return Stay
-	}
-	field := regionField(p, t-1)
-	n := promptSuggested(s, "How many?", 0, *field)
-	if n <= 0 {
-		return Stay
-	}
-	if err := w.SellRegions(p, field, n); err != nil {
-		fail(s, err)
-	} else {
-		ok(s, "Sold %d regions. Gold: %d", n, p.Gold)
-	}
+	ok(s, "You cannot sell regions, only drop them.")
 	return Stay
 }
 
