@@ -104,6 +104,41 @@ interchangeable at the byte level.**
 `references/glyphs.md` has the full CP437-hex ↔ Unicode ↔ glyph table for every
 block, shade, and box-drawing character.
 
+## Plain ASCII art (7-bit) — the portable sibling medium
+
+Everything above draws with block/shade glyphs and color. **Plain ASCII art** is
+a different medium: it uses only printable 7-bit ASCII (`0x20`–`0x7E` — letters,
+digits, and punctuation like `/ \ | _ - = + * . : # @`), no color required, no
+block glyphs. Because every byte is plain ASCII, it renders identically in *any*
+terminal, encoding, code comment, README, commit message, log file, or email —
+none of the CP437/UTF-8 gotcha above applies. It is also the right choice for a
+deliberate retro "ASCII" look (as distinct from colored "ANSI" block art).
+
+**Reach for plain ASCII when** the target is a plain-text context (source
+comments, `--help` output, READMEs, diagrams in docs), an unknown/legacy
+terminal, or you want art that survives copy-paste anywhere. **Reach for the
+block/color approach** (the rest of this skill) when you control the terminal
+and want smooth, dimensional, colored images.
+
+The core techniques:
+
+- **The ASCII density ramp** — the plain-text analog of the shade ramp. Order
+  characters by how much ink they put on the cell:
+  `` .`'^",:;Il!i><~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$ ``
+  A short, reliable subset is `` .:-=+*#%@ `` (light→dark). Walk it to fake
+  gradients and shade 3-D forms, exactly like the block ramp but with letters.
+- **Line / outline art** — trace silhouettes with `/ \ | _ - ( ) < >`; use
+  `/ \` for diagonals and corners, `_` for flat tops/bottoms, `|` for verticals.
+- **Boxes and rules** — `+---+`, `|   |` for frames; `===` / `***` for heavier
+  rules; `->`, `=>`, `-->` for arrows in diagrams.
+- **Big text** — `figlet` / `toilet` render FIGlet fonts (large ASCII letters)
+  for banners without hand-placing glyphs.
+
+The shading discipline carries over unchanged: pick one light direction, keep a
+consistent density ramp, assume a monospace grid, and test at the target width.
+`references/plain-ascii.md` has the full density ramps, worked examples
+(sphere, banner, box), and tool notes.
+
 ## Building a piece: workflow
 
 1. **Decide the size and the light direction first.** Pick a canvas width
@@ -191,6 +226,8 @@ original art.)
   chrome/glass/glow, 16-color ramp strategy, scene-depth composition.
 - `references/formats-and-tools.md` — `.ans`/`.asc`/XBin/SAUCE formats, the
   editor/tool landscape, and `ansilove` for headless PNG previews.
+- `references/plain-ascii.md` — plain 7-bit ASCII art: density ramps, line/box
+  art, shading a form, figlet/toilet banners, and when to use it vs. block art.
 
 ## scripts/
 
