@@ -175,6 +175,27 @@ func investFunds(s session.Session, w *game.World) Result {
 	return Stay
 }
 
+// abdicate deletes the player's empire from the game (BRE.DOC: "immediately
+// delete your empire from the game so you may start over the next day"). It
+// is irreversible, so the player must retype their realm name to confirm.
+// Removing the empire and quitting is enough: play.go persists the world on
+// exit, and the caller's next visit finds no empire and onboards a fresh one.
+func abdicate(s session.Session, w *game.World) Result {
+	p := w.Player()
+	fmt.Fprintf(s, "\n%sAbdicating deletes %s permanently. This cannot be undone.%s\n",
+		ansi.FgBrightRed, p.Name, ansi.Reset)
+	typed := prompt(s, fmt.Sprintf("Type your realm name (%s) to confirm, or anything else to cancel", p.Name))
+	if strings.TrimSpace(typed) != p.Name {
+		fmt.Fprint(s, "\nAbdication cancelled.\n")
+		pause(s)
+		return Stay
+	}
+	w.RemoveEmpire(p)
+	fmt.Fprintf(s, "\n%sYour empire is no more. Fare thee well.%s\n", ansi.FgYellow, ansi.Reset)
+	pause(s)
+	return Quit
+}
+
 // listInvestments shows the player's pending investments and any debt.
 func listInvestments(s session.Session, w *game.World) Result {
 	p := w.Player()

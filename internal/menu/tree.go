@@ -186,7 +186,7 @@ func BuildMenus() *Menus {
 	}
 
 	system.Items = []Item{
-		{Key: '#', Label: "Abdicate", Do: stubbed("Abdicate")},
+		{Key: '#', Label: "Abdicate", Do: abdicate},
 		{Key: 'A', Label: "Visit Advisors", Do: visitAdvisors},
 		{Key: 'D', Label: "Diplomacy", Do: gotoMenu(diplomacy)},
 		{Key: 'E', Label: "Empire Status", Do: empireStatus},

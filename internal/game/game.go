@@ -270,6 +270,21 @@ func (w *World) AddHuman(handle, realm string) *Empire {
 
 func (w *World) Player() *Empire { return w.Active }
 
+// RemoveEmpire deletes e from the world (Abdicate). The empire is gone
+// entirely; the caller gets a fresh realm on their next visit. Active is
+// cleared if it pointed at e.
+func (w *World) RemoveEmpire(e *Empire) {
+	for i, x := range w.Empires {
+		if x == e {
+			w.Empires = append(w.Empires[:i], w.Empires[i+1:]...)
+			break
+		}
+	}
+	if w.Active == e {
+		w.Active = nil
+	}
+}
+
 func (w *World) FindByOwner(handle string) *Empire {
 	h := strings.ToLower(strings.TrimSpace(handle))
 	for _, e := range w.Empires {

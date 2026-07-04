@@ -120,3 +120,23 @@ func TestTechBoostsMilitary(t *testing.T) {
 		t.Errorf("Defense should rise with Technology regions: base=%d tech=%d", base.Defense(), tech.Defense())
 	}
 }
+
+func TestRemoveEmpireAbdicate(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	before := len(w.Empires)
+	e := w.AddHuman("bob", "Bobland")
+	w.Active = e
+	if w.FindByOwner("bob") == nil {
+		t.Fatal("empire not registered")
+	}
+	w.RemoveEmpire(e)
+	if got := len(w.Empires); got != before {
+		t.Errorf("empire count = %d, want %d after abdication", got, before)
+	}
+	if w.FindByOwner("bob") != nil {
+		t.Error("abdicated empire still findable by owner")
+	}
+	if w.Active != nil {
+		t.Error("Active should be cleared after removing the active empire")
+	}
+}
