@@ -310,10 +310,11 @@ func specialOps(s session.Session, w *game.World) Result {
 
 func attackPirates(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "\n%sPirate factions (strength is random; fat ones just raided someone):%s\n", ansi.FgBrightCyan, ansi.Reset)
-	fmt.Fprintf(s, "  %-3s %-12s %-8s %-6s %s\n", "#", "Faction", "Forces", "Land", "Loot T/J/K")
+	fmt.Fprintf(s, "  %-3s %-11s %-7s %-4s %-8s %s\n", "#", "Faction", "Forces", "Rgn", "Gold", "Loot T/J/U/K/A")
 	for i, p := range w.Pirates {
-		fmt.Fprintf(s, "  %d)  %-12s %-8d %-6d %d/%d/%d\n",
-			i+1, p.Name, p.Forces, p.Land, p.LootTroopers, p.LootJets, p.LootTanks)
+		fmt.Fprintf(s, "  %d) %-11s %-7d %-4d %-8d %d/%d/%d/%d/%d\n",
+			i+1, p.Name, p.Forces, p.Land, p.Gold,
+			p.LootTroopers, p.LootJets, p.LootTurrets, p.LootTanks, p.LootAgents)
 	}
 	f := promptInt(s, "Raid which faction (0 to cancel)?")
 	if f < 1 || f > len(w.Pirates) {

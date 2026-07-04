@@ -93,17 +93,17 @@ func TestRaidFactionDrainsOverSeveralHits(t *testing.T) {
 	p.Forces = 100
 	p.LootTroopers = 1000
 
-	// One hit must not clear it; several hits should drain most of it.
+	// One hit must not clear it; many hits should drain most of it.
 	w.RaidFaction(a, 0, 1_000_000, 0, 0)
 	if p.LootTroopers == 0 {
 		t.Error("a single hit should not fully drain a faction")
 	}
-	for i := 0; i < 5; i++ {
+	for i := 0; i < 12; i++ {
 		p.Forces = 100 // keep it beatable each hit
 		w.RaidFaction(a, 0, 1_000_000, 0, 0)
 	}
-	if p.LootTroopers > 1000*PirateReclaimPct/100 {
-		t.Errorf("after several hits most loot should be reclaimed, %d left", p.LootTroopers)
+	if p.LootTroopers > 200 {
+		t.Errorf("after many hits most loot should be reclaimed, %d left", p.LootTroopers)
 	}
 }
 
@@ -113,5 +113,52 @@ func TestEnsurePiratesSeedsOldSave(t *testing.T) {
 	w.EnsurePirates()
 	if len(w.Pirates) != len(PirateFactions) {
 		t.Errorf("EnsurePirates should seed %d factions, got %d", len(PirateFactions), len(w.Pirates))
+	}
+}
+
+func TestPirateRaidStealsAllButBombersAndCarriers(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	v := w.AddHuman("me", "Mine")
+	v.Troopers, v.Jets, v.Turrets, v.Tanks, v.Agents, v.Gold = 1000, 1000, 1000, 1000, 1000, 1000
+	v.Bombers, v.Carriers = 500, 500
+	p := &w.Pirates[0]
+
+	w.pirateRaidVictim(p, v)
+
+	if v.Bombers != 500 || v.Carriers != 500 {
+		t.Errorf("pirates must not take bombers/carriers: bombers=%d carriers=%d", v.Bombers, v.Carriers)
+	}
+	stolen := map[string]int{
+		"troopers": v.Troopers, "jets": v.Jets, "turrets": v.Turrets,
+		"tanks": v.Tanks, "agents": v.Agents, "gold": v.Gold,
+	}
+	for name, got := range stolen {
+		if got != 950 { // 1000 - 5%
+			t.Errorf("%s: expected 950 after a 5%% raid, got %d", name, got)
+		}
+	}
+	if p.LootAgents != 50 || p.Gold != 50 || p.LootTurrets != 50 {
+		t.Errorf("faction should hold looted agents/gold/turrets, got A=%d G=%d U=%d",
+			p.LootAgents, p.Gold, p.LootTurrets)
+	}
+}
+
+func TestPirateTakeCappedAtMax(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	v := w.AddHuman("me", "Mine")
+	v.Troopers = 100_000_000 // 5% would be 5,000,000 — far over the take cap
+	p := &w.Pirates[0]
+	before := v.Troopers
+
+	w.pirateRaidVictim(p, v)
+
+	if before-v.Troopers != PirateRaidMaxTake {
+		t.Errorf("a single raid should take at most %d, took %d", PirateRaidMaxTake, before-v.Troopers)
+	}
+}
+
+func TestPirateHoldingClampsToCap(t *testing.T) {
+	if got := capAdd(PirateCapTanks-10, 1000, PirateCapTanks); got != PirateCapTanks {
+		t.Errorf("holdings should clamp to cap %d, got %d", PirateCapTanks, got)
 	}
 }

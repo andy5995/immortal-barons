@@ -73,12 +73,18 @@ Net-worth value contributed per unit (from the guide's net-worth table):
 - **Biological attack** — hurts people and troopers, but not land.
 - **Attack pirates** — the nine pirate factions are living bands, not a
   fixed difficulty ladder: their strength is random (any faction can be the
-  strongest). Pirates raid players at random, carrying off a small share of
-  the victim's units (they do not take the victim's regions); the game grants
-  a raiding pirate new regions, so a pirate that just raided is fatter and
-  holds more land. Beating a pirate reclaims only a portion of its held loot
-  and regions per hit — it takes several hits (~4-5) to fully recover your
-  goods. Ignored pirates grow into mini-empires owning thousands of regions.
+  strongest). Pirates raid players at random, carrying off a share of the
+  victim's **troopers, jets, turrets, tanks, agents, and gold** — but never
+  bombers or carriers, and never the victim's regions; the game grants a
+  raiding pirate new regions instead, so a pirate that just raided is fatter.
+  A single raid takes at most **24,999** of any one thing (BRE.EXE constant is
+  25,000). Beating a pirate reclaims ~a fifth of its hoard per hit, so it
+  takes several hits to fully recover your goods.
+
+  Hard caps on what a faction can hold (per R&P play data; ✓ = also verified
+  against the BRE.EXE constants table): tanks **50,000** ✓, troopers/jets/
+  turrets **100,000** ✓ each, agents **65,000**, regions **100**, gold
+  **300,000** (R&P "assumed"; the BRE table has a 600,000 that may be this).
   Military parked in the Trading Market is safe from pirate raids.
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
