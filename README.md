@@ -34,6 +34,8 @@ door under Synchronet or Mystic.
   strikes on the enemy's intelligence, airbases, food stores, and HeadQuarters
 - Region types (coastal, mountain, desert, river, agricultural, urban,
   industrial, technology) and a food market
+- Diplomacy: typed treaties (defense, trade, intelligence) with their effects
+- Sysop configuration editor
 - Messages: player-to-player mail and a planetary bulletin
 - "While you were away" event log for asynchronous play
 - Scores and net worth
@@ -42,9 +44,8 @@ door under Synchronet or Mystic.
 
 - Diplomacy and trading between empires
 - Leagues that run for a set time, then reset and crown a winner
-- Sysop setup screen (game rules are read from a config file for now)
-- Inter-BBS (IBBS) play: sending game data between servers
-- A web (browser) front-end
+- Inter-BBS (IBBS) live play (the score-packet exchange works and is tested;
+  validation under real BBS software is still pending)
 
 ## Build and run
 
@@ -87,6 +88,19 @@ it looks for `DOOR32.SYS` or `DOOR.SYS` in the working directory.
 Callers share one persistent world: each caller's empire is saved between
 calls, keyed by their BBS handle. A nightly maintenance step
 (`barons-door -maint`) advances the world.
+
+## Running in a browser (experimental)
+
+A browser front-end serves the game over Server-Sent Events with xterm.js:
+
+```
+go build -o barons-web ./cmd/barons-web
+./barons-web -addr :8080
+```
+
+Open `http://localhost:8080`. Each browser gets its own game session. This is
+early and loads xterm.js from a CDN; the assets should be vendored (or
+integrity-pinned) before any real deployment.
 
 ## How to play
 
