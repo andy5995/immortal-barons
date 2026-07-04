@@ -16,8 +16,12 @@ go run ./cmd/barons        # play locally in your terminal
 gofmt -w .                 # always run before committing
 ```
 
-Go 1.26. No external dependencies (stdlib only) — keep it that way unless
-there's a strong reason.
+Go 1.26. Prefer the standard library, but a dependency is fine when it
+clearly earns its place. Keep the set small and justified. Commit
+`go.mod`/`go.sum`; do NOT commit `vendor/` (distros build against their own
+packaged deps or fetch at build); a release tarball may `go mod vendor` for
+offline builds. i18n uses gettext/PO (po4a for docs, a Go gettext lib for UI
+strings) — see `docs/superpowers/specs/2026-07-03-docs-help-localization-design.md`.
 
 ## Architecture
 
