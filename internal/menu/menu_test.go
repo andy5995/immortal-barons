@@ -367,3 +367,22 @@ func TestMenuChromeEnglishByDefault(t *testing.T) {
 		t.Errorf("default menu should be English; output:\n%s", out)
 	}
 }
+
+func TestHelperTranslatesViaWrappedSession(t *testing.T) {
+	w := newWorld()
+	w.Player().Language = "de"
+	f := &fakeSession{keys: []rune("\r")}
+	ls := &langSession{Session: f, w: w}
+	prompt(ls, "Troopers") // "Troopers" -> "Soldaten" in de.po
+	if !strings.Contains(f.out.String(), "Soldaten") {
+		t.Errorf("prompt through wrapped session not translated:\n%s", f.out.String())
+	}
+}
+
+func TestPlainSessionStaysEnglish(t *testing.T) {
+	f := &fakeSession{keys: []rune("\r")}
+	prompt(f, "Troopers") // plain session -> no Lang() -> English
+	if !strings.Contains(f.out.String(), "Troopers") {
+		t.Errorf("plain session should be English:\n%s", f.out.String())
+	}
+}

@@ -5,6 +5,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
 // Menus holds every top-level and sub menu built by BuildMenus, so the
@@ -280,6 +281,6 @@ func ibbsHidden(w *game.World) bool { return !w.Config.InterBBSEnabled() }
 
 func statusBar(w *game.World) string {
 	p := w.Player()
-	return fmt.Sprintf("%s | Gold %d  Food %d  Land %d  Army %d | Turns left %d | Day %d",
+	return fmt.Sprintf(i18n.T(playerLang(w), "%s | Gold %d  Food %d  Land %d  Army %d | Turns left %d | Day %d"),
 		p.Name, p.Gold, p.Food, p.Land, p.Army(), p.TurnsLeft, w.GameDay)
 }

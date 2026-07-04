@@ -23,6 +23,27 @@ func playerLang(g *game.World) string {
 	return ""
 }
 
+// langSession wraps a Session so downstream output helpers can learn the
+// caller's language from the Session alone (they receive s but not the World).
+// The language is read live from the World, so a mid-session change in
+// Preferences takes effect immediately. This is per-session state — safe for
+// the web front-end, which runs concurrent sessions in one process.
+type langSession struct {
+	session.Session
+	w *game.World
+}
+
+func (l *langSession) Lang() string { return playerLang(l.w) }
+
+// sessionLang extracts the caller's language from a wrapped Session, or "" for
+// a plain Session (e.g. tests) — which renders English.
+func sessionLang(s session.Session) string {
+	if lp, ok := s.(interface{ Lang() string }); ok {
+		return lp.Lang()
+	}
+	return ""
+}
+
 // Result tells the Run loop what to do after an action fires.
 type Result struct {
 	kind   resultKind
@@ -124,7 +145,7 @@ func (m *Menu) readChoice(s session.Session, g *game.World) (*Item, error) {
 	if g.EnterExitsBuy && m.ExitOnEnter {
 		def = m.byKey('0', g)
 	}
-	fmt.Fprintf(s, "%sChoice>%s ", ansi.FgBrightWhite, ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s ", ansi.FgBrightWhite, i18n.T(playerLang(g), "Choice>"), ansi.Reset)
 	if def != nil {
 		fmt.Fprint(s, def.label(g))
 	}
@@ -156,6 +177,7 @@ func (m *Menu) readChoice(s session.Session, g *game.World) (*Item, error) {
 // easy to test with a scripted Session. Returns nil on a clean Quit, or the
 // ReadKey error otherwise.
 func Run(s session.Session, g *game.World, root *Menu) error {
+	s = &langSession{Session: s, w: g}
 	stack := []*Menu{root}
 	for len(stack) > 0 {
 		cur := stack[len(stack)-1]

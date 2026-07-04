@@ -6,13 +6,14 @@ import (
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
 // prompt writes msg and reads a line of input (terminated by Enter),
 // echoing keystrokes since the console runs in no-echo mode.
 func prompt(s session.Session, msg string) string {
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, msg, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), ansi.Reset)
 	line, _ := session.ReadLine(s)
 	return line
 }
@@ -48,7 +49,7 @@ func parseAmount(input string, max int) int {
 }
 
 func promptInt(s session.Session, msg string) int {
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, msg, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), ansi.Reset)
 	line, _ := session.ReadLine(s)
 	return parseAmount(line, 1<<62)
 }
@@ -58,7 +59,7 @@ func promptInt(s session.Session, msg string) int {
 // (still editable); otherwise the typed number (k/m shortcuts) is used.
 // The result is clamped to [0, max].
 func promptSuggested(s session.Session, msg string, suggested, max int) int {
-	fmt.Fprintf(s, "\n%s%s (%d; %d):%s ", ansi.FgBrightWhite, msg, suggested, max, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s (%d; %d):%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), suggested, max, ansi.Reset)
 	var b []rune
 	for {
 		r, err := s.ReadKey()
@@ -111,7 +112,7 @@ func clampAmt(n, max int) int {
 
 func pause(s session.Session) {
 	// BRE's pause prompt.
-	fmt.Fprintf(s, "\n%s─»>Paused<«─%s", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, i18n.T(sessionLang(s), "─»>Paused<«─"), ansi.Reset)
 	s.ReadKey()
 }
 
@@ -142,15 +143,17 @@ func statLine(s session.Session, n int, text string) {
 	if n == 0 {
 		return
 	}
-	fmt.Fprintf(s, "  %s%s%s %s\n", ansi.FgBrightCyan, comma(n), ansi.Reset, text)
+	fmt.Fprintf(s, "  %s%s%s %s\n", ansi.FgBrightCyan, comma(n), ansi.Reset, i18n.T(sessionLang(s), text))
 }
 
+// ok and fail translate their message text by the caller's language, so every
+// call site becomes translatable just by adding the string to the catalogs.
 func ok(s session.Session, format string, a ...any) {
-	fmt.Fprintf(s, "\n  %s%s%s", ansi.FgGreen, fmt.Sprintf(format, a...), ansi.Reset)
+	fmt.Fprintf(s, "\n  %s%s%s", ansi.FgGreen, fmt.Sprintf(i18n.T(sessionLang(s), format), a...), ansi.Reset)
 	pause(s)
 }
 
 func fail(s session.Session, err error) {
-	fmt.Fprintf(s, "\n  %s%s%s", ansi.FgRed, err, ansi.Reset)
+	fmt.Fprintf(s, "\n  %s%s%s", ansi.FgRed, i18n.T(sessionLang(s), err.Error()), ansi.Reset)
 	pause(s)
 }

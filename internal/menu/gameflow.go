@@ -5,6 +5,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -44,7 +45,7 @@ func showBulletin(s session.Session, w *game.World) Result {
 // 'y'/'Y' or Enter means yes (the default), 'n'/'N' means no. No Enter is
 // required after the letter.
 func askYesNo(s session.Session, msg string) bool {
-	fmt.Fprintf(s, "\n%s (Y/n) ", msg)
+	fmt.Fprintf(s, "\n%s (Y/n) ", i18n.T(sessionLang(s), msg))
 	for {
 		r, err := s.ReadKey()
 		if err != nil {
@@ -63,7 +64,7 @@ func askYesNo(s session.Session, msg string) bool {
 
 // askYesNoDefaultNo prompts "(y/N)" and defaults to No, so Enter declines.
 func askYesNoDefaultNo(s session.Session, msg string) bool {
-	fmt.Fprintf(s, "\n%s (y/N) ", msg)
+	fmt.Fprintf(s, "\n%s (y/N) ", i18n.T(sessionLang(s), msg))
 	for {
 		r, err := s.ReadKey()
 		if err != nil {
