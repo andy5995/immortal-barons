@@ -34,6 +34,7 @@ func main() {
 	setup := flag.Bool("setup", false, "interactively configure the game and exit")
 	export := flag.String("export", "", "write this board's score packet to FILE and exit")
 	imp := flag.String("import", "", "import a score packet from FILE and exit")
+	planetary := flag.Bool("planetary", false, "run the inter-BBS PLANETARY step (read inbound, launch attacks, write outbound) and exit")
 	flag.Parse()
 
 	cfg, err := store.LoadConfig(*dataDir)
@@ -70,6 +71,14 @@ func main() {
 	if *maint {
 		if err := runMaint(cfg, today); err != nil {
 			fmt.Fprintln(os.Stderr, "barons-door -maint:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if *planetary {
+		if err := runPlanetary(cfg); err != nil {
+			fmt.Fprintln(os.Stderr, "barons-door -planetary:", err)
 			os.Exit(1)
 		}
 		return
@@ -123,6 +132,30 @@ func runMaint(cfg game.Config, today string) error {
 		return err
 	}
 	w.DailyMaintenance(today)
+	if cfg.IBBS {
+		if err := store.RunPlanetary(w, cfg.InboundDir, cfg.OutboundDir); err != nil {
+			return err
+		}
+	}
+	return store.Save(w, cfg)
+}
+
+// runPlanetary runs the inter-BBS maintenance step on its own (BRE's
+// "BRE PLANETARY"): apply inbound packets, launch due group attacks, export
+// scores, and write the outbox. Can run several times a day.
+func runPlanetary(cfg game.Config) error {
+	lock, err := store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	defer lock.Release()
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	if err := store.RunPlanetary(w, cfg.InboundDir, cfg.OutboundDir); err != nil {
+		return err
+	}
 	return store.Save(w, cfg)
 }
 
