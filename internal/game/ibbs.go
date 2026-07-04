@@ -63,6 +63,18 @@ type RemoteAttack struct {
 	Contributors []Contribution
 }
 
+// LeagueNode is one board in the inter-BBS league, as listed in the
+// coordinator's node list (BRE's BRNODES.DAT). Node 1 is the League
+// Coordinator's board.
+type LeagueNode struct {
+	Number  int
+	Name    string // planet / BBS name
+	Address string // FidoNet net/node address
+	City    string
+	State   string
+	Country string
+}
+
 // SpyReport is intel on a remote empire, stored in the planet-wide Spy
 // Database and readable by every baron here. Populated by interplanetary spy
 // ops (built in a later increment).
