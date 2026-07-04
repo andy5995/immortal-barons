@@ -798,6 +798,37 @@ func joinGroupAttack(s session.Session, w *game.World) Result {
 	return Stay
 }
 
+// travelTimes lists the approximate round-trip time to each known planet.
+// Packets exchange on each PLANETARY maintenance run (about daily), so most
+// interplanetary operations take roughly a day each way.
+func travelTimes(s session.Session, w *game.World) Result {
+	if len(w.RemoteBoards) == 0 {
+		ok(s, "No other planets are known yet.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%sApproximate travel times:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for _, b := range w.RemoteBoards {
+		fmt.Fprintf(s, "  %-18s about 1 day each way (last packet %s)\n", b.BoardID, b.Date)
+	}
+	pause(s)
+	return Stay
+}
+
+// spyDatabase shows the planet-wide store of spy reports on remote empires.
+func spyDatabase(s session.Session, w *game.World) Result {
+	if len(w.SpyDatabase) == 0 {
+		ok(s, "The spy database is empty. Spy on empires on other planets to fill it.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%sSpy Database:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for _, r := range w.SpyDatabase {
+		fmt.Fprintf(s, "  %s @ %s (%s): Land %s  Off %s  Def %s  Gold %s\n",
+			r.Empire, r.Board, r.Date, comma(r.Land), comma(r.Offense), comma(r.Defense), comma(r.Gold))
+	}
+	pause(s)
+	return Stay
+}
+
 func readMessages(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if len(p.Mail) == 0 {
