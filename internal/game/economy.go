@@ -271,11 +271,16 @@ func (w *World) Deposit(e *Empire, n int) error {
 	if e.Gold < n {
 		return ErrCantAfford
 	}
+	// Don't consume gold that won't fit under the money cap — only bank as
+	// much as there is room for.
+	if room := MoneyCap - e.Bank; n > room {
+		n = room
+	}
+	if n <= 0 {
+		return nil
+	}
 	e.Gold -= n
 	e.Bank += n
-	if e.Bank > MoneyCap {
-		e.Bank = MoneyCap
-	}
 	return nil
 }
 

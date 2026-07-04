@@ -88,8 +88,9 @@ func BuildMenus() *Menus {
 	bank.Items = []Item{
 		{Key: 'D', Label: "Deposit", Do: money("Deposit", func(p *game.Empire) int { return p.Gold }, (*game.World).Deposit)},
 		{Key: 'W', Label: "Withdraw", Do: money("Withdraw", func(p *game.Empire) int { return p.Bank }, (*game.World).Withdraw)},
-		// Loan cap is a v1 balance knob: 100 gold of credit per region owned.
-		{Key: 'B', Label: "Take Loan", Do: money("Borrow", func(p *game.Empire) int { return p.Land * 100 }, (*game.World).Loan)},
+		// Loan cap is a v1 balance knob: 100 gold of credit per region owned,
+		// measured against current debt so repeat visits can't exceed it.
+		{Key: 'B', Label: "Take Loan", Do: money("Borrow", func(p *game.Empire) int { return max(0, p.Land*100-p.Debt) }, (*game.World).Loan)},
 		{Key: 'R', Label: "Repay Loan", Do: money("Repay", func(p *game.Empire) int { return min(p.Gold, p.Debt) }, (*game.World).Repay)},
 		{Key: 'I', Label: "Invest", Do: investFunds},
 		{Key: 'L', Label: "List Investments", Do: listInvestments},

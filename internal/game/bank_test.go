@@ -122,3 +122,23 @@ func TestInvestRateMigration(t *testing.T) {
 		t.Errorf("InvestRate after migration: want %d, got %d", DefaultInvestRate, w.InvestRate)
 	}
 }
+
+func TestDepositRespectsMoneyCapWithoutLosingGold(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("h", "Realm")
+	e.Bank = MoneyCap - 100
+	e.Gold = 10_000
+	before := e.Gold + e.Bank
+	if err := w.Deposit(e, 5_000); err != nil {
+		t.Fatal(err)
+	}
+	if e.Bank != MoneyCap {
+		t.Errorf("Bank should sit at the cap, got %d", e.Bank)
+	}
+	if e.Gold+e.Bank != before {
+		t.Errorf("gold vanished at the cap: before=%d after=%d", before, e.Gold+e.Bank)
+	}
+	if e.Gold != 10_000-100 {
+		t.Errorf("only the 100 that fit should leave gold, got gold=%d", e.Gold)
+	}
+}
