@@ -61,6 +61,25 @@ func askYesNo(s session.Session, msg string) bool {
 	}
 }
 
+// askYesNoDefaultNo prompts "(y/N)" and defaults to No, so Enter declines.
+func askYesNoDefaultNo(s session.Session, msg string) bool {
+	fmt.Fprintf(s, "\n%s (y/N) ", msg)
+	for {
+		r, err := s.ReadKey()
+		if err != nil {
+			return false
+		}
+		switch r {
+		case 'y', 'Y':
+			fmt.Fprint(s, "y\n")
+			return true
+		case 'n', 'N', '\r', '\n':
+			fmt.Fprint(s, "n\n")
+			return false
+		}
+	}
+}
+
 // showTurnEvents prints and clears p's accumulated events, if any.
 func showTurnEvents(s session.Session, p *game.Empire) {
 	if len(p.Events) == 0 {

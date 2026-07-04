@@ -1368,14 +1368,23 @@ func prodField(p *game.Empire, idx int) *int {
 // 100 some production points go unused (v1 choice — no normalization).
 func setIndustries(s session.Session, w *game.World) Result {
 	p := w.Player()
+	proj := w.ProjectedProduction(p)
+	fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgBrightRed, "Industrial Production"))
+	for i, name := range prodTypeNames {
+		fmt.Fprintf(s, "%-10s : %s%3d%%%s      %s(%d per turn)%s\n",
+			name, ansi.FgBrightYellow, *prodField(p, i), ansi.Reset, ansi.FgRed, proj[i], ansi.Reset)
+	}
 	if p.Specialized != "" {
-		fmt.Fprintf(s, "\n%sYour industry is specialized in %s: more of it, less of everything else.%s\n",
+		fmt.Fprintf(s, "\n%sSpecialized in %s: more of it, less of everything else.%s\n",
 			ansi.FgBrightCyan, p.Specialized, ansi.Reset)
 	}
-	fmt.Fprintf(s, "\n%sSet Industries — percentage of production spent on each unit:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "%s\n", rule)
+	if !askYesNoDefaultNo(s, "Change Production?") {
+		return Stay
+	}
 	for i, name := range prodTypeNames {
 		cur := *prodField(p, i)
-		n := promptSuggested(s, name+" %", cur, 100)
+		n := promptSuggested(s, name, cur, 100)
 		*prodField(p, i) = n
 	}
 	ok(s, "Industry production percentages updated.")

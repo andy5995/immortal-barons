@@ -248,24 +248,20 @@ const (
 // then spends the points on units per e.ProdXxx percentages. Specialization
 // applies a per-unit efficiency bonus/penalty on top (see below); it never
 // overrides the percentage split.
-func (w *World) manufacture(e *Empire) {
-	e.IndustryGold = e.Regions.Industrial * IndustryGoldPerRegion
-	e.Gold += e.IndustryGold
-
+// ProjectedProduction computes the units e would manufacture this turn at its
+// current Industrial regions, percentages, and specialization — without
+// applying them. Order matches the Set Industries screen: Troopers, Jets,
+// Turrets, Bombers, Tanks, Carriers.
+//
+// The percentage split always governs how points are allocated. On top of that,
+// specialization (per BRE's help: "increases the ability of your industries to
+// develop a specific type of military unit ... decreases your ability to
+// produce all other equipment") applies a per-unit efficiency modifier — a
+// bonus to the specialized unit, a penalty to everything else. The magnitudes
+// are reconstructed and tunable; the exact BRE values would come from a
+// disassembly (mercutio is authoritative there).
+func (w *World) ProjectedProduction(e *Empire) [6]int {
 	pts := e.Regions.Industrial * IndustryPointsPerRegion
-	e.MadeTroopers, e.MadeJets, e.MadeTurrets = 0, 0, 0
-	e.MadeBombers, e.MadeTanks, e.MadeCarriers = 0, 0, 0
-	if pts <= 0 {
-		return
-	}
-
-	// The percentage split always governs how points are allocated. On top of
-	// that, specialization (per BRE's help: "increases the ability of your
-	// industries to develop a specific type of military unit ... decreases your
-	// ability to produce all other equipment") applies a per-unit efficiency
-	// modifier — a bonus to the specialized unit, a penalty to everything else.
-	// The bonus/penalty magnitudes are reconstructed and tunable; the exact BRE
-	// values would come from a disassembly (mercutio is authoritative there).
 	made := func(name string, pct, cost int) int {
 		units := (pts * pct / 100) / cost
 		switch {
@@ -278,12 +274,23 @@ func (w *World) manufacture(e *Empire) {
 		}
 		return units
 	}
-	e.MadeTroopers = made("Troopers", e.ProdTroopers, CostTrooper)
-	e.MadeJets = made("Jets", e.ProdJets, CostJet)
-	e.MadeTurrets = made("Turrets", e.ProdTurrets, CostTurret)
-	e.MadeBombers = made("Bombers", e.ProdBombers, CostBomber)
-	e.MadeTanks = made("Tanks", e.ProdTanks, CostTank)
-	e.MadeCarriers = made("Carriers", e.ProdCarriers, CostCarrier)
+	return [6]int{
+		made("Troopers", e.ProdTroopers, CostTrooper),
+		made("Jets", e.ProdJets, CostJet),
+		made("Turrets", e.ProdTurrets, CostTurret),
+		made("Bombers", e.ProdBombers, CostBomber),
+		made("Tanks", e.ProdTanks, CostTank),
+		made("Carriers", e.ProdCarriers, CostCarrier),
+	}
+}
+
+func (w *World) manufacture(e *Empire) {
+	e.IndustryGold = e.Regions.Industrial * IndustryGoldPerRegion
+	e.Gold += e.IndustryGold
+
+	p := w.ProjectedProduction(e)
+	e.MadeTroopers, e.MadeJets, e.MadeTurrets = p[0], p[1], p[2]
+	e.MadeBombers, e.MadeTanks, e.MadeCarriers = p[3], p[4], p[5]
 
 	e.Troopers += e.MadeTroopers
 	e.Jets += e.MadeJets
