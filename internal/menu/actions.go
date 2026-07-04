@@ -329,6 +329,43 @@ func bombHQ(s session.Session, w *game.World) Result {
 	return specialAttack(s, w, "Bomb HQ", 0, func(a, d *game.Empire) (string, error) { return w.BombHQ(a, d) })
 }
 
+// visitAdvisors gives contextual advice based on the empire's current state —
+// the sort of nudges the original's advisors offered.
+func visitAdvisors(s session.Session, w *game.World) Result {
+	p := w.Player()
+	fmt.Fprintf(s, "\n%sYour Advisors%s\n", ansi.FgBrightCyan, ansi.Reset)
+	var tips []string
+	switch {
+	case p.HQ == 0:
+		tips = append(tips, "We have no HeadQuarters, Sire. Building one would strengthen our tanks.")
+	case p.HQ < 100:
+		tips = append(tips, "Our HeadQuarters is still under construction.")
+	}
+	if p.Carriers*100 < p.Jets {
+		tips = append(tips, "We have more jets than our carriers can carry into battle. Build more carriers.")
+	}
+	if p.Food < w.FoodNeededNextTurn(p) {
+		tips = append(tips, "Our food will not last the turn. Buy or grow more.")
+	}
+	if p.Support < 50 {
+		tips = append(tips, "The people grow restless. Lower taxes or spend on their support.")
+	}
+	if p.Debt > 0 {
+		tips = append(tips, "We carry debt that grows each turn. Repay it soon.")
+	}
+	if p.Agents == 0 {
+		tips = append(tips, "We have no covert agents. Recruit some for spying and sabotage.")
+	}
+	if len(tips) == 0 {
+		tips = append(tips, "The realm is in good order, Sire. Press the attack.")
+	}
+	for _, t := range tips {
+		fmt.Fprintf(s, "  - %s\n", t)
+	}
+	pause(s)
+	return Stay
+}
+
 // gameSetup shows the current game rules (read-only; the sysop edits them from
 // the Coordinator menu's Configuration Editor).
 func gameSetup(s session.Session, w *game.World) Result {

@@ -185,7 +185,7 @@ func BuildMenus() *Menus {
 
 	system.Items = []Item{
 		{Key: '#', Label: "Abdicate", Do: stubbed("Abdicate")},
-		{Key: 'A', Label: "Visit Advisors", Do: stubbed("Advisors")},
+		{Key: 'A', Label: "Visit Advisors", Do: visitAdvisors},
 		{Key: 'D', Label: "Diplomacy", Do: gotoMenu(diplomacy)},
 		{Key: 'E', Label: "Empire Status", Do: empireStatus},
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
@@ -211,8 +211,8 @@ func BuildMenus() *Menus {
 		{Key: '1', Label: "Play Game", Do: runTurn},
 		{Key: '2', Label: "See Status", Do: empireStatus},
 		{Key: '3', Label: "See Scores", Do: seeScores},
-		{Key: '4', Label: "Today's News", Do: stubbed("Today's News")},
-		{Key: '5', Label: "Yesterday's News", Do: stubbed("Yesterday's News")},
+		{Key: '4', Label: "Today's News", Do: showBulletin},
+		{Key: '5', Label: "Yesterday's News", Do: showBulletin},
 		{Key: '6', Label: "Read Messages", Do: readMessages},
 		{Key: '7', Label: "Send Message", Do: sendMessage},
 		{Key: '8', Label: "Game Bulletins", Do: showBulletin},
