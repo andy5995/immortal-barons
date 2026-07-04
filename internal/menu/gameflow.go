@@ -30,9 +30,9 @@ func GameLoop(s session.Session, w *game.World) error {
 // showBulletin prints the planetary bulletin, or a note if there is none.
 func showBulletin(s session.Session, w *game.World) Result {
 	if len(w.Bulletin) == 0 {
-		fmt.Fprint(s, "\nNo planetary bulletins.\n")
+		fmt.Fprintf(s, "\n%s\n", tr(s, "No planetary bulletins."))
 	} else {
-		fmt.Fprintf(s, "\n%sPlanetary Bulletin:%s\n", ansi.FgBrightCyan, ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
 		for _, b := range w.Bulletin {
 			fmt.Fprintf(s, "  %s\n", b)
 		}
@@ -86,7 +86,7 @@ func showTurnEvents(s session.Session, p *game.Empire) {
 	if len(p.Events) == 0 {
 		return
 	}
-	fmt.Fprintf(s, "\n%sSince your last play, this has happened:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Since your last play, this has happened:"), ansi.Reset)
 	for _, ev := range p.Events {
 		fmt.Fprintf(s, "  %s\n", ev)
 	}
@@ -99,7 +99,7 @@ func showTurnEvents(s session.Session, p *game.Empire) {
 func incomeReport(s session.Session, w *game.World, p *game.Empire) {
 	b := w.IncomeThisTurn(p)
 
-	fmt.Fprintf(s, "\n%sIncome Report:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Income Report:"), ansi.Reset)
 	statLine(s, b.Taxes, "gold was earned in taxes.")
 	statLine(s, b.Ore, "gold was produced from the Ore Mines.")
 	statLine(s, b.Tourism, "gold was earned in Tourism.")
@@ -119,14 +119,14 @@ func incomeReport(s session.Session, w *game.World, p *game.Empire) {
 
 // endOfTurnStats prints a short flavor line and the remaining turns.
 func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
-	fmt.Fprintf(s, "\n%sEnd of Turn Statistics:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	fmt.Fprintf(s, "  The people of %s go about their business.\n", p.Name)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "End of Turn Statistics:"), ansi.Reset)
+	fmt.Fprintf(s, "  "+tr(s, "The people of %s go about their business.")+"\n", p.Name)
 	if p.LastPopGrowth > 0 {
-		fmt.Fprintf(s, "  Your dominion gained %s%s%s people.\n", ansi.FgBrightCyan, comma(p.LastPopGrowth), ansi.Reset)
+		fmt.Fprintf(s, "  "+tr(s, "Your dominion gained %s%s%s people.")+"\n", ansi.FgBrightCyan, comma(p.LastPopGrowth), ansi.Reset)
 	}
 	statLine(s, p.LastSpoiled, "units of food spoiled.")
 	if p.LastRiot {
-		fmt.Fprintf(s, "  %sRiots have broken out due to high tax rates!%s\n", ansi.FgRed, ansi.Reset)
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, tr(s, "Riots have broken out due to high tax rates!"), ansi.Reset)
 	}
 	statLine(s, p.IndustryGold, "gold was produced by your Industry.")
 	statLine(s, p.MadeTroopers, "Troopers were trained by Industrial Zones.")
@@ -135,7 +135,7 @@ func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
 	statLine(s, p.MadeBombers, "Bombers were manufactured by Industrial Zones.")
 	statLine(s, p.MadeTanks, "Tanks were manufactured by Industrial Zones.")
 	statLine(s, p.MadeCarriers, "Carriers were manufactured by Industrial Zones.")
-	fmt.Fprintf(s, "  Turns left today: %d\n", p.TurnsLeft)
+	fmt.Fprintf(s, "  "+tr(s, "Turns left today: %d")+"\n", p.TurnsLeft)
 	pause(s)
 }
 
@@ -153,7 +153,7 @@ func paymentStage(s session.Session, w *game.World, p *game.Empire) {
 	// If on-hand gold can't cover maintenance but savings can, offer to draw
 	// from the bank before paying (BRE lets you visit the bank to make upkeep).
 	if p.Gold < due && p.Bank > 0 &&
-		askYesNo(s, fmt.Sprintf("Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?", due, p.Gold, p.Bank)) {
+		askYesNo(s, fmt.Sprintf(tr(s, "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"), due, p.Gold, p.Bank)) {
 		n := promptSuggested(s, "Withdraw how much?", min(due-p.Gold, p.Bank), p.Bank)
 		w.Withdraw(p, n)
 	}
@@ -161,28 +161,28 @@ func paymentStage(s session.Session, w *game.World, p *game.Empire) {
 	if w.AutoPayMaint && p.Gold >= forces+regions {
 		w.PayForces(p, forces)
 		w.PayRegions(p, regions)
-		fmt.Fprintf(s, "\nMaintenance paid: %d gold to your forces, %d to your regions.\n", forces, regions)
+		fmt.Fprintf(s, "\n"+tr(s, "Maintenance paid: %d gold to your forces, %d to your regions.")+"\n", forces, regions)
 		return
 	}
 
-	fmt.Fprintf(s, "\n%sMaintenance:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Maintenance:"), ansi.Reset)
 	if w.AutoPayMaint {
-		fmt.Fprintf(s, "%sYou cannot cover all your maintenance this turn.%s\n", ansi.FgYellow, ansi.Reset)
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgYellow, tr(s, "You cannot cover all your maintenance this turn."), ansi.Reset)
 	}
 
-	fmt.Fprintf(s, "\nYour armed forces require %d gold.\n", forces)
+	fmt.Fprintf(s, "\n"+tr(s, "Your armed forces require %d gold.")+"\n", forces)
 	if lost := w.PayForces(p, promptSuggested(s, "How much will you give?", min(forces, p.Gold), p.Gold)); lost > 0 {
-		fmt.Fprintf(s, "%s%d units deserted for lack of pay.%s\n", ansi.FgRed, lost, ansi.Reset)
+		fmt.Fprintf(s, "%s"+tr(s, "%d units deserted for lack of pay.")+"%s\n", ansi.FgRed, lost, ansi.Reset)
 	}
 
-	fmt.Fprintf(s, "\n%d gold is required to maintain your regions.\n", regions)
+	fmt.Fprintf(s, "\n"+tr(s, "%d gold is required to maintain your regions.")+"\n", regions)
 	if lost := w.PayRegions(p, promptSuggested(s, "How much will you give?", min(regions, p.Gold), p.Gold)); lost > 0 {
-		fmt.Fprintf(s, "%s%d regions revolted for lack of upkeep.%s\n", ansi.FgRed, lost, ansi.Reset)
+		fmt.Fprintf(s, "%s"+tr(s, "%d regions revolted for lack of upkeep.")+"%s\n", ansi.FgRed, lost, ansi.Reset)
 	}
 
 	if p.Support < 100 && p.Gold > 0 && askYesNo(s, "Spend gold to boost popular support?") {
 		if pts := w.BoostSupport(p, promptSuggested(s, "How much will you give?", 0, p.Gold)); pts > 0 {
-			fmt.Fprintf(s, "Popular support rose %d points.\n", pts)
+			fmt.Fprintf(s, tr(s, "Popular support rose %d points.")+"\n", pts)
 		}
 	}
 }

@@ -156,3 +156,106 @@ msgstr "Специализация"
 
 msgid "Write Macros"
 msgstr "Написать макросы"
+
+# Turn pipeline — headers
+msgid "Income Report:"
+msgstr "Отчёт о доходах:"
+
+msgid "End of Turn Statistics:"
+msgstr "Статистика конца хода:"
+
+msgid "Maintenance:"
+msgstr "Содержание:"
+
+msgid "Planetary Bulletin:"
+msgstr "Планетарный бюллетень:"
+
+msgid "No planetary bulletins."
+msgstr "Планетарных бюллетеней нет."
+
+msgid "Since your last play, this has happened:"
+msgstr "С вашего последнего хода произошло следующее:"
+
+msgid "Turns left today: %d"
+msgstr "Осталось ходов сегодня: %d"
+
+# Turn pipeline — income report lines
+msgid "gold was earned in taxes."
+msgstr "золота получено от налогов."
+
+msgid "gold was produced from the Ore Mines."
+msgstr "золота добыто на рудниках."
+
+msgid "gold was earned in Tourism."
+msgstr "золота получено от туризма."
+
+msgid "gold was earned by Solar Power Generators."
+msgstr "золота получено от солнечных электростанций."
+
+msgid "gold was earned from Rivers."
+msgstr "золота получено от рек."
+
+msgid "gold was earned in Urban Centers."
+msgstr "золота получено в городских центрах."
+
+msgid "gold was earned from Industrial Zones."
+msgstr "золота получено от промышленных зон."
+
+msgid "gold was earned from Technology."
+msgstr "золота получено от технологий."
+
+msgid "gold was earned from Trade."
+msgstr "золота получено от торговли."
+
+msgid "Food units were grown."
+msgstr "единиц еды выращено."
+
+# Turn pipeline — end of turn
+msgid "gold was produced by your Industry."
+msgstr "золота произведено вашей промышленностью."
+
+msgid "Troopers were trained by Industrial Zones."
+msgstr "солдат обучено промышленными зонами."
+
+msgid "Jets were manufactured by Industrial Zones."
+msgstr "самолётов произведено промышленными зонами."
+
+msgid "Turrets were manufactured by Industrial Zones."
+msgstr "турелей произведено промышленными зонами."
+
+msgid "Bombers were manufactured by Industrial Zones."
+msgstr "бомбардировщиков произведено промышленными зонами."
+
+msgid "Tanks were manufactured by Industrial Zones."
+msgstr "танков произведено промышленными зонами."
+
+msgid "Carriers were manufactured by Industrial Zones."
+msgstr "авианосцев произведено промышленными зонами."
+
+msgid "units of food spoiled."
+msgstr "единиц еды испортилось."
+
+msgid "Riots have broken out due to high tax rates!"
+msgstr "Из-за высоких налогов начались бунты!"
+
+# Turn pipeline — maintenance
+msgid "Your armed forces require %d gold."
+msgstr "Вашим вооружённым силам требуется %d золота."
+
+msgid "%d gold is required to maintain your regions."
+msgstr "%d золота требуется на содержание ваших регионов."
+
+msgid "%d units deserted for lack of pay."
+msgstr "%d единиц дезертировало из-за отсутствия жалованья."
+
+msgid "%d regions revolted for lack of upkeep."
+msgstr "%d регионов взбунтовалось из-за нехватки содержания."
+
+msgid "You cannot cover all your maintenance this turn."
+msgstr "Вы не можете покрыть всё содержание в этот ход."
+
+msgid "─»>Paused<«─"
+msgstr "─»>Пауза<«─"
+
+msgid "Change Production?"
+msgstr "Изменить производство?"

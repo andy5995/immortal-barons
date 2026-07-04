@@ -44,6 +44,13 @@ func sessionLang(s session.Session) string {
 	return ""
 }
 
+// tr translates msgid to the session's language, for direct-print call sites
+// that don't go through a prompt/ok/fail helper. Keep color codes and layout
+// whitespace outside the msgid so the catalog holds clean, translatable text.
+func tr(s session.Session, msgid string) string {
+	return i18n.T(sessionLang(s), msgid)
+}
+
 // Result tells the Run loop what to do after an action fires.
 type Result struct {
 	kind   resultKind

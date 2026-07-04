@@ -156,3 +156,106 @@ msgstr "Industrie spezialisieren"
 
 msgid "Write Macros"
 msgstr "Makros schreiben"
+
+# Turn pipeline — headers
+msgid "Income Report:"
+msgstr "Einkommensbericht:"
+
+msgid "End of Turn Statistics:"
+msgstr "Statistik am Zugende:"
+
+msgid "Maintenance:"
+msgstr "Unterhalt:"
+
+msgid "Planetary Bulletin:"
+msgstr "Planetenaushang:"
+
+msgid "No planetary bulletins."
+msgstr "Keine Planetenaushänge."
+
+msgid "Since your last play, this has happened:"
+msgstr "Seit deinem letzten Zug ist Folgendes geschehen:"
+
+msgid "Turns left today: %d"
+msgstr "Verbleibende Züge heute: %d"
+
+# Turn pipeline — income report lines
+msgid "gold was earned in taxes."
+msgstr "Gold wurde durch Steuern eingenommen."
+
+msgid "gold was produced from the Ore Mines."
+msgstr "Gold wurde von den Erzminen erzeugt."
+
+msgid "gold was earned in Tourism."
+msgstr "Gold wurde durch Tourismus eingenommen."
+
+msgid "gold was earned by Solar Power Generators."
+msgstr "Gold wurde durch Solarkraftwerke eingenommen."
+
+msgid "gold was earned from Rivers."
+msgstr "Gold wurde durch Flüsse eingenommen."
+
+msgid "gold was earned in Urban Centers."
+msgstr "Gold wurde in Stadtzentren eingenommen."
+
+msgid "gold was earned from Industrial Zones."
+msgstr "Gold wurde durch Industriezonen eingenommen."
+
+msgid "gold was earned from Technology."
+msgstr "Gold wurde durch Technologie eingenommen."
+
+msgid "gold was earned from Trade."
+msgstr "Gold wurde durch Handel eingenommen."
+
+msgid "Food units were grown."
+msgstr "Nahrungseinheiten wurden angebaut."
+
+# Turn pipeline — end of turn
+msgid "gold was produced by your Industry."
+msgstr "Gold wurde von deiner Industrie erzeugt."
+
+msgid "Troopers were trained by Industrial Zones."
+msgstr "Soldaten wurden in Industriezonen ausgebildet."
+
+msgid "Jets were manufactured by Industrial Zones."
+msgstr "Jets wurden in Industriezonen hergestellt."
+
+msgid "Turrets were manufactured by Industrial Zones."
+msgstr "Türme wurden in Industriezonen hergestellt."
+
+msgid "Bombers were manufactured by Industrial Zones."
+msgstr "Bomber wurden in Industriezonen hergestellt."
+
+msgid "Tanks were manufactured by Industrial Zones."
+msgstr "Panzer wurden in Industriezonen hergestellt."
+
+msgid "Carriers were manufactured by Industrial Zones."
+msgstr "Träger wurden in Industriezonen hergestellt."
+
+msgid "units of food spoiled."
+msgstr "Nahrungseinheiten sind verdorben."
+
+msgid "Riots have broken out due to high tax rates!"
+msgstr "Aufstände sind wegen hoher Steuern ausgebrochen!"
+
+# Turn pipeline — maintenance
+msgid "Your armed forces require %d gold."
+msgstr "Deine Streitkräfte benötigen %d Gold."
+
+msgid "%d gold is required to maintain your regions."
+msgstr "%d Gold werden benötigt, um deine Regionen zu unterhalten."
+
+msgid "%d units deserted for lack of pay."
+msgstr "%d Einheiten desertierten mangels Sold."
+
+msgid "%d regions revolted for lack of upkeep."
+msgstr "%d Regionen rebellierten mangels Unterhalt."
+
+msgid "You cannot cover all your maintenance this turn."
+msgstr "Du kannst diesen Zug nicht deinen gesamten Unterhalt decken."
+
+msgid "─»>Paused<«─"
+msgstr "─»>Pause<«─"
+
+msgid "Change Production?"
+msgstr "Produktion ändern?"
