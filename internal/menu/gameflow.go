@@ -2,7 +2,6 @@ package menu
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -41,15 +40,25 @@ func showBulletin(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-// askYesNo prompts msg with a "(Y/n)" hint, defaulting to yes: only an
-// answer starting with 'n'/'N' returns false.
+// askYesNo prompts msg with a "(Y/n)" hint and reads a single keypress —
+// 'y'/'Y' or Enter means yes (the default), 'n'/'N' means no. No Enter is
+// required after the letter.
 func askYesNo(s session.Session, msg string) bool {
-	line := prompt(s, msg+" (Y/n)")
-	line = strings.TrimSpace(line)
-	if line == "" {
-		return true
+	fmt.Fprintf(s, "\n%s (Y/n) ", msg)
+	for {
+		r, err := s.ReadKey()
+		if err != nil {
+			return false
+		}
+		switch r {
+		case 'n', 'N':
+			fmt.Fprint(s, "n\n")
+			return false
+		case 'y', 'Y', '\r', '\n':
+			fmt.Fprint(s, "y\n")
+			return true
+		}
 	}
-	return line[0] != 'n' && line[0] != 'N'
 }
 
 // showTurnEvents prints and clears p's accumulated events, if any.

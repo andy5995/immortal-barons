@@ -22,25 +22,29 @@ func NewMacroExpander(inner Session, lookup func(letter string) (string, bool)) 
 }
 
 func (m *MacroExpander) ReadKey() (rune, error) {
-	for {
-		if len(m.queue) > 0 {
-			r := m.queue[0]
-			m.queue = m.queue[1:]
-			return r, nil
-		}
-		r, err := m.inner.ReadKey()
-		if err != nil {
-			return r, err
-		}
-		if r >= 1 && r <= 26 { // Ctrl-A..Ctrl-Z
-			letter := string(rune('A' + r - 1))
-			if seq, ok := m.lookup(letter); ok && seq != "" {
-				m.queue = append(m.queue, []rune(seq)...)
-			}
-			continue // serve the queue (or read again if no macro matched)
-		}
+	if len(m.queue) > 0 {
+		r := m.queue[0]
+		m.queue = m.queue[1:]
 		return r, nil
 	}
+	r, err := m.inner.ReadKey()
+	if err != nil {
+		return r, err
+	}
+	// Ctrl-A..Ctrl-Z can trigger a macro — but NEVER intercept the control
+	// codes that double as essential keys (Backspace, Tab, LF, Enter), or
+	// ReadLine and single-key prompts would never see their terminator.
+	// An unmapped Ctrl-key just passes through (the menu ignores it).
+	if r >= 1 && r <= 26 && r != '\b' && r != '\t' && r != '\n' && r != '\r' {
+		letter := string(rune('A' + r - 1))
+		if seq, ok := m.lookup(letter); ok && seq != "" {
+			m.queue = []rune(seq)
+			first := m.queue[0]
+			m.queue = m.queue[1:]
+			return first, nil
+		}
+	}
+	return r, nil
 }
 
 func (m *MacroExpander) Write(p []byte) (int, error) { return m.inner.Write(p) }

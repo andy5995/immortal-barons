@@ -54,12 +54,30 @@ func TestMacroExpanderExpandsCtrlKey(t *testing.T) {
 	}
 }
 
-func TestMacroExpanderIgnoresUnmappedCtrlKey(t *testing.T) {
-	// Ctrl-A (rune 1) has no macro; it should be swallowed, leaving "AB".
+func TestMacroExpanderPassesUnmappedCtrlKey(t *testing.T) {
+	// Ctrl-A (rune 1) has no macro; it passes through unchanged (the menu
+	// ignores it) rather than being swallowed.
 	inner := &scriptedKeys{keys: []rune{1, 'A', 'B'}}
 	m := NewMacroExpander(inner, func(string) (string, bool) { return "", false })
-	if got := string(drain(t, m)); got != "AB" {
-		t.Errorf("want AB, got %q", got)
+	got := drain(t, m)
+	if len(got) != 3 || got[0] != 1 || got[1] != 'A' || got[2] != 'B' {
+		t.Errorf("unmapped Ctrl-key should pass through, got %v", got)
+	}
+}
+
+func TestMacroExpanderNeverInterceptsEnter(t *testing.T) {
+	// Enter is Ctrl-M (rune 13). Even with a macro bound to "M", Enter must
+	// pass through so ReadLine and single-key prompts still terminate.
+	inner := &scriptedKeys{keys: []rune{'\r'}}
+	m := NewMacroExpander(inner, func(letter string) (string, bool) {
+		if letter == "M" {
+			return "XX", true
+		}
+		return "", false
+	})
+	got := drain(t, m)
+	if len(got) != 1 || got[0] != '\r' {
+		t.Errorf("Enter must not be hijacked by a Ctrl-M macro, got %v", got)
 	}
 }
 
