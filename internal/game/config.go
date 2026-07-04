@@ -1,16 +1,135 @@
 package game
 
-type Config struct {
-	TurnsPerDay     int
-	ProtectionTurns int
-	AICount         int
-	DataDir         string
-	GameLength      int    // days before the league ends and resets; 0 = endless
-	BoardID         string // name of this board in exported inter-BBS packets
-	IBBS            bool   // participate in inter-BBS play (gates the interplanetary menus)
-	InboundDir      string // inter-BBS packets arrive here (RunPlanetary reads them)
-	OutboundDir     string // inter-BBS packets are written here for the transport to move
+// Level is a cost/damage/reward preset, as BRE's Configuration Editor uses
+// ([H,M,L,N]). Medium is the baseline. Percent() gives the multiplier applied
+// to the underlying value. None (0×) is valid only for the cost knobs; the
+// damage/reward knobs use only High/Medium/Low.
+type Level int
+
+const (
+	Medium Level = iota // baseline (zero value so old saves default here)
+	Low
+	High
+	None
+)
+
+func (l Level) String() string {
+	switch l {
+	case Low:
+		return "Low"
+	case High:
+		return "High"
+	case None:
+		return "None"
+	default:
+		return "Medium"
+	}
 }
+
+// Percent is the multiplier this level applies, in percent: None 0, Low 50,
+// Medium 100, High 200.
+func (l Level) Percent() int {
+	switch l {
+	case None:
+		return 0
+	case Low:
+		return 50
+	case High:
+		return 200
+	default:
+		return 100
+	}
+}
+
+// BuyMode controls military purchasing (BRE "Buy Military": Yes/No/Limited).
+type BuyMode int
+
+const (
+	BuyYes     BuyMode = iota // unlimited purchasing (zero value / BRE default)
+	BuyNo                     // no purchasing; players must build via industry
+	BuyLimited                // a limited amount is on the market each day
+)
+
+func (b BuyMode) String() string {
+	switch b {
+	case BuyNo:
+		return "No"
+	case BuyLimited:
+		return "Limited"
+	default:
+		return "Yes"
+	}
+}
+
+// SabreMode controls S3-Sabre missile handling (BRE "Sabre Handling").
+type SabreMode int
+
+const (
+	SabreUserSelect SabreMode = iota // User Select/Original (BRE default)
+	SabreNone                        // None/Disabled
+	SabreRandom                      // random return
+	SabreConstant                    // constant return
+)
+
+func (m SabreMode) String() string {
+	switch m {
+	case SabreNone:
+		return "None/Disabled"
+	case SabreRandom:
+		return "Random"
+	case SabreConstant:
+		return "Constant"
+	default:
+		return "User Select/Original"
+	}
+}
+
+// Config holds the game rules. The first block is per-board; the rest mirror
+// BRE's Configuration Editor (Image #15) and, in a league, are set by the
+// Coordinator and broadcast to every board (see LeagueConfig). Defaults are
+// from BRE's reset-init code and Configuration Help screens.
+type Config struct {
+	// Per-board (not part of the league ruleset).
+	AICount     int
+	DataDir     string
+	BoardID     string // name of this board in exported inter-BBS packets
+	IBBS        bool   // participate in inter-BBS play (gates the interplanetary menus)
+	InboundDir  string // inter-BBS packets arrive here (RunPlanetary reads them)
+	OutboundDir string // inter-BBS packets are written here for the transport to move
+
+	// League ruleset (BRE Configuration Editor fields).
+	TurnsPerDay       int       // turns each player gets per day
+	ProtectionTurns   int       // New Realm Protection length
+	GameLength        int       // days before the league ends and resets; 0 = endless
+	InitialMarketLand int       // land on the market at reset
+	LandPerDay        int       // land added to the market each day
+	InterestRate      int       // bank interest (BRE: % over 10 days; 200 = 20%/day)
+	StdInvestRate     int       // standard investment rate (BRE: % over 10 days)
+	SteadyInvest      bool      // steady (fixed) investment rate instead of floating
+	MaxTaxRate        int       // highest tax rate a player may set
+	MaxRegions        int       // most regions a player may own
+	MaxPlayers        int       // most human empires per board (0 = unlimited)
+	BuyMilitary       BuyMode   // Yes / No / Limited
+	MaintCosts        Level     // maintenance costs (regions + forces)
+	TradeCosts        Level     // trade-deal costs
+	RegionCosts       Level     // region purchase price
+	AttackDamage      Level     // damage attacks inflict (never None)
+	AttackRewards     Level     // land/goods gained from a win (never None)
+	SabreHandling     SabreMode // S3-Sabre missile handling
+}
+
+// Config-editor upper bounds, from BRE's Configuration Help screens, which show
+// each field as "(default; max)". Confirmed by Andy against the game.
+const (
+	MaxTurnsPerDay        = 20    // turns-per-day ceiling (default 8)
+	MaxProtectionTurns    = 200   // Turns of Protection ceiling (default 20)
+	MaxLandPerDay         = 5000  // Daily Land Creation ceiling (default 1000)
+	MaxInitialMarketLand  = 50000 // Initial Market Land ceiling (default 0)
+	MaxPurchasableRegions = 10000 // Max Purchasable Regions ceiling (default 500)
+	MaxPlanetaryTaxRate   = 200   // Tax Rate ceiling (default 50)
+	MaxBankInterest       = 200   // Bank Interest Rate ceiling (default 50; 200 = 20%/day)
+	MaxStdInvestRate      = 100   // Standard Investment Rate ceiling (default 35; 100 = 10%/day)
+)
 
 // InterBBSEnabled reports whether inter-BBS / interplanetary features (group
 // attacks, IP scores) should be offered: the game is IBBS-configured, or is a
@@ -21,13 +140,30 @@ func (c Config) InterBBSEnabled() bool {
 
 func DefaultConfig() Config {
 	return Config{
-		TurnsPerDay:     10,
-		ProtectionTurns: 20,
-		AICount:         0,
-		DataDir:         "./data",
-		GameLength:      0,
-		BoardID:         "local",
-		InboundDir:      "./data/inbound",
-		OutboundDir:     "./data/outbound",
+		AICount:     0,
+		DataDir:     "./data",
+		BoardID:     "local",
+		InboundDir:  "./data/inbound",
+		OutboundDir: "./data/outbound",
+
+		// Defaults from BRE's reset-init code and Configuration Help screens.
+		TurnsPerDay:       8,
+		ProtectionTurns:   20,
+		GameLength:        0,
+		InitialMarketLand: 0,
+		LandPerDay:        1000,
+		InterestRate:      50,
+		StdInvestRate:     35,
+		SteadyInvest:      false,
+		MaxTaxRate:        50,
+		MaxRegions:        500,
+		MaxPlayers:        25,
+		BuyMilitary:       BuyYes,
+		MaintCosts:        Medium,
+		TradeCosts:        Medium,
+		RegionCosts:       Medium,
+		AttackDamage:      Medium,
+		AttackRewards:     Medium,
+		SabreHandling:     SabreUserSelect,
 	}
 }
