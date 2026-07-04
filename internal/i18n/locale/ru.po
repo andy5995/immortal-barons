@@ -302,3 +302,22 @@ msgstr "Военные"
 
 msgid "You have %s%s turns of Protection Left."
 msgstr "У вас осталось %s%s ходов защиты."
+
+# Scores
+msgid "Rank"
+msgstr "Ранг"
+
+msgid "Empire"
+msgstr "Империя"
+
+msgid "Land"
+msgstr "Земля"
+
+msgid "Net Worth"
+msgstr "Состояние"
+
+msgid "(dead)"
+msgstr "(мёртв)"
+
+msgid "Last Planetary Master: %s"
+msgstr "Последний Мастер Планеты: %s"

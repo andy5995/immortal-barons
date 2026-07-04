@@ -727,11 +727,11 @@ func printScores(s session.Session, w *game.World) {
 	sort.Slice(rows, func(i, j int) bool { return rows[i].nw > rows[j].nw })
 
 	fmt.Fprintf(s, "\n%s%-4s %-18s %-8s %-10s%s\n",
-		ansi.FgBrightCyan, "Rank", "Empire", "Land", "Net Worth", ansi.Reset)
+		ansi.FgBrightCyan, tr(s, "Rank"), tr(s, "Empire"), tr(s, "Land"), tr(s, "Net Worth"), ansi.Reset)
 	for i, r := range rows {
 		name := r.e.Name
 		if !r.e.Alive {
-			name += " (dead)"
+			name += " " + tr(s, "(dead)")
 		}
 		mark := "  "
 		if r.e == w.Player() {
@@ -740,7 +740,7 @@ func printScores(s session.Session, w *game.World) {
 		fmt.Fprintf(s, "%s%2d %-18s %-8d %-10d\n", mark, i+1, name, r.e.Land, r.nw)
 	}
 	if w.LastMaster != "" {
-		fmt.Fprintf(s, "\nLast Planetary Master: %s\n", w.LastMaster)
+		fmt.Fprintf(s, "\n"+tr(s, "Last Planetary Master: %s")+"\n", w.LastMaster)
 	}
 }
 

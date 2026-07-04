@@ -302,3 +302,22 @@ msgstr "Militär"
 
 msgid "You have %s%s turns of Protection Left."
 msgstr "Du hast noch %s%s Züge Schutz."
+
+# Scores
+msgid "Rank"
+msgstr "Rang"
+
+msgid "Empire"
+msgstr "Imperium"
+
+msgid "Land"
+msgstr "Land"
+
+msgid "Net Worth"
+msgstr "Reinvermögen"
+
+msgid "(dead)"
+msgstr "(tot)"
+
+msgid "Last Planetary Master: %s"
+msgstr "Letzter Planetenmeister: %s"
