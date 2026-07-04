@@ -273,6 +273,9 @@ func (w *World) Deposit(e *Empire, n int) error {
 	}
 	e.Gold -= n
 	e.Bank += n
+	if e.Bank > MoneyCap {
+		e.Bank = MoneyCap
+	}
 	return nil
 }
 
