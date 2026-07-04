@@ -102,7 +102,7 @@ func regionField(p *game.Empire, idx int) *int {
 // / Owned table, colored (magenta keys, yellow names) so buy and drop share one
 // look.
 func printRegionTable(s session.Session, p *game.Empire) {
-	fmt.Fprintf(s, "%sKey  Name           Produces       Owned%s\n", ansi.FgBrightWhite, ansi.Reset)
+	fmt.Fprintf(s, "%s%-5s%-15s%-15s%s%s\n", ansi.FgBrightWhite, tr(s, "Key"), tr(s, "Name"), tr(s, "Produces"), tr(s, "Owned"), ansi.Reset)
 	for i, name := range regionTypeNames {
 		fmt.Fprintf(s, " %s(%c)%s %s%-14s%s %-14s %5d\n",
 			ansi.FgBrightMagenta, regionTypeKeys[i], ansi.Reset,
@@ -128,10 +128,9 @@ func promptRegionType(s session.Session) int {
 
 func buyLand(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%sBuy Regions — %d gold each.%s\n", ansi.FgBrightCyan, w.LandPrice(p), ansi.Reset)
-	fmt.Fprintf(s, "Note: Region prices rise as you expand, so the price shown is only\n")
-	fmt.Fprintf(s, "      the cost of the first region you buy.\n")
-	fmt.Fprintf(s, "You can afford %s%d%s regions.\n\n", ansi.FgBrightCyan, w.MaxAffordableRegions(p), ansi.Reset)
+	fmt.Fprintf(s, "\n%s"+tr(s, "Buy Regions — %d gold each.")+"%s\n", ansi.FgBrightCyan, w.LandPrice(p), ansi.Reset)
+	fmt.Fprintf(s, "%s\n", tr(s, "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."))
+	fmt.Fprintf(s, tr(s, "You can afford %s%d%s regions.")+"\n\n", ansi.FgBrightCyan, w.MaxAffordableRegions(p), ansi.Reset)
 	printRegionTable(s, p)
 	t := promptRegionType(s)
 	if t < 0 {
@@ -151,7 +150,7 @@ func buyLand(s session.Session, w *game.World) Result {
 
 func sellLand(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%sNOTE: You cannot sell Regions, only drop them...%s\n", ansi.FgYellow, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "NOTE: You cannot sell Regions, only drop them..."), ansi.Reset)
 	printRegionTable(s, p)
 	t := promptRegionType(s)
 	if t < 0 {
@@ -192,7 +191,7 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 // return, and locks the gold via w.Invest.
 func investFunds(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\nCurrent investment rate: %d%% per day.\n", w.InvestRate)
+	fmt.Fprintf(s, "\n"+tr(s, "Current investment rate: %d%% per day.")+"\n", w.InvestRate)
 	days := promptInt(s, "Invest for how many days?")
 	if days < game.MinInvestDays {
 		days = game.MinInvestDays
@@ -202,7 +201,7 @@ func investFunds(s session.Session, w *game.World) Result {
 		return Stay
 	}
 	expected := game.ExpectedReturn(amount, w.InvestRate, days)
-	fmt.Fprintf(s, "\n  Expected return: ~%d\n", expected)
+	fmt.Fprintf(s, "\n  "+tr(s, "Expected return: ~%d")+"\n", expected)
 	ret, err := w.Invest(p, amount, days)
 	if err != nil {
 		fail(s, err)
@@ -219,16 +218,16 @@ func investFunds(s session.Session, w *game.World) Result {
 // exit, and the caller's next visit finds no empire and onboards a fresh one.
 func abdicate(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%sAbdicating deletes %s permanently. This cannot be undone.%s\n",
+	fmt.Fprintf(s, "\n%s"+tr(s, "Abdicating deletes %s permanently. This cannot be undone.")+"%s\n",
 		ansi.FgBrightRed, p.Name, ansi.Reset)
-	typed := prompt(s, fmt.Sprintf("Type your realm name (%s) to confirm, or anything else to cancel", p.Name))
+	typed := prompt(s, fmt.Sprintf(tr(s, "Type your realm name (%s) to confirm, or anything else to cancel"), p.Name))
 	if strings.TrimSpace(typed) != p.Name {
-		fmt.Fprint(s, "\nAbdication cancelled.\n")
+		fmt.Fprintf(s, "\n%s\n", tr(s, "Abdication cancelled."))
 		pause(s)
 		return Stay
 	}
 	w.RemoveEmpire(p)
-	fmt.Fprintf(s, "\n%sYour empire is no more. Fare thee well.%s\n", ansi.FgYellow, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "Your empire is no more. Fare thee well."), ansi.Reset)
 	pause(s)
 	return Quit
 }
@@ -248,16 +247,16 @@ func writeMacros(s session.Session, w *game.World) Result {
 	if p.Macros == nil {
 		p.Macros = map[string]string{}
 	}
-	fmt.Fprintf(s, "\n%sMacro Editor%s\n\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n\n", ansi.FgBrightCyan, tr(s, "Macro Editor"), ansi.Reset)
 	for _, k := range macroKeys {
 		val := p.Macros[string(k)]
 		if val == "" {
-			val = "None"
+			val = tr(s, "None")
 		}
 		fmt.Fprintf(s, "Ctrl-%c: %s%s%s\n", k, ansi.FgGreen, val, ansi.Reset)
 	}
 
-	fmt.Fprintf(s, "\nEdit which macro [D,E,F,R,I,O,K,L]? ")
+	fmt.Fprintf(s, "\n%s ", tr(s, "Edit which macro [D,E,F,R,I,O,K,L]?"))
 	r, err := s.ReadKey()
 	if err != nil {
 		return Stay
@@ -276,7 +275,7 @@ func writeMacros(s session.Session, w *game.World) Result {
 	// (passes through the expander) instead of replaying the old macro.
 	delete(p.Macros, string(letter))
 	ctrl := rune(letter - 'A' + 1)
-	fmt.Fprintf(s, "\nEditing Macro Ctrl-%c    Press Ctrl-%c to end edit.\n", letter, letter)
+	fmt.Fprintf(s, "\n"+tr(s, "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit.")+"\n", letter, letter)
 	var seq []rune
 	for {
 		k, err := s.ReadKey()
@@ -301,18 +300,18 @@ func writeMacros(s session.Session, w *game.World) Result {
 func listInvestments(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if len(p.Investments) == 0 && p.Debt == 0 {
-		fmt.Fprint(s, "\nYou have no active investments or loans.\n")
+		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no active investments or loans."))
 		pause(s)
 		return Stay
 	}
 	if len(p.Investments) > 0 {
-		fmt.Fprint(s, "\n  Amount      Return    Matures Day\n")
+		fmt.Fprintf(s, "\n  %s\n", tr(s, "Amount      Return    Matures Day"))
 		for _, inv := range p.Investments {
 			fmt.Fprintf(s, "  %-10d  %-8d  %d\n", inv.Amount, inv.Return, inv.MaturesDay)
 		}
 	}
 	if p.Debt > 0 {
-		fmt.Fprintf(s, "\n  Debt owed: %d\n", p.Debt)
+		fmt.Fprintf(s, "\n  "+tr(s, "Debt owed: %d")+"\n", p.Debt)
 	}
 	pause(s)
 	return Stay
@@ -320,7 +319,7 @@ func listInvestments(s session.Session, w *game.World) Result {
 
 // bankRates shows the current savings and investment rates.
 func bankRates(s session.Session, w *game.World) Result {
-	fmt.Fprintf(s, "\n  Savings interest: ~1%% per game day.\n  Investment rate: %d%% per day.\n", w.InvestRate)
+	fmt.Fprintf(s, "\n  "+tr(s, "Savings interest: ~1%% per game day.")+"\n  "+tr(s, "Investment rate: %d%% per day.")+"\n", w.InvestRate)
 	pause(s)
 	return Stay
 }
@@ -364,10 +363,8 @@ func regularAttack(s session.Session, w *game.World) Result {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%sChoose a target:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	for i, e := range targets {
-		fmt.Fprintf(s, "  %d) %-16s Land %-5d Army %-7d\n", i+1, e.Name, e.Land, e.Army())
-	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose a target:"), ansi.Reset)
+	printTargetRows(s, targets)
 	i := promptInt(s, "Attack which empire (0 to cancel)?")
 	if i < 1 || i > len(targets) {
 		return Stay
@@ -375,6 +372,13 @@ func regularAttack(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "\n%s\n", w.Attack(w.Player(), targets[i-1]))
 	pause(s)
 	return Stay
+}
+
+// printTargetRows lists attackable empires with their Land and Army columns.
+func printTargetRows(s session.Session, targets []*game.Empire) {
+	for i, e := range targets {
+		fmt.Fprintf(s, "  %d) %-16s %s %-5d %s %-7d\n", i+1, e.Name, tr(s, "Land"), e.Land, tr(s, "Army"), e.Army())
+	}
 }
 
 // specialAttack shares the target-selection loop used by the nuclear,
@@ -390,13 +394,11 @@ func specialAttack(s session.Session, w *game.World, label string, cost int, str
 		return Stay
 	}
 	if cost > 0 {
-		fmt.Fprintf(s, "\n%s%s — %d gold. Choose a target:%s\n", ansi.FgBrightCyan, label, cost, ansi.Reset)
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s — %d gold. Choose a target:")+"%s\n", ansi.FgBrightCyan, label, cost, ansi.Reset)
 	} else {
-		fmt.Fprintf(s, "\n%s%s — choose a target:%s\n", ansi.FgBrightCyan, label, ansi.Reset)
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s — choose a target:")+"%s\n", ansi.FgBrightCyan, label, ansi.Reset)
 	}
-	for i, e := range targets {
-		fmt.Fprintf(s, "  %d) %-16s Land %-5d Army %-7d\n", i+1, e.Name, e.Land, e.Army())
-	}
+	printTargetRows(s, targets)
 	i := promptInt(s, "Attack which empire (0 to cancel)?")
 	if i < 1 || i > len(targets) {
 		return Stay
@@ -455,31 +457,31 @@ func bombHQ(s session.Session, w *game.World) Result {
 // the sort of nudges the original's advisors offered.
 func visitAdvisors(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%sYour Advisors%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your Advisors"), ansi.Reset)
 	var tips []string
 	switch {
 	case p.HQ == 0:
-		tips = append(tips, "We have no HeadQuarters, Sire. Building one would strengthen our tanks.")
+		tips = append(tips, tr(s, "We have no HeadQuarters, Sire. Building one would strengthen our tanks."))
 	case p.HQ < 100:
-		tips = append(tips, "Our HeadQuarters is still under construction.")
+		tips = append(tips, tr(s, "Our HeadQuarters is still under construction."))
 	}
 	if p.Carriers*100 < p.Jets {
-		tips = append(tips, "We have more jets than our carriers can carry into battle. Build more carriers.")
+		tips = append(tips, tr(s, "We have more jets than our carriers can carry into battle. Build more carriers."))
 	}
 	if p.Food < w.FoodNeededNextTurn(p) {
-		tips = append(tips, "Our food will not last the turn. Buy or grow more.")
+		tips = append(tips, tr(s, "Our food will not last the turn. Buy or grow more."))
 	}
 	if p.Support < 50 {
-		tips = append(tips, "The people grow restless. Lower taxes or spend on their support.")
+		tips = append(tips, tr(s, "The people grow restless. Lower taxes or spend on their support."))
 	}
 	if p.Debt > 0 {
-		tips = append(tips, "We carry debt that grows each turn. Repay it soon.")
+		tips = append(tips, tr(s, "We carry debt that grows each turn. Repay it soon."))
 	}
 	if p.Agents == 0 {
-		tips = append(tips, "We have no covert agents. Recruit some for spying and sabotage.")
+		tips = append(tips, tr(s, "We have no covert agents. Recruit some for spying and sabotage."))
 	}
 	if len(tips) == 0 {
-		tips = append(tips, "The realm is in good order, Sire. Press the attack.")
+		tips = append(tips, tr(s, "The realm is in good order, Sire. Press the attack."))
 	}
 	for _, t := range tips {
 		fmt.Fprintf(s, "  - %s\n", t)
@@ -492,26 +494,26 @@ func visitAdvisors(s session.Session, w *game.World) Result {
 // the Coordinator menu's Configuration Editor).
 func gameSetup(s session.Session, w *game.World) Result {
 	c := w.Config
-	fmt.Fprintf(s, "\n%sGame Rules%s\n", ansi.FgBrightCyan, ansi.Reset)
-	fmt.Fprintf(s, "  Turns per day:      %d\n", c.TurnsPerDay)
-	fmt.Fprintf(s, "  Protection turns:   %d\n", c.ProtectionTurns)
-	fmt.Fprintf(s, "  Game length (days): %d  (0 = endless)\n", c.GameLength)
-	fmt.Fprintf(s, "  Inter-BBS play:     %s\n", onOffStr(c.IBBS))
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Game Rules"), ansi.Reset)
+	fmt.Fprintf(s, "  "+tr(s, "Turns per day:      %d")+"\n", c.TurnsPerDay)
+	fmt.Fprintf(s, "  "+tr(s, "Protection turns:   %d")+"\n", c.ProtectionTurns)
+	fmt.Fprintf(s, "  "+tr(s, "Game length (days): %d  (0 = endless)")+"\n", c.GameLength)
+	fmt.Fprintf(s, "  "+tr(s, "Inter-BBS play:     %s")+"\n", onOffStr(c.IBBS))
 	pause(s)
 	return Stay
 }
 
 // playerList shows every living empire (Coordinator tool).
 func playerList(s session.Session, w *game.World) Result {
-	fmt.Fprintf(s, "\n%sPlayer List%s\n", ansi.FgBrightBlue, ansi.Reset)
-	fmt.Fprintf(s, "  %-16s %-14s %-8s %s\n", "Empire", "Owner", "Land", "Net Worth")
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightBlue, tr(s, "Player List"), ansi.Reset)
+	fmt.Fprintf(s, "  %-16s %-14s %-8s %s\n", tr(s, "Empire"), tr(s, "Owner"), tr(s, "Land"), tr(s, "Net Worth"))
 	for _, e := range w.Empires {
 		if !e.Alive {
 			continue
 		}
 		owner := e.Owner
 		if owner == "" {
-			owner = "(AI)"
+			owner = tr(s, "(AI)")
 		}
 		fmt.Fprintf(s, "  %-16s %-14s %-8d %d\n", e.Name, owner, e.Land, w.NetWorth(e))
 	}
@@ -532,20 +534,20 @@ func briberyOp(s session.Session, w *game.World) Result {
 func allianceStrength(s session.Session, w *game.World) Result {
 	p := w.Player()
 	off, def, allies := w.AllianceStrength(p)
-	fmt.Fprintf(s, "\n%sAlliance Strength%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Alliance Strength"), ansi.Reset)
 	if len(allies) == 0 {
-		fmt.Fprint(s, "  You have no defense allies.\n")
+		fmt.Fprintf(s, "  %s\n", tr(s, "You have no defense allies."))
 	} else {
-		fmt.Fprintf(s, "  Allies: %s\n", strings.Join(allies, ", "))
+		fmt.Fprintf(s, "  "+tr(s, "Allies: %s")+"\n", strings.Join(allies, ", "))
 	}
-	fmt.Fprintf(s, "  Combined offense: %d\n  Combined defense: %d\n", off, def)
+	fmt.Fprintf(s, "  "+tr(s, "Combined offense: %d")+"\n  "+tr(s, "Combined defense: %d")+"\n", off, def)
 	pause(s)
 	return Stay
 }
 
 func attackPirates(s session.Session, w *game.World) Result {
-	fmt.Fprintf(s, "\n%sPirate factions (strength is random; fat ones just raided someone):%s\n", ansi.FgBrightCyan, ansi.Reset)
-	fmt.Fprintf(s, "  %-3s %-11s %-7s %-4s %-8s %s\n", "#", "Faction", "Forces", "Rgn", "Gold", "Loot T/J/U/K/A")
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Pirate factions (strength is random; fat ones just raided someone):"), ansi.Reset)
+	fmt.Fprintf(s, "  %-3s %-11s %-7s %-4s %-8s %s\n", "#", tr(s, "Faction"), tr(s, "Forces"), tr(s, "Rgn"), tr(s, "Gold"), tr(s, "Loot T/J/U/K/A"))
 	for i, p := range w.Pirates {
 		fmt.Fprintf(s, "  %d) %-11s %-7d %-4d %-8d %d/%d/%d/%d/%d\n",
 			i+1, p.Name, p.Forces, p.Land, p.Gold,
@@ -567,7 +569,7 @@ func attackPirates(s session.Session, w *game.World) Result {
 
 func sdiProgram(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%sSDI Program — current defense: %d%%%s\n", ansi.FgBrightCyan, p.SDI, ansi.Reset)
+	fmt.Fprintf(s, "\n%s"+tr(s, "SDI Program — current defense: %d%%")+"%s\n", ansi.FgBrightCyan, p.SDI, ansi.Reset)
 	gold := promptInt(s, "Fund SDI — gold to spend (10000 per +1%%, max 75%%)?")
 	if gold <= 0 {
 		return Stay
@@ -752,7 +754,7 @@ func interbbsScores(s session.Session, w *game.World) Result {
 		return Stay
 	}
 	for _, b := range w.RemoteBoards {
-		fmt.Fprintf(s, "\n%sBoard: %s (%s)%s\n", ansi.FgBrightCyan, b.BoardID, b.Date, ansi.Reset)
+		fmt.Fprintf(s, "\n%s"+tr(s, "Board: %s (%s)")+"%s\n", ansi.FgBrightCyan, b.BoardID, b.Date, ansi.Reset)
 		scores := append([]game.RemoteScore(nil), b.Scores...)
 		sort.Slice(scores, func(i, j int) bool { return scores[i].NetWorth > scores[j].NetWorth })
 		for _, sc := range scores {
@@ -777,7 +779,7 @@ func createGroupAttack(s session.Session, w *game.World) Result {
 	for i, b := range w.RemoteBoards {
 		boards[i] = b.BoardID
 	}
-	fmt.Fprintf(s, "\n%sTarget which planet?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
 	board := pickFromList(s, "Planet", boards)
 	if board == "" {
 		return Stay
@@ -788,11 +790,11 @@ func createGroupAttack(s session.Session, w *game.World) Result {
 			rb = &w.RemoteBoards[i]
 		}
 	}
-	choices := []string{"(the whole planet)"}
+	choices := []string{tr(s, "(the whole planet)")}
 	for _, sc := range rb.Scores {
 		choices = append(choices, sc.Empire)
 	}
-	fmt.Fprintf(s, "\n%sTarget which baron?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
 	pick := pickFromList(s, "Baron", choices)
 	if pick == "" {
 		return Stay
@@ -825,7 +827,7 @@ func joinGroupAttack(s session.Session, w *game.World) Result {
 		}
 		tgt := ga.TargetEmpire
 		if tgt == "" {
-			tgt = "the whole planet"
+			tgt = tr(s, "the whole planet")
 		}
 		lines = append(lines, fmt.Sprintf("#%d -> %s on %s (leaves day %d, offense %s)",
 			ga.ID, tgt, ga.TargetBoard, ga.DepartDay, comma(ga.Offense())))
@@ -835,7 +837,7 @@ func joinGroupAttack(s session.Session, w *game.World) Result {
 		ok(s, "No group attacks are forming right now.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%sJoin which attack?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Join which attack?"), ansi.Reset)
 	for i, x := range lines {
 		fmt.Fprintf(s, "    %d) %s\n", i+1, x)
 	}
@@ -863,13 +865,12 @@ func travelTimes(s session.Session, w *game.World) Result {
 		ok(s, "No other planets are known yet.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%sTravel Times%s\n", ansi.FgBrightCyan, ansi.Reset)
-	fmt.Fprint(s, "How long an operation takes to reach another planet and return\n")
-	fmt.Fprint(s, "depends on how often your sysop exchanges inter-BBS packets.\n")
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Travel Times"), ansi.Reset)
+	fmt.Fprintf(s, "%s\n", tr(s, "How long an operation takes to reach another planet and return\ndepends on how often your sysop exchanges inter-BBS packets."))
 
 	// The league roster from ibnodes.dat, if the coordinator has distributed it.
 	if len(w.LeagueNodes) > 0 {
-		fmt.Fprintf(s, "\n%sLeague members:%s\n", ansi.FgBrightCyan, ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "League members:"), ansi.Reset)
 		for _, n := range w.LeagueNodes {
 			fmt.Fprintf(s, "  #%-3d %s\n", n.Number, n.Name)
 		}
@@ -880,18 +881,18 @@ func travelTimes(s session.Session, w *game.World) Result {
 		if now == "" {
 			now = w.LastMaintDate
 		}
-		fmt.Fprintf(s, "\n%sLast packet received from:%s\n", ansi.FgBrightCyan, ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Last packet received from:"), ansi.Reset)
 		for _, b := range w.RemoteBoards {
-			fmt.Fprintf(s, "  %-20s %s%s%s\n", b.BoardID, ansi.FgBrightCyan, daysAgoText(b.Date, now), ansi.Reset)
+			fmt.Fprintf(s, "  %-20s %s%s%s\n", b.BoardID, ansi.FgBrightCyan, daysAgoLocalized(s, b.Date, now), ansi.Reset)
 		}
 	}
 	pause(s)
 	return Stay
 }
 
-// daysAgoText renders how long ago (in days) the ISO date `then` was relative
-// to `now`, for the observed inter-BBS packet latency.
-func daysAgoText(then, now string) string {
+// daysAgoLocalized renders how long ago (in days) the ISO date `then` was
+// relative to `now`, in the session's language, for inter-BBS packet latency.
+func daysAgoLocalized(s session.Session, then, now string) string {
 	t1, e1 := time.Parse("2006-01-02", then)
 	t2, e2 := time.Parse("2006-01-02", now)
 	if e1 != nil || e2 != nil {
@@ -899,11 +900,11 @@ func daysAgoText(then, now string) string {
 	}
 	switch d := int(t2.Sub(t1).Hours() / 24); {
 	case d <= 0:
-		return "today"
+		return tr(s, "today")
 	case d == 1:
-		return "1 day ago"
+		return tr(s, "1 day ago")
 	default:
-		return fmt.Sprintf("%d days ago", d)
+		return fmt.Sprintf(tr(s, "%d days ago"), d)
 	}
 }
 
@@ -913,9 +914,9 @@ func spyDatabase(s session.Session, w *game.World) Result {
 		ok(s, "The spy database is empty. Spy on empires on other planets to fill it.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%sSpy Database:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy Database:"), ansi.Reset)
 	for _, r := range w.SpyDatabase {
-		fmt.Fprintf(s, "  %s @ %s (%s): Land %s  Off %s  Def %s  Gold %s\n",
+		fmt.Fprintf(s, "  "+tr(s, "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s")+"\n",
 			r.Empire, r.Board, r.Date, comma(r.Land), comma(r.Offense), comma(r.Defense), comma(r.Gold))
 	}
 	pause(s)
@@ -940,7 +941,7 @@ func terroristOps(s session.Session, w *game.World) Result {
 	for i, b := range w.RemoteBoards {
 		boards[i] = b.BoardID
 	}
-	fmt.Fprintf(s, "\n%sSpy on which planet?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy on which planet?"), ansi.Reset)
 	board := pickFromList(s, "Planet", boards)
 	if board == "" {
 		return Stay
@@ -959,7 +960,7 @@ func terroristOps(s session.Session, w *game.World) Result {
 	for i, sc := range rb.Scores {
 		names[i] = sc.Empire
 	}
-	fmt.Fprintf(s, "\n%sSpy on which baron?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy on which baron?"), ansi.Reset)
 	pick := pickFromList(s, "Baron", names)
 	if pick == "" {
 		return Stay
@@ -994,7 +995,7 @@ func voteCoordinator(s session.Session, w *game.World) Result {
 		owners = append(owners, e.Owner)
 		label := e.Name
 		if e.Owner == p.CoordinatorVote {
-			label += " (your current vote)"
+			label += " " + tr(s, "(your current vote)")
 		}
 		names = append(names, label)
 	}
@@ -1003,9 +1004,9 @@ func voteCoordinator(s session.Session, w *game.World) Result {
 		return Stay
 	}
 	if co := w.BBSCoordinator(); co != nil {
-		fmt.Fprintf(s, "\n%sThe current BBS Coordinator is %s.%s\n", ansi.FgBrightCyan, co.Name, ansi.Reset)
+		fmt.Fprintf(s, "\n%s"+tr(s, "The current BBS Coordinator is %s.")+"%s\n", ansi.FgBrightCyan, co.Name, ansi.Reset)
 	}
-	fmt.Fprintf(s, "\n%sWho should be the BBS Coordinator?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Who should be the BBS Coordinator?"), ansi.Reset)
 	for i, n := range names {
 		fmt.Fprintf(s, "    %d) %s\n", i+1, n)
 	}
@@ -1026,7 +1027,7 @@ func modifyLeagueDiplomacy(s session.Session, w *game.World) Result {
 		ok(s, "Only the BBS Coordinator may set league diplomacy.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%sCurrent league diplomacy:%s %s\n", ansi.FgBrightCyan, ansi.Reset, w.LeagueDiplomacy)
+	fmt.Fprintf(s, "\n%s%s%s %s\n", ansi.FgBrightCyan, tr(s, "Current league diplomacy:"), ansi.Reset, w.LeagueDiplomacy)
 	decl := prompt(s, "New league diplomacy declaration (blank to keep)")
 	if strings.TrimSpace(decl) == "" {
 		return Stay
@@ -1039,16 +1040,16 @@ func modifyLeagueDiplomacy(s session.Session, w *game.World) Result {
 func readMessages(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if len(p.Mail) == 0 {
-		fmt.Fprint(s, "\nYou have no messages.\n")
+		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no messages."))
 	} else {
-		fmt.Fprintf(s, "\n%sYour messages:%s\n", ansi.FgBrightCyan, ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your messages:"), ansi.Reset)
 		for _, m := range p.Mail {
 			fmt.Fprintf(s, "  %s\n", m)
 		}
 		p.Mail = nil
 	}
 	if len(w.Bulletin) > 0 {
-		fmt.Fprintf(s, "\n%sPlanetary Bulletin:%s\n", ansi.FgBrightCyan, ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
 		for _, b := range w.Bulletin {
 			fmt.Fprintf(s, "  %s\n", b)
 		}
@@ -1089,7 +1090,7 @@ func pickRecipient(s session.Session, w *game.World, prompt string, allowAll boo
 		ok(s, "There is no one to reach.")
 		return nil, false
 	}
-	fmt.Fprintf(s, "\n%s%-4s %-20s %-6s %-6s %s%s\n", ansi.FgBrightCyan, "Id", "Empire", "Land", "Score", "Net Worth", ansi.Reset)
+	fmt.Fprintf(s, "\n%s%-4s %-20s %-6s %-6s %s%s\n", ansi.FgBrightCyan, tr(s, "Id"), tr(s, "Empire"), tr(s, "Land"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
 	for i, e := range rs {
 		if i >= 25 { // A..Y
 			break
@@ -1098,15 +1099,15 @@ func pickRecipient(s session.Session, w *game.World, prompt string, allowAll boo
 	}
 	extra := ""
 	if allowAll {
-		extra = ", Z=All"
+		extra = tr(s, ", Z=All")
 	}
-	fmt.Fprintf(s, "\n%s(A-%c%s, 0=cancel) %s%s ", ansi.FgBrightWhite, 'A'+min(len(rs), 25)-1, extra, prompt, ansi.Reset)
+	fmt.Fprintf(s, "\n%s"+tr(s, "(A-%c%s, 0=cancel) %s")+"%s ", ansi.FgBrightWhite, 'A'+min(len(rs), 25)-1, extra, tr(s, prompt), ansi.Reset)
 	r, err := s.ReadKey()
 	if err != nil {
 		return nil, false
 	}
 	if allowAll && (r == 'z' || r == 'Z') {
-		fmt.Fprint(s, "All\n")
+		fmt.Fprintf(s, "%s\n", tr(s, "All"))
 		return nil, true
 	}
 	idx := recipientIndex(r, len(rs))
@@ -1126,7 +1127,7 @@ const msgMaxLines = 20
 // [A]bort / [S]ave / [C]lear. Returns the joined text and whether to send it
 // (false = aborted).
 func composeMessage(s session.Session) (string, bool) {
-	fmt.Fprintf(s, "\n    You have %s%d%s lines for your message.  %s/S%s=save %s/A%s=abort %s/C%s=clear\n",
+	fmt.Fprintf(s, "\n    "+tr(s, "You have %s%d%s lines for your message.  %s/S%s=save %s/A%s=abort %s/C%s=clear")+"\n",
 		ansi.FgBrightCyan, msgMaxLines, ansi.Reset,
 		ansi.FgBrightYellow, ansi.Reset, ansi.FgBrightYellow, ansi.Reset, ansi.FgBrightYellow, ansi.Reset)
 	ruler := "[" + strings.Repeat("----+----|", 8)[:76] + "]"
@@ -1140,7 +1141,7 @@ func composeMessage(s session.Session) (string, bool) {
 			return "", false
 		}
 		if strings.TrimSpace(line) == "/" {
-			fmt.Fprintf(s, "    /-Command?  [%sA%s,%sS%s,%sC%s] ",
+			fmt.Fprintf(s, "    "+tr(s, "/-Command?")+"  [%sA%s,%sS%s,%sC%s] ",
 				ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset)
 			r, err := s.ReadKey()
 			if err != nil {
@@ -1148,13 +1149,13 @@ func composeMessage(s session.Session) (string, bool) {
 			}
 			switch unicode.ToUpper(r) {
 			case 'A':
-				fmt.Fprint(s, "Abort\n")
+				fmt.Fprintf(s, "%s\n", tr(s, "Abort"))
 				return "", false
 			case 'S':
-				fmt.Fprint(s, "Save\n")
+				fmt.Fprintf(s, "%s\n", tr(s, "Save"))
 				return trimTrailingBlank(lines), true
 			case 'C':
-				fmt.Fprint(s, "Clear\n")
+				fmt.Fprintf(s, "%s\n", tr(s, "Clear"))
 				lines = nil
 			default:
 				fmt.Fprint(s, "\n")
@@ -1163,7 +1164,7 @@ func composeMessage(s session.Session) (string, bool) {
 		}
 		lines = append(lines, line)
 	}
-	fmt.Fprintf(s, "%sYou have used all %d lines.%s\n", ansi.FgYellow, msgMaxLines, ansi.Reset)
+	fmt.Fprintf(s, "%s"+tr(s, "You have used all %d lines.")+"%s\n", ansi.FgYellow, msgMaxLines, ansi.Reset)
 	return trimTrailingBlank(lines), true
 }
 
@@ -1184,7 +1185,7 @@ func sendMessage(s session.Session, w *game.World) Result {
 		}
 		text, send := composeMessage(s)
 		if send && strings.TrimSpace(text) != "" {
-			fmt.Fprintf(s, "\n%sSaving...%s\n", ansi.FgBrightCyan, ansi.Reset)
+			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Saving..."), ansi.Reset)
 			if all {
 				for _, e := range recipients(w) {
 					w.SendMail(p, e, text)
@@ -1193,7 +1194,7 @@ func sendMessage(s session.Session, w *game.World) Result {
 				w.SendMail(p, to, text)
 			}
 		}
-		fmt.Fprint(s, "\nDo you wish to send another message? (y/N) ")
+		fmt.Fprintf(s, "\n%s (y/N) ", tr(s, "Do you wish to send another message?"))
 		r, err := s.ReadKey()
 		if err != nil || (r != 'y' && r != 'Y') {
 			fmt.Fprint(s, "n\n")
@@ -1243,7 +1244,7 @@ func modifyDiplomacy(s session.Session, w *game.World) Result {
 		ok(s, "There is no one to negotiate with.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%sChoose an empire:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose an empire:"), ansi.Reset)
 	for i, e := range others {
 		suffix := ""
 		if held := w.TreatiesBetween(p, e); len(held) > 0 {
@@ -1262,18 +1263,18 @@ func modifyDiplomacy(s session.Session, w *game.World) Result {
 // negotiateWith runs the propose / accept / break loop with one empire.
 func negotiateWith(s session.Session, w *game.World, p, e *game.Empire) {
 	for {
-		fmt.Fprintf(s, "\n%sDiplomacy with %s%s\n", ansi.FgBrightCyan, e.Name, ansi.Reset)
+		fmt.Fprintf(s, "\n%s"+tr(s, "Diplomacy with %s")+"%s\n", ansi.FgBrightCyan, e.Name, ansi.Reset)
 		held := w.TreatiesBetween(p, e)
 		if len(held) == 0 {
-			fmt.Fprint(s, "  Treaties: (none)\n")
+			fmt.Fprintf(s, "  %s\n", tr(s, "Treaties: (none)"))
 		} else {
-			fmt.Fprintf(s, "  Treaties: %s\n", strings.Join(held, ", "))
+			fmt.Fprintf(s, "  "+tr(s, "Treaties: %s")+"\n", strings.Join(held, ", "))
 		}
 		offers := offersFrom(p, e.Name)
 		if len(offers) > 0 {
-			fmt.Fprintf(s, "  %s offers you: %s\n", e.Name, strings.Join(offers, ", "))
+			fmt.Fprintf(s, "  "+tr(s, "%s offers you: %s")+"\n", e.Name, strings.Join(offers, ", "))
 		}
-		fmt.Fprint(s, "  (1) Propose  (2) Accept an offer  (3) Break a treaty  (0) Done\n")
+		fmt.Fprintf(s, "  %s\n", tr(s, "(1) Propose  (2) Accept an offer  (3) Break a treaty  (0) Done"))
 		switch promptInt(s, "Choice?") {
 		case 1:
 			if ttype := pickFromList(s, "Propose which treaty", game.TreatyTypes); ttype != "" {
@@ -1325,7 +1326,7 @@ func pickFromList(s session.Session, msg string, list []string) string {
 
 func viewDiplomacy(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%sYour treaties:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your treaties:"), ansi.Reset)
 	found := false
 	for _, e := range w.Empires {
 		if e == p || !e.Alive {
@@ -1337,11 +1338,11 @@ func viewDiplomacy(s session.Session, w *game.World) Result {
 		}
 	}
 	if !found {
-		fmt.Fprint(s, "  (none)\n")
+		fmt.Fprintf(s, "  %s\n", tr(s, "(none)"))
 	}
-	fmt.Fprintf(s, "\n%sPending offers received:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Pending offers received:"), ansi.Reset)
 	if len(p.TreatyOffers) == 0 {
-		fmt.Fprint(s, "  (none)\n")
+		fmt.Fprintf(s, "  %s\n", tr(s, "(none)"))
 	} else {
 		for _, o := range p.TreatyOffers {
 			fmt.Fprintf(s, "  %s — %s\n", o.From, o.Type)
@@ -1369,14 +1370,14 @@ func prodField(p *game.Empire, idx int) *int {
 func setIndustries(s session.Session, w *game.World) Result {
 	p := w.Player()
 	proj := w.ProjectedProduction(p)
-	fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgBrightRed, "Industrial Production"))
+	fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgBrightRed, tr(s, "Industrial Production")))
 	for i, name := range prodTypeNames {
-		fmt.Fprintf(s, "%-10s : %s%3d%%%s      %s(%d per year)%s\n",
-			name, ansi.FgBrightYellow, *prodField(p, i), ansi.Reset, ansi.FgRed, proj[i], ansi.Reset)
+		fmt.Fprintf(s, "%-10s : %s%3d%%%s      %s"+tr(s, "(%d per year)")+"%s\n",
+			tr(s, name), ansi.FgBrightYellow, *prodField(p, i), ansi.Reset, ansi.FgRed, proj[i], ansi.Reset)
 	}
 	if p.Specialized != "" {
-		fmt.Fprintf(s, "\n%sSpecialized in %s: more of it, less of everything else.%s\n",
-			ansi.FgBrightCyan, p.Specialized, ansi.Reset)
+		fmt.Fprintf(s, "\n%s"+tr(s, "Specialized in %s: more of it, less of everything else.")+"%s\n",
+			ansi.FgBrightCyan, tr(s, p.Specialized), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", rule)
 	if !askYesNoDefaultNo(s, "Change Production?") {
@@ -1400,9 +1401,9 @@ func specializeIndustry(s session.Session, w *game.World) Result {
 		ok(s, "Your industry is already specialized in %s.", p.Specialized)
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%sSpecialize Industry — choose a unit type. This is PERMANENT:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Specialize Industry — choose a unit type. This is PERMANENT:"), ansi.Reset)
 	for i, name := range prodTypeNames {
-		fmt.Fprintf(s, "  %d) %s\n", i+1, name)
+		fmt.Fprintf(s, "  %d) %s\n", i+1, tr(s, name))
 	}
 	t := promptInt(s, "Specialize in which unit (0 to cancel)?")
 	if t < 1 || t > len(prodTypeNames) {
@@ -1416,7 +1417,7 @@ func specializeIndustry(s session.Session, w *game.World) Result {
 func setTaxRate(s session.Session, w *game.World) Result {
 	p := w.Player()
 	maxRate := w.Config.MaxTaxRate
-	fmt.Fprintf(s, "\n%sCurrent tax rate: %d%%%s\n", ansi.FgBrightCyan, p.Tax, ansi.Reset)
+	fmt.Fprintf(s, "\n%s"+tr(s, "Current tax rate: %d%%")+"%s\n", ansi.FgBrightCyan, p.Tax, ansi.Reset)
 	rate := promptInt(s, fmt.Sprintf("New tax rate (0-%d)?", maxRate))
 	if rate < 0 || rate > maxRate {
 		fail(s, fmt.Errorf("tax rate must be between 0 and %d", maxRate))
