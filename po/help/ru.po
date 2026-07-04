@@ -137,20 +137,20 @@ msgstr "Новые игроки получают Защиту нового ко�
 #: internal/help/content/diplomacy/treaties.md:8
 #, no-wrap
 msgid "Treaties and Alliances"
-msgstr ""
+msgstr "Договоры и союзы"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:12
 msgid ""
 "You can send agreements to other rulers. A treaty starts when the other side "
 "accepts it. These are the main agreements."
-msgstr ""
+msgstr "Вы можете предлагать соглашения другим правителям. Договор вступает в силу, когда другая сторона его принимает. Вот их виды."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:13
 #, no-wrap
 msgid "Tariff Trade Agreement"
-msgstr ""
+msgstr "Тарифное торговое соглашение"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:17
@@ -158,26 +158,26 @@ msgid ""
 "Trade between two realms, with a tax on goods that cross the border. Both "
 "sides earn extra income based on population. This is good if you have many "
 "people."
-msgstr ""
+msgstr "Торговля между двумя государствами с пошлиной на товары, пересекающие границу. Обе стороны получают дополнительный доход в зависимости от объёма торговли."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:18
 #, no-wrap
 msgid "Protective Trade"
-msgstr ""
+msgstr "Защищённая торговля"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:22
 msgid ""
 "Guards along the trade routes. This stops enemies from bombing your trade "
 "deals, and makes trade deals cheaper to send and to keep."
-msgstr ""
+msgstr "Охрана вдоль торговых путей. Это мешает врагам бомбить ваши сделки и делает торговлю безопаснее."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:23
 #, no-wrap
 msgid "Free Trade Agreement"
-msgstr ""
+msgstr "Соглашение о свободной торговле"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:28
@@ -185,82 +185,82 @@ msgid ""
 "People and goods move freely, with no border tax. You earn a lot from income "
 "taxes. But people mixing across borders can spread low morale and low "
 "support, so watch it."
-msgstr ""
+msgstr "Люди и товары движутся свободно, без пошлин. Вы много зарабатываете на налогах. Но смешение народов может ухудшить настроение в других государствах."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:29
 #, no-wrap
 msgid "Terrorist Prevention"
-msgstr ""
+msgstr "Противодействие терроризму"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:33
 msgid ""
 "The two realms' intelligence agencies help each other find and stop covert "
 "and terrorist attacks."
-msgstr ""
+msgstr "Разведки обоих государств помогают друг другу находить и предотвращать тайные и террористические атаки."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:34
 #, no-wrap
 msgid "Intelligence Alliance"
-msgstr ""
+msgstr "Разведывательный союз"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:38
 msgid ""
 "The two realms give each other covert help in operations, both at home and "
 "between planets."
-msgstr ""
+msgstr "Оба государства оказывают друг другу тайную помощь в операциях — и дома, и между планетами."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:39
 #, no-wrap
 msgid "Technology Agreement"
-msgstr ""
+msgstr "Технологическое соглашение"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:42
 msgid ""
 "The two realms share science. Each side gains some of the other's technology."
-msgstr ""
+msgstr "Оба государства делятся наукой. Каждая сторона получает часть технологий другой."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:43
 #, no-wrap
 msgid "Full Defense Alliance"
-msgstr ""
+msgstr "Полный оборонительный союз"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:47
 msgid ""
 "The strongest alliance. You commit a large part of your forces to defend an "
 "ally in need. This works only in local (single-board) games."
-msgstr ""
+msgstr "Сильнейший союз. Вы выделяете значительную часть войск на защиту союзника в беде. Это работает в обе стороны."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:48
 #, no-wrap
 msgid "Declaration of War"
-msgstr ""
+msgstr "Объявление войны"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:52
 msgid ""
 "Ends an agreement without causing trouble at home. The treaty is not truly "
 "broken until the other realm is told."
-msgstr ""
+msgstr "Прекращает соглашение, не вызывая волнений дома. Договор по-настоящему разорван лишь после ответа другого государства."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:53
 #, no-wrap
 msgid "View Treaties"
-msgstr ""
+msgstr "Просмотр договоров"
 
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:55
 msgid "Shows your relations with the other rulers in the game."
-msgstr ""
+msgstr "Показывает ваши отношения с другими правителями в игре."
 
 #. type: Title #
 #: internal/help/content/economy/banking.md:1
@@ -900,14 +900,14 @@ msgstr ""
 #: internal/help/content/military/units.md:53
 #, no-wrap
 msgid "HeadQuarters"
-msgstr ""
+msgstr "Штаб"
 
 #. type: Plain text
 #: internal/help/content/military/headquarters.md:12
 msgid ""
 "Your HeadQuarters coordinates your army. It is a one-time building project "
 "that advances a little each turn until it is complete."
-msgstr ""
+msgstr "Ваш штаб управляет армией. Это единовременный строительный проект, который каждый ход понемногу продвигается, пока не будет завершён."
 
 #. type: Plain text
 #: internal/help/content/military/headquarters.md:15
@@ -915,25 +915,25 @@ msgid ""
 "While it is being built — and more so once finished — it raises how much "
 "your Tanks add to both attack and defense. Enemies can bomb your HQ with "
 "covert operations to weaken your tanks."
-msgstr ""
+msgstr "Пока штаб строится — и ещё сильнее по завершении — он увеличивает вклад ваших танков в атаку и защиту."
 
 #. type: Title #
 #: internal/help/content/military/units.md:1
 #: internal/help/content/military/units.md:8
 #, no-wrap
 msgid "Units"
-msgstr ""
+msgstr "Юниты"
 
 #. type: Plain text
 #: internal/help/content/military/units.md:11
 msgid "Your army is built from these units. Each one has a job."
-msgstr ""
+msgstr "Ваша армия состоит из этих юнитов. У каждого своя задача."
 
 #. type: Title ##
 #: internal/help/content/military/units.md:12
 #, no-wrap
 msgid "Troopers"
-msgstr ""
+msgstr "Пехота"
 
 #. type: Plain text
 #: internal/help/content/military/units.md:17
@@ -941,13 +941,13 @@ msgid ""
 "Troopers fight on both attack and defense, but they are weak at each. They "
 "are cheap to buy and cheap to keep. They eat more food than other units. "
 "They help you defend against Sabre missile attacks."
-msgstr ""
+msgstr "Пехота"
 
 #. type: Title ##
 #: internal/help/content/military/units.md:18
 #, no-wrap
 msgid "Jets"
-msgstr ""
+msgstr "Истребители"
 
 #. type: Plain text
 #: internal/help/content/military/units.md:24
@@ -956,13 +956,13 @@ msgid ""
 "attack as a trooper. Jets are cheap to buy but cost a lot to keep. They need "
 "carriers to reach a battle: one carrier moves 100 jets. An enemy SDI shield "
 "cuts your jets' strength by about a quarter."
-msgstr ""
+msgstr "Истребители"
 
 #. type: Title ##
 #: internal/help/content/military/units.md:25
 #, no-wrap
 msgid "Turrets"
-msgstr ""
+msgstr "Турели"
 
 #. type: Plain text
 #: internal/help/content/military/units.md:30
@@ -970,13 +970,13 @@ msgid ""
 "Turrets defend only. One turret is about twice as strong on defense as a "
 "trooper. They shoot down attacking jets, destroy tanks, and kill troops. "
 "They also help stop incoming missiles. Covert operations cannot destroy them."
-msgstr ""
+msgstr "Турели"
 
 #. type: Title ##
 #: internal/help/content/military/units.md:31
 #, no-wrap
 msgid "Tanks"
-msgstr ""
+msgstr "Танки"
 
 #. type: Plain text
 #: internal/help/content/military/units.md:36
@@ -985,13 +985,13 @@ msgid ""
 "defense.  They cost a lot to buy but little to keep. A strong HeadQuarters "
 "and good morale make your tanks even stronger. Tanks help you defend against "
 "chemical attacks."
-msgstr ""
+msgstr "Танки"
 
 #. type: Title ##
 #: internal/help/content/military/units.md:37
 #, no-wrap
 msgid "Bombers"
-msgstr ""
+msgstr "Бомбардировщики"
 
 #. type: Plain text
 #: internal/help/content/military/units.md:42
@@ -1000,40 +1000,40 @@ msgid ""
 "payloads.  Missiles and interplanetary bombings need bombers to deliver "
 "them. In a regular attack, your bombers destroy the enemy jets that are "
 "sitting on the ground."
-msgstr ""
+msgstr "Бомбардировщики"
 
 #. type: Title ##
 #: internal/help/content/military/units.md:43
 #, no-wrap
 msgid "Carriers"
-msgstr ""
+msgstr "Авианосцы"
 
 #. type: Plain text
 #: internal/help/content/military/units.md:47
 msgid ""
 "Carriers move your jets to a battle and carry goods for trade. One carrier "
 "moves up to 100 jets."
-msgstr ""
+msgstr "Авианосцы"
 
 #. type: Title ##
 #: internal/help/content/military/units.md:48
 #, no-wrap
 msgid "Covert Agents"
-msgstr ""
+msgstr "Тайные агенты"
 
 #. type: Plain text
 #: internal/help/content/military/units.md:52
 msgid ""
 "Agents run covert operations, such as spying and sabotage. Having many "
 "agents also helps defend you against enemy covert operations."
-msgstr ""
+msgstr "Агенты проводят тайные операции — шпионаж и диверсии. Множество агентов также помогает защищаться от вражеских тайных операций."
 
 #. type: Plain text
 #: internal/help/content/military/units.md:56
 msgid ""
 "A HeadQuarters coordinates your army. A strong HQ makes your tanks much more "
 "effective. Enemies can bomb your HQ to weaken your tanks."
-msgstr ""
+msgstr "Штаб управляет армией. Сильный штаб делает ваши танки гораздо эффективнее. Враги могут бомбить ваш штаб, чтобы ослабить его."
 
 #. type: Title #
 #: internal/help/content/warfare/attacks.md:1
