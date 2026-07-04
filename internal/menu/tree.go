@@ -60,7 +60,7 @@ func BuildMenus() *Menus {
 			Do: buy2("Carriers", func(w *game.World) int { return w.Prices.Carrier }, (*game.World).BuildCarriers)},
 		{Key: 'S', Label: "Sell", Do: gotoMenu(sell)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: '?', Label: "Help", Do: helpDatabase},
+		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: '0', Label: "Proceed with Turn", Do: back},
 	}
 
@@ -193,7 +193,7 @@ func BuildMenus() *Menus {
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: 'W', Label: "Write Macros", Do: stubbed("Write Macros")},
 		{Key: '1', Label: "Set Industries", Do: setIndustries},
-		{Key: '2', Label: "Show Instructions", Do: helpDatabase},
+		{Key: '2', Label: "Show Instructions", Do: helpBrowse},
 		{Key: '3', Label: "Specialize Industry", Do: specializeIndustry},
 		{Key: 'Y', Label: "Sysop / Coordinator", Do: gotoMenu(coord),
 			Hidden: func(w *game.World) bool { return !w.Coordinator }},
