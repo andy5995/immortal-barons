@@ -1371,7 +1371,7 @@ func setIndustries(s session.Session, w *game.World) Result {
 	proj := w.ProjectedProduction(p)
 	fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgBrightRed, "Industrial Production"))
 	for i, name := range prodTypeNames {
-		fmt.Fprintf(s, "%-10s : %s%3d%%%s      %s(%d per turn)%s\n",
+		fmt.Fprintf(s, "%-10s : %s%3d%%%s      %s(%d per year)%s\n",
 			name, ansi.FgBrightYellow, *prodField(p, i), ansi.Reset, ansi.FgRed, proj[i], ansi.Reset)
 	}
 	if p.Specialized != "" {
