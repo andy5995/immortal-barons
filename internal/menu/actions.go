@@ -329,6 +329,19 @@ func bombHQ(s session.Session, w *game.World) Result {
 	return specialAttack(s, w, "Bomb HQ", 0, func(a, d *game.Empire) (string, error) { return w.BombHQ(a, d) })
 }
 
+// gameSetup shows the current game rules (read-only; the sysop edits them from
+// the Coordinator menu's Configuration Editor).
+func gameSetup(s session.Session, w *game.World) Result {
+	c := w.Config
+	fmt.Fprintf(s, "\n%sGame Rules%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "  Turns per day:      %d\n", c.TurnsPerDay)
+	fmt.Fprintf(s, "  Protection turns:   %d\n", c.ProtectionTurns)
+	fmt.Fprintf(s, "  Game length (days): %d  (0 = endless)\n", c.GameLength)
+	fmt.Fprintf(s, "  Inter-BBS play:     %s\n", onOffStr(c.IBBS))
+	pause(s)
+	return Stay
+}
+
 // playerList shows every living empire (Coordinator tool).
 func playerList(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "\n%sPlayer List%s\n", ansi.FgBrightBlue, ansi.Reset)

@@ -189,7 +189,7 @@ func BuildMenus() *Menus {
 		{Key: 'D', Label: "Diplomacy", Do: gotoMenu(diplomacy)},
 		{Key: 'E', Label: "Empire Status", Do: empireStatus},
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
-		{Key: 'G', Label: "Game Setup", Do: stubbed("Game Setup")},
+		{Key: 'G', Label: "Game Setup", Do: gameSetup},
 		{Key: 'M', Label: "Messages", Do: gotoMenu(messages)},
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
 		{Key: 'R', Label: "Set Tax Rate", Do: setTaxRate},
