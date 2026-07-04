@@ -8,6 +8,7 @@ var (
 	ErrNoDebt     = errors.New("You do not owe that much.")
 	ErrNoAgents   = errors.New("You have no agents for that operation.")
 	ErrHQExists   = errors.New("Your HeadQuarters is already under construction or built.")
+	ErrRegionCap  = errors.New("You have reached the region limit for this league.")
 )
 
 // HQCost is the gold price to start HeadQuarters construction.
@@ -46,18 +47,43 @@ func (e *Empire) spend(n, unit int) error {
 // next region's price by Prices.Land/LandPriceStep.
 const LandPriceStep = 50
 
+// landUnitPrice is the base per-region price, scaled by the league's Region
+// Costs knob (Medium = 100% = unchanged). LandPrice, MaxAffordableRegions, and
+// BuyRegions all build the rising-price formula on top of it.
+func (w *World) landUnitPrice() int {
+	return w.Prices.Land * w.Config.RegionCosts.Percent() / 100
+}
+
+// regionRoom is how many more regions e may own before hitting the league's
+// Max Purchasable Regions cap. A cap of 0 means unlimited.
+func (w *World) regionRoom(e *Empire) int {
+	if w.Config.MaxRegions <= 0 {
+		return 1 << 30
+	}
+	if room := w.Config.MaxRegions - e.Land; room > 0 {
+		return room
+	}
+	return 0
+}
+
 // LandPrice is the current gold cost of the next region for empire e.
 func (w *World) LandPrice(e *Empire) int {
-	return w.Prices.Land + e.Land*w.Prices.Land/LandPriceStep
+	base := w.landUnitPrice()
+	return base + e.Land*base/LandPriceStep
 }
 
 // MaxAffordableRegions is the most regions e can buy at the current rising
-// price. Because each successive region costs more (see BuyRegions), a simple
-// gold/price divide overcounts — this sums the real climbing cost.
+// price, also bounded by the Max Purchasable Regions cap. Because each
+// successive region costs more (see BuyRegions), a simple gold/price divide
+// overcounts — this sums the real climbing cost.
 func (w *World) MaxAffordableRegions(e *Empire) int {
-	base := w.Prices.Land
+	base := w.landUnitPrice()
+	room := w.regionRoom(e)
 	total := 0
 	for n := 0; ; n++ {
+		if n >= room {
+			return n
+		}
 		cost := base + (e.Land+n)*base/LandPriceStep
 		if total+cost > e.Gold {
 			return n
@@ -74,9 +100,13 @@ func (w *World) BuyRegions(e *Empire, field *int, n int) error {
 	if n <= 0 {
 		return nil
 	}
+	if n > w.regionRoom(e) {
+		return ErrRegionCap
+	}
+	base := w.landUnitPrice()
 	total := 0
 	for i := 0; i < n; i++ {
-		total += w.Prices.Land + (e.Land+i)*w.Prices.Land/LandPriceStep
+		total += base + (e.Land+i)*base/LandPriceStep
 	}
 	if e.Gold < total {
 		return ErrCantAfford // must afford the whole purchase

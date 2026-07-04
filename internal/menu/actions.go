@@ -1290,10 +1290,11 @@ func specializeIndustry(s session.Session, w *game.World) Result {
 
 func setTaxRate(s session.Session, w *game.World) Result {
 	p := w.Player()
+	maxRate := w.Config.MaxTaxRate
 	fmt.Fprintf(s, "\n%sCurrent tax rate: %d%%%s\n", ansi.FgBrightCyan, p.Tax, ansi.Reset)
-	rate := promptInt(s, "New tax rate (0-100)?")
-	if rate < 0 || rate > 100 {
-		fail(s, fmt.Errorf("tax rate must be between 0 and 100"))
+	rate := promptInt(s, fmt.Sprintf("New tax rate (0-%d)?", maxRate))
+	if rate < 0 || rate > maxRate {
+		fail(s, fmt.Errorf("tax rate must be between 0 and %d", maxRate))
 		return Stay
 	}
 	p.Tax = rate

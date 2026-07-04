@@ -281,6 +281,23 @@ func newEmpire(name, owner string, cfg Config) *Empire {
 	}
 }
 
+// HumanCount is the number of human (caller-owned) empires in the world.
+func (w *World) HumanCount() int {
+	n := 0
+	for _, e := range w.Empires {
+		if e.Owner != "" {
+			n++
+		}
+	}
+	return n
+}
+
+// BoardFull reports whether the Max Players Per BBS cap is reached (0 =
+// unlimited), so no new caller may enroll.
+func (w *World) BoardFull() bool {
+	return w.Config.MaxPlayers > 0 && w.HumanCount() >= w.Config.MaxPlayers
+}
+
 // AddHuman creates and registers a human empire keyed by handle.
 func (w *World) AddHuman(handle, realm string) *Empire {
 	e := newEmpire(realm, strings.ToLower(strings.TrimSpace(handle)), w.Config)
