@@ -343,3 +343,27 @@ func TestComposeMessageClearThenSave(t *testing.T) {
 		t.Errorf("after clear: text=%q send=%v, want %q true", text, send, "keep")
 	}
 }
+
+func TestMenuChromeTranslated(t *testing.T) {
+	menus := BuildMenus()
+	f := &fakeSession{}
+	w := newWorld()
+	w.Player().Language = "de"
+	draw(f, w, menus.Spending)
+	out := f.out.String()
+	for _, want := range []string{"Ausgabenmenü", "Soldaten", "Panzer"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("German menu missing %q; output:\n%s", want, out)
+		}
+	}
+}
+
+func TestMenuChromeEnglishByDefault(t *testing.T) {
+	menus := BuildMenus()
+	f := &fakeSession{}
+	w := newWorld() // Language "" => English
+	draw(f, w, menus.Spending)
+	if out := f.out.String(); !strings.Contains(out, "Troopers") {
+		t.Errorf("default menu should be English; output:\n%s", out)
+	}
+}

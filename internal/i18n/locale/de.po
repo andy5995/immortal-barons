@@ -1,0 +1,158 @@
+# Immortal Barons — German UI strings.
+# Translator-editable. Untranslated (empty msgstr) entries fall back to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: immortal-barons\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Menu titles
+msgid "Spending Menu"
+msgstr "Ausgabenmenü"
+
+msgid "Sell Menu"
+msgstr "Verkaufsmenü"
+
+msgid "System Menu"
+msgstr "Systemmenü"
+
+msgid "Coordinator Menu"
+msgstr "Koordinatormenü"
+
+msgid "Food Market"
+msgstr "Nahrungsmarkt"
+
+msgid "Preferences"
+msgstr "Einstellungen"
+
+msgid "Configuration Editor"
+msgstr "Konfigurationseditor"
+
+# Main game menu
+msgid "Play Game"
+msgstr "Spielen"
+
+msgid "See Status"
+msgstr "Status ansehen"
+
+msgid "See Scores"
+msgstr "Punkte ansehen"
+
+msgid "Today's News"
+msgstr "Heutige Nachrichten"
+
+msgid "Yesterday's News"
+msgstr "Gestrige Nachrichten"
+
+msgid "Read Messages"
+msgstr "Nachrichten lesen"
+
+msgid "Send Message"
+msgstr "Nachricht senden"
+
+msgid "Game Bulletins"
+msgstr "Spielaushänge"
+
+msgid "Instructions"
+msgstr "Anleitung"
+
+msgid "Help Database"
+msgstr "Hilfe-Datenbank"
+
+msgid "Quit"
+msgstr "Beenden"
+
+msgid "Return"
+msgstr "Zurück"
+
+# Buy / sell items
+msgid "Troopers"
+msgstr "Soldaten"
+
+msgid "Jets"
+msgstr "Jets"
+
+msgid "Turrets"
+msgstr "Türme"
+
+msgid "Bombers"
+msgstr "Bomber"
+
+msgid "HeadQuarters"
+msgstr "Hauptquartier"
+
+msgid "Regions"
+msgstr "Regionen"
+
+msgid "Covert Agents"
+msgstr "Agenten"
+
+msgid "Tanks"
+msgstr "Panzer"
+
+msgid "Carriers"
+msgstr "Träger"
+
+msgid "Sell"
+msgstr "Verkaufen"
+
+msgid "Buy"
+msgstr "Kaufen"
+
+msgid "Visit Bank"
+msgstr "Bank besuchen"
+
+msgid "Help"
+msgstr "Hilfe"
+
+# Bank
+msgid "Deposit Funds"
+msgstr "Einzahlen"
+
+msgid "Withdraw Funds"
+msgstr "Abheben"
+
+msgid "Take Loan"
+msgstr "Kredit aufnehmen"
+
+msgid "Repay Loan"
+msgstr "Kredit zurückzahlen"
+
+msgid "Invest"
+msgstr "Investieren"
+
+msgid "List Investments"
+msgstr "Investitionen anzeigen"
+
+msgid "View Bank Rates"
+msgstr "Bankzinsen ansehen"
+
+# System menu
+msgid "Abdicate"
+msgstr "Abdanken"
+
+msgid "Visit Advisors"
+msgstr "Berater besuchen"
+
+msgid "Diplomacy"
+msgstr "Diplomatie"
+
+msgid "Empire Status"
+msgstr "Imperiumsstatus"
+
+msgid "Set Tax Rate"
+msgstr "Steuersatz setzen"
+
+msgid "Trading"
+msgstr "Handel"
+
+msgid "Set Industries"
+msgstr "Industrie einstellen"
+
+msgid "Specialize Industry"
+msgstr "Industrie spezialisieren"
+
+msgid "Write Macros"
+msgstr "Makros schreiben"

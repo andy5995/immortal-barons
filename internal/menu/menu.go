@@ -10,8 +10,18 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
+
+// playerLang is the active caller's UI language ("" = English), used to
+// localize menu chrome at render time.
+func playerLang(g *game.World) string {
+	if p := g.Player(); p != nil {
+		return p.Language
+	}
+	return ""
+}
 
 // Result tells the Run loop what to do after an action fires.
 type Result struct {
@@ -63,6 +73,16 @@ func (it *Item) label(g *game.World) string {
 		return it.LabelFn(g)
 	}
 	return it.Label
+}
+
+// displayLabel is the label as shown: a static Label is translated to lang; a
+// dynamic LabelFn (toggle state, "Language: X") is left as its function
+// produces it, since those are formatted, not catalog strings.
+func (it *Item) displayLabel(g *game.World, lang string) string {
+	if it.LabelFn != nil {
+		return it.LabelFn(g)
+	}
+	return i18n.T(lang, it.Label)
 }
 
 type Menu struct {
@@ -229,10 +249,12 @@ func draw(s session.Session, g *game.World, m *Menu) {
 	if col == "" {
 		col = ansi.FgBrightCyan
 	}
-	fmt.Fprintf(s, "%s\n", titleRule(col, m.Title))
+	lang := playerLang(g)
+	fmt.Fprintf(s, "%s\n", titleRule(col, i18n.T(lang, m.Title)))
 	cols := m.hasColumns(g)
 	if cols {
-		fmt.Fprintf(s, "%s  Key %-18s %8s %9s%s\n", col, "Item", "Price", "# Owned", ansi.Reset)
+		fmt.Fprintf(s, "%s  Key %-18s %8s %9s%s\n",
+			col, i18n.T(lang, "Item"), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
 	}
 	for i := range m.Items {
 		it := &m.Items[i]
@@ -240,7 +262,7 @@ func draw(s session.Session, g *game.World, m *Menu) {
 			continue
 		}
 		if it.Do == nil {
-			fmt.Fprintf(s, "  %s\n", it.label(g))
+			fmt.Fprintf(s, "  %s\n", it.displayLabel(g, lang))
 			continue
 		}
 		if cols {
@@ -252,11 +274,11 @@ func draw(s session.Session, g *game.World, m *Menu) {
 				owned = comma(it.Owned(g))
 			}
 			fmt.Fprintf(s, "  %s(%c)%s %s%-18s%s %8s %9s\n",
-				col, it.Key, ansi.Reset, ansi.FgWhite, it.label(g), ansi.Reset, price, owned)
+				col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset, price, owned)
 			continue
 		}
 		fmt.Fprintf(s, "  %s(%c)%s %s%s%s\n",
-			col, it.Key, ansi.Reset, ansi.FgWhite, it.label(g), ansi.Reset)
+			col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset)
 	}
 	if m.Status != nil {
 		fmt.Fprintf(s, "%s\n%s%s%s\n", rule, ansi.FgGreen, m.Status(g), ansi.Reset)

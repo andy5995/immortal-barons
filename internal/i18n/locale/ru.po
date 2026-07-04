@@ -1,0 +1,158 @@
+# Immortal Barons — Russian UI strings.
+# Translator-editable. Untranslated (empty msgstr) entries fall back to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: immortal-barons\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# Menu titles
+msgid "Spending Menu"
+msgstr "Меню расходов"
+
+msgid "Sell Menu"
+msgstr "Меню продажи"
+
+msgid "System Menu"
+msgstr "Системное меню"
+
+msgid "Coordinator Menu"
+msgstr "Меню координатора"
+
+msgid "Food Market"
+msgstr "Рынок еды"
+
+msgid "Preferences"
+msgstr "Настройки"
+
+msgid "Configuration Editor"
+msgstr "Редактор конфигурации"
+
+# Main game menu
+msgid "Play Game"
+msgstr "Играть"
+
+msgid "See Status"
+msgstr "Статус"
+
+msgid "See Scores"
+msgstr "Очки"
+
+msgid "Today's News"
+msgstr "Новости сегодня"
+
+msgid "Yesterday's News"
+msgstr "Новости вчера"
+
+msgid "Read Messages"
+msgstr "Читать сообщения"
+
+msgid "Send Message"
+msgstr "Отправить сообщение"
+
+msgid "Game Bulletins"
+msgstr "Бюллетени"
+
+msgid "Instructions"
+msgstr "Инструкции"
+
+msgid "Help Database"
+msgstr "База помощи"
+
+msgid "Quit"
+msgstr "Выход"
+
+msgid "Return"
+msgstr "Назад"
+
+# Buy / sell items
+msgid "Troopers"
+msgstr "Солдаты"
+
+msgid "Jets"
+msgstr "Самолёты"
+
+msgid "Turrets"
+msgstr "Турели"
+
+msgid "Bombers"
+msgstr "Бомбардировщики"
+
+msgid "HeadQuarters"
+msgstr "Штаб"
+
+msgid "Regions"
+msgstr "Регионы"
+
+msgid "Covert Agents"
+msgstr "Агенты"
+
+msgid "Tanks"
+msgstr "Танки"
+
+msgid "Carriers"
+msgstr "Авианосцы"
+
+msgid "Sell"
+msgstr "Продать"
+
+msgid "Buy"
+msgstr "Купить"
+
+msgid "Visit Bank"
+msgstr "Банк"
+
+msgid "Help"
+msgstr "Помощь"
+
+# Bank
+msgid "Deposit Funds"
+msgstr "Внести средства"
+
+msgid "Withdraw Funds"
+msgstr "Снять средства"
+
+msgid "Take Loan"
+msgstr "Взять кредит"
+
+msgid "Repay Loan"
+msgstr "Погасить кредит"
+
+msgid "Invest"
+msgstr "Инвестировать"
+
+msgid "List Investments"
+msgstr "Инвестиции"
+
+msgid "View Bank Rates"
+msgstr "Ставки банка"
+
+# System menu
+msgid "Abdicate"
+msgstr "Отречься"
+
+msgid "Visit Advisors"
+msgstr "Советники"
+
+msgid "Diplomacy"
+msgstr "Дипломатия"
+
+msgid "Empire Status"
+msgstr "Статус империи"
+
+msgid "Set Tax Rate"
+msgstr "Налоговая ставка"
+
+msgid "Trading"
+msgstr "Торговля"
+
+msgid "Set Industries"
+msgstr "Настроить промышленность"
+
+msgid "Specialize Industry"
+msgstr "Специализация"
+
+msgid "Write Macros"
+msgstr "Написать макросы"
