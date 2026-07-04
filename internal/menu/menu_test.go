@@ -289,3 +289,30 @@ func TestPromptSuggestedExpandsKAndM(t *testing.T) {
 		t.Errorf("2m should expand to 2000000, got %d", got)
 	}
 }
+
+func TestEnterExitsWhenPrefOn(t *testing.T) {
+	w := newWorld()
+	w.EnterExitsBuy = true
+	m := &Menu{ExitOnEnter: true, Items: []Item{
+		{Key: '1', Label: "Buy", Do: func(session.Session, *game.World) Result { return Stay }},
+		{Key: '0', Label: "Quit", Do: back},
+	}}
+	f := &fakeSession{keys: []rune{'\r'}}
+	it, err := m.readChoice(f, w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if it == nil || it.Key != '0' {
+		t.Errorf("Enter with pref on should select the '0' exit, got %v", it)
+	}
+}
+
+func TestEnterIgnoredWhenPrefOff(t *testing.T) {
+	w := newWorld()
+	w.EnterExitsBuy = false
+	m := &Menu{ExitOnEnter: true, Items: []Item{{Key: '0', Label: "Quit", Do: back}}}
+	f := &fakeSession{keys: []rune{'\r'}}
+	if it, _ := m.readChoice(f, w); it != nil {
+		t.Errorf("Enter with pref off should select nothing, got %v", it)
+	}
+}

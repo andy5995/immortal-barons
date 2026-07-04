@@ -60,10 +60,14 @@ func (it *Item) label(g *game.World) string {
 }
 
 type Menu struct {
-	Title  string
-	Color  string // ansi color escape for the title and item hotkeys; "" uses a default
-	Items  []Item
-	Status func(*game.World) string // optional status bar under the menu
+	Title string
+	Color string // ansi color escape for the title and item hotkeys; "" uses a default
+	Items []Item
+	// ExitOnEnter marks a turn-pipeline menu whose '0' item is a safe exit
+	// (back, not session quit). When the player's EnterExitsBuy preference is
+	// on, that item is offered as the default and Enter selects it.
+	ExitOnEnter bool
+	Status      func(*game.World) string // optional status bar under the menu
 }
 
 // selectable reports whether it is a visible, choosable item (not a
@@ -88,10 +92,28 @@ func (m *Menu) byKey(r rune, g *game.World) *Item {
 // menu item immediately (no Enter). It echoes the chosen item's label. Keys
 // that match no visible selectable item are ignored (return nil -> redraw).
 func (m *Menu) readChoice(s session.Session, g *game.World) (*Item, error) {
+	// With EnterExitsBuy on, a pipeline menu offers its '0' exit as the
+	// default: show it after the prompt, and let Enter select it.
+	var def *Item
+	if g.EnterExitsBuy && m.ExitOnEnter {
+		def = m.byKey('0', g)
+	}
 	fmt.Fprintf(s, "%sChoice>%s ", ansi.FgBrightWhite, ansi.Reset)
+	if def != nil {
+		fmt.Fprint(s, def.label(g))
+	}
 	r, err := s.ReadKey()
 	if err != nil {
 		return nil, err
+	}
+	if def != nil && (r == '\r' || r == '\n') {
+		fmt.Fprint(s, "\n")
+		return def, nil
+	}
+	if def != nil { // a real choice follows; erase the shown default first
+		for range []rune(def.label(g)) {
+			fmt.Fprint(s, "\b \b")
+		}
 	}
 	it := m.byKey(r, g)
 	if it == nil {

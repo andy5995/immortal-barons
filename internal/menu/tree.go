@@ -28,12 +28,12 @@ type Menus struct {
 // then wired, so submenus can reference each other (e.g. several menus
 // offer "Visit Bank").
 func BuildMenus() *Menus {
-	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed}
+	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true}
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
 	bank := &Menu{Title: "Bank", Color: ansi.FgBrightCyan}
-	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta}
-	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightMagenta}
-	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed}
+	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
+	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
+	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
 	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
 	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
 	prefs := &Menu{Title: "Preferences", Color: ansi.FgBrightCyan}
