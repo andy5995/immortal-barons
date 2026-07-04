@@ -130,9 +130,12 @@ state or province, and country. Board number 1 is the League Coordinator.
 
 ## League-wide rules (Coordinator only)
 
-The League Coordinator sets the rules that must match across the whole league —
-turns per day, protection turns, and game length. Set them in the
-Coordinator's own `config.json`, then broadcast them to every board:
+The League Coordinator sets the rules that must match across the whole league.
+These are all the fields marked with a star in the Configuration Editor: turns
+per day, protection turns, game length, land market and daily land, interest
+and investment rates, tax and region and player limits, buy-military mode, and
+the cost, damage, and reward levels. Set them in the Coordinator's own
+`config.json`, then broadcast them to every board:
 
 ```
 barons-door -league-config -data /path/to/data
