@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [trunk, main]
+  pull_request:
+
+# Concurrency block (Andy's convention): cancel superseded runs for the same
+# PR / commit so only the latest is in flight.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      # setup-go pinned to v5 — a known-good major; NOT cross-checked against
+      # the DC repo (DC has no Go workflow). go-version-file keeps CI on the
+      # exact toolchain the module declares (go.mod: go 1.26.x).
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: gofmt (must be clean)
+        run: |
+          unformatted="$(gofmt -l .)"
+          if [ -n "$unformatted" ]; then
+            echo "These files are not gofmt-clean:"
+            echo "$unformatted"
+            exit 1
+          fi
+
+      - name: go vet
+        run: go vet ./...
+
+      - name: go build
+        run: go build ./...
+
+      - name: go test
+        run: go test ./...
