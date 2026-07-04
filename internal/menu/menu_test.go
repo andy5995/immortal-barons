@@ -225,9 +225,9 @@ func TestMenuColorRendersTitleAndHotkeys(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 	out := f.out.String()
-	wantTitle := ansi.FgBrightMagenta + "[Colorful Menu]" + ansi.Reset
-	if !strings.Contains(out, wantTitle) {
-		t.Errorf("expected bracketed colored title %q in output, got:\n%s", wantTitle, out)
+	// The title is centered within a colored rule line: "──[Colorful Menu]──".
+	if !strings.Contains(out, "[Colorful Menu]") {
+		t.Errorf("expected bracketed title in output, got:\n%s", out)
 	}
 	if !strings.Contains(out, ansi.FgBrightMagenta) {
 		t.Error("expected menu color code in drawn output")

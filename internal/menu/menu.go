@@ -158,6 +158,19 @@ func Run(s session.Session, g *game.World, root *Menu) error {
 
 const rule = "────────────────────────────────────────────────────────────"
 
+// titleRule renders a BRE-style header: the bracketed menu title centered on a
+// rule line, e.g. "──────[Goldie Luck's Bank]──────", all in the menu color.
+func titleRule(color, title string) string {
+	label := "[" + title + "]"
+	width := len([]rune(rule))
+	if len([]rune(label)) >= width {
+		return color + label + ansi.Reset
+	}
+	left := (width - len([]rune(label))) / 2
+	right := width - left - len([]rune(label))
+	return color + strings.Repeat("─", left) + label + strings.Repeat("─", right) + ansi.Reset
+}
+
 // barWidth is the fixed status-bar width (classic 80-column door screen).
 const barWidth = 80
 
@@ -195,8 +208,7 @@ func draw(s session.Session, g *game.World, m *Menu) {
 	if col == "" {
 		col = ansi.FgBrightCyan
 	}
-	fmt.Fprintf(s, "%s[%s]%s\n", col, m.Title, ansi.Reset)
-	fmt.Fprintf(s, "%s\n", rule)
+	fmt.Fprintf(s, "%s\n", titleRule(col, m.Title))
 	for i := range m.Items {
 		it := &m.Items[i]
 		if it.hidden(g) {

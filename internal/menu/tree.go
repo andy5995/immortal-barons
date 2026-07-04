@@ -30,7 +30,7 @@ type Menus struct {
 func BuildMenus() *Menus {
 	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true}
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
-	bank := &Menu{Title: "Bank", Color: ansi.FgBrightCyan}
+	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan}
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
@@ -86,8 +86,8 @@ func BuildMenus() *Menus {
 	}
 
 	bank.Items = []Item{
-		{Key: 'D', Label: "Deposit", Do: money("Deposit", func(p *game.Empire) int { return p.Gold }, (*game.World).Deposit)},
-		{Key: 'W', Label: "Withdraw", Do: money("Withdraw", func(p *game.Empire) int { return p.Bank }, (*game.World).Withdraw)},
+		{Key: 'D', Label: "Deposit Funds", Do: money("Deposit", func(p *game.Empire) int { return p.Gold }, (*game.World).Deposit)},
+		{Key: 'W', Label: "Withdraw Funds", Do: money("Withdraw", func(p *game.Empire) int { return p.Bank }, (*game.World).Withdraw)},
 		// Loan cap is a v1 balance knob: 100 gold of credit per region owned,
 		// measured against current debt so repeat visits can't exceed it.
 		{Key: 'B', Label: "Take Loan", Do: money("Borrow", func(p *game.Empire) int { return max(0, p.Land*100-p.Debt) }, (*game.World).Loan)},
@@ -95,7 +95,12 @@ func BuildMenus() *Menus {
 		{Key: 'I', Label: "Invest", Do: investFunds},
 		{Key: 'L', Label: "List Investments", Do: listInvestments},
 		{Key: 'V', Label: "View Bank Rates", Do: bankRates},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
+	}
+	bank.Status = func(w *game.World) string {
+		p := w.Player()
+		return fmt.Sprintf("You have %s%s%s gold in hand and %s%s%s gold in the bank.",
+			ansi.FgBrightCyan, comma(p.Gold), ansi.FgGreen, ansi.FgBrightCyan, comma(p.Bank), ansi.FgGreen)
 	}
 
 	attack.Items = []Item{
