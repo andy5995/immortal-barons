@@ -118,7 +118,7 @@ func BuildMenus() *Menus {
 		{Key: 'S', Label: "Send Spy", Do: sendSpy},
 		{Key: 'P', Label: "Spy on Relations", Do: spyRelations},
 		{Key: 'D', Label: "Spy Database", Do: stubbed("Spy Database")},
-		{Key: 'B', Label: "Bribery", Do: stubbed("Bribery")},
+		{Key: 'B', Label: "Bribery", Do: briberyOp},
 		{Key: 'O', Label: "Special Operations", Do: specialOps},
 		{Key: 'I', Label: "Bomb Intelligence", Do: bombIntel},
 		{Key: 'C', Label: "Stir Revolts", Do: stirRevolts},

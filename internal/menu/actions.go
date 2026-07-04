@@ -401,6 +401,10 @@ func spyRelations(s session.Session, w *game.World) Result {
 	return specialAttack(s, w, "Spy on Relations", 0, func(a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) })
 }
 
+func briberyOp(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Bribery", 0, func(a, d *game.Empire) (string, error) { return w.Bribery(a, d) })
+}
+
 // allianceStrength shows the player's combined offense and defense with their
 // Full Defense Alliance partners.
 func allianceStrength(s session.Session, w *game.World) Result {

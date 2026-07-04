@@ -46,6 +46,7 @@ type Empire struct {
 	Events      []string
 	Mail        []string
 	PirateRaids []string // raids suffered since last play; shown in the income report
+	ImmuneFrom  []string // empires whose covert ops against us auto-fail (we bribed their agents)
 
 	AllianceOffers []string      // legacy (pre-typed-treaties); migrated by EnsureTreaties
 	TreatyOffers   []TreatyOffer // pending treaty proposals received

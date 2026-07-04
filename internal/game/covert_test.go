@@ -203,3 +203,23 @@ func TestSpyOnRelationsRevealsTreaties(t *testing.T) {
 		t.Errorf("report should reveal Delta's treaty with Gamma, got: %s", report)
 	}
 }
+
+func TestBriberyGrantsImmunity(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	a.Agents = 1_000_000
+	d := w.AddHuman("d", "Delta")
+	d.Agents = 4
+	if _, err := w.Bribery(a, d); err != nil {
+		t.Fatal(err)
+	}
+	// d now cannot land covert ops on a, even with overwhelming agents.
+	d.Agents = 1_000_000
+	before := a.Troopers
+	if _, err := w.Sabotage(d, a); err != nil {
+		t.Fatal(err)
+	}
+	if a.Troopers != before {
+		t.Errorf("d's sabotage should fail from a's bribery immunity, troopers %d -> %d", before, a.Troopers)
+	}
+}

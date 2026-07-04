@@ -8,6 +8,12 @@ import (
 // covertSuccess reports whether a covert op by `a` against `d` succeeds:
 // the more agents the attacker has relative to the defender, the likelier.
 func (w *World) covertSuccess(a, d *Empire) bool {
+	// If d has bribed one of a's agents (Bribery), a's ops against d fail.
+	for _, name := range d.ImmuneFrom {
+		if name == a.Name {
+			return false
+		}
+	}
 	// Intelligence Alliance lends half an ally's agents to the attacker's
 	// covert strength; Terrorist Prevention lends half to the defender's.
 	aAgents := a.Agents + w.allyAgents(a, "Intelligence Alliance")/2
@@ -77,6 +83,27 @@ func (w *World) SpyOnRelations(a, d *Empire) (string, error) {
 	a.Agents--
 	d.Events = append(d.Events, "Your counter-intelligence caught a spy probing your relations.")
 	return "Your spy was caught and did not return.", nil
+}
+
+// Bribery buys off an agent inside d, so that from now on d's covert
+// operations against you fail. On failure your own agent is lost.
+func (w *World) Bribery(a, d *Empire) (string, error) {
+	if a.Agents < 1 {
+		return "", ErrNoAgents
+	}
+	if w.covertSuccess(a, d) {
+		for _, n := range a.ImmuneFrom {
+			if n == d.Name {
+				return fmt.Sprintf("You already hold a bribed agent inside %s.", d.Name), nil
+			}
+		}
+		a.ImmuneFrom = append(a.ImmuneFrom, d.Name)
+		d.Events = append(d.Events, "A rival power bribed one of your agents.")
+		return fmt.Sprintf("You bribed an agent in %s. Their covert ops against you will now fail.", d.Name), nil
+	}
+	a.Agents--
+	d.Events = append(d.Events, "Your security foiled a bribery attempt.")
+	return "The operation failed and your agent was lost.", nil
 }
 
 // BombIntelligence kills a share of d's agents, softening the target for your

@@ -24,6 +24,8 @@ Common operations:
 - Bomb Airbases — destroy enemy jets that are on the ground.
 - Bomb Food Stores — destroy much of the enemy's food reserve.
 - Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less effective.
+- Bribery — buy off an agent inside the enemy, so that their covert operations
+  against you fail from then on.
 
 An Intelligence Alliance adds half of an ally's agents to your covert strength.
 A Terrorist Prevention treaty adds half an ally's agents to your defense.
