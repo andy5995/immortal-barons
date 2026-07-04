@@ -23,16 +23,7 @@ func (s *Stdio) ReadKey() (rune, error) {
 }
 
 func (s *Stdio) Write(p []byte) (int, error) {
-	out := make([]byte, 0, len(p)+16)
-	var prev byte
-	for _, b := range p {
-		if b == '\n' && prev != '\r' {
-			out = append(out, '\r')
-		}
-		out = append(out, b)
-		prev = b
-	}
-	if _, err := os.Stdout.Write(out); err != nil {
+	if _, err := os.Stdout.Write(toCRLF(p)); err != nil {
 		return 0, err
 	}
 	return len(p), nil

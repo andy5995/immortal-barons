@@ -13,3 +13,19 @@ type Session interface {
 	// Writer receives ANSI bytes to display to the player.
 	io.Writer
 }
+
+// toCRLF translates a lone "\n" to "\r\n", leaving existing "\r\n" alone.
+// Both Stdio and the raw-mode Console need this: no terminal is doing output
+// post-processing for them, so a bare LF would otherwise stair-step.
+func toCRLF(p []byte) []byte {
+	out := make([]byte, 0, len(p)+16)
+	var prev byte
+	for _, b := range p {
+		if b == '\n' && prev != '\r' {
+			out = append(out, '\r')
+		}
+		out = append(out, b)
+		prev = b
+	}
+	return out
+}

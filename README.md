@@ -16,7 +16,7 @@ The game is written in Go. It is an independent remake, inspired by the
 Version 0.0.1 — a persistent, multi-user BBS door game. Each caller has a
 lasting empire in one shared world; you play your turns, and other barons
 (and any AI) act on their own turns. The game runs locally or as a native
-door under Synchronet or Mystic.
+BBS door.
 
 **Works now:**
 
@@ -50,8 +50,8 @@ door under Synchronet or Mystic.
 ## Build and run
 
 You need Go 1.26 or newer. The game builds and runs anywhere Go does — Linux,
-macOS, Windows, and the BSDs. The BBS door front-end targets modern BBS
-software running on Linux.
+macOS, Windows, and the BSDs (DOS is not supported). It plays locally or as a
+native BBS door.
 
 ```
 go build -o barons ./cmd/barons
@@ -66,8 +66,8 @@ go run ./cmd/barons
 
 ## Running as a BBS door
 
-Immortal Barons can run as a native door under modern BBS software
-(Synchronet, Mystic) on Linux. Build the door front-end:
+Immortal Barons can run as a native door under modern BBS software such as
+Synchronet or Mystic. Build the door front-end:
 
 ```
 go build -o barons-door ./cmd/barons-door

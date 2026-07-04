@@ -3,23 +3,35 @@ package session
 import (
 	"bufio"
 	"os"
-	"os/exec"
+
+	"golang.org/x/term"
 )
 
 // Console is the local-terminal Session: keypresses from stdin, ANSI to
-// stdout. It puts the terminal in cbreak+no-echo mode so ReadKey returns
-// one character at a time without the player pressing Enter. Output
-// processing (onlcr) is left on, so a bare "\n" still maps to CR-LF.
+// stdout. It puts the terminal in raw mode via x/term so ReadKey returns one
+// character at a time with no echo, uniformly across Linux, macOS, the BSDs,
+// and Windows. Raw mode disables the terminal's output post-processing, so
+// Write translates a lone "\n" to "\r\n" itself (as Stdio does).
+//
+// Raw mode also means Ctrl-C no longer raises SIGINT; the player quits through
+// the menu instead. This matches how door play already behaves (the BBS hands
+// us a raw stream).
 type Console struct {
 	r       *bufio.Reader
 	restore func()
 }
 
 func NewConsole() *Console {
-	stty("cbreak", "-echo")
+	var restore func()
+	fd := int(os.Stdin.Fd())
+	// Best effort: if stdin is not a terminal (e.g. piped input in tests),
+	// MakeRaw fails and we simply run without raw mode.
+	if st, err := term.MakeRaw(fd); err == nil {
+		restore = func() { term.Restore(fd, st) }
+	}
 	return &Console{
 		r:       bufio.NewReader(os.Stdin),
-		restore: func() { stty("sane") },
+		restore: restore,
 	}
 }
 
@@ -29,7 +41,10 @@ func (c *Console) ReadKey() (rune, error) {
 }
 
 func (c *Console) Write(p []byte) (int, error) {
-	return os.Stdout.Write(p)
+	if _, err := os.Stdout.Write(toCRLF(p)); err != nil {
+		return 0, err
+	}
+	return len(p), nil
 }
 
 // Close restores the terminal to its normal mode. Safe to call once.
@@ -38,9 +53,4 @@ func (c *Console) Close() {
 		c.restore()
 		c.restore = nil
 	}
-}
-
-func stty(args ...string) {
-	cmd := exec.Command("stty", append([]string{"-F", "/dev/tty"}, args...)...)
-	cmd.Run() // best effort; no TTY (e.g. piped input) just means no raw mode
 }

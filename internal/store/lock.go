@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
-	"syscall"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -15,7 +14,9 @@ var ErrBusy = errors.New("game is busy")
 type FileLock struct{ f *os.File }
 
 // Lock takes the exclusive game lock. With block=false it returns ErrBusy
-// immediately if the lock is held; with block=true it waits.
+// immediately if the lock is held; with block=true it waits. The actual
+// locking primitive is platform-specific (flock on Unix, LockFileEx on
+// Windows) — see lock_unix.go and lock_windows.go.
 func Lock(cfg game.Config, block bool) (*FileLock, error) {
 	if err := os.MkdirAll(cfg.DataDir, 0o755); err != nil {
 		return nil, err
@@ -24,21 +25,14 @@ func Lock(cfg game.Config, block bool) (*FileLock, error) {
 	if err != nil {
 		return nil, err
 	}
-	how := syscall.LOCK_EX
-	if !block {
-		how |= syscall.LOCK_NB
-	}
-	if err := syscall.Flock(int(f.Fd()), how); err != nil {
+	if err := lockFile(f, block); err != nil {
 		f.Close()
-		if errors.Is(err, syscall.EWOULDBLOCK) {
-			return nil, ErrBusy
-		}
 		return nil, err
 	}
 	return &FileLock{f: f}, nil
 }
 
 func (l *FileLock) Release() error {
-	syscall.Flock(int(l.f.Fd()), syscall.LOCK_UN)
+	unlockFile(l.f)
 	return l.f.Close()
 }
