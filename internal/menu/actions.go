@@ -199,43 +199,63 @@ func abdicate(s session.Session, w *game.World) Result {
 // writeMacros is BRE's Macro Editor: it lists the player's saved macros and
 // lets them set or clear one, keyed by a letter A-Z. In game the macro replays
 // when the player presses Ctrl-<letter> (see session.MacroExpander).
+// macroKeys is BRE's fixed set of macro slots, each triggered in game by
+// Ctrl-<letter> (see the Macro Editor, Image #9).
+const macroKeys = "DEFRIOKL"
+
+// writeMacros is BRE's Macro Editor: it lists the eight macro slots, lets the
+// player pick one, then records keystrokes live until the player presses that
+// same Ctrl-<letter> to end the edit.
 func writeMacros(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if p.Macros == nil {
 		p.Macros = map[string]string{}
 	}
-	fmt.Fprintf(s, "\n%sMacro Editor%s\n", ansi.FgBrightCyan, ansi.Reset)
-	if len(p.Macros) == 0 {
-		fmt.Fprint(s, "  (no macros defined)\n")
-	} else {
-		letters := make([]string, 0, len(p.Macros))
-		for l := range p.Macros {
-			letters = append(letters, l)
+	fmt.Fprintf(s, "\n%sMacro Editor%s\n\n", ansi.FgBrightCyan, ansi.Reset)
+	for _, k := range macroKeys {
+		val := p.Macros[string(k)]
+		if val == "" {
+			val = "None"
 		}
-		sort.Strings(letters)
-		for _, l := range letters {
-			fmt.Fprintf(s, "  Ctrl-%s: %s\n", l, p.Macros[l])
-		}
+		fmt.Fprintf(s, "Ctrl-%c: %s%s%s\n", k, ansi.FgGreen, val, ansi.Reset)
 	}
 
-	line := strings.ToUpper(strings.TrimSpace(prompt(s, "Edit which macro? Enter a letter A-Z (triggered by Ctrl-<letter>), or blank to cancel")))
-	if line == "" {
+	fmt.Fprintf(s, "\nEdit which macro [D,E,F,R,I,O,K,L]? ")
+	r, err := s.ReadKey()
+	if err != nil {
 		return Stay
 	}
-	if len(line) != 1 || line[0] < 'A' || line[0] > 'Z' {
-		fmt.Fprint(s, "\nPlease enter a single letter A-Z.\n")
-		pause(s)
+	letter := byte(r)
+	if letter >= 'a' && letter <= 'z' {
+		letter -= 'a' - 'A'
+	}
+	if !strings.ContainsRune(macroKeys, rune(letter)) {
+		fmt.Fprint(s, "\n")
 		return Stay
 	}
+	fmt.Fprintf(s, "%c\n", letter)
 
-	fmt.Fprintf(s, "\nCurrent Ctrl-%s macro: %q\n", line, p.Macros[line])
-	seq := prompt(s, "Enter the keystrokes to replay (blank to clear this macro)")
-	if strings.TrimSpace(seq) == "" {
-		delete(p.Macros, line)
-		ok(s, "Macro Ctrl-%s cleared.", line)
+	// Clear the slot first so pressing its own Ctrl-<letter> ends the edit
+	// (passes through the expander) instead of replaying the old macro.
+	delete(p.Macros, string(letter))
+	ctrl := rune(letter - 'A' + 1)
+	fmt.Fprintf(s, "\nEditing Macro Ctrl-%c    Press Ctrl-%c to end edit.\n", letter, letter)
+	var seq []rune
+	for {
+		k, err := s.ReadKey()
+		if err != nil || k == ctrl {
+			break
+		}
+		seq = append(seq, k)
+		if k >= 32 { // echo printable keys as they are recorded
+			fmt.Fprintf(s, "%c", k)
+		}
+	}
+	if len(seq) > 0 {
+		p.Macros[string(letter)] = string(seq)
+		ok(s, "Macro Ctrl-%c saved.", letter)
 	} else {
-		p.Macros[line] = seq
-		ok(s, "Macro Ctrl-%s set.", line)
+		ok(s, "Macro Ctrl-%c cleared.", letter)
 	}
 	return Stay
 }

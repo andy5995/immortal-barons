@@ -32,10 +32,11 @@ func (m *MacroExpander) ReadKey() (rune, error) {
 		return r, err
 	}
 	// Ctrl-A..Ctrl-Z can trigger a macro — but NEVER intercept the control
-	// codes that double as essential keys (Backspace, Tab, LF, Enter), or
-	// ReadLine and single-key prompts would never see their terminator.
-	// An unmapped Ctrl-key just passes through (the menu ignores it).
-	if r >= 1 && r <= 26 && r != '\b' && r != '\t' && r != '\n' && r != '\r' {
+	// codes that double as essential line-editing keys (Backspace, LF, Enter),
+	// or ReadLine and single-key prompts would never see their terminator. Tab
+	// (Ctrl-I) IS allowed, since BRE's macro set includes Ctrl-I. An unmapped
+	// Ctrl-key just passes through (the menu ignores it).
+	if r >= 1 && r <= 26 && r != '\b' && r != '\n' && r != '\r' {
 		letter := string(rune('A' + r - 1))
 		if seq, ok := m.lookup(letter); ok && seq != "" {
 			m.queue = []rune(seq)
