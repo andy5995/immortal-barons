@@ -223,3 +223,14 @@ func TestTechCutsSpoilage(t *testing.T) {
 		t.Errorf("Technology regions should reduce spoilage: base=%d tech=%d", base.LastSpoiled, tech.LastSpoiled)
 	}
 }
+
+func TestIncomeReportMatchesCredit(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("h", "Realm")
+	e.Gold = 0
+	sum := w.IncomeThisTurn(e).Gold()
+	w.CollectIncome(e)
+	if e.Gold != sum {
+		t.Errorf("credited %d but the itemized breakdown sums to %d", e.Gold, sum)
+	}
+}

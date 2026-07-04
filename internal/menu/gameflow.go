@@ -74,23 +74,22 @@ func showTurnEvents(s session.Session, p *game.Empire) {
 	pause(s)
 }
 
-// incomeReport itemizes p's per-turn income by source, using the same
-// per-type multipliers RegionMix.income()/foodProduced() apply.
+// incomeReport itemizes p's per-turn income by source. It shows exactly the
+// values CollectIncome credits: both derive from World.IncomeThisTurn.
 func incomeReport(s session.Session, w *game.World, p *game.Empire) {
-	taxes := p.People * p.Tax / 100 * 8
-	ore := p.Regions.Mountain * 12
-	tourism := p.Regions.Coastal * 25
-	solar := p.Regions.Desert * 20
-	rivers := p.Regions.River * 30
-	food := p.Regions.Agricultural*250 + p.Regions.Total()*15
+	b := w.IncomeThisTurn(p)
 
 	fmt.Fprintf(s, "\n%sIncome Report:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	statLine(s, taxes, "gold was earned in taxes.")
-	statLine(s, ore, "gold was produced from the Ore Mines.")
-	statLine(s, tourism, "gold was earned in Tourism.")
-	statLine(s, solar, "gold was earned by Solar Power Generators.")
-	statLine(s, rivers, "gold was earned from Rivers.")
-	statLine(s, food, "Food units were grown.")
+	statLine(s, b.Taxes, "gold was earned in taxes.")
+	statLine(s, b.Ore, "gold was produced from the Ore Mines.")
+	statLine(s, b.Tourism, "gold was earned in Tourism.")
+	statLine(s, b.Solar, "gold was earned by Solar Power Generators.")
+	statLine(s, b.Rivers, "gold was earned from Rivers.")
+	statLine(s, b.Urban, "gold was earned in Urban Centers.")
+	statLine(s, b.Industrial, "gold was earned from Industrial Zones.")
+	statLine(s, b.Technology, "gold was earned from Technology.")
+	statLine(s, b.Trade, "gold was earned from Trade.")
+	statLine(s, b.Food, "Food units were grown.")
 	for _, r := range p.PirateRaids {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, r, ansi.Reset)
 	}

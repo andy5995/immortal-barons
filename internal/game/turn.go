@@ -102,22 +102,47 @@ const (
 	RiotTaxFloor     = 20 // no riots at/below this tax rate
 )
 
-// CollectIncome credits this turn's tax and region income to the empire's
-// gold, so it is in hand for maintenance and spending during the turn. It is
-// applied at the start of a played turn: BRE shows the income report then, and
-// its auto-deposit banks only the "extra" gold left at the end of the turn.
-// Keeping this separate from processEconomy (which runs the end-of-turn steps:
-// interest, food, manufacture) is what lets start-of-turn maintenance be paid
-// from the income the turn earns, instead of a turn behind.
-func (w *World) CollectIncome(e *Empire) {
+// IncomeBreakdown itemizes a turn's income by source (gold), plus the food
+// grown. The income report and the actual gold credit both derive from this,
+// so what the player is shown equals what is credited to the last coin.
+type IncomeBreakdown struct {
+	Taxes, Ore, Tourism, Solar, Rivers, Urban, Industrial, Technology, Trade int
+	Food                                                                     int
+}
+
+// Gold sums the gold-producing sources.
+func (b IncomeBreakdown) Gold() int {
+	return b.Taxes + b.Ore + b.Tourism + b.Solar + b.Rivers + b.Urban + b.Industrial + b.Technology + b.Trade
+}
+
+// IncomeThisTurn itemizes e's income for the current turn. Technology scales
+// every gold source by techFactor; low popular support cuts Coastal tourism.
+// Region gold weights mirror RegionMix.income().
+func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 	tf := e.techFactor()
-	base := e.Regions.income()
-	coastal := e.Regions.Coastal * 25
-	income := base - coastal + coastal*e.Support/100 // low support slashes tourism
-	income = income * (100 + tf) / 100
-	income += w.tradeIncome(e) // trade-treaty bonus (population-scaled)
-	tax := e.People * e.Tax / 100 * 8 * (100 + tf) / 100
-	e.Gold += tax + income
+	scale := func(n int) int { return n * (100 + tf) / 100 }
+	return IncomeBreakdown{
+		Taxes:      scale(e.People * e.Tax / 100 * 8),
+		Ore:        scale(e.Regions.Mountain * 12),
+		Tourism:    scale(e.Regions.Coastal * 25 * e.Support / 100), // support slashes tourism
+		Solar:      scale(e.Regions.Desert * 20),
+		Rivers:     scale(e.Regions.River * 30),
+		Urban:      scale(e.Regions.Urban * 8),
+		Industrial: scale(e.Regions.Industrial * 10),
+		Technology: scale(e.Regions.Technology * 15),
+		Trade:      w.tradeIncome(e), // trade-treaty bonus (population-scaled)
+		Food:       e.Regions.foodProduced(),
+	}
+}
+
+// CollectIncome credits this turn's gold income (see IncomeThisTurn) at the
+// start of the turn, so it is in hand for maintenance and spending. BRE shows
+// the income report then, and its auto-deposit banks only the "extra" gold
+// left at the end of the turn. Keeping this out of processEconomy (the
+// end-of-turn steps: interest, food, manufacture) is what lets start-of-turn
+// maintenance be paid from the income the turn earns, instead of a turn behind.
+func (w *World) CollectIncome(e *Empire) {
+	e.Gold += w.IncomeThisTurn(e).Gold()
 }
 
 func (w *World) processEconomy(e *Empire) {
