@@ -125,7 +125,7 @@ func TestCoordinatorReachableWhenFlagged(t *testing.T) {
 
 func TestBuyLandThroughSpendingMenu(t *testing.T) {
 	menus := BuildMenus()
-	f := &fakeSession{keys: []rune("61\r5\r ")} // Buy Land -> type 1 (Coastal) -> qty 5
+	f := &fakeSession{keys: []rune("6C\r5\r ")} // Buy Land -> type C (Coastal) -> qty 5
 	w := newWorld()
 	before := w.Active.Land
 	beforeCoastal := w.Active.Regions.Coastal

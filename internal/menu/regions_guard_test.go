@@ -17,6 +17,17 @@ func TestRegionFieldOrdering(t *testing.T) {
 	if len(regionTypeHints) != 8 {
 		t.Errorf("regionTypeHints len = %d, want 8", len(regionTypeHints))
 	}
+	if len(regionTypeKeys) != 8 {
+		t.Errorf("regionTypeKeys len = %d, want 8", len(regionTypeKeys))
+	}
+	// Selection keys must be unique, or a letter would pick the wrong type.
+	seen := map[byte]bool{}
+	for _, k := range regionTypeKeys {
+		if seen[k] {
+			t.Errorf("duplicate region key %q", k)
+		}
+		seen[k] = true
+	}
 
 	// For each region type, verify regionField points to the correct struct field.
 	for i, name := range regionTypeNames {

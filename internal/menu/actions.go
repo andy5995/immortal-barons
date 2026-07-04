@@ -84,6 +84,10 @@ var regionTypeHints = []string{
 	"food", "people", "gold", "gold",
 }
 
+// regionTypeKeys are the single-letter selection keys (BRE style), in the same
+// order as regionTypeNames.
+var regionTypeKeys = []byte{'C', 'M', 'D', 'R', 'A', 'U', 'I', 'T'}
+
 // regionField returns a pointer to the idx'th (0-based) field of p.Regions,
 // in the same order as regionTypeNames.
 func regionField(p *game.Empire, idx int) *int {
@@ -94,50 +98,74 @@ func regionField(p *game.Empire, idx int) *int {
 	return fields[idx]
 }
 
-func printRegionTypes(s session.Session) {
+// printRegionTable renders the BRE-style region picker: a Key / Name / Produces
+// / Owned table, colored (magenta keys, yellow names) so buy and drop share one
+// look.
+func printRegionTable(s session.Session, p *game.Empire) {
+	fmt.Fprintf(s, "%sKey  Name           Produces       Owned%s\n", ansi.FgBrightWhite, ansi.Reset)
 	for i, name := range regionTypeNames {
-		fmt.Fprintf(s, "  %d) %s (%s)\n", i+1, name, regionTypeHints[i])
+		fmt.Fprintf(s, " %s(%c)%s %s%-14s%s %-14s %5d\n",
+			ansi.FgBrightMagenta, regionTypeKeys[i], ansi.Reset,
+			ansi.FgBrightYellow, name, ansi.Reset,
+			regionTypeHints[i], *regionField(p, i))
 	}
+}
+
+// promptRegionType reads a single-letter region choice (case-insensitive),
+// returning its 0-based index or -1 to cancel.
+func promptRegionType(s session.Session) int {
+	in := strings.ToUpper(strings.TrimSpace(prompt(s, "Your choice? (0 to cancel)")))
+	if in == "" || in == "0" {
+		return -1
+	}
+	for i, k := range regionTypeKeys {
+		if k == in[0] {
+			return i
+		}
+	}
+	return -1
 }
 
 func buyLand(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%sBuy Regions — %d gold each. Choose a type:%s\n", ansi.FgBrightCyan, w.LandPrice(p), ansi.Reset)
-	printRegionTypes(s)
-	t := promptInt(s, "Region type (0 to cancel)?")
-	if t < 1 || t > len(regionTypeNames) {
+	fmt.Fprintf(s, "\n%sBuy Regions — %d gold each.%s\n", ansi.FgBrightCyan, w.LandPrice(p), ansi.Reset)
+	fmt.Fprintf(s, "Note: Region prices rise as you expand, so the price shown is only\n")
+	fmt.Fprintf(s, "      the cost of the first region you buy.\n")
+	fmt.Fprintf(s, "You can afford %s%d%s regions.\n\n", ansi.FgBrightCyan, w.MaxAffordableRegions(p), ansi.Reset)
+	printRegionTable(s, p)
+	t := promptRegionType(s)
+	if t < 0 {
 		return Stay
 	}
-	n := promptSuggested(s, "How many?", 0, w.MaxAffordableRegions(p))
+	n := promptSuggested(s, fmt.Sprintf("Buy how many %s regions?", regionTypeNames[t]), 0, w.MaxAffordableRegions(p))
 	if n <= 0 {
 		return Stay
 	}
-	if err := w.BuyRegions(p, regionField(p, t-1), n); err != nil {
+	if err := w.BuyRegions(p, regionField(p, t), n); err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Bought %d regions. Gold: %d", n, p.Gold)
+		ok(s, "%d %s regions purchased. Gold: %d", n, regionTypeNames[t], p.Gold)
 	}
 	return Stay
 }
 
 func sellLand(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%sYou cannot sell regions, only drop them.%s\n", ansi.FgYellow, ansi.Reset)
-	fmt.Fprintf(s, "%sDrop Regions — choose a type to abandon (no gold is returned):%s\n", ansi.FgBrightCyan, ansi.Reset)
-	printRegionTypes(s)
-	t := promptInt(s, "Region type (0 to cancel)?")
-	if t < 1 || t > len(regionTypeNames) {
+	fmt.Fprintf(s, "\n%sNOTE: You cannot sell Regions, only drop them...%s\n", ansi.FgYellow, ansi.Reset)
+	printRegionTable(s, p)
+	t := promptRegionType(s)
+	if t < 0 {
 		return Stay
 	}
-	field := regionField(p, t-1)
-	n := promptSuggested(s, "How many to drop?", 0, *field)
+	field := regionField(p, t)
+	n := promptSuggested(s, fmt.Sprintf("Drop how many %s regions?", regionTypeNames[t]), 0, *field)
 	if n <= 0 {
 		return Stay
 	}
 	if err := w.DropRegions(p, field, n); err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Dropped %d regions. You now hold %d land.", n, p.Land)
+		ok(s, "%d %s regions dropped. You now hold %d land.", n, regionTypeNames[t], p.Land)
 	}
 	return Stay
 }
