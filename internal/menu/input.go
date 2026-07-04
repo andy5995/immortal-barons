@@ -78,6 +78,12 @@ func promptSuggested(s session.Session, msg string, suggested, max int) int {
 				b = append(b, c)
 			}
 			fmt.Fprint(s, str) // echo the prefilled max, still editable
+		case r == 'k' || r == 'K': // expand in place: 1 k -> 1000
+			b = append(b, '0', '0', '0')
+			fmt.Fprint(s, "000")
+		case r == 'm' || r == 'M':
+			b = append(b, '0', '0', '0', '0', '0', '0')
+			fmt.Fprint(s, "000000")
 		case r == 127 || r == 8: // backspace
 			if len(b) > 0 {
 				b = b[:len(b)-1]

@@ -100,7 +100,7 @@ func buyLand(s session.Session, w *game.World) Result {
 	if t < 1 || t > len(regionTypeNames) {
 		return Stay
 	}
-	n := promptInt(s, "How many?")
+	n := promptSuggested(s, "How many?", 0, w.MaxAffordableRegions(p))
 	if n <= 0 {
 		return Stay
 	}
@@ -120,11 +120,12 @@ func sellLand(s session.Session, w *game.World) Result {
 	if t < 1 || t > len(regionTypeNames) {
 		return Stay
 	}
-	n := promptInt(s, "How many?")
+	field := regionField(p, t-1)
+	n := promptSuggested(s, "How many?", 0, *field)
 	if n <= 0 {
 		return Stay
 	}
-	if err := w.SellRegions(p, regionField(p, t-1), n); err != nil {
+	if err := w.SellRegions(p, field, n); err != nil {
 		fail(s, err)
 	} else {
 		ok(s, "Sold %d regions. Gold: %d", n, p.Gold)

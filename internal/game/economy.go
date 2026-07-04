@@ -51,6 +51,21 @@ func (w *World) LandPrice(e *Empire) int {
 	return w.Prices.Land + e.Land*w.Prices.Land/LandPriceStep
 }
 
+// MaxAffordableRegions is the most regions e can buy at the current rising
+// price. Because each successive region costs more (see BuyRegions), a simple
+// gold/price divide overcounts — this sums the real climbing cost.
+func (w *World) MaxAffordableRegions(e *Empire) int {
+	base := w.Prices.Land
+	total := 0
+	for n := 0; ; n++ {
+		cost := base + (e.Land+n)*base/LandPriceStep
+		if total+cost > e.Gold {
+			return n
+		}
+		total += cost
+	}
+}
+
 // BuyRegions buys n regions of the type pointed to by field (a pointer into
 // e.Regions, e.g. &e.Regions.Coastal), using the same rising-price formula
 // as before region types existed. All-or-nothing: either the whole

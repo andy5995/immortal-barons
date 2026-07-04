@@ -105,10 +105,10 @@ func BuildMenus() *Menus {
 		{Key: 'K', Label: "Gooie Kablooie Ops", Do: gooieKablooie},
 		{Key: 'I', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: 'G', Label: "Create Group Attack", Do: stubbed("Create Group Attack")},
-		{Key: 'J', Label: "Join Group Attack", Do: stubbed("Join Group Attack")},
+		{Key: 'G', Label: "Create Group Attack", Do: stubbed("Create Group Attack"), Hidden: ibbsHidden},
+		{Key: 'J', Label: "Join Group Attack", Do: stubbed("Join Group Attack"), Hidden: ibbsHidden},
 		{Key: 'T', Label: "Terrorist Ops", Do: stubbed("Terrorist Ops")},
-		{Key: 'X', Label: "Travel Times", Do: stubbed("Travel Times")},
+		{Key: 'X', Label: "Travel Times", Do: stubbed("Travel Times"), Hidden: ibbsHidden},
 		{Key: '0', Label: "Proceed with Turn", Do: back},
 	}
 
@@ -125,7 +125,7 @@ func BuildMenus() *Menus {
 	trading.Items = []Item{
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
 		{Key: '1', Label: "Send Trade Deal", Do: sendTradeDeal},
-		{Key: '2', Label: "View IPScores", Do: interbbsScores},
+		{Key: '2', Label: "View IPScores", Do: interbbsScores, Hidden: ibbsHidden},
 		{Key: 'B', Label: "Buy / Sell", Do: gotoMenu(buy)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Proceed with Turn", Do: back},
@@ -231,6 +231,10 @@ func BuildMenus() *Menus {
 		Food:      food,
 	}
 }
+
+// ibbsHidden hides interplanetary/inter-BBS menu items unless the game is
+// configured for IBBS or league play.
+func ibbsHidden(w *game.World) bool { return !w.Config.InterBBSEnabled() }
 
 func statusBar(w *game.World) string {
 	p := w.Player()

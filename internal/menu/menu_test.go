@@ -243,3 +243,35 @@ func TestSetTaxRateViaSystemMenu(t *testing.T) {
 		t.Errorf("expected tax rate 50, got %d", w.Active.Tax)
 	}
 }
+
+func TestInterBBSItemsHiddenUnlessEnabled(t *testing.T) {
+	f := &fakeSession{keys: []rune("0")}
+	w := newWorld() // default: no IBBS, no league
+	Run(f, w, BuildMenus().Trading)
+	if strings.Contains(f.out.String(), "View IPScores") {
+		t.Error("IPScores should be hidden when IBBS/league is off")
+	}
+
+	f2 := &fakeSession{keys: []rune("0")}
+	w2 := newWorld()
+	w2.Config.IBBS = true
+	Run(f2, w2, BuildMenus().Trading)
+	if !strings.Contains(f2.out.String(), "View IPScores") {
+		t.Error("IPScores should appear when IBBS is enabled")
+	}
+}
+
+func TestPromptSuggestedExpandsKAndM(t *testing.T) {
+	f := &fakeSession{keys: []rune("1k\r")}
+	if got := promptSuggested(f, "How many?", 0, 1_000_000); got != 1000 {
+		t.Errorf("1k should expand to 1000, got %d", got)
+	}
+	if !strings.Contains(f.out.String(), "1000") {
+		t.Errorf("screen should show 1000, not a literal k: %q", f.out.String())
+	}
+
+	f2 := &fakeSession{keys: []rune("2m\r")}
+	if got := promptSuggested(f2, "How many?", 0, 100_000_000); got != 2_000_000 {
+		t.Errorf("2m should expand to 2000000, got %d", got)
+	}
+}
