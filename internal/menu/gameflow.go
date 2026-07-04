@@ -13,7 +13,18 @@ import (
 // player quits. "Play Game" runs a turn pipeline.
 func GameLoop(s session.Session, w *game.World) error {
 	menus := BuildMenus()
-	return Run(s, w, menus.Game)
+	// Expand Ctrl-<letter> into the active player's saved macro keystrokes.
+	// This single wrap covers every front-end, since all of them reach the
+	// menu through GameLoop.
+	ms := session.NewMacroExpander(s, func(letter string) (string, bool) {
+		p := w.Player()
+		if p == nil {
+			return "", false
+		}
+		seq, ok := p.Macros[letter]
+		return seq, ok
+	})
+	return Run(ms, w, menus.Game)
 }
 
 // showBulletin prints the planetary bulletin, or a note if there is none.

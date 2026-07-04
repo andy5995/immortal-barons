@@ -196,6 +196,50 @@ func abdicate(s session.Session, w *game.World) Result {
 	return Quit
 }
 
+// writeMacros is BRE's Macro Editor: it lists the player's saved macros and
+// lets them set or clear one, keyed by a letter A-Z. In game the macro replays
+// when the player presses Ctrl-<letter> (see session.MacroExpander).
+func writeMacros(s session.Session, w *game.World) Result {
+	p := w.Player()
+	if p.Macros == nil {
+		p.Macros = map[string]string{}
+	}
+	fmt.Fprintf(s, "\n%sMacro Editor%s\n", ansi.FgBrightCyan, ansi.Reset)
+	if len(p.Macros) == 0 {
+		fmt.Fprint(s, "  (no macros defined)\n")
+	} else {
+		letters := make([]string, 0, len(p.Macros))
+		for l := range p.Macros {
+			letters = append(letters, l)
+		}
+		sort.Strings(letters)
+		for _, l := range letters {
+			fmt.Fprintf(s, "  Ctrl-%s: %s\n", l, p.Macros[l])
+		}
+	}
+
+	line := strings.ToUpper(strings.TrimSpace(prompt(s, "Edit which macro? Enter a letter A-Z (triggered by Ctrl-<letter>), or blank to cancel")))
+	if line == "" {
+		return Stay
+	}
+	if len(line) != 1 || line[0] < 'A' || line[0] > 'Z' {
+		fmt.Fprint(s, "\nPlease enter a single letter A-Z.\n")
+		pause(s)
+		return Stay
+	}
+
+	fmt.Fprintf(s, "\nCurrent Ctrl-%s macro: %q\n", line, p.Macros[line])
+	seq := prompt(s, "Enter the keystrokes to replay (blank to clear this macro)")
+	if strings.TrimSpace(seq) == "" {
+		delete(p.Macros, line)
+		ok(s, "Macro Ctrl-%s cleared.", line)
+	} else {
+		p.Macros[line] = seq
+		ok(s, "Macro Ctrl-%s set.", line)
+	}
+	return Stay
+}
+
 // listInvestments shows the player's pending investments and any debt.
 func listInvestments(s session.Session, w *game.World) Result {
 	p := w.Player()

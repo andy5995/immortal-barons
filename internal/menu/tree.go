@@ -199,7 +199,7 @@ func BuildMenus() *Menus {
 		{Key: 'S', Label: "See Scores", Do: seeScores},
 		{Key: 'T', Label: "Trading", Do: gotoMenu(trading)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: 'W', Label: "Write Macros", Do: stubbed("Write Macros")},
+		{Key: 'W', Label: "Write Macros", Do: writeMacros},
 		{Key: '1', Label: "Set Industries", Do: setIndustries},
 		{Key: '2', Label: "Show Instructions", Do: helpBrowse},
 		{Key: '3', Label: "Specialize Industry", Do: specializeIndustry},

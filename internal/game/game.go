@@ -53,6 +53,11 @@ type Empire struct {
 
 	Investments []Investment
 
+	// Macros maps a single uppercase letter (invoked in-game as Ctrl-<letter>)
+	// to a saved keystroke sequence that is replayed when the player presses
+	// that combo. BRE's "Write Macros" / Macro Editor feature.
+	Macros map[string]string
+
 	// Production percentages (should sum to ~100) for what Industrial
 	// regions build. See manufacture() in turn.go.
 	ProdTroopers int
