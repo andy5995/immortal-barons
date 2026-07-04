@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -826,20 +827,48 @@ func travelTimes(s session.Session, w *game.World) Result {
 		ok(s, "No other planets are known yet.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%sApproximate travel times:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	// Prefer the league roster (ibnodes.dat) when it's loaded; else fall back
-	// to boards we've heard score packets from.
+	fmt.Fprintf(s, "\n%sTravel Times%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprint(s, "How long an operation takes to reach another planet and return\n")
+	fmt.Fprint(s, "depends on how often your sysop exchanges inter-BBS packets.\n")
+
+	// The league roster from ibnodes.dat, if the coordinator has distributed it.
 	if len(w.LeagueNodes) > 0 {
+		fmt.Fprintf(s, "\n%sLeague members:%s\n", ansi.FgBrightCyan, ansi.Reset)
 		for _, n := range w.LeagueNodes {
-			fmt.Fprintf(s, "  #%-3d %-22s about 1 day each way\n", n.Number, n.Name)
+			fmt.Fprintf(s, "  #%-3d %s\n", n.Number, n.Name)
 		}
-	} else {
+	}
+	// Observed latency: how recently a packet actually arrived from each board.
+	if len(w.RemoteBoards) > 0 {
+		now := w.Today
+		if now == "" {
+			now = w.LastMaintDate
+		}
+		fmt.Fprintf(s, "\n%sLast packet received from:%s\n", ansi.FgBrightCyan, ansi.Reset)
 		for _, b := range w.RemoteBoards {
-			fmt.Fprintf(s, "  %-22s about 1 day each way (last packet %s)\n", b.BoardID, b.Date)
+			fmt.Fprintf(s, "  %-20s %s%s%s\n", b.BoardID, ansi.FgBrightCyan, daysAgoText(b.Date, now), ansi.Reset)
 		}
 	}
 	pause(s)
 	return Stay
+}
+
+// daysAgoText renders how long ago (in days) the ISO date `then` was relative
+// to `now`, for the observed inter-BBS packet latency.
+func daysAgoText(then, now string) string {
+	t1, e1 := time.Parse("2006-01-02", then)
+	t2, e2 := time.Parse("2006-01-02", now)
+	if e1 != nil || e2 != nil {
+		return then
+	}
+	switch d := int(t2.Sub(t1).Hours() / 24); {
+	case d <= 0:
+		return "today"
+	case d == 1:
+		return "1 day ago"
+	default:
+		return fmt.Sprintf("%d days ago", d)
+	}
 }
 
 // spyDatabase shows the planet-wide store of spy reports on remote empires.
