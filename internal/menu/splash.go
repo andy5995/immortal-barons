@@ -17,9 +17,7 @@ func Splash(s session.Session) {
 	pause(s)
 }
 
-const banner = "    \x1b[90m════════\x1b[0m\x1b[31m════════\x1b[0m\x1b[90m════════\x1b[0m\x1b[31m════════\x1b[0m\x1b[90m════════\x1b[0m\x1b[31m════════\x1b[0m\x1b[90m════════\x1b[0m\x1b[31m════════\x1b[0m\x1b[90m════════\x1b[0m\x1b[31m════\x1b[0m\n" +
-	"\n" +
-	"                \x1b[93m█████\x1b[0m \x1b[93m█\x1b[0m   \x1b[93m█\x1b[0m \x1b[93m█\x1b[0m   \x1b[93m█\x1b[0m  \x1b[93m███\x1b[0m  \x1b[93m████\x1b[0m  \x1b[93m█████\x1b[0m  \x1b[93m███\x1b[0m  \x1b[93m█\x1b[0m    \n" +
+const banner = "                \x1b[93m█████\x1b[0m \x1b[93m█\x1b[0m   \x1b[93m█\x1b[0m \x1b[93m█\x1b[0m   \x1b[93m█\x1b[0m  \x1b[93m███\x1b[0m  \x1b[93m████\x1b[0m  \x1b[93m█████\x1b[0m  \x1b[93m███\x1b[0m  \x1b[93m█\x1b[0m    \n" +
 	"                  \x1b[93m█\x1b[0m   \x1b[93m██\x1b[0m \x1b[93m██\x1b[0m \x1b[93m██\x1b[0m \x1b[93m██\x1b[0m \x1b[93m█\x1b[0m   \x1b[93m█\x1b[0m \x1b[93m█\x1b[0m   \x1b[93m█\x1b[0m   \x1b[93m█\x1b[0m   \x1b[93m█\x1b[0m   \x1b[93m█\x1b[0m \x1b[93m█\x1b[0m    \n" +
 	"                  \x1b[93;101m▒\x1b[0m   \x1b[93;101m▒▒\x1b[0m \x1b[93;101m▒▒\x1b[0m \x1b[93;101m▒▒\x1b[0m \x1b[93;101m▒▒\x1b[0m \x1b[93;101m▒\x1b[0m   \x1b[93;101m▒\x1b[0m \x1b[93;101m▒\x1b[0m   \x1b[93;101m▒\x1b[0m   \x1b[93;101m▒\x1b[0m   \x1b[93;101m▒\x1b[0m   \x1b[93;101m▒\x1b[0m \x1b[93;101m▒\x1b[0m    \n" +
 	"                  \x1b[91m█\x1b[0m   \x1b[91m█\x1b[0m \x1b[91m█\x1b[0m \x1b[91m█\x1b[0m \x1b[91m█\x1b[0m \x1b[91m█\x1b[0m \x1b[91m█\x1b[0m \x1b[91m█\x1b[0m   \x1b[91m█\x1b[0m \x1b[91m█\x1b[0m   \x1b[91m█\x1b[0m   \x1b[91m█\x1b[0m   \x1b[91m█\x1b[0m   \x1b[91m█\x1b[0m \x1b[91m█\x1b[0m    \n" +
@@ -40,9 +38,6 @@ const banner = "    \x1b[90m════════\x1b[0m\x1b[31m════�
 	"                      \x1b[33m█\x1b[0m   \x1b[33m█\x1b[0m \x1b[33m█\x1b[0m   \x1b[33m█\x1b[0m \x1b[33m█\x1b[0m  \x1b[33m█\x1b[0m  \x1b[33m█\x1b[0m   \x1b[33m█\x1b[0m \x1b[33m█\x1b[0m   \x1b[33m█\x1b[0m     \x1b[33m█\x1b[0m\n" +
 	"                      \x1b[33m████\x1b[0m  \x1b[33m█\x1b[0m   \x1b[33m█\x1b[0m \x1b[33m█\x1b[0m   \x1b[33m█\x1b[0m  \x1b[33m███\x1b[0m  \x1b[33m█\x1b[0m   \x1b[33m█\x1b[0m \x1b[33m████\x1b[0m \n" +
 	"                      \x1b[90m▓▓▓▓\x1b[0m  \x1b[90m▓\x1b[0m   \x1b[90m▓\x1b[0m \x1b[90m▓\x1b[0m   \x1b[90m▓\x1b[0m  \x1b[90m▓▓▓\x1b[0m  \x1b[90m▓\x1b[0m   \x1b[90m▓\x1b[0m \x1b[90m▓▓▓▓\x1b[0m \n" +
-	"\n" +
-	"\n" +
 	"\x1b[90m▂▃▁▄▆\x1b[31m▂▅▃▁▇\x1b[90m▂▄▃▆▁\x1b[31m▃▅▂▄▃\x1b[90m▇▂▅▃▁\x1b[31m▄▆▂▃▅\x1b[90m▁▇▃▂▄\x1b[31m▆▂▅▃▁\x1b[90m▂▃▁▄▆\x1b[31m▂▅▃▁▇\x1b[90m▂▄▃▆▁\x1b[31m▃▅▂▄▃\x1b[90m▇▂▅▃▁\x1b[31m▄▆▂▃▅\x1b[90m▁▇▃▂▄\x1b[31m▆▂▅▃▁\x1b[0m\n" +
 	"\x1b[31m░\x1b[90m░░▒▒░\x1b[93m▓\x1b[90m░░░░░▒\x1b[31m▒\x1b[90m░░░░░░░\x1b[93m▓\x1b[90m▒░░░\x1b[31m░\x1b[90m░░░▒▒░░░░░\x1b[93m▓\x1b[90m░\x1b[31m▒\x1b[90m▒░░░░░░░▒▒░░\x1b[93m▓\x1b[90m░░░░▒▒░░░░░░\x1b[31m░\x1b[90m▒▒\x1b[93m▓\x1b[90m░░░░░\x1b[93m▓\x1b[90m▒▒░\x1b[31m░\x1b[90m░\x1b[0m\n" +
-	"\n" +
 	"\x1b[0m"
