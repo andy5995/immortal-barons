@@ -329,6 +329,24 @@ func bombHQ(s session.Session, w *game.World) Result {
 	return specialAttack(s, w, "Bomb HQ", 0, func(a, d *game.Empire) (string, error) { return w.BombHQ(a, d) })
 }
 
+// playerList shows every living empire (Coordinator tool).
+func playerList(s session.Session, w *game.World) Result {
+	fmt.Fprintf(s, "\n%sPlayer List%s\n", ansi.FgBrightBlue, ansi.Reset)
+	fmt.Fprintf(s, "  %-16s %-14s %-8s %s\n", "Empire", "Owner", "Land", "Net Worth")
+	for _, e := range w.Empires {
+		if !e.Alive {
+			continue
+		}
+		owner := e.Owner
+		if owner == "" {
+			owner = "(AI)"
+		}
+		fmt.Fprintf(s, "  %-16s %-14s %-8d %d\n", e.Name, owner, e.Land, w.NetWorth(e))
+	}
+	pause(s)
+	return Stay
+}
+
 func spyRelations(s session.Session, w *game.World) Result {
 	return specialAttack(s, w, "Spy on Relations", 0, func(a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) })
 }
