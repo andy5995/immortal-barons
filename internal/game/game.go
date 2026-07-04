@@ -213,7 +213,8 @@ type World struct {
 	NextAttackID    int
 	Outbox          []Packet
 	SpyDatabase     []SpyReport
-	LeagueDiplomacy string // coordinator's league-wide diplomacy declaration
+	LeagueDiplomacy string       // coordinator's league-wide diplomacy declaration
+	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from BRNODES.DAT at startup
 
 	Coordinator bool
 

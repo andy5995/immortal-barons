@@ -17,7 +17,9 @@ func worldPath(cfg game.Config) string { return filepath.Join(cfg.DataDir, "worl
 func Load(cfg game.Config) (*game.World, error) {
 	data, err := os.ReadFile(worldPath(cfg))
 	if os.IsNotExist(err) {
-		return game.NewWorld(cfg), nil
+		w := game.NewWorld(cfg)
+		loadLeagueNodes(w, cfg)
+		return w, nil
 	}
 	if err != nil {
 		return nil, err
@@ -35,7 +37,21 @@ func Load(cfg game.Config) (*game.World, error) {
 	w.EnsurePirates()
 	w.EnsureTreaties()
 	w.Config = cfg
+	loadLeagueNodes(w, cfg)
 	return w, nil
+}
+
+// NodeListFile is the league roster filename. The clone isn't binary-compatible
+// with BRE (its own packet format), so it uses its own name rather than BRE's
+// BRNODES.DAT — the format is still the BRNODES layout ParseNodeList reads.
+const NodeListFile = "ibnodes.dat"
+
+// loadLeagueNodes loads the league roster from ibnodes.dat in the data dir. A
+// missing file just means no roster — fine for a single-BBS game.
+func loadLeagueNodes(w *game.World, cfg game.Config) {
+	if nodes, err := ParseNodeList(filepath.Join(cfg.DataDir, NodeListFile)); err == nil {
+		w.LeagueNodes = nodes
+	}
 }
 
 // Save writes the world atomically (temp file + rename).

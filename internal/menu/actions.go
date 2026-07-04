@@ -822,13 +822,21 @@ func joinGroupAttack(s session.Session, w *game.World) Result {
 // Packets exchange on each PLANETARY maintenance run (about daily), so most
 // interplanetary operations take roughly a day each way.
 func travelTimes(s session.Session, w *game.World) Result {
-	if len(w.RemoteBoards) == 0 {
+	if len(w.LeagueNodes) == 0 && len(w.RemoteBoards) == 0 {
 		ok(s, "No other planets are known yet.")
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%sApproximate travel times:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	for _, b := range w.RemoteBoards {
-		fmt.Fprintf(s, "  %-18s about 1 day each way (last packet %s)\n", b.BoardID, b.Date)
+	// Prefer the league roster (ibnodes.dat) when it's loaded; else fall back
+	// to boards we've heard score packets from.
+	if len(w.LeagueNodes) > 0 {
+		for _, n := range w.LeagueNodes {
+			fmt.Fprintf(s, "  #%-3d %-22s about 1 day each way\n", n.Number, n.Name)
+		}
+	} else {
+		for _, b := range w.RemoteBoards {
+			fmt.Fprintf(s, "  %-22s about 1 day each way (last packet %s)\n", b.BoardID, b.Date)
+		}
 	}
 	pause(s)
 	return Stay
