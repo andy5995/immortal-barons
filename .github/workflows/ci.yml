@@ -15,17 +15,14 @@ permissions:
   contents: read
 
 jobs:
-  build-test:
+  # gofmt is platform-independent, so run it once rather than on every OS.
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # setup-go pinned to v6 (current, per Andy; DC has no Go workflow to
-      # cross-check against). go-version-file keeps CI on the exact toolchain
-      # the module declares (go.mod: go 1.26.x).
       - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
-
       - name: gofmt (must be clean)
         run: |
           unformatted="$(gofmt -l .)"
@@ -34,6 +31,25 @@ jobs:
             echo "$unformatted"
             exit 1
           fi
+
+  # Native build/test on each OS. This is what exercises the platform-specific
+  # files (lock_unix.go / lock_windows.go) and the x/term console at runtime;
+  # cross-compiling from one host cannot. go vet runs per-OS too, so each
+  # build-tagged file is vetted on the platform it targets.
+  build-test:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7
+      # setup-go pinned to v6 (current, per Andy; DC has no Go workflow to
+      # cross-check against). go-version-file keeps CI on the exact toolchain
+      # the module declares (go.mod: go 1.26.x).
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
 
       - name: go vet
         run: go vet ./...

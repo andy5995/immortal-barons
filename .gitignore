@@ -1,5 +1,7 @@
-# Built binary
+# Built binaries (one per front-end in cmd/)
 /barons
+/barons-door
+/barons-web
 
 # Go test and profiling output
 *.test
