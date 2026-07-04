@@ -8,6 +8,9 @@ highest net worth when the turns run out, or to conquer everyone else.
 The game is written in Go. It is an independent remake, inspired by the
 1990s BBS door game *Barren Realms Elite*. See [Heritage](#heritage) below.
 
+> **Early work in progress.** Immortal Barons is not ready for real
+> play-testing or inter-BBS (IBBS) play yet. Mechanics are still changing.
+
 ## Status
 
 Version 0.0.1 — a persistent, multi-user BBS door game. Each caller has a
@@ -27,14 +30,16 @@ door under Synchronet or Mystic.
 - Bank: deposit, withdraw, take a loan, repay, invest (about 1%/turn)
 - War: conventional attack (offense vs. defense), plus **nuclear, chemical,
   and biological** strikes and **pirate raids**
-- Covert ops: send a spy for intel, run sabotage (agent-count decides success)
+- Covert ops (agent-count decides success): spy for intel, sabotage, and
+  strikes on the enemy's intelligence, airbases, food stores, and HeadQuarters
+- Region types (coastal, mountain, desert, river, agricultural, urban,
+  industrial, technology) and a food market
 - Messages: player-to-player mail and a planetary bulletin
 - "While you were away" event log for asynchronous play
 - Scores and net worth
 
 **Planned (not built yet):**
 
-- Region types (coastal, mountain, river, …) and a food market
 - Diplomacy and trading between empires
 - Leagues that run for a set time, then reset and crown a winner
 - Sysop setup screen (game rules are read from a config file for now)
@@ -43,7 +48,9 @@ door under Synchronet or Mystic.
 
 ## Build and run
 
-You need Go 1.26 or newer.
+You need Go 1.26 or newer. The game builds and runs anywhere Go does — Linux,
+macOS, Windows, and the BSDs. The BBS door front-end targets modern BBS
+software running on Linux.
 
 ```
 go build -o barons ./cmd/barons
@@ -59,8 +66,7 @@ go run ./cmd/barons
 ## Running as a BBS door
 
 Immortal Barons can run as a native door under modern BBS software
-(Synchronet, Mystic) on Linux — no DOSBox or DOSEMU needed. Build the door
-front-end:
+(Synchronet, Mystic) on Linux. Build the door front-end:
 
 ```
 go build -o barons-door ./cmd/barons-door
@@ -78,8 +84,9 @@ node, time left, and whether their terminal supports ANSI. The BBS connects
 the caller to the door over standard input and output. With no `-dropfile`,
 it looks for `DOOR32.SYS` or `DOOR.SYS` in the working directory.
 
-This first version runs a single game per call. Persistent empires shared
-across calls are the next step.
+Callers share one persistent world: each caller's empire is saved between
+calls, keyed by their BBS handle. A nightly maintenance step
+(`barons-door -maint`) advances the world.
 
 ## How to play
 
