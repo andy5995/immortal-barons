@@ -201,6 +201,14 @@ type World struct {
 	RemoteBoards  []RemoteBoard
 	Pirates       []PirateFaction
 
+	// Inter-BBS (interplanetary) play — see ibbs.go. GroupAttacks assemble
+	// locally until they depart; Outbox holds packets queued for other boards;
+	// SpyDatabase holds spy reports shared across the planet.
+	GroupAttacks []GroupAttack
+	NextAttackID int
+	Outbox       []Packet
+	SpyDatabase  []SpyReport
+
 	Coordinator bool
 
 	// Player preferences (kept on the world for now; per-empire is a later

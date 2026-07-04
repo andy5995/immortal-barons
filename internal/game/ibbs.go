@@ -1,0 +1,216 @@
+package game
+
+import (
+	"errors"
+	"fmt"
+)
+
+// Inter-BBS (interplanetary) play. Transport is Option A from the design spec
+// (docs/superpowers/specs/2026-07-04-interbbs-design.md): the game reads and
+// writes packet files in inbound/outbound dirs in its own JSON format; how the
+// files move between boards is the operator's concern. This file is the pure
+// in-memory model and resolution logic, testable with several World instances;
+// the store layer handles reading/writing the JSON files.
+
+var (
+	ErrNoAttack = errors.New("no such group attack")
+	ErrDeparted = errors.New("that attack force has already left")
+)
+
+// Packet carries inter-BBS actions from one board to another (or, with an empty
+// ToBoard, broadcast to the whole league).
+type Packet struct {
+	FromBoard string
+	ToBoard   string
+	Date      string
+	Scores    []RemoteScore  // score share (feeds RemoteBoards / IP scores)
+	Attacks   []RemoteAttack // strikes landing on ToBoard
+	Results   []AttackResult // outcomes returning to the origin
+}
+
+// Contribution records one baron's share of a group attack, so spoils split
+// proportionally.
+type Contribution struct {
+	Owner   string
+	Offense int
+}
+
+// GroupAttack is a strike being assembled on this board. Until DepartDay,
+// other barons here may join it.
+type GroupAttack struct {
+	ID           int
+	TargetBoard  string
+	TargetEmpire string // "" = the whole planet (its strongest baron)
+	DepartDay    int
+	Contributors []Contribution
+}
+
+// Offense totals the committed offensive strength.
+func (g GroupAttack) Offense() int {
+	total := 0
+	for _, c := range g.Contributors {
+		total += c.Offense
+	}
+	return total
+}
+
+// RemoteAttack is a departed strike aimed at an empire on another board.
+type RemoteAttack struct {
+	ID           int
+	FromBoard    string
+	TargetEmpire string
+	Offense      int
+	Contributors []Contribution
+}
+
+// SpyReport is intel on a remote empire, stored in the planet-wide Spy
+// Database and readable by every baron here. Populated by interplanetary spy
+// ops (built in a later increment).
+type SpyReport struct {
+	Board   string
+	Empire  string
+	Date    string
+	Land    int
+	Offense int
+	Defense int
+	Gold    int
+}
+
+// AttackResult returns to the origin board after a remote strike resolves.
+type AttackResult struct {
+	ID           int
+	TargetBoard  string
+	TargetEmpire string
+	LandTaken    int
+	Won          bool
+}
+
+// CreateGroupAttack starts a new group strike led by e (contributing offense),
+// aimed at targetEmpire on targetBoard, leaving on departDay.
+func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, departDay, offense int) *GroupAttack {
+	w.NextAttackID++
+	w.GroupAttacks = append(w.GroupAttacks, GroupAttack{
+		ID:           w.NextAttackID,
+		TargetBoard:  targetBoard,
+		TargetEmpire: targetEmpire,
+		DepartDay:    departDay,
+		Contributors: []Contribution{{Owner: e.Owner, Offense: offense}},
+	})
+	return &w.GroupAttacks[len(w.GroupAttacks)-1]
+}
+
+// JoinGroupAttack adds e's offense to a pending group attack (before it leaves).
+func (w *World) JoinGroupAttack(e *Empire, id, offense int) error {
+	for i := range w.GroupAttacks {
+		ga := &w.GroupAttacks[i]
+		if ga.ID != id {
+			continue
+		}
+		if w.GameDay >= ga.DepartDay {
+			return ErrDeparted
+		}
+		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, Offense: offense})
+		return nil
+	}
+	return ErrNoAttack
+}
+
+// LaunchDueGroupAttacks turns every group attack whose DepartDay has arrived
+// into an outbound RemoteAttack and removes it from the pending list. Run
+// during the PLANETARY maintenance step.
+func (w *World) LaunchDueGroupAttacks() {
+	var remaining []GroupAttack
+	for _, ga := range w.GroupAttacks {
+		if w.GameDay < ga.DepartDay {
+			remaining = append(remaining, ga)
+			continue
+		}
+		w.enqueue(ga.TargetBoard, RemoteAttack{
+			ID:           ga.ID,
+			FromBoard:    w.Config.BoardID,
+			TargetEmpire: ga.TargetEmpire,
+			Offense:      ga.Offense(),
+			Contributors: ga.Contributors,
+		})
+	}
+	w.GroupAttacks = remaining
+}
+
+// enqueue appends atk to the outbound packet for toBoard, creating it if needed.
+func (w *World) enqueue(toBoard string, atk RemoteAttack) {
+	for i := range w.Outbox {
+		if w.Outbox[i].ToBoard == toBoard {
+			w.Outbox[i].Attacks = append(w.Outbox[i].Attacks, atk)
+			return
+		}
+	}
+	w.Outbox = append(w.Outbox, Packet{
+		FromBoard: w.Config.BoardID,
+		ToBoard:   toBoard,
+		Date:      w.LastMaintDate,
+		Attacks:   []RemoteAttack{atk},
+	})
+}
+
+// ApplyPacket applies an inbound packet to this board and returns a result
+// packet (attack outcomes) addressed back to the origin.
+func (w *World) ApplyPacket(p Packet) Packet {
+	if len(p.Scores) > 0 {
+		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores})
+	}
+	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
+	for _, atk := range p.Attacks {
+		result.Results = append(result.Results, w.resolveRemoteAttack(atk))
+	}
+	return result
+}
+
+// resolveRemoteAttack resolves a remote strike against its target empire (or,
+// for a whole-planet attack, this board's strongest baron).
+func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
+	target := w.remoteTarget(atk.TargetEmpire)
+	res := AttackResult{ID: atk.ID, TargetBoard: w.Config.BoardID, TargetEmpire: atk.TargetEmpire}
+	if target == nil {
+		return res
+	}
+	res.TargetEmpire = target.Name
+	def := target.Defense()
+	if atk.Offense <= def {
+		target.Events = append(target.Events, fmt.Sprintf("You repelled an interplanetary strike from %s.", atk.FromBoard))
+		return res
+	}
+	// Overwhelmed: take a bite of land proportional to the margin (capped).
+	frac := (atk.Offense - def) * 100 / max(atk.Offense, 1)
+	land := target.Land * frac / 100 / 4
+	if land > target.Land {
+		land = target.Land
+	}
+	if land > 0 {
+		target.Regions.remove(land)
+		target.syncLand()
+	}
+	target.Events = append(target.Events, fmt.Sprintf("An interplanetary strike from %s took %d regions!", atk.FromBoard, land))
+	res.LandTaken = land
+	res.Won = true
+	return res
+}
+
+// remoteTarget finds the empire a remote attack should hit: the named baron, or
+// (for a whole-planet strike) this board's strongest living human empire.
+func (w *World) remoteTarget(name string) *Empire {
+	if name != "" {
+		for _, e := range w.Empires {
+			if e.Alive && e.Name == name {
+				return e
+			}
+		}
+		return nil
+	}
+	var best *Empire
+	for _, e := range w.Empires {
+		if e.Alive && e.Owner != "" && (best == nil || w.NetWorth(e) > w.NetWorth(best)) {
+			best = e
+		}
+	}
+	return best
+}
