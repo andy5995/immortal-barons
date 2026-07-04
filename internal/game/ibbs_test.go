@@ -107,3 +107,25 @@ func TestJoinDepartedAttackFails(t *testing.T) {
 		t.Errorf("unknown id should fail with ErrNoAttack, got %v", err)
 	}
 }
+
+func TestBBSCoordinatorElection(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Bravo")
+	c := w.AddHuman("c", "Charlie")
+
+	if w.BBSCoordinator() != nil {
+		t.Error("no votes cast yet -> no coordinator")
+	}
+	w.VoteCoordinator(a, "b") // Bravo: 1
+	w.VoteCoordinator(c, "b") // Bravo: 2
+	w.VoteCoordinator(b, "a") // Alpha: 1
+	if co := w.BBSCoordinator(); co != b {
+		t.Errorf("Bravo has the most votes and should be coordinator, got %v", co)
+	}
+	// Changing a vote re-elects.
+	w.VoteCoordinator(c, "a") // now Alpha 2, Bravo 1
+	if co := w.BBSCoordinator(); co != a {
+		t.Errorf("after re-vote Alpha should be coordinator, got %v", co)
+	}
+}

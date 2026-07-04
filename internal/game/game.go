@@ -48,6 +48,11 @@ type Empire struct {
 	PirateRaids []string // raids suffered since last play; shown in the income report
 	ImmuneFrom  []string // empires whose covert ops against us auto-fail (we bribed their agents)
 
+	// CoordinatorVote is the owner handle this baron votes for as the BBS
+	// Coordinator (the elected player who gets the Coordinator menu). Changeable
+	// any time from the System menu.
+	CoordinatorVote string
+
 	AllianceOffers []string      // legacy (pre-typed-treaties); migrated by EnsureTreaties
 	TreatyOffers   []TreatyOffer // pending treaty proposals received
 

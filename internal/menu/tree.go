@@ -37,7 +37,7 @@ func BuildMenus() *Menus {
 	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
 	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
 	prefs := &Menu{Title: "Preferences", Color: ansi.FgBrightCyan}
-	coord := &Menu{Title: "Sysop / Coordinator", Color: ansi.FgBrightBlue}
+	coord := &Menu{Title: "Coordinator Menu", Color: ansi.FgBrightBlue}
 	system := &Menu{Title: "System Menu", Color: ansi.FgBrightBlue}
 	food := &Menu{Title: "Food Market", Color: ansi.FgBrightCyan}
 
@@ -176,9 +176,10 @@ func BuildMenus() *Menus {
 		{Key: '0', Label: "Return", Do: back},
 	}
 
+	// The Coordinator Menu belongs to the elected BBS Coordinator (see the
+	// System menu gate below); it holds the planet-coordination functions.
 	coord.Items = []Item{
-		{Key: 'C', Label: "Configuration Editor", Do: configEditor},
-		{Key: 'M', Label: "Modify League Diplomacy", Do: modifyLeagueDiplomacy, Hidden: ibbsHidden},
+		{Key: 'M', Label: "Modify League Diplomacy", Do: modifyLeagueDiplomacy},
 		{Key: 'P', Label: "Player List", Do: playerList},
 		{Key: '0', Label: "Return", Do: back},
 	}
@@ -208,7 +209,10 @@ func BuildMenus() *Menus {
 		{Key: '1', Label: "Set Industries", Do: setIndustries},
 		{Key: '2', Label: "Show Instructions", Do: helpBrowse},
 		{Key: '3', Label: "Specialize Industry", Do: specializeIndustry},
-		{Key: 'Y', Label: "Sysop / Coordinator", Do: gotoMenu(coord),
+		{Key: 'O', Label: "Vote for Coordinator", Do: voteCoordinator, Hidden: ibbsHidden},
+		{Key: 'Y', Label: "Coordinator Menu", Do: gotoMenu(coord),
+			Hidden: func(w *game.World) bool { return ibbsHidden(w) || w.BBSCoordinator() != w.Player() }},
+		{Key: 'C', Label: "Configuration Editor", Do: configEditor,
 			Hidden: func(w *game.World) bool { return !w.Coordinator }},
 		{Key: '0', Label: "Return", Do: back},
 		{Key: 'Q', Label: "Quit", Do: quit},

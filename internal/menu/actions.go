@@ -888,12 +888,49 @@ func terroristOps(s session.Session, w *game.World) Result {
 	return Stay
 }
 
+// voteCoordinator lets the player cast (or change) their vote for the BBS
+// Coordinator — the elected player who gets the Coordinator menu. BRE: "Who do
+// you feel should be the BBS Coordinator?"; the vote can change any time.
+func voteCoordinator(s session.Session, w *game.World) Result {
+	p := w.Player()
+	var owners, names []string
+	for _, e := range w.Empires {
+		if !e.Alive || e.Owner == "" {
+			continue
+		}
+		owners = append(owners, e.Owner)
+		label := e.Name
+		if e.Owner == p.CoordinatorVote {
+			label += " (your current vote)"
+		}
+		names = append(names, label)
+	}
+	if len(names) == 0 {
+		ok(s, "There are no barons to vote for yet.")
+		return Stay
+	}
+	if co := w.BBSCoordinator(); co != nil {
+		fmt.Fprintf(s, "\n%sThe current BBS Coordinator is %s.%s\n", ansi.FgBrightCyan, co.Name, ansi.Reset)
+	}
+	fmt.Fprintf(s, "\n%sWho should be the BBS Coordinator?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for i, n := range names {
+		fmt.Fprintf(s, "    %d) %s\n", i+1, n)
+	}
+	i := promptInt(s, "Vote for (0 to cancel)?")
+	if i < 1 || i > len(owners) {
+		return Stay
+	}
+	w.VoteCoordinator(p, owners[i-1])
+	ok(s, "Your vote is recorded. You may change it any time.")
+	return Stay
+}
+
 // modifyLeagueDiplomacy lets a League Coordinator post a planet-wide diplomacy
 // declaration, broadcast to the league on the next packet run. v1: a single
 // free-text stance; a fuller model would track pairwise planet relations.
 func modifyLeagueDiplomacy(s session.Session, w *game.World) Result {
-	if !w.Coordinator {
-		ok(s, "Only the League Coordinator may set league diplomacy.")
+	if w.BBSCoordinator() != w.Player() {
+		ok(s, "Only the BBS Coordinator may set league diplomacy.")
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%sCurrent league diplomacy:%s %s\n", ansi.FgBrightCyan, ansi.Reset, w.LeagueDiplomacy)

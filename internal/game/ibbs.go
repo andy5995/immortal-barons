@@ -136,6 +136,39 @@ func (w *World) LaunchDueGroupAttacks() {
 	w.GroupAttacks = remaining
 }
 
+// VoteCoordinator records voter's vote for the empire owned by forOwner to be
+// the BBS Coordinator.
+func (w *World) VoteCoordinator(voter *Empire, forOwner string) {
+	voter.CoordinatorVote = forOwner
+}
+
+// BBSCoordinator returns the empire elected this board's Coordinator: the
+// living human empire with the most votes (ties break by net worth). It
+// returns nil until at least one vote is cast.
+func (w *World) BBSCoordinator() *Empire {
+	votes := map[string]int{}
+	for _, e := range w.Empires {
+		if e.Alive && e.CoordinatorVote != "" {
+			votes[e.CoordinatorVote]++
+		}
+	}
+	var best *Empire
+	bestVotes := 0
+	for _, e := range w.Empires {
+		if !e.Alive || e.Owner == "" {
+			continue
+		}
+		v := votes[e.Owner]
+		if v == 0 {
+			continue
+		}
+		if v > bestVotes || (v == bestVotes && best != nil && w.NetWorth(e) > w.NetWorth(best)) {
+			best, bestVotes = e, v
+		}
+	}
+	return best
+}
+
 // ExportScores queues a broadcast packet of this board's living human empires'
 // scores for the league — it feeds the other boards' interplanetary score
 // screens and gives group attacks targets to choose from.
