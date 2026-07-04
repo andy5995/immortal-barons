@@ -630,75 +630,106 @@ func modifyDiplomacy(s session.Session, w *game.World) Result {
 	}
 	fmt.Fprintf(s, "\n%sChoose an empire:%s\n", ansi.FgBrightCyan, ansi.Reset)
 	for i, e := range others {
-		status := ""
-		switch {
-		case w.AreAllied(p, e):
-			status = " (allied)"
-		case inList(p.AllianceOffers, e.Name):
-			status = " (offered you)"
-		case inList(e.AllianceOffers, p.Name):
-			status = " (proposal sent)"
+		suffix := ""
+		if held := w.TreatiesBetween(p, e); len(held) > 0 {
+			suffix = " — " + strings.Join(held, ", ")
 		}
-		fmt.Fprintf(s, "  %d) %s%s\n", i+1, e.Name, status)
+		fmt.Fprintf(s, "  %d) %s%s\n", i+1, e.Name, suffix)
 	}
 	i := promptInt(s, "Negotiate with which empire (0 to cancel)?")
 	if i < 1 || i > len(others) {
 		return Stay
 	}
-	e := others[i-1]
-	switch {
-	case w.AreAllied(p, e):
-		w.BreakAlliance(p, e)
-		ok(s, "Alliance with %s broken.", e.Name)
-	case inList(p.AllianceOffers, e.Name):
-		w.AcceptAlliance(p, e.Name)
-		ok(s, "You are now allied with %s.", e.Name)
-	default:
-		w.ProposeAlliance(p, e)
-		ok(s, "Alliance proposed to %s.", e.Name)
-	}
+	negotiateWith(s, w, p, others[i-1])
 	return Stay
 }
 
-func inList(list []string, name string) bool {
-	for _, x := range list {
-		if x == name {
-			return true
+// negotiateWith runs the propose / accept / break loop with one empire.
+func negotiateWith(s session.Session, w *game.World, p, e *game.Empire) {
+	for {
+		fmt.Fprintf(s, "\n%sDiplomacy with %s%s\n", ansi.FgBrightCyan, e.Name, ansi.Reset)
+		held := w.TreatiesBetween(p, e)
+		if len(held) == 0 {
+			fmt.Fprint(s, "  Treaties: (none)\n")
+		} else {
+			fmt.Fprintf(s, "  Treaties: %s\n", strings.Join(held, ", "))
+		}
+		offers := offersFrom(p, e.Name)
+		if len(offers) > 0 {
+			fmt.Fprintf(s, "  %s offers you: %s\n", e.Name, strings.Join(offers, ", "))
+		}
+		fmt.Fprint(s, "  (1) Propose  (2) Accept an offer  (3) Break a treaty  (0) Done\n")
+		switch promptInt(s, "Choice?") {
+		case 1:
+			if ttype := pickFromList(s, "Propose which treaty", game.TreatyTypes); ttype != "" {
+				w.ProposeTreaty(p, e, ttype)
+				ok(s, "Proposed a %s to %s.", ttype, e.Name)
+			}
+		case 2:
+			if len(offers) == 0 {
+				ok(s, "No offers to accept.")
+			} else if ttype := pickFromList(s, "Accept which offer", offers); ttype != "" {
+				w.AcceptTreaty(p, e.Name, ttype)
+				ok(s, "You accepted the %s with %s.", ttype, e.Name)
+			}
+		case 3:
+			if len(held) == 0 {
+				ok(s, "No treaties to break.")
+			} else if ttype := pickFromList(s, "Break which treaty", held); ttype != "" {
+				w.BreakTreaty(p, e, ttype)
+				ok(s, "You broke the %s with %s.", ttype, e.Name)
+			}
+		default:
+			return
 		}
 	}
-	return false
+}
+
+// offersFrom returns the treaty types `from` has offered to p.
+func offersFrom(p *game.Empire, from string) []string {
+	var out []string
+	for _, o := range p.TreatyOffers {
+		if o.From == from {
+			out = append(out, o.Type)
+		}
+	}
+	return out
+}
+
+// pickFromList shows a numbered list and returns the chosen entry, or "".
+func pickFromList(s session.Session, msg string, list []string) string {
+	for i, x := range list {
+		fmt.Fprintf(s, "    %d) %s\n", i+1, x)
+	}
+	i := promptInt(s, msg+" (0 to cancel)?")
+	if i < 1 || i > len(list) {
+		return ""
+	}
+	return list[i-1]
 }
 
 func viewDiplomacy(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%sYour allies:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%sYour treaties:%s\n", ansi.FgBrightCyan, ansi.Reset)
 	found := false
-	for _, k := range w.Alliances {
-		names := strings.SplitN(k, "\x00", 2)
-		if len(names) != 2 {
+	for _, e := range w.Empires {
+		if e == p || !e.Alive {
 			continue
 		}
-		var other string
-		switch p.Name {
-		case names[0]:
-			other = names[1]
-		case names[1]:
-			other = names[0]
-		default:
-			continue
+		if held := w.TreatiesBetween(p, e); len(held) > 0 {
+			fmt.Fprintf(s, "  %s: %s\n", e.Name, strings.Join(held, ", "))
+			found = true
 		}
-		fmt.Fprintf(s, "  %s\n", other)
-		found = true
 	}
 	if !found {
 		fmt.Fprint(s, "  (none)\n")
 	}
 	fmt.Fprintf(s, "\n%sPending offers received:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	if len(p.AllianceOffers) == 0 {
+	if len(p.TreatyOffers) == 0 {
 		fmt.Fprint(s, "  (none)\n")
 	} else {
-		for _, o := range p.AllianceOffers {
-			fmt.Fprintf(s, "  %s\n", o)
+		for _, o := range p.TreatyOffers {
+			fmt.Fprintf(s, "  %s — %s\n", o.From, o.Type)
 		}
 	}
 	pause(s)

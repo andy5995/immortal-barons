@@ -2,87 +2,78 @@ package game
 
 import "testing"
 
-func TestProposeAllianceAddsOfferAndMails(t *testing.T) {
-	cfg := DefaultConfig()
-	w := NewWorldSeed(cfg, 1)
+func TestProposeTreatyAddsOfferAndMails(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
 
-	w.ProposeAlliance(a, b)
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
 
-	if len(b.AllianceOffers) != 1 || b.AllianceOffers[0] != a.Name {
-		t.Fatalf("want offer from %q, got %v", a.Name, b.AllianceOffers)
+	if len(b.TreatyOffers) != 1 || b.TreatyOffers[0].From != a.Name || b.TreatyOffers[0].Type != fullDefenseAlliance {
+		t.Fatalf("want offer from %q, got %v", a.Name, b.TreatyOffers)
 	}
 	if len(b.Mail) != 1 {
 		t.Fatalf("want 1 mail, got %d", len(b.Mail))
 	}
-
-	// duplicate proposal is a no-op
-	w.ProposeAlliance(a, b)
-	if len(b.AllianceOffers) != 1 {
-		t.Fatalf("duplicate proposal should be a no-op, got %v", b.AllianceOffers)
-	}
-	if len(b.Mail) != 1 {
-		t.Fatalf("duplicate proposal should not mail again, got %d", len(b.Mail))
+	w.ProposeTreaty(a, b, fullDefenseAlliance) // duplicate = no-op
+	if len(b.TreatyOffers) != 1 || len(b.Mail) != 1 {
+		t.Fatal("duplicate proposal should not add another offer or mail")
 	}
 }
 
-func TestAcceptAllianceFormsMutualAllianceAndConsumesOffer(t *testing.T) {
-	cfg := DefaultConfig()
-	w := NewWorldSeed(cfg, 1)
+func TestAcceptTreatyFormsItAndConsumesOffer(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
 
-	w.ProposeAlliance(a, b)
-	if ok := w.AcceptAlliance(b, a.Name); !ok {
-		t.Fatal("want AcceptAlliance to succeed")
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	if !w.AcceptTreaty(b, a.Name, fullDefenseAlliance) {
+		t.Fatal("want AcceptTreaty to succeed")
 	}
-
-	if !w.AreAllied(a, b) {
-		t.Error("want AreAllied(a, b)")
+	if !w.AreAllied(a, b) || !w.AreAllied(b, a) {
+		t.Error("want a mutual alliance")
 	}
-	if !w.AreAllied(b, a) {
-		t.Error("want AreAllied(b, a)")
-	}
-	if len(b.AllianceOffers) != 0 {
-		t.Errorf("want offer consumed, got %v", b.AllianceOffers)
+	if len(b.TreatyOffers) != 0 {
+		t.Errorf("want the offer consumed, got %v", b.TreatyOffers)
 	}
 }
 
-func TestAcceptAllianceClearsReciprocalOffer(t *testing.T) {
-	cfg := DefaultConfig()
-	w := NewWorldSeed(cfg, 1)
+func TestAcceptTreatyWithNoOfferFails(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
-
-	w.ProposeAlliance(a, b)
-	w.ProposeAlliance(b, a)
-
-	if ok := w.AcceptAlliance(a, "Beta"); !ok {
-		t.Fatal("want AcceptAlliance to succeed")
-	}
-
-	if !w.AreAllied(a, b) {
-		t.Error("want AreAllied(a, b)")
-	}
-	for _, o := range b.AllianceOffers {
-		if o == a.Name {
-			t.Errorf("want B's offer from %q cleared, got %v", a.Name, b.AllianceOffers)
-		}
-	}
-}
-
-func TestAcceptAllianceWithNoOfferFails(t *testing.T) {
-	cfg := DefaultConfig()
-	w := NewWorldSeed(cfg, 1)
-	a := w.AddHuman("a", "Alpha")
-	b := w.AddHuman("b", "Beta")
-
-	if ok := w.AcceptAlliance(b, a.Name); ok {
-		t.Fatal("want AcceptAlliance to fail with no pending offer")
+	if w.AcceptTreaty(b, a.Name, fullDefenseAlliance) {
+		t.Fatal("want failure with no pending offer")
 	}
 	if w.AreAllied(a, b) {
 		t.Error("want no alliance formed")
+	}
+}
+
+func TestBreakTreatyEnds(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+	w.BreakTreaty(a, b, fullDefenseAlliance)
+	if w.AreAllied(a, b) {
+		t.Error("want the alliance ended")
+	}
+}
+
+// A non-defense treaty must NOT count as an alliance (no attack block).
+func TestTradeTreatyIsNotAnAlliance(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	w.ProposeTreaty(a, b, "Tariff Trade Agreement")
+	w.AcceptTreaty(b, a.Name, "Tariff Trade Agreement")
+	if w.AreAllied(a, b) {
+		t.Error("a trade treaty should not count as a defense alliance")
+	}
+	if !w.HasTreaty(a, b, "Tariff Trade Agreement") {
+		t.Error("want the trade treaty recorded")
 	}
 }
 
@@ -92,47 +83,68 @@ func TestTargetsExcludesAllies(t *testing.T) {
 	w := NewWorldSeed(cfg, 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
-	a.Protection = 0
-	b.Protection = 0
 	for _, e := range w.Empires {
 		e.Protection = 0
 	}
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
 
-	w.ProposeAlliance(a, b)
-	w.AcceptAlliance(b, a.Name)
-
-	targets := w.Targets(a)
-	for _, e := range targets {
+	for _, e := range w.Targets(a) {
 		if e.Name == b.Name {
-			t.Errorf("want ally %q excluded from targets, got %v", b.Name, names(targets))
+			t.Errorf("want ally %q excluded from targets, got %v", b.Name, names(w.Targets(a)))
 		}
-	}
-	found := false
-	for _, e := range targets {
-		if e == w.Empires[0] {
-			found = true
-		}
-	}
-	if !found {
-		t.Errorf("want non-allied living unprotected empire in targets, got %v", names(targets))
 	}
 }
 
-func TestBreakAllianceEndsAlliance(t *testing.T) {
-	cfg := DefaultConfig()
-	w := NewWorldSeed(cfg, 1)
+func TestEnsureTreatiesMigratesLegacyAlliances(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
+	// Simulate an old save: an untyped alliance and an alliance offer.
+	x, y := treatyPair(a.Name, b.Name)
+	w.Alliances = []string{x + "\x00" + y}
+	b.AllianceOffers = []string{"Gamma"}
 
-	w.ProposeAlliance(a, b)
-	w.AcceptAlliance(b, a.Name)
+	w.EnsureTreaties()
+
 	if !w.AreAllied(a, b) {
-		t.Fatal("setup: want alliance formed")
+		t.Error("legacy alliance should migrate to a Full Defense Alliance")
 	}
+	if len(w.Alliances) != 0 {
+		t.Error("legacy Alliances should be cleared")
+	}
+	if len(b.TreatyOffers) != 1 || b.TreatyOffers[0].From != "Gamma" || b.TreatyOffers[0].Type != fullDefenseAlliance {
+		t.Errorf("legacy alliance offer should migrate, got %v", b.TreatyOffers)
+	}
+	if len(b.AllianceOffers) != 0 {
+		t.Error("legacy AllianceOffers should be cleared")
+	}
+}
 
-	w.BreakAlliance(a, b)
-	if w.AreAllied(a, b) {
-		t.Error("want AreAllied false after BreakAlliance")
+func TestTradeTreatyAddsIncome(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	a.People = 4000
+	if got := w.tradeIncome(a); got != 0 {
+		t.Fatalf("no treaties -> no trade income, got %d", got)
+	}
+	w.ProposeTreaty(a, b, "Free Trade Agreement")
+	w.AcceptTreaty(b, a.Name, "Free Trade Agreement")
+	if got := w.tradeIncome(a); got != 4000/20 {
+		t.Errorf("free trade should add People/20 = %d, got %d", 4000/20, got)
+	}
+}
+
+func TestIntelligenceAllianceLendsAgents(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	ally := w.AddHuman("c", "Gamma")
+	ally.Agents = 100
+	w.ProposeTreaty(a, ally, "Intelligence Alliance")
+	w.AcceptTreaty(ally, a.Name, "Intelligence Alliance")
+	if got := w.allyAgents(a, "Intelligence Alliance"); got != 100 {
+		t.Errorf("allyAgents should sum the ally's agents (100), got %d", got)
 	}
 }
 

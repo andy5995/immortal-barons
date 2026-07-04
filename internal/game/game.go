@@ -47,7 +47,8 @@ type Empire struct {
 	Mail        []string
 	PirateRaids []string // raids suffered since last play; shown in the income report
 
-	AllianceOffers []string
+	AllianceOffers []string      // legacy (pre-typed-treaties); migrated by EnsureTreaties
+	TreatyOffers   []TreatyOffer // pending treaty proposals received
 
 	Investments []Investment
 
@@ -188,7 +189,8 @@ type World struct {
 	InvestRate    int // percent per day, floats each daily maintenance
 	LastMaintDate string
 	Bulletin      []string
-	Alliances     []string
+	Alliances     []string // legacy (pre-typed-treaties); migrated by EnsureTreaties
+	Treaties      []Treaty
 	LastMaster    string
 	RemoteBoards  []RemoteBoard
 	Pirates       []PirateFaction

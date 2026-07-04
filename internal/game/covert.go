@@ -5,11 +5,15 @@ import "fmt"
 // covertSuccess reports whether a covert op by `a` against `d` succeeds:
 // the more agents the attacker has relative to the defender, the likelier.
 func (w *World) covertSuccess(a, d *Empire) bool {
-	total := a.Agents + d.Agents
+	// Intelligence Alliance lends half an ally's agents to the attacker's
+	// covert strength; Terrorist Prevention lends half to the defender's.
+	aAgents := a.Agents + w.allyAgents(a, "Intelligence Alliance")/2
+	dAgents := d.Agents + w.allyAgents(d, "Terrorist Prevention")/2
+	total := aAgents + dAgents
 	if total == 0 {
 		return false
 	}
-	return w.rng.Intn(total) < a.Agents
+	return w.rng.Intn(total) < aAgents
 }
 
 // SendSpy gathers military intel on d. Needs at least one agent. On failure

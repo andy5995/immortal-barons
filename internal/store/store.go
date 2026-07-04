@@ -33,6 +33,7 @@ func Load(cfg game.Config) (*game.World, error) {
 	}
 	w.EnsureInvestRate()
 	w.EnsurePirates()
+	w.EnsureTreaties()
 	w.Config = cfg
 	return w, nil
 }

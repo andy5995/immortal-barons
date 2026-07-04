@@ -108,6 +108,7 @@ func (w *World) processEconomy(e *Empire) {
 	coastal := e.Regions.Coastal * 25
 	income := base - coastal + coastal*e.Support/100 // low support slashes tourism
 	income = income * (100 + tf) / 100
+	income += w.tradeIncome(e) // trade-treaty bonus (population-scaled)
 	tax := e.People * e.Tax / 100 * 8 * (100 + tf) / 100
 	e.Gold += tax + income
 

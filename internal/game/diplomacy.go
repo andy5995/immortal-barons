@@ -1,90 +1,181 @@
 package game
 
-// allyKey returns a canonical, order-independent key for an empire pair.
-func allyKey(a, b string) string {
-	if a < b {
-		return a + "\x00" + b
-	}
-	return b + "\x00" + a
+import (
+	"fmt"
+	"strings"
+)
+
+// TreatyTypes are the agreement types two empires can form, from the BRE
+// manual's Diplomacy menu. The zeroth, Full Defense Alliance, is the pact that
+// blocks attacks between the two empires (see AreAllied); the trade and
+// intelligence pacts carry economic and covert effects (see the effect helpers
+// below and their callers in turn.go / covert.go). Technology Agreement and
+// Protective Trade are recorded but not yet wired to an effect.
+var TreatyTypes = []string{
+	"Full Defense Alliance",
+	"Tariff Trade Agreement",
+	"Free Trade Agreement",
+	"Protective Trade",
+	"Terrorist Prevention",
+	"Intelligence Alliance",
+	"Technology Agreement",
 }
 
-// AreAllied reports whether a and b have a standing alliance.
-func (w *World) AreAllied(a, b *Empire) bool {
-	k := allyKey(a.Name, b.Name)
-	for _, x := range w.Alliances {
-		if x == k {
+const fullDefenseAlliance = "Full Defense Alliance"
+
+// Treaty is a standing agreement of a given type between two empires. A and B
+// are the empire names in canonical (sorted) order so a pair has one key.
+type Treaty struct {
+	Type string
+	A, B string
+}
+
+// TreatyOffer is a pending proposal recorded on the target empire.
+type TreatyOffer struct {
+	From string
+	Type string
+}
+
+// treatyPair returns the two names in canonical order.
+func treatyPair(a, b string) (string, string) {
+	if a < b {
+		return a, b
+	}
+	return b, a
+}
+
+func hasTreatyRaw(ts []Treaty, ttype, x, y string) bool {
+	for _, t := range ts {
+		if t.Type == ttype && t.A == x && t.B == y {
 			return true
 		}
 	}
 	return false
 }
 
-// ProposeAlliance records a pending alliance offer from `from` to `to` and
-// mails the target. No-op if already allied or an identical offer is pending.
-func (w *World) ProposeAlliance(from, to *Empire) {
-	if w.AreAllied(from, to) {
+// HasTreaty reports whether a and b share a treaty of the given type.
+func (w *World) HasTreaty(a, b *Empire, ttype string) bool {
+	x, y := treatyPair(a.Name, b.Name)
+	return hasTreatyRaw(w.Treaties, ttype, x, y)
+}
+
+// TreatiesBetween returns the types of treaty a and b currently share.
+func (w *World) TreatiesBetween(a, b *Empire) []string {
+	x, y := treatyPair(a.Name, b.Name)
+	var out []string
+	for _, t := range w.Treaties {
+		if t.A == x && t.B == y {
+			out = append(out, t.Type)
+		}
+	}
+	return out
+}
+
+// AreAllied reports a standing Full Defense Alliance — the pact that blocks
+// attacks between the two empires (used by Targets).
+func (w *World) AreAllied(a, b *Empire) bool {
+	return w.HasTreaty(a, b, fullDefenseAlliance)
+}
+
+// alliesOf returns every living empire that shares a treaty of ttype with e.
+func (w *World) alliesOf(e *Empire, ttype string) []*Empire {
+	var out []*Empire
+	for _, other := range w.Empires {
+		if other != e && other.Alive && w.HasTreaty(e, other, ttype) {
+			out = append(out, other)
+		}
+	}
+	return out
+}
+
+// allyAgents sums the agents of every empire sharing a treaty of ttype with e.
+// Used to blend allied intelligence into covert odds.
+func (w *World) allyAgents(e *Empire, ttype string) int {
+	sum := 0
+	for _, ally := range w.alliesOf(e, ttype) {
+		sum += ally.Agents
+	}
+	return sum
+}
+
+// tradeIncome is the extra per-turn gold from trade treaties, scaled by
+// population: a Free Trade Agreement earns more than a Tariff Trade Agreement.
+func (w *World) tradeIncome(e *Empire) int {
+	tariff := len(w.alliesOf(e, "Tariff Trade Agreement"))
+	free := len(w.alliesOf(e, "Free Trade Agreement"))
+	return tariff*e.People/40 + free*e.People/20
+}
+
+// ProposeTreaty records a pending offer of ttype from `from` to `to`, and
+// mails the target. No-op if they already hold that treaty or an identical
+// offer is pending.
+func (w *World) ProposeTreaty(from, to *Empire, ttype string) {
+	if w.HasTreaty(from, to, ttype) {
 		return
 	}
-	for _, o := range to.AllianceOffers {
-		if o == from.Name {
+	for _, o := range to.TreatyOffers {
+		if o.From == from.Name && o.Type == ttype {
 			return
 		}
 	}
-	to.AllianceOffers = append(to.AllianceOffers, from.Name)
-	to.Mail = append(to.Mail, from.Name+" proposes an alliance (accept it in the Diplomacy menu).")
+	to.TreatyOffers = append(to.TreatyOffers, TreatyOffer{From: from.Name, Type: ttype})
+	to.Mail = append(to.Mail, fmt.Sprintf("%s proposes a %s (respond in the Diplomacy menu).", from.Name, ttype))
 }
 
-// AcceptAlliance forms a mutual alliance if `me` has a pending offer from
-// fromName; it consumes the offer. Returns false if there was no such offer.
-func (w *World) AcceptAlliance(me *Empire, fromName string) bool {
+// AcceptTreaty forms the treaty if `me` has a matching pending offer, consuming
+// the offer. Returns false if there was no such offer.
+func (w *World) AcceptTreaty(me *Empire, fromName, ttype string) bool {
 	found := false
-	kept := me.AllianceOffers[:0]
-	for _, o := range me.AllianceOffers {
-		if o == fromName {
+	kept := me.TreatyOffers[:0]
+	for _, o := range me.TreatyOffers {
+		if o.From == fromName && o.Type == ttype {
 			found = true
 		} else {
 			kept = append(kept, o)
 		}
 	}
-	me.AllianceOffers = kept
+	me.TreatyOffers = kept
 	if !found {
 		return false
 	}
-	k := allyKey(me.Name, fromName)
-	for _, x := range w.Alliances {
-		if x == k {
-			return true
-		}
+	x, y := treatyPair(me.Name, fromName)
+	if !hasTreatyRaw(w.Treaties, ttype, x, y) {
+		w.Treaties = append(w.Treaties, Treaty{Type: ttype, A: x, B: y})
 	}
-	w.Alliances = append(w.Alliances, k)
-
-	// If the proposer had also sent me.Name a reverse offer, clear it too
-	// so it doesn't linger as a phantom pending offer.
-	for _, e := range w.Empires {
-		if e.Name != fromName {
-			continue
-		}
-		kept := e.AllianceOffers[:0]
-		for _, o := range e.AllianceOffers {
-			if o != me.Name {
-				kept = append(kept, o)
-			}
-		}
-		e.AllianceOffers = kept
-		break
-	}
-
 	return true
 }
 
-// BreakAlliance ends any alliance between a and b.
-func (w *World) BreakAlliance(a, b *Empire) {
-	k := allyKey(a.Name, b.Name)
-	out := w.Alliances[:0]
-	for _, x := range w.Alliances {
-		if x != k {
-			out = append(out, x)
+// BreakTreaty ends a treaty of ttype between a and b.
+func (w *World) BreakTreaty(a, b *Empire, ttype string) {
+	x, y := treatyPair(a.Name, b.Name)
+	out := w.Treaties[:0]
+	for _, t := range w.Treaties {
+		if !(t.Type == ttype && t.A == x && t.B == y) {
+			out = append(out, t)
 		}
 	}
-	w.Alliances = out
+	w.Treaties = out
+}
+
+// EnsureTreaties migrates a save that predates typed treaties: old untyped
+// alliances become Full Defense Alliance treaties, and old alliance offers
+// become Full Defense Alliance offers. Idempotent (clears the legacy fields).
+func (w *World) EnsureTreaties() {
+	for _, k := range w.Alliances {
+		names := strings.SplitN(k, "\x00", 2)
+		if len(names) != 2 {
+			continue
+		}
+		x, y := treatyPair(names[0], names[1])
+		if !hasTreatyRaw(w.Treaties, fullDefenseAlliance, x, y) {
+			w.Treaties = append(w.Treaties, Treaty{Type: fullDefenseAlliance, A: x, B: y})
+		}
+	}
+	w.Alliances = nil
+	for _, e := range w.Empires {
+		for _, from := range e.AllianceOffers {
+			e.TreatyOffers = append(e.TreatyOffers, TreatyOffer{From: from, Type: fullDefenseAlliance})
+		}
+		e.AllianceOffers = nil
+	}
 }
