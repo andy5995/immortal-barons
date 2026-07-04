@@ -46,6 +46,12 @@ type Item struct {
 	LabelFn func(*game.World) string // dynamic label (e.g. toggle state); wins over Label
 	Do      Action                   // nil => heading/separator, not selectable
 	Hidden  func(*game.World) bool   // nil => always shown
+
+	// Price and Owned drive the BRE-style Price / # Owned columns on the
+	// Spending and Sell menus. When any item in a menu sets either, the menu
+	// draws the column header and every item's values (blank where nil).
+	Price func(*game.World) int
+	Owned func(*game.World) int
 }
 
 func (it *Item) hidden(g *game.World) bool {
@@ -201,6 +207,21 @@ func topBar(g *game.World) string {
 	return ansi.BgBlue + ansi.FgBrightWhite + string(row) + ansi.Reset
 }
 
+// hasColumns reports whether any visible item carries a Price/Owned column, so
+// the menu draws the BRE-style "Price / # Owned" table (Spending, Sell).
+func (m *Menu) hasColumns(g *game.World) bool {
+	for i := range m.Items {
+		it := &m.Items[i]
+		if it.hidden(g) {
+			continue
+		}
+		if it.Price != nil || it.Owned != nil {
+			return true
+		}
+	}
+	return false
+}
+
 func draw(s session.Session, g *game.World, m *Menu) {
 	fmt.Fprint(s, ansi.Clear)
 	fmt.Fprintf(s, "%s\n", topBar(g))
@@ -209,6 +230,10 @@ func draw(s session.Session, g *game.World, m *Menu) {
 		col = ansi.FgBrightCyan
 	}
 	fmt.Fprintf(s, "%s\n", titleRule(col, m.Title))
+	cols := m.hasColumns(g)
+	if cols {
+		fmt.Fprintf(s, "%s  Key %-18s %8s %9s%s\n", col, "Item", "Price", "# Owned", ansi.Reset)
+	}
 	for i := range m.Items {
 		it := &m.Items[i]
 		if it.hidden(g) {
@@ -216,6 +241,18 @@ func draw(s session.Session, g *game.World, m *Menu) {
 		}
 		if it.Do == nil {
 			fmt.Fprintf(s, "  %s\n", it.label(g))
+			continue
+		}
+		if cols {
+			price, owned := "", ""
+			if it.Price != nil {
+				price = comma(it.Price(g))
+			}
+			if it.Owned != nil {
+				owned = comma(it.Owned(g))
+			}
+			fmt.Fprintf(s, "  %s(%c)%s %s%-18s%s %8s %9s\n",
+				col, it.Key, ansi.Reset, ansi.FgWhite, it.label(g), ansi.Reset, price, owned)
 			continue
 		}
 		fmt.Fprintf(s, "  %s(%c)%s %s%s%s\n",

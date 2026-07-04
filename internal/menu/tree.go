@@ -41,24 +41,48 @@ func BuildMenus() *Menus {
 	system := &Menu{Title: "System Menu", Color: ansi.FgBrightBlue}
 	food := &Menu{Title: "Food Market", Color: ansi.FgBrightCyan}
 
+	// owned adapts a per-empire count into a menu column function.
+	owned := func(f func(*game.Empire) int) func(*game.World) int {
+		return func(w *game.World) int { return f(w.Player()) }
+	}
+	troopers := func(p *game.Empire) int { return p.Troopers }
+	jets := func(p *game.Empire) int { return p.Jets }
+	turrets := func(p *game.Empire) int { return p.Turrets }
+	bombers := func(p *game.Empire) int { return p.Bombers }
+	agents := func(p *game.Empire) int { return p.Agents }
+	tanks := func(p *game.Empire) int { return p.Tanks }
+	carriers := func(p *game.Empire) int { return p.Carriers }
+	land := func(p *game.Empire) int { return p.Land }
+	priceTrooper := func(w *game.World) int { return w.Prices.Trooper }
+	priceJet := func(w *game.World) int { return w.Prices.Jet }
+	priceTurret := func(w *game.World) int { return w.Prices.Turret }
+	priceBomber := func(w *game.World) int { return w.Prices.Bomber }
+	priceAgent := func(w *game.World) int { return w.Prices.Agent }
+	priceTank := func(w *game.World) int { return w.Prices.Tank }
+	priceCarrier := func(w *game.World) int { return w.Prices.Carrier }
+	// half is the sell (buy-back) price shown on the Sell menu.
+	half := func(f func(*game.World) int) func(*game.World) int {
+		return func(w *game.World) int { return f(w) / 2 }
+	}
+
 	buy.Items = []Item{
 		{Key: '*', Label: "System Menu", Do: gotoMenu(system)},
-		{Key: '1', Label: "Troopers",
-			Do: buy2("Troopers", true, func(w *game.World) int { return w.Prices.Trooper }, (*game.World).Recruit)},
-		{Key: '2', Label: "Jets",
-			Do: buy2("Jets", true, func(w *game.World) int { return w.Prices.Jet }, (*game.World).BuildJets)},
-		{Key: '3', Label: "Turrets",
-			Do: buy2("Turrets", true, func(w *game.World) int { return w.Prices.Turret }, (*game.World).BuildTurrets)},
-		{Key: '4', Label: "Bombers",
-			Do: buy2("Bombers", true, func(w *game.World) int { return w.Prices.Bomber }, (*game.World).BuildBombers)},
-		{Key: '5', Label: "HeadQuarters", Do: buildHQ},
-		{Key: '6', Label: "Regions", Do: buyLand},
-		{Key: '7', Label: "Covert Agents",
-			Do: buy2("Covert Agents", false, func(w *game.World) int { return w.Prices.Agent }, (*game.World).RecruitAgents)},
-		{Key: '8', Label: "Tanks",
-			Do: buy2("Tanks", true, func(w *game.World) int { return w.Prices.Tank }, (*game.World).BuildTanks)},
-		{Key: '9', Label: "Carriers",
-			Do: buy2("Carriers", true, func(w *game.World) int { return w.Prices.Carrier }, (*game.World).BuildCarriers)},
+		{Key: '1', Label: "Troopers", Price: priceTrooper, Owned: owned(troopers),
+			Do: buy2("Troopers", true, priceTrooper, (*game.World).Recruit)},
+		{Key: '2', Label: "Jets", Price: priceJet, Owned: owned(jets),
+			Do: buy2("Jets", true, priceJet, (*game.World).BuildJets)},
+		{Key: '3', Label: "Turrets", Price: priceTurret, Owned: owned(turrets),
+			Do: buy2("Turrets", true, priceTurret, (*game.World).BuildTurrets)},
+		{Key: '4', Label: "Bombers", Price: priceBomber, Owned: owned(bombers),
+			Do: buy2("Bombers", true, priceBomber, (*game.World).BuildBombers)},
+		{Key: '5', Label: "HeadQuarters", Price: func(w *game.World) int { return game.HQCost }, Owned: owned(func(p *game.Empire) int { return p.HQ }), Do: buildHQ},
+		{Key: '6', Label: "Regions", Price: func(w *game.World) int { return w.LandPrice(w.Player()) }, Owned: owned(land), Do: buyLand},
+		{Key: '7', Label: "Covert Agents", Price: priceAgent, Owned: owned(agents),
+			Do: buy2("Covert Agents", false, priceAgent, (*game.World).RecruitAgents)},
+		{Key: '8', Label: "Tanks", Price: priceTank, Owned: owned(tanks),
+			Do: buy2("Tanks", true, priceTank, (*game.World).BuildTanks)},
+		{Key: '9', Label: "Carriers", Price: priceCarrier, Owned: owned(carriers),
+			Do: buy2("Carriers", true, priceCarrier, (*game.World).BuildCarriers)},
 		{Key: 'S', Label: "Sell", Do: gotoMenu(sell)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '?', Label: "Help", Do: helpBrowse},
@@ -67,21 +91,21 @@ func BuildMenus() *Menus {
 
 	sell.Items = []Item{
 		{Key: 'B', Label: "Buy", Do: back},
-		{Key: '1', Label: "Troopers",
-			Do: sellUnit2("Sell Troopers", func(p *game.Empire) int { return p.Troopers }, (*game.World).SellTroopers)},
-		{Key: '2', Label: "Jets",
-			Do: sellUnit2("Sell Jets", func(p *game.Empire) int { return p.Jets }, (*game.World).SellJets)},
-		{Key: '3', Label: "Turrets",
-			Do: sellUnit2("Sell Turrets", func(p *game.Empire) int { return p.Turrets }, (*game.World).SellTurrets)},
-		{Key: '4', Label: "Bombers",
-			Do: sellUnit2("Sell Bombers", func(p *game.Empire) int { return p.Bombers }, (*game.World).SellBombers)},
-		{Key: '6', Label: "Regions", Do: sellLand},
-		{Key: '7', Label: "Covert Agents",
-			Do: sellUnit2("Sell Covert Agents", func(p *game.Empire) int { return p.Agents }, (*game.World).SellAgents)},
-		{Key: '8', Label: "Tanks",
-			Do: sellUnit2("Sell Tanks", func(p *game.Empire) int { return p.Tanks }, (*game.World).SellTanks)},
-		{Key: '9', Label: "Carriers",
-			Do: sellUnit2("Sell Carriers", func(p *game.Empire) int { return p.Carriers }, (*game.World).SellCarriers)},
+		{Key: '1', Label: "Troopers", Price: half(priceTrooper), Owned: owned(troopers),
+			Do: sellUnit2("Sell Troopers", troopers, (*game.World).SellTroopers)},
+		{Key: '2', Label: "Jets", Price: half(priceJet), Owned: owned(jets),
+			Do: sellUnit2("Sell Jets", jets, (*game.World).SellJets)},
+		{Key: '3', Label: "Turrets", Price: half(priceTurret), Owned: owned(turrets),
+			Do: sellUnit2("Sell Turrets", turrets, (*game.World).SellTurrets)},
+		{Key: '4', Label: "Bombers", Price: half(priceBomber), Owned: owned(bombers),
+			Do: sellUnit2("Sell Bombers", bombers, (*game.World).SellBombers)},
+		{Key: '6', Label: "Regions", Price: func(w *game.World) int { return 0 }, Owned: owned(land), Do: sellLand},
+		{Key: '7', Label: "Covert Agents", Price: half(priceAgent), Owned: owned(agents),
+			Do: sellUnit2("Sell Covert Agents", agents, (*game.World).SellAgents)},
+		{Key: '8', Label: "Tanks", Price: half(priceTank), Owned: owned(tanks),
+			Do: sellUnit2("Sell Tanks", tanks, (*game.World).SellTanks)},
+		{Key: '9', Label: "Carriers", Price: half(priceCarrier), Owned: owned(carriers),
+			Do: sellUnit2("Sell Carriers", carriers, (*game.World).SellCarriers)},
 		{Key: '0', Label: "Return", Do: back},
 	}
 
