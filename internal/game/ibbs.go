@@ -158,6 +158,14 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	if len(p.Scores) > 0 {
 		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores})
 	}
+	// Outcomes of our own strikes, returning from the target board.
+	for _, res := range p.Results {
+		if res.Won {
+			w.Bulletin = append(w.Bulletin, fmt.Sprintf("Our interplanetary strike on %s (%s) took %d regions!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
+		} else {
+			w.Bulletin = append(w.Bulletin, fmt.Sprintf("Our interplanetary strike on %s (%s) was repelled.", res.TargetEmpire, res.TargetBoard))
+		}
+	}
 	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
 	for _, atk := range p.Attacks {
 		result.Results = append(result.Results, w.resolveRemoteAttack(atk))
