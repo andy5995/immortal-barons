@@ -67,20 +67,20 @@ func BuildMenus() *Menus {
 
 	sell.Items = []Item{
 		{Key: 'B', Label: "Buy", Do: back},
-		{Key: '1', Label: "Sell Troopers",
+		{Key: '1', Label: "Troopers",
 			Do: sellUnit2("Sell Troopers", func(p *game.Empire) int { return p.Troopers }, (*game.World).SellTroopers)},
-		{Key: '2', Label: "Sell Jets",
+		{Key: '2', Label: "Jets",
 			Do: sellUnit2("Sell Jets", func(p *game.Empire) int { return p.Jets }, (*game.World).SellJets)},
-		{Key: '3', Label: "Sell Turrets",
+		{Key: '3', Label: "Turrets",
 			Do: sellUnit2("Sell Turrets", func(p *game.Empire) int { return p.Turrets }, (*game.World).SellTurrets)},
-		{Key: '4', Label: "Sell Bombers",
+		{Key: '4', Label: "Bombers",
 			Do: sellUnit2("Sell Bombers", func(p *game.Empire) int { return p.Bombers }, (*game.World).SellBombers)},
-		{Key: '6', Label: "Sell Regions", Do: sellLand},
-		{Key: '7', Label: "Sell Covert Agents",
+		{Key: '6', Label: "Regions", Do: sellLand},
+		{Key: '7', Label: "Covert Agents",
 			Do: sellUnit2("Sell Covert Agents", func(p *game.Empire) int { return p.Agents }, (*game.World).SellAgents)},
-		{Key: '8', Label: "Sell Tanks",
+		{Key: '8', Label: "Tanks",
 			Do: sellUnit2("Sell Tanks", func(p *game.Empire) int { return p.Tanks }, (*game.World).SellTanks)},
-		{Key: '9', Label: "Sell Carriers",
+		{Key: '9', Label: "Carriers",
 			Do: sellUnit2("Sell Carriers", func(p *game.Empire) int { return p.Carriers }, (*game.World).SellCarriers)},
 		{Key: '0', Label: "Return", Do: back},
 	}
@@ -187,7 +187,7 @@ func BuildMenus() *Menus {
 	food.Items = []Item{
 		{Label: fmt.Sprintf("The market buys food for %d and sells for %d.", game.FoodSellPrice, game.FoodBuyPrice)},
 		{Key: 'B', Label: "Buy Food", Do: buyFoodMarket},
-		{Key: 'S', Label: "Sell Food", Do: sellFoodMarket},
+		{Key: 'S', Label: "Food", Do: sellFoodMarket},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Return", Do: back},
 	}
@@ -214,8 +214,7 @@ func BuildMenus() *Menus {
 			Hidden: func(w *game.World) bool { return ibbsHidden(w) || w.BBSCoordinator() != w.Player() }},
 		{Key: 'C', Label: "Configuration Editor", Do: configEditor,
 			Hidden: func(w *game.World) bool { return !w.Coordinator }},
-		{Key: '0', Label: "Return", Do: back},
-		{Key: 'Q', Label: "Quit", Do: quit},
+		{Key: '0', Label: "Quit", Do: back},
 	}
 
 	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Color: ansi.FgBrightMagenta, Status: statusBar}
