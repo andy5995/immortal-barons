@@ -150,3 +150,7 @@ the original authors.
 ## License
 
 Released into the public domain under the [Unlicense](LICENSE).
+
+## Related Realms
+
+* [Medusa's Barren Realms Elite (BRE) Discord](https://discord.gg/5wTZpstcjM)
