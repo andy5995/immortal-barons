@@ -250,29 +250,37 @@ func (w *World) manufacture(e *Empire) {
 		return
 	}
 
+	// The percentage split always governs allocation. Specialization does not
+	// replace it: any points the percentages leave unspent (when they sum to
+	// under 100) are poured into the specialized unit, so specializing directs
+	// the surplus without cancelling the player's chosen focus.
+	made := func(pct, cost int) int { return (pts * pct / 100) / cost }
+	e.MadeTroopers = made(e.ProdTroopers, CostTrooper)
+	e.MadeJets = made(e.ProdJets, CostJet)
+	e.MadeTurrets = made(e.ProdTurrets, CostTurret)
+	e.MadeBombers = made(e.ProdBombers, CostBomber)
+	e.MadeTanks = made(e.ProdTanks, CostTank)
+	e.MadeCarriers = made(e.ProdCarriers, CostCarrier)
+
 	if e.Specialized != "" {
-		switch e.Specialized {
-		case "Troopers":
-			e.MadeTroopers = pts / CostTrooper
-		case "Jets":
-			e.MadeJets = pts / CostJet
-		case "Turrets":
-			e.MadeTurrets = pts / CostTurret
-		case "Bombers":
-			e.MadeBombers = pts / CostBomber
-		case "Tanks":
-			e.MadeTanks = pts / CostTank
-		case "Carriers":
-			e.MadeCarriers = pts / CostCarrier
+		used := e.ProdTroopers + e.ProdJets + e.ProdTurrets + e.ProdBombers + e.ProdTanks + e.ProdCarriers
+		if used < 100 {
+			extra := pts * (100 - used) / 100
+			switch e.Specialized {
+			case "Troopers":
+				e.MadeTroopers += extra / CostTrooper
+			case "Jets":
+				e.MadeJets += extra / CostJet
+			case "Turrets":
+				e.MadeTurrets += extra / CostTurret
+			case "Bombers":
+				e.MadeBombers += extra / CostBomber
+			case "Tanks":
+				e.MadeTanks += extra / CostTank
+			case "Carriers":
+				e.MadeCarriers += extra / CostCarrier
+			}
 		}
-	} else {
-		made := func(pct, cost int) int { return (pts * pct / 100) / cost }
-		e.MadeTroopers = made(e.ProdTroopers, CostTrooper)
-		e.MadeJets = made(e.ProdJets, CostJet)
-		e.MadeTurrets = made(e.ProdTurrets, CostTurret)
-		e.MadeBombers = made(e.ProdBombers, CostBomber)
-		e.MadeTanks = made(e.ProdTanks, CostTank)
-		e.MadeCarriers = made(e.ProdCarriers, CostCarrier)
 	}
 
 	e.Troopers += e.MadeTroopers

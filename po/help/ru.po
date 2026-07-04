@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-04 10:32-0500\n"
+"POT-Creation-Date: 2026-07-04 17:20-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -419,10 +419,30 @@ msgstr ""
 
 #. type: Plain text
 #: internal/help/content/economy/industry.md:15
+#, fuzzy
+#| msgid ""
+#| "Use Set Industries to split your production across unit types by "
+#| "percentage. Or use Specialize to send all of your production into one "
+#| "unit type. Specializing cannot be undone, so choose with care."
 msgid ""
 "Use Set Industries to split your production across unit types by percentage. "
-"Or use Specialize to send all of your production into one unit type. "
-"Specializing cannot be undone, so choose with care."
+"You can change the split at any time."
+msgstr ""
+"В «Задать производство» распределите выпуск по типам юнитов в процентах. "
+"Либо через «Специализацию» выберите один тип для большего выпуска — но потом "
+"ничего другого строить нельзя."
+
+#. type: Plain text
+#: internal/help/content/economy/industry.md:18
+#, fuzzy
+#| msgid ""
+#| "Use Set Industries to split your production across unit types by "
+#| "percentage. Or use Specialize to send all of your production into one "
+#| "unit type. Specializing cannot be undone, so choose with care."
+msgid ""
+"Specialize marks one unit type as your focus. It does not replace your "
+"percentage split. Any production your percentages leave unspent goes to the "
+"specialized unit. Specializing cannot be undone, so choose with care."
 msgstr ""
 "В «Задать производство» распределите выпуск по типам юнитов в процентах. "
 "Либо через «Специализацию» выберите один тип для большего выпуска — но потом "
@@ -1011,21 +1031,24 @@ msgid "League-wide rules (Coordinator only)"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:136
+#: internal/help/content/interbbs/sysop.md:139
 msgid ""
 "The League Coordinator sets the rules that must match across the whole "
-"league — turns per day, protection turns, and game length. Set them in the "
+"league.  These are all the fields marked with a star in the Configuration "
+"Editor: turns per day, protection turns, game length, land market and daily "
+"land, interest and investment rates, tax and region and player limits, buy-"
+"military mode, and the cost, damage, and reward levels. Set them in the "
 "Coordinator's own `config.json`, then broadcast them to every board:"
 msgstr ""
 
 #. type: Fenced code block
-#: internal/help/content/interbbs/sysop.md:137
+#: internal/help/content/interbbs/sysop.md:140
 #, no-wrap
 msgid "barons-door -league-config -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:145
+#: internal/help/content/interbbs/sysop.md:148
 msgid ""
 "This writes a settings packet to your outbound directory. Each member board "
 "adopts the settings on its next `-planetary` run. Member boards accept these "
@@ -1034,20 +1057,20 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/sysop.md:146
+#: internal/help/content/interbbs/sysop.md:149
 #, no-wrap
 msgid "The Coordinator"
 msgstr "Координатор"
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:149
+#: internal/help/content/interbbs/sysop.md:152
 msgid ""
 "There are two different \"coordinator\" ideas, and they are not the same "
 "thing:"
 msgstr "Есть два разных понятия «координатор», и это не одно и то же:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:154
+#: internal/help/content/interbbs/sysop.md:157
 msgid ""
 "**League Coordinator** — the sysop of board number 1. This person keeps the "
 "node list and hands it out to the other boards."
@@ -1056,7 +1079,7 @@ msgstr ""
 "его другим доскам."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:154
+#: internal/help/content/interbbs/sysop.md:157
 msgid ""
 "**BBS Coordinator** — a *player* your board elects. Players vote in the "
 "System menu, and the player with the most votes gets the Coordinator menu.  "

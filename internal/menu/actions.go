@@ -121,7 +121,24 @@ func buyLand(s session.Session, w *game.World) Result {
 }
 
 func sellLand(s session.Session, w *game.World) Result {
-	ok(s, "You cannot sell regions, only drop them.")
+	p := w.Player()
+	fmt.Fprintf(s, "\n%sYou cannot sell regions, only drop them.%s\n", ansi.FgYellow, ansi.Reset)
+	fmt.Fprintf(s, "%sDrop Regions — choose a type to abandon (no gold is returned):%s\n", ansi.FgBrightCyan, ansi.Reset)
+	printRegionTypes(s)
+	t := promptInt(s, "Region type (0 to cancel)?")
+	if t < 1 || t > len(regionTypeNames) {
+		return Stay
+	}
+	field := regionField(p, t-1)
+	n := promptSuggested(s, "How many to drop?", 0, *field)
+	if n <= 0 {
+		return Stay
+	}
+	if err := w.DropRegions(p, field, n); err != nil {
+		fail(s, err)
+	} else {
+		ok(s, "Dropped %d regions. You now hold %d land.", n, p.Land)
+	}
 	return Stay
 }
 
@@ -1260,8 +1277,8 @@ func prodField(p *game.Empire, idx int) *int {
 func setIndustries(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if p.Specialized != "" {
-		ok(s, "Your industry is specialized in %s and can no longer be split.", p.Specialized)
-		return Stay
+		fmt.Fprintf(s, "\n%sYour industry is specialized in %s; unspent production still favors it.%s\n",
+			ansi.FgBrightCyan, p.Specialized, ansi.Reset)
 	}
 	fmt.Fprintf(s, "\n%sSet Industries — percentage of production spent on each unit:%s\n", ansi.FgBrightCyan, ansi.Reset)
 	for i, name := range prodTypeNames {

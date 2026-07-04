@@ -10,6 +10,9 @@ title: Промышленность
 Каждый промышленный регион каждый ход даёт золото и очки производства. Очки
 превращаются в юниты.
 
-В «Задать производство» распределите выпуск по типам юнитов в
-процентах. Либо через «Специализацию» выберите один тип для большего выпуска
-— но потом ничего другого строить нельзя.
+Use Set Industries to split your production across unit types by
+percentage. You can change the split at any time.
+
+Specialize marks one unit type as your focus. It does not replace your
+percentage split. Any production your percentages leave unspent goes to the
+specialized unit. Specializing cannot be undone, so choose with care.

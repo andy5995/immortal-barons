@@ -79,24 +79,50 @@ func TestManufactureZeroWithoutIndustrial(t *testing.T) {
 	}
 }
 
-func TestSpecializedConcentratesOutput(t *testing.T) {
+// Specialization does not replace the percentage split; it absorbs the points
+// the percentages leave unspent. Here 40% goes to troopers and the remaining
+// 60% falls to the Tanks specialty.
+func TestSpecializedAbsorbsSurplus(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 1)
 	e := w.AddHuman("me", "Mine")
 	e.Regions = RegionMix{Industrial: 100}
 	e.Land = e.Regions.Total()
+	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 40, 0, 0
+	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 0, 0, 0
 	e.Specialized = "Tanks"
 
 	w.manufacture(e)
 
 	pts := 100 * IndustryPointsPerRegion
-	want := pts / CostTank
-	if e.MadeTanks != want {
-		t.Errorf("MadeTanks = %d, want %d", e.MadeTanks, want)
+	if want := (pts * 40 / 100) / CostTrooper; e.MadeTroopers != want {
+		t.Errorf("MadeTroopers = %d, want %d", e.MadeTroopers, want)
 	}
-	if e.MadeTroopers != 0 || e.MadeJets != 0 || e.MadeTurrets != 0 ||
-		e.MadeBombers != 0 || e.MadeCarriers != 0 {
-		t.Errorf("expected only MadeTanks set, got %+v", e)
+	if want := (pts * 60 / 100) / CostTank; e.MadeTanks != want {
+		t.Errorf("MadeTanks (surplus to specialty) = %d, want %d", e.MadeTanks, want)
+	}
+}
+
+// When the percentages already sum to 100, the specialty gets no surplus and
+// the split is honored exactly.
+func TestSpecializedNoSurplusHonorsSplit(t *testing.T) {
+	cfg := DefaultConfig()
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("me", "Mine")
+	e.Regions = RegionMix{Industrial: 100}
+	e.Land = e.Regions.Total()
+	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 100, 0, 0
+	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 0, 0, 0
+	e.Specialized = "Tanks"
+
+	w.manufacture(e)
+
+	if e.MadeTanks != 0 {
+		t.Errorf("MadeTanks = %d, want 0 (no surplus)", e.MadeTanks)
+	}
+	pts := 100 * IndustryPointsPerRegion
+	if want := pts / CostTrooper; e.MadeTroopers != want {
+		t.Errorf("MadeTroopers = %d, want %d", e.MadeTroopers, want)
 	}
 }
 

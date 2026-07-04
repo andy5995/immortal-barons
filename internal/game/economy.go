@@ -294,6 +294,21 @@ func (w *World) SellLand(e *Empire, n int) error {
 	return w.SellRegions(e, &e.Regions.Coastal, n)
 }
 
+// DropRegions abandons n regions of the type pointed to by field. Unlike a
+// sale, no gold is returned — BRE lets you drop regions, not sell them. n is
+// clamped to *field.
+func (w *World) DropRegions(e *Empire, field *int, n int) error {
+	if n <= 0 {
+		return nil
+	}
+	if n > *field {
+		n = *field
+	}
+	*field -= n
+	e.syncLand()
+	return nil
+}
+
 func (w *World) Deposit(e *Empire, n int) error {
 	if n <= 0 {
 		return nil

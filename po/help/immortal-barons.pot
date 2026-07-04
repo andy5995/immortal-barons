@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-04 10:32-0500\n"
+"POT-Creation-Date: 2026-07-04 17:20-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -395,8 +395,16 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Use Set Industries to split your production across unit types by "
-"percentage. Or use Specialize to send all of your production into one unit "
-"type. Specializing cannot be undone, so choose with care."
+"percentage. You can change the split at any time."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/industry.md:18
+#, markdown-text
+msgid ""
+"Specialize marks one unit type as your focus. It does not replace your "
+"percentage split. Any production your percentages leave unspent goes to the "
+"specialized unit. Specializing cannot be undone, so choose with care."
 msgstr ""
 
 #. type: Title #
@@ -955,22 +963,25 @@ msgid "League-wide rules (Coordinator only)"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:136
+#: internal/help/content/interbbs/sysop.md:139
 #, markdown-text
 msgid ""
 "The League Coordinator sets the rules that must match across the whole "
-"league — turns per day, protection turns, and game length. Set them in the "
+"league.  These are all the fields marked with a star in the Configuration "
+"Editor: turns per day, protection turns, game length, land market and daily "
+"land, interest and investment rates, tax and region and player limits, "
+"buy-military mode, and the cost, damage, and reward levels. Set them in the "
 "Coordinator's own `config.json`, then broadcast them to every board:"
 msgstr ""
 
 #. type: Fenced code block
-#: internal/help/content/interbbs/sysop.md:137
+#: internal/help/content/interbbs/sysop.md:140
 #, no-wrap
 msgid "barons-door -league-config -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:145
+#: internal/help/content/interbbs/sysop.md:148
 #, markdown-text
 msgid ""
 "This writes a settings packet to your outbound directory. Each member board "
@@ -980,13 +991,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/sysop.md:146
+#: internal/help/content/interbbs/sysop.md:149
 #, markdown-text, no-wrap
 msgid "The Coordinator"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:149
+#: internal/help/content/interbbs/sysop.md:152
 #, markdown-text
 msgid ""
 "There are two different \"coordinator\" ideas, and they are not the same "
@@ -994,7 +1005,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:154
+#: internal/help/content/interbbs/sysop.md:157
 #, markdown-text
 msgid ""
 "**League Coordinator** — the sysop of board number 1. This person keeps the "
@@ -1002,7 +1013,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:154
+#: internal/help/content/interbbs/sysop.md:157
 #, markdown-text
 msgid ""
 "**BBS Coordinator** — a *player* your board elects. Players vote in the "
