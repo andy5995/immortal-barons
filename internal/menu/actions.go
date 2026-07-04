@@ -547,17 +547,37 @@ func gooieKablooie(s session.Session, w *game.World) Result {
 // packing values across lines instead of one dot-leader row each.
 func empireStatus(s session.Session, w *game.World) Result {
 	p := w.Player()
-	c, r := ansi.FgBrightCyan, ansi.Reset
-	fmt.Fprintf(s, "\n%s-*%s*-%s\n", c, p.Name, r)
-	fmt.Fprintf(s, "Turns left: %d    Net worth: %d\n", p.TurnsLeft, w.NetWorth(p))
-	fmt.Fprintf(s, "Gold: %d    Bank: %d    Debt: %d\n", p.Gold, p.Bank, p.Debt)
-	fmt.Fprintf(s, "Population: %d (Tax %d%%)    Support: %d%%\n", p.People, p.Tax, p.Support)
-	fmt.Fprintf(s, "Food: %d    HeadQuarters: %s    SDI: %d%%\n", p.Food, hqStatus(p), p.SDI)
-	fmt.Fprintf(s, "Offense: %d    Defense: %d\n", p.Offense(), p.Defense())
-	fmt.Fprintf(s, "Military: [%d Troopers] [%d Jets] [%d Turrets] [%d Tanks] [%d Bombers] [%d Carriers] [%d Agents]\n",
-		p.Troopers, p.Jets, p.Turrets, p.Tanks, p.Bombers, p.Carriers, p.Agents)
-	fmt.Fprintf(s, "Regions: %s\n", regionBreakdown(p))
-	fmt.Fprintf(s, "Protection: %d turns left\n", p.Protection)
+	c, wht, r := ansi.FgBrightCyan, ansi.FgWhite, ansi.Reset
+	num := func(n int) string { return c + comma(n) + r }
+	pct := func(n int) string { return fmt.Sprintf("%s%d%%%s", c, n, r) }
+	kv := func(label, value string) { fmt.Fprintf(s, "%s%s:%s %s\n", wht, label, r, value) }
+
+	fmt.Fprintf(s, "\n%s─*%s*─%s\n", c, p.Name, r)
+	kv("Turns", num(p.TurnsLeft))
+	kv("Score", num(w.NetWorth(p)))
+	kv("Gold", num(p.Gold))
+	kv("Bank", num(p.Bank))
+	if p.Debt > 0 {
+		kv("Debt", num(p.Debt))
+	}
+	fmt.Fprintf(s, "%sPopulation:%s %s %s(Tax Rate: %s)%s\n", wht, r, num(p.People), wht, pct(p.Tax), r)
+	kv("Popular Support", pct(p.Support))
+	kv("Food", num(p.Food))
+	fmt.Fprintf(s, "%sHeadquarters:%s %s%s%s\n", wht, r, c, hqStatus(p), r)
+	if p.SDI > 0 {
+		kv("SDI", pct(p.SDI))
+	}
+	fmt.Fprintf(s, "%sOffense:%s %s   %sDefense:%s %s\n", wht, r, num(p.Offense()), wht, r, num(p.Defense()))
+	writeBracketRow(s, "Military", []bracketItem{
+		mkBracket(p.Troopers, "Troopers"), mkBracket(p.Jets, "Jets"), mkBracket(p.Turrets, "Turrets"),
+		mkBracket(p.Tanks, "Tanks"), mkBracket(p.Bombers, "Bombers"), mkBracket(p.Carriers, "Carriers"),
+		mkBracket(p.Agents, "Agents"),
+	})
+	writeBracketRow(s, "Regions", regionBracketItems(p))
+	if p.Protection > 0 {
+		fmt.Fprintf(s, "%sYou have %s%s turns of Protection Left.%s\n", wht, num(p.Protection), wht, r)
+	}
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBlue, rule, r)
 	pause(s)
 	return Stay
 }
@@ -573,19 +593,56 @@ func hqStatus(p *game.Empire) string {
 	}
 }
 
-// regionBreakdown formats the non-zero region counts of p as bracketed
-// items, e.g. "[40 Coastal] [25 Agricultural] [10 Urban]".
-func regionBreakdown(p *game.Empire) string {
-	var parts []string
+// bracketItem is a "[N Label]" group plus its visible width (excluding ANSI
+// color codes) so writeBracketRow can wrap without miscounting.
+type bracketItem struct {
+	text  string
+	width int
+}
+
+// mkBracket builds a "[N Label]" group with the count highlighted.
+func mkBracket(n int, label string) bracketItem {
+	numStr := comma(n)
+	return bracketItem{
+		text:  "[" + ansi.FgBrightCyan + numStr + ansi.Reset + " " + label + "]",
+		width: len(numStr) + len(label) + 3, // '[' + number + ' ' + label + ']'
+	}
+}
+
+// writeBracketRow prints "Label: " then the bracket groups, wrapping to a new
+// indented line when a group would overflow the classic 80-column screen.
+func writeBracketRow(s session.Session, label string, items []bracketItem) {
+	prefix := label + ": "
+	fmt.Fprintf(s, "%s%s%s", ansi.FgWhite, prefix, ansi.Reset)
+	indent := strings.Repeat(" ", len(prefix))
+	col := len(prefix)
+	const maxWidth = 78
+	for i, it := range items {
+		if i > 0 {
+			if col+1+it.width > maxWidth {
+				fmt.Fprintf(s, "\n%s", indent)
+				col = len(indent)
+			} else {
+				fmt.Fprint(s, " ")
+				col++
+			}
+		}
+		fmt.Fprint(s, it.text)
+		col += it.width
+	}
+	fmt.Fprint(s, "\n")
+}
+
+// regionBracketItems returns the empire's non-zero region counts as bracket
+// groups, e.g. [40 Coastal] [25 Agricultural].
+func regionBracketItems(p *game.Empire) []bracketItem {
+	var items []bracketItem
 	for i, name := range regionTypeNames {
 		if n := *regionField(p, i); n > 0 {
-			parts = append(parts, fmt.Sprintf("[%d %s]", n, name))
+			items = append(items, mkBracket(n, name))
 		}
 	}
-	if len(parts) == 0 {
-		return fmt.Sprintf("%d regions", p.Land)
-	}
-	return strings.Join(parts, " ")
+	return items
 }
 
 func seeScores(s session.Session, w *game.World) Result {
