@@ -62,7 +62,7 @@ func BuildMenus() *Menus {
 		{Key: 'S', Label: "Sell", Do: gotoMenu(sell)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '?', Label: "Help", Do: helpBrowse},
-		{Key: '0', Label: "Proceed with Turn", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
 	}
 
 	sell.Items = []Item{
@@ -105,14 +105,14 @@ func BuildMenus() *Menus {
 		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack},
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates},
 		{Key: 'A', Label: "Alliance Strength", Do: allianceStrength},
-		{Key: 'K', Label: "Gooie Kablooie Ops", Do: gooieKablooie},
-		{Key: 'I', Label: "SDI Program", Do: sdiProgram},
+		{Key: 'K', Label: "Gooie Kablooie Ops", Do: gooieKablooie, Hidden: ibbsHidden},
+		{Key: 'I', Label: "SDI Program", Do: sdiProgram, Hidden: ibbsHidden},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: 'G', Label: "Create Group Attack", Do: stubbed("Create Group Attack"), Hidden: ibbsHidden},
 		{Key: 'J', Label: "Join Group Attack", Do: stubbed("Join Group Attack"), Hidden: ibbsHidden},
 		{Key: 'T', Label: "Terrorist Ops", Do: stubbed("Terrorist Ops"), Hidden: ibbsHidden},
 		{Key: 'X', Label: "Travel Times", Do: stubbed("Travel Times"), Hidden: ibbsHidden},
-		{Key: '0', Label: "Proceed with Turn", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
 	}
 
 	covert.Items = []Item{
@@ -127,7 +127,7 @@ func BuildMenus() *Menus {
 		{Key: 'F', Label: "Bomb Food Stores", Do: bombFood},
 		{Key: 'H', Label: "Bomb HQ", Do: bombHQ},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: '0', Label: "Proceed with Turn", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
 	}
 
 	trading.Items = []Item{
@@ -136,7 +136,7 @@ func BuildMenus() *Menus {
 		{Key: '2', Label: "View IPScores", Do: interbbsScores, Hidden: ibbsHidden},
 		{Key: 'B', Label: "Buy / Sell", Do: gotoMenu(buy)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: '0', Label: "Proceed with Turn", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
 	}
 
 	diplomacy.Items = []Item{
