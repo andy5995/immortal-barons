@@ -28,15 +28,17 @@ func helpBrowse(s session.Session, w *game.World) Result {
 	}
 }
 
-// helpLanguages are the languages the in-game help can render, in menu order.
-// "" is English (the canonical source); the rest have po4a-generated trees.
+// helpLanguages are the languages the UI/help can render, in menu order. "" is
+// English (the canonical source); the rest have translations. Names are shown
+// as endonyms (each language in its own tongue), the standard for a language
+// picker, so they read the same regardless of the current UI language.
 var helpLanguages = []struct{ code, name string }{
 	{"", "English"},
-	{"de", "German (Deutsch)"},
-	{"ru", "Russian (Русский)"},
+	{"de", "Deutsch"},
+	{"ru", "Русский"},
 }
 
-// languageName is the display name for a stored language code.
+// languageName is the endonym for a stored language code.
 func languageName(code string) string {
 	for _, l := range helpLanguages {
 		if l.code == code {
@@ -46,12 +48,12 @@ func languageName(code string) string {
 	return "English"
 }
 
-// pickLanguage lets the caller choose the help language, stored per-empire so
-// each caller keeps their own. Partly-translated languages fall back to English
-// per topic.
+// pickLanguage lets the caller choose the UI/help language, stored per-empire
+// so each caller keeps their own. Partly-translated languages fall back to
+// English per string.
 func pickLanguage(s session.Session, w *game.World) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%sHelp language:%s\n", ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Language:"), ansi.Reset)
 	for i, l := range helpLanguages {
 		fmt.Fprintf(s, "  %d) %s\n", i+1, l.name)
 	}

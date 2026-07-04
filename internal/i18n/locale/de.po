@@ -409,3 +409,16 @@ msgstr "vor 1 Tag"
 
 msgid "%d days ago"
 msgstr "vor %d Tagen"
+
+# Language picker
+msgid "Language"
+msgstr "Sprache"
+
+msgid "Language:"
+msgstr "Sprache:"
+
+msgid "Choose (0 to keep current)?"
+msgstr "Wählen (0 = aktuelle behalten)?"
+
+msgid "Language set to %s."
+msgstr "Sprache auf %s gesetzt."

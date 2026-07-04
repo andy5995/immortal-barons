@@ -41,7 +41,7 @@ msgstr ""
 msgid "%s offers you: %s"
 msgstr ""
 
-#: internal/menu/tree.go:284
+#: internal/menu/tree.go:285
 msgid "%s | Gold %d  Food %d  Land %d  Army %d | Turns left %d | Day %d"
 msgstr ""
 
@@ -101,7 +101,7 @@ msgstr ""
 msgid "AI empires"
 msgstr ""
 
-#: internal/menu/tree.go:223
+#: internal/menu/tree.go:224
 msgid "Abdicate"
 msgstr ""
 
@@ -201,7 +201,7 @@ msgstr ""
 msgid "Buy / Sell"
 msgstr ""
 
-#: internal/menu/tree.go:216
+#: internal/menu/tree.go:217
 msgid "Buy Food"
 msgstr ""
 
@@ -237,7 +237,7 @@ msgstr ""
 msgid "Choice?"
 msgstr ""
 
-#: internal/menu/helpbrowse.go:58
+#: internal/menu/helpbrowse.go:60
 msgid "Choose (0 to keep current)?"
 msgstr ""
 
@@ -273,7 +273,7 @@ msgstr ""
 msgid "Commit how many Troopers?"
 msgstr ""
 
-#: internal/menu/tree.go:242
+#: internal/menu/tree.go:243
 msgid "Configuration Editor"
 msgstr ""
 
@@ -361,7 +361,7 @@ msgstr ""
 msgid "Empire"
 msgstr ""
 
-#: internal/menu/tree.go:226
+#: internal/menu/tree.go:227
 msgid "Empire Status"
 msgstr ""
 
@@ -377,7 +377,7 @@ msgstr ""
 msgid "Faction"
 msgstr ""
 
-#: internal/menu/tree.go:217
+#: internal/menu/tree.go:218
 msgid "Food"
 msgstr ""
 
@@ -397,7 +397,7 @@ msgstr ""
 msgid "Fund SDI — gold to spend (10000 per +1%%, max 75%%)?"
 msgstr ""
 
-#: internal/menu/tree.go:256
+#: internal/menu/tree.go:257
 msgid "Game Bulletins"
 msgstr ""
 
@@ -405,7 +405,7 @@ msgstr ""
 msgid "Game Rules"
 msgstr ""
 
-#: internal/menu/tree.go:228
+#: internal/menu/tree.go:229
 msgid "Game Setup"
 msgstr ""
 
@@ -449,7 +449,7 @@ msgstr ""
 msgid "Help"
 msgstr ""
 
-#: internal/menu/tree.go:258
+#: internal/menu/tree.go:259
 msgid "Help Database"
 msgstr ""
 
@@ -489,7 +489,7 @@ msgstr ""
 msgid "Id"
 msgstr ""
 
-#: internal/menu/tree.go:247
+#: internal/menu/tree.go:248
 msgid "Immortal Barons — Game Menu"
 msgstr ""
 
@@ -509,7 +509,7 @@ msgstr ""
 msgid "Initial Market Land"
 msgstr ""
 
-#: internal/menu/tree.go:257
+#: internal/menu/tree.go:258
 msgid "Instructions"
 msgstr ""
 
@@ -569,8 +569,16 @@ msgstr ""
 msgid "Land Created / Day"
 msgstr ""
 
-#: internal/menu/helpbrowse.go:63
+#: internal/menu/tree.go:202
+msgid "Language"
+msgstr ""
+
+#: internal/menu/helpbrowse.go:65
 msgid "Language set to %s."
+msgstr ""
+
+#: internal/menu/helpbrowse.go:56
+msgid "Language:"
 msgstr ""
 
 #: internal/menu/actions.go:745
@@ -649,7 +657,7 @@ msgstr ""
 msgid "Modify Diplomacy"
 msgstr ""
 
-#: internal/menu/tree.go:209
+#: internal/menu/tree.go:210
 msgid "Modify League Diplomacy"
 msgstr ""
 
@@ -757,7 +765,7 @@ msgstr ""
 msgid "Planetary Post"
 msgstr ""
 
-#: internal/menu/tree.go:249
+#: internal/menu/tree.go:250
 msgid "Play Game"
 msgstr ""
 
@@ -869,11 +877,11 @@ msgstr ""
 msgid "Score"
 msgstr ""
 
-#: internal/menu/tree.go:232
+#: internal/menu/tree.go:233
 msgid "See Scores"
 msgstr ""
 
-#: internal/menu/tree.go:250
+#: internal/menu/tree.go:251
 msgid "See Status"
 msgstr ""
 
@@ -905,15 +913,15 @@ msgstr ""
 msgid "Sent %d gold to %s."
 msgstr ""
 
-#: internal/menu/tree.go:236
+#: internal/menu/tree.go:237
 msgid "Set Industries"
 msgstr ""
 
-#: internal/menu/tree.go:231
+#: internal/menu/tree.go:232
 msgid "Set Tax Rate"
 msgstr ""
 
-#: internal/menu/tree.go:237
+#: internal/menu/tree.go:238
 msgid "Show Instructions"
 msgstr ""
 
@@ -937,7 +945,7 @@ msgstr ""
 msgid "Special Operations"
 msgstr ""
 
-#: internal/menu/tree.go:238
+#: internal/menu/tree.go:239
 msgid "Specialize Industry"
 msgstr ""
 
@@ -1061,11 +1069,11 @@ msgstr ""
 msgid "There is no one to reach."
 msgstr ""
 
-#: internal/menu/tree.go:252
+#: internal/menu/tree.go:253
 msgid "Today's News"
 msgstr ""
 
-#: internal/menu/helpbrowse.go:75
+#: internal/menu/helpbrowse.go:77
 msgid "Topic (0 to go back)?"
 msgstr ""
 
@@ -1133,7 +1141,7 @@ msgstr ""
 msgid "View IPScores"
 msgstr ""
 
-#: internal/menu/tree.go:224
+#: internal/menu/tree.go:225
 msgid "Visit Advisors"
 msgstr ""
 
@@ -1145,7 +1153,7 @@ msgstr ""
 msgid "Vote for (0 to cancel)?"
 msgstr ""
 
-#: internal/menu/tree.go:239
+#: internal/menu/tree.go:240
 msgid "Vote for Coordinator"
 msgstr ""
 
@@ -1181,11 +1189,11 @@ msgstr ""
 msgid "Withdraw how much?"
 msgstr ""
 
-#: internal/menu/tree.go:235
+#: internal/menu/tree.go:236
 msgid "Write Macros"
 msgstr ""
 
-#: internal/menu/tree.go:253
+#: internal/menu/tree.go:254
 msgid "Yesterday's News"
 msgstr ""
 
