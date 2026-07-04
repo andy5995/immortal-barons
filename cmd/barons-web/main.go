@@ -124,6 +124,19 @@ func (h *hub) stream(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "data: %s\n\n", base64.StdEncoding.EncodeToString(b))
 			flusher.Flush()
 		case <-ws.Done():
+			// Game over: flush any output still buffered, then send a terminal
+			// "end" event so the browser's EventSource stops instead of
+			// auto-reconnecting and starting a brand-new game.
+			for draining := true; draining; {
+				select {
+				case b := <-ws.Out():
+					fmt.Fprintf(w, "data: %s\n\n", base64.StdEncoding.EncodeToString(b))
+				default:
+					draining = false
+				}
+			}
+			fmt.Fprint(w, "event: end\ndata: \n\n")
+			flusher.Flush()
 			return
 		case <-r.Context().Done():
 			return
@@ -193,6 +206,9 @@ const indexHTML = `<!doctype html>
   term.focus();
 
   const es = new EventSource('/stream');
+  // The server sends an "end" event when the game is over. Close the stream so
+  // the browser does not auto-reconnect and start a fresh game on its own.
+  es.addEventListener('end', () => es.close());
   es.onmessage = (e) => {
     const bin = atob(e.data);
     const bytes = new Uint8Array(bin.length);
