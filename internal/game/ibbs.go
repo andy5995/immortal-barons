@@ -34,9 +34,73 @@ type Packet struct {
 // it so everyone plays by the same turns/protection/length — replacing the
 // hand-coordinated config that BRE distributed at reset.
 type LeagueConfig struct {
-	TurnsPerDay     int
-	ProtectionTurns int
-	GameLength      int
+	TurnsPerDay       int
+	ProtectionTurns   int
+	GameLength        int
+	InitialMarketLand int
+	LandPerDay        int
+	InterestRate      int
+	StdInvestRate     int
+	SteadyInvest      bool
+	MaxTaxRate        int
+	MaxRegions        int
+	MaxPlayers        int
+	BuyMilitary       BuyMode
+	MaintCosts        Level
+	TradeCosts        Level
+	RegionCosts       Level
+	AttackDamage      Level
+	AttackRewards     Level
+	SabreHandling     SabreMode
+}
+
+// leagueRuleset extracts the league-wide rules (the fields marked * in the
+// Configuration Editor) from this board's config, for the coordinator to
+// broadcast.
+func (c Config) leagueRuleset() *LeagueConfig {
+	return &LeagueConfig{
+		TurnsPerDay:       c.TurnsPerDay,
+		ProtectionTurns:   c.ProtectionTurns,
+		GameLength:        c.GameLength,
+		InitialMarketLand: c.InitialMarketLand,
+		LandPerDay:        c.LandPerDay,
+		InterestRate:      c.InterestRate,
+		StdInvestRate:     c.StdInvestRate,
+		SteadyInvest:      c.SteadyInvest,
+		MaxTaxRate:        c.MaxTaxRate,
+		MaxRegions:        c.MaxRegions,
+		MaxPlayers:        c.MaxPlayers,
+		BuyMilitary:       c.BuyMilitary,
+		MaintCosts:        c.MaintCosts,
+		TradeCosts:        c.TradeCosts,
+		RegionCosts:       c.RegionCosts,
+		AttackDamage:      c.AttackDamage,
+		AttackRewards:     c.AttackRewards,
+		SabreHandling:     c.SabreHandling,
+	}
+}
+
+// applyLeagueRuleset copies broadcast league rules into this board's config,
+// leaving per-board fields (BoardID, dirs, AICount, IBBS) untouched.
+func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
+	c.TurnsPerDay = lc.TurnsPerDay
+	c.ProtectionTurns = lc.ProtectionTurns
+	c.GameLength = lc.GameLength
+	c.InitialMarketLand = lc.InitialMarketLand
+	c.LandPerDay = lc.LandPerDay
+	c.InterestRate = lc.InterestRate
+	c.StdInvestRate = lc.StdInvestRate
+	c.SteadyInvest = lc.SteadyInvest
+	c.MaxTaxRate = lc.MaxTaxRate
+	c.MaxRegions = lc.MaxRegions
+	c.MaxPlayers = lc.MaxPlayers
+	c.BuyMilitary = lc.BuyMilitary
+	c.MaintCosts = lc.MaintCosts
+	c.TradeCosts = lc.TradeCosts
+	c.RegionCosts = lc.RegionCosts
+	c.AttackDamage = lc.AttackDamage
+	c.AttackRewards = lc.AttackRewards
+	c.SabreHandling = lc.SabreHandling
 }
 
 // CoordinatorBoardID is the name of node #1 in the roster — the League
@@ -60,13 +124,9 @@ func (w *World) IsLeagueCoordinator() bool {
 // when it comes from node #1 (see ApplyPacket).
 func (w *World) ExportLeagueConfig() {
 	w.Outbox = append(w.Outbox, Packet{
-		FromBoard: w.Config.BoardID,
-		Date:      w.LastMaintDate,
-		LeagueConfig: &LeagueConfig{
-			TurnsPerDay:     w.Config.TurnsPerDay,
-			ProtectionTurns: w.Config.ProtectionTurns,
-			GameLength:      w.Config.GameLength,
-		},
+		FromBoard:    w.Config.BoardID,
+		Date:         w.LastMaintDate,
+		LeagueConfig: w.Config.leagueRuleset(),
 	})
 }
 
@@ -262,9 +322,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// so a member board can't push rules onto the league. The LC ignores its
 	// own echo.
 	if p.LeagueConfig != nil && p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID() && !w.IsLeagueCoordinator() {
-		w.Config.TurnsPerDay = p.LeagueConfig.TurnsPerDay
-		w.Config.ProtectionTurns = p.LeagueConfig.ProtectionTurns
-		w.Config.GameLength = p.LeagueConfig.GameLength
+		w.Config.applyLeagueRuleset(p.LeagueConfig)
 		w.Bulletin = append(w.Bulletin, "The League Coordinator updated the league settings.")
 	}
 	if len(p.Scores) > 0 {
