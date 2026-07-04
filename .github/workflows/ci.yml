@@ -19,10 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      # setup-go pinned to v5 — a known-good major; NOT cross-checked against
-      # the DC repo (DC has no Go workflow). go-version-file keeps CI on the
-      # exact toolchain the module declares (go.mod: go 1.26.x).
-      - uses: actions/setup-go@v5
+      # setup-go pinned to v6 (current, per Andy; DC has no Go workflow to
+      # cross-check against). go-version-file keeps CI on the exact toolchain
+      # the module declares (go.mod: go 1.26.x).
+      - uses: actions/setup-go@v6
         with:
           go-version-file: go.mod
 
