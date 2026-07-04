@@ -59,9 +59,13 @@ func TestFindHelpTopicEmptyReturnsNil(t *testing.T) {
 	}
 }
 
+// The old flat helpDatabase now lives on the Spending menu's '?' key (the Game
+// Menu's Help Database key drives the new categorized browser); route these
+// through Spending. helpDatabase and the categorized browser coexist until the
+// rest of the content is migrated (slice 2 of the docs/help spec).
 func TestHelpDatabaseQuitsOnZero(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "B0\r0", menus.Game) // Help Database -> quit lookup -> Quit game menu
+	f, _, err := run(t, "?0\r0", menus.Spending) // Help -> quit lookup -> leave Spending
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -72,7 +76,7 @@ func TestHelpDatabaseQuitsOnZero(t *testing.T) {
 
 func TestHelpDatabaseLooksUpTopic(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "BTroopers\r 0\r0", menus.Game) // Help Database -> "Troopers" -> pause -> quit lookup -> Quit game menu
+	f, _, err := run(t, "?Troopers\r 0\r0", menus.Spending) // Help -> "Troopers" -> pause -> quit -> leave
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}

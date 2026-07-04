@@ -212,7 +212,7 @@ func BuildMenus() *Menus {
 		{Key: '7', Label: "Send Message", Do: sendMessage},
 		{Key: '8', Label: "Game Bulletins", Do: showBulletin},
 		{Key: 'A', Label: "Instructions", Do: stubbed("Instructions")},
-		{Key: 'B', Label: "Help Database", Do: helpDatabase},
+		{Key: 'B', Label: "Help Database", Do: helpBrowse},
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
 		{Key: '0', Label: "Quit", Do: quit},
 	}

@@ -261,6 +261,20 @@ func TestInterBBSItemsHiddenUnlessEnabled(t *testing.T) {
 	}
 }
 
+func TestHelpBrowseShowsControls(t *testing.T) {
+	// category 1 (controls) -> topic 1 -> pause -> back (0) -> leave (0)
+	f := &fakeSession{keys: []rune("1\r1\r 0\r0\r")}
+	w := newWorld()
+	helpBrowse(f, w)
+	out := f.out.String()
+	if !strings.Contains(out, "Controls") {
+		t.Error("help browser should list the Controls category")
+	}
+	if !strings.Contains(out, "Moving Through the Menus") && !strings.Contains(out, "Entering Numbers") {
+		t.Error("help browser should render a controls topic")
+	}
+}
+
 func TestPromptSuggestedExpandsKAndM(t *testing.T) {
 	f := &fakeSession{keys: []rune("1k\r")}
 	if got := promptSuggested(f, "How many?", 0, 1_000_000); got != 1000 {
