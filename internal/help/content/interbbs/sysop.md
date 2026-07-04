@@ -128,6 +128,21 @@ USA
 The six lines are: node number, board (planet) name, network address, city,
 state or province, and country. Board number 1 is the League Coordinator.
 
+## League-wide rules (Coordinator only)
+
+The League Coordinator sets the rules that must match across the whole league —
+turns per day, protection turns, and game length. Set them in the
+Coordinator's own `config.json`, then broadcast them to every board:
+
+```
+barons-door -league-config -data /path/to/data
+```
+
+This writes a settings packet to your outbound directory. Each member board
+adopts the settings on its next `-planetary` run. Member boards accept these
+settings only from the Coordinator's board (node 1), so no one else can change
+the league rules. Only the Coordinator's board may send this packet.
+
 ## The Coordinator
 
 There are two different "coordinator" ideas, and they are not the same thing:

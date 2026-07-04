@@ -21,6 +21,11 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string) error {
 	if _, err := ReadInbound(w, inboundDir); err != nil {
 		return err
 	}
+	// An inbound league-config packet may have updated w.Config; persist it so
+	// the adopted settings survive the next load (config.json is authoritative).
+	if err := SaveConfig(w.Config); err != nil {
+		return err
+	}
 	w.LaunchDueGroupAttacks()
 	w.ExportScores()
 	return WriteOutbox(w, outboundDir)

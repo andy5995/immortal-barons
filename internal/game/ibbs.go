@@ -20,12 +20,54 @@ var (
 // Packet carries inter-BBS actions from one board to another (or, with an empty
 // ToBoard, broadcast to the whole league).
 type Packet struct {
-	FromBoard string
-	ToBoard   string
-	Date      string
-	Scores    []RemoteScore  // score share (feeds RemoteBoards / IP scores)
-	Attacks   []RemoteAttack // strikes landing on ToBoard
-	Results   []AttackResult // outcomes returning to the origin
+	FromBoard    string
+	ToBoard      string
+	Date         string
+	Scores       []RemoteScore  // score share (feeds RemoteBoards / IP scores)
+	Attacks      []RemoteAttack // strikes landing on ToBoard
+	Results      []AttackResult // outcomes returning to the origin
+	LeagueConfig *LeagueConfig  // LC-authored league settings (nil if absent)
+}
+
+// LeagueConfig is the set of game rules the League Coordinator sets for the
+// whole league. The coordinator (board #1) broadcasts it; member boards adopt
+// it so everyone plays by the same turns/protection/length — replacing the
+// hand-coordinated config that BRE distributed at reset.
+type LeagueConfig struct {
+	TurnsPerDay     int
+	ProtectionTurns int
+	GameLength      int
+}
+
+// CoordinatorBoardID is the name of node #1 in the roster — the League
+// Coordinator's board. Empty if no roster is loaded.
+func (w *World) CoordinatorBoardID() string {
+	for _, n := range w.LeagueNodes {
+		if n.Number == 1 {
+			return n.Name
+		}
+	}
+	return ""
+}
+
+// IsLeagueCoordinator reports whether this board is node #1 (the LC).
+func (w *World) IsLeagueCoordinator() bool {
+	return w.Config.BoardID != "" && w.Config.BoardID == w.CoordinatorBoardID()
+}
+
+// ExportLeagueConfig queues a broadcast packet carrying this board's league
+// rules. Only meaningful from the coordinator; member boards accept it only
+// when it comes from node #1 (see ApplyPacket).
+func (w *World) ExportLeagueConfig() {
+	w.Outbox = append(w.Outbox, Packet{
+		FromBoard: w.Config.BoardID,
+		Date:      w.LastMaintDate,
+		LeagueConfig: &LeagueConfig{
+			TurnsPerDay:     w.Config.TurnsPerDay,
+			ProtectionTurns: w.Config.ProtectionTurns,
+			GameLength:      w.Config.GameLength,
+		},
+	})
 }
 
 // Contribution records one baron's share of a group attack, so spoils split
@@ -216,6 +258,15 @@ func (w *World) enqueue(toBoard string, atk RemoteAttack) {
 // ApplyPacket applies an inbound packet to this board and returns a result
 // packet (attack outcomes) addressed back to the origin.
 func (w *World) ApplyPacket(p Packet) Packet {
+	// League settings are accepted only from the coordinator board (node #1),
+	// so a member board can't push rules onto the league. The LC ignores its
+	// own echo.
+	if p.LeagueConfig != nil && p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID() && !w.IsLeagueCoordinator() {
+		w.Config.TurnsPerDay = p.LeagueConfig.TurnsPerDay
+		w.Config.ProtectionTurns = p.LeagueConfig.ProtectionTurns
+		w.Config.GameLength = p.LeagueConfig.GameLength
+		w.Bulletin = append(w.Bulletin, "The League Coordinator updated the league settings.")
+	}
 	if len(p.Scores) > 0 {
 		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores})
 	}

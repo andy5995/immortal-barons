@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-04 09:57-0500\n"
+"POT-Creation-Date: 2026-07-04 10:32-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -29,7 +29,10 @@ msgid ""
 "Press one key to choose. You do not press Enter to pick a menu item. Each "
 "item shows its key in brackets, like `(1)`. Press that key and it runs at "
 "once."
-msgstr "Drücken Sie eine Taste zur Auswahl. Sie drücken nicht die Eingabetaste, um einen Menüpunkt zu wählen. Jeder Punkt zeigt seine Taste in Klammern, wie `(1)`. Drücken Sie diese Taste, und er wird sofort ausgeführt."
+msgstr ""
+"Drücken Sie eine Taste zur Auswahl. Sie drücken nicht die Eingabetaste, um "
+"einen Menüpunkt zu wählen. Jeder Punkt zeigt seine Taste in Klammern, wie "
+"`(1)`. Drücken Sie diese Taste, und er wird sofort ausgeführt."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:16
@@ -37,28 +40,38 @@ msgid ""
 "\"Quit\" (the `0` key) leaves a turn menu (Spending, Attack, Covert, "
 "Trading) and moves you to the next step of your turn. You cannot go back to "
 "that menu until your next turn."
-msgstr "„Quit“ (die Taste `0`) verlässt ein Zugmenü (Ausgaben, Angriff, Verdeckt, Handel) und bringt Sie zum nächsten Schritt Ihres Zuges. Sie können erst in Ihrem nächsten Zug zu diesem Menü zurückkehren."
+msgstr ""
+"„Quit“ (die Taste `0`) verlässt ein Zugmenü (Ausgaben, Angriff, Verdeckt, "
+"Handel) und bringt Sie zum nächsten Schritt Ihres Zuges. Sie können erst in "
+"Ihrem nächsten Zug zu diesem Menü zurückkehren."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:19
 msgid ""
 "\"Return\" (the `0` key) leaves a side menu (like the Bank or the System "
 "Menu) and takes you back to where you were."
-msgstr "„Return“ (die Taste `0`) verlässt ein Nebenmenü (wie die Bank oder das Systemmenü) und bringt Sie dorthin zurück, wo Sie waren."
+msgstr ""
+"„Return“ (die Taste `0`) verlässt ein Nebenmenü (wie die Bank oder das "
+"Systemmenü) und bringt Sie dorthin zurück, wo Sie waren."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:22
 msgid ""
 "The System Menu opens with the `*` key from the Spending menu. It holds "
 "extra options like Preferences, Set Tax Rate, and Show Instructions."
-msgstr "Das Systemmenü öffnet sich mit der Taste `*` im Ausgabenmenü. Es enthält zusätzliche Optionen wie Einstellungen, Steuersatz festlegen und Anweisungen anzeigen."
+msgstr ""
+"Das Systemmenü öffnet sich mit der Taste `*` im Ausgabenmenü. Es enthält "
+"zusätzliche Optionen wie Einstellungen, Steuersatz festlegen und Anweisungen "
+"anzeigen."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:25
 msgid ""
 "If you turn on \"Enter exits Buy menu\" in Preferences, pressing Enter at a "
 "turn menu chooses Quit for you."
-msgstr "Wenn Sie in den Einstellungen „Enter verlässt das Kaufmenü“ aktivieren, wählt das Drücken der Eingabetaste in einem Zugmenü für Sie „Quit“."
+msgstr ""
+"Wenn Sie in den Einstellungen „Enter verlässt das Kaufmenü“ aktivieren, "
+"wählt das Drücken der Eingabetaste in einem Zugmenü für Sie „Quit“."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:26
@@ -77,37 +90,50 @@ msgstr "Zahlen eingeben"
 msgid ""
 "When the game asks for an amount, it shows two numbers in brackets, like "
 "`How many? (0; 40):`."
-msgstr "Wenn das Spiel nach einer Menge fragt, zeigt es zwei Zahlen in Klammern, wie `How many? (0; 40):`."
+msgstr ""
+"Wenn das Spiel nach einer Menge fragt, zeigt es zwei Zahlen in Klammern, wie "
+"`How many? (0; 40):`."
 
 #. type: Bullet: '- '
 #: internal/help/content/controls/numbers.md:18
 msgid "The left number is a suggested value. Press Enter to accept it."
-msgstr "Die linke Zahl ist ein Vorschlagswert. Drücken Sie die Eingabetaste, um ihn zu übernehmen."
+msgstr ""
+"Die linke Zahl ist ein Vorschlagswert. Drücken Sie die Eingabetaste, um ihn "
+"zu übernehmen."
 
 #. type: Bullet: '- '
 #: internal/help/content/controls/numbers.md:18
 msgid ""
 "The right number is the most you can pick. Type `>` to fill the box with "
 "that maximum. You can still edit it."
-msgstr "Die rechte Zahl ist das Höchste, was Sie wählen können. Geben Sie `>` ein, um das Feld mit diesem Maximum zu füllen. Sie können danach weiterhin eine kleinere Zahl eingeben."
+msgstr ""
+"Die rechte Zahl ist das Höchste, was Sie wählen können. Geben Sie `>` ein, "
+"um das Feld mit diesem Maximum zu füllen. Sie können danach weiterhin eine "
+"kleinere Zahl eingeben."
 
 #. type: Bullet: '- '
 #: internal/help/content/controls/numbers.md:18
 msgid ""
 "`k` adds three zeros as you type. Press `1` then `k` and you see `1000`."
-msgstr "`k` fügt beim Tippen drei Nullen hinzu. Drücken Sie `1` und dann `k`, und Sie sehen `1000`."
+msgstr ""
+"`k` fügt beim Tippen drei Nullen hinzu. Drücken Sie `1` und dann `k`, und "
+"Sie sehen `1000`."
 
 #. type: Bullet: '- '
 #: internal/help/content/controls/numbers.md:18
 msgid "`m` adds six zeros. Press `2` then `m` and you see `2000000`."
-msgstr "`m` fügt sechs Nullen hinzu. Drücken Sie `2` und dann `m`, und Sie sehen `2000000`."
+msgstr ""
+"`m` fügt sechs Nullen hinzu. Drücken Sie `2` und dann `m`, und Sie sehen "
+"`2000000`."
 
 #. type: Plain text
 #: internal/help/content/controls/numbers.md:20
 msgid ""
 "If you type a number larger than the maximum, the game lowers it to the "
 "maximum when you press Enter."
-msgstr "Wenn Sie eine Zahl eingeben, die größer als das Maximum ist, senkt das Spiel sie beim Drücken der Eingabetaste auf das Maximum."
+msgstr ""
+"Wenn Sie eine Zahl eingeben, die größer als das Maximum ist, senkt das Spiel "
+"sie beim Drücken der Eingabetaste auf das Maximum."
 
 #. type: Title #
 #: internal/help/content/controls/turns.md:1
@@ -121,7 +147,9 @@ msgstr "Züge und Schutz"
 msgid ""
 "You get a set number of turns each day. When you use them all, come back the "
 "next day for more."
-msgstr "Sie erhalten jeden Tag eine feste Anzahl von Zügen. Wenn Sie alle verbraucht haben, kommen Sie am nächsten Tag für weitere zurück."
+msgstr ""
+"Sie erhalten jeden Tag eine feste Anzahl von Zügen. Wenn Sie alle verbraucht "
+"haben, kommen Sie am nächsten Tag für weitere zurück."
 
 #. type: Plain text
 #: internal/help/content/controls/turns.md:15
@@ -129,7 +157,10 @@ msgid ""
 "New players get New Realm Protection: a number of turns during which you "
 "cannot attack or be attacked. It only ticks down on turns you actually play, "
 "so you are safe while you learn the game."
-msgstr "Neue Spieler erhalten Neureich-Schutz: eine Anzahl von Zügen, in denen Sie weder angreifen noch angegriffen werden können. Das gibt Ihnen Zeit, sich aufzubauen."
+msgstr ""
+"Neue Spieler erhalten Neureich-Schutz: eine Anzahl von Zügen, in denen Sie "
+"weder angreifen noch angegriffen werden können. Das gibt Ihnen Zeit, sich "
+"aufzubauen."
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaties.md:1
@@ -143,7 +174,9 @@ msgstr "Verträge und Bündnisse"
 msgid ""
 "You can send agreements to other rulers. A treaty starts when the other side "
 "accepts it. These are the main agreements."
-msgstr "Sie können anderen Herrschern Abkommen anbieten. Ein Vertrag beginnt, wenn die andere Seite ihn annimmt. Dies sind die Arten."
+msgstr ""
+"Sie können anderen Herrschern Abkommen anbieten. Ein Vertrag beginnt, wenn "
+"die andere Seite ihn annimmt. Dies sind die Arten."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:13
@@ -157,7 +190,9 @@ msgid ""
 "Trade between two realms, with a tax on goods that cross the border. Both "
 "sides earn extra income based on population. This is good if you have many "
 "people."
-msgstr "Handel zwischen zwei Reichen, mit einer Abgabe auf Waren, die die Grenze überqueren. Beide Seiten verdienen zusätzlich, je nach Größe des Handels."
+msgstr ""
+"Handel zwischen zwei Reichen, mit einer Abgabe auf Waren, die die Grenze "
+"überqueren. Beide Seiten verdienen zusätzlich, je nach Größe des Handels."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:18
@@ -170,7 +205,9 @@ msgstr "Geschützter Handel"
 msgid ""
 "Guards along the trade routes. This stops enemies from bombing your trade "
 "deals, and makes trade deals cheaper to send and to keep."
-msgstr "Wachen entlang der Handelswege. Das hindert Feinde daran, Ihre Handelsgeschäfte zu bombardieren, und macht Handelsgeschäfte sicherer."
+msgstr ""
+"Wachen entlang der Handelswege. Das hindert Feinde daran, Ihre "
+"Handelsgeschäfte zu bombardieren, und macht Handelsgeschäfte sicherer."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:23
@@ -184,7 +221,10 @@ msgid ""
 "People and goods move freely, with no border tax. You earn a lot from income "
 "taxes. But people mixing across borders can spread low morale and low "
 "support, so watch it."
-msgstr "Menschen und Waren bewegen sich frei, ohne Grenzabgabe. Sie verdienen viel an Einkommensteuern. Aber die Vermischung der Völker kann die Stimmung in anderen Reichen trüben."
+msgstr ""
+"Menschen und Waren bewegen sich frei, ohne Grenzabgabe. Sie verdienen viel "
+"an Einkommensteuern. Aber die Vermischung der Völker kann die Stimmung in "
+"anderen Reichen trüben."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:29
@@ -197,7 +237,9 @@ msgstr "Terrorabwehr"
 msgid ""
 "The two realms' intelligence agencies help each other find and stop covert "
 "and terrorist attacks."
-msgstr "Die Geheimdienste beider Reiche helfen einander, verdeckte und terroristische Angriffe zu finden und zu verhindern."
+msgstr ""
+"Die Geheimdienste beider Reiche helfen einander, verdeckte und "
+"terroristische Angriffe zu finden und zu verhindern."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:34
@@ -210,7 +252,9 @@ msgstr "Geheimdienstbündnis"
 msgid ""
 "The two realms give each other covert help in operations, both at home and "
 "between planets."
-msgstr "Die beiden Reiche leisten einander verdeckte Hilfe bei Operationen, sowohl daheim als auch zwischen Planeten."
+msgstr ""
+"Die beiden Reiche leisten einander verdeckte Hilfe bei Operationen, sowohl "
+"daheim als auch zwischen Planeten."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:39
@@ -222,7 +266,9 @@ msgstr "Technologieabkommen"
 #: internal/help/content/diplomacy/treaties.md:42
 msgid ""
 "The two realms share science. Each side gains some of the other's technology."
-msgstr "Die beiden Reiche teilen ihre Wissenschaft. Jede Seite gewinnt einen Teil der Technologie der anderen."
+msgstr ""
+"Die beiden Reiche teilen ihre Wissenschaft. Jede Seite gewinnt einen Teil "
+"der Technologie der anderen."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:43
@@ -235,7 +281,9 @@ msgstr "Volles Verteidigungsbündnis"
 msgid ""
 "The strongest alliance. You commit a large part of your forces to defend an "
 "ally in need. This works only in local (single-board) games."
-msgstr "Das stärkste Bündnis. Sie verpflichten einen großen Teil Ihrer Streitkräfte zur Verteidigung eines Verbündeten in Not. Dies gilt in beide Richtungen."
+msgstr ""
+"Das stärkste Bündnis. Sie verpflichten einen großen Teil Ihrer Streitkräfte "
+"zur Verteidigung eines Verbündeten in Not. Dies gilt in beide Richtungen."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:48
@@ -248,7 +296,9 @@ msgstr "Kriegserklärung"
 msgid ""
 "Ends an agreement without causing trouble at home. The treaty is not truly "
 "broken until the other realm is told."
-msgstr "Beendet ein Abkommen, ohne daheim Unruhe zu stiften. Der Vertrag ist erst wirklich gebrochen, wenn das andere Reich reagiert."
+msgstr ""
+"Beendet ein Abkommen, ohne daheim Unruhe zu stiften. Der Vertrag ist erst "
+"wirklich gebrochen, wenn das andere Reich reagiert."
 
 #. type: Title ##
 #: internal/help/content/diplomacy/treaties.md:53
@@ -273,7 +323,9 @@ msgstr "Bankwesen"
 msgid ""
 "The bank keeps your gold safe and earns interest. Gold in the bank cannot be "
 "taken by pirates or raids."
-msgstr "Die Bank verwahrt Ihr Gold sicher und wirft Zinsen ab. Gold auf der Bank kann nicht von Piraten oder Angriffen geraubt werden."
+msgstr ""
+"Die Bank verwahrt Ihr Gold sicher und wirft Zinsen ab. Gold auf der Bank "
+"kann nicht von Piraten oder Angriffen geraubt werden."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:18
@@ -291,7 +343,9 @@ msgid ""
 "Take Loan — borrow gold, up to a limit based on how much land you own. A "
 "loan grows over time until you repay it, so pay it back before it becomes a "
 "burden."
-msgstr "Kredit aufnehmen — Gold leihen, bis zu einer Grenze, die sich nach Ihrem Landbesitz richtet. Ein Kredit wächst mit der Zeit, bis Sie ihn zurückzahlen."
+msgstr ""
+"Kredit aufnehmen — Gold leihen, bis zu einer Grenze, die sich nach Ihrem "
+"Landbesitz richtet. Ein Kredit wächst mit der Zeit, bis Sie ihn zurückzahlen."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:18
@@ -311,7 +365,9 @@ msgid ""
 "your gold plus interest when it matures. The interest rate floats — it rises "
 "and falls with how much everyone is investing — so check the rate before you "
 "commit."
-msgstr "Sie können Gold für eine Anzahl von Tagen als Investition anlegen. Es zahlt Ihr Gold plus Zinsen zurück, wenn die Laufzeit endet."
+msgstr ""
+"Sie können Gold für eine Anzahl von Tagen als Investition anlegen. Es zahlt "
+"Ihr Gold plus Zinsen zurück, wenn die Laufzeit endet."
 
 #. type: Title #
 #: internal/help/content/economy/food.md:1
@@ -325,14 +381,19 @@ msgstr "Nahrungsmarkt und Verderb"
 msgid ""
 "Your people and army eat food every turn. Agricultural regions grow food, "
 "and you can buy more at the Food Market."
-msgstr "Ihr Volk und Ihre Armee verbrauchen jede Runde Nahrung. Landwirtschaftsgebiete bauen Nahrung an, und weitere können Sie auf dem Markt kaufen."
+msgstr ""
+"Ihr Volk und Ihre Armee verbrauchen jede Runde Nahrung. "
+"Landwirtschaftsgebiete bauen Nahrung an, und weitere können Sie auf dem "
+"Markt kaufen."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:15
 msgid ""
 "The market sells food to you for more than it pays to buy it back. So it is "
 "not a place to store extra food for profit."
-msgstr "Der Markt verkauft Ihnen Nahrung teurer, als er beim Rückkauf zahlt. Er ist also kein Ort, um überschüssige Nahrung zu lagern."
+msgstr ""
+"Der Markt verkauft Ihnen Nahrung teurer, als er beim Rückkauf zahlt. Er ist "
+"also kein Ort, um überschüssige Nahrung zu lagern."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:17
@@ -340,7 +401,9 @@ msgid ""
 "Food you hold beyond about two turns' worth of eating spoils each turn. A "
 "high technology level slows spoilage. Use or sell surplus food rather than "
 "hoard it."
-msgstr "Nahrung, die über etwa zwei Runden Verbrauch hinausgeht, verdirbt jede Runde. Ein hoher Technologiestand verlangsamt den Verderb."
+msgstr ""
+"Nahrung, die über etwa zwei Runden Verbrauch hinausgeht, verdirbt jede "
+"Runde. Ein hoher Technologiestand verlangsamt den Verderb."
 
 #. type: Title #
 #: internal/help/content/economy/industry.md:1
@@ -354,7 +417,9 @@ msgstr "Industrie"
 msgid ""
 "Each Industrial region makes gold and production points every turn. The "
 "points are built into units."
-msgstr "Jedes Industriegebiet erzeugt jede Runde Gold und Produktionspunkte. Die Punkte werden in Einheiten umgewandelt."
+msgstr ""
+"Jedes Industriegebiet erzeugt jede Runde Gold und Produktionspunkte. Die "
+"Punkte werden in Einheiten umgewandelt."
 
 #. type: Plain text
 #: internal/help/content/economy/industry.md:15
@@ -362,7 +427,10 @@ msgid ""
 "Use Set Industries to split your production across unit types by percentage. "
 "Or use Specialize to send all of your production into one unit type. "
 "Specializing cannot be undone, so choose with care."
-msgstr "Mit „Industrien festlegen“ verteilen Sie Ihre Produktion prozentual auf Einheitentypen. Oder wählen Sie mit „Spezialisieren“ einen einzigen Typ für höhere Ausbeute — aber Sie können danach nichts anderes mehr bauen."
+msgstr ""
+"Mit „Industrien festlegen“ verteilen Sie Ihre Produktion prozentual auf "
+"Einheitentypen. Oder wählen Sie mit „Spezialisieren“ einen einzigen Typ für "
+"höhere Ausbeute — aber Sie können danach nichts anderes mehr bauen."
 
 #. type: Title #
 #: internal/help/content/economy/net-worth.md:1
@@ -383,7 +451,9 @@ msgid ""
 "Gold, food, and people are not counted directly. So a rich empire with "
 "little land or army still scores low. To climb the ranks, hold land and a "
 "strong army."
-msgstr "Er zählt vor allem Ihr Land und Ihre militärische Stärke, abzüglich Ihrer Schulden. Gold, Nahrung und Volk werden nicht zum Nennwert gezählt."
+msgstr ""
+"Er zählt vor allem Ihr Land und Ihre militärische Stärke, abzüglich Ihrer "
+"Schulden. Gold, Nahrung und Volk werden nicht zum Nennwert gezählt."
 
 #. type: Title #
 #: internal/help/content/economy/regions.md:1
@@ -397,7 +467,9 @@ msgstr "Gebiete"
 msgid ""
 "Land is made of regions. You buy regions from a market, and the price rises "
 "as you buy more. There are eight region types, each with a different job."
-msgstr "Land besteht aus Gebieten. Sie kaufen Gebiete auf einem Markt, und der Preis steigt, je mehr Sie kaufen. Es gibt mehrere Arten."
+msgstr ""
+"Land besteht aus Gebieten. Sie kaufen Gebiete auf einem Markt, und der Preis "
+"steigt, je mehr Sie kaufen. Es gibt mehrere Arten."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:13
@@ -410,7 +482,9 @@ msgstr ""
 msgid ""
 "Best for tourism income. In good times it makes the most gold. But with low "
 "public support, your people lose interest and tourism drops sharply."
-msgstr "Am besten für Tourismuseinnahmen. In guten Zeiten bringt es das meiste Gold. Aber bei geringer Zustimmung des Volkes bricht Ihr Tourismus ein."
+msgstr ""
+"Am besten für Tourismuseinnahmen. In guten Zeiten bringt es das meiste Gold. "
+"Aber bei geringer Zustimmung des Volkes bricht Ihr Tourismus ein."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:18
@@ -423,7 +497,9 @@ msgstr ""
 msgid ""
 "Mines natural resources. Income is lower on average, but steady — few things "
 "change it. Mountains also boost how much your Industrial regions produce."
-msgstr "Baut Bodenschätze ab. Die Einnahmen sind im Schnitt niedriger, aber stabil — kaum etwas beeinflusst sie. Berge steigern zudem die Industrieleistung."
+msgstr ""
+"Baut Bodenschätze ab. Die Einnahmen sind im Schnitt niedriger, aber stabil — "
+"kaum etwas beeinflusst sie. Berge steigern zudem die Industrieleistung."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:23
@@ -436,7 +512,9 @@ msgstr ""
 msgid ""
 "Good for solar power. Income swings with conditions, but on average it beats "
 "mountains and trails good Coastal land."
-msgstr "Gut für Solarenergie. Die Einnahmen schwanken je nach Bedingungen, liegen im Schnitt aber über den Bergen und unter der Küste."
+msgstr ""
+"Gut für Solarenergie. Die Einnahmen schwanken je nach Bedingungen, liegen im "
+"Schnitt aber über den Bergen und unter der Küste."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:28
@@ -458,7 +536,9 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/economy/regions.md:35
 msgid "Grows food. This is your main source of food if you are not buying it."
-msgstr "Baut Nahrung an. Das ist Ihre Hauptquelle für Nahrung, wenn Sie sie nicht kaufen."
+msgstr ""
+"Baut Nahrung an. Das ist Ihre Hauptquelle für Nahrung, wenn Sie sie nicht "
+"kaufen."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:36
@@ -471,7 +551,9 @@ msgstr ""
 msgid ""
 "Home to your people. More urban regions means more people can live in your "
 "empire."
-msgstr "Heimat Ihres Volkes. Mehr Stadtgebiete bedeuten, dass mehr Menschen in Ihrem Imperium leben können."
+msgstr ""
+"Heimat Ihres Volkes. Mehr Stadtgebiete bedeuten, dass mehr Menschen in Ihrem "
+"Imperium leben können."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:41
@@ -484,7 +566,9 @@ msgstr ""
 msgid ""
 "Builds military each turn. In some games this is your only way to get new "
 "units.  A good base of Mountain regions makes your industry produce more."
-msgstr "Baut jede Runde Militär. In manchen Spielen ist dies Ihr einziger Weg zu neuen Einheiten. Eine gute Grundlage an Bergen steigert die Ausbeute."
+msgstr ""
+"Baut jede Runde Militär. In manchen Spielen ist dies Ihr einziger Weg zu "
+"neuen Einheiten. Eine gute Grundlage an Bergen steigert die Ausbeute."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:46
@@ -498,7 +582,9 @@ msgid ""
 "Raises your efficiency. A larger share of Technology regions boosts your "
 "income and your army and lowers some upkeep. Bigger empires need more "
 "Technology to get the same benefit."
-msgstr "Steigert Ihre Effizienz. Ein größerer Anteil an Technologiegebieten erhöht Ihr Einkommen und Ihre Armee und senkt den Unterhalt."
+msgstr ""
+"Steigert Ihre Effizienz. Ein größerer Anteil an Technologiegebieten erhöht "
+"Ihr Einkommen und Ihre Armee und senkt den Unterhalt."
 
 #. type: Title #
 #: internal/help/content/economy/taxes.md:1
@@ -512,7 +598,9 @@ msgstr "Steuern, Zustimmung und Aufstände"
 msgid ""
 "Your tax rate sets how much gold you collect from your people, and it shapes "
 "their mood."
-msgstr "Ihr Steuersatz bestimmt, wie viel Gold Sie von Ihrem Volk einnehmen, und prägt dessen Stimmung."
+msgstr ""
+"Ihr Steuersatz bestimmt, wie viel Gold Sie von Ihrem Volk einnehmen, und "
+"prägt dessen Stimmung."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:16
@@ -520,7 +608,9 @@ msgid ""
 "Popular Support drifts each turn toward a target set by your tax rate. A "
 "steady, moderate tax rate keeps Support near its highest. High taxes push "
 "Support down.  Low Support badly cuts your Coastal (tourism) income."
-msgstr "Die öffentliche Zustimmung nähert sich jede Runde einem Zielwert, den Ihr Steuersatz vorgibt. Ein stetiger, mäßiger Steuersatz hält sie hoch."
+msgstr ""
+"Die öffentliche Zustimmung nähert sich jede Runde einem Zielwert, den Ihr "
+"Steuersatz vorgibt. Ein stetiger, mäßiger Steuersatz hält sie hoch."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:18
@@ -528,7 +618,10 @@ msgid ""
 "Riots grow more likely as your tax rate climbs past a safe level. A riot "
 "crashes your Support and drives off part of your population. Raise taxes "
 "with care."
-msgstr "Aufstände werden wahrscheinlicher, je weiter Ihr Steuersatz über ein sicheres Maß steigt. Ein Aufstand lässt Ihre Zustimmung einbrechen und vertreibt einen Teil Ihres Volkes."
+msgstr ""
+"Aufstände werden wahrscheinlicher, je weiter Ihr Steuersatz über ein "
+"sicheres Maß steigt. Ein Aufstand lässt Ihre Zustimmung einbrechen und "
+"vertreibt einen Teil Ihres Volkes."
 
 #. type: Title #
 #: internal/help/content/economy/trading.md:1
@@ -543,7 +636,9 @@ msgid ""
 "From the Trading menu you can send gold directly to another empire as a "
 "trade deal, with no strings attached. Use it to help an ally, or to move "
 "gold to a friend on your board."
-msgstr "Über das Handelsmenü können Sie einem anderen Imperium Gold direkt als Handelsgeschenk senden, ohne Bedingungen."
+msgstr ""
+"Über das Handelsmenü können Sie einem anderen Imperium Gold direkt als "
+"Handelsgeschenk senden, ohne Bedingungen."
 
 #. type: Title #
 #: internal/help/content/interbbs/leagues.md:1
@@ -558,14 +653,19 @@ msgid ""
 "Some games link many boards together into one world. Your goal grows from "
 "beating the local rulers to helping your board beat other boards. Teamwork "
 "matters."
-msgstr "Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg über die lokalen Herrscher zum Sieg über andere Planeten."
+msgstr ""
+"Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg "
+"über die lokalen Herrscher zum Sieg über andere Planeten."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:17
 msgid ""
 "Group Attack — several rulers on your board join one strike against a "
 "distant enemy. The gains are shared among those who take part."
-msgstr "Gruppenangriff — mehrere Herrscher Ihres Boards schließen sich zu einem Schlag gegen einen fernen Feind zusammen. Die Beute wird nach Beitrag geteilt."
+msgstr ""
+"Gruppenangriff — mehrere Herrscher Ihres Boards schließen sich zu einem "
+"Schlag gegen einen fernen Feind zusammen. Die Beute wird nach Beitrag "
+"geteilt."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:17
@@ -577,14 +677,18 @@ msgstr "IP-Punkte — sehen, wie die Boards zueinander stehen."
 msgid ""
 "A league game has a set length. When it ends, the world resets and a new "
 "game begins."
-msgstr "Ein Ligaspiel hat eine feste Dauer. Wenn es endet, wird die Welt zurückgesetzt und ein neues Spiel beginnt."
+msgstr ""
+"Ein Ligaspiel hat eine feste Dauer. Wenn es endet, wird die Welt "
+"zurückgesetzt und ein neues Spiel beginnt."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:21
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
 "play."
-msgstr "Diese Funktionen erscheinen nur, wenn das Spiel für Inter-BBS- oder Ligaspiel eingerichtet ist."
+msgstr ""
+"Diese Funktionen erscheinen nur, wenn das Spiel für Inter-BBS- oder "
+"Ligaspiel eingerichtet ist."
 
 #. type: Title #
 #: internal/help/content/interbbs/sysop.md:1
@@ -599,7 +703,10 @@ msgid ""
 "This guide is for the BBS operator (the sysop). It explains how to set up "
 "the game on your board, and how to join an inter-BBS league. Players do not "
 "need to read this."
-msgstr "Diese Anleitung ist für den BBS-Betreiber (den Sysop). Sie erklärt, wie Sie das Spiel auf Ihrem Board einrichten und einer Inter-BBS-Liga beitreten. Spieler müssen sie nicht lesen."
+msgstr ""
+"Diese Anleitung ist für den BBS-Betreiber (den Sysop). Sie erklärt, wie Sie "
+"das Spiel auf Ihrem Board einrichten und einer Inter-BBS-Liga beitreten. "
+"Spieler müssen sie nicht lesen."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:14
@@ -613,14 +720,19 @@ msgid ""
 "The game is one program: `barons-door`. It runs as a native door under "
 "modern BBS software such as Synchronet or Mystic. You do not need DOSBox or "
 "DOSEMU."
-msgstr "Das Spiel ist ein einziges Programm: `barons-door`. Es läuft als nativer Door unter moderner BBS-Software wie Synchronet oder Mystic. Sie brauchen weder DOSBox noch DOSEMU."
+msgstr ""
+"Das Spiel ist ein einziges Programm: `barons-door`. Es läuft als nativer "
+"Door unter moderner BBS-Software wie Synchronet oder Mystic. Sie brauchen "
+"weder DOSBox noch DOSEMU."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:21
 msgid ""
 "The game keeps all its files in one data directory (default `./data`). Point "
 "the `-data` option at it."
-msgstr "Das Spiel hält alle seine Dateien in einem Datenverzeichnis (Standard `./data`). Richten Sie die Option `-data` darauf."
+msgstr ""
+"Das Spiel hält alle seine Dateien in einem Datenverzeichnis (Standard `./"
+"data`). Richten Sie die Option `-data` darauf."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:22
@@ -631,7 +743,9 @@ msgstr "Ersteinrichtung"
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:25
 msgid "Run the setup once to create the config file:"
-msgstr "Führen Sie die Einrichtung einmal aus, um die Konfigurationsdatei zu erstellen:"
+msgstr ""
+"Führen Sie die Einrichtung einmal aus, um die Konfigurationsdatei zu "
+"erstellen:"
 
 #. type: Fenced code block
 #: internal/help/content/interbbs/sysop.md:26
@@ -644,7 +758,9 @@ msgstr ""
 msgid ""
 "It asks a few questions (turns per day, protection turns, number of AI "
 "barons, game length) and writes `config.json`."
-msgstr "Es stellt ein paar Fragen (Züge pro Tag, Schutzzüge, Anzahl der KI-Barone, Spieldauer) und schreibt `config.json`."
+msgstr ""
+"Es stellt ein paar Fragen (Züge pro Tag, Schutzzüge, Anzahl der KI-Barone, "
+"Spieldauer) und schreibt `config.json`."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:33
@@ -658,7 +774,11 @@ msgid ""
 "Set up the game as an external program (a \"door\") in your BBS software. "
 "Your BBS writes a dropfile when a caller runs the door. The game reads it to "
 "learn who is playing and how much time they have."
-msgstr "Richten Sie das Spiel als externes Programm (einen „Door“) in Ihrer BBS-Software ein. Ihr BBS schreibt eine Dropfile-Datei, wenn ein Anrufer den Door startet. Das Spiel liest sie, um zu erfahren, wer spielt und wie viel Zeit er hat."
+msgstr ""
+"Richten Sie das Spiel als externes Programm (einen „Door“) in Ihrer BBS-"
+"Software ein. Ihr BBS schreibt eine Dropfile-Datei, wenn ein Anrufer den "
+"Door startet. Das Spiel liest sie, um zu erfahren, wer spielt und wie viel "
+"Zeit er hat."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:43
@@ -666,7 +786,10 @@ msgid ""
 "The game reads **DOOR32.SYS** (both Synchronet and Mystic write it) or "
 "**DOOR.SYS**. Point the game at it with `-dropfile`, or let it search the "
 "current directory."
-msgstr "Das Spiel liest **DOOR32.SYS** (Synchronet und Mystic schreiben beide diese) oder **DOOR.SYS**. Weisen Sie das Spiel mit `-dropfile` darauf hin, oder lassen Sie es das aktuelle Verzeichnis durchsuchen."
+msgstr ""
+"Das Spiel liest **DOOR32.SYS** (Synchronet und Mystic schreiben beide diese) "
+"oder **DOOR.SYS**. Weisen Sie das Spiel mit `-dropfile` darauf hin, oder "
+"lassen Sie es das aktuelle Verzeichnis durchsuchen."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:43
@@ -693,7 +816,9 @@ msgstr "Tägliche Wartung"
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:53
 msgid "Run maintenance once a day (a nightly event is the usual place):"
-msgstr "Führen Sie die Wartung einmal am Tag aus (ein nächtliches Ereignis ist der übliche Ort):"
+msgstr ""
+"Führen Sie die Wartung einmal am Tag aus (ein nächtliches Ereignis ist der "
+"übliche Ort):"
 
 #. type: Fenced code block
 #: internal/help/content/interbbs/sysop.md:54
@@ -706,7 +831,9 @@ msgstr ""
 msgid ""
 "This advances the game one day for every day that passed, lets the AI barons "
 "take their turns, and refreshes each player's turns."
-msgstr "Dies bringt das Spiel für jeden vergangenen Tag einen Tag voran, lässt die KI-Barone ihre Züge machen und erneuert die Züge jedes Spielers."
+msgstr ""
+"Dies bringt das Spiel für jeden vergangenen Tag einen Tag voran, lässt die "
+"KI-Barone ihre Züge machen und erneuert die Züge jedes Spielers."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:61
@@ -719,7 +846,10 @@ msgstr "Inter-BBS-(Liga-)Spiel"
 msgid ""
 "A league is a group of boards whose players compete against each other. To "
 "join one, turn on inter-BBS play and give your board a name."
-msgstr "Eine Liga ist eine Gruppe von Boards, deren Spieler gegeneinander antreten. Um beizutreten, schalten Sie das Inter-BBS-Spiel ein und geben Ihrem Board einen Namen."
+msgstr ""
+"Eine Liga ist eine Gruppe von Boards, deren Spieler gegeneinander antreten. "
+"Um beizutreten, schalten Sie das Inter-BBS-Spiel ein und geben Ihrem Board "
+"einen Namen."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:67
@@ -734,27 +864,35 @@ msgstr "`\"IBBS\": true` — die Inter-BBS-Menüs einschalten."
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:73
 msgid "`\"BoardID\"` — a short unique name for your board (your \"planet\")."
-msgstr "`\"BoardID\"` — ein kurzer, eindeutiger Name für Ihr Board (Ihren „Planeten“)."
+msgstr ""
+"`\"BoardID\"` — ein kurzer, eindeutiger Name für Ihr Board (Ihren "
+"„Planeten“)."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:73
 msgid ""
 "`\"InboundDir\"` — the directory where packets from other boards arrive."
-msgstr "`\"InboundDir\"` — das Verzeichnis, in dem Pakete von anderen Boards eintreffen."
+msgstr ""
+"`\"InboundDir\"` — das Verzeichnis, in dem Pakete von anderen Boards "
+"eintreffen."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:73
 msgid ""
 "`\"OutboundDir\"` — the directory where the game writes packets for other "
 "boards."
-msgstr "`\"OutboundDir\"` — das Verzeichnis, in das das Spiel Pakete für andere Boards schreibt."
+msgstr ""
+"`\"OutboundDir\"` — das Verzeichnis, in das das Spiel Pakete für andere "
+"Boards schreibt."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:76
 msgid ""
 "Ask your League Coordinator for the node list and add it to your data "
 "directory as **`ibnodes.dat`** (see the format below)."
-msgstr "Bitten Sie Ihren Liga-Koordinator um die Knotenliste und legen Sie sie als **`ibnodes.dat`** in Ihr Datenverzeichnis (siehe Format unten)."
+msgstr ""
+"Bitten Sie Ihren Liga-Koordinator um die Knotenliste und legen Sie sie als "
+"**`ibnodes.dat`** in Ihr Datenverzeichnis (siehe Format unten)."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:77
@@ -768,7 +906,11 @@ msgid ""
 "The game never moves files between boards. It only reads and writes packet "
 "files in your inbound and outbound directories. Moving the files between "
 "boards is your job, and you choose how often it happens."
-msgstr "Das Spiel bewegt niemals Dateien zwischen Boards. Es liest und schreibt nur Paketdateien in Ihren Eingangs- und Ausgangsverzeichnissen. Die Dateien zwischen den Boards zu bewegen, ist Ihre Aufgabe, und Sie bestimmen, wie oft das geschieht."
+msgstr ""
+"Das Spiel bewegt niemals Dateien zwischen Boards. Es liest und schreibt nur "
+"Paketdateien in Ihren Eingangs- und Ausgangsverzeichnissen. Die Dateien "
+"zwischen den Boards zu bewegen, ist Ihre Aufgabe, und Sie bestimmen, wie oft "
+"das geschieht."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:84
@@ -787,7 +929,10 @@ msgid ""
 "It reads every packet in your inbound directory, applies it, and writes new "
 "packets to your outbound directory. It also runs automatically inside `-"
 "maint` when inter-BBS play is on."
-msgstr "Es liest jedes Paket in Ihrem Eingangsverzeichnis, wendet es an und schreibt neue Pakete in Ihr Ausgangsverzeichnis. Es läuft auch automatisch innerhalb von `-maint`, wenn das Inter-BBS-Spiel eingeschaltet ist."
+msgstr ""
+"Es liest jedes Paket in Ihrem Eingangsverzeichnis, wendet es an und schreibt "
+"neue Pakete in Ihr Ausgangsverzeichnis. Es läuft auch automatisch innerhalb "
+"von `-maint`, wenn das Inter-BBS-Spiel eingeschaltet ist."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:94
@@ -802,7 +947,9 @@ msgstr "Ein Anrufer spielt das Spiel."
 #. type: Bullet: '2. '
 #: internal/help/content/interbbs/sysop.md:101
 msgid "After the caller exits, or on a schedule you pick, run `-planetary`."
-msgstr "Nachdem der Anrufer beendet hat, oder nach einem von Ihnen gewählten Zeitplan, führen Sie `-planetary` aus."
+msgstr ""
+"Nachdem der Anrufer beendet hat, oder nach einem von Ihnen gewählten "
+"Zeitplan, führen Sie `-planetary` aus."
 
 #. type: Bullet: '3. '
 #: internal/help/content/interbbs/sysop.md:101
@@ -810,12 +957,17 @@ msgid ""
 "Your transport script copies each file from your outbound directory to the "
 "inbound directory of every other board (over FidoNet, a sync tool, scp, a "
 "shared mount — whatever you use)."
-msgstr "Ihr Transportskript kopiert jede Datei aus Ihrem Ausgangsverzeichnis in das Eingangsverzeichnis jedes anderen Boards (über FidoNet, ein Sync-Werkzeug, scp, ein gemeinsames Laufwerk — was auch immer Sie nutzen)."
+msgstr ""
+"Ihr Transportskript kopiert jede Datei aus Ihrem Ausgangsverzeichnis in das "
+"Eingangsverzeichnis jedes anderen Boards (über FidoNet, ein Sync-Werkzeug, "
+"scp, ein gemeinsames Laufwerk — was auch immer Sie nutzen)."
 
 #. type: Bullet: '4. '
 #: internal/help/content/interbbs/sysop.md:101
 msgid "The next `-planetary` run on each board reads and applies those files."
-msgstr "Der nächste `-planetary`-Lauf auf jedem Board liest und wendet diese Dateien an."
+msgstr ""
+"Der nächste `-planetary`-Lauf auf jedem Board liest und wendet diese Dateien "
+"an."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:105
@@ -823,7 +975,11 @@ msgid ""
 "Run it as often as you like. More often means shorter travel times between "
 "planets. The in-game \"Travel Times\" screen shows players how recently "
 "packets have arrived, so they know how fast operations move."
-msgstr "Führen Sie es so oft aus, wie Sie möchten. Öfter bedeutet kürzere Reisezeiten zwischen Planeten. Der Ingame-Bildschirm „Reisezeiten“ zeigt den Spielern, wie kürzlich Pakete eingetroffen sind, damit sie wissen, wie schnell Operationen ablaufen."
+msgstr ""
+"Führen Sie es so oft aus, wie Sie möchten. Öfter bedeutet kürzere "
+"Reisezeiten zwischen Planeten. Der Ingame-Bildschirm „Reisezeiten“ zeigt den "
+"Spielern, wie kürzlich Pakete eingetroffen sind, damit sie wissen, wie "
+"schnell Operationen ablaufen."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:106
@@ -837,7 +993,10 @@ msgid ""
 "The node list names every board in the league. It uses the same simple "
 "layout as the original BRE `BRNODES.DAT`. Each board is six lines, and a "
 "blank line separates boards:"
-msgstr "Die Knotenliste nennt jedes Board in der Liga. Sie verwendet dasselbe einfache Layout wie die ursprüngliche BRE-`BRNODES.DAT`. Jedes Board umfasst sechs Zeilen, und eine Leerzeile trennt die Boards:"
+msgstr ""
+"Die Knotenliste nennt jedes Board in der Liga. Sie verwendet dasselbe "
+"einfache Layout wie die ursprüngliche BRE-`BRNODES.DAT`. Jedes Board umfasst "
+"sechs Zeilen, und eine Leerzeile trennt die Boards:"
 
 #. type: Fenced code block
 #: internal/help/content/interbbs/sysop.md:112
@@ -863,35 +1022,74 @@ msgstr ""
 msgid ""
 "The six lines are: node number, board (planet) name, network address, city, "
 "state or province, and country. Board number 1 is the League Coordinator."
-msgstr "Die sechs Zeilen sind: Knotennummer, Board-(Planeten-)Name, Netzwerkadresse, Stadt, Bundesland oder Provinz und Land. Board Nummer 1 ist der Liga-Koordinator."
+msgstr ""
+"Die sechs Zeilen sind: Knotennummer, Board-(Planeten-)Name, Netzwerkadresse, "
+"Stadt, Bundesland oder Provinz und Land. Board Nummer 1 ist der Liga-"
+"Koordinator."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:131
+#, no-wrap
+msgid "League-wide rules (Coordinator only)"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:136
+msgid ""
+"The League Coordinator sets the rules that must match across the whole "
+"league — turns per day, protection turns, and game length. Set them in the "
+"Coordinator's own `config.json`, then broadcast them to every board:"
+msgstr ""
+
+#. type: Fenced code block
+#: internal/help/content/interbbs/sysop.md:137
+#, no-wrap
+msgid "barons-door -league-config -data /path/to/data\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:145
+msgid ""
+"This writes a settings packet to your outbound directory. Each member board "
+"adopts the settings on its next `-planetary` run. Member boards accept these "
+"settings only from the Coordinator's board (node 1), so no one else can "
+"change the league rules. Only the Coordinator's board may send this packet."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:146
 #, no-wrap
 msgid "The Coordinator"
 msgstr "Der Koordinator"
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:134
+#: internal/help/content/interbbs/sysop.md:149
 msgid ""
 "There are two different \"coordinator\" ideas, and they are not the same "
 "thing:"
-msgstr "Es gibt zwei verschiedene „Koordinator“-Begriffe, und sie sind nicht dasselbe:"
+msgstr ""
+"Es gibt zwei verschiedene „Koordinator“-Begriffe, und sie sind nicht "
+"dasselbe:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:139
+#: internal/help/content/interbbs/sysop.md:154
 msgid ""
 "**League Coordinator** — the sysop of board number 1. This person keeps the "
 "node list and hands it out to the other boards."
-msgstr "**Liga-Koordinator** — der Sysop von Board Nummer 1. Diese Person pflegt die Knotenliste und gibt sie an die anderen Boards weiter."
+msgstr ""
+"**Liga-Koordinator** — der Sysop von Board Nummer 1. Diese Person pflegt die "
+"Knotenliste und gibt sie an die anderen Boards weiter."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:139
+#: internal/help/content/interbbs/sysop.md:154
 msgid ""
 "**BBS Coordinator** — a *player* your board elects. Players vote in the "
 "System menu, and the player with the most votes gets the Coordinator menu.  "
 "Votes can change at any time."
-msgstr "**BBS-Koordinator** — ein *Spieler*, den Ihr Board wählt. Spieler stimmen im Systemmenü ab, und der Spieler mit den meisten Stimmen erhält das Koordinatormenü. Stimmen können jederzeit geändert werden."
+msgstr ""
+"**BBS-Koordinator** — ein *Spieler*, den Ihr Board wählt. Spieler stimmen im "
+"Systemmenü ab, und der Spieler mit den meisten Stimmen erhält das "
+"Koordinatormenü. Stimmen können jederzeit geändert werden."
 
 #. type: Title ##
 #: internal/help/content/military/headquarters.md:1
@@ -906,7 +1104,9 @@ msgstr "Hauptquartier"
 msgid ""
 "Your HeadQuarters coordinates your army. It is a one-time building project "
 "that advances a little each turn until it is complete."
-msgstr "Ihr Hauptquartier koordiniert Ihre Armee. Es ist ein einmaliges Bauprojekt, das jede Runde ein Stück voranschreitet, bis es fertig ist."
+msgstr ""
+"Ihr Hauptquartier koordiniert Ihre Armee. Es ist ein einmaliges Bauprojekt, "
+"das jede Runde ein Stück voranschreitet, bis es fertig ist."
 
 #. type: Plain text
 #: internal/help/content/military/headquarters.md:15
@@ -914,7 +1114,9 @@ msgid ""
 "While it is being built — and more so once finished — it raises how much "
 "your Tanks add to both attack and defense. Enemies can bomb your HQ with "
 "covert operations to weaken your tanks."
-msgstr "Während es gebaut wird — und noch mehr, sobald es fertig ist — erhöht es, wie viel Ihre Panzer zu Angriff und Verteidigung beitragen."
+msgstr ""
+"Während es gebaut wird — und noch mehr, sobald es fertig ist — erhöht es, "
+"wie viel Ihre Panzer zu Angriff und Verteidigung beitragen."
 
 #. type: Title #
 #: internal/help/content/military/units.md:1
@@ -1025,14 +1227,19 @@ msgstr "Verdeckte Agenten"
 msgid ""
 "Agents run covert operations, such as spying and sabotage. Having many "
 "agents also helps defend you against enemy covert operations."
-msgstr "Agenten führen verdeckte Operationen aus, etwa Spionage und Sabotage. Viele Agenten helfen auch, Sie gegen feindliche verdeckte Operationen zu verteidigen."
+msgstr ""
+"Agenten führen verdeckte Operationen aus, etwa Spionage und Sabotage. Viele "
+"Agenten helfen auch, Sie gegen feindliche verdeckte Operationen zu "
+"verteidigen."
 
 #. type: Plain text
 #: internal/help/content/military/units.md:56
 msgid ""
 "A HeadQuarters coordinates your army. A strong HQ makes your tanks much more "
 "effective. Enemies can bomb your HQ to weaken your tanks."
-msgstr "Ein Hauptquartier koordiniert Ihre Armee. Ein starkes HQ macht Ihre Panzer viel wirksamer. Feinde können Ihr HQ bombardieren, um es zu schwächen."
+msgstr ""
+"Ein Hauptquartier koordiniert Ihre Armee. Ein starkes HQ macht Ihre Panzer "
+"viel wirksamer. Feinde können Ihr HQ bombardieren, um es zu schwächen."
 
 #. type: Title #
 #: internal/help/content/warfare/attacks.md:1
@@ -1058,7 +1265,10 @@ msgid ""
 "A direct assault with your army. Your attack strength is compared to the "
 "enemy's defense. If you win, you capture some of their regions and take some "
 "gold. Your bombers first destroy the enemy jets that are on the ground."
-msgstr "Ein direkter Angriff mit Ihrer Armee. Ihre Angriffsstärke wird mit der Verteidigung des Feindes verglichen. Wenn Sie gewinnen, nehmen Sie ihm Land ab."
+msgstr ""
+"Ein direkter Angriff mit Ihrer Armee. Ihre Angriffsstärke wird mit der "
+"Verteidigung des Feindes verglichen. Wenn Sie gewinnen, nehmen Sie ihm Land "
+"ab."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:18
@@ -1072,7 +1282,9 @@ msgid ""
 "Turns some of the enemy's regions into waste. It costs a lot, and the cost "
 "grows with the size of the target. Large numbers of enemy turrets can shoot "
 "down some of the missiles."
-msgstr "Verwandelt einige Gebiete des Feindes in Ödland. Er kostet viel, und die Kosten steigen mit der Größe des Ziels."
+msgstr ""
+"Verwandelt einige Gebiete des Feindes in Ödland. Er kostet viel, und die "
+"Kosten steigen mit der Größe des Ziels."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:24
@@ -1085,7 +1297,9 @@ msgstr "Chemischer Angriff"
 msgid ""
 "Kills many of the enemy's people and troopers, but harms fewer regions. "
 "Enemy tanks help defend against it."
-msgstr "Tötet viele Menschen und Soldaten des Feindes, schädigt aber weniger Gebiete. Feindliche Panzer helfen bei der Verteidigung dagegen."
+msgstr ""
+"Tötet viele Menschen und Soldaten des Feindes, schädigt aber weniger "
+"Gebiete. Feindliche Panzer helfen bei der Verteidigung dagegen."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:29
@@ -1111,7 +1325,10 @@ msgid ""
 "The whole board funds it, and only one can exist at a time. It takes a few "
 "days to build, then strikes every empire on the target planet. Defenders can "
 "send jets to shoot it down before it finishes."
-msgstr "Die ultimative Waffe, die auf einen ganzen feindlichen Planeten zielt statt auf ein einzelnes Imperium. Der ganze Planet finanziert sie, und der Schaden ist gewaltig."
+msgstr ""
+"Die ultimative Waffe, die auf einen ganzen feindlichen Planeten zielt statt "
+"auf ein einzelnes Imperium. Der ganze Planet finanziert sie, und der Schaden "
+"ist gewaltig."
 
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:40
@@ -1125,7 +1342,10 @@ msgid ""
 "A shield you fund. When it is complete, it destroys about half of the "
 "missiles fired at you and cuts attacking jets' strength by about a quarter. "
 "Technology regions lower its upkeep."
-msgstr "Ein Schild, den Sie finanzieren. Wenn er fertig ist, zerstört er etwa die Hälfte der auf Sie abgefeuerten Raketen und schwächt feindliche Jets und Bomber."
+msgstr ""
+"Ein Schild, den Sie finanzieren. Wenn er fertig ist, zerstört er etwa die "
+"Hälfte der auf Sie abgefeuerten Raketen und schwächt feindliche Jets und "
+"Bomber."
 
 #. type: Title #
 #: internal/help/content/warfare/covert.md:1
@@ -1141,7 +1361,11 @@ msgid ""
 "how many agents you have compared to the target. More agents means a better "
 "chance.  Keeping many agents also defends you against enemy covert "
 "operations."
-msgstr "Verdeckte Operationen sind geheime Missionen Ihrer Agenten. Der Erfolg hängt davon ab, wie viele Agenten Sie im Vergleich zum Ziel haben. Mehr Agenten bedeuten bessere Chancen. Viele Agenten verteidigen Sie auch gegen feindliche verdeckte Operationen."
+msgstr ""
+"Verdeckte Operationen sind geheime Missionen Ihrer Agenten. Der Erfolg hängt "
+"davon ab, wie viele Agenten Sie im Vergleich zum Ziel haben. Mehr Agenten "
+"bedeuten bessere Chancen. Viele Agenten verteidigen Sie auch gegen "
+"feindliche verdeckte Operationen."
 
 #. type: Plain text
 #: internal/help/content/warfare/covert.md:15
@@ -1157,28 +1381,36 @@ msgstr "Spion senden — die Verteidigungsstärke des Feindes ausspähen."
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Spy on Relations — reveal all of the enemy's treaties (useful before a war)."
-msgstr "Beziehungen ausspähen — alle Verträge des Feindes aufdecken (nützlich vor einem Krieg)."
+msgstr ""
+"Beziehungen ausspähen — alle Verträge des Feindes aufdecken (nützlich vor "
+"einem Krieg)."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Special Operations — sabotage the enemy army, destroying a share of their "
 "troopers."
-msgstr "Spezialoperationen — die feindliche Armee sabotieren und einen Teil ihrer Soldaten vernichten."
+msgstr ""
+"Spezialoperationen — die feindliche Armee sabotieren und einen Teil ihrer "
+"Soldaten vernichten."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Bomb Intelligence — kill enemy agents, so your later missions land more "
 "easily. Use this one first."
-msgstr "Geheimdienst bombardieren — feindliche Agenten töten, damit Ihre späteren Missionen leichter gelingen. Setzen Sie diese zuerst ein."
+msgstr ""
+"Geheimdienst bombardieren — feindliche Agenten töten, damit Ihre späteren "
+"Missionen leichter gelingen. Setzen Sie diese zuerst ein."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Stir Revolts — spread propaganda that lowers the enemy's public support, "
 "which weakens their troopers and their economy."
-msgstr "Aufstände schüren — Propaganda verbreiten, die die öffentliche Zustimmung des Feindes senkt, was seine Soldaten und seine Wirtschaft schwächt."
+msgstr ""
+"Aufstände schüren — Propaganda verbreiten, die die öffentliche Zustimmung "
+"des Feindes senkt, was seine Soldaten und seine Wirtschaft schwächt."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
@@ -1188,20 +1420,26 @@ msgstr "Flugplätze bombardieren — feindliche Jets am Boden zerstören."
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid "Bomb Food Stores — destroy much of the enemy's food reserve."
-msgstr "Nahrungslager bombardieren — einen großen Teil der Nahrungsreserve des Feindes vernichten."
+msgstr ""
+"Nahrungslager bombardieren — einen großen Teil der Nahrungsreserve des "
+"Feindes vernichten."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less effective."
-msgstr "HQ bombardieren — das Hauptquartier des Feindes schwächen, was seine Panzer weniger wirksam macht."
+msgstr ""
+"HQ bombardieren — das Hauptquartier des Feindes schwächen, was seine Panzer "
+"weniger wirksam macht."
 
 #. type: Bullet: '- '
 #: internal/help/content/warfare/covert.md:29
 msgid ""
 "Bribery — buy off an agent inside the enemy, so that their covert operations "
 "against you fail from then on."
-msgstr "Bestechung — einen Agenten im Inneren des Feindes kaufen, sodass dessen verdeckte Operationen gegen Sie von da an scheitern."
+msgstr ""
+"Bestechung — einen Agenten im Inneren des Feindes kaufen, sodass dessen "
+"verdeckte Operationen gegen Sie von da an scheitern."
 
 #. type: Plain text
 #: internal/help/content/warfare/covert.md:31
@@ -1209,7 +1447,10 @@ msgid ""
 "An Intelligence Alliance adds half of an ally's agents to your covert "
 "strength.  A Terrorist Prevention treaty adds half an ally's agents to your "
 "defense."
-msgstr "Ein Geheimdienstbündnis fügt Ihrer verdeckten Stärke die Hälfte der Agenten eines Verbündeten hinzu. Ein Terrorabwehr-Vertrag fügt Ihrer Verteidigung die Hälfte der Agenten eines Verbündeten hinzu."
+msgstr ""
+"Ein Geheimdienstbündnis fügt Ihrer verdeckten Stärke die Hälfte der Agenten "
+"eines Verbündeten hinzu. Ein Terrorabwehr-Vertrag fügt Ihrer Verteidigung "
+"die Hälfte der Agenten eines Verbündeten hinzu."
 
 #. type: Title #
 #: internal/help/content/warfare/pirates.md:1
@@ -1224,7 +1465,9 @@ msgid ""
 "Nine pirate factions live in the world. Their strength is random. Any "
 "faction can be the strongest, so do not assume the last one on the list is "
 "the hardest."
-msgstr "Neun Piratenfraktionen leben in der Welt. Ihre Stärke ist zufällig. Jede Fraktion kann die stärkste sein, also prüfen Sie erst, bevor Sie angreifen."
+msgstr ""
+"Neun Piratenfraktionen leben in der Welt. Ihre Stärke ist zufällig. Jede "
+"Fraktion kann die stärkste sein, also prüfen Sie erst, bevor Sie angreifen."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:16
@@ -1241,7 +1484,9 @@ msgid ""
 "When a pirate raids, the game gives it new regions. So a pirate that just "
 "raided someone is fatter and holds more land. If no one fights them, pirates "
 "grow."
-msgstr "Wenn ein Pirat überfällt, gibt ihm das Spiel neue Gebiete. Ein Pirat, der gerade jemanden überfallen hat, ist also fetter und ein besseres Ziel."
+msgstr ""
+"Wenn ein Pirat überfällt, gibt ihm das Spiel neue Gebiete. Ein Pirat, der "
+"gerade jemanden überfallen hat, ist also fetter und ein besseres Ziel."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:24
@@ -1250,9 +1495,13 @@ msgid ""
 "about a fifth of what that faction holds — its stolen units, its gold, and "
 "some of its regions. It takes several hits to drain a fat faction. A loss "
 "costs you a share of the forces you sent."
-msgstr "Sie können eine Piratenfraktion angreifen, um Güter zurückzuholen. Ein Sieg gibt Ihnen etwa ein Fünftel dessen zurück, was diese Fraktion besitzt."
+msgstr ""
+"Sie können eine Piratenfraktion angreifen, um Güter zurückzuholen. Ein Sieg "
+"gibt Ihnen etwa ein Fünftel dessen zurück, was diese Fraktion besitzt."
 
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:25
 msgid "Tip: military parked in the Trading Market is safe from pirate raids."
-msgstr "Tipp: Militär, das im Handelsmarkt geparkt ist, ist vor Piratenüberfällen sicher."
+msgstr ""
+"Tipp: Militär, das im Handelsmarkt geparkt ist, ist vor Piratenüberfällen "
+"sicher."

@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-04 10:00-0500\n"
+"POT-Creation-Date: 2026-07-04 10:32-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -951,11 +951,42 @@ msgstr ""
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:131
 #, markdown-text, no-wrap
+msgid "League-wide rules (Coordinator only)"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:136
+#, markdown-text
+msgid ""
+"The League Coordinator sets the rules that must match across the whole "
+"league — turns per day, protection turns, and game length. Set them in the "
+"Coordinator's own `config.json`, then broadcast them to every board:"
+msgstr ""
+
+#. type: Fenced code block
+#: internal/help/content/interbbs/sysop.md:137
+#, no-wrap
+msgid "barons-door -league-config -data /path/to/data\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:145
+#, markdown-text
+msgid ""
+"This writes a settings packet to your outbound directory. Each member board "
+"adopts the settings on its next `-planetary` run. Member boards accept these "
+"settings only from the Coordinator's board (node 1), so no one else can "
+"change the league rules. Only the Coordinator's board may send this packet."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:146
+#, markdown-text, no-wrap
 msgid "The Coordinator"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:134
+#: internal/help/content/interbbs/sysop.md:149
 #, markdown-text
 msgid ""
 "There are two different \"coordinator\" ideas, and they are not the same "
@@ -963,7 +994,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:139
+#: internal/help/content/interbbs/sysop.md:154
 #, markdown-text
 msgid ""
 "**League Coordinator** — the sysop of board number 1. This person keeps the "
@@ -971,7 +1002,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:139
+#: internal/help/content/interbbs/sysop.md:154
 #, markdown-text
 msgid ""
 "**BBS Coordinator** — a *player* your board elects. Players vote in the "

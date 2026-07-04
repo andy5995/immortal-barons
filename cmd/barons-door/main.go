@@ -35,6 +35,7 @@ func main() {
 	export := flag.String("export", "", "write this board's score packet to FILE and exit")
 	imp := flag.String("import", "", "import a score packet from FILE and exit")
 	planetary := flag.Bool("planetary", false, "run the inter-BBS PLANETARY step (read inbound, launch attacks, write outbound) and exit")
+	leagueConfig := flag.Bool("league-config", false, "broadcast this board's league settings to the league (coordinator/node #1 only) and exit")
 	flag.Parse()
 
 	cfg, err := store.LoadConfig(*dataDir)
@@ -79,6 +80,14 @@ func main() {
 	if *planetary {
 		if err := runPlanetary(cfg); err != nil {
 			fmt.Fprintln(os.Stderr, "barons-door -planetary:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if *leagueConfig {
+		if err := runLeagueConfig(cfg); err != nil {
+			fmt.Fprintln(os.Stderr, "barons-door -league-config:", err)
 			os.Exit(1)
 		}
 		return
@@ -137,6 +146,31 @@ func runMaint(cfg game.Config, today string) error {
 			return err
 		}
 	}
+	return store.Save(w, cfg)
+}
+
+// runLeagueConfig broadcasts this board's league rules (turns, protection,
+// game length) to the league. Only the League Coordinator (node #1 in the
+// roster) may author it; member boards adopt it on their next PLANETARY run.
+func runLeagueConfig(cfg game.Config) error {
+	lock, err := store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	defer lock.Release()
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	if !w.IsLeagueCoordinator() {
+		return fmt.Errorf("this board (%q) is not the League Coordinator (node #1 in %s)", cfg.BoardID, store.NodeListFile)
+	}
+	w.ExportLeagueConfig()
+	if err := store.WriteOutbox(w, cfg.OutboundDir); err != nil {
+		return err
+	}
+	fmt.Printf("Broadcast league config (turns/day=%d, protection=%d, length=%d) to %s\n",
+		cfg.TurnsPerDay, cfg.ProtectionTurns, cfg.GameLength, cfg.OutboundDir)
 	return store.Save(w, cfg)
 }
 

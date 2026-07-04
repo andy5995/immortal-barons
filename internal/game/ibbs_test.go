@@ -129,3 +129,38 @@ func TestBBSCoordinatorElection(t *testing.T) {
 		t.Errorf("after re-vote Alpha should be coordinator, got %v", co)
 	}
 }
+
+func TestLeagueConfigOnlyFromCoordinator(t *testing.T) {
+	roster := []LeagueNode{{Number: 1, Name: "AlphaBBS"}, {Number: 2, Name: "BravoBBS"}}
+
+	// Coordinator board (Alpha = node #1) authors the league config.
+	cfgA := DefaultConfig()
+	cfgA.BoardID, cfgA.GameLength, cfgA.TurnsPerDay = "AlphaBBS", 42, 15
+	wA := NewWorldSeed(cfgA, 1)
+	wA.LeagueNodes = roster
+	if !wA.IsLeagueCoordinator() {
+		t.Fatal("Alpha (node #1) should be the League Coordinator")
+	}
+	wA.ExportLeagueConfig()
+	pkt := wA.Outbox[0]
+
+	// Member board (Bravo) adopts the coordinator's config.
+	cfgB := DefaultConfig()
+	cfgB.BoardID, cfgB.GameLength, cfgB.TurnsPerDay = "BravoBBS", 0, 10
+	wB := NewWorldSeed(cfgB, 1)
+	wB.LeagueNodes = roster
+	wB.ApplyPacket(pkt)
+	if wB.Config.GameLength != 42 || wB.Config.TurnsPerDay != 15 {
+		t.Errorf("member should adopt LC config, got length=%d turns=%d", wB.Config.GameLength, wB.Config.TurnsPerDay)
+	}
+
+	// A config packet from a NON-coordinator board must be ignored.
+	cfgC := DefaultConfig()
+	cfgC.BoardID, cfgC.GameLength = "CharlieBBS", 5
+	wC := NewWorldSeed(cfgC, 1)
+	wC.LeagueNodes = roster
+	wC.ApplyPacket(Packet{FromBoard: "BravoBBS", LeagueConfig: &LeagueConfig{GameLength: 999}})
+	if wC.Config.GameLength != 5 {
+		t.Errorf("config from a non-coordinator board must be ignored, got %d", wC.Config.GameLength)
+	}
+}
