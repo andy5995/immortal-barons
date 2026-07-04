@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
-# End-to-end inter-BBS smoke test with the real barons-door binary.
-# Validates: Synchronet DOOR32.SYS parsing, onboarding, RunPlanetary export,
-# file-drop transport, and import on a second board. No Synchronet required —
-# a shared directory stands in for the packet transport (mailer / sync / scp).
+# End-to-end inter-BBS smoke test with the real barons-door binary across THREE
+# boards. Validates: Synchronet DOOR32.SYS parsing, onboarding, RunPlanetary
+# export, the file-drop transport, and import on the other boards.
+#
+# No Synchronet required. Each board has its own inbound/outbound dir (as a real
+# BBS.CFG would), and a shell "transport" step fans each outbound packet out to
+# the other boards' inbound dirs — exactly what the sysop's mailer/sync/scp
+# script does between maintenance runs. The sysop chooses how often that runs.
 set -euo pipefail
 
 tmp="$(mktemp -d)"
@@ -10,7 +14,7 @@ trap 'rm -rf "$tmp"' EXIT
 door="$tmp/barons-door"
 go build -o "$door" ./cmd/barons-door
 
-mkdir -p "$tmp/A" "$tmp/B" "$tmp/xchg"
+boards=(AlphaBBS BravoBBS CharlieBBS)
 cat > "$tmp/door32.sys" <<DROP
 2
 0
@@ -24,22 +28,46 @@ andy
 1
 1
 DROP
-for b in A B; do
-  id=$([ "$b" = A ] && echo AlphaBBS || echo BravoBBS)
-  cat > "$tmp/$b/config.json" <<CFG
-{"TurnsPerDay":10,"ProtectionTurns":20,"AICount":2,"DataDir":"$tmp/$b","GameLength":30,"BoardID":"$id","IBBS":true,"InboundDir":"$tmp/xchg","OutboundDir":"$tmp/xchg"}
+
+for id in "${boards[@]}"; do
+  mkdir -p "$tmp/$id" "$tmp/$id/in" "$tmp/$id/out"
+  cat > "$tmp/$id/config.json" <<CFG
+{"TurnsPerDay":10,"ProtectionTurns":20,"AICount":2,"DataDir":"$tmp/$id","GameLength":30,"BoardID":"$id","IBBS":true,"InboundDir":"$tmp/$id/in","OutboundDir":"$tmp/$id/out"}
 CFG
 done
 
-# Onboard a human on board A via the real dropfile path, then export its scores.
-printf ' Asgard\r \r \rQ\r' | timeout 15 "$door" -dropfile "$tmp/door32.sys" -data "$tmp/A" >/dev/null 2>&1 || true
-"$door" -planetary -data "$tmp/A"
-[ -n "$(ls -A "$tmp/xchg")" ] || { echo "FAIL: no packet written"; exit 1; }
+# transport: fan every board's outbound packet out to the other boards' inbound
+# dirs (a broadcast reaches all; the sysop's real script does the same move).
+transport() {
+  for src in "${boards[@]}"; do
+    for pkt in "$tmp/$src/out/"*.brp; do
+      [ -e "$pkt" ] || continue
+      for dst in "${boards[@]}"; do
+        [ "$dst" = "$src" ] && continue
+        cp "$pkt" "$tmp/$dst/in/"
+      done
+      rm -f "$pkt"
+    done
+  done
+}
 
-# Board B imports it.
-"$door" -planetary -data "$tmp/B"
-if grep -q '"BoardID":"AlphaBBS"' "$tmp/B/world.json"; then
-  echo "PASS: BravoBBS imported AlphaBBS scores over the file-drop transport"
-else
-  echo "FAIL: BravoBBS did not import AlphaBBS scores"; exit 1
-fi
+# Onboard a human on AlphaBBS via the real dropfile path, then export its scores.
+printf ' Asgard\r \r \rQ\r' | timeout 15 "$door" -dropfile "$tmp/door32.sys" -data "$tmp/AlphaBBS" >/dev/null 2>&1 || true
+"$door" -planetary -data "$tmp/AlphaBBS"
+[ -n "$(ls -A "$tmp/AlphaBBS/out")" ] || { echo "FAIL: AlphaBBS wrote no packet"; exit 1; }
+
+transport   # the sysop's between-runs packet move
+
+# Bravo and Charlie process their inbound on their next maintenance run.
+"$door" -planetary -data "$tmp/BravoBBS"
+"$door" -planetary -data "$tmp/CharlieBBS"
+
+fail=0
+for id in BravoBBS CharlieBBS; do
+  if grep -q 'AlphaBBS' "$tmp/$id/world.json"; then
+    echo "PASS: $id imported AlphaBBS scores over the file-drop transport"
+  else
+    echo "FAIL: $id did not import AlphaBBS scores"; fail=1
+  fi
+done
+exit $fail
