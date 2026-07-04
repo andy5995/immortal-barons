@@ -61,10 +61,30 @@ func (w *World) matureInvestments(e *Empire) int {
 // gold); below it, the rate drifts up.
 const investRateHeavyThreshold = 5_000_000
 
+// steadyInvestRate is the fixed daily rate the league's Standard Investment
+// Rate knob implies (BRE states that value over 10 days), clamped to the
+// engine's [MinInvestRate, MaxInvestRate] band.
+func (w *World) steadyInvestRate() int {
+	r := w.Config.StdInvestRate / 10
+	if r < MinInvestRate {
+		return MinInvestRate
+	}
+	if r > MaxInvestRate {
+		return MaxInvestRate
+	}
+	return r
+}
+
 // adjustInvestRate nudges the floating rate: heavy total investing across all
 // empires pushes it down, light investing pushes it up, plus a small random
-// drift; clamped to [MinInvestRate, MaxInvestRate].
+// drift; clamped to [MinInvestRate, MaxInvestRate]. With Steady Investment Rate
+// on, the rate is instead pinned to the league's standard rate and never
+// floats.
 func (w *World) adjustInvestRate() {
+	if w.Config.SteadyInvest {
+		w.InvestRate = w.steadyInvestRate()
+		return
+	}
 	total := 0
 	for _, e := range w.Empires {
 		if e.Alive {
