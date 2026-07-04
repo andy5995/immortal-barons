@@ -1,6 +1,9 @@
 package i18n
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestEnglishAndUnknownFallBack(t *testing.T) {
 	if got := T("", "Troopers"); got != "Troopers" {
@@ -40,5 +43,49 @@ func TestParsePOSkipsHeaderAndEmpty(t *testing.T) {
 	}
 	if _, ok := m["x"]; ok {
 		t.Error("untranslated (empty msgstr) should be skipped")
+	}
+}
+
+// verbs extracts fmt format verbs (%d, %s, ...) from a string, ignoring the
+// literal %% escape and their flags/width.
+func verbs(s string) []string {
+	var out []string
+	for i := 0; i < len(s); i++ {
+		if s[i] != '%' {
+			continue
+		}
+		if i+1 < len(s) && s[i+1] == '%' {
+			i++
+			continue
+		}
+		j := i + 1
+		for j < len(s) && strings.ContainsRune("+-# 0123456789.[]*", rune(s[j])) {
+			j++
+		}
+		if j < len(s) {
+			out = append(out, string(s[j]))
+		}
+	}
+	return out
+}
+
+// A mismatched verb set between msgid and msgstr would make fmt.Fprintf emit
+// %!verb garbage at runtime, so guard the committed catalogs.
+func TestCatalogFormatVerbsMatch(t *testing.T) {
+	for lang, cat := range catalogs {
+		for id, str := range cat {
+			iv, sv := verbs(id), verbs(str)
+			if len(iv) != len(sv) {
+				t.Errorf("[%s] verb count differs\n  id:  %q %v\n  str: %q %v", lang, id, iv, str, sv)
+				continue
+			}
+			// Order matters for %-verbs without positional args (our case).
+			for k := range iv {
+				if iv[k] != sv[k] {
+					t.Errorf("[%s] verb %d differs (%s vs %s)\n  id:  %q\n  str: %q", lang, k, iv[k], sv[k], id, str)
+					break
+				}
+			}
+		}
 	}
 }

@@ -321,3 +321,91 @@ msgstr "(tot)"
 
 msgid "Last Planetary Master: %s"
 msgstr "Letzter Planetenmeister: %s"
+
+# High-frequency gameplay strings
+msgid "%s | Gold %d  Food %d  Land %d  Army %d | Turns left %d | Day %d"
+msgstr "%s | Gold %d  Nahrung %d  Land %d  Armee %d | Züge übrig %d | Tag %d"
+
+msgid "Army"
+msgstr "Armee"
+
+msgid "Owner"
+msgstr "Besitzer"
+
+msgid "(none)"
+msgstr "(keine)"
+
+msgid "(AI)"
+msgstr "(KI)"
+
+msgid "(dead)"
+msgstr "(tot)"
+
+msgid "# Owned"
+msgstr "# Besitz"
+
+msgid "(%d per year)"
+msgstr "(%d pro Jahr)"
+
+msgid "Industrial Production"
+msgstr "Industrieproduktion"
+
+msgid "You are under New Realm Protection and cannot attack yet."
+msgstr "Du stehst unter Schutz eines neuen Reiches und kannst noch nicht angreifen."
+
+msgid "There are no rival empires left to attack."
+msgstr "Es sind keine gegnerischen Imperien mehr übrig, die du angreifen kannst."
+
+msgid "You cannot afford that."
+msgstr "Das kannst du dir nicht leisten."
+
+msgid "You do not have that much in the bank."
+msgstr "So viel hast du nicht auf der Bank."
+
+msgid "You do not owe that much."
+msgstr "So viel schuldest du nicht."
+
+msgid "You have no agents for that operation."
+msgstr "Du hast keine Agenten für diese Operation."
+
+msgid "Current tax rate: %d%%"
+msgstr "Aktueller Steuersatz: %d%%"
+
+msgid "Tax rate set to %d%%."
+msgstr "Steuersatz auf %d%% gesetzt."
+
+msgid "Saving..."
+msgstr "Speichern..."
+
+msgid "Do you wish to send another message?"
+msgstr "Möchtest du eine weitere Nachricht senden?"
+
+msgid "Abort"
+msgstr "Abbrechen"
+
+msgid "Save"
+msgstr "Speichern"
+
+msgid "Clear"
+msgstr "Löschen"
+
+msgid "/-Command?"
+msgstr "/-Befehl?"
+
+msgid "Your messages:"
+msgstr "Deine Nachrichten:"
+
+msgid "You have no messages."
+msgstr "Du hast keine Nachrichten."
+
+msgid "Industry production percentages updated."
+msgstr "Industrieproduktions-Prozentsätze aktualisiert."
+
+msgid "today"
+msgstr "heute"
+
+msgid "1 day ago"
+msgstr "vor 1 Tag"
+
+msgid "%d days ago"
+msgstr "vor %d Tagen"

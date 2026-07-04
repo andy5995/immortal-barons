@@ -321,3 +321,91 @@ msgstr "(мёртв)"
 
 msgid "Last Planetary Master: %s"
 msgstr "Последний Мастер Планеты: %s"
+
+# High-frequency gameplay strings
+msgid "%s | Gold %d  Food %d  Land %d  Army %d | Turns left %d | Day %d"
+msgstr "%s | Золото %d  Еда %d  Земля %d  Армия %d | Ходов %d | День %d"
+
+msgid "Army"
+msgstr "Армия"
+
+msgid "Owner"
+msgstr "Владелец"
+
+msgid "(none)"
+msgstr "(нет)"
+
+msgid "(AI)"
+msgstr "(ИИ)"
+
+msgid "(dead)"
+msgstr "(мёртв)"
+
+msgid "# Owned"
+msgstr "# Есть"
+
+msgid "(%d per year)"
+msgstr "(%d в год)"
+
+msgid "Industrial Production"
+msgstr "Промышленное производство"
+
+msgid "You are under New Realm Protection and cannot attack yet."
+msgstr "Вы под защитой нового королевства и пока не можете атаковать."
+
+msgid "There are no rival empires left to attack."
+msgstr "Не осталось вражеских империй для атаки."
+
+msgid "You cannot afford that."
+msgstr "Вам это не по карману."
+
+msgid "You do not have that much in the bank."
+msgstr "У вас нет столько в банке."
+
+msgid "You do not owe that much."
+msgstr "Вы должны не так много."
+
+msgid "You have no agents for that operation."
+msgstr "У вас нет агентов для этой операции."
+
+msgid "Current tax rate: %d%%"
+msgstr "Текущая налоговая ставка: %d%%"
+
+msgid "Tax rate set to %d%%."
+msgstr "Налоговая ставка установлена на %d%%."
+
+msgid "Saving..."
+msgstr "Сохранение..."
+
+msgid "Do you wish to send another message?"
+msgstr "Хотите отправить ещё одно сообщение?"
+
+msgid "Abort"
+msgstr "Отмена"
+
+msgid "Save"
+msgstr "Сохранить"
+
+msgid "Clear"
+msgstr "Очистить"
+
+msgid "/-Command?"
+msgstr "/-Команда?"
+
+msgid "Your messages:"
+msgstr "Ваши сообщения:"
+
+msgid "You have no messages."
+msgstr "У вас нет сообщений."
+
+msgid "Industry production percentages updated."
+msgstr "Проценты промышленного производства обновлены."
+
+msgid "today"
+msgstr "сегодня"
+
+msgid "1 day ago"
+msgstr "1 день назад"
+
+msgid "%d days ago"
+msgstr "%d дн. назад"
