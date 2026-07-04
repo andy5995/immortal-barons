@@ -73,3 +73,12 @@ func TestPromptSuggested(t *testing.T) {
 		})
 	}
 }
+
+func TestComma(t *testing.T) {
+	cases := map[int]string{0: "0", 5: "5", 612: "612", 1000: "1,000", 15853: "15,853", 478967: "478,967", 1000000: "1,000,000", -1234: "-1,234"}
+	for in, want := range cases {
+		if got := comma(in); got != want {
+			t.Errorf("comma(%d) = %q, want %q", in, got, want)
+		}
+	}
+}

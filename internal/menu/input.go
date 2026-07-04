@@ -110,9 +110,39 @@ func clampAmt(n, max int) int {
 }
 
 func pause(s session.Session) {
-	// BRE's own pause prompt.
-	fmt.Fprintf(s, "\n%s-=<Paused>=-%s", ansi.FgBrightGreen, ansi.Reset)
+	// BRE's pause prompt.
+	fmt.Fprintf(s, "\n%s─»>Paused<«─%s", ansi.FgBrightCyan, ansi.Reset)
 	s.ReadKey()
+}
+
+// comma formats n with thousands separators (478967 -> "478,967").
+func comma(n int) string {
+	str := strconv.Itoa(n)
+	neg := n < 0
+	if neg {
+		str = str[1:]
+	}
+	var b strings.Builder
+	for i := 0; i < len(str); i++ {
+		if i > 0 && (len(str)-i)%3 == 0 {
+			b.WriteByte(',')
+		}
+		b.WriteByte(str[i])
+	}
+	if neg {
+		return "-" + b.String()
+	}
+	return b.String()
+}
+
+// statLine prints one BRE-style result line — a highlighted, comma-formatted
+// number followed by text — and skips the line entirely when n is zero (BRE
+// only lists results that actually happened).
+func statLine(s session.Session, n int, text string) {
+	if n == 0 {
+		return
+	}
+	fmt.Fprintf(s, "  %s%s%s %s\n", ansi.FgBrightCyan, comma(n), ansi.Reset, text)
 }
 
 func ok(s session.Session, format string, a ...any) {
