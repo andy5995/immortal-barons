@@ -267,24 +267,24 @@ msgstr ""
 #: internal/help/content/economy/banking.md:8
 #, no-wrap
 msgid "Banking"
-msgstr ""
+msgstr "Банк"
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:12
 msgid ""
 "The bank keeps your gold safe and earns interest. Gold in the bank cannot be "
 "taken by pirates or raids."
-msgstr ""
+msgstr "Банк хранит ваше золото в безопасности и приносит проценты. Золото в банке не могут отнять пираты или налётчики."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:18
 msgid "Deposit — move gold from your treasury into the bank."
-msgstr ""
+msgstr "Внести — перевести золото из казны в банк."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:18
 msgid "Withdraw — move gold from the bank back to your treasury."
-msgstr ""
+msgstr "Снять — вернуть золото из банка в казну."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:18
@@ -292,18 +292,18 @@ msgid ""
 "Take Loan — borrow gold, up to a limit based on how much land you own. A "
 "loan grows over time until you repay it, so pay it back before it becomes a "
 "burden."
-msgstr ""
+msgstr "Взять заём — занять золото до предела, зависящего от размера ваших земель. Заём растёт со временем, пока вы его не погасите."
 
 #. type: Bullet: '- '
 #: internal/help/content/economy/banking.md:18
 msgid "Repay Loan — pay back what you borrowed."
-msgstr ""
+msgstr "Погасить заём — вернуть занятое."
 
 #. type: Title ##
 #: internal/help/content/economy/banking.md:19
 #, no-wrap
 msgid "Investments"
-msgstr ""
+msgstr "Инвестиции"
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:23
@@ -312,28 +312,28 @@ msgid ""
 "your gold plus interest when it matures. The interest rate floats — it rises "
 "and falls with how much everyone is investing — so check the rate before you "
 "commit."
-msgstr ""
+msgstr "Можно вложить золото на несколько дней. По окончании срока оно возвращается вместе с процентами."
 
 #. type: Title #
 #: internal/help/content/economy/food.md:1
 #: internal/help/content/economy/food.md:8
 #, no-wrap
 msgid "Food Market and Spoilage"
-msgstr ""
+msgstr "Рынок еды и порча"
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:12
 msgid ""
 "Your people and army eat food every turn. Agricultural regions grow food, "
 "and you can buy more at the Food Market."
-msgstr ""
+msgstr "Ваш народ и армия каждый ход едят еду. Сельские регионы выращивают её, а ещё можно докупить на рынке."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:15
 msgid ""
 "The market sells food to you for more than it pays to buy it back. So it is "
 "not a place to store extra food for profit."
-msgstr ""
+msgstr "Рынок продаёт еду дороже, чем платит при обратной покупке. Поэтому хранить излишки там невыгодно."
 
 #. type: Plain text
 #: internal/help/content/economy/food.md:17
@@ -341,21 +341,21 @@ msgid ""
 "Food you hold beyond about two turns' worth of eating spoils each turn. A "
 "high technology level slows spoilage. Use or sell surplus food rather than "
 "hoard it."
-msgstr ""
+msgstr "Еда сверх примерно двухходового запаса каждый ход портится. Высокий уровень технологий замедляет порчу."
 
 #. type: Title #
 #: internal/help/content/economy/industry.md:1
 #: internal/help/content/economy/industry.md:8
 #, no-wrap
 msgid "Industry"
-msgstr ""
+msgstr "Промышленность"
 
 #. type: Plain text
 #: internal/help/content/economy/industry.md:12
 msgid ""
 "Each Industrial region makes gold and production points every turn. The "
 "points are built into units."
-msgstr ""
+msgstr "Каждый промышленный регион каждый ход даёт золото и очки производства. Очки превращаются в юниты."
 
 #. type: Plain text
 #: internal/help/content/economy/industry.md:15
@@ -363,19 +363,19 @@ msgid ""
 "Use Set Industries to split your production across unit types by percentage. "
 "Or use Specialize to send all of your production into one unit type. "
 "Specializing cannot be undone, so choose with care."
-msgstr ""
+msgstr "В «Задать производство» распределите выпуск по типам юнитов в процентах. Либо через «Специализацию» выберите один тип для большего выпуска — но потом ничего другого строить нельзя."
 
 #. type: Title #
 #: internal/help/content/economy/net-worth.md:1
 #: internal/help/content/economy/net-worth.md:8
 #, no-wrap
 msgid "Net Worth"
-msgstr ""
+msgstr "Состояние"
 
 #. type: Plain text
 #: internal/help/content/economy/net-worth.md:11
 msgid "Net Worth is your overall score. It ranks every empire (see Scores)."
-msgstr ""
+msgstr "Состояние"
 
 #. type: Plain text
 #: internal/help/content/economy/net-worth.md:14
@@ -384,21 +384,21 @@ msgid ""
 "Gold, food, and people are not counted directly. So a rich empire with "
 "little land or army still scores low. To climb the ranks, hold land and a "
 "strong army."
-msgstr ""
+msgstr "Оно учитывает в основном земли и военную силу за вычетом долга. Золото, еда и население не считаются по номиналу."
 
 #. type: Title #
 #: internal/help/content/economy/regions.md:1
 #: internal/help/content/economy/regions.md:8
 #, no-wrap
 msgid "Regions"
-msgstr ""
+msgstr "Регионы"
 
 #. type: Plain text
 #: internal/help/content/economy/regions.md:12
 msgid ""
 "Land is made of regions. You buy regions from a market, and the price rises "
 "as you buy more. There are eight region types, each with a different job."
-msgstr ""
+msgstr "Земля состоит из регионов. Их покупают на рынке, и цена растёт с каждой покупкой. Есть несколько видов."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:13
@@ -411,7 +411,7 @@ msgstr ""
 msgid ""
 "Best for tourism income. In good times it makes the most gold. But with low "
 "public support, your people lose interest and tourism drops sharply."
-msgstr ""
+msgstr "Лучше всего для дохода от туризма. В хорошие времена даёт больше всего золота. Но при низкой поддержке народа туризм рушится."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:18
@@ -424,7 +424,7 @@ msgstr ""
 msgid ""
 "Mines natural resources. Income is lower on average, but steady — few things "
 "change it. Mountains also boost how much your Industrial regions produce."
-msgstr ""
+msgstr "Добывает природные ресурсы. Доход в среднем ниже, но стабилен — почти ничто на него не влияет. Горы также повышают выпуск промышленности."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:23
@@ -437,7 +437,7 @@ msgstr ""
 msgid ""
 "Good for solar power. Income swings with conditions, but on average it beats "
 "mountains and trails good Coastal land."
-msgstr ""
+msgstr "Хорош для солнечной энергии. Доход колеблется, но в среднем выше гор и ниже побережья."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:28
@@ -448,7 +448,7 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/economy/regions.md:31
 msgid "Provides a steady river income."
-msgstr ""
+msgstr "Даёт стабильный речной доход."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:32
@@ -459,7 +459,7 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/economy/regions.md:35
 msgid "Grows food. This is your main source of food if you are not buying it."
-msgstr ""
+msgstr "Выращивает еду. Это главный источник еды, если вы её не покупаете."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:36
@@ -472,7 +472,7 @@ msgstr ""
 msgid ""
 "Home to your people. More urban regions means more people can live in your "
 "empire."
-msgstr ""
+msgstr "Дом вашего народа. Чем больше городских регионов, тем больше людей может жить в империи."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:41
@@ -485,7 +485,7 @@ msgstr ""
 msgid ""
 "Builds military each turn. In some games this is your only way to get new "
 "units.  A good base of Mountain regions makes your industry produce more."
-msgstr ""
+msgstr "Строит военных каждый ход. В некоторых играх это единственный способ получить новые юниты. Хорошая база из гор повышает выпуск."
 
 #. type: Title ##
 #: internal/help/content/economy/regions.md:46
@@ -499,21 +499,21 @@ msgid ""
 "Raises your efficiency. A larger share of Technology regions boosts your "
 "income and your army and lowers some upkeep. Bigger empires need more "
 "Technology to get the same benefit."
-msgstr ""
+msgstr "Повышает эффективность. Большая доля технологических регионов увеличивает доход и армию и снижает содержание."
 
 #. type: Title #
 #: internal/help/content/economy/taxes.md:1
 #: internal/help/content/economy/taxes.md:8
 #, no-wrap
 msgid "Taxes, Support, and Riots"
-msgstr ""
+msgstr "Налоги, поддержка и бунты"
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:12
 msgid ""
 "Your tax rate sets how much gold you collect from your people, and it shapes "
 "their mood."
-msgstr ""
+msgstr "Налоговая ставка определяет, сколько золота вы собираете с народа, и влияет на его настроение."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:16
@@ -521,7 +521,7 @@ msgid ""
 "Popular Support drifts each turn toward a target set by your tax rate. A "
 "steady, moderate tax rate keeps Support near its highest. High taxes push "
 "Support down.  Low Support badly cuts your Coastal (tourism) income."
-msgstr ""
+msgstr "Поддержка народа каждый ход стремится к цели, заданной налоговой ставкой. Умеренная стабильная ставка держит её высокой."
 
 #. type: Plain text
 #: internal/help/content/economy/taxes.md:18
@@ -529,14 +529,14 @@ msgid ""
 "Riots grow more likely as your tax rate climbs past a safe level. A riot "
 "crashes your Support and drives off part of your population. Raise taxes "
 "with care."
-msgstr ""
+msgstr "Бунты становятся вероятнее по мере роста налога выше безопасного уровня. Бунт обрушивает поддержку и прогоняет часть народа."
 
 #. type: Title #
 #: internal/help/content/economy/trading.md:1
 #: internal/help/content/economy/trading.md:8
 #, no-wrap
 msgid "Trading"
-msgstr ""
+msgstr "Торговля"
 
 #. type: Plain text
 #: internal/help/content/economy/trading.md:12
@@ -544,7 +544,7 @@ msgid ""
 "From the Trading menu you can send gold directly to another empire as a "
 "trade deal, with no strings attached. Use it to help an ally, or to move "
 "gold to a friend on your board."
-msgstr ""
+msgstr "Из меню торговли можно напрямую отправить золото другой империи как торговый подарок, без условий."
 
 #. type: Title #
 #: internal/help/content/interbbs/leagues.md:1
