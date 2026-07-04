@@ -49,8 +49,8 @@ func TestLowSupportCutsCoastalIncome(t *testing.T) {
 	low.Tax = 0
 	lowStart := low.Gold
 
-	wHigh.PlayTurn(high, "2026-07-03")
-	wLow.PlayTurn(low, "2026-07-03")
+	wHigh.CollectIncome(high)
+	wLow.CollectIncome(low)
 
 	highGain := high.Gold - highStart
 	lowGain := low.Gold - lowStart

@@ -263,8 +263,8 @@ func TestTechBoostsIncomeAndCutsMaintenance(t *testing.T) {
 	wBase, base := setup(RegionMix{Coastal: 100})
 	wTech, tech := setup(RegionMix{Coastal: 60, Technology: 40})
 
-	wBase.processEconomy(base)
-	wTech.processEconomy(tech)
+	wBase.CollectIncome(base)
+	wTech.CollectIncome(tech)
 
 	if tech.Gold <= base.Gold {
 		t.Errorf("Technology empire should net more gold: base=%d tech=%d", base.Gold, tech.Gold)

@@ -15,6 +15,7 @@ func TestPlayTurnAffectsOnlyActingEmpire(t *testing.T) {
 	turns := me.TurnsLeft
 	prot := me.Protection
 
+	w.CollectIncome(me) // income is now credited at turn start, not inside PlayTurn
 	w.PlayTurn(me, "2026-07-03")
 
 	if me.TurnsLeft != turns-1 {
@@ -27,10 +28,23 @@ func TestPlayTurnAffectsOnlyActingEmpire(t *testing.T) {
 		t.Errorf("LastPlayed: got %q", me.LastPlayed)
 	}
 	if other.Gold != otherGold {
-		t.Error("PlayTurn must not touch other empires")
+		t.Error("PlayTurn/CollectIncome must not touch other empires")
 	}
 	if me.Gold <= 10000 {
 		t.Errorf("acting empire should collect income, got %d", me.Gold)
+	}
+}
+
+func TestCollectIncomeCoversStartingMaintenance(t *testing.T) {
+	// Regression for the auto-deposit bug: with income credited at turn start,
+	// a starting empire whose gold was swept to the bank can still pay its
+	// maintenance from the income the turn earns.
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("h", "Realm")
+	e.Gold = 0 // as if auto-deposit banked everything at the end of last turn
+	w.CollectIncome(e)
+	if due := e.ForcesUpkeep() + e.RegionUpkeep(); e.Gold < due {
+		t.Errorf("collected income %d does not cover maintenance %d", e.Gold, due)
 	}
 }
 

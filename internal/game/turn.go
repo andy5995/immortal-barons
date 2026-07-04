@@ -89,6 +89,7 @@ func (w *World) aiPlay(today string) {
 			e.LastGoldPaid = 0
 			w.PayForces(e, e.ForcesUpkeep())
 			w.PayRegions(e, e.RegionUpkeep())
+			w.CollectIncome(e) // same point income used to be credited (start of PlayTurn)
 			w.PlayTurn(e, today)
 		}
 	}
@@ -101,9 +102,15 @@ const (
 	RiotTaxFloor     = 20 // no riots at/below this tax rate
 )
 
-func (w *World) processEconomy(e *Empire) {
+// CollectIncome credits this turn's tax and region income to the empire's
+// gold, so it is in hand for maintenance and spending during the turn. It is
+// applied at the start of a played turn: BRE shows the income report then, and
+// its auto-deposit banks only the "extra" gold left at the end of the turn.
+// Keeping this separate from processEconomy (which runs the end-of-turn steps:
+// interest, food, manufacture) is what lets start-of-turn maintenance be paid
+// from the income the turn earns, instead of a turn behind.
+func (w *World) CollectIncome(e *Empire) {
 	tf := e.techFactor()
-
 	base := e.Regions.income()
 	coastal := e.Regions.Coastal * 25
 	income := base - coastal + coastal*e.Support/100 // low support slashes tourism
@@ -111,6 +118,10 @@ func (w *World) processEconomy(e *Empire) {
 	income += w.tradeIncome(e) // trade-treaty bonus (population-scaled)
 	tax := e.People * e.Tax / 100 * 8 * (100 + tf) / 100
 	e.Gold += tax + income
+}
+
+func (w *World) processEconomy(e *Empire) {
+	tf := e.techFactor()
 
 	e.Bank += min(e.Bank, InterestCap) / 100
 	if e.Debt > 0 {

@@ -131,6 +131,15 @@ func paymentStage(s session.Session, w *game.World, p *game.Empire) {
 	p.LastGoldPaid = 0
 	forces := p.ForcesUpkeep()
 	regions := p.RegionUpkeep()
+	due := forces + regions
+
+	// If on-hand gold can't cover maintenance but savings can, offer to draw
+	// from the bank before paying (BRE lets you visit the bank to make upkeep).
+	if p.Gold < due && p.Bank > 0 &&
+		askYesNo(s, fmt.Sprintf("Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?", due, p.Gold, p.Bank)) {
+		n := promptSuggested(s, "Withdraw how much?", min(due-p.Gold, p.Bank), p.Bank)
+		w.Withdraw(p, n)
+	}
 
 	if w.AutoPayMaint && p.Gold >= forces+regions {
 		w.PayForces(p, forces)
@@ -174,6 +183,7 @@ func runTurn(s session.Session, w *game.World) Result {
 			return Stay
 		}
 
+		w.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
 		showTurnEvents(s, p)
 		incomeReport(s, w, p)
 		empireStatus(s, w)
