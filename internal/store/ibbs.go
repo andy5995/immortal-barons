@@ -13,6 +13,19 @@ import (
 // packetExt is the file extension for inter-BBS packet files.
 const packetExt = ".brp"
 
+// RunPlanetary is the inter-BBS maintenance step (BRE's "BRE PLANETARY"): it
+// reads and applies inbound packets, launches any group attacks whose day has
+// come, exports this board's scores to the league, and writes the outbox. Run
+// it on a schedule (or on the door's -maint pass) — can run several times a day.
+func RunPlanetary(w *game.World, inboundDir, outboundDir string) error {
+	if _, err := ReadInbound(w, inboundDir); err != nil {
+		return err
+	}
+	w.LaunchDueGroupAttacks()
+	w.ExportScores()
+	return WriteOutbox(w, outboundDir)
+}
+
 // WriteOutbox writes each queued packet to a JSON file in dir and clears the
 // world's Outbox. How the files then reach other boards (a sync tool, FidoNet,
 // scp, a shared mount) is the operator's concern — this is the Option A

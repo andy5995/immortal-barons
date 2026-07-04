@@ -8,6 +8,8 @@ type Config struct {
 	GameLength      int    // days before the league ends and resets; 0 = endless
 	BoardID         string // name of this board in exported inter-BBS packets
 	IBBS            bool   // participate in inter-BBS play (gates the interplanetary menus)
+	InboundDir      string // inter-BBS packets arrive here (RunPlanetary reads them)
+	OutboundDir     string // inter-BBS packets are written here for the transport to move
 }
 
 // InterBBSEnabled reports whether inter-BBS / interplanetary features (group
@@ -25,5 +27,7 @@ func DefaultConfig() Config {
 		DataDir:         "./data",
 		GameLength:      0,
 		BoardID:         "local",
+		InboundDir:      "./data/inbound",
+		OutboundDir:     "./data/outbound",
 	}
 }

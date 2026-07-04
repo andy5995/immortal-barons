@@ -1,6 +1,7 @@
 package store
 
 import (
+	"os"
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -50,4 +51,21 @@ func TestPacketFileRoundTrip(t *testing.T) {
 		t.Errorf("board A should have a bulletin entry for the strike outcome")
 	}
 	_ = ga
+}
+
+func TestRunPlanetaryExportsScores(t *testing.T) {
+	in, out := t.TempDir(), t.TempDir()
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "boardA"
+	w := game.NewWorldSeed(cfg, 1)
+	w.AddHuman("p", "Player")
+
+	if err := RunPlanetary(w, in, out); err != nil {
+		t.Fatalf("RunPlanetary: %v", err)
+	}
+	// A broadcast score packet should have been written to the outbound dir.
+	entries, _ := os.ReadDir(out)
+	if len(entries) == 0 {
+		t.Fatal("RunPlanetary should have written a score packet")
+	}
 }

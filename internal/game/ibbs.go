@@ -136,6 +136,22 @@ func (w *World) LaunchDueGroupAttacks() {
 	w.GroupAttacks = remaining
 }
 
+// ExportScores queues a broadcast packet of this board's living human empires'
+// scores for the league — it feeds the other boards' interplanetary score
+// screens and gives group attacks targets to choose from.
+func (w *World) ExportScores() {
+	var scores []RemoteScore
+	for _, e := range w.Empires {
+		if e.Alive && e.Owner != "" {
+			scores = append(scores, RemoteScore{Empire: e.Name, NetWorth: w.NetWorth(e), Land: e.Land})
+		}
+	}
+	if len(scores) == 0 {
+		return
+	}
+	w.Outbox = append(w.Outbox, Packet{FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores})
+}
+
 // enqueue appends atk to the outbound packet for toBoard, creating it if needed.
 func (w *World) enqueue(toBoard string, atk RemoteAttack) {
 	for i := range w.Outbox {
