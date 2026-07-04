@@ -1,0 +1,13 @@
+version: 2
+updates:
+  # Keep the pinned action versions in .github/workflows current.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+  # Keep Go module dependencies current. A no-op while the module is
+  # stdlib-only; activates once go.mod gains deps (e.g. the i18n gettext lib).
+  - package-ecosystem: "gomod"
+    directory: "/"
+    schedule:
+      interval: "weekly"
