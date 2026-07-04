@@ -169,7 +169,7 @@ func BuildMenus() *Menus {
 	}
 
 	coord.Items = []Item{
-		{Key: 'C', Label: "Configuration Editor", Do: stubbed("Configuration Editor")},
+		{Key: 'C', Label: "Configuration Editor", Do: configEditor},
 		{Key: 'M', Label: "Modify League Diplomacy", Do: stubbed("Modify League Diplomacy")},
 		{Key: 'P', Label: "Player List", Do: stubbed("Player List")},
 		{Key: '0', Label: "Return", Do: back},
