@@ -309,6 +309,26 @@ func specialOps(s session.Session, w *game.World) Result {
 	return specialAttack(s, w, "Special Operations", 0, func(a, d *game.Empire) (string, error) { return w.Sabotage(a, d) })
 }
 
+func bombIntel(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Bomb Intelligence", 0, func(a, d *game.Empire) (string, error) { return w.BombIntelligence(a, d) })
+}
+
+func causeDissensions(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Cause Dissensions", 0, func(a, d *game.Empire) (string, error) { return w.CauseDissensions(a, d) })
+}
+
+func bombAirbases(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Bomb Airbases", 0, func(a, d *game.Empire) (string, error) { return w.BombAirbases(a, d) })
+}
+
+func bombFood(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Bomb Food Stores", 0, func(a, d *game.Empire) (string, error) { return w.BombFood(a, d) })
+}
+
+func bombHQ(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Bomb HQ", 0, func(a, d *game.Empire) (string, error) { return w.BombHQ(a, d) })
+}
+
 func attackPirates(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "\n%sPirate factions (strength is random; fat ones just raided someone):%s\n", ansi.FgBrightCyan, ansi.Reset)
 	fmt.Fprintf(s, "  %-3s %-11s %-7s %-4s %-8s %s\n", "#", "Faction", "Forces", "Rgn", "Gold", "Loot T/J/U/K/A")

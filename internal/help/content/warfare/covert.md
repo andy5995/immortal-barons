@@ -14,14 +14,14 @@ Keeping many agents also defends you against enemy covert operations.
 Common operations:
 
 - Send Spy — read the enemy's defensive strength.
+- Special Operations — sabotage the enemy army, destroying a share of their
+  troopers.
 - Bomb Intelligence — kill enemy agents, so your later missions land more
   easily. Use this one first.
-- Demoralize — lower the enemy's military morale. Their army fights worse, and
-  if morale falls far enough, units desert. The most-used operation.
 - Cause Dissensions — lower the enemy's public support, which weakens their
-  troopers.
+  troopers and their economy.
 - Bomb Airbases — destroy enemy jets that are on the ground.
-- Bomb Food Stores — destroy the enemy's food reserve.
+- Bomb Food Stores — destroy much of the enemy's food reserve.
 - Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less effective.
 
 An Intelligence Alliance adds half of an ally's agents to your covert strength.

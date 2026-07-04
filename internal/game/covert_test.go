@@ -121,3 +121,66 @@ func TestSabotageFailure(t *testing.T) {
 		t.Fatalf("expected one victim event, got %d new", len(d.Events)-beforeEvents)
 	}
 }
+
+func TestBombAirbasesDestroysGroundedJets(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents, d.Jets = 50, 0, 400
+	if _, err := w.BombAirbases(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if d.Jets != 300 {
+		t.Errorf("expected 300 jets after a 25%% strike, got %d", d.Jets)
+	}
+}
+
+func TestBombFoodDestroysReserve(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents, d.Food = 50, 0, 1000
+	if _, err := w.BombFood(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if d.Food != 500 {
+		t.Errorf("expected 500 food after a 50%% strike, got %d", d.Food)
+	}
+}
+
+func TestBombHQWeakensAndClamps(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents, d.HQ = 50, 0, 10
+	if _, err := w.BombHQ(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if d.HQ != 0 { // 10 - 20, clamped at 0
+		t.Errorf("HQ should clamp at 0, got %d", d.HQ)
+	}
+}
+
+func TestCauseDissensionsLowersSupport(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents, d.Support = 50, 0, 100
+	if _, err := w.CauseDissensions(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if d.Support != 85 {
+		t.Errorf("expected support 85, got %d", d.Support)
+	}
+}
+
+func TestBombIntelligenceKillsAgents(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents = 1_000_000, 8 // overwhelming odds -> success
+	if _, err := w.BombIntelligence(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if d.Agents != 6 { // 8 - 8/4
+		t.Errorf("expected 6 agents after a 25%% strike, got %d", d.Agents)
+	}
+}
+
+func TestCovertOpNeedsAnAgent(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents = 0
+	if _, err := w.BombAirbases(a, d); !errors.Is(err, ErrNoAgents) {
+		t.Errorf("expected ErrNoAgents, got %v", err)
+	}
+}

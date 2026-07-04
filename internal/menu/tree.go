@@ -118,6 +118,11 @@ func BuildMenus() *Menus {
 		{Key: 'D', Label: "Spy Database", Do: stubbed("Spy Database")},
 		{Key: 'B', Label: "Bribery", Do: stubbed("Bribery")},
 		{Key: 'O', Label: "Special Operations", Do: specialOps},
+		{Key: 'I', Label: "Bomb Intelligence", Do: bombIntel},
+		{Key: 'C', Label: "Cause Dissensions", Do: causeDissensions},
+		{Key: 'A', Label: "Bomb Airbases", Do: bombAirbases},
+		{Key: 'F', Label: "Bomb Food Stores", Do: bombFood},
+		{Key: 'H', Label: "Bomb HQ", Do: bombHQ},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Proceed with Turn", Do: back},
 	}
