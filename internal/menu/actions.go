@@ -1118,25 +1118,89 @@ func pickRecipient(s session.Session, w *game.World, prompt string, allowAll boo
 	return rs[idx], false
 }
 
+// msgMaxLines is how many lines a single message may hold (BRE: 20).
+const msgMaxLines = 20
+
+// composeMessage runs BRE's multi-line message editor: up to msgMaxLines lines
+// under a column ruler. Entering "/" on a line opens the command prompt
+// [A]bort / [S]ave / [C]lear. Returns the joined text and whether to send it
+// (false = aborted).
+func composeMessage(s session.Session) (string, bool) {
+	fmt.Fprintf(s, "\n    You have %s%d%s lines for your message.  %s/S%s=save %s/A%s=abort %s/C%s=clear\n",
+		ansi.FgBrightCyan, msgMaxLines, ansi.Reset,
+		ansi.FgBrightYellow, ansi.Reset, ansi.FgBrightYellow, ansi.Reset, ansi.FgBrightYellow, ansi.Reset)
+	ruler := "[" + strings.Repeat("----+----|", 8)[:76] + "]"
+	fmt.Fprintf(s, "    %s%s%s\n", ansi.FgBlue, ruler, ansi.Reset)
+
+	var lines []string
+	for len(lines) < msgMaxLines {
+		fmt.Fprintf(s, "%s%2d>%s ", ansi.FgBrightGreen, len(lines)+1, ansi.Reset)
+		line, err := session.ReadLine(s)
+		if err != nil {
+			return "", false
+		}
+		if strings.TrimSpace(line) == "/" {
+			fmt.Fprintf(s, "    /-Command?  [%sA%s,%sS%s,%sC%s] ",
+				ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset)
+			r, err := s.ReadKey()
+			if err != nil {
+				return "", false
+			}
+			switch unicode.ToUpper(r) {
+			case 'A':
+				fmt.Fprint(s, "Abort\n")
+				return "", false
+			case 'S':
+				fmt.Fprint(s, "Save\n")
+				return trimTrailingBlank(lines), true
+			case 'C':
+				fmt.Fprint(s, "Clear\n")
+				lines = nil
+			default:
+				fmt.Fprint(s, "\n")
+			}
+			continue
+		}
+		lines = append(lines, line)
+	}
+	fmt.Fprintf(s, "%sYou have used all %d lines.%s\n", ansi.FgYellow, msgMaxLines, ansi.Reset)
+	return trimTrailingBlank(lines), true
+}
+
+// trimTrailingBlank joins message lines, dropping trailing empty ones.
+func trimTrailingBlank(lines []string) string {
+	for len(lines) > 0 && strings.TrimSpace(lines[len(lines)-1]) == "" {
+		lines = lines[:len(lines)-1]
+	}
+	return strings.Join(lines, "\n")
+}
+
 func sendMessage(s session.Session, w *game.World) Result {
 	p := w.Player()
-	to, all := pickRecipient(s, w, "Send to:", true)
-	if !all && to == nil {
-		return Stay
-	}
-	text := strings.TrimSpace(prompt(s, "Message:"))
-	if text == "" {
-		return Stay
-	}
-	if all {
-		for _, e := range recipients(w) {
-			w.SendMail(p, e, text)
+	for {
+		to, all := pickRecipient(s, w, "Send to:", true)
+		if !all && to == nil {
+			return Stay
 		}
-	} else {
-		w.SendMail(p, to, text)
+		text, send := composeMessage(s)
+		if send && strings.TrimSpace(text) != "" {
+			fmt.Fprintf(s, "\n%sSaving...%s\n", ansi.FgBrightCyan, ansi.Reset)
+			if all {
+				for _, e := range recipients(w) {
+					w.SendMail(p, e, text)
+				}
+			} else {
+				w.SendMail(p, to, text)
+			}
+		}
+		fmt.Fprint(s, "\nDo you wish to send another message? (y/N) ")
+		r, err := s.ReadKey()
+		if err != nil || (r != 'y' && r != 'Y') {
+			fmt.Fprint(s, "n\n")
+			return Stay
+		}
+		fmt.Fprint(s, "y\n")
 	}
-	ok(s, "Message sent.")
-	return Stay
 }
 
 func sendTradeDeal(s session.Session, w *game.World) Result {

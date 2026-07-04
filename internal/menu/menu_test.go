@@ -316,3 +316,30 @@ func TestEnterIgnoredWhenPrefOff(t *testing.T) {
 		t.Errorf("Enter with pref off should select nothing, got %v", it)
 	}
 }
+
+func TestComposeMessageSaves(t *testing.T) {
+	f := &fakeSession{keys: []rune("hello\rworld\r/\rS")} // two lines, then /S
+	text, send := composeMessage(f)
+	if !send {
+		t.Fatal("expected save")
+	}
+	if text != "hello\nworld" {
+		t.Errorf("text = %q, want %q", text, "hello\nworld")
+	}
+}
+
+func TestComposeMessageAborts(t *testing.T) {
+	f := &fakeSession{keys: []rune("secret\r/\rA")} // one line, then /A
+	_, send := composeMessage(f)
+	if send {
+		t.Error("expected abort (send=false)")
+	}
+}
+
+func TestComposeMessageClearThenSave(t *testing.T) {
+	f := &fakeSession{keys: []rune("oops\r/\rCkeep\r/\rS")} // clear, then one line, save
+	text, send := composeMessage(f)
+	if !send || text != "keep" {
+		t.Errorf("after clear: text=%q send=%v, want %q true", text, send, "keep")
+	}
+}
