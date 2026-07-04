@@ -7,19 +7,14 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-// Splash prints the Immortal Barons ANSI title banner and a short hints panel,
-// then waits for a keypress. The banner is original art (not copied from BRE),
-// built with the ansi-artwork skill; it carries its own colors, so it is
-// printed as-is. See the banner const below.
+// Splash prints the Immortal Barons ANSI title banner, then waits for a
+// keypress. The banner is original art (not copied from BRE), built with the
+// ansi-artwork skill; it carries its own colors, so it is printed as-is. See
+// the banner const below.
 func Splash(s session.Session) {
 	fmt.Fprint(s, ansi.Clear)
 	fmt.Fprint(s, banner)
-	fmt.Fprintf(s, "\n%sQuick tips:%s\n", ansi.FgBrightYellow, ansi.Reset)
-	fmt.Fprintf(s, "%s  - At number prompts: type > for the max, or use k/m for thousands/millions.\n", ansi.FgWhite)
-	fmt.Fprintf(s, "  - Press ? at a menu for help; * opens the System Menu.\n")
-	fmt.Fprintf(s, "  - Your empire is saved between visits.%s\n", ansi.Reset)
-	fmt.Fprintf(s, "\n%sPress any key to continue...%s", ansi.FgWhite, ansi.Reset)
-	s.ReadKey()
+	pause(s)
 }
 
 const banner = "    \x1b[90m════════\x1b[0m\x1b[31m════════\x1b[0m\x1b[90m════════\x1b[0m\x1b[31m════════\x1b[0m\x1b[90m════════\x1b[0m\x1b[31m════════\x1b[0m\x1b[90m════════\x1b[0m\x1b[31m════════\x1b[0m\x1b[90m════════\x1b[0m\x1b[31m════\x1b[0m\n" +
