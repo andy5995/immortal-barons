@@ -35,10 +35,11 @@ type Empire struct {
 	Bombers  int
 	Agents   int
 
-	Tax     int
-	SDI     int // 0-75, percentage reduction of incoming strike damage
-	HQ      int // 0 = none/not started; 1-100 = percent complete
-	Support int // 0-100, popular support; erodes with high tax, slashes Coastal income when low
+	Tax      int
+	SDI      int    // 0-75, percentage reduction of incoming strike damage
+	HQ       int    // 0 = none/not started; 1-100 = percent complete
+	Support  int    // 0-100, popular support; erodes with high tax, slashes Coastal income when low
+	Language string // help/UI language ("" = English; "de", "ru")
 
 	TurnsLeft   int
 	Protection  int

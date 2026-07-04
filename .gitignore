@@ -11,5 +11,3 @@
 # Runtime game state (created by the binaries)
 /data/
 
-# Generated translated docs (regenerate: po4a po4a.cfg && scripts/gen-help-translations.sh)
-/docs/help.*/

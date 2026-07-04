@@ -173,6 +173,8 @@ func BuildMenus() *Menus {
 			Do: toggle(func(w *game.World) *bool { return &w.VisitTrading })},
 		{Key: 'G', LabelFn: onOff("Visit Message Menu", func(w *game.World) *bool { return &w.VisitMessage }),
 			Do: toggle(func(w *game.World) *bool { return &w.VisitMessage })},
+		{Key: 'L', LabelFn: func(w *game.World) string { return "Language: " + languageName(w.Player().Language) },
+			Do: pickLanguage},
 		{Key: '0', Label: "Return", Do: back},
 	}
 

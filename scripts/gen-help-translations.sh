@@ -14,10 +14,10 @@ for lang in "${langs[@]}"; do
   [ -f "$po" ] || continue
   while IFS= read -r f; do
     rel="${f#internal/help/content/}"
-    out="docs/help.$lang/$rel"
+    out="internal/help/content.$lang/$rel"
     mkdir -p "$(dirname "$out")"
     po4a-translate -f text -o markdown -o yfm_keys=title -k 0 \
       -m "$f" -p "$po" -l "$out" >/dev/null 2>&1
   done < <(find internal/help/content -name '*.md' | sort)
-  echo "wrote docs/help.$lang/ ($(grep -c '^msgstr "[^"]' "$po" 2>/dev/null || echo 0) strings translated)"
+  echo "wrote internal/help/content.$lang/ ($(grep -c '^msgstr "[^"]' "$po" 2>/dev/null || echo 0) strings translated)"
 done

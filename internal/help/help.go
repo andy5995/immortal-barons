@@ -21,7 +21,11 @@ import (
 	"strings"
 )
 
-//go:embed content
+// content embeds the English source (content/) plus the po4a-generated
+// per-language trees (content.<lang>/). All three are committed; the language
+// dirs are regenerated from po/help/*.po by scripts/gen-help-translations.sh.
+//
+//go:embed content content.de content.ru
 var content embed.FS
 
 // Topic is one help article, parsed from a content/<category>/<file>.md file.
@@ -31,6 +35,8 @@ type Topic struct {
 	Order    int    // sort order within the category
 	InGame   bool   // show in the in-game browser (docs-only topics set false)
 	Body     string // the Markdown body, frontmatter stripped
+
+	path string // relative path under the content dir (e.g. "controls/interface.md")
 }
 
 // categoryOrder fixes the display order of the known categories; any category
@@ -50,17 +56,24 @@ var categoryNames = map[string]string{
 	"interbbs":  "Inter-BBS",
 }
 
-// all is the parsed topic set, loaded once at package init from the embedded
-// files. Loading at init keeps callers simple (no error path) and surfaces a
-// malformed committed file immediately as a panic during startup/tests.
-var all = mustLoad()
+// all is the English topic set (the canonical structure), loaded once at init.
+// translated indexes each language's topics by relative path, so a topic can be
+// localized in place. Loading at init keeps callers simple (no error path) and
+// surfaces a malformed committed file immediately as a panic during startup.
+var (
+	all        = loadDir("content")
+	translated = map[string]map[string]Topic{
+		"de": indexByPath(loadDir("content.de")),
+		"ru": indexByPath(loadDir("content.ru")),
+	}
+)
 
-// mustLoad walks the embedded content tree and parses every .md file. The
-// content is embedded at build time, so a walk/read failure is a programming
-// error, not a runtime condition — hence the panic.
-func mustLoad() []Topic {
+// loadDir walks one embedded content root and parses every .md file, recording
+// each topic's path relative to that root. A walk/read failure is a programming
+// error (content is embedded at build time) — hence the panic.
+func loadDir(root string) []Topic {
 	var topics []Topic
-	err := fs.WalkDir(content, "content", func(path string, d fs.DirEntry, err error) error {
+	err := fs.WalkDir(content, root, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
@@ -71,13 +84,37 @@ func mustLoad() []Topic {
 		if err != nil {
 			return err
 		}
-		topics = append(topics, parseTopic(string(raw)))
+		t := parseTopic(string(raw))
+		t.path = strings.TrimPrefix(path, root+"/")
+		topics = append(topics, t)
 		return nil
 	})
 	if err != nil {
 		panic("help: loading embedded content: " + err.Error())
 	}
 	return topics
+}
+
+func indexByPath(topics []Topic) map[string]Topic {
+	idx := make(map[string]Topic, len(topics))
+	for _, t := range topics {
+		idx[t.path] = t
+	}
+	return idx
+}
+
+// localize returns t with its Title and Body swapped for the given language's
+// translation when one exists; the structure (category, order, in_game) always
+// comes from the English canonical topic. An empty or unknown lang yields
+// English, as does a topic with no translation on file.
+func localize(t Topic, lang string) Topic {
+	if idx, ok := translated[lang]; ok {
+		if tr, ok := idx[t.path]; ok {
+			t.Title = tr.Title
+			t.Body = tr.Body
+		}
+	}
+	return t
 }
 
 // parseTopic splits a "---\nkey: value\n...\n---\nbody" file into a Topic. The
@@ -100,9 +137,9 @@ func parseTopic(raw string) Topic {
 				}
 				switch strings.TrimSpace(key) {
 				case "title":
-					t.Title = strings.TrimSpace(val)
+					t.Title = unquote(strings.TrimSpace(val))
 				case "category":
-					t.Category = strings.TrimSpace(val)
+					t.Category = unquote(strings.TrimSpace(val))
 				case "order":
 					t.Order, _ = strconv.Atoi(strings.TrimSpace(val))
 				case "in_game":
@@ -113,6 +150,15 @@ func parseTopic(raw string) Topic {
 	}
 	t.Body = strings.TrimSpace(body)
 	return t
+}
+
+// unquote strips a single pair of matching surrounding quotes, which po4a adds
+// around YAML frontmatter values when it regenerates a translated file.
+func unquote(s string) string {
+	if len(s) >= 2 && (s[0] == '\'' || s[0] == '"') && s[len(s)-1] == s[0] {
+		return s[1 : len(s)-1]
+	}
+	return s
 }
 
 // CategoryName returns a category slug's display name, or the slug unchanged
@@ -151,19 +197,21 @@ func Categories() []string {
 	return append(known, extra...)
 }
 
-// Topics returns the in-game topics in a category, sorted by Order then Title.
-func Topics(category string) []Topic {
+// Topics returns the in-game topics in a category, localized to lang (English
+// for "" or an unknown lang), sorted by Order then Title. Order comes from the
+// English canonical frontmatter, so the sort is stable across languages.
+func Topics(category, lang string) []Topic {
 	var out []Topic
 	for _, t := range all {
 		if t.InGame && t.Category == category {
-			out = append(out, t)
+			out = append(out, localize(t, lang))
 		}
 	}
 	sort.Slice(out, func(i, j int) bool {
 		if out[i].Order != out[j].Order {
 			return out[i].Order < out[j].Order
 		}
-		return out[i].Title < out[j].Title
+		return out[i].path < out[j].path // language-independent tie-break
 	})
 	return out
 }
