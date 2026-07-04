@@ -706,6 +706,98 @@ func interbbsScores(s session.Session, w *game.World) Result {
 	return Stay
 }
 
+// createGroupAttack assembles an interplanetary strike against an empire on
+// another planet (chosen from imported scores). v1 commits a raw offense
+// figure; it does not yet remove the units from the empire — a follow-up will
+// make the forces actually depart.
+func createGroupAttack(s session.Session, w *game.World) Result {
+	p := w.Player()
+	if len(w.RemoteBoards) == 0 {
+		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
+		return Stay
+	}
+	boards := make([]string, len(w.RemoteBoards))
+	for i, b := range w.RemoteBoards {
+		boards[i] = b.BoardID
+	}
+	fmt.Fprintf(s, "\n%sTarget which planet?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	board := pickFromList(s, "Planet", boards)
+	if board == "" {
+		return Stay
+	}
+	var rb *game.RemoteBoard
+	for i := range w.RemoteBoards {
+		if w.RemoteBoards[i].BoardID == board {
+			rb = &w.RemoteBoards[i]
+		}
+	}
+	choices := []string{"(the whole planet)"}
+	for _, sc := range rb.Scores {
+		choices = append(choices, sc.Empire)
+	}
+	fmt.Fprintf(s, "\n%sTarget which baron?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	pick := pickFromList(s, "Baron", choices)
+	if pick == "" {
+		return Stay
+	}
+	target := pick
+	if pick == choices[0] {
+		target = "" // whole planet
+	}
+	offense := promptSuggested(s, "How much offense to commit?", p.Offense(), p.Offense())
+	if offense <= 0 {
+		return Stay
+	}
+	days := promptInt(s, "Leave in how many days?")
+	if days < 1 {
+		days = 1
+	}
+	ga := w.CreateGroupAttack(p, board, target, w.GameDay+days, offense)
+	ok(s, "Group attack #%d formed against %s on %s, leaving day %d.", ga.ID, pick, board, ga.DepartDay)
+	return Stay
+}
+
+// joinGroupAttack adds the player's offense to a group attack still forming.
+func joinGroupAttack(s session.Session, w *game.World) Result {
+	p := w.Player()
+	var lines []string
+	var ids []int
+	for _, ga := range w.GroupAttacks {
+		if w.GameDay >= ga.DepartDay {
+			continue
+		}
+		tgt := ga.TargetEmpire
+		if tgt == "" {
+			tgt = "the whole planet"
+		}
+		lines = append(lines, fmt.Sprintf("#%d -> %s on %s (leaves day %d, offense %s)",
+			ga.ID, tgt, ga.TargetBoard, ga.DepartDay, comma(ga.Offense())))
+		ids = append(ids, ga.ID)
+	}
+	if len(lines) == 0 {
+		ok(s, "No group attacks are forming right now.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%sJoin which attack?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	for i, x := range lines {
+		fmt.Fprintf(s, "    %d) %s\n", i+1, x)
+	}
+	i := promptInt(s, "Attack (0 to cancel)?")
+	if i < 1 || i > len(ids) {
+		return Stay
+	}
+	offense := promptSuggested(s, "How much offense to add?", p.Offense(), p.Offense())
+	if offense <= 0 {
+		return Stay
+	}
+	if err := w.JoinGroupAttack(p, ids[i-1], offense); err != nil {
+		fail(s, err)
+		return Stay
+	}
+	ok(s, "You joined group attack #%d with %s offense.", ids[i-1], comma(offense))
+	return Stay
+}
+
 func readMessages(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if len(p.Mail) == 0 {
