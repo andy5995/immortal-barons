@@ -110,7 +110,8 @@ func clampAmt(n, max int) int {
 }
 
 func pause(s session.Session) {
-	fmt.Fprintf(s, "\n%sPress any key...%s", ansi.FgWhite, ansi.Reset)
+	// BRE's own pause prompt.
+	fmt.Fprintf(s, "\n%s-=<Paused>=-%s", ansi.FgBrightGreen, ansi.Reset)
 	s.ReadKey()
 }
 

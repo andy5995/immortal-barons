@@ -86,7 +86,7 @@ func showEvents(s session.Session, e *game.Empire) {
 		fmt.Fprintf(s, "  %s\n", ev)
 	}
 	e.Events = nil
-	fmt.Fprintf(s, "\n%sPress any key...%s", ansi.FgWhite, ansi.Reset)
+	fmt.Fprintf(s, "\n%s-=<Paused>=-%s", ansi.FgBrightGreen, ansi.Reset)
 	s.ReadKey() // intentional wait-for-keypress; result unused
 }
 
