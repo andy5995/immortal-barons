@@ -195,7 +195,7 @@ type RemoteBoard struct {
 type World struct {
 	Empires       []*Empire
 	Prices        Prices
-	Config        Config
+	Config        Config `json:"-"` // authoritative copy is config.json; Load sets this
 	GameDay       int
 	InvestRate    int // percent per day, floats each daily maintenance
 	LastMaintDate string
