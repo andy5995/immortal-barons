@@ -311,3 +311,26 @@ func TestFoodNeededNextTurn(t *testing.T) {
 		t.Errorf("FoodNeededNextTurn: want %d, got %d", want, got)
 	}
 }
+
+func TestBuildAndSellBombers(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Gold = 100000
+
+	if err := w.BuildBombers(e, 10); err != nil {
+		t.Fatal(err)
+	}
+	if e.Bombers != 10 {
+		t.Errorf("expected 10 bombers, got %d", e.Bombers)
+	}
+	before := e.Gold
+	if err := w.SellBombers(e, 5); err != nil {
+		t.Fatal(err)
+	}
+	if e.Bombers != 5 {
+		t.Errorf("expected 5 bombers after selling, got %d", e.Bombers)
+	}
+	if e.Gold <= before {
+		t.Error("selling bombers should add gold")
+	}
+}

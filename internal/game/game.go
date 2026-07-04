@@ -141,7 +141,7 @@ func (e *Empire) techFactor() int {
 }
 
 type Prices struct {
-	Land, Food, Trooper, Jet, Turret, Tank, Carrier, Agent int
+	Land, Food, Trooper, Jet, Turret, Tank, Carrier, Agent, Bomber int
 }
 
 const (
@@ -217,7 +217,7 @@ func NewWorld(cfg Config) *World { return NewWorldSeed(cfg, time.Now().UnixNano(
 
 func NewWorldSeed(cfg Config, seed int64) *World {
 	w := &World{
-		Prices:       Prices{Land: 100, Food: 2, Trooper: 50, Jet: 60, Turret: 60, Tank: 350, Carrier: 40, Agent: 100},
+		Prices:       Prices{Land: 100, Food: 2, Trooper: 50, Jet: 60, Turret: 60, Tank: 350, Carrier: 40, Agent: 100, Bomber: 200},
 		Config:       cfg,
 		rng:          rand.New(rand.NewSource(seed)),
 		VisitCovert:  true,

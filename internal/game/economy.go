@@ -211,6 +211,20 @@ func (w *World) SellJets(e *Empire, n int) error {
 	return sellUnit(&e.Jets, n, w.Prices.Jet, e)
 }
 
+// BuildBombers buys n bombers directly (they can also be produced by Industrial
+// regions). Old saves lacking a Bomber price default to it via NewWorld.
+func (w *World) BuildBombers(e *Empire, n int) error {
+	if err := e.spend(n, w.Prices.Bomber); err != nil {
+		return err
+	}
+	e.Bombers += n
+	return nil
+}
+
+func (w *World) SellBombers(e *Empire, n int) error {
+	return sellUnit(&e.Bombers, n, w.Prices.Bomber, e)
+}
+
 func (w *World) SellTurrets(e *Empire, n int) error {
 	return sellUnit(&e.Turrets, n, w.Prices.Turret, e)
 }
