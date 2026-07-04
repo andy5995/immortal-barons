@@ -5,11 +5,11 @@ import (
 	"testing"
 )
 
-// With auto-pay maintenance on and enough gold, the end-of-turn summary must
-// still report what was paid and consumed (regression: the income-timing bug
-// left the player broke at maintenance, so nothing was paid and the summary
-// was empty).
-func TestAutoPayShowsGoldPaidAndFoodConsumed(t *testing.T) {
+// With auto-pay maintenance on and enough gold, the maintenance screen (shown
+// after the empire status, before the pause) must report the gold paid, and
+// the food upkeep must be a real number to display beside it. Regression: the
+// income-timing bug left the player broke at maintenance so nothing was paid.
+func TestAutoPayReportsMaintenance(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
 	p.Gold = 5_000_000
@@ -18,14 +18,11 @@ func TestAutoPayShowsGoldPaidAndFoodConsumed(t *testing.T) {
 
 	f := &fakeSession{}
 	paymentStage(f, w, p)
-	w.PlayTurn(p, w.Today)
-	endOfTurnStats(f, w, p)
 
-	out := f.out.String()
-	if !strings.Contains(out, "Gold paid") {
-		t.Errorf("end-of-turn missing 'Gold paid'.\n--- output ---\n%s", out)
+	if out := f.out.String(); !strings.Contains(out, "Maintenance paid") {
+		t.Errorf("auto-pay should report maintenance paid.\n--- output ---\n%s", out)
 	}
-	if !strings.Contains(out, "Food consumed") {
-		t.Errorf("end-of-turn missing 'Food consumed'.\n--- output ---\n%s", out)
+	if p.FoodUpkeep() <= 0 {
+		t.Errorf("FoodUpkeep should be positive for a populated empire, got %d", p.FoodUpkeep())
 	}
 }

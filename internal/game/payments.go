@@ -24,6 +24,10 @@ func (e *Empire) ForcesUpkeep() int {
 // RegionUpkeep is the gold required to maintain the empire's regions.
 func (e *Empire) RegionUpkeep() int { return e.Land * RegionUpkeepPerLand }
 
+// FoodUpkeep is the food the population and army eat per turn. Jets and tanks
+// eat double (crews plus fuel/rations).
+func (e *Empire) FoodUpkeep() int { return e.People + e.Troopers + e.Jets*2 + e.Tanks*2 }
+
 // clampGive limits a payment to what the empire can actually afford and
 // deducts it, recording it in the turn's LastGoldPaid tally. Returns the
 // amount actually paid.

@@ -153,7 +153,7 @@ func (w *World) processEconomy(e *Empire) {
 		e.Debt += e.Debt * 10 / 100
 	}
 
-	e.LastFoodConsumed = e.People + e.Troopers + e.Jets*2 + e.Tanks*2
+	e.LastFoodConsumed = e.FoodUpkeep()
 	e.Food += e.Regions.foodProduced() - e.LastFoodConsumed
 	if e.Food < 0 {
 		e.People -= (-e.Food)/10 + 1

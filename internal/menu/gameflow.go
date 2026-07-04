@@ -115,8 +115,6 @@ func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
 	statLine(s, p.MadeBombers, "Bombers were manufactured by Industrial Zones.")
 	statLine(s, p.MadeTanks, "Tanks were manufactured by Industrial Zones.")
 	statLine(s, p.MadeCarriers, "Carriers were manufactured by Industrial Zones.")
-	statLine(s, p.LastGoldPaid, "Gold paid.")
-	statLine(s, p.LastFoodConsumed, "units of Food consumed.")
 	fmt.Fprintf(s, "  Turns left today: %d\n", p.TurnsLeft)
 	pause(s)
 }
@@ -191,6 +189,7 @@ func runTurn(s session.Session, w *game.World) Result {
 		// clear-screen would wipe it before the player could read it.
 		renderEmpireStatus(s, w)
 		paymentStage(s, w, p)
+		statLine(s, p.FoodUpkeep(), "units of Food consumed.")
 		pause(s)
 
 		if err := Run(s, w, menus.Spending); err != nil {
