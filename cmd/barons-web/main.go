@@ -10,7 +10,9 @@
 package main
 
 import (
+	"crypto/rand"
 	"encoding/base64"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"io"
@@ -56,20 +58,46 @@ func (h *hub) index(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+	// The session id is a server-generated secret carried in an HttpOnly
+	// cookie — never a client-supplied query param — so it can't be guessed,
+	// forged, or used to impersonate another caller's handle.
+	if _, err := r.Cookie("bsid"); err != nil {
+		b := make([]byte, 16)
+		if _, err := rand.Read(b); err != nil {
+			http.Error(w, "internal error", http.StatusInternalServerError)
+			return
+		}
+		http.SetCookie(w, &http.Cookie{
+			Name:     "bsid",
+			Value:    hex.EncodeToString(b),
+			Path:     "/",
+			HttpOnly: true,
+			SameSite: http.SameSiteStrictMode,
+		})
+	}
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	io.WriteString(w, indexHTML)
+}
+
+// sessionID reads the secret session id from the bsid cookie.
+func sessionID(r *http.Request) (string, bool) {
+	c, err := r.Cookie("bsid")
+	if err != nil || c.Value == "" {
+		return "", false
+	}
+	return c.Value, true
 }
 
 // stream opens the Server-Sent Events channel for a session, creating the
 // session (and starting its game) on first connect.
 func (h *hub) stream(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
-	if id == "" {
-		http.Error(w, "missing id", http.StatusBadRequest)
+	id, ok := sessionID(r)
+	if !ok {
+		http.Error(w, "no session; load / first", http.StatusBadRequest)
 		return
 	}
-	flusher, ok := w.(http.Flusher)
-	if !ok {
+	flusher, canFlush := w.(http.Flusher)
+	if !canFlush {
 		http.Error(w, "streaming unsupported", http.StatusInternalServerError)
 		return
 	}
@@ -79,7 +107,7 @@ func (h *hub) stream(w http.ResponseWriter, r *http.Request) {
 	if !existed {
 		ws = session.NewWebSession()
 		h.sessions[id] = ws
-		go h.runGame(id, ws, r.URL.Query().Get("name"))
+		go h.runGame(id, ws)
 	}
 	h.mu.Unlock()
 
@@ -105,7 +133,11 @@ func (h *hub) stream(w http.ResponseWriter, r *http.Request) {
 
 // key feeds one or more keystrokes (the POST body) to a session.
 func (h *hub) key(w http.ResponseWriter, r *http.Request) {
-	id := r.URL.Query().Get("id")
+	id, ok := sessionID(r)
+	if !ok {
+		http.Error(w, "no session", http.StatusBadRequest)
+		return
+	}
 	h.mu.Lock()
 	ws := h.sessions[id]
 	h.mu.Unlock()
@@ -121,20 +153,18 @@ func (h *hub) key(w http.ResponseWriter, r *http.Request) {
 }
 
 // runGame plays one session to completion, then cleans it up.
-func (h *hub) runGame(id string, ws *session.WebSession, name string) {
+func (h *hub) runGame(id string, ws *session.WebSession) {
 	defer func() {
 		ws.Close()
 		h.mu.Lock()
 		delete(h.sessions, id)
 		h.mu.Unlock()
 	}()
-	handle := name
-	if handle == "" {
-		handle = "web-" + id
-	}
+	// Handle is derived from the secret session id, so a web caller cannot
+	// claim another caller's BBS handle.
 	today := time.Now().Format("2006-01-02")
-	if err := play.Run(ws, play.Identity{Handle: handle}, h.cfg, today); err != nil {
-		log.Printf("session %s: %v", id, err)
+	if err := play.Run(ws, play.Identity{Handle: "web-" + id}, h.cfg, today); err != nil {
+		log.Printf("session %q: %v", id, err) // %q: id is a safe secret, quoted defensively
 	}
 	fmt.Fprint(ws, "\r\n\x1b[97mUntil next turn, Baron. Refresh to play again.\x1b[0m\r\n")
 }
@@ -155,14 +185,14 @@ const indexHTML = `<!doctype html>
 <body>
 <div id="term"></div>
 <script>
-  const id = (window.crypto && crypto.randomUUID) ? crypto.randomUUID()
-                                                   : String(Date.now()) + Math.random();
+  // The session id lives in an HttpOnly cookie set by GET /, sent
+  // automatically with same-origin requests — the page never handles it.
   const term = new Terminal({cols: 80, rows: 25, convertEol: true,
                              fontFamily: 'monospace', cursorBlink: true});
   term.open(document.getElementById('term'));
   term.focus();
 
-  const es = new EventSource('/stream?id=' + id);
+  const es = new EventSource('/stream');
   es.onmessage = (e) => {
     const bin = atob(e.data);
     const bytes = new Uint8Array(bin.length);
@@ -171,7 +201,7 @@ const indexHTML = `<!doctype html>
   };
 
   term.onData((data) => {
-    fetch('/key?id=' + id, {method: 'POST', body: data});
+    fetch('/key', {method: 'POST', body: data});
   });
 </script>
 </body>
