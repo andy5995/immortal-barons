@@ -14,9 +14,16 @@ import (
 
 // buy2 wraps a "prompt for quantity, apply, report" economy action. The
 // max offered is what the empire can currently afford at unit's price.
-func buy2(label string, unit func(*game.World) int, apply func(*game.World, *game.Empire, int) error) Action {
+func buy2(label string, military bool, unit func(*game.World) int, apply func(*game.World, *game.Empire, int) error) Action {
 	return func(s session.Session, w *game.World) Result {
 		p := w.Player()
+		// The league's Buy Military knob can forbid buying army units on the
+		// open market (players must then build them through industry). Limited
+		// mode's daily market pool isn't built yet, so it behaves like Yes.
+		if military && w.Config.BuyMilitary == game.BuyNo {
+			fail(s, fmt.Errorf("Buying military units is disabled in this league."))
+			return Stay
+		}
 		price := unit(w)
 		max := 0
 		if price > 0 {

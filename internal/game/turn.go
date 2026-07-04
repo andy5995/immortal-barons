@@ -148,7 +148,10 @@ func (w *World) CollectIncome(e *Empire) {
 func (w *World) processEconomy(e *Empire) {
 	tf := e.techFactor()
 
-	e.Bank += min(e.Bank, InterestCap) / 100
+	// Bank interest scales with the league's Interest Rate knob, anchored so
+	// the default (50) reproduces the historical ~1%/turn. Mapping to BRE's
+	// exact per-day interest math is deferred; this keeps the knob linear.
+	e.Bank += min(e.Bank, InterestCap) * w.Config.InterestRate / 5000
 	if e.Debt > 0 {
 		e.Debt += e.Debt * 10 / 100
 	}
