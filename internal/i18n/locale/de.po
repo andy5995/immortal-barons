@@ -259,3 +259,46 @@ msgstr "─»>Pause<«─"
 
 msgid "Change Production?"
 msgstr "Produktion ändern?"
+
+# Empire status
+msgid "Turns"
+msgstr "Züge"
+
+msgid "Score"
+msgstr "Punkte"
+
+msgid "Debt"
+msgstr "Schulden"
+
+msgid "Population"
+msgstr "Bevölkerung"
+
+msgid "Tax Rate"
+msgstr "Steuersatz"
+
+msgid "Popular Support"
+msgstr "Rückhalt"
+
+msgid "Food"
+msgstr "Nahrung"
+
+msgid "Headquarters"
+msgstr "Hauptquartier"
+
+msgid "None"
+msgstr "Keins"
+
+msgid "Complete"
+msgstr "Fertig"
+
+msgid "Offense"
+msgstr "Angriff"
+
+msgid "Defense"
+msgstr "Verteidigung"
+
+msgid "Military"
+msgstr "Militär"
+
+msgid "You have %s%s turns of Protection Left."
+msgstr "Du hast noch %s%s Züge Schutz."

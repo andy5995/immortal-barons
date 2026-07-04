@@ -609,7 +609,7 @@ func renderEmpireStatus(s session.Session, w *game.World) {
 	c, wht, r := ansi.FgBrightCyan, ansi.FgWhite, ansi.Reset
 	num := func(n int) string { return c + comma(n) + r }
 	pct := func(n int) string { return fmt.Sprintf("%s%d%%%s", c, n, r) }
-	kv := func(label, value string) { fmt.Fprintf(s, "%s%s:%s %s\n", wht, label, r, value) }
+	kv := func(label, value string) { fmt.Fprintf(s, "%s%s:%s %s\n", wht, tr(s, label), r, value) }
 
 	fmt.Fprintf(s, "\n%s─*%s*─%s\n", c, p.Name, r)
 	kv("Turns", num(p.TurnsLeft))
@@ -619,22 +619,22 @@ func renderEmpireStatus(s session.Session, w *game.World) {
 	if p.Debt > 0 {
 		kv("Debt", num(p.Debt))
 	}
-	fmt.Fprintf(s, "%sPopulation:%s %s %s(Tax Rate: %s)%s\n", wht, r, num(p.People), wht, pct(p.Tax), r)
+	fmt.Fprintf(s, "%s%s:%s %s %s(%s: %s)%s\n", wht, tr(s, "Population"), r, num(p.People), wht, tr(s, "Tax Rate"), pct(p.Tax), r)
 	kv("Popular Support", pct(p.Support))
 	kv("Food", num(p.Food))
-	fmt.Fprintf(s, "%sHeadquarters:%s %s%s%s\n", wht, r, c, hqStatus(p), r)
+	fmt.Fprintf(s, "%s%s:%s %s%s%s\n", wht, tr(s, "Headquarters"), r, c, tr(s, hqStatus(p)), r)
 	if p.SDI > 0 {
 		kv("SDI", pct(p.SDI))
 	}
-	fmt.Fprintf(s, "%sOffense:%s %s   %sDefense:%s %s\n", wht, r, num(p.Offense()), wht, r, num(p.Defense()))
-	writeBracketRow(s, "Military", []bracketItem{
+	fmt.Fprintf(s, "%s%s:%s %s   %s%s:%s %s\n", wht, tr(s, "Offense"), r, num(p.Offense()), wht, tr(s, "Defense"), r, num(p.Defense()))
+	writeBracketRow(s, tr(s, "Military"), []bracketItem{
 		mkBracket(p.Troopers, "Troopers"), mkBracket(p.Jets, "Jets"), mkBracket(p.Turrets, "Turrets"),
 		mkBracket(p.Tanks, "Tanks"), mkBracket(p.Bombers, "Bombers"), mkBracket(p.Carriers, "Carriers"),
 		mkBracket(p.Agents, "Agents"),
 	})
-	writeBracketRow(s, "Regions", regionBracketItems(p))
+	writeBracketRow(s, tr(s, "Regions"), regionBracketItems(p))
 	if p.Protection > 0 {
-		fmt.Fprintf(s, "%sYou have %s%s turns of Protection Left.%s\n", wht, num(p.Protection), wht, r)
+		fmt.Fprintf(s, "%s"+tr(s, "You have %s%s turns of Protection Left.")+"%s\n", wht, num(p.Protection), wht, r)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBlue, rule, r)
 }

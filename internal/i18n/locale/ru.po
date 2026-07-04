@@ -259,3 +259,46 @@ msgstr "─»>Пауза<«─"
 
 msgid "Change Production?"
 msgstr "Изменить производство?"
+
+# Empire status
+msgid "Turns"
+msgstr "Ходы"
+
+msgid "Score"
+msgstr "Очки"
+
+msgid "Debt"
+msgstr "Долг"
+
+msgid "Population"
+msgstr "Население"
+
+msgid "Tax Rate"
+msgstr "Налоговая ставка"
+
+msgid "Popular Support"
+msgstr "Поддержка народа"
+
+msgid "Food"
+msgstr "Еда"
+
+msgid "Headquarters"
+msgstr "Штаб"
+
+msgid "None"
+msgstr "Нет"
+
+msgid "Complete"
+msgstr "Готово"
+
+msgid "Offense"
+msgstr "Атака"
+
+msgid "Defense"
+msgstr "Защита"
+
+msgid "Military"
+msgstr "Военные"
+
+msgid "You have %s%s turns of Protection Left."
+msgstr "У вас осталось %s%s ходов защиты."
