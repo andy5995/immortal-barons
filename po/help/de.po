@@ -550,7 +550,7 @@ msgstr "Über das Handelsmenü können Sie einem anderen Imperium Gold direkt al
 #: internal/help/content/interbbs/leagues.md:8
 #, no-wrap
 msgid "Leagues and Inter-BBS Play"
-msgstr ""
+msgstr "Ligen und Inter-BBS-Spiel"
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:13
@@ -558,40 +558,40 @@ msgid ""
 "Some games link many boards together into one world. Your goal grows from "
 "beating the local rulers to helping your board beat other boards. Teamwork "
 "matters."
-msgstr ""
+msgstr "Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg über die lokalen Herrscher zum Sieg über andere Planeten."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:17
 msgid ""
 "Group Attack — several rulers on your board join one strike against a "
 "distant enemy. The gains are shared among those who take part."
-msgstr ""
+msgstr "Gruppenangriff — mehrere Herrscher Ihres Boards schließen sich zu einem Schlag gegen einen fernen Feind zusammen. Die Beute wird nach Beitrag geteilt."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/leagues.md:17
 msgid "IP Scores — see how the boards rank against each other."
-msgstr ""
+msgstr "IP-Punkte — sehen, wie die Boards zueinander stehen."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:20
 msgid ""
 "A league game has a set length. When it ends, the world resets and a new "
 "game begins."
-msgstr ""
+msgstr "Ein Ligaspiel hat eine feste Dauer. Wenn es endet, wird die Welt zurückgesetzt und ein neues Spiel beginnt."
 
 #. type: Plain text
 #: internal/help/content/interbbs/leagues.md:21
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
 "play."
-msgstr ""
+msgstr "Diese Funktionen erscheinen nur, wenn das Spiel für Inter-BBS- oder Ligaspiel eingerichtet ist."
 
 #. type: Title #
 #: internal/help/content/interbbs/sysop.md:1
 #: internal/help/content/interbbs/sysop.md:8
 #, no-wrap
 msgid "Sysop Guide — Running Immortal Barons"
-msgstr ""
+msgstr "Sysop-Anleitung — Immortal Barons betreiben"
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:13
@@ -599,13 +599,13 @@ msgid ""
 "This guide is for the BBS operator (the sysop). It explains how to set up "
 "the game on your board, and how to join an inter-BBS league. Players do not "
 "need to read this."
-msgstr ""
+msgstr "Diese Anleitung ist für den BBS-Betreiber (den Sysop). Sie erklärt, wie Sie das Spiel auf Ihrem Board einrichten und einer Inter-BBS-Liga beitreten. Spieler müssen sie nicht lesen."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:14
 #, no-wrap
 msgid "What you need"
-msgstr ""
+msgstr "Was Sie brauchen"
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:18
@@ -613,25 +613,25 @@ msgid ""
 "The game is one program: `barons-door`. It runs as a native door under "
 "modern BBS software such as Synchronet or Mystic. You do not need DOSBox or "
 "DOSEMU."
-msgstr ""
+msgstr "Das Spiel ist ein einziges Programm: `barons-door`. Es läuft als nativer Door unter moderner BBS-Software wie Synchronet oder Mystic. Sie brauchen weder DOSBox noch DOSEMU."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:21
 msgid ""
 "The game keeps all its files in one data directory (default `./data`). Point "
 "the `-data` option at it."
-msgstr ""
+msgstr "Das Spiel hält alle seine Dateien in einem Datenverzeichnis (Standard `./data`). Richten Sie die Option `-data` darauf."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:22
 #, no-wrap
 msgid "First-time setup"
-msgstr ""
+msgstr "Ersteinrichtung"
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:25
 msgid "Run the setup once to create the config file:"
-msgstr ""
+msgstr "Führen Sie die Einrichtung einmal aus, um die Konfigurationsdatei zu erstellen:"
 
 #. type: Fenced code block
 #: internal/help/content/interbbs/sysop.md:26
@@ -644,13 +644,13 @@ msgstr ""
 msgid ""
 "It asks a few questions (turns per day, protection turns, number of AI "
 "barons, game length) and writes `config.json`."
-msgstr ""
+msgstr "Es stellt ein paar Fragen (Züge pro Tag, Schutzzüge, Anzahl der KI-Barone, Spieldauer) und schreibt `config.json`."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:33
 #, no-wrap
 msgid "Registering the door"
-msgstr ""
+msgstr "Den Door registrieren"
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:38
@@ -658,7 +658,7 @@ msgid ""
 "Set up the game as an external program (a \"door\") in your BBS software. "
 "Your BBS writes a dropfile when a caller runs the door. The game reads it to "
 "learn who is playing and how much time they have."
-msgstr ""
+msgstr "Richten Sie das Spiel als externes Programm (einen „Door“) in Ihrer BBS-Software ein. Ihr BBS schreibt eine Dropfile-Datei, wenn ein Anrufer den Door startet. Das Spiel liest sie, um zu erfahren, wer spielt und wie viel Zeit er hat."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:43
@@ -666,17 +666,17 @@ msgid ""
 "The game reads **DOOR32.SYS** (both Synchronet and Mystic write it) or "
 "**DOOR.SYS**. Point the game at it with `-dropfile`, or let it search the "
 "current directory."
-msgstr ""
+msgstr "Das Spiel liest **DOOR32.SYS** (Synchronet und Mystic schreiben beide diese) oder **DOOR.SYS**. Weisen Sie das Spiel mit `-dropfile` darauf hin, oder lassen Sie es das aktuelle Verzeichnis durchsuchen."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:43
 msgid "The caller's handle from the dropfile becomes the name of their realm."
-msgstr ""
+msgstr "Der Handle des Anrufers aus der Dropfile wird zum Namen seines Reichs."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:45
 msgid "A typical command line:"
-msgstr ""
+msgstr "Eine typische Befehlszeile:"
 
 #. type: Fenced code block
 #: internal/help/content/interbbs/sysop.md:46
@@ -688,12 +688,12 @@ msgstr ""
 #: internal/help/content/interbbs/sysop.md:50
 #, no-wrap
 msgid "Daily maintenance"
-msgstr ""
+msgstr "Tägliche Wartung"
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:53
 msgid "Run maintenance once a day (a nightly event is the usual place):"
-msgstr ""
+msgstr "Führen Sie die Wartung einmal am Tag aus (ein nächtliches Ereignis ist der übliche Ort):"
 
 #. type: Fenced code block
 #: internal/help/content/interbbs/sysop.md:54
@@ -706,61 +706,61 @@ msgstr ""
 msgid ""
 "This advances the game one day for every day that passed, lets the AI barons "
 "take their turns, and refreshes each player's turns."
-msgstr ""
+msgstr "Dies bringt das Spiel für jeden vergangenen Tag einen Tag voran, lässt die KI-Barone ihre Züge machen und erneuert die Züge jedes Spielers."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:61
 #, no-wrap
 msgid "Inter-BBS (league) play"
-msgstr ""
+msgstr "Inter-BBS-(Liga-)Spiel"
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:65
 msgid ""
 "A league is a group of boards whose players compete against each other. To "
 "join one, turn on inter-BBS play and give your board a name."
-msgstr ""
+msgstr "Eine Liga ist eine Gruppe von Boards, deren Spieler gegeneinander antreten. Um beizutreten, schalten Sie das Inter-BBS-Spiel ein und geben Ihrem Board einen Namen."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:67
 msgid "Edit `config.json` and set:"
-msgstr ""
+msgstr "Bearbeiten Sie `config.json` und setzen Sie:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:73
 msgid "`\"IBBS\": true` — turn on the inter-BBS menus."
-msgstr ""
+msgstr "`\"IBBS\": true` — die Inter-BBS-Menüs einschalten."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:73
 msgid "`\"BoardID\"` — a short unique name for your board (your \"planet\")."
-msgstr ""
+msgstr "`\"BoardID\"` — ein kurzer, eindeutiger Name für Ihr Board (Ihren „Planeten“)."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:73
 msgid ""
 "`\"InboundDir\"` — the directory where packets from other boards arrive."
-msgstr ""
+msgstr "`\"InboundDir\"` — das Verzeichnis, in dem Pakete von anderen Boards eintreffen."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:73
 msgid ""
 "`\"OutboundDir\"` — the directory where the game writes packets for other "
 "boards."
-msgstr ""
+msgstr "`\"OutboundDir\"` — das Verzeichnis, in das das Spiel Pakete für andere Boards schreibt."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:76
 msgid ""
 "Ask your League Coordinator for the node list and add it to your data "
 "directory as **`ibnodes.dat`** (see the format below)."
-msgstr ""
+msgstr "Bitten Sie Ihren Liga-Koordinator um die Knotenliste und legen Sie sie als **`ibnodes.dat`** in Ihr Datenverzeichnis (siehe Format unten)."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:77
 #, no-wrap
 msgid "How packets move (you choose the schedule)"
-msgstr ""
+msgstr "Wie Pakete sich bewegen (Sie wählen den Zeitplan)"
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:82
@@ -768,12 +768,12 @@ msgid ""
 "The game never moves files between boards. It only reads and writes packet "
 "files in your inbound and outbound directories. Moving the files between "
 "boards is your job, and you choose how often it happens."
-msgstr ""
+msgstr "Das Spiel bewegt niemals Dateien zwischen Boards. Es liest und schreibt nur Paketdateien in Ihren Eingangs- und Ausgangsverzeichnissen. Die Dateien zwischen den Boards zu bewegen, ist Ihre Aufgabe, und Sie bestimmen, wie oft das geschieht."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:84
 msgid "The inter-BBS step is:"
-msgstr ""
+msgstr "Der Inter-BBS-Schritt ist:"
 
 #. type: Fenced code block
 #: internal/help/content/interbbs/sysop.md:85
@@ -787,22 +787,22 @@ msgid ""
 "It reads every packet in your inbound directory, applies it, and writes new "
 "packets to your outbound directory. It also runs automatically inside `-"
 "maint` when inter-BBS play is on."
-msgstr ""
+msgstr "Es liest jedes Paket in Ihrem Eingangsverzeichnis, wendet es an und schreibt neue Pakete in Ihr Ausgangsverzeichnis. Es läuft auch automatisch innerhalb von `-maint`, wenn das Inter-BBS-Spiel eingeschaltet ist."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:94
 msgid "A common setup:"
-msgstr ""
+msgstr "Ein üblicher Aufbau:"
 
 #. type: Bullet: '1. '
 #: internal/help/content/interbbs/sysop.md:101
 msgid "A caller plays the game."
-msgstr ""
+msgstr "Ein Anrufer spielt das Spiel."
 
 #. type: Bullet: '2. '
 #: internal/help/content/interbbs/sysop.md:101
 msgid "After the caller exits, or on a schedule you pick, run `-planetary`."
-msgstr ""
+msgstr "Nachdem der Anrufer beendet hat, oder nach einem von Ihnen gewählten Zeitplan, führen Sie `-planetary` aus."
 
 #. type: Bullet: '3. '
 #: internal/help/content/interbbs/sysop.md:101
@@ -810,12 +810,12 @@ msgid ""
 "Your transport script copies each file from your outbound directory to the "
 "inbound directory of every other board (over FidoNet, a sync tool, scp, a "
 "shared mount — whatever you use)."
-msgstr ""
+msgstr "Ihr Transportskript kopiert jede Datei aus Ihrem Ausgangsverzeichnis in das Eingangsverzeichnis jedes anderen Boards (über FidoNet, ein Sync-Werkzeug, scp, ein gemeinsames Laufwerk — was auch immer Sie nutzen)."
 
 #. type: Bullet: '4. '
 #: internal/help/content/interbbs/sysop.md:101
 msgid "The next `-planetary` run on each board reads and applies those files."
-msgstr ""
+msgstr "Der nächste `-planetary`-Lauf auf jedem Board liest und wendet diese Dateien an."
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:105
@@ -823,13 +823,13 @@ msgid ""
 "Run it as often as you like. More often means shorter travel times between "
 "planets. The in-game \"Travel Times\" screen shows players how recently "
 "packets have arrived, so they know how fast operations move."
-msgstr ""
+msgstr "Führen Sie es so oft aus, wie Sie möchten. Öfter bedeutet kürzere Reisezeiten zwischen Planeten. Der Ingame-Bildschirm „Reisezeiten“ zeigt den Spielern, wie kürzlich Pakete eingetroffen sind, damit sie wissen, wie schnell Operationen ablaufen."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:106
 #, no-wrap
 msgid "The node list: `ibnodes.dat`"
-msgstr ""
+msgstr "Die Knotenliste: `ibnodes.dat`"
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:111
@@ -837,7 +837,7 @@ msgid ""
 "The node list names every board in the league. It uses the same simple "
 "layout as the original BRE `BRNODES.DAT`. Each board is six lines, and a "
 "blank line separates boards:"
-msgstr ""
+msgstr "Die Knotenliste nennt jedes Board in der Liga. Sie verwendet dasselbe einfache Layout wie die ursprüngliche BRE-`BRNODES.DAT`. Jedes Board umfasst sechs Zeilen, und eine Leerzeile trennt die Boards:"
 
 #. type: Fenced code block
 #: internal/help/content/interbbs/sysop.md:112
@@ -863,27 +863,27 @@ msgstr ""
 msgid ""
 "The six lines are: node number, board (planet) name, network address, city, "
 "state or province, and country. Board number 1 is the League Coordinator."
-msgstr ""
+msgstr "Die sechs Zeilen sind: Knotennummer, Board-(Planeten-)Name, Netzwerkadresse, Stadt, Bundesland oder Provinz und Land. Board Nummer 1 ist der Liga-Koordinator."
 
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:131
 #, no-wrap
 msgid "The Coordinator"
-msgstr ""
+msgstr "Der Koordinator"
 
 #. type: Plain text
 #: internal/help/content/interbbs/sysop.md:134
 msgid ""
 "There are two different \"coordinator\" ideas, and they are not the same "
 "thing:"
-msgstr ""
+msgstr "Es gibt zwei verschiedene „Koordinator“-Begriffe, und sie sind nicht dasselbe:"
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:139
 msgid ""
 "**League Coordinator** — the sysop of board number 1. This person keeps the "
 "node list and hands it out to the other boards."
-msgstr ""
+msgstr "**Liga-Koordinator** — der Sysop von Board Nummer 1. Diese Person pflegt die Knotenliste und gibt sie an die anderen Boards weiter."
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/sysop.md:139
@@ -891,7 +891,7 @@ msgid ""
 "**BBS Coordinator** — a *player* your board elects. Players vote in the "
 "System menu, and the player with the most votes gets the Coordinator menu.  "
 "Votes can change at any time."
-msgstr ""
+msgstr "**BBS-Koordinator** — ein *Spieler*, den Ihr Board wählt. Spieler stimmen im Systemmenü ab, und der Spieler mit den meisten Stimmen erhält das Koordinatormenü. Stimmen können jederzeit geändert werden."
 
 #. type: Title ##
 #: internal/help/content/military/headquarters.md:1
