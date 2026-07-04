@@ -54,16 +54,15 @@ func (w *World) landUnitPrice() int {
 	return w.Prices.Land * w.Config.RegionCosts.Percent() / 100
 }
 
-// regionRoom is how many more regions e may own before hitting the league's
-// Max Purchasable Regions cap. A cap of 0 means unlimited.
-func (w *World) regionRoom(e *Empire) int {
+// regionBuyLimit is the most regions e may buy in a single purchase, from the
+// league's Max Purchasable Regions knob. In BRE this is a high ceiling on one
+// transaction, not a cap on total land owned — the real limit players hit is
+// affordability. A knob of 0 means unlimited.
+func (w *World) regionBuyLimit(e *Empire) int {
 	if w.Config.MaxRegions <= 0 {
 		return 1 << 30
 	}
-	if room := w.Config.MaxRegions - e.Land; room > 0 {
-		return room
-	}
-	return 0
+	return w.Config.MaxRegions
 }
 
 // LandPrice is the current gold cost of the next region for empire e.
@@ -78,10 +77,10 @@ func (w *World) LandPrice(e *Empire) int {
 // overcounts — this sums the real climbing cost.
 func (w *World) MaxAffordableRegions(e *Empire) int {
 	base := w.landUnitPrice()
-	room := w.regionRoom(e)
+	limit := w.regionBuyLimit(e)
 	total := 0
 	for n := 0; ; n++ {
-		if n >= room {
+		if n >= limit {
 			return n
 		}
 		cost := base + (e.Land+n)*base/LandPriceStep
@@ -100,7 +99,7 @@ func (w *World) BuyRegions(e *Empire, field *int, n int) error {
 	if n <= 0 {
 		return nil
 	}
-	if n > w.regionRoom(e) {
+	if n > w.regionBuyLimit(e) {
 		return ErrRegionCap
 	}
 	base := w.landUnitPrice()
