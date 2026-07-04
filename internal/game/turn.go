@@ -87,8 +87,8 @@ func (w *World) aiPlay(today string) {
 				e.Gold -= n * w.Prices.Trooper
 			}
 			e.LastGoldPaid = 0
-			w.PayForces(e, e.ForcesUpkeep())
-			w.PayRegions(e, e.RegionUpkeep())
+			w.PayForces(e, w.ForcesDue(e))
+			w.PayRegions(e, w.RegionsDue(e))
 			w.CollectIncome(e) // same point income used to be credited (start of PlayTurn)
 			w.PlayTurn(e, today)
 		}

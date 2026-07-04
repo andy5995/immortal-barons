@@ -24,6 +24,17 @@ func (e *Empire) ForcesUpkeep() int {
 // RegionUpkeep is the gold required to maintain the empire's regions.
 func (e *Empire) RegionUpkeep() int { return e.Land * RegionUpkeepPerLand }
 
+// ForcesDue and RegionsDue apply the league's Maintenance Costs knob to the
+// base upkeep (Medium = 100% = unchanged; None = 0 = free upkeep). These are
+// the amounts actually charged and displayed; the Empire methods above give
+// the unscaled baseline.
+func (w *World) ForcesDue(e *Empire) int {
+	return e.ForcesUpkeep() * w.Config.MaintCosts.Percent() / 100
+}
+func (w *World) RegionsDue(e *Empire) int {
+	return e.RegionUpkeep() * w.Config.MaintCosts.Percent() / 100
+}
+
 // FoodUpkeep is the food the population and army eat per turn. Jets and tanks
 // eat double (crews plus fuel/rations).
 func (e *Empire) FoodUpkeep() int { return e.People + e.Troopers + e.Jets*2 + e.Tanks*2 }
@@ -47,7 +58,7 @@ func (e *Empire) clampGive(given int) int {
 // units desert proportionally and lowers popular support. Returns the number
 // of units lost to desertion.
 func (w *World) PayForces(e *Empire, given int) int {
-	req := e.ForcesUpkeep()
+	req := w.ForcesDue(e)
 	given = e.clampGive(given)
 	if given >= req {
 		return 0
@@ -72,7 +83,7 @@ func (w *World) PayForces(e *Empire, given int) int {
 // regions revolt (land is lost) and lowers popular support. Returns the
 // number of regions lost.
 func (w *World) PayRegions(e *Empire, given int) int {
-	req := e.RegionUpkeep()
+	req := w.RegionsDue(e)
 	given = e.clampGive(given)
 	if given >= req {
 		return 0

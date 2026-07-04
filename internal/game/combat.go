@@ -50,15 +50,20 @@ func (w *World) Attack(a, d *Empire) string {
 		fmt.Fprint(&b, ".\n\n")
 	}
 
+	// AttackDamage scales how many units both sides lose; AttackRewards scales
+	// the winner's captured land and plunder. Medium = 100% = unchanged.
+	dmg := w.Config.AttackDamage.Percent()
+	rew := w.Config.AttackRewards.Percent()
+
 	ap := w.jitter(a.Offense())
 	dp := w.jitter(d.Defense() + d.Land*2)
 
 	if ap > dp {
-		captured := d.Land/5 + 1
+		captured := (d.Land/5 + 1) * rew / 100
 		if captured > d.Land {
 			captured = d.Land
 		}
-		plunder := d.Gold / 4
+		plunder := d.Gold / 4 * rew / 100
 		lost := d.Regions.remove(captured)
 		d.syncLand()
 		a.Regions.addMix(lost)
@@ -66,8 +71,8 @@ func (w *World) Attack(a, d *Empire) string {
 		d.Gold -= plunder
 		a.Gold += plunder
 
-		aloss := loseForces(a, 15)
-		dloss := loseForces(d, 30)
+		aloss := loseForces(a, 15*dmg/100)
+		dloss := loseForces(d, 30*dmg/100)
 
 		fmt.Fprintf(&b, "Victory! You captured %d regions and plundered %d gold.\n", captured, plunder)
 		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
@@ -77,8 +82,8 @@ func (w *World) Attack(a, d *Empire) string {
 		}
 		d.Events = append(d.Events, fmt.Sprintf("%s attacked you: you lost %d regions, %d gold, and %d units.", a.Name, captured, plunder, dloss))
 	} else {
-		aloss := loseForces(a, 25)
-		dloss := loseForces(d, 10)
+		aloss := loseForces(a, 25*dmg/100)
+		dloss := loseForces(d, 10*dmg/100)
 		fmt.Fprintf(&b, "Defeat! Your forces returned exhausted.\n")
 		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
 		d.Events = append(d.Events, fmt.Sprintf("%s attacked you but was repelled. You lost %d units.", a.Name, dloss))

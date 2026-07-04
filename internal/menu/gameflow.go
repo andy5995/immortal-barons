@@ -126,8 +126,8 @@ func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
 // underpayment causes desertion/revolt), then an optional support boost.
 func paymentStage(s session.Session, w *game.World, p *game.Empire) {
 	p.LastGoldPaid = 0
-	forces := p.ForcesUpkeep()
-	regions := p.RegionUpkeep()
+	forces := w.ForcesDue(p)
+	regions := w.RegionsDue(p)
 	due := forces + regions
 
 	// If on-hand gold can't cover maintenance but savings can, offer to draw
