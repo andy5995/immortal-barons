@@ -1305,7 +1305,7 @@ func prodField(p *game.Empire, idx int) *int {
 func setIndustries(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if p.Specialized != "" {
-		fmt.Fprintf(s, "\n%sYour industry is specialized in %s; unspent production still favors it.%s\n",
+		fmt.Fprintf(s, "\n%sYour industry is specialized in %s: more of it, less of everything else.%s\n",
 			ansi.FgBrightCyan, p.Specialized, ansi.Reset)
 	}
 	fmt.Fprintf(s, "\n%sSet Industries — percentage of production spent on each unit:%s\n", ansi.FgBrightCyan, ansi.Reset)

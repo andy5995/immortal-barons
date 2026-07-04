@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-04 17:20-0500\n"
+"POT-Creation-Date: 2026-07-04 17:44-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -437,7 +437,7 @@ msgstr ""
 "höhere Ausbeute — aber Sie können danach nichts anderes mehr bauen."
 
 #. type: Plain text
-#: internal/help/content/economy/industry.md:18
+#: internal/help/content/economy/industry.md:20
 #, fuzzy
 #| msgid ""
 #| "Use Set Industries to split your production across unit types by "
@@ -445,8 +445,10 @@ msgstr ""
 #| "unit type. Specializing cannot be undone, so choose with care."
 msgid ""
 "Specialize marks one unit type as your focus. It does not replace your "
-"percentage split. Any production your percentages leave unspent goes to the "
-"specialized unit. Specializing cannot be undone, so choose with care."
+"percentage split. Your industries make more of the specialized unit and "
+"fewer of every other unit. Specializing cannot be undone, so choose with "
+"care.  Trading with other specialized empires is the most efficient way to "
+"get the units you no longer make well."
 msgstr ""
 "Mit „Industrien festlegen“ verteilen Sie Ihre Produktion prozentual auf "
 "Einheitentypen. Oder wählen Sie mit „Spezialisieren“ einen einzigen Typ für "

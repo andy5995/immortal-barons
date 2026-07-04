@@ -236,9 +236,18 @@ const (
 	CostBomber  = 5
 )
 
-// manufacture converts e's Industrial regions into production points and
-// gold, then spends the points on units per e.ProdXxx percentages (or, if
-// e.Specialized is set, entirely on that one unit type).
+// Industrial specialization efficiency modifiers (reconstructed; tunable). BRE
+// describes specialization as increasing output of the chosen unit and
+// decreasing all others, but the exact magnitudes live in compiled code.
+const (
+	SpecialtyBonusPct   = 50 // + to the specialized unit's production
+	SpecialtyPenaltyPct = 50 // - to every other unit's production
+)
+
+// manufacture converts e's Industrial regions into production points and gold,
+// then spends the points on units per e.ProdXxx percentages. Specialization
+// applies a per-unit efficiency bonus/penalty on top (see below); it never
+// overrides the percentage split.
 func (w *World) manufacture(e *Empire) {
 	e.IndustryGold = e.Regions.Industrial * IndustryGoldPerRegion
 	e.Gold += e.IndustryGold
@@ -250,38 +259,31 @@ func (w *World) manufacture(e *Empire) {
 		return
 	}
 
-	// The percentage split always governs allocation. Specialization does not
-	// replace it: any points the percentages leave unspent (when they sum to
-	// under 100) are poured into the specialized unit, so specializing directs
-	// the surplus without cancelling the player's chosen focus.
-	made := func(pct, cost int) int { return (pts * pct / 100) / cost }
-	e.MadeTroopers = made(e.ProdTroopers, CostTrooper)
-	e.MadeJets = made(e.ProdJets, CostJet)
-	e.MadeTurrets = made(e.ProdTurrets, CostTurret)
-	e.MadeBombers = made(e.ProdBombers, CostBomber)
-	e.MadeTanks = made(e.ProdTanks, CostTank)
-	e.MadeCarriers = made(e.ProdCarriers, CostCarrier)
-
-	if e.Specialized != "" {
-		used := e.ProdTroopers + e.ProdJets + e.ProdTurrets + e.ProdBombers + e.ProdTanks + e.ProdCarriers
-		if used < 100 {
-			extra := pts * (100 - used) / 100
-			switch e.Specialized {
-			case "Troopers":
-				e.MadeTroopers += extra / CostTrooper
-			case "Jets":
-				e.MadeJets += extra / CostJet
-			case "Turrets":
-				e.MadeTurrets += extra / CostTurret
-			case "Bombers":
-				e.MadeBombers += extra / CostBomber
-			case "Tanks":
-				e.MadeTanks += extra / CostTank
-			case "Carriers":
-				e.MadeCarriers += extra / CostCarrier
+	// The percentage split always governs how points are allocated. On top of
+	// that, specialization (per BRE's help: "increases the ability of your
+	// industries to develop a specific type of military unit ... decreases your
+	// ability to produce all other equipment") applies a per-unit efficiency
+	// modifier — a bonus to the specialized unit, a penalty to everything else.
+	// The bonus/penalty magnitudes are reconstructed and tunable; the exact BRE
+	// values would come from a disassembly (mercutio is authoritative there).
+	made := func(name string, pct, cost int) int {
+		units := (pts * pct / 100) / cost
+		switch {
+		case e.Specialized == "" || e.Specialized == name:
+			if e.Specialized == name {
+				units = units * (100 + SpecialtyBonusPct) / 100
 			}
+		default:
+			units = units * (100 - SpecialtyPenaltyPct) / 100
 		}
+		return units
 	}
+	e.MadeTroopers = made("Troopers", e.ProdTroopers, CostTrooper)
+	e.MadeJets = made("Jets", e.ProdJets, CostJet)
+	e.MadeTurrets = made("Turrets", e.ProdTurrets, CostTurret)
+	e.MadeBombers = made("Bombers", e.ProdBombers, CostBomber)
+	e.MadeTanks = made("Tanks", e.ProdTanks, CostTank)
+	e.MadeCarriers = made("Carriers", e.ProdCarriers, CostCarrier)
 
 	e.Troopers += e.MadeTroopers
 	e.Jets += e.MadeJets

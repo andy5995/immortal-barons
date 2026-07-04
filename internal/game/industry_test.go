@@ -79,33 +79,34 @@ func TestManufactureZeroWithoutIndustrial(t *testing.T) {
 	}
 }
 
-// Specialization does not replace the percentage split; it absorbs the points
-// the percentages leave unspent. Here 40% goes to troopers and the remaining
-// 60% falls to the Tanks specialty.
-func TestSpecializedAbsorbsSurplus(t *testing.T) {
+// Specialization keeps the percentage split but applies an efficiency modifier:
+// the specialized unit gets a bonus, every other unit a penalty. Here half the
+// points go to troopers (penalized) and half to the Tanks specialty (bonused).
+func TestSpecializedBonusAndPenalty(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 1)
 	e := w.AddHuman("me", "Mine")
 	e.Regions = RegionMix{Industrial: 100}
 	e.Land = e.Regions.Total()
-	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 40, 0, 0
-	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 0, 0, 0
+	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 50, 0, 0
+	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 0, 50, 0
 	e.Specialized = "Tanks"
 
 	w.manufacture(e)
 
 	pts := 100 * IndustryPointsPerRegion
-	if want := (pts * 40 / 100) / CostTrooper; e.MadeTroopers != want {
-		t.Errorf("MadeTroopers = %d, want %d", e.MadeTroopers, want)
+	wantTroopers := (pts * 50 / 100) / CostTrooper * (100 - SpecialtyPenaltyPct) / 100
+	wantTanks := (pts * 50 / 100) / CostTank * (100 + SpecialtyBonusPct) / 100
+	if e.MadeTroopers != wantTroopers {
+		t.Errorf("MadeTroopers (penalized) = %d, want %d", e.MadeTroopers, wantTroopers)
 	}
-	if want := (pts * 60 / 100) / CostTank; e.MadeTanks != want {
-		t.Errorf("MadeTanks (surplus to specialty) = %d, want %d", e.MadeTanks, want)
+	if e.MadeTanks != wantTanks {
+		t.Errorf("MadeTanks (bonused) = %d, want %d", e.MadeTanks, wantTanks)
 	}
 }
 
-// When the percentages already sum to 100, the specialty gets no surplus and
-// the split is honored exactly.
-func TestSpecializedNoSurplusHonorsSplit(t *testing.T) {
+// With no specialization the split is honored exactly (no modifier).
+func TestUnspecializedHonorsSplit(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 1)
 	e := w.AddHuman("me", "Mine")
@@ -113,13 +114,9 @@ func TestSpecializedNoSurplusHonorsSplit(t *testing.T) {
 	e.Land = e.Regions.Total()
 	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 100, 0, 0
 	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 0, 0, 0
-	e.Specialized = "Tanks"
 
 	w.manufacture(e)
 
-	if e.MadeTanks != 0 {
-		t.Errorf("MadeTanks = %d, want 0 (no surplus)", e.MadeTanks)
-	}
 	pts := 100 * IndustryPointsPerRegion
 	if want := pts / CostTrooper; e.MadeTroopers != want {
 		t.Errorf("MadeTroopers = %d, want %d", e.MadeTroopers, want)
