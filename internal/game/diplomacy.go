@@ -106,6 +106,18 @@ func (w *World) tradeIncome(e *Empire) int {
 	return tariff*e.People/40 + free*e.People/20
 }
 
+// AllianceStrength returns e's combined offense and defense with its Full
+// Defense Alliance partners, plus the ally names.
+func (w *World) AllianceStrength(e *Empire) (offense, defense int, allies []string) {
+	offense, defense = e.Offense(), e.Defense()
+	for _, ally := range w.alliesOf(e, fullDefenseAlliance) {
+		offense += ally.Offense()
+		defense += ally.Defense()
+		allies = append(allies, ally.Name)
+	}
+	return offense, defense, allies
+}
+
 // ProposeTreaty records a pending offer of ttype from `from` to `to`, and
 // mails the target. No-op if they already hold that treaty or an identical
 // offer is pending.

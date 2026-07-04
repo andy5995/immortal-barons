@@ -1,6 +1,9 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // covertSuccess reports whether a covert op by `a` against `d` succeeds:
 // the more agents the attacker has relative to the defender, the likelier.
@@ -47,6 +50,33 @@ func (w *World) Sabotage(a, d *Empire) (string, error) {
 	a.Agents--
 	d.Events = append(d.Events, "Your security foiled an enemy sabotage attempt.")
 	return "The operation failed and your agent was lost.", nil
+}
+
+// SpyOnRelations reveals every treaty d holds with other empires — useful
+// pre-war intelligence on alliance networks and trade partners. On failure the
+// agent is lost.
+func (w *World) SpyOnRelations(a, d *Empire) (string, error) {
+	if a.Agents < 1 {
+		return "", ErrNoAgents
+	}
+	if w.covertSuccess(a, d) {
+		var lines []string
+		for _, other := range w.Empires {
+			if other == d || !other.Alive {
+				continue
+			}
+			for _, tt := range w.TreatiesBetween(d, other) {
+				lines = append(lines, fmt.Sprintf("  %s with %s: %s", d.Name, other.Name, tt))
+			}
+		}
+		if len(lines) == 0 {
+			return fmt.Sprintf("%s holds no treaties.", d.Name), nil
+		}
+		return fmt.Sprintf("Treaties of %s:\n%s", d.Name, strings.Join(lines, "\n")), nil
+	}
+	a.Agents--
+	d.Events = append(d.Events, "Your counter-intelligence caught a spy probing your relations.")
+	return "Your spy was caught and did not return.", nil
 }
 
 // BombIntelligence kills a share of d's agents, softening the target for your

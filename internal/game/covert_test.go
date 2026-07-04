@@ -184,3 +184,22 @@ func TestCovertOpNeedsAnAgent(t *testing.T) {
 		t.Errorf("expected ErrNoAgents, got %v", err)
 	}
 }
+
+func TestSpyOnRelationsRevealsTreaties(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	a.Agents = 50
+	d := w.AddHuman("d", "Delta")
+	d.Agents = 0
+	c := w.AddHuman("c", "Gamma")
+	w.ProposeTreaty(d, c, "Tariff Trade Agreement")
+	w.AcceptTreaty(c, d.Name, "Tariff Trade Agreement")
+
+	report, err := w.SpyOnRelations(a, d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(report, "Tariff Trade Agreement") || !strings.Contains(report, "Gamma") {
+		t.Errorf("report should reveal Delta's treaty with Gamma, got: %s", report)
+	}
+}

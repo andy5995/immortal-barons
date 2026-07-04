@@ -14,6 +14,7 @@ Keeping many agents also defends you against enemy covert operations.
 Common operations:
 
 - Send Spy — read the enemy's defensive strength.
+- Spy on Relations — reveal all of the enemy's treaties (useful before a war).
 - Special Operations — sabotage the enemy army, destroying a share of their
   troopers.
 - Bomb Intelligence — kill enemy agents, so your later missions land more

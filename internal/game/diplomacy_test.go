@@ -155,3 +155,20 @@ func names(es []*Empire) []string {
 	}
 	return r
 }
+
+func TestAllianceStrengthSumsAllies(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	a.Troopers, b.Troopers = 100, 50
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+
+	off, _, allies := w.AllianceStrength(a)
+	if len(allies) != 1 || allies[0] != "Beta" {
+		t.Errorf("want Beta as the ally, got %v", allies)
+	}
+	if want := a.Offense() + b.Offense(); off != want {
+		t.Errorf("combined offense: want %d, got %d", want, off)
+	}
+}

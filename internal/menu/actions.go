@@ -329,6 +329,26 @@ func bombHQ(s session.Session, w *game.World) Result {
 	return specialAttack(s, w, "Bomb HQ", 0, func(a, d *game.Empire) (string, error) { return w.BombHQ(a, d) })
 }
 
+func spyRelations(s session.Session, w *game.World) Result {
+	return specialAttack(s, w, "Spy on Relations", 0, func(a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) })
+}
+
+// allianceStrength shows the player's combined offense and defense with their
+// Full Defense Alliance partners.
+func allianceStrength(s session.Session, w *game.World) Result {
+	p := w.Player()
+	off, def, allies := w.AllianceStrength(p)
+	fmt.Fprintf(s, "\n%sAlliance Strength%s\n", ansi.FgBrightCyan, ansi.Reset)
+	if len(allies) == 0 {
+		fmt.Fprint(s, "  You have no defense allies.\n")
+	} else {
+		fmt.Fprintf(s, "  Allies: %s\n", strings.Join(allies, ", "))
+	}
+	fmt.Fprintf(s, "  Combined offense: %d\n  Combined defense: %d\n", off, def)
+	pause(s)
+	return Stay
+}
+
 func attackPirates(s session.Session, w *game.World) Result {
 	fmt.Fprintf(s, "\n%sPirate factions (strength is random; fat ones just raided someone):%s\n", ansi.FgBrightCyan, ansi.Reset)
 	fmt.Fprintf(s, "  %-3s %-11s %-7s %-4s %-8s %s\n", "#", "Faction", "Forces", "Rgn", "Gold", "Loot T/J/U/K/A")

@@ -101,7 +101,7 @@ func BuildMenus() *Menus {
 		{Key: 'C', Label: "Chemical Attack", Do: chemicalAttack},
 		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack},
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates},
-		{Key: 'A', Label: "Alliance Strength", Do: stubbed("Alliance Strength")},
+		{Key: 'A', Label: "Alliance Strength", Do: allianceStrength},
 		{Key: 'K', Label: "Gooie Kablooie Ops", Do: gooieKablooie},
 		{Key: 'I', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
@@ -114,7 +114,7 @@ func BuildMenus() *Menus {
 
 	covert.Items = []Item{
 		{Key: 'S', Label: "Send Spy", Do: sendSpy},
-		{Key: 'P', Label: "Spy on Relations", Do: stubbed("Spy on Relations")},
+		{Key: 'P', Label: "Spy on Relations", Do: spyRelations},
 		{Key: 'D', Label: "Spy Database", Do: stubbed("Spy Database")},
 		{Key: 'B', Label: "Bribery", Do: stubbed("Bribery")},
 		{Key: 'O', Label: "Special Operations", Do: specialOps},
