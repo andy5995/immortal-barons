@@ -214,7 +214,7 @@ type World struct {
 	Outbox          []Packet
 	SpyDatabase     []SpyReport
 	LeagueDiplomacy string       // coordinator's league-wide diplomacy declaration
-	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from BRNODES.DAT at startup
+	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from ibnodes.dat at startup
 
 	Coordinator bool
 
