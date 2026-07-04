@@ -115,7 +115,7 @@ func BuildMenus() *Menus {
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: 'G', Label: "Create Group Attack", Do: createGroupAttack, Hidden: ibbsHidden},
 		{Key: 'J', Label: "Join Group Attack", Do: joinGroupAttack, Hidden: ibbsHidden},
-		{Key: 'T', Label: "Terrorist Ops", Do: stubbed("Terrorist Ops"), Hidden: ibbsHidden},
+		{Key: 'T', Label: "Terrorist Ops", Do: terroristOps, Hidden: ibbsHidden},
 		{Key: 'X', Label: "Travel Times", Do: travelTimes, Hidden: ibbsHidden},
 		{Key: '0', Label: "Quit", Do: back},
 	}
@@ -178,7 +178,7 @@ func BuildMenus() *Menus {
 
 	coord.Items = []Item{
 		{Key: 'C', Label: "Configuration Editor", Do: configEditor},
-		{Key: 'M', Label: "Modify League Diplomacy", Do: stubbed("Modify League Diplomacy"), Hidden: ibbsHidden},
+		{Key: 'M', Label: "Modify League Diplomacy", Do: modifyLeagueDiplomacy, Hidden: ibbsHidden},
 		{Key: 'P', Label: "Player List", Do: playerList},
 		{Key: '0', Label: "Return", Do: back},
 	}

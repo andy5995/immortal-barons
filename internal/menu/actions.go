@@ -829,6 +829,83 @@ func spyDatabase(s session.Session, w *game.World) Result {
 	return Stay
 }
 
+// terroristOps sends an agent to a remote planet to gather intel on a baron
+// there; the report lands in the planet-wide Spy Database. v1: intel is drawn
+// from the imported score data (land/net worth). A fuller model will queue an
+// interplanetary covert strike into a packet like group attacks do.
+func terroristOps(s session.Session, w *game.World) Result {
+	p := w.Player()
+	if len(w.RemoteBoards) == 0 {
+		ok(s, "No other planets are known yet.")
+		return Stay
+	}
+	if p.Agents < 1 {
+		fail(s, game.ErrNoAgents)
+		return Stay
+	}
+	boards := make([]string, len(w.RemoteBoards))
+	for i, b := range w.RemoteBoards {
+		boards[i] = b.BoardID
+	}
+	fmt.Fprintf(s, "\n%sSpy on which planet?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	board := pickFromList(s, "Planet", boards)
+	if board == "" {
+		return Stay
+	}
+	var rb *game.RemoteBoard
+	for i := range w.RemoteBoards {
+		if w.RemoteBoards[i].BoardID == board {
+			rb = &w.RemoteBoards[i]
+		}
+	}
+	if len(rb.Scores) == 0 {
+		ok(s, "No barons are known on that planet yet.")
+		return Stay
+	}
+	names := make([]string, len(rb.Scores))
+	for i, sc := range rb.Scores {
+		names[i] = sc.Empire
+	}
+	fmt.Fprintf(s, "\n%sSpy on which baron?%s\n", ansi.FgBrightCyan, ansi.Reset)
+	pick := pickFromList(s, "Baron", names)
+	if pick == "" {
+		return Stay
+	}
+	var sc game.RemoteScore
+	for _, x := range rb.Scores {
+		if x.Empire == pick {
+			sc = x
+		}
+	}
+	p.Agents--
+	w.SpyDatabase = append(w.SpyDatabase, game.SpyReport{
+		Board:  board,
+		Empire: pick,
+		Date:   w.LastMaintDate,
+		Land:   sc.Land,
+	})
+	ok(s, "Your agents infiltrated %s on %s; the report is in the Spy Database.", pick, board)
+	return Stay
+}
+
+// modifyLeagueDiplomacy lets a League Coordinator post a planet-wide diplomacy
+// declaration, broadcast to the league on the next packet run. v1: a single
+// free-text stance; a fuller model would track pairwise planet relations.
+func modifyLeagueDiplomacy(s session.Session, w *game.World) Result {
+	if !w.Coordinator {
+		ok(s, "Only the League Coordinator may set league diplomacy.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%sCurrent league diplomacy:%s %s\n", ansi.FgBrightCyan, ansi.Reset, w.LeagueDiplomacy)
+	decl := prompt(s, "New league diplomacy declaration (blank to keep)")
+	if strings.TrimSpace(decl) == "" {
+		return Stay
+	}
+	w.LeagueDiplomacy = decl
+	ok(s, "League diplomacy updated. It will be broadcast to the league.")
+	return Stay
+}
+
 func readMessages(s session.Session, w *game.World) Result {
 	p := w.Player()
 	if len(p.Mail) == 0 {

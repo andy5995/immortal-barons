@@ -204,10 +204,11 @@ type World struct {
 	// Inter-BBS (interplanetary) play — see ibbs.go. GroupAttacks assemble
 	// locally until they depart; Outbox holds packets queued for other boards;
 	// SpyDatabase holds spy reports shared across the planet.
-	GroupAttacks []GroupAttack
-	NextAttackID int
-	Outbox       []Packet
-	SpyDatabase  []SpyReport
+	GroupAttacks    []GroupAttack
+	NextAttackID    int
+	Outbox          []Packet
+	SpyDatabase     []SpyReport
+	LeagueDiplomacy string // coordinator's league-wide diplomacy declaration
 
 	Coordinator bool
 
