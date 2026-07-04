@@ -107,4 +107,4 @@ source (`~/src/sbbs/src/xpdoor/dropfiles.c`).
 
 One-line subject by default; body only for a non-obvious *why*. End with the
 `Co-Authored-By: Claude ...` trailer. Do not add any `claude.ai` session
-trailer. Commit only when asked.
+trailer.
