@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -65,19 +66,27 @@ func cycleSabre(m game.SabreMode) game.SabreMode {
 
 // ConfigEditor runs the Configuration Editor standalone (used by the door's
 // -reset command, BRE's "reset" being the settings screen). It edits w.Config
-// in place and saves config.json when the sysop exits with 0.
-func ConfigEditor(s session.Session, w *game.World) { configEditor(s, w) }
+// in place, saves config.json when the sysop exits with 0, and reports whether
+// they saved (true) or cancelled with Q (false) — so -reset can abort.
+func ConfigEditor(s session.Session, w *game.World) bool { return runConfigEditor(s, w) }
 
-// configEditor is BRE's Configuration Editor: the LC (or a single-BBS sysop)
+// configEditor is the menu-action form (Coordinator menu). It ignores the
+// saved/cancelled result and just returns to the menu.
+func configEditor(s session.Session, w *game.World) Result {
+	runConfigEditor(s, w)
+	return Stay
+}
+
+// runConfigEditor is BRE's Configuration Editor: the LC (or a single-BBS sysop)
 // sets the league ruleset. It edits the world's Config in place and writes it
 // back to config.json. Defaults and the turns/day cap come from BRE's compiled
 // code; other caps are generous where BRE's exact max isn't confirmed. The
 // league ruleset fields (marked *) are the ones a Coordinator broadcasts to the
-// league with -league-config.
+// league with -league-config. Returns true if saved, false if cancelled.
 //
 // Changes take effect going forward (a new TurnsPerDay applies at the next
 // daily maintenance; AICount does not retroactively add or remove AI empires).
-func configEditor(s session.Session, w *game.World) Result {
+func runConfigEditor(s session.Session, w *game.World) bool {
 	c := &w.Config
 	for {
 		fmt.Fprint(s, ansi.Clear)
@@ -107,14 +116,23 @@ func configEditor(s session.Session, w *game.World) Result {
 		fmt.Fprintf(s, "%s\n%s* = league ruleset (Coordinator broadcasts with -league-config)%s\n",
 			rule, ansi.FgWhite, ansi.Reset)
 
-		switch promptInt(s, "Edit which (0 to save and exit)?") {
+		choice := strings.ToLower(strings.TrimSpace(prompt(s, "Edit which (0 = save & exit, Q = cancel)?")))
+		if choice == "q" || choice == "quit" || choice == "cancel" {
+			ok(s, "Cancelled — no changes were saved.")
+			return false
+		}
+		n, err := strconv.Atoi(choice)
+		if err != nil {
+			continue
+		}
+		switch n {
 		case 0:
 			if err := store.SaveConfig(*c); err != nil {
 				fail(s, err)
 			} else {
 				ok(s, "Configuration saved.")
 			}
-			return Stay
+			return true
 		case 1:
 			c.TurnsPerDay = max(1, promptSuggested(s, "Turns per day", c.TurnsPerDay, game.MaxTurnsPerDay))
 		case 2:
