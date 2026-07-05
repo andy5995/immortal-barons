@@ -63,6 +63,11 @@ func cycleSabre(m game.SabreMode) game.SabreMode {
 	}
 }
 
+// ConfigEditor runs the Configuration Editor standalone (used by the door's
+// -reset command, BRE's "reset" being the settings screen). It edits w.Config
+// in place and saves config.json when the sysop exits with 0.
+func ConfigEditor(s session.Session, w *game.World) { configEditor(s, w) }
+
 // configEditor is BRE's Configuration Editor: the LC (or a single-BBS sysop)
 // sets the league ruleset. It edits the world's Config in place and writes it
 // back to config.json. Defaults and the turns/day cap come from BRE's compiled

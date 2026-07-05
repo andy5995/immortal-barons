@@ -22,6 +22,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/door"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/ibbs"
+	"github.com/andy5995/immortal-barons/internal/menu"
 	"github.com/andy5995/immortal-barons/internal/play"
 	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
@@ -183,9 +184,10 @@ func runLeagueConfig(cfg game.Config) error {
 	return store.Save(w, cfg)
 }
 
-// runReset starts a fresh game (BRE's sysop reset): back up the world, wipe all
-// empires (humans re-onboard on their next login) and re-seed AI, then save.
-// It does not crown a winner — that is not what BRE's reset does.
+// runReset is BRE's sysop reset: present the game-settings menu (the
+// Configuration Editor) so the sysop sets up the new game, then wipe all
+// empires (humans re-onboard on their next login), re-seed AI, and save. The
+// old world is backed up first. It does not crown a winner.
 func runReset(cfg game.Config) error {
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
@@ -199,11 +201,18 @@ func runReset(cfg game.Config) error {
 	if err != nil {
 		return err
 	}
+
+	// The settings menu edits w.Config and saves config.json on exit (0).
+	c := session.NewConsole()
+	fmt.Fprint(c, "\r\nConfigure the new game below. Choose 0 to save the settings and reset.\r\n")
+	menu.ConfigEditor(c, w)
+	c.Close()
+
 	w.Reset()
 	if err := store.Save(w, cfg); err != nil {
 		return err
 	}
-	fmt.Println("Game reset. All empires cleared and the world re-seeded; a fresh game has begun.")
+	fmt.Println("\nGame reset with the new settings. Empires cleared and re-seeded.")
 	fmt.Println("The previous world was backed up to world.json.bak.")
 	return nil
 }
