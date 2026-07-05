@@ -1,0 +1,166 @@
+package docsite
+
+import (
+	"os"
+	"path/filepath"
+	"strings"
+
+	"github.com/andy5995/immortal-barons/internal/help"
+)
+
+// copyMarkdown reads a Markdown file and writes it to dst (creating parent
+// dirs). Link rewriting is layered on here in a later slice; for now it is a
+// verbatim copy.
+func copyMarkdown(src, dst string) error {
+	data, err := os.ReadFile(src)
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile(dst, data, 0o644)
+}
+
+// copyIfExists copies src to dst when src exists; a missing src is not an error
+// (that language simply falls back to English for this page).
+func copyIfExists(src, dst string) error {
+	if _, err := os.Stat(src); err != nil {
+		return nil
+	}
+	return copyMarkdown(src, dst)
+}
+
+// copyTree copies every .md under srcDir to dstDir, preserving structure.
+func copyTree(srcDir, dstDir string) error {
+	if _, err := os.Stat(srcDir); err != nil {
+		return nil // no such source tree (e.g. no dev docs) — skip
+	}
+	return filepath.WalkDir(srcDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || !strings.HasSuffix(path, ".md") {
+			return nil
+		}
+		rel, err := filepath.Rel(srcDir, path)
+		if err != nil {
+			return err
+		}
+		return copyMarkdown(path, filepath.Join(dstDir, rel))
+	})
+}
+
+// navNode is one entry in the MkDocs nav: a leaf (title + path) or a branch
+// (title + children).
+type navNode struct {
+	title    string
+	path     string
+	children []navNode
+}
+
+// buildNav assembles the site nav from the English help topics (which fix the
+// Guide's structure) plus the fixed Home / Running a Board / Developers
+// sections. Nav paths are relative to a language folder; the i18n plugin
+// resolves them per language.
+func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
+	nav := []navNode{{title: "Home", path: "index.md"}}
+
+	// Guide: an overview, then a group per category in the help's fixed order.
+	guide := []navNode{{title: "Overview", path: "guide/index.md"}}
+	byCat := map[string][]topic{}
+	for _, t := range enTopics {
+		byCat[t.Category] = append(byCat[t.Category], t)
+	}
+	for _, cat := range orderedCategories(enTopics) {
+		ts := byCat[cat]
+		sortTopics(ts)
+		var leaves []navNode
+		for _, t := range ts {
+			leaves = append(leaves, navNode{title: t.Title, path: "guide/" + t.relPath})
+		}
+		guide = append(guide, navNode{title: help.CategoryName(cat), children: leaves})
+	}
+	nav = append(nav, navNode{title: "Guide", children: guide})
+
+	nav = append(nav, navNode{title: "Running a Board", path: "running-a-board/index.md"})
+
+	// Developers: one leaf per English dev doc, titled from its first heading.
+	dev, err := devNav(repoRoot)
+	if err != nil {
+		return nil, err
+	}
+	if len(dev) > 0 {
+		nav = append(nav, navNode{title: "Developers", children: dev})
+	}
+	return nav, nil
+}
+
+// orderedCategories returns the categories present, known ones first in the
+// help's fixed order, then any extras alphabetically.
+func orderedCategories(topics []topic) []string {
+	present := map[string]bool{}
+	for _, t := range topics {
+		present[t.Category] = true
+	}
+	rank := map[string]int{}
+	order := help.CategoryOrder()
+	for i, c := range order {
+		rank[c] = i
+	}
+	var known, extra []string
+	for c := range present {
+		if _, ok := rank[c]; ok {
+			known = append(known, c)
+		} else {
+			extra = append(extra, c)
+		}
+	}
+	sortByRank(known, rank)
+	sortStrings(extra)
+	return append(known, extra...)
+}
+
+// devNav lists the English developer docs as nav leaves, titled from the first
+// Markdown heading (falling back to the filename).
+func devNav(repoRoot string) ([]navNode, error) {
+	srcDir := filepath.Join(repoRoot, "docs", "dev")
+	if _, err := os.Stat(srcDir); err != nil {
+		return nil, nil
+	}
+	var out []navNode
+	err := filepath.WalkDir(srcDir, func(path string, d os.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d.IsDir() || !strings.HasSuffix(path, ".md") {
+			return nil
+		}
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		rel, err := filepath.Rel(srcDir, path)
+		if err != nil {
+			return err
+		}
+		out = append(out, navNode{
+			title: firstHeading(string(raw), rel),
+			path:  "developers/" + filepath.ToSlash(rel),
+		})
+		return nil
+	})
+	sortNav(out)
+	return out, err
+}
+
+// firstHeading returns the text of the first "# " heading, or a title derived
+// from the filename if there is none.
+func firstHeading(md, relPath string) string {
+	for _, line := range strings.Split(md, "\n") {
+		if strings.HasPrefix(line, "# ") {
+			return strings.TrimSpace(line[2:])
+		}
+	}
+	return titleize(strings.TrimSuffix(filepath.Base(relPath), ".md"))
+}

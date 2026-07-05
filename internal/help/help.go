@@ -45,6 +45,11 @@ var categoryOrder = []string{
 	"controls", "military", "economy", "warfare", "diplomacy", "interbbs",
 }
 
+// CategoryOrder returns the fixed display order of the known category slugs, so
+// the docs-site assembler orders its Guide sidebar the same way the in-game help
+// does.
+func CategoryOrder() []string { return append([]string(nil), categoryOrder...) }
+
 // categoryNames maps a category slug to its display name (a few need casing
 // the slug can't carry, like inter-bbs).
 var categoryNames = map[string]string{
@@ -116,6 +121,11 @@ func localize(t Topic, lang string) Topic {
 	}
 	return t
 }
+
+// ParseTopic parses a topic file's raw text (frontmatter + body) into a Topic.
+// Exported for the docs-site assembler (cmd/barons-docs) so "what a topic is"
+// has one definition shared with the in-game help.
+func ParseTopic(raw string) Topic { return parseTopic(raw) }
 
 // parseTopic splits a "---\nkey: value\n...\n---\nbody" file into a Topic. The
 // frontmatter is a tiny flat key:value subset (NOT full YAML), so we need no
