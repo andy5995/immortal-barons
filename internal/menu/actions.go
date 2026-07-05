@@ -1173,12 +1173,16 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 // free-text stance; a fuller model would track pairwise planet relations.
 func modifyLeagueDiplomacy(s session.Session, w *ctx) Result {
 	var isCoordinator bool
-	w.With(func() { isCoordinator = w.BBSCoordinator() == w.Player() })
+	var current string
+	w.With(func() {
+		isCoordinator = w.BBSCoordinator() == w.Player()
+		current = w.LeagueDiplomacy
+	})
 	if !isCoordinator {
 		ok(s, "Only the BBS Coordinator may set league diplomacy.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s%s%s %s\n", ansi.FgBrightCyan, tr(s, "Current league diplomacy:"), ansi.Reset, w.LeagueDiplomacy)
+	fmt.Fprintf(s, "\n%s%s%s %s\n", ansi.FgBrightCyan, tr(s, "Current league diplomacy:"), ansi.Reset, current)
 	decl := prompt(s, "New league diplomacy declaration (blank to keep)")
 	if strings.TrimSpace(decl) == "" {
 		return Stay
