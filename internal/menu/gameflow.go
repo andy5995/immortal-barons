@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -114,17 +115,51 @@ func incomeReport(s session.Session, w *ctx, p *game.Empire) {
 		p.PirateRaids = nil
 	})
 
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Income Report:"), ansi.Reset)
-	statLine(s, b.Taxes, "gold was earned in taxes.")
-	statLine(s, b.Ore, "gold was produced from the Ore Mines.")
-	statLine(s, b.Tourism, "gold was earned in Tourism.")
-	statLine(s, b.Solar, "gold was earned by Solar Power Generators.")
-	statLine(s, b.Rivers, "gold was earned from Rivers.")
-	statLine(s, b.Urban, "gold was earned in Urban Centers.")
-	statLine(s, b.Industrial, "gold was earned from Industrial Zones.")
-	statLine(s, b.Technology, "gold was earned from Technology.")
-	statLine(s, b.Trade, "gold was earned from Trade.")
-	statLine(s, b.Food, "Food units were grown.")
+	golds := []struct {
+		amount int
+		text   string
+	}{
+		{b.Taxes, "gold was earned in taxes."},
+		{b.Ore, "gold was produced from the Ore Mines."},
+		{b.Tourism, "gold was earned in Tourism."},
+		{b.Solar, "gold was earned by Solar Power Generators."},
+		{b.Rivers, "gold was earned from Rivers."},
+		{b.Urban, "gold was earned in Urban Centers."},
+		{b.Industrial, "gold was earned from Industrial Zones."},
+		{b.Technology, "gold was earned from Technology."},
+		{b.Trade, "gold was earned from Trade."},
+	}
+	// Right-align every amount to one column width so the report scans cleanly.
+	total := 0
+	width := len(comma(b.Food))
+	for _, l := range golds {
+		if l.amount > 0 {
+			total += l.amount
+			if w := len(comma(l.amount)); w > width {
+				width = w
+			}
+		}
+	}
+	if w := len(comma(total)); w > width {
+		width = w
+	}
+
+	titleBar(s, tr(s, "Income Report"))
+	amt := func(color string, n int, text string) {
+		fmt.Fprintf(s, "  %s%*s%s  %s\n", color, width, comma(n), ansi.Reset, i18n.T(sessionLang(s), text))
+	}
+	for _, l := range golds {
+		if l.amount > 0 {
+			amt(ansi.FgBrightCyan, l.amount, l.text)
+		}
+	}
+	if total > 0 {
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", width), ansi.Reset)
+		amt(ansi.FgBrightYellow, total, "gold earned this turn.")
+	}
+	if b.Food > 0 {
+		amt(ansi.FgBrightCyan, b.Food, "Food units were grown.")
+	}
 	for _, r := range raids {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, r, ansi.Reset)
 	}

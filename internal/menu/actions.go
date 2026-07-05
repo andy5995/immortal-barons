@@ -748,12 +748,7 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 	pct := func(n int) string { return fmt.Sprintf("%s%d%%%s", c, n, r) }
 	kv := func(label, value string) { fmt.Fprintf(s, "%s%s:%s %s\n", wht, tr(s, label), r, value) }
 
-	// Title bar: white-on-blue panel spanning the rule width.
-	title := " " + tr(s, "Empire Status") + ": " + p.Name + " "
-	if pad := len(rule) - len([]rune(title)); pad > 0 {
-		title += strings.Repeat(" ", pad)
-	}
-	fmt.Fprintf(s, "\n%s%s%s%s\n", ansi.BgBlue, ansi.FgBrightWhite, title, ansi.Reset)
+	titleBar(s, tr(s, "Empire Status")+": "+p.Name)
 
 	kv("Turns", num(p.TurnsLeft))
 	kv("Score", num(netWorth))
@@ -786,6 +781,15 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "%s"+tr(s, "You have %s%s turns of Protection Left.")+"%s\n", wht, num(p.Protection), wht, r)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBlue, rule, r)
+}
+
+// titleBar prints a full-width white-on-blue panel header spanning the rule.
+func titleBar(s session.Session, text string) {
+	bar := " " + text + " "
+	if pad := len(rule) - len([]rune(bar)); pad > 0 {
+		bar += strings.Repeat(" ", pad)
+	}
+	fmt.Fprintf(s, "\n%s%s%s%s\n", ansi.BgBlue, ansi.FgBrightWhite, bar, ansi.Reset)
 }
 
 // statCol is one column of a stat table: a heading and its value.
