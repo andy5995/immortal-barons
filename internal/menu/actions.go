@@ -120,16 +120,25 @@ func printRegionTable(s session.Session, p *game.Empire) {
 // promptRegionType reads a single-letter region choice (case-insensitive),
 // returning its 0-based index or -1 to cancel.
 func promptRegionType(s session.Session) int {
-	in := strings.ToUpper(strings.TrimSpace(prompt(s, "Your choice? (0 to cancel)")))
-	if in == "" || in == "0" {
-		return -1
-	}
-	for i, k := range regionTypeKeys {
-		if k == in[0] {
-			return i
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice? (0 to cancel)"), ansi.Reset)
+	for {
+		r, err := s.ReadKey()
+		if err != nil {
+			return -1
 		}
+		if r == '0' {
+			fmt.Fprint(s, "0\n")
+			return -1
+		}
+		u := byte(unicode.ToUpper(r))
+		for i, k := range regionTypeKeys {
+			if k == u {
+				fmt.Fprintf(s, "%c\n", u) // echo the single keypress; no Enter needed
+				return i
+			}
+		}
+		// invalid key — ignore and wait for a valid region letter or 0
 	}
-	return -1
 }
 
 func buyLand(s session.Session, w *ctx) Result {
