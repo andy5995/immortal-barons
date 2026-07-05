@@ -66,9 +66,6 @@ func TestEndGame(t *testing.T) {
 	if w.Alliances != nil {
 		t.Errorf("expected Alliances reset to nil, got %v", w.Alliances)
 	}
-	if w.Active != nil {
-		t.Errorf("expected Active reset to nil, got %v", w.Active)
-	}
 }
 
 func TestEndGameCrownsSoleSurvivorWithNegativeNetWorth(t *testing.T) {

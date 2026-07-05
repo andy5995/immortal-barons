@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
-	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/help"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
@@ -13,7 +12,7 @@ import (
 // then read it. It replaces the old flat "pick 1-of-N topics" list. Content is
 // the embedded single-source Markdown from internal/help (see
 // docs/superpowers/specs/2026-07-03-docs-help-localization-design.md).
-func helpBrowse(s session.Session, w *game.World) Result {
+func helpBrowse(s session.Session, w *ctx) Result {
 	for {
 		cats := help.Categories()
 		fmt.Fprintf(s, "\n%sHelp — choose a category:%s\n", ansi.FgBrightCyan, ansi.Reset)
@@ -51,7 +50,7 @@ func languageName(code string) string {
 // pickLanguage lets the caller choose the UI/help language, stored per-empire
 // so each caller keeps their own. Partly-translated languages fall back to
 // English per string.
-func pickLanguage(s session.Session, w *game.World) Result {
+func pickLanguage(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Language:"), ansi.Reset)
 	for i, l := range helpLanguages {

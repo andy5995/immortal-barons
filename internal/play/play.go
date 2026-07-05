@@ -70,13 +70,11 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 		realm := onboard(s, w, id.Handle)
 		e = w.AddHuman(id.Handle, realm)
 	}
-	w.Active = e
-
 	showEvents(s, e)
 
 	// io.EOF means the caller dropped the connection or was booted; still persist
 	// state below.
-	gameErr := menu.GameLoop(s, w)
+	gameErr := menu.GameLoop(s, w, e)
 	reason = d.Reason()
 	if reason == "" {
 		if errors.Is(gameErr, io.EOF) {

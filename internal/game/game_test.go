@@ -18,9 +18,6 @@ func TestNewWorldSeedsAIOnly(t *testing.T) {
 			t.Errorf("AI empire should have empty Owner, got %q", e.Owner)
 		}
 	}
-	if w.Player() != nil {
-		t.Error("no active empire yet, Player() should be nil")
-	}
 }
 
 func TestAddHumanAndFindByOwner(t *testing.T) {
@@ -125,7 +122,6 @@ func TestRemoveEmpireAbdicate(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	before := len(w.Empires)
 	e := w.AddHuman("bob", "Bobland")
-	w.Active = e
 	if w.FindByOwner("bob") == nil {
 		t.Fatal("empire not registered")
 	}
@@ -135,8 +131,5 @@ func TestRemoveEmpireAbdicate(t *testing.T) {
 	}
 	if w.FindByOwner("bob") != nil {
 		t.Error("abdicated empire still findable by owner")
-	}
-	if w.Active != nil {
-		t.Error("Active should be cleared after removing the active empire")
 	}
 }

@@ -10,25 +10,28 @@ import (
 )
 
 // GameLoop is the top-level session flow: show the Game Menu until the
-// player quits. "Play Game" runs a turn pipeline.
-func GameLoop(s session.Session, w *game.World) error {
+// player quits. "Play Game" runs a turn pipeline. active is the empire
+// playing THIS session — per-session state, not shared World state, so the
+// web front-end can run concurrent sessions against one World.
+func GameLoop(s session.Session, w *game.World, active *game.Empire) error {
+	c := &ctx{World: w, active: active}
 	menus := BuildMenus()
 	// Expand Ctrl-<letter> into the active player's saved macro keystrokes.
 	// This single wrap covers every front-end, since all of them reach the
 	// menu through GameLoop.
 	ms := session.NewMacroExpander(s, func(letter string) (string, bool) {
-		p := w.Player()
+		p := c.Player()
 		if p == nil {
 			return "", false
 		}
 		seq, ok := p.Macros[letter]
 		return seq, ok
 	})
-	return Run(ms, w, menus.Game)
+	return Run(ms, c, menus.Game)
 }
 
 // showBulletin prints the planetary bulletin, or a note if there is none.
-func showBulletin(s session.Session, w *game.World) Result {
+func showBulletin(s session.Session, w *ctx) Result {
 	if len(w.Bulletin) == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "No planetary bulletins."))
 	} else {
@@ -96,7 +99,7 @@ func showTurnEvents(s session.Session, p *game.Empire) {
 
 // incomeReport itemizes p's per-turn income by source. It shows exactly the
 // values CollectIncome credits: both derive from World.IncomeThisTurn.
-func incomeReport(s session.Session, w *game.World, p *game.Empire) {
+func incomeReport(s session.Session, w *ctx, p *game.Empire) {
 	b := w.IncomeThisTurn(p)
 
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Income Report:"), ansi.Reset)
@@ -118,7 +121,7 @@ func incomeReport(s session.Session, w *game.World, p *game.Empire) {
 }
 
 // endOfTurnStats prints a short flavor line and the remaining turns.
-func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
+func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "End of Turn Statistics:"), ansi.Reset)
 	fmt.Fprintf(s, "  "+tr(s, "The people of %s go about their business.")+"\n", p.Name)
 	if p.LastPopGrowth > 0 {
@@ -144,7 +147,7 @@ func endOfTurnStats(s session.Session, w *game.World, p *game.Empire) {
 // (pref off, or can't afford a required cost) the player is prompted for
 // each obligation: armed-forces upkeep and region maintenance (required,
 // underpayment causes desertion/revolt), then an optional support boost.
-func paymentStage(s session.Session, w *game.World, p *game.Empire) {
+func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 	p.LastGoldPaid = 0
 	forces := w.ForcesDue(p)
 	regions := w.RegionsDue(p)
@@ -190,7 +193,7 @@ func paymentStage(s session.Session, w *game.World, p *game.Empire) {
 // runTurn is the "Play Game" action: it walks the turn pipeline (event
 // log, income report, status, spending/attack/covert/trading/message
 // stages, then end-of-turn) for as many turns as the player wants to play.
-func runTurn(s session.Session, w *game.World) Result {
+func runTurn(s session.Session, w *ctx) Result {
 	menus := BuildMenus()
 	for {
 		p := w.Player()

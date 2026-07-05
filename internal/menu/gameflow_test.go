@@ -27,7 +27,7 @@ func TestAskYesNo(t *testing.T) {
 func TestIncomeReportWritesNonEmpty(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")} // pause keypress
 	w := newWorld()
-	incomeReport(f, w, w.Active)
+	incomeReport(f, w, w.Player())
 	if f.out.Len() == 0 {
 		t.Error("expected incomeReport to write output")
 	}
@@ -39,7 +39,7 @@ func TestIncomeReportWritesNonEmpty(t *testing.T) {
 func TestEndOfTurnStatsWritesNonEmpty(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")} // pause keypress
 	w := newWorld()
-	endOfTurnStats(f, w, w.Active)
+	endOfTurnStats(f, w, w.Player())
 	if f.out.Len() == 0 {
 		t.Error("expected endOfTurnStats to write output")
 	}
@@ -51,7 +51,7 @@ func TestEndOfTurnStatsWritesNonEmpty(t *testing.T) {
 func TestRunTurnNoTurnsLeftReturnsImmediately(t *testing.T) {
 	f := &fakeSession{keys: []rune("  ")} // pause keypress inside ok(), then seeScores' pause
 	w := newWorld()
-	w.Active.TurnsLeft = 0
+	w.Player().TurnsLeft = 0
 	runTurn(f, w)
 	if !strings.Contains(f.out.String(), "used all of your turns today") {
 		t.Error("expected the no-turns-left message")
@@ -61,7 +61,7 @@ func TestRunTurnNoTurnsLeftReturnsImmediately(t *testing.T) {
 func TestIncomeReportSurfacesAndClearsPirateRaids(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")} // one key for the pause
 	w := newWorld()
-	p := w.Active
+	p := w.Player()
 	p.PirateRaids = []string{"The Sharks pirates raided you, carrying off 40 troopers, 0 jets, and 5 tanks!"}
 
 	incomeReport(f, w, p)
@@ -78,7 +78,7 @@ func TestPaymentStageAutoPays(t *testing.T) {
 	f := &fakeSession{}
 	w := newWorld()
 	w.AutoPayMaint = true
-	p := w.Active
+	p := w.Player()
 	p.Gold = 100000
 	before := p.Gold
 	want := p.ForcesUpkeep() + p.RegionUpkeep()
@@ -97,7 +97,7 @@ func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
 	f := &fakeSession{keys: []rune("\r\r")} // accept suggested (full) for forces, then regions
 	w := newWorld()
 	w.AutoPayMaint = false
-	p := w.Active
+	p := w.Player()
 	p.Gold = 100000
 	p.Support = 100 // skips the optional support-boost prompt
 	beforeTroopers := p.Troopers
@@ -118,7 +118,7 @@ func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 	f := &fakeSession{keys: []rune("0\r0\r")} // give 0 to forces, then 0 to regions
 	w := newWorld()
 	w.AutoPayMaint = false
-	p := w.Active
+	p := w.Player()
 	p.Gold = 100000
 	p.Support = 100
 	beforeTroopers := p.Troopers
@@ -142,9 +142,9 @@ func TestRunTurnConsumesATurn(t *testing.T) {
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true // pay maintenance silently; this test is about the turn loop
-	left := w.Active.TurnsLeft
+	left := w.Player().TurnsLeft
 	runTurn(f, w)
-	if w.Active.TurnsLeft != left-1 {
-		t.Errorf("expected TurnsLeft %d, got %d", left-1, w.Active.TurnsLeft)
+	if w.Player().TurnsLeft != left-1 {
+		t.Errorf("expected TurnsLeft %d, got %d", left-1, w.Player().TurnsLeft)
 	}
 }

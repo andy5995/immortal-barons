@@ -73,8 +73,8 @@ func ConfigEditor(s session.Session, w *game.World) bool { return runConfigEdito
 
 // configEditor is the menu-action form (Coordinator menu). It ignores the
 // saved/cancelled result and just returns to the menu.
-func configEditor(s session.Session, w *game.World) Result {
-	runConfigEditor(s, w)
+func configEditor(s session.Session, w *ctx) Result {
+	runConfigEditor(s, w.World)
 	return Stay
 }
 

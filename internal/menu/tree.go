@@ -43,8 +43,8 @@ func BuildMenus() *Menus {
 	food := &Menu{Title: "Food Market", Color: ansi.FgBrightCyan}
 
 	// owned adapts a per-empire count into a menu column function.
-	owned := func(f func(*game.Empire) int) func(*game.World) int {
-		return func(w *game.World) int { return f(w.Player()) }
+	owned := func(f func(*game.Empire) int) func(*ctx) int {
+		return func(w *ctx) int { return f(w.Player()) }
 	}
 	troopers := func(p *game.Empire) int { return p.Troopers }
 	jets := func(p *game.Empire) int { return p.Jets }
@@ -54,16 +54,16 @@ func BuildMenus() *Menus {
 	tanks := func(p *game.Empire) int { return p.Tanks }
 	carriers := func(p *game.Empire) int { return p.Carriers }
 	land := func(p *game.Empire) int { return p.Land }
-	priceTrooper := func(w *game.World) int { return w.Prices.Trooper }
-	priceJet := func(w *game.World) int { return w.Prices.Jet }
-	priceTurret := func(w *game.World) int { return w.Prices.Turret }
-	priceBomber := func(w *game.World) int { return w.Prices.Bomber }
-	priceAgent := func(w *game.World) int { return w.Prices.Agent }
-	priceTank := func(w *game.World) int { return w.Prices.Tank }
-	priceCarrier := func(w *game.World) int { return w.Prices.Carrier }
+	priceTrooper := func(w *ctx) int { return w.Prices.Trooper }
+	priceJet := func(w *ctx) int { return w.Prices.Jet }
+	priceTurret := func(w *ctx) int { return w.Prices.Turret }
+	priceBomber := func(w *ctx) int { return w.Prices.Bomber }
+	priceAgent := func(w *ctx) int { return w.Prices.Agent }
+	priceTank := func(w *ctx) int { return w.Prices.Tank }
+	priceCarrier := func(w *ctx) int { return w.Prices.Carrier }
 	// half is the sell (buy-back) price shown on the Sell menu.
-	half := func(f func(*game.World) int) func(*game.World) int {
-		return func(w *game.World) int { return f(w) / 2 }
+	half := func(f func(*ctx) int) func(*ctx) int {
+		return func(w *ctx) int { return f(w) / 2 }
 	}
 
 	buy.Items = []Item{
@@ -76,8 +76,8 @@ func BuildMenus() *Menus {
 			Do: buy2("Turrets", true, priceTurret, (*game.World).BuildTurrets)},
 		{Key: '4', Label: "Bombers", Price: priceBomber, Owned: owned(bombers),
 			Do: buy2("Bombers", true, priceBomber, (*game.World).BuildBombers)},
-		{Key: '5', Label: "HeadQuarters", Price: func(w *game.World) int { return game.HQCost }, Owned: owned(func(p *game.Empire) int { return p.HQ }), Do: buildHQ},
-		{Key: '6', Label: "Regions", Price: func(w *game.World) int { return w.LandPrice(w.Player()) }, Owned: owned(land), Do: buyLand},
+		{Key: '5', Label: "HeadQuarters", Price: func(w *ctx) int { return game.HQCost }, Owned: owned(func(p *game.Empire) int { return p.HQ }), Do: buildHQ},
+		{Key: '6', Label: "Regions", Price: func(w *ctx) int { return w.LandPrice(w.Player()) }, Owned: owned(land), Do: buyLand},
 		{Key: '7', Label: "Covert Agents", Price: priceAgent, Owned: owned(agents),
 			Do: buy2("Covert Agents", false, priceAgent, (*game.World).RecruitAgents)},
 		{Key: '8', Label: "Tanks", Price: priceTank, Owned: owned(tanks),
@@ -100,7 +100,7 @@ func BuildMenus() *Menus {
 			Do: sellUnit2("Sell Turrets", turrets, (*game.World).SellTurrets)},
 		{Key: '4', Label: "Bombers", Price: half(priceBomber), Owned: owned(bombers),
 			Do: sellUnit2("Sell Bombers", bombers, (*game.World).SellBombers)},
-		{Key: '6', Label: "Regions", Price: func(w *game.World) int { return 0 }, Owned: owned(land), Do: sellLand},
+		{Key: '6', Label: "Regions", Price: func(w *ctx) int { return 0 }, Owned: owned(land), Do: sellLand},
 		{Key: '7', Label: "Covert Agents", Price: half(priceAgent), Owned: owned(agents),
 			Do: sellUnit2("Sell Covert Agents", agents, (*game.World).SellAgents)},
 		{Key: '8', Label: "Tanks", Price: half(priceTank), Owned: owned(tanks),
@@ -122,7 +122,7 @@ func BuildMenus() *Menus {
 		{Key: 'V', Label: "View Bank Rates", Do: bankRates},
 		{Key: '0', Label: "Quit", Do: back},
 	}
-	bank.Status = func(w *game.World) string {
+	bank.Status = func(w *ctx) string {
 		p := w.Player()
 		return fmt.Sprintf("You have %s%s%s gold in hand and %s%s%s gold in the bank.",
 			ansi.FgBrightCyan, comma(p.Gold), ansi.FgGreen, ansi.FgBrightCyan, comma(p.Bank), ansi.FgGreen)
@@ -184,21 +184,21 @@ func BuildMenus() *Menus {
 	}
 
 	prefs.Items = []Item{
-		{Key: 'E', LabelFn: onOff("Enter exits Buy menu", func(w *game.World) *bool { return &w.EnterExitsBuy }),
-			Do: toggle(func(w *game.World) *bool { return &w.EnterExitsBuy })},
-		{Key: 'D', LabelFn: onOff("Deposit gold at end of turn", func(w *game.World) *bool { return &w.DepositEndTurn }),
-			Do: toggle(func(w *game.World) *bool { return &w.DepositEndTurn })},
-		{Key: 'M', LabelFn: onOff("Auto-pay maintenance", func(w *game.World) *bool { return &w.AutoPayMaint }),
-			Do: toggle(func(w *game.World) *bool { return &w.AutoPayMaint })},
-		{Key: 'F', LabelFn: onOff("Auto-feed people & army", func(w *game.World) *bool { return &w.AutoFeed }),
-			Do: toggle(func(w *game.World) *bool { return &w.AutoFeed })},
-		{Key: 'C', LabelFn: onOff("Visit Covert Menu", func(w *game.World) *bool { return &w.VisitCovert }),
-			Do: toggle(func(w *game.World) *bool { return &w.VisitCovert })},
-		{Key: 'T', LabelFn: onOff("Visit Trading Menu", func(w *game.World) *bool { return &w.VisitTrading }),
-			Do: toggle(func(w *game.World) *bool { return &w.VisitTrading })},
-		{Key: 'G', LabelFn: onOff("Visit Message Menu", func(w *game.World) *bool { return &w.VisitMessage }),
-			Do: toggle(func(w *game.World) *bool { return &w.VisitMessage })},
-		{Key: 'L', LabelFn: func(w *game.World) string {
+		{Key: 'E', LabelFn: onOff("Enter exits Buy menu", func(w *ctx) *bool { return &w.EnterExitsBuy }),
+			Do: toggle(func(w *ctx) *bool { return &w.EnterExitsBuy })},
+		{Key: 'D', LabelFn: onOff("Deposit gold at end of turn", func(w *ctx) *bool { return &w.DepositEndTurn }),
+			Do: toggle(func(w *ctx) *bool { return &w.DepositEndTurn })},
+		{Key: 'M', LabelFn: onOff("Auto-pay maintenance", func(w *ctx) *bool { return &w.AutoPayMaint }),
+			Do: toggle(func(w *ctx) *bool { return &w.AutoPayMaint })},
+		{Key: 'F', LabelFn: onOff("Auto-feed people & army", func(w *ctx) *bool { return &w.AutoFeed }),
+			Do: toggle(func(w *ctx) *bool { return &w.AutoFeed })},
+		{Key: 'C', LabelFn: onOff("Visit Covert Menu", func(w *ctx) *bool { return &w.VisitCovert }),
+			Do: toggle(func(w *ctx) *bool { return &w.VisitCovert })},
+		{Key: 'T', LabelFn: onOff("Visit Trading Menu", func(w *ctx) *bool { return &w.VisitTrading }),
+			Do: toggle(func(w *ctx) *bool { return &w.VisitTrading })},
+		{Key: 'G', LabelFn: onOff("Visit Message Menu", func(w *ctx) *bool { return &w.VisitMessage }),
+			Do: toggle(func(w *ctx) *bool { return &w.VisitMessage })},
+		{Key: 'L', LabelFn: func(w *ctx) string {
 			return i18n.T(playerLang(w), "Language") + ": " + languageName(w.Player().Language)
 		}, Do: pickLanguage},
 		{Key: '0', Label: "Return", Do: back},
@@ -239,9 +239,9 @@ func BuildMenus() *Menus {
 		{Key: '3', Label: "Specialize Industry", Do: specializeIndustry},
 		{Key: 'O', Label: "Vote for Coordinator", Do: voteCoordinator, Hidden: ibbsHidden},
 		{Key: 'Y', Label: "Coordinator Menu", Do: gotoMenu(coord),
-			Hidden: func(w *game.World) bool { return ibbsHidden(w) || w.BBSCoordinator() != w.Player() }},
+			Hidden: func(w *ctx) bool { return ibbsHidden(w) || w.BBSCoordinator() != w.Player() }},
 		{Key: 'C', Label: "Configuration Editor", Do: configEditor,
-			Hidden: func(w *game.World) bool { return !w.Coordinator }},
+			Hidden: func(w *ctx) bool { return !w.Coordinator }},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 
@@ -278,9 +278,9 @@ func BuildMenus() *Menus {
 
 // ibbsHidden hides interplanetary/inter-BBS menu items unless the game is
 // configured for IBBS or league play.
-func ibbsHidden(w *game.World) bool { return !w.Config.InterBBSEnabled() }
+func ibbsHidden(w *ctx) bool { return !w.Config.InterBBSEnabled() }
 
-func statusBar(w *game.World) string {
+func statusBar(w *ctx) string {
 	p := w.Player()
 	return fmt.Sprintf(i18n.T(playerLang(w), "%s | Gold %d  Food %d  Land %d  Army %d | Turns left %d | Day %d"),
 		p.Name, p.Gold, p.Food, p.Land, p.Army(), p.TurnsLeft, w.GameDay)

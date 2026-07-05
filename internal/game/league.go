@@ -35,7 +35,5 @@ func (w *World) resetForNewGame() {
 	w.Alliances = nil
 	w.Treaties = nil
 	w.GameDay = 0
-	// The next session re-resolves Active after maintenance.
-	w.Active = nil
 	w.seedAIEmpires()
 }

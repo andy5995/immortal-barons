@@ -14,8 +14,8 @@ import (
 
 // buy2 wraps a "prompt for quantity, apply, report" economy action. The
 // max offered is what the empire can currently afford at unit's price.
-func buy2(label string, military bool, unit func(*game.World) int, apply func(*game.World, *game.Empire, int) error) Action {
-	return func(s session.Session, w *game.World) Result {
+func buy2(label string, military bool, unit func(*ctx) int, apply func(*game.World, *game.Empire, int) error) Action {
+	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
 		// The league's Buy Military knob can forbid buying army units on the
 		// open market (players must then build them through industry). Limited
@@ -33,7 +33,7 @@ func buy2(label string, military bool, unit func(*game.World) int, apply func(*g
 		if n <= 0 {
 			return Stay
 		}
-		if err := apply(w, p, n); err != nil {
+		if err := apply(w.World, p, n); err != nil {
 			fail(s, err)
 		} else {
 			ok(s, "Done. Gold remaining: %d", p.Gold)
@@ -45,14 +45,14 @@ func buy2(label string, military bool, unit func(*game.World) int, apply func(*g
 // sellUnit2 wraps a "prompt for quantity, sell, report" unit-selling action.
 // The max offered is what the empire currently owns.
 func sellUnit2(label string, owned func(*game.Empire) int, apply func(*game.World, *game.Empire, int) error) Action {
-	return func(s session.Session, w *game.World) Result {
+	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
 		max := owned(p)
 		n := promptSuggested(s, fmt.Sprintf("%s (half price)?", label), 0, max)
 		if n <= 0 {
 			return Stay
 		}
-		if err := apply(w, p, n); err != nil {
+		if err := apply(w.World, p, n); err != nil {
 			fail(s, err)
 		} else {
 			ok(s, "Sold %d. Gold: %d", n, p.Gold)
@@ -62,7 +62,7 @@ func sellUnit2(label string, owned func(*game.Empire) int, apply func(*game.Worl
 }
 
 // buildHQ starts HeadQuarters construction for the acting empire.
-func buildHQ(s session.Session, w *game.World) Result {
+func buildHQ(s session.Session, w *ctx) Result {
 	p := w.Player()
 	if err := w.StartHQ(p); err != nil {
 		fail(s, err)
@@ -126,7 +126,7 @@ func promptRegionType(s session.Session) int {
 	return -1
 }
 
-func buyLand(s session.Session, w *game.World) Result {
+func buyLand(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s"+tr(s, "Buy Regions — %d gold each.")+"%s\n", ansi.FgBrightCyan, w.LandPrice(p), ansi.Reset)
 	fmt.Fprintf(s, "%s\n", tr(s, "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."))
@@ -148,7 +148,7 @@ func buyLand(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func sellLand(s session.Session, w *game.World) Result {
+func sellLand(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "NOTE: You cannot sell Regions, only drop them..."), ansi.Reset)
 	printRegionTable(s, p)
@@ -172,13 +172,13 @@ func sellLand(s session.Session, w *game.World) Result {
 // money wraps a bank action that moves a gold amount, offering max as the
 // largest sensible value for that action (e.g. Withdraw's max is p.Bank).
 func money(label string, max func(*game.Empire) int, apply func(*game.World, *game.Empire, int) error) Action {
-	return func(s session.Session, w *game.World) Result {
+	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
 		n := promptSuggested(s, label+" how much gold?", 0, max(p))
 		if n <= 0 {
 			return Stay
 		}
-		if err := apply(w, p, n); err != nil {
+		if err := apply(w.World, p, n); err != nil {
 			fail(s, err)
 		} else {
 			ok(s, "Gold: %d   Bank: %d   Debt: %d", p.Gold, p.Bank, p.Debt)
@@ -189,7 +189,7 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 
 // investFunds prompts for a term (days) and amount, shows the expected
 // return, and locks the gold via w.Invest.
-func investFunds(s session.Session, w *game.World) Result {
+func investFunds(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n"+tr(s, "Current investment rate: %d%% per day.")+"\n", w.InvestRate)
 	days := promptInt(s, "Invest for how many days?")
@@ -216,7 +216,7 @@ func investFunds(s session.Session, w *game.World) Result {
 // is irreversible, so the player must retype their realm name to confirm.
 // Removing the empire and quitting is enough: play.go persists the world on
 // exit, and the caller's next visit finds no empire and onboards a fresh one.
-func abdicate(s session.Session, w *game.World) Result {
+func abdicate(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s"+tr(s, "Abdicating deletes %s permanently. This cannot be undone.")+"%s\n",
 		ansi.FgBrightRed, p.Name, ansi.Reset)
@@ -227,6 +227,7 @@ func abdicate(s session.Session, w *game.World) Result {
 		return Stay
 	}
 	w.RemoveEmpire(p)
+	w.active = nil
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "Your empire is no more. Fare thee well."), ansi.Reset)
 	pause(s)
 	return Quit
@@ -242,7 +243,7 @@ const macroKeys = "DEFRIOKL"
 // writeMacros is BRE's Macro Editor: it lists the eight macro slots, lets the
 // player pick one, then records keystrokes live until the player presses that
 // same Ctrl-<letter> to end the edit.
-func writeMacros(s session.Session, w *game.World) Result {
+func writeMacros(s session.Session, w *ctx) Result {
 	p := w.Player()
 	if p.Macros == nil {
 		p.Macros = map[string]string{}
@@ -297,7 +298,7 @@ func writeMacros(s session.Session, w *game.World) Result {
 }
 
 // listInvestments shows the player's pending investments and any debt.
-func listInvestments(s session.Session, w *game.World) Result {
+func listInvestments(s session.Session, w *ctx) Result {
 	p := w.Player()
 	if len(p.Investments) == 0 && p.Debt == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no active investments or loans."))
@@ -318,13 +319,13 @@ func listInvestments(s session.Session, w *game.World) Result {
 }
 
 // bankRates shows the current savings and investment rates.
-func bankRates(s session.Session, w *game.World) Result {
+func bankRates(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "\n  "+tr(s, "Savings interest: ~1%% per game day.")+"\n  "+tr(s, "Investment rate: %d%% per day.")+"\n", w.InvestRate)
 	pause(s)
 	return Stay
 }
 
-func buyFoodMarket(s session.Session, w *game.World) Result {
+func buyFoodMarket(s session.Session, w *ctx) Result {
 	p := w.Player()
 	n := promptSuggested(s, "How much food to buy?", 0, p.Gold/game.FoodBuyPrice)
 	if n <= 0 {
@@ -338,7 +339,7 @@ func buyFoodMarket(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func sellFoodMarket(s session.Session, w *game.World) Result {
+func sellFoodMarket(s session.Session, w *ctx) Result {
 	p := w.Player()
 	suggested := max(0, p.Food-w.FoodNeededNextTurn(p))
 	n := promptSuggested(s, "How much food to sell?", suggested, p.Food)
@@ -353,7 +354,7 @@ func sellFoodMarket(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func regularAttack(s session.Session, w *game.World) Result {
+func regularAttack(s session.Session, w *ctx) Result {
 	if w.Player().Protection > 0 {
 		ok(s, "You are under New Realm Protection and cannot attack yet.")
 		return Stay
@@ -383,7 +384,7 @@ func printTargetRows(s session.Session, targets []*game.Empire) {
 
 // specialAttack shares the target-selection loop used by the nuclear,
 // chemical, and biological attacks.
-func specialAttack(s session.Session, w *game.World, label string, cost int, strike func(a, d *game.Empire) (string, error)) Result {
+func specialAttack(s session.Session, w *ctx, label string, cost int, strike func(a, d *game.Empire) (string, error)) Result {
 	if w.Player().Protection > 0 {
 		ok(s, "You are under New Realm Protection and cannot attack yet.")
 		return Stay
@@ -413,49 +414,49 @@ func specialAttack(s session.Session, w *game.World, label string, cost int, str
 	return Stay
 }
 
-func nuclearAttack(s session.Session, w *game.World) Result {
+func nuclearAttack(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Nuclear Attack", game.NukeCost, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
 }
 
-func chemicalAttack(s session.Session, w *game.World) Result {
+func chemicalAttack(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Chemical Attack", game.ChemCost, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
 }
 
-func biologicalAttack(s session.Session, w *game.World) Result {
+func biologicalAttack(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Biological Attack", game.BioCost, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
 }
 
-func sendSpy(s session.Session, w *game.World) Result {
+func sendSpy(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Send Spy", 0, func(a, d *game.Empire) (string, error) { return w.SendSpy(a, d) })
 }
 
-func specialOps(s session.Session, w *game.World) Result {
+func specialOps(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Special Operations", 0, func(a, d *game.Empire) (string, error) { return w.Sabotage(a, d) })
 }
 
-func bombIntel(s session.Session, w *game.World) Result {
+func bombIntel(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Bomb Intelligence", 0, func(a, d *game.Empire) (string, error) { return w.BombIntelligence(a, d) })
 }
 
-func stirRevolts(s session.Session, w *game.World) Result {
+func stirRevolts(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Stir Revolts", 0, func(a, d *game.Empire) (string, error) { return w.StirRevolts(a, d) })
 }
 
-func bombAirbases(s session.Session, w *game.World) Result {
+func bombAirbases(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Bomb Airbases", 0, func(a, d *game.Empire) (string, error) { return w.BombAirbases(a, d) })
 }
 
-func bombFood(s session.Session, w *game.World) Result {
+func bombFood(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Bomb Food Stores", 0, func(a, d *game.Empire) (string, error) { return w.BombFood(a, d) })
 }
 
-func bombHQ(s session.Session, w *game.World) Result {
+func bombHQ(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Bomb HQ", 0, func(a, d *game.Empire) (string, error) { return w.BombHQ(a, d) })
 }
 
 // visitAdvisors gives contextual advice based on the empire's current state —
 // the sort of nudges the original's advisors offered.
-func visitAdvisors(s session.Session, w *game.World) Result {
+func visitAdvisors(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your Advisors"), ansi.Reset)
 	var tips []string
@@ -492,7 +493,7 @@ func visitAdvisors(s session.Session, w *game.World) Result {
 
 // gameSetup shows the current game rules (read-only; the sysop edits them from
 // the Coordinator menu's Configuration Editor).
-func gameSetup(s session.Session, w *game.World) Result {
+func gameSetup(s session.Session, w *ctx) Result {
 	c := w.Config
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Game Rules"), ansi.Reset)
 	fmt.Fprintf(s, "  "+tr(s, "Turns per day:      %d")+"\n", c.TurnsPerDay)
@@ -504,7 +505,7 @@ func gameSetup(s session.Session, w *game.World) Result {
 }
 
 // playerList shows every living empire (Coordinator tool).
-func playerList(s session.Session, w *game.World) Result {
+func playerList(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightBlue, tr(s, "Player List"), ansi.Reset)
 	fmt.Fprintf(s, "  %-16s %-14s %-8s %s\n", tr(s, "Empire"), tr(s, "Owner"), tr(s, "Land"), tr(s, "Net Worth"))
 	for _, e := range w.Empires {
@@ -521,17 +522,17 @@ func playerList(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func spyRelations(s session.Session, w *game.World) Result {
+func spyRelations(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Spy on Relations", 0, func(a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) })
 }
 
-func briberyOp(s session.Session, w *game.World) Result {
+func briberyOp(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Bribery", 0, func(a, d *game.Empire) (string, error) { return w.Bribery(a, d) })
 }
 
 // allianceStrength shows the player's combined offense and defense with their
 // Full Defense Alliance partners.
-func allianceStrength(s session.Session, w *game.World) Result {
+func allianceStrength(s session.Session, w *ctx) Result {
 	p := w.Player()
 	off, def, allies := w.AllianceStrength(p)
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Alliance Strength"), ansi.Reset)
@@ -545,7 +546,7 @@ func allianceStrength(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func attackPirates(s session.Session, w *game.World) Result {
+func attackPirates(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Pirate factions (strength is random; fat ones just raided someone):"), ansi.Reset)
 	fmt.Fprintf(s, "  %-3s %-11s %-7s %-4s %-8s %s\n", "#", tr(s, "Faction"), tr(s, "Forces"), tr(s, "Rgn"), tr(s, "Gold"), tr(s, "Loot T/J/U/K/A"))
 	for i, p := range w.Pirates {
@@ -567,7 +568,7 @@ func attackPirates(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func sdiProgram(s session.Session, w *game.World) Result {
+func sdiProgram(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s"+tr(s, "SDI Program — current defense: %d%%")+"%s\n", ansi.FgBrightCyan, p.SDI, ansi.Reset)
 	gold := promptInt(s, "Fund SDI — gold to spend (10000 per +1%%, max 75%%)?")
@@ -583,7 +584,7 @@ func sdiProgram(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func gooieKablooie(s session.Session, w *game.World) Result {
+func gooieKablooie(s session.Session, w *ctx) Result {
 	if w.Player().Protection > 0 {
 		ok(s, "You are under New Realm Protection and cannot attack yet.")
 		return Stay
@@ -606,7 +607,7 @@ func gooieKablooie(s session.Session, w *game.World) Result {
 // turn pipeline can append the maintenance results below it and pause once —
 // otherwise the maintenance line prints after the pause and the next menu's
 // clear-screen wipes it before the player sees it.
-func renderEmpireStatus(s session.Session, w *game.World) {
+func renderEmpireStatus(s session.Session, w *ctx) {
 	p := w.Player()
 	c, wht, r := ansi.FgBrightCyan, ansi.FgWhite, ansi.Reset
 	num := func(n int) string { return c + comma(n) + r }
@@ -642,7 +643,7 @@ func renderEmpireStatus(s session.Session, w *game.World) {
 }
 
 // empireStatus is the standalone status action (System menu): render + pause.
-func empireStatus(s session.Session, w *game.World) Result {
+func empireStatus(s session.Session, w *ctx) Result {
 	renderEmpireStatus(s, w)
 	pause(s)
 	return Stay
@@ -711,13 +712,13 @@ func regionBracketItems(p *game.Empire) []bracketItem {
 	return items
 }
 
-func seeScores(s session.Session, w *game.World) Result {
+func seeScores(s session.Session, w *ctx) Result {
 	printScores(s, w)
 	pause(s)
 	return Stay
 }
 
-func printScores(s session.Session, w *game.World) {
+func printScores(s session.Session, w *ctx) {
 	type row struct {
 		e  *game.Empire
 		nw int
@@ -748,7 +749,7 @@ func printScores(s session.Session, w *game.World) {
 
 // interbbsScores displays scores imported from other boards via inter-BBS
 // packets (see internal/ibbs). v1 covers only score/news sharing.
-func interbbsScores(s session.Session, w *game.World) Result {
+func interbbsScores(s session.Session, w *ctx) Result {
 	if len(w.RemoteBoards) == 0 {
 		ok(s, "No inter-BBS scores have been imported yet.")
 		return Stay
@@ -769,7 +770,7 @@ func interbbsScores(s session.Session, w *game.World) Result {
 // another planet (chosen from imported scores). v1 commits a raw offense
 // figure; it does not yet remove the units from the empire — a follow-up will
 // make the forces actually depart.
-func createGroupAttack(s session.Session, w *game.World) Result {
+func createGroupAttack(s session.Session, w *ctx) Result {
 	p := w.Player()
 	if len(w.RemoteBoards) == 0 {
 		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
@@ -817,7 +818,7 @@ func createGroupAttack(s session.Session, w *game.World) Result {
 }
 
 // joinGroupAttack adds the player's offense to a group attack still forming.
-func joinGroupAttack(s session.Session, w *game.World) Result {
+func joinGroupAttack(s session.Session, w *ctx) Result {
 	p := w.Player()
 	var lines []string
 	var ids []int
@@ -860,7 +861,7 @@ func joinGroupAttack(s session.Session, w *game.World) Result {
 // travelTimes lists the approximate round-trip time to each known planet.
 // Packets exchange on each PLANETARY maintenance run (about daily), so most
 // interplanetary operations take roughly a day each way.
-func travelTimes(s session.Session, w *game.World) Result {
+func travelTimes(s session.Session, w *ctx) Result {
 	if len(w.LeagueNodes) == 0 && len(w.RemoteBoards) == 0 {
 		ok(s, "No other planets are known yet.")
 		return Stay
@@ -909,7 +910,7 @@ func daysAgoLocalized(s session.Session, then, now string) string {
 }
 
 // spyDatabase shows the planet-wide store of spy reports on remote empires.
-func spyDatabase(s session.Session, w *game.World) Result {
+func spyDatabase(s session.Session, w *ctx) Result {
 	if len(w.SpyDatabase) == 0 {
 		ok(s, "The spy database is empty. Spy on empires on other planets to fill it.")
 		return Stay
@@ -927,7 +928,7 @@ func spyDatabase(s session.Session, w *game.World) Result {
 // there; the report lands in the planet-wide Spy Database. v1: intel is drawn
 // from the imported score data (land/net worth). A fuller model will queue an
 // interplanetary covert strike into a packet like group attacks do.
-func terroristOps(s session.Session, w *game.World) Result {
+func terroristOps(s session.Session, w *ctx) Result {
 	p := w.Player()
 	if len(w.RemoteBoards) == 0 {
 		ok(s, "No other planets are known yet.")
@@ -985,7 +986,7 @@ func terroristOps(s session.Session, w *game.World) Result {
 // voteCoordinator lets the player cast (or change) their vote for the BBS
 // Coordinator — the elected player who gets the Coordinator menu. BRE: "Who do
 // you feel should be the BBS Coordinator?"; the vote can change any time.
-func voteCoordinator(s session.Session, w *game.World) Result {
+func voteCoordinator(s session.Session, w *ctx) Result {
 	p := w.Player()
 	var owners, names []string
 	for _, e := range w.Empires {
@@ -1022,7 +1023,7 @@ func voteCoordinator(s session.Session, w *game.World) Result {
 // modifyLeagueDiplomacy lets a League Coordinator post a planet-wide diplomacy
 // declaration, broadcast to the league on the next packet run. v1: a single
 // free-text stance; a fuller model would track pairwise planet relations.
-func modifyLeagueDiplomacy(s session.Session, w *game.World) Result {
+func modifyLeagueDiplomacy(s session.Session, w *ctx) Result {
 	if w.BBSCoordinator() != w.Player() {
 		ok(s, "Only the BBS Coordinator may set league diplomacy.")
 		return Stay
@@ -1037,7 +1038,7 @@ func modifyLeagueDiplomacy(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func readMessages(s session.Session, w *game.World) Result {
+func readMessages(s session.Session, w *ctx) Result {
 	p := w.Player()
 	if len(p.Mail) == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no messages."))
@@ -1059,7 +1060,7 @@ func readMessages(s session.Session, w *game.World) Result {
 }
 
 // recipients lists the living empires other than the player.
-func recipients(w *game.World) []*game.Empire {
+func recipients(w *ctx) []*game.Empire {
 	var r []*game.Empire
 	for _, e := range w.Empires {
 		if e.Alive && e != w.Player() {
@@ -1084,7 +1085,7 @@ func recipientIndex(r rune, n int) int {
 // Net Worth) and reads a SINGLE keypress: a letter A.. selects that empire;
 // '0' cancels (returns nil, false). If allowAll, 'Z' returns (nil, true)
 // meaning "all". Returns (empire, all).
-func pickRecipient(s session.Session, w *game.World, prompt string, allowAll bool) (*game.Empire, bool) {
+func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*game.Empire, bool) {
 	rs := recipients(w)
 	if len(rs) == 0 {
 		ok(s, "There is no one to reach.")
@@ -1176,7 +1177,7 @@ func trimTrailingBlank(lines []string) string {
 	return strings.Join(lines, "\n")
 }
 
-func sendMessage(s session.Session, w *game.World) Result {
+func sendMessage(s session.Session, w *ctx) Result {
 	p := w.Player()
 	for {
 		to, all := pickRecipient(s, w, "Send to:", true)
@@ -1204,7 +1205,7 @@ func sendMessage(s session.Session, w *game.World) Result {
 	}
 }
 
-func sendTradeDeal(s session.Session, w *game.World) Result {
+func sendTradeDeal(s session.Session, w *ctx) Result {
 	p := w.Player()
 	to, _ := pickRecipient(s, w, "Trade with:", false)
 	if to == nil {
@@ -1222,7 +1223,7 @@ func sendTradeDeal(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func planetaryPost(s session.Session, w *game.World) Result {
+func planetaryPost(s session.Session, w *ctx) Result {
 	text := strings.TrimSpace(prompt(s, "Post to the planet:"))
 	if text == "" {
 		return Stay
@@ -1232,7 +1233,7 @@ func planetaryPost(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func modifyDiplomacy(s session.Session, w *game.World) Result {
+func modifyDiplomacy(s session.Session, w *ctx) Result {
 	p := w.Player()
 	var others []*game.Empire
 	for _, e := range w.Empires {
@@ -1261,7 +1262,7 @@ func modifyDiplomacy(s session.Session, w *game.World) Result {
 }
 
 // negotiateWith runs the propose / accept / break loop with one empire.
-func negotiateWith(s session.Session, w *game.World, p, e *game.Empire) {
+func negotiateWith(s session.Session, w *ctx, p, e *game.Empire) {
 	for {
 		fmt.Fprintf(s, "\n%s"+tr(s, "Diplomacy with %s")+"%s\n", ansi.FgBrightCyan, e.Name, ansi.Reset)
 		held := w.TreatiesBetween(p, e)
@@ -1324,7 +1325,7 @@ func pickFromList(s session.Session, msg string, list []string) string {
 	return list[i-1]
 }
 
-func viewDiplomacy(s session.Session, w *game.World) Result {
+func viewDiplomacy(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your treaties:"), ansi.Reset)
 	found := false
@@ -1367,7 +1368,7 @@ func prodField(p *game.Empire, idx int) *int {
 // points spent on each unit type. Percentages need not sum to 100; the
 // manufacturing split uses the raw percentages, so if they sum to less than
 // 100 some production points go unused (v1 choice — no normalization).
-func setIndustries(s session.Session, w *game.World) Result {
+func setIndustries(s session.Session, w *ctx) Result {
 	p := w.Player()
 	proj := w.ProjectedProduction(p)
 	fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgBrightRed, tr(s, "Industrial Production")))
@@ -1395,7 +1396,7 @@ func setIndustries(s session.Session, w *game.World) Result {
 // specializeIndustry lets the player concentrate all Industrial production
 // into a single unit type. This is permanent, matching the original BRE's
 // one-way specialization; once set it cannot be undone.
-func specializeIndustry(s session.Session, w *game.World) Result {
+func specializeIndustry(s session.Session, w *ctx) Result {
 	p := w.Player()
 	if p.Specialized != "" {
 		ok(s, "Your industry is already specialized in %s.", p.Specialized)
@@ -1414,7 +1415,7 @@ func specializeIndustry(s session.Session, w *game.World) Result {
 	return Stay
 }
 
-func setTaxRate(s session.Session, w *game.World) Result {
+func setTaxRate(s session.Session, w *ctx) Result {
 	p := w.Player()
 	maxRate := w.Config.MaxTaxRate
 	fmt.Fprintf(s, "\n%s"+tr(s, "Current tax rate: %d%%")+"%s\n", ansi.FgBrightCyan, p.Tax, ansi.Reset)

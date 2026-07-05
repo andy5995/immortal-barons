@@ -14,26 +14,40 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
+// ctx is the per-session menu context: one shared *game.World plus the active
+// empire for THIS session. Threading the active empire here (instead of a
+// field on the shared World) is what lets the web server run concurrent
+// sessions against one world. It embeds *game.World so callback bodies keep
+// using w.Config, w.Prices, w.NetWorth(...), etc. unchanged.
+type ctx struct {
+	*game.World
+	active *game.Empire
+}
+
+// Player is the active empire for this session (nil before onboarding / after
+// abdication).
+func (c *ctx) Player() *game.Empire { return c.active }
+
 // playerLang is the active caller's UI language ("" = English), used to
 // localize menu chrome at render time.
-func playerLang(g *game.World) string {
-	if p := g.Player(); p != nil {
-		return p.Language
+func playerLang(c *ctx) string {
+	if c != nil && c.active != nil {
+		return c.active.Language
 	}
 	return ""
 }
 
 // langSession wraps a Session so downstream output helpers can learn the
 // caller's language from the Session alone (they receive s but not the World).
-// The language is read live from the World, so a mid-session change in
+// The language is read live from the active empire, so a mid-session change in
 // Preferences takes effect immediately. This is per-session state — safe for
 // the web front-end, which runs concurrent sessions in one process.
 type langSession struct {
 	session.Session
-	w *game.World
+	c *ctx
 }
 
-func (l *langSession) Lang() string { return playerLang(l.w) }
+func (l *langSession) Lang() string { return playerLang(l.c) }
 
 // sessionLang extracts the caller's language from a wrapped Session, or "" for
 // a plain Session (e.g. tests) — which renders English.
@@ -76,27 +90,27 @@ var (
 func Goto(m *Menu) Result { return Result{kind: kindGoto, target: m} }
 
 // Action performs a menu item and reports what the loop should do next.
-type Action func(s session.Session, g *game.World) Result
+type Action func(s session.Session, g *ctx) Result
 
 type Item struct {
 	Key     rune
 	Label   string
-	LabelFn func(*game.World) string // dynamic label (e.g. toggle state); wins over Label
-	Do      Action                   // nil => heading/separator, not selectable
-	Hidden  func(*game.World) bool   // nil => always shown
+	LabelFn func(*ctx) string // dynamic label (e.g. toggle state); wins over Label
+	Do      Action            // nil => heading/separator, not selectable
+	Hidden  func(*ctx) bool   // nil => always shown
 
 	// Price and Owned drive the BRE-style Price / # Owned columns on the
 	// Spending and Sell menus. When any item in a menu sets either, the menu
 	// draws the column header and every item's values (blank where nil).
-	Price func(*game.World) int
-	Owned func(*game.World) int
+	Price func(*ctx) int
+	Owned func(*ctx) int
 }
 
-func (it *Item) hidden(g *game.World) bool {
+func (it *Item) hidden(g *ctx) bool {
 	return it.Hidden != nil && it.Hidden(g)
 }
 
-func (it *Item) label(g *game.World) string {
+func (it *Item) label(g *ctx) string {
 	if it.LabelFn != nil {
 		return it.LabelFn(g)
 	}
@@ -106,7 +120,7 @@ func (it *Item) label(g *game.World) string {
 // displayLabel is the label as shown: a static Label is translated to lang; a
 // dynamic LabelFn (toggle state, "Language: X") is left as its function
 // produces it, since those are formatted, not catalog strings.
-func (it *Item) displayLabel(g *game.World, lang string) string {
+func (it *Item) displayLabel(g *ctx, lang string) string {
 	if it.LabelFn != nil {
 		return it.LabelFn(g)
 	}
@@ -121,17 +135,17 @@ type Menu struct {
 	// (back, not session quit). When the player's EnterExitsBuy preference is
 	// on, that item is offered as the default and Enter selects it.
 	ExitOnEnter bool
-	Status      func(*game.World) string // optional status bar under the menu
+	Status      func(*ctx) string // optional status bar under the menu
 }
 
 // selectable reports whether it is a visible, choosable item (not a
 // heading/separator, not hidden).
-func (it *Item) selectable(g *game.World) bool {
+func (it *Item) selectable(g *ctx) bool {
 	return it.Do != nil && !it.hidden(g)
 }
 
 // byKey returns the selectable item whose Key case-insensitively equals r.
-func (m *Menu) byKey(r rune, g *game.World) *Item {
+func (m *Menu) byKey(r rune, g *ctx) *Item {
 	key := unicode.ToUpper(r)
 	for i := range m.Items {
 		it := &m.Items[i]
@@ -145,7 +159,7 @@ func (m *Menu) byKey(r rune, g *game.World) *Item {
 // readChoice prints "Choice> ", reads ONE keypress, and returns the matching
 // menu item immediately (no Enter). It echoes the chosen item's label. Keys
 // that match no visible selectable item are ignored (return nil -> redraw).
-func (m *Menu) readChoice(s session.Session, g *game.World) (*Item, error) {
+func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	// With EnterExitsBuy on, a pipeline menu offers its '0' exit as the
 	// default: show it after the prompt, and let Enter select it.
 	var def *Item
@@ -183,8 +197,8 @@ func (m *Menu) readChoice(s session.Session, g *game.World) (*Item, error) {
 // push/pop/quit/redraw. The loop is flat (no recursion), which keeps it
 // easy to test with a scripted Session. Returns nil on a clean Quit, or the
 // ReadKey error otherwise.
-func Run(s session.Session, g *game.World, root *Menu) error {
-	s = &langSession{Session: s, w: g}
+func Run(s session.Session, g *ctx, root *Menu) error {
+	s = &langSession{Session: s, c: g}
 	stack := []*Menu{root}
 	for len(stack) > 0 {
 		cur := stack[len(stack)-1]
@@ -233,7 +247,7 @@ const barWidth = 80
 // title/version, and the player's realm right-aligned. No absolute cursor
 // positioning — it's printed as the first line so it works over a plain
 // byte stream (door socket or local tty) without assuming screen height.
-func topBar(g *game.World) string {
+func topBar(g *ctx) string {
 	realm := ""
 	if p := g.Player(); p != nil {
 		realm = p.Name
@@ -258,7 +272,7 @@ func topBar(g *game.World) string {
 
 // hasColumns reports whether any visible item carries a Price/Owned column, so
 // the menu draws the BRE-style "Price / # Owned" table (Spending, Sell).
-func (m *Menu) hasColumns(g *game.World) bool {
+func (m *Menu) hasColumns(g *ctx) bool {
 	for i := range m.Items {
 		it := &m.Items[i]
 		if it.hidden(g) {
@@ -271,7 +285,7 @@ func (m *Menu) hasColumns(g *game.World) bool {
 	return false
 }
 
-func draw(s session.Session, g *game.World, m *Menu) {
+func draw(s session.Session, g *ctx, m *Menu) {
 	fmt.Fprint(s, ansi.Clear)
 	fmt.Fprintf(s, "%s\n", topBar(g))
 	col := m.Color
@@ -316,23 +330,23 @@ func draw(s session.Session, g *game.World, m *Menu) {
 }
 
 func gotoMenu(m *Menu) Action {
-	return func(session.Session, *game.World) Result { return Goto(m) }
+	return func(session.Session, *ctx) Result { return Goto(m) }
 }
 
-func back(session.Session, *game.World) Result { return Back }
-func quit(session.Session, *game.World) Result { return Quit }
+func back(session.Session, *ctx) Result { return Back }
+func quit(session.Session, *ctx) Result { return Quit }
 
 // toggle flips a bool preference and redraws (its label shows the state).
-func toggle(get func(*game.World) *bool) Action {
-	return func(_ session.Session, g *game.World) Result {
+func toggle(get func(*ctx) *bool) Action {
+	return func(_ session.Session, g *ctx) Result {
 		p := get(g)
 		*p = !*p
 		return Stay
 	}
 }
 
-func onOff(name string, get func(*game.World) *bool) func(*game.World) string {
-	return func(g *game.World) string {
+func onOff(name string, get func(*ctx) *bool) func(*ctx) string {
+	return func(g *ctx) string {
 		state := "OFF"
 		if *get(g) {
 			state = "ON"

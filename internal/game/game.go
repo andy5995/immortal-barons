@@ -230,8 +230,7 @@ type World struct {
 	VisitTrading   bool
 	VisitMessage   bool
 
-	Active *Empire `json:"-"` // the empire playing this session
-	Today  string  `json:"-"` // ISO date for this session
+	Today string `json:"-"` // ISO date for this session
 
 	mu  sync.Mutex // guards concurrent access when a server shares one World
 	rng *rand.Rand
@@ -308,8 +307,6 @@ func (w *World) AddHuman(handle, realm string) *Empire {
 	return e
 }
 
-func (w *World) Player() *Empire { return w.Active }
-
 // Lock/Unlock guard the shared World when a single process runs concurrent
 // sessions (the web server). The door/local front-ends run one session and
 // take it uncontended.
@@ -325,17 +322,13 @@ func (w *World) With(fn func()) {
 }
 
 // RemoveEmpire deletes e from the world (Abdicate). The empire is gone
-// entirely; the caller gets a fresh realm on their next visit. Active is
-// cleared if it pointed at e.
+// entirely; the caller gets a fresh realm on their next visit.
 func (w *World) RemoveEmpire(e *Empire) {
 	for i, x := range w.Empires {
 		if x == e {
 			w.Empires = append(w.Empires[:i], w.Empires[i+1:]...)
 			break
 		}
-	}
-	if w.Active == e {
-		w.Active = nil
 	}
 }
 

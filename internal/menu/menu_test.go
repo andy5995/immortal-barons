@@ -14,9 +14,9 @@ import (
 func TestStatusBar(t *testing.T) {
 	w := game.NewWorldSeed(game.DefaultConfig(), 1)
 	p := w.AddHuman("me", "Waste Kings")
-	w.Active = p
+	c := &ctx{World: w, active: p}
 
-	bar := topBar(w)
+	bar := topBar(c)
 	for _, want := range []string{"LOCAL", "Immortal Barons v" + game.Version, "Waste Kings"} {
 		if !strings.Contains(bar, want) {
 			t.Errorf("status bar missing %q: %q", want, bar)
@@ -50,17 +50,17 @@ func (f *fakeSession) ReadKey() (rune, error) {
 
 func (f *fakeSession) Write(p []byte) (int, error) { return f.out.Write(p) }
 
-// newWorld builds a fresh test world with an active human empire.
-func newWorld() *game.World {
+// newWorld builds a fresh test ctx with an active human empire.
+func newWorld() *ctx {
 	cfg := game.DefaultConfig()
 	cfg.AICount = 1
 	w := game.NewWorldSeed(cfg, 1)
-	w.Active = w.AddHuman("tester", "Testland")
-	w.Today = "2026-07-03"
-	return w
+	c := &ctx{World: w, active: w.AddHuman("tester", "Testland")}
+	c.Today = "2026-07-03"
+	return c
 }
 
-func run(t *testing.T, keys string, root *Menu) (*fakeSession, *game.World, error) {
+func run(t *testing.T, keys string, root *Menu) (*fakeSession, *ctx, error) {
 	t.Helper()
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
@@ -127,14 +127,14 @@ func TestBuyLandThroughSpendingMenu(t *testing.T) {
 	menus := BuildMenus()
 	f := &fakeSession{keys: []rune("6C\r5\r ")} // Buy Land -> type C (Coastal) -> qty 5
 	w := newWorld()
-	before := w.Active.Land
-	beforeCoastal := w.Active.Regions.Coastal
+	before := w.Player().Land
+	beforeCoastal := w.Player().Regions.Coastal
 	Run(f, w, menus.Spending)
-	if w.Active.Land != before+5 {
-		t.Errorf("expected land %d, got %d", before+5, w.Active.Land)
+	if w.Player().Land != before+5 {
+		t.Errorf("expected land %d, got %d", before+5, w.Player().Land)
 	}
-	if w.Active.Regions.Coastal != beforeCoastal+5 {
-		t.Errorf("expected Coastal regions %d, got %d", beforeCoastal+5, w.Active.Regions.Coastal)
+	if w.Player().Regions.Coastal != beforeCoastal+5 {
+		t.Errorf("expected Coastal regions %d, got %d", beforeCoastal+5, w.Player().Regions.Coastal)
 	}
 }
 
@@ -164,12 +164,12 @@ func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 // testByKeyMenu builds a small menu exercising hotkey match, a heading
 // (unselectable), and a hidden item.
 func testByKeyMenu() *Menu {
-	noop := func(session.Session, *game.World) Result { return Back }
+	noop := func(session.Session, *ctx) Result { return Back }
 	return &Menu{Items: []Item{
 		{Key: 'C', Label: "Carriers", Do: noop},
 		{Key: 'X', Label: "Card readers", Do: noop},
 		{Label: "-- heading --"}, // Do == nil, not selectable
-		{Key: 'H', Label: "Hidden Item", Do: noop, Hidden: func(*game.World) bool { return true }},
+		{Key: 'H', Label: "Hidden Item", Do: noop, Hidden: func(*ctx) bool { return true }},
 	}}
 }
 
@@ -239,8 +239,8 @@ func TestSetTaxRateViaSystemMenu(t *testing.T) {
 	f := &fakeSession{keys: []rune("R50\r ")}
 	w := newWorld()
 	Run(f, w, menus.System)
-	if w.Active.Tax != 50 {
-		t.Errorf("expected tax rate 50, got %d", w.Active.Tax)
+	if w.Player().Tax != 50 {
+		t.Errorf("expected tax rate 50, got %d", w.Player().Tax)
 	}
 }
 
@@ -294,7 +294,7 @@ func TestEnterExitsWhenPrefOn(t *testing.T) {
 	w := newWorld()
 	w.EnterExitsBuy = true
 	m := &Menu{ExitOnEnter: true, Items: []Item{
-		{Key: '1', Label: "Buy", Do: func(session.Session, *game.World) Result { return Stay }},
+		{Key: '1', Label: "Buy", Do: func(session.Session, *ctx) Result { return Stay }},
 		{Key: '0', Label: "Quit", Do: back},
 	}}
 	f := &fakeSession{keys: []rune{'\r'}}
@@ -372,7 +372,7 @@ func TestHelperTranslatesViaWrappedSession(t *testing.T) {
 	w := newWorld()
 	w.Player().Language = "de"
 	f := &fakeSession{keys: []rune("\r")}
-	ls := &langSession{Session: f, w: w}
+	ls := &langSession{Session: f, c: w}
 	prompt(ls, "Troopers") // "Troopers" -> "Soldaten" in de.po
 	if !strings.Contains(f.out.String(), "Soldaten") {
 		t.Errorf("prompt through wrapped session not translated:\n%s", f.out.String())
