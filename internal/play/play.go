@@ -46,6 +46,13 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	w.Today = today
 	w.DailyMaintenance(today)
 
+	return Session(s, id, w, cfg, func() error { return store.Save(w, cfg) })
+}
+
+// Session plays one session against an already-loaded world owned by the
+// caller. It does not take the flock, load, or run daily maintenance — the
+// caller owns those. It calls save once at session end.
+func Session(s session.Session, id Identity, w *game.World, cfg game.Config, save func() error) (reason string, err error) {
 	// Bound the session: boot after IdleTimeoutSecs idle, or at the caller's
 	// BBS time-left, so an abandoned session frees the world lock.
 	var hard time.Time
@@ -59,16 +66,16 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 
 	e := w.FindByOwner(id.Handle)
 	if e == nil {
-		if !w.Config.JoinOpen(today) {
+		if !w.Config.JoinOpen(w.Today) {
 			fmt.Fprintf(s, "\n%sThe game is closed to new barons (join cutoff %s has passed).%s\n", ansi.FgYellow, w.Config.JoinDate, ansi.Reset)
-			return "closed", store.Save(w, cfg)
+			return "closed", save()
 		}
 		if w.BoardFull() {
 			fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
-			return "closed", store.Save(w, cfg)
+			return "closed", save()
 		}
 		realm := onboard(s, w, id.Handle)
-		e = w.AddHuman(id.Handle, realm)
+		w.With(func() { e = w.AddHuman(id.Handle, realm) })
 	}
 	showEvents(s, e)
 
@@ -86,7 +93,7 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	if gameErr != nil && !errors.Is(gameErr, io.EOF) {
 		return reason, gameErr
 	}
-	return reason, store.Save(w, cfg)
+	return reason, save()
 }
 
 func onboard(s session.Session, w *game.World, handle string) string {

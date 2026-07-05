@@ -32,6 +32,15 @@ type hub struct {
 	mu       sync.Mutex
 	sessions map[string]*session.WebSession
 	cfg      game.Config
+	world    *game.World
+	lock     *store.FileLock
+}
+
+// saveWorld persists the shared world under the world lock.
+func (h *hub) saveWorld() error {
+	var err error
+	h.world.With(func() { err = store.Save(h.world, h.cfg) })
+	return err
 }
 
 func main() {
@@ -43,7 +52,35 @@ func main() {
 	if err != nil {
 		log.Fatalln("config:", err)
 	}
-	h := &hub{sessions: map[string]*session.WebSession{}, cfg: cfg}
+
+	lock, err := store.Lock(cfg, false)
+	if err != nil {
+		log.Fatalf("cannot start: another process holds this world (a web-hosted world can't be shared with a door): %v", err)
+	}
+	defer lock.Release()
+	world, err := store.Load(cfg)
+	if err != nil {
+		log.Fatalf("load world: %v", err)
+	}
+	today := time.Now().Format("2006-01-02")
+	world.Today = today
+	world.DailyMaintenance(today)
+	h := &hub{sessions: map[string]*session.WebSession{}, cfg: cfg, world: world, lock: lock}
+
+	// Daily maintenance on date rollover (guarded by the world lock).
+	go func() {
+		t := time.NewTicker(time.Minute)
+		defer t.Stop()
+		for range t.C {
+			d := time.Now().Format("2006-01-02")
+			h.world.With(func() {
+				if h.world.Today != d {
+					h.world.Today = d
+					h.world.DailyMaintenance(d)
+				}
+			})
+		}
+	}()
 
 	http.HandleFunc("/", h.index)
 	http.HandleFunc("/stream", h.stream)
@@ -187,8 +224,7 @@ func (h *hub) runGame(id string, ws *session.WebSession, addr string) {
 	}()
 	// Handle is derived from the secret session id, so a web caller cannot
 	// claim another caller's BBS handle.
-	today := time.Now().Format("2006-01-02")
-	reason, err := play.Run(ws, play.Identity{Handle: "web-" + id}, h.cfg, today)
+	reason, err := play.Session(ws, play.Identity{Handle: "web-" + id}, h.world, h.cfg, h.saveWorld)
 	if err != nil {
 		log.Printf("session from %s: %v", addr, err)
 	}
