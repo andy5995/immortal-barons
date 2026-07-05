@@ -29,7 +29,7 @@ type Menus struct {
 // then wired, so submenus can reference each other (e.g. several menus
 // offer "Visit Bank").
 func BuildMenus() *Menus {
-	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true}
+	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus}
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan}
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
@@ -284,4 +284,12 @@ func statusBar(w *ctx) string {
 	p := w.Player()
 	return fmt.Sprintf(i18n.T(playerLang(w), "%s | Gold %d  Food %d  Land %d  Army %d | Turns left %d | Day %d"),
 		p.Name, p.Gold, p.Food, p.Land, p.Army(), p.TurnsLeft, w.GameDay)
+}
+
+// spendingStatus is the Spending menu footer: gold on hand and turns left.
+// It runs inside draw's world-lock section (like statusBar), so the reads
+// need no separate locking.
+func spendingStatus(w *ctx) string {
+	p := w.Player()
+	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d turns."), comma(p.Gold), p.TurnsLeft)
 }
