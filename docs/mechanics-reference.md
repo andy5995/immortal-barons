@@ -66,7 +66,16 @@ Net-worth value contributed per unit (from the guide's net-worth table):
 ## Attack types
 
 - **Regular attack** — direct assault; the winner takes some of the
-  loser's regions.
+  loser's regions. Exact figures from BRE's `attack.hlp`:
+  - **Normal Attack:** capture **20%** of the opponent's regions; both sides
+    fight until they suffer **15%** losses, then retreat.
+  - **Quick Strike:** fight at **110%** strength (surprise) but capture only
+    **50%** of a normal attack (10% of regions); both retreat at **8%** losses.
+  - **Extended Battle:** fight at **85%** strength (fatigue) but capture up to
+    **125%** of normal (25% of regions); both accept **20%** losses.
+
+  The clone implements the Normal Attack (20% capture, symmetric 15% losses);
+  Quick Strike / Extended Battle are not yet offered.
 - **Nuclear attack** — turns enemy regions into waste (high cost).
 - **Chemical attack** — damages fewer regions but kills a lot of people
   (and troopers).

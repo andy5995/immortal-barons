@@ -12,6 +12,11 @@ import (
 const (
 	BomberJetKills       = 3
 	TurretsPerBomberDown = 25
+
+	// RegularAttackLossPct is how much of each side's forces a regular (Normal)
+	// attack costs — both attacker and defender — per BRE's attack.hlp ("both
+	// sides fight until they suffer 15% losses, at which time they retreat").
+	RegularAttackLossPct = 15
 )
 
 // bombingRun sends a's bombers against d's airfields before the ground
@@ -58,6 +63,13 @@ func (w *World) Attack(a, d *Empire) string {
 	ap := w.jitter(a.Offense())
 	dp := w.jitter(d.Defense() + d.Land*2)
 
+	// BRE's Normal Attack (attack.hlp): the winner captures 20% of the loser's
+	// regions, and "both sides fight until they suffer 15% losses, at which
+	// time they retreat" — the loss is symmetric regardless of who wins.
+	loss := RegularAttackLossPct * dmg / 100
+	aloss := loseForces(a, loss)
+	dloss := loseForces(d, loss)
+
 	if ap > dp {
 		captured := (d.Land/5 + 1) * rew / 100
 		if captured > d.Land {
@@ -71,9 +83,6 @@ func (w *World) Attack(a, d *Empire) string {
 		d.Gold -= plunder
 		a.Gold += plunder
 
-		aloss := loseForces(a, 15*dmg/100)
-		dloss := loseForces(d, 30*dmg/100)
-
 		fmt.Fprintf(&b, "Victory! You captured %d regions and plundered %d gold.\n", captured, plunder)
 		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
 		if d.Land <= 0 || d.People <= 0 {
@@ -82,8 +91,6 @@ func (w *World) Attack(a, d *Empire) string {
 		}
 		d.Events = append(d.Events, fmt.Sprintf("%s attacked you: you lost %d regions, %d gold, and %d units.", a.Name, captured, plunder, dloss))
 	} else {
-		aloss := loseForces(a, 25*dmg/100)
-		dloss := loseForces(d, 10*dmg/100)
 		fmt.Fprintf(&b, "Defeat! Your forces returned exhausted.\n")
 		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
 		d.Events = append(d.Events, fmt.Sprintf("%s attacked you but was repelled. You lost %d units.", a.Name, dloss))
