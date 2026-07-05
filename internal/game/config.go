@@ -98,6 +98,8 @@ type Config struct {
 	OutboundDir string // inter-BBS packets are written here for the transport to move
 
 	// League ruleset (BRE Configuration Editor fields).
+	GameStartDate     string    // ISO date the game begins; before it, maintenance doesn't advance ("" = already started)
+	JoinDate          string    // ISO date after which no new player may join ("" = no cutoff)
 	TurnsPerDay       int       // turns each player gets per day
 	ProtectionTurns   int       // New Realm Protection length
 	GameLength        int       // days before the league ends and resets; 0 = endless
@@ -136,6 +138,19 @@ const (
 // timed league.
 func (c Config) InterBBSEnabled() bool {
 	return c.IBBS || c.GameLength > 0
+}
+
+// GameStarted reports whether the game has begun as of ISO date `today`. An
+// empty GameStartDate (the default) means it started immediately. ISO dates
+// sort chronologically as strings, so a plain comparison works.
+func (c Config) GameStarted(today string) bool {
+	return c.GameStartDate == "" || today >= c.GameStartDate
+}
+
+// JoinOpen reports whether a new player may still join as of ISO date `today`.
+// An empty JoinDate means joining is always open.
+func (c Config) JoinOpen(today string) bool {
+	return c.JoinDate == "" || today <= c.JoinDate
 }
 
 func DefaultConfig() Config {

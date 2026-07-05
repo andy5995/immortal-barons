@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -110,9 +111,11 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		p(16, "* Attack Damage", c.AttackDamage.String())
 		p(17, "* Attack Rewards", c.AttackRewards.String())
 		p(18, "* Sabre Handling", c.SabreHandling.String())
-		p(19, "AI empires", fmt.Sprintf("%d", c.AICount))
-		p(20, "Inter-BBS play", onOffStr(c.IBBS))
-		p(21, "Board ID", c.BoardID)
+		p(19, "* Game Start Date", dateOr(c.GameStartDate, "starts immediately"))
+		p(20, "* Join Cutoff Date", dateOr(c.JoinDate, "always open"))
+		p(21, "AI empires", fmt.Sprintf("%d", c.AICount))
+		p(22, "Inter-BBS play", onOffStr(c.IBBS))
+		p(23, "Board ID", c.BoardID)
 		fmt.Fprintf(s, "%s\n%s* = league ruleset (Coordinator broadcasts with -league-config)%s\n",
 			rule, ansi.FgWhite, ansi.Reset)
 
@@ -170,15 +173,44 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		case 18:
 			c.SabreHandling = cycleSabre(c.SabreHandling)
 		case 19:
-			c.AICount = promptSuggested(s, "AI empires", c.AICount, 5)
+			c.GameStartDate = promptDate(s, "Game Start Date", c.GameStartDate)
 		case 20:
-			c.IBBS = !c.IBBS
+			c.JoinDate = promptDate(s, "Join Cutoff Date", c.JoinDate)
 		case 21:
+			c.AICount = promptSuggested(s, "AI empires", c.AICount, 5)
+		case 22:
+			c.IBBS = !c.IBBS
+		case 23:
 			if v := strings.TrimSpace(prompt(s, "Board ID:")); v != "" {
 				c.BoardID = v
 			}
 		}
 	}
+}
+
+// dateOr renders an ISO date, or a placeholder when it is unset.
+func dateOr(d, unset string) string {
+	if d == "" {
+		return "(" + unset + ")"
+	}
+	return d
+}
+
+// promptDate reads an ISO date (YYYY-MM-DD); blank keeps the current value and
+// "-" clears it. A malformed date is rejected and the current value kept.
+func promptDate(s session.Session, label, cur string) string {
+	in := strings.TrimSpace(prompt(s, label+" (YYYY-MM-DD, blank = keep, - = clear)"))
+	switch in {
+	case "":
+		return cur
+	case "-":
+		return ""
+	}
+	if _, err := time.Parse("2006-01-02", in); err != nil {
+		fail(s, fmt.Errorf("not a valid date (use YYYY-MM-DD)"))
+		return cur
+	}
+	return in
 }
 
 func onOffStr(b bool) string {

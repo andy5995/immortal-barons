@@ -28,6 +28,13 @@ func (w *World) PlayTurn(e *Empire, today string) {
 // up (loops over multiple missed days). The first call on a brand-new world
 // just records the date.
 func (w *World) DailyMaintenance(today string) {
+	// Before the configured Game Start Date, players may sign up but the game
+	// does not advance. Pin the clock to today so it doesn't catch up when the
+	// start date arrives.
+	if !w.Config.GameStarted(today) {
+		w.LastMaintDate = today
+		return
+	}
 	if w.LastMaintDate == "" {
 		w.LastMaintDate = today
 		return

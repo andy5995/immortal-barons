@@ -34,6 +34,8 @@ type Packet struct {
 // it so everyone plays by the same turns/protection/length — replacing the
 // hand-coordinated config that BRE distributed at reset.
 type LeagueConfig struct {
+	GameStartDate     string
+	JoinDate          string
 	TurnsPerDay       int
 	ProtectionTurns   int
 	GameLength        int
@@ -59,6 +61,8 @@ type LeagueConfig struct {
 // broadcast.
 func (c Config) leagueRuleset() *LeagueConfig {
 	return &LeagueConfig{
+		GameStartDate:     c.GameStartDate,
+		JoinDate:          c.JoinDate,
 		TurnsPerDay:       c.TurnsPerDay,
 		ProtectionTurns:   c.ProtectionTurns,
 		GameLength:        c.GameLength,
@@ -83,6 +87,8 @@ func (c Config) leagueRuleset() *LeagueConfig {
 // applyLeagueRuleset copies broadcast league rules into this board's config,
 // leaving per-board fields (BoardID, dirs, AICount, IBBS) untouched.
 func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
+	c.GameStartDate = lc.GameStartDate
+	c.JoinDate = lc.JoinDate
 	c.TurnsPerDay = lc.TurnsPerDay
 	c.ProtectionTurns = lc.ProtectionTurns
 	c.GameLength = lc.GameLength

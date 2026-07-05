@@ -42,6 +42,10 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) error {
 
 	e := w.FindByOwner(id.Handle)
 	if e == nil {
+		if !w.Config.JoinOpen(today) {
+			fmt.Fprintf(s, "\n%sThe game is closed to new barons (join cutoff %s has passed).%s\n", ansi.FgYellow, w.Config.JoinDate, ansi.Reset)
+			return store.Save(w, cfg)
+		}
 		if w.BoardFull() {
 			fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
 			return store.Save(w, cfg)
