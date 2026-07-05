@@ -107,7 +107,8 @@ func (h *hub) stream(w http.ResponseWriter, r *http.Request) {
 	if !existed {
 		ws = session.NewWebSession()
 		h.sessions[id] = ws
-		go h.runGame(id, ws)
+		log.Printf("session connected from %s", r.RemoteAddr)
+		go h.runGame(id, ws, r.RemoteAddr)
 	}
 	h.mu.Unlock()
 
@@ -139,6 +140,10 @@ func (h *hub) stream(w http.ResponseWriter, r *http.Request) {
 			flusher.Flush()
 			return
 		case <-r.Context().Done():
+			// The tab/stream closed. The game keeps running until the idle
+			// timeout boots it (the browser's EventSource may just be
+			// reconnecting), so don't end the session here.
+			log.Printf("session from %s stream disconnected", r.RemoteAddr)
 			return
 		}
 	}
@@ -165,8 +170,10 @@ func (h *hub) key(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-// runGame plays one session to completion, then cleans it up.
-func (h *hub) runGame(id string, ws *session.WebSession) {
+// runGame plays one session to completion, then cleans it up. addr is the
+// caller's remote address, logged for the operator (the secret session id is
+// never logged).
+func (h *hub) runGame(id string, ws *session.WebSession, addr string) {
 	defer func() {
 		ws.Close()
 		h.mu.Lock()
@@ -176,9 +183,11 @@ func (h *hub) runGame(id string, ws *session.WebSession) {
 	// Handle is derived from the secret session id, so a web caller cannot
 	// claim another caller's BBS handle.
 	today := time.Now().Format("2006-01-02")
-	if err := play.Run(ws, play.Identity{Handle: "web-" + id}, h.cfg, today); err != nil {
-		log.Printf("session %q: %v", id, err) // %q: id is a safe secret, quoted defensively
+	reason, err := play.Run(ws, play.Identity{Handle: "web-" + id}, h.cfg, today)
+	if err != nil {
+		log.Printf("session from %s: %v", addr, err)
 	}
+	log.Printf("session from %s ended (%s)", addr, reason)
 	fmt.Fprint(ws, "\r\n\x1b[97mUntil next turn, Baron. Refresh to play again.\x1b[0m\r\n")
 }
 

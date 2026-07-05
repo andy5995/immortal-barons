@@ -36,7 +36,7 @@ func TestOnboardsThenPersists(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	// splash dismiss, then realm name "Khanate", then Quit
 	f := &fakeSession{keys: []rune(" Khanate\r0")}
-	if err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
+	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
 	}
 	w, _ := store.Load(cfg)
@@ -68,7 +68,7 @@ func TestBusyLockIsReported(t *testing.T) {
 	}
 	defer held.Release()
 	f := &fakeSession{}
-	if err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
+	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatalf("busy should be handled gracefully, got %v", err)
 	}
 	if !strings.Contains(f.out.String(), "busy") {

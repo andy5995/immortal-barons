@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -17,26 +18,42 @@ import (
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
-type Identity struct{ Handle string }
+// Identity is who is playing. TimeLeft, when > 0, is a hard cap on the whole
+// session (a door caller's remaining BBS minutes); 0 means unlimited.
+type Identity struct {
+	Handle   string
+	TimeLeft time.Duration
+}
 
-// Run plays one session for the given caller.
-func Run(s session.Session, id Identity, cfg game.Config, today string) error {
+// Run plays one session for the given caller. The returned reason describes how
+// the session ended — "quit", "idle", "time", "disconnect", "busy", or
+// "closed" — for the front-end's logs.
+func Run(s session.Session, id Identity, cfg game.Config, today string) (reason string, err error) {
 	lock, err := store.Lock(cfg, false)
 	if errors.Is(err, store.ErrBusy) {
 		fmt.Fprintf(s, "\n%sThe game is busy — please try again shortly.%s\n", ansi.FgYellow, ansi.Reset)
-		return nil
+		return "busy", nil
 	}
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer lock.Release()
 
 	w, err := store.Load(cfg)
 	if err != nil {
-		return err
+		return "", err
 	}
 	w.Today = today
 	w.DailyMaintenance(today)
+
+	// Bound the session: boot after IdleTimeoutSecs idle, or at the caller's
+	// BBS time-left, so an abandoned session frees the world lock.
+	var hard time.Time
+	if id.TimeLeft > 0 {
+		hard = time.Now().Add(id.TimeLeft)
+	}
+	d := session.NewDeadline(s, time.Duration(cfg.IdleTimeoutSecs)*time.Second, cfg.MaxIdleWarnings, hard)
+	s = d
 
 	menu.Splash(s)
 
@@ -44,11 +61,11 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) error {
 	if e == nil {
 		if !w.Config.JoinOpen(today) {
 			fmt.Fprintf(s, "\n%sThe game is closed to new barons (join cutoff %s has passed).%s\n", ansi.FgYellow, w.Config.JoinDate, ansi.Reset)
-			return store.Save(w, cfg)
+			return "closed", store.Save(w, cfg)
 		}
 		if w.BoardFull() {
 			fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
-			return store.Save(w, cfg)
+			return "closed", store.Save(w, cfg)
 		}
 		realm := onboard(s, w, id.Handle)
 		e = w.AddHuman(id.Handle, realm)
@@ -57,11 +74,21 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) error {
 
 	showEvents(s, e)
 
-	// io.EOF means the caller dropped the connection; still persist state below.
-	if err := menu.GameLoop(s, w); err != nil && !errors.Is(err, io.EOF) {
-		return err
+	// io.EOF means the caller dropped the connection or was booted; still persist
+	// state below.
+	gameErr := menu.GameLoop(s, w)
+	reason = d.Reason()
+	if reason == "" {
+		if errors.Is(gameErr, io.EOF) {
+			reason = "disconnect"
+		} else {
+			reason = "quit"
+		}
 	}
-	return store.Save(w, cfg)
+	if gameErr != nil && !errors.Is(gameErr, io.EOF) {
+		return reason, gameErr
+	}
+	return reason, store.Save(w, cfg)
 }
 
 func onboard(s session.Session, w *game.World, handle string) string {

@@ -29,7 +29,7 @@ func main() {
 	c := session.NewConsole()
 	defer c.Close()
 
-	if err := play.Run(c, play.Identity{Handle: *name}, cfg, today); err != nil {
+	if _, err := play.Run(c, play.Identity{Handle: *name}, cfg, today); err != nil {
 		fmt.Fprintln(os.Stderr, "barons:", err)
 	}
 	fmt.Fprint(c, "\nUntil next turn, Baron.\n")

@@ -117,18 +117,15 @@ func main() {
 	}
 
 	s := session.NewStdio()
-	if caller.SecondsLeft > 0 {
-		go func() {
-			time.Sleep(time.Duration(caller.SecondsLeft) * time.Second)
-			fmt.Fprint(s, "\r\n\r\nYour BBS time is up. Farewell, Baron!\r\n")
-			os.Exit(0)
-		}()
-	}
 	handle := caller.Handle
 	if handle == "" {
 		handle = fmt.Sprintf("node%d", caller.Node)
 	}
-	if err := play.Run(s, play.Identity{Handle: handle}, cfg, today); err != nil {
+	// The caller's remaining BBS time is a hard session cap: play.Run's deadline
+	// boots at it, saving the world and releasing the lock cleanly (unlike the
+	// old os.Exit, which lost the turn's progress).
+	id := play.Identity{Handle: handle, TimeLeft: time.Duration(caller.SecondsLeft) * time.Second}
+	if _, err := play.Run(s, id, cfg, today); err != nil {
 		fmt.Fprintln(os.Stderr, "barons-door:", err)
 		os.Exit(1)
 	}
