@@ -1,0 +1,8 @@
+# Documentation-website build toolchain, used by .github/workflows/docs.yml and
+# for local `mkdocs serve`. This is translation-time / CI tooling ONLY — it is
+# never a game runtime or `go build` dependency (like po4a's Perl).
+#
+# Pinned to a minor series for reproducible builds; tighten to exact versions
+# with `pip freeze` after a known-good build if you want stricter pinning.
+mkdocs-material~=9.5
+mkdocs-static-i18n~=1.2

@@ -1,0 +1,53 @@
+name: Docs
+
+on:
+  push:
+    branches: [trunk, main]
+  pull_request:
+
+# Cancel superseded runs for the same PR / commit (repo convention).
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # Assemble the MkDocs source from the committed Markdown and build the static
+  # site. Runs on every push and PR so a broken link/rename fails before deploy.
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+      - name: Assemble MkDocs source tree
+        run: go run ./cmd/barons-docs -out build/docs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install docs toolchain
+        run: pip install -r requirements-docs.txt
+      - name: Build site (strict)
+        run: mkdocs build --strict -f build/docs/mkdocs.yml -d "$GITHUB_WORKSPACE/site"
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+
+  # Deploy the built site to GitHub Pages (pushes to the default branch only).
+  # Requires Settings -> Pages -> Source = "GitHub Actions". No gh-pages branch.
+  deploy:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@v4
