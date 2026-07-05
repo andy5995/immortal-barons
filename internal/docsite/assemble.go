@@ -47,16 +47,18 @@ func Assemble(repoRoot, outDir string) error {
 	if err != nil {
 		return err
 	}
+	lk := newLinker(repoRoot, enTopics)
+	srcRel := func(abs string) string { r, _ := filepath.Rel(repoRoot, abs); return filepath.ToSlash(r) }
 
 	for _, lang := range languages {
 		langDir := filepath.Join(siteSrc, lang.code)
 		// Home (README) and the two doc pages: only if this language has them.
-		for _, pair := range [][2]string{
-			{homeSource(repoRoot, lang.code), filepath.Join(langDir, "index.md")},
-			{guideIntroSource(repoRoot, lang.code), filepath.Join(langDir, "guide", "index.md")},
-			{sysopSource(repoRoot, lang.code), filepath.Join(langDir, "running-a-board", "index.md")},
+		for _, pg := range []struct{ src, dst, siteRel string }{
+			{homeSource(repoRoot, lang.code), filepath.Join(langDir, "index.md"), "index.md"},
+			{guideIntroSource(repoRoot, lang.code), filepath.Join(langDir, "guide", "index.md"), "guide/index.md"},
+			{sysopSource(repoRoot, lang.code), filepath.Join(langDir, "running-a-board", "index.md"), "running-a-board/index.md"},
 		} {
-			if err := copyIfExists(pair[0], pair[1]); err != nil {
+			if err := copyIfExists(pg.src, pg.dst, srcRel(pg.src), pg.siteRel, lk); err != nil {
 				return err
 			}
 		}
@@ -69,14 +71,14 @@ func Assemble(repoRoot, outDir string) error {
 		}
 		for _, t := range topics {
 			dst := filepath.Join(langDir, "guide", filepath.FromSlash(t.relPath))
-			if err := copyMarkdown(t.absPath, dst); err != nil {
+			if err := copyMarkdown(t.absPath, dst, srcRel(t.absPath), "guide/"+t.relPath, lk); err != nil {
 				return err
 			}
 		}
 	}
 
 	// Developer docs are English-only.
-	if err := copyTree(filepath.Join(repoRoot, "docs", "dev"), filepath.Join(siteSrc, "en", "developers")); err != nil {
+	if err := copyTree(filepath.Join(repoRoot, "docs", "dev"), filepath.Join(siteSrc, "en", "developers"), repoRoot, "developers", lk); err != nil {
 		return err
 	}
 

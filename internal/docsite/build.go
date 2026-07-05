@@ -8,10 +8,10 @@ import (
 	"github.com/andy5995/immortal-barons/internal/help"
 )
 
-// copyMarkdown reads a Markdown file and writes it to dst (creating parent
-// dirs). Link rewriting is layered on here in a later slice; for now it is a
-// verbatim copy.
-func copyMarkdown(src, dst string) error {
+// copyMarkdown reads a Markdown file, rewrites its intra-repo links for the
+// site (see linker), and writes it to dst (creating parent dirs). srcRepoRel is
+// the file's repo path; siteRel is its language-relative site path.
+func copyMarkdown(src, dst, srcRepoRel, siteRel string, lk *linker) error {
 	data, err := os.ReadFile(src)
 	if err != nil {
 		return err
@@ -19,35 +19,39 @@ func copyMarkdown(src, dst string) error {
 	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile(dst, data, 0o644)
+	out := lk.rewrite(string(data), srcRepoRel, siteRel)
+	return os.WriteFile(dst, []byte(out), 0o644)
 }
 
 // copyIfExists copies src to dst when src exists; a missing src is not an error
 // (that language simply falls back to English for this page).
-func copyIfExists(src, dst string) error {
+func copyIfExists(src, dst, srcRepoRel, siteRel string, lk *linker) error {
 	if _, err := os.Stat(src); err != nil {
 		return nil
 	}
-	return copyMarkdown(src, dst)
+	return copyMarkdown(src, dst, srcRepoRel, siteRel, lk)
 }
 
-// copyTree copies every .md under srcDir to dstDir, preserving structure.
-func copyTree(srcDir, dstDir string) error {
+// copyTree copies every .md under srcDir to dstDir (site path siteBase/…),
+// preserving structure.
+func copyTree(srcDir, dstDir, repoRoot, siteBase string, lk *linker) error {
 	if _, err := os.Stat(srcDir); err != nil {
 		return nil // no such source tree (e.g. no dev docs) — skip
 	}
-	return filepath.WalkDir(srcDir, func(path string, d os.DirEntry, err error) error {
+	return filepath.WalkDir(srcDir, func(p string, d os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if d.IsDir() || !strings.HasSuffix(path, ".md") {
+		if d.IsDir() || !strings.HasSuffix(p, ".md") {
 			return nil
 		}
-		rel, err := filepath.Rel(srcDir, path)
+		rel, err := filepath.Rel(srcDir, p)
 		if err != nil {
 			return err
 		}
-		return copyMarkdown(path, filepath.Join(dstDir, rel))
+		srcRepoRel, _ := filepath.Rel(repoRoot, p)
+		siteRel := siteBase + "/" + filepath.ToSlash(rel)
+		return copyMarkdown(p, filepath.Join(dstDir, rel), filepath.ToSlash(srcRepoRel), siteRel, lk)
 	})
 }
 
