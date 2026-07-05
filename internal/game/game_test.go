@@ -133,3 +133,17 @@ func TestRemoveEmpireAbdicate(t *testing.T) {
 		t.Error("abdicated empire still findable by owner")
 	}
 }
+
+func TestRealmNameTaken(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.AddHuman("alice", "Khanate")
+	if !w.RealmNameTaken("Khanate") {
+		t.Error("exact name should be taken")
+	}
+	if !w.RealmNameTaken("  khanate  ") {
+		t.Error("case-insensitive, trimmed name should be taken")
+	}
+	if w.RealmNameTaken("Empire") {
+		t.Error("unused name should be free")
+	}
+}

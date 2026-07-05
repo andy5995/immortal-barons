@@ -84,25 +84,36 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 			fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
 			return "closed", save()
 		}
-		realm := onboard(s, w, id.Handle)
-		// Re-check under the same lock that does the insert: another goroutine
-		// may have onboarded this handle, or filled the board, while we
-		// prompted for a name.
-		full := false
-		w.With(func() {
-			if existing := w.FindByOwner(id.Handle); existing != nil {
-				e = existing
-				return
+		// Prompt for a realm name and insert atomically. Re-check under the
+		// same lock that does the insert: while we prompted, another goroutine
+		// may have onboarded this handle, filled the board, or claimed the name
+		// we chose. On a name collision, re-prompt; the loop ends once we insert
+		// (e != nil) or hit a terminal condition.
+		for e == nil {
+			realm := onboard(s, w, id.Handle)
+			var full, taken bool
+			w.With(func() {
+				if existing := w.FindByOwner(id.Handle); existing != nil {
+					e = existing
+					return
+				}
+				if w.BoardFull() {
+					full = true
+					return
+				}
+				if w.RealmNameTaken(realm) {
+					taken = true
+					return
+				}
+				e = w.AddHuman(id.Handle, realm)
+			})
+			if full {
+				fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
+				return "closed", save()
 			}
-			if w.BoardFull() {
-				full = true
-				return
+			if taken {
+				fmt.Fprintf(s, "%s  That realm name was just taken — please choose another.%s\n", ansi.FgRed, ansi.Reset)
 			}
-			e = w.AddHuman(id.Handle, realm)
-		})
-		if e == nil && full {
-			fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
-			return "closed", save()
 		}
 	}
 	showEvents(s, w, e)

@@ -307,6 +307,20 @@ func (w *World) AddHuman(handle, realm string) *Empire {
 	return e
 }
 
+// RealmNameTaken reports whether an empire already uses this realm name
+// (case-insensitive). Call it under the world lock together with AddHuman so a
+// concurrent onboarding cannot slip a duplicate name in between the check and
+// the insert.
+func (w *World) RealmNameTaken(name string) bool {
+	n := strings.ToLower(strings.TrimSpace(name))
+	for _, e := range w.Empires {
+		if strings.ToLower(e.Name) == n {
+			return true
+		}
+	}
+	return false
+}
+
 // Lock/Unlock guard the shared World when a single process runs concurrent
 // sessions (the web server). The door/local front-ends run one session and
 // take it uncontended.
