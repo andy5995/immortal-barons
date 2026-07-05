@@ -64,20 +64,48 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 
 	menu.Splash(s)
 
-	e := w.FindByOwner(id.Handle)
+	var joinOpen, boardFull bool
+	var joinDate string
+	var e *game.Empire
+	w.With(func() {
+		e = w.FindByOwner(id.Handle)
+		if e == nil {
+			joinOpen = w.Config.JoinOpen(w.Today)
+			boardFull = w.BoardFull()
+			joinDate = w.Config.JoinDate
+		}
+	})
 	if e == nil {
-		if !w.Config.JoinOpen(w.Today) {
-			fmt.Fprintf(s, "\n%sThe game is closed to new barons (join cutoff %s has passed).%s\n", ansi.FgYellow, w.Config.JoinDate, ansi.Reset)
+		if !joinOpen {
+			fmt.Fprintf(s, "\n%sThe game is closed to new barons (join cutoff %s has passed).%s\n", ansi.FgYellow, joinDate, ansi.Reset)
 			return "closed", save()
 		}
-		if w.BoardFull() {
+		if boardFull {
 			fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
 			return "closed", save()
 		}
 		realm := onboard(s, w, id.Handle)
-		w.With(func() { e = w.AddHuman(id.Handle, realm) })
+		// Re-check under the same lock that does the insert: another goroutine
+		// may have onboarded this handle, or filled the board, while we
+		// prompted for a name.
+		full := false
+		w.With(func() {
+			if existing := w.FindByOwner(id.Handle); existing != nil {
+				e = existing
+				return
+			}
+			if w.BoardFull() {
+				full = true
+				return
+			}
+			e = w.AddHuman(id.Handle, realm)
+		})
+		if e == nil && full {
+			fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
+			return "closed", save()
+		}
 	}
-	showEvents(s, e)
+	showEvents(s, w, e)
 
 	// io.EOF means the caller dropped the connection or was booted; still persist
 	// state below.
@@ -97,10 +125,13 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 }
 
 func onboard(s session.Session, w *game.World, handle string) string {
-	taken := map[string]bool{}
-	for _, e := range w.Empires {
-		taken[strings.ToLower(e.Name)] = true
-	}
+	var taken map[string]bool
+	w.With(func() {
+		taken = make(map[string]bool, len(w.Empires))
+		for _, e := range w.Empires {
+			taken[strings.ToLower(e.Name)] = true
+		}
+	})
 	fmt.Fprintf(s, "%s%sName Your Empire%s\n", ansi.Clear, ansi.FgBrightCyan, ansi.Reset)
 	for {
 		fmt.Fprintf(s, "\n%sName your Realm:%s ", ansi.FgBrightWhite, ansi.Reset)
@@ -117,15 +148,19 @@ func onboard(s session.Session, w *game.World, handle string) string {
 	}
 }
 
-func showEvents(s session.Session, e *game.Empire) {
-	if len(e.Events) == 0 {
+func showEvents(s session.Session, w *game.World, e *game.Empire) {
+	var events []string
+	w.With(func() {
+		events = e.Events
+		e.Events = nil
+	})
+	if len(events) == 0 {
 		return
 	}
 	fmt.Fprintf(s, "%s%sWhile you were away:%s\n", ansi.Clear, ansi.FgBrightCyan, ansi.Reset)
-	for _, ev := range e.Events {
+	for _, ev := range events {
 		fmt.Fprintf(s, "  %s\n", ev)
 	}
-	e.Events = nil
 	fmt.Fprintf(s, "\n%s-=<Paused>=-%s", ansi.FgBrightGreen, ansi.Reset)
 	s.ReadKey() // intentional wait-for-keypress; result unused
 }

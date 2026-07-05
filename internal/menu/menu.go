@@ -161,14 +161,23 @@ func (m *Menu) byKey(r rune, g *ctx) *Item {
 // that match no visible selectable item are ignored (return nil -> redraw).
 func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	// With EnterExitsBuy on, a pipeline menu offers its '0' exit as the
-	// default: show it after the prompt, and let Enter select it.
+	// default: show it after the prompt, and let Enter select it. Resolve the
+	// default item and its label under the world lock (byKey/label read shared
+	// state), before any I/O.
 	var def *Item
-	if g.EnterExitsBuy && m.ExitOnEnter {
-		def = m.byKey('0', g)
-	}
-	fmt.Fprintf(s, "%s%s%s ", ansi.FgBrightWhite, i18n.T(playerLang(g), "Choice>"), ansi.Reset)
+	var defLabel, prompt string
+	g.With(func() {
+		if g.EnterExitsBuy && m.ExitOnEnter {
+			def = m.byKey('0', g)
+			if def != nil {
+				defLabel = def.label(g)
+			}
+		}
+		prompt = i18n.T(playerLang(g), "Choice>")
+	})
+	fmt.Fprintf(s, "%s%s%s ", ansi.FgBrightWhite, prompt, ansi.Reset)
 	if def != nil {
-		fmt.Fprint(s, def.label(g))
+		fmt.Fprint(s, defLabel)
 	}
 	r, err := s.ReadKey()
 	if err != nil {
@@ -179,16 +188,24 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 		return def, nil
 	}
 	if def != nil { // a real choice follows; erase the shown default first
-		for range []rune(def.label(g)) {
+		for range []rune(defLabel) {
 			fmt.Fprint(s, "\b \b")
 		}
 	}
-	it := m.byKey(r, g)
+	// Match the keypress and read the chosen item's label under the lock.
+	var it *Item
+	var itLabel string
+	g.With(func() {
+		it = m.byKey(r, g)
+		if it != nil {
+			itLabel = it.label(g)
+		}
+	})
 	if it == nil {
 		fmt.Fprint(s, "\n")
 		return nil, nil
 	}
-	fmt.Fprintf(s, "%s\n", it.label(g))
+	fmt.Fprintf(s, "%s\n", itLabel)
 	return it, nil
 }
 
@@ -286,47 +303,58 @@ func (m *Menu) hasColumns(g *ctx) bool {
 }
 
 func draw(s session.Session, g *ctx, m *Menu) {
-	fmt.Fprint(s, ansi.Clear)
-	fmt.Fprintf(s, "%s\n", topBar(g))
-	col := m.Color
-	if col == "" {
-		col = ansi.FgBrightCyan
-	}
-	lang := playerLang(g)
-	fmt.Fprintf(s, "%s\n", titleRule(col, i18n.T(lang, m.Title)))
-	cols := m.hasColumns(g)
-	if cols {
-		fmt.Fprintf(s, "%s  Key %-18s %8s %9s%s\n",
-			col, i18n.T(lang, "Item"), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
-	}
-	for i := range m.Items {
-		it := &m.Items[i]
-		if it.hidden(g) {
-			continue
+	// Render the whole menu into an in-memory buffer while holding the world
+	// lock, then flush it to the session unlocked. Every item callback
+	// (hidden/label/Price/Owned/Status/topBar) reads shared empire and world
+	// state; running them all inside one g.With makes those reads race-free
+	// against the daily-maintenance ticker. Building a strings.Builder is not
+	// I/O, so the lock is never held across the actual write (the final
+	// Fprint below).
+	var b strings.Builder
+	g.With(func() {
+		b.WriteString(ansi.Clear)
+		fmt.Fprintf(&b, "%s\n", topBar(g))
+		col := m.Color
+		if col == "" {
+			col = ansi.FgBrightCyan
 		}
-		if it.Do == nil {
-			fmt.Fprintf(s, "  %s\n", it.displayLabel(g, lang))
-			continue
-		}
+		lang := playerLang(g)
+		fmt.Fprintf(&b, "%s\n", titleRule(col, i18n.T(lang, m.Title)))
+		cols := m.hasColumns(g)
 		if cols {
-			price, owned := "", ""
-			if it.Price != nil {
-				price = comma(it.Price(g))
-			}
-			if it.Owned != nil {
-				owned = comma(it.Owned(g))
-			}
-			fmt.Fprintf(s, "  %s(%c)%s %s%-18s%s %8s %9s\n",
-				col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset, price, owned)
-			continue
+			fmt.Fprintf(&b, "%s  Key %-18s %8s %9s%s\n",
+				col, i18n.T(lang, "Item"), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
 		}
-		fmt.Fprintf(s, "  %s(%c)%s %s%s%s\n",
-			col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset)
-	}
-	if m.Status != nil {
-		fmt.Fprintf(s, "%s\n%s%s%s\n", rule, ansi.FgGreen, m.Status(g), ansi.Reset)
-	}
-	fmt.Fprint(s, "\n")
+		for i := range m.Items {
+			it := &m.Items[i]
+			if it.hidden(g) {
+				continue
+			}
+			if it.Do == nil {
+				fmt.Fprintf(&b, "  %s\n", it.displayLabel(g, lang))
+				continue
+			}
+			if cols {
+				price, owned := "", ""
+				if it.Price != nil {
+					price = comma(it.Price(g))
+				}
+				if it.Owned != nil {
+					owned = comma(it.Owned(g))
+				}
+				fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %8s %9s\n",
+					col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset, price, owned)
+				continue
+			}
+			fmt.Fprintf(&b, "  %s(%c)%s %s%s%s\n",
+				col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset)
+		}
+		if m.Status != nil {
+			fmt.Fprintf(&b, "%s\n%s%s%s\n", rule, ansi.FgGreen, m.Status(g), ansi.Reset)
+		}
+		b.WriteString("\n")
+	})
+	fmt.Fprint(s, b.String())
 }
 
 func gotoMenu(m *Menu) Action {

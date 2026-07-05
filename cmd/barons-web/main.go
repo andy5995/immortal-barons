@@ -33,7 +33,6 @@ type hub struct {
 	sessions map[string]*session.WebSession
 	cfg      game.Config
 	world    *game.World
-	lock     *store.FileLock
 }
 
 // saveWorld persists the shared world under the world lock.
@@ -65,7 +64,7 @@ func main() {
 	today := time.Now().Format("2006-01-02")
 	world.Today = today
 	world.DailyMaintenance(today)
-	h := &hub{sessions: map[string]*session.WebSession{}, cfg: cfg, world: world, lock: lock}
+	h := &hub{sessions: map[string]*session.WebSession{}, cfg: cfg, world: world}
 
 	// Daily maintenance on date rollover (guarded by the world lock).
 	go func() {
