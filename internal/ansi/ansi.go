@@ -10,6 +10,7 @@ const (
 	Dim   = esc + "2m"
 	Clear = esc + "2J" + esc + "H" // clear screen, cursor home
 
+	FgBlack   = esc + "30m"
 	FgRed     = esc + "31m"
 	FgGreen   = esc + "32m"
 	FgYellow  = esc + "33m"
@@ -26,6 +27,8 @@ const (
 	FgBrightCyan    = esc + "96m"
 	FgBrightWhite   = esc + "97m"
 
-	BgBlue  = esc + "44m"
-	BgBlack = esc + "40m"
+	BgBlue        = esc + "44m"
+	BgBlack       = esc + "40m"
+	BgWhite       = esc + "47m"
+	BgBrightBlack = esc + "100m" // gray, for zebra-striped table rows
 )

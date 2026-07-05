@@ -770,12 +770,12 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 	writeStatTable(s, tr(s, "Military"), []statCol{
 		{"Troopers", p.Troopers}, {"Jets", p.Jets}, {"Turrets", p.Turrets}, {"Tanks", p.Tanks},
 		{"Bombers", p.Bombers}, {"Carriers", p.Carriers}, {"Agents", p.Agents},
-	})
+	}, 0)
 	regionCols := make([]statCol, len(regionTypeNames))
 	for i, name := range regionTypeNames {
 		regionCols[i] = statCol{name, *regionField(p, i)}
 	}
-	writeStatTable(s, tr(s, "Regions"), regionCols)
+	writeStatTable(s, tr(s, "Regions"), regionCols, 4)
 
 	if p.Protection > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "You have %s%s turns of Protection Left.")+"%s\n", wht, num(p.Protection), wht, r)
@@ -798,24 +798,27 @@ type statCol struct {
 	val  int
 }
 
-// writeStatTable prints a titled table with each column's heading (unit or
-// region name) over its right-aligned value, packing columns into rows that
-// fit an 80-column screen. More readable than a run of "[N Name]" brackets.
-func writeStatTable(s session.Session, title string, cols []statCol) {
+// writeStatTable prints title, then the columns as zebra-striped rows. maxCols
+// caps how many columns share a row (0 = pack as many as fit 80 columns); a
+// group that would overflow the width also wraps regardless.
+func writeStatTable(s session.Session, title string, cols []statCol, maxCols int) {
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, title, ansi.Reset)
-	const maxWidth = 78
-	colW := func(cd statCol) int {
+	const maxWidth = 76 // leaves room for the 2-space indent
+	cellW := func(cd statCol) int {
 		w := len(cd.name)
 		if v := len(comma(cd.val)); v > w {
 			w = v
 		}
-		return w + 2 // two-space gap between columns
+		return w
 	}
 	for i := 0; i < len(cols); {
 		var group []statCol
-		width := 0
+		width := 1 // leading border
 		for i < len(cols) {
-			w := colW(cols[i])
+			if maxCols > 0 && len(group) >= maxCols {
+				break
+			}
+			w := cellW(cols[i]) + 3 // " " + content + " │"
 			if len(group) > 0 && width+w > maxWidth {
 				break
 			}
@@ -824,13 +827,18 @@ func writeStatTable(s session.Session, title string, cols []statCol) {
 			i++
 		}
 		var hdr, vals strings.Builder
+		hdr.WriteString("│")
+		vals.WriteString("│")
 		for _, cd := range group {
-			w := colW(cd)
-			fmt.Fprintf(&hdr, "%*s", w, cd.name)
-			fmt.Fprintf(&vals, "%s%*s%s", ansi.FgBrightCyan, w, comma(cd.val), ansi.Reset)
+			w := cellW(cd)
+			fmt.Fprintf(&hdr, " %*s │", w, cd.name)
+			fmt.Fprintf(&vals, " %*s │", w, comma(cd.val))
 		}
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgWhite, hdr.String(), ansi.Reset)
-		fmt.Fprintf(s, "  %s\n", vals.String())
+		// Zebra rows: the heading row on white, the value row on gray, both in
+		// black text. The background fills the whole row, so the │ dividers read
+		// as cell borders within a solid bar.
+		fmt.Fprintf(s, "  %s%s%s%s\n", ansi.BgWhite, ansi.FgBlack, hdr.String(), ansi.Reset)
+		fmt.Fprintf(s, "  %s%s%s%s\n", ansi.BgBrightBlack, ansi.FgBlack, vals.String(), ansi.Reset)
 	}
 }
 
