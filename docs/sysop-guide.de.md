@@ -22,8 +22,18 @@ erstellen:
 barons-door -setup -data /path/to/data
 ```
 
-Es stellt ein paar Fragen (Züge pro Tag, Schutzzüge, Anzahl der KI-Barone,
-Spieldauer) und schreibt `config.json`.
+This opens the **Configuration Editor**: a menu of every game rule (turns
+per day, protection turns, land and market settings, interest and investment
+rates, tax and region limits, costs and attack settings, number of AI
+barons, game length, and more). Change what you like, then press `0` to save
+`config.json`, or `Q` to cancel. `-setup` only writes the config; it does
+not create or change any game world (the world is created when your first
+caller logs in).
+
+There is also a **`-reset`** command described later. It opens the *same*
+Configuration Editor, but after you save it also **starts a fresh game**
+(clears all empires and re-seeds the AI). Use `-setup` when you first
+install the game, and `-reset` when you want to reconfigure and start over.
 
 ## Den Door registrieren
 
@@ -57,16 +67,18 @@ KI-Barone ihre Züge machen und erneuert die Züge jedes Spielers.
 
 ## Starting a fresh game (reset)
 
-To wipe the current game and start over, run:
+To reconfigure and start the game over, run:
 
 ```
 barons-door -reset -data /path/to/data
 ```
 
-This clears all empires (players re-create their realm the next time they
-log in) and re-seeds the AI barons on a fresh day one. It does not pick a
-winner.  The old world is saved to `world.json.bak` in the data directory
-first, so you can restore it if you reset by mistake.
+This opens the same **Configuration Editor** as `-setup` (adjust any rules,
+then `0` to save or `Q` to cancel). After you save, it clears all empires
+(players re-create their realm the next time they log in) and re-seeds the
+AI barons on a fresh day one. It does not pick a winner. The old world is
+saved to `world.json.bak` in the data directory first, so you can restore it
+if you reset by mistake. Cancelling with `Q` leaves the game untouched.
 
 ## Inter-BBS-(Liga-)Spiel
 

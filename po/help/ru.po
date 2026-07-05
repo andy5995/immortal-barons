@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-05 10:59-0500\n"
+"POT-Creation-Date: 2026-07-05 11:16-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1691,22 +1691,34 @@ msgid "barons-door -setup -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:25
+#: docs/sysop-guide.md:29
 msgid ""
-"It asks a few questions (turns per day, protection turns, number of AI "
-"barons, game length) and writes `config.json`."
+"This opens the **Configuration Editor**: a menu of every game rule (turns "
+"per day, protection turns, land and market settings, interest and investment "
+"rates, tax and region limits, costs and attack settings, number of AI "
+"barons, game length, and more). Change what you like, then press `0` to save "
+"`config.json`, or `Q` to cancel. `-setup` only writes the config; it does "
+"not create or change any game world (the world is created when your first "
+"caller logs in)."
 msgstr ""
-"Она задаёт несколько вопросов (ходов в день, ходов защиты, число ИИ-баронов, "
-"длительность игры) и записывает `config.json`."
+
+#. type: Plain text
+#: docs/sysop-guide.md:34
+msgid ""
+"There is also a **`-reset`** command described later. It opens the *same* "
+"Configuration Editor, but after you save it also **starts a fresh game** "
+"(clears all empires and re-seeds the AI). Use `-setup` when you first "
+"install the game, and `-reset` when you want to reconfigure and start over."
+msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:26
+#: docs/sysop-guide.md:35
 #, no-wrap
 msgid "Registering the door"
 msgstr "Регистрация двери"
 
 #. type: Plain text
-#: docs/sysop-guide.md:31
+#: docs/sysop-guide.md:40
 msgid ""
 "Set up the game as an external program (a \"door\") in your BBS software. "
 "Your BBS writes a dropfile when a caller runs the door. The game reads it to "
@@ -1717,7 +1729,7 @@ msgstr ""
 "узнать, кто играет и сколько у него времени."
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:36
+#: docs/sysop-guide.md:45
 msgid ""
 "The game reads **DOOR32.SYS** (both Synchronet and Mystic write it) or "
 "**DOOR.SYS**. Point the game at it with `-dropfile`, or let it search the "
@@ -1728,40 +1740,40 @@ msgstr ""
 "его в текущем каталоге."
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:36
+#: docs/sysop-guide.md:45
 msgid "The caller's handle from the dropfile becomes the name of their realm."
 msgstr "Псевдоним абонента из dropfile становится названием его королевства."
 
 #. type: Plain text
-#: docs/sysop-guide.md:38
+#: docs/sysop-guide.md:47
 msgid "A typical command line:"
 msgstr "Типичная командная строка:"
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:39
+#: docs/sysop-guide.md:48
 #, no-wrap
 msgid "barons-door -dropfile /path/to/DOOR32.SYS -data /path/to/data\n"
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:43
+#: docs/sysop-guide.md:52
 #, no-wrap
 msgid "Daily maintenance"
 msgstr "Ежедневное обслуживание"
 
 #. type: Plain text
-#: docs/sysop-guide.md:46
+#: docs/sysop-guide.md:55
 msgid "Run maintenance once a day (a nightly event is the usual place):"
 msgstr "Запускайте обслуживание раз в день (обычно это ночное событие):"
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:47
+#: docs/sysop-guide.md:56
 #, no-wrap
 msgid "barons-door -maint -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:53
+#: docs/sysop-guide.md:62
 msgid ""
 "This advances the game one day for every day that passed, lets the AI barons "
 "take their turns, and refreshes each player's turns."
@@ -1770,39 +1782,41 @@ msgstr ""
 "сделать ходы и обновляет ходы каждого игрока."
 
 #. type: Title ##
-#: docs/sysop-guide.md:54
+#: docs/sysop-guide.md:63
 #, no-wrap
 msgid "Starting a fresh game (reset)"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:57
-msgid "To wipe the current game and start over, run:"
+#: docs/sysop-guide.md:66
+msgid "To reconfigure and start the game over, run:"
 msgstr ""
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:58
+#: docs/sysop-guide.md:67
 #, no-wrap
 msgid "barons-door -reset -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:66
+#: docs/sysop-guide.md:77
 msgid ""
-"This clears all empires (players re-create their realm the next time they "
-"log in) and re-seeds the AI barons on a fresh day one. It does not pick a "
-"winner.  The old world is saved to `world.json.bak` in the data directory "
-"first, so you can restore it if you reset by mistake."
+"This opens the same **Configuration Editor** as `-setup` (adjust any rules, "
+"then `0` to save or `Q` to cancel). After you save, it clears all empires "
+"(players re-create their realm the next time they log in) and re-seeds the "
+"AI barons on a fresh day one. It does not pick a winner. The old world is "
+"saved to `world.json.bak` in the data directory first, so you can restore it "
+"if you reset by mistake. Cancelling with `Q` leaves the game untouched."
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:67
+#: docs/sysop-guide.md:78
 #, no-wrap
 msgid "Inter-BBS (league) play"
 msgstr "Межсистемная (лиговая) игра"
 
 #. type: Plain text
-#: docs/sysop-guide.md:71
+#: docs/sysop-guide.md:82
 msgid ""
 "A league is a group of boards whose players compete against each other. To "
 "join one, turn on inter-BBS play and give your board a name."
@@ -1811,28 +1825,28 @@ msgstr ""
 "вступить, включите межсистемную игру и дайте своей доске имя."
 
 #. type: Plain text
-#: docs/sysop-guide.md:73
+#: docs/sysop-guide.md:84
 msgid "Edit `config.json` and set:"
 msgstr "Отредактируйте `config.json` и задайте:"
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:79
+#: docs/sysop-guide.md:90
 msgid "`\"IBBS\": true` — turn on the inter-BBS menus."
 msgstr "`\"IBBS\": true` — включить межсистемные меню."
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:79
+#: docs/sysop-guide.md:90
 msgid "`\"BoardID\"` — a short unique name for your board (your \"planet\")."
 msgstr "`\"BoardID\"` — короткое уникальное имя вашей доски (вашей «планеты»)."
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:79
+#: docs/sysop-guide.md:90
 msgid ""
 "`\"InboundDir\"` — the directory where packets from other boards arrive."
 msgstr "`\"InboundDir\"` — каталог, куда приходят пакеты от других досок."
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:79
+#: docs/sysop-guide.md:90
 msgid ""
 "`\"OutboundDir\"` — the directory where the game writes packets for other "
 "boards."
@@ -1840,7 +1854,7 @@ msgstr ""
 "`\"OutboundDir\"` — каталог, куда игра записывает пакеты для других досок."
 
 #. type: Plain text
-#: docs/sysop-guide.md:82
+#: docs/sysop-guide.md:93
 msgid ""
 "Ask your League Coordinator for the node list and add it to your data "
 "directory as **`ibnodes.dat`** (see the format below)."
@@ -1849,13 +1863,13 @@ msgstr ""
 "как **`ibnodes.dat`** (формат см. ниже)."
 
 #. type: Title ##
-#: docs/sysop-guide.md:83
+#: docs/sysop-guide.md:94
 #, no-wrap
 msgid "How packets move (you choose the schedule)"
 msgstr "Как перемещаются пакеты (расписание выбираете вы)"
 
 #. type: Plain text
-#: docs/sysop-guide.md:88
+#: docs/sysop-guide.md:99
 msgid ""
 "The game never moves files between boards. It only reads and writes packet "
 "files in your inbound and outbound directories. Moving the files between "
@@ -1866,18 +1880,18 @@ msgstr ""
 "досками — ваша задача, и вы решаете, как часто это делать."
 
 #. type: Plain text
-#: docs/sysop-guide.md:90
+#: docs/sysop-guide.md:101
 msgid "The inter-BBS step is:"
 msgstr "Межсистемный шаг:"
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:91
+#: docs/sysop-guide.md:102
 #, no-wrap
 msgid "barons-door -planetary -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:98
+#: docs/sysop-guide.md:109
 msgid ""
 "It reads every packet in your inbound directory, applies it, and writes new "
 "packets to your outbound directory. It also runs automatically inside `-"
@@ -1888,24 +1902,24 @@ msgstr ""
 "maint`, когда включена межсистемная игра."
 
 #. type: Plain text
-#: docs/sysop-guide.md:100
+#: docs/sysop-guide.md:111
 msgid "A common setup:"
 msgstr "Типичная схема:"
 
 #. type: Bullet: '1. '
-#: docs/sysop-guide.md:107
+#: docs/sysop-guide.md:118
 msgid "A caller plays the game."
 msgstr "Абонент играет."
 
 #. type: Bullet: '2. '
-#: docs/sysop-guide.md:107
+#: docs/sysop-guide.md:118
 msgid "After the caller exits, or on a schedule you pick, run `-planetary`."
 msgstr ""
 "После выхода абонента или по выбранному вами расписанию запустите `-"
 "planetary`."
 
 #. type: Bullet: '3. '
-#: docs/sysop-guide.md:107
+#: docs/sysop-guide.md:118
 msgid ""
 "Your transport script copies each file from your outbound directory to the "
 "inbound directory of every other board (over FidoNet, a sync tool, scp, a "
@@ -1916,13 +1930,13 @@ msgstr ""
 "scp, общий диск — что используете)."
 
 #. type: Bullet: '4. '
-#: docs/sysop-guide.md:107
+#: docs/sysop-guide.md:118
 msgid "The next `-planetary` run on each board reads and applies those files."
 msgstr ""
 "Следующий запуск `-planetary` на каждой доске читает и применяет эти файлы."
 
 #. type: Plain text
-#: docs/sysop-guide.md:111
+#: docs/sysop-guide.md:122
 msgid ""
 "Run it as often as you like. More often means shorter travel times between "
 "planets. The in-game \"Travel Times\" screen shows players how recently "
@@ -1933,13 +1947,13 @@ msgstr ""
 "приходили пакеты, чтобы они знали скорость операций."
 
 #. type: Title ##
-#: docs/sysop-guide.md:112
+#: docs/sysop-guide.md:123
 #, no-wrap
 msgid "The node list: `ibnodes.dat`"
 msgstr "Список узлов: `ibnodes.dat`"
 
 #. type: Plain text
-#: docs/sysop-guide.md:117
+#: docs/sysop-guide.md:128
 msgid ""
 "The node list names every board in the league. It uses the same simple "
 "layout as the original BRE `BRNODES.DAT`. Each board is six lines, and a "
@@ -1950,7 +1964,7 @@ msgstr ""
 "строк, доски разделяет пустая строка:"
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:118
+#: docs/sysop-guide.md:129
 #, no-wrap
 msgid ""
 "1\n"
@@ -1969,7 +1983,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:136
+#: docs/sysop-guide.md:147
 msgid ""
 "The six lines are: node number, board (planet) name, network address, city, "
 "state or province, and country. Board number 1 is the League Coordinator."
@@ -1978,13 +1992,13 @@ msgstr ""
 "или провинция и страна. Доска номер 1 — координатор лиги."
 
 #. type: Title ##
-#: docs/sysop-guide.md:137
+#: docs/sysop-guide.md:148
 #, no-wrap
 msgid "League-wide rules (Coordinator only)"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:145
+#: docs/sysop-guide.md:156
 msgid ""
 "The League Coordinator sets the rules that must match across the whole "
 "league.  These are all the fields marked with a star in the Configuration "
@@ -1995,13 +2009,13 @@ msgid ""
 msgstr ""
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:146
+#: docs/sysop-guide.md:157
 #, no-wrap
 msgid "barons-door -league-config -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:154
+#: docs/sysop-guide.md:165
 msgid ""
 "This writes a settings packet to your outbound directory. Each member board "
 "adopts the settings on its next `-planetary` run. Member boards accept these "
@@ -2010,20 +2024,20 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:155
+#: docs/sysop-guide.md:166
 #, no-wrap
 msgid "The Coordinator"
 msgstr "Координатор"
 
 #. type: Plain text
-#: docs/sysop-guide.md:158
+#: docs/sysop-guide.md:169
 msgid ""
 "There are two different \"coordinator\" ideas, and they are not the same "
 "thing:"
 msgstr "Есть два разных понятия «координатор», и это не одно и то же:"
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:163
+#: docs/sysop-guide.md:174
 msgid ""
 "**League Coordinator** — the sysop of board number 1. This person keeps the "
 "node list and hands it out to the other boards."
@@ -2032,7 +2046,7 @@ msgstr ""
 "его другим доскам."
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:163
+#: docs/sysop-guide.md:174
 msgid ""
 "**BBS Coordinator** — a *player* your board elects. Players vote in the "
 "System menu, and the player with the most votes gets the Coordinator menu.  "
@@ -2041,3 +2055,10 @@ msgstr ""
 "**Координатор BBS** — *игрок*, которого выбирает ваша доска. Игроки голосуют "
 "в системном меню, и игрок с наибольшим числом голосов получает меню "
 "координатора. Голос можно менять в любой момент."
+
+#~ msgid ""
+#~ "It asks a few questions (turns per day, protection turns, number of AI "
+#~ "barons, game length) and writes `config.json`."
+#~ msgstr ""
+#~ "Она задаёт несколько вопросов (ходов в день, ходов защиты, число ИИ-"
+#~ "баронов, длительность игры) и записывает `config.json`."

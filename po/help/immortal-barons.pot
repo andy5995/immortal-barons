@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-05 10:59-0500\n"
+"POT-Creation-Date: 2026-07-05 11:16-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1677,21 +1677,36 @@ msgid "barons-door -setup -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:25
+#: docs/sysop-guide.md:29
 #, markdown-text
 msgid ""
-"It asks a few questions (turns per day, protection turns, number of AI "
-"barons, game length) and writes `config.json`."
+"This opens the **Configuration Editor**: a menu of every game rule (turns "
+"per day, protection turns, land and market settings, interest and investment "
+"rates, tax and region limits, costs and attack settings, number of AI "
+"barons, game length, and more). Change what you like, then press `0` to save "
+"`config.json`, or `Q` to cancel. `-setup` only writes the config; it does "
+"not create or change any game world (the world is created when your first "
+"caller logs in)."
+msgstr ""
+
+#. type: Plain text
+#: docs/sysop-guide.md:34
+#, markdown-text
+msgid ""
+"There is also a **`-reset`** command described later. It opens the *same* "
+"Configuration Editor, but after you save it also **starts a fresh game** "
+"(clears all empires and re-seeds the AI). Use `-setup` when you first "
+"install the game, and `-reset` when you want to reconfigure and start over."
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:26
+#: docs/sysop-guide.md:35
 #, markdown-text, no-wrap
 msgid "Registering the door"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:31
+#: docs/sysop-guide.md:40
 #, markdown-text
 msgid ""
 "Set up the game as an external program (a \"door\") in your BBS "
@@ -1700,7 +1715,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:36
+#: docs/sysop-guide.md:45
 #, markdown-text
 msgid ""
 "The game reads **DOOR32.SYS** (both Synchronet and Mystic write it) or "
@@ -1709,43 +1724,43 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:36
+#: docs/sysop-guide.md:45
 #, markdown-text
 msgid "The caller's handle from the dropfile becomes the name of their realm."
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:38
+#: docs/sysop-guide.md:47
 #, markdown-text
 msgid "A typical command line:"
 msgstr ""
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:39
+#: docs/sysop-guide.md:48
 #, no-wrap
 msgid "barons-door -dropfile /path/to/DOOR32.SYS -data /path/to/data\n"
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:43
+#: docs/sysop-guide.md:52
 #, markdown-text, no-wrap
 msgid "Daily maintenance"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:46
+#: docs/sysop-guide.md:55
 #, markdown-text
 msgid "Run maintenance once a day (a nightly event is the usual place):"
 msgstr ""
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:47
+#: docs/sysop-guide.md:56
 #, no-wrap
 msgid "barons-door -maint -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:53
+#: docs/sysop-guide.md:62
 #, markdown-text
 msgid ""
 "This advances the game one day for every day that passed, lets the AI barons "
@@ -1753,41 +1768,43 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:54
+#: docs/sysop-guide.md:63
 #, markdown-text, no-wrap
 msgid "Starting a fresh game (reset)"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:57
+#: docs/sysop-guide.md:66
 #, markdown-text
-msgid "To wipe the current game and start over, run:"
+msgid "To reconfigure and start the game over, run:"
 msgstr ""
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:58
+#: docs/sysop-guide.md:67
 #, no-wrap
 msgid "barons-door -reset -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:66
+#: docs/sysop-guide.md:77
 #, markdown-text
 msgid ""
-"This clears all empires (players re-create their realm the next time they "
-"log in) and re-seeds the AI barons on a fresh day one. It does not pick a "
-"winner.  The old world is saved to `world.json.bak` in the data directory "
-"first, so you can restore it if you reset by mistake."
+"This opens the same **Configuration Editor** as `-setup` (adjust any rules, "
+"then `0` to save or `Q` to cancel). After you save, it clears all empires "
+"(players re-create their realm the next time they log in) and re-seeds the "
+"AI barons on a fresh day one. It does not pick a winner. The old world is "
+"saved to `world.json.bak` in the data directory first, so you can restore it "
+"if you reset by mistake. Cancelling with `Q` leaves the game untouched."
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:67
+#: docs/sysop-guide.md:78
 #, markdown-text, no-wrap
 msgid "Inter-BBS (league) play"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:71
+#: docs/sysop-guide.md:82
 #, markdown-text
 msgid ""
 "A league is a group of boards whose players compete against each other. To "
@@ -1795,31 +1812,31 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:73
+#: docs/sysop-guide.md:84
 #, markdown-text
 msgid "Edit `config.json` and set:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:79
+#: docs/sysop-guide.md:90
 #, markdown-text
 msgid "`\"IBBS\": true` — turn on the inter-BBS menus."
 msgstr ""
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:79
+#: docs/sysop-guide.md:90
 #, markdown-text
 msgid "`\"BoardID\"` — a short unique name for your board (your \"planet\")."
 msgstr ""
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:79
+#: docs/sysop-guide.md:90
 #, markdown-text
 msgid "`\"InboundDir\"` — the directory where packets from other boards arrive."
 msgstr ""
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:79
+#: docs/sysop-guide.md:90
 #, markdown-text
 msgid ""
 "`\"OutboundDir\"` — the directory where the game writes packets for other "
@@ -1827,7 +1844,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:82
+#: docs/sysop-guide.md:93
 #, markdown-text
 msgid ""
 "Ask your League Coordinator for the node list and add it to your data "
@@ -1835,13 +1852,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:83
+#: docs/sysop-guide.md:94
 #, markdown-text, no-wrap
 msgid "How packets move (you choose the schedule)"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:88
+#: docs/sysop-guide.md:99
 #, markdown-text
 msgid ""
 "The game never moves files between boards. It only reads and writes packet "
@@ -1850,19 +1867,19 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:90
+#: docs/sysop-guide.md:101
 #, markdown-text
 msgid "The inter-BBS step is:"
 msgstr ""
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:91
+#: docs/sysop-guide.md:102
 #, no-wrap
 msgid "barons-door -planetary -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:98
+#: docs/sysop-guide.md:109
 #, markdown-text
 msgid ""
 "It reads every packet in your inbound directory, applies it, and writes new "
@@ -1871,25 +1888,25 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:100
+#: docs/sysop-guide.md:111
 #, markdown-text
 msgid "A common setup:"
 msgstr ""
 
 #. type: Bullet: '1. '
-#: docs/sysop-guide.md:107
+#: docs/sysop-guide.md:118
 #, markdown-text
 msgid "A caller plays the game."
 msgstr ""
 
 #. type: Bullet: '2. '
-#: docs/sysop-guide.md:107
+#: docs/sysop-guide.md:118
 #, markdown-text
 msgid "After the caller exits, or on a schedule you pick, run `-planetary`."
 msgstr ""
 
 #. type: Bullet: '3. '
-#: docs/sysop-guide.md:107
+#: docs/sysop-guide.md:118
 #, markdown-text
 msgid ""
 "Your transport script copies each file from your outbound directory to the "
@@ -1898,13 +1915,13 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '4. '
-#: docs/sysop-guide.md:107
+#: docs/sysop-guide.md:118
 #, markdown-text
 msgid "The next `-planetary` run on each board reads and applies those files."
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:111
+#: docs/sysop-guide.md:122
 #, markdown-text
 msgid ""
 "Run it as often as you like. More often means shorter travel times between "
@@ -1913,13 +1930,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:112
+#: docs/sysop-guide.md:123
 #, markdown-text, no-wrap
 msgid "The node list: `ibnodes.dat`"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:117
+#: docs/sysop-guide.md:128
 #, markdown-text
 msgid ""
 "The node list names every board in the league. It uses the same simple "
@@ -1928,7 +1945,7 @@ msgid ""
 msgstr ""
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:118
+#: docs/sysop-guide.md:129
 #, no-wrap
 msgid ""
 "1\n"
@@ -1947,7 +1964,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:136
+#: docs/sysop-guide.md:147
 #, markdown-text
 msgid ""
 "The six lines are: node number, board (planet) name, network address, city, "
@@ -1955,13 +1972,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:137
+#: docs/sysop-guide.md:148
 #, markdown-text, no-wrap
 msgid "League-wide rules (Coordinator only)"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:145
+#: docs/sysop-guide.md:156
 #, markdown-text
 msgid ""
 "The League Coordinator sets the rules that must match across the whole "
@@ -1973,13 +1990,13 @@ msgid ""
 msgstr ""
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:146
+#: docs/sysop-guide.md:157
 #, no-wrap
 msgid "barons-door -league-config -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:154
+#: docs/sysop-guide.md:165
 #, markdown-text
 msgid ""
 "This writes a settings packet to your outbound directory. Each member board "
@@ -1989,13 +2006,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:155
+#: docs/sysop-guide.md:166
 #, markdown-text, no-wrap
 msgid "The Coordinator"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:158
+#: docs/sysop-guide.md:169
 #, markdown-text
 msgid ""
 "There are two different \"coordinator\" ideas, and they are not the same "
@@ -2003,7 +2020,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:163
+#: docs/sysop-guide.md:174
 #, markdown-text
 msgid ""
 "**League Coordinator** — the sysop of board number 1. This person keeps the "
@@ -2011,7 +2028,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: docs/sysop-guide.md:163
+#: docs/sysop-guide.md:174
 #, markdown-text
 msgid ""
 "**BBS Coordinator** — a *player* your board elects. Players vote in the "

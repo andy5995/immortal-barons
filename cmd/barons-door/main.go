@@ -10,13 +10,9 @@
 package main
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/door"
@@ -304,33 +300,19 @@ func runImport(cfg game.Config, path string) error {
 	return nil
 }
 
-// runSetup interactively prompts the sysop for game rules and saves them to
-// config.json.
+// runSetup configures a new install: it presents the same Configuration Editor
+// as -reset (all fields), saving config.json on exit. Unlike -reset it does not
+// touch the world — a fresh world is created on the first caller's login.
 func runSetup(cfg game.Config) error {
-	r := bufio.NewReader(os.Stdin)
-	cfg.TurnsPerDay = askInt(r, "Turns per day", cfg.TurnsPerDay)
-	cfg.ProtectionTurns = askInt(r, "New-realm protection turns", cfg.ProtectionTurns)
-	cfg.AICount = askInt(r, "Number of AI barons (0 = human only)", cfg.AICount)
-	cfg.GameLength = askInt(r, "Game length in days (0 = endless)", cfg.GameLength)
-	if err := store.SaveConfig(cfg); err != nil {
-		return err
+	w := game.NewWorld(cfg) // a throwaway world, just to host the editor's Config
+	c := session.NewConsole()
+	fmt.Fprint(c, "\r\nConfigure the game. Choose 0 to save the settings, or Q to cancel.\r\n")
+	saved := menu.ConfigEditor(c, w)
+	c.Close()
+	if !saved {
+		fmt.Println("Setup cancelled. No configuration was written.")
 	}
-	fmt.Printf("Saved configuration to %s\n", filepath.Join(cfg.DataDir, "config.json"))
 	return nil
-}
-
-// askInt prompts with the current value in brackets; empty input keeps it.
-func askInt(r *bufio.Reader, label string, cur int) int {
-	fmt.Printf("%s [%d]: ", label, cur)
-	line, _ := r.ReadString('\n')
-	line = strings.TrimSpace(line)
-	if line == "" {
-		return cur
-	}
-	if n, err := strconv.Atoi(line); err == nil && n >= 0 {
-		return n
-	}
-	return cur
 }
 
 func findDropfile() string {
