@@ -213,3 +213,30 @@ extra machinery. The lock only ever protects a short mutate-or-snapshot window.
   while the door/local path keeps the combined behavior. Cleanly separating
   these without duplicating logic is the main structural judgment call for the
   implementation plan.
+
+## Known limitation (as built)
+
+The implementation locks every world **mutation**, the menu render path, the
+turn sequence, empire-list iterations, and the big display handlers. But a
+residual class of **unlocked reads of a session's own empire fields**
+(`Protection`, `Troopers`, `Jets`, `Tanks`, and similar) remains in scattered
+action guards and preconditions. These race two concurrent writers now that the
+web world is shared: the once-per-day maintenance ticker, and *other* sessions'
+attacks/covert ops against this empire.
+
+These are genuine data races per the Go memory model, so "fully race-free" is
+stronger than the code guarantees. In practice they are low-consequence: the
+values are ints whose torn read self-corrects, and every actual **mutation** is
+locked and re-validates its preconditions — so a stale guard read cannot corrupt
+state, only, at worst, momentarily mis-display or mis-gate one action that then
+fails cleanly. The window is tiny (the ticker fires ~once a day; cross-session
+combat is infrequent) and the target is ~4 concurrent players on a turn-based
+door.
+
+Decision: **accept and document** rather than chase every read (which does not
+converge — new code reintroduces such reads) or hold the world lock across all
+computation. If a future need for true race-freedom arises (higher player
+counts, real-time PvP correctness), the durable fix is to **invert the model to
+lock-by-default, unlocking only around player input** (a coarse "world GIL"),
+making reads safe by construction. That inversion is filed as a follow-up, not
+built here.
