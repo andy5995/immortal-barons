@@ -81,10 +81,11 @@ Net-worth value contributed per unit (from the guide's net-worth table):
   25,000). Beating a pirate reclaims ~a fifth of its hoard per hit, so it
   takes several hits to fully recover your goods.
 
-  Hard caps on what a faction can hold (per R&P play data; ✓ = also verified
-  against the BRE.EXE constants table): tanks **50,000** ✓, troopers/jets/
-  turrets **100,000** ✓ each, agents **65,000**, regions **100**, gold
-  **300,000** (R&P "assumed"; the BRE table has a 600,000 that may be this).
+  Hard caps on what a faction can hold (✓ = verified against the BRE.EXE caps
+  table at 0x14ede — `5000,25000,50000,80000,80000,100000,100000,200000,600000`):
+  tanks **50,000** ✓, troopers/jets/turrets **100,000** ✓ each, agents
+  **65,000** ✓ (BRE.EXE ×3), regions **100** (R&P), gold **600,000** ✓ — the
+  earlier "300,000 assumed" is absent from the binary; 600,000 is in the table.
   Military parked in the Trading Market is safe from pirate raids.
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
@@ -196,8 +197,8 @@ league ran tax 85%, interest 75%).
 
 - **Bank interest: about 1% per turn** on gold held in the bank *while you
   are playing* (investments tie money up until your next login and are
-  less useful for this). Our clone currently uses 5% per turn — this
-  should be ~1%.
+  less useful for this). The clone's Interest Rate knob is anchored so its
+  default (50) yields ~1%/turn, matching this.
 - **Interest cap: 1,599,999,999.** Gold above this does not earn interest.
   At the cap, interest is roughly 25–35 million per turn.
 - **Absolute money cap: 2,000,000,000.** You cannot hold more than 2 billion

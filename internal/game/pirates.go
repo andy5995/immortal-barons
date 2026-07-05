@@ -46,9 +46,12 @@ const (
 	pirateRaidLossPct = 15    // % of committed force lost on a failed raid
 
 	// Hard caps on faction holdings. No bombers/carriers (absent from the caps).
-	PirateCapGold     = 300_000 // R&P "assumed" (BRE.EXE table has a 600000 that may be this)
-	PirateCapRegions  = 100     // R&P
-	PirateCapAgents   = 65_000  // R&P
+	// Verified against the BRE.EXE caps table at 0x14ede
+	// (5000,25000,50000,80000,80000,100000,100000,200000,600000): the clone's
+	// earlier 300000 gold cap is absent from the binary; 600000 is present.
+	PirateCapGold     = 600_000 // binary (caps table); was a guessed 300000
+	PirateCapRegions  = 100     // R&P (not a distinctive binary constant)
+	PirateCapAgents   = 65_000  // binary (BRE.EXE ×3)
 	PirateCapTroopers = 100_000 // binary
 	PirateCapJets     = 100_000 // binary
 	PirateCapTurrets  = 100_000 // binary
