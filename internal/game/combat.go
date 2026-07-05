@@ -90,10 +90,12 @@ func (w *World) Attack(a, d *Empire) string {
 			fmt.Fprintf(&b, "\n%s has been utterly conquered!\n", d.Name)
 		}
 		d.Events = append(d.Events, fmt.Sprintf("%s attacked you: you lost %d regions, %d gold, and %d units.", a.Name, captured, plunder, dloss))
+		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
 		fmt.Fprintf(&b, "Defeat! Your forces returned exhausted.\n")
 		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
 		d.Events = append(d.Events, fmt.Sprintf("%s attacked you but was repelled. You lost %d units.", a.Name, dloss))
+		w.postCombatNews(a, d, false, false)
 	}
 	return b.String()
 }

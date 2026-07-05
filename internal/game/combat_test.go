@@ -69,3 +69,22 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 		t.Errorf("event should be victim-perspective: %q", d.Events[len(d.Events)-1])
 	}
 }
+
+func TestAttackPostsPlanetaryNews(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 1
+	w := NewWorldSeed(cfg, 1)
+	a := w.AddHuman("att", "Attacker")
+	a.Troopers = 100000 // overwhelming, deterministic win
+	d := w.Empires[0]
+	d.Protection = 0
+
+	before := len(w.Bulletin)
+	w.Attack(a, d)
+	if len(w.Bulletin) != before+1 {
+		t.Fatalf("attack should post one planetary news line, got %d new", len(w.Bulletin)-before)
+	}
+	if last := w.Bulletin[len(w.Bulletin)-1]; !strings.Contains(last, "Attacker") {
+		t.Errorf("news should name the attacker: %q", last)
+	}
+}

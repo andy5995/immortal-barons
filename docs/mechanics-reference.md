@@ -317,6 +317,29 @@ on a general market. Interplanetary trades auto-accept. Carriers may be
 needed to move traded goods. Teamwork and trade are described as the main
 path to winning large InterBBS games.
 
+## News files (what BRE broadcasts)
+
+BRE keeps two planet-wide news feeds, populated from template files with random
+flavor variants and placeholders `%F` (from/attacker), `%T` (target), `%N`
+(empire), `%P` (planet), `%C` (captured amount):
+
+- **Planetary news** (`game/news.dat`) — written when the event happens, seen
+  by everyone on the planet. Categories: `NORMALWIN` / `NORMALLOSS` (regular
+  attacks), `TOTALWIN` (an empire is destroyed), `NUKE` / `CHEM` / `BIO`
+  (WMD strikes), `PIRATEWIN` / `PIRATELOSS` (pirate raids), `CIVILWAR`
+  (collapse from poor leadership), `RIOTS` (high-tax unrest).
+- **Interplanetary news** (`game/ipnews.dat`) — inter-BBS attacks: individual /
+  group-on-single / group-on-whole-BBS, each with a WIN and LOSS variant, plus
+  the returning-strike (`IP-RET-*`) versions and `IP-RET-KILL`.
+- **Interplanetary report** (`game/ipreport.dat`) — the *private* per-player
+  result of covert/special IP ops (bombing, terrorist ops, special operations,
+  Sabre), not planet-wide news.
+
+The clone broadcasts a subset: regular-attack results now post planet-wide news
+(NORMALWIN / NORMALLOSS / TOTALWIN); IP strike results post to the bulletin.
+WMD-strike, pirate-raid, riot, and civil-war planetary news are not generated
+yet — the events happen but only the victim is notified.
+
 ## How Immortal Barons differs right now
 
 Now matching this reference (as of v0.0.1):
