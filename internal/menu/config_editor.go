@@ -116,6 +116,8 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		p(21, "AI empires", fmt.Sprintf("%d", c.AICount))
 		p(22, "Inter-BBS play", onOffStr(c.IBBS))
 		p(23, "Board ID", c.BoardID)
+		p(24, "Idle timeout (sec)", fmt.Sprintf("%d (0 = never)", c.IdleTimeoutSecs))
+		p(25, "Idle warnings before boot", fmt.Sprintf("%d", c.MaxIdleWarnings))
 		fmt.Fprintf(s, "%s\n%s* = league ruleset (Coordinator broadcasts with -league-config)%s\n",
 			rule, ansi.FgWhite, ansi.Reset)
 
@@ -184,6 +186,10 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 			if v := strings.TrimSpace(prompt(s, "Board ID:")); v != "" {
 				c.BoardID = v
 			}
+		case 24:
+			c.IdleTimeoutSecs = promptSuggested(s, "Idle timeout in seconds (0 = never)", c.IdleTimeoutSecs, 86400)
+		case 25:
+			c.MaxIdleWarnings = max(1, promptSuggested(s, "Idle warnings before boot", c.MaxIdleWarnings, 100))
 		}
 	}
 }

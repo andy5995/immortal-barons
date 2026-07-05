@@ -40,3 +40,13 @@ func TestMaintenanceFrozenBeforeStart(t *testing.T) {
 		t.Fatalf("game should advance after the start date, GameDay=%d want 2", w.GameDay)
 	}
 }
+
+func TestDefaultIdleConfig(t *testing.T) {
+	c := DefaultConfig()
+	if c.IdleTimeoutSecs != 180 {
+		t.Errorf("IdleTimeoutSecs = %d, want 180", c.IdleTimeoutSecs)
+	}
+	if c.MaxIdleWarnings != 3 {
+		t.Errorf("MaxIdleWarnings = %d, want 3", c.MaxIdleWarnings)
+	}
+}

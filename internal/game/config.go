@@ -90,12 +90,14 @@ func (m SabreMode) String() string {
 // from BRE's reset-init code and Configuration Help screens.
 type Config struct {
 	// Per-board (not part of the league ruleset).
-	AICount     int
-	DataDir     string
-	BoardID     string // name of this board in exported inter-BBS packets
-	IBBS        bool   // participate in inter-BBS play (gates the interplanetary menus)
-	InboundDir  string // inter-BBS packets arrive here (RunPlanetary reads them)
-	OutboundDir string // inter-BBS packets are written here for the transport to move
+	AICount         int
+	DataDir         string
+	BoardID         string // name of this board in exported inter-BBS packets
+	IBBS            bool   // participate in inter-BBS play (gates the interplanetary menus)
+	InboundDir      string // inter-BBS packets arrive here (RunPlanetary reads them)
+	OutboundDir     string // inter-BBS packets are written here for the transport to move
+	IdleTimeoutSecs int    // boot a session after this many seconds with no keypress (0 = never), freeing the world lock
+	MaxIdleWarnings int    // idle warnings a session may collect before a hard boot
 
 	// League ruleset (BRE Configuration Editor fields).
 	GameStartDate     string    // ISO date the game begins; before it, maintenance doesn't advance ("" = already started)
@@ -155,11 +157,13 @@ func (c Config) JoinOpen(today string) bool {
 
 func DefaultConfig() Config {
 	return Config{
-		AICount:     0,
-		DataDir:     "./data",
-		BoardID:     "local",
-		InboundDir:  "./data/inbound",
-		OutboundDir: "./data/outbound",
+		AICount:         0,
+		DataDir:         "./data",
+		BoardID:         "local",
+		InboundDir:      "./data/inbound",
+		OutboundDir:     "./data/outbound",
+		IdleTimeoutSecs: 180,
+		MaxIdleWarnings: 3,
 
 		// Defaults from BRE's reset-init code and Configuration Help screens.
 		TurnsPerDay:       8,
