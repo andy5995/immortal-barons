@@ -12,6 +12,8 @@ BBS software such as Synchronet or Mystic. You do not need DOSBox or DOSEMU.
 The game keeps all its files in one data directory (default `./data`). Point
 the `-data` option at it.
 
+Run `barons-door -help` to see all the command-line options.
+
 ## First-time setup
 
 Run the setup once to create the config file:
@@ -34,9 +36,7 @@ and `-reset` when you want to reconfigure and start over.
 
 ## Registering the door
 
-Set up the game as an external program (a "door") in your BBS software. Your BBS
-writes a dropfile when a caller runs the door. The game reads it to learn who
-is playing and how much time they have.
+Set up the game as an external program (a "door") in your BBS software.
 
 - The game reads **DOOR32.SYS** (both Synchronet and Mystic write it) or
   **DOOR.SYS**. Point the game at it with `-dropfile`, or let it search the

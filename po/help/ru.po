@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-05 11:34-0500\n"
+"POT-Creation-Date: 2026-07-05 17:01-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1673,25 +1673,30 @@ msgstr ""
 "Игра хранит все файлы в одном каталоге данных (по умолчанию `./data`). "
 "Укажите на него параметром `-data`."
 
+#. type: Plain text
+#: docs/sysop-guide.md:16
+msgid "Run `barons-door -help` to see all the command-line options."
+msgstr ""
+
 #. type: Title ##
-#: docs/sysop-guide.md:15
+#: docs/sysop-guide.md:17
 #, no-wrap
 msgid "First-time setup"
 msgstr "Первоначальная настройка"
 
 #. type: Plain text
-#: docs/sysop-guide.md:18
+#: docs/sysop-guide.md:20
 msgid "Run the setup once to create the config file:"
 msgstr "Запустите настройку один раз, чтобы создать файл конфигурации:"
 
 #. type: Fenced code block
-#: docs/sysop-guide.md:19
+#: docs/sysop-guide.md:21
 #, no-wrap
 msgid "barons-door -setup -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:29
+#: docs/sysop-guide.md:31
 msgid ""
 "This opens the **Configuration Editor**: a menu of every game rule (turns "
 "per day, protection turns, land and market settings, interest and investment "
@@ -1703,7 +1708,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: docs/sysop-guide.md:34
+#: docs/sysop-guide.md:36
 msgid ""
 "There is also a **`-reset`** command described later. It opens the *same* "
 "Configuration Editor, but after you save it also **starts a fresh game** "
@@ -1712,7 +1717,7 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: docs/sysop-guide.md:35
+#: docs/sysop-guide.md:37
 #, no-wrap
 msgid "Registering the door"
 msgstr "Регистрация двери"
@@ -1720,13 +1725,8 @@ msgstr "Регистрация двери"
 #. type: Plain text
 #: docs/sysop-guide.md:40
 msgid ""
-"Set up the game as an external program (a \"door\") in your BBS software. "
-"Your BBS writes a dropfile when a caller runs the door. The game reads it to "
-"learn who is playing and how much time they have."
+"Set up the game as an external program (a \"door\") in your BBS software."
 msgstr ""
-"Настройте игру как внешнюю программу («дверь») в ПО вашей BBS. Ваша BBS "
-"записывает dropfile, когда абонент запускает дверь. Игра читает его, чтобы "
-"узнать, кто играет и сколько у него времени."
 
 #. type: Bullet: '- '
 #: docs/sysop-guide.md:45
@@ -2055,6 +2055,15 @@ msgstr ""
 "**Координатор BBS** — *игрок*, которого выбирает ваша доска. Игроки голосуют "
 "в системном меню, и игрок с наибольшим числом голосов получает меню "
 "координатора. Голос можно менять в любой момент."
+
+#~ msgid ""
+#~ "Set up the game as an external program (a \"door\") in your BBS software. "
+#~ "Your BBS writes a dropfile when a caller runs the door. The game reads it "
+#~ "to learn who is playing and how much time they have."
+#~ msgstr ""
+#~ "Настройте игру как внешнюю программу («дверь») в ПО вашей BBS. Ваша BBS "
+#~ "записывает dropfile, когда абонент запускает дверь. Игра читает его, "
+#~ "чтобы узнать, кто играет и сколько у него времени."
 
 #~ msgid ""
 #~ "It asks a few questions (turns per day, protection turns, number of AI "
