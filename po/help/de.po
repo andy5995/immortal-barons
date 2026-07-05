@@ -937,7 +937,7 @@ msgstr "Schädigt das Volk und die Soldaten des Feindes, aber nicht sein Land."
 #: internal/help/content/warfare/attacks.md:33
 #, no-wrap
 msgid "Doomer Kaboomer"
-msgstr "Doomer Kaboomer"
+msgstr ""
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:39

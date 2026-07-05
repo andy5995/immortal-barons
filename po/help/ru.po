@@ -927,7 +927,7 @@ msgstr "Наносит вред людям и пехоте врага, но не
 #: internal/help/content/warfare/attacks.md:33
 #, no-wrap
 msgid "Doomer Kaboomer"
-msgstr "Doomer Kaboomer"
+msgstr ""
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:39
