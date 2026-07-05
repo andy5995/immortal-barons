@@ -1,10 +1,3 @@
----
-title: Sysop Guide — Running Immortal Barons
-category: interbbs
-order: 9
-in_game: false
----
-
 # Sysop Guide — Running Immortal Barons
 
 This guide is for the BBS operator (the sysop). It explains how to set up the

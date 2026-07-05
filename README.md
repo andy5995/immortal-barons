@@ -97,6 +97,10 @@ Callers share one persistent world: each caller's empire is saved between
 calls, keyed by their BBS handle. A nightly maintenance step
 (`barons-door -maint`) advances the world.
 
+Full setup instructions for local and inter-BBS play — registering the door,
+daily maintenance, the node list, and starting a fresh game with
+`barons-door -reset` — are in [`docs/sysop-guide.md`](docs/sysop-guide.md).
+
 ## Running in a browser (experimental)
 
 A browser front-end serves the game over Server-Sent Events with xterm.js:
