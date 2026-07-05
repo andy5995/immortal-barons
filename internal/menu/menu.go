@@ -350,7 +350,7 @@ func draw(s session.Session, g *ctx, m *Menu) {
 				col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset)
 		}
 		if m.Status != nil {
-			fmt.Fprintf(&b, "%s\n%s%s%s\n", rule, ansi.FgGreen, m.Status(g), ansi.Reset)
+			fmt.Fprintf(&b, "%s\n%s%s%s\n", rule, ansi.FgBrightYellow, m.Status(g), ansi.Reset)
 		}
 		b.WriteString("\n")
 	})

@@ -125,7 +125,7 @@ func BuildMenus() *Menus {
 	bank.Status = func(w *ctx) string {
 		p := w.Player()
 		return fmt.Sprintf("You have %s%s%s gold in hand and %s%s%s gold in the bank.",
-			ansi.FgBrightCyan, comma(p.Gold), ansi.FgGreen, ansi.FgBrightCyan, comma(p.Bank), ansi.FgGreen)
+			ansi.FgBrightCyan, comma(p.Gold), ansi.FgBrightYellow, ansi.FgBrightCyan, comma(p.Bank), ansi.FgBrightYellow)
 	}
 
 	attack.Items = []Item{
