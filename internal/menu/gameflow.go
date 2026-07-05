@@ -84,23 +84,35 @@ func askYesNoDefaultNo(s session.Session, msg string) bool {
 	}
 }
 
-// showTurnEvents prints and clears p's accumulated events, if any.
-func showTurnEvents(s session.Session, p *game.Empire) {
-	if len(p.Events) == 0 {
+// showTurnEvents prints and clears p's accumulated events, if any. The read
+// and clear happen together under w's lock so a concurrent maintenance tick
+// or another session's action can't append to p.Events between the two.
+func showTurnEvents(s session.Session, w *ctx, p *game.Empire) {
+	var events []string
+	w.With(func() {
+		events = p.Events
+		p.Events = nil
+	})
+	if len(events) == 0 {
 		return
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Since your last play, this has happened:"), ansi.Reset)
-	for _, ev := range p.Events {
+	for _, ev := range events {
 		fmt.Fprintf(s, "  %s\n", ev)
 	}
-	p.Events = nil
 	pause(s)
 }
 
 // incomeReport itemizes p's per-turn income by source. It shows exactly the
 // values CollectIncome credits: both derive from World.IncomeThisTurn.
 func incomeReport(s session.Session, w *ctx, p *game.Empire) {
-	b := w.IncomeThisTurn(p)
+	var b game.IncomeBreakdown
+	var raids []string
+	w.With(func() {
+		b = w.IncomeThisTurn(p)
+		raids = p.PirateRaids
+		p.PirateRaids = nil
+	})
 
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Income Report:"), ansi.Reset)
 	statLine(s, b.Taxes, "gold was earned in taxes.")
@@ -113,15 +125,19 @@ func incomeReport(s session.Session, w *ctx, p *game.Empire) {
 	statLine(s, b.Technology, "gold was earned from Technology.")
 	statLine(s, b.Trade, "gold was earned from Trade.")
 	statLine(s, b.Food, "Food units were grown.")
-	for _, r := range p.PirateRaids {
+	for _, r := range raids {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, r, ansi.Reset)
 	}
-	p.PirateRaids = nil
 	pause(s)
 }
 
-// endOfTurnStats prints a short flavor line and the remaining turns.
+// endOfTurnStats prints a short flavor line and the remaining turns. It
+// snapshots p under the lock first, since the daily-maintenance ticker (or
+// another session) can mutate these same fields concurrently.
 func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
+	var snap game.Empire
+	w.With(func() { snap = *p })
+	p = &snap
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "End of Turn Statistics:"), ansi.Reset)
 	fmt.Fprintf(s, "  "+tr(s, "The people of %s go about their business.")+"\n", p.Name)
 	if p.LastPopGrowth > 0 {
@@ -149,19 +165,30 @@ func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
 // underpayment causes desertion/revolt), then an optional support boost.
 func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 	w.With(func() { p.LastGoldPaid = 0 })
-	forces := w.ForcesDue(p)
-	regions := w.RegionsDue(p)
+
+	var forces, regions, gold, bank int
+	var autoPay bool
+	w.With(func() {
+		forces = w.ForcesDue(p)
+		regions = w.RegionsDue(p)
+		gold = p.Gold
+		bank = p.Bank
+		autoPay = w.AutoPayMaint
+	})
 	due := forces + regions
 
 	// If on-hand gold can't cover maintenance but savings can, offer to draw
 	// from the bank before paying (BRE lets you visit the bank to make upkeep).
-	if p.Gold < due && p.Bank > 0 &&
-		askYesNo(s, fmt.Sprintf(tr(s, "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"), due, p.Gold, p.Bank)) {
-		n := promptSuggested(s, "Withdraw how much?", min(due-p.Gold, p.Bank), p.Bank)
-		w.With(func() { w.World.Withdraw(p, n) })
+	if gold < due && bank > 0 &&
+		askYesNo(s, fmt.Sprintf(tr(s, "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"), due, gold, bank)) {
+		n := promptSuggested(s, "Withdraw how much?", min(due-gold, bank), bank)
+		w.With(func() {
+			w.World.Withdraw(p, n)
+			gold = p.Gold
+		})
 	}
 
-	if w.AutoPayMaint && p.Gold >= forces+regions {
+	if autoPay && gold >= forces+regions {
 		w.With(func() {
 			w.World.PayForces(p, forces)
 			w.World.PayRegions(p, regions)
@@ -171,28 +198,36 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 	}
 
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Maintenance:"), ansi.Reset)
-	if w.AutoPayMaint {
+	if autoPay {
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgYellow, tr(s, "You cannot cover all your maintenance this turn."), ansi.Reset)
 	}
 
 	fmt.Fprintf(s, "\n"+tr(s, "Your armed forces require %d gold.")+"\n", forces)
-	forcesGold := promptSuggested(s, "How much will you give?", min(forces, p.Gold), p.Gold)
+	forcesGold := promptSuggested(s, "How much will you give?", min(forces, gold), gold)
 	var forcesLost int
-	w.With(func() { forcesLost = w.World.PayForces(p, forcesGold) })
+	w.With(func() {
+		forcesLost = w.World.PayForces(p, forcesGold)
+		gold = p.Gold
+	})
 	if forcesLost > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "%d units deserted for lack of pay.")+"%s\n", ansi.FgRed, forcesLost, ansi.Reset)
 	}
 
 	fmt.Fprintf(s, "\n"+tr(s, "%d gold is required to maintain your regions.")+"\n", regions)
-	regionsGold := promptSuggested(s, "How much will you give?", min(regions, p.Gold), p.Gold)
+	regionsGold := promptSuggested(s, "How much will you give?", min(regions, gold), gold)
 	var regionsLost int
-	w.With(func() { regionsLost = w.World.PayRegions(p, regionsGold) })
+	var support int
+	w.With(func() {
+		regionsLost = w.World.PayRegions(p, regionsGold)
+		gold = p.Gold
+		support = p.Support
+	})
 	if regionsLost > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "%d regions revolted for lack of upkeep.")+"%s\n", ansi.FgRed, regionsLost, ansi.Reset)
 	}
 
-	if p.Support < 100 && p.Gold > 0 && askYesNo(s, "Spend gold to boost popular support?") {
-		supportGold := promptSuggested(s, "How much will you give?", 0, p.Gold)
+	if support < 100 && gold > 0 && askYesNo(s, "Spend gold to boost popular support?") {
+		supportGold := promptSuggested(s, "How much will you give?", 0, gold)
 		var pts int
 		w.With(func() { pts = w.World.BoostSupport(p, supportGold) })
 		if pts > 0 {
@@ -208,14 +243,16 @@ func runTurn(s session.Session, w *ctx) Result {
 	menus := BuildMenus()
 	for {
 		p := w.Player()
-		if p.TurnsLeft <= 0 {
+		var turnsLeft int
+		w.With(func() { turnsLeft = p.TurnsLeft })
+		if turnsLeft <= 0 {
 			ok(s, "Sorry, you have used all of your turns today.")
 			seeScores(s, w)
 			return Stay
 		}
 
 		w.With(func() { w.World.CollectIncome(p) }) // credit this turn's income up front, so maintenance and spending draw from it
-		showTurnEvents(s, p)
+		showTurnEvents(s, w, p)
 		incomeReport(s, w, p)
 
 		// Status and the maintenance results share one screen with a single
@@ -223,7 +260,9 @@ func runTurn(s session.Session, w *ctx) Result {
 		// clear-screen would wipe it before the player could read it.
 		renderEmpireStatus(s, w)
 		paymentStage(s, w, p)
-		statLine(s, p.FoodUpkeep(), "units of Food consumed.")
+		var foodUpkeep int
+		w.With(func() { foodUpkeep = p.FoodUpkeep() })
+		statLine(s, foodUpkeep, "units of Food consumed.")
 		pause(s)
 
 		if err := Run(s, w, menus.Spending); err != nil {
@@ -257,7 +296,8 @@ func runTurn(s session.Session, w *ctx) Result {
 
 		endOfTurnStats(s, w, p)
 
-		if p.TurnsLeft <= 0 || !askYesNo(s, "Continue to your next turn?") {
+		w.With(func() { turnsLeft = p.TurnsLeft })
+		if turnsLeft <= 0 || !askYesNo(s, "Continue to your next turn?") {
 			return Stay
 		}
 	}

@@ -314,19 +314,25 @@ func writeMacros(s session.Session, w *ctx) Result {
 // listInvestments shows the player's pending investments and any debt.
 func listInvestments(s session.Session, w *ctx) Result {
 	p := w.Player()
-	if len(p.Investments) == 0 && p.Debt == 0 {
+	var investments []game.Investment
+	var debt int
+	w.With(func() {
+		investments = append([]game.Investment(nil), p.Investments...)
+		debt = p.Debt
+	})
+	if len(investments) == 0 && debt == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no active investments or loans."))
 		pause(s)
 		return Stay
 	}
-	if len(p.Investments) > 0 {
+	if len(investments) > 0 {
 		fmt.Fprintf(s, "\n  %s\n", tr(s, "Amount      Return    Matures Day"))
-		for _, inv := range p.Investments {
+		for _, inv := range investments {
 			fmt.Fprintf(s, "  %-10d  %-8d  %d\n", inv.Amount, inv.Return, inv.MaturesDay)
 		}
 	}
-	if p.Debt > 0 {
-		fmt.Fprintf(s, "\n  "+tr(s, "Debt owed: %d")+"\n", p.Debt)
+	if debt > 0 {
+		fmt.Fprintf(s, "\n  "+tr(s, "Debt owed: %d")+"\n", debt)
 	}
 	pause(s)
 	return Stay
@@ -372,33 +378,80 @@ func sellFoodMarket(s session.Session, w *ctx) Result {
 	return Stay
 }
 
+// targetRow snapshots the identity plus displayed fields of one attackable
+// empire, taken under the world lock so the picker list can be rendered and
+// prompted over safely (w.Targets ranges the shared w.Empires slice).
+type targetRow struct {
+	e          *game.Empire
+	name       string
+	land, army int
+}
+
+// snapshotTargets takes w.Targets(w.Player()) under the lock, copying the
+// display fields the picker needs. The *game.Empire pointers stay valid
+// afterward (empires are never reallocated), but re-validate with
+// stillTarget inside the resolving w.With before acting on a choice — the
+// target may have died or gone under protection in the meantime.
+func snapshotTargets(w *ctx) []targetRow {
+	var rows []targetRow
+	w.With(func() {
+		for _, e := range w.Targets(w.Player()) {
+			rows = append(rows, targetRow{e, e.Name, e.Land, e.Army()})
+		}
+	})
+	return rows
+}
+
+// stillTarget reports whether target is still among w.Player()'s valid
+// targets. Call only from inside a w.With block.
+func stillTarget(w *ctx, target *game.Empire) bool {
+	for _, t := range w.Targets(w.Player()) {
+		if t == target {
+			return true
+		}
+	}
+	return false
+}
+
 func regularAttack(s session.Session, w *ctx) Result {
 	if w.Player().Protection > 0 {
 		ok(s, "You are under New Realm Protection and cannot attack yet.")
 		return Stay
 	}
-	targets := w.Targets(w.Player())
-	if len(targets) == 0 {
+	rows := snapshotTargets(w)
+	if len(rows) == 0 {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose a target:"), ansi.Reset)
-	printTargetRows(s, targets)
+	printTargetRows(s, rows)
 	i := promptInt(s, "Attack which empire (0 to cancel)?")
-	if i < 1 || i > len(targets) {
+	if i < 1 || i > len(rows) {
 		return Stay
 	}
+	target := rows[i-1].e
 	var report string
-	w.With(func() { report = w.World.Attack(w.Player(), targets[i-1]) })
+	var err error
+	w.With(func() {
+		if !stillTarget(w, target) {
+			err = fmt.Errorf("that empire is no longer a valid target")
+			return
+		}
+		report = w.World.Attack(w.Player(), target)
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
 	fmt.Fprintf(s, "\n%s\n", report)
 	pause(s)
 	return Stay
 }
 
 // printTargetRows lists attackable empires with their Land and Army columns.
-func printTargetRows(s session.Session, targets []*game.Empire) {
-	for i, e := range targets {
-		fmt.Fprintf(s, "  %d) %-16s %s %-5d %s %-7d\n", i+1, e.Name, tr(s, "Land"), e.Land, tr(s, "Army"), e.Army())
+func printTargetRows(s session.Session, rows []targetRow) {
+	for i, r := range rows {
+		fmt.Fprintf(s, "  %d) %-16s %s %-5d %s %-7d\n", i+1, r.name, tr(s, "Land"), r.land, tr(s, "Army"), r.army)
 	}
 }
 
@@ -409,8 +462,8 @@ func specialAttack(s session.Session, w *ctx, label string, cost int, strike fun
 		ok(s, "You are under New Realm Protection and cannot attack yet.")
 		return Stay
 	}
-	targets := w.Targets(w.Player())
-	if len(targets) == 0 {
+	rows := snapshotTargets(w)
+	if len(rows) == 0 {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
@@ -419,14 +472,21 @@ func specialAttack(s session.Session, w *ctx, label string, cost int, strike fun
 	} else {
 		fmt.Fprintf(s, "\n%s"+tr(s, "%s — choose a target:")+"%s\n", ansi.FgBrightCyan, label, ansi.Reset)
 	}
-	printTargetRows(s, targets)
+	printTargetRows(s, rows)
 	i := promptInt(s, "Attack which empire (0 to cancel)?")
-	if i < 1 || i > len(targets) {
+	if i < 1 || i > len(rows) {
 		return Stay
 	}
+	target := rows[i-1].e
 	var report string
 	var err error
-	w.With(func() { report, err = strike(w.Player(), targets[i-1]) })
+	w.With(func() {
+		if !stillTarget(w, target) {
+			err = fmt.Errorf("that empire is no longer a valid target")
+			return
+		}
+		report, err = strike(w.Player(), target)
+	})
 	if err != nil {
 		fail(s, err)
 		return Stay
@@ -528,17 +588,27 @@ func gameSetup(s session.Session, w *ctx) Result {
 
 // playerList shows every living empire (Coordinator tool).
 func playerList(s session.Session, w *ctx) Result {
+	type row struct {
+		name, owner string
+		land, nw    int
+	}
+	var rows []row
+	w.With(func() {
+		for _, e := range w.Empires {
+			if !e.Alive {
+				continue
+			}
+			rows = append(rows, row{e.Name, e.Owner, e.Land, w.NetWorth(e)})
+		}
+	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightBlue, tr(s, "Player List"), ansi.Reset)
 	fmt.Fprintf(s, "  %-16s %-14s %-8s %s\n", tr(s, "Empire"), tr(s, "Owner"), tr(s, "Land"), tr(s, "Net Worth"))
-	for _, e := range w.Empires {
-		if !e.Alive {
-			continue
-		}
-		owner := e.Owner
+	for _, r := range rows {
+		owner := r.owner
 		if owner == "" {
 			owner = tr(s, "(AI)")
 		}
-		fmt.Fprintf(s, "  %-16s %-14s %-8d %d\n", e.Name, owner, e.Land, w.NetWorth(e))
+		fmt.Fprintf(s, "  %-16s %-14s %-8d %d\n", r.name, owner, r.land, r.nw)
 	}
 	pause(s)
 	return Stay
@@ -556,7 +626,9 @@ func briberyOp(s session.Session, w *ctx) Result {
 // Full Defense Alliance partners.
 func allianceStrength(s session.Session, w *ctx) Result {
 	p := w.Player()
-	off, def, allies := w.AllianceStrength(p)
+	var off, def int
+	var allies []string
+	w.With(func() { off, def, allies = w.AllianceStrength(p) })
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Alliance Strength"), ansi.Reset)
 	if len(allies) == 0 {
 		fmt.Fprintf(s, "  %s\n", tr(s, "You have no defense allies."))
@@ -569,15 +641,29 @@ func allianceStrength(s session.Session, w *ctx) Result {
 }
 
 func attackPirates(s session.Session, w *ctx) Result {
+	type pirateRow struct {
+		name                              string
+		forces, land, gold                int
+		lootT, lootJ, lootU, lootK, lootA int
+	}
+	var rows []pirateRow
+	w.With(func() {
+		for _, p := range w.Pirates {
+			rows = append(rows, pirateRow{
+				p.Name, p.Forces, p.Land, p.Gold,
+				p.LootTroopers, p.LootJets, p.LootTurrets, p.LootTanks, p.LootAgents,
+			})
+		}
+	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Pirate factions (strength is random; fat ones just raided someone):"), ansi.Reset)
 	fmt.Fprintf(s, "  %-3s %-11s %-7s %-4s %-8s %s\n", "#", tr(s, "Faction"), tr(s, "Forces"), tr(s, "Rgn"), tr(s, "Gold"), tr(s, "Loot T/J/U/K/A"))
-	for i, p := range w.Pirates {
+	for i, r := range rows {
 		fmt.Fprintf(s, "  %d) %-11s %-7d %-4d %-8d %d/%d/%d/%d/%d\n",
-			i+1, p.Name, p.Forces, p.Land, p.Gold,
-			p.LootTroopers, p.LootJets, p.LootTurrets, p.LootTanks, p.LootAgents)
+			i+1, r.name, r.forces, r.land, r.gold,
+			r.lootT, r.lootJ, r.lootU, r.lootK, r.lootA)
 	}
 	f := promptInt(s, "Raid which faction (0 to cancel)?")
-	if f < 1 || f > len(w.Pirates) {
+	if f < 1 || f > len(rows) {
 		return Stay
 	}
 	p := w.Player()
@@ -585,6 +671,9 @@ func attackPirates(s session.Session, w *ctx) Result {
 	jets := promptSuggested(s, "Commit how many Jets?", 0, p.Jets)
 	tanks := promptSuggested(s, "Commit how many Tanks?", 0, p.Tanks)
 
+	// RaidFaction bounds-checks the faction index itself, so a faction that
+	// vanished between the snapshot above and here just reports "no such
+	// faction" instead of a stale read.
 	var report string
 	w.With(func() { report = w.World.RaidFaction(p, f-1, troopers, jets, tanks) })
 	fmt.Fprintf(s, "\n%s\n", report)
@@ -857,9 +946,12 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	if days < 1 {
 		days = 1
 	}
-	var ga *game.GroupAttack
-	w.With(func() { ga = w.World.CreateGroupAttack(p, board, target, w.GameDay+days, offense) })
-	ok(s, "Group attack #%d formed against %s on %s, leaving day %d.", ga.ID, pick, board, ga.DepartDay)
+	var id, departDay int
+	w.With(func() {
+		ga := w.World.CreateGroupAttack(p, board, target, w.GameDay+days, offense)
+		id, departDay = ga.ID, ga.DepartDay
+	})
+	ok(s, "Group attack #%d formed against %s on %s, leaving day %d.", id, pick, board, departDay)
 	return Stay
 }
 
@@ -1039,23 +1131,29 @@ func terroristOps(s session.Session, w *ctx) Result {
 func voteCoordinator(s session.Session, w *ctx) Result {
 	p := w.Player()
 	var owners, names []string
-	for _, e := range w.Empires {
-		if !e.Alive || e.Owner == "" {
-			continue
+	var coordinatorName string
+	w.With(func() {
+		for _, e := range w.Empires {
+			if !e.Alive || e.Owner == "" {
+				continue
+			}
+			owners = append(owners, e.Owner)
+			label := e.Name
+			if e.Owner == p.CoordinatorVote {
+				label += " " + tr(s, "(your current vote)")
+			}
+			names = append(names, label)
 		}
-		owners = append(owners, e.Owner)
-		label := e.Name
-		if e.Owner == p.CoordinatorVote {
-			label += " " + tr(s, "(your current vote)")
+		if co := w.BBSCoordinator(); co != nil {
+			coordinatorName = co.Name
 		}
-		names = append(names, label)
-	}
+	})
 	if len(names) == 0 {
 		ok(s, "There are no barons to vote for yet.")
 		return Stay
 	}
-	if co := w.BBSCoordinator(); co != nil {
-		fmt.Fprintf(s, "\n%s"+tr(s, "The current BBS Coordinator is %s.")+"%s\n", ansi.FgBrightCyan, co.Name, ansi.Reset)
+	if coordinatorName != "" {
+		fmt.Fprintf(s, "\n%s"+tr(s, "The current BBS Coordinator is %s.")+"%s\n", ansi.FgBrightCyan, coordinatorName, ansi.Reset)
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Who should be the BBS Coordinator?"), ansi.Reset)
 	for i, n := range names {
@@ -1074,7 +1172,9 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 // declaration, broadcast to the league on the next packet run. v1: a single
 // free-text stance; a fuller model would track pairwise planet relations.
 func modifyLeagueDiplomacy(s session.Session, w *ctx) Result {
-	if w.BBSCoordinator() != w.Player() {
+	var isCoordinator bool
+	w.With(func() { isCoordinator = w.BBSCoordinator() == w.Player() })
+	if !isCoordinator {
 		ok(s, "Only the BBS Coordinator may set league diplomacy.")
 		return Stay
 	}
@@ -1109,7 +1209,9 @@ func readMessages(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// recipients lists the living empires other than the player.
+// recipients lists the living empires other than the player. Callers must
+// already hold w's lock (w.Empires is shared, mutable state) — see
+// pickRecipient and sendMessage.
 func recipients(w *ctx) []*game.Empire {
 	var r []*game.Empire
 	for _, e := range w.Empires {
@@ -1136,23 +1238,33 @@ func recipientIndex(r rune, n int) int {
 // '0' cancels (returns nil, false). If allowAll, 'Z' returns (nil, true)
 // meaning "all". Returns (empire, all).
 func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*game.Empire, bool) {
-	rs := recipients(w)
-	if len(rs) == 0 {
+	type row struct {
+		e               *game.Empire
+		name            string
+		land, land2, nw int
+	}
+	var rows []row
+	w.With(func() {
+		for _, e := range recipients(w) {
+			rows = append(rows, row{e, e.Name, e.Land, e.Land, w.NetWorth(e)})
+		}
+	})
+	if len(rows) == 0 {
 		ok(s, "There is no one to reach.")
 		return nil, false
 	}
 	fmt.Fprintf(s, "\n%s%-4s %-20s %-6s %-6s %s%s\n", ansi.FgBrightCyan, tr(s, "Id"), tr(s, "Empire"), tr(s, "Land"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
-	for i, e := range rs {
+	for i, r := range rows {
 		if i >= 25 { // A..Y
 			break
 		}
-		fmt.Fprintf(s, "(%c) %-20s %-6d %-6d %d\n", 'A'+i, e.Name, e.Land, e.Land, w.NetWorth(e))
+		fmt.Fprintf(s, "(%c) %-20s %-6d %-6d %d\n", 'A'+i, r.name, r.land, r.land2, r.nw)
 	}
 	extra := ""
 	if allowAll {
 		extra = tr(s, ", Z=All")
 	}
-	fmt.Fprintf(s, "\n%s"+tr(s, "(A-%c%s, 0=cancel) %s")+"%s ", ansi.FgBrightWhite, 'A'+min(len(rs), 25)-1, extra, tr(s, prompt), ansi.Reset)
+	fmt.Fprintf(s, "\n%s"+tr(s, "(A-%c%s, 0=cancel) %s")+"%s ", ansi.FgBrightWhite, 'A'+min(len(rows), 25)-1, extra, tr(s, prompt), ansi.Reset)
 	r, err := s.ReadKey()
 	if err != nil {
 		return nil, false
@@ -1161,13 +1273,13 @@ func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*ga
 		fmt.Fprintf(s, "%s\n", tr(s, "All"))
 		return nil, true
 	}
-	idx := recipientIndex(r, len(rs))
+	idx := recipientIndex(r, len(rows))
 	if idx < 0 {
 		fmt.Fprint(s, "\n")
 		return nil, false
 	}
-	fmt.Fprintf(s, "%s\n", rs[idx].Name)
-	return rs[idx], false
+	fmt.Fprintf(s, "%s\n", rows[idx].name)
+	return rows[idx].e, false
 }
 
 // msgMaxLines is how many lines a single message may hold (BRE: 20).
@@ -1289,43 +1401,57 @@ func planetaryPost(s session.Session, w *ctx) Result {
 
 func modifyDiplomacy(s session.Session, w *ctx) Result {
 	p := w.Player()
-	var others []*game.Empire
-	for _, e := range w.Empires {
-		if e.Alive && e != p {
-			others = append(others, e)
-		}
+	type row struct {
+		e      *game.Empire
+		name   string
+		suffix string
 	}
-	if len(others) == 0 {
+	var rows []row
+	w.With(func() {
+		for _, e := range w.Empires {
+			if !e.Alive || e == p {
+				continue
+			}
+			suffix := ""
+			if held := w.TreatiesBetween(p, e); len(held) > 0 {
+				suffix = " — " + strings.Join(held, ", ")
+			}
+			rows = append(rows, row{e, e.Name, suffix})
+		}
+	})
+	if len(rows) == 0 {
 		ok(s, "There is no one to negotiate with.")
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose an empire:"), ansi.Reset)
-	for i, e := range others {
-		suffix := ""
-		if held := w.TreatiesBetween(p, e); len(held) > 0 {
-			suffix = " — " + strings.Join(held, ", ")
-		}
-		fmt.Fprintf(s, "  %d) %s%s\n", i+1, e.Name, suffix)
+	for i, r := range rows {
+		fmt.Fprintf(s, "  %d) %s%s\n", i+1, r.name, r.suffix)
 	}
 	i := promptInt(s, "Negotiate with which empire (0 to cancel)?")
-	if i < 1 || i > len(others) {
+	if i < 1 || i > len(rows) {
 		return Stay
 	}
-	negotiateWith(s, w, p, others[i-1])
+	negotiateWith(s, w, p, rows[i-1].e)
 	return Stay
 }
 
-// negotiateWith runs the propose / accept / break loop with one empire.
+// negotiateWith runs the propose / accept / break loop with one empire. Each
+// pass snapshots the held treaties and pending offers under the lock before
+// prompting, since another session's ProposeTreaty/AcceptTreaty/BreakTreaty
+// can change them between passes.
 func negotiateWith(s session.Session, w *ctx, p, e *game.Empire) {
 	for {
+		var held, offers []string
+		w.With(func() {
+			held = w.TreatiesBetween(p, e)
+			offers = offersFrom(p, e.Name)
+		})
 		fmt.Fprintf(s, "\n%s"+tr(s, "Diplomacy with %s")+"%s\n", ansi.FgBrightCyan, e.Name, ansi.Reset)
-		held := w.TreatiesBetween(p, e)
 		if len(held) == 0 {
 			fmt.Fprintf(s, "  %s\n", tr(s, "Treaties: (none)"))
 		} else {
 			fmt.Fprintf(s, "  "+tr(s, "Treaties: %s")+"\n", strings.Join(held, ", "))
 		}
-		offers := offersFrom(p, e.Name)
 		if len(offers) > 0 {
 			fmt.Fprintf(s, "  "+tr(s, "%s offers you: %s")+"\n", e.Name, strings.Join(offers, ", "))
 		}
@@ -1381,25 +1507,33 @@ func pickFromList(s session.Session, msg string, list []string) string {
 
 func viewDiplomacy(s session.Session, w *ctx) Result {
 	p := w.Player()
+	type row struct{ name, treaties string }
+	var rows []row
+	var offers []game.TreatyOffer
+	w.With(func() {
+		for _, e := range w.Empires {
+			if e == p || !e.Alive {
+				continue
+			}
+			if held := w.TreatiesBetween(p, e); len(held) > 0 {
+				rows = append(rows, row{e.Name, strings.Join(held, ", ")})
+			}
+		}
+		offers = append([]game.TreatyOffer(nil), p.TreatyOffers...)
+	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your treaties:"), ansi.Reset)
-	found := false
-	for _, e := range w.Empires {
-		if e == p || !e.Alive {
-			continue
-		}
-		if held := w.TreatiesBetween(p, e); len(held) > 0 {
-			fmt.Fprintf(s, "  %s: %s\n", e.Name, strings.Join(held, ", "))
-			found = true
-		}
-	}
-	if !found {
-		fmt.Fprintf(s, "  %s\n", tr(s, "(none)"))
-	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Pending offers received:"), ansi.Reset)
-	if len(p.TreatyOffers) == 0 {
+	if len(rows) == 0 {
 		fmt.Fprintf(s, "  %s\n", tr(s, "(none)"))
 	} else {
-		for _, o := range p.TreatyOffers {
+		for _, r := range rows {
+			fmt.Fprintf(s, "  %s: %s\n", r.name, r.treaties)
+		}
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Pending offers received:"), ansi.Reset)
+	if len(offers) == 0 {
+		fmt.Fprintf(s, "  %s\n", tr(s, "(none)"))
+	} else {
+		for _, o := range offers {
 			fmt.Fprintf(s, "  %s — %s\n", o.From, o.Type)
 		}
 	}
