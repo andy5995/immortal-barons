@@ -13,6 +13,8 @@
 Игра хранит все файлы в одном каталоге данных (по умолчанию
 `./data`). Укажите на него параметром `-data`.
 
+Run `barons-door -help` to see all the command-line options.
+
 ## Первоначальная настройка
 
 Запустите настройку один раз, чтобы создать файл конфигурации:
@@ -36,9 +38,7 @@ install the game, and `-reset` when you want to reconfigure and start over.
 
 ## Регистрация двери
 
-Настройте игру как внешнюю программу («дверь») в ПО вашей BBS. Ваша BBS
-записывает dropfile, когда абонент запускает дверь. Игра читает его, чтобы
-узнать, кто играет и сколько у него времени.
+Set up the game as an external program (a "door") in your BBS software.
 
 - Игра читает **DOOR32.SYS** (его пишут и Synchronet, и Mystic) или
   **DOOR.SYS**. Укажите на него параметром `-dropfile` или дайте игре найти

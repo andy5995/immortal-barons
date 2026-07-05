@@ -13,6 +13,8 @@ weder DOSBox noch DOSEMU.
 Das Spiel hält alle seine Dateien in einem Datenverzeichnis (Standard
 `./data`). Richten Sie die Option `-data` darauf.
 
+Run `barons-door -help` to see all the command-line options.
+
 ## Ersteinrichtung
 
 Führen Sie die Einrichtung einmal aus, um die Konfigurationsdatei zu
@@ -37,10 +39,7 @@ install the game, and `-reset` when you want to reconfigure and start over.
 
 ## Den Door registrieren
 
-Richten Sie das Spiel als externes Programm (einen „Door“) in Ihrer
-BBS-Software ein. Ihr BBS schreibt eine Dropfile-Datei, wenn ein Anrufer den
-Door startet. Das Spiel liest sie, um zu erfahren, wer spielt und wie viel
-Zeit er hat.
+Set up the game as an external program (a "door") in your BBS software.
 
 - Das Spiel liest **DOOR32.SYS** (Synchronet und Mystic schreiben beide
   diese) oder **DOOR.SYS**. Weisen Sie das Spiel mit `-dropfile` darauf hin,
