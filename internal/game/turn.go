@@ -204,6 +204,7 @@ func (w *World) processEconomy(e *Empire) {
 	e.LastRiot = false
 	if e.Tax > RiotTaxFloor && w.rng.Intn(100) < (e.Tax-SupportStableTax)*2 {
 		e.LastRiot = true
+		w.postRiotNews(e)
 		e.Support -= 15
 		if e.Support < 0 {
 			e.Support = 0

@@ -42,3 +42,40 @@ func (w *World) postCombatNews(a, d *Empire, won, conquered bool) {
 	}
 	w.postNews(lines[w.rng.Intn(len(lines))])
 }
+
+// postStrikeNews broadcasts a WMD strike (weapon = "nuclear"/"chemical"/
+// "biological"), matching BRE's NUKE/CHEM/BIO news categories.
+func (w *World) postStrikeNews(a, d *Empire, weapon string) {
+	lines := []string{
+		fmt.Sprintf("ALERT: %s struck %s with %s weapons!", a.Name, d.Name, weapon),
+		fmt.Sprintf("%s unleashed %s fire upon %s.", a.Name, weapon, d.Name),
+		fmt.Sprintf("The planet recoils as %s hits %s with %s missiles.", a.Name, d.Name, weapon),
+	}
+	w.postNews(lines[w.rng.Intn(len(lines))])
+}
+
+// postPirateNews broadcasts a pirate-raid outcome (BRE PIRATEWIN/PIRATELOSS).
+func (w *World) postPirateNews(a *Empire, faction string, won bool) {
+	var lines []string
+	if won {
+		lines = []string{
+			fmt.Sprintf("%s drove off the %s in a daring raid.", a.Name, faction),
+			fmt.Sprintf("The %s were bloodied by %s today.", faction, a.Name),
+		}
+	} else {
+		lines = []string{
+			fmt.Sprintf("%s's raid on the %s ended in humiliation.", a.Name, faction),
+			fmt.Sprintf("The %s repelled %s with ease.", faction, a.Name),
+		}
+	}
+	w.postNews(lines[w.rng.Intn(len(lines))])
+}
+
+// postRiotNews broadcasts tax riots in an empire (BRE RIOTS).
+func (w *World) postRiotNews(e *Empire) {
+	lines := []string{
+		fmt.Sprintf("Riots erupt in %s over crushing taxes!", e.Name),
+		fmt.Sprintf("The people of %s take to the streets against high taxes.", e.Name),
+	}
+	w.postNews(lines[w.rng.Intn(len(lines))])
+}

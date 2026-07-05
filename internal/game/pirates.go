@@ -226,6 +226,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) strin
 		if loot == "" {
 			loot = "nothing of value"
 		}
+		w.postPirateNews(a, p.Name, true)
 		return fmt.Sprintf("You broke the %s and recovered %s.", p.Name, loot)
 	}
 
@@ -235,6 +236,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) strin
 	a.Troopers -= tLost
 	a.Jets -= jLost
 	a.Tanks -= kLost
+	w.postPirateNews(a, p.Name, false)
 	return fmt.Sprintf("You could not break the %s. You lost %d Troopers, %d Jets, and %d Tanks.",
 		p.Name, tLost, jLost, kLost)
 }

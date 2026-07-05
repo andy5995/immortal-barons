@@ -335,10 +335,13 @@ flavor variants and placeholders `%F` (from/attacker), `%T` (target), `%N`
   result of covert/special IP ops (bombing, terrorist ops, special operations,
   Sabre), not planet-wide news.
 
-The clone broadcasts a subset: regular-attack results now post planet-wide news
-(NORMALWIN / NORMALLOSS / TOTALWIN); IP strike results post to the bulletin.
-WMD-strike, pirate-raid, riot, and civil-war planetary news are not generated
-yet — the events happen but only the victim is notified.
+The clone broadcasts most of these to its planetary bulletin (original wording,
+not BRE's verbatim lines): regular-attack wins/losses/conquests (NORMALWIN /
+NORMALLOSS / TOTALWIN), nuclear/chemical/biological strikes (NUKE / CHEM / BIO),
+pirate-raid outcomes (PIRATEWIN / PIRATELOSS), and tax riots (RIOTS). IP strike
+results post to the bulletin too. Not yet generated: CIVILWAR (the clone has no
+civil-war collapse mechanic) and BRE's finer-grained interplanetary news
+categories (individual vs. group vs. whole-BBS, attack vs. return).
 
 ## How Immortal Barons differs right now
 

@@ -52,6 +52,7 @@ func (w *World) NuclearStrike(a, d *Empire) (string, error) {
 
 	d.Events = append(d.Events, fmt.Sprintf("%s hit you with a nuclear strike: %d regions reduced to waste.", a.Name, regions))
 
+	w.postStrikeNews(a, d, "nuclear")
 	report := fmt.Sprintf("Nuclear strike! %d regions of %s reduced to waste.", regions, d.Name)
 	if !d.Alive {
 		report += fmt.Sprintf("\n%s has been utterly conquered!", d.Name)
@@ -82,6 +83,7 @@ func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 
 	d.Events = append(d.Events, fmt.Sprintf("%s hit you with a chemical strike: %d people, %d troopers, and %d regions lost.", a.Name, people, troops, regions))
 
+	w.postStrikeNews(a, d, "chemical")
 	report := fmt.Sprintf("Chemical strike! %s lost %d people, %d troopers, and %d regions.", d.Name, people, troops, regions)
 	if !d.Alive {
 		report += fmt.Sprintf("\n%s has been utterly conquered!", d.Name)
@@ -109,6 +111,7 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 
 	d.Events = append(d.Events, fmt.Sprintf("%s hit you with a biological strike: %d people and %d troopers lost.", a.Name, people, troops))
 
+	w.postStrikeNews(a, d, "biological")
 	report := fmt.Sprintf("Biological strike! %s lost %d people and %d troopers.", d.Name, people, troops)
 	if !d.Alive {
 		report += fmt.Sprintf("\n%s has been utterly conquered!", d.Name)
