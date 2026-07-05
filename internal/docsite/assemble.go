@@ -18,6 +18,19 @@ import (
 	"github.com/andy5995/immortal-barons/internal/help"
 )
 
+// extraCSS makes in-content links obviously links. Material for MkDocs only
+// colors body links by default (no underline), so a link in a sentence is easy
+// to miss; underline them and give them a clearer color.
+const extraCSS = `/* Underline in-content links so they read as links, not just tinted text. */
+.md-typeset a {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.md-typeset a:hover {
+  text-decoration: underline;
+}
+`
+
 // languages are the site's languages in menu order; the first is the default
 // and the fallback for untranslated pages.
 var languages = []struct {
@@ -79,6 +92,16 @@ func Assemble(repoRoot, outDir string) error {
 
 	// Developer docs are English-only.
 	if err := copyTree(filepath.Join(repoRoot, "docs", "dev"), filepath.Join(siteSrc, "en", "developers"), repoRoot, "developers", lk); err != nil {
+		return err
+	}
+
+	// Custom CSS lives in the default-language folder (served at the site root,
+	// so all languages pick it up).
+	cssPath := filepath.Join(siteSrc, "en", "stylesheets", "extra.css")
+	if err := os.MkdirAll(filepath.Dir(cssPath), 0o755); err != nil {
+		return err
+	}
+	if err := os.WriteFile(cssPath, []byte(extraCSS), 0o644); err != nil {
 		return err
 	}
 

@@ -87,6 +87,9 @@ markdown_extensions:
       permalink: true
   - pymdownx.superfences
 
+extra_css:
+  - stylesheets/extra.css
+
 nav:
 `)
 	for _, n := range nav {
