@@ -17,11 +17,13 @@ gofmt -w .                 # always run before committing
 ```
 
 Go 1.26. Prefer the standard library, but a dependency is fine when it
-clearly earns its place. Keep the set small and justified. Commit
-`go.mod`/`go.sum`; do NOT commit `vendor/` (distros build against their own
-packaged deps or fetch at build); a release tarball may `go mod vendor` for
-offline builds. i18n uses gettext/PO (po4a for docs, a Go gettext lib for UI
-strings) — see `docs/superpowers/specs/2026-07-03-docs-help-localization-design.md`.
+clearly earns its place (current deps: `golang.org/x/term`, `golang.org/x/sys`).
+Keep the set small and justified. Commit `go.mod`/`go.sum`; do NOT commit
+`vendor/` (distros build against their own packaged deps or fetch at build); a
+release tarball may `go mod vendor` for offline builds. i18n uses gettext/PO:
+**po4a** for the help docs and a small **in-house PO reader** (`internal/i18n`,
+no runtime dependency) for UI strings — see
+`docs/superpowers/specs/2026-07-03-docs-help-localization-design.md`.
 
 ## Architecture
 
@@ -30,15 +32,27 @@ keypresses from, and writes ANSI bytes to, a `session.Session` (a byte
 stream). Front-ends attach different streams; the engine is unchanged.
 
 - `cmd/barons` — local terminal front-end (a person plays in their console)
-- `internal/session` — the `Session` byte-stream abstraction + a console
-  implementation + shared `ReadLine`
+- `cmd/barons-door` — native BBS door front-end (stdio + dropfile; `-maint`,
+  `-planetary`, `-league-config`, `-setup`, …)
+- `cmd/barons-web` — experimental browser front-end (SSE + xterm.js)
+- `internal/session` — the `Session` byte-stream abstraction + console/stdio/web
+  implementations, shared `ReadLine`, and the Ctrl-key macro expander
 - `internal/ansi` — ANSI escape helpers (one rendering path for all front-ends)
 - `internal/menu` — the generic menu engine (`menu.go`) plus the BRE menu
   tree and actions (`tree.go`, `actions.go`, `input.go`)
-- `internal/game` — the world: empires, economy, turn engine, combat
+- `internal/game` — the world: empires, economy, turn engine, combat, news
+- `internal/store` — JSON persistence under an exclusive flock, config file,
+  inter-BBS packet I/O, league roster
+- `internal/play` — session bootstrap (load world → onboard/find empire → run)
+- `internal/door` — dropfile parsing (`DOOR32.SYS`/`DOOR.SYS`)
+- `internal/help` — embedded categorized Markdown help + Markdown→ANSI renderer,
+  per-language content (`content/`, `content.de/`, `content.ru/`)
+- `internal/i18n` — dependency-free gettext-PO reader for UI strings
 
 `menu.go` is the framework; `tree.go` is content. That split is the seam
-that lets the menu tree grow without touching the engine.
+that lets the menu tree grow without touching the engine. Language is threaded
+to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
+`ok`/`fail`/`prompt`/`tr` translate by the caller's `Empire.Language`.
 
 ## Conventions
 
@@ -53,12 +67,20 @@ that lets the menu tree grow without touching the engine.
 `docs/mechanics-reference.md` is the authoritative spec, built from the
 original binary strings plus public strategy guides and the GameBanshee
 manual overview. It covers units (offense/defense values, maintenance,
-net-worth), covert ops, region types, economy, caps, and the new-player
-start flow. Design specs live in `docs/superpowers/specs/`.
+net-worth), covert ops, region types, economy, caps, the new-player start
+flow, combat percentages, and the news feeds. Design specs live in
+`docs/superpowers/specs/`. Values cross-referenced against the actual BRE
+files (`~/.dosemu/drive_c/games/bre-dos/`) are noted there and in the
+`bre-binary-verified-math` memory; mercutio/Mantis is authoritative for
+exact disassembled constants.
 
 Combat uses a split offense/defense model (trooper 1/1, jet 2/0, turret
-0/2, tank 4/4); jets need carriers to attack. Bank interest is ~1%/turn
-with the 1.599-billion interest cap and 2-billion money cap.
+0/2, tank 4/4); jets need carriers to attack. A regular attack captures 20%
+of the loser's regions and costs both sides 15% losses (per `attack.hlp`).
+Bank interest is ~1%/turn with the 1.599-billion interest cap and 2-billion
+money cap. Net-worth and maintenance use BRE's per-unit tables (net worth in
+thousandths for exactness; bombers now carry upkeep). Pirate gold cap is
+600,000 (BRE.EXE caps table).
 
 ## Status (v0.0.1)
 
@@ -66,21 +88,37 @@ Persistent, multi-user door game. One shared JSON world guarded by an
 exclusive flock; per-caller empires keyed by BBS handle; per-turn economy
 (idle empires stagnate) split from a daily maintenance step; turns-per-day
 and new-realm protection; an event log for asynchronous play. Front-ends:
-`cmd/barons` (local) and `cmd/barons-door` (native BBS door, `+ -maint`).
-Persistence design/plan: `docs/superpowers/{specs,plans}/2026-07-03-door-*`.
+`cmd/barons` (local), `cmd/barons-door` (native BBS door), and `cmd/barons-web`
+(experimental browser). Persistence design/plan:
+`docs/superpowers/{specs,plans}/2026-07-03-door-*`.
 
 Implemented gameplay: conventional combat (offense/defense, turrets, carriers,
-jets), nuclear/chemical/biological strikes, pirate raids, covert agents
-(spy + sabotage), player mail + planetary bulletin, banking, and a rising
-land-market price (expansion is now self-limiting; the flat-land exploit is
-fixed). Key gameplay knobs (unit values, maintenance, prices, `LandPriceStep`)
-are constants — tune freely; keep them matching `docs/mechanics-reference.md`.
+jets, bomber airfield strikes), nuclear/chemical/biological strikes, pirate
+raids, covert agents (spy + sabotage), diplomacy treaties, trading, region
+types + food market, SDI, Gooie Kablooie, player mail + a BRE-style multi-line
+message editor + planetary bulletin, banking (deposit/withdraw/loan/invest),
+Set Industries + Specialize, Write Macros, and a rising land-market price
+(expansion self-limiting). A **planetary news feed** broadcasts battles, WMD
+strikes, pirate raids, and riots (original wording). The **sysop Configuration
+Editor** edits the full BRE field set and those knobs are wired into gameplay
+(tax/region caps, maintenance/attack Level presets, interest, Buy Military,
+etc.); a league Coordinator broadcasts the whole ruleset over inter-BBS.
 
-Stubbed / not built: region types + food market, diplomacy, trading, leagues
-+ reset + Planetary Master, Gooie Kablooie, SDI, the sysop config screen
-(rules come from a config file with defaults), and IBBS inter-BBS play. Some
-covert-menu items (Spy on Relations, Spy Database, Bribery) remain stubs
-pending the diplomacy/database subsystems.
+**Inter-BBS ("Option A")**: file-drop `.brp` JSON packets in Inbound/Outbound
+dirs; the sysop's transport moves them; `-planetary` processes inbound, launches
+group attacks, and exports scores/news. **Localization**: help docs (po4a) and
+UI strings (`internal/i18n`) render in the caller's language; de/ru are seeded
+and grow via the `.po` catalogs.
+
+Key gameplay knobs (unit values, maintenance, prices, `LandPriceStep`) are
+constants — tune freely; keep them matching `docs/mechanics-reference.md`.
+
+Stubbed / not built: leagues auto-reset + Planetary Master crowning, the
+Quick-Strike / Extended-Battle attack variants, civil-war collapse, and BRE's
+finer interplanetary news subtypes. Some covert-menu items (Spy on Relations,
+Spy Database, Bribery) route through the special-ops path pending fuller
+diplomacy/database subsystems. Known scale gap: region income is ~100× smaller
+than BRE's documented figures (an open scale decision).
 
 ## Primary goal: run as a BBS door
 
@@ -94,10 +132,15 @@ decomposes into:
    a hard time-left cutoff, and names the realm from the caller's handle.
    Socket I/O (Synchronet `COM0:SOCKETn` / Mystic telnet) is parsed but not
    yet used as a backend — stdio covers native Unix doors.
-2. **Persistence / multi-user** — a persistent empire per caller in a shared
-   world, keyed by BBS identity + node, with turns-per-day and daily
-   maintenance. This is the heart of a door game.
-3. **Sysop config** — game-rules settings file and dropfile path/type.
+2. **Persistence / multi-user** — DONE. A persistent empire per caller in a
+   shared JSON world under an exclusive flock, keyed by BBS handle, with
+   turns-per-day and daily maintenance (`internal/store`, `internal/play`).
+3. **Sysop config** — DONE. `config.json` with defaults + an in-game
+   Configuration Editor (Coordinator menu); `-setup` seeds the file. The
+   knobs are wired into gameplay and broadcast across a league.
+
+Remaining toward the goal: socket-backed I/O (Synchronet `COM0:SOCKETn` /
+Mystic telnet) and validation under real BBS software (needs Andy's env).
 
 Dropfile field maps and the I/O contract are documented in
 `docs/mechanics-reference.md` and cross-checked against the Synchronet

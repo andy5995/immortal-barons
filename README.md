@@ -36,16 +36,24 @@ BBS door.
   industrial, technology) and a food market
 - Diplomacy: typed treaties (defense, trade, intelligence) with their effects
 - Sysop configuration editor
-- Messages: player-to-player mail and a planetary bulletin
+- Industry: set production percentages per unit, or specialize (permanent)
+- Messages: player-to-player mail with a multi-line editor, and a planetary
+  bulletin
+- A planetary news feed: battles, nuclear/chemical/biological strikes, pirate
+  raids, and tax riots are broadcast to everyone
+- Write Macros: record a Ctrl-key to replay a sequence of keystrokes
+- Localization: menus, prompts, and the help database render in the caller's
+  language (English, German, and Russian so far)
 - "While you were away" event log for asynchronous play
 - Scores and net worth
 
 **Planned (not built yet):**
 
-- Diplomacy and trading between empires
-- Leagues that run for a set time, then reset and crown a winner
-- Inter-BBS (IBBS) live play (the score-packet exchange works and is tested;
-  validation under real BBS software is still pending)
+- Leagues that reset on a timer and crown a winner
+- The Quick Strike and Extended Battle attack variants
+- Inter-BBS (IBBS) live play (the packet exchange — scores, news, and group
+  attacks — works and is tested; validation under real BBS software is still
+  pending)
 
 ## Build and run
 
