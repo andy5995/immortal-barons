@@ -13,6 +13,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/door"
@@ -137,23 +138,26 @@ func main() {
 	}
 }
 
-// openSession attaches to the caller per the dropfile's I/O mode. When the BBS
-// hands us a socket (Synchronet COM0:SOCKETn / Mystic telnet), talk over it
-// directly; otherwise the BBS pipes the connection through our stdin/stdout.
-// The returned func releases the connection at exit.
+// openSession attaches to the caller per the dropfile's I/O mode and platform.
+//
+// On Unix, Synchronet and Mystic run native doors with the caller's connection
+// wired to our stdin/stdout (Synchronet's EX_STDIO mode pipes the socket to us
+// and handles telnet itself), so stdio is correct even though the dropfile
+// reports a socket with a handle — that handle is the BBS's own socket, not
+// something the door attaches to. Only on Windows does the door attach to the
+// inherited winsock handle directly. The returned func releases the connection.
 func openSession(caller *door.Caller) (session.Session, func(), error) {
-	switch caller.IO {
-	case door.IOSocket:
+	if caller.IO == door.IOSocket && runtime.GOOS == "windows" {
 		sock, err := session.NewSocket(caller.Socket)
 		if err != nil {
 			return nil, nil, err
 		}
 		return sock, sock.Close, nil
-	case door.IOSerial:
-		return nil, nil, fmt.Errorf("serial (FOSSIL) doors are not supported; configure your BBS for a socket or stdio door")
-	default: // IOLocal, IOStdio
-		return session.NewStdio(), func() {}, nil
 	}
+	if caller.IO == door.IOSerial {
+		return nil, nil, fmt.Errorf("serial (FOSSIL) doors are not supported; configure your BBS for a socket or stdio door")
+	}
+	return session.NewStdio(), func() {}, nil
 }
 
 // runMaint blocks on the lock (waits for any active player) then advances
