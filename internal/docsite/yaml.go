@@ -51,7 +51,6 @@ use_directory_urls: true
 theme:
   name: material
   features:
-    - navigation.instant
     - navigation.sections
     - navigation.top
     - search.suggest
