@@ -748,7 +748,13 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 	pct := func(n int) string { return fmt.Sprintf("%s%d%%%s", c, n, r) }
 	kv := func(label, value string) { fmt.Fprintf(s, "%s%s:%s %s\n", wht, tr(s, label), r, value) }
 
-	fmt.Fprintf(s, "\n%s─*%s*─%s\n", c, p.Name, r)
+	// Title bar: white-on-blue panel spanning the rule width.
+	title := " " + tr(s, "Empire Status") + ": " + p.Name + " "
+	if pad := len(rule) - len([]rune(title)); pad > 0 {
+		title += strings.Repeat(" ", pad)
+	}
+	fmt.Fprintf(s, "\n%s%s%s%s\n", ansi.BgBlue, ansi.FgBrightWhite, title, ansi.Reset)
+
 	kv("Turns", num(p.TurnsLeft))
 	kv("Score", num(netWorth))
 	kv("Gold", num(p.Gold))
@@ -758,22 +764,70 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 	}
 	fmt.Fprintf(s, "%s%s:%s %s %s(%s: %s)%s\n", wht, tr(s, "Population"), r, num(p.People), wht, tr(s, "Tax Rate"), pct(p.Tax), r)
 	kv("Popular Support", pct(p.Support))
+	kv("Military Morale", pct(p.Morale))
 	kv("Food", num(p.Food))
 	fmt.Fprintf(s, "%s%s:%s %s%s%s\n", wht, tr(s, "Headquarters"), r, c, tr(s, hqStatus(p)), r)
 	if p.SDI > 0 {
 		kv("SDI", pct(p.SDI))
 	}
 	fmt.Fprintf(s, "%s%s:%s %s   %s%s:%s %s\n", wht, tr(s, "Offense"), r, num(p.Offense()), wht, tr(s, "Defense"), r, num(p.Defense()))
-	writeBracketRow(s, tr(s, "Military"), []bracketItem{
-		mkBracket(p.Troopers, "Troopers"), mkBracket(p.Jets, "Jets"), mkBracket(p.Turrets, "Turrets"),
-		mkBracket(p.Tanks, "Tanks"), mkBracket(p.Bombers, "Bombers"), mkBracket(p.Carriers, "Carriers"),
-		mkBracket(p.Agents, "Agents"),
+
+	writeStatTable(s, tr(s, "Military"), []statCol{
+		{"Troopers", p.Troopers}, {"Jets", p.Jets}, {"Turrets", p.Turrets}, {"Tanks", p.Tanks},
+		{"Bombers", p.Bombers}, {"Carriers", p.Carriers}, {"Agents", p.Agents},
 	})
-	writeBracketRow(s, tr(s, "Regions"), regionBracketItems(p))
+	regionCols := make([]statCol, len(regionTypeNames))
+	for i, name := range regionTypeNames {
+		regionCols[i] = statCol{name, *regionField(p, i)}
+	}
+	writeStatTable(s, tr(s, "Regions"), regionCols)
+
 	if p.Protection > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "You have %s%s turns of Protection Left.")+"%s\n", wht, num(p.Protection), wht, r)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBlue, rule, r)
+}
+
+// statCol is one column of a stat table: a heading and its value.
+type statCol struct {
+	name string
+	val  int
+}
+
+// writeStatTable prints a titled table with each column's heading (unit or
+// region name) over its right-aligned value, packing columns into rows that
+// fit an 80-column screen. More readable than a run of "[N Name]" brackets.
+func writeStatTable(s session.Session, title string, cols []statCol) {
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, title, ansi.Reset)
+	const maxWidth = 78
+	colW := func(cd statCol) int {
+		w := len(cd.name)
+		if v := len(comma(cd.val)); v > w {
+			w = v
+		}
+		return w + 2 // two-space gap between columns
+	}
+	for i := 0; i < len(cols); {
+		var group []statCol
+		width := 0
+		for i < len(cols) {
+			w := colW(cols[i])
+			if len(group) > 0 && width+w > maxWidth {
+				break
+			}
+			group = append(group, cols[i])
+			width += w
+			i++
+		}
+		var hdr, vals strings.Builder
+		for _, cd := range group {
+			w := colW(cd)
+			fmt.Fprintf(&hdr, "%*s", w, cd.name)
+			fmt.Fprintf(&vals, "%s%*s%s", ansi.FgBrightCyan, w, comma(cd.val), ansi.Reset)
+		}
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgWhite, hdr.String(), ansi.Reset)
+		fmt.Fprintf(s, "  %s\n", vals.String())
+	}
 }
 
 // empireStatus is the standalone status action (System menu): render + pause.
@@ -792,58 +846,6 @@ func hqStatus(p *game.Empire) string {
 	default:
 		return fmt.Sprintf("%d%%", p.HQ)
 	}
-}
-
-// bracketItem is a "[N Label]" group plus its visible width (excluding ANSI
-// color codes) so writeBracketRow can wrap without miscounting.
-type bracketItem struct {
-	text  string
-	width int
-}
-
-// mkBracket builds a "[N Label]" group with the count highlighted.
-func mkBracket(n int, label string) bracketItem {
-	numStr := comma(n)
-	return bracketItem{
-		text:  "[" + ansi.FgBrightCyan + numStr + ansi.Reset + " " + label + "]",
-		width: len(numStr) + len(label) + 3, // '[' + number + ' ' + label + ']'
-	}
-}
-
-// writeBracketRow prints "Label: " then the bracket groups, wrapping to a new
-// indented line when a group would overflow the classic 80-column screen.
-func writeBracketRow(s session.Session, label string, items []bracketItem) {
-	prefix := label + ": "
-	fmt.Fprintf(s, "%s%s%s", ansi.FgWhite, prefix, ansi.Reset)
-	indent := strings.Repeat(" ", len(prefix))
-	col := len(prefix)
-	const maxWidth = 78
-	for i, it := range items {
-		if i > 0 {
-			if col+1+it.width > maxWidth {
-				fmt.Fprintf(s, "\n%s", indent)
-				col = len(indent)
-			} else {
-				fmt.Fprint(s, " ")
-				col++
-			}
-		}
-		fmt.Fprint(s, it.text)
-		col += it.width
-	}
-	fmt.Fprint(s, "\n")
-}
-
-// regionBracketItems returns the empire's non-zero region counts as bracket
-// groups, e.g. [40 Coastal] [25 Agricultural].
-func regionBracketItems(p *game.Empire) []bracketItem {
-	var items []bracketItem
-	for i, name := range regionTypeNames {
-		if n := *regionField(p, i); n > 0 {
-			items = append(items, mkBracket(n, name))
-		}
-	}
-	return items
 }
 
 func seeScores(s session.Session, w *ctx) Result {
