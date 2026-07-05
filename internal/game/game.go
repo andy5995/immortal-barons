@@ -6,6 +6,7 @@ package game
 import (
 	"math/rand"
 	"strings"
+	"sync"
 	"time"
 )
 
@@ -232,6 +233,7 @@ type World struct {
 	Active *Empire `json:"-"` // the empire playing this session
 	Today  string  `json:"-"` // ISO date for this session
 
+	mu  sync.Mutex // guards concurrent access when a server shares one World
 	rng *rand.Rand
 }
 
@@ -307,6 +309,20 @@ func (w *World) AddHuman(handle, realm string) *Empire {
 }
 
 func (w *World) Player() *Empire { return w.Active }
+
+// Lock/Unlock guard the shared World when a single process runs concurrent
+// sessions (the web server). The door/local front-ends run one session and
+// take it uncontended.
+func (w *World) Lock()   { w.mu.Lock() }
+func (w *World) Unlock() { w.mu.Unlock() }
+
+// With runs fn while holding the world lock. Use it around a short
+// mutate-or-snapshot window — never around player input.
+func (w *World) With(fn func()) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	fn()
+}
 
 // RemoveEmpire deletes e from the world (Abdicate). The empire is gone
 // entirely; the caller gets a fresh realm on their next visit. Active is
