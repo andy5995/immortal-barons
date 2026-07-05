@@ -13,10 +13,10 @@ The game is written in Go. It is an independent remake, inspired by the
 
 ## Status
 
-Version 0.0.1 — a persistent, multi-user BBS door game. Each caller has a
-lasting empire in one shared world; you play your turns, and other barons
-(and any AI) act on their own turns. The game runs locally or as a native
-BBS door.
+In development — not yet released. Immortal Barons is a persistent, multi-user
+BBS door game: each caller has a lasting empire in one shared world; you play
+your turns, and other barons (and any AI) act on their own turns. The game runs
+locally or as a native BBS door.
 
 **Works now:**
 

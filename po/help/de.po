@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-05 11:16-0500\n"
+"POT-Creation-Date: 2026-07-05 11:34-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1166,10 +1166,10 @@ msgstr ""
 #. type: Plain text
 #: README.md:20
 msgid ""
-"Version 0.0.1 — a persistent, multi-user BBS door game. Each caller has a "
-"lasting empire in one shared world; you play your turns, and other barons "
-"(and any AI) act on their own turns. The game runs locally or as a native "
-"BBS door."
+"In development — not yet released. Immortal Barons is a persistent, multi-"
+"user BBS door game: each caller has a lasting empire in one shared world; "
+"you play your turns, and other barons (and any AI) act on their own turns. "
+"The game runs locally or as a native BBS door."
 msgstr ""
 
 #. type: Plain text
