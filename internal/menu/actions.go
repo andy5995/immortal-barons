@@ -1307,7 +1307,20 @@ func composeMessage(s session.Session) (string, bool) {
 		if err != nil {
 			return "", false
 		}
-		if strings.TrimSpace(line) == "/" {
+		// A line that is exactly a slash command (as advertised in the header)
+		// saves/aborts/clears; a bare "/" falls back to a follow-up keypress.
+		switch strings.ToUpper(strings.TrimSpace(line)) {
+		case "/S":
+			fmt.Fprintf(s, "    %s\n", tr(s, "Save"))
+			return trimTrailingBlank(lines), true
+		case "/A":
+			fmt.Fprintf(s, "    %s\n", tr(s, "Abort"))
+			return "", false
+		case "/C":
+			fmt.Fprintf(s, "    %s\n", tr(s, "Clear"))
+			lines = nil
+			continue
+		case "/":
 			fmt.Fprintf(s, "    "+tr(s, "/-Command?")+"  [%sA%s,%sS%s,%sC%s] ",
 				ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset)
 			r, err := s.ReadKey()
