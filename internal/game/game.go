@@ -371,9 +371,13 @@ func (w *World) ImportBoard(b RemoteBoard) {
 // per-unit values (trooper 0.25, jet 0.325, …) in integer math, then /10.
 // Gold, bank, food, and population are NOT counted at face value — net worth
 // is a ranking score, not a cash tally (a cash-rich baron still scores low).
+// NetWorth values each asset by BRE's net-worth table (per unit: Trooper 0.250,
+// Jet 0.325, Turret 0.425, Tank 1.250, Bomber 3.000, Carrier 1.000, Agent
+// 0.500, Region 12.50). Computed in thousandths so the 0.x25 values are exact
+// (tenths rounded Trooper/Jet/Turret/Tank down).
 func (w *World) NetWorth(e *Empire) int {
-	tenths := e.Land*125 +
-		e.Troopers*2 + e.Jets*3 + e.Turrets*4 + e.Bombers*30 +
-		e.Agents*5 + e.Tanks*12 + e.Carriers*10
-	return tenths/10 - e.Debt/100
+	thou := e.Land*12500 +
+		e.Troopers*250 + e.Jets*325 + e.Turrets*425 + e.Bombers*3000 +
+		e.Agents*500 + e.Tanks*1250 + e.Carriers*1000
+	return thou/1000 - e.Debt/100
 }

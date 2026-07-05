@@ -65,7 +65,7 @@ func TestForcesUpkeepFormula(t *testing.T) {
 	e := w.AddHuman("tester", "Testland")
 	// newEmpire has Troopers=150, Carriers=1, no Technology regions => no
 	// techFactor reduction.
-	want := 150*6 + 0*12 + 0*9 + 0*6 + 1*1
+	want := 150*6 + 0*12 + 0*9 + 0*13 + 0*6 + 1*1
 	if got := e.ForcesUpkeep(); got != want {
 		t.Errorf("ForcesUpkeep: want %d, got %d", want, got)
 	}

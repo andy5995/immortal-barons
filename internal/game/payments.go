@@ -17,8 +17,11 @@ const (
 // ForcesUpkeep is the gold the armed forces require this turn. Technology
 // regions lower it (same factor income uses); this is the formula the old
 // auto-deducted maintenance used.
+// Per-unit maintenance follows BRE's Medium table (Trooper 0.60, Jet 1.20,
+// Turret 0.90, Bomber 1.30, Tank 0.60, Carrier 0.10 gold/turn) scaled ×10, so
+// the ratios match the original exactly. Bombers were previously omitted.
 func (e *Empire) ForcesUpkeep() int {
-	return (e.Troopers*6 + e.Jets*12 + e.Turrets*9 + e.Tanks*6 + e.Carriers*1) * (100 - e.techFactor()) / 100
+	return (e.Troopers*6 + e.Jets*12 + e.Turrets*9 + e.Bombers*13 + e.Tanks*6 + e.Carriers*1) * (100 - e.techFactor()) / 100
 }
 
 // RegionUpkeep is the gold required to maintain the empire's regions.
