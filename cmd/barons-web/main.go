@@ -105,6 +105,11 @@ func (h *hub) stream(w http.ResponseWriter, r *http.Request) {
 	h.mu.Lock()
 	ws, existed := h.sessions[id]
 	if !existed {
+		if len(h.sessions) >= h.cfg.MaxConcurrentSessions {
+			h.mu.Unlock()
+			http.Error(w, "The realm is full — try again shortly.", http.StatusServiceUnavailable)
+			return
+		}
 		ws = session.NewWebSession()
 		h.sessions[id] = ws
 		log.Printf("session connected from %s", r.RemoteAddr)

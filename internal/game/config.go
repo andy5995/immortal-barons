@@ -100,26 +100,27 @@ type Config struct {
 	MaxIdleWarnings int    // idle warnings a session may collect before a hard boot
 
 	// League ruleset (BRE Configuration Editor fields).
-	GameStartDate     string    // ISO date the game begins; before it, maintenance doesn't advance ("" = already started)
-	JoinDate          string    // ISO date after which no new player may join ("" = no cutoff)
-	TurnsPerDay       int       // turns each player gets per day
-	ProtectionTurns   int       // New Realm Protection length
-	GameLength        int       // days before the league ends and resets; 0 = endless
-	InitialMarketLand int       // land on the market at reset
-	LandPerDay        int       // land added to the market each day
-	InterestRate      int       // bank interest (BRE: % over 10 days; 200 = 20%/day)
-	StdInvestRate     int       // standard investment rate (BRE: % over 10 days)
-	SteadyInvest      bool      // steady (fixed) investment rate instead of floating
-	MaxTaxRate        int       // highest tax rate a player may set
-	MaxRegions        int       // most regions a player may own
-	MaxPlayers        int       // most human empires per board (0 = unlimited)
-	BuyMilitary       BuyMode   // Yes / No / Limited
-	MaintCosts        Level     // maintenance costs (regions + forces)
-	TradeCosts        Level     // trade-deal costs
-	RegionCosts       Level     // region purchase price
-	AttackDamage      Level     // damage attacks inflict (never None)
-	AttackRewards     Level     // land/goods gained from a win (never None)
-	SabreHandling     SabreMode // S3-Sabre missile handling
+	GameStartDate         string    // ISO date the game begins; before it, maintenance doesn't advance ("" = already started)
+	JoinDate              string    // ISO date after which no new player may join ("" = no cutoff)
+	TurnsPerDay           int       // turns each player gets per day
+	ProtectionTurns       int       // New Realm Protection length
+	GameLength            int       // days before the league ends and resets; 0 = endless
+	InitialMarketLand     int       // land on the market at reset
+	LandPerDay            int       // land added to the market each day
+	InterestRate          int       // bank interest (BRE: % over 10 days; 200 = 20%/day)
+	StdInvestRate         int       // standard investment rate (BRE: % over 10 days)
+	SteadyInvest          bool      // steady (fixed) investment rate instead of floating
+	MaxTaxRate            int       // highest tax rate a player may set
+	MaxRegions            int       // most regions a player may own
+	MaxPlayers            int       // most human empires per board (0 = unlimited)
+	MaxConcurrentSessions int       // max live browser sessions at once
+	BuyMilitary           BuyMode   // Yes / No / Limited
+	MaintCosts            Level     // maintenance costs (regions + forces)
+	TradeCosts            Level     // trade-deal costs
+	RegionCosts           Level     // region purchase price
+	AttackDamage          Level     // damage attacks inflict (never None)
+	AttackRewards         Level     // land/goods gained from a win (never None)
+	SabreHandling         SabreMode // S3-Sabre missile handling
 }
 
 // Config-editor upper bounds, from BRE's Configuration Help screens, which show
@@ -166,23 +167,24 @@ func DefaultConfig() Config {
 		MaxIdleWarnings: 3,
 
 		// Defaults from BRE's reset-init code and Configuration Help screens.
-		TurnsPerDay:       8,
-		ProtectionTurns:   20,
-		GameLength:        0,
-		InitialMarketLand: 0,
-		LandPerDay:        1000,
-		InterestRate:      50,
-		StdInvestRate:     35,
-		SteadyInvest:      false,
-		MaxTaxRate:        50,
-		MaxRegions:        500,
-		MaxPlayers:        25,
-		BuyMilitary:       BuyYes,
-		MaintCosts:        Medium,
-		TradeCosts:        Medium,
-		RegionCosts:       Medium,
-		AttackDamage:      Medium,
-		AttackRewards:     Medium,
-		SabreHandling:     SabreUserSelect,
+		TurnsPerDay:           8,
+		ProtectionTurns:       20,
+		GameLength:            0,
+		InitialMarketLand:     0,
+		LandPerDay:            1000,
+		InterestRate:          50,
+		StdInvestRate:         35,
+		SteadyInvest:          false,
+		MaxTaxRate:            50,
+		MaxRegions:            500,
+		MaxPlayers:            25,
+		MaxConcurrentSessions: 4,
+		BuyMilitary:           BuyYes,
+		MaintCosts:            Medium,
+		TradeCosts:            Medium,
+		RegionCosts:           Medium,
+		AttackDamage:          Medium,
+		AttackRewards:         Medium,
+		SabreHandling:         SabreUserSelect,
 	}
 }
