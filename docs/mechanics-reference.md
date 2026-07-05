@@ -199,6 +199,17 @@ maintenance, tax payments, spending on public support/morale, and the food
 market (limited supply — relying on it is risky). Banking offers
 interest-earning savings and loans; investment rates move over time.
 
+**Popular support and military morale** are 0–100 stats. Each turn's payment
+stage prompts for both when they are below 100 ("N gold is requested to boost
+popular support / improve military morale"); a single turn's payment only
+raises each by a capped amount, so full recovery takes several turns.
+Underpaying maintenance lowers them (and taxes erode support). Low popular
+support cuts Coastal income and, at the extreme, brings riots. Low military
+morale scales down combat effectiveness, and below a threshold troops desert
+each turn. The exact request/boost/decay constants are not in BRE's released
+files (the empire record layout was deliberately withheld); the values in
+`internal/game/payments.go` are reconstructed placeholders, tunable.
+
 Tax rate, bank interest, and investment rates are configurable (a real
 league ran tax 85%, interest 75%).
 

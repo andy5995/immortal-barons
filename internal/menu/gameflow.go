@@ -147,6 +147,7 @@ func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
 	if p.LastRiot {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, tr(s, "Riots have broken out due to high tax rates!"), ansi.Reset)
 	}
+	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
 	statLine(s, p.IndustryGold, "gold was produced by your Industry.")
 	statLine(s, p.MadeTroopers, "Troopers were trained by Industrial Zones.")
 	statLine(s, p.MadeJets, "Jets were manufactured by Industrial Zones.")
@@ -202,36 +203,64 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgYellow, tr(s, "You cannot cover all your maintenance this turn."), ansi.Reset)
 	}
 
-	fmt.Fprintf(s, "\n"+tr(s, "Your armed forces require %d gold.")+"\n", forces)
-	forcesGold := promptSuggested(s, "How much will you give?", min(forces, gold), gold)
-	var forcesLost int
+	// Gather the player's intended payments without applying them, so that if
+	// they underpay a required obligation we can warn ("DISASTEROUS results")
+	// and let them reconsider before the consequences land.
+	var forcesGold, regionsGold int
+	for {
+		fmt.Fprintf(s, "\n"+tr(s, "Your armed forces require %d gold.")+"\n", forces)
+		forcesGold = promptSuggested(s, "How much will you give?", min(forces, gold), gold)
+
+		fmt.Fprintf(s, "\n"+tr(s, "%d gold is required to maintain your regions.")+"\n", regions)
+		regionsGold = promptSuggested(s, "How much will you give?", min(regions, gold-forcesGold), gold-forcesGold)
+
+		if forcesGold >= forces && regionsGold >= regions {
+			break // fully paid — no warning
+		}
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
+		if !askYesNo(s, "Would you like to reconsider?") {
+			break // proceed despite the shortfall
+		}
+		// Reconsider: re-read current gold (it is unchanged; nothing applied yet)
+		// and prompt again.
+		w.With(func() { gold = p.Gold })
+	}
+
+	var forcesLost, regionsLost, support, morale int
 	w.With(func() {
 		forcesLost = w.World.PayForces(p, forcesGold)
+		regionsLost = w.World.PayRegions(p, regionsGold)
 		gold = p.Gold
+		support = p.Support
+		morale = p.Morale
 	})
 	if forcesLost > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "%d units deserted for lack of pay.")+"%s\n", ansi.FgRed, forcesLost, ansi.Reset)
 	}
-
-	fmt.Fprintf(s, "\n"+tr(s, "%d gold is required to maintain your regions.")+"\n", regions)
-	regionsGold := promptSuggested(s, "How much will you give?", min(regions, gold), gold)
-	var regionsLost int
-	var support int
-	w.With(func() {
-		regionsLost = w.World.PayRegions(p, regionsGold)
-		gold = p.Gold
-		support = p.Support
-	})
 	if regionsLost > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "%d regions revolted for lack of upkeep.")+"%s\n", ansi.FgRed, regionsLost, ansi.Reset)
 	}
 
-	if support < 100 && gold > 0 && askYesNo(s, "Spend gold to boost popular support?") {
+	if support < 100 && gold > 0 {
+		fmt.Fprintf(s, "\n"+tr(s, "%d gold is requested to boost popular support.")+"\n", (100-support)*game.SupportPerBoostGold)
 		supportGold := promptSuggested(s, "How much will you give?", 0, gold)
 		var pts int
-		w.With(func() { pts = w.World.BoostSupport(p, supportGold) })
+		w.With(func() {
+			pts = w.World.BoostSupport(p, supportGold)
+			gold = p.Gold
+		})
 		if pts > 0 {
 			fmt.Fprintf(s, tr(s, "Popular support rose %d points.")+"\n", pts)
+		}
+	}
+
+	if morale < 100 && gold > 0 {
+		fmt.Fprintf(s, "\n"+tr(s, "%d gold is requested to improve military morale.")+"\n", (100-morale)*game.MoralePerBoostGold)
+		moraleGold := promptSuggested(s, "How much will you give?", 0, gold)
+		var pts int
+		w.With(func() { pts = w.World.BoostMorale(p, moraleGold) })
+		if pts > 0 {
+			fmt.Fprintf(s, tr(s, "Military morale rose %d points.")+"\n", pts)
 		}
 	}
 }

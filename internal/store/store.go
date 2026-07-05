@@ -31,6 +31,7 @@ func Load(cfg game.Config) (*game.World, error) {
 	for _, e := range w.Empires {
 		e.EnsureRegions()
 		e.EnsureSupport()
+		e.EnsureMorale()
 		e.EnsureProduction()
 	}
 	w.EnsureInvestRate()

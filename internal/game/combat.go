@@ -60,8 +60,10 @@ func (w *World) Attack(a, d *Empire) string {
 	dmg := w.Config.AttackDamage.Percent()
 	rew := w.Config.AttackRewards.Percent()
 
-	ap := w.jitter(a.Offense())
-	dp := w.jitter(d.Defense() + d.Land*2)
+	// Military morale scales each side's unit effectiveness (the land defense
+	// bonus is terrain, not troops, so morale doesn't touch it).
+	ap := w.jitter(a.Offense() * moraleFactor(a.Morale) / 100)
+	dp := w.jitter(d.Defense()*moraleFactor(d.Morale)/100 + d.Land*2)
 
 	// BRE's Normal Attack (attack.hlp): the winner captures 20% of the loser's
 	// regions, and "both sides fight until they suffer 15% losses, at which

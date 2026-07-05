@@ -40,6 +40,7 @@ type Empire struct {
 	SDI      int    // 0-75, percentage reduction of incoming strike damage
 	HQ       int    // 0 = none/not started; 1-100 = percent complete
 	Support  int    // 0-100, popular support; erodes with high tax, slashes Coastal income when low
+	Morale   int    // 0-100, military morale; low morale weakens combat and causes desertion
 	Language string // help/UI language ("" = English; "de", "ru")
 
 	TurnsLeft   int
@@ -76,18 +77,19 @@ type Empire struct {
 	Specialized  string // "" = none, else a unit type name; specialization concentrates output
 
 	// Transient per-turn stats for the end-of-turn report; not persisted.
-	LastSpoiled      int  `json:"-"`
-	LastPopGrowth    int  `json:"-"`
-	LastRiot         bool `json:"-"`
-	MadeTroopers     int  `json:"-"`
-	MadeJets         int  `json:"-"`
-	MadeTurrets      int  `json:"-"`
-	MadeBombers      int  `json:"-"`
-	MadeTanks        int  `json:"-"`
-	MadeCarriers     int  `json:"-"`
-	IndustryGold     int  `json:"-"`
-	LastGoldPaid     int  `json:"-"`
-	LastFoodConsumed int  `json:"-"`
+	LastSpoiled         int  `json:"-"`
+	LastPopGrowth       int  `json:"-"`
+	LastRiot            bool `json:"-"`
+	LastMoraleDesertion int  `json:"-"`
+	MadeTroopers        int  `json:"-"`
+	MadeJets            int  `json:"-"`
+	MadeTurrets         int  `json:"-"`
+	MadeBombers         int  `json:"-"`
+	MadeTanks           int  `json:"-"`
+	MadeCarriers        int  `json:"-"`
+	IndustryGold        int  `json:"-"`
+	LastGoldPaid        int  `json:"-"`
+	LastFoodConsumed    int  `json:"-"`
 }
 
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }
@@ -114,6 +116,21 @@ func (e *Empire) EnsureSupport() {
 	if e.Support == 0 {
 		e.Support = 100
 	}
+}
+
+// EnsureMorale repairs Morale after loading a save that predates the Morale
+// field (Morale zero), the same way EnsureSupport does.
+func (e *Empire) EnsureMorale() {
+	if e.Morale == 0 {
+		e.Morale = 100
+	}
+}
+
+// moraleFactor maps military morale (0-100) to a combat-effectiveness percent.
+// Full morale fights at 100%; empty morale still fights at MoraleCombatFloor
+// (units don't become useless, just weaker). Placeholder curve — tunable.
+func moraleFactor(morale int) int {
+	return MoraleCombatFloor + (100-MoraleCombatFloor)*morale/100
 }
 
 // EnsureProduction repairs the production percentages after loading a save
@@ -277,7 +294,7 @@ func newEmpire(name, owner string, cfg Config) *Empire {
 		Name: name, Owner: owner, Alive: true,
 		Gold: 10000, Food: 20000, Land: regions.Total(), People: 2000,
 		Regions:  regions,
-		Troopers: 150, Carriers: 1, Tax: 15, Support: 100,
+		Troopers: 150, Carriers: 1, Tax: 15, Support: 100, Morale: 100,
 		TurnsLeft: cfg.TurnsPerDay, Protection: cfg.ProtectionTurns,
 		ProdTroopers: 30, ProdJets: 20, ProdTurrets: 15, ProdBombers: 5, ProdTanks: 20, ProdCarriers: 10,
 	}

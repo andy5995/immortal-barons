@@ -12,6 +12,21 @@ const (
 	DesertRate          = 25  // % of the army that deserts at full non-payment
 	RegionRevoltRate    = 15  // % of land that revolts at full non-payment
 	SupportPerBoostGold = 100 // gold to raise popular support by one point
+	MoralePerBoostGold  = 100 // gold to raise military morale by one point
+
+	// A single turn's payment cannot fully restore support/morale — paying the
+	// whole requested amount only buys a bounded number of points, so recovery
+	// takes several turns (per observed BRE behavior). Placeholder — tunable.
+	MaxSupportBoostPerTurn = 20
+	MaxMoraleBoostPerTurn  = 20
+
+	// Military morale effects (placeholders, tunable). Below the floor, combat
+	// effectiveness is scaled by moraleFactor; below the desert threshold, a
+	// slice of the army deserts each turn morale stays that low.
+	MoraleCombatFloor     = 50 // combat effectiveness % at zero morale
+	MoraleDesertThreshold = 30 // morale at/below which troops start deserting
+	MoraleDesertRate      = 5  // % of the army lost per turn while morale is that low
+	MoraleDrift           = 4  // points morale recovers toward 100 per turn
 )
 
 // ForcesUpkeep is the gold the armed forces require this turn. Technology
@@ -79,6 +94,7 @@ func (w *World) PayForces(e *Empire, given int) int {
 	desert(&e.Turrets)
 	desert(&e.Tanks)
 	e.adjustSupport(-fracPct / 5)
+	e.adjustMorale(-fracPct / 4) // unpaid troops lose heart faster than the public
 	return lost
 }
 
@@ -102,21 +118,41 @@ func (w *World) PayRegions(e *Empire, given int) int {
 }
 
 // BoostSupport spends gold to raise popular support (the optional
-// "requested" obligation). Returns the number of support points gained.
+// "requested" obligation). One turn's boost is capped, so it takes several
+// turns of payment to fully recover. Returns the support points gained.
 func (w *World) BoostSupport(e *Empire, given int) int {
 	given = e.clampGive(given)
-	pts := given / SupportPerBoostGold
+	pts := min(given/SupportPerBoostGold, MaxSupportBoostPerTurn)
 	e.adjustSupport(pts)
+	return pts
+}
+
+// BoostMorale spends gold to raise military morale, mirroring BoostSupport
+// (capped per turn). Returns the morale points gained.
+func (w *World) BoostMorale(e *Empire, given int) int {
+	given = e.clampGive(given)
+	pts := min(given/MoralePerBoostGold, MaxMoraleBoostPerTurn)
+	e.adjustMorale(pts)
 	return pts
 }
 
 // adjustSupport moves support by delta, clamped to [0, 100].
 func (e *Empire) adjustSupport(delta int) {
-	e.Support += delta
-	if e.Support < 0 {
-		e.Support = 0
+	e.Support = clampPct(e.Support + delta)
+}
+
+// adjustMorale moves morale by delta, clamped to [0, 100].
+func (e *Empire) adjustMorale(delta int) {
+	e.Morale = clampPct(e.Morale + delta)
+}
+
+// clampPct clamps a percentage-style stat to [0, 100].
+func clampPct(v int) int {
+	if v < 0 {
+		return 0
 	}
-	if e.Support > 100 {
-		e.Support = 100
+	if v > 100 {
+		return 100
 	}
+	return v
 }

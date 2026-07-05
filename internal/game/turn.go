@@ -219,6 +219,28 @@ func (w *World) processEconomy(e *Empire) {
 		e.People -= e.People / 10 // a tenth flee in the unrest
 	}
 
+	// Morale slowly recovers toward 100 each turn (a paid, quiet army regains
+	// heart); paying forces short knocks it back down in PayForces. When morale
+	// stays very low, troops desert.
+	if e.Morale < 100 {
+		e.Morale = min(100, e.Morale+MoraleDrift)
+	}
+	if e.Morale <= MoraleDesertThreshold {
+		lost := 0
+		desert := func(n *int) {
+			d := *n * MoraleDesertRate / 100
+			*n -= d
+			lost += d
+		}
+		desert(&e.Troopers)
+		desert(&e.Jets)
+		desert(&e.Turrets)
+		desert(&e.Tanks)
+		e.LastMoraleDesertion = lost
+	} else {
+		e.LastMoraleDesertion = 0
+	}
+
 	if e.Gold > MoneyCap {
 		e.Gold = MoneyCap
 	}
