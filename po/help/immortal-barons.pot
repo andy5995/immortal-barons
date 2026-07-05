@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-04 17:44-0500\n"
+"POT-Creation-Date: 2026-07-05 09:26-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -787,11 +787,39 @@ msgstr ""
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:61
 #, markdown-text, no-wrap
+msgid "Starting a fresh game (reset)"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:64
+#, markdown-text
+msgid "To wipe the current game and start over, run:"
+msgstr ""
+
+#. type: Fenced code block
+#: internal/help/content/interbbs/sysop.md:65
+#, no-wrap
+msgid "barons-door -reset -data /path/to/data\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:73
+#, markdown-text
+msgid ""
+"This clears all empires (players re-create their realm the next time they "
+"log in) and re-seeds the AI barons on a fresh day one. It does not pick a "
+"winner.  The old world is saved to `world.json.bak` in the data directory "
+"first, so you can restore it if you reset by mistake."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:74
+#, markdown-text, no-wrap
 msgid "Inter-BBS (league) play"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:65
+#: internal/help/content/interbbs/sysop.md:78
 #, markdown-text
 msgid ""
 "A league is a group of boards whose players compete against each other. To "
@@ -799,31 +827,31 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:67
+#: internal/help/content/interbbs/sysop.md:80
 #, markdown-text
 msgid "Edit `config.json` and set:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:73
+#: internal/help/content/interbbs/sysop.md:86
 #, markdown-text
 msgid "`\"IBBS\": true` — turn on the inter-BBS menus."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:73
+#: internal/help/content/interbbs/sysop.md:86
 #, markdown-text
 msgid "`\"BoardID\"` — a short unique name for your board (your \"planet\")."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:73
+#: internal/help/content/interbbs/sysop.md:86
 #, markdown-text
 msgid "`\"InboundDir\"` — the directory where packets from other boards arrive."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:73
+#: internal/help/content/interbbs/sysop.md:86
 #, markdown-text
 msgid ""
 "`\"OutboundDir\"` — the directory where the game writes packets for other "
@@ -831,7 +859,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:76
+#: internal/help/content/interbbs/sysop.md:89
 #, markdown-text
 msgid ""
 "Ask your League Coordinator for the node list and add it to your data "
@@ -839,13 +867,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/sysop.md:77
+#: internal/help/content/interbbs/sysop.md:90
 #, markdown-text, no-wrap
 msgid "How packets move (you choose the schedule)"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:82
+#: internal/help/content/interbbs/sysop.md:95
 #, markdown-text
 msgid ""
 "The game never moves files between boards. It only reads and writes packet "
@@ -854,19 +882,19 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:84
+#: internal/help/content/interbbs/sysop.md:97
 #, markdown-text
 msgid "The inter-BBS step is:"
 msgstr ""
 
 #. type: Fenced code block
-#: internal/help/content/interbbs/sysop.md:85
+#: internal/help/content/interbbs/sysop.md:98
 #, no-wrap
 msgid "barons-door -planetary -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:92
+#: internal/help/content/interbbs/sysop.md:105
 #, markdown-text
 msgid ""
 "It reads every packet in your inbound directory, applies it, and writes new "
@@ -875,25 +903,25 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:94
+#: internal/help/content/interbbs/sysop.md:107
 #, markdown-text
 msgid "A common setup:"
 msgstr ""
 
 #. type: Bullet: '1. '
-#: internal/help/content/interbbs/sysop.md:101
+#: internal/help/content/interbbs/sysop.md:114
 #, markdown-text
 msgid "A caller plays the game."
 msgstr ""
 
 #. type: Bullet: '2. '
-#: internal/help/content/interbbs/sysop.md:101
+#: internal/help/content/interbbs/sysop.md:114
 #, markdown-text
 msgid "After the caller exits, or on a schedule you pick, run `-planetary`."
 msgstr ""
 
 #. type: Bullet: '3. '
-#: internal/help/content/interbbs/sysop.md:101
+#: internal/help/content/interbbs/sysop.md:114
 #, markdown-text
 msgid ""
 "Your transport script copies each file from your outbound directory to the "
@@ -902,13 +930,13 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '4. '
-#: internal/help/content/interbbs/sysop.md:101
+#: internal/help/content/interbbs/sysop.md:114
 #, markdown-text
 msgid "The next `-planetary` run on each board reads and applies those files."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:105
+#: internal/help/content/interbbs/sysop.md:118
 #, markdown-text
 msgid ""
 "Run it as often as you like. More often means shorter travel times between "
@@ -917,13 +945,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/sysop.md:106
+#: internal/help/content/interbbs/sysop.md:119
 #, markdown-text, no-wrap
 msgid "The node list: `ibnodes.dat`"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:111
+#: internal/help/content/interbbs/sysop.md:124
 #, markdown-text
 msgid ""
 "The node list names every board in the league. It uses the same simple "
@@ -932,7 +960,7 @@ msgid ""
 msgstr ""
 
 #. type: Fenced code block
-#: internal/help/content/interbbs/sysop.md:112
+#: internal/help/content/interbbs/sysop.md:125
 #, no-wrap
 msgid ""
 "1\n"
@@ -951,7 +979,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:130
+#: internal/help/content/interbbs/sysop.md:143
 #, markdown-text
 msgid ""
 "The six lines are: node number, board (planet) name, network address, city, "
@@ -959,13 +987,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/sysop.md:131
+#: internal/help/content/interbbs/sysop.md:144
 #, markdown-text, no-wrap
 msgid "League-wide rules (Coordinator only)"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:139
+#: internal/help/content/interbbs/sysop.md:152
 #, markdown-text
 msgid ""
 "The League Coordinator sets the rules that must match across the whole "
@@ -977,13 +1005,13 @@ msgid ""
 msgstr ""
 
 #. type: Fenced code block
-#: internal/help/content/interbbs/sysop.md:140
+#: internal/help/content/interbbs/sysop.md:153
 #, no-wrap
 msgid "barons-door -league-config -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:148
+#: internal/help/content/interbbs/sysop.md:161
 #, markdown-text
 msgid ""
 "This writes a settings packet to your outbound directory. Each member board "
@@ -993,13 +1021,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/sysop.md:149
+#: internal/help/content/interbbs/sysop.md:162
 #, markdown-text, no-wrap
 msgid "The Coordinator"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:152
+#: internal/help/content/interbbs/sysop.md:165
 #, markdown-text
 msgid ""
 "There are two different \"coordinator\" ideas, and they are not the same "
@@ -1007,7 +1035,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:157
+#: internal/help/content/interbbs/sysop.md:170
 #, markdown-text
 msgid ""
 "**League Coordinator** — the sysop of board number 1. This person keeps the "
@@ -1015,7 +1043,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:157
+#: internal/help/content/interbbs/sysop.md:170
 #, markdown-text
 msgid ""
 "**BBS Coordinator** — a *player* your board elects. Players vote in the "

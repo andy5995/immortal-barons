@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-04 17:44-0500\n"
+"POT-Creation-Date: 2026-07-05 09:26-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -860,11 +860,37 @@ msgstr ""
 #. type: Title ##
 #: internal/help/content/interbbs/sysop.md:61
 #, no-wrap
+msgid "Starting a fresh game (reset)"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:64
+msgid "To wipe the current game and start over, run:"
+msgstr ""
+
+#. type: Fenced code block
+#: internal/help/content/interbbs/sysop.md:65
+#, no-wrap
+msgid "barons-door -reset -data /path/to/data\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/sysop.md:73
+msgid ""
+"This clears all empires (players re-create their realm the next time they "
+"log in) and re-seeds the AI barons on a fresh day one. It does not pick a "
+"winner.  The old world is saved to `world.json.bak` in the data directory "
+"first, so you can restore it if you reset by mistake."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/sysop.md:74
+#, no-wrap
 msgid "Inter-BBS (league) play"
 msgstr "Inter-BBS-(Liga-)Spiel"
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:65
+#: internal/help/content/interbbs/sysop.md:78
 msgid ""
 "A league is a group of boards whose players compete against each other. To "
 "join one, turn on inter-BBS play and give your board a name."
@@ -874,24 +900,24 @@ msgstr ""
 "einen Namen."
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:67
+#: internal/help/content/interbbs/sysop.md:80
 msgid "Edit `config.json` and set:"
 msgstr "Bearbeiten Sie `config.json` und setzen Sie:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:73
+#: internal/help/content/interbbs/sysop.md:86
 msgid "`\"IBBS\": true` — turn on the inter-BBS menus."
 msgstr "`\"IBBS\": true` — die Inter-BBS-Menüs einschalten."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:73
+#: internal/help/content/interbbs/sysop.md:86
 msgid "`\"BoardID\"` — a short unique name for your board (your \"planet\")."
 msgstr ""
 "`\"BoardID\"` — ein kurzer, eindeutiger Name für Ihr Board (Ihren "
 "„Planeten“)."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:73
+#: internal/help/content/interbbs/sysop.md:86
 msgid ""
 "`\"InboundDir\"` — the directory where packets from other boards arrive."
 msgstr ""
@@ -899,7 +925,7 @@ msgstr ""
 "eintreffen."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:73
+#: internal/help/content/interbbs/sysop.md:86
 msgid ""
 "`\"OutboundDir\"` — the directory where the game writes packets for other "
 "boards."
@@ -908,7 +934,7 @@ msgstr ""
 "Boards schreibt."
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:76
+#: internal/help/content/interbbs/sysop.md:89
 msgid ""
 "Ask your League Coordinator for the node list and add it to your data "
 "directory as **`ibnodes.dat`** (see the format below)."
@@ -917,13 +943,13 @@ msgstr ""
 "**`ibnodes.dat`** in Ihr Datenverzeichnis (siehe Format unten)."
 
 #. type: Title ##
-#: internal/help/content/interbbs/sysop.md:77
+#: internal/help/content/interbbs/sysop.md:90
 #, no-wrap
 msgid "How packets move (you choose the schedule)"
 msgstr "Wie Pakete sich bewegen (Sie wählen den Zeitplan)"
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:82
+#: internal/help/content/interbbs/sysop.md:95
 msgid ""
 "The game never moves files between boards. It only reads and writes packet "
 "files in your inbound and outbound directories. Moving the files between "
@@ -935,18 +961,18 @@ msgstr ""
 "das geschieht."
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:84
+#: internal/help/content/interbbs/sysop.md:97
 msgid "The inter-BBS step is:"
 msgstr "Der Inter-BBS-Schritt ist:"
 
 #. type: Fenced code block
-#: internal/help/content/interbbs/sysop.md:85
+#: internal/help/content/interbbs/sysop.md:98
 #, no-wrap
 msgid "barons-door -planetary -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:92
+#: internal/help/content/interbbs/sysop.md:105
 msgid ""
 "It reads every packet in your inbound directory, applies it, and writes new "
 "packets to your outbound directory. It also runs automatically inside `-"
@@ -957,24 +983,24 @@ msgstr ""
 "von `-maint`, wenn das Inter-BBS-Spiel eingeschaltet ist."
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:94
+#: internal/help/content/interbbs/sysop.md:107
 msgid "A common setup:"
 msgstr "Ein üblicher Aufbau:"
 
 #. type: Bullet: '1. '
-#: internal/help/content/interbbs/sysop.md:101
+#: internal/help/content/interbbs/sysop.md:114
 msgid "A caller plays the game."
 msgstr "Ein Anrufer spielt das Spiel."
 
 #. type: Bullet: '2. '
-#: internal/help/content/interbbs/sysop.md:101
+#: internal/help/content/interbbs/sysop.md:114
 msgid "After the caller exits, or on a schedule you pick, run `-planetary`."
 msgstr ""
 "Nachdem der Anrufer beendet hat, oder nach einem von Ihnen gewählten "
 "Zeitplan, führen Sie `-planetary` aus."
 
 #. type: Bullet: '3. '
-#: internal/help/content/interbbs/sysop.md:101
+#: internal/help/content/interbbs/sysop.md:114
 msgid ""
 "Your transport script copies each file from your outbound directory to the "
 "inbound directory of every other board (over FidoNet, a sync tool, scp, a "
@@ -985,14 +1011,14 @@ msgstr ""
 "scp, ein gemeinsames Laufwerk — was auch immer Sie nutzen)."
 
 #. type: Bullet: '4. '
-#: internal/help/content/interbbs/sysop.md:101
+#: internal/help/content/interbbs/sysop.md:114
 msgid "The next `-planetary` run on each board reads and applies those files."
 msgstr ""
 "Der nächste `-planetary`-Lauf auf jedem Board liest und wendet diese Dateien "
 "an."
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:105
+#: internal/help/content/interbbs/sysop.md:118
 msgid ""
 "Run it as often as you like. More often means shorter travel times between "
 "planets. The in-game \"Travel Times\" screen shows players how recently "
@@ -1004,13 +1030,13 @@ msgstr ""
 "schnell Operationen ablaufen."
 
 #. type: Title ##
-#: internal/help/content/interbbs/sysop.md:106
+#: internal/help/content/interbbs/sysop.md:119
 #, no-wrap
 msgid "The node list: `ibnodes.dat`"
 msgstr "Die Knotenliste: `ibnodes.dat`"
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:111
+#: internal/help/content/interbbs/sysop.md:124
 msgid ""
 "The node list names every board in the league. It uses the same simple "
 "layout as the original BRE `BRNODES.DAT`. Each board is six lines, and a "
@@ -1021,7 +1047,7 @@ msgstr ""
 "sechs Zeilen, und eine Leerzeile trennt die Boards:"
 
 #. type: Fenced code block
-#: internal/help/content/interbbs/sysop.md:112
+#: internal/help/content/interbbs/sysop.md:125
 #, no-wrap
 msgid ""
 "1\n"
@@ -1040,7 +1066,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:130
+#: internal/help/content/interbbs/sysop.md:143
 msgid ""
 "The six lines are: node number, board (planet) name, network address, city, "
 "state or province, and country. Board number 1 is the League Coordinator."
@@ -1050,13 +1076,13 @@ msgstr ""
 "Koordinator."
 
 #. type: Title ##
-#: internal/help/content/interbbs/sysop.md:131
+#: internal/help/content/interbbs/sysop.md:144
 #, no-wrap
 msgid "League-wide rules (Coordinator only)"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:139
+#: internal/help/content/interbbs/sysop.md:152
 msgid ""
 "The League Coordinator sets the rules that must match across the whole "
 "league.  These are all the fields marked with a star in the Configuration "
@@ -1067,13 +1093,13 @@ msgid ""
 msgstr ""
 
 #. type: Fenced code block
-#: internal/help/content/interbbs/sysop.md:140
+#: internal/help/content/interbbs/sysop.md:153
 #, no-wrap
 msgid "barons-door -league-config -data /path/to/data\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:148
+#: internal/help/content/interbbs/sysop.md:161
 msgid ""
 "This writes a settings packet to your outbound directory. Each member board "
 "adopts the settings on its next `-planetary` run. Member boards accept these "
@@ -1082,13 +1108,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/sysop.md:149
+#: internal/help/content/interbbs/sysop.md:162
 #, no-wrap
 msgid "The Coordinator"
 msgstr "Der Koordinator"
 
 #. type: Plain text
-#: internal/help/content/interbbs/sysop.md:152
+#: internal/help/content/interbbs/sysop.md:165
 msgid ""
 "There are two different \"coordinator\" ideas, and they are not the same "
 "thing:"
@@ -1097,7 +1123,7 @@ msgstr ""
 "dasselbe:"
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:157
+#: internal/help/content/interbbs/sysop.md:170
 msgid ""
 "**League Coordinator** — the sysop of board number 1. This person keeps the "
 "node list and hands it out to the other boards."
@@ -1106,7 +1132,7 @@ msgstr ""
 "Knotenliste und gibt sie an die anderen Boards weiter."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/sysop.md:157
+#: internal/help/content/interbbs/sysop.md:170
 msgid ""
 "**BBS Coordinator** — a *player* your board elects. Players vote in the "
 "System menu, and the player with the most votes gets the Coordinator menu.  "

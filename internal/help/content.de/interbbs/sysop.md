@@ -62,6 +62,19 @@ barons-door -maint -data /path/to/data
 Dies bringt das Spiel für jeden vergangenen Tag einen Tag voran, lässt die
 KI-Barone ihre Züge machen und erneuert die Züge jedes Spielers.
 
+## Starting a fresh game (reset)
+
+To wipe the current game and start over, run:
+
+```
+barons-door -reset -data /path/to/data
+```
+
+This clears all empires (players re-create their realm the next time they
+log in) and re-seeds the AI barons on a fresh day one. It does not pick a
+winner.  The old world is saved to `world.json.bak` in the data directory
+first, so you can restore it if you reset by mistake.
+
 ## Inter-BBS-(Liga-)Spiel
 
 Eine Liga ist eine Gruppe von Boards, deren Spieler gegeneinander

@@ -58,6 +58,19 @@ barons-door -maint -data /path/to/data
 This advances the game one day for every day that passed, lets the AI barons
 take their turns, and refreshes each player's turns.
 
+## Starting a fresh game (reset)
+
+To wipe the current game and start over, run:
+
+```
+barons-door -reset -data /path/to/data
+```
+
+This clears all empires (players re-create their realm the next time they log
+in) and re-seeds the AI barons on a fresh day one. It does not pick a winner.
+The old world is saved to `world.json.bak` in the data directory first, so you
+can restore it if you reset by mistake.
+
 ## Inter-BBS (league) play
 
 A league is a group of boards whose players compete against each other. To join

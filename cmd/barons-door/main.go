@@ -36,6 +36,7 @@ func main() {
 	imp := flag.String("import", "", "import a score packet from FILE and exit")
 	planetary := flag.Bool("planetary", false, "run the inter-BBS PLANETARY step (read inbound, launch attacks, write outbound) and exit")
 	leagueConfig := flag.Bool("league-config", false, "broadcast this board's league settings to the league (coordinator/node #1 only) and exit")
+	reset := flag.Bool("reset", false, "end the current game: crown the Planetary Master, wipe empires, re-seed, and start fresh (backs up world.json first)")
 	flag.Parse()
 
 	cfg, err := store.LoadConfig(*dataDir)
@@ -88,6 +89,14 @@ func main() {
 	if *leagueConfig {
 		if err := runLeagueConfig(cfg); err != nil {
 			fmt.Fprintln(os.Stderr, "barons-door -league-config:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if *reset {
+		if err := runReset(cfg); err != nil {
+			fmt.Fprintln(os.Stderr, "barons-door -reset:", err)
 			os.Exit(1)
 		}
 		return
@@ -172,6 +181,31 @@ func runLeagueConfig(cfg game.Config) error {
 	fmt.Printf("Broadcast league config (turns/day=%d, protection=%d, length=%d) to %s\n",
 		cfg.TurnsPerDay, cfg.ProtectionTurns, cfg.GameLength, cfg.OutboundDir)
 	return store.Save(w, cfg)
+}
+
+// runReset starts a fresh game (BRE's sysop reset): back up the world, wipe all
+// empires (humans re-onboard on their next login) and re-seed AI, then save.
+// It does not crown a winner — that is not what BRE's reset does.
+func runReset(cfg game.Config) error {
+	lock, err := store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	defer lock.Release()
+	if err := store.BackupWorld(cfg); err != nil {
+		return err
+	}
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	w.Reset()
+	if err := store.Save(w, cfg); err != nil {
+		return err
+	}
+	fmt.Println("Game reset. All empires cleared and the world re-seeded; a fresh game has begun.")
+	fmt.Println("The previous world was backed up to world.json.bak.")
+	return nil
 }
 
 // runPlanetary runs the inter-BBS maintenance step on its own (BRE's

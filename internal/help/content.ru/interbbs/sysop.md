@@ -59,6 +59,19 @@ barons-door -maint -data /path/to/data
 Это продвигает игру на один день за каждый прошедший день, даёт ИИ-баронам
 сделать ходы и обновляет ходы каждого игрока.
 
+## Starting a fresh game (reset)
+
+To wipe the current game and start over, run:
+
+```
+barons-door -reset -data /path/to/data
+```
+
+This clears all empires (players re-create their realm the next time they
+log in) and re-seeds the AI barons on a fresh day one. It does not pick a
+winner.  The old world is saved to `world.json.bak` in the data directory
+first, so you can restore it if you reset by mistake.
+
 ## Межсистемная (лиговая) игра
 
 Лига — это группа досок, игроки которых соревнуются друг с другом. Чтобы
