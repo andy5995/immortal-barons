@@ -148,7 +148,7 @@ func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
 // each obligation: armed-forces upkeep and region maintenance (required,
 // underpayment causes desertion/revolt), then an optional support boost.
 func paymentStage(s session.Session, w *ctx, p *game.Empire) {
-	p.LastGoldPaid = 0
+	w.With(func() { p.LastGoldPaid = 0 })
 	forces := w.ForcesDue(p)
 	regions := w.RegionsDue(p)
 	due := forces + regions
@@ -158,12 +158,14 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 	if p.Gold < due && p.Bank > 0 &&
 		askYesNo(s, fmt.Sprintf(tr(s, "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"), due, p.Gold, p.Bank)) {
 		n := promptSuggested(s, "Withdraw how much?", min(due-p.Gold, p.Bank), p.Bank)
-		w.Withdraw(p, n)
+		w.With(func() { w.World.Withdraw(p, n) })
 	}
 
 	if w.AutoPayMaint && p.Gold >= forces+regions {
-		w.PayForces(p, forces)
-		w.PayRegions(p, regions)
+		w.With(func() {
+			w.World.PayForces(p, forces)
+			w.World.PayRegions(p, regions)
+		})
 		fmt.Fprintf(s, "\n"+tr(s, "Maintenance paid: %d gold to your forces, %d to your regions.")+"\n", forces, regions)
 		return
 	}
@@ -174,17 +176,26 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 	}
 
 	fmt.Fprintf(s, "\n"+tr(s, "Your armed forces require %d gold.")+"\n", forces)
-	if lost := w.PayForces(p, promptSuggested(s, "How much will you give?", min(forces, p.Gold), p.Gold)); lost > 0 {
-		fmt.Fprintf(s, "%s"+tr(s, "%d units deserted for lack of pay.")+"%s\n", ansi.FgRed, lost, ansi.Reset)
+	forcesGold := promptSuggested(s, "How much will you give?", min(forces, p.Gold), p.Gold)
+	var forcesLost int
+	w.With(func() { forcesLost = w.World.PayForces(p, forcesGold) })
+	if forcesLost > 0 {
+		fmt.Fprintf(s, "%s"+tr(s, "%d units deserted for lack of pay.")+"%s\n", ansi.FgRed, forcesLost, ansi.Reset)
 	}
 
 	fmt.Fprintf(s, "\n"+tr(s, "%d gold is required to maintain your regions.")+"\n", regions)
-	if lost := w.PayRegions(p, promptSuggested(s, "How much will you give?", min(regions, p.Gold), p.Gold)); lost > 0 {
-		fmt.Fprintf(s, "%s"+tr(s, "%d regions revolted for lack of upkeep.")+"%s\n", ansi.FgRed, lost, ansi.Reset)
+	regionsGold := promptSuggested(s, "How much will you give?", min(regions, p.Gold), p.Gold)
+	var regionsLost int
+	w.With(func() { regionsLost = w.World.PayRegions(p, regionsGold) })
+	if regionsLost > 0 {
+		fmt.Fprintf(s, "%s"+tr(s, "%d regions revolted for lack of upkeep.")+"%s\n", ansi.FgRed, regionsLost, ansi.Reset)
 	}
 
 	if p.Support < 100 && p.Gold > 0 && askYesNo(s, "Spend gold to boost popular support?") {
-		if pts := w.BoostSupport(p, promptSuggested(s, "How much will you give?", 0, p.Gold)); pts > 0 {
+		supportGold := promptSuggested(s, "How much will you give?", 0, p.Gold)
+		var pts int
+		w.With(func() { pts = w.World.BoostSupport(p, supportGold) })
+		if pts > 0 {
 			fmt.Fprintf(s, tr(s, "Popular support rose %d points.")+"\n", pts)
 		}
 	}
@@ -203,7 +214,7 @@ func runTurn(s session.Session, w *ctx) Result {
 			return Stay
 		}
 
-		w.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
+		w.With(func() { w.World.CollectIncome(p) }) // credit this turn's income up front, so maintenance and spending draw from it
 		showTurnEvents(s, p)
 		incomeReport(s, w, p)
 
@@ -237,10 +248,12 @@ func runTurn(s session.Session, w *ctx) Result {
 			}
 		}
 
-		w.PlayTurn(p, w.Today)
-		if w.DepositEndTurn && p.Gold > 0 {
-			w.Deposit(p, p.Gold)
-		}
+		w.With(func() {
+			w.World.PlayTurn(p, w.Today)
+			if w.DepositEndTurn && p.Gold > 0 {
+				w.World.Deposit(p, p.Gold)
+			}
+		})
 
 		endOfTurnStats(s, w, p)
 

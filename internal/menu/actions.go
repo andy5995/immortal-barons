@@ -33,7 +33,9 @@ func buy2(label string, military bool, unit func(*ctx) int, apply func(*game.Wor
 		if n <= 0 {
 			return Stay
 		}
-		if err := apply(w.World, p, n); err != nil {
+		var err error
+		w.With(func() { err = apply(w.World, p, n) }) // apply re-checks gold atomically
+		if err != nil {
 			fail(s, err)
 		} else {
 			ok(s, "Done. Gold remaining: %d", p.Gold)
@@ -52,7 +54,9 @@ func sellUnit2(label string, owned func(*game.Empire) int, apply func(*game.Worl
 		if n <= 0 {
 			return Stay
 		}
-		if err := apply(w.World, p, n); err != nil {
+		var err error
+		w.With(func() { err = apply(w.World, p, n) }) // apply re-checks stock atomically
+		if err != nil {
 			fail(s, err)
 		} else {
 			ok(s, "Sold %d. Gold: %d", n, p.Gold)
@@ -64,7 +68,9 @@ func sellUnit2(label string, owned func(*game.Empire) int, apply func(*game.Worl
 // buildHQ starts HeadQuarters construction for the acting empire.
 func buildHQ(s session.Session, w *ctx) Result {
 	p := w.Player()
-	if err := w.StartHQ(p); err != nil {
+	var err error
+	w.With(func() { err = w.World.StartHQ(p) })
+	if err != nil {
 		fail(s, err)
 	} else {
 		ok(s, "You have started work on your HeadQuarters.")
@@ -140,7 +146,9 @@ func buyLand(s session.Session, w *ctx) Result {
 	if n <= 0 {
 		return Stay
 	}
-	if err := w.BuyRegions(p, regionField(p, t), n); err != nil {
+	var err error
+	w.With(func() { err = w.World.BuyRegions(p, regionField(p, t), n) })
+	if err != nil {
 		fail(s, err)
 	} else {
 		ok(s, "%d %s regions purchased. Gold: %d", n, regionTypeNames[t], p.Gold)
@@ -161,7 +169,9 @@ func sellLand(s session.Session, w *ctx) Result {
 	if n <= 0 {
 		return Stay
 	}
-	if err := w.DropRegions(p, field, n); err != nil {
+	var err error
+	w.With(func() { err = w.World.DropRegions(p, field, n) })
+	if err != nil {
 		fail(s, err)
 	} else {
 		ok(s, "%d %s regions dropped. You now hold %d land.", n, regionTypeNames[t], p.Land)
@@ -178,7 +188,9 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 		if n <= 0 {
 			return Stay
 		}
-		if err := apply(w.World, p, n); err != nil {
+		var err error
+		w.With(func() { err = apply(w.World, p, n) })
+		if err != nil {
 			fail(s, err)
 		} else {
 			ok(s, "Gold: %d   Bank: %d   Debt: %d", p.Gold, p.Bank, p.Debt)
@@ -202,7 +214,9 @@ func investFunds(s session.Session, w *ctx) Result {
 	}
 	expected := game.ExpectedReturn(amount, w.InvestRate, days)
 	fmt.Fprintf(s, "\n  "+tr(s, "Expected return: ~%d")+"\n", expected)
-	ret, err := w.Invest(p, amount, days)
+	var ret int
+	var err error
+	w.With(func() { ret, err = w.World.Invest(p, amount, days) })
 	if err != nil {
 		fail(s, err)
 	} else {
@@ -226,7 +240,7 @@ func abdicate(s session.Session, w *ctx) Result {
 		pause(s)
 		return Stay
 	}
-	w.RemoveEmpire(p)
+	w.With(func() { w.World.RemoveEmpire(p) })
 	w.active = nil
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "Your empire is no more. Fare thee well."), ansi.Reset)
 	pause(s)
@@ -274,7 +288,7 @@ func writeMacros(s session.Session, w *ctx) Result {
 
 	// Clear the slot first so pressing its own Ctrl-<letter> ends the edit
 	// (passes through the expander) instead of replaying the old macro.
-	delete(p.Macros, string(letter))
+	w.With(func() { delete(p.Macros, string(letter)) })
 	ctrl := rune(letter - 'A' + 1)
 	fmt.Fprintf(s, "\n"+tr(s, "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit.")+"\n", letter, letter)
 	var seq []rune
@@ -289,7 +303,7 @@ func writeMacros(s session.Session, w *ctx) Result {
 		}
 	}
 	if len(seq) > 0 {
-		p.Macros[string(letter)] = string(seq)
+		w.With(func() { p.Macros[string(letter)] = string(seq) })
 		ok(s, "Macro Ctrl-%c saved.", letter)
 	} else {
 		ok(s, "Macro Ctrl-%c cleared.", letter)
@@ -331,7 +345,9 @@ func buyFoodMarket(s session.Session, w *ctx) Result {
 	if n <= 0 {
 		return Stay
 	}
-	if err := w.BuyFoodMarket(p, n); err != nil {
+	var err error
+	w.With(func() { err = w.World.BuyFoodMarket(p, n) })
+	if err != nil {
 		fail(s, err)
 	} else {
 		ok(s, "Bought %d food. Gold: %d", n, p.Gold)
@@ -346,7 +362,9 @@ func sellFoodMarket(s session.Session, w *ctx) Result {
 	if n <= 0 {
 		return Stay
 	}
-	if err := w.SellFood(p, n); err != nil {
+	var err error
+	w.With(func() { err = w.World.SellFood(p, n) })
+	if err != nil {
 		fail(s, err)
 	} else {
 		ok(s, "Sold %d food. Gold: %d", n, p.Gold)
@@ -370,7 +388,9 @@ func regularAttack(s session.Session, w *ctx) Result {
 	if i < 1 || i > len(targets) {
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s\n", w.Attack(w.Player(), targets[i-1]))
+	var report string
+	w.With(func() { report = w.World.Attack(w.Player(), targets[i-1]) })
+	fmt.Fprintf(s, "\n%s\n", report)
 	pause(s)
 	return Stay
 }
@@ -404,7 +424,9 @@ func specialAttack(s session.Session, w *ctx, label string, cost int, strike fun
 	if i < 1 || i > len(targets) {
 		return Stay
 	}
-	report, err := strike(w.Player(), targets[i-1])
+	var report string
+	var err error
+	w.With(func() { report, err = strike(w.Player(), targets[i-1]) })
 	if err != nil {
 		fail(s, err)
 		return Stay
@@ -563,7 +585,9 @@ func attackPirates(s session.Session, w *ctx) Result {
 	jets := promptSuggested(s, "Commit how many Jets?", 0, p.Jets)
 	tanks := promptSuggested(s, "Commit how many Tanks?", 0, p.Tanks)
 
-	fmt.Fprintf(s, "\n%s\n", w.RaidFaction(p, f-1, troopers, jets, tanks))
+	var report string
+	w.With(func() { report = w.World.RaidFaction(p, f-1, troopers, jets, tanks) })
+	fmt.Fprintf(s, "\n%s\n", report)
 	pause(s)
 	return Stay
 }
@@ -575,7 +599,9 @@ func sdiProgram(s session.Session, w *ctx) Result {
 	if gold <= 0 {
 		return Stay
 	}
-	level, err := w.FundSDI(p, gold)
+	var level int
+	var err error
+	w.With(func() { level, err = w.World.FundSDI(p, gold) })
 	if err != nil {
 		fail(s, err)
 		return Stay
@@ -593,7 +619,9 @@ func gooieKablooie(s session.Session, w *ctx) Result {
 	if answer != 1 {
 		return Stay
 	}
-	report, err := w.GooieKablooie(w.Player())
+	var report string
+	var err error
+	w.With(func() { report, err = w.World.GooieKablooie(w.Player()) })
 	if err != nil {
 		fail(s, err)
 		return Stay
@@ -608,7 +636,15 @@ func gooieKablooie(s session.Session, w *ctx) Result {
 // otherwise the maintenance line prints after the pause and the next menu's
 // clear-screen wipes it before the player sees it.
 func renderEmpireStatus(s session.Session, w *ctx) {
-	p := w.Player()
+	// Snapshot the empire and its net worth together so the screen shows one
+	// consistent moment, even if another session mutates the world mid-render.
+	var snap game.Empire
+	var netWorth int
+	w.With(func() {
+		snap = *w.Player()
+		netWorth = w.NetWorth(w.Player())
+	})
+	p := &snap
 	c, wht, r := ansi.FgBrightCyan, ansi.FgWhite, ansi.Reset
 	num := func(n int) string { return c + comma(n) + r }
 	pct := func(n int) string { return fmt.Sprintf("%s%d%%%s", c, n, r) }
@@ -616,7 +652,7 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 
 	fmt.Fprintf(s, "\n%s─*%s*─%s\n", c, p.Name, r)
 	kv("Turns", num(p.TurnsLeft))
-	kv("Score", num(w.NetWorth(p)))
+	kv("Score", num(netWorth))
 	kv("Gold", num(p.Gold))
 	kv("Bank", num(p.Bank))
 	if p.Debt > 0 {
@@ -719,31 +755,40 @@ func seeScores(s session.Session, w *ctx) Result {
 }
 
 func printScores(s session.Session, w *ctx) {
+	// Snapshot every empire's rank inputs together so the board reflects one
+	// consistent moment, even if another session mutates the world mid-render.
 	type row struct {
-		e  *game.Empire
-		nw int
+		name     string
+		alive    bool
+		isPlayer bool
+		land, nw int
 	}
-	rows := make([]row, 0, len(w.Empires))
-	for _, e := range w.Empires {
-		rows = append(rows, row{e, w.NetWorth(e)})
-	}
+	var rows []row
+	var lastMaster string
+	w.With(func() {
+		rows = make([]row, 0, len(w.Empires))
+		for _, e := range w.Empires {
+			rows = append(rows, row{e.Name, e.Alive, e == w.Player(), e.Land, w.NetWorth(e)})
+		}
+		lastMaster = w.LastMaster
+	})
 	sort.Slice(rows, func(i, j int) bool { return rows[i].nw > rows[j].nw })
 
 	fmt.Fprintf(s, "\n%s%-4s %-18s %-8s %-10s%s\n",
 		ansi.FgBrightCyan, tr(s, "Rank"), tr(s, "Empire"), tr(s, "Land"), tr(s, "Net Worth"), ansi.Reset)
 	for i, r := range rows {
-		name := r.e.Name
-		if !r.e.Alive {
+		name := r.name
+		if !r.alive {
 			name += " " + tr(s, "(dead)")
 		}
 		mark := "  "
-		if r.e == w.Player() {
+		if r.isPlayer {
 			mark = "->"
 		}
-		fmt.Fprintf(s, "%s%2d %-18s %-8d %-10d\n", mark, i+1, name, r.e.Land, r.nw)
+		fmt.Fprintf(s, "%s%2d %-18s %-8d %-10d\n", mark, i+1, name, r.land, r.nw)
 	}
-	if w.LastMaster != "" {
-		fmt.Fprintf(s, "\n"+tr(s, "Last Planetary Master: %s")+"\n", w.LastMaster)
+	if lastMaster != "" {
+		fmt.Fprintf(s, "\n"+tr(s, "Last Planetary Master: %s")+"\n", lastMaster)
 	}
 }
 
@@ -812,7 +857,8 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	if days < 1 {
 		days = 1
 	}
-	ga := w.CreateGroupAttack(p, board, target, w.GameDay+days, offense)
+	var ga *game.GroupAttack
+	w.With(func() { ga = w.World.CreateGroupAttack(p, board, target, w.GameDay+days, offense) })
 	ok(s, "Group attack #%d formed against %s on %s, leaving day %d.", ga.ID, pick, board, ga.DepartDay)
 	return Stay
 }
@@ -850,7 +896,9 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	if offense <= 0 {
 		return Stay
 	}
-	if err := w.JoinGroupAttack(p, ids[i-1], offense); err != nil {
+	var err error
+	w.With(func() { err = w.World.JoinGroupAttack(p, ids[i-1], offense) })
+	if err != nil {
 		fail(s, err)
 		return Stay
 	}
@@ -972,12 +1020,14 @@ func terroristOps(s session.Session, w *ctx) Result {
 			sc = x
 		}
 	}
-	p.Agents--
-	w.SpyDatabase = append(w.SpyDatabase, game.SpyReport{
-		Board:  board,
-		Empire: pick,
-		Date:   w.LastMaintDate,
-		Land:   sc.Land,
+	w.With(func() {
+		p.Agents--
+		w.SpyDatabase = append(w.SpyDatabase, game.SpyReport{
+			Board:  board,
+			Empire: pick,
+			Date:   w.LastMaintDate,
+			Land:   sc.Land,
+		})
 	})
 	ok(s, "Your agents infiltrated %s on %s; the report is in the Spy Database.", pick, board)
 	return Stay
@@ -1015,7 +1065,7 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 	if i < 1 || i > len(owners) {
 		return Stay
 	}
-	w.VoteCoordinator(p, owners[i-1])
+	w.With(func() { w.World.VoteCoordinator(p, owners[i-1]) })
 	ok(s, "Your vote is recorded. You may change it any time.")
 	return Stay
 }
@@ -1033,7 +1083,7 @@ func modifyLeagueDiplomacy(s session.Session, w *ctx) Result {
 	if strings.TrimSpace(decl) == "" {
 		return Stay
 	}
-	w.LeagueDiplomacy = decl
+	w.With(func() { w.LeagueDiplomacy = decl })
 	ok(s, "League diplomacy updated. It will be broadcast to the league.")
 	return Stay
 }
@@ -1047,7 +1097,7 @@ func readMessages(s session.Session, w *ctx) Result {
 		for _, m := range p.Mail {
 			fmt.Fprintf(s, "  %s\n", m)
 		}
-		p.Mail = nil
+		w.With(func() { p.Mail = nil })
 	}
 	if len(w.Bulletin) > 0 {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
@@ -1187,13 +1237,15 @@ func sendMessage(s session.Session, w *ctx) Result {
 		text, send := composeMessage(s)
 		if send && strings.TrimSpace(text) != "" {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Saving..."), ansi.Reset)
-			if all {
-				for _, e := range recipients(w) {
-					w.SendMail(p, e, text)
+			w.With(func() {
+				if all {
+					for _, e := range recipients(w) {
+						w.World.SendMail(p, e, text)
+					}
+				} else {
+					w.World.SendMail(p, to, text)
 				}
-			} else {
-				w.SendMail(p, to, text)
-			}
+			})
 		}
 		fmt.Fprintf(s, "\n%s (y/N) ", tr(s, "Do you wish to send another message?"))
 		r, err := s.ReadKey()
@@ -1215,7 +1267,9 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 	if amount <= 0 {
 		return Stay
 	}
-	if err := w.SendGold(p, to, amount); err != nil {
+	var err error
+	w.With(func() { err = w.World.SendGold(p, to, amount) })
+	if err != nil {
 		fail(s, err)
 	} else {
 		ok(s, "Sent %d gold to %s.", amount, to.Name)
@@ -1228,7 +1282,7 @@ func planetaryPost(s session.Session, w *ctx) Result {
 	if text == "" {
 		return Stay
 	}
-	w.PostBulletin(w.Player(), text)
+	w.With(func() { w.World.PostBulletin(w.Player(), text) })
 	ok(s, "Posted.")
 	return Stay
 }
@@ -1279,21 +1333,21 @@ func negotiateWith(s session.Session, w *ctx, p, e *game.Empire) {
 		switch promptInt(s, "Choice?") {
 		case 1:
 			if ttype := pickFromList(s, "Propose which treaty", game.TreatyTypes); ttype != "" {
-				w.ProposeTreaty(p, e, ttype)
+				w.With(func() { w.World.ProposeTreaty(p, e, ttype) })
 				ok(s, "Proposed a %s to %s.", ttype, e.Name)
 			}
 		case 2:
 			if len(offers) == 0 {
 				ok(s, "No offers to accept.")
 			} else if ttype := pickFromList(s, "Accept which offer", offers); ttype != "" {
-				w.AcceptTreaty(p, e.Name, ttype)
+				w.With(func() { w.World.AcceptTreaty(p, e.Name, ttype) })
 				ok(s, "You accepted the %s with %s.", ttype, e.Name)
 			}
 		case 3:
 			if len(held) == 0 {
 				ok(s, "No treaties to break.")
 			} else if ttype := pickFromList(s, "Break which treaty", held); ttype != "" {
-				w.BreakTreaty(p, e, ttype)
+				w.With(func() { w.World.BreakTreaty(p, e, ttype) })
 				ok(s, "You broke the %s with %s.", ttype, e.Name)
 			}
 		default:
@@ -1384,11 +1438,16 @@ func setIndustries(s session.Session, w *ctx) Result {
 	if !askYesNoDefaultNo(s, "Change Production?") {
 		return Stay
 	}
+	ns := make([]int, len(prodTypeNames))
 	for i, name := range prodTypeNames {
 		cur := *prodField(p, i)
-		n := promptSuggested(s, name, cur, 100)
-		*prodField(p, i) = n
+		ns[i] = promptSuggested(s, name, cur, 100)
 	}
+	w.With(func() {
+		for i, n := range ns {
+			*prodField(p, i) = n
+		}
+	})
 	ok(s, "Industry production percentages updated.")
 	return Stay
 }
@@ -1410,7 +1469,7 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 	if t < 1 || t > len(prodTypeNames) {
 		return Stay
 	}
-	p.Specialized = prodTypeNames[t-1]
+	w.With(func() { p.Specialized = prodTypeNames[t-1] })
 	ok(s, "Your industry is now permanently specialized in %s.", p.Specialized)
 	return Stay
 }
@@ -1424,7 +1483,7 @@ func setTaxRate(s session.Session, w *ctx) Result {
 		fail(s, fmt.Errorf("tax rate must be between 0 and %d", maxRate))
 		return Stay
 	}
-	p.Tax = rate
+	w.With(func() { p.Tax = rate })
 	ok(s, "Tax rate set to %d%%.", rate)
 	return Stay
 }
