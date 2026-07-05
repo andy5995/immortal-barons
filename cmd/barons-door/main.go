@@ -116,7 +116,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	s := session.NewStdio()
+	s, closeSession, err := openSession(caller)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "barons-door:", err)
+		os.Exit(1)
+	}
+	defer closeSession()
+
 	handle := caller.Handle
 	if handle == "" {
 		handle = fmt.Sprintf("node%d", caller.Node)
@@ -128,6 +134,25 @@ func main() {
 	if _, err := play.Run(s, id, cfg, today); err != nil {
 		fmt.Fprintln(os.Stderr, "barons-door:", err)
 		os.Exit(1)
+	}
+}
+
+// openSession attaches to the caller per the dropfile's I/O mode. When the BBS
+// hands us a socket (Synchronet COM0:SOCKETn / Mystic telnet), talk over it
+// directly; otherwise the BBS pipes the connection through our stdin/stdout.
+// The returned func releases the connection at exit.
+func openSession(caller *door.Caller) (session.Session, func(), error) {
+	switch caller.IO {
+	case door.IOSocket:
+		sock, err := session.NewSocket(caller.Socket)
+		if err != nil {
+			return nil, nil, err
+		}
+		return sock, sock.Close, nil
+	case door.IOSerial:
+		return nil, nil, fmt.Errorf("serial (FOSSIL) doors are not supported; configure your BBS for a socket or stdio door")
+	default: // IOLocal, IOStdio
+		return session.NewStdio(), func() {}, nil
 	}
 }
 
