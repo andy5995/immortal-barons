@@ -29,7 +29,7 @@ Gebiete. Feindliche Panzer helfen bei der Verteidigung dagegen.
 
 Schädigt das Volk und die Soldaten des Feindes, aber nicht sein Land.
 
-## Gooie Kablooie
+## Doomer Kaboomer
 
 Die ultimative Waffe, die auf einen ganzen feindlichen Planeten zielt statt
 auf ein einzelnes Imperium. Der ganze Planet finanziert sie, und der Schaden

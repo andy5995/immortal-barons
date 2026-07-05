@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-05 17:01-0500\n"
+"POT-Creation-Date: 2026-07-05 17:20-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -936,8 +936,8 @@ msgstr "Schädigt das Volk und die Soldaten des Feindes, aber nicht sein Land."
 #. type: Title ##
 #: internal/help/content/warfare/attacks.md:33
 #, no-wrap
-msgid "Gooie Kablooie"
-msgstr "Gooie Kablooie"
+msgid "Doomer Kaboomer"
+msgstr "Doomer Kaboomer"
 
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:39

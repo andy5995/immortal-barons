@@ -99,8 +99,8 @@ Net-worth value contributed per unit (from the guide's net-worth table):
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
 
-**Gooie Kablooie** — the ultimate weapon, aimed at an entire enemy
-planet/BBS rather than one empire. It is community-funded (all members of
+**Doomer Kaboomer** (the clone's equivalent of BRE's *Gooie Kablooie*) — the
+ultimate weapon, aimed at an entire enemy planet/BBS rather than one empire. It is community-funded (all members of
 the attacking board contribute; funding scales with the target's size) and
 only one can exist at a time. After funding it takes a few days to build,
 then launches. On arrival it destroys 10% of *all* regions on the target
@@ -361,9 +361,9 @@ Now matching this reference (as of v0.0.1):
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and 2-billion money cap
 - Nuclear / chemical / biological strikes and pirate raids
-- Gooie Kablooie and SDI defense (v1 simplification: Gooie is an instant
-  planet-wide strike rather than the original's multi-day build/decay, and
-  SDI is a flat percentage damage-reducer)
+- Doomer Kaboomer and SDI defense (v1 simplification: the Doomer Kaboomer is an
+  instant planet-wide strike rather than the original's multi-day build/decay,
+  and SDI is a flat percentage damage-reducer)
 - Covert agents with spying and sabotage (success scales with agent count)
 - Player mail and a planetary bulletin
 - Multiple turns per day, new-realm protection, and daily maintenance

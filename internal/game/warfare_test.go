@@ -88,7 +88,7 @@ func TestNuclearStrikeSDIReducesDamage(t *testing.T) {
 	}
 }
 
-func TestGooieKablooie(t *testing.T) {
+func TestDoomerKaboomer(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AICount = 2
 	w := NewWorldSeed(cfg, 7)
@@ -105,14 +105,14 @@ func TestGooieKablooie(t *testing.T) {
 		beforeEvents[i] = len(e.Events)
 	}
 
-	report, err := w.GooieKablooie(a)
+	report, err := w.DoomerKaboomer(a)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if report == "" {
 		t.Error("expected a non-empty report")
 	}
-	if a.Gold != 1_000_000-GooieCost {
+	if a.Gold != 1_000_000-DoomerCost {
 		t.Errorf("gold not deducted: got %d", a.Gold)
 	}
 	if a.Land != beforeAttackerLand {
@@ -132,13 +132,13 @@ func TestGooieKablooie(t *testing.T) {
 	}
 }
 
-func TestGooieKablooieCantAfford(t *testing.T) {
+func TestDoomerKaboomerCantAfford(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Gold = 100
 	beforeLand := d.Land
 	beforeEvents := len(d.Events)
 
-	_, err := w.GooieKablooie(a)
+	_, err := w.DoomerKaboomer(a)
 	if err != ErrCantAfford {
 		t.Fatalf("expected ErrCantAfford, got %v", err)
 	}

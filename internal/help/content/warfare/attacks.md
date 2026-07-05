@@ -30,7 +30,7 @@ tanks help defend against it.
 
 Harms the enemy's people and troopers, but not their land.
 
-## Gooie Kablooie
+## Doomer Kaboomer
 
 The ultimate weapon, aimed at a whole enemy planet rather than one empire. The
 whole board funds it, and only one can exist at a time. It takes a few days to

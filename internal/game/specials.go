@@ -10,9 +10,9 @@ const (
 	ChemCost = 40000
 	BioCost  = 40000
 
-	GooieCost = 500000
-	SDIStep   = 10000 // gold per +1% SDI
-	SDIMax    = 75
+	DoomerCost = 500000
+	SDIStep    = 10000 // gold per +1% SDI
+	SDIMax     = 75
 )
 
 // FundSDI raises e's SDI defense level. Only whole SDIStep chunks of gold
@@ -119,16 +119,16 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 	return report, nil
 }
 
-// GooieKablooie is a planet-wide superweapon: for a very high cost it
+// DoomerKaboomer is a planet-wide superweapon: for a very high cost it
 // destroys ~10% of EVERY other living empire's land at once (reduced by each
 // target's SDI). v1 simplification of the original's multi-day build/decay.
-func (w *World) GooieKablooie(a *Empire) (string, error) {
-	if a.Gold < GooieCost {
+func (w *World) DoomerKaboomer(a *Empire) (string, error) {
+	if a.Gold < DoomerCost {
 		return "", ErrCantAfford
 	}
-	a.Gold -= GooieCost
+	a.Gold -= DoomerCost
 	var b strings.Builder
-	b.WriteString("Your Gooie Kablooie detonates across the planet!\n")
+	b.WriteString("Your Doomer Kaboomer detonates across the planet!\n")
 	for _, d := range w.Empires {
 		if d == a || !d.Alive {
 			continue
@@ -145,7 +145,7 @@ func (w *World) GooieKablooie(a *Empire) (string, error) {
 		if d.Land <= 0 || d.People <= 0 {
 			d.Alive = false
 		}
-		d.Events = append(d.Events, fmt.Sprintf("A Gooie Kablooie struck the planet — you lost %d regions.", regions))
+		d.Events = append(d.Events, fmt.Sprintf("A Doomer Kaboomer struck the planet — you lost %d regions.", regions))
 		fmt.Fprintf(&b, "  %s lost %d regions.\n", d.Name, regions)
 	}
 	return b.String(), nil

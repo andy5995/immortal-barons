@@ -135,7 +135,7 @@ func BuildMenus() *Menus {
 		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack},
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates},
 		{Key: 'A', Label: "Alliance Strength", Do: allianceStrength},
-		{Key: 'K', Label: "Gooie Kablooie Ops", Do: gooieKablooie, Hidden: ibbsHidden},
+		{Key: 'K', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer, Hidden: ibbsHidden},
 		{Key: 'I', Label: "SDI Program", Do: sdiProgram, Hidden: ibbsHidden},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: 'G', Label: "Create Group Attack", Do: createGroupAttack, Hidden: ibbsHidden},

@@ -699,18 +699,18 @@ func sdiProgram(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-func gooieKablooie(s session.Session, w *ctx) Result {
+func doomerKaboomer(s session.Session, w *ctx) Result {
 	if w.Player().Protection > 0 {
 		ok(s, "You are under New Realm Protection and cannot attack yet.")
 		return Stay
 	}
-	answer := promptInt(s, fmt.Sprintf("A Gooie Kablooie costs %d gold. Launch? (1 = yes)", game.GooieCost))
+	answer := promptInt(s, fmt.Sprintf("A Doomer Kaboomer costs %d gold. Launch? (1 = yes)", game.DoomerCost))
 	if answer != 1 {
 		return Stay
 	}
 	var report string
 	var err error
-	w.With(func() { report, err = w.World.GooieKablooie(w.Player()) })
+	w.With(func() { report, err = w.World.DoomerKaboomer(w.Player()) })
 	if err != nil {
 		fail(s, err)
 		return Stay
