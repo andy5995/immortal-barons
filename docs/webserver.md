@@ -1,8 +1,8 @@
 # Web Server Guide — Running Immortal Barons in a Browser
 
-This is experimental. The web front-end (`barons-web`) lets someone play the
+This is experimental. The web front-end (`immortal-barons-web`) lets someone play the
 game in a normal web browser, using [xterm.js](https://xtermjs.org/) to draw
-the terminal screen. It is a separate program from `barons-door`; it does not
+the terminal screen. It is a separate program from `immortal-barons`; it does not
 run as a BBS door.
 
 ## For players
@@ -30,30 +30,30 @@ Points to know before you play:
 ### Build
 
 ```
-go build -o barons-web ./cmd/barons-web
+go build -o immortal-barons-web ./cmd/immortal-barons-web
 ```
 
 ### Run
 
 ```
-./barons-web -addr :8080 -data /path/to/data
+./immortal-barons-web -addr :8080 -data /path/to/data
 ```
 
 - `-addr` — the address to listen on (default `:8080`).
 - `-data` — the game data directory (default `./data`), same meaning as for
-  `barons-door`: it holds `config.json` and the world save file.
+  `immortal-barons`: it holds `config.json` and the world save file.
 
-There is no `-setup` flag for `barons-web`. If `-data` has no `config.json`
-yet, it starts from the built-in defaults; use `barons-door -setup` first if
+There is no `-setup` flag for `immortal-barons-web`. If `-data` has no `config.json`
+yet, it starts from the built-in defaults; use `immortal-barons -setup` first if
 you want to choose the rules ahead of time.
 
 ### The web world is stand-alone
 
-`barons-web` loads its own world from the data directory you point it at,
+`immortal-barons-web` loads its own world from the data directory you point it at,
 and holds an exclusive lock on it while it runs — the same lock
-`barons-door` uses. That means:
+`immortal-barons` uses. That means:
 
-- A `barons-web` world and a `barons-door` world are only the same world if
+- An `immortal-barons-web` world and an `immortal-barons` world are only the same world if
   you point both programs at the *same* data directory, and you must not run
   both against that directory at the same time (the second one to start
   will fail to get the lock).
@@ -62,4 +62,4 @@ and holds an exclusive lock on it while it runs — the same lock
   of empires. Nothing a web player does affects the door's world, and vice
   versa.
 
-Run `barons-web -help` to see all the command-line options.
+Run `immortal-barons-web -help` to see all the command-line options.

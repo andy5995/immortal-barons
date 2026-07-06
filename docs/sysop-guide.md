@@ -6,20 +6,20 @@ read this.
 
 ## What you need
 
-The game is one program: `barons-door`. It runs as a native door under modern
+The game is one program: `immortal-barons`. It runs as a native door under modern
 BBS software such as Synchronet or Mystic. You do not need DOSBox or DOSEMU.
 
 The game keeps all its files in one data directory (default `./data`). Point
 the `-data` option at it.
 
-Run `barons-door -help` to see all the command-line options.
+Run `immortal-barons -help` to see all the command-line options.
 
 ## First-time setup
 
 Run the setup once to create the config file:
 
 ```
-barons-door -setup -data /path/to/data
+immortal-barons -setup -data /path/to/data
 ```
 
 This opens the **Configuration Editor**: a menu of every game rule (turns per
@@ -46,7 +46,7 @@ Set up the game as an external program (a "door") in your BBS software.
 A typical command line:
 
 ```
-barons-door -dropfile /path/to/DOOR32.SYS -data /path/to/data
+immortal-barons -dropfile /path/to/DOOR32.SYS -data /path/to/data
 ```
 
 ## Daily maintenance
@@ -54,7 +54,7 @@ barons-door -dropfile /path/to/DOOR32.SYS -data /path/to/data
 Run maintenance once a day (a nightly event is the usual place):
 
 ```
-barons-door -maint -data /path/to/data
+immortal-barons -maint -data /path/to/data
 ```
 
 This advances the game one day for every day that passed, lets the AI barons
@@ -65,7 +65,7 @@ take their turns, and refreshes each player's turns.
 To reconfigure and start the game over, run:
 
 ```
-barons-door -reset -data /path/to/data
+immortal-barons -reset -data /path/to/data
 ```
 
 This opens the same **Configuration Editor** as `-setup` (adjust any rules, then
@@ -100,7 +100,7 @@ is your job, and you choose how often it happens.
 The inter-BBS step is:
 
 ```
-barons-door -planetary -data /path/to/data
+immortal-barons -planetary -data /path/to/data
 ```
 
 It reads every packet in your inbound directory, applies it, and writes new
@@ -155,7 +155,7 @@ the cost, damage, and reward levels. Set them in the Coordinator's own
 `config.json`, then broadcast them to every board:
 
 ```
-barons-door -league-config -data /path/to/data
+immortal-barons -league-config -data /path/to/data
 ```
 
 This writes a settings packet to your outbound directory. Each member board

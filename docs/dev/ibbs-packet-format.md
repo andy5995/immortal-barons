@@ -17,7 +17,7 @@ The game only reads and writes packet files in two directories, set per board in
 - `OutboundDir` — the game writes packets for other boards here.
 
 Moving files between boards is external to the game (a mailer, a sync tool, scp,
-a shared mount). `RunPlanetary` (`barons-door -planetary`, also folded into
+a shared mount). `RunPlanetary` (`immortal-barons -planetary`, also folded into
 `-maint` when `IBBS` is on) reads and applies inbound packets, launches due
 group attacks, exports this board's scores, and writes the outbox.
 

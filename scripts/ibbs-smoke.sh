@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# End-to-end inter-BBS smoke test with the real barons-door binary across THREE
+# End-to-end inter-BBS smoke test with the real immortal-barons binary across THREE
 # boards. Validates: Synchronet DOOR32.SYS parsing, onboarding, RunPlanetary
 # export, the file-drop transport, and import on the other boards.
 #
@@ -11,8 +11,8 @@ set -euo pipefail
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-door="$tmp/barons-door"
-go build -o "$door" ./cmd/barons-door
+door="$tmp/immortal-barons"
+go build -o "$door" ./cmd/immortal-barons
 
 boards=(AlphaBBS BravoBBS CharlieBBS)
 cat > "$tmp/door32.sys" <<DROP

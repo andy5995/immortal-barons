@@ -1,4 +1,4 @@
-// Command barons-web serves Immortal Barons in a web browser. It's a thin
+// Command immortal-barons-web serves Immortal Barons in a web browser. It's a thin
 // front-end: the browser runs xterm.js, receives the game's ANSI output over a
 // Server-Sent Events stream, and POSTs keystrokes back. Each browser gets its
 // own game session (keyed by a browser-generated id); the game itself runs

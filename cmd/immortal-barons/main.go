@@ -1,10 +1,12 @@
-// Command barons-door runs Immortal Barons as a native BBS door. Normal
-// mode reads the caller's dropfile and plays over stdio. With -maint it runs
-// daily maintenance non-interactively (for the sysop's nightly event).
+// Command immortal-barons runs the game. Normal (door) mode reads the
+// caller's dropfile and plays over stdio or a socket, for use under a BBS.
+// With -local it instead plays locally in your terminal against the shared
+// persistent world. With -maint it runs daily maintenance non-interactively
+// (for the sysop's nightly event).
 //
 // Configure your BBS to run it with the dropfile path, e.g.:
 //
-//	barons-door -dropfile /path/to/node/DOOR32.SYS
+//	immortal-barons -dropfile /path/to/node/DOOR32.SYS
 //
 // With no -dropfile it looks for DOOR32.SYS or DOOR.SYS in the working directory.
 package main
@@ -13,6 +15,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"os/user"
 	"runtime"
 	"time"
 
@@ -26,6 +29,8 @@ import (
 )
 
 func main() {
+	local := flag.Bool("local", false, "play locally in your terminal instead of running as a BBS door")
+	name := flag.String("name", defaultName(), "your player handle (-local only)")
 	dropPath := flag.String("dropfile", "", "path to the BBS dropfile (DOOR32.SYS or DOOR.SYS)")
 	dataDir := flag.String("data", "./data", "game data directory")
 	maint := flag.Bool("maint", false, "run daily maintenance and exit")
@@ -46,7 +51,7 @@ func main() {
 
 	if *export != "" {
 		if err := runExport(cfg, *export, today); err != nil {
-			fmt.Fprintln(os.Stderr, "barons-door -export:", err)
+			fmt.Fprintln(os.Stderr, "immortal-barons -export:", err)
 			os.Exit(1)
 		}
 		return
@@ -54,7 +59,7 @@ func main() {
 
 	if *imp != "" {
 		if err := runImport(cfg, *imp); err != nil {
-			fmt.Fprintln(os.Stderr, "barons-door -import:", err)
+			fmt.Fprintln(os.Stderr, "immortal-barons -import:", err)
 			os.Exit(1)
 		}
 		return
@@ -62,7 +67,7 @@ func main() {
 
 	if *setup {
 		if err := runSetup(cfg); err != nil {
-			fmt.Fprintln(os.Stderr, "barons-door -setup:", err)
+			fmt.Fprintln(os.Stderr, "immortal-barons -setup:", err)
 			os.Exit(1)
 		}
 		return
@@ -70,7 +75,7 @@ func main() {
 
 	if *maint {
 		if err := runMaint(cfg, today); err != nil {
-			fmt.Fprintln(os.Stderr, "barons-door -maint:", err)
+			fmt.Fprintln(os.Stderr, "immortal-barons -maint:", err)
 			os.Exit(1)
 		}
 		return
@@ -78,7 +83,7 @@ func main() {
 
 	if *planetary {
 		if err := runPlanetary(cfg); err != nil {
-			fmt.Fprintln(os.Stderr, "barons-door -planetary:", err)
+			fmt.Fprintln(os.Stderr, "immortal-barons -planetary:", err)
 			os.Exit(1)
 		}
 		return
@@ -86,7 +91,7 @@ func main() {
 
 	if *leagueConfig {
 		if err := runLeagueConfig(cfg); err != nil {
-			fmt.Fprintln(os.Stderr, "barons-door -league-config:", err)
+			fmt.Fprintln(os.Stderr, "immortal-barons -league-config:", err)
 			os.Exit(1)
 		}
 		return
@@ -94,9 +99,14 @@ func main() {
 
 	if *reset {
 		if err := runReset(cfg); err != nil {
-			fmt.Fprintln(os.Stderr, "barons-door -reset:", err)
+			fmt.Fprintln(os.Stderr, "immortal-barons -reset:", err)
 			os.Exit(1)
 		}
+		return
+	}
+
+	if *local {
+		runLocal(cfg, *name, today)
 		return
 	}
 
@@ -108,18 +118,18 @@ func main() {
 		path = findDropfile()
 	}
 	if path == "" {
-		fmt.Fprintln(os.Stderr, "barons-door: no dropfile found; pass -dropfile PATH")
+		fmt.Fprintln(os.Stderr, "immortal-barons: no dropfile found; pass -dropfile PATH")
 		os.Exit(2)
 	}
 	caller, err := door.ParseDropfile(path)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "barons-door:", err)
+		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
 		os.Exit(1)
 	}
 
 	s, closeSession, err := openSession(caller)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "barons-door:", err)
+		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
 		os.Exit(1)
 	}
 	defer closeSession()
@@ -133,9 +143,28 @@ func main() {
 	// old os.Exit, which lost the turn's progress).
 	id := play.Identity{Handle: handle, TimeLeft: time.Duration(caller.SecondsLeft) * time.Second}
 	if _, err := play.Run(s, id, cfg, today); err != nil {
-		fmt.Fprintln(os.Stderr, "barons-door:", err)
+		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
 		os.Exit(1)
 	}
+}
+
+// runLocal plays Immortal Barons locally in the caller's terminal against the
+// shared persistent world, for someone testing or playing outside a BBS.
+func runLocal(cfg game.Config, name, today string) {
+	c := session.NewConsole()
+	defer c.Close()
+
+	if _, err := play.Run(c, play.Identity{Handle: name}, cfg, today); err != nil {
+		fmt.Fprintln(os.Stderr, "immortal-barons -local:", err)
+	}
+	fmt.Fprint(c, "\nUntil next turn, Baron.\n")
+}
+
+func defaultName() string {
+	if u, err := user.Current(); err == nil && u.Username != "" {
+		return u.Username
+	}
+	return "sysop"
 }
 
 // openSession attaches to the caller per the dropfile's I/O mode and platform.

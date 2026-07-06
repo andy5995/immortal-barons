@@ -26,7 +26,7 @@ func TestConcurrentSessionsShareWorld(t *testing.T) {
 	save := func() error { saveMu.Lock(); defer saveMu.Unlock(); return nil }
 
 	// Writer: repeatedly advances the world clock and runs daily maintenance
-	// under the lock, the way cmd/barons-web's ticker does. Stops once all
+	// under the lock, the way cmd/immortal-barons-web's ticker does. Stops once all
 	// player sessions have finished.
 	stop := make(chan struct{})
 	var writer sync.WaitGroup

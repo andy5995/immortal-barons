@@ -62,30 +62,30 @@ macOS, Windows, and the BSDs (DOS is not supported). It plays locally or as a
 native BBS door.
 
 ```
-go build -o barons ./cmd/barons
-./barons
+go build ./cmd/immortal-barons
+./immortal-barons -local
 ```
 
 Or run it directly:
 
 ```
-go run ./cmd/barons
+go run ./cmd/immortal-barons -local
 ```
 
 ## Running as a BBS door
 
 Immortal Barons can run as a native door under modern BBS software such as
-Synchronet or Mystic. Build the door front-end:
+Synchronet or Mystic. Build it:
 
 ```
-go build -o barons-door ./cmd/barons-door
+go build ./cmd/immortal-barons
 ```
 
 The BBS writes a dropfile when a caller starts the door. Configure your BBS
-to run `barons-door` and pass the dropfile path:
+to run `immortal-barons` and pass the dropfile path:
 
 ```
-barons-door -dropfile /path/to/node/DOOR32.SYS
+immortal-barons -dropfile /path/to/node/DOOR32.SYS
 ```
 
 It reads `DOOR32.SYS` (preferred) or `DOOR.SYS` to learn the caller's name,
@@ -95,19 +95,19 @@ it looks for `DOOR32.SYS` or `DOOR.SYS` in the working directory.
 
 Callers share one persistent world: each caller's empire is saved between
 calls, keyed by their BBS handle. A nightly maintenance step
-(`barons-door -maint`) advances the world.
+(`immortal-barons -maint`) advances the world.
 
 Full setup instructions for local and inter-BBS play — registering the door,
 daily maintenance, the node list, and starting a fresh game with
-`barons-door -reset` — are in [`docs/sysop-guide.md`](docs/sysop-guide.md).
+`immortal-barons -reset` — are in [`docs/sysop-guide.md`](docs/sysop-guide.md).
 
 ## Running in a browser (experimental)
 
 A browser front-end serves the game over Server-Sent Events with xterm.js:
 
 ```
-go build -o barons-web ./cmd/barons-web
-./barons-web -addr :8080
+go build -o immortal-barons-web ./cmd/immortal-barons-web
+./immortal-barons-web -addr :8080
 ```
 
 Open `http://localhost:8080`. Each browser gets its own game session. This is
@@ -147,7 +147,7 @@ the player. The engine only reads keypresses from, and writes text to, a
 `Session`. This makes it possible to add a BBS-door front-end and a web
 front-end later without changing the game rules.
 
-- `cmd/barons` — the local terminal front-end
+- `cmd/immortal-barons` — the door and local terminal front-end (`-local` for local play)
 - `internal/session` — the input/output abstraction
 - `internal/ansi` — terminal color and screen codes
 - `internal/menu` — the menu engine and the menu tree

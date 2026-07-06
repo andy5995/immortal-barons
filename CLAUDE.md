@@ -27,7 +27,7 @@ generic.
 ```
 go build ./...
 go test ./...
-go run ./cmd/barons        # play locally in your terminal
+go run ./cmd/immortal-barons -local   # play locally in your terminal
 gofmt -w .                 # always run before committing
 ```
 
@@ -46,10 +46,9 @@ The game logic never knows how it is shown to the player. It only reads
 keypresses from, and writes ANSI bytes to, a `session.Session` (a byte
 stream). Front-ends attach different streams; the engine is unchanged.
 
-- `cmd/barons` — local terminal front-end (a person plays in their console)
-- `cmd/barons-door` — native BBS door front-end (stdio + dropfile; `-maint`,
-  `-planetary`, `-league-config`, `-setup`, …)
-- `cmd/barons-web` — experimental browser front-end (SSE + xterm.js)
+- `cmd/immortal-barons` — the door + local terminal front-end (stdio + dropfile;
+  `-local`, `-maint`, `-planetary`, `-league-config`, `-setup`, …)
+- `cmd/immortal-barons-web` — experimental browser front-end (SSE + xterm.js)
 - `internal/session` — the `Session` byte-stream abstraction + console/stdio/web
   implementations, shared `ReadLine`, and the Ctrl-key macro expander
 - `internal/ansi` — ANSI escape helpers (one rendering path for all front-ends)
@@ -103,7 +102,7 @@ Persistent, multi-user door game. One shared JSON world guarded by an
 exclusive flock; per-caller empires keyed by BBS handle; per-turn economy
 (idle empires stagnate) split from a daily maintenance step; turns-per-day
 and new-realm protection; an event log for asynchronous play. Front-ends:
-`cmd/barons` (local), `cmd/barons-door` (native BBS door), and `cmd/barons-web`
+`cmd/immortal-barons` (door + `-local` local play) and `cmd/immortal-barons-web`
 (experimental browser). Persistence design/plan:
 `docs/superpowers/{specs,plans}/2026-07-03-door-*`.
 
@@ -143,7 +142,7 @@ target, but the game builds and runs on macOS, Windows, and the BSDs (per-OS
 file lock, `x/term` console) — so a Windows Synchronet door is in scope too.
 The stage decomposes into:
 
-1. **Dropfile + stdio/socket front-end** (`cmd/barons-door`) — DONE. Parses
+1. **Dropfile + stdio/socket front-end** (`cmd/immortal-barons`) — DONE. Parses
    `DOOR32.SYS`/`DOOR.SYS` (`internal/door`), runs the game over a stdio
    `Session` (`session.Stdio`, which adds `\r\n`), honors the ANSI flag and
    a hard time-left cutoff, and names the realm from the caller's handle.
