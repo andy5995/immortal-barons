@@ -143,12 +143,17 @@ func promptRegionType(s session.Session) int {
 
 // advisorsChoice is returned by promptBuyRegionType when the player picks
 // the "(*) Advisors" entry instead of a region type.
-const advisorsChoice = -2
+const (
+	advisorsChoice  = -2
+	redisplayChoice = -3
+)
 
 // promptBuyRegionType is promptRegionType plus a '*' key for Advisors (BRE's
-// Buy Regions screen lists "(*) Advisors" at the bottom of the region list).
+// Buy Regions screen lists "(*) Advisors" at the bottom of the region list) and
+// a '?' key to redisplay the region list (the list is only drawn on entry, then
+// on demand, so repeat purchases don't rescroll it).
 func promptBuyRegionType(s session.Session) int {
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice? (0 to cancel)"), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice? (? to list, 0 to cancel)"), ansi.Reset)
 	for {
 		r, err := s.ReadKey()
 		if err != nil {
@@ -157,6 +162,10 @@ func promptBuyRegionType(s session.Session) int {
 		if r == '0' {
 			fmt.Fprint(s, "0\n")
 			return -1
+		}
+		if r == '?' {
+			fmt.Fprint(s, "?\n")
+			return redisplayChoice
 		}
 		if r == '*' {
 			fmt.Fprint(s, "*\n")
@@ -179,31 +188,43 @@ func promptBuyRegionType(s session.Session) int {
 // Advisors screen and returns to the region list instead of leaving.
 func buyLand(s session.Session, w *ctx) Result {
 	p := w.Player()
-	for {
+	showMenu := func() {
 		fmt.Fprintf(s, "\n%s"+tr(s, "Buy Regions — %d gold each.")+"%s\n", ansi.FgBrightCyan, w.LandPrice(p), ansi.Reset)
 		fmt.Fprintf(s, "%s\n", tr(s, "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."))
 		fmt.Fprintf(s, tr(s, "You can afford %s%d%s regions.")+"\n\n", ansi.FgBrightCyan, w.MaxAffordableRegions(p), ansi.Reset)
 		printRegionTable(s, p)
 		fmt.Fprintf(s, " %s(*)%s %s%s%s\n", ansi.FgBrightMagenta, ansi.Reset, ansi.FgBrightYellow, tr(s, "Advisors"), ansi.Reset)
-		t := promptBuyRegionType(s)
-		if t == advisorsChoice {
+	}
+	showMenu()
+	for {
+		switch t := promptBuyRegionType(s); {
+		case t == redisplayChoice:
+			showMenu()
+		case t == advisorsChoice:
 			renderAdvisors(s, w)
 			pause(s)
-			continue
-		}
-		if t < 0 {
+			showMenu()
+		case t < 0:
 			return Stay
-		}
-		n := promptSuggested(s, fmt.Sprintf("Buy how many %s regions?", regionTypeNames[t]), 0, w.MaxAffordableRegions(p))
-		if n <= 0 {
-			continue
-		}
-		var err error
-		w.With(func() { err = w.World.BuyRegions(p, regionField(p, t), n) })
-		if err != nil {
-			fail(s, err)
-		} else {
-			ok(s, "%d %s regions purchased. Gold: %d", n, regionTypeNames[t], p.Gold)
+		default:
+			n := promptSuggested(s, fmt.Sprintf("Buy how many %s regions?", regionTypeNames[t]), 0, w.MaxAffordableRegions(p))
+			if n <= 0 {
+				continue
+			}
+			var err error
+			var gold int
+			w.With(func() {
+				err = w.World.BuyRegions(p, regionField(p, t), n)
+				gold = p.Gold
+			})
+			if err != nil {
+				// No pause: the message stays above the next prompt; the player
+				// keeps buying without the region list rescrolling each time.
+				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgRed, tr(s, err.Error()), ansi.Reset)
+			} else {
+				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
+					fmt.Sprintf(tr(s, "%d %s regions purchased. Gold: %d"), n, regionTypeNames[t], gold), ansi.Reset)
+			}
 		}
 	}
 }

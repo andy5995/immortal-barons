@@ -183,8 +183,11 @@ func TestBuyLandLoopsForMultiplePurchases(t *testing.T) {
 		t.Errorf("expected Mountain regions %d, got %d", beforeMountain+3, got)
 	}
 	out := f.out.String()
-	if strings.Count(out, "Buy Regions") < 2 {
-		t.Errorf("expected the region list to be shown at least twice (looped), got:\n%s", out)
+	if n := strings.Count(out, "Buy Regions"); n != 1 {
+		t.Errorf("region list should be drawn once (not reprinted per purchase), got %d:\n%s", n, out)
+	}
+	if !strings.Contains(out, "Coastal regions purchased") || !strings.Contains(out, "Mountain regions purchased") {
+		t.Errorf("expected both purchase confirmations in one visit:\n%s", out)
 	}
 }
 
