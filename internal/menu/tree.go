@@ -159,17 +159,27 @@ func BuildMenus() *Menus {
 
 	// InterPlanetary Operations: BRE gathers the cross-planet actions on their
 	// own menu, "only for InterBBS Games". The whole node hangs off a gated
-	// entry on the War menu, so the items need no per-item Hidden. Keys mirror
-	// BRE's InterPlanetary Operations menu; items whose cross-planet variants
-	// don't exist yet here (Send Trade Deal, Indiv. Attack Force, Send Message,
-	// Special Operations) are omitted until they are made interplanetary-aware.
+	// entry on the War menu, so the items need no per-item Hidden. Order and
+	// hotkeys match BRE.OVR's full InterPlanetary Operations string table
+	// (#75); Doomer Kaboomer Ops ('K') is IB's equivalent of the Gooie
+	// Kablooie item BRE's own table carries but the observed board had
+	// config-hidden. Send Trade Deal and Send Message reuse the same actions
+	// as the Trading and Messages menus; Special Operations opens the Covert
+	// Operations menu, matching BRE. Indiv. Attack Force ('6') has no
+	// interplanetary individual-attack mechanic behind it yet — see
+	// indivAttackForce's doc comment.
 	interplanetary.Items = []Item{
 		{Key: '1', Label: "View IPScores", Do: interbbsScores},
 		{Key: '2', Label: "Terrorist Ops", Do: terroristOps},
+		{Key: '3', Label: "Send Trade Deal", Do: sendTradeDeal},
 		{Key: '4', Label: "Create Group Attack", Do: createGroupAttack},
 		{Key: '5', Label: "Join Group Attack", Do: joinGroupAttack},
+		{Key: '6', Label: "Indiv. Attack Force", Do: indivAttackForce},
+		{Key: '7', Label: "Send Message", Do: sendMessage},
+		{Key: '8', Label: "Special Operations", Do: gotoMenu(covert)},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'K', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer},
+		{Key: 'D', Label: "Diplomacy List", Do: viewDiplomacy},
 		{Key: 'S', Label: "Spy Database", Do: spyDatabase},
 		{Key: 'T', Label: "Travel Times", Do: travelTimes},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},

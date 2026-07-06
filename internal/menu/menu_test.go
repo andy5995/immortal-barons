@@ -436,6 +436,47 @@ func TestInterBBSItemsHiddenUnlessEnabled(t *testing.T) {
 	}
 }
 
+// TestInterPlanetaryMenuMatchesBRE checks the InterPlanetary Operations menu
+// carries BRE's full item set (#75), not just the subset that existed
+// before cross-planet trade/message/special-ops actions were wired in.
+func TestInterPlanetaryMenuMatchesBRE(t *testing.T) {
+	// "O" enters InterPlanetary Ops from the War menu, "0" quits it, "0"
+	// quits the War menu.
+	f := &fakeSession{keys: []rune("O00")}
+	w := newWorld()
+	w.Config.IBBS = true
+	if err := Run(f, w, BuildMenus().Attack); err != nil {
+		t.Fatalf("got %v", err)
+	}
+	out := f.out.String()
+	for _, want := range []string{
+		"View IPScores", "Terrorist Ops", "Send Trade Deal", "Create Group Attack",
+		"Join Group Attack", "Indiv. Attack Force", "Send Message", "Special Operations",
+		"SDI Program", "Doomer Kaboomer Ops", "Diplomacy List", "Spy Database",
+		"Travel Times", "Visit Bank", "Help", "Quit",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("InterPlanetary Ops menu missing %q, got:\n%s", want, out)
+		}
+	}
+}
+
+// TestInterPlanetarySpecialOpsReachesCovert checks BRE's "Special Operations"
+// InterPlanetary Ops item opens the Covert Operations menu (#75).
+func TestInterPlanetarySpecialOpsReachesCovert(t *testing.T) {
+	// "O" enters InterPlanetary Ops, "8" selects Special Operations, then
+	// "0" "0" "0" quits Covert Ops, InterPlanetary Ops, and the War menu.
+	f := &fakeSession{keys: []rune("O8000")}
+	w := newWorld()
+	w.Config.IBBS = true
+	if err := Run(f, w, BuildMenus().Attack); err != nil {
+		t.Fatalf("got %v", err)
+	}
+	if !strings.Contains(f.out.String(), "Covert Operations") {
+		t.Errorf("Special Operations should reach the Covert Operations menu, got:\n%s", f.out.String())
+	}
+}
+
 func TestHelpBrowseShowsControls(t *testing.T) {
 	// category 1 (controls) -> topic 1 -> pause -> back (0) -> leave (0)
 	f := &fakeSession{keys: []rune("1\r1\r 0\r0\r")}

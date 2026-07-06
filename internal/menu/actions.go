@@ -1223,6 +1223,15 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	return Stay
 }
 
+// indivAttackForce is BRE's "Indiv. Attack Force" InterPlanetary Operations
+// item. IB has no interplanetary individual-attack mechanic yet (unlike
+// Create/Join Group Attack, which do); this is a recorded-but-inert stub so
+// the menu's item set matches BRE's while the mechanic itself is unbuilt.
+func indivAttackForce(s session.Session, w *ctx) Result {
+	ok(s, "Individual attack forces are not yet available; use Create Group Attack.")
+	return Stay
+}
+
 // travelTimes lists the approximate round-trip time to each known planet.
 // Packets exchange on each PLANETARY maintenance run (about daily), so most
 // interplanetary operations take roughly a day each way.
