@@ -49,6 +49,24 @@ A typical command line:
 immortal-barons -dropfile /path/to/DOOR32.SYS -data /path/to/data
 ```
 
+### How the game talks to the caller
+
+The game connects to the caller in one of two ways, chosen automatically:
+
+- **On Linux, macOS, and the BSDs**, it reads and writes the caller through
+  standard input and output. Synchronet (in its EX_STDIO mode) and Mystic hand
+  the connection to the door this way, so this is the normal case. You do not
+  need to set anything up for it.
+- **On Windows**, it attaches directly to the caller's socket. The socket
+  handle is on line 2 of `DOOR32.SYS` (a Windows "winsock" handle). This is how
+  a Windows door normally works.
+
+Serial (FOSSIL) doors are not supported. Configure your BBS for a socket or
+stdio door.
+
+Note: the Windows socket path is built but has not yet been tested against a
+live BBS. If you run the game as a Windows door, please report how it goes.
+
 ## Daily maintenance
 
 Run maintenance once a day (a nightly event is the usual place):
