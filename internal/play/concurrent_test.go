@@ -57,7 +57,7 @@ func TestConcurrentSessionsShareWorld(t *testing.T) {
 		go func(i int) {
 			defer sessions.Done()
 			// splash dismiss, realm name, then quit.
-			f := &fakeSession{keys: []rune(fmt.Sprintf(" Realm%d\r0", i))}
+			f := &fakeSession{keys: []rune(fmt.Sprintf(" \rRealm%d\r0", i))}
 			if _, err := Session(f, Identity{Handle: fmt.Sprintf("caller%d", i)}, w, cfg, save); err != nil {
 				t.Errorf("session %d: %v", i, err)
 			}
@@ -132,7 +132,7 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 		sessions.Add(1)
 		go func(i int) {
 			defer sessions.Done()
-			f := &fakeSession{keys: []rune(fmt.Sprintf(" Realm%d\r0", i))}
+			f := &fakeSession{keys: []rune(fmt.Sprintf(" \rRealm%d\r0", i))}
 			if _, err := Session(f, Identity{Handle: fmt.Sprintf("caller%d", i)}, w, cfg, save); err != nil {
 				t.Errorf("session %d: %v", i, err)
 			}
@@ -146,7 +146,7 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 	// next-turn prompt, then quit from the Game Menu. Keys verified against
 	// internal/menu/tree.go's hotkeys and the proven sequence in
 	// internal/menu/gameflow_test.go's TestRunTurnConsumesATurn.
-	turnKeys := " TurnPlayer\r" + "1 \r\r *DV 000000n\r n\r0"
+	turnKeys := " \rTurnPlayer\r" + "1 \r\r *DV 000000n\r n\r0"
 	sessions.Add(1)
 	go func() {
 		defer sessions.Done()

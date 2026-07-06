@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -84,6 +85,10 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 			fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
 			return "closed", save()
 		}
+		// First run: a brand-new player picks their UI language once, before
+		// naming their realm. Returning players (found above) never reach here.
+		lang := selectLanguage(s)
+
 		// Prompt for a realm name and insert atomically. Re-check under the
 		// same lock that does the insert: while we prompted, another goroutine
 		// may have onboarded this handle, filled the board, or claimed the name
@@ -106,6 +111,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 					return
 				}
 				e = w.AddHuman(id.Handle, realm)
+				e.Language = lang
 			})
 			if full {
 				fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
@@ -133,6 +139,36 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 		return reason, gameErr
 	}
 	return reason, save()
+}
+
+// languageOptions lists the selectable UI languages in menu order; index 0 is
+// English (Empire.Language == ""), matching the field's own convention. Names
+// are shown in their own language, not translated — a language picker's
+// options aren't chrome the player has a language preference for yet.
+var languageOptions = []struct{ code, name string }{
+	{"", "English"},
+	{"de", "Deutsch"},
+	{"ru", "Русский"},
+}
+
+// selectLanguage is shown once, to a brand-new player, after the splash and
+// before onboarding. Enter, an empty line, or any input that doesn't match a
+// listed option selects English.
+func selectLanguage(s session.Session) string {
+	fmt.Fprintf(s, "\n%s%sSelect your language:%s\n", ansi.Clear, ansi.FgBrightCyan, ansi.Reset)
+	for i, opt := range languageOptions {
+		fmt.Fprintf(s, "  %s%d)%s %s\n", ansi.FgBrightWhite, i+1, ansi.Reset, opt.name)
+	}
+	fmt.Fprintf(s, "\n%sChoice (Enter for English):%s ", ansi.FgBrightWhite, ansi.Reset)
+	line, err := session.ReadLine(s)
+	if err != nil {
+		return ""
+	}
+	n, err := strconv.Atoi(strings.TrimSpace(line))
+	if err != nil || n < 1 || n > len(languageOptions) {
+		return ""
+	}
+	return languageOptions[n-1].code
 }
 
 func onboard(s session.Session, w *game.World, handle string) string {
