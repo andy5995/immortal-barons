@@ -836,6 +836,7 @@ func writeStatTable(s session.Session, title string, cols []statCol, maxCols, fi
 		}
 		return w
 	}
+	rowW := 0
 	for i := 0; i < len(cols); {
 		var group []statCol
 		width := 1 // leading border
@@ -851,6 +852,7 @@ func writeStatTable(s session.Session, title string, cols []statCol, maxCols, fi
 			width += w
 			i++
 		}
+		rowW = width
 		var hdr, vals strings.Builder
 		hdr.WriteString("│")
 		vals.WriteString("│")
@@ -859,12 +861,16 @@ func writeStatTable(s session.Session, title string, cols []statCol, maxCols, fi
 			fmt.Fprintf(&hdr, " %*s │", w, cd.name)
 			fmt.Fprintf(&vals, " %*s │", w, comma(cd.val))
 		}
-		// Zebra rows: the heading row on white, the value row on gray, both in
-		// black text. A dark-gray cell past the right border casts a raised
-		// drop-shadow, so the light-topped table reads as a 3D panel.
+		// Zebra rows: heading on white, values on gray, black text. A dark-gray
+		// cell past the right border is the raised panel's right-edge shadow.
 		shadow := ansi.BgShadow + " " + ansi.Reset
 		fmt.Fprintf(s, "  %s%s%s%s%s\n", ansi.BgWhite, ansi.FgBlack, hdr.String(), ansi.Reset, shadow)
 		fmt.Fprintf(s, "  %s%s%s%s%s\n", ansi.BgLightGray, ansi.FgBlack, vals.String(), ansi.Reset, shadow)
+	}
+	// Bottom shadow: a dark-gray bar offset one cell right, completing the
+	// drop-shadow (right + bottom) so the table reads as a raised 3D panel.
+	if rowW > 0 {
+		fmt.Fprintf(s, "   %s%s%s\n", ansi.BgShadow, strings.Repeat(" ", rowW), ansi.Reset)
 	}
 }
 
