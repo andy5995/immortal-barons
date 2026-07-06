@@ -245,19 +245,21 @@ func TestSetTaxRateViaSystemMenu(t *testing.T) {
 }
 
 func TestInterBBSItemsHiddenUnlessEnabled(t *testing.T) {
+	// The interplanetary actions live behind a single gated "InterPlanetary
+	// Ops" entry on the War menu; it is hidden unless the game is InterBBS.
 	f := &fakeSession{keys: []rune("0")}
 	w := newWorld() // default: no IBBS, no league
-	Run(f, w, BuildMenus().Trading)
-	if strings.Contains(f.out.String(), "View IPScores") {
-		t.Error("IPScores should be hidden when IBBS/league is off")
+	Run(f, w, BuildMenus().Attack)
+	if strings.Contains(f.out.String(), "InterPlanetary Ops") {
+		t.Error("InterPlanetary Ops should be hidden when IBBS/league is off")
 	}
 
 	f2 := &fakeSession{keys: []rune("0")}
 	w2 := newWorld()
 	w2.Config.IBBS = true
-	Run(f2, w2, BuildMenus().Trading)
-	if !strings.Contains(f2.out.String(), "View IPScores") {
-		t.Error("IPScores should appear when IBBS is enabled")
+	Run(f2, w2, BuildMenus().Attack)
+	if !strings.Contains(f2.out.String(), "InterPlanetary Ops") {
+		t.Error("InterPlanetary Ops should appear when IBBS is enabled")
 	}
 }
 

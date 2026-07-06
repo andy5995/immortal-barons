@@ -33,6 +33,7 @@ func BuildMenus() *Menus {
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan}
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
+	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
 	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
@@ -135,20 +136,34 @@ func BuildMenus() *Menus {
 		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack},
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates},
 		{Key: 'A', Label: "Alliance Strength", Do: allianceStrength},
-		{Key: 'K', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer, Hidden: ibbsHidden},
-		{Key: 'I', Label: "SDI Program", Do: sdiProgram, Hidden: ibbsHidden},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: 'G', Label: "Create Group Attack", Do: createGroupAttack, Hidden: ibbsHidden},
-		{Key: 'J', Label: "Join Group Attack", Do: joinGroupAttack, Hidden: ibbsHidden},
-		{Key: 'T', Label: "Terrorist Ops", Do: terroristOps, Hidden: ibbsHidden},
-		{Key: 'X', Label: "Travel Times", Do: travelTimes, Hidden: ibbsHidden},
+		{Key: 'O', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden},
+		{Key: '0', Label: "Quit", Do: back},
+	}
+
+	// InterPlanetary Operations: BRE gathers the cross-planet actions on their
+	// own menu, "only for InterBBS Games". The whole node hangs off a gated
+	// entry on the War menu, so the items need no per-item Hidden. Keys mirror
+	// BRE's InterPlanetary Operations menu; items whose cross-planet variants
+	// don't exist yet here (Send Trade Deal, Indiv. Attack Force, Send Message,
+	// Special Operations) are omitted until they are made interplanetary-aware.
+	interplanetary.Items = []Item{
+		{Key: '1', Label: "View IPScores", Do: interbbsScores},
+		{Key: '2', Label: "Terrorist Ops", Do: terroristOps},
+		{Key: '4', Label: "Create Group Attack", Do: createGroupAttack},
+		{Key: '5', Label: "Join Group Attack", Do: joinGroupAttack},
+		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
+		{Key: 'K', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer},
+		{Key: 'S', Label: "Spy Database", Do: spyDatabase},
+		{Key: 'T', Label: "Travel Times", Do: travelTimes},
+		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
+		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 
 	covert.Items = []Item{
 		{Key: 'S', Label: "Send Spy", Do: sendSpy},
 		{Key: 'P', Label: "Spy on Relations", Do: spyRelations},
-		{Key: 'D', Label: "Spy Database", Do: spyDatabase, Hidden: ibbsHidden},
 		{Key: 'B', Label: "Bribery", Do: briberyOp},
 		{Key: 'O', Label: "Special Operations", Do: specialOps},
 		{Key: 'I', Label: "Bomb Intelligence", Do: bombIntel},
@@ -163,7 +178,6 @@ func BuildMenus() *Menus {
 	trading.Items = []Item{
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
 		{Key: '1', Label: "Send Trade Deal", Do: sendTradeDeal},
-		{Key: '2', Label: "View IPScores", Do: interbbsScores, Hidden: ibbsHidden},
 		{Key: 'B', Label: "Buy / Sell", Do: gotoMenu(buy)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},

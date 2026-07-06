@@ -137,10 +137,13 @@ const (
 )
 
 // InterBBSEnabled reports whether inter-BBS / interplanetary features (group
-// attacks, IP scores) should be offered: the game is IBBS-configured, or is a
-// timed league.
+// attacks, IP scores, travel times, terrorist ops, planetary Gooie/SDI) should
+// be offered. In BRE these live on a separate "InterPlanetary Operations" menu
+// that is "only for InterBBS Games", so the sole gate is the IBBS flag. A timed
+// single-BBS league (GameLength > 0) is not interplanetary: there are no other
+// planets to attack or travel to.
 func (c Config) InterBBSEnabled() bool {
-	return c.IBBS || c.GameLength > 0
+	return c.IBBS
 }
 
 // GameStarted reports whether the game has begun as of ISO date `today`. An
