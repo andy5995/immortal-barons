@@ -545,11 +545,17 @@ func bombHQ(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Bomb HQ", 0, func(a, d *game.Empire) (string, error) { return w.BombHQ(a, d) })
 }
 
-// visitAdvisors gives contextual advice based on the empire's current state —
-// the sort of nudges the original's advisors offered.
-func visitAdvisors(s session.Session, w *ctx) Result {
-	p := w.Player()
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your Advisors"), ansi.Reset)
+// renderAdvisors prints the Advisors screen: contextual advice based on the
+// empire's current state — the sort of nudges the original's advisors
+// offered (military readiness, food, support/morale, taxes, treasury,
+// technology). Split from visitAdvisors so tests can render without a pause.
+func renderAdvisors(s session.Session, w *ctx) {
+	// Snapshot so the report reflects one consistent moment even if another
+	// session mutates the world mid-render (same reasoning as Empire Status).
+	var p game.Empire
+	w.With(func() { p = *w.Player() })
+
+	titleBar(s, tr(s, "Visit Advisors"))
 	var tips []string
 	switch {
 	case p.HQ == 0:
@@ -560,11 +566,23 @@ func visitAdvisors(s session.Session, w *ctx) Result {
 	if p.Carriers*100 < p.Jets {
 		tips = append(tips, tr(s, "We have more jets than our carriers can carry into battle. Build more carriers."))
 	}
-	if p.Food < w.FoodNeededNextTurn(p) {
+	if p.Morale < 50 {
+		tips = append(tips, tr(s, "Morale is low among our troops. Desertion is a real risk before our next battle."))
+	}
+	if p.Food < w.FoodNeededNextTurn(&p) {
 		tips = append(tips, tr(s, "Our food will not last the turn. Buy or grow more."))
 	}
 	if p.Support < 50 {
 		tips = append(tips, tr(s, "The people grow restless. Lower taxes or spend on their support."))
+	}
+	if p.Tax > game.RiotTaxFloor {
+		tips = append(tips, tr(s, "Taxes are set high enough to risk riots. Consider lowering them."))
+	}
+	if p.TechFactor() == 0 {
+		tips = append(tips, tr(s, "We have no Technology infrastructure. Such regions would sharpen our efficiency."))
+	}
+	if p.Gold <= 0 && p.Bank <= 0 {
+		tips = append(tips, tr(s, "Our treasury is empty, Sire. We should raise gold before it costs us dearly."))
 	}
 	if p.Debt > 0 {
 		tips = append(tips, tr(s, "We carry debt that grows each turn. Repay it soon."))
@@ -578,6 +596,11 @@ func visitAdvisors(s session.Session, w *ctx) Result {
 	for _, t := range tips {
 		fmt.Fprintf(s, "  - %s\n", t)
 	}
+}
+
+// visitAdvisors is the System menu's "Visit Advisors" action.
+func visitAdvisors(s session.Session, w *ctx) Result {
+	renderAdvisors(s, w)
 	pause(s)
 	return Stay
 }
