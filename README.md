@@ -114,6 +114,10 @@ Open `http://localhost:8080`. Each browser gets its own game session. This is
 early and loads xterm.js from a CDN; the assets should be vendored (or
 integrity-pinned) before any real deployment.
 
+See [`docs/webserver.md`](docs/webserver.md) for how players are tracked, the
+full list of options, and why the web server's world is separate from a
+BBS door's world.
+
 ## How to play
 
 The game uses single keypresses. You do not press Enter to choose a menu
