@@ -166,8 +166,10 @@ Immortal Barons is made with these open-source tools:
 - The title banner uses the "ANSI Shadow" FIGlet font, rendered with
   [figlet](https://github.com/damienbutt/figlet) (a Go version of the classic
   tool).
-- ANSI art is checked by rendering it to a PNG image with
-  [ansilove](https://www.ansilove.org/).
+- ANSI art is previewed by rendering it to a PNG image:
+  [ansilove](https://www.ansilove.org/) for 16-color CP437 pieces, and
+  [textimg](https://github.com/jiro4989/textimg) for 256-color / UTF-8 art
+  like the title splash.
 - The documentation is translated with [po4a](https://po4a.org/).
 
 ## License
