@@ -55,6 +55,7 @@ type Empire struct {
 	Mail                  []string
 	PirateRaids           []string // raids suffered since last play; shown in the income report
 	ImmuneFrom            []string // empires whose covert ops against us auto-fail (we bribed their agents)
+	ShieldedUntilDay      int      // GameDay through which ALL incoming covert ops auto-fail (Expose Enemy Ops)
 
 	// CoordinatorVote is the owner handle this baron votes for as the BBS
 	// Coordinator (the elected player who gets the Coordinator menu). Changeable

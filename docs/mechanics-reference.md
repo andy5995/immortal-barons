@@ -16,7 +16,7 @@ settings from a real league, so they are defaults, not fixed rules.
 | Unit | Offense | Defense | Notes |
 |------|---------|---------|-------|
 | Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. Helps defend vs. "Sabre" attacks. |
-| Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). SDI cuts jet strength 25–30%. Targeted by the "Bomb Airbases" op. |
+| Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). SDI cuts jet strength 25–30%. |
 | Turret | **0** | 2 | Defense only — the defensive **counterpart to jets**: it shoots down attacking jets (and blows up tanks / kills troops). Also helps intercept nuclear missiles. Cannot be destroyed by terrorist ops. |
 | Tank | 4 | 4 | Best all-round. Low upkeep, high buy cost. Strength scales with HQ and morale. Helps defend vs. chemical missiles. |
 | Bomber | 0 | 0 | Carries bombs / special-ops; destroys enemy *grounded* jets when sent in an attack. |
@@ -124,33 +124,50 @@ Success depends on how many agents you have compared to the target: more
 agents relative to the enemy means a higher success rate. Keeping many
 agents on hand also *defends* you against incoming terrorist ops.
 
-- **Send spy** — read the enemy's defensive strength.
-- **Bomb intelligence** — kill enemy agents, so your later ops land more
-  easily. Best used first.
-- **Demoralize** — lower enemy military morale; they fight worse and, if
-  low enough, units desert. The most-used op.
-- **Cause dissensions** — lower popular support; weakens troopers.
-- **Bomb airbases** — destroy grounded jets (if the enemy's jets are home).
-- **Stir emigrations** — population starts leaving; damages support.
-- **Spread propaganda** — sharply reduce popular support.
-- **Bomb food stores** — destroy an empire's food reserve (can trigger a
+The Covert Operations menu's item order and labels are confirmed from
+BRE.OVR's string table (#73):
+
+- **Send Spy** — read the enemy's defensive strength.
+- **Stir Revolts** — spread propaganda that sharply lowers popular support.
+- **Set Up** — trick d and one of its Full Defense Alliance partners into
+  believing the other declared war, voiding the alliance between them
+  (useful against a defense pact protecting a target).
+- **Support Dissensions** — agitate d's own troopers into fleeing (~10%
+  trooper loss).
+- **Demoralize Forces** — lower enemy military morale; they fight worse
+  and, if low enough, units desert.
+- **Spy on Relations** — reveal the enemy's treaties.
+- **Bomb Enemy Targets** — a submenu (see below).
+- **Bribery** — bribe an enemy agent inside d, so d's future covert ops
+  against you auto-fail.
+- **Expose Enemy Ops** — per BRE.OVR ("Bribed Agent will expose enemy
+  operations for 24 Hours"), a temporary shield against *all* incoming
+  covert ops. IB models the 24 hours as one game-day
+  (`ExposeOpsShieldDays`).
+- **Visit Bank**.
+
+**Bomb Enemy Targets** submenu (BRE.OVR: "All missiles and bombs require
+500 Bombers to deliver their payloads" — `BombingBombersRequired` gates
+every item below):
+
+- **Bomb Food Market** — destroy an empire's food reserve (can trigger a
   death spiral).
-- **Bomb HQ** — weaken the enemy's HQ, reducing their tank effectiveness.
-- **Spy on relations** — reveal the enemy's treaties.
-- **Expose enemy ops** — ~24 hours of near-total immunity to incoming
-  covert operations.
+- **Bomb Trading Market** — raid a quarter of the target's gold.
+- **Bomb Trade Routes** — sever one of the target's standing trade
+  treaties.
+- **Undermine Investments** — trim a quarter off the principal of the
+  target's pending bank investments.
+- **Nuclear Assault** / **Chemical Bombing** — reuses the WAR menu's
+  `NuclearStrike`/`ChemicalStrike`.
+- **S3-Sabre** — a variable-return missile (BRE.OVR: the dial's per-value
+  effects were never documented, and heavy Trooper counts on the target
+  can backfire it). IB v1 simplification: a single Trooper-loss effect
+  scaled by a `SabreMode`-driven dial, with a backfire chance above
+  `SabreBackfireTroopers`.
 
-Which op to use against which unit: troopers → demoralize / dissensions /
-bomb food; jets → bomb airbases; turrets → demoralize; tanks → demoralize
-/ bomb HQ. **Alliances:** a Terrorist-Prevention treaty adds half an
-ally's agents to your defense; an Intelligence alliance adds half their
-agents to your offense.
-
-Two more local covert ops from the game manual: **Set Up** — trick two
-other empires into believing they declared war on each other (voids their
-treaty; useful against defense pacts); and **Bribery** — bribe an enemy
-agent to learn the opponent's covert tactics, which sets up "Expose Enemy
-Ops."
+**Alliances:** a Terrorist-Prevention treaty adds half an ally's agents to
+your defense; an Intelligence alliance adds half their agents to your
+offense.
 
 ## Economy and regions
 

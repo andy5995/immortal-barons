@@ -47,6 +47,7 @@ func BuildMenus() *Menus {
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
+	bombTargets := &Menu{Title: "Bomb Enemy Targets", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
 	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
 	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
@@ -177,20 +178,34 @@ func BuildMenus() *Menus {
 	}
 	interplanetary.DefaultOnEnter = quitOnEnter(interplanetary)
 
+	// Order and hotkeys match BRE.OVR's string table for the Covert
+	// Operations menu and its Bomb Enemy Targets submenu (#73).
 	covert.Items = []Item{
 		{Key: 'S', Label: "Send Spy", Do: sendSpy},
+		{Key: 'R', Label: "Stir Revolts", Do: stirRevolts},
+		{Key: 'U', Label: "Set Up", Do: setUp},
+		{Key: 'D', Label: "Support Dissensions", Do: supportDissensions},
+		{Key: 'M', Label: "Demoralize Forces", Do: demoralizeForces},
 		{Key: 'P', Label: "Spy on Relations", Do: spyRelations},
-		{Key: 'B', Label: "Bribery", Do: briberyOp},
-		{Key: 'O', Label: "Special Operations", Do: specialOps},
-		{Key: 'I', Label: "Bomb Intelligence", Do: bombIntel},
-		{Key: 'C', Label: "Stir Revolts", Do: stirRevolts},
-		{Key: 'A', Label: "Bomb Airbases", Do: bombAirbases},
-		{Key: 'F', Label: "Bomb Food Stores", Do: bombFood},
-		{Key: 'H', Label: "Bomb HQ", Do: bombHQ},
+		{Key: 'B', Label: "Bomb Enemy Targets", Do: gotoMenu(bombTargets)},
+		{Key: 'Y', Label: "Bribery", Do: briberyOp},
+		{Key: 'X', Label: "Expose Enemy Ops", Do: exposeEnemyOps},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	covert.DefaultOnEnter = quitOnEnter(covert)
+
+	bombTargets.Items = []Item{
+		{Key: 'F', Label: "Bomb Food Market", Do: bombFoodMarket},
+		{Key: 'T', Label: "Bomb Trading Market", Do: bombTradingMarket},
+		{Key: 'R', Label: "Bomb Trade Routes", Do: bombTradeRoutes},
+		{Key: 'U', Label: "Undermine Investments", Do: undermineInvestments},
+		{Key: 'N', Label: "Nuclear Assault", Do: nuclearAssault},
+		{Key: 'C', Label: "Chemical Bombing", Do: chemicalBombing},
+		{Key: 'S', Label: "S3-Sabre", Do: sabreStrike},
+		{Key: '0', Label: "Quit", Do: back},
+	}
+	bombTargets.DefaultOnEnter = quitOnEnter(bombTargets)
 
 	trading.Items = []Item{
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},

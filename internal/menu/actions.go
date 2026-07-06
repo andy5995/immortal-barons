@@ -589,28 +589,63 @@ func sendSpy(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Send Spy", 0, func(a, d *game.Empire) (string, error) { return w.SendSpy(a, d) })
 }
 
-func specialOps(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Special Operations", 0, func(a, d *game.Empire) (string, error) { return w.Sabotage(a, d) })
+func supportDissensions(s session.Session, w *ctx) Result {
+	return specialAttack(s, w, "Support Dissensions", 0, func(a, d *game.Empire) (string, error) { return w.SupportDissensions(a, d) })
 }
 
-func bombIntel(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Bomb Intelligence", 0, func(a, d *game.Empire) (string, error) { return w.BombIntelligence(a, d) })
+func demoralizeForces(s session.Session, w *ctx) Result {
+	return specialAttack(s, w, "Demoralize Forces", 0, func(a, d *game.Empire) (string, error) { return w.DemoralizeForces(a, d) })
+}
+
+func setUp(s session.Session, w *ctx) Result {
+	return specialAttack(s, w, "Set Up", 0, func(a, d *game.Empire) (string, error) { return w.SetUp(a, d) })
+}
+
+func exposeEnemyOps(s session.Session, w *ctx) Result {
+	return specialAttack(s, w, "Expose Enemy Ops", 0, func(a, d *game.Empire) (string, error) { return w.ExposeEnemyOps(a, d) })
 }
 
 func stirRevolts(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Stir Revolts", 0, func(a, d *game.Empire) (string, error) { return w.StirRevolts(a, d) })
 }
 
-func bombAirbases(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Bomb Airbases", 0, func(a, d *game.Empire) (string, error) { return w.BombAirbases(a, d) })
+// bombingAttack wraps specialAttack with BRE's Bomb Enemy Targets 500-Bomber
+// payload requirement (BRE.OVR: "All missiles and bombs require 500 Bombers
+// to deliver their payloads").
+func bombingAttack(s session.Session, w *ctx, label string, cost int, strike func(a, d *game.Empire) (string, error)) Result {
+	if w.Player().Bombers < game.BombingBombersRequired {
+		fail(s, fmt.Errorf("you need at least %d Bombers to deliver a payload", game.BombingBombersRequired))
+		return Stay
+	}
+	return specialAttack(s, w, label, cost, strike)
 }
 
-func bombFood(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Bomb Food Stores", 0, func(a, d *game.Empire) (string, error) { return w.BombFood(a, d) })
+func bombFoodMarket(s session.Session, w *ctx) Result {
+	return bombingAttack(s, w, "Bomb Food Market", 0, func(a, d *game.Empire) (string, error) { return w.BombFood(a, d) })
 }
 
-func bombHQ(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Bomb HQ", 0, func(a, d *game.Empire) (string, error) { return w.BombHQ(a, d) })
+func bombTradingMarket(s session.Session, w *ctx) Result {
+	return bombingAttack(s, w, "Bomb Trading Market", 0, func(a, d *game.Empire) (string, error) { return w.BombTradingMarket(a, d) })
+}
+
+func bombTradeRoutes(s session.Session, w *ctx) Result {
+	return bombingAttack(s, w, "Bomb Trade Routes", 0, func(a, d *game.Empire) (string, error) { return w.BombTradeRoutes(a, d) })
+}
+
+func undermineInvestments(s session.Session, w *ctx) Result {
+	return bombingAttack(s, w, "Undermine Investments", 0, func(a, d *game.Empire) (string, error) { return w.UndermineInvestments(a, d) })
+}
+
+func nuclearAssault(s session.Session, w *ctx) Result {
+	return bombingAttack(s, w, "Nuclear Assault", game.NukeCost, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
+}
+
+func chemicalBombing(s session.Session, w *ctx) Result {
+	return bombingAttack(s, w, "Chemical Bombing", game.ChemCost, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
+}
+
+func sabreStrike(s session.Session, w *ctx) Result {
+	return bombingAttack(s, w, "S3-Sabre", 0, func(a, d *game.Empire) (string, error) { return w.SabreStrike(a, d) })
 }
 
 // renderAdvisors prints the Advisors screen: contextual advice based on the

@@ -8,6 +8,11 @@ import (
 // covertSuccess reports whether a covert op by `a` against `d` succeeds:
 // the more agents the attacker has relative to the defender, the likelier.
 func (w *World) covertSuccess(a, d *Empire) bool {
+	// Expose Enemy Ops shields d from every incoming covert op for a few
+	// game-days, regardless of who the attacker is.
+	if d.ShieldedUntilDay > 0 && w.GameDay <= d.ShieldedUntilDay {
+		return false
+	}
 	// If d has bribed one of a's agents (Bribery), a's ops against d fail.
 	for _, name := range d.ImmuneFrom {
 		if name == a.Name {
@@ -40,10 +45,10 @@ func (w *World) SendSpy(a, d *Empire) (string, error) {
 	return "Your spy was caught and did not return.", nil
 }
 
-// Sabotage (Special Operations) eliminates ~10% of d's troopers on success;
-// on failure the agent is lost. Covert ops are secret, so the victim event
-// does not name the attacker.
-func (w *World) Sabotage(a, d *Empire) (string, error) {
+// SupportDissensions agitates d's own troopers into fleeing — eliminating
+// ~10% of them on success; on failure the agent is lost. Covert ops are
+// secret, so the victim event does not name the attacker.
+func (w *World) SupportDissensions(a, d *Empire) (string, error) {
 	if a.Agents < 1 {
 		return "", ErrNoAgents
 	}
@@ -51,11 +56,69 @@ func (w *World) Sabotage(a, d *Empire) (string, error) {
 		lost := d.Troopers / 10
 		d.Troopers -= lost
 		d.Events = append(d.Events, fmt.Sprintf("Saboteurs struck your army — %d troopers lost.", lost))
-		return fmt.Sprintf("Your agents sabotaged %s: %d troopers eliminated.", d.Name, lost), nil
+		return fmt.Sprintf("Your agents sowed dissension in %s: %d troopers eliminated.", d.Name, lost), nil
 	}
 	a.Agents--
 	d.Events = append(d.Events, "Your security foiled an enemy sabotage attempt.")
 	return "The operation failed and your agent was lost.", nil
+}
+
+// DemoralizeForces lowers d's military morale on success, weakening combat
+// and risking desertion (see moraleFactor and MoraleDesertThreshold). On
+// failure the agent is lost.
+func (w *World) DemoralizeForces(a, d *Empire) (string, error) {
+	if a.Agents < 1 {
+		return "", ErrNoAgents
+	}
+	if w.covertSuccess(a, d) {
+		d.adjustMorale(-15)
+		d.Events = append(d.Events, "Agents demoralized your forces — morale fell.")
+		return fmt.Sprintf("You demoralized %s's forces, lowering their morale.", d.Name), nil
+	}
+	a.Agents--
+	d.Events = append(d.Events, "Your security foiled an enemy attempt to demoralize your forces.")
+	return "The operation failed and your agent was lost.", nil
+}
+
+// SetUp tricks d and one of its Full Defense Alliance partners into believing
+// the other declared war, voiding the alliance between them — useful against
+// a defense pact protecting a target you want to attack. On failure the
+// agent is lost.
+func (w *World) SetUp(a, d *Empire) (string, error) {
+	if a.Agents < 1 {
+		return "", ErrNoAgents
+	}
+	if w.covertSuccess(a, d) {
+		if allies := w.alliesOf(d, fullDefenseAlliance); len(allies) > 0 {
+			partner := allies[0]
+			w.BreakTreaty(d, partner, fullDefenseAlliance)
+			d.Events = append(d.Events, fmt.Sprintf("Agents tricked you and %s into believing you had declared war — your alliance is void.", partner.Name))
+			return fmt.Sprintf("You tricked %s and %s into voiding their Full Defense Alliance.", d.Name, partner.Name), nil
+		}
+		return fmt.Sprintf("%s holds no alliance for us to unravel.", d.Name), nil
+	}
+	a.Agents--
+	d.Events = append(d.Events, "Your security foiled an enemy attempt to set us up.")
+	return "The operation failed and your agent was lost.", nil
+}
+
+// ExposeOpsShieldDays is how many game-days Expose Enemy Ops shields the
+// caller from incoming covert operations (BRE.OVR: "Bribed Agent will expose
+// enemy operations for 24 Hours" — reinterpreted as game-days here, since IB
+// tracks whole days rather than hours).
+const ExposeOpsShieldDays = 1
+
+// ExposeEnemyOps spends an agent to shield a from every incoming covert
+// operation for ExposeOpsShieldDays game-days. Unlike the rest of Covert
+// Operations this is a defensive action on the caller, not an attack on d;
+// d is unused but kept so the action fits the same target-picker flow as
+// every other item on this menu.
+func (w *World) ExposeEnemyOps(a, d *Empire) (string, error) {
+	if a.Agents < 1 {
+		return "", ErrNoAgents
+	}
+	a.ShieldedUntilDay = w.GameDay + ExposeOpsShieldDays
+	return "Your agents expose enemy covert operations — you are shielded from incoming ops for the next day.", nil
 }
 
 // SpyOnRelations reveals every treaty d holds with other empires — useful
@@ -106,27 +169,8 @@ func (w *World) Bribery(a, d *Empire) (string, error) {
 	return "The operation failed and your agent was lost.", nil
 }
 
-// BombIntelligence kills a share of d's agents, softening the target for your
-// later covert ops. Best used first. On failure the agent is lost.
-func (w *World) BombIntelligence(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
-	}
-	if w.covertSuccess(a, d) {
-		lost := d.Agents / 4
-		d.Agents -= lost
-		d.Events = append(d.Events, fmt.Sprintf("Enemy operatives struck your intelligence — %d agents lost.", lost))
-		return fmt.Sprintf("You crippled %s's intelligence: %d agents eliminated.", d.Name, lost), nil
-	}
-	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy intelligence strike.")
-	return "The operation failed and your agent was lost.", nil
-}
-
 // StirRevolts spreads propaganda that lowers d's popular support (rioting and
-// revolt), weakening its economy and its troopers. The manual's name for this
-// op; not to be confused with "Support Dissensions", which is the
-// troopers-flee sabotage op (our Special Operations). On failure the agent is
+// revolt), weakening its economy and its troopers. On failure the agent is
 // lost.
 func (w *World) StirRevolts(a, d *Empire) (string, error) {
 	if a.Agents < 1 {
@@ -139,23 +183,6 @@ func (w *World) StirRevolts(a, d *Empire) (string, error) {
 	}
 	a.Agents--
 	d.Events = append(d.Events, "Your security foiled an enemy agitation attempt.")
-	return "The operation failed and your agent was lost.", nil
-}
-
-// BombAirbases destroys a share of d's grounded jets. On failure the agent is
-// lost.
-func (w *World) BombAirbases(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
-	}
-	if w.covertSuccess(a, d) {
-		lost := d.Jets / 4
-		d.Jets -= lost
-		d.Events = append(d.Events, fmt.Sprintf("Saboteurs hit your airbases — %d jets destroyed.", lost))
-		return fmt.Sprintf("You bombed %s's airbases: %d jets destroyed.", d.Name, lost), nil
-	}
-	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy airbase attack.")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -176,22 +203,123 @@ func (w *World) BombFood(a, d *Empire) (string, error) {
 	return "The operation failed and your agent was lost.", nil
 }
 
-// BombHQ weakens d's HeadQuarters, reducing its tank effectiveness. On failure
-// the agent is lost.
-func (w *World) BombHQ(a, d *Empire) (string, error) {
+// BombingBombersRequired is the Bombers an empire must hold to run any Bomb
+// Enemy Targets submenu op (BRE.OVR: "All missiles and bombs require 500
+// Bombers to deliver their payloads").
+const BombingBombersRequired = 500
+
+// BombTradingMarket raids d's gold reserves via its own trading market. On
+// failure the agent is lost.
+func (w *World) BombTradingMarket(a, d *Empire) (string, error) {
 	if a.Agents < 1 {
 		return "", ErrNoAgents
 	}
 	if w.covertSuccess(a, d) {
-		before := d.HQ
-		d.HQ -= 20
-		if d.HQ < 0 {
-			d.HQ = 0
-		}
-		d.Events = append(d.Events, "Saboteurs damaged your HeadQuarters.")
-		return fmt.Sprintf("You damaged %s's HeadQuarters (%d%% -> %d%%).", d.Name, before, d.HQ), nil
+		lost := d.Gold / 4
+		d.Gold -= lost
+		d.Events = append(d.Events, fmt.Sprintf("Saboteurs disrupted your trading market — %d gold lost.", lost))
+		return fmt.Sprintf("You disrupted %s's trading market: %d gold lost.", d.Name, lost), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy strike on your HeadQuarters.")
+	d.Events = append(d.Events, "Your security foiled an enemy strike on your trading market.")
+	return "The operation failed and your agent was lost.", nil
+}
+
+// tradeTreatyTypes are the treaty types BombTradeRoutes and SetUp look for
+// when severing d's standing agreements.
+var tradeTreatyTypes = []string{"Tariff Trade Agreement", "Free Trade Agreement", "Protective Trade"}
+
+// BombTradeRoutes severs one of d's standing trade treaties. On failure the
+// agent is lost.
+func (w *World) BombTradeRoutes(a, d *Empire) (string, error) {
+	if a.Agents < 1 {
+		return "", ErrNoAgents
+	}
+	if w.covertSuccess(a, d) {
+		for _, ttype := range tradeTreatyTypes {
+			if allies := w.alliesOf(d, ttype); len(allies) > 0 {
+				partner := allies[0]
+				w.BreakTreaty(d, partner, ttype)
+				d.Events = append(d.Events, fmt.Sprintf("Saboteurs severed your %s with %s.", ttype, partner.Name))
+				return fmt.Sprintf("You severed %s's %s with %s.", d.Name, ttype, partner.Name), nil
+			}
+		}
+		return fmt.Sprintf("%s has no trade routes to sever.", d.Name), nil
+	}
+	a.Agents--
+	d.Events = append(d.Events, "Your security foiled an enemy attempt to sever your trade routes.")
+	return "The operation failed and your agent was lost.", nil
+}
+
+// UndermineInvestments trims a quarter off the principal (and matching
+// return) of each of d's pending bank investments. On failure the agent is
+// lost.
+func (w *World) UndermineInvestments(a, d *Empire) (string, error) {
+	if a.Agents < 1 {
+		return "", ErrNoAgents
+	}
+	if w.covertSuccess(a, d) {
+		if len(d.Investments) == 0 {
+			return fmt.Sprintf("%s has no investments to undermine.", d.Name), nil
+		}
+		var lost int
+		for i := range d.Investments {
+			cut := d.Investments[i].Amount / 4
+			d.Investments[i].Amount -= cut
+			d.Investments[i].Return -= cut
+			lost += cut
+		}
+		d.Events = append(d.Events, fmt.Sprintf("Saboteurs undermined your investments — %d gold in principal lost.", lost))
+		return fmt.Sprintf("You undermined %s's investments: %d gold lost.", d.Name, lost), nil
+	}
+	a.Agents--
+	d.Events = append(d.Events, "Your security foiled an enemy attempt to undermine your investments.")
+	return "The operation failed and your agent was lost.", nil
+}
+
+// SabreBackfireTroopers is the Trooper count on the target above which an
+// S3-Sabre missile risks backfiring (BRE.OVR: "large quantities of Troopers
+// on the target empire are known to cause the missile to backfire").
+const SabreBackfireTroopers = 5000
+
+// sabreDial picks the S3-Sabre's random-return magnitude (BRE's "dial",
+// 0-10) according to the sysop's Sabre Handling mode. This is a v1
+// simplification of BRE's dial: the original's per-value effect table was
+// never documented ("the instruction manual did not tell which number
+// corresponds to which task"), so we scale a single Trooper-loss effect by
+// the dial instead of reproducing an unknown effect table.
+func (w *World) sabreDial() int {
+	switch w.Config.SabreHandling {
+	case SabreConstant:
+		return 5
+	case SabreNone:
+		return 0
+	default: // SabreRandom, SabreUserSelect
+		return w.rng.Intn(11)
+	}
+}
+
+// SabreStrike fires an S3-Sabre missile at d, a variable-return weapon whose
+// magnitude depends on sabreDial. A heavily-garrisoned target has a chance
+// to backfire the missile onto the attacker instead. On failure (the covert
+// roll, not the backfire) the agent is lost.
+func (w *World) SabreStrike(a, d *Empire) (string, error) {
+	if a.Agents < 1 {
+		return "", ErrNoAgents
+	}
+	if w.covertSuccess(a, d) {
+		dial := w.sabreDial()
+		if d.Troopers > SabreBackfireTroopers && w.rng.Intn(2) == 0 {
+			lost := a.Troopers / 10
+			a.Troopers -= lost
+			return fmt.Sprintf("The S3-Sabre backfired! You lost %d troopers.", lost), nil
+		}
+		lost := d.Troopers * dial / 20
+		d.Troopers -= lost
+		d.Events = append(d.Events, fmt.Sprintf("An S3-Sabre struck your forces — %d troopers lost.", lost))
+		return fmt.Sprintf("Your S3-Sabre hit %s: %d troopers eliminated (dial %d).", d.Name, lost, dial), nil
+	}
+	a.Agents--
+	d.Events = append(d.Events, "Your security foiled an enemy S3-Sabre strike.")
 	return "The operation failed and your agent was lost.", nil
 }

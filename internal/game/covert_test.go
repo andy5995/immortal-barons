@@ -36,14 +36,14 @@ func TestSendSpyNoAgents(t *testing.T) {
 	}
 }
 
-func TestSabotageSuccess(t *testing.T) {
+func TestSupportDissensionsSuccess(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents = 50
 	d.Agents = 0
 	d.Troopers = 1000
 	beforeEvents := len(d.Events)
 
-	report, err := w.Sabotage(a, d)
+	report, err := w.SupportDissensions(a, d)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -58,11 +58,11 @@ func TestSabotageSuccess(t *testing.T) {
 	}
 }
 
-func TestSabotageNoAgents(t *testing.T) {
+func TestSupportDissensionsNoAgents(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents = 0
 
-	_, err := w.Sabotage(a, d)
+	_, err := w.SupportDissensions(a, d)
 	if !errors.Is(err, ErrNoAgents) {
 		t.Fatalf("expected ErrNoAgents, got %v", err)
 	}
@@ -95,16 +95,16 @@ func TestSendSpyFailure(t *testing.T) {
 	}
 }
 
-// TestSabotageFailure forces the same covert failure branch as
+// TestSupportDissensionsFailure forces the same covert failure branch as
 // TestSendSpyFailure (see its comment for why seed 1 is deterministic here).
-func TestSabotageFailure(t *testing.T) {
+func TestSupportDissensionsFailure(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents = 1
 	d.Agents = 1000000
 	d.Troopers = 1000
 	beforeEvents := len(d.Events)
 
-	report, err := w.Sabotage(a, d)
+	report, err := w.SupportDissensions(a, d)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -122,17 +122,6 @@ func TestSabotageFailure(t *testing.T) {
 	}
 }
 
-func TestBombAirbasesDestroysGroundedJets(t *testing.T) {
-	w, a, d := newAttackerAndTarget(t)
-	a.Agents, d.Agents, d.Jets = 50, 0, 400
-	if _, err := w.BombAirbases(a, d); err != nil {
-		t.Fatal(err)
-	}
-	if d.Jets != 300 {
-		t.Errorf("expected 300 jets after a 25%% strike, got %d", d.Jets)
-	}
-}
-
 func TestBombFoodDestroysReserve(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Food = 50, 0, 1000
@@ -141,17 +130,6 @@ func TestBombFoodDestroysReserve(t *testing.T) {
 	}
 	if d.Food != 500 {
 		t.Errorf("expected 500 food after a 50%% strike, got %d", d.Food)
-	}
-}
-
-func TestBombHQWeakensAndClamps(t *testing.T) {
-	w, a, d := newAttackerAndTarget(t)
-	a.Agents, d.Agents, d.HQ = 50, 0, 10
-	if _, err := w.BombHQ(a, d); err != nil {
-		t.Fatal(err)
-	}
-	if d.HQ != 0 { // 10 - 20, clamped at 0
-		t.Errorf("HQ should clamp at 0, got %d", d.HQ)
 	}
 }
 
@@ -166,22 +144,118 @@ func TestStirRevoltsLowersSupport(t *testing.T) {
 	}
 }
 
-func TestBombIntelligenceKillsAgents(t *testing.T) {
-	w, a, d := newAttackerAndTarget(t)
-	a.Agents, d.Agents = 1_000_000, 8 // overwhelming odds -> success
-	if _, err := w.BombIntelligence(a, d); err != nil {
-		t.Fatal(err)
-	}
-	if d.Agents != 6 { // 8 - 8/4
-		t.Errorf("expected 6 agents after a 25%% strike, got %d", d.Agents)
-	}
-}
-
 func TestCovertOpNeedsAnAgent(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents = 0
-	if _, err := w.BombAirbases(a, d); !errors.Is(err, ErrNoAgents) {
+	if _, err := w.DemoralizeForces(a, d); !errors.Is(err, ErrNoAgents) {
 		t.Errorf("expected ErrNoAgents, got %v", err)
+	}
+}
+
+func TestDemoralizeForcesLowersMorale(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents, d.Morale = 50, 0, 100
+	if _, err := w.DemoralizeForces(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if d.Morale != 85 {
+		t.Errorf("expected morale 85, got %d", d.Morale)
+	}
+}
+
+func TestSetUpVoidsAlliance(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	a.Agents = 1_000_000
+	d := w.AddHuman("d", "Delta")
+	d.Agents = 0
+	partner := w.AddHuman("p", "PartnerLand")
+	w.ProposeTreaty(d, partner, "Full Defense Alliance")
+	w.AcceptTreaty(partner, d.Name, "Full Defense Alliance")
+
+	report, err := w.SetUp(a, d)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(report, partner.Name) {
+		t.Errorf("expected report to name the tricked ally %q, got %q", partner.Name, report)
+	}
+	if w.HasTreaty(d, partner, "Full Defense Alliance") {
+		t.Error("expected the Full Defense Alliance to be voided")
+	}
+}
+
+func TestExposeEnemyOpsShieldsAgainstCovertOps(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	a.Agents = 1
+	d := w.AddHuman("d", "Delta") // unused target, required by the action signature
+
+	if _, err := w.ExposeEnemyOps(a, d); err != nil {
+		t.Fatal(err)
+	}
+
+	attacker := w.AddHuman("e", "Enemyland")
+	attacker.Agents = 1_000_000
+	before := a.Troopers
+	if _, err := w.SupportDissensions(attacker, a); err != nil {
+		t.Fatal(err)
+	}
+	if a.Troopers != before {
+		t.Errorf("Expose Enemy Ops should shield a from incoming covert ops, troopers %d -> %d", before, a.Troopers)
+	}
+}
+
+func TestBombTradingMarketDrainsGold(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents, d.Gold = 50, 0, 1000
+	if _, err := w.BombTradingMarket(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if d.Gold != 750 {
+		t.Errorf("expected 750 gold after a 25%% strike, got %d", d.Gold)
+	}
+}
+
+func TestBombTradeRoutesSeversTreaty(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	a.Agents = 1_000_000
+	d := w.AddHuman("d", "Delta")
+	d.Agents = 0
+	partner := w.AddHuman("p", "PartnerLand")
+	w.ProposeTreaty(d, partner, "Free Trade Agreement")
+	w.AcceptTreaty(partner, d.Name, "Free Trade Agreement")
+
+	if _, err := w.BombTradeRoutes(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if w.HasTreaty(d, partner, "Free Trade Agreement") {
+		t.Error("expected the Free Trade Agreement to be severed")
+	}
+}
+
+func TestUndermineInvestmentsReducesPrincipal(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents = 50, 0
+	d.Investments = []Investment{{Amount: 1000, Return: 1100, MaturesDay: 5}}
+	if _, err := w.UndermineInvestments(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if d.Investments[0].Amount != 750 {
+		t.Errorf("expected 750 principal remaining, got %d", d.Investments[0].Amount)
+	}
+}
+
+func TestSabreStrikeDamagesTroopers(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents, d.Troopers = 50, 0, 1000
+	w.Config.SabreHandling = SabreConstant // deterministic dial
+	if _, err := w.SabreStrike(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if d.Troopers >= 1000 {
+		t.Errorf("expected the S3-Sabre to reduce troopers, got %d", d.Troopers)
 	}
 }
 
@@ -216,10 +290,10 @@ func TestBriberyGrantsImmunity(t *testing.T) {
 	// d now cannot land covert ops on a, even with overwhelming agents.
 	d.Agents = 1_000_000
 	before := a.Troopers
-	if _, err := w.Sabotage(d, a); err != nil {
+	if _, err := w.SupportDissensions(d, a); err != nil {
 		t.Fatal(err)
 	}
 	if a.Troopers != before {
-		t.Errorf("d's sabotage should fail from a's bribery immunity, troopers %d -> %d", before, a.Troopers)
+		t.Errorf("d's ops should fail from a's bribery immunity, troopers %d -> %d", before, a.Troopers)
 	}
 }
