@@ -32,7 +32,7 @@ type PirateFaction struct {
 
 // Pirate tuning. Steal rates/chances are reconstructed; the take cap and
 // several holding caps are cross-checked against BRE.EXE's constants table
-// (marked "binary" below); the rest are R&P play data (see
+// (marked "binary" below); the rest are reconstructed from play data (see
 // docs/mechanics-reference.md).
 const (
 	pirateForcesMin   = 150 // seed-strength range, randomized (no faction ladder)
@@ -50,7 +50,7 @@ const (
 	// (5000,25000,50000,80000,80000,100000,100000,200000,600000): the clone's
 	// earlier 300000 gold cap is absent from the binary; 600000 is present.
 	PirateCapGold     = 600_000 // binary (caps table); was a guessed 300000
-	PirateCapRegions  = 100     // R&P (not a distinctive binary constant)
+	PirateCapRegions  = 100     // play-data estimate (not a distinctive binary constant)
 	PirateCapAgents   = 65_000  // binary (BRE.EXE ×3)
 	PirateCapTroopers = 100_000 // binary
 	PirateCapJets     = 100_000 // binary

@@ -7,6 +7,21 @@ copy verbatim display text/art from the original into this repo, and never
 put John Dailey's (or any third party's) private contact info into any
 artifact here.
 
+Be careful with other people's names and handles in repo artifacts (code,
+comments, docs, commit messages, ChangeLog). The line is public vs. private:
+
+- **Fine to name** — an actual project contributor; or a person credited for a
+  **public document, project, or repository they have published** that we cite
+  or build on (proper attribution of public work). The original authors in the
+  Heritage section (Mehul Patel, John Dailey) are named for creating BRE.
+- **Do NOT name** — usernames/handles from **private or community channels**
+  (forum/Discord/Slack handles, private tips, relayed disassembly notes). Credit
+  the *source* generically instead: "a disassembly of the original binary",
+  "reconstructed from play data", "community strategy guides".
+
+When unsure whether a source is public enough to credit by name, keep it
+generic.
+
 ## Build, test, run
 
 ```
@@ -71,8 +86,8 @@ net-worth), covert ops, region types, economy, caps, the new-player start
 flow, combat percentages, and the news feeds. Design specs live in
 `docs/superpowers/specs/`. Values cross-referenced against the actual BRE
 files (`~/.dosemu/drive_c/games/bre-dos/`) are noted there and in the
-`bre-binary-verified-math` memory; mercutio/Mantis is authoritative for
-exact disassembled constants.
+`bre-binary-verified-math` memory; a disassembly of the original binary is
+authoritative for exact constants.
 
 Combat uses a split offense/defense model (trooper 1/1, jet 2/0, turret
 0/2, tank 4/4); jets need carriers to attack. A regular attack captures 20%

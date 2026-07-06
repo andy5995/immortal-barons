@@ -93,7 +93,7 @@ Net-worth value contributed per unit (from the guide's net-worth table):
   Hard caps on what a faction can hold (✓ = verified against the BRE.EXE caps
   table at 0x14ede — `5000,25000,50000,80000,80000,100000,100000,200000,600000`):
   tanks **50,000** ✓, troopers/jets/turrets **100,000** ✓ each, agents
-  **65,000** ✓ (BRE.EXE ×3), regions **100** (R&P), gold **600,000** ✓ — the
+  **65,000** ✓ (BRE.EXE ×3), regions **100** (play-data estimate), gold **600,000** ✓ — the
   earlier "300,000 assumed" is absent from the binary; 600,000 is in the table.
   Military parked in the Trading Market is safe from pirate raids.
 - **Group vs. individual** (interplanetary) — a solo strike returns double;

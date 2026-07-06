@@ -289,7 +289,7 @@ const (
 // produce all other equipment") applies a per-unit efficiency modifier — a
 // bonus to the specialized unit, a penalty to everything else. The magnitudes
 // are reconstructed and tunable; the exact BRE values would come from a
-// disassembly (mercutio is authoritative there).
+// disassembly of the original binary.
 func (w *World) ProjectedProduction(e *Empire) [6]int {
 	pts := e.Regions.Industrial * IndustryPointsPerRegion
 	made := func(name string, pct, cost int) int {
