@@ -30,7 +30,7 @@ const (
 	BgBlue        = esc + "44m"
 	BgBlack       = esc + "40m"
 	BgBrightBlack = esc + "100m"      // dark gray
-	BgHeader      = esc + "48;5;240m" // dark accent gray, for zebra table header rows
+	BgHeader      = esc + "48;5;233m" // darkest gray, for zebra table header rows (white text contrast)
 	BgRow         = esc + "48;5;236m" // darker gray (256-color), for zebra table value rows
 	BgShadow      = esc + "48;5;238m" // dark-but-not-black gray, for a raised right-edge shadow
 )
