@@ -8,7 +8,7 @@ var (
 	ErrNoDebt     = errors.New("You do not owe that much.")
 	ErrNoAgents   = errors.New("You have no agents for that operation.")
 	ErrHQExists   = errors.New("Your HeadQuarters is already under construction or built.")
-	ErrRegionCap  = errors.New("You have reached the region limit for this league.")
+	ErrRegionCap  = errors.New("You have reached your region purchase limit for this turn.")
 )
 
 // HQCost is the gold price to start HeadQuarters construction.
@@ -54,15 +54,22 @@ func (w *World) landUnitPrice() int {
 	return w.Prices.Land * w.Config.RegionCosts.Percent() / 100
 }
 
-// regionBuyLimit is the most regions e may buy in a single purchase, from the
-// league's Max Purchasable Regions knob. In BRE this is a high ceiling on one
-// transaction, not a cap on total land owned — the real limit players hit is
-// affordability. A knob of 0 means unlimited.
+// regionBuyLimit is the most regions e may still buy this turn, from the
+// league's Max Purchasable Regions knob minus what e has already bought
+// since the turn began (Empire.RegionsBoughtThisTurn, which is reset to 0 at
+// the start of each turn). The cap is cumulative across every purchase made
+// during the turn, not just the single transaction in front of the player —
+// re-entering the Spending menu does not refresh it. A knob of 0 means
+// unlimited.
 func (w *World) regionBuyLimit(e *Empire) int {
 	if w.Config.MaxRegions <= 0 {
 		return 1 << 30
 	}
-	return w.Config.MaxRegions
+	remaining := w.Config.MaxRegions - e.RegionsBoughtThisTurn
+	if remaining < 0 {
+		return 0
+	}
+	return remaining
 }
 
 // LandPrice is the current gold cost of the next region for empire e.
@@ -112,6 +119,7 @@ func (w *World) BuyRegions(e *Empire, field *int, n int) error {
 	}
 	e.Gold -= total
 	*field += n
+	e.RegionsBoughtThisTurn += n
 	e.syncLand()
 	return nil
 }

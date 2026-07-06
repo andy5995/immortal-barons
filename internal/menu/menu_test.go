@@ -138,6 +138,31 @@ func TestBuyLandThroughSpendingMenu(t *testing.T) {
 	}
 }
 
+func TestBuyLandThroughSpendingMenuCannotExceedPerTurnCap(t *testing.T) {
+	menus := BuildMenus()
+	w := newWorld()
+	w.Config.MaxRegions = 5
+	w.Player().Gold = 1_000_000
+	before := w.Player().Land
+
+	// First visit: buy the max affordable, which the rising price and the
+	// per-turn cap both bound; expect it clamped to the 5-region cap.
+	f := &fakeSession{keys: []rune("6C>\r")}
+	Run(f, w, menus.Spending)
+	if got := w.Player().Land - before; got != 5 {
+		t.Fatalf("first purchase: want 5 regions bought, got %d", got)
+	}
+
+	// Second visit in the same turn (re-entering the Spending menu, the bug
+	// scenario): the cap must already be exhausted, so the offered max is 0
+	// and nothing more can be bought — the cap does not reset per action.
+	f2 := &fakeSession{keys: []rune("6C>\r")}
+	Run(f2, w, menus.Spending)
+	if got := w.Player().Land - before; got != 5 {
+		t.Errorf("second purchase in the same turn: want land still +5, got +%d", got)
+	}
+}
+
 func TestReachSystemMenuFromSpending(t *testing.T) {
 	menus := BuildMenus()
 	f, _, err := run(t, "*00", menus.Spending) // '*' -> System Menu -> Quit -> Quit

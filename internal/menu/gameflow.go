@@ -335,7 +335,10 @@ func runTurn(s session.Session, w *ctx) Result {
 			return Stay
 		}
 
-		w.With(func() { w.World.CollectIncome(p) }) // credit this turn's income up front, so maintenance and spending draw from it
+		w.With(func() {
+			w.World.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
+			p.RegionsBoughtThisTurn = 0
+		})
 		showTurnEvents(s, w, p)
 		incomeReport(s, w, p)
 

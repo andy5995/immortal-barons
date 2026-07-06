@@ -43,13 +43,18 @@ type Empire struct {
 	Morale   int    // 0-100, military morale; low morale weakens combat and causes desertion
 	Language string // help/UI language ("" = English; "de", "ru")
 
-	TurnsLeft   int
-	Protection  int
-	LastPlayed  string
-	Events      []string
-	Mail        []string
-	PirateRaids []string // raids suffered since last play; shown in the income report
-	ImmuneFrom  []string // empires whose covert ops against us auto-fail (we bribed their agents)
+	TurnsLeft int
+	// RegionsBoughtThisTurn counts regions bought since the turn began,
+	// enforcing Config.MaxRegions cumulatively across every Buy Regions visit
+	// in the turn rather than per purchase. Reset to 0 at the start of each
+	// turn (see runTurn in internal/menu/gameflow.go).
+	RegionsBoughtThisTurn int
+	Protection            int
+	LastPlayed            string
+	Events                []string
+	Mail                  []string
+	PirateRaids           []string // raids suffered since last play; shown in the income report
+	ImmuneFrom            []string // empires whose covert ops against us auto-fail (we bribed their agents)
 
 	// CoordinatorVote is the owner handle this baron votes for as the BBS
 	// Coordinator (the elected player who gets the Coordinator menu). Changeable

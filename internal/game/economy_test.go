@@ -298,6 +298,45 @@ func TestMaxAffordableRegionsIsTrulyAffordable(t *testing.T) {
 	}
 }
 
+func TestRegionPurchaseCapIsCumulativePerTurn(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Config.MaxRegions = 5
+	e := w.AddHuman("tester", "Testland")
+	e.Gold = 1_000_000
+	startLand := e.Land
+
+	// Buying up to the cap works.
+	if err := w.BuyLand(e, 3); err != nil {
+		t.Fatalf("BuyLand(3): %v", err)
+	}
+	if err := w.BuyLand(e, 2); err != nil {
+		t.Fatalf("BuyLand(2): %v", err)
+	}
+	if e.RegionsBoughtThisTurn != 5 {
+		t.Fatalf("RegionsBoughtThisTurn: want 5, got %d", e.RegionsBoughtThisTurn)
+	}
+
+	// A further purchase in the same turn — even a single region, even after
+	// returning to the Spending menu — must be blocked at the cap, not
+	// allowed to reset per action.
+	if err := w.BuyLand(e, 1); err != ErrRegionCap {
+		t.Errorf("BuyLand(1) over the per-turn cap: want ErrRegionCap, got %v", err)
+	}
+	if e.Land != startLand+5 {
+		t.Errorf("Land should be unchanged by the rejected purchase, want %d, got %d", startLand+5, e.Land)
+	}
+
+	// Once the turn advances, the counter resets and the cap is available
+	// again (mirrors the reset in runTurn, internal/menu/gameflow.go).
+	e.RegionsBoughtThisTurn = 0
+	if err := w.BuyLand(e, 5); err != nil {
+		t.Fatalf("BuyLand(5) after turn reset: %v", err)
+	}
+	if e.Land != startLand+10 {
+		t.Errorf("Land: want %d, got %d", startLand+10, e.Land)
+	}
+}
+
 func TestFoodNeededNextTurn(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
