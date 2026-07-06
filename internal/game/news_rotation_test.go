@@ -68,8 +68,18 @@ func TestRollNewsRotatesBulletinAndNews(t *testing.T) {
 	prevTotals := w.BulletinToday.Totals
 	w.DailyMaintenance("2026-07-03")
 
-	if len(w.NewsYesterday) != 1 || w.NewsYesterday[0] != "day two news" {
-		t.Errorf("NewsYesterday = %v, want [\"day two news\"]", w.NewsYesterday)
+	// Maintenance also posts its own economic/political news (invest-rate
+	// moves, Planetary Master standing) alongside the manually-posted line,
+	// so check "day two news" made it through rather than asserting an
+	// exact line count.
+	found := false
+	for _, line := range w.NewsYesterday {
+		if line == "day two news" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("NewsYesterday = %v, want to contain %q", w.NewsYesterday, "day two news")
 	}
 	if w.NewsToday != nil {
 		t.Errorf("NewsToday should be cleared after second maintenance, got %v", w.NewsToday)

@@ -64,6 +64,7 @@ func (w *World) DailyMaintenance(today string) {
 			}
 		}
 		w.adjustInvestRate()
+		w.postMasterNews()
 		w.rollNews()
 		if w.Config.GameLength > 0 && w.GameDay >= w.Config.GameLength {
 			w.endGame()
@@ -192,6 +193,7 @@ func (w *World) processEconomy(e *Empire) {
 			e.People = 0
 		}
 		e.Food = 0
+		w.postStarvationNews(e)
 	}
 
 	// Hoarded food spoils beyond a two-turn buffer (v1 tunable — a modest

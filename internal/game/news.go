@@ -79,3 +79,56 @@ func (w *World) postRiotNews(e *Empire) {
 	}
 	w.postNews(lines[w.rng.Intn(len(lines))])
 }
+
+// postStarvationNews broadcasts an empire's food shortfall reducing its
+// population.
+func (w *World) postStarvationNews(e *Empire) {
+	lines := []string{
+		fmt.Sprintf("Famine grips %s as food stocks run out.", e.Name),
+		fmt.Sprintf("Reports of starvation reach the planet from %s.", e.Name),
+	}
+	w.postNews(lines[w.rng.Intn(len(lines))])
+}
+
+// postInvestRateNews broadcasts a change in the planetary investment rate
+// (BRE's daily bank-rate float). No line posts when the rate did not move.
+func (w *World) postInvestRateNews(before int) {
+	switch {
+	case w.InvestRate > before:
+		w.postNews(fmt.Sprintf("The planetary investment rate rose to %d%%.", w.InvestRate))
+	case w.InvestRate < before:
+		w.postNews(fmt.Sprintf("The planetary investment rate fell to %d%%.", w.InvestRate))
+	}
+}
+
+// postMasterNews broadcasts the planet's political standing: the empire
+// with the highest net worth among the living either keeps or claims the
+// title of Planetary Master, and LastMaster is kept in sync with it. This
+// runs every maintenance day (matching BRE, which shows the title daily),
+// separate from endGame's one-time crowning at a league's end.
+func (w *World) postMasterNews() {
+	best := ""
+	bestNW := 0
+	found := false
+	for _, e := range w.Empires {
+		if e.Alive {
+			if nw := w.NetWorth(e); !found || nw > bestNW {
+				bestNW = nw
+				best = e.Name
+				found = true
+			}
+		}
+	}
+	if !found {
+		return
+	}
+	switch {
+	case best == w.LastMaster:
+		w.postNews(fmt.Sprintf("%s retains the title of Planetary Master.", best))
+	case w.LastMaster == "":
+		w.postNews(fmt.Sprintf("%s claims the title of Planetary Master!", best))
+	default:
+		w.postNews(fmt.Sprintf("%s has seized the title of Planetary Master from %s!", best, w.LastMaster))
+	}
+	w.LastMaster = best
+}

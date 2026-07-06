@@ -81,8 +81,10 @@ func (w *World) steadyInvestRate() int {
 // on, the rate is instead pinned to the league's standard rate and never
 // floats.
 func (w *World) adjustInvestRate() {
+	before := w.InvestRate
 	if w.Config.SteadyInvest {
 		w.InvestRate = w.steadyInvestRate()
+		w.postInvestRateNews(before)
 		return
 	}
 	total := 0
@@ -103,4 +105,5 @@ func (w *World) adjustInvestRate() {
 	if w.InvestRate > MaxInvestRate {
 		w.InvestRate = MaxInvestRate
 	}
+	w.postInvestRateNews(before)
 }

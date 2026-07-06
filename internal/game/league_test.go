@@ -37,8 +37,18 @@ func TestDailyMaintenanceEndlessByDefault(t *testing.T) {
 	w.LastMaintDate = "2026-06-20"
 	w.DailyMaintenance("2026-06-30")
 
-	if w.LastMaster != "" {
-		t.Errorf("expected LastMaster to remain unset with GameLength=0, got %q", w.LastMaster)
+	// LastMaster now doubles as the daily Planetary Master standing (see
+	// postMasterNews), so it is kept in sync with the net-worth leader every
+	// day, not just at a league's end (GameLength==0 means endless, no
+	// league reset, but the daily title still tracks the current leader).
+	found := false
+	for _, e := range w.Empires {
+		if e.Name == w.LastMaster {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("expected LastMaster to name a living empire, got %q", w.LastMaster)
 	}
 	if w.GameDay != 10 {
 		t.Errorf("expected GameDay to climb to 10 without resetting, got %d", w.GameDay)
