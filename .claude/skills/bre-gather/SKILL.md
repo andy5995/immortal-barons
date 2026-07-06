@@ -64,6 +64,16 @@ order.
 - **Colors + hotkey characters → NO.** They are set by the draw code (immediate
   operands in the code segment), not stored next to the string. Get them from a
   screenshot (source 1) or the disassembly (source 2).
+- **Rates, probabilities, thresholds, and formulas → NO.** The strings and help
+  text give you the *trigger* and the qualitative behaviour ("Riots have broken
+  out due to high tax rates!"), never the numbers behind them (the riot chance %,
+  emigration rate, growth formula, damage math). `breins.txt` even says outright
+  that "much information has been left out of the documentation." Those live in
+  the **disassembly** (source 2). So when the task needs an exact rate/formula:
+  extract the *trigger and direction* from strings/help, then get the number from
+  the disassembly — and if no disassembly value is available, **say the rate is
+  unverified and reconstruct it as a tunable constant** (as IB does for
+  morale/support), rather than presenting a guess as fact. State the confidence.
 
 **The length-prefix trap:** the byte immediately *before* each string is its
 **length**, not a color or a hotkey. Example: `0d "View IPScores"` — `0x0d`=13 =
