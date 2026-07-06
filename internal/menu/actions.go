@@ -38,7 +38,11 @@ func buy2(label string, military bool, unit func(*ctx) int, apply func(*game.Wor
 		if err != nil {
 			fail(s, err)
 		} else {
-			ok(s, "Done. Gold remaining: %d", p.Gold)
+			// No pause: the Spending menu (NoClear) redraws right after with
+			// updated Owned counts, so the confirmation stays visible above it
+			// instead of forcing an extra keypress (BRE-style).
+			fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
+				fmt.Sprintf(tr(s, "Done. Gold remaining: %d"), p.Gold), ansi.Reset)
 		}
 		return Stay
 	}
@@ -1668,14 +1672,14 @@ func negotiateWithType(s session.Session, w *ctx, p, e *game.Empire, ttype strin
 	switch {
 	case held:
 		fmt.Fprintf(s, "\n%s"+tr(s, "You hold a %s with %s.")+"%s\n", ansi.FgBrightCyan, ttype, e.Name, ansi.Reset)
-		if !askYesNoDefaultNo(s, "Break this treaty?") {
+		if !askYesNo(s, "Break this treaty?", false) {
 			return
 		}
 		w.With(func() { w.World.BreakTreaty(p, e, ttype) })
 		ok(s, "You broke the %s with %s.", ttype, e.Name)
 	case offered:
 		fmt.Fprintf(s, "\n%s"+tr(s, "%s offers you a %s.")+"%s\n", ansi.FgBrightCyan, e.Name, ttype, ansi.Reset)
-		if !askYesNoDefaultNo(s, "Accept this treaty?") {
+		if !askYesNo(s, "Accept this treaty?", false) {
 			return
 		}
 		w.With(func() { w.World.AcceptTreaty(p, e.Name, ttype) })
@@ -1720,7 +1724,7 @@ func declareWar(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	target := rows[i-1].e
-	if !askYesNoDefaultNo(s, "Declare war? This breaks all treaties with them.") {
+	if !askYesNo(s, "Declare war? This breaks all treaties with them.", false) {
 		return Stay
 	}
 	var broke []string
@@ -1825,7 +1829,7 @@ func setIndustries(s session.Session, w *ctx) Result {
 			ansi.FgBrightCyan, tr(s, p.Specialized), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", rule)
-	if !askYesNoDefaultNo(s, "Change Production?") {
+	if !askYesNo(s, "Change Production?", false) {
 		return Stay
 	}
 	ns := make([]int, len(prodTypeNames))

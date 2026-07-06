@@ -38,7 +38,10 @@ func quitOnEnter(m *Menu) func(*ctx) *Item {
 // then wired, so submenus can reference each other (e.g. several menus
 // offer "Visit Bank").
 func BuildMenus() *Menus {
-	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus}
+	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus,
+		// NoClear: after a unit purchase the confirmation stays visible above
+		// the redrawn menu (BRE-style), instead of being wiped by a clear.
+		NoClear: true}
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan}
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}

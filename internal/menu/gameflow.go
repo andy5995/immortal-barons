@@ -65,30 +65,15 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 	return Stay
 }
 
-// askYesNo prompts msg with a "(Y/n)" hint and reads a single keypress —
-// 'y'/'Y' or Enter means yes (the default), 'n'/'N' means no. No Enter is
-// required after the letter.
-func askYesNo(s session.Session, msg string) bool {
-	fmt.Fprintf(s, "\n%s (Y/n) ", i18n.T(sessionLang(s), msg))
-	for {
-		r, err := s.ReadKey()
-		if err != nil {
-			return false
-		}
-		switch r {
-		case 'n', 'N':
-			fmt.Fprint(s, "n\n")
-			return false
-		case 'y', 'Y', '\r', '\n':
-			fmt.Fprint(s, "y\n")
-			return true
-		}
+// askYesNo prompts msg with a "(Y/n)" or "(y/N)" hint (whichever matches
+// defYes) and reads a single keypress — no Enter required. 'y'/'Y' returns
+// true, 'n'/'N' returns false; Enter or any other key returns defYes.
+func askYesNo(s session.Session, msg string, defYes bool) bool {
+	hint := "(y/N)"
+	if defYes {
+		hint = "(Y/n)"
 	}
-}
-
-// askYesNoDefaultNo prompts "(y/N)" and defaults to No, so Enter declines.
-func askYesNoDefaultNo(s session.Session, msg string) bool {
-	fmt.Fprintf(s, "\n%s (y/N) ", i18n.T(sessionLang(s), msg))
+	fmt.Fprintf(s, "\n%s %s ", i18n.T(sessionLang(s), msg), hint)
 	for {
 		r, err := s.ReadKey()
 		if err != nil {
@@ -98,9 +83,16 @@ func askYesNoDefaultNo(s session.Session, msg string) bool {
 		case 'y', 'Y':
 			fmt.Fprint(s, "y\n")
 			return true
-		case 'n', 'N', '\r', '\n':
+		case 'n', 'N':
 			fmt.Fprint(s, "n\n")
 			return false
+		default:
+			if defYes {
+				fmt.Fprint(s, "y\n")
+			} else {
+				fmt.Fprint(s, "n\n")
+			}
+			return defYes
 		}
 	}
 }
@@ -224,9 +216,13 @@ func peopleMood(support int) string {
 	}
 }
 
-// endOfTurnStats prints a short flavor line and the remaining turns. It
-// snapshots p under the lock first, since the daily-maintenance ticker (or
-// another session) can mutate these same fields concurrently.
+// endOfTurnStats prints a short flavor line and the remaining turns. It does
+// not pause — the caller (runTurn) immediately follows it with the "Continue
+// to your next turn?" prompt, and a pause here plus that prompt were two
+// consecutive single-key reads that could cross a fast typist's input.
+// endOfTurnStats snapshots p under the lock first, since the daily-
+// maintenance ticker (or another session) can mutate these same fields
+// concurrently.
 func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
 	var snap game.Empire
 	w.With(func() { snap = *p })
@@ -242,7 +238,6 @@ func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
 	}
 	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
 	fmt.Fprintf(s, "  "+tr(s, "Turns left today: %d")+"\n", p.TurnsLeft)
-	pause(s)
 }
 
 // paymentStage runs BRE's start-of-turn maintenance prompts. With Auto-Pay
@@ -267,7 +262,7 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 	// If on-hand gold can't cover maintenance but savings can, offer to draw
 	// from the bank before paying (BRE lets you visit the bank to make upkeep).
 	if gold < due && bank > 0 &&
-		askYesNo(s, fmt.Sprintf(tr(s, "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"), due, gold, bank)) {
+		askYesNo(s, fmt.Sprintf(tr(s, "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"), due, gold, bank), true) {
 		n := promptSuggested(s, "Withdraw how much?", min(due-gold, bank), bank)
 		w.With(func() {
 			w.World.Withdraw(p, n)
@@ -304,7 +299,7 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 			break // fully paid — no warning
 		}
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
-		if !askYesNo(s, "Would you like to reconsider?") {
+		if !askYesNo(s, "Would you like to reconsider?", true) {
 			break // proceed despite the shortfall
 		}
 		// Reconsider: re-read current gold (it is unchanged; nothing applied yet)
@@ -417,7 +412,7 @@ func runTurn(s session.Session, w *ctx) Result {
 			}
 		}
 		if w.VisitMessage {
-			if askYesNo(s, "Send a message?") {
+			if askYesNo(s, "Send a message?", true) {
 				sendMessage(s, w)
 			}
 		}
@@ -432,7 +427,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		endOfTurnStats(s, w, p)
 
 		w.With(func() { turnsLeft = p.TurnsLeft })
-		if turnsLeft <= 0 || !askYesNo(s, "Continue to your next turn?") {
+		if turnsLeft <= 0 || !askYesNo(s, "Continue to your next turn?", true) {
 			return Stay
 		}
 	}

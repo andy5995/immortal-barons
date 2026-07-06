@@ -141,6 +141,10 @@ type Menu struct {
 	// return means no default this time. Takes priority over ExitOnEnter.
 	DefaultOnEnter func(*ctx) *Item
 	Status         func(*ctx) string // optional status bar under the menu
+	// NoClear suppresses the screen clear normally done before drawing this
+	// menu, so an action's output (e.g. a purchase confirmation) stays
+	// visible above the redrawn menu instead of being wiped (BRE-style).
+	NoClear bool
 }
 
 // selectable reports whether it is a visible, choosable item (not a
@@ -319,7 +323,9 @@ func draw(s session.Session, g *ctx, m *Menu) {
 	// Fprint below).
 	var b strings.Builder
 	g.With(func() {
-		b.WriteString(ansi.Clear)
+		if !m.NoClear {
+			b.WriteString(ansi.Clear)
+		}
 		fmt.Fprintf(&b, "%s\n", topBar(g))
 		col := m.Color
 		if col == "" {

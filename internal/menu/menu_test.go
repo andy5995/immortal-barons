@@ -92,6 +92,57 @@ func TestEnterAndLeaveSpendingMenu(t *testing.T) {
 	}
 }
 
+// TestSpendingMenuNoClearOnDraw checks that the Spending menu opts out of the
+// screen clear other menus get, so a purchase confirmation printed just
+// before a redraw stays visible above the redrawn menu (BRE-style).
+func TestSpendingMenuNoClearOnDraw(t *testing.T) {
+	menus := BuildMenus()
+	f := &fakeSession{}
+	w := newWorld()
+	draw(f, w, menus.Spending)
+	if strings.Contains(f.out.String(), ansi.Clear) {
+		t.Error("Spending menu draw should not emit ansi.Clear")
+	}
+}
+
+// TestOtherMenuStillClearsOnDraw makes sure the NoClear opt-out is scoped to
+// the Spending menu only — other menus keep clearing before they draw.
+func TestOtherMenuStillClearsOnDraw(t *testing.T) {
+	menus := BuildMenus()
+	f := &fakeSession{}
+	w := newWorld()
+	draw(f, w, menus.Attack)
+	if !strings.Contains(f.out.String(), ansi.Clear) {
+		t.Error("War/Attack menu draw should still emit ansi.Clear")
+	}
+}
+
+// TestBuyTroopersShowsConfirmationWithoutPause buys Troopers through the
+// Spending menu and checks the purchase confirmation prints without a pause
+// (no extra keypress needed) and the menu redraws in place afterward with
+// the updated Owned count.
+func TestBuyTroopersShowsConfirmationWithoutPause(t *testing.T) {
+	menus := BuildMenus()
+	w := newWorld()
+	beforeTroopers := w.Player().Troopers
+	// '1' (Troopers) -> qty 5 -> Enter -> '0' (Quit Spending), with no pause
+	// keypress between the purchase and the next menu prompt.
+	f := &fakeSession{keys: []rune("15\r0")}
+	if err := Run(f, w, menus.Spending); err != nil {
+		t.Fatalf("got %v", err)
+	}
+	if got := w.Player().Troopers; got != beforeTroopers+5 {
+		t.Errorf("expected Troopers %d, got %d", beforeTroopers+5, got)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "Done. Gold remaining") {
+		t.Errorf("expected purchase confirmation, got:\n%s", out)
+	}
+	if n := strings.Count(out, "Spending Menu"); n < 2 {
+		t.Errorf("expected the Spending menu to redraw after the purchase, got %d draws:\n%s", n, out)
+	}
+}
+
 func TestUnknownKeyIgnored(t *testing.T) {
 	menus := BuildMenus()
 	if _, _, err := run(t, "z0", menus.Game); err != nil {

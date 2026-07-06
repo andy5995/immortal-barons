@@ -10,20 +10,39 @@ import (
 
 func TestAskYesNo(t *testing.T) {
 	cases := []struct {
-		keys string
-		want bool
+		keys   string
+		defYes bool
+		want   bool
 	}{
-		{"y\r", true},
-		{"\r", true},
-		{"n\r", false},
-		{"N\r", false},
+		{"y", true, true},
+		{"\r", true, true},
+		{"n", true, false},
+		{"N", true, false},
+		{"y", false, true},
+		{"\r", false, false},
+		{"n", false, false},
+		{"N", false, false},
 	}
 	for _, c := range cases {
 		f := &fakeSession{keys: []rune(c.keys)}
-		got := askYesNo(f, "Continue?")
+		got := askYesNo(f, "Continue?", c.defYes)
 		if got != c.want {
-			t.Errorf("askYesNo(%q) = %v, want %v", c.keys, got, c.want)
+			t.Errorf("askYesNo(%q, defYes=%v) = %v, want %v", c.keys, c.defYes, got, c.want)
 		}
+	}
+}
+
+func TestAskYesNoHint(t *testing.T) {
+	f := &fakeSession{keys: []rune("\r")}
+	askYesNo(f, "Continue?", true)
+	if !strings.Contains(f.out.String(), "(Y/n)") {
+		t.Errorf("expected (Y/n) hint, got %q", f.out.String())
+	}
+
+	f2 := &fakeSession{keys: []rune("\r")}
+	askYesNo(f2, "Continue?", false)
+	if !strings.Contains(f2.out.String(), "(y/N)") {
+		t.Errorf("expected (y/N) hint, got %q", f2.out.String())
 	}
 }
 
@@ -182,10 +201,10 @@ func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 // TestRunTurnConsumesATurn scripts a full pass through the pipeline for one
 // turn: Quit ('0') out of the pre-turn Diplomacy stop, decline Change
 // Production, income/status pauses, Quit ('0') out of Spending, Attack,
-// Covert, and Trading, decline the message prompt, the end-of-turn pause,
-// then decline "continue" to stop after one turn.
+// Covert, and Trading, decline the message prompt, then decline "continue"
+// to stop after one turn.
 func TestRunTurnConsumesATurn(t *testing.T) {
-	keys := "0\r  0000n\r n\r"
+	keys := "0\r  0000nn"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true // pay maintenance silently; this test is about the turn loop
@@ -200,7 +219,7 @@ func TestRunTurnConsumesATurn(t *testing.T) {
 // event log ("Since your last play..."), then Diplomacy, then Change
 // Production (Set Industries), all before the ordinary turn pipeline (#63).
 func TestRunTurnShowsPreTurnStopsInOrder(t *testing.T) {
-	keys := " 0\r  0000n\r n\r" // leading pause for the non-empty event log
+	keys := " 0\r  0000nn" // leading pause for the non-empty event log
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true
@@ -228,9 +247,9 @@ func TestRunTurnShowsPreTurnStopsInOrder(t *testing.T) {
 // they must appear exactly once even when the player continues into a
 // second turn.
 func TestRunTurnPreTurnStopsOnceAcrossTwoTurns(t *testing.T) {
-	preTurn := "0\r"       // Diplomacy quit, decline Change Production
-	perTurn := "  0000n\r" // income/status pauses, quit Spending/Attack/Covert/Trading, decline message, end-of-turn pause
-	keys := preTurn + perTurn + "y" + perTurn + "n\r"
+	preTurn := "0\r"     // Diplomacy quit, decline Change Production
+	perTurn := "  0000n" // income/status pauses, quit Spending/Attack/Covert/Trading, decline message
+	keys := preTurn + perTurn + "y" + perTurn + "n"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true
