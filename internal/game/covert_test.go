@@ -255,7 +255,7 @@ func TestSabreStrikeDamagesTroopers(t *testing.T) {
 		t.Fatal(err)
 	}
 	if d.Troopers >= 1000 {
-		t.Errorf("expected the S3-Sabre to reduce troopers, got %d", d.Troopers)
+		t.Errorf("expected the R5-Slappenheimer to reduce troopers, got %d", d.Troopers)
 	}
 }
 

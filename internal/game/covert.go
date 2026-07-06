@@ -278,11 +278,11 @@ func (w *World) UndermineInvestments(a, d *Empire) (string, error) {
 }
 
 // SabreBackfireTroopers is the Trooper count on the target above which an
-// S3-Sabre missile risks backfiring (BRE.OVR: "large quantities of Troopers
+// R5-Slappenheimer missile risks backfiring (BRE.OVR: "large quantities of Troopers
 // on the target empire are known to cause the missile to backfire").
 const SabreBackfireTroopers = 5000
 
-// sabreDial picks the S3-Sabre's random-return magnitude (BRE's "dial",
+// sabreDial picks the R5-Slappenheimer's random-return magnitude (BRE's "dial",
 // 0-10) according to the sysop's Sabre Handling mode. This is a v1
 // simplification of BRE's dial: the original's per-value effect table was
 // never documented ("the instruction manual did not tell which number
@@ -299,7 +299,7 @@ func (w *World) sabreDial() int {
 	}
 }
 
-// SabreStrike fires an S3-Sabre missile at d, a variable-return weapon whose
+// SabreStrike fires an R5-Slappenheimer missile at d, a variable-return weapon whose
 // magnitude depends on sabreDial. A heavily-garrisoned target has a chance
 // to backfire the missile onto the attacker instead. On failure (the covert
 // roll, not the backfire) the agent is lost.
@@ -312,14 +312,14 @@ func (w *World) SabreStrike(a, d *Empire) (string, error) {
 		if d.Troopers > SabreBackfireTroopers && w.rng.Intn(2) == 0 {
 			lost := a.Troopers / 10
 			a.Troopers -= lost
-			return fmt.Sprintf("The S3-Sabre backfired! You lost %d troopers.", lost), nil
+			return fmt.Sprintf("The R5-Slappenheimer backfired! You lost %d troopers.", lost), nil
 		}
 		lost := d.Troopers * dial / 20
 		d.Troopers -= lost
-		d.Events = append(d.Events, fmt.Sprintf("An S3-Sabre struck your forces — %d troopers lost.", lost))
-		return fmt.Sprintf("Your S3-Sabre hit %s: %d troopers eliminated (dial %d).", d.Name, lost, dial), nil
+		d.Events = append(d.Events, fmt.Sprintf("An R5-Slappenheimer struck your forces — %d troopers lost.", lost))
+		return fmt.Sprintf("Your R5-Slappenheimer hit %s: %d troopers eliminated (dial %d).", d.Name, lost, dial), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy S3-Sabre strike.")
+	d.Events = append(d.Events, "Your security foiled an enemy R5-Slappenheimer strike.")
 	return "The operation failed and your agent was lost.", nil
 }

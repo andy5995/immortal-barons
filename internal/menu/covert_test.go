@@ -58,7 +58,7 @@ func TestBombEnemyTargetsSubmenuShowsItems(t *testing.T) {
 		"Undermine Investments",
 		"Nuclear Assault",
 		"Chemical Bombing",
-		"S3-Sabre",
+		"R5-Slappenheimer",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("Bomb Enemy Targets submenu missing item %q; output:\n%s", want, out)

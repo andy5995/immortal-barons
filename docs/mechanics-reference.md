@@ -159,9 +159,10 @@ every item below):
   target's pending bank investments.
 - **Nuclear Assault** / **Chemical Bombing** — reuses the WAR menu's
   `NuclearStrike`/`ChemicalStrike`.
-- **S3-Sabre** — a variable-return missile (BRE.OVR: the dial's per-value
-  effects were never documented, and heavy Trooper counts on the target
-  can backfire it). IB v1 simplification: a single Trooper-loss effect
+- **R5-Slappenheimer** (the clone's rename of BRE's *S3-Sabre*, avoiding the
+  original's coined name) — a variable-return missile (BRE.OVR: the dial's
+  per-value effects were never documented, and heavy Trooper counts on the
+  target can backfire it). IB v1 simplification: a single Trooper-loss effect
   scaled by a `SabreMode`-driven dial, with a backfire chance above
   `SabreBackfireTroopers`.
 

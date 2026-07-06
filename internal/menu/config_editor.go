@@ -110,7 +110,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		p(15, "* Region Costs", c.RegionCosts.String())
 		p(16, "* Attack Damage", c.AttackDamage.String())
 		p(17, "* Attack Rewards", c.AttackRewards.String())
-		p(18, "* Sabre Handling", c.SabreHandling.String())
+		p(18, "* R5-Slappenheimer Handling", c.SabreHandling.String())
 		p(19, "* Game Start Date", dateOr(c.GameStartDate, "starts immediately"))
 		p(20, "* Join Cutoff Date", dateOr(c.JoinDate, "always open"))
 		p(21, "AI empires", fmt.Sprintf("%d", c.AICount))

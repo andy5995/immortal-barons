@@ -645,7 +645,7 @@ func chemicalBombing(s session.Session, w *ctx) Result {
 }
 
 func sabreStrike(s session.Session, w *ctx) Result {
-	return bombingAttack(s, w, "S3-Sabre", 0, func(a, d *game.Empire) (string, error) { return w.SabreStrike(a, d) })
+	return bombingAttack(s, w, "R5-Slappenheimer", 0, func(a, d *game.Empire) (string, error) { return w.SabreStrike(a, d) })
 }
 
 // renderAdvisors prints the Advisors screen: contextual advice based on the
