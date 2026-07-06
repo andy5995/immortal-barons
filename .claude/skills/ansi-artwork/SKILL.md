@@ -186,6 +186,50 @@ Full tables (including tee/cross junctions and mixed single/double joints) are
 in `references/glyphs.md`. A colored title bar is often just a run of spaces
 with a background color set, plus text — see the embedding section.
 
+## Raised panels and 3D tables (functional UI, not just art)
+
+Data tables and status panels in a terminal app can be given a **raised,
+beveled** look with the same lighting logic as a 3D object: **light on the
+top-left, dark on the bottom-right.** This reads as "lifted off the page"
+without any pictorial art, and stays readable (unlike dithered cell fills,
+which fight the text — keep the shade ramp *off* data cells).
+
+The recipe (proven in this repo's Empire Status tables, `internal/menu`):
+
+- **Light top edge.** Give the header row a bright background — `BgWhite` with
+  black text. A zebra pattern (white header, light-gray value rows,
+  `48;5;252`) reinforces "top is lit."
+- **Dark right + bottom drop-shadow.** Cast a shadow in a *dark-but-not-black*
+  gray (`48;5;238` works; pure black just looks like a gap). Two pieces:
+    - **Right edge:** one shadow-gray cell printed *after* each row's closing
+      border (`Reset` the row bg first, then `Bg<shadow> " " Reset`).
+    - **Bottom edge:** one shadow-gray bar *offset one cell to the right*,
+      printed under the last row (`"   "` = 2-space indent + 1 offset, then the
+      bar). The offset is what makes it a drop-shadow, exactly like the dark
+      offset copy behind extruded scene-ANSI wordmarks.
+- **Cell borders** (`│` between columns) inside a solid background bar read as
+  dividers; set the row's bg + fg once and print the whole `│ … │ … │` string,
+  so the borders inherit the background.
+- **Fixed cell width** (pad every cell to the widest heading/value) makes
+  stacked sub-tables line up column-for-column.
+
+256-color backgrounds (`\x1b[48;5;Nm`) are the practical way to get true light
+and mid grays that the 16-color palette lacks (it only has black / bright-black
+/ white / bright-white). Modern terminals and xterm.js render them; legacy
+CP437 BBS clients may not, so treat the 3D shading as progressive enhancement.
+
+## Telling pure 16-color ANSI from extended-palette / truecolor
+
+Modern "ANSI" scene pieces (e.g. on 16colo.rs) often *look* like they use
+dozens of colors — deep gray gradients, shaded skin/cloth. Usually that is
+**16-color iCE ANSI faking tone by dithering** (4 grays + `░▒▓` + fg/bg mixing
+→ ~7 perceived shades per hue), the same trick this skill's depth section
+describes. But it can also be **XBin** (custom 256-entry palette + custom font)
+or **24-bit truecolor** ANSI (Moebius/PabloDraw support both). You cannot tell
+which from a rendered PNG alone — only the source `.ANS`/`.XB` settles it. When
+in doubt, assume 16-color + dithering (it's the most common and the most
+portable) and say the color-depth is unconfirmed.
+
 ## Embedding finished art into source code
 
 For a program that prints art (a BBS door, a CLI tool), embed the art as a
