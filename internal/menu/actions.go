@@ -893,11 +893,12 @@ func writeStatTable(s session.Session, title string, cols []statCol, maxCols, fi
 			fmt.Fprintf(&hdr, " %*s │", w, cd.name)
 			fmt.Fprintf(&vals, " %*s │", w, comma(cd.val))
 		}
-		// Zebra rows: heading on white, values on gray, black text. A dark-gray
-		// cell past the right border is the raised panel's right-edge shadow.
+		// Zebra rows: heading on a dark accent gray, values on a darker gray,
+		// white text. A dark-gray cell past the right border is the raised
+		// panel's right-edge shadow.
 		shadow := ansi.BgShadow + " " + ansi.Reset
-		fmt.Fprintf(s, "  %s%s%s%s%s\n", ansi.BgWhite, ansi.FgBlack, hdr.String(), ansi.Reset, shadow)
-		fmt.Fprintf(s, "  %s%s%s%s%s\n", ansi.BgLightGray, ansi.FgBlack, vals.String(), ansi.Reset, shadow)
+		fmt.Fprintf(s, "  %s%s%s%s%s\n", ansi.BgHeader, ansi.FgBrightWhite, hdr.String(), ansi.Reset, shadow)
+		fmt.Fprintf(s, "  %s%s%s%s%s\n", ansi.BgRow, ansi.FgBrightWhite, vals.String(), ansi.Reset, shadow)
 	}
 }
 
