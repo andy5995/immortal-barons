@@ -1,7 +1,13 @@
 # BRE Clone — Menu System Design
 
 Date: 2026-07-03
-Status: approved (design), implementation in progress
+Status: superseded — historical slice-1 design record, not kept in sync with the
+code. Since this was written the module was renamed (`github.com/andy5995/immortal-barons`,
+`cmd/barons`), the game logic was implemented (actions are no longer stubs), and
+the menu tree moved on (e.g. the interplanetary actions now live on their own
+InterPlanetary Operations menu, "Gooie Kablooie" → "Doomer Kaboomer"). The
+authoritative current menu tree, package layout, and API are the code and
+`CLAUDE.md`.
 
 ## Background
 
