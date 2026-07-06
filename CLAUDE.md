@@ -108,13 +108,26 @@ and new-realm protection; an event log for asynchronous play. Front-ends:
 
 Implemented gameplay: conventional combat (offense/defense, turrets, carriers,
 jets, bomber airfield strikes), nuclear/chemical/biological strikes, pirate
-raids, covert agents (spy + sabotage), diplomacy treaties, trading, region
-types + food market, SDI, Gooie Kablooie, player mail + a BRE-style multi-line
-message editor + planetary bulletin, banking (deposit/withdraw/loan/invest),
-Set Industries + Specialize, Write Macros, and a rising land-market price
-(expansion self-limiting). A **planetary news feed** broadcasts battles, WMD
-strikes, pirate raids, and riots (original wording). The **sysop Configuration
-Editor** edits the full BRE field set and those knobs are wired into gameplay
+raids, covert operations (spy, stir revolts, set up, support dissensions,
+demoralize forces, bribery, expose enemy ops, and a Bomb Enemy Targets
+submenu — incl. R5-Slappenheimer, the clone's rename of BRE's S3-Sabre),
+diplomacy treaties, trading, region types + food market, SDI, Doomer Kaboomer
+(BRE's Gooie Kablooie), player mail + a BRE-style multi-line message editor +
+planetary bulletin, banking (deposit/withdraw/loan/invest), Set Industries +
+Specialize, Write Macros, an About screen, a first-run language picker, and a
+rising land-market price (expansion self-limiting). The menu tree mirrors BRE:
+the Diplomacy, Covert, and InterPlanetary Operations menus are matched
+item-for-item where a mechanic exists (recorded-but-inert items are flagged in
+`docs/mechanics-reference.md`). Menus share a uniform exit — `'0'` labeled
+"Quit" with a `DefaultOnEnter` hook so Enter triggers the default (Play/Quit on
+the opening menu; Quit on submenus). A **Play** turn opens once with BRE's
+pre-turn flow (event log → Diplomacy → Change Production). A **daily news
+system** renders a Daily Bulletin header (planet totals with day-over-day
+change) and a Today/Yesterday split of planet news (battles, WMD strikes,
+pirate raids, riots, bank-rate moves, Planetary Master changes — original
+wording), plus random per-empire "while you were away" events. The **sysop
+Configuration Editor** edits the full BRE field set and those knobs are wired
+into gameplay
 (tax/region caps, maintenance/attack Level presets, interest, Buy Military,
 etc.); a league Coordinator broadcasts the whole ruleset over inter-BBS.
 
@@ -127,12 +140,14 @@ and grow via the `.po` catalogs.
 Key gameplay knobs (unit values, maintenance, prices, `LandPriceStep`) are
 constants — tune freely; keep them matching `docs/mechanics-reference.md`.
 
-Stubbed / not built: leagues auto-reset + Planetary Master crowning, the
-Quick-Strike / Extended-Battle attack variants, civil-war collapse, and BRE's
-finer interplanetary news subtypes. Some covert-menu items (Spy on Relations,
-Spy Database, Bribery) route through the special-ops path pending fuller
-diplomacy/database subsystems. Known scale gap: region income is ~100× smaller
-than BRE's documented figures (an open scale decision).
+Stubbed / not built: leagues auto-reset (a daily Planetary Master leader is
+tracked, `CurrentMaster`, and `endGame` crowns `LastMaster`, but timed
+auto-reset is not built), the Quick-Strike / Extended-Battle attack variants,
+civil-war collapse, an interplanetary individual-attack force (`Indiv. Attack
+Force` is a stub), and BRE's finer interplanetary news subtypes. A few
+covert/diplomacy items are recorded-but-inert pending fuller subsystems (flagged
+in `docs/mechanics-reference.md`). Known scale gap: region income is ~100×
+smaller than BRE's documented figures (an open scale decision).
 
 ## Primary goal: run as a BBS door
 
