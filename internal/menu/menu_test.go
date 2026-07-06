@@ -163,6 +163,72 @@ func TestBuyLandThroughSpendingMenuCannotExceedPerTurnCap(t *testing.T) {
 	}
 }
 
+func TestBuyLandLoopsForMultiplePurchases(t *testing.T) {
+	menus := BuildMenus()
+	w := newWorld()
+	before := w.Player().Land
+	beforeCoastal := w.Player().Regions.Coastal
+	beforeMountain := w.Player().Regions.Mountain
+	// Buy Land -> C (Coastal) -> qty 5 -> pause -> M (Mountain) -> qty 3 ->
+	// pause -> 0 (quit the buy loop) -> 0 (quit Spending menu).
+	f := &fakeSession{keys: []rune("6C5\r M3\r 00")}
+	Run(f, w, menus.Spending)
+	if w.Player().Land != before+8 {
+		t.Errorf("expected land %d, got %d", before+8, w.Player().Land)
+	}
+	if got := w.Player().Regions.Coastal; got != beforeCoastal+5 {
+		t.Errorf("expected Coastal regions %d, got %d", beforeCoastal+5, got)
+	}
+	if got := w.Player().Regions.Mountain; got != beforeMountain+3 {
+		t.Errorf("expected Mountain regions %d, got %d", beforeMountain+3, got)
+	}
+	out := f.out.String()
+	if strings.Count(out, "Buy Regions") < 2 {
+		t.Errorf("expected the region list to be shown at least twice (looped), got:\n%s", out)
+	}
+}
+
+func TestBuyLandAdvisorsThenContinuesLoop(t *testing.T) {
+	menus := BuildMenus()
+	w := newWorld()
+	before := w.Player().Land
+	// Buy Land -> * (Advisors) -> pause -> C (Coastal) -> qty 4 -> pause ->
+	// 0 (quit the buy loop) -> 0 (quit Spending menu).
+	f := &fakeSession{keys: []rune("6* C4\r 00")}
+	Run(f, w, menus.Spending)
+	if w.Player().Land != before+4 {
+		t.Errorf("expected land %d, got %d", before+4, w.Player().Land)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "Visit Advisors") {
+		t.Errorf("expected Advisors output, got:\n%s", out)
+	}
+	if !strings.Contains(out, "Coastal") {
+		t.Errorf("expected region list after Advisors, got:\n%s", out)
+	}
+}
+
+func TestBuyLandCapBlocksButLoopContinues(t *testing.T) {
+	menus := BuildMenus()
+	w := newWorld()
+	w.Config.MaxRegions = 5
+	w.Player().Gold = 1_000_000
+	before := w.Player().Land
+
+	// Buy Land -> C -> 5 (hits the cap) -> pause -> C again -> > (offer is
+	// now clamped to 0, so nothing more is bought) -> * (Advisors) -> pause
+	// -> 0 (quit the buy loop) -> 0 (quit Spending menu).
+	f := &fakeSession{keys: []rune("6C5\r C>\r * 00")}
+	Run(f, w, menus.Spending)
+	if got := w.Player().Land - before; got != 5 {
+		t.Fatalf("want 5 regions bought before hitting the cap, got %d", got)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "Visit Advisors") {
+		t.Errorf("expected Advisors to still be reachable after the cap blocked further buys, got:\n%s", out)
+	}
+}
+
 func TestReachSystemMenuFromSpending(t *testing.T) {
 	menus := BuildMenus()
 	f, _, err := run(t, "*00", menus.Spending) // '*' -> System Menu -> Quit -> Quit
