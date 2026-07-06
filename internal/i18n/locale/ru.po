@@ -419,3 +419,9 @@ msgstr "Выберите (0 — оставить текущий)?"
 
 msgid "Language set to %s."
 msgstr "Язык установлен на %s."
+
+msgid "Name your Realm:"
+msgstr "Назовите своё королевство:"
+
+msgid "Invalid: at least 3 letters/numbers, not matching another realm."
+msgstr "Неверно: не менее 3 букв или цифр, не совпадает с другим королевством."

@@ -14,6 +14,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/menu"
 	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
@@ -95,7 +96,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 		// we chose. On a name collision, re-prompt; the loop ends once we insert
 		// (e != nil) or hit a terminal condition.
 		for e == nil {
-			realm := onboard(s, w, id.Handle)
+			realm := onboard(s, w, id.Handle, lang)
 			var full, taken bool
 			w.With(func() {
 				if existing := w.FindByOwner(id.Handle); existing != nil {
@@ -171,7 +172,7 @@ func selectLanguage(s session.Session) string {
 	return languageOptions[n-1].code
 }
 
-func onboard(s session.Session, w *game.World, handle string) string {
+func onboard(s session.Session, w *game.World, handle, lang string) string {
 	var taken map[string]bool
 	w.With(func() {
 		taken = make(map[string]bool, len(w.Empires))
@@ -179,16 +180,16 @@ func onboard(s session.Session, w *game.World, handle string) string {
 			taken[strings.ToLower(e.Name)] = true
 		}
 	})
-	fmt.Fprintf(s, "%s%sName Your Empire%s\n", ansi.Clear, ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprint(s, ansi.Clear)
 	for {
-		fmt.Fprintf(s, "\n%sName your Realm:%s ", ansi.FgBrightWhite, ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s, %s%s ", ansi.FgBrightWhite, handle, i18n.T(lang, "Name your Realm:"), ansi.Reset)
 		name, err := session.ReadLine(s)
 		if err != nil {
 			return handle // stream ended; fall back to the handle
 		}
 		name = strings.TrimSpace(name)
 		if alnum(name) < 3 || taken[strings.ToLower(name)] {
-			fmt.Fprintf(s, "%s  Invalid: at least 3 letters/numbers, not matching another realm.%s\n", ansi.FgRed, ansi.Reset)
+			fmt.Fprintf(s, "%s  %s%s\n", ansi.FgRed, i18n.T(lang, "Invalid: at least 3 letters/numbers, not matching another realm."), ansi.Reset)
 			continue
 		}
 		return name
