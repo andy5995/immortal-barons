@@ -1602,12 +1602,101 @@ func planetaryPost(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-func modifyDiplomacy(s session.Session, w *ctx) Result {
+// negotiateTreaty returns a Diplomacy menu action for one BRE treaty type
+// (#68): pick a target empire, then propose it, accept a matching offer from
+// them, or break it if already held. Treaty types are now direct menu items
+// instead of hiding behind a single "Modify Diplomacy" item.
+func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
+	return func(s session.Session, w *ctx) Result {
+		p := w.Player()
+		type row struct {
+			e      *game.Empire
+			name   string
+			suffix string
+		}
+		var rows []row
+		w.With(func() {
+			for _, e := range w.Empires {
+				if !e.Alive || e == p {
+					continue
+				}
+				suffix := ""
+				if w.World.HasTreaty(p, e, ttype) {
+					suffix = " — " + tr(s, "held")
+				} else {
+					for _, o := range offersFrom(p, e.Name) {
+						if o == ttype {
+							suffix = " — " + tr(s, "offers this to you")
+						}
+					}
+				}
+				rows = append(rows, row{e, e.Name, suffix})
+			}
+		})
+		if len(rows) == 0 {
+			ok(s, "There is no one to negotiate with.")
+			return Stay
+		}
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose an empire:"), ansi.Reset)
+		for i, r := range rows {
+			fmt.Fprintf(s, "  %d) %s%s\n", i+1, r.name, r.suffix)
+		}
+		i := promptInt(s, "Negotiate with which empire (0 to cancel)?")
+		if i < 1 || i > len(rows) {
+			return Stay
+		}
+		negotiateWithType(s, w, p, rows[i-1].e, ttype)
+		return Stay
+	}
+}
+
+// negotiateWithType performs the one action that applies to ttype between p
+// and e: propose it if neither side has it, accept it if e has already
+// offered it, or break it (with confirmation) if p already holds it.
+func negotiateWithType(s session.Session, w *ctx, p, e *game.Empire, ttype string) {
+	var held, offered bool
+	w.With(func() {
+		held = w.World.HasTreaty(p, e, ttype)
+		if !held {
+			for _, o := range offersFrom(p, e.Name) {
+				if o == ttype {
+					offered = true
+				}
+			}
+		}
+	})
+	switch {
+	case held:
+		fmt.Fprintf(s, "\n%s"+tr(s, "You hold a %s with %s.")+"%s\n", ansi.FgBrightCyan, ttype, e.Name, ansi.Reset)
+		if !askYesNoDefaultNo(s, "Break this treaty?") {
+			return
+		}
+		w.With(func() { w.World.BreakTreaty(p, e, ttype) })
+		ok(s, "You broke the %s with %s.", ttype, e.Name)
+	case offered:
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s offers you a %s.")+"%s\n", ansi.FgBrightCyan, e.Name, ttype, ansi.Reset)
+		if !askYesNoDefaultNo(s, "Accept this treaty?") {
+			return
+		}
+		w.With(func() { w.World.AcceptTreaty(p, e.Name, ttype) })
+		ok(s, "You accepted the %s with %s.", ttype, e.Name)
+	default:
+		w.With(func() { w.World.ProposeTreaty(p, e, ttype) })
+		ok(s, "Proposed a %s to %s.", ttype, e.Name)
+	}
+}
+
+// declareWar is BRE's Declaration Of War: pick a target and, on confirmation,
+// break every treaty currently held with them in one action. Per
+// docs/mechanics-reference.md this is meant to skip the internal unrest a
+// normal treaty break causes — but IB does not yet model unrest on treaty
+// breaks at all, so there is no behavioral difference from breaking each
+// treaty individually today; this is a placeholder for when that lands.
+func declareWar(s session.Session, w *ctx) Result {
 	p := w.Player()
 	type row struct {
-		e      *game.Empire
-		name   string
-		suffix string
+		e    *game.Empire
+		name string
 	}
 	var rows []row
 	w.With(func() {
@@ -1615,74 +1704,38 @@ func modifyDiplomacy(s session.Session, w *ctx) Result {
 			if !e.Alive || e == p {
 				continue
 			}
-			suffix := ""
-			if held := w.TreatiesBetween(p, e); len(held) > 0 {
-				suffix = " — " + strings.Join(held, ", ")
-			}
-			rows = append(rows, row{e, e.Name, suffix})
+			rows = append(rows, row{e, e.Name})
 		}
 	})
 	if len(rows) == 0 {
-		ok(s, "There is no one to negotiate with.")
+		ok(s, "There is no one to declare war on.")
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose an empire:"), ansi.Reset)
 	for i, r := range rows {
-		fmt.Fprintf(s, "  %d) %s%s\n", i+1, r.name, r.suffix)
+		fmt.Fprintf(s, "  %d) %s\n", i+1, r.name)
 	}
-	i := promptInt(s, "Negotiate with which empire (0 to cancel)?")
+	i := promptInt(s, "Declare war on which empire (0 to cancel)?")
 	if i < 1 || i > len(rows) {
 		return Stay
 	}
-	negotiateWith(s, w, p, rows[i-1].e)
-	return Stay
-}
-
-// negotiateWith runs the propose / accept / break loop with one empire. Each
-// pass snapshots the held treaties and pending offers under the lock before
-// prompting, since another session's ProposeTreaty/AcceptTreaty/BreakTreaty
-// can change them between passes.
-func negotiateWith(s session.Session, w *ctx, p, e *game.Empire) {
-	for {
-		var held, offers []string
-		w.With(func() {
-			held = w.TreatiesBetween(p, e)
-			offers = offersFrom(p, e.Name)
-		})
-		fmt.Fprintf(s, "\n%s"+tr(s, "Diplomacy with %s")+"%s\n", ansi.FgBrightCyan, e.Name, ansi.Reset)
-		if len(held) == 0 {
-			fmt.Fprintf(s, "  %s\n", tr(s, "Treaties: (none)"))
-		} else {
-			fmt.Fprintf(s, "  "+tr(s, "Treaties: %s")+"\n", strings.Join(held, ", "))
-		}
-		if len(offers) > 0 {
-			fmt.Fprintf(s, "  "+tr(s, "%s offers you: %s")+"\n", e.Name, strings.Join(offers, ", "))
-		}
-		fmt.Fprintf(s, "  %s\n", tr(s, "(1) Propose  (2) Accept an offer  (3) Break a treaty  (0) Done"))
-		switch promptInt(s, "Choice?") {
-		case 1:
-			if ttype := pickFromList(s, "Propose which treaty", game.TreatyTypes); ttype != "" {
-				w.With(func() { w.World.ProposeTreaty(p, e, ttype) })
-				ok(s, "Proposed a %s to %s.", ttype, e.Name)
-			}
-		case 2:
-			if len(offers) == 0 {
-				ok(s, "No offers to accept.")
-			} else if ttype := pickFromList(s, "Accept which offer", offers); ttype != "" {
-				w.With(func() { w.World.AcceptTreaty(p, e.Name, ttype) })
-				ok(s, "You accepted the %s with %s.", ttype, e.Name)
-			}
-		case 3:
-			if len(held) == 0 {
-				ok(s, "No treaties to break.")
-			} else if ttype := pickFromList(s, "Break which treaty", held); ttype != "" {
-				w.With(func() { w.World.BreakTreaty(p, e, ttype) })
-				ok(s, "You broke the %s with %s.", ttype, e.Name)
-			}
-		default:
-			return
-		}
+	target := rows[i-1].e
+	if !askYesNoDefaultNo(s, "Declare war? This breaks all treaties with them.") {
+		return Stay
 	}
+	var broke []string
+	w.With(func() {
+		for _, tt := range w.World.TreatiesBetween(p, target) {
+			w.World.BreakTreaty(p, target, tt)
+			broke = append(broke, tt)
+		}
+	})
+	if len(broke) == 0 {
+		ok(s, "You declared war on %s.", target.Name)
+	} else {
+		ok(s, "You declared war on %s. Treaties broken: %s", target.Name, strings.Join(broke, ", "))
+	}
+	return Stay
 }
 
 // offersFrom returns the treaty types `from` has offered to p.

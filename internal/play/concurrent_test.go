@@ -84,7 +84,7 @@ func TestConcurrentSessionsShareWorld(t *testing.T) {
 
 // TestConcurrentTurnAndDiplomacyRaceMaintenance drives one session through a
 // FULL turn (runTurn's income/status/payment pipeline, then a detour through
-// the System -> Diplomacy -> View Diplomacy screen, which ranges w.Empires)
+// the System -> Diplomacy -> View Treaties screen, which ranges w.Empires)
 // concurrently with: a maintenance-ticker goroutine mutating the same
 // empire's fields under the lock, and several onboarding/quitting sessions
 // whose AddHuman appends to w.Empires. This is the shape of race the
@@ -127,7 +127,7 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 
 	// Plain onboard-and-quit sessions, to keep w.Empires' backing slice
 	// churning (AddHuman appends) while the turn-playing session below reads
-	// it via View Diplomacy.
+	// it via View Treaties.
 	for i := 0; i < n; i++ {
 		sessions.Add(1)
 		go func(i int) {
@@ -141,12 +141,12 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 
 	// The turn-playing session: splash, realm name, Play Game, accept the
 	// suggested forces/regions maintenance payment, detour through
-	// System Menu -> Diplomacy -> View Diplomacy (ranges w.Empires), back
+	// System Menu -> Diplomacy -> View Treaties (ranges w.Empires), back
 	// out through Attack/Covert/Trading, decline the message prompt and the
 	// next-turn prompt, then quit from the Game Menu. Keys verified against
 	// internal/menu/tree.go's hotkeys and the proven sequence in
 	// internal/menu/gameflow_test.go's TestRunTurnConsumesATurn.
-	turnKeys := " \rTurnPlayer\r" + "1 \r\r *DV 000000n\r n\r0"
+	turnKeys := " \rTurnPlayer\r" + "1 \r\r *D9 000000n\r n\r0"
 	sessions.Add(1)
 	go func() {
 		defer sessions.Done()
