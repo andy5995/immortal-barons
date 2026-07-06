@@ -143,14 +143,16 @@ target, but the game builds and runs on macOS, Windows, and the BSDs (per-OS
 file lock, `x/term` console) — so a Windows Synchronet door is in scope too.
 The stage decomposes into:
 
-1. **Dropfile + stdio front-end** (`cmd/barons-door`) — DONE. Parses
+1. **Dropfile + stdio/socket front-end** (`cmd/barons-door`) — DONE. Parses
    `DOOR32.SYS`/`DOOR.SYS` (`internal/door`), runs the game over a stdio
    `Session` (`session.Stdio`, which adds `\r\n`), honors the ANSI flag and
    a hard time-left cutoff, and names the realm from the caller's handle.
-   Socket I/O (the `DOOR32.SYS` line-2 handle — a winsock handle on Windows,
-   a plain fd socket on *nix) is parsed but not yet used as a backend. stdio
-   covers native Unix doors today; a socket-handle backend (planned) is what a
-   Windows door needs, where stdio redirection of the socket isn't the norm.
+   The socket backend is built too: `session.Socket` attaches to the
+   `DOOR32.SYS` line-2 handle (a winsock handle on Windows, a plain fd socket on
+   *nix) via `net.FileConn`, and `openSession` wires it for a Windows door that
+   reports a socket. On Unix, stdio is correct even when a socket is reported —
+   Synchronet/Mystic (`EX_STDIO`) pipe the socket to stdin/stdout and handle
+   telnet themselves. Serial/FOSSIL doors are explicitly unsupported.
 2. **Persistence / multi-user** — DONE. A persistent empire per caller in a
    shared JSON world under an exclusive flock, keyed by BBS handle, with
    turns-per-day and daily maintenance (`internal/store`, `internal/play`).
@@ -158,10 +160,11 @@ The stage decomposes into:
    Configuration Editor (Coordinator menu); `-setup` seeds the file. The
    knobs are wired into gameplay and broadcast across a league.
 
-Remaining toward the goal: socket-backed I/O (the DOOR32.SYS socket handle —
-Synchronet `COM0:SOCKETn` / Mystic telnet / Windows winsock; Go's `net` stack
-should make it one cross-platform backend) and validation under real BBS
-software (needs Andy's env). Scheduled after the multiplayer web server lands.
+Remaining toward the goal: validation of the door under real BBS software
+(Synchronet/Mystic on Windows for the socket backend; needs Andy's env),
+including confirming the assumption that the BBS performs telnet negotiation
+before launching the door (the socket backend does no IAC handling). Scheduled
+after the multiplayer web server lands.
 
 Dropfile field maps and the I/O contract are documented in
 `docs/mechanics-reference.md` and cross-checked against the Synchronet
