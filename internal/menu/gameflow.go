@@ -412,7 +412,7 @@ func runTurn(s session.Session, w *ctx) Result {
 			}
 		}
 		if w.VisitMessage {
-			if askYesNo(s, "Send a message?", true) {
+			if askYesNo(s, "Send a message?", false) {
 				sendMessage(s, w)
 			}
 		}
