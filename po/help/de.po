@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-05 17:20-0500\n"
+"POT-Creation-Date: 2026-07-05 20:21-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1127,967 +1127,263 @@ msgstr ""
 "Tipp: Militär, das im Handelsmarkt geparkt ist, ist vor Piratenüberfällen "
 "sicher."
 
-#. type: Title #
-#: README.md:1
-#, no-wrap
-msgid "Immortal Barons"
-msgstr ""
-
-#. type: Plain text
-#: README.md:7
-msgid ""
-"Immortal Barons is a turn-based strategy game for the terminal. You rule a "
-"barony in a ruined, post-apocalyptic world. You buy land, feed your people, "
-"build an army, and fight rival empires. The goal is to have the highest net "
-"worth when the turns run out, or to conquer everyone else."
-msgstr ""
-
-#. type: Plain text
-#: README.md:10
-msgid ""
-"The game is written in Go. It is an independent remake, inspired by the "
-"1990s BBS door game *Barren Realms Elite*. See [Heritage](#heritage) below."
-msgstr ""
-
-#. type: Plain text
-#: README.md:13
-#, no-wrap
-msgid ""
-"> **Early work in progress.** Immortal Barons is not ready for real\n"
-"> play-testing or inter-BBS (IBBS) play yet. Mechanics are still changing.\n"
-msgstr ""
-
-#. type: Title ##
-#: README.md:14
-#, no-wrap
-msgid "Status"
-msgstr ""
-
-#. type: Plain text
-#: README.md:20
-msgid ""
-"In development — not yet released. Immortal Barons is a persistent, multi-"
-"user BBS door game: each caller has a lasting empire in one shared world; "
-"you play your turns, and other barons (and any AI) act on their own turns. "
-"The game runs locally or as a native BBS door."
-msgstr ""
-
-#. type: Plain text
-#: README.md:22
-#, no-wrap
-msgid "**Works now:**\n"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid "Full menu system with single-key commands"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"Persistent shared world: your empire is saved between calls, keyed by your "
-"BBS handle; one player at a time (exclusive lock); a daily maintenance step"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"Per-turn economy (idle empires stagnate); turns-per-day and new-realm "
-"protection"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"Economy: buy and sell land at a **rising market price**, buy food, recruit "
-"troopers, build jets/turrets/tanks/carriers, recruit covert agents"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid "Bank: deposit, withdraw, take a loan, repay, invest (about 1%/turn)"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"War: conventional attack (offense vs. defense), plus **nuclear, chemical, "
-"and biological** strikes and **pirate raids**"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"Covert ops (agent-count decides success): spy for intel, sabotage, and "
-"strikes on the enemy's intelligence, airbases, food stores, and HeadQuarters"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"Region types (coastal, mountain, desert, river, agricultural, urban, "
-"industrial, technology) and a food market"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"Diplomacy: typed treaties (defense, trade, intelligence) with their effects"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid "Sysop configuration editor"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"Industry: set production percentages per unit, or specialize (permanent)"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"Messages: player-to-player mail with a multi-line editor, and a planetary "
-"bulletin"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"A planetary news feed: battles, nuclear/chemical/biological strikes, pirate "
-"raids, and tax riots are broadcast to everyone"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid "Write Macros: record a Ctrl-key to replay a sequence of keystrokes"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid ""
-"Localization: menus, prompts, and the help database render in the caller's "
-"language (English, German, and Russian so far)"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid "\"While you were away\" event log for asynchronous play"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:49
-msgid "Scores and net worth"
-msgstr ""
-
-#. type: Plain text
-#: README.md:51
-#, no-wrap
-msgid "**Planned (not built yet):**\n"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:57
-msgid "Leagues that reset on a timer and crown a winner"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:57
-msgid "The Quick Strike and Extended Battle attack variants"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:57
-msgid ""
-"Inter-BBS (IBBS) live play (the packet exchange — scores, news, and group "
-"attacks — works and is tested; validation under real BBS software is still "
-"pending)"
-msgstr ""
-
-#. type: Title ##
-#: README.md:58
-#, no-wrap
-msgid "Build and run"
-msgstr ""
-
-#. type: Plain text
-#: README.md:63
-msgid ""
-"You need Go 1.26 or newer. The game builds and runs anywhere Go does — "
-"Linux, macOS, Windows, and the BSDs (DOS is not supported). It plays locally "
-"or as a native BBS door."
-msgstr ""
-
-#. type: Fenced code block
-#: README.md:64
-#, no-wrap
-msgid ""
-"go build -o barons ./cmd/barons\n"
-"./barons\n"
-msgstr ""
-
-#. type: Plain text
-#: README.md:70
-msgid "Or run it directly:"
-msgstr ""
-
-#. type: Fenced code block
-#: README.md:71
-#, no-wrap
-msgid "go run ./cmd/barons\n"
-msgstr ""
-
-#. type: Title ##
-#: README.md:75
-#, no-wrap
-msgid "Running as a BBS door"
-msgstr ""
-
-#. type: Plain text
-#: README.md:79
 #, fuzzy
-#| msgid ""
-#| "The game is one program: `barons-door`. It runs as a native door under "
-#| "modern BBS software such as Synchronet or Mystic. You do not need DOSBox "
-#| "or DOSEMU."
-msgid ""
-"Immortal Barons can run as a native door under modern BBS software such as "
-"Synchronet or Mystic. Build the door front-end:"
-msgstr ""
-"Das Spiel ist ein einziges Programm: `barons-door`. Es läuft als nativer "
-"Door unter moderner BBS-Software wie Synchronet oder Mystic. Sie brauchen "
-"weder DOSBox noch DOSEMU."
+#~| msgid ""
+#~| "The game is one program: `barons-door`. It runs as a native door under "
+#~| "modern BBS software such as Synchronet or Mystic. You do not need DOSBox "
+#~| "or DOSEMU."
+#~ msgid ""
+#~ "Immortal Barons can run as a native door under modern BBS software such "
+#~ "as Synchronet or Mystic. Build the door front-end:"
+#~ msgstr ""
+#~ "Das Spiel ist ein einziges Programm: `barons-door`. Es läuft als nativer "
+#~ "Door unter moderner BBS-Software wie Synchronet oder Mystic. Sie brauchen "
+#~ "weder DOSBox noch DOSEMU."
 
-#. type: Fenced code block
-#: README.md:80
-#, no-wrap
-msgid "go build -o barons-door ./cmd/barons-door\n"
-msgstr ""
-
-#. type: Plain text
-#: README.md:86
-msgid ""
-"The BBS writes a dropfile when a caller starts the door. Configure your BBS "
-"to run `barons-door` and pass the dropfile path:"
-msgstr ""
-
-#. type: Fenced code block
-#: README.md:87
-#, no-wrap
-msgid "barons-door -dropfile /path/to/node/DOOR32.SYS\n"
-msgstr ""
-
-#. type: Plain text
-#: README.md:95
-msgid ""
-"It reads `DOOR32.SYS` (preferred) or `DOOR.SYS` to learn the caller's name, "
-"node, time left, and whether their terminal supports ANSI. The BBS connects "
-"the caller to the door over standard input and output. With no `-dropfile`, "
-"it looks for `DOOR32.SYS` or `DOOR.SYS` in the working directory."
-msgstr ""
-
-#. type: Plain text
-#: README.md:99
-msgid ""
-"Callers share one persistent world: each caller's empire is saved between "
-"calls, keyed by their BBS handle. A nightly maintenance step (`barons-door "
-"-maint`) advances the world."
-msgstr ""
-
-#. type: Plain text
-#: README.md:103
-msgid ""
-"Full setup instructions for local and inter-BBS play — registering the door, "
-"daily maintenance, the node list, and starting a fresh game with `barons-"
-"door -reset` — are in [`docs/sysop-guide.md`](docs/sysop-guide.md)."
-msgstr ""
-
-#. type: Title ##
-#: README.md:104
-#, no-wrap
-msgid "Running in a browser (experimental)"
-msgstr ""
-
-#. type: Plain text
-#: README.md:107
-msgid ""
-"A browser front-end serves the game over Server-Sent Events with xterm.js:"
-msgstr ""
-
-#. type: Fenced code block
-#: README.md:108
-#, no-wrap
-msgid ""
-"go build -o barons-web ./cmd/barons-web\n"
-"./barons-web -addr :8080\n"
-msgstr ""
-
-#. type: Plain text
-#: README.md:116
-msgid ""
-"Open `http://localhost:8080`. Each browser gets its own game session. This "
-"is early and loads xterm.js from a CDN; the assets should be vendored (or "
-"integrity-pinned) before any real deployment."
-msgstr ""
-
-#. type: Title ##
-#: README.md:117
-#, no-wrap
-msgid "How to play"
-msgstr ""
-
-#. type: Plain text
-#: README.md:122
-msgid ""
-"The game uses single keypresses. You do not press Enter to choose a menu "
-"item. When the game asks for a number (for example, how much land to buy), "
-"type the number and press Enter."
-msgstr ""
-
-#. type: Plain text
-#: README.md:124
-msgid "From the main menu:"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:131
-msgid "`B` — Buy or sell land, food, and military units"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:131
-msgid "`K` — Visit the bank"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:131
-msgid "`W` — Attack a rival empire"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:131
-msgid "`D` — Display your empire status and the scores"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:131
-msgid "`N` — End your turn (this runs the daily update for the whole world)"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:131
-msgid "`Q` — Quit"
-msgstr ""
-
-#. type: Plain text
-#: README.md:135
-msgid ""
-"Each game lasts 20 turns. Build your army before you attack. A rival defends "
-"its home land, so a weak attack will lose. Watch your food: if your people "
-"run out of food, they starve and your empire shrinks."
-msgstr ""
-
-#. type: Title ##
-#: README.md:136
-#, no-wrap
-msgid "Design"
-msgstr ""
-
-#. type: Plain text
-#: README.md:140
-msgid ""
-"The design notes are in [`docs/superpowers/specs/`](docs/superpowers/specs/)."
-msgstr ""
-
-#. type: Plain text
-#: README.md:145
-msgid ""
-"The code is split so that the game logic does not know how it is shown to "
-"the player. The engine only reads keypresses from, and writes text to, a "
-"`Session`. This makes it possible to add a BBS-door front-end and a web "
-"front-end later without changing the game rules."
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:151
-msgid "`cmd/barons` — the local terminal front-end"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:151
-msgid "`internal/session` — the input/output abstraction"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:151
-msgid "`internal/ansi` — terminal color and screen codes"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:151
-msgid "`internal/menu` — the menu engine and the menu tree"
-msgstr ""
-
-#. type: Bullet: '- '
-#: README.md:151
-msgid "`internal/game` — the world, economy, turn engine, and combat"
-msgstr ""
-
-#. type: Title ##
-#: README.md:152
-#, no-wrap
-msgid "Heritage"
-msgstr ""
-
-#. type: Plain text
-#: README.md:161
-msgid ""
-"Immortal Barons is a tribute to *Barren Realms Elite*, created by Mehul "
-"Patel and later maintained by [John Dailey](https://"
-"www.johndaileysoftware.com/).  This project shares that game's ideas and "
-"feel, but it does not use any of its code, text, or artwork.  Game rules and "
-"mechanics are not covered by copyright, so this is a fresh implementation of "
-"the concept. It is not affiliated with, or endorsed by, the original authors."
-msgstr ""
-
-#. type: Title ##
-#: README.md:162
-#, no-wrap
-msgid "License"
-msgstr ""
-
-#. type: Plain text
-#: README.md:165
-msgid "Released into the public domain under the [Unlicense](LICENSE)."
-msgstr ""
-
-#. type: Title ##
-#: README.md:166
-#, no-wrap
-msgid "Related Realms"
-msgstr ""
-
-#. type: Bullet: '* '
-#: README.md:168
-msgid ""
-"[Medusa's Barren Realms Elite (BRE) Discord](https://discord.gg/5wTZpstcjM)"
-msgstr ""
-
-#. type: Title #
-#: docs/playing.md:1
 #, fuzzy, no-wrap
-#| msgid "Sysop Guide — Running Immortal Barons"
-msgid "Playing Immortal Barons"
-msgstr "Sysop-Anleitung — Immortal Barons betreiben"
+#~| msgid "Sysop Guide — Running Immortal Barons"
+#~ msgid "Playing Immortal Barons"
+#~ msgstr "Sysop-Anleitung — Immortal Barons betreiben"
 
-#. type: Plain text
-#: docs/playing.md:6
-msgid ""
-"Immortal Barons is a strategy game. You rule an empire in a broken world. "
-"You build an economy, raise an army, and compete with other rulers. You play "
-"a set number of turns each day."
-msgstr ""
-
-#. type: Title ##
-#: docs/playing.md:7
-#, no-wrap
-msgid "The player guide is the in-game help"
-msgstr ""
-
-#. type: Plain text
-#: docs/playing.md:11
-msgid ""
-"The guide lives inside the game as **categorized help**. Open it from the "
-"Game Menu (Help Database), or press `?` at a menu. It is organized by "
-"category:"
-msgstr ""
-
-#. type: Bullet: '- '
-#: docs/playing.md:18
-msgid "**Controls** — moving through the menus, entering numbers"
-msgstr ""
-
-#. type: Bullet: '- '
-#: docs/playing.md:18
-msgid "**Military** — units and their roles"
-msgstr ""
-
-#. type: Bullet: '- '
-#: docs/playing.md:18
-msgid "**Economy** — regions, food, banking"
-msgstr ""
-
-#. type: Bullet: '- '
-#: docs/playing.md:18
-msgid "**Warfare** — attacks, covert operations, pirates"
-msgstr ""
-
-#. type: Bullet: '- '
-#: docs/playing.md:18
 #, fuzzy
-#| msgid "Treaties and Alliances"
-msgid "**Diplomacy** — treaties and alliances"
-msgstr "Verträge und Bündnisse"
+#~| msgid "Treaties and Alliances"
+#~ msgid "**Diplomacy** — treaties and alliances"
+#~ msgstr "Verträge und Bündnisse"
 
-#. type: Bullet: '- '
-#: docs/playing.md:18
-msgid "**Inter-BBS** — leagues and group attacks"
-msgstr ""
-
-#. type: Plain text
-#: docs/playing.md:22
 #, no-wrap
-msgid ""
-"The same content is the single source for a web guide too. It lives as Markdown\n"
-"under `internal/help/content/<category>/`, and is translated with po4a (see\n"
-"`docs/superpowers/specs/2026-07-03-docs-help-localization-design.md`). Edit the\n"
-"topic files there; the in-game help and the web guide both come from them.\n"
-msgstr ""
+#~ msgid "Sysop Guide — Running Immortal Barons"
+#~ msgstr "Sysop-Anleitung — Immortal Barons betreiben"
 
-#. type: Title #
-#: docs/sysop-guide.md:1
+#~ msgid ""
+#~ "This guide is for the BBS operator (the sysop). It explains how to set up "
+#~ "the game on your board, and how to join an inter-BBS league. Players do "
+#~ "not need to read this."
+#~ msgstr ""
+#~ "Diese Anleitung ist für den BBS-Betreiber (den Sysop). Sie erklärt, wie "
+#~ "Sie das Spiel auf Ihrem Board einrichten und einer Inter-BBS-Liga "
+#~ "beitreten. Spieler müssen sie nicht lesen."
+
 #, no-wrap
-msgid "Sysop Guide — Running Immortal Barons"
-msgstr "Sysop-Anleitung — Immortal Barons betreiben"
+#~ msgid "What you need"
+#~ msgstr "Was Sie brauchen"
 
-#. type: Plain text
-#: docs/sysop-guide.md:6
-msgid ""
-"This guide is for the BBS operator (the sysop). It explains how to set up "
-"the game on your board, and how to join an inter-BBS league. Players do not "
-"need to read this."
-msgstr ""
-"Diese Anleitung ist für den BBS-Betreiber (den Sysop). Sie erklärt, wie Sie "
-"das Spiel auf Ihrem Board einrichten und einer Inter-BBS-Liga beitreten. "
-"Spieler müssen sie nicht lesen."
+#~ msgid ""
+#~ "The game is one program: `barons-door`. It runs as a native door under "
+#~ "modern BBS software such as Synchronet or Mystic. You do not need DOSBox "
+#~ "or DOSEMU."
+#~ msgstr ""
+#~ "Das Spiel ist ein einziges Programm: `barons-door`. Es läuft als nativer "
+#~ "Door unter moderner BBS-Software wie Synchronet oder Mystic. Sie brauchen "
+#~ "weder DOSBox noch DOSEMU."
 
-#. type: Title ##
-#: docs/sysop-guide.md:7
+#~ msgid ""
+#~ "The game keeps all its files in one data directory (default `./data`). "
+#~ "Point the `-data` option at it."
+#~ msgstr ""
+#~ "Das Spiel hält alle seine Dateien in einem Datenverzeichnis (Standard `./"
+#~ "data`). Richten Sie die Option `-data` darauf."
+
 #, no-wrap
-msgid "What you need"
-msgstr "Was Sie brauchen"
+#~ msgid "First-time setup"
+#~ msgstr "Ersteinrichtung"
 
-#. type: Plain text
-#: docs/sysop-guide.md:11
-msgid ""
-"The game is one program: `barons-door`. It runs as a native door under "
-"modern BBS software such as Synchronet or Mystic. You do not need DOSBox or "
-"DOSEMU."
-msgstr ""
-"Das Spiel ist ein einziges Programm: `barons-door`. Es läuft als nativer "
-"Door unter moderner BBS-Software wie Synchronet oder Mystic. Sie brauchen "
-"weder DOSBox noch DOSEMU."
+#~ msgid "Run the setup once to create the config file:"
+#~ msgstr ""
+#~ "Führen Sie die Einrichtung einmal aus, um die Konfigurationsdatei zu "
+#~ "erstellen:"
 
-#. type: Plain text
-#: docs/sysop-guide.md:14
-msgid ""
-"The game keeps all its files in one data directory (default `./data`). Point "
-"the `-data` option at it."
-msgstr ""
-"Das Spiel hält alle seine Dateien in einem Datenverzeichnis (Standard `./"
-"data`). Richten Sie die Option `-data` darauf."
-
-#. type: Plain text
-#: docs/sysop-guide.md:16
-msgid "Run `barons-door -help` to see all the command-line options."
-msgstr ""
-
-#. type: Title ##
-#: docs/sysop-guide.md:17
 #, no-wrap
-msgid "First-time setup"
-msgstr "Ersteinrichtung"
+#~ msgid "Registering the door"
+#~ msgstr "Den Door registrieren"
 
-#. type: Plain text
-#: docs/sysop-guide.md:20
-msgid "Run the setup once to create the config file:"
-msgstr ""
-"Führen Sie die Einrichtung einmal aus, um die Konfigurationsdatei zu "
-"erstellen:"
+#~ msgid ""
+#~ "The game reads **DOOR32.SYS** (both Synchronet and Mystic write it) or "
+#~ "**DOOR.SYS**. Point the game at it with `-dropfile`, or let it search the "
+#~ "current directory."
+#~ msgstr ""
+#~ "Das Spiel liest **DOOR32.SYS** (Synchronet und Mystic schreiben beide "
+#~ "diese) oder **DOOR.SYS**. Weisen Sie das Spiel mit `-dropfile` darauf "
+#~ "hin, oder lassen Sie es das aktuelle Verzeichnis durchsuchen."
 
-#. type: Fenced code block
-#: docs/sysop-guide.md:21
+#~ msgid ""
+#~ "The caller's handle from the dropfile becomes the name of their realm."
+#~ msgstr ""
+#~ "Der Handle des Anrufers aus der Dropfile wird zum Namen seines Reichs."
+
+#~ msgid "A typical command line:"
+#~ msgstr "Eine typische Befehlszeile:"
+
 #, no-wrap
-msgid "barons-door -setup -data /path/to/data\n"
-msgstr ""
+#~ msgid "Daily maintenance"
+#~ msgstr "Tägliche Wartung"
 
-#. type: Plain text
-#: docs/sysop-guide.md:31
-msgid ""
-"This opens the **Configuration Editor**: a menu of every game rule (turns "
-"per day, protection turns, land and market settings, interest and investment "
-"rates, tax and region limits, costs and attack settings, number of AI "
-"barons, game length, and more). Change what you like, then press `0` to save "
-"`config.json`, or `Q` to cancel. `-setup` only writes the config; it does "
-"not create or change any game world (the world is created when your first "
-"caller logs in)."
-msgstr ""
+#~ msgid "Run maintenance once a day (a nightly event is the usual place):"
+#~ msgstr ""
+#~ "Führen Sie die Wartung einmal am Tag aus (ein nächtliches Ereignis ist "
+#~ "der übliche Ort):"
 
-#. type: Plain text
-#: docs/sysop-guide.md:36
-msgid ""
-"There is also a **`-reset`** command described later. It opens the *same* "
-"Configuration Editor, but after you save it also **starts a fresh game** "
-"(clears all empires and re-seeds the AI). Use `-setup` when you first "
-"install the game, and `-reset` when you want to reconfigure and start over."
-msgstr ""
+#~ msgid ""
+#~ "This advances the game one day for every day that passed, lets the AI "
+#~ "barons take their turns, and refreshes each player's turns."
+#~ msgstr ""
+#~ "Dies bringt das Spiel für jeden vergangenen Tag einen Tag voran, lässt "
+#~ "die KI-Barone ihre Züge machen und erneuert die Züge jedes Spielers."
 
-#. type: Title ##
-#: docs/sysop-guide.md:37
 #, no-wrap
-msgid "Registering the door"
-msgstr "Den Door registrieren"
+#~ msgid "Inter-BBS (league) play"
+#~ msgstr "Inter-BBS-(Liga-)Spiel"
 
-#. type: Plain text
-#: docs/sysop-guide.md:40
-msgid ""
-"Set up the game as an external program (a \"door\") in your BBS software."
-msgstr ""
+#~ msgid ""
+#~ "A league is a group of boards whose players compete against each other. "
+#~ "To join one, turn on inter-BBS play and give your board a name."
+#~ msgstr ""
+#~ "Eine Liga ist eine Gruppe von Boards, deren Spieler gegeneinander "
+#~ "antreten. Um beizutreten, schalten Sie das Inter-BBS-Spiel ein und geben "
+#~ "Ihrem Board einen Namen."
 
-#. type: Bullet: '- '
-#: docs/sysop-guide.md:45
-msgid ""
-"The game reads **DOOR32.SYS** (both Synchronet and Mystic write it) or "
-"**DOOR.SYS**. Point the game at it with `-dropfile`, or let it search the "
-"current directory."
-msgstr ""
-"Das Spiel liest **DOOR32.SYS** (Synchronet und Mystic schreiben beide diese) "
-"oder **DOOR.SYS**. Weisen Sie das Spiel mit `-dropfile` darauf hin, oder "
-"lassen Sie es das aktuelle Verzeichnis durchsuchen."
+#~ msgid "Edit `config.json` and set:"
+#~ msgstr "Bearbeiten Sie `config.json` und setzen Sie:"
 
-#. type: Bullet: '- '
-#: docs/sysop-guide.md:45
-msgid "The caller's handle from the dropfile becomes the name of their realm."
-msgstr "Der Handle des Anrufers aus der Dropfile wird zum Namen seines Reichs."
+#~ msgid "`\"IBBS\": true` — turn on the inter-BBS menus."
+#~ msgstr "`\"IBBS\": true` — die Inter-BBS-Menüs einschalten."
 
-#. type: Plain text
-#: docs/sysop-guide.md:47
-msgid "A typical command line:"
-msgstr "Eine typische Befehlszeile:"
+#~ msgid ""
+#~ "`\"BoardID\"` — a short unique name for your board (your \"planet\")."
+#~ msgstr ""
+#~ "`\"BoardID\"` — ein kurzer, eindeutiger Name für Ihr Board (Ihren "
+#~ "„Planeten“)."
 
-#. type: Fenced code block
-#: docs/sysop-guide.md:48
+#~ msgid ""
+#~ "`\"InboundDir\"` — the directory where packets from other boards arrive."
+#~ msgstr ""
+#~ "`\"InboundDir\"` — das Verzeichnis, in dem Pakete von anderen Boards "
+#~ "eintreffen."
+
+#~ msgid ""
+#~ "`\"OutboundDir\"` — the directory where the game writes packets for other "
+#~ "boards."
+#~ msgstr ""
+#~ "`\"OutboundDir\"` — das Verzeichnis, in das das Spiel Pakete für andere "
+#~ "Boards schreibt."
+
+#~ msgid ""
+#~ "Ask your League Coordinator for the node list and add it to your data "
+#~ "directory as **`ibnodes.dat`** (see the format below)."
+#~ msgstr ""
+#~ "Bitten Sie Ihren Liga-Koordinator um die Knotenliste und legen Sie sie "
+#~ "als **`ibnodes.dat`** in Ihr Datenverzeichnis (siehe Format unten)."
+
 #, no-wrap
-msgid "barons-door -dropfile /path/to/DOOR32.SYS -data /path/to/data\n"
-msgstr ""
+#~ msgid "How packets move (you choose the schedule)"
+#~ msgstr "Wie Pakete sich bewegen (Sie wählen den Zeitplan)"
 
-#. type: Title ##
-#: docs/sysop-guide.md:52
+#~ msgid ""
+#~ "The game never moves files between boards. It only reads and writes "
+#~ "packet files in your inbound and outbound directories. Moving the files "
+#~ "between boards is your job, and you choose how often it happens."
+#~ msgstr ""
+#~ "Das Spiel bewegt niemals Dateien zwischen Boards. Es liest und schreibt "
+#~ "nur Paketdateien in Ihren Eingangs- und Ausgangsverzeichnissen. Die "
+#~ "Dateien zwischen den Boards zu bewegen, ist Ihre Aufgabe, und Sie "
+#~ "bestimmen, wie oft das geschieht."
+
+#~ msgid "The inter-BBS step is:"
+#~ msgstr "Der Inter-BBS-Schritt ist:"
+
+#~ msgid ""
+#~ "It reads every packet in your inbound directory, applies it, and writes "
+#~ "new packets to your outbound directory. It also runs automatically inside "
+#~ "`-maint` when inter-BBS play is on."
+#~ msgstr ""
+#~ "Es liest jedes Paket in Ihrem Eingangsverzeichnis, wendet es an und "
+#~ "schreibt neue Pakete in Ihr Ausgangsverzeichnis. Es läuft auch "
+#~ "automatisch innerhalb von `-maint`, wenn das Inter-BBS-Spiel "
+#~ "eingeschaltet ist."
+
+#~ msgid "A common setup:"
+#~ msgstr "Ein üblicher Aufbau:"
+
+#~ msgid "A caller plays the game."
+#~ msgstr "Ein Anrufer spielt das Spiel."
+
+#~ msgid "After the caller exits, or on a schedule you pick, run `-planetary`."
+#~ msgstr ""
+#~ "Nachdem der Anrufer beendet hat, oder nach einem von Ihnen gewählten "
+#~ "Zeitplan, führen Sie `-planetary` aus."
+
+#~ msgid ""
+#~ "Your transport script copies each file from your outbound directory to "
+#~ "the inbound directory of every other board (over FidoNet, a sync tool, "
+#~ "scp, a shared mount — whatever you use)."
+#~ msgstr ""
+#~ "Ihr Transportskript kopiert jede Datei aus Ihrem Ausgangsverzeichnis in "
+#~ "das Eingangsverzeichnis jedes anderen Boards (über FidoNet, ein Sync-"
+#~ "Werkzeug, scp, ein gemeinsames Laufwerk — was auch immer Sie nutzen)."
+
+#~ msgid ""
+#~ "The next `-planetary` run on each board reads and applies those files."
+#~ msgstr ""
+#~ "Der nächste `-planetary`-Lauf auf jedem Board liest und wendet diese "
+#~ "Dateien an."
+
+#~ msgid ""
+#~ "Run it as often as you like. More often means shorter travel times "
+#~ "between planets. The in-game \"Travel Times\" screen shows players how "
+#~ "recently packets have arrived, so they know how fast operations move."
+#~ msgstr ""
+#~ "Führen Sie es so oft aus, wie Sie möchten. Öfter bedeutet kürzere "
+#~ "Reisezeiten zwischen Planeten. Der Ingame-Bildschirm „Reisezeiten“ zeigt "
+#~ "den Spielern, wie kürzlich Pakete eingetroffen sind, damit sie wissen, "
+#~ "wie schnell Operationen ablaufen."
+
 #, no-wrap
-msgid "Daily maintenance"
-msgstr "Tägliche Wartung"
+#~ msgid "The node list: `ibnodes.dat`"
+#~ msgstr "Die Knotenliste: `ibnodes.dat`"
 
-#. type: Plain text
-#: docs/sysop-guide.md:55
-msgid "Run maintenance once a day (a nightly event is the usual place):"
-msgstr ""
-"Führen Sie die Wartung einmal am Tag aus (ein nächtliches Ereignis ist der "
-"übliche Ort):"
+#~ msgid ""
+#~ "The node list names every board in the league. It uses the same simple "
+#~ "layout as the original BRE `BRNODES.DAT`. Each board is six lines, and a "
+#~ "blank line separates boards:"
+#~ msgstr ""
+#~ "Die Knotenliste nennt jedes Board in der Liga. Sie verwendet dasselbe "
+#~ "einfache Layout wie die ursprüngliche BRE-`BRNODES.DAT`. Jedes Board "
+#~ "umfasst sechs Zeilen, und eine Leerzeile trennt die Boards:"
 
-#. type: Fenced code block
-#: docs/sysop-guide.md:56
+#~ msgid ""
+#~ "The six lines are: node number, board (planet) name, network address, "
+#~ "city, state or province, and country. Board number 1 is the League "
+#~ "Coordinator."
+#~ msgstr ""
+#~ "Die sechs Zeilen sind: Knotennummer, Board-(Planeten-)Name, "
+#~ "Netzwerkadresse, Stadt, Bundesland oder Provinz und Land. Board Nummer 1 "
+#~ "ist der Liga-Koordinator."
+
 #, no-wrap
-msgid "barons-door -maint -data /path/to/data\n"
-msgstr ""
+#~ msgid "The Coordinator"
+#~ msgstr "Der Koordinator"
 
-#. type: Plain text
-#: docs/sysop-guide.md:62
-msgid ""
-"This advances the game one day for every day that passed, lets the AI barons "
-"take their turns, and refreshes each player's turns."
-msgstr ""
-"Dies bringt das Spiel für jeden vergangenen Tag einen Tag voran, lässt die "
-"KI-Barone ihre Züge machen und erneuert die Züge jedes Spielers."
+#~ msgid ""
+#~ "There are two different \"coordinator\" ideas, and they are not the same "
+#~ "thing:"
+#~ msgstr ""
+#~ "Es gibt zwei verschiedene „Koordinator“-Begriffe, und sie sind nicht "
+#~ "dasselbe:"
 
-#. type: Title ##
-#: docs/sysop-guide.md:63
-#, no-wrap
-msgid "Starting a fresh game (reset)"
-msgstr ""
+#~ msgid ""
+#~ "**League Coordinator** — the sysop of board number 1. This person keeps "
+#~ "the node list and hands it out to the other boards."
+#~ msgstr ""
+#~ "**Liga-Koordinator** — der Sysop von Board Nummer 1. Diese Person pflegt "
+#~ "die Knotenliste und gibt sie an die anderen Boards weiter."
 
-#. type: Plain text
-#: docs/sysop-guide.md:66
-msgid "To reconfigure and start the game over, run:"
-msgstr ""
-
-#. type: Fenced code block
-#: docs/sysop-guide.md:67
-#, no-wrap
-msgid "barons-door -reset -data /path/to/data\n"
-msgstr ""
-
-#. type: Plain text
-#: docs/sysop-guide.md:77
-msgid ""
-"This opens the same **Configuration Editor** as `-setup` (adjust any rules, "
-"then `0` to save or `Q` to cancel). After you save, it clears all empires "
-"(players re-create their realm the next time they log in) and re-seeds the "
-"AI barons on a fresh day one. It does not pick a winner. The old world is "
-"saved to `world.json.bak` in the data directory first, so you can restore it "
-"if you reset by mistake. Cancelling with `Q` leaves the game untouched."
-msgstr ""
-
-#. type: Title ##
-#: docs/sysop-guide.md:78
-#, no-wrap
-msgid "Inter-BBS (league) play"
-msgstr "Inter-BBS-(Liga-)Spiel"
-
-#. type: Plain text
-#: docs/sysop-guide.md:82
-msgid ""
-"A league is a group of boards whose players compete against each other. To "
-"join one, turn on inter-BBS play and give your board a name."
-msgstr ""
-"Eine Liga ist eine Gruppe von Boards, deren Spieler gegeneinander antreten. "
-"Um beizutreten, schalten Sie das Inter-BBS-Spiel ein und geben Ihrem Board "
-"einen Namen."
-
-#. type: Plain text
-#: docs/sysop-guide.md:84
-msgid "Edit `config.json` and set:"
-msgstr "Bearbeiten Sie `config.json` und setzen Sie:"
-
-#. type: Bullet: '- '
-#: docs/sysop-guide.md:90
-msgid "`\"IBBS\": true` — turn on the inter-BBS menus."
-msgstr "`\"IBBS\": true` — die Inter-BBS-Menüs einschalten."
-
-#. type: Bullet: '- '
-#: docs/sysop-guide.md:90
-msgid "`\"BoardID\"` — a short unique name for your board (your \"planet\")."
-msgstr ""
-"`\"BoardID\"` — ein kurzer, eindeutiger Name für Ihr Board (Ihren "
-"„Planeten“)."
-
-#. type: Bullet: '- '
-#: docs/sysop-guide.md:90
-msgid ""
-"`\"InboundDir\"` — the directory where packets from other boards arrive."
-msgstr ""
-"`\"InboundDir\"` — das Verzeichnis, in dem Pakete von anderen Boards "
-"eintreffen."
-
-#. type: Bullet: '- '
-#: docs/sysop-guide.md:90
-msgid ""
-"`\"OutboundDir\"` — the directory where the game writes packets for other "
-"boards."
-msgstr ""
-"`\"OutboundDir\"` — das Verzeichnis, in das das Spiel Pakete für andere "
-"Boards schreibt."
-
-#. type: Plain text
-#: docs/sysop-guide.md:93
-msgid ""
-"Ask your League Coordinator for the node list and add it to your data "
-"directory as **`ibnodes.dat`** (see the format below)."
-msgstr ""
-"Bitten Sie Ihren Liga-Koordinator um die Knotenliste und legen Sie sie als "
-"**`ibnodes.dat`** in Ihr Datenverzeichnis (siehe Format unten)."
-
-#. type: Title ##
-#: docs/sysop-guide.md:94
-#, no-wrap
-msgid "How packets move (you choose the schedule)"
-msgstr "Wie Pakete sich bewegen (Sie wählen den Zeitplan)"
-
-#. type: Plain text
-#: docs/sysop-guide.md:99
-msgid ""
-"The game never moves files between boards. It only reads and writes packet "
-"files in your inbound and outbound directories. Moving the files between "
-"boards is your job, and you choose how often it happens."
-msgstr ""
-"Das Spiel bewegt niemals Dateien zwischen Boards. Es liest und schreibt nur "
-"Paketdateien in Ihren Eingangs- und Ausgangsverzeichnissen. Die Dateien "
-"zwischen den Boards zu bewegen, ist Ihre Aufgabe, und Sie bestimmen, wie oft "
-"das geschieht."
-
-#. type: Plain text
-#: docs/sysop-guide.md:101
-msgid "The inter-BBS step is:"
-msgstr "Der Inter-BBS-Schritt ist:"
-
-#. type: Fenced code block
-#: docs/sysop-guide.md:102
-#, no-wrap
-msgid "barons-door -planetary -data /path/to/data\n"
-msgstr ""
-
-#. type: Plain text
-#: docs/sysop-guide.md:109
-msgid ""
-"It reads every packet in your inbound directory, applies it, and writes new "
-"packets to your outbound directory. It also runs automatically inside `-"
-"maint` when inter-BBS play is on."
-msgstr ""
-"Es liest jedes Paket in Ihrem Eingangsverzeichnis, wendet es an und schreibt "
-"neue Pakete in Ihr Ausgangsverzeichnis. Es läuft auch automatisch innerhalb "
-"von `-maint`, wenn das Inter-BBS-Spiel eingeschaltet ist."
-
-#. type: Plain text
-#: docs/sysop-guide.md:111
-msgid "A common setup:"
-msgstr "Ein üblicher Aufbau:"
-
-#. type: Bullet: '1. '
-#: docs/sysop-guide.md:118
-msgid "A caller plays the game."
-msgstr "Ein Anrufer spielt das Spiel."
-
-#. type: Bullet: '2. '
-#: docs/sysop-guide.md:118
-msgid "After the caller exits, or on a schedule you pick, run `-planetary`."
-msgstr ""
-"Nachdem der Anrufer beendet hat, oder nach einem von Ihnen gewählten "
-"Zeitplan, führen Sie `-planetary` aus."
-
-#. type: Bullet: '3. '
-#: docs/sysop-guide.md:118
-msgid ""
-"Your transport script copies each file from your outbound directory to the "
-"inbound directory of every other board (over FidoNet, a sync tool, scp, a "
-"shared mount — whatever you use)."
-msgstr ""
-"Ihr Transportskript kopiert jede Datei aus Ihrem Ausgangsverzeichnis in das "
-"Eingangsverzeichnis jedes anderen Boards (über FidoNet, ein Sync-Werkzeug, "
-"scp, ein gemeinsames Laufwerk — was auch immer Sie nutzen)."
-
-#. type: Bullet: '4. '
-#: docs/sysop-guide.md:118
-msgid "The next `-planetary` run on each board reads and applies those files."
-msgstr ""
-"Der nächste `-planetary`-Lauf auf jedem Board liest und wendet diese Dateien "
-"an."
-
-#. type: Plain text
-#: docs/sysop-guide.md:122
-msgid ""
-"Run it as often as you like. More often means shorter travel times between "
-"planets. The in-game \"Travel Times\" screen shows players how recently "
-"packets have arrived, so they know how fast operations move."
-msgstr ""
-"Führen Sie es so oft aus, wie Sie möchten. Öfter bedeutet kürzere "
-"Reisezeiten zwischen Planeten. Der Ingame-Bildschirm „Reisezeiten“ zeigt den "
-"Spielern, wie kürzlich Pakete eingetroffen sind, damit sie wissen, wie "
-"schnell Operationen ablaufen."
-
-#. type: Title ##
-#: docs/sysop-guide.md:123
-#, no-wrap
-msgid "The node list: `ibnodes.dat`"
-msgstr "Die Knotenliste: `ibnodes.dat`"
-
-#. type: Plain text
-#: docs/sysop-guide.md:128
-msgid ""
-"The node list names every board in the league. It uses the same simple "
-"layout as the original BRE `BRNODES.DAT`. Each board is six lines, and a "
-"blank line separates boards:"
-msgstr ""
-"Die Knotenliste nennt jedes Board in der Liga. Sie verwendet dasselbe "
-"einfache Layout wie die ursprüngliche BRE-`BRNODES.DAT`. Jedes Board umfasst "
-"sechs Zeilen, und eine Leerzeile trennt die Boards:"
-
-#. type: Fenced code block
-#: docs/sysop-guide.md:129
-#, no-wrap
-msgid ""
-"1\n"
-"Avalon\n"
-"363/277\n"
-"Orlando\n"
-"FL\n"
-"USA\n"
-"\n"
-"2\n"
-"Pier 7\n"
-"106/477\n"
-"Houston\n"
-"TX\n"
-"USA\n"
-msgstr ""
-
-#. type: Plain text
-#: docs/sysop-guide.md:147
-msgid ""
-"The six lines are: node number, board (planet) name, network address, city, "
-"state or province, and country. Board number 1 is the League Coordinator."
-msgstr ""
-"Die sechs Zeilen sind: Knotennummer, Board-(Planeten-)Name, Netzwerkadresse, "
-"Stadt, Bundesland oder Provinz und Land. Board Nummer 1 ist der Liga-"
-"Koordinator."
-
-#. type: Title ##
-#: docs/sysop-guide.md:148
-#, no-wrap
-msgid "League-wide rules (Coordinator only)"
-msgstr ""
-
-#. type: Plain text
-#: docs/sysop-guide.md:156
-msgid ""
-"The League Coordinator sets the rules that must match across the whole "
-"league.  These are all the fields marked with a star in the Configuration "
-"Editor: turns per day, protection turns, game length, land market and daily "
-"land, interest and investment rates, tax and region and player limits, buy-"
-"military mode, and the cost, damage, and reward levels. Set them in the "
-"Coordinator's own `config.json`, then broadcast them to every board:"
-msgstr ""
-
-#. type: Fenced code block
-#: docs/sysop-guide.md:157
-#, no-wrap
-msgid "barons-door -league-config -data /path/to/data\n"
-msgstr ""
-
-#. type: Plain text
-#: docs/sysop-guide.md:165
-msgid ""
-"This writes a settings packet to your outbound directory. Each member board "
-"adopts the settings on its next `-planetary` run. Member boards accept these "
-"settings only from the Coordinator's board (node 1), so no one else can "
-"change the league rules. Only the Coordinator's board may send this packet."
-msgstr ""
-
-#. type: Title ##
-#: docs/sysop-guide.md:166
-#, no-wrap
-msgid "The Coordinator"
-msgstr "Der Koordinator"
-
-#. type: Plain text
-#: docs/sysop-guide.md:169
-msgid ""
-"There are two different \"coordinator\" ideas, and they are not the same "
-"thing:"
-msgstr ""
-"Es gibt zwei verschiedene „Koordinator“-Begriffe, und sie sind nicht "
-"dasselbe:"
-
-#. type: Bullet: '- '
-#: docs/sysop-guide.md:174
-msgid ""
-"**League Coordinator** — the sysop of board number 1. This person keeps the "
-"node list and hands it out to the other boards."
-msgstr ""
-"**Liga-Koordinator** — der Sysop von Board Nummer 1. Diese Person pflegt die "
-"Knotenliste und gibt sie an die anderen Boards weiter."
-
-#. type: Bullet: '- '
-#: docs/sysop-guide.md:174
-msgid ""
-"**BBS Coordinator** — a *player* your board elects. Players vote in the "
-"System menu, and the player with the most votes gets the Coordinator menu.  "
-"Votes can change at any time."
-msgstr ""
-"**BBS-Koordinator** — ein *Spieler*, den Ihr Board wählt. Spieler stimmen im "
-"Systemmenü ab, und der Spieler mit den meisten Stimmen erhält das "
-"Koordinatormenü. Stimmen können jederzeit geändert werden."
+#~ msgid ""
+#~ "**BBS Coordinator** — a *player* your board elects. Players vote in the "
+#~ "System menu, and the player with the most votes gets the Coordinator "
+#~ "menu.  Votes can change at any time."
+#~ msgstr ""
+#~ "**BBS-Koordinator** — ein *Spieler*, den Ihr Board wählt. Spieler stimmen "
+#~ "im Systemmenü ab, und der Spieler mit den meisten Stimmen erhält das "
+#~ "Koordinatormenü. Stimmen können jederzeit geändert werden."
 
 #~ msgid ""
 #~ "Set up the game as an external program (a \"door\") in your BBS software. "

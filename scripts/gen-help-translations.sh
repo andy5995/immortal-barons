@@ -20,12 +20,4 @@ for lang in "${langs[@]}"; do
       -m "$f" -p "$po" -l "$out" >/dev/null 2>&1
   done < <(find internal/help/content -name '*.md' | sort)
   echo "wrote internal/help/content.$lang/ ($(grep -c '^msgstr "[^"]' "$po" 2>/dev/null || echo 0) strings translated)"
-
-  # Site docs (README, playing, sysop guide): -k 1 so an untranslated doc is
-  # not written (the website falls back to English) instead of committing an
-  # all-English "translation".
-  for src in README.md docs/playing.md docs/sysop-guide.md; do
-    out="${src%.md}.$lang.md"
-    po4a-translate -f text -o markdown -k 1 -m "$src" -p "$po" -l "$out" >/dev/null 2>&1 || true
-  done
 done
