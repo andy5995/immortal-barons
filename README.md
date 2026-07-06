@@ -159,6 +159,16 @@ Game rules and mechanics are not covered by copyright, so this is a fresh
 implementation of the concept. It is not affiliated with, or endorsed by,
 the original authors.
 
+## Tools
+
+The game's terminal art was made with open-source tools:
+
+- The title banner uses the "ANSI Shadow" FIGlet font, rendered with
+  [figlet](https://github.com/damienbutt/figlet) (a Go version of the classic
+  tool).
+- ANSI art is checked by rendering it to a PNG image with
+  [ansilove](https://www.ansilove.org/).
+
 ## License
 
 Released into the public domain under the [Unlicense](LICENSE).
