@@ -31,13 +31,33 @@ func GameLoop(s session.Session, w *game.World, active *game.Empire) error {
 	return Run(ms, c, menus.Game)
 }
 
-// showBulletin prints the planetary bulletin, or a note if there is none.
-func showBulletin(s session.Session, w *ctx) Result {
-	if len(w.NewsToday) == 0 {
+// showBulletinToday is the Today's News menu action.
+func showBulletinToday(s session.Session, w *ctx) Result { return showBulletin(s, w, false) }
+
+// showBulletinYesterday is the Yesterday's News menu action.
+func showBulletinYesterday(s session.Session, w *ctx) Result { return showBulletin(s, w, true) }
+
+// showBulletin prints the Daily Bulletin header plus that day's planetary
+// news lines, or a note if there is no news. yesterday selects
+// BulletinYesterday/NewsYesterday instead of today's.
+func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
+	var bulletin game.DailyBulletin
+	var news []string
+	var boardID string
+	w.With(func() {
+		if yesterday {
+			bulletin, news = w.BulletinYesterday, w.NewsYesterday
+		} else {
+			bulletin, news = w.BulletinToday, w.NewsToday
+		}
+		boardID = w.Config.BoardID
+	})
+	renderDailyBulletin(s, bulletin, boardID)
+	if len(news) == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "No planetary bulletins."))
 	} else {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
-		for _, b := range w.NewsToday {
+		for _, b := range news {
 			fmt.Fprintf(s, "  %s\n", b)
 		}
 	}

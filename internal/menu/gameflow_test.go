@@ -3,6 +3,9 @@ package menu
 import (
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/ansi"
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 func TestAskYesNo(t *testing.T) {
@@ -146,5 +149,86 @@ func TestRunTurnConsumesATurn(t *testing.T) {
 	runTurn(f, w)
 	if w.Player().TurnsLeft != left-1 {
 		t.Errorf("expected TurnsLeft %d, got %d", left-1, w.Player().TurnsLeft)
+	}
+}
+
+func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
+	b := game.DailyBulletin{
+		Totals: game.PlanetTotals{Population: 1865289, Regions: 53266, NetWorth: 34833000},
+		Change: game.PlanetTotals{Population: -5838, Regions: 0, NetWorth: 1373000},
+	}
+	f := &fakeSession{}
+	renderDailyBulletin(f, b, "wildside")
+	out := f.out.String()
+
+	for _, want := range []string{
+		"wildside — Daily Bulletin",
+		"Total Population", "1,865,289", "-5,838",
+		"Total Regions", "53,266", "+0",
+		"Total Net Worth", "34,833k", "+1,373k",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected output to contain %q, got:\n%s", want, out)
+		}
+	}
+	// Population change is negative -> red; net worth change is positive -> green;
+	// regions change is zero -> neutral white.
+	if !strings.Contains(out, ansi.FgRed+"-5,838") {
+		t.Error("expected the negative population change to be red")
+	}
+	if !strings.Contains(out, ansi.FgGreen+"+1,373k") {
+		t.Error("expected the positive net-worth change to be green")
+	}
+	if !strings.Contains(out, ansi.FgWhite+"+0") {
+		t.Error("expected the zero regions change to be neutral white")
+	}
+}
+
+func TestRenderDailyBulletinNoTitle(t *testing.T) {
+	f := &fakeSession{}
+	renderDailyBulletin(f, game.DailyBulletin{}, "")
+	if strings.Contains(f.out.String(), "—") {
+		t.Error("expected no board-name prefix when title is empty")
+	}
+	if !strings.Contains(f.out.String(), "Daily Bulletin") {
+		t.Error("expected the bare 'Daily Bulletin' header")
+	}
+}
+
+func TestShowBulletinTodayVsYesterday(t *testing.T) {
+	w := newWorld()
+	w.BulletinToday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 111}}
+	w.NewsToday = []string{"today-line"}
+	w.BulletinYesterday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 222}}
+	w.NewsYesterday = []string{"yesterday-line"}
+
+	fToday := &fakeSession{keys: []rune(" ")}
+	showBulletinToday(fToday, w)
+	todayOut := fToday.out.String()
+	if !strings.Contains(todayOut, "today-line") || strings.Contains(todayOut, "yesterday-line") {
+		t.Errorf("showBulletinToday should show only today's news, got:\n%s", todayOut)
+	}
+	if !strings.Contains(todayOut, "111") {
+		t.Error("showBulletinToday should render today's totals")
+	}
+
+	fYesterday := &fakeSession{keys: []rune(" ")}
+	showBulletinYesterday(fYesterday, w)
+	yesterdayOut := fYesterday.out.String()
+	if !strings.Contains(yesterdayOut, "yesterday-line") || strings.Contains(yesterdayOut, "today-line") {
+		t.Errorf("showBulletinYesterday should show only yesterday's news, got:\n%s", yesterdayOut)
+	}
+	if !strings.Contains(yesterdayOut, "222") {
+		t.Error("showBulletinYesterday should render yesterday's totals")
+	}
+}
+
+func TestShowBulletinEmptyNewsShowsNoBulletinsNote(t *testing.T) {
+	w := newWorld()
+	w.NewsToday = nil
+	f := &fakeSession{keys: []rune(" ")}
+	showBulletinToday(f, w)
+	if !strings.Contains(f.out.String(), "No planetary bulletins.") {
+		t.Error("expected the empty-state note when there is no news")
 	}
 }

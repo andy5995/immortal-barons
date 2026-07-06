@@ -785,6 +785,40 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBlue, rule, r)
 }
 
+// renderDailyBulletin draws the boxed Daily Bulletin header: planet-wide
+// totals with day-over-day change, colored green/red/neutral for +/-/0.
+// title is Config.BoardID, or "" to show just "Daily Bulletin".
+func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) {
+	head := tr(s, "Daily Bulletin")
+	if title != "" {
+		head = title + " — " + head
+	}
+	titleBar(s, head)
+
+	row := func(label string, total, change int, fmtNum func(int) string) {
+		clr := ansi.FgWhite
+		switch {
+		case change > 0:
+			clr = ansi.FgGreen
+		case change < 0:
+			clr = ansi.FgRed
+		}
+		sign := "+"
+		abs := change
+		if change < 0 {
+			sign = "-"
+			abs = -change
+		}
+		fmt.Fprintf(s, "  %s%s:%s %s    %s%s:%s %s%s%s%s\n",
+			ansi.FgWhite, tr(s, label), ansi.Reset, fmtNum(total),
+			ansi.FgWhite, tr(s, "Change"), ansi.Reset, clr, sign, fmtNum(abs), ansi.Reset)
+	}
+
+	row("Total Population", b.Totals.Population, b.Change.Population, comma)
+	row("Total Regions", b.Totals.Regions, b.Change.Regions, comma)
+	row("Total Net Worth", b.Totals.NetWorth, b.Change.NetWorth, abbrevMoney)
+}
+
 // titleBar prints a full-width white-on-blue panel header spanning the rule.
 func titleBar(s session.Session, text string) {
 	bar := " " + text + " "

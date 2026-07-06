@@ -136,6 +136,26 @@ func comma(n int) string {
 	return b.String()
 }
 
+// abbrevMoney formats large totals with a k/m suffix (34833289 -> "34,833k",
+// 1373000000 -> "1,373m") so a planet-wide total fits on one line. The switch
+// to "m" only kicks in at a billion, since gold/net-worth totals commonly run
+// into the tens of millions (still readable as "k") per the money caps in
+// docs/mechanics-reference.md. Below 1,000 it falls back to comma().
+func abbrevMoney(n int) string {
+	abs := n
+	if abs < 0 {
+		abs = -abs
+	}
+	switch {
+	case abs >= 1_000_000_000:
+		return comma(n/1_000_000) + "m"
+	case abs >= 1_000:
+		return comma(n/1_000) + "k"
+	default:
+		return comma(n)
+	}
+}
+
 // statLine prints one BRE-style result line — a highlighted, comma-formatted
 // number followed by text — and skips the line entirely when n is zero (BRE
 // only lists results that actually happened).
