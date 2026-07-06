@@ -750,32 +750,34 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 
 	titleBar(s, tr(s, "Empire Status")+": "+p.Name)
 
-	kv("Turns", num(p.TurnsLeft))
-	kv("Score", num(netWorth))
-	kv("Gold", num(p.Gold))
-	kv("Bank", num(p.Bank))
-	if p.Debt > 0 {
-		kv("Debt", num(p.Debt))
+	top := []statCol{
+		{"Turns", p.TurnsLeft}, {"Score", netWorth}, {"Gold", p.Gold},
+		{"Bank", p.Bank}, {"Food", p.Food},
 	}
+	if p.Debt > 0 {
+		top = append(top, statCol{"Debt", p.Debt})
+	}
+	writeStatTable(s, "", top, 0, uniformWidth(top))
+
 	fmt.Fprintf(s, "%s%s:%s %s %s(%s: %s)%s\n", wht, tr(s, "Population"), r, num(p.People), wht, tr(s, "Tax Rate"), pct(p.Tax), r)
 	kv("Popular Support", pct(p.Support))
 	kv("Military Morale", pct(p.Morale))
-	kv("Food", num(p.Food))
 	fmt.Fprintf(s, "%s%s:%s %s%s%s\n", wht, tr(s, "Headquarters"), r, c, tr(s, hqStatus(p)), r)
 	if p.SDI > 0 {
 		kv("SDI", pct(p.SDI))
 	}
 	fmt.Fprintf(s, "%s%s:%s %s   %s%s:%s %s\n", wht, tr(s, "Offense"), r, num(p.Offense()), wht, tr(s, "Defense"), r, num(p.Defense()))
 
-	writeStatTable(s, tr(s, "Military"), []statCol{
+	milCols := []statCol{
 		{"Troopers", p.Troopers}, {"Jets", p.Jets}, {"Turrets", p.Turrets}, {"Tanks", p.Tanks},
 		{"Bombers", p.Bombers}, {"Carriers", p.Carriers}, {"Agents", p.Agents},
-	}, 0)
+	}
+	writeStatTable(s, tr(s, "Military"), milCols, 0, uniformWidth(milCols))
 	regionCols := make([]statCol, len(regionTypeNames))
 	for i, name := range regionTypeNames {
 		regionCols[i] = statCol{name, *regionField(p, i)}
 	}
-	writeStatTable(s, tr(s, "Regions"), regionCols, 4)
+	writeStatTable(s, tr(s, "Regions"), regionCols, 4, uniformWidth(regionCols))
 
 	if p.Protection > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "You have %s%s turns of Protection Left.")+"%s\n", wht, num(p.Protection), wht, r)
@@ -798,13 +800,36 @@ type statCol struct {
 	val  int
 }
 
+// uniformWidth is the widest cell (heading or value) in cols, so a table can
+// give every cell that width and line its columns up.
+func uniformWidth(cols []statCol) int {
+	m := 0
+	for _, cd := range cols {
+		w := len(cd.name)
+		if v := len(comma(cd.val)); v > w {
+			w = v
+		}
+		if w > m {
+			m = w
+		}
+	}
+	return m
+}
+
 // writeStatTable prints title, then the columns as zebra-striped rows. maxCols
 // caps how many columns share a row (0 = pack as many as fit 80 columns); a
 // group that would overflow the width also wraps regardless.
-func writeStatTable(s session.Session, title string, cols []statCol, maxCols int) {
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, title, ansi.Reset)
-	const maxWidth = 76 // leaves room for the 2-space indent
+func writeStatTable(s session.Session, title string, cols []statCol, maxCols, fixedW int) {
+	if title != "" {
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, title, ansi.Reset)
+	}
+	const maxWidth = 78 // leaves room for the 2-space indent within 80 columns
+	// fixedW > 0 forces every cell to that width so all tables' columns line up
+	// on one grid; 0 falls back to each column's natural width.
 	cellW := func(cd statCol) int {
+		if fixedW > 0 {
+			return fixedW
+		}
 		w := len(cd.name)
 		if v := len(comma(cd.val)); v > w {
 			w = v
@@ -835,10 +860,11 @@ func writeStatTable(s session.Session, title string, cols []statCol, maxCols int
 			fmt.Fprintf(&vals, " %*s │", w, comma(cd.val))
 		}
 		// Zebra rows: the heading row on white, the value row on gray, both in
-		// black text. The background fills the whole row, so the │ dividers read
-		// as cell borders within a solid bar.
-		fmt.Fprintf(s, "  %s%s%s%s\n", ansi.BgWhite, ansi.FgBlack, hdr.String(), ansi.Reset)
-		fmt.Fprintf(s, "  %s%s%s%s\n", ansi.BgBrightBlack, ansi.FgBlack, vals.String(), ansi.Reset)
+		// black text. A dark-gray cell past the right border casts a raised
+		// drop-shadow, so the light-topped table reads as a 3D panel.
+		shadow := ansi.BgShadow + " " + ansi.Reset
+		fmt.Fprintf(s, "  %s%s%s%s%s\n", ansi.BgWhite, ansi.FgBlack, hdr.String(), ansi.Reset, shadow)
+		fmt.Fprintf(s, "  %s%s%s%s%s\n", ansi.BgLightGray, ansi.FgBlack, vals.String(), ansi.Reset, shadow)
 	}
 }
 

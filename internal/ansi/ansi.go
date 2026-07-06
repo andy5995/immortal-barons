@@ -30,5 +30,7 @@ const (
 	BgBlue        = esc + "44m"
 	BgBlack       = esc + "40m"
 	BgWhite       = esc + "47m"
-	BgBrightBlack = esc + "100m" // gray, for zebra-striped table rows
+	BgBrightBlack = esc + "100m"      // dark gray
+	BgLightGray   = esc + "48;5;252m" // light gray (256-color), for zebra table value rows
+	BgShadow      = esc + "48;5;238m" // dark-but-not-black gray, for a raised right-edge shadow
 )
