@@ -37,6 +37,7 @@ func Load(cfg game.Config) (*game.World, error) {
 	w.EnsureInvestRate()
 	w.EnsurePirates()
 	w.EnsureTreaties()
+	w.EnsureNews()
 	w.Config = cfg
 	loadLeagueNodes(w, cfg)
 	return w, nil

@@ -8,8 +8,8 @@ func (w *World) SendMail(from, to *Empire, text string) {
 // PostBulletin adds a line to the planetary bulletin, keeping the most
 // recent 20 entries.
 func (w *World) PostBulletin(from *Empire, text string) {
-	w.Bulletin = append(w.Bulletin, from.Name+": "+text)
-	if len(w.Bulletin) > 20 {
-		w.Bulletin = w.Bulletin[len(w.Bulletin)-20:]
+	w.NewsToday = append(w.NewsToday, from.Name+": "+text)
+	if len(w.NewsToday) > 20 {
+		w.NewsToday = w.NewsToday[len(w.NewsToday)-20:]
 	}
 }

@@ -64,6 +64,7 @@ func (w *World) DailyMaintenance(today string) {
 			}
 		}
 		w.adjustInvestRate()
+		w.rollNews()
 		if w.Config.GameLength > 0 && w.GameDay >= w.Config.GameLength {
 			w.endGame()
 		}
@@ -74,6 +75,26 @@ func (w *World) DailyMaintenance(today string) {
 		}
 		w.LastMaintDate = next
 	}
+}
+
+// rollNews snapshots the day's planet totals into BulletinToday (rolling the
+// previous snapshot into BulletinYesterday, with Change the per-field delta)
+// and rolls NewsToday into NewsYesterday. News/event generation for the day
+// happens elsewhere during maintenance, before this runs.
+func (w *World) rollNews() {
+	newTotals := planetTotals(w)
+	prev := w.BulletinToday
+	w.BulletinYesterday = w.BulletinToday
+	w.BulletinToday = DailyBulletin{
+		Totals: newTotals,
+		Change: PlanetTotals{
+			Population: newTotals.Population - prev.Totals.Population,
+			Regions:    newTotals.Regions - prev.Totals.Regions,
+			NetWorth:   newTotals.NetWorth - prev.Totals.NetWorth,
+		},
+	}
+	w.NewsYesterday = w.NewsToday
+	w.NewsToday = nil
 }
 
 func (w *World) nextDate(d string) string {

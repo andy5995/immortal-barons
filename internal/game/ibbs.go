@@ -329,7 +329,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// own echo.
 	if p.LeagueConfig != nil && p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID() && !w.IsLeagueCoordinator() {
 		w.Config.applyLeagueRuleset(p.LeagueConfig)
-		w.Bulletin = append(w.Bulletin, "The League Coordinator updated the league settings.")
+		w.postNews("The League Coordinator updated the league settings.")
 	}
 	if len(p.Scores) > 0 {
 		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores})
@@ -337,9 +337,9 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// Outcomes of our own strikes, returning from the target board.
 	for _, res := range p.Results {
 		if res.Won {
-			w.Bulletin = append(w.Bulletin, fmt.Sprintf("Our interplanetary strike on %s (%s) took %d regions!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
+			w.postNews(fmt.Sprintf("Our interplanetary strike on %s (%s) took %d regions!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
 		} else {
-			w.Bulletin = append(w.Bulletin, fmt.Sprintf("Our interplanetary strike on %s (%s) was repelled.", res.TargetEmpire, res.TargetBoard))
+			w.postNews(fmt.Sprintf("Our interplanetary strike on %s (%s) was repelled.", res.TargetEmpire, res.TargetBoard))
 		}
 	}
 	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}

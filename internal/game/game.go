@@ -211,6 +211,20 @@ type RemoteBoard struct {
 	Scores  []RemoteScore
 }
 
+// PlanetTotals is a snapshot of planet-wide aggregates over living empires.
+type PlanetTotals struct {
+	Population int // Σ Empire.People
+	Regions    int // Σ Empire.Land
+	NetWorth   int // Σ NetWorth(e)
+}
+
+// DailyBulletin is one day's frozen header: the totals at that day's
+// maintenance and the change since the prior day.
+type DailyBulletin struct {
+	Totals PlanetTotals
+	Change PlanetTotals // Totals minus the previous day's Totals
+}
+
 type World struct {
 	Empires       []*Empire
 	Prices        Prices
@@ -218,12 +232,21 @@ type World struct {
 	GameDay       int
 	InvestRate    int // percent per day, floats each daily maintenance
 	LastMaintDate string
-	Bulletin      []string
-	Alliances     []string // legacy (pre-typed-treaties); migrated by EnsureTreaties
-	Treaties      []Treaty
-	LastMaster    string
-	RemoteBoards  []RemoteBoard
-	Pirates       []PirateFaction
+
+	// NewsToday/NewsYesterday split the planetary news feed by day; the JSON
+	// key stays "Bulletin" (the field's old name) so old saves load their
+	// lines into today's news. BulletinToday/BulletinYesterday are the frozen
+	// daily headers of planet-wide totals; see rollNews.
+	NewsToday         []string `json:"Bulletin"`
+	NewsYesterday     []string
+	BulletinToday     DailyBulletin
+	BulletinYesterday DailyBulletin
+
+	Alliances    []string // legacy (pre-typed-treaties); migrated by EnsureTreaties
+	Treaties     []Treaty
+	LastMaster   string
+	RemoteBoards []RemoteBoard
+	Pirates      []PirateFaction
 
 	// Inter-BBS (interplanetary) play — see ibbs.go. GroupAttacks assemble
 	// locally until they depart; Outbox holds packets queued for other boards;
@@ -276,6 +299,26 @@ func (w *World) EnsureInvestRate() {
 	if w.InvestRate == 0 {
 		w.InvestRate = DefaultInvestRate
 	}
+}
+
+// EnsureNews migrates a save that predates the Today/Yesterday news split.
+// The old Bulletin field is loaded into NewsToday via the reused JSON key, so
+// there is no data to move; this is a no-op kept for symmetry with the other
+// Ensure* migrations and as a hook for future news-related repairs.
+func (w *World) EnsureNews() {}
+
+// planetTotals sums People, Land, and NetWorth over living empires.
+func planetTotals(w *World) PlanetTotals {
+	var t PlanetTotals
+	for _, e := range w.Empires {
+		if !e.Alive {
+			continue
+		}
+		t.Population += e.People
+		t.Regions += e.Land
+		t.NetWorth += w.NetWorth(e)
+	}
+	return t
 }
 
 // seedAIEmpires appends Config.AICount AI empires to the world.

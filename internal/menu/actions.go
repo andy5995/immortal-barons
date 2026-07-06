@@ -1251,9 +1251,9 @@ func readMessages(s session.Session, w *ctx) Result {
 		}
 		w.With(func() { p.Mail = nil })
 	}
-	if len(w.Bulletin) > 0 {
+	if len(w.NewsToday) > 0 {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
-		for _, b := range w.Bulletin {
+		for _, b := range w.NewsToday {
 			fmt.Fprintf(s, "  %s\n", b)
 		}
 	}

@@ -11,9 +11,9 @@ import "fmt"
 // postNews appends a system news line to the planetary bulletin, keeping only
 // the most recent entries (same cap as player bulletins).
 func (w *World) postNews(line string) {
-	w.Bulletin = append(w.Bulletin, line)
-	if len(w.Bulletin) > 20 {
-		w.Bulletin = w.Bulletin[len(w.Bulletin)-20:]
+	w.NewsToday = append(w.NewsToday, line)
+	if len(w.NewsToday) > 20 {
+		w.NewsToday = w.NewsToday[len(w.NewsToday)-20:]
 	}
 }
 

@@ -79,12 +79,12 @@ func TestAttackPostsPlanetaryNews(t *testing.T) {
 	d := w.Empires[0]
 	d.Protection = 0
 
-	before := len(w.Bulletin)
+	before := len(w.NewsToday)
 	w.Attack(a, d)
-	if len(w.Bulletin) != before+1 {
-		t.Fatalf("attack should post one planetary news line, got %d new", len(w.Bulletin)-before)
+	if len(w.NewsToday) != before+1 {
+		t.Fatalf("attack should post one planetary news line, got %d new", len(w.NewsToday)-before)
 	}
-	if last := w.Bulletin[len(w.Bulletin)-1]; !strings.Contains(last, "Attacker") {
+	if last := w.NewsToday[len(w.NewsToday)-1]; !strings.Contains(last, "Attacker") {
 		t.Errorf("news should name the attacker: %q", last)
 	}
 }

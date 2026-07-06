@@ -47,7 +47,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	if _, err := ReadInbound(wA, exchange); err != nil {
 		t.Fatalf("ReadInbound A: %v", err)
 	}
-	if len(wA.Bulletin) == 0 {
+	if len(wA.NewsToday) == 0 {
 		t.Errorf("board A should have a bulletin entry for the strike outcome")
 	}
 	_ = ga

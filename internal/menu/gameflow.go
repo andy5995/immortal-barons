@@ -33,11 +33,11 @@ func GameLoop(s session.Session, w *game.World, active *game.Empire) error {
 
 // showBulletin prints the planetary bulletin, or a note if there is none.
 func showBulletin(s session.Session, w *ctx) Result {
-	if len(w.Bulletin) == 0 {
+	if len(w.NewsToday) == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "No planetary bulletins."))
 	} else {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
-		for _, b := range w.Bulletin {
+		for _, b := range w.NewsToday {
 			fmt.Fprintf(s, "  %s\n", b)
 		}
 	}
