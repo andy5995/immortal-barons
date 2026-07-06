@@ -197,6 +197,33 @@ func incomeReport(s session.Session, w *ctx, p *game.Empire) {
 	pause(s)
 }
 
+// peopleMood returns an end-of-turn flavor line keyed to popular support, in
+// the spirit of BRE's tiered "how your people feel" message (original wording).
+func peopleMood(support int) string {
+	switch {
+	case support < 10:
+		return "The mob is at your gates — your people would be rid of you by any means."
+	case support < 20:
+		return "Your people seethe with open hatred for your rule."
+	case support < 30:
+		return "Riots flare through the streets almost daily."
+	case support < 40:
+		return "Unrest simmers; angry crowds gather against your decrees."
+	case support < 50:
+		return "Discontent runs deep — your people grumble at every order."
+	case support < 60:
+		return "Your people endure your rule, but take little joy in it."
+	case support < 70:
+		return "Your people go about their business, content enough."
+	case support < 80:
+		return "Your people are glad to live under your banner."
+	case support < 90:
+		return "Your people admire your leadership and prosper gladly."
+	default:
+		return "Your people revere you — faith in your rule has never been higher."
+	}
+}
+
 // endOfTurnStats prints a short flavor line and the remaining turns. It
 // snapshots p under the lock first, since the daily-maintenance ticker (or
 // another session) can mutate these same fields concurrently.
@@ -205,7 +232,7 @@ func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
 	w.With(func() { snap = *p })
 	p = &snap
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "End of Turn Statistics:"), ansi.Reset)
-	fmt.Fprintf(s, "  "+tr(s, "The people of %s go about their business.")+"\n", p.Name)
+	fmt.Fprintf(s, "  %s\n", tr(s, peopleMood(p.Support)))
 	if p.LastPopGrowth > 0 {
 		fmt.Fprintf(s, "  "+tr(s, "Your dominion gained %s%s%s people.")+"\n", ansi.FgBrightCyan, comma(p.LastPopGrowth), ansi.Reset)
 	}
