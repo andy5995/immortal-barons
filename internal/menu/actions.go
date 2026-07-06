@@ -582,6 +582,17 @@ func visitAdvisors(s session.Session, w *ctx) Result {
 	return Stay
 }
 
+// about shows a short project panel: name, version, website, and the BRE
+// heritage note (reachable from both the Game and System menus, #66).
+func about(s session.Session, w *ctx) Result {
+	titleBar(s, tr(s, "About"))
+	fmt.Fprintf(s, "  %s\n", "Immortal Barons v"+game.Version)
+	fmt.Fprintf(s, "  %s\n", "https://andy5995.github.io/immortal-barons/")
+	fmt.Fprintf(s, "  %s\n", tr(s, "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and later maintained by John Dailey. No original BRE code, text, or art is used."))
+	pause(s)
+	return Stay
+}
+
 // gameSetup shows the current game rules (read-only; the sysop edits them from
 // the Coordinator menu's Configuration Editor).
 func gameSetup(s session.Session, w *ctx) Result {

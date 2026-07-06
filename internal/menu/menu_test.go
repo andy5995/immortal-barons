@@ -186,6 +186,34 @@ func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 	}
 }
 
+func TestAboutFromGameMenu(t *testing.T) {
+	menus := BuildMenus()
+	f, _, err := run(t, "I 0", menus.Game) // About -> pause -> Quit
+	if err != nil {
+		t.Fatalf("got %v", err)
+	}
+	out := f.out.String()
+	for _, want := range []string{"Immortal Barons", "v" + game.Version, "andy5995.github.io/immortal-barons", "Barren Realms Elite"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("About output missing %q: %q", want, out)
+		}
+	}
+}
+
+func TestAboutFromSystemMenu(t *testing.T) {
+	menus := BuildMenus()
+	f, _, err := run(t, "I 0", menus.System) // About -> pause -> Quit (Back)
+	if err != nil {
+		t.Fatalf("got %v", err)
+	}
+	out := f.out.String()
+	for _, want := range []string{"Immortal Barons", "v" + game.Version, "andy5995.github.io/immortal-barons", "Barren Realms Elite"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("About output missing %q: %q", want, out)
+		}
+	}
+}
+
 // testByKeyMenu builds a small menu exercising hotkey match, a heading
 // (unselectable), and a hidden item.
 func testByKeyMenu() *Menu {

@@ -261,6 +261,7 @@ func BuildMenus() *Menus {
 		{Key: 'E', Label: "Empire Status", Do: empireStatus},
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
 		{Key: 'G', Label: "Game Setup", Do: gameSetup},
+		{Key: 'I', Label: "About", Do: about},
 		{Key: 'M', Label: "Messages", Do: gotoMenu(messages)},
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
 		{Key: 'R', Label: "Set Tax Rate", Do: setTaxRate},
@@ -292,6 +293,7 @@ func BuildMenus() *Menus {
 		{Key: '8', Label: "Game Bulletins", Do: showBulletinToday},
 		{Key: 'A', Label: "Instructions", Do: helpBrowse},
 		{Key: 'B', Label: "Help Database", Do: helpBrowse},
+		{Key: 'I', Label: "About", Do: about},
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
 		{Key: '0', Label: "Quit", Do: quit},
 	}
