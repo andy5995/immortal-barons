@@ -4,10 +4,11 @@ import "time"
 
 // PlayTurn processes one turn for a single empire: its economy runs, and
 // its turn/protection counters tick down. Idle empires (whose owner never
-// plays) never call this, so they stagnate.
+// plays) never call this, so they stagnate. Industry production
+// (manufacture) is a turn-start step, run alongside CollectIncome by the
+// caller, not here.
 func (w *World) PlayTurn(e *Empire, today string) {
 	w.processEconomy(e)
-	w.manufacture(e)
 	if e.HQ > 0 && e.HQ < 100 {
 		e.HQ += 5
 		if e.HQ > 100 {
@@ -123,6 +124,7 @@ func (w *World) aiPlay(today string) {
 			e.LastGoldPaid = 0
 			w.PayForces(e, w.ForcesDue(e))
 			w.PayRegions(e, w.RegionsDue(e))
+			w.Manufacture(e)   // industry production also runs at turn start (#71)
 			w.CollectIncome(e) // same point income used to be credited (start of PlayTurn)
 			w.PlayTurn(e, today)
 		}
@@ -173,8 +175,10 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 // start of the turn, so it is in hand for maintenance and spending. BRE shows
 // the income report then, and its auto-deposit banks only the "extra" gold
 // left at the end of the turn. Keeping this out of processEconomy (the
-// end-of-turn steps: interest, food, manufacture) is what lets start-of-turn
-// maintenance be paid from the income the turn earns, instead of a turn behind.
+// end-of-turn steps: interest, food, population) is what lets start-of-turn
+// maintenance be paid from the income the turn earns, instead of a turn
+// behind. manufacture is likewise called at turn start, alongside this, so
+// freshly-produced units are on hand the same turn (#71).
 func (w *World) CollectIncome(e *Empire) {
 	e.Gold += w.IncomeThisTurn(e).Gold()
 }
@@ -302,10 +306,6 @@ const (
 	SpecialtyPenaltyPct = 50 // - to every other unit's production
 )
 
-// manufacture converts e's Industrial regions into production points and gold,
-// then spends the points on units per e.ProdXxx percentages. Specialization
-// applies a per-unit efficiency bonus/penalty on top (see below); it never
-// overrides the percentage split.
 // ProjectedProduction computes the units e would manufacture this turn at its
 // current Industrial regions, percentages, and specialization — without
 // applying them. Order matches the Set Industries screen: Troopers, Jets,
@@ -342,7 +342,12 @@ func (w *World) ProjectedProduction(e *Empire) [6]int {
 	}
 }
 
-func (w *World) manufacture(e *Empire) {
+// Manufacture converts e's Industrial regions into production points and
+// gold, then spends the points on units per e.ProdXxx percentages (see
+// ProjectedProduction). Specialization applies a per-unit efficiency
+// bonus/penalty on top; it never overrides the percentage split. Called at
+// turn start, alongside CollectIncome (#71).
+func (w *World) Manufacture(e *Empire) {
 	e.IndustryGold = e.Regions.Industrial * IndustryGoldPerRegion
 	e.Gold += e.IndustryGold
 

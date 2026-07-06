@@ -72,7 +72,7 @@ type Empire struct {
 	Macros map[string]string
 
 	// Production percentages (should sum to ~100) for what Industrial
-	// regions build. See manufacture() in turn.go.
+	// regions build. See Manufacture() in turn.go.
 	ProdTroopers int
 	ProdJets     int
 	ProdTurrets  int

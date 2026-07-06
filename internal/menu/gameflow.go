@@ -129,10 +129,14 @@ func showTurnEvents(s session.Session, w *ctx, p *game.Empire) {
 func incomeReport(s session.Session, w *ctx, p *game.Empire) {
 	var b game.IncomeBreakdown
 	var raids []string
+	var industryGold, madeTroopers, madeJets, madeTurrets, madeBombers, madeTanks, madeCarriers int
 	w.With(func() {
 		b = w.IncomeThisTurn(p)
 		raids = p.PirateRaids
 		p.PirateRaids = nil
+		industryGold = p.IndustryGold
+		madeTroopers, madeJets, madeTurrets = p.MadeTroopers, p.MadeJets, p.MadeTurrets
+		madeBombers, madeTanks, madeCarriers = p.MadeBombers, p.MadeTanks, p.MadeCarriers
 	})
 
 	golds := []struct {
@@ -183,6 +187,13 @@ func incomeReport(s session.Session, w *ctx, p *game.Empire) {
 	for _, r := range raids {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, r, ansi.Reset)
 	}
+	statLine(s, industryGold, "gold was produced by your Industry.")
+	statLine(s, madeTroopers, "Troopers were trained by Industrial Zones.")
+	statLine(s, madeJets, "Jets were manufactured by Industrial Zones.")
+	statLine(s, madeTurrets, "Turrets were manufactured by Industrial Zones.")
+	statLine(s, madeBombers, "Bombers were manufactured by Industrial Zones.")
+	statLine(s, madeTanks, "Tanks were manufactured by Industrial Zones.")
+	statLine(s, madeCarriers, "Carriers were manufactured by Industrial Zones.")
 	pause(s)
 }
 
@@ -203,13 +214,6 @@ func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, tr(s, "Riots have broken out due to high tax rates!"), ansi.Reset)
 	}
 	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
-	statLine(s, p.IndustryGold, "gold was produced by your Industry.")
-	statLine(s, p.MadeTroopers, "Troopers were trained by Industrial Zones.")
-	statLine(s, p.MadeJets, "Jets were manufactured by Industrial Zones.")
-	statLine(s, p.MadeTurrets, "Turrets were manufactured by Industrial Zones.")
-	statLine(s, p.MadeBombers, "Bombers were manufactured by Industrial Zones.")
-	statLine(s, p.MadeTanks, "Tanks were manufactured by Industrial Zones.")
-	statLine(s, p.MadeCarriers, "Carriers were manufactured by Industrial Zones.")
 	fmt.Fprintf(s, "  "+tr(s, "Turns left today: %d")+"\n", p.TurnsLeft)
 	pause(s)
 }
@@ -320,15 +324,30 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 	}
 }
 
-// runTurn is the "Play Game" action: it walks the turn pipeline (event
-// log, Diplomacy, Change Production, income report, status,
+// runTurn is the "Play Game" action. It first runs BRE's pre-turn stops
+// once per Play session — the event log, Diplomacy (act on treaties, or
+// Quit out), and Change Production (Set Industries, or decline) (#63) — then
+// walks the per-turn pipeline (industry production, income report, status,
 // spending/attack/covert/trading/message stages, then end-of-turn) for as
-// many turns as the player wants to play.
+// many turns as the player wants to play (#70).
 func runTurn(s session.Session, w *ctx) Result {
 	menus := BuildMenus()
+	p := w.Player()
+	var turnsLeft int
+	w.With(func() { turnsLeft = p.TurnsLeft })
+	if turnsLeft <= 0 {
+		ok(s, "Sorry, you have used all of your turns today.")
+		seeScores(s, w)
+		return Stay
+	}
+
+	showTurnEvents(s, w, p)
+	if err := Run(s, w, menus.Diplomacy); err != nil {
+		return Stay
+	}
+	setIndustries(s, w)
+
 	for {
-		p := w.Player()
-		var turnsLeft int
 		w.With(func() { turnsLeft = p.TurnsLeft })
 		if turnsLeft <= 0 {
 			ok(s, "Sorry, you have used all of your turns today.")
@@ -337,18 +356,10 @@ func runTurn(s session.Session, w *ctx) Result {
 		}
 
 		w.With(func() {
+			w.World.Manufacture(p)   // industry production happens at turn start, alongside income (#71)
 			w.World.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
 			p.RegionsBoughtThisTurn = 0
 		})
-		showTurnEvents(s, w, p)
-
-		// BRE's pre-turn stops, once per turn before the ordinary pipeline
-		// below: Diplomacy (act on treaties, or Quit out), then Change
-		// Production (Set Industries, or decline) (#63).
-		if err := Run(s, w, menus.Diplomacy); err != nil {
-			return Stay
-		}
-		setIndustries(s, w)
 
 		incomeReport(s, w, p)
 

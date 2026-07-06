@@ -51,6 +51,49 @@ func TestEndOfTurnStatsWritesNonEmpty(t *testing.T) {
 	}
 }
 
+// TestIncomeReportShowsIndustryProduction checks #71: production (and its
+// report lines) moved from end-of-turn to turn start, alongside income.
+func TestIncomeReportShowsIndustryProduction(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")} // pause keypress
+	w := newWorld()
+	p := w.Player()
+	p.Regions.Industrial = 10
+	w.World.Manufacture(p) // turn-start step, done by runTurn's loop before incomeReport
+
+	incomeReport(f, w, p)
+	out := f.out.String()
+	for _, want := range []string{
+		"gold was produced by your Industry",
+		"Troopers were trained by Industrial Zones",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected incomeReport to contain %q, got:\n%s", want, out)
+		}
+	}
+}
+
+// TestEndOfTurnStatsNoLongerShowsIndustryProduction is the flip side of
+// TestIncomeReportShowsIndustryProduction: the industry lines no longer
+// belong in endOfTurnStats (#71).
+func TestEndOfTurnStatsNoLongerShowsIndustryProduction(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")} // pause keypress
+	w := newWorld()
+	p := w.Player()
+	p.Regions.Industrial = 10
+	w.World.Manufacture(p)
+
+	endOfTurnStats(f, w, p)
+	out := f.out.String()
+	for _, unwanted := range []string{
+		"gold was produced by your Industry",
+		"Troopers were trained by Industrial Zones",
+	} {
+		if strings.Contains(out, unwanted) {
+			t.Errorf("expected endOfTurnStats to NOT contain %q, got:\n%s", unwanted, out)
+		}
+	}
+}
+
 func TestRunTurnNoTurnsLeftReturnsImmediately(t *testing.T) {
 	f := &fakeSession{keys: []rune("  ")} // pause keypress inside ok(), then seeScores' pause
 	w := newWorld()
@@ -177,6 +220,36 @@ func TestRunTurnShowsPreTurnStopsInOrder(t *testing.T) {
 	if !(eventsAt < diplomacyAt && diplomacyAt < productionAt && productionAt < incomeAt) {
 		t.Errorf("expected order events < Diplomacy < Change Production < Income Report, got offsets %d, %d, %d, %d",
 			eventsAt, diplomacyAt, productionAt, incomeAt)
+	}
+}
+
+// TestRunTurnPreTurnStopsOnceAcrossTwoTurns checks #70: Diplomacy and Change
+// Production are pre-turn stops for the whole Play session, not per turn —
+// they must appear exactly once even when the player continues into a
+// second turn.
+func TestRunTurnPreTurnStopsOnceAcrossTwoTurns(t *testing.T) {
+	preTurn := "0\r"       // Diplomacy quit, decline Change Production
+	perTurn := "  0000n\r" // income/status pauses, quit Spending/Attack/Covert/Trading, decline message, end-of-turn pause
+	keys := preTurn + perTurn + "y" + perTurn + "n\r"
+	f := &fakeSession{keys: []rune(keys)}
+	w := newWorld()
+	w.AutoPayMaint = true
+	left := w.Player().TurnsLeft
+
+	runTurn(f, w)
+	out := f.out.String()
+
+	if got := w.Player().TurnsLeft; got != left-2 {
+		t.Fatalf("expected two turns consumed, TurnsLeft %d -> %d", left, got)
+	}
+	if n := strings.Count(out, "[Diplomacy]"); n != 1 {
+		t.Errorf("expected Diplomacy to appear once across two turns, got %d\n%s", n, out)
+	}
+	if n := strings.Count(out, "[Industrial Production]"); n != 1 {
+		t.Errorf("expected Industrial Production to appear once across two turns, got %d\n%s", n, out)
+	}
+	if n := strings.Count(out, "Income Report"); n != 2 {
+		t.Errorf("expected Income Report once per turn (2), got %d\n%s", n, out)
 	}
 }
 

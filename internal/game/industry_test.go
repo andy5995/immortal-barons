@@ -12,7 +12,7 @@ func TestManufactureSplitsByPercent(t *testing.T) {
 	beforeTroopers, beforeJets, beforeTurrets := e.Troopers, e.Jets, e.Turrets
 	beforeTanks, beforeCarriers := e.Tanks, e.Carriers
 
-	w.manufacture(e)
+	w.Manufacture(e)
 
 	pts := 100 * IndustryPointsPerRegion
 	wantTroopers := (pts * e.ProdTroopers / 100) / CostTrooper
@@ -68,7 +68,7 @@ func TestManufactureZeroWithoutIndustrial(t *testing.T) {
 	e.Regions = RegionMix{Coastal: 100}
 	e.Land = e.Regions.Total()
 
-	w.manufacture(e)
+	w.Manufacture(e)
 
 	if e.MadeTroopers != 0 || e.MadeJets != 0 || e.MadeTurrets != 0 ||
 		e.MadeBombers != 0 || e.MadeTanks != 0 || e.MadeCarriers != 0 {
@@ -92,7 +92,7 @@ func TestSpecializedBonusAndPenalty(t *testing.T) {
 	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 0, 50, 0
 	e.Specialized = "Tanks"
 
-	w.manufacture(e)
+	w.Manufacture(e)
 
 	pts := 100 * IndustryPointsPerRegion
 	wantTroopers := (pts * 50 / 100) / CostTrooper * (100 - SpecialtyPenaltyPct) / 100
@@ -115,7 +115,7 @@ func TestUnspecializedHonorsSplit(t *testing.T) {
 	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 100, 0, 0
 	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 0, 0, 0
 
-	w.manufacture(e)
+	w.Manufacture(e)
 
 	pts := 100 * IndustryPointsPerRegion
 	if want := pts / CostTrooper; e.MadeTroopers != want {
