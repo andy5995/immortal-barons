@@ -40,9 +40,10 @@ func buy2(label string, military bool, unit func(*ctx) int, apply func(*game.Wor
 		} else {
 			// No pause: the Spending menu (NoClear) redraws right after with
 			// updated Owned counts, so the confirmation stays visible above it
-			// instead of forcing an extra keypress (BRE-style).
+			// instead of forcing an extra keypress (BRE-style). Gold isn't
+			// repeated here — it's in the Spending menu's status footer.
 			fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
-				fmt.Sprintf(tr(s, "Done. Gold remaining: %d"), p.Gold), ansi.Reset)
+				fmt.Sprintf(tr(s, "%d %s purchased."), n, label), ansi.Reset)
 		}
 		return Stay
 	}

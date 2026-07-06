@@ -135,7 +135,7 @@ func TestBuyTroopersShowsConfirmationWithoutPause(t *testing.T) {
 		t.Errorf("expected Troopers %d, got %d", beforeTroopers+5, got)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "Done. Gold remaining") {
+	if !strings.Contains(out, "Troopers purchased") {
 		t.Errorf("expected purchase confirmation, got:\n%s", out)
 	}
 	if n := strings.Count(out, "Spending Menu"); n < 2 {
