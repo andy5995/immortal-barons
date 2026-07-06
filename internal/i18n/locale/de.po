@@ -64,9 +64,6 @@ msgstr "Hilfe-Datenbank"
 msgid "Quit"
 msgstr "Beenden"
 
-msgid "Return"
-msgstr "Zurück"
-
 # Buy / sell items
 msgid "Troopers"
 msgstr "Soldaten"

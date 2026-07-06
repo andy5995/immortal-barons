@@ -25,6 +25,15 @@ type Menus struct {
 	Food      *Menu
 }
 
+// quitOnEnter makes Enter activate a menu's own '0' Quit item, so the prompt
+// shows and selects "Quit" uniformly across submenus (#62). The Spending
+// menu is the one exception: its Enter-to-exit stays gated behind the
+// EnterExitsBuy preference (see buy.ExitOnEnter below), so it does not use
+// this hook.
+func quitOnEnter(m *Menu) func(*ctx) *Item {
+	return func(g *ctx) *Item { return m.byKey('0', g) }
+}
+
 // BuildMenus constructs the full BRE menu tree. Menus are created first,
 // then wired, so submenus can reference each other (e.g. several menus
 // offer "Visit Bank").
@@ -108,8 +117,9 @@ func BuildMenus() *Menus {
 			Do: sellUnit2("Sell Tanks", tanks, (*game.World).SellTanks)},
 		{Key: '9', Label: "Carriers", Price: half(priceCarrier), Owned: owned(carriers),
 			Do: sellUnit2("Sell Carriers", carriers, (*game.World).SellCarriers)},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
 	}
+	sell.DefaultOnEnter = quitOnEnter(sell)
 
 	bank.Items = []Item{
 		{Key: 'D', Label: "Deposit Funds", Do: money("Deposit", func(p *game.Empire) int { return p.Gold }, (*game.World).Deposit)},
@@ -123,6 +133,7 @@ func BuildMenus() *Menus {
 		{Key: 'V', Label: "View Bank Rates", Do: bankRates},
 		{Key: '0', Label: "Quit", Do: back},
 	}
+	bank.DefaultOnEnter = quitOnEnter(bank)
 	bank.Status = func(w *ctx) string {
 		p := w.Player()
 		return fmt.Sprintf("You have %s%s%s gold in hand and %s%s%s gold in the bank.",
@@ -140,6 +151,7 @@ func BuildMenus() *Menus {
 		{Key: 'O', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden},
 		{Key: '0', Label: "Quit", Do: back},
 	}
+	attack.DefaultOnEnter = quitOnEnter(attack)
 
 	// InterPlanetary Operations: BRE gathers the cross-planet actions on their
 	// own menu, "only for InterBBS Games". The whole node hangs off a gated
@@ -160,6 +172,7 @@ func BuildMenus() *Menus {
 		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: '0', Label: "Quit", Do: back},
 	}
+	interplanetary.DefaultOnEnter = quitOnEnter(interplanetary)
 
 	covert.Items = []Item{
 		{Key: 'S', Label: "Send Spy", Do: sendSpy},
@@ -174,6 +187,7 @@ func BuildMenus() *Menus {
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
 	}
+	covert.DefaultOnEnter = quitOnEnter(covert)
 
 	trading.Items = []Item{
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
@@ -182,20 +196,23 @@ func BuildMenus() *Menus {
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
 	}
+	trading.DefaultOnEnter = quitOnEnter(trading)
 
 	diplomacy.Items = []Item{
 		{Key: 'M', Label: "Modify Diplomacy", Do: modifyDiplomacy},
 		{Key: 'V', Label: "View Diplomacy", Do: viewDiplomacy},
 		{Key: 'L', Label: "Diplomacy List", Do: viewDiplomacy},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
 	}
+	diplomacy.DefaultOnEnter = quitOnEnter(diplomacy)
 
 	messages.Items = []Item{
 		{Key: 'R', Label: "Read Messages", Do: readMessages},
 		{Key: 'S', Label: "Send Message", Do: sendMessage},
 		{Key: 'P', Label: "Planetary Post", Do: planetaryPost},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
 	}
+	messages.DefaultOnEnter = quitOnEnter(messages)
 
 	prefs.Items = []Item{
 		{Key: 'E', LabelFn: onOff("Enter exits Buy menu", func(w *ctx) *bool { return &w.EnterExitsBuy }),
@@ -215,24 +232,27 @@ func BuildMenus() *Menus {
 		{Key: 'L', LabelFn: func(w *ctx) string {
 			return i18n.T(playerLang(w), "Language") + ": " + languageName(w.Player().Language)
 		}, Do: pickLanguage},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
 	}
+	prefs.DefaultOnEnter = quitOnEnter(prefs)
 
 	// The Coordinator Menu belongs to the elected BBS Coordinator (see the
 	// System menu gate below); it holds the planet-coordination functions.
 	coord.Items = []Item{
 		{Key: 'M', Label: "Modify League Diplomacy", Do: modifyLeagueDiplomacy},
 		{Key: 'P', Label: "Player List", Do: playerList},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
 	}
+	coord.DefaultOnEnter = quitOnEnter(coord)
 
 	food.Items = []Item{
 		{Label: fmt.Sprintf("The market buys food for %d and sells for %d.", game.FoodSellPrice, game.FoodBuyPrice)},
 		{Key: 'B', Label: "Buy Food", Do: buyFoodMarket},
 		{Key: 'S', Label: "Food", Do: sellFoodMarket},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: '0', Label: "Return", Do: back},
+		{Key: '0', Label: "Quit", Do: back},
 	}
+	food.DefaultOnEnter = quitOnEnter(food)
 
 	system.Items = []Item{
 		{Key: '#', Label: "Abdicate", Do: abdicate},
@@ -258,6 +278,7 @@ func BuildMenus() *Menus {
 			Hidden: func(w *ctx) bool { return !w.Coordinator }},
 		{Key: '0', Label: "Quit", Do: back},
 	}
+	system.DefaultOnEnter = quitOnEnter(system)
 
 	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Color: ansi.FgBrightMagenta, Status: statusBar}
 	gameMenu.Items = []Item{

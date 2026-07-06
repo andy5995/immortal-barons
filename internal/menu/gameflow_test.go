@@ -137,7 +137,7 @@ func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 }
 
 // TestRunTurnConsumesATurn scripts a full pass through the pipeline for one
-// turn: income/status pauses, Return ('0') out of Spending, Attack, Covert,
+// turn: income/status pauses, Quit ('0') out of Spending, Attack, Covert,
 // and Trading, decline the message prompt, the end-of-turn pause, then
 // decline "continue" to stop after one turn.
 func TestRunTurnConsumesATurn(t *testing.T) {

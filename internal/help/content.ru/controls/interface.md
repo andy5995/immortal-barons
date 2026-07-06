@@ -11,17 +11,17 @@ title: 'Перемещение по меню'
 пункт меню. У каждого пункта клавиша показана в скобках, например
 `(1)`. Нажмите эту клавишу — и он сразу выполнится.
 
-«Quit» (клавиша `0`) выходит из меню хода (Расходы, Атака, Разведка,
-Торговля) и переводит вас к следующему шагу хода. Вернуться в это меню можно
-только на следующем ходу.
-
-«Return» (клавиша `0`) выходит из бокового меню (например, Банк или
-Системное меню) и возвращает вас туда, где вы были.
+Every menu leaves with the `0` key, labeled "Quit". On a turn menu
+(Spending, Attack, Covert, Trading), Quit moves you to the next step of your
+turn; you cannot go back to that menu until your next turn. On a side menu
+(like the Bank or the System Menu), Quit takes you back to where you were.
 
 Системное меню открывается клавишей `*` из меню Расходов. В нём собраны
 дополнительные пункты: Настройки, Задать налог и Показать инструкции.
 
-Если включить «Enter выходит из меню покупок» в Настройках, нажатие Enter в
-меню хода выберет за вас «Quit».
+Pressing Enter with no other key also chooses Quit — the prompt shows "Quit"
+so you can see what Enter will do. On a turn menu, this only happens if you
+turn on "Enter exits Buy menu" in Preferences; on a side menu, Enter always
+chooses Quit.
 
 Нажмите `?` в любом меню, чтобы открыть эту справку.

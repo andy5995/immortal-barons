@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-05 20:21-0500\n"
+"POT-Creation-Date: 2026-07-06 11:09-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -35,27 +35,24 @@ msgstr ""
 "`(1)`. Drücken Sie diese Taste, und er wird sofort ausgeführt."
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:16
+#: internal/help/content/controls/interface.md:17
+#, fuzzy
+#| msgid ""
+#| "\"Quit\" (the `0` key) leaves a turn menu (Spending, Attack, Covert, "
+#| "Trading) and moves you to the next step of your turn. You cannot go back "
+#| "to that menu until your next turn."
 msgid ""
-"\"Quit\" (the `0` key) leaves a turn menu (Spending, Attack, Covert, "
-"Trading) and moves you to the next step of your turn. You cannot go back to "
-"that menu until your next turn."
+"Every menu leaves with the `0` key, labeled \"Quit\". On a turn menu "
+"(Spending, Attack, Covert, Trading), Quit moves you to the next step of your "
+"turn; you cannot go back to that menu until your next turn. On a side menu "
+"(like the Bank or the System Menu), Quit takes you back to where you were."
 msgstr ""
 "„Quit“ (die Taste `0`) verlässt ein Zugmenü (Ausgaben, Angriff, Verdeckt, "
 "Handel) und bringt Sie zum nächsten Schritt Ihres Zuges. Sie können erst in "
 "Ihrem nächsten Zug zu diesem Menü zurückkehren."
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:19
-msgid ""
-"\"Return\" (the `0` key) leaves a side menu (like the Bank or the System "
-"Menu) and takes you back to where you were."
-msgstr ""
-"„Return“ (die Taste `0`) verlässt ein Nebenmenü (wie die Bank oder das "
-"Systemmenü) und bringt Sie dorthin zurück, wo Sie waren."
-
-#. type: Plain text
-#: internal/help/content/controls/interface.md:22
+#: internal/help/content/controls/interface.md:20
 msgid ""
 "The System Menu opens with the `*` key from the Spending menu. It holds "
 "extra options like Preferences, Set Tax Rate, and Show Instructions."
@@ -67,11 +64,11 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/controls/interface.md:25
 msgid ""
-"If you turn on \"Enter exits Buy menu\" in Preferences, pressing Enter at a "
-"turn menu chooses Quit for you."
+"Pressing Enter with no other key also chooses Quit — the prompt shows "
+"\"Quit\" so you can see what Enter will do. On a turn menu, this only "
+"happens if you turn on \"Enter exits Buy menu\" in Preferences; on a side "
+"menu, Enter always chooses Quit."
 msgstr ""
-"Wenn Sie in den Einstellungen „Enter verlässt das Kaufmenü“ aktivieren, "
-"wählt das Drücken der Eingabetaste in einem Zugmenü für Sie „Quit“."
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:26
@@ -1126,6 +1123,20 @@ msgid "Tip: military parked in the Trading Market is safe from pirate raids."
 msgstr ""
 "Tipp: Militär, das im Handelsmarkt geparkt ist, ist vor Piratenüberfällen "
 "sicher."
+
+#~ msgid ""
+#~ "\"Return\" (the `0` key) leaves a side menu (like the Bank or the System "
+#~ "Menu) and takes you back to where you were."
+#~ msgstr ""
+#~ "„Return“ (die Taste `0`) verlässt ein Nebenmenü (wie die Bank oder das "
+#~ "Systemmenü) und bringt Sie dorthin zurück, wo Sie waren."
+
+#~ msgid ""
+#~ "If you turn on \"Enter exits Buy menu\" in Preferences, pressing Enter at "
+#~ "a turn menu chooses Quit for you."
+#~ msgstr ""
+#~ "Wenn Sie in den Einstellungen „Enter verlässt das Kaufmenü“ aktivieren, "
+#~ "wählt das Drücken der Eingabetaste in einem Zugmenü für Sie „Quit“."
 
 #, fuzzy
 #~| msgid ""

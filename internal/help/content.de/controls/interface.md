@@ -11,18 +11,18 @@ Drücken Sie eine Taste zur Auswahl. Sie drücken nicht die Eingabetaste, um
 einen Menüpunkt zu wählen. Jeder Punkt zeigt seine Taste in Klammern, wie
 `(1)`. Drücken Sie diese Taste, und er wird sofort ausgeführt.
 
-„Quit“ (die Taste `0`) verlässt ein Zugmenü (Ausgaben, Angriff, Verdeckt,
-Handel) und bringt Sie zum nächsten Schritt Ihres Zuges. Sie können erst in
-Ihrem nächsten Zug zu diesem Menü zurückkehren.
-
-„Return“ (die Taste `0`) verlässt ein Nebenmenü (wie die Bank oder das
-Systemmenü) und bringt Sie dorthin zurück, wo Sie waren.
+Every menu leaves with the `0` key, labeled "Quit". On a turn menu
+(Spending, Attack, Covert, Trading), Quit moves you to the next step of your
+turn; you cannot go back to that menu until your next turn. On a side menu
+(like the Bank or the System Menu), Quit takes you back to where you were.
 
 Das Systemmenü öffnet sich mit der Taste `*` im Ausgabenmenü. Es enthält
 zusätzliche Optionen wie Einstellungen, Steuersatz festlegen und Anweisungen
 anzeigen.
 
-Wenn Sie in den Einstellungen „Enter verlässt das Kaufmenü“ aktivieren,
-wählt das Drücken der Eingabetaste in einem Zugmenü für Sie „Quit“.
+Pressing Enter with no other key also chooses Quit — the prompt shows "Quit"
+so you can see what Enter will do. On a turn menu, this only happens if you
+turn on "Enter exits Buy menu" in Preferences; on a side menu, Enter always
+chooses Quit.
 
 Drücken Sie `?` in einem Menü, um diese Hilfe zu öffnen.

@@ -64,9 +64,6 @@ msgstr "База помощи"
 msgid "Quit"
 msgstr "Выход"
 
-msgid "Return"
-msgstr "Назад"
-
 # Buy / sell items
 msgid "Troopers"
 msgstr "Солдаты"

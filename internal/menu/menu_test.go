@@ -83,7 +83,7 @@ func TestQuitIsCaseInsensitive(t *testing.T) {
 
 func TestEnterAndLeaveSpendingMenu(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "0", menus.Spending) // Return immediately
+	f, _, err := run(t, "0", menus.Spending) // Quit immediately
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -140,7 +140,7 @@ func TestBuyLandThroughSpendingMenu(t *testing.T) {
 
 func TestReachSystemMenuFromSpending(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "*00", menus.Spending) // '*' -> System Menu -> Return -> Return
+	f, _, err := run(t, "*00", menus.Spending) // '*' -> System Menu -> Quit -> Quit
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -377,6 +377,67 @@ func TestDefaultOnEnterNilHookIgnoresEnter(t *testing.T) {
 	f := &fakeSession{keys: []rune{'\r'}}
 	if it, _ := m.readChoice(f, w); it != nil {
 		t.Errorf("Enter with no DefaultOnEnter hook should select nothing, got %v", it)
+	}
+}
+
+// TestSubmenusUseQuitNotReturn is the #62 regression check: every submenu
+// that used to say "Return" now says "Quit" instead, with no leftover
+// "Return" label anywhere in the tree.
+func TestSubmenusUseQuitNotReturn(t *testing.T) {
+	menus := BuildMenus()
+	for name, m := range map[string]*Menu{
+		"Sell":      menus.Sell,
+		"Diplomacy": menus.Diplomacy,
+		"Messages":  menus.Messages,
+	} {
+		f, _, err := run(t, "0", m)
+		if err != nil {
+			t.Fatalf("%s: got %v", name, err)
+		}
+		out := f.out.String()
+		if strings.Contains(out, "Return") {
+			t.Errorf("%s: expected no \"Return\" label, got:\n%s", name, out)
+		}
+		if !strings.Contains(out, "Quit") {
+			t.Errorf("%s: expected a \"Quit\" label, got:\n%s", name, out)
+		}
+	}
+}
+
+// TestEnterActivatesSubmenuQuit confirms the DefaultOnEnter hook wired onto
+// submenus (#62): pressing Enter alone shows and selects "Quit", the same
+// way '0' does.
+func TestEnterActivatesSubmenuQuit(t *testing.T) {
+	menus := BuildMenus()
+	f, _, err := run(t, "\r", menus.Bank)
+	if err != nil {
+		t.Fatalf("got %v", err)
+	}
+	if !strings.Contains(f.out.String(), "Quit") {
+		t.Errorf("expected Enter to show/select Quit, got:\n%s", f.out.String())
+	}
+}
+
+// TestEnterExitsSpendingRespectsPreference confirms #62 didn't weaken the
+// EnterExitsBuy preference: it still gates whether Enter exits the real
+// Spending menu, independent of the DefaultOnEnter hook used elsewhere.
+func TestEnterExitsSpendingRespectsPreference(t *testing.T) {
+	menus := BuildMenus()
+
+	w := newWorld()
+	w.EnterExitsBuy = true
+	if it, err := menus.Spending.readChoice(&fakeSession{keys: []rune{'\r'}}, w); err != nil {
+		t.Fatal(err)
+	} else if it == nil || it.Key != '0' {
+		t.Errorf("pref on: expected Enter to select Spending's '0' Quit, got %v", it)
+	}
+
+	w2 := newWorld()
+	w2.EnterExitsBuy = false
+	if it, err := menus.Spending.readChoice(&fakeSession{keys: []rune{'\r'}}, w2); err != nil {
+		t.Fatal(err)
+	} else if it != nil {
+		t.Errorf("pref off: expected Enter to select nothing, got %v", it)
 	}
 }
 
