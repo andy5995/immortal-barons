@@ -261,7 +261,7 @@ func BuildMenus() *Menus {
 
 	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Color: ansi.FgBrightMagenta, Status: statusBar}
 	gameMenu.Items = []Item{
-		{Key: '1', Label: "Play Game", Do: runTurn},
+		{Key: '1', Label: "Play", Do: runTurn},
 		{Key: '2', Label: "See Status", Do: empireStatus},
 		{Key: '3', Label: "See Scores", Do: seeScores},
 		{Key: '4', Label: "Today's News", Do: showBulletinToday},
@@ -273,6 +273,15 @@ func BuildMenus() *Menus {
 		{Key: 'B', Label: "Help Database", Do: helpBrowse},
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
 		{Key: '0', Label: "Quit", Do: quit},
+	}
+	// Enter picks "Play" while turns remain, else "Quit" — mutually
+	// exclusive defaults on the opening menu (#56/#57).
+	gameMenu.DefaultOnEnter = func(w *ctx) *Item {
+		key := byte('0')
+		if p := w.Player(); p != nil && p.TurnsLeft > 0 {
+			key = '1'
+		}
+		return gameMenu.byKey(rune(key), w)
 	}
 
 	return &Menus{

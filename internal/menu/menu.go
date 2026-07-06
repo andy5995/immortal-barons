@@ -135,7 +135,12 @@ type Menu struct {
 	// (back, not session quit). When the player's EnterExitsBuy preference is
 	// on, that item is offered as the default and Enter selects it.
 	ExitOnEnter bool
-	Status      func(*ctx) string // optional status bar under the menu
+	// DefaultOnEnter picks a per-context default item (e.g. "Play" while
+	// turns remain, "Quit" once they're gone): it's offered after the prompt
+	// the same way the ExitOnEnter default is, and Enter selects it. nil
+	// return means no default this time. Takes priority over ExitOnEnter.
+	DefaultOnEnter func(*ctx) *Item
+	Status         func(*ctx) string // optional status bar under the menu
 }
 
 // selectable reports whether it is a visible, choosable item (not a
@@ -167,11 +172,13 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	var def *Item
 	var defLabel, prompt string
 	g.With(func() {
-		if g.EnterExitsBuy && m.ExitOnEnter {
+		if m.DefaultOnEnter != nil {
+			def = m.DefaultOnEnter(g)
+		} else if g.EnterExitsBuy && m.ExitOnEnter {
 			def = m.byKey('0', g)
-			if def != nil {
-				defLabel = def.label(g)
-			}
+		}
+		if def != nil {
+			defLabel = def.label(g)
 		}
 		prompt = i18n.T(playerLang(g), "Choice>")
 	})

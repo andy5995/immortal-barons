@@ -319,6 +319,67 @@ func TestEnterIgnoredWhenPrefOff(t *testing.T) {
 	}
 }
 
+func TestDefaultOnEnterPlaysWhenTurnsRemain(t *testing.T) {
+	w := newWorld()
+	w.Player().TurnsLeft = 5
+	m := &Menu{Items: []Item{
+		{Key: '1', Label: "Play", Do: func(session.Session, *ctx) Result { return Stay }},
+		{Key: '0', Label: "Quit", Do: back},
+	}}
+	m.DefaultOnEnter = func(g *ctx) *Item {
+		if g.Player().TurnsLeft > 0 {
+			return m.byKey('1', g)
+		}
+		return m.byKey('0', g)
+	}
+	f := &fakeSession{keys: []rune{'\r'}}
+	it, err := m.readChoice(f, w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if it == nil || it.Key != '1' {
+		t.Errorf("Enter with turns remaining should select Play, got %v", it)
+	}
+	if !strings.Contains(f.out.String(), "Play") {
+		t.Errorf("prompt should show Play, got %q", f.out.String())
+	}
+}
+
+func TestDefaultOnEnterQuitsWhenNoTurns(t *testing.T) {
+	w := newWorld()
+	w.Player().TurnsLeft = 0
+	m := &Menu{Items: []Item{
+		{Key: '1', Label: "Play", Do: func(session.Session, *ctx) Result { return Stay }},
+		{Key: '0', Label: "Quit", Do: back},
+	}}
+	m.DefaultOnEnter = func(g *ctx) *Item {
+		if g.Player().TurnsLeft > 0 {
+			return m.byKey('1', g)
+		}
+		return m.byKey('0', g)
+	}
+	f := &fakeSession{keys: []rune{'\r'}}
+	it, err := m.readChoice(f, w)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if it == nil || it.Key != '0' {
+		t.Errorf("Enter with no turns left should select Quit, got %v", it)
+	}
+	if !strings.Contains(f.out.String(), "Quit") {
+		t.Errorf("prompt should show Quit, got %q", f.out.String())
+	}
+}
+
+func TestDefaultOnEnterNilHookIgnoresEnter(t *testing.T) {
+	w := newWorld()
+	m := &Menu{Items: []Item{{Key: '0', Label: "Quit", Do: back}}}
+	f := &fakeSession{keys: []rune{'\r'}}
+	if it, _ := m.readChoice(f, w); it != nil {
+		t.Errorf("Enter with no DefaultOnEnter hook should select nothing, got %v", it)
+	}
+}
+
 func TestComposeMessageSaves(t *testing.T) {
 	f := &fakeSession{keys: []rune("hello\rworld\r/\rS")} // two lines, then /S
 	text, send := composeMessage(f)
