@@ -150,10 +150,10 @@ func (b IncomeBreakdown) Gold() int {
 }
 
 // IncomeThisTurn itemizes e's income for the current turn. Technology scales
-// every gold source by techFactor; low popular support cuts Coastal tourism.
+// every gold source by TechFactor; low popular support cuts Coastal tourism.
 // Region gold weights mirror RegionMix.income().
 func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
-	tf := e.techFactor()
+	tf := e.TechFactor()
 	scale := func(n int) int { return n * (100 + tf) / 100 }
 	return IncomeBreakdown{
 		Taxes:      scale(e.People * e.Tax / 100 * 8),
@@ -180,7 +180,7 @@ func (w *World) CollectIncome(e *Empire) {
 }
 
 func (w *World) processEconomy(e *Empire) {
-	tf := e.techFactor()
+	tf := e.TechFactor()
 
 	// Bank interest scales with the league's Interest Rate knob, anchored so
 	// the default (50) reproduces the historical ~1%/turn. Mapping to BRE's

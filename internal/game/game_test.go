@@ -89,17 +89,17 @@ func TestHQBoostsTanks(t *testing.T) {
 
 func TestTechFactor(t *testing.T) {
 	e := &Empire{Land: 100, Regions: RegionMix{Coastal: 100}}
-	if got := e.techFactor(); got != 0 {
+	if got := e.TechFactor(); got != 0 {
 		t.Errorf("no Technology regions: want 0, got %d", got)
 	}
 
 	e = &Empire{Land: 100, Regions: RegionMix{Coastal: 80, Technology: 20}}
-	if got := e.techFactor(); got != 20 {
+	if got := e.TechFactor(); got != 20 {
 		t.Errorf("20%% Technology: want 20, got %d", got)
 	}
 
 	e = &Empire{Land: 100, Regions: RegionMix{Technology: 100}}
-	if got := e.techFactor(); got != TechFactorCap {
+	if got := e.TechFactor(); got != TechFactorCap {
 		t.Errorf("all-Technology empire should be capped at %d, got %d", TechFactorCap, got)
 	}
 }

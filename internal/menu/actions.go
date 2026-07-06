@@ -790,6 +790,11 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 	}
 	writeStatTable(s, tr(s, "Regions"), regionCols, 4, uniformWidth(regionCols))
 
+	if tf := p.TechFactor(); tf > 0 {
+		fmt.Fprintf(s, "%s%s:%s +%s %s%s%s\n", wht, tr(s, "Technology Bonus"), r, pct(tf),
+			wht, tr(s, "to income, upkeep, and combat strength"), r)
+	}
+
 	if p.Protection > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "You have %s%s turns of Protection Left.")+"%s\n", wht, num(p.Protection), wht, r)
 	}
