@@ -137,11 +137,12 @@ func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 }
 
 // TestRunTurnConsumesATurn scripts a full pass through the pipeline for one
-// turn: income/status pauses, Quit ('0') out of Spending, Attack, Covert,
-// and Trading, decline the message prompt, the end-of-turn pause, then
-// decline "continue" to stop after one turn.
+// turn: Quit ('0') out of the pre-turn Diplomacy stop, decline Change
+// Production, income/status pauses, Quit ('0') out of Spending, Attack,
+// Covert, and Trading, decline the message prompt, the end-of-turn pause,
+// then decline "continue" to stop after one turn.
 func TestRunTurnConsumesATurn(t *testing.T) {
-	keys := "  0000n\r n\r"
+	keys := "0\r  0000n\r n\r"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true // pay maintenance silently; this test is about the turn loop
@@ -149,6 +150,33 @@ func TestRunTurnConsumesATurn(t *testing.T) {
 	runTurn(f, w)
 	if w.Player().TurnsLeft != left-1 {
 		t.Errorf("expected TurnsLeft %d, got %d", left-1, w.Player().TurnsLeft)
+	}
+}
+
+// TestRunTurnShowsPreTurnStopsInOrder checks BRE's pre-turn sequence: the
+// event log ("Since your last play..."), then Diplomacy, then Change
+// Production (Set Industries), all before the ordinary turn pipeline (#63).
+func TestRunTurnShowsPreTurnStopsInOrder(t *testing.T) {
+	keys := " 0\r  0000n\r n\r" // leading pause for the non-empty event log
+	f := &fakeSession{keys: []rune(keys)}
+	w := newWorld()
+	w.AutoPayMaint = true
+	w.Player().Events = []string{"A dragon attacked your regions."}
+
+	runTurn(f, w)
+	out := f.out.String()
+
+	eventsAt := strings.Index(out, "Since your last play, this has happened:")
+	diplomacyAt := strings.Index(out, "[Diplomacy]")
+	productionAt := strings.Index(out, "[Industrial Production]")
+	incomeAt := strings.Index(out, "Income Report")
+
+	if eventsAt == -1 || diplomacyAt == -1 || productionAt == -1 || incomeAt == -1 {
+		t.Fatalf("expected event log, Diplomacy, Industrial Production, and Income Report all present, got:\n%s", out)
+	}
+	if !(eventsAt < diplomacyAt && diplomacyAt < productionAt && productionAt < incomeAt) {
+		t.Errorf("expected order events < Diplomacy < Change Production < Income Report, got offsets %d, %d, %d, %d",
+			eventsAt, diplomacyAt, productionAt, incomeAt)
 	}
 }
 
