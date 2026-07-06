@@ -138,15 +138,19 @@ than BRE's documented figures (an open scale decision).
 ## Primary goal: run as a BBS door
 
 The main goal is to run as a native door game under modern BBS software
-(Synchronet, Mystic) on Linux. Native means no DOSBox/DOSEMU. The stage
-decomposes into:
+(Synchronet, Mystic). Native means no DOSBox/DOSEMU. Linux is the primary
+target, but the game builds and runs on macOS, Windows, and the BSDs (per-OS
+file lock, `x/term` console) — so a Windows Synchronet door is in scope too.
+The stage decomposes into:
 
 1. **Dropfile + stdio front-end** (`cmd/barons-door`) — DONE. Parses
    `DOOR32.SYS`/`DOOR.SYS` (`internal/door`), runs the game over a stdio
    `Session` (`session.Stdio`, which adds `\r\n`), honors the ANSI flag and
    a hard time-left cutoff, and names the realm from the caller's handle.
-   Socket I/O (Synchronet `COM0:SOCKETn` / Mystic telnet) is parsed but not
-   yet used as a backend — stdio covers native Unix doors.
+   Socket I/O (the `DOOR32.SYS` line-2 handle — a winsock handle on Windows,
+   a plain fd socket on *nix) is parsed but not yet used as a backend. stdio
+   covers native Unix doors today; a socket-handle backend (planned) is what a
+   Windows door needs, where stdio redirection of the socket isn't the norm.
 2. **Persistence / multi-user** — DONE. A persistent empire per caller in a
    shared JSON world under an exclusive flock, keyed by BBS handle, with
    turns-per-day and daily maintenance (`internal/store`, `internal/play`).
@@ -154,8 +158,10 @@ decomposes into:
    Configuration Editor (Coordinator menu); `-setup` seeds the file. The
    knobs are wired into gameplay and broadcast across a league.
 
-Remaining toward the goal: socket-backed I/O (Synchronet `COM0:SOCKETn` /
-Mystic telnet) and validation under real BBS software (needs Andy's env).
+Remaining toward the goal: socket-backed I/O (the DOOR32.SYS socket handle —
+Synchronet `COM0:SOCKETn` / Mystic telnet / Windows winsock; Go's `net` stack
+should make it one cross-platform backend) and validation under real BBS
+software (needs Andy's env). Scheduled after the multiplayer web server lands.
 
 Dropfile field maps and the I/O contract are documented in
 `docs/mechanics-reference.md` and cross-checked against the Synchronet
