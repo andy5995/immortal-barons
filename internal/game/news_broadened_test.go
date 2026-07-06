@@ -27,8 +27,9 @@ func TestPostInvestRateNewsOnMove(t *testing.T) {
 }
 
 // TestPostMasterNewsClaimAndRetain covers both branches: a new leader posts
-// a claim line and updates LastMaster; an unchanged leader posts a retain
-// line and leaves LastMaster alone.
+// a claim line and updates CurrentMaster; an unchanged leader posts a retain
+// line and leaves CurrentMaster alone. LastMaster (the crowned league
+// champion) is untouched by postMasterNews throughout.
 func TestPostMasterNewsClaimAndRetain(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AICount = 0
@@ -37,8 +38,8 @@ func TestPostMasterNewsClaimAndRetain(t *testing.T) {
 	leader.Land = 1000
 
 	w.postMasterNews()
-	if w.LastMaster != leader.Name {
-		t.Fatalf("LastMaster = %q, want %q", w.LastMaster, leader.Name)
+	if w.CurrentMaster != leader.Name {
+		t.Fatalf("CurrentMaster = %q, want %q", w.CurrentMaster, leader.Name)
 	}
 	if len(w.NewsToday) != 1 {
 		t.Fatalf("expected one claim line, got %v", w.NewsToday)
@@ -46,8 +47,8 @@ func TestPostMasterNewsClaimAndRetain(t *testing.T) {
 
 	w.NewsToday = nil
 	w.postMasterNews() // unchanged leader
-	if w.LastMaster != leader.Name {
-		t.Fatalf("LastMaster changed unexpectedly: %q", w.LastMaster)
+	if w.CurrentMaster != leader.Name {
+		t.Fatalf("CurrentMaster changed unexpectedly: %q", w.CurrentMaster)
 	}
 	if len(w.NewsToday) != 1 {
 		t.Fatalf("expected one retain line, got %v", w.NewsToday)
@@ -58,11 +59,15 @@ func TestPostMasterNewsClaimAndRetain(t *testing.T) {
 	challenger := w.AddHuman("challenger", "Challengeria")
 	challenger.Land = 1_000_000
 	w.postMasterNews()
-	if w.LastMaster != challenger.Name {
-		t.Fatalf("LastMaster = %q, want %q", w.LastMaster, challenger.Name)
+	if w.CurrentMaster != challenger.Name {
+		t.Fatalf("CurrentMaster = %q, want %q", w.CurrentMaster, challenger.Name)
 	}
 	if len(w.NewsToday) != 1 {
 		t.Fatalf("expected one seized-title line, got %v", w.NewsToday)
+	}
+
+	if w.LastMaster != "" {
+		t.Errorf("expected LastMaster to stay untouched by postMasterNews, got %q", w.LastMaster)
 	}
 }
 

@@ -103,9 +103,9 @@ func (w *World) postInvestRateNews(before int) {
 
 // postMasterNews broadcasts the planet's political standing: the empire
 // with the highest net worth among the living either keeps or claims the
-// title of Planetary Master, and LastMaster is kept in sync with it. This
+// title of Planetary Master, and CurrentMaster is kept in sync with it. This
 // runs every maintenance day (matching BRE, which shows the title daily),
-// separate from endGame's one-time crowning at a league's end.
+// separate from endGame's one-time crowning of LastMaster at a league's end.
 func (w *World) postMasterNews() {
 	best := ""
 	bestNW := 0
@@ -123,12 +123,12 @@ func (w *World) postMasterNews() {
 		return
 	}
 	switch {
-	case best == w.LastMaster:
+	case best == w.CurrentMaster:
 		w.postNews(fmt.Sprintf("%s retains the title of Planetary Master.", best))
-	case w.LastMaster == "":
+	case w.CurrentMaster == "":
 		w.postNews(fmt.Sprintf("%s claims the title of Planetary Master!", best))
 	default:
-		w.postNews(fmt.Sprintf("%s has seized the title of Planetary Master from %s!", best, w.LastMaster))
+		w.postNews(fmt.Sprintf("%s has seized the title of Planetary Master from %s!", best, w.CurrentMaster))
 	}
-	w.LastMaster = best
+	w.CurrentMaster = best
 }

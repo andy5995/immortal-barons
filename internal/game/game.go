@@ -242,11 +242,12 @@ type World struct {
 	BulletinToday     DailyBulletin
 	BulletinYesterday DailyBulletin
 
-	Alliances    []string // legacy (pre-typed-treaties); migrated by EnsureTreaties
-	Treaties     []Treaty
-	LastMaster   string
-	RemoteBoards []RemoteBoard
-	Pirates      []PirateFaction
+	Alliances     []string // legacy (pre-typed-treaties); migrated by EnsureTreaties
+	Treaties      []Treaty
+	LastMaster    string // crowned at league end (endGame); shown as "Last Planetary Master"
+	CurrentMaster string // daily net-worth leader, tracked by postMasterNews
+	RemoteBoards  []RemoteBoard
+	Pirates       []PirateFaction
 
 	// Inter-BBS (interplanetary) play — see ibbs.go. GroupAttacks assemble
 	// locally until they depart; Outbox holds packets queued for other boards;
