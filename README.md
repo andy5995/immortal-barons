@@ -75,6 +75,9 @@ go build ./cmd/immortal-barons
 ./immortal-barons -local
 ```
 
+On Windows the binary is `immortal-barons.exe`. Run it as `immortal-barons -local`
+from Command Prompt, or `./immortal-barons -local` from PowerShell.
+
 Or run it directly:
 
 ```
@@ -108,14 +111,16 @@ calls, keyed by their BBS handle. A nightly maintenance step
 
 Full setup instructions for local and inter-BBS play — registering the door,
 daily maintenance, the node list, and starting a fresh game with
-`immortal-barons -reset` — are in [`docs/door-setup.md`](docs/door-setup.md).
+`immortal-barons -reset` — are in the
+[Door Setup guide](https://andy5995.github.io/immortal-barons/door-setup/).
 
 ## Running in a browser (experimental)
 
 Immortal Barons also has an experimental browser front-end (`immortal-barons-web`),
-separate from the BBS door. See the [Web Server Guide](docs/webserver.md) for how
-to build and run it, how players are tracked, the full list of options, and why
-its world is separate from a BBS door's world.
+separate from the BBS door. See the
+[Web Server Guide](https://andy5995.github.io/immortal-barons/web-server/) for
+how to build and run it, how players are tracked, the full list of options, and
+why its world is separate from a BBS door's world.
 
 ## How to play
 
