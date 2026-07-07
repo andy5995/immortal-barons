@@ -110,22 +110,10 @@ its world is separate from a BBS door's world.
 
 ## How to play
 
-The game uses single keypresses. You do not press Enter to choose a menu
-item. When the game asks for a number (for example, how much land to buy),
-type the number and press Enter.
-
-From the main menu:
-
-- `B` — Buy or sell land, food, and military units
-- `K` — Visit the bank
-- `W` — Attack a rival empire
-- `D` — Display your empire status and the scores
-- `N` — End your turn (this runs the daily update for the whole world)
-- `Q` — Quit
-
-Each game lasts 20 turns. Build your army before you attack. A rival
-defends its home land, so a weak attack will lose. Watch your food: if
-your people run out of food, they starve and your empire shrinks.
+The game uses single keypresses — you do not press Enter to choose a menu
+item. See the
+[player's guide](https://andy5995.github.io/immortal-barons/guide/) for the
+menus, the controls, and strategy.
 
 ## Design
 
