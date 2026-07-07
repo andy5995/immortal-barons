@@ -41,11 +41,38 @@ Set up the game as an external program (a "door") in your BBS software.
   current directory.
 - The caller's handle from the dropfile becomes the name of their realm.
 
-A typical command line:
+A typical command line (use the full path to `immortal-barons` only if it is not
+installed on your `PATH`):
 
 ```
-immortal-barons -dropfile /path/to/DOOR32.SYS -data /path/to/data
+/path/to/immortal-barons -dropfile /path/to/DOOR32.SYS -data /path/to/data
 ```
+
+### Example: Mystic BBS
+
+In Mystic's menu editor, add a command of type **D3 (Exec DOOR32 program)** and
+set its **Data** field to the command line below. Mystic writes the dropfile
+into each node's own temporary directory and gives you `%P` for that directory
+(with a trailing slash), so the same line works for every node:
+
+```
+/path/to/immortal-barons -dropfile %Pdoor32.sys -data /path/to/game-data
+```
+
+Two things to note. Mystic writes the file name in lower case (`door32.sys`),
+which matters on Linux because file names there are case-sensitive. And the
+game's data directory should be a separate directory from the BBS's own files.
+
+Before the first caller connects, create the data directory and seed it:
+
+```
+mkdir -p /path/to/game-data
+/path/to/immortal-barons -reset -data /path/to/game-data
+```
+
+The first command makes the directory. The second opens the settings editor
+(see "First-time setup" above) and, when you save with `S`, writes
+`config.json` and the starting world into it.
 
 ### How the game talks to the caller
 
