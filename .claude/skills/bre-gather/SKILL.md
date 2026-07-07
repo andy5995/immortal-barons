@@ -80,6 +80,21 @@ order.
 `len("View IPScores")`. A run of 16-bit little-endian values before a menu
 cluster is usually a Pascal case/jump table, not data you want.
 
+**The variant-string trap (a number in a string may be the WRONG variant's
+number).** A literal value baked into a string is only authoritative for *that
+call site*, and BRE often has several near-identical strings for variants of one
+feature. `strings` flattens them with no context, so grabbing the first match
+can hand you a number that belongs to a different mode. Real example: searching
+the message editor turned up `You have 3 lines for your message.  /S=save
+/A=abort /C=clear` — but a live screenshot showed the standalone message editor
+allows **20** lines. The "3" was the *short attach-a-note-to-a-trade-deal*
+editor; the "20" was the *Send Message* editor — two variants with almost
+identical banners. Lesson: when a string carries a feature's number, don't
+assume it's the mode you care about. Grep for sibling copies of the same banner
+(`grep -a "lines for your message"` finds both), and confirm the number against
+a live screenshot of the *specific* feature before treating it as fact — the
+same source-1-beats-strings rule that already applies to colors.
+
 See `references/extraction.md` for the exact `strings` / `grep -abo` / `dd|xxd`
 commands and worked examples.
 
