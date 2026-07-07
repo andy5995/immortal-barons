@@ -248,7 +248,7 @@ func runReset(cfg game.Config) error {
 	// The settings menu edits w.Config and saves config.json on exit (0); Q
 	// cancels the whole reset.
 	c := session.NewConsole()
-	fmt.Fprint(c, "\r\nConfigure the game below. Choose 0 to save the settings and start a fresh game, or Q to cancel.\r\n")
+	fmt.Fprint(c, "\r\nConfigure the game below. Choose S to save the settings and start a fresh game, or Q to cancel.\r\n")
 	saved := menu.ConfigEditor(c, w)
 	c.Close()
 

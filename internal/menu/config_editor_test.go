@@ -12,8 +12,8 @@ func TestConfigEditorEditsAndSaves(t *testing.T) {
 	w.Config.DataDir = dir
 	w.Config.TurnsPerDay = 10
 
-	// Edit item 1 (turns per day) to 20, then 0 to save and exit.
-	f := &fakeSession{keys: []rune("1\r20\r0\r ")}
+	// Edit item 1 (turns per day) to 20, then S to save and exit.
+	f := &fakeSession{keys: []rune("1\r20\rs\r ")}
 	configEditor(f, w)
 
 	if w.Config.TurnsPerDay != 20 {
@@ -30,7 +30,8 @@ func TestConfigEditorTurnsFloorAtOne(t *testing.T) {
 	w.Config.DataDir = dir
 
 	// Try to set turns per day to 0; it must floor at 1 (a day needs a turn).
-	f := &fakeSession{keys: []rune("1\r0\r0\r ")}
+	// Value 0, then S to save and exit.
+	f := &fakeSession{keys: []rune("1\r0\rs\r ")}
 	configEditor(f, w)
 
 	if w.Config.TurnsPerDay != 1 {

@@ -67,8 +67,8 @@ func cycleSabre(m game.SabreMode) game.SabreMode {
 
 // ConfigEditor runs the Configuration Editor standalone (used by the door's
 // -reset command, BRE's "reset" being the settings screen). It edits w.Config
-// in place, saves config.json when the sysop exits with 0, and reports whether
-// they saved (true) or cancelled with Q (false) — so -reset can abort.
+// in place, saves config.json when the sysop exits with S, and reports whether
+// they saved (true) or cancelled with Q/0 (false) — so -reset can abort.
 func ConfigEditor(s session.Session, w *game.World) bool { return runConfigEditor(s, w) }
 
 // configEditor is the menu-action form (Coordinator menu). It ignores the
@@ -121,8 +121,16 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		fmt.Fprintf(s, "%s\n%s* = league ruleset (Coordinator broadcasts with -league-config)%s\n",
 			rule, ansi.FgWhite, ansi.Reset)
 
-		choice := strings.ToLower(strings.TrimSpace(prompt(s, "Edit which (0 = save & exit, Q = cancel)?")))
-		if choice == "q" || choice == "quit" || choice == "cancel" {
+		choice := strings.ToLower(strings.TrimSpace(prompt(s, "Edit which (S = save & exit, Q = cancel)?")))
+		if choice == "s" || choice == "save" {
+			if err := store.SaveConfig(*c); err != nil {
+				fail(s, err)
+			} else {
+				ok(s, "Configuration saved.")
+			}
+			return true
+		}
+		if choice == "q" || choice == "quit" || choice == "cancel" || choice == "0" {
 			ok(s, "Cancelled — no changes were saved.")
 			return false
 		}
@@ -131,13 +139,6 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 			continue
 		}
 		switch n {
-		case 0:
-			if err := store.SaveConfig(*c); err != nil {
-				fail(s, err)
-			} else {
-				ok(s, "Configuration saved.")
-			}
-			return true
 		case 1:
 			c.TurnsPerDay = max(1, promptSuggested(s, "Turns per day", c.TurnsPerDay, game.MaxTurnsPerDay))
 		case 2:

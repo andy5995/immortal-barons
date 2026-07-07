@@ -27,7 +27,7 @@ immortal-barons -reset -data /path/to/data
 This opens the **Configuration Editor**: a menu of every game rule (turns per
 day, protection turns, land and market settings, interest and investment rates,
 tax and region limits, costs and attack settings, number of AI barons, game
-length, and more). Change what you like, then press `0` to save `config.json`
+length, and more). Change what you like, then press `S` to save `config.json`
 and start a fresh game, or `Q` to cancel. On a brand-new install there is
 nothing to clear, so this just writes your config and seeds the starting world.
 See "Starting a fresh game" below — it is the same command.
@@ -85,7 +85,7 @@ immortal-barons -reset -data /path/to/data
 ```
 
 This opens the **Configuration Editor** (adjust any rules, then
-`0` to save or `Q` to cancel). After you save, it clears all empires (players
+`S` to save or `Q` to cancel). After you save, it clears all empires (players
 re-create their realm the next time they log in) and re-seeds the AI barons on a
 fresh day one. It does not pick a winner. The old world is saved to
 `world.json.bak` in the data directory first, so you can restore it if you reset
