@@ -15,7 +15,10 @@ import (
 // echoing keystrokes since the console runs in no-echo mode.
 func prompt(s session.Session, msg string) string {
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), ansi.Reset)
-	line, _ := session.ReadLine(s)
+	line, err := session.ReadLine(s)
+	if errors.Is(err, session.ErrSessionEnded) {
+		session.End(err) // idle boot / disconnect: unwind (a bare io.EOF falls through)
+	}
 	return line
 }
 
@@ -51,7 +54,10 @@ func parseAmount(input string, max int) int {
 
 func promptInt(s session.Session, msg string) int {
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), ansi.Reset)
-	line, _ := session.ReadLine(s)
+	line, err := session.ReadLine(s)
+	if errors.Is(err, session.ErrSessionEnded) {
+		session.End(err)
+	}
 	return parseAmount(line, 1<<62)
 }
 
@@ -60,9 +66,22 @@ func promptInt(s session.Session, msg string) int {
 // (still editable); otherwise the typed number (k/m shortcuts) is used.
 // The result is clamped to [0, max].
 func promptSuggested(s session.Session, msg string, suggested, max int) int {
-	fmt.Fprintf(s, "\n%s%s (%d; %d):%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), suggested, max, ansi.Reset)
+	prefix := fmt.Sprintf("%s%s (%d; %d):%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), suggested, max, ansi.Reset)
+	fmt.Fprint(s, "\n"+prefix)
+
+	// Register the line being edited so an interrupting idle/time warning can
+	// reprint it and restore the cursor. A no-op for sessions with no Deadline
+	// (e.g. the test fakeSession), which don't implement InputLineSetter.
+	ls, _ := s.(session.InputLineSetter)
+	if ls != nil {
+		defer ls.SetInputLine("")
+	}
+
 	var b []rune
 	for {
+		if ls != nil {
+			ls.SetInputLine(prefix + string(b))
+		}
 		r, err := s.ReadKey()
 		if err != nil {
 			if errors.Is(err, session.ErrSessionEnded) {
@@ -115,11 +134,14 @@ func clampAmt(n, max int) int {
 }
 
 func pause(s session.Session) {
-	// BRE's pause prompt. A read error here (boot/disconnect) is benign: this is
-	// the tail of a result display, so we let the next read end the session
-	// rather than End-unwinding from every ok()/fail() call site.
+	// BRE's pause prompt. A boot/disconnect here (ErrSessionEnded) must unwind:
+	// otherwise the flow falls through, redraws the menu, and only boots again
+	// on the next read — a double "Disconnected" with a delay. A bare io.EOF
+	// (test stream) still falls through.
 	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, i18n.T(sessionLang(s), "─»>Paused<«─"), ansi.Reset)
-	s.ReadKey()
+	if _, err := s.ReadKey(); errors.Is(err, session.ErrSessionEnded) {
+		session.End(err) // boot during a pause: unwind instead of falling through
+	}
 }
 
 // comma formats n with thousands separators (478967 -> "478,967").

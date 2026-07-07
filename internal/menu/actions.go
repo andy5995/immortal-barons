@@ -1613,13 +1613,9 @@ func sendMessage(s session.Session, w *ctx) Result {
 				}
 			})
 		}
-		fmt.Fprintf(s, "\n%s (y/N) ", tr(s, "Do you wish to send another message?"))
-		r, err := s.ReadKey()
-		if err != nil || (r != 'y' && r != 'Y') {
-			fmt.Fprint(s, "n\n")
+		if !askYesNo(s, "Do you wish to send another message?", false) {
 			return Stay
 		}
-		fmt.Fprint(s, "y\n")
 	}
 }
 

@@ -64,6 +64,22 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 	d := session.NewDeadline(s, time.Duration(cfg.IdleTimeoutSecs)*time.Second, cfg.MaxIdleWarnings, hard)
 	s = d
 
+	// A boot/disconnect during the splash or onboarding unwinds via session.End
+	// (GameLoop catches its own, but these run before it). Recover here so the
+	// session ends cleanly and the world is still saved.
+	defer func() {
+		if r := recover(); r != nil {
+			if _, ok := session.AsEnd(r); !ok {
+				panic(r)
+			}
+			reason = d.Reason()
+			if reason == "" {
+				reason = "disconnect"
+			}
+			err = save()
+		}
+	}()
+
 	menu.Splash(s)
 
 	var joinOpen, boardFull bool

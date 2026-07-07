@@ -4,6 +4,7 @@
 package menu
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"unicode"
@@ -48,6 +49,14 @@ type langSession struct {
 }
 
 func (l *langSession) Lang() string { return playerLang(l.c) }
+
+// SetInputLine forwards the prompt-restore hook down to the inner session so an
+// idle/time warning can reprint the caller's current input line.
+func (l *langSession) SetInputLine(line string) {
+	if s, ok := l.Session.(session.InputLineSetter); ok {
+		s.SetInputLine(line)
+	}
+}
 
 // sessionLang extracts the caller's language from a wrapped Session, or "" for
 // a plain Session (e.g. tests) — which renders English.
@@ -192,6 +201,13 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	}
 	r, err := s.ReadKey()
 	if err != nil {
+		if errors.Is(err, session.ErrSessionEnded) {
+			// Boot at a menu: unwind everything — nested submenus and the
+			// turn flow (runTurn calls Run for Spending/Attack/etc.) — instead
+			// of returning up one level, which drops the caller back to the
+			// game menu rather than ending the session.
+			session.End(err)
+		}
 		return nil, err
 	}
 	if def != nil && (r == '\r' || r == '\n') {

@@ -49,3 +49,11 @@ func (m *MacroExpander) ReadKey() (rune, error) {
 }
 
 func (m *MacroExpander) Write(p []byte) (int, error) { return m.inner.Write(p) }
+
+// SetInputLine forwards the prompt-restore hook to the inner session (the
+// Deadline) if it supports it, so a warning can restore the caller's input line.
+func (m *MacroExpander) SetInputLine(line string) {
+	if s, ok := m.inner.(InputLineSetter); ok {
+		s.SetInputLine(line)
+	}
+}

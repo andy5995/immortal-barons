@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"sync/atomic"
 	"time"
 )
 
@@ -42,6 +43,30 @@ type Deadline struct {
 	warnings   int
 	timeWarned bool
 	reason     string
+
+	// inputLine holds the text of the prompt line the caller is editing
+	// (prompt prefix + typed value). ReadKey reprints it after an interrupting
+	// warning so the cursor lands back at the end of the value. Stored
+	// atomically: the reading goroutine sets it while ReadKey blocks in another.
+	inputLine atomic.Value // string
+}
+
+// InputLineSetter is implemented by Deadline and forwarded by the session
+// wrappers. A prompt registers the line it is editing so an interrupting
+// idle/time warning can restore that line, and the cursor, afterwards.
+type InputLineSetter interface {
+	SetInputLine(line string)
+}
+
+// SetInputLine registers (or, with "", clears) the current prompt line to
+// restore after a warning. Safe to call while ReadKey blocks concurrently.
+func (d *Deadline) SetInputLine(line string) { d.inputLine.Store(line) }
+
+func (d *Deadline) currentInputLine() string {
+	if v := d.inputLine.Load(); v != nil {
+		return v.(string)
+	}
+	return ""
 }
 
 // NewDeadline wraps inner. idle<=0 disables the idle timeout; a zero hard
@@ -105,6 +130,12 @@ func (d *Deadline) ReadKey() (rune, error) {
 				}
 				return res.r, ended(res.err)
 			}
+			if !warned {
+				// Responded before any warning fired: actively playing, not
+				// dodging the timeout. Reset the strike count so only repeated
+				// last-second dodges accumulate toward a no-warning boot.
+				d.warnings = 0
+			}
 			return res.r, nil
 		case <-timer.C:
 			if warned {
@@ -125,6 +156,12 @@ func (d *Deadline) ReadKey() (rune, error) {
 				}
 				d.timeWarned = true
 				fmt.Fprintf(d.inner, "\r\n\x1b[93m** Your time is almost up (%s left). **\x1b[0m\r\n", humanLead(d.warnLead))
+			}
+			// The warning was printed on its own lines, stranding the cursor
+			// below the prompt. Reprint the line the caller was editing so the
+			// cursor returns to the end of their typed value.
+			if line := d.currentInputLine(); line != "" {
+				fmt.Fprint(d.inner, line)
 			}
 			warned = true
 		}

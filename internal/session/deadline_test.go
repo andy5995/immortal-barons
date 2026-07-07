@@ -78,6 +78,47 @@ func TestDeadlineStrikesBootEarly(t *testing.T) {
 	}
 }
 
+func TestDeadlineActiveResponseResetsStrikes(t *testing.T) {
+	f := newFakeConn()
+	// idle 80ms -> warning at ~40ms; respond well before that.
+	d := NewDeadline(f, 80*time.Millisecond, 3, time.Time{})
+	d.warnings = 2 // two prior strikes
+	go func() { time.Sleep(10 * time.Millisecond); f.in <- 'x' }()
+	r, err := d.ReadKey()
+	if err != nil || r != 'x' {
+		t.Fatalf("got (%q, %v), want ('x', nil)", r, err)
+	}
+	if d.warnings != 0 {
+		t.Errorf("strikes should reset when the player responds before a warning, got %d", d.warnings)
+	}
+}
+
+func TestDeadlineRestoresInputLineAfterWarning(t *testing.T) {
+	f := newFakeConn()
+	// idle 80ms -> warnLead 40ms -> warning at ~40ms idle, boot at 80ms.
+	d := NewDeadline(f, 80*time.Millisecond, 3, time.Time{})
+	d.SetInputLine("Amount: 45")
+	// Feed a key after the warning fires but before the boot, so ReadKey
+	// returns cleanly and we can inspect what was written.
+	go func() {
+		time.Sleep(55 * time.Millisecond)
+		f.in <- '6'
+	}()
+	r, err := d.ReadKey()
+	if err != nil || r != '6' {
+		t.Fatalf("got (%q, %v), want ('6', nil)", r, err)
+	}
+	out := f.out.String()
+	warn := strings.Index(out, "inactivity")
+	restore := strings.LastIndex(out, "Amount: 45")
+	if warn == -1 {
+		t.Fatalf("expected an inactivity warning:\n%s", out)
+	}
+	if restore == -1 || restore < warn {
+		t.Errorf("input line should be reprinted after the warning:\n%s", out)
+	}
+}
+
 func TestDeadlineHardDeadline(t *testing.T) {
 	f := newFakeConn()
 	d := NewDeadline(f, 0, 3, time.Now().Add(40*time.Millisecond)) // idle off, hard in 40ms
