@@ -107,7 +107,7 @@ var eventLoseLines = [numEventResources]([]string){
 	},
 	eventPeople: {
 		"A sickness moves through the barony, claiming %d lives.",
-		"%d people leave for a rival's realm in search of better fortune.",
+		"%d people wander off into the wastes and are never seen again.",
 		"An accident at the mines kills %d people.",
 	},
 }

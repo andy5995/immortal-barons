@@ -242,8 +242,15 @@ files (the empire record layout was deliberately withheld); the values in
   "most of your empire has left your rule" / troops-fleeing system is gated on
   a severity byte whose *only* nonzero setter is BRE's **crack/registration
   check** — it fires only when a *pirated* copy is detected. In a registered
-  BRE, emigration never happens; misrule attrition is **riots (tax) and
-  starvation (food) only**. So the clone deliberately models no emigration.
+  BRE, misrule-driven emigration never happens; misrule attrition is **riots
+  (tax) and starvation (food) only**. So the clone models no misrule emigration.
+- **Random population swings ARE real, though** — separate from the above.
+  BRE's sysop-editable random events (`events.dat` `^GAINPEOPLE` / `^LOSEPEOPLE`:
+  "people flee to your empire", "aliens drop off N million", "killed in bungee
+  accidents", …) make population appear "from nowhere" and vanish "into
+  oblivion" — never a transfer to/from another realm. The clone implements
+  these as random per-empire events (`internal/game/events_random.go`,
+  `eventPeople`).
 
 The clone implements the verified riot trigger/chance and the `People div 15`
 loss (`internal/game/turn.go`); the Support hit on a riot is the clone's own
