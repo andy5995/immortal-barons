@@ -64,7 +64,7 @@ type navNode struct {
 }
 
 // buildNav assembles the site nav from the English help topics (which fix the
-// Guide's structure) plus the fixed Home / Running a Board / Developers
+// Guide's structure) plus the fixed Home / Door Setup / Web Server / Developers
 // sections. Nav paths are relative to a language folder; the i18n plugin
 // resolves them per language.
 func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
@@ -87,7 +87,8 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	}
 	nav = append(nav, navNode{title: "Guide", children: guide})
 
-	nav = append(nav, navNode{title: "Running a Board", path: "running-a-board/index.md"})
+	nav = append(nav, navNode{title: "Door Setup", path: "door-setup/index.md"})
+	nav = append(nav, navNode{title: "Web Server", path: "web-server/index.md"})
 
 	// Developers: one leaf per English dev doc, titled from its first heading.
 	dev, err := devNav(repoRoot)

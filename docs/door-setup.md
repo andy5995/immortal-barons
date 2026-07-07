@@ -1,4 +1,4 @@
-# Sysop Guide — Running Immortal Barons
+# Door Setup — Running Immortal Barons
 
 This guide is for the BBS operator (the sysop). It explains how to set up the
 game on your board, and how to join an inter-BBS league. Players do not need to
@@ -16,23 +16,21 @@ Run `immortal-barons -help` to see all the command-line options.
 
 ## First-time setup
 
-Run the setup once to create the config file:
+The game runs from built-in defaults, so you can register the door and let your
+first caller start a game without any setup step. To choose the rules ahead of
+time, use the same `-reset` command you would use to start a fresh game later:
 
 ```
-immortal-barons -setup -data /path/to/data
+immortal-barons -reset -data /path/to/data
 ```
 
 This opens the **Configuration Editor**: a menu of every game rule (turns per
 day, protection turns, land and market settings, interest and investment rates,
 tax and region limits, costs and attack settings, number of AI barons, game
-length, and more). Change what you like, then press `0` to save `config.json`,
-or `Q` to cancel. `-setup` only writes the config; it does not create or change
-any game world (the world is created when your first caller logs in).
-
-There is also a **`-reset`** command described later. It opens the *same*
-Configuration Editor, but after you save it also **starts a fresh game** (clears
-all empires and re-seeds the AI). Use `-setup` when you first install the game,
-and `-reset` when you want to reconfigure and start over.
+length, and more). Change what you like, then press `0` to save `config.json`
+and start a fresh game, or `Q` to cancel. On a brand-new install there is
+nothing to clear, so this just writes your config and seeds the starting world.
+See "Starting a fresh game" below — it is the same command.
 
 ## Registering the door
 
@@ -86,7 +84,7 @@ To reconfigure and start the game over, run:
 immortal-barons -reset -data /path/to/data
 ```
 
-This opens the same **Configuration Editor** as `-setup` (adjust any rules, then
+This opens the **Configuration Editor** (adjust any rules, then
 `0` to save or `Q` to cancel). After you save, it clears all empires (players
 re-create their realm the next time they log in) and re-seeds the AI barons on a
 fresh day one. It does not pick a winner. The old world is saved to

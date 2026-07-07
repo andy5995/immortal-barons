@@ -99,24 +99,14 @@ calls, keyed by their BBS handle. A nightly maintenance step
 
 Full setup instructions for local and inter-BBS play — registering the door,
 daily maintenance, the node list, and starting a fresh game with
-`immortal-barons -reset` — are in [`docs/sysop-guide.md`](docs/sysop-guide.md).
+`immortal-barons -reset` — are in [`docs/door-setup.md`](docs/door-setup.md).
 
 ## Running in a browser (experimental)
 
-A browser front-end serves the game over Server-Sent Events with xterm.js:
-
-```
-go build -o immortal-barons-web ./cmd/immortal-barons-web
-./immortal-barons-web -addr :8080
-```
-
-Open `http://localhost:8080`. Each browser gets its own game session. This is
-early and loads xterm.js from a CDN; the assets should be vendored (or
-integrity-pinned) before any real deployment.
-
-See [`docs/webserver.md`](docs/webserver.md) for how players are tracked, the
-full list of options, and why the web server's world is separate from a
-BBS door's world.
+Immortal Barons also has an experimental browser front-end (`immortal-barons-web`),
+separate from the BBS door. See the [Web Server Guide](docs/webserver.md) for how
+to build and run it, how players are tracked, the full list of options, and why
+its world is separate from a BBS door's world.
 
 ## How to play
 

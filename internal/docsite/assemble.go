@@ -69,7 +69,8 @@ func Assemble(repoRoot, outDir string) error {
 		for _, pg := range []struct{ src, dst, siteRel string }{
 			{homeSource(repoRoot, lang.code), filepath.Join(langDir, "index.md"), "index.md"},
 			{guideIntroSource(repoRoot, lang.code), filepath.Join(langDir, "guide", "index.md"), "guide/index.md"},
-			{sysopSource(repoRoot, lang.code), filepath.Join(langDir, "running-a-board", "index.md"), "running-a-board/index.md"},
+			{doorSetupSource(repoRoot, lang.code), filepath.Join(langDir, "door-setup", "index.md"), "door-setup/index.md"},
+			{webserverSource(repoRoot, lang.code), filepath.Join(langDir, "web-server", "index.md"), "web-server/index.md"},
 		} {
 			if err := copyIfExists(pg.src, pg.dst, srcRel(pg.src), pg.siteRel, lk); err != nil {
 				return err
@@ -163,16 +164,19 @@ func loadTopics(repoRoot, lang string) ([]topic, error) {
 	return topics, nil
 }
 
-// homeSource / guideIntroSource / sysopSource resolve a doc's file for a
-// language: <base>.md for English, <base>.<lang>.md otherwise.
+// homeSource / guideIntroSource / doorSetupSource / webserverSource resolve a
+// doc's file for a language: <base>.md for English, <base>.<lang>.md otherwise.
 func homeSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "README.md"), lang)
 }
 func guideIntroSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "docs", "playing.md"), lang)
 }
-func sysopSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "sysop-guide.md"), lang)
+func doorSetupSource(repoRoot, lang string) string {
+	return langFile(filepath.Join(repoRoot, "docs", "door-setup.md"), lang)
+}
+func webserverSource(repoRoot, lang string) string {
+	return langFile(filepath.Join(repoRoot, "docs", "webserver.md"), lang)
 }
 
 func langFile(enPath, lang string) string {

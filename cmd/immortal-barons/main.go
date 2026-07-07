@@ -34,7 +34,6 @@ func main() {
 	dropPath := flag.String("dropfile", "", "path to the BBS dropfile (DOOR32.SYS or DOOR.SYS)")
 	dataDir := flag.String("data", "./data", "game data directory")
 	maint := flag.Bool("maint", false, "run daily maintenance and exit")
-	setup := flag.Bool("setup", false, "interactively configure the game and exit")
 	export := flag.String("export", "", "write this board's score packet to FILE and exit")
 	imp := flag.String("import", "", "import a score packet from FILE and exit")
 	planetary := flag.Bool("planetary", false, "run the inter-BBS PLANETARY step (read inbound, launch attacks, write outbound) and exit")
@@ -60,14 +59,6 @@ func main() {
 	if *imp != "" {
 		if err := runImport(cfg, *imp); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -import:", err)
-			os.Exit(1)
-		}
-		return
-	}
-
-	if *setup {
-		if err := runSetup(cfg); err != nil {
-			fmt.Fprintln(os.Stderr, "immortal-barons -setup:", err)
 			os.Exit(1)
 		}
 		return
@@ -245,7 +236,8 @@ func runReset(cfg game.Config) error {
 		return err
 	}
 	defer lock.Release()
-	if err := store.BackupWorld(cfg); err != nil {
+	backedUp, err := store.BackupWorld(cfg)
+	if err != nil {
 		return err
 	}
 	w, err := store.Load(cfg)
@@ -256,12 +248,12 @@ func runReset(cfg game.Config) error {
 	// The settings menu edits w.Config and saves config.json on exit (0); Q
 	// cancels the whole reset.
 	c := session.NewConsole()
-	fmt.Fprint(c, "\r\nConfigure the new game below. Choose 0 to save the settings and reset, or Q to cancel.\r\n")
+	fmt.Fprint(c, "\r\nConfigure the game below. Choose 0 to save the settings and start a fresh game, or Q to cancel.\r\n")
 	saved := menu.ConfigEditor(c, w)
 	c.Close()
 
 	if !saved {
-		fmt.Println("\nReset cancelled. The game was left unchanged.")
+		fmt.Println("\nCancelled. The game was left unchanged.")
 		return nil
 	}
 
@@ -269,8 +261,10 @@ func runReset(cfg game.Config) error {
 	if err := store.Save(w, cfg); err != nil {
 		return err
 	}
-	fmt.Println("\nGame reset with the new settings. Empires cleared and re-seeded.")
-	fmt.Println("The previous world was backed up to world.json.bak.")
+	fmt.Println("\nGame started with the new settings. Empires cleared and AI re-seeded.")
+	if backedUp {
+		fmt.Println("The previous world was backed up to world.json.bak.")
+	}
 	return nil
 }
 
@@ -352,21 +346,6 @@ func runImport(cfg game.Config, path string) error {
 		return err
 	}
 	fmt.Printf("Imported board %s (%d scores)\n", board.BoardID, len(board.Scores))
-	return nil
-}
-
-// runSetup configures a new install: it presents the same Configuration Editor
-// as -reset (all fields), saving config.json on exit. Unlike -reset it does not
-// touch the world — a fresh world is created on the first caller's login.
-func runSetup(cfg game.Config) error {
-	w := game.NewWorld(cfg) // a throwaway world, just to host the editor's Config
-	c := session.NewConsole()
-	fmt.Fprint(c, "\r\nConfigure the game. Choose 0 to save the settings, or Q to cancel.\r\n")
-	saved := menu.ConfigEditor(c, w)
-	c.Close()
-	if !saved {
-		fmt.Println("Setup cancelled. No configuration was written.")
-	}
 	return nil
 }
 

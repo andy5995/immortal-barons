@@ -47,7 +47,7 @@ keypresses from, and writes ANSI bytes to, a `session.Session` (a byte
 stream). Front-ends attach different streams; the engine is unchanged.
 
 - `cmd/immortal-barons` — the door + local terminal front-end (stdio + dropfile;
-  `-local`, `-maint`, `-planetary`, `-league-config`, `-setup`, …)
+  `-local`, `-maint`, `-planetary`, `-league-config`, `-reset`, …)
 - `cmd/immortal-barons-web` — experimental browser front-end (SSE + xterm.js)
 - `internal/session` — the `Session` byte-stream abstraction + console/stdio/web
   implementations, shared `ReadLine`, and the Ctrl-key macro expander
@@ -171,8 +171,9 @@ The stage decomposes into:
    shared JSON world under an exclusive flock, keyed by BBS handle, with
    turns-per-day and daily maintenance (`internal/store`, `internal/play`).
 3. **Sysop config** — DONE. `config.json` with defaults + an in-game
-   Configuration Editor (Coordinator menu); `-setup` seeds the file. The
-   knobs are wired into gameplay and broadcast across a league.
+   Configuration Editor (Coordinator menu); `-reset` writes the file (and
+   seeds/re-seeds the world). The knobs are wired into gameplay and broadcast
+   across a league.
 
 Remaining toward the goal: validation of the door under real BBS software
 (Synchronet/Mystic on Windows for the socket backend; needs Andy's env),

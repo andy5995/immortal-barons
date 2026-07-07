@@ -73,14 +73,18 @@ func Save(w *game.World, cfg game.Config) error {
 }
 
 // BackupWorld copies the current world file to world.json.bak, so a destructive
-// operation (like -reset) is recoverable. A missing world file is not an error.
-func BackupWorld(cfg game.Config) error {
+// operation (like -reset) is recoverable. It reports whether a backup was made;
+// a missing world file (a fresh install) is not an error and returns false.
+func BackupWorld(cfg game.Config) (bool, error) {
 	data, err := os.ReadFile(worldPath(cfg))
 	if os.IsNotExist(err) {
-		return nil
+		return false, nil
 	}
 	if err != nil {
-		return err
+		return false, err
 	}
-	return os.WriteFile(worldPath(cfg)+".bak", data, 0o644)
+	if err := os.WriteFile(worldPath(cfg)+".bak", data, 0o644); err != nil {
+		return false, err
+	}
+	return true, nil
 }

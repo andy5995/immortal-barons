@@ -21,7 +21,9 @@ Points to know before you play:
   tab of the *same* browser reuses your cookie and your existing game;
   opening it in a different browser (or private window) starts a new player.
 - This front-end is early and loads xterm.js from a public CDN
-  (jsdelivr.net). Do not treat it as a locked-down production deployment yet.
+  (jsdelivr.net). The assets should be vendored (or integrity-pinned) before
+  any real deployment. Do not treat it as a locked-down production deployment
+  yet.
 - If the game says "The realm is full," the server has reached its limit on
   players connected at the same time. Try again later.
 
@@ -43,9 +45,9 @@ go build -o immortal-barons-web ./cmd/immortal-barons-web
 - `-data` — the game data directory (default `./data`), same meaning as for
   `immortal-barons`: it holds `config.json` and the world save file.
 
-There is no `-setup` flag for `immortal-barons-web`. If `-data` has no `config.json`
-yet, it starts from the built-in defaults; use `immortal-barons -setup` first if
-you want to choose the rules ahead of time.
+`immortal-barons-web` has no configuration step of its own. If `-data` has no
+`config.json` yet, it starts from the built-in defaults; run
+`immortal-barons -reset` first if you want to choose the rules ahead of time.
 
 ### The web world is stand-alone
 

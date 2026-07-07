@@ -15,8 +15,8 @@ func TestRewriteLinks(t *testing.T) {
 	lk := &linker{
 		repoRoot: root,
 		siteMap: map[string]string{
-			"README.md":           "index.md",
-			"docs/sysop-guide.md": "running-a-board/index.md",
+			"README.md":          "index.md",
+			"docs/door-setup.md": "door-setup/index.md",
 			"internal/help/content/economy/regions.md": "guide/economy/regions.md",
 			"internal/help/content/warfare/attacks.md": "guide/warfare/attacks.md",
 		},
@@ -25,8 +25,8 @@ func TestRewriteLinks(t *testing.T) {
 	tests := []struct {
 		name, md, srcRepoRel, siteRel, want string
 	}{
-		{"published from Home", "[s](docs/sysop-guide.md)", "README.md", "index.md",
-			"[s](running-a-board/index.md)"},
+		{"published from Home", "[s](docs/door-setup.md)", "README.md", "index.md",
+			"[s](door-setup/index.md)"},
 		{"off-site file", "[l](LICENSE)", "README.md", "index.md",
 			"[l](https://github.com/andy5995/immortal-barons/blob/trunk/LICENSE)"},
 		{"off-site dir", "[d](docs/superpowers/specs/)", "README.md", "index.md",
@@ -35,8 +35,8 @@ func TestRewriteLinks(t *testing.T) {
 			"[e](https://example.com)"},
 		{"anchor untouched", "[a](#heritage)", "README.md", "index.md",
 			"[a](#heritage)"},
-		{"published keeps anchor", "[a](docs/sysop-guide.md#reset)", "README.md", "index.md",
-			"[a](running-a-board/index.md#reset)"},
+		{"published keeps anchor", "[a](docs/door-setup.md#reset)", "README.md", "index.md",
+			"[a](door-setup/index.md#reset)"},
 		{"relative between topics", "[a](../warfare/attacks.md)", "internal/help/content/economy/regions.md", "guide/economy/regions.md",
 			"[a](../warfare/attacks.md)"},
 		{"translated topic resolves to English page", "[a](../warfare/attacks.md)", "internal/help/content.de/economy/regions.md", "guide/economy/regions.md",
