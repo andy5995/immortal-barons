@@ -2,6 +2,7 @@ package session
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -49,8 +50,8 @@ func TestDeadlineIdleBoots(t *testing.T) {
 	f := newFakeConn()
 	d := NewDeadline(f, 40*time.Millisecond, 3, time.Time{})
 	r, err := d.ReadKey() // never feed a key
-	if err != io.EOF || r != 0 {
-		t.Fatalf("got (%q, %v), want (0, EOF)", r, err)
+	if !errors.Is(err, ErrSessionEnded) || r != 0 {
+		t.Fatalf("got (%q, %v), want (0, ErrSessionEnded)", r, err)
 	}
 	if d.Reason() != "idle" {
 		t.Errorf("reason = %q, want idle", d.Reason())
@@ -67,8 +68,8 @@ func TestDeadlineStrikesBootEarly(t *testing.T) {
 	start := time.Now()
 	_, err := d.ReadKey()
 	elapsed := time.Since(start)
-	if err != io.EOF || d.Reason() != "idle" {
-		t.Fatalf("got (%v, reason=%q), want (EOF, idle)", err, d.Reason())
+	if !errors.Is(err, ErrSessionEnded) || d.Reason() != "idle" {
+		t.Fatalf("got (%v, reason=%q), want (ErrSessionEnded, idle)", err, d.Reason())
 	}
 	// With strikes maxed it boots at the warning point (idle-warnLead), not the
 	// full idle deadline.
@@ -81,8 +82,8 @@ func TestDeadlineHardDeadline(t *testing.T) {
 	f := newFakeConn()
 	d := NewDeadline(f, 0, 3, time.Now().Add(40*time.Millisecond)) // idle off, hard in 40ms
 	_, err := d.ReadKey()
-	if err != io.EOF || d.Reason() != "time" {
-		t.Fatalf("got (%v, reason=%q), want (EOF, time)", err, d.Reason())
+	if !errors.Is(err, ErrSessionEnded) || d.Reason() != "time" {
+		t.Fatalf("got (%v, reason=%q), want (ErrSessionEnded, time)", err, d.Reason())
 	}
 	if !strings.Contains(f.out.String(), "time is") {
 		t.Errorf("expected a time warning in output:\n%s", f.out.String())

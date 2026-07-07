@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -14,7 +15,11 @@ import (
 // player quits. "Play Game" runs a turn pipeline. active is the empire
 // playing THIS session — per-session state, not shared World state, so the
 // web front-end can run concurrent sessions against one World.
-func GameLoop(s session.Session, w *game.World, active *game.Empire) error {
+func GameLoop(s session.Session, w *game.World, active *game.Empire) (err error) {
+	// A prompt read failing mid-turn (idle boot or dropped connection) unwinds
+	// the whole session via session.End; catch it here and report it as io.EOF,
+	// which the caller (play.Session) treats as a clean save-and-exit end.
+	defer session.GuardEnd(&err)
 	c := &ctx{World: w, active: active}
 	menus := BuildMenus()
 	// Expand Ctrl-<letter> into the active player's saved macro keystrokes.
@@ -77,7 +82,10 @@ func askYesNo(s session.Session, msg string, defYes bool) bool {
 	for {
 		r, err := s.ReadKey()
 		if err != nil {
-			return false
+			if errors.Is(err, session.ErrSessionEnded) {
+				session.End(err) // idle boot / disconnect: unwind, don't answer "no"
+			}
+			return false // test stream ran out
 		}
 		switch r {
 		case 'y', 'Y':

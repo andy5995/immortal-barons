@@ -1,6 +1,42 @@
 package session
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
+
+// A read failing mid-session — an idle/time boot returning io.EOF, or a dropped
+// connection — means the session is over. Rather than each prompt returning a
+// fake value and letting the turn run on to completion on defaults, an input
+// helper calls End to unwind the whole session at once. GuardEnd (deferred at
+// the top of the menu loop) turns that back into an io.EOF return, which the
+// caller already treats as a clean, save-and-exit end.
+type endPanic struct{ err error }
+
+// End aborts the session by panicking with the read error; recover it with
+// GuardEnd or AsEnd. Input helpers call it when a read returns an error.
+func End(err error) { panic(endPanic{err}) }
+
+// AsEnd reports whether a recovered panic value came from End, returning the
+// wrapped read error (io.EOF if none). For callers that want a custom recover.
+func AsEnd(r any) (error, bool) {
+	ep, ok := r.(endPanic)
+	if !ok {
+		return nil, false
+	}
+	if ep.err != nil {
+		return ep.err, true
+	}
+	return io.EOF, true
+}
+
+// GuardEnd recovers an End panic into *err (as the wrapped read error, or
+// io.EOF); any other panic is re-raised. Use as: defer session.GuardEnd(&err).
+func GuardEnd(err *error) {
+	if e, ok := AsEnd(recover()); ok {
+		*err = e
+	}
+}
 
 // ReadLine reads a line of input terminated by Enter, echoing keystrokes
 // (the console runs in no-echo mode). Backspace/DEL erase the last rune.

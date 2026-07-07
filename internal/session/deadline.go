@@ -1,10 +1,24 @@
 package session
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"time"
 )
+
+// ErrSessionEnded marks a read that failed because the session is actually over
+// — an idle/time boot or a dropped connection — as opposed to a test input
+// stream simply running out. Input helpers unwind the whole turn only on this,
+// not on a bare io.EOF. It wraps io.EOF so existing io.EOF checks still match.
+var ErrSessionEnded = errors.New("session ended")
+
+func ended(cause error) error {
+	if cause == nil {
+		cause = io.EOF
+	}
+	return fmt.Errorf("%w: %w", ErrSessionEnded, cause)
+}
 
 // Deadline wraps a Session and bounds how long it may sit idle (and, optionally,
 // its total wall-clock time). It boots an inactive session by returning io.EOF
@@ -54,7 +68,12 @@ type keyResult struct {
 
 func (d *Deadline) ReadKey() (rune, error) {
 	if d.idle <= 0 && d.hard.IsZero() {
-		return d.inner.ReadKey()
+		r, err := d.inner.ReadKey()
+		if err != nil {
+			d.reason = "disconnect"
+			return r, ended(err)
+		}
+		return r, nil
 	}
 
 	ch := make(chan keyResult, 1)
@@ -80,7 +99,13 @@ func (d *Deadline) ReadKey() (rune, error) {
 		select {
 		case res := <-ch:
 			timer.Stop()
-			return res.r, res.err
+			if res.err != nil {
+				if d.reason == "" {
+					d.reason = "disconnect"
+				}
+				return res.r, ended(res.err)
+			}
+			return res.r, nil
 		case <-timer.C:
 			if warned {
 				return d.boot(ch, reason)
@@ -123,7 +148,7 @@ func (d *Deadline) boot(ch chan keyResult, reason string) (rune, error) {
 	case <-ch:
 	case <-time.After(100 * time.Millisecond):
 	}
-	return 0, io.EOF
+	return 0, ended(nil)
 }
 
 // earlier returns the sooner of two deadlines (ignoring zero times) with its

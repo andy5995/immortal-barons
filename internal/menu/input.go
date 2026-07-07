@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -64,7 +65,10 @@ func promptSuggested(s session.Session, msg string, suggested, max int) int {
 	for {
 		r, err := s.ReadKey()
 		if err != nil {
-			break
+			if errors.Is(err, session.ErrSessionEnded) {
+				session.End(err) // idle boot / disconnect: unwind the whole turn
+			}
+			break // test stream ran out: fall back to the suggested value
 		}
 		switch {
 		case r == '\r' || r == '\n':
@@ -111,7 +115,9 @@ func clampAmt(n, max int) int {
 }
 
 func pause(s session.Session) {
-	// BRE's pause prompt.
+	// BRE's pause prompt. A read error here (boot/disconnect) is benign: this is
+	// the tail of a result display, so we let the next read end the session
+	// rather than End-unwinding from every ok()/fail() call site.
 	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, i18n.T(sessionLang(s), "─»>Paused<«─"), ansi.Reset)
 	s.ReadKey()
 }

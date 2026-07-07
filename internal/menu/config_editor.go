@@ -69,7 +69,21 @@ func cycleSabre(m game.SabreMode) game.SabreMode {
 // -reset command, BRE's "reset" being the settings screen). It edits w.Config
 // in place, saves config.json when the sysop exits with S, and reports whether
 // they saved (true) or cancelled with Q/0 (false) — so -reset can abort.
-func ConfigEditor(s session.Session, w *game.World) bool { return runConfigEditor(s, w) }
+func ConfigEditor(s session.Session, w *game.World) (saved bool) {
+	// -reset runs this on a bare console with no GameLoop above it, so recover
+	// an End panic (a closed stdin during editing) here and report "not saved"
+	// instead of crashing. The in-game path lets End propagate to GameLoop.
+	defer func() {
+		if r := recover(); r != nil {
+			if _, ok := session.AsEnd(r); ok {
+				saved = false
+				return
+			}
+			panic(r)
+		}
+	}()
+	return runConfigEditor(s, w)
+}
 
 // configEditor is the menu-action form (Coordinator menu). It ignores the
 // saved/cancelled result and just returns to the menu.
