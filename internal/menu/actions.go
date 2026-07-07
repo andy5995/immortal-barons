@@ -1431,18 +1431,28 @@ func modifyLeagueDiplomacy(s session.Session, w *ctx) Result {
 
 func readMessages(s session.Session, w *ctx) Result {
 	p := w.Player()
-	if len(p.Mail) == 0 {
+	// Snapshot the mailbox and today's news under the world lock, clearing the
+	// mailbox in the same critical section. An unlocked read of p.Mail would
+	// race a concurrent sender, and reading-then-clearing separately could wipe
+	// a message that arrived mid-display; a message that arrives after the
+	// snapshot stays in p.Mail for next time. (issues #2, #5)
+	var mail, news []string
+	w.With(func() {
+		mail = p.Mail
+		p.Mail = nil
+		news = append([]string(nil), w.NewsToday...)
+	})
+	if len(mail) == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no messages."))
 	} else {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your messages:"), ansi.Reset)
-		for _, m := range p.Mail {
+		for _, m := range mail {
 			fmt.Fprintf(s, "  %s\n", m)
 		}
-		w.With(func() { p.Mail = nil })
 	}
-	if len(w.NewsToday) > 0 {
+	if len(news) > 0 {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
-		for _, b := range w.NewsToday {
+		for _, b := range news {
 			fmt.Fprintf(s, "  %s\n", b)
 		}
 	}
@@ -1531,34 +1541,27 @@ const msgMaxLines = 20
 // [A]bort / [S]ave / [C]lear. Returns the joined text and whether to send it
 // (false = aborted).
 func composeMessage(s session.Session) (string, bool) {
-	fmt.Fprintf(s, "\n    "+tr(s, "You have %s%d%s lines for your message.  %s/S%s=save %s/A%s=abort %s/C%s=clear")+"\n",
-		ansi.FgBrightCyan, msgMaxLines, ansi.Reset,
-		ansi.FgBrightYellow, ansi.Reset, ansi.FgBrightYellow, ansi.Reset, ansi.FgBrightYellow, ansi.Reset)
-	ruler := "[" + strings.Repeat("----+----|", 8)[:76] + "]"
-	fmt.Fprintf(s, "    %s%s%s\n", ansi.FgBlue, ruler, ansi.Reset)
+	// The banner and ruler are uniformly bright cyan in BRE (verified from a
+	// live message-editor screenshot); the line-number prompts below are green.
+	fmt.Fprintf(s, "\n    %s"+tr(s, "You have %d lines for your message.  /S=save /A=abort /C=clear")+"%s\n",
+		ansi.FgBrightCyan, msgMaxLines, ansi.Reset)
+	ruler := "[" + "---+----|" + strings.Repeat("----+----|", 6) + "]"
+	fmt.Fprintf(s, "    %s%s%s\n", ansi.FgBrightCyan, ruler, ansi.Reset)
 
 	var lines []string
 	for len(lines) < msgMaxLines {
 		fmt.Fprintf(s, "%s%2d>%s ", ansi.FgBrightGreen, len(lines)+1, ansi.Reset)
-		line, err := session.ReadLine(s)
+
+		// A '/' as the FIRST key of a line opens the command sub-menu right away
+		// — BRE reads key-by-key and reacts on the bare '/', so we peek the first
+		// key instead of reading a whole line. '/' anywhere else stays literal
+		// text (e.g. "line s /s"), so only the leading key is special.
+		first, err := s.ReadKey()
 		if err != nil {
 			return "", false
 		}
-		// A line that is exactly a slash command (as advertised in the header)
-		// saves/aborts/clears; a bare "/" falls back to a follow-up keypress.
-		switch strings.ToUpper(strings.TrimSpace(line)) {
-		case "/S":
-			fmt.Fprintf(s, "    %s\n", tr(s, "Save"))
-			return trimTrailingBlank(lines), true
-		case "/A":
-			fmt.Fprintf(s, "    %s\n", tr(s, "Abort"))
-			return "", false
-		case "/C":
-			fmt.Fprintf(s, "    %s\n", tr(s, "Clear"))
-			lines = nil
-			continue
-		case "/":
-			fmt.Fprintf(s, "    "+tr(s, "/-Command?")+"  [%sA%s,%sS%s,%sC%s] ",
+		if first == '/' {
+			fmt.Fprintf(s, tr(s, "/-Command?")+"  [%sA%s,%sS%s,%sC%s] ",
 				ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset)
 			r, err := s.ReadKey()
 			if err != nil {
@@ -1579,7 +1582,37 @@ func composeMessage(s session.Session) (string, bool) {
 			}
 			continue
 		}
-		lines = append(lines, line)
+		if first == '\r' || first == '\n' {
+			fmt.Fprint(s, "\n")
+			lines = append(lines, "")
+			continue
+		}
+
+		// Ordinary line: echo the first key, then read the rest until Enter.
+		b := []rune{first}
+		fmt.Fprintf(s, "%c", first)
+		for {
+			r, err := s.ReadKey()
+			if err != nil {
+				return "", false
+			}
+			if r == '\r' || r == '\n' {
+				fmt.Fprint(s, "\n")
+				break
+			}
+			if r == 127 || r == 8 { // backspace / DEL
+				if len(b) > 0 {
+					b = b[:len(b)-1]
+					fmt.Fprint(s, "\b \b")
+				}
+				continue
+			}
+			if r >= 32 {
+				b = append(b, r)
+				fmt.Fprintf(s, "%c", r)
+			}
+		}
+		lines = append(lines, string(b))
 	}
 	fmt.Fprintf(s, "%s"+tr(s, "You have used all %d lines.")+"%s\n", ansi.FgYellow, msgMaxLines, ansi.Reset)
 	return trimTrailingBlank(lines), true

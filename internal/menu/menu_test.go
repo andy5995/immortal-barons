@@ -635,7 +635,7 @@ func TestEnterExitsSpendingRespectsPreference(t *testing.T) {
 }
 
 func TestComposeMessageSaves(t *testing.T) {
-	f := &fakeSession{keys: []rune("hello\rworld\r/\rS")} // two lines, then /S
+	f := &fakeSession{keys: []rune("hello\rworld\r/S")} // two lines, then /S
 	text, send := composeMessage(f)
 	if !send {
 		t.Fatal("expected save")
@@ -646,7 +646,7 @@ func TestComposeMessageSaves(t *testing.T) {
 }
 
 func TestComposeMessageAborts(t *testing.T) {
-	f := &fakeSession{keys: []rune("secret\r/\rA")} // one line, then /A
+	f := &fakeSession{keys: []rune("secret\r/A")} // one line, then /A
 	_, send := composeMessage(f)
 	if send {
 		t.Error("expected abort (send=false)")
@@ -654,7 +654,7 @@ func TestComposeMessageAborts(t *testing.T) {
 }
 
 func TestComposeMessageClearThenSave(t *testing.T) {
-	f := &fakeSession{keys: []rune("oops\r/\rCkeep\r/\rS")} // clear, then one line, save
+	f := &fakeSession{keys: []rune("oops\r/Ckeep\r/S")} // clear, then one line, save
 	text, send := composeMessage(f)
 	if !send || text != "keep" {
 		t.Errorf("after clear: text=%q send=%v, want %q true", text, send, "keep")

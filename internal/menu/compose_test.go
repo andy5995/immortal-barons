@@ -27,7 +27,7 @@ func TestComposeMessageSlashALowercaseAborts(t *testing.T) {
 
 func TestComposeMessageSlashCClears(t *testing.T) {
 	// Type a line, clear it, type another, then save: only the second survives.
-	f := &fakeSession{keys: []rune("first\r/C\rsecond\r/S\r")}
+	f := &fakeSession{keys: []rune("first\r/Csecond\r/S")}
 	msg, ok := composeMessage(f)
 	if !ok {
 		t.Fatal("/S after /C should save")
