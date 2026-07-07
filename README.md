@@ -64,8 +64,9 @@ native BBS door.
 To install Go, download an official installer or tarball from
 <https://go.dev/doc/install>. That same page also has the step-by-step install
 instructions for Windows, macOS, Linux, and the BSDs, and always offers a
-current version. On macOS you can also run `brew install go`, and on Ubuntu
-`snap install go --classic` (both track a current Go). On Linux and the BSDs the
+current version. On macOS you can also run `brew install go`; on any Linux with
+snap (preinstalled on Ubuntu), `snap install go --classic` tracks a current Go
+too. On Linux and the BSDs the
 package manager's Go is usually called `go` or `golang` (for example `go` on
 Arch, Alpine, and FreeBSD; `golang` on Debian, Ubuntu, and Fedora). A distro's
 package can be older than 1.26, though — if it is, use the official tarball.
