@@ -66,18 +66,18 @@ func TestHighTaxCanRiot(t *testing.T) {
 	e := w.AddHuman("rioter", "Riot Realm")
 	e.Tax = 39
 
+	// A turn runs population growth AND (maybe) a riot, so a riot turn can
+	// still net a population gain when logistic growth outweighs the riot's
+	// People/15 loss. We can't isolate the riot's People effect from a full
+	// PlayTurn, so here we only assert a riot never *raises* Support.
 	sawRiot := false
 	for i := 0; i < 200; i++ {
-		peopleBefore := e.People
 		supportBefore := e.Support
 		w.PlayTurn(e, "2026-07-03")
 		if e.LastRiot {
 			sawRiot = true
 			if e.Support > supportBefore {
 				t.Errorf("riot should not raise Support: before=%d after=%d", supportBefore, e.Support)
-			}
-			if e.People > peopleBefore {
-				t.Errorf("riot should not raise People: before=%d after=%d", peopleBefore, e.People)
 			}
 		}
 	}

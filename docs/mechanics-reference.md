@@ -200,6 +200,31 @@ the main income. Set tax to 0% for a few turns to spike growth, then buy
 **urban** regions so people don't leave when you raise tax back to ~7–9%.
 Growing population needs enough **agricultural** regions to stay fed.
 
+**Population growth model — BRE's shape, the clone's own tuning.** A BRE.OVR
+disassembly (HIGH confidence on shape) shows BRE grows population **logistically
+toward a carrying capacity**, not at a flat birth rate:
+`capacity = (Σ region·weight + Support·90 + base) · taxFactor(tax)`, then
+`growth = min(capacity − People, People/2)` plus a small jitter (population is
+stored in *millions*). Capacity is dominated by **popular support**; **tax**
+lowers growth twice (a decreasing `taxFactor` multiplier *and* by dragging
+support down); **urban** is one of the weighted region types. That `People/2`
+term is a **50%/turn ceiling** — with high support a realm sits far below
+capacity and pins to it, which is BRE's characteristic explosive growth. The
+exact float `taxFactor(tax)` curve is the one value the disassembly could not
+recover (a relocated Turbo-Pascal FP routine).
+
+The clone keeps the **self-limiting logistic shape** but replaces BRE's runaway
+ceiling with moderate rates (a deliberate balance choice, not a fidelity gap).
+In `internal/game/turn.go`: `popCapacity = Land·20 + Urban·60 + Agricultural·20
++ Support·30`, growth closes headroom at `~1/12` per turn, clamped to
+**±8%/turn** (`PopGrowthCapPct`), and positive growth needs food. Support is the
+main lever, matching BRE's intent. Selling urban/agricultural land or losing
+support lowers capacity, so population then **drifts down gradually** toward the
+new capacity — the clone's answer to BRE's separate instant ~1M-per-urban
+housing loss on a land sell (one code path instead of two, and it makes the
+"no misrule emigration" result below correct by construction: being over
+capacity *is* the attrition). All weights are tunable constants.
+
 **Industrial production:** industrial regions output military units. You
 set production percentages across trooper/jet/turret/tank/bomber/carrier.
 A common money tip: set industry to 100% carriers and *sell* the carriers

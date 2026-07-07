@@ -231,6 +231,8 @@ func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
 	fmt.Fprintf(s, "  %s\n", tr(s, peopleMood(p.Support)))
 	if p.LastPopGrowth > 0 {
 		fmt.Fprintf(s, "  "+tr(s, "Your dominion gained %s%s%s people.")+"\n", ansi.FgBrightCyan, comma(p.LastPopGrowth), ansi.Reset)
+	} else if p.LastPopGrowth < 0 {
+		fmt.Fprintf(s, "  "+tr(s, "Your dominion lost %s%s%s people.")+"\n", ansi.FgRed, comma(-p.LastPopGrowth), ansi.Reset)
 	}
 	statLine(s, p.LastSpoiled, "units of food spoiled.")
 	if p.LastRiot {

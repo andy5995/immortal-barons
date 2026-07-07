@@ -138,6 +138,34 @@ const (
 	RiotTaxFloor     = 10 // no riots at/below this tax rate (BRE.OVR: riots need tax > 10)
 )
 
+// Population model (IB's own tuning). BRE uses the same logistic shape —
+// growth toward a carrying capacity — but with a runaway 50%/turn ceiling
+// (recovered from a BRE.OVR disassembly). IB keeps the self-limiting shape and
+// trades the ceiling for moderate rates; see docs/mechanics-reference.md.
+const (
+	PopGrowthCapPct   = 8  // max % of population gained or lost per turn
+	PopGrowthApproach = 12 // headroom is closed at ~1/12 per turn (before the cap)
+
+	// Carrying-capacity weights (per region / per support point). Land houses
+	// people, urban and agricultural regions add extra headroom, and popular
+	// support is the dominant lever — the same factor roles BRE uses.
+	PopCapPerLand    = 20
+	PopCapPerUrban   = 60
+	PopCapPerAgri    = 20
+	PopCapPerSupport = 30
+)
+
+// popCapacity is the carrying capacity the population grows toward. Selling
+// urban/agricultural land or losing support lowers it, so population then
+// drifts down toward the new capacity at the growth cap rather than via a
+// separate housing-loss hit. IB's own values; see docs/mechanics-reference.md.
+func (e *Empire) popCapacity() int {
+	return e.Land*PopCapPerLand +
+		e.Regions.Urban*PopCapPerUrban +
+		e.Regions.Agricultural*PopCapPerAgri +
+		e.Support*PopCapPerSupport
+}
+
 // IncomeBreakdown itemizes a turn's income by source (gold), plus the food
 // grown. The income report and the actual gold credit both derive from this,
 // so what the player is shown equals what is credited to the last coin.
@@ -216,14 +244,26 @@ func (w *World) processEconomy(e *Empire) {
 		e.LastSpoiled = 0
 	}
 
+	// Population follows a logistic curve toward popCapacity, capped at
+	// PopGrowthCapPct%/turn in either direction (IB's own tuning; see the
+	// constants above and docs/mechanics-reference.md). Positive growth needs
+	// food; decline toward capacity — after selling land or losing support —
+	// always runs, which is why selling urban regions drains people gradually
+	// instead of via a separate housing-loss hit.
 	e.LastPopGrowth = 0
-	if e.Food > 0 {
-		if g := e.People * (10 - e.Tax/5) / 100; g > 0 {
-			e.People += g
-			e.LastPopGrowth = g
-		}
+	growth := (e.popCapacity() - e.People) / PopGrowthApproach
+	if ceiling := e.People * PopGrowthCapPct / 100; growth > ceiling {
+		growth = ceiling
+	} else if growth < -ceiling {
+		growth = -ceiling
 	}
-	e.People += e.Regions.Urban * 10 // urban regions draw settlers
+	if growth > 0 && e.Food <= 0 {
+		growth = 0 // starving realms don't grow; starvation attrition is separate
+	}
+	if growth != 0 {
+		e.People += growth
+		e.LastPopGrowth = growth
+	}
 
 	// Support drifts toward a tax-based target (higher tax => lower target).
 	target := 100 - (e.Tax-SupportStableTax)*3
