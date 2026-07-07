@@ -87,8 +87,8 @@ go run ./cmd/immortal-barons -local
 
 ## Running as a BBS door
 
-Immortal Barons can run as a native door under modern BBS software such as
-Synchronet or Mystic. The BBS writes a dropfile (`DOOR32.SYS` or `DOOR.SYS`)
+Immortal Barons can run as a native door under BBS software on any platform Go
+supports. The BBS writes a dropfile (`DOOR32.SYS` or `DOOR.SYS`)
 when a caller starts the door, and the caller shares one persistent world with
 everyone else on the board — each empire is saved between calls, keyed by its
 BBS handle.

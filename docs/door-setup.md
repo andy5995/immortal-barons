@@ -6,8 +6,8 @@ read this.
 
 ## What you need
 
-The game is one program: `immortal-barons`. It runs as a native door under modern
-BBS software such as Synchronet or Mystic. You do not need DOSBox or DOSEMU.
+The game is one program: `immortal-barons`. It runs as a native door under BBS
+software on any platform Go supports.
 
 The game keeps all its files in one data directory (default `./data`). Point
 the `-data` option at it.
@@ -36,7 +36,7 @@ See "Starting a fresh game" below — it is the same command.
 
 Set up the game as an external program (a "door") in your BBS software.
 
-- The game reads **DOOR32.SYS** (both Synchronet and Mystic write it) or
+- The game reads **DOOR32.SYS** (the dropfile most BBS software writes) or
   **DOOR.SYS**. Point the game at it with `-dropfile`, or let it search the
   current directory.
 - The caller's handle from the dropfile becomes the name of their realm.
