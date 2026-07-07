@@ -679,7 +679,9 @@ func renderAdvisors(s session.Session, w *ctx) {
 	if p.Support < 50 {
 		tips = append(tips, tr(s, "The people grow restless. Lower taxes or spend on their support."))
 	}
-	if p.Tax > game.RiotTaxFloor {
+	// Riots are possible above RiotTaxFloor(10), but the chance (tax^2/10000)
+	// is trivial near the floor; only advise once the risk is worth acting on.
+	if p.Tax > 20 {
 		tips = append(tips, tr(s, "Taxes are set high enough to risk riots. Consider lowering them."))
 	}
 	if p.TechFactor() == 0 {

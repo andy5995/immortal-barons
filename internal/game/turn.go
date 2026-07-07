@@ -135,7 +135,7 @@ func (w *World) aiPlay(today string) {
 const (
 	SupportStableTax = 15 // tax rate at which support holds at 100
 	SupportDrift     = 3  // points support moves toward its target per turn
-	RiotTaxFloor     = 20 // no riots at/below this tax rate
+	RiotTaxFloor     = 10 // no riots at/below this tax rate (BRE.OVR: riots need tax > 10)
 )
 
 // IncomeBreakdown itemizes a turn's income by source (gold), plus the food
@@ -239,16 +239,20 @@ func (w *World) processEconomy(e *Empire) {
 		e.Support -= min(SupportDrift, e.Support-target)
 	}
 
-	// Riots: chance rises with tax above the floor.
+	// Riots: verified against a BRE.OVR disassembly — a riot fires iff
+	// tax > 10 AND tax*tax >= Random(10000), i.e. probability = tax^2 / 10000
+	// (quadratic, not linear), and each riot removes People div 15 (~6.67%).
+	// BRE also cancels that turn's population growth via tax/3 (not modeled
+	// here); the Support hit is IB's own reconstruction, not from BRE.
 	e.LastRiot = false
-	if e.Tax > RiotTaxFloor && w.rng.Intn(100) < (e.Tax-SupportStableTax)*2 {
+	if e.Tax > RiotTaxFloor && e.Tax*e.Tax >= w.rng.Intn(10000) {
 		e.LastRiot = true
 		w.postRiotNews(e)
 		e.Support -= 15
 		if e.Support < 0 {
 			e.Support = 0
 		}
-		e.People -= e.People / 10 // a tenth flee in the unrest
+		e.People -= e.People / 15 // BRE (disassembly): People div 15 lost per riot
 	}
 
 	// Morale slowly recovers toward 100 each turn (a paid, quiet army regains

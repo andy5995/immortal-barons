@@ -85,13 +85,16 @@ func TestHighTaxCanRiot(t *testing.T) {
 		t.Error("expected at least one riot at Tax=39 across 200 turns")
 	}
 
+	// At/below the riot tax floor (BRE: riots need tax > 10), no riot can ever
+	// fire — tax 15 CAN riot (~2.25%/turn per tax^2/10000), so the floor is the
+	// real no-riot guarantee.
 	w2 := NewWorldSeed(DefaultConfig(), 42)
 	stable := w2.AddHuman("stable", "Stable Realm")
-	stable.Tax = SupportStableTax
+	stable.Tax = RiotTaxFloor
 	for i := 0; i < 200; i++ {
 		w2.PlayTurn(stable, "2026-07-03")
 		if stable.LastRiot {
-			t.Error("no riot should fire at the stable tax rate")
+			t.Error("no riot should fire at or below the riot tax floor")
 		}
 	}
 }

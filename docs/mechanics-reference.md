@@ -228,6 +228,27 @@ each turn. The exact request/boost/decay constants are not in BRE's released
 files (the empire record layout was deliberately withheld); the values in
 `internal/game/payments.go` are reconstructed placeholders, tunable.
 
+**Riots and emigration — verified against a BRE.OVR disassembly (HIGH confidence):**
+
+- **Riot trigger + chance:** each turn a riot fires iff `tax > 10` **and**
+  `tax*tax >= Random(10000)` — i.e. **riot probability = tax² / 10000**
+  (quadratic, not linear). Samples: tax 15 → 2.25%, 20 → 4%, 30 → 9%,
+  50 → 25%, 71 → ~50%, 100 → 100%.
+- **Riot effect:** each riot removes **`People div 15`** (~6.67%) of the
+  population, and cancels that turn's population growth (a suppression
+  accumulator bumped by `tax div 3`). (Recovered by identifying the 32-bit
+  divide/subtract runtime helpers across 138 call sites.)
+- **Emigration is NOT a gameplay mechanic.** BRE's tiered civil-revolt /
+  "most of your empire has left your rule" / troops-fleeing system is gated on
+  a severity byte whose *only* nonzero setter is BRE's **crack/registration
+  check** — it fires only when a *pirated* copy is detected. In a registered
+  BRE, emigration never happens; misrule attrition is **riots (tax) and
+  starvation (food) only**. So the clone deliberately models no emigration.
+
+The clone implements the verified riot trigger/chance and the `People div 15`
+loss (`internal/game/turn.go`); the Support hit on a riot is the clone's own
+addition, not from BRE. The growth-cancel (`tax div 3`) is not yet modeled.
+
 Tax rate, bank interest, and investment rates are configurable (a real
 league ran tax 85%, interest 75%).
 
