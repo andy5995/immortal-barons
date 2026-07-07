@@ -87,31 +87,14 @@ go run ./cmd/immortal-barons -local
 ## Running as a BBS door
 
 Immortal Barons can run as a native door under modern BBS software such as
-Synchronet or Mystic. Build it:
+Synchronet or Mystic. The BBS writes a dropfile (`DOOR32.SYS` or `DOOR.SYS`)
+when a caller starts the door, and the caller shares one persistent world with
+everyone else on the board — each empire is saved between calls, keyed by its
+BBS handle.
 
-```
-go build ./cmd/immortal-barons
-```
-
-The BBS writes a dropfile when a caller starts the door. Configure your BBS
-to run `immortal-barons` and pass the dropfile path:
-
-```
-immortal-barons -dropfile /path/to/node/DOOR32.SYS
-```
-
-It reads `DOOR32.SYS` (preferred) or `DOOR.SYS` to learn the caller's name,
-node, time left, and whether their terminal supports ANSI. The BBS connects
-the caller to the door over standard input and output. With no `-dropfile`,
-it looks for `DOOR32.SYS` or `DOOR.SYS` in the working directory.
-
-Callers share one persistent world: each caller's empire is saved between
-calls, keyed by their BBS handle. A nightly maintenance step
-(`immortal-barons -maint`) advances the world.
-
-Full setup instructions for local and inter-BBS play — registering the door,
-daily maintenance, the node list, and starting a fresh game with
-`immortal-barons -reset` — are in the
+Registering the door, the dropfile, daily maintenance (`immortal-barons -maint`),
+the node list, inter-BBS play, and starting a fresh game (`immortal-barons -reset`)
+are all covered in the
 [Door Setup guide](https://andy5995.github.io/immortal-barons/door-setup/).
 
 ## Running in a browser (experimental)
