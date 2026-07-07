@@ -268,36 +268,6 @@ func titleRule(color, title string) string {
 	return color + strings.Repeat("─", left) + label + strings.Repeat("─", right) + ansi.Reset
 }
 
-// barWidth is the fixed status-bar width (classic 80-column door screen).
-const barWidth = 80
-
-// topBar renders BRE's top bar: a blue band with "LOCAL", the game
-// title/version, and the player's realm right-aligned. No absolute cursor
-// positioning — it's printed as the first line so it works over a plain
-// byte stream (door socket or local tty) without assuming screen height.
-func topBar(g *ctx) string {
-	realm := ""
-	if p := g.Player(); p != nil {
-		realm = p.Name
-	}
-	left := " LOCAL "
-	mid := "Immortal Barons v" + game.Version
-	right := realm + " "
-
-	row := []rune(strings.Repeat(" ", barWidth))
-	overlay := func(text string, at int) {
-		for i, r := range text {
-			if at+i >= 0 && at+i < barWidth {
-				row[at+i] = r
-			}
-		}
-	}
-	overlay(left, 0)
-	overlay(mid, (barWidth-len([]rune(mid)))/2)
-	overlay(right, barWidth-len([]rune(right)))
-	return ansi.BgBlue + ansi.FgBrightWhite + string(row) + ansi.Reset
-}
-
 // hasColumns reports whether any visible item carries a Price/Owned column, so
 // the menu draws the BRE-style "Price / # Owned" table (Spending, Sell).
 func (m *Menu) hasColumns(g *ctx) bool {
@@ -316,7 +286,7 @@ func (m *Menu) hasColumns(g *ctx) bool {
 func draw(s session.Session, g *ctx, m *Menu) {
 	// Render the whole menu into an in-memory buffer while holding the world
 	// lock, then flush it to the session unlocked. Every item callback
-	// (hidden/label/Price/Owned/Status/topBar) reads shared empire and world
+	// (hidden/label/Price/Owned/Status) reads shared empire and world
 	// state; running them all inside one g.With makes those reads race-free
 	// against the daily-maintenance ticker. Building a strings.Builder is not
 	// I/O, so the lock is never held across the actual write (the final
@@ -326,7 +296,6 @@ func draw(s session.Session, g *ctx, m *Menu) {
 		if !m.NoClear {
 			b.WriteString(ansi.Clear)
 		}
-		fmt.Fprintf(&b, "%s\n", topBar(g))
 		col := m.Color
 		if col == "" {
 			col = ansi.FgBrightCyan

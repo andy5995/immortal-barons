@@ -11,27 +11,6 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-func TestStatusBar(t *testing.T) {
-	w := game.NewWorldSeed(game.DefaultConfig(), 1)
-	p := w.AddHuman("me", "Waste Kings")
-	c := &ctx{World: w, active: p}
-
-	bar := topBar(c)
-	for _, want := range []string{"LOCAL", "Immortal Barons v" + game.Version, "Waste Kings"} {
-		if !strings.Contains(bar, want) {
-			t.Errorf("status bar missing %q: %q", want, bar)
-		}
-	}
-	// Visible width (color codes stripped) must be exactly barWidth.
-	visible := bar
-	for _, code := range []string{ansi.BgBlue, ansi.FgBrightWhite, ansi.Reset} {
-		visible = strings.ReplaceAll(visible, code, "")
-	}
-	if got := len([]rune(visible)); got != barWidth {
-		t.Errorf("visible width = %d, want %d", got, barWidth)
-	}
-}
-
 // fakeSession feeds a scripted key sequence and captures written output.
 type fakeSession struct {
 	keys []rune
