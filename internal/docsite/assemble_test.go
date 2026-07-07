@@ -11,11 +11,12 @@ import (
 func writeFixture(t *testing.T, root string) {
 	t.Helper()
 	files := map[string]string{
-		"README.md":                                   "# Immortal Barons\n\nOverview. See [door setup](docs/door-setup.md).\n",
-		"docs/playing.md":                             "# Playing\n\nHow to play.\n",
-		"docs/door-setup.md":                          "# Door Setup\n\nSetup.\n",
-		"docs/webserver.md":                           "# Web Server\n\nBrowser front-end.\n",
-		"docs/dev/packets.md":                         "# Packet Format\n\nDev reference.\n",
+		"README.md":           "# Immortal Barons\n\nOverview. See [door setup](docs/door-setup.md).\n",
+		"docs/playing.md":     "# Playing\n\nHow to play.\n",
+		"docs/door-setup.md":  "# Door Setup\n\nSetup.\n",
+		"docs/webserver.md":   "# Web Server\n\nBrowser front-end.\n",
+		"docs/faq.md":         "# FAQ\n\nQuestions.\n",
+		"docs/dev/packets.md": "# Packet Format\n\nDev reference.\n",
 		"internal/help/content/economy/regions.md":    "---\ntitle: Regions\ncategory: economy\norder: 1\nin_game: true\n---\n# Regions\n\nBuy land.\n",
 		"internal/help/content/controls/interface.md": "---\ntitle: Menus\ncategory: controls\norder: 1\nin_game: true\n---\n# Menus\n\nNavigate.\n",
 		// German: only the one topic is translated.
@@ -52,6 +53,7 @@ func TestAssembleLayout(t *testing.T) {
 		"site-src/en/guide/controls/interface.md", // help topic
 		"site-src/en/door-setup/index.md",         // door setup (was sysop guide)
 		"site-src/en/web-server/index.md",         // web server
+		"site-src/en/faq/index.md",                // faq
 		"site-src/en/developers/packets.md",       // dev doc (en only)
 		"site-src/de/guide/economy/regions.md",    // translated topic
 		"mkdocs.yml",
@@ -64,7 +66,7 @@ func TestAssembleLayout(t *testing.T) {
 
 	// German has no translated README/playing/sysop, so those files must be
 	// absent (the i18n plugin falls back to English at build time).
-	for _, rel := range []string{"site-src/de/index.md", "site-src/de/door-setup/index.md", "site-src/de/web-server/index.md", "site-src/de/developers/packets.md"} {
+	for _, rel := range []string{"site-src/de/index.md", "site-src/de/door-setup/index.md", "site-src/de/web-server/index.md", "site-src/de/faq/index.md", "site-src/de/developers/packets.md"} {
 		if _, err := os.Stat(filepath.Join(out, rel)); err == nil {
 			t.Errorf("did not expect %s (should fall back to English)", rel)
 		}
@@ -94,6 +96,7 @@ func TestAssembleNavAndConfig(t *testing.T) {
 		`- "Regions": guide/economy/regions.md`,
 		`- "Door Setup": door-setup/index.md`,
 		`- "Web Server": web-server/index.md`,
+		`- "FAQ": faq/index.md`,
 		`- "Packet Format": developers/packets.md`, // dev nav titled from its H1
 	} {
 		if !strings.Contains(s, want) {

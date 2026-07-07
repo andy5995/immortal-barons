@@ -30,6 +30,7 @@ func newLinker(repoRoot string, enTopics []topic) *linker {
 		"docs/playing.md":    "guide/index.md",
 		"docs/door-setup.md": "door-setup/index.md",
 		"docs/webserver.md":  "web-server/index.md",
+		"docs/faq.md":        "faq/index.md",
 	}
 	for _, t := range enTopics {
 		m["internal/help/content/"+t.relPath] = "guide/" + t.relPath
