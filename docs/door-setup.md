@@ -63,15 +63,14 @@ Two things to note. Mystic writes the file name in lower case (`door32.sys`),
 which matters on Linux because file names there are case-sensitive. And the
 game's data directory should be a separate directory from the BBS's own files.
 
-Before the first caller connects, create the data directory and seed it:
+Before the first caller connects, seed the game:
 
 ```
-mkdir -p /path/to/game-data
 /path/to/immortal-barons -reset -data /path/to/game-data
 ```
 
-The first command makes the directory. The second opens the settings editor
-(see "First-time setup" above) and, when you save with `S`, writes
+This opens the settings editor (see "First-time setup" above); when you save
+with `S`, it creates the data directory if it does not exist and writes
 `config.json` and the starting world into it.
 
 ### How the game talks to the caller
