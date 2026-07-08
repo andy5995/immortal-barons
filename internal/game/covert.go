@@ -277,49 +277,120 @@ func (w *World) UndermineInvestments(a, d *Empire) (string, error) {
 	return "The operation failed and your agent was lost.", nil
 }
 
-// SabreBackfireTroopers is the Trooper count on the target above which an
-// R5-Slappenheimer missile risks backfiring (BRE.OVR: "large quantities of Troopers
-// on the target empire are known to cause the missile to backfire").
-const SabreBackfireTroopers = 5000
+// R5-Slappenheimer tuning. In BRE's S3-Sabre only 3 of the 11 dial settings
+// (1, 2, 3) did anything and the rest fizzled; the manual never said which
+// number did what. IB keeps the unpredictability but makes it honest: the dial
+// (0-10) is a bluff that changes nothing — every launch is the same random
+// gamble. Only about SlappenheimerEffectHits launches in SlappenheimerEffectRange
+// (3 in 10) deliver a payload; the rest fizzle. The sysop's None handling mode
+// disables the weapon entirely (gated in the menu).
+const (
+	SlappenheimerEffectHits    = 3   // landing launches per SlappenheimerEffectRange...
+	SlappenheimerEffectRange   = 10  // ...i.e. a 3-in-10 chance to deliver a payload
+	SlappenheimerBaseDamagePct = 5   // a landed hit always removes at least this %
+	SlappenheimerDamageSpread  = 26  // random % headroom on top of the base (5-30% total)
+	SlappenheimerBackfireScale = 200 // target Troopers / this = backfire chance (percent)
+	SlappenheimerMultiHitOdds  = 10  // 1-in-this a hit strafes several assets at once
+)
 
-// sabreDial picks the R5-Slappenheimer's random-return magnitude (BRE's "dial",
-// 0-10) according to the sysop's Sabre Handling mode. This is a v1
-// simplification of BRE's dial: the original's per-value effect table was
-// never documented ("the instruction manual did not tell which number
-// corresponds to which task"), so we scale a single Trooper-loss effect by
-// the dial instead of reproducing an unknown effect table.
-func (w *World) sabreDial() int {
-	switch w.Config.SabreHandling {
-	case SabreConstant:
-		return 5
-	case SabreNone:
-		return 0
-	default: // SabreRandom, SabreUserSelect
-		return w.rng.Intn(11)
+// slappenheimerResource pairs a strikeable field with its display name. BRE hid
+// which asset each effect hit, so IB picks its own spread of targets.
+type slappenheimerResource struct {
+	name string
+	val  *int
+}
+
+func slappenheimerResources(e *Empire) []slappenheimerResource {
+	return []slappenheimerResource{
+		{"Troopers", &e.Troopers},
+		{"Jets", &e.Jets},
+		{"Turrets", &e.Turrets},
+		{"Tanks", &e.Tanks},
+		{"Bombers", &e.Bombers},
+		{"Carriers", &e.Carriers},
+		{"Agents", &e.Agents},
+		{"Gold", &e.Gold},
+		{"Food", &e.Food},
 	}
 }
 
-// SabreStrike fires an R5-Slappenheimer missile at d, a variable-return weapon whose
-// magnitude depends on sabreDial. A heavily-garrisoned target has a chance
-// to backfire the missile onto the attacker instead. On failure (the covert
-// roll, not the backfire) the agent is lost.
-func (w *World) SabreStrike(a, d *Empire) (string, error) {
+// slappenheimerDamage applies a landed R5-Slappenheimer hit to e and returns a
+// human-readable list of what was destroyed (empty if the roll removed
+// nothing). Each hit removes a random 5-30% of one asset; usually a single
+// asset, but occasionally the missile strafes several at once — BRE's
+// "extremely devastating" outcome. Land is one of the targets, but must be
+// removed through the RegionMix (whose Total must always equal e.Land) rather
+// than by touching e.Land directly.
+func (w *World) slappenheimerDamage(e *Empire) string {
+	res := slappenheimerResources(e)
+	landIdx := len(res) // one past the plain-int assets: Land
+	hits := 1
+	if w.rng.Intn(SlappenheimerMultiHitOdds) == 0 {
+		hits = 2 + w.rng.Intn(3) // 2-4 assets at once
+	}
+	seen := make(map[int]bool, hits)
+	var parts []string
+	for k := 0; k < hits; k++ {
+		i := w.rng.Intn(landIdx + 1)
+		if seen[i] {
+			continue
+		}
+		seen[i] = true
+		pct := SlappenheimerBaseDamagePct + w.rng.Intn(SlappenheimerDamageSpread)
+		if i == landIdx {
+			lost := e.Land * pct / 100
+			if lost <= 0 {
+				continue
+			}
+			e.Regions.remove(lost)
+			e.syncLand()
+			parts = append(parts, fmt.Sprintf("%d Regions", lost))
+			continue
+		}
+		lost := *res[i].val * pct / 100
+		if lost <= 0 {
+			continue
+		}
+		*res[i].val -= lost
+		parts = append(parts, fmt.Sprintf("%d %s", lost, res[i].name))
+	}
+	return strings.Join(parts, ", ")
+}
+
+// SlappenheimerStrike fires an R5-Slappenheimer at d. The missile can be shot
+// down by the target's SDI, fizzle harmlessly, or land a random payload on a
+// spread of the target's assets; a heavily-garrisoned target can turn it back
+// on the attacker. The dial the player sets under User Select handling is a
+// bluff and has no effect here, so it is not passed in. The agent is only lost
+// when the covert approach itself is foiled — not on an SDI shoot-down, a
+// fizzle, or a backfire.
+func (w *World) SlappenheimerStrike(a, d *Empire) (string, error) {
 	if a.Agents < 1 {
 		return "", ErrNoAgents
 	}
-	if w.covertSuccess(a, d) {
-		dial := w.sabreDial()
-		if d.Troopers > SabreBackfireTroopers && w.rng.Intn(2) == 0 {
-			lost := a.Troopers / 10
-			a.Troopers -= lost
-			return fmt.Sprintf("The R5-Slappenheimer backfired! You lost %d troopers.", lost), nil
-		}
-		lost := d.Troopers * dial / 20
-		d.Troopers -= lost
-		d.Events = append(d.Events, fmt.Sprintf("An R5-Slappenheimer struck your forces — %d troopers lost.", lost))
-		return fmt.Sprintf("Your R5-Slappenheimer hit %s: %d troopers eliminated (dial %d).", d.Name, lost, dial), nil
+	if !w.covertSuccess(a, d) {
+		a.Agents--
+		d.Events = append(d.Events, "Your security foiled an enemy R5-Slappenheimer strike.")
+		return "The operation failed and your agent was lost.", nil
 	}
-	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy R5-Slappenheimer strike.")
-	return "The operation failed and your agent was lost.", nil
+	if w.rng.Intn(100) < d.SDI {
+		return fmt.Sprintf("%s's SDI intercepted your R5-Slappenheimer.", d.Name), nil
+	}
+	if w.rng.Intn(SlappenheimerEffectRange) >= SlappenheimerEffectHits {
+		return "The R5-Slappenheimer fizzled and did no damage.", nil
+	}
+	// The more Troopers the target garrisons, the likelier the missile turns
+	// back on the attacker.
+	if w.rng.Intn(100) < d.Troopers/SlappenheimerBackfireScale {
+		if hit := w.slappenheimerDamage(a); hit != "" {
+			return "The R5-Slappenheimer backfired! You lost " + hit + ".", nil
+		}
+		return "The R5-Slappenheimer backfired, but the damage was negligible.", nil
+	}
+	hit := w.slappenheimerDamage(d)
+	if hit == "" {
+		return fmt.Sprintf("Your R5-Slappenheimer reached %s but did negligible damage.", d.Name), nil
+	}
+	d.Events = append(d.Events, "An R5-Slappenheimer struck your empire — lost "+hit+".")
+	return fmt.Sprintf("Your R5-Slappenheimer hit %s: %s destroyed.", d.Name, hit), nil
 }

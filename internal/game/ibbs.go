@@ -34,26 +34,26 @@ type Packet struct {
 // it so everyone plays by the same turns/protection/length — replacing the
 // hand-coordinated config that BRE distributed at reset.
 type LeagueConfig struct {
-	GameStartDate     string
-	JoinDate          string
-	TurnsPerDay       int
-	ProtectionTurns   int
-	GameLength        int
-	InitialMarketLand int
-	LandPerDay        int
-	InterestRate      int
-	StdInvestRate     int
-	SteadyInvest      bool
-	MaxTaxRate        int
-	MaxRegions        int
-	MaxPlayers        int
-	BuyMilitary       BuyMode
-	MaintCosts        Level
-	TradeCosts        Level
-	RegionCosts       Level
-	AttackDamage      Level
-	AttackRewards     Level
-	SabreHandling     SabreMode
+	GameStartDate         string
+	JoinDate              string
+	TurnsPerDay           int
+	ProtectionTurns       int
+	GameLength            int
+	InitialMarketLand     int
+	LandPerDay            int
+	InterestRate          int
+	StdInvestRate         int
+	SteadyInvest          bool
+	MaxTaxRate            int
+	MaxRegions            int
+	MaxPlayers            int
+	BuyMilitary           BuyMode
+	MaintCosts            Level
+	TradeCosts            Level
+	RegionCosts           Level
+	AttackDamage          Level
+	AttackRewards         Level
+	SlappenheimerHandling SlappenheimerMode
 }
 
 // leagueRuleset extracts the league-wide rules (the fields marked * in the
@@ -61,26 +61,26 @@ type LeagueConfig struct {
 // broadcast.
 func (c Config) leagueRuleset() *LeagueConfig {
 	return &LeagueConfig{
-		GameStartDate:     c.GameStartDate,
-		JoinDate:          c.JoinDate,
-		TurnsPerDay:       c.TurnsPerDay,
-		ProtectionTurns:   c.ProtectionTurns,
-		GameLength:        c.GameLength,
-		InitialMarketLand: c.InitialMarketLand,
-		LandPerDay:        c.LandPerDay,
-		InterestRate:      c.InterestRate,
-		StdInvestRate:     c.StdInvestRate,
-		SteadyInvest:      c.SteadyInvest,
-		MaxTaxRate:        c.MaxTaxRate,
-		MaxRegions:        c.MaxRegions,
-		MaxPlayers:        c.MaxPlayers,
-		BuyMilitary:       c.BuyMilitary,
-		MaintCosts:        c.MaintCosts,
-		TradeCosts:        c.TradeCosts,
-		RegionCosts:       c.RegionCosts,
-		AttackDamage:      c.AttackDamage,
-		AttackRewards:     c.AttackRewards,
-		SabreHandling:     c.SabreHandling,
+		GameStartDate:         c.GameStartDate,
+		JoinDate:              c.JoinDate,
+		TurnsPerDay:           c.TurnsPerDay,
+		ProtectionTurns:       c.ProtectionTurns,
+		GameLength:            c.GameLength,
+		InitialMarketLand:     c.InitialMarketLand,
+		LandPerDay:            c.LandPerDay,
+		InterestRate:          c.InterestRate,
+		StdInvestRate:         c.StdInvestRate,
+		SteadyInvest:          c.SteadyInvest,
+		MaxTaxRate:            c.MaxTaxRate,
+		MaxRegions:            c.MaxRegions,
+		MaxPlayers:            c.MaxPlayers,
+		BuyMilitary:           c.BuyMilitary,
+		MaintCosts:            c.MaintCosts,
+		TradeCosts:            c.TradeCosts,
+		RegionCosts:           c.RegionCosts,
+		AttackDamage:          c.AttackDamage,
+		AttackRewards:         c.AttackRewards,
+		SlappenheimerHandling: c.SlappenheimerHandling,
 	}
 }
 
@@ -106,7 +106,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.RegionCosts = lc.RegionCosts
 	c.AttackDamage = lc.AttackDamage
 	c.AttackRewards = lc.AttackRewards
-	c.SabreHandling = lc.SabreHandling
+	c.SlappenheimerHandling = lc.SlappenheimerHandling
 }
 
 // CoordinatorBoardID is the name of node #1 in the roster — the League

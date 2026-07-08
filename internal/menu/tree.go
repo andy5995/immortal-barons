@@ -212,7 +212,7 @@ func BuildMenus() *Menus {
 		{Key: 'U', Label: "Undermine Investments", Do: undermineInvestments},
 		{Key: 'N', Label: "Nuclear Assault", Do: nuclearAssault},
 		{Key: 'C', Label: "Chemical Bombing", Do: chemicalBombing},
-		{Key: 'S', Label: "R5-Slappenheimer", Do: sabreStrike},
+		{Key: 'S', Label: "R5-Slappenheimer", Do: slappenheimerStrike},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	bombTargets.DefaultOnEnter = quitOnEnter(bombTargets)

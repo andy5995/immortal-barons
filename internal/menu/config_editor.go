@@ -51,17 +51,17 @@ func cycleBuy(b game.BuyMode) game.BuyMode {
 	}
 }
 
-// cycleSabre steps Sabre Handling through its four settings.
-func cycleSabre(m game.SabreMode) game.SabreMode {
+// cycleSlappenheimer steps Slappenheimer Handling through its four settings.
+func cycleSlappenheimer(m game.SlappenheimerMode) game.SlappenheimerMode {
 	switch m {
-	case game.SabreUserSelect:
-		return game.SabreNone
-	case game.SabreNone:
-		return game.SabreRandom
-	case game.SabreRandom:
-		return game.SabreConstant
+	case game.SlappenheimerUserSelect:
+		return game.SlappenheimerNone
+	case game.SlappenheimerNone:
+		return game.SlappenheimerRandom
+	case game.SlappenheimerRandom:
+		return game.SlappenheimerConstant
 	default:
-		return game.SabreUserSelect
+		return game.SlappenheimerUserSelect
 	}
 }
 
@@ -124,7 +124,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		p(15, "* Region Costs", c.RegionCosts.String())
 		p(16, "* Attack Damage", c.AttackDamage.String())
 		p(17, "* Attack Rewards", c.AttackRewards.String())
-		p(18, "* R5-Slappenheimer Handling", c.SabreHandling.String())
+		p(18, "* R5-Slappenheimer Handling", c.SlappenheimerHandling.String())
 		p(19, "* Game Start Date", dateOr(c.GameStartDate, "starts immediately"))
 		p(20, "* Join Cutoff Date", dateOr(c.JoinDate, "always open"))
 		p(21, "AI empires", fmt.Sprintf("%d", c.AICount))
@@ -188,7 +188,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		case 17:
 			c.AttackRewards = cycleHML(c.AttackRewards)
 		case 18:
-			c.SabreHandling = cycleSabre(c.SabreHandling)
+			c.SlappenheimerHandling = cycleSlappenheimer(c.SlappenheimerHandling)
 		case 19:
 			c.GameStartDate = promptDate(s, "Game Start Date", c.GameStartDate)
 		case 20:

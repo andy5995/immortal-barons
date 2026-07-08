@@ -15,7 +15,7 @@ settings from a real league, so they are defaults, not fixed rules.
 
 | Unit | Offense | Defense | Notes |
 |------|---------|---------|-------|
-| Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. Helps defend vs. "Sabre" attacks. |
+| Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy R5-Slappenheimer likelier to backfire. |
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). SDI cuts jet strength 25–30%. |
 | Turret | **0** | 2 | Defense only — the defensive **counterpart to jets**: it shoots down attacking jets (and blows up tanks / kills troops). Also helps intercept nuclear missiles. Cannot be destroyed by terrorist ops. |
 | Tank | 4 | 4 | Best all-round. Low upkeep, high buy cost. Strength scales with HQ and morale. Helps defend vs. chemical missiles. |
@@ -160,11 +160,27 @@ every item below):
 - **Nuclear Assault** / **Chemical Bombing** — reuses the WAR menu's
   `NuclearStrike`/`ChemicalStrike`.
 - **R5-Slappenheimer** (the clone's rename of BRE's *S3-Sabre*, avoiding the
-  original's coined name) — a variable-return missile (BRE.OVR: the dial's
-  per-value effects were never documented, and heavy Trooper counts on the
-  target can backfire it). IB v1 simplification: a single Trooper-loss effect
-  scaled by a `SabreMode`-driven dial, with a backfire chance above
-  `SabreBackfireTroopers`.
+  original's coined name) — a variable-return missile. A disassembly of BRE's
+  `SABREHIT` showed only 3 of the 11 dial settings (1, 2, 3) did anything and
+  the manual never said which number did what, so from the player's seat the
+  result was random; the target's SDI could intercept it and a heavily
+  garrisoned target could turn it back on the attacker. IB keeps that feel but
+  makes it honest: the **dial is a bluff** — the player still sets it 0–10 under
+  User Select handling, but it changes nothing (every launch is the same random
+  gamble). The `None` handling mode disables the weapon (gated in the menu);
+  `User Select`/`Random`/`Constant` all enable it and differ only in the (inert)
+  dial. The target's SDI (`d.SDI`%) can intercept, and only about 3 launches in
+  10 (`SlappenheimerEffectHits`/`SlappenheimerEffectRange`) land a payload — the
+  rest fizzle. A landed hit removes a random 5–30 %
+  (`SlappenheimerBaseDamagePct` + `rng.Intn(SlappenheimerDamageSpread)`) of one
+  asset, and ~1-in-`SlappenheimerMultiHitOdds` strafes several at once (BRE's
+  "extremely devastating" outcome). Backfire is a continuous probability scaled
+  by the target's Troopers (`d.Troopers / SlappenheimerBackfireScale`), applying
+  the same damage to the attacker. BRE hid which field each effect hit, so IB
+  picks its own spread (Troopers, Jets, Turrets, Tanks, Bombers, Carriers,
+  Agents, Gold, Food, and Land — Land removed through the RegionMix so its Total
+  stays equal to `Land`). The agent is lost only when the covert approach itself
+  is foiled — not on an interception, a fizzle, or a backfire.
 
 **Alliances:** a Terrorist-Prevention treaty adds half an ally's agents to
 your defense; an Intelligence alliance adds half their agents to your

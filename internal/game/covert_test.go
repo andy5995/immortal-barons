@@ -247,15 +247,22 @@ func TestUndermineInvestmentsReducesPrincipal(t *testing.T) {
 	}
 }
 
-func TestSabreStrikeDamagesTroopers(t *testing.T) {
+func TestSlappenheimerStrikeDamagesTarget(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	a.Agents, d.Agents, d.Troopers = 50, 0, 1000
-	w.Config.SabreHandling = SabreConstant // deterministic dial
-	if _, err := w.SabreStrike(a, d); err != nil {
-		t.Fatal(err)
+	// Give the attacker overwhelming agents so covertSuccess always passes, no
+	// Troopers on the target so it can never backfire, and a stock of every
+	// strikeable resource. Only ~3 in 10 launches land, so fire many.
+	a.Agents, d.Agents, d.Troopers, d.SDI = 50, 0, 0, 0
+	d.Jets, d.Turrets, d.Tanks, d.Bombers, d.Carriers, d.Gold, d.Food = 1000, 1000, 1000, 1000, 1000, 1000, 1000
+	before := d.Jets + d.Turrets + d.Tanks + d.Bombers + d.Carriers + d.Agents + d.Gold + d.Food
+	for i := 0; i < 100; i++ {
+		if _, err := w.SlappenheimerStrike(a, d); err != nil {
+			t.Fatal(err)
+		}
 	}
-	if d.Troopers >= 1000 {
-		t.Errorf("expected the R5-Slappenheimer to reduce troopers, got %d", d.Troopers)
+	after := d.Jets + d.Turrets + d.Tanks + d.Bombers + d.Carriers + d.Agents + d.Gold + d.Food
+	if after >= before {
+		t.Errorf("expected R5-Slappenheimer strikes to reduce the target's resources, before=%d after=%d", before, after)
 	}
 }
 

@@ -645,8 +645,20 @@ func chemicalBombing(s session.Session, w *ctx) Result {
 	return bombingAttack(s, w, "Chemical Bombing", game.ChemCost, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
 }
 
-func sabreStrike(s session.Session, w *ctx) Result {
-	return bombingAttack(s, w, "R5-Slappenheimer", 0, func(a, d *game.Empire) (string, error) { return w.SabreStrike(a, d) })
+func slappenheimerStrike(s session.Session, w *ctx) Result {
+	var mode game.SlappenheimerMode
+	w.With(func() { mode = w.Config.SlappenheimerHandling })
+	if mode == game.SlappenheimerNone {
+		ok(s, "The R5-Slappenheimer is disabled.")
+		return Stay
+	}
+	// Under User Select handling the player dials the missile in (0-10). The
+	// dial is BRE's bluff — it changes nothing about the outcome — but we still
+	// prompt for it to keep the original's feel.
+	if mode == game.SlappenheimerUserSelect {
+		promptInt(s, "Set the R5-Slappenheimer dial (0-10)")
+	}
+	return bombingAttack(s, w, "R5-Slappenheimer", 0, func(a, d *game.Empire) (string, error) { return w.SlappenheimerStrike(a, d) })
 }
 
 // renderAdvisors prints the Advisors screen: contextual advice based on the

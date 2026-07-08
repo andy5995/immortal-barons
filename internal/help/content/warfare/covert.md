@@ -24,11 +24,17 @@ Common operations:
 - Bomb Airbases — destroy enemy jets that are on the ground.
 - Bomb Food Stores — destroy much of the enemy's food reserve.
 - Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less effective.
-- R5-Slappenheimer — fire a missile that kills some of the enemy's troopers. The
-  amount varies. Against a very large trooper army the missile can backfire and
-  hurt you instead. Troopers help defend against it.
-- Bribery — buy off an agent inside the enemy, so that their covert operations
-  against you fail from then on.
+- R5-Slappenheimer — an unreliable weapon of mass destruction. Before you fire,
+  you set a dial from 0 to 10, but the dial is for show and changes nothing, so
+  pick any number you like. The missile is a gamble every time. Most launches
+  do nothing: it misses, it malfunctions, or the enemy's SDI shoots it down.
+  When one does get through, it destroys part of one of the enemy's assets —
+  troops, jets, tanks, turrets, bombers, carriers, agents, gold, food, or
+  regions — and sometimes it wrecks several of these at once, which can be
+  devastating. It can also backfire: if the enemy keeps a very large trooper
+  army, the missile may turn back and strike your own empire instead.
+- Bribery — pay one of the enemy's own agents to work for you. From then on,
+  that enemy's covert operations against you fail.
 
 An Intelligence Alliance adds half of an ally's agents to your covert strength.
 A Terrorist Prevention treaty adds half an ally's agents to your defense.
