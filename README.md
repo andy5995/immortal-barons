@@ -55,6 +55,21 @@ locally or as a native BBS door.
   attacks — works and is tested; validation under real BBS software is still
   pending)
 
+## Download
+
+The first stable version is not released yet. Until it is, only **development
+snapshots** are available. Snapshots are rebuilt automatically from the latest
+source, so they change often and are not stable. Get them from the
+[snapshot release](https://github.com/andy5995/immortal-barons/releases/tag/snapshot).
+Once the first version is out, stable releases will appear on the
+[releases page](https://github.com/andy5995/immortal-barons/releases).
+
+Builds are provided for Windows (32-bit and 64-bit), Linux (x86-64 and ARM64),
+and macOS (Intel and Apple Silicon). The binaries are not signed, so Windows may
+show a SmartScreen warning the first time you run one.
+
+To build from source instead, see below.
+
 ## Build and run
 
 You need Go 1.26 or newer. The game builds and runs anywhere Go does — Linux,
