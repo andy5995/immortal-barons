@@ -1,0 +1,69 @@
+name: Snapshot
+
+on:
+  push:
+    branches: [trunk]
+  workflow_dispatch:
+
+# Only the newest trunk build should publish. Keyed on the ref (not the sha as
+# in ci.yml) so a fresh push supersedes an in-flight run instead of racing it on
+# the shared "snapshot" tag.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write # needed to publish the snapshot prerelease
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: go.mod
+
+      # Pure-Go / CGO-free, so every target cross-compiles on this one runner.
+      - name: Cross-compile the door binary
+        run: |
+          mkdir -p dist
+          for target in windows/386 windows/amd64 linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
+            os="${target%/*}"
+            arch="${target#*/}"
+            ext=""
+            [ "$os" = windows ] && ext=".exe"
+            echo "==> building $os/$arch"
+            GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags "-s -w" \
+              -o "immortal-barons$ext" ./cmd/immortal-barons
+            name="immortal-barons-snapshot-${os}-${arch}"
+            if [ "$os" = windows ]; then
+              zip -q "dist/${name}.zip" "immortal-barons$ext"
+            else
+              tar -czf "dist/${name}.tar.gz" "immortal-barons$ext"
+            fi
+            rm -f "immortal-barons$ext"
+          done
+          ( cd dist && sha256sum * > SHA256SUMS )
+          ls -l dist
+
+      - name: Publish rolling "snapshot" prerelease
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          printf '%s\n' \
+            "Rolling development build of the latest trunk commit (${GITHUB_SHA:0:7})." \
+            "" \
+            "Not a stable release." \
+            "Binaries are unsigned; Windows SmartScreen may warn on first run." \
+            "The Windows/winsock door path has not been tested against a live BBS." \
+            > "$RUNNER_TEMP/notes.md"
+          # Create the "snapshot" prerelease once, then just swap its assets on
+          # later pushes. Editing (rather than delete+recreate) means watchers
+          # are not re-notified on every trunk build.
+          if gh release view snapshot >/dev/null 2>&1; then
+            gh release edit snapshot --prerelease --title snapshot --notes-file "$RUNNER_TEMP/notes.md"
+            gh release upload snapshot dist/* --clobber
+          else
+            gh release create snapshot dist/* --prerelease --target "$GITHUB_SHA" --title snapshot --notes-file "$RUNNER_TEMP/notes.md"
+          fi
