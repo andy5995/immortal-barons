@@ -15,6 +15,19 @@ set -euo pipefail
 # skip both languages at the `[ -f "$po" ]` guard and silently do nothing.
 cd "$(dirname "$(readlink -f "$0")")/.."
 
+# Step 0: keep po4a.cfg's per-file [type: text] entries in sync with the content
+# tree, so adding or removing a help topic needs no manual config edit. Only the
+# generated block is rewritten — the header (comments, [po4a_paths] languages)
+# and the trailing comment are preserved by splitting on the first/last entry.
+{
+  awk '/^\[type: text\]/{exit} {print}' po4a.cfg
+  find internal/help/content -name '*.md' | sort | while read -r f; do
+    rel="${f#internal/help/content/}"
+    printf '[type: text] internal/help/content/%s $lang:internal/help/content.$lang/%s opt:"-o markdown -o yfm_keys=title"\n' "$rel" "$rel"
+  done
+  tac po4a.cfg | awk '/^\[type: text\]/{exit} {print}' | tac
+} > po4a.cfg.tmp && mv po4a.cfg.tmp po4a.cfg
+
 # Step 1: refresh the PO catalogs from the current English topics. --force
 # bypasses po4a's mtime optimization, which otherwise silently skips extraction
 # whenever the .pot happens to be newer than the source topics (e.g. after a
