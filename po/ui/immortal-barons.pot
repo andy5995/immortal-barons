@@ -5,1211 +5,1339 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: internal/menu/menu.go:286
+#: internal/menu/menu.go:324
 msgid "# Owned"
 msgstr ""
 
-#: internal/menu/actions.go:167
+#: internal/menu/actions.go:46
+msgid "%d %s purchased."
+msgstr ""
+
+#: internal/menu/actions.go:255
 msgid "%d %s regions dropped. You now hold %d land."
 msgstr ""
 
-#: internal/menu/actions.go:146
+#: internal/menu/actions.go:231
 msgid "%d %s regions purchased. Gold: %d"
 msgstr ""
 
-#: internal/menu/actions.go:907
+#: internal/menu/actions.go:1297
 msgid "%d days ago"
 msgstr ""
 
-#: internal/menu/gameflow.go:178
+#: internal/menu/gameflow.go:336
+msgid "%d gold is requested to boost popular support."
+msgstr ""
+
+#: internal/menu/gameflow.go:349
+msgid "%d gold is requested to improve military morale."
+msgstr ""
+
+#: internal/menu/gameflow.go:305
 msgid "%d gold is required to maintain your regions."
 msgstr ""
 
-#: internal/menu/gameflow.go:180
+#: internal/menu/gameflow.go:332
 msgid "%d regions revolted for lack of upkeep."
 msgstr ""
 
-#: internal/menu/gameflow.go:175
+#: internal/menu/gameflow.go:329
 msgid "%d units deserted for lack of pay."
 msgstr ""
 
-#: internal/menu/actions.go:919
+#: internal/menu/actions.go:1309
 msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
 msgstr ""
 
-#: internal/menu/actions.go:1275
-msgid "%s offers you: %s"
+#: internal/menu/actions.go:1769
+msgid "%s offers you a %s."
 msgstr ""
 
-#: internal/menu/tree.go:285
+#: internal/menu/tree.go:369
 msgid "%s | Gold %d  Food %d  Land %d  Army %d | Turns left %d | Day %d"
 msgstr ""
 
-#: internal/menu/actions.go:397
+#: internal/menu/actions.go:549
 msgid "%s — %d gold. Choose a target:"
 msgstr ""
 
-#: internal/menu/actions.go:399
+#: internal/menu/actions.go:551
 msgid "%s — choose a target:"
 msgstr ""
 
-#: internal/menu/actions.go:1375
+#: internal/menu/actions.go:1912
 msgid "(%d per year)"
 msgstr ""
 
-#: internal/menu/actions.go:1277
-msgid "(1) Propose  (2) Accept an offer  (3) Break a treaty  (0) Done"
-msgstr ""
-
-#: internal/menu/actions.go:1104
+#: internal/menu/actions.go:1530
 msgid "(A-%c%s, 0=cancel) %s"
 msgstr ""
 
-#: internal/menu/actions.go:516
+#: internal/menu/actions.go:770
 msgid "(AI)"
 msgstr ""
 
-#: internal/menu/actions.go:736
+#: internal/menu/actions.go:1111
 msgid "(dead)"
 msgstr ""
 
-#: internal/menu/actions.go:1341
+#: internal/menu/actions.go:1874
 msgid "(none)"
 msgstr ""
 
-#: internal/menu/actions.go:793
+#: internal/menu/actions.go:1168
 msgid "(the whole planet)"
 msgstr ""
 
-#: internal/menu/actions.go:998
+#: internal/menu/actions.go:1392
 msgid "(your current vote)"
 msgstr ""
 
-#: internal/menu/actions.go:1102
+#: internal/menu/actions.go:1528
 msgid ", Z=All"
 msgstr ""
 
-#: internal/menu/actions.go:1144
+#: internal/menu/actions.go:1576
 msgid "/-Command?"
 msgstr ""
 
-#: internal/menu/actions.go:905
+#: internal/menu/actions.go:1295
 msgid "1 day ago"
 msgstr ""
 
-#: internal/menu/config_editor.go:150
+#: internal/menu/config_editor.go:197
 msgid "AI empires"
 msgstr ""
 
-#: internal/menu/tree.go:224
+#: internal/menu/tree.go:296
 msgid "Abdicate"
 msgstr ""
 
-#: internal/menu/actions.go:221
+#: internal/menu/actions.go:313
 msgid "Abdicating deletes %s permanently. This cannot be undone."
 msgstr ""
 
-#: internal/menu/actions.go:225
+#: internal/menu/actions.go:317
 msgid "Abdication cancelled."
 msgstr ""
 
-#: internal/menu/actions.go:1152
+#: internal/menu/actions.go:1584
 msgid "Abort"
 msgstr ""
 
-#: internal/menu/actions.go:1110
+#: internal/menu/actions.go:729
+msgid "About"
+msgstr ""
+
+#: internal/menu/actions.go:1770
+msgid "Accept this treaty?"
+msgstr ""
+
+#: internal/menu/actions.go:201
+msgid "Advisors"
+msgstr ""
+
+#: internal/menu/actions.go:1536
 msgid "All"
 msgstr ""
 
-#: internal/menu/actions.go:537
+#: internal/menu/actions.go:793
 msgid "Alliance Strength"
 msgstr ""
 
-#: internal/menu/actions.go:541
+#: internal/menu/actions.go:797
 msgid "Allies: %s"
 msgstr ""
 
-#: internal/menu/actions.go:308
+#: internal/menu/actions.go:407
 msgid "Amount      Return    Matures Day"
 msgstr ""
 
-#: internal/menu/actions.go:380
+#: internal/menu/actions.go:732
+msgid "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and later maintained by John Dailey. No original BRE code, text, or art is used."
+msgstr ""
+
+#: internal/menu/actions.go:532
 msgid "Army"
 msgstr ""
 
-#: internal/menu/actions.go:844
+#: internal/menu/actions.go:1223
 msgid "Attack (0 to cancel)?"
 msgstr ""
 
-#: internal/menu/tree.go:136
+#: internal/menu/tree.go:152
 msgid "Attack Pirates"
 msgstr ""
 
-#: internal/menu/actions.go:368
+#: internal/menu/actions.go:506
 msgid "Attack which empire (0 to cancel)?"
 msgstr ""
 
-#: internal/menu/tree.go:135
+#: internal/menu/tree.go:151
 msgid "Biological Attack"
 msgstr ""
 
-#: internal/menu/config_editor.go:154
+#: internal/menu/config_editor.go:201
 msgid "Board ID:"
 msgstr ""
 
-#: internal/menu/actions.go:757
+#: internal/menu/actions.go:1132
 msgid "Board: %s (%s)"
 msgstr ""
 
-#: internal/menu/tree.go:156
-msgid "Bomb Airbases"
+#: internal/menu/tree.go:50
+msgid "Bomb Enemy Targets"
 msgstr ""
 
-#: internal/menu/tree.go:157
-msgid "Bomb Food Stores"
+#: internal/menu/tree.go:209
+msgid "Bomb Food Market"
 msgstr ""
 
-#: internal/menu/tree.go:158
-msgid "Bomb HQ"
-msgstr ""
-
-#: internal/menu/tree.go:154
-msgid "Bomb Intelligence"
-msgstr ""
-
-#: internal/menu/tree.go:77
-msgid "Bombers"
-msgstr ""
-
-#: internal/menu/gameflow.go:135
-msgid "Bombers were manufactured by Industrial Zones."
-msgstr ""
-
-#: internal/menu/actions.go:336
-msgid "Bought %d food. Gold: %d"
-msgstr ""
-
-#: internal/menu/tree.go:152
-msgid "Bribery"
-msgstr ""
-
-#: internal/menu/tree.go:94
-msgid "Buy"
-msgstr ""
-
-#: internal/menu/tree.go:167
-msgid "Buy / Sell"
-msgstr ""
-
-#: internal/menu/tree.go:217
-msgid "Buy Food"
-msgstr ""
-
-#: internal/menu/actions.go:131
-msgid "Buy Regions — %d gold each."
-msgstr ""
-
-#: internal/menu/tree.go:85
-msgid "Carriers"
-msgstr ""
-
-#: internal/menu/gameflow.go:137
-msgid "Carriers were manufactured by Industrial Zones."
-msgstr ""
-
-#: internal/menu/helpbrowse.go:23
-msgid "Category (0 to leave)?"
-msgstr ""
-
-#: internal/menu/actions.go:1383
-msgid "Change Production?"
-msgstr ""
-
-#: internal/menu/tree.go:134
-msgid "Chemical Attack"
-msgstr ""
-
-#: internal/menu/menu.go:155
-msgid "Choice>"
-msgstr ""
-
-#: internal/menu/actions.go:1278
-msgid "Choice?"
-msgstr ""
-
-#: internal/menu/helpbrowse.go:60
-msgid "Choose (0 to keep current)?"
-msgstr ""
-
-#: internal/menu/actions.go:366
-msgid "Choose a target:"
-msgstr ""
-
-#: internal/menu/actions.go:1247
-msgid "Choose an empire:"
-msgstr ""
-
-#: internal/menu/actions.go:1158
-msgid "Clear"
-msgstr ""
-
-#: internal/menu/actions.go:543
-msgid "Combined defense: %d"
-msgstr ""
-
-#: internal/menu/actions.go:543
-msgid "Combined offense: %d"
-msgstr ""
-
-#: internal/menu/actions.go:562
-msgid "Commit how many Jets?"
-msgstr ""
-
-#: internal/menu/actions.go:563
-msgid "Commit how many Tanks?"
-msgstr ""
-
-#: internal/menu/actions.go:561
-msgid "Commit how many Troopers?"
-msgstr ""
-
-#: internal/menu/tree.go:243
-msgid "Configuration Editor"
-msgstr ""
-
-#: internal/menu/config_editor.go:110
-msgid "Configuration saved."
-msgstr ""
-
-#: internal/menu/gameflow.go:244
-msgid "Continue to your next turn?"
-msgstr ""
-
-#: internal/menu/tree.go:41
-msgid "Coordinator Menu"
-msgstr ""
-
-#: internal/menu/tree.go:81
-msgid "Covert Agents"
-msgstr ""
-
-#: internal/menu/tree.go:36
-msgid "Covert Operations"
-msgstr ""
-
-#: internal/menu/tree.go:141
-msgid "Create Group Attack"
-msgstr ""
-
-#: internal/menu/actions.go:194
-msgid "Current investment rate: %d%% per day."
-msgstr ""
-
-#: internal/menu/actions.go:1030
-msgid "Current league diplomacy:"
-msgstr ""
-
-#: internal/menu/actions.go:1420
-msgid "Current tax rate: %d%%"
-msgstr ""
-
-#: internal/menu/actions.go:314
-msgid "Debt owed: %d"
-msgstr ""
-
-#: internal/menu/actions.go:631
-msgid "Defense"
-msgstr ""
-
-#: internal/menu/tree.go:114
-msgid "Deposit Funds"
-msgstr ""
-
-#: internal/menu/tree.go:38
-msgid "Diplomacy"
-msgstr ""
-
-#: internal/menu/tree.go:175
-msgid "Diplomacy List"
-msgstr ""
-
-#: internal/menu/actions.go:1266
-msgid "Diplomacy with %s"
-msgstr ""
-
-#: internal/menu/actions.go:1197
-msgid "Do you wish to send another message?"
-msgstr ""
-
-#: internal/menu/actions.go:39
-msgid "Done. Gold remaining: %d"
-msgstr ""
-
-#: internal/menu/config_editor.go:105
-msgid "Edit which (0 to save and exit)?"
-msgstr ""
-
-#: internal/menu/actions.go:259
-msgid "Edit which macro [D,E,F,R,I,O,K,L]?"
-msgstr ""
-
-#: internal/menu/actions.go:278
-msgid "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit."
-msgstr ""
-
-#: internal/menu/actions.go:509
-msgid "Empire"
-msgstr ""
-
-#: internal/menu/tree.go:227
-msgid "Empire Status"
-msgstr ""
-
-#: internal/menu/gameflow.go:122
-msgid "End of Turn Statistics:"
-msgstr ""
-
-#: internal/menu/actions.go:204
-msgid "Expected return: ~%d"
-msgstr ""
-
-#: internal/menu/actions.go:550
-msgid "Faction"
-msgstr ""
-
-#: internal/menu/tree.go:218
-msgid "Food"
-msgstr ""
-
-#: internal/menu/tree.go:43
-msgid "Food Market"
-msgstr ""
-
-#: internal/menu/gameflow.go:112
-msgid "Food units were grown."
-msgstr ""
-
-#: internal/menu/actions.go:550
-msgid "Forces"
-msgstr ""
-
-#: internal/menu/actions.go:573
-msgid "Fund SDI — gold to spend (10000 per +1%%, max 75%%)?"
-msgstr ""
-
-#: internal/menu/tree.go:257
-msgid "Game Bulletins"
-msgstr ""
-
-#: internal/menu/actions.go:497
-msgid "Game Rules"
-msgstr ""
-
-#: internal/menu/tree.go:229
-msgid "Game Setup"
-msgstr ""
-
-#: internal/menu/actions.go:500
-msgid "Game length (days): %d  (0 = endless)"
-msgstr ""
-
-#: internal/menu/config_editor.go:118
-msgid "Game length in days (0 = endless)"
-msgstr ""
-
-#: internal/menu/actions.go:550
-msgid "Gold"
-msgstr ""
-
-#: internal/menu/actions.go:184
-msgid "Gold: %d   Bank: %d   Debt: %d"
-msgstr ""
-
-#: internal/menu/tree.go:34
-msgid "Goldie Luck's Bank"
-msgstr ""
-
-#: internal/menu/tree.go:138
-msgid "Gooie Kablooie Ops"
-msgstr ""
-
-#: internal/menu/actions.go:815
-msgid "Group attack #%d formed against %s on %s, leaving day %d."
-msgstr ""
-
-#: internal/menu/tree.go:79
-msgid "HeadQuarters"
-msgstr ""
-
-#: internal/menu/actions.go:627
-msgid "Headquarters"
-msgstr ""
-
-#: internal/menu/tree.go:89
-msgid "Help"
-msgstr ""
-
-#: internal/menu/tree.go:259
-msgid "Help Database"
-msgstr ""
-
-#: internal/menu/actions.go:869
-msgid "How long an operation takes to reach another planet and return\ndepends on how often your sysop exchanges inter-BBS packets."
-msgstr ""
-
-#: internal/menu/actions.go:329
-msgid "How much food to buy?"
-msgstr ""
-
-#: internal/menu/actions.go:344
-msgid "How much food to sell?"
-msgstr ""
-
-#: internal/menu/actions.go:1213
-msgid "How much gold?"
-msgstr ""
-
-#: internal/menu/actions.go:848
-msgid "How much offense to add?"
-msgstr ""
-
-#: internal/menu/actions.go:806
-msgid "How much offense to commit?"
-msgstr ""
-
-#: internal/menu/actions.go:199
-msgid "How much to invest?"
-msgstr ""
-
-#: internal/menu/gameflow.go:174
-msgid "How much will you give?"
-msgstr ""
-
-#: internal/menu/actions.go:1093
-msgid "Id"
-msgstr ""
-
-#: internal/menu/tree.go:248
-msgid "Immortal Barons — Game Menu"
-msgstr ""
-
-#: internal/menu/gameflow.go:102
-msgid "Income Report:"
-msgstr ""
-
-#: internal/menu/actions.go:1373
-msgid "Industrial Production"
-msgstr ""
-
-#: internal/menu/actions.go:1391
-msgid "Industry production percentages updated."
-msgstr ""
-
-#: internal/menu/config_editor.go:120
-msgid "Initial Market Land"
-msgstr ""
-
-#: internal/menu/tree.go:258
-msgid "Instructions"
-msgstr ""
-
-#: internal/menu/actions.go:501
-msgid "Inter-BBS play:     %s"
-msgstr ""
-
-#: internal/menu/config_editor.go:124
-msgid "Interest Rate"
-msgstr ""
-
-#: internal/menu/tree.go:120
-msgid "Invest"
-msgstr ""
-
-#: internal/menu/actions.go:195
-msgid "Invest for how many days?"
-msgstr ""
-
-#: internal/menu/actions.go:209
-msgid "Invested %d for %d days; ~%d returns on day %d."
-msgstr ""
-
-#: internal/menu/actions.go:322
-msgid "Investment rate: %d%% per day."
-msgstr ""
-
-#: internal/menu/menu.go:286
-msgid "Item"
-msgstr ""
-
-#: internal/menu/tree.go:73
-msgid "Jets"
-msgstr ""
-
-#: internal/menu/gameflow.go:133
-msgid "Jets were manufactured by Industrial Zones."
-msgstr ""
-
-#: internal/menu/tree.go:142
-msgid "Join Group Attack"
-msgstr ""
-
-#: internal/menu/actions.go:840
-msgid "Join which attack?"
-msgstr ""
-
-#: internal/menu/actions.go:105
-msgid "Key"
-msgstr ""
-
-#: internal/menu/actions.go:380
-msgid "Land"
-msgstr ""
-
-#: internal/menu/config_editor.go:122
-msgid "Land Created / Day"
-msgstr ""
-
-#: internal/menu/tree.go:202
-msgid "Language"
-msgstr ""
-
-#: internal/menu/helpbrowse.go:65
-msgid "Language set to %s."
-msgstr ""
-
-#: internal/menu/helpbrowse.go:56
-msgid "Language:"
-msgstr ""
-
-#: internal/menu/actions.go:745
-msgid "Last Planetary Master: %s"
-msgstr ""
-
-#: internal/menu/actions.go:884
-msgid "Last packet received from:"
-msgstr ""
-
-#: internal/menu/actions.go:1036
-msgid "League diplomacy updated. It will be broadcast to the league."
-msgstr ""
-
-#: internal/menu/actions.go:873
-msgid "League members:"
-msgstr ""
-
-#: internal/menu/actions.go:810
-msgid "Leave in how many days?"
-msgstr ""
-
-#: internal/menu/tree.go:121
-msgid "List Investments"
-msgstr ""
-
-#: internal/menu/actions.go:550
-msgid "Loot T/J/U/K/A"
-msgstr ""
-
-#: internal/menu/actions.go:294
-msgid "Macro Ctrl-%c cleared."
-msgstr ""
-
-#: internal/menu/actions.go:292
-msgid "Macro Ctrl-%c saved."
-msgstr ""
-
-#: internal/menu/actions.go:250
-msgid "Macro Editor"
-msgstr ""
-
-#: internal/menu/gameflow.go:156
-msgid "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"
-msgstr ""
-
-#: internal/menu/gameflow.go:164
-msgid "Maintenance paid: %d gold to your forces, %d to your regions."
-msgstr ""
-
-#: internal/menu/gameflow.go:168
-msgid "Maintenance:"
-msgstr ""
-
-#: internal/menu/config_editor.go:134
-msgid "Max Players Per BBS (0 = unlimited)"
-msgstr ""
-
-#: internal/menu/config_editor.go:132
-msgid "Max Purchasable Regions"
-msgstr ""
-
-#: internal/menu/config_editor.go:130
-msgid "Max Tax Rate"
-msgstr ""
-
-#: internal/menu/tree.go:39
-msgid "Messages"
-msgstr ""
-
-#: internal/menu/actions.go:632
-msgid "Military"
-msgstr ""
-
-#: internal/menu/tree.go:173
-msgid "Modify Diplomacy"
+#: internal/menu/tree.go:211
+msgid "Bomb Trade Routes"
 msgstr ""
 
 #: internal/menu/tree.go:210
-msgid "Modify League Diplomacy"
+msgid "Bomb Trading Market"
 msgstr ""
 
-#: internal/menu/actions.go:153
-msgid "NOTE: You cannot sell Regions, only drop them..."
+#: internal/menu/tree.go:91
+msgid "Bombers"
 msgstr ""
 
-#: internal/menu/actions.go:105
-msgid "Name"
+#: internal/menu/gameflow.go:194
+msgid "Bombers were manufactured by Industrial Zones."
 msgstr ""
 
-#: internal/menu/actions.go:1255
-msgid "Negotiate with which empire (0 to cancel)?"
+#: internal/menu/actions.go:437
+msgid "Bought %d food. Gold: %d"
 msgstr ""
 
-#: internal/menu/actions.go:509
-msgid "Net Worth"
+#: internal/menu/actions.go:1763
+msgid "Break this treaty?"
 msgstr ""
 
-#: internal/menu/actions.go:1031
-msgid "New league diplomacy declaration (blank to keep)"
+#: internal/menu/tree.go:201
+msgid "Bribery"
 msgstr ""
 
-#: internal/menu/actions.go:956
-msgid "No barons are known on that planet yet."
+#: internal/menu/tree.go:108
+msgid "Buy"
 msgstr ""
 
-#: internal/menu/actions.go:837
-msgid "No group attacks are forming right now."
+#: internal/menu/tree.go:223
+msgid "Buy / Sell"
 msgstr ""
 
-#: internal/menu/actions.go:753
-msgid "No inter-BBS scores have been imported yet."
+#: internal/menu/tree.go:288
+msgid "Buy Food"
 msgstr ""
 
-#: internal/menu/actions.go:1286
-msgid "No offers to accept."
+#: internal/menu/actions.go:197
+msgid "Buy Regions — %d gold each."
 msgstr ""
 
-#: internal/menu/actions.go:865
-msgid "No other planets are known yet."
+#: internal/menu/config_editor.go:148
+msgid "Cancelled — no changes were saved."
 msgstr ""
 
-#: internal/menu/actions.go:775
-msgid "No other planets are known yet. Wait for inter-BBS scores to arrive."
+#: internal/menu/tree.go:99
+msgid "Carriers"
 msgstr ""
 
-#: internal/menu/gameflow.go:33
-msgid "No planetary bulletins."
+#: internal/menu/gameflow.go:196
+msgid "Carriers were manufactured by Industrial Zones."
 msgstr ""
 
-#: internal/menu/actions.go:1293
-msgid "No treaties to break."
+#: internal/menu/helpbrowse.go:22
+msgid "Category (0 to leave)?"
 msgstr ""
 
-#: internal/menu/actions.go:254
-msgid "None"
+#: internal/menu/actions.go:971
+msgid "Change"
 msgstr ""
 
-#: internal/menu/actions.go:132
-msgid "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."
-msgstr ""
-
-#: internal/menu/tree.go:133
-msgid "Nuclear Attack"
-msgstr ""
-
-#: internal/menu/actions.go:631
-msgid "Offense"
-msgstr ""
-
-#: internal/menu/actions.go:1027
-msgid "Only the BBS Coordinator may set league diplomacy."
-msgstr ""
-
-#: internal/menu/actions.go:466
-msgid "Our HeadQuarters is still under construction."
-msgstr ""
-
-#: internal/menu/actions.go:472
-msgid "Our food will not last the turn. Buy or grow more."
-msgstr ""
-
-#: internal/menu/actions.go:105
-msgid "Owned"
-msgstr ""
-
-#: internal/menu/actions.go:509
-msgid "Owner"
-msgstr ""
-
-#: internal/menu/actions.go:1343
-msgid "Pending offers received:"
-msgstr ""
-
-#: internal/menu/actions.go:549
-msgid "Pirate factions (strength is random; fat ones just raided someone):"
-msgstr ""
-
-#: internal/menu/actions.go:1052
-msgid "Planetary Bulletin:"
-msgstr ""
-
-#: internal/menu/tree.go:182
-msgid "Planetary Post"
-msgstr ""
-
-#: internal/menu/tree.go:250
-msgid "Play Game"
-msgstr ""
-
-#: internal/menu/actions.go:508
-msgid "Player List"
-msgstr ""
-
-#: internal/menu/gameflow.go:185
-msgid "Popular support rose %d points."
-msgstr ""
-
-#: internal/menu/actions.go:624
-msgid "Population"
-msgstr ""
-
-#: internal/menu/actions.go:1226
-msgid "Post to the planet:"
-msgstr ""
-
-#: internal/menu/actions.go:1231
-msgid "Posted."
-msgstr ""
-
-#: internal/menu/tree.go:40
-msgid "Preferences"
-msgstr ""
-
-#: internal/menu/menu.go:286
-msgid "Price"
-msgstr ""
-
-#: internal/menu/actions.go:105
-msgid "Produces"
-msgstr ""
-
-#: internal/menu/actions.go:1282
-msgid "Proposed a %s to %s."
-msgstr ""
-
-#: internal/menu/actions.go:499
-msgid "Protection turns:   %d"
-msgstr ""
-
-#: internal/menu/tree.go:90
-msgid "Quit"
-msgstr ""
-
-#: internal/menu/actions.go:556
-msgid "Raid which faction (0 to cancel)?"
-msgstr ""
-
-#: internal/menu/actions.go:732
-msgid "Rank"
-msgstr ""
-
-#: internal/menu/tree.go:180
-msgid "Read Messages"
-msgstr ""
-
-#: internal/menu/actions.go:637
-msgid "Regions"
-msgstr ""
-
-#: internal/menu/tree.go:132
-msgid "Regular Attack"
-msgstr ""
-
-#: internal/menu/tree.go:119
-msgid "Repay Loan"
-msgstr ""
-
-#: internal/menu/tree.go:110
-msgid "Return"
-msgstr ""
-
-#: internal/menu/actions.go:550
-msgid "Rgn"
-msgstr ""
-
-#: internal/menu/gameflow.go:129
-msgid "Riots have broken out due to high tax rates!"
-msgstr ""
-
-#: internal/menu/tree.go:139
-msgid "SDI Program"
-msgstr ""
-
-#: internal/menu/actions.go:572
-msgid "SDI Program — current defense: %d%%"
-msgstr ""
-
-#: internal/menu/actions.go:582
-msgid "SDI is now %d%%."
-msgstr ""
-
-#: internal/menu/actions.go:1155
-msgid "Save"
-msgstr ""
-
-#: internal/menu/actions.go:1188
-msgid "Saving..."
-msgstr ""
-
-#: internal/menu/actions.go:322
-msgid "Savings interest: ~1%% per game day."
-msgstr ""
-
-#: internal/menu/actions.go:1093
-msgid "Score"
-msgstr ""
-
-#: internal/menu/tree.go:233
-msgid "See Scores"
-msgstr ""
-
-#: internal/menu/tree.go:251
-msgid "See Status"
-msgstr ""
-
-#: internal/menu/tree.go:87
-msgid "Sell"
-msgstr ""
-
-#: internal/menu/tree.go:33
-msgid "Sell Menu"
-msgstr ""
-
-#: internal/menu/tree.go:181
-msgid "Send Message"
-msgstr ""
-
-#: internal/menu/tree.go:149
-msgid "Send Spy"
-msgstr ""
-
-#: internal/menu/tree.go:165
-msgid "Send Trade Deal"
-msgstr ""
-
-#: internal/menu/gameflow.go:232
-msgid "Send a message?"
-msgstr ""
-
-#: internal/menu/actions.go:1220
-msgid "Sent %d gold to %s."
-msgstr ""
-
-#: internal/menu/tree.go:237
-msgid "Set Industries"
-msgstr ""
-
-#: internal/menu/tree.go:232
-msgid "Set Tax Rate"
-msgstr ""
-
-#: internal/menu/tree.go:238
-msgid "Show Instructions"
-msgstr ""
-
-#: internal/menu/gameflow.go:89
-msgid "Since your last play, this has happened:"
-msgstr ""
-
-#: internal/menu/actions.go:351
-msgid "Sold %d food. Gold: %d"
-msgstr ""
-
-#: internal/menu/actions.go:58
-msgid "Sold %d. Gold: %d"
-msgstr ""
-
-#: internal/menu/gameflow.go:198
-msgid "Sorry, you have used all of your turns today."
-msgstr ""
-
-#: internal/menu/tree.go:153
-msgid "Special Operations"
-msgstr ""
-
-#: internal/menu/tree.go:239
-msgid "Specialize Industry"
-msgstr ""
-
-#: internal/menu/actions.go:1404
-msgid "Specialize Industry — choose a unit type. This is PERMANENT:"
-msgstr ""
-
-#: internal/menu/actions.go:1408
-msgid "Specialize in which unit (0 to cancel)?"
-msgstr ""
-
-#: internal/menu/actions.go:1379
-msgid "Specialized in %s: more of it, less of everything else."
-msgstr ""
-
-#: internal/menu/gameflow.go:183
-msgid "Spend gold to boost popular support?"
-msgstr ""
-
-#: internal/menu/tree.go:32
-msgid "Spending Menu"
-msgstr ""
-
-#: internal/menu/tree.go:151
-msgid "Spy Database"
-msgstr ""
-
-#: internal/menu/actions.go:917
-msgid "Spy Database:"
+#: internal/menu/actions.go:1920
+msgid "Change Production?"
 msgstr ""
 
 #: internal/menu/tree.go:150
-msgid "Spy on Relations"
+msgid "Chemical Attack"
 msgstr ""
 
-#: internal/menu/actions.go:963
-msgid "Spy on which baron?"
+#: internal/menu/tree.go:214
+msgid "Chemical Bombing"
 msgstr ""
 
-#: internal/menu/actions.go:944
-msgid "Spy on which planet?"
+#: internal/menu/menu.go:196
+msgid "Choice>"
 msgstr ""
 
-#: internal/menu/config_editor.go:126
-msgid "Standard Investment Rate"
+#: internal/menu/helpbrowse.go:59
+msgid "Choose (0 to keep current)?"
 msgstr ""
 
-#: internal/menu/tree.go:155
-msgid "Stir Revolts"
+#: internal/menu/actions.go:504
+msgid "Choose a target:"
 msgstr ""
 
-#: internal/menu/tree.go:42
-msgid "System Menu"
+#: internal/menu/actions.go:1732
+msgid "Choose an empire:"
 msgstr ""
 
-#: internal/menu/tree.go:118
-msgid "Take Loan"
+#: internal/menu/actions.go:1590
+msgid "Clear"
 msgstr ""
 
-#: internal/menu/tree.go:83
-msgid "Tanks"
+#: internal/menu/actions.go:799
+msgid "Combined defense: %d"
 msgstr ""
 
-#: internal/menu/gameflow.go:136
-msgid "Tanks were manufactured by Industrial Zones."
+#: internal/menu/actions.go:799
+msgid "Combined offense: %d"
 msgstr ""
 
-#: internal/menu/actions.go:797
-msgid "Target which baron?"
+#: internal/menu/actions.go:832
+msgid "Commit how many Jets?"
 msgstr ""
 
-#: internal/menu/actions.go:782
-msgid "Target which planet?"
+#: internal/menu/actions.go:833
+msgid "Commit how many Tanks?"
 msgstr ""
 
-#: internal/menu/actions.go:624
-msgid "Tax Rate"
+#: internal/menu/actions.go:831
+msgid "Commit how many Troopers?"
 msgstr ""
 
-#: internal/menu/actions.go:1427
-msgid "Tax rate set to %d%%."
+#: internal/menu/tree.go:316
+msgid "Configuration Editor"
 msgstr ""
 
-#: internal/menu/tree.go:143
-msgid "Terrorist Ops"
+#: internal/menu/config_editor.go:143
+msgid "Configuration saved."
 msgstr ""
 
-#: internal/menu/actions.go:1007
-msgid "The current BBS Coordinator is %s."
+#: internal/menu/gameflow.go:440
+msgid "Continue to your next turn?"
 msgstr ""
 
-#: internal/menu/actions.go:475
-msgid "The people grow restless. Lower taxes or spend on their support."
+#: internal/menu/tree.go:55
+msgid "Coordinator Menu"
 msgstr ""
 
-#: internal/menu/gameflow.go:123
-msgid "The people of %s go about their business."
+#: internal/menu/tree.go:95
+msgid "Covert Agents"
 msgstr ""
 
-#: internal/menu/actions.go:484
-msgid "The realm is in good order, Sire. Press the attack."
+#: internal/menu/tree.go:49
+msgid "Covert Operations"
 msgstr ""
 
-#: internal/menu/actions.go:914
-msgid "The spy database is empty. Spy on empires on other planets to fill it."
+#: internal/menu/tree.go:175
+msgid "Create Group Attack"
 msgstr ""
 
-#: internal/menu/actions.go:1003
-msgid "There are no barons to vote for yet."
+#: internal/menu/actions.go:284
+msgid "Current investment rate: %d%% per day."
 msgstr ""
 
-#: internal/menu/actions.go:363
-msgid "There are no rival empires left to attack."
+#: internal/menu/actions.go:1434
+msgid "Current league diplomacy:"
 msgstr ""
 
-#: internal/menu/actions.go:1244
-msgid "There is no one to negotiate with."
+#: internal/menu/actions.go:1962
+msgid "Current tax rate: %d%%"
 msgstr ""
 
-#: internal/menu/actions.go:1090
-msgid "There is no one to reach."
+#: internal/menu/actions.go:949
+msgid "Daily Bulletin"
 msgstr ""
 
-#: internal/menu/tree.go:253
-msgid "Today's News"
-msgstr ""
-
-#: internal/menu/helpbrowse.go:77
-msgid "Topic (0 to go back)?"
-msgstr ""
-
-#: internal/menu/tree.go:37
-msgid "Trading"
-msgstr ""
-
-#: internal/menu/actions.go:868
-msgid "Travel Times"
-msgstr ""
-
-#: internal/menu/actions.go:1271
-msgid "Treaties: %s"
-msgstr ""
-
-#: internal/menu/actions.go:1269
-msgid "Treaties: (none)"
-msgstr ""
-
-#: internal/menu/tree.go:71
-msgid "Troopers"
-msgstr ""
-
-#: internal/menu/gameflow.go:132
-msgid "Troopers were trained by Industrial Zones."
-msgstr ""
-
-#: internal/menu/gameflow.go:138
-msgid "Turns left today: %d"
-msgstr ""
-
-#: internal/menu/config_editor.go:116
-msgid "Turns of Protection"
-msgstr ""
-
-#: internal/menu/config_editor.go:114
-msgid "Turns per day"
-msgstr ""
-
-#: internal/menu/actions.go:498
-msgid "Turns per day:      %d"
-msgstr ""
-
-#: internal/menu/tree.go:75
-msgid "Turrets"
-msgstr ""
-
-#: internal/menu/gameflow.go:134
-msgid "Turrets were manufactured by Industrial Zones."
-msgstr ""
-
-#: internal/menu/actions.go:223
-msgid "Type your realm name (%s) to confirm, or anything else to cancel"
-msgstr ""
-
-#: internal/menu/tree.go:122
-msgid "View Bank Rates"
-msgstr ""
-
-#: internal/menu/tree.go:174
-msgid "View Diplomacy"
-msgstr ""
-
-#: internal/menu/tree.go:166
-msgid "View IPScores"
-msgstr ""
-
-#: internal/menu/tree.go:225
-msgid "Visit Advisors"
-msgstr ""
-
-#: internal/menu/tree.go:88
-msgid "Visit Bank"
-msgstr ""
-
-#: internal/menu/actions.go:1013
-msgid "Vote for (0 to cancel)?"
+#: internal/menu/actions.go:413
+msgid "Debt owed: %d"
 msgstr ""
 
 #: internal/menu/tree.go:240
-msgid "Vote for Coordinator"
+msgid "Declaration Of War"
 msgstr ""
 
-#: internal/menu/tree.go:35
-msgid "War / Attack"
+#: internal/menu/actions.go:1810
+msgid "Declare war on which empire (0 to cancel)?"
 msgstr ""
 
-#: internal/menu/actions.go:478
-msgid "We carry debt that grows each turn. Repay it soon."
+#: internal/menu/actions.go:1815
+msgid "Declare war? This breaks all treaties with them."
 msgstr ""
 
-#: internal/menu/actions.go:469
-msgid "We have more jets than our carriers can carry into battle. Build more carriers."
+#: internal/menu/actions.go:921
+msgid "Defense"
 msgstr ""
 
-#: internal/menu/actions.go:464
-msgid "We have no HeadQuarters, Sire. Building one would strengthen our tanks."
+#: internal/menu/tree.go:198
+msgid "Demoralize Forces"
 msgstr ""
 
-#: internal/menu/actions.go:481
-msgid "We have no covert agents. Recruit some for spying and sabotage."
+#: internal/menu/tree.go:129
+msgid "Deposit Funds"
 msgstr ""
 
-#: internal/menu/actions.go:1009
-msgid "Who should be the BBS Coordinator?"
+#: internal/menu/tree.go:52
+msgid "Diplomacy"
 msgstr ""
 
-#: internal/menu/tree.go:115
-msgid "Withdraw Funds"
+#: internal/menu/tree.go:182
+msgid "Diplomacy List"
 msgstr ""
 
-#: internal/menu/gameflow.go:157
-msgid "Withdraw how much?"
+#: internal/menu/actions.go:1661
+msgid "Do you wish to send another message?"
+msgstr ""
+
+#: internal/menu/tree.go:181
+msgid "Doomer Kaboomer Ops"
+msgstr ""
+
+#: internal/menu/config_editor.go:138
+msgid "Edit which (S = save & exit, Q = cancel)?"
+msgstr ""
+
+#: internal/menu/actions.go:352
+msgid "Edit which macro [D,E,F,R,I,O,K,L]?"
+msgstr ""
+
+#: internal/menu/actions.go:371
+msgid "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit."
+msgstr ""
+
+#: internal/menu/actions.go:766
+msgid "Empire"
+msgstr ""
+
+#: internal/menu/actions.go:903
+msgid "Empire Status"
+msgstr ""
+
+#: internal/menu/gameflow.go:238
+msgid "End of Turn Statistics:"
+msgstr ""
+
+#: internal/menu/actions.go:294
+msgid "Expected return: ~%d"
+msgstr ""
+
+#: internal/menu/tree.go:202
+msgid "Expose Enemy Ops"
+msgstr ""
+
+#: internal/menu/actions.go:820
+msgid "Faction"
+msgstr ""
+
+#: internal/menu/tree.go:289
+msgid "Food"
+msgstr ""
+
+#: internal/menu/tree.go:57
+msgid "Food Market"
+msgstr ""
+
+#: internal/menu/actions.go:820
+msgid "Forces"
+msgstr ""
+
+#: internal/menu/tree.go:235
+msgid "Free Trade Agreement"
+msgstr ""
+
+#: internal/menu/tree.go:239
+msgid "Full Defense Alliance"
+msgstr ""
+
+#: internal/menu/actions.go:848
+msgid "Fund SDI — gold to spend (10000 per +1%%, max 75%%)?"
+msgstr ""
+
+#: internal/menu/tree.go:331
+msgid "Game Bulletins"
+msgstr ""
+
+#: internal/menu/actions.go:741
+msgid "Game Rules"
+msgstr ""
+
+#: internal/menu/tree.go:301
+msgid "Game Setup"
+msgstr ""
+
+#: internal/menu/actions.go:744
+msgid "Game length (days): %d  (0 = endless)"
+msgstr ""
+
+#: internal/menu/config_editor.go:161
+msgid "Game length in days (0 = endless)"
+msgstr ""
+
+#: internal/menu/actions.go:820
+msgid "Gold"
+msgstr ""
+
+#: internal/menu/actions.go:274
+msgid "Gold: %d   Bank: %d   Debt: %d"
+msgstr ""
+
+#: internal/menu/tree.go:46
+msgid "Goldie Luck's Bank"
+msgstr ""
+
+#: internal/menu/actions.go:1194
+msgid "Group attack #%d formed against %s on %s, leaving day %d."
+msgstr ""
+
+#: internal/menu/tree.go:93
+msgid "HeadQuarters"
+msgstr ""
+
+#: internal/menu/actions.go:917
+msgid "Headquarters"
+msgstr ""
+
+#: internal/menu/tree.go:103
+msgid "Help"
+msgstr ""
+
+#: internal/menu/tree.go:333
+msgid "Help Database"
+msgstr ""
+
+#: internal/menu/actions.go:1259
+msgid "How long an operation takes to reach another planet and return\ndepends on how often your sysop exchanges inter-BBS packets."
+msgstr ""
+
+#: internal/menu/actions.go:428
+msgid "How much food to buy?"
+msgstr ""
+
+#: internal/menu/actions.go:445
+msgid "How much food to sell?"
+msgstr ""
+
+#: internal/menu/actions.go:1673
+msgid "How much gold?"
+msgstr ""
+
+#: internal/menu/actions.go:1227
+msgid "How much offense to add?"
+msgstr ""
+
+#: internal/menu/actions.go:1181
+msgid "How much offense to commit?"
+msgstr ""
+
+#: internal/menu/actions.go:289
+msgid "How much to invest?"
+msgstr ""
+
+#: internal/menu/gameflow.go:303
+msgid "How much will you give?"
+msgstr ""
+
+#: internal/menu/actions.go:1519
+msgid "Id"
+msgstr ""
+
+#: internal/menu/config_editor.go:205
+msgid "Idle timeout in seconds (0 = never)"
+msgstr ""
+
+#: internal/menu/config_editor.go:207
+msgid "Idle warnings before boot"
+msgstr ""
+
+#: internal/menu/tree.go:322
+msgid "Immortal Barons — Game Menu"
+msgstr ""
+
+#: internal/menu/gameflow.go:171
+msgid "Income Report"
+msgstr ""
+
+#: internal/menu/tree.go:177
+msgid "Indiv. Attack Force"
+msgstr ""
+
+#: internal/menu/actions.go:1246
+msgid "Individual attack forces are not yet available; use Create Group Attack."
+msgstr ""
+
+#: internal/menu/actions.go:1910
+msgid "Industrial Production"
+msgstr ""
+
+#: internal/menu/actions.go:1933
+msgid "Industry production percentages updated."
+msgstr ""
+
+#: internal/menu/config_editor.go:163
+msgid "Initial Market Land"
+msgstr ""
+
+#: internal/menu/tree.go:332
+msgid "Instructions"
+msgstr ""
+
+#: internal/menu/tree.go:237
+msgid "Intelligence Alliance"
+msgstr ""
+
+#: internal/menu/actions.go:745
+msgid "Inter-BBS play:     %s"
+msgstr ""
+
+#: internal/menu/tree.go:48
+msgid "InterPlanetary Operations"
+msgstr ""
+
+#: internal/menu/tree.go:155
+msgid "InterPlanetary Ops"
+msgstr ""
+
+#: internal/menu/config_editor.go:167
+msgid "Interest Rate"
+msgstr ""
+
+#: internal/menu/tree.go:135
+msgid "Invest"
+msgstr ""
+
+#: internal/menu/actions.go:285
+msgid "Invest for how many days?"
+msgstr ""
+
+#: internal/menu/actions.go:301
+msgid "Invested %d for %d days; ~%d returns on day %d."
+msgstr ""
+
+#: internal/menu/actions.go:421
+msgid "Investment rate: %d%% per day."
+msgstr ""
+
+#: internal/menu/menu.go:324
+msgid "Item"
+msgstr ""
+
+#: internal/menu/tree.go:87
+msgid "Jets"
+msgstr ""
+
+#: internal/menu/gameflow.go:192
+msgid "Jets were manufactured by Industrial Zones."
+msgstr ""
+
+#: internal/menu/tree.go:176
+msgid "Join Group Attack"
+msgstr ""
+
+#: internal/menu/actions.go:1219
+msgid "Join which attack?"
+msgstr ""
+
+#: internal/menu/actions.go:116
+msgid "Key"
+msgstr ""
+
+#: internal/menu/actions.go:532
+msgid "Land"
+msgstr ""
+
+#: internal/menu/config_editor.go:165
+msgid "Land Created / Day"
+msgstr ""
+
+#: internal/menu/tree.go:271
+msgid "Language"
+msgstr ""
+
+#: internal/menu/helpbrowse.go:64
+msgid "Language set to %s."
+msgstr ""
+
+#: internal/menu/helpbrowse.go:55
+msgid "Language:"
+msgstr ""
+
+#: internal/menu/actions.go:1120
+msgid "Last Planetary Master: %s"
+msgstr ""
+
+#: internal/menu/actions.go:1274
+msgid "Last packet received from:"
+msgstr ""
+
+#: internal/menu/actions.go:1440
+msgid "League diplomacy updated. It will be broadcast to the league."
+msgstr ""
+
+#: internal/menu/actions.go:1263
+msgid "League members:"
+msgstr ""
+
+#: internal/menu/actions.go:1185
+msgid "Leave in how many days?"
+msgstr ""
+
+#: internal/menu/tree.go:136
+msgid "List Investments"
+msgstr ""
+
+#: internal/menu/actions.go:820
+msgid "Loot T/J/U/K/A"
+msgstr ""
+
+#: internal/menu/actions.go:387
+msgid "Macro Ctrl-%c cleared."
+msgstr ""
+
+#: internal/menu/actions.go:385
+msgid "Macro Ctrl-%c saved."
+msgstr ""
+
+#: internal/menu/actions.go:343
+msgid "Macro Editor"
+msgstr ""
+
+#: internal/menu/gameflow.go:275
+msgid "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"
+msgstr ""
+
+#: internal/menu/gameflow.go:288
+msgid "Maintenance paid: %d gold to your forces, %d to your regions."
+msgstr ""
+
+#: internal/menu/gameflow.go:292
+msgid "Maintenance:"
+msgstr ""
+
+#: internal/menu/config_editor.go:177
+msgid "Max Players Per BBS (0 = unlimited)"
+msgstr ""
+
+#: internal/menu/config_editor.go:175
+msgid "Max Purchasable Regions"
+msgstr ""
+
+#: internal/menu/config_editor.go:173
+msgid "Max Tax Rate"
+msgstr ""
+
+#: internal/menu/tree.go:53
+msgid "Messages"
+msgstr ""
+
+#: internal/menu/actions.go:927
+msgid "Military"
+msgstr ""
+
+#: internal/menu/gameflow.go:354
+msgid "Military morale rose %d points."
+msgstr ""
+
+#: internal/menu/tree.go:280
+msgid "Modify League Diplomacy"
+msgstr ""
+
+#: internal/menu/actions.go:686
+msgid "Morale is low among our troops. Desertion is a real risk before our next battle."
+msgstr ""
+
+#: internal/menu/actions.go:239
+msgid "NOTE: You cannot sell Regions, only drop them..."
+msgstr ""
+
+#: internal/menu/actions.go:116
+msgid "Name"
+msgstr ""
+
+#: internal/menu/actions.go:1736
+msgid "Negotiate with which empire (0 to cancel)?"
+msgstr ""
+
+#: internal/menu/actions.go:766
+msgid "Net Worth"
+msgstr ""
+
+#: internal/menu/actions.go:1435
+msgid "New league diplomacy declaration (blank to keep)"
+msgstr ""
+
+#: internal/menu/actions.go:1346
+msgid "No barons are known on that planet yet."
+msgstr ""
+
+#: internal/menu/actions.go:1216
+msgid "No group attacks are forming right now."
+msgstr ""
+
+#: internal/menu/actions.go:1128
+msgid "No inter-BBS scores have been imported yet."
+msgstr ""
+
+#: internal/menu/actions.go:1255
+msgid "No other planets are known yet."
+msgstr ""
+
+#: internal/menu/actions.go:1150
+msgid "No other planets are known yet. Wait for inter-BBS scores to arrive."
+msgstr ""
+
+#: internal/menu/gameflow.go:62
+msgid "No planetary bulletins."
+msgstr ""
+
+#: internal/menu/actions.go:347
+msgid "None"
+msgstr ""
+
+#: internal/menu/actions.go:198
+msgid "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."
+msgstr ""
+
+#: internal/menu/tree.go:213
+msgid "Nuclear Assault"
+msgstr ""
+
+#: internal/menu/tree.go:149
+msgid "Nuclear Attack"
+msgstr ""
+
+#: internal/menu/actions.go:921
+msgid "Offense"
+msgstr ""
+
+#: internal/menu/actions.go:1431
+msgid "Only the BBS Coordinator may set league diplomacy."
+msgstr ""
+
+#: internal/menu/actions.go:680
+msgid "Our HeadQuarters is still under construction."
+msgstr ""
+
+#: internal/menu/actions.go:689
+msgid "Our food will not last the turn. Buy or grow more."
+msgstr ""
+
+#: internal/menu/actions.go:703
+msgid "Our treasury is empty, Sire. We should raise gold before it costs us dearly."
+msgstr ""
+
+#: internal/menu/actions.go:116
+msgid "Owned"
+msgstr ""
+
+#: internal/menu/actions.go:766
+msgid "Owner"
+msgstr ""
+
+#: internal/menu/actions.go:1880
+msgid "Pending offers received:"
+msgstr ""
+
+#: internal/menu/actions.go:819
+msgid "Pirate factions (strength is random; fat ones just raided someone):"
+msgstr ""
+
+#: internal/menu/actions.go:1466
+msgid "Planetary Bulletin:"
+msgstr ""
+
+#: internal/menu/tree.go:250
+msgid "Planetary Post"
+msgstr ""
+
+#: internal/menu/tree.go:324
+msgid "Play"
+msgstr ""
+
+#: internal/menu/actions.go:765
+msgid "Player List"
+msgstr ""
+
+#: internal/menu/gameflow.go:344
+msgid "Popular support rose %d points."
+msgstr ""
+
+#: internal/menu/actions.go:914
+msgid "Population"
+msgstr ""
+
+#: internal/menu/actions.go:1688
+msgid "Post to the planet:"
+msgstr ""
+
+#: internal/menu/actions.go:1693
+msgid "Posted."
+msgstr ""
+
+#: internal/menu/tree.go:54
+msgid "Preferences"
+msgstr ""
+
+#: internal/menu/menu.go:324
+msgid "Price"
+msgstr ""
+
+#: internal/menu/actions.go:116
+msgid "Produces"
+msgstr ""
+
+#: internal/menu/actions.go:1777
+msgid "Proposed a %s to %s."
+msgstr ""
+
+#: internal/menu/actions.go:743
+msgid "Protection turns:   %d"
+msgstr ""
+
+#: internal/menu/tree.go:234
+msgid "Protective Trade"
+msgstr ""
+
+#: internal/menu/tree.go:104
+msgid "Quit"
+msgstr ""
+
+#: internal/menu/tree.go:215
+msgid "R5-Slappenheimer"
+msgstr ""
+
+#: internal/menu/actions.go:826
+msgid "Raid which faction (0 to cancel)?"
+msgstr ""
+
+#: internal/menu/actions.go:1107
+msgid "Rank"
+msgstr ""
+
+#: internal/menu/tree.go:248
+msgid "Read Messages"
+msgstr ""
+
+#: internal/menu/actions.go:932
+msgid "Regions"
+msgstr ""
+
+#: internal/menu/tree.go:148
+msgid "Regular Attack"
+msgstr ""
+
+#: internal/menu/tree.go:134
+msgid "Repay Loan"
+msgstr ""
+
+#: internal/menu/actions.go:820
+msgid "Rgn"
+msgstr ""
+
+#: internal/menu/gameflow.go:247
+msgid "Riots have broken out due to high tax rates!"
+msgstr ""
+
+#: internal/menu/tree.go:180
+msgid "SDI Program"
+msgstr ""
+
+#: internal/menu/actions.go:847
+msgid "SDI Program — current defense: %d%%"
+msgstr ""
+
+#: internal/menu/actions.go:859
+msgid "SDI is now %d%%."
+msgstr ""
+
+#: internal/menu/actions.go:1587
+msgid "Save"
+msgstr ""
+
+#: internal/menu/actions.go:1650
+msgid "Saving..."
+msgstr ""
+
+#: internal/menu/actions.go:421
+msgid "Savings interest: ~1%% per game day."
+msgstr ""
+
+#: internal/menu/actions.go:1519
+msgid "Score"
+msgstr ""
+
+#: internal/menu/tree.go:306
+msgid "See Scores"
+msgstr ""
+
+#: internal/menu/tree.go:325
+msgid "See Status"
+msgstr ""
+
+#: internal/menu/tree.go:101
+msgid "Sell"
+msgstr ""
+
+#: internal/menu/tree.go:45
+msgid "Sell Menu"
+msgstr ""
+
+#: internal/menu/tree.go:178
+msgid "Send Message"
+msgstr ""
+
+#: internal/menu/tree.go:194
+msgid "Send Spy"
+msgstr ""
+
+#: internal/menu/tree.go:174
+msgid "Send Trade Deal"
+msgstr ""
+
+#: internal/menu/gameflow.go:425
+msgid "Send a message?"
+msgstr ""
+
+#: internal/menu/actions.go:1682
+msgid "Sent %d gold to %s."
+msgstr ""
+
+#: internal/menu/tree.go:310
+msgid "Set Industries"
+msgstr ""
+
+#: internal/menu/tree.go:305
+msgid "Set Tax Rate"
+msgstr ""
+
+#: internal/menu/tree.go:196
+msgid "Set Up"
+msgstr ""
+
+#: internal/menu/actions.go:659
+msgid "Set the R5-Slappenheimer dial (0-10)"
+msgstr ""
+
+#: internal/menu/tree.go:311
+msgid "Show Instructions"
+msgstr ""
+
+#: internal/menu/gameflow.go:120
+msgid "Since your last play, this has happened:"
+msgstr ""
+
+#: internal/menu/actions.go:454
+msgid "Sold %d food. Gold: %d"
+msgstr ""
+
+#: internal/menu/actions.go:67
+msgid "Sold %d. Gold: %d"
+msgstr ""
+
+#: internal/menu/gameflow.go:371
+msgid "Sorry, you have used all of your turns today."
+msgstr ""
+
+#: internal/menu/tree.go:179
+msgid "Special Operations"
+msgstr ""
+
+#: internal/menu/tree.go:312
+msgid "Specialize Industry"
+msgstr ""
+
+#: internal/menu/actions.go:1946
+msgid "Specialize Industry — choose a unit type. This is PERMANENT:"
+msgstr ""
+
+#: internal/menu/actions.go:1950
+msgid "Specialize in which unit (0 to cancel)?"
+msgstr ""
+
+#: internal/menu/actions.go:1916
+msgid "Specialized in %s: more of it, less of everything else."
+msgstr ""
+
+#: internal/menu/tree.go:41
+msgid "Spending Menu"
+msgstr ""
+
+#: internal/menu/tree.go:183
+msgid "Spy Database"
+msgstr ""
+
+#: internal/menu/actions.go:1307
+msgid "Spy Database:"
+msgstr ""
+
+#: internal/menu/tree.go:199
+msgid "Spy on Relations"
+msgstr ""
+
+#: internal/menu/actions.go:1353
+msgid "Spy on which baron?"
+msgstr ""
+
+#: internal/menu/actions.go:1334
+msgid "Spy on which planet?"
+msgstr ""
+
+#: internal/menu/config_editor.go:169
+msgid "Standard Investment Rate"
+msgstr ""
+
+#: internal/menu/tree.go:195
+msgid "Stir Revolts"
+msgstr ""
+
+#: internal/menu/tree.go:197
+msgid "Support Dissensions"
+msgstr ""
+
+#: internal/menu/tree.go:56
+msgid "System Menu"
+msgstr ""
+
+#: internal/menu/tree.go:133
+msgid "Take Loan"
+msgstr ""
+
+#: internal/menu/tree.go:97
+msgid "Tanks"
+msgstr ""
+
+#: internal/menu/gameflow.go:195
+msgid "Tanks were manufactured by Industrial Zones."
+msgstr ""
+
+#: internal/menu/actions.go:1172
+msgid "Target which baron?"
+msgstr ""
+
+#: internal/menu/actions.go:1157
+msgid "Target which planet?"
+msgstr ""
+
+#: internal/menu/tree.go:233
+msgid "Tariff Trade Agreement"
+msgstr ""
+
+#: internal/menu/actions.go:914
+msgid "Tax Rate"
+msgstr ""
+
+#: internal/menu/actions.go:1969
+msgid "Tax rate set to %d%%."
+msgstr ""
+
+#: internal/menu/actions.go:697
+msgid "Taxes are set high enough to risk riots. Consider lowering them."
+msgstr ""
+
+#: internal/menu/tree.go:238
+msgid "Technology Agreement"
+msgstr ""
+
+#: internal/menu/actions.go:935
+msgid "Technology Bonus"
+msgstr ""
+
+#: internal/menu/tree.go:173
+msgid "Terrorist Ops"
 msgstr ""
 
 #: internal/menu/tree.go:236
+msgid "Terrorist Prevention"
+msgstr ""
+
+#: internal/menu/actions.go:652
+msgid "The R5-Slappenheimer is disabled."
+msgstr ""
+
+#: internal/menu/actions.go:1405
+msgid "The current BBS Coordinator is %s."
+msgstr ""
+
+#: internal/menu/actions.go:692
+msgid "The people grow restless. Lower taxes or spend on their support."
+msgstr ""
+
+#: internal/menu/actions.go:712
+msgid "The realm is in good order, Sire. Press the attack."
+msgstr ""
+
+#: internal/menu/actions.go:1304
+msgid "The spy database is empty. Spy on empires on other planets to fill it."
+msgstr ""
+
+#: internal/menu/actions.go:1401
+msgid "There are no barons to vote for yet."
+msgstr ""
+
+#: internal/menu/actions.go:501
+msgid "There are no rival empires left to attack."
+msgstr ""
+
+#: internal/menu/actions.go:1803
+msgid "There is no one to declare war on."
+msgstr ""
+
+#: internal/menu/actions.go:1729
+msgid "There is no one to negotiate with."
+msgstr ""
+
+#: internal/menu/actions.go:1516
+msgid "There is no one to reach."
+msgstr ""
+
+#: internal/menu/tree.go:327
+msgid "Today's News"
+msgstr ""
+
+#: internal/menu/helpbrowse.go:76
+msgid "Topic (0 to go back)?"
+msgstr ""
+
+#: internal/menu/tree.go:51
+msgid "Trading"
+msgstr ""
+
+#: internal/menu/actions.go:1258
+msgid "Travel Times"
+msgstr ""
+
+#: internal/menu/tree.go:85
+msgid "Troopers"
+msgstr ""
+
+#: internal/menu/gameflow.go:191
+msgid "Troopers were trained by Industrial Zones."
+msgstr ""
+
+#: internal/menu/gameflow.go:250
+msgid "Turns left today: %d"
+msgstr ""
+
+#: internal/menu/config_editor.go:159
+msgid "Turns of Protection"
+msgstr ""
+
+#: internal/menu/config_editor.go:157
+msgid "Turns per day"
+msgstr ""
+
+#: internal/menu/actions.go:742
+msgid "Turns per day:      %d"
+msgstr ""
+
+#: internal/menu/tree.go:89
+msgid "Turrets"
+msgstr ""
+
+#: internal/menu/gameflow.go:193
+msgid "Turrets were manufactured by Industrial Zones."
+msgstr ""
+
+#: internal/menu/actions.go:315
+msgid "Type your realm name (%s) to confirm, or anything else to cancel"
+msgstr ""
+
+#: internal/menu/tree.go:212
+msgid "Undermine Investments"
+msgstr ""
+
+#: internal/menu/tree.go:137
+msgid "View Bank Rates"
+msgstr ""
+
+#: internal/menu/tree.go:172
+msgid "View IPScores"
+msgstr ""
+
+#: internal/menu/tree.go:241
+msgid "View Treaties"
+msgstr ""
+
+#: internal/menu/actions.go:674
+msgid "Visit Advisors"
+msgstr ""
+
+#: internal/menu/tree.go:102
+msgid "Visit Bank"
+msgstr ""
+
+#: internal/menu/actions.go:1411
+msgid "Vote for (0 to cancel)?"
+msgstr ""
+
+#: internal/menu/tree.go:313
+msgid "Vote for Coordinator"
+msgstr ""
+
+#: internal/menu/tree.go:47
+msgid "War / Attack"
+msgstr ""
+
+#: internal/menu/actions.go:706
+msgid "We carry debt that grows each turn. Repay it soon."
+msgstr ""
+
+#: internal/menu/actions.go:683
+msgid "We have more jets than our carriers can carry into battle. Build more carriers."
+msgstr ""
+
+#: internal/menu/actions.go:678
+msgid "We have no HeadQuarters, Sire. Building one would strengthen our tanks."
+msgstr ""
+
+#: internal/menu/actions.go:700
+msgid "We have no Technology infrastructure. Such regions would sharpen our efficiency."
+msgstr ""
+
+#: internal/menu/actions.go:709
+msgid "We have no covert agents. Recruit some for spying and sabotage."
+msgstr ""
+
+#: internal/menu/actions.go:1407
+msgid "Who should be the BBS Coordinator?"
+msgstr ""
+
+#: internal/menu/tree.go:130
+msgid "Withdraw Funds"
+msgstr ""
+
+#: internal/menu/gameflow.go:276
+msgid "Withdraw how much?"
+msgstr ""
+
+#: internal/menu/gameflow.go:312
+msgid "Would you like to reconsider?"
+msgstr ""
+
+#: internal/menu/tree.go:309
 msgid "Write Macros"
 msgstr ""
 
-#: internal/menu/tree.go:254
+#: internal/menu/tree.go:328
 msgid "Yesterday's News"
 msgstr ""
 
-#: internal/menu/actions.go:1289
+#: internal/menu/actions.go:1774
 msgid "You accepted the %s with %s."
 msgstr ""
 
-#: internal/menu/actions.go:358
+#: internal/menu/actions.go:496
 msgid "You are under New Realm Protection and cannot attack yet."
 msgstr ""
 
-#: internal/menu/actions.go:1296
+#: internal/menu/actions.go:1767
 msgid "You broke the %s with %s."
 msgstr ""
 
-#: internal/menu/actions.go:133
+#: internal/menu/actions.go:199
 msgid "You can afford %s%d%s regions."
 msgstr ""
 
@@ -1217,8 +1345,16 @@ msgstr ""
 msgid "You cannot afford that."
 msgstr ""
 
-#: internal/menu/gameflow.go:170
+#: internal/menu/gameflow.go:294
 msgid "You cannot cover all your maintenance this turn."
+msgstr ""
+
+#: internal/menu/actions.go:1826
+msgid "You declared war on %s."
+msgstr ""
+
+#: internal/menu/actions.go:1828
+msgid "You declared war on %s. Treaties broken: %s"
 msgstr ""
 
 #: internal/game/economy.go:7
@@ -1229,15 +1365,19 @@ msgstr ""
 msgid "You do not owe that much."
 msgstr ""
 
-#: internal/menu/actions.go:1130
-msgid "You have %s%d%s lines for your message.  %s/S%s=save %s/A%s=abort %s/C%s=clear"
+#: internal/menu/actions.go:1558
+msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr ""
 
-#: internal/menu/actions.go:639
+#: internal/menu/tree.go:378
+msgid "You have %s gold and %d turns."
+msgstr ""
+
+#: internal/menu/actions.go:940
 msgid "You have %s%s turns of Protection Left."
 msgstr ""
 
-#: internal/menu/actions.go:303
+#: internal/menu/actions.go:402
 msgid "You have no active investments or loans."
 msgstr ""
 
@@ -1245,143 +1385,135 @@ msgstr ""
 msgid "You have no agents for that operation."
 msgstr ""
 
-#: internal/menu/actions.go:539
+#: internal/menu/actions.go:795
 msgid "You have no defense allies."
 msgstr ""
 
-#: internal/menu/actions.go:1043
+#: internal/menu/actions.go:1458
 msgid "You have no messages."
 msgstr ""
 
 #: internal/game/economy.go:11
-msgid "You have reached the region limit for this league."
+msgid "You have reached your region purchase limit for this turn."
 msgstr ""
 
-#: internal/menu/actions.go:70
+#: internal/menu/actions.go:81
 msgid "You have started work on your HeadQuarters."
 msgstr ""
 
-#: internal/menu/actions.go:1167
+#: internal/menu/actions.go:1629
 msgid "You have used all %d lines."
 msgstr ""
 
-#: internal/menu/actions.go:856
-msgid "You joined group attack #%d with %s offense."
+#: internal/menu/actions.go:1762
+msgid "You hold a %s with %s."
 msgstr ""
 
-#: internal/menu/actions.go:460
-msgid "Your Advisors"
+#: internal/menu/actions.go:1237
+msgid "You joined group attack #%d with %s offense."
 msgstr ""
 
 #: internal/game/economy.go:10
 msgid "Your HeadQuarters is already under construction or built."
 msgstr ""
 
-#: internal/menu/actions.go:981
+#: internal/menu/gameflow.go:311
+msgid "Your actions may lead to disastrous results."
+msgstr ""
+
+#: internal/menu/actions.go:1373
 msgid "Your agents infiltrated %s on %s; the report is in the Spy Database."
 msgstr ""
 
-#: internal/menu/gameflow.go:173
+#: internal/menu/gameflow.go:302
 msgid "Your armed forces require %d gold."
 msgstr ""
 
-#: internal/menu/actions.go:117
+#: internal/menu/actions.go:128
 msgid "Your choice? (0 to cancel)"
 msgstr ""
 
-#: internal/menu/gameflow.go:125
+#: internal/menu/actions.go:161
+msgid "Your choice? (? to list, 0 to cancel)"
+msgstr ""
+
+#: internal/menu/gameflow.go:241
 msgid "Your dominion gained %s%s%s people."
 msgstr ""
 
-#: internal/menu/actions.go:230
+#: internal/menu/gameflow.go:243
+msgid "Your dominion lost %s%s%s people."
+msgstr ""
+
+#: internal/menu/actions.go:323
 msgid "Your empire is no more. Fare thee well."
 msgstr ""
 
-#: internal/menu/actions.go:1401
+#: internal/menu/actions.go:1943
 msgid "Your industry is already specialized in %s."
 msgstr ""
 
-#: internal/menu/actions.go:1413
+#: internal/menu/actions.go:1955
 msgid "Your industry is now permanently specialized in %s."
 msgstr ""
 
-#: internal/menu/actions.go:1045
+#: internal/menu/actions.go:1460
 msgid "Your messages:"
 msgstr ""
 
-#: internal/menu/actions.go:1329
+#: internal/menu/actions.go:1872
 msgid "Your treaties:"
 msgstr ""
 
-#: internal/menu/actions.go:1018
+#: internal/menu/actions.go:1416
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 
-#: internal/menu/gameflow.go:106
-msgid "gold was earned by Solar Power Generators."
-msgstr ""
-
-#: internal/menu/gameflow.go:109
-msgid "gold was earned from Industrial Zones."
-msgstr ""
-
-#: internal/menu/gameflow.go:107
-msgid "gold was earned from Rivers."
-msgstr ""
-
-#: internal/menu/gameflow.go:110
-msgid "gold was earned from Technology."
-msgstr ""
-
-#: internal/menu/gameflow.go:111
-msgid "gold was earned from Trade."
-msgstr ""
-
-#: internal/menu/gameflow.go:105
-msgid "gold was earned in Tourism."
-msgstr ""
-
-#: internal/menu/gameflow.go:108
-msgid "gold was earned in Urban Centers."
-msgstr ""
-
-#: internal/menu/gameflow.go:103
-msgid "gold was earned in taxes."
-msgstr ""
-
-#: internal/menu/gameflow.go:131
+#: internal/menu/gameflow.go:190
 msgid "gold was produced by your Industry."
 msgstr ""
 
-#: internal/menu/gameflow.go:104
-msgid "gold was produced from the Ore Mines."
+#: internal/menu/actions.go:1717
+msgid "held"
 msgstr ""
 
 #: internal/game/ibbs.go:16
 msgid "no such group attack"
 msgstr ""
 
+#: internal/menu/actions.go:1721
+msgid "offers this to you"
+msgstr ""
+
 #: internal/game/ibbs.go:17
 msgid "that attack force has already left"
 msgstr ""
 
-#: internal/menu/actions.go:830
+#: internal/menu/actions.go:1209
 msgid "the whole planet"
 msgstr ""
 
-#: internal/menu/actions.go:903
+#: internal/menu/actions.go:936
+msgid "to income, upkeep, and combat strength"
+msgstr ""
+
+#: internal/menu/actions.go:1293
 msgid "today"
 msgstr ""
 
-#: internal/menu/gameflow.go:212
+#: internal/menu/gameflow.go:249
+msgid "troops deserted due to low morale."
+msgstr ""
+
+#: internal/menu/gameflow.go:405
 msgid "units of Food consumed."
 msgstr ""
 
-#: internal/menu/gameflow.go:127
+#: internal/menu/gameflow.go:245
 msgid "units of food spoiled."
 msgstr ""
 
-#: internal/menu/input.go:115
+#: internal/menu/input.go:141
 msgid "─»>Paused<«─"
 msgstr ""
 

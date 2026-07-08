@@ -1,14 +1,15 @@
 ---
 category: military
 in_game: true
-order: 2
+order: 8
 title: Штаб
 ---
 
 # Штаб
 
-Ваш штаб управляет армией. Это единовременный строительный проект, который
-каждый ход понемногу продвигается, пока не будет завершён.
+Your HeadQuarters is the command center of your army. It is a one-time
+building project that advances a little each turn until it is complete.
 
-Пока штаб строится — и ещё сильнее по завершении — он увеличивает вклад
-ваших танков в атаку и защиту.
+While it is being built — and more so once it is finished — it raises how
+much your tanks add to both attack and defense. Enemies can bomb your
+HeadQuarters with covert operations to weaken your tanks.

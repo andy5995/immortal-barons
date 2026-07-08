@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-06 11:09-0500\n"
+"POT-Creation-Date: 2026-07-07 21:46-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -646,10 +646,9 @@ msgid ""
 "play."
 msgstr ""
 
-#. type: Title ##
+#. type: Title #
 #: internal/help/content/military/headquarters.md:1
 #: internal/help/content/military/headquarters.md:8
-#: internal/help/content/military/units.md:53
 #, markdown-text, no-wrap
 msgid "HeadQuarters"
 msgstr ""
@@ -658,145 +657,329 @@ msgstr ""
 #: internal/help/content/military/headquarters.md:12
 #, markdown-text
 msgid ""
-"Your HeadQuarters coordinates your army. It is a one-time building project "
-"that advances a little each turn until it is complete."
+"Your HeadQuarters is the command center of your army. It is a one-time "
+"building project that advances a little each turn until it is complete."
 msgstr ""
 
 #. type: Plain text
 #: internal/help/content/military/headquarters.md:15
 #, markdown-text
 msgid ""
-"While it is being built — and more so once finished — it raises how much "
-"your Tanks add to both attack and defense. Enemies can bomb your HQ with "
-"covert operations to weaken your tanks."
+"While it is being built — and more so once it is finished — it raises how "
+"much your tanks add to both attack and defense. Enemies can bomb your "
+"HeadQuarters with covert operations to weaken your tanks."
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/military/units.md:1
-#: internal/help/content/military/units.md:8
-#, markdown-text, no-wrap
-msgid "Units"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/units.md:11
-#, markdown-text
-msgid "Your army is built from these units. Each one has a job."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/military/units.md:12
+#: internal/help/content/military/troopers.md:1
+#: internal/help/content/military/troopers.md:8
 #, markdown-text, no-wrap
 msgid "Troopers"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/units.md:17
+#: internal/help/content/military/troopers.md:12
 #, markdown-text
 msgid ""
-"Troopers fight on both attack and defense, but they are weak at each. They "
-"are cheap to buy and cheap to keep. They eat more food than other "
-"units. They help you defend against Sabre missile attacks."
+"Troopers are your basic soldiers — the cheapest and weakest fighting "
+"unit. They fight on both attack and defense, with an offense of 1 and a "
+"defense of 1."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/military/units.md:18
+#. type: Plain text
+#: internal/help/content/military/troopers.md:16
+#, markdown-text
+msgid ""
+"They are cheap to buy and cheap to keep. About seven troopers cost as much "
+"as one tank, but one tank has the strength of four troopers. Troopers are "
+"the better value early in the game, and tanks become stronger later."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/troopers.md:19
+#, markdown-text
+msgid ""
+"Troopers eat more food than any other unit, so a large trooper army needs a "
+"strong food supply."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/troopers.md:24
+#, markdown-text
+msgid ""
+"A large trooper army also discourages enemy R5-Slappenheimer strikes. The "
+"more troopers you hold, the more likely that missile is to backfire onto the "
+"empire that fired it. Troopers are a common target of enemy covert "
+"operations, which can make them desert."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/troopers.md:25
+#, markdown-text
+msgid "Buy troopers early to survive, and build more tanks as your economy grows."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/jets.md:1
+#: internal/help/content/military/jets.md:8
 #, markdown-text, no-wrap
 msgid "Jets"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/units.md:24
+#: internal/help/content/military/jets.md:13
 #, markdown-text
 msgid ""
-"Jets attack only. They cannot defend. One jet is about twice as strong on "
-"attack as a trooper. Jets are cheap to buy but cost a lot to keep. They need "
-"carriers to reach a battle: one carrier moves 100 jets. An enemy SDI shield "
-"cuts your jets' strength by about a quarter."
+"Jets are an attack-only aircraft. They have an offense of 2 and a defense of "
+"0, so they add nothing to your defense. One jet is about twice as strong on "
+"attack as a trooper."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/military/units.md:25
+#. type: Plain text
+#: internal/help/content/military/jets.md:16
+#, markdown-text
+msgid ""
+"Jets are cheap to buy but expensive to keep, so do not buy more than you "
+"will use."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/jets.md:20
+#, markdown-text
+msgid ""
+"Jets cannot reach a battle on their own. You need carriers to carry them, "
+"and one carrier moves up to 100 jets. Without enough carriers, your jets "
+"cannot join the attack."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/jets.md:23
+#, markdown-text
+msgid ""
+"An enemy SDI shield lowers your jets' attacking strength, so jets are weaker "
+"against a well-shielded target."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/jets.md:25
+#, markdown-text
+msgid ""
+"Jets are also weak on the ground. In a normal attack the enemy's bombers "
+"destroy your grounded jets, and enemy turrets shoot down the jets that do "
+"attack."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/turrets.md:1
+#: internal/help/content/military/turrets.md:8
 #, markdown-text, no-wrap
 msgid "Turrets"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/units.md:30
+#: internal/help/content/military/turrets.md:13
 #, markdown-text
 msgid ""
-"Turrets defend only. One turret is about twice as strong on defense as a "
-"trooper. They shoot down attacking jets, destroy tanks, and kill "
-"troops. They also help stop incoming missiles. Covert operations cannot "
-"destroy them."
+"Turrets are a defense-only unit — the defensive counterpart to jets. They "
+"have a defense of 2 and an offense of 0, which is about twice as strong on "
+"defense as a trooper."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/military/units.md:31
+#. type: Plain text
+#: internal/help/content/military/turrets.md:16
+#, markdown-text
+msgid ""
+"Turrets shoot down attacking jets, destroy attacking tanks, and kill "
+"attacking troops. They also help stop incoming nuclear missiles."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/turrets.md:19
+#, markdown-text
+msgid ""
+"Covert operations cannot destroy your turrets, so they form a stable core "
+"for your defense."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/turrets.md:22
+#, markdown-text
+msgid ""
+"Some strategy guides call this unit a \"Missile Base.\" It is the same "
+"defensive unit."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/turrets.md:24
+#, markdown-text
+msgid ""
+"Build turrets to defend your regions, and pair them with troopers and tanks "
+"so you can both defend and attack."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/tanks.md:1
+#: internal/help/content/military/tanks.md:8
 #, markdown-text, no-wrap
 msgid "Tanks"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/units.md:36
+#: internal/help/content/military/tanks.md:13
 #, markdown-text
 msgid ""
-"Tanks are the best all-around unit. They are strong on both attack and "
-"defense.  They cost a lot to buy but little to keep. A strong HeadQuarters "
-"and good morale make your tanks even stronger. Tanks help you defend against "
-"chemical attacks."
+"Tanks are the strongest general-purpose unit, powerful on both attack and "
+"defense. They have an offense of 4 and a defense of 4 — the strength of four "
+"troopers in a single unit."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/military/units.md:37
+#. type: Plain text
+#: internal/help/content/military/tanks.md:16
+#, markdown-text
+msgid ""
+"They cost a lot to buy but little to keep. A tank army is expensive to build "
+"and cheap to maintain, so over a long game tanks are the most efficient "
+"force."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/tanks.md:20
+#, markdown-text
+msgid ""
+"A strong HeadQuarters and high military morale make your tanks even more "
+"effective, so keep both high. Enemies will bomb your HeadQuarters to weaken "
+"your tanks."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/tanks.md:22
+#, markdown-text
+msgid "Tanks also help defend your empire against chemical missile attacks."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/tanks.md:24
+#, markdown-text
+msgid ""
+"Grow your economy first, and then turn your gold into tanks for a force that "
+"wins both attacks and defenses."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/bombers.md:1
+#: internal/help/content/military/bombers.md:8
 #, markdown-text, no-wrap
 msgid "Bombers"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/units.md:42
+#: internal/help/content/military/bombers.md:13
 #, markdown-text
 msgid ""
-"Bombers have no attack or defense strength of their own. They carry "
-"payloads.  Missiles and interplanetary bombings need bombers to deliver "
-"them. In a regular attack, your bombers destroy the enemy jets that are "
-"sitting on the ground."
+"Bombers are delivery aircraft. They have no attack or defense strength of "
+"their own — an offense of 0 and a defense of 0 — and their only job is to "
+"carry payloads."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/military/units.md:43
+#. type: Plain text
+#: internal/help/content/military/bombers.md:16
+#, markdown-text
+msgid ""
+"Missiles and interplanetary bombings need bombers to deliver them. Without "
+"enough bombers, you cannot launch those attacks."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/bombers.md:19
+#, markdown-text
+msgid ""
+"In a normal attack, your bombers first destroy the enemy jets that are on "
+"the ground, which weakens the enemy's next strike."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/bombers.md:21
+#, markdown-text
+msgid ""
+"Bombers add a large amount to your net worth, so a fleet of them raises your "
+"score as well as your reach."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/carriers.md:1
+#: internal/help/content/military/carriers.md:8
 #, markdown-text, no-wrap
 msgid "Carriers"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/units.md:47
+#: internal/help/content/military/carriers.md:12
 #, markdown-text
 msgid ""
-"Carriers move your jets to a battle and carry goods for trade. One carrier "
-"moves up to 100 jets."
+"Carriers are a support unit with no attack or defense strength of their "
+"own.  They do two jobs."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/military/units.md:48
+#. type: Plain text
+#: internal/help/content/military/carriers.md:15
+#, markdown-text
+msgid ""
+"First, they move your jets to a battle: one carrier carries up to 100 jets.  "
+"Without enough carriers, your jets cannot reach the enemy."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/carriers.md:17
+#, markdown-text
+msgid "Second, they carry goods for trade between empires."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/carriers.md:20
+#, markdown-text
+msgid ""
+"Carriers are very cheap to keep. A common way to earn gold is to set your "
+"industry to build carriers and then sell them. This can earn more than "
+"producing gold directly."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/agents.md:1
+#: internal/help/content/military/agents.md:8
 #, markdown-text, no-wrap
 msgid "Covert Agents"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/units.md:52
+#: internal/help/content/military/agents.md:12
 #, markdown-text
 msgid ""
-"Agents run covert operations, such as spying and sabotage. Having many "
-"agents also helps defend you against enemy covert operations."
+"Agents are your spies. They carry out covert operations — spying, sabotage, "
+"bombing enemy targets, bribery, and more."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/units.md:56
+#: internal/help/content/military/agents.md:15
 #, markdown-text
 msgid ""
-"A HeadQuarters coordinates your army. A strong HQ makes your tanks much more "
-"effective. Enemies can bomb your HQ to weaken your tanks."
+"Your chance of success at a covert operation depends on how many agents you "
+"have compared to the target. More agents give you a better chance."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/agents.md:18
+#, markdown-text
+msgid ""
+"Keeping many agents also protects you. It lowers the chance that enemy "
+"covert operations against you succeed."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/agents.md:20
+#, markdown-text
+msgid ""
+"Agents do not fight in normal battles. Build a network of them if you plan "
+"to fight a secret war. See the Covert Operations topic for what they can do."
 msgstr ""
 
 #. type: Title #
@@ -923,19 +1106,19 @@ msgid "Common operations:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:29
+#: internal/help/content/warfare/covert.md:38
 #, markdown-text
 msgid "Send Spy — read the enemy's defensive strength."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:29
+#: internal/help/content/warfare/covert.md:38
 #, markdown-text
 msgid "Spy on Relations — reveal all of the enemy's treaties (useful before a war)."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:29
+#: internal/help/content/warfare/covert.md:38
 #, markdown-text
 msgid ""
 "Special Operations — sabotage the enemy army, destroying a share of their "
@@ -943,7 +1126,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:29
+#: internal/help/content/warfare/covert.md:38
 #, markdown-text
 msgid ""
 "Bomb Intelligence — kill enemy agents, so your later missions land more "
@@ -951,7 +1134,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:29
+#: internal/help/content/warfare/covert.md:38
 #, markdown-text
 msgid ""
 "Stir Revolts — spread propaganda that lowers the enemy's public support, "
@@ -959,19 +1142,19 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:29
+#: internal/help/content/warfare/covert.md:38
 #, markdown-text
 msgid "Bomb Airbases — destroy enemy jets that are on the ground."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:29
+#: internal/help/content/warfare/covert.md:38
 #, markdown-text
 msgid "Bomb Food Stores — destroy much of the enemy's food reserve."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:29
+#: internal/help/content/warfare/covert.md:38
 #, markdown-text
 msgid ""
 "Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less "
@@ -979,15 +1162,31 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:29
+#: internal/help/content/warfare/covert.md:38
 #, markdown-text
 msgid ""
-"Bribery — buy off an agent inside the enemy, so that their covert operations "
-"against you fail from then on."
+"R5-Slappenheimer — an unreliable weapon of mass destruction. Before you "
+"fire, you set a dial from 0 to 10, but the dial is for show and changes "
+"nothing, so pick any number you like. The missile is a gamble every "
+"time. Most launches do nothing: it misses, it malfunctions, or the enemy's "
+"SDI shoots it down.  When one does get through, it destroys part of one of "
+"the enemy's assets — troops, jets, tanks, turrets, bombers, carriers, "
+"agents, gold, food, or regions — and sometimes it wrecks several of these at "
+"once, which can be devastating. It can also backfire: if the enemy keeps a "
+"very large trooper army, the missile may turn back and strike your own "
+"empire instead."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/warfare/covert.md:38
+#, markdown-text
+msgid ""
+"Bribery — pay one of the enemy's own agents to work for you. From then on, "
+"that enemy's covert operations against you fail."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/covert.md:31
+#: internal/help/content/warfare/covert.md:40
 #, markdown-text
 msgid ""
 "An Intelligence Alliance adds half of an ally's agents to your covert "
