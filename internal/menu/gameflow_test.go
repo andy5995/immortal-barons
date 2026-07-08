@@ -204,7 +204,7 @@ func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 // Covert, and Trading, decline the message prompt, then decline "continue"
 // to stop after one turn.
 func TestRunTurnConsumesATurn(t *testing.T) {
-	keys := "0\r  0000nn"
+	keys := "0\r   0000nn"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true // pay maintenance silently; this test is about the turn loop
@@ -219,7 +219,7 @@ func TestRunTurnConsumesATurn(t *testing.T) {
 // event log ("Since your last play..."), then Diplomacy, then Change
 // Production (Set Industries), all before the ordinary turn pipeline (#63).
 func TestRunTurnShowsPreTurnStopsInOrder(t *testing.T) {
-	keys := " 0\r  0000nn" // leading pause for the non-empty event log
+	keys := " 0\r   0000nn" // leading pause for the non-empty event log
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true
@@ -247,8 +247,8 @@ func TestRunTurnShowsPreTurnStopsInOrder(t *testing.T) {
 // they must appear exactly once even when the player continues into a
 // second turn.
 func TestRunTurnPreTurnStopsOnceAcrossTwoTurns(t *testing.T) {
-	preTurn := "0\r"     // Diplomacy quit, decline Change Production
-	perTurn := "  0000n" // income/status pauses, quit Spending/Attack/Covert/Trading, decline message
+	preTurn := "0\r"      // Diplomacy quit, decline Change Production
+	perTurn := "   0000n" // income/status pauses (income, status page 1, status+maint), quit Spending/Attack/Covert/Trading, decline message
 	keys := preTurn + perTurn + "y" + perTurn + "n"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()

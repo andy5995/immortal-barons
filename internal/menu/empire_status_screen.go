@@ -65,12 +65,17 @@ func empireStatusFields(s session.Session, w *ctx) (map[string]string, func(stri
 // empireStatusPages are the template files, in display order.
 var empireStatusPages = []string{"screens/empire-status-1.ans", "screens/empire-status-2.ans"}
 
-// renderEmpireStatus draws the Empire Status pages back to back with NO pause,
-// for inline use in the turn summary where the caller pauses once for the whole
-// screen. The standalone menu action (empireStatus) pages through them instead.
+// renderEmpireStatus draws the Empire Status pages, pausing between them so the
+// first page can be read before the second scrolls it away. It does not pause
+// after the last page — the caller pauses once for the final page (the turn
+// summary shares that pause with the maintenance results; empireStatus adds its
+// own).
 func renderEmpireStatus(s session.Session, w *ctx) {
 	fields, translate := empireStatusFields(s, w)
-	for _, name := range empireStatusPages {
+	for i, name := range empireStatusPages {
+		if i > 0 {
+			pause(s)
+		}
 		renderScreenPage(s, name, fields, translate)
 	}
 }

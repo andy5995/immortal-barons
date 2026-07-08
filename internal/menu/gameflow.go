@@ -395,9 +395,10 @@ func runTurn(s session.Session, w *ctx) Result {
 
 		incomeReport(s, w, p)
 
-		// Status and the maintenance results share one screen with a single
-		// pause. If maintenance printed after the pause, the next menu's
-		// clear-screen would wipe it before the player could read it.
+		// The second status page and the maintenance results share one screen
+		// with a single pause (renderEmpireStatus already paused after page 1).
+		// If maintenance printed after the pause, the next menu's clear-screen
+		// would wipe it before the player could read it.
 		renderEmpireStatus(s, w)
 		paymentStage(s, w, p)
 		var foodUpkeep int

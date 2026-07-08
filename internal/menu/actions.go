@@ -927,13 +927,7 @@ func titleBar(s session.Session, text string) {
 // empireStatus is the standalone status action (System menu): page through the
 // Empire Status screens, pausing on each so a wide screen is not scrolled past.
 func empireStatus(s session.Session, w *ctx) Result {
-	fields, translate := empireStatusFields(s, w)
-	for i, name := range empireStatusPages {
-		if i > 0 {
-			pause(s)
-		}
-		renderScreenPage(s, name, fields, translate)
-	}
+	renderEmpireStatus(s, w)
 	pause(s)
 	return Stay
 }
