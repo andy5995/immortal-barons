@@ -1,7 +1,7 @@
 ---
 title: HeadQuarters
 category: military
-order: 2
+order: 8
 in_game: true
 ---
 
