@@ -64,6 +64,18 @@ order.
 - **Colors + hotkey characters → NO.** They are set by the draw code (immediate
   operands in the code segment), not stored next to the string. Get them from a
   screenshot (source 1) or the disassembly (source 2).
+- **Menu HIERARCHY / reachability → NO.** The string table gives one menu's
+  item labels in declaration order — it does NOT tell you how menus nest, which
+  item opens which sub-menu, or *when a menu is shown*. Do not infer "feature X
+  lives only under menu Y" from string proximity or from finding a single entry
+  point. For the structure, `breins.txt`'s **table of contents lists the menus**
+  (a top-level menu there is a top-level menu, e.g. Covert Operations is its own
+  menu, separate from Interplanetary Operations). For the clone, **reachability
+  is runtime code** — a turn-flow sequence, a preference gate (e.g.
+  `VisitCovert`), an IBBS gate — so read the actual code path, not just a
+  `gotoMenu` grep. (Real miss: twice concluded covert was InterPlanetary-only
+  from the menu tree, when `runTurn` presents it every turn behind a default-on
+  preference.)
 - **Rates, probabilities, thresholds, and formulas → NO.** The strings and help
   text give you the *trigger* and the qualitative behaviour ("Riots have broken
   out due to high tax rates!"), never the numbers behind them (the riot chance %,

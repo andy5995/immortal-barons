@@ -18,3 +18,6 @@ you.
 
 Each operation has its own topic. The bombing operations also need Bombers to
 deliver their payloads.
+
+The Covert Operations menu appears during your turn, after the Attack menu. If
+you do not see it, turn on "Visit Covert Menu" in the Preferences menu.

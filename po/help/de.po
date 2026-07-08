@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-08 11:03-0500\n"
+"POT-Creation-Date: 2026-07-08 14:50-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -300,10 +300,17 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:20
+#: internal/help/content/covert/overview.md:21
 msgid ""
 "Each operation has its own topic. The bombing operations also need Bombers "
 "to deliver their payloads."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:23
+msgid ""
+"The Covert Operations menu appears during your turn, after the Attack menu. "
+"If you do not see it, turn on \"Visit Covert Menu\" in the Preferences menu."
 msgstr ""
 
 #. type: Title #
