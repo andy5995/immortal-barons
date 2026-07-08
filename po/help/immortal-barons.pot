@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-07 21:46-0500\n"
+"POT-Creation-Date: 2026-07-08 11:03-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -140,6 +140,263 @@ msgid ""
 msgstr ""
 
 #. type: Title #
+#: internal/help/content/covert/bomb-enemy-targets.md:1
+#: internal/help/content/covert/bomb-enemy-targets.md:8
+#, markdown-text, no-wrap
+msgid "Bomb Enemy Targets"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/bomb-enemy-targets.md:11
+#, markdown-text
+msgid ""
+"Bomb Enemy Targets is a submenu of bombing operations. Every operation here "
+"needs at least 500 Bombers to deliver its payload. Each one has its own "
+"topic."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/bomb-food-market.md:1
+#: internal/help/content/covert/bomb-food-market.md:8
+#, markdown-text, no-wrap
+msgid "Bomb Food Market"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/bomb-food-market.md:11
+#, markdown-text
+msgid ""
+"Bomb Food Market destroys much of the target's food reserve. A large loss "
+"can start a food shortage that harms their people and army."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/bomb-trade-routes.md:1
+#: internal/help/content/covert/bomb-trade-routes.md:8
+#, markdown-text, no-wrap
+msgid "Bomb Trade Routes"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/bomb-trade-routes.md:11
+#, markdown-text
+msgid ""
+"Bomb Trade Routes severs one of the target's standing trade treaties, "
+"cutting off the income that deal provided."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/bomb-trading-market.md:1
+#: internal/help/content/covert/bomb-trading-market.md:8
+#, markdown-text, no-wrap
+msgid "Bomb Trading Market"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/bomb-trading-market.md:11
+#, markdown-text
+msgid ""
+"Bomb Trading Market raids the target's gold through their own trading "
+"market, taking some of their reserves."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/bribery.md:1
+#: internal/help/content/covert/bribery.md:8
+#, markdown-text, no-wrap
+msgid "Bribery"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/bribery.md:11
+#, markdown-text
+msgid ""
+"Bribery pays one of the enemy's own agents to work for you. From then on, "
+"that enemy's covert operations against you fail."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/demoralize-forces.md:1
+#: internal/help/content/covert/demoralize-forces.md:8
+#, markdown-text, no-wrap
+msgid "Demoralize Forces"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/demoralize-forces.md:11
+#, markdown-text
+msgid ""
+"Demoralize Forces lowers the target's military morale. Low morale weakens "
+"their army in battle and can cause desertion."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/expose-enemy-ops.md:1
+#: internal/help/content/covert/expose-enemy-ops.md:8
+#, markdown-text, no-wrap
+msgid "Expose Enemy Ops"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/expose-enemy-ops.md:12
+#, markdown-text
+msgid ""
+"Expose Enemy Ops is a defensive operation. It shields your empire from all "
+"incoming covert operations for a short time. Use it when you expect an enemy "
+"to strike."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/overview.md:1
+#: internal/help/content/covert/overview.md:8
+#, markdown-text, no-wrap
+msgid "Covert Operations"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:14
+#, markdown-text
+msgid ""
+"Covert operations are secret missions run by your agents. Your chance of "
+"success depends on how many agents you have compared to the target. More "
+"agents give you a better chance. Keeping many agents also protects you, "
+"because it lowers the chance that enemy operations against you succeed."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:18
+#, markdown-text
+msgid ""
+"When an operation fails, your agent is caught and lost, and the target may "
+"be warned. The operations are secret, so the report the victim sees does not "
+"name you."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:20
+#, markdown-text
+msgid ""
+"Each operation has its own topic. The bombing operations also need Bombers "
+"to deliver their payloads."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/r5-slappenheimer.md:1
+#: internal/help/content/covert/r5-slappenheimer.md:8
+#, markdown-text, no-wrap
+msgid "R5-Slappenheimer"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/r5-slappenheimer.md:18
+#, markdown-text
+msgid ""
+"The R5-Slappenheimer is an unreliable weapon of mass destruction. Before you "
+"fire, you set a dial from 0 to 10, but the dial is for show and changes "
+"nothing, so pick any number you like. The missile is a gamble every "
+"time. Most launches do nothing: it misses, it malfunctions, or the enemy's "
+"SDI shoots it down. When one does get through, it destroys part of one of "
+"the enemy's assets — troops, jets, tanks, turrets, bombers, carriers, "
+"agents, gold, food, or regions — and sometimes it wrecks several of these at "
+"once, which can be devastating. It can also backfire: if the enemy keeps a "
+"very large trooper army, the missile may turn back and strike your own "
+"empire instead."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/send-spy.md:1
+#: internal/help/content/covert/send-spy.md:8
+#, markdown-text, no-wrap
+msgid "Send Spy"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/send-spy.md:12
+#, markdown-text
+msgid ""
+"Send Spy gathers military intelligence on an enemy. It reveals their land, "
+"troops, defenses, gold, and more, so you can plan an attack. If the mission "
+"fails, your spy is caught and does not return."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/set-up.md:1
+#: internal/help/content/covert/set-up.md:8
+#, markdown-text, no-wrap
+msgid "Set Up"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/set-up.md:12
+#, markdown-text
+msgid ""
+"Set Up tricks the target and one of its Full Defense Alliance partners into "
+"believing the other declared war. Their alliance is voided. Use it to strip "
+"a defensive pact off an enemy you plan to attack."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/spy-on-relations.md:1
+#: internal/help/content/covert/spy-on-relations.md:8
+#, markdown-text, no-wrap
+msgid "Spy on Relations"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/spy-on-relations.md:11
+#, markdown-text
+msgid ""
+"Spy on Relations reveals every treaty the target holds with other rulers. It "
+"is useful before a war, so you can see which alliances might come to their "
+"defense."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/stir-revolts.md:1
+#: internal/help/content/covert/stir-revolts.md:8
+#, markdown-text, no-wrap
+msgid "Stir Revolts"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/stir-revolts.md:11
+#, markdown-text
+msgid ""
+"Stir Revolts spreads propaganda that lowers the target's public support. Low "
+"support weakens their troopers and their economy."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/support-dissensions.md:1
+#: internal/help/content/covert/support-dissensions.md:8
+#, markdown-text, no-wrap
+msgid "Support Dissensions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/support-dissensions.md:11
+#, markdown-text
+msgid ""
+"Support Dissensions turns the target's own troopers against them. Some of "
+"their army deserts and flees."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/covert/undermine-investments.md:1
+#: internal/help/content/covert/undermine-investments.md:8
+#, markdown-text, no-wrap
+msgid "Undermine Investments"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/undermine-investments.md:11
+#, markdown-text
+msgid ""
+"Undermine Investments damages the target's pending bank investments, "
+"trimming about a quarter off the money they were due to get back."
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/diplomacy/treaties.md:1
 #: internal/help/content/diplomacy/treaties.md:8
 #, markdown-text, no-wrap
@@ -150,134 +407,127 @@ msgstr ""
 #: internal/help/content/diplomacy/treaties.md:12
 #, markdown-text
 msgid ""
-"You can send agreements to other rulers. A treaty starts when the other side "
-"accepts it. These are the main agreements."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/diplomacy/treaties.md:13
-#, markdown-text, no-wrap
-msgid "Tariff Trade Agreement"
+"Treaties are agreements you send to other rulers. A treaty starts only when "
+"the other side accepts it. Each treaty type has its own topic."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:17
+#: internal/help/content/diplomacy/treaties.md:16
 #, markdown-text
 msgid ""
-"Trade between two realms, with a tax on goods that cross the border. Both "
-"sides earn extra income based on population. This is good if you have many "
-"people."
+"Two related actions also live on the Diplomacy menu. A Declaration of War "
+"ends an agreement without causing trouble at home; the treaty is not truly "
+"broken until the other realm is told. View Treaties shows your current "
+"relations with the other rulers in the game."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/diplomacy/treaties.md:18
-#, markdown-text, no-wrap
-msgid "Protective Trade"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:22
-#, markdown-text
-msgid ""
-"Guards along the trade routes. This stops enemies from bombing your trade "
-"deals, and makes trade deals cheaper to send and to keep."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/diplomacy/treaties.md:23
+#. type: Title #
+#: internal/help/content/diplomacy/treaty-free-trade.md:1
+#: internal/help/content/diplomacy/treaty-free-trade.md:8
 #, markdown-text, no-wrap
 msgid "Free Trade Agreement"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:28
+#: internal/help/content/diplomacy/treaty-free-trade.md:12
 #, markdown-text
 msgid ""
-"People and goods move freely, with no border tax. You earn a lot from income "
-"taxes. But people mixing across borders can spread low morale and low "
-"support, so watch it."
+"A Free Trade Agreement lets people and goods move freely, with no border "
+"tax. You earn a lot from income taxes. But people mixing across borders can "
+"spread low morale and low support, so watch it."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/diplomacy/treaties.md:29
-#, markdown-text, no-wrap
-msgid "Terrorist Prevention"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:33
-#, markdown-text
-msgid ""
-"The two realms' intelligence agencies help each other find and stop covert "
-"and terrorist attacks."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/diplomacy/treaties.md:34
-#, markdown-text, no-wrap
-msgid "Intelligence Alliance"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:38
-#, markdown-text
-msgid ""
-"The two realms give each other covert help in operations, both at home and "
-"between planets."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/diplomacy/treaties.md:39
-#, markdown-text, no-wrap
-msgid "Technology Agreement"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:42
-#, markdown-text
-msgid ""
-"The two realms share science. Each side gains some of the other's "
-"technology."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/diplomacy/treaties.md:43
+#. type: Title #
+#: internal/help/content/diplomacy/treaty-full-defense.md:1
+#: internal/help/content/diplomacy/treaty-full-defense.md:8
 #, markdown-text, no-wrap
 msgid "Full Defense Alliance"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:47
+#: internal/help/content/diplomacy/treaty-full-defense.md:12
 #, markdown-text
 msgid ""
-"The strongest alliance. You commit a large part of your forces to defend an "
-"ally in need. This works only in local (single-board) games."
+"A Full Defense Alliance is the strongest alliance. You commit a large part "
+"of your forces to defend an ally in need. It works only in local "
+"(single-board)  games."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/diplomacy/treaties.md:48
+#. type: Title #
+#: internal/help/content/diplomacy/treaty-intelligence-alliance.md:1
+#: internal/help/content/diplomacy/treaty-intelligence-alliance.md:8
 #, markdown-text, no-wrap
-msgid "Declaration of War"
+msgid "Intelligence Alliance"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:52
+#: internal/help/content/diplomacy/treaty-intelligence-alliance.md:11
 #, markdown-text
 msgid ""
-"Ends an agreement without causing trouble at home. The treaty is not truly "
-"broken until the other realm is told."
+"An Intelligence Alliance means the two realms give each other covert help in "
+"operations, both at home and between planets."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/diplomacy/treaties.md:53
+#. type: Title #
+#: internal/help/content/diplomacy/treaty-protective-trade.md:1
+#: internal/help/content/diplomacy/treaty-protective-trade.md:8
 #, markdown-text, no-wrap
-msgid "View Treaties"
+msgid "Protective Trade"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:55
+#: internal/help/content/diplomacy/treaty-protective-trade.md:11
 #, markdown-text
-msgid "Shows your relations with the other rulers in the game."
+msgid ""
+"Protective Trade places guards along the trade routes. It stops enemies from "
+"bombing your trade deals, and it makes trade deals cheaper to send and to "
+"keep."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/diplomacy/treaty-tariff-trade.md:1
+#: internal/help/content/diplomacy/treaty-tariff-trade.md:8
+#, markdown-text, no-wrap
+msgid "Tariff Trade Agreement"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaty-tariff-trade.md:12
+#, markdown-text
+msgid ""
+"A Tariff Trade Agreement is trade between two realms, with a tax on goods "
+"that cross the border. Both sides earn extra income based on population. It "
+"is good if you have many people."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/diplomacy/treaty-technology-agreement.md:1
+#: internal/help/content/diplomacy/treaty-technology-agreement.md:8
+#, markdown-text, no-wrap
+msgid "Technology Agreement"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaty-technology-agreement.md:11
+#, markdown-text
+msgid ""
+"A Technology Agreement shares science between the two realms. Each side "
+"gains some of the other's technology."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:1
+#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:8
+#, markdown-text, no-wrap
+msgid "Terrorist Prevention"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:11
+#, markdown-text
+msgid ""
+"Terrorist Prevention links the two realms' intelligence agencies. They help "
+"each other find and stop covert and terrorist attacks."
 msgstr ""
 
 #. type: Title #
@@ -428,6 +678,99 @@ msgid ""
 msgstr ""
 
 #. type: Title #
+#: internal/help/content/economy/region-agricultural.md:1
+#: internal/help/content/economy/region-agricultural.md:8
+#, markdown-text, no-wrap
+msgid "Agricultural Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/region-agricultural.md:11
+#, markdown-text
+msgid ""
+"Agricultural regions grow food. They are your main source of food if you are "
+"not buying it from the market."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/region-coastal.md:1
+#: internal/help/content/economy/region-coastal.md:8
+#, markdown-text, no-wrap
+msgid "Coastal Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/region-coastal.md:12
+#, markdown-text
+msgid ""
+"Coastal regions are your best source of tourism income. In good times they "
+"make the most gold. But when public support is low, your people lose "
+"interest and tourism income drops sharply."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/region-desert.md:1
+#: internal/help/content/economy/region-desert.md:8
+#, markdown-text, no-wrap
+msgid "Desert Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/region-desert.md:11
+#, markdown-text
+msgid ""
+"Desert regions are good for solar power. Their income swings with "
+"conditions, but on average it beats mountains and trails good Coastal land."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/region-industrial.md:1
+#: internal/help/content/economy/region-industrial.md:8
+#, markdown-text, no-wrap
+msgid "Industrial Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/region-industrial.md:12
+#, markdown-text
+msgid ""
+"Industrial regions build military units each turn. In some games this is "
+"your only way to get new units. A good base of Mountain regions makes your "
+"industry produce more."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/region-mountain.md:1
+#: internal/help/content/economy/region-mountain.md:8
+#, markdown-text, no-wrap
+msgid "Mountain Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/region-mountain.md:12
+#, markdown-text
+msgid ""
+"Mountain regions mine natural resources. Their income is lower on average, "
+"but steady, because few things change it. Mountains also boost how much your "
+"Industrial regions produce."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/region-river.md:1
+#: internal/help/content/economy/region-river.md:8
+#, markdown-text, no-wrap
+msgid "River Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/region-river.md:11
+#, markdown-text
+msgid ""
+"River regions provide a steady income each turn. They do not swing with "
+"conditions, so they are a reliable base."
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/economy/regions.md:1
 #: internal/help/content/economy/regions.md:8
 #, markdown-text, no-wrap
@@ -439,116 +782,39 @@ msgstr ""
 #, markdown-text
 msgid ""
 "Land is made of regions. You buy regions from a market, and the price rises "
-"as you buy more. There are eight region types, each with a different job."
+"as you buy more. There are eight region types, each with a different "
+"job. Each type has its own topic."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/economy/regions.md:13
+#. type: Title #
+#: internal/help/content/economy/region-technology.md:1
+#: internal/help/content/economy/region-technology.md:8
 #, markdown-text, no-wrap
-msgid "Coastal"
+msgid "Technology Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/regions.md:17
+#: internal/help/content/economy/region-technology.md:12
 #, markdown-text
 msgid ""
-"Best for tourism income. In good times it makes the most gold. But with low "
-"public support, your people lose interest and tourism drops sharply."
+"Technology regions raise your efficiency. A larger share of Technology "
+"regions boosts your income and your army and lowers some upkeep. Bigger "
+"empires need more Technology regions to get the same benefit."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/economy/regions.md:18
+#. type: Title #
+#: internal/help/content/economy/region-urban.md:1
+#: internal/help/content/economy/region-urban.md:8
 #, markdown-text, no-wrap
-msgid "Mountain"
+msgid "Urban Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/regions.md:22
+#: internal/help/content/economy/region-urban.md:11
 #, markdown-text
 msgid ""
-"Mines natural resources. Income is lower on average, but steady — few things "
-"change it. Mountains also boost how much your Industrial regions produce."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/economy/regions.md:23
-#, markdown-text, no-wrap
-msgid "Desert"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/regions.md:27
-#, markdown-text
-msgid ""
-"Good for solar power. Income swings with conditions, but on average it beats "
-"mountains and trails good Coastal land."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/economy/regions.md:28
-#, markdown-text, no-wrap
-msgid "River"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/regions.md:31
-#, markdown-text
-msgid "Provides a steady river income."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/economy/regions.md:32
-#, markdown-text, no-wrap
-msgid "Agricultural"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/regions.md:35
-#, markdown-text
-msgid "Grows food. This is your main source of food if you are not buying it."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/economy/regions.md:36
-#, markdown-text, no-wrap
-msgid "Urban"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/regions.md:40
-#, markdown-text
-msgid ""
-"Home to your people. More urban regions means more people can live in your "
-"empire."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/economy/regions.md:41
-#, markdown-text, no-wrap
-msgid "Industrial"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/regions.md:45
-#, markdown-text
-msgid ""
-"Builds military each turn. In some games this is your only way to get new "
-"units.  A good base of Mountain regions makes your industry produce more."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/economy/regions.md:46
-#, markdown-text, no-wrap
-msgid "Technology"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/regions.md:50
-#, markdown-text
-msgid ""
-"Raises your efficiency. A larger share of Technology regions boosts your "
-"income and your army and lowers some upkeep. Bigger empires need more "
-"Technology to get the same benefit."
+"Urban regions are home to your people. The more urban regions you own, the "
+"more people can live in your empire."
 msgstr ""
 
 #. type: Title #
@@ -647,222 +913,42 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/military/headquarters.md:1
-#: internal/help/content/military/headquarters.md:8
+#: internal/help/content/military/agents.md:1
+#: internal/help/content/military/agents.md:8
 #, markdown-text, no-wrap
-msgid "HeadQuarters"
+msgid "Covert Agents"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/headquarters.md:12
+#: internal/help/content/military/agents.md:12
 #, markdown-text
 msgid ""
-"Your HeadQuarters is the command center of your army. It is a one-time "
-"building project that advances a little each turn until it is complete."
+"Agents are your spies. They carry out covert operations — spying, sabotage, "
+"bombing enemy targets, bribery, and more."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/headquarters.md:15
+#: internal/help/content/military/agents.md:15
 #, markdown-text
 msgid ""
-"While it is being built — and more so once it is finished — it raises how "
-"much your tanks add to both attack and defense. Enemies can bomb your "
-"HeadQuarters with covert operations to weaken your tanks."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/military/troopers.md:1
-#: internal/help/content/military/troopers.md:8
-#, markdown-text, no-wrap
-msgid "Troopers"
+"Your chance of success at a covert operation depends on how many agents you "
+"have compared to the target. More agents give you a better chance."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/troopers.md:12
+#: internal/help/content/military/agents.md:18
 #, markdown-text
 msgid ""
-"Troopers are your basic soldiers — the cheapest and weakest fighting "
-"unit. They fight on both attack and defense, with an offense of 1 and a "
-"defense of 1."
+"Keeping many agents also protects you. It lowers the chance that enemy "
+"covert operations against you succeed."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/troopers.md:16
+#: internal/help/content/military/agents.md:20
 #, markdown-text
 msgid ""
-"They are cheap to buy and cheap to keep. About seven troopers cost as much "
-"as one tank, but one tank has the strength of four troopers. Troopers are "
-"the better value early in the game, and tanks become stronger later."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/troopers.md:19
-#, markdown-text
-msgid ""
-"Troopers eat more food than any other unit, so a large trooper army needs a "
-"strong food supply."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/troopers.md:24
-#, markdown-text
-msgid ""
-"A large trooper army also discourages enemy R5-Slappenheimer strikes. The "
-"more troopers you hold, the more likely that missile is to backfire onto the "
-"empire that fired it. Troopers are a common target of enemy covert "
-"operations, which can make them desert."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/troopers.md:25
-#, markdown-text
-msgid "Buy troopers early to survive, and build more tanks as your economy grows."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/military/jets.md:1
-#: internal/help/content/military/jets.md:8
-#, markdown-text, no-wrap
-msgid "Jets"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/jets.md:13
-#, markdown-text
-msgid ""
-"Jets are an attack-only aircraft. They have an offense of 2 and a defense of "
-"0, so they add nothing to your defense. One jet is about twice as strong on "
-"attack as a trooper."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/jets.md:16
-#, markdown-text
-msgid ""
-"Jets are cheap to buy but expensive to keep, so do not buy more than you "
-"will use."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/jets.md:20
-#, markdown-text
-msgid ""
-"Jets cannot reach a battle on their own. You need carriers to carry them, "
-"and one carrier moves up to 100 jets. Without enough carriers, your jets "
-"cannot join the attack."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/jets.md:23
-#, markdown-text
-msgid ""
-"An enemy SDI shield lowers your jets' attacking strength, so jets are weaker "
-"against a well-shielded target."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/jets.md:25
-#, markdown-text
-msgid ""
-"Jets are also weak on the ground. In a normal attack the enemy's bombers "
-"destroy your grounded jets, and enemy turrets shoot down the jets that do "
-"attack."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/military/turrets.md:1
-#: internal/help/content/military/turrets.md:8
-#, markdown-text, no-wrap
-msgid "Turrets"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/turrets.md:13
-#, markdown-text
-msgid ""
-"Turrets are a defense-only unit — the defensive counterpart to jets. They "
-"have a defense of 2 and an offense of 0, which is about twice as strong on "
-"defense as a trooper."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/turrets.md:16
-#, markdown-text
-msgid ""
-"Turrets shoot down attacking jets, destroy attacking tanks, and kill "
-"attacking troops. They also help stop incoming nuclear missiles."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/turrets.md:19
-#, markdown-text
-msgid ""
-"Covert operations cannot destroy your turrets, so they form a stable core "
-"for your defense."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/turrets.md:22
-#, markdown-text
-msgid ""
-"Some strategy guides call this unit a \"Missile Base.\" It is the same "
-"defensive unit."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/turrets.md:24
-#, markdown-text
-msgid ""
-"Build turrets to defend your regions, and pair them with troopers and tanks "
-"so you can both defend and attack."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/military/tanks.md:1
-#: internal/help/content/military/tanks.md:8
-#, markdown-text, no-wrap
-msgid "Tanks"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/tanks.md:13
-#, markdown-text
-msgid ""
-"Tanks are the strongest general-purpose unit, powerful on both attack and "
-"defense. They have an offense of 4 and a defense of 4 — the strength of four "
-"troopers in a single unit."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/tanks.md:16
-#, markdown-text
-msgid ""
-"They cost a lot to buy but little to keep. A tank army is expensive to build "
-"and cheap to maintain, so over a long game tanks are the most efficient "
-"force."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/tanks.md:20
-#, markdown-text
-msgid ""
-"A strong HeadQuarters and high military morale make your tanks even more "
-"effective, so keep both high. Enemies will bomb your HeadQuarters to weaken "
-"your tanks."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/tanks.md:22
-#, markdown-text
-msgid "Tanks also help defend your empire against chemical missile attacks."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/tanks.md:24
-#, markdown-text
-msgid ""
-"Grow your economy first, and then turn your gold into tanks for a force that "
-"wins both attacks and defenses."
+"Agents do not fight in normal battles. Build a network of them if you plan "
+"to fight a secret war. See the Covert Operations topic for what they can do."
 msgstr ""
 
 #. type: Title #
@@ -944,42 +1030,285 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/military/agents.md:1
-#: internal/help/content/military/agents.md:8
+#: internal/help/content/military/headquarters.md:1
+#: internal/help/content/military/headquarters.md:8
 #, markdown-text, no-wrap
-msgid "Covert Agents"
+msgid "HeadQuarters"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/agents.md:12
+#: internal/help/content/military/headquarters.md:12
 #, markdown-text
 msgid ""
-"Agents are your spies. They carry out covert operations — spying, sabotage, "
-"bombing enemy targets, bribery, and more."
+"Your HeadQuarters is the command center of your army. It is a one-time "
+"building project that advances a little each turn until it is complete."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/agents.md:15
+#: internal/help/content/military/headquarters.md:15
 #, markdown-text
 msgid ""
-"Your chance of success at a covert operation depends on how many agents you "
-"have compared to the target. More agents give you a better chance."
+"While it is being built — and more so once it is finished — it raises how "
+"much your tanks add to both attack and defense. Enemies can bomb your "
+"HeadQuarters with covert operations to weaken your tanks."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/jets.md:1
+#: internal/help/content/military/jets.md:8
+#, markdown-text, no-wrap
+msgid "Jets"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/agents.md:18
+#: internal/help/content/military/jets.md:13
 #, markdown-text
 msgid ""
-"Keeping many agents also protects you. It lowers the chance that enemy "
-"covert operations against you succeed."
+"Jets are an attack-only aircraft. They have an offense of 2 and a defense of "
+"0, so they add nothing to your defense. One jet is about twice as strong on "
+"attack as a trooper."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/agents.md:20
+#: internal/help/content/military/jets.md:16
 #, markdown-text
 msgid ""
-"Agents do not fight in normal battles. Build a network of them if you plan "
-"to fight a secret war. See the Covert Operations topic for what they can do."
+"Jets are cheap to buy but expensive to keep, so do not buy more than you "
+"will use."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/jets.md:20
+#, markdown-text
+msgid ""
+"Jets cannot reach a battle on their own. You need carriers to carry them, "
+"and one carrier moves up to 100 jets. Without enough carriers, your jets "
+"cannot join the attack."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/jets.md:23
+#, markdown-text
+msgid ""
+"An enemy SDI shield lowers your jets' attacking strength, so jets are weaker "
+"against a well-shielded target."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/jets.md:25
+#, markdown-text
+msgid ""
+"Jets are also weak on the ground. In a normal attack the enemy's bombers "
+"destroy your grounded jets, and enemy turrets shoot down the jets that do "
+"attack."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/tanks.md:1
+#: internal/help/content/military/tanks.md:8
+#, markdown-text, no-wrap
+msgid "Tanks"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/tanks.md:13
+#, markdown-text
+msgid ""
+"Tanks are the strongest general-purpose unit, powerful on both attack and "
+"defense. They have an offense of 4 and a defense of 4 — the strength of four "
+"troopers in a single unit."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/tanks.md:16
+#, markdown-text
+msgid ""
+"They cost a lot to buy but little to keep. A tank army is expensive to build "
+"and cheap to maintain, so over a long game tanks are the most efficient "
+"force."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/tanks.md:20
+#, markdown-text
+msgid ""
+"A strong HeadQuarters and high military morale make your tanks even more "
+"effective, so keep both high. Enemies will bomb your HeadQuarters to weaken "
+"your tanks."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/tanks.md:22
+#, markdown-text
+msgid "Tanks also help defend your empire against chemical missile attacks."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/tanks.md:24
+#, markdown-text
+msgid ""
+"Grow your economy first, and then turn your gold into tanks for a force that "
+"wins both attacks and defenses."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/troopers.md:1
+#: internal/help/content/military/troopers.md:8
+#, markdown-text, no-wrap
+msgid "Troopers"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/troopers.md:12
+#, markdown-text
+msgid ""
+"Troopers are your basic soldiers — the cheapest and weakest fighting "
+"unit. They fight on both attack and defense, with an offense of 1 and a "
+"defense of 1."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/troopers.md:16
+#, markdown-text
+msgid ""
+"They are cheap to buy and cheap to keep. About seven troopers cost as much "
+"as one tank, but one tank has the strength of four troopers. Troopers are "
+"the better value early in the game, and tanks become stronger later."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/troopers.md:19
+#, markdown-text
+msgid ""
+"Troopers eat more food than any other unit, so a large trooper army needs a "
+"strong food supply."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/troopers.md:24
+#, markdown-text
+msgid ""
+"A large trooper army also discourages enemy R5-Slappenheimer strikes. The "
+"more troopers you hold, the more likely that missile is to backfire onto the "
+"empire that fired it. Troopers are a common target of enemy covert "
+"operations, which can make them desert."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/troopers.md:25
+#, markdown-text
+msgid "Buy troopers early to survive, and build more tanks as your economy grows."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/military/turrets.md:1
+#: internal/help/content/military/turrets.md:8
+#, markdown-text, no-wrap
+msgid "Turrets"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/turrets.md:13
+#, markdown-text
+msgid ""
+"Turrets are a defense-only unit — the defensive counterpart to jets. They "
+"have a defense of 2 and an offense of 0, which is about twice as strong on "
+"defense as a trooper."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/turrets.md:16
+#, markdown-text
+msgid ""
+"Turrets shoot down attacking jets, destroy attacking tanks, and kill "
+"attacking troops. They also help stop incoming nuclear missiles."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/turrets.md:19
+#, markdown-text
+msgid ""
+"Covert operations cannot destroy your turrets, so they form a stable core "
+"for your defense."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/turrets.md:22
+#, markdown-text
+msgid ""
+"Some strategy guides call this unit a \"Missile Base.\" It is the same "
+"defensive unit."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/turrets.md:24
+#, markdown-text
+msgid ""
+"Build turrets to defend your regions, and pair them with troopers and tanks "
+"so you can both defend and attack."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/warfare/attack-biological.md:1
+#: internal/help/content/warfare/attack-biological.md:8
+#, markdown-text, no-wrap
+msgid "Biological Attack"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-biological.md:10
+#, markdown-text
+msgid ""
+"A Biological Attack harms the enemy's people and troopers, but not their "
+"land."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/warfare/attack-chemical.md:1
+#: internal/help/content/warfare/attack-chemical.md:8
+#, markdown-text, no-wrap
+msgid "Chemical Attack"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-chemical.md:11
+#, markdown-text
+msgid ""
+"A Chemical Attack kills many of the enemy's people and troopers, but harms "
+"fewer regions. Enemy tanks help defend against it."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/warfare/attack-nuclear.md:1
+#: internal/help/content/warfare/attack-nuclear.md:8
+#, markdown-text, no-wrap
+msgid "Nuclear Attack"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-nuclear.md:12
+#, markdown-text
+msgid ""
+"A Nuclear Attack turns some of the enemy's regions into waste. It costs a "
+"lot, and the cost grows with the size of the target. Large numbers of enemy "
+"turrets can shoot down some of the missiles."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/warfare/attack-regular.md:1
+#: internal/help/content/warfare/attack-regular.md:8
+#, markdown-text, no-wrap
+msgid "Regular Attack"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-regular.md:13
+#, markdown-text
+msgid ""
+"A Regular Attack is a direct assault with your army. Your attack strength is "
+"compared to the enemy's defense. If you win, you capture some of their "
+"regions and take some gold. Your bombers first destroy the enemy jets that "
+"are on the ground."
 msgstr ""
 
 #. type: Title #
@@ -992,206 +1321,27 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/warfare/attacks.md:11
 #, markdown-text
-msgid "You can strike other empires in several ways."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/warfare/attacks.md:12
-#, markdown-text, no-wrap
-msgid "Regular Attack"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/warfare/attacks.md:17
-#, markdown-text
 msgid ""
-"A direct assault with your army. Your attack strength is compared to the "
-"enemy's defense. If you win, you capture some of their regions and take some "
-"gold. Your bombers first destroy the enemy jets that are on the ground."
+"You can strike other empires in several ways, from a direct assault with "
+"your army to missiles and planet-wide weapons. Each kind of attack has its "
+"own topic."
 msgstr ""
 
-#. type: Title ##
-#: internal/help/content/warfare/attacks.md:18
-#, markdown-text, no-wrap
-msgid "Nuclear Attack"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/warfare/attacks.md:23
-#, markdown-text
-msgid ""
-"Turns some of the enemy's regions into waste. It costs a lot, and the cost "
-"grows with the size of the target. Large numbers of enemy turrets can shoot "
-"down some of the missiles."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/warfare/attacks.md:24
-#, markdown-text, no-wrap
-msgid "Chemical Attack"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/warfare/attacks.md:28
-#, markdown-text
-msgid ""
-"Kills many of the enemy's people and troopers, but harms fewer "
-"regions. Enemy tanks help defend against it."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/warfare/attacks.md:29
-#, markdown-text, no-wrap
-msgid "Biological Attack"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/warfare/attacks.md:32
-#, markdown-text
-msgid "Harms the enemy's people and troopers, but not their land."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/warfare/attacks.md:33
+#. type: Title #
+#: internal/help/content/warfare/doomer-kaboomer.md:1
+#: internal/help/content/warfare/doomer-kaboomer.md:8
 #, markdown-text, no-wrap
 msgid "Doomer Kaboomer"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attacks.md:39
+#: internal/help/content/warfare/doomer-kaboomer.md:13
 #, markdown-text
 msgid ""
-"The ultimate weapon, aimed at a whole enemy planet rather than one "
-"empire. The whole board funds it, and only one can exist at a time. It takes "
-"a few days to build, then strikes every empire on the target "
-"planet. Defenders can send jets to shoot it down before it finishes."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/warfare/attacks.md:40
-#, markdown-text, no-wrap
-msgid "SDI Program"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/warfare/attacks.md:44
-#, markdown-text
-msgid ""
-"A shield you fund. When it is complete, it destroys about half of the "
-"missiles fired at you and cuts attacking jets' strength by about a "
-"quarter. Technology regions lower its upkeep."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/warfare/covert.md:1
-#: internal/help/content/warfare/covert.md:8
-#, markdown-text, no-wrap
-msgid "Covert Operations"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/warfare/covert.md:13
-#, markdown-text
-msgid ""
-"Covert operations are secret missions run by your agents. Success depends on "
-"how many agents you have compared to the target. More agents means a better "
-"chance.  Keeping many agents also defends you against enemy covert "
-"operations."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/warfare/covert.md:15
-#, markdown-text
-msgid "Common operations:"
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:38
-#, markdown-text
-msgid "Send Spy — read the enemy's defensive strength."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:38
-#, markdown-text
-msgid "Spy on Relations — reveal all of the enemy's treaties (useful before a war)."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:38
-#, markdown-text
-msgid ""
-"Special Operations — sabotage the enemy army, destroying a share of their "
-"troopers."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:38
-#, markdown-text
-msgid ""
-"Bomb Intelligence — kill enemy agents, so your later missions land more "
-"easily. Use this one first."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:38
-#, markdown-text
-msgid ""
-"Stir Revolts — spread propaganda that lowers the enemy's public support, "
-"which weakens their troopers and their economy."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:38
-#, markdown-text
-msgid "Bomb Airbases — destroy enemy jets that are on the ground."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:38
-#, markdown-text
-msgid "Bomb Food Stores — destroy much of the enemy's food reserve."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:38
-#, markdown-text
-msgid ""
-"Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less "
-"effective."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:38
-#, markdown-text
-msgid ""
-"R5-Slappenheimer — an unreliable weapon of mass destruction. Before you "
-"fire, you set a dial from 0 to 10, but the dial is for show and changes "
-"nothing, so pick any number you like. The missile is a gamble every "
-"time. Most launches do nothing: it misses, it malfunctions, or the enemy's "
-"SDI shoots it down.  When one does get through, it destroys part of one of "
-"the enemy's assets — troops, jets, tanks, turrets, bombers, carriers, "
-"agents, gold, food, or regions — and sometimes it wrecks several of these at "
-"once, which can be devastating. It can also backfire: if the enemy keeps a "
-"very large trooper army, the missile may turn back and strike your own "
-"empire instead."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/warfare/covert.md:38
-#, markdown-text
-msgid ""
-"Bribery — pay one of the enemy's own agents to work for you. From then on, "
-"that enemy's covert operations against you fail."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/warfare/covert.md:40
-#, markdown-text
-msgid ""
-"An Intelligence Alliance adds half of an ally's agents to your covert "
-"strength.  A Terrorist Prevention treaty adds half an ally's agents to your "
-"defense."
+"The Doomer Kaboomer is the ultimate weapon, aimed at a whole enemy planet "
+"rather than one empire. The whole board funds it, and only one can exist at "
+"a time. It takes a few days to build, then strikes every empire on the "
+"target planet.  Defenders can send jets to shoot it down before it finishes."
 msgstr ""
 
 #. type: Title #
@@ -1243,4 +1393,20 @@ msgstr ""
 #: internal/help/content/warfare/pirates.md:25
 #, markdown-text
 msgid "Tip: military parked in the Trading Market is safe from pirate raids."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/warfare/sdi.md:1
+#: internal/help/content/warfare/sdi.md:8
+#, markdown-text, no-wrap
+msgid "SDI Program"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:12
+#, markdown-text
+msgid ""
+"The SDI Program is a shield you fund. When it is complete, it destroys about "
+"half of the missiles fired at you and cuts attacking jets' strength by about "
+"a quarter. Technology regions lower its upkeep."
 msgstr ""

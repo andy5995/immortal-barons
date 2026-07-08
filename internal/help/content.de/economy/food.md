@@ -1,7 +1,7 @@
 ---
 category: economy
 in_game: true
-order: 3
+order: 11
 title: 'Nahrungsmarkt und Verderb'
 ---
 

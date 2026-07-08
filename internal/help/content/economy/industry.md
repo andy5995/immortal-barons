@@ -1,7 +1,7 @@
 ---
 title: Industry
 category: economy
-order: 6
+order: 14
 in_game: true
 ---
 

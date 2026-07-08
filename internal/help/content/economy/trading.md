@@ -1,7 +1,7 @@
 ---
 title: Trading
 category: economy
-order: 7
+order: 15
 in_game: true
 ---
 

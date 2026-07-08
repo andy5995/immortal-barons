@@ -1,7 +1,7 @@
 ---
 category: economy
 in_game: true
-order: 2
+order: 10
 title: Bankwesen
 ---
 

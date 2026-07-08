@@ -1,7 +1,7 @@
 ---
 category: economy
 in_game: true
-order: 6
+order: 14
 title: Промышленность
 ---
 

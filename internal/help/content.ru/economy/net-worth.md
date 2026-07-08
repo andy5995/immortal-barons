@@ -1,7 +1,7 @@
 ---
 category: economy
 in_game: true
-order: 5
+order: 13
 title: Состояние
 ---
 

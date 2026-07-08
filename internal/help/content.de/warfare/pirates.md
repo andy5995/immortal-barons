@@ -1,7 +1,7 @@
 ---
 category: warfare
 in_game: true
-order: 3
+order: 9
 title: Piraten
 ---
 

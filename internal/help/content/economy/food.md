@@ -1,7 +1,7 @@
 ---
 title: Food Market and Spoilage
 category: economy
-order: 3
+order: 11
 in_game: true
 ---
 

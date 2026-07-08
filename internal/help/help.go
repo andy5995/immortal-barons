@@ -42,7 +42,7 @@ type Topic struct {
 // categoryOrder fixes the display order of the known categories; any category
 // not listed here sorts after these, alphabetically. Matches the spec's set.
 var categoryOrder = []string{
-	"controls", "military", "economy", "warfare", "diplomacy", "interbbs",
+	"controls", "military", "economy", "warfare", "covert", "diplomacy", "interbbs",
 }
 
 // CategoryOrder returns the fixed display order of the known category slugs, so
@@ -57,6 +57,7 @@ var categoryNames = map[string]string{
 	"military":  "Military",
 	"economy":   "Economy",
 	"warfare":   "Warfare",
+	"covert":    "Covert Operations",
 	"diplomacy": "Diplomacy",
 	"interbbs":  "Inter-BBS",
 }

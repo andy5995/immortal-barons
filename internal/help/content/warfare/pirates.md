@@ -1,7 +1,7 @@
 ---
 title: Pirates
 category: warfare
-order: 3
+order: 9
 in_game: true
 ---
 

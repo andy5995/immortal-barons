@@ -1,7 +1,7 @@
 ---
 title: Net Worth
 category: economy
-order: 5
+order: 13
 in_game: true
 ---
 

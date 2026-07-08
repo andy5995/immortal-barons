@@ -1,7 +1,7 @@
 ---
 title: Banking
 category: economy
-order: 2
+order: 10
 in_game: true
 ---
 

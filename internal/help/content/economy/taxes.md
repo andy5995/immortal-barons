@@ -1,7 +1,7 @@
 ---
 title: Taxes, Support, and Riots
 category: economy
-order: 4
+order: 12
 in_game: true
 ---
 

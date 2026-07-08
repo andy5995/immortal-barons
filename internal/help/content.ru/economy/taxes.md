@@ -1,7 +1,7 @@
 ---
 category: economy
 in_game: true
-order: 4
+order: 12
 title: 'Налоги, поддержка и бунты'
 ---
 

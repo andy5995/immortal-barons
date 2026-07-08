@@ -1,7 +1,7 @@
 ---
 category: economy
 in_game: true
-order: 7
+order: 15
 title: Торговля
 ---
 

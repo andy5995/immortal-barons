@@ -7,50 +7,10 @@ title: 'Verträge und Bündnisse'
 
 # Verträge und Bündnisse
 
-Sie können anderen Herrschern Abkommen anbieten. Ein Vertrag beginnt, wenn
-die andere Seite ihn annimmt. Dies sind die Arten.
+Treaties are agreements you send to other rulers. A treaty starts only when
+the other side accepts it. Each treaty type has its own topic.
 
-## Zoll-Handelsabkommen
-
-Handel zwischen zwei Reichen, mit einer Abgabe auf Waren, die die Grenze
-überqueren. Beide Seiten verdienen zusätzlich, je nach Größe des Handels.
-
-## Geschützter Handel
-
-Wachen entlang der Handelswege. Das hindert Feinde daran, Ihre
-Handelsgeschäfte zu bombardieren, und macht Handelsgeschäfte sicherer.
-
-## Freihandelsabkommen
-
-Menschen und Waren bewegen sich frei, ohne Grenzabgabe. Sie verdienen viel
-an Einkommensteuern. Aber die Vermischung der Völker kann die Stimmung in
-anderen Reichen trüben.
-
-## Terrorabwehr
-
-Die Geheimdienste beider Reiche helfen einander, verdeckte und
-terroristische Angriffe zu finden und zu verhindern.
-
-## Geheimdienstbündnis
-
-Die beiden Reiche leisten einander verdeckte Hilfe bei Operationen, sowohl
-daheim als auch zwischen Planeten.
-
-## Technologieabkommen
-
-Die beiden Reiche teilen ihre Wissenschaft. Jede Seite gewinnt einen Teil
-der Technologie der anderen.
-
-## Volles Verteidigungsbündnis
-
-Das stärkste Bündnis. Sie verpflichten einen großen Teil Ihrer Streitkräfte
-zur Verteidigung eines Verbündeten in Not. Dies gilt in beide Richtungen.
-
-## Kriegserklärung
-
-Beendet ein Abkommen, ohne daheim Unruhe zu stiften. Der Vertrag ist erst
-wirklich gebrochen, wenn das andere Reich reagiert.
-
-## Verträge ansehen
-
-Zeigt Ihre Beziehungen zu den anderen Herrschern im Spiel.
+Two related actions also live on the Diplomacy menu. A Declaration of War
+ends an agreement without causing trouble at home; the treaty is not truly
+broken until the other realm is told. View Treaties shows your current
+relations with the other rulers in the game.
