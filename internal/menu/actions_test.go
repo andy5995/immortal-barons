@@ -31,7 +31,9 @@ func TestEmpireStatusShowsTechnologyBonus(t *testing.T) {
 	}
 }
 
-func TestEmpireStatusNoTechnologyBonusWhenZero(t *testing.T) {
+// The status screen now always shows every field (fixed template layout), so
+// with no Technology regions the bonus line is still present, reading +0%.
+func TestEmpireStatusTechnologyBonusZeroShown(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
 	p.Land = 100
@@ -40,8 +42,8 @@ func TestEmpireStatusNoTechnologyBonusWhenZero(t *testing.T) {
 	f := &fakeSession{}
 	renderEmpireStatus(f, w)
 	out := f.out.String()
-	if strings.Contains(out, "Technology Bonus") {
-		t.Errorf("did not expect Technology Bonus line with 0 Technology regions; output:\n%s", out)
+	if !strings.Contains(out, "Technology Bonus") {
+		t.Errorf("expected the Technology Bonus line to always show; output:\n%s", out)
 	}
 }
 

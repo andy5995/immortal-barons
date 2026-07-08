@@ -315,23 +315,6 @@ func TestRenderDailyBulletinNoTitle(t *testing.T) {
 	}
 }
 
-func TestWriteStatTableDarkZebraColors(t *testing.T) {
-	f := &fakeSession{}
-	cols := []statCol{{name: "Money", val: 1234}, {name: "Regions", val: 5}}
-	writeStatTable(f, "Overview", cols, 0, uniformWidth(cols))
-	out := f.out.String()
-
-	if !strings.Contains(out, ansi.BgHeader+ansi.FgBrightWhite) {
-		t.Error("expected the header row to use BgHeader + FgBrightWhite")
-	}
-	if !strings.Contains(out, ansi.BgRow+ansi.FgBrightWhite) {
-		t.Error("expected the value row to use BgRow + FgBrightWhite")
-	}
-	if strings.Contains(out, ansi.FgBlack) {
-		t.Error("expected no black foreground text in a dark-scheme table")
-	}
-}
-
 func TestShowBulletinTodayVsYesterday(t *testing.T) {
 	w := newWorld()
 	w.BulletinToday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 111}}

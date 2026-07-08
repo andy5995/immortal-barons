@@ -881,67 +881,6 @@ func doomerKaboomer(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// renderEmpireStatus prints the BRE-style status screen with NO pause, so the
-// turn pipeline can append the maintenance results below it and pause once —
-// otherwise the maintenance line prints after the pause and the next menu's
-// clear-screen wipes it before the player sees it.
-func renderEmpireStatus(s session.Session, w *ctx) {
-	// Snapshot the empire and its net worth together so the screen shows one
-	// consistent moment, even if another session mutates the world mid-render.
-	var snap game.Empire
-	var netWorth int
-	w.With(func() {
-		snap = *w.Player()
-		netWorth = w.NetWorth(w.Player())
-	})
-	p := &snap
-	c, wht, r := ansi.FgBrightCyan, ansi.FgWhite, ansi.Reset
-	num := func(n int) string { return c + comma(n) + r }
-	pct := func(n int) string { return fmt.Sprintf("%s%d%%%s", c, n, r) }
-	kv := func(label, value string) { fmt.Fprintf(s, "%s%s:%s %s\n", wht, tr(s, label), r, value) }
-
-	titleBar(s, tr(s, "Empire Status")+": "+p.Name)
-
-	top := []statCol{
-		{"Turns", p.TurnsLeft}, {"Score", netWorth}, {"Gold", p.Gold},
-		{"Bank", p.Bank}, {"Food", p.Food},
-	}
-	if p.Debt > 0 {
-		top = append(top, statCol{"Debt", p.Debt})
-	}
-	writeStatTable(s, "", top, 0, uniformWidth(top))
-
-	fmt.Fprintf(s, "%s%s:%s %s %s(%s: %s)%s\n", wht, tr(s, "Population"), r, num(p.People), wht, tr(s, "Tax Rate"), pct(p.Tax), r)
-	kv("Popular Support", pct(p.Support))
-	kv("Military Morale", pct(p.Morale))
-	fmt.Fprintf(s, "%s%s:%s %s%s%s\n", wht, tr(s, "Headquarters"), r, c, tr(s, hqStatus(p)), r)
-	if p.SDI > 0 {
-		kv("SDI", pct(p.SDI))
-	}
-	fmt.Fprintf(s, "%s%s:%s %s   %s%s:%s %s\n", wht, tr(s, "Offense"), r, num(p.Offense()), wht, tr(s, "Defense"), r, num(p.Defense()))
-
-	milCols := []statCol{
-		{"Troopers", p.Troopers}, {"Jets", p.Jets}, {"Turrets", p.Turrets}, {"Tanks", p.Tanks},
-		{"Bombers", p.Bombers}, {"Carriers", p.Carriers}, {"Agents", p.Agents},
-	}
-	writeStatTable(s, tr(s, "Military"), milCols, 0, uniformWidth(milCols))
-	regionCols := make([]statCol, len(regionTypeNames))
-	for i, name := range regionTypeNames {
-		regionCols[i] = statCol{name, *regionField(p, i)}
-	}
-	writeStatTable(s, tr(s, "Regions"), regionCols, 4, uniformWidth(regionCols))
-
-	if tf := p.TechFactor(); tf > 0 {
-		fmt.Fprintf(s, "%s%s:%s +%s %s%s%s\n", wht, tr(s, "Technology Bonus"), r, pct(tf),
-			wht, tr(s, "to income, upkeep, and combat strength"), r)
-	}
-
-	if p.Protection > 0 {
-		fmt.Fprintf(s, "%s"+tr(s, "You have %s%s turns of Protection Left.")+"%s\n", wht, num(p.Protection), wht, r)
-	}
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBlue, rule, r)
-}
-
 // renderDailyBulletin draws the boxed Daily Bulletin header: planet-wide
 // totals with day-over-day change, colored green/red/neutral for +/-/0.
 // title is Config.BoardID, or "" to show just "Daily Bulletin".
@@ -985,83 +924,16 @@ func titleBar(s session.Session, text string) {
 	fmt.Fprintf(s, "\n%s%s%s%s\n", ansi.BgBlue, ansi.FgBrightWhite, bar, ansi.Reset)
 }
 
-// statCol is one column of a stat table: a heading and its value.
-type statCol struct {
-	name string
-	val  int
-}
-
-// uniformWidth is the widest cell (heading or value) in cols, so a table can
-// give every cell that width and line its columns up.
-func uniformWidth(cols []statCol) int {
-	m := 0
-	for _, cd := range cols {
-		w := len(cd.name)
-		if v := len(comma(cd.val)); v > w {
-			w = v
-		}
-		if w > m {
-			m = w
-		}
-	}
-	return m
-}
-
-// writeStatTable prints title, then the columns as zebra-striped rows. maxCols
-// caps how many columns share a row (0 = pack as many as fit 80 columns); a
-// group that would overflow the width also wraps regardless.
-func writeStatTable(s session.Session, title string, cols []statCol, maxCols, fixedW int) {
-	if title != "" {
-		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, title, ansi.Reset)
-	}
-	const maxWidth = 78 // leaves room for the 2-space indent within 80 columns
-	// fixedW > 0 forces every cell to that width so all tables' columns line up
-	// on one grid; 0 falls back to each column's natural width.
-	cellW := func(cd statCol) int {
-		if fixedW > 0 {
-			return fixedW
-		}
-		w := len(cd.name)
-		if v := len(comma(cd.val)); v > w {
-			w = v
-		}
-		return w
-	}
-	for i := 0; i < len(cols); {
-		var group []statCol
-		width := 1 // leading border
-		for i < len(cols) {
-			if maxCols > 0 && len(group) >= maxCols {
-				break
-			}
-			w := cellW(cols[i]) + 3 // " " + content + " │"
-			if len(group) > 0 && width+w > maxWidth {
-				break
-			}
-			group = append(group, cols[i])
-			width += w
-			i++
-		}
-		var hdr, vals strings.Builder
-		hdr.WriteString("│")
-		vals.WriteString("│")
-		for _, cd := range group {
-			w := cellW(cd)
-			fmt.Fprintf(&hdr, " %*s │", w, cd.name)
-			fmt.Fprintf(&vals, " %*s │", w, comma(cd.val))
-		}
-		// Zebra rows: heading on a dark accent gray, values on a darker gray,
-		// white text. A dark-gray cell past the right border is the raised
-		// panel's right-edge shadow.
-		shadow := ansi.BgShadow + " " + ansi.Reset
-		fmt.Fprintf(s, "  %s%s%s%s%s\n", ansi.BgHeader, ansi.FgBrightWhite, hdr.String(), ansi.Reset, shadow)
-		fmt.Fprintf(s, "  %s%s%s%s%s\n", ansi.BgRow, ansi.FgBrightWhite, vals.String(), ansi.Reset, shadow)
-	}
-}
-
-// empireStatus is the standalone status action (System menu): render + pause.
+// empireStatus is the standalone status action (System menu): page through the
+// Empire Status screens, pausing on each so a wide screen is not scrolled past.
 func empireStatus(s session.Session, w *ctx) Result {
-	renderEmpireStatus(s, w)
+	fields, translate := empireStatusFields(s, w)
+	for i, name := range empireStatusPages {
+		if i > 0 {
+			pause(s)
+		}
+		renderScreenPage(s, name, fields, translate)
+	}
 	pause(s)
 	return Stay
 }

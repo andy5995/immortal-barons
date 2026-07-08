@@ -1,0 +1,81 @@
+package menu
+
+import (
+	"embed"
+	"fmt"
+	"strings"
+
+	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/screen"
+	"github.com/andy5995/immortal-barons/internal/session"
+)
+
+// The Empire Status is drawn from two artist-editable ANSI templates (CP437
+// .ans, what PabloDraw/TheDraw produce). The templates own the layout and
+// colors; the program fills their {label}/[value] tokens at display time (see
+// internal/screen), so the screen can be reskinned without touching Go.
+//
+//go:embed screens/empire-status-1.ans screens/empire-status-2.ans
+var empireStatusFS embed.FS
+
+// empireStatusFields snapshots the player's empire together with its net worth
+// (one consistent moment, even if another session mutates the world mid-render)
+// and returns the value for each field token plus the translator for the label
+// tokens. Values are plain strings; their colors come from the template.
+func empireStatusFields(s session.Session, w *ctx) (map[string]string, func(string) string) {
+	var p game.Empire
+	var netWorth int
+	w.With(func() {
+		p = *w.Player()
+		netWorth = w.NetWorth(w.Player())
+	})
+	pct := func(n int) string { return fmt.Sprintf("%d%%", n) }
+	f := map[string]string{
+		"name":       p.Name,
+		"turns":      comma(p.TurnsLeft),
+		"score":      comma(netWorth),
+		"gold":       comma(p.Gold),
+		"bank":       comma(p.Bank),
+		"food":       comma(p.Food),
+		"debt":       comma(p.Debt),
+		"population": comma(p.People),
+		"tax":        pct(p.Tax),
+		"support":    pct(p.Support),
+		"morale":     pct(p.Morale),
+		"sdi":        pct(p.SDI),
+		"hq":         tr(s, hqStatus(&p)),
+		"offense":    comma(p.Offense()),
+		"defense":    comma(p.Defense()),
+		"troopers":   comma(p.Troopers),
+		"jets":       comma(p.Jets),
+		"turrets":    comma(p.Turrets),
+		"tanks":      comma(p.Tanks),
+		"bombers":    comma(p.Bombers),
+		"carriers":   comma(p.Carriers),
+		"agents":     comma(p.Agents),
+		"techbonus":  "+" + pct(p.TechFactor()),
+		"protection": comma(p.Protection),
+	}
+	for i, name := range regionTypeNames {
+		f[strings.ToLower(name)] = comma(*regionField(&p, i))
+	}
+	return f, func(id string) string { return tr(s, id) }
+}
+
+// empireStatusPages are the template files, in display order.
+var empireStatusPages = []string{"screens/empire-status-1.ans", "screens/empire-status-2.ans"}
+
+// renderEmpireStatus draws the Empire Status pages back to back with NO pause,
+// for inline use in the turn summary where the caller pauses once for the whole
+// screen. The standalone menu action (empireStatus) pages through them instead.
+func renderEmpireStatus(s session.Session, w *ctx) {
+	fields, translate := empireStatusFields(s, w)
+	for _, name := range empireStatusPages {
+		renderScreenPage(s, name, fields, translate)
+	}
+}
+
+func renderScreenPage(s session.Session, name string, fields map[string]string, translate func(string) string) {
+	tpl, _ := empireStatusFS.ReadFile(name)
+	fmt.Fprint(s, screen.Render(tpl, fields, translate))
+}
