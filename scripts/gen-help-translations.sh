@@ -21,11 +21,11 @@ cd "$(dirname "$(readlink -f "$0")")/.."
 # checkout or a prior run) and leaves the catalogs stale.
 po4a --force po4a.cfg
 
-# Step 2: write the translated markdown from the catalogs.
-langs=(de ru)
-for lang in "${langs[@]}"; do
-  po="po/help/$lang.po"
-  [ -f "$po" ] || continue
+# Step 2: write the translated markdown from the catalogs. The languages are
+# whichever catalogs po4a just refreshed under po/help/ (driven by po4a.cfg), so
+# a new language needs no edit here.
+for po in po/help/*.po; do
+  lang="$(basename "$po" .po)"
   while IFS= read -r f; do
     rel="${f#internal/help/content/}"
     out="internal/help/content.$lang/$rel"

@@ -96,43 +96,36 @@ translated Markdown. Changed English is marked for review.
 
 ## Add a new language
 
-Adding a language means creating its catalogs and listing its code in a few
-places. Use the two-letter language code (for example `es` for Spanish).
+Register the language in one place, then create and translate its two catalogs.
+Use the two-letter language code (for example `es` for Spanish). Everything else
+picks the language up on its own: the in-game menu, the website, and the refresh
+scripts all read the language set from the list below and from the catalog files
+on disk.
 
-**Interface:**
+1. Add one line to `Languages` in `internal/i18n/languages.go`:
 
-1. Create the catalog from the template:
+   ```go
+   {Code: "<code>", Name: "<endonym>"},
+   ```
+
+   The endonym is the language's name in its own tongue (for example
+   "Español"). This is what makes the game and the website offer the language.
+
+2. Create the **interface** catalog from the template:
 
    ```
    msginit -i po/ui/immortal-barons.pot -l <code> -o internal/i18n/locale/<code>.po --no-translator
    ```
 
-   Run from `po/ui/` you can omit `-i` — msginit finds the template in the
-   current directory on its own.
+   (Run from `po/ui/` you can omit `-i` — msginit finds the template on its own.)
 
-2. Add `<code>` to the `langs=(...)` list in `scripts/merge-ui-po.sh`.
-
-**Help pages:**
-
-3. Add `<code>:po/help/<code>.po` to the `[po4a_paths]` line in `po4a.cfg`.
-4. Add `<code>` to the `langs=(...)` list in `scripts/gen-help-translations.sh`.
-5. Run `scripts/gen-help-translations.sh` to create `po/help/<code>.po`.
-
-**Offer the language in the game and on the website:**
-
-6. Add `{"<code>", "<native name>"}` to `helpLanguages` in
-   `internal/menu/helpbrowse.go`. This is the in-game language menu.
-7. Add the code to the language lists in `internal/docsite/assemble.go` and
-   `internal/docsite/links.go`, so the website builds the translated pages.
+3. Create the **help** catalog: add `<code>:po/help/<code>.po` to the
+   `[po4a_paths]` line in `po4a.cfg`, then run `scripts/gen-help-translations.sh`.
+   It creates `po/help/<code>.po` and the translated pages.
 
 Then translate the two new `.po` files as described above.
-
-> The language code has to be listed in several files today. If you add a
-> language and are unsure, open an issue or a draft pull request and ask — a
-> maintainer can help wire it in.
 
 ## Send your work
 
 Open a pull request with the changed `.po` files. For help pages, also include
-the regenerated files under `internal/help/content.<lang>/`. If you prefer, send
-the `.po` files to the maintainer and they will include them.
+the regenerated files under `internal/help/content.<lang>/`.

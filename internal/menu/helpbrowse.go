@@ -5,6 +5,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/help"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -27,15 +28,18 @@ func helpBrowse(s session.Session, w *ctx) Result {
 	}
 }
 
-// helpLanguages are the languages the UI/help can render, in menu order. "" is
-// English (the canonical source); the rest have translations. Names are shown
-// as endonyms (each language in its own tongue), the standard for a language
-// picker, so they read the same regardless of the current UI language.
-var helpLanguages = []struct{ code, name string }{
-	{"", "English"},
-	{"de", "Deutsch"},
-	{"ru", "Русский"},
-}
+// helpLanguages are the languages the UI/help can render, in menu order: English
+// (the canonical source, code "") followed by every translated language from the
+// single source of truth in i18n.Languages. Endonyms (each language in its own
+// tongue) read the same regardless of the current UI language, the standard for
+// a language picker.
+var helpLanguages = func() []struct{ code, name string } {
+	ls := []struct{ code, name string }{{"", "English"}}
+	for _, l := range i18n.Languages {
+		ls = append(ls, struct{ code, name string }{l.Code, l.Name})
+	}
+	return ls
+}()
 
 // languageName is the endonym for a stored language code.
 func languageName(code string) string {

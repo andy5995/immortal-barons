@@ -6,6 +6,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
 const (
@@ -56,7 +58,7 @@ var mdLink = regexp.MustCompile(`\]\(([^)]+)\)`)
 // normContent collapses a translated help path (content.de/…, content.ru/…) to
 // its English content path so links resolve to one site page.
 func normContent(repoRel string) string {
-	for _, lang := range []string{"de", "ru"} {
+	for _, lang := range i18n.Codes() {
 		repoRel = strings.Replace(repoRel, "internal/help/content."+lang+"/", "internal/help/content/", 1)
 	}
 	return repoRel

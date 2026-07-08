@@ -16,6 +16,7 @@ import (
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/help"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
 // extraCSS makes in-content links obviously links. Material for MkDocs only
@@ -31,17 +32,24 @@ const extraCSS = `/* Underline in-content links so they read as links, not just 
 }
 `
 
-// languages are the site's languages in menu order; the first is the default
-// and the fallback for untranslated pages.
-var languages = []struct {
+// siteLang is one language column of the site: its code, its endonym (shown in
+// the language switcher), and whether it is the default/fallback.
+type siteLang struct {
 	code    string
-	name    string // endonym, shown in the language switcher
+	name    string
 	isFirst bool
-}{
-	{"en", "English", true},
-	{"de", "Deutsch", false},
-	{"ru", "Русский", false},
 }
+
+// languages are the site's languages in menu order; English is the default and
+// the fallback for untranslated pages, followed by every translated language
+// from the single source of truth in i18n.Languages.
+var languages = func() []siteLang {
+	ls := []siteLang{{"en", "English", true}}
+	for _, l := range i18n.Languages {
+		ls = append(ls, siteLang{l.Code, l.Name, false})
+	}
+	return ls
+}()
 
 // Assemble reads the doc sources under repoRoot and writes the MkDocs source
 // tree + mkdocs.yml under outDir (which is cleared first).
