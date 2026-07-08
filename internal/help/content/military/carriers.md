@@ -15,6 +15,6 @@ Without enough carriers, your jets cannot reach the enemy.
 
 Second, they carry goods for trade between empires.
 
-Carriers are very cheap to keep. A common money tip is to set your industry to
-build carriers and then sell them, which can earn more gold than producing gold
-directly.
+Carriers are very cheap to keep. A common way to earn gold is to set your
+industry to build carriers and then sell them. This can earn more than producing
+gold directly.
