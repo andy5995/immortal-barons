@@ -3,6 +3,7 @@ package menu
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strconv"
 	"strings"
 
@@ -58,7 +59,7 @@ func promptInt(s session.Session, msg string) int {
 	if errors.Is(err, session.ErrSessionEnded) {
 		session.End(err)
 	}
-	return parseAmount(line, 1<<62)
+	return parseAmount(line, math.MaxInt)
 }
 
 // promptSuggested shows "<msg> (<suggested>; <max>): " and returns a value.
