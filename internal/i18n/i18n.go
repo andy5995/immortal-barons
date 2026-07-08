@@ -67,15 +67,25 @@ func load() map[string]map[string]string {
 // parsePO reads a gettext .po into a msgid->msgstr map. It handles the common
 // subset the UI needs: msgid/msgstr with adjacent quoted continuation lines and
 // the standard C string escapes. The header entry (empty msgid) is skipped, as
-// are comments and untranslated (empty msgstr) entries.
+// are comments and untranslated (empty msgstr) entries. Entries flagged
+// "#, fuzzy" are also skipped: gettext marks a translation fuzzy precisely
+// because a human has not validated it yet, and msgfmt excludes fuzzy entries
+// from its output unless --use-fuzzy (which its own manual calls "usually
+// wrong"). Skipping them here falls back to English until a translator clears
+// the flag, and keeps unreviewed msgmerge guesses (whose format verbs may not
+// even match) out of the game.
 func parsePO(src string) map[string]string {
 	out := map[string]string{}
 	var id, str strings.Builder
 	// which field the current quoted lines append to: 0=none, 1=msgid, 2=msgstr
 	field := 0
+	fuzzy := false
 	flush := func() {
 		if id.Len() > 0 && str.Len() > 0 {
-			out[id.String()] = str.String()
+			if !fuzzy {
+				out[id.String()] = str.String()
+			}
+			fuzzy = false // the flag belongs to this entry only
 		}
 		id.Reset()
 		str.Reset()
@@ -84,6 +94,14 @@ func parsePO(src string) map[string]string {
 	for _, line := range strings.Split(src, "\n") {
 		t := strings.TrimSpace(line)
 		switch {
+		case strings.HasPrefix(t, "#,"):
+			// A flag comment (e.g. "#, fuzzy" or "#, fuzzy, c-format") for the
+			// entry that follows. Note fuzzy without clearing it on this no-op
+			// flush, so it survives to the entry's own flush.
+			if strings.Contains(t, "fuzzy") {
+				fuzzy = true
+			}
+			flush()
 		case t == "" || strings.HasPrefix(t, "#"):
 			flush()
 		case strings.HasPrefix(t, "msgid "):

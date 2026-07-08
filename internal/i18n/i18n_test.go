@@ -1,6 +1,7 @@
 package i18n
 
 import (
+	"io/fs"
 	"strings"
 	"testing"
 )
@@ -26,6 +27,63 @@ func TestTranslations(t *testing.T) {
 	}
 }
 
+// msgidsOf returns every active msgid in a .po in file order (with quoted
+// continuations joined; obsolete "#~" and fuzzy flags are irrelevant to
+// identity). Duplicates are what we are hunting, so it does NOT dedupe.
+func msgidsOf(src string) []string {
+	var ids []string
+	var cur strings.Builder
+	inID := false
+	end := func() {
+		if inID {
+			ids = append(ids, cur.String())
+			cur.Reset()
+			inID = false
+		}
+	}
+	for _, line := range strings.Split(src, "\n") {
+		t := strings.TrimSpace(line)
+		switch {
+		case strings.HasPrefix(t, "msgid "):
+			end()
+			inID = true
+			cur.WriteString(unquote(strings.TrimPrefix(t, "msgid ")))
+		case inID && strings.HasPrefix(t, "\""):
+			cur.WriteString(unquote(t))
+		default:
+			end()
+		}
+	}
+	end()
+	return ids
+}
+
+// A duplicate msgid is "invalid input for other programs like msgfmt, msgmerge
+// or msgcat" (gettext manual) — msgmerge outright refuses to run. Our in-house
+// reader silently last-wins, so guard the committed catalogs here.
+func TestCatalogsNoDuplicateMsgids(t *testing.T) {
+	entries, err := fs.ReadDir(locale, "locale")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, e := range entries {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".po") {
+			continue
+		}
+		raw, err := locale.ReadFile("locale/" + e.Name())
+		if err != nil {
+			t.Fatal(err)
+		}
+		seen := map[string]bool{}
+		for _, id := range msgidsOf(string(raw)) {
+			if seen[id] {
+				t.Errorf("%s: duplicate msgid %q (invalid gettext input)", e.Name(), id)
+			}
+			seen[id] = true
+		}
+	}
+}
+
 func TestParsePOContinuation(t *testing.T) {
 	m := parsePO("msgid \"a\"\nmsgstr \"\"\n\"b\"\n\nmsgid \"c\"\nmsgstr \"d\"\n")
 	if m["a"] != "b" {
@@ -43,6 +101,16 @@ func TestParsePOSkipsHeaderAndEmpty(t *testing.T) {
 	}
 	if _, ok := m["x"]; ok {
 		t.Error("untranslated (empty msgstr) should be skipped")
+	}
+}
+
+func TestParsePOSkipsFuzzy(t *testing.T) {
+	m := parsePO("#, fuzzy\nmsgid \"x\"\nmsgstr \"y\"\n\nmsgid \"z\"\nmsgstr \"w\"\n")
+	if _, ok := m["x"]; ok {
+		t.Error("fuzzy entry should be skipped (unvalidated by a human)")
+	}
+	if m["z"] != "w" {
+		t.Errorf("fuzzy flag must not leak to the next entry: z = %q, want w", m["z"])
 	}
 }
 
