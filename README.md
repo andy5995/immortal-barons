@@ -18,42 +18,11 @@ BBS door game: each caller has a lasting empire in one shared world; you play
 your turns, and other barons (and any AI) act on their own turns. The game runs
 locally or as a native BBS door.
 
-**Works now:**
-
-- Full menu system with single-key commands
-- Persistent shared world: your empire is saved between calls, keyed by your
-  BBS handle; one player at a time (exclusive lock); a daily maintenance step
-- Per-turn economy (idle empires stagnate); turns-per-day and new-realm
-  protection
-- Economy: buy and sell land at a **rising market price**, buy food, recruit
-  troopers, build jets/turrets/tanks/carriers, recruit covert agents
-- Bank: deposit, withdraw, take a loan, repay, invest (about 1%/turn)
-- War: conventional attack (offense vs. defense), plus **nuclear, chemical,
-  and biological** strikes and **pirate raids**
-- Covert ops (agent-count decides success): spy for intel, sabotage, and
-  strikes on the enemy's intelligence, airbases, food stores, and HeadQuarters
-- Region types (coastal, mountain, desert, river, agricultural, urban,
-  industrial, technology) and a food market
-- Diplomacy: typed treaties (defense, trade, intelligence) with their effects
-- Sysop configuration editor
-- Industry: set production percentages per unit, or specialize (permanent)
-- Messages: player-to-player mail with a multi-line editor, and a planetary
-  bulletin
-- A planetary news feed: battles, nuclear/chemical/biological strikes, pirate
-  raids, and tax riots are broadcast to everyone
-- Write Macros: record a Ctrl-key to replay a sequence of keystrokes
-- Localization: menus, prompts, and the help database render in the caller's
-  language (English, German, and Russian so far)
-- "While you were away" event log for asynchronous play
-- Scores and net worth
-
-**Planned (not built yet):**
-
-- Leagues that reset on a timer and crown a winner
-- The Quick Strike and Extended Battle attack variants
-- Inter-BBS (IBBS) live play (the packet exchange — scores, news, and group
-  attacks — works and is tested; validation under real BBS software is still
-  pending)
+The core game is already playable — economy, military and war, covert
+operations, diplomacy, and messaging all work. Larger features, such as leagues
+and live inter-BBS play, are still to come. For what works today and what is
+planned, see the
+[issue tracker](https://github.com/andy5995/immortal-barons/issues).
 
 ## Download
 
