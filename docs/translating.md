@@ -1,0 +1,138 @@
+# Translating Immortal Barons
+
+Immortal Barons can show its interface and its help pages in more than one
+language. This guide explains how to improve an existing translation and how to
+add a new language.
+
+You do not need to know Go. Translations live in standard **gettext PO files**
+(`.po`), which you can edit in any text editor or in a PO editor such as Poedit.
+
+## Two sets of text
+
+There are two separate groups of text, kept in two places:
+
+1. **The interface** — menus, prompts, on-screen messages, and reports.
+   Catalogs live in `internal/i18n/locale/<lang>.po`.
+2. **The help pages** — the topics shown in the in-game Guide and on the website
+   Guide. Catalogs live in `po/help/<lang>.po`.
+
+The website's own pages — this guide, the FAQ, and the setup pages — are kept in
+English only.
+
+Both groups use the same PO format, so the editing work feels the same. Only the
+commands that refresh the files differ.
+
+## What to install
+
+- **gettext** — provides `msgmerge`, `msgfmt`, and `msginit`. Most systems
+  already have it; otherwise install it with your package manager.
+- **po4a** — used for the help pages only.
+- Optional: **Poedit**, a graphical PO editor.
+
+## The PO format in one minute
+
+Each entry has an English source line and its translation:
+
+```
+msgid "Buy Regions"
+msgstr "Regionen kaufen"
+```
+
+- `msgid` is the English text. Never change it.
+- `msgstr` is your translation. Fill it in.
+- An **empty** `msgstr` means "not translated yet". The game shows the English
+  text instead, so you can translate a little at a time.
+- A `#, fuzzy` line above an entry marks a guess that needs review. The game
+  treats it as untranslated (it shows English) until you check the entry and
+  remove the `#, fuzzy` line.
+- Keep every placeholder — `%d`, `%s`, and so on — exactly as it appears in the
+  `msgid`, in the same order. A wrong placeholder can break the display. A test
+  checks this.
+- Do not create two entries with the same `msgid`.
+
+## Improve an existing translation
+
+### Interface
+
+1. Open `internal/i18n/locale/<lang>.po` (for example `de.po`).
+2. Fill in or correct the `msgstr` lines.
+3. Save. That is all — the game reads the `.po` file directly.
+
+### Help pages
+
+1. Open `po/help/<lang>.po`.
+2. Fill in or correct the `msgstr` lines.
+3. Rebuild the translated pages:
+
+   ```
+   scripts/gen-help-translations.sh
+   ```
+
+   This writes the translated Markdown under `internal/help/content.<lang>/`.
+
+## Refresh the catalogs after the English text changes
+
+When the game's English text changes, the catalogs need new entries. These
+commands add them; run them from the project root.
+
+### Interface
+
+```
+python scripts/gen-ui-pot.py     # collect the English interface strings
+scripts/merge-ui-po.sh           # add new/changed ones to every locale .po
+```
+
+New strings appear with an empty `msgstr`, and changed ones become `#, fuzzy`,
+for you to translate.
+
+### Help pages
+
+```
+scripts/gen-help-translations.sh
+```
+
+This refreshes `po/help/*.po` from the English topics and rebuilds the
+translated Markdown. Changed English is marked for review.
+
+## Add a new language
+
+Adding a language means creating its catalogs and listing its code in a few
+places. Use the two-letter language code (for example `es` for Spanish).
+
+**Interface:**
+
+1. Create the catalog from the template:
+
+   ```
+   msginit -i po/ui/immortal-barons.pot -l <code> -o internal/i18n/locale/<code>.po --no-translator
+   ```
+
+   Run from `po/ui/` you can omit `-i` — msginit finds the template in the
+   current directory on its own.
+
+2. Add `<code>` to the `langs=(...)` list in `scripts/merge-ui-po.sh`.
+
+**Help pages:**
+
+3. Add `<code>:po/help/<code>.po` to the `[po4a_paths]` line in `po4a.cfg`.
+4. Add `<code>` to the `langs=(...)` list in `scripts/gen-help-translations.sh`.
+5. Run `scripts/gen-help-translations.sh` to create `po/help/<code>.po`.
+
+**Offer the language in the game and on the website:**
+
+6. Add `{"<code>", "<native name>"}` to `helpLanguages` in
+   `internal/menu/helpbrowse.go`. This is the in-game language menu.
+7. Add the code to the language lists in `internal/docsite/assemble.go` and
+   `internal/docsite/links.go`, so the website builds the translated pages.
+
+Then translate the two new `.po` files as described above.
+
+> The language code has to be listed in several files today. If you add a
+> language and are unsure, open an issue or a draft pull request and ask — a
+> maintainer can help wire it in.
+
+## Send your work
+
+Open a pull request with the changed `.po` files. For help pages, also include
+the regenerated files under `internal/help/content.<lang>/`. If you prefer, send
+the `.po` files to the maintainer and they will include them.

@@ -72,6 +72,7 @@ func Assemble(repoRoot, outDir string) error {
 			{doorSetupSource(repoRoot, lang.code), filepath.Join(langDir, "door-setup", "index.md"), "door-setup/index.md"},
 			{webserverSource(repoRoot, lang.code), filepath.Join(langDir, "web-server", "index.md"), "web-server/index.md"},
 			{faqSource(repoRoot, lang.code), filepath.Join(langDir, "faq", "index.md"), "faq/index.md"},
+			{translatingSource(repoRoot, lang.code), filepath.Join(langDir, "translating", "index.md"), "translating/index.md"},
 		} {
 			if err := copyIfExists(pg.src, pg.dst, srcRel(pg.src), pg.siteRel, lk); err != nil {
 				return err
@@ -181,6 +182,9 @@ func webserverSource(repoRoot, lang string) string {
 }
 func faqSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "docs", "faq.md"), lang)
+}
+func translatingSource(repoRoot, lang string) string {
+	return langFile(filepath.Join(repoRoot, "docs", "translating.md"), lang)
 }
 
 func langFile(enPath, lang string) string {

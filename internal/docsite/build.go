@@ -90,6 +90,7 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	nav = append(nav, navNode{title: "Door Setup", path: "door-setup/index.md"})
 	nav = append(nav, navNode{title: "Web Server", path: "web-server/index.md"})
 	nav = append(nav, navNode{title: "FAQ", path: "faq/index.md"})
+	nav = append(nav, navNode{title: "Translating", path: "translating/index.md"})
 
 	// Developers: one leaf per English dev doc, titled from its first heading.
 	dev, err := devNav(repoRoot)
