@@ -24,6 +24,9 @@ Common operations:
 - Bomb Airbases — destroy enemy jets that are on the ground.
 - Bomb Food Stores — destroy much of the enemy's food reserve.
 - Bomb HQ — weaken the enemy's HeadQuarters, making their tanks less effective.
+- R5-Slappenheimer — fire a missile that kills some of the enemy's troopers. The
+  amount varies. Against a very large trooper army the missile can backfire and
+  hurt you instead. Troopers help defend against it.
 - Bribery — buy off an agent inside the enemy, so that their covert operations
   against you fail from then on.
 

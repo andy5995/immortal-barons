@@ -13,7 +13,7 @@ Your army is built from these units. Each one has a job.
 
 Troopers fight on both attack and defense, but they are weak at each. They are
 cheap to buy and cheap to keep. They eat more food than other units. They help
-you defend against Sabre missile attacks.
+you defend against R5-Slappenheimer missile strikes.
 
 ## Jets
 
