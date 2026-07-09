@@ -19,10 +19,30 @@ your turns, and other barons (and any AI) act on their own turns. The game runs
 locally or as a native BBS door.
 
 The core game is already playable — economy, military and war, covert
-operations, diplomacy, and messaging all work. Larger features, such as leagues
-and live inter-BBS play, are still to come. For what works today and what is
+operations, diplomacy, and messaging all work, but the game is not yet balanced.
+Many values do not match BRE's yet, so parts of the game are far too easy or too
+hard. Larger features, such as leagues and live inter-BBS play, are still to
+come. For what works today and what is
 planned, see the
 [issue tracker](https://github.com/andy5995/immortal-barons/issues).
+
+## Running
+
+The game plays locally in your terminal or as a native BBS door. Once you have
+the `immortal-barons` binary — download it (see below) or build it from source —
+play locally:
+
+```
+./immortal-barons -local
+```
+
+On Windows the binary is `immortal-barons.exe`. Run it as `immortal-barons -local`
+from Command Prompt, or `./immortal-barons -local` from PowerShell. From a source
+checkout you can also run it without building first with
+`go run ./cmd/immortal-barons -local`.
+
+Run `immortal-barons -help` (or `-h`) to see all the command-line options. To run
+the game as a native BBS door instead, see "Running as a BBS door" below.
 
 ## Download
 
@@ -39,11 +59,11 @@ show a SmartScreen warning the first time you run one.
 
 To build from source instead, see below.
 
-## Build and run
+## Build
 
-You need Go 1.26 or newer. The game builds and runs anywhere Go does — Linux,
-macOS, Windows, and the BSDs (DOS is not supported). It plays locally or as a
-native BBS door.
+You only need this to build from source; if you downloaded a binary above, skip
+it. To build, you need Go 1.26 or newer. The game builds anywhere Go does —
+Linux, macOS, Windows, and the BSDs (DOS is not supported).
 
 To install Go, download an official installer or tarball from
 <https://go.dev/doc/install>. That same page also has the step-by-step install
@@ -57,19 +77,9 @@ package can be older than 1.26, though — if it is, use the official tarball.
 
 ```
 go build ./cmd/immortal-barons
-./immortal-barons -local
 ```
 
-On Windows the binary is `immortal-barons.exe`. Run it as `immortal-barons -local`
-from Command Prompt, or `./immortal-barons -local` from PowerShell.
-
-Or run it directly:
-
-```
-go run ./cmd/immortal-barons -local
-```
-
-Run `immortal-barons -help` (or `-h`) to see all the command-line options.
+This produces the `immortal-barons` binary; see "Running" above to start it.
 
 ## Character set
 
