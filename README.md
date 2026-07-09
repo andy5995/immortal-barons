@@ -92,10 +92,7 @@ why its world is separate from a BBS door's world.
 
 ## How to play
 
-The game uses single keypresses — you do not press Enter to choose a menu
-item. See the
-[player's guide](https://andy5995.github.io/immortal-barons/guide/) for the
-menus, the controls, and strategy.
+See the [player's guide](https://andy5995.github.io/immortal-barons/guide/).
 
 ## Design
 
