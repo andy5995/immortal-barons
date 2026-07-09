@@ -1,0 +1,332 @@
+package menu
+
+import (
+	"fmt"
+	"sort"
+	"strings"
+	"time"
+
+	"github.com/andy5995/immortal-barons/internal/ansi"
+	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/session"
+)
+
+// interbbsScores displays scores imported from other boards via inter-BBS
+// packets (see internal/ibbs). v1 covers only score/news sharing.
+func interbbsScores(s session.Session, w *ctx) Result {
+	if len(w.RemoteBoards) == 0 {
+		ok(s, "No inter-BBS scores have been imported yet.")
+		return Stay
+	}
+	for _, b := range w.RemoteBoards {
+		fmt.Fprintf(s, "\n%s"+tr(s, "Board: %s (%s)")+"%s\n", ansi.FgBrightCyan, b.BoardID, b.Date, ansi.Reset)
+		scores := append([]game.RemoteScore(nil), b.Scores...)
+		sort.Slice(scores, func(i, j int) bool { return scores[i].NetWorth > scores[j].NetWorth })
+		for _, sc := range scores {
+			fmt.Fprintf(s, "  %-18s %-8d %-10d\n", sc.Empire, sc.Land, sc.NetWorth)
+		}
+	}
+	pause(s)
+	return Stay
+}
+
+// createGroupAttack assembles an interplanetary strike against an empire on
+// another planet (chosen from imported scores). v1 commits a raw offense
+// figure; it does not yet remove the units from the empire — a follow-up will
+// make the forces actually depart.
+func createGroupAttack(s session.Session, w *ctx) Result {
+	p := w.Player()
+	if len(w.RemoteBoards) == 0 {
+		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
+		return Stay
+	}
+	boards := make([]string, len(w.RemoteBoards))
+	for i, b := range w.RemoteBoards {
+		boards[i] = b.BoardID
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
+	board := pickFromList(s, "Planet", boards)
+	if board == "" {
+		return Stay
+	}
+	var rb *game.RemoteBoard
+	for i := range w.RemoteBoards {
+		if w.RemoteBoards[i].BoardID == board {
+			rb = &w.RemoteBoards[i]
+		}
+	}
+	choices := []string{tr(s, "(the whole planet)")}
+	for _, sc := range rb.Scores {
+		choices = append(choices, sc.Empire)
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
+	pick := pickFromList(s, "Baron", choices)
+	if pick == "" {
+		return Stay
+	}
+	target := pick
+	if pick == choices[0] {
+		target = "" // whole planet
+	}
+	offense := promptSuggested(s, "How much offense to commit?", p.Offense(), p.Offense())
+	if offense <= 0 {
+		return Stay
+	}
+	days := promptInt(s, "Leave in how many days?")
+	if days < 1 {
+		days = 1
+	}
+	var id, departDay int
+	w.With(func() {
+		ga := w.World.CreateGroupAttack(p, board, target, w.GameDay+days, offense)
+		id, departDay = ga.ID, ga.DepartDay
+	})
+	ok(s, "Group attack #%d formed against %s on %s, leaving day %d.", id, pick, board, departDay)
+	return Stay
+}
+
+// joinGroupAttack adds the player's offense to a group attack still forming.
+func joinGroupAttack(s session.Session, w *ctx) Result {
+	p := w.Player()
+	var lines []string
+	var ids []int
+	for _, ga := range w.GroupAttacks {
+		if w.GameDay >= ga.DepartDay {
+			continue
+		}
+		tgt := ga.TargetEmpire
+		if tgt == "" {
+			tgt = tr(s, "the whole planet")
+		}
+		lines = append(lines, fmt.Sprintf("#%d -> %s on %s (leaves day %d, offense %s)",
+			ga.ID, tgt, ga.TargetBoard, ga.DepartDay, comma(ga.Offense())))
+		ids = append(ids, ga.ID)
+	}
+	if len(lines) == 0 {
+		ok(s, "No group attacks are forming right now.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Join which attack?"), ansi.Reset)
+	for i, x := range lines {
+		fmt.Fprintf(s, "    %d) %s\n", i+1, x)
+	}
+	i := promptInt(s, "Attack (0 to cancel)?")
+	if i < 1 || i > len(ids) {
+		return Stay
+	}
+	offense := promptSuggested(s, "How much offense to add?", p.Offense(), p.Offense())
+	if offense <= 0 {
+		return Stay
+	}
+	var err error
+	w.With(func() { err = w.World.JoinGroupAttack(p, ids[i-1], offense) })
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	ok(s, "You joined group attack #%d with %s offense.", ids[i-1], comma(offense))
+	return Stay
+}
+
+// indivAttackForce is BRE's "Indiv. Attack Force" InterPlanetary Operations
+// item. IB has no interplanetary individual-attack mechanic yet (unlike
+// Create/Join Group Attack, which do); this is a recorded-but-inert stub so
+// the menu's item set matches BRE's while the mechanic itself is unbuilt.
+func indivAttackForce(s session.Session, w *ctx) Result {
+	ok(s, "Individual attack forces are not yet available; use Create Group Attack.")
+	return Stay
+}
+
+// travelTimes lists the approximate round-trip time to each known planet.
+// Packets exchange on each PLANETARY maintenance run (about daily), so most
+// interplanetary operations take roughly a day each way.
+func travelTimes(s session.Session, w *ctx) Result {
+	if len(w.LeagueNodes) == 0 && len(w.RemoteBoards) == 0 {
+		ok(s, "No other planets are known yet.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Travel Times"), ansi.Reset)
+	fmt.Fprintf(s, "%s\n", tr(s, "How long an operation takes to reach another planet and return\ndepends on how often your sysop exchanges inter-BBS packets."))
+
+	// The league roster from ibnodes.dat, if the coordinator has distributed it.
+	if len(w.LeagueNodes) > 0 {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "League members:"), ansi.Reset)
+		for _, n := range w.LeagueNodes {
+			fmt.Fprintf(s, "  #%-3d %s\n", n.Number, n.Name)
+		}
+	}
+	// Observed latency: how recently a packet actually arrived from each board.
+	if len(w.RemoteBoards) > 0 {
+		now := w.Today
+		if now == "" {
+			now = w.LastMaintDate
+		}
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Last packet received from:"), ansi.Reset)
+		for _, b := range w.RemoteBoards {
+			fmt.Fprintf(s, "  %-20s %s%s%s\n", b.BoardID, ansi.FgBrightCyan, daysAgoLocalized(s, b.Date, now), ansi.Reset)
+		}
+	}
+	pause(s)
+	return Stay
+}
+
+// daysAgoLocalized renders how long ago (in days) the ISO date `then` was
+// relative to `now`, in the session's language, for inter-BBS packet latency.
+func daysAgoLocalized(s session.Session, then, now string) string {
+	t1, e1 := time.Parse("2006-01-02", then)
+	t2, e2 := time.Parse("2006-01-02", now)
+	if e1 != nil || e2 != nil {
+		return then
+	}
+	switch d := int(t2.Sub(t1).Hours() / 24); {
+	case d <= 0:
+		return tr(s, "today")
+	case d == 1:
+		return tr(s, "1 day ago")
+	default:
+		return fmt.Sprintf(tr(s, "%d days ago"), d)
+	}
+}
+
+// spyDatabase shows the planet-wide store of spy reports on remote empires.
+func spyDatabase(s session.Session, w *ctx) Result {
+	if len(w.SpyDatabase) == 0 {
+		ok(s, "The spy database is empty. Spy on empires on other planets to fill it.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy Database:"), ansi.Reset)
+	for _, r := range w.SpyDatabase {
+		fmt.Fprintf(s, "  "+tr(s, "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s")+"\n",
+			r.Empire, r.Board, r.Date, comma(r.Land), comma(r.Offense), comma(r.Defense), comma(r.Gold))
+	}
+	pause(s)
+	return Stay
+}
+
+// terroristOps sends an agent to a remote planet to gather intel on a baron
+// there; the report lands in the planet-wide Spy Database. v1: intel is drawn
+// from the imported score data (land/net worth). A fuller model will queue an
+// interplanetary covert strike into a packet like group attacks do.
+func terroristOps(s session.Session, w *ctx) Result {
+	p := w.Player()
+	if len(w.RemoteBoards) == 0 {
+		ok(s, "No other planets are known yet.")
+		return Stay
+	}
+	if p.Agents < 1 {
+		fail(s, game.ErrNoAgents)
+		return Stay
+	}
+	boards := make([]string, len(w.RemoteBoards))
+	for i, b := range w.RemoteBoards {
+		boards[i] = b.BoardID
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy on which planet?"), ansi.Reset)
+	board := pickFromList(s, "Planet", boards)
+	if board == "" {
+		return Stay
+	}
+	var rb *game.RemoteBoard
+	for i := range w.RemoteBoards {
+		if w.RemoteBoards[i].BoardID == board {
+			rb = &w.RemoteBoards[i]
+		}
+	}
+	if len(rb.Scores) == 0 {
+		ok(s, "No barons are known on that planet yet.")
+		return Stay
+	}
+	names := make([]string, len(rb.Scores))
+	for i, sc := range rb.Scores {
+		names[i] = sc.Empire
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy on which baron?"), ansi.Reset)
+	pick := pickFromList(s, "Baron", names)
+	if pick == "" {
+		return Stay
+	}
+	var sc game.RemoteScore
+	for _, x := range rb.Scores {
+		if x.Empire == pick {
+			sc = x
+		}
+	}
+	w.With(func() {
+		p.Agents--
+		w.SpyDatabase = append(w.SpyDatabase, game.SpyReport{
+			Board:  board,
+			Empire: pick,
+			Date:   w.LastMaintDate,
+			Land:   sc.Land,
+		})
+	})
+	ok(s, "Your agents infiltrated %s on %s; the report is in the Spy Database.", pick, board)
+	return Stay
+}
+
+// voteCoordinator lets the player cast (or change) their vote for the BBS
+// Coordinator — the elected player who gets the Coordinator menu. BRE: "Who do
+// you feel should be the BBS Coordinator?"; the vote can change any time.
+func voteCoordinator(s session.Session, w *ctx) Result {
+	p := w.Player()
+	var owners, names []string
+	var coordinatorName string
+	w.With(func() {
+		for _, e := range w.Empires {
+			if !e.Alive || e.Owner == "" {
+				continue
+			}
+			owners = append(owners, e.Owner)
+			label := e.Name
+			if e.Owner == p.CoordinatorVote {
+				label += " " + tr(s, "(your current vote)")
+			}
+			names = append(names, label)
+		}
+		if co := w.BBSCoordinator(); co != nil {
+			coordinatorName = co.Name
+		}
+	})
+	if len(names) == 0 {
+		ok(s, "There are no barons to vote for yet.")
+		return Stay
+	}
+	if coordinatorName != "" {
+		fmt.Fprintf(s, "\n%s"+tr(s, "The current BBS Coordinator is %s.")+"%s\n", ansi.FgBrightCyan, coordinatorName, ansi.Reset)
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Who should be the BBS Coordinator?"), ansi.Reset)
+	for i, n := range names {
+		fmt.Fprintf(s, "    %d) %s\n", i+1, n)
+	}
+	i := promptInt(s, "Vote for (0 to cancel)?")
+	if i < 1 || i > len(owners) {
+		return Stay
+	}
+	w.With(func() { w.World.VoteCoordinator(p, owners[i-1]) })
+	ok(s, "Your vote is recorded. You may change it any time.")
+	return Stay
+}
+
+// modifyLeagueDiplomacy lets a League Coordinator post a planet-wide diplomacy
+// declaration, broadcast to the league on the next packet run. v1: a single
+// free-text stance; a fuller model would track pairwise planet relations.
+func modifyLeagueDiplomacy(s session.Session, w *ctx) Result {
+	var isCoordinator bool
+	var current string
+	w.With(func() {
+		isCoordinator = w.BBSCoordinator() == w.Player()
+		current = w.LeagueDiplomacy
+	})
+	if !isCoordinator {
+		ok(s, "Only the BBS Coordinator may set league diplomacy.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s%s %s\n", ansi.FgBrightCyan, tr(s, "Current league diplomacy:"), ansi.Reset, current)
+	decl := prompt(s, "New league diplomacy declaration (blank to keep)")
+	if strings.TrimSpace(decl) == "" {
+		return Stay
+	}
+	w.With(func() { w.LeagueDiplomacy = decl })
+	ok(s, "League diplomacy updated. It will be broadcast to the league.")
+	return Stay
+}
