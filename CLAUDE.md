@@ -75,6 +75,11 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   a fixed RNG seed via `game.NewSeed` for determinism.
 - Keep combat/economy numbers matching `docs/mechanics-reference.md`; when
   they diverge, update the doc in the same change.
+- **Menu prompts are consistent.** A numbered selection list ends with a
+  `0) Quit` line and the standard `Choice> Quit` prompt (use `choiceQuit`),
+  matching the menu engine's `readChoice` — not a one-off `promptInt("… 0 to
+  cancel?")`. Keep new lists on this convention unless a specific case calls for
+  something else.
 
 ## Mechanics fidelity
 

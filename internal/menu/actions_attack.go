@@ -138,30 +138,42 @@ func biologicalAttack(s session.Session, w *ctx) Result {
 	return specialAttack(s, w, "Biological Attack", game.BioCost, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
 }
 
+// pirateColors are BRE's per-faction name colors, in game.PirateFactions order.
+// Verified from BRE.EXE's color table (the 9 bytes right after the faction-name
+// array): 0a 0e 0c 04 05 0d 09 03 0b.
+var pirateColors = []string{
+	ansi.FgBrightGreen,   // Humans      (10 light green)
+	ansi.FgBrightYellow,  // Barbarians  (14 yellow)
+	ansi.FgBrightRed,     // Solarians   (12 light red)
+	ansi.FgRed,           // Sharks      (4 red)
+	ansi.FgMagenta,       // Mechanoids  (5 magenta)
+	ansi.FgBrightMagenta, // Rexxogans   (13 light magenta)
+	ansi.FgBrightBlue,    // Xandorians  (9 light blue)
+	ansi.FgCyan,          // Monitorians (3 cyan)
+	ansi.FgBrightCyan,    // Spacians    (11 light cyan)
+}
+
 func attackPirates(s session.Session, w *ctx) Result {
-	type pirateRow struct {
-		name                              string
-		forces, land, gold                int
-		lootT, lootJ, lootU, lootK, lootA int
-	}
-	var rows []pirateRow
+	// BRE lists only the colored faction names — a faction's strength and hoard
+	// are hidden, so raiding blind (not knowing which band is fat or lean) is
+	// part of the game.
+	var names []string
 	w.With(func() {
 		for _, p := range w.Pirates {
-			rows = append(rows, pirateRow{
-				p.Name, p.Forces, p.Land, p.Gold,
-				p.LootTroopers, p.LootJets, p.LootTurrets, p.LootTanks, p.LootAgents,
-			})
+			names = append(names, p.Name)
 		}
 	})
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Pirate factions (strength is random; fat ones just raided someone):"), ansi.Reset)
-	fmt.Fprintf(s, "  %-3s %-11s %-7s %-4s %-8s %s\n", "#", tr(s, "Faction"), tr(s, "Forces"), tr(s, "Rgn"), tr(s, "Gold"), tr(s, "Loot T/J/U/K/A"))
-	for i, r := range rows {
-		fmt.Fprintf(s, "  %d) %-11s %-7d %-4d %-8d %d/%d/%d/%d/%d\n",
-			i+1, r.name, r.forces, r.land, r.gold,
-			r.lootT, r.lootJ, r.lootU, r.lootK, r.lootA)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Attack Pirates"), ansi.Reset)
+	for i, name := range names {
+		color := ""
+		if i < len(pirateColors) {
+			color = pirateColors[i]
+		}
+		fmt.Fprintf(s, "  %d) %s%s%s\n", i+1, color, name, ansi.Reset)
 	}
-	f := promptInt(s, "Raid which faction (0 to cancel)?")
-	if f < 1 || f > len(rows) {
+	fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
+	f := choiceQuit(s, len(names))
+	if f < 1 {
 		return Stay
 	}
 	p := w.Player()

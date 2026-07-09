@@ -134,6 +134,37 @@ func clampAmt(n, max int) int {
 	return n
 }
 
+// choiceQuit prints the standard menu prompt ("Choice> Quit", with "Quit" shown
+// after the prompt as the Enter default) for a custom numbered list, so those
+// lists match the menu engine's readChoice. It reads one key and returns the
+// chosen number 1..max, or 0 to quit (Enter, '0', or any non-matching key).
+func choiceQuit(s session.Session, max int) int {
+	lang := sessionLang(s)
+	quit := i18n.T(lang, "Quit")
+	fmt.Fprintf(s, "\n%s%s%s %s", ansi.FgBrightWhite, i18n.T(lang, "Choice>"), ansi.Reset, quit)
+	r, err := s.ReadKey()
+	if err != nil {
+		if errors.Is(err, session.ErrSessionEnded) {
+			session.End(err)
+		}
+		return 0
+	}
+	if r == '\r' || r == '\n' || r == '0' { // Enter/0 selects the shown Quit
+		fmt.Fprint(s, "\n")
+		return 0
+	}
+	for range []rune(quit) { // a real choice: erase the shown default first
+		fmt.Fprint(s, "\b \b")
+	}
+	n := int(r - '0')
+	if r < '1' || r > '9' || n > max {
+		fmt.Fprint(s, "\n")
+		return 0
+	}
+	fmt.Fprintf(s, "%d\n", n) // echo the choice
+	return n
+}
+
 func pause(s session.Session) {
 	// BRE's pause prompt. A boot/disconnect here (ErrSessionEnded) must unwind:
 	// otherwise the flow falls through, redraws the menu, and only boots again
