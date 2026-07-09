@@ -15,7 +15,7 @@ cookie.
 
 Points to know before you play:
 
-- Just open the address the sysop gives you, for example
+- Open the address where the server is running, for example
   `http://localhost:8080`.
 - Each browser session is its own player. Opening the same page in a second
   tab of the *same* browser reuses your cookie and your existing game;
@@ -27,7 +27,7 @@ Points to know before you play:
 - If the game says "The realm is full," the server has reached its limit on
   players connected at the same time. Try again later.
 
-## For sysops
+## For server hosts
 
 ### Build
 
