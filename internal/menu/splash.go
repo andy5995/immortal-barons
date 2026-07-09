@@ -1,47 +1,29 @@
 package menu
 
 import (
+	_ "embed"
 	"fmt"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
+	"github.com/andy5995/immortal-barons/internal/screen"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
+// splashANS is the title screen, authored as a CP437 .ans (like the Empire
+// Status screens) so it is editable in the usual ANSI-art tools (PabloDraw,
+// TheDraw) rather than as Go string escapes. It carries its own 256-color SGR:
+// an "ANSI Shadow" wordmark with a vertical gold gradient over a starfield with
+// three lit half-block planets. Modern terminals and xterm.js render the
+// gradients; a 16-color client degrades gracefully.
+//
+//go:embed screens/splash.ans
+var splashANS []byte
+
 // Splash prints the Immortal Barons title screen, then waits for a keypress.
-// Original art: an "ANSI Shadow" FIGlet wordmark with a vertical gold gradient
-// (dark at the top, bright below), over a starfield with three lit half-block
-// planets. Uses 256-color SGR for the smooth gradients (modern terminals and
-// xterm.js render it; a 16-color client degrades gracefully). UTF-8 block
-// glyphs; carries its own colors, printed as-is.
+// FromCP437 decodes the .ans to the engine's internal UTF-8; the session's wire
+// encoder re-encodes to CP437 for a CP437 door.
 func Splash(s session.Session) {
 	fmt.Fprint(s, ansi.Clear)
-	fmt.Fprint(s, banner)
+	fmt.Fprint(s, screen.FromCP437(splashANS))
 	pause(s)
 }
-
-const banner = "\n" +
-	"                                                                            \x1b[97m*\x1b[0m  \x1b[36m+\x1b[0m\n" +
-	"      \x1b[38;5;136m██\x1b[38;5;94m╗\x1b[38;5;136m███\x1b[38;5;94m╗\x1b[0m   \x1b[38;5;136m███\x1b[38;5;94m╗\x1b[38;5;136m███\x1b[38;5;94m╗\x1b[0m   \x1b[38;5;136m███\x1b[38;5;94m╗\x1b[0m \x1b[38;5;136m██████\x1b[38;5;94m╗\x1b[0m \x1b[38;5;136m██████\x1b[38;5;94m╗\x1b[0m \x1b[38;5;136m████████\x1b[38;5;94m╗\x1b[0m \x1b[38;5;136m█████\x1b[38;5;94m╗\x1b[0m \x1b[38;5;136m██\x1b[38;5;94m╗\x1b[0m\n" +
-	"   \x1b[36m+\x1b[0m  \x1b[38;5;178m██\x1b[38;5;94m║\x1b[38;5;178m████\x1b[38;5;94m╗\x1b[0m \x1b[38;5;178m████\x1b[38;5;94m║\x1b[38;5;178m████\x1b[38;5;94m╗\x1b[0m \x1b[38;5;178m████\x1b[38;5;94m║\x1b[38;5;178m██\x1b[38;5;94m╔═══\x1b[38;5;178m██\x1b[38;5;94m╗\x1b[38;5;178m██\x1b[38;5;94m╔══\x1b[38;5;178m██\x1b[38;5;94m╗╚══\x1b[38;5;178m██\x1b[38;5;94m╔══╝\x1b[38;5;178m██\x1b[38;5;94m╔══\x1b[38;5;178m██\x1b[38;5;94m╗\x1b[38;5;178m██\x1b[38;5;94m║\x1b[0m\n" +
-	"      \x1b[38;5;214m██\x1b[38;5;94m║\x1b[38;5;214m██\x1b[38;5;94m╔\x1b[38;5;214m████\x1b[38;5;94m╔\x1b[38;5;214m██\x1b[38;5;94m║\x1b[38;5;214m██\x1b[38;5;94m╔\x1b[38;5;214m████\x1b[38;5;94m╔\x1b[38;5;214m██\x1b[38;5;94m║\x1b[38;5;214m██\x1b[38;5;94m║\x1b[0m   \x1b[38;5;214m██\x1b[38;5;94m║\x1b[38;5;214m██████\x1b[38;5;94m╔╝\x1b[0m   \x1b[38;5;214m██\x1b[38;5;94m║\x1b[0m   \x1b[38;5;214m███████\x1b[38;5;94m║\x1b[38;5;214m██\x1b[38;5;94m║\x1b[0m\n" +
-	"      \x1b[38;5;220m██\x1b[38;5;94m║\x1b[38;5;220m██\x1b[38;5;94m║╚\x1b[38;5;220m██\x1b[38;5;94m╔╝\x1b[38;5;220m██\x1b[38;5;94m║\x1b[38;5;220m██\x1b[38;5;94m║╚\x1b[38;5;220m██\x1b[38;5;94m╔╝\x1b[38;5;220m██\x1b[38;5;94m║\x1b[38;5;220m██\x1b[38;5;94m║\x1b[0m   \x1b[38;5;220m██\x1b[38;5;94m║\x1b[38;5;220m██\x1b[38;5;94m╔══\x1b[38;5;220m██\x1b[38;5;94m╗\x1b[0m   \x1b[38;5;220m██\x1b[38;5;94m║\x1b[0m   \x1b[38;5;220m██\x1b[38;5;94m╔══\x1b[38;5;220m██\x1b[38;5;94m║\x1b[38;5;220m██\x1b[38;5;94m║\x1b[0m\n" +
-	"      \x1b[38;5;226m██\x1b[38;5;94m║\x1b[38;5;226m██\x1b[38;5;94m║\x1b[0m \x1b[38;5;94m╚═╝\x1b[0m \x1b[38;5;226m██\x1b[38;5;94m║\x1b[38;5;226m██\x1b[38;5;94m║\x1b[0m \x1b[38;5;94m╚═╝\x1b[0m \x1b[38;5;226m██\x1b[38;5;94m║╚\x1b[38;5;226m██████\x1b[38;5;94m╔╝\x1b[38;5;226m██\x1b[38;5;94m║\x1b[0m  \x1b[38;5;226m██\x1b[38;5;94m║\x1b[0m   \x1b[38;5;226m██\x1b[38;5;94m║\x1b[0m   \x1b[38;5;226m██\x1b[38;5;94m║\x1b[0m  \x1b[38;5;226m██\x1b[38;5;94m║\x1b[38;5;226m███████\x1b[38;5;94m╗\x1b[0m\n" +
-	"  \x1b[90m·\x1b[0m \x1b[90m·\x1b[0m \x1b[38;5;94m╚═╝╚═╝\x1b[0m     \x1b[38;5;94m╚═╝╚═╝\x1b[0m     \x1b[38;5;94m╚═╝\x1b[0m \x1b[38;5;94m╚═════╝\x1b[0m \x1b[38;5;94m╚═╝\x1b[0m  \x1b[38;5;94m╚═╝\x1b[0m   \x1b[38;5;94m╚═╝\x1b[0m   \x1b[38;5;94m╚═╝\x1b[0m  \x1b[38;5;94m╚═╝╚══════╝\x1b[0m  \x1b[36m+\x1b[0m\n" +
-	"                                                                              \x1b[90m·\x1b[0m\n" +
-	"        \x1b[97m*\x1b[0m     \x1b[38;5;136m██████\x1b[38;5;94m╗\x1b[0m  \x1b[38;5;136m█████\x1b[38;5;94m╗\x1b[0m \x1b[38;5;136m██████\x1b[38;5;94m╗\x1b[0m  \x1b[38;5;136m██████\x1b[38;5;94m╗\x1b[0m \x1b[38;5;136m███\x1b[38;5;94m╗\x1b[0m   \x1b[38;5;136m██\x1b[38;5;94m╗\x1b[38;5;136m███████\x1b[38;5;94m╗\x1b[0m\n" +
-	"              \x1b[38;5;178m██\x1b[38;5;94m╔══\x1b[38;5;178m██\x1b[38;5;94m╗\x1b[38;5;178m██\x1b[38;5;94m╔══\x1b[38;5;178m██\x1b[38;5;94m╗\x1b[38;5;178m██\x1b[38;5;94m╔══\x1b[38;5;178m██\x1b[38;5;94m╗\x1b[38;5;178m██\x1b[38;5;94m╔═══\x1b[38;5;178m██\x1b[38;5;94m╗\x1b[38;5;178m████\x1b[38;5;94m╗\x1b[0m  \x1b[38;5;178m██\x1b[38;5;94m║\x1b[38;5;178m██\x1b[38;5;94m╔════╝\x1b[0m\n" +
-	"              \x1b[38;5;214m██████\x1b[38;5;94m╔╝\x1b[38;5;214m███████\x1b[38;5;94m║\x1b[38;5;214m██████\x1b[38;5;94m╔╝\x1b[38;5;214m██\x1b[38;5;94m║\x1b[0m   \x1b[38;5;214m██\x1b[38;5;94m║\x1b[38;5;214m██\x1b[38;5;94m╔\x1b[38;5;214m██\x1b[38;5;94m╗\x1b[0m \x1b[38;5;214m██\x1b[38;5;94m║\x1b[38;5;214m███████\x1b[38;5;94m╗\x1b[0m\n" +
-	"              \x1b[38;5;220m██\x1b[38;5;94m╔══\x1b[38;5;220m██\x1b[38;5;94m╗\x1b[38;5;220m██\x1b[38;5;94m╔══\x1b[38;5;220m██\x1b[38;5;94m║\x1b[38;5;220m██\x1b[38;5;94m╔══\x1b[38;5;220m██\x1b[38;5;94m╗\x1b[38;5;220m██\x1b[38;5;94m║\x1b[0m   \x1b[38;5;220m██\x1b[38;5;94m║\x1b[38;5;220m██\x1b[38;5;94m║╚\x1b[38;5;220m██\x1b[38;5;94m╗\x1b[38;5;220m██\x1b[38;5;94m║╚════\x1b[38;5;220m██\x1b[38;5;94m║\x1b[0m\n" +
-	"              \x1b[38;5;226m██████\x1b[38;5;94m╔╝\x1b[38;5;226m██\x1b[38;5;94m║\x1b[0m  \x1b[38;5;226m██\x1b[38;5;94m║\x1b[38;5;226m██\x1b[38;5;94m║\x1b[0m  \x1b[38;5;226m██\x1b[38;5;94m║╚\x1b[38;5;226m██████\x1b[38;5;94m╔╝\x1b[38;5;226m██\x1b[38;5;94m║\x1b[0m \x1b[38;5;94m╚\x1b[38;5;226m████\x1b[38;5;94m║\x1b[38;5;226m███████\x1b[38;5;94m║\x1b[0m           \x1b[97m*\x1b[0m\n" +
-	" \x1b[90m·\x1b[0m        \x1b[90m·\x1b[0m   \x1b[38;5;94m╚═════╝\x1b[0m \x1b[38;5;94m╚═╝\x1b[0m  \x1b[38;5;94m╚═╝╚═╝\x1b[0m  \x1b[38;5;94m╚═╝\x1b[0m \x1b[38;5;94m╚═════╝\x1b[0m \x1b[38;5;94m╚═╝\x1b[0m  \x1b[38;5;94m╚═══╝╚══════╝\x1b[0m\n" +
-	"       \x1b[97m*\x1b[0m \x1b[36m+\x1b[37m.\x1b[0m                                                                    \x1b[90m·\x1b[0m\n" +
-	"  \x1b[37m.\x1b[0m   \x1b[97m*\x1b[0m                      \x1b[36m+\x1b[0m          \x1b[38;5;42m▄\x1b[0m        \x1b[36m+\x1b[0m               \x1b[36m+\x1b[0m         \x1b[36m+\x1b[37m.\x1b[0m\n" +
-	"    \x1b[37m.\x1b[0m    \x1b[38;5;215m▄\x1b[38;5;208m\x1b[48;5;215m▀▀\x1b[38;5;208m\x1b[48;5;208m▀\x1b[38;5;202m\x1b[48;5;202m▀\x1b[38;5;160m\x1b[48;5;166m▀\x1b[38;5;124m▄\x1b[0m             \x1b[37m.\x1b[0m       \x1b[38;5;86m▄\x1b[38;5;159m\x1b[48;5;159m▀▀\x1b[38;5;86m\x1b[48;5;86m▀\x1b[38;5;48m\x1b[48;5;48m▀\x1b[38;5;35m\x1b[48;5;35m▀\x1b[38;5;22m▄\x1b[0m   \x1b[36m+\x1b[0m         \x1b[36m+\x1b[0m       \x1b[38;5;153m▄\x1b[38;5;74m\x1b[48;5;153m▀▀\x1b[38;5;74m\x1b[48;5;74m▀\x1b[38;5;38m\x1b[48;5;38m▀\x1b[38;5;25m\x1b[48;5;31m▀\x1b[38;5;19m▄\x1b[0m\n" +
-	"        \x1b[38;5;215m\x1b[48;5;215m▀▀▀▀\x1b[38;5;208m\x1b[48;5;208m▀\x1b[38;5;202m\x1b[48;5;202m▀\x1b[38;5;166m\x1b[48;5;166m▀\x1b[38;5;160m\x1b[48;5;124m▀\x1b[38;5;52m\x1b[48;5;52m▀\x1b[0m                    \x1b[38;5;86m\x1b[48;5;48m▀\x1b[38;5;159m\x1b[48;5;48m▀\x1b[38;5;86m\x1b[48;5;48m▀\x1b[38;5;48m\x1b[48;5;42m▀\x1b[38;5;42m\x1b[48;5;35m▀\x1b[38;5;29m\x1b[48;5;23m▀\x1b[38;5;22m\x1b[48;5;22m▀\x1b[0m        \x1b[90m·\x1b[0m    \x1b[97m*\x1b[0m      \x1b[38;5;153m\x1b[48;5;153m▀▀▀▀\x1b[38;5;74m\x1b[48;5;74m▀\x1b[38;5;38m\x1b[48;5;38m▀\x1b[38;5;31m\x1b[48;5;31m▀\x1b[38;5;25m\x1b[48;5;19m▀\x1b[38;5;17m\x1b[48;5;17m▀\x1b[0m\n" +
-	"        \x1b[38;5;208m\x1b[48;5;202m▀\x1b[38;5;215m\x1b[48;5;208m▀\x1b[38;5;208m\x1b[48;5;208m▀\x1b[38;5;208m\x1b[48;5;202m▀\x1b[38;5;202m\x1b[48;5;166m▀\x1b[38;5;166m\x1b[48;5;160m▀\x1b[38;5;160m\x1b[48;5;124m▀\x1b[38;5;124m\x1b[48;5;88m▀\x1b[38;5;52m\x1b[48;5;52m▀\x1b[90m·\x1b[0m                \x1b[37m.\x1b[0m  \x1b[38;5;35m▀\x1b[38;5;42m\x1b[48;5;23m▀\x1b[38;5;35m\x1b[48;5;23m▀\x1b[38;5;29m\x1b[48;5;22m▀\x1b[38;5;23m\x1b[48;5;22m▀\x1b[38;5;22m\x1b[48;5;22m▀\x1b[38;5;22m▀\x1b[0m                    \x1b[38;5;74m\x1b[48;5;38m▀\x1b[38;5;153m\x1b[48;5;74m▀\x1b[38;5;74m\x1b[48;5;74m▀\x1b[38;5;74m\x1b[48;5;38m▀\x1b[38;5;38m\x1b[48;5;31m▀\x1b[38;5;31m\x1b[48;5;25m▀\x1b[38;5;25m\x1b[48;5;19m▀\x1b[38;5;19m\x1b[48;5;18m▀\x1b[38;5;17m\x1b[48;5;17m▀\x1b[0m\n" +
-	" \x1b[37m.\x1b[90m·\x1b[0m     \x1b[38;5;166m\x1b[48;5;124m▀\x1b[38;5;202m\x1b[48;5;160m▀\x1b[38;5;166m\x1b[48;5;160m▀▀\x1b[38;5;160m\x1b[48;5;124m▀\x1b[38;5;124m\x1b[48;5;88m▀\x1b[38;5;88m\x1b[48;5;52m▀\x1b[38;5;52m\x1b[48;5;52m▀▀\x1b[0m                       \x1b[38;5;22m▀\x1b[0m         \x1b[36m+\x1b[0m             \x1b[38;5;31m\x1b[48;5;19m▀\x1b[38;5;38m\x1b[48;5;25m▀\x1b[38;5;31m\x1b[48;5;25m▀▀\x1b[38;5;25m\x1b[48;5;19m▀\x1b[38;5;19m\x1b[48;5;18m▀\x1b[38;5;18m\x1b[48;5;17m▀\x1b[38;5;17m\x1b[48;5;17m▀▀\x1b[0m     \x1b[90m·\x1b[0m\n" +
-	"         \x1b[38;5;88m▀\x1b[38;5;88m\x1b[48;5;52m▀▀\x1b[38;5;52m\x1b[48;5;52m▀▀▀\x1b[38;5;52m▀\x1b[0m       \x1b[90m·\x1b[0m     \x1b[37m.\x1b[0m                                   \x1b[38;5;18m▀\x1b[38;5;18m\x1b[48;5;17m▀▀\x1b[38;5;17m\x1b[48;5;17m▀▀▀\x1b[38;5;17m▀\x1b[0m  \x1b[90m·\x1b[0m   \x1b[90m·\x1b[0m\n" +
-	"  \x1b[90m·\x1b[0m                   \x1b[36m+\x1b[0m  \x1b[37m.\x1b[0m\n" +
-	"                                                                    \x1b[90m·\x1b[0m\n" +
-	"                   \x1b[90m·\x1b[36m+\x1b[90ma\x1b[0m \x1b[90mBBS·door\x1b[0m \x1b[90mgame\x1b[0m \x1b[90mof\x1b[0m \x1b[90mconquest\x1b[0m \x1b[90mand\x1b[0m \x1b[90mempire\x1b[0m \x1b[90m·\x1b[0m\n" +
-	"\n"

@@ -69,6 +69,13 @@ Or run it directly:
 go run ./cmd/immortal-barons -local
 ```
 
+Run `immortal-barons -help` (or `-h`) to see all the command-line options.
+
+## Character set
+
+See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset/)
+for how to choose between CP437 and UTF-8.
+
 ## Running as a BBS door
 
 Immortal Barons can run as a native door under BBS software on any platform Go

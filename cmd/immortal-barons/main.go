@@ -39,7 +39,14 @@ func main() {
 	planetary := flag.Bool("planetary", false, "run the inter-BBS PLANETARY step (read inbound, launch attacks, write outbound) and exit")
 	leagueConfig := flag.Bool("league-config", false, "broadcast this board's league settings to the league (coordinator/node #1 only) and exit")
 	reset := flag.Bool("reset", false, "end the current game: crown the Planetary Master, wipe empires, re-seed, and start fresh (backs up world.json first)")
+	utf8 := flag.Bool("utf8", false, "force UTF-8 output (needed for non-English languages; -local auto-detects this from your locale)")
+	cp437 := flag.Bool("cp437", false, "force CP437 output (the door default; overrides -local locale auto-detection)")
 	flag.Parse()
+
+	if *utf8 && *cp437 {
+		fmt.Fprintln(os.Stderr, "immortal-barons: use only one of -utf8 and -cp437")
+		os.Exit(2)
+	}
 
 	cfg, err := store.LoadConfig(*dataDir)
 	if err != nil {
@@ -97,7 +104,7 @@ func main() {
 	}
 
 	if *local {
-		runLocal(cfg, *name, today)
+		runLocal(cfg, *name, today, wantUTF8(*utf8, *cp437, true))
 		return
 	}
 
@@ -125,6 +132,12 @@ func main() {
 	}
 	defer closeSession()
 
+	// Traditional BBS terminals speak CP437, and Synchronet assumes doors output
+	// CP437; transcode UTF-8 -> CP437 unless the sysop forces UTF-8.
+	if !wantUTF8(*utf8, *cp437, false) {
+		s = session.NewCP437Writer(s)
+	}
+
 	handle := caller.Handle
 	if handle == "" {
 		handle = fmt.Sprintf("node%d", caller.Node)
@@ -141,14 +154,35 @@ func main() {
 
 // runLocal plays Immortal Barons locally in the caller's terminal against the
 // shared persistent world, for someone testing or playing outside a BBS.
-func runLocal(cfg game.Config, name, today string) {
+func runLocal(cfg game.Config, name, today string, utf8 bool) {
 	c := session.NewConsole()
 	defer c.Close()
 
-	if _, err := play.Run(c, play.Identity{Handle: name}, cfg, today); err != nil {
+	// utf8 was resolved from the flags and the locale by wantUTF8.
+	var s session.Session = c
+	if !utf8 {
+		s = session.NewCP437Writer(c)
+	}
+	if _, err := play.Run(s, play.Identity{Handle: name}, cfg, today); err != nil {
 		fmt.Fprintln(os.Stderr, "immortal-barons -local:", err)
 	}
-	fmt.Fprint(c, "\nUntil next turn, Baron.\n")
+	fmt.Fprint(s, "\nUntil next turn, Baron.\n")
+}
+
+// wantUTF8 resolves the output charset. An explicit -utf8/-cp437 always wins;
+// otherwise a local session follows the process locale, and a door assumes
+// CP437 (its locale reflects the BBS server, not the caller's terminal).
+func wantUTF8(forceUTF8, forceCP437, local bool) bool {
+	switch {
+	case forceUTF8:
+		return true
+	case forceCP437:
+		return false
+	case local:
+		return session.LocaleIsUTF8()
+	default:
+		return false
+	}
 }
 
 func defaultName() string {

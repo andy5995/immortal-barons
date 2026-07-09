@@ -61,6 +61,10 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 	if id.TimeLeft > 0 {
 		hard = time.Now().Add(id.TimeLeft)
 	}
+	// Read the charset capability before wrapping s in the Deadline (which does
+	// not forward the marker): CP437 sessions get English-only, UTF-8 sessions
+	// may use any language.
+	utf8 := session.IsUTF8(s)
 	d := session.NewDeadline(s, time.Duration(cfg.IdleTimeoutSecs)*time.Second, cfg.MaxIdleWarnings, hard)
 	s = d
 
@@ -104,7 +108,12 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 		}
 		// First run: a brand-new player picks their UI language once, before
 		// naming their realm. Returning players (found above) never reach here.
-		lang := selectLanguage(s)
+		// The picker only appears in UTF-8 mode — a CP437 session can't display
+		// non-English text, so it stays English.
+		lang := ""
+		if utf8 {
+			lang = selectLanguage(s)
+		}
 
 		// Prompt for a realm name and insert atomically. Re-check under the
 		// same lock that does the insert: while we prompted, another goroutine
@@ -143,7 +152,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 
 	// io.EOF means the caller dropped the connection or was booted; still persist
 	// state below.
-	gameErr := menu.GameLoop(s, w, e)
+	gameErr := menu.GameLoop(s, w, e, utf8)
 	reason = d.Reason()
 	if reason == "" {
 		if errors.Is(gameErr, io.EOF) {

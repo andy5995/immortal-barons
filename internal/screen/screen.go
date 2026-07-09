@@ -18,6 +18,8 @@ package screen
 import (
 	"strings"
 	"unicode/utf8"
+
+	"golang.org/x/text/encoding/charmap"
 )
 
 // Render converts a CP437 template to UTF-8 and fills its field tokens. Label
@@ -89,6 +91,13 @@ func Render(template []byte, values map[string]string, translate func(string) st
 	return b.String()
 }
 
+// FromCP437 decodes a CP437 byte stream to UTF-8 (ASCII bytes, which include
+// every ANSI escape, pass through unchanged; high bytes map to their CP437
+// glyph). Use it to render a static .ans screen that has no {label}/[value]
+// field tokens — a title screen or splash — where the token parsing in Render
+// is neither needed nor wanted.
+func FromCP437(b []byte) string { return fromCP437(b) }
+
 // Label is one translatable label field found in a template: its msgid and the
 // column width its token span reserves. A build-time guard uses this to flag a
 // translation that would not fit its cell.
@@ -146,31 +155,17 @@ func indexRune(runes []rune, target rune, from int) int {
 	return -1
 }
 
-// fromCP437 maps a CP437 byte stream to UTF-8. Bytes below 0x80 (ASCII, which
-// includes every ANSI escape sequence) pass through unchanged; high bytes map
-// to their CP437 glyph. This lets artists author in the CP437 tools they
-// already use while the game emits UTF-8.
+// fromCP437 maps a CP437 byte stream to UTF-8 using the same code-page table
+// as the output encoder (golang.org/x/text/encoding/charmap), so decode and
+// encode are exact inverses. ASCII bytes (which include every ANSI escape
+// sequence) map to themselves; high bytes map to their CP437 glyph. This lets
+// artists author screens in the CP437 tools they already use while the game
+// works internally in UTF-8.
 func fromCP437(b []byte) string {
 	var sb strings.Builder
 	sb.Grow(len(b))
 	for _, c := range b {
-		if c < 0x80 {
-			sb.WriteByte(c)
-		} else {
-			sb.WriteRune(cp437High[c-0x80])
-		}
+		sb.WriteRune(charmap.CodePage437.DecodeByte(c))
 	}
 	return sb.String()
-}
-
-// cp437High is the Unicode glyph for each CP437 byte 0x80..0xFF, in order.
-var cp437High = [...]rune{
-	'Ç', 'ü', 'é', 'â', 'ä', 'à', 'å', 'ç', 'ê', 'ë', 'è', 'ï', 'î', 'ì', 'Ä', 'Å',
-	'É', 'æ', 'Æ', 'ô', 'ö', 'ò', 'û', 'ù', 'ÿ', 'Ö', 'Ü', '¢', '£', '¥', '₧', 'ƒ',
-	'á', 'í', 'ó', 'ú', 'ñ', 'Ñ', 'ª', 'º', '¿', '⌐', '¬', '½', '¼', '¡', '«', '»',
-	'░', '▒', '▓', '│', '┤', '╡', '╢', '╖', '╕', '╣', '║', '╗', '╝', '╜', '╛', '┐',
-	'└', '┴', '┬', '├', '─', '┼', '╞', '╟', '╚', '╔', '╩', '╦', '╠', '═', '╬', '╧',
-	'╨', '╤', '╥', '╙', '╘', '╒', '╓', '╫', '╪', '┘', '┌', '█', '▄', '▌', '▐', '▀',
-	'α', 'ß', 'Γ', 'π', 'Σ', 'σ', 'µ', 'τ', 'Φ', 'Θ', 'Ω', 'δ', '∞', 'φ', 'ε', '∩',
-	'≡', '±', '≥', '≤', '⌠', '⌡', '÷', '≈', '°', '∙', '·', '√', 'ⁿ', '²', '■', ' ',
 }

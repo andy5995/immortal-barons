@@ -8,6 +8,10 @@
 - See [How the game talks to the caller](https://andy5995.github.io/immortal-barons/door-setup/#how-the-game-talks-to-the-caller)
   in the Door Setup guide for the socket and stdio details.
 
+## The characters look wrong. What can I do?
+
+See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset/).
+
 ## How is Immortal Barons different from Barren Realms Elite?
 
 - It is a new game, written from scratch in Go, inspired by BRE. It shares no

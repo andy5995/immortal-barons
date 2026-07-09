@@ -79,6 +79,7 @@ func Assemble(repoRoot, outDir string) error {
 			{guideIntroSource(repoRoot, lang.code), filepath.Join(langDir, "guide", "index.md"), "guide/index.md"},
 			{doorSetupSource(repoRoot, lang.code), filepath.Join(langDir, "door-setup", "index.md"), "door-setup/index.md"},
 			{webserverSource(repoRoot, lang.code), filepath.Join(langDir, "web-server", "index.md"), "web-server/index.md"},
+			{charsetSource(repoRoot, lang.code), filepath.Join(langDir, "charset", "index.md"), "charset/index.md"},
 			{faqSource(repoRoot, lang.code), filepath.Join(langDir, "faq", "index.md"), "faq/index.md"},
 			{translatingSource(repoRoot, lang.code), filepath.Join(langDir, "translating", "index.md"), "translating/index.md"},
 		} {
@@ -187,6 +188,9 @@ func doorSetupSource(repoRoot, lang string) string {
 }
 func webserverSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "docs", "webserver.md"), lang)
+}
+func charsetSource(repoRoot, lang string) string {
+	return langFile(filepath.Join(repoRoot, "docs", "charset.md"), lang)
 }
 func faqSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "docs", "faq.md"), lang)

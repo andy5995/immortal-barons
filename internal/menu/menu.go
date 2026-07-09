@@ -23,6 +23,10 @@ import (
 type ctx struct {
 	*game.World
 	active *game.Empire
+	// UTF8 reports whether this session can display UTF-8. When false (a CP437
+	// door/terminal) all output is forced to English, since non-English text
+	// cannot be represented in CP437.
+	UTF8 bool
 }
 
 // Player is the active empire for this session (nil before onboarding / after
@@ -32,7 +36,10 @@ func (c *ctx) Player() *game.Empire { return c.active }
 // playerLang is the active caller's UI language ("" = English), used to
 // localize menu chrome at render time.
 func playerLang(c *ctx) string {
-	if c != nil && c.active != nil {
+	// A CP437 session can only render English, so ignore any stored language —
+	// this is the single render-time guard that keeps a language set via the
+	// UTF-8 web front-end from mojibaking when reached through a CP437 door.
+	if c != nil && c.UTF8 && c.active != nil {
 		return c.active.Language
 	}
 	return ""

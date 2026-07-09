@@ -91,6 +91,21 @@ stdio door.
 Note: the Windows socket path is built but has not yet been tested against a
 live BBS. If you run the game as a Windows door, please report how it goes.
 
+### Character set
+
+The door sends CP437 by default — the character set traditional BBS terminals
+(SyncTERM, NetRunner) expect. BBS software passes the door's output to the caller
+unchanged, so it must match the caller's terminal:
+
+- CP437 terminals (SyncTERM and most classic clients) — use the default.
+- UTF-8 terminals (for example, telnet from a modern terminal) — add `-utf8`.
+
+One door command line sends one character set; for a mixed board, pick the
+majority or set up two entries. Non-English languages need `-utf8`.
+
+See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset/)
+for the full explanation and how to test each one.
+
 ## Daily maintenance
 
 Run maintenance once a day (a nightly event is the usual place):

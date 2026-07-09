@@ -55,6 +55,12 @@ func languageName(code string) string {
 // so each caller keeps their own. Partly-translated languages fall back to
 // English per string.
 func pickLanguage(s session.Session, w *ctx) Result {
+	// Non-English text can't be shown over a CP437 session, so language
+	// selection is only offered in UTF-8 mode.
+	if !w.UTF8 {
+		ok(s, "To enable language selection, this program must be run with -utf8")
+		return Stay
+	}
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Language:"), ansi.Reset)
 	for i, l := range helpLanguages {
