@@ -47,17 +47,24 @@ sometimes has no locale set.
 
 ## Running as a door
 
-BBS software such as Synchronet and Mystic sends the door's output to the caller
-without changing it. So the character set the door sends must match the caller's
-terminal:
+How the door's character set reaches the caller depends on your BBS software.
+
+**Synchronet (its default mode)** detects the caller's character set when they
+connect and translates the door's CP437 output to it. So keep the default
+(CP437), and Synchronet handles every caller — CP437 and UTF-8 alike. Do not add
+`-utf8`, and do not turn on Synchronet's "Untranslated" mode for the door.
+
+**Mystic, or any pass-through setup** (including Synchronet's "Untranslated"
+mode), sends the door's output to the caller unchanged. Then the character set
+the door sends must match the caller's terminal:
 
 - CP437 terminals (SyncTERM and most classic clients) — use the default.
 - UTF-8 terminals (for example, telnet from a modern terminal window) — add
   `-utf8`.
 
-One door command line sends one character set. If your board serves both kinds
-of caller, pick the character set most of them use, or set up two door entries
-(one with `-utf8`, one without) and let callers choose.
+In a pass-through setup, one door command line sends one character set. If your
+board serves both kinds of caller, pick the character set most of them use, or
+set up two door entries (one with `-utf8`, one without) and let callers choose.
 
 ## Languages
 
