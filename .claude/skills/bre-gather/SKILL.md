@@ -110,6 +110,40 @@ same source-1-beats-strings rule that already applies to colors.
 See `references/extraction.md` for the exact `strings` / `grep -abo` / `dd|xxd`
 commands and worked examples.
 
+## Cross-reference the docs, the overlay, AND a disassembly — never one alone
+
+A mechanic's full intended scope is usually described in ONE place in the help
+docs (`game/breins.txt`, `game/*.hlp`), while the overlay strings and the
+disassembly show it piecemeal — a display routine here, a constant there. So for
+any mechanic: read the docs' entry FIRST for the complete list of effects, then
+confirm the specifics in `BRE.OVR`/`BRE.EXE`, and (when a number is needed) the
+disassembly — and reconcile all three before concluding. Reconstructing from only
+the overlay + code, skipping the docs, is how a "finding" gets revised two or
+three times.
+
+Real miss (the Technology-region mechanic): `breins.txt`'s Technology entry lists
+*every* effect (military efficiency, region output, maintenance on regions +
+military + SDI, food spoilage, tax income). Skipping it and rebuilding the list
+from the overlay "Because of technology…" report strings + the code produced two
+wrong answers before the docs settled it.
+
+**Plain grep silently misses these files — use `grep -a`, `strings`, or `ack`.**
+`breins.txt` / `*.hlp` contain non-text bytes (ISO-8859/CP437 high bytes plus
+color control codes like 0x04/0x07 in the `^\0BTechnology^\07 … ^END` entry
+wrappers). GNU grep classifies such a file as *binary* and, by default, reports
+NO match for text that is plainly there — no line, no "Binary file matches"
+message, just exit 1. This is grep's binary classification of the file, **not**
+the locale: reproduced here in BOTH a UTF-8 and a C locale, and `LC_ALL=C` does
+not fix it. What works: `grep -a` (`--binary-files=text`), `strings <file> |
+grep`, or **`ack`** (which treats these as text by default). **Never trust a
+*silent* empty grep on a BRE file — confirm with `strings`/`ack` before
+concluding the text isn't there.** (Reproduced: `grep 'longterm enhancements'
+breins.txt` → exit 1; `grep -a` and `ack -i tech` → match.)
+
+**One word heads several unrelated entries.** `Technology` is both the region-type
+mechanic AND the "Technology Agreement" diplomacy treaty. Read the whole entry
+(to its `^END`) and don't conflate two entries that share a keyword.
+
 ## License boundaries — BRE is proprietary, not open source
 
 Barren Realms Elite is copyrighted (John Dailey Software; original design by
