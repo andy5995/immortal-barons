@@ -12,7 +12,7 @@ import (
 
 // cp437Writer wraps a Session so the engine's UTF-8 output is transcoded to
 // CP437 on the wire — the character set traditional BBS terminals (SyncTERM,
-// NetRunner) and Synchronet doors expect. A rune with no CP437 equivalent is
+// NetRunner) expect. A rune with no CP437 equivalent is
 // replaced with the substitution byte 0x1a; in practice a CP437 session forces
 // English (see ctx.UTF8), so every rune it emits is already CP437-mappable and
 // the substitution is effectively unreachable. ReadKey passes through to the

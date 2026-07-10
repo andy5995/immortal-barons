@@ -142,8 +142,8 @@ func main() {
 	}
 	defer closeSession()
 
-	// Traditional BBS terminals speak CP437, and Synchronet assumes doors output
-	// CP437; transcode UTF-8 -> CP437 unless the sysop forces UTF-8.
+	// Traditional BBS terminals expect CP437, so transcode UTF-8 -> CP437 unless
+	// the sysop forces UTF-8.
 	if !wantUTF8(*utf8, *cp437, false) {
 		s = session.NewCP437Writer(s)
 	}
