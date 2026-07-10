@@ -17,6 +17,7 @@ import (
 	"os"
 	"os/user"
 	"runtime"
+	"runtime/debug"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/door"
@@ -41,7 +42,13 @@ func main() {
 	reset := flag.Bool("reset", false, "end the current game: crown the Planetary Master, wipe empires, re-seed, and start fresh (backs up world.json first)")
 	utf8 := flag.Bool("utf8", false, "force UTF-8 output (needed for non-English languages; -local auto-detects this from your locale)")
 	cp437 := flag.Bool("cp437", false, "force CP437 output (the door default; overrides -local locale auto-detection)")
+	version := flag.Bool("version", false, "print version information and exit")
 	flag.Parse()
+
+	if *version {
+		printVersion()
+		return
+	}
 
 	if *utf8 && *cp437 {
 		fmt.Fprintln(os.Stderr, "immortal-barons: use only one of -utf8 and -cp437")
@@ -193,6 +200,30 @@ func defaultName() string {
 		return u.Username
 	}
 	return "sysop"
+}
+
+// printVersion writes the app version, the Go runtime, and — when built from a
+// VCS checkout (Go embeds this automatically) — the revision. This is the
+// conventional -version output for a Go program.
+func printVersion() {
+	fmt.Printf("immortal-barons %s\n", game.Version)
+	fmt.Printf("go: %s\n", runtime.Version())
+	if bi, ok := debug.ReadBuildInfo(); ok {
+		var rev, mod string
+		for _, s := range bi.Settings {
+			switch s.Key {
+			case "vcs.revision":
+				rev = s.Value
+			case "vcs.modified":
+				if s.Value == "true" {
+					mod = " (modified)"
+				}
+			}
+		}
+		if rev != "" {
+			fmt.Printf("revision: %s%s\n", rev, mod)
+		}
+	}
 }
 
 // openSession attaches to the caller per the dropfile's I/O mode and platform.
