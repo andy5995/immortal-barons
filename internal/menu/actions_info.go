@@ -175,8 +175,9 @@ func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) 
 			ansi.FgWhite, tr(s, "Change"), ansi.Reset, clr, sign, fmtNum(abs), ansi.Reset)
 	}
 
-	row("Total Population", b.Totals.Population, b.Change.Population, comma)
-	row("Total Regions", b.Totals.Regions, b.Change.Regions, comma)
+	locale := func(n int) string { return formatGold(n, sessionLang(s)) }
+	row("Total Population", b.Totals.Population, b.Change.Population, locale)
+	row("Total Regions", b.Totals.Regions, b.Change.Regions, locale)
 	row("Total Net Worth", b.Totals.NetWorth, b.Change.NetWorth, abbrevMoney)
 }
 

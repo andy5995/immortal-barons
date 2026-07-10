@@ -82,7 +82,7 @@ func TestIncomeReportShowsIndustryProduction(t *testing.T) {
 	incomeReport(f, w, p)
 	out := f.out.String()
 	for _, want := range []string{
-		"gold was produced by your Industry",
+		"gold was earned from Industrial Zones", // industrial gold, now itemized in the breakdown
 		"Troopers were trained by Industrial Zones",
 	} {
 		if !strings.Contains(out, want) {

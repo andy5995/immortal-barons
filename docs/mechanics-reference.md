@@ -205,10 +205,32 @@ different economic role:
 - **Technology** — long-term efficiency: cheaper units, lower maintenance,
   higher tax income.
 - **Industrial** — produces military goods; vital when buying arms is
-  disabled and you must *build* instead.
+  disabled and you must *build* instead. Also yields gold.
 
 Waste regions (from enemy weapons) can be cleaned for less than the cost
 of new land.
+
+**Region gold income (BRE-verified — disassembly of BRE.OVR, offsets
+0x342C0–0x34A4E).** Each gold region yields, per turn,
+`perRegion = yield×Rate/100 + Base`, times its region count, where `yield` is a
+per-(game-day) factor in the band 1.0–1.5 (the exact BRE distribution lives in
+an unmapped helper segment; IB reconstructs it as this tunable band):
+
+| Region | Rate | Base | Notes |
+|--------|-----:|-----:|-------|
+| Mountain (ore) | 400 | 3,550 | smallest swing → most stable |
+| Coastal (tourism) | 1,000 | 3,750 | × support factor `0.10 + 0.90·(Support/100)` — floor ~375/region at 0% support, never zero |
+| Desert (solar) | 2,000 | 3,000 | widest swing |
+| Industrial | 100 | 2,500 | × industry-efficiency modifier |
+| River (hydro) | 100 | 5,000 | highest base; ~10% "bad-year" turns halve it |
+
+**Urban and Technology produce no direct gold** (BRE-verified): Urban is
+population housing, Technology is maintenance reduction. Food output: River ×20,
+Agricultural ×5 per region. These income numbers, the caps (2B money / 1.599B
+interest), the pirate caps table, and the net-worth weights are BRE-scale;
+**unit prices, the tax per-capita coefficient, and the yield band are IB's own
+reconstructions** anchored to this scale (BRE computes prices/maintenance inline
+— not stored as constants). All tunables live in `internal/game/balance.go`.
 
 **Population and tax** are a major income engine. A *low* tax rate (2–3%)
 drives fast population growth; late game, tax on a huge population becomes

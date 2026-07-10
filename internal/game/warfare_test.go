@@ -4,25 +4,25 @@ import "testing"
 
 func TestFundSDI(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
-	a.Gold = 100000
+	a.Gold = 100_000_000
 
-	level, err := w.FundSDI(a, 30000)
+	level, err := w.FundSDI(a, 3*SDIStep)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if level != 3 {
 		t.Errorf("expected SDI 3, got %d", level)
 	}
-	if a.Gold != 70000 {
-		t.Errorf("expected gold 70000, got %d", a.Gold)
+	if want := 100_000_000 - 3*SDIStep; a.Gold != want {
+		t.Errorf("expected gold %d, got %d", want, a.Gold)
 	}
 }
 
 func TestFundSDICapsAtMax(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
-	a.Gold = 2_000_000
+	a.Gold = 200_000_000
 
-	level, err := w.FundSDI(a, 1_000_000)
+	level, err := w.FundSDI(a, 200_000_000)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -30,7 +30,7 @@ func TestFundSDICapsAtMax(t *testing.T) {
 		t.Errorf("expected SDI capped at %d, got %d", SDIMax, level)
 	}
 	wantSpent := SDIMax * SDIStep
-	if a.Gold != 2_000_000-wantSpent {
+	if a.Gold != 200_000_000-wantSpent {
 		t.Errorf("expected only %d gold spent, gold now %d", wantSpent, a.Gold)
 	}
 }
@@ -39,7 +39,7 @@ func TestFundSDICantAfford(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
 	a.Gold = 100
 
-	_, err := w.FundSDI(a, 30000)
+	_, err := w.FundSDI(a, 3*SDIStep)
 	if err != ErrCantAfford {
 		t.Fatalf("expected ErrCantAfford, got %v", err)
 	}
@@ -54,7 +54,7 @@ func TestNuclearStrikeSDIReducesDamage(t *testing.T) {
 
 	w1 := NewWorldSeed(cfg, 42)
 	a1 := w1.AddHuman("att", "Attacker")
-	a1.Gold = 100000
+	a1.Gold = 10_000_000
 	d1 := w1.Empires[0]
 	d1.Protection, a1.Protection = 0, 0
 	d1.Land = 1000
@@ -62,7 +62,7 @@ func TestNuclearStrikeSDIReducesDamage(t *testing.T) {
 
 	w2 := NewWorldSeed(cfg, 42)
 	a2 := w2.AddHuman("att", "Attacker")
-	a2.Gold = 100000
+	a2.Gold = 10_000_000
 	d2 := w2.Empires[0]
 	d2.Protection, a2.Protection = 0, 0
 	d2.Land = 1000
@@ -93,7 +93,7 @@ func TestDoomerKaboomer(t *testing.T) {
 	cfg.AICount = 2
 	w := NewWorldSeed(cfg, 7)
 	a := w.AddHuman("att", "Attacker")
-	a.Gold = 1_000_000
+	a.Gold = 100_000_000
 	a.Protection = 0
 	beforeAttackerLand := a.Land
 
@@ -112,7 +112,7 @@ func TestDoomerKaboomer(t *testing.T) {
 	if report == "" {
 		t.Error("expected a non-empty report")
 	}
-	if a.Gold != 1_000_000-DoomerCost {
+	if a.Gold != 100_000_000-DoomerCost {
 		t.Errorf("gold not deducted: got %d", a.Gold)
 	}
 	if a.Land != beforeAttackerLand {

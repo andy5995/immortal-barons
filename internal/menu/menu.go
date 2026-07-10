@@ -344,10 +344,10 @@ func draw(s session.Session, g *ctx, m *Menu) {
 			if cols {
 				price, owned := "", ""
 				if it.Price != nil {
-					price = comma(it.Price(g))
+					price = formatGold(it.Price(g), lang)
 				}
 				if it.Owned != nil {
-					owned = comma(it.Owned(g))
+					owned = formatGold(it.Owned(g), lang)
 				}
 				fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %8s %9s\n",
 					col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset, price, owned)

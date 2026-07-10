@@ -9,7 +9,7 @@ package game
 // tunable.
 const (
 	RegionUpkeepPerLand = 2   // gold per region of land, per turn
-	DesertRate          = 25  // % of the army that deserts at full non-payment
+	ArmyDesertRate      = 25  // % of the army that deserts at full non-payment
 	RegionRevoltRate    = 15  // % of land that revolts at full non-payment
 	SupportPerBoostGold = 100 // gold to raise popular support by one point
 	MoralePerBoostGold  = 100 // gold to raise military morale by one point
@@ -82,7 +82,7 @@ func (w *World) PayForces(e *Empire, given int) int {
 		return 0
 	}
 	fracPct := (req - given) * 100 / req // req > 0 here (else given >= req)
-	desertPct := fracPct * DesertRate / 100
+	desertPct := fracPct * ArmyDesertRate / 100
 	lost := 0
 	desert := func(n *int) {
 		d := *n * desertPct / 100

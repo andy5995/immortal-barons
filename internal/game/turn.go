@@ -1,6 +1,11 @@
 package game
 
-import "time"
+import (
+	"encoding/binary"
+	"hash/fnv"
+	"io"
+	"time"
+)
 
 // PlayTurn processes one turn for a single empire: its economy runs, and
 // its turn/protection counters tick down. Idle empires (whose owner never
@@ -168,32 +173,74 @@ func (e *Empire) popCapacity() int {
 
 // IncomeBreakdown itemizes a turn's income by source (gold), plus the food
 // grown. The income report and the actual gold credit both derive from this,
-// so what the player is shown equals what is credited to the last coin.
+// so what the player is shown equals what is credited to the last coin. Urban
+// and Technology regions produce no direct gold (BRE-verified), so they are
+// not listed here.
 type IncomeBreakdown struct {
-	Taxes, Ore, Tourism, Solar, Rivers, Urban, Industrial, Technology, Trade int
-	Food                                                                     int
+	Taxes, Ore, Tourism, Solar, Rivers, Industrial, Trade int
+	Food                                                  int
 }
 
 // Gold sums the gold-producing sources.
 func (b IncomeBreakdown) Gold() int {
-	return b.Taxes + b.Ore + b.Tourism + b.Solar + b.Rivers + b.Urban + b.Industrial + b.Technology + b.Trade
+	return b.Taxes + b.Ore + b.Tourism + b.Solar + b.Rivers + b.Industrial + b.Trade
 }
 
-// IncomeThisTurn itemizes e's income for the current turn. Technology scales
-// every gold source by TechFactor; low popular support cuts Coastal tourism.
-// Region gold weights mirror RegionMix.income().
+// regionYield returns this turn's income yield (percent, YieldMin..YieldMax)
+// for empire e's region type identified by salt. It is deterministic in
+// (w.GameDay, e.Name, salt) — NOT a fresh RNG draw — so IncomeThisTurn stays
+// pure and the income report always equals what CollectIncome credits. The
+// variance is per game-day: a good/bad "year" lasts the whole day.
+func (w *World) regionYield(e *Empire, salt int) int {
+	h := fnv.New32a()
+	var buf [8]byte
+	binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
+	binary.LittleEndian.PutUint32(buf[4:8], uint32(salt))
+	h.Write(buf[:])
+	io.WriteString(h, e.Name)
+	span := YieldMax - YieldMin + 1
+	return YieldMin + int(h.Sum32()%uint32(span))
+}
+
+// industrialGold is one Industrial region's gold this turn: the BRE per-region
+// value, scaled by IB's industry-efficiency modifier. IB has no separate gold
+// efficiency factor today, so the modifier is 100% (a no-op hook for a future
+// tech-driven industry bonus). This is credited once, via IncomeThisTurn — the
+// old double-count (here AND in Manufacture) is gone.
+func (w *World) industrialGold(e *Empire) int {
+	base := w.regionYield(e, 5)*IndustrialRate/100 + IndustrialBase
+	return base // × industry-efficiency modifier (100% today; hook for a future tech bonus)
+}
+
+// riverGold is one River region's gold this turn. Rivers have the highest base
+// but an occasional "bad year" (a small deterministic chance, keyed off a
+// separate yield salt) that halves the take.
+func (w *World) riverGold(e *Empire) int {
+	if w.regionYield(e, 40) < YieldMin+5 { // ~10% bad-year dud (tunable)
+		return RiverBase / 2
+	}
+	return w.regionYield(e, 4)*RiverRate/100 + RiverBase
+}
+
+// IncomeThisTurn itemizes e's income for the current turn. Each region's gold
+// is BRE's perRegion = yield*Rate/100 + Base times its region count; Coastal is
+// additionally scaled by a support floor (0.10 + 0.90·support, so tourism never
+// zeroes out). TechFactor scales every gold source (the tech-factor's role as
+// an income multiplier is otherwise deferred to #20). Products are widened to
+// int64 so they stay correct on 32-bit builds even at money-cap scale.
 func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 	tf := e.TechFactor()
-	scale := func(n int) int { return n * (100 + tf) / 100 }
+	scale := func(n int64) int { return int(n * int64(100+tf) / 100) }
+	perRegion := func(salt, rate, base int) int { return w.regionYield(e, salt)*rate/100 + base }
+
+	support := 10 + 90*e.Support/100 // support factor ×100: 0.10 + 0.90·(Support/100)
 	return IncomeBreakdown{
-		Taxes:      scale(e.People * e.Tax / 100 * 8),
-		Ore:        scale(e.Regions.Mountain * 12),
-		Tourism:    scale(e.Regions.Coastal * 25 * e.Support / 100), // support slashes tourism
-		Solar:      scale(e.Regions.Desert * 20),
-		Rivers:     scale(e.Regions.River * 30),
-		Urban:      scale(e.Regions.Urban * 8),
-		Industrial: scale(e.Regions.Industrial * 10),
-		Technology: scale(e.Regions.Technology * 15),
+		Taxes:      scale(int64(e.People) * int64(e.Tax) / 100 * TaxGoldPerCapita),
+		Ore:        scale(int64(perRegion(1, MountainRate, MountainBase)) * int64(e.Regions.Mountain)),
+		Tourism:    scale(int64(perRegion(2, CoastalRate, CoastalBase)) * int64(support) / 100 * int64(e.Regions.Coastal)),
+		Solar:      scale(int64(perRegion(3, DesertRate, DesertBase)) * int64(e.Regions.Desert)),
+		Rivers:     scale(int64(w.riverGold(e)) * int64(e.Regions.River)),
+		Industrial: scale(int64(w.industrialGold(e)) * int64(e.Regions.Industrial)),
 		Trade:      w.tradeIncome(e), // trade-treaty bonus (population-scaled)
 		Food:       e.Regions.foodProduced(),
 	}
@@ -217,7 +264,15 @@ func (w *World) processEconomy(e *Empire) {
 	// Bank interest scales with the league's Interest Rate knob, anchored so
 	// the default (50) reproduces the historical ~1%/turn. Mapping to BRE's
 	// exact per-day interest math is deferred; this keeps the knob linear.
-	e.Bank += min(e.Bank, InterestCap) * w.Config.InterestRate / 5000
+	// Compute the whole interest step in int64 and clamp before storing: on a
+	// 32-bit build (386) both the min(Bank,InterestCap)*InterestRate product AND
+	// the Bank+interest sum can exceed int32 before the MoneyCap clamp. Storage
+	// stays int.
+	newBank := int64(e.Bank) + int64(min(e.Bank, InterestCap))*int64(w.Config.InterestRate)/5000
+	if newBank > MoneyCap {
+		newBank = MoneyCap
+	}
+	e.Bank = int(newBank)
 	if e.Debt > 0 {
 		e.Debt += e.Debt * 10 / 100
 	}
@@ -326,10 +381,9 @@ func (w *World) processEconomy(e *Empire) {
 }
 
 // Industrial production tuning (v1, tunable — see docs/mechanics-reference.md).
-const (
-	IndustryPointsPerRegion = 10  // production points each Industrial region yields per turn
-	IndustryGoldPerRegion   = 250 // gold each Industrial region yields per turn
-)
+// Industrial gold is credited via IncomeThisTurn (see industrialGold); this
+// governs unit production only.
+const IndustryPointsPerRegion = 10 // production points each Industrial region yields per turn
 
 // Point cost to manufacture one of each unit type; cheaper units convert
 // from more of the same points.
@@ -386,14 +440,14 @@ func (w *World) ProjectedProduction(e *Empire) [6]int {
 	}
 }
 
-// Manufacture converts e's Industrial regions into production points and
-// gold, then spends the points on units per e.ProdXxx percentages (see
-// ProjectedProduction). Specialization applies a per-unit efficiency
-// bonus/penalty on top; it never overrides the percentage split. Called at
-// turn start, alongside CollectIncome (#71).
+// Manufacture converts e's Industrial regions into production points and spends
+// them on units per e.ProdXxx percentages (see ProjectedProduction).
+// Specialization applies a per-unit efficiency bonus/penalty on top; it never
+// overrides the percentage split. Called at turn start, alongside CollectIncome
+// (#71). Industrial GOLD is not credited here — it flows through IncomeThisTurn
+// (see industrialGold); e.IndustryGold is set for the report only.
 func (w *World) Manufacture(e *Empire) {
-	e.IndustryGold = e.Regions.Industrial * IndustryGoldPerRegion
-	e.Gold += e.IndustryGold
+	e.IndustryGold = w.industrialGold(e) * e.Regions.Industrial
 
 	p := w.ProjectedProduction(e)
 	e.MadeTroopers, e.MadeJets, e.MadeTurrets = p[0], p[1], p[2]

@@ -176,8 +176,18 @@ func pause(s session.Session) {
 	}
 }
 
-// comma formats n with thousands separators (478967 -> "478,967").
-func comma(n int) string {
+// groupSep maps a UI language to its thousands separator. All three are ASCII,
+// so they are CP437-safe (and CP437 mode forces English anyway). Unknown
+// languages fall back to the comma.
+var groupSep = map[string]byte{"": ',', "en": ',', "de": '.', "ru": ' '}
+
+// formatGold groups n's thousands with lang's locale separator
+// (en 1,847,392,104 / de 1.847.392.104 / ru "1 847 392 104").
+func formatGold(n int, lang string) string {
+	sep, ok := groupSep[lang]
+	if !ok {
+		sep = ','
+	}
 	str := strconv.Itoa(n)
 	neg := n < 0
 	if neg {
@@ -186,7 +196,7 @@ func comma(n int) string {
 	var b strings.Builder
 	for i := 0; i < len(str); i++ {
 		if i > 0 && (len(str)-i)%3 == 0 {
-			b.WriteByte(',')
+			b.WriteByte(sep)
 		}
 		b.WriteByte(str[i])
 	}
@@ -195,6 +205,9 @@ func comma(n int) string {
 	}
 	return b.String()
 }
+
+// comma formats n with English thousands separators (478967 -> "478,967").
+func comma(n int) string { return formatGold(n, "") }
 
 // abbrevMoney formats large totals with a k/m suffix (34833289 -> "34,833k",
 // 1373000000 -> "1,373m") so a planet-wide total fits on one line. The switch

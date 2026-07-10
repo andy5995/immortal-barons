@@ -151,8 +151,7 @@ auto-reset is not built), the Quick-Strike / Extended-Battle attack variants,
 civil-war collapse, an interplanetary individual-attack force (`Indiv. Attack
 Force` is a stub), and BRE's finer interplanetary news subtypes. A few
 covert/diplomacy items are recorded-but-inert pending fuller subsystems (flagged
-in `docs/mechanics-reference.md`). Known scale gap: region income is ~100×
-smaller than BRE's documented figures (an open scale decision).
+in `docs/mechanics-reference.md`).
 
 ## Primary goal: run as a BBS door
 

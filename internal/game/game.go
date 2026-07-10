@@ -287,7 +287,7 @@ func NewWorld(cfg Config) *World { return NewWorldSeed(cfg, time.Now().UnixNano(
 
 func NewWorldSeed(cfg Config, seed int64) *World {
 	w := &World{
-		Prices:       Prices{Land: 100, Food: 2, Trooper: 50, Jet: 60, Turret: 60, Tank: 350, Carrier: 40, Agent: 100, Bomber: 200},
+		Prices:       Prices{Land: PriceLand, Food: PriceFood, Trooper: PriceTrooper, Jet: PriceJet, Turret: PriceTurret, Tank: PriceTank, Carrier: PriceCarrier, Agent: PriceAgent, Bomber: PriceBomber},
 		Config:       cfg,
 		rng:          rand.New(rand.NewSource(seed)),
 		VisitCovert:  true,
@@ -466,8 +466,11 @@ func (w *World) ImportBoard(b RemoteBoard) {
 // 0.500, Region 12.50). Computed in thousandths so the 0.x25 values are exact
 // (tenths rounded Trooper/Jet/Turret/Tank down).
 func (w *World) NetWorth(e *Empire) int {
-	thou := e.Land*12500 +
-		e.Troopers*250 + e.Jets*325 + e.Turrets*425 + e.Bombers*3000 +
-		e.Agents*500 + e.Tanks*1250 + e.Carriers*1000
-	return thou/1000 - e.Debt/100
+	// int64 intermediate: e.Land*12500 (and the unit terms) overflow int32 on a
+	// 32-bit build for a large realm. Weights are BRE-exact and unchanged; only
+	// the arithmetic is widened. Storage/return stay int.
+	thou := int64(e.Land)*12500 +
+		int64(e.Troopers)*250 + int64(e.Jets)*325 + int64(e.Turrets)*425 + int64(e.Bombers)*3000 +
+		int64(e.Agents)*500 + int64(e.Tanks)*1250 + int64(e.Carriers)*1000
+	return int(thou/1000 - int64(e.Debt)/100)
 }

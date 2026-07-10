@@ -24,11 +24,11 @@ func TestBuyLandIncremental(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
 
-	// Land=0, Prices.Land=100, LandPriceStep=50: price(Land) = 100 + 2*Land,
-	// so buying 5 regions costs 100+102+104+106+108 = 520 exactly.
+	// price(Land) = Prices.Land + Land*Prices.Land/LandPriceStep, so buying 5
+	// regions from Land=0 costs the sum of the first five rising prices.
 	e.Regions = RegionMix{}
 	e.Land = 0
-	e.Gold = 1000
+	e.Gold = 1_000_000
 	startGold := e.Gold
 
 	const n = 5
@@ -80,7 +80,7 @@ func TestSellLandRefundsHalf(t *testing.T) {
 
 	e.Regions = RegionMix{}
 	e.Land = 0
-	e.Gold = 10000
+	e.Gold = 1_000_000
 	startGold := e.Gold
 
 	if err := w.BuyLand(e, 5); err != nil {
@@ -104,14 +104,14 @@ func TestSellLandRefundsHalf(t *testing.T) {
 func TestBuyFoodMarket(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
-	e.Gold = 1000
+	e.Gold = 100_000
 	e.Food = 0
 
 	if err := w.BuyFoodMarket(e, 10); err != nil {
 		t.Fatalf("BuyFoodMarket: %v", err)
 	}
-	if e.Gold != 1000-10*FoodBuyPrice {
-		t.Errorf("Gold: want %d, got %d", 1000-10*FoodBuyPrice, e.Gold)
+	if e.Gold != 100_000-10*FoodBuyPrice {
+		t.Errorf("Gold: want %d, got %d", 100_000-10*FoodBuyPrice, e.Gold)
 	}
 	if e.Food != 10 {
 		t.Errorf("Food: want 10, got %d", e.Food)
@@ -277,22 +277,22 @@ func TestTechBoostsIncomeAndCutsMaintenance(t *testing.T) {
 func TestMaxAffordableRegionsIsTrulyAffordable(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
-	e.Gold = 12000
+	e.Gold = 1_000_000
 	max := w.MaxAffordableRegions(e)
 	if max <= 0 {
-		t.Fatalf("expected to afford some regions with 12000 gold, got %d", max)
+		t.Fatalf("expected to afford some regions with 1,000,000 gold, got %d", max)
 	}
 
 	// Buying exactly the reported max must succeed against a fresh identical
 	// empire; one more must fail — that was the bug (prompt offered a max the
 	// rising price made unaffordable).
 	ok := w.AddHuman("ok", "OK")
-	ok.Gold = 12000
+	ok.Gold = 1_000_000
 	if err := w.BuyRegions(ok, &ok.Regions.Coastal, max); err != nil {
 		t.Errorf("buying the affordable max (%d) should succeed, got %v", max, err)
 	}
 	over := w.AddHuman("over", "Over")
-	over.Gold = 12000
+	over.Gold = 1_000_000
 	if err := w.BuyRegions(over, &over.Regions.Coastal, max+1); err == nil {
 		t.Errorf("buying one more than the max (%d+1) should have failed", max)
 	}
@@ -354,7 +354,7 @@ func TestFoodNeededNextTurn(t *testing.T) {
 func TestBuildAndSellBombers(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
-	e.Gold = 100000
+	e.Gold = 1_000_000
 
 	if err := w.BuildBombers(e, 10); err != nil {
 		t.Fatal(err)

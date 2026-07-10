@@ -31,8 +31,8 @@ func TestPayForcesShortfallDeserts(t *testing.T) {
 	if lost <= 0 {
 		t.Fatal("paying nothing should cause desertion")
 	}
-	// At full non-payment fracPct=100, desertPct = DesertRate.
-	wantTroopers := 1000 - 1000*DesertRate/100
+	// At full non-payment fracPct=100, desertPct = ArmyDesertRate.
+	wantTroopers := 1000 - 1000*ArmyDesertRate/100
 	if e.Troopers != wantTroopers {
 		t.Errorf("troopers: want %d, got %d", wantTroopers, e.Troopers)
 	}

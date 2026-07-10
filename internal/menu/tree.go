@@ -140,8 +140,9 @@ func BuildMenus() *Menus {
 	bank.DefaultOnEnter = quitOnEnter(bank)
 	bank.Status = func(w *ctx) string {
 		p := w.Player()
+		lang := playerLang(w)
 		return fmt.Sprintf("You have %s%s%s gold in hand and %s%s%s gold in the bank.",
-			ansi.FgBrightCyan, comma(p.Gold), ansi.FgBrightYellow, ansi.FgBrightCyan, comma(p.Bank), ansi.FgBrightYellow)
+			ansi.FgBrightCyan, formatGold(p.Gold, lang), ansi.FgBrightYellow, ansi.FgBrightCyan, formatGold(p.Bank, lang), ansi.FgBrightYellow)
 	}
 
 	attack.Items = []Item{
@@ -375,5 +376,5 @@ func statusBar(w *ctx) string {
 // need no separate locking.
 func spendingStatus(w *ctx) string {
 	p := w.Player()
-	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d turns."), comma(p.Gold), p.TurnsLeft)
+	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d turns."), formatGold(p.Gold, playerLang(w)), p.TurnsLeft)
 }

@@ -129,12 +129,11 @@ func showTurnEvents(s session.Session, w *ctx, p *game.Empire) {
 func incomeReport(s session.Session, w *ctx, p *game.Empire) {
 	var b game.IncomeBreakdown
 	var raids []string
-	var industryGold, madeTroopers, madeJets, madeTurrets, madeBombers, madeTanks, madeCarriers int
+	var madeTroopers, madeJets, madeTurrets, madeBombers, madeTanks, madeCarriers int
 	w.With(func() {
 		b = w.IncomeThisTurn(p)
 		raids = p.PirateRaids
 		p.PirateRaids = nil
-		industryGold = p.IndustryGold
 		madeTroopers, madeJets, madeTurrets = p.MadeTroopers, p.MadeJets, p.MadeTurrets
 		madeBombers, madeTanks, madeCarriers = p.MadeBombers, p.MadeTanks, p.MadeCarriers
 	})
@@ -148,9 +147,7 @@ func incomeReport(s session.Session, w *ctx, p *game.Empire) {
 		{b.Tourism, "gold was earned in Tourism."},
 		{b.Solar, "gold was earned by Solar Power Generators."},
 		{b.Rivers, "gold was earned from Rivers."},
-		{b.Urban, "gold was earned in Urban Centers."},
 		{b.Industrial, "gold was earned from Industrial Zones."},
-		{b.Technology, "gold was earned from Technology."},
 		{b.Trade, "gold was earned from Trade."},
 	}
 	// Right-align every amount to one column width so the report scans cleanly.
@@ -187,7 +184,6 @@ func incomeReport(s session.Session, w *ctx, p *game.Empire) {
 	for _, r := range raids {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, r, ansi.Reset)
 	}
-	statLine(s, industryGold, "gold was produced by your Industry.")
 	statLine(s, madeTroopers, "Troopers were trained by Industrial Zones.")
 	statLine(s, madeJets, "Jets were manufactured by Industrial Zones.")
 	statLine(s, madeTurrets, "Turrets were manufactured by Industrial Zones.")

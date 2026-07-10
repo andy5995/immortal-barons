@@ -19,7 +19,7 @@ func newAttackerAndTarget(t *testing.T) (*World, *Empire, *Empire) {
 
 func TestNuclearStrike(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	a.Gold = 100000
+	a.Gold = 10_000_000
 	beforeLand := d.Land
 	beforeEvents := len(d.Events)
 
@@ -30,7 +30,7 @@ func TestNuclearStrike(t *testing.T) {
 	if report == "" {
 		t.Error("expected a non-empty attacker report")
 	}
-	if a.Gold != 100000-NukeCost {
+	if a.Gold != 10_000_000-NukeCost {
 		t.Errorf("gold not deducted: got %d", a.Gold)
 	}
 	if d.Land >= beforeLand {
@@ -64,7 +64,7 @@ func TestNuclearStrikeCantAfford(t *testing.T) {
 
 func TestChemicalStrike(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	a.Gold = 100000
+	a.Gold = 10_000_000
 	beforePeople := d.People
 	beforeTroopers := d.Troopers
 
@@ -75,7 +75,7 @@ func TestChemicalStrike(t *testing.T) {
 	if report == "" {
 		t.Error("expected a non-empty attacker report")
 	}
-	if a.Gold != 100000-ChemCost {
+	if a.Gold != 10_000_000-ChemCost {
 		t.Errorf("gold not deducted: got %d", a.Gold)
 	}
 	if d.People >= beforePeople {
@@ -88,7 +88,7 @@ func TestChemicalStrike(t *testing.T) {
 
 func TestBiologicalStrike(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	a.Gold = 100000
+	a.Gold = 10_000_000
 	beforePeople := d.People
 	beforeTroopers := d.Troopers
 	beforeLand := d.Land
@@ -100,7 +100,7 @@ func TestBiologicalStrike(t *testing.T) {
 	if report == "" {
 		t.Error("expected a non-empty attacker report")
 	}
-	if a.Gold != 100000-BioCost {
+	if a.Gold != 10_000_000-BioCost {
 		t.Errorf("gold not deducted: got %d", a.Gold)
 	}
 	if d.People >= beforePeople {

@@ -103,6 +103,7 @@ func TestOtherMenuStillClearsOnDraw(t *testing.T) {
 func TestBuyTroopersShowsConfirmationWithoutPause(t *testing.T) {
 	menus := BuildMenus()
 	w := newWorld()
+	w.Player().Gold = 1_000_000
 	beforeTroopers := w.Player().Troopers
 	// '1' (Troopers) -> qty 5 -> Enter -> '0' (Quit Spending), with no pause
 	// keypress between the purchase and the next menu prompt.
@@ -157,6 +158,7 @@ func TestBuyLandThroughSpendingMenu(t *testing.T) {
 	menus := BuildMenus()
 	f := &fakeSession{keys: []rune("6C5\r ")} // Buy Land -> C (Coastal, single key) -> qty 5
 	w := newWorld()
+	w.Player().Gold = 1_000_000
 	before := w.Player().Land
 	beforeCoastal := w.Player().Regions.Coastal
 	Run(f, w, menus.Spending)
@@ -196,6 +198,7 @@ func TestBuyLandThroughSpendingMenuCannotExceedPerTurnCap(t *testing.T) {
 func TestBuyLandLoopsForMultiplePurchases(t *testing.T) {
 	menus := BuildMenus()
 	w := newWorld()
+	w.Player().Gold = 1_000_000
 	before := w.Player().Land
 	beforeCoastal := w.Player().Regions.Coastal
 	beforeMountain := w.Player().Regions.Mountain
@@ -224,6 +227,7 @@ func TestBuyLandLoopsForMultiplePurchases(t *testing.T) {
 func TestBuyLandAdvisorsThenContinuesLoop(t *testing.T) {
 	menus := BuildMenus()
 	w := newWorld()
+	w.Player().Gold = 1_000_000
 	before := w.Player().Land
 	// Buy Land -> * (Advisors) -> pause -> C (Coastal) -> qty 4 -> pause ->
 	// 0 (quit the buy loop) -> 0 (quit Spending menu).

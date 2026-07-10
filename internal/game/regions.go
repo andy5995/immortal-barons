@@ -25,12 +25,6 @@ func (r *RegionMix) fields() []*int {
 		&r.Agricultural, &r.Urban, &r.Industrial, &r.Technology}
 }
 
-// income is the per-turn gold this mix produces (v1 tunable values).
-func (r RegionMix) income() int {
-	return r.Coastal*25 + r.Mountain*12 + r.Desert*20 + r.River*30 +
-		r.Urban*8 + r.Industrial*10 + r.Technology*15 // Agricultural produces food, not gold
-}
-
 // foodProduced is the per-turn food this mix yields (agricultural regions
 // plus a small base per region).
 func (r RegionMix) foodProduced() int {

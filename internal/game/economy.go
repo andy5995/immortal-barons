@@ -11,8 +11,7 @@ var (
 	ErrRegionCap  = errors.New("You have reached your region purchase limit for this turn.")
 )
 
-// HQCost is the gold price to start HeadQuarters construction.
-const HQCost = 5000
+// HQCost is the gold price to start HeadQuarters construction (see balance.go).
 
 // StartHQ begins HeadQuarters construction (5% the first turn); it then
 // advances during daily play. Errors if already started/built or unaffordable.
@@ -138,11 +137,8 @@ func (w *World) BuyFood(e *Empire, n int) error {
 	return nil
 }
 
-// Food market prices (v1): the market sells food to you dearer than it buys.
-const (
-	FoodBuyPrice  = 20 // gold per unit to buy from the market
-	FoodSellPrice = 7  // gold per unit the market pays you
-)
+// Food market prices (FoodBuyPrice / FoodSellPrice) live in balance.go: the
+// market sells food to you dearer than it buys.
 
 // BuyFoodMarket buys n units of food at FoodBuyPrice. This is the canonical
 // way to buy food; the Spending Menu's "Buy Food" item routes here too.

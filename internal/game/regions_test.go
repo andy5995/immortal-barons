@@ -7,10 +7,6 @@ func TestRegionMixTotalIncomeFood(t *testing.T) {
 	if got, want := r.Total(), 18; got != want {
 		t.Errorf("Total: want %d, got %d", want, got)
 	}
-	wantIncome := 2*25 + 3*12 + 1*20 + 1*30 + 5*8 + 1*10 + 1*15
-	if got := r.income(); got != wantIncome {
-		t.Errorf("income: want %d, got %d", wantIncome, got)
-	}
 	wantFood := 4*250 + 18*15
 	if got := r.foodProduced(); got != wantFood {
 		t.Errorf("foodProduced: want %d, got %d", wantFood, got)
@@ -109,7 +105,7 @@ func TestNewEmpireStartsWithRegionsSummingToLand(t *testing.T) {
 
 func TestRegionInvariantAfterBuySellAttackNuke(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	a.Gold = 1_000_000
+	a.Gold = 20_000_000
 	d.Troopers = 0 // make the defender an easy, deterministic loser
 
 	if err := w.BuyRegions(a, &a.Regions.Mountain, 10); err != nil {

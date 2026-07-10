@@ -5,15 +5,9 @@ import (
 	"strings"
 )
 
-const (
-	NukeCost = 50000
-	ChemCost = 40000
-	BioCost  = 40000
-
-	DoomerCost = 500000
-	SDIStep    = 10000 // gold per +1% SDI
-	SDIMax     = 75
-)
+// Strike/SDI gold costs (NukeCost, ChemCost, BioCost, DoomerCost, SDIStep)
+// live in balance.go. SDIMax is a level cap, not a cost, so it stays here.
+const SDIMax = 75
 
 // FundSDI raises e's SDI defense level. Only whole SDIStep chunks of gold
 // are spent (leftover gold under SDIStep is not charged), and the level is

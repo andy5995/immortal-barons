@@ -30,6 +30,30 @@ func TestAbbrevMoney(t *testing.T) {
 	}
 }
 
+func TestFormatGoldLocale(t *testing.T) {
+	cases := []struct {
+		n    int
+		lang string
+		want string
+	}{
+		{1847392104, "de", "1.847.392.104"},
+		{1847392104, "ru", "1 847 392 104"},
+		{1847392104, "en", "1,847,392,104"},
+		{-1234567, "en", "-1,234,567"},
+		{-1234567, "", "-1,234,567"}, // "" defaults to the English comma
+		{1234567, "xx", "1,234,567"}, // unknown language falls back to comma
+		{0, "de", "0"},
+	}
+	for _, c := range cases {
+		if got := formatGold(c.n, c.lang); got != c.want {
+			t.Errorf("formatGold(%d, %q) = %q, want %q", c.n, c.lang, got, c.want)
+		}
+	}
+	if comma(1234567) != "1,234,567" {
+		t.Errorf("comma should equal English formatGold, got %q", comma(1234567))
+	}
+}
+
 func TestHQStatus(t *testing.T) {
 	cases := []struct {
 		hq   int
