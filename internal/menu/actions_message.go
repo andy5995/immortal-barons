@@ -97,7 +97,7 @@ func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*ga
 		extra = tr(s, ", Z=All")
 	}
 	fmt.Fprintf(s, "\n%s"+tr(s, "(A-%c%s, 0=cancel) %s")+"%s ", ansi.FgBrightWhite, 'A'+min(len(rows), 25)-1, extra, tr(s, prompt), ansi.Reset)
-	r, err := s.ReadKey()
+	r, err := readKey(s)
 	if err != nil {
 		return nil, false
 	}
@@ -137,14 +137,14 @@ func composeMessage(s session.Session) (string, bool) {
 		// — BRE reads key-by-key and reacts on the bare '/', so we peek the first
 		// key instead of reading a whole line. '/' anywhere else stays literal
 		// text (e.g. "line s /s"), so only the leading key is special.
-		first, err := s.ReadKey()
+		first, err := readKey(s)
 		if err != nil {
 			return "", false
 		}
 		if first == '/' {
 			fmt.Fprintf(s, tr(s, "/-Command?")+"  [%sA%s,%sS%s,%sC%s] ",
 				ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset)
-			r, err := s.ReadKey()
+			r, err := readKey(s)
 			if err != nil {
 				return "", false
 			}
@@ -173,7 +173,7 @@ func composeMessage(s session.Session) (string, bool) {
 		b := []rune{first}
 		fmt.Fprintf(s, "%c", first)
 		for {
-			r, err := s.ReadKey()
+			r, err := readKey(s)
 			if err != nil {
 				return "", false
 			}

@@ -4,7 +4,6 @@
 package menu
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 	"unicode"
@@ -208,15 +207,8 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	if def != nil {
 		fmt.Fprint(s, defLabel)
 	}
-	r, err := s.ReadKey()
+	r, err := readKey(s)
 	if err != nil {
-		if errors.Is(err, session.ErrSessionEnded) {
-			// Boot at a menu: unwind everything — nested submenus and the
-			// turn flow (runTurn calls Run for Spending/Attack/etc.) — instead
-			// of returning up one level, which drops the caller back to the
-			// game menu rather than ending the session.
-			session.End(err)
-		}
 		return nil, err
 	}
 	if def != nil && (r == '\r' || r == '\n') {

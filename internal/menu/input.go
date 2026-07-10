@@ -12,6 +12,20 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
+// readKey reads one key, propagating an idle/disconnect boot (ErrSessionEnded)
+// via session.End so the whole session unwinds — nested sub-prompts, submenus,
+// and the turn flow — instead of a prompt swallowing the boot as a cancel or
+// returning up only one level. Swallowing it leaves the session limping on to
+// the next guarded read (a false "Disconnected", then a second idle cycle). A
+// bare io.EOF (a test stream ending) is returned for the caller to handle.
+func readKey(s session.Session) (rune, error) {
+	r, err := s.ReadKey()
+	if errors.Is(err, session.ErrSessionEnded) {
+		session.End(err)
+	}
+	return r, err
+}
+
 // prompt writes msg and reads a line of input (terminated by Enter),
 // echoing keystrokes since the console runs in no-echo mode.
 func prompt(s session.Session, msg string) string {
@@ -83,11 +97,8 @@ func promptSuggested(s session.Session, msg string, suggested, max int) int {
 		if ls != nil {
 			ls.SetInputLine(prefix + string(b))
 		}
-		r, err := s.ReadKey()
+		r, err := readKey(s)
 		if err != nil {
-			if errors.Is(err, session.ErrSessionEnded) {
-				session.End(err) // idle boot / disconnect: unwind the whole turn
-			}
 			break // test stream ran out: fall back to the suggested value
 		}
 		switch {
@@ -142,11 +153,8 @@ func choiceQuit(s session.Session, max int) int {
 	lang := sessionLang(s)
 	quit := i18n.T(lang, "Quit")
 	fmt.Fprintf(s, "\n%s%s%s %s", ansi.FgBrightWhite, i18n.T(lang, "Choice>"), ansi.Reset, quit)
-	r, err := s.ReadKey()
+	r, err := readKey(s)
 	if err != nil {
-		if errors.Is(err, session.ErrSessionEnded) {
-			session.End(err)
-		}
 		return 0
 	}
 	if r == '\r' || r == '\n' || r == '0' { // Enter/0 selects the shown Quit
@@ -166,14 +174,10 @@ func choiceQuit(s session.Session, max int) int {
 }
 
 func pause(s session.Session) {
-	// BRE's pause prompt. A boot/disconnect here (ErrSessionEnded) must unwind:
-	// otherwise the flow falls through, redraws the menu, and only boots again
-	// on the next read — a double "Disconnected" with a delay. A bare io.EOF
-	// (test stream) still falls through.
+	// A boot/disconnect during the pause must unwind (readKey handles it); a
+	// bare io.EOF (test stream) falls through.
 	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, i18n.T(sessionLang(s), "─»>Paused<«─"), ansi.Reset)
-	if _, err := s.ReadKey(); errors.Is(err, session.ErrSessionEnded) {
-		session.End(err) // boot during a pause: unwind instead of falling through
-	}
+	readKey(s)
 }
 
 // groupSep maps a UI language to its thousands separator. All three are ASCII,

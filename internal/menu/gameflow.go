@@ -1,7 +1,6 @@
 package menu
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -80,11 +79,8 @@ func askYesNo(s session.Session, msg string, defYes bool) bool {
 	}
 	fmt.Fprintf(s, "\n%s %s ", i18n.T(sessionLang(s), msg), hint)
 	for {
-		r, err := s.ReadKey()
+		r, err := readKey(s)
 		if err != nil {
-			if errors.Is(err, session.ErrSessionEnded) {
-				session.End(err) // idle boot / disconnect: unwind, don't answer "no"
-			}
 			return false // test stream ran out
 		}
 		switch r {

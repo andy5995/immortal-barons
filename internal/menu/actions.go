@@ -119,7 +119,7 @@ func printRegionTable(s session.Session, p *game.Empire) {
 func promptRegionType(s session.Session) int {
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice? (0 to cancel)"), ansi.Reset)
 	for {
-		r, err := s.ReadKey()
+		r, err := readKey(s)
 		if err != nil {
 			return -1
 		}
@@ -152,7 +152,7 @@ const (
 func promptBuyRegionType(s session.Session) int {
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice? (? to list, 0 to cancel)"), ansi.Reset)
 	for {
-		r, err := s.ReadKey()
+		r, err := readKey(s)
 		if err != nil {
 			return -1
 		}
@@ -320,7 +320,7 @@ func writeMacros(s session.Session, w *ctx) Result {
 	}
 
 	fmt.Fprintf(s, "\n%s ", tr(s, "Edit which macro [D,E,F,R,I,O,K,L]?"))
-	r, err := s.ReadKey()
+	r, err := readKey(s)
 	if err != nil {
 		return Stay
 	}
@@ -341,7 +341,7 @@ func writeMacros(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "\n"+tr(s, "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit.")+"\n", letter, letter)
 	var seq []rune
 	for {
-		k, err := s.ReadKey()
+		k, err := readKey(s)
 		if err != nil || k == ctrl {
 			break
 		}

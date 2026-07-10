@@ -15,11 +15,15 @@ import (
 type fakeSession struct {
 	keys []rune
 	pos  int
+	boot bool // when keys run out, return an idle boot (ErrSessionEnded) not io.EOF
 	out  bytes.Buffer
 }
 
 func (f *fakeSession) ReadKey() (rune, error) {
 	if f.pos >= len(f.keys) {
+		if f.boot {
+			return 0, session.ErrSessionEnded
+		}
 		return 0, io.EOF
 	}
 	r := f.keys[f.pos]
