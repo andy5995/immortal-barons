@@ -6,16 +6,13 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// TestRegionFieldOrdering ensures regionTypeNames, regionTypeHints, and
+// TestRegionFieldOrdering ensures regionTypeNames, regionTypeKeys, and
 // regionField all agree on the field order, so a future insertion can't
 // silently mislabel a region type.
 func TestRegionFieldOrdering(t *testing.T) {
 	// Assert slice lengths match.
 	if len(regionTypeNames) != 8 {
 		t.Errorf("regionTypeNames len = %d, want 8", len(regionTypeNames))
-	}
-	if len(regionTypeHints) != 8 {
-		t.Errorf("regionTypeHints len = %d, want 8", len(regionTypeHints))
 	}
 	if len(regionTypeKeys) != 8 {
 		t.Errorf("regionTypeKeys len = %d, want 8", len(regionTypeKeys))

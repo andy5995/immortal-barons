@@ -81,16 +81,11 @@ func buildHQ(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// regionTypeNames and regionTypeHints describe the 8 region types in the
-// stable order RegionMix.fields()/e.Regions' own field order uses.
+// regionTypeNames lists the 8 region types in the stable order
+// RegionMix.fields()/e.Regions' own field order uses.
 var regionTypeNames = []string{
 	"Coastal", "Mountain", "Desert", "River",
 	"Agricultural", "Urban", "Industrial", "Technology",
-}
-
-var regionTypeHints = []string{
-	"gold", "gold, stable", "gold", "gold",
-	"food", "people", "gold", "gold",
 }
 
 // regionTypeKeys are the single-letter selection keys (BRE style), in the same
@@ -107,16 +102,15 @@ func regionField(p *game.Empire, idx int) *int {
 	return fields[idx]
 }
 
-// printRegionTable renders the BRE-style region picker: a Key / Name / Produces
-// / Owned table, colored (magenta keys, yellow names) so buy and drop share one
-// look.
+// printRegionTable renders the BRE-style region picker: a Key / Name / Owned
+// table, colored (magenta keys, yellow names) so buy and drop share one look.
 func printRegionTable(s session.Session, p *game.Empire) {
-	fmt.Fprintf(s, "%s%-5s%-15s%-15s%s%s\n", ansi.FgBrightWhite, tr(s, "Key"), tr(s, "Name"), tr(s, "Produces"), tr(s, "Owned"), ansi.Reset)
+	fmt.Fprintf(s, "%s%-5s%-15s%s%s\n", ansi.FgBrightWhite, tr(s, "Key"), tr(s, "Name"), tr(s, "Owned"), ansi.Reset)
 	for i, name := range regionTypeNames {
-		fmt.Fprintf(s, " %s(%c)%s %s%-14s%s %-14s %5d\n",
+		fmt.Fprintf(s, " %s(%c)%s %s%-14s%s %5d\n",
 			ansi.FgBrightMagenta, regionTypeKeys[i], ansi.Reset,
 			ansi.FgBrightYellow, name, ansi.Reset,
-			regionTypeHints[i], *regionField(p, i))
+			*regionField(p, i))
 	}
 }
 
