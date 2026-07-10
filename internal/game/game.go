@@ -158,10 +158,6 @@ func (e *Empire) Defense() int {
 	return sum * (100 + e.TechFactor()) / 100
 }
 
-// TechFactorCap is the maximum percent bonus/reduction Technology regions
-// can grant (see TechFactor).
-const TechFactorCap = 40
-
 // TechFactor is the Technology bonus percent: the share of land that is
 // Technology regions, capped. Bigger empires need proportionally more
 // Technology to get the same factor (it's a share, not a raw count).
@@ -179,11 +175,6 @@ func (e *Empire) TechFactor() int {
 type Prices struct {
 	Land, Food, Trooper, Jet, Turret, Tank, Carrier, Agent, Bomber int
 }
-
-const (
-	InterestCap = 1_599_999_999
-	MoneyCap    = 2_000_000_000
-)
 
 // Investment is a term deposit: an amount locked until MaturesDay, paying
 // out Return (principal + interest at the rate in effect when invested).
@@ -469,8 +460,8 @@ func (w *World) NetWorth(e *Empire) int {
 	// int64 intermediate: e.Land*12500 (and the unit terms) overflow int32 on a
 	// 32-bit build for a large realm. Weights are BRE-exact and unchanged; only
 	// the arithmetic is widened. Storage/return stay int.
-	thou := int64(e.Land)*12500 +
-		int64(e.Troopers)*250 + int64(e.Jets)*325 + int64(e.Turrets)*425 + int64(e.Bombers)*3000 +
-		int64(e.Agents)*500 + int64(e.Tanks)*1250 + int64(e.Carriers)*1000
+	thou := int64(e.Land)*NetWorthLand +
+		int64(e.Troopers)*NetWorthTrooper + int64(e.Jets)*NetWorthJet + int64(e.Turrets)*NetWorthTurret + int64(e.Bombers)*NetWorthBomber +
+		int64(e.Agents)*NetWorthAgent + int64(e.Tanks)*NetWorthTank + int64(e.Carriers)*NetWorthCarrier
 	return int(thou/1000 - int64(e.Debt)/100)
 }

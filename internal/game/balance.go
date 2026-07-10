@@ -79,3 +79,48 @@ const (
 	DoomerCost = 75_000_000
 	SDIStep    = 1_500_000 // gold per +1% SDI
 )
+
+// --- Upkeep / maintenance (reconstructed / tunable) ---
+//
+// Per-unit gold maintenance per turn (Technology reduces the total via
+// TechFactor — see Empire.ForcesUpkeep). Ratios follow BRE's guide table
+// (×10 of the 0.60/1.20/0.90/1.30/0.60/0.10 figures).
+const (
+	MaintTrooper = 6
+	MaintJet     = 12
+	MaintTurret  = 9
+	MaintBomber  = 13
+	MaintTank    = 6
+	MaintCarrier = 1
+
+	RegionUpkeepPerLand = 2 // gold per region of land, per turn
+)
+
+// --- Net-worth weights (BRE-verified — guide net-worth table) ---
+//
+// Contribution to net worth per unit / per region, in thousandths of a gold
+// (World.NetWorth divides by 1000 for exactness).
+const (
+	NetWorthLand    = 12500
+	NetWorthTrooper = 250
+	NetWorthJet     = 325
+	NetWorthTurret  = 425
+	NetWorthBomber  = 3000
+	NetWorthAgent   = 500
+	NetWorthTank    = 1250
+	NetWorthCarrier = 1000
+)
+
+// --- Other economy tunables ---
+const (
+	DebtGrowthPct = 10 // % a loan's outstanding debt grows each turn
+	LandPriceStep = 50 // each region owned raises the next region's price by Prices.Land/LandPriceStep
+	TechFactorCap = 40 // max % bonus/reduction Technology regions grant (see TechFactor)
+)
+
+// Money ceilings (BRE-scale). Kept under int32 max so 32-bit door builds stay
+// correct — do not raise past ~2.1e9 without widening the money fields to int64.
+const (
+	InterestCap = 1_599_999_999 // bank balance above this earns no more interest
+	MoneyCap    = 2_000_000_000 // hard cap on gold on hand / in bank
+)

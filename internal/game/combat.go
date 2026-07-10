@@ -17,6 +17,10 @@ const (
 	// attack costs — both attacker and defender — per BRE's attack.hlp ("both
 	// sides fight until they suffer 15% losses, at which time they retreat").
 	RegularAttackLossPct = 15
+
+	// RegularAttackCapturePct is the share of the loser's regions a Normal
+	// attack captures (attack.hlp: 20%).
+	RegularAttackCapturePct = 20
 )
 
 // bombingRun sends a's bombers against d's airfields before the ground
@@ -73,7 +77,7 @@ func (w *World) Attack(a, d *Empire) string {
 	dloss := loseForces(d, loss)
 
 	if ap > dp {
-		captured := (d.Land/5 + 1) * rew / 100
+		captured := (d.Land*RegularAttackCapturePct/100 + 1) * rew / 100
 		if captured > d.Land {
 			captured = d.Land
 		}

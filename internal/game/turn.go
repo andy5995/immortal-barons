@@ -274,7 +274,7 @@ func (w *World) processEconomy(e *Empire) {
 	}
 	e.Bank = int(newBank)
 	if e.Debt > 0 {
-		e.Debt += e.Debt * 10 / 100
+		e.Debt += e.Debt * DebtGrowthPct / 100
 	}
 
 	e.LastFoodConsumed = e.FoodUpkeep()

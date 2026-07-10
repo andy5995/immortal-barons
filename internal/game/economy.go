@@ -43,8 +43,7 @@ func (e *Empire) spend(n, unit int) error {
 
 // LandPriceStep controls how fast land gets more expensive as an empire
 // grows (v1 balance knob — tune freely). Each region you own raises the
-// next region's price by Prices.Land/LandPriceStep.
-const LandPriceStep = 50
+// next region's price by Prices.Land/LandPriceStep (LandPriceStep is in balance.go).
 
 // landUnitPrice is the base per-region price, scaled by the league's Region
 // Costs knob (Medium = 100% = unchanged). LandPrice, MaxAffordableRegions, and

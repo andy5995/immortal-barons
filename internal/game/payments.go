@@ -8,7 +8,6 @@ package game
 // rates live in compiled code, so the constants below are reconstructed and
 // tunable.
 const (
-	RegionUpkeepPerLand = 2   // gold per region of land, per turn
 	ArmyDesertRate      = 25  // % of the army that deserts at full non-payment
 	RegionRevoltRate    = 15  // % of land that revolts at full non-payment
 	SupportPerBoostGold = 100 // gold to raise popular support by one point
@@ -36,7 +35,7 @@ const (
 // Turret 0.90, Bomber 1.30, Tank 0.60, Carrier 0.10 gold/turn) scaled ×10, so
 // the ratios match the original exactly. Bombers were previously omitted.
 func (e *Empire) ForcesUpkeep() int {
-	return (e.Troopers*6 + e.Jets*12 + e.Turrets*9 + e.Bombers*13 + e.Tanks*6 + e.Carriers*1) * (100 - e.TechFactor()) / 100
+	return (e.Troopers*MaintTrooper + e.Jets*MaintJet + e.Turrets*MaintTurret + e.Bombers*MaintBomber + e.Tanks*MaintTank + e.Carriers*MaintCarrier) * (100 - e.TechFactor()) / 100
 }
 
 // RegionUpkeep is the gold required to maintain the empire's regions.
