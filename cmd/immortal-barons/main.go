@@ -116,7 +116,10 @@ func main() {
 		path = findDropfile()
 	}
 	if path == "" {
-		fmt.Fprintln(os.Stderr, "immortal-barons: no dropfile found; pass -dropfile PATH")
+		fmt.Fprintln(os.Stderr, "immortal-barons: no dropfile found.")
+		fmt.Fprintln(os.Stderr, "Run it as a BBS door with -dropfile PATH, or play in your terminal with -local.")
+		fmt.Fprintln(os.Stderr)
+		flag.Usage()
 		os.Exit(2)
 	}
 	caller, err := door.ParseDropfile(path)
