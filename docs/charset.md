@@ -5,11 +5,10 @@ This page explains the difference, which one to use, and how to choose.
 
 ## Quick answer
 
-- **Playing locally** (`-local`): the game follows your terminal. It uses UTF-8
-  when your system locale is UTF-8 (common today) and CP437 otherwise. You
-  usually do not need any option.
-- **Running as a door**: the game sends CP437 by default. Add `-utf8` if your
-  callers use UTF-8 terminals.
+- **By default** the game sends CP437 (what traditional BBS terminals expect).
+  Use `-utf8` for UTF-8, or `-cp437` to force CP437.
+- **`-local`** auto-detects from your locale — UTF-8 when your locale is UTF-8
+  (common today) — so local play usually needs no option.
 - **The web browser version** always uses UTF-8.
 
 ## The two character sets
@@ -28,49 +27,35 @@ symbols instead of clean lines.
 
 - `-utf8` — force UTF-8 output.
 - `-cp437` — force CP437 output.
-- Neither — auto-detect for local play (from your locale); CP437 for a door.
+- Neither — the game sends CP437, unless you use `-local`, which auto-detects
+  from your locale (see below).
 
 You cannot use both at once.
 
-## Playing locally
+## Auto-detection
 
-When you run `-local`, the game reads your locale (`LC_ALL`, `LC_CTYPE`, then
-`LANG`). If it names UTF-8, the game uses UTF-8; otherwise it uses CP437. So on a
-normal desktop terminal it just works.
+The game auto-detects the character set only with `-local`: it reads your
+terminal's locale (`LC_ALL`, `LC_CTYPE`, then `LANG`) and uses UTF-8 when the
+locale is UTF-8, so local play usually needs no option. To see CP437 on a UTF-8
+system, run with `-cp437` (or set a non-UTF-8 locale, for example `LANG=C`).
 
-To see CP437 on a UTF-8 system, run with `-cp437` (or set a non-UTF-8 locale,
-for example `LANG=C`).
+Without `-local` — for example when the game runs as a door, serving a remote
+caller — there is no local terminal to read, so the game uses the default
+(CP437) unless you pass `-utf8` or `-cp437`.
 
 Note: the Linux text console (a raw virtual terminal, not a terminal window) is
 UTF-8. Use `-utf8` there if the game does not pick it — a bare console login
 sometimes has no locale set.
 
-## Running as a door
-
-How the door's character set reaches the caller depends on your BBS software.
-
-**Synchronet (its default mode)** detects the caller's character set when they
-connect and translates the door's CP437 output to it. So keep the default
-(CP437), and Synchronet handles every caller — CP437 and UTF-8 alike. Do not add
-`-utf8`, and do not turn on Synchronet's "Untranslated" mode for the door.
-
-**Mystic, or any pass-through setup** (including Synchronet's "Untranslated"
-mode), sends the door's output to the caller unchanged. Then the character set
-the door sends must match the caller's terminal:
-
-- CP437 terminals (SyncTERM and most classic clients) — use the default.
-- UTF-8 terminals (for example, telnet from a modern terminal window) — add
-  `-utf8`.
-
-In a pass-through setup, one door command line sends one character set. If your
-board serves both kinds of caller, pick the character set most of them use, or
-set up two door entries (one with `-utf8`, one without) and let callers choose.
+If the game could better fit how you run it — for example, by detecting the
+character set when it runs as a door — please
+[open a feature request](https://github.com/andy5995/immortal-barons/issues).
 
 ## Languages
 
-Non-English languages need UTF-8, because CP437 can only show English. In CP437
-mode the game stays in English and language selection is turned off. Run with
-`-utf8` to use another language.
+Non-English languages need UTF-8 output (`-utf8`). In CP437 mode the game shows
+English only, and language selection is turned off. The caller must receive UTF-8
+for the text to display correctly.
 
 ## Testing a character set
 

@@ -93,21 +93,18 @@ live BBS. If you run the game as a Windows door, please report how it goes.
 
 ### Character set
 
-The door sends CP437 by default — the character set traditional BBS terminals
-(SyncTERM, NetRunner) expect. How it reaches the caller depends on your BBS
-software:
+The game sends CP437 by default — the character set traditional BBS terminals
+expect. A door does not auto-detect the character set (only `-local` does), so it
+uses that default unless you pass `-utf8` or `-cp437`. Set the option that fits
+your board (non-English languages need `-utf8`).
 
-- **Synchronet** (its default mode) detects the caller's character set on connect
-  and translates the door's CP437 output to it. Keep the default; it works for
-  CP437 and UTF-8 callers alike. Do not add `-utf8`, and do not enable
-  Synchronet's "Untranslated" mode for the door.
-- **Mystic, or any pass-through setup** (including Synchronet's "Untranslated"
-  mode) sends the door's output unchanged, so it must match the caller's
-  terminal: use the default for CP437 clients, or add `-utf8` for UTF-8 clients.
+If your board serves callers on different character sets, and your BBS software
+can tell a program the caller's character set (for example, by setting a shell
+variable when it invokes a door), you can wrap the door in a small script that
+passes `-utf8` or `-cp437` to match each caller.
 
-Non-English languages need `-utf8`. See the
-[Character Set guide](https://andy5995.github.io/immortal-barons/charset/) for the
-full explanation and how to test each one.
+See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset/)
+for the options and how to test each one.
 
 ## Daily maintenance
 

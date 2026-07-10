@@ -36,9 +36,11 @@ func (c *ctx) Player() *game.Empire { return c.active }
 // playerLang is the active caller's UI language ("" = English), used to
 // localize menu chrome at render time.
 func playerLang(c *ctx) string {
-	// A CP437 session can only render English, so ignore any stored language —
-	// this is the single render-time guard that keeps a language set via the
-	// UTF-8 web front-end from mojibaking when reached through a CP437 door.
+	// IB serves English in a CP437 session — its translations aren't mapped to
+	// CP437 (Russian has no CP437 form), so language selection needs UTF-8 —
+	// hence ignore any stored language here. This single render-time guard keeps
+	// a language set via the UTF-8 web front-end from mojibaking when the same
+	// empire is reached through a CP437 door.
 	if c != nil && c.UTF8 && c.active != nil {
 		return c.active.Language
 	}
