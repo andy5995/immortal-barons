@@ -41,15 +41,25 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	// *World pointer, then route every With through the FileStore.
 	w.SetStore(store.NewFileStore(w, cfg))
 	// Login date-rollover maintenance is itself a transaction (reload → maintain
-	// → save), so it can't race another node's login.
+	// → save), so it can't race another node's login. Note whether the caller's
+	// realm was a dead husk that this maintenance sweeps, so Session can announce
+	// the fresh start (the husk is gone by the time Session binds the empire).
+	var rebornFrom string
 	w.With(func() {
 		w.Today = today
+		var deadName string
+		if e := w.FindByOwner(id.Handle); e != nil && !e.Alive {
+			deadName = e.Name
+		}
 		w.DailyMaintenance(today)
+		if deadName != "" && w.FindByOwner(id.Handle) == nil {
+			rebornFrom = deadName
+		}
 	})
 
 	// Each action already persisted via its Transact; the session-end save is a
 	// no-op here (saving w's in-memory state would overwrite concurrent nodes).
-	return Session(s, id, w, cfg, func() error { return nil })
+	return Session(s, id, w, cfg, rebornFrom, func() error { return nil })
 }
 
 // Session plays one session against an already-loaded world owned by the
@@ -57,7 +67,7 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 // caller owns those. save is called once at session end: the web front-end
 // persists its in-memory world there, while the door passes a no-op because
 // every action already committed through its FileStore transaction.
-func Session(s session.Session, id Identity, w *game.World, cfg game.Config, save func() error) (reason string, err error) {
+func Session(s session.Session, id Identity, w *game.World, cfg game.Config, rebornFrom string, save func() error) (reason string, err error) {
 	// Bound the session: boot after IdleTimeoutSecs idle, or at the caller's
 	// BBS time-left, so an abandoned session frees the world lock.
 	var hard time.Time
@@ -92,15 +102,15 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 	var joinOpen, boardFull bool
 	var joinDate string
 	var e *game.Empire
-	var rebornFrom string // former realm destroyed on a past day; announce a fresh start
-	var deadToday string  // realm destroyed today; no play until a later day
+	var localReborn string // a husk maintenance didn't sweep yet; swept here as a fallback
+	var deadToday string   // realm destroyed today; no play until a later day
 	w.With(func() {
 		e = w.FindByOwner(id.Handle)
 		if e != nil && !e.Alive {
 			if w.GameDay > e.DiedDay {
-				// Died on a past day: sweep the husk and let the fresh-onboard
-				// path below build a new realm.
-				rebornFrom = e.Name
+				// A past-day husk maintenance hasn't swept: sweep it now and let
+				// the fresh-onboard path below build a new realm.
+				localReborn = e.Name
 				w.RemoveEmpire(e)
 				e = nil
 			} else {
@@ -120,9 +130,15 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 			ansi.FgYellow, deadToday, ansi.Reset)
 		return "dead", save()
 	}
-	if rebornFrom != "" {
+	// rebornFrom (captured by the caller before login maintenance swept the husk)
+	// or localReborn (a husk we swept just now): announce the fresh start before
+	// onboarding prompts for a new realm name.
+	if reborn := rebornFrom; reborn != "" || localReborn != "" {
+		if reborn == "" {
+			reborn = localReborn
+		}
 		fmt.Fprintf(s, "\n%sYour former realm %s was destroyed; you begin anew.%s\n",
-			ansi.FgYellow, rebornFrom, ansi.Reset)
+			ansi.FgYellow, reborn, ansi.Reset)
 	}
 	if e == nil {
 		if !joinOpen {

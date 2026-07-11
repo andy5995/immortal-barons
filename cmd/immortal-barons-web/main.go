@@ -223,7 +223,7 @@ func (h *hub) runGame(id string, ws *session.WebSession, addr string) {
 	}()
 	// Handle is derived from the secret session id, so a web caller cannot
 	// claim another caller's BBS handle.
-	reason, err := play.Session(ws, play.Identity{Handle: "web-" + id}, h.world, h.cfg, h.saveWorld)
+	reason, err := play.Session(ws, play.Identity{Handle: "web-" + id}, h.world, h.cfg, "", h.saveWorld)
 	if err != nil {
 		log.Printf("session from %s: %v", addr, err)
 	}
