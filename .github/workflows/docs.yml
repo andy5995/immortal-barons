@@ -32,7 +32,7 @@ jobs:
         run: pip install -r requirements-docs.txt
       - name: Build site (strict)
         run: mkdocs build --strict -f build/docs/mkdocs.yml -d "$GITHUB_WORKSPACE/site"
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: site
 
