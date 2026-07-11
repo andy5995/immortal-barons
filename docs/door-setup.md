@@ -108,14 +108,23 @@ for the options and how to test each one.
 
 ## Daily maintenance
 
-Run maintenance once a day (a nightly event is the usual place):
+Maintenance advances the game one day for every day that has passed. It lets the
+AI barons take their turns, runs pirate raids, and refreshes each player's turns.
+
+**You usually do not need to schedule this.** Maintenance runs on its own the
+first time a player logs in on a new day. If several days passed with no play,
+the next login catches up all of them at once. A board that is not played every
+day needs no nightly event.
+
+Run it by hand only if you want the game to move forward while no one is playing:
 
 ```
 immortal-barons -maint -data /path/to/data
 ```
 
-This advances the game one day for every day that passed, lets the AI barons
-take their turns, and refreshes each player's turns.
+This is useful for a league board, where the AI barons, pirates, and inter-BBS
+packets should keep to a set schedule even on days when no local player logs in.
+For a solo or local game, you can skip it.
 
 ## Starting a fresh game (reset)
 

@@ -24,6 +24,19 @@ See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset
   may not match BRE exactly. The game aims to get as close as it can, using
   BRE's own numbers where they are known. A few mechanics are still being built.
 
+## How do I add AI barons (computer opponents)?
+
+- Set the number of AI barons before you start a game. A fresh game has none by
+  default.
+- Open the Configuration Editor (run `immortal-barons -reset`, or the
+  Coordinator menu in game) and set the **AI empires** field.
+- The AI barons are created when you reset the game. Changing the number later
+  does not add or remove them from a game already in progress — reset to apply a
+  new count.
+- Once in the game, the AI barons take their turns on their own during daily
+  maintenance. See [Daily maintenance](https://andy5995.github.io/immortal-barons/door-setup/#daily-maintenance)
+  for when that runs.
+
 ## Can several people play as a door at the same time?
 
 - Not yet. As a BBS door, one caller plays at a time right now; a second caller
