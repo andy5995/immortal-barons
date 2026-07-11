@@ -30,12 +30,21 @@ See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset
   default.
 - Open the Configuration Editor (run `immortal-barons -reset`, or the
   Coordinator menu in game) and set the **AI empires** field.
-- The AI barons are created when you reset the game. Changing the number later
-  does not add or remove them from a game already in progress — reset to apply a
-  new count.
+- The AI barons are created when you reset the game. To add more to a game that
+  is already running — **without** resetting — run
+  `immortal-barons -add-ai N` (it adds N new AI barons and exits). Lowering the
+  count still needs a reset.
 - Once in the game, the AI barons take their turns on their own during daily
   maintenance. See [Daily maintenance](https://andy5995.github.io/immortal-barons/door-setup/#daily-maintenance)
   for when that runs.
+
+## What happens when my empire is destroyed?
+
+- If your realm is wiped out — its people or land reach zero, from an attack or a
+  weapon — your empire is gone, and you cannot keep playing it.
+- You build a **new realm the next day**: log in again on a later day and you
+  are prompted to name a new realm (it need not match your old one), starting
+  fresh under the same handle.
 
 ## Can several people play as a door at the same time?
 

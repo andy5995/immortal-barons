@@ -423,6 +423,15 @@ Turns per day: 15 (config). New players get protection turns at the start
 
 If a player is cut off mid-turn, they resume where they left off.
 
+## Elimination and restart
+
+An empire is destroyed when its people or land reach zero (from an attack, a
+weapon, or starvation). A destroyed empire is removed from the game — its owner
+cannot keep playing it. As in BRE, the player builds a **new realm the next
+day**: on a later day's login they are prompted to name a new realm (it need not
+be the old name) and start fresh under the same handle. Voluntary abdication
+works the same way.
+
 ## Diplomacy
 
 Treaty types: tariff trade, protective trade, free trade (spreads morale

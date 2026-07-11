@@ -141,6 +141,18 @@ fresh day one. It does not pick a winner. The old world is saved to
 `world.json.bak` in the data directory first, so you can restore it if you reset
 by mistake. Cancelling with `Q` leaves the game untouched.
 
+## Adding AI barons to a running game
+
+To drop more AI opponents into a game that is already going, without resetting:
+
+```
+immortal-barons -add-ai N -data /path/to/data
+```
+
+This adds N new AI barons and exits. It leaves existing players and AI alone.
+(To set the AI count for a brand-new game instead, use the Configuration Editor
+via `-reset`.)
+
 ## Inter-BBS (league) play
 
 A league is a group of boards whose players compete against each other. To join
