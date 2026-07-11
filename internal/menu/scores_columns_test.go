@@ -5,9 +5,9 @@ import (
 	"testing"
 )
 
-// TestPrintScoresBREHeader checks the local scores board uses BRE.OVR's column
-// labels/order (Id, Empire Name, Territory, Net Worth), marks the player's row,
-// and flags an eliminated empire with (dead).
+// TestPrintScoresBREHeader checks the local scores board matches BRE's layout:
+// the game-name banner, BRE's column labels/order (Id, Empire Name, Territory,
+// Score, Net Worth), lettered (A)/(B) ids, and (dead) on an eliminated empire.
 func TestPrintScoresBREHeader(t *testing.T) {
 	w := newWorld()
 	f := &fakeSession{}
@@ -21,7 +21,7 @@ func TestPrintScoresBREHeader(t *testing.T) {
 	})
 	printScores(f, w)
 	out := f.out.String()
-	for _, want := range []string{"Id", "Empire Name", "Territory", "Net Worth", "(dead)", "->"} {
+	for _, want := range []string{"Immortal Barons", "Id", "Empire Name", "Territory", "Score", "Net Worth", "(dead)", "(A)"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("scores output missing %q:\n%s", want, out)
 		}

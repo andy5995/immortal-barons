@@ -219,40 +219,63 @@ func printScores(s session.Session, w *ctx) {
 	// Snapshot every empire's rank inputs together so the board reflects one
 	// consistent moment, even if another session mutates the world mid-render.
 	type row struct {
-		name     string
-		alive    bool
-		isPlayer bool
-		land, nw int
+		name            string
+		alive, isPlayer bool
+		land, score, nw int
 	}
 	var rows []row
 	var lastMaster string
 	w.With(func() {
 		rows = make([]row, 0, len(w.Empires))
 		for _, e := range w.Empires {
-			rows = append(rows, row{e.Name, e.Alive, e == w.Player(), e.Land, w.NetWorth(e)})
+			nw := w.NetWorth(e)
+			// Net Worth is the asset value (land + military); Score is overall
+			// standing = net worth plus liquid assets (gold + bank). BRE shows
+			// both as distinct columns; its exact Score formula isn't in the
+			// strings, so this is IB's own definition (tune if it should differ).
+			rows = append(rows, row{e.Name, e.Alive, e == w.Player(), e.Land, nw + e.Gold + e.Bank, nw})
 		}
 		lastMaster = w.LastMaster
 	})
-	sort.Slice(rows, func(i, j int) bool { return rows[i].nw > rows[j].nw })
+	sort.Slice(rows, func(i, j int) bool { return rows[i].score > rows[j].score })
 
-	// Columns follow BRE.OVR's local scores header (Id, Empire Name, Territory,
-	// Score, Net Worth). IB has no distinct Score value — net worth is the
-	// score — so BRE's separate Score column is omitted rather than printed
-	// twice. Widths allow BRE-scale net worth (~10 digits).
-	fmt.Fprintf(s, "\n%s%-4s %-20s %-10s %-12s%s\n",
-		ansi.FgBrightCyan, tr(s, "Id"), tr(s, "Empire Name"), tr(s, "Territory"), tr(s, "Net Worth"), ansi.Reset)
+	// BRE-style scores screen (matches a live BRE scores screen): a game-name
+	// banner, lettered (A)/(B) ids, Id / Empire Name / Territory / Score /
+	// Net Worth columns, magenta header/footer rules. IB-branded.
+	rule := strings.Repeat("─", 72)
+	fmt.Fprintf(s, "\n%s-*%s%s%s%s*-%s\n\n",
+		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
+	fmt.Fprintf(s, "%s%-4s %-26s %10s %11s %11s%s\n",
+		ansi.FgBrightWhite, tr(s, "Id"), tr(s, "Empire Name"),
+		tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
 	for i, r := range rows {
 		name := r.name
 		if !r.alive {
 			name += " " + tr(s, "(dead)")
 		}
-		mark := "  "
+		nameColor := ansi.FgBrightWhite
 		if r.isPlayer {
-			mark = "->"
+			nameColor = ansi.FgBrightYellow // highlight the caller's own realm
 		}
-		fmt.Fprintf(s, "%s%2d %-20s %-10d %-12d\n", mark, i+1, name, r.land, r.nw)
+		fmt.Fprintf(s, "%s%-4s%s %s%-26s%s %s%10d%s %s%11d%s %s%11d%s\n",
+			ansi.FgBrightMagenta, scoreID(i), ansi.Reset,
+			nameColor, name, ansi.Reset,
+			ansi.FgBrightMagenta, r.land, ansi.Reset,
+			ansi.FgBrightWhite, r.score, ansi.Reset,
+			ansi.FgWhite, r.nw, ansi.Reset)
 	}
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
 	if lastMaster != "" {
 		fmt.Fprintf(s, "\n"+tr(s, "Last Planetary Master: %s")+"\n", lastMaster)
 	}
+}
+
+// scoreID is the lettered id for a scores row — (A), (B), … (Z), then (27)+ for
+// the rare game with more than 26 realms.
+func scoreID(i int) string {
+	if i < 26 {
+		return fmt.Sprintf("(%c)", 'A'+i)
+	}
+	return fmt.Sprintf("(%d)", i+1)
 }
