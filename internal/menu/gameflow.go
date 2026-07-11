@@ -120,6 +120,38 @@ func showTurnEvents(s session.Session, w *ctx, p *game.Empire) {
 	pause(s)
 }
 
+// showUnreadMail is a pre-turn stop: when the player has unread mail, note the
+// count and offer to read it inline. It lives in the shared pre-turn flow so
+// every front-end (web + door) gets the same notice for free (#3). Declining
+// leaves the mail for the Messages menu. Count/read-and-clear happen under w's
+// lock so a concurrent sender can't slip a message between the check and the
+// read.
+func showUnreadMail(s session.Session, w *ctx, p *game.Empire) {
+	var count int
+	w.With(func() { count = len(p.Mail) })
+	if count == 0 {
+		return
+	}
+	if count == 1 {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "You have a new message."), ansi.Reset)
+	} else {
+		fmt.Fprintf(s, "\n%s"+tr(s, "You have %d new messages.")+"%s\n", ansi.FgBrightCyan, count, ansi.Reset)
+	}
+	if !askYesNo(s, "Read them now?", true) {
+		return
+	}
+	var mail []string
+	w.With(func() {
+		mail = p.Mail
+		p.Mail = nil
+	})
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your messages:"), ansi.Reset)
+	for _, m := range mail {
+		fmt.Fprintf(s, "  %s\n", m)
+	}
+	pause(s)
+}
+
 // incomeReport itemizes p's per-turn income by source. It shows exactly the
 // values CollectIncome credits: both derive from World.IncomeThisTurn.
 func incomeReport(s session.Session, w *ctx, p *game.Empire) {
@@ -366,6 +398,7 @@ func runTurn(s session.Session, w *ctx) Result {
 	}
 
 	showTurnEvents(s, w, p)
+	showUnreadMail(s, w, p)
 	if err := Run(s, w, menus.Diplomacy); err != nil {
 		return Stay
 	}
