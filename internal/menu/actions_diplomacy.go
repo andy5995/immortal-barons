@@ -35,7 +35,6 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
 		type row struct {
-			e      *game.Empire
 			name   string
 			suffix string
 		}
@@ -55,7 +54,7 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 						}
 					}
 				}
-				rows = append(rows, row{e, e.Name, suffix})
+				rows = append(rows, row{e.Name, suffix})
 			}
 		})
 		if len(rows) == 0 {
@@ -70,17 +69,28 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 		if i < 1 || i > len(rows) {
 			return Stay
 		}
-		negotiateWithType(s, w, p, rows[i-1].e, ttype)
+		negotiateWithType(s, w, rows[i-1].name, ttype)
 		return Stay
 	}
 }
 
-// negotiateWithType performs the one action that applies to ttype between p
-// and e: propose it if neither side has it, accept it if e has already
-// offered it, or break it (with confirmation) if p already holds it.
-func negotiateWithType(s session.Session, w *ctx, p, e *game.Empire, ttype string) {
-	var held, offered bool
+// negotiateWithType performs the one action that applies to ttype between the
+// player and the empire named ename: propose it if neither side has it, accept
+// it if ename has already offered it, or break it (with confirmation) if the
+// player already holds it. Both empires are re-resolved by name inside every
+// mutating transaction, so a concurrent node that eliminates ename (or the
+// player) between the prompt and the write aborts cleanly instead of mutating a
+// stale/rebound pointer. AcceptTreaty is idempotent — a second accept of an
+// already-consumed offer forms no duplicate treaty.
+func negotiateWithType(s session.Session, w *ctx, ename, ttype string) {
+	var held, offered, gone bool
 	w.With(func() {
+		p := w.Player()
+		e := findRealm(w, ename)
+		if p == nil || e == nil {
+			gone = true
+			return
+		}
 		held = w.World.HasTreaty(p, e, ttype)
 		if !held {
 			for _, o := range offersFrom(p, e.Name) {
@@ -90,24 +100,67 @@ func negotiateWithType(s session.Session, w *ctx, p, e *game.Empire, ttype strin
 			}
 		}
 	})
+	if gone {
+		fail(s, errTargetGone)
+		return
+	}
 	switch {
 	case held:
-		fmt.Fprintf(s, "\n%s"+tr(s, "You hold a %s with %s.")+"%s\n", ansi.FgBrightCyan, ttype, e.Name, ansi.Reset)
+		fmt.Fprintf(s, "\n%s"+tr(s, "You hold a %s with %s.")+"%s\n", ansi.FgBrightCyan, ttype, ename, ansi.Reset)
 		if !askYesNo(s, "Break this treaty?", false) {
 			return
 		}
-		w.With(func() { w.World.BreakTreaty(p, e, ttype) })
-		ok(s, "You broke the %s with %s.", ttype, e.Name)
+		var err error
+		w.With(func() {
+			p := w.Player()
+			e := findRealm(w, ename)
+			if p == nil || e == nil {
+				err = errTargetGone
+				return
+			}
+			w.World.BreakTreaty(p, e, ttype)
+		})
+		if err != nil {
+			fail(s, err)
+			return
+		}
+		ok(s, "You broke the %s with %s.", ttype, ename)
 	case offered:
-		fmt.Fprintf(s, "\n%s"+tr(s, "%s offers you a %s.")+"%s\n", ansi.FgBrightCyan, e.Name, ttype, ansi.Reset)
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s offers you a %s.")+"%s\n", ansi.FgBrightCyan, ename, ttype, ansi.Reset)
 		if !askYesNo(s, "Accept this treaty?", false) {
 			return
 		}
-		w.With(func() { w.World.AcceptTreaty(p, e.Name, ttype) })
-		ok(s, "You accepted the %s with %s.", ttype, e.Name)
+		var err error
+		w.With(func() {
+			p := w.Player()
+			e := findRealm(w, ename)
+			if p == nil || e == nil {
+				err = errTargetGone
+				return
+			}
+			w.World.AcceptTreaty(p, e.Name, ttype)
+		})
+		if err != nil {
+			fail(s, err)
+			return
+		}
+		ok(s, "You accepted the %s with %s.", ttype, ename)
 	default:
-		w.With(func() { w.World.ProposeTreaty(p, e, ttype) })
-		ok(s, "Proposed a %s to %s.", ttype, e.Name)
+		var err error
+		w.With(func() {
+			p := w.Player()
+			e := findRealm(w, ename)
+			if p == nil || e == nil {
+				err = errTargetGone
+				return
+			}
+			w.World.ProposeTreaty(p, e, ttype)
+		})
+		if err != nil {
+			fail(s, err)
+			return
+		}
+		ok(s, "Proposed a %s to %s.", ttype, ename)
 	}
 }
 
@@ -119,48 +172,71 @@ func negotiateWithType(s session.Session, w *ctx, p, e *game.Empire, ttype strin
 // treaty individually today; this is a placeholder for when that lands.
 func declareWar(s session.Session, w *ctx) Result {
 	p := w.Player()
-	type row struct {
-		e    *game.Empire
-		name string
-	}
-	var rows []row
+	var names []string
 	w.With(func() {
 		for _, e := range w.Empires {
 			if !e.Alive || e == p {
 				continue
 			}
-			rows = append(rows, row{e, e.Name})
+			names = append(names, e.Name)
 		}
 	})
-	if len(rows) == 0 {
+	if len(names) == 0 {
 		ok(s, "There is no one to declare war on.")
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose an empire:"), ansi.Reset)
-	for i, r := range rows {
-		fmt.Fprintf(s, "  %d) %s\n", i+1, r.name)
+	for i, n := range names {
+		fmt.Fprintf(s, "  %d) %s\n", i+1, n)
 	}
 	i := promptInt(s, "Declare war on which empire (0 to cancel)?")
-	if i < 1 || i > len(rows) {
+	if i < 1 || i > len(names) {
 		return Stay
 	}
-	target := rows[i-1].e
+	targetName := names[i-1]
 	if !askYesNo(s, "Declare war? This breaks all treaties with them.", false) {
 		return Stay
 	}
 	var broke []string
+	var err error
 	w.With(func() {
+		p := w.Player()
+		target := findRealm(w, targetName)
+		if p == nil || target == nil {
+			err = errTargetGone
+			return
+		}
 		for _, tt := range w.World.TreatiesBetween(p, target) {
 			w.World.BreakTreaty(p, target, tt)
 			broke = append(broke, tt)
 		}
 	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
 	if len(broke) == 0 {
-		ok(s, "You declared war on %s.", target.Name)
+		ok(s, "You declared war on %s.", targetName)
 	} else {
-		ok(s, "You declared war on %s. Treaties broken: %s", target.Name, strings.Join(broke, ", "))
+		ok(s, "You declared war on %s. Treaties broken: %s", targetName, strings.Join(broke, ", "))
 	}
 	return Stay
+}
+
+// findRealm re-resolves a living empire by realm name against the freshly
+// reloaded world. Call it only from inside a w.With block (after the world has
+// reloaded). Matching by name, not a cached pointer, is what survives the
+// reload: json.Unmarshal reuses *Empire pointers by slice INDEX, so a pre-
+// gathered pointer rebinds to a different realm when the empire set shifts.
+// Names are unique (RealmNameTaken guards onboarding), so this returns the
+// intended realm or nil (eliminated/abdicated).
+func findRealm(w *ctx, name string) *game.Empire {
+	for _, e := range w.Empires {
+		if e.Alive && e.Name == name {
+			return e
+		}
+	}
+	return nil
 }
 
 // offersFrom returns the treaty types `from` has offered to p.

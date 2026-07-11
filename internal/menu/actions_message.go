@@ -234,21 +234,33 @@ func sendMessage(s session.Session, w *ctx) Result {
 }
 
 func sendTradeDeal(s session.Session, w *ctx) Result {
-	p := w.Player()
 	to, _ := pickRecipient(s, w, "Trade with:", false)
 	if to == nil {
 		return Stay
 	}
+	toName := to.Name
 	amount := promptInt(s, "How much gold?")
 	if amount <= 0 {
 		return Stay
 	}
 	var err error
-	w.With(func() { err = w.World.SendGold(p, to, amount) })
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		recip := findRealm(w, toName)
+		if recip == nil || recip == p {
+			err = errTargetGone
+			return
+		}
+		err = w.World.SendGold(p, recip, amount) // re-checks the sender's fresh balance
+	})
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Sent %d gold to %s.", amount, to.Name)
+		ok(s, "Sent %d gold to %s.", amount, toName)
 	}
 	return Stay
 }

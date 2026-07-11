@@ -61,11 +61,18 @@ func twoNodeWorld(t *testing.T, handle, realm string, cfgSetup func(*game.Config
 // a test can assert the on-disk truth after both nodes have acted.
 func committedEmpire(t *testing.T, cfg game.Config, handle string) *game.Empire {
 	t.Helper()
+	return committedWorld(t, cfg).FindByOwner(strings.ToLower(handle))
+}
+
+// committedWorld reloads the world file fresh so a test can assert on-disk
+// state (treaties, group attacks, mail) that isn't keyed to a single empire.
+func committedWorld(t *testing.T, cfg game.Config) *game.World {
+	t.Helper()
 	w, err := store.Load(cfg)
 	if err != nil {
 		t.Fatalf("reload committed world: %v", err)
 	}
-	return w.FindByOwner(strings.ToLower(handle))
+	return w
 }
 
 // commitOnFile stands in for another BBS node committing a transaction: it loads
