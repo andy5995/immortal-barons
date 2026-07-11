@@ -78,12 +78,10 @@ const (
 	BioCost    = 6_000_000
 	DoomerCost = 75_000_000
 	SDIStep    = 1_500_000 // gold per +1% SDI
-	// GroupAttackGoldPerOffense converts pooled group-attack funding into
-	// offensive strength (tunable; exact BRE rate not in the strings).
-	GroupAttackGoldPerOffense = 500
-	// TerrorTrooperKill is how many of a target's troopers each committed agent
-	// destroys in a terror op (tunable; exact BRE rate not in the strings).
-	TerrorTrooperKill = 50
+	// TerrorUnitLossDenom: each successful terror hit removes 1/N of one random
+	// unit type. BRE's disassembled hit applier uses a 6/7 ratio (removes ~1/7),
+	// so N = 7.
+	TerrorUnitLossDenom = 7
 )
 
 // --- Upkeep / maintenance (reconstructed / tunable) ---

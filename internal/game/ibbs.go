@@ -138,11 +138,11 @@ func (w *World) ExportLeagueConfig() {
 }
 
 // Contribution records one baron's share of a group attack, so spoils split
-// proportionally. BRE group attacks are gold-funded ("Add how much gold for
-// funding?"): each baron pays gold into the pool.
+// proportionally. BRE group attacks commit real forces (each baron sends
+// troopers, deducted from their army), not gold.
 type Contribution struct {
-	Owner string
-	Gold  int
+	Owner    string
+	Troopers int
 }
 
 // GroupAttack is a strike being assembled on this board. Until DepartDay,
@@ -155,20 +155,14 @@ type GroupAttack struct {
 	Contributors []Contribution
 }
 
-// Gold totals the funding pooled into the attack.
-func (g GroupAttack) Gold() int {
+// Offense is the strike's offensive strength: the pooled committed troopers
+// (1 offense each, as in the combat table).
+func (g GroupAttack) Offense() int {
 	total := 0
 	for _, c := range g.Contributors {
-		total += c.Gold
+		total += c.Troopers
 	}
 	return total
-}
-
-// Offense is the strike's offensive strength: the pooled funding converted at
-// GroupAttackGoldPerOffense (a tunable — the exact BRE gold→force rate isn't in
-// the strings; it tracks roughly a trooper's cost per point of offense).
-func (g GroupAttack) Offense() int {
-	return g.Gold() / GroupAttackGoldPerOffense
 }
 
 // RemoteAttack is a departed strike aimed at an empire on another board.
@@ -227,27 +221,27 @@ type RemoteTerror struct {
 }
 
 // CreateGroupAttack starts a new group strike led by e, aimed at targetEmpire
-// on targetBoard, leaving on departDay. e pays gold into the funding pool;
-// ErrCantAfford if it lacks the gold.
-func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, departDay, gold int) (*GroupAttack, error) {
-	if e.Gold < gold {
+// on targetBoard, leaving on departDay. e commits troopers (deducted from its
+// army); ErrCantAfford if it lacks them.
+func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, departDay, troopers int) (*GroupAttack, error) {
+	if e.Troopers < troopers {
 		return nil, ErrCantAfford
 	}
-	e.Gold -= gold
+	e.Troopers -= troopers
 	w.NextAttackID++
 	w.GroupAttacks = append(w.GroupAttacks, GroupAttack{
 		ID:           w.NextAttackID,
 		TargetBoard:  targetBoard,
 		TargetEmpire: targetEmpire,
 		DepartDay:    departDay,
-		Contributors: []Contribution{{Owner: e.Owner, Gold: gold}},
+		Contributors: []Contribution{{Owner: e.Owner, Troopers: troopers}},
 	})
 	return &w.GroupAttacks[len(w.GroupAttacks)-1], nil
 }
 
-// JoinGroupAttack adds e's gold funding to a pending group attack (before it
-// leaves). ErrCantAfford if e lacks the gold.
-func (w *World) JoinGroupAttack(e *Empire, id, gold int) error {
+// JoinGroupAttack commits e's troopers to a pending group attack (before it
+// leaves). ErrCantAfford if e lacks the troopers.
+func (w *World) JoinGroupAttack(e *Empire, id, troopers int) error {
 	for i := range w.GroupAttacks {
 		ga := &w.GroupAttacks[i]
 		if ga.ID != id {
@@ -256,11 +250,11 @@ func (w *World) JoinGroupAttack(e *Empire, id, gold int) error {
 		if w.GameDay >= ga.DepartDay {
 			return ErrDeparted
 		}
-		if e.Gold < gold {
+		if e.Troopers < troopers {
 			return ErrCantAfford
 		}
-		e.Gold -= gold
-		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, Gold: gold})
+		e.Troopers -= troopers
+		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, Troopers: troopers})
 		return nil
 	}
 	return ErrNoAttack
@@ -390,13 +384,23 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 		target.Events = append(target.Events, fmt.Sprintf("Terrorists from %s were stopped by your New Realm Protection.", t.FromBoard))
 		return res
 	}
-	killed := t.Agents * TerrorTrooperKill
-	if killed > target.Troopers {
-		killed = target.Troopers
+	// BRE terror: each committed agent is an independent hit that removes a
+	// fraction (~1/TerrorUnitLossDenom, from BRE's disassembled 6/7 ratio) of one
+	// randomly chosen unit type.
+	fields := []*int{&target.Troopers, &target.Jets, &target.Turrets, &target.Tanks, &target.Bombers, &target.Carriers}
+	destroyed := 0
+	for i := 0; i < t.Agents; i++ {
+		f := fields[w.rng.Intn(len(fields))]
+		loss := *f / TerrorUnitLossDenom
+		*f -= loss
+		destroyed += loss
 	}
-	target.Troopers -= killed
-	target.Events = append(target.Events, fmt.Sprintf("Terrorists from %s destroyed %d of your troopers!", t.FromBoard, killed))
-	res.LandTaken = killed
+	if destroyed == 0 {
+		target.Events = append(target.Events, fmt.Sprintf("Terrorists from %s struck but destroyed nothing.", t.FromBoard))
+		return res
+	}
+	target.Events = append(target.Events, fmt.Sprintf("Terrorists from %s destroyed %d of your forces!", t.FromBoard, destroyed))
+	res.LandTaken = destroyed
 	res.Won = true
 	return res
 }

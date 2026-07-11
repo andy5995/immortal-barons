@@ -434,20 +434,21 @@ works the same way.
 
 ## Interplanetary operations (IB implementation)
 
-InterBBS ops run over file-drop packets. IB matches BRE's player-facing model;
-a few conversion rates aren't in the BRE strings and are **tunable constants**
-in `balance.go`:
+InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
+(verified against a disassembly of the original binary):
 
-- **Group Attack** — gold-funded ("Add how much gold for funding?"). Each baron
-  pays gold into a pool; on departure the pool becomes offense at
-  `GroupAttackGoldPerOffense` (500 gold/point, tunable).
+- **Group Attack** — commit real forces, not gold. Each baron sends troopers
+  (deducted from their army); the pooled troopers are the strike's offense
+  (1 each). BRE also lets you send jets/tanks/bombers and returns survivors;
+  IB's v1 commits troopers only.
 - **Terrorist Ops** — a force-destroying strike (not intel). Commit agents; the
-  op is queued and resolves on the target board's next packet run, destroying
-  `TerrorTrooperKill` troopers per agent (50, tunable). New Realm Protection
-  blocks it.
+  op is queued and resolves on the target board's next packet run. Each agent is
+  one hit that removes ~1/`TerrorUnitLossDenom` (7, from BRE's disassembled 6/7
+  ratio) of one randomly chosen unit type. New Realm Protection blocks it.
 - **Spy** — send an agent to a remote baron; intel lands in the planet-wide Spy
   Database. Reached from the Spy Database screen.
-- **SDI** — funds whole per-point steps of `SDIStep` gold up to `SDIMax`%.
+- **SDI** — funds whole per-point steps of `SDIStep` gold up to `SDIMax` (50%,
+  per BRE's "up to 50%" missile interception).
 
 ## Diplomacy
 

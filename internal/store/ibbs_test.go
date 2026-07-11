@@ -14,7 +14,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	cfgA.BoardID = "boardA"
 	wA := game.NewWorldSeed(cfgA, 1)
 	leader := wA.AddHuman("leader", "Alpha")
-	leader.Gold = 1_000_000 // fund the group attack
+	leader.Troopers = 1_000_000 // troops to commit
 
 	cfgB := game.DefaultConfig()
 	cfgB.BoardID = "boardB"

@@ -59,8 +59,9 @@ func interbbsScores(s session.Session, w *ctx) Result {
 }
 
 // createGroupAttack assembles an interplanetary strike against an empire on
-// another planet (chosen from imported scores). Barons fund it with gold (BRE's
-// model); the pooled funding becomes the strike's offense on departure.
+// another planet (chosen from imported scores). Barons commit troopers (BRE's
+// model — real forces, not gold); the pooled troopers become the strike's
+// offense on departure.
 func createGroupAttack(s session.Session, w *ctx) Result {
 	p := w.Player()
 	if len(w.RemoteBoards) == 0 {
@@ -95,8 +96,8 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	if pick == choices[0] {
 		target = "" // whole planet
 	}
-	gold := promptSuggested(s, "Add how much gold for funding?", p.Gold, p.Gold)
-	if gold <= 0 {
+	troopers := promptSuggested(s, "Send how many Troopers?", p.Troopers, p.Troopers)
+	if troopers <= 0 {
 		return Stay
 	}
 	days := promptInt(s, "Leave in how many days?")
@@ -112,7 +113,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 			return
 		}
 		var ga *game.GroupAttack
-		ga, err = w.World.CreateGroupAttack(p, board, target, w.GameDay+days, gold)
+		ga, err = w.World.CreateGroupAttack(p, board, target, w.GameDay+days, troopers)
 		if err != nil {
 			return
 		}
@@ -139,7 +140,7 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 		if p == nil {
 			return
 		}
-		suggested = p.Gold
+		suggested = p.Troopers
 		for _, ga := range w.GroupAttacks {
 			if w.GameDay >= ga.DepartDay {
 				continue
@@ -148,8 +149,8 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 			if tgt == "" {
 				tgt = tr(s, "the whole planet")
 			}
-			rows = append(rows, gaRow{ga.ID, fmt.Sprintf("#%d -> %s on %s (leaves day %d, funding %s gold)",
-				ga.ID, tgt, ga.TargetBoard, ga.DepartDay, comma(ga.Gold()))})
+			rows = append(rows, gaRow{ga.ID, fmt.Sprintf("#%d -> %s on %s (leaves day %d, %s troopers)",
+				ga.ID, tgt, ga.TargetBoard, ga.DepartDay, comma(ga.Offense()))})
 		}
 	})
 	if len(rows) == 0 {
@@ -164,8 +165,8 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	if i < 1 || i > len(rows) {
 		return Stay
 	}
-	gold := promptSuggested(s, "Add how much gold for funding?", suggested, suggested)
-	if gold <= 0 {
+	troopers := promptSuggested(s, "Send how many Troopers?", suggested, suggested)
+	if troopers <= 0 {
 		return Stay
 	}
 	id := rows[i-1].id
@@ -177,15 +178,15 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 			return
 		}
 		// JoinGroupAttack re-validates against fresh state: the attack must still
-		// exist (ErrNoAttack), not yet have departed (ErrDeparted), and the funder
-		// must still hold the gold (ErrCantAfford).
-		err = w.World.JoinGroupAttack(p, id, gold)
+		// exist (ErrNoAttack), not yet have departed (ErrDeparted), and the baron
+		// must still hold the troopers (ErrCantAfford).
+		err = w.World.JoinGroupAttack(p, id, troopers)
 	})
 	if err != nil {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "You joined group attack #%d with %s gold.", id, comma(gold))
+	ok(s, "You joined group attack #%d with %s troopers.", id, comma(troopers))
 	return Stay
 }
 

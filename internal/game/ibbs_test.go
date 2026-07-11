@@ -67,7 +67,7 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 	target.syncLand()
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0 // defenseless
 
-	leader.Gold, ally.Gold = 1_000_000, 1_000_000 // fund the pool
+	leader.Troopers, ally.Troopers = 1_000_000, 1_000_000 // troops to commit
 	ga, err := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, 100_000)
 	if err != nil {
 		t.Fatalf("create: %v", err)
@@ -81,9 +81,9 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 	if len(wA.Outbox) != 1 || len(wA.Outbox[0].Attacks) != 1 {
 		t.Fatalf("expected one outbound attack, got %+v", wA.Outbox)
 	}
-	// 150,000 gold pooled / GroupAttackGoldPerOffense (500) = 300 offense.
-	if got := wA.Outbox[0].Attacks[0].Offense; got != 300 {
-		t.Errorf("combined offense: want 300, got %d", got)
+	// 100,000 + 50,000 committed troopers = 150,000 offense (1 each).
+	if got := wA.Outbox[0].Attacks[0].Offense; got != 150_000 {
+		t.Errorf("combined offense: want 150000, got %d", got)
 	}
 	if len(wA.GroupAttacks) != 0 {
 		t.Errorf("departed attack should be removed from the pending list")
@@ -113,7 +113,10 @@ func TestTerrorOpDestroysForces(t *testing.T) {
 	wB := NewWorldSeed(cfgB, 1)
 	target := wB.AddHuman("victim", "Victim")
 	target.Protection = 0
-	target.Troopers = 5000
+	// Units in every slot so each random hit destroys something.
+	target.Troopers, target.Jets, target.Turrets = 5000, 700, 700
+	target.Tanks, target.Bombers, target.Carriers = 700, 700, 700
+	totalBefore := target.Troopers + target.Jets + target.Turrets + target.Tanks + target.Bombers + target.Carriers
 
 	if err := wA.SendTerror(attacker, "boardB", "Victim", 4); err != nil {
 		t.Fatalf("SendTerror: %v", err)
@@ -126,12 +129,13 @@ func TestTerrorOpDestroysForces(t *testing.T) {
 	}
 
 	result := wB.ApplyPacket(wA.Outbox[0])
-	// 4 agents * TerrorTrooperKill (50) = 200 troopers destroyed.
-	if target.Troopers != 4800 {
-		t.Errorf("target troopers: want 4800, got %d", target.Troopers)
+	res := result.Results[0]
+	if !res.Won || res.Kind != "terror" || res.LandTaken <= 0 {
+		t.Errorf("expected a won terror result with forces destroyed, got %+v", res)
 	}
-	if len(result.Results) != 1 || !result.Results[0].Won || result.Results[0].Kind != "terror" {
-		t.Errorf("expected a won terror result, got %+v", result.Results)
+	totalAfter := target.Troopers + target.Jets + target.Turrets + target.Tanks + target.Bombers + target.Carriers
+	if totalAfter >= totalBefore {
+		t.Errorf("target should have lost forces: before %d, after %d", totalBefore, totalAfter)
 	}
 }
 
@@ -164,7 +168,7 @@ func TestTerrorOpBlockedByProtection(t *testing.T) {
 func TestJoinDepartedAttackFails(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("e", "E")
-	e.Gold = 10_000
+	e.Troopers = 10_000
 	ga, _ := w.CreateGroupAttack(e, "boardB", "", w.GameDay, 1000) // departs today
 	if err := w.JoinGroupAttack(e, ga.ID, 500); err != ErrDeparted {
 		t.Errorf("joining a departed attack should fail with ErrDeparted, got %v", err)

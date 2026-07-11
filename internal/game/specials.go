@@ -7,7 +7,9 @@ import (
 
 // Strike/SDI gold costs (NukeCost, ChemCost, BioCost, DoomerCost, SDIStep)
 // live in balance.go. SDIMax is a level cap, not a cost, so it stays here.
-const SDIMax = 75
+// SDIMax caps SDI at 50%: BRE's SDI destroys "up to 50%" of incoming missiles
+// (breins.txt), so the level tops out there.
+const SDIMax = 50
 
 // FundSDI raises e's SDI defense level. Only whole SDIStep chunks of gold
 // are spent (leftover gold under SDIStep is not charged), and the level is

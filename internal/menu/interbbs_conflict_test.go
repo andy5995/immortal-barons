@@ -16,19 +16,19 @@ import (
 // realm and aborts, leaving the group attack's contributor list untouched.
 func TestJoinGroupAttackVanishedActorConflict(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
-		p.Gold = 10_000 // give Alice gold so the funding prompt has a nonzero max
+		p.Troopers = 10_000 // give Alice troopers so the send prompt has a nonzero max
 	})
 	commitOnFile(t, cfg, func(w *game.World) {
 		leader := w.AddHuman("leader", "Leaderland")
-		leader.Gold = 10_000
+		leader.Troopers = 10_000
 		w.GameDay = 0
 		w.CreateGroupAttack(leader, "Mars", "", 5, 1000) // departs day 5, still forming
 	})
 	commitOnFile(t, cfg, func(w *game.World) { w.AddHuman("decoy", "Decoyland") })
 
 	fb := &hookSession{
-		fakeSession: fakeSession{keys: []rune("1\r500\r")}, // pick attack 1, add 500 gold
-		marker:      "Add how much gold for funding",
+		fakeSession: fakeSession{keys: []rune("1\r500\r")}, // pick attack 1, send 500 troopers
+		marker:      "Send how many Troopers",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("alice")) })
 		},
@@ -53,18 +53,18 @@ func TestJoinGroupAttackVanishedActorConflict(t *testing.T) {
 // adds no contribution.
 func TestJoinGroupAttackDepartedWindow(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
-		p.Gold = 10_000
+		p.Troopers = 10_000
 	})
 	commitOnFile(t, cfg, func(w *game.World) {
 		leader := w.AddHuman("leader", "Leaderland")
-		leader.Gold = 10_000
+		leader.Troopers = 10_000
 		w.GameDay = 0
 		w.CreateGroupAttack(leader, "Mars", "", 5, 1000)
 	})
 
 	fb := &hookSession{
 		fakeSession: fakeSession{keys: []rune("1\r500\r")},
-		marker:      "Add how much gold for funding",
+		marker:      "Send how many Troopers",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.GameDay = 10 }) // the force leaves
 		},
