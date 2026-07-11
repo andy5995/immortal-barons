@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"unicode"
@@ -9,6 +10,12 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
+
+// errRealmChanged is the abort-on-conflict notice: a mutating action re-resolves
+// the active empire inside its transaction and, if it has vanished (abdicated by
+// another node between the prompt and the write), aborts cleanly with this rather
+// than dereferencing a nil empire.
+var errRealmChanged = errors.New("The realm has changed — try again.")
 
 // buy2 wraps a "prompt for quantity, apply, report" economy action. The
 // max offered is what the empire can currently afford at unit's price.
@@ -70,9 +77,15 @@ func sellUnit2(label string, owned func(*game.Empire) int, apply func(*game.Worl
 
 // buildHQ starts HeadQuarters construction for the acting empire.
 func buildHQ(s session.Session, w *ctx) Result {
-	p := w.Player()
 	var err error
-	w.With(func() { err = w.World.StartHQ(p) })
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		err = w.World.StartHQ(p)
+	})
 	if err != nil {
 		fail(s, err)
 	} else {
@@ -211,8 +224,16 @@ func buyLand(s session.Session, w *ctx) Result {
 			var err error
 			var gold int
 			w.With(func() {
-				err = w.World.BuyRegions(p, regionField(p, t), n)
-				gold = p.Gold
+				// Re-resolve inside the transaction: BuyRegions re-checks gold and
+				// the per-turn region cap against fresh state, and the region field
+				// pointer must index the reloaded empire, not the stale gather.
+				fp := w.Player()
+				if fp == nil {
+					err = errRealmChanged
+					return
+				}
+				err = w.World.BuyRegions(fp, regionField(fp, t), n)
+				gold = fp.Gold
 			})
 			if err != nil {
 				// No pause: the message stays above the next prompt; the player
@@ -222,6 +243,7 @@ func buyLand(s session.Session, w *ctx) Result {
 				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
 					fmt.Sprintf(tr(s, "%d %s regions purchased. Gold: %d"), n, regionTypeNames[t], gold), ansi.Reset)
 			}
+			p = w.Player() // refresh the display pointer for the next iteration
 		}
 	}
 }
@@ -240,11 +262,20 @@ func sellLand(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var err error
-	w.With(func() { err = w.World.DropRegions(p, field, n) })
+	var land int
+	w.With(func() {
+		fp := w.Player()
+		if fp == nil {
+			err = errRealmChanged
+			return
+		}
+		err = w.World.DropRegions(fp, regionField(fp, t), n)
+		land = fp.Land
+	})
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "%d %s regions dropped. You now hold %d land.", n, regionTypeNames[t], p.Land)
+		ok(s, "%d %s regions dropped. You now hold %d land.", n, regionTypeNames[t], land)
 	}
 	return Stay
 }
@@ -400,11 +431,20 @@ func buyFoodMarket(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var err error
-	w.With(func() { err = w.World.BuyFoodMarket(p, n) })
+	var gold int
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		err = w.World.BuyFoodMarket(p, n) // re-checks gold atomically
+		gold = p.Gold
+	})
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Bought %d food. Gold: %d", n, p.Gold)
+		ok(s, "Bought %d food. Gold: %d", n, gold)
 	}
 	return Stay
 }
@@ -417,11 +457,20 @@ func sellFoodMarket(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var err error
-	w.With(func() { err = w.World.SellFood(p, n) })
+	var gold int
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		err = w.World.SellFood(p, n) // re-clamps to fresh food stock atomically
+		gold = p.Gold
+	})
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Sold %d food. Gold: %d", n, p.Gold)
+		ok(s, "Sold %d food. Gold: %d", n, gold)
 	}
 	return Stay
 }
