@@ -39,7 +39,17 @@ func buy2(label string, military bool, unit func(*ctx) int, apply func(*game.Wor
 			return Stay
 		}
 		var err error
-		w.With(func() { err = apply(w.World, p, n) }) // apply re-checks gold atomically
+		w.With(func() {
+			// Re-resolve the empire against the freshly-reloaded world and let
+			// apply re-check gold atomically — the p/price gathered above (before
+			// the prompt) may be stale after a concurrent node's transaction.
+			p := w.Player()
+			if p == nil {
+				err = errRealmChanged
+				return
+			}
+			err = apply(w.World, p, n)
+		})
 		if err != nil {
 			fail(s, err)
 		} else {
@@ -65,11 +75,20 @@ func sellUnit2(label string, owned func(*game.Empire) int, apply func(*game.Worl
 			return Stay
 		}
 		var err error
-		w.With(func() { err = apply(w.World, p, n) }) // apply re-checks stock atomically
+		var gold int
+		w.With(func() {
+			p := w.Player()
+			if p == nil {
+				err = errRealmChanged
+				return
+			}
+			err = apply(w.World, p, n) // apply re-checks stock atomically
+			gold = p.Gold
+		})
 		if err != nil {
 			fail(s, err)
 		} else {
-			ok(s, "Sold %d. Gold: %d", n, p.Gold)
+			ok(s, "Sold %d. Gold: %d", n, gold)
 		}
 		return Stay
 	}
