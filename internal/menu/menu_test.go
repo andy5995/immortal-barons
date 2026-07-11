@@ -449,19 +449,26 @@ func TestInterPlanetaryMenuMatchesBRE(t *testing.T) {
 	}
 }
 
-// TestInterPlanetarySpecialOpsReachesCovert checks BRE's "Special Operations"
-// InterPlanetary Ops item opens the Covert Operations menu (#75).
-func TestInterPlanetarySpecialOpsReachesCovert(t *testing.T) {
+// TestInterPlanetarySpecialOpsMenu checks BRE's "Special Operations" IP item
+// opens the separate interplanetary Special Operations menu (cross-planet
+// covert set), not the local Covert menu.
+func TestInterPlanetarySpecialOpsMenu(t *testing.T) {
 	// "9" enters InterPlanetary Ops, "8" selects Special Operations, then
-	// "0" "0" "0" quits Covert Ops, InterPlanetary Ops, and the opening menu.
+	// "0" "0" "0" quits Special Ops, InterPlanetary Ops, and the opening menu.
 	f := &fakeSession{keys: []rune("98000")}
 	w := newWorld()
 	w.Config.IBBS = true
 	if err := Run(f, w, BuildMenus().Game); err != nil {
 		t.Fatalf("got %v", err)
 	}
-	if !strings.Contains(f.out.String(), "Covert Operations") {
-		t.Errorf("Special Operations should reach the Covert Operations menu, got:\n%s", f.out.String())
+	out := f.out.String()
+	for _, want := range []string{"Special Operations", "Send SpyGuy", "Bomb Enemy Food Market"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("IP Special Operations menu missing %q, got:\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "Covert Operations") {
+		t.Errorf("IP Special Operations should NOT open the local Covert menu:\n%s", out)
 	}
 }
 

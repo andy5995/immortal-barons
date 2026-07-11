@@ -385,12 +385,29 @@ func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt strin
 	return board, baron, sc, true
 }
 
-// spyDatabase shows the planet-wide store of spy reports and offers to send a
-// spy to gather more (BRE's Spy Database / Send Spy).
-func spyDatabase(s session.Session, w *ctx) Result {
-	if w.Player().Agents >= 1 && askYesNo(s, "Send a spy to another planet? (uses 1 agent)", false) {
-		sendRemoteSpy(s, w)
+// sendSpyGuy is the Special Operations "Send SpyGuy" item: infiltrate a baron on
+// another planet. BRE puts sending on Special Operations and keeps the Spy
+// Database as the read-only viewer.
+func sendSpyGuy(s session.Session, w *ctx) Result {
+	if w.Player().Agents < 1 {
+		fail(s, game.ErrNoAgents)
+		return Stay
 	}
+	sendRemoteSpy(s, w)
+	return Stay
+}
+
+// ipSpecialStub is a recorded-but-inert interplanetary Special Operations item:
+// the cross-planet bombing/WMD variants aren't built yet, so the menu matches
+// BRE while the mechanic stays a stub.
+func ipSpecialStub(s session.Session, w *ctx) Result {
+	ok(s, "That interplanetary operation is not yet available.")
+	return Stay
+}
+
+// spyDatabase is the read-only Spy Database viewer (sending is Special
+// Operations → Send SpyGuy, matching BRE).
+func spyDatabase(s session.Session, w *ctx) Result {
 	if len(w.SpyDatabase) == 0 {
 		ok(s, "The spy database is empty. Spy on empires on other planets to fill it.")
 		return Stay

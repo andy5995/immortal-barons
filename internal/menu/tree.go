@@ -46,9 +46,10 @@ func BuildMenus() *Menus {
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan, Columns: 2}
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
-	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true}
+	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	bombTargets := &Menu{Title: "Bomb Enemy Targets", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
+	ipSpecial := &Menu{Title: "Special Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
 	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
 	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
@@ -169,10 +170,10 @@ func BuildMenus() *Menus {
 	// (#75); Doomer Kaboomer Ops ('K') is IB's equivalent of the Gooie
 	// Kablooie item BRE's own table carries but the observed board had
 	// config-hidden. Send Trade Deal and Send Message reuse the same actions
-	// as the Trading and Messages menus; Special Operations opens the Covert
-	// Operations menu, matching BRE. Indiv. Attack Force ('6') has no
-	// interplanetary individual-attack mechanic behind it yet — see
-	// indivAttackForce's doc comment.
+	// as the Trading and Messages menus; Special Operations opens the separate
+	// interplanetary Special Operations menu (BRE's cross-planet covert set, not
+	// the local Covert menu). Indiv. Attack Force ('6') has no interplanetary
+	// individual-attack mechanic behind it yet — see indivAttackForce's doc.
 	interplanetary.Items = []Item{
 		{Key: '1', Label: "View IPScores", Do: interbbsScores},
 		{Key: '2', Label: "Terrorist Ops", Do: terroristOps},
@@ -181,7 +182,7 @@ func BuildMenus() *Menus {
 		{Key: '5', Label: "Join Group Attack", Do: joinGroupAttack},
 		{Key: '6', Label: "Indiv. Attack Force", Do: indivAttackForce},
 		{Key: '7', Label: "Send Message", Do: sendMessage},
-		{Key: '8', Label: "Special Operations", Do: gotoMenu(covert)},
+		{Key: '8', Label: "Special Operations", Do: gotoMenu(ipSpecial)},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'K', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
@@ -221,6 +222,25 @@ func BuildMenus() *Menus {
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	bombTargets.DefaultOnEnter = quitOnEnter(bombTargets)
+
+	// Interplanetary Special Operations: BRE's cross-planet covert menu, a
+	// separate node from the local Covert Operations menu — every op targets an
+	// empire on another planet. Order mirrors the local Bomb Enemy Targets set
+	// plus Send SpyGuy. Only Send SpyGuy is wired; the bombing/WMD variants are
+	// recorded-but-inert until interplanetary covert strikes are built.
+	ipSpecial.Items = []Item{
+		{Key: 'F', Label: "Bomb Enemy Food Market", Do: ipSpecialStub},
+		{Key: 'T', Label: "Bomb Enemy Trade Market", Do: ipSpecialStub},
+		{Key: 'R', Label: "Bomb Trade Routes", Do: ipSpecialStub},
+		{Key: 'U', Label: "Undermine Investments", Do: ipSpecialStub},
+		{Key: 'N', Label: "Nuclear Assault", Do: ipSpecialStub},
+		{Key: 'C', Label: "Chemical Bombing", Do: ipSpecialStub},
+		{Key: 'S', Label: "R5-Slappenheimer", Do: ipSpecialStub},
+		{Key: 'G', Label: "Send SpyGuy", Do: sendSpyGuy},
+		{Key: '?', Label: "Help", Do: helpBrowse},
+		{Key: '0', Label: "Quit", Do: back},
+	}
+	ipSpecial.DefaultOnEnter = quitOnEnter(ipSpecial)
 
 	trading.Items = []Item{
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
