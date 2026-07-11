@@ -208,24 +208,44 @@ func trimTrailingBlank(lines []string) string {
 }
 
 func sendMessage(s session.Session, w *ctx) Result {
-	p := w.Player()
 	for {
 		to, all := pickRecipient(s, w, "Send to:", true)
 		if !all && to == nil {
 			return Stay
 		}
+		var toName string
+		if to != nil {
+			toName = to.Name
+		}
 		text, send := composeMessage(s)
 		if send && strings.TrimSpace(text) != "" {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Saving..."), ansi.Reset)
+			var err error
 			w.With(func() {
+				// Re-resolve sender and recipient by handle/name against the freshly
+				// reloaded world, so a concurrent send to the same inbox appends
+				// (both messages land) and a vanished recipient aborts.
+				p := w.Player()
+				if p == nil {
+					err = errRealmChanged
+					return
+				}
 				if all {
 					for _, e := range recipients(w) {
 						w.World.SendMail(p, e, text)
 					}
-				} else {
-					w.World.SendMail(p, to, text)
+					return
 				}
+				recip := findRealm(w, toName)
+				if recip == nil || recip == p {
+					err = errTargetGone
+					return
+				}
+				w.World.SendMail(p, recip, text)
 			})
+			if err != nil {
+				fail(s, err)
+			}
 		}
 		if !askYesNo(s, "Do you wish to send another message?", false) {
 			return Stay
@@ -270,7 +290,19 @@ func planetaryPost(s session.Session, w *ctx) Result {
 	if text == "" {
 		return Stay
 	}
-	w.With(func() { w.World.PostBulletin(w.Player(), text) })
+	var err error
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		w.World.PostBulletin(p, text)
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
 	ok(s, "Posted.")
 	return Stay
 }

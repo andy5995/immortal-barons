@@ -412,7 +412,11 @@ func writeMacros(s session.Session, w *ctx) Result {
 
 	// Clear the slot first so pressing its own Ctrl-<letter> ends the edit
 	// (passes through the expander) instead of replaying the old macro.
-	w.With(func() { delete(p.Macros, string(letter)) })
+	w.With(func() {
+		if p := w.Player(); p != nil {
+			delete(p.Macros, string(letter))
+		}
+	})
 	ctrl := rune(letter - 'A' + 1)
 	fmt.Fprintf(s, "\n"+tr(s, "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit.")+"\n", letter, letter)
 	var seq []rune
@@ -426,8 +430,23 @@ func writeMacros(s session.Session, w *ctx) Result {
 			fmt.Fprintf(s, "%c", k)
 		}
 	}
+	var saveErr error
 	if len(seq) > 0 {
-		w.With(func() { p.Macros[string(letter)] = string(seq) })
+		w.With(func() {
+			p := w.Player()
+			if p == nil {
+				saveErr = errRealmChanged
+				return
+			}
+			if p.Macros == nil {
+				p.Macros = map[string]string{}
+			}
+			p.Macros[string(letter)] = string(seq)
+		})
+		if saveErr != nil {
+			fail(s, saveErr)
+			return Stay
+		}
 		ok(s, "Macro Ctrl-%c saved.", letter)
 	} else {
 		ok(s, "Macro Ctrl-%c cleared.", letter)
@@ -565,11 +584,21 @@ func setIndustries(s session.Session, w *ctx) Result {
 		cur := *prodField(p, i)
 		ns[i] = promptSuggested(s, name, cur, 100)
 	}
+	var err error
 	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
 		for i, n := range ns {
 			*prodField(p, i) = n
 		}
 	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
 	ok(s, "Industry production percentages updated.")
 	return Stay
 }
@@ -591,8 +620,31 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 	if t < 1 || t > len(prodTypeNames) {
 		return Stay
 	}
-	w.With(func() { p.Specialized = prodTypeNames[t-1] })
-	ok(s, "Your industry is now permanently specialized in %s.", p.Specialized)
+	var err error
+	var already bool
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		// Re-check against fresh state: specialization is permanent, so if another
+		// visit set it between the prompt and here, keep the existing choice.
+		if p.Specialized != "" {
+			already = true
+			return
+		}
+		p.Specialized = prodTypeNames[t-1]
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	if already {
+		ok(s, "Your industry is already specialized.")
+		return Stay
+	}
+	ok(s, "Your industry is now permanently specialized in %s.", prodTypeNames[t-1])
 	return Stay
 }
 

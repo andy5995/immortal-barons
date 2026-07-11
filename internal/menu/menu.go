@@ -387,11 +387,18 @@ func gotoMenu(m *Menu) Action {
 func back(session.Session, *ctx) Result { return Back }
 func quit(session.Session, *ctx) Result { return Quit }
 
-// toggle flips a bool preference and redraws (its label shows the state).
+// toggle flips a bool preference and redraws (its label shows the state). The
+// flip runs inside a transaction: the preferences live on the World, so a door
+// node must read-modify-write them against fresh state and persist the change —
+// an unlocked flip would be lost on the next reload. (The pointer stays valid
+// across reloads because the World is reloaded in place; only *Empire pointers
+// rebind.)
 func toggle(get func(*ctx) *bool) Action {
 	return func(_ session.Session, g *ctx) Result {
-		p := get(g)
-		*p = !*p
+		g.With(func() {
+			p := get(g)
+			*p = !*p
+		})
 		return Stay
 	}
 }
