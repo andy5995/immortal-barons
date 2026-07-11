@@ -28,6 +28,16 @@ func Load(cfg game.Config) (*game.World, error) {
 	if err := json.Unmarshal(data, w); err != nil {
 		return nil, err
 	}
+	repair(w, cfg)
+	return w, nil
+}
+
+// repair re-runs the migration/normalization Load applies after unmarshalling:
+// per-empire Ensure* backfills, world-level backfills, re-pointing Config, and
+// loading the league roster. Factored out so FileStore can reload the JSON into
+// an EXISTING *World (keeping the caller's pointer valid) without duplicating
+// this list.
+func repair(w *game.World, cfg game.Config) {
 	for _, e := range w.Empires {
 		e.EnsureRegions()
 		e.EnsureSupport()
@@ -40,7 +50,6 @@ func Load(cfg game.Config) (*game.World, error) {
 	w.EnsureNews()
 	w.Config = cfg
 	loadLeagueNodes(w, cfg)
-	return w, nil
 }
 
 // NodeListFile is the league roster filename. The clone isn't binary-compatible
