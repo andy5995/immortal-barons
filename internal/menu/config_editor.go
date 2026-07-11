@@ -140,7 +140,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 			if err := store.SaveConfig(*c); err != nil {
 				fail(s, err)
 			} else {
-				ok(s, "Configuration saved.")
+				okNoPause(s, "Configuration saved.")
 			}
 			return true
 		}

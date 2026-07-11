@@ -246,8 +246,14 @@ func statLine(s session.Session, n int, text string) {
 // ok and fail translate their message text by the caller's language, so every
 // call site becomes translatable just by adding the string to the catalogs.
 func ok(s session.Session, format string, a ...any) {
-	fmt.Fprintf(s, "\n  %s%s%s", ansi.FgGreen, fmt.Sprintf(i18n.T(sessionLang(s), format), a...), ansi.Reset)
+	okNoPause(s, format, a...)
 	pause(s)
+}
+
+// okNoPause is ok without the trailing wait-for-keypress, for a success message
+// that a following screen or prompt makes the pause redundant.
+func okNoPause(s session.Session, format string, a ...any) {
+	fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen, fmt.Sprintf(i18n.T(sessionLang(s), format), a...), ansi.Reset)
 }
 
 func fail(s session.Session, err error) {
