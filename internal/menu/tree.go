@@ -321,7 +321,7 @@ func BuildMenus() *Menus {
 	}
 	system.DefaultOnEnter = quitOnEnter(system)
 
-	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Color: ansi.FgBrightMagenta, Status: statusBar, Columns: 2}
+	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Color: ansi.FgBrightMagenta, Columns: 2}
 	gameMenu.Items = []Item{
 		{Key: '1', Label: "Play", Do: runTurn},
 		{Key: '2', Label: "See Status", Do: empireStatus},
@@ -365,15 +365,9 @@ func BuildMenus() *Menus {
 // configured for IBBS or league play.
 func ibbsHidden(w *ctx) bool { return !w.Config.InterBBSEnabled() }
 
-func statusBar(w *ctx) string {
-	p := w.Player()
-	return fmt.Sprintf(i18n.T(playerLang(w), "%s | Gold %d  Food %d  Land %d  Army %d | Turns left %d | Day %d"),
-		p.Name, p.Gold, p.Food, p.Land, p.Army(), p.TurnsLeft, w.GameDay)
-}
-
 // spendingStatus is the Spending menu footer: gold on hand and turns left.
-// It runs inside draw's world-lock section (like statusBar), so the reads
-// need no separate locking.
+// It runs inside draw's world-lock section, so the reads need no separate
+// locking.
 func spendingStatus(w *ctx) string {
 	p := w.Player()
 	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d turns."), formatGold(p.Gold, playerLang(w)), p.TurnsLeft)
