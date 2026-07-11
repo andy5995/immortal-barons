@@ -229,8 +229,11 @@ func attackPirates(s session.Session, w *ctx) Result {
 
 func sdiProgram(s session.Session, w *ctx) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%s"+tr(s, "SDI Program — current defense: %d%%")+"%s\n", ansi.FgBrightCyan, p.SDI, ansi.Reset)
-	gold := promptInt(s, "Fund SDI — gold to spend (10000 per +1%%, max 75%%)?")
+	// BRE's SDI screen shows "Current SDI Strength" and the funding step; IB
+	// funds whole per-point steps (SDIStep gold each) up to SDIMax.
+	fmt.Fprintf(s, "\n%s"+tr(s, "Current SDI Strength: %d%%")+"%s\n", ansi.FgBrightCyan, p.SDI, ansi.Reset)
+	fmt.Fprintf(s, "%s\n", fmt.Sprintf(tr(s, "Each +1%% costs %s gold (max %d%%); fund in whole increments of that."), comma(game.SDIStep), game.SDIMax))
+	gold := promptInt(s, "Fund SDI — gold to spend?")
 	if gold <= 0 {
 		return Stay
 	}
