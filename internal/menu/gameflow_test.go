@@ -49,7 +49,7 @@ func TestAskYesNoHint(t *testing.T) {
 func TestIncomeReportWritesNonEmpty(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")} // pause keypress
 	w := newWorld()
-	incomeReport(f, w, w.Player())
+	incomeReport(f, w)
 	if f.out.Len() == 0 {
 		t.Error("expected incomeReport to write output")
 	}
@@ -61,7 +61,7 @@ func TestIncomeReportWritesNonEmpty(t *testing.T) {
 func TestEndOfTurnStatsWritesNonEmpty(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")} // pause keypress
 	w := newWorld()
-	endOfTurnStats(f, w, w.Player())
+	endOfTurnStats(f, w)
 	if f.out.Len() == 0 {
 		t.Error("expected endOfTurnStats to write output")
 	}
@@ -79,7 +79,7 @@ func TestIncomeReportShowsIndustryProduction(t *testing.T) {
 	p.Regions.Industrial = 10
 	w.World.Manufacture(p) // turn-start step, done by runTurn's loop before incomeReport
 
-	incomeReport(f, w, p)
+	incomeReport(f, w)
 	out := f.out.String()
 	for _, want := range []string{
 		"gold was earned from Industrial Zones", // industrial gold, now itemized in the breakdown
@@ -101,7 +101,7 @@ func TestEndOfTurnStatsNoLongerShowsIndustryProduction(t *testing.T) {
 	p.Regions.Industrial = 10
 	w.World.Manufacture(p)
 
-	endOfTurnStats(f, w, p)
+	endOfTurnStats(f, w)
 	out := f.out.String()
 	for _, unwanted := range []string{
 		"gold was produced by your Industry",
@@ -129,7 +129,7 @@ func TestIncomeReportSurfacesAndClearsPirateRaids(t *testing.T) {
 	p := w.Player()
 	p.PirateRaids = []string{"The Sharks pirates raided you, carrying off 40 troopers, 0 jets, and 5 tanks!"}
 
-	incomeReport(f, w, p)
+	incomeReport(f, w)
 
 	if !strings.Contains(f.out.String(), "Sharks pirates raided you") {
 		t.Error("income report should show the pirate raid notice")
@@ -148,7 +148,7 @@ func TestPaymentStageAutoPays(t *testing.T) {
 	before := p.Gold
 	want := p.ForcesUpkeep() + p.RegionUpkeep()
 
-	paymentStage(f, w, p)
+	paymentStage(f, w)
 
 	if p.Gold != before-want {
 		t.Errorf("auto-pay should deduct %d, gold %d -> %d", want, before, p.Gold)
@@ -169,7 +169,7 @@ func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
 	want := p.ForcesUpkeep() + p.RegionUpkeep()
 	before := p.Gold
 
-	paymentStage(f, w, p)
+	paymentStage(f, w)
 
 	if p.Troopers != beforeTroopers {
 		t.Errorf("full pay should not desert troopers, %d -> %d", beforeTroopers, p.Troopers)
@@ -188,7 +188,7 @@ func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 	p.Support = 100
 	beforeTroopers := p.Troopers
 
-	paymentStage(f, w, p)
+	paymentStage(f, w)
 
 	if p.Troopers >= beforeTroopers {
 		t.Errorf("underpaying forces should desert troopers, %d -> %d", beforeTroopers, p.Troopers)

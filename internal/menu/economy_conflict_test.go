@@ -131,6 +131,40 @@ func TestBuyRegionsVanishedEmpireConflict(t *testing.T) {
 	}
 }
 
+// TestPaymentStageVanishedEmpireConflict proves the turn pipeline re-resolves the
+// active empire inside every transaction. paymentStage is a turn-pipeline stage
+// (runTurn calls it each turn); it once took a *Empire captured before its first
+// w.With. Node B gathers its realm, another node removes it leaving only a decoy,
+// then node B runs paymentStage with Auto-Pay on. The pointer-reuse-by-index
+// reload maps node B's cached pointer onto the decoy's data, so paying off the
+// stale pointer would spend the DECOY's gold on maintenance. The re-resolve finds
+// no realm and aborts the stage, leaving the decoy untouched.
+func TestPaymentStageVanishedEmpireConflict(t *testing.T) {
+	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
+		p.Gold = 100_000_000
+	})
+	const decoyGold = 100_000_000
+	addDecoy(t, cfg, decoyGold, 0)
+
+	_ = b.Player() // gather node B's realm (caches the pointer)
+	// Another node removes alice and turns Auto-Pay on for the whole world, so the
+	// stale-pointer path would silently auto-pay the decoy's maintenance.
+	commitOnFile(t, cfg, func(w *game.World) {
+		w.RemoveEmpire(w.FindByOwner("alice"))
+		w.AutoPayMaint = true
+	})
+
+	fb := &fakeSession{}
+	paymentStage(fb, b)
+
+	if d := committedEmpire(t, cfg, "decoy"); d.Gold != decoyGold {
+		t.Fatalf("decoy gold = %d, want %d — a stale pointer paid the wrong empire's maintenance", d.Gold, decoyGold)
+	}
+	if out := fb.out.String(); strings.Contains(out, "Maintenance paid") {
+		t.Fatalf("paymentStage should have aborted for the vanished realm, but paid maintenance: %q", out)
+	}
+}
+
 // TestBuyFoodVanishedEmpireConflict is the same conflict for Buy Food.
 func TestBuyFoodVanishedEmpireConflict(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {

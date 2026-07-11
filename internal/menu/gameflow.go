@@ -108,12 +108,30 @@ func askYesNo(s session.Session, msg string, defYes bool) bool {
 	}
 }
 
-// showTurnEvents prints and clears p's accumulated events, if any. The read
-// and clear happen together under w's lock so a concurrent maintenance tick
-// or another session's action can't append to p.Events between the two.
-func showTurnEvents(s session.Session, w *ctx, p *game.Empire) {
-	var events []string
+// withPlayer runs fn under w's lock against the FRESHLY-resolved active empire.
+// It returns false when the empire has vanished (eliminated/abdicated by another
+// node mid-turn), so a turn-pipeline caller can abort instead of mutating a
+// stale *Empire that a reload may have rebound to a rival's data. Every mutating
+// transaction in the turn pipeline goes through here rather than closing over a
+// p captured across a w.With boundary.
+func withPlayer(w *ctx, fn func(p *game.Empire)) bool {
+	alive := false
 	w.With(func() {
+		if p := w.Player(); p != nil {
+			fn(p)
+			alive = true
+		}
+	})
+	return alive
+}
+
+// showTurnEvents prints and clears the active empire's accumulated events, if
+// any. The read and clear happen together under w's lock so a concurrent
+// maintenance tick or another session's action can't append between the two,
+// and the empire is re-resolved inside the lock so a reload can't rebind it.
+func showTurnEvents(s session.Session, w *ctx) {
+	var events []string
+	withPlayer(w, func(p *game.Empire) {
 		events = p.Events
 		p.Events = nil
 	})
@@ -133,9 +151,9 @@ func showTurnEvents(s session.Session, w *ctx, p *game.Empire) {
 // leaves the mail for the Messages menu. Count/read-and-clear happen under w's
 // lock so a concurrent sender can't slip a message between the check and the
 // read.
-func showUnreadMail(s session.Session, w *ctx, p *game.Empire) {
+func showUnreadMail(s session.Session, w *ctx) {
 	var count int
-	w.With(func() { count = len(p.Mail) })
+	withPlayer(w, func(p *game.Empire) { count = len(p.Mail) })
 	if count == 0 {
 		return
 	}
@@ -148,7 +166,7 @@ func showUnreadMail(s session.Session, w *ctx, p *game.Empire) {
 		return
 	}
 	var mail []string
-	w.With(func() {
+	withPlayer(w, func(p *game.Empire) {
 		mail = p.Mail
 		p.Mail = nil
 	})
@@ -161,17 +179,19 @@ func showUnreadMail(s session.Session, w *ctx, p *game.Empire) {
 
 // incomeReport itemizes p's per-turn income by source. It shows exactly the
 // values CollectIncome credits: both derive from World.IncomeThisTurn.
-func incomeReport(s session.Session, w *ctx, p *game.Empire) {
+func incomeReport(s session.Session, w *ctx) {
 	var b game.IncomeBreakdown
 	var raids []string
 	var madeTroopers, madeJets, madeTurrets, madeBombers, madeTanks, madeCarriers int
-	w.With(func() {
+	if !withPlayer(w, func(p *game.Empire) {
 		b = w.IncomeThisTurn(p)
 		raids = p.PirateRaids
 		p.PirateRaids = nil
 		madeTroopers, madeJets, madeTurrets = p.MadeTroopers, p.MadeJets, p.MadeTurrets
 		madeBombers, madeTanks, madeCarriers = p.MadeBombers, p.MadeTanks, p.MadeCarriers
-	})
+	}) {
+		return
+	}
 
 	golds := []struct {
 		amount int
@@ -262,10 +282,12 @@ func peopleMood(support int) string {
 // endOfTurnStats snapshots p under the lock first, since the daily-
 // maintenance ticker (or another session) can mutate these same fields
 // concurrently.
-func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
+func endOfTurnStats(s session.Session, w *ctx) {
 	var snap game.Empire
-	w.With(func() { snap = *p })
-	p = &snap
+	if !withPlayer(w, func(p *game.Empire) { snap = *p }) {
+		return
+	}
+	p := &snap
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "End of Turn Statistics:"), ansi.Reset)
 	fmt.Fprintf(s, "  %s\n", tr(s, peopleMood(p.Support)))
 	if p.LastPopGrowth > 0 {
@@ -286,18 +308,25 @@ func endOfTurnStats(s session.Session, w *ctx, p *game.Empire) {
 // (pref off, or can't afford a required cost) the player is prompted for
 // each obligation: armed-forces upkeep and region maintenance (required,
 // underpayment causes desertion/revolt), then an optional support boost.
-func paymentStage(s session.Session, w *ctx, p *game.Empire) {
-	w.With(func() { p.LastGoldPaid = 0 })
+func paymentStage(s session.Session, w *ctx) {
+	// Every transaction below re-resolves the active empire via withPlayer; if it
+	// has vanished (eliminated by another node mid-turn) the stage aborts cleanly
+	// rather than paying maintenance for a rival's realm.
+	if !withPlayer(w, func(p *game.Empire) { p.LastGoldPaid = 0 }) {
+		return
+	}
 
 	var forces, regions, gold, bank int
 	var autoPay bool
-	w.With(func() {
+	if !withPlayer(w, func(p *game.Empire) {
 		forces = w.ForcesDue(p)
 		regions = w.RegionsDue(p)
 		gold = p.Gold
 		bank = p.Bank
 		autoPay = w.AutoPayMaint
-	})
+	}) {
+		return
+	}
 	due := forces + regions
 
 	// If on-hand gold can't cover maintenance but savings can, offer to draw
@@ -305,17 +334,21 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 	if gold < due && bank > 0 &&
 		askYesNo(s, fmt.Sprintf(tr(s, "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"), due, gold, bank), true) {
 		n := promptSuggested(s, "Withdraw how much?", min(due-gold, bank), bank)
-		w.With(func() {
+		if !withPlayer(w, func(p *game.Empire) {
 			w.World.Withdraw(p, n)
 			gold = p.Gold
-		})
+		}) {
+			return
+		}
 	}
 
 	if autoPay && gold >= forces+regions {
-		w.With(func() {
+		if !withPlayer(w, func(p *game.Empire) {
 			w.World.PayForces(p, forces)
 			w.World.PayRegions(p, regions)
-		})
+		}) {
+			return
+		}
 		fmt.Fprintf(s, "\n"+tr(s, "Maintenance paid: %d gold to your forces, %d to your regions.")+"\n", forces, regions)
 		return
 	}
@@ -345,17 +378,21 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 		}
 		// Reconsider: re-read current gold (it is unchanged; nothing applied yet)
 		// and prompt again.
-		w.With(func() { gold = p.Gold })
+		if !withPlayer(w, func(p *game.Empire) { gold = p.Gold }) {
+			return
+		}
 	}
 
 	var forcesLost, regionsLost, support, morale int
-	w.With(func() {
+	if !withPlayer(w, func(p *game.Empire) {
 		forcesLost = w.World.PayForces(p, forcesGold)
 		regionsLost = w.World.PayRegions(p, regionsGold)
 		gold = p.Gold
 		support = p.Support
 		morale = p.Morale
-	})
+	}) {
+		return
+	}
 	if forcesLost > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "%d units deserted for lack of pay.")+"%s\n", ansi.FgRed, forcesLost, ansi.Reset)
 	}
@@ -367,10 +404,12 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 		fmt.Fprintf(s, "\n"+tr(s, "%d gold is requested to boost popular support.")+"\n", (100-support)*game.SupportPerBoostGold)
 		supportGold := promptSuggested(s, "How much will you give?", 0, gold)
 		var pts int
-		w.With(func() {
+		if !withPlayer(w, func(p *game.Empire) {
 			pts = w.World.BoostSupport(p, supportGold)
 			gold = p.Gold
-		})
+		}) {
+			return
+		}
 		if pts > 0 {
 			fmt.Fprintf(s, tr(s, "Popular support rose %d points.")+"\n", pts)
 		}
@@ -380,7 +419,9 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 		fmt.Fprintf(s, "\n"+tr(s, "%d gold is requested to improve military morale.")+"\n", (100-morale)*game.MoralePerBoostGold)
 		moraleGold := promptSuggested(s, "How much will you give?", 0, gold)
 		var pts int
-		w.With(func() { pts = w.World.BoostMorale(p, moraleGold) })
+		if !withPlayer(w, func(p *game.Empire) { pts = w.World.BoostMorale(p, moraleGold) }) {
+			return
+		}
 		if pts > 0 {
 			fmt.Fprintf(s, tr(s, "Military morale rose %d points.")+"\n", pts)
 		}
@@ -395,46 +436,61 @@ func paymentStage(s session.Session, w *ctx, p *game.Empire) {
 // many turns as the player wants to play (#70).
 func runTurn(s session.Session, w *ctx) Result {
 	menus := BuildMenus()
-	p := w.Player()
+	// abort ends the turn cleanly when the active empire has been eliminated by
+	// another node mid-turn (withPlayer returned false). The active *Empire is
+	// re-resolved inside every transaction below, never captured across a w.With,
+	// so a reload that reshapes the empire set can't rebind it to a rival's data.
+	abort := func() Result {
+		ok(s, "Your realm is no longer active.")
+		return Stay
+	}
 	var turnsLeft int
-	w.With(func() { turnsLeft = p.TurnsLeft })
+	if !withPlayer(w, func(p *game.Empire) { turnsLeft = p.TurnsLeft }) {
+		return abort()
+	}
 	if turnsLeft <= 0 {
 		ok(s, "Sorry, you have used all of your turns today.")
 		seeScores(s, w)
 		return Stay
 	}
 
-	showTurnEvents(s, w, p)
-	showUnreadMail(s, w, p)
+	showTurnEvents(s, w)
+	showUnreadMail(s, w)
 	if err := Run(s, w, menus.Diplomacy); err != nil {
 		return Stay
 	}
 	setIndustries(s, w)
 
 	for {
-		w.With(func() { turnsLeft = p.TurnsLeft })
+		if !withPlayer(w, func(p *game.Empire) { turnsLeft = p.TurnsLeft }) {
+			return abort()
+		}
 		if turnsLeft <= 0 {
 			ok(s, "Sorry, you have used all of your turns today.")
 			seeScores(s, w)
 			return Stay
 		}
 
-		w.With(func() {
+		if !withPlayer(w, func(p *game.Empire) {
 			w.World.Manufacture(p)   // industry production happens at turn start, alongside income (#71)
 			w.World.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
 			p.RegionsBoughtThisTurn = 0
-		})
+		}) {
+			return abort()
+		}
 
-		incomeReport(s, w, p)
+		incomeReport(s, w)
 
 		// The second status page and the maintenance results share one screen
 		// with a single pause (renderEmpireStatus already paused after page 1).
 		// If maintenance printed after the pause, the next menu's clear-screen
 		// would wipe it before the player could read it.
 		renderEmpireStatus(s, w)
-		paymentStage(s, w, p)
+		paymentStage(s, w)
 		var foodUpkeep int
-		w.With(func() { foodUpkeep = p.FoodUpkeep() })
+		if !withPlayer(w, func(p *game.Empire) { foodUpkeep = p.FoodUpkeep() }) {
+			return abort()
+		}
 		statLine(s, foodUpkeep, "units of Food consumed.")
 		pause(s)
 
@@ -460,16 +516,20 @@ func runTurn(s session.Session, w *ctx) Result {
 			}
 		}
 
-		w.With(func() {
+		if !withPlayer(w, func(p *game.Empire) {
 			w.World.PlayTurn(p, w.Today)
 			if w.DepositEndTurn && p.Gold > 0 {
 				w.World.Deposit(p, p.Gold)
 			}
-		})
+		}) {
+			return abort()
+		}
 
-		endOfTurnStats(s, w, p)
+		endOfTurnStats(s, w)
 
-		w.With(func() { turnsLeft = p.TurnsLeft })
+		if !withPlayer(w, func(p *game.Empire) { turnsLeft = p.TurnsLeft }) {
+			return abort()
+		}
 		if turnsLeft <= 0 || !askYesNo(s, "Continue to your next turn?", true) {
 			return Stay
 		}

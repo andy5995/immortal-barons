@@ -13,7 +13,7 @@ func TestShowUnreadMailReadsInline(t *testing.T) {
 	p.Mail = []string{"Alice: hi", "Bob: gg"}
 
 	f := &fakeSession{keys: []rune("y ")} // y=read, space=pause key
-	showUnreadMail(f, w, p)
+	showUnreadMail(f, w)
 
 	out := f.out.String()
 	if !strings.Contains(out, "2 new messages") {
@@ -35,7 +35,7 @@ func TestShowUnreadMailDeclineKeepsMail(t *testing.T) {
 	p.Mail = []string{"Alice: hi"}
 
 	f := &fakeSession{keys: []rune("n")}
-	showUnreadMail(f, w, p)
+	showUnreadMail(f, w)
 
 	if out := f.out.String(); !strings.Contains(out, "new message") {
 		t.Errorf("expected singular new-message notice, got: %q", out)
@@ -51,7 +51,7 @@ func TestShowUnreadMailNoneSilent(t *testing.T) {
 	p := w.Player()
 	p.Mail = nil
 	f := &fakeSession{}
-	showUnreadMail(f, w, p)
+	showUnreadMail(f, w)
 	if out := f.out.String(); out != "" {
 		t.Errorf("no mail should be silent, got: %q", out)
 	}
