@@ -45,7 +45,7 @@ func BuildMenus() *Menus {
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan, Columns: 2}
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
-	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
+	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true}
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	bombTargets := &Menu{Title: "Bomb Enemy Targets", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
@@ -153,14 +153,15 @@ func BuildMenus() *Menus {
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates},
 		{Key: 'A', Label: "Alliance Strength", Do: allianceStrength},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: 'O', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	attack.DefaultOnEnter = quitOnEnter(attack)
 
 	// InterPlanetary Operations: BRE gathers the cross-planet actions on their
-	// own menu, "only for InterBBS Games". The whole node hangs off a gated
-	// entry on the War menu, so the items need no per-item Hidden. Order and
+	// own menu, "only for InterBBS Games", reached by (9) on the opening menu.
+	// The whole node hangs off that gated entry, so the items need no per-item
+	// Hidden. BRE renders this menu in amber, not the magenta of the war menus.
+	// Order and
 	// hotkeys match BRE.OVR's full InterPlanetary Operations string table
 	// (#75); Doomer Kaboomer Ops ('K') is IB's equivalent of the Gooie
 	// Kablooie item BRE's own table carries but the observed board had
@@ -330,6 +331,7 @@ func BuildMenus() *Menus {
 		{Key: '5', Label: "Yesterday's News", Do: showBulletinYesterday},
 		{Key: '6', Label: "Messages", Do: gotoMenu(messages)},
 		{Key: '8', Label: "Game Bulletins", Do: showBulletinToday},
+		{Key: '9', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden},
 		{Key: 'A', Label: "Instructions", Do: helpBrowse},
 		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: 'I', Label: "About", Do: about},
