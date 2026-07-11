@@ -17,6 +17,12 @@ import (
 // than dereferencing a nil empire.
 var errRealmChanged = errors.New("The realm has changed — try again.")
 
+// errTargetGone aborts a targeted action (attack, strike, covert op) when the
+// chosen target empire is no longer among the actor's valid targets after the
+// world reloads inside the transaction — eliminated, abdicated, or shielded by
+// another node between the target pick and the write.
+var errTargetGone = errors.New("Your target is no longer there.")
+
 // buy2 wraps a "prompt for quantity, apply, report" economy action. The
 // max offered is what the empire can currently afford at unit's price.
 func buy2(label string, military bool, unit func(*ctx) int, apply func(*game.World, *game.Empire, int) error) Action {

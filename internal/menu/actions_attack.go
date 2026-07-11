@@ -43,6 +43,23 @@ func stillTarget(w *ctx, target *game.Empire) bool {
 	return false
 }
 
+// findTarget re-resolves a target empire by realm name among attacker's
+// CURRENT valid targets. Call only from inside a w.With block, after the world
+// has reloaded. Matching by name (not by a pre-gathered pointer) is what makes
+// this safe across a reload: json.Unmarshal reuses *Empire pointers by slice
+// INDEX, so when the empire set changes shape — a rival is eliminated or
+// abdicates and the slots shift — a cached pointer silently rebinds to a
+// DIFFERENT realm. Names are unique (RealmNameTaken guards onboarding), so this
+// returns the intended realm or nil (gone/dead/protected/allied → not a target).
+func findTarget(w *ctx, attacker *game.Empire, name string) *game.Empire {
+	for _, t := range w.Targets(attacker) {
+		if t.Name == name {
+			return t
+		}
+	}
+	return nil
+}
+
 func regularAttack(s session.Session, w *ctx) Result {
 	if w.Player().Protection > 0 {
 		ok(s, "You are under New Realm Protection and cannot attack yet.")
@@ -59,15 +76,21 @@ func regularAttack(s session.Session, w *ctx) Result {
 	if i < 1 || i > len(rows) {
 		return Stay
 	}
-	target := rows[i-1].e
+	name := rows[i-1].name
 	var report string
 	var err error
 	w.With(func() {
-		if !stillTarget(w, target) {
-			err = fmt.Errorf("that empire is no longer a valid target")
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
 			return
 		}
-		report = w.World.Attack(w.Player(), target)
+		d := findTarget(w, p, name)
+		if d == nil {
+			err = errTargetGone
+			return
+		}
+		report = w.World.Attack(p, d)
 	})
 	if err != nil {
 		fail(s, err)
@@ -183,9 +206,23 @@ func attackPirates(s session.Session, w *ctx) Result {
 
 	// RaidFaction bounds-checks the faction index itself, so a faction that
 	// vanished between the snapshot above and here just reports "no such
-	// faction" instead of a stale read.
+	// faction" instead of a stale read. Re-resolve the raider inside the
+	// transaction: the p gathered above (before the commit prompts) is stale
+	// after a concurrent node's reload, and clamps against the fresh stock.
 	var report string
-	w.With(func() { report = w.World.RaidFaction(p, f-1, troopers, jets, tanks) })
+	var err error
+	w.With(func() {
+		fp := w.Player()
+		if fp == nil {
+			err = errRealmChanged
+			return
+		}
+		report = w.World.RaidFaction(fp, f-1, troopers, jets, tanks)
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
 	fmt.Fprintf(s, "\n%s\n", report)
 	pause(s)
 	return Stay
