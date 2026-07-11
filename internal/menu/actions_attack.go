@@ -10,37 +10,30 @@ import (
 
 // targetRow snapshots the identity plus displayed fields of one attackable
 // empire, taken under the world lock so the picker list can be rendered and
-// prompted over safely (w.Targets ranges the shared w.Empires slice).
+// prompted over safely (w.Targets ranges the shared w.Empires slice). The realm
+// name is the identity the resolving w.With re-finds by (see findTarget); a
+// pre-gathered pointer is not carried across the reload.
 type targetRow struct {
-	e          *game.Empire
 	name       string
 	land, army int
 }
 
 // snapshotTargets takes w.Targets(w.Player()) under the lock, copying the
-// display fields the picker needs. The *game.Empire pointers stay valid
-// afterward (empires are never reallocated), but re-validate with
-// stillTarget inside the resolving w.With before acting on a choice — the
-// target may have died or gone under protection in the meantime.
+// display fields the picker needs. It captures only the realm name as identity;
+// the acting w.With later re-finds the chosen target by that name against fresh
+// state (findTarget), since a pointer cached here would go stale after a reload.
 func snapshotTargets(w *ctx) []targetRow {
 	var rows []targetRow
 	w.With(func() {
-		for _, e := range w.Targets(w.Player()) {
-			rows = append(rows, targetRow{e, e.Name, e.Land, e.Army()})
+		p := w.Player()
+		if p == nil {
+			return
+		}
+		for _, e := range w.Targets(p) {
+			rows = append(rows, targetRow{e.Name, e.Land, e.Army()})
 		}
 	})
 	return rows
-}
-
-// stillTarget reports whether target is still among w.Player()'s valid
-// targets. Call only from inside a w.With block.
-func stillTarget(w *ctx, target *game.Empire) bool {
-	for _, t := range w.Targets(w.Player()) {
-		if t == target {
-			return true
-		}
-	}
-	return false
 }
 
 // findTarget re-resolves a target empire by realm name among attacker's
@@ -130,15 +123,21 @@ func specialAttack(s session.Session, w *ctx, label string, cost int, strike fun
 	if i < 1 || i > len(rows) {
 		return Stay
 	}
-	target := rows[i-1].e
+	name := rows[i-1].name
 	var report string
 	var err error
 	w.With(func() {
-		if !stillTarget(w, target) {
-			err = fmt.Errorf("that empire is no longer a valid target")
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
 			return
 		}
-		report, err = strike(w.Player(), target)
+		d := findTarget(w, p, name)
+		if d == nil {
+			err = errTargetGone
+			return
+		}
+		report, err = strike(p, d)
 	})
 	if err != nil {
 		fail(s, err)
@@ -237,7 +236,17 @@ func sdiProgram(s session.Session, w *ctx) Result {
 	}
 	var level int
 	var err error
-	w.With(func() { level, err = w.World.FundSDI(p, gold) })
+	w.With(func() {
+		// Re-resolve inside the transaction: FundSDI re-checks gold and the
+		// SDIMax cap against fresh state, so a concurrent node can't let two
+		// sessions spend the same gold or push past the cap.
+		fp := w.Player()
+		if fp == nil {
+			err = errRealmChanged
+			return
+		}
+		level, err = w.World.FundSDI(fp, gold)
+	})
 	if err != nil {
 		fail(s, err)
 		return Stay
@@ -257,7 +266,14 @@ func doomerKaboomer(s session.Session, w *ctx) Result {
 	}
 	var report string
 	var err error
-	w.With(func() { report, err = w.World.DoomerKaboomer(w.Player()) })
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		report, err = w.World.DoomerKaboomer(p)
+	})
 	if err != nil {
 		fail(s, err)
 		return Stay
