@@ -31,7 +31,11 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 	initialGold := unitPrice * iterations // enough to fund every buy
 	p.Gold = initialGold
 
-	c := &ctx{World: w, active: p}
+	// Two SESSIONS over one world: each goroutine drives its own ctx (the active
+	// empire is per-session cached state), the realistic shape of this project's
+	// concurrency. Both resolve the same shared empire p through w.
+	cW := &ctx{World: w, handle: p.Owner}
+	cR := &ctx{World: w, handle: p.Owner}
 	price := func(_ *ctx) int { return unitPrice }
 	apply := func(gw *game.World, e *game.Empire, n int) error { return gw.Recruit(e, n) }
 	action := buy2("Troopers", false, price, apply)
@@ -44,7 +48,7 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 		defer wg.Done()
 		for i := 0; i < iterations; i++ {
 			f := &fakeSession{keys: []rune("1\r")}
-			action(f, c)
+			action(f, cW)
 		}
 	}()
 
@@ -53,7 +57,7 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 	go func() {
 		defer wg.Done()
 		for i := 0; i < iterations; i++ {
-			printScores(&fakeSession{}, c)
+			printScores(&fakeSession{}, cR)
 		}
 	}()
 
@@ -80,7 +84,7 @@ func TestBuyRefusesInsufficientGold(t *testing.T) {
 	p := w.AddHuman("alice", "Alice")
 	p.Gold = 100
 	startTroopers := p.Troopers
-	c := &ctx{World: w, active: p}
+	c := &ctx{World: w, handle: p.Owner}
 
 	price := func(_ *ctx) int { return 10 }
 	action := buy2("Troopers", false, price, func(gw *game.World, e *game.Empire, n int) error {

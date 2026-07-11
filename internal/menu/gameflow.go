@@ -11,15 +11,22 @@ import (
 )
 
 // GameLoop is the top-level session flow: show the Game Menu until the
-// player quits. "Play Game" runs a turn pipeline. active is the empire
-// playing THIS session — per-session state, not shared World state, so the
-// web front-end can run concurrent sessions against one World.
-func GameLoop(s session.Session, w *game.World, active *game.Empire, utf8 bool) (err error) {
+// player quits. "Play Game" runs a turn pipeline. handle identifies the empire
+// playing THIS session — per-session state, not shared World state, so the web
+// front-end can run concurrent sessions against one World, and re-resolved each
+// transaction so it survives the door's per-action world reload.
+func GameLoop(s session.Session, w *game.World, handle string, utf8 bool) (err error) {
 	// A prompt read failing mid-turn (idle boot or dropped connection) unwinds
 	// the whole session via session.End; catch it here and report it as io.EOF,
 	// which the caller (play.Session) treats as a clean save-and-exit end.
 	defer session.GuardEnd(&err)
-	c := &ctx{World: w, active: active, UTF8: utf8}
+	c := &ctx{World: w, handle: handle, UTF8: utf8}
+	// Seed the active-empire cache under the raw world lock so the first resolve
+	// can't race a concurrent AddHuman (web onboarding). Later resolves are
+	// cache hits until a reload bumps the generation.
+	w.Lock()
+	c.Player()
+	w.Unlock()
 	menus := BuildMenus()
 	// Expand Ctrl-<letter> into the active player's saved macro keystrokes.
 	// This single wrap covers every front-end, since all of them reach the

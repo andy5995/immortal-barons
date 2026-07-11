@@ -38,7 +38,8 @@ func newWorld() *ctx {
 	cfg := game.DefaultConfig()
 	cfg.AICount = 1
 	w := game.NewWorldSeed(cfg, 1)
-	c := &ctx{World: w, active: w.AddHuman("tester", "Testland"), UTF8: true}
+	w.AddHuman("tester", "Testland")
+	c := &ctx{World: w, handle: "tester", UTF8: true}
 	c.Today = "2026-07-03"
 	return c
 }

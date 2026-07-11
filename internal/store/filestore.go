@@ -59,5 +59,8 @@ func (fs *FileStore) reload() error {
 		return err
 	}
 	repair(fs.w, fs.cfg)
+	// Unmarshal replaced every *Empire; tell per-session caches to re-resolve
+	// their active empire by handle.
+	fs.w.MarkReloaded()
 	return nil
 }

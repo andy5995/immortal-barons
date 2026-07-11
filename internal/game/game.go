@@ -273,6 +273,13 @@ type World struct {
 	mu    sync.Mutex // guards concurrent access when a server shares one World
 	rng   *rand.Rand
 	store Store // transaction backend for With: in-memory (web) or file-per-action (door)
+	// reloadGen counts wholesale reloads of the empire set. The door's FileStore
+	// bumps it on every reload (which replaces every *Empire); a per-session
+	// cache of the active empire (menu.ctx) re-resolves its handle when the count
+	// changes. The web's in-memory store never reloads, so it stays 0 and the
+	// cache is resolved once — the same stable pointer the pre-handle code held,
+	// so concurrent onboarding (AddHuman) never races a cached read.
+	reloadGen uint64
 }
 
 func NewWorld(cfg Config) *World { return NewWorldSeed(cfg, time.Now().UnixNano()) }
@@ -386,6 +393,15 @@ func (w *World) RealmNameTaken(name string) bool {
 // take it uncontended.
 func (w *World) Lock()   { w.mu.Lock() }
 func (w *World) Unlock() { w.mu.Unlock() }
+
+// ReloadGen reports how many times the empire set has been wholesale-reloaded
+// from disk. A per-session cache of the active empire compares it to detect a
+// FileStore reload (which invalidates every *Empire pointer) and re-resolve.
+func (w *World) ReloadGen() uint64 { return w.reloadGen }
+
+// MarkReloaded records that the empire set was just replaced (a FileStore
+// reload), so cached empire pointers get re-resolved by handle.
+func (w *World) MarkReloaded() { w.reloadGen++ }
 
 // With runs fn while holding the world lock. Use it around a short
 // mutate-or-snapshot window — never around player input.

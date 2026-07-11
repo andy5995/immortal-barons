@@ -14,14 +14,27 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-// ctx is the per-session menu context: one shared *game.World plus the active
-// empire for THIS session. Threading the active empire here (instead of a
-// field on the shared World) is what lets the web server run concurrent
-// sessions against one world. It embeds *game.World so callback bodies keep
-// using w.Config, w.Prices, w.NetWorth(...), etc. unchanged.
+// ctx is the per-session menu context: one shared *game.World plus the caller's
+// BBS handle, which identifies the active empire for THIS session. Storing the
+// handle (not a cached *Empire pointer) is what keeps the active empire correct
+// after the door's FileStore reloads the world inside a transaction — the old
+// pointer would go stale, but the handle re-resolves against fresh state. It
+// also lets the web server run concurrent sessions against one world. It embeds
+// *game.World so callback bodies keep using w.Config, w.Prices, w.NetWorth(...),
+// etc. unchanged.
 type ctx struct {
 	*game.World
-	active *game.Empire
+	handle string
+	// cached memoizes the active empire so unlocked reads (the macro expander on
+	// each keypress, output-time language, action-body gathers) don't scan
+	// w.Empires and race a concurrent AddHuman on the web front-end. It is
+	// re-resolved by handle whenever the world's reload generation advances (a
+	// door FileStore reload) — the web never reloads, so after the first resolve
+	// this is the same stable pointer the pre-handle code cached. ctx is
+	// per-session, driven by one goroutine, so these fields need no locking.
+	cached    *game.Empire
+	cachedGen uint64
+	cachedSet bool
 	// UTF8 reports whether this session can display UTF-8. When false (a CP437
 	// door/terminal) all output is forced to English, since non-English text
 	// cannot be represented in CP437.
@@ -29,8 +42,17 @@ type ctx struct {
 }
 
 // Player is the active empire for this session (nil before onboarding / after
-// abdication).
-func (c *ctx) Player() *game.Empire { return c.active }
+// abdication). It re-resolves by handle after a world reload (so a stale
+// post-reload pointer is never returned) but otherwise returns the memoized
+// empire, keeping unlocked reads off the shared w.Empires slice.
+func (c *ctx) Player() *game.Empire {
+	if gen := c.World.ReloadGen(); !c.cachedSet || c.cachedGen != gen {
+		c.cached = c.World.FindByOwner(c.handle)
+		c.cachedGen = gen
+		c.cachedSet = true
+	}
+	return c.cached
+}
 
 // playerLang is the active caller's UI language ("" = English), used to
 // localize menu chrome at render time.
@@ -40,8 +62,10 @@ func playerLang(c *ctx) string {
 	// hence ignore any stored language here. This single render-time guard keeps
 	// a language set via the UTF-8 web front-end from mojibaking when the same
 	// empire is reached through a CP437 door.
-	if c != nil && c.UTF8 && c.active != nil {
-		return c.active.Language
+	if c != nil && c.UTF8 {
+		if p := c.Player(); p != nil {
+			return p.Language
+		}
 	}
 	return ""
 }

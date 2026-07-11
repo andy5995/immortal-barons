@@ -152,7 +152,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 
 	// io.EOF means the caller dropped the connection or was booted; still persist
 	// state below.
-	gameErr := menu.GameLoop(s, w, e, utf8)
+	gameErr := menu.GameLoop(s, w, e.Owner, utf8)
 	reason = d.Reason()
 	if reason == "" {
 		if errors.Is(gameErr, io.EOF) {
