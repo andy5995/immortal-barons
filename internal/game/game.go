@@ -204,6 +204,7 @@ type RemoteScore struct {
 	Empire   string
 	NetWorth int
 	Land     int
+	Score    int // overall standing (net worth + gold + bank); 0 in pre-Score packets
 }
 
 // RemoteBoard is a snapshot of another board's scores, imported via an

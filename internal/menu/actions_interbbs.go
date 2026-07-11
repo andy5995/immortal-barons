@@ -14,18 +14,46 @@ import (
 // interbbsScores displays scores imported from other boards via inter-BBS
 // packets (see internal/ibbs). v1 covers only score/news sharing.
 func interbbsScores(s session.Session, w *ctx) Result {
-	if len(w.RemoteBoards) == 0 {
+	// BRE's View IPScores is one cross-planet board (header
+	// "Id Empire Name Territory Score Net Worth", lettered ids, "No Scores"
+	// when empty), not a per-board split. Reuse the local scores layout.
+	type row struct {
+		name            string
+		land, score, nw int
+	}
+	var rows []row
+	w.With(func() {
+		for _, b := range w.RemoteBoards {
+			for _, sc := range b.Scores {
+				score := sc.Score
+				if score == 0 {
+					score = sc.NetWorth // pre-Score packets carried only net worth
+				}
+				rows = append(rows, row{sc.Empire, sc.Land, score, sc.NetWorth})
+			}
+		}
+	})
+	if len(rows) == 0 {
 		ok(s, "No inter-BBS scores have been imported yet.")
 		return Stay
 	}
-	for _, b := range w.RemoteBoards {
-		fmt.Fprintf(s, "\n%s"+tr(s, "Board: %s (%s)")+"%s\n", ansi.FgBrightCyan, b.BoardID, b.Date, ansi.Reset)
-		scores := append([]game.RemoteScore(nil), b.Scores...)
-		sort.Slice(scores, func(i, j int) bool { return scores[i].NetWorth > scores[j].NetWorth })
-		for _, sc := range scores {
-			fmt.Fprintf(s, "  %-18s %-8d %-10d\n", sc.Empire, sc.Land, sc.NetWorth)
-		}
+	sort.Slice(rows, func(i, j int) bool { return rows[i].score > rows[j].score })
+	rule := strings.Repeat("─", 72)
+	fmt.Fprintf(s, "\n%s-*%s%s%s%s*-%s\n\n",
+		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "InterBBS Scores"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
+	fmt.Fprintf(s, "%s%-4s %-26s %10s %11s %11s%s\n",
+		ansi.FgBrightWhite, tr(s, "Id"), tr(s, "Empire Name"),
+		tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
+	for i, r := range rows {
+		fmt.Fprintf(s, "%s%-4s%s %s%-26s%s %s%10d%s %s%11d%s %s%11d%s\n",
+			ansi.FgBrightMagenta, scoreID(i), ansi.Reset,
+			ansi.FgBrightWhite, r.name, ansi.Reset,
+			ansi.FgBrightMagenta, r.land, ansi.Reset,
+			ansi.FgBrightWhite, r.score, ansi.Reset,
+			ansi.FgWhite, r.nw, ansi.Reset)
 	}
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
 	pause(s)
 	return Stay
 }

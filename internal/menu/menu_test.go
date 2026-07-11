@@ -480,6 +480,22 @@ func TestPlanetaryTreatiesMatchesBRE(t *testing.T) {
 	}
 }
 
+// TestIPScoresMatchesBRE checks View IPScores renders BRE's cross-planet board:
+// the Id/Empire Name/Territory/Score/Net Worth header and lettered (A) id.
+func TestIPScoresMatchesBRE(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	w := newWorld()
+	w.RemoteBoards = []game.RemoteBoard{{BoardID: "ZZap BBS", Date: "2026-07-02",
+		Scores: []game.RemoteScore{{Empire: "Iron Dominion", Land: 120, NetWorth: 50000, Score: 61000}}}}
+	interbbsScores(f, w)
+	out := f.out.String()
+	for _, want := range []string{"InterBBS Scores", "Id", "Empire Name", "Territory", "Score", "Net Worth", "(A)", "Iron Dominion"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("interbbsScores missing %q:\n%s", want, out)
+		}
+	}
+}
+
 // TestTravelTimesMatchesBRE checks the Travel Times screen uses BRE's header and
 // shows a turnaround (days) for a board with a packet and "No Data" for one
 // without.
