@@ -309,11 +309,23 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 			return Stay
 		}
 		var err error
-		w.With(func() { err = apply(w.World, p, n) })
+		var gold, bank, debt int
+		w.With(func() {
+			// apply (Deposit/Withdraw/Loan/Repay) re-checks the balance/debt and
+			// the MoneyCap against the reloaded empire, so a concurrent node can't
+			// let two sessions withdraw the same funds or overdraw.
+			p := w.Player()
+			if p == nil {
+				err = errRealmChanged
+				return
+			}
+			err = apply(w.World, p, n)
+			gold, bank, debt = p.Gold, p.Bank, p.Debt
+		})
 		if err != nil {
 			fail(s, err)
 		} else {
-			ok(s, "Gold: %d   Bank: %d   Debt: %d", p.Gold, p.Bank, p.Debt)
+			ok(s, "Gold: %d   Bank: %d   Debt: %d", gold, bank, debt)
 		}
 		return Stay
 	}
@@ -334,13 +346,21 @@ func investFunds(s session.Session, w *ctx) Result {
 	}
 	expected := game.ExpectedReturn(amount, w.InvestRate, days)
 	fmt.Fprintf(s, "\n  "+tr(s, "Expected return: ~%d")+"\n", expected)
-	var ret int
+	var ret, matureDay int
 	var err error
-	w.With(func() { ret, err = w.World.Invest(p, amount, days) })
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		ret, err = w.World.Invest(p, amount, days) // re-checks affordability atomically
+		matureDay = w.GameDay + days
+	})
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Invested %d for %d days; ~%d returns on day %d.", amount, days, ret, w.GameDay+days)
+		ok(s, "Invested %d for %d days; ~%d returns on day %d.", amount, days, ret, matureDay)
 	}
 	return Stay
 }
