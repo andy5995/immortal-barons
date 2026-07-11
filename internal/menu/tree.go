@@ -43,7 +43,7 @@ func BuildMenus() *Menus {
 		// the redrawn menu (BRE-style), instead of being wiped by a clear.
 		NoClear: true}
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
-	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan}
+	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan, Columns: 2}
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
@@ -320,7 +320,7 @@ func BuildMenus() *Menus {
 	}
 	system.DefaultOnEnter = quitOnEnter(system)
 
-	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Color: ansi.FgBrightMagenta, Status: statusBar}
+	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Color: ansi.FgBrightMagenta, Status: statusBar, Columns: 2}
 	gameMenu.Items = []Item{
 		{Key: '1', Label: "Play", Do: runTurn},
 		{Key: '2', Label: "See Status", Do: empireStatus},

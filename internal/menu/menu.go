@@ -8,6 +8,7 @@ import (
 	"io"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -187,6 +188,11 @@ type Menu struct {
 	// menu, so an action's output (e.g. a purchase confirmation) stays
 	// visible above the redrawn menu instead of being wiped (BRE-style).
 	NoClear bool
+	// Columns opts a menu into a two-column item block (BRE draws its menus in
+	// two columns). 0 or 1 keeps the default one-item-per-line layout; 2 lays
+	// the selectable items out row-major across two columns. Only used for
+	// menus without Price/# Owned columns.
+	Columns int
 }
 
 // selectable reports whether it is a visible, choosable item (not a
@@ -372,29 +378,33 @@ func draw(s session.Session, g *ctx, m *Menu) {
 			fmt.Fprintf(&b, "%s  Key %-18s %8s %9s%s\n",
 				col, i18n.T(lang, "Item"), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
 		}
-		for i := range m.Items {
-			it := &m.Items[i]
-			if it.hidden(g) {
-				continue
-			}
-			if it.Do == nil {
-				fmt.Fprintf(&b, "  %s\n", it.displayLabel(g, lang))
-				continue
-			}
-			if cols {
-				price, owned := "", ""
-				if it.Price != nil {
-					price = formatGold(it.Price(g), lang)
+		if m.Columns == 2 && !cols {
+			drawItemsTwoColumn(&b, g, m, col, lang)
+		} else {
+			for i := range m.Items {
+				it := &m.Items[i]
+				if it.hidden(g) {
+					continue
 				}
-				if it.Owned != nil {
-					owned = formatGold(it.Owned(g), lang)
+				if it.Do == nil {
+					fmt.Fprintf(&b, "  %s\n", it.displayLabel(g, lang))
+					continue
 				}
-				fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %8s %9s\n",
-					col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset, price, owned)
-				continue
+				if cols {
+					price, owned := "", ""
+					if it.Price != nil {
+						price = formatGold(it.Price(g), lang)
+					}
+					if it.Owned != nil {
+						owned = formatGold(it.Owned(g), lang)
+					}
+					fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %8s %9s\n",
+						col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset, price, owned)
+					continue
+				}
+				fmt.Fprintf(&b, "  %s(%c)%s %s%s%s\n",
+					col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset)
 			}
-			fmt.Fprintf(&b, "  %s(%c)%s %s%s%s\n",
-				col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset)
 		}
 		if m.Status != nil {
 			fmt.Fprintf(&b, "%s\n%s%s%s\n", rule, ansi.FgBrightYellow, m.Status(g), ansi.Reset)
@@ -402,6 +412,55 @@ func draw(s session.Session, g *ctx, m *Menu) {
 		b.WriteString("\n")
 	})
 	fmt.Fprint(s, b.String())
+}
+
+// drawItemsTwoColumn renders a menu's items in two side-by-side columns,
+// filling row-major (item 1 left, item 2 right, item 3 left, ...). The left
+// cell is padded to a fixed visible width so the right column aligns; ANSI
+// escapes are excluded from that width. Hidden items are skipped; a
+// heading/separator (Do == nil) breaks the current pair and takes its own
+// full-width line. The padded left cell plus the widest right cell stay inside
+// 80 columns for the door standard.
+func drawItemsTwoColumn(b *strings.Builder, g *ctx, m *Menu, col, lang string) {
+	const leftWidth = 34 // visible width of the left cell (incl. the "  (K) " prefix)
+	cell := func(it *Item) (string, int) {
+		label := it.displayLabel(g, lang)
+		s := fmt.Sprintf("  %s(%c)%s %s%s%s", col, it.Key, ansi.Reset, ansi.FgWhite, label, ansi.Reset)
+		return s, 6 + utf8.RuneCountInString(label) // "  (K) " is 6 visible cols
+	}
+	var pending string // buffered, already-padded left cell awaiting its right partner
+	flush := func() {
+		if pending != "" {
+			b.WriteString(pending)
+			b.WriteString("\n")
+			pending = ""
+		}
+	}
+	for i := range m.Items {
+		it := &m.Items[i]
+		if it.hidden(g) {
+			continue
+		}
+		if it.Do == nil { // heading/separator: full-width line, breaks any pair
+			flush()
+			fmt.Fprintf(b, "  %s\n", it.displayLabel(g, lang))
+			continue
+		}
+		c, n := cell(it)
+		if pending == "" {
+			pad := leftWidth - n
+			if pad < 1 {
+				pad = 1
+			}
+			pending = c + strings.Repeat(" ", pad)
+			continue
+		}
+		b.WriteString(pending)
+		b.WriteString(c)
+		b.WriteString("\n")
+		pending = ""
+	}
+	flush()
 }
 
 func gotoMenu(m *Menu) Action {
