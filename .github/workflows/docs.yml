@@ -25,7 +25,7 @@ jobs:
           go-version-file: go.mod
       - name: Assemble MkDocs source tree
         run: go run ./cmd/barons-docs -out build/docs
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: '3.x'
       - name: Install docs toolchain
