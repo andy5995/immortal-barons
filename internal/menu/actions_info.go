@@ -235,8 +235,12 @@ func printScores(s session.Session, w *ctx) {
 	})
 	sort.Slice(rows, func(i, j int) bool { return rows[i].nw > rows[j].nw })
 
-	fmt.Fprintf(s, "\n%s%-4s %-18s %-8s %-10s%s\n",
-		ansi.FgBrightCyan, tr(s, "Rank"), tr(s, "Empire"), tr(s, "Land"), tr(s, "Net Worth"), ansi.Reset)
+	// Columns follow BRE.OVR's local scores header (Id, Empire Name, Territory,
+	// Score, Net Worth). IB has no distinct Score value — net worth is the
+	// score — so BRE's separate Score column is omitted rather than printed
+	// twice. Widths allow BRE-scale net worth (~10 digits).
+	fmt.Fprintf(s, "\n%s%-4s %-20s %-10s %-12s%s\n",
+		ansi.FgBrightCyan, tr(s, "Id"), tr(s, "Empire Name"), tr(s, "Territory"), tr(s, "Net Worth"), ansi.Reset)
 	for i, r := range rows {
 		name := r.name
 		if !r.alive {
@@ -246,7 +250,7 @@ func printScores(s session.Session, w *ctx) {
 		if r.isPlayer {
 			mark = "->"
 		}
-		fmt.Fprintf(s, "%s%2d %-18s %-8d %-10d\n", mark, i+1, name, r.land, r.nw)
+		fmt.Fprintf(s, "%s%2d %-20s %-10d %-12d\n", mark, i+1, name, r.land, r.nw)
 	}
 	if lastMaster != "" {
 		fmt.Fprintf(s, "\n"+tr(s, "Last Planetary Master: %s")+"\n", lastMaster)
