@@ -93,6 +93,10 @@ func (w *World) DailyMaintenance(today string) {
 		}
 		w.LastMaintDate = next
 	}
+	// Sweep stale husks even when no day rolled over (e.g. a same-day -maint on
+	// an already-current world), so past-day dead realms don't linger. A realm
+	// that died today (DiedDay == GameDay) is kept by removeDeadHusks.
+	w.removeDeadHusks()
 }
 
 // rollNews snapshots the day's planet totals into BulletinToday (rolling the

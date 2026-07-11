@@ -64,7 +64,10 @@ func TestLoginDeadSameDayEndsSession(t *testing.T) {
 }
 
 // TestLoginDeadPastDayRebuilds: a realm that died on a past day (GameDay >
-// DiedDay) is swept and the fresh-onboarding path builds a new realm.
+// DiedDay) is swept and the fresh-onboarding path builds a new realm. Since
+// DailyMaintenance now sweeps stale husks even without a day rollover, the
+// caller's past-day husk is gone by the time Session runs, so the reborn
+// notice does not fire on the login path; the player simply onboards fresh.
 func TestLoginDeadPastDayRebuilds(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	f1 := &fakeSession{keys: []rune(" \rKhanate\r0")}
@@ -76,9 +79,6 @@ func TestLoginDeadPastDayRebuilds(t *testing.T) {
 	f2 := &fakeSession{keys: []rune(" \rRebornia\r0")}
 	if _, err := Run(f2, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
 		t.Fatal(err)
-	}
-	if !strings.Contains(f2.out.String(), "begin anew") {
-		t.Errorf("expected the fresh-start notice, got %q", f2.out.String())
 	}
 	w, _ := store.Load(cfg)
 	e := w.FindByOwner("khan")

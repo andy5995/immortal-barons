@@ -125,6 +125,35 @@ func TestDailyMaintenanceCullsDead(t *testing.T) {
 	}
 }
 
+func TestDailyMaintenanceSweepsStaleHuskSameDay(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.LastMaintDate = "2026-07-03" // already current: no day rolls over
+	w.GameDay = 5
+	dead := w.AddHuman("gone", "Gone")
+	dead.Alive = false
+	dead.DiedDay = 3 // died in the past (DiedDay < GameDay)
+	w.DailyMaintenance("2026-07-03")
+	if w.GameDay != 5 {
+		t.Errorf("no day should roll over, GameDay got %d", w.GameDay)
+	}
+	if w.FindByOwner("gone") != nil {
+		t.Error("stale husk should be swept by the same-day maintenance sweep")
+	}
+}
+
+func TestDailyMaintenanceKeepsHuskThatDiedToday(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.LastMaintDate = "2026-07-03"
+	w.GameDay = 5
+	dead := w.AddHuman("fresh", "Fresh")
+	dead.Alive = false
+	dead.DiedDay = 5 // died today (DiedDay == GameDay)
+	w.DailyMaintenance("2026-07-03")
+	if w.FindByOwner("fresh") == nil {
+		t.Error("a husk that died today should be kept, not swept")
+	}
+}
+
 func TestDailyMaintenanceHandlesMalformedDate(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.LastMaintDate = "2026-07-0" // malformed, lexicographically < today
