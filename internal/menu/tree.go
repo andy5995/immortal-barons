@@ -153,14 +153,16 @@ func BuildMenus() *Menus {
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates},
 		{Key: 'A', Label: "Alliance Strength", Do: allianceStrength},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
+		{Key: 'O', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden, Color: interplanetary.Color},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	attack.DefaultOnEnter = quitOnEnter(attack)
 
 	// InterPlanetary Operations: BRE gathers the cross-planet actions on their
-	// own menu, "only for InterBBS Games", reached by (9) on the opening menu.
-	// The whole node hangs off that gated entry, so the items need no per-item
-	// Hidden. BRE renders this menu in amber, not the magenta of the war menus.
+	// own menu, "only for InterBBS Games", reached by (9) on the opening menu
+	// (and 'O' on the war menu). Those gated entries carry the whole node, so
+	// its items need no per-item Hidden. BRE renders this menu in amber, not the
+	// magenta of the war menus; the entries that open it are tinted to match.
 	// Order and
 	// hotkeys match BRE.OVR's full InterPlanetary Operations string table
 	// (#75); Doomer Kaboomer Ops ('K') is IB's equivalent of the Gooie
@@ -331,7 +333,7 @@ func BuildMenus() *Menus {
 		{Key: '5', Label: "Yesterday's News", Do: showBulletinYesterday},
 		{Key: '6', Label: "Messages", Do: gotoMenu(messages)},
 		{Key: '8', Label: "Game Bulletins", Do: showBulletinToday},
-		{Key: '9', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden},
+		{Key: '9', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden, Color: interplanetary.Color},
 		{Key: 'A', Label: "Instructions", Do: helpBrowse},
 		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: 'I', Label: "About", Do: about},

@@ -141,6 +141,7 @@ type Item struct {
 	LabelFn func(*ctx) string // dynamic label (e.g. toggle state); wins over Label
 	Do      Action            // nil => heading/separator, not selectable
 	Hidden  func(*ctx) bool   // nil => always shown
+	Color   string            // overrides the menu color for this item's key+label; e.g. to tint an entry the color of the submenu it opens
 
 	// Price and Owned drive the BRE-style Price / # Owned columns on the
 	// Spending and Sell menus. When any item in a menu sets either, the menu
@@ -402,8 +403,12 @@ func draw(s session.Session, g *ctx, m *Menu) {
 						col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset, price, owned)
 					continue
 				}
+				kcol, lcol := col, ansi.FgWhite
+				if it.Color != "" {
+					kcol, lcol = it.Color, it.Color
+				}
 				fmt.Fprintf(&b, "  %s(%c)%s %s%s%s\n",
-					col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset)
+					kcol, it.Key, ansi.Reset, lcol, it.displayLabel(g, lang), ansi.Reset)
 			}
 		}
 		if m.Status != nil {
@@ -429,7 +434,11 @@ func drawItemsColumns(b *strings.Builder, g *ctx, m *Menu, col, lang string, nco
 	}
 	cell := func(it *Item) (string, int) {
 		label := it.displayLabel(g, lang)
-		s := fmt.Sprintf("  %s(%c)%s %s%s%s", col, it.Key, ansi.Reset, ansi.FgWhite, label, ansi.Reset)
+		kcol, lcol := col, ansi.FgWhite
+		if it.Color != "" {
+			kcol, lcol = it.Color, it.Color
+		}
+		s := fmt.Sprintf("  %s(%c)%s %s%s%s", kcol, it.Key, ansi.Reset, lcol, label, ansi.Reset)
 		return s, 6 + utf8.RuneCountInString(label) // "  (K) " is 6 visible cols
 	}
 	var pending []string // buffered, already-padded cells awaiting the end of the row
