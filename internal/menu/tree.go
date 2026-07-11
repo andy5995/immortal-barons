@@ -53,7 +53,7 @@ func BuildMenus() *Menus {
 	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
 	prefs := &Menu{Title: "Preferences", Color: ansi.FgBrightCyan}
 	coord := &Menu{Title: "Coordinator Menu", Color: ansi.FgBrightBlue}
-	system := &Menu{Title: "System Menu", Color: ansi.FgBrightBlue}
+	system := &Menu{Title: "System Menu", Color: ansi.FgBrightBlue, Columns: 3}
 	food := &Menu{Title: "Food Market", Color: ansi.FgBrightCyan}
 
 	// owned adapts a per-empire count into a menu column function.
@@ -311,6 +311,7 @@ func BuildMenus() *Menus {
 		{Key: '1', Label: "Set Industries", Do: setIndustries},
 		{Key: '2', Label: "Show Instructions", Do: helpBrowse},
 		{Key: '3', Label: "Specialize Industry", Do: specializeIndustry},
+		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: 'O', Label: "Vote for Coordinator", Do: voteCoordinator, Hidden: ibbsHidden},
 		{Key: 'Y', Label: "Coordinator Menu", Do: gotoMenu(coord),
 			Hidden: func(w *ctx) bool { return ibbsHidden(w) || w.BBSCoordinator() != w.Player() }},
@@ -327,11 +328,10 @@ func BuildMenus() *Menus {
 		{Key: '3', Label: "See Scores", Do: seeScores},
 		{Key: '4', Label: "Today's News", Do: showBulletinToday},
 		{Key: '5', Label: "Yesterday's News", Do: showBulletinYesterday},
-		{Key: '6', Label: "Read Messages", Do: readMessages},
-		{Key: '7', Label: "Send Message", Do: sendMessage},
+		{Key: '6', Label: "Messages", Do: gotoMenu(messages)},
 		{Key: '8', Label: "Game Bulletins", Do: showBulletinToday},
 		{Key: 'A', Label: "Instructions", Do: helpBrowse},
-		{Key: 'B', Label: "Help Database", Do: helpBrowse},
+		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: 'I', Label: "About", Do: about},
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
 		{Key: '0', Label: "Quit", Do: quit},

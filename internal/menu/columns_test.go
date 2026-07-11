@@ -33,3 +33,60 @@ func TestGameMenuTwoColumn(t *testing.T) {
 		t.Errorf("Attack menu should draw one item per line:\n%s", f.out.String())
 	}
 }
+
+// lineWithAll reports whether any single line of out contains every substring.
+func lineWithAll(out string, subs ...string) bool {
+	for _, line := range strings.Split(out, "\n") {
+		ok := true
+		for _, s := range subs {
+			if !strings.Contains(line, s) {
+				ok = false
+				break
+			}
+		}
+		if ok {
+			return true
+		}
+	}
+	return false
+}
+
+// TestSystemMenuThreeColumn checks the System menu lays three items on one row
+// and offers a Help item.
+func TestSystemMenuThreeColumn(t *testing.T) {
+	menus := BuildMenus()
+	w := newWorld()
+
+	f := &fakeSession{}
+	draw(f, w, menus.System)
+	out := f.out.String()
+	if !lineWithAll(out, "Abdicate", "Visit Advisors", "Diplomacy") {
+		t.Errorf("System menu should place three items on one line:\n%s", out)
+	}
+	if !lineWithAll(out, "(?)", "Help") {
+		t.Errorf("System menu should include a (?) Help item:\n%s", out)
+	}
+}
+
+// TestGameMenuMessagesAndHelp checks the opening menu merged Read/Send into a
+// single Messages item and renamed the help hotkey to (?) Help.
+func TestGameMenuMessagesAndHelp(t *testing.T) {
+	menus := BuildMenus()
+	w := newWorld()
+
+	f := &fakeSession{}
+	draw(f, w, menus.Game)
+	out := f.out.String()
+	if !strings.Contains(out, "Messages") {
+		t.Errorf("Game menu should contain a Messages item:\n%s", out)
+	}
+	if strings.Contains(out, "Read Messages") || strings.Contains(out, "Send Message") {
+		t.Errorf("Game menu should not contain Read Messages / Send Message:\n%s", out)
+	}
+	if !lineWithAll(out, "(?)", "Help") {
+		t.Errorf("Game menu should include a (?) Help item:\n%s", out)
+	}
+	if strings.Contains(out, "Help Database") || lineWithAll(out, "(B)", "Help") {
+		t.Errorf("Game menu should not contain the old Help Database / (B) item:\n%s", out)
+	}
+}

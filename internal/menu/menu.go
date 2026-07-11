@@ -188,10 +188,10 @@ type Menu struct {
 	// menu, so an action's output (e.g. a purchase confirmation) stays
 	// visible above the redrawn menu instead of being wiped (BRE-style).
 	NoClear bool
-	// Columns opts a menu into a two-column item block (BRE draws its menus in
-	// two columns). 0 or 1 keeps the default one-item-per-line layout; 2 lays
-	// the selectable items out row-major across two columns. Only used for
-	// menus without Price/# Owned columns.
+	// Columns opts a menu into a multi-column item block (BRE draws its menus
+	// in columns). 0 or 1 keeps the default one-item-per-line layout; 2 or 3
+	// lay the selectable items out row-major across that many columns. Only
+	// used for menus without Price/# Owned columns.
 	Columns int
 }
 
@@ -378,8 +378,8 @@ func draw(s session.Session, g *ctx, m *Menu) {
 			fmt.Fprintf(&b, "%s  Key %-18s %8s %9s%s\n",
 				col, i18n.T(lang, "Item"), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
 		}
-		if m.Columns == 2 && !cols {
-			drawItemsTwoColumn(&b, g, m, col, lang)
+		if m.Columns >= 2 && !cols {
+			drawItemsColumns(&b, g, m, col, lang, m.Columns)
 		} else {
 			for i := range m.Items {
 				it := &m.Items[i]
@@ -414,26 +414,30 @@ func draw(s session.Session, g *ctx, m *Menu) {
 	fmt.Fprint(s, b.String())
 }
 
-// drawItemsTwoColumn renders a menu's items in two side-by-side columns,
-// filling row-major (item 1 left, item 2 right, item 3 left, ...). The left
-// cell is padded to a fixed visible width so the right column aligns; ANSI
-// escapes are excluded from that width. Hidden items are skipped; a
-// heading/separator (Do == nil) breaks the current pair and takes its own
-// full-width line. The padded left cell plus the widest right cell stay inside
-// 80 columns for the door standard.
-func drawItemsTwoColumn(b *strings.Builder, g *ctx, m *Menu, col, lang string) {
-	const leftWidth = 34 // visible width of the left cell (incl. the "  (K) " prefix)
+// drawItemsColumns renders a menu's selectable items in ncol side-by-side
+// columns, filling row-major (item 1, 2, 3 across the row, then wrap). Every
+// cell but the last in a row is padded to a fixed visible width so the columns
+// align; ANSI escapes are excluded from that width (utf8.RuneCountInString).
+// Hidden items are skipped; a heading/separator (Do == nil) breaks the current
+// row and takes its own full-width line. The cell width narrows as ncol grows
+// so a full row stays inside 80 columns for the door standard (2 cols → 34,
+// 3+ cols → 25: 25+25+~25 ≈ 75).
+func drawItemsColumns(b *strings.Builder, g *ctx, m *Menu, col, lang string, ncol int) {
+	cellWidth := 34 // visible width of a padded cell (incl. the "  (K) " prefix)
+	if ncol >= 3 {
+		cellWidth = 25
+	}
 	cell := func(it *Item) (string, int) {
 		label := it.displayLabel(g, lang)
 		s := fmt.Sprintf("  %s(%c)%s %s%s%s", col, it.Key, ansi.Reset, ansi.FgWhite, label, ansi.Reset)
 		return s, 6 + utf8.RuneCountInString(label) // "  (K) " is 6 visible cols
 	}
-	var pending string // buffered, already-padded left cell awaiting its right partner
+	var pending []string // buffered, already-padded cells awaiting the end of the row
 	flush := func() {
-		if pending != "" {
-			b.WriteString(pending)
+		if len(pending) > 0 {
+			b.WriteString(strings.Join(pending, ""))
 			b.WriteString("\n")
-			pending = ""
+			pending = pending[:0]
 		}
 	}
 	for i := range m.Items {
@@ -441,24 +445,22 @@ func drawItemsTwoColumn(b *strings.Builder, g *ctx, m *Menu, col, lang string) {
 		if it.hidden(g) {
 			continue
 		}
-		if it.Do == nil { // heading/separator: full-width line, breaks any pair
+		if it.Do == nil { // heading/separator: full-width line, breaks the row
 			flush()
 			fmt.Fprintf(b, "  %s\n", it.displayLabel(g, lang))
 			continue
 		}
 		c, n := cell(it)
-		if pending == "" {
-			pad := leftWidth - n
+		if len(pending) < ncol-1 { // not the last cell in the row: pad it
+			pad := cellWidth - n
 			if pad < 1 {
 				pad = 1
 			}
-			pending = c + strings.Repeat(" ", pad)
+			pending = append(pending, c+strings.Repeat(" ", pad))
 			continue
 		}
-		b.WriteString(pending)
-		b.WriteString(c)
-		b.WriteString("\n")
-		pending = ""
+		pending = append(pending, c)
+		flush()
 	}
 	flush()
 }
