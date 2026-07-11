@@ -12,17 +12,18 @@ import (
 // outer game flow (gameflow.go) can drive them as turn-pipeline stages
 // without re-parsing the tree.
 type Menus struct {
-	Spending  *Menu // the "Spending Menu" (formerly "buy")
-	Sell      *Menu
-	Bank      *Menu
-	Attack    *Menu
-	Covert    *Menu
-	Trading   *Menu
-	Diplomacy *Menu
-	Messages  *Menu
-	System    *Menu
-	Game      *Menu
-	Food      *Menu
+	Spending       *Menu // the "Spending Menu" (formerly "buy")
+	Sell           *Menu
+	Bank           *Menu
+	Attack         *Menu
+	InterPlanetary *Menu
+	Covert         *Menu
+	Trading        *Menu
+	Diplomacy      *Menu
+	Messages       *Menu
+	System         *Menu
+	Game           *Menu
+	Food           *Menu
 }
 
 // quitOnEnter makes Enter activate a menu's own '0' Quit item, so the prompt
@@ -153,16 +154,16 @@ func BuildMenus() *Menus {
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates},
 		{Key: 'A', Label: "Alliance Strength", Do: allianceStrength},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: 'O', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden, Color: interplanetary.Color},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	attack.DefaultOnEnter = quitOnEnter(attack)
 
 	// InterPlanetary Operations: BRE gathers the cross-planet actions on their
 	// own menu, "only for InterBBS Games", reached by (9) on the opening menu
-	// (and 'O' on the war menu). Those gated entries carry the whole node, so
-	// its items need no per-item Hidden. BRE renders this menu in amber, not the
-	// magenta of the war menus; the entries that open it are tinted to match.
+	// and shown as a turn step after the Spending menu (both gated on IBBS). The
+	// gated access carries the whole node, so its items need no per-item Hidden.
+	// BRE renders this menu in amber, not the magenta of the war menus; the (9)
+	// opening-menu entry is tinted to match.
 	// Order and
 	// hotkeys match BRE.OVR's full InterPlanetary Operations string table
 	// (#75); Doomer Kaboomer Ops ('K') is IB's equivalent of the Gooie
@@ -351,17 +352,18 @@ func BuildMenus() *Menus {
 	}
 
 	return &Menus{
-		Spending:  buy,
-		Sell:      sell,
-		Bank:      bank,
-		Attack:    attack,
-		Covert:    covert,
-		Trading:   trading,
-		Diplomacy: diplomacy,
-		Messages:  messages,
-		System:    system,
-		Game:      gameMenu,
-		Food:      food,
+		Spending:       buy,
+		Sell:           sell,
+		Bank:           bank,
+		Attack:         attack,
+		InterPlanetary: interplanetary,
+		Covert:         covert,
+		Trading:        trading,
+		Diplomacy:      diplomacy,
+		Messages:       messages,
+		System:         system,
+		Game:           gameMenu,
+		Food:           food,
 	}
 }
 

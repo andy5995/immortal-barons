@@ -500,6 +500,12 @@ func runTurn(s session.Session, w *ctx) Result {
 		if err := Run(s, w, menus.Spending); err != nil {
 			return Stay
 		}
+		// InterPlanetary Ops is an InterBBS-only step, shown after Spending.
+		if w.Config.InterBBSEnabled() {
+			if err := Run(s, w, menus.InterPlanetary); err != nil {
+				return Stay
+			}
+		}
 		if err := Run(s, w, menus.Attack); err != nil {
 			return Stay
 		}
