@@ -66,9 +66,15 @@ func (w *World) DailyMaintenance(today string) {
 		for _, e := range w.Empires {
 			if e.Alive && (e.Land <= 0 || e.People <= 0) {
 				e.Alive = false
+				e.DiedDay = w.GameDay
 			}
 		}
 		w.GameDay++
+		// Sweep out husks whose death is now in the past so dead barons (AI
+		// included) don't linger on the scoreboard or in the world. A realm
+		// that died today (DiedDay == GameDay before the increment above) is
+		// removed on this pass; the owner rebuilds on a later login.
+		w.removeDeadHusks()
 		for _, e := range w.Empires {
 			if e.Alive {
 				w.matureInvestments(e)

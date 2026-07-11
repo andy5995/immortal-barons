@@ -10,11 +10,12 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-// abdicate deletes the player's empire from the game (BRE.DOC: "immediately
-// delete your empire from the game so you may start over the next day"). It
-// is irreversible, so the player must retype their realm name to confirm.
-// Removing the empire and quitting is enough: play.go persists the world on
-// exit, and the caller's next visit finds no empire and onboards a fresh one.
+// abdicate ends the player's empire (BRE.DOC: "delete your empire from the game
+// so you may start over the next day"). It is irreversible, so the player must
+// retype their realm name to confirm. The realm is marked dead (not removed) so
+// the same next-day rule as a battlefield death applies: the husk lingers until
+// a LATER day, and only then does a login rebuild a fresh realm. Daily
+// maintenance sweeps the husk once GameDay passes DiedDay.
 func abdicate(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s"+tr(s, "Abdicating deletes %s permanently. This cannot be undone.")+"%s\n",
@@ -25,16 +26,17 @@ func abdicate(s session.Session, w *ctx) Result {
 		pause(s)
 		return Stay
 	}
-	// Re-resolve inside the transaction: RemoveEmpire matches by pointer
-	// identity, so a p captured before the confirmation prompt could delete the
-	// WRONG empire after a reload reshaped the empire set. Player() re-resolves
-	// by handle; after removal FindByOwner returns nil, so no cache clear needed.
+	// Re-resolve inside the transaction: a p captured before the confirmation
+	// prompt could rebind to the WRONG empire after a reload reshaped the empire
+	// set. Mark the freshly-resolved empire dead instead of removing it, so the
+	// husk survives to enforce the next-day rebuild rule.
 	w.With(func() {
 		if p := w.Player(); p != nil {
-			w.World.RemoveEmpire(p)
+			p.Alive = false
+			p.DiedDay = w.GameDay
 		}
 	})
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "Your empire is no more. Fare thee well."), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "Your empire is no more. Return on a later day to build a new realm."), ansi.Reset)
 	pause(s)
 	return Quit
 }

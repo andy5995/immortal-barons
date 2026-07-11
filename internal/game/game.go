@@ -19,6 +19,12 @@ type Empire struct {
 	Name  string
 	Owner string // normalized BBS handle; "" for AI
 	Alive bool
+	// DiedDay is the GameDay on which this empire was eliminated (People or
+	// Land hit 0, or the owner abdicated). 0 means it never died. The husk is
+	// kept until a LATER day so the owner cannot immediately re-onboard: BRE
+	// deletes a destroyed/abdicated realm and lets the player rebuild the next
+	// day. Daily maintenance and the login path remove husks once GameDay > DiedDay.
+	DiedDay int
 
 	Gold    int
 	Bank    int
@@ -424,6 +430,20 @@ func (w *World) RemoveEmpire(e *Empire) {
 			break
 		}
 	}
+}
+
+// removeDeadHusks deletes eliminated empires whose death is in the past
+// (GameDay > DiedDay), keeping husks that died today so the owner cannot
+// re-onboard on the same day. AI barons are removed too; they never rebuild.
+func (w *World) removeDeadHusks() {
+	kept := w.Empires[:0]
+	for _, e := range w.Empires {
+		if !e.Alive && w.GameDay > e.DiedDay {
+			continue
+		}
+		kept = append(kept, e)
+	}
+	w.Empires = kept
 }
 
 func (w *World) FindByOwner(handle string) *Empire {

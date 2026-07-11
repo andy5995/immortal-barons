@@ -5,6 +5,7 @@ package menu
 
 import (
 	"fmt"
+	"io"
 	"strings"
 	"unicode"
 
@@ -290,8 +291,31 @@ func Run(s session.Session, g *ctx, root *Menu) error {
 		case kindGoto:
 			stack = append(stack, res.target)
 		}
+		// Eliminated mid-session: another node's attack (or a WMD strike) can kill
+		// this empire while the caller is playing. Once dead — or gone entirely —
+		// the caller may not keep playing the corpse. End the whole session via
+		// session.End so the unwind reaches GameLoop even from a nested Run (e.g.
+		// the pre-turn Diplomacy menu); the collapse notice prints once.
+		if eliminated(g) {
+			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
+				tr(s, "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."),
+				ansi.Reset)
+			session.End(io.EOF)
+		}
 	}
 	return nil
+}
+
+// eliminated reports whether the active empire is gone or dead, read under the
+// world lock so a concurrent maintenance tick (web front-end) can't race the
+// Alive check. A nil Player (removed) counts as eliminated too.
+func eliminated(g *ctx) bool {
+	dead := false
+	g.With(func() {
+		p := g.Player()
+		dead = p == nil || !p.Alive
+	})
+	return dead
 }
 
 const rule = "────────────────────────────────────────────────────────────"

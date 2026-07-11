@@ -93,6 +93,7 @@ func (w *World) Attack(a, d *Empire) string {
 		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
 		if d.Land <= 0 || d.People <= 0 {
 			d.Alive = false
+			d.DiedDay = w.GameDay
 			fmt.Fprintf(&b, "\n%s has been utterly conquered!\n", d.Name)
 		}
 		d.Events = append(d.Events, fmt.Sprintf("%s attacked you: you lost %d regions, %d gold, and %d units.", a.Name, captured, plunder, dloss))

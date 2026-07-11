@@ -117,8 +117,11 @@ func TestDailyMaintenanceCullsDead(t *testing.T) {
 	dead := w.AddHuman("gone", "Gone")
 	dead.Land = 0
 	w.DailyMaintenance("2026-07-03")
-	if w.FindByOwner("gone").Alive {
-		t.Error("empire with 0 land should be marked dead")
+	// The empire dies as the day rolls, and because its death then lies in the
+	// past (GameDay advanced past DiedDay) the husk is swept the same maintenance
+	// pass, freeing the owner to rebuild on a later login.
+	if w.FindByOwner("gone") != nil {
+		t.Error("dead empire's husk should be culled once its death is in the past")
 	}
 }
 

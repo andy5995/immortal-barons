@@ -92,14 +92,38 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 	var joinOpen, boardFull bool
 	var joinDate string
 	var e *game.Empire
+	var rebornFrom string // former realm destroyed on a past day; announce a fresh start
+	var deadToday string  // realm destroyed today; no play until a later day
 	w.With(func() {
 		e = w.FindByOwner(id.Handle)
+		if e != nil && !e.Alive {
+			if w.GameDay > e.DiedDay {
+				// Died on a past day: sweep the husk and let the fresh-onboard
+				// path below build a new realm.
+				rebornFrom = e.Name
+				w.RemoveEmpire(e)
+				e = nil
+			} else {
+				// Died today: keep the husk and end the session; the owner
+				// rebuilds on a later login.
+				deadToday = e.Name
+			}
+		}
 		if e == nil {
 			joinOpen = w.Config.JoinOpen(w.Today)
 			boardFull = w.BoardFull()
 			joinDate = w.Config.JoinDate
 		}
 	})
+	if deadToday != "" {
+		fmt.Fprintf(s, "\n%sYour realm %s was destroyed. Return on a later day to build a new realm.%s\n",
+			ansi.FgYellow, deadToday, ansi.Reset)
+		return "dead", save()
+	}
+	if rebornFrom != "" {
+		fmt.Fprintf(s, "\n%sYour former realm %s was destroyed; you begin anew.%s\n",
+			ansi.FgYellow, rebornFrom, ansi.Reset)
+	}
 	if e == nil {
 		if !joinOpen {
 			fmt.Fprintf(s, "\n%sThe game is closed to new barons (join cutoff %s has passed).%s\n", ansi.FgYellow, joinDate, ansi.Reset)

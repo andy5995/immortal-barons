@@ -42,6 +42,7 @@ func (w *World) NuclearStrike(a, d *Empire) (string, error) {
 	d.syncLand()
 	if d.Land <= 0 || d.People <= 0 {
 		d.Alive = false
+		d.DiedDay = w.GameDay
 	}
 
 	d.Events = append(d.Events, fmt.Sprintf("%s hit you with a nuclear strike: %d regions reduced to waste.", a.Name, regions))
@@ -73,6 +74,7 @@ func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 
 	if d.Land <= 0 || d.People <= 0 {
 		d.Alive = false
+		d.DiedDay = w.GameDay
 	}
 
 	d.Events = append(d.Events, fmt.Sprintf("%s hit you with a chemical strike: %d people, %d troopers, and %d regions lost.", a.Name, people, troops, regions))
@@ -101,6 +103,7 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 
 	if d.People <= 0 {
 		d.Alive = false
+		d.DiedDay = w.GameDay
 	}
 
 	d.Events = append(d.Events, fmt.Sprintf("%s hit you with a biological strike: %d people and %d troopers lost.", a.Name, people, troops))
@@ -138,6 +141,7 @@ func (w *World) DoomerKaboomer(a *Empire) (string, error) {
 		d.syncLand()
 		if d.Land <= 0 || d.People <= 0 {
 			d.Alive = false
+			d.DiedDay = w.GameDay
 		}
 		d.Events = append(d.Events, fmt.Sprintf("A Doomer Kaboomer struck the planet — you lost %d regions.", regions))
 		fmt.Fprintf(&b, "  %s lost %d regions.\n", d.Name, regions)
