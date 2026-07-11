@@ -81,6 +81,9 @@ const (
 	// GroupAttackGoldPerOffense converts pooled group-attack funding into
 	// offensive strength (tunable; exact BRE rate not in the strings).
 	GroupAttackGoldPerOffense = 500
+	// TerrorTrooperKill is how many of a target's troopers each committed agent
+	// destroys in a terror op (tunable; exact BRE rate not in the strings).
+	TerrorTrooperKill = 50
 )
 
 // --- Upkeep / maintenance (reconstructed / tunable) ---

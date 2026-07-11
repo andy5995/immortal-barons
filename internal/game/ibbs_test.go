@@ -101,6 +101,66 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 	}
 }
 
+func TestTerrorOpDestroysForces(t *testing.T) {
+	cfgA := DefaultConfig()
+	cfgA.BoardID = "boardA"
+	wA := NewWorldSeed(cfgA, 1)
+	attacker := wA.AddHuman("att", "Attacker")
+	attacker.Agents = 10
+
+	cfgB := DefaultConfig()
+	cfgB.BoardID = "boardB"
+	wB := NewWorldSeed(cfgB, 1)
+	target := wB.AddHuman("victim", "Victim")
+	target.Protection = 0
+	target.Troopers = 5000
+
+	if err := wA.SendTerror(attacker, "boardB", "Victim", 4); err != nil {
+		t.Fatalf("SendTerror: %v", err)
+	}
+	if attacker.Agents != 6 {
+		t.Errorf("agents: want 6 after committing 4, got %d", attacker.Agents)
+	}
+	if len(wA.Outbox) != 1 || len(wA.Outbox[0].Terrors) != 1 {
+		t.Fatalf("expected one outbound terror op, got %+v", wA.Outbox)
+	}
+
+	result := wB.ApplyPacket(wA.Outbox[0])
+	// 4 agents * TerrorTrooperKill (50) = 200 troopers destroyed.
+	if target.Troopers != 4800 {
+		t.Errorf("target troopers: want 4800, got %d", target.Troopers)
+	}
+	if len(result.Results) != 1 || !result.Results[0].Won || result.Results[0].Kind != "terror" {
+		t.Errorf("expected a won terror result, got %+v", result.Results)
+	}
+}
+
+func TestTerrorOpBlockedByProtection(t *testing.T) {
+	cfgA := DefaultConfig()
+	cfgA.BoardID = "boardA"
+	wA := NewWorldSeed(cfgA, 1)
+	attacker := wA.AddHuman("att", "Attacker")
+	attacker.Agents = 10
+
+	cfgB := DefaultConfig()
+	cfgB.BoardID = "boardB"
+	wB := NewWorldSeed(cfgB, 1)
+	target := wB.AddHuman("victim", "Victim")
+	target.Protection = 3
+	target.Troopers = 5000
+
+	if err := wA.SendTerror(attacker, "boardB", "Victim", 4); err != nil {
+		t.Fatalf("SendTerror: %v", err)
+	}
+	result := wB.ApplyPacket(wA.Outbox[0])
+	if target.Troopers != 5000 {
+		t.Errorf("protected target should keep all troopers, got %d", target.Troopers)
+	}
+	if result.Results[0].Won {
+		t.Errorf("terror op against a protected target should not win")
+	}
+}
+
 func TestJoinDepartedAttackFails(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("e", "E")

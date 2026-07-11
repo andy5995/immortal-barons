@@ -25,6 +25,7 @@ type Packet struct {
 	Date         string
 	Scores       []RemoteScore  // score share (feeds RemoteBoards / IP scores)
 	Attacks      []RemoteAttack // strikes landing on ToBoard
+	Terrors      []RemoteTerror // terror ops landing on ToBoard
 	Results      []AttackResult // outcomes returning to the origin
 	LeagueConfig *LeagueConfig  // LC-authored league settings (nil if absent)
 }
@@ -204,13 +205,25 @@ type SpyReport struct {
 	Gold    int
 }
 
-// AttackResult returns to the origin board after a remote strike resolves.
+// AttackResult returns to the origin board after a remote strike resolves. For
+// a terror op (Kind == "terror") LandTaken carries the troopers destroyed
+// instead of regions.
 type AttackResult struct {
 	ID           int
 	TargetBoard  string
 	TargetEmpire string
 	LandTaken    int
 	Won          bool
+	Kind         string // "" = regular strike, "terror" = terror op
+}
+
+// RemoteTerror is a terror strike sent to an empire on another board: BRE's
+// Terrorist Ops destroy the target's forces rather than capturing land.
+type RemoteTerror struct {
+	ID           int
+	FromBoard    string
+	TargetEmpire string
+	Agents       int // agents committed; scales the forces destroyed
 }
 
 // CreateGroupAttack starts a new group strike led by e, aimed at targetEmpire
@@ -339,6 +352,55 @@ func (w *World) enqueue(toBoard string, atk RemoteAttack) {
 	})
 }
 
+// SendTerror queues a terror op against targetEmpire on targetBoard, committing
+// agents (deducted now). It resolves on the target board's next packet run.
+func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents int) error {
+	if e.Agents < agents {
+		return ErrNoAgents
+	}
+	e.Agents -= agents
+	w.NextAttackID++
+	t := RemoteTerror{ID: w.NextAttackID, FromBoard: w.Config.BoardID, TargetEmpire: targetEmpire, Agents: agents}
+	for i := range w.Outbox {
+		if w.Outbox[i].ToBoard == targetBoard {
+			w.Outbox[i].Terrors = append(w.Outbox[i].Terrors, t)
+			return nil
+		}
+	}
+	w.Outbox = append(w.Outbox, Packet{
+		FromBoard: w.Config.BoardID,
+		ToBoard:   targetBoard,
+		Date:      w.LastMaintDate,
+		Terrors:   []RemoteTerror{t},
+	})
+	return nil
+}
+
+// resolveRemoteTerror applies a terror op on this board: a protected target is
+// untouched (the op fails); otherwise it destroys TerrorTrooperKill troopers per
+// committed agent, capped at the target's troopers.
+func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
+	res := AttackResult{ID: t.ID, TargetBoard: w.Config.BoardID, TargetEmpire: t.TargetEmpire, Kind: "terror"}
+	target := w.remoteTarget(t.TargetEmpire)
+	if target == nil {
+		return res
+	}
+	res.TargetEmpire = target.Name
+	if target.Protection > 0 {
+		target.Events = append(target.Events, fmt.Sprintf("Terrorists from %s were stopped by your New Realm Protection.", t.FromBoard))
+		return res
+	}
+	killed := t.Agents * TerrorTrooperKill
+	if killed > target.Troopers {
+		killed = target.Troopers
+	}
+	target.Troopers -= killed
+	target.Events = append(target.Events, fmt.Sprintf("Terrorists from %s destroyed %d of your troopers!", t.FromBoard, killed))
+	res.LandTaken = killed
+	res.Won = true
+	return res
+}
+
 // ApplyPacket applies an inbound packet to this board and returns a result
 // packet (attack outcomes) addressed back to the origin.
 func (w *World) ApplyPacket(p Packet) Packet {
@@ -354,15 +416,23 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	}
 	// Outcomes of our own strikes, returning from the target board.
 	for _, res := range p.Results {
-		if res.Won {
+		switch {
+		case res.Kind == "terror" && res.Won:
+			w.postNews(fmt.Sprintf("Our terror op on %s (%s) destroyed %d troopers!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
+		case res.Kind == "terror":
+			w.postNews(fmt.Sprintf("Our terror op on %s (%s) was foiled.", res.TargetEmpire, res.TargetBoard))
+		case res.Won:
 			w.postNews(fmt.Sprintf("Our interplanetary strike on %s (%s) took %d regions!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
-		} else {
+		default:
 			w.postNews(fmt.Sprintf("Our interplanetary strike on %s (%s) was repelled.", res.TargetEmpire, res.TargetBoard))
 		}
 	}
 	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
 	for _, atk := range p.Attacks {
 		result.Results = append(result.Results, w.resolveRemoteAttack(atk))
+	}
+	for _, t := range p.Terrors {
+		result.Results = append(result.Results, w.resolveRemoteTerror(t))
 	}
 	return result
 }

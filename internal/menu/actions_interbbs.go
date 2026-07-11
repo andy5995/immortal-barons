@@ -59,9 +59,8 @@ func interbbsScores(s session.Session, w *ctx) Result {
 }
 
 // createGroupAttack assembles an interplanetary strike against an empire on
-// another planet (chosen from imported scores). v1 commits a raw offense
-// figure; it does not yet remove the units from the empire — a follow-up will
-// make the forces actually depart.
+// another planet (chosen from imported scores). Barons fund it with gold (BRE's
+// model); the pooled funding becomes the strike's offense on departure.
 func createGroupAttack(s session.Session, w *ctx) Result {
 	p := w.Player()
 	if len(w.RemoteBoards) == 0 {
@@ -324,8 +323,56 @@ func daysAgoLocalized(s session.Session, then, now string) string {
 	}
 }
 
-// spyDatabase shows the planet-wide store of spy reports on remote empires.
+// pickRemoteTarget prompts for a planet then a baron on it, returning the
+// board, the baron's name, and its imported score. found is false if the caller
+// cancels or no planets/barons are known.
+func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt string) (board, baron string, sc game.RemoteScore, found bool) {
+	if len(w.RemoteBoards) == 0 {
+		ok(s, "No other planets are known yet.")
+		return
+	}
+	boards := make([]string, len(w.RemoteBoards))
+	for i, b := range w.RemoteBoards {
+		boards[i] = b.BoardID
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, planetPrompt), ansi.Reset)
+	board = pickFromList(s, "Planet", boards)
+	if board == "" {
+		return "", "", sc, false
+	}
+	var rb *game.RemoteBoard
+	for i := range w.RemoteBoards {
+		if w.RemoteBoards[i].BoardID == board {
+			rb = &w.RemoteBoards[i]
+		}
+	}
+	if rb == nil || len(rb.Scores) == 0 {
+		ok(s, "No barons are known on that planet yet.")
+		return "", "", sc, false
+	}
+	names := make([]string, len(rb.Scores))
+	for i, x := range rb.Scores {
+		names[i] = x.Empire
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, baronPrompt), ansi.Reset)
+	baron = pickFromList(s, "Baron", names)
+	if baron == "" {
+		return "", "", sc, false
+	}
+	for _, x := range rb.Scores {
+		if x.Empire == baron {
+			sc = x
+		}
+	}
+	return board, baron, sc, true
+}
+
+// spyDatabase shows the planet-wide store of spy reports and offers to send a
+// spy to gather more (BRE's Spy Database / Send Spy).
 func spyDatabase(s session.Session, w *ctx) Result {
+	if w.Player().Agents >= 1 && askYesNo(s, "Send a spy to another planet? (uses 1 agent)", false) {
+		sendRemoteSpy(s, w)
+	}
 	if len(w.SpyDatabase) == 0 {
 		ok(s, "The spy database is empty. Spy on empires on other planets to fill it.")
 		return Stay
@@ -339,53 +386,13 @@ func spyDatabase(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// terroristOps sends an agent to a remote planet to gather intel on a baron
-// there; the report lands in the planet-wide Spy Database. v1: intel is drawn
-// from the imported score data (land/net worth). A fuller model will queue an
-// interplanetary covert strike into a packet like group attacks do.
-func terroristOps(s session.Session, w *ctx) Result {
-	p := w.Player()
-	if len(w.RemoteBoards) == 0 {
-		ok(s, "No other planets are known yet.")
-		return Stay
-	}
-	if p.Agents < 1 {
-		fail(s, game.ErrNoAgents)
-		return Stay
-	}
-	boards := make([]string, len(w.RemoteBoards))
-	for i, b := range w.RemoteBoards {
-		boards[i] = b.BoardID
-	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy on which planet?"), ansi.Reset)
-	board := pickFromList(s, "Planet", boards)
-	if board == "" {
-		return Stay
-	}
-	var rb *game.RemoteBoard
-	for i := range w.RemoteBoards {
-		if w.RemoteBoards[i].BoardID == board {
-			rb = &w.RemoteBoards[i]
-		}
-	}
-	if len(rb.Scores) == 0 {
-		ok(s, "No barons are known on that planet yet.")
-		return Stay
-	}
-	names := make([]string, len(rb.Scores))
-	for i, sc := range rb.Scores {
-		names[i] = sc.Empire
-	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Spy on which baron?"), ansi.Reset)
-	pick := pickFromList(s, "Baron", names)
-	if pick == "" {
-		return Stay
-	}
-	var sc game.RemoteScore
-	for _, x := range rb.Scores {
-		if x.Empire == pick {
-			sc = x
-		}
+// sendSpy infiltrates a baron on another planet, filing intel into the
+// planet-wide Spy Database. v1 intel is drawn from imported score data; a
+// caught spy is lost.
+func sendRemoteSpy(s session.Session, w *ctx) {
+	board, baron, sc, found := pickRemoteTarget(s, w, "Spy on which planet?", "Spy on which baron?")
+	if !found {
+		return
 	}
 	var err error
 	w.With(func() {
@@ -401,16 +408,48 @@ func terroristOps(s session.Session, w *ctx) Result {
 		p.Agents--
 		w.SpyDatabase = append(w.SpyDatabase, game.SpyReport{
 			Board:  board,
-			Empire: pick,
+			Empire: baron,
 			Date:   w.LastMaintDate,
 			Land:   sc.Land,
 		})
 	})
 	if err != nil {
 		fail(s, err)
+		return
+	}
+	ok(s, "Your agents infiltrated %s on %s; the report is in the Spy Database.", baron, board)
+}
+
+// terroristOps sends agents to destroy an enemy baron's forces on another
+// planet — BRE's Terrorist Ops. The strike is queued and resolves on the target
+// board's next packet run; New Realm Protection blocks it.
+func terroristOps(s session.Session, w *ctx) Result {
+	if w.Player().Agents < 1 {
+		fail(s, game.ErrNoAgents)
 		return Stay
 	}
-	ok(s, "Your agents infiltrated %s on %s; the report is in the Spy Database.", pick, board)
+	board, baron, _, found := pickRemoteTarget(s, w, "Terrorize which planet?", "Terrorize which baron?")
+	if !found {
+		return Stay
+	}
+	agents := promptSuggested(s, "How many agents to send?", w.Player().Agents, w.Player().Agents)
+	if agents <= 0 {
+		return Stay
+	}
+	var err error
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		err = w.World.SendTerror(p, board, baron, agents)
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	ok(s, "Your terrorists depart for %s on %s.", baron, board)
 	return Stay
 }
 
