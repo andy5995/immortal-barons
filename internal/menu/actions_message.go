@@ -11,17 +11,21 @@ import (
 )
 
 func readMessages(s session.Session, w *ctx) Result {
-	p := w.Player()
 	// Snapshot the mailbox and today's news under the world lock, clearing the
 	// mailbox in the same critical section. An unlocked read of p.Mail would
 	// race a concurrent sender, and reading-then-clearing separately could wipe
 	// a message that arrived mid-display; a message that arrives after the
-	// snapshot stays in p.Mail for next time. (issues #2, #5)
+	// snapshot stays in p.Mail for next time. p is re-resolved inside the lock so
+	// a reload can't rebind it to another empire's private mail. (issues #2, #5)
 	var mail, news []string
 	w.With(func() {
+		news = append([]string(nil), w.NewsToday...)
+		p := w.Player()
+		if p == nil {
+			return
+		}
 		mail = p.Mail
 		p.Mail = nil
-		news = append([]string(nil), w.NewsToday...)
 	})
 	if len(mail) == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no messages."))

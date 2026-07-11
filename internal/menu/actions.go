@@ -657,7 +657,11 @@ func setTaxRate(s session.Session, w *ctx) Result {
 		fail(s, fmt.Errorf("tax rate must be between 0 and %d", maxRate))
 		return Stay
 	}
-	w.With(func() { p.Tax = rate })
+	w.With(func() {
+		if p := w.Player(); p != nil {
+			p.Tax = rate
+		}
+	})
 	ok(s, "Tax rate set to %d%%.", rate)
 	return Stay
 }

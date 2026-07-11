@@ -25,9 +25,15 @@ func abdicate(s session.Session, w *ctx) Result {
 		pause(s)
 		return Stay
 	}
-	w.With(func() { w.World.RemoveEmpire(p) })
-	// No need to clear a cached pointer: Player() now re-resolves by handle, and
-	// after removal FindByOwner returns nil.
+	// Re-resolve inside the transaction: RemoveEmpire matches by pointer
+	// identity, so a p captured before the confirmation prompt could delete the
+	// WRONG empire after a reload reshaped the empire set. Player() re-resolves
+	// by handle; after removal FindByOwner returns nil, so no cache clear needed.
+	w.With(func() {
+		if p := w.Player(); p != nil {
+			w.World.RemoveEmpire(p)
+		}
+	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "Your empire is no more. Fare thee well."), ansi.Reset)
 	pause(s)
 	return Quit

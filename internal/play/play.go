@@ -151,7 +151,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, sav
 			}
 		}
 	}
-	showEvents(s, w, e)
+	showEvents(s, w, id.Handle)
 
 	// io.EOF means the caller dropped the connection or was booted; still persist
 	// state below.
@@ -224,9 +224,17 @@ func onboard(s session.Session, w *game.World, handle, lang string) string {
 	}
 }
 
-func showEvents(s session.Session, w *game.World, e *game.Empire) {
+func showEvents(s session.Session, w *game.World, handle string) {
 	var events []string
+	// Re-resolve the empire by handle inside the transaction: an empire captured
+	// by an earlier separate w.With can rebind to another realm's data after a
+	// reload reshapes the empire set, so reading/clearing Events off a stale
+	// pointer could wipe the wrong empire's events.
 	w.With(func() {
+		e := w.FindByOwner(handle)
+		if e == nil {
+			return
+		}
 		events = e.Events
 		e.Events = nil
 	})
