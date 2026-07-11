@@ -77,54 +77,83 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 		days = 1
 	}
 	var id, departDay int
+	var err error
 	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
 		ga := w.World.CreateGroupAttack(p, board, target, w.GameDay+days, offense)
 		id, departDay = ga.ID, ga.DepartDay
 	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
 	ok(s, "Group attack #%d formed against %s on %s, leaving day %d.", id, pick, board, departDay)
 	return Stay
 }
 
 // joinGroupAttack adds the player's offense to a group attack still forming.
 func joinGroupAttack(s session.Session, w *ctx) Result {
-	p := w.Player()
-	var lines []string
-	var ids []int
-	for _, ga := range w.GroupAttacks {
-		if w.GameDay >= ga.DepartDay {
-			continue
-		}
-		tgt := ga.TargetEmpire
-		if tgt == "" {
-			tgt = tr(s, "the whole planet")
-		}
-		lines = append(lines, fmt.Sprintf("#%d -> %s on %s (leaves day %d, offense %s)",
-			ga.ID, tgt, ga.TargetBoard, ga.DepartDay, comma(ga.Offense())))
-		ids = append(ids, ga.ID)
+	type gaRow struct {
+		id   int
+		line string
 	}
-	if len(lines) == 0 {
+	var rows []gaRow
+	var suggested int
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			return
+		}
+		suggested = p.Offense()
+		for _, ga := range w.GroupAttacks {
+			if w.GameDay >= ga.DepartDay {
+				continue
+			}
+			tgt := ga.TargetEmpire
+			if tgt == "" {
+				tgt = tr(s, "the whole planet")
+			}
+			rows = append(rows, gaRow{ga.ID, fmt.Sprintf("#%d -> %s on %s (leaves day %d, offense %s)",
+				ga.ID, tgt, ga.TargetBoard, ga.DepartDay, comma(ga.Offense()))})
+		}
+	})
+	if len(rows) == 0 {
 		ok(s, "No group attacks are forming right now.")
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Join which attack?"), ansi.Reset)
-	for i, x := range lines {
-		fmt.Fprintf(s, "    %d) %s\n", i+1, x)
+	for i, r := range rows {
+		fmt.Fprintf(s, "    %d) %s\n", i+1, r.line)
 	}
 	i := promptInt(s, "Attack (0 to cancel)?")
-	if i < 1 || i > len(ids) {
+	if i < 1 || i > len(rows) {
 		return Stay
 	}
-	offense := promptSuggested(s, "How much offense to add?", p.Offense(), p.Offense())
+	offense := promptSuggested(s, "How much offense to add?", suggested, suggested)
 	if offense <= 0 {
 		return Stay
 	}
+	id := rows[i-1].id
 	var err error
-	w.With(func() { err = w.World.JoinGroupAttack(p, ids[i-1], offense) })
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		// JoinGroupAttack re-validates against fresh state: the attack must still
+		// exist (ErrNoAttack) and not yet have departed (ErrDeparted).
+		err = w.World.JoinGroupAttack(p, id, offense)
+	})
 	if err != nil {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "You joined group attack #%d with %s offense.", ids[i-1], comma(offense))
+	ok(s, "You joined group attack #%d with %s offense.", id, comma(offense))
 	return Stay
 }
 
@@ -251,7 +280,17 @@ func terroristOps(s session.Session, w *ctx) Result {
 			sc = x
 		}
 	}
+	var err error
 	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		if p.Agents < 1 { // re-check the agent against fresh state
+			err = game.ErrNoAgents
+			return
+		}
 		p.Agents--
 		w.SpyDatabase = append(w.SpyDatabase, game.SpyReport{
 			Board:  board,
@@ -260,6 +299,10 @@ func terroristOps(s session.Session, w *ctx) Result {
 			Land:   sc.Land,
 		})
 	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
 	ok(s, "Your agents infiltrated %s on %s; the report is in the Spy Database.", pick, board)
 	return Stay
 }
@@ -302,7 +345,19 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 	if i < 1 || i > len(owners) {
 		return Stay
 	}
-	w.With(func() { w.World.VoteCoordinator(p, owners[i-1]) })
+	var err error
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		w.World.VoteCoordinator(p, owners[i-1])
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
 	ok(s, "Your vote is recorded. You may change it any time.")
 	return Stay
 }
@@ -326,7 +381,20 @@ func modifyLeagueDiplomacy(s session.Session, w *ctx) Result {
 	if strings.TrimSpace(decl) == "" {
 		return Stay
 	}
-	w.With(func() { w.LeagueDiplomacy = decl })
+	var err error
+	w.With(func() {
+		// Re-check the coordinator role against fresh state: a vote elsewhere may
+		// have unseated the player between the check and here.
+		if w.BBSCoordinator() != w.Player() {
+			err = errRealmChanged
+			return
+		}
+		w.LeagueDiplomacy = decl
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
 	ok(s, "League diplomacy updated. It will be broadcast to the league.")
 	return Stay
 }
