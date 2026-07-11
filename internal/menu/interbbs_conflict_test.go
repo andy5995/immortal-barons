@@ -22,7 +22,7 @@ func TestJoinGroupAttackVanishedActorConflict(t *testing.T) {
 		leader := w.AddHuman("leader", "Leaderland")
 		leader.Troopers = 10_000
 		w.GameDay = 0
-		w.CreateGroupAttack(leader, "Mars", "", 5, 1000) // departs day 5, still forming
+		w.CreateGroupAttack(leader, "Mars", "", 5, game.AttackForce{Troopers: 1000}) // departs day 5, still forming
 	})
 	commitOnFile(t, cfg, func(w *game.World) { w.AddHuman("decoy", "Decoyland") })
 
@@ -59,7 +59,7 @@ func TestJoinGroupAttackDepartedWindow(t *testing.T) {
 		leader := w.AddHuman("leader", "Leaderland")
 		leader.Troopers = 10_000
 		w.GameDay = 0
-		w.CreateGroupAttack(leader, "Mars", "", 5, 1000)
+		w.CreateGroupAttack(leader, "Mars", "", 5, game.AttackForce{Troopers: 1000})
 	})
 
 	fb := &hookSession{

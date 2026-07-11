@@ -96,8 +96,8 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	if pick == choices[0] {
 		target = "" // whole planet
 	}
-	troopers := promptSuggested(s, "Send how many Troopers?", p.Troopers, p.Troopers)
-	if troopers <= 0 {
+	force := promptAttackForce(s, p)
+	if force.Empty() {
 		return Stay
 	}
 	days := promptInt(s, "Leave in how many days?")
@@ -113,7 +113,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 			return
 		}
 		var ga *game.GroupAttack
-		ga, err = w.World.CreateGroupAttack(p, board, target, w.GameDay+days, troopers)
+		ga, err = w.World.CreateGroupAttack(p, board, target, w.GameDay+days, force)
 		if err != nil {
 			return
 		}
@@ -134,13 +134,10 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 		line string
 	}
 	var rows []gaRow
-	var suggested int
 	w.With(func() {
-		p := w.Player()
-		if p == nil {
+		if w.Player() == nil {
 			return
 		}
-		suggested = p.Troopers
 		for _, ga := range w.GroupAttacks {
 			if w.GameDay >= ga.DepartDay {
 				continue
@@ -149,7 +146,7 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 			if tgt == "" {
 				tgt = tr(s, "the whole planet")
 			}
-			rows = append(rows, gaRow{ga.ID, fmt.Sprintf("#%d -> %s on %s (leaves day %d, %s troopers)",
+			rows = append(rows, gaRow{ga.ID, fmt.Sprintf("#%d -> %s on %s (leaves day %d, %s offense)",
 				ga.ID, tgt, ga.TargetBoard, ga.DepartDay, comma(ga.Offense()))})
 		}
 	})
@@ -165,8 +162,8 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	if i < 1 || i > len(rows) {
 		return Stay
 	}
-	troopers := promptSuggested(s, "Send how many Troopers?", suggested, suggested)
-	if troopers <= 0 {
+	force := promptAttackForce(s, w.Player())
+	if force.Empty() {
 		return Stay
 	}
 	id := rows[i-1].id
@@ -179,15 +176,35 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 		}
 		// JoinGroupAttack re-validates against fresh state: the attack must still
 		// exist (ErrNoAttack), not yet have departed (ErrDeparted), and the baron
-		// must still hold the troopers (ErrCantAfford).
-		err = w.World.JoinGroupAttack(p, id, troopers)
+		// must still hold the committed units (ErrCantAfford).
+		err = w.World.JoinGroupAttack(p, id, force)
 	})
 	if err != nil {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "You joined group attack #%d with %s troopers.", id, comma(troopers))
+	ok(s, "You joined group attack #%d.", id)
 	return Stay
+}
+
+// promptAttackForce asks how many of each unit type to commit to a group attack
+// (BRE's "Send how many Troopers?/Jets?/Tanks?/Bombers?"), skipping types the
+// baron has none of.
+func promptAttackForce(s session.Session, p *game.Empire) game.AttackForce {
+	var f game.AttackForce
+	if p.Troopers > 0 {
+		f.Troopers = promptSuggested(s, "Send how many Troopers?", p.Troopers, p.Troopers)
+	}
+	if p.Jets > 0 {
+		f.Jets = promptSuggested(s, "Send how many Jets?", 0, p.Jets)
+	}
+	if p.Tanks > 0 {
+		f.Tanks = promptSuggested(s, "Send how many Tanks?", 0, p.Tanks)
+	}
+	if p.Bombers > 0 {
+		f.Bombers = promptSuggested(s, "Send how many Bombers?", 0, p.Bombers)
+	}
+	return f
 }
 
 // indivAttackForce is BRE's "Indiv. Attack Force" InterPlanetary Operations

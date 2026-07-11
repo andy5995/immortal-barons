@@ -25,7 +25,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0
 
 	// Board A launches a group attack and writes its outbox to the exchange.
-	ga, cErr := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, 100_000)
+	ga, cErr := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, game.AttackForce{Troopers: 100_000})
 	if cErr != nil {
 		t.Fatalf("create: %v", cErr)
 	}

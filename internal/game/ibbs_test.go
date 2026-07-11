@@ -68,11 +68,11 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0 // defenseless
 
 	leader.Troopers, ally.Troopers = 1_000_000, 1_000_000 // troops to commit
-	ga, err := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, 100_000)
+	ga, err := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, AttackForce{Troopers: 100_000})
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
-	if err := wA.JoinGroupAttack(ally, ga.ID, 50_000); err != nil {
+	if err := wA.JoinGroupAttack(ally, ga.ID, AttackForce{Troopers: 50_000}); err != nil {
 		t.Fatalf("join: %v", err)
 	}
 
@@ -169,12 +169,46 @@ func TestJoinDepartedAttackFails(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("e", "E")
 	e.Troopers = 10_000
-	ga, _ := w.CreateGroupAttack(e, "boardB", "", w.GameDay, 1000) // departs today
-	if err := w.JoinGroupAttack(e, ga.ID, 500); err != ErrDeparted {
+	ga, _ := w.CreateGroupAttack(e, "boardB", "", w.GameDay, AttackForce{Troopers: 1000}) // departs today
+	if err := w.JoinGroupAttack(e, ga.ID, AttackForce{Troopers: 500}); err != ErrDeparted {
 		t.Errorf("joining a departed attack should fail with ErrDeparted, got %v", err)
 	}
-	if err := w.JoinGroupAttack(e, 999, 500); err != ErrNoAttack {
+	if err := w.JoinGroupAttack(e, 999, AttackForce{Troopers: 500}); err != ErrNoAttack {
 		t.Errorf("unknown id should fail with ErrNoAttack, got %v", err)
+	}
+}
+
+func TestGroupAttackReturnsSurvivors(t *testing.T) {
+	cfgA := DefaultConfig()
+	cfgA.BoardID = "boardA"
+	wA := NewWorldSeed(cfgA, 1)
+	leader := wA.AddHuman("leader", "Leader")
+	leader.Troopers, leader.Tanks = 100_000, 1000
+
+	cfgB := DefaultConfig()
+	cfgB.BoardID = "boardB"
+	wB := NewWorldSeed(cfgB, 1)
+	target := wB.AddHuman("victim", "Victim")
+	target.Regions = RegionMix{Coastal: 100}
+	target.syncLand()
+	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0 // defenseless
+
+	_, err := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, AttackForce{Troopers: 100_000, Tanks: 1000})
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
+	if leader.Troopers != 0 || leader.Tanks != 0 {
+		t.Fatalf("committed units should be deducted, have %d troopers %d tanks", leader.Troopers, leader.Tanks)
+	}
+
+	wA.GameDay++
+	wA.LaunchDueGroupAttacks()
+	result := wB.ApplyPacket(wA.Outbox[0]) // B resolves, returns survivors to A
+	wA.ApplyPacket(result)                 // A restores survivors
+
+	// 15% lost, 85% return: 85,000 troopers and 850 tanks.
+	if leader.Troopers != 85_000 || leader.Tanks != 850 {
+		t.Errorf("survivors returned wrong: have %d troopers, %d tanks (want 85000, 850)", leader.Troopers, leader.Tanks)
 	}
 }
 

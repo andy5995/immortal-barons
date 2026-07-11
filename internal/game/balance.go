@@ -82,6 +82,12 @@ const (
 	// unit type. BRE's disassembled hit applier uses a 6/7 ratio (removes ~1/7),
 	// so N = 7.
 	TerrorUnitLossDenom = 7
+	// GroupAttackBomberOffense values a committed bomber's offense in a group
+	// attack (tunable; BRE's exact figure not recovered — set to a tank's).
+	GroupAttackBomberOffense = 4
+	// GroupAttackLossPct is the share of a committed force lost in the strike;
+	// the rest returns. 15% matches attack.hlp's normal-attack losses.
+	GroupAttackLossPct = 15
 )
 
 // --- Upkeep / maintenance (reconstructed / tunable) ---

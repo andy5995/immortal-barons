@@ -137,12 +137,30 @@ func (w *World) ExportLeagueConfig() {
 	})
 }
 
-// Contribution records one baron's share of a group attack, so spoils split
-// proportionally. BRE group attacks commit real forces (each baron sends
-// troopers, deducted from their army), not gold.
-type Contribution struct {
-	Owner    string
+// AttackForce is the detachment a baron commits to a group attack (BRE lets you
+// send troopers, jets, tanks, and bombers — real units, deducted from your
+// army, not gold).
+type AttackForce struct {
 	Troopers int
+	Jets     int
+	Tanks    int
+	Bombers  int
+}
+
+// Empty reports whether no units were committed.
+func (f AttackForce) Empty() bool { return f.Troopers+f.Jets+f.Tanks+f.Bombers == 0 }
+
+// offense values the detachment by the combat table (trooper 1, jet 2, tank 4,
+// bomber GroupAttackBomberOffense).
+func (f AttackForce) offense() int {
+	return f.Troopers + f.Jets*2 + f.Tanks*4 + f.Bombers*GroupAttackBomberOffense
+}
+
+// Contribution records one baron's committed detachment, so the strike's
+// strength and the returning survivors split per baron.
+type Contribution struct {
+	Owner string
+	AttackForce
 }
 
 // GroupAttack is a strike being assembled on this board. Until DepartDay,
@@ -155,12 +173,12 @@ type GroupAttack struct {
 	Contributors []Contribution
 }
 
-// Offense is the strike's offensive strength: the pooled committed troopers
-// (1 offense each, as in the combat table).
+// Offense is the strike's offensive strength: every contributor's detachment
+// valued by the combat table.
 func (g GroupAttack) Offense() int {
 	total := 0
 	for _, c := range g.Contributors {
-		total += c.Troopers
+		total += c.offense()
 	}
 	return total
 }
@@ -208,7 +226,8 @@ type AttackResult struct {
 	TargetEmpire string
 	LandTaken    int
 	Won          bool
-	Kind         string // "" = regular strike, "terror" = terror op
+	Kind         string         // "" = regular strike, "terror" = terror op
+	Survivors    []Contribution // forces returning to their contributors (per owner)
 }
 
 // RemoteTerror is a terror strike sent to an empire on another board: BRE's
@@ -220,28 +239,40 @@ type RemoteTerror struct {
 	Agents       int // agents committed; scales the forces destroyed
 }
 
-// CreateGroupAttack starts a new group strike led by e, aimed at targetEmpire
-// on targetBoard, leaving on departDay. e commits troopers (deducted from its
-// army); ErrCantAfford if it lacks them.
-func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, departDay, troopers int) (*GroupAttack, error) {
-	if e.Troopers < troopers {
-		return nil, ErrCantAfford
+// commitForce deducts the detachment f from e's army; ErrCantAfford if e lacks
+// any unit type.
+func (e *Empire) commitForce(f AttackForce) error {
+	if e.Troopers < f.Troopers || e.Jets < f.Jets || e.Tanks < f.Tanks || e.Bombers < f.Bombers {
+		return ErrCantAfford
 	}
-	e.Troopers -= troopers
+	e.Troopers -= f.Troopers
+	e.Jets -= f.Jets
+	e.Tanks -= f.Tanks
+	e.Bombers -= f.Bombers
+	return nil
+}
+
+// CreateGroupAttack starts a new group strike led by e, aimed at targetEmpire
+// on targetBoard, leaving on departDay. e commits the detachment f (deducted
+// from its army); ErrCantAfford if it lacks the units.
+func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, departDay int, f AttackForce) (*GroupAttack, error) {
+	if err := e.commitForce(f); err != nil {
+		return nil, err
+	}
 	w.NextAttackID++
 	w.GroupAttacks = append(w.GroupAttacks, GroupAttack{
 		ID:           w.NextAttackID,
 		TargetBoard:  targetBoard,
 		TargetEmpire: targetEmpire,
 		DepartDay:    departDay,
-		Contributors: []Contribution{{Owner: e.Owner, Troopers: troopers}},
+		Contributors: []Contribution{{Owner: e.Owner, AttackForce: f}},
 	})
 	return &w.GroupAttacks[len(w.GroupAttacks)-1], nil
 }
 
-// JoinGroupAttack commits e's troopers to a pending group attack (before it
-// leaves). ErrCantAfford if e lacks the troopers.
-func (w *World) JoinGroupAttack(e *Empire, id, troopers int) error {
+// JoinGroupAttack commits e's detachment f to a pending group attack (before it
+// leaves). ErrCantAfford if e lacks the units.
+func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 	for i := range w.GroupAttacks {
 		ga := &w.GroupAttacks[i]
 		if ga.ID != id {
@@ -250,11 +281,10 @@ func (w *World) JoinGroupAttack(e *Empire, id, troopers int) error {
 		if w.GameDay >= ga.DepartDay {
 			return ErrDeparted
 		}
-		if e.Troopers < troopers {
-			return ErrCantAfford
+		if err := e.commitForce(f); err != nil {
+			return err
 		}
-		e.Troopers -= troopers
-		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, Troopers: troopers})
+		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, AttackForce: f})
 		return nil
 	}
 	return ErrNoAttack
@@ -430,6 +460,17 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		default:
 			w.postNews(fmt.Sprintf("Our interplanetary strike on %s (%s) was repelled.", res.TargetEmpire, res.TargetBoard))
 		}
+		// Return each contributor's surviving forces to their army.
+		for _, sv := range res.Survivors {
+			e := w.FindByOwner(sv.Owner)
+			if e == nil {
+				continue
+			}
+			e.Troopers += sv.Troopers
+			e.Jets += sv.Jets
+			e.Tanks += sv.Tanks
+			e.Bombers += sv.Bombers
+		}
 	}
 	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
 	for _, atk := range p.Attacks {
@@ -446,6 +487,9 @@ func (w *World) ApplyPacket(p Packet) Packet {
 func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	target := w.remoteTarget(atk.TargetEmpire)
 	res := AttackResult{ID: atk.ID, TargetBoard: w.Config.BoardID, TargetEmpire: atk.TargetEmpire}
+	// Survivors return to their contributors whatever the outcome (a share is
+	// lost in the strike).
+	res.Survivors = survivorsOf(atk.Contributors)
 	if target == nil {
 		return res
 	}
@@ -469,6 +513,22 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	res.LandTaken = land
 	res.Won = true
 	return res
+}
+
+// survivorsOf returns each contributor's detachment reduced by
+// GroupAttackLossPct — the forces that come home after the strike.
+func survivorsOf(cs []Contribution) []Contribution {
+	keep := 100 - GroupAttackLossPct
+	out := make([]Contribution, 0, len(cs))
+	for _, c := range cs {
+		out = append(out, Contribution{Owner: c.Owner, AttackForce: AttackForce{
+			Troopers: c.Troopers * keep / 100,
+			Jets:     c.Jets * keep / 100,
+			Tanks:    c.Tanks * keep / 100,
+			Bombers:  c.Bombers * keep / 100,
+		}})
+	}
+	return out
 }
 
 // remoteTarget finds the empire a remote attack should hit: the named baron, or
