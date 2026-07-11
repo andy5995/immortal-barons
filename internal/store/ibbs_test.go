@@ -14,6 +14,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	cfgA.BoardID = "boardA"
 	wA := game.NewWorldSeed(cfgA, 1)
 	leader := wA.AddHuman("leader", "Alpha")
+	leader.Gold = 1_000_000 // fund the group attack
 
 	cfgB := game.DefaultConfig()
 	cfgB.BoardID = "boardB"
@@ -24,7 +25,10 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0
 
 	// Board A launches a group attack and writes its outbox to the exchange.
-	ga := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, 100_000)
+	ga, cErr := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, 100_000)
+	if cErr != nil {
+		t.Fatalf("create: %v", cErr)
+	}
 	wA.GameDay++
 	wA.LaunchDueGroupAttacks()
 	if err := WriteOutbox(wA, exchange); err != nil {

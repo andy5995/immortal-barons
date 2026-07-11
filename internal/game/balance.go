@@ -78,6 +78,9 @@ const (
 	BioCost    = 6_000_000
 	DoomerCost = 75_000_000
 	SDIStep    = 1_500_000 // gold per +1% SDI
+	// GroupAttackGoldPerOffense converts pooled group-attack funding into
+	// offensive strength (tunable; exact BRE rate not in the strings).
+	GroupAttackGoldPerOffense = 500
 )
 
 // --- Upkeep / maintenance (reconstructed / tunable) ---

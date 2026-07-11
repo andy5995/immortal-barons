@@ -137,10 +137,11 @@ func (w *World) ExportLeagueConfig() {
 }
 
 // Contribution records one baron's share of a group attack, so spoils split
-// proportionally.
+// proportionally. BRE group attacks are gold-funded ("Add how much gold for
+// funding?"): each baron pays gold into the pool.
 type Contribution struct {
-	Owner   string
-	Offense int
+	Owner string
+	Gold  int
 }
 
 // GroupAttack is a strike being assembled on this board. Until DepartDay,
@@ -153,13 +154,20 @@ type GroupAttack struct {
 	Contributors []Contribution
 }
 
-// Offense totals the committed offensive strength.
-func (g GroupAttack) Offense() int {
+// Gold totals the funding pooled into the attack.
+func (g GroupAttack) Gold() int {
 	total := 0
 	for _, c := range g.Contributors {
-		total += c.Offense
+		total += c.Gold
 	}
 	return total
+}
+
+// Offense is the strike's offensive strength: the pooled funding converted at
+// GroupAttackGoldPerOffense (a tunable — the exact BRE gold→force rate isn't in
+// the strings; it tracks roughly a trooper's cost per point of offense).
+func (g GroupAttack) Offense() int {
+	return g.Gold() / GroupAttackGoldPerOffense
 }
 
 // RemoteAttack is a departed strike aimed at an empire on another board.
@@ -205,22 +213,28 @@ type AttackResult struct {
 	Won          bool
 }
 
-// CreateGroupAttack starts a new group strike led by e (contributing offense),
-// aimed at targetEmpire on targetBoard, leaving on departDay.
-func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, departDay, offense int) *GroupAttack {
+// CreateGroupAttack starts a new group strike led by e, aimed at targetEmpire
+// on targetBoard, leaving on departDay. e pays gold into the funding pool;
+// ErrCantAfford if it lacks the gold.
+func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, departDay, gold int) (*GroupAttack, error) {
+	if e.Gold < gold {
+		return nil, ErrCantAfford
+	}
+	e.Gold -= gold
 	w.NextAttackID++
 	w.GroupAttacks = append(w.GroupAttacks, GroupAttack{
 		ID:           w.NextAttackID,
 		TargetBoard:  targetBoard,
 		TargetEmpire: targetEmpire,
 		DepartDay:    departDay,
-		Contributors: []Contribution{{Owner: e.Owner, Offense: offense}},
+		Contributors: []Contribution{{Owner: e.Owner, Gold: gold}},
 	})
-	return &w.GroupAttacks[len(w.GroupAttacks)-1]
+	return &w.GroupAttacks[len(w.GroupAttacks)-1], nil
 }
 
-// JoinGroupAttack adds e's offense to a pending group attack (before it leaves).
-func (w *World) JoinGroupAttack(e *Empire, id, offense int) error {
+// JoinGroupAttack adds e's gold funding to a pending group attack (before it
+// leaves). ErrCantAfford if e lacks the gold.
+func (w *World) JoinGroupAttack(e *Empire, id, gold int) error {
 	for i := range w.GroupAttacks {
 		ga := &w.GroupAttacks[i]
 		if ga.ID != id {
@@ -229,7 +243,11 @@ func (w *World) JoinGroupAttack(e *Empire, id, offense int) error {
 		if w.GameDay >= ga.DepartDay {
 			return ErrDeparted
 		}
-		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, Offense: offense})
+		if e.Gold < gold {
+			return ErrCantAfford
+		}
+		e.Gold -= gold
+		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, Gold: gold})
 		return nil
 	}
 	return ErrNoAttack

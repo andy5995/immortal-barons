@@ -67,7 +67,11 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 	target.syncLand()
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0 // defenseless
 
-	ga := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, 100_000)
+	leader.Gold, ally.Gold = 1_000_000, 1_000_000 // fund the pool
+	ga, err := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, 100_000)
+	if err != nil {
+		t.Fatalf("create: %v", err)
+	}
 	if err := wA.JoinGroupAttack(ally, ga.ID, 50_000); err != nil {
 		t.Fatalf("join: %v", err)
 	}
@@ -77,8 +81,9 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 	if len(wA.Outbox) != 1 || len(wA.Outbox[0].Attacks) != 1 {
 		t.Fatalf("expected one outbound attack, got %+v", wA.Outbox)
 	}
-	if got := wA.Outbox[0].Attacks[0].Offense; got != 150_000 {
-		t.Errorf("combined offense: want 150000, got %d", got)
+	// 150,000 gold pooled / GroupAttackGoldPerOffense (500) = 300 offense.
+	if got := wA.Outbox[0].Attacks[0].Offense; got != 300 {
+		t.Errorf("combined offense: want 300, got %d", got)
 	}
 	if len(wA.GroupAttacks) != 0 {
 		t.Errorf("departed attack should be removed from the pending list")
@@ -99,7 +104,8 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 func TestJoinDepartedAttackFails(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("e", "E")
-	ga := w.CreateGroupAttack(e, "boardB", "", w.GameDay, 1000) // departs today
+	e.Gold = 10_000
+	ga, _ := w.CreateGroupAttack(e, "boardB", "", w.GameDay, 1000) // departs today
 	if err := w.JoinGroupAttack(e, ga.ID, 500); err != ErrDeparted {
 		t.Errorf("joining a departed attack should fail with ErrDeparted, got %v", err)
 	}
