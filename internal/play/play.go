@@ -28,32 +28,35 @@ type Identity struct {
 }
 
 // Run plays one session for the given caller. The returned reason describes how
-// the session ended — "quit", "idle", "time", "disconnect", "busy", or
-// "closed" — for the front-end's logs.
+// the session ended — "quit", "idle", "time", "disconnect", or "closed" — for
+// the front-end's logs.
 func Run(s session.Session, id Identity, cfg game.Config, today string) (reason string, err error) {
-	lock, err := store.Lock(cfg, false)
-	if errors.Is(err, store.ErrBusy) {
-		fmt.Fprintf(s, "\n%sThe game is busy — please try again shortly.%s\n", ansi.FgYellow, ansi.Reset)
-		return "busy", nil
-	}
-	if err != nil {
-		return "", err
-	}
-	defer lock.Release()
-
 	w, err := store.Load(cfg)
 	if err != nil {
 		return "", err
 	}
-	w.Today = today
-	w.DailyMaintenance(today)
+	// The door/-local path is multi-node: every mutation is its own file-locked
+	// transaction, so there is no session-long lock and no session-end save that
+	// could clobber another node's concurrent changes. Load once for a stable
+	// *World pointer, then route every With through the FileStore.
+	w.SetStore(store.NewFileStore(w, cfg))
+	// Login date-rollover maintenance is itself a transaction (reload → maintain
+	// → save), so it can't race another node's login.
+	w.With(func() {
+		w.Today = today
+		w.DailyMaintenance(today)
+	})
 
-	return Session(s, id, w, cfg, func() error { return store.Save(w, cfg) })
+	// Each action already persisted via its Transact; the session-end save is a
+	// no-op here (saving w's in-memory state would overwrite concurrent nodes).
+	return Session(s, id, w, cfg, func() error { return nil })
 }
 
 // Session plays one session against an already-loaded world owned by the
 // caller. It does not take the flock, load, or run daily maintenance — the
-// caller owns those. It calls save once at session end.
+// caller owns those. save is called once at session end: the web front-end
+// persists its in-memory world there, while the door passes a no-op because
+// every action already committed through its FileStore transaction.
 func Session(s session.Session, id Identity, w *game.World, cfg game.Config, save func() error) (reason string, err error) {
 	// Bound the session: boot after IdleTimeoutSecs idle, or at the caller's
 	// BBS time-left, so an abandoned session frees the world lock.

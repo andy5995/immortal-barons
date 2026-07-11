@@ -103,22 +103,6 @@ func TestReturningPlayerNotPrompted(t *testing.T) {
 	}
 }
 
-func TestBusyLockIsReported(t *testing.T) {
-	cfg := cfgIn(t.TempDir())
-	held, err := store.Lock(cfg, false)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer held.Release()
-	f := &fakeSession{}
-	if _, err := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03"); err != nil {
-		t.Fatalf("busy should be handled gracefully, got %v", err)
-	}
-	if !strings.Contains(f.out.String(), "busy") {
-		t.Error("should tell the caller the game is busy")
-	}
-}
-
 func TestEventsShownThenCleared(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	// create + save an empire with a pending event
