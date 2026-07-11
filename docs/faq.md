@@ -39,8 +39,10 @@ See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset
 
 ## Can several people play as a door at the same time?
 
-- Not yet. As a BBS door, one caller plays at a time right now; a second caller
-  is asked to try again shortly.
-- Concurrent multi-node play (several callers in one game at once) is planned.
-- The web version already serves several players at once, but it runs as its
-  own separate game, not as a BBS door.
+- Yes. Several BBS nodes can play the same game at once. Each node's changes —
+  new scores, mail, attacks — become visible to the others between actions.
+- Each action reads and writes the shared game file under a brief lock, so
+  nodes wait for each other only for the instant of a change, not for a whole
+  session.
+- The web version also serves several players at once (as its own separate
+  game, not as a BBS door).

@@ -103,8 +103,10 @@ thousandths for exactness; bombers now carry upkeep). Pirate gold cap is
 
 ## Status (v0.0.1)
 
-Persistent, multi-user door game. One shared JSON world guarded by an
-exclusive flock; per-caller empires keyed by BBS handle; per-turn economy
+Persistent, multi-user door game. One shared JSON world; concurrent multi-node
+door play (each action reloads/re-validates/mutates/saves under a brief
+exclusive flock — a pluggable `Store`: file-per-action for the door, in-memory
+for the web; #5); per-caller empires keyed by BBS handle; per-turn economy
 (idle empires stagnate) split from a daily maintenance step; turns-per-day
 and new-realm protection; an event log for asynchronous play. Front-ends:
 `cmd/immortal-barons` (door + `-local` local play) and `cmd/immortal-barons-web`
@@ -171,9 +173,12 @@ The stage decomposes into:
    reports a socket. On Unix, stdio is correct even when a socket is reported —
    Synchronet/Mystic (`EX_STDIO`) pipe the socket to stdin/stdout and handle
    telnet themselves. Serial/FOSSIL doors are explicitly unsupported.
-2. **Persistence / multi-user** — DONE. A persistent empire per caller in a
-   shared JSON world under an exclusive flock, keyed by BBS handle, with
-   turns-per-day and daily maintenance (`internal/store`, `internal/play`).
+2. **Persistence / multi-user** — DONE, now concurrent multi-node (#5). A
+   persistent empire per caller in a shared JSON world; each door action
+   reloads/re-validates/mutates/saves under a brief exclusive flock (a pluggable
+   `Store`: file-per-action for the door, in-memory for the web), so several BBS
+   nodes play at once. Keyed by BBS handle, with turns-per-day and daily
+   maintenance (`internal/store`, `internal/play`, `internal/game/store.go`).
 3. **Sysop config** — DONE. `config.json` with defaults + an in-game
    Configuration Editor (Coordinator menu); `-reset` writes the file (and
    seeds/re-seeds the world). The knobs are wired into gameplay and broadcast
