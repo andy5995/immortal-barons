@@ -184,7 +184,7 @@ func BuildMenus() *Menus {
 		{Key: '8', Label: "Special Operations", Do: gotoMenu(covert)},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'K', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer},
-		{Key: 'D', Label: "Diplomacy List", Do: viewDiplomacy},
+		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
 		{Key: 'S', Label: "Spy Database", Do: spyDatabase},
 		{Key: 'T', Label: "Travel Times", Do: travelTimes},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},

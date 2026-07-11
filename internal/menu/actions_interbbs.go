@@ -166,34 +166,108 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// travelTimes lists the approximate round-trip time to each known planet.
-// Packets exchange on each PLANETARY maintenance run (about daily), so most
-// interplanetary operations take roughly a day each way.
+// travelTimes shows the round-trip time to each known planet, matching BRE's
+// "Average Turn Around Times to All BBSes" screen: each BBS with its turnaround
+// coloured green (sub-day), cyan (days), or red ("No Data"). BRE averages many
+// exchanges; IB has only the last packet's date per board, so the figure is the
+// latency of the most recent exchange rather than a running average.
 func travelTimes(s session.Session, w *ctx) Result {
-	if len(w.LeagueNodes) == 0 && len(w.RemoteBoards) == 0 {
-		ok(s, "No other planets are known yet.")
-		return Stay
-	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Travel Times"), ansi.Reset)
-	fmt.Fprintf(s, "%s\n", tr(s, "How long an operation takes to reach another planet and return\ndepends on how often your sysop exchanges inter-BBS packets."))
-
-	// The league roster from ibnodes.dat, if the coordinator has distributed it.
-	if len(w.LeagueNodes) > 0 {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "League members:"), ansi.Reset)
-		for _, n := range w.LeagueNodes {
-			fmt.Fprintf(s, "  #%-3d %s\n", n.Number, n.Name)
-		}
-	}
-	// Observed latency: how recently a packet actually arrived from each board.
-	if len(w.RemoteBoards) > 0 {
-		now := w.Today
+	type planet struct{ name, date string }
+	var planets []planet
+	var now string
+	w.With(func() {
+		now = w.Today
 		if now == "" {
 			now = w.LastMaintDate
 		}
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Last packet received from:"), ansi.Reset)
-		for _, b := range w.RemoteBoards {
-			fmt.Fprintf(s, "  %-20s %s%s%s\n", b.BoardID, ansi.FgBrightCyan, daysAgoLocalized(s, b.Date, now), ansi.Reset)
+		at := map[string]int{}
+		add := func(name, date string) {
+			if i, ok := at[name]; ok {
+				if date != "" {
+					planets[i].date = date
+				}
+				return
+			}
+			at[name] = len(planets)
+			planets = append(planets, planet{name, date})
 		}
+		for _, n := range w.LeagueNodes {
+			add(n.Name, "")
+		}
+		for _, b := range w.RemoteBoards {
+			add(b.BoardID, b.Date)
+		}
+	})
+	if len(planets) == 0 {
+		ok(s, "No other planets are known yet.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Average Turn Around Times to All BBSes"), ansi.Reset)
+	for _, p := range planets {
+		label, col := turnaroundLabel(s, p.date, now)
+		fmt.Fprintf(s, "  %-24s %s%s%s\n", p.name, col, label, ansi.Reset)
+	}
+	pause(s)
+	return Stay
+}
+
+// turnaroundLabel renders a planet's round-trip time and its colour from the
+// last packet date, matching BRE's Travel Times colouring: red "No Data" when
+// no packet has arrived, green under a day, cyan for whole days.
+func turnaroundLabel(s session.Session, then, now string) (string, string) {
+	if then == "" {
+		return tr(s, "No Data"), ansi.FgBrightRed
+	}
+	t1, e1 := time.Parse("2006-01-02", then)
+	t2, e2 := time.Parse("2006-01-02", now)
+	if e1 != nil || e2 != nil {
+		return tr(s, "No Data"), ansi.FgBrightRed
+	}
+	if days := t2.Sub(t1).Hours() / 24; days >= 1 {
+		return fmt.Sprintf(tr(s, "%.1f days"), days), ansi.FgBrightCyan
+	}
+	return tr(s, "< 1 day"), ansi.FgBrightGreen
+}
+
+// planetaryTreaties is the InterPlanetary Ops "Diplomacy List": BRE's
+// "Planetary Treaties" screen lists every other BBS with the planet-to-planet
+// treaty in force. IB has no inter-BBS treaty mechanic yet, so each shows
+// "None" — which is what the observed BRE board displayed as well.
+func planetaryTreaties(s session.Session, w *ctx) Result {
+	type row struct {
+		num  int
+		name string
+	}
+	var rows []row
+	w.With(func() {
+		seen := map[string]bool{}
+		maxNum := 1
+		for _, n := range w.LeagueNodes {
+			if seen[n.Name] {
+				continue
+			}
+			seen[n.Name] = true
+			rows = append(rows, row{n.Number, n.Name})
+			if n.Number > maxNum {
+				maxNum = n.Number
+			}
+		}
+		for _, b := range w.RemoteBoards {
+			if seen[b.BoardID] {
+				continue
+			}
+			seen[b.BoardID] = true
+			maxNum++
+			rows = append(rows, row{maxNum, b.BoardID})
+		}
+	})
+	if len(rows) == 0 {
+		ok(s, "No other planets are known yet.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Planetary Treaties"), ansi.Reset)
+	for _, r := range rows {
+		fmt.Fprintf(s, "  %s(%2d)%s %-24s %s\n", ansi.FgBrightRed, r.num, ansi.Reset, r.name, tr(s, "None"))
 	}
 	pause(s)
 	return Stay

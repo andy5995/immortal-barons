@@ -465,6 +465,38 @@ func TestInterPlanetarySpecialOpsReachesCovert(t *testing.T) {
 	}
 }
 
+// TestPlanetaryTreatiesMatchesBRE checks the IP-ops "Diplomacy List" renders
+// BRE's Planetary Treaties screen: each known BBS with its treaty status.
+func TestPlanetaryTreatiesMatchesBRE(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	w := newWorld()
+	w.RemoteBoards = []game.RemoteBoard{{BoardID: "ZZap BBS", Date: "2026-07-02"}}
+	planetaryTreaties(f, w)
+	out := f.out.String()
+	for _, want := range []string{"Planetary Treaties", "ZZap BBS", "None"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("planetaryTreaties missing %q:\n%s", want, out)
+		}
+	}
+}
+
+// TestTravelTimesMatchesBRE checks the Travel Times screen uses BRE's header and
+// shows a turnaround (days) for a board with a packet and "No Data" for one
+// without.
+func TestTravelTimesMatchesBRE(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	w := newWorld() // Today = 2026-07-03
+	w.RemoteBoards = []game.RemoteBoard{{BoardID: "ZZap BBS", Date: "2026-06-30"}}
+	w.LeagueNodes = []game.LeagueNode{{Number: 5, Name: "Sky Rocket BBS"}}
+	travelTimes(f, w)
+	out := f.out.String()
+	for _, want := range []string{"Average Turn Around Times to All BBSes", "ZZap BBS", "days", "Sky Rocket BBS", "No Data"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("travelTimes missing %q:\n%s", want, out)
+		}
+	}
+}
+
 func TestHelpBrowseShowsControls(t *testing.T) {
 	// category 1 (controls) -> topic 1 -> pause -> back (0) -> leave (0)
 	f := &fakeSession{keys: []rune("1\r1\r 0\r0\r")}
