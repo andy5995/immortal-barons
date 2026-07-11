@@ -432,6 +432,23 @@ day**: on a later day's login they are prompted to name a new realm (it need not
 be the old name) and start fresh under the same handle. Voluntary abdication
 works the same way.
 
+## Interplanetary operations (IB implementation)
+
+InterBBS ops run over file-drop packets. IB matches BRE's player-facing model;
+a few conversion rates aren't in the BRE strings and are **tunable constants**
+in `balance.go`:
+
+- **Group Attack** — gold-funded ("Add how much gold for funding?"). Each baron
+  pays gold into a pool; on departure the pool becomes offense at
+  `GroupAttackGoldPerOffense` (500 gold/point, tunable).
+- **Terrorist Ops** — a force-destroying strike (not intel). Commit agents; the
+  op is queued and resolves on the target board's next packet run, destroying
+  `TerrorTrooperKill` troopers per agent (50, tunable). New Realm Protection
+  blocks it.
+- **Spy** — send an agent to a remote baron; intel lands in the planet-wide Spy
+  Database. Reached from the Spy Database screen.
+- **SDI** — funds whole per-point steps of `SDIStep` gold up to `SDIMax`%.
+
 ## Diplomacy
 
 Treaty types: tariff trade, protective trade, free trade (spreads morale
