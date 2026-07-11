@@ -270,8 +270,9 @@ type World struct {
 
 	Today string `json:"-"` // ISO date for this session
 
-	mu  sync.Mutex // guards concurrent access when a server shares one World
-	rng *rand.Rand
+	mu    sync.Mutex // guards concurrent access when a server shares one World
+	rng   *rand.Rand
+	store Store // transaction backend for With: in-memory (web) or file-per-action (door)
 }
 
 func NewWorld(cfg Config) *World { return NewWorldSeed(cfg, time.Now().UnixNano()) }
@@ -286,6 +287,7 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 		VisitMessage: true,
 		InvestRate:   DefaultInvestRate,
 	}
+	w.store = &MemStore{w}
 	w.seedAIEmpires()
 	w.seedPirates()
 	return w
@@ -388,6 +390,10 @@ func (w *World) Unlock() { w.mu.Unlock() }
 // With runs fn while holding the world lock. Use it around a short
 // mutate-or-snapshot window — never around player input.
 func (w *World) With(fn func()) {
+	if w.store != nil {
+		w.store.Transact(fn)
+		return
+	}
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	fn()
