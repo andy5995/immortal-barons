@@ -334,14 +334,54 @@ func planetTotals(w *World) PlanetTotals {
 	return t
 }
 
+// aiBaronNames is the themed name pool for AI barons, shared by seedAIEmpires
+// (world creation) and AddAIEmpires (injecting into a live game). Names are
+// handed out in order, skipping any already in use.
+var aiBaronNames = []string{
+	"Crimson Horde", "Iron Dominion", "Ashfall Clan", "Storm Reavers", "Dust Kings",
+	"Obsidian Pact", "Ashen Legion", "Void Marauders", "Bloodfen Clan", "Rust Barons",
+	"Cinder Host", "Grim Vanguard", "Salt Reavers", "Ember Coven", "Dread Coil",
+}
+
+// addAIEmpire appends one AI empire (Owner "") with the standard AI starting
+// setup and returns it. Shared by seedAIEmpires and AddAIEmpires.
+func (w *World) addAIEmpire(name string) *Empire {
+	e := newEmpire(name, "", w.Config)
+	e.Jets = 5
+	e.Turrets = 40
+	w.Empires = append(w.Empires, e)
+	return e
+}
+
 // seedAIEmpires appends Config.AICount AI empires to the world.
 func (w *World) seedAIEmpires() {
-	names := []string{"Crimson Horde", "Iron Dominion", "Ashfall Clan", "Storm Reavers", "Dust Kings"}
-	for i := 0; i < w.Config.AICount && i < len(names); i++ {
-		w.Empires = append(w.Empires, newEmpire(names[i], "", w.Config))
-		w.Empires[len(w.Empires)-1].Jets = 5
-		w.Empires[len(w.Empires)-1].Turrets = 40
+	for i := 0; i < w.Config.AICount && i < len(aiBaronNames); i++ {
+		w.addAIEmpire(aiBaronNames[i])
 	}
+}
+
+// AddAIEmpires injects up to n new AI barons into the live world, picking names
+// from aiBaronNames not already used by any existing empire (dead or alive,
+// case-insensitive). It returns the count actually added, which is less than n
+// if the unused-name pool runs out first.
+func (w *World) AddAIEmpires(n int) int {
+	used := make(map[string]bool, len(w.Empires))
+	for _, e := range w.Empires {
+		used[strings.ToLower(e.Name)] = true
+	}
+	added := 0
+	for _, name := range aiBaronNames {
+		if added >= n {
+			break
+		}
+		if used[strings.ToLower(name)] {
+			continue
+		}
+		w.addAIEmpire(name)
+		used[strings.ToLower(name)] = true
+		added++
+	}
+	return added
 }
 
 func newEmpire(name, owner string, cfg Config) *Empire {

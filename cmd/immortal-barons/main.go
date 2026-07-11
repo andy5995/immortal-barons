@@ -40,6 +40,7 @@ func main() {
 	planetary := flag.Bool("planetary", false, "run the inter-BBS PLANETARY step (read inbound, launch attacks, write outbound) and exit")
 	leagueConfig := flag.Bool("league-config", false, "broadcast this board's league settings to the league (coordinator/node #1 only) and exit")
 	reset := flag.Bool("reset", false, "end the current game: crown the Planetary Master, wipe empires, re-seed, and start fresh (backs up world.json first)")
+	addAI := flag.Int("add-ai", 0, "add N AI barons to the running game and exit")
 	utf8 := flag.Bool("utf8", false, "force UTF-8 output (needed for non-English languages; -local auto-detects this from your locale)")
 	cp437 := flag.Bool("cp437", false, "force CP437 output (the door default; overrides -local locale auto-detection)")
 	version := flag.Bool("version", false, "print version information and exit")
@@ -105,6 +106,14 @@ func main() {
 	if *reset {
 		if err := runReset(cfg); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -reset:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if *addAI > 0 {
+		if err := runAddAI(cfg, *addAI); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -add-ai:", err)
 			os.Exit(1)
 		}
 		return
@@ -332,6 +341,30 @@ func runReset(cfg game.Config) error {
 	fmt.Println("\nGame started with the new settings. Empires cleared and AI re-seeded.")
 	if backedUp {
 		fmt.Println("The previous world was backed up to world.json.bak.")
+	}
+	return nil
+}
+
+// runAddAI injects up to n new AI barons into the running world (no reset),
+// picking unused names from the pool. It reports how many were actually added,
+// noting when the name pool was exhausted before reaching n.
+func runAddAI(cfg game.Config, n int) error {
+	lock, err := store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	defer lock.Release()
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	added := w.AddAIEmpires(n)
+	if err := store.Save(w, cfg); err != nil {
+		return err
+	}
+	fmt.Printf("Added %d AI barons.\n", added)
+	if added < n {
+		fmt.Printf("(Requested %d, but the AI name pool is exhausted.)\n", n)
 	}
 	return nil
 }

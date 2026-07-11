@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func testWorld() *World {
 	cfg := DefaultConfig()
@@ -34,6 +37,67 @@ func TestAddHumanAndFindByOwner(t *testing.T) {
 	}
 	if w.FindByOwner("nobody") != nil {
 		t.Error("FindByOwner should return nil for unknown handle")
+	}
+}
+
+func TestAddAIEmpires(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+
+	if got := w.AddAIEmpires(3); got != 3 {
+		t.Fatalf("AddAIEmpires(3) added %d, want 3", got)
+	}
+	if len(w.Empires) != 3 {
+		t.Fatalf("want 3 empires, got %d", len(w.Empires))
+	}
+	seen := map[string]bool{}
+	for _, e := range w.Empires {
+		if e.Owner != "" {
+			t.Errorf("injected empire should be AI (empty Owner), got %q", e.Owner)
+		}
+		if e.Jets != 5 || e.Turrets != 40 {
+			t.Errorf("AI setup: Jets=%d Turrets=%d, want 5/40", e.Jets, e.Turrets)
+		}
+		key := strings.ToLower(e.Name)
+		if seen[key] {
+			t.Errorf("duplicate AI name %q", e.Name)
+		}
+		seen[key] = true
+	}
+
+	// A second call skips names already used and keeps names distinct.
+	if got := w.AddAIEmpires(2); got != 2 {
+		t.Fatalf("second AddAIEmpires(2) added %d, want 2", got)
+	}
+	names := map[string]bool{}
+	for _, e := range w.Empires {
+		key := strings.ToLower(e.Name)
+		if names[key] {
+			t.Errorf("second call duplicated name %q", e.Name)
+		}
+		names[key] = true
+	}
+	if len(w.Empires) != 5 {
+		t.Fatalf("want 5 empires after two calls, got %d", len(w.Empires))
+	}
+}
+
+func TestAddAIEmpiresExhaustsPool(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+
+	pool := len(aiBaronNames)
+	if got := w.AddAIEmpires(pool + 10); got != pool {
+		t.Fatalf("requesting more than the pool added %d, want %d", got, pool)
+	}
+	if len(w.Empires) != pool {
+		t.Fatalf("want %d empires (whole pool), got %d", pool, len(w.Empires))
+	}
+	// No names left; a further request adds nothing.
+	if got := w.AddAIEmpires(1); got != 0 {
+		t.Errorf("exhausted pool should add 0, got %d", got)
 	}
 }
 
