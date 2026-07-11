@@ -455,7 +455,6 @@ func runTurn(s session.Session, w *ctx) Result {
 	}
 
 	showTurnEvents(s, w)
-	showUnreadMail(s, w)
 	if err := Run(s, w, menus.Diplomacy); err != nil {
 		return Stay
 	}
@@ -470,6 +469,10 @@ func runTurn(s session.Session, w *ctx) Result {
 			seeScores(s, w)
 			return Stay
 		}
+
+		// New mail may arrive between turns (from another node), so check each
+		// turn, not just once in the pre-turn flow (#3).
+		showUnreadMail(s, w)
 
 		if !withPlayer(w, func(p *game.Empire) {
 			w.World.Manufacture(p)   // industry production happens at turn start, alongside income (#71)
