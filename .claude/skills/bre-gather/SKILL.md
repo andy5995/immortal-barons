@@ -165,8 +165,9 @@ strictly limited. The idea/expression line:
 - **Display text verbatim**: menu descriptions, prompts, news/bulletin lines,
   help text, tutorial prose, end-of-turn messages. Reconstruct in our own words.
 - **ANSI art, logos, splash/end screens** (`game/bre.ans`, `breend.ans`, etc.).
-- **BRE's coined flavor names.** We deliberately renamed "Gooie Kablooie" →
-  "Doomer Kaboomer" for exactly this reason; do the same for other coined terms.
+- **Distinctive flavor names.** Reconstruct BRE's distinctive labels in IB's own
+  words rather than copy them verbatim; IB renamed the "Gooie Kablooie" weapon to
+  "Doomer Kaboomer".
 
 **Trademark / branding:** do not present the project as "Barren Realms Elite" or
 use its name/logo as our branding. IB is an independent tribute, "not affiliated
