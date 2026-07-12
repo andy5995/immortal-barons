@@ -56,7 +56,7 @@ func BuildMenus() *Menus {
 	prefs := &Menu{Title: "Preferences", Color: ansi.FgBrightCyan}
 	coord := &Menu{Title: "Coordinator Menu", Color: ansi.FgBrightBlue}
 	system := &Menu{Title: "System Menu", Color: ansi.FgBrightBlue, Columns: 3}
-	food := &Menu{Title: "Food Market", Color: ansi.FgBrightCyan}
+	food := &Menu{Title: "Chopper's Fair Market", Color: ansi.FgBrightCyan}
 
 	// owned adapts a per-empire count into a menu column function.
 	owned := func(f func(*game.Empire) int) func(*ctx) int {
