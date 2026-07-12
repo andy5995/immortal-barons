@@ -239,12 +239,18 @@ an unmapped helper segment; IB reconstructs it as this tunable band):
 | Mountain (ore) | 400 | 3,550 | smallest swing → most stable |
 | Coastal (tourism) | 1,000 | 3,750 | × support factor `0.10 + 0.90·(Support/100)` — floor ~375/region at 0% support, never zero |
 | Desert (solar) | 2,000 | 3,000 | widest swing |
-| Industrial | 100 | 2,500 | × industry-efficiency modifier |
-| River (hydro) | 100 | 5,000 | highest base; ~10% "bad-year" turns halve it |
+| River (hydro) | 100 | 5,000 | highest base; a river fishes instead some turns (#29) |
+
+**Industrial** regions don't use a fixed rate/base — each is one shared capacity
+pool (~2,600 gold-valued points/region, live-verified). The production
+percentages buy units (costs: trooper 100 / jet 140 / turret 150 / tank 500 /
+bomber 1,500 / carrier 1,750); the **unallocated %** pays out as gold 1:1.
+Specialize: +25% to the chosen unit, −15% to the rest.
 
 **Urban and Technology produce no direct gold** (BRE-verified): Urban is
-population housing, Technology is maintenance reduction. Food output: River ×20,
-Agricultural ×5 per region. These income numbers, the caps (2B money / 1.599B
+population housing, Technology is maintenance reduction. Food output:
+`Agricultural × 300` grown; rivers fish `× 124` on a fishing turn (else
+hydropower gold), see the Rivers section. These income numbers, the caps (2B money / 1.599B
 interest), the pirate caps table, and the net-worth weights are BRE-scale;
 **unit prices, the tax per-capita coefficient, and the yield band are IB's own
 reconstructions** anchored to this scale (BRE computes prices/maintenance inline
