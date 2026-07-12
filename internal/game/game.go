@@ -238,12 +238,16 @@ type DailyBulletin struct {
 }
 
 type World struct {
-	Empires       []*Empire
-	Prices        Prices
-	Config        Config `json:"-"` // authoritative copy is config.json; Load sets this
-	GameDay       int
-	InvestRate    int // percent per day, floats each daily maintenance
-	LastMaintDate string
+	Empires    []*Empire
+	Prices     Prices
+	Config     Config `json:"-"` // authoritative copy is config.json; Load sets this
+	GameDay    int
+	InvestRate int // percent per day, floats each daily maintenance
+	// FoodMarketSupply is the shared planet-wide pool of food available to buy
+	// today; buying depletes it, selling replenishes it, and it resets to
+	// FoodMarketDailySupply each day's maintenance (issue #19).
+	FoodMarketSupply int
+	LastMaintDate    string
 
 	// NewsToday/NewsYesterday split the planetary news feed by day; the JSON
 	// key stays "Bulletin" (the field's old name) so old saves load their
@@ -301,13 +305,14 @@ func NewWorld(cfg Config) *World { return NewWorldSeed(cfg, time.Now().UnixNano(
 
 func NewWorldSeed(cfg Config, seed int64) *World {
 	w := &World{
-		Prices:       Prices{Land: PriceLand, Food: PriceFood, Trooper: PriceTrooper, Jet: PriceJet, Turret: PriceTurret, Tank: PriceTank, Carrier: PriceCarrier, Agent: PriceAgent, Bomber: PriceBomber},
-		Config:       cfg,
-		rng:          rand.New(rand.NewSource(seed)),
-		VisitCovert:  true,
-		VisitTrading: true,
-		VisitMessage: true,
-		InvestRate:   DefaultInvestRate,
+		Prices:           Prices{Land: PriceLand, Food: PriceFood, Trooper: PriceTrooper, Jet: PriceJet, Turret: PriceTurret, Tank: PriceTank, Carrier: PriceCarrier, Agent: PriceAgent, Bomber: PriceBomber},
+		Config:           cfg,
+		rng:              rand.New(rand.NewSource(seed)),
+		VisitCovert:      true,
+		VisitTrading:     true,
+		VisitMessage:     true,
+		InvestRate:       DefaultInvestRate,
+		FoodMarketSupply: FoodMarketDailySupply,
 	}
 	w.store = &MemStore{w}
 	w.seedAIEmpires()

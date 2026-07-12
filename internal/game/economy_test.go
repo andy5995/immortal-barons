@@ -110,11 +110,72 @@ func TestBuyFoodMarket(t *testing.T) {
 	if err := w.BuyFoodMarket(e, 10); err != nil {
 		t.Fatalf("BuyFoodMarket: %v", err)
 	}
-	if e.Gold != 100_000-10*FoodBuyPrice {
-		t.Errorf("Gold: want %d, got %d", 100_000-10*FoodBuyPrice, e.Gold)
+	if e.Gold != 100_000-10*w.FoodBuyPrice() {
+		t.Errorf("Gold: want %d, got %d", 100_000-10*w.FoodBuyPrice(), e.Gold)
 	}
 	if e.Food != 10 {
 		t.Errorf("Food: want 10, got %d", e.Food)
+	}
+}
+
+func TestFoodMarketSupplyDepletesAndReplenishes(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("t", "T")
+	e.Gold, e.Food = 1_000_000_000, 0
+	start := w.FoodMarketSupply
+	if err := w.BuyFoodMarket(e, 100); err != nil {
+		t.Fatalf("buy: %v", err)
+	}
+	if w.FoodMarketSupply != start-100 {
+		t.Errorf("supply after buy: want %d, got %d", start-100, w.FoodMarketSupply)
+	}
+	if err := w.SellFood(e, 40); err != nil {
+		t.Fatalf("sell: %v", err)
+	}
+	if w.FoodMarketSupply != start-60 {
+		t.Errorf("supply after sell: want %d, got %d", start-60, w.FoodMarketSupply)
+	}
+}
+
+func TestFoodMarketOutOfFood(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("t", "T")
+	e.Gold, e.Food = 1_000_000_000, 0
+	w.FoodMarketSupply = 0
+	if err := w.BuyFoodMarket(e, 10); err != ErrNoFoodSupply {
+		t.Errorf("want ErrNoFoodSupply, got %v", err)
+	}
+	w.FoodMarketSupply = 5 // buying clamps to what's left today
+	if err := w.BuyFoodMarket(e, 10); err != nil {
+		t.Fatalf("buy: %v", err)
+	}
+	if e.Food != 5 || w.FoodMarketSupply != 0 {
+		t.Errorf("should buy only the 5 available: food=%d supply=%d", e.Food, w.FoodMarketSupply)
+	}
+}
+
+func TestFoodUnlimitedIgnoresSupply(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.FoodUnlimited = true
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("t", "T")
+	e.Gold, e.Food = 1_000_000_000, 0
+	w.FoodMarketSupply = 0 // empty pool, but unlimited mode ignores it
+	if err := w.BuyFoodMarket(e, 100); err != nil {
+		t.Fatalf("unlimited buy: %v", err)
+	}
+	if e.Food != 100 || w.FoodMarketSupply != 0 {
+		t.Errorf("unlimited: want 100 food and untouched pool, got food=%d supply=%d", e.Food, w.FoodMarketSupply)
+	}
+}
+
+func TestFoodMarketRefillsDaily(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.LastMaintDate = "2026-07-03"
+	w.FoodMarketSupply = 123
+	w.DailyMaintenance("2026-07-04")
+	if w.FoodMarketSupply != FoodMarketDailySupply {
+		t.Errorf("supply should refill to %d, got %d", FoodMarketDailySupply, w.FoodMarketSupply)
 	}
 }
 
@@ -141,8 +202,8 @@ func TestSellFood(t *testing.T) {
 	if err := w.SellFood(e, 30); err != nil {
 		t.Fatalf("SellFood: %v", err)
 	}
-	if e.Gold != 30*FoodSellPrice {
-		t.Errorf("Gold: want %d, got %d", 30*FoodSellPrice, e.Gold)
+	if e.Gold != 30*w.FoodSellPrice() {
+		t.Errorf("Gold: want %d, got %d", 30*w.FoodSellPrice(), e.Gold)
 	}
 	if e.Food != 70 {
 		t.Errorf("Food: want 70, got %d", e.Food)
@@ -161,8 +222,8 @@ func TestSellFoodClampedToOwned(t *testing.T) {
 	if e.Food != 0 {
 		t.Errorf("Food: want 0, got %d", e.Food)
 	}
-	if e.Gold != 5*FoodSellPrice {
-		t.Errorf("Gold: want %d, got %d", 5*FoodSellPrice, e.Gold)
+	if e.Gold != 5*w.FoodSellPrice() {
+		t.Errorf("Gold: want %d, got %d", 5*w.FoodSellPrice(), e.Gold)
 	}
 }
 

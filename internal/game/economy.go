@@ -1,15 +1,38 @@
 package game
 
-import "errors"
+import (
+	"encoding/binary"
+	"errors"
+	"hash/fnv"
+	"io"
+)
 
 var (
-	ErrCantAfford = errors.New("You cannot afford that.")
-	ErrNoBank     = errors.New("You do not have that much in the bank.")
-	ErrNoDebt     = errors.New("You do not owe that much.")
-	ErrNoAgents   = errors.New("You have no agents for that operation.")
-	ErrHQExists   = errors.New("Your HeadQuarters is already under construction or built.")
-	ErrRegionCap  = errors.New("You have reached your region purchase limit for this turn.")
+	ErrCantAfford   = errors.New("You cannot afford that.")
+	ErrNoBank       = errors.New("You do not have that much in the bank.")
+	ErrNoDebt       = errors.New("You do not owe that much.")
+	ErrNoAgents     = errors.New("You have no agents for that operation.")
+	ErrHQExists     = errors.New("Your HeadQuarters is already under construction or built.")
+	ErrRegionCap    = errors.New("You have reached your region purchase limit for this turn.")
+	ErrNoFoodSupply = errors.New("The food market is out of food for today.")
 )
+
+// FoodBuyPrice is today's price to buy one unit of food, varying planet-wide
+// within [FoodBuyPriceMin, 3×FoodBuyPriceMin] (BRE's [20,60] band at IB's
+// scale). Deterministic per game-day, so it holds for the whole day.
+func (w *World) FoodBuyPrice() int {
+	h := fnv.New32a()
+	var buf [4]byte
+	binary.LittleEndian.PutUint32(buf[:], uint32(w.GameDay))
+	h.Write(buf[:])
+	io.WriteString(h, "foodprice")
+	span := uint32(2*FoodBuyPriceMin + 1) // range min .. 3×min
+	return FoodBuyPriceMin + int(h.Sum32()%span)
+}
+
+// FoodSellPrice is today's price the market pays per unit sold: buy/3 (BRE's
+// sell ≈ buy/3, band ~[7,20]).
+func (w *World) FoodSellPrice() int { return w.FoodBuyPrice() / 3 }
 
 // HQCost is the gold price to start HeadQuarters construction (see balance.go).
 
@@ -139,22 +162,36 @@ func (w *World) BuyFood(e *Empire, n int) error {
 // Food market prices (FoodBuyPrice / FoodSellPrice) live in balance.go: the
 // market sells food to you dearer than it buys.
 
-// BuyFoodMarket buys n units of food at FoodBuyPrice. This is the canonical
+// BuyFoodMarket buys n units of food at today's FoodBuyPrice. Unless the sysop's
+// Food Unlimited toggle is on, purchases draw from the shared planet-wide daily
+// pool (FoodMarketSupply) and are clamped to what remains. This is the canonical
 // way to buy food; the Spending Menu's "Buy Food" item routes here too.
 func (w *World) BuyFoodMarket(e *Empire, n int) error {
 	if n <= 0 {
 		return nil
 	}
-	cost := n * FoodBuyPrice
+	if !w.Config.FoodUnlimited {
+		if w.FoodMarketSupply <= 0 {
+			return ErrNoFoodSupply
+		}
+		if n > w.FoodMarketSupply {
+			n = w.FoodMarketSupply // buy what's left today
+		}
+	}
+	cost := n * w.FoodBuyPrice()
 	if e.Gold < cost {
 		return ErrCantAfford
 	}
 	e.Gold -= cost
 	e.Food += n
+	if !w.Config.FoodUnlimited {
+		w.FoodMarketSupply -= n
+	}
 	return nil
 }
 
-// SellFood sells n units of food at FoodSellPrice, clamped to what e owns.
+// SellFood sells n units of food at today's FoodSellPrice, clamped to what e
+// owns. In limited mode the sold food goes back into the planet-wide pool.
 func (w *World) SellFood(e *Empire, n int) error {
 	if n <= 0 {
 		return nil
@@ -163,7 +200,10 @@ func (w *World) SellFood(e *Empire, n int) error {
 		n = e.Food
 	}
 	e.Food -= n
-	e.Gold += n * FoodSellPrice
+	e.Gold += n * w.FoodSellPrice()
+	if !w.Config.FoodUnlimited {
+		w.FoodMarketSupply += n
+	}
 	return nil
 }
 

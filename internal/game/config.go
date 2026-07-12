@@ -111,6 +111,7 @@ type Config struct {
 	InterestRate          int               // bank interest (BRE: % over 10 days; 200 = 20%/day)
 	StdInvestRate         int               // standard investment rate (BRE: % over 10 days)
 	SteadyInvest          bool              // steady (fixed) investment rate instead of floating
+	FoodUnlimited         bool              // food market has no daily supply limit (BRE "Food Unlimited"; default false = limited)
 	MaxTaxRate            int               // highest tax rate a player may set
 	MaxRegions            int               // most regions a player may own
 	MaxPlayers            int               // most human empires per board (0 = unlimited)

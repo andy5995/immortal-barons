@@ -7,7 +7,7 @@ func TestRegionMixTotalIncomeFood(t *testing.T) {
 	if got, want := r.Total(), 18; got != want {
 		t.Errorf("Total: want %d, got %d", want, got)
 	}
-	wantFood := 4*250 + 18*15
+	wantFood := 4*FoodPerAgri + 1*FoodPerRiver // Agricultural + River fishing
 	if got := r.foodProduced(); got != wantFood {
 		t.Errorf("foodProduced: want %d, got %d", wantFood, got)
 	}

@@ -25,10 +25,13 @@ func (r *RegionMix) fields() []*int {
 		&r.Agricultural, &r.Urban, &r.Industrial, &r.Technology}
 }
 
-// foodProduced is the per-turn food this mix yields (agricultural regions
-// plus a small base per region).
+// foodProduced is the per-turn food this mix yields (constants in balance.go).
+// Calibrated to live BRE (97 Agri→29,197 and 16 Agri→4,864 food, both no River)
+// = ~300 food/Agri with no flat per-region base. Rivers also fish for food; BRE
+// makes a river's yearly gold-vs-food an either/or the people decide (see the
+// river-food issue), so IB's always-on River term is provisional.
 func (r RegionMix) foodProduced() int {
-	return r.Agricultural*250 + r.Total()*15
+	return r.Agricultural*FoodPerAgri + r.River*FoodPerRiver
 }
 
 // remove takes n regions away, spread proportionally across the mix (largest

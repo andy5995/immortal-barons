@@ -52,6 +52,7 @@ func (w *World) DailyMaintenance(today string) {
 		return
 	}
 	for w.LastMaintDate < today {
+		w.FoodMarketSupply = FoodMarketDailySupply // refill the food market for the new day (#19)
 		for _, e := range w.Empires {
 			if e.Alive {
 				e.TurnsLeft = w.Config.TurnsPerDay
@@ -307,11 +308,11 @@ func (w *World) processEconomy(e *Empire) {
 		w.postStarvationNews(e)
 	}
 
-	// Hoarded food spoils beyond a two-turn buffer (v1 tunable — a modest
-	// buffer is safe; it's why players sell surplus at the food market).
-	buffer := (e.People + e.Troopers + e.Jets*2 + e.Tanks*2) * 2
-	if e.Food > buffer {
-		spoiled := (e.Food - buffer) / 25 * (100 - tf) / 100
+	// Food spoilage (BRE shape, issue #19): stored food at/below FoodSpoilFloor
+	// (~1000) never spoils; above it, a fraction of the EXCESS decays, reduced by
+	// Technology regions (via tf). This is why players sell surplus at the market.
+	if e.Food > FoodSpoilFloor {
+		spoiled := (e.Food - FoodSpoilFloor) / 25 * (100 - tf) / 100
 		e.Food -= spoiled
 		e.LastSpoiled = spoiled
 		if spoiled > 0 {

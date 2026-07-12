@@ -70,8 +70,24 @@ const (
 const (
 	HQCost = 750_000 // gold to start HeadQuarters construction
 
-	FoodBuyPrice  = 3000 // gold per unit bought from the food market
-	FoodSellPrice = 1000 // gold per unit the market pays you
+	// Food market (issue #19). BRE prices vary daily within buy∈[20,60] /
+	// sell∈[7,20] with sell=buy/3; IB keeps its ~150× economy scale, so buy
+	// varies within [FoodBuyPriceMin, 3×FoodBuyPriceMin] and sell = buy/3. The
+	// old fixed 3000/1000 was the band floor. See World.FoodBuyPrice/FoodSellPrice.
+	FoodBuyPriceMin = 3000 // gold per unit at the cheapest; buys range up to 3× this
+	// FoodMarketDailySupply is the planet-wide pool of food available to buy each
+	// day (BRE seeds ~1,000,000); buying depletes it, selling replenishes it,
+	// unless the sysop's Food Unlimited toggle is on.
+	FoodMarketDailySupply = 1_000_000
+	// FoodSpoilFloor: stored food at or below this never spoils (BRE gates
+	// spoilage above ~1000 units); above it, a fraction of the EXCESS decays,
+	// reduced by Technology regions (via TechFactor). Exact rate is an IB tunable.
+	FoodSpoilFloor = 1000
+	// Food production per region per turn. Calibrated to live BRE (97 Agri →
+	// 29,197 and 16 Agri → 4,864 food, both no River → ~300/Agri). Rivers also
+	// fish for food; River yield is provisional pending the river-food issue.
+	FoodPerAgri  = 300
+	FoodPerRiver = 20
 
 	NukeCost   = 7_500_000
 	ChemCost   = 6_000_000

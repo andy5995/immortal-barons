@@ -351,9 +351,21 @@ league ran tax 85%, interest 75%).
 - **Absolute money cap: 2,000,000,000.** You cannot hold more than 2 billion
   coins at once (in the bank or on hand) — a separate, higher ceiling than
   the interest cap.
-- **Food market:** you buy and sell food against a shared market whose
-  price moves with supply. Guide values: sell for ~6 coins/unit, buy back
-  for ~3 coins/unit. A new empire starts with about 30,000 food.
+- **Food market (issue #19):** food is bought and sold against a **shared
+  planet-wide pool** that starts each day at `FoodMarketDailySupply` (1,000,000
+  units, from BRE's live "~1,001,452 available today"). Buying depletes the pool
+  and is capped to what remains; selling replenishes it. The sysop's **Food
+  Unlimited** toggle (Config Editor; default off/limited) removes the cap. Prices
+  **vary daily** within `buy ∈ [FoodBuyPriceMin, 3×FoodBuyPriceMin]` with
+  `sell = buy/3` — BRE's [20,60]/[7,20] band structure at IB's economy scale
+  (constants in `balance.go`).
+- **Food production:** `Agricultural × FoodPerAgri (300)` per turn, calibrated to
+  live BRE (97 Agri → 29,197; 16 Agri → 4,864, both no River). Rivers also fish
+  (`River × FoodPerRiver (20)`), provisional — BRE makes a river's yearly
+  gold-vs-food an either/or (see the river-food issue).
+- **Food spoilage:** stored food at/below `FoodSpoilFloor` (1000) never spoils;
+  above it a fraction of the excess decays, reduced by Technology regions — BRE's
+  recovered shape (exact rate an IB tunable).
 - **Land market:** starts with a pool of about 5,000 regions; you may buy
   at most **500 regions per turn**; the per-region price rises as you own
   more (about 1,100 coins/region when you hold only 2).

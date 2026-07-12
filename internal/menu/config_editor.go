@@ -132,6 +132,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		p(23, "Board ID", c.BoardID)
 		p(24, "Idle timeout (sec)", fmt.Sprintf("%d (0 = never)", c.IdleTimeoutSecs))
 		p(25, "Idle warnings before boot", fmt.Sprintf("%d", c.MaxIdleWarnings))
+		p(26, "* Food Unlimited", onOffStr(c.FoodUnlimited))
 		fmt.Fprintf(s, "%s\n%s* = league ruleset (Coordinator broadcasts with -league-config)%s\n",
 			rule, ansi.FgWhite, ansi.Reset)
 
@@ -205,6 +206,8 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 			c.IdleTimeoutSecs = promptSuggested(s, "Idle timeout in seconds (0 = never)", c.IdleTimeoutSecs, 86400)
 		case 25:
 			c.MaxIdleWarnings = max(1, promptSuggested(s, "Idle warnings before boot", c.MaxIdleWarnings, 100))
+		case 26:
+			c.FoodUnlimited = !c.FoodUnlimited
 		}
 	}
 }

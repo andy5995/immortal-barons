@@ -490,7 +490,11 @@ func bankRates(s session.Session, w *ctx) Result {
 
 func buyFoodMarket(s session.Session, w *ctx) Result {
 	p := w.Player()
-	n := promptSuggested(s, "How much food to buy?", 0, p.Gold/game.FoodBuyPrice)
+	maxBuy := p.Gold / w.FoodBuyPrice()
+	if !w.Config.FoodUnlimited && w.FoodMarketSupply < maxBuy {
+		maxBuy = w.FoodMarketSupply // can't buy more than the market has today
+	}
+	n := promptSuggested(s, "How much food to buy?", 0, maxBuy)
 	if n <= 0 {
 		return Stay
 	}

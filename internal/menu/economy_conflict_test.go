@@ -168,11 +168,11 @@ func TestPaymentStageVanishedEmpireConflict(t *testing.T) {
 // TestBuyFoodVanishedEmpireConflict is the same conflict for Buy Food.
 func TestBuyFoodVanishedEmpireConflict(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
-		p.Gold = game.FoodBuyPrice * 100
+		p.Gold = 1_000_000
 	})
 	commitOnFile(t, cfg, func(w *game.World) {
 		d := w.AddHuman("decoy", "Decoyland")
-		d.Gold = game.FoodBuyPrice * 100
+		d.Gold = 1_000_000
 	})
 	startFood := committedEmpire(t, cfg, "decoy").Food
 

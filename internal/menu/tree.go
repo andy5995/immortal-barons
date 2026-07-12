@@ -313,9 +313,16 @@ func BuildMenus() *Menus {
 	coord.DefaultOnEnter = quitOnEnter(coord)
 
 	food.Items = []Item{
-		{Label: fmt.Sprintf("The market buys food for %d and sells for %d.", game.FoodSellPrice, game.FoodBuyPrice)},
+		{LabelFn: func(w *ctx) string {
+			lang := playerLang(w)
+			avail := i18n.T(lang, "Unlimited supply today.")
+			if !w.Config.FoodUnlimited {
+				avail = fmt.Sprintf(i18n.T(lang, "%s units of food available today."), comma(w.FoodMarketSupply))
+			}
+			return fmt.Sprintf(i18n.T(lang, "%s You buy at %s, sell at %s per unit."), avail, comma(w.FoodBuyPrice()), comma(w.FoodSellPrice()))
+		}},
 		{Key: 'B', Label: "Buy Food", Do: buyFoodMarket},
-		{Key: 'S', Label: "Food", Do: sellFoodMarket},
+		{Key: 'S', Label: "Sell Food", Do: sellFoodMarket},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
 	}
