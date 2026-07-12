@@ -69,6 +69,8 @@ type navNode struct {
 // resolves them per language.
 func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	nav := []navNode{{title: "Home", path: "index.md"}}
+	// FAQ sits right after Home so it is easy to find in the nav/tabs.
+	nav = append(nav, navNode{title: "FAQ", path: "faq/index.md"})
 
 	// Guide: an overview, then a group per category in the help's fixed order.
 	guide := []navNode{{title: "Overview", path: "guide/index.md"}}
@@ -90,7 +92,6 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	nav = append(nav, navNode{title: "Door Setup", path: "door-setup/index.md"})
 	nav = append(nav, navNode{title: "Web Server", path: "web-server/index.md"})
 	nav = append(nav, navNode{title: "Character Set", path: "charset/index.md"})
-	nav = append(nav, navNode{title: "FAQ", path: "faq/index.md"})
 	nav = append(nav, navNode{title: "Translating", path: "translating/index.md"})
 
 	// Developers: one leaf per English dev doc, titled from its first heading.
