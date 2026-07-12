@@ -94,6 +94,10 @@ when a caller starts the door, and the caller shares one persistent world with
 everyone else on the board — each empire is saved between calls, keyed by its
 BBS handle.
 
+Several callers can play at the same time. On a multi-node BBS, each node runs
+its own copy of the door against the same shared world. Every action is saved
+right away under a short file lock, so two nodes never overwrite each other.
+
 Registering the door, the dropfile, daily maintenance (`immortal-barons -maint`),
 the node list, inter-BBS play, and starting a fresh game (`immortal-barons -reset`)
 are all covered in the
