@@ -71,6 +71,15 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
 ## Conventions
 
 - Run `gofmt -w .` before every commit; keep `go vet` clean.
+- **Separate data from code: every tunable gameplay/economy number is a named
+  constant in a dedicated data file, not a bare literal in the formula code.**
+  Today that file is `internal/game/balance.go`; as the set grows it's fine to
+  split into more focused files (e.g. a `food.go`/`combat_balance.go`) — the
+  rule is the separation, not the single filename. This covers unit costs,
+  prices, rates, caps, starting-setup values, score weights, food/industry
+  figures, penalties — all of it. When you add a mechanic, put its numbers in
+  the data file (with a one-line provenance comment) and reference them by
+  name. Only structural literals (`0`, `1`, `100` for percent math) stay inline.
 - Tests use a scripted fake `Session` (see `internal/menu/menu_test.go`) and
   a fixed RNG seed via `game.NewSeed` for determinism.
 - Keep combat/economy numbers matching `docs/mechanics-reference.md`; when
