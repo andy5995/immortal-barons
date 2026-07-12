@@ -128,18 +128,33 @@ For a solo or local game, you can skip it.
 
 ## Starting a fresh game (reset)
 
-To reconfigure and start the game over, run:
+There are two ways to start the game over. Both clear all empires (players
+re-create their realm the next time they log in) and re-seed the AI barons on a
+fresh day one. Neither picks a winner. Each one saves the old world to
+`world.json.bak` in the data directory first, so you can restore it if you reset
+by mistake.
+
+**Reset and choose the rules:**
 
 ```
 immortal-barons -reset -data /path/to/data
 ```
 
-This opens the **Configuration Editor** (adjust any rules, then
-`S` to save or `Q` to cancel). After you save, it clears all empires (players
-re-create their realm the next time they log in) and re-seeds the AI barons on a
-fresh day one. It does not pick a winner. The old world is saved to
-`world.json.bak` in the data directory first, so you can restore it if you reset
-by mistake. Cancelling with `Q` leaves the game untouched.
+This opens the **Configuration Editor** starting from the built-in defaults, so
+it also resets `config.json` to those defaults. Adjust any rules, then press `S`
+to save and start the fresh game, or `Q` to cancel (which leaves the game
+untouched). Because it writes a clean default `config.json`, you can also use
+this to produce a config file to copy and reuse.
+
+**Reset and keep your current rules:**
+
+```
+immortal-barons -reset-from-config -data /path/to/data
+```
+
+This starts the fresh game using the `config.json` you already have. It does not
+open the editor and does not change your settings. Use it when you are happy with
+the current rules and only want to clear the world.
 
 ## Adding AI barons to a running game
 
