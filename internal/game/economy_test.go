@@ -406,7 +406,7 @@ func TestFoodNeededNextTurn(t *testing.T) {
 	e.Jets = 5
 	e.Tanks = 3
 
-	want := 100 + 10 + 5*2 + 3*2
+	want := 100*PeopleFoodPerThousand/1000 + 10 + 5*2 + 3*2
 	if got := w.FoodNeededNextTurn(e); got != want {
 		t.Errorf("FoodNeededNextTurn: want %d, got %d", want, got)
 	}

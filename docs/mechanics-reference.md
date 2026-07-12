@@ -74,12 +74,14 @@ realm (NW 212.5) scored a flat **+213 every turn**; 8 turns = **1704** (matching
 another 8-turn realm exactly). BRE's exact per-win attack bonus and the
 day-rollover behaviour are not recoverable from the binary (overlay-blocked).
 
-IB implements: `Empire.Score` (seeded 0) `+= Empire.DayStartNetWorth` each turn;
-`DayStartNetWorth` is re-snapshotted at each day's maintenance (and at creation).
-**IB additions (not in BRE):** a riot and food spoilage each subtract
-`DayStartNetWorth/10` from Score (tunable in `balance.go`; Score never goes
-below 0). BRE's exact attack-scoring bonus is unrecoverable from the binary, so
-IB uses its own combat-score model (below).
+IB implements: `Empire.Score` (seeded 0) `+= ScorePerTurn` (a flat **213**) each
+turn played. All measured BRE empires were standard starts (net worth 212, award
+213), so whether the award tracks net worth or is a size-independent constant was
+never distinguishable — IB awards a **flat constant**, so Score measures turns
+played, not realm size. **IB additions (not in BRE):** a riot and food spoilage
+each subtract `ScorePerTurn/10` from Score (tunable in `balance.go`; Score never
+goes below 0). BRE's exact attack-scoring bonus is unrecoverable from the binary,
+so IB uses its own combat-score model (below).
 
 **Combat score (IB's own).** A battle's Score award scales with the forces used
 up in it (units both sides lose = `battle`):

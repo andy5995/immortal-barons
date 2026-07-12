@@ -40,6 +40,36 @@ const (
 	YieldMax = 80
 )
 
+// --- New-realm starting setup ---
+//
+// A fresh realm's regions and units. The region mix, trooper count, and food
+// are BRE-verified from a live BRE new-empire screen (2 Agricultural, 5 Desert,
+// 5 Mountain, 3 Coastal = 15 regions; 100 troopers; 1000 food; full morale, no
+// other units). Gold, population, and tax are IB's own start values.
+const (
+	StartAgricultural = 2
+	StartDesert       = 5
+	StartMountain     = 5
+	StartCoastal      = 3
+	StartTroopers     = 100
+	StartFood         = 1000
+	StartGold         = 10000
+	StartPeople       = 2000
+	StartTax          = 15
+)
+
+// --- AI economic behaviour (reconstructed / tunable) ---
+//
+// The AI mimics a human managing its realm: it keeps a few turns of food in
+// reserve, and when its food production can't cover its army it expands
+// Agriculture instead of buying more troops it can't feed (BRE realms grow food
+// capacity alongside their military). Without this an AI buys troopers every
+// turn until its food need outruns production and it starves.
+const (
+	AIFoodBufferTurns = 3 // turns of food consumption the AI keeps on hand
+	AIAgriBuyMax      = 5 // Agricultural regions the AI buys per turn when food-tight
+)
+
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income
 // as an inline "6 − f(tax)" × Population shape that was only partially
 // recovered; this flat per-capita gold figure is anchored to the new income
@@ -92,6 +122,12 @@ const (
 	// yields ~124 food/river and gives NO river gold that turn). Tunable.
 	RiverFishFood   = 124 // food per River region on a fishing turn
 	RiverFishChance = 50  // percent chance the rivers fish (vs hydropower) each turn
+	// PeopleFoodPerThousand is the food the population eats per 1000 people per
+	// turn. BRE's maintenance shows "Your People Need ~150 units of food"; at IB's
+	// ~2000-person start that lands on ~150 (2000×75/1000), so a fresh realm's 1000
+	// food comfortably covers it. Was an unscaled 1:1 with People, which starved a
+	// BRE-faithful 1000-food start. Tunable.
+	PeopleFoodPerThousand = 75
 
 	// --- Industry (live-verified; one capacity pool per region, split between
 	// units and gold — see World.industrialGold / ProjectedProduction) ---
@@ -122,11 +158,16 @@ const (
 	// unit type. BRE's disassembled hit applier uses a 6/7 ratio (removes ~1/7),
 	// so N = 7.
 	TerrorUnitLossDenom = 7
+	// ScorePerTurn is the flat Score a played turn earns. BRE's observed award
+	// for a standard start was 213 (= round of the standard-start net worth
+	// 212.5), constant within a day; day-over-day growth was never shown to
+	// change it, so IB awards a flat constant to every empire per turn rather
+	// than tracking net worth. Combat and covert score (combat.go) are on top.
+	ScorePerTurn = 213
 	// Score penalties (IB's own — BRE leaves Score untouched by economy events).
-	// A riot or food spoilage shaves a small fraction of a turn's Score award
-	// (which is DayStartNetWorth), so the ding scales with the empire.
-	ScoreRiotPenaltyDiv  = 10 // a riot costs DayStartNetWorth/10 Score
-	ScoreSpoilPenaltyDiv = 10 // food spoilage costs DayStartNetWorth/10 Score
+	// A riot or food spoilage shaves a small fraction of a turn's Score award.
+	ScoreRiotPenaltyDiv  = 10 // a riot costs ScorePerTurn/10 Score
+	ScoreSpoilPenaltyDiv = 10 // food spoilage costs ScorePerTurn/10 Score
 	// Combat score (IB's own): a battle's Score award scales with the forces used
 	// (units both sides lose). The winner gains, the loser loses a bit less, and a
 	// successful DEFENSE is worth more than a successful attack.

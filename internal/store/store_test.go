@@ -85,8 +85,8 @@ func TestLoadMigratesPreRegionTypesSave(t *testing.T) {
 	if ge.Regions.Total() != ge.Land {
 		t.Errorf("Regions.Total()=%d, Land=%d: migration did not run", ge.Regions.Total(), ge.Land)
 	}
-	if ge.Land != 100 {
-		t.Errorf("Land=%d, want 100", ge.Land)
+	if ge.Land != 15 {
+		t.Errorf("Land=%d, want 15", ge.Land)
 	}
 }
 

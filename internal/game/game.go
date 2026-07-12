@@ -57,13 +57,11 @@ type Empire struct {
 	RegionsBoughtThisTurn int
 	Protection            int
 	// Score is BRE's cumulative score (shown on the scores board, distinct from
-	// Net Worth): += DayStartNetWorth once per turn played, minus small IB-only
-	// penalties for riots and food spoilage. Seeded 0. DayStartNetWorth is the
-	// net worth snapshotted at each day's maintenance (and at empire creation),
-	// so within a day the per-turn award is flat — matching BRE (verified live:
-	// a standard realm scored a flat +213/turn, 8 turns = 1704).
+	// Net Worth): += a flat ScorePerTurn once per turn played, minus small
+	// IB-only penalties for riots/food spoilage, plus combat/covert score.
+	// Seeded 0. Matches BRE live data (a standard realm scored a flat +213/turn,
+	// 8 turns = 1704).
 	Score            int
-	DayStartNetWorth int
 	LastPlayed       string
 	Events           []string
 	Mail             []string
@@ -364,7 +362,6 @@ func (w *World) addAIEmpire(name string) *Empire {
 	e := newEmpire(name, "", w.Config)
 	e.Jets = 5
 	e.Turrets = 40
-	e.DayStartNetWorth = w.NetWorth(e)
 	w.Empires = append(w.Empires, e)
 	return e
 }
@@ -401,12 +398,15 @@ func (w *World) AddAIEmpires(n int) int {
 }
 
 func newEmpire(name, owner string, cfg Config) *Empire {
-	regions := defaultRegionMix(100)
+	// BRE's starting realm (verified from a live BRE new-empire screen): 15
+	// regions — 2 Agricultural, 5 Desert, 5 Mountain, 3 Coastal — with 100
+	// troopers, 1000 food, full morale, and no other units.
+	regions := RegionMix{Agricultural: StartAgricultural, Desert: StartDesert, Mountain: StartMountain, Coastal: StartCoastal}
 	return &Empire{
 		Name: name, Owner: owner, Alive: true,
-		Gold: 10000, Food: 20000, Land: regions.Total(), People: 2000,
+		Gold: StartGold, Food: StartFood, Land: regions.Total(), People: StartPeople,
 		Regions:  regions,
-		Troopers: 150, Carriers: 1, Tax: 15, Support: 100, Morale: 100,
+		Troopers: StartTroopers, Tax: StartTax, Support: 100, Morale: 100,
 		TurnsLeft: cfg.TurnsPerDay, Protection: cfg.ProtectionTurns,
 		// BRE default: all six at DefaultProdPct (15% → 90% units, 10% remainder → gold).
 		ProdTroopers: DefaultProdPct, ProdJets: DefaultProdPct, ProdTurrets: DefaultProdPct,
@@ -434,7 +434,6 @@ func (w *World) BoardFull() bool {
 // AddHuman creates and registers a human empire keyed by handle.
 func (w *World) AddHuman(handle, realm string) *Empire {
 	e := newEmpire(realm, strings.ToLower(strings.TrimSpace(handle)), w.Config)
-	e.DayStartNetWorth = w.NetWorth(e)
 	w.Empires = append(w.Empires, e)
 	return e
 }

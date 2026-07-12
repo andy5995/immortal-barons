@@ -52,9 +52,12 @@ func (w *World) RegionsDue(e *Empire) int {
 	return e.RegionUpkeep() * w.Config.MaintCosts.Percent() / 100
 }
 
-// FoodUpkeep is the food the population and army eat per turn. Jets and tanks
-// eat double (crews plus fuel/rations).
-func (e *Empire) FoodUpkeep() int { return e.People + e.Troopers + e.Jets*2 + e.Tanks*2 }
+// FoodUpkeep is the food the population and army eat per turn. The population's
+// share is scaled (BRE bills "People Need ~150 food", not one-per-person); jets
+// and tanks eat double (crews plus fuel/rations).
+func (e *Empire) FoodUpkeep() int {
+	return e.People*PeopleFoodPerThousand/1000 + e.Troopers + e.Jets*2 + e.Tanks*2
+}
 
 // clampGive limits a payment to what the empire can actually afford and
 // deducts it, recording it in the turn's LastGoldPaid tally. Returns the

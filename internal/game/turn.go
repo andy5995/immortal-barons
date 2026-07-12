@@ -13,9 +13,9 @@ import (
 // (manufacture) is a turn-start step, run alongside CollectIncome by the
 // caller, not here.
 func (w *World) PlayTurn(e *Empire, today string) {
-	// BRE score: each turn played awards the day-start net worth (flat within a
-	// day). processEconomy may then subtract small riot/spoilage penalties.
-	e.Score += e.DayStartNetWorth
+	// BRE score: each turn played awards a flat amount. processEconomy may then
+	// subtract small riot/spoilage penalties.
+	e.Score += ScorePerTurn
 	w.processEconomy(e)
 	if e.Score < 0 {
 		e.Score = 0
@@ -56,9 +56,6 @@ func (w *World) DailyMaintenance(today string) {
 		for _, e := range w.Empires {
 			if e.Alive {
 				e.TurnsLeft = w.Config.TurnsPerDay
-				// Re-snapshot the day-start net worth so the per-turn Score award
-				// tracks the empire's size at the start of each new day.
-				e.DayStartNetWorth = w.NetWorth(e)
 			}
 		}
 		w.aiPlay(w.LastMaintDate)
@@ -141,11 +138,7 @@ func (w *World) nextDate(d string) string {
 func (w *World) aiPlay(today string) {
 	for _, e := range w.AIEmpires() {
 		for e.TurnsLeft > 0 {
-			if e.Gold > 5000 {
-				n := (e.Gold / 4) / w.Prices.Trooper
-				e.Troopers += n
-				e.Gold -= n * w.Prices.Trooper
-			}
+			w.aiManageEconomy(e)
 			e.LastGoldPaid = 0
 			w.PayForces(e, w.ForcesDue(e))
 			w.PayRegions(e, w.RegionsDue(e))
@@ -153,6 +146,51 @@ func (w *World) aiPlay(today string) {
 			w.CollectIncome(e) // same point income used to be credited (start of PlayTurn)
 			w.PlayTurn(e, today)
 		}
+	}
+}
+
+// aiManageEconomy spends an AI empire's gold for the turn like a human would:
+// it keeps a few turns of food in reserve, and when its food production can't
+// cover its army it grows Agriculture rather than buying more troops it can't
+// feed. Only when the realm is food-healthy does it convert spare gold into
+// troopers. This keeps AI realms from starving themselves to death.
+func (w *World) aiManageEconomy(e *Empire) {
+	produced := e.Regions.foodProduced() + w.riverFood(e)
+	upkeep := e.FoodUpkeep()
+
+	// 1. Keep a food buffer, spending at most half the treasury on it.
+	if target := upkeep * AIFoodBufferTurns; e.Food < target {
+		if price := w.FoodBuyPrice(); price > 0 {
+			buy := target - e.Food
+			if buy > (e.Gold/2)/price {
+				buy = (e.Gold / 2) / price
+			}
+			if buy > 0 {
+				e.Food += buy
+				e.Gold -= buy * price
+			}
+		}
+	}
+
+	// 2. If production can't feed the realm, expand Agriculture instead of army.
+	if produced < upkeep && e.Gold > w.Prices.Land {
+		n := (e.Gold / 4) / w.Prices.Land
+		if n > AIAgriBuyMax {
+			n = AIAgriBuyMax
+		}
+		if n > 0 {
+			e.Regions.Agricultural += n
+			e.syncLand()
+			e.Gold -= n * w.Prices.Land
+			return
+		}
+	}
+
+	// 3. Food-healthy: turn spare gold into troopers.
+	if e.Gold > 5000 {
+		n := (e.Gold / 4) / w.Prices.Trooper
+		e.Troopers += n
+		e.Gold -= n * w.Prices.Trooper
 	}
 }
 
@@ -279,12 +317,18 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 }
 
 // riversFish reports whether e's rivers fish for food (vs run hydropower for
-// gold) this turn — a per-turn, per-empire either/or (BRE #29; live ~50/50).
-// Deterministic in (GameDay, empire) so the income report matches what's
-// credited.
+// gold) this turn. In BRE (#29) a "year" is one turn and the empire's people
+// pick one or the other for that year, so ALL of e's rivers do the same thing
+// and the choice is redrawn every turn. Deterministic in (GameDay, TurnsLeft,
+// empire) so the income report matches what's credited within the turn.
 func (w *World) riversFish(e *Empire) bool {
-	span := YieldMax - YieldMin + 1
-	return w.regionYield(e, 99)-YieldMin < span*RiverFishChance/100
+	h := fnv.New32a()
+	var buf [8]byte
+	binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
+	binary.LittleEndian.PutUint32(buf[4:8], uint32(e.TurnsLeft))
+	h.Write(buf[:])
+	io.WriteString(h, e.Name)
+	return int(h.Sum32()%100) < RiverFishChance
 }
 
 // riverFood is the food e's rivers fish this turn: RiverFishFood per River on a
@@ -346,7 +390,7 @@ func (w *World) processEconomy(e *Empire) {
 		e.Food -= spoiled
 		e.LastSpoiled = spoiled
 		if spoiled > 0 {
-			e.Score -= e.DayStartNetWorth / ScoreSpoilPenaltyDiv // IB: spoilage dings score a little
+			e.Score -= ScorePerTurn / ScoreSpoilPenaltyDiv // IB: spoilage dings score a little
 		}
 	} else {
 		e.LastSpoiled = 0
@@ -395,7 +439,7 @@ func (w *World) processEconomy(e *Empire) {
 	e.LastRiot = false
 	if e.Tax > RiotTaxFloor && e.Tax*e.Tax >= w.rng.Intn(10000) {
 		e.LastRiot = true
-		e.Score -= e.DayStartNetWorth / ScoreRiotPenaltyDiv // IB: a riot dings score a little
+		e.Score -= ScorePerTurn / ScoreRiotPenaltyDiv // IB: a riot dings score a little
 		w.postRiotNews(e)
 		e.Support -= 15
 		if e.Support < 0 {

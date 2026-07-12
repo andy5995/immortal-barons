@@ -98,8 +98,8 @@ func TestNewEmpireStartsWithRegionsSummingToLand(t *testing.T) {
 	if e.Regions.Total() != e.Land {
 		t.Fatalf("Regions.Total()=%d, Land=%d", e.Regions.Total(), e.Land)
 	}
-	if e.Land != 100 {
-		t.Errorf("expected starting Land 100, got %d", e.Land)
+	if e.Land != 15 {
+		t.Errorf("expected starting Land 15, got %d", e.Land)
 	}
 }
 

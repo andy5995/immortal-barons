@@ -93,8 +93,8 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 	wg.Wait()
 
 	// Reload the shared world from disk and assert BOTH purchases survived. A
-	// new empire starts with 150 troopers and no Industrial regions, so nothing
-	// but the buy changes the count — the final value is exactly 150 + buy.
+	// new empire starts with 100 troopers and no Industrial regions, so nothing
+	// but the buy changes the count — the final value is exactly 100 + buy.
 	w, err := store.Load(cfg)
 	if err != nil {
 		t.Fatalf("reload world: %v", err)
@@ -107,7 +107,7 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 		if e.Name != p.realm {
 			t.Errorf("%s realm = %q, want %q", p.handle, e.Name, p.realm)
 		}
-		if want := 150 + p.buy; e.Troopers != want {
+		if want := 100 + p.buy; e.Troopers != want {
 			t.Errorf("%s troopers = %d, want %d (its purchase was lost or clobbered by the other node)", p.handle, e.Troopers, want)
 		}
 	}

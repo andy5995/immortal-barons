@@ -208,9 +208,10 @@ func (w *World) SellFood(e *Empire, n int) error {
 }
 
 // FoodNeededNextTurn estimates the empire's next-turn food consumption
-// (so the sell prompt can suggest keeping enough on hand).
+// (so the sell prompt can suggest keeping enough on hand). Same figure the
+// turn engine consumes — FoodUpkeep — kept as one formula so they can't drift.
 func (w *World) FoodNeededNextTurn(e *Empire) int {
-	return e.People + e.Troopers + e.Jets*2 + e.Tanks*2
+	return e.FoodUpkeep()
 }
 
 func (w *World) Recruit(e *Empire, n int) error {
