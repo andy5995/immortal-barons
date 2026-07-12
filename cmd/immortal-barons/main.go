@@ -39,7 +39,8 @@ func main() {
 	imp := flag.String("import", "", "import a score packet from FILE and exit")
 	planetary := flag.Bool("planetary", false, "run the inter-BBS PLANETARY step (read inbound, launch attacks, write outbound) and exit")
 	leagueConfig := flag.Bool("league-config", false, "broadcast this board's league settings to the league (coordinator/node #1 only) and exit")
-	reset := flag.Bool("reset", false, "end the current game: crown the Planetary Master, wipe empires, re-seed, and start fresh (backs up world.json first)")
+	reset := flag.Bool("reset", false, "start a fresh game: edit the settings (starting from defaults), then wipe empires and re-seed (backs up world.json first)")
+	resetFromConfig := flag.Bool("reset-from-config", false, "start a fresh game using the current config.json as-is (no editor): wipe empires and re-seed (backs up world.json first)")
 	addAI := flag.Int("add-ai", 0, "add N AI barons to the running game and exit")
 	utf8 := flag.Bool("utf8", false, "force UTF-8 output (needed for non-English languages; -local auto-detects this from your locale)")
 	cp437 := flag.Bool("cp437", false, "force CP437 output (the door default; overrides -local locale auto-detection)")
@@ -104,8 +105,16 @@ func main() {
 	}
 
 	if *reset {
-		if err := runReset(cfg); err != nil {
+		if err := runReset(cfg, false); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -reset:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if *resetFromConfig {
+		if err := runReset(cfg, true); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -reset-from-config:", err)
 			os.Exit(1)
 		}
 		return
@@ -307,7 +316,11 @@ func runLeagueConfig(cfg game.Config) error {
 // Configuration Editor) so the sysop sets up the new game, then wipe all
 // empires (humans re-onboard on their next login), re-seed AI, and save. The
 // old world is backed up first. It does not crown a winner.
-func runReset(cfg game.Config) error {
+// runReset starts a fresh game. With fromConfig=false (-reset) it opens the
+// settings editor seeded from defaults and saves the edited config.json. With
+// fromConfig=true (-reset-from-config) it skips the editor and keeps the current
+// config.json as-is. Either way the world is wiped and re-seeded.
+func runReset(cfg game.Config, fromConfig bool) error {
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
@@ -322,10 +335,28 @@ func runReset(cfg game.Config) error {
 		return err
 	}
 
-	// The settings menu edits w.Config and saves config.json on exit (0); Q
-	// cancels the whole reset.
+	if fromConfig {
+		w.Config = cfg // keep the current config.json untouched
+		w.Reset()
+		if err := store.Save(w, cfg); err != nil {
+			return err
+		}
+		fmt.Println("\nWorld cleared and re-seeded using the current config.json.")
+		if backedUp {
+			fmt.Println("The previous world was backed up to world.json.bak.")
+		}
+		return nil
+	}
+
+	// Seed the settings editor from defaults (keeping the data directory), so a
+	// plain -reset also resets config.json to defaults. The editor saves
+	// config.json on exit (S); Q cancels the whole reset.
+	def := game.DefaultConfig()
+	def.DataDir = cfg.DataDir
+	w.Config = def
+
 	c := session.NewConsole()
-	fmt.Fprint(c, "\r\nConfigure the game below. Choose S to save the settings and start a fresh game, or Q to cancel.\r\n")
+	fmt.Fprint(c, "\r\nConfigure the game below (starting from defaults). Choose S to save the settings and start a fresh game, or Q to cancel.\r\n")
 	saved := menu.ConfigEditor(c, w)
 	c.Close()
 
@@ -338,7 +369,7 @@ func runReset(cfg game.Config) error {
 	if err := store.Save(w, cfg); err != nil {
 		return err
 	}
-	fmt.Println("\nGame started with the new settings. Empires cleared and AI re-seeded.")
+	fmt.Println("\nGame started with the new settings (config reset to defaults). Empires cleared and AI re-seeded.")
 	if backedUp {
 		fmt.Println("The previous world was backed up to world.json.bak.")
 	}
