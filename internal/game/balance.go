@@ -30,12 +30,14 @@ const (
 	RiverRate, RiverBase       = 100, 5000  // hydro — highest base, occasional bad-year dud
 )
 
-// Yield band (reconstructed / tunable). The exact BRE distribution lives in an
-// unmapped helper segment; [1.0, 1.5] keeps income at or above BASE. Expressed
-// as integer percents so the math stays in integers.
+// Yield band (live-calibrated). Each turn a planet-wide year factor is drawn in
+// this band and multiplies each region's Rate on top of its Base. Live BRE data
+// (mountain 7 turns, coastal 3, river 2 — all with the disassembled Bases) pins
+// the band to ~[0.30, 0.80], NOT the earlier reconstructed [1.0, 1.5]. Integer
+// percents so the math stays in integers.
 const (
-	YieldMin = 100 // income = BASE at yield 1.0
-	YieldMax = 150 // BRE's ~1.5 amplitude (reconstructed)
+	YieldMin = 30 // live-verified: mountain/coastal/river all land in [30, 80]
+	YieldMax = 80
 )
 
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income

@@ -231,8 +231,9 @@ of new land.
 **Region gold income (BRE-verified — disassembly of BRE.OVR, offsets
 0x342C0–0x34A4E).** Each gold region yields, per turn,
 `perRegion = yield×Rate/100 + Base`, times its region count, where `yield` is a
-per-(game-day) factor in the band 1.0–1.5 (the exact BRE distribution lives in
-an unmapped helper segment; IB reconstructs it as this tunable band):
+per-(game-day), planet-wide factor in the band **0.30–0.80** (live-calibrated:
+mountain, coastal, and river income all reconcile with the disassembled Bases at
+this band — the earlier 1.0–1.5 reconstruction ran ~15–30% high):
 
 | Region | Rate | Base | Notes |
 |--------|-----:|-----:|-------|
