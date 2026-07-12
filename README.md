@@ -26,6 +26,8 @@ come. For what works today and what is
 planned, see the
 [issue tracker](https://github.com/andy5995/immortal-barons/issues).
 
+Most people will want to start by reading the [FAQ](docs/faq.md).
+
 ## Running
 
 The game plays locally in your terminal or as a native BBS door. Once you have
