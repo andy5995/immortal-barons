@@ -23,10 +23,10 @@ See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset
 - Some game values — such as attack rewards, unit prices, and economy rates —
   may not match BRE exactly. The game aims to get as close as it can, using
   BRE's own numbers where they are known. A few mechanics are still being built.
-- When a sysop starts a fresh game, they can keep their old settings. The rules
-  are stored in a `config.json` file. Running `immortal-barons -reset-from-config`
-  clears the world but reuses that file, so you do not have to set the rules
-  again each time you reset.
+- When a sysop starts a fresh game, they can keep their old settings. Those
+  settings are stored in a `config.json` file. Running
+  `immortal-barons -reset-from-config` clears the world but reuses that file, so
+  you do not have to choose the settings again each time you reset.
 
 ## How do I add AI barons (computer opponents)?
 

@@ -17,14 +17,14 @@ Run `immortal-barons -help` to see all the command-line options.
 ## First-time setup
 
 The game runs from built-in defaults, so you can register the door and let your
-first caller start a game without any setup step. To choose the rules ahead of
+first caller start a game without any setup step. To choose the settings ahead of
 time, use the same `-reset` command you would use to start a fresh game later:
 
 ```
 immortal-barons -reset -data /path/to/data
 ```
 
-This opens the **Configuration Editor**: a menu of every game rule (turns per
+This opens the **Configuration Editor**: a menu of every game setting (turns per
 day, protection turns, land and market settings, interest and investment rates,
 tax and region limits, costs and attack settings, number of AI barons, game
 length, and more). Change what you like, then press `S` to save `config.json`
@@ -134,19 +134,19 @@ fresh day one. Neither picks a winner. Each one saves the old world to
 `world.json.bak` in the data directory first, so you can restore it if you reset
 by mistake.
 
-**Reset and choose the rules:**
+**Reset and choose the settings:**
 
 ```
 immortal-barons -reset -data /path/to/data
 ```
 
 This opens the **Configuration Editor** starting from the built-in defaults, so
-it also resets `config.json` to those defaults. Adjust any rules, then press `S`
+it also resets `config.json` to those defaults. Adjust any settings, then press `S`
 to save and start the fresh game, or `Q` to cancel (which leaves the game
 untouched). Because it writes a clean default `config.json`, you can also use
 this to produce a config file to copy and reuse.
 
-**Reset and keep your current rules:**
+**Reset and keep your current settings:**
 
 ```
 immortal-barons -reset-from-config -data /path/to/data
@@ -154,13 +154,13 @@ immortal-barons -reset-from-config -data /path/to/data
 
 This starts the fresh game using the `config.json` you already have. It does not
 open the editor and does not change your settings. Use it when you are happy with
-the current rules and only want to clear the world.
+the current settings and only want to clear the world.
 
 ### The config file is portable
 
-All the game rules live in `config.json` in the data directory. This file can be
+All the game settings live in `config.json` in the data directory. This file can be
 copied. You can back it up to another place, and you can copy it into any data
-directory to reuse the same rules there. To carry your settings to a new install
+directory to reuse the same settings there. To carry your settings to a new install
 or a fresh game, copy your saved `config.json` into the data directory, then run
 `-reset-from-config`.
 
