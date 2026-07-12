@@ -156,6 +156,14 @@ This starts the fresh game using the `config.json` you already have. It does not
 open the editor and does not change your settings. Use it when you are happy with
 the current rules and only want to clear the world.
 
+### The config file is portable
+
+All the game rules live in `config.json` in the data directory. This file can be
+copied. You can back it up to another place, and you can copy it into any data
+directory to reuse the same rules there. To carry your settings to a new install
+or a fresh game, copy your saved `config.json` into the data directory, then run
+`-reset-from-config`.
+
 ## Adding AI barons to a running game
 
 To drop more AI opponents into a game that is already going, without resetting:
