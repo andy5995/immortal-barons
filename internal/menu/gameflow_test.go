@@ -77,6 +77,10 @@ func TestIncomeReportShowsIndustryProduction(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
 	p.Regions.Industrial = 10
+	// Allocate only 30% to troopers so the other 70% pays out as industrial gold
+	// (BRE's trade-off: units and gold share one capacity pool).
+	p.ProdTroopers, p.ProdJets, p.ProdTurrets = 30, 0, 0
+	p.ProdBombers, p.ProdTanks, p.ProdCarriers = 0, 0, 0
 	w.World.Manufacture(p) // turn-start step, done by runTurn's loop before incomeReport
 
 	incomeReport(f, w)

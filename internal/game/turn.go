@@ -223,14 +223,19 @@ func (w *World) regionYield(e *Empire, salt int) int {
 	return YieldMin + int(h.Sum32()%uint32(span))
 }
 
-// industrialGold is one Industrial region's gold this turn: the BRE per-region
-// value, scaled by IB's industry-efficiency modifier. IB has no separate gold
-// efficiency factor today, so the modifier is 100% (a no-op hook for a future
-// tech-driven industry bonus). This is credited once, via IncomeThisTurn — the
-// old double-count (here AND in Manufacture) is gone.
+// industrialGold is the gold one Industrial region yields this turn. BRE (live-
+// verified) splits each region's capacity by the production percentages: the
+// UNALLOCATED share ("The remaining N% will be used to produce Gold") pays out
+// 1 gold per point. Units and gold come from ONE pool — allocating to units is a
+// direct trade-off against industrial gold. So a realm at 100% allocation earns
+// no industrial gold; leaving a remainder is how you buy gold.
 func (w *World) industrialGold(e *Empire) int {
-	base := w.regionYield(e, 5)*IndustrialRate/100 + IndustrialBase
-	return base // × industry-efficiency modifier (100% today; hook for a future tech bonus)
+	allocated := e.ProdTroopers + e.ProdJets + e.ProdTurrets + e.ProdBombers + e.ProdTanks + e.ProdCarriers
+	unalloc := 100 - allocated
+	if unalloc < 0 {
+		unalloc = 0
+	}
+	return IndustryPointsPerRegion * unalloc / 100
 }
 
 // riverGold is one River region's gold this turn. Rivers have the highest base
@@ -432,25 +437,30 @@ func (w *World) processEconomy(e *Empire) {
 // Industrial production tuning (v1, tunable — see docs/mechanics-reference.md).
 // Industrial gold is credited via IncomeThisTurn (see industrialGold); this
 // governs unit production only.
-const IndustryPointsPerRegion = 10 // production points each Industrial region yields per turn
+// IndustryPointsPerRegion is the capacity (gold-valued points) each Industrial
+// region yields per turn — ONE pool shared between unit production and gold (see
+// industrialGold). Live BRE: ~2,548/region (114 ind @ 15% each → 29,050 gold at
+// 10% unallocated → 290,500/114); IB uses 2,600 as a round value.
+const IndustryPointsPerRegion = 2600
 
-// Point cost to manufacture one of each unit type; cheaper units convert
-// from more of the same points.
+// Point cost to manufacture one of each unit type, calibrated to live BRE
+// (114 ind @ 15% each → 455/325/303/30/91/26 troopers/jets/turrets/bombers/
+// tanks/carriers → ratios 1 : 1.4 : 1.5 : 15 : 5 : 17.5). Carriers and bombers
+// are the most expensive to build.
 const (
-	CostTrooper = 1
-	CostJet     = 2
-	CostTurret  = 2
-	CostCarrier = 1
-	CostTank    = 4
-	CostBomber  = 5
+	CostTrooper = 100
+	CostJet     = 140
+	CostTurret  = 150
+	CostCarrier = 1750
+	CostTank    = 500
+	CostBomber  = 1500
 )
 
-// Industrial specialization efficiency modifiers (reconstructed; tunable). BRE
-// describes specialization as increasing output of the chosen unit and
-// decreasing all others, but the exact magnitudes live in compiled code.
+// Industrial specialization efficiency modifiers (live BRE: specialize Tanks →
+// tanks +25%, every other unit −15%).
 const (
-	SpecialtyBonusPct   = 50 // + to the specialized unit's production
-	SpecialtyPenaltyPct = 50 // - to every other unit's production
+	SpecialtyBonusPct   = 25 // + to the specialized unit's production
+	SpecialtyPenaltyPct = 15 // - to every other unit's production
 )
 
 // ProjectedProduction computes the units e would manufacture this turn at its

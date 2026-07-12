@@ -24,11 +24,10 @@ package game
 // additionally multiplied by a support factor (see IncomeThisTurn); Urban and
 // Technology produce NO direct gold (housing / maintenance-reduction only).
 const (
-	MountainRate, MountainBase     = 400, 3550  // ore — smallest Rate, most stable
-	CoastalRate, CoastalBase       = 1000, 3750 // tourism — × support factor
-	DesertRate, DesertBase         = 2000, 3000 // solar — widest swing
-	IndustrialRate, IndustrialBase = 100, 2500  // × industry-efficiency modifier
-	RiverRate, RiverBase           = 100, 5000  // hydro — highest base, occasional bad-year dud
+	MountainRate, MountainBase = 400, 3550  // ore — smallest Rate, most stable
+	CoastalRate, CoastalBase   = 1000, 3750 // tourism — × support factor
+	DesertRate, DesertBase     = 2000, 3000 // solar — widest swing
+	RiverRate, RiverBase       = 100, 5000  // hydro — highest base, occasional bad-year dud
 )
 
 // Yield band (reconstructed / tunable). The exact BRE distribution lives in an

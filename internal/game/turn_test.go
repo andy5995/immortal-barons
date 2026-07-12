@@ -112,6 +112,50 @@ func TestRiversFishOrHydropowerNotBoth(t *testing.T) {
 	}
 }
 
+func TestIndustryGoldIsUnallocatedCapacity(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("t", "T")
+	e.Regions = RegionMix{Industrial: 114}
+	e.syncLand()
+	// Each of 6 types at 15% = 90% to units, 10% unallocated -> gold.
+	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 15, 15, 15
+	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 15, 15, 15
+	if got, want := w.industrialGold(e), IndustryPointsPerRegion*10/100; got != want {
+		t.Errorf("industrial gold/region at 90%% allocation: want %d, got %d", want, got)
+	}
+	p := w.ProjectedProduction(e)
+	if want := 114 * IndustryPointsPerRegion * 15 / 100 / CostTrooper; p[0] != want {
+		t.Errorf("troopers made: want %d, got %d", want, p[0])
+	}
+	if p[5] >= p[0] { // carriers cost far more -> far fewer than troopers
+		t.Errorf("carriers (%d) should be far fewer than troopers (%d)", p[5], p[0])
+	}
+	// Allocate 100% -> no unallocated capacity -> no industrial gold.
+	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 40, 30, 30
+	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 0, 0, 0
+	if g := w.industrialGold(e); g != 0 {
+		t.Errorf("100%% allocation should yield 0 industrial gold, got %d", g)
+	}
+}
+
+func TestIndustrySpecializationBonusPenalty(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("t", "T")
+	e.Regions = RegionMix{Industrial: 114}
+	e.syncLand()
+	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 15, 15, 15
+	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 15, 15, 15
+	base := w.ProjectedProduction(e)
+	e.Specialized = "Tanks"
+	spec := w.ProjectedProduction(e)
+	if want := base[4] * (100 + SpecialtyBonusPct) / 100; spec[4] != want { // tanks +25%
+		t.Errorf("specialized tanks: want %d, got %d", want, spec[4])
+	}
+	if want := base[0] * (100 - SpecialtyPenaltyPct) / 100; spec[0] != want { // troopers -15%
+		t.Errorf("penalized troopers: want %d, got %d", want, spec[0])
+	}
+}
+
 func TestCollectIncomeCoversStartingMaintenance(t *testing.T) {
 	// Regression for the auto-deposit bug: with income credited at turn start,
 	// a starting empire whose gold was swept to the bank can still pay its
