@@ -76,9 +76,9 @@ day-rollover behaviour are not recoverable from the binary (overlay-blocked).
 
 IB implements: `Empire.Score` (seeded 0) `+= Empire.DayStartNetWorth` each turn;
 `DayStartNetWorth` is re-snapshotted at each day's maintenance (and at creation).
-**IB additions (not in BRE):** a riot subtracts `DayStartNetWorth/20` and food
-spoilage subtracts `DayStartNetWorth/40` from Score (tunable in `balance.go`;
-Score never goes below 0). BRE's attack-scoring bonus is a config toggle
+**IB additions (not in BRE):** a riot and food spoilage each subtract
+`DayStartNetWorth/10` from Score (tunable in `balance.go`; Score never goes
+below 0). BRE's attack-scoring bonus is a config toggle
 (default off) — not yet built in IB.
 
 ## Attack types

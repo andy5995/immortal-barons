@@ -85,8 +85,8 @@ const (
 	// Score penalties (IB's own — BRE leaves Score untouched by economy events).
 	// A riot or food spoilage shaves a small fraction of a turn's Score award
 	// (which is DayStartNetWorth), so the ding scales with the empire.
-	ScoreRiotPenaltyDiv  = 20 // a riot costs DayStartNetWorth/20 Score
-	ScoreSpoilPenaltyDiv = 40 // food spoilage costs DayStartNetWorth/40 Score
+	ScoreRiotPenaltyDiv  = 10 // a riot costs DayStartNetWorth/10 Score
+	ScoreSpoilPenaltyDiv = 10 // food spoilage costs DayStartNetWorth/10 Score
 	// GroupAttackBomberOffense values a committed bomber's offense in a group
 	// attack (tunable; BRE's exact figure not recovered — set to a tank's).
 	GroupAttackBomberOffense = 4
