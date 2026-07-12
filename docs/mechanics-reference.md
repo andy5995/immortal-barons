@@ -63,6 +63,24 @@ Net-worth value contributed per unit (from the guide's net-worth table):
 | Turret | 0.425 | Carrier | 1.000 |
 | Agent | 0.500 | Region | 12.50 |
 
+## Score (distinct from Net Worth)
+
+The scores board shows **Score** and **Net Worth** as separate columns. Net
+Worth is the wealth snapshot above. **Score is a cumulative, earned metric**,
+verified from live BRE play: it starts at **0** and grows by the empire's
+**net worth measured at the start of the day**, awarded **once per turn played**
+— flat within a day, regardless of mid-day growth. Measured: a standard new
+realm (NW 212.5) scored a flat **+213 every turn**; 8 turns = **1704** (matching
+another 8-turn realm exactly). BRE's exact per-win attack bonus and the
+day-rollover behaviour are not recoverable from the binary (overlay-blocked).
+
+IB implements: `Empire.Score` (seeded 0) `+= Empire.DayStartNetWorth` each turn;
+`DayStartNetWorth` is re-snapshotted at each day's maintenance (and at creation).
+**IB additions (not in BRE):** a riot subtracts `DayStartNetWorth/20` and food
+spoilage subtracts `DayStartNetWorth/40` from Score (tunable in `balance.go`;
+Score never goes below 0). BRE's attack-scoring bonus is a config toggle
+(default off) — not yet built in IB.
+
 ## Attack types
 
 - **Regular attack** — direct assault; the winner takes some of the

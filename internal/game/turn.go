@@ -13,7 +13,13 @@ import (
 // (manufacture) is a turn-start step, run alongside CollectIncome by the
 // caller, not here.
 func (w *World) PlayTurn(e *Empire, today string) {
+	// BRE score: each turn played awards the day-start net worth (flat within a
+	// day). processEconomy may then subtract small riot/spoilage penalties.
+	e.Score += e.DayStartNetWorth
 	w.processEconomy(e)
+	if e.Score < 0 {
+		e.Score = 0
+	}
 	if e.HQ > 0 && e.HQ < 100 {
 		e.HQ += 5
 		if e.HQ > 100 {
@@ -49,6 +55,9 @@ func (w *World) DailyMaintenance(today string) {
 		for _, e := range w.Empires {
 			if e.Alive {
 				e.TurnsLeft = w.Config.TurnsPerDay
+				// Re-snapshot the day-start net worth so the per-turn Score award
+				// tracks the empire's size at the start of each new day.
+				e.DayStartNetWorth = w.NetWorth(e)
 			}
 		}
 		w.aiPlay(w.LastMaintDate)
@@ -305,6 +314,9 @@ func (w *World) processEconomy(e *Empire) {
 		spoiled := (e.Food - buffer) / 25 * (100 - tf) / 100
 		e.Food -= spoiled
 		e.LastSpoiled = spoiled
+		if spoiled > 0 {
+			e.Score -= e.DayStartNetWorth / ScoreSpoilPenaltyDiv // IB: spoilage dings score a little
+		}
 	} else {
 		e.LastSpoiled = 0
 	}
@@ -352,6 +364,7 @@ func (w *World) processEconomy(e *Empire) {
 	e.LastRiot = false
 	if e.Tax > RiotTaxFloor && e.Tax*e.Tax >= w.rng.Intn(10000) {
 		e.LastRiot = true
+		e.Score -= e.DayStartNetWorth / ScoreRiotPenaltyDiv // IB: a riot dings score a little
 		w.postRiotNews(e)
 		e.Support -= 15
 		if e.Support < 0 {

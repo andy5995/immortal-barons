@@ -351,7 +351,7 @@ func (w *World) ExportScores() {
 	var scores []RemoteScore
 	for _, e := range w.Empires {
 		if e.Alive && e.Owner != "" {
-			scores = append(scores, RemoteScore{Empire: e.Name, NetWorth: w.NetWorth(e), Land: e.Land, Score: w.NetWorth(e) + e.Gold + e.Bank})
+			scores = append(scores, RemoteScore{Empire: e.Name, NetWorth: w.NetWorth(e), Land: e.Land, Score: e.Score})
 		}
 	}
 	if len(scores) == 0 {

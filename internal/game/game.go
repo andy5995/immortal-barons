@@ -56,12 +56,20 @@ type Empire struct {
 	// turn (see runTurn in internal/menu/gameflow.go).
 	RegionsBoughtThisTurn int
 	Protection            int
-	LastPlayed            string
-	Events                []string
-	Mail                  []string
-	PirateRaids           []string // raids suffered since last play; shown in the income report
-	ImmuneFrom            []string // empires whose covert ops against us auto-fail (we bribed their agents)
-	ShieldedUntilDay      int      // GameDay through which ALL incoming covert ops auto-fail (Expose Enemy Ops)
+	// Score is BRE's cumulative score (shown on the scores board, distinct from
+	// Net Worth): += DayStartNetWorth once per turn played, minus small IB-only
+	// penalties for riots and food spoilage. Seeded 0. DayStartNetWorth is the
+	// net worth snapshotted at each day's maintenance (and at empire creation),
+	// so within a day the per-turn award is flat — matching BRE (verified live:
+	// a standard realm scored a flat +213/turn, 8 turns = 1704).
+	Score            int
+	DayStartNetWorth int
+	LastPlayed       string
+	Events           []string
+	Mail             []string
+	PirateRaids      []string // raids suffered since last play; shown in the income report
+	ImmuneFrom       []string // empires whose covert ops against us auto-fail (we bribed their agents)
+	ShieldedUntilDay int      // GameDay through which ALL incoming covert ops auto-fail (Expose Enemy Ops)
 
 	// CoordinatorVote is the owner handle this baron votes for as the BBS
 	// Coordinator (the elected player who gets the Coordinator menu). Changeable
@@ -204,7 +212,7 @@ type RemoteScore struct {
 	Empire   string
 	NetWorth int
 	Land     int
-	Score    int // overall standing (net worth + gold + bank); 0 in pre-Score packets
+	Score    int // BRE cumulative score (Empire.Score); 0 in pre-Score packets
 }
 
 // RemoteBoard is a snapshot of another board's scores, imported via an
@@ -350,6 +358,7 @@ func (w *World) addAIEmpire(name string) *Empire {
 	e := newEmpire(name, "", w.Config)
 	e.Jets = 5
 	e.Turrets = 40
+	e.DayStartNetWorth = w.NetWorth(e)
 	w.Empires = append(w.Empires, e)
 	return e
 }
@@ -417,6 +426,7 @@ func (w *World) BoardFull() bool {
 // AddHuman creates and registers a human empire keyed by handle.
 func (w *World) AddHuman(handle, realm string) *Empire {
 	e := newEmpire(realm, strings.ToLower(strings.TrimSpace(handle)), w.Config)
+	e.DayStartNetWorth = w.NetWorth(e)
 	w.Empires = append(w.Empires, e)
 	return e
 }

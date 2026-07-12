@@ -35,6 +35,56 @@ func TestPlayTurnAffectsOnlyActingEmpire(t *testing.T) {
 	}
 }
 
+func TestScoreAccumulatesDayStartNetWorthFlat(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	// Desert-only, no military, no tax: no food production/spoilage, no riots —
+	// so each turn awards exactly the day-start net worth.
+	e.Regions = RegionMix{Desert: 100}
+	e.syncLand()
+	e.Troopers, e.Carriers, e.Tax, e.Food = 0, 0, 0, 0
+	e.DayStartNetWorth = w.NetWorth(e)
+	dsn := e.DayStartNetWorth
+	if dsn <= 0 || e.Score != 0 {
+		t.Fatalf("want seeded DayStartNetWorth>0 and Score 0, got dsn=%d score=%d", dsn, e.Score)
+	}
+	for i := 0; i < 3; i++ {
+		w.PlayTurn(e, "2026-07-03")
+	}
+	if e.Score != 3*dsn {
+		t.Errorf("Score after 3 turns: want %d (3 x %d), got %d", 3*dsn, dsn, e.Score)
+	}
+}
+
+func TestScoreSpoilageAndRiotPenalize(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Tax = 0                 // no riot
+	e.Food = 1_000_000        // way over buffer -> spoilage
+	e.DayStartNetWorth = 1000 // known award
+	w.PlayTurn(e, "2026-07-03")
+	// base +1000, minus a spoilage ding of 1000/ScoreSpoilPenaltyDiv.
+	if want := 1000 - 1000/ScoreSpoilPenaltyDiv; e.Score != want {
+		t.Errorf("spoilage: Score want %d, got %d", want, e.Score)
+	}
+	if e.LastSpoiled <= 0 {
+		t.Errorf("expected food to spoil, LastSpoiled=%d", e.LastSpoiled)
+	}
+}
+
+func TestScoreDayStartNetWorthResnapshotsOnNewDay(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.LastMaintDate = "2026-07-03"
+	e := w.AddHuman("me", "Mine")
+	dsn1 := e.DayStartNetWorth
+	e.Regions = RegionMix{Desert: 500} // grow substantially
+	e.syncLand()
+	w.DailyMaintenance("2026-07-04") // roll one day
+	if e.DayStartNetWorth <= dsn1 {
+		t.Errorf("DayStartNetWorth should re-snapshot higher after growth: was %d, now %d", dsn1, e.DayStartNetWorth)
+	}
+}
+
 func TestCollectIncomeCoversStartingMaintenance(t *testing.T) {
 	// Regression for the auto-deposit bug: with income credited at turn start,
 	// a starting empire whose gold was swept to the bank can still pay its

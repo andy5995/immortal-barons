@@ -229,11 +229,10 @@ func printScores(s session.Session, w *ctx) {
 		rows = make([]row, 0, len(w.Empires))
 		for _, e := range w.Empires {
 			nw := w.NetWorth(e)
-			// Net Worth is the asset value (land + military); Score is overall
-			// standing = net worth plus liquid assets (gold + bank). BRE shows
-			// both as distinct columns; its exact Score formula isn't in the
-			// strings, so this is IB's own definition (tune if it should differ).
-			rows = append(rows, row{e.Name, e.Alive, e == w.Player(), e.Land, nw + e.Gold + e.Bank, nw})
+			// Net Worth is the asset value (land + military). Score is BRE's
+			// cumulative metric (Empire.Score): the day-start net worth awarded per
+			// turn played, minus small riot/spoilage dings — separate from wealth.
+			rows = append(rows, row{e.Name, e.Alive, e == w.Player(), e.Land, e.Score, nw})
 		}
 		lastMaster = w.LastMaster
 	})
