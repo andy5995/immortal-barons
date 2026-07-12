@@ -157,7 +157,8 @@ func moraleFactor(morale int) int {
 // that predates industrial production (all Prod* fields zero).
 func (e *Empire) EnsureProduction() {
 	if e.ProdTroopers+e.ProdJets+e.ProdTurrets+e.ProdBombers+e.ProdTanks+e.ProdCarriers == 0 {
-		e.ProdTroopers, e.ProdJets, e.ProdTurrets, e.ProdBombers, e.ProdTanks, e.ProdCarriers = 30, 20, 15, 5, 20, 10
+		e.ProdTroopers, e.ProdJets, e.ProdTurrets = DefaultProdPct, DefaultProdPct, DefaultProdPct
+		e.ProdBombers, e.ProdTanks, e.ProdCarriers = DefaultProdPct, DefaultProdPct, DefaultProdPct
 	}
 }
 
@@ -407,7 +408,9 @@ func newEmpire(name, owner string, cfg Config) *Empire {
 		Regions:  regions,
 		Troopers: 150, Carriers: 1, Tax: 15, Support: 100, Morale: 100,
 		TurnsLeft: cfg.TurnsPerDay, Protection: cfg.ProtectionTurns,
-		ProdTroopers: 30, ProdJets: 20, ProdTurrets: 15, ProdBombers: 5, ProdTanks: 20, ProdCarriers: 10,
+		// BRE default: all six at DefaultProdPct (15% → 90% units, 10% remainder → gold).
+		ProdTroopers: DefaultProdPct, ProdJets: DefaultProdPct, ProdTurrets: DefaultProdPct,
+		ProdBombers: DefaultProdPct, ProdTanks: DefaultProdPct, ProdCarriers: DefaultProdPct,
 	}
 }
 

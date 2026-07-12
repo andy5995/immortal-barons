@@ -133,8 +133,8 @@ func TestProdMigration(t *testing.T) {
 	e := &Empire{}
 	e.EnsureProduction()
 
-	if e.ProdTroopers != 30 || e.ProdJets != 20 || e.ProdTurrets != 15 ||
-		e.ProdBombers != 5 || e.ProdTanks != 20 || e.ProdCarriers != 10 {
+	if e.ProdTroopers != DefaultProdPct || e.ProdJets != DefaultProdPct || e.ProdTurrets != DefaultProdPct ||
+		e.ProdBombers != DefaultProdPct || e.ProdTanks != DefaultProdPct || e.ProdCarriers != DefaultProdPct {
 		t.Errorf("EnsureProduction gave unexpected defaults: %+v", e)
 	}
 }

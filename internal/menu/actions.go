@@ -564,16 +564,21 @@ func prodField(p *game.Empire, idx int) *int {
 }
 
 // setIndustries lets the player set the percentage of Industrial production
-// points spent on each unit type. Percentages need not sum to 100; the
-// manufacturing split uses the raw percentages, so if they sum to less than
-// 100 some production points go unused (v1 choice — no normalization).
+// points spent on each unit type. Percentages need not sum to 100; capacity not
+// allocated to units is paid out as gold (BRE's trade-off — see industrialGold).
 func setIndustries(s session.Session, w *ctx) Result {
 	p := w.Player()
 	proj := w.ProjectedProduction(p)
 	fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgBrightRed, tr(s, "Industrial Production")))
+	allocated := 0
 	for i, name := range prodTypeNames {
+		allocated += *prodField(p, i)
 		fmt.Fprintf(s, "%-10s : %s%3d%%%s      %s"+tr(s, "(%d per year)")+"%s\n",
 			tr(s, name), ansi.FgBrightYellow, *prodField(p, i), ansi.Reset, ansi.FgRed, proj[i], ansi.Reset)
+	}
+	if gold := 100 - allocated; gold > 0 {
+		fmt.Fprintf(s, "%s"+tr(s, "The remaining %d%% is turned into gold.")+"%s\n",
+			ansi.FgBrightCyan, gold, ansi.Reset)
 	}
 	if p.Specialized != "" {
 		fmt.Fprintf(s, "\n%s"+tr(s, "Specialized in %s: more of it, less of everything else.")+"%s\n",

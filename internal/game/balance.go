@@ -91,6 +91,26 @@ const (
 	RiverFishFood   = 124 // food per River region on a fishing turn
 	RiverFishChance = 50  // percent chance the rivers fish (vs hydropower) each turn
 
+	// --- Industry (live-verified; one capacity pool per region, split between
+	// units and gold — see World.industrialGold / ProjectedProduction) ---
+	// IndustryPointsPerRegion is the gold-valued capacity each Industrial region
+	// yields per turn (live BRE ~2,548/region; IB uses a round 2,600).
+	IndustryPointsPerRegion = 2600
+	// DefaultProdPct is each unit type's default production percentage — BRE's
+	// default is all six at 15% (90% to units, 10% remainder → industrial gold).
+	DefaultProdPct = 15
+	// Point cost to manufacture one unit, from live BRE (114 ind @ 15% →
+	// 455/325/303/30/91/26 → ratios 1 : 1.4 : 1.5 : 15 : 5 : 17.5).
+	CostTrooper = 100
+	CostJet     = 140
+	CostTurret  = 150
+	CostTank    = 500
+	CostBomber  = 1500
+	CostCarrier = 1750
+	// Specialization efficiency (live BRE: specialize a unit → it +25%, others −15%).
+	SpecialtyBonusPct   = 25
+	SpecialtyPenaltyPct = 15
+
 	NukeCost   = 7_500_000
 	ChemCost   = 6_000_000
 	BioCost    = 6_000_000

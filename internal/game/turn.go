@@ -437,32 +437,6 @@ func (w *World) processEconomy(e *Empire) {
 // Industrial production tuning (v1, tunable — see docs/mechanics-reference.md).
 // Industrial gold is credited via IncomeThisTurn (see industrialGold); this
 // governs unit production only.
-// IndustryPointsPerRegion is the capacity (gold-valued points) each Industrial
-// region yields per turn — ONE pool shared between unit production and gold (see
-// industrialGold). Live BRE: ~2,548/region (114 ind @ 15% each → 29,050 gold at
-// 10% unallocated → 290,500/114); IB uses 2,600 as a round value.
-const IndustryPointsPerRegion = 2600
-
-// Point cost to manufacture one of each unit type, calibrated to live BRE
-// (114 ind @ 15% each → 455/325/303/30/91/26 troopers/jets/turrets/bombers/
-// tanks/carriers → ratios 1 : 1.4 : 1.5 : 15 : 5 : 17.5). Carriers and bombers
-// are the most expensive to build.
-const (
-	CostTrooper = 100
-	CostJet     = 140
-	CostTurret  = 150
-	CostCarrier = 1750
-	CostTank    = 500
-	CostBomber  = 1500
-)
-
-// Industrial specialization efficiency modifiers (live BRE: specialize Tanks →
-// tanks +25%, every other unit −15%).
-const (
-	SpecialtyBonusPct   = 25 // + to the specialized unit's production
-	SpecialtyPenaltyPct = 15 // - to every other unit's production
-)
-
 // ProjectedProduction computes the units e would manufacture this turn at its
 // current Industrial regions, percentages, and specialization — without
 // applying them. Order matches the Set Industries screen: Troopers, Jets,
