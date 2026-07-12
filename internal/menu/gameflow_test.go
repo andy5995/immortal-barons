@@ -218,7 +218,10 @@ func TestRunTurnConsumesATurn(t *testing.T) {
 // TestRunTurnShowsPreTurnStopsInOrder checks BRE's pre-turn sequence: the
 // event log ("Since your last play..."), then Diplomacy, then Change
 // Production (Set Industries), all before the ordinary turn pipeline (#63).
-func TestRunTurnShowsPreTurnStopsInOrder(t *testing.T) {
+// TestRunTurnHasNoPreTurnDiplomacyOrProduction checks the Play flow shows the
+// event log then goes straight into the turn — Diplomacy and Change Production
+// are no longer pre-turn stops (they live on the System menu).
+func TestRunTurnHasNoPreTurnDiplomacyOrProduction(t *testing.T) {
 	keys := " 0\r   0000nn" // leading pause for the non-empty event log
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
@@ -229,16 +232,18 @@ func TestRunTurnShowsPreTurnStopsInOrder(t *testing.T) {
 	out := f.out.String()
 
 	eventsAt := strings.Index(out, "Since your last play, this has happened:")
-	diplomacyAt := strings.Index(out, "[Diplomacy]")
-	productionAt := strings.Index(out, "[Industrial Production]")
 	incomeAt := strings.Index(out, "Income Report")
-
-	if eventsAt == -1 || diplomacyAt == -1 || productionAt == -1 || incomeAt == -1 {
-		t.Fatalf("expected event log, Diplomacy, Industrial Production, and Income Report all present, got:\n%s", out)
+	if eventsAt == -1 || incomeAt == -1 {
+		t.Fatalf("expected the event log and Income Report, got:\n%s", out)
 	}
-	if !(eventsAt < diplomacyAt && diplomacyAt < productionAt && productionAt < incomeAt) {
-		t.Errorf("expected order events < Diplomacy < Change Production < Income Report, got offsets %d, %d, %d, %d",
-			eventsAt, diplomacyAt, productionAt, incomeAt)
+	if eventsAt > incomeAt {
+		t.Errorf("event log should precede the Income Report, got offsets %d, %d", eventsAt, incomeAt)
+	}
+	if strings.Contains(out, "[Diplomacy]") {
+		t.Errorf("Diplomacy should not appear in the Play flow (System menu only):\n%s", out)
+	}
+	if strings.Contains(out, "Change Production?") {
+		t.Errorf("Change Production should not appear in the Play flow (System menu only):\n%s", out)
 	}
 }
 
@@ -246,10 +251,11 @@ func TestRunTurnShowsPreTurnStopsInOrder(t *testing.T) {
 // Production are pre-turn stops for the whole Play session, not per turn —
 // they must appear exactly once even when the player continues into a
 // second turn.
-func TestRunTurnPreTurnStopsOnceAcrossTwoTurns(t *testing.T) {
-	preTurn := "0\r"      // Diplomacy quit, decline Change Production
-	perTurn := "   0000n" // income/status pauses (income, status page 1, status+maint), quit Spending/Attack/Covert/Trading, decline message
-	keys := preTurn + perTurn + "y" + perTurn + "n"
+// TestRunTurnPlaysTwoTurnsWithoutDiplomacy checks two turns play cleanly with an
+// Income Report each turn and no Diplomacy/Change Production stop anywhere.
+func TestRunTurnPlaysTwoTurnsWithoutDiplomacy(t *testing.T) {
+	perTurn := "   0000n" // income/status pauses, quit Spending/Attack/Covert/Trading, decline message
+	keys := perTurn + "y" + perTurn + "n"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true
@@ -261,11 +267,8 @@ func TestRunTurnPreTurnStopsOnceAcrossTwoTurns(t *testing.T) {
 	if got := w.Player().TurnsLeft; got != left-2 {
 		t.Fatalf("expected two turns consumed, TurnsLeft %d -> %d", left, got)
 	}
-	if n := strings.Count(out, "[Diplomacy]"); n != 1 {
-		t.Errorf("expected Diplomacy to appear once across two turns, got %d\n%s", n, out)
-	}
-	if n := strings.Count(out, "[Industrial Production]"); n != 1 {
-		t.Errorf("expected Industrial Production to appear once across two turns, got %d\n%s", n, out)
+	if strings.Contains(out, "[Diplomacy]") {
+		t.Errorf("Diplomacy should not appear in the Play flow:\n%s", out)
 	}
 	if n := strings.Count(out, "Income Report"); n != 2 {
 		t.Errorf("expected Income Report once per turn (2), got %d\n%s", n, out)

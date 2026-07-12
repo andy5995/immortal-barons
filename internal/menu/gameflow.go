@@ -428,12 +428,11 @@ func paymentStage(s session.Session, w *ctx) {
 	}
 }
 
-// runTurn is the "Play Game" action. It first runs BRE's pre-turn stops
-// once per Play session — the event log, Diplomacy (act on treaties, or
-// Quit out), and Change Production (Set Industries, or decline) (#63) — then
-// walks the per-turn pipeline (industry production, income report, status,
+// runTurn is the "Play Game" action. It shows the event log, then walks the
+// per-turn pipeline (industry production, income report, status,
 // spending/attack/covert/trading/message stages, then end-of-turn) for as
-// many turns as the player wants to play (#70).
+// many turns as the player wants to play (#70). Diplomacy and Change Production
+// are no longer pre-turn stops here — they stay reachable from the System menu.
 func runTurn(s session.Session, w *ctx) Result {
 	menus := BuildMenus()
 	// abort ends the turn cleanly when the active empire has been eliminated by
@@ -455,10 +454,6 @@ func runTurn(s session.Session, w *ctx) Result {
 	}
 
 	showTurnEvents(s, w)
-	if err := Run(s, w, menus.Diplomacy); err != nil {
-		return Stay
-	}
-	setIndustries(s, w)
 
 	for {
 		if !withPlayer(w, func(p *game.Empire) { turnsLeft = p.TurnsLeft }) {
