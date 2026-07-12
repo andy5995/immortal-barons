@@ -101,7 +101,8 @@ func capAdd(cur, delta, cap int) int {
 func (w *World) piratesRaid() {
 	var victims []*Empire
 	for _, e := range w.Empires {
-		if e.Alive {
+		// New-realm protection wards off pirate raids too.
+		if e.Alive && e.Protection <= 0 {
 			victims = append(victims, e)
 		}
 	}
@@ -147,7 +148,7 @@ func (w *World) pirateRaidVictim(p *PirateFaction, v *Empire) {
 	if v.Owner != "" {
 		if loot := lootList(tookT, tookJ, tookU, tookK, tookA, tookG); loot != "" {
 			v.PirateRaids = append(v.PirateRaids, fmt.Sprintf(
-				"The %s pirates raided you, carrying off %s!", p.Name, loot))
+				"The %s raided you, carrying off %s!", p.Name, loot))
 		}
 	}
 }

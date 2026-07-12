@@ -85,6 +85,28 @@ func TestRaidFactionWinReclaimsPortion(t *testing.T) {
 	}
 }
 
+func TestPiratesSkipProtectedEmpires(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	safe := w.AddHuman("safe", "Safe")
+	safe.Protection = 100
+	safe.Troopers = 1_000_000
+	exposed := w.AddHuman("exp", "Exposed")
+	exposed.Protection = 0
+	exposed.Troopers = 1_000_000
+
+	for i := 0; i < 200; i++ {
+		w.piratesRaid()
+	}
+	if len(safe.PirateRaids) != 0 {
+		t.Errorf("empire under protection was raided %d times, want 0", len(safe.PirateRaids))
+	}
+	if len(exposed.PirateRaids) == 0 {
+		t.Error("unprotected empire should have been raided at least once")
+	}
+}
+
 func TestRaidFactionScoreIsSmall(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("me", "Mine")
