@@ -224,7 +224,7 @@ var languageOptions = []struct{ code, name string }{
 // before onboarding. Enter, an empty line, or any input that doesn't match a
 // listed option selects English.
 func selectLanguage(s session.Session) string {
-	fmt.Fprintf(s, "\n%s%sSelect your language:%s\n", ansi.Clear, ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "\n%sSelect your language:%s\n", ansi.FgBrightCyan, ansi.Reset)
 	for i, opt := range languageOptions {
 		fmt.Fprintf(s, "  %s%d)%s %s\n", ansi.FgBrightWhite, i+1, ansi.Reset, opt.name)
 	}
@@ -248,7 +248,6 @@ func onboard(s session.Session, w *game.World, handle, lang string) string {
 			taken[strings.ToLower(e.Name)] = true
 		}
 	})
-	fmt.Fprint(s, ansi.Clear)
 	for {
 		fmt.Fprintf(s, "\n%s%s, %s%s ", ansi.FgBrightWhite, handle, i18n.T(lang, "Name your Realm:"), ansi.Reset)
 		name, err := session.ReadLine(s)
@@ -281,7 +280,7 @@ func showEvents(s session.Session, w *game.World, handle string) {
 	if len(events) == 0 {
 		return
 	}
-	fmt.Fprintf(s, "%s%sWhile you were away:%s\n", ansi.Clear, ansi.FgBrightCyan, ansi.Reset)
+	fmt.Fprintf(s, "%sWhile you were away:%s\n", ansi.FgBrightCyan, ansi.Reset)
 	for _, ev := range events {
 		fmt.Fprintf(s, "  %s\n", ev)
 	}

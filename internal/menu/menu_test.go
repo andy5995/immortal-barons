@@ -76,28 +76,16 @@ func TestEnterAndLeaveSpendingMenu(t *testing.T) {
 	}
 }
 
-// TestSpendingMenuNoClearOnDraw checks that the Spending menu opts out of the
-// screen clear other menus get, so a purchase confirmation printed just
-// before a redraw stays visible above the redrawn menu (BRE-style).
-func TestSpendingMenuNoClearOnDraw(t *testing.T) {
+// TestMenusDoNotClearOnDraw checks that drawing a menu never wipes the screen,
+// so terminal scrollback is preserved as the player moves between menus.
+func TestMenusDoNotClearOnDraw(t *testing.T) {
 	menus := BuildMenus()
-	f := &fakeSession{}
-	w := newWorld()
-	draw(f, w, menus.Spending)
-	if strings.Contains(f.out.String(), ansi.Clear) {
-		t.Error("Spending menu draw should not emit ansi.Clear")
-	}
-}
-
-// TestOtherMenuStillClearsOnDraw makes sure the NoClear opt-out is scoped to
-// the Spending menu only — other menus keep clearing before they draw.
-func TestOtherMenuStillClearsOnDraw(t *testing.T) {
-	menus := BuildMenus()
-	f := &fakeSession{}
-	w := newWorld()
-	draw(f, w, menus.Attack)
-	if !strings.Contains(f.out.String(), ansi.Clear) {
-		t.Error("War/Attack menu draw should still emit ansi.Clear")
+	for name, m := range map[string]*Menu{"Spending": menus.Spending, "Attack": menus.Attack} {
+		f := &fakeSession{}
+		draw(f, newWorld(), m)
+		if strings.Contains(f.out.String(), ansi.Clear) {
+			t.Errorf("%s menu draw should not emit ansi.Clear", name)
+		}
 	}
 }
 

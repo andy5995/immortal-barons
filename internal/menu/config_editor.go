@@ -104,7 +104,6 @@ func configEditor(s session.Session, w *ctx) Result {
 func runConfigEditor(s session.Session, w *game.World) bool {
 	c := &w.Config
 	for {
-		fmt.Fprint(s, ansi.Clear)
 		fmt.Fprintf(s, "%s\n", titleRule(ansi.FgBrightBlue, "Configuration Editor"))
 		p := func(n int, label, val string) { fmt.Fprintf(s, "  %2d) %-26s %s\n", n, label, val) }
 		p(1, "* Turns per day", fmt.Sprintf("%d", c.TurnsPerDay))

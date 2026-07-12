@@ -4,7 +4,6 @@ import (
 	_ "embed"
 	"fmt"
 
-	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/screen"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
@@ -23,7 +22,6 @@ var splashANS []byte
 // FromCP437 decodes the .ans to the engine's internal UTF-8; the session's wire
 // encoder re-encodes to CP437 for a CP437 door.
 func Splash(s session.Session) {
-	fmt.Fprint(s, ansi.Clear)
 	fmt.Fprint(s, screen.FromCP437(splashANS))
 	pause(s)
 }

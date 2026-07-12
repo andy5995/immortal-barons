@@ -185,10 +185,6 @@ type Menu struct {
 	// return means no default this time. Takes priority over ExitOnEnter.
 	DefaultOnEnter func(*ctx) *Item
 	Status         func(*ctx) string // optional status bar under the menu
-	// NoClear suppresses the screen clear normally done before drawing this
-	// menu, so an action's output (e.g. a purchase confirmation) stays
-	// visible above the redrawn menu instead of being wiped (BRE-style).
-	NoClear bool
 	// Columns opts a menu into a multi-column item block (BRE draws its menus
 	// in columns). 0 or 1 keeps the default one-item-per-line layout; 2 or 3
 	// lay the selectable items out row-major across that many columns. Only
@@ -365,9 +361,6 @@ func draw(s session.Session, g *ctx, m *Menu) {
 	// Fprint below).
 	var b strings.Builder
 	g.With(func() {
-		if !m.NoClear {
-			b.WriteString(ansi.Clear)
-		}
 		col := m.Color
 		if col == "" {
 			col = ansi.FgBrightCyan

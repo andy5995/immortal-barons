@@ -39,10 +39,7 @@ func quitOnEnter(m *Menu) func(*ctx) *Item {
 // then wired, so submenus can reference each other (e.g. several menus
 // offer "Visit Bank").
 func BuildMenus() *Menus {
-	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus,
-		// NoClear: after a unit purchase the confirmation stays visible above
-		// the redrawn menu (BRE-style), instead of being wiped by a clear.
-		NoClear: true}
+	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus}
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan, Columns: 2}
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
@@ -345,7 +342,9 @@ func BuildMenus() *Menus {
 		{Key: 'W', Label: "Write Macros", Do: writeMacros},
 		{Key: '1', Label: "Set Industries", Do: setIndustries},
 		{Key: '2', Label: "Show Instructions", Do: helpBrowse},
-		{Key: '3', Label: "Specialize Industry", Do: specializeIndustry},
+		{Key: '3', Label: "Specialize Industry", Do: specializeIndustry,
+			// Specializing is permanent, so hide the option once it's been done.
+			Hidden: func(w *ctx) bool { return w.Player().Specialized != "" }},
 		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: 'O', Label: "Vote for Coordinator", Do: voteCoordinator, Hidden: ibbsHidden},
 		{Key: 'Y', Label: "Coordinator Menu", Do: gotoMenu(coord),
