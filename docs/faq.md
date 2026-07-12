@@ -20,6 +20,8 @@ See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset
   under BBS software on any platform Go supports.
 - It has a [web browser version](https://andy5995.github.io/immortal-barons/web-server/),
   which BRE does not. It also plays in a local terminal.
+- Several BBS nodes can play the same game at the same time, which BRE could not
+  do. See [Can several people play as a door at the same time?](#can-several-people-play-as-a-door-at-the-same-time).
 - Some game values — such as attack rewards, unit prices, and economy rates —
   may not match BRE exactly. The game aims to get as close as it can, using
   BRE's own numbers where they are known. A few mechanics are still being built.
