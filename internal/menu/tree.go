@@ -223,14 +223,18 @@ func BuildMenus() *Menus {
 	}
 	bombTargets.DefaultOnEnter = quitOnEnter(bombTargets)
 
-	// Interplanetary Special Operations: BRE's cross-planet covert menu, a
-	// separate node from the local Covert Operations menu — every op targets an
-	// empire on another planet. Order mirrors the local Bomb Enemy Targets set
-	// plus Send SpyGuy. Only Send SpyGuy is wired; the bombing/WMD variants are
-	// recorded-but-inert until interplanetary covert strikes are built.
+	// Interplanetary Special Operations: BRE's cross-planet covert menu — every
+	// op targets an empire on another planet. Disassembly (BRE.OVR string table
+	// @170012) shows the local Bomb Enemy Targets set and this IP menu draw from
+	// ONE 8-item table; the local menu shows the first 7, the IP menu shows all 8
+	// (it adds Send SpyGuy). Labels/order are binary-verified; the Send SpyGuy
+	// hotkey ('G' here) wasn't recoverable from the overlay dispatch. Only Send
+	// SpyGuy is wired; the bombing/WMD variants are recorded-but-inert until
+	// interplanetary covert strikes are built. ('?'/'0' are IB's menu convention;
+	// BRE exits via ESC/Q with no listed items.)
 	ipSpecial.Items = []Item{
-		{Key: 'F', Label: "Bomb Enemy Food Market", Do: ipSpecialStub},
-		{Key: 'T', Label: "Bomb Enemy Trade Market", Do: ipSpecialStub},
+		{Key: 'F', Label: "Bomb Food Market", Do: ipSpecialStub},
+		{Key: 'T', Label: "Bomb Trading Market", Do: ipSpecialStub},
 		{Key: 'R', Label: "Bomb Trade Routes", Do: ipSpecialStub},
 		{Key: 'U', Label: "Undermine Investments", Do: ipSpecialStub},
 		{Key: 'N', Label: "Nuclear Assault", Do: ipSpecialStub},

@@ -462,7 +462,7 @@ func TestInterPlanetarySpecialOpsMenu(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 	out := f.out.String()
-	for _, want := range []string{"Special Operations", "Send SpyGuy", "Bomb Enemy Food Market"} {
+	for _, want := range []string{"Special Operations", "Send SpyGuy", "Bomb Food Market"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("IP Special Operations menu missing %q, got:\n%s", want, out)
 		}
