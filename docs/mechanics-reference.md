@@ -360,9 +360,13 @@ league ran tax 85%, interest 75%).
   `sell = buy/3` — BRE's [20,60]/[7,20] band structure at IB's economy scale
   (constants in `balance.go`).
 - **Food production:** `Agricultural × FoodPerAgri (300)` per turn, calibrated to
-  live BRE (97 Agri → 29,197; 16 Agri → 4,864, both no River). Rivers also fish
-  (`River × FoodPerRiver (20)`), provisional — BRE makes a river's yearly
-  gold-vs-food an either/or (see the river-food issue).
+  live BRE (97 Agri → 29,197; 16 Agri → 4,864, both no River).
+- **Rivers — hydropower *or* fishing (issue #29, live-verified):** each turn an
+  empire's rivers do EITHER hydropower (gold, as usual) OR fishing, chosen by a
+  per-turn coin-flip (`RiverFishChance`, ~50/50 in live BRE). On a fishing turn
+  the rivers yield `River × RiverFishFood (124)` food and **no** river gold that
+  turn; on a hydropower turn, gold and no river food. (Constants in `balance.go`;
+  the exact chance/rates are tunable, live-sampled.)
 - **Food spoilage:** stored food at/below `FoodSpoilFloor` (1000) never spoils;
   above it a fraction of the excess decays, reduced by Technology regions — BRE's
   recovered shape (exact rate an IB tunable).

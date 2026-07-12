@@ -198,7 +198,8 @@ func (e *Empire) popCapacity() int {
 // not listed here.
 type IncomeBreakdown struct {
 	Taxes, Ore, Tourism, Solar, Rivers, Industrial, Trade int
-	Food                                                  int
+	Food                                                  int // grown by Agricultural regions
+	RiverFood                                             int // fished from rivers this turn (0 on a hydropower turn)
 }
 
 // Gold sums the gold-producing sources.
@@ -254,16 +255,40 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 	perRegion := func(salt, rate, base int) int { return w.regionYield(e, salt)*rate/100 + base }
 
 	support := 10 + 90*e.Support/100 // support factor ×100: 0.10 + 0.90·(Support/100)
+	// Rivers do hydropower (gold) OR fishing (food) this turn, not both (#29).
+	riverGold := 0
+	if !w.riversFish(e) {
+		riverGold = w.riverGold(e)
+	}
 	return IncomeBreakdown{
 		Taxes:      scale(int64(e.People) * int64(e.Tax) / 100 * TaxGoldPerCapita),
 		Ore:        scale(int64(perRegion(1, MountainRate, MountainBase)) * int64(e.Regions.Mountain)),
 		Tourism:    scale(int64(perRegion(2, CoastalRate, CoastalBase)) * int64(support) / 100 * int64(e.Regions.Coastal)),
 		Solar:      scale(int64(perRegion(3, DesertRate, DesertBase)) * int64(e.Regions.Desert)),
-		Rivers:     scale(int64(w.riverGold(e)) * int64(e.Regions.River)),
+		Rivers:     scale(int64(riverGold) * int64(e.Regions.River)),
 		Industrial: scale(int64(w.industrialGold(e)) * int64(e.Regions.Industrial)),
 		Trade:      w.tradeIncome(e), // trade-treaty bonus (population-scaled)
 		Food:       e.Regions.foodProduced(),
+		RiverFood:  w.riverFood(e),
 	}
+}
+
+// riversFish reports whether e's rivers fish for food (vs run hydropower for
+// gold) this turn — a per-turn, per-empire either/or (BRE #29; live ~50/50).
+// Deterministic in (GameDay, empire) so the income report matches what's
+// credited.
+func (w *World) riversFish(e *Empire) bool {
+	span := YieldMax - YieldMin + 1
+	return w.regionYield(e, 99)-YieldMin < span*RiverFishChance/100
+}
+
+// riverFood is the food e's rivers fish this turn: RiverFishFood per River on a
+// fishing turn, 0 on a hydropower turn.
+func (w *World) riverFood(e *Empire) int {
+	if w.riversFish(e) {
+		return e.Regions.River * RiverFishFood
+	}
+	return 0
 }
 
 // CollectIncome credits this turn's gold income (see IncomeThisTurn) at the
@@ -298,7 +323,7 @@ func (w *World) processEconomy(e *Empire) {
 	}
 
 	e.LastFoodConsumed = e.FoodUpkeep()
-	e.Food += e.Regions.foodProduced() - e.LastFoodConsumed
+	e.Food += e.Regions.foodProduced() + w.riverFood(e) - e.LastFoodConsumed
 	if e.Food < 0 {
 		e.People -= (-e.Food)/10 + 1
 		if e.People < 0 {

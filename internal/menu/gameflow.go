@@ -236,6 +236,9 @@ func incomeReport(s session.Session, w *ctx) {
 	if b.Food > 0 {
 		amt(ansi.FgBrightCyan, b.Food, "Food units were grown.")
 	}
+	if b.RiverFood > 0 {
+		amt(ansi.FgBrightCyan, b.RiverFood, "Food units were fished from the rivers.")
+	}
 	for _, r := range raids {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, r, ansi.Reset)
 	}

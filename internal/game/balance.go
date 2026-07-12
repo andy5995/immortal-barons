@@ -83,11 +83,14 @@ const (
 	// spoilage above ~1000 units); above it, a fraction of the EXCESS decays,
 	// reduced by Technology regions (via TechFactor). Exact rate is an IB tunable.
 	FoodSpoilFloor = 1000
-	// Food production per region per turn. Calibrated to live BRE (97 Agri →
-	// 29,197 and 16 Agri → 4,864 food, both no River → ~300/Agri). Rivers also
-	// fish for food; River yield is provisional pending the river-food issue.
-	FoodPerAgri  = 300
-	FoodPerRiver = 20
+	// Food production per region per turn. Agri calibrated to live BRE (97 Agri
+	// → 29,197 and 16 Agri → 4,864 food → ~300/Agri, no flat base).
+	FoodPerAgri = 300
+	// Rivers do EITHER hydropower (gold, as usual) OR fishing (food) each turn —
+	// an either/or the empire flips per turn (BRE #29; live: ~50/50, fishing
+	// yields ~124 food/river and gives NO river gold that turn). Tunable.
+	RiverFishFood   = 124 // food per River region on a fishing turn
+	RiverFishChance = 50  // percent chance the rivers fish (vs hydropower) each turn
 
 	NukeCost   = 7_500_000
 	ChemCost   = 6_000_000

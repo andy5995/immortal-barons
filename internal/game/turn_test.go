@@ -85,6 +85,33 @@ func TestScoreDayStartNetWorthResnapshotsOnNewDay(t *testing.T) {
 	}
 }
 
+func TestRiversFishOrHydropowerNotBoth(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("t", "T")
+	e.Regions = RegionMix{River: 24}
+	e.syncLand()
+	sawFish, sawGold := false, false
+	for d := 0; d < 40; d++ {
+		w.GameDay = d
+		b := w.IncomeThisTurn(e)
+		fish, gold := b.RiverFood > 0, b.Rivers > 0
+		if fish == gold {
+			t.Fatalf("day %d: rivers should do exactly one of fish/hydropower (fish=%v gold=%v)", d, fish, gold)
+		}
+		if fish {
+			sawFish = true
+			if b.RiverFood != 24*RiverFishFood {
+				t.Errorf("day %d: river food want %d, got %d", d, 24*RiverFishFood, b.RiverFood)
+			}
+		} else {
+			sawGold = true
+		}
+	}
+	if !sawFish || !sawGold {
+		t.Errorf("over 40 days expected both fishing and hydropower turns (fish=%v gold=%v)", sawFish, sawGold)
+	}
+}
+
 func TestCollectIncomeCoversStartingMaintenance(t *testing.T) {
 	// Regression for the auto-deposit bug: with income credited at turn start,
 	// a starting empire whose gold was swept to the bank can still pay its
