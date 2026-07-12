@@ -180,6 +180,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) strin
 		return "There is no such pirate faction."
 	}
 	p := &w.Pirates[faction]
+	startForces := p.Forces // battle scale for Score, before any reclaim shrinks it
 
 	troopers = clamp(a.Troopers, troopers)
 	jets = clamp(a.Jets, jets)
@@ -226,6 +227,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) strin
 		if loot == "" {
 			loot = "nothing of value"
 		}
+		addScore(a, startForces/PirateScoreDivisor)
 		w.postPirateNews(a, p.Name, true)
 		return fmt.Sprintf("You broke the %s and recovered %s.", p.Name, loot)
 	}
@@ -236,6 +238,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) strin
 	a.Troopers -= tLost
 	a.Jets -= jLost
 	a.Tanks -= kLost
+	addScore(a, -startForces/PirateScoreDivisor)
 	w.postPirateNews(a, p.Name, false)
 	return fmt.Sprintf("You could not break the %s. You lost %d Troopers, %d Jets, and %d Tanks.",
 		p.Name, tLost, jLost, kLost)

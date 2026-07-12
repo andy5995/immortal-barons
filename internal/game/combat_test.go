@@ -70,6 +70,52 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 	}
 }
 
+func TestAttackScoreAttackerWins(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := &Empire{Name: "A", Troopers: 100000, Morale: 100, Alive: true}
+	d := &Empire{Name: "D", Turrets: 1000, Morale: 100, Land: 100,
+		Regions: RegionMix{Mountain: 100}, Gold: 1000, People: 1000, Alive: true, Score: 1_000_000}
+
+	w.Attack(a, d)
+
+	// aloss = 15% of 100000 troopers; dloss = 15% of 1000 turrets.
+	battle := 100000*RegularAttackLossPct/100 + 1000*RegularAttackLossPct/100
+	gain := battle / CombatScoreDivisor
+	if a.Score != gain {
+		t.Errorf("attacker Score = %d, want %d", a.Score, gain)
+	}
+	wantD := 1_000_000 - gain*CombatLoserPenaltyPct/100
+	if d.Score != wantD {
+		t.Errorf("defender Score = %d, want %d (loses less than the winner gains)", d.Score, wantD)
+	}
+	if gain-(1_000_000-d.Score) <= 0 {
+		t.Errorf("loser penalty should be smaller than the winner's gain")
+	}
+}
+
+func TestAttackScoreDefenderWinsWorthMore(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := &Empire{Name: "A", Troopers: 10, Morale: 100, Alive: true, Score: 1_000_000}
+	d := &Empire{Name: "D", Turrets: 100000, Morale: 100, Land: 100, People: 1000, Alive: true}
+
+	w.Attack(a, d)
+
+	// aloss = 15% of 10 troopers; dloss = 15% of 100000 turrets.
+	battle := 10*RegularAttackLossPct/100 + 100000*RegularAttackLossPct/100
+	gain := battle / CombatScoreDivisor * DefenseWinBonusPct / 100
+	if d.Score != gain {
+		t.Errorf("defending winner Score = %d, want %d", d.Score, gain)
+	}
+	wantA := 1_000_000 - gain*CombatLoserPenaltyPct/100
+	if a.Score != wantA {
+		t.Errorf("repelled attacker Score = %d, want %d", a.Score, wantA)
+	}
+	// A defensive win awards more than the same-size attack would (150% vs 100%).
+	if gain <= battle/CombatScoreDivisor {
+		t.Errorf("defensive win (%d) should out-award an equivalent attack win (%d)", gain, battle/CombatScoreDivisor)
+	}
+}
+
 func TestAttackPostsPlanetaryNews(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AICount = 1

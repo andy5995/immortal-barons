@@ -78,8 +78,22 @@ IB implements: `Empire.Score` (seeded 0) `+= Empire.DayStartNetWorth` each turn;
 `DayStartNetWorth` is re-snapshotted at each day's maintenance (and at creation).
 **IB additions (not in BRE):** a riot and food spoilage each subtract
 `DayStartNetWorth/10` from Score (tunable in `balance.go`; Score never goes
-below 0). BRE's attack-scoring bonus is a config toggle
-(default off) — not yet built in IB.
+below 0). BRE's exact attack-scoring bonus is unrecoverable from the binary, so
+IB uses its own combat-score model (below).
+
+**Combat score (IB's own).** A battle's Score award scales with the forces used
+up in it (units both sides lose = `battle`):
+
+- Attacker wins: attacker `+= battle / CombatScoreDivisor`; the defender loses
+  `CombatLoserPenaltyPct%` of that (a bit less than the winner gained).
+- Defender repels the attack: the defender gains `DefenseWinBonusPct%` of an
+  attacker's award (a successful defense is worth more); the losing attacker
+  loses `CombatLoserPenaltyPct%` of that.
+- Raids on a **pirate faction** move Score only a little — win or lose,
+  `faction strength / PirateScoreDivisor` (scaled by the fight's real size, not
+  the army you bring, so it can't be farmed; far below an empire battle).
+
+All four constants live in `balance.go`; Score never drops below 0.
 
 ## Attack types
 

@@ -127,6 +127,15 @@ const (
 	// (which is DayStartNetWorth), so the ding scales with the empire.
 	ScoreRiotPenaltyDiv  = 10 // a riot costs DayStartNetWorth/10 Score
 	ScoreSpoilPenaltyDiv = 10 // food spoilage costs DayStartNetWorth/10 Score
+	// Combat score (IB's own): a battle's Score award scales with the forces used
+	// (units both sides lose). The winner gains, the loser loses a bit less, and a
+	// successful DEFENSE is worth more than a successful attack.
+	CombatScoreDivisor    = 2   // Score award = (units lost by both sides) / this
+	CombatLoserPenaltyPct = 80  // the loser loses this % of the winner's gain
+	DefenseWinBonusPct    = 150 // a defender's win awards this % of an attacker's win
+	// PirateScoreDivisor keeps raids on pirate factions worth only a little Score
+	// (win or lose) — far less than a battle against another empire.
+	PirateScoreDivisor = 50
 	// GroupAttackBomberOffense values a committed bomber's offense in a group
 	// attack (tunable; BRE's exact figure not recovered — set to a tank's).
 	GroupAttackBomberOffense = 4

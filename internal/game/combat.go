@@ -76,6 +76,11 @@ func (w *World) Attack(a, d *Empire) string {
 	aloss := loseForces(a, loss)
 	dloss := loseForces(d, loss)
 
+	// Score (IB's own): the award scales with the forces used up in the battle.
+	// The winner gains; the loser loses a bit less; a successful defense is worth
+	// more than a successful attack.
+	battle := aloss + dloss
+
 	if ap > dp {
 		captured := (d.Land*RegularAttackCapturePct/100 + 1) * rew / 100
 		if captured > d.Land {
@@ -89,8 +94,15 @@ func (w *World) Attack(a, d *Empire) string {
 		d.Gold -= plunder
 		a.Gold += plunder
 
+		gain := battle / CombatScoreDivisor
+		addScore(a, gain)
+		addScore(d, -gain*CombatLoserPenaltyPct/100)
+
 		fmt.Fprintf(&b, "Victory! You captured %d regions and plundered %d gold.\n", captured, plunder)
 		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
+		if gain > 0 {
+			fmt.Fprintf(&b, "Your score rose by %d.\n", gain)
+		}
 		if d.Land <= 0 || d.People <= 0 {
 			d.Alive = false
 			d.DiedDay = w.GameDay
@@ -99,9 +111,13 @@ func (w *World) Attack(a, d *Empire) string {
 		d.Events = append(d.Events, fmt.Sprintf("%s attacked you: you lost %d regions, %d gold, and %d units.", a.Name, captured, plunder, dloss))
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
+		gain := battle / CombatScoreDivisor * DefenseWinBonusPct / 100
+		addScore(d, gain)
+		addScore(a, -gain*CombatLoserPenaltyPct/100)
+
 		fmt.Fprintf(&b, "Defeat! Your forces returned exhausted.\n")
 		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
-		d.Events = append(d.Events, fmt.Sprintf("%s attacked you but was repelled. You lost %d units.", a.Name, dloss))
+		d.Events = append(d.Events, fmt.Sprintf("%s attacked you but was repelled. You lost %d units; your score rose by %d.", a.Name, dloss, gain))
 		w.postCombatNews(a, d, false, false)
 	}
 	return b.String()
@@ -119,6 +135,14 @@ func loseForces(e *Empire, pct int) int {
 	e.Turrets -= u
 	e.Tanks -= k
 	return t + j + u + k
+}
+
+// addScore adjusts an empire's Score, never letting it fall below zero.
+func addScore(e *Empire, n int) {
+	e.Score += n
+	if e.Score < 0 {
+		e.Score = 0
+	}
 }
 
 // jitter scales v by a random 0.8–1.2 factor.

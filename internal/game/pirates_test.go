@@ -85,6 +85,30 @@ func TestRaidFactionWinReclaimsPortion(t *testing.T) {
 	}
 }
 
+func TestRaidFactionScoreIsSmall(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("me", "Mine")
+	a.Troopers = 1_000_000 // overwhelming, deterministic win
+	p := &w.Pirates[0]
+	p.Forces = 100
+
+	w.RaidFaction(a, 0, 1_000_000, 0, 0)
+	if want := 100 / PirateScoreDivisor; a.Score != want {
+		t.Errorf("pirate-win Score = %d, want %d (scaled by faction strength, not army size)", a.Score, want)
+	}
+
+	// A loss shaves the same small amount, and never below zero.
+	b := w.AddHuman("you", "Yours")
+	b.Troopers = 10
+	b.Score = 1000
+	q := &w.Pirates[1]
+	q.Forces = 1000
+	w.RaidFaction(b, 1, 10, 0, 0)
+	if want := 1000 - 1000/PirateScoreDivisor; b.Score != want {
+		t.Errorf("pirate-loss Score = %d, want %d", b.Score, want)
+	}
+}
+
 func TestRaidFactionDrainsOverSeveralHits(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("me", "Mine")
