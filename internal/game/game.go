@@ -303,20 +303,51 @@ type World struct {
 func NewWorld(cfg Config) *World { return NewWorldSeed(cfg, time.Now().UnixNano()) }
 
 func NewWorldSeed(cfg Config, seed int64) *World {
-	w := &World{
-		Prices:           Prices{Land: PriceLand, Food: PriceFood, Trooper: PriceTrooper, Jet: PriceJet, Turret: PriceTurret, Tank: PriceTank, Carrier: PriceCarrier, Agent: PriceAgent, Bomber: PriceBomber},
-		Config:           cfg,
-		rng:              rand.New(rand.NewSource(seed)),
-		VisitCovert:      true,
-		VisitTrading:     true,
-		VisitMessage:     true,
-		InvestRate:       DefaultInvestRate,
-		FoodMarketSupply: FoodMarketDailySupply,
-	}
+	w := &World{Config: cfg, rng: rand.New(rand.NewSource(seed))}
 	w.store = &MemStore{w}
+	w.initFreshGame()
+	return w
+}
+
+// initFreshGame installs a brand-new game's state onto w, keeping only its
+// infrastructure (mutex, rng, store) and Config. It is the SINGLE definition of
+// what a fresh game contains, called both at world creation (NewWorldSeed) and
+// on -reset (resetForNewGame). Keeping it in one place means a default can never
+// be seeded at creation but forgotten on reset — the drift that stranded the
+// old prices (and would silently carry pirates, news, and the master across a
+// reset). Add any new creation-time world default here, not in NewWorldSeed.
+func (w *World) initFreshGame() {
+	w.Empires = nil
+	w.Prices = defaultPrices()
+	w.GameDay = 0
+	w.InvestRate = DefaultInvestRate
+	w.FoodMarketSupply = FoodMarketDailySupply
+	w.LastMaintDate = ""
+	w.NewsToday = nil
+	w.NewsYesterday = nil
+	w.BulletinToday = DailyBulletin{}
+	w.BulletinYesterday = DailyBulletin{}
+	w.Alliances = nil
+	w.Treaties = nil
+	w.LastMaster = ""
+	w.CurrentMaster = ""
+	w.RemoteBoards = nil
+	w.Pirates = nil
+	w.GroupAttacks = nil
+	w.NextAttackID = 0
+	w.Outbox = nil
+	w.SpyDatabase = nil
+	w.LeagueDiplomacy = ""
+	w.Coordinator = false
+	w.EnterExitsBuy = false
+	w.DepositEndTurn = false
+	w.AutoPayMaint = false
+	w.AutoFeed = false
+	w.VisitCovert = true
+	w.VisitTrading = true
+	w.VisitMessage = true
 	w.seedAIEmpires()
 	w.seedPirates()
-	return w
 }
 
 // EnsureInvestRate repairs InvestRate after loading a save that predates
@@ -395,6 +426,13 @@ func (w *World) AddAIEmpires(n int) int {
 		added++
 	}
 	return added
+}
+
+// defaultPrices is the world's starting price table, from balance.go. Used at
+// world creation and re-applied on -reset, so a reset always installs the
+// current prices instead of carrying the old world's stale ones.
+func defaultPrices() Prices {
+	return Prices{Land: PriceLand, Food: PriceFood, Trooper: PriceTrooper, Jet: PriceJet, Turret: PriceTurret, Tank: PriceTank, Carrier: PriceCarrier, Agent: PriceAgent, Bomber: PriceBomber}
 }
 
 func newEmpire(name, owner string, cfg Config) *Empire {

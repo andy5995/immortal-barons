@@ -22,18 +22,12 @@ func (w *World) endGame() {
 			}
 		}
 	}
-	if found {
-		w.LastMaster = best
-	}
 	w.resetForNewGame()
+	if found {
+		w.LastMaster = best // crown after the reset so the trophy survives it
+	}
 }
 
 // resetForNewGame wipes all empires (humans re-onboard on next login) and
 // re-seeds AI, resetting per-game state. LastMaster and Bulletin persist.
-func (w *World) resetForNewGame() {
-	w.Empires = nil
-	w.Alliances = nil
-	w.Treaties = nil
-	w.GameDay = 0
-	w.seedAIEmpires()
-}
+func (w *World) resetForNewGame() { w.initFreshGame() }

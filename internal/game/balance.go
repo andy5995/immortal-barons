@@ -83,23 +83,29 @@ const TaxGoldPerCapita = 1200
 // preserving IB's ratios (which match BRE: ~7 troopers per tank, ~6 jets per
 // tank). Used as the DefaultConfig / NewWorldSeed price defaults.
 const (
-	PriceLand    = 15000
-	PriceFood    = 300
-	PriceTrooper = 7500
-	PriceJet     = 9000
-	PriceTurret  = 9000
-	PriceTank    = 50000
-	PriceCarrier = 6000
-	PriceAgent   = 15000
-	PriceBomber  = 30000
+	// Unit buy prices — BRE early-game live snapshot (2026-07-11). BRE recomputes
+	// these inline so they fluctuate turn to turn; IB uses the snapshot as a
+	// fixed base for now (the per-turn ±% fluctuation is the still-open part of
+	// #30). Sell price is buy/3 (see sellUnit), except agents (SellAgentPrice).
+	PriceTrooper = 263
+	PriceJet     = 345
+	PriceTurret  = 380
+	PriceTank    = 2172
+	PriceCarrier = 5943
+	PriceAgent   = 608
+	PriceBomber  = 2572
+	PriceFood    = 300 // food is bought via the food market (Chopper's), not this
+	// Region price rises with land owned: BRE ≈ 917 + Land×33 (live-sampled). See
+	// World.LandPrice. PriceLand is the base; LandPerRegion the per-owned climb.
+	PriceLand     = 917
+	LandPerRegion = 33
+	// SellAgentPrice: agents sell at a flat 100 in BRE, not buy/3 like other units.
+	SellAgentPrice = 100
 )
 
 // --- Misc gold costs (reconstructed / tunable) ---
-//
-// Scaled to the BRE income magnitude alongside the prices above. (LandPriceStep
-// is a divisor ratio, not a gold amount, so it lives in economy.go unchanged.)
 const (
-	HQCost = 750_000 // gold to start HeadQuarters construction
+	HQCost = 5104 // gold to start HeadQuarters construction (BRE live snapshot)
 
 	// Food market (issue #19). BRE prices vary daily within buy∈[20,60] /
 	// sell∈[7,20] with sell=buy/3; IB keeps its ~150× economy scale, so buy
@@ -219,7 +225,6 @@ const (
 // --- Other economy tunables ---
 const (
 	DebtGrowthPct = 10 // % a loan's outstanding debt grows each turn
-	LandPriceStep = 50 // each region owned raises the next region's price by Prices.Land/LandPriceStep
 	TechFactorCap = 40 // max % bonus/reduction Technology regions grant (see TechFactor)
 )
 

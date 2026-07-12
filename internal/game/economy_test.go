@@ -24,8 +24,8 @@ func TestBuyLandIncremental(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
 
-	// price(Land) = Prices.Land + Land*Prices.Land/LandPriceStep, so buying 5
-	// regions from Land=0 costs the sum of the first five rising prices.
+	// regionCost climbs with holdings, so buying 5 regions from Land=0 costs the
+	// sum of the first five rising prices.
 	e.Regions = RegionMix{}
 	e.Land = 0
 	e.Gold = 1_000_000
@@ -34,7 +34,7 @@ func TestBuyLandIncremental(t *testing.T) {
 	const n = 5
 	total := 0
 	for i := 0; i < n; i++ {
-		total += w.Prices.Land + (e.Land+i)*w.Prices.Land/LandPriceStep
+		total += w.regionCost(e.Land + i)
 	}
 
 	if err := w.BuyLand(e, n); err != nil {
@@ -58,7 +58,7 @@ func TestBuyLandRejectsWhenBroke(t *testing.T) {
 	const n = 5
 	total := 0
 	for i := 0; i < n; i++ {
-		total += w.Prices.Land + (e.Land+i)*w.Prices.Land/LandPriceStep
+		total += w.regionCost(e.Land + i)
 	}
 	e.Gold = total - 1
 	startGold := e.Gold
@@ -275,7 +275,7 @@ func TestStartHQCantAfford(t *testing.T) {
 	}
 }
 
-func TestSellUnitsHalfPrice(t *testing.T) {
+func TestSellUnitsThirdPrice(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
 	e.Troopers = 10
@@ -288,12 +288,12 @@ func TestSellUnitsHalfPrice(t *testing.T) {
 	if e.Troopers != 0 {
 		t.Errorf("Troopers: want 0, got %d", e.Troopers)
 	}
-	wantGold := 10 * w.Prices.Trooper / 2
+	wantGold := 10 * w.Prices.Trooper / 3
 	if e.Gold != wantGold {
 		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
 	}
 
-	// Selling a partial amount only removes n and pays n*price/2.
+	// Selling a partial amount only removes n and pays n*price/3.
 	e.Jets = 8
 	e.Gold = 0
 	if err := w.SellJets(e, 3); err != nil {
@@ -302,7 +302,7 @@ func TestSellUnitsHalfPrice(t *testing.T) {
 	if e.Jets != 5 {
 		t.Errorf("Jets: want 5, got %d", e.Jets)
 	}
-	wantGold = 3 * w.Prices.Jet / 2
+	wantGold = 3 * w.Prices.Jet / 3
 	if e.Gold != wantGold {
 		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
 	}

@@ -64,15 +64,13 @@ func (e *Empire) spend(n, unit int) error {
 	return nil
 }
 
-// LandPriceStep controls how fast land gets more expensive as an empire
-// grows (v1 balance knob — tune freely). Each region you own raises the
-// next region's price by Prices.Land/LandPriceStep (LandPriceStep is in balance.go).
-
-// landUnitPrice is the base per-region price, scaled by the league's Region
-// Costs knob (Medium = 100% = unchanged). LandPrice, MaxAffordableRegions, and
-// BuyRegions all build the rising-price formula on top of it.
-func (w *World) landUnitPrice() int {
-	return w.Prices.Land * w.Config.RegionCosts.Percent() / 100
+// regionCost is the gold cost of the next region when the empire already owns
+// `owned` regions: BRE's rising price ≈ Prices.Land + owned×LandPerRegion
+// (≈ 917 + owned×33, live-sampled), scaled by the league's Region Costs knob
+// (Medium = 100% = unchanged). LandPrice, MaxAffordableRegions, and BuyRegions
+// all build on it.
+func (w *World) regionCost(owned int) int {
+	return (w.Prices.Land + owned*LandPerRegion) * w.Config.RegionCosts.Percent() / 100
 }
 
 // regionBuyLimit is the most regions e may still buy this turn, from the
@@ -95,8 +93,7 @@ func (w *World) regionBuyLimit(e *Empire) int {
 
 // LandPrice is the current gold cost of the next region for empire e.
 func (w *World) LandPrice(e *Empire) int {
-	base := w.landUnitPrice()
-	return base + e.Land*base/LandPriceStep
+	return w.regionCost(e.Land)
 }
 
 // MaxAffordableRegions is the most regions e can buy at the current rising
@@ -104,14 +101,13 @@ func (w *World) LandPrice(e *Empire) int {
 // successive region costs more (see BuyRegions), a simple gold/price divide
 // overcounts — this sums the real climbing cost.
 func (w *World) MaxAffordableRegions(e *Empire) int {
-	base := w.landUnitPrice()
 	limit := w.regionBuyLimit(e)
 	total := 0
 	for n := 0; ; n++ {
 		if n >= limit {
 			return n
 		}
-		cost := base + (e.Land+n)*base/LandPriceStep
+		cost := w.regionCost(e.Land + n)
 		if total+cost > e.Gold {
 			return n
 		}
@@ -130,10 +126,9 @@ func (w *World) BuyRegions(e *Empire, field *int, n int) error {
 	if n > w.regionBuyLimit(e) {
 		return ErrRegionCap
 	}
-	base := w.landUnitPrice()
 	total := 0
 	for i := 0; i < n; i++ {
-		total += base + (e.Land+i)*base/LandPriceStep
+		total += w.regionCost(e.Land + i)
 	}
 	if e.Gold < total {
 		return ErrCantAfford // must afford the whole purchase
@@ -272,7 +267,7 @@ func sellUnit(stock *int, n, price int, e *Empire) error {
 		n = *stock
 	}
 	*stock -= n
-	e.Gold += n * price / 2
+	e.Gold += n * price / 3 // BRE: sell price is buy/3
 	return nil
 }
 
@@ -311,7 +306,16 @@ func (w *World) SellCarriers(e *Empire, n int) error {
 }
 
 func (w *World) SellAgents(e *Empire, n int) error {
-	return sellUnit(&e.Agents, n, w.Prices.Agent, e)
+	// BRE sells agents at a flat SellAgentPrice, not buy/3 like other units.
+	if n <= 0 {
+		return nil
+	}
+	if n > e.Agents {
+		n = e.Agents
+	}
+	e.Agents -= n
+	e.Gold += n * SellAgentPrice
+	return nil
 }
 
 // SellRegions returns regions of the type pointed to by field for half
