@@ -38,8 +38,20 @@ func (e *Empire) ForcesUpkeep() int {
 	return (e.Troopers*MaintTrooper + e.Jets*MaintJet + e.Turrets*MaintTurret + e.Bombers*MaintBomber + e.Tanks*MaintTank + e.Carriers*MaintCarrier) * (100 - e.TechFactor()) / 100
 }
 
-// RegionUpkeep is the gold required to maintain the empire's regions.
-func (e *Empire) RegionUpkeep() int { return e.Land * RegionUpkeepPerLand }
+// RegionUpkeep is the gold required to maintain the empire's regions. Technology
+// lowers it (same factor military upkeep uses); BRE lists "maintenance costs on
+// regions" among technology's effects (#20).
+func (e *Empire) RegionUpkeep() int {
+	return e.Land * RegionUpkeepPerLand * (100 - e.TechFactor()) / 100
+}
+
+// FoodProduced is the empire's food-region output this turn, raised by the
+// Technology bonus — BRE counts food regions under "increased region output",
+// which technology improves (#20). River fishing (riverFood) is a separate
+// mechanic and is not scaled here.
+func (e *Empire) FoodProduced() int {
+	return e.Regions.foodProduced() * (100 + e.TechFactor()) / 100
+}
 
 // ForcesDue and RegionsDue apply the league's Maintenance Costs knob to the
 // base upkeep (Medium = 100% = unchanged; None = 0 = free upkeep). These are

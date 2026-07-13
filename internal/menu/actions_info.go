@@ -41,65 +41,184 @@ func abdicate(s session.Session, w *ctx) Result {
 	return Quit
 }
 
-// renderAdvisors prints the Advisors screen: contextual advice based on the
-// empire's current state — the sort of nudges the original's advisors
-// offered (military readiness, food, support/morale, taxes, treasury,
-// technology). Split from visitAdvisors so tests can render without a pause.
-func renderAdvisors(s session.Session, w *ctx) {
-	// Snapshot so the report reflects one consistent moment even if another
-	// session mutates the world mid-render (same reasoning as Empire Status).
-	var p game.Empire
-	w.With(func() { p = *w.Player() })
+// advisorDomain is one of BRE's four advisors. The values match the submenu's
+// 1..4 numbering (Civilian, Economic, Military, Technology).
+type advisorDomain int
 
-	titleBar(s, tr(s, "Visit Advisors"))
-	var tips []string
-	switch {
-	case p.HQ == 0:
-		tips = append(tips, tr(s, "We have no HeadQuarters, Sire. Building one would strengthen our tanks."))
-	case p.HQ < 100:
-		tips = append(tips, tr(s, "Our HeadQuarters is still under construction."))
+const (
+	advisorCivilian advisorDomain = iota + 1
+	advisorEconomic
+	advisorMilitary
+	advisorTechnology
+)
+
+// advisorData is a consistent snapshot of the figures the advisors report,
+// gathered under one lock so the numbers agree (same discipline as Empire
+// Status). The world totals feed the Economic advisor's share-of-world and
+// world-average figures.
+type advisorData struct {
+	p           game.Empire
+	foodGrown   int // this turn's food production (tech-boosted, incl. rivers)
+	foodEaten   int // this turn's food consumption
+	income      int // this turn's gold income
+	worldIncome int // Σ income over living empires
+	worldLand   int // Σ Land over living empires
+}
+
+func gatherAdvisorData(w *ctx) advisorData {
+	var d advisorData
+	w.With(func() {
+		d.p = *w.Player()
+		d.foodGrown = w.FoodGrown(&d.p)
+		d.foodEaten = d.p.FoodUpkeep()
+		d.income = w.IncomeThisTurn(&d.p).Gold()
+		for _, e := range w.Empires {
+			if e.Alive {
+				d.worldIncome += w.IncomeThisTurn(e).Gold()
+				d.worldLand += e.Land
+			}
+		}
+	})
+	return d
+}
+
+// advisorGreeting is the advisor's first-person opening line (BRE's advisors
+// speak in first person, e.g. "Hi, I'm your military advisor").
+func advisorGreeting(s session.Session, d advisorDomain) string {
+	switch d {
+	case advisorCivilian:
+		return tr(s, "I am your Civilian advisor, Sire.")
+	case advisorEconomic:
+		return tr(s, "I am your Economic advisor, Sire.")
+	case advisorMilitary:
+		return tr(s, "I am your Military advisor, Sire.")
+	default:
+		return tr(s, "I am your Technology advisor, Sire.")
 	}
-	if p.Carriers*100 < p.Jets {
-		tips = append(tips, tr(s, "We have more jets than our carriers can carry into battle. Build more carriers."))
+}
+
+// advisorReport builds the lines one advisor speaks: the figures for its domain
+// (mirroring BRE's advisor reports — the populace and food, the treasury and
+// income, the armed forces, and technology's effects) plus any advice that
+// applies. Kept separate from rendering so tests can inspect the lines.
+func advisorReport(s session.Session, d advisorData, dom advisorDomain) []string {
+	num := func(n int) string { return formatGold(n, sessionLang(s)) }
+	p := &d.p
+	var out []string
+	switch dom {
+	case advisorCivilian:
+		out = append(out, fmt.Sprintf(tr(s, "Our people number %s, and their support stands at %d%%."), num(p.People), p.Support))
+		out = append(out, fmt.Sprintf(tr(s, "We grow %s food each turn and consume %s."), num(d.foodGrown), num(d.foodEaten)))
+		net := d.foodGrown - d.foodEaten
+		switch {
+		case p.Food < d.foodEaten:
+			out = append(out, tr(s, "Our food will not last the turn. Buy or grow more."))
+		case net < 0:
+			out = append(out, fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), num(-net), p.Food/(-net)))
+		default:
+			out = append(out, fmt.Sprintf(tr(s, "That leaves a surplus of %s. Our stores are secure."), num(net)))
+		}
+		if p.Support < 50 {
+			out = append(out, tr(s, "The people grow restless. Lower taxes or spend on their support."))
+		}
+		if p.Tax > 20 {
+			out = append(out, tr(s, "Taxes are high enough to risk riots. Consider lowering them."))
+		}
+	case advisorEconomic:
+		out = append(out, fmt.Sprintf(tr(s, "Our treasury holds %s gold, with %s more in the bank."), num(p.Gold), num(p.Bank)))
+		if p.Debt > 0 {
+			out = append(out, fmt.Sprintf(tr(s, "We owe %s gold in debt, which grows each turn."), num(p.Debt)))
+		}
+		share := 0
+		if d.worldIncome > 0 {
+			share = d.income * 100 / d.worldIncome
+		}
+		out = append(out, fmt.Sprintf(tr(s, "We earn about %s gold each turn, %d%% of the world total."), num(d.income), share))
+		perRegion, avg := 0, 0
+		if p.Land > 0 {
+			perRegion = d.income / p.Land
+		}
+		if d.worldLand > 0 {
+			avg = d.worldIncome / d.worldLand
+		}
+		out = append(out, fmt.Sprintf(tr(s, "That is %s gold per region; the world average is %s."), num(perRegion), num(avg)))
+		if p.Gold <= 0 && p.Bank <= 0 {
+			out = append(out, tr(s, "Our treasury is empty, Sire. We should raise gold soon."))
+		}
+	case advisorMilitary:
+		out = append(out, fmt.Sprintf(tr(s, "Our forces: %s troopers, %s jets, %s turrets, %s tanks, %s bombers, %s carriers."),
+			num(p.Troopers), num(p.Jets), num(p.Turrets), num(p.Tanks), num(p.Bombers), num(p.Carriers)))
+		switch {
+		case p.HQ == 0:
+			out = append(out, tr(s, "We have no HeadQuarters. Building one would strengthen our tanks."))
+		case p.HQ < 100:
+			out = append(out, fmt.Sprintf(tr(s, "Our HeadQuarters is %d%% built."), p.HQ))
+		default:
+			out = append(out, tr(s, "Our HeadQuarters is fully built."))
+		}
+		if p.Carriers*100 < p.Jets {
+			out = append(out, tr(s, "We have more jets than our carriers can carry. Build more carriers."))
+		}
+		out = append(out, fmt.Sprintf(tr(s, "Troop morale stands at %d%%."), p.Morale))
+		if p.Morale < 50 {
+			out = append(out, tr(s, "Morale is low. Desertion is a real risk before our next battle."))
+		}
+		if p.Agents == 0 {
+			out = append(out, tr(s, "We have no covert agents. Recruit some for spying and sabotage."))
+		} else {
+			out = append(out, fmt.Sprintf(tr(s, "We keep %s covert agents."), num(p.Agents)))
+		}
+	case advisorTechnology:
+		tf := p.TechFactor()
+		switch {
+		case p.Regions.Technology == 0:
+			out = append(out, tr(s, "We have no Technology regions."))
+			out = append(out, tr(s, "Building some would raise our military strength, income, and food output, and lower our upkeep — a benefit that builds up over time."))
+		case tf == 0:
+			out = append(out, tr(s, "Our Technology regions are new. Their benefits will build up as we hold them."))
+		default:
+			out = append(out, fmt.Sprintf(tr(s, "Technology stands at %d%%."), tf))
+			out = append(out, fmt.Sprintf(tr(s, "It raises our military strength, income, and food output by %d%%."), tf))
+			out = append(out, fmt.Sprintf(tr(s, "It lowers unit and region upkeep, and food spoilage, to %d%% of normal."), 100-tf))
+			out = append(out, tr(s, "The bonus builds up the longer we hold Technology regions. Larger empires need more of it for the same effect."))
+		}
 	}
-	if p.Morale < 50 {
-		tips = append(tips, tr(s, "Morale is low among our troops. Desertion is a real risk before our next battle."))
+	return out
+}
+
+// renderAdvisor prints one advisor's greeting and its report. Split from the
+// menu loop so tests can render an advisor without a pause.
+func renderAdvisor(s session.Session, w *ctx, d advisorDomain) {
+	data := gatherAdvisorData(w)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, advisorGreeting(s, d), ansi.Reset)
+	for _, line := range advisorReport(s, data, d) {
+		fmt.Fprintf(s, "  %s\n", line)
 	}
-	if p.Food < w.FoodNeededNextTurn(&p) {
-		tips = append(tips, tr(s, "Our food will not last the turn. Buy or grow more."))
-	}
-	if p.Support < 50 {
-		tips = append(tips, tr(s, "The people grow restless. Lower taxes or spend on their support."))
-	}
-	// Riots are possible above RiotTaxFloor(10), but the chance (tax^2/10000)
-	// is trivial near the floor; only advise once the risk is worth acting on.
-	if p.Tax > 20 {
-		tips = append(tips, tr(s, "Taxes are set high enough to risk riots. Consider lowering them."))
-	}
-	if p.TechFactor() == 0 {
-		tips = append(tips, tr(s, "We have no Technology infrastructure. Such regions would sharpen our efficiency."))
-	}
-	if p.Gold <= 0 && p.Bank <= 0 {
-		tips = append(tips, tr(s, "Our treasury is empty, Sire. We should raise gold before it costs us dearly."))
-	}
-	if p.Debt > 0 {
-		tips = append(tips, tr(s, "We carry debt that grows each turn. Repay it soon."))
-	}
-	if p.Agents == 0 {
-		tips = append(tips, tr(s, "We have no covert agents. Recruit some for spying and sabotage."))
-	}
-	if len(tips) == 0 {
-		tips = append(tips, tr(s, "The realm is in good order, Sire. Press the attack."))
-	}
-	for _, t := range tips {
-		fmt.Fprintf(s, "  - %s\n", t)
+}
+
+// advisorsMenu is BRE's four-advisor submenu: pick an advisor to hear that
+// domain's counsel, or 0 to leave. Shared by the System menu's "Visit Advisors"
+// action and the Buy Regions "(*) Advisors" entry.
+func advisorsMenu(s session.Session, w *ctx) {
+	for {
+		titleBar(s, tr(s, "Visit Advisors"))
+		fmt.Fprintf(s, "  1) %s\n", tr(s, "Civilian"))
+		fmt.Fprintf(s, "  2) %s\n", tr(s, "Economic"))
+		fmt.Fprintf(s, "  3) %s\n", tr(s, "Military"))
+		fmt.Fprintf(s, "  4) %s\n", tr(s, "Technology"))
+		fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
+		n := choiceQuit(s, 4)
+		if n < 1 {
+			return
+		}
+		renderAdvisor(s, w, advisorDomain(n))
+		pause(s)
 	}
 }
 
 // visitAdvisors is the System menu's "Visit Advisors" action.
 func visitAdvisors(s session.Session, w *ctx) Result {
-	renderAdvisors(s, w)
-	pause(s)
+	advisorsMenu(s, w)
 	return Stay
 }
 

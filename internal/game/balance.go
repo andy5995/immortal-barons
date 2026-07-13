@@ -225,7 +225,16 @@ const (
 // --- Other economy tunables ---
 const (
 	DebtGrowthPct = 10 // % a loan's outstanding debt grows each turn
-	TechFactorCap = 40 // max % bonus/reduction Technology regions grant (see TechFactor)
+	// Technology now ACCUMULATES over turns rather than applying instantly
+	// (BRE-verified via live play: the bonus ramps up slowly and saturates,
+	// faster when tech is a denser share of the realm). These shape IB's own
+	// reconstructed curve — tune freely; see advanceTech and TechFactor.
+	// Each played turn adds share²/TechGainDiv (in tenths of a %) to TechLevel,
+	// capped at share×TechCeilMul tenths (i.e. the bonus tops out near the tech
+	// share), and hard-capped at TechFactorCap.
+	TechGainDiv   = 250 // per-turn TechLevel gain (tenths %) = share² / this
+	TechCeilMul   = 10  // per-share TechLevel ceiling (tenths %) = share × this
+	TechFactorCap = 60  // max % bonus/reduction Technology grants (was 40, pre-cumulative)
 )
 
 // Money ceilings (BRE-scale). Kept under int32 max so 32-bit door builds stay

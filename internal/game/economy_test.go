@@ -323,6 +323,7 @@ func TestTechBoostsIncomeAndCutsMaintenance(t *testing.T) {
 
 	wBase, base := setup(RegionMix{Coastal: 100})
 	wTech, tech := setup(RegionMix{Coastal: 60, Technology: 40})
+	tech.TechLevel = 400 // 40% bonus, fully ramped (decoupled from the turn-by-turn ramp)
 
 	wBase.CollectIncome(base)
 	wTech.CollectIncome(tech)

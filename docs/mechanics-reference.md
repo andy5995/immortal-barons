@@ -236,8 +236,15 @@ different economic role:
   often it produces food instead — never rely on it for either alone.
 - **Agriculture** — grows food; food self-sufficiency.
 - **Urban** — more population, tax revenue, and trade capacity.
-- **Technology** — long-term efficiency: cheaper units, lower maintenance,
-  higher tax income.
+- **Technology** — long-term efficiency, applied as the `TechFactor` percent. It
+  is **cumulative** (BRE-verified via live play): a per-empire `TechLevel`
+  accumulates each turn Technology regions are held (gain ∝ tech-share², ceiling
+  ∝ tech-share, hard cap `TechFactorCap`), so the bonus **ramps up over turns**
+  and is not the instantaneous share. `TechFactor` raises army strength, all gold
+  income (incl. tax), and food-region output by `tf`%; lowers upkeep on units
+  **and regions** (#20) and food spoilage to `100−tf`%. Produces no direct gold.
+  Constants (`TechGainDiv`, `TechCeilMul`, `TechFactorCap`) are IB's own tunable
+  reconstruction; see the `bre-binary-verified-math` notes for the live data.
 - **Industrial** — produces military goods; vital when buying arms is
   disabled and you must *build* instead. Also yields gold.
 
@@ -265,9 +272,10 @@ bomber 1,500 / carrier 1,750); the **unallocated %** pays out as gold 1:1.
 Specialize: +25% to the chosen unit, −15% to the rest.
 
 **Urban and Technology produce no direct gold** (BRE-verified): Urban is
-population housing, Technology is maintenance reduction. Food output:
-`Agricultural × 300` grown; rivers fish `× 124` on a fishing turn (else
-hydropower gold), see the Rivers section. These income numbers, the caps (2B money / 1.599B
+population housing, Technology is an efficiency multiplier (see the Technology
+region above). Food output: `Agricultural × 300` grown, then raised by the
+Technology factor (#20); rivers fish `× 124` on a fishing turn (else hydropower
+gold), see the Rivers section. These income numbers, the caps (2B money / 1.599B
 interest), the pirate caps table, and the net-worth weights are BRE-scale;
 **unit prices, the tax per-capita coefficient, and the yield band are IB's own
 reconstructions** anchored to this scale (BRE computes prices/maintenance inline

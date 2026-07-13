@@ -279,21 +279,24 @@ func BuildMenus() *Menus {
 	}
 	messages.DefaultOnEnter = quitOnEnter(messages)
 
+	// Item set and order mirror BRE's Preferences submenu (the three "Visit …
+	// Menu" skip-toggles, then the four behaviour toggles). The 'L' language
+	// picker is IB's own addition, kept at the end.
 	prefs.Items = []Item{
-		{Key: 'E', LabelFn: onOff("Enter exits Buy menu", func(w *ctx) *bool { return &w.EnterExitsBuy }),
-			Do: toggle(func(w *ctx) *bool { return &w.EnterExitsBuy })},
-		{Key: 'D', LabelFn: onOff("Deposit gold at end of turn", func(w *ctx) *bool { return &w.DepositEndTurn }),
-			Do: toggle(func(w *ctx) *bool { return &w.DepositEndTurn })},
-		{Key: 'M', LabelFn: onOff("Auto-pay maintenance", func(w *ctx) *bool { return &w.AutoPayMaint }),
-			Do: toggle(func(w *ctx) *bool { return &w.AutoPayMaint })},
-		{Key: 'F', LabelFn: onOff("Auto-feed people & army", func(w *ctx) *bool { return &w.AutoFeed }),
-			Do: toggle(func(w *ctx) *bool { return &w.AutoFeed })},
-		{Key: 'C', LabelFn: onOff("Visit Covert Menu", func(w *ctx) *bool { return &w.VisitCovert }),
+		{Key: '1', LabelFn: onOff("Visit Covert Menu", func(w *ctx) *bool { return &w.VisitCovert }),
 			Do: toggle(func(w *ctx) *bool { return &w.VisitCovert })},
-		{Key: 'T', LabelFn: onOff("Visit Trading Menu", func(w *ctx) *bool { return &w.VisitTrading }),
+		{Key: '2', LabelFn: onOff("Visit Trading Menu", func(w *ctx) *bool { return &w.VisitTrading }),
 			Do: toggle(func(w *ctx) *bool { return &w.VisitTrading })},
-		{Key: 'G', LabelFn: onOff("Visit Message Menu", func(w *ctx) *bool { return &w.VisitMessage }),
+		{Key: '3', LabelFn: onOff("Visit Message Menu", func(w *ctx) *bool { return &w.VisitMessage }),
 			Do: toggle(func(w *ctx) *bool { return &w.VisitMessage })},
+		{Key: '4', LabelFn: onOff("Use Enter To Exit BUY Menu", func(w *ctx) *bool { return &w.EnterExitsBuy }),
+			Do: toggle(func(w *ctx) *bool { return &w.EnterExitsBuy })},
+		{Key: '5', LabelFn: onOff("Deposit gold at End of Turn", func(w *ctx) *bool { return &w.DepositEndTurn }),
+			Do: toggle(func(w *ctx) *bool { return &w.DepositEndTurn })},
+		{Key: '6', LabelFn: onOff("Auto-Pay Maintenance", func(w *ctx) *bool { return &w.AutoPayMaint }),
+			Do: toggle(func(w *ctx) *bool { return &w.AutoPayMaint })},
+		{Key: '7', LabelFn: onOff("Auto-Feed Empire", func(w *ctx) *bool { return &w.AutoFeed }),
+			Do: toggle(func(w *ctx) *bool { return &w.AutoFeed })},
 		{Key: 'L', LabelFn: func(w *ctx) string {
 			return i18n.T(playerLang(w), "Language") + ": " + languageName(w.Player().Language)
 		}, Do: pickLanguage},

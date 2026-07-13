@@ -16,6 +16,7 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	// BRE score: each turn played awards a flat amount. processEconomy may then
 	// subtract small riot/spoilage penalties.
 	e.Score += ScorePerTurn
+	w.advanceTech(e) // Technology bonus builds up a little each turn (not instant)
 	w.processEconomy(e)
 	if e.Score < 0 {
 		e.Score = 0
@@ -155,7 +156,7 @@ func (w *World) aiPlay(today string) {
 // feed. Only when the realm is food-healthy does it convert spare gold into
 // troopers. This keeps AI realms from starving themselves to death.
 func (w *World) aiManageEconomy(e *Empire) {
-	produced := e.Regions.foodProduced() + w.riverFood(e)
+	produced := w.FoodGrown(e)
 	upkeep := e.FoodUpkeep()
 
 	// 1. Keep a food buffer, spending at most half the treasury on it.
@@ -311,7 +312,7 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 		Rivers:     scale(int64(riverGold) * int64(e.Regions.River)),
 		Industrial: scale(int64(w.industrialGold(e)) * int64(e.Regions.Industrial)),
 		Trade:      w.tradeIncome(e), // trade-treaty bonus (population-scaled)
-		Food:       e.Regions.foodProduced(),
+		Food:       e.FoodProduced(),
 		RiverFood:  w.riverFood(e),
 	}
 }
@@ -338,6 +339,13 @@ func (w *World) riverFood(e *Empire) int {
 		return e.Regions.River * RiverFishFood
 	}
 	return 0
+}
+
+// FoodGrown is the empire's total food production this turn: its tech-boosted
+// food-region output (FoodProduced) plus river fishing. The single source of
+// truth for produced food, so the turn engine, the AI, and the advisors agree.
+func (w *World) FoodGrown(e *Empire) int {
+	return e.FoodProduced() + w.riverFood(e)
 }
 
 // CollectIncome credits this turn's gold income (see IncomeThisTurn) at the
@@ -372,7 +380,7 @@ func (w *World) processEconomy(e *Empire) {
 	}
 
 	e.LastFoodConsumed = e.FoodUpkeep()
-	e.Food += e.Regions.foodProduced() + w.riverFood(e) - e.LastFoodConsumed
+	e.Food += w.FoodGrown(e) - e.LastFoodConsumed
 	if e.Food < 0 {
 		e.People -= (-e.Food)/10 + 1
 		if e.People < 0 {

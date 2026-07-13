@@ -175,7 +175,14 @@ func main() {
 	// old os.Exit, which lost the turn's progress).
 	id := play.Identity{Handle: handle, TimeLeft: time.Duration(caller.SecondsLeft) * time.Second}
 	if _, err := play.Run(s, id, cfg, today); err != nil {
+		// Fail loudly to the CALLER, not just the BBS log. A bootstrap failure
+		// (world load, lock, I/O) otherwise drops the caller straight back to the
+		// BBS menu with no splash and no reason — looking like the door is broken.
+		// Write the reason to their screen and hold it briefly so they can read it
+		// before the BBS reclaims the screen.
+		fmt.Fprintf(s, "\r\nImmortal Barons could not start:\r\n  %v\r\n\r\nPlease tell the sysop. Returning to the BBS...\r\n", err)
 		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
+		time.Sleep(4 * time.Second)
 		os.Exit(1)
 	}
 }
@@ -256,7 +263,7 @@ func openSession(caller *door.Caller) (session.Session, func(), error) {
 	if caller.IO == door.IOSocket && runtime.GOOS == "windows" {
 		sock, err := session.NewSocket(caller.Socket)
 		if err != nil {
-			return nil, nil, err
+			return nil, nil, fmt.Errorf("attaching to the winsock handle %d from the dropfile failed: %w", caller.Socket, err)
 		}
 		return sock, sock.Close, nil
 	}

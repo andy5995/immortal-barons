@@ -61,7 +61,15 @@ type Empire struct {
 	// IB-only penalties for riots/food spoilage, plus combat/covert score.
 	// Seeded 0. Matches BRE live data (a standard realm scored a flat +213/turn,
 	// 8 turns = 1704).
-	Score            int
+	Score int
+	// TechLevel is the empire's accumulated Technology bonus, in TENTHS of a
+	// percent (600 = 60.0%). Unlike a raw region-share ratio it BUILDS UP over
+	// turns the empire holds Technology regions and saturates at a share-scaled
+	// cap — BRE-verified: the bonus is not instantaneous but ramps slowly, and
+	// faster the denser the tech share (see advanceTech, TechFactor). Seeded 0,
+	// so a realm's tech advantage grows with sustained investment, not a single
+	// purchase.
+	TechLevel        int
 	LastPlayed       string
 	Events           []string
 	Mail             []string
@@ -92,7 +100,13 @@ type Empire struct {
 	ProdBombers  int
 	ProdTanks    int
 	ProdCarriers int
-	Specialized  string // "" = none, else a unit type name; specialization concentrates output
+	// ProdInitialized distinguishes an empire whose production has been set up
+	// (at creation, or by the player) from a pre-feature save whose Prod* are
+	// all zero because the fields didn't exist. Without it, a player who sets
+	// every percentage to 0 (all output → gold) has it reset to the default on
+	// the next reload. See EnsureProduction.
+	ProdInitialized bool
+	Specialized     string // "" = none, else a unit type name; specialization concentrates output
 
 	// Transient per-turn stats for the end-of-turn report; not persisted.
 	LastSpoiled         int  `json:"-"`
@@ -151,9 +165,15 @@ func moraleFactor(morale int) int {
 	return MoraleCombatFloor + (100-MoraleCombatFloor)*morale/100
 }
 
-// EnsureProduction repairs the production percentages after loading a save
-// that predates industrial production (all Prod* fields zero).
+// EnsureProduction repairs the production percentages after loading a save that
+// predates industrial production (all Prod* fields zero). It runs on every load,
+// so it must NOT touch an empire that has already been initialized — otherwise a
+// player who deliberately sets every percentage to 0 gets reset to the default.
 func (e *Empire) EnsureProduction() {
+	if e.ProdInitialized {
+		return
+	}
+	e.ProdInitialized = true
 	if e.ProdTroopers+e.ProdJets+e.ProdTurrets+e.ProdBombers+e.ProdTanks+e.ProdCarriers == 0 {
 		e.ProdTroopers, e.ProdJets, e.ProdTurrets = DefaultProdPct, DefaultProdPct, DefaultProdPct
 		e.ProdBombers, e.ProdTanks, e.ProdCarriers = DefaultProdPct, DefaultProdPct, DefaultProdPct
@@ -171,18 +191,47 @@ func (e *Empire) Defense() int {
 	return sum * (100 + e.TechFactor()) / 100
 }
 
-// TechFactor is the Technology bonus percent: the share of land that is
-// Technology regions, capped. Bigger empires need proportionally more
-// Technology to get the same factor (it's a share, not a raw count).
-func (e *Empire) TechFactor() int {
+// techShare is the percent of the empire's land that is Technology regions
+// (0..100). It sets how fast TechLevel accumulates and how high it saturates,
+// so bigger empires need proportionally more Technology for the same bonus.
+func (e *Empire) techShare() int {
 	if e.Land <= 0 {
 		return 0
 	}
-	f := e.Regions.Technology * 100 / e.Land
+	return e.Regions.Technology * 100 / e.Land
+}
+
+// TechFactor is the empire's current Technology bonus percent, derived from the
+// accumulated TechLevel (advanceTech ramps it up over turns). It is NOT the
+// instantaneous tech share — a realm has to hold Technology regions for a while
+// before the bonus builds up.
+func (e *Empire) TechFactor() int {
+	f := e.TechLevel / 10
 	if f > TechFactorCap {
 		f = TechFactorCap
 	}
 	return f
+}
+
+// advanceTech ramps the empire's TechLevel one turn's worth toward its
+// share-scaled ceiling. Called once per turn played. The per-turn gain grows
+// with the square of the tech share (a tech-dense realm advances much faster),
+// and the ceiling scales with the share (so the bonus tops out near the share).
+// Selling Technology regions lowers the ceiling and settles the level back down.
+func (w *World) advanceTech(e *Empire) {
+	share := e.techShare()
+	ceil := share * TechCeilMul
+	if hardCap := TechFactorCap * 10; ceil > hardCap {
+		ceil = hardCap
+	}
+	if e.TechLevel >= ceil {
+		e.TechLevel = ceil // sold-off tech (or a shrunk share): settle to the new ceiling
+		return
+	}
+	e.TechLevel += share * share / TechGainDiv
+	if e.TechLevel > ceil {
+		e.TechLevel = ceil
+	}
 }
 
 type Prices struct {
@@ -449,6 +498,7 @@ func newEmpire(name, owner string, cfg Config) *Empire {
 		// BRE default: all six at DefaultProdPct (15% → 90% units, 10% remainder → gold).
 		ProdTroopers: DefaultProdPct, ProdJets: DefaultProdPct, ProdTurrets: DefaultProdPct,
 		ProdBombers: DefaultProdPct, ProdTanks: DefaultProdPct, ProdCarriers: DefaultProdPct,
+		ProdInitialized: true, // so a player's later all-zero setting isn't overwritten
 	}
 }
 

@@ -138,3 +138,19 @@ func TestProdMigration(t *testing.T) {
 		t.Errorf("EnsureProduction gave unexpected defaults: %+v", e)
 	}
 }
+
+// TestProdKeepsIntentionalZero: an already-initialized empire whose player set
+// every percentage to 0 (all output → gold) must NOT be reset by the
+// load-time EnsureProduction repair.
+func TestProdKeepsIntentionalZero(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine") // created initialized, at the 15% defaults
+	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 0, 0, 0
+	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 0, 0, 0
+
+	e.EnsureProduction() // runs on every reload — must leave the zeros alone
+
+	if sum := e.ProdTroopers + e.ProdJets + e.ProdTurrets + e.ProdBombers + e.ProdTanks + e.ProdCarriers; sum != 0 {
+		t.Errorf("intentional all-zero production must persist across reload, got sum %d", sum)
+	}
+}

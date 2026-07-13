@@ -272,7 +272,7 @@ func TestReachSystemMenuFromSpending(t *testing.T) {
 
 func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 	menus := BuildMenus()
-	f := &fakeSession{keys: []rune("PF")}
+	f := &fakeSession{keys: []rune("P7")} // P = Preferences, 7 = Auto-Feed Empire
 	w := newWorld()
 	if err := Run(f, w, menus.System); err != io.EOF {
 		t.Fatalf("expected EOF after script, got %v", err)

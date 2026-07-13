@@ -152,26 +152,83 @@ func TestHQBoostsTanks(t *testing.T) {
 }
 
 func TestTechFactor(t *testing.T) {
-	e := &Empire{Land: 100, Regions: RegionMix{Coastal: 100}}
+	// The bonus is the accumulated TechLevel, NOT the instantaneous share: an
+	// empire with Technology regions but no ramp yet still reads 0.
+	e := &Empire{Land: 100, Regions: RegionMix{Coastal: 80, Technology: 20}}
 	if got := e.TechFactor(); got != 0 {
-		t.Errorf("no Technology regions: want 0, got %d", got)
+		t.Errorf("un-ramped Technology: want 0, got %d", got)
 	}
 
-	e = &Empire{Land: 100, Regions: RegionMix{Coastal: 80, Technology: 20}}
+	e.TechLevel = 200 // TechLevel is tenths of a percent → 20%
 	if got := e.TechFactor(); got != 20 {
-		t.Errorf("20%% Technology: want 20, got %d", got)
+		t.Errorf("TechLevel 200 → 20%%: want 20, got %d", got)
 	}
 
-	e = &Empire{Land: 100, Regions: RegionMix{Technology: 100}}
+	e.TechLevel = 10000 // well over the cap
 	if got := e.TechFactor(); got != TechFactorCap {
-		t.Errorf("all-Technology empire should be capped at %d, got %d", TechFactorCap, got)
+		t.Errorf("TechFactor should cap at %d, got %d", TechFactorCap, got)
+	}
+}
+
+// TestTechRampsOverTurns: a fresh empire with Technology regions starts at 0
+// bonus and builds up (never decreasing) as it plays turns.
+func TestTechRampsOverTurns(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Regions = RegionMix{Coastal: 40, Technology: 60} // 60% tech share
+	e.Land = e.Regions.Total()
+	if e.TechFactor() != 0 {
+		t.Fatalf("fresh Technology empire should start at 0 bonus, got %d", e.TechFactor())
+	}
+	prev := 0
+	for i := 0; i < 10; i++ {
+		w.advanceTech(e)
+		if e.TechFactor() < prev {
+			t.Errorf("TechFactor should not decrease while holding tech: %d -> %d", prev, e.TechFactor())
+		}
+		prev = e.TechFactor()
+	}
+	if e.TechFactor() <= 0 {
+		t.Errorf("TechFactor should have ramped above 0 after 10 turns, got %d", e.TechFactor())
+	}
+}
+
+// TestTechHigherShareRampsFaster: a tech-denser realm advances faster.
+func TestTechHigherShareRampsFaster(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	lo := w.AddHuman("lo", "Lo")
+	lo.Regions = RegionMix{Coastal: 74, Technology: 26}
+	lo.Land = lo.Regions.Total()
+	hi := w.AddHuman("hi", "Hi")
+	hi.Regions = RegionMix{Coastal: 40, Technology: 60}
+	hi.Land = hi.Regions.Total()
+	for i := 0; i < 10; i++ {
+		w.advanceTech(lo)
+		w.advanceTech(hi)
+	}
+	if hi.TechFactor() <= lo.TechFactor() {
+		t.Errorf("denser tech should ramp faster: lo(26%%)=%d hi(60%%)=%d", lo.TechFactor(), hi.TechFactor())
+	}
+}
+
+// TestTechSaturatesAtShareCeiling: the bonus tops out near the tech share.
+func TestTechSaturatesAtShareCeiling(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Regions = RegionMix{Coastal: 74, Technology: 26} // ceiling ≈ 26%
+	e.Land = e.Regions.Total()
+	for i := 0; i < 1000; i++ {
+		w.advanceTech(e)
+	}
+	if got := e.TechFactor(); got != 26 {
+		t.Errorf("26%% tech share should saturate at 26%% bonus, got %d", got)
 	}
 }
 
 func TestTechBoostsMilitary(t *testing.T) {
 	base := &Empire{Land: 100, Regions: RegionMix{Coastal: 100},
 		Troopers: 100, Jets: 20, Carriers: 1, Turrets: 30, Tanks: 10}
-	tech := &Empire{Land: 100, Regions: RegionMix{Technology: 40},
+	tech := &Empire{Land: 100, Regions: RegionMix{Technology: 40}, TechLevel: 400, // 40% ramped
 		Troopers: 100, Jets: 20, Carriers: 1, Turrets: 30, Tanks: 10}
 
 	if tech.Offense() <= base.Offense() {

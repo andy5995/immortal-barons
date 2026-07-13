@@ -94,7 +94,9 @@ func sellUnit2(label string, owned func(*game.Empire) int, apply func(*game.Worl
 		if err != nil {
 			fail(s, err)
 		} else {
-			ok(s, "Sold %d. Gold: %d", n, gold)
+			// No pause: like buy2, the Spending/Sell menu redraws with updated
+			// counts right after, so the confirmation stays visible above it.
+			okNoPause(s, "Sold %d. Gold: %d", n, gold)
 		}
 		return Stay
 	}
@@ -114,7 +116,7 @@ func buildHQ(s session.Session, w *ctx) Result {
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "You have started work on your HeadQuarters.")
+		okNoPause(s, "You have started work on your HeadQuarters.")
 	}
 	return Stay
 }
@@ -142,8 +144,18 @@ func regionField(p *game.Empire, idx int) *int {
 
 // printRegionTable renders the BRE-style region picker: a Key / Name / Owned
 // table, colored (magenta keys, yellow names) so buy and drop share one look.
+// regionRule is the BRE-style separator around the region table: a short magenta
+// accent segment above a longer white rule ("a partial quarter line above the
+// longer line"). Both use only the box-drawing horizontal, which transcodes
+// cleanly to CP437.
+func regionRule(s session.Session) {
+	fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightMagenta, strings.Repeat("─", 12), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, strings.Repeat("─", 36), ansi.Reset)
+}
+
 func printRegionTable(s session.Session, p *game.Empire) {
 	fmt.Fprintf(s, "%s%-5s%-15s%s%s\n", ansi.FgBrightWhite, tr(s, "Key"), tr(s, "Name"), tr(s, "Owned"), ansi.Reset)
+	regionRule(s)
 	for i, name := range regionTypeNames {
 		fmt.Fprintf(s, " %s(%c)%s %s%-14s%s %5d\n",
 			ansi.FgBrightMagenta, regionTypeKeys[i], ansi.Reset,
@@ -229,6 +241,7 @@ func buyLand(s session.Session, w *ctx) Result {
 		fmt.Fprintf(s, tr(s, "You can afford %s%d%s regions.")+"\n\n", ansi.FgBrightCyan, w.MaxAffordableRegions(p), ansi.Reset)
 		printRegionTable(s, p)
 		fmt.Fprintf(s, " %s(*)%s %s%s%s\n", ansi.FgBrightMagenta, ansi.Reset, ansi.FgBrightYellow, tr(s, "Advisors"), ansi.Reset)
+		regionRule(s)
 	}
 	showMenu()
 	for {
@@ -236,8 +249,7 @@ func buyLand(s session.Session, w *ctx) Result {
 		case t == redisplayChoice:
 			showMenu()
 		case t == advisorsChoice:
-			renderAdvisors(s, w)
-			pause(s)
+			advisorsMenu(s, w)
 			showMenu()
 		case t < 0:
 			return Stay
@@ -300,7 +312,7 @@ func sellLand(s session.Session, w *ctx) Result {
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "%d %s regions dropped. You now hold %d land.", n, regionTypeNames[t], land)
+		okNoPause(s, "%d %s regions dropped. You now hold %d land.", n, regionTypeNames[t], land)
 	}
 	return Stay
 }
@@ -378,6 +390,10 @@ func investFunds(s session.Session, w *ctx) Result {
 // Ctrl-<letter> (see the Macro Editor, Image #9).
 const macroKeys = "DEFRIOKL"
 
+// macroMaxLen caps a recorded macro's length, matching BRE's editor (127 keys,
+// from a disassembly of its record loop).
+const macroMaxLen = 127
+
 // writeMacros is BRE's Macro Editor: it lists the eight macro slots, lets the
 // player pick one, then records keystrokes live until the player presses that
 // same Ctrl-<letter> to end the edit.
@@ -419,14 +435,30 @@ func writeMacros(s session.Session, w *ctx) Result {
 	})
 	ctrl := rune(letter - 'A' + 1)
 	fmt.Fprintf(s, "\n"+tr(s, "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit.")+"\n", letter, letter)
+	// Record like BRE's editor (disassembled): only printable ASCII and Enter
+	// go into the macro; Backspace edits the recording; other control keys are
+	// ignored; capped at macroMaxLen. Ending on the macro's own Ctrl-key is
+	// handled by the loop condition (the slot was cleared above so it passes
+	// through the expander instead of replaying).
 	var seq []rune
 	for {
 		k, err := readKey(s)
 		if err != nil || k == ctrl {
 			break
 		}
-		seq = append(seq, k)
-		if k >= 32 { // echo printable keys as they are recorded
+		switch {
+		case k == '\b' || k == 127: // Backspace: delete the last recorded key
+			if len(seq) > 0 {
+				seq = seq[:len(seq)-1]
+				fmt.Fprint(s, "\b \b")
+			}
+		case len(seq) >= macroMaxLen:
+			// full: ignore further keys until the end key
+		case k == '\r' || k == '\n': // Enter is part of the macro (BRE records CR)
+			seq = append(seq, '\r')
+			fmt.Fprint(s, "\r\n")
+		case k >= 0x20 && k <= 0x7e: // printable ASCII: record and echo
+			seq = append(seq, k)
 			fmt.Fprintf(s, "%c", k)
 		}
 	}
@@ -512,7 +544,7 @@ func buyFoodMarket(s session.Session, w *ctx) Result {
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Bought %d food. Gold: %d", n, gold)
+		okNoPause(s, "Bought %d food. Gold: %d", n, gold)
 	}
 	return Stay
 }
@@ -538,7 +570,7 @@ func sellFoodMarket(s session.Session, w *ctx) Result {
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Sold %d food. Gold: %d", n, gold)
+		okNoPause(s, "Sold %d food. Gold: %d", n, gold)
 	}
 	return Stay
 }

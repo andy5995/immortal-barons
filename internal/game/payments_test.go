@@ -2,6 +2,43 @@ package game
 
 import "testing"
 
+// TestTechnologyLowersRegionUpkeep locks #20: region maintenance is reduced by
+// the Technology factor, the same way military upkeep is.
+func TestTechnologyLowersRegionUpkeep(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Regions = RegionMix{Agricultural: 80, Technology: 20}
+	e.Land = e.Regions.Total() // 100
+	e.TechLevel = 200          // 20% bonus, ramped
+	if tf := e.TechFactor(); tf != 20 {
+		t.Fatalf("expected TechFactor 20, got %d", tf)
+	}
+	base := e.Land * RegionUpkeepPerLand
+	if want, got := base*(100-20)/100, e.RegionUpkeep(); got != want {
+		t.Errorf("RegionUpkeep with tech: want %d, got %d", want, got)
+	}
+	if e.RegionUpkeep() >= base {
+		t.Errorf("technology should lower region upkeep: %d not < %d", e.RegionUpkeep(), base)
+	}
+}
+
+// TestTechnologyRaisesFoodProduced locks #20: food-region output is raised by
+// the Technology factor ("increased region output").
+func TestTechnologyRaisesFoodProduced(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Regions = RegionMix{Agricultural: 80, Technology: 20}
+	e.Land = e.Regions.Total()
+	e.TechLevel = 200 // 20% bonus, ramped
+	base := e.Regions.foodProduced()
+	if want, got := base*(100+20)/100, e.FoodProduced(); got != want {
+		t.Errorf("FoodProduced with tech: want %d, got %d", want, got)
+	}
+	if e.FoodProduced() <= base {
+		t.Errorf("technology should raise food output: %d not > %d", e.FoodProduced(), base)
+	}
+}
+
 func TestPayForcesFullNoDesertion(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")

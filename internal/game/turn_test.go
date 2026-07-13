@@ -349,6 +349,7 @@ func TestTechCutsSpoilage(t *testing.T) {
 
 	wBase, base := setup(RegionMix{Coastal: 100})
 	wTech, tech := setup(RegionMix{Coastal: 60, Technology: 40})
+	tech.TechLevel = 400 // 40% bonus, fully ramped (already at its share ceiling)
 
 	wBase.PlayTurn(base, "2026-07-03")
 	wTech.PlayTurn(tech, "2026-07-03")

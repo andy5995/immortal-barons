@@ -45,8 +45,6 @@ func empireStatusFields(s session.Session, w *ctx) (map[string]string, func(stri
 		"morale":     pct(p.Morale),
 		"sdi":        pct(p.SDI),
 		"hq":         tr(s, hqStatus(&p)),
-		"offense":    comma(p.Offense()),
-		"defense":    comma(p.Defense()),
 		"troopers":   comma(p.Troopers),
 		"jets":       comma(p.Jets),
 		"turrets":    comma(p.Turrets),
@@ -54,7 +52,6 @@ func empireStatusFields(s session.Session, w *ctx) (map[string]string, func(stri
 		"bombers":    comma(p.Bombers),
 		"carriers":   comma(p.Carriers),
 		"agents":     comma(p.Agents),
-		"techbonus":  "+" + pct(p.TechFactor()),
 		"protection": comma(p.Protection),
 	}
 	for i, name := range regionTypeNames {
