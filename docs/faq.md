@@ -4,7 +4,8 @@
 
 - Yes, on Windows. The game attaches to the caller's socket handle that the BBS
   passes on line 2 of `DOOR32.SYS`.
-- The Windows socket path is built but has not been tested with a live BBS yet.
+- A sysop has run the Windows socket path with a live caller and reports that it
+  works. More reports are still welcome.
 - See [How the game talks to the caller](https://andy5995.github.io/immortal-barons/door-setup/#how-the-game-talks-to-the-caller)
   in the Door Setup guide for the socket and stdio details.
 

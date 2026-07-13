@@ -88,8 +88,9 @@ The game connects to the caller in one of two ways, chosen automatically:
 Serial (FOSSIL) doors are not supported. Configure your BBS for a socket or
 stdio door.
 
-Note: the Windows socket path is built but has not yet been tested against a
-live BBS. If you run the game as a Windows door, please report how it goes.
+Note: a sysop has run the Windows socket path with a live caller and reports
+that it works. If you run the game as a Windows door, please still report how it
+goes.
 
 ### Character set
 
