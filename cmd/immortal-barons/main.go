@@ -12,6 +12,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
@@ -43,6 +44,7 @@ func main() {
 	reset := flag.Bool("reset", false, "start a fresh game: edit the settings (starting from defaults), then wipe empires and re-seed (backs up world.json first)")
 	resetFromConfig := flag.Bool("reset-from-config", false, "start a fresh game using the current config.json as-is (no editor): wipe empires and re-seed (backs up world.json first)")
 	addAI := flag.Int("add-ai", 0, "add N AI barons to the running game and exit")
+	dump := flag.Bool("dump", false, "print the game world as JSON to stdout and exit (for scripting and balance checks)")
 	utf8 := flag.Bool("utf8", false, "force UTF-8 output (needed for non-English languages; -local auto-detects this from your locale)")
 	cp437 := flag.Bool("cp437", false, "force CP437 output (the door default; overrides -local locale auto-detection)")
 	version := flag.Bool("version", false, "print version information and exit")
@@ -124,6 +126,14 @@ func main() {
 	if *addAI > 0 {
 		if err := runAddAI(cfg, *addAI); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -add-ai:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if *dump {
+		if err := runDump(cfg); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -dump:", err)
 			os.Exit(1)
 		}
 		return
@@ -273,6 +283,24 @@ func openSession(caller *door.Caller) (session.Session, func(), error) {
 		return nil, nil, fmt.Errorf("serial (FOSSIL) doors are not supported; configure your BBS for a socket or stdio door")
 	}
 	return session.NewStdio(), func() {}, nil
+}
+
+// runDump prints the loaded game world as indented JSON to stdout — a read-only
+// snapshot for scripting and balance checks (pipe to jq). It reads the last
+// committed world.json (written atomically), so it needs no lock and doesn't
+// block players; derived figures (net worth, tech factor, income) can be worked
+// out from the persisted fields it shows.
+func runDump(cfg game.Config) error {
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	b, err := json.MarshalIndent(w, "", "  ")
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(b))
+	return nil
 }
 
 // runMaint blocks on the lock (waits for any active player) then advances
