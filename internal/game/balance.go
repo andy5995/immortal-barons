@@ -72,9 +72,11 @@ const (
 
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income
 // as an inline "6 − f(tax)" × Population shape that was only partially
-// recovered; this flat per-capita gold figure is anchored to the new income
-// scale (was an inline ×8 before the rebalance). Top playtest knob.
-const TaxGoldPerCapita = 1200
+// recovered. Calibrated to BRE's first-turn income report: a new realm
+// (People 2000, Tax 15%) earns 2000·0.15·17 = 5100 gold in taxes, matching BRE's
+// ~5183 — so taxes are a minor part of income (region income dominates, as in
+// BRE), not the runaway 360k the old 1200 produced. Top playtest knob.
+const TaxGoldPerCapita = 17
 
 // --- Unit / land / food prices (reconstructed / tunable) ---
 //

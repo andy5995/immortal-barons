@@ -321,8 +321,12 @@ func TestTechBoostsIncomeAndCutsMaintenance(t *testing.T) {
 		return w, e
 	}
 
+	// Isolate the bonus: identical regions, one with the ramped tech factor and
+	// one without. (Swapping income-regions for Technology regions would confound
+	// this — Technology produces no direct gold, so the % boost applies to a
+	// smaller base; tech's payoff is the multiplier/upkeep/combat, not more land.)
 	wBase, base := setup(RegionMix{Coastal: 100})
-	wTech, tech := setup(RegionMix{Coastal: 60, Technology: 40})
+	wTech, tech := setup(RegionMix{Coastal: 100})
 	tech.TechLevel = 400 // 40% bonus, fully ramped (decoupled from the turn-by-turn ramp)
 
 	wBase.CollectIncome(base)

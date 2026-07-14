@@ -281,7 +281,10 @@ interest), the pirate caps table, and the net-worth weights are BRE-scale;
 reconstructions** anchored to this scale (BRE computes prices/maintenance inline
 — not stored as constants). All tunables live in `internal/game/balance.go`.
 
-**Population and tax** are a major income engine. A *low* tax rate (2–3%)
+**Population and tax** are a major income engine. The per-capita coefficient
+(`TaxGoldPerCapita`) is calibrated so a new realm's first-turn taxes (~5,100)
+match BRE's income report (~5,183) — a minor share of income, with region
+income dominating, as in BRE. A *low* tax rate (2–3%)
 drives fast population growth; late game, tax on a huge population becomes
 the main income. Set tax to 0% for a few turns to spike growth, then buy
 **urban** regions so people don't leave when you raise tax back to ~7–9%.
