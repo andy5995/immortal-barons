@@ -43,6 +43,22 @@ func Has(lang string) bool {
 	return ok
 }
 
+// Strings returns every translated string (the msgstr values) in lang's
+// catalog, for callers that inspect a catalog as a whole — e.g. testing whether
+// a language is representable in a legacy code page. Order is unspecified; nil
+// for an unknown language.
+func Strings(lang string) []string {
+	c, ok := catalogs[lang]
+	if !ok {
+		return nil
+	}
+	out := make([]string, 0, len(c))
+	for _, v := range c {
+		out = append(out, v)
+	}
+	return out
+}
+
 func load() map[string]map[string]string {
 	out := map[string]map[string]string{}
 	entries, err := fs.ReadDir(locale, "locale")

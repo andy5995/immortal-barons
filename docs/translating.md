@@ -125,6 +125,19 @@ on disk.
 
 Then translate the two new `.po` files as described above.
 
+## Character set: some languages are UTF-8 only
+
+Traditional BBS terminals use the CP437 character set, which has only a small set
+of letters (see the [Character Set](charset.md) page). If your language uses any
+character CP437 cannot show — Cyrillic, or Latin letters with less common accents,
+for example — the game does not offer your language to callers running in CP437
+mode. It is still offered to UTF-8 callers, and the web version is always UTF-8.
+
+You do not need to do anything for this. The game detects it automatically from
+your catalog: if any string uses a character outside CP437, the language is left
+off the CP437 list so nothing shows as broken characters. It just means a CP437
+caller may see only English, or the languages that fit CP437.
+
 ## Send your work
 
 Open a pull request with the changed `.po` files. For help pages, also include

@@ -151,8 +151,9 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 		}
 		// First run: a brand-new player picks their UI language once, before
 		// naming their realm. Returning players (found above) never reach here.
-		// The picker only appears in UTF-8 mode — a CP437 session can't display
-		// non-English text, so it stays English.
+		// The signup prompt only appears in UTF-8 mode; a CP437 caller who wants a
+		// CP437-representable language (e.g. German) sets it later from the
+		// in-game Preferences menu, keeping the common English signup unchanged.
 		lang := ""
 		if utf8 {
 			lang = selectLanguage(s)

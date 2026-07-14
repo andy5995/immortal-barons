@@ -56,18 +56,42 @@ func (c *ctx) Player() *game.Empire {
 	return c.cached
 }
 
+// cp437SafeLangs records, per language code, whether that whole catalog maps to
+// CP437 — computed once at startup (catalogs are static). A CP437 door can then
+// render the catalogs that fit the code page (e.g. German) and fall back to
+// English only for the ones that don't (Cyrillic, CJK, Central-European Latin).
+// English ("") is trivially safe.
+var cp437SafeLangs = func() map[string]bool {
+	m := map[string]bool{"": true}
+	for _, l := range i18n.Languages {
+		// The endonym is vetted along with the catalog: the picker prints it, so
+		// a language whose own name can't be shown in CP437 isn't safe either.
+		m[l.Code] = session.CP437Encodable(l.Name) &&
+			session.AllCP437Encodable(i18n.Strings(l.Code))
+	}
+	return m
+}()
+
+// cp437SafeLang reports whether lang's catalog can be shown on a CP437 terminal.
+func cp437SafeLang(lang string) bool { return cp437SafeLangs[lang] }
+
 // playerLang is the active caller's UI language ("" = English), used to
 // localize menu chrome at render time.
 func playerLang(c *ctx) string {
-	// IB serves English in a CP437 session — its translations aren't mapped to
-	// CP437 (Russian has no CP437 form), so language selection needs UTF-8 —
-	// hence ignore any stored language here. This single render-time guard keeps
-	// a language set via the UTF-8 web front-end from mojibaking when the same
-	// empire is reached through a CP437 door.
-	if c != nil && c.UTF8 {
-		if p := c.Player(); p != nil {
-			return p.Language
-		}
+	if c == nil {
+		return ""
+	}
+	p := c.Player()
+	if p == nil || p.Language == "" {
+		return ""
+	}
+	// A UTF-8 session renders any language. A CP437 session renders only a
+	// catalog that maps entirely to CP437 (e.g. German); anything else (Cyrillic,
+	// CJK) falls back to English rather than mojibake. This one render-time guard
+	// also keeps a language set via the UTF-8 web front-end from breaking when the
+	// same empire is later reached through a CP437 door.
+	if c.UTF8 || cp437SafeLang(p.Language) {
+		return p.Language
 	}
 	return ""
 }

@@ -24,7 +24,10 @@ func helpBrowse(s session.Session, w *ctx) Result {
 		if i < 1 || i > len(cats) {
 			return Stay
 		}
-		browseCategory(s, cats[i-1], w.Player().Language)
+		// playerLang, not the raw stored language: it applies the CP437 guard, so
+		// a CP437 door reads help in English (or a CP437-safe language) instead
+		// of substitution glyphs when the stored language can't be shown.
+		browseCategory(s, cats[i-1], playerLang(w))
 	}
 }
 
@@ -55,22 +58,24 @@ func languageName(code string) string {
 // so each caller keeps their own. Partly-translated languages fall back to
 // English per string.
 func pickLanguage(s session.Session, w *ctx) Result {
-	// Non-English text can't be shown over a CP437 session, so language
-	// selection is only offered in UTF-8 mode.
-	if !w.UTF8 {
-		ok(s, "To enable language selection, this program must be run with -utf8")
-		return Stay
-	}
 	p := w.Player()
+	// A CP437 session can only render a catalog that maps to CP437, so offer just
+	// those languages there (English, German, …); a UTF-8 session offers all.
+	var langs []struct{ code, name string }
+	for _, l := range helpLanguages {
+		if w.UTF8 || cp437SafeLang(l.code) {
+			langs = append(langs, l)
+		}
+	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Language:"), ansi.Reset)
-	for i, l := range helpLanguages {
+	for i, l := range langs {
 		fmt.Fprintf(s, "  %d) %s\n", i+1, l.name)
 	}
 	i := promptInt(s, "Choose (0 to keep current)?")
-	if i < 1 || i > len(helpLanguages) {
+	if i < 1 || i > len(langs) {
 		return Stay
 	}
-	p.Language = helpLanguages[i-1].code
+	p.Language = langs[i-1].code
 	ok(s, "Language set to %s.", languageName(p.Language))
 	return Stay
 }

@@ -12,15 +12,27 @@ import (
 
 // cp437Writer wraps a Session so the engine's UTF-8 output is transcoded to
 // CP437 on the wire — the character set traditional BBS terminals (SyncTERM,
-// NetRunner) expect. A rune with no CP437 equivalent is
-// replaced with the substitution byte 0x1a; in practice a CP437 session forces
-// English (see ctx.UTF8), so every rune it emits is already CP437-mappable and
-// the substitution is effectively unreachable. ReadKey passes through to the
-// inner session; only output is transcoded.
+// NetRunner) expect. UI text is pre-vetted per language (CP437Encodable — a
+// CP437 session only renders catalogs that map cleanly), and cp437Fallback
+// rewrites common typographic characters to ASCII, so the encoder's
+// last-resort substitution byte (0x1a) should be effectively unreachable.
+// ReadKey passes through to the inner session; only output is transcoded.
 type cp437Writer struct {
 	Session           // inner session; promotes ReadKey (Write is overridden below)
 	enc     io.Writer // transform.Writer that encodes UTF-8 -> CP437 into inner
 }
+
+// cp437Fallback maps typographic characters with no CP437 form to their plain
+// ASCII look-alikes before encoding, so an em-dash or curly quote in content
+// (help pages, player-entered text) degrades to readable ASCII instead of the
+// encoder's substitution glyph.
+var cp437Fallback = strings.NewReplacer(
+	"—", "--", // em dash
+	"–", "-", // en dash
+	"…", "...", // ellipsis
+	"“", `"`, "”", `"`, // curly double quotes
+	"‘", "'", "’", "'", // curly single quotes
+)
 
 // NewCP437Writer returns a Session that emits CP437 instead of UTF-8. The
 // door/local front-end wraps its session in this when the caller's terminal is
@@ -33,10 +45,38 @@ func NewCP437Writer(inner Session) Session {
 	}
 }
 
-func (c *cp437Writer) Write(p []byte) (int, error) { return c.enc.Write(p) }
+func (c *cp437Writer) Write(p []byte) (int, error) {
+	// The fallback may change the byte count, so report the caller's own count
+	// on success (the io.Writer contract is about p, not the transcoded bytes).
+	if _, err := io.WriteString(c.enc, cp437Fallback.Replace(string(p))); err != nil {
+		return 0, err
+	}
+	return len(p), nil
+}
 
 // UTF8 reports that this session is NOT UTF-8 — it emits CP437.
 func (c *cp437Writer) UTF8() bool { return false }
+
+// CP437Encodable reports whether s can be rendered on a CP437 session with no
+// loss — every rune maps to a CP437 code point. Used to decide whether a
+// translated catalog is safe to show on a CP437 terminal (German maps; Cyrillic
+// and CJK do not). Unlike NewCP437Writer it does NOT ReplaceUnsupported, so an
+// unmappable rune surfaces as an error rather than a silent substitution.
+func CP437Encodable(s string) bool {
+	_, err := charmap.CodePage437.NewEncoder().String(s)
+	return err == nil
+}
+
+// AllCP437Encodable reports whether every string in ss is CP437Encodable — e.g.
+// whether a whole translation catalog can be shown on a CP437 terminal.
+func AllCP437Encodable(ss []string) bool {
+	for _, s := range ss {
+		if !CP437Encodable(s) {
+			return false
+		}
+	}
+	return true
+}
 
 // IsUTF8 reports whether s emits UTF-8. A session that does not advertise its
 // charset (every base session and the web session) is treated as UTF-8; only

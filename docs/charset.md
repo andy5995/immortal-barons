@@ -53,9 +53,27 @@ character set when it runs as a door — please
 
 ## Languages
 
-Non-English languages need UTF-8 output (`-utf8`). In CP437 mode the game shows
-English only, and language selection is turned off. The caller must receive UTF-8
-for the text to display correctly.
+The game ships translations in other languages. Which ones you can pick depends
+on the character set.
+
+- **UTF-8** — every language is available. UTF-8 can show any character.
+- **CP437** — a language is available only if all of its characters exist in
+  CP437. German works, for example, because CP437 has the letters ä, ö, ü, and ß.
+
+Languages that use characters CP437 does not have are not offered in CP437 mode.
+This includes Russian and other Cyrillic languages; Czech, Polish, and similar
+languages (their accented letters); and Chinese, Japanese, and Korean. To use one
+of those, run with `-utf8`. The web version is always UTF-8.
+
+The game works this out for itself. It checks each translation, and if even one
+character in it cannot be shown in CP437, that language is left off the CP437
+list — so the screen never shows broken characters. Nothing is hard-coded: if a
+translation later adds a character outside CP437, that language drops from the
+CP437 list on its own.
+
+In CP437 mode the language menu (under Preferences) lists only the languages
+CP437 can display. If a language was already set — for example over the web — and
+it does not fit CP437, that CP437 session falls back to English.
 
 ## Testing a character set
 

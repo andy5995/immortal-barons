@@ -52,6 +52,53 @@ func TestCP437WriterTranscodes(t *testing.T) {
 	}
 }
 
+// Typographic characters with no CP437 form degrade to readable ASCII
+// look-alikes (via cp437Fallback), not the substitution glyph.
+func TestCP437WriterTypographicFallback(t *testing.T) {
+	inner := &fakeInner{}
+	w := NewCP437Writer(inner)
+
+	if _, err := io.WriteString(w, "a—b–c…“d”‘e’"); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	if got, want := inner.out.String(), `a--b-c..."d"'e'`; got != want {
+		t.Errorf("fallback = %q, want %q", got, want)
+	}
+}
+
+func TestCP437Encodable(t *testing.T) {
+	cases := []struct {
+		in   string
+		want bool
+	}{
+		{"", true},
+		{"plain ASCII", true},
+		{"äöüß ñ é", true}, // German/Spanish letters exist in CP437
+		{"█─│░▒▓", true},   // block/box glyphs
+		{"Ж", false},       // Cyrillic
+		{"—", false},       // em dash (the classic translator slip)
+		{"…", false},       // ellipsis
+		{"„deutsche Anführungszeichen“", false}, // low-9 quotes
+	}
+	for _, c := range cases {
+		if got := CP437Encodable(c.in); got != c.want {
+			t.Errorf("CP437Encodable(%q) = %v, want %v", c.in, got, c.want)
+		}
+	}
+}
+
+func TestAllCP437Encodable(t *testing.T) {
+	if !AllCP437Encodable(nil) {
+		t.Error("nil slice should be encodable (vacuously)")
+	}
+	if !AllCP437Encodable([]string{"abc", "äöü"}) {
+		t.Error("all-safe slice should be encodable")
+	}
+	if AllCP437Encodable([]string{"abc", "Ж"}) {
+		t.Error("one unmappable string should fail the whole slice")
+	}
+}
+
 func TestCP437WriterReadKeyPassesThrough(t *testing.T) {
 	inner := &fakeInner{keys: []rune("xy")}
 	w := NewCP437Writer(inner)

@@ -298,7 +298,10 @@ func BuildMenus() *Menus {
 		{Key: '7', LabelFn: onOff("Auto-Feed Empire", func(w *ctx) *bool { return &w.AutoFeed }),
 			Do: toggle(func(w *ctx) *bool { return &w.AutoFeed })},
 		{Key: 'L', LabelFn: func(w *ctx) string {
-			return i18n.T(playerLang(w), "Language") + ": " + languageName(w.Player().Language)
+			// playerLang, not the raw stored code: on a CP437 session it names the
+			// language actually rendering (the CP437-safe fallback), and its
+			// endonym is displayable — a stored "Русский" would only mojibake.
+			return i18n.T(playerLang(w), "Language") + ": " + languageName(playerLang(w))
 		}, Do: pickLanguage},
 		{Key: '0', Label: "Quit", Do: back},
 	}
