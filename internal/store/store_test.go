@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -14,15 +15,19 @@ func cfgIn(dir string) game.Config {
 	return c
 }
 
-func TestLoadMissingReturnsFreshWorld(t *testing.T) {
+func TestLoadMissingReturnsErrNoWorld(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	if _, err := Load(cfg); !errors.Is(err, ErrNoWorld) {
+		t.Errorf("Load of a missing world: want ErrNoWorld, got %v", err)
+	}
+}
+
+func TestNewGameSeedsAI(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	cfg.AICount = 3
-	w, err := Load(cfg)
-	if err != nil {
-		t.Fatal(err)
-	}
+	w := NewGame(cfg)
 	if len(w.Empires) != 3 {
-		t.Errorf("fresh world should have 3 AI, got %d", len(w.Empires))
+		t.Errorf("NewGame should seed %d AI, got %d", 3, len(w.Empires))
 	}
 }
 

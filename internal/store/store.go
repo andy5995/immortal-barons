@@ -5,11 +5,26 @@ package store
 
 import (
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
+
+// ErrNoWorld is returned by Load when no saved world exists yet. A game must be
+// created with -reset (or -reset-from-config) before it can be played or
+// maintained; a missing world is a setup error, not a fresh empty game.
+var ErrNoWorld = errors.New("no game found — run with -reset to create one")
+
+// NewGame builds a fresh, unsaved world from the config. It is the only path
+// that conjures a world from nothing (used by -reset); every other entry point
+// loads an existing one and errors with ErrNoWorld if it is missing.
+func NewGame(cfg game.Config) *game.World {
+	w := game.NewWorld(cfg)
+	loadLeagueNodes(w, cfg)
+	return w
+}
 
 func worldPath(cfg game.Config) string { return filepath.Join(cfg.DataDir, "world.json") }
 
@@ -17,9 +32,7 @@ func worldPath(cfg game.Config) string { return filepath.Join(cfg.DataDir, "worl
 func Load(cfg game.Config) (*game.World, error) {
 	data, err := os.ReadFile(worldPath(cfg))
 	if os.IsNotExist(err) {
-		w := game.NewWorld(cfg)
-		loadLeagueNodes(w, cfg)
-		return w, nil
+		return nil, ErrNoWorld
 	}
 	if err != nil {
 		return nil, err

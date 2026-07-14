@@ -32,7 +32,10 @@ func TestThreeBoardIBBSExchange(t *testing.T) {
 		if err := store.SaveConfig(cfg); err != nil {
 			t.Fatalf("%s SaveConfig: %v", b.id, err)
 		}
-		if err := runMaint(cfg, today); err != nil { // creates the world (with AI empires)
+		if err := store.Save(store.NewGame(cfg), cfg); err != nil { // create the world (with AI empires)
+			t.Fatalf("%s seed world: %v", b.id, err)
+		}
+		if err := runMaint(cfg, today); err != nil {
 			t.Fatalf("%s runMaint: %v", b.id, err)
 		}
 		cfgs[b.id] = cfg

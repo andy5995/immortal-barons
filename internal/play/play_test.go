@@ -29,6 +29,11 @@ func (f *fakeSession) Write(p []byte) (int, error) { return f.out.Write(p) }
 func cfgIn(dir string) game.Config {
 	c := game.DefaultConfig()
 	c.DataDir = dir
+	// Load now errors on a missing world, so stand one up first — as a real
+	// deployment does with -reset before the first caller plays.
+	if err := store.Save(store.NewGame(c), c); err != nil {
+		panic(err)
+	}
 	return c
 }
 

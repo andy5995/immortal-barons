@@ -12,6 +12,7 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -200,6 +201,7 @@ func runLocal(cfg game.Config, name, today string, utf8 bool) {
 	}
 	if _, err := play.Run(s, play.Identity{Handle: name}, cfg, today); err != nil {
 		fmt.Fprintln(os.Stderr, "immortal-barons -local:", err)
+		return // no sign-off after a startup failure (e.g. no game — run -reset)
 	}
 	fmt.Fprint(s, "\nUntil next turn, Baron.\n")
 }
@@ -338,7 +340,9 @@ func runReset(cfg game.Config, fromConfig bool) error {
 		return err
 	}
 	w, err := store.Load(cfg)
-	if err != nil {
+	if errors.Is(err, store.ErrNoWorld) {
+		w = store.NewGame(cfg) // first-ever reset: no prior world to load
+	} else if err != nil {
 		return err
 	}
 

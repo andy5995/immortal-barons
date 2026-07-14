@@ -16,13 +16,17 @@ Run `immortal-barons -help` to see all the command-line options.
 
 ## First-time setup
 
-The game runs from built-in defaults, so you can register the door and let your
-first caller start a game without any setup step. To choose the settings ahead of
-time, use the same `-reset` command you would use to start a fresh game later:
+You must create the game once before anyone can play. Run `-reset` to open the
+Configuration Editor (starting from built-in defaults), choose your settings, and
+seed the world. Until this is done, the game reports "no game found" and refuses
+to start, so a caller never lands in an empty, unplayable world.
 
 ```
 immortal-barons -reset -data /path/to/data
 ```
+
+To create the game without the editor — using the current `config.json` as-is —
+use `-reset-from-config` instead.
 
 This opens the **Configuration Editor**: a menu of every game setting (turns per
 day, protection turns, land and market settings, interest and investment rates,
