@@ -53,9 +53,20 @@ func findTarget(w *ctx, attacker *game.Empire, name string) *game.Empire {
 	return nil
 }
 
-func regularAttack(s session.Session, w *ctx) Result {
+// blockedByProtection reports whether the acting empire is still under new-realm
+// protection and may not attack yet, printing the standard message when it is.
+// The gate belongs on the attack ATTEMPT, so players can still browse the war
+// menus; only launching an attack — including a pirate raid — is refused.
+func blockedByProtection(s session.Session, w *ctx) bool {
 	if w.Player().Protection > 0 {
 		ok(s, "You are under New Realm Protection and cannot attack yet.")
+		return true
+	}
+	return false
+}
+
+func regularAttack(s session.Session, w *ctx) Result {
+	if blockedByProtection(s, w) {
 		return Stay
 	}
 	rows := snapshotTargets(w)
@@ -91,7 +102,9 @@ func regularAttack(s session.Session, w *ctx) Result {
 	}
 	fmt.Fprintf(s, "\n%s\n", report)
 	pause(s)
-	return Stay
+	// One attack per turn: leave the War menu so the turn moves forward (BRE-
+	// style — the player can't keep attacking until their next turn).
+	return Back
 }
 
 // printTargetRows lists attackable empires with their Land and Army columns.
@@ -101,11 +114,11 @@ func printTargetRows(s session.Session, rows []targetRow) {
 	}
 }
 
-// specialAttack shares the target-selection loop used by the nuclear,
-// chemical, and biological attacks.
-func specialAttack(s session.Session, w *ctx, label string, cost int, strike func(a, d *game.Empire) (string, error)) Result {
-	if w.Player().Protection > 0 {
-		ok(s, "You are under New Realm Protection and cannot attack yet.")
+// specialAttack shares the target-selection loop used by the nuclear, chemical,
+// and biological attacks and by the covert/bomb ops. endsTurn is true only for
+// the War-menu WMD (one attack per turn); covert ops stay in their own menu.
+func specialAttack(s session.Session, w *ctx, label string, cost int, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
+	if blockedByProtection(s, w) {
 		return Stay
 	}
 	rows := snapshotTargets(w)
@@ -145,19 +158,22 @@ func specialAttack(s session.Session, w *ctx, label string, cost int, strike fun
 	}
 	fmt.Fprintf(s, "\n%s\n", report)
 	pause(s)
+	if endsTurn {
+		return Back // one War-menu attack per turn (see regularAttack)
+	}
 	return Stay
 }
 
 func nuclearAttack(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Nuclear Attack", game.NukeCost, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
+	return specialAttack(s, w, "Nuclear Attack", game.NukeCost, true, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
 }
 
 func chemicalAttack(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Chemical Attack", game.ChemCost, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
+	return specialAttack(s, w, "Chemical Attack", game.ChemCost, true, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
 }
 
 func biologicalAttack(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Biological Attack", game.BioCost, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
+	return specialAttack(s, w, "Biological Attack", game.BioCost, true, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
 }
 
 // pirateColors are BRE's per-faction name colors, in game.PirateFactions order.
@@ -176,6 +192,9 @@ var pirateColors = []string{
 }
 
 func attackPirates(s session.Session, w *ctx) Result {
+	if blockedByProtection(s, w) {
+		return Stay
+	}
 	// BRE lists only the colored faction names — a faction's strength and hoard
 	// are hidden, so raiding blind (not knowing which band is fat or lean) is
 	// part of the game.
@@ -224,7 +243,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 	}
 	fmt.Fprintf(s, "\n%s\n", report)
 	pause(s)
-	return Stay
+	return Back // one attack per turn (see regularAttack)
 }
 
 func sdiProgram(s session.Session, w *ctx) Result {
@@ -259,8 +278,7 @@ func sdiProgram(s session.Session, w *ctx) Result {
 }
 
 func doomerKaboomer(s session.Session, w *ctx) Result {
-	if w.Player().Protection > 0 {
-		ok(s, "You are under New Realm Protection and cannot attack yet.")
+	if blockedByProtection(s, w) {
 		return Stay
 	}
 	answer := promptInt(s, fmt.Sprintf("A Doomer Kaboomer costs %d gold. Launch? (1 = yes)", game.DoomerCost))

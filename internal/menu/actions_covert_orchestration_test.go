@@ -41,7 +41,7 @@ func TestSpecialAttackBlockedByProtection(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{}
 
-	specialAttack(f, w, "Send Spy", 0, recordingStrike(&called, &a, &d))
+	specialAttack(f, w, "Send Spy", 0, false, recordingStrike(&called, &a, &d))
 
 	if called {
 		t.Error("strike ran while under New Realm Protection")
@@ -58,7 +58,7 @@ func TestSpecialAttackNoTargets(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{}
 
-	specialAttack(f, w, "Send Spy", 0, recordingStrike(&called, &a, &d))
+	specialAttack(f, w, "Send Spy", 0, false, recordingStrike(&called, &a, &d))
 
 	if called {
 		t.Error("strike ran with no valid targets")
@@ -74,7 +74,7 @@ func TestSpecialAttackCancel(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{keys: []rune("0\r")}
 
-	specialAttack(f, w, "Send Spy", 0, recordingStrike(&called, &a, &d))
+	specialAttack(f, w, "Send Spy", 0, false, recordingStrike(&called, &a, &d))
 
 	if called {
 		t.Error("strike ran after the player cancelled")
@@ -87,7 +87,7 @@ func TestSpecialAttackInvalidIndex(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{keys: []rune("9\r")} // only one target exists
 
-	specialAttack(f, w, "Send Spy", 0, recordingStrike(&called, &a, &d))
+	specialAttack(f, w, "Send Spy", 0, false, recordingStrike(&called, &a, &d))
 
 	if called {
 		t.Error("strike ran for an out-of-range target index")
@@ -100,7 +100,7 @@ func TestSpecialAttackSuccess(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{keys: []rune("1\r")}
 
-	specialAttack(f, w, "Send Spy", 0, recordingStrike(&called, &a, &d))
+	specialAttack(f, w, "Send Spy", 0, false, recordingStrike(&called, &a, &d))
 
 	if !called {
 		t.Fatal("strike did not run for a valid target")
@@ -119,7 +119,7 @@ func TestSpecialAttackShowsCost(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{keys: []rune("0\r")} // cancel; we only check the cost header
 
-	specialAttack(f, w, "Nuclear Assault", 50000, recordingStrike(&called, &a, &d))
+	specialAttack(f, w, "Nuclear Assault", 50000, false, recordingStrike(&called, &a, &d))
 
 	if !strings.Contains(f.out.String(), "50000") {
 		t.Errorf("expected the gold cost in the header; got:\n%s", f.out.String())

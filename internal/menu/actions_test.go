@@ -159,3 +159,40 @@ func TestEndProtectionEarly(t *testing.T) {
 		t.Errorf("confirming should end protection, got %d", got)
 	}
 }
+
+// TestAttackGatedByProtection: a protected realm is refused (Stay + message) on
+// a regular attack AND a pirate raid — the gate covers pirates too.
+func TestAttackGatedByProtection(t *testing.T) {
+	w := newWorld() // a new realm starts under protection
+	if w.Player().Protection == 0 {
+		t.Fatal("expected a protected new realm")
+	}
+	f := &fakeSession{}
+	if r := regularAttack(f, w); r != Stay {
+		t.Errorf("regular attack under protection: want Stay, got %v", r)
+	}
+	if !strings.Contains(f.out.String(), "New Realm Protection") {
+		t.Errorf("expected the protection message; got:\n%s", f.out.String())
+	}
+	f2 := &fakeSession{}
+	if r := attackPirates(f2, w); r != Stay {
+		t.Errorf("pirate raid under protection: want Stay, got %v", r)
+	}
+	if !strings.Contains(f2.out.String(), "New Realm Protection") {
+		t.Errorf("pirate raid should be gated by protection; got:\n%s", f2.out.String())
+	}
+}
+
+// TestRegularAttackAdvancesTurn: a completed War-menu attack returns Back so the
+// turn pipeline moves forward (one attack per turn).
+func TestRegularAttackAdvancesTurn(t *testing.T) {
+	w := newWorld()
+	w.Player().Protection = 0
+	v := w.AddHuman("victim", "Victimville")
+	v.Protection = 0
+
+	f := &fakeSession{keys: []rune("1\r ")} // target 1, then a key to clear the report pause
+	if r := regularAttack(f, w); r != Back {
+		t.Errorf("completed attack should advance the turn (Back), got %v", r)
+	}
+}

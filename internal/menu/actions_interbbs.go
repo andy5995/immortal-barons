@@ -63,6 +63,9 @@ func interbbsScores(s session.Session, w *ctx) Result {
 // model — real forces, not gold); the pooled troopers become the strike's
 // offense on departure.
 func createGroupAttack(s session.Session, w *ctx) Result {
+	if blockedByProtection(s, w) {
+		return Stay
+	}
 	p := w.Player()
 	if len(w.RemoteBoards) == 0 {
 		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
@@ -129,6 +132,9 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 
 // joinGroupAttack adds the player's offense to a group attack still forming.
 func joinGroupAttack(s session.Session, w *ctx) Result {
+	if blockedByProtection(s, w) {
+		return Stay
+	}
 	type gaRow struct {
 		id   int
 		line string
@@ -459,6 +465,9 @@ func sendRemoteSpy(s session.Session, w *ctx) {
 // planet — BRE's Terrorist Ops. The strike is queued and resolves on the target
 // board's next packet run; New Realm Protection blocks it.
 func terroristOps(s session.Session, w *ctx) Result {
+	if blockedByProtection(s, w) {
+		return Stay
+	}
 	if w.Player().Agents < 1 {
 		fail(s, game.ErrNoAgents)
 		return Stay

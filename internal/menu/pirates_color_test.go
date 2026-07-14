@@ -12,6 +12,7 @@ import (
 // game.PirateFactions order, which is how the menu lists them.
 func TestAttackPiratesColorsFactions(t *testing.T) {
 	w := newWorld()
+	w.Player().Protection = 0              // past new-realm protection so the raid list shows
 	f := &fakeSession{keys: []rune("0\r")} // cancel at the faction prompt
 
 	attackPirates(f, w)

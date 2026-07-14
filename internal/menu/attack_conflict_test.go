@@ -76,6 +76,7 @@ func TestRegularAttackShapeShiftConflict(t *testing.T) {
 func TestPirateRaidVanishedRaiderConflict(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
 		p.Troopers = 5000
+		p.Protection = 0 // past new-realm protection so the raid isn't gated
 	})
 	commitOnFile(t, cfg, func(w *game.World) {
 		d := w.AddHuman("decoy", "Decoyland")

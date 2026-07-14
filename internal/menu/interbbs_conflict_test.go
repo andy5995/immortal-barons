@@ -17,6 +17,7 @@ import (
 func TestJoinGroupAttackVanishedActorConflict(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
 		p.Troopers = 10_000 // give Alice troopers so the send prompt has a nonzero max
+		p.Protection = 0    // past new-realm protection so the join isn't gated
 	})
 	commitOnFile(t, cfg, func(w *game.World) {
 		leader := w.AddHuman("leader", "Leaderland")
@@ -54,6 +55,7 @@ func TestJoinGroupAttackVanishedActorConflict(t *testing.T) {
 func TestJoinGroupAttackDepartedWindow(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
 		p.Troopers = 10_000
+		p.Protection = 0 // past new-realm protection so the join isn't gated
 	})
 	commitOnFile(t, cfg, func(w *game.World) {
 		leader := w.AddHuman("leader", "Leaderland")
