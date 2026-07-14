@@ -52,15 +52,19 @@ func endProtection(s session.Session, w *ctx) Result {
 	}
 	fmt.Fprintf(s, "\n%s"+tr(s, "Your realm has %d turns of new-realm protection left.")+"%s\n",
 		ansi.FgBrightYellow, p.Protection, ansi.Reset)
-	if !askYesNo(s, "End it now? Your realm can then be attacked and raided, and this cannot be undone.", false) {
+	if !askYesNo(s, "You will be out of protection at the end of this turn. Are you sure?", false) {
 		return Stay
 	}
+	// Drop to a single turn, not 0: the realm stays protected for the rest of
+	// this turn (still can't attack or be attacked), and the turn-end tick in
+	// PlayTurn clears it — so ending protection can't double as a free same-turn
+	// attack.
 	w.With(func() {
-		if fp := w.Player(); fp != nil {
-			fp.Protection = 0
+		if fp := w.Player(); fp != nil && fp.Protection > 1 {
+			fp.Protection = 1
 		}
 	})
-	ok(s, "Your new-realm protection has ended.")
+	ok(s, "Your new-realm protection will end when this turn does.")
 	return Stay
 }
 

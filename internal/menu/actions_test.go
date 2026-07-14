@@ -154,9 +154,11 @@ func TestEndProtectionEarly(t *testing.T) {
 		t.Errorf("declining should keep protection, got %d", got)
 	}
 
+	// Confirming drops protection to its last turn (still protected now); the
+	// turn-end tick in PlayTurn clears it.
 	endProtection(&fakeSession{keys: []rune{'y'}}, w) // confirm
-	if got := w.Player().Protection; got != 0 {
-		t.Errorf("confirming should end protection, got %d", got)
+	if got := w.Player().Protection; got != 1 {
+		t.Errorf("confirming should leave one turn of protection, got %d", got)
 	}
 }
 
