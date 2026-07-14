@@ -334,6 +334,9 @@ func BuildMenus() *Menus {
 
 	system.Items = []Item{
 		{Key: '#', Label: "Abdicate", Do: abdicate},
+		{Key: 'X', Label: "End Protection Early", Do: endProtection,
+			// Only relevant while the realm is still under new-realm protection.
+			Hidden: func(w *ctx) bool { return w.Player().Protection <= 0 }},
 		{Key: 'A', Label: "Visit Advisors", Do: visitAdvisors},
 		{Key: 'D', Label: "Diplomacy", Do: gotoMenu(diplomacy)},
 		{Key: 'E', Label: "Empire Status", Do: empireStatus},

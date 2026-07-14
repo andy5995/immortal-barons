@@ -136,3 +136,26 @@ func TestAdvisorsHealthyEmpire(t *testing.T) {
 		}
 	}
 }
+
+// TestEndProtectionEarly: confirming ends new-realm protection (one-way);
+// declining leaves it; a realm not under protection is a no-op.
+func TestEndProtectionEarly(t *testing.T) {
+	w := newWorld()
+
+	w.Player().Protection = 0
+	endProtection(&fakeSession{}, w)
+	if got := w.Player().Protection; got != 0 {
+		t.Errorf("no protection: should stay 0, got %d", got)
+	}
+
+	w.Player().Protection = 5
+	endProtection(&fakeSession{keys: []rune{'n'}}, w) // decline
+	if got := w.Player().Protection; got != 5 {
+		t.Errorf("declining should keep protection, got %d", got)
+	}
+
+	endProtection(&fakeSession{keys: []rune{'y'}}, w) // confirm
+	if got := w.Player().Protection; got != 0 {
+		t.Errorf("confirming should end protection, got %d", got)
+	}
+}

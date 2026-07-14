@@ -60,7 +60,7 @@ func TestSystemMenuThreeColumn(t *testing.T) {
 	f := &fakeSession{}
 	draw(f, w, menus.System)
 	out := f.out.String()
-	if !lineWithAll(out, "Abdicate", "Visit Advisors", "Diplomacy") {
+	if !lineWithAll(out, "Diplomacy", "Empire Status", "Food Market") {
 		t.Errorf("System menu should place three items on one line:\n%s", out)
 	}
 	if !lineWithAll(out, "(?)", "Help") {

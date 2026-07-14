@@ -41,6 +41,29 @@ func abdicate(s session.Session, w *ctx) Result {
 	return Quit
 }
 
+// endProtection lets a player waive their remaining new-realm protection early
+// (IB's own — BRE has no such option). It is one-way: the realm becomes open to
+// attacks and pirate raids at once, so it takes a confirmation.
+func endProtection(s session.Session, w *ctx) Result {
+	p := w.Player()
+	if p.Protection <= 0 {
+		okNoPause(s, "Your realm is not under new-realm protection.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s"+tr(s, "Your realm has %d turns of new-realm protection left.")+"%s\n",
+		ansi.FgBrightYellow, p.Protection, ansi.Reset)
+	if !askYesNo(s, "End it now? Your realm can then be attacked and raided, and this cannot be undone.", false) {
+		return Stay
+	}
+	w.With(func() {
+		if fp := w.Player(); fp != nil {
+			fp.Protection = 0
+		}
+	})
+	ok(s, "Your new-realm protection has ended.")
+	return Stay
+}
+
 // advisorDomain is one of BRE's four advisors. The values match the submenu's
 // 1..4 numbering (Civilian, Economic, Military, Technology).
 type advisorDomain int
