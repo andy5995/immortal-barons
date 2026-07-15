@@ -437,13 +437,14 @@ func draw(s session.Session, g *ctx, m *Menu) {
 }
 
 // drawItemsColumns renders a menu's selectable items in ncol side-by-side
-// columns, filling row-major (item 1, 2, 3 across the row, then wrap). Every
-// cell but the last in a row is padded to a fixed visible width so the columns
-// align; ANSI escapes are excluded from that width (utf8.RuneCountInString).
-// Hidden items are skipped; a heading/separator (Do == nil) breaks the current
-// row and takes its own full-width line. The cell width narrows as ncol grows
-// so a full row stays inside 80 columns for the door standard (2 cols → 34,
-// 3+ cols → 25: 25+25+~25 ≈ 75).
+// columns, filling column-major (down the first column, then the next), so the
+// on-screen key order descends the left edge as BRE's menus do — NOT row-major
+// left-to-right. Every cell but the last in a row is padded to a fixed visible
+// width so the columns align; ANSI escapes are excluded from that width
+// (utf8.RuneCountInString). Hidden items are skipped; a heading/separator
+// (Do == nil) closes the current column block and takes its own full-width
+// line. The cell width narrows as ncol grows so a full row stays inside 80
+// columns for the door standard (2 cols → 34, 3+ cols → 25: 25+25+~25 ≈ 75).
 func drawItemsColumns(b *strings.Builder, g *ctx, m *Menu, col, lang string, ncol int) {
 	cellWidth := 34 // visible width of a padded cell (incl. the "  (K) " prefix)
 	if ncol >= 3 {
@@ -458,37 +459,52 @@ func drawItemsColumns(b *strings.Builder, g *ctx, m *Menu, col, lang string, nco
 		s := fmt.Sprintf("  %s(%c)%s %s%s%s", kcol, it.Key, ansi.Reset, lcol, label, ansi.Reset)
 		return s, 6 + utf8.RuneCountInString(label) // "  (K) " is 6 visible cols
 	}
-	var pending []string // buffered, already-padded cells awaiting the end of the row
-	flush := func() {
-		if len(pending) > 0 {
-			b.WriteString(strings.Join(pending, ""))
+	// renderBlock lays a run of items out column-major. With nrows =
+	// ceil(len/ncol), cell (row r, col c) is item[c*nrows+r]: item indices fill
+	// down column 0 first, so keys read top-to-bottom then left-to-right.
+	renderBlock := func(items []*Item) {
+		if len(items) == 0 {
+			return
+		}
+		nrows := (len(items) + ncol - 1) / ncol
+		for r := 0; r < nrows; r++ {
+			// last = the rightmost populated column on this row (may be short on the
+			// final row); indices grow with c, so every column left of it is filled.
+			last := 0
+			for c := 0; c < ncol; c++ {
+				if c*nrows+r < len(items) {
+					last = c
+				}
+			}
+			for c := 0; c <= last; c++ {
+				s, n := cell(items[c*nrows+r])
+				if c < last { // pad all but the trailing cell so columns align
+					pad := cellWidth - n
+					if pad < 1 {
+						pad = 1
+					}
+					s += strings.Repeat(" ", pad)
+				}
+				b.WriteString(s)
+			}
 			b.WriteString("\n")
-			pending = pending[:0]
 		}
 	}
+	var block []*Item
 	for i := range m.Items {
 		it := &m.Items[i]
 		if it.hidden(g) {
 			continue
 		}
-		if it.Do == nil { // heading/separator: full-width line, breaks the row
-			flush()
+		if it.Do == nil { // heading/separator: close the block, then a full-width line
+			renderBlock(block)
+			block = block[:0]
 			fmt.Fprintf(b, "  %s\n", it.displayLabel(g, lang))
 			continue
 		}
-		c, n := cell(it)
-		if len(pending) < ncol-1 { // not the last cell in the row: pad it
-			pad := cellWidth - n
-			if pad < 1 {
-				pad = 1
-			}
-			pending = append(pending, c+strings.Repeat(" ", pad))
-			continue
-		}
-		pending = append(pending, c)
-		flush()
+		block = append(block, it)
 	}
-	flush()
+	renderBlock(block)
 }
 
 func gotoMenu(m *Menu) Action {
