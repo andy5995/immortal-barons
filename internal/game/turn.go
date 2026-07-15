@@ -138,6 +138,7 @@ func (w *World) nextDate(d string) string {
 // aiPlay runs each AI empire's turns for one day.
 func (w *World) aiPlay(today string) {
 	for _, e := range w.AIEmpires() {
+		w.aiHandleDiplomacy(e) // answer pending treaty offers before playing (#36)
 		for e.TurnsLeft > 0 {
 			w.aiManageEconomy(e)
 			e.LastGoldPaid = 0

@@ -18,7 +18,12 @@ const Version = "0.0.1"
 type Empire struct {
 	Name  string
 	Owner string // normalized BBS handle; "" for AI
-	Alive bool
+	// AIProfile is the personality of an AI empire (#36): it shapes which treaty
+	// offers the AI accepts and its military posture. Empty on human empires and
+	// on AI empires saved before profiles existed (aiProfile() derives a stable
+	// fallback from the name in that case).
+	AIProfile string
+	Alive     bool
 	// DiedDay is the GameDay on which this empire was eliminated (People or
 	// Land hit 0, or the owner abdicated). 0 means it never died. The husk is
 	// kept until a LATER day so the owner cannot immediately re-onboard: BRE
@@ -442,6 +447,9 @@ func (w *World) addAIEmpire(name string) *Empire {
 	e := newEmpire(name, "", w.Config)
 	e.Jets = 5
 	e.Turrets = 40
+	// Spread personalities evenly across the AI pool (#36) so a game gets a mix
+	// of diplomats, balanced realms, and aggressors rather than all alike.
+	e.AIProfile = aiProfiles[len(w.AIEmpires())%len(aiProfiles)]
 	w.Empires = append(w.Empires, e)
 	return e
 }
