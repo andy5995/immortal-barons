@@ -150,7 +150,9 @@ func BuildMenus() *Menus {
 		{Key: 'N', Label: "Nuclear Attack", Do: nuclearAttack},
 		{Key: 'C', Label: "Chemical Attack", Do: chemicalAttack},
 		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack},
-		{Key: 'P', Label: "Attack Pirates", Do: attackPirates},
+		{Key: 'P', Label: "Attack Pirates", Do: attackPirates,
+			// Hidden while under new-realm protection — a protected realm can't raid.
+			Hidden: func(w *ctx) bool { return w.Player().Protection > 0 }},
 		{Key: 'A', Label: "Alliance Strength", Do: allianceStrength},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
