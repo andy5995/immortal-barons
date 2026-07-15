@@ -46,13 +46,163 @@ Key files inside:
    source for **colors** and for the exact **hotkey characters + on-screen
    order**. Anyone with BRE running can grab one — select the menu/screen and
    paste it. Prefer this whenever colors or exact keys matter; if you can't run
-   BRE, ask a maintainer or contributor who can.
+   BRE, ask a maintainer or contributor who can. For **text content and layout**
+   (not colors), you can also drive BRE yourself headlessly — see "Running BRE
+   headless" below.
 2. **A disassembly of the original binary** — authoritative for exact numeric
    constants. Disassembled values override a reconstruction or a guess when
    they conflict.
 3. **`BRE.OVR` / `BRE.EXE` strings** — authoritative for menu **labels** and
    **declaration order** (which equals menu order). See the extraction cookbook.
 4. **`game/*.hlp`, `docs/`, `breins.txt`** — prose, help text, tutorial wording.
+
+## Running BRE headless (tmux + dosemu2 harness)
+
+Proven working (2026-07): BRE can be driven scriptably and its screens scraped
+as plain UTF-8 text. Good for menu text/layout/flow (NOT colors — capture-pane
+drops them; use a screenshot for colors, or `capture-pane -e` untested).
+
+**Prerequisites — check first; do NOT assume or auto-install.** This harness
+needs three things:
+
+1. **`dosemu2`** (or `dosemu`) and **`tmux`** installed on the machine. Verify
+   with `command -v dosemu tmux`. If `dosemu2` isn't packaged for the user's
+   distro, point them at one of: **appman/AM** (`https://github.com/ivan-hc/AM`),
+   a prebuilt **dosemu2 AppImage**
+   (`https://github.com/theimpossibleastronaut/dosemu2-appimage/releases`), or a
+   **Docker image** (`https://github.com/theimpossibleastronaut/dosemu2-container/`).
+   `tmux` is in every mainstream distro's repos.
+2. **The original BRE distribution files** — normally just the official BRE DOS
+   door archive downloaded from the John Dailey Software release site (or the BRE
+   community; the project README links a BRE Discord), unpacked to a local
+   directory (see "Getting the original BRE" above for the key files). This skill
+   never ships or bundles them (license section).
+
+**If any of these is missing, STOP and tell the user exactly what to get** — name
+the missing package(s) to install via their system package manager (dosemu2,
+tmux), and/or that they need to download and unpack the original BRE archive from
+the official site and point the skill at it. Let the user install/download it
+themselves — never install software on the user's machine, and never present the
+harness as simply "unavailable" without naming the specific missing dependency.
+Only proceed once all three are present. (`xclip`/`wl-copy` for clipboard sharing
+are Andy-specific conveniences, not harness requirements.)
+
+**Why dosemu2 specifically — not DOSBox.** The whole approach depends on
+dosemu2's ability to render DOS **text-mode / INT 10h video to a real terminal**
+(the `-t` S-Lang mode), so `tmux capture-pane -p` scrapes the door screens as
+**plain UTF-8 characters** — no images, cheap and reliable, drivable blind in a
+headless pane. DOSBox / DOSBox-X / DOSBox-Staging are fundamentally **graphical**
+emulators: they emulate VGA and render even text-mode screens to an SDL window
+(pixels), with no supported path to pipe character cells to a Unix TTY. Using
+DOSBox would force **screenshot + OCR** for every read. DOSBox's more-active
+development is aimed at game graphics/sound compatibility — an axis this task
+doesn't use; dosemu2 is purpose-built for the Linux-integration / BBS-door /
+text-redirection case. (DOSBox is perfectly fine for a human who just wants to
+*play* BRE — it's the *scriptable text scraping* that needs dosemu2.)
+
+**NOT VERIFIED (don't state as certain):** the "DOSBox can't be scraped as text"
+claim is reasoning from how these emulators render (graphical SDL surface), not
+from an actual test. Nobody here has tried to coax a text-mode TTY out of
+DOSBox-X (the most feature-rich variant), so an obscure mode can't be ruled out.
+The dosemu2 side IS proven (it's what this harness runs on). If DOSBox is the
+only emulator available, TEST whether its screens are text-scrapable before
+concluding either way — say it's unverified, don't assert it fails.
+
+The recipe — every step below dodges a landmine that otherwise kills the run:
+
+```
+tmux new-session -d -s bre -x 80 -y 25 "dosemu -t"     # -t = S-Lang video; real 80x25 pane
+sleep 9
+tmux send-keys -t bre "C:" Enter; sleep 1
+tmux send-keys -t bre "CD \\GAMES\\BRE-DOS" Enter; sleep 1
+tmux send-keys -t bre "DATE 07-25-2026" Enter; sleep 1  # SEE CLOCK CHECK BELOW
+tmux send-keys -t bre "SRDOOR local" Enter; sleep 2     # writes DOORFILE.SR
+# type at the Name: prompt ONE KEY AT A TIME (see pacing below), then Enter
+tmux send-keys -t bre "BRE" Enter; sleep 5
+tmux capture-pane -t bre -p                             # scrape the screen as text
+```
+
+The landmines:
+
+- **The clock check.** BRE compares the DOS date against its data files and
+  exits instantly with `ERROR: Computer Clock has been tampered with` if the
+  boot date is EARLIER than the game's last-recorded date. A fresh dosemu boot
+  uses the host date, but the game data may have been written under a dosemu
+  session whose clock ran ahead. Fix: `DATE <late-enough-date>` before `BRE`.
+  If BRE dies silently right after "Probation/Reprieve Area Size", it's this.
+- **Key pacing.** A burst (`send-keys "Andy" Enter`) crashes dosemu `-t` /
+  overflows the 16-byte BIOS keyboard buffer. Send ONE key per send-keys call
+  with ~0.25–0.3s sleeps between; Enter as its own call.
+- **Interactive prompt, not `-E batch`.** `dosemu -E FILE.BAT` auto-exits the
+  emulator the moment the batch ends, wiping the screen you wanted; error
+  messages also scroll away. Boot to `C:\>` and type commands stepwise.
+- **Pipes are blind.** Piping stdin/stdout (`-dumb` mode) captures DOS teletype
+  output only — BRE's door screens render via INT 10h video and never reach the
+  pipe. The tmux pane (a real TTY at 80×25) is what makes them scrapable.
+- **New-caller flow** (fresh world): intro text `Continue? (Y/n)` → `n` →
+  `Name your Realm:` → name + Enter → confirm `(Y/n)` → `y` →
+  `Would you like Instructions? (y/N)` → `n` → ANSI splash (takes ~5s) →
+  pause → main menu. An EMPTY realm name makes BRE exit immediately.
+- **Playing creates real state.** The run enrolls an empire under the
+  DOORFILE.SR caller name in the sysop's actual game data — tell Andy so he can
+  re-`reset`, and never run this against data he cares about. Don't run while
+  his own dosemu session is up (single-instance conflicts).
+- **Fresh test player = edit the name in DOORFILE.SR, then run BRE.** The caller
+  name appears in **two** places in `doorfile.sr`: **line 1 and the last line**
+  (both were `Andy`). Change BOTH to a new name and launch `BRE` — BRE enrolls a
+  brand-new empire under that name. Use this to gather under a throwaway empire
+  without touching Andy's own (his is under `Andy`); each distinct name is a
+  separate realm in the shared game data.
+- Quit cleanly: `0` at the main menu (+ `y` confirm), then `EXITEMU` at `C:\>`,
+  then `tmux kill-session`.
+
+### Driving turns and reading the in-game economy (2026-07-14, proven)
+
+Once inside a turn you can scrape income/status numbers per turn. Hard-won rules:
+
+- **Input model: menus take ONE keypress, no Enter; numeric prompts need Enter.**
+  A menu (`Choice> Quit`, Diplomacy, Spending, Attack…) acts on a single key —
+  `tmux send-keys -t bre "0"` (NO `Enter`). If you send `"0" Enter`, the `0`
+  picks the item and the stray Enter is consumed by the NEXT screen as its
+  default (usually Quit) — silently skipping a menu (this is why the Spending
+  Menu "vanishes"). Numeric "How much will you give?" prompts DO need Enter.
+  y/N prompts take a single key (`n`), no Enter.
+- **Enter = the default everywhere:** Quit on a submenu, No on y/N, pay-full on a
+  maintenance prompt, Yes on "continue?", Play Game at the main menu. So a turn
+  can be driven almost entirely by repeated Enter — but you must key off the
+  ACTIVE prompt to stop at the right screen (next point).
+- **The screen is NOT fully cleared between transitions.** Income lines linger in
+  the upper pane while the active prompt is lower, so a screen-wide `grep` for
+  "earned in Tourism" matches long after you've left the income screen. **Detect
+  state from the active bottom line** (last non-empty line above the status bar):
+  `cap | grep -v 'F2=Extra Information' | awk 'NF{l=$0} END{print l}'`.
+- **The "Do you wish to visit the Bank? (y/N)" screen shows income AND status
+  together** — one capture yields Tourism/Ore/Solar gold, Popular Support, Tax
+  Rate, region counts, and Population. Best single per-turn data point.
+- **System Menu (Set Tax Rate, Preferences, Write Macros, Empire Status, Set
+  Industries) is reached via the Spending Menu's `(*) System Menu`** — the
+  Spending Menu appears every turn AFTER the bank prompt and maintenance. Send
+  `*` (single key) there.
+- **Preferences (System Menu → P) to streamline a scripted run:** turn OFF Visit
+  Covert/Trading/Message menus, turn ON Auto-Pay Maintenance + Auto-Feed Empire,
+  and turn OFF "Deposit gold at End of Turn". Auto-pay only stays SILENT when you
+  have enough gold ON HAND — depositing at end-of-turn sweeps it to the bank and
+  makes auto-pay re-prompt every turn, so leave deposit off.
+- **A "gold requested to boost popular support" prompt appears every turn when
+  Support < 100** (no pref to disable). Enter `0` to decline (lets support erode);
+  Enter the default to pay (raises support). Use it — plus the tax rate — to
+  drive Support up or down for a sweep.
+- **Conditional prompts a blind macro will desync on:** the boost-support prompt
+  (support<100), a "People Need N food" prompt (only when short — gone with
+  Auto-Feed), a "buy a lottery ticket?" event, and "Change Production? (y/N)".
+  Handle each by matching the active line, not by a fixed key count.
+- **Support DYNAMICS (for setting up a sweep):** tax ≤ ~60 barely erodes support
+  (equilibrium 80-98); tax = 100 crashes it ~40/turn (faster at low pop/urban).
+  To sweep the full range, crash with tax 100, then recover with tax 0 + paying
+  the boost prompt. Support recovers to 100 overnight (daily maintenance).
+- **A stale `inuse.flg`** left by an unclean exit makes BRE report "someone is
+  currently playing… on another node." Delete it (`rmw .../inuse.flg`) before
+  relaunching.
 
 ## What the strings give you — and what they DON'T
 
