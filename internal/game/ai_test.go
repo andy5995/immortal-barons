@@ -129,3 +129,38 @@ func TestAIAggressorRespectsProtection(t *testing.T) {
 		t.Errorf("aggressor must not attack a protected realm: before=%d after=%d", before, vic.Land)
 	}
 }
+
+func TestAIAggressorBuysAgents(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("agg", "Aggressor")
+	e.AIProfile = AIProfileAggressor
+	e.Regions = RegionMix{Agricultural: 50}
+	e.syncLand()
+	e.People = 1000
+	e.Troopers, e.Turrets, e.Tanks, e.Agents = 0, 0, 0, 0
+	e.Food = 1_000_000
+	e.Gold = 500_000
+
+	w.aiManageEconomy(e)
+
+	if e.Agents == 0 {
+		t.Error("aggressor should buy agents for covert ops, got 0")
+	}
+}
+
+func TestAIAggressorDemoralizesBeforeWar(t *testing.T) {
+	w, agg, vic := warWorld(t)
+	agg.Troopers, agg.Tanks = 5000, 500 // clearly favored
+	agg.Agents = 50                     // enough agents that the covert op reliably lands
+	vic.Morale = 100
+	beforeLand := vic.Land
+
+	w.aiWageWar(agg)
+
+	if vic.Land >= beforeLand {
+		t.Fatalf("precondition: the attack should still have happened, land %d->%d", beforeLand, vic.Land)
+	}
+	if vic.Morale >= 100 {
+		t.Errorf("aggressor should have demoralized the target before attacking, morale still %d", vic.Morale)
+	}
+}

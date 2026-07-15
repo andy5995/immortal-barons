@@ -228,6 +228,9 @@ func (w *World) aiBuildForces(e *Empire) {
 	buy(trooperPct, w.Prices.Trooper, &e.Troopers)
 	buy(turretPct, w.Prices.Turret, &e.Turrets)
 	buy(tankPct, w.Prices.Tank, &e.Tanks)
+	if e.aiProfile() == AIProfileAggressor {
+		buy(AIForceAgentPctWar, w.Prices.Agent, &e.Agents) // agents for pre-war covert ops (#36)
+	}
 }
 
 // aiInvestIdle parks the AI's gold above a working reserve into investments so

@@ -87,10 +87,12 @@ const (
 
 	// War (#36): aggressor-profile AIs lean into offense (tanks + troopers, few
 	// turrets) so they can actually wage the wars they start, where the other
-	// profiles keep the defensive default mix above.
-	AIForceTrooperPctWar = 45
+	// profiles keep the defensive default mix above. They also fund a few agents
+	// for pre-war covert ops. The four shares sum to 100.
+	AIForceTrooperPctWar = 40
 	AIForceTurretPctWar  = 5
-	AIForceTankPctWar    = 50
+	AIForceTankPctWar    = 45
+	AIForceAgentPctWar   = 10 // aggressors buy agents to demoralize a target first
 
 	// AIWarOffenseMargin gates aggression: an aggressor attacks the weakest valid
 	// target only when its offense exceeds the target's effective defense (units
