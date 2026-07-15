@@ -351,7 +351,7 @@ func BuildMenus() *Menus {
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: 'W', Label: "Write Macros", Do: writeMacros},
 		{Key: '1', Label: "Set Industries", Do: setIndustries},
-		{Key: '2', Label: "Show Instructions", Do: helpBrowse},
+		{Key: '2', Label: "Show Instructions", Do: showInstructions},
 		{Key: '3', Label: "Specialize Industry", Do: specializeIndustry,
 			// Specializing is permanent, so hide the option once it's been done.
 			Hidden: func(w *ctx) bool { return w.Player().Specialized != "" }},
@@ -375,7 +375,7 @@ func BuildMenus() *Menus {
 		{Key: '6', Label: "Messages", Do: gotoMenu(messages)},
 		{Key: '8', Label: "Game Bulletins", Do: showBulletinToday},
 		{Key: '9', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden, Color: interplanetary.Color},
-		{Key: 'A', Label: "Instructions", Do: helpBrowse},
+		{Key: 'A', Label: "Instructions", Do: showInstructions},
 		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: 'I', Label: "About", Do: about},
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},

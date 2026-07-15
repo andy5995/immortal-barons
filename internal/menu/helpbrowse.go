@@ -31,6 +31,40 @@ func helpBrowse(s session.Session, w *ctx) Result {
 	}
 }
 
+// showInstructions is the linear "read the manual" screen (BRE's Instructions
+// item, separate from the ? help browser). It reads the overview plus every
+// help topic in sequence from the single-source Markdown (help.Instructions),
+// printing a section bar when the category changes and paging between topics.
+// Q leaves early. Because it assembles the same topics the browser shows, it
+// stays complete as the help content grows — no parallel document to maintain.
+func showInstructions(s session.Session, w *ctx) Result {
+	lang := playerLang(w)
+	topics := help.Instructions(lang)
+	lastCat := ""
+	for i, t := range topics {
+		// The overview carries its own title heading, so it needs no section bar;
+		// the real categories get one, mirroring BRE's section dividers.
+		if t.Category != lastCat && t.Category != "introduction" {
+			fmt.Fprintf(s, "\n%s── %s ──%s\n", ansi.FgBrightCyan, help.CategoryName(t.Category), ansi.Reset)
+		}
+		lastCat = t.Category
+		fmt.Fprintf(s, "\n%s\n", t.RenderANSI(78))
+		if i == len(topics)-1 {
+			break
+		}
+		fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, tr(s, "─»>Enter to continue, Q to quit<«─"), ansi.Reset)
+		k, err := readKey(s)
+		if err != nil {
+			return Stay
+		}
+		if k == 'q' || k == 'Q' {
+			break
+		}
+	}
+	pause(s)
+	return Stay
+}
+
 // helpLanguages are the languages the UI/help can render, in menu order: English
 // (the canonical source, code "") followed by every translated language from the
 // single source of truth in i18n.Languages. Endonyms (each language in its own

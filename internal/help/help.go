@@ -42,7 +42,7 @@ type Topic struct {
 // categoryOrder fixes the display order of the known categories; any category
 // not listed here sorts after these, alphabetically. Matches the spec's set.
 var categoryOrder = []string{
-	"controls", "military", "economy", "warfare", "covert", "diplomacy", "interbbs",
+	"introduction", "controls", "military", "economy", "warfare", "covert", "diplomacy", "interbbs",
 }
 
 // CategoryOrder returns the fixed display order of the known category slugs, so
@@ -53,13 +53,14 @@ func CategoryOrder() []string { return append([]string(nil), categoryOrder...) }
 // categoryNames maps a category slug to its display name (a few need casing
 // the slug can't carry, like inter-bbs).
 var categoryNames = map[string]string{
-	"controls":  "Controls",
-	"military":  "Military",
-	"economy":   "Economy",
-	"warfare":   "Warfare",
-	"covert":    "Covert Operations",
-	"diplomacy": "Diplomacy",
-	"interbbs":  "Inter-BBS",
+	"introduction": "Introduction",
+	"controls":     "Controls",
+	"military":     "Military",
+	"economy":      "Economy",
+	"warfare":      "Warfare",
+	"covert":       "Covert Operations",
+	"diplomacy":    "Diplomacy",
+	"interbbs":     "Inter-BBS",
 }
 
 // all is the English topic set (the canonical structure), loaded once at init.
@@ -224,5 +225,35 @@ func Topics(category, lang string) []Topic {
 		}
 		return out[i].path < out[j].path // language-independent tie-break
 	})
+	return out
+}
+
+// topicByPath returns the topic at a content-relative path (e.g.
+// "introduction/overview.md"), localized to lang, and whether it was found. It
+// reaches topics regardless of their InGame flag, so the Instructions assembler
+// can pull docs-only entries the ? browser hides.
+func topicByPath(path, lang string) (Topic, bool) {
+	for _, t := range all {
+		if t.path == path {
+			return localize(t, lang), true
+		}
+	}
+	return Topic{}, false
+}
+
+// Instructions returns the linear "read the manual" sequence: the How to Play
+// overview followed by every in-game topic in category + order sequence, each
+// localized to lang. This is BRE's breins.txt shape — the same topics the ?
+// browser shows one at a time, stitched into one continuous read — assembled
+// from the single-source Markdown so it never drifts from the help. The overview
+// is a docs-only topic (InGame false), so Categories() below never re-adds it.
+func Instructions(lang string) []Topic {
+	var out []Topic
+	if intro, ok := topicByPath("introduction/overview.md", lang); ok {
+		out = append(out, intro)
+	}
+	for _, cat := range Categories() {
+		out = append(out, Topics(cat, lang)...)
+	}
 	return out
 }

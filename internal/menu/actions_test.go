@@ -7,6 +7,35 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
+// TestShowInstructions pages through the whole linear manual: the overview leads
+// and the assembled help topics follow (BRE's Instructions item).
+func TestShowInstructions(t *testing.T) {
+	w := newWorld()
+	f := &fakeSession{keys: []rune(strings.Repeat(" ", 200))} // continue past every page
+	showInstructions(f, w)
+	out := f.out.String()
+	if !strings.Contains(out, "How to Play") {
+		t.Errorf("overview should lead the instructions; got:\n%.200s", out)
+	}
+	if !strings.Contains(out, "Troopers") {
+		t.Error("instructions should stitch in help topics like Troopers")
+	}
+}
+
+// TestShowInstructionsQuitsEarly: Q on the first page stops before later topics.
+func TestShowInstructionsQuitsEarly(t *testing.T) {
+	w := newWorld()
+	f := &fakeSession{keys: []rune("Q")}
+	showInstructions(f, w)
+	out := f.out.String()
+	if !strings.Contains(out, "How to Play") {
+		t.Error("the overview should print before an early quit")
+	}
+	if strings.Contains(out, "Troopers") {
+		t.Error("Q on the first page should stop before the topic sections")
+	}
+}
+
 // TestWriteMacrosBackspaceEdits: recording a macro, Backspace deletes the last
 // key and Enter is recorded — mirroring BRE's editor.
 func TestWriteMacrosBackspaceEdits(t *testing.T) {

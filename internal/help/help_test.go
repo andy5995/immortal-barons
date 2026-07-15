@@ -73,6 +73,32 @@ func TestControlsCategoryLoads(t *testing.T) {
 	}
 }
 
+func TestInstructionsAssembly(t *testing.T) {
+	seq := Instructions("")
+	if len(seq) == 0 {
+		t.Fatal("Instructions returned nothing")
+	}
+	// The overview leads the read-through.
+	if seq[0].Category != "introduction" {
+		t.Errorf("first item should be the introduction overview, got category %q", seq[0].Category)
+	}
+	// It stitches in real help topics from more than one category, so it is the
+	// whole manual, not just the intro.
+	cats := map[string]bool{}
+	for _, top := range seq {
+		cats[top.Category] = true
+	}
+	if !cats["military"] || !cats["economy"] {
+		t.Errorf("expected topics from multiple categories, got %v", cats)
+	}
+	// The docs-only overview must never leak into the ? browser's category list.
+	for _, c := range Categories() {
+		if c == "introduction" {
+			t.Error("introduction is docs-only and must not be a browsable category")
+		}
+	}
+}
+
 func TestRenderANSIWrapsToWidth(t *testing.T) {
 	top := Topic{Body: "# Title\n\nThis is a fairly long line of prose that should wrap onto several lines when the width is small."}
 	out := top.RenderANSI(30)
