@@ -158,7 +158,7 @@ Immortal Barons is made with these open-source tools:
 
 ## License
 
-Released into the public domain under the [Unlicense](LICENSE).
+Free software under the [MIT License](LICENSE).
 
 ## Related Realms
 
