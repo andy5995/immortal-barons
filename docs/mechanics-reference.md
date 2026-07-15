@@ -261,7 +261,7 @@ this band — the earlier 1.0–1.5 reconstruction ran ~15–30% high):
 | Region | Rate | Base | Notes |
 |--------|-----:|-----:|-------|
 | Mountain (ore) | 400 | 3,550 | smallest swing → most stable |
-| Coastal (tourism) | 1,000 | 3,750 | × support factor `0.10 + 0.90·(Support/100)` — floor ~375/region at 0% support, never zero |
+| Coastal (tourism) | 1,000 | 3,750 | × support factor `0.10 + 0.90·(Support/100)` — floor ~375/region at 0% support, never zero. **Live-verified (#31):** a headless BRE sweep of Tourism income across Support 0→100 (coastal count held at 3) fits `factor = 0.099 + 0.901·(Support/100)`, matching this curve to ~1% on both floor and slope |
 | Desert (solar) | 2,000 | 3,000 | widest swing |
 | River (hydro) | 100 | 5,000 | highest base; a river fishes instead some turns (#29) |
 
