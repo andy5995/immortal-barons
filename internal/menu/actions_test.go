@@ -3,6 +3,8 @@ package menu
 import (
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 // TestWriteMacrosBackspaceEdits: recording a macro, Backspace deletes the last
@@ -55,6 +57,27 @@ func TestAdvisorsWarnFoodDeficit(t *testing.T) {
 	out := f.out.String()
 	if !strings.Contains(out, "food will not last the turn") {
 		t.Errorf("expected food-deficit advice; output:\n%s", out)
+	}
+}
+
+// TestAdvisorsWarnGrowthOutrunsFood checks the Civilian advisor warns while a
+// realm is still fed now but its support-driven population is growing toward a
+// capacity whose food need outruns production (issue #35).
+func TestAdvisorsWarnGrowthOutrunsFood(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.People = 100                              // tiny now → current consumption is trivial
+	p.Support = 100                             // high support → large population capacity
+	p.Land = 200                                // capacity scales with land + support
+	p.Regions = game.RegionMix{Agricultural: 1} // barely any food production
+	p.Troopers, p.Jets, p.Tanks = 0, 0, 0       // isolate the population food need
+	p.Food = 10_000_000                         // stores comfortably cover this turn
+
+	f := &fakeSession{}
+	renderAdvisor(f, w, advisorCivilian)
+	out := f.out.String()
+	if !strings.Contains(out, "still growing") {
+		t.Errorf("expected the grow-past-food warning; output:\n%s", out)
 	}
 }
 

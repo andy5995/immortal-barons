@@ -315,6 +315,17 @@ housing loss on a land sell (one code path instead of two, and it makes the
 "no misrule emigration" result below correct by construction: being over
 capacity *is* the attrition). All weights are tunable constants.
 
+**Capacity is decoupled from food, as in BRE.** Carrying capacity is
+support-driven; food is a separate gate (positive growth needs stored food, and
+a food shortage starves population back). So a high-support, low-agriculture
+realm can sit at a food *surplus* while its population climbs toward a capacity
+whose food need will outrun production. This is the intended balance — you
+manage agriculture (or the food market) to match a support-driven population,
+not the other way round. The Civilian advisor warns ahead of that wall: when the
+realm is fed now but its food need *at full population* would exceed production,
+it flags "our people are still growing… add agricultural regions before then"
+(issue #35).
+
 **Industrial production:** industrial regions output military units. You
 set production percentages across trooper/jet/turret/tank/bomber/carrier.
 A common money tip: set industry to 100% carriers and *sell* the carriers

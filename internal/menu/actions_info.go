@@ -87,6 +87,7 @@ type advisorData struct {
 	p           game.Empire
 	foodGrown   int // this turn's food production (tech-boosted, incl. rivers)
 	foodEaten   int // this turn's food consumption
+	foodAtCap   int // consumption once population fills its carrying capacity
 	income      int // this turn's gold income
 	worldIncome int // Σ income over living empires
 	worldLand   int // Σ Land over living empires
@@ -98,6 +99,7 @@ func gatherAdvisorData(w *ctx) advisorData {
 		d.p = *w.Player()
 		d.foodGrown = w.FoodGrown(&d.p)
 		d.foodEaten = d.p.FoodUpkeep()
+		d.foodAtCap = d.p.FoodUpkeepAtCapacity()
 		d.income = w.IncomeThisTurn(&d.p).Gold()
 		for _, e := range w.Empires {
 			if e.Alive {
@@ -142,6 +144,10 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []string
 			out = append(out, tr(s, "Our food will not last the turn. Buy or grow more."))
 		case net < 0:
 			out = append(out, fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), num(-net), p.Food/(-net)))
+		case d.foodAtCap > d.foodGrown:
+			// Fed now, but the populace is still growing toward a support-driven
+			// capacity whose food need outruns production (see issue #35).
+			out = append(out, fmt.Sprintf(tr(s, "We have a surplus now, but our people are still growing. At full size they will eat about %s food each turn, more than we grow. Add agricultural regions before then."), num(d.foodAtCap)))
 		default:
 			out = append(out, fmt.Sprintf(tr(s, "That leaves a surplus of %s. Our stores are secure."), num(net)))
 		}

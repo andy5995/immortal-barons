@@ -71,6 +71,20 @@ func (e *Empire) FoodUpkeep() int {
 	return e.People*PeopleFoodPerThousand/1000 + e.Troopers + e.Jets*2 + e.Tanks*2
 }
 
+// FoodUpkeepAtCapacity projects FoodUpkeep to the empire's population carrying
+// capacity — the food it will consume once a still-growing populace fills out
+// (military upkeep unchanged). Population capacity is support-driven and
+// decoupled from food (as in BRE), so a high-support realm can sit at a food
+// surplus now yet outgrow its production later; the advisor uses this to warn
+// before that happens. Never projects below the current population.
+func (e *Empire) FoodUpkeepAtCapacity() int {
+	people := e.People
+	if cap := e.popCapacity(); cap > people {
+		people = cap
+	}
+	return people*PeopleFoodPerThousand/1000 + e.Troopers + e.Jets*2 + e.Tanks*2
+}
+
 // clampGive limits a payment to what the empire can actually afford and
 // deducts it, recording it in the turn's LastGoldPaid tally. Returns the
 // amount actually paid.
