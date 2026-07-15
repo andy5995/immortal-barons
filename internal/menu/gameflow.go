@@ -495,16 +495,27 @@ func runTurn(s session.Session, w *ctx) Result {
 		statLine(s, foodUpkeep, "units of Food consumed.")
 		pause(s)
 
+		// Covert Operations runs right after maintenance and before Spending, per
+		// BRE's turn order (Payment/Food Market -> Covert -> Spending). Shown only
+		// when the player keeps the step on (Preferences) AND holds at least one
+		// covert agent to act with — a fresh realm starts with none.
+		if w.VisitCovert {
+			var agents int
+			if !withPlayer(w, func(p *game.Empire) { agents = p.Agents }) {
+				return abort()
+			}
+			if agents >= 1 {
+				if err := Run(s, w, menus.Covert); err != nil {
+					return Stay
+				}
+			}
+		}
+
 		if err := Run(s, w, menus.Spending); err != nil {
 			return Stay
 		}
 		if err := Run(s, w, menus.Attack); err != nil {
 			return Stay
-		}
-		if w.VisitCovert {
-			if err := Run(s, w, menus.Covert); err != nil {
-				return Stay
-			}
 		}
 		if w.VisitTrading {
 			if err := Run(s, w, menus.Trading); err != nil {

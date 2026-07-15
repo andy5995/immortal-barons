@@ -491,7 +491,8 @@ Turns per day: 15 (config). New players get protection turns at the start
 1. Diplomacy (first turn only)
 2. Status screen
 3. Payment / food market
-4. Covert operations
+4. Covert operations (shown only when the step is enabled in Preferences and
+   the player holds at least one covert agent — a fresh realm starts with none)
 5. Bank
 6. Spending (buy military and regions)
 7. Attacks

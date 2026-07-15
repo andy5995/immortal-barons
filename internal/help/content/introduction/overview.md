@@ -34,9 +34,10 @@ A turn moves through these steps in order:
 - **Reports.** You see an income report and your full Empire Status.
 - **Upkeep.** You pay to maintain your military and your land, and you feed your
   people and your army. Short food or gold causes trouble, so watch these.
+- **Covert Operations.** Spying and sabotage. This step appears only if you keep
+  it turned on and hold at least one covert agent.
 - **Spending.** You buy land, military, and other things.
 - **Attacks.** You may attack another barony (once per turn).
-- **Covert Operations.** Spying and sabotage, if you keep this step turned on.
 - **Trading.** Trade goods with other baronies, if you keep this step turned on.
 - **InterPlanetary Operations.** Actions against other planets, in linked games.
 - **Messages.** You may send a message to another player.
