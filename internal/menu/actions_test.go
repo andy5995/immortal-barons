@@ -75,10 +75,13 @@ func TestAdvisorsWarnLowSupport(t *testing.T) {
 }
 
 // TestAdvisorsWarnFoodDeficit checks the Civilian advisor surfaces the
-// food-shortfall nudge when stores won't cover next turn's consumption.
+// food-shortfall nudge when the realm ends the turn with negative food:
+// production trails consumption and stores can't bridge the gap.
 func TestAdvisorsWarnFoodDeficit(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
+	p.Regions = game.RegionMix{Agricultural: 1} // barely any production
+	p.Troopers = 1000                           // a hungry army outruns it
 	p.Food = 0
 
 	f := &fakeSession{}
@@ -86,6 +89,23 @@ func TestAdvisorsWarnFoodDeficit(t *testing.T) {
 	out := f.out.String()
 	if !strings.Contains(out, "food will not last the turn") {
 		t.Errorf("expected food-deficit advice; output:\n%s", out)
+	}
+}
+
+// TestAdvisorsNoFalseFoodWarning guards against issue where the Civilian
+// advisor cried "food will not last" whenever stored food was below one turn's
+// consumption, ignoring production. A realm that grows more than it eats never
+// starves however empty its stores are.
+func TestAdvisorsNoFalseFoodWarning(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Food = 0 // empty stores, but a fresh realm runs a food surplus
+
+	f := &fakeSession{}
+	renderAdvisor(f, w, advisorCivilian)
+	out := f.out.String()
+	if strings.Contains(out, "will not last") {
+		t.Errorf("surplus realm must not warn of starvation; output:\n%s", out)
 	}
 }
 

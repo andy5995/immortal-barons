@@ -140,7 +140,9 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []string
 		out = append(out, fmt.Sprintf(tr(s, "We grow %s food each turn and consume %s."), num(d.foodGrown), num(d.foodEaten)))
 		net := d.foodGrown - d.foodEaten
 		switch {
-		case p.Food < d.foodEaten:
+		case p.Food+net < 0:
+			// Production trails consumption and stores can't cover the gap, so
+			// the turn ends with negative food (see turn.go starvation step).
 			out = append(out, tr(s, "Our food will not last the turn. Buy or grow more."))
 		case net < 0:
 			out = append(out, fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), num(-net), p.Food/(-net)))
