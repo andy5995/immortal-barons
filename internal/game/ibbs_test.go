@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestImportBoardAppendsNewBoard(t *testing.T) {
 	w := NewWorld(DefaultConfig())
@@ -63,6 +66,7 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 	cfgB.BoardID = "boardB"
 	wB := NewWorldSeed(cfgB, 1)
 	target := wB.AddHuman("victim", "Victim")
+	target.Protection = 0 // past new-realm protection, so the strike can land
 	target.Regions = RegionMix{Coastal: 100}
 	target.syncLand()
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0 // defenseless
@@ -165,6 +169,32 @@ func TestTerrorOpBlockedByProtection(t *testing.T) {
 	}
 }
 
+func TestRemoteAttackBlockedByProtection(t *testing.T) {
+	cfgB := DefaultConfig()
+	cfgB.BoardID = "boardB"
+	wB := NewWorldSeed(cfgB, 1)
+	target := wB.AddHuman("victim", "Victim")
+	target.Protection = 3
+	target.Troopers = 100 // weak defense: without the guard the strike would take land
+	landBefore := target.Land
+
+	// An overwhelming interplanetary strike lands on the protected realm.
+	pkt := Packet{FromBoard: "boardA", ToBoard: "boardB", Attacks: []RemoteAttack{{
+		ID: 1, FromBoard: "boardA", TargetEmpire: "Victim", Offense: 1_000_000,
+	}}}
+	result := wB.ApplyPacket(pkt)
+
+	if target.Land != landBefore {
+		t.Errorf("protected target should lose no land, %d -> %d", landBefore, target.Land)
+	}
+	if result.Results[0].Won || result.Results[0].LandTaken != 0 {
+		t.Errorf("remote attack against a protected target should not win, got %+v", result.Results[0])
+	}
+	if n := len(target.Events); n == 0 || !strings.Contains(target.Events[n-1], "New Realm Protection") {
+		t.Errorf("protected target should be told the strike was stopped, events: %v", target.Events)
+	}
+}
+
 func TestJoinDepartedAttackFails(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("e", "E")
@@ -189,6 +219,7 @@ func TestGroupAttackReturnsSurvivors(t *testing.T) {
 	cfgB.BoardID = "boardB"
 	wB := NewWorldSeed(cfgB, 1)
 	target := wB.AddHuman("victim", "Victim")
+	target.Protection = 0 // past new-realm protection, so the strike can land
 	target.Regions = RegionMix{Coastal: 100}
 	target.syncLand()
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0 // defenseless

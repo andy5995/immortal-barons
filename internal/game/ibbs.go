@@ -494,6 +494,13 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		return res
 	}
 	res.TargetEmpire = target.Name
+	// A target still under New Realm Protection is shielded, same as an incoming
+	// terror op (resolveRemoteTerror). Protection counts down in transit, so this
+	// arrival-time check — not the sender's view days earlier — is authoritative.
+	if target.Protection > 0 {
+		target.Events = append(target.Events, fmt.Sprintf("An interplanetary strike from %s was stopped by your New Realm Protection.", atk.FromBoard))
+		return res
+	}
 	def := target.Defense()
 	if atk.Offense <= def {
 		target.Events = append(target.Events, fmt.Sprintf("You repelled an interplanetary strike from %s.", atk.FromBoard))
