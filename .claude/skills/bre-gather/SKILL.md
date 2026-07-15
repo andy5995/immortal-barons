@@ -72,6 +72,17 @@ needs three things:
    (`https://github.com/theimpossibleastronaut/dosemu2-appimage/releases`), or a
    **Docker image** (`https://github.com/theimpossibleastronaut/dosemu2-container/`).
    `tmux` is in every mainstream distro's repos.
+   - **Native install / AppImage is the proven path** — dosemu2 runs on the host
+     and the recipe below works verbatim.
+   - **The Docker image also works for this text-scraping harness** (its `-t`
+     text mode is a first-class use case, not just X11 games). Don't run tmux
+     *inside* the container — make the container the pane's process on the host:
+     `tmux new-session -d -s bre -x 80 -y 25 "docker run --rm -it -v ~/.dosemu:/home/dosuser/.dosemu ghcr.io/theimpossibleastronaut/dosemu2-container:release -t"`,
+     then `send-keys`/`capture-pane` the host pane as usual. The BRE files must
+     live under the bind-mounted `~/.dosemu` (drive_c + mutating game state
+     persist there). **UNVERIFIED end-to-end for the BRE flow** — reasoned from
+     the container's README, not tested; the one spot to confirm is that
+     `docker run -it` allocates a pty cleanly inside a *detached* tmux pane.
 2. **The original BRE distribution files** — normally just the official BRE DOS
    door archive downloaded from the John Dailey Software release site (or the BRE
    community; the project README links a BRE Discord), unpacked to a local
