@@ -91,19 +91,13 @@ for how to choose between CP437 and UTF-8.
 ## Running as a BBS door
 
 Immortal Barons can run as a native door under BBS software on any platform Go
-supports. The BBS writes a dropfile (`DOOR32.SYS` or `DOOR.SYS`)
-when a caller starts the door, and the caller shares one persistent world with
-everyone else on the board — each empire is saved between calls, keyed by its
-BBS handle.
+supports. Callers share one persistent world, each empire saved between calls
+and keyed by its BBS handle, and several nodes can play at the same time.
 
-Several callers can play at the same time. On a multi-node BBS, each node runs
-its own copy of the door against the same shared world. Every action is saved
-right away under a short file lock, so two nodes never overwrite each other.
-
-Registering the door, the dropfile, daily maintenance (`immortal-barons -maint`),
-the node list, inter-BBS play, and starting a fresh game (`immortal-barons -reset`)
-are all covered in the
-[Door Setup guide](https://andy5995.github.io/immortal-barons/door-setup/).
+The [Door Setup guide](https://andy5995.github.io/immortal-barons/door-setup/)
+covers the details: registering the door, the dropfile, daily maintenance
+(`immortal-barons -maint`), the node list, inter-BBS play, and starting a fresh
+game (`immortal-barons -reset`).
 
 ## Running in a browser (experimental)
 
