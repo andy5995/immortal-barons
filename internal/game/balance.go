@@ -84,6 +84,19 @@ const (
 	// investments so idle gold earns instead of sitting.
 	AIGoldReserve = 50_000 // gold kept on hand for food/maintenance/expansion
 	AIInvestPct   = 50     // % of the surplus above the reserve to invest
+
+	// War (#36): aggressor-profile AIs lean into offense (tanks + troopers, few
+	// turrets) so they can actually wage the wars they start, where the other
+	// profiles keep the defensive default mix above.
+	AIForceTrooperPctWar = 45
+	AIForceTurretPctWar  = 5
+	AIForceTankPctWar    = 50
+
+	// AIWarOffenseMargin gates aggression: an aggressor attacks the weakest valid
+	// target only when its offense exceeds the target's effective defense (units
+	// + land bonus) by this %, so it picks winnable fights instead of throwing
+	// its army away.
+	AIWarOffenseMargin = 130
 )
 
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income

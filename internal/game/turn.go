@@ -139,13 +139,16 @@ func (w *World) nextDate(d string) string {
 func (w *World) aiPlay(today string) {
 	for _, e := range w.AIEmpires() {
 		w.aiHandleDiplomacy(e) // answer pending treaty offers before playing (#36)
-		for e.TurnsLeft > 0 {
+		// e.Alive is re-checked because an earlier aggressor in this pass may have
+		// conquered this realm before its own turn came up (#36).
+		for e.Alive && e.TurnsLeft > 0 {
 			w.aiManageEconomy(e)
 			e.LastGoldPaid = 0
 			w.PayForces(e, w.ForcesDue(e))
 			w.PayRegions(e, w.RegionsDue(e))
 			w.Manufacture(e)   // industry production also runs at turn start (#71)
 			w.CollectIncome(e) // same point income used to be credited (start of PlayTurn)
+			w.aiWageWar(e)     // aggressors strike a weak neighbour when clearly favored (#36)
 			w.PlayTurn(e, today)
 		}
 	}
@@ -221,9 +224,10 @@ func (w *World) aiBuildForces(e *Empire) {
 			e.Gold -= n * price
 		}
 	}
-	buy(AIForceTrooperPct, w.Prices.Trooper, &e.Troopers)
-	buy(AIForceTurretPct, w.Prices.Turret, &e.Turrets)
-	buy(AIForceTankPct, w.Prices.Tank, &e.Tanks)
+	trooperPct, turretPct, tankPct := aiForceShares(e.aiProfile())
+	buy(trooperPct, w.Prices.Trooper, &e.Troopers)
+	buy(turretPct, w.Prices.Turret, &e.Turrets)
+	buy(tankPct, w.Prices.Tank, &e.Tanks)
 }
 
 // aiInvestIdle parks the AI's gold above a working reserve into investments so

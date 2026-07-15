@@ -45,6 +45,48 @@ func aiAcceptsTreaty(profile, ttype string) bool {
 	}
 }
 
+// aiForceShares returns the trooper/turret/tank gold shares an AI of the given
+// profile spends its military budget on (#36). Aggressors lean into offense
+// (tanks + troopers, few turrets); every other profile keeps the defensive
+// default (turret-heavy). Each triple sums to 100.
+func aiForceShares(profile string) (trooper, turret, tank int) {
+	if profile == AIProfileAggressor {
+		return AIForceTrooperPctWar, AIForceTurretPctWar, AIForceTankPctWar
+	}
+	return AIForceTrooperPct, AIForceTurretPct, AIForceTankPct
+}
+
+// effectiveDefense is a realm's total defensive strength as the battle math
+// sees it: its unit defense plus the per-region land bonus. The AI uses this to
+// judge whether a target is winnable (#36).
+func effectiveDefense(e *Empire) int {
+	return e.Defense() + e.Land*LandDefenseBonus
+}
+
+// aiWageWar lets an aggressor-profile AI strike the weakest valid target when it
+// is clearly favored (#36). It reuses World.Targets (which already excludes
+// dead, protected, and allied realms) and only commits when its offense beats
+// the target's effective defense by AIWarOffenseMargin, so it starts winnable
+// wars rather than suicidal ones. Non-aggressors and protected AIs never start a
+// war. At most one attack per call (one per turn, BRE-style).
+func (w *World) aiWageWar(e *Empire) {
+	if e.Protection > 0 || e.aiProfile() != AIProfileAggressor {
+		return
+	}
+	var target *Empire
+	for _, t := range w.Targets(e) {
+		if target == nil || effectiveDefense(t) < effectiveDefense(target) {
+			target = t
+		}
+	}
+	if target == nil {
+		return
+	}
+	if e.Offense() > effectiveDefense(target)*AIWarOffenseMargin/100 {
+		w.Attack(e, target)
+	}
+}
+
 // aiHandleDiplomacy responds to an AI's pending treaty offers (#36): it accepts
 // the ones its personality favors and drops the rest, so a player (or another
 // AI) proposing a pact to an AI gets a real answer instead of silence. Declined

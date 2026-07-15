@@ -60,3 +60,72 @@ func TestAIAggressorAcceptsTradePact(t *testing.T) {
 		t.Error("aggressor AI should accept a self-serving trade agreement")
 	}
 }
+
+// warWorld builds a 2-empire world (no seeded AI) for deterministic war tests:
+// one aggressor and one victim, both out of protection at full morale.
+func warWorld(t *testing.T) (*World, *Empire, *Empire) {
+	t.Helper()
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	agg := w.AddHuman("agg", "Aggressor")
+	agg.AIProfile = AIProfileAggressor
+	agg.Protection, agg.Morale = 0, 100
+	vic := w.AddHuman("vic", "Victim")
+	vic.Protection, vic.Morale = 0, 100
+	vic.Troopers, vic.Turrets, vic.Tanks, vic.Jets, vic.Carriers = 100, 0, 0, 0, 0
+	vic.Regions = RegionMix{Desert: 50}
+	vic.syncLand()
+	return w, agg, vic
+}
+
+func TestAIAggressorAttacksWeakNeighbor(t *testing.T) {
+	w, agg, vic := warWorld(t)
+	agg.Troopers, agg.Tanks = 5000, 500 // overwhelming offense
+	before := vic.Land
+
+	w.aiWageWar(agg)
+
+	if vic.Land >= before {
+		t.Errorf("aggressor should have captured land: before=%d after=%d", before, vic.Land)
+	}
+}
+
+func TestAIAggressorHoldsWhenOutmatched(t *testing.T) {
+	w, agg, vic := warWorld(t)
+	agg.Troopers = 50 // far too weak to win
+	vic.Troopers, vic.Turrets = 3000, 2000
+	before := vic.Land
+
+	w.aiWageWar(agg)
+
+	if vic.Land != before {
+		t.Errorf("aggressor should not attack when outmatched: before=%d after=%d", before, vic.Land)
+	}
+}
+
+func TestAINonAggressorDoesNotStartWar(t *testing.T) {
+	w, agg, vic := warWorld(t)
+	agg.AIProfile = AIProfileDiplomat
+	agg.Troopers, agg.Tanks = 5000, 500 // strong, but not warlike
+	before := vic.Land
+
+	w.aiWageWar(agg)
+
+	if vic.Land != before {
+		t.Errorf("non-aggressor should not start a war: before=%d after=%d", before, vic.Land)
+	}
+}
+
+func TestAIAggressorRespectsProtection(t *testing.T) {
+	w, agg, vic := warWorld(t)
+	agg.Troopers, agg.Tanks = 5000, 500
+	vic.Protection = 20 // shielded — no longer a valid target
+	before := vic.Land
+
+	w.aiWageWar(agg)
+
+	if vic.Land != before {
+		t.Errorf("aggressor must not attack a protected realm: before=%d after=%d", before, vic.Land)
+	}
+}

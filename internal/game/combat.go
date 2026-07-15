@@ -21,6 +21,11 @@ const (
 	// RegularAttackCapturePct is the share of the loser's regions a Normal
 	// attack captures (attack.hlp: 20%).
 	RegularAttackCapturePct = 20
+
+	// LandDefenseBonus is the defensive strength each region adds on top of the
+	// defender's units (terrain the attacker must take). Used in the battle math
+	// and by the AI when judging whether a target is winnable (#36).
+	LandDefenseBonus = 2
 )
 
 // bombingRun sends a's bombers against d's airfields before the ground
@@ -67,7 +72,7 @@ func (w *World) Attack(a, d *Empire) string {
 	// Military morale scales each side's unit effectiveness (the land defense
 	// bonus is terrain, not troops, so morale doesn't touch it).
 	ap := w.jitter(a.Offense() * moraleFactor(a.Morale) / 100)
-	dp := w.jitter(d.Defense()*moraleFactor(d.Morale)/100 + d.Land*2)
+	dp := w.jitter(d.Defense()*moraleFactor(d.Morale)/100 + d.Land*LandDefenseBonus)
 
 	// BRE's Normal Attack (attack.hlp): the winner captures 20% of the loser's
 	// regions, and "both sides fight until they suffer 15% losses, at which
