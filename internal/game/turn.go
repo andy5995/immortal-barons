@@ -187,11 +187,41 @@ func (w *World) aiManageEconomy(e *Empire) {
 		}
 	}
 
-	// 3. Food-healthy: turn spare gold into troopers.
-	if e.Gold > 5000 {
-		n := (e.Gold / 4) / w.Prices.Trooper
-		e.Troopers += n
-		e.Gold -= n * w.Prices.Trooper
+	// 3. Food-healthy: build a defensive-capable force mix, then park the clear
+	//    surplus in investments instead of hoarding it (#36).
+	w.aiBuildForces(e)
+	w.aiInvestIdle(e)
+}
+
+// aiBuildForces spends a share of the AI's gold on military each turn, split by
+// gold-value across troopers, turrets, and tanks (#36). The old AI bought only
+// troopers, so its realms had no turret defense; this gives them a real
+// defensive posture while still fielding offense. Shares come from balance.go.
+func (w *World) aiBuildForces(e *Empire) {
+	budget := e.Gold * AIMilitaryBudgetPct / 100
+	buy := func(share, price int, count *int) {
+		if price <= 0 {
+			return
+		}
+		if n := (budget * share / 100) / price; n > 0 {
+			*count += n
+			e.Gold -= n * price
+		}
+	}
+	buy(AIForceTrooperPct, w.Prices.Trooper, &e.Troopers)
+	buy(AIForceTurretPct, w.Prices.Turret, &e.Turrets)
+	buy(AIForceTankPct, w.Prices.Tank, &e.Tanks)
+}
+
+// aiInvestIdle parks the AI's gold above a working reserve into investments so
+// idle treasury earns rather than sitting (#36). Runs after food, expansion,
+// and military spending, so only a genuine surplus is locked away.
+func (w *World) aiInvestIdle(e *Empire) {
+	if e.Gold <= AIGoldReserve {
+		return
+	}
+	if amt := (e.Gold - AIGoldReserve) * AIInvestPct / 100; amt > 0 {
+		w.Invest(e, amt, MinInvestDays)
 	}
 }
 

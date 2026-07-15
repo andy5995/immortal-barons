@@ -68,6 +68,22 @@ const (
 const (
 	AIFoodBufferTurns = 3 // turns of food consumption the AI keeps on hand
 	AIAgriBuyMax      = 5 // Agricultural regions the AI buys per turn when food-tight
+
+	// Force mix (#36): once food-healthy, the AI spends this share of its gold
+	// on military each turn, split by gold-value across a defensive-capable mix
+	// instead of buying only troopers. Troopers are versatile (1 offense / 1
+	// defense), turrets give cheap defense (0/2) the old trooper-only AI lacked,
+	// and tanks (4/4) add punch when it can afford them. Shares sum to 100.
+	AIMilitaryBudgetPct = 50 // % of gold spent on military when food-healthy
+	AIForceTrooperPct   = 50 // % of the military budget spent on troopers
+	AIForceTurretPct    = 30 // % on turrets (defense)
+	AIForceTankPct      = 20 // % on tanks
+
+	// Banking (#36): rather than hoard the gold left after buying food and
+	// military, the AI parks the clear surplus above a working reserve in
+	// investments so idle gold earns instead of sitting.
+	AIGoldReserve = 50_000 // gold kept on hand for food/maintenance/expansion
+	AIInvestPct   = 50     // % of the surplus above the reserve to invest
 )
 
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income

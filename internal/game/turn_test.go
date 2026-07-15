@@ -372,3 +372,56 @@ func TestIncomeReportMatchesCredit(t *testing.T) {
 		t.Errorf("credited %d but the itemized breakdown sums to %d", e.Gold, sum)
 	}
 }
+
+// TestAIBuildsDefensiveForceMix checks the AI (#36) no longer buys only
+// troopers: when food-healthy it builds a mix that includes defensive turrets
+// and tanks, giving its realm an actual defensive posture.
+func TestAIBuildsDefensiveForceMix(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("ai", "AI")
+	e.Regions = RegionMix{Agricultural: 50} // ~15k food/turn produced
+	e.syncLand()
+	e.People = 1000 // tiny upkeep so the realm is food-healthy
+	e.Troopers, e.Jets, e.Turrets, e.Tanks, e.Carriers = 0, 0, 0, 0, 0
+	e.Food = 1_000_000
+	e.Gold = 500_000
+	e.Investments = nil
+
+	w.aiManageEconomy(e)
+
+	if e.Troopers == 0 {
+		t.Error("AI should still buy troopers, got 0")
+	}
+	if e.Turrets == 0 {
+		t.Error("AI should buy turrets for defense, got 0")
+	}
+	if e.Tanks == 0 {
+		t.Error("AI should buy tanks, got 0")
+	}
+	if e.Defense() == 0 {
+		t.Error("AI should have a defensive posture, got 0 Defense")
+	}
+}
+
+// TestAIInvestsIdleGold checks the AI parks its clear surplus in investments
+// (#36) instead of hoarding gold that just sits.
+func TestAIInvestsIdleGold(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("ai", "AI")
+	e.Regions = RegionMix{Agricultural: 50}
+	e.syncLand()
+	e.People = 1000
+	e.Troopers, e.Jets, e.Turrets, e.Tanks, e.Carriers = 0, 0, 0, 0, 0
+	e.Food = 1_000_000
+	e.Gold = 2_000_000
+	e.Investments = nil
+
+	w.aiManageEconomy(e)
+
+	if len(e.Investments) == 0 {
+		t.Error("AI with a large surplus should invest, got no investments")
+	}
+	if e.Gold >= 2_000_000 {
+		t.Errorf("AI should have spent/invested gold, still holds %d", e.Gold)
+	}
+}
