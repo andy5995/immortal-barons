@@ -425,3 +425,27 @@ func TestAIInvestsIdleGold(t *testing.T) {
 		t.Errorf("AI should have spent/invested gold, still holds %d", e.Gold)
 	}
 }
+
+// TestAIStartsHQ checks the AI builds a HeadQuarters (#36) once it fields tanks,
+// so its tanks get the HQ offense/defense multiplier instead of being unamplified.
+func TestAIStartsHQ(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("ai", "AI")
+	e.Regions = RegionMix{Agricultural: 50}
+	e.syncLand()
+	e.People = 1000
+	e.Troopers, e.Jets, e.Turrets, e.Tanks, e.Carriers = 0, 0, 0, 0, 0
+	e.Food = 1_000_000
+	e.Gold = 500_000
+	e.HQ = 0
+	e.Investments = nil
+
+	w.aiManageEconomy(e)
+
+	if e.Tanks == 0 {
+		t.Fatal("precondition: AI should have bought tanks")
+	}
+	if e.HQ == 0 {
+		t.Error("AI with tanks and ample gold should start a HeadQuarters, HQ still 0")
+	}
+}

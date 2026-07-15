@@ -187,10 +187,22 @@ func (w *World) aiManageEconomy(e *Empire) {
 		}
 	}
 
-	// 3. Food-healthy: build a defensive-capable force mix, then park the clear
-	//    surplus in investments instead of hoarding it (#36).
+	// 3. Food-healthy: build a defensive-capable force mix, start a HeadQuarters
+	//    to amplify its tanks, then park the clear surplus in investments
+	//    instead of hoarding it (#36).
 	w.aiBuildForces(e)
+	w.aiStartHQ(e)
 	w.aiInvestIdle(e)
+}
+
+// aiStartHQ builds a HeadQuarters once the AI fields tanks (#36): HQ multiplies
+// tank offense and defense, so it is only worth the gold when there are tanks
+// to amplify. StartHQ re-checks affordability, and HQ then advances on its own
+// each turn (see PlayTurn), so this fires once and needs no further management.
+func (w *World) aiStartHQ(e *Empire) {
+	if e.HQ == 0 && e.Tanks > 0 && e.Gold > HQCost {
+		w.StartHQ(e)
+	}
 }
 
 // aiBuildForces spends a share of the AI's gold on military each turn, split by
