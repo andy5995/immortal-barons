@@ -82,17 +82,18 @@ func lineWithAll(out string, subs ...string) bool {
 	return false
 }
 
-// TestSystemMenuThreeColumn checks the System menu lays three items on one row
-// and offers a Help item.
-func TestSystemMenuThreeColumn(t *testing.T) {
+// TestSystemMenuTwoColumn checks the System menu lays two items on one row (2
+// columns, not BRE's 3 — wide/translated labels overflow 3; see tree.go) and
+// offers a Help item.
+func TestSystemMenuTwoColumn(t *testing.T) {
 	menus := BuildMenus()
 	w := newWorld()
 
 	f := &fakeSession{}
 	draw(f, w, menus.System)
 	out := f.out.String()
-	if maxItemsPerLine(out) < 3 {
-		t.Errorf("System menu should place three items on one line:\n%s", out)
+	if maxItemsPerLine(out) < 2 {
+		t.Errorf("System menu should place two items on one line:\n%s", out)
 	}
 	if !lineWithAll(out, "(?)", "Help") {
 		t.Errorf("System menu should include a (?) Help item:\n%s", out)

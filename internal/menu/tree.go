@@ -52,7 +52,10 @@ func BuildMenus() *Menus {
 	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
 	prefs := &Menu{Title: "Preferences", Color: ansi.FgBrightCyan}
 	coord := &Menu{Title: "Coordinator Menu", Color: ansi.FgBrightBlue}
-	system := &Menu{Title: "System Menu", Color: ansi.FgBrightBlue, Columns: 3}
+	// Two columns, not BRE's three: several labels ("Configuration Editor",
+	// "Specialize Industry") are already wide in English and grow when translated,
+	// so a 3-column row overflows 80 cols. The wider 2-column cell fits them.
+	system := &Menu{Title: "System Menu", Color: ansi.FgBrightBlue, Columns: 2}
 	food := &Menu{Title: "Chopper's Fair Market", Color: ansi.FgBrightCyan}
 
 	// owned adapts a per-empire count into a menu column function.
@@ -339,7 +342,7 @@ func BuildMenus() *Menus {
 
 	system.Items = []Item{
 		{Key: '#', Label: "Abdicate", Do: abdicate},
-		{Key: 'X', Label: "End Protection Early", Do: endProtection,
+		{Key: 'X', Label: "End Protection", Do: endProtection,
 			// Only relevant while the realm is still under new-realm protection.
 			Hidden: func(w *ctx) bool { return w.Player().Protection <= 0 }},
 		{Key: 'A', Label: "Visit Advisors", Do: visitAdvisors},
@@ -349,7 +352,7 @@ func BuildMenus() *Menus {
 		{Key: 'G', Label: "Game Setup", Do: gameSetup},
 		// BRE reserves 'I' on the System Menu for InterBBS Scores; About (an IB
 		// addition) now lives in the Help browser, so the two don't collide (#17).
-		{Key: 'I', Label: "InterBBS Scores", Do: interbbsScores},
+		{Key: 'I', Label: "InterBBS Scores", Do: interbbsScores, Hidden: ibbsHidden},
 		{Key: 'M', Label: "Messages", Do: gotoMenu(messages)},
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
 		{Key: 'R', Label: "Set Tax Rate", Do: setTaxRate},
@@ -362,9 +365,17 @@ func BuildMenus() *Menus {
 		{Key: '3', Label: "Specialize Industry", Do: specializeIndustry,
 			// Specializing is permanent, so hide the option once it's been done.
 			Hidden: func(w *ctx) bool { return w.Player().Specialized != "" }},
+		// BRE lists the Spy Database on the System Menu ('4') as well as on
+		// InterPlanetary Ops ('S'); it holds cross-board intel, so IBBS-only.
+		{Key: '4', Label: "Spy Database", Do: spyDatabase, Hidden: ibbsHidden},
 		{Key: '?', Label: "Help", Do: helpBrowse},
-		{Key: 'O', Label: "Vote for Coordinator", Do: voteCoordinator, Hidden: ibbsHidden},
-		{Key: 'Y', Label: "Coordinator Menu", Do: gotoMenu(coord),
+		// BRE: Coordinator Vote is '5', shown only in IBBS games and only once the
+		// voter's new-realm protection ends (a protected realm can't vote and isn't
+		// a candidate). The Coordinator Menu is '*' and appears only for the empire
+		// currently elected Coordinator (most votes).
+		{Key: '5', Label: "Coordinator Vote", Do: voteCoordinator,
+			Hidden: func(w *ctx) bool { return ibbsHidden(w) || w.Player().Protection > 0 }},
+		{Key: '*', Label: "Coordinator Menu", Do: gotoMenu(coord),
 			Hidden: func(w *ctx) bool { return ibbsHidden(w) || w.BBSCoordinator() != w.Player() }},
 		{Key: 'C', Label: "Configuration Editor", Do: configEditor,
 			Hidden: func(w *ctx) bool { return !w.Coordinator }},

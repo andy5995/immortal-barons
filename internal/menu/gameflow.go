@@ -80,10 +80,12 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 // defYes) and reads a single keypress — no Enter required. 'y'/'Y' returns
 // true, 'n'/'N' returns false; Enter or any other key returns defYes.
 func askYesNo(s session.Session, msg string, defYes bool) bool {
-	hint := "(y/N)"
+	letters := "y/N"
 	if defYes {
-		hint = "(Y/n)"
+		letters = "Y/n"
 	}
+	// BRE colors the y/n hint: the letters cyan, the parens a slightly darker blue.
+	hint := ansi.FgBrightBlue + "(" + ansi.FgBrightCyan + letters + ansi.FgBrightBlue + ")" + ansi.Reset
 	fmt.Fprintf(s, "\n%s %s ", i18n.T(sessionLang(s), msg), hint)
 	for {
 		r, err := readKey(s)

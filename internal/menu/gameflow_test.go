@@ -35,14 +35,14 @@ func TestAskYesNo(t *testing.T) {
 func TestAskYesNoHint(t *testing.T) {
 	f := &fakeSession{keys: []rune("\r")}
 	askYesNo(f, "Continue?", true)
-	if !strings.Contains(f.out.String(), "(Y/n)") {
-		t.Errorf("expected (Y/n) hint, got %q", f.out.String())
+	if !strings.Contains(f.out.String(), "Y/n") { // colored parens surround the letters
+		t.Errorf("expected Y/n hint, got %q", f.out.String())
 	}
 
 	f2 := &fakeSession{keys: []rune("\r")}
 	askYesNo(f2, "Continue?", false)
-	if !strings.Contains(f2.out.String(), "(y/N)") {
-		t.Errorf("expected (y/N) hint, got %q", f2.out.String())
+	if !strings.Contains(f2.out.String(), "y/N") {
+		t.Errorf("expected y/N hint, got %q", f2.out.String())
 	}
 }
 

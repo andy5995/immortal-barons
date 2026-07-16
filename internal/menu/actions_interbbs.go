@@ -506,7 +506,9 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 	var coordinatorName string
 	w.With(func() {
 		for _, e := range w.Empires {
-			if !e.Alive || e.Owner == "" {
+			// Realms still under new-realm protection are not eligible candidates
+			// (BRE). Voting for yourself is allowed once your own protection ends.
+			if !e.Alive || e.Owner == "" || e.Protection > 0 {
 				continue
 			}
 			owners = append(owners, e.Owner)
