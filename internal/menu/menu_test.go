@@ -681,10 +681,12 @@ func TestEnterExitsSpendingRespectsPreference(t *testing.T) {
 
 	w2 := newWorld()
 	w2.EnterExitsBuy = false
-	if it, err := menus.Spending.readChoice(&fakeSession{keys: []rune{'\r'}}, w2); err != nil {
+	// With the pref off, Enter is not the default, so it's ignored (not treated as
+	// Quit) and the next real key is what selects: feed Enter then '0'.
+	if it, err := menus.Spending.readChoice(&fakeSession{keys: []rune{'\r', '0'}}, w2); err != nil {
 		t.Fatal(err)
-	} else if it != nil {
-		t.Errorf("pref off: expected Enter to select nothing, got %v", it)
+	} else if it == nil || it.Key != '0' {
+		t.Errorf("pref off: Enter should be ignored (not select Quit), then '0' selects; got %v", it)
 	}
 }
 

@@ -234,9 +234,10 @@ func (m *Menu) byKey(r rune, g *ctx) *Item {
 	return nil
 }
 
-// readChoice prints "Choice> ", reads ONE keypress, and returns the matching
-// menu item immediately (no Enter). It echoes the chosen item's label. Keys
-// that match no visible selectable item are ignored (return nil -> redraw).
+// readChoice prints "Choice> ", reads keypresses, and returns the matching menu
+// item immediately (no Enter). It echoes the chosen item's label. Keys that match
+// no visible selectable item are ignored in place — the menu is NOT redrawn — so
+// an unbound keypress doesn't rescroll the screen.
 func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	// With EnterExitsBuy on, a pipeline menu offers its '0' exit as the
 	// default: show it after the prompt, and let Enter select it. Resolve the
@@ -259,34 +260,38 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	if def != nil {
 		fmt.Fprint(s, defLabel)
 	}
-	r, err := readKey(s)
-	if err != nil {
-		return nil, err
-	}
-	if def != nil && (r == '\r' || r == '\n') {
-		fmt.Fprint(s, "\n")
-		return def, nil
-	}
-	if def != nil { // a real choice follows; erase the shown default first
-		for range []rune(defLabel) {
-			fmt.Fprint(s, "\b \b")
+	// Wait for a key that actually does something: Enter (the default) or a key
+	// bound to a visible item. Keys bound to nothing are ignored in place — no
+	// newline, no menu redraw — so mashing an unbound key doesn't rescroll the menu.
+	for {
+		r, err := readKey(s)
+		if err != nil {
+			return nil, err
 		}
-	}
-	// Match the keypress and read the chosen item's label under the lock.
-	var it *Item
-	var itLabel string
-	g.With(func() {
-		it = m.byKey(r, g)
-		if it != nil {
-			itLabel = it.label(g)
+		if def != nil && (r == '\r' || r == '\n') {
+			fmt.Fprint(s, "\n")
+			return def, nil
 		}
-	})
-	if it == nil {
-		fmt.Fprint(s, "\n")
-		return nil, nil
+		// Match the keypress and read the chosen item's label under the lock.
+		var it *Item
+		var itLabel string
+		g.With(func() {
+			it = m.byKey(r, g)
+			if it != nil {
+				itLabel = it.label(g)
+			}
+		})
+		if it == nil {
+			continue // no item for this key: ignore it, keep waiting
+		}
+		if def != nil { // a real choice follows; erase the shown default first
+			for range []rune(defLabel) {
+				fmt.Fprint(s, "\b \b")
+			}
+		}
+		fmt.Fprintf(s, "%s\n", itLabel)
+		return it, nil
 	}
-	fmt.Fprintf(s, "%s\n", itLabel)
-	return it, nil
 }
 
 // Run drives the menu loop against a Session. It keeps a stack of menus:
