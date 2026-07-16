@@ -281,6 +281,21 @@ interest), the pirate caps table, and the net-worth weights are BRE-scale;
 reconstructions** anchored to this scale (BRE computes prices/maintenance inline
 — not stored as constants). All tunables live in `internal/game/balance.go`.
 
+**Per-turn price walk (#30).** Each unit's buy price follows a *persistent random
+walk*, per empire: every empire stores its own current prices (`Empire.Prices`) and
+steps them once per turn (`World.stepPrices`, from `PlayTurn`). A step moves a price
+up or down by up to `PriceWalkStep*`% of its base (cheap units 3%, agents 8%) and is
+clamped to ±`PriceWalkBandPct`% (30%) of the base, so prices drift like BRE but can't
+run away. The stored value is what the Spending menu shows and what a buy/sell charges
+within the turn (shown == charged; buy and sell route through the same accessor, sell =
+buy/3, agents flat), and it persists across days via the save. Steps are deterministic
+(keyed per empire and turn, same `GameDay`/`TurnsLeft` basis as river fishing) so play
+is reproducible and concurrency-safe. This matches a live 14-turn sample (2026-07-15):
+each price drifted across turns and days, and the walk is per-empire — a fresh empire
+created the same day a veteran had drifted saw prices back at base. AI empires walk
+independently too (each keyed on its own name). **Regions do not walk** — their price
+rises purely with holdings (`917 + owned×33`), which BRE held exact every turn.
+
 **Population and tax** are a major income engine. The per-capita coefficient
 (`TaxGoldPerCapita`) is calibrated so a new realm's first-turn taxes (~5,100)
 match BRE's income report (~5,183) — a minor share of income, with region
@@ -503,6 +518,35 @@ Turns per day: 15 (config). New players get protection turns at the start
 
 If a player is cut off mid-turn, they resume where they left off.
 
+## Menu fidelity vs BRE
+
+IB's menus match BRE's layout, item order, and hotkeys where practical (#17 menu
+audit, verified live with `tmux capture-pane -e`). A few places diverge on
+purpose:
+
+- **Number formatting is locale-aware.** Prices and totals use the selected
+  language's thousands separator (comma for English, `.` for German, space for
+  Russian; see `groupSep`), so a column won't always read exactly like BRE's
+  English, no-separator figures.
+- **Menu label/column widths flex for translations.** German/Russian labels differ
+  in length from English, so column widths can't be pinned to BRE's exact English
+  spacing.
+- **The Sell menu omits HeadQuarters.** BRE lists it and refuses the sale ("you
+  cannot sell your headquarters!"); IB simply doesn't offer an option that always
+  fails.
+- **Set Industries / Change Production keeps the current % on Enter.** BRE walks
+  each unit with a suggested value of **0** (pressing Enter zeroes it), so a stray
+  Enter wipes the allocation; IB suggests the unit's **current** % instead, so Enter
+  leaves it unchanged. Both cap the running total at 100% via a shrinking max (the
+  remainder becomes gold). The order and per-unit prompt otherwise match BRE.
+- **About lives in the Help browser** (keyed `A`), not on the Game/System menus,
+  so `I` stays BRE's InterBBS Scores key.
+- **Menu items carry a 2-space left margin** where BRE's start at column 0 — a
+  minor deliberate layout choice, kept because it applies uniformly across every
+  menu and reads cleanly in a terminal.
+- Otherwise the region-type order (Buy Regions), the unit rows, the Price/Owned
+  column colors, and the hotkey layout follow BRE.
+
 ## Elimination and restart
 
 An empire is destroyed when its people or land reach zero (from an attack, a
@@ -539,10 +583,34 @@ war (breaks treaties without causing internal unrest).
 
 ## Trading
 
-Local and interplanetary markets let empires specialize. Players set prices
-on a general market. Interplanetary trades auto-accept. Carriers may be
-needed to move traded goods. Teamwork and trade are described as the main
-path to winning large InterBBS games.
+Local and interplanetary markets let empires specialize. Teamwork and trade are
+described as the main path to winning large InterBBS games.
+
+**General Trading Market (#17, built).** Reached via `System → Trading → Trading
+Market`. Any empire can list goods for other empires to buy:
+
+- **Goods:** troopers, jets, turrets, bombers, food, agents, tanks, carriers
+  (units + food + agents; not regions or HQ). Verified live against BRE.
+- **Listing escrows the goods:** setting a For Sale quantity moves that many out
+  of your inventory into the market (Owned drops); `Change setup` to a lower
+  quantity or 0 returns them. Columns: `Your Prices · Owned · For Sale · Total
+  For Sale` (Total = the planet-wide pool).
+- **Buying:** pick a good, choose a selling empire from the live listings (`Id ·
+  Empire · For Sale · Price`), and buy. You cannot buy your own listing. The
+  buyer pays the full price immediately (verified live — no markup); the seller's
+  proceeds are deposited at **day-end maintenance** (`settleMarketProceeds` —
+  BRE's "Depositing trading market money" step), minus a `MarketCommissionPct`
+  tunable (default 0 — BRE's real cut was too noisy to isolate live).
+- **Protection-gated:** a realm under new-realm protection cannot use the market.
+- **Escrowed goods are safe from pirates and attacks** — an intended BRE strategy
+  (community guide: park military to evade pirates). But listing does **not** dodge
+  your own economy: escrowed **military units still cost maintenance** and escrowed
+  **food still spoils**. `Bomb Trading Market` (covert) destroys a share
+  (`BombMarketLossPct`) of a target's listed goods and pending proceeds.
+
+Negotiated empire-to-empire trade deals carrying goods with demands (BRE's other
+trading half) are not built yet; `Send Trade Deal` still sends gold only.
+Interplanetary trades and carrier-moved goods remain future work.
 
 ## News files (what BRE broadcasts)
 
