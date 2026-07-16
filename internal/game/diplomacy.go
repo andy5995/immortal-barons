@@ -6,11 +6,16 @@ import (
 )
 
 // TreatyTypes are the agreement types two empires can form, from the BRE
-// manual's Diplomacy menu. The zeroth, Full Defense Alliance, is the pact that
-// blocks attacks between the two empires (see AreAllied); the trade and
-// intelligence pacts carry economic and covert effects (see the effect helpers
-// below and their callers in turn.go / covert.go). Technology Agreement and
-// Protective Trade are recorded but not yet wired to an effect.
+// manual's Diplomacy menu. All seven now carry an effect (#11):
+//   - Full Defense Alliance blocks attacks between the two empires and combines
+//     offense/defense (see AreAllied, AllianceStrength).
+//   - Tariff and Free Trade Agreements add per-turn trade income (tradeIncome).
+//   - Intelligence Alliance and Terrorist Prevention lend agents to covert
+//     offense/defense (covert.go).
+//   - Technology Agreement shares a partner's tech (techAgreementCeiling,
+//     advanceTech).
+//   - Protective Trade guards the two realms' trade from covert bombing
+//     (BombTradeRoutes, BombTradingMarket).
 var TreatyTypes = []string{
 	"Full Defense Alliance",
 	"Tariff Trade Agreement",
@@ -104,6 +109,20 @@ func (w *World) tradeIncome(e *Empire) int {
 	tariff := len(w.alliesOf(e, "Tariff Trade Agreement"))
 	free := len(w.alliesOf(e, "Free Trade Agreement"))
 	return tariff*e.People/40 + free*e.People/20
+}
+
+// techAgreementCeiling is the TechLevel an empire may reach from its Technology
+// Agreement partners alone (#11): a capped share of the highest-tech partner's
+// level, so even a realm with little Technology of its own gains some of a strong
+// partner's advances. Zero if it holds no such treaty. See advanceTech.
+func (w *World) techAgreementCeiling(e *Empire) int {
+	best := 0
+	for _, ally := range w.alliesOf(e, "Technology Agreement") {
+		if ally.TechLevel > best {
+			best = ally.TechLevel
+		}
+	}
+	return best * TechAgreementCapPct / 100
 }
 
 // AllianceStrength returns e's combined offense and defense with its Full

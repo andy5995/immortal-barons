@@ -576,10 +576,30 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 
 ## Diplomacy
 
-Treaty types: tariff trade, protective trade, free trade (spreads morale
-between realms), terrorist prevention, intelligence alliance, technology
-agreement, full defense alliance (local games only), and declaration of
-war (breaks treaties without causing internal unrest).
+Seven treaty types are proposed / accepted / broken through the Diplomacy menu,
+and each carries a gameplay effect (#11 wired the last two):
+
+- **Full Defense Alliance** — blocks attacks between the two realms and combines
+  their offense and defense (`AreAllied`, `AllianceStrength`).
+- **Tariff Trade Agreement** / **Free Trade Agreement** — per-turn trade income
+  scaled by population; Free earns more than Tariff (`tradeIncome`).
+- **Intelligence Alliance** / **Terrorist Prevention** — lend half an ally's
+  agents to your covert offense / defense (`covert.go`).
+- **Technology Agreement** — a tech-sharing pact (BRE: "gain some of the
+  technological advances of its partner"). A higher-tech partner raises your
+  `TechLevel` ceiling to `TechAgreementCapPct` (60%) of their level, and you catch
+  up `1/TechAgreementGainDiv` (1/20) of the gap each turn — so even a realm with
+  little Technology of its own gains from a strong partner (`techAgreementCeiling`,
+  `advanceTech`).
+- **Protective Trade** — guards the two realms' trade (BRE: "preventing bombing
+  of trade deals"): a partner cannot bomb the other's trade routes or trading
+  market (`BombTradeRoutes` / `BombTradingMarket` refuse the op, no agent lost).
+  BRE also makes trade deals "cheaper to send and maintain" — deferred until IB's
+  trade deals carry costs (#17 Phase 2).
+
+Declaration of War breaks treaties without causing internal unrest. The two
+newly-wired treaties' magnitudes are IB tunables — BRE's manual gives the intent,
+not the numbers.
 
 ## Trading
 

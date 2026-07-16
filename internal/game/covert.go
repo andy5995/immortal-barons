@@ -217,6 +217,11 @@ func (w *World) BombTradingMarket(a, d *Empire) (string, error) {
 	if a.Agents < 1 {
 		return "", ErrNoAgents
 	}
+	// A Protective Trade agreement guards the two realms' trade, so a partner
+	// cannot bomb the other's market (#11; BRE: "preventing bombing of trade deals").
+	if w.HasTreaty(a, d, "Protective Trade") {
+		return fmt.Sprintf("%s's trade is guarded by your Protective Trade agreement — the strike cannot proceed.", d.Name), nil
+	}
 	if w.covertSuccess(a, d) {
 		goods, proceeds := w.bombMarketPosition(d, BombMarketLossPct)
 		if goods == 0 && proceeds == 0 {
@@ -242,6 +247,11 @@ var tradeTreatyTypes = []string{"Tariff Trade Agreement", "Free Trade Agreement"
 func (w *World) BombTradeRoutes(a, d *Empire) (string, error) {
 	if a.Agents < 1 {
 		return "", ErrNoAgents
+	}
+	// A Protective Trade agreement guards the trade routes between the two realms,
+	// so a partner cannot bomb them (#11; BRE: "preventing bombing of trade deals").
+	if w.HasTreaty(a, d, "Protective Trade") {
+		return fmt.Sprintf("%s's trade routes are guarded by your Protective Trade agreement — the strike cannot proceed.", d.Name), nil
 	}
 	if w.covertSuccess(a, d) {
 		for _, ttype := range tradeTreatyTypes {

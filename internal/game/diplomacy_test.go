@@ -1,6 +1,82 @@
 package game
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
+
+// A Technology Agreement lets a low-Technology realm gain some of a high-tech
+// partner's advances, up to a capped share of the partner's level (#11).
+func TestTechnologyAgreementSharesTech(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha") // no Technology regions of its own
+	b := w.AddHuman("b", "Beta")
+	b.TechLevel = 500 // 50.0% tech (tenths)
+
+	// Without a treaty, a realm with no Technology regions never advances.
+	w.advanceTech(a)
+	if a.TechLevel != 0 {
+		t.Fatalf("no treaty: TechLevel should stay 0, got %d", a.TechLevel)
+	}
+
+	w.ProposeTreaty(a, b, "Technology Agreement")
+	if !w.AcceptTreaty(b, a.Name, "Technology Agreement") {
+		t.Fatal("AcceptTreaty failed")
+	}
+	for i := 0; i < 200; i++ {
+		w.advanceTech(a)
+	}
+	want := b.TechLevel * TechAgreementCapPct / 100 // capped share of the partner's tech
+	if a.TechLevel != want {
+		t.Errorf("with treaty: TechLevel = %d, want the capped share %d of the partner's %d", a.TechLevel, want, b.TechLevel)
+	}
+}
+
+// A Protective Trade agreement guards the two realms' trade, so a partner cannot
+// bomb the other's trade routes or market (#11).
+func TestProtectiveTradeGuardsTradeCovert(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	d := w.AddHuman("d", "Delta")
+	partner := w.AddHuman("p", "Partner")
+	a.Agents = 10
+	d.Tanks = 10
+	// d has a trade treaty (a target for Bomb Trade Routes) and a market listing.
+	w.ProposeTreaty(d, partner, "Free Trade Agreement")
+	w.AcceptTreaty(partner, d.Name, "Free Trade Agreement")
+	if err := w.SetMarketListing(d, "Tank", 5, 1000); err != nil {
+		t.Fatalf("list: %v", err)
+	}
+
+	w.ProposeTreaty(a, d, "Protective Trade")
+	if !w.AcceptTreaty(d, a.Name, "Protective Trade") {
+		t.Fatal("AcceptTreaty failed")
+	}
+
+	// Bomb Trade Routes is refused: agent kept, d's trade treaty intact.
+	before := a.Agents
+	msg, err := w.BombTradeRoutes(a, d)
+	if err != nil {
+		t.Fatalf("BombTradeRoutes: %v", err)
+	}
+	if !strings.Contains(msg, "guarded") {
+		t.Errorf("expected a 'guarded' message, got %q", msg)
+	}
+	if a.Agents != before {
+		t.Errorf("agent lost against a Protective Trade partner: %d -> %d", before, a.Agents)
+	}
+	if !w.HasTreaty(d, partner, "Free Trade Agreement") {
+		t.Error("d's Free Trade treaty should be intact")
+	}
+
+	// Bomb Trading Market is refused: d's listing survives.
+	if _, err := w.BombTradingMarket(a, d); err != nil {
+		t.Fatalf("BombTradingMarket: %v", err)
+	}
+	if got := w.MarketForSale("d", "Tank"); got != 5 {
+		t.Errorf("d's market listing should be untouched, got %d", got)
+	}
+}
 
 func TestProposeTreatyAddsOfferAndMails(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)

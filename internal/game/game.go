@@ -238,11 +238,28 @@ func (w *World) advanceTech(e *Empire) {
 	if hardCap := TechFactorCap * 10; ceil > hardCap {
 		ceil = hardCap
 	}
+	// A Technology Agreement raises the ceiling toward a capped share of a
+	// higher-tech partner's level, so you gain some of their advances even with
+	// little Technology of your own (#11).
+	agCeil := w.techAgreementCeiling(e)
+	if agCeil > ceil {
+		ceil = agCeil
+	}
 	if e.TechLevel >= ceil {
-		e.TechLevel = ceil // sold-off tech (or a shrunk share): settle to the new ceiling
+		e.TechLevel = ceil // sold-off tech / broken treaty / shrunk share: settle to the ceiling
 		return
 	}
-	e.TechLevel += share * share / TechGainDiv
+	gain := share * share / TechGainDiv
+	if agCeil > e.TechLevel { // a partner pulls a low-Technology realm upward
+		catchUp := (agCeil - e.TechLevel) / TechAgreementGainDiv
+		if catchUp < 1 {
+			catchUp = 1
+		}
+		if catchUp > gain {
+			gain = catchUp
+		}
+	}
+	e.TechLevel += gain
 	if e.TechLevel > ceil {
 		e.TechLevel = ceil
 	}

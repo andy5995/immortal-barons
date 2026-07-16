@@ -304,6 +304,17 @@ const (
 	TechGainDiv   = 250 // per-turn TechLevel gain (tenths %) = share² / this
 	TechCeilMul   = 10  // per-share TechLevel ceiling (tenths %) = share × this
 	TechFactorCap = 60  // max % bonus/reduction Technology grants (was 40, pre-cumulative)
+
+	// Technology Agreement treaty (#11): BRE's manual says the pact "allows an
+	// empire to gain some of the technological advances of its partner" — a
+	// tech-sharing effect. The magnitude isn't in the manual (and isn't
+	// disassembly-recovered), so these are IB's own reconstructed tunables. A
+	// Technology Agreement raises your TechLevel ceiling to TechAgreementCapPct%
+	// of your highest-tech partner's level, and you catch up 1/TechAgreementGainDiv
+	// of the remaining gap each turn — so even a low-Technology realm slowly gains
+	// from a strong partner. See advanceTech.
+	TechAgreementCapPct  = 60 // reach this % of the best partner's TechLevel
+	TechAgreementGainDiv = 20 // per-turn catch-up = (partner ceiling − yours) / this
 )
 
 // Money ceilings (BRE-scale). Kept under int32 max so 32-bit door builds stay
