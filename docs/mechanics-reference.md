@@ -109,7 +109,16 @@ All four constants live in `balance.go`; Score never drops below 0.
     **125%** of normal (25% of regions); both accept **20%** losses.
 
   The clone implements the Normal Attack (20% capture, symmetric 15% losses);
-  Quick Strike / Extended Battle are not yet offered.
+  Quick Strike / Extended Battle are not yet offered. Like BRE, the attacker
+  first picks a **committed force** — how many Troopers/Jets/Tanks/Bombers to
+  send (jets usable only up to `Carriers × 100`). Only the committed units add
+  offense, and only they take the 15% loss; held-back units stay home and unhurt.
+  The win **captures 20% of the loser's regions and takes no gold** — BRE's
+  Regular Attack rewards land, not money (*"a successful assault brings you extra
+  regions"*, `breins.txt`; gold-to-bank is the separate pirate-raid path). The
+  20% is a fixed share regardless of the strength gap, so a large empire is
+  ground down over many attacks; a small one can lose its last regions in one,
+  which eliminates it (and the conqueror absorbs its surviving military).
 - **Nuclear attack** — turns enemy regions into waste (high cost).
 - **Chemical attack** — damages fewer regions but kills a lot of people
   (and troopers).

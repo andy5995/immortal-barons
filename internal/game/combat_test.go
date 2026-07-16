@@ -9,7 +9,7 @@ func TestBombingRunDestroysGroundedJets(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := &Empire{Bombers: 10}
 	d := &Empire{Jets: 100} // no turrets, no SDI
-	kills, lost := w.bombingRun(a, d)
+	kills, lost := w.bombingRun(a, d, a.Bombers)
 	if lost != 0 {
 		t.Errorf("no turrets means no bombers lost, got %d", lost)
 	}
@@ -25,7 +25,7 @@ func TestBombingRunTurretsDownBombersAndSDIBlunts(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := &Empire{Bombers: 10}
 	d := &Empire{Jets: 1000, Turrets: 50, SDI: 50} // 50/25 = 2 bombers lost, SDI halves
-	kills, lost := w.bombingRun(a, d)
+	kills, lost := w.bombingRun(a, d, a.Bombers)
 	if lost != 2 {
 		t.Errorf("50 turrets should down 2 bombers, got %d", lost)
 	}
@@ -42,7 +42,7 @@ func TestBombingRunCapsAtDefenderJets(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := &Empire{Bombers: 100}
 	d := &Empire{Jets: 5}
-	kills, _ := w.bombingRun(a, d)
+	kills, _ := w.bombingRun(a, d, a.Bombers)
 	if kills != 5 || d.Jets != 0 {
 		t.Errorf("kills should cap at 5 and zero out jets, got kills=%d jets=%d", kills, d.Jets)
 	}
@@ -58,7 +58,7 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 	d.Protection = 0
 
 	before := len(d.Events)
-	w.Attack(a, d)
+	w.Attack(a, d, FullForce(a))
 	if len(d.Events) != before+1 {
 		t.Fatalf("victim should get one event, got %d new", len(d.Events)-before)
 	}
@@ -76,7 +76,7 @@ func TestAttackScoreAttackerWins(t *testing.T) {
 	d := &Empire{Name: "D", Turrets: 1000, Morale: 100, Land: 100,
 		Regions: RegionMix{Mountain: 100}, Gold: 1000, People: 1000, Alive: true, Score: 1_000_000}
 
-	w.Attack(a, d)
+	w.Attack(a, d, FullForce(a))
 
 	// aloss = 15% of 100000 troopers; dloss = 15% of 1000 turrets.
 	battle := 100000*RegularAttackLossPct/100 + 1000*RegularAttackLossPct/100
@@ -98,7 +98,7 @@ func TestAttackScoreDefenderWinsWorthMore(t *testing.T) {
 	a := &Empire{Name: "A", Troopers: 10, Morale: 100, Alive: true, Score: 1_000_000}
 	d := &Empire{Name: "D", Turrets: 100000, Morale: 100, Land: 100, People: 1000, Alive: true}
 
-	w.Attack(a, d)
+	w.Attack(a, d, FullForce(a))
 
 	// aloss = 15% of 10 troopers; dloss = 15% of 100000 turrets.
 	battle := 10*RegularAttackLossPct/100 + 100000*RegularAttackLossPct/100
@@ -126,11 +126,85 @@ func TestAttackPostsPlanetaryNews(t *testing.T) {
 	d.Protection = 0
 
 	before := len(w.NewsToday)
-	w.Attack(a, d)
+	w.Attack(a, d, FullForce(a))
 	if len(w.NewsToday) != before+1 {
 		t.Fatalf("attack should post one planetary news line, got %d new", len(w.NewsToday)-before)
 	}
 	if last := w.NewsToday[len(w.NewsToday)-1]; !strings.Contains(last, "Attacker") {
 		t.Errorf("news should name the attacker: %q", last)
+	}
+}
+
+// A regular attack only commits (and only risks) the chosen force; held-back
+// units stay home, and the offense scales with what's sent (#: force selection).
+func TestAttackUsesOnlyCommittedForce(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	d := w.AddHuman("d", "Delta")
+	a.Troopers, a.Morale = 200, 100
+	d.Morale = 100
+
+	// Offense scales with the committed force (no HQ/Tech → 1 per trooper).
+	if got := (AttackForce{Troopers: 50}).groundOffense(a); got != 50 {
+		t.Errorf("committed offense = %d, want 50", got)
+	}
+	if got := FullForce(a).groundOffense(a); got != 200 {
+		t.Errorf("full offense = %d, want 200", got)
+	}
+
+	// Commit only 50; both sides lose 15% of what fought, so at most 8 of the 50
+	// committed troopers are lost and the 150 held back are untouched.
+	w.Attack(a, d, AttackForce{Troopers: 50})
+	if a.Troopers < 200-50*RegularAttackLossPct/100-1 {
+		t.Errorf("held-back troopers were hit: 200 -> %d", a.Troopers)
+	}
+	if a.Troopers < 150 {
+		t.Errorf("the 150 held-back troopers should be safe, got %d", a.Troopers)
+	}
+}
+
+// A regular attack takes LAND, not money: BRE plunders no gold on a Regular
+// Attack (breins.txt/attack.hlp/overlay all say regions only). Gold is untouched.
+func TestRegularAttackTakesNoGold(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := &Empire{Name: "A", Troopers: 100000, Morale: 100, Alive: true, Gold: 500}
+	d := &Empire{Name: "D", Turrets: 10, Morale: 100, Land: 100,
+		Regions: RegionMix{Mountain: 100}, Gold: 1000, People: 100000, Alive: true}
+	w.Attack(a, d, FullForce(a))
+	if a.Gold != 500 {
+		t.Errorf("attacker gold changed: got %d, want 500 (a win takes land, not gold)", a.Gold)
+	}
+	if d.Gold != 1000 {
+		t.Errorf("defender gold changed: got %d, want 1000 (no plunder on a regular attack)", d.Gold)
+	}
+}
+
+// A total conquest — the capture that reduces the defender to its last region —
+// absorbs the loser's surviving military into the conqueror and leaves the loser
+// with none. Strength alone doesn't wipe an empire out; being ground down to one
+// region does. BRE's BRCRUSH reward.
+func TestTotalConquestAbsorbsMilitary(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := &Empire{Name: "A", Troopers: 1_000_000, Morale: 100, Alive: true}
+	d := &Empire{Name: "D", Troopers: 500, Jets: 40, Turrets: 30, Tanks: 20, Carriers: 5, Bombers: 10,
+		Morale: 100, Land: 1, Regions: RegionMix{Mountain: 1}, People: 100, Alive: true}
+
+	w.Attack(a, d, FullForce(a))
+
+	if d.Alive {
+		t.Fatalf("an overwhelming attack should conquer the defender")
+	}
+	if n := d.Troopers + d.Jets + d.Turrets + d.Tanks + d.Carriers + d.Bombers; n != 0 {
+		t.Errorf("conquered empire should keep no military, got %d units total", n)
+	}
+	// Defender's post-battle survivors (after its 15% loss) transfer to the attacker:
+	// carriers and bombers aren't hit by the battle loss, so all 5/10 carry over.
+	if a.Carriers != 5 || a.Bombers != 10 {
+		t.Errorf("attacker should absorb the defender's 5 carriers and 10 bombers, got C%d B%d", a.Carriers, a.Bombers)
+	}
+	// a keeps 85% of its 1,000,000 committed troopers plus the defender's 425 survivors.
+	wantTroopers := 1_000_000 - 1_000_000*RegularAttackLossPct/100 + (500 - 500*RegularAttackLossPct/100)
+	if a.Troopers != wantTroopers {
+		t.Errorf("attacker troopers = %d, want %d (own survivors + absorbed)", a.Troopers, wantTroopers)
 	}
 }

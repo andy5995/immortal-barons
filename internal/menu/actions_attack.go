@@ -81,6 +81,26 @@ func regularAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	name := rows[i-1].name
+
+	// BRE's regular-attack force selection: show the available forces and prompt
+	// how many of each to commit (jets are only usable up to what the carriers can
+	// transport). Held-back units stay home and out of harm's way. clampTo in
+	// Attack re-checks against the reloaded empire, so a concurrent change is safe.
+	p := w.Player()
+	usableJets := min(p.Jets, p.Carriers*game.JetsPerCarrier)
+	fmt.Fprintf(s, "\n%s"+tr(s, "You have %d Troopers, %d usable Jets, %d Tanks, and %d Bombers.")+"%s\n",
+		ansi.FgBrightCyan, p.Troopers, usableJets, p.Tanks, p.Bombers, ansi.Reset)
+	force := game.AttackForce{
+		Troopers: promptSuggested(s, "Send how many Troopers?", p.Troopers, p.Troopers),
+		Jets:     promptSuggested(s, "Send how many Jets?", usableJets, usableJets),
+		Tanks:    promptSuggested(s, "Send how many Tanks?", p.Tanks, p.Tanks),
+		Bombers:  promptSuggested(s, "Send how many Bombers?", p.Bombers, p.Bombers),
+	}
+	if force.Troopers+force.Jets+force.Tanks+force.Bombers <= 0 {
+		ok(s, "You committed no forces; the attack is called off.")
+		return Stay
+	}
+
 	var report string
 	var err error
 	w.With(func() {
@@ -94,7 +114,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 			err = errTargetGone
 			return
 		}
-		report = w.World.Attack(p, d)
+		report = w.World.Attack(p, d, force)
 	})
 	if err != nil {
 		fail(s, err)

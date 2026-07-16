@@ -194,10 +194,10 @@ func (e *Empire) EnsureProduction() {
 	}
 }
 
+// Offense is the empire's full attack strength — every usable unit committed (see
+// FullForce/AttackForce.offense). A regular attack may commit less (force select).
 func (e *Empire) Offense() int {
-	usableJets := min(e.Jets, e.Carriers*100)
-	sum := e.Troopers + usableJets*2 + e.Tanks*4*(100+e.HQ)/100
-	return sum * (100 + e.TechFactor()) / 100
+	return FullForce(e).groundOffense(e)
 }
 
 func (e *Empire) Defense() int {
