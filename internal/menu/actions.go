@@ -338,7 +338,6 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 			return Stay
 		}
 		var err error
-		var gold, bank, debt int
 		w.With(func() {
 			// apply (Deposit/Withdraw/Loan/Repay) re-checks the balance/debt and
 			// the MoneyCap against the reloaded empire, so a concurrent node can't
@@ -349,13 +348,12 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 				return
 			}
 			err = apply(w.World, p, n)
-			gold, bank, debt = p.Gold, p.Bank, p.Debt
 		})
 		if err != nil {
 			fail(s, err)
-		} else {
-			ok(s, "Gold: %d   Bank: %d   Debt: %d", gold, bank, debt)
 		}
+		// On success there's no confirmation line or pause: the Bank menu redraws
+		// with the updated Gold/Bank in its status footer (like the Spending buys).
 		return Stay
 	}
 }
@@ -542,7 +540,6 @@ func buyFoodMarket(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var err error
-	var gold int
 	w.With(func() {
 		p := w.Player()
 		if p == nil {
@@ -550,13 +547,12 @@ func buyFoodMarket(s session.Session, w *ctx) Result {
 			return
 		}
 		err = w.World.BuyFoodMarket(p, n) // re-checks gold atomically
-		gold = p.Gold
 	})
 	if err != nil {
 		fail(s, err)
-	} else {
-		okNoPause(s, "Bought %d food. Gold: %d", n, gold)
 	}
+	// No confirmation/pause on success: the Food Market redraws with the updated
+	// gold and food in its footer.
 	return Stay
 }
 
@@ -568,7 +564,6 @@ func sellFoodMarket(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var err error
-	var gold int
 	w.With(func() {
 		p := w.Player()
 		if p == nil {
@@ -576,13 +571,12 @@ func sellFoodMarket(s session.Session, w *ctx) Result {
 			return
 		}
 		err = w.World.SellFood(p, n) // re-clamps to fresh food stock atomically
-		gold = p.Gold
 	})
 	if err != nil {
 		fail(s, err)
-	} else {
-		okNoPause(s, "Sold %d food. Gold: %d", n, gold)
 	}
+	// No confirmation/pause on success: the Food Market redraws with the updated
+	// gold and food in its footer.
 	return Stay
 }
 
