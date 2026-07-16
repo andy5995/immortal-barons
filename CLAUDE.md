@@ -84,6 +84,13 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   a fixed RNG seed via `game.NewSeed` for determinism.
 - Keep combat/economy numbers matching `docs/mechanics-reference.md`; when
   they diverge, update the doc in the same change.
+- **Single-source help details.** In the in-game help (`internal/help/content/`),
+  each specific mechanic/unit fact (a ratio, a number, a unit property) belongs
+  in ONE canonical file — the unit's or feature's own doc. Other help files that
+  touch the concept in passing mention it generically without restating the
+  figure (e.g. the 100-jets-per-carrier ratio lives in `jets.md`/`carriers.md`;
+  the attack doc just says jets need carriers to fight). Duplicated numbers drift
+  out of sync when tuned — this is the prose analogue of the balance.go rule.
 - **Menu prompts are consistent.** A numbered selection list ends with a
   `0) Quit` line and the standard `Choice> Quit` prompt (use `choiceQuit`),
   matching the menu engine's `readChoice` — not a one-off `promptInt("… 0 to
