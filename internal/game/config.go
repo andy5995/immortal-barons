@@ -171,8 +171,9 @@ func DefaultConfig() Config {
 		IdleTimeoutSecs: 180,
 		MaxIdleWarnings: 3,
 
-		// Defaults from BRE's reset-init code and Configuration Help screens.
-		TurnsPerDay:           8,
+		// Defaults from BRE's reset-init code and Configuration Help screens,
+		// except TurnsPerDay, raised from BRE's 8 to 15 for the modern door.
+		TurnsPerDay:           15,
 		ProtectionTurns:       20,
 		GameLength:            0,
 		InitialMarketLand:     0,
