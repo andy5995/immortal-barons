@@ -104,7 +104,9 @@ func promptProduction(s session.Session, label string, labelW, suggested, max in
 // editAmount runs the number-editing loop after `prefix` has already been
 // printed: >, k/m expansion, backspace, and Enter. Empty Enter keeps the
 // suggested value AND echoes it on the line (BRE prints the kept number), so the
-// player sees what a bare Enter chose.
+// player sees what a bare Enter chose. An over-max entry is clamp-and-confirmed
+// (#9): the first Enter corrects the field to the max on screen and a second Enter
+// commits it — never a silent one-keystroke clamp.
 func editAmount(s session.Session, prefix string, suggested, max int) int {
 	// Register the line being edited so an interrupting idle/time warning can
 	// reprint it and restore the cursor. A no-op for sessions with no Deadline
@@ -130,8 +132,22 @@ func editAmount(s session.Session, prefix string, suggested, max int) int {
 				fmt.Fprintf(s, "%d\n", v) // echo the kept value on the line
 				return v
 			}
+			v := parseAmount(string(b), max)
+			if v > max {
+				// BRE clamp-and-confirm (#9): an over-max entry is corrected to the
+				// max on screen and needs a SECOND Enter to commit — feedback and a
+				// chance to reconsider, not a silent one-keystroke clamp. Rewrite the
+				// field to the max in place and keep waiting.
+				str := strconv.Itoa(max)
+				for range b {
+					fmt.Fprint(s, "\b \b")
+				}
+				fmt.Fprint(s, str)
+				b = []rune(str)
+				continue
+			}
 			fmt.Fprint(s, "\n")
-			return clampAmt(parseAmount(string(b), max), max)
+			return clampAmt(v, max)
 		case r == '>' && len(b) == 0:
 			str := strconv.Itoa(max)
 			for _, c := range str {

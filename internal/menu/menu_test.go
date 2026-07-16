@@ -759,3 +759,28 @@ func TestPlainSessionStaysEnglish(t *testing.T) {
 		t.Errorf("plain session should be English:\n%s", f.out.String())
 	}
 }
+
+// TestPromptClampAndConfirm verifies #9: a numeric entry over the max is clamped
+// to the max ON SCREEN and requires a second Enter to commit, instead of silently
+// clamping and committing in one keystroke.
+func TestPromptClampAndConfirm(t *testing.T) {
+	// Within max: a single Enter commits the typed value.
+	if got := promptSuggested(&fakeSession{keys: []rune("5000\r")}, "Deposit", 0, 12899); got != 5000 {
+		t.Errorf("within max: got %d, want 5000", got)
+	}
+
+	// Over max: first Enter clamps to the max on screen, a second Enter commits it.
+	f := &fakeSession{keys: []rune("35000\r\r")}
+	if got := promptSuggested(f, "Deposit", 0, 12899); got != 12899 {
+		t.Errorf("over max, two Enters: got %d, want 12899 (clamped)", got)
+	}
+	if !strings.Contains(f.out.String(), "12899") {
+		t.Errorf("over-max entry should show the clamped value on screen:\n%q", f.out.String())
+	}
+
+	// Over max with a single Enter must NOT commit: after the clamp the stream ends,
+	// so it falls back to the suggested value (0), never the clamped 12899.
+	if got := promptSuggested(&fakeSession{keys: []rune("35000\r")}, "Deposit", 0, 12899); got == 12899 {
+		t.Errorf("one Enter must not commit an over-max entry, but it returned %d", got)
+	}
+}
