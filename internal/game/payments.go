@@ -58,7 +58,22 @@ func (e *Empire) FoodProduced() int {
 // the amounts actually charged and displayed; the Empire methods above give
 // the unscaled baseline.
 func (w *World) ForcesDue(e *Empire) int {
-	return e.ForcesUpkeep() * w.Config.MaintCosts.Percent() / 100
+	return (e.ForcesUpkeep() + w.listedForcesUpkeep(e)) * w.Config.MaintCosts.Percent() / 100
+}
+
+// listedForcesUpkeep is the maintenance owed on this empire's military units that
+// are escrowed on the Trading Market (#17). Listing a unit removes it from
+// inventory, but it still costs upkeep — so parking an army on the market to dodge
+// maintenance doesn't work. Same per-unit rates and Technology scaling as
+// ForcesUpkeep; food and agents have no upkeep.
+func (w *World) listedForcesUpkeep(e *Empire) int {
+	up := w.MarketForSale(e.Owner, "Trooper")*MaintTrooper +
+		w.MarketForSale(e.Owner, "Jet")*MaintJet +
+		w.MarketForSale(e.Owner, "Turret")*MaintTurret +
+		w.MarketForSale(e.Owner, "Bomber")*MaintBomber +
+		w.MarketForSale(e.Owner, "Tank")*MaintTank +
+		w.MarketForSale(e.Owner, "Carrier")*MaintCarrier
+	return up * (100 - e.TechFactor()) / 100
 }
 func (w *World) RegionsDue(e *Empire) int {
 	return e.RegionUpkeep() * w.Config.MaintCosts.Percent() / 100

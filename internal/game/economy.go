@@ -209,8 +209,79 @@ func (w *World) FoodNeededNextTurn(e *Empire) int {
 	return e.FoodUpkeep()
 }
 
+// curPrice returns e's stored walk price for a unit, or the world base when the
+// walk hasn't seeded it yet (stored==0: a fresh empire's first turn, or a save
+// from before per-empire prices existed).
+func curPrice(stored, base int) int {
+	if stored <= 0 {
+		return base
+	}
+	return stored
+}
+
+// Current per-turn buy prices for each unit: the empire's own stored walk value
+// (World.stepPrices advances it once per turn), falling back to the world base
+// until seeded. Both the Spending-menu display and the charge/sell paths call
+// these, so shown == charged within a turn; each empire sees its own prices.
+// Regions have no equivalent — their price rises with holdings (see regionCost)
+// but takes no per-turn walk.
+func (w *World) TrooperPrice(e *Empire) int { return curPrice(e.Prices.Trooper, w.Prices.Trooper) }
+func (w *World) JetPrice(e *Empire) int     { return curPrice(e.Prices.Jet, w.Prices.Jet) }
+func (w *World) TurretPrice(e *Empire) int  { return curPrice(e.Prices.Turret, w.Prices.Turret) }
+func (w *World) TankPrice(e *Empire) int    { return curPrice(e.Prices.Tank, w.Prices.Tank) }
+func (w *World) BomberPrice(e *Empire) int  { return curPrice(e.Prices.Bomber, w.Prices.Bomber) }
+func (w *World) CarrierPrice(e *Empire) int { return curPrice(e.Prices.Carrier, w.Prices.Carrier) }
+func (w *World) AgentPrice(e *Empire) int   { return curPrice(e.Prices.Agent, w.Prices.Agent) }
+
+// stepPrice advances one stored per-empire price one walk step: it moves by up to
+// stepPct% of the base (deterministic, keyed per empire+turn like riversFish) and
+// is clamped to ±PriceWalkBandPct% of the base so the walk drifts but can't run
+// away. A zero `stored` seeds from base first (fresh empire / pre-feature save).
+func (w *World) stepPrice(e *Empire, stored, base, stepPct int, tag string) int {
+	if base <= 0 {
+		return stored
+	}
+	if stored <= 0 {
+		stored = base
+	}
+	if stepMax := base * stepPct / 100; stepMax > 0 {
+		h := fnv.New32a()
+		var buf [8]byte
+		binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
+		binary.LittleEndian.PutUint32(buf[4:8], uint32(e.TurnsLeft))
+		h.Write(buf[:])
+		io.WriteString(h, tag)
+		io.WriteString(h, e.Name)
+		stored += int(h.Sum32()%uint32(2*stepMax+1)) - stepMax
+	}
+	band := base * PriceWalkBandPct / 100
+	if stored > base+band {
+		stored = base + band
+	}
+	if stored < base-band {
+		stored = base - band
+	}
+	if stored < 1 {
+		stored = 1
+	}
+	return stored
+}
+
+// stepPrices advances every per-empire unit price one walk step. Called once per
+// turn from PlayTurn (after the turn's buys), so a price is stable during a turn
+// (shown == charged) and drifts turn to turn, persisting across days via the save.
+func (w *World) stepPrices(e *Empire) {
+	e.Prices.Trooper = w.stepPrice(e, e.Prices.Trooper, w.Prices.Trooper, PriceWalkStepTrooper, "trooper")
+	e.Prices.Jet = w.stepPrice(e, e.Prices.Jet, w.Prices.Jet, PriceWalkStepJet, "jet")
+	e.Prices.Turret = w.stepPrice(e, e.Prices.Turret, w.Prices.Turret, PriceWalkStepTurret, "turret")
+	e.Prices.Tank = w.stepPrice(e, e.Prices.Tank, w.Prices.Tank, PriceWalkStepTank, "tank")
+	e.Prices.Bomber = w.stepPrice(e, e.Prices.Bomber, w.Prices.Bomber, PriceWalkStepBomber, "bomber")
+	e.Prices.Carrier = w.stepPrice(e, e.Prices.Carrier, w.Prices.Carrier, PriceWalkStepCarrier, "carrier")
+	e.Prices.Agent = w.stepPrice(e, e.Prices.Agent, w.Prices.Agent, PriceWalkStepAgent, "agent")
+}
+
 func (w *World) Recruit(e *Empire, n int) error {
-	if err := e.spend(n, w.Prices.Trooper); err != nil {
+	if err := e.spend(n, w.TrooperPrice(e)); err != nil {
 		return err
 	}
 	e.Troopers += n
@@ -218,7 +289,7 @@ func (w *World) Recruit(e *Empire, n int) error {
 }
 
 func (w *World) BuildJets(e *Empire, n int) error {
-	if err := e.spend(n, w.Prices.Jet); err != nil {
+	if err := e.spend(n, w.JetPrice(e)); err != nil {
 		return err
 	}
 	e.Jets += n
@@ -226,7 +297,7 @@ func (w *World) BuildJets(e *Empire, n int) error {
 }
 
 func (w *World) BuildTurrets(e *Empire, n int) error {
-	if err := e.spend(n, w.Prices.Turret); err != nil {
+	if err := e.spend(n, w.TurretPrice(e)); err != nil {
 		return err
 	}
 	e.Turrets += n
@@ -234,7 +305,7 @@ func (w *World) BuildTurrets(e *Empire, n int) error {
 }
 
 func (w *World) BuildCarriers(e *Empire, n int) error {
-	if err := e.spend(n, w.Prices.Carrier); err != nil {
+	if err := e.spend(n, w.CarrierPrice(e)); err != nil {
 		return err
 	}
 	e.Carriers += n
@@ -242,7 +313,7 @@ func (w *World) BuildCarriers(e *Empire, n int) error {
 }
 
 func (w *World) BuildTanks(e *Empire, n int) error {
-	if err := e.spend(n, w.Prices.Tank); err != nil {
+	if err := e.spend(n, w.TankPrice(e)); err != nil {
 		return err
 	}
 	e.Tanks += n
@@ -250,7 +321,7 @@ func (w *World) BuildTanks(e *Empire, n int) error {
 }
 
 func (w *World) RecruitAgents(e *Empire, n int) error {
-	if err := e.spend(n, w.Prices.Agent); err != nil {
+	if err := e.spend(n, w.AgentPrice(e)); err != nil {
 		return err
 	}
 	e.Agents += n
@@ -272,17 +343,17 @@ func sellUnit(stock *int, n, price int, e *Empire) error {
 }
 
 func (w *World) SellTroopers(e *Empire, n int) error {
-	return sellUnit(&e.Troopers, n, w.Prices.Trooper, e)
+	return sellUnit(&e.Troopers, n, w.TrooperPrice(e), e)
 }
 
 func (w *World) SellJets(e *Empire, n int) error {
-	return sellUnit(&e.Jets, n, w.Prices.Jet, e)
+	return sellUnit(&e.Jets, n, w.JetPrice(e), e)
 }
 
 // BuildBombers buys n bombers directly (they can also be produced by Industrial
 // regions). Old saves lacking a Bomber price default to it via NewWorld.
 func (w *World) BuildBombers(e *Empire, n int) error {
-	if err := e.spend(n, w.Prices.Bomber); err != nil {
+	if err := e.spend(n, w.BomberPrice(e)); err != nil {
 		return err
 	}
 	e.Bombers += n
@@ -290,19 +361,19 @@ func (w *World) BuildBombers(e *Empire, n int) error {
 }
 
 func (w *World) SellBombers(e *Empire, n int) error {
-	return sellUnit(&e.Bombers, n, w.Prices.Bomber, e)
+	return sellUnit(&e.Bombers, n, w.BomberPrice(e), e)
 }
 
 func (w *World) SellTurrets(e *Empire, n int) error {
-	return sellUnit(&e.Turrets, n, w.Prices.Turret, e)
+	return sellUnit(&e.Turrets, n, w.TurretPrice(e), e)
 }
 
 func (w *World) SellTanks(e *Empire, n int) error {
-	return sellUnit(&e.Tanks, n, w.Prices.Tank, e)
+	return sellUnit(&e.Tanks, n, w.TankPrice(e), e)
 }
 
 func (w *World) SellCarriers(e *Empire, n int) error {
-	return sellUnit(&e.Carriers, n, w.Prices.Carrier, e)
+	return sellUnit(&e.Carriers, n, w.CarrierPrice(e), e)
 }
 
 func (w *World) SellAgents(e *Empire, n int) error {

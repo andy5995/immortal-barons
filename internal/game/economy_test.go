@@ -1,6 +1,125 @@
 package game
 
-import "testing"
+import (
+	"sync"
+	"testing"
+)
+
+// TestConcurrentPerEmpirePricing drives two distinct empires buying at the same
+// time and asserts each is charged its OWN per-empire price with no cross-
+// contamination — the property the whole per-empire model rests on. The two
+// empires' walks are advanced separately first so their prices differ; then they
+// buy concurrently. Run under -race, it also proves the buy path adds no shared-
+// write race (prices are read from each empire's own stored state).
+func TestConcurrentPerEmpirePricing(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e1 := w.AddHuman("alice", "Alethia")
+	e2 := w.AddHuman("bob", "Bobland")
+
+	// Diverge their walks over a handful of turns so the two prices differ.
+	for i := 0; i < 6; i++ {
+		w.GameDay, e1.TurnsLeft, e2.TurnsLeft = i, i, i
+		w.stepPrices(e1)
+		w.stepPrices(e2)
+	}
+	if w.TrooperPrice(e1) == w.TrooperPrice(e2) {
+		t.Fatalf("walks did not diverge: both %d", w.TrooperPrice(e1))
+	}
+
+	const n = 200
+	p1, p2 := w.TrooperPrice(e1), w.TrooperPrice(e2)
+	e1.Troopers, e2.Troopers = 0, 0
+	e1.Gold, e2.Gold = n*p1, n*p2
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+	for _, arg := range []struct {
+		e     *Empire
+		price int
+	}{{e1, p1}, {e2, p2}} {
+		go func(e *Empire) {
+			defer wg.Done()
+			for i := 0; i < n; i++ {
+				if err := w.Recruit(e, 1); err != nil {
+					t.Errorf("%s Recruit #%d: %v", e.Name, i, err)
+					return
+				}
+			}
+		}(arg.e)
+	}
+	wg.Wait()
+
+	// Each empire bought exactly n at its own price and spent its own gold to
+	// zero — if pricing had leaked across empires, one would have run short.
+	if e1.Troopers != n || e1.Gold != 0 {
+		t.Errorf("alice: troopers=%d gold=%d, want %d and 0 (price %d)", e1.Troopers, e1.Gold, n, p1)
+	}
+	if e2.Troopers != n || e2.Gold != 0 {
+		t.Errorf("bob: troopers=%d gold=%d, want %d and 0 (price %d)", e2.Troopers, e2.Gold, n, p2)
+	}
+}
+
+func TestUnitPriceWalk(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("alice", "Alethia")
+	base := w.Prices.Trooper
+	band := base * PriceWalkBandPct / 100
+
+	// A fresh empire is unseeded → sits at the world base, and reads are stable
+	// within a turn (no step between two reads).
+	if got := w.TrooperPrice(e); got != base {
+		t.Fatalf("fresh empire trooper price = %d, want base %d", got, base)
+	}
+	if a, b := w.TrooperPrice(e), w.TrooperPrice(e); a != b {
+		t.Fatalf("price not stable within a turn: %d vs %d", a, b)
+	}
+
+	// Walk 60 turns: it moves off base but stays clamped inside the band.
+	moved := false
+	seen := map[int]bool{}
+	for i := 0; i < 60; i++ {
+		w.GameDay, e.TurnsLeft = i/16, i%16
+		w.stepPrices(e)
+		p := w.TrooperPrice(e)
+		if p < base-band || p > base+band {
+			t.Errorf("step %d: price %d out of band [%d,%d]", i, p, base-band, base+band)
+		}
+		if p != base {
+			moved = true
+		}
+		seen[p] = true
+	}
+	if !moved {
+		t.Error("price never left base — the walk is not moving")
+	}
+	if len(seen) < 3 {
+		t.Errorf("walk barely moved: %v", seen)
+	}
+
+	// Per-empire: a second empire walked through the same turns lands on different
+	// prices (its own market), so the walk is genuinely per-empire.
+	f := w.AddHuman("bob", "Bobland")
+	for i := 0; i < 60; i++ {
+		w.GameDay, f.TurnsLeft = i/16, i%16
+		w.stepPrices(f)
+	}
+	if w.TrooperPrice(e) == w.TrooperPrice(f) &&
+		w.BomberPrice(e) == w.BomberPrice(f) &&
+		w.AgentPrice(e) == w.AgentPrice(f) {
+		t.Error("two empires walked to identical prices on every unit; walk is not per-empire")
+	}
+
+	// Shown == charged: a buy charges the stored price (stable, no step mid-buy).
+	e.Gold, e.Troopers = 1<<30, 0
+	price := w.TrooperPrice(e)
+	before := e.Gold
+	if err := w.Recruit(e, 3); err != nil {
+		t.Fatalf("Recruit: %v", err)
+	}
+	if spent := before - e.Gold; spent != 3*price {
+		t.Errorf("charged %d, shown price implies %d", spent, 3*price)
+	}
+}
 
 func TestLandPriceRisesWithHoldings(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
@@ -288,7 +407,7 @@ func TestSellUnitsThirdPrice(t *testing.T) {
 	if e.Troopers != 0 {
 		t.Errorf("Troopers: want 0, got %d", e.Troopers)
 	}
-	wantGold := 10 * w.Prices.Trooper / 3
+	wantGold := 10 * w.TrooperPrice(e) / 3
 	if e.Gold != wantGold {
 		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
 	}
@@ -302,7 +421,7 @@ func TestSellUnitsThirdPrice(t *testing.T) {
 	if e.Jets != 5 {
 		t.Errorf("Jets: want 5, got %d", e.Jets)
 	}
-	wantGold = 3 * w.Prices.Jet / 3
+	wantGold = 3 * w.JetPrice(e) / 3
 	if e.Gold != wantGold {
 		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
 	}

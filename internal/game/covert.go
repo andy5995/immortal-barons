@@ -208,17 +208,25 @@ func (w *World) BombFood(a, d *Empire) (string, error) {
 // Bombers to deliver their payloads").
 const BombingBombersRequired = 500
 
-// BombTradingMarket raids d's gold reserves via its own trading market. On
-// failure the agent is lost.
+// BombTradingMarket destroys a share of d's goods listed on the general market
+// and its pending sale proceeds (#17; BRE: "destroys a portion of all goods
+// stored in an opposing planet's trading market"). If d has nothing on the
+// market, it falls back to a small gold raid so the op still bites. On failure
+// the agent is lost.
 func (w *World) BombTradingMarket(a, d *Empire) (string, error) {
 	if a.Agents < 1 {
 		return "", ErrNoAgents
 	}
 	if w.covertSuccess(a, d) {
-		lost := d.Gold / 4
-		d.Gold -= lost
-		d.Events = append(d.Events, fmt.Sprintf("Saboteurs disrupted your trading market — %d gold lost.", lost))
-		return fmt.Sprintf("You disrupted %s's trading market: %d gold lost.", d.Name, lost), nil
+		goods, proceeds := w.bombMarketPosition(d, BombMarketLossPct)
+		if goods == 0 && proceeds == 0 {
+			lost := d.Gold / 4
+			d.Gold -= lost
+			d.Events = append(d.Events, fmt.Sprintf("Saboteurs disrupted your trading market — %d gold lost.", lost))
+			return fmt.Sprintf("You disrupted %s's trading market: %d gold lost.", d.Name, lost), nil
+		}
+		d.Events = append(d.Events, fmt.Sprintf("Saboteurs wrecked your trading market — %d listed goods and %d gold in proceeds destroyed.", goods, proceeds))
+		return fmt.Sprintf("You wrecked %s's trading market: %d listed goods and %d gold destroyed.", d.Name, goods, proceeds), nil
 	}
 	a.Agents--
 	d.Events = append(d.Events, "Your security foiled an enemy strike on your trading market.")

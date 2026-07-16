@@ -27,6 +27,10 @@ func (w *World) PlayTurn(e *Empire, today string) {
 			e.HQ = 100
 		}
 	}
+	// Advance this empire's price walk for next turn (#30). Done after the turn's
+	// buys so the price stays stable within the turn (shown == charged), and keyed
+	// on the still-current TurnsLeft so each turn's step is distinct.
+	w.stepPrices(e)
 	if e.TurnsLeft > 0 {
 		e.TurnsLeft--
 	}
@@ -53,6 +57,7 @@ func (w *World) DailyMaintenance(today string) {
 		return
 	}
 	for w.LastMaintDate < today {
+		w.settleMarketProceeds()                   // "Depositing trading market money" — pay sellers at day-end (#17)
 		w.FoodMarketSupply = FoodMarketDailySupply // refill the food market for the new day (#19)
 		for _, e := range w.Empires {
 			if e.Alive {
@@ -225,11 +230,11 @@ func (w *World) aiBuildForces(e *Empire) {
 		}
 	}
 	trooperPct, turretPct, tankPct := aiForceShares(e.aiProfile())
-	buy(trooperPct, w.Prices.Trooper, &e.Troopers)
-	buy(turretPct, w.Prices.Turret, &e.Turrets)
-	buy(tankPct, w.Prices.Tank, &e.Tanks)
+	buy(trooperPct, w.TrooperPrice(e), &e.Troopers)
+	buy(turretPct, w.TurretPrice(e), &e.Turrets)
+	buy(tankPct, w.TankPrice(e), &e.Tanks)
 	if e.aiProfile() == AIProfileAggressor {
-		buy(AIForceAgentPctWar, w.Prices.Agent, &e.Agents) // agents for pre-war covert ops (#36)
+		buy(AIForceAgentPctWar, w.AgentPrice(e), &e.Agents) // agents for pre-war covert ops (#36)
 	}
 }
 
@@ -442,14 +447,19 @@ func (w *World) processEconomy(e *Empire) {
 
 	// Food spoilage (BRE shape, issue #19): stored food at/below FoodSpoilFloor
 	// (~1000) never spoils; above it, a fraction of the EXCESS decays, reduced by
-	// Technology regions (via tf). This is why players sell surplus at the market.
-	if e.Food > FoodSpoilFloor {
-		spoiled := (e.Food - FoodSpoilFloor) / 25 * (100 - tf) / 100
-		e.Food -= spoiled
+	// Technology regions (via tf). Food escrowed on the Trading Market counts
+	// toward the total, so listing food doesn't dodge spoilage — only attacks
+	// (#17). Spoilage comes out of the granary first, then the listing.
+	listedFood := w.MarketForSale(e.Owner, "Food")
+	if total := e.Food + listedFood; total > FoodSpoilFloor {
+		spoiled := (total - FoodSpoilFloor) / 25 * (100 - tf) / 100
 		e.LastSpoiled = spoiled
-		if spoiled > 0 {
-			e.Score -= ScorePerTurn / ScoreSpoilPenaltyDiv // IB: spoilage dings score a little
+		fromGranary := spoiled
+		if fromGranary > e.Food {
+			fromGranary = e.Food
 		}
+		e.Food -= fromGranary
+		w.spoilListedFood(e.Owner, spoiled-fromGranary)
 	} else {
 		e.LastSpoiled = 0
 	}
@@ -497,7 +507,6 @@ func (w *World) processEconomy(e *Empire) {
 	e.LastRiot = false
 	if e.Tax > RiotTaxFloor && e.Tax*e.Tax >= w.rng.Intn(10000) {
 		e.LastRiot = true
-		e.Score -= ScorePerTurn / ScoreRiotPenaltyDiv // IB: a riot dings score a little
 		w.postRiotNews(e)
 		e.Support -= 15
 		if e.Support < 0 {

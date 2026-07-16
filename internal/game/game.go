@@ -92,6 +92,15 @@ type Empire struct {
 
 	Investments []Investment
 
+	// Prices is this empire's own current unit buy prices — a persistent per-turn
+	// random walk (#30; BRE gives every empire its own drifting prices). Only the
+	// seven unit fields are used: regions price by holdings and food by the market,
+	// so Land/Food here stay unused. A zero field means unseeded (a fresh empire's
+	// first turn, or a pre-feature save) — callers fall back to the world base
+	// (World.*Price) until the first walk step (World.stepPrices, once per turn in
+	// PlayTurn) seeds it.
+	Prices Prices
+
 	// Macros maps a single uppercase letter (invoked in-game as Ctrl-<letter>)
 	// to a saved keystroke sequence that is replayed when the player presses
 	// that combo. BRE's "Write Macros" / Macro Editor feature.
@@ -318,6 +327,12 @@ type World struct {
 	RemoteBoards  []RemoteBoard
 	Pirates       []PirateFaction
 
+	// Market holds every empire's listings on the general Trading Market (#17);
+	// listed goods are escrowed out of the owner's inventory. MarketProceeds
+	// accrues each seller's unpaid sale gold, deposited at daily maintenance.
+	Market         []MarketListing
+	MarketProceeds map[string]int
+
 	// Inter-BBS (interplanetary) play — see ibbs.go. GroupAttacks assemble
 	// locally until they depart; Outbox holds packets queued for other boards;
 	// SpyDatabase holds spy reports shared across the planet.
@@ -387,6 +402,8 @@ func (w *World) initFreshGame() {
 	w.CurrentMaster = ""
 	w.RemoteBoards = nil
 	w.Pirates = nil
+	w.Market = nil
+	w.MarketProceeds = nil
 	w.GroupAttacks = nil
 	w.NextAttackID = 0
 	w.Outbox = nil

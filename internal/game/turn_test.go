@@ -54,15 +54,15 @@ func TestScoreAccumulatesFlatPerTurn(t *testing.T) {
 	}
 }
 
-func TestScoreSpoilageAndRiotPenalize(t *testing.T) {
+func TestScoreUnaffectedBySpoilage(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
 	e.Tax = 0          // no riot
 	e.Food = 1_000_000 // way over buffer -> spoilage
 	w.PlayTurn(e, "2026-07-03")
-	// base +ScorePerTurn, minus a spoilage ding of ScorePerTurn/ScoreSpoilPenaltyDiv.
-	if want := ScorePerTurn - ScorePerTurn/ScoreSpoilPenaltyDiv; e.Score != want {
-		t.Errorf("spoilage: Score want %d, got %d", want, e.Score)
+	// Score is the cumulative earned metric — spoilage does not ding it.
+	if e.Score != ScorePerTurn {
+		t.Errorf("spoilage should not affect Score: want %d, got %d", ScorePerTurn, e.Score)
 	}
 	if e.LastSpoiled <= 0 {
 		t.Errorf("expected food to spoil, LastSpoiled=%d", e.LastSpoiled)

@@ -116,10 +116,10 @@ const TaxGoldPerCapita = 17
 // preserving IB's ratios (which match BRE: ~7 troopers per tank, ~6 jets per
 // tank). Used as the DefaultConfig / NewWorldSeed price defaults.
 const (
-	// Unit buy prices — BRE early-game live snapshot (2026-07-11). BRE recomputes
-	// these inline so they fluctuate turn to turn; IB uses the snapshot as a
-	// fixed base for now (the per-turn ±% fluctuation is the still-open part of
-	// #30). Sell price is buy/3 (see sellUnit), except agents (SellAgentPrice).
+	// Unit buy prices — BRE early-game live snapshot (2026-07-11). These are the
+	// BASE each empire's per-turn price walk starts from and stays near (see the
+	// PriceWalkStep*/PriceWalkBandPct block below and World.stepPrices, #30). Sell
+	// price is buy/3 (see sellUnit), except agents (SellAgentPrice).
 	PriceTrooper = 263
 	PriceJet     = 345
 	PriceTurret  = 380
@@ -135,6 +135,43 @@ const (
 	// SellAgentPrice: agents sell at a flat 100 in BRE, not buy/3 like other units.
 	SellAgentPrice = 100
 )
+
+// Per-turn price WALK (#30). BRE recomputes each unit's buy price every turn as a
+// persistent random walk with per-empire state — confirmed live (2026-07-15): a
+// fresh empire started at base while a veteran on the same day had drifted (bomber
+// +22%, agent +100%), and the drift carried across the day boundary. IB matches
+// that: each empire stores its own current prices (Empire.Prices) and steps them
+// once per turn in PlayTurn (World.stepPrices). A step moves a price up or down by
+// up to PriceWalkStep*% of its base, clamped to ±PriceWalkBandPct% of the base so
+// it drifts like BRE but can't run away. The stored price is what the Spending menu
+// shows AND what a buy/sell charges within the turn (shown == charged); it persists
+// across days via the save. Steps are deterministic (keyed per empire+turn like
+// riversFish) so play is reproducible and concurrency-safe. Cheap units take small
+// steps; agents step wider (matching the calibration). Regions do NOT walk — their
+// price is holdings-only (917+owned×33), which BRE held exact every turn. Tunable.
+const (
+	PriceWalkStepTrooper = 3
+	PriceWalkStepJet     = 3
+	PriceWalkStepTurret  = 3
+	PriceWalkStepTank    = 3
+	PriceWalkStepBomber  = 3
+	PriceWalkStepCarrier = 3
+	PriceWalkStepAgent   = 8
+	// PriceWalkBandPct caps how far any price may drift from its base. BRE's bomber
+	// reached ~+22% in a 14-turn sample and was still climbing, so keep it generous.
+	PriceWalkBandPct = 30
+)
+
+// BombMarketLossPct is the share (percent) of a target's listed goods and pending
+// market proceeds destroyed by a successful Bomb Trading Market covert op (#17).
+const BombMarketLossPct = 25
+
+// MarketCommissionPct is the cut (percent) the general Trading Market takes from
+// a seller's proceeds at day-end settlement (#17). BRE's exact value was not
+// observable live (a real cross-empire sale needs two non-protected empires,
+// which the protection grind + self-buy refusal blocked), so it defaults to 0 —
+// tunable once the real figure is known.
+const MarketCommissionPct = 0
 
 // --- Misc gold costs (reconstructed / tunable) ---
 const (
@@ -203,10 +240,9 @@ const (
 	// change it, so IB awards a flat constant to every empire per turn rather
 	// than tracking net worth. Combat and covert score (combat.go) are on top.
 	ScorePerTurn = 213
-	// Score penalties (IB's own — BRE leaves Score untouched by economy events).
-	// A riot or food spoilage shaves a small fraction of a turn's Score award.
-	ScoreRiotPenaltyDiv  = 10 // a riot costs ScorePerTurn/10 Score
-	ScoreSpoilPenaltyDiv = 10 // food spoilage costs ScorePerTurn/10 Score
+	// Riots and food spoilage do NOT affect Score — Score is the cumulative earned
+	// metric, and BRE leaves it untouched by economy events (Andy's call, reversing
+	// IB's earlier per-event dings).
 	// Combat score (IB's own): a battle's Score award scales with the forces used
 	// (units both sides lose). The winner gains, the loser loses a bit less, and a
 	// successful DEFENSE is worth more than a successful attack.
