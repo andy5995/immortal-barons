@@ -284,7 +284,8 @@ func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 
 func TestAboutFromGameMenu(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "I 0", menus.Game) // About -> pause -> Quit
+	// About now lives inside Help (keyed 'A'): ? -> A -> pause -> 0 (leave help) -> 0 (Quit).
+	f, _, err := run(t, "?A\r00", menus.Game)
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -298,7 +299,8 @@ func TestAboutFromGameMenu(t *testing.T) {
 
 func TestAboutFromSystemMenu(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "I 0", menus.System) // About -> pause -> Quit (Back)
+	// About now lives inside Help (keyed 'A'): ? -> A -> pause -> 0 (leave help) -> 0 (Back).
+	f, _, err := run(t, "?A\r00", menus.System)
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}

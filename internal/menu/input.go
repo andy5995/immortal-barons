@@ -6,6 +6,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/i18n"
@@ -83,7 +84,28 @@ func promptInt(s session.Session, msg string) int {
 func promptSuggested(s session.Session, msg string, suggested, max int) int {
 	prefix := fmt.Sprintf("%s%s (%d; %d):%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), suggested, max, ansi.Reset)
 	fmt.Fprint(s, "\n"+prefix)
+	return editAmount(s, prefix, suggested, max)
+}
 
+// promptProduction is the Set Industries per-unit prompt (no leading blank line,
+// so the units sit on consecutive lines). `label` is padded to labelW runes and
+// the (suggested; max) numbers are right-aligned to 3 digits, so the input column
+// lines up down the whole list. Enter keeps the suggested value and echoes it.
+func promptProduction(s session.Session, label string, labelW, suggested, max int) int {
+	pad := labelW - utf8.RuneCountInString(label)
+	if pad < 0 {
+		pad = 0
+	}
+	prefix := fmt.Sprintf("%s%s%s (%3d; %3d):%s ", ansi.FgBrightWhite, label, strings.Repeat(" ", pad), suggested, max, ansi.Reset)
+	fmt.Fprint(s, prefix)
+	return editAmount(s, prefix, suggested, max)
+}
+
+// editAmount runs the number-editing loop after `prefix` has already been
+// printed: >, k/m expansion, backspace, and Enter. Empty Enter keeps the
+// suggested value AND echoes it on the line (BRE prints the kept number), so the
+// player sees what a bare Enter chose.
+func editAmount(s session.Session, prefix string, suggested, max int) int {
 	// Register the line being edited so an interrupting idle/time warning can
 	// reprint it and restore the cursor. A no-op for sessions with no Deadline
 	// (e.g. the test fakeSession), which don't implement InputLineSetter.
@@ -103,10 +125,12 @@ func promptSuggested(s session.Session, msg string, suggested, max int) int {
 		}
 		switch {
 		case r == '\r' || r == '\n':
-			fmt.Fprint(s, "\n")
 			if len(b) == 0 {
-				return clampAmt(suggested, max)
+				v := clampAmt(suggested, max)
+				fmt.Fprintf(s, "%d\n", v) // echo the kept value on the line
+				return v
 			}
+			fmt.Fprint(s, "\n")
 			return clampAmt(parseAmount(string(b), max), max)
 		case r == '>' && len(b) == 0:
 			str := strconv.Itoa(max)

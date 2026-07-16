@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -121,23 +122,25 @@ func buildHQ(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// regionTypeNames lists the 8 region types in the stable order
-// RegionMix.fields()/e.Regions' own field order uses.
+// regionTypeNames lists the 8 region types in BRE's Buy Regions screen order
+// (Coastal, River, Agricultural, Desert, Industrial, Urban, Mountain, Technology
+// — verified live, #17 menu audit). regionTypeKeys and regionField track this
+// same order; the index is display/selection-only and never persisted.
 var regionTypeNames = []string{
-	"Coastal", "Mountain", "Desert", "River",
-	"Agricultural", "Urban", "Industrial", "Technology",
+	"Coastal", "River", "Agricultural", "Desert",
+	"Industrial", "Urban", "Mountain", "Technology",
 }
 
 // regionTypeKeys are the single-letter selection keys (BRE style), in the same
 // order as regionTypeNames.
-var regionTypeKeys = []byte{'C', 'M', 'D', 'R', 'A', 'U', 'I', 'T'}
+var regionTypeKeys = []byte{'C', 'R', 'A', 'D', 'I', 'U', 'M', 'T'}
 
 // regionField returns a pointer to the idx'th (0-based) field of p.Regions,
 // in the same order as regionTypeNames.
 func regionField(p *game.Empire, idx int) *int {
 	fields := []*int{
-		&p.Regions.Coastal, &p.Regions.Mountain, &p.Regions.Desert, &p.Regions.River,
-		&p.Regions.Agricultural, &p.Regions.Urban, &p.Regions.Industrial, &p.Regions.Technology,
+		&p.Regions.Coastal, &p.Regions.River, &p.Regions.Agricultural, &p.Regions.Desert,
+		&p.Regions.Industrial, &p.Regions.Urban, &p.Regions.Mountain, &p.Regions.Technology,
 	}
 	return fields[idx]
 }
@@ -167,10 +170,14 @@ func printRegionTable(s session.Session, p *game.Empire) {
 // promptRegionType reads a single-letter region choice (case-insensitive),
 // returning its 0-based index or -1 to cancel.
 func promptRegionType(s session.Session) int {
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice? (0 to cancel)"), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice?"), ansi.Reset)
 	for {
 		r, err := readKey(s)
 		if err != nil {
+			return -1
+		}
+		if r == '\r' || r == '\n' { // Enter leaves, like '0'
+			fmt.Fprint(s, "\n")
 			return -1
 		}
 		if r == '0' {
@@ -184,7 +191,7 @@ func promptRegionType(s session.Session) int {
 				return i
 			}
 		}
-		// invalid key — ignore and wait for a valid region letter or 0
+		// invalid key — ignore and wait for a valid region letter, Enter, or 0
 	}
 }
 
@@ -200,10 +207,14 @@ const (
 // a '?' key to redisplay the region list (the list is only drawn on entry, then
 // on demand, so repeat purchases don't rescroll it).
 func promptBuyRegionType(s session.Session) int {
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice? (? to list, 0 to cancel)"), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice?"), ansi.Reset)
 	for {
 		r, err := readKey(s)
 		if err != nil {
+			return -1
+		}
+		if r == '\r' || r == '\n' { // Enter leaves, like '0'
+			fmt.Fprint(s, "\n")
 			return -1
 		}
 		if r == '0' {
@@ -620,10 +631,29 @@ func setIndustries(s session.Session, w *ctx) Result {
 	if !askYesNo(s, "Change Production?", false) {
 		return Stay
 	}
+	// Walk each unit like BRE (Troopers, Jets, …), capping the max at the budget
+	// left so the total can't exceed 100% (BRE does this via a shrinking max).
+	// Unlike BRE, the suggested value is the CURRENT % (clamped to what's left),
+	// so pressing Enter keeps a unit unchanged instead of zeroing it (a deliberate
+	// UX improvement — see the Set Industries note in docs/mechanics-reference.md).
 	ns := make([]int, len(prodTypeNames))
+	remaining := 100
+	// Pad every unit label to the widest (rune-based, so translations line up too)
+	// and right-align the numbers, so the input column lines up down the list.
+	labelW := 0
+	for _, name := range prodTypeNames {
+		if wdt := utf8.RuneCountInString(tr(s, name)); wdt > labelW {
+			labelW = wdt
+		}
+	}
+	fmt.Fprint(s, "\n") // one blank line after "Change Production? y", then the units follow consecutively
 	for i, name := range prodTypeNames {
 		cur := *prodField(p, i)
-		ns[i] = promptSuggested(s, name, cur, 100)
+		if cur > remaining {
+			cur = remaining
+		}
+		ns[i] = promptProduction(s, tr(s, name), labelW, cur, remaining)
+		remaining -= ns[i]
 	}
 	var err error
 	w.With(func() {

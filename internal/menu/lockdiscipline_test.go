@@ -26,8 +26,9 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 
 	const iterations = 400
 	// Match the price buy2's gather uses to the price Recruit actually charges
-	// (w.Prices.Trooper), so gold accounting reconciles exactly.
-	unitPrice := w.Prices.Trooper
+	// (the per-turn fluctuating TrooperPrice; constant here since no turn is
+	// played), so gold accounting reconciles exactly.
+	unitPrice := w.TrooperPrice(p)
 	initialGold := unitPrice * iterations // enough to fund every buy
 	p.Gold = initialGold
 

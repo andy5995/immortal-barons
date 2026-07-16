@@ -20,14 +20,40 @@ func helpBrowse(s session.Session, w *ctx) Result {
 		for i, c := range cats {
 			fmt.Fprintf(s, "  %d) %s\n", i+1, help.CategoryName(c))
 		}
-		i := promptInt(s, "Category (0 to leave)?")
-		if i < 1 || i > len(cats) {
+		// About lives here (keyed 'A') rather than on the Game/System menus, so 'I'
+		// can stay BRE's InterBBS Scores key (#17 menu audit). Categories stay
+		// numbered; only About is lettered. A 0) Quit line closes the list like the
+		// other menus.
+		fmt.Fprintf(s, "  A) %s\n", tr(s, "About"))
+		fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
+		fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Choice?"), ansi.Reset)
+		// Single keypress, no Enter (like the other menus). Categories are numbered
+		// 1..N (7 today, always <10), plus 'A' About and '0' Quit; ignore any other
+		// key and keep waiting.
+		var sel rune
+		for {
+			r, err := readKey(s)
+			if err != nil {
+				return Stay
+			}
+			if r == '0' || r == '\r' || r == '\n' || r == 'A' || r == 'a' || (r >= '1' && int(r-'0') <= len(cats)) {
+				sel = r
+				break
+			}
+		}
+		if sel == '0' || sel == '\r' || sel == '\n' { // Enter leaves, like '0'
+			fmt.Fprint(s, "\n")
 			return Stay
+		}
+		fmt.Fprintf(s, "%c\n", sel)
+		if sel == 'A' || sel == 'a' {
+			about(s, w)
+			continue
 		}
 		// playerLang, not the raw stored language: it applies the CP437 guard, so
 		// a CP437 door reads help in English (or a CP437-safe language) instead
 		// of substitution glyphs when the stored language can't be shown.
-		browseCategory(s, cats[i-1], playerLang(w))
+		browseCategory(s, cats[int(sel-'1')], playerLang(w))
 	}
 }
 
@@ -122,7 +148,10 @@ func browseCategory(s session.Session, cat, lang string) {
 		for i, t := range topics {
 			fmt.Fprintf(s, "  %d) %s\n", i+1, t.Title)
 		}
-		i := promptInt(s, "Topic (0 to go back)?")
+		// A 0) Back line + the same "Choice?" prompt as the category list. Topics
+		// need Enter (some categories have >9, so a single key can't address them).
+		fmt.Fprintf(s, "  0) %s\n", tr(s, "Back"))
+		i := promptInt(s, "Choice?")
 		if i < 1 || i > len(topics) {
 			return
 		}

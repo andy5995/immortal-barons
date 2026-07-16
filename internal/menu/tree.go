@@ -67,13 +67,15 @@ func BuildMenus() *Menus {
 	tanks := func(p *game.Empire) int { return p.Tanks }
 	carriers := func(p *game.Empire) int { return p.Carriers }
 	land := func(p *game.Empire) int { return p.Land }
-	priceTrooper := func(w *ctx) int { return w.Prices.Trooper }
-	priceJet := func(w *ctx) int { return w.Prices.Jet }
-	priceTurret := func(w *ctx) int { return w.Prices.Turret }
-	priceBomber := func(w *ctx) int { return w.Prices.Bomber }
-	priceAgent := func(w *ctx) int { return w.Prices.Agent }
-	priceTank := func(w *ctx) int { return w.Prices.Tank }
-	priceCarrier := func(w *ctx) int { return w.Prices.Carrier }
+	// Prices fluctuate per empire per turn (#30); the display closures call the
+	// same accessors the buy/sell paths charge through, so shown == charged.
+	priceTrooper := func(w *ctx) int { return w.TrooperPrice(w.Player()) }
+	priceJet := func(w *ctx) int { return w.JetPrice(w.Player()) }
+	priceTurret := func(w *ctx) int { return w.TurretPrice(w.Player()) }
+	priceBomber := func(w *ctx) int { return w.BomberPrice(w.Player()) }
+	priceAgent := func(w *ctx) int { return w.AgentPrice(w.Player()) }
+	priceTank := func(w *ctx) int { return w.TankPrice(w.Player()) }
+	priceCarrier := func(w *ctx) int { return w.CarrierPrice(w.Player()) }
 	// third is the sell (buy-back) price shown on the Sell menu: BRE sells units
 	// at buy/3 (agents are the exception — a flat SellAgentPrice).
 	third := func(f func(*ctx) int) func(*ctx) int {
@@ -249,6 +251,7 @@ func BuildMenus() *Menus {
 	trading.Items = []Item{
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
 		{Key: '1', Label: "Send Trade Deal", Do: sendTradeDeal},
+		{Key: '2', Label: "Trading Market", Do: tradingMarket},
 		{Key: 'B', Label: "Buy / Sell", Do: gotoMenu(buy)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
@@ -344,7 +347,9 @@ func BuildMenus() *Menus {
 		{Key: 'E', Label: "Empire Status", Do: empireStatus},
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
 		{Key: 'G', Label: "Game Setup", Do: gameSetup},
-		{Key: 'I', Label: "About", Do: about},
+		// BRE reserves 'I' on the System Menu for InterBBS Scores; About (an IB
+		// addition) now lives in the Help browser, so the two don't collide (#17).
+		{Key: 'I', Label: "InterBBS Scores", Do: interbbsScores},
 		{Key: 'M', Label: "Messages", Do: gotoMenu(messages)},
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
 		{Key: 'R', Label: "Set Tax Rate", Do: setTaxRate},
@@ -378,8 +383,7 @@ func BuildMenus() *Menus {
 		{Key: '8', Label: "Game Bulletins", Do: showBulletinToday},
 		{Key: '9', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden, Color: interplanetary.Color},
 		{Key: 'A', Label: "Instructions", Do: showInstructions},
-		{Key: '?', Label: "Help", Do: helpBrowse},
-		{Key: 'I', Label: "About", Do: about},
+		{Key: '?', Label: "Help", Do: helpBrowse}, // About lives inside Help now (#17)
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},
 		{Key: '0', Label: "Quit", Do: quit},
 	}

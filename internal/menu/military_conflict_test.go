@@ -27,7 +27,7 @@ func TestBuyTroopersVanishedEmpireConflict(t *testing.T) {
 	_ = b.Player()
 	commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("alice")) })
 
-	buyTroopers := buy2("Troopers", false, func(w *ctx) int { return w.Prices.Trooper }, (*game.World).Recruit)
+	buyTroopers := buy2("Troopers", false, func(w *ctx) int { return w.TrooperPrice(w.Player()) }, (*game.World).Recruit)
 	fb := &fakeSession{keys: []rune("10\r")}
 	buyTroopers(fb, b)
 

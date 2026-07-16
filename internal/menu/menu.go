@@ -416,8 +416,11 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					if it.Owned != nil {
 						owned = formatGold(it.Owned(g), lang)
 					}
-					fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %8s %9s\n",
-						col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset, price, owned)
+					// BRE renders the Price column bright-white and the Owned column
+					// white (#17 menu audit); the key is the menu accent color.
+					fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %s%8s%s %s%9s%s\n",
+						col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset,
+						ansi.FgBrightWhite, price, ansi.Reset, ansi.FgWhite, owned, ansi.Reset)
 					continue
 				}
 				kcol, lcol := col, ansi.FgWhite
