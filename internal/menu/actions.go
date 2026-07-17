@@ -46,7 +46,7 @@ func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.
 		// Re-resolve the empire against the freshly-reloaded world and let apply
 		// re-check gold atomically — the p/price gathered above (before the prompt)
 		// may be stale after a concurrent node's transaction.
-		err := w.withPlayer(func(p *game.Empire) error {
+		err := w.mutatePlayer(func(p *game.Empire) error {
 			return apply(w.World, p, n)
 		})
 		if err != nil {
@@ -74,7 +74,7 @@ func sellUnit(label string, owned func(*game.Empire) int, apply func(*game.World
 			return Stay
 		}
 		var gold int
-		err := w.withPlayer(func(p *game.Empire) error {
+		err := w.mutatePlayer(func(p *game.Empire) error {
 			e := apply(w.World, p, n) // apply re-checks stock atomically
 			gold = p.Gold
 			return e
@@ -92,7 +92,7 @@ func sellUnit(label string, owned func(*game.Empire) int, apply func(*game.World
 
 // buildHQ starts HeadQuarters construction for the acting empire.
 func buildHQ(s session.Session, w *ctx) Result {
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		return w.World.StartHQ(p)
 	})
 	if err != nil {
@@ -181,7 +181,7 @@ func writeMacros(s session.Session, w *ctx) Result {
 		}
 	}
 	if len(seq) > 0 {
-		saveErr := w.withPlayer(func(p *game.Empire) error {
+		saveErr := w.mutatePlayer(func(p *game.Empire) error {
 			if p.Macros == nil {
 				p.Macros = map[string]string{}
 			}

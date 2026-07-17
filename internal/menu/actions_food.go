@@ -15,7 +15,7 @@ func buyFoodMarket(s session.Session, w *ctx) Result {
 	if n <= 0 {
 		return Stay
 	}
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		return w.World.BuyFoodMarket(p, n) // re-checks gold atomically
 	})
 	if err != nil {
@@ -33,7 +33,7 @@ func sellFoodMarket(s session.Session, w *ctx) Result {
 	if n <= 0 {
 		return Stay
 	}
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		return w.World.SellFood(p, n) // re-clamps to fresh food stock atomically
 	})
 	if err != nil {

@@ -19,7 +19,7 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 		// apply (Deposit/Withdraw/Loan/Repay) re-checks the balance/debt and the
 		// MoneyCap against the reloaded empire, so a concurrent node can't let two
 		// sessions withdraw the same funds or overdraw.
-		err := w.withPlayer(func(p *game.Empire) error {
+		err := w.mutatePlayer(func(p *game.Empire) error {
 			return apply(w.World, p, n)
 		})
 		if err != nil {
@@ -47,7 +47,7 @@ func investFunds(s session.Session, w *ctx) Result {
 	expected := game.ExpectedReturn(amount, w.InvestRate, days)
 	fmt.Fprintf(s, "\n  "+tr(s, "Expected return: ~%d")+"\n", expected)
 	var ret, matureDay int
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		var e error
 		ret, e = w.World.Invest(p, amount, days) // re-checks affordability atomically
 		matureDay = w.GameDay + days

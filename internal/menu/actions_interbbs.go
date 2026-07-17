@@ -108,7 +108,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 		days = 1
 	}
 	var id, departDay int
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		ga, e := w.World.CreateGroupAttack(p, board, target, w.GameDay+days, force)
 		if e != nil {
 			return e
@@ -170,7 +170,7 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	// JoinGroupAttack re-validates against fresh state: the attack must still exist
 	// (ErrNoAttack), not yet have departed (ErrDeparted), and the baron must still
 	// hold the committed units (ErrCantAfford).
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		return w.World.JoinGroupAttack(p, id, force)
 	})
 	if err != nil {
@@ -424,7 +424,7 @@ func sendRemoteSpy(s session.Session, w *ctx) {
 	if !found {
 		return
 	}
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		if p.Agents < 1 { // re-check the agent against fresh state
 			return game.ErrNoAgents
 		}
@@ -463,7 +463,7 @@ func terroristOps(s session.Session, w *ctx) Result {
 	if agents <= 0 {
 		return Stay
 	}
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		return w.World.SendTerror(p, board, baron, agents)
 	})
 	if err != nil {
@@ -514,7 +514,7 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 	if i < 1 || i > len(owners) {
 		return Stay
 	}
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		w.World.VoteCoordinator(p, owners[i-1])
 		return nil
 	})
@@ -545,7 +545,7 @@ func modifyLeagueDiplomacy(s session.Session, w *ctx) Result {
 	if strings.TrimSpace(decl) == "" {
 		return Stay
 	}
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		// Re-check the coordinator role against fresh state: a vote elsewhere may
 		// have unseated the player between the check and here.
 		if w.BBSCoordinator() != p {

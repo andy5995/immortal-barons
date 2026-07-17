@@ -56,12 +56,12 @@ func (c *ctx) Player() *game.Empire {
 	return c.cached
 }
 
-// withPlayer runs fn inside a world transaction with the re-resolved active
+// mutatePlayer runs fn inside a world transaction with the re-resolved active
 // player, returning errRealmChanged if the realm has vanished (abdicated by
 // another node between the prompt and the write). It centralizes the
 // re-resolve-then-nil-check that every mutating menu action shares; callers
 // capture any extra values (gold, land, a report) through the closure.
-func (c *ctx) withPlayer(fn func(p *game.Empire) error) error {
+func (c *ctx) mutatePlayer(fn func(p *game.Empire) error) error {
 	var err error
 	c.With(func() {
 		p := c.Player()

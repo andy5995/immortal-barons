@@ -161,7 +161,7 @@ func buyLand(s session.Session, w *ctx) Result {
 			// Re-resolve inside the transaction: BuyRegions re-checks gold and the
 			// per-turn region cap against fresh state, and the region field pointer
 			// must index the reloaded empire, not the stale gather.
-			err := w.withPlayer(func(fp *game.Empire) error {
+			err := w.mutatePlayer(func(fp *game.Empire) error {
 				e := w.World.BuyRegions(fp, regionField(fp, t), n)
 				gold = fp.Gold
 				return e
@@ -193,7 +193,7 @@ func sellLand(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var land int
-	err := w.withPlayer(func(fp *game.Empire) error {
+	err := w.mutatePlayer(func(fp *game.Empire) error {
 		e := w.World.DropRegions(fp, regionField(fp, t), n)
 		land = fp.Land
 		return e

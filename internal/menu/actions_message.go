@@ -227,7 +227,7 @@ func sendMessage(s session.Session, w *ctx) Result {
 			// Re-resolve sender and recipient by handle/name against the freshly
 			// reloaded world, so a concurrent send to the same inbox appends (both
 			// messages land) and a vanished recipient aborts.
-			err := w.withPlayer(func(p *game.Empire) error {
+			err := w.mutatePlayer(func(p *game.Empire) error {
 				if all {
 					for _, e := range recipients(w) {
 						w.World.SendMail(p, e, text)
@@ -261,7 +261,7 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 	if amount <= 0 {
 		return Stay
 	}
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		recip := findRealm(w, toName)
 		if recip == nil || recip == p {
 			return errTargetGone
@@ -281,7 +281,7 @@ func planetaryPost(s session.Session, w *ctx) Result {
 	if text == "" {
 		return Stay
 	}
-	err := w.withPlayer(func(p *game.Empire) error {
+	err := w.mutatePlayer(func(p *game.Empire) error {
 		w.World.PostBulletin(p, text)
 		return nil
 	})
