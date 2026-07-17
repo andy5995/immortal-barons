@@ -301,10 +301,10 @@ func ok(s session.Session, format string, a ...any) {
 // okNoPause is ok without the trailing wait-for-keypress, for a success message
 // that a following screen or prompt makes the pause redundant.
 func okNoPause(s session.Session, format string, a ...any) {
-	fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen, fmt.Sprintf(i18n.T(sessionLang(s), format), a...), ansi.Reset)
+	fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgBrightWhite, fmt.Sprintf(i18n.T(sessionLang(s), format), a...), ansi.Reset)
 }
 
 func fail(s session.Session, err error) {
-	fmt.Fprintf(s, "\n  %s%s%s", ansi.FgRed, i18n.T(sessionLang(s), err.Error()), ansi.Reset)
+	fmt.Fprintf(s, "\n  %s%s%s", ansi.FgBrightRed, i18n.T(sessionLang(s), err.Error()), ansi.Reset)
 	pause(s)
 }

@@ -242,7 +242,7 @@ func incomeReport(s session.Session, w *ctx) {
 		amt(ansi.FgBrightCyan, b.RiverFood, "Food units were fished from the rivers.")
 	}
 	for _, r := range raids {
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, r, ansi.Reset)
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, r, ansi.Reset)
 	}
 	statLine(s, madeTroopers, "Troopers were trained by Industrial Zones.")
 	statLine(s, madeJets, "Jets were manufactured by Industrial Zones.")
@@ -298,12 +298,12 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	if p.LastPopGrowth > 0 {
 		fmt.Fprintf(s, "  "+tr(s, "Your dominion gained %s%s%s people.")+"\n", ansi.FgBrightCyan, comma(p.LastPopGrowth), ansi.Reset)
 	} else if p.LastPopGrowth < 0 {
-		fmt.Fprintf(s, "  "+tr(s, "Your dominion lost %s%s%s people.")+"\n", ansi.FgRed, comma(-p.LastPopGrowth), ansi.Reset)
+		fmt.Fprintf(s, "  "+tr(s, "Your dominion lost %s%s%s people.")+"\n", ansi.FgBrightRed, comma(-p.LastPopGrowth), ansi.Reset)
 	}
 	statLine(s, p.LastStarved, "people left your realm, unable to be fed.")
 	statLine(s, p.LastSpoiled, "units of food spoiled.")
 	if p.LastRiot {
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, tr(s, "Riots have broken out due to high tax rates!"), ansi.Reset)
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, tr(s, "Riots have broken out due to high tax rates!"), ansi.Reset)
 	}
 	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
 }
@@ -377,7 +377,7 @@ func paymentStage(s session.Session, w *ctx) {
 		if forcesGold >= forces && regionsGold >= regions {
 			break // fully paid — no warning
 		}
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
 		if !askYesNo(s, "Would you like to reconsider?", true) {
 			break // proceed despite the shortfall
 		}
@@ -399,10 +399,10 @@ func paymentStage(s session.Session, w *ctx) {
 		return
 	}
 	if forcesLost > 0 {
-		fmt.Fprintf(s, "%s"+tr(s, "%d units deserted for lack of pay.")+"%s\n", ansi.FgRed, forcesLost, ansi.Reset)
+		fmt.Fprintf(s, "%s"+tr(s, "%d units deserted for lack of pay.")+"%s\n", ansi.FgBrightRed, forcesLost, ansi.Reset)
 	}
 	if regionsLost > 0 {
-		fmt.Fprintf(s, "%s"+tr(s, "%d regions revolted for lack of upkeep.")+"%s\n", ansi.FgRed, regionsLost, ansi.Reset)
+		fmt.Fprintf(s, "%s"+tr(s, "%d regions revolted for lack of upkeep.")+"%s\n", ansi.FgBrightRed, regionsLost, ansi.Reset)
 	}
 
 	if support < 100 && gold > 0 {
@@ -454,7 +454,7 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 		// Auto-Feed off: just warn (no pause) — the player manages food from the menu.
 		fmt.Fprintf(s, "\n%s"+tr(s, "Your people need %s units of food and you have only %s.")+"%s\n",
 			ansi.FgYellow, comma(need), comma(have), ansi.Reset)
-		fmt.Fprintf(s, "%s%s%s\n", ansi.FgRed, tr(s, "Visit the Food Market to feed them, or they will starve."), ansi.Reset)
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed, tr(s, "Visit the Food Market to feed them, or they will starve."), ansi.Reset)
 		return nil
 	}
 	// Auto-Feed on and short: bring up the Food Market so the player can buy food,
@@ -475,7 +475,7 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 		if give >= need {
 			return nil // fed the full amount — proceed
 		}
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
 		if !askYesNo(s, "Would you like to reconsider?", true) {
 			return nil // proceed despite underfeeding
 		}
