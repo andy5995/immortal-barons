@@ -208,9 +208,18 @@ func (w *World) aiManageEconomy(e *Empire) {
 		}
 	}
 
-	// 2. If production can't feed the realm, expand Agriculture instead of army.
+	// 2. If food production can't cover this turn's consumption, expand Agriculture
+	//    to close the whole gap before buying anything else — buying enough regions
+	//    (up to AIAgriBuyMax) to actually cover the shortfall, not a token few. A
+	//    fast-growing realm's consumption climbs several regions' worth of food per
+	//    turn, so the old 5-region trickle never caught up and the population
+	//    outran its food into starvation; the food buffer in step 1 rides out the
+	//    turn while this closes the gap.
 	if produced < upkeep && e.Gold > w.Prices.Land {
-		n := (e.Gold / 4) / w.Prices.Land
+		n := (upkeep-produced)/FoodPerAgri + 1
+		if afford := e.Gold / w.Prices.Land; n > afford {
+			n = afford
+		}
 		if n > AIAgriBuyMax {
 			n = AIAgriBuyMax
 		}

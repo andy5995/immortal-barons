@@ -66,8 +66,8 @@ const (
 // capacity alongside their military). Without this an AI buys troopers every
 // turn until its food need outruns production and it starves.
 const (
-	AIFoodBufferTurns = 8 // turns of food consumption the AI keeps on hand (enough to ride out 5% per-turn spoilage without starving mid-day)
-	AIAgriBuyMax      = 5 // Agricultural regions the AI buys per turn when food-tight
+	AIFoodBufferTurns = 8  // turns of food consumption the AI keeps on hand (enough to ride out 5% per-turn spoilage without starving mid-day)
+	AIAgriBuyMax      = 40 // Agricultural regions the AI buys per turn to keep food output ahead of a growing population
 
 	// Force mix (#36): once food-healthy, the AI spends this share of its gold
 	// on military each turn, split by gold-value across a defensive-capable mix
