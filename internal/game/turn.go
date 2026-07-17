@@ -170,13 +170,18 @@ func (w *World) aiPlay(today string) {
 		// e.Alive is re-checked because an earlier aggressor in this pass may have
 		// conquered this realm before its own turn came up (#36).
 		for e.Alive && e.TurnsLeft > 0 {
-			w.aiManageEconomy(e)
+			// Mirror the human turn: produce and collect income, pay maintenance from
+			// that income, THEN spend what's left. Spending before paying maintenance
+			// (the old order) let the AI blow its treasury on expansion and new
+			// military it then couldn't maintain, so its forces deserted and its
+			// regions revolted every turn — a self-inflicted boom-bust.
+			w.Manufacture(e)   // industry production at turn start (#71)
+			w.CollectIncome(e) // income in hand before anything is spent
 			e.LastGoldPaid = 0
 			w.PayForces(e, w.ForcesDue(e))
 			w.PayRegions(e, w.RegionsDue(e))
-			w.Manufacture(e)   // industry production also runs at turn start (#71)
-			w.CollectIncome(e) // same point income used to be credited (start of PlayTurn)
-			w.aiWageWar(e)     // aggressors strike a weak neighbour when clearly favored (#36)
+			w.aiManageEconomy(e) // discretionary spending: food, military, land
+			w.aiWageWar(e)       // aggressors strike a weak neighbour when clearly favored (#36)
 			w.PlayTurn(e, today)
 		}
 	}
