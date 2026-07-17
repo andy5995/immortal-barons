@@ -457,26 +457,27 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgRed, tr(s, "Visit the Food Market to feed them, or they will starve."), ansi.Reset)
 		return nil
 	}
-	// Auto-Feed on: bring up the Food Market so the player can buy food. If they
-	// leave it still short, warn of disastrous results and let them reconsider —
-	// answering yes returns them to the Food Market (mirrors BRE and IB's own
-	// maintenance-underpayment guard). IB consumes food automatically, so there is
-	// no BRE-style "how much will you give?" allocation; buying enough is the fix.
+	// Auto-Feed on and short: bring up the Food Market so the player can buy food,
+	// then ask how much to give (BRE's "How much will you give?"). Giving LESS than
+	// required triggers the disastrous-results reconsider, which loops back to the
+	// market — exactly like IB's maintenance-underpayment guard; giving the full
+	// amount proceeds silently. (IB consumes food automatically, so the given amount
+	// gates the reconsider; buying enough food is the real fix.)
 	for {
-		fmt.Fprintf(s, "\n%s"+tr(s, "Your people need %s units of food and you have only %s.")+"%s\n",
-			ansi.FgYellow, comma(need), comma(have), ansi.Reset)
 		if err := Run(s, w, food); err != nil {
 			return err
 		}
 		if !withPlayer(w, func(p *game.Empire) { need, have = p.FoodUpkeep(), p.Food }) {
 			return nil
 		}
-		if have >= need {
-			return nil // now fed
+		fmt.Fprintf(s, "\n"+tr(s, "Your people need %s units of food.")+"\n", comma(need))
+		give := promptSuggested(s, "How much will you give?", min(have, need), have)
+		if give >= need {
+			return nil // fed the full amount — proceed
 		}
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgRed, tr(s, "Your people will go hungry — your actions may lead to disastrous results."), ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
 		if !askYesNo(s, "Would you like to reconsider?", true) {
-			return nil // proceed despite the shortfall
+			return nil // proceed despite underfeeding
 		}
 	}
 }
