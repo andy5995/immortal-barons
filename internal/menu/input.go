@@ -82,8 +82,16 @@ func promptInt(s session.Session, msg string) int {
 // (still editable); otherwise the typed number (k/m shortcuts) is used.
 // The result is clamped to [0, max].
 func promptSuggested(s session.Session, msg string, suggested, max int) int {
+	fmt.Fprint(s, "\n")
+	return promptSuggestedTight(s, msg, suggested, max)
+}
+
+// promptSuggestedTight is promptSuggested without the leading blank line, for a
+// run of prompts that should sit on consecutive lines — the attack force
+// selection (Troopers/Jets/Tanks/Bombers) after a single header line.
+func promptSuggestedTight(s session.Session, msg string, suggested, max int) int {
 	prefix := fmt.Sprintf("%s%s (%d; %d):%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), suggested, max, ansi.Reset)
-	fmt.Fprint(s, "\n"+prefix)
+	fmt.Fprint(s, prefix)
 	return editAmount(s, prefix, suggested, max)
 }
 

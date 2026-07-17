@@ -265,7 +265,7 @@ func TestRegularAttackAdvancesTurn(t *testing.T) {
 	v := w.AddHuman("victim", "Victimville")
 	v.Protection = 0
 
-	f := &fakeSession{keys: []rune("1\r ")} // target 1, then a key to clear the report pause
+	f := &fakeSession{keys: []rune("A\r\r\r\r ")} // target A, full-force defaults, then a key to clear the report pause
 	if r := regularAttack(f, w); r != Back {
 		t.Errorf("completed attack should advance the turn (Back), got %v", r)
 	}

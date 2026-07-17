@@ -88,7 +88,7 @@ func TestDemoralizeForcesAppliesEffect(t *testing.T) {
 	target.Agents = 0
 	target.Morale = 100
 
-	f := &fakeSession{keys: []rune("1\r ")} // pick target 1, then the pause key
+	f := &fakeSession{keys: []rune("A ")} // pick target A, then the pause key
 	if res := demoralizeForces(f, w); res != Stay {
 		t.Fatalf("demoralizeForces = %v, want Stay", res)
 	}
@@ -137,7 +137,7 @@ func TestBombFoodMarketAppliesEffectWithBombers(t *testing.T) {
 	target.Agents = 0
 	target.Food = 1000
 
-	f := &fakeSession{keys: []rune("1\r ")}
+	f := &fakeSession{keys: []rune("A ")} // target A, then the pause key
 	if res := bombFoodMarket(f, w); res != Stay {
 		t.Fatalf("bombFoodMarket = %v, want Stay", res)
 	}

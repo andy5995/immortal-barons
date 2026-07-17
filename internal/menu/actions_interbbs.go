@@ -198,17 +198,18 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 // baron has none of.
 func promptAttackForce(s session.Session, p *game.Empire) game.AttackForce {
 	var f game.AttackForce
+	fmt.Fprint(s, "\n")
 	if p.Troopers > 0 {
-		f.Troopers = promptSuggested(s, "Send how many Troopers?", p.Troopers, p.Troopers)
+		f.Troopers = promptSuggestedTight(s, "Send how many Troopers?", p.Troopers, p.Troopers)
 	}
 	if p.Jets > 0 {
-		f.Jets = promptSuggested(s, "Send how many Jets?", 0, p.Jets)
+		f.Jets = promptSuggestedTight(s, "Send how many Jets?", 0, p.Jets)
 	}
 	if p.Tanks > 0 {
-		f.Tanks = promptSuggested(s, "Send how many Tanks?", 0, p.Tanks)
+		f.Tanks = promptSuggestedTight(s, "Send how many Tanks?", 0, p.Tanks)
 	}
 	if p.Bombers > 0 {
-		f.Bombers = promptSuggested(s, "Send how many Bombers?", 0, p.Bombers)
+		f.Bombers = promptSuggestedTight(s, "Send how many Bombers?", 0, p.Bombers)
 	}
 	return f
 }

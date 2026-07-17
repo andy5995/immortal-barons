@@ -2,26 +2,32 @@ package menu
 
 import (
 	"fmt"
+	"strings"
+	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-// targetRow snapshots the identity plus displayed fields of one attackable
-// empire, taken under the world lock so the picker list can be rendered and
-// prompted over safely (w.Targets ranges the shared w.Empires slice). The realm
-// name is the identity the resolving w.With re-finds by (see findTarget); a
-// pre-gathered pointer is not carried across the reload.
+// targetRow snapshots the identity plus displayed fields of one living rival,
+// taken under the world lock so the picker list can be rendered and prompted
+// over safely (the snapshot ranges the shared w.Empires slice). The realm name
+// is the identity the resolving w.With re-finds by (see findTarget); a
+// pre-gathered pointer is not carried across the reload. attackable is false for
+// a realm the player can see in the list but cannot hit (shielded by New Realm
+// Protection or an alliance) — it is shown without a selection letter.
 type targetRow struct {
-	name       string
-	land, army int
+	name                  string
+	land, score, netWorth int
+	attackable            bool
 }
 
-// snapshotTargets takes w.Targets(w.Player()) under the lock, copying the
-// display fields the picker needs. It captures only the realm name as identity;
-// the acting w.With later re-finds the chosen target by that name against fresh
-// state (findTarget), since a pointer cached here would go stale after a reload.
+// snapshotTargets copies every LIVING rival (not just the attackable ones) under
+// the lock, marking which can be attacked. Listing the shielded realms — rather
+// than hiding them — keeps a player from reading "all rivals protected" as "the
+// world is empty". attackable mirrors game.Targets (protection, then alliance);
+// an empty result means no rivals are left at all.
 func snapshotTargets(w *ctx) []targetRow {
 	var rows []targetRow
 	w.With(func() {
@@ -29,8 +35,12 @@ func snapshotTargets(w *ctx) []targetRow {
 		if p == nil {
 			return
 		}
-		for _, e := range w.Targets(p) {
-			rows = append(rows, targetRow{e.Name, e.Land, e.Army()})
+		for _, e := range w.Empires {
+			if e == p || !e.Alive {
+				continue
+			}
+			attackable := e.Protection == 0 && !w.AreAllied(p, e)
+			rows = append(rows, targetRow{e.Name, e.Land, e.Score, w.NetWorth(e), attackable})
 		}
 	})
 	return rows
@@ -75,12 +85,10 @@ func regularAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose a target:"), ansi.Reset)
-	printTargetRows(s, rows)
-	i := promptInt(s, "Attack which empire (0 to cancel)?")
-	if i < 1 || i > len(rows) {
+	name, chosen := pickAttackTarget(s, rows)
+	if !chosen {
 		return Stay
 	}
-	name := rows[i-1].name
 
 	// BRE's regular-attack force selection: show the available forces and prompt
 	// how many of each to commit (jets are only usable up to what the carriers can
@@ -91,10 +99,10 @@ func regularAttack(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "\n%s"+tr(s, "You have %d Troopers, %d usable Jets, %d Tanks, and %d Bombers.")+"%s\n",
 		ansi.FgBrightCyan, p.Troopers, usableJets, p.Tanks, p.Bombers, ansi.Reset)
 	force := game.AttackForce{
-		Troopers: promptSuggested(s, "Send how many Troopers?", p.Troopers, p.Troopers),
-		Jets:     promptSuggested(s, "Send how many Jets?", usableJets, usableJets),
-		Tanks:    promptSuggested(s, "Send how many Tanks?", p.Tanks, p.Tanks),
-		Bombers:  promptSuggested(s, "Send how many Bombers?", p.Bombers, p.Bombers),
+		Troopers: promptSuggestedTight(s, "Send how many Troopers?", p.Troopers, p.Troopers),
+		Jets:     promptSuggestedTight(s, "Send how many Jets?", usableJets, usableJets),
+		Tanks:    promptSuggestedTight(s, "Send how many Tanks?", p.Tanks, p.Tanks),
+		Bombers:  promptSuggestedTight(s, "Send how many Bombers?", p.Bombers, p.Bombers),
 	}
 	if force.Troopers+force.Jets+force.Tanks+force.Bombers <= 0 {
 		ok(s, "You committed no forces; the attack is called off.")
@@ -127,17 +135,58 @@ func regularAttack(s session.Session, w *ctx) Result {
 	return Back
 }
 
-// printTargetRows lists attackable empires with their Land and Army columns.
-func printTargetRows(s session.Session, rows []targetRow) {
-	for i, r := range rows {
-		fmt.Fprintf(s, "  %d) %-16s %s %-5d %s %-7d\n", i+1, r.name, tr(s, "Land"), r.land, tr(s, "Army"), r.army)
+// pickAttackTarget renders the living rivals in IB's familiar scores-table
+// layout (Id / Empire Name / Territory / Score / Net Worth, lettered ids) and
+// reads the player's single-key choice. Only attackable realms get a selection
+// letter; shielded ones (New Realm Protection or an alliance) are listed with a
+// blank id so they can be seen but not picked — their diplomacy status shows in
+// the diplomacy menus. Returns the chosen realm name, or chosen=false if the
+// player aborts (RETURN / any non-letter) or nothing is attackable.
+func pickAttackTarget(s session.Session, rows []targetRow) (name string, chosen bool) {
+	rule := strings.Repeat("─", 72)
+	fmt.Fprintf(s, "%s%-4s %-26s %10s %11s %11s%s\n",
+		ansi.FgBrightWhite, tr(s, "Id"), tr(s, "Empire Name"),
+		tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
+	var names []string
+	for _, r := range rows {
+		id := "" // no selection letter for a realm that can't be attacked
+		if r.attackable {
+			id = scoreID(len(names))
+			names = append(names, r.name)
+		}
+		fmt.Fprintf(s, "%s%-4s%s %s%-26s%s %s%10d%s %s%11d%s %s%11d%s\n",
+			ansi.FgBrightMagenta, id, ansi.Reset,
+			ansi.FgBrightWhite, r.name, ansi.Reset,
+			ansi.FgBrightMagenta, r.land, ansi.Reset,
+			ansi.FgBrightWhite, r.score, ansi.Reset,
+			ansi.FgWhite, r.netWorth, ansi.Reset)
 	}
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
+	if len(names) == 0 {
+		ok(s, "None of these realms can be attacked — they are protected or allied with you.")
+		return "", false
+	}
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Attack which realm? (letter, RETURN to abort)"), ansi.Reset)
+	r, err := readKey(s)
+	if err != nil {
+		return "", false
+	}
+	i := int(unicode.ToUpper(r) - 'A')
+	if i < 0 || i >= len(names) {
+		fmt.Fprint(s, "\n")
+		return "", false
+	}
+	fmt.Fprintf(s, "%c\n", unicode.ToUpper(r))
+	return names[i], true
 }
 
-// specialAttack shares the target-selection loop used by the nuclear, chemical,
-// and biological attacks and by the covert/bomb ops. endsTurn is true only for
-// the War-menu WMD (one attack per turn); covert ops stay in their own menu.
-func specialAttack(s session.Session, w *ctx, label string, cost int, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
+// localAttack shares the target-selection loop used by the nuclear, chemical,
+// and biological attacks and by the covert/bomb ops — every attack aimed at a
+// realm on the local planet (as opposed to an interplanetary/group attack).
+// endsTurn is true only for the War-menu WMD (one attack per turn); covert ops
+// stay in their own menu.
+func localAttack(s session.Session, w *ctx, label string, cost int, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
 	if blockedByProtection(s, w) {
 		return Stay
 	}
@@ -151,12 +200,10 @@ func specialAttack(s session.Session, w *ctx, label string, cost int, endsTurn b
 	} else {
 		fmt.Fprintf(s, "\n%s"+tr(s, "%s — choose a target:")+"%s\n", ansi.FgBrightCyan, label, ansi.Reset)
 	}
-	printTargetRows(s, rows)
-	i := promptInt(s, "Attack which empire (0 to cancel)?")
-	if i < 1 || i > len(rows) {
+	name, chosen := pickAttackTarget(s, rows)
+	if !chosen {
 		return Stay
 	}
-	name := rows[i-1].name
 	var report string
 	var err error
 	w.With(func() {
@@ -185,15 +232,15 @@ func specialAttack(s session.Session, w *ctx, label string, cost int, endsTurn b
 }
 
 func nuclearAttack(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Nuclear Attack", game.NukeCost, true, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
+	return localAttack(s, w, "Nuclear Attack", game.NukeCost, true, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
 }
 
 func chemicalAttack(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Chemical Attack", game.ChemCost, true, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
+	return localAttack(s, w, "Chemical Attack", game.ChemCost, true, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
 }
 
 func biologicalAttack(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Biological Attack", game.BioCost, true, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
+	return localAttack(s, w, "Biological Attack", game.BioCost, true, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
 }
 
 // pirateColors are BRE's per-faction name colors, in game.PirateFactions order.
@@ -238,9 +285,10 @@ func attackPirates(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	p := w.Player()
-	troopers := promptSuggested(s, "Commit how many Troopers?", 0, p.Troopers)
-	jets := promptSuggested(s, "Commit how many Jets?", 0, p.Jets)
-	tanks := promptSuggested(s, "Commit how many Tanks?", 0, p.Tanks)
+	fmt.Fprint(s, "\n")
+	troopers := promptSuggestedTight(s, "Commit how many Troopers?", 0, p.Troopers)
+	jets := promptSuggestedTight(s, "Commit how many Jets?", 0, p.Jets)
+	tanks := promptSuggestedTight(s, "Commit how many Tanks?", 0, p.Tanks)
 
 	// RaidFaction bounds-checks the faction index itself, so a faction that
 	// vanished between the snapshot above and here just reports "no such

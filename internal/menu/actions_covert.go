@@ -8,30 +8,30 @@ import (
 )
 
 func sendSpy(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Send Spy", 0, false, func(a, d *game.Empire) (string, error) { return w.SendSpy(a, d) })
+	return localAttack(s, w, "Send Spy", 0, false, func(a, d *game.Empire) (string, error) { return w.SendSpy(a, d) })
 }
 
 func supportDissensions(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Support Dissensions", 0, false, func(a, d *game.Empire) (string, error) { return w.SupportDissensions(a, d) })
+	return localAttack(s, w, "Support Dissensions", 0, false, func(a, d *game.Empire) (string, error) { return w.SupportDissensions(a, d) })
 }
 
 func demoralizeForces(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Demoralize Forces", 0, false, func(a, d *game.Empire) (string, error) { return w.DemoralizeForces(a, d) })
+	return localAttack(s, w, "Demoralize Forces", 0, false, func(a, d *game.Empire) (string, error) { return w.DemoralizeForces(a, d) })
 }
 
 func setUp(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Set Up", 0, false, func(a, d *game.Empire) (string, error) { return w.SetUp(a, d) })
+	return localAttack(s, w, "Set Up", 0, false, func(a, d *game.Empire) (string, error) { return w.SetUp(a, d) })
 }
 
 func exposeEnemyOps(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Expose Enemy Ops", 0, false, func(a, d *game.Empire) (string, error) { return w.ExposeEnemyOps(a, d) })
+	return localAttack(s, w, "Expose Enemy Ops", 0, false, func(a, d *game.Empire) (string, error) { return w.ExposeEnemyOps(a, d) })
 }
 
 func stirRevolts(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Stir Revolts", 0, false, func(a, d *game.Empire) (string, error) { return w.StirRevolts(a, d) })
+	return localAttack(s, w, "Stir Revolts", 0, false, func(a, d *game.Empire) (string, error) { return w.StirRevolts(a, d) })
 }
 
-// bombingAttack wraps specialAttack with BRE's Bomb Enemy Targets 500-Bomber
+// bombingAttack wraps localAttack with BRE's Bomb Enemy Targets 500-Bomber
 // payload requirement (BRE.OVR: "All missiles and bombs require 500 Bombers
 // to deliver their payloads").
 func bombingAttack(s session.Session, w *ctx, label string, cost int, strike func(a, d *game.Empire) (string, error)) Result {
@@ -39,7 +39,7 @@ func bombingAttack(s session.Session, w *ctx, label string, cost int, strike fun
 		fail(s, fmt.Errorf("you need at least %d Bombers to deliver a payload", game.BombingBombersRequired))
 		return Stay
 	}
-	return specialAttack(s, w, label, cost, false, strike)
+	return localAttack(s, w, label, cost, false, strike)
 }
 
 func bombFoodMarket(s session.Session, w *ctx) Result {
@@ -83,9 +83,9 @@ func slappenheimerStrike(s session.Session, w *ctx) Result {
 }
 
 func spyRelations(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Spy on Relations", 0, false, func(a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) })
+	return localAttack(s, w, "Spy on Relations", 0, false, func(a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) })
 }
 
 func briberyOp(s session.Session, w *ctx) Result {
-	return specialAttack(s, w, "Bribery", 0, false, func(a, d *game.Empire) (string, error) { return w.Bribery(a, d) })
+	return localAttack(s, w, "Bribery", 0, false, func(a, d *game.Empire) (string, error) { return w.Bribery(a, d) })
 }

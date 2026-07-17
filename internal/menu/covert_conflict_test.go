@@ -7,9 +7,9 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// TestNuclearStrikeShapeShiftConflict is the specialAttack analogue of the
+// TestNuclearStrikeShapeShiftConflict is the localAttack analogue of the
 // regular-attack shape-shift test, covering the covert-ops / WMD path (every
-// covert op, missile, and bomb runs through specialAttack). Node B picks
+// covert op, missile, and bomb runs through localAttack). Node B picks
 // Victimville to nuke; while B is at the target prompt another node eliminates
 // it, and B's reload rebinds Victimville's slot to Decoyland. Re-finding the
 // target by name sees it is gone and aborts before charging the missile — so no
@@ -30,8 +30,8 @@ func TestNuclearStrikeShapeShiftConflict(t *testing.T) {
 	})
 
 	fb := &hookSession{
-		fakeSession: fakeSession{keys: []rune("1\r")},
-		marker:      "Attack which empire",
+		fakeSession: fakeSession{keys: []rune("A")},
+		marker:      "Attack which realm",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("victim")) })
 		},
