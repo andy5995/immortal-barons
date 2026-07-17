@@ -396,3 +396,56 @@ func TestShowBulletinEmptyNewsShowsNoBulletinsNote(t *testing.T) {
 		t.Error("expected the empty-state note when there is no news")
 	}
 }
+
+// Auto-Feed on + a food shortfall brings the Food Market up automatically so the
+// player can buy food before their people starve (the old bug: nothing did).
+func TestFeedStageAutoFeedOpensMarketWhenShort(t *testing.T) {
+	w := newWorld()
+	w.AutoFeed = true
+	p := w.Player()
+	p.Food = 0
+	p.People = 100000                    // ensures FoodUpkeep > 0
+	f := &fakeSession{keys: []rune("0")} // quit the food market
+	if err := feedStage(f, w, BuildMenus().Food); err != nil {
+		t.Fatalf("feedStage: %v", err)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "need") {
+		t.Errorf("expected a food-shortfall warning; got:\n%s", out)
+	}
+	if !strings.Contains(out, "Chopper") { // the Food Market title
+		t.Errorf("Auto-Feed should open the Food Market; got:\n%s", out)
+	}
+}
+
+func TestFeedStageNoNoticeWhenFed(t *testing.T) {
+	w := newWorld()
+	w.AutoFeed = true
+	w.Player().Food = 10_000_000 // far more than needed
+	f := &fakeSession{}
+	if err := feedStage(f, w, BuildMenus().Food); err != nil {
+		t.Fatalf("feedStage: %v", err)
+	}
+	if f.out.Len() != 0 {
+		t.Errorf("a fed realm should get no feed notice; got:\n%s", f.out.String())
+	}
+}
+
+func TestFeedStageWarnsButNoMarketWhenAutoFeedOff(t *testing.T) {
+	w := newWorld()
+	w.AutoFeed = false
+	p := w.Player()
+	p.Food = 0
+	p.People = 100000
+	f := &fakeSession{}
+	if err := feedStage(f, w, BuildMenus().Food); err != nil {
+		t.Fatalf("feedStage: %v", err)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "need") {
+		t.Errorf("expected a warning; got:\n%s", out)
+	}
+	if strings.Contains(out, "Chopper") {
+		t.Errorf("Auto-Feed off must NOT open the market; got:\n%s", out)
+	}
+}

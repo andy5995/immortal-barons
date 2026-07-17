@@ -432,6 +432,34 @@ func paymentStage(s session.Session, w *ctx) {
 	}
 }
 
+// feedStage is BRE's Food Market slot in the turn (Payment -> Food Market ->
+// Covert). When the realm's stored food can't cover this turn's consumption it
+// warns the player; with Auto-Feed on it also brings the Food Market up
+// automatically so they can buy food before their people starve (BRE's "the food
+// bank comes up automatically" behaviour). With Auto-Feed off it only warns — the
+// player manages food from the menu themselves. Fixes the old silent starvation:
+// Auto-Feed was a dead no-op and nothing ever flagged a food shortfall.
+func feedStage(s session.Session, w *ctx, food *Menu) error {
+	var need, have int
+	var autoFeed bool
+	if !withPlayer(w, func(p *game.Empire) {
+		need, have, autoFeed = p.FoodUpkeep(), p.Food, w.AutoFeed
+	}) {
+		return nil // realm gone; the caller's next withPlayer aborts the turn
+	}
+	if have >= need {
+		return nil // fed — no notice
+	}
+	fmt.Fprintf(s, "\n%s"+tr(s, "Your people need %s units of food and you have only %s.")+"%s\n",
+		ansi.FgYellow, comma(need), comma(have), ansi.Reset)
+	if !autoFeed {
+		// Auto-Feed off: just warn (no pause) — the player manages food themselves.
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgRed, tr(s, "Visit the Food Market to feed them, or they will starve."), ansi.Reset)
+		return nil
+	}
+	return Run(s, w, food) // Auto-Feed: bring up the Food Market so they can buy food now
+}
+
 // runTurn is the "Play Game" action. It shows the event log, then walks the
 // per-turn pipeline (industry production, income report, status,
 // spending/attack/covert/trading/message stages, then end-of-turn) for as
@@ -489,6 +517,9 @@ func runTurn(s session.Session, w *ctx) Result {
 		// would wipe it before the player could read it.
 		renderEmpireStatus(s, w)
 		paymentStage(s, w)
+		if err := feedStage(s, w, menus.Food); err != nil {
+			return Stay
+		}
 		var foodUpkeep int
 		if !withPlayer(w, func(p *game.Empire) { foodUpkeep = p.FoodUpkeep() }) {
 			return abort()
