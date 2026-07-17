@@ -324,20 +324,20 @@ func BuildMenus() *Menus {
 	}
 	coord.DefaultOnEnter = quitOnEnter(coord)
 
+	// BRE-style Price / # Owned columns: the buy price on Buy Food, the sell price
+	// on Sell Food, and the caller's current food holdings on both — so the player
+	// can see what they hold before buying or selling. The daily supply and gold on
+	// hand go in the status line below (see foodMarketStatus).
+	foodOwned := owned(func(p *game.Empire) int { return p.Food })
 	food.Items = []Item{
-		{LabelFn: func(w *ctx) string {
-			lang := playerLang(w)
-			avail := i18n.T(lang, "Unlimited supply today.")
-			if !w.Config.FoodUnlimited {
-				avail = fmt.Sprintf(i18n.T(lang, "%s units of food available today."), comma(w.FoodMarketSupply))
-			}
-			return fmt.Sprintf(i18n.T(lang, "%s You buy at %s, sell at %s per unit."), avail, comma(w.FoodBuyPrice()), comma(w.FoodSellPrice()))
-		}},
-		{Key: 'B', Label: "Buy Food", Do: buyFoodMarket},
-		{Key: 'S', Label: "Sell Food", Do: sellFoodMarket},
+		{Key: 'B', Label: "Buy Food", Do: buyFoodMarket,
+			Price: func(w *ctx) int { return w.FoodBuyPrice() }, Owned: foodOwned},
+		{Key: 'S', Label: "Sell Food", Do: sellFoodMarket,
+			Price: func(w *ctx) int { return w.FoodSellPrice() }, Owned: foodOwned},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
 	}
+	food.Status = foodMarketStatus
 	food.DefaultOnEnter = quitOnEnter(food)
 
 	system.Items = []Item{
@@ -434,4 +434,15 @@ func ibbsHidden(w *ctx) bool { return !w.Config.InterBBSEnabled() }
 func spendingStatus(w *ctx) string {
 	p := w.Player()
 	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d turns."), formatGold(p.Gold, playerLang(w)), p.TurnsLeft)
+}
+
+// foodMarketStatus is the Food Market status line: today's planet-wide supply
+// (or "Unlimited" when the sysop toggled it) plus the caller's gold on hand.
+func foodMarketStatus(w *ctx) string {
+	lang := playerLang(w)
+	supply := i18n.T(lang, "Unlimited supply today.")
+	if !w.Config.FoodUnlimited {
+		supply = fmt.Sprintf(i18n.T(lang, "%s units of food available today."), comma(w.FoodMarketSupply))
+	}
+	return fmt.Sprintf(i18n.T(lang, "%s  You have %s gold."), supply, formatGold(w.Player().Gold, lang))
 }
