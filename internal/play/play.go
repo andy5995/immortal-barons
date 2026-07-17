@@ -189,7 +189,10 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 		// we chose. On a name collision, re-prompt; the loop ends once we insert
 		// (e != nil) or hit a terminal condition.
 		for e == nil {
-			realm := onboard(s, w, id.Handle, lang)
+			realm, quit := onboard(s, w, id.Handle, lang)
+			if quit {
+				return "quit", save()
+			}
 			var full, taken bool
 			w.With(func() {
 				if existing := w.FindByOwner(id.Handle); existing != nil {
@@ -265,7 +268,12 @@ func selectLanguage(s session.Session) string {
 	return languageOptions[n-1].code
 }
 
-func onboard(s session.Session, w *game.World, handle, lang string) string {
+// onboard prompts for a realm name, re-prompting on an invalid or taken one.
+// Pressing Enter with nothing typed offers a way out — "Quit? (n,Y)" — so a
+// player who reached the name prompt by mistake can leave instead of being
+// forced to invent a realm. quit is true when they chose to leave without
+// creating one; the caller then ends the session.
+func onboard(s session.Session, w *game.World, handle, lang string) (name string, quit bool) {
 	var taken map[string]bool
 	w.With(func() {
 		taken = make(map[string]bool, len(w.Empires))
@@ -275,16 +283,30 @@ func onboard(s session.Session, w *game.World, handle, lang string) string {
 	})
 	for {
 		fmt.Fprintf(s, "\n%s%s, %s%s ", ansi.FgBrightWhite, handle, i18n.T(lang, "Name your Realm:"), ansi.Reset)
-		name, err := session.ReadLine(s)
+		line, err := session.ReadLine(s)
 		if err != nil {
-			return handle // stream ended; fall back to the handle
+			return handle, false // stream ended; fall back to the handle
 		}
-		name = strings.TrimSpace(name)
-		if alnum(name) < 3 || taken[strings.ToLower(name)] {
-			fmt.Fprintf(s, "%s  %s%s\n", ansi.FgRed, i18n.T(lang, "Invalid: at least 3 letters/numbers, not matching another realm."), ansi.Reset)
+		name = strings.TrimSpace(line)
+		if name == "" {
+			// Empty entry offers a way out. AskYesNo reads a single key (the game's
+			// y/n convention); Yes is the default, so Enter quits and "n" re-prompts.
+			if menu.AskYesNo(s, "Quit?", true) {
+				return "", true
+			}
 			continue
 		}
-		return name
+		if alnum(name) < 3 || taken[strings.ToLower(name)] {
+			fmt.Fprintf(s, "%s  %s%s\n", ansi.FgBrightRed, i18n.T(lang, "Invalid: at least 3 letters/numbers, not matching another realm."), ansi.Reset)
+			continue
+		}
+		// Confirm the name before committing to it — a typo is easy to make and the
+		// realm name is permanent. Declining re-prompts for a different one.
+		fmt.Fprintf(s, "\n%s"+i18n.T(lang, "Your realm will be named %s.")+"%s\n", ansi.FgBrightCyan, name, ansi.Reset)
+		if !menu.AskYesNo(s, "Confirm?", true) {
+			continue
+		}
+		return name, false
 	}
 }
 

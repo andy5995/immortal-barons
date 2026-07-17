@@ -25,22 +25,22 @@ func TestAskYesNo(t *testing.T) {
 	}
 	for _, c := range cases {
 		f := &fakeSession{keys: []rune(c.keys)}
-		got := askYesNo(f, "Continue?", c.defYes)
+		got := AskYesNo(f, "Continue?", c.defYes)
 		if got != c.want {
-			t.Errorf("askYesNo(%q, defYes=%v) = %v, want %v", c.keys, c.defYes, got, c.want)
+			t.Errorf("AskYesNo(%q, defYes=%v) = %v, want %v", c.keys, c.defYes, got, c.want)
 		}
 	}
 }
 
 func TestAskYesNoHint(t *testing.T) {
 	f := &fakeSession{keys: []rune("\r")}
-	askYesNo(f, "Continue?", true)
+	AskYesNo(f, "Continue?", true)
 	if !strings.Contains(f.out.String(), "Y/n") { // colored parens surround the letters
 		t.Errorf("expected Y/n hint, got %q", f.out.String())
 	}
 
 	f2 := &fakeSession{keys: []rune("\r")}
-	askYesNo(f2, "Continue?", false)
+	AskYesNo(f2, "Continue?", false)
 	if !strings.Contains(f2.out.String(), "y/N") {
 		t.Errorf("expected y/N hint, got %q", f2.out.String())
 	}

@@ -76,10 +76,10 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 	return Stay
 }
 
-// askYesNo prompts msg with a "(Y/n)" or "(y/N)" hint (whichever matches
+// AskYesNo prompts msg with a "(Y/n)" or "(y/N)" hint (whichever matches
 // defYes) and reads a single keypress — no Enter required. 'y'/'Y' returns
 // true, 'n'/'N' returns false; Enter or any other key returns defYes.
-func askYesNo(s session.Session, msg string, defYes bool) bool {
+func AskYesNo(s session.Session, msg string, defYes bool) bool {
 	letters := "y/N"
 	if defYes {
 		letters = "Y/n"
@@ -164,7 +164,7 @@ func showUnreadMail(s session.Session, w *ctx) {
 	} else {
 		fmt.Fprintf(s, "\n%s"+tr(s, "You have %d new messages.")+"%s\n", ansi.FgBrightCyan, count, ansi.Reset)
 	}
-	if !askYesNo(s, "Read them now?", true) {
+	if !AskYesNo(s, "Read them now?", true) {
 		return
 	}
 	var mail []string
@@ -337,7 +337,7 @@ func paymentStage(s session.Session, w *ctx) {
 	// If on-hand gold can't cover maintenance but savings can, offer to draw
 	// from the bank before paying (BRE lets you visit the bank to make upkeep).
 	if gold < due && bank > 0 &&
-		askYesNo(s, fmt.Sprintf(tr(s, "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"), due, gold, bank), true) {
+		AskYesNo(s, fmt.Sprintf(tr(s, "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"), due, gold, bank), true) {
 		n := promptSuggested(s, "Withdraw how much?", min(due-gold, bank), bank)
 		if !withPlayer(w, func(p *game.Empire) {
 			w.World.Withdraw(p, n)
@@ -378,7 +378,7 @@ func paymentStage(s session.Session, w *ctx) {
 			break // fully paid — no warning
 		}
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
-		if !askYesNo(s, "Would you like to reconsider?", true) {
+		if !AskYesNo(s, "Would you like to reconsider?", true) {
 			break // proceed despite the shortfall
 		}
 		// Reconsider: re-read current gold (it is unchanged; nothing applied yet)
@@ -476,7 +476,7 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 			return nil // fed the full amount — proceed
 		}
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
-		if !askYesNo(s, "Would you like to reconsider?", true) {
+		if !AskYesNo(s, "Would you like to reconsider?", true) {
 			return nil // proceed despite underfeeding
 		}
 	}
@@ -583,7 +583,7 @@ func runTurn(s session.Session, w *ctx) Result {
 			}
 		}
 		if w.VisitMessage {
-			if askYesNo(s, "Send a message?", false) {
+			if AskYesNo(s, "Send a message?", false) {
 				sendMessage(s, w)
 			}
 		}
@@ -602,7 +602,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		if !withPlayer(w, func(p *game.Empire) { turnsLeft = p.TurnsLeft }) {
 			return abort()
 		}
-		if turnsLeft <= 0 || !askYesNo(s, "Continue to your next turn?", true) {
+		if turnsLeft <= 0 || !AskYesNo(s, "Continue to your next turn?", true) {
 			return Stay
 		}
 	}

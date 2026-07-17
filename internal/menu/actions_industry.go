@@ -42,7 +42,7 @@ func setIndustries(s session.Session, w *ctx) Result {
 			ansi.FgBrightCyan, tr(s, p.Specialized), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", rule)
-	if !askYesNo(s, "Change Production?", false) {
+	if !AskYesNo(s, "Change Production?", false) {
 		return Stay
 	}
 	// Walk each unit like BRE (Troopers, Jets, …), capping the max at the budget

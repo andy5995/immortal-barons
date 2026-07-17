@@ -107,7 +107,7 @@ func negotiateWithType(s session.Session, w *ctx, ename, ttype string) {
 	switch {
 	case held:
 		fmt.Fprintf(s, "\n%s"+tr(s, "You hold a %s with %s.")+"%s\n", ansi.FgBrightCyan, ttype, ename, ansi.Reset)
-		if !askYesNo(s, "Break this treaty?", false) {
+		if !AskYesNo(s, "Break this treaty?", false) {
 			return
 		}
 		var err error
@@ -127,7 +127,7 @@ func negotiateWithType(s session.Session, w *ctx, ename, ttype string) {
 		ok(s, "You broke the %s with %s.", ttype, ename)
 	case offered:
 		fmt.Fprintf(s, "\n%s"+tr(s, "%s offers you a %s.")+"%s\n", ansi.FgBrightCyan, ename, ttype, ansi.Reset)
-		if !askYesNo(s, "Accept this treaty?", false) {
+		if !AskYesNo(s, "Accept this treaty?", false) {
 			return
 		}
 		var err error
@@ -194,7 +194,7 @@ func declareWar(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	targetName := names[i-1]
-	if !askYesNo(s, "Declare war? This breaks all treaties with them.", false) {
+	if !AskYesNo(s, "Declare war? This breaks all treaties with them.", false) {
 		return Stay
 	}
 	var broke []string

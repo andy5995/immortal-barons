@@ -52,7 +52,7 @@ func endProtection(s session.Session, w *ctx) Result {
 	}
 	fmt.Fprintf(s, "\n%s"+tr(s, "Your realm has %d turns of new-realm protection left.")+"%s\n",
 		ansi.FgBrightYellow, p.Protection, ansi.Reset)
-	if !askYesNo(s, "You will be out of protection at the end of this turn. Are you sure?", false) {
+	if !AskYesNo(s, "You will be out of protection at the end of this turn. Are you sure?", false) {
 		return Stay
 	}
 	// Drop to a single turn, not 0: the realm stays protected for the rest of

@@ -245,7 +245,7 @@ func sendMessage(s session.Session, w *ctx) Result {
 				fail(s, err)
 			}
 		}
-		if !askYesNo(s, "Do you wish to send another message?", false) {
+		if !AskYesNo(s, "Do you wish to send another message?", false) {
 			return Stay
 		}
 	}
