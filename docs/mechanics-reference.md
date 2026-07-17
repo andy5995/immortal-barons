@@ -436,9 +436,12 @@ league ran tax 85%, interest 75%).
   the rivers yield `River × RiverFishFood (124)` food and **no** river gold that
   turn; on a hydropower turn, gold and no river food. (Constants in `balance.go`;
   the exact chance/rates are tunable, live-sampled.)
-- **Food spoilage:** stored food at/below `FoodSpoilFloor` (1000) never spoils;
-  above it a fraction of the excess decays, reduced by Technology regions — BRE's
-  recovered shape (exact rate an IB tunable).
+- **Food spoilage:** **5% of the *entire* stored food stock** spoils each turn —
+  `floor(0.05 × food)` — with **no floor** below which nothing spoils, reduced by
+  Technology regions. BRE-verified by driving the original (2026-07-16): spoilage
+  matched `floor(5% × food)` to the unit across food stocks from 1.4k to 13.9k
+  (`FoodSpoilPct` in `balance.go`). Spoilage runs *after* the turn's food growth
+  and population consumption. (Was an unverified "4% of food above 1000" guess.)
 - **Land market:** starts with a pool of about 5,000 regions; you may buy
   at most **500 regions per turn**; the per-region price rises as you own
   more (about 1,100 coins/region when you hold only 2).

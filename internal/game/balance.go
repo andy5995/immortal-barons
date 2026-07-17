@@ -66,7 +66,7 @@ const (
 // capacity alongside their military). Without this an AI buys troopers every
 // turn until its food need outruns production and it starves.
 const (
-	AIFoodBufferTurns = 3 // turns of food consumption the AI keeps on hand
+	AIFoodBufferTurns = 8 // turns of food consumption the AI keeps on hand (enough to ride out 5% per-turn spoilage without starving mid-day)
 	AIAgriBuyMax      = 5 // Agricultural regions the AI buys per turn when food-tight
 
 	// Force mix (#36): once food-healthy, the AI spends this share of its gold
@@ -193,10 +193,12 @@ const (
 	// day (BRE seeds ~1,000,000); buying depletes it, selling replenishes it,
 	// unless the sysop's Food Unlimited toggle is on.
 	FoodMarketDailySupply = 1_000_000
-	// FoodSpoilFloor: stored food at or below this never spoils (BRE gates
-	// spoilage above ~1000 units); above it, a fraction of the EXCESS decays,
-	// reduced by Technology regions (via TechFactor). Exact rate is an IB tunable.
-	FoodSpoilFloor = 1000
+	// FoodSpoilPct: each turn this % of the ENTIRE stored food stock spoils —
+	// floor(0.05 × food) — with NO floor below which nothing spoils. BRE-verified
+	// by driving the original (2026-07-16): spoilage matched floor(5% × food) to
+	// the unit across food stocks from 1.4k to 13.9k. Technology decreases it (via
+	// TechFactor). Was an unverified "4% of food above 1000" guess.
+	FoodSpoilPct = 5
 	// Food production per region per turn. Agri calibrated to live BRE (97 Agri
 	// → 29,197 and 16 Agri → 4,864 food → ~300/Agri, no flat base).
 	FoodPerAgri = 300

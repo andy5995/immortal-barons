@@ -178,7 +178,10 @@ func (w *World) aiManageEconomy(e *Empire) {
 	produced := w.FoodGrown(e)
 	upkeep := e.FoodUpkeep()
 
-	// 1. Keep a food buffer, spending at most half the treasury on it.
+	// 1. Keep a food buffer, spending at most half the treasury on it so expansion
+	//    gold survives. AIFoodBufferTurns is sized to ride out a day of consumption
+	//    plus the 5% per-turn spoilage; too small a buffer let the correct BRE
+	//    spoilage drain the granary mid-day and starve the realm's people.
 	if target := upkeep * AIFoodBufferTurns; e.Food < target {
 		if price := w.FoodBuyPrice(); price > 0 {
 			buy := target - e.Food
@@ -491,14 +494,15 @@ func (w *World) processEconomy(e *Empire) {
 		w.postStarvationNews(e)
 	}
 
-	// Food spoilage (BRE shape, issue #19): stored food at/below FoodSpoilFloor
-	// (~1000) never spoils; above it, a fraction of the EXCESS decays, reduced by
-	// Technology regions (via tf). Food escrowed on the Trading Market counts
-	// toward the total, so listing food doesn't dodge spoilage — only attacks
-	// (#17). Spoilage comes out of the granary first, then the listing.
+	// Food spoilage (BRE-verified by driving the original, 2026-07-16): FoodSpoilPct
+	// (5%) of the ENTIRE stored food spoils each turn — floor(0.05 × food) — with NO
+	// floor below which nothing spoils. Technology decreases it (via tf). Food
+	// escrowed on the Trading Market counts toward the total, so listing food doesn't
+	// dodge spoilage — only attacks (#17). Spoilage comes out of the granary first,
+	// then the listing.
 	listedFood := w.MarketForSale(e.Owner, "Food")
-	if total := e.Food + listedFood; total > FoodSpoilFloor {
-		spoiled := (total - FoodSpoilFloor) / 25 * (100 - tf) / 100
+	if total := e.Food + listedFood; total > 0 {
+		spoiled := total * FoodSpoilPct / 100 * (100 - tf) / 100
 		e.LastSpoiled = spoiled
 		fromGranary := spoiled
 		if fromGranary > e.Food {

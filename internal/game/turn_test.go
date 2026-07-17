@@ -318,21 +318,22 @@ func TestFoodSpoilageAboveBuffer(t *testing.T) {
 	}
 }
 
-func TestFoodNoSpoilageBelowBuffer(t *testing.T) {
+// BRE-verified (2026-07-16): 5% of the ENTIRE food stock spoils each turn, with
+// NO floor below which nothing spoils.
+func TestFoodSpoils5PctNoFloor(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
-	e.People = 100
-	e.Troopers = 10
-	e.Jets = 0
-	e.Tanks = 0
-	e.Regions = RegionMix{}
-	e.Land = 0
-	e.Food = 150 // consumption (110) leaves 40, well below the buffer (220)
+	e.People, e.Troopers, e.Jets, e.Tanks = 0, 0, 0, 0 // no consumption
+	e.Regions, e.Land = RegionMix{}, 0                 // no food grown
+	e.Food = 200                                       // below the old 1000 "floor" — BRE spoils it anyway
 
 	w.PlayTurn(e, "2026-07-03")
 
-	if e.LastSpoiled != 0 {
-		t.Errorf("expect no spoilage below buffer, got LastSpoiled=%d", e.LastSpoiled)
+	if e.LastSpoiled != 200*FoodSpoilPct/100 { // 5% of 200 = 10, no floor
+		t.Errorf("food should spoil %d%% with no floor: want %d, got %d", FoodSpoilPct, 200*FoodSpoilPct/100, e.LastSpoiled)
+	}
+	if e.Food != 200-200*FoodSpoilPct/100 {
+		t.Errorf("food after spoilage: want %d, got %d", 200-200*FoodSpoilPct/100, e.Food)
 	}
 }
 
