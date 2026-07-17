@@ -7,6 +7,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/help"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -227,7 +228,11 @@ func renderAdvisor(s session.Session, w *ctx, d advisorDomain) {
 	data := gatherAdvisorData(w)
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, advisorGreeting(s, d), ansi.Reset)
 	for _, line := range advisorReport(s, data, d) {
-		fmt.Fprintf(s, "  %s\n", line)
+		// Word-wrap each report line to the screen width (78) less the 2-space
+		// indent, so a long sentence breaks at spaces instead of mid-word at col 80.
+		for _, wl := range strings.Split(help.Wrap(line, 76), "\n") {
+			fmt.Fprintf(s, "  %s\n", wl)
+		}
 	}
 }
 

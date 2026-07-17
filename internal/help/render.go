@@ -18,7 +18,7 @@ import (
 //
 // Anything outside the subset passes through as plain wrapped text. The help
 // files are authored to stay inside this subset, so we need no Markdown
-// dependency. If we later want colored inline spans, wrap() must be taught to
+// dependency. If we later want colored inline spans, Wrap() must be taught to
 // measure *visible* width (ignoring SGR bytes); today inline() strips markers
 // so visible width equals rune count.
 func (t Topic) RenderANSI(width int) string {
@@ -33,7 +33,7 @@ func (t Topic) RenderANSI(width int) string {
 		if len(para) == 0 {
 			return
 		}
-		b.WriteString(wrap(strings.Join(para, " "), width))
+		b.WriteString(Wrap(strings.Join(para, " "), width))
 		b.WriteByte('\n')
 		para = nil
 	}
@@ -75,7 +75,10 @@ func inline(s string) string {
 
 // wrap word-wraps text to width columns, measuring width in runes (so multibyte
 // glyphs count as one column, not their byte length).
-func wrap(text string, width int) string {
+// Wrap re-flows plain text (no ANSI markers) to the given column width, breaking
+// only at spaces so words are never split mid-token. Shared with the menu package
+// for wrapping advisor/report prose to the screen width.
+func Wrap(text string, width int) string {
 	words := strings.Fields(text)
 	if len(words) == 0 {
 		return ""
@@ -104,7 +107,7 @@ func wrap(text string, width int) string {
 func bullet(item string, width int) string {
 	const lead = "  • " // two spaces, bullet, space
 	const cont = "    " // continuation indent (aligns under the text)
-	wrapped := wrap(item, width-len([]rune(lead)))
+	wrapped := Wrap(item, width-len([]rune(lead)))
 	lines := strings.Split(wrapped, "\n")
 	var b strings.Builder
 	for i, l := range lines {
