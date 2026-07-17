@@ -204,6 +204,7 @@ const (
 	// turn). Scaled by how much of the turn's food need went unmet (0–100%): the
 	// hungrier the realm, the more popular support falls and the more people leave.
 	FoodShortfallSupportDrop   = 70 // support points lost per turn at 100% unfed
+	FoodShortfallMoraleDrop    = 80 // morale points lost per turn at 100% unfed (hungry troops demoralize faster than the public, as under pay shortfall)
 	FoodShortfallEmigrationPct = 10 // % of population that leaves per turn at 100% unfed
 	// SupportFedBoost: a well-run realm (people fed AND maintenance paid in full)
 	// recovers this many points of popular support per turn, for free — a

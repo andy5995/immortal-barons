@@ -445,13 +445,14 @@ league ran tax 85%, interest 75%).
 - **Feeding & food shortfall:** each turn the realm consumes food; a **feed stage**
   (BRE's Payment→Food-Market slot) warns when short, and with **Auto-Feed** on the
   Food Market opens automatically so the player can buy food. Going underfed hurts:
-  **popular support drops and people emigrate, scaled to how much of the turn's
-  food need went unmet** (`FoodShortfallSupportDrop` = 70 support points, and
-  `FoodShortfallEmigrationPct` = 10% of population, both at 100% unfed). IB's own
-  reconstruction (BRE publishes no rate), calibrated to a live BRE point: ~73%
-  short dropped support ~50 points in one turn. breins.txt confirms the direction:
-  *"Without food, morale and public support will [decline]."* (Morale not yet
-  modeled here.)
+  **popular support and military morale drop and people emigrate, scaled to how
+  much of the turn's food need went unmet** (`FoodShortfallSupportDrop` = 70
+  support points, `FoodShortfallMoraleDrop` = 80 morale points — hungry troops
+  demoralize faster than the public — and `FoodShortfallEmigrationPct` = 10% of
+  population, all at 100% unfed). IB's own reconstruction (BRE publishes no rate),
+  calibrated to a live BRE point: ~73% short dropped support ~50 points in one
+  turn. breins.txt confirms the direction: *"Without food, morale and public
+  support will [decline]."*
 - **Land market:** starts with a pool of about 5,000 regions; you may buy
   at most **500 regions per turn**; the per-region price rises as you own
   more (about 1,100 coins/region when you hold only 2).

@@ -525,6 +525,7 @@ func (w *World) processEconomy(e *Empire) {
 		if e.Support < 0 {
 			e.Support = 0
 		}
+		e.adjustMorale(-shortPct * FoodShortfallMoraleDrop / 100) // hungry troops lose heart too (breins.txt)
 		left := e.People * shortPct * FoodShortfallEmigrationPct / 10000
 		if left < 1 {
 			left = 1 // at least a token loss while starving
