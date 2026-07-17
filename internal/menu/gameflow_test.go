@@ -404,8 +404,8 @@ func TestFeedStageAutoFeedOpensMarketWhenShort(t *testing.T) {
 	w.AutoFeed = true
 	p := w.Player()
 	p.Food = 0
-	p.People = 100000                    // ensures FoodUpkeep > 0
-	f := &fakeSession{keys: []rune("0")} // quit the food market
+	p.People = 100000                     // ensures FoodUpkeep > 0
+	f := &fakeSession{keys: []rune("0n")} // quit the food market, then decline reconsider
 	if err := feedStage(f, w, BuildMenus().Food); err != nil {
 		t.Fatalf("feedStage: %v", err)
 	}

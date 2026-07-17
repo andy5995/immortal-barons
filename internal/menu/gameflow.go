@@ -441,8 +441,7 @@ func paymentStage(s session.Session, w *ctx) {
 // player manages food from the menu themselves. Fixes the old silent starvation:
 // Auto-Feed was a dead no-op and nothing ever flagged a food shortfall.
 func feedStage(s session.Session, w *ctx, food *Menu) error {
-	var need, have int
-	var autoFeed bool
+	need, have, autoFeed := 0, 0, false
 	if !withPlayer(w, func(p *game.Empire) {
 		need, have, autoFeed = p.FoodUpkeep(), p.Food, w.AutoFeed
 	}) {
@@ -451,14 +450,35 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 	if have >= need {
 		return nil // fed — no notice
 	}
-	fmt.Fprintf(s, "\n%s"+tr(s, "Your people need %s units of food and you have only %s.")+"%s\n",
-		ansi.FgYellow, comma(need), comma(have), ansi.Reset)
 	if !autoFeed {
-		// Auto-Feed off: just warn (no pause) — the player manages food themselves.
+		// Auto-Feed off: just warn (no pause) — the player manages food from the menu.
+		fmt.Fprintf(s, "\n%s"+tr(s, "Your people need %s units of food and you have only %s.")+"%s\n",
+			ansi.FgYellow, comma(need), comma(have), ansi.Reset)
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgRed, tr(s, "Visit the Food Market to feed them, or they will starve."), ansi.Reset)
 		return nil
 	}
-	return Run(s, w, food) // Auto-Feed: bring up the Food Market so they can buy food now
+	// Auto-Feed on: bring up the Food Market so the player can buy food. If they
+	// leave it still short, warn of disastrous results and let them reconsider —
+	// answering yes returns them to the Food Market (mirrors BRE and IB's own
+	// maintenance-underpayment guard). IB consumes food automatically, so there is
+	// no BRE-style "how much will you give?" allocation; buying enough is the fix.
+	for {
+		fmt.Fprintf(s, "\n%s"+tr(s, "Your people need %s units of food and you have only %s.")+"%s\n",
+			ansi.FgYellow, comma(need), comma(have), ansi.Reset)
+		if err := Run(s, w, food); err != nil {
+			return err
+		}
+		if !withPlayer(w, func(p *game.Empire) { need, have = p.FoodUpkeep(), p.Food }) {
+			return nil
+		}
+		if have >= need {
+			return nil // now fed
+		}
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgRed, tr(s, "Your people will go hungry — your actions may lead to disastrous results."), ansi.Reset)
+		if !askYesNo(s, "Would you like to reconsider?", true) {
+			return nil // proceed despite the shortfall
+		}
+	}
 }
 
 // runTurn is the "Play Game" action. It shows the event log, then walks the
