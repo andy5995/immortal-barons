@@ -224,28 +224,22 @@ func sendMessage(s session.Session, w *ctx) Result {
 		text, send := composeMessage(s)
 		if send && strings.TrimSpace(text) != "" {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Saving..."), ansi.Reset)
-			var err error
-			w.With(func() {
-				// Re-resolve sender and recipient by handle/name against the freshly
-				// reloaded world, so a concurrent send to the same inbox appends
-				// (both messages land) and a vanished recipient aborts.
-				p := w.Player()
-				if p == nil {
-					err = errRealmChanged
-					return
-				}
+			// Re-resolve sender and recipient by handle/name against the freshly
+			// reloaded world, so a concurrent send to the same inbox appends (both
+			// messages land) and a vanished recipient aborts.
+			err := w.withPlayer(func(p *game.Empire) error {
 				if all {
 					for _, e := range recipients(w) {
 						w.World.SendMail(p, e, text)
 					}
-					return
+					return nil
 				}
 				recip := findRealm(w, toName)
 				if recip == nil || recip == p {
-					err = errTargetGone
-					return
+					return errTargetGone
 				}
 				w.World.SendMail(p, recip, text)
+				return nil
 			})
 			if err != nil {
 				fail(s, err)
@@ -267,19 +261,12 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 	if amount <= 0 {
 		return Stay
 	}
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
+	err := w.withPlayer(func(p *game.Empire) error {
 		recip := findRealm(w, toName)
 		if recip == nil || recip == p {
-			err = errTargetGone
-			return
+			return errTargetGone
 		}
-		err = w.World.SendGold(p, recip, amount) // re-checks the sender's fresh balance
+		return w.World.SendGold(p, recip, amount) // re-checks the sender's fresh balance
 	})
 	if err != nil {
 		fail(s, err)
@@ -294,14 +281,9 @@ func planetaryPost(s session.Session, w *ctx) Result {
 	if text == "" {
 		return Stay
 	}
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
+	err := w.withPlayer(func(p *game.Empire) error {
 		w.World.PostBulletin(p, text)
+		return nil
 	})
 	if err != nil {
 		fail(s, err)

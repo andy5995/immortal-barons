@@ -56,6 +56,24 @@ func (c *ctx) Player() *game.Empire {
 	return c.cached
 }
 
+// withPlayer runs fn inside a world transaction with the re-resolved active
+// player, returning errRealmChanged if the realm has vanished (abdicated by
+// another node between the prompt and the write). It centralizes the
+// re-resolve-then-nil-check that every mutating menu action shares; callers
+// capture any extra values (gold, land, a report) through the closure.
+func (c *ctx) withPlayer(fn func(p *game.Empire) error) error {
+	var err error
+	c.With(func() {
+		p := c.Player()
+		if p == nil {
+			err = errRealmChanged
+			return
+		}
+		err = fn(p)
+	})
+	return err
+}
+
 // cp437SafeLangs records, per language code, whether that whole catalog maps to
 // CP437 — computed once at startup (catalogs are static). A CP437 door can then
 // render the catalogs that fit the code page (e.g. German) and fall back to

@@ -108,19 +108,13 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 		days = 1
 	}
 	var id, departDay int
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
-		var ga *game.GroupAttack
-		ga, err = w.World.CreateGroupAttack(p, board, target, w.GameDay+days, force)
-		if err != nil {
-			return
+	err := w.withPlayer(func(p *game.Empire) error {
+		ga, e := w.World.CreateGroupAttack(p, board, target, w.GameDay+days, force)
+		if e != nil {
+			return e
 		}
 		id, departDay = ga.ID, ga.DepartDay
+		return nil
 	})
 	if err != nil {
 		fail(s, err)
@@ -173,17 +167,11 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	id := rows[i-1].id
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
-		// JoinGroupAttack re-validates against fresh state: the attack must still
-		// exist (ErrNoAttack), not yet have departed (ErrDeparted), and the baron
-		// must still hold the committed units (ErrCantAfford).
-		err = w.World.JoinGroupAttack(p, id, force)
+	// JoinGroupAttack re-validates against fresh state: the attack must still exist
+	// (ErrNoAttack), not yet have departed (ErrDeparted), and the baron must still
+	// hold the committed units (ErrCantAfford).
+	err := w.withPlayer(func(p *game.Empire) error {
+		return w.World.JoinGroupAttack(p, id, force)
 	})
 	if err != nil {
 		fail(s, err)
@@ -436,16 +424,9 @@ func sendRemoteSpy(s session.Session, w *ctx) {
 	if !found {
 		return
 	}
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
+	err := w.withPlayer(func(p *game.Empire) error {
 		if p.Agents < 1 { // re-check the agent against fresh state
-			err = game.ErrNoAgents
-			return
+			return game.ErrNoAgents
 		}
 		p.Agents--
 		w.SpyDatabase = append(w.SpyDatabase, game.SpyReport{
@@ -454,6 +435,7 @@ func sendRemoteSpy(s session.Session, w *ctx) {
 			Date:   w.LastMaintDate,
 			Land:   sc.Land,
 		})
+		return nil
 	})
 	if err != nil {
 		fail(s, err)
@@ -481,14 +463,8 @@ func terroristOps(s session.Session, w *ctx) Result {
 	if agents <= 0 {
 		return Stay
 	}
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
-		err = w.World.SendTerror(p, board, baron, agents)
+	err := w.withPlayer(func(p *game.Empire) error {
+		return w.World.SendTerror(p, board, baron, agents)
 	})
 	if err != nil {
 		fail(s, err)
@@ -538,14 +514,9 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 	if i < 1 || i > len(owners) {
 		return Stay
 	}
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
+	err := w.withPlayer(func(p *game.Empire) error {
 		w.World.VoteCoordinator(p, owners[i-1])
+		return nil
 	})
 	if err != nil {
 		fail(s, err)
@@ -574,15 +545,14 @@ func modifyLeagueDiplomacy(s session.Session, w *ctx) Result {
 	if strings.TrimSpace(decl) == "" {
 		return Stay
 	}
-	var err error
-	w.With(func() {
+	err := w.withPlayer(func(p *game.Empire) error {
 		// Re-check the coordinator role against fresh state: a vote elsewhere may
 		// have unseated the player between the check and here.
-		if w.BBSCoordinator() != w.Player() {
-			err = errRealmChanged
-			return
+		if w.BBSCoordinator() != p {
+			return errRealmChanged
 		}
 		w.LeagueDiplomacy = decl
+		return nil
 	})
 	if err != nil {
 		fail(s, err)

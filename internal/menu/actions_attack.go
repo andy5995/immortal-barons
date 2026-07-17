@@ -110,19 +110,13 @@ func regularAttack(s session.Session, w *ctx) Result {
 	}
 
 	var report string
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
+	err := w.withPlayer(func(p *game.Empire) error {
 		d := findTarget(w, p, name)
 		if d == nil {
-			err = errTargetGone
-			return
+			return errTargetGone
 		}
 		report = w.World.Attack(p, d, force)
+		return nil
 	})
 	if err != nil {
 		fail(s, err)
@@ -205,19 +199,14 @@ func localAttack(s session.Session, w *ctx, label string, cost int, endsTurn boo
 		return Stay
 	}
 	var report string
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
+	err := w.withPlayer(func(p *game.Empire) error {
 		d := findTarget(w, p, name)
 		if d == nil {
-			err = errTargetGone
-			return
+			return errTargetGone
 		}
-		report, err = strike(p, d)
+		var e error
+		report, e = strike(p, d)
+		return e
 	})
 	if err != nil {
 		fail(s, err)
@@ -296,14 +285,9 @@ func attackPirates(s session.Session, w *ctx) Result {
 	// transaction: the p gathered above (before the commit prompts) is stale
 	// after a concurrent node's reload, and clamps against the fresh stock.
 	var report string
-	var err error
-	w.With(func() {
-		fp := w.Player()
-		if fp == nil {
-			err = errRealmChanged
-			return
-		}
+	err := w.withPlayer(func(fp *game.Empire) error {
 		report = w.World.RaidFaction(fp, f-1, troopers, jets, tanks)
+		return nil
 	})
 	if err != nil {
 		fail(s, err)
@@ -325,17 +309,13 @@ func sdiProgram(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var level int
-	var err error
-	w.With(func() {
-		// Re-resolve inside the transaction: FundSDI re-checks gold and the
-		// SDIMax cap against fresh state, so a concurrent node can't let two
-		// sessions spend the same gold or push past the cap.
-		fp := w.Player()
-		if fp == nil {
-			err = errRealmChanged
-			return
-		}
-		level, err = w.World.FundSDI(fp, gold)
+	// Re-resolve inside the transaction: FundSDI re-checks gold and the SDIMax cap
+	// against fresh state, so a concurrent node can't let two sessions spend the
+	// same gold or push past the cap.
+	err := w.withPlayer(func(fp *game.Empire) error {
+		var e error
+		level, e = w.World.FundSDI(fp, gold)
+		return e
 	})
 	if err != nil {
 		fail(s, err)
@@ -354,14 +334,10 @@ func doomerKaboomer(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var report string
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
-		report, err = w.World.DoomerKaboomer(p)
+	err := w.withPlayer(func(p *game.Empire) error {
+		var e error
+		report, e = w.World.DoomerKaboomer(p)
+		return e
 	})
 	if err != nil {
 		fail(s, err)

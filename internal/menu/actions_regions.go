@@ -157,19 +157,14 @@ func buyLand(s session.Session, w *ctx) Result {
 			if n <= 0 {
 				continue
 			}
-			var err error
 			var gold int
-			w.With(func() {
-				// Re-resolve inside the transaction: BuyRegions re-checks gold and
-				// the per-turn region cap against fresh state, and the region field
-				// pointer must index the reloaded empire, not the stale gather.
-				fp := w.Player()
-				if fp == nil {
-					err = errRealmChanged
-					return
-				}
-				err = w.World.BuyRegions(fp, regionField(fp, t), n)
+			// Re-resolve inside the transaction: BuyRegions re-checks gold and the
+			// per-turn region cap against fresh state, and the region field pointer
+			// must index the reloaded empire, not the stale gather.
+			err := w.withPlayer(func(fp *game.Empire) error {
+				e := w.World.BuyRegions(fp, regionField(fp, t), n)
 				gold = fp.Gold
+				return e
 			})
 			if err != nil {
 				// No pause: the message stays above the next prompt; the player
@@ -197,16 +192,11 @@ func sellLand(s session.Session, w *ctx) Result {
 	if n <= 0 {
 		return Stay
 	}
-	var err error
 	var land int
-	w.With(func() {
-		fp := w.Player()
-		if fp == nil {
-			err = errRealmChanged
-			return
-		}
-		err = w.World.DropRegions(fp, regionField(fp, t), n)
+	err := w.withPlayer(func(fp *game.Empire) error {
+		e := w.World.DropRegions(fp, regionField(fp, t), n)
 		land = fp.Land
+		return e
 	})
 	if err != nil {
 		fail(s, err)

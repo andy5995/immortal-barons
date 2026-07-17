@@ -69,16 +69,11 @@ func setIndustries(s session.Session, w *ctx) Result {
 		ns[i] = promptProduction(s, tr(s, name), labelW, cur, remaining)
 		remaining -= ns[i]
 	}
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
+	err := w.withPlayer(func(p *game.Empire) error {
 		for i, n := range ns {
 			*prodField(p, i) = n
 		}
+		return nil
 	})
 	if err != nil {
 		fail(s, err)
@@ -105,21 +100,16 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 	if t < 1 || t > len(prodTypeNames) {
 		return Stay
 	}
-	var err error
 	var already bool
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
+	err := w.withPlayer(func(p *game.Empire) error {
 		// Re-check against fresh state: specialization is permanent, so if another
 		// visit set it between the prompt and here, keep the existing choice.
 		if p.Specialized != "" {
 			already = true
-			return
+			return nil
 		}
 		p.Specialized = prodTypeNames[t-1]
+		return nil
 	})
 	if err != nil {
 		fail(s, err)

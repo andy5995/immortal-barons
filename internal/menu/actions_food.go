@@ -1,6 +1,9 @@
 package menu
 
-import "github.com/andy5995/immortal-barons/internal/session"
+import (
+	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/session"
+)
 
 func buyFoodMarket(s session.Session, w *ctx) Result {
 	p := w.Player()
@@ -12,14 +15,8 @@ func buyFoodMarket(s session.Session, w *ctx) Result {
 	if n <= 0 {
 		return Stay
 	}
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
-		err = w.World.BuyFoodMarket(p, n) // re-checks gold atomically
+	err := w.withPlayer(func(p *game.Empire) error {
+		return w.World.BuyFoodMarket(p, n) // re-checks gold atomically
 	})
 	if err != nil {
 		fail(s, err)
@@ -36,14 +33,8 @@ func sellFoodMarket(s session.Session, w *ctx) Result {
 	if n <= 0 {
 		return Stay
 	}
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
-		err = w.World.SellFood(p, n) // re-clamps to fresh food stock atomically
+	err := w.withPlayer(func(p *game.Empire) error {
+		return w.World.SellFood(p, n) // re-clamps to fresh food stock atomically
 	})
 	if err != nil {
 		fail(s, err)

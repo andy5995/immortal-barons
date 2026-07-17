@@ -43,17 +43,11 @@ func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.
 		if n <= 0 {
 			return Stay
 		}
-		var err error
-		w.With(func() {
-			// Re-resolve the empire against the freshly-reloaded world and let
-			// apply re-check gold atomically — the p/price gathered above (before
-			// the prompt) may be stale after a concurrent node's transaction.
-			p := w.Player()
-			if p == nil {
-				err = errRealmChanged
-				return
-			}
-			err = apply(w.World, p, n)
+		// Re-resolve the empire against the freshly-reloaded world and let apply
+		// re-check gold atomically — the p/price gathered above (before the prompt)
+		// may be stale after a concurrent node's transaction.
+		err := w.withPlayer(func(p *game.Empire) error {
+			return apply(w.World, p, n)
 		})
 		if err != nil {
 			fail(s, err)
@@ -79,16 +73,11 @@ func sellUnit(label string, owned func(*game.Empire) int, apply func(*game.World
 		if n <= 0 {
 			return Stay
 		}
-		var err error
 		var gold int
-		w.With(func() {
-			p := w.Player()
-			if p == nil {
-				err = errRealmChanged
-				return
-			}
-			err = apply(w.World, p, n) // apply re-checks stock atomically
+		err := w.withPlayer(func(p *game.Empire) error {
+			e := apply(w.World, p, n) // apply re-checks stock atomically
 			gold = p.Gold
+			return e
 		})
 		if err != nil {
 			fail(s, err)
@@ -103,14 +92,8 @@ func sellUnit(label string, owned func(*game.Empire) int, apply func(*game.World
 
 // buildHQ starts HeadQuarters construction for the acting empire.
 func buildHQ(s session.Session, w *ctx) Result {
-	var err error
-	w.With(func() {
-		p := w.Player()
-		if p == nil {
-			err = errRealmChanged
-			return
-		}
-		err = w.World.StartHQ(p)
+	err := w.withPlayer(func(p *game.Empire) error {
+		return w.World.StartHQ(p)
 	})
 	if err != nil {
 		fail(s, err)
@@ -197,18 +180,13 @@ func writeMacros(s session.Session, w *ctx) Result {
 			fmt.Fprintf(s, "%c", k)
 		}
 	}
-	var saveErr error
 	if len(seq) > 0 {
-		w.With(func() {
-			p := w.Player()
-			if p == nil {
-				saveErr = errRealmChanged
-				return
-			}
+		saveErr := w.withPlayer(func(p *game.Empire) error {
 			if p.Macros == nil {
 				p.Macros = map[string]string{}
 			}
 			p.Macros[string(letter)] = string(seq)
+			return nil
 		})
 		if saveErr != nil {
 			fail(s, saveErr)

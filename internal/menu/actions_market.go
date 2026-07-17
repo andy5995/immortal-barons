@@ -107,14 +107,8 @@ func marketChangeSetup(s session.Session, w *ctx, good string) {
 	max := marketFieldValue(p, good) + w.MarketForSale(p.Owner, good)
 	qty := promptSuggested(s, fmt.Sprintf(tr(s, "New amount of %s for sale"), tr(s, good)), w.MarketForSale(p.Owner, good), max)
 	price := promptSuggested(s, fmt.Sprintf(tr(s, "Set %s price"), tr(s, good)), w.MarketPrice(p.Owner, good), game.MoneyCap)
-	var err error
-	w.With(func() {
-		pp := w.Player()
-		if pp == nil {
-			err = errRealmChanged
-			return
-		}
-		err = w.World.SetMarketListing(pp, good, qty, price)
+	err := w.withPlayer(func(pp *game.Empire) error {
+		return w.World.SetMarketListing(pp, good, qty, price)
 	})
 	if err != nil {
 		fail(s, err)
@@ -167,14 +161,8 @@ func marketBuy(s session.Session, w *ctx, good string) {
 		return
 	}
 	owner := target.Owner
-	var buyErr error
-	w.With(func() {
-		pp := w.Player()
-		if pp == nil {
-			buyErr = errRealmChanged
-			return
-		}
-		buyErr = w.World.BuyFromMarket(pp, owner, good, n)
+	buyErr := w.withPlayer(func(pp *game.Empire) error {
+		return w.World.BuyFromMarket(pp, owner, good, n)
 	})
 	if buyErr != nil {
 		fail(s, buyErr)
