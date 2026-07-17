@@ -66,6 +66,18 @@ func main() {
 		os.Exit(1)
 	}
 	today := time.Now().Format("2006-01-02")
+	// IB_GAME_DATE overrides the game's "today" for testing (e.g.
+	// IB_GAME_DATE=2026-07-17 to advance a day and run daily maintenance without
+	// changing the system clock). An env var, not a flag, so it stays out of -help
+	// and off a casual player's radar. A malformed value errors rather than
+	// silently using the real date.
+	if d := os.Getenv("IB_GAME_DATE"); d != "" {
+		if _, err := time.Parse("2006-01-02", d); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons: IB_GAME_DATE must be YYYY-MM-DD:", err)
+			os.Exit(2)
+		}
+		today = d
+	}
 
 	if *export != "" {
 		if err := runExport(cfg, *export, today); err != nil {
