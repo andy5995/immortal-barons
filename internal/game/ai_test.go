@@ -165,3 +165,33 @@ func TestAIAggressorDemoralizesBeforeWar(t *testing.T) {
 		t.Errorf("aggressor should have demoralized the target before attacking, morale still %d", vic.Morale)
 	}
 }
+
+// A dull-skill AI throttles its land-buying, so it expands less than a sharp one
+// from the same position (both still expand). Two tiers give a game a mix of
+// strong and weak rivals.
+func TestAIDullExpandsLessThanSharp(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	build := func(skill string) *Empire {
+		e := w.AddHuman(skill, skill)
+		e.AISkill = skill
+		e.Regions = RegionMix{Agricultural: 50} // food-healthy: goes straight to land
+		e.syncLand()
+		e.People = 1000
+		e.Food = 1_000_000
+		e.Gold = 500_000  // budget-limited (below the per-turn region cap), so the throttle shows
+		e.Protection = 20 // under protection: expand, no military spend
+		e.Investments = nil
+		return e
+	}
+	sharp, dull := build(AISkillSharp), build(AISkillDull)
+	sharpBefore, dullBefore := sharp.Land, dull.Land
+	w.aiManageEconomy(sharp)
+	w.aiManageEconomy(dull)
+	sharpBought, dullBought := sharp.Land-sharpBefore, dull.Land-dullBefore
+	if dullBought <= 0 {
+		t.Errorf("dull AI should still expand, bought %d", dullBought)
+	}
+	if dullBought >= sharpBought {
+		t.Errorf("dull AI should expand less than sharp: dull bought %d, sharp bought %d", dullBought, sharpBought)
+	}
+}

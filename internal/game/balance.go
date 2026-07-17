@@ -84,6 +84,11 @@ const (
 	// investments so idle gold earns instead of sitting.
 	AIGoldReserve = 50_000 // gold kept on hand for food/maintenance/expansion
 	AIInvestPct   = 50     // % of the surplus above the reserve to invest
+	// AIDullLandBuyPct is the share of the affordable land-buy budget a dull-skill
+	// AI spends each turn (a sharp AI spends it all). Because expansion compounds,
+	// this is tuned empirically so a dull baron reaches ~700 regions over a day's
+	// 15 turns against a sharp baron's ~1300. See aiExpandLand / aiSkill.
+	AIDullLandBuyPct = 45
 
 	// War (#36): aggressor-profile AIs lean into offense (tanks + troopers, few
 	// turrets) so they can actually wage the wars they start, where the other

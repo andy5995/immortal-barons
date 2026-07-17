@@ -23,7 +23,12 @@ type Empire struct {
 	// on AI empires saved before profiles existed (aiProfile() derives a stable
 	// fallback from the name in that case).
 	AIProfile string
-	Alive     bool
+	// AISkill is how well an AI empire plays its economy — sharp barons expand at
+	// full tilt, dull ones hold back and grow slower, so a game has a mix of strong
+	// and weak rivals. Empty on humans and pre-skill saves (aiSkill() derives a
+	// stable fallback from the name then).
+	AISkill string
+	Alive   bool
 	// DiedDay is the GameDay on which this empire was eliminated (People or
 	// Land hit 0, or the owner abdicated). 0 means it never died. The husk is
 	// kept until a LATER day so the owner cannot immediately re-onboard: BRE
@@ -484,6 +489,13 @@ func (w *World) addAIEmpire(name string) *Empire {
 	// Spread personalities evenly across the AI pool (#36) so a game gets a mix
 	// of diplomats, balanced realms, and aggressors rather than all alike.
 	e.AIProfile = aiProfiles[len(w.AIEmpires())%len(aiProfiles)]
+	// Economic skill is rolled randomly (not cycled), so the sharp/dull split
+	// varies game to game rather than being a fixed pattern.
+	if w.rng.Intn(2) == 0 {
+		e.AISkill = AISkillDull
+	} else {
+		e.AISkill = AISkillSharp
+	}
 	w.Empires = append(w.Empires, e)
 	return e
 }

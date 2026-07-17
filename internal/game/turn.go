@@ -232,6 +232,9 @@ func (w *World) aiExpandLand(e *Empire) {
 		return
 	}
 	budget := e.Gold - AIGoldReserve
+	if e.aiSkill() == AISkillDull {
+		budget = budget * AIDullLandBuyPct / 100 // dull barons hold back and grow slower
+	}
 	limit := w.regionBuyLimit(e)
 	n, total := 0, 0
 	for n < limit {

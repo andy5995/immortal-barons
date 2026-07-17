@@ -30,6 +30,28 @@ func (e *Empire) aiProfile() string {
 	return aiProfiles[h.Sum32()%uint32(len(aiProfiles))]
 }
 
+// AI economic skill: sharp barons expand at full tilt; dull barons throttle their
+// land-buying (AIDullLandBuyPct) and so grow slower, giving a game a mix of strong
+// and weak rivals. Assigned randomly at seed (addAIEmpire).
+const (
+	AISkillSharp = "sharp"
+	AISkillDull  = "dull"
+)
+
+// aiSkill returns e's economic skill, deriving a stable one from its name when
+// unset so AI empires saved before skill existed still behave consistently.
+func (e *Empire) aiSkill() string {
+	if e.AISkill != "" {
+		return e.AISkill
+	}
+	h := fnv.New32a()
+	io.WriteString(h, e.Name+"skill") // distinct salt from aiProfile's name hash
+	if h.Sum32()%2 == 0 {
+		return AISkillDull
+	}
+	return AISkillSharp
+}
+
 // aiAcceptsTreaty reports whether an AI of the given profile accepts a proposed
 // treaty type. A diplomat takes any cooperative pact; an aggressor takes only
 // self-serving economic ones (and keeps its hands free to attack); a balanced
