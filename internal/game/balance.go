@@ -199,6 +199,12 @@ const (
 	// the unit across food stocks from 1.4k to 13.9k. Technology decreases it (via
 	// TechFactor). Was an unverified "4% of food above 1000" guess.
 	FoodSpoilPct = 5
+	// Food-shortfall penalties (IB reconstruction — BRE publishes no rate;
+	// calibrated to a live BRE point: ~73% short dropped support ~50 points in one
+	// turn). Scaled by how much of the turn's food need went unmet (0–100%): the
+	// hungrier the realm, the more popular support falls and the more people leave.
+	FoodShortfallSupportDrop   = 70 // support points lost per turn at 100% unfed
+	FoodShortfallEmigrationPct = 10 // % of population that leaves per turn at 100% unfed
 	// Food production per region per turn. Agri calibrated to live BRE (97 Agri
 	// → 29,197 and 16 Agri → 4,864 food → ~300/Agri, no flat base).
 	FoodPerAgri = 300

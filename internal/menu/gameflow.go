@@ -300,6 +300,7 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	} else if p.LastPopGrowth < 0 {
 		fmt.Fprintf(s, "  "+tr(s, "Your dominion lost %s%s%s people.")+"\n", ansi.FgRed, comma(-p.LastPopGrowth), ansi.Reset)
 	}
+	statLine(s, p.LastStarved, "people left your realm, unable to be fed.")
 	statLine(s, p.LastSpoiled, "units of food spoiled.")
 	if p.LastRiot {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, tr(s, "Riots have broken out due to high tax rates!"), ansi.Reset)

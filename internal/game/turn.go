@@ -498,12 +498,31 @@ func (w *World) processEconomy(e *Empire) {
 	e.LastFoodConsumed = e.FoodUpkeep()
 	e.Food += w.FoodGrown(e) - e.LastFoodConsumed
 	if e.Food < 0 {
-		e.People -= (-e.Food)/10 + 1
-		if e.People < 0 {
-			e.People = 0
+		// Underfeeding hits popular support and drives people away, worse the
+		// hungrier the realm. shortPct is the % of this turn's food need left unmet.
+		// Our own reconstruction (BRE publishes no rate), calibrated to a live BRE
+		// point: ~73% short dropped support ~50 points in one turn.
+		shortPct := 100
+		if e.LastFoodConsumed > 0 {
+			shortPct = min(100, (-e.Food)*100/e.LastFoodConsumed)
 		}
+		e.Support -= shortPct * FoodShortfallSupportDrop / 100
+		if e.Support < 0 {
+			e.Support = 0
+		}
+		left := e.People * shortPct * FoodShortfallEmigrationPct / 10000
+		if left < 1 {
+			left = 1 // at least a token loss while starving
+		}
+		if left > e.People {
+			left = e.People
+		}
+		e.People -= left
+		e.LastStarved = left
 		e.Food = 0
 		w.postStarvationNews(e)
+	} else {
+		e.LastStarved = 0
 	}
 
 	// Food spoilage (BRE-verified by driving the original, 2026-07-16): FoodSpoilPct

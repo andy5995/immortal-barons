@@ -130,6 +130,7 @@ type Empire struct {
 	// Transient per-turn stats for the end-of-turn report; not persisted.
 	LastSpoiled         int  `json:"-"`
 	LastPopGrowth       int  `json:"-"`
+	LastStarved         int  `json:"-"` // people who left this turn from a food shortfall
 	LastRiot            bool `json:"-"`
 	LastMoraleDesertion int  `json:"-"`
 	MadeTroopers        int  `json:"-"`
