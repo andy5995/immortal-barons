@@ -266,7 +266,7 @@ func (w *World) advanceTech(e *Empire) {
 }
 
 type Prices struct {
-	Land, Food, Trooper, Jet, Turret, Tank, Carrier, Agent, Bomber int
+	Land, Trooper, Jet, Turret, Tank, Carrier, Agent, Bomber int
 }
 
 // Investment is a term deposit: an amount locked until MaturesDay, paying
@@ -523,7 +523,7 @@ func (w *World) AddAIEmpires(n int) int {
 // world creation and re-applied on -reset, so a reset always installs the
 // current prices instead of carrying the old world's stale ones.
 func defaultPrices() Prices {
-	return Prices{Land: PriceLand, Food: PriceFood, Trooper: PriceTrooper, Jet: PriceJet, Turret: PriceTurret, Tank: PriceTank, Carrier: PriceCarrier, Agent: PriceAgent, Bomber: PriceBomber}
+	return Prices{Land: PriceLand, Trooper: PriceTrooper, Jet: PriceJet, Turret: PriceTurret, Tank: PriceTank, Carrier: PriceCarrier, Agent: PriceAgent, Bomber: PriceBomber}
 }
 
 func newEmpire(name, owner string, cfg Config) *Empire {

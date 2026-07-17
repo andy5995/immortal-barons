@@ -127,7 +127,6 @@ const (
 	PriceCarrier = 5943
 	PriceAgent   = 608
 	PriceBomber  = 2572
-	PriceFood    = 300 // food is bought via the food market (Chopper's), not this
 	// Region price rises with land owned: BRE ≈ 917 + Land×33 (live-sampled). See
 	// World.LandPrice. PriceLand is the base; LandPerRegion the per-owned climb.
 	PriceLand     = 917

@@ -146,14 +146,6 @@ func (w *World) BuyLand(e *Empire, n int) error {
 	return w.BuyRegions(e, &e.Regions.Coastal, n)
 }
 
-func (w *World) BuyFood(e *Empire, n int) error {
-	if err := e.spend(n, w.Prices.Food); err != nil {
-		return err
-	}
-	e.Food += n
-	return nil
-}
-
 // Food market prices (FoodBuyPrice / FoodSellPrice) live in balance.go: the
 // market sells food to you dearer than it buys.
 
