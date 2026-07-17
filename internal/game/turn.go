@@ -45,17 +45,26 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	e.LastPlayed = today
 }
 
+// MaintReport summarizes what a DailyMaintenance call did, so the login flow and
+// the sysop -maint command can tell the player/operator whether maintenance ran.
+// Days is how many game days it advanced (0 when already current for today).
+// NotStarted is set when the configured Game Start Date has not arrived yet.
+type MaintReport struct {
+	Days       int
+	NotStarted bool
+}
+
 // DailyMaintenance advances the world to `today`, running one pass per
 // missed day. It is idempotent (no-op if already current) and self-catching
 // up (loops over multiple missed days). The first call on a brand-new world
-// just records the date.
-func (w *World) DailyMaintenance(today string) {
+// just records the date. It returns a MaintReport summarizing what it did.
+func (w *World) DailyMaintenance(today string) MaintReport {
 	// Before the configured Game Start Date, players may sign up but the game
 	// does not advance. Pin the clock to today so it doesn't catch up when the
 	// start date arrives.
 	if !w.Config.GameStarted(today) {
 		w.LastMaintDate = today
-		return
+		return MaintReport{NotStarted: true}
 	}
 	if w.LastMaintDate == "" {
 		// First maintenance of a fresh game: play the AI barons' opening turns (they
@@ -64,8 +73,9 @@ func (w *World) DailyMaintenance(today string) {
 		// sit idle until the next calendar day's maintenance.
 		w.aiPlay(today)
 		w.LastMaintDate = today
-		return
+		return MaintReport{}
 	}
+	days := 0
 	for w.LastMaintDate < today {
 		w.settleMarketProceeds()                   // "Depositing trading market money" — pay sellers at day-end (#17)
 		w.FoodMarketSupply = FoodMarketDailySupply // refill the food market for the new day (#19)
@@ -109,6 +119,7 @@ func (w *World) DailyMaintenance(today string) {
 		if w.Config.GameLength > 0 && w.GameDay >= w.Config.GameLength {
 			w.endGame()
 		}
+		days++
 		next := w.nextDate(w.LastMaintDate)
 		if next == w.LastMaintDate {
 			w.LastMaintDate = today // malformed date; snap to today to stop repeating
@@ -120,6 +131,7 @@ func (w *World) DailyMaintenance(today string) {
 	// an already-current world), so past-day dead realms don't linger. A realm
 	// that died today (DiedDay == GameDay) is kept by removeDeadHusks.
 	w.removeDeadHusks()
+	return MaintReport{Days: days}
 }
 
 // rollNews snapshots the day's planet totals into BulletinToday (rolling the

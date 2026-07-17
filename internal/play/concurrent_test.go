@@ -58,7 +58,7 @@ func TestConcurrentSessionsShareWorld(t *testing.T) {
 			defer sessions.Done()
 			// splash dismiss, realm name, then quit.
 			f := &fakeSession{keys: []rune(fmt.Sprintf(" \rRealm%d\r0", i))}
-			if _, err := Session(f, Identity{Handle: fmt.Sprintf("caller%d", i)}, w, cfg, "", save); err != nil {
+			if _, err := Session(f, Identity{Handle: fmt.Sprintf("caller%d", i)}, w, cfg, "", game.MaintReport{}, save); err != nil {
 				t.Errorf("session %d: %v", i, err)
 			}
 		}(i)
@@ -133,7 +133,7 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 		go func(i int) {
 			defer sessions.Done()
 			f := &fakeSession{keys: []rune(fmt.Sprintf(" \rRealm%d\r0", i))}
-			if _, err := Session(f, Identity{Handle: fmt.Sprintf("caller%d", i)}, w, cfg, "", save); err != nil {
+			if _, err := Session(f, Identity{Handle: fmt.Sprintf("caller%d", i)}, w, cfg, "", game.MaintReport{}, save); err != nil {
 				t.Errorf("session %d: %v", i, err)
 			}
 		}(i)
@@ -151,7 +151,7 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 	go func() {
 		defer sessions.Done()
 		f := &fakeSession{keys: []rune(turnKeys)}
-		if _, err := Session(f, Identity{Handle: "turnplayer"}, w, cfg, "", save); err != nil {
+		if _, err := Session(f, Identity{Handle: "turnplayer"}, w, cfg, "", game.MaintReport{}, save); err != nil {
 			t.Errorf("turn-playing session: %v", err)
 		}
 	}()

@@ -45,13 +45,14 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	// realm was a dead husk that this maintenance sweeps, so Session can announce
 	// the fresh start (the husk is gone by the time Session binds the empire).
 	var rebornFrom string
+	var maint game.MaintReport
 	w.With(func() {
 		w.Today = today
 		var deadName string
 		if e := w.FindByOwner(id.Handle); e != nil && !e.Alive {
 			deadName = e.Name
 		}
-		w.DailyMaintenance(today)
+		maint = w.DailyMaintenance(today)
 		if deadName != "" && w.FindByOwner(id.Handle) == nil {
 			rebornFrom = deadName
 		}
@@ -59,7 +60,29 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 
 	// Each action already persisted via its Transact; the session-end save is a
 	// no-op here (saving w's in-memory state would overwrite concurrent nodes).
-	return Session(s, id, w, cfg, rebornFrom, func() error { return nil })
+	return Session(s, id, w, cfg, rebornFrom, maint, func() error { return nil })
+}
+
+// maintNotice tells the caller what the login's daily maintenance did — that the
+// world advanced (and by how many days) or was already current for today. Shown
+// right after the splash, with no pause of its own so the opening menu follows
+// immediately.
+func maintNotice(s session.Session, r game.MaintReport) {
+	switch {
+	case r.NotStarted:
+		// Nothing ran — the game hasn't started yet; the opening menu shows the
+		// start date, so no notice is needed here.
+	case r.Days > 0:
+		fmt.Fprintf(s, "\n%sRunning daily maintenance...%s\n", ansi.FgBrightCyan, ansi.Reset)
+		day := "day"
+		if r.Days > 1 {
+			day = "days"
+		}
+		fmt.Fprintf(s, "  Advanced %d %s. Rival barons played their turns, markets settled,\n", r.Days, day)
+		fmt.Fprint(s, "  investments matured, and every realm's turns were refreshed.\n")
+	default:
+		fmt.Fprintf(s, "\n%sMaintenance has already been run today.%s\n", ansi.FgWhite, ansi.Reset)
+	}
 }
 
 // Session plays one session against an already-loaded world owned by the
@@ -67,7 +90,7 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 // caller owns those. save is called once at session end: the web front-end
 // persists its in-memory world there, while the door passes a no-op because
 // every action already committed through its FileStore transaction.
-func Session(s session.Session, id Identity, w *game.World, cfg game.Config, rebornFrom string, save func() error) (reason string, err error) {
+func Session(s session.Session, id Identity, w *game.World, cfg game.Config, rebornFrom string, maint game.MaintReport, save func() error) (reason string, err error) {
 	// Bound the session: boot after IdleTimeoutSecs idle, or at the caller's
 	// BBS time-left, so an abandoned session frees the world lock.
 	var hard time.Time
@@ -98,6 +121,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	}()
 
 	menu.Splash(s)
+	maintNotice(s, maint)
 
 	var joinOpen, boardFull bool
 	var joinDate string

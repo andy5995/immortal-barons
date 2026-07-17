@@ -407,6 +407,7 @@ func BuildMenus() *Menus {
 		}
 		return gameMenu.byKey(rune(key), w)
 	}
+	gameMenu.Status = gameMenuStatus
 
 	return &Menus{
 		Spending:       buy,
@@ -445,4 +446,20 @@ func foodMarketStatus(w *ctx) string {
 		supply = fmt.Sprintf(i18n.T(lang, "%s units of food available today."), comma(w.FoodMarketSupply))
 	}
 	return fmt.Sprintf(i18n.T(lang, "%s  You have %s gold."), supply, formatGold(w.Player().Gold, lang))
+}
+
+// gameMenuStatus shows the game's start date on the opening menu (BRE displays it
+// there) plus the current game day. Before the start date arrives it announces
+// when the game begins; an immediate-start game (no configured date) shows only
+// the day.
+func gameMenuStatus(w *ctx) string {
+	lang := playerLang(w)
+	d := w.Config.GameStartDate
+	if d == "" {
+		return fmt.Sprintf(i18n.T(lang, "Game Day %d"), w.GameDay)
+	}
+	if w.Today != "" && !w.Config.GameStarted(w.Today) {
+		return fmt.Sprintf(i18n.T(lang, "The game begins %s."), d)
+	}
+	return fmt.Sprintf(i18n.T(lang, "Game started %s  ·  Day %d"), d, w.GameDay)
 }

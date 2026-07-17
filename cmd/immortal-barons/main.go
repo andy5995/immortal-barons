@@ -327,7 +327,14 @@ func runMaint(cfg game.Config, today string) error {
 	if err != nil {
 		return err
 	}
-	w.DailyMaintenance(today)
+	switch r := w.DailyMaintenance(today); {
+	case r.NotStarted:
+		fmt.Println("The game has not started yet; maintenance did not advance the world.")
+	case r.Days > 0:
+		fmt.Printf("Daily maintenance ran: advanced %d day(s) to game day %d.\n", r.Days, w.GameDay)
+	default:
+		fmt.Println("Maintenance has already been run today.")
+	}
 	if cfg.IBBS {
 		if err := store.RunPlanetary(w, cfg.InboundDir, cfg.OutboundDir); err != nil {
 			return err
