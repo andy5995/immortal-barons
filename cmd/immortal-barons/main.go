@@ -152,6 +152,12 @@ func main() {
 	}
 
 	if *local {
+		// -local takes no positional argument. A stray word here is almost always a
+		// mistaken realm name, so point at the right flag instead of ignoring it.
+		if flag.NArg() > 0 {
+			fmt.Fprintf(os.Stderr, "immortal-barons: unexpected argument %q. To name your realm, use -name %q\n", flag.Arg(0), flag.Arg(0))
+			os.Exit(2)
+		}
 		runLocal(cfg, *name, today, wantUTF8(*utf8, *cp437, true))
 		return
 	}
