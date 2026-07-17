@@ -8,13 +8,13 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// TestConcurrentBuyIsRaceFree proves buy2's world lock. It models the real
+// TestConcurrentBuyIsRaceFree proves buyUnit's world lock. It models the real
 // concurrency this project creates: separate sessions sharing ONE *game.World.
 // One goroutine repeatedly buys (Recruit writes p.Troopers/p.Gold); another
 // repeatedly renders the scoreboard (printScores snapshots every empire's
-// Troopers via NetWorth). buy2 wraps its Recruit in w.With and printScores
+// Troopers via NetWorth). buyUnit wraps its Recruit in w.With and printScores
 // snapshots under w.With, so the write and the read share the world mutex —
-// no data race. Remove buy2's w.With and the unlocked Recruit write races the
+// no data race. Remove buyUnit's w.With and the unlocked Recruit write races the
 // scoreboard's Troopers read, which -race reports as a DATA RACE (test fails).
 // That is what gives this test teeth: it fails without the lock, passes with it.
 func TestConcurrentBuyIsRaceFree(t *testing.T) {
@@ -25,7 +25,7 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 	startTroopers := p.Troopers
 
 	const iterations = 400
-	// Match the price buy2's gather uses to the price Recruit actually charges
+	// Match the price buyUnit's gather uses to the price Recruit actually charges
 	// (the per-turn fluctuating TrooperPrice; constant here since no turn is
 	// played), so gold accounting reconciles exactly.
 	unitPrice := w.TrooperPrice(p)
@@ -39,7 +39,7 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 	cR := &ctx{World: w, handle: p.Owner}
 	price := func(_ *ctx) int { return unitPrice }
 	apply := func(gw *game.World, e *game.Empire, n int) error { return gw.Recruit(e, n) }
-	action := buy2("Troopers", false, price, apply)
+	action := buyUnit("Troopers", false, price, apply)
 
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -75,9 +75,9 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 	}
 }
 
-// TestBuyRefusesInsufficientGold checks buy2's error path: when the empire
+// TestBuyRefusesInsufficientGold checks buyUnit's error path: when the empire
 // cannot afford the requested amount, Recruit's own gold precondition refuses
-// it and buy2 surfaces the failure. This is a plain single-goroutine check of
+// it and buyUnit surfaces the failure. This is a plain single-goroutine check of
 // Recruit's precondition — it does NOT exercise the world lock (see
 // TestConcurrentBuyIsRaceFree for that).
 func TestBuyRefusesInsufficientGold(t *testing.T) {
@@ -88,7 +88,7 @@ func TestBuyRefusesInsufficientGold(t *testing.T) {
 	c := &ctx{World: w, handle: p.Owner}
 
 	price := func(_ *ctx) int { return 10 }
-	action := buy2("Troopers", false, price, func(gw *game.World, e *game.Empire, n int) error {
+	action := buyUnit("Troopers", false, price, func(gw *game.World, e *game.Empire, n int) error {
 		// Simulate gold being drained between the prompt and the apply.
 		e.Gold = 5
 		return gw.Recruit(e, n)

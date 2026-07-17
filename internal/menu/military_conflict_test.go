@@ -7,7 +7,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// TestBuyTroopersVanishedEmpireConflict proves a military purchase (buy2 →
+// TestBuyTroopersVanishedEmpireConflict proves a military purchase (buyUnit →
 // Recruit) re-resolves the active empire inside its write transaction. Node B
 // gathers its realm; another node removes it, leaving only a decoy realm; node B
 // then commits. Because the reload reuses *Empire pointers by slice index, the
@@ -27,7 +27,7 @@ func TestBuyTroopersVanishedEmpireConflict(t *testing.T) {
 	_ = b.Player()
 	commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("alice")) })
 
-	buyTroopers := buy2("Troopers", false, func(w *ctx) int { return w.TrooperPrice(w.Player()) }, (*game.World).Recruit)
+	buyTroopers := buyUnit("Troopers", false, func(w *ctx) int { return w.TrooperPrice(w.Player()) }, (*game.World).Recruit)
 	fb := &fakeSession{keys: []rune("10\r")}
 	buyTroopers(fb, b)
 

@@ -22,9 +22,9 @@ var errRealmChanged = errors.New("The realm has changed — try again.")
 // another node between the target pick and the write.
 var errTargetGone = errors.New("Your target is no longer there.")
 
-// buy2 wraps a "prompt for quantity, apply, report" economy action. The
+// buyUnit wraps a "prompt for quantity, apply, report" economy action. The
 // max offered is what the empire can currently afford at unit's price.
-func buy2(label string, military bool, unit func(*ctx) int, apply func(*game.World, *game.Empire, int) error) Action {
+func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.World, *game.Empire, int) error) Action {
 	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
 		// The league's Buy Military knob can forbid buying army units on the
@@ -69,9 +69,9 @@ func buy2(label string, military bool, unit func(*ctx) int, apply func(*game.Wor
 	}
 }
 
-// sellUnit2 wraps a "prompt for quantity, sell, report" unit-selling action.
+// sellUnit wraps a "prompt for quantity, sell, report" unit-selling action.
 // The max offered is what the empire currently owns.
-func sellUnit2(label string, owned func(*game.Empire) int, apply func(*game.World, *game.Empire, int) error) Action {
+func sellUnit(label string, owned func(*game.Empire) int, apply func(*game.World, *game.Empire, int) error) Action {
 	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
 		max := owned(p)
@@ -93,7 +93,7 @@ func sellUnit2(label string, owned func(*game.Empire) int, apply func(*game.Worl
 		if err != nil {
 			fail(s, err)
 		} else {
-			// No pause: like buy2, the Spending/Sell menu redraws with updated
+			// No pause: like buyUnit, the Spending/Sell menu redraws with updated
 			// counts right after, so the confirmation stays visible above it.
 			okNoPause(s, "Sold %d. Gold: %d", n, gold)
 		}
