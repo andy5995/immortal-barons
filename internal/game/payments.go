@@ -124,6 +124,7 @@ func (w *World) PayForces(e *Empire, given int) int {
 	if given >= req {
 		return 0
 	}
+	e.MaintUnderpaid = true              // underpaid this obligation; blocks the well-run support boost
 	fracPct := (req - given) * 100 / req // req > 0 here (else given >= req)
 	desertPct := fracPct * ArmyDesertRate / 100
 	lost := 0
@@ -150,6 +151,7 @@ func (w *World) PayRegions(e *Empire, given int) int {
 	if given >= req {
 		return 0
 	}
+	e.MaintUnderpaid = true              // underpaid this obligation; blocks the well-run support boost
 	fracPct := (req - given) * 100 / req // req > 0 here (else given >= req)
 	lost := e.Land * fracPct / 100 * RegionRevoltRate / 100
 	if lost > 0 {

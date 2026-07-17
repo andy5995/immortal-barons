@@ -205,6 +205,10 @@ const (
 	// hungrier the realm, the more popular support falls and the more people leave.
 	FoodShortfallSupportDrop   = 70 // support points lost per turn at 100% unfed
 	FoodShortfallEmigrationPct = 10 // % of population that leaves per turn at 100% unfed
+	// SupportFedBoost: a well-run realm (people fed AND maintenance paid in full)
+	// recovers this many points of popular support per turn, for free — a
+	// placeholder for BRE's pay-to-boost-support mechanic (#39), not yet built.
+	SupportFedBoost = 5
 	// Food production per region per turn. Agri calibrated to live BRE (97 Agri
 	// → 29,197 and 16 Agri → 4,864 food → ~300/Agri, no flat base).
 	FoodPerAgri = 300

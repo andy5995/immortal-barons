@@ -42,6 +42,7 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	// turns straight through PlayTurn — without this the AI's cap accumulates across
 	// the day and strands it at MaxRegions total instead of MaxRegions per turn.
 	e.RegionsBoughtThisTurn = 0
+	e.MaintUnderpaid = false // cleared for next turn; set again by PayForces/PayRegions on underpayment
 	e.LastPlayed = today
 }
 
@@ -578,6 +579,14 @@ func (w *World) processEconomy(e *Empire) {
 		e.Support += min(SupportDrift, target-e.Support)
 	} else if e.Support > target {
 		e.Support -= min(SupportDrift, e.Support-target)
+	}
+
+	// A well-run realm — people fed AND maintenance paid in full — recovers some
+	// popular support for free each turn (placeholder for BRE's pay-to-boost-support
+	// mechanic, #39). LastStarved is 0 when fed (set above); MaintUnderpaid is set by
+	// PayForces/PayRegions when an obligation is underpaid.
+	if !e.MaintUnderpaid && e.LastStarved == 0 {
+		e.Support = min(100, e.Support+SupportFedBoost)
 	}
 
 	// Riots: verified against a BRE.OVR disassembly — a riot fires iff

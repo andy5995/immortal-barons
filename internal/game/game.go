@@ -131,6 +131,7 @@ type Empire struct {
 	LastSpoiled         int  `json:"-"`
 	LastPopGrowth       int  `json:"-"`
 	LastStarved         int  `json:"-"` // people who left this turn from a food shortfall
+	MaintUnderpaid      bool `json:"-"` // forces/regions maintenance was underpaid this turn (blocks the well-run support boost)
 	LastRiot            bool `json:"-"`
 	LastMoraleDesertion int  `json:"-"`
 	MadeTroopers        int  `json:"-"`
