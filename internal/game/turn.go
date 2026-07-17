@@ -83,6 +83,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		for _, e := range w.Empires {
 			if e.Alive {
 				e.TurnsLeft = w.Config.TurnsPerDay
+				e.AttacksToday = 0 // fresh day: the individual-attack allotment resets
 			}
 		}
 		w.aiPlay(w.LastMaintDate)

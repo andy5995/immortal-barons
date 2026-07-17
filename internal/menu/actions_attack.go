@@ -79,6 +79,10 @@ func regularAttack(s session.Session, w *ctx) Result {
 	if blockedByProtection(s, w) {
 		return Stay
 	}
+	if !w.CanAttack(w.Player()) {
+		ok(s, "You have already launched all %d of your attacks for today.", w.Config.MaxIndividualAttacks)
+		return Stay
+	}
 	rows := snapshotTargets(w)
 	if len(rows) == 0 {
 		ok(s, "There are no rival empires left to attack.")
@@ -114,6 +118,9 @@ func regularAttack(s session.Session, w *ctx) Result {
 		d := findTarget(w, p, name)
 		if d == nil {
 			return errTargetGone
+		}
+		if !w.CanAttack(p) {
+			return errAttacksExhausted
 		}
 		report = w.World.Attack(p, d, force)
 		return nil

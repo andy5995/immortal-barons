@@ -95,6 +95,9 @@ func (w *World) aiWageWar(e *Empire) {
 	if e.Protection > 0 || e.aiProfile() != AIProfileAggressor {
 		return
 	}
+	if !w.CanAttack(e) {
+		return // used up the day's individual-attack allotment
+	}
 	var target *Empire
 	for _, t := range w.Targets(e) {
 		if target == nil || effectiveDefense(t) < effectiveDefense(target) {

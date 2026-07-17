@@ -22,6 +22,11 @@ var errRealmChanged = errors.New("The realm has changed — try again.")
 // another node between the target pick and the write.
 var errTargetGone = errors.New("Your target is no longer there.")
 
+// errAttacksExhausted is returned inside the attack transaction when the daily
+// individual-attack cap was reached between the pre-check and the write (another
+// node on the same handle, or a day that did not roll as expected).
+var errAttacksExhausted = errors.New("You have used all your attacks for today.")
+
 // buyUnit wraps a "prompt for quantity, apply, report" economy action. The
 // max offered is what the empire can currently afford at unit's price.
 func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.World, *game.Empire, int) error) Action {

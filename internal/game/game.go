@@ -65,7 +65,12 @@ type Empire struct {
 	// in the turn rather than per purchase. Reset to 0 at the start of each
 	// turn (see runTurn in internal/menu/gameflow.go).
 	RegionsBoughtThisTurn int
-	Protection            int
+	// AttacksToday counts individual (conventional) attacks launched since the day
+	// began, enforcing Config.MaxIndividualAttacks across every turn in the day.
+	// Persisted so it survives the per-action reload/save cycle of door play; reset
+	// to 0 at daily maintenance (see DailyMaintenance).
+	AttacksToday int
+	Protection   int
 	// Score is BRE's cumulative score (shown on the scores board, distinct from
 	// Net Worth): += a flat ScorePerTurn once per turn played, minus small
 	// IB-only penalties for riots/food spoilage, plus combat/covert score.

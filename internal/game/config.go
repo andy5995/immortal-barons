@@ -114,6 +114,7 @@ type Config struct {
 	FoodUnlimited         bool              // food market has no daily supply limit (BRE "Food Unlimited"; default false = limited)
 	MaxTaxRate            int               // highest tax rate a player may set
 	MaxRegions            int               // most regions a player may own
+	MaxIndividualAttacks  int               // most individual (conventional) attacks a player may launch per day; 0 = unlimited (BRE "Maximum Individual Attacks Per Day")
 	MaxPlayers            int               // most human empires per board (0 = unlimited)
 	MaxConcurrentSessions int               // max live browser sessions at once
 	BuyMilitary           BuyMode           // Yes / No / Limited
@@ -183,6 +184,7 @@ func DefaultConfig() Config {
 		SteadyInvest:          false,
 		MaxTaxRate:            50,
 		MaxRegions:            500,
+		MaxIndividualAttacks:  3, // Andy's choice for the modern door; BRE has the setting but its stock default is unverified
 		MaxPlayers:            25,
 		MaxConcurrentSessions: 4,
 		BuyMilitary:           BuyYes,

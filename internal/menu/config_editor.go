@@ -132,6 +132,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		p(24, "Idle timeout (sec)", fmt.Sprintf("%d (0 = never)", c.IdleTimeoutSecs))
 		p(25, "Idle warnings before boot", fmt.Sprintf("%d", c.MaxIdleWarnings))
 		p(26, "* Food Unlimited", onOffStr(c.FoodUnlimited))
+		p(27, "* Max Individual Attacks/Day", fmt.Sprintf("%d (0 = unlimited)", c.MaxIndividualAttacks))
 		fmt.Fprintf(s, "%s\n%s* = league ruleset (Coordinator broadcasts with -league-config)%s\n",
 			rule, ansi.FgWhite, ansi.Reset)
 
@@ -207,6 +208,8 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 			c.MaxIdleWarnings = max(1, promptSuggested(s, "Idle warnings before boot", c.MaxIdleWarnings, 100))
 		case 26:
 			c.FoodUnlimited = !c.FoodUnlimited
+		case 27:
+			c.MaxIndividualAttacks = promptSuggested(s, "Max Individual Attacks/Day (0 = unlimited)", c.MaxIndividualAttacks, 100)
 		}
 	}
 }

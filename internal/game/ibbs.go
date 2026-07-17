@@ -47,6 +47,7 @@ type LeagueConfig struct {
 	SteadyInvest          bool
 	MaxTaxRate            int
 	MaxRegions            int
+	MaxIndividualAttacks  int
 	MaxPlayers            int
 	BuyMilitary           BuyMode
 	MaintCosts            Level
@@ -74,6 +75,7 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		SteadyInvest:          c.SteadyInvest,
 		MaxTaxRate:            c.MaxTaxRate,
 		MaxRegions:            c.MaxRegions,
+		MaxIndividualAttacks:  c.MaxIndividualAttacks,
 		MaxPlayers:            c.MaxPlayers,
 		BuyMilitary:           c.BuyMilitary,
 		MaintCosts:            c.MaintCosts,
@@ -100,6 +102,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.SteadyInvest = lc.SteadyInvest
 	c.MaxTaxRate = lc.MaxTaxRate
 	c.MaxRegions = lc.MaxRegions
+	c.MaxIndividualAttacks = lc.MaxIndividualAttacks
 	c.MaxPlayers = lc.MaxPlayers
 	c.BuyMilitary = lc.BuyMilitary
 	c.MaintCosts = lc.MaintCosts
