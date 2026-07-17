@@ -119,6 +119,13 @@ All four constants live in `balance.go`; Score never drops below 0.
   20% is a fixed share regardless of the strength gap, so a large empire is
   ground down over many attacks; a small one can lose its last regions in one,
   which eliminates it (and the conqueror absorbs its surviving military).
+
+  A player (human or AI) may launch at most `Config.MaxIndividualAttacks`
+  regular attacks per **day** (BRE's "Maximum Individual Attacks Per Day",
+  default **3**; `0` = unlimited). The count resets at daily maintenance and is
+  shared across all of the day's turns, so it caps total aggression, not
+  attacks-per-turn. Only conventional/regular attacks count — WMD strikes and
+  pirate raids are not limited by it.
 - **Nuclear attack** — turns enemy regions into waste (high cost).
 - **Chemical attack** — damages fewer regions but kills a lot of people
   (and troopers).
