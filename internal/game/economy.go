@@ -18,8 +18,8 @@ var (
 )
 
 // FoodBuyPrice is today's price to buy one unit of food, varying planet-wide
-// within [FoodBuyPriceMin, 3×FoodBuyPriceMin] (BRE's [20,60] band at IB's
-// scale). Deterministic per game-day, so it holds for the whole day.
+// within [FoodBuyPriceMin, 3×FoodBuyPriceMin] — BRE's [20,60] band (IB is
+// BRE-native scale). Deterministic per game-day, so it holds for the whole day.
 func (w *World) FoodBuyPrice() int {
 	h := fnv.New32a()
 	var buf [4]byte

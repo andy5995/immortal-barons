@@ -177,11 +177,14 @@ const MarketCommissionPct = 0
 const (
 	HQCost = 5104 // gold to start HeadQuarters construction (BRE live snapshot)
 
-	// Food market (issue #19). BRE prices vary daily within buy∈[20,60] /
-	// sell∈[7,20] with sell=buy/3; IB keeps its ~150× economy scale, so buy
-	// varies within [FoodBuyPriceMin, 3×FoodBuyPriceMin] and sell = buy/3. The
-	// old fixed 3000/1000 was the band floor. See World.FoodBuyPrice/FoodSellPrice.
-	FoodBuyPriceMin = 3000 // gold per unit at the cheapest; buys range up to 3× this
+	// Food market (issue #19). BRE food prices vary daily within buy∈[20,60] /
+	// sell∈[7,20] with sell=buy/3. IB's economy is BRE-native scale (units at the
+	// BRE live snapshot, food quantities calibrated to live BRE), so the price is
+	// BRE's own band: buy varies within [FoodBuyPriceMin, 3×FoodBuyPriceMin], sell
+	// = buy/3. See World.FoodBuyPrice/FoodSellPrice. (Was 3000, a leftover ~150×
+	// factor from before the economy was re-anchored to BRE magnitude — food then
+	// cost 150× a trooper, wildly out of line with the rest of the economy.)
+	FoodBuyPriceMin = 20 // gold per unit at the cheapest; buys range up to 3× this
 	// FoodMarketDailySupply is the planet-wide pool of food available to buy each
 	// day (BRE seeds ~1,000,000); buying depletes it, selling replenishes it,
 	// unless the sysop's Food Unlimited toggle is on.

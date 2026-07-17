@@ -426,8 +426,8 @@ league ran tax 85%, interest 75%).
   and is capped to what remains; selling replenishes it. The sysop's **Food
   Unlimited** toggle (Config Editor; default off/limited) removes the cap. Prices
   **vary daily** within `buy ∈ [FoodBuyPriceMin, 3×FoodBuyPriceMin]` with
-  `sell = buy/3` — BRE's [20,60]/[7,20] band structure at IB's economy scale
-  (constants in `balance.go`).
+  `sell = buy/3` — BRE's own [20,60]/[7,20] band (IB runs BRE-native economy
+  scale; `FoodBuyPriceMin = 20` in `balance.go`).
 - **Food production:** `Agricultural × FoodPerAgri (300)` per turn, calibrated to
   live BRE (97 Agri → 29,197; 16 Agri → 4,864, both no River).
 - **Rivers — hydropower *or* fishing (issue #29, live-verified):** each turn an
