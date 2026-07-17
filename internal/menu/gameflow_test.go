@@ -65,8 +65,8 @@ func TestEndOfTurnStatsWritesNonEmpty(t *testing.T) {
 	if f.out.Len() == 0 {
 		t.Error("expected endOfTurnStats to write output")
 	}
-	if !strings.Contains(f.out.String(), "Turns left") {
-		t.Error("expected turns-left line")
+	if !strings.Contains(f.out.String(), "End of Turn Statistics") {
+		t.Error("expected the End of Turn Statistics heading")
 	}
 }
 

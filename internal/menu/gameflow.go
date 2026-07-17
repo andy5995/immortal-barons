@@ -305,7 +305,6 @@ func endOfTurnStats(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgRed, tr(s, "Riots have broken out due to high tax rates!"), ansi.Reset)
 	}
 	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
-	fmt.Fprintf(s, "  "+tr(s, "Turns left today: %d")+"\n", p.TurnsLeft)
 }
 
 // paymentStage runs BRE's start-of-turn maintenance prompts. With Auto-Pay
