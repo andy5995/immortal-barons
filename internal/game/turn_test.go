@@ -381,7 +381,8 @@ func TestAIBuildsDefensiveForceMix(t *testing.T) {
 	e := w.AddHuman("ai", "AI")
 	e.Regions = RegionMix{Agricultural: 50} // ~15k food/turn produced
 	e.syncLand()
-	e.People = 1000 // tiny upkeep so the realm is food-healthy
+	e.People = 1000  // tiny upkeep so the realm is food-healthy
+	e.Protection = 0 // past protection: the AI builds a defensive force (under protection it expands land)
 	e.Troopers, e.Jets, e.Turrets, e.Tanks, e.Carriers = 0, 0, 0, 0, 0
 	e.Food = 1_000_000
 	e.Gold = 500_000
@@ -438,6 +439,7 @@ func TestAIStartsHQ(t *testing.T) {
 	e.Food = 1_000_000
 	e.Gold = 500_000
 	e.HQ = 0
+	e.Protection = 0 // past protection: the AI buys tanks (then an HQ); under protection it expands land
 	e.Investments = nil
 
 	w.aiManageEconomy(e)

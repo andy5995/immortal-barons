@@ -140,6 +140,7 @@ func TestAIAggressorBuysAgents(t *testing.T) {
 	e.Troopers, e.Turrets, e.Tanks, e.Agents = 0, 0, 0, 0
 	e.Food = 1_000_000
 	e.Gold = 500_000
+	e.Protection = 0 // past protection: the aggressor buys agents for covert ops (under protection it expands land)
 
 	w.aiManageEconomy(e)
 

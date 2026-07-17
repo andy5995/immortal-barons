@@ -37,6 +37,11 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	if e.Protection > 0 {
 		e.Protection--
 	}
+	// Clear the per-turn region-buy budget so the next turn starts fresh. The human
+	// menu flow already zeroes this at turn start (gameflow), but aiPlay drives its
+	// turns straight through PlayTurn — without this the AI's cap accumulates across
+	// the day and strands it at MaxRegions total instead of MaxRegions per turn.
+	e.RegionsBoughtThisTurn = 0
 	e.LastPlayed = today
 }
 
@@ -53,6 +58,11 @@ func (w *World) DailyMaintenance(today string) {
 		return
 	}
 	if w.LastMaintDate == "" {
+		// First maintenance of a fresh game: play the AI barons' opening turns (they
+		// were seeded with a full day's TurnsLeft) so the first human to log in meets
+		// developed rivals, not static starting-state realms. Without this the AIs
+		// sit idle until the next calendar day's maintenance.
+		w.aiPlay(today)
 		w.LastMaintDate = today
 		return
 	}
@@ -196,12 +206,45 @@ func (w *World) aiManageEconomy(e *Empire) {
 		}
 	}
 
-	// 3. Food-healthy: build a defensive-capable force mix, start a HeadQuarters
-	//    to amplify its tanks, then park the clear surplus in investments
-	//    instead of hoarding it (#36).
-	w.aiBuildForces(e)
-	w.aiStartHQ(e)
+	// 3. Food-healthy. Under New Realm Protection the AI can't be attacked, so it
+	//    goes all-in on land like a strong human (community strategy guides: plow
+	//    every coin into money-making regions during protection, compounding
+	//    land -> income -> land). Once protection lapses it buys a defensive force
+	//    and an HQ first, then keeps expanding with what's left. Surplus above the
+	//    reserve after land is capped is invested (aiInvestIdle), not hoarded.
+	if e.Protection == 0 {
+		w.aiBuildForces(e)
+		w.aiStartHQ(e)
+	}
+	w.aiExpandLand(e)
 	w.aiInvestIdle(e)
+}
+
+// aiExpandLand plows the AI's surplus gold into Coastal regions — the compounding
+// land rush a strong human runs under protection (community strategy guides:
+// Coastal is the early pick while popular support is high). It buys through the
+// same BuyRegions path a human uses, so the per-turn region cap and the rising
+// holdings-based price apply identically. Gold below AIGoldReserve is left for
+// food/maintenance; when the per-turn cap is hit the caller's aiInvestIdle parks
+// the remainder instead of hoarding it.
+func (w *World) aiExpandLand(e *Empire) {
+	if e.Gold <= AIGoldReserve {
+		return
+	}
+	budget := e.Gold - AIGoldReserve
+	limit := w.regionBuyLimit(e)
+	n, total := 0, 0
+	for n < limit {
+		cost := w.regionCost(e.Land + n)
+		if total+cost > budget {
+			break
+		}
+		total += cost
+		n++
+	}
+	if n > 0 {
+		w.BuyRegions(e, &e.Regions.Coastal, n)
+	}
 }
 
 // aiStartHQ builds a HeadQuarters once the AI fields tanks (#36): HQ multiplies
