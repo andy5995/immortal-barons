@@ -208,7 +208,12 @@ func editAmount(s session.Session, prefix string, suggested, max int) int {
 				fmt.Fprint(s, "\b \b")
 			}
 		default:
-			if r >= 32 {
+			// A numeric field takes only digits (its >/k/m/backspace shortcuts are
+			// handled above). Silently ignore any other rune so a stray printable byte
+			// — a nav/function key in DOORWAY mode, a non-CSI escape our readKey does
+			// not drain, a paste — can't echo into the field (as the "→→" a caller saw)
+			// or corrupt the parsed amount.
+			if r >= '0' && r <= '9' {
 				b = append(b, r)
 				fmt.Fprintf(s, "%c", r)
 			}
