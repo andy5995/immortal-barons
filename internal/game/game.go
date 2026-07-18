@@ -5,6 +5,7 @@ package game
 
 import (
 	"math/rand"
+	"runtime/debug"
 	"strings"
 	"sync"
 	"time"
@@ -14,6 +15,49 @@ import (
 // displayed in the status bar and reported by the front-ends. Stays at
 // 0.0.1 until the first release.
 const Version = "0.0.1"
+
+// Revision is the short VCS revision (7 hex chars, git's default short hash) the
+// binary was built from, with a "-dirty" suffix when the working tree had
+// uncommitted changes, or "" when the build carries no VCS info (e.g. `go build`
+// outside a repo, or an unversioned release tarball). Go embeds this automatically
+// for a `go build` from a git checkout. Shared by -version and the About screen.
+func Revision() string {
+	bi, ok := debug.ReadBuildInfo()
+	if !ok {
+		return ""
+	}
+	var rev string
+	var dirty bool
+	for _, s := range bi.Settings {
+		switch s.Key {
+		case "vcs.revision":
+			rev = s.Value
+		case "vcs.modified":
+			dirty = s.Value == "true"
+		}
+	}
+	if rev == "" {
+		return ""
+	}
+	if len(rev) > 7 {
+		rev = rev[:7]
+	}
+	if dirty {
+		rev += "-dirty"
+	}
+	return rev
+}
+
+// VersionString is the game's full version identity: the release version plus the
+// short VCS revision when the build has one — "0.0.1 (ffdec31)", or "0.0.1
+// (ffdec31-dirty)" for a dirty build, else just "0.0.1". The single source both
+// the -version output and the in-game About screen use, so they never diverge.
+func VersionString() string {
+	if rev := Revision(); rev != "" {
+		return Version + " (" + rev + ")"
+	}
+	return Version
+}
 
 type Empire struct {
 	Name  string

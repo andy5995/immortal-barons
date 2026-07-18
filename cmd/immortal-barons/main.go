@@ -19,7 +19,6 @@ import (
 	"os"
 	"os/user"
 	"runtime"
-	"runtime/debug"
 	"strings"
 	"time"
 
@@ -293,24 +292,8 @@ func helpLang() string {
 // VCS checkout (Go embeds this automatically) — the revision. This is the
 // conventional -version output for a Go program.
 func printVersion() {
-	fmt.Printf("immortal-barons %s\n", game.Version)
+	fmt.Printf("immortal-barons %s\n", game.VersionString())
 	fmt.Printf("go: %s\n", runtime.Version())
-	if bi, ok := debug.ReadBuildInfo(); ok {
-		var rev, mod string
-		for _, s := range bi.Settings {
-			switch s.Key {
-			case "vcs.revision":
-				rev = s.Value
-			case "vcs.modified":
-				if s.Value == "true" {
-					mod = " (modified)"
-				}
-			}
-		}
-		if rev != "" {
-			fmt.Printf("revision: %s%s\n", rev, mod)
-		}
-	}
 }
 
 // openSession attaches to the caller per the dropfile's I/O mode and platform.

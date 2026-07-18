@@ -266,7 +266,7 @@ func visitAdvisors(s session.Session, w *ctx) Result {
 // heritage note (reachable from both the Game and System menus, #66).
 func about(s session.Session, w *ctx) Result {
 	titleBar(s, tr(s, "About"))
-	fmt.Fprintf(s, "  %s\n", "Immortal Barons v"+game.Version)
+	fmt.Fprintf(s, "  %s\n", "Immortal Barons v"+game.VersionString())
 	fmt.Fprintf(s, "  %s\n", "https://andy5995.github.io/immortal-barons/")
 	fmt.Fprintf(s, "  %s\n", tr(s, "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and later maintained by John Dailey. No original BRE code, text, or art is used."))
 	fmt.Fprintf(s, "  %s\n", "Free software under the MIT License. Copyright (c) 2026 Andy Alt.")
