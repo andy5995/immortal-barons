@@ -52,28 +52,18 @@ func (w *World) bombingRun(a, d *Empire, bombers int) (int, int) {
 	return kills, lost
 }
 
-// Attack resolves a battle between attacker a and defender d, mutating
-// both empires, and returns a battle report. The attacker commits its
-// offense; the defender fights with its defense plus a home bonus from its
-// land. Both sides apply a random factor.
 // CanAttack reports whether e may launch another individual (conventional)
 // attack today. Config.MaxIndividualAttacks <= 0 means unlimited (matching the
 // MaxRegions "<= 0 = no cap" convention).
 func (w *World) CanAttack(e *Empire) bool {
-	cap := w.Config.MaxIndividualAttacks
-	return cap <= 0 || e.AttacksToday < cap
+	limit := w.Config.MaxIndividualAttacks
+	return limit <= 0 || e.AttacksToday < limit
 }
 
-// AttacksLeft is how many individual attacks e has remaining today, or -1 when
-// the cap is disabled (unlimited).
-func (w *World) AttacksLeft(e *Empire) int {
-	cap := w.Config.MaxIndividualAttacks
-	if cap <= 0 {
-		return -1
-	}
-	return max(0, cap-e.AttacksToday)
-}
-
+// Attack resolves a battle between attacker a and defender d, mutating
+// both empires, and returns a battle report. The attacker commits its
+// offense; the defender fights with its defense plus a home bonus from its
+// land. Both sides apply a random factor.
 func (w *World) Attack(a, d *Empire, f AttackForce) string {
 	a.AttacksToday++ // counts against the daily individual-attack cap (both human and AI)
 	f = f.clampTo(a) // only units the attacker actually holds can be committed

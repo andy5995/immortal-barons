@@ -25,17 +25,11 @@ func TestIndividualAttackCap(t *testing.T) {
 	if w.CanAttack(a) {
 		t.Error("a 4th attack should be blocked by the daily cap")
 	}
-	if got := w.AttacksLeft(a); got != 0 {
-		t.Errorf("AttacksLeft=%d, want 0", got)
-	}
 
 	// Disabled cap means unlimited.
 	w.Config.MaxIndividualAttacks = 0
 	if !w.CanAttack(a) {
 		t.Error("cap 0 should mean unlimited attacks")
-	}
-	if got := w.AttacksLeft(a); got != -1 {
-		t.Errorf("AttacksLeft with cap disabled=%d, want -1", got)
 	}
 }
 
