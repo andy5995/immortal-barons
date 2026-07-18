@@ -33,8 +33,6 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 	}
 }
 
-// investFunds prompts for a term (days) and amount, shows the expected
-// return, and locks the gold via w.Invest.
 // cashRelief runs BRE's Cash Relief / Loans flow: settle any overdue debt, then
 // borrow. A loan picks a repayment term (days), shows the daily rate and the
 // overall interest, offers up to the ceiling, and owes the compounded total on
@@ -84,6 +82,8 @@ func cashRelief(s session.Session, w *ctx) Result {
 // tenthsPct renders a tenths-of-a-percent value as "N.N" (84 -> "8.4").
 func tenthsPct(t int) string { return fmt.Sprintf("%d.%d", t/10, t%10) }
 
+// investFunds prompts for a term (days) and amount, shows the expected return,
+// and locks the gold via w.Invest.
 func investFunds(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n"+tr(s, "The current interest returns on investments are %d%%.")+"\n", w.InvestRate)
@@ -175,7 +175,6 @@ func listInvestments(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// bankRates shows the current savings and investment rates.
 // bankRates shows the daily savings and investing rates BRE-style. Savings is the
 // Interest Rate knob read as a daily percent (config/10, e.g. 50 → 5.0%);
 // investing is the current floating rate.

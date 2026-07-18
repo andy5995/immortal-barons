@@ -14,21 +14,18 @@ type Loan struct {
 	DueDay    int
 }
 
-// loanRateTenths is a loan's daily interest rate in tenths of a percent for a
+// LoanRateTenths is a loan's daily interest rate in tenths of a percent for a
 // term of `days` days. The rate rises with the term (BRE-verified live: 2d→8.4,
 // 5d→9.0, 10d→10.0 %/day).
-func loanRateTenths(days int) int {
+func LoanRateTenths(days int) int {
 	return LoanBaseRateTenths + LoanRatePerDayTenths*days
 }
-
-// LoanRateTenths exports the daily loan rate (tenths of a %) for display.
-func LoanRateTenths(days int) int { return loanRateTenths(days) }
 
 // loanFactor is the compound multiplier (1 + daily_rate)^days for a term. BRE
 // uses floating point ("TP reals"), so IB matches it — int-iterative truncation
 // drifts low over a 10-day term (500@10d would give 1292, not BRE's 1296).
 func loanFactor(days int) float64 {
-	return math.Pow(1+float64(loanRateTenths(days))/1000, float64(days))
+	return math.Pow(1+float64(LoanRateTenths(days))/1000, float64(days))
 }
 
 // LoanTotalOwed is the amount to repay for borrowing `amount` for `days` days:
