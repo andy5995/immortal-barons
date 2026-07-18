@@ -12,7 +12,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
-#: internal/menu/menu.go:420
+#: internal/menu/menu.go:414
 msgid "# Owned"
 msgstr ""
 
@@ -144,6 +144,14 @@ msgstr ""
 msgid "About"
 msgstr ""
 
+#: internal/menu/actions_diplomacy.go:130
+msgid "Accept this treaty?"
+msgstr ""
+
+#: internal/menu/actions_bank.go:101
+msgid "Accept?"
+msgstr ""
+
 #: internal/menu/actions_regions.go:142
 msgid "Advisors"
 msgstr ""
@@ -219,6 +227,10 @@ msgstr "Bommenwerpers"
 msgid "Bombers were manufactured by Industrial Zones."
 msgstr ""
 
+#: internal/menu/actions_diplomacy.go:110
+msgid "Break this treaty?"
+msgstr ""
+
 #: internal/menu/tree.go:209
 msgid "Bribery"
 msgstr "Omkoping"
@@ -273,6 +285,11 @@ msgstr "Noodkrediet / Leningen"
 msgid "Change"
 msgstr ""
 
+#: internal/menu/actions_industry.go:45
+#, fuzzy
+msgid "Change Production?"
+msgstr "Bescherming beëindigen"
+
 #: internal/menu/actions_market.go:53
 msgid "Change your setup, or"
 msgstr ""
@@ -287,7 +304,7 @@ msgstr "Chemisch bombardement"
 
 #: internal/menu/input.go:237
 msgid "Choice>"
-msgstr ""
+msgstr "Keuze>"
 
 #: internal/menu/helpbrowse.go:29
 msgid "Choice?"
@@ -332,6 +349,14 @@ msgstr ""
 #: internal/menu/tree.go:377
 msgid "Configuration Editor"
 msgstr "Configuratie-editor"
+
+#: internal/play/play.go:327
+msgid "Confirm?"
+msgstr "Bevestigen?"
+
+#: internal/menu/gameflow.go:605
+msgid "Continue to your next turn?"
+msgstr ""
 
 #: internal/menu/tree.go:54
 msgid "Coordinator Menu"
@@ -381,6 +406,10 @@ msgstr "Oorlogsverklaring"
 msgid "Declare war on which empire (0 to cancel)?"
 msgstr ""
 
+#: internal/menu/actions_diplomacy.go:197
+msgid "Declare war? This breaks all treaties with them."
+msgstr ""
+
 #: internal/menu/tree.go:206
 msgid "Demoralize Forces"
 msgstr "Troepen demoraliseren"
@@ -396,6 +425,10 @@ msgstr "Diplomatie"
 #: internal/menu/tree.go:190
 msgid "Diplomacy List"
 msgstr "Diplomatielijst"
+
+#: internal/menu/actions_message.go:248
+msgid "Do you wish to send another message?"
+msgstr ""
 
 #: internal/menu/tree.go:189
 msgid "Doomer Kaboomer Ops"
@@ -634,6 +667,10 @@ msgstr "Interplanetaire operaties"
 msgid "Interest Rate"
 msgstr ""
 
+#: internal/play/play.go:321
+msgid "Invalid: at least 3 letters/numbers, not matching another realm."
+msgstr "Ongeldig: minstens 3 letters/cijfers, niet gelijk aan een ander rijk."
+
 #: internal/menu/actions_bank.go:184
 msgid "Investing Interest Rate:"
 msgstr ""
@@ -650,7 +687,7 @@ msgstr ""
 msgid "It raises our military strength, income, and food output by %d%%."
 msgstr ""
 
-#: internal/menu/menu.go:420
+#: internal/menu/menu.go:414
 msgid "Item"
 msgstr ""
 
@@ -783,6 +820,10 @@ msgstr ""
 #: internal/menu/actions_regions.go:48
 msgid "Name"
 msgstr ""
+
+#: internal/play/play.go:306
+msgid "Name your Realm:"
+msgstr "Noem je rijk:"
 
 #: internal/menu/actions_diplomacy.go:68
 msgid "Negotiate with which empire (0 to cancel)?"
@@ -962,6 +1003,10 @@ msgstr "Beschermde handel"
 msgid "Quit"
 msgstr "Stoppen"
 
+#: internal/play/play.go:315
+msgid "Quit?"
+msgstr "Stoppen?"
+
 #: internal/menu/tree.go:223
 msgid "R5-Slappenheimer"
 msgstr ""
@@ -970,6 +1015,10 @@ msgstr ""
 msgid "Read Messages"
 msgstr "Berichten lezen"
 
+#: internal/menu/gameflow.go:167
+msgid "Read them now?"
+msgstr ""
+
 #: internal/menu/tree.go:99
 msgid "Regions"
 msgstr "Regio's"
@@ -977,6 +1026,10 @@ msgstr "Regio's"
 #: internal/menu/tree.go:151
 msgid "Regular Attack"
 msgstr "Gewone aanval"
+
+#: internal/menu/actions_bank.go:49
+msgid "Repay some now?"
+msgstr ""
 
 #: internal/menu/actions_bank.go:100
 msgid "Returns expected to be approximately %s gold."
@@ -1045,6 +1098,11 @@ msgstr "SpyGuy sturen"
 #: internal/menu/tree.go:182
 msgid "Send Trade Deal"
 msgstr "Handelsaanbod sturen"
+
+#: internal/menu/gameflow.go:586
+#, fuzzy
+msgid "Send a message?"
+msgstr "Bericht versturen"
 
 #: internal/menu/actions_message.go:274
 msgid "Sent %d gold to %s."
@@ -1431,6 +1489,10 @@ msgstr "Geld opnemen"
 msgid "Withdraw how much?"
 msgstr ""
 
+#: internal/menu/gameflow.go:381
+msgid "Would you like to reconsider?"
+msgstr ""
+
 #: internal/menu/tree.go:359
 msgid "Write Macros"
 msgstr "Macro's schrijven"
@@ -1551,6 +1613,10 @@ msgstr ""
 msgid "You owe %s gold in overdue debt (it grows each turn)."
 msgstr ""
 
+#: internal/menu/actions_info.go:56
+msgid "You will be out of protection at the end of this turn. Are you sure?"
+msgstr ""
+
 #: internal/menu/actions_market.go:38
 msgid "Your Choice?"
 msgstr ""
@@ -1587,7 +1653,7 @@ msgstr ""
 msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
-#: internal/menu/menu.go:351
+#: internal/menu/menu.go:345
 msgid ""
 "Your empire has collapsed — you have been eliminated. Return on a later day "
 "to build a new realm."
@@ -1632,6 +1698,10 @@ msgstr ""
 #: internal/menu/gameflow.go:497
 msgid "Your realm is no longer active."
 msgstr ""
+
+#: internal/play/play.go:326
+msgid "Your realm will be named %s."
+msgstr "Je rijk krijgt de naam %s."
 
 #: internal/menu/actions_interbbs.go:473
 msgid "Your terrorists depart for %s on %s."

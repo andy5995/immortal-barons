@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 
-#: internal/menu/menu.go:420
+#: internal/menu/menu.go:414
 msgid "# Owned"
 msgstr ""
 
@@ -137,6 +137,14 @@ msgstr ""
 msgid "About"
 msgstr ""
 
+#: internal/menu/actions_diplomacy.go:130
+msgid "Accept this treaty?"
+msgstr ""
+
+#: internal/menu/actions_bank.go:101
+msgid "Accept?"
+msgstr ""
+
 #: internal/menu/actions_regions.go:142
 msgid "Advisors"
 msgstr ""
@@ -209,6 +217,10 @@ msgstr ""
 msgid "Bombers were manufactured by Industrial Zones."
 msgstr ""
 
+#: internal/menu/actions_diplomacy.go:110
+msgid "Break this treaty?"
+msgstr ""
+
 #: internal/menu/tree.go:209
 msgid "Bribery"
 msgstr ""
@@ -259,6 +271,10 @@ msgstr ""
 
 #: internal/menu/actions_info.go:344
 msgid "Change"
+msgstr ""
+
+#: internal/menu/actions_industry.go:45
+msgid "Change Production?"
 msgstr ""
 
 #: internal/menu/actions_market.go:53
@@ -321,6 +337,14 @@ msgstr ""
 msgid "Configuration Editor"
 msgstr ""
 
+#: internal/play/play.go:327
+msgid "Confirm?"
+msgstr ""
+
+#: internal/menu/gameflow.go:605
+msgid "Continue to your next turn?"
+msgstr ""
+
 #: internal/menu/tree.go:54
 msgid "Coordinator Menu"
 msgstr ""
@@ -369,6 +393,10 @@ msgstr ""
 msgid "Declare war on which empire (0 to cancel)?"
 msgstr ""
 
+#: internal/menu/actions_diplomacy.go:197
+msgid "Declare war? This breaks all treaties with them."
+msgstr ""
+
 #: internal/menu/tree.go:206
 msgid "Demoralize Forces"
 msgstr ""
@@ -383,6 +411,10 @@ msgstr ""
 
 #: internal/menu/tree.go:190
 msgid "Diplomacy List"
+msgstr ""
+
+#: internal/menu/actions_message.go:248
+msgid "Do you wish to send another message?"
 msgstr ""
 
 #: internal/menu/tree.go:189
@@ -621,6 +653,10 @@ msgstr ""
 msgid "Interest Rate"
 msgstr ""
 
+#: internal/play/play.go:321
+msgid "Invalid: at least 3 letters/numbers, not matching another realm."
+msgstr ""
+
 #: internal/menu/actions_bank.go:184
 msgid "Investing Interest Rate:"
 msgstr ""
@@ -637,7 +673,7 @@ msgstr ""
 msgid "It raises our military strength, income, and food output by %d%%."
 msgstr ""
 
-#: internal/menu/menu.go:420
+#: internal/menu/menu.go:414
 msgid "Item"
 msgstr ""
 
@@ -767,6 +803,10 @@ msgstr ""
 
 #: internal/menu/actions_regions.go:48
 msgid "Name"
+msgstr ""
+
+#: internal/play/play.go:306
+msgid "Name your Realm:"
 msgstr ""
 
 #: internal/menu/actions_diplomacy.go:68
@@ -941,6 +981,10 @@ msgstr ""
 msgid "Quit"
 msgstr ""
 
+#: internal/play/play.go:315
+msgid "Quit?"
+msgstr ""
+
 #: internal/menu/tree.go:223
 msgid "R5-Slappenheimer"
 msgstr ""
@@ -949,12 +993,20 @@ msgstr ""
 msgid "Read Messages"
 msgstr ""
 
+#: internal/menu/gameflow.go:167
+msgid "Read them now?"
+msgstr ""
+
 #: internal/menu/tree.go:99
 msgid "Regions"
 msgstr ""
 
 #: internal/menu/tree.go:151
 msgid "Regular Attack"
+msgstr ""
+
+#: internal/menu/actions_bank.go:49
+msgid "Repay some now?"
 msgstr ""
 
 #: internal/menu/actions_bank.go:100
@@ -1023,6 +1075,10 @@ msgstr ""
 
 #: internal/menu/tree.go:182
 msgid "Send Trade Deal"
+msgstr ""
+
+#: internal/menu/gameflow.go:586
+msgid "Send a message?"
 msgstr ""
 
 #: internal/menu/actions_message.go:274
@@ -1405,6 +1461,10 @@ msgstr ""
 msgid "Withdraw how much?"
 msgstr ""
 
+#: internal/menu/gameflow.go:381
+msgid "Would you like to reconsider?"
+msgstr ""
+
 #: internal/menu/tree.go:359
 msgid "Write Macros"
 msgstr ""
@@ -1525,6 +1585,10 @@ msgstr ""
 msgid "You owe %s gold in overdue debt (it grows each turn)."
 msgstr ""
 
+#: internal/menu/actions_info.go:56
+msgid "You will be out of protection at the end of this turn. Are you sure?"
+msgstr ""
+
 #: internal/menu/actions_market.go:38
 msgid "Your Choice?"
 msgstr ""
@@ -1561,7 +1625,7 @@ msgstr ""
 msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
-#: internal/menu/menu.go:351
+#: internal/menu/menu.go:345
 msgid "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."
 msgstr ""
 
@@ -1603,6 +1667,10 @@ msgstr ""
 
 #: internal/menu/gameflow.go:497
 msgid "Your realm is no longer active."
+msgstr ""
+
+#: internal/play/play.go:326
+msgid "Your realm will be named %s."
 msgstr ""
 
 #: internal/menu/actions_interbbs.go:473

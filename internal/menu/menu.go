@@ -196,13 +196,6 @@ func (it *Item) hidden(g *ctx) bool {
 	return it.Hidden != nil && it.Hidden(g)
 }
 
-func (it *Item) label(g *ctx) string {
-	if it.LabelFn != nil {
-		return it.LabelFn(g)
-	}
-	return it.Label
-}
-
 // displayLabel is the label as shown: a static Label is translated to lang; a
 // dynamic LabelFn (toggle state, "Language: X") is left as its function
 // produces it, since those are formatted, not catalog strings.
@@ -264,15 +257,16 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	var def *Item
 	var defLabel, prompt string
 	g.With(func() {
+		lang := playerLang(g)
 		if m.DefaultOnEnter != nil {
 			def = m.DefaultOnEnter(g)
 		} else if g.EnterExitsBuy && m.ExitOnEnter {
 			def = m.byKey('0', g)
 		}
 		if def != nil {
-			defLabel = def.label(g)
+			defLabel = def.displayLabel(g, lang)
 		}
-		prompt = i18n.T(playerLang(g), "Choice>")
+		prompt = i18n.T(lang, "Choice>")
 	})
 	fmt.Fprintf(s, "%s%s%s ", ansi.FgBrightWhite, prompt, ansi.Reset)
 	if def != nil {
@@ -296,7 +290,7 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 		g.With(func() {
 			it = m.byKey(r, g)
 			if it != nil {
-				itLabel = it.label(g)
+				itLabel = it.displayLabel(g, playerLang(g))
 			}
 		})
 		if it == nil {

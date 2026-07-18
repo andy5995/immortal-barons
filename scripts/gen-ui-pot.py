@@ -34,8 +34,7 @@ CALL_PATTERNS = [
     re.compile(r'\bprompt\(s,\s*' + STR),
     re.compile(r'\bpromptInt\(s,\s*' + STR),
     re.compile(r'\bpromptSuggested\(s,\s*' + STR),
-    re.compile(r'\baskYesNo\(s,\s*' + STR),
-    re.compile(r'\baskYesNoDefaultNo\(s,\s*' + STR),
+    re.compile(r'\bAskYesNo\(s,\s*' + STR),
     re.compile(r'\bstatLine\(s,\s*[^,]+,\s*' + STR),
     re.compile(r'\b(?:Label|Title):\s*' + STR),
 ]
@@ -53,9 +52,10 @@ def extract():
     def add(mid, loc):
         if mid and mid not in seen:
             seen[mid] = loc
-    # internal/menu is the bulk of the UI; cmd holds the -help/usage strings
-    # (flag descriptions wrapped in i18n.T so they translate to the locale).
-    for path in go_files("internal/menu", "cmd"):
+    # internal/menu is the bulk of the UI; internal/play holds the first-run
+    # onboarding text; cmd holds the -help/usage strings (flag descriptions wrapped
+    # in i18n.T so they translate to the locale).
+    for path in go_files("internal/menu", "internal/play", "cmd"):
         rel = os.path.relpath(path, ROOT)
         for n, line in enumerate(open(path, encoding="utf-8"), 1):
             for pat in CALL_PATTERNS:

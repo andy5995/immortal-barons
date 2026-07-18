@@ -182,6 +182,12 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 		if utf8 {
 			lang = selectLanguage(s)
 		}
+		if lang != "" {
+			// Translate the onboarding text (name prompt, Confirm?/Quit?) to the
+			// language just picked — the empire doesn't exist yet, so menu.sessionLang
+			// has nothing to read until GameLoop; this wrapper reports it early.
+			s = onboardLang{Session: s, lang: lang}
+		}
 
 		// Prompt for a realm name and insert atomically. Re-check under the
 		// same lock that does the insert: while we prompted, another goroutine
@@ -264,6 +270,23 @@ func selectLanguage(s session.Session) string {
 		return ""
 	}
 	return opts[n-1].code
+}
+
+// onboardLang wraps the session during first-run onboarding so text shown before
+// the empire exists (the realm-name prompt, Confirm?/Quit?) translates to the
+// language just picked — menu.sessionLang reads a Lang() method. SetInputLine is
+// forwarded so an idle warning can still reprint the current input line.
+type onboardLang struct {
+	session.Session
+	lang string
+}
+
+func (o onboardLang) Lang() string { return o.lang }
+
+func (o onboardLang) SetInputLine(line string) {
+	if ls, ok := o.Session.(session.InputLineSetter); ok {
+		ls.SetInputLine(line)
+	}
 }
 
 // onboard prompts for a realm name, re-prompting on an invalid or taken one.
