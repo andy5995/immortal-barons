@@ -1,11 +1,14 @@
 package game
 
-// Invest locks `amount` gold for `days` days (>= MinInvestDays) and records a
-// maturing return at the current InvestRate (simple interest). Returns the
-// expected return, or an error if the amount is unaffordable.
+// Invest locks `amount` gold for `days` days (clamped to [MinInvestDays,
+// MaxInvestDays]) and records a maturing return at the current InvestRate (simple
+// interest). Returns the expected return, or an error if the amount is unaffordable.
 func (w *World) Invest(e *Empire, amount, days int) (int, error) {
 	if days < MinInvestDays {
 		days = MinInvestDays
+	}
+	if days > MaxInvestDays {
+		days = MaxInvestDays
 	}
 	if amount <= 0 {
 		return 0, nil
@@ -19,10 +22,21 @@ func (w *World) Invest(e *Empire, amount, days int) (int, error) {
 	return ret, nil
 }
 
-// ExpectedReturn is the total payout for investing `amount` for `days` days
-// at investment rate `rate` (percent per day, simple interest).
+// ExpectedReturn is the total payout (principal + interest) for investing
+// `amount` for `days` days at `rate` percent per day, COMPOUNDED daily — matching
+// BRE (live-verified: 1000 for 2 days at 5%/day returns 1102 = 1000·1.05²). Applied
+// iteratively in int64 and clamped to MoneyCap each step so a long high-rate term
+// can't overflow.
 func ExpectedReturn(amount, rate, days int) int {
-	return amount + amount*rate*days/100
+	v := int64(amount)
+	for i := 0; i < days; i++ {
+		v = v * int64(100+rate) / 100
+		if v > MoneyCap {
+			v = MoneyCap
+			break
+		}
+	}
+	return int(v)
 }
 
 // PendingInvested is the total principal an empire has locked in investments.

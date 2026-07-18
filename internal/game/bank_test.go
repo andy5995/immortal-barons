@@ -13,7 +13,7 @@ func TestInvestLocksAndSchedules(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Invest: %v", err)
 	}
-	wantRet := 1000 + 1000*5*3/100
+	wantRet := 1157 // compound daily at 5%: 1000·1.05³, int-truncated each day (1000→1050→1102→1157)
 	if ret != wantRet {
 		t.Errorf("Invest return: want %d, got %d", wantRet, ret)
 	}

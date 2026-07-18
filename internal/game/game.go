@@ -291,7 +291,12 @@ type Investment struct {
 
 // Investment tuning (v1, tunable — see docs/mechanics-reference.md).
 const (
-	MinInvestDays     = 1
+	// Investment term bounds — live-BRE-verified (screenshot, 2026-07-17): the
+	// bank prints "There is now a 2 day minimum on investments." and the prompt
+	// reads "How many days would you like to invest for? (2; 10)". So min 2, max
+	// 10, and BRE's own suggested value is the minimum (2), not 0.
+	MinInvestDays     = 2
+	MaxInvestDays     = 10
 	DefaultInvestRate = 5 // % per day
 	MinInvestRate     = 1
 	MaxInvestRate     = 25

@@ -497,10 +497,14 @@ The bank has three actions plus two views: **Deposit Funds** (savings),
 - **Savings** earn the *Bank/Savings Interest Rate* per turn on gold in the
   bank (about 1%/turn; see the caps above).
 - **Investments** are term deposits (like bonds): you choose an **amount**
-  and a **number of days** (there is a **minimum term**), the gold is
-  **locked**, and it **matures on a future date**, returning principal plus
-  interest at the current **Investment Rate**. Before confirming, the bank
-  shows "Returns expected to be approximately N." The list view shows
+  and a **number of days** — **2 to 10 days** (`MinInvestDays`=2, `MaxInvestDays`=10,
+  live-BRE-verified: the bank prints "There is now a 2 day minimum on
+  investments." and prompts "…invest for? (2; 10)") — the gold is **locked**, and
+  it **matures on a future date**, returning principal plus interest at the
+  current **Investment Rate**, **compounded daily** (live-verified: 1000 for 2
+  days at 5%/day returns 1102 = 1000·1.05²). Before confirming, the bank shows
+  "Returns expected to be approximately N gold. Accept? (Y/n)"; on accept it
+  reports "Investment will be returned on MM/DD/YYYY." The list view shows
   columns: Date / Investments / Loans Due.
 - **The Investment Rate floats** — each daily maintenance updates it:
   - Supply/demand: heavy investing pushes rates **down**; weak investing

@@ -18,6 +18,8 @@ taken by pirates or raids.
 
 ## Investments
 
-You can lock gold away as an investment for a number of days. It pays back your
+You can lock gold away as an investment for 2 to 10 days. It pays back your
 gold plus interest when it matures. The interest rate floats — it rises and
 falls with how much everyone is investing — so check the rate before you commit.
+A common tactic is to keep several investments running at once, each for a
+different length, so one matures every day.

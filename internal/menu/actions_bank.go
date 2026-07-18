@@ -35,29 +35,32 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 // return, and locks the gold via w.Invest.
 func investFunds(s session.Session, w *ctx) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n"+tr(s, "Current investment rate: %d%% per day.")+"\n", w.InvestRate)
-	days := promptInt(s, "Invest for how many days?")
+	fmt.Fprintf(s, "\n"+tr(s, "The current interest returns on investments are %d%%.")+"\n", w.InvestRate)
+	fmt.Fprintf(s, tr(s, "There is a %d-day minimum on investments.")+"\n", game.MinInvestDays)
+	days := promptSuggested(s, "How many days would you like to invest for?", game.MinInvestDays, game.MaxInvestDays)
 	if days < game.MinInvestDays {
 		days = game.MinInvestDays
 	}
-	amount := promptSuggested(s, "How much to invest?", 0, p.Gold)
+	amount := promptSuggested(s, "How much would you like to invest?", 0, p.Gold)
 	if amount <= 0 {
 		return Stay
 	}
 	expected := game.ExpectedReturn(amount, w.InvestRate, days)
-	fmt.Fprintf(s, "\n  "+tr(s, "Expected return: ~%d")+"\n", expected)
-	var ret, matureDay int
+	fmt.Fprintf(s, "\n  "+tr(s, "Returns expected to be approximately %s gold.")+"\n", comma(expected))
+	if !AskYesNo(s, "Accept?", true) {
+		return Stay
+	}
+	var matureDay int
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		var e error
-		ret, e = w.World.Invest(p, amount, days) // re-checks affordability atomically
+		_, e := w.World.Invest(p, amount, days) // re-checks affordability atomically
 		matureDay = w.GameDay + days
 		return e
 	})
 	if err != nil {
 		fail(s, err)
-	} else {
-		ok(s, "Invested %d for %d days; ~%d returns on day %d.", amount, days, ret, matureDay)
+		return Stay
 	}
+	okNoPause(s, "Investment will be returned on %s.", w.DateForDay(matureDay))
 	return Stay
 }
 

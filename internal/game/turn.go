@@ -164,6 +164,17 @@ func (w *World) nextDate(d string) string {
 	return t.AddDate(0, 0, 1).Format("2006-01-02")
 }
 
+// DateForDay renders the calendar date of GameDay `day` as MM/DD/YYYY, the way
+// BRE shows investment-maturity and loan-due dates. It is computed from Today and
+// the current GameDay, so day == GameDay is today and future days project forward.
+func (w *World) DateForDay(day int) string {
+	t, err := time.Parse("2006-01-02", w.Today)
+	if err != nil {
+		return ""
+	}
+	return t.AddDate(0, 0, day-w.GameDay).Format("01/02/2006")
+}
+
 // aiPlay runs each AI empire's turns for one day.
 func (w *World) aiPlay(today string) {
 	for _, e := range w.AIEmpires() {
