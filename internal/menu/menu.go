@@ -556,6 +556,6 @@ func onOff(name string, get func(*ctx) *bool) func(*ctx) string {
 		if *get(g) {
 			state = "ON"
 		}
-		return fmt.Sprintf("%-28s [%s]", name, state)
+		return fmt.Sprintf("%-28s [%s]", i18n.T(playerLang(g), name), state)
 	}
 }

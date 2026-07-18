@@ -187,11 +187,19 @@ msgstr "Piraten aanvallen"
 msgid "Attack which realm? (letter, RETURN to abort)"
 msgstr ""
 
+#: internal/menu/tree.go:303
+msgid "Auto-Feed Empire"
+msgstr "Rijk automatisch voeden"
+
+#: internal/menu/tree.go:301
+msgid "Auto-Pay Maintenance"
+msgstr "Onderhoud automatisch betalen"
+
 #: internal/menu/actions_interbbs.go:250
 msgid "Average Turn Around Times to All BBSes"
 msgstr ""
 
-#: internal/menu/helpbrowse.go:153
+#: internal/menu/helpbrowse.go:183
 msgid "Back"
 msgstr ""
 
@@ -302,13 +310,13 @@ msgstr "Chemische aanval"
 msgid "Chemical Bombing"
 msgstr "Chemisch bombardement"
 
-#: internal/menu/helpbrowse.go:29
+#: internal/menu/helpbrowse.go:31
 msgid "Choice?"
 msgstr ""
 
-#: internal/menu/helpbrowse.go:134
+#: internal/menu/helpbrowse.go:155
 msgid "Choose (0 to keep current)?"
-msgstr ""
+msgstr "Kies (0 om huidige te behouden)?"
 
 #: internal/menu/actions_market.go:140
 msgid "Choose a Target (0 to cancel)?"
@@ -413,6 +421,10 @@ msgstr "Troepen demoraliseren"
 #: internal/menu/tree.go:135
 msgid "Deposit Funds"
 msgstr "Geld storten"
+
+#: internal/menu/tree.go:299
+msgid "Deposit gold at End of Turn"
+msgstr "Goud storten aan einde beurt"
 
 #: internal/menu/tree.go:51
 msgid "Diplomacy"
@@ -717,15 +729,15 @@ msgstr ""
 
 #: internal/menu/tree.go:309
 msgid "Language"
-msgstr ""
+msgstr "Taal"
 
-#: internal/menu/helpbrowse.go:139
+#: internal/menu/helpbrowse.go:169
 msgid "Language set to %s."
-msgstr ""
+msgstr "Taal ingesteld op %s."
 
-#: internal/menu/helpbrowse.go:130
+#: internal/menu/helpbrowse.go:151
 msgid "Language:"
-msgstr ""
+msgstr "Taal:"
 
 #: internal/menu/actions_info.go:429
 msgid "Last Planetary Master: %s"
@@ -1390,6 +1402,10 @@ msgstr "Investeringen ondermijnen"
 msgid "Unlimited supply today."
 msgstr ""
 
+#: internal/menu/tree.go:297
+msgid "Use Enter To Exit BUY Menu"
+msgstr "Enter om koopmenu te verlaten"
+
 #: internal/menu/tree.go:139
 msgid "View Bank Rates"
 msgstr "Banktarieven bekijken"
@@ -1409,6 +1425,18 @@ msgstr "Adviseurs raadplegen"
 #: internal/menu/tree.go:107
 msgid "Visit Bank"
 msgstr "Bank bezoeken"
+
+#: internal/menu/tree.go:291
+msgid "Visit Covert Menu"
+msgstr "Geheim menu tonen"
+
+#: internal/menu/tree.go:295
+msgid "Visit Message Menu"
+msgstr "Berichtenmenu tonen"
+
+#: internal/menu/tree.go:293
+msgid "Visit Trading Menu"
+msgstr "Handelsmenu tonen"
 
 #: internal/menu/gameflow.go:457
 msgid "Visit the Food Market to feed them, or they will starve."
@@ -1840,7 +1868,7 @@ msgstr "schrijf het scorepakket van dit board naar FILE en sluit af"
 msgid "your player name (only used with -local)"
 msgstr "je spelersnaam (alleen gebruikt met -local)"
 
-#: internal/menu/helpbrowse.go:81
+#: internal/menu/helpbrowse.go:82
 msgid "─»>Enter to continue, Q to quit<«─"
 msgstr ""
 

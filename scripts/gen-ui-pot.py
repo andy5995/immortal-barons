@@ -37,6 +37,7 @@ CALL_PATTERNS = [
     re.compile(r'\bAskYesNo\(s,\s*' + STR),
     re.compile(r'\bstatLine\(s,\s*[^,]+,\s*' + STR),
     re.compile(r'\b(?:Label|Title):\s*' + STR),
+    re.compile(r'\bonOff\(' + STR),  # Preferences toggle labels (dynamic LabelFn)
 ]
 ERR_PATTERN = re.compile(r'errors\.New\(' + STR + r'\)')
 

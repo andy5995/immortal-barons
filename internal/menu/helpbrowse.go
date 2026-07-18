@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
+	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/help"
 	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/session"
@@ -139,7 +140,6 @@ func languageName(code string) string {
 // so each caller keeps their own. Partly-translated languages fall back to
 // English per string.
 func pickLanguage(s session.Session, w *ctx) Result {
-	p := w.Player()
 	// A CP437 session can only render a catalog that maps to CP437, so offer just
 	// those languages there (English, German, …); a UTF-8 session offers all.
 	var langs []struct{ code, name string }
@@ -156,8 +156,17 @@ func pickLanguage(s session.Session, w *ctx) Result {
 	if i < 1 || i > len(langs) {
 		return Stay
 	}
-	p.Language = langs[i-1].code
-	ok(s, "Language set to %s.", languageName(p.Language))
+	// Persist through a transaction — setting it on the w.Player() snapshot was
+	// discarded, so the change never took effect and the menu kept the old language.
+	code := langs[i-1].code
+	if err := w.mutatePlayer(func(p *game.Empire) error {
+		p.Language = code
+		return nil
+	}); err != nil {
+		fail(s, err)
+		return Stay
+	}
+	ok(s, "Language set to %s.", languageName(code))
 	return Stay
 }
 
