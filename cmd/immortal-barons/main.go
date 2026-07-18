@@ -20,10 +20,12 @@ import (
 	"os/user"
 	"runtime"
 	"runtime/debug"
+	"strings"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/door"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/ibbs"
 	"github.com/andy5995/immortal-barons/internal/menu"
 	"github.com/andy5995/immortal-barons/internal/play"
@@ -32,22 +34,25 @@ import (
 )
 
 func main() {
-	local := flag.Bool("local", false, "play locally in your terminal instead of running as a BBS door")
-	name := flag.String("name", defaultName(), "your player handle (-local only)")
-	dropPath := flag.String("dropfile", "", "path to the BBS dropfile (DOOR32.SYS or DOOR.SYS)")
-	dataDir := flag.String("data", "./data", "game data directory")
-	maint := flag.Bool("maint", false, "run daily maintenance and exit")
-	export := flag.String("export", "", "write this board's score packet to FILE and exit")
-	imp := flag.String("import", "", "import a score packet from FILE and exit")
-	planetary := flag.Bool("planetary", false, "run the inter-BBS PLANETARY step (read inbound, launch attacks, write outbound) and exit")
-	leagueConfig := flag.Bool("league-config", false, "broadcast this board's league settings to the league (coordinator/node #1 only) and exit")
-	reset := flag.Bool("reset", false, "start a fresh game: edit the settings (starting from defaults), then wipe empires and re-seed (backs up world.json first)")
-	resetFromConfig := flag.Bool("reset-from-config", false, "start a fresh game using the current config.json as-is (no editor): wipe empires and re-seed (backs up world.json first)")
-	addAI := flag.Int("add-ai", 0, "add N AI barons to the running game and exit")
-	dump := flag.Bool("dump", false, "print the game world as JSON to stdout and exit (for scripting and balance checks)")
-	utf8 := flag.Bool("utf8", false, "force UTF-8 output (needed for non-English languages; -local auto-detects this from your locale)")
-	cp437 := flag.Bool("cp437", false, "force CP437 output (the door default; overrides -local locale auto-detection)")
-	version := flag.Bool("version", false, "print version information and exit")
+	// -help/usage text is translated to the environment's locale (there is no
+	// player context at flag-parse time). i18n.T falls back to English for lang "".
+	lang := helpLang()
+	local := flag.Bool("local", false, i18n.T(lang, "play in your own terminal, not as a BBS door"))
+	name := flag.String("name", defaultName(), i18n.T(lang, "your player name (only used with -local)"))
+	dropPath := flag.String("dropfile", "", i18n.T(lang, "path to the BBS dropfile (DOOR32.SYS or DOOR.SYS)"))
+	dataDir := flag.String("data", "./data", i18n.T(lang, "folder that holds the game data"))
+	maint := flag.Bool("maint", false, i18n.T(lang, "run the daily maintenance, then exit"))
+	export := flag.String("export", "", i18n.T(lang, "write this board's score packet to FILE, then exit"))
+	imp := flag.String("import", "", i18n.T(lang, "read a score packet from FILE, then exit"))
+	planetary := flag.Bool("planetary", false, i18n.T(lang, "run the inter-BBS step: read incoming packets, run group attacks, write outgoing packets, then exit"))
+	leagueConfig := flag.Bool("league-config", false, i18n.T(lang, "send this board's league settings to the whole league (node #1 only), then exit"))
+	reset := flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"))
+	resetFromConfig := flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)"))
+	addAI := flag.Int("add-ai", 0, i18n.T(lang, "add N computer barons to the running game, then exit"))
+	dump := flag.Bool("dump", false, i18n.T(lang, "print the game world as JSON, then exit (for scripts and balance checks)"))
+	utf8 := flag.Bool("utf8", false, i18n.T(lang, "force UTF-8 output (needed for non-English languages; -local detects this from your locale)"))
+	cp437 := flag.Bool("cp437", false, i18n.T(lang, "force CP437 output (the door default; overrides the -local locale detection)"))
+	version := flag.Bool("version", false, i18n.T(lang, "print the version, then exit"))
 	flag.Parse()
 
 	if *version {
@@ -261,6 +266,27 @@ func defaultName() string {
 		return u.Username
 	}
 	return "sysop"
+}
+
+// helpLang picks the language for -help/usage text from the environment locale
+// (LC_ALL, then LC_MESSAGES, then LANG), when the game ships a UI catalog for it —
+// e.g. LANG=nl_NL.UTF-8 → "nl". There is no player context at flag-parse time, so
+// the locale is the only signal; an unknown or unset locale falls back to English.
+func helpLang() string {
+	loc := os.Getenv("LC_ALL")
+	if loc == "" {
+		loc = os.Getenv("LC_MESSAGES")
+	}
+	if loc == "" {
+		loc = os.Getenv("LANG")
+	}
+	if i := strings.IndexAny(loc, "_.@"); i >= 0 {
+		loc = loc[:i]
+	}
+	if i18n.Has(loc) {
+		return loc
+	}
+	return ""
 }
 
 // printVersion writes the app version, the Go runtime, and — when built from a

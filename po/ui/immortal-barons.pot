@@ -1617,6 +1617,22 @@ msgstr ""
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 
+#: cmd/immortal-barons/main.go:51
+msgid "add N computer barons to the running game, then exit"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:43
+msgid "folder that holds the game data"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:54
+msgid "force CP437 output (the door default; overrides the -local locale detection)"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:53
+msgid "force UTF-8 output (needed for non-English languages; -local detects this from your locale)"
+msgstr ""
+
 #: internal/menu/actions_diplomacy.go:49
 msgid "held"
 msgstr ""
@@ -1629,8 +1645,48 @@ msgstr ""
 msgid "offers this to you"
 msgstr ""
 
+#: cmd/immortal-barons/main.go:42
+msgid "path to the BBS dropfile (DOOR32.SYS or DOOR.SYS)"
+msgstr ""
+
 #: internal/menu/gameflow.go:303
 msgid "people left your realm, unable to be fed."
+msgstr ""
+
+#: cmd/immortal-barons/main.go:40
+msgid "play in your own terminal, not as a BBS door"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:52
+msgid "print the game world as JSON, then exit (for scripts and balance checks)"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:55
+msgid "print the version, then exit"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:46
+msgid "read a score packet from FILE, then exit"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:44
+msgid "run the daily maintenance, then exit"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:47
+msgid "run the inter-BBS step: read incoming packets, run group attacks, write outgoing packets, then exit"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:48
+msgid "send this board's league settings to the whole league (node #1 only), then exit"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:50
+msgid "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:49
+msgid "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"
 msgstr ""
 
 #: internal/game/ibbs.go:17
@@ -1655,6 +1711,14 @@ msgstr ""
 
 #: internal/menu/gameflow.go:304
 msgid "units of food spoiled."
+msgstr ""
+
+#: cmd/immortal-barons/main.go:45
+msgid "write this board's score packet to FILE, then exit"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:41
+msgid "your player name (only used with -local)"
 msgstr ""
 
 #: internal/menu/helpbrowse.go:81

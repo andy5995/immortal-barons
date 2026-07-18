@@ -53,7 +53,9 @@ def extract():
     def add(mid, loc):
         if mid and mid not in seen:
             seen[mid] = loc
-    for path in go_files("internal/menu"):
+    # internal/menu is the bulk of the UI; cmd holds the -help/usage strings
+    # (flag descriptions wrapped in i18n.T so they translate to the locale).
+    for path in go_files("internal/menu", "cmd"):
         rel = os.path.relpath(path, ROOT)
         for n, line in enumerate(open(path, encoding="utf-8"), 1):
             for pat in CALL_PATTERNS:

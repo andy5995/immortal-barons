@@ -3,12 +3,12 @@
 # internal/i18n/locale/<lang>.po (same msgid).
 msgid ""
 msgstr ""
-"Content-Type: text/plain; charset=UTF-8\n"
 "Project-Id-Version: andy 5995\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
 "Language: nl\n"
 "MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
@@ -1645,6 +1645,29 @@ msgstr ""
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 
+#: cmd/immortal-barons/main.go:51
+msgid "add N computer barons to the running game, then exit"
+msgstr "voeg N computerbaronnen toe aan het lopende spel en sluit af"
+
+#: cmd/immortal-barons/main.go:43
+msgid "folder that holds the game data"
+msgstr "map met de spelgegevens"
+
+#: cmd/immortal-barons/main.go:54
+msgid ""
+"force CP437 output (the door default; overrides the -local locale detection)"
+msgstr ""
+"forceer CP437-uitvoer (de standaard voor doors; overschrijft de locale-"
+"herkenning van -local)"
+
+#: cmd/immortal-barons/main.go:53
+msgid ""
+"force UTF-8 output (needed for non-English languages; -local detects this "
+"from your locale)"
+msgstr ""
+"forceer UTF-8-uitvoer (nodig voor niet-Engelse talen; -local herkent dit aan "
+"je locale)"
+
 #: internal/menu/actions_diplomacy.go:49
 msgid "held"
 msgstr ""
@@ -1657,9 +1680,67 @@ msgstr ""
 msgid "offers this to you"
 msgstr ""
 
+#: cmd/immortal-barons/main.go:42
+msgid "path to the BBS dropfile (DOOR32.SYS or DOOR.SYS)"
+msgstr "pad naar het BBS-dropbestand (DOOR32.SYS of DOOR.SYS)"
+
 #: internal/menu/gameflow.go:303
 msgid "people left your realm, unable to be fed."
 msgstr ""
+
+#: cmd/immortal-barons/main.go:40
+msgid "play in your own terminal, not as a BBS door"
+msgstr "speel in je eigen terminal, niet als BBS-door"
+
+#: cmd/immortal-barons/main.go:52
+msgid ""
+"print the game world as JSON, then exit (for scripts and balance checks)"
+msgstr ""
+"print de spelwereld als JSON en sluit af (voor scripts en balanscontroles)"
+
+#: cmd/immortal-barons/main.go:55
+msgid "print the version, then exit"
+msgstr "print de versie en sluit af"
+
+#: cmd/immortal-barons/main.go:46
+msgid "read a score packet from FILE, then exit"
+msgstr "lees een scorepakket uit FILE en sluit af"
+
+#: cmd/immortal-barons/main.go:44
+msgid "run the daily maintenance, then exit"
+msgstr "voer het dagelijkse onderhoud uit en sluit af"
+
+#: cmd/immortal-barons/main.go:47
+msgid ""
+"run the inter-BBS step: read incoming packets, run group attacks, write "
+"outgoing packets, then exit"
+msgstr ""
+"voer de inter-BBS-stap uit: lees inkomende pakketten, voer groepsaanvallen "
+"uit, schrijf uitgaande pakketten en sluit af"
+
+#: cmd/immortal-barons/main.go:48
+msgid ""
+"send this board's league settings to the whole league (node #1 only), then "
+"exit"
+msgstr ""
+"stuur de liga-instellingen van dit board naar de hele liga (alleen node #1) "
+"en sluit af"
+
+#: cmd/immortal-barons/main.go:50
+msgid ""
+"start a new game from the current config.json without the editor: clear all "
+"empires and rebuild the world (the old world is saved first)"
+msgstr ""
+"start een nieuw spel met de huidige config.json zonder editor: wis alle "
+"rijken en bouw de wereld opnieuw op (de oude wereld wordt eerst opgeslagen)"
+
+#: cmd/immortal-barons/main.go:49
+msgid ""
+"start a new game: change the settings, then clear all empires and rebuild "
+"the world (the old world is saved first)"
+msgstr ""
+"start een nieuw spel: wijzig de instellingen, wis daarna alle rijken en bouw "
+"de wereld opnieuw op (de oude wereld wordt eerst opgeslagen)"
 
 #: internal/game/ibbs.go:17
 msgid "that attack force has already left"
@@ -1684,6 +1765,14 @@ msgstr ""
 #: internal/menu/gameflow.go:304
 msgid "units of food spoiled."
 msgstr ""
+
+#: cmd/immortal-barons/main.go:45
+msgid "write this board's score packet to FILE, then exit"
+msgstr "schrijf het scorepakket van dit board naar FILE en sluit af"
+
+#: cmd/immortal-barons/main.go:41
+msgid "your player name (only used with -local)"
+msgstr "je spelersnaam (alleen gebruikt met -local)"
 
 #: internal/menu/helpbrowse.go:81
 msgid "─»>Enter to continue, Q to quit<«─"
