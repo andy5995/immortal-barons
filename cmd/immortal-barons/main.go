@@ -197,8 +197,8 @@ func main() {
 	// no other trace, so record what the dropfile gave us at launch — the I/O mode,
 	// time-left, and socket handle name the environment. A file (not stderr) so a
 	// remote tester needs no door-config change to capture it.
-	doorLog(cfg.DataDir, "launch handle=%q node=%d io=%s seconds-left=%d socket=%d os=%s",
-		caller.Handle, caller.Node, ioModeName(caller.IO), caller.SecondsLeft, caller.Socket, runtime.GOOS)
+	doorLog(cfg.DataDir, "launch handle=%q node=%d io=%s seconds-left=%d socket=%d os=%s stdin-tty=%v",
+		caller.Handle, caller.Node, ioModeName(caller.IO), caller.SecondsLeft, caller.Socket, runtime.GOOS, session.StdinIsTerminal())
 
 	s, closeSession, err := openSession(caller)
 	if err != nil {
@@ -362,7 +362,8 @@ func openSession(caller *door.Caller) (session.Session, func(), error) {
 	if caller.IO == door.IOSerial {
 		return nil, nil, fmt.Errorf("serial (FOSSIL) doors are not supported; configure your BBS for a socket or stdio door")
 	}
-	return session.NewStdio(), func() {}, nil
+	st := session.NewStdio()
+	return st, st.Close, nil // Close restores a pty stdin's mode (no-op for a pipe)
 }
 
 // runDump prints the loaded game world as indented JSON to stdout — a read-only
