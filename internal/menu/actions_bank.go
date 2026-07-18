@@ -14,7 +14,7 @@ import (
 func money(label string, max func(*game.Empire) int, apply func(*game.World, *game.Empire, int) error) Action {
 	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
-		n := promptSuggested(s, label+" how much gold?", 0, max(p))
+		n := promptSuggested(s, label+" how many gold?", 0, max(p))
 		if n <= 0 {
 			return Stay
 		}
@@ -176,8 +176,12 @@ func listInvestments(s session.Session, w *ctx) Result {
 }
 
 // bankRates shows the current savings and investment rates.
+// bankRates shows the daily savings and investing rates BRE-style. Savings is the
+// Interest Rate knob read as a daily percent (config/10, e.g. 50 → 5.0%);
+// investing is the current floating rate.
 func bankRates(s session.Session, w *ctx) Result {
-	fmt.Fprintf(s, "\n  "+tr(s, "Savings interest: ~1%% per game day.")+"\n  "+tr(s, "Investment rate: %d%% per day.")+"\n", w.InvestRate)
+	fmt.Fprintf(s, "\n  %-25s%s%%\n", tr(s, "Savings Interest Rate:"), tenthsPct(w.Config.InterestRate))
+	fmt.Fprintf(s, "  %-25s%s%%\n", tr(s, "Investing Interest Rate:"), tenthsPct(w.InvestRate*10))
 	pause(s)
 	return Stay
 }

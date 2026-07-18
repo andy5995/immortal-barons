@@ -494,8 +494,13 @@ The bank menu (BRE "Crazy Gold Bank", IB "Goldie Luck's Bank"): **Cash Relief /
 Loans**, **Deposit Funds**, **Withdraw Funds**, **Investments**, **List
 Investments / Loans**, and **View Bank Rates**.
 
-- **Savings** earn the *Bank/Savings Interest Rate* per turn on gold in the
-  bank (about 1%/turn; see the caps above).
+- **Savings** earn the *Bank Interest Rate* on gold in the bank. BRE-faithful
+  (config-help verified): the knob is "interest the bank gives in **10 days**", so
+  `InterestRate/10` is the **daily** rate (config 50 → **5.0%/day**, shown in View
+  Bank Rates), credited "at the end of each turn" — so per turn it is the daily
+  rate spread across `TurnsPerDay` turns: `Bank × InterestRate / (1000 ×
+  TurnsPerDay)`. (This replaced IB's old flat ~1%/turn, which compounded to a much
+  higher effective daily rate.)
 - **Investments** are term deposits (like bonds): you choose an **amount**
   and a **number of days** — **2 to 10 days** (`MinInvestDays`=2, `MaxInvestDays`=10,
   live-BRE-verified: the bank prints "There is now a 2 day minimum on

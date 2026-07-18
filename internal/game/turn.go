@@ -507,14 +507,19 @@ func (w *World) CollectIncome(e *Empire) {
 func (w *World) processEconomy(e *Empire) {
 	tf := e.TechFactor()
 
-	// Bank interest scales with the league's Interest Rate knob, anchored so
-	// the default (50) reproduces the historical ~1%/turn. Mapping to BRE's
-	// exact per-day interest math is deferred; this keeps the knob linear.
-	// Compute the whole interest step in int64 and clamp before storing: on a
-	// 32-bit build (386) both the min(Bank,InterestCap)*InterestRate product AND
-	// the Bank+interest sum can exceed int32 before the MoneyCap clamp. Storage
-	// stays int.
-	newBank := int64(e.Bank) + int64(min(e.Bank, InterestCap))*int64(w.Config.InterestRate)/5000
+	// Savings interest (BRE-faithful, config-help verified): the Interest Rate knob
+	// is "the interest the bank gives in 10 days", so config/10 is the DAILY rate
+	// (shown in View Bank Rates: config 50 → 5.0%/day). BRE credits it "at the end
+	// of each turn", so per turn it is the daily rate spread across the day's turns:
+	// interest = Bank × (InterestRate/10)/100 / TurnsPerDay = Bank × InterestRate /
+	// (1000 × TurnsPerDay). int64 throughout and clamp before storing: on a 32-bit
+	// build the min(Bank,InterestCap)*InterestRate product overflows int32 before
+	// the divide. Storage stays int.
+	tpd := int64(w.Config.TurnsPerDay)
+	if tpd < 1 {
+		tpd = 1
+	}
+	newBank := int64(e.Bank) + int64(min(e.Bank, InterestCap))*int64(w.Config.InterestRate)/(1000*tpd)
 	if newBank > MoneyCap {
 		newBank = MoneyCap
 	}

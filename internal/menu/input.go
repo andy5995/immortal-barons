@@ -90,7 +90,7 @@ func promptSuggested(s session.Session, msg string, suggested, max int) int {
 // run of prompts that should sit on consecutive lines — the attack force
 // selection (Troopers/Jets/Tanks/Bombers) after a single header line.
 func promptSuggestedTight(s session.Session, msg string, suggested, max int) int {
-	prefix := fmt.Sprintf("%s%s (%d; %d):%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), suggested, max, ansi.Reset)
+	prefix := fmt.Sprintf("%s%s (%s; %s):%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), comma(suggested), comma(max), ansi.Reset)
 	fmt.Fprint(s, prefix)
 	return editAmount(s, prefix, suggested, max)
 }
