@@ -113,6 +113,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		for _, e := range w.Empires {
 			if e.Alive {
 				w.matureInvestments(e)
+				w.matureLoans(e)
 			}
 		}
 		w.adjustInvestRate()

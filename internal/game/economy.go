@@ -451,16 +451,6 @@ func (w *World) Withdraw(e *Empire, n int) error {
 	return nil
 }
 
-// Loan borrows gold, added to the debt that accrues interest each turn.
-func (w *World) Loan(e *Empire, n int) error {
-	if n <= 0 {
-		return nil
-	}
-	e.Gold += n
-	e.Debt += n
-	return nil
-}
-
 func (w *World) Repay(e *Empire, n int) error {
 	if n <= 0 {
 		return nil

@@ -311,6 +311,22 @@ const (
 	NetWorthCarrier = 1000
 )
 
+// Cash Relief loans (#40) — term-based borrowing, gathered live from BRE
+// (2026-07-17): the daily rate rises with the term and compounds daily.
+// The daily rate and its per-term math are VERIFIED (matched three live loans);
+// the borrowing ceiling and default penalty are IB reconstructions — BRE's
+// ceiling formula stays unverified (the gathered points were confounded by
+// growing debt), so treat LoanCeilingMultiple as a tunable placeholder.
+const (
+	LoanMinDays            = 1 // BRE prompt "(1; 10)"
+	LoanMaxDays            = 10
+	LoanBaseRateTenths     = 80 // daily rate at term 0, in tenths of a % (8.0%/day)
+	LoanRatePerDayTenths   = 2  // +0.2%/day of daily rate per term-day (2d→8.4, 5d→9.0, 10d→10.0 — verified)
+	LoanCeilingMultiple    = 8  // max borrowable ≈ this × NetWorth less outstanding (UNVERIFIED: one confounded BRE point ≈8.5×NW; term-dependence unmodeled)
+	LoanDefaultPenaltyPct  = 25 // an unpaid loan at its due date rolls into Debt grown by this % (IB's late-payment penalty)
+	LoanDefaultSupportDrop = 10 // popular-support points lost when a loan defaults
+)
+
 // --- Other economy tunables ---
 const (
 	DebtGrowthPct = 10 // % a loan's outstanding debt grows each turn

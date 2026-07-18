@@ -1,5 +1,7 @@
 package game
 
+import "math"
+
 // Invest locks `amount` gold for `days` days (clamped to [MinInvestDays,
 // MaxInvestDays]) and records a maturing return at the current InvestRate (simple
 // interest). Returns the expected return, or an error if the amount is unaffordable.
@@ -24,17 +26,13 @@ func (w *World) Invest(e *Empire, amount, days int) (int, error) {
 
 // ExpectedReturn is the total payout (principal + interest) for investing
 // `amount` for `days` days at `rate` percent per day, COMPOUNDED daily — matching
-// BRE (live-verified: 1000 for 2 days at 5%/day returns 1102 = 1000·1.05²). Applied
-// iteratively in int64 and clamped to MoneyCap each step so a long high-rate term
-// can't overflow.
+// BRE (live-verified: 1000 for 2 days at 5%/day returns 1102 = 1000·1.05²). BRE
+// computes this in floating point ("TP reals") and truncates once at the end, so
+// IB does the same (int-iterative truncation would drift low over a long term).
 func ExpectedReturn(amount, rate, days int) int {
-	v := int64(amount)
-	for i := 0; i < days; i++ {
-		v = v * int64(100+rate) / 100
-		if v > MoneyCap {
-			v = MoneyCap
-			break
-		}
+	v := float64(amount) * math.Pow(1+float64(rate)/100, float64(days))
+	if v > float64(MoneyCap) {
+		return MoneyCap
 	}
 	return int(v)
 }

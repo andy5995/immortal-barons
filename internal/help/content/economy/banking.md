@@ -12,9 +12,19 @@ taken by pirates or raids.
 
 - Deposit — move gold from your treasury into the bank.
 - Withdraw — move gold from the bank back to your treasury.
-- Take Loan — borrow gold, up to a limit based on how much land you own. A loan
-  grows over time until you repay it, so pay it back before it becomes a burden.
-- Repay Loan — pay back what you borrowed.
+- Cash Relief / Loans — borrow gold, or pay back what you already owe.
+
+## Cash Relief / Loans
+
+When you borrow, you first pick how many days you have to pay it back (1 to 10).
+A longer term has a higher daily interest rate, and the interest builds up each
+day (it compounds), so a long loan costs much more in total. The bank tells you
+the rate and the most it will lend you, then you choose how much to take.
+
+You must repay the full amount on the due date. The bank takes it from your
+gold first, then from your savings. If you cannot pay it all, the rest becomes a
+debt with an extra penalty added, and your people lose some support. Debt keeps
+growing each turn until you repay it, so clear it early.
 
 ## Investments
 

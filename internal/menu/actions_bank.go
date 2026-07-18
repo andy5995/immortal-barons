@@ -2,7 +2,9 @@ package menu
 
 import (
 	"fmt"
+	"sort"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
@@ -33,6 +35,55 @@ func money(label string, max func(*game.Empire) int, apply func(*game.World, *ga
 
 // investFunds prompts for a term (days) and amount, shows the expected
 // return, and locks the gold via w.Invest.
+// cashRelief runs BRE's Cash Relief / Loans flow: settle any overdue debt, then
+// borrow. A loan picks a repayment term (days), shows the daily rate and the
+// overall interest, offers up to the ceiling, and owes the compounded total on
+// its due date. Defaulting at the due date is handled by matureLoans (the
+// shortfall rolls into Debt with a penalty).
+func cashRelief(s session.Session, w *ctx) Result {
+	p := w.Player()
+	// Overdue debt (from a defaulted loan) is settled here too — Cash Relief covers
+	// both borrowing and paying down what you already owe.
+	if p.Debt > 0 {
+		fmt.Fprintf(s, "\n"+tr(s, "You owe %s gold in overdue debt (it grows each turn).")+"\n", comma(p.Debt))
+		if AskYesNo(s, "Repay some now?", false) {
+			if n := promptSuggested(s, "How much to repay?", 0, min(p.Gold, p.Debt)); n > 0 {
+				if err := w.mutatePlayer(func(p *game.Empire) error { return w.World.Repay(p, n) }); err != nil {
+					fail(s, err)
+				}
+			}
+		}
+	}
+	days := promptSuggested(s, "When do you wish to pay your loan back [# of Days]?", game.LoanMinDays, game.LoanMaxDays)
+	if days < game.LoanMinDays {
+		days = game.LoanMinDays
+	}
+	fmt.Fprintf(s, "\n"+tr(s, "The loan rate will be %s%% per day, totalling %s%% interest overall.")+"\n",
+		tenthsPct(game.LoanRateTenths(days)), tenthsPct(game.LoanOverallTenths(days)))
+	ceiling := w.LoanCeiling(p)
+	fmt.Fprintf(s, tr(s, "We will provide up to %s gold.")+"\n", comma(ceiling))
+	amount := promptSuggested(s, "How many would you like to borrow?", 0, ceiling)
+	if amount <= 0 {
+		return Stay
+	}
+	var owed int
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		l, e := w.World.TakeLoan(p, amount, days)
+		owed = l.Owed
+		return e
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	fmt.Fprintf(s, "\n  "+tr(s, "You owe %s gold in %d Days.")+"\n", comma(owed), days)
+	okNoPause(s, "Note that late payments will incur additional penalties.")
+	return Stay
+}
+
+// tenthsPct renders a tenths-of-a-percent value as "N.N" (84 -> "8.4").
+func tenthsPct(t int) string { return fmt.Sprintf("%d.%d", t/10, t%10) }
+
 func investFunds(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n"+tr(s, "The current interest returns on investments are %d%%.")+"\n", w.InvestRate)
@@ -64,28 +115,61 @@ func investFunds(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// listInvestments shows the player's pending investments and any debt.
+// listInvestments shows the player's pending investments and loans in BRE's
+// combined "Date / Investments / Loans Due" table — a row per maturity/due date
+// (sorted), the maturing investment total and the loan total owed on that date.
+// Any defaulted, open-ended debt is shown separately below (it has no due date).
 func listInvestments(s session.Session, w *ctx) Result {
-	p := w.Player()
-	var investments []game.Investment
+	var invs []game.Investment
+	var loans []game.Loan
 	var debt int
 	w.With(func() {
-		investments = append([]game.Investment(nil), p.Investments...)
+		p := w.Player()
+		if p == nil {
+			return
+		}
+		invs = append([]game.Investment(nil), p.Investments...)
+		loans = append([]game.Loan(nil), p.Loans...)
 		debt = p.Debt
 	})
-	if len(investments) == 0 && debt == 0 {
-		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no active investments or loans."))
-		pause(s)
+	if len(invs) == 0 && len(loans) == 0 && debt == 0 {
+		ok(s, "You have no active investments or loans.")
 		return Stay
 	}
-	if len(investments) > 0 {
-		fmt.Fprintf(s, "\n  %s\n", tr(s, "Amount      Return    Matures Day"))
-		for _, inv := range investments {
-			fmt.Fprintf(s, "  %-10d  %-8d  %d\n", inv.Amount, inv.Return, inv.MaturesDay)
+	// Aggregate by day: maturing investment returns and loan amounts due.
+	type row struct{ inv, loan int }
+	byDay := map[int]*row{}
+	var days []int
+	at := func(day int) *row {
+		r, ok := byDay[day]
+		if !ok {
+			r = &row{}
+			byDay[day] = r
+			days = append(days, day)
 		}
+		return r
+	}
+	for _, inv := range invs {
+		at(inv.MaturesDay).inv += inv.Return
+	}
+	for _, l := range loans {
+		at(l.DueDay).loan += l.Owed
+	}
+	sort.Ints(days)
+
+	fmt.Fprintf(s, "\n  %s%-12s %-20s %s%s\n", ansi.FgBrightCyan, tr(s, "Date"), tr(s, "Investments"), tr(s, "Loans Due"), ansi.Reset)
+	dollar := func(n int) string {
+		if n <= 0 {
+			return ""
+		}
+		return "$" + comma(n)
+	}
+	for _, day := range days {
+		r := byDay[day]
+		fmt.Fprintf(s, "  %-12s %-20s %s\n", w.DateForDay(day), dollar(r.inv), dollar(r.loan))
 	}
 	if debt > 0 {
-		fmt.Fprintf(s, "\n  "+tr(s, "Debt owed: %d")+"\n", debt)
+		fmt.Fprintf(s, "\n  "+tr(s, "Overdue debt: $%s (grows each turn until repaid)")+"\n", comma(debt))
 	}
 	pause(s)
 	return Stay

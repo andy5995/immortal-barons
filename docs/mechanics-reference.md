@@ -490,9 +490,9 @@ league ran tax 85%, interest 75%).
 
 ### Banking and investments (from the binary strings)
 
-The bank has three actions plus two views: **Deposit Funds** (savings),
-**Withdraw Funds**, **Investments**, **List Investments / Loans**, and
-**View Bank Rates**.
+The bank menu (BRE "Crazy Gold Bank", IB "Goldie Luck's Bank"): **Cash Relief /
+Loans**, **Deposit Funds**, **Withdraw Funds**, **Investments**, **List
+Investments / Loans**, and **View Bank Rates**.
 
 - **Savings** earn the *Bank/Savings Interest Rate* per turn on gold in the
   bank (about 1%/turn; see the caps above).
@@ -506,6 +506,21 @@ The bank has three actions plus two views: **Deposit Funds** (savings),
   "Returns expected to be approximately N gold. Accept? (Y/n)"; on accept it
   reports "Investment will be returned on MM/DD/YYYY." The list view shows
   columns: Date / Investments / Loans Due.
+- **Cash Relief / Loans** (#40) — term-based borrowing (`internal/game/loan.go`).
+  You choose a **repayment term** of **1–10 days** (`LoanMinDays`/`LoanMaxDays`),
+  the bank shows the **rate** ("The loan rate will be X% per day, totalling Y%
+  overall") and a **ceiling** ("We will provide up to N gold"), then you borrow
+  up to it and **owe the compounded total on the due date** ("You owe N gold in D
+  Days."). Loan math is **live-BRE-verified**: daily rate = `8.0 + 0.2·days` %
+  (`LoanBaseRateTenths`/`LoanRatePerDayTenths`; 2d→8.4, 5d→9.0, 10d→10.0),
+  compounded daily (1000@2d=1175, 616@5d=947, 500@10d=1296). The **ceiling
+  formula is IB-reconstructed** (`LoanCeilingMultiple` × net worth less
+  outstanding — BRE's exact formula is unverified, the gathered points were
+  confounded by growing debt). At the due date `matureLoans` deducts the amount
+  owed from gold then bank; an unpaid loan **defaults** — the shortfall rolls into
+  open-ended **Debt** grown by `LoanDefaultPenaltyPct` (25%) and support drops.
+  Defaulted **Debt** still grows `DebtGrowthPct`/turn and is repaid from the same
+  Cash Relief screen.
 - **The Investment Rate floats** — each daily maintenance updates it:
   - Supply/demand: heavy investing pushes rates **down**; weak investing
     pushes them **up**.

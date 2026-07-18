@@ -101,6 +101,7 @@ type Empire struct {
 	TreatyOffers   []TreatyOffer // pending treaty proposals received
 
 	Investments []Investment
+	Loans       []Loan // active Cash Relief loans (#40), each due on its DueDay
 
 	// Prices is this empire's own current unit buy prices — a persistent per-turn
 	// random walk (#30; BRE gives every empire its own drifting prices). Only the
