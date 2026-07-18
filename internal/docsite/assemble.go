@@ -145,6 +145,13 @@ func contentDir(repoRoot, lang string) string {
 // with the same parser the game uses.
 func loadTopics(repoRoot, lang string) ([]topic, error) {
 	root := contentDir(repoRoot, lang)
+	// A language may have its UI translated but not its help pages (the two are
+	// separate catalogs). With no content.<lang> dir, return no topics so the
+	// language reuses the English structure and bodies — the same fallback an
+	// individual untranslated page gets.
+	if _, err := os.Stat(root); os.IsNotExist(err) {
+		return nil, nil
+	}
 	var topics []topic
 	err := filepath.WalkDir(root, func(path string, d os.DirEntry, err error) error {
 		if err != nil {

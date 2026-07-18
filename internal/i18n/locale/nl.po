@@ -4,6 +4,13 @@
 msgid ""
 msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
+"Project-Id-Version: andy 5995\n"
+"Last-Translator: Automatically generated\n"
+"Language-Team: none\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: internal/menu/menu.go:420
 msgid "# Owned"
@@ -119,7 +126,7 @@ msgstr ""
 
 #: internal/menu/tree.go:341
 msgid "Abdicate"
-msgstr ""
+msgstr "Aftreden"
 
 #: internal/menu/actions_info.go:22
 msgid "Abdicating deletes %s permanently. This cannot be undone."
@@ -147,14 +154,17 @@ msgstr ""
 
 #: internal/menu/actions_diplomacy.go:19
 msgid "Alliance Strength"
-msgstr ""
+msgstr "Sterkte van bondgenootschap"
 
 #: internal/menu/actions_diplomacy.go:23
 msgid "Allies: %s"
 msgstr ""
 
 #: internal/menu/actions_info.go:271
-msgid "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and later maintained by John Dailey. No original BRE code, text, or art is used."
+msgid ""
+"An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel "
+"and later maintained by John Dailey. No original BRE code, text, or art is "
+"used."
 msgstr ""
 
 #: internal/menu/actions_interbbs.go:161
@@ -163,7 +173,7 @@ msgstr ""
 
 #: internal/menu/actions_attack.go:270
 msgid "Attack Pirates"
-msgstr ""
+msgstr "Piraten aanvallen"
 
 #: internal/menu/actions_attack.go:171
 msgid "Attack which realm? (letter, RETURN to abort)"
@@ -179,7 +189,7 @@ msgstr ""
 
 #: internal/menu/tree.go:154
 msgid "Biological Attack"
-msgstr ""
+msgstr "Biologische aanval"
 
 #: internal/menu/config_editor.go:202
 msgid "Board ID:"
@@ -187,23 +197,23 @@ msgstr ""
 
 #: internal/menu/tree.go:48
 msgid "Bomb Enemy Targets"
-msgstr ""
+msgstr "Vijandelijke doelen bombarderen"
 
 #: internal/menu/tree.go:217
 msgid "Bomb Food Market"
-msgstr ""
+msgstr "Voedselmarkt bombarderen"
 
 #: internal/menu/tree.go:219
 msgid "Bomb Trade Routes"
-msgstr ""
+msgstr "Handelsroutes bombarderen"
 
 #: internal/menu/tree.go:218
 msgid "Bomb Trading Market"
-msgstr ""
+msgstr "Handelsmarkt bombarderen"
 
 #: internal/menu/tree.go:96
 msgid "Bombers"
-msgstr ""
+msgstr "Bommenwerpers"
 
 #: internal/menu/gameflow.go:250
 msgid "Bombers were manufactured by Industrial Zones."
@@ -211,23 +221,25 @@ msgstr ""
 
 #: internal/menu/tree.go:209
 msgid "Bribery"
-msgstr ""
+msgstr "Omkoping"
 
 #: internal/menu/actions_info.go:212
-msgid "Building some would raise our military strength, income, and food output, and lower our upkeep — a benefit that builds up over time."
+msgid ""
+"Building some would raise our military strength, income, and food output, "
+"and lower our upkeep — a benefit that builds up over time."
 msgstr ""
 
 #: internal/menu/tree.go:113
 msgid "Buy"
-msgstr ""
+msgstr "Kopen"
 
 #: internal/menu/tree.go:255
 msgid "Buy / Sell"
-msgstr ""
+msgstr "Kopen / Verkopen"
 
 #: internal/menu/tree.go:330
 msgid "Buy Food"
-msgstr ""
+msgstr "Voedsel kopen"
 
 #: internal/menu/actions_regions.go:138
 msgid "Buy Regions — %d gold each."
@@ -247,7 +259,7 @@ msgstr ""
 
 #: internal/menu/tree.go:104
 msgid "Carriers"
-msgstr ""
+msgstr "Vliegdekschepen"
 
 #: internal/menu/gameflow.go:252
 msgid "Carriers were manufactured by Industrial Zones."
@@ -255,7 +267,7 @@ msgstr ""
 
 #: internal/menu/tree.go:134
 msgid "Cash Relief / Loans"
-msgstr ""
+msgstr "Noodkrediet / Leningen"
 
 #: internal/menu/actions_info.go:344
 msgid "Change"
@@ -267,11 +279,11 @@ msgstr ""
 
 #: internal/menu/tree.go:153
 msgid "Chemical Attack"
-msgstr ""
+msgstr "Chemische aanval"
 
 #: internal/menu/tree.go:222
 msgid "Chemical Bombing"
-msgstr ""
+msgstr "Chemisch bombardement"
 
 #: internal/menu/input.go:237
 msgid "Choice>"
@@ -319,27 +331,27 @@ msgstr ""
 
 #: internal/menu/tree.go:377
 msgid "Configuration Editor"
-msgstr ""
+msgstr "Configuratie-editor"
 
 #: internal/menu/tree.go:54
 msgid "Coordinator Menu"
-msgstr ""
+msgstr "Coördinatormenu"
 
 #: internal/menu/tree.go:373
 msgid "Coordinator Vote"
-msgstr ""
+msgstr "Coördinatorstemming"
 
 #: internal/menu/tree.go:100
 msgid "Covert Agents"
-msgstr ""
+msgstr "Geheim agenten"
 
 #: internal/menu/tree.go:47
 msgid "Covert Operations"
-msgstr ""
+msgstr "Geheime operaties"
 
 #: internal/menu/tree.go:183
 msgid "Create Group Attack"
-msgstr ""
+msgstr "Groepsaanval maken"
 
 #: internal/menu/actions_attack.go:312
 msgid "Current SDI Strength: %d%%"
@@ -363,7 +375,7 @@ msgstr ""
 
 #: internal/menu/tree.go:272
 msgid "Declaration Of War"
-msgstr ""
+msgstr "Oorlogsverklaring"
 
 #: internal/menu/actions_diplomacy.go:192
 msgid "Declare war on which empire (0 to cancel)?"
@@ -371,19 +383,19 @@ msgstr ""
 
 #: internal/menu/tree.go:206
 msgid "Demoralize Forces"
-msgstr ""
+msgstr "Troepen demoraliseren"
 
 #: internal/menu/tree.go:135
 msgid "Deposit Funds"
-msgstr ""
+msgstr "Geld storten"
 
 #: internal/menu/tree.go:51
 msgid "Diplomacy"
-msgstr ""
+msgstr "Diplomatie"
 
 #: internal/menu/tree.go:190
 msgid "Diplomacy List"
-msgstr ""
+msgstr "Diplomatielijst"
 
 #: internal/menu/tree.go:189
 msgid "Doomer Kaboomer Ops"
@@ -419,11 +431,11 @@ msgstr ""
 
 #: internal/menu/tree.go:347
 msgid "Empire Status"
-msgstr ""
+msgstr "Rijksstatus"
 
 #: internal/menu/tree.go:342
 msgid "End Protection"
-msgstr ""
+msgstr "Bescherming beëindigen"
 
 #: internal/menu/gameflow.go:296
 msgid "End of Turn Statistics:"
@@ -431,11 +443,11 @@ msgstr ""
 
 #: internal/menu/tree.go:210
 msgid "Expose Enemy Ops"
-msgstr ""
+msgstr "Vijandelijke operaties onthullen"
 
 #: internal/menu/tree.go:252
 msgid "Food Market"
-msgstr ""
+msgstr "Voedselmarkt"
 
 #: internal/menu/actions_market.go:81
 msgid "For Sale"
@@ -443,11 +455,11 @@ msgstr ""
 
 #: internal/menu/tree.go:267
 msgid "Free Trade Agreement"
-msgstr ""
+msgstr "Vrijhandelsverdrag"
 
 #: internal/menu/tree.go:271
 msgid "Full Defense Alliance"
-msgstr ""
+msgstr "Volledig defensiebondgenootschap"
 
 #: internal/menu/actions_attack.go:314
 msgid "Fund SDI — gold to spend?"
@@ -455,7 +467,7 @@ msgstr ""
 
 #: internal/menu/tree.go:391
 msgid "Game Bulletins"
-msgstr ""
+msgstr "Spelbulletins"
 
 #: internal/menu/tree.go:456
 msgid "Game Day %d"
@@ -467,7 +479,7 @@ msgstr ""
 
 #: internal/menu/tree.go:349
 msgid "Game Setup"
-msgstr ""
+msgstr "Spelinstellingen"
 
 #: internal/menu/actions_info.go:284
 msgid "Game length (days): %d  (0 = endless)"
@@ -491,11 +503,11 @@ msgstr ""
 
 #: internal/menu/tree.go:98
 msgid "HeadQuarters"
-msgstr ""
+msgstr "Hoofdkwartier"
 
 #: internal/menu/tree.go:108
 msgid "Help"
-msgstr ""
+msgstr "Help"
 
 #: internal/menu/actions_interbbs.go:462
 msgid "How many agents to send?"
@@ -567,7 +579,7 @@ msgstr ""
 
 #: internal/menu/tree.go:383
 msgid "Immortal Barons — Game Menu"
-msgstr ""
+msgstr "Immortal Barons — Spelmenu"
 
 #: internal/menu/gameflow.go:225
 msgid "Income Report"
@@ -575,10 +587,11 @@ msgstr ""
 
 #: internal/menu/tree.go:185
 msgid "Indiv. Attack Force"
-msgstr ""
+msgstr "Individuele aanvalsmacht"
 
 #: internal/menu/actions_interbbs.go:210
-msgid "Individual attack forces are not yet available; use Create Group Attack."
+msgid ""
+"Individual attack forces are not yet available; use Create Group Attack."
 msgstr ""
 
 #: internal/menu/actions_industry.go:29
@@ -595,11 +608,11 @@ msgstr ""
 
 #: internal/menu/tree.go:393
 msgid "Instructions"
-msgstr ""
+msgstr "Instructies"
 
 #: internal/menu/tree.go:269
 msgid "Intelligence Alliance"
-msgstr ""
+msgstr "Inlichtingenbondgenootschap"
 
 #: internal/menu/actions_info.go:285
 msgid "Inter-BBS play:     %s"
@@ -607,15 +620,15 @@ msgstr ""
 
 #: internal/menu/actions_interbbs.go:43
 msgid "InterBBS Scores"
-msgstr ""
+msgstr "InterBBS-scores"
 
 #: internal/menu/tree.go:46
 msgid "InterPlanetary Operations"
-msgstr ""
+msgstr "Interplanetaire operaties"
 
 #: internal/menu/tree.go:392
 msgid "InterPlanetary Ops"
-msgstr ""
+msgstr "Interplanetaire operaties"
 
 #: internal/menu/config_editor.go:168
 msgid "Interest Rate"
@@ -627,7 +640,7 @@ msgstr ""
 
 #: internal/menu/actions_bank.go:160
 msgid "Investments"
-msgstr ""
+msgstr "Investeringen"
 
 #: internal/menu/actions_info.go:218
 msgid "It lowers unit and region upkeep, and food spoilage, to %d%% of normal."
@@ -643,7 +656,7 @@ msgstr ""
 
 #: internal/menu/tree.go:92
 msgid "Jets"
-msgstr ""
+msgstr "Straaljagers"
 
 #: internal/menu/gameflow.go:248
 msgid "Jets were manufactured by Industrial Zones."
@@ -651,7 +664,7 @@ msgstr ""
 
 #: internal/menu/tree.go:184
 msgid "Join Group Attack"
-msgstr ""
+msgstr "Deelnemen aan groepsaanval"
 
 #: internal/menu/actions_interbbs.go:157
 msgid "Join which attack?"
@@ -695,7 +708,7 @@ msgstr ""
 
 #: internal/menu/tree.go:138
 msgid "List Investments / Loans"
-msgstr ""
+msgstr "Investeringen / Leningen weergeven"
 
 #: internal/menu/actions_bank.go:160
 msgid "Loans Due"
@@ -714,7 +727,9 @@ msgid "Macro Editor"
 msgstr ""
 
 #: internal/menu/gameflow.go:340
-msgid "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"
+msgid ""
+"Maintenance is %d but you hold only %d gold. Withdraw from your bank "
+"(balance %d)?"
 msgstr ""
 
 #: internal/menu/gameflow.go:357
@@ -743,7 +758,7 @@ msgstr ""
 
 #: internal/menu/tree.go:52
 msgid "Messages"
-msgstr ""
+msgstr "Berichten"
 
 #: internal/menu/actions_info.go:247
 msgid "Military"
@@ -755,7 +770,7 @@ msgstr ""
 
 #: internal/menu/tree.go:318
 msgid "Modify League Diplomacy"
-msgstr ""
+msgstr "Ligadiplomatie wijzigen"
 
 #: internal/menu/actions_info.go:200
 msgid "Morale is low. Desertion is a real risk before our next battle."
@@ -818,20 +833,23 @@ msgid "None"
 msgstr ""
 
 #: internal/menu/actions_attack.go:168
-msgid "None of these realms can be attacked — they are protected or allied with you."
+msgid ""
+"None of these realms can be attacked — they are protected or allied with you."
 msgstr ""
 
 #: internal/menu/actions_regions.go:139
-msgid "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."
+msgid ""
+"Note: Region prices rise as you expand, so the price shown is only\n"
+"      the cost of the first region you buy."
 msgstr ""
 
 #: internal/menu/tree.go:221
 msgid "Nuclear Assault"
-msgstr ""
+msgstr "Nucleaire aanval"
 
 #: internal/menu/tree.go:152
 msgid "Nuclear Attack"
-msgstr ""
+msgstr "Nucleaire aanval"
 
 #: internal/menu/actions_interbbs.go:540
 msgid "Only the BBS Coordinator may set league diplomacy."
@@ -846,7 +864,8 @@ msgid "Our HeadQuarters is fully built."
 msgstr ""
 
 #: internal/menu/actions_info.go:214
-msgid "Our Technology regions are new. Their benefits will build up as we hold them."
+msgid ""
+"Our Technology regions are new. Their benefits will build up as we hold them."
 msgstr ""
 
 #: internal/menu/actions_info.go:147
@@ -854,7 +873,9 @@ msgid "Our food will not last the turn. Buy or grow more."
 msgstr ""
 
 #: internal/menu/actions_info.go:185
-msgid "Our forces: %s troopers, %s jets, %s turrets, %s tanks, %s bombers, %s carriers."
+msgid ""
+"Our forces: %s troopers, %s jets, %s turrets, %s tanks, %s bombers, %s "
+"carriers."
 msgstr ""
 
 #: internal/menu/actions_info.go:140
@@ -891,7 +912,7 @@ msgstr ""
 
 #: internal/menu/tree.go:282
 msgid "Planetary Post"
-msgstr ""
+msgstr "Planetaire post"
 
 #: internal/menu/actions_interbbs.go:313
 msgid "Planetary Treaties"
@@ -899,11 +920,11 @@ msgstr ""
 
 #: internal/menu/tree.go:385
 msgid "Play"
-msgstr ""
+msgstr "Spelen"
 
 #: internal/menu/actions_info.go:305
 msgid "Player List"
-msgstr ""
+msgstr "Spelerslijst"
 
 #: internal/menu/gameflow.go:419
 msgid "Popular support rose %d points."
@@ -919,7 +940,7 @@ msgstr ""
 
 #: internal/menu/tree.go:53
 msgid "Preferences"
-msgstr ""
+msgstr "Voorkeuren"
 
 #: internal/menu/actions_market.go:128
 msgid "Price"
@@ -935,11 +956,11 @@ msgstr ""
 
 #: internal/menu/tree.go:266
 msgid "Protective Trade"
-msgstr ""
+msgstr "Beschermde handel"
 
 #: internal/menu/input.go:236
 msgid "Quit"
-msgstr ""
+msgstr "Stoppen"
 
 #: internal/menu/tree.go:223
 msgid "R5-Slappenheimer"
@@ -947,15 +968,15 @@ msgstr ""
 
 #: internal/menu/tree.go:280
 msgid "Read Messages"
-msgstr ""
+msgstr "Berichten lezen"
 
 #: internal/menu/tree.go:99
 msgid "Regions"
-msgstr ""
+msgstr "Regio's"
 
 #: internal/menu/tree.go:151
 msgid "Regular Attack"
-msgstr ""
+msgstr "Gewone aanval"
 
 #: internal/menu/actions_bank.go:100
 msgid "Returns expected to be approximately %s gold."
@@ -967,7 +988,7 @@ msgstr ""
 
 #: internal/menu/tree.go:188
 msgid "SDI Program"
-msgstr ""
+msgstr "SDI-programma"
 
 #: internal/menu/actions_attack.go:331
 msgid "SDI is now %d%%."
@@ -991,39 +1012,39 @@ msgstr ""
 
 #: internal/menu/tree.go:356
 msgid "See Scores"
-msgstr ""
+msgstr "Scores bekijken"
 
 #: internal/menu/tree.go:386
 msgid "See Status"
-msgstr ""
+msgstr "Status bekijken"
 
 #: internal/menu/tree.go:106
 msgid "Sell"
-msgstr ""
+msgstr "Verkopen"
 
 #: internal/menu/tree.go:332
 msgid "Sell Food"
-msgstr ""
+msgstr "Voedsel verkopen"
 
 #: internal/menu/tree.go:43
 msgid "Sell Menu"
-msgstr ""
+msgstr "Verkoopmenu"
 
 #: internal/menu/tree.go:186
 msgid "Send Message"
-msgstr ""
+msgstr "Bericht versturen"
 
 #: internal/menu/tree.go:202
 msgid "Send Spy"
-msgstr ""
+msgstr "Spion sturen"
 
 #: internal/menu/tree.go:245
 msgid "Send SpyGuy"
-msgstr ""
+msgstr "SpyGuy sturen"
 
 #: internal/menu/tree.go:182
 msgid "Send Trade Deal"
-msgstr ""
+msgstr "Handelsaanbod sturen"
 
 #: internal/menu/actions_message.go:274
 msgid "Sent %d gold to %s."
@@ -1035,15 +1056,15 @@ msgstr ""
 
 #: internal/menu/tree.go:360
 msgid "Set Industries"
-msgstr ""
+msgstr "Industrieën instellen"
 
 #: internal/menu/tree.go:355
 msgid "Set Tax Rate"
-msgstr ""
+msgstr "Belastingtarief instellen"
 
 #: internal/menu/tree.go:204
 msgid "Set Up"
-msgstr ""
+msgstr "In de val lokken"
 
 #: internal/menu/actions_covert.go:80
 msgid "Set the R5-Slappenheimer dial (0-10)"
@@ -1051,7 +1072,7 @@ msgstr ""
 
 #: internal/menu/tree.go:361
 msgid "Show Instructions"
-msgstr ""
+msgstr "Instructies tonen"
 
 #: internal/menu/gameflow.go:143
 msgid "Since your last play, this has happened:"
@@ -1059,15 +1080,15 @@ msgstr ""
 
 #: internal/menu/gameflow.go:505
 msgid "Sorry, you have used all of your turns today."
-msgstr ""
+msgstr "Sorry, u hebt vandaag al uw beurten gebruikt."
 
 #: internal/menu/tree.go:49
 msgid "Special Operations"
-msgstr ""
+msgstr "Speciale operaties"
 
 #: internal/menu/tree.go:362
 msgid "Specialize Industry"
-msgstr ""
+msgstr "Industrie specialiseren"
 
 #: internal/menu/actions_industry.go:95
 msgid "Specialize Industry — choose a unit type. This is PERMANENT:"
@@ -1083,11 +1104,11 @@ msgstr ""
 
 #: internal/menu/tree.go:42
 msgid "Spending Menu"
-msgstr ""
+msgstr "Uitgavenmenu"
 
 #: internal/menu/tree.go:191
 msgid "Spy Database"
-msgstr ""
+msgstr "Spionagedatabase"
 
 #: internal/menu/actions_interbbs.go:410
 msgid "Spy Database:"
@@ -1095,7 +1116,7 @@ msgstr ""
 
 #: internal/menu/tree.go:207
 msgid "Spy on Relations"
-msgstr ""
+msgstr "Relaties bespioneren"
 
 #: internal/menu/config_editor.go:170
 msgid "Standard Investment Rate"
@@ -1103,19 +1124,19 @@ msgstr ""
 
 #: internal/menu/tree.go:203
 msgid "Stir Revolts"
-msgstr ""
+msgstr "Opstanden aanwakkeren"
 
 #: internal/menu/tree.go:205
 msgid "Support Dissensions"
-msgstr ""
+msgstr "Tweedracht steunen"
 
 #: internal/menu/tree.go:58
 msgid "System Menu"
-msgstr ""
+msgstr "Systeemmenu"
 
 #: internal/menu/tree.go:102
 msgid "Tanks"
-msgstr ""
+msgstr "Tanks"
 
 #: internal/menu/gameflow.go:251
 msgid "Tanks were manufactured by Industrial Zones."
@@ -1131,7 +1152,7 @@ msgstr ""
 
 #: internal/menu/tree.go:265
 msgid "Tariff Trade Agreement"
-msgstr ""
+msgstr "Tariefhandelsverdrag"
 
 #: internal/menu/actions.go:233
 msgid "Tax rate set to %d%%."
@@ -1147,7 +1168,7 @@ msgstr ""
 
 #: internal/menu/tree.go:270
 msgid "Technology Agreement"
-msgstr ""
+msgstr "Technologieovereenkomst"
 
 #: internal/menu/actions_info.go:216
 msgid "Technology stands at %d%%."
@@ -1159,11 +1180,11 @@ msgstr ""
 
 #: internal/menu/tree.go:181
 msgid "Terrorist Ops"
-msgstr ""
+msgstr "Terreuroperaties"
 
 #: internal/menu/tree.go:268
 msgid "Terrorist Prevention"
-msgstr ""
+msgstr "Terreurpreventie"
 
 #: internal/game/market.go:8
 msgid "That empire has none of those for sale."
@@ -1190,7 +1211,9 @@ msgid "The R5-Slappenheimer is disabled."
 msgstr ""
 
 #: internal/menu/actions_info.go:219
-msgid "The bonus builds up the longer we hold Technology regions. Larger empires need more of it for the same effect."
+msgid ""
+"The bonus builds up the longer we hold Technology regions. Larger empires "
+"need more of it for the same effect."
 msgstr ""
 
 #: internal/menu/actions_interbbs.go:507
@@ -1251,7 +1274,7 @@ msgstr ""
 
 #: internal/menu/tree.go:388
 msgid "Today's News"
-msgstr ""
+msgstr "Nieuws van vandaag"
 
 #: internal/menu/actions_market.go:81
 msgid "Total For Sale"
@@ -1259,15 +1282,15 @@ msgstr ""
 
 #: internal/menu/tree.go:50
 msgid "Trading"
-msgstr ""
+msgstr "Handel"
 
 #: internal/menu/actions_market.go:78
 msgid "Trading Market"
-msgstr ""
+msgstr "Handelsmarkt"
 
 #: internal/menu/tree.go:192
 msgid "Travel Times"
-msgstr ""
+msgstr "Reistijden"
 
 #: internal/menu/actions_info.go:198
 msgid "Troop morale stands at %d%%."
@@ -1275,7 +1298,7 @@ msgstr ""
 
 #: internal/menu/tree.go:90
 msgid "Troopers"
-msgstr ""
+msgstr "Soldaten"
 
 #: internal/menu/gameflow.go:247
 msgid "Troopers were trained by Industrial Zones."
@@ -1295,7 +1318,7 @@ msgstr ""
 
 #: internal/menu/tree.go:94
 msgid "Turrets"
-msgstr ""
+msgstr "Geschutstorens"
 
 #: internal/menu/gameflow.go:249
 msgid "Turrets were manufactured by Industrial Zones."
@@ -1307,7 +1330,7 @@ msgstr ""
 
 #: internal/menu/tree.go:220
 msgid "Undermine Investments"
-msgstr ""
+msgstr "Investeringen ondermijnen"
 
 #: internal/menu/tree.go:441
 msgid "Unlimited supply today."
@@ -1315,23 +1338,23 @@ msgstr ""
 
 #: internal/menu/tree.go:139
 msgid "View Bank Rates"
-msgstr ""
+msgstr "Banktarieven bekijken"
 
 #: internal/menu/tree.go:180
 msgid "View IPScores"
-msgstr ""
+msgstr "IP-scores bekijken"
 
 #: internal/menu/tree.go:273
 msgid "View Treaties"
-msgstr ""
+msgstr "Verdragen bekijken"
 
 #: internal/menu/actions_info.go:244
 msgid "Visit Advisors"
-msgstr ""
+msgstr "Adviseurs raadplegen"
 
 #: internal/menu/tree.go:107
 msgid "Visit Bank"
-msgstr ""
+msgstr "Bank bezoeken"
 
 #: internal/menu/gameflow.go:457
 msgid "Visit the Food Market to feed them, or they will starve."
@@ -1343,7 +1366,7 @@ msgstr ""
 
 #: internal/menu/tree.go:45
 msgid "War / Attack"
-msgstr ""
+msgstr "Oorlog / Aanval"
 
 #: internal/menu/actions_info.go:172
 msgid "We earn about %s gold each turn, %d%% of the world total."
@@ -1354,7 +1377,10 @@ msgid "We grow %s food each turn and consume %s."
 msgstr ""
 
 #: internal/menu/actions_info.go:153
-msgid "We have a surplus now, but our people are still growing. At full size they will eat about %s food each turn, more than we grow. Add agricultural regions before then."
+msgid ""
+"We have a surplus now, but our people are still growing. At full size they "
+"will eat about %s food each turn, more than we grow. Add agricultural "
+"regions before then."
 msgstr ""
 
 #: internal/menu/actions_info.go:196
@@ -1399,7 +1425,7 @@ msgstr ""
 
 #: internal/menu/tree.go:136
 msgid "Withdraw Funds"
-msgstr ""
+msgstr "Geld opnemen"
 
 #: internal/menu/gameflow.go:341
 msgid "Withdraw how much?"
@@ -1407,11 +1433,11 @@ msgstr ""
 
 #: internal/menu/tree.go:359
 msgid "Write Macros"
-msgstr ""
+msgstr "Macro's schrijven"
 
 #: internal/menu/tree.go:389
 msgid "Yesterday's News"
-msgstr ""
+msgstr "Nieuws van gisteren"
 
 #: internal/menu/actions_diplomacy.go:147
 msgid "You accepted the %s with %s."
@@ -1562,7 +1588,9 @@ msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
 #: internal/menu/menu.go:351
-msgid "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."
+msgid ""
+"Your empire has collapsed — you have been eliminated. Return on a later day "
+"to build a new realm."
 msgstr ""
 
 #: internal/menu/actions_info.go:40
@@ -1664,4 +1692,3 @@ msgstr ""
 #: internal/menu/input.go:261
 msgid "─»>Paused<«─"
 msgstr ""
-

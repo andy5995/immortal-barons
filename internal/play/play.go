@@ -238,23 +238,21 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	return reason, save()
 }
 
-// languageOptions lists the selectable UI languages in menu order; index 0 is
-// English (Empire.Language == ""), matching the field's own convention. Names
-// are shown in their own language, not translated — a language picker's
-// options aren't chrome the player has a language preference for yet.
-var languageOptions = []struct{ code, name string }{
-	{"", "English"},
-	{"de", "Deutsch"},
-	{"ru", "Русский"},
-}
-
 // selectLanguage is shown once, to a brand-new player, after the splash and
-// before onboarding. Enter, an empty line, or any input that doesn't match a
-// listed option selects English.
+// before onboarding. The options are English (always index 1, the default and
+// fallback for untranslated text) followed by i18n.Languages, so adding a
+// language to that single registry surfaces it here automatically. Names are
+// shown in their own language, not translated. Enter, an empty line, or any
+// unmatched input selects English.
 func selectLanguage(s session.Session) string {
+	type opt struct{ code, name string }
+	opts := []opt{{"", "English"}}
+	for _, l := range i18n.Languages {
+		opts = append(opts, opt{l.Code, l.Name})
+	}
 	fmt.Fprintf(s, "\n%sSelect your language:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	for i, opt := range languageOptions {
-		fmt.Fprintf(s, "  %s%d)%s %s\n", ansi.FgBrightWhite, i+1, ansi.Reset, opt.name)
+	for i, o := range opts {
+		fmt.Fprintf(s, "  %s%d)%s %s\n", ansi.FgBrightWhite, i+1, ansi.Reset, o.name)
 	}
 	fmt.Fprintf(s, "\n%sChoice (Enter for English):%s ", ansi.FgBrightWhite, ansi.Reset)
 	line, err := session.ReadLine(s)
@@ -262,10 +260,10 @@ func selectLanguage(s session.Session) string {
 		return ""
 	}
 	n, err := strconv.Atoi(strings.TrimSpace(line))
-	if err != nil || n < 1 || n > len(languageOptions) {
+	if err != nil || n < 1 || n > len(opts) {
 		return ""
 	}
-	return languageOptions[n-1].code
+	return opts[n-1].code
 }
 
 // onboard prompts for a realm name, re-prompting on an invalid or taken one.

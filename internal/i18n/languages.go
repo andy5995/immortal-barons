@@ -16,6 +16,7 @@ type Language struct {
 var Languages = []Language{
 	{Code: "de", Name: "Deutsch"},
 	{Code: "ru", Name: "Русский"},
+	{Code: "nl", Name: "Nederlands"},
 }
 
 // Codes returns just the language codes from Languages, in order.
