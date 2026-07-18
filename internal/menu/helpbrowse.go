@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/help"
@@ -65,29 +66,49 @@ func helpBrowse(s session.Session, w *ctx) Result {
 // stays complete as the help content grows — no parallel document to maintain.
 func showInstructions(s session.Session, w *ctx) Result {
 	lang := playerLang(w)
-	topics := help.Instructions(lang)
+	// Page the whole manual a screen at a time: emit one line, and after every
+	// instructionsPerPage lines pause for Enter (continue) or Q (quit), so a long
+	// topic can't scroll off before it's read. count carries across topics.
+	const instructionsPerPage = 20
+	count := 0
+	emit := func(line string) bool {
+		fmt.Fprintf(s, "%s\n", line)
+		count++
+		if count < instructionsPerPage {
+			return true
+		}
+		count = 0
+		fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, tr(s, "─»>Enter to continue, Q to quit<«─"), ansi.Reset)
+		k, err := readKey(s)
+		if err != nil || k == 'q' || k == 'Q' {
+			return false
+		}
+		fmt.Fprint(s, "\n")
+		return true
+	}
+
 	lastCat := ""
-	for i, t := range topics {
+	for _, t := range help.Instructions(lang) {
 		// The overview carries its own title heading, so it needs no section bar;
 		// the real categories get one, mirroring BRE's section dividers.
 		if t.Category != lastCat && t.Category != "introduction" {
-			fmt.Fprintf(s, "\n%s── %s ──%s\n", ansi.FgBrightCyan, help.CategoryName(t.Category), ansi.Reset)
+			if !emit("") || !emit(fmt.Sprintf("%s── %s ──%s", ansi.FgBrightCyan, help.CategoryName(t.Category), ansi.Reset)) {
+				return Stay
+			}
 		}
 		lastCat = t.Category
-		fmt.Fprintf(s, "\n%s\n", t.RenderANSI(78))
-		if i == len(topics)-1 {
-			break
-		}
-		fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, tr(s, "─»>Enter to continue, Q to quit<«─"), ansi.Reset)
-		k, err := readKey(s)
-		if err != nil {
+		if !emit("") {
 			return Stay
 		}
-		if k == 'q' || k == 'Q' {
-			break
+		for _, line := range strings.Split(t.RenderANSI(78), "\n") {
+			if !emit(line) {
+				return Stay
+			}
 		}
 	}
-	pause(s)
+	if count > 0 { // un-paged lines remain since the last break: final "press a key"
+		pause(s)
+	}
 	return Stay
 }
 
