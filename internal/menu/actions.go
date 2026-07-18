@@ -220,11 +220,9 @@ func setTaxRate(s session.Session, w *ctx) Result {
 	p := w.Player()
 	maxRate := w.Config.MaxTaxRate
 	fmt.Fprintf(s, "\n%s"+tr(s, "Current tax rate: %d%%")+"%s\n", ansi.FgBrightCyan, p.Tax, ansi.Reset)
-	rate := promptInt(s, fmt.Sprintf("New tax rate (0-%d)?", maxRate))
-	if rate < 0 || rate > maxRate {
-		fail(s, fmt.Errorf("tax rate must be between 0 and %d", maxRate))
-		return Stay
-	}
+	// Suggest the current rate so a bare Enter keeps it (promptSuggested clamps to
+	// [0, maxRate]); the old promptInt read empty input as 0 and zeroed the tax.
+	rate := promptSuggested(s, "New tax rate?", p.Tax, maxRate)
 	w.With(func() {
 		if p := w.Player(); p != nil {
 			p.Tax = rate
