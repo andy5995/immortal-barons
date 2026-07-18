@@ -20,11 +20,45 @@ import (
 // the next guarded read (a false "Disconnected", then a second idle cycle). A
 // bare io.EOF (a test stream ending) is returned for the caller to handle.
 func readKey(s session.Session) (rune, error) {
-	r, err := s.ReadKey()
-	if errors.Is(err, session.ErrSessionEnded) {
-		session.End(err)
+	for {
+		r, err := s.ReadKey()
+		if errors.Is(err, session.ErrSessionEnded) {
+			session.End(err)
+		}
+		if err != nil {
+			return r, err
+		}
+		if r == 0x1b { // ESC: an arrow/PgUp/PgDn/Home/function-key sequence — swallow
+			consumeEscape(s) // and read the next real key, so its bytes don't leak
+			continue         // into a menu selection or a numeric/y-n prompt
+		}
+		return r, nil
 	}
-	return r, err
+}
+
+// consumeEscape drains the rest of a terminal escape sequence after an ESC:
+// a CSI "ESC [ … final" (arrows ABCD, PgUp/PgDn/Home/End as "…~", etc.) or an
+// SS3 "ESC O x" (arrows in application mode). Best-effort; a stream error just
+// stops (the caller's next read surfaces it). A lone ESC keypress has no trailing
+// bytes, so this consumes the following keystroke — an accepted trade-off, since
+// arrow/navigation keys always arrive as a full burst and a bare ESC is rare in
+// menu navigation.
+func consumeEscape(s session.Session) {
+	r, err := s.ReadKey()
+	if err != nil {
+		return
+	}
+	switch r {
+	case '[': // CSI: read until a final byte in 0x40–0x7E ('A'..'D', '~', 'H', 'F', …)
+		for {
+			c, err := s.ReadKey()
+			if err != nil || (c >= 0x40 && c <= 0x7e) {
+				return
+			}
+		}
+	case 'O': // SS3: exactly one more byte
+		s.ReadKey()
+	}
 }
 
 // prompt writes msg and reads a line of input (terminated by Enter),
