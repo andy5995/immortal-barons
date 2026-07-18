@@ -245,7 +245,7 @@ func (m *Menu) byKey(r rune, g *ctx) *Item {
 	return nil
 }
 
-// readChoice prints "Choice> ", reads keypresses, and returns the matching menu
+// readChoice prints the "> " prompt, reads keypresses, and returns the matching menu
 // item immediately (no Enter). It echoes the chosen item's label. Keys that match
 // no visible selectable item are ignored in place — the menu is NOT redrawn — so
 // an unbound keypress doesn't rescroll the screen.
@@ -255,20 +255,20 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	// default item and its label under the world lock (byKey/label read shared
 	// state), before any I/O.
 	var def *Item
-	var defLabel, prompt string
+	var defLabel string
 	g.With(func() {
-		lang := playerLang(g)
 		if m.DefaultOnEnter != nil {
 			def = m.DefaultOnEnter(g)
 		} else if g.EnterExitsBuy && m.ExitOnEnter {
 			def = m.byKey('0', g)
 		}
 		if def != nil {
-			defLabel = def.displayLabel(g, lang)
+			defLabel = def.displayLabel(g, playerLang(g))
 		}
-		prompt = i18n.T(lang, "Choice>")
 	})
-	fmt.Fprintf(s, "%s%s%s ", ansi.FgBrightWhite, prompt, ansi.Reset)
+	// A bare ">" is the prompt — language-neutral, so it needs no translation
+	// (replaces BRE's "Choice>"). The default action's label follows it.
+	fmt.Fprintf(s, "%s>%s ", ansi.FgBrightWhite, ansi.Reset)
 	if def != nil {
 		fmt.Fprint(s, defLabel)
 	}

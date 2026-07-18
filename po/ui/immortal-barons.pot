@@ -289,10 +289,6 @@ msgstr ""
 msgid "Chemical Bombing"
 msgstr ""
 
-#: internal/menu/input.go:237
-msgid "Choice>"
-msgstr ""
-
 #: internal/menu/helpbrowse.go:29
 msgid "Choice?"
 msgstr ""
@@ -977,7 +973,7 @@ msgstr ""
 msgid "Protective Trade"
 msgstr ""
 
-#: internal/menu/input.go:236
+#: internal/menu/input.go:235
 msgid "Quit"
 msgstr ""
 
@@ -1793,7 +1789,7 @@ msgstr ""
 msgid "─»>Enter to continue, Q to quit<«─"
 msgstr ""
 
-#: internal/menu/input.go:261
+#: internal/menu/input.go:260
 msgid "─»>Paused<«─"
 msgstr ""
 

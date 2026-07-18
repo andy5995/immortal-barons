@@ -302,10 +302,6 @@ msgstr "Chemische aanval"
 msgid "Chemical Bombing"
 msgstr "Chemisch bombardement"
 
-#: internal/menu/input.go:237
-msgid "Choice>"
-msgstr "Keuze>"
-
 #: internal/menu/helpbrowse.go:29
 msgid "Choice?"
 msgstr ""
@@ -999,7 +995,7 @@ msgstr ""
 msgid "Protective Trade"
 msgstr "Beschermde handel"
 
-#: internal/menu/input.go:236
+#: internal/menu/input.go:235
 msgid "Quit"
 msgstr "Stoppen"
 
@@ -1848,6 +1844,9 @@ msgstr "je spelersnaam (alleen gebruikt met -local)"
 msgid "─»>Enter to continue, Q to quit<«─"
 msgstr ""
 
-#: internal/menu/input.go:261
+#: internal/menu/input.go:260
 msgid "─»>Paused<«─"
 msgstr ""
+
+#~ msgid "Choice>"
+#~ msgstr "Keuze>"

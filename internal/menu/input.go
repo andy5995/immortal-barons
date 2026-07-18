@@ -227,14 +227,13 @@ func clampAmt(n, max int) int {
 	return n
 }
 
-// choiceQuit prints the standard menu prompt ("Choice> Quit", with "Quit" shown
-// after the prompt as the Enter default) for a custom numbered list, so those
-// lists match the menu engine's readChoice. It reads one key and returns the
-// chosen number 1..max, or 0 to quit (Enter, '0', or any non-matching key).
+// choiceQuit prints the standard menu prompt ("> Quit", with "Quit" shown after
+// the ">" as the Enter default) for a custom numbered list, so those lists match
+// the menu engine's readChoice. It reads one key and returns the chosen number
+// 1..max, or 0 to quit (Enter, '0', or any non-matching key).
 func choiceQuit(s session.Session, max int) int {
-	lang := sessionLang(s)
-	quit := i18n.T(lang, "Quit")
-	fmt.Fprintf(s, "\n%s%s%s %s", ansi.FgBrightWhite, i18n.T(lang, "Choice>"), ansi.Reset, quit)
+	quit := i18n.T(sessionLang(s), "Quit")
+	fmt.Fprintf(s, "\n%s>%s %s", ansi.FgBrightWhite, ansi.Reset, quit)
 	r, err := readKey(s)
 	if err != nil {
 		return 0
