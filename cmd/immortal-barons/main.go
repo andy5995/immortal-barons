@@ -60,6 +60,18 @@ func main() {
 		os.Exit(2)
 	}
 
+	// Only the default door front-end takes a positional argument (a dropfile path
+	// when -dropfile isn't given). Every explicit-mode flag consumes none, so a
+	// stray word alongside one is a mistake — flag it instead of silently ignoring
+	// it. (Unknown -flags are already rejected by the flag package.)
+	explicitMode := *maint || *planetary || *leagueConfig || *reset || *resetFromConfig ||
+		*addAI > 0 || *dump || *local || *export != "" || *imp != ""
+	if flag.NArg() > 0 && explicitMode {
+		fmt.Fprintf(os.Stderr, "immortal-barons: unknown argument %q\n\n", flag.Arg(0))
+		flag.Usage() // show -help, the common convention for a bad invocation
+		os.Exit(2)
+	}
+
 	cfg, err := store.LoadConfig(*dataDir)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "config:", err)
@@ -152,12 +164,6 @@ func main() {
 	}
 
 	if *local {
-		// -local takes no positional argument. A stray word here is almost always a
-		// mistaken realm name, so point at the right flag instead of ignoring it.
-		if flag.NArg() > 0 {
-			fmt.Fprintf(os.Stderr, "immortal-barons: unexpected argument %q. To name your realm, use -name %q\n", flag.Arg(0), flag.Arg(0))
-			os.Exit(2)
-		}
 		runLocal(cfg, *name, today, wantUTF8(*utf8, *cp437, true))
 		return
 	}
