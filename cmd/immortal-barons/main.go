@@ -202,6 +202,10 @@ func main() {
 
 	s, closeSession, err := openSession(caller)
 	if err != nil {
+		// Log the attach failure to the file too: a winsock socket attach that
+		// fails here (issue #37, Windows socket doors) exits before the "session
+		// ended" line, so without this it would leave only the launch line.
+		doorLog(cfg.DataDir, "openSession failed: %v", err)
 		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
 		os.Exit(1)
 	}
