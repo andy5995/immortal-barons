@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"os"
 	"os/user"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -192,6 +193,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Diagnostic (data/ib-door.log): a silent no-splash bounce (issue #37) leaves
+	// no other trace, so record what the dropfile gave us at launch — the I/O mode,
+	// time-left, and socket handle name the environment. A file (not stderr) so a
+	// remote tester needs no door-config change to capture it.
+	doorLog(cfg.DataDir, "launch handle=%q node=%d io=%s seconds-left=%d socket=%d os=%s",
+		caller.Handle, caller.Node, ioModeName(caller.IO), caller.SecondsLeft, caller.Socket, runtime.GOOS)
+
 	s, closeSession, err := openSession(caller)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
@@ -213,7 +221,13 @@ func main() {
 	// boots at it, saving the world and releasing the lock cleanly (unlike the
 	// old os.Exit, which lost the turn's progress).
 	id := play.Identity{Handle: handle, TimeLeft: time.Duration(caller.SecondsLeft) * time.Second}
-	if _, err := play.Run(s, id, cfg, today); err != nil {
+	reason, err := play.Run(s, id, cfg, today)
+	// Diagnostic (data/ib-door.log): record how the session ended. A silent
+	// no-splash bounce (issue #37) shows up here as reason="disconnect" right
+	// after launch — an I/O read that failed immediately, which points at a dead
+	// handle rather than the time-left deadline (that prints before it boots).
+	doorLog(cfg.DataDir, "session ended handle=%q reason=%q err=%v", handle, reason, err)
+	if err != nil {
 		// Fail loudly to the CALLER, not just the BBS log. A bootstrap failure
 		// (world load, lock, I/O) otherwise drops the caller straight back to the
 		// BBS menu with no splash and no reason — looking like the door is broken.
@@ -223,6 +237,35 @@ func main() {
 		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
 		time.Sleep(4 * time.Second)
 		os.Exit(1)
+	}
+}
+
+// doorLog appends one timestamped diagnostic line to <dataDir>/ib-door.log. It
+// is best-effort — a logging failure must never stop the door, so errors are
+// ignored — and writes to a file (not stderr) so a remote sysop can capture the
+// silent no-splash bounce (issue #37) without changing the door command. Short
+// O_APPEND lines are atomic on a local filesystem, so concurrent nodes don't
+// interleave.
+func doorLog(dataDir, format string, args ...any) {
+	f, err := os.OpenFile(filepath.Join(dataDir, "ib-door.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	fmt.Fprintf(f, time.Now().Format("2006-01-02 15:04:05")+" "+format+"\n", args...)
+}
+
+// ioModeName renders a dropfile I/O mode for the launch diagnostic.
+func ioModeName(m door.IOMode) string {
+	switch m {
+	case door.IOSerial:
+		return "serial"
+	case door.IOSocket:
+		return "socket"
+	case door.IOStdio:
+		return "stdio"
+	default:
+		return "local"
 	}
 }
 
