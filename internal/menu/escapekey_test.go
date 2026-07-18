@@ -12,9 +12,9 @@ func TestReadKeySwallowsEscapeSequences(t *testing.T) {
 	}{
 		{"up-arrow", "\x1b[A5", '5'},
 		{"down-arrow", "\x1b[B1", '1'},
-		{"pgup", "\x1b[5~2", '2'},   // ESC [ 5 ~
-		{"pgdn", "\x1b[6~3", '3'},   // ESC [ 6 ~
-		{"home", "\x1b[H4", '4'},    // final byte 'H'
+		{"pgup", "\x1b[5~2", '2'},     // ESC [ 5 ~
+		{"pgdn", "\x1b[6~3", '3'},     // ESC [ 6 ~
+		{"home", "\x1b[H4", '4'},      // final byte 'H'
 		{"ss3-arrow", "\x1bOA6", '6'}, // SS3 application-mode arrow
 		{"plain-key", "q", 'q'},
 	}
