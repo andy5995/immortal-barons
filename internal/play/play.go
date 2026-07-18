@@ -289,6 +289,10 @@ func (o onboardLang) SetInputLine(line string) {
 	}
 }
 
+// DrainInput forwards the single-key trailing-terminator drain (menu.AskYesNo
+// drains after the onboarding Quit?/Confirm? answers) to the inner session.
+func (o onboardLang) DrainInput() { session.Drain(o.Session) }
+
 // onboard prompts for a realm name, re-prompting on an invalid or taken one.
 // Pressing Enter with nothing typed offers a way out — "Quit? (n,Y)" — so a
 // player who reached the name prompt by mistake can leave instead of being

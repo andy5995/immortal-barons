@@ -36,6 +36,12 @@ func readKey(s session.Session) (rune, error) {
 	}
 }
 
+// drainInput drops a line terminator left buffered after a single-key answer,
+// so a caller who types "n" then Enter (a telnet line-mode client sends both in
+// one burst) does not have the Enter carry into the next single-key prompt as
+// its default. A no-op for sessions with no input buffer (web, test fakes).
+func drainInput(s session.Session) { session.Drain(s) }
+
 // consumeEscape drains the rest of a terminal escape sequence after an ESC:
 // a CSI "ESC [ … final" (arrows ABCD, PgUp/PgDn/Home/End as "…~", etc.) or an
 // SS3 "ESC O x" (arrows in application mode). Best-effort; a stream error just
@@ -243,6 +249,7 @@ func choiceQuit(s session.Session, max int) int {
 	if err != nil {
 		return 0
 	}
+	drainInput(s)                           // drop a trailing Enter sent in one burst with the selection key
 	if r == '\r' || r == '\n' || r == '0' { // Enter/0 selects the shown Quit
 		fmt.Fprint(s, "\n")
 		return 0
@@ -264,6 +271,7 @@ func pause(s session.Session) {
 	// bare io.EOF (test stream) falls through.
 	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, i18n.T(sessionLang(s), "─»>Paused<«─"), ansi.Reset)
 	readKey(s)
+	drainInput(s) // drop a trailing Enter sent in one burst with the dismissing key
 }
 
 // groupSep maps a UI language to its thousands separator. All three are ASCII,

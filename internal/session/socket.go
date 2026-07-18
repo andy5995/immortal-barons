@@ -33,6 +33,10 @@ func (s *Socket) ReadKey() (rune, error) {
 	return r, err
 }
 
+// DrainInput drops a line terminator left buffered after a single-key answer
+// (see InputDrainer).
+func (s *Socket) DrainInput() { drainTerminators(s.r) }
+
 func (s *Socket) Write(p []byte) (int, error) {
 	if _, err := s.conn.Write(toCRLF(p)); err != nil {
 		return 0, err

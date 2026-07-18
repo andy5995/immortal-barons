@@ -92,6 +92,7 @@ func AskYesNo(s session.Session, msg string, defYes bool) bool {
 		if err != nil {
 			return false // test stream ran out
 		}
+		drainInput(s) // drop a trailing Enter typed with the single-key answer
 		switch r {
 		case 'y', 'Y':
 			fmt.Fprint(s, "y\n")

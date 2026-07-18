@@ -82,6 +82,10 @@ func NewDeadline(inner Session, idle time.Duration, maxWarnings int, hard time.T
 
 func (d *Deadline) Write(p []byte) (int, error) { return d.inner.Write(p) }
 
+// DrainInput forwards to the inner session (see InputDrainer). Safe to call
+// between reads — no ReadKey goroutine is in flight once ReadKey has returned.
+func (d *Deadline) DrainInput() { Drain(d.inner) }
+
 // Reason reports why the session ended: "idle", "time", or "" if it has not
 // booted (a clean quit or a raw disconnect leaves it "").
 func (d *Deadline) Reason() string { return d.reason }

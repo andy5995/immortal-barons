@@ -59,12 +59,15 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 		t.Fatalf("seed world: %v", err)
 	}
 
-	// Splash dismiss, realm name, Play, quit Diplomacy, decline production,
-	// three pauses, Spending: buy N troopers then quit, quit Attack, decline
-	// "continue", quit the Game menu. -cp437 keeps the session English (no
-	// language picker), so the script is locale-independent.
+	// Splash dismiss, realm name + confirm, Play, three pauses (income, status,
+	// military+maintenance), Spending: buy N troopers then quit, quit Attack,
+	// decline "continue", quit the Game menu. Every prompt gets its own explicit
+	// key — single-key prompts drain a trailing line terminator (the Enter-leak
+	// fix), so a script may not lean on a stray "\r" reaching the next prompt.
+	// -cp437 keeps the session English (no language picker), so the script is
+	// locale-independent.
 	script := func(realm string, buy int) string {
-		return " " + realm + "\r1\rn   1" + strconv.Itoa(buy) + "\r00n0"
+		return " " + realm + "\ry1   1" + strconv.Itoa(buy) + "\r00n0"
 	}
 
 	type player struct {

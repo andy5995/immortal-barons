@@ -45,6 +45,10 @@ func (s *Stdio) ReadKey() (rune, error) {
 	return r, err
 }
 
+// DrainInput drops a line terminator left buffered after a single-key answer
+// (see InputDrainer).
+func (s *Stdio) DrainInput() { drainTerminators(s.r) }
+
 func (s *Stdio) Write(p []byte) (int, error) {
 	if _, err := os.Stdout.Write(toCRLF(p)); err != nil {
 		return 0, err

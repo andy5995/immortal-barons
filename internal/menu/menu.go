@@ -134,6 +134,10 @@ func (l *langSession) SetInputLine(line string) {
 	}
 }
 
+// DrainInput forwards the single-key trailing-terminator drain to the inner
+// session; the embedded Session promotes ReadKey but not this optional method.
+func (l *langSession) DrainInput() { session.Drain(l.Session) }
+
 // sessionLang extracts the caller's language from a wrapped Session, or "" for
 // a plain Session (e.g. tests) — which renders English.
 func sessionLang(s session.Session) string {
@@ -280,6 +284,7 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 		if err != nil {
 			return nil, err
 		}
+		drainInput(s) // drop a trailing Enter sent in one burst with the selection key
 		if def != nil && (r == '\r' || r == '\n') {
 			fmt.Fprint(s, "\n")
 			return def, nil

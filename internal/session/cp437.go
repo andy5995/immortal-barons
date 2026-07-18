@@ -45,6 +45,10 @@ func NewCP437Writer(inner Session) Session {
 	}
 }
 
+// DrainInput forwards to the inner session (see InputDrainer); the embedded
+// Session promotes ReadKey but not this optional method, so forward explicitly.
+func (c *cp437Writer) DrainInput() { Drain(c.Session) }
+
 func (c *cp437Writer) Write(p []byte) (int, error) {
 	// The fallback may change the byte count, so report the caller's own count
 	// on success (the io.Writer contract is about p, not the transcoded bytes).

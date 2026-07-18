@@ -21,6 +21,9 @@ func NewMacroExpander(inner Session, lookup func(letter string) (string, bool)) 
 	return &MacroExpander{inner: inner, lookup: lookup}
 }
 
+// DrainInput forwards to the inner session (see InputDrainer).
+func (m *MacroExpander) DrainInput() { Drain(m.inner) }
+
 func (m *MacroExpander) ReadKey() (rune, error) {
 	if len(m.queue) > 0 {
 		r := m.queue[0]

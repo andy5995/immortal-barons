@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/session"
 )
 
 func TestSessionOnboardsAndSaves(t *testing.T) {
@@ -21,3 +22,21 @@ func TestSessionOnboardsAndSaves(t *testing.T) {
 		t.Fatal("Session should call save at end of session")
 	}
 }
+
+// TestOnboardLangForwardsDrainInput guards the onboarding wrapper's DrainInput
+// forward: without it, the trailing-Enter drain after the onboarding
+// Quit?/Confirm? answers silently no-ops for callers who picked a language.
+func TestOnboardLangForwardsDrainInput(t *testing.T) {
+	spy := &drainSpySession{}
+	session.Drain(onboardLang{Session: spy, lang: "nl"})
+	if !spy.drained {
+		t.Fatal("onboardLang did not forward DrainInput to its inner session")
+	}
+}
+
+type drainSpySession struct {
+	session.Session
+	drained bool
+}
+
+func (d *drainSpySession) DrainInput() { d.drained = true }
