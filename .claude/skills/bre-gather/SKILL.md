@@ -215,6 +215,22 @@ Once inside a turn you can scrape income/status numbers per turn. Hard-won rules
   currently playing… on another node." Delete it (`rmw .../inuse.flg`) before
   relaunching.
 
+### Bank + turn-flow notes (2026-07-17, proven)
+
+- **`SRDOOR local` prompts `Name:` interactively** — type the caller name one
+  key at a time (not a burst) then Enter, same pacing as any BRE prompt. It
+  rewrites `doorfile.sr` line1+last with that name.
+- **The bank re-opens after the maintenance prompts inside a turn.** Turn order
+  after the income screen is: `Do you wish to visit the Bank? (y/N)` → (bank if
+  y) → maintenance prompts (Armed Forces, Regions, boost Popular Support, Queen
+  Royale taxes, food) → the **Crazy Gold Bank menu appears AGAIN** → `0` to
+  quit it → Spending/Buy-Military menu → Attack menu → InterPlanetary Ops menu →
+  `Do you wish to continue? (Y/n)` (n = stop, back to scores+main menu). Key off
+  the active line; don't assume one bank visit per turn.
+- **`0` at the main menu quit straight to `C:\>` with NO `y` confirm** in this
+  run (v0.988). The earlier "+ y confirm" note may be version/preference
+  dependent — check the active line rather than blind-sending a `y`.
+
 ## What the strings give you — and what they DON'T
 
 BRE is Turbo Pascal. Menu items are **length-prefixed ShortStrings stored
