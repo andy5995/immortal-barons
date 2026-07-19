@@ -14,7 +14,7 @@ func TestConfigEditorEditsAndSaves(t *testing.T) {
 
 	// Edit item 1 (turns per day) to 20, then S to save and exit.
 	f := &fakeSession{keys: []rune("1\r20\rs\r ")}
-	configEditor(f, w)
+	ConfigEditor(f, w.World)
 
 	if w.Config.TurnsPerDay != 20 {
 		t.Errorf("expected turns per day 20, got %d", w.Config.TurnsPerDay)
@@ -32,7 +32,7 @@ func TestConfigEditorTurnsFloorAtOne(t *testing.T) {
 	// Try to set turns per day to 0; it must floor at 1 (a day needs a turn).
 	// Value 0, then S to save and exit.
 	f := &fakeSession{keys: []rune("1\r0\rs\r ")}
-	configEditor(f, w)
+	ConfigEditor(f, w.World)
 
 	if w.Config.TurnsPerDay != 1 {
 		t.Errorf("turns per day should floor at 1, got %d", w.Config.TurnsPerDay)

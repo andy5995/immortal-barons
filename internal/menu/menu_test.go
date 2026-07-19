@@ -123,30 +123,6 @@ func TestUnknownKeyIgnored(t *testing.T) {
 	}
 }
 
-func TestHiddenCoordinatorNotSelectable(t *testing.T) {
-	menus := BuildMenus()
-	f, _, err := run(t, "Y0", menus.System)
-	if err != nil {
-		t.Fatalf("got %v", err)
-	}
-	if strings.Contains(f.out.String(), "Configuration Editor") {
-		t.Error("hidden Coordinator menu should not be reachable")
-	}
-}
-
-func TestCoordinatorReachableWhenFlagged(t *testing.T) {
-	menus := BuildMenus()
-	f := &fakeSession{keys: []rune("Y00")}
-	w := newWorld()
-	w.Coordinator = true
-	if err := Run(f, w, menus.System); err != nil {
-		t.Fatalf("got %v", err)
-	}
-	if !strings.Contains(f.out.String(), "Configuration Editor") {
-		t.Error("coordinator menu should be reachable when flagged")
-	}
-}
-
 func TestBuyLandThroughSpendingMenu(t *testing.T) {
 	menus := BuildMenus()
 	f := &fakeSession{keys: []rune("6C5\r ")} // Buy Land -> C (Coastal, single key) -> qty 5

@@ -274,8 +274,8 @@ func about(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// gameSetup shows the current game rules (read-only; the sysop edits them from
-// the Coordinator menu's Configuration Editor).
+// gameSetup shows the current game rules (read-only; the sysop edits them with
+// the -reset Configuration Editor).
 func gameSetup(s session.Session, w *ctx) Result {
 	c := w.Config
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Game Rules"), ansi.Reset)

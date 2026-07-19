@@ -85,13 +85,6 @@ func ConfigEditor(s session.Session, w *game.World) (saved bool) {
 	return runConfigEditor(s, w)
 }
 
-// configEditor is the menu-action form (Coordinator menu). It ignores the
-// saved/cancelled result and just returns to the menu.
-func configEditor(s session.Session, w *ctx) Result {
-	runConfigEditor(s, w.World)
-	return Stay
-}
-
 // runConfigEditor is BRE's Configuration Editor: the LC (or a single-BBS sysop)
 // sets the league ruleset. It edits the world's Config in place and writes it
 // back to config.json. Defaults and the turns/day cap come from BRE's compiled

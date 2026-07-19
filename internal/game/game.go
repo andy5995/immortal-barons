@@ -422,8 +422,6 @@ type World struct {
 	LeagueDiplomacy string       // coordinator's league-wide diplomacy declaration
 	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from ibnodes.dat at startup
 
-	Coordinator bool
-
 	// Player preferences (kept on the world for now; per-empire is a later
 	// refinement). Referenced by the Preferences menu.
 	EnterExitsBuy  bool
@@ -488,7 +486,6 @@ func (w *World) initFreshGame() {
 	w.Outbox = nil
 	w.SpyDatabase = nil
 	w.LeagueDiplomacy = ""
-	w.Coordinator = false
 	w.EnterExitsBuy = false
 	w.DepositEndTurn = false
 	w.AutoPayMaint = false

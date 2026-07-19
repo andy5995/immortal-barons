@@ -374,8 +374,6 @@ func BuildMenus() *Menus {
 			Hidden: func(w *ctx) bool { return ibbsHidden(w) || w.Player().Protection > 0 }},
 		{Key: '*', Label: "Coordinator Menu", Do: gotoMenu(coord),
 			Hidden: func(w *ctx) bool { return ibbsHidden(w) || w.BBSCoordinator() != w.Player() }},
-		{Key: 'C', Label: "Configuration Editor", Do: configEditor,
-			Hidden: func(w *ctx) bool { return !w.Coordinator }},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	system.DefaultOnEnter = quitOnEnter(system)
