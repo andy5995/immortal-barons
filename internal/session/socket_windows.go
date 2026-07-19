@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"sync"
+	"unsafe"
 
 	"golang.org/x/sys/windows"
 )
@@ -24,7 +25,37 @@ func NewSocket(fd int) (*Socket, error) {
 	if err := ensureWinsock(); err != nil {
 		return nil, fmt.Errorf("winsock init for BBS socket %d: %w", fd, err)
 	}
-	return newSocket(&winsockConn{h: windows.Handle(fd)}), nil
+	h := windows.Handle(fd)
+	// Some BBSes (MagicBBS) hand the door a socket already in non-blocking mode.
+	// Our WSARecv is blocking, so on a non-blocking handle the first read with no
+	// key pending returns WSAEWOULDBLOCK and the session dies (issue #37). Clear
+	// non-blocking so the recv waits for input as the loop assumes.
+	if err := setBlocking(h); err != nil {
+		return nil, fmt.Errorf("setting BBS socket %d to blocking mode: %w", fd, err)
+	}
+	return newSocket(&winsockConn{h: h}), nil
+}
+
+// fionbio is ioctlsocket's command to toggle non-blocking mode: a nonzero argp
+// enables it, zero restores blocking. x/sys/windows exposes neither the command
+// nor ioctlsocket, so we call ws2_32 directly.
+const fionbio = 0x8004667e
+
+var (
+	modws2_32       = windows.NewLazySystemDLL("ws2_32.dll")
+	procIoctlsocket = modws2_32.NewProc("ioctlsocket")
+)
+
+// setBlocking clears non-blocking mode on an inherited socket via
+// ioctlsocket(FIONBIO, 0). ioctlsocket returns 0 on success, SOCKET_ERROR on
+// failure; on an already-blocking handle it is a harmless no-op.
+func setBlocking(h windows.Handle) error {
+	var mode uint32 // 0 = blocking
+	r, _, err := procIoctlsocket.Call(uintptr(h), fionbio, uintptr(unsafe.Pointer(&mode)))
+	if int32(r) != 0 { // SOCKET_ERROR
+		return err
+	}
+	return nil
 }
 
 // ensureWinsock initializes winsock once for the process. On Windows the door
