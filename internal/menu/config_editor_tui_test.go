@@ -1,0 +1,102 @@
+package menu
+
+import (
+	"reflect"
+	"strings"
+	"testing"
+
+	"github.com/rivo/tview"
+
+	"github.com/andy5995/immortal-barons/internal/game"
+)
+
+// distinctConfig gives every editable field a distinct, in-range value so a
+// round-trip through the form catches a binder that reads the wrong widget or
+// writes the wrong Config field (the copy-paste hazard in the repetitive
+// addInt/addDropDown wiring).
+func distinctConfig() game.Config {
+	c := game.DefaultConfig()
+	c.TurnsPerDay = 2
+	c.ProtectionTurns = 3
+	c.GameLength = 4
+	c.GameStartDate = "2026-01-02"
+	c.JoinDate = "2026-03-04"
+	c.AICount = 5
+	c.InitialMarketLand = 6
+	c.LandPerDay = 7
+	c.InterestRate = 8
+	c.StdInvestRate = 9
+	c.SteadyInvest = true
+	c.MaxTaxRate = 11
+	c.FoodUnlimited = true
+	c.BuyMilitary = game.BuyLimited
+	c.MaintCosts = game.High
+	c.TradeCosts = game.Low
+	c.RegionCosts = game.None
+	c.AttackDamage = game.High
+	c.AttackRewards = game.Low
+	c.SlappenheimerHandling = game.SlappenheimerRandom
+	c.MaxIndividualAttacks = 12
+	c.MaxRegions = 13
+	c.MaxPlayers = 14
+	c.IBBS = true
+	c.BoardID = "TESTBBS"
+	c.IdleTimeoutSecs = 15
+	c.MaxIdleWarnings = 16
+	return c
+}
+
+func TestConfigTUIRoundTrip(t *testing.T) {
+	w := newWorld()
+	w.Config = distinctConfig()
+	tui := newConfigTUI(w.World)
+
+	got := tui.collect()
+	if !reflect.DeepEqual(got, w.Config) {
+		t.Errorf("collect() did not round-trip the config\n got: %+v\nwant: %+v", got, w.Config)
+	}
+}
+
+func TestConfigTUIClampsAndValidates(t *testing.T) {
+	w := newWorld()
+	w.Config = distinctConfig()
+	tui := newConfigTUI(w.World)
+
+	// An over-max integer clamps to the field's ceiling.
+	setField(t, tui, 0, star+"Turns per day", func(f *tview.InputField) { f.SetText("99999") })
+	// A malformed date is ignored, keeping the value the editor opened with.
+	setField(t, tui, 0, star+"Game Start Date (YYYY-MM-DD)", func(f *tview.InputField) { f.SetText("not-a-date") })
+
+	got := tui.collect()
+	if got.TurnsPerDay != game.MaxTurnsPerDay {
+		t.Errorf("turns per day should clamp to %d, got %d", game.MaxTurnsPerDay, got.TurnsPerDay)
+	}
+	if got.GameStartDate != "2026-01-02" {
+		t.Errorf("malformed date should keep the opening value, got %q", got.GameStartDate)
+	}
+}
+
+// setField reaches into a built form to drive a widget the way the user would,
+// so the test exercises the same read-back path collect() uses. It matches on a
+// label prefix since numeric labels now carry a " [lo-hi]" range suffix.
+func setField(t *testing.T, tui *configTUI, tab int, labelPrefix string, edit func(*tview.InputField)) {
+	t.Helper()
+	form := tui.forms[tab]
+	for i := 0; i < form.GetFormItemCount(); i++ {
+		item := form.GetFormItem(i)
+		if !strings.HasPrefix(item.GetLabel(), labelPrefix) {
+			continue
+		}
+		// Fields are wrapped in *styledField (zebra/yellow styling); unwrap it.
+		if sf, ok := item.(*styledField); ok {
+			item = sf.FormItem
+		}
+		f, ok := item.(*tview.InputField)
+		if !ok {
+			t.Fatalf("field %q is not an input field", labelPrefix)
+		}
+		edit(f)
+		return
+	}
+	t.Fatalf("no form field with label prefix %q on tab %d", labelPrefix, tab)
+}

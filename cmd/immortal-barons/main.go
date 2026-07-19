@@ -482,10 +482,20 @@ func runReset(cfg game.Config, fromConfig bool) error {
 	def.DataDir = cfg.DataDir
 	w.Config = def
 
-	c := session.NewConsole()
-	fmt.Fprint(c, "\r\nConfigure the game below (starting from defaults). Choose S to save the settings and start a fresh game, or Q to cancel.\r\n")
-	saved := menu.ConfigEditor(c, w)
-	c.Close()
+	// On a real terminal use the tabbed tview editor (issue #7); fall back to the
+	// line-based editor when stdin is piped/redirected or the TUI can't init.
+	saved, usedTUI := false, false
+	if session.StdinIsTerminal() {
+		if s, err := menu.ConfigEditorTUI(w); err == nil {
+			saved, usedTUI = s, true
+		}
+	}
+	if !usedTUI {
+		c := session.NewConsole()
+		fmt.Fprint(c, "\r\nConfigure the game below (starting from defaults). Choose S to save the settings and start a fresh game, or Q to cancel.\r\n")
+		saved = menu.ConfigEditor(c, w)
+		c.Close()
+	}
 
 	if !saved {
 		fmt.Println("\nCancelled. The game was left unchanged.")
