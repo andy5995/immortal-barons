@@ -1,6 +1,6 @@
 ---
 title: Regions
-category: economy
+category: regions
 order: 1
 in_game: true
 ---

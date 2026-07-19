@@ -1,5 +1,5 @@
 ---
-category: economy
+category: regions
 in_game: true
 order: 4
 title: 'Desert Regions'

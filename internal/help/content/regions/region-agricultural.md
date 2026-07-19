@@ -1,6 +1,6 @@
 ---
 title: Agricultural Regions
-category: economy
+category: regions
 order: 6
 in_game: true
 ---

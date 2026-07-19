@@ -767,14 +767,14 @@ msgstr ""
 "и население не считаются по номиналу."
 
 #. type: Title #
-#: internal/help/content/economy/region-agricultural.md:1
-#: internal/help/content/economy/region-agricultural.md:8
+#: internal/help/content/regions/region-agricultural.md:1
+#: internal/help/content/regions/region-agricultural.md:8
 #, no-wrap
 msgid "Agricultural Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/region-agricultural.md:11
+#: internal/help/content/regions/region-agricultural.md:11
 #, fuzzy
 #| msgid ""
 #| "Grows food. This is your main source of food if you are not buying it."
@@ -784,15 +784,15 @@ msgid ""
 msgstr "Выращивает еду. Это главный источник еды, если вы её не покупаете."
 
 #. type: Title #
-#: internal/help/content/economy/region-coastal.md:1
-#: internal/help/content/economy/region-coastal.md:8
+#: internal/help/content/regions/region-coastal.md:1
+#: internal/help/content/regions/region-coastal.md:8
 #, fuzzy, no-wrap
 #| msgid "Regions"
 msgid "Coastal Regions"
 msgstr "Регионы"
 
 #. type: Plain text
-#: internal/help/content/economy/region-coastal.md:12
+#: internal/help/content/regions/region-coastal.md:12
 #, fuzzy
 #| msgid ""
 #| "Best for tourism income. In good times it makes the most gold. But with "
@@ -806,15 +806,15 @@ msgstr ""
 "золота. Но при низкой поддержке народа туризм рушится."
 
 #. type: Title #
-#: internal/help/content/economy/region-desert.md:1
-#: internal/help/content/economy/region-desert.md:8
+#: internal/help/content/regions/region-desert.md:1
+#: internal/help/content/regions/region-desert.md:8
 #, fuzzy, no-wrap
 #| msgid "Regions"
 msgid "Desert Regions"
 msgstr "Регионы"
 
 #. type: Plain text
-#: internal/help/content/economy/region-desert.md:11
+#: internal/help/content/regions/region-desert.md:11
 #, fuzzy
 #| msgid ""
 #| "Good for solar power. Income swings with conditions, but on average it "
@@ -827,14 +827,14 @@ msgstr ""
 "побережья."
 
 #. type: Title #
-#: internal/help/content/economy/region-industrial.md:1
-#: internal/help/content/economy/region-industrial.md:8
+#: internal/help/content/regions/region-industrial.md:1
+#: internal/help/content/regions/region-industrial.md:8
 #, no-wrap
 msgid "Industrial Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/region-industrial.md:12
+#: internal/help/content/regions/region-industrial.md:12
 #, fuzzy
 #| msgid ""
 #| "Builds military each turn. In some games this is your only way to get new "
@@ -848,15 +848,15 @@ msgstr ""
 "получить новые юниты. Хорошая база из гор повышает выпуск."
 
 #. type: Title #
-#: internal/help/content/economy/region-mountain.md:1
-#: internal/help/content/economy/region-mountain.md:8
+#: internal/help/content/regions/region-mountain.md:1
+#: internal/help/content/regions/region-mountain.md:8
 #, fuzzy, no-wrap
 #| msgid "Regions"
 msgid "Mountain Regions"
 msgstr "Регионы"
 
 #. type: Plain text
-#: internal/help/content/economy/region-mountain.md:12
+#: internal/help/content/regions/region-mountain.md:12
 #, fuzzy
 #| msgid ""
 #| "Mines natural resources. Income is lower on average, but steady — few "
@@ -871,29 +871,29 @@ msgstr ""
 "на него не влияет. Горы также повышают выпуск промышленности."
 
 #. type: Title #
-#: internal/help/content/economy/region-river.md:1
-#: internal/help/content/economy/region-river.md:8
+#: internal/help/content/regions/region-river.md:1
+#: internal/help/content/regions/region-river.md:8
 #, fuzzy, no-wrap
 #| msgid "Regions"
 msgid "River Regions"
 msgstr "Регионы"
 
 #. type: Plain text
-#: internal/help/content/economy/region-river.md:11
+#: internal/help/content/regions/region-river.md:11
 msgid ""
 "River regions provide a steady income each turn. They do not swing with "
 "conditions, so they are a reliable base."
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/economy/regions.md:1
-#: internal/help/content/economy/regions.md:8
+#: internal/help/content/regions/regions.md:1
+#: internal/help/content/regions/regions.md:8
 #, no-wrap
 msgid "Regions"
 msgstr "Регионы"
 
 #. type: Plain text
-#: internal/help/content/economy/regions.md:12
+#: internal/help/content/regions/regions.md:12
 #, fuzzy
 #| msgid ""
 #| "Land is made of regions. You buy regions from a market, and the price "
@@ -908,15 +908,15 @@ msgstr ""
 "покупкой. Есть несколько видов."
 
 #. type: Title #
-#: internal/help/content/economy/region-technology.md:1
-#: internal/help/content/economy/region-technology.md:8
+#: internal/help/content/regions/region-technology.md:1
+#: internal/help/content/regions/region-technology.md:8
 #, fuzzy, no-wrap
 #| msgid "Technology Agreement"
 msgid "Technology Regions"
 msgstr "Технологическое соглашение"
 
 #. type: Plain text
-#: internal/help/content/economy/region-technology.md:12
+#: internal/help/content/regions/region-technology.md:12
 #, fuzzy
 #| msgid ""
 #| "Raises your efficiency. A larger share of Technology regions boosts your "
@@ -931,15 +931,15 @@ msgstr ""
 "доход и армию и снижает содержание."
 
 #. type: Title #
-#: internal/help/content/economy/region-urban.md:1
-#: internal/help/content/economy/region-urban.md:8
+#: internal/help/content/regions/region-urban.md:1
+#: internal/help/content/regions/region-urban.md:8
 #, fuzzy, no-wrap
 #| msgid "Regions"
 msgid "Urban Regions"
 msgstr "Регионы"
 
 #. type: Plain text
-#: internal/help/content/economy/region-urban.md:11
+#: internal/help/content/regions/region-urban.md:11
 #, fuzzy
 #| msgid ""
 #| "Home to your people. More urban regions means more people can live in "

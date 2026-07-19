@@ -1,6 +1,6 @@
 ---
 title: Desert Regions
-category: economy
+category: regions
 order: 4
 in_game: true
 ---

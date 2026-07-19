@@ -11,7 +11,8 @@ Menu (Help Database), or press `?` at a menu. It is organized by category:
 
 - **Controls** — moving through the menus, entering numbers
 - **Military** — units and their roles
-- **Economy** — regions, food, banking
+- **Economy** — food, banking, taxes, trading
+- **Regions** — the region types and what each one produces
 - **Warfare** — attacks, covert operations, pirates
 - **Diplomacy** — treaties and alliances
 - **Inter-BBS** — leagues and group attacks

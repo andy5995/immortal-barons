@@ -125,7 +125,7 @@ func Assemble(repoRoot, outDir string) error {
 }
 
 // topic is a help article located on disk, with its path relative to the
-// language's content root (e.g. "economy/regions.md").
+// language's content root (e.g. "regions/regions.md").
 type topic struct {
 	help.Topic
 	relPath string

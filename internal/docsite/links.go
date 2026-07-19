@@ -21,7 +21,7 @@ const (
 // links and pure anchors are left untouched.
 type linker struct {
 	repoRoot string
-	siteMap  map[string]string // normalized repo path -> language-relative site path (e.g. "guide/economy/regions.md")
+	siteMap  map[string]string // normalized repo path -> language-relative site path (e.g. "guide/regions/regions.md")
 }
 
 // buildSiteMap maps each published source's repo path (help content normalized

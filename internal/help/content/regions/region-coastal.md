@@ -1,6 +1,6 @@
 ---
 title: Coastal Regions
-category: economy
+category: regions
 order: 2
 in_game: true
 ---

@@ -678,14 +678,14 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/economy/region-agricultural.md:1
-#: internal/help/content/economy/region-agricultural.md:8
+#: internal/help/content/regions/region-agricultural.md:1
+#: internal/help/content/regions/region-agricultural.md:8
 #, markdown-text, no-wrap
 msgid "Agricultural Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/region-agricultural.md:11
+#: internal/help/content/regions/region-agricultural.md:11
 #, markdown-text
 msgid ""
 "Agricultural regions grow food. They are your main source of food if you are "
@@ -693,14 +693,14 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/economy/region-coastal.md:1
-#: internal/help/content/economy/region-coastal.md:8
+#: internal/help/content/regions/region-coastal.md:1
+#: internal/help/content/regions/region-coastal.md:8
 #, markdown-text, no-wrap
 msgid "Coastal Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/region-coastal.md:12
+#: internal/help/content/regions/region-coastal.md:12
 #, markdown-text
 msgid ""
 "Coastal regions are your best source of tourism income. In good times they "
@@ -709,14 +709,14 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/economy/region-desert.md:1
-#: internal/help/content/economy/region-desert.md:8
+#: internal/help/content/regions/region-desert.md:1
+#: internal/help/content/regions/region-desert.md:8
 #, markdown-text, no-wrap
 msgid "Desert Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/region-desert.md:11
+#: internal/help/content/regions/region-desert.md:11
 #, markdown-text
 msgid ""
 "Desert regions are good for solar power. Their income swings with "
@@ -724,14 +724,14 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/economy/region-industrial.md:1
-#: internal/help/content/economy/region-industrial.md:8
+#: internal/help/content/regions/region-industrial.md:1
+#: internal/help/content/regions/region-industrial.md:8
 #, markdown-text, no-wrap
 msgid "Industrial Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/region-industrial.md:12
+#: internal/help/content/regions/region-industrial.md:12
 #, markdown-text
 msgid ""
 "Industrial regions build military units each turn. In some games this is "
@@ -740,14 +740,14 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/economy/region-mountain.md:1
-#: internal/help/content/economy/region-mountain.md:8
+#: internal/help/content/regions/region-mountain.md:1
+#: internal/help/content/regions/region-mountain.md:8
 #, markdown-text, no-wrap
 msgid "Mountain Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/region-mountain.md:12
+#: internal/help/content/regions/region-mountain.md:12
 #, markdown-text
 msgid ""
 "Mountain regions mine natural resources. Their income is lower on average, "
@@ -756,14 +756,14 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/economy/region-river.md:1
-#: internal/help/content/economy/region-river.md:8
+#: internal/help/content/regions/region-river.md:1
+#: internal/help/content/regions/region-river.md:8
 #, markdown-text, no-wrap
 msgid "River Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/region-river.md:11
+#: internal/help/content/regions/region-river.md:11
 #, markdown-text
 msgid ""
 "River regions provide a steady income each turn. They do not swing with "
@@ -771,14 +771,14 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/economy/regions.md:1
-#: internal/help/content/economy/regions.md:8
+#: internal/help/content/regions/regions.md:1
+#: internal/help/content/regions/regions.md:8
 #, markdown-text, no-wrap
 msgid "Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/regions.md:12
+#: internal/help/content/regions/regions.md:12
 #, markdown-text
 msgid ""
 "Land is made of regions. You buy regions from a market, and the price rises "
@@ -787,14 +787,14 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/economy/region-technology.md:1
-#: internal/help/content/economy/region-technology.md:8
+#: internal/help/content/regions/region-technology.md:1
+#: internal/help/content/regions/region-technology.md:8
 #, markdown-text, no-wrap
 msgid "Technology Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/region-technology.md:12
+#: internal/help/content/regions/region-technology.md:12
 #, markdown-text
 msgid ""
 "Technology regions raise your efficiency. A larger share of Technology "
@@ -803,14 +803,14 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/economy/region-urban.md:1
-#: internal/help/content/economy/region-urban.md:8
+#: internal/help/content/regions/region-urban.md:1
+#: internal/help/content/regions/region-urban.md:8
 #, markdown-text, no-wrap
 msgid "Urban Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/region-urban.md:11
+#: internal/help/content/regions/region-urban.md:11
 #, markdown-text
 msgid ""
 "Urban regions are home to your people. The more urban regions you own, the "

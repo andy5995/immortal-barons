@@ -1,6 +1,6 @@
 ---
 title: Technology Regions
-category: economy
+category: regions
 order: 9
 in_game: true
 ---

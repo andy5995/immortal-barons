@@ -1,6 +1,6 @@
 ---
 title: Mountain Regions
-category: economy
+category: regions
 order: 3
 in_game: true
 ---

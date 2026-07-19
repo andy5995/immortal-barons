@@ -1,6 +1,6 @@
 ---
 title: Industrial Regions
-category: economy
+category: regions
 order: 8
 in_game: true
 ---

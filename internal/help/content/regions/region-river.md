@@ -1,6 +1,6 @@
 ---
 title: River Regions
-category: economy
+category: regions
 order: 5
 in_game: true
 ---

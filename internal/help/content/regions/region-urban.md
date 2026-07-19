@@ -1,6 +1,6 @@
 ---
 title: Urban Regions
-category: economy
+category: regions
 order: 7
 in_game: true
 ---
