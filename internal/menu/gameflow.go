@@ -311,10 +311,13 @@ func endOfTurnStats(s session.Session, w *ctx) {
 
 // paymentStage runs BRE's start-of-turn maintenance prompts. With Auto-Pay
 // Maintenance on and enough gold, everything is paid silently. Otherwise
-// (pref off, or can't afford a required cost) the player is prompted for
-// each obligation: armed-forces upkeep and region maintenance (required,
-// underpayment causes desertion/revolt), then an optional support boost.
-func paymentStage(s session.Session, w *ctx) {
+// (pref off, or can't afford a required cost) it runs BRE's manual flow: an
+// optional bank visit (draw savings to cover upkeep), then the required
+// armed-forces and region upkeep (underpayment causes desertion/revolt), then
+// optional support/morale boosts. Underpaying a required cost warns of
+// "disastrous results" and offers to reconsider, which loops back to the bank
+// visit — matching BRE, where "reconsider" restarts the sequence.
+func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	// Every transaction below re-resolves the active empire via withPlayer; if it
 	// has vanished (eliminated by another node mid-turn) the stage aborts cleanly
 	// rather than paying maintenance for a rival's realm.
@@ -322,33 +325,19 @@ func paymentStage(s session.Session, w *ctx) {
 		return
 	}
 
-	var forces, regions, gold, bank int
+	var forces, regions, gold int
 	var autoPay bool
 	if !withPlayer(w, func(p *game.Empire) {
 		forces = w.ForcesDue(p)
 		regions = w.RegionsDue(p)
 		gold = p.Gold
-		bank = p.Bank
 		autoPay = w.AutoPayMaint
 	}) {
 		return
 	}
 	due := forces + regions
 
-	// If on-hand gold can't cover maintenance but savings can, offer to draw
-	// from the bank before paying (BRE lets you visit the bank to make upkeep).
-	if gold < due && bank > 0 &&
-		AskYesNo(s, fmt.Sprintf(tr(s, "Maintenance is %d but you hold only %d gold. Withdraw from your bank (balance %d)?"), due, gold, bank), true) {
-		n := promptSuggested(s, "Withdraw how much?", min(due-gold, bank), bank)
-		if !withPlayer(w, func(p *game.Empire) {
-			w.World.Withdraw(p, n)
-			gold = p.Gold
-		}) {
-			return
-		}
-	}
-
-	if autoPay && gold >= forces+regions {
+	if autoPay && gold >= due {
 		if !withPlayer(w, func(p *game.Empire) {
 			w.World.PayForces(p, forces)
 			w.World.PayRegions(p, regions)
@@ -369,11 +358,23 @@ func paymentStage(s session.Session, w *ctx) {
 	// and let them reconsider before the consequences land.
 	var forcesGold, regionsGold int
 	for {
-		fmt.Fprintf(s, "\n"+tr(s, "Your armed forces require %d gold.")+"\n", forces)
-		forcesGold = promptSuggested(s, "How much will you give?", min(forces, gold), gold)
+		// BRE opens the manual flow with a bank visit so a baron short on hand can
+		// draw savings to cover upkeep; the reconsider below loops back here. Gold
+		// is re-read after the visit, since a withdrawal changes it.
+		if AskYesNo(s, "Do you wish to visit the bank?", false) {
+			_ = Run(s, w, bankMenu) // a disconnect unwinds via the next read below
+		}
+		if !withPlayer(w, func(p *game.Empire) { gold = p.Gold }) {
+			return
+		}
 
-		fmt.Fprintf(s, "\n"+tr(s, "%d gold is required to maintain your regions.")+"\n", regions)
-		regionsGold = promptSuggested(s, "How much will you give?", min(regions, gold-forcesGold), gold-forcesGold)
+		fmt.Fprintf(s, "\n%s"+tr(s, "Your armed forces require %s gold.")+"%s\n",
+			ansi.FgWhite, ansi.FgBrightCyan+comma(forces)+ansi.FgWhite, ansi.Reset)
+		forcesGold = promptSuggested(s, "How much will you give?", min(forces, gold), min(forces, gold))
+
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s gold is required to maintain your regions.")+"%s\n",
+			ansi.FgWhite, ansi.FgBrightCyan+comma(regions)+ansi.FgWhite, ansi.Reset)
+		regionsGold = promptSuggested(s, "How much will you give?", min(regions, gold-forcesGold), min(regions, gold-forcesGold))
 
 		if forcesGold >= forces && regionsGold >= regions {
 			break // fully paid — no warning
@@ -382,11 +383,7 @@ func paymentStage(s session.Session, w *ctx) {
 		if !AskYesNo(s, "Would you like to reconsider?", true) {
 			break // proceed despite the shortfall
 		}
-		// Reconsider: re-read current gold (it is unchanged; nothing applied yet)
-		// and prompt again.
-		if !withPlayer(w, func(p *game.Empire) { gold = p.Gold }) {
-			return
-		}
+		// Reconsider: loop back to the bank visit (gold is re-read at the top).
 	}
 
 	var forcesLost, regionsLost, support, morale int
@@ -472,7 +469,7 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 			return nil
 		}
 		fmt.Fprintf(s, "\n"+tr(s, "Your people need %s units of food.")+"\n", comma(need))
-		give := promptSuggested(s, "How much will you give?", min(have, need), have)
+		give := promptSuggested(s, "How much will you give?", min(have, need), min(have, need))
 		if give >= need {
 			return nil // fed the full amount — proceed
 		}
@@ -539,7 +536,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		// If maintenance printed after the pause, the next menu's clear-screen
 		// would wipe it before the player could read it.
 		renderEmpireStatus(s, w)
-		paymentStage(s, w)
+		paymentStage(s, w, menus.Bank)
 		if err := feedStage(s, w, menus.Food); err != nil {
 			return Stay
 		}

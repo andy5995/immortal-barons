@@ -41,7 +41,7 @@ msgid "%d gold is requested to improve military morale."
 msgstr ""
 
 #: internal/menu/gameflow.go:374
-msgid "%d gold is required to maintain your regions."
+msgid "%s gold is required to maintain your regions."
 msgstr ""
 
 #: internal/menu/gameflow.go:405
@@ -1662,7 +1662,7 @@ msgid "Your agents infiltrated %s on %s; the report is in the Spy Database."
 msgstr ""
 
 #: internal/menu/gameflow.go:371
-msgid "Your armed forces require %d gold."
+msgid "Your armed forces require %s gold."
 msgstr ""
 
 #: internal/menu/actions_regions.go:61

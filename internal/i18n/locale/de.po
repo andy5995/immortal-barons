@@ -31,16 +31,16 @@ msgstr "vor %d Tagen"
 #: internal/menu/gameflow.go:336
 #, fuzzy
 msgid "%d gold is requested to boost popular support."
-msgstr "%d Gold werden benötigt, um deine Regionen zu unterhalten."
+msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 
 #: internal/menu/gameflow.go:349
 #, fuzzy
 msgid "%d gold is requested to improve military morale."
-msgstr "%d Gold werden benötigt, um deine Regionen zu unterhalten."
+msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 
 #: internal/menu/gameflow.go:305
-msgid "%d gold is required to maintain your regions."
-msgstr "%d Gold werden benötigt, um deine Regionen zu unterhalten."
+msgid "%s gold is required to maintain your regions."
+msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 
 #: internal/menu/gameflow.go:332
 msgid "%d regions revolted for lack of upkeep."
@@ -1498,8 +1498,8 @@ msgstr ""
 
 # Turn pipeline — maintenance
 #: internal/menu/gameflow.go:302
-msgid "Your armed forces require %d gold."
-msgstr "Deine Streitkräfte benötigen %d Gold."
+msgid "Your armed forces require %s gold."
+msgstr "Deine Streitkräfte benötigen %s Gold."
 
 #: internal/menu/actions.go:128
 msgid "Your choice? (0 to cancel)"

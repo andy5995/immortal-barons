@@ -152,7 +152,7 @@ func TestPaymentStageAutoPays(t *testing.T) {
 	before := p.Gold
 	want := p.ForcesUpkeep() + p.RegionUpkeep()
 
-	paymentStage(f, w)
+	paymentStage(f, w, BuildMenus().Bank)
 
 	if p.Gold != before-want {
 		t.Errorf("auto-pay should deduct %d, gold %d -> %d", want, before, p.Gold)
@@ -163,7 +163,7 @@ func TestPaymentStageAutoPays(t *testing.T) {
 }
 
 func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
-	f := &fakeSession{keys: []rune("\r\r")} // accept suggested (full) for forces, then regions
+	f := &fakeSession{keys: []rune("n\r\r")} // decline bank, accept suggested (full) for forces then regions
 	w := newWorld()
 	w.AutoPayMaint = false
 	p := w.Player()
@@ -173,7 +173,7 @@ func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
 	want := p.ForcesUpkeep() + p.RegionUpkeep()
 	before := p.Gold
 
-	paymentStage(f, w)
+	paymentStage(f, w, BuildMenus().Bank)
 
 	if p.Troopers != beforeTroopers {
 		t.Errorf("full pay should not desert troopers, %d -> %d", beforeTroopers, p.Troopers)
@@ -184,7 +184,7 @@ func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
 }
 
 func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
-	f := &fakeSession{keys: []rune("0\r0\r")} // give 0 to forces, then 0 to regions
+	f := &fakeSession{keys: []rune("n0\r0\r")} // decline bank, give 0 to forces then 0 to regions
 	w := newWorld()
 	w.AutoPayMaint = false
 	p := w.Player()
@@ -192,7 +192,7 @@ func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 	p.Support = 100
 	beforeTroopers := p.Troopers
 
-	paymentStage(f, w)
+	paymentStage(f, w, BuildMenus().Bank)
 
 	if p.Troopers >= beforeTroopers {
 		t.Errorf("underpaying forces should desert troopers, %d -> %d", beforeTroopers, p.Troopers)

@@ -130,7 +130,13 @@ func promptSuggested(s session.Session, msg string, suggested, max int) int {
 // run of prompts that should sit on consecutive lines — the attack force
 // selection (Troopers/Jets/Tanks/Bombers) after a single header line.
 func promptSuggestedTight(s session.Session, msg string, suggested, max int) int {
-	prefix := fmt.Sprintf("%s%s (%s; %s):%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), comma(suggested), comma(max), ansi.Reset)
+	// BRE colors the "(suggested; max)": bright-blue parens/semicolon, bright-cyan
+	// suggested, dark-cyan max (the same blue/cyan scheme as the y/n hint).
+	prefix := fmt.Sprintf("%s%s %s(%s%s%s; %s%s%s)%s:%s ",
+		ansi.FgWhite, i18n.T(sessionLang(s), msg),
+		ansi.FgBrightBlue, ansi.FgBrightCyan, comma(suggested), ansi.FgBrightBlue,
+		ansi.FgCyan, comma(max), ansi.FgBrightBlue,
+		ansi.FgWhite, ansi.Reset)
 	fmt.Fprint(s, prefix)
 	return editAmount(s, prefix, suggested, max)
 }

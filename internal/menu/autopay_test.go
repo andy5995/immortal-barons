@@ -17,7 +17,7 @@ func TestAutoPayReportsMaintenance(t *testing.T) {
 	w.AutoPayMaint = true
 
 	f := &fakeSession{}
-	paymentStage(f, w)
+	paymentStage(f, w, BuildMenus().Bank)
 
 	if out := f.out.String(); !strings.Contains(out, "Maintenance paid") {
 		t.Errorf("auto-pay should report maintenance paid.\n--- output ---\n%s", out)

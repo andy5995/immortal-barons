@@ -31,16 +31,16 @@ msgstr "%d дн. назад"
 #: internal/menu/gameflow.go:336
 #, fuzzy
 msgid "%d gold is requested to boost popular support."
-msgstr "%d золота требуется на содержание ваших регионов."
+msgstr "%s золота требуется на содержание ваших регионов."
 
 #: internal/menu/gameflow.go:349
 #, fuzzy
 msgid "%d gold is requested to improve military morale."
-msgstr "%d золота требуется на содержание ваших регионов."
+msgstr "%s золота требуется на содержание ваших регионов."
 
 #: internal/menu/gameflow.go:305
-msgid "%d gold is required to maintain your regions."
-msgstr "%d золота требуется на содержание ваших регионов."
+msgid "%s gold is required to maintain your regions."
+msgstr "%s золота требуется на содержание ваших регионов."
 
 #: internal/menu/gameflow.go:332
 msgid "%d regions revolted for lack of upkeep."
@@ -1495,8 +1495,8 @@ msgstr ""
 
 # Turn pipeline — maintenance
 #: internal/menu/gameflow.go:302
-msgid "Your armed forces require %d gold."
-msgstr "Вашим вооружённым силам требуется %d золота."
+msgid "Your armed forces require %s gold."
+msgstr "Вашим вооружённым силам требуется %s золота."
 
 #: internal/menu/actions.go:128
 msgid "Your choice? (0 to cancel)"

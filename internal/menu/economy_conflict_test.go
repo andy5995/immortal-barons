@@ -155,7 +155,7 @@ func TestPaymentStageVanishedEmpireConflict(t *testing.T) {
 	})
 
 	fb := &fakeSession{}
-	paymentStage(fb, b)
+	paymentStage(fb, b, BuildMenus().Bank)
 
 	if d := committedEmpire(t, cfg, "decoy"); d.Gold != decoyGold {
 		t.Fatalf("decoy gold = %d, want %d — a stale pointer paid the wrong empire's maintenance", d.Gold, decoyGold)
