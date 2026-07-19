@@ -157,5 +157,6 @@ Free software under the [MIT License](LICENSE).
 ## Related Realms
 
 * [Medusa's Barren Realms Elite (BRE) Discord](https://discord.gg/5wTZpstcjM)
+* [Lazarus Project on Discord](https://discord.gg/weAEgZ2re6)
 * [X-Bit BBS](https://x-bit.org/info)
 * [LibreGaming](https://libregaming.org/)
