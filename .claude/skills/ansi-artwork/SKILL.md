@@ -218,6 +218,23 @@ and mid grays that the 16-color palette lacks (it only has black / bright-black
 / white / bright-white). Modern terminals and xterm.js render them; legacy
 CP437 BBS clients may not, so treat the 3D shading as progressive enhancement.
 
+## Lightbar menus (moving-highlight navigation)
+
+A **lightbar** is a menu where a reverse-video/colored bar highlights the
+current item and the arrow keys move it (Enter selects) — the interactive cousin
+of static art. It is half *rendering* (drawing and repainting a full-width
+background bar) and half *input loop* (raw mode + parsing arrow-key escape
+sequences). Note it is a *modern* BBS-door convention; classic hotkey menus
+(one letter acts immediately, no bar — what BRE and IB use) are a different
+style, and a good lightbar keeps a hotkey fallback so it degrades to one.
+
+**When building a lightbar menu, read `references/lightbar.md`** — it covers the
+bar-rendering recipe (fixed-width background rectangle, full-redraw vs minimal
+repaint, cursor hide/save/restore), the input state machine (raw mode, the
+`\x1b[A`-vs-`\x1bOA` two-encoding trap, the bare-ESC ambiguity, bytes splitting
+across reads, wrap-around indexing), the hotkey-fallback rationale, and a
+language-neutral loop sketch.
+
 ## Telling pure 16-color ANSI from extended-palette / truecolor
 
 Modern "ANSI" scene pieces (e.g. on 16colo.rs) often *look* like they use
@@ -272,6 +289,9 @@ original art.)
   editor/tool landscape, and `ansilove` for headless PNG previews.
 - `references/plain-ascii.md` — plain 7-bit ASCII art: density ramps, line/box
   art, shading a form, figlet/toilet banners, and when to use it vs. block art.
+- `references/lightbar.md` — lightbar (moving-highlight) menus: bar rendering,
+  repaint strategies, raw-mode input, arrow-key escape-sequence parsing, the
+  selection state machine, and the hotkey fallback.
 
 ## scripts/
 
