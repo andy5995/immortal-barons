@@ -63,6 +63,34 @@ Net-worth value contributed per unit (from the guide's net-worth table):
 | Turret | 0.425 | Carrier | 1.000 |
 | Agent | 0.500 | Region | 12.50 |
 
+### Maintenance payment flow (BRE-verified)
+
+Captured live from BRE (fresh realm, Auto-Pay Maintenance off). With Auto-Pay on
+and enough gold on hand, all maintenance is paid silently. Otherwise the manual
+flow runs in this order:
+
+1. **Visit the bank? (y/N)** — opens the bank so a baron short on hand can
+   withdraw savings to cover upkeep.
+2. **Armed-forces upkeep**, then **region maintenance** — each a "how much will
+   you give?" prompt. The prompt's max is the amount **required** (you cannot
+   overpay); if you can't afford it, the max is your gold.
+3. **Crown tax** — a per-turn tax to the Queen Royale (a non-player NPC monarch)
+   that is a pure sink (no recipient); its prompt max is your available gold.
+   *(Not built in IB yet — issue #52; the amount formula needs the disassembly.)*
+4. Conditional: SDI maintenance (with SDI), waste-region decontamination (with
+   waste regions), then the popular-support and military-morale boosts (shown
+   only below 100). Support/morale are *requested* (optional), not required.
+5. **Reconsider gate** — underpaying any *required* cost warns of disastrous
+   results and offers to reconsider. Yes **restarts the whole sequence from the
+   bank prompt**; No proceeds, with desertion/revolt for the shortfall.
+
+Prompt colors (from a color capture): text plain white; the required and
+suggested amounts bright cyan, the max dark cyan, the `(…; …)` parens bright blue.
+
+IB implements steps 1, 2, the support/morale part of 4, and 5, with the
+required-capped prompts and these colors. SDI/waste maintenance and the crown tax
+(step 3) are not built (crown tax tracked in #52).
+
 ## Score (distinct from Net Worth)
 
 The scores board shows **Score** and **Net Worth** as separate columns. Net
