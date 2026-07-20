@@ -114,6 +114,12 @@ type Empire struct {
 	// Persisted so it survives the per-action reload/save cycle of door play; reset
 	// to 0 at daily maintenance (see DailyMaintenance).
 	AttacksToday int
+	// TurnProgress records which stages of the current turn have already completed,
+	// so a turn REPLAYED after an idle-boot skips what was done — no double income
+	// or double charge, and no re-showing a menu the player already exited (GH #10).
+	// Serialized (NOT json:"-"): surviving a cross-boot process restart is the whole
+	// point. Cleared at turn-commit (PlayTurn) and on daily rollover (DailyMaintenance).
+	TurnProgress TurnProgress
 	Protection   int
 	// Score is BRE's cumulative score (shown on the scores board, distinct from
 	// Net Worth): += a flat ScorePerTurn once per turn played, minus small
@@ -193,6 +199,23 @@ type Empire struct {
 	IndustryGold        int  `json:"-"`
 	LastGoldPaid        int  `json:"-"`
 	LastFoodConsumed    int  `json:"-"`
+}
+
+// TurnProgress marks the stages of the current turn that have already completed,
+// so replaying a turn interrupted by an idle-boot skips what was already done
+// (GH #10). Correctness flags (IncomeCollected, MaintPaid, Fed) prevent
+// re-applying a resource effect; the rest prevent re-showing a menu the player
+// already exited. All are cleared at turn-commit (PlayTurn) and daily rollover.
+type TurnProgress struct {
+	IncomeCollected    bool // turn-start Manufacture + CollectIncome + regions-cap reset done
+	MaintPaid          bool // paymentStage done (set with the forces/regions charge)
+	Fed                bool // feedStage done
+	CovertDone         bool
+	SpendingDone       bool
+	AttackDone         bool
+	TradingDone        bool
+	InterPlanetaryDone bool
+	MessageDone        bool
 }
 
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }

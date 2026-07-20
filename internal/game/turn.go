@@ -42,7 +42,8 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	// turns straight through PlayTurn — without this the AI's cap accumulates across
 	// the day and strands it at MaxRegions total instead of MaxRegions per turn.
 	e.RegionsBoughtThisTurn = 0
-	e.MaintUnderpaid = false // cleared for next turn; set again by PayForces/PayRegions on underpayment
+	e.MaintUnderpaid = false        // cleared for next turn; set again by PayForces/PayRegions on underpayment
+	e.TurnProgress = TurnProgress{} // turn committed: the next turn starts with a clean slate (#10)
 	e.LastPlayed = today
 }
 
@@ -83,7 +84,8 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		for _, e := range w.Empires {
 			if e.Alive {
 				e.TurnsLeft = w.Config.TurnsPerDay
-				e.AttacksToday = 0 // fresh day: the individual-attack allotment resets
+				e.AttacksToday = 0              // fresh day: the individual-attack allotment resets
+				e.TurnProgress = TurnProgress{} // abandon any turn left uncommitted at rollover (#10)
 			}
 		}
 		w.aiPlay(w.LastMaintDate)

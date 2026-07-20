@@ -42,6 +42,44 @@ func GameLoop(s session.Session, w *game.World, handle string, utf8 bool) (err e
 	return Run(ms, c, menus.Game)
 }
 
+// collectTurnIncome runs the turn-start block — industry production, income
+// collection, and the per-turn region-cap reset — guarded so a turn REPLAYED
+// after an idle-boot does not collect income (or reset the region cap) twice
+// (#10). The mutation and the IncomeCollected flag commit in one transaction, so
+// a boot leaves them consistent. Returns false if the empire vanished mid-turn
+// (eliminated by another node), like every withPlayer transaction here.
+func collectTurnIncome(w *ctx) bool {
+	return withPlayer(w, func(p *game.Empire) {
+		if p.TurnProgress.IncomeCollected {
+			return
+		}
+		w.World.Manufacture(p)   // industry production at turn start, alongside income (#71)
+		w.World.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
+		p.RegionsBoughtThisTurn = 0
+		p.TurnProgress.IncomeCollected = true
+	})
+}
+
+// runStageOnce runs one turn stage unless it already completed this turn, in
+// which case it is skipped — so a turn REPLAYED after an idle-boot does not walk
+// the player back through a menu they already exited (#10). fn runs the stage
+// (typically a nested Run); on a clean return the stage is marked done. If fn
+// returns an error (a bare io.EOF stream end) the stage is left unmarked, and a
+// session boot panics out of fn (via session.End) before the mark is written —
+// both leave the stage to re-run on replay, resuming where the boot hit.
+func runStageOnce(w *ctx, get func(game.TurnProgress) bool, set func(*game.TurnProgress), fn func() error) error {
+	done := false
+	withPlayer(w, func(p *game.Empire) { done = get(p.TurnProgress) })
+	if done {
+		return nil
+	}
+	if err := fn(); err != nil {
+		return err
+	}
+	withPlayer(w, func(p *game.Empire) { set(&p.TurnProgress) })
+	return nil
+}
+
 // showBulletinToday is the Today's News menu action.
 func showBulletinToday(s session.Session, w *ctx) Result { return showBulletin(s, w, false) }
 
@@ -318,6 +356,16 @@ func endOfTurnStats(s session.Session, w *ctx) {
 // "disastrous results" and offers to reconsider, which loops back to the bank
 // visit — matching BRE, where "reconsider" restarts the sequence.
 func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
+	// Skip entirely on a replayed turn whose maintenance was already paid before an
+	// idle-boot (#10). MaintPaid is set inside the charge transaction below, so
+	// reaching here with it set means the required forces/regions charge already
+	// committed — re-running would double-charge.
+	alreadyPaid := false
+	withPlayer(w, func(p *game.Empire) { alreadyPaid = p.TurnProgress.MaintPaid })
+	if alreadyPaid {
+		return
+	}
+
 	// Every transaction below re-resolves the active empire via withPlayer; if it
 	// has vanished (eliminated by another node mid-turn) the stage aborts cleanly
 	// rather than paying maintenance for a rival's realm.
@@ -341,6 +389,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		if !withPlayer(w, func(p *game.Empire) {
 			w.World.PayForces(p, forces)
 			w.World.PayRegions(p, regions)
+			p.TurnProgress.MaintPaid = true // record the charge atomically so a later boot can't replay it (#10)
 		}) {
 			return
 		}
@@ -390,6 +439,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	if !withPlayer(w, func(p *game.Empire) {
 		forcesLost = w.World.PayForces(p, forcesGold)
 		regionsLost = w.World.PayRegions(p, regionsGold)
+		p.TurnProgress.MaintPaid = true // required charge committed; a later boot must not replay it (#10)
 		gold = p.Gold
 		support = p.Support
 		morale = p.Morale
@@ -521,11 +571,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		// turn, not just once in the pre-turn flow (#3).
 		showUnreadMail(s, w)
 
-		if !withPlayer(w, func(p *game.Empire) {
-			w.World.Manufacture(p)   // industry production happens at turn start, alongside income (#71)
-			w.World.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
-			p.RegionsBoughtThisTurn = 0
-		}) {
+		if !collectTurnIncome(w) {
 			return abort()
 		}
 
@@ -537,7 +583,10 @@ func runTurn(s session.Session, w *ctx) Result {
 		// would wipe it before the player could read it.
 		renderEmpireStatus(s, w)
 		paymentStage(s, w, menus.Bank)
-		if err := feedStage(s, w, menus.Food); err != nil {
+		if err := runStageOnce(w,
+			func(tp game.TurnProgress) bool { return tp.Fed },
+			func(tp *game.TurnProgress) { tp.Fed = true },
+			func() error { return feedStage(s, w, menus.Food) }); err != nil {
 			return Stay
 		}
 		var foodUpkeep int
@@ -557,33 +606,54 @@ func runTurn(s session.Session, w *ctx) Result {
 				return abort()
 			}
 			if agents >= 1 {
-				if err := Run(s, w, menus.Covert); err != nil {
+				if err := runStageOnce(w,
+					func(tp game.TurnProgress) bool { return tp.CovertDone },
+					func(tp *game.TurnProgress) { tp.CovertDone = true },
+					func() error { return Run(s, w, menus.Covert) }); err != nil {
 					return Stay
 				}
 			}
 		}
 
-		if err := Run(s, w, menus.Spending); err != nil {
+		if err := runStageOnce(w,
+			func(tp game.TurnProgress) bool { return tp.SpendingDone },
+			func(tp *game.TurnProgress) { tp.SpendingDone = true },
+			func() error { return Run(s, w, menus.Spending) }); err != nil {
 			return Stay
 		}
-		if err := Run(s, w, menus.Attack); err != nil {
+		if err := runStageOnce(w,
+			func(tp game.TurnProgress) bool { return tp.AttackDone },
+			func(tp *game.TurnProgress) { tp.AttackDone = true },
+			func() error { return Run(s, w, menus.Attack) }); err != nil {
 			return Stay
 		}
 		if w.VisitTrading {
-			if err := Run(s, w, menus.Trading); err != nil {
+			if err := runStageOnce(w,
+				func(tp game.TurnProgress) bool { return tp.TradingDone },
+				func(tp *game.TurnProgress) { tp.TradingDone = true },
+				func() error { return Run(s, w, menus.Trading) }); err != nil {
 				return Stay
 			}
 		}
 		// InterPlanetary Ops is an InterBBS-only step, shown after Trading.
 		if w.Config.InterBBSEnabled() {
-			if err := Run(s, w, menus.InterPlanetary); err != nil {
+			if err := runStageOnce(w,
+				func(tp game.TurnProgress) bool { return tp.InterPlanetaryDone },
+				func(tp *game.TurnProgress) { tp.InterPlanetaryDone = true },
+				func() error { return Run(s, w, menus.InterPlanetary) }); err != nil {
 				return Stay
 			}
 		}
 		if w.VisitMessage {
-			if AskYesNo(s, "Send a message?", false) {
-				sendMessage(s, w)
-			}
+			_ = runStageOnce(w,
+				func(tp game.TurnProgress) bool { return tp.MessageDone },
+				func(tp *game.TurnProgress) { tp.MessageDone = true },
+				func() error {
+					if AskYesNo(s, "Send a message?", false) {
+						sendMessage(s, w)
+					}
+					return nil
+				})
 		}
 
 		if !withPlayer(w, func(p *game.Empire) {
