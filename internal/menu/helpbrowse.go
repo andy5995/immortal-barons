@@ -36,13 +36,9 @@ func lightbarSelect(s session.Session, title string, items []string, backLabel s
 	// already jumps to any item, so the numbers would be redundant.
 	all := append(append([]string{}, items...), backLabel)
 	back := len(items) // Back's index in all
-	sel, prefix, first := 0, "", true
-	rows := len(all) + 3 // title + blank + rows + hint
+	sel, prefix := 0, ""
 	draw := func() {
-		if !first {
-			fmt.Fprint(s, ansi.CursorUp(rows))
-		}
-		first = false
+		fmt.Fprint(s, ansi.Home) // redraw from top-left each frame — survives a resize
 		fmt.Fprintf(s, "%s%s%s%s\n%s\n", ansi.EraseLine, ansi.FgBrightCyan, title, ansi.Reset, ansi.EraseLine)
 		for i, it := range all {
 			fmt.Fprint(s, ansi.EraseLine)
@@ -52,7 +48,7 @@ func lightbarSelect(s session.Session, title string, items []string, backLabel s
 				fmt.Fprintf(s, "    %s\n", it)
 			}
 		}
-		fmt.Fprintf(s, "%s   %s↑↓ move · Enter select · type to jump · Backspace back%s\n", ansi.EraseLine, ansi.Dim, ansi.Reset)
+		fmt.Fprintf(s, "%s   %s↑↓ move · Enter select · type to jump · Backspace back%s\n%s", ansi.EraseLine, ansi.Dim, ansi.Reset, ansi.EraseDown)
 	}
 	for {
 		draw()
