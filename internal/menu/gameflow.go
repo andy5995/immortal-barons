@@ -60,6 +60,19 @@ func collectTurnIncome(w *ctx) bool {
 	})
 }
 
+// showTurnIntro prints the per-turn income report and the empire status pages.
+// The income report covers THIS turn's production/income, so on a replay after an
+// idle-boot (income already collected before the boot) it is skipped. The empire
+// status is shown unconditionally — including on re-entry — so a player dropped
+// back mid-turn sees their current state (gold, food, military) before acting,
+// instead of landing cold at a submenu (#10).
+func showTurnIntro(s session.Session, w *ctx, replaying bool) {
+	if !replaying {
+		incomeReport(s, w)
+	}
+	renderEmpireStatus(s, w)
+}
+
 // runStageOnce runs one turn stage unless it already completed this turn, in
 // which case it is skipped — so a turn REPLAYED after an idle-boot does not walk
 // the player back through a menu they already exited (#10). fn runs the stage
@@ -571,30 +584,37 @@ func runTurn(s session.Session, w *ctx) Result {
 		// turn, not just once in the pre-turn flow (#3).
 		showUnreadMail(s, w)
 
+		// Capture whether this is a replay BEFORE collecting income (which sets the
+		// flag), so the intro screens can be skipped on a booted-turn replay.
+		replaying := false
+		withPlayer(w, func(p *game.Empire) { replaying = p.TurnProgress.IncomeCollected })
+
 		if !collectTurnIncome(w) {
 			return abort()
 		}
 
-		incomeReport(s, w)
-
-		// The second status page and the maintenance results share one screen
-		// with a single pause (renderEmpireStatus already paused after page 1).
-		// If maintenance printed after the pause, the next menu's clear-screen
-		// would wipe it before the player could read it.
-		renderEmpireStatus(s, w)
+		showTurnIntro(s, w, replaying)
 		paymentStage(s, w, menus.Bank)
+		// Was the realm already fed before this pass? On a replay it may have been
+		// (fed before the boot), in which case the feed stage and its "food consumed"
+		// summary are both skipped — so the replay lands at the first unfinished
+		// stage without re-showing a screen the player already saw (#10).
+		fedBefore := false
+		withPlayer(w, func(p *game.Empire) { fedBefore = p.TurnProgress.Fed })
 		if err := runStageOnce(w,
 			func(tp game.TurnProgress) bool { return tp.Fed },
 			func(tp *game.TurnProgress) { tp.Fed = true },
 			func() error { return feedStage(s, w, menus.Food) }); err != nil {
 			return Stay
 		}
-		var foodUpkeep int
-		if !withPlayer(w, func(p *game.Empire) { foodUpkeep = p.FoodUpkeep() }) {
-			return abort()
+		if !fedBefore {
+			var foodUpkeep int
+			if !withPlayer(w, func(p *game.Empire) { foodUpkeep = p.FoodUpkeep() }) {
+				return abort()
+			}
+			statLine(s, foodUpkeep, "units of Food consumed.")
+			pause(s)
 		}
-		statLine(s, foodUpkeep, "units of Food consumed.")
-		pause(s)
 
 		// Covert Operations runs right after maintenance and before Spending, per
 		// BRE's turn order (Payment/Food Market -> Covert -> Spending). Shown only
