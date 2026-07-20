@@ -11,7 +11,11 @@ func buyFoodMarket(s session.Session, w *ctx) Result {
 	if !w.Config.FoodUnlimited && w.FoodMarketSupply < maxBuy {
 		maxBuy = w.FoodMarketSupply // can't buy more than the market has today
 	}
-	n := promptSuggested(s, "How much food to buy?", 0, maxBuy)
+	// Default (Enter) to this turn's shortfall — what the realm needs minus what it
+	// has — the inverse of the Sell default, capped by what the player can afford
+	// and the market has. Zero once the realm is fed.
+	suggested := min(max(0, w.FoodNeededNextTurn(p)-p.Food), maxBuy)
+	n := promptSuggested(s, "How much food to buy?", suggested, maxBuy)
 	if n <= 0 {
 		return Stay
 	}
