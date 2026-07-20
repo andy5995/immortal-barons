@@ -64,4 +64,5 @@ and holds an exclusive lock on it while it runs — the same lock
   of empires. Nothing a web player does affects the door's world, and vice
   versa.
 
-Run `immortal-barons-web -help` to see all the command-line options.
+Run `immortal-barons-web -help` to see all the command-line options. The
+[Command Reference](command-reference.md) explains every option in one place.

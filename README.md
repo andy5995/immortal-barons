@@ -43,8 +43,10 @@ from Command Prompt, or `./immortal-barons -local` from PowerShell. From a sourc
 checkout you can also run it without building first with
 `go run ./cmd/immortal-barons -local`.
 
-Run `immortal-barons -help` (or `-h`) to see all the command-line options. To run
-the game as a native BBS door instead, see "Running as a BBS door" below.
+Run `immortal-barons -help` (or `-h`) to see all the command-line options; the
+[Command Reference](docs/command-reference.md) explains every option in one
+place. To run the game as a native BBS door instead, see "Running as a BBS door"
+below.
 
 ## Download
 

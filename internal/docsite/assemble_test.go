@@ -15,6 +15,7 @@ func writeFixture(t *testing.T, root string) {
 		"docs/playing.md":                             "# Playing\n\nHow to play.\n",
 		"docs/door-setup.md":                          "# Door Setup\n\nSetup.\n",
 		"docs/webserver.md":                           "# Web Server\n\nBrowser front-end.\n",
+		"docs/command-reference.md":                   "# Command Reference\n\nAll options.\n",
 		"docs/faq.md":                                 "# FAQ\n\nQuestions.\n",
 		"docs/translating.md":                         "# Translating\n\nHow to translate.\n",
 		"docs/dev/packets.md":                         "# Packet Format\n\nDev reference.\n",
@@ -54,6 +55,7 @@ func TestAssembleLayout(t *testing.T) {
 		"site-src/en/guide/controls/interface.md", // help topic
 		"site-src/en/door-setup/index.md",         // door setup (was sysop guide)
 		"site-src/en/web-server/index.md",         // web server
+		"site-src/en/command-reference/index.md",  // command reference (#34)
 		"site-src/en/faq/index.md",                // faq
 		"site-src/en/translating/index.md",        // translating guide
 		"site-src/en/developers/packets.md",       // dev doc (en only)
@@ -68,7 +70,7 @@ func TestAssembleLayout(t *testing.T) {
 
 	// German has no translated README/playing/sysop, so those files must be
 	// absent (the i18n plugin falls back to English at build time).
-	for _, rel := range []string{"site-src/de/index.md", "site-src/de/door-setup/index.md", "site-src/de/web-server/index.md", "site-src/de/faq/index.md", "site-src/de/translating/index.md", "site-src/de/developers/packets.md"} {
+	for _, rel := range []string{"site-src/de/index.md", "site-src/de/door-setup/index.md", "site-src/de/web-server/index.md", "site-src/de/command-reference/index.md", "site-src/de/faq/index.md", "site-src/de/translating/index.md", "site-src/de/developers/packets.md"} {
 		if _, err := os.Stat(filepath.Join(out, rel)); err == nil {
 			t.Errorf("did not expect %s (should fall back to English)", rel)
 		}
@@ -98,6 +100,7 @@ func TestAssembleNavAndConfig(t *testing.T) {
 		`- "Regions": guide/economy/regions.md`,
 		`- "Door Setup": door-setup/index.md`,
 		`- "Web Server": web-server/index.md`,
+		`- "Command Reference": command-reference/index.md`,
 		`- "FAQ": faq/index.md`,
 		`- "Translating": translating/index.md`,
 		`- "Packet Format": developers/packets.md`, // dev nav titled from its H1

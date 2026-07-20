@@ -30,7 +30,8 @@ symbols instead of clean lines.
 - Neither — the game sends CP437, unless you use `-local`, which auto-detects
   from your locale (see below).
 
-You cannot use both at once.
+You cannot use both at once. See the [Command Reference](command-reference.md)
+for the full list of command-line options.
 
 ## Auto-detection
 

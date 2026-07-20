@@ -28,13 +28,14 @@ type linker struct {
 // to its English path) to its language-relative site path.
 func newLinker(repoRoot string, enTopics []topic) *linker {
 	m := map[string]string{
-		"README.md":           "index.md",
-		"docs/playing.md":     "guide/index.md",
-		"docs/door-setup.md":  "door-setup/index.md",
-		"docs/webserver.md":   "web-server/index.md",
-		"docs/charset.md":     "charset/index.md",
-		"docs/faq.md":         "faq/index.md",
-		"docs/translating.md": "translating/index.md",
+		"README.md":                 "index.md",
+		"docs/playing.md":           "guide/index.md",
+		"docs/door-setup.md":        "door-setup/index.md",
+		"docs/webserver.md":         "web-server/index.md",
+		"docs/charset.md":           "charset/index.md",
+		"docs/command-reference.md": "command-reference/index.md",
+		"docs/faq.md":               "faq/index.md",
+		"docs/translating.md":       "translating/index.md",
 	}
 	for _, t := range enTopics {
 		m["internal/help/content/"+t.relPath] = "guide/" + t.relPath

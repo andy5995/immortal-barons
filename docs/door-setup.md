@@ -12,7 +12,8 @@ software on any platform Go supports.
 The game keeps all its files in one data directory (default `./data`). Point
 the `-data` option at it.
 
-Run `immortal-barons -help` to see all the command-line options.
+Run `immortal-barons -help` to see all the command-line options. The
+[Command Reference](command-reference.md) explains every option in one place.
 
 ## First-time setup
 
