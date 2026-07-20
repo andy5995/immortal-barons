@@ -43,8 +43,8 @@ func TestMaintenanceFrozenBeforeStart(t *testing.T) {
 
 func TestDefaultIdleConfig(t *testing.T) {
 	c := DefaultConfig()
-	if c.IdleTimeoutSecs != 180 {
-		t.Errorf("IdleTimeoutSecs = %d, want 180", c.IdleTimeoutSecs)
+	if c.IdleTimeoutSecs != 300 {
+		t.Errorf("IdleTimeoutSecs = %d, want 300", c.IdleTimeoutSecs)
 	}
 	if c.MaxIdleWarnings != 3 {
 		t.Errorf("MaxIdleWarnings = %d, want 3", c.MaxIdleWarnings)

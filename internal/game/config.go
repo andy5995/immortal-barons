@@ -169,7 +169,7 @@ func DefaultConfig() Config {
 		BoardID:         "local",
 		InboundDir:      "./data/inbound",
 		OutboundDir:     "./data/outbound",
-		IdleTimeoutSecs: 180,
+		IdleTimeoutSecs: 300,
 		MaxIdleWarnings: 3,
 
 		// Defaults from BRE's reset-init code and Configuration Help screens,
