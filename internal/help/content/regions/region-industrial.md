@@ -1,5 +1,5 @@
 ---
-title: Industrial Regions
+title: Industrial
 category: regions
 order: 8
 in_game: true

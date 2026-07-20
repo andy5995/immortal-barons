@@ -1,5 +1,5 @@
 ---
-title: River Regions
+title: River
 category: regions
 order: 5
 in_game: true

@@ -1,5 +1,5 @@
 ---
-title: Technology Regions
+title: Technology
 category: regions
 order: 9
 in_game: true

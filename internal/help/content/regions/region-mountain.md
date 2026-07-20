@@ -1,5 +1,5 @@
 ---
-title: Mountain Regions
+title: Mountain
 category: regions
 order: 3
 in_game: true

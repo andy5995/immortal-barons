@@ -1,5 +1,5 @@
 ---
-title: Desert Regions
+title: Desert
 category: regions
 order: 4
 in_game: true

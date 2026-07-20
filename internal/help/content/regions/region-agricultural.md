@@ -1,5 +1,5 @@
 ---
-title: Agricultural Regions
+title: Agricultural
 category: regions
 order: 6
 in_game: true

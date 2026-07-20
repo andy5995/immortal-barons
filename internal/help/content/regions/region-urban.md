@@ -1,5 +1,5 @@
 ---
-title: Urban Regions
+title: Urban
 category: regions
 order: 7
 in_game: true
