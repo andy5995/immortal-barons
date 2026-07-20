@@ -9,6 +9,7 @@ func TestSupportDriftsWithTax(t *testing.T) {
 	e := w.AddHuman("hightax", "High Tax Realm")
 	e.Tax = 39
 	for i := 0; i < 10; i++ {
+		w.GrowFood(e) // keep the realm fed so Support moves from tax, not starvation
 		w.PlayTurn(e, "2026-07-03")
 	}
 	if e.Support >= 100 {
@@ -20,6 +21,7 @@ func TestSupportDriftsWithTax(t *testing.T) {
 	stable.Tax = SupportStableTax
 	stable.Support = 50 // start low to confirm it drifts back up
 	for i := 0; i < 20; i++ {
+		w2.GrowFood(stable) // keep it fed so Support returns from tax stability, not starving
 		w2.PlayTurn(stable, "2026-07-03")
 	}
 	if stable.Support < 90 {

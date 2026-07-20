@@ -471,12 +471,23 @@ league ran tax 85%, interest 75%).
   the rivers yield `River × RiverFishFood (124)` food and **no** river gold that
   turn; on a hydropower turn, gold and no river food. (Constants in `balance.go`;
   the exact chance/rates are tunable, live-sampled.)
-- **Food spoilage:** **5% of the *entire* stored food stock** spoils each turn —
-  `floor(0.05 × food)` — with **no floor** below which nothing spoils, reduced by
-  Technology regions. BRE-verified by driving the original (2026-07-16): spoilage
-  matched `floor(5% × food)` to the unit across food stocks from 1.4k to 13.9k
-  (`FoodSpoilPct` in `balance.go`). Spoilage runs *after* the turn's food growth
-  and population consumption. (Was an unverified "4% of food above 1000" guess.)
+- **Food growth is a *turn-start* credit (matches BRE).** This turn's food yield
+  (`Agricultural × 300` + river fishing) is added to the granary at the **start**
+  of the turn — alongside military production and gold income, exactly what the
+  start-of-turn income report announces (`World.GrowFood`). So the player can
+  **sell or spend this turn's growth the same turn**. (Earlier IB deferred the
+  growth to the end-of-turn economy step, where it arrived after the food market
+  and was always subject to spoilage — corrected 2026-07-20 after driving BRE.)
+- **Food spoilage:** **5% of the food remaining after growth and consumption**
+  spoils each turn — `floor(0.05 × food)` — with **no floor** below which nothing
+  spoils, reduced by Technology regions. **Re-verified by driving the original
+  (2026-07-20):** spoilage matched `floor(5% × food-after-grow-and-consume)` to
+  the unit at three stocks (1,452→72, 2,668→133, 0→0). Because growth is credited
+  at turn start (above), selling the surplus down to next-turn consumption drains
+  the granary to ~0 after feeding, yielding **zero spoilage** — BRE's "sell excess
+  → no decay" behavior. (`FoodSpoilPct` in `balance.go`. An earlier 2026-07-11
+  disassembly read hypothesized a ~1,000-unit floor + decay of the excess; the
+  live driving disproved it — a floor would give 22/83, not 72/133.)
 - **Feeding & food shortfall:** each turn the realm consumes food; a **feed stage**
   (BRE's Payment→Food-Market slot) warns when short, and with **Auto-Feed** on the
   Food Market opens automatically so the player can buy food. Going underfed hurts:

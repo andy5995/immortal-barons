@@ -192,6 +192,7 @@ func (w *World) aiPlay(today string) {
 			// regions revolted every turn — a self-inflicted boom-bust.
 			w.Manufacture(e)   // industry production at turn start (#71)
 			w.CollectIncome(e) // income in hand before anything is spent
+			w.GrowFood(e)      // food credited at turn start too, so aiManageEconomy sees it (matches the human flow)
 			e.LastGoldPaid = 0
 			w.PayForces(e, w.ForcesDue(e))
 			w.PayRegions(e, w.RegionsDue(e))
@@ -502,6 +503,17 @@ func (w *World) FoodGrown(e *Empire) int {
 // maintenance be paid from the income the turn earns, instead of a turn
 // behind. manufacture is likewise called at turn start, alongside this, so
 // freshly-produced units are on hand the same turn (#71).
+// GrowFood credits this turn's food yield (region output + river fishing) at the
+// START of the turn, alongside Manufacture (military) and CollectIncome (gold) —
+// the three things the start-of-turn income report announces. BRE grows food at
+// turn start, so the player can sell or spend this turn's growth the same turn;
+// deferring it to processEconomy (the old behavior) meant the growth arrived
+// after the food market and always spoiled 5% (verified against BRE, 2026-07-20).
+// Consumption and spoilage stay in processEconomy (end of turn).
+func (w *World) GrowFood(e *Empire) {
+	e.Food += w.FoodGrown(e)
+}
+
 func (w *World) CollectIncome(e *Empire) {
 	e.Gold += w.IncomeThisTurn(e).Gold()
 }
@@ -530,8 +542,11 @@ func (w *World) processEconomy(e *Empire) {
 		e.Debt += e.Debt * DebtGrowthPct / 100
 	}
 
+	// Food growth was already credited at turn start (GrowFood); here we only
+	// consume and then spoil. (Was `Food += FoodGrown - consumed`, which grew the
+	// food at turn end where it couldn't be sold and always spoiled.)
 	e.LastFoodConsumed = e.FoodUpkeep()
-	e.Food += w.FoodGrown(e) - e.LastFoodConsumed
+	e.Food -= e.LastFoodConsumed
 	if e.Food < 0 {
 		// Underfeeding hits popular support and drives people away, worse the
 		// hungrier the realm. shortPct is the % of this turn's food need left unmet.

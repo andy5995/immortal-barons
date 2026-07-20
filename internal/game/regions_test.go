@@ -143,9 +143,11 @@ func TestProcessEconomyReflectsRegionMix(t *testing.T) {
 	ag.syncLand()
 	ag.Gold, ag.Food = 0, 0
 
-	wCoastal.CollectIncome(coastal)  // gold income
-	wCoastal.processEconomy(coastal) // food production/consumption
+	wCoastal.CollectIncome(coastal)  // gold income (turn start)
+	wCoastal.GrowFood(coastal)       // food yield (turn start)
+	wCoastal.processEconomy(coastal) // food consumption/spoilage (turn end)
 	wAg.CollectIncome(ag)
+	wAg.GrowFood(ag)
 	wAg.processEconomy(ag)
 
 	if coastal.Gold <= ag.Gold {

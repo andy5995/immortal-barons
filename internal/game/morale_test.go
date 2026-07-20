@@ -69,6 +69,7 @@ func TestMoraleRecoversOverTurns(t *testing.T) {
 	e.Morale = 60
 	e.Gold = 10_000_000 // pay upkeep freely so nothing drags morale down
 	for i := 0; i < 10; i++ {
+		w.GrowFood(e) // turn-start food yield, so the realm stays fed across the loop
 		w.PlayTurn(e, "2026-07-03")
 	}
 	if e.Morale <= 60 {

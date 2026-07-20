@@ -55,6 +55,7 @@ func collectTurnIncome(w *ctx) bool {
 		}
 		w.World.Manufacture(p)   // industry production at turn start, alongside income (#71)
 		w.World.CollectIncome(p) // credit this turn's income up front, so maintenance and spending draw from it
+		w.World.GrowFood(p)      // credit this turn's food at turn start too, so it can be sold this turn (matches BRE)
 		p.RegionsBoughtThisTurn = 0
 		p.TurnProgress.IncomeCollected = true
 	})
