@@ -331,6 +331,7 @@ func BuildMenus() *Menus {
 			Price: func(w *ctx) int { return w.FoodBuyPrice() }, Owned: foodOwned},
 		{Key: 'S', Label: "Sell Food", Do: sellFoodMarket,
 			Price: func(w *ctx) int { return w.FoodSellPrice() }, Owned: foodOwned},
+		{Key: 'A', Label: "Visit Advisors", Do: visitAdvisors},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
 	}
