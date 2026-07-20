@@ -29,8 +29,12 @@ These options are for playing the game.
   the game uses your system login name.
 - **`-dropfile PATH`** — Path to the BBS dropfile (`DOOR32.SYS` or `DOOR.SYS`).
   Your BBS software writes this file and tells the door where it is.
-- **`-data DIR`** — The folder that holds the game data. The default is `./data`.
-  All modes use this option to find the shared world.
+- **`-data DIR`** — The folder that holds the game data. The default is `./data`,
+  which is **relative to the directory you run the command from**, not to where
+  the program file is. Run the game from a different folder and it looks for
+  `data` there. To avoid surprises, give a full path (for example
+  `-data /home/bbs/immortal-barons/data`). All modes use this option to find the
+  shared world.
 
 ### Character set (output)
 
@@ -89,5 +93,7 @@ immortal-barons-web [options]
 ```
 
 - **`-addr ADDRESS`** — The address to listen on. The default is `:8080`.
-- **`-data DIR`** — The folder that holds the game data. The default is `./data`.
-  Point it at the same folder the game program uses to share one world.
+- **`-data DIR`** — The folder that holds the game data. The default is `./data`,
+  relative to the directory you run the command from (see the note under the game
+  program's `-data` above). Point it at the same folder the game program uses to
+  share one world.
