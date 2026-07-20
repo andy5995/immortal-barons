@@ -67,6 +67,76 @@ func consumeEscape(s session.Session) {
 	}
 }
 
+// Navigation keys returned by readNavKey.
+const (
+	keyRune  = iota // r holds the pressed rune
+	keyUp           // up arrow
+	keyDown         // down arrow
+	keyEnter        // Enter / Return
+	keyOther        // an escape sequence we don't act on (left/right/PgUp/…)
+)
+
+// readNavKey reads one key for a lightbar. Unlike readKey (which swallows arrow
+// escape sequences so their bytes can't leak into a selection), it decodes them
+// and returns keyUp/keyDown; keyEnter for Return; or keyRune with the rune for
+// anything printable. A session boot still unwinds via session.End.
+func readNavKey(s session.Session) (kind int, r rune, err error) {
+	c, err := s.ReadKey()
+	if errors.Is(err, session.ErrSessionEnded) {
+		session.End(err)
+	}
+	if err != nil {
+		return keyOther, 0, err
+	}
+	switch c {
+	case 0x1b:
+		return readEscapeNav(s), 0, nil
+	case '\r', '\n':
+		return keyEnter, 0, nil
+	}
+	return keyRune, c, nil
+}
+
+// readEscapeNav decodes the tail of an escape sequence after an ESC — the CSI
+// "ESC [ … A/B" or SS3 "ESC O A/B" arrow forms — returning keyUp/keyDown for the
+// up/down arrows and keyOther for anything else. Mirrors consumeEscape's parsing
+// but keeps the final byte instead of discarding it.
+func readEscapeNav(s session.Session) int {
+	c, err := s.ReadKey()
+	if err != nil {
+		return keyOther
+	}
+	var final rune
+	switch c {
+	case '[': // CSI: read to the final byte in 0x40–0x7E
+		for {
+			b, err := s.ReadKey()
+			if err != nil {
+				return keyOther
+			}
+			if b >= 0x40 && b <= 0x7e {
+				final = b
+				break
+			}
+		}
+	case 'O': // SS3: exactly one more byte
+		b, err := s.ReadKey()
+		if err != nil {
+			return keyOther
+		}
+		final = b
+	default:
+		return keyOther // a lone ESC consumed the next key; act on nothing
+	}
+	switch final {
+	case 'A':
+		return keyUp
+	case 'B':
+		return keyDown
+	}
+	return keyOther
+}
+
 // prompt writes msg and reads a line of input (terminated by Enter),
 // echoing keystrokes since the console runs in no-echo mode.
 func prompt(s session.Session, msg string) string {

@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 	"strings"
+	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -11,6 +12,91 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
+// lightbarSelect renders a list with a moving highlight and returns the chosen
+// 0-based index, or -1 to go back. It sidesteps the old single-key limit (a list
+// over 9 items couldn't be addressed by one digit) — the highlight reaches any
+// item, so there are no numbers and no digit hotkeys. Navigation:
+//
+//   - ↑ / ↓            move the highlight (wrapping, and Back is part of the cycle)
+//   - Enter            choose the highlighted item (Enter on Back goes back)
+//   - a letter         BRE-style prefix type-ahead: jump to the first item whose
+//     title matches the growing typed prefix
+//   - Backspace / Q    go back immediately
+//
+// It clears the screen once, then redraws the list in place (cursor-up + erase)
+// on each move, so it needs a plain ANSI terminal — which the door front-ends
+// target.
+func lightbarSelect(s session.Session, title string, items []string, backLabel string) int {
+	if len(items) == 0 {
+		return -1
+	}
+	fmt.Fprint(s, ansi.Clear)
+	// Back is the final selectable row, so the highlight walks onto it like any
+	// other item and Enter there goes back. No number hotkeys: typing a prefix
+	// already jumps to any item, so the numbers would be redundant.
+	all := append(append([]string{}, items...), backLabel)
+	back := len(items) // Back's index in all
+	sel, prefix, first := 0, "", true
+	rows := len(all) + 3 // title + blank + rows + hint
+	draw := func() {
+		if !first {
+			fmt.Fprint(s, ansi.CursorUp(rows))
+		}
+		first = false
+		fmt.Fprintf(s, "%s%s%s%s\n%s\n", ansi.EraseLine, ansi.FgBrightCyan, title, ansi.Reset, ansi.EraseLine)
+		for i, it := range all {
+			fmt.Fprint(s, ansi.EraseLine)
+			if i == sel {
+				fmt.Fprintf(s, "  %s %s %s\n", ansi.Reverse, it, ansi.Reset)
+			} else {
+				fmt.Fprintf(s, "    %s\n", it)
+			}
+		}
+		fmt.Fprintf(s, "%s   %s↑↓ move · Enter select · type to jump · Backspace back%s\n", ansi.EraseLine, ansi.Dim, ansi.Reset)
+	}
+	for {
+		draw()
+		kind, r, err := readNavKey(s)
+		if err != nil {
+			return -1
+		}
+		switch kind {
+		case keyUp:
+			sel, prefix = (sel-1+len(all))%len(all), ""
+		case keyDown:
+			sel, prefix = (sel+1)%len(all), ""
+		case keyEnter:
+			if sel == back {
+				return -1
+			}
+			return sel
+		case keyRune:
+			switch {
+			case r == 'q' || r == 'Q' || r == 0x08 || r == 0x7f: // Q, Backspace, Del: go back
+				return -1
+			case unicode.IsLetter(r):
+				k := unicode.ToLower(r)
+				if i := prefixMatch(all, prefix+string(k)); i >= 0 {
+					sel, prefix = i, prefix+string(k)
+				} else if i := prefixMatch(all, string(k)); i >= 0 {
+					sel, prefix = i, string(k) // no match extending the prefix: restart it
+				}
+			}
+		}
+	}
+}
+
+// prefixMatch returns the index of the first item whose title, lowercased,
+// starts with p, or -1 if none does.
+func prefixMatch(items []string, p string) int {
+	for i, it := range items {
+		if strings.HasPrefix(strings.ToLower(it), p) {
+			return i
+		}
+	}
+	return -1
+}
+
 // helpBrowse is the categorized help browser: pick a category, then a topic,
 // then read it. It replaces the old flat "pick 1-of-N topics" list. Content is
 // the embedded single-source Markdown from internal/help (see
@@ -18,44 +104,25 @@ import (
 func helpBrowse(s session.Session, w *ctx) Result {
 	for {
 		cats := help.Categories()
-		fmt.Fprintf(s, "\n%sHelp — choose a category:%s\n", ansi.FgBrightCyan, ansi.Reset)
-		for i, c := range cats {
-			fmt.Fprintf(s, "  %d) %s\n", i+1, help.CategoryName(c))
+		// About is the last list item (not a reserved letter as before): with a
+		// lightbar the arrows/type-ahead reach it, so it needs no dedicated key.
+		items := make([]string, 0, len(cats)+1)
+		for _, c := range cats {
+			items = append(items, help.CategoryName(c))
 		}
-		// About lives here (keyed 'A') rather than on the Game/System menus, so 'I'
-		// can stay BRE's InterBBS Scores key (#17 menu audit). Categories stay
-		// numbered; only About is lettered. A 0) Quit line closes the list like the
-		// other menus.
-		fmt.Fprintf(s, "  A) %s\n", tr(s, "About"))
-		fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
-		fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Choice?"), ansi.Reset)
-		// Single keypress, no Enter (like the other menus). Categories are numbered
-		// 1..N (7 today, always <10), plus 'A' About and '0' Quit; ignore any other
-		// key and keep waiting.
-		var sel rune
-		for {
-			r, err := readKey(s)
-			if err != nil {
-				return Stay
-			}
-			if r == '0' || r == '\r' || r == '\n' || r == 'A' || r == 'a' || (r >= '1' && int(r-'0') <= len(cats)) {
-				sel = r
-				break
-			}
-		}
-		if sel == '0' || sel == '\r' || sel == '\n' { // Enter leaves, like '0'
-			fmt.Fprint(s, "\n")
+		items = append(items, tr(s, "About"))
+		i := lightbarSelect(s, tr(s, "Help — choose a category:"), items, tr(s, "Quit"))
+		if i < 0 {
 			return Stay
 		}
-		fmt.Fprintf(s, "%c\n", sel)
-		if sel == 'A' || sel == 'a' {
+		if i == len(cats) { // the About entry
 			about(s, w)
 			continue
 		}
 		// playerLang, not the raw stored language: it applies the CP437 guard, so
 		// a CP437 door reads help in English (or a CP437-safe language) instead
 		// of substitution glyphs when the stored language can't be shown.
-		browseCategory(s, cats[int(sel-'1')], playerLang(w))
+		browseCategory(s, cats[i], playerLang(w))
 	}
 }
 
@@ -170,22 +237,21 @@ func pickLanguage(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// browseCategory lists a category's topics and renders the chosen one, paged.
+// browseCategory lists a category's topics as a lightbar and renders the chosen
+// one, paged. The lightbar reaches any number of topics (covert has 15), so no
+// single-key-vs-Enter compromise is needed.
 func browseCategory(s session.Session, cat, lang string) {
 	for {
 		topics := help.Topics(cat, lang)
-		fmt.Fprintf(s, "\n%s%s — choose a topic:%s\n", ansi.FgBrightCyan, help.CategoryName(cat), ansi.Reset)
+		titles := make([]string, len(topics))
 		for i, t := range topics {
-			fmt.Fprintf(s, "  %d) %s\n", i+1, t.Title)
+			titles[i] = t.Title
 		}
-		// A 0) Back line + the same "Choice?" prompt as the category list. Topics
-		// need Enter (some categories have >9, so a single key can't address them).
-		fmt.Fprintf(s, "  0) %s\n", tr(s, "Back"))
-		i := promptInt(s, "Choice?")
-		if i < 1 || i > len(topics) {
+		i := lightbarSelect(s, help.CategoryName(cat)+tr(s, " — choose a topic:"), titles, tr(s, "Back"))
+		if i < 0 {
 			return
 		}
-		fmt.Fprintf(s, "\n%s\n", topics[i-1].RenderANSI(78))
+		fmt.Fprintf(s, "\n%s\n", topics[i].RenderANSI(78))
 		pause(s)
 	}
 }

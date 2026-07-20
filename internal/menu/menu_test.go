@@ -260,8 +260,9 @@ func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 
 func TestAboutFromGameMenu(t *testing.T) {
 	menus := BuildMenus()
-	// About now lives inside Help (keyed 'A'): ? -> A -> pause -> 0 (leave help) -> 0 (Quit).
-	f, _, err := run(t, "?A\r00", menus.Game)
+	// Help lightbar: ? -> type 'a' (jumps to About) -> Enter (select) -> dismiss
+	// pause -> q (leave help) -> 0 (Quit game).
+	f, _, err := run(t, "?a\rzq0", menus.Game)
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -275,8 +276,9 @@ func TestAboutFromGameMenu(t *testing.T) {
 
 func TestAboutFromSystemMenu(t *testing.T) {
 	menus := BuildMenus()
-	// About now lives inside Help (keyed 'A'): ? -> A -> pause -> 0 (leave help) -> 0 (Back).
-	f, _, err := run(t, "?A\r00", menus.System)
+	// Help lightbar: ? -> type 'a' (jumps to About) -> Enter (select) -> dismiss
+	// pause -> q (leave help) -> 0 (Back on System menu).
+	f, _, err := run(t, "?a\rzq0", menus.System)
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -487,8 +489,9 @@ func TestTravelTimesMatchesBRE(t *testing.T) {
 }
 
 func TestHelpBrowseShowsControls(t *testing.T) {
-	// category 1 (controls) -> topic 1 -> pause -> back (0) -> leave (0)
-	f := &fakeSession{keys: []rune("1\r1\r 0\r0\r")}
+	// lightbar: type 'c' (jumps to Controls) -> Enter -> Enter (first topic) ->
+	// dismiss pause (z) -> q (back to categories) -> q (leave help)
+	f := &fakeSession{keys: []rune("c\r\rzqq")}
 	w := newWorld()
 	helpBrowse(f, w)
 	out := f.out.String()
