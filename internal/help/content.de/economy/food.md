@@ -14,5 +14,9 @@ dem Markt kaufen.
 Der Markt verkauft Ihnen Nahrung teurer, als er beim Rückkauf zahlt. Er ist
 also kein Ort, um überschüssige Nahrung zu lagern.
 
+The price changes a little each day. It is the same for everyone on the
+planet that day, and it stays the same until the next day. Buy on a cheap
+day if you can.
+
 Nahrung, die über etwa zwei Runden Verbrauch hinausgeht, verdirbt jede
 Runde. Ein hoher Technologiestand verlangsamt den Verderb.

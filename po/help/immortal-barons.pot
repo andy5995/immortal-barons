@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-08 11:03-0500\n"
+"POT-Creation-Date: 2026-07-19 21:14-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -273,11 +273,20 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:20
+#: internal/help/content/covert/overview.md:21
 #, markdown-text
 msgid ""
 "Each operation has its own topic. The bombing operations also need Bombers "
 "to deliver their payloads."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:23
+#, markdown-text
+msgid ""
+"The Covert Operations menu appears during your turn, after the Attack "
+"menu. If you do not see it, turn on \"Visit Covert Menu\" in the Preferences "
+"menu."
 msgstr ""
 
 #. type: Title #
@@ -546,46 +555,65 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/banking.md:18
+#: internal/help/content/economy/banking.md:16
 #, markdown-text
 msgid "Deposit — move gold from your treasury into the bank."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/banking.md:18
+#: internal/help/content/economy/banking.md:16
 #, markdown-text
 msgid "Withdraw — move gold from the bank back to your treasury."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/banking.md:18
+#: internal/help/content/economy/banking.md:16
 #, markdown-text
-msgid ""
-"Take Loan — borrow gold, up to a limit based on how much land you own. A "
-"loan grows over time until you repay it, so pay it back before it becomes a "
-"burden."
-msgstr ""
-
-#. type: Bullet: '- '
-#: internal/help/content/economy/banking.md:18
-#, markdown-text
-msgid "Repay Loan — pay back what you borrowed."
+msgid "Cash Relief / Loans — borrow gold, or pay back what you already owe."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/banking.md:19
+#: internal/help/content/economy/banking.md:17
 #, markdown-text, no-wrap
-msgid "Investments"
+msgid "Cash Relief / Loans"
 msgstr ""
 
 #. type: Plain text
 #: internal/help/content/economy/banking.md:23
 #, markdown-text
 msgid ""
-"You can lock gold away as an investment for a number of days. It pays back "
-"your gold plus interest when it matures. The interest rate floats — it rises "
-"and falls with how much everyone is investing — so check the rate before you "
-"commit."
+"When you borrow, you first pick how many days you have to pay it back (1 to "
+"10).  A longer term has a higher daily interest rate, and the interest "
+"builds up each day (it compounds), so a long loan costs much more in "
+"total. The bank tells you the rate and the most it will lend you, then you "
+"choose how much to take."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:28
+#, markdown-text
+msgid ""
+"You must repay the full amount on the due date. The bank takes it from your "
+"gold first, then from your savings. If you cannot pay it all, the rest "
+"becomes a debt with an extra penalty added, and your people lose some "
+"support. Debt keeps growing each turn until you repay it, so clear it early."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/banking.md:29
+#, markdown-text, no-wrap
+msgid "Investments"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:35
+#, markdown-text
+msgid ""
+"You can lock gold away as an investment for 2 to 10 days. It pays back your "
+"gold plus interest when it matures. The interest rate floats — it rises and "
+"falls with how much everyone is investing — so check the rate before you "
+"commit.  A common tactic is to keep several investments running at once, "
+"each for a different length, so one matures every day."
 msgstr ""
 
 #. type: Title #
@@ -612,7 +640,16 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:17
+#: internal/help/content/economy/food.md:19
+#, markdown-text
+msgid ""
+"The price changes a little each day. It is the same for everyone on the "
+"planet that day, and it stays the same until the next day. Buy on a cheap "
+"day if you can."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/food.md:21
 #, markdown-text
 msgid ""
 "Food you hold beyond about two turns' worth of eating spoils each turn. A "
@@ -675,146 +712,6 @@ msgid ""
 "debt. Gold, food, and people are not counted directly. So a rich empire with "
 "little land or army still scores low. To climb the ranks, hold land and a "
 "strong army."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/regions/region-agricultural.md:1
-#: internal/help/content/regions/region-agricultural.md:8
-#, markdown-text, no-wrap
-msgid "Agricultural Regions"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/regions/region-agricultural.md:11
-#, markdown-text
-msgid ""
-"Agricultural regions grow food. They are your main source of food if you are "
-"not buying it from the market."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/regions/region-coastal.md:1
-#: internal/help/content/regions/region-coastal.md:8
-#, markdown-text, no-wrap
-msgid "Coastal Regions"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/regions/region-coastal.md:12
-#, markdown-text
-msgid ""
-"Coastal regions are your best source of tourism income. In good times they "
-"make the most gold. But when public support is low, your people lose "
-"interest and tourism income drops sharply."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/regions/region-desert.md:1
-#: internal/help/content/regions/region-desert.md:8
-#, markdown-text, no-wrap
-msgid "Desert Regions"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/regions/region-desert.md:11
-#, markdown-text
-msgid ""
-"Desert regions are good for solar power. Their income swings with "
-"conditions, but on average it beats mountains and trails good Coastal land."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/regions/region-industrial.md:1
-#: internal/help/content/regions/region-industrial.md:8
-#, markdown-text, no-wrap
-msgid "Industrial Regions"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/regions/region-industrial.md:12
-#, markdown-text
-msgid ""
-"Industrial regions build military units each turn. In some games this is "
-"your only way to get new units. A good base of Mountain regions makes your "
-"industry produce more."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/regions/region-mountain.md:1
-#: internal/help/content/regions/region-mountain.md:8
-#, markdown-text, no-wrap
-msgid "Mountain Regions"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/regions/region-mountain.md:12
-#, markdown-text
-msgid ""
-"Mountain regions mine natural resources. Their income is lower on average, "
-"but steady, because few things change it. Mountains also boost how much your "
-"Industrial regions produce."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/regions/region-river.md:1
-#: internal/help/content/regions/region-river.md:8
-#, markdown-text, no-wrap
-msgid "River Regions"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/regions/region-river.md:11
-#, markdown-text
-msgid ""
-"River regions provide a steady income each turn. They do not swing with "
-"conditions, so they are a reliable base."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/regions/regions.md:1
-#: internal/help/content/regions/regions.md:8
-#, markdown-text, no-wrap
-msgid "Regions"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/regions/regions.md:12
-#, markdown-text
-msgid ""
-"Land is made of regions. You buy regions from a market, and the price rises "
-"as you buy more. There are eight region types, each with a different "
-"job. Each type has its own topic."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/regions/region-technology.md:1
-#: internal/help/content/regions/region-technology.md:8
-#, markdown-text, no-wrap
-msgid "Technology Regions"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/regions/region-technology.md:12
-#, markdown-text
-msgid ""
-"Technology regions raise your efficiency. A larger share of Technology "
-"regions boosts your income and your army and lowers some upkeep. Bigger "
-"empires need more Technology regions to get the same benefit."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/regions/region-urban.md:1
-#: internal/help/content/regions/region-urban.md:8
-#, markdown-text, no-wrap
-msgid "Urban Regions"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/regions/region-urban.md:11
-#, markdown-text
-msgid ""
-"Urban regions are home to your people. The more urban regions you own, the "
-"more people can live in your empire."
 msgstr ""
 
 #. type: Title #
@@ -910,6 +807,185 @@ msgstr ""
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
 "play."
+msgstr ""
+
+#. type: Yaml Front Matter Hash Value: title
+#: internal/help/content/introduction/overview.md:1
+#, no-wrap
+msgid "How to Play"
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/introduction/overview.md:8
+#, markdown-text, no-wrap
+msgid "Immortal Barons — How to Play"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/introduction/overview.md:14
+#, markdown-text
+msgid ""
+"You rule a barony: a small kingdom on a planet. Your goal is to build the "
+"strongest empire. You do this through your economy, your military, and your "
+"dealings with the other barons. The other players want the same thing, so "
+"you face steady competition."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/introduction/overview.md:19
+#, markdown-text
+msgid ""
+"Many bulletin board systems can link their games together. When they do, "
+"each board is one planet, and your planet competes against the others. Then "
+"the goal is not just the strongest barony, but the strongest planet. Your "
+"side has to work together to win."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/introduction/overview.md:20
+#, markdown-text, no-wrap
+msgid "Turns"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/introduction/overview.md:25
+#, markdown-text
+msgid ""
+"You get a set number of turns each day. A turn is one round of play: you "
+"collect income, pay your costs, and give your orders. When your turns for "
+"the day run out, you come back the next day for more."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/introduction/overview.md:26
+#, markdown-text, no-wrap
+msgid "What happens in a turn"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/introduction/overview.md:29
+#, markdown-text
+msgid "A turn moves through these steps in order:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid ""
+"**News and mail.** You see what happened since your last turn, and read any "
+"new messages from other players."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid ""
+"**Production and income.** Your industry builds military units, and your "
+"income for the turn arrives."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid "**Reports.** You see an income report and your full Empire Status."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid ""
+"**Upkeep.** You pay to maintain your military and your land, and you feed "
+"your people and your army. Short food or gold causes trouble, so watch "
+"these."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid ""
+"**Covert Operations.** Spying and sabotage. This step appears only if you "
+"keep it turned on and hold at least one covert agent."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid "**Spending.** You buy land, military, and other things."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid "**Attacks.** You may attack another barony (once per turn)."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid ""
+"**Trading.** Trade goods with other baronies, if you keep this step turned "
+"on."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid ""
+"**InterPlanetary Operations.** Actions against other planets, in linked "
+"games."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid "**Messages.** You may send a message to another player."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/introduction/overview.md:45
+#, markdown-text
+msgid "**End of turn.** Your economy and population settle, and the turn closes."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/introduction/overview.md:46
+#, markdown-text, no-wrap
+msgid "The System menu"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/introduction/overview.md:52
+#, markdown-text
+msgid ""
+"Some choices are not forced on you every turn. From the **System menu** you "
+"can set your tax rate, change what your industry builds, open diplomacy, "
+"visit the bank, use the food market, set your preferences, and write "
+"macros. Open it when you need it."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/introduction/overview.md:56
+#, markdown-text
+msgid ""
+"In this game, **diplomacy** and **changing production** live on the System "
+"menu.  They are not automatic stops in each turn, so visit them yourself "
+"when you want to change your plans."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/introduction/overview.md:57
+#, markdown-text, no-wrap
+msgid "Reading the rest"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/introduction/overview.md:62
+#, markdown-text
+msgid ""
+"The sections that follow explain each part of the game in turn: the "
+"controls, your military, your economy, warfare, covert operations, "
+"diplomacy, and linked inter-board play. Press a key to move from one section "
+"to the next. You can stop at any time."
 msgstr ""
 
 #. type: Title #
@@ -1249,6 +1325,192 @@ msgid ""
 msgstr ""
 
 #. type: Title #
+#: internal/help/content/regions/region-agricultural.md:1
+#: internal/help/content/regions/region-agricultural.md:8
+#, markdown-text, no-wrap
+msgid "Agricultural Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-agricultural.md:11
+#, markdown-text
+msgid ""
+"Agricultural regions grow food. They are your main source of food if you are "
+"not buying it from the market."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/regions/region-coastal.md:1
+#: internal/help/content/regions/region-coastal.md:8
+#, markdown-text, no-wrap
+msgid "Coastal Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-coastal.md:12
+#, markdown-text
+msgid ""
+"Coastal regions are your best source of tourism income. In good times they "
+"make the most gold. But when public support is low, your people lose "
+"interest and tourism income drops sharply."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/regions/region-desert.md:1
+#: internal/help/content/regions/region-desert.md:8
+#, markdown-text, no-wrap
+msgid "Desert Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-desert.md:11
+#, markdown-text
+msgid ""
+"Desert regions are good for solar power. Their income swings with "
+"conditions, but on average it beats mountains and trails good Coastal land."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/regions/region-industrial.md:1
+#: internal/help/content/regions/region-industrial.md:8
+#, markdown-text, no-wrap
+msgid "Industrial Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-industrial.md:12
+#, markdown-text
+msgid ""
+"Industrial regions build military units each turn. In some games this is "
+"your only way to get new units. A good base of Mountain regions makes your "
+"industry produce more."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/regions/region-mountain.md:1
+#: internal/help/content/regions/region-mountain.md:8
+#, markdown-text, no-wrap
+msgid "Mountain Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-mountain.md:12
+#, markdown-text
+msgid ""
+"Mountain regions mine natural resources. Their income is lower on average, "
+"but steady, because few things change it. Mountains also boost how much your "
+"Industrial regions produce."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/regions/region-river.md:1
+#: internal/help/content/regions/region-river.md:8
+#, markdown-text, no-wrap
+msgid "River Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-river.md:11
+#, markdown-text
+msgid ""
+"River regions provide a steady income each turn. They do not swing with "
+"conditions, so they are a reliable base."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/regions/regions.md:1
+#: internal/help/content/regions/regions.md:8
+#, markdown-text, no-wrap
+msgid "Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/regions.md:12
+#, markdown-text
+msgid ""
+"Land is made of regions. You buy regions from a market, and the price rises "
+"as you buy more. There are eight region types, each with a different "
+"job. Each type has its own topic."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/regions/region-technology.md:1
+#: internal/help/content/regions/region-technology.md:8
+#, markdown-text, no-wrap
+msgid "Technology Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-technology.md:14
+#, markdown-text
+msgid ""
+"Technology regions make your whole empire more efficient. The bonus is not "
+"instant: it builds up slowly the longer you hold Technology regions, and it "
+"builds faster when they are a larger share of your land. Bigger empires need "
+"more Technology regions to reach the same level."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-technology.md:16
+#, markdown-text
+msgid "Technology helps in several ways:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/regions/region-technology.md:22
+#, markdown-text
+msgid "Your army fights harder."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/regions/region-technology.md:22
+#, markdown-text
+msgid "Your income goes up, including tax income."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/regions/region-technology.md:22
+#, markdown-text
+msgid "Your food regions grow more food."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/regions/region-technology.md:22
+#, markdown-text
+msgid "Your upkeep goes down, on both your units and your regions."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/regions/region-technology.md:22
+#, markdown-text
+msgid "Less of your stored food spoils."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-technology.md:25
+#, markdown-text
+msgid ""
+"Technology regions produce no gold by themselves. Their worth is the boost "
+"they give to everything else. They can be costly to keep at first, but over "
+"a long game they pay off."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/regions/region-urban.md:1
+#: internal/help/content/regions/region-urban.md:8
+#, markdown-text, no-wrap
+msgid "Urban Regions"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-urban.md:11
+#, markdown-text
+msgid ""
+"Urban regions are home to your people. The more urban regions you own, the "
+"more people can live in your empire."
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/warfare/attack-biological.md:1
 #: internal/help/content/warfare/attack-biological.md:8
 #, markdown-text, no-wrap
@@ -1302,13 +1564,39 @@ msgid "Regular Attack"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-regular.md:13
+#: internal/help/content/warfare/attack-regular.md:12
 #, markdown-text
 msgid ""
 "A Regular Attack is a direct assault with your army. Your attack strength is "
-"compared to the enemy's defense. If you win, you capture some of their "
-"regions and take some gold. Your bombers first destroy the enemy jets that "
-"are on the ground."
+"compared to the enemy's defense."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-regular.md:16
+#, markdown-text
+msgid ""
+"First you choose how many of each unit to send: Troopers, Jets, Tanks, and "
+"Bombers. Jets can only fight if you have carriers to carry them. Units you "
+"keep at home do not fight and cannot be lost."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-regular.md:20
+#, markdown-text
+msgid ""
+"Your bombers fly first and destroy enemy jets that are on the ground. Then "
+"the armies clash. Only the units you sent add to your attack, and only they "
+"can be lost. Both sides lose about 15% of the forces that fought."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-regular.md:24
+#, markdown-text
+msgid ""
+"If you win, you capture a share of the enemy's regions. You do not take "
+"their gold. A Regular Attack gives you land, not money. A small empire can "
+"lose all of its regions in one attack. A large empire loses only part, so "
+"you must attack it again and again to take it down."
 msgstr ""
 
 #. type: Title #

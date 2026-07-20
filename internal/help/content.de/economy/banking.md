@@ -12,12 +12,25 @@ kann nicht von Piraten oder Angriffen geraubt werden.
 
 - Einzahlen — Gold aus Ihrer Schatzkammer auf die Bank überweisen.
 - Abheben — Gold von der Bank zurück in Ihre Schatzkammer holen.
-- Kredit aufnehmen — Gold leihen, bis zu einer Grenze, die sich nach Ihrem
-  Landbesitz richtet. Ein Kredit wächst mit der Zeit, bis Sie ihn
-  zurückzahlen.
-- Kredit zurückzahlen — das Geliehene zurückzahlen.
+- Cash Relief / Loans — borrow gold, or pay back what you already owe.
+
+## Cash Relief / Loans
+
+When you borrow, you first pick how many days you have to pay it back (1 to
+10).  A longer term has a higher daily interest rate, and the interest
+builds up each day (it compounds), so a long loan costs much more in
+total. The bank tells you the rate and the most it will lend you, then you
+choose how much to take.
+
+You must repay the full amount on the due date. The bank takes it from your
+gold first, then from your savings. If you cannot pay it all, the rest
+becomes a debt with an extra penalty added, and your people lose some
+support. Debt keeps growing each turn until you repay it, so clear it early.
 
 ## Investitionen
 
-Sie können Gold für eine Anzahl von Tagen als Investition anlegen. Es zahlt
-Ihr Gold plus Zinsen zurück, wenn die Laufzeit endet.
+You can lock gold away as an investment for 2 to 10 days. It pays back your
+gold plus interest when it matures. The interest rate floats — it rises and
+falls with how much everyone is investing — so check the rate before you
+commit.  A common tactic is to keep several investments running at once,
+each for a different length, so one matures every day.
