@@ -251,7 +251,6 @@ func BuildMenus() *Menus {
 	trading.Items = []Item{
 		{Key: '1', Label: "Send Trade Deal", Do: sendTradeDeal},
 		{Key: '2', Label: "Trading Market", Do: tradingMarket},
-		{Key: 'B', Label: "Buy / Sell", Do: gotoMenu(buy)},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},
 	}
