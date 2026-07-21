@@ -9,6 +9,10 @@ import (
 // by the time the recipient accepts (eliminated by another node mid-turn).
 var ErrTradeSenderGone = errors.New("The empire that sent this deal is gone.")
 
+// ErrTradeNeedsCarrier is returned when the sender lacks a carrier to transport
+// the deal (BRE consumes one carrier per deal).
+var ErrTradeNeedsCarrier = errors.New("You do not have a carrier to send this deal.")
+
 // FindByName returns the empire whose realm name equals name, alive or dead, or
 // nil. Realm names are unique (RealmNameTaken guards onboarding), so this is
 // unambiguous.
@@ -89,16 +93,40 @@ type TradeDeal struct {
 	Demand TradeBasket // goods the sender wants back from the recipient
 }
 
-// SendTradeDeal escrows the Send goods off `from` and records a pending deal on
-// `to`. Fails if `from` doesn't own the Send goods, or both baskets are empty.
-func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket) error {
+// TradeDealCost is the gold cost to send a deal for the given number of days,
+// clamped to the allowed span (BRE: TradeDealGoldPerDay per day, 2-5 days).
+func TradeDealCost(days int) int {
+	if days < TradeDealMinDays {
+		days = TradeDealMinDays
+	}
+	if days > TradeDealMaxDays {
+		days = TradeDealMaxDays
+	}
+	return days * TradeDealGoldPerDay
+}
+
+// SendTradeDeal sends a trade deal from `from` to `to` over `days` days: it
+// consumes one carrier to transport it, charges the per-day gold fee, escrows the
+// Send goods, and records a pending deal on `to` (arrives on the recipient's next
+// turn). Fails if both baskets are empty, `from` lacks the offered goods, lacks a
+// transport carrier, or can't afford the fee.
+func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days int) error {
 	if send.IsEmpty() && demand.IsEmpty() {
 		return fmt.Errorf("A trade deal must offer or request something.")
 	}
+	cost := TradeDealCost(days)
 	if !empireHasBasket(from, send) {
 		return ErrCantAfford
 	}
-	subBasket(from, send) // escrow
+	if from.Carriers < send.Carriers+TradeDealCarriers {
+		return ErrTradeNeedsCarrier
+	}
+	if from.Gold < send.Gold+cost {
+		return ErrCantAfford
+	}
+	subBasket(from, send)              // escrow the offered goods
+	from.Carriers -= TradeDealCarriers // the transport carrier is consumed
+	from.Gold -= cost                  // pay the per-day transit fee
 	to.TradeDeals = append(to.TradeDeals, TradeDeal{From: from.Name, Send: send, Demand: demand})
 	to.Mail = append(to.Mail, fmt.Sprintf("%s sent you a trade deal (respond in the Trading menu).", from.Name))
 	return nil

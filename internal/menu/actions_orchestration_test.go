@@ -110,16 +110,20 @@ func TestSendTradeDealZeroAmountSendsNothing(t *testing.T) {
 func TestSendTradeDealSuccess(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
-	p.Gold = 1000
+	p.Gold, p.Carriers = 300_000, 1
 	to := recipients(w)[0]
 	toGold := to.Gold
-	// Pick (A), offer 100 gold (6), done (0), no request (0), confirm (y).
-	f := &fakeSession{keys: []rune("A6100\r00y")}
+	// Pick (A), offer 100 gold (6), done (0), no request (0), confirm (y), 2 days (Enter).
+	f := &fakeSession{keys: []rune("A6100\r00y\r")}
 
 	sendTradeDeal(f, w)
 
-	if p.Gold != 900 {
-		t.Errorf("offer should escrow 100 gold off the sender: Gold = %d, want 900", p.Gold)
+	// 300,000 − 100 escrowed − 200,000 fee (2 days) = 99,900; carrier consumed.
+	if p.Gold != 99_900 {
+		t.Errorf("send should escrow the offered gold and charge the fee: Gold = %d, want 99900", p.Gold)
+	}
+	if p.Carriers != 0 {
+		t.Errorf("send should consume the transport carrier: %d, want 0", p.Carriers)
 	}
 	if to.Gold != toGold {
 		t.Errorf("recipient gold must not change until they accept: %d, want %d", to.Gold, toGold)

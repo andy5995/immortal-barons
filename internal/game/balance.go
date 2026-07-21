@@ -359,3 +359,15 @@ const (
 	InterestCap = 1_599_999_999 // bank balance above this earns no more interest
 	MoneyCap    = 2_000_000_000 // hard cap on gold on hand / in bank
 )
+
+// Trade-deal sending (BRE-verified live, 2026-07-21): sending a trade deal
+// consumes one carrier to transport the goods and costs TradeDealGoldPerDay per
+// day for a chosen span of TradeDealMinDays..TradeDealMaxDays days; the offered
+// goods are escrowed and arrive on the recipient's next turn. (BRE adds a small
+// deal-size component on top of the 100,000/day base that IB does not model.)
+const (
+	TradeDealCarriers   = 1       // carriers consumed to send one deal
+	TradeDealGoldPerDay = 100_000 // gold cost per day of transit
+	TradeDealMinDays    = 2       // shortest a deal may be sent for
+	TradeDealMaxDays    = 5       // longest a deal may be sent for
+)

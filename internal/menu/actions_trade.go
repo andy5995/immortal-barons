@@ -74,6 +74,21 @@ func buildTradeBasket(s session.Session, w *ctx, title string, limitToOwned bool
 					ansi.FgBrightWhite, comma(*g.field(&b)), ansi.Reset)
 			}
 		}
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", 38), ansi.Reset)
+		if limitToOwned {
+			// The offered goods need a carrier to transport them (BRE's "Trade Deal
+			// requires N Carriers" line). A carrier is consumed when the deal is sent.
+			need := 0
+			if !b.IsEmpty() {
+				need = game.TradeDealCarriers
+			}
+			warn := ""
+			if p.Carriers < need {
+				warn = "  " + ansi.FgBrightRed + tr(s, "(not enough carriers)") + ansi.Reset
+			}
+			fmt.Fprintf(s, "  %s"+tr(s, "This deal needs %d carrier(s); you own %d.")+"%s%s\n",
+				ansi.Dim, need, p.Carriers, ansi.Reset, warn)
+		}
 		fmt.Fprintf(s, "  (%s0%s) %s\n", ansi.FgBrightMagenta, ansi.Reset, tr(s, "Done"))
 		fmt.Fprintf(s, "%s%s%s ", ansi.FgBrightWhite, tr(s, "Choice?"), ansi.Reset)
 		r, err := readKey(s)
@@ -137,18 +152,28 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 	if !AskYesNo(s, "Send this trade deal?", true) {
 		return Stay
 	}
+	// BRE: a deal is sent for 2-5 days at a per-day gold fee and consumes a carrier.
+	fmt.Fprintf(s, "\n%s"+tr(s, "Sending costs %s gold per day; it needs one carrier.")+"%s\n",
+		ansi.Dim, comma(game.TradeDealGoldPerDay), ansi.Reset)
+	days := promptSuggested(s, "How many days to send it for?", game.TradeDealMinDays, game.TradeDealMaxDays)
+	if days < game.TradeDealMinDays {
+		days = game.TradeDealMinDays
+	}
+	if days > game.TradeDealMaxDays {
+		days = game.TradeDealMaxDays
+	}
 
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		recip := findRealm(w, toName)
 		if recip == nil || recip == p {
 			return errTargetGone
 		}
-		return w.World.SendTradeDeal(p, recip, send, demand)
+		return w.World.SendTradeDeal(p, recip, send, demand, days)
 	})
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Trade deal sent to %s.", toName)
+		ok(s, "Trade deal sent to %s for %d days (%s gold).", toName, days, comma(game.TradeDealCost(days)))
 	}
 	return Stay
 }
@@ -165,16 +190,26 @@ func reviewTradeDeals(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "\n%s"+tr(s, "%s offers you a trade deal.")+"%s\n", ansi.FgBrightCyan, d.From, ansi.Reset)
 		fmt.Fprintf(s, "  "+tr(s, "You receive: %s")+"\n", basketSummary(s, d.Send))
 		fmt.Fprintf(s, "  "+tr(s, "You give:    %s")+"\n", basketSummary(s, d.Demand))
-		if AskYesNo(s, "Accept?", false) {
-			var err error
-			withPlayer(w, func(p *game.Empire) { err = w.World.AcceptTradeDeal(p, d.From) })
-			if err != nil {
-				fail(s, err)
+		// BRE's three-way: Yes accepts, No declines, Ignore leaves it pending.
+		fmt.Fprintf(s, "  %s%s%s ", ansi.FgBrightWhite, tr(s, "Accept? [Y]es, [N]o, [I]gnore for now"), ansi.Reset)
+		r, err := readKey(s)
+		if err != nil {
+			return
+		}
+		fmt.Fprint(s, "\n")
+		switch unicode.ToUpper(r) {
+		case 'Y':
+			var aerr error
+			withPlayer(w, func(p *game.Empire) { aerr = w.World.AcceptTradeDeal(p, d.From) })
+			if aerr != nil {
+				fail(s, aerr)
 			} else {
 				ok(s, "Trade deal accepted.")
 			}
-		} else {
+		case 'N':
 			withPlayer(w, func(p *game.Empire) { w.World.DeclineTradeDeal(p, d.From) })
+		default:
+			// Ignore for now: leave the deal pending for a later turn.
 		}
 	}
 }
