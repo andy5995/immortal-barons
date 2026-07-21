@@ -7,7 +7,7 @@ import (
 
 // These tests exercise the menu handlers' orchestration branches — the
 // prompt -> validate -> reject-or-mutate flow — using the scripted fakeSession.
-// The underlying game rules (Attack, SendGold, BuyRegions) are covered in the
+// The underlying game rules (Attack, SendTradeDeal, BuyRegions) are covered in the
 // game package; here we check that a handler rejects bad input *without*
 // mutating state, and applies the mutation on good input.
 
@@ -113,15 +113,19 @@ func TestSendTradeDealSuccess(t *testing.T) {
 	p.Gold = 1000
 	to := recipients(w)[0]
 	toGold := to.Gold
-	f := &fakeSession{keys: []rune("A100\r")} // pick A, send 100
+	// Pick (A), offer 100 gold (6), done (0), no request (0), confirm (y).
+	f := &fakeSession{keys: []rune("A6100\r00y")}
 
 	sendTradeDeal(f, w)
 
 	if p.Gold != 900 {
-		t.Errorf("player Gold = %d, want 900", p.Gold)
+		t.Errorf("offer should escrow 100 gold off the sender: Gold = %d, want 900", p.Gold)
 	}
-	if to.Gold != toGold+100 {
-		t.Errorf("target Gold = %d, want %d", to.Gold, toGold+100)
+	if to.Gold != toGold {
+		t.Errorf("recipient gold must not change until they accept: %d, want %d", to.Gold, toGold)
+	}
+	if len(to.TradeDeals) != 1 || to.TradeDeals[0].Send.Gold != 100 {
+		t.Errorf("recipient should have one pending deal offering 100 gold, got %+v", to.TradeDeals)
 	}
 }
 

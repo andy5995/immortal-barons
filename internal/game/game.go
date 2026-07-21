@@ -149,6 +149,7 @@ type Empire struct {
 
 	AllianceOffers []string      // legacy (pre-typed-treaties); migrated by EnsureTreaties
 	TreatyOffers   []TreatyOffer // pending treaty proposals received
+	TradeDeals     []TradeDeal   // pending barter offers received (respond in the Trading menu)
 
 	Investments []Investment
 	Loans       []Loan // active Cash Relief loans (#40), each due on its DueDay

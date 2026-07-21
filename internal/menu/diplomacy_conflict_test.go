@@ -29,8 +29,9 @@ func TestSendTradeDealVanishedRecipientConflict(t *testing.T) {
 	})
 
 	fb := &hookSession{
-		fakeSession: fakeSession{keys: []rune("A1000\r")}, // pick (A) Victimville, send 1000
-		marker:      "How much gold",
+		// pick (A) Victimville, offer 1000 gold (6), done (0), no request (0), confirm (y)
+		fakeSession: fakeSession{keys: []rune("A61000\r00y")},
+		marker:      "Send this trade deal",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("victim")) })
 		},

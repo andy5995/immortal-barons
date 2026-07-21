@@ -251,31 +251,6 @@ func sendMessage(s session.Session, w *ctx) Result {
 	}
 }
 
-func sendTradeDeal(s session.Session, w *ctx) Result {
-	to, _ := pickRecipient(s, w, "Trade with:", false)
-	if to == nil {
-		return Stay
-	}
-	toName := to.Name
-	amount := promptInt(s, "How much gold?")
-	if amount <= 0 {
-		return Stay
-	}
-	err := w.mutatePlayer(func(p *game.Empire) error {
-		recip := findRealm(w, toName)
-		if recip == nil || recip == p {
-			return errTargetGone
-		}
-		return w.World.SendGold(p, recip, amount) // re-checks the sender's fresh balance
-	})
-	if err != nil {
-		fail(s, err)
-	} else {
-		ok(s, "Sent %d gold to %s.", amount, toName)
-	}
-	return Stay
-}
-
 func planetaryPost(s session.Session, w *ctx) Result {
 	text := strings.TrimSpace(prompt(s, "Post to the planet:"))
 	if text == "" {
