@@ -99,7 +99,8 @@ func TestAdvisorsWarnFoodDeficit(t *testing.T) {
 func TestAdvisorsNoFalseFoodWarning(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
-	p.Food = 0 // empty stores, but a fresh realm runs a food surplus
+	p.Food = 0          // empty pre-growth stores, but a fresh realm runs a food surplus
+	w.World.GrowFood(p) // this turn's growth is credited at turn start, as a real turn does
 
 	f := &fakeSession{}
 	renderAdvisor(f, w, advisorCivilian)

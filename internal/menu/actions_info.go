@@ -140,13 +140,17 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []string
 		out = append(out, fmt.Sprintf(tr(s, "Our people number %s, and their support stands at %d%%."), num(p.People), p.Support))
 		out = append(out, fmt.Sprintf(tr(s, "We grow %s food each turn and consume %s."), num(d.foodGrown), num(d.foodEaten)))
 		net := d.foodGrown - d.foodEaten
+		// Food is credited at turn start, so p.Food already includes this turn's
+		// growth. The projections below are written against the pre-growth stock, so
+		// recover it (p.Food - foodGrown) rather than counting the growth twice.
+		stock := p.Food - d.foodGrown
 		switch {
-		case p.Food+net < 0:
-			// Production trails consumption and stores can't cover the gap, so
-			// the turn ends with negative food (see turn.go starvation step).
+		case stock+net < 0:
+			// Even with this turn's growth already in, stores can't cover this turn's
+			// consumption, so the turn ends with negative food (turn.go starvation step).
 			out = append(out, tr(s, "Our food will not last the turn. Buy or grow more."))
 		case net < 0:
-			out = append(out, fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), num(-net), p.Food/(-net)))
+			out = append(out, fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), num(-net), stock/(-net)))
 		case d.foodAtCap > d.foodGrown:
 			// Fed now, but the populace is still growing toward a support-driven
 			// capacity whose food need outruns production (see issue #35).
@@ -216,7 +220,7 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []string
 			out = append(out, fmt.Sprintf(tr(s, "Technology stands at %d%%."), tf))
 			out = append(out, fmt.Sprintf(tr(s, "It raises our military strength, income, and food output by %d%%."), tf))
 			out = append(out, fmt.Sprintf(tr(s, "It lowers unit and region upkeep, and food spoilage, to %d%% of normal."), 100-tf))
-			out = append(out, tr(s, "The bonus builds up the longer we hold Technology regions. Larger empires need more of it for the same effect."))
+			out = append(out, tr(s, "The bonus builds up the longer we hold Technology regions."))
 		}
 	}
 	return out
