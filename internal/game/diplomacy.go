@@ -176,6 +176,23 @@ func (w *World) AcceptTreaty(me *Empire, fromName, ttype string) bool {
 	return true
 }
 
+// DeclineTreaty removes a matching pending offer from `me` without forming a
+// treaty (the counterpart to AcceptTreaty). Returns false if there was no such
+// offer.
+func (w *World) DeclineTreaty(me *Empire, fromName, ttype string) bool {
+	found := false
+	kept := me.TreatyOffers[:0]
+	for _, o := range me.TreatyOffers {
+		if o.From == fromName && o.Type == ttype {
+			found = true
+		} else {
+			kept = append(kept, o)
+		}
+	}
+	me.TreatyOffers = kept
+	return found
+}
+
 // BreakTreaty ends a treaty of ttype between a and b.
 func (w *World) BreakTreaty(a, b *Empire, ttype string) {
 	x, y := treatyPair(a.Name, b.Name)

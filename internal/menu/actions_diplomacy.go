@@ -9,6 +9,47 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
+// reviewTreatyOffers surfaces each pending treaty offer to the player at turn
+// start, BRE-style: the proposer's Regions / Net Worth / Score inline with an
+// Accept? (Y/n) prompt, instead of making the player hunt for it in the Diplomacy
+// menu. Accepting forms the treaty; declining removes the offer so it does not
+// re-prompt. Wording matches the original (driven live); colors are IB house
+// style, since capture-pane cannot read BRE's.
+func reviewTreatyOffers(s session.Session, w *ctx) {
+	var offers []game.TreatyOffer
+	withPlayer(w, func(p *game.Empire) {
+		offers = append([]game.TreatyOffer(nil), p.TreatyOffers...)
+	})
+	for _, o := range offers {
+		var regions, netWorth, score int
+		var gone bool
+		w.With(func() {
+			from := findRealm(w, o.From)
+			if from == nil {
+				gone = true
+				return
+			}
+			regions, netWorth, score = from.Land, w.NetWorth(from), from.Score
+		})
+		if gone {
+			// Proposer eliminated before we got here: drop the stale offer silently.
+			withPlayer(w, func(p *game.Empire) { w.World.DeclineTreaty(p, o.From, o.Type) })
+			continue
+		}
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s proposes a %s.")+"%s\n",
+			ansi.FgBrightCyan, o.From, tr(s, o.Type), ansi.Reset)
+		// No trailing newline: AskYesNo begins on its own line, so this avoids a
+		// blank gap between the stats and the "Accept? (Y/n)" prompt.
+		fmt.Fprintf(s, "  "+tr(s, "Regions: %s; Net Worth: %s; Score: %s"),
+			comma(regions), comma(netWorth), comma(score))
+		if AskYesNo(s, "Accept?", true) {
+			withPlayer(w, func(p *game.Empire) { w.World.AcceptTreaty(p, o.From, o.Type) })
+		} else {
+			withPlayer(w, func(p *game.Empire) { w.World.DeclineTreaty(p, o.From, o.Type) })
+		}
+	}
+}
+
 // allianceStrength shows the player's combined offense and defense with their
 // Full Defense Alliance partners.
 func allianceStrength(s session.Session, w *ctx) Result {

@@ -570,6 +570,7 @@ func runTurn(s session.Session, w *ctx) Result {
 	}
 
 	showTurnEvents(s, w)
+	reviewTreatyOffers(s, w) // BRE surfaces pending treaty offers here, with proposer stats + accept/decline
 
 	for {
 		if !withPlayer(w, func(p *game.Empire) { turnsLeft = p.TurnsLeft }) {
