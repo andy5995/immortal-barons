@@ -249,7 +249,6 @@ func BuildMenus() *Menus {
 	ipSpecial.DefaultOnEnter = quitOnEnter(ipSpecial)
 
 	trading.Items = []Item{
-		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
 		{Key: '1', Label: "Send Trade Deal", Do: sendTradeDeal},
 		{Key: '2', Label: "Trading Market", Do: tradingMarket},
 		{Key: 'B', Label: "Buy / Sell", Do: gotoMenu(buy)},
