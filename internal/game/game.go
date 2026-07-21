@@ -457,9 +457,13 @@ type World struct {
 
 	Today string `json:"-"` // ISO date for this session
 
-	mu    sync.Mutex // guards concurrent access when a server shares one World
-	rng   *rand.Rand
-	store Store // transaction backend for With: in-memory (web) or file-per-action (door)
+	mu  sync.Mutex // guards concurrent access when a server shares one World
+	rng *rand.Rand
+	// nameRng is a SEPARATE stream for cosmetic AI-name generation, so choosing
+	// names never perturbs the gameplay rng — seed-reproducible combat/events stay
+	// identical no matter how many names are drawn.
+	nameRng *rand.Rand
+	store   Store // transaction backend for With: in-memory (web) or file-per-action (door)
 	// reloadGen counts wholesale reloads of the empire set. The door's FileStore
 	// bumps it on every reload (which replaces every *Empire); a per-session
 	// cache of the active empire (menu.ctx) re-resolves its handle when the count
@@ -472,7 +476,9 @@ type World struct {
 func NewWorld(cfg Config) *World { return NewWorldSeed(cfg, time.Now().UnixNano()) }
 
 func NewWorldSeed(cfg Config, seed int64) *World {
-	w := &World{Config: cfg, rng: rand.New(rand.NewSource(seed))}
+	// nameRng is salted off the same seed so names are deterministic per seed yet
+	// draw from a stream independent of gameplay rng.
+	w := &World{Config: cfg, rng: rand.New(rand.NewSource(seed)), nameRng: rand.New(rand.NewSource(seed ^ 0x4149_6e61_6d65))}
 	w.store = &MemStore{w}
 	w.initFreshGame()
 	return w
@@ -548,13 +554,44 @@ func planetTotals(w *World) PlanetTotals {
 	return t
 }
 
-// aiBaronNames is the themed name pool for AI barons, shared by seedAIEmpires
-// (world creation) and AddAIEmpires (injecting into a live game). Names are
-// handed out in order, skipping any already in use.
-var aiBaronNames = []string{
-	"Crimson Horde", "Iron Dominion", "Ashfall Clan", "Storm Reavers", "Dust Kings",
-	"Obsidian Pact", "Ashen Legion", "Void Marauders", "Bloodfen Clan", "Rust Barons",
-	"Cinder Host", "Grim Vanguard", "Salt Reavers", "Ember Coven", "Dread Coil",
+// AI baron names are built from a modifier x noun matrix rather than a fixed
+// list, so a game can field far more distinct barons and the lineup varies
+// game to game. The two single-word pools combine as "<modifier> <noun>"
+// (e.g. "Crimson Horde"); ~24 x ~24 gives hundreds of gritty combinations.
+var (
+	aiNameModifiers = []string{
+		"Crimson", "Iron", "Ashen", "Obsidian", "Void", "Rust", "Cinder", "Grim",
+		"Ember", "Dread", "Storm", "Dust", "Salt", "Blood", "Frost", "Bone",
+		"Shadow", "Molten", "Scarlet", "Onyx", "Thorn", "Gale", "Coal", "Ashfall",
+	}
+	aiNameNouns = []string{
+		"Horde", "Dominion", "Clan", "Reavers", "Kings", "Pact", "Legion",
+		"Marauders", "Barons", "Host", "Vanguard", "Coven", "Coil", "Wardens",
+		"Raiders", "Syndicate", "Covenant", "Brood", "Vultures", "Jackals",
+		"Corsairs", "Warband", "Conclave", "Sovereigns",
+	}
+)
+
+// newAIName returns a "<modifier> <noun>" name not present in used, or ok=false
+// only when every combination is taken. It tries random combinations first (via
+// w.nameRng, so it is deterministic per seed and varied game to game), then
+// falls back to a deterministic scan so the "pool exhausted" answer is exact.
+func (w *World) newAIName(used map[string]bool) (string, bool) {
+	for tries := 0; tries < 200; tries++ {
+		name := aiNameModifiers[w.nameRng.Intn(len(aiNameModifiers))] + " " + aiNameNouns[w.nameRng.Intn(len(aiNameNouns))]
+		if !used[strings.ToLower(name)] {
+			return name, true
+		}
+	}
+	for _, m := range aiNameModifiers {
+		for _, n := range aiNameNouns {
+			name := m + " " + n
+			if !used[strings.ToLower(name)] {
+				return name, true
+			}
+		}
+	}
+	return "", false
 }
 
 // addAIEmpire appends one AI empire (Owner "") with the standard AI starting
@@ -579,27 +616,23 @@ func (w *World) addAIEmpire(name string) *Empire {
 
 // seedAIEmpires appends Config.AICount AI empires to the world.
 func (w *World) seedAIEmpires() {
-	for i := 0; i < w.Config.AICount && i < len(aiBaronNames); i++ {
-		w.addAIEmpire(aiBaronNames[i])
-	}
+	w.AddAIEmpires(w.Config.AICount)
 }
 
-// AddAIEmpires injects up to n new AI barons into the live world, picking names
-// from aiBaronNames not already used by any existing empire (dead or alive,
+// AddAIEmpires injects up to n new AI barons into the live world, generating
+// matrix names not already used by any existing empire (dead or alive,
 // case-insensitive). It returns the count actually added, which is less than n
-// if the unused-name pool runs out first.
+// only if every name combination is already taken.
 func (w *World) AddAIEmpires(n int) int {
 	used := make(map[string]bool, len(w.Empires))
 	for _, e := range w.Empires {
 		used[strings.ToLower(e.Name)] = true
 	}
 	added := 0
-	for _, name := range aiBaronNames {
-		if added >= n {
+	for added < n {
+		name, ok := w.newAIName(used)
+		if !ok {
 			break
-		}
-		if used[strings.ToLower(name)] {
-			continue
 		}
 		w.addAIEmpire(name)
 		used[strings.ToLower(name)] = true

@@ -8,19 +8,20 @@ func TestDailyMaintenanceEndsGameAtGameLength(t *testing.T) {
 	cfg.AICount = 2
 	w := NewWorldSeed(cfg, 1)
 	w.LastMaintDate = "2026-06-27" // 3 days before target
+	// Capture the ended game's empire names BEFORE maintenance resets the world:
+	// LastMaster records the just-ended game's master, whose (now varied) name need
+	// not match a freshly-seeded post-reset empire.
+	endedNames := map[string]bool{}
+	for _, e := range w.Empires {
+		endedNames[e.Name] = true
+	}
 	w.DailyMaintenance("2026-06-30")
 
 	if w.LastMaster == "" {
 		t.Fatal("expected LastMaster to be set after game ended")
 	}
-	found := false
-	for _, e := range w.Empires {
-		if e.Name == w.LastMaster {
-			found = true
-		}
-	}
-	if !found {
-		t.Errorf("LastMaster %q does not match any empire", w.LastMaster)
+	if !endedNames[w.LastMaster] {
+		t.Errorf("LastMaster %q was not one of the ended game's empires", w.LastMaster)
 	}
 	if w.GameDay >= cfg.GameLength {
 		t.Errorf("expected GameDay to have reset below GameLength, got %d", w.GameDay)

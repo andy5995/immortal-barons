@@ -88,7 +88,7 @@ func TestAddAIEmpiresExhaustsPool(t *testing.T) {
 	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 
-	pool := len(aiBaronNames)
+	pool := len(aiNameModifiers) * len(aiNameNouns) // every modifier x noun combination
 	if got := w.AddAIEmpires(pool + 10); got != pool {
 		t.Fatalf("requesting more than the pool added %d, want %d", got, pool)
 	}
