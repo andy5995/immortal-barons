@@ -38,6 +38,9 @@ func reviewTreatyOffers(s session.Session, w *ctx) {
 		}
 		fmt.Fprintf(s, "\n%s"+tr(s, "%s proposes a %s.")+"%s\n",
 			ansi.FgBrightCyan, o.From, tr(s, o.Type), ansi.Reset)
+		if o.Message != "" {
+			fmt.Fprintf(s, "  %s\"%s\"%s\n", ansi.Dim, o.Message, ansi.Reset)
+		}
 		// No trailing newline: AskYesNo begins on its own line, so this avoids a
 		// blank gap between the stats and the "Accept? (Y/n)" prompt.
 		fmt.Fprintf(s, "  "+tr(s, "Regions: %s; Net Worth: %s; Score: %s"),
@@ -68,6 +71,20 @@ func allianceStrength(s session.Session, w *ctx) Result {
 	return Stay
 }
 
+// treatyDescriptions explains, in plain English, what each pact does in IB —
+// shown when the player opens that treaty type's negotiation (BRE shows a pact
+// blurb before the send-to list). Wording is IB's own (not copied from BRE) and
+// describes IB's actual mechanics (see internal/game/diplomacy.go).
+var treatyDescriptions = map[string]string{
+	"Full Defense Alliance":  "Neither realm may attack the other, and your armies stand together — your combined offense and defense count in every battle.",
+	"Tariff Trade Agreement": "Opens a taxed trade route. Both realms earn a modest income each turn, scaled to population.",
+	"Free Trade Agreement":   "Opens an open trade route. Both realms earn a larger income each turn — about double a tariff — scaled to population.",
+	"Protective Trade":       "Shields both realms' trade routes and markets from covert sabotage.",
+	"Terrorist Prevention":   "Pools covert agents for defense, making both realms harder to spy on and sabotage.",
+	"Intelligence Alliance":  "Shares intelligence — partner agents strengthen your covert operations, both attacking and defending.",
+	"Technology Agreement":   "Shares technology — the partner with less advanced tech is pulled up toward the more advanced one.",
+}
+
 // negotiateTreaty returns a Diplomacy menu action for one BRE treaty type
 // (#68): pick a target empire, then propose it, accept a matching offer from
 // them, or break it if already held. Treaty types are now direct menu items
@@ -76,8 +93,9 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
 		type row struct {
-			name   string
-			suffix string
+			name      string
+			relations string // treaty types held with this empire (BRE's Relations column), or "None"
+			suffix    string
 		}
 		var rows []row
 		w.With(func() {
@@ -85,26 +103,39 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 				if !e.Alive || e == p {
 					continue
 				}
+				relations := tr(s, "None")
+				if held := w.World.TreatiesBetween(p, e); len(held) > 0 {
+					named := make([]string, len(held))
+					for i, t := range held {
+						named[i] = tr(s, t)
+					}
+					relations = strings.Join(named, ", ")
+				}
 				suffix := ""
-				if w.World.HasTreaty(p, e, ttype) {
-					suffix = " — " + tr(s, "held")
-				} else {
-					for _, o := range offersFrom(p, e.Name) {
-						if o == ttype {
-							suffix = " — " + tr(s, "offers this to you")
-						}
+				for _, o := range offersFrom(p, e.Name) {
+					if o == ttype {
+						suffix = "  " + tr(s, "(offers this to you)")
 					}
 				}
-				rows = append(rows, row{e.Name, suffix})
+				rows = append(rows, row{e.Name, relations, suffix})
 			}
 		})
 		if len(rows) == 0 {
 			ok(s, "There is no one to negotiate with.")
 			return Stay
 		}
+		// Show what this pact does, so the player sees its effect before choosing a
+		// partner (BRE shows a blurb here).
+		if desc := treatyDescriptions[ttype]; desc != "" {
+			fmt.Fprintf(s, "\n%s%s%s\n%s  %s%s\n",
+				ansi.FgBrightYellow, tr(s, ttype), ansi.Reset, ansi.Dim, tr(s, desc), ansi.Reset)
+		}
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose an empire:"), ansi.Reset)
+		// BRE's send-to list shows a Relations column (your standing with each
+		// empire) so you can see who you already have pacts with before choosing.
 		for i, r := range rows {
-			fmt.Fprintf(s, "  %d) %s%s\n", i+1, r.name, r.suffix)
+			fmt.Fprintf(s, "  %d) %-22s %s%s%s%s\n",
+				i+1, r.name, ansi.Dim, tr(s, "Relations: ")+r.relations, ansi.Reset, r.suffix)
 		}
 		i := promptInt(s, "Negotiate with which empire (0 to cancel)?")
 		if i < 1 || i > len(rows) {
@@ -187,6 +218,12 @@ func negotiateWithType(s session.Session, w *ctx, ename, ttype string) {
 		}
 		ok(s, "You accepted the %s with %s.", ttype, ename)
 	default:
+		// BRE offers to attach a note to the proposal; the recipient sees it with
+		// the offer.
+		message := ""
+		if AskYesNo(s, "Attach a message?", false) {
+			message = prompt(s, "Message:")
+		}
 		var err error
 		w.With(func() {
 			p := w.Player()
@@ -195,7 +232,7 @@ func negotiateWithType(s session.Session, w *ctx, ename, ttype string) {
 				err = errTargetGone
 				return
 			}
-			w.World.ProposeTreaty(p, e, ttype)
+			w.World.ProposeTreatyWithMessage(p, e, ttype, message)
 		})
 		if err != nil {
 			fail(s, err)

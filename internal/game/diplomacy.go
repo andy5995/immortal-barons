@@ -37,8 +37,9 @@ type Treaty struct {
 
 // TreatyOffer is a pending proposal recorded on the target empire.
 type TreatyOffer struct {
-	From string
-	Type string
+	From    string
+	Type    string
+	Message string // optional note the proposer attached; shown to the recipient
 }
 
 // treatyPair returns the two names in canonical order.
@@ -137,10 +138,16 @@ func (w *World) AllianceStrength(e *Empire) (offense, defense int, allies []stri
 	return offense, defense, allies
 }
 
-// ProposeTreaty records a pending offer of ttype from `from` to `to`, and
-// mails the target. No-op if they already hold that treaty or an identical
-// offer is pending.
+// ProposeTreaty records a pending offer of ttype from `from` to `to` with no
+// attached message. Thin wrapper over ProposeTreatyWithMessage.
 func (w *World) ProposeTreaty(from, to *Empire, ttype string) {
+	w.ProposeTreatyWithMessage(from, to, ttype, "")
+}
+
+// ProposeTreatyWithMessage records a pending offer of ttype from `from` to `to`
+// with an optional attached message, and mails the target. No-op if they already
+// hold that treaty or an identical offer is pending.
+func (w *World) ProposeTreatyWithMessage(from, to *Empire, ttype, message string) {
 	if w.HasTreaty(from, to, ttype) {
 		return
 	}
@@ -149,7 +156,7 @@ func (w *World) ProposeTreaty(from, to *Empire, ttype string) {
 			return
 		}
 	}
-	to.TreatyOffers = append(to.TreatyOffers, TreatyOffer{From: from.Name, Type: ttype})
+	to.TreatyOffers = append(to.TreatyOffers, TreatyOffer{From: from.Name, Type: ttype, Message: message})
 	to.Mail = append(to.Mail, fmt.Sprintf("%s proposes a %s (respond in the Diplomacy menu).", from.Name, ttype))
 }
 

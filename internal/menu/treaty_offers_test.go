@@ -66,3 +66,17 @@ func TestReviewTreatyOffersSilentWhenNone(t *testing.T) {
 		t.Errorf("no offers should produce no output, got:\n%s", f.out.String())
 	}
 }
+
+// An offer's attached message is shown to the recipient in the inline review.
+func TestReviewTreatyOffersShowsAttachedMessage(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	other := recipients(w)[0]
+	p.TreatyOffers = []game.TreatyOffer{{From: other.Name, Type: "Free Trade Agreement", Message: "Peace and profit."}}
+
+	f := &fakeSession{keys: []rune("n")}
+	reviewTreatyOffers(f, w)
+	if !strings.Contains(f.out.String(), "Peace and profit.") {
+		t.Errorf("the attached message should be shown to the recipient, got:\n%s", f.out.String())
+	}
+}
