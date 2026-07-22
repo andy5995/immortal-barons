@@ -77,24 +77,33 @@ func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*ga
 	type row struct {
 		e               *game.Empire
 		name            string
-		land, land2, nw int
+		land, score, nw int
 	}
 	var rows []row
 	w.With(func() {
 		for _, e := range recipients(w) {
-			rows = append(rows, row{e, e.Name, e.Land, e.Land, w.NetWorth(e)})
+			rows = append(rows, row{e, e.Name, e.Land, e.Score, w.NetWorth(e)})
 		}
 	})
 	if len(rows) == 0 {
 		ok(s, "There is no one to reach.")
 		return nil, false
 	}
-	fmt.Fprintf(s, "\n%s%-4s %-20s %-6s %-6s %s%s\n", ansi.FgBrightCyan, tr(s, "Id"), tr(s, "Empire"), tr(s, "Land"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
+	// Same visual language as the scores board (printScores): magenta rule,
+	// colored and right-aligned numeric columns.
+	fmt.Fprintf(s, "\n%s%-4s %-20s %10s %10s %11s%s\n",
+		ansi.FgBrightWhite, tr(s, "Id"), tr(s, "Empire"), tr(s, "Land"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, strings.Repeat("─", 58), ansi.Reset)
 	for i, r := range rows {
 		if i >= 25 { // A..Y
 			break
 		}
-		fmt.Fprintf(s, "(%c) %-20s %-6d %-6d %d\n", 'A'+i, r.name, r.land, r.land2, r.nw)
+		fmt.Fprintf(s, "%s(%c)%s %s%-20s%s %s%10d%s %s%10d%s %s%11d%s\n",
+			ansi.FgBrightMagenta, 'A'+i, ansi.Reset,
+			ansi.FgBrightWhite, r.name, ansi.Reset,
+			ansi.FgBrightMagenta, r.land, ansi.Reset,
+			ansi.FgBrightWhite, r.score, ansi.Reset,
+			ansi.FgWhite, r.nw, ansi.Reset)
 	}
 	extra := ""
 	if allowAll {

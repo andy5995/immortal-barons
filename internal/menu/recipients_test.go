@@ -1,6 +1,9 @@
 package menu
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
 
 func TestRecipientsExcludesPlayerAndDead(t *testing.T) {
 	w := newWorld()
@@ -69,6 +72,26 @@ func TestPickRecipientSelectsByLetter(t *testing.T) {
 	}
 	if got != rs[0] {
 		t.Errorf("pickRecipient('A') = %v, want %v", got, rs[0])
+	}
+}
+
+// The picker's Score column must show the empire's cumulative Score, not a
+// second copy of Land (which made every row read Land==Score).
+func TestPickRecipientShowsScoreNotLand(t *testing.T) {
+	w := newWorld()
+	rs := recipients(w)
+	if len(rs) == 0 {
+		t.Skip("no recipients seeded")
+	}
+	w.With(func() {
+		rs[0].Land = 4242
+		rs[0].Score = 7777
+	})
+	f := &fakeSession{keys: []rune{'0'}} // 0 cancels; we only need the rendered list
+	pickRecipient(f, w, "Send to:", false)
+	out := f.out.String()
+	if !strings.Contains(out, "7777") {
+		t.Errorf("Score column should show the empire's Score (7777):\n%s", out)
 	}
 }
 
