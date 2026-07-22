@@ -90,3 +90,49 @@ identity from an existing BRE-style setup.
 - `internal/store/ibbs.go` — `WriteOutbox`, `ReadInbound`, `RunPlanetary`.
 - `internal/store/league.go` — `ParseNodeList`, `ParseBoardConfig`.
 - `scripts/ibbs-smoke.sh` — end-to-end 3-board exchange with the real binary.
+
+## Verified against real BRE (2026-07-22)
+
+The clone's inter-BBS model was cross-checked by running a two-board **BRE
+0.988** InterBBS league (coordinator + member) locally under dosemu2 and
+comparing its exchange against IB's Option A packet. Findings and the remaining
+gaps are tracked in #60.
+
+**Local two-board setup (no mailer).** BRE's own "Local InterBBS Setup" runs
+several boards on one machine with no front-end mailer: each board's *inbound*
+directory points directly at the *other* board's `\OUTBOUND`, and a `ROUTE.CFG`
+forms a circle (`ROUTE * 2` on board 1, `ROUTE * 1` on board 2). `BBS.CFG` line
+4 is the inbound-file dir, line 5 the outbound/netmail dir. This works because
+the boards share a disk. The clone's `InboundDir`/`OutboundDir` are the direct
+analogue.
+
+**Exchange commands.** BRE runs maintenance from the command line:
+`BRE PLANETARY` (read inbound, then write outbound — the equivalent of
+`immortal-barons -planetary`), split into `BRE INBOUND` (read + route) and
+`BRE OUTBOUND` (write). A league-wide reset by the coordinator propagates to
+members: a member's next `PLANETARY` wipes and rebuilds its world from the
+coordinator's reset packet.
+
+**Transport format (what IB deliberately does *not* copy).** BRE moves files as
+FidoNet FTS-0001 netmail (`N.msg`, from/to user "BRE System", subject = the
+attached file's absolute path, file-attach attribute, `INTL` kludge) carrying a
+compressed binary data packet named `<league>b<from><to>.<seq>` (BRE's own
+`fd`-escape packer, ~90% ratio) plus a broadcast `brnodes.<league>` node list.
+IB uses plain JSON `.brp` instead — an intentional clean-room simplification.
+The transport differs; the *contents* are what fidelity is judged on.
+
+**Packet contents (BRE's PLANETARY stages).** Local recon info; global recon
+requests; routing data; node list; group attacks; individual IP-attack info;
+Gooie-Kablooie (Doomer Kaboomer) status; scores/news; coordinator config +
+reset. IB currently carries scores, group attacks, terror ops, results, and the
+`LeagueConfig` ruleset broadcast; the recon exchange, individual interplanetary
+attacks, cross-board Doomer status, node-list broadcast, and league-wide reset
+are the open gaps under #60.
+
+**Config field set.** BRE's coordinator config editor (the `LeagueConfig`
+analogue) marks league-wide fields with `*` = "InterBBS Setting Only": Attack /
+Terrorist Costs, Individual / Group / Terrorist Attacks per day, Bombings per
+day, Days for Lost Attacks, Gooie Kablooies, Bombing / Missile Operations, Local
+Attacks, Local Attack Scoring, Dupe Checking — alongside the non-`*` general
+settings (turns/day, protection, land, interest, tax, region caps, maintenance /
+trade-deal / region costs, attack damage / rewards).
