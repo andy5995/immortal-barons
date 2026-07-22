@@ -92,6 +92,32 @@ func TestRegularAttackLossesAreAsymmetric(t *testing.T) {
 	}
 }
 
+// A won Normal attack captures max(floor, ~10% of the loser's regions) — a
+// bigger share of a small realm, ~10% of a large one (BRE live).
+func TestRegularAttackCaptureFloorAndPercent(t *testing.T) {
+	newFight := func(defenderLand int) (*World, *Empire, *Empire) {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		a := &Empire{Name: "A", Troopers: 1_000_000, Morale: 100, Alive: true}
+		d := &Empire{Name: "D", Troopers: 1, Morale: 100, Land: defenderLand,
+			Regions: RegionMix{Mountain: defenderLand}, People: 1_000_000, Alive: true}
+		return w, a, d
+	}
+
+	// Large defender: ~10% (500 → capture 50).
+	w, a, d := newFight(500)
+	w.Attack(a, d, FullForce(a))
+	if got := 500 - d.Land; got != 500*RegularAttackCapturePct/100 {
+		t.Errorf("large defender: captured %d, want %d (%d%%)", got, 500*RegularAttackCapturePct/100, RegularAttackCapturePct)
+	}
+
+	// Small defender: the floor dominates (100 regions → 10% = 10 < floor 15).
+	w, a, d = newFight(100)
+	w.Attack(a, d, FullForce(a))
+	if got := 100 - d.Land; got != RegularAttackCaptureFloor {
+		t.Errorf("small defender: captured %d, want the floor %d", got, RegularAttackCaptureFloor)
+	}
+}
+
 func TestAttackScoreAttackerWins(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := &Empire{Name: "A", Troopers: 100000, Morale: 100, Alive: true}

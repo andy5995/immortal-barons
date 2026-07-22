@@ -24,9 +24,14 @@ const (
 	RegularAttackWinnerLossPct = 8
 	RegularAttackLoserLossPct  = 20
 
-	// RegularAttackCapturePct is the share of the loser's regions a Normal
-	// attack captures (attack.hlp: 20%).
-	RegularAttackCapturePct = 20
+	// A Normal attack captures max(RegularAttackCaptureFloor, capture% of the
+	// loser's regions). Live BRE (2026-07-21, Attack Rewards=Medium, five points
+	// 30-574 regions): ~10% of regions with a ~15-region floor — small realms lose
+	// a bigger share, large ones ~10%, and the outcome is independent of the
+	// strength ratio (verified 1.3x-4x). attack.hlp's "20%" is likely the High-
+	// rewards value; Medium is ~10%. Medium-setup constants; tune here.
+	RegularAttackCapturePct   = 10
+	RegularAttackCaptureFloor = 15
 
 	// LandDefenseBonus is the defensive strength each region adds on top of the
 	// defender's units (terrain the attacker must take). Used in the battle math
@@ -117,7 +122,13 @@ func (w *World) Attack(a, d *Empire, f AttackForce) string {
 		// path). One attack always captures the same SHARE of regions no matter how
 		// lopsided the strength: a far stronger army takes ground faster over many
 		// attacks, it does not annihilate an empire in a single blow.
-		captured := (d.Land*RegularAttackCapturePct/100 + 1) * rew / 100
+		// max(floor, capture% of the loser's land), then scaled by Attack Rewards.
+		// The floor makes a decisive win on a small realm take (up to) all of it.
+		captured := d.Land * RegularAttackCapturePct / 100
+		if captured < RegularAttackCaptureFloor {
+			captured = RegularAttackCaptureFloor
+		}
+		captured = captured * rew / 100
 		if captured > d.Land {
 			captured = d.Land
 		}

@@ -138,20 +138,25 @@ All four constants live in `balance.go`; Score never drops below 0.
     variant menu — so IB correctly does not offer them locally (verify against
     the group-attack docs).
 
-  Region **capture** was **~50% at ~3× strength** live (attack.hlp's 20% is a
-  baseline that scales up with the strength ratio / Attack Rewards config — the
-  exact curve is not yet pinned down; IB keeps 20% as a tunable placeholder). The
-  **loser only loses regions if it is the defender** — a losing attacker never
-  loses land. In BRE the **winner then picks which region *types*** to take
-  (a region picker); IB currently captures an automatic mix (a known gap).
+  Region **capture** follows `max(RegularAttackCaptureFloor, RegularAttackCapturePct%
+  × loser regions)`, scaled by Attack Rewards. A **live region-count sweep**
+  (2026-07-21, Attack Rewards = Medium, five points 30–574 regions) gave a clean
+  formula: **a ~15-region floor** below ~150 regions, **~10% above** — and it is
+  **independent of the strength ratio** (verified 1.3×–4×). So a small realm loses
+  a big share (a 100-region defender loses 15 = 15%), a large one ~10% (a 574-region
+  defender loses 57). `attack.hlp`'s "20%" is likely the *High*-rewards value;
+  Medium is ~10%. (An earlier "scales with the strength ratio" reading was an
+  artifact of comparing victims of different *sizes* across resets — the count
+  sweep corrected it.) The **loser only loses regions if it is the defender** — a
+  losing attacker never loses land. In BRE the **winner then picks which region
+  *types*** to take (a region picker); IB currently captures an automatic mix (#58).
   Like BRE, the attacker first picks a **committed force** — how many
   Troopers/Jets/Tanks/Bombers to send (jets usable only up to `Carriers × 100`).
   Only the committed units add offense, and only they take the loss; held-back
   units stay home and unhurt.
   The win **captures regions and takes no gold** — BRE's Regular Attack rewards
   land, not money (*"a successful assault brings you extra regions"*, `breins.txt`;
-  gold-to-bank is the separate pirate-raid path). IB currently captures a fixed
-  20% share (a placeholder pending the live-verified scaling curve); either way a
+  gold-to-bank is the separate pirate-raid path). Either way a
   large empire is ground down over many attacks, while a small one can lose its
   last regions in one, which eliminates it (and the conqueror absorbs its
   surviving military).
