@@ -255,6 +255,45 @@ Once inside a turn you can scrape income/status numbers per turn. Hard-won rules
   run (v0.988). The earlier "+ y confirm" note may be version/preference
   dependent — check the active line rather than blind-sending a `y`.
 
+### Setting up an efficient test run (2026-07-21, proven)
+
+Before a mechanics test that needs lots of gold/agents/military (covert costs,
+attack outcomes), **don't blow your starting gold on the first turn.** Two
+levers make testing far faster:
+
+1. **Ask the maintainer to set reset config options for testing, up front.**
+   The BRE Configuration Editor (sysop) has options that remove testing
+   friction. Proven-useful settings: **Maintenance Costs: None** (income is not
+   eaten each turn, so gold accumulates), **Turns of Protection: 0** (empires
+   are attackable/covert-targetable immediately, no new-realm shield),
+   **Tax Rate: 0** (popular support stays ~100, no erosion), high **Max
+   Purchasable Regions**. Whoever runs the reset controls these — **remind them
+   to set them** rather than grinding around the defaults. (Note: "Region Costs:
+   None" and "Maintenance Costs: None" are *maintenance*-cost toggles, NOT the
+   purchase price — regions still cost ~gold to BUY, and the buy quantity is
+   gold-limited.)
+
+2. **Play a few turns to build a saturated income BEFORE spending on the test.**
+   The fastest income engine is **Coastal regions** (Tourism): buy the max
+   affordable Coastal each turn for 2-3 turns and Tourism compounds hard —
+   observed ~12k → 147k → 403k gold/turn over three buys. With Maintenance None
+   you keep it all. Once income is saturated, stop buying land and let gold pile
+   up for a turn or two; now you can afford repeated/expensive ops. Keep Tax
+   Rate low (support high) or Coastal output "slumps drastically."
+
+**Blind turn-advance macros desync on conditional prompts** — the boost-support
+prompt (support < 100), a food-shortage "reconsider? (Y/n)" after underpaying
+food, a lottery event, "Change Production?". A fixed key-count loop will feed a
+key to the wrong prompt (e.g. a `0` meant for a menu becomes `0` food → a
+DISASTEROUS-results warning). Drive prompt-by-prompt keying off the active
+bottom line, not a blind burst, for any turn that might hit one of these.
+
+**Two empires for attacker/victim tests.** BRE seeds no AI opponents on a fresh
+reset — only your enrolled realm exists. To test attacks/covert against a
+target and read the *victim* side, enroll a SECOND realm (edit both the first
+and last line of `doorfile.sr` to a new caller name, launch, name the realm),
+then switch back. Repeat the doorfile swap to alternate attacker/victim.
+
 ## What the strings give you — and what they DON'T
 
 BRE is Turbo Pascal. Menu items are **length-prefixed ShortStrings stored
