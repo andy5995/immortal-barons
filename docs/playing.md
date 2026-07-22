@@ -18,6 +18,5 @@ Menu (Help Database), or press `?` at a menu. It is organized by category:
 - **Inter-BBS** — leagues and group attacks
 
 The same content is the single source for a web guide too. It lives as Markdown
-under `internal/help/content/<category>/`, and is translated with po4a (see
-`docs/superpowers/specs/2026-07-03-docs-help-localization-design.md`). Edit the
+under `internal/help/content/<category>/`, and is translated with po4a. Edit the
 topic files there; the in-game help and the web guide both come from them.

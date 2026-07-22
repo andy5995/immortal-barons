@@ -37,8 +37,7 @@ Keep the set small and justified. Commit `go.mod`/`go.sum`; do NOT commit
 `vendor/` (distros build against their own packaged deps or fetch at build); a
 release tarball may `go mod vendor` for offline builds. i18n uses gettext/PO:
 **po4a** for the help docs and a small **in-house PO reader** (`internal/i18n`,
-no runtime dependency) for UI strings — see
-`docs/superpowers/specs/2026-07-03-docs-help-localization-design.md`.
+no runtime dependency) for UI strings.
 
 ## Architecture
 
@@ -103,8 +102,7 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
 original binary strings plus public strategy guides and the GameBanshee
 manual overview. It covers units (offense/defense values, maintenance,
 net-worth), covert ops, region types, economy, caps, the new-player start
-flow, combat percentages, and the news feeds. Design specs live in
-`docs/superpowers/specs/`. Values cross-referenced against the actual BRE
+flow, combat percentages, and the news feeds. Values cross-referenced against the actual BRE
 files (`~/.dosemu/drive_c/games/bre-dos/`) are noted there and in the
 `bre-binary-verified-math` memory; a disassembly of the original binary is
 authoritative for exact constants.
@@ -126,8 +124,7 @@ for the web; #5); per-caller empires keyed by BBS handle; per-turn economy
 (idle empires stagnate) split from a daily maintenance step; turns-per-day
 and new-realm protection; an event log for asynchronous play. Front-ends:
 `cmd/immortal-barons` (door + `-local` local play) and `cmd/immortal-barons-web`
-(experimental browser). Persistence design/plan:
-`docs/superpowers/{specs,plans}/2026-07-03-door-*`.
+(experimental browser).
 
 Implemented gameplay: conventional combat (offense/defense, turrets, carriers,
 jets, bomber airfield strikes), nuclear/chemical/biological strikes, pirate

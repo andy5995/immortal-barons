@@ -5,8 +5,7 @@ import (
 	"fmt"
 )
 
-// Inter-BBS (interplanetary) play. Transport is Option A from the design spec
-// (docs/superpowers/specs/2026-07-04-interbbs-design.md): the game reads and
+// Inter-BBS (interplanetary) play. Transport is Option A: the game reads and
 // writes packet files in inbound/outbound dirs in its own JSON format; how the
 // files move between boards is the operator's concern. This file is the pure
 // in-memory model and resolution logic, testable with several World instances;

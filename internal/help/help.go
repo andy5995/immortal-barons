@@ -5,7 +5,7 @@
 // (title/category/order/in_game). That Markdown is the SINGLE SOURCE OF TRUTH:
 // the game embeds and renders it to ANSI here (see render.go), and the
 // user-facing web docs are assembled from the same files and translated with
-// po4a. Design: docs/superpowers/specs/2026-07-03-docs-help-localization-design.md
+// po4a.
 //
 // Why the content lives under this package instead of docs/help/: Go's
 // //go:embed can only reach files at or below the embedding package's

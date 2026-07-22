@@ -95,8 +95,7 @@ func prefixMatch(items []string, p string) int {
 
 // helpBrowse is the categorized help browser: pick a category, then a topic,
 // then read it. It replaces the old flat "pick 1-of-N topics" list. Content is
-// the embedded single-source Markdown from internal/help (see
-// docs/superpowers/specs/2026-07-03-docs-help-localization-design.md).
+// the embedded single-source Markdown from internal/help.
 func helpBrowse(s session.Session, w *ctx) Result {
 	for {
 		cats := help.Categories()

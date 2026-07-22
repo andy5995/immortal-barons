@@ -6,8 +6,7 @@
 //	go run ./cmd/barons-docs            # assemble into ./build/docs
 //	go run ./cmd/barons-docs -out DIR   # assemble into DIR
 //
-// Then: mkdocs build (reads <out>/mkdocs.yml). See
-// docs/superpowers/specs/2026-07-05-docs-website-design.md.
+// Then: mkdocs build (reads <out>/mkdocs.yml).
 package main
 
 import (

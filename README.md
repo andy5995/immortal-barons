@@ -119,9 +119,6 @@ See the [player's guide](https://andy5995.github.io/immortal-barons/guide/).
 
 ## Design
 
-The design notes are in
-[`docs/superpowers/specs/`](docs/superpowers/specs/).
-
 The code is split so that the game logic does not know how it is shown to
 the player. The engine only reads keypresses from, and writes text to, a
 `Session`. This makes it possible to add a BBS-door front-end and a web
