@@ -31,7 +31,7 @@ func TestNuclearStrikeShapeShiftConflict(t *testing.T) {
 
 	fb := &hookSession{
 		fakeSession: fakeSession{keys: []rune("A")},
-		marker:      "Attack which realm",
+		marker:      "Choose a target",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("victim")) })
 		},

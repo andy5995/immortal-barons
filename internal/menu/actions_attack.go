@@ -88,8 +88,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose a target:"), ansi.Reset)
-	name, chosen := pickAttackTarget(s, rows)
+	name, chosen := pickAttackTarget(s, rows, tr(s, "Attack which realm? (letter, RETURN to abort)"))
 	if !chosen {
 		return Stay
 	}
@@ -143,7 +142,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 // blank id so they can be seen but not picked — their diplomacy status shows in
 // the diplomacy menus. Returns the chosen realm name, or chosen=false if the
 // player aborts (RETURN / any non-letter) or nothing is attackable.
-func pickAttackTarget(s session.Session, rows []targetRow) (name string, chosen bool) {
+func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name string, chosen bool) {
 	rule := strings.Repeat("─", 72)
 	fmt.Fprintf(s, "%s%-4s %-26s %10s %11s %11s%s\n",
 		ansi.FgBrightWhite, tr(s, "Id"), tr(s, "Empire Name"),
@@ -168,7 +167,7 @@ func pickAttackTarget(s session.Session, rows []targetRow) (name string, chosen 
 		ok(s, "None of these realms can be attacked — they are protected or allied with you.")
 		return "", false
 	}
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Attack which realm? (letter, RETURN to abort)"), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, prompt, ansi.Reset)
 	r, err := readKey(s)
 	if err != nil {
 		return "", false
@@ -196,12 +195,12 @@ func localAttack(s session.Session, w *ctx, label string, cost int, endsTurn boo
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
+	// BRE goes straight to the target prompt after the menu echoes the op; only a
+	// gold-fee op (WMD) shows a cost line first, since its price isn't on a menu.
 	if cost > 0 {
-		fmt.Fprintf(s, "\n%s"+tr(s, "%s — %d gold. Choose a target:")+"%s\n", ansi.FgBrightCyan, label, cost, ansi.Reset)
-	} else {
-		fmt.Fprintf(s, "\n%s"+tr(s, "%s — choose a target:")+"%s\n", ansi.FgBrightCyan, label, ansi.Reset)
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s — %d gold.")+"%s\n", ansi.FgBrightCyan, label, cost, ansi.Reset)
 	}
-	name, chosen := pickAttackTarget(s, rows)
+	name, chosen := pickAttackTarget(s, rows, tr(s, "Choose a target (letter, RETURN to abort)"))
 	if !chosen {
 		return Stay
 	}
