@@ -258,6 +258,24 @@ func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 	}
 }
 
+// Preference labels show BRE's bare Yes/No (right-aligned), not IB's old
+// bracketed [ON]/[OFF] (verified against a live BRE Preferences capture).
+func TestPreferenceLabelUsesBareYesNo(t *testing.T) {
+	w := newWorld()
+	label := onOff("Auto-Feed Empire", func(g *ctx) *bool { return &g.AutoFeed })
+
+	w.AutoFeed = true
+	on := label(w)
+	if !strings.Contains(on, "Yes") || strings.ContainsAny(on, "[]") || strings.Contains(on, "ON") {
+		t.Errorf("enabled pref should read bare 'Yes', got %q", on)
+	}
+	w.AutoFeed = false
+	off := label(w)
+	if !strings.Contains(off, "No") || strings.ContainsAny(off, "[]") {
+		t.Errorf("disabled pref should read bare 'No', got %q", off)
+	}
+}
+
 func TestAboutFromGameMenu(t *testing.T) {
 	menus := BuildMenus()
 	// Help lightbar: ? -> type 'a' (jumps to About) -> Enter (select) -> dismiss

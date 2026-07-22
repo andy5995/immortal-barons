@@ -367,7 +367,8 @@ func eliminated(g *ctx) bool {
 	return dead
 }
 
-const rule = "────────────────────────────────────────────────────────────"
+// 62 columns wide, matching BRE's main menu rules (from a live capture).
+const rule = "──────────────────────────────────────────────────────────────"
 
 // titleRule renders a BRE-style header: the bracketed menu title centered on a
 // rule line, e.g. "──────[Goldie Luck's Bank]──────", all in the menu color.
@@ -557,10 +558,12 @@ func toggle(get func(*ctx) *bool) Action {
 
 func onOff(name string, get func(*ctx) *bool) func(*ctx) string {
 	return func(g *ctx) string {
-		state := "OFF"
+		// BRE shows a bare, right-aligned Yes/No (no brackets), verified against a
+		// live Preferences capture.
+		state := "No"
 		if *get(g) {
-			state = "ON"
+			state = "Yes"
 		}
-		return fmt.Sprintf("%-28s [%s]", i18n.T(playerLang(g), name), state)
+		return fmt.Sprintf("%-28s %3s", i18n.T(playerLang(g), name), state)
 	}
 }
