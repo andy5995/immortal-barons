@@ -1,5 +1,26 @@
 # Frequently Asked Questions
 
+## How is Immortal Barons different from Barren Realms Elite?
+
+- All features are enabled and free to all sysops and players. There is no
+  "registered" or "unregistered" version.
+- Several BBS nodes can play the same game at the same time, which BRE could not
+  do. See [Can several people play as a door at the same time?](#can-several-people-play-as-a-door-at-the-same-time).
+- It has a [web browser version](https://andy5995.github.io/immortal-barons/web-server/),
+  which BRE does not. It also plays in a local terminal.
+- It does not run under DOS. It is a modern native program that runs as a door
+  under BBS software on any platform Go supports.
+- A new player can end their own new-realm protection early, from the System
+  menu, to start fighting sooner. BRE does not offer this.
+- Immortal Barons hides realms under new-realm protection from the attack list.
+- When a sysop starts a fresh game, they can keep their old settings. Those
+  settings are stored in a `config.json` file. Running
+  `immortal-barons -reset-from-config` clears the world but reuses that file, so
+  you do not have to choose the settings again each time you reset.
+- Some game values — such as attack rewards, unit prices, and economy rates —
+  may not match BRE exactly. The game aims to get as close as it can, using
+  BRE's own numbers where they are known. A few mechanics are still being built.
+
 ## Is winsock supported?
 
 - Yes, on Windows. The game attaches to the caller's socket handle that the BBS
@@ -12,27 +33,6 @@
 ## The characters look wrong. What can I do?
 
 See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset/).
-
-## How is Immortal Barons different from Barren Realms Elite?
-
-- It is a new game, written from scratch in Go, inspired by BRE. It shares no
-  code, text, or art with the original.
-- It does not run under DOS. It is a modern native program that runs as a door
-  under BBS software on any platform Go supports.
-- It has a [web browser version](https://andy5995.github.io/immortal-barons/web-server/),
-  which BRE does not. It also plays in a local terminal.
-- Several BBS nodes can play the same game at the same time, which BRE could not
-  do. See [Can several people play as a door at the same time?](#can-several-people-play-as-a-door-at-the-same-time).
-- A new player can end their own new-realm protection early, from the System
-  menu, to start fighting sooner. BRE does not offer this.
-- Immortal Barons hides realms under new-realm protection from the attack list.
-- Some game values — such as attack rewards, unit prices, and economy rates —
-  may not match BRE exactly. The game aims to get as close as it can, using
-  BRE's own numbers where they are known. A few mechanics are still being built.
-- When a sysop starts a fresh game, they can keep their old settings. Those
-  settings are stored in a `config.json` file. Running
-  `immortal-barons -reset-from-config` clears the world but reuses that file, so
-  you do not have to choose the settings again each time you reset.
 
 ## How do I add AI barons (computer opponents)?
 
