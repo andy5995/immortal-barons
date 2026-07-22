@@ -44,9 +44,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v7
-      # setup-go pinned to v6 (current, per Andy; DC has no Go workflow to
-      # cross-check against). go-version-file keeps CI on the exact toolchain
-      # the module declares (go.mod: go 1.26.x).
+      # setup-go pinned to v7 (bumped from v6 by Dependabot). go-version-file
+      # keeps CI on the exact toolchain the module declares (go.mod: go 1.26.x).
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.mod
