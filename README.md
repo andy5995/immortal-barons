@@ -8,15 +8,14 @@ highest net worth when the turns run out, or to conquer everyone else.
 The game is written in Go. It is an independent remake, inspired by the
 1990s BBS door game *Barren Realms Elite*. See [Heritage](#heritage) below.
 
-> **Early work in progress.** Immortal Barons is not ready for real
-> play-testing or inter-BBS (IBBS) play yet. Mechanics are still changing.
+> **Early release.** The game is playable but not finished. Game values are
+> still being balanced, and live inter-BBS (IBBS) play is not ready yet.
 
 ## Status
 
-In development — not yet released. Immortal Barons is a persistent, multi-user
-BBS door game: each caller has a lasting empire in one shared world; you play
-your turns, and other barons (and any AI) act on their own turns. The game runs
-locally or as a native BBS door.
+Immortal Barons is a persistent, multi-user BBS door game: each caller has a
+lasting empire in one shared world; you play your turns, and other barons (and
+any AI) act on their own turns. The game runs locally or as a native BBS door.
 
 The core game is already playable — economy, military and war, covert
 operations, diplomacy, and messaging all work, but the game is not yet balanced.
@@ -50,12 +49,13 @@ below.
 
 ## Download
 
-The first stable version is not released yet. Until it is, only **development
-snapshots** are available. Snapshots are rebuilt automatically from the latest
-source, so they change often and are not stable. Get them from the
-[snapshot release](https://github.com/andy5995/immortal-barons/releases/tag/snapshot).
-Once the first version is out, stable releases will appear on the
+Tagged releases are on the
 [releases page](https://github.com/andy5995/immortal-barons/releases).
+
+**Development snapshots** are also available. Snapshots are rebuilt
+automatically from the latest source, so they change often and may be less
+stable than a tagged release. Get them from the
+[snapshot release](https://github.com/andy5995/immortal-barons/releases/tag/snapshot).
 
 Builds are provided for Windows (32-bit and 64-bit), Linux (x86-64 and ARM64),
 and macOS (Intel and Apple Silicon). The binaries are not signed, so Windows may
