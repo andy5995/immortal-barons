@@ -21,9 +21,13 @@ The core game is already playable — economy, military and war, covert
 operations, diplomacy, and messaging all work, but the game is not yet balanced.
 Many values do not match BRE's yet, so parts of the game are far too easy or too
 hard. Larger features, such as leagues and live inter-BBS play, are still to
-come. For what works today and what is
-planned, see the
-[issue tracker](https://github.com/andy5995/immortal-barons/issues).
+come.
+
+Learn more, follow progress, or get involved:
+
+- [Website](https://andy5995.github.io/immortal-barons/)
+- [Issue tracker](https://github.com/andy5995/immortal-barons/issues)
+- [Discussions](https://github.com/andy5995/immortal-barons/discussions)
 
 We strongly recommend reading the [FAQ](docs/faq.md) first.
 
