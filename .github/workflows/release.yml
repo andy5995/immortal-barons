@@ -1,0 +1,59 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write # needed to publish the release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      # Same build script as the rolling snapshot; here the tag drives both the
+      # archive filename and the wrapped dir version (each tag is distinct, so
+      # no clobber). GITHUB_REF_NAME is the pushed tag, e.g. "v0.0.1".
+      - name: Cross-compile and archive
+        run: scripts/build-archives.sh "$GITHUB_REF_NAME" "$GITHUB_REF_NAME"
+
+      # Offline-buildable source tarball for distro packagers: the committed
+      # tree (git archive, so it excludes dist/ and untracked cruft) plus the
+      # vendored module deps, which Go uses automatically when vendor/ is
+      # present. Run after the binary build so it doesn't mark that tree dirty.
+      - name: Bundle vendored source tarball
+        run: |
+          name="immortal-barons-${GITHUB_REF_NAME}"
+          go mod vendor
+          mkdir -p "$RUNNER_TEMP/$name"
+          git archive --format=tar HEAD | tar -x -C "$RUNNER_TEMP/$name"
+          cp -r vendor "$RUNNER_TEMP/$name/"
+          tar -czf "dist/${name}-vendored-source.tar.gz" -C "$RUNNER_TEMP" "$name"
+          # Regenerate checksums so they cover the source tarball too.
+          ( cd dist && sha256sum immortal-barons-* > SHA256SUMS )
+          ls -l dist
+
+      # Works whether the release already exists (drafted/published via the web
+      # UI, which creates the tag on publish and fires this workflow) or not
+      # (a tag pushed from the CLI). When it already exists we only attach the
+      # assets, leaving any notes written in the UI untouched.
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1; then
+            gh release upload "$GITHUB_REF_NAME" dist/* --clobber
+          else
+            gh release create "$GITHUB_REF_NAME" dist/* \
+              --title "$GITHUB_REF_NAME" \
+              --generate-notes
+          fi

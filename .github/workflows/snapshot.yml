@@ -24,28 +24,12 @@ jobs:
         with:
           go-version-file: go.mod
 
-      # Pure-Go / CGO-free, so every target cross-compiles on this one runner.
-      - name: Cross-compile the door binary
-        run: |
-          mkdir -p dist
-          for target in windows/386 windows/amd64 linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
-            os="${target%/*}"
-            arch="${target#*/}"
-            ext=""
-            [ "$os" = windows ] && ext=".exe"
-            echo "==> building $os/$arch"
-            GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags "-s -w" \
-              -o "immortal-barons$ext" ./cmd/immortal-barons
-            name="immortal-barons-snapshot-${os}-${arch}"
-            if [ "$os" = windows ]; then
-              zip -q "dist/${name}.zip" "immortal-barons$ext"
-            else
-              tar -czf "dist/${name}.tar.gz" "immortal-barons$ext"
-            fi
-            rm -f "immortal-barons$ext"
-          done
-          ( cd dist && sha256sum * > SHA256SUMS )
-          ls -l dist
+      # Shared with release.yml (scripts/build-archives.sh) so the two can't
+      # drift. The archive filename stays stable ("snapshot") so the release
+      # assets clobber in place each push; the inner dir carries the short sha
+      # so an unpacked build is identifiable.
+      - name: Cross-compile and archive
+        run: scripts/build-archives.sh snapshot "${GITHUB_SHA:0:7}"
 
       - name: Publish rolling "snapshot" prerelease
         env:
