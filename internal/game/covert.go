@@ -30,11 +30,26 @@ func (w *World) covertSuccess(a, d *Empire) bool {
 	return w.rng.Intn(total) < aAgents
 }
 
+// covertCost gates a covert op: the attacker must hold at least one agent and
+// enough gold for the op's fee, which is charged up front (BRE charges per op).
+// The agent check comes first so a broke-but-agentless caller still sees
+// ErrNoAgents. No state changes when it returns an error.
+func (w *World) covertCost(a *Empire, cost int) error {
+	if a.Agents < 1 {
+		return ErrNoAgents
+	}
+	if a.Gold < cost {
+		return ErrCantAfford
+	}
+	a.Gold -= cost
+	return nil
+}
+
 // SendSpy gathers military intel on d. Needs at least one agent. On failure
 // the agent is caught (lost) and the victim is alerted.
 func (w *World) SendSpy(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
+	if err := w.covertCost(a, CostSendSpy); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		return fmt.Sprintf("Intel on %s — Land %d, Troops %d, Turrets %d, Tanks %d, Offense %d, Defense %d, Gold %d, Agents %d",
@@ -49,8 +64,8 @@ func (w *World) SendSpy(a, d *Empire) (string, error) {
 // ~10% of them on success; on failure the agent is lost. Covert ops are
 // secret, so the victim event does not name the attacker.
 func (w *World) SupportDissensions(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
+	if err := w.covertCost(a, CostSupportDissensions); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		lost := d.Troopers / 10
@@ -67,8 +82,8 @@ func (w *World) SupportDissensions(a, d *Empire) (string, error) {
 // and risking desertion (see moraleFactor and MoraleDesertThreshold). On
 // failure the agent is lost.
 func (w *World) DemoralizeForces(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
+	if err := w.covertCost(a, CostDemoralizeForces); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		d.adjustMorale(-15)
@@ -85,8 +100,8 @@ func (w *World) DemoralizeForces(a, d *Empire) (string, error) {
 // a defense pact protecting a target you want to attack. On failure the
 // agent is lost.
 func (w *World) SetUp(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
+	if err := w.covertCost(a, CostSetUp); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		if allies := w.alliesOf(d, fullDefenseAlliance); len(allies) > 0 {
@@ -114,8 +129,8 @@ const ExposeOpsShieldDays = 1
 // d is unused but kept so the action fits the same target-picker flow as
 // every other item on this menu.
 func (w *World) ExposeEnemyOps(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
+	if err := w.covertCost(a, CostExposeEnemyOps); err != nil {
+		return "", err
 	}
 	a.ShieldedUntilDay = w.GameDay + ExposeOpsShieldDays
 	return "Your agents expose enemy covert operations — you are shielded from incoming ops for the next day.", nil
@@ -125,8 +140,8 @@ func (w *World) ExposeEnemyOps(a, d *Empire) (string, error) {
 // pre-war intelligence on alliance networks and trade partners. On failure the
 // agent is lost.
 func (w *World) SpyOnRelations(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
+	if err := w.covertCost(a, CostSpyOnRelations); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		var lines []string
@@ -151,8 +166,8 @@ func (w *World) SpyOnRelations(a, d *Empire) (string, error) {
 // Bribery buys off an agent inside d, so that from now on d's covert
 // operations against you fail. On failure your own agent is lost.
 func (w *World) Bribery(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
+	if err := w.covertCost(a, CostBribery); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		for _, n := range a.ImmuneFrom {
@@ -173,8 +188,8 @@ func (w *World) Bribery(a, d *Empire) (string, error) {
 // revolt), weakening its economy and its troopers. On failure the agent is
 // lost.
 func (w *World) StirRevolts(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
+	if err := w.covertCost(a, CostStirRevolts); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		d.adjustSupport(-15)
@@ -189,8 +204,8 @@ func (w *World) StirRevolts(a, d *Empire) (string, error) {
 // BombFood destroys much of d's food reserve, which can trigger a death
 // spiral. On failure the agent is lost.
 func (w *World) BombFood(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
+	if err := w.covertCost(a, CostBombEnemyTargets); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		lost := d.Food / 2
@@ -214,13 +229,14 @@ const BombingBombersRequired = 500
 // market, it falls back to a small gold raid so the op still bites. On failure
 // the agent is lost.
 func (w *World) BombTradingMarket(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
-	}
 	// A Protective Trade agreement guards the two realms' trade, so a partner
 	// cannot bomb the other's market (#11; BRE: "preventing bombing of trade deals").
+	// Checked before the fee so a guarded strike costs nothing.
 	if w.HasTreaty(a, d, "Protective Trade") {
 		return fmt.Sprintf("%s's trade is guarded by your Protective Trade agreement — the strike cannot proceed.", d.Name), nil
+	}
+	if err := w.covertCost(a, CostBombEnemyTargets); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		goods, proceeds := w.bombMarketPosition(d, BombMarketLossPct)
@@ -245,13 +261,14 @@ var tradeTreatyTypes = []string{"Tariff Trade Agreement", "Free Trade Agreement"
 // BombTradeRoutes severs one of d's standing trade treaties. On failure the
 // agent is lost.
 func (w *World) BombTradeRoutes(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
-	}
 	// A Protective Trade agreement guards the trade routes between the two realms,
 	// so a partner cannot bomb them (#11; BRE: "preventing bombing of trade deals").
+	// Checked before the fee so a guarded strike costs nothing.
 	if w.HasTreaty(a, d, "Protective Trade") {
 		return fmt.Sprintf("%s's trade routes are guarded by your Protective Trade agreement — the strike cannot proceed.", d.Name), nil
+	}
+	if err := w.covertCost(a, CostBombEnemyTargets); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		for _, ttype := range tradeTreatyTypes {
@@ -273,8 +290,8 @@ func (w *World) BombTradeRoutes(a, d *Empire) (string, error) {
 // return) of each of d's pending bank investments. On failure the agent is
 // lost.
 func (w *World) UndermineInvestments(a, d *Empire) (string, error) {
-	if a.Agents < 1 {
-		return "", ErrNoAgents
+	if err := w.covertCost(a, CostBombEnemyTargets); err != nil {
+		return "", err
 	}
 	if w.covertSuccess(a, d) {
 		if len(d.Investments) == 0 {

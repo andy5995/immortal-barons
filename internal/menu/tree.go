@@ -44,8 +44,8 @@ func BuildMenus() *Menus {
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan, Columns: 2}
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
-	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
-	bombTargets := &Menu{Title: "Bomb Enemy Targets", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
+	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightGreen, ExitOnEnter: true, Status: covertStatus}
+	bombTargets := &Menu{Title: "Bomb Enemy Targets", Color: ansi.FgBrightGreen, ExitOnEnter: true}
 	ipSpecial := &Menu{Title: "Special Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
 	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
@@ -196,19 +196,22 @@ func BuildMenus() *Menus {
 	}
 	interplanetary.DefaultOnEnter = quitOnEnter(interplanetary)
 
-	// Order and hotkeys match BRE.OVR's string table for the Covert
-	// Operations menu and its Bomb Enemy Targets submenu (#73).
+	// Order, numeric hotkeys, and per-op gold costs match BRE's live Covert
+	// Operations menu (2026-07-21); costs are the balance.go Cost* constants
+	// (#73). costOf shows a fixed gold price in the menu's cost column.
+	costOf := func(n int) func(*ctx) int { return func(*ctx) int { return n } }
 	covert.Items = []Item{
-		{Key: 'S', Label: "Send Spy", Do: sendSpy},
-		{Key: 'R', Label: "Stir Revolts", Do: stirRevolts},
-		{Key: 'U', Label: "Set Up", Do: setUp},
-		{Key: 'D', Label: "Support Dissensions", Do: supportDissensions},
-		{Key: 'M', Label: "Demoralize Forces", Do: demoralizeForces},
-		{Key: 'P', Label: "Spy on Relations", Do: spyRelations},
-		{Key: 'B', Label: "Bomb Enemy Targets", Do: gotoMenu(bombTargets)},
-		{Key: 'Y', Label: "Bribery", Do: briberyOp},
-		{Key: 'X', Label: "Expose Enemy Ops", Do: exposeEnemyOps},
+		{Key: '1', Label: "Send Spy", Price: costOf(game.CostSendSpy), Do: sendSpy},
+		{Key: '2', Label: "Stir Revolts", Price: costOf(game.CostStirRevolts), Do: stirRevolts},
+		{Key: '3', Label: "Set Up", Price: costOf(game.CostSetUp), Do: setUp},
+		{Key: '4', Label: "Support Dissensions", Price: costOf(game.CostSupportDissensions), Do: supportDissensions},
+		{Key: '5', Label: "Demoralize Forces", Price: costOf(game.CostDemoralizeForces), Do: demoralizeForces},
+		{Key: '6', Label: "Spy on Relations", Price: costOf(game.CostSpyOnRelations), Do: spyRelations},
+		{Key: '7', Label: "Bomb Enemy Targets", Price: costOf(game.CostBombEnemyTargets), Do: gotoMenu(bombTargets)},
+		{Key: '8', Label: "Bribery", Price: costOf(game.CostBribery), Do: briberyOp},
+		{Key: '9', Label: "Expose Enemy Ops", Price: costOf(game.CostExposeEnemyOps), Do: exposeEnemyOps},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
+		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	covert.DefaultOnEnter = quitOnEnter(covert)
@@ -429,6 +432,13 @@ func ibbsHidden(w *ctx) bool { return !w.Config.InterBBSEnabled() }
 func spendingStatus(w *ctx) string {
 	p := w.Player()
 	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d turns."), formatGold(p.Gold, playerLang(w)), p.TurnsLeft)
+}
+
+// covertStatus is the Covert Operations footer: gold on hand and agents held
+// (BRE: "You have <gold> gold and <N> agents.").
+func covertStatus(w *ctx) string {
+	p := w.Player()
+	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d agents."), formatGold(p.Gold, playerLang(w)), p.Agents)
 }
 
 // foodMarketStatus is the Food Market status line: today's planet-wide supply

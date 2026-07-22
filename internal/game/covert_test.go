@@ -26,6 +26,34 @@ func TestSendSpySuccess(t *testing.T) {
 	}
 }
 
+// Covert ops charge their BRE gold cost per op (on top of the agent risk), and
+// an op the attacker can't afford does nothing.
+func TestCovertOpChargesGold(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents = 50
+	d.Agents = 0 // ensure success
+	a.Gold = 10_000
+	if _, err := w.SendSpy(a, d); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if a.Gold != 10_000-CostSendSpy {
+		t.Errorf("Send Spy should charge %d gold: Gold = %d, want %d", CostSendSpy, a.Gold, 10_000-CostSendSpy)
+	}
+}
+
+func TestCovertOpTooPoor(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents = 50
+	a.Gold = CostBribery - 1 // can't cover Bribery's fee
+	agentsBefore := a.Agents
+	if _, err := w.Bribery(a, d); !errors.Is(err, ErrCantAfford) {
+		t.Fatalf("expected ErrCantAfford when too poor, got %v", err)
+	}
+	if a.Gold != CostBribery-1 || a.Agents != agentsBefore {
+		t.Error("a failed (unaffordable) op must charge no gold and lose no agent")
+	}
+}
+
 func TestSendSpyNoAgents(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents = 0
@@ -166,6 +194,7 @@ func TestDemoralizeForcesLowersMorale(t *testing.T) {
 func TestSetUpVoidsAlliance(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
+	a.Gold = 10_000_000 // afford covert op fees
 	a.Agents = 1_000_000
 	d := w.AddHuman("d", "Delta")
 	d.Agents = 0
@@ -188,6 +217,7 @@ func TestSetUpVoidsAlliance(t *testing.T) {
 func TestExposeEnemyOpsShieldsAgainstCovertOps(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
+	a.Gold = 10_000_000 // afford covert op fees
 	a.Agents = 1
 	d := w.AddHuman("d", "Delta") // unused target, required by the action signature
 
@@ -197,6 +227,7 @@ func TestExposeEnemyOpsShieldsAgainstCovertOps(t *testing.T) {
 
 	attacker := w.AddHuman("e", "Enemyland")
 	attacker.Agents = 1_000_000
+	attacker.Gold = 10_000_000
 	before := a.Troopers
 	if _, err := w.SupportDissensions(attacker, a); err != nil {
 		t.Fatal(err)
@@ -220,6 +251,7 @@ func TestBombTradingMarketDrainsGold(t *testing.T) {
 func TestBombTradeRoutesSeversTreaty(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
+	a.Gold = 10_000_000 // afford covert op fees
 	a.Agents = 1_000_000
 	d := w.AddHuman("d", "Delta")
 	d.Agents = 0
@@ -269,6 +301,7 @@ func TestSlappenheimerStrikeDamagesTarget(t *testing.T) {
 func TestSpyOnRelationsRevealsTreaties(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
+	a.Gold = 10_000_000 // afford covert op fees
 	a.Agents = 50
 	d := w.AddHuman("d", "Delta")
 	d.Agents = 0
@@ -288,6 +321,7 @@ func TestSpyOnRelationsRevealsTreaties(t *testing.T) {
 func TestBriberyGrantsImmunity(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
+	a.Gold = 10_000_000 // afford covert op fees
 	a.Agents = 1_000_000
 	d := w.AddHuman("d", "Delta")
 	d.Agents = 4
@@ -296,6 +330,7 @@ func TestBriberyGrantsImmunity(t *testing.T) {
 	}
 	// d now cannot land covert ops on a, even with overwhelming agents.
 	d.Agents = 1_000_000
+	d.Gold = 10_000_000
 	before := a.Troopers
 	if _, err := w.SupportDissensions(d, a); err != nil {
 		t.Fatal(err)

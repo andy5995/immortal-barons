@@ -403,6 +403,19 @@ func (m *Menu) hasColumns(g *ctx) bool {
 	return false
 }
 
+// hasOwnedColumn reports whether any visible item carries an Owned count, so a
+// price-only menu (BRE's Covert Operations) omits the "# Owned" column entirely
+// rather than trailing an empty one.
+func (m *Menu) hasOwnedColumn(g *ctx) bool {
+	for i := range m.Items {
+		it := &m.Items[i]
+		if !it.hidden(g) && it.Owned != nil {
+			return true
+		}
+	}
+	return false
+}
+
 func draw(s session.Session, g *ctx, m *Menu) {
 	// Render the whole menu into an in-memory buffer while holding the world
 	// lock, then flush it to the session unlocked. Every item callback
@@ -420,9 +433,13 @@ func draw(s session.Session, g *ctx, m *Menu) {
 		lang := playerLang(g)
 		fmt.Fprintf(&b, "%s\n", titleRule(col, i18n.T(lang, m.Title)))
 		cols := m.hasColumns(g)
-		if cols {
+		ownedCol := cols && m.hasOwnedColumn(g)
+		if cols && ownedCol {
 			fmt.Fprintf(&b, "%s  Key %-18s %8s %9s%s\n",
 				col, i18n.T(lang, "Item"), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
+		} else if cols {
+			fmt.Fprintf(&b, "%s  Key %-18s %8s%s\n",
+				col, i18n.T(lang, "Item"), i18n.T(lang, "Price"), ansi.Reset)
 		}
 		if m.Columns >= 2 && !cols {
 			drawItemsColumns(&b, g, m, col, lang, m.Columns)
@@ -446,9 +463,15 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					}
 					// BRE renders the Price column bright-white and the Owned column
 					// white (#17 menu audit); the key is the menu accent color.
-					fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %s%8s%s %s%9s%s\n",
-						col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset,
-						ansi.FgBrightWhite, price, ansi.Reset, ansi.FgWhite, owned, ansi.Reset)
+					if ownedCol {
+						fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %s%8s%s %s%9s%s\n",
+							col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset,
+							ansi.FgBrightWhite, price, ansi.Reset, ansi.FgWhite, owned, ansi.Reset)
+					} else {
+						fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %s%8s%s\n",
+							col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset,
+							ansi.FgBrightWhite, price, ansi.Reset)
+					}
 					continue
 				}
 				kcol, lcol := col, ansi.FgWhite

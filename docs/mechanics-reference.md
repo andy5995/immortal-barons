@@ -202,27 +202,42 @@ Success depends on how many agents you have compared to the target: more
 agents relative to the enemy means a higher success rate. Keeping many
 agents on hand also *defends* you against incoming terrorist ops.
 
-The Covert Operations menu's item order and labels are confirmed from
-BRE.OVR's string table (#73):
+**Each op charges a gold fee up front** (on top of the agent risk), shown as
+a cost column on the menu. The fees below are live-sampled from BRE's default
+(medium) game setup on 2026-07-21 — other BRE setups scale them, so IB keeps
+them as tunable `Cost*` constants in `balance.go`. A failed op still risks
+losing the agent, but an op you cannot afford does nothing (charges neither
+gold nor agent). The menu footer shows `You have <gold> gold and <N> agents.`
 
-- **Send Spy** — read the enemy's defensive strength.
-- **Stir Revolts** — spread propaganda that sharply lowers popular support.
-- **Set Up** — trick d and one of its Full Defense Alliance partners into
+The menu's item order, labels, numeric hotkeys (1-9), and per-op costs are
+confirmed from BRE (BRE.OVR string table plus a live capture, #73):
+
+- **(1) Send Spy** — read the enemy's full status. Cost `CostSendSpy` (5,000).
+- **(2) Stir Revolts** — propaganda that sharply lowers popular support.
+  Cost `CostStirRevolts` (25,000).
+- **(3) Set Up** — trick d and one of its Full Defense Alliance partners into
   believing the other declared war, voiding the alliance between them
-  (useful against a defense pact protecting a target).
-- **Support Dissensions** — agitate d's own troopers into fleeing (~10%
-  trooper loss).
-- **Demoralize Forces** — lower enemy military morale; they fight worse
-  and, if low enough, units desert.
-- **Spy on Relations** — reveal the enemy's treaties.
-- **Bomb Enemy Targets** — a submenu (see below).
-- **Bribery** — bribe an enemy agent inside d, so d's future covert ops
-  against you auto-fail.
-- **Expose Enemy Ops** — per BRE.OVR ("Bribed Agent will expose enemy
+  (useful against a defense pact protecting a target). Cost `CostSetUp`
+  (50,000).
+- **(4) Support Dissensions** — agitate d's own troopers into fleeing (~10%
+  trooper loss). Cost `CostSupportDissensions` (80,000).
+- **(5) Demoralize Forces** — lower enemy military morale; they fight worse
+  and, if low enough, units desert. Cost `CostDemoralizeForces` (80,000).
+- **(6) Spy on Relations** — reveal the enemy's treaties. Cost
+  `CostSpyOnRelations` (100,000).
+- **(7) Bomb Enemy Targets** — a submenu (see below). Cost
+  `CostBombEnemyTargets` (100,000) per variant.
+- **(8) Bribery** — bribe an enemy agent inside d, so d's future covert ops
+  against you auto-fail. Cost `CostBribery` (200,000).
+- **(9) Expose Enemy Ops** — per BRE.OVR ("Bribed Agent will expose enemy
   operations for 24 Hours"), a temporary shield against *all* incoming
   covert ops. IB models the 24 hours as one game-day
-  (`ExposeOpsShieldDays`).
-- **Visit Bank**.
+  (`ExposeOpsShieldDays`). Cost `CostExposeEnemyOps` (600,000).
+- **(V) Visit Bank**.
+
+BRE caps *some* covert ops at one attempt per turn ("Limit one try per turn!"),
+but Send Spy is not capped (verified live). Which specific ops carry the
+one-per-turn cap is not yet pinned down; IB does not yet enforce it.
 
 **Bomb Enemy Targets** submenu (BRE.OVR: "All missiles and bombs require
 500 Bombers to deliver their payloads" — `BombingBombersRequired` gates

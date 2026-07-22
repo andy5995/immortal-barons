@@ -12,6 +12,10 @@ depends on how many agents you have compared to the target. More agents give you
 a better chance. Keeping many agents also protects you, because it lowers the
 chance that enemy operations against you succeed.
 
+Each operation also costs gold. The menu shows the price next to each one, and
+the footer shows how much gold and how many agents you have. You pay the gold
+when you send the operation. If you cannot pay, the operation does not run.
+
 When an operation fails, your agent is caught and lost, and the target may be
 warned. The operations are secret, so the report the victim sees does not name
 you.

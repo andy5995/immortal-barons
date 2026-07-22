@@ -109,8 +109,9 @@ func (w *World) aiWageWar(e *Empire) {
 	}
 	if e.Offense() > effectiveDefense(target)*AIWarOffenseMargin/100 {
 		// Soften the target with a covert strike first: demoralized forces defend
-		// worse, so the aggressor's agents pave the way for the attack (#36).
-		if e.Agents > 0 {
+		// worse, so the aggressor's agents pave the way for the attack (#36). The
+		// op now carries a gold fee, so only attempt it when the AI can pay.
+		if e.Agents > 0 && e.Gold >= CostDemoralizeForces {
 			w.DemoralizeForces(e, target)
 		}
 		w.Attack(e, target, FullForce(e)) // the AI commits its whole army

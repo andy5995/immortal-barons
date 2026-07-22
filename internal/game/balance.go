@@ -140,6 +140,23 @@ const (
 	SellAgentPrice = 100
 )
 
+// Covert Operations gold costs, charged per op on top of the agent risk
+// (live-sampled from BRE's Covert Operations menu at the DEFAULT/medium game
+// setup, 2026-07-21 — other BRE setups scale these; tune here as needed). Bomb
+// Enemy Targets is one 100k menu entry in BRE; IB splits it into a submenu and
+// charges each variant CostBombEnemyTargets.
+const (
+	CostSendSpy            = 5_000
+	CostStirRevolts        = 25_000
+	CostSetUp              = 50_000
+	CostSupportDissensions = 80_000
+	CostDemoralizeForces   = 80_000
+	CostSpyOnRelations     = 100_000
+	CostBombEnemyTargets   = 100_000
+	CostBribery            = 200_000
+	CostExposeEnemyOps     = 600_000
+)
+
 // Per-turn price WALK (#30). BRE recomputes each unit's buy price every turn as a
 // persistent random walk with per-empire state — confirmed live (2026-07-15): a
 // fresh empire started at base while a veteran on the same day had drifted (bomber

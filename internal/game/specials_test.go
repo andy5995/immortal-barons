@@ -12,6 +12,7 @@ func newAttackerAndTarget(t *testing.T) (*World, *Empire, *Empire) {
 	w := NewWorldSeed(cfg, 1)
 	a := w.AddHuman("att", "Attacker")
 	a.Protection = 0
+	a.Gold = 10_000_000 // enough to afford covert/WMD op costs; gold-asserting tests reset it
 	d := w.Empires[0]
 	d.Protection = 0
 	return w, a, d

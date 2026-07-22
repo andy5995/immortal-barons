@@ -46,7 +46,7 @@ func TestCovertMenuShowsBREItems(t *testing.T) {
 // submenu (BRE.OVR order) and checks its item labels.
 func TestBombEnemyTargetsSubmenuShowsItems(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "B00", menus.Covert) // enter submenu, quit submenu, quit Covert
+	f, _, err := run(t, "700", menus.Covert) // 7 = Bomb Enemy Targets: enter submenu, quit submenu, quit Covert
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -85,6 +85,7 @@ func TestDemoralizeForcesAppliesEffect(t *testing.T) {
 	p.Protection = 0
 	target.Protection = 0
 	p.Agents = 50
+	p.Gold = 1_000_000 // afford the covert op fee
 	target.Agents = 0
 	target.Morale = 100
 
@@ -133,6 +134,7 @@ func TestBombFoodMarketAppliesEffectWithBombers(t *testing.T) {
 	p.Protection = 0
 	target.Protection = 0
 	p.Agents = 50
+	p.Gold = 1_000_000 // afford the covert op fee
 	p.Bombers = game.BombingBombersRequired
 	target.Agents = 0
 	target.Food = 1000

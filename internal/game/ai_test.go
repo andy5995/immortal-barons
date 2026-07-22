@@ -153,6 +153,7 @@ func TestAIAggressorDemoralizesBeforeWar(t *testing.T) {
 	w, agg, vic := warWorld(t)
 	agg.Troopers, agg.Tanks = 5000, 500 // clearly favored
 	agg.Agents = 50                     // enough agents that the covert op reliably lands
+	agg.Gold = 1_000_000                // afford the demoralize fee
 	vic.Morale = 100
 	beforeLand := vic.Land
 
