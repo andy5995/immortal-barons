@@ -122,7 +122,9 @@ concluding either way — say it's unverified, don't assert it fails.
 The recipe — every step below dodges a landmine that otherwise kills the run:
 
 ```
-tmux new-session -d -s bre -x 80 -y 25 "dosemu -t"     # -t = S-Lang video; real 80x25 pane
+# Wrap dosemu in `script` so the raw stream (incl. ANSI COLOR) is logged to a
+# file — capture-pane -p only ever gives you plain text. See "Capturing color".
+tmux new-session -d -s bre -x 80 -y 25 'script -q -c "dosemu -t" /tmp/bre-color.cap'
 sleep 9
 tmux send-keys -t bre "C:" Enter; sleep 1
 tmux send-keys -t bre "CD \\GAMES\\BRE-DOS" Enter; sleep 1
@@ -132,6 +134,28 @@ tmux send-keys -t bre "SRDOOR local" Enter; sleep 2     # writes DOORFILE.SR
 tmux send-keys -t bre "BRE" Enter; sleep 5
 tmux capture-pane -t bre -p                             # scrape the screen as text
 ```
+
+### Capturing color (the `script` wrapper) — verified 2026-07-21
+
+`tmux capture-pane -p` reconstructs the pane as **plain text and drops all
+color** — useless when the task is the menu color scheme. Wrapping dosemu in
+`script` (as the recipe's launch line now does) logs the **raw pty byte stream**
+— exactly what dosemu writes, SGR color escapes included — to `/tmp/bre-color.cap`
+while you still drive/scrape the tmux pane normally. Proven end-to-end here: the
+tmux→script→dosemu pty nesting boots, keys register via `send-keys`, and the file
+fills with real `\x1b[..m` codes. Two gotchas:
+
+- **`script` block-buffers.** The file sits at one 4 KB block until it flushes.
+  It flushes on the child's clean exit, so quit with **`EXITEMU`** (not
+  `tmux kill-session`, which can lose the tail) before reading `/tmp/bre-color.cap`.
+- **The file is noisy** — dosemu repaints the whole screen via S-Lang, so expect
+  heavy cursor-positioning escapes and full-frame redraws between menus. The
+  color is in there; grep the SGR runs (`grep -aoE $'\x1b\\[[0-9;]*m'`) near the
+  menu text you want. For text/layout keep using `capture-pane -p` (cleaner); use
+  the color file only when you actually need colors.
+- Minicom's built-in capture (`Ctrl-A L`), by contrast, **strips** escape
+  sequences — so for a real BBS door session, wrap minicom the same way:
+  `script -q -c minicom /tmp/bre-color.cap`.
 
 The landmines:
 
