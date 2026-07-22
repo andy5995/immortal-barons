@@ -48,12 +48,6 @@ See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset
   maintenance. See [Daily maintenance](https://andy5995.github.io/immortal-barons/door-setup/#daily-maintenance)
   for when that runs.
 
-## Where are all the command-line options explained?
-
-- The [Command Reference](command-reference.md) lists every option for the game
-  program and the web server, grouped by what you use them for.
-- You can also run `immortal-barons -help` to see the same list in your terminal.
-
 ## What happens when my empire is destroyed?
 
 - If your realm is wiped out — its people or land reach zero, from an attack or a
