@@ -17,10 +17,12 @@ const (
 	// beyond that are grounded (not "usable" — BRE's Offense/attack force screen).
 	JetsPerCarrier = 100
 
-	// RegularAttackLossPct is how much of each side's forces a regular (Normal)
-	// attack costs — both attacker and defender — per BRE's attack.hlp ("both
-	// sides fight until they suffer 15% losses, at which time they retreat").
-	RegularAttackLossPct = 15
+	// A Normal attack costs the LOSER more than the WINNER (BRE live 2026-07-21,
+	// two samples: loser ~20% of forces, winner ~8% — asymmetric, not the flat
+	// 15% attack.hlp implies). Medium-setup values, scaled by AttackDamage; tune
+	// here. The exact ratio-dependence isn't pinned down yet — treated as fixed.
+	RegularAttackWinnerLossPct = 8
+	RegularAttackLoserLossPct  = 20
 
 	// RegularAttackCapturePct is the share of the loser's regions a Normal
 	// attack captures (attack.hlp: 20%).
@@ -89,20 +91,27 @@ func (w *World) Attack(a, d *Empire, f AttackForce) string {
 	ap := w.jitter(f.groundOffense(a) * moraleFactor(a.Morale) / 100)
 	dp := w.jitter(d.Defense()*moraleFactor(d.Morale)/100 + d.Land*LandDefenseBonus)
 
-	// BRE's Normal Attack (attack.hlp): the winner captures 20% of the loser's
-	// regions, and "both sides fight until they suffer 15% losses, at which
-	// time they retreat" — the loss is symmetric regardless of who wins. The
-	// attacker's losses fall only on the committed force (held-back units are safe).
-	loss := RegularAttackLossPct * dmg / 100
-	aloss := loseCommitted(a, f, loss)
-	dloss := loseForces(d, loss)
+	// BRE's Normal Attack (attack.hlp): the winner captures a share of the loser's
+	// regions. Losses are ASYMMETRIC (BRE live): the LOSER bleeds ~20%, the WINNER
+	// ~8%, both scaled by AttackDamage. The attacker's losses fall only on the
+	// committed force (held-back units are safe). The winner is decided first so
+	// each side takes its own loss rate.
+	attackerWins := ap > dp
+	winnerLoss := RegularAttackWinnerLossPct * dmg / 100
+	loserLoss := RegularAttackLoserLossPct * dmg / 100
+	aLoss, dLoss := loserLoss, winnerLoss
+	if attackerWins {
+		aLoss, dLoss = winnerLoss, loserLoss
+	}
+	aloss := loseCommitted(a, f, aLoss)
+	dloss := loseForces(d, dLoss)
 
 	// Score (IB's own): the award scales with the forces used up in the battle.
 	// The winner gains; the loser loses a bit less; a successful defense is worth
 	// more than a successful attack.
 	battle := aloss + dloss
 
-	if ap > dp {
+	if attackerWins {
 		// BRE's Normal Attack yields LAND ONLY — "a successful assault brings you
 		// extra regions" (breins.txt); no gold is plundered (that's the pirate-raid
 		// path). One attack always captures the same SHARE of regions no matter how

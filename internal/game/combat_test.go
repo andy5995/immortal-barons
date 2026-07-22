@@ -70,6 +70,28 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 	}
 }
 
+// Regular-attack losses are asymmetric (BRE live): the winner loses a smaller
+// share of its forces than the loser. Here the attacker overwhelms and wins, so
+// it should bleed less than the defender it beats.
+func TestRegularAttackLossesAreAsymmetric(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := &Empire{Name: "A", Troopers: 100000, Morale: 100, Alive: true}
+	d := &Empire{Name: "D", Troopers: 1000, Morale: 100, Land: 100,
+		Regions: RegionMix{Mountain: 100}, People: 100000, Alive: true}
+	aBefore, dBefore := a.Troopers, d.Troopers
+
+	w.Attack(a, d, FullForce(a))
+
+	aLostPct := (aBefore - a.Troopers) * 100 / aBefore
+	dLostPct := (dBefore - d.Troopers) * 100 / dBefore
+	if aLostPct == 0 || dLostPct == 0 {
+		t.Fatalf("both sides should take losses: winner %d%%, loser %d%%", aLostPct, dLostPct)
+	}
+	if aLostPct >= dLostPct {
+		t.Errorf("the winner should lose a smaller share than the loser: winner %d%%, loser %d%%", aLostPct, dLostPct)
+	}
+}
+
 func TestAttackScoreAttackerWins(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := &Empire{Name: "A", Troopers: 100000, Morale: 100, Alive: true}
@@ -78,8 +100,8 @@ func TestAttackScoreAttackerWins(t *testing.T) {
 
 	w.Attack(a, d, FullForce(a))
 
-	// aloss = 15% of 100000 troopers; dloss = 15% of 1000 turrets.
-	battle := 100000*RegularAttackLossPct/100 + 1000*RegularAttackLossPct/100
+	// Attacker wins: aloss = winner% of 100000 troopers; dloss = loser% of 1000 turrets.
+	battle := 100000*RegularAttackWinnerLossPct/100 + 1000*RegularAttackLoserLossPct/100
 	gain := battle / CombatScoreDivisor
 	if a.Score != gain {
 		t.Errorf("attacker Score = %d, want %d", a.Score, gain)
@@ -100,8 +122,8 @@ func TestAttackScoreDefenderWinsWorthMore(t *testing.T) {
 
 	w.Attack(a, d, FullForce(a))
 
-	// aloss = 15% of 10 troopers; dloss = 15% of 100000 turrets.
-	battle := 10*RegularAttackLossPct/100 + 100000*RegularAttackLossPct/100
+	// Attacker loses: aloss = loser% of 10 troopers; dloss = winner% of 100000 turrets.
+	battle := 10*RegularAttackLoserLossPct/100 + 100000*RegularAttackWinnerLossPct/100
 	gain := battle / CombatScoreDivisor * DefenseWinBonusPct / 100
 	if d.Score != gain {
 		t.Errorf("defending winner Score = %d, want %d", d.Score, gain)
@@ -152,10 +174,10 @@ func TestAttackUsesOnlyCommittedForce(t *testing.T) {
 		t.Errorf("full offense = %d, want 200", got)
 	}
 
-	// Commit only 50; both sides lose 15% of what fought, so at most 8 of the 50
-	// committed troopers are lost and the 150 held back are untouched.
+	// Commit only 50; a side loses at most the loser rate of what fought, so at
+	// most ~10 of the 50 committed troopers are lost and the 150 held back are safe.
 	w.Attack(a, d, AttackForce{Troopers: 50})
-	if a.Troopers < 200-50*RegularAttackLossPct/100-1 {
+	if a.Troopers < 200-50*RegularAttackLoserLossPct/100-1 {
 		t.Errorf("held-back troopers were hit: 200 -> %d", a.Troopers)
 	}
 	if a.Troopers < 150 {
@@ -197,13 +219,14 @@ func TestTotalConquestAbsorbsMilitary(t *testing.T) {
 	if n := d.Troopers + d.Jets + d.Turrets + d.Tanks + d.Carriers + d.Bombers; n != 0 {
 		t.Errorf("conquered empire should keep no military, got %d units total", n)
 	}
-	// Defender's post-battle survivors (after its 15% loss) transfer to the attacker:
-	// carriers and bombers aren't hit by the battle loss, so all 5/10 carry over.
+	// Defender's post-battle survivors (after its loser-rate loss) transfer to the
+	// attacker: carriers and bombers aren't hit by the battle loss, so all 5/10 carry over.
 	if a.Carriers != 5 || a.Bombers != 10 {
 		t.Errorf("attacker should absorb the defender's 5 carriers and 10 bombers, got C%d B%d", a.Carriers, a.Bombers)
 	}
-	// a keeps 85% of its 1,000,000 committed troopers plus the defender's 425 survivors.
-	wantTroopers := 1_000_000 - 1_000_000*RegularAttackLossPct/100 + (500 - 500*RegularAttackLossPct/100)
+	// a (winner) keeps its committed troopers minus the winner rate, plus the
+	// defender's (loser) surviving troopers.
+	wantTroopers := 1_000_000 - 1_000_000*RegularAttackWinnerLossPct/100 + (500 - 500*RegularAttackLoserLossPct/100)
 	if a.Troopers != wantTroopers {
 		t.Errorf("attacker troopers = %d, want %d (own survivors + absorbed)", a.Troopers, wantTroopers)
 	}

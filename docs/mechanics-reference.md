@@ -128,25 +128,33 @@ All four constants live in `balance.go`; Score never drops below 0.
 ## Attack types
 
 - **Regular attack** — direct assault; the winner takes some of the
-  loser's regions. Exact figures from BRE's `attack.hlp`:
-  - **Normal Attack:** capture **20%** of the opponent's regions; both sides
-    fight until they suffer **15%** losses, then retreat.
-  - **Quick Strike:** fight at **110%** strength (surprise) but capture only
-    **50%** of a normal attack (10% of regions); both retreat at **8%** losses.
-  - **Extended Battle:** fight at **85%** strength (fatigue) but capture up to
-    **125%** of normal (25% of regions); both accept **20%** losses.
+  loser's regions. `attack.hlp` documents the Normal attack as "both sides fight
+  to 15% losses"; a **live BRE test (2026-07-21, two samples)** showed losses are
+  actually **asymmetric — the LOSER bleeds ~20%, the WINNER ~8%** (scaled by the
+  Attack Damage config). IB now uses `RegularAttackLoserLossPct` (20) /
+  `RegularAttackWinnerLossPct` (8), deciding the winner first.
+  - **Quick Strike / Extended Battle** (`attack.hlp`): these are **IBBS
+    group-attack** variants, not local — a live local Regular Attack offers no
+    variant menu — so IB correctly does not offer them locally (verify against
+    the group-attack docs).
 
-  The clone implements the Normal Attack (20% capture, symmetric 15% losses);
-  Quick Strike / Extended Battle are not yet offered. Like BRE, the attacker
-  first picks a **committed force** — how many Troopers/Jets/Tanks/Bombers to
-  send (jets usable only up to `Carriers × 100`). Only the committed units add
-  offense, and only they take the 15% loss; held-back units stay home and unhurt.
-  The win **captures 20% of the loser's regions and takes no gold** — BRE's
-  Regular Attack rewards land, not money (*"a successful assault brings you extra
-  regions"*, `breins.txt`; gold-to-bank is the separate pirate-raid path). The
-  20% is a fixed share regardless of the strength gap, so a large empire is
-  ground down over many attacks; a small one can lose its last regions in one,
-  which eliminates it (and the conqueror absorbs its surviving military).
+  Region **capture** was **~50% at ~3× strength** live (attack.hlp's 20% is a
+  baseline that scales up with the strength ratio / Attack Rewards config — the
+  exact curve is not yet pinned down; IB keeps 20% as a tunable placeholder). The
+  **loser only loses regions if it is the defender** — a losing attacker never
+  loses land. In BRE the **winner then picks which region *types*** to take
+  (a region picker); IB currently captures an automatic mix (a known gap).
+  Like BRE, the attacker first picks a **committed force** — how many
+  Troopers/Jets/Tanks/Bombers to send (jets usable only up to `Carriers × 100`).
+  Only the committed units add offense, and only they take the loss; held-back
+  units stay home and unhurt.
+  The win **captures regions and takes no gold** — BRE's Regular Attack rewards
+  land, not money (*"a successful assault brings you extra regions"*, `breins.txt`;
+  gold-to-bank is the separate pirate-raid path). IB currently captures a fixed
+  20% share (a placeholder pending the live-verified scaling curve); either way a
+  large empire is ground down over many attacks, while a small one can lose its
+  last regions in one, which eliminates it (and the conqueror absorbs its
+  surviving military).
 
   A player (human or AI) may launch at most `Config.MaxIndividualAttacks`
   regular attacks per **day** (BRE's "Maximum Individual Attacks Per Day",
