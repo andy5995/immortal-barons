@@ -16,6 +16,10 @@ Each operation also costs gold. The menu shows the price next to each one, and
 the footer shows how much gold and how many agents you have. You pay the gold
 when you send the operation. If you cannot pay, the operation does not run.
 
+You may run only one covert operation that affects an enemy per turn. After you
+run one, the others are blocked until your next turn. Send Spy and Spy on
+Relations only gather information, so they do not count against this limit.
+
 When an operation fails, your agent is caught and lost, and the target may be
 warned. The operations are secret, so the report the victim sees does not name
 you.

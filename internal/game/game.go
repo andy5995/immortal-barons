@@ -212,6 +212,7 @@ type TurnProgress struct {
 	MaintPaid          bool // paymentStage done (set with the forces/regions charge)
 	Fed                bool // feedStage done
 	CovertDone         bool
+	CovertOpUsed       bool // an EFFECT covert op ran this turn (BRE's one-per-turn cap; info ops exempt)
 	SpendingDone       bool
 	AttackDone         bool
 	TradingDone        bool

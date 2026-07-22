@@ -235,9 +235,14 @@ confirmed from BRE (BRE.OVR string table plus a live capture, #73):
   (`ExposeOpsShieldDays`). Cost `CostExposeEnemyOps` (600,000).
 - **(V) Visit Bank**.
 
-BRE caps *some* covert ops at one attempt per turn ("Limit one try per turn!"),
-but Send Spy is not capped (verified live). Which specific ops carry the
-one-per-turn cap is not yet pinned down; IB does not yet enforce it.
+**One effect op per turn (#54).** BRE caps *effect* covert ops at one per turn
+("Limit one try per turn!"): the first effect op works, and any second effect op
+of *any* type is refused that turn — verified live (Stir Revolts, then Set Up,
+was refused). The two *info* ops — **Send Spy** and **Spy on Relations** — are
+exempt and unlimited. IB enforces this: `covertCost(..., capped)` sets
+`TurnProgress.CovertOpUsed` on the first effect op and returns
+`ErrCovertCapReached` for the rest until the flag clears at turn start; the info
+ops pass `capped=false`.
 
 **Bomb Enemy Targets** submenu (BRE.OVR: "All missiles and bombs require
 500 Bombers to deliver their payloads" — `BombingBombersRequired` gates

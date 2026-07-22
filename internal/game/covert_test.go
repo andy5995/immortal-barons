@@ -54,6 +54,32 @@ func TestCovertOpTooPoor(t *testing.T) {
 	}
 }
 
+// BRE caps EFFECT covert ops at one per turn ("Limit one try per turn!"): the
+// first works, any second effect op (of any type) is blocked, but the info ops
+// (Send Spy, Spy on Relations) stay exempt. The cap clears next turn.
+func TestCovertEffectOpCappedOncePerTurn(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents = 50, 0 // d has no agents, so ops reliably succeed
+	a.Gold = 10_000_000
+
+	if _, err := w.StirRevolts(a, d); err != nil {
+		t.Fatalf("first effect op should work: %v", err)
+	}
+	if _, err := w.SetUp(a, d); !errors.Is(err, ErrCovertCapReached) {
+		t.Fatalf("a second effect op (any type) should be capped, got %v", err)
+	}
+	if _, err := w.SendSpy(a, d); err != nil {
+		t.Errorf("Send Spy is an info op, exempt from the cap: %v", err)
+	}
+	if _, err := w.SpyOnRelations(a, d); err != nil {
+		t.Errorf("Spy on Relations is an info op, exempt from the cap: %v", err)
+	}
+	a.TurnProgress = TurnProgress{} // next turn
+	if _, err := w.StirRevolts(a, d); err != nil {
+		t.Errorf("the cap should reset next turn: %v", err)
+	}
+}
+
 func TestSendSpyNoAgents(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents = 0
