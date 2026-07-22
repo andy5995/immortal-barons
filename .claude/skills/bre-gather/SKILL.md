@@ -168,6 +168,20 @@ The landmines:
 - **Key pacing.** A burst (`send-keys "Andy" Enter`) crashes dosemu `-t` /
   overflows the 16-byte BIOS keyboard buffer. Send ONE key per send-keys call
   with ~0.25–0.3s sleeps between; Enter as its own call.
+- **ESC needs the raw byte, not `send-keys Escape`.** On S-Lang "ESC to Save &
+  Quit" screens — BRE's Configuration Editor (from `BRE RESET`) is the one that
+  bit us — `tmux send-keys Escape` is silently swallowed: S-Lang holds a lone
+  ESC, waiting to disambiguate an escape sequence, and it never delivers. Send
+  the raw byte instead: `tmux send-keys -t bre -H 1b` (double it, `-H 1b 1b`, if
+  one doesn't take). Same fix for any menu that ignores ESC.
+- **Headless (agent) driving = background script + scrape.** Running this from
+  Claude Code, there's no live pane to watch and foreground `sleep` is blocked,
+  so don't run the recipe inline. Put the whole drive sequence (with its
+  `sleep`s) in a small script and run it BACKGROUNDED, ending in
+  `tmux capture-pane -t bre -p > /tmp/bre.cap`; then read that file. Each
+  interactive step (send a key → sleep → capture) is one such backgrounded call.
+  A human instead just `tmux attach`es and types — this scaffolding is only for
+  the blind/headless case.
 - **Interactive prompt, not `-E batch`.** `dosemu -E FILE.BAT` auto-exits the
   emulator the moment the batch ends, wiping the screen you wanted; error
   messages also scroll away. Boot to `C:\>` and type commands stepwise.
