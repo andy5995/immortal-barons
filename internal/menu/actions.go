@@ -125,7 +125,8 @@ func writeMacros(s session.Session, w *ctx) Result {
 	if p.Macros == nil {
 		p.Macros = map[string]string{}
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n\n", ansi.FgBrightCyan, tr(s, "Macro Editor"), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Macro Editor"), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightCyan, insetRule, ansi.Reset)
 	for _, k := range macroKeys {
 		val := p.Macros[string(k)]
 		if val == "" {
@@ -133,6 +134,7 @@ func writeMacros(s session.Session, w *ctx) Result {
 		}
 		fmt.Fprintf(s, "Ctrl-%c: %s%s%s\n", k, ansi.FgGreen, val, ansi.Reset)
 	}
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightCyan, insetRule, ansi.Reset)
 
 	fmt.Fprintf(s, "\n%s ", tr(s, "Edit which macro [D,E,F,R,I,O,K,L]?"))
 	r, err := readKey(s)

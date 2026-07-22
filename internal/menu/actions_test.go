@@ -36,6 +36,24 @@ func TestShowInstructionsQuitsEarly(t *testing.T) {
 	}
 }
 
+// The macro-slot list is framed top and bottom by BRE's inset rule — a
+// double-line (═) segment set into a single-line rule (from a live capture).
+func TestWriteMacrosFramesListWithInsetRule(t *testing.T) {
+	w := newWorld()
+	f := &fakeSession{keys: []rune{'0'}} // '0' isn't a macro key: draw the list, then exit
+	writeMacros(f, w)
+	out := f.out.String()
+	if n := strings.Count(out, insetRule); n != 2 {
+		t.Errorf("macro list should be framed by the inset rule top and bottom (want 2), got %d:\n%s", n, out)
+	}
+	// The list must sit between the two rules, not outside them.
+	first := strings.Index(out, insetRule)
+	last := strings.LastIndex(out, insetRule)
+	if ctrl := strings.Index(out, "Ctrl-D:"); !(first < ctrl && ctrl < last) {
+		t.Errorf("Ctrl-D slot should fall between the two rules (first=%d ctrl=%d last=%d)", first, ctrl, last)
+	}
+}
+
 // TestWriteMacrosBackspaceEdits: recording a macro, Backspace deletes the last
 // key and Enter is recorded — mirroring BRE's editor.
 func TestWriteMacrosBackspaceEdits(t *testing.T) {

@@ -370,6 +370,11 @@ func eliminated(g *ctx) bool {
 // 62 columns wide, matching BRE's main menu rules (from a live capture).
 const rule = "──────────────────────────────────────────────────────────────"
 
+// insetRule is BRE's Macro Editor frame (live capture): a double-line (═)
+// segment set into the single-line rule — 5 single, 15 double, then single to
+// the rule width.
+var insetRule = strings.Repeat("─", 5) + strings.Repeat("═", 15) + strings.Repeat("─", len([]rune(rule))-20)
+
 // titleRule renders a BRE-style header: the bracketed menu title centered on a
 // rule line, e.g. "──────[Goldie Luck's Bank]──────", all in the menu color.
 func titleRule(color, title string) string {
