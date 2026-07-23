@@ -17,7 +17,7 @@ func TestIndividualAttackCap(t *testing.T) {
 		if !w.CanAttack(a) {
 			t.Fatalf("attack %d should be allowed", i)
 		}
-		w.Attack(a, d, FullForce(a))
+		w.Attack(a, d, FullForce(a), true)
 		if a.AttacksToday != i {
 			t.Fatalf("after attack %d, AttacksToday=%d", i, a.AttacksToday)
 		}

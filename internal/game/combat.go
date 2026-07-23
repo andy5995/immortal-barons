@@ -71,7 +71,14 @@ func (w *World) CanAttack(e *Empire) bool {
 // both empires, and returns a battle report. The attacker commits its
 // offense; the defender fights with its defense plus a home bonus from its
 // land. Both sides apply a random factor.
-func (w *World) Attack(a, d *Empire, f AttackForce) string {
+// Attack resolves a regular attack. On a win the loser bleeds its regions as a
+// proportional mix; the winner captures the same count. autoCapture governs how
+// the winner GAINS that land: true (AI, group attacks) adds it as the same mix;
+// false (the human menu path) leaves the attacker's regions untouched and
+// returns the captured count so the caller can let the player pick the types
+// (#58 — BRE decouples the loser's mix from the winner's freely-chosen
+// composition). captured is 0 on a loss or an auto-captured win.
+func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report string, captured int) {
 	a.AttacksToday++ // counts against the daily individual-attack cap (both human and AI)
 	f = f.clampTo(a) // only units the attacker actually holds can be committed
 	var b strings.Builder
@@ -124,7 +131,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce) string {
 		// attacks, it does not annihilate an empire in a single blow.
 		// max(floor, capture% of the loser's land), then scaled by Attack Rewards.
 		// The floor makes a decisive win on a small realm take (up to) all of it.
-		captured := d.Land * RegularAttackCapturePct / 100
+		captured = d.Land * RegularAttackCapturePct / 100
 		if captured < RegularAttackCaptureFloor {
 			captured = RegularAttackCaptureFloor
 		}
@@ -134,8 +141,11 @@ func (w *World) Attack(a, d *Empire, f AttackForce) string {
 		}
 		lost := d.Regions.remove(captured)
 		d.syncLand()
-		a.Regions.addMix(lost)
-		a.syncLand()
+		captured = lost.Total() // the actual count taken (remove caps at the defender's land)
+		if autoCapture {
+			a.Regions.addMix(lost)
+			a.syncLand()
+		}
 
 		gain := battle / CombatScoreDivisor
 		addScore(a, gain)
@@ -167,7 +177,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce) string {
 		d.Events = append(d.Events, fmt.Sprintf("%s attacked you but was repelled. You lost %d units; your score rose by %d.", a.Name, dloss, gain))
 		w.postCombatNews(a, d, false, false)
 	}
-	return b.String()
+	return b.String(), captured
 }
 
 // absorbMilitary transfers a conquered empire's surviving military to the

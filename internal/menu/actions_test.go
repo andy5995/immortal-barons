@@ -36,6 +36,47 @@ func TestShowInstructionsQuitsEarly(t *testing.T) {
 	}
 }
 
+// allocateCaptured lets the winner split the captured regions across types
+// (#58): assign 6 as River then 4 as Mountain; the loop ends when all 10 are
+// placed and the empire gains exactly that split.
+func TestAllocateCapturedSplitsByType(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	beforeLand, beforeRiver, beforeMtn := p.Land, p.Regions.River, p.Regions.Mountain
+	f := &fakeSession{keys: []rune("R6\rM4\r")} // River 6, Mountain 4 -> 10 placed
+	allocateCaptured(f, w, 10)
+	p = w.Player()
+	if p.Regions.River != beforeRiver+6 {
+		t.Errorf("River = %d, want %d", p.Regions.River, beforeRiver+6)
+	}
+	if p.Regions.Mountain != beforeMtn+4 {
+		t.Errorf("Mountain = %d, want %d", p.Regions.Mountain, beforeMtn+4)
+	}
+	if p.Land != beforeLand+10 {
+		t.Errorf("Land = %d, want %d", p.Land, beforeLand+10)
+	}
+}
+
+// Quitting the allocator early (0) must not lose captured land: the unassigned
+// remainder defaults to Coastal so Land still rises by the full captured count.
+func TestAllocateCapturedRemainderToCoastal(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	beforeLand, beforeCoastal, beforeRiver := p.Land, p.Regions.Coastal, p.Regions.River
+	f := &fakeSession{keys: []rune("R3\r0")} // River 3, then quit: 7 remain
+	allocateCaptured(f, w, 10)
+	p = w.Player()
+	if p.Regions.River != beforeRiver+3 {
+		t.Errorf("River = %d, want %d", p.Regions.River, beforeRiver+3)
+	}
+	if p.Regions.Coastal != beforeCoastal+7 {
+		t.Errorf("Coastal (remainder) = %d, want %d", p.Regions.Coastal, beforeCoastal+7)
+	}
+	if p.Land != beforeLand+10 {
+		t.Errorf("Land = %d, want %d (no captured land lost)", p.Land, beforeLand+10)
+	}
+}
+
 // The macro-slot list is framed top and bottom by BRE's inset rule — a
 // double-line (═) segment set into a single-line rule (from a live capture).
 func TestWriteMacrosFramesListWithInsetRule(t *testing.T) {

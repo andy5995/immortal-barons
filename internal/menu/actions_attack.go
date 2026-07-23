@@ -113,6 +113,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 	}
 
 	var report string
+	var captured int
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		d := findTarget(w, p, name)
 		if d == nil {
@@ -121,7 +122,9 @@ func regularAttack(s session.Session, w *ctx) Result {
 		if !w.CanAttack(p) {
 			return errAttacksExhausted
 		}
-		report = w.World.Attack(p, d, force)
+		// Deferred capture (autoCapture=false): the defender bleeds its regions but
+		// the attacker gains none yet, so the human can pick the types below (#58).
+		report, captured = w.World.Attack(p, d, force, false)
 		return nil
 	})
 	if err != nil {
@@ -129,6 +132,9 @@ func regularAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s\n", report)
+	if captured > 0 {
+		allocateCaptured(s, w, captured)
+	}
 	pause(s)
 	// One attack per turn: leave the War menu so the turn moves forward (BRE-
 	// style — the player can't keep attacking until their next turn).

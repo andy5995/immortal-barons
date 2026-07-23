@@ -140,6 +140,19 @@ func (w *World) BuyRegions(e *Empire, field *int, n int) error {
 	return nil
 }
 
+// GrantRegions adds n regions to a specific field of e's mix and resyncs Land.
+// It is the no-cost analogue of BuyRegions, for land AWARDED rather than bought:
+// a winning attacker allocating the regions captured in a Regular Attack (#58).
+// field must point into e.Regions (use the menu's regionField). Unlike a
+// purchase it ignores the per-turn buy cap and gold.
+func (w *World) GrantRegions(e *Empire, field *int, n int) {
+	if n <= 0 {
+		return
+	}
+	*field += n
+	e.syncLand()
+}
+
 // BuyLand is a thin wrapper over BuyRegions that buys Coastal regions, kept
 // for callers that don't care about region type.
 func (w *World) BuyLand(e *Empire, n int) error {

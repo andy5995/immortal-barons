@@ -114,7 +114,7 @@ func (w *World) aiWageWar(e *Empire) {
 		if e.Agents > 0 && e.Gold >= CostDemoralizeForces {
 			w.DemoralizeForces(e, target)
 		}
-		w.Attack(e, target, FullForce(e)) // the AI commits its whole army
+		w.Attack(e, target, FullForce(e), true) // the AI commits its whole army
 	}
 }
 

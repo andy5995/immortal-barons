@@ -179,6 +179,47 @@ func buyLand(s session.Session, w *ctx) Result {
 	}
 }
 
+// allocateCaptured lets a winning attacker choose the region types for the land
+// captured in a Regular Attack (#58 — BRE decouples the winner's freely-chosen
+// composition from the proportional mix the loser bled). It reuses the Buy
+// Regions table and picker as an allocate-N loop (no gold): the player assigns
+// the n captured regions across types until none remain. Any left unassigned
+// when they quit early default to Coastal, so the captured land is never lost.
+func allocateCaptured(s session.Session, w *ctx, n int) {
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan,
+		fmt.Sprintf(tr(s, "You captured %d regions — choose which types to hold them as."), n), ansi.Reset)
+	printRegionTable(s, w.Player())
+
+	alloc := make([]int, len(regionTypeNames))
+	remaining := n
+	for remaining > 0 {
+		fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan,
+			fmt.Sprintf(tr(s, "%d regions left to assign."), remaining), ansi.Reset)
+		t := promptRegionType(s)
+		if t < 0 { // 0/Enter: assign the rest as Coastal and finish
+			break
+		}
+		got := promptSuggested(s, fmt.Sprintf("How many as %s?", regionTypeNames[t]), remaining, remaining)
+		if got <= 0 {
+			continue
+		}
+		alloc[t] += got
+		remaining -= got
+	}
+	alloc[0] += remaining // regionTypeNames[0] == Coastal: soak up any unassigned remainder
+
+	if err := w.mutatePlayer(func(fp *game.Empire) error {
+		for i, cnt := range alloc {
+			w.World.GrantRegions(fp, regionField(fp, i), cnt)
+		}
+		return nil
+	}); err != nil {
+		fail(s, err)
+		return
+	}
+	okNoPause(s, "Captured regions added to your empire. You now hold %d land.", w.Player().Land)
+}
+
 func sellLand(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "NOTE: You cannot sell Regions, only drop them..."), ansi.Reset)

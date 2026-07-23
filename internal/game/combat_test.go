@@ -58,7 +58,7 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 	d.Protection = 0
 
 	before := len(d.Events)
-	w.Attack(a, d, FullForce(a))
+	w.Attack(a, d, FullForce(a), true)
 	if len(d.Events) != before+1 {
 		t.Fatalf("victim should get one event, got %d new", len(d.Events)-before)
 	}
@@ -80,7 +80,7 @@ func TestRegularAttackLossesAreAsymmetric(t *testing.T) {
 		Regions: RegionMix{Mountain: 100}, People: 100000, Alive: true}
 	aBefore, dBefore := a.Troopers, d.Troopers
 
-	w.Attack(a, d, FullForce(a))
+	w.Attack(a, d, FullForce(a), true)
 
 	aLostPct := (aBefore - a.Troopers) * 100 / aBefore
 	dLostPct := (dBefore - d.Troopers) * 100 / dBefore
@@ -105,16 +105,48 @@ func TestRegularAttackCaptureFloorAndPercent(t *testing.T) {
 
 	// Large defender: ~10% (500 → capture 50).
 	w, a, d := newFight(500)
-	w.Attack(a, d, FullForce(a))
+	w.Attack(a, d, FullForce(a), true)
 	if got := 500 - d.Land; got != 500*RegularAttackCapturePct/100 {
 		t.Errorf("large defender: captured %d, want %d (%d%%)", got, 500*RegularAttackCapturePct/100, RegularAttackCapturePct)
 	}
 
 	// Small defender: the floor dominates (100 regions → 10% = 10 < floor 15).
 	w, a, d = newFight(100)
-	w.Attack(a, d, FullForce(a))
+	w.Attack(a, d, FullForce(a), true)
 	if got := 100 - d.Land; got != RegularAttackCaptureFloor {
 		t.Errorf("small defender: captured %d, want the floor %d", got, RegularAttackCaptureFloor)
+	}
+}
+
+// autoCapture=false defers the winner's land gain (#58): the defender loses its
+// regions and Attack returns the captured count, but the attacker's own regions
+// are untouched — the menu picker allocates the count freely. autoCapture=true
+// keeps the old behavior (the winner gains the loser's proportional mix).
+func TestAttackDeferredCapture(t *testing.T) {
+	newFight := func() (*World, *Empire, *Empire) {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		a := &Empire{Name: "A", Troopers: 1_000_000, Morale: 100, Alive: true}
+		d := &Empire{Name: "D", Turrets: 1, Morale: 100, Land: 500,
+			Regions: RegionMix{Mountain: 500}, People: 1_000_000, Alive: true}
+		return w, a, d
+	}
+
+	w, a, d := newFight()
+	_, captured := w.Attack(a, d, FullForce(a), false)
+	if captured <= 0 {
+		t.Fatalf("won attack should return a positive captured count, got %d", captured)
+	}
+	if d.Land != 500-captured {
+		t.Errorf("defender should lose %d regions: 500 -> %d", captured, d.Land)
+	}
+	if a.Land != 0 || a.Regions.Total() != 0 {
+		t.Errorf("deferred path must not add land to the attacker yet, got Land=%d mix=%d", a.Land, a.Regions.Total())
+	}
+
+	w, a, d = newFight()
+	_, cap2 := w.Attack(a, d, FullForce(a), true)
+	if a.Regions.Total() != cap2 || a.Land != cap2 {
+		t.Errorf("autoCapture should add the %d captured regions to the attacker, got mix=%d Land=%d", cap2, a.Regions.Total(), a.Land)
 	}
 }
 
@@ -124,7 +156,7 @@ func TestAttackScoreAttackerWins(t *testing.T) {
 	d := &Empire{Name: "D", Turrets: 1000, Morale: 100, Land: 100,
 		Regions: RegionMix{Mountain: 100}, Gold: 1000, People: 1000, Alive: true, Score: 1_000_000}
 
-	w.Attack(a, d, FullForce(a))
+	w.Attack(a, d, FullForce(a), true)
 
 	// Attacker wins: aloss = winner% of 100000 troopers; dloss = loser% of 1000 turrets.
 	battle := 100000*RegularAttackWinnerLossPct/100 + 1000*RegularAttackLoserLossPct/100
@@ -146,7 +178,7 @@ func TestAttackScoreDefenderWinsWorthMore(t *testing.T) {
 	a := &Empire{Name: "A", Troopers: 10, Morale: 100, Alive: true, Score: 1_000_000}
 	d := &Empire{Name: "D", Turrets: 100000, Morale: 100, Land: 100, People: 1000, Alive: true}
 
-	w.Attack(a, d, FullForce(a))
+	w.Attack(a, d, FullForce(a), true)
 
 	// Attacker loses: aloss = loser% of 10 troopers; dloss = winner% of 100000 turrets.
 	battle := 10*RegularAttackLoserLossPct/100 + 100000*RegularAttackWinnerLossPct/100
@@ -174,7 +206,7 @@ func TestAttackPostsPlanetaryNews(t *testing.T) {
 	d.Protection = 0
 
 	before := len(w.NewsToday)
-	w.Attack(a, d, FullForce(a))
+	w.Attack(a, d, FullForce(a), true)
 	if len(w.NewsToday) != before+1 {
 		t.Fatalf("attack should post one planetary news line, got %d new", len(w.NewsToday)-before)
 	}
@@ -202,7 +234,7 @@ func TestAttackUsesOnlyCommittedForce(t *testing.T) {
 
 	// Commit only 50; a side loses at most the loser rate of what fought, so at
 	// most ~10 of the 50 committed troopers are lost and the 150 held back are safe.
-	w.Attack(a, d, AttackForce{Troopers: 50})
+	w.Attack(a, d, AttackForce{Troopers: 50}, true)
 	if a.Troopers < 200-50*RegularAttackLoserLossPct/100-1 {
 		t.Errorf("held-back troopers were hit: 200 -> %d", a.Troopers)
 	}
@@ -218,7 +250,7 @@ func TestRegularAttackTakesNoGold(t *testing.T) {
 	a := &Empire{Name: "A", Troopers: 100000, Morale: 100, Alive: true, Gold: 500}
 	d := &Empire{Name: "D", Turrets: 10, Morale: 100, Land: 100,
 		Regions: RegionMix{Mountain: 100}, Gold: 1000, People: 100000, Alive: true}
-	w.Attack(a, d, FullForce(a))
+	w.Attack(a, d, FullForce(a), true)
 	if a.Gold != 500 {
 		t.Errorf("attacker gold changed: got %d, want 500 (a win takes land, not gold)", a.Gold)
 	}
@@ -237,7 +269,7 @@ func TestTotalConquestAbsorbsMilitary(t *testing.T) {
 	d := &Empire{Name: "D", Troopers: 500, Jets: 40, Turrets: 30, Tanks: 20, Carriers: 5, Bombers: 10,
 		Morale: 100, Land: 1, Regions: RegionMix{Mountain: 1}, People: 100, Alive: true}
 
-	w.Attack(a, d, FullForce(a))
+	w.Attack(a, d, FullForce(a), true)
 
 	if d.Alive {
 		t.Fatalf("an overwhelming attack should conquer the defender")

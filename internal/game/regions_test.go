@@ -118,7 +118,7 @@ func TestRegionInvariantAfterBuySellAttackNuke(t *testing.T) {
 	}
 	assertRegionInvariant(t, "after SellRegions", a)
 
-	w.Attack(a, d, FullForce(a))
+	w.Attack(a, d, FullForce(a), true)
 	assertRegionInvariant(t, "after Attack (attacker)", a)
 	assertRegionInvariant(t, "after Attack (defender)", d)
 
