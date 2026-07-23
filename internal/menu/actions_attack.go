@@ -297,8 +297,9 @@ func attackPirates(s session.Session, w *ctx) Result {
 	// transaction: the p gathered above (before the commit prompts) is stale
 	// after a concurrent node's reload, and clamps against the fresh stock.
 	var report string
+	var captured int
 	err := w.mutatePlayer(func(fp *game.Empire) error {
-		report = w.World.RaidFaction(fp, f-1, troopers, jets, tanks)
+		report, captured = w.World.RaidFaction(fp, f-1, troopers, jets, tanks)
 		return nil
 	})
 	if err != nil {
@@ -306,6 +307,11 @@ func attackPirates(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s\n", report)
+	// A pirate win with land opens the same type picker a Regular Attack uses; a
+	// landless faction wins gold/military only, so no picker appears (#21, BRE).
+	if captured > 0 {
+		allocateCaptured(s, w, captured)
+	}
 	pause(s)
 	return Back // one attack per turn (see regularAttack)
 }

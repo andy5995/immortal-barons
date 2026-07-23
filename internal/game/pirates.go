@@ -176,9 +176,13 @@ func lootList(troopers, jets, turrets, tanks, agents, gold int) string {
 // reclaims a portion of the faction's hoard and regions and weakens it — so
 // draining a large faction takes several hits. On a loss the attacker loses a
 // fraction of the committed force.
-func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) string {
+// The report names the loot; capturedLand is the number of regions won (0 on a
+// loss or against a landless faction), which the caller lets the player allocate
+// by type through the same picker a Regular Attack uses (#21). Reclaimed gold and
+// military land in the attacker at once; only the land is deferred.
+func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (report string, capturedLand int) {
 	if faction < 0 || faction >= len(w.Pirates) {
-		return "There is no such pirate faction."
+		return "There is no such pirate faction.", 0
 	}
 	p := &w.Pirates[faction]
 	startForces := p.Forces // battle scale for Score, before any reclaim shrinks it
@@ -214,10 +218,10 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) strin
 		a.Tanks += gotK
 		a.Agents += gotA
 		a.Gold += gotG
-		if gotLand > 0 {
-			a.Regions.Coastal += gotLand
-			a.syncLand()
-		}
+		// The captured land is DEFERRED, not auto-added: the caller opens the
+		// region-type picker so the player chooses the composition (#21). Reclaimed
+		// gold/military above land immediately; only the regions wait.
+		capturedLand = gotLand
 		loot := lootList(gotT, gotJ, gotU, gotK, gotA, gotG)
 		if gotLand > 0 {
 			if loot != "" {
@@ -230,7 +234,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) strin
 		}
 		addScore(a, startForces/PirateScoreDivisor)
 		w.postPirateNews(a, p.Name, true)
-		return fmt.Sprintf("You broke the %s and recovered %s.", p.Name, loot)
+		return fmt.Sprintf("You broke the %s and recovered %s.", p.Name, loot), capturedLand
 	}
 
 	tLost := troopers * pirateRaidLossPct / 100
@@ -242,5 +246,5 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) strin
 	addScore(a, -startForces/PirateScoreDivisor)
 	w.postPirateNews(a, p.Name, false)
 	return fmt.Sprintf("You could not break the %s. You lost %d Troopers, %d Jets, and %d Tanks.",
-		p.Name, tLost, jLost, kLost)
+		p.Name, tLost, jLost, kLost), 0
 }

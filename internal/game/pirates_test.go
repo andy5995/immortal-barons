@@ -85,6 +85,27 @@ func TestRaidFactionWinReclaimsPortion(t *testing.T) {
 	}
 }
 
+// A win against a faction that holds no land captures no regions, so the caller
+// shows no picker (#21 — BRE: raiding a landless band yields gold/military only).
+func TestRaidFactionLandlessCapturesNoRegions(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("me", "Mine")
+	a.Troopers = 1_000_000
+	p := &w.Pirates[0]
+	p.Forces = 100
+	p.Land = 0 // landless band
+	p.Gold = 50_000
+
+	beforeLand := a.Land
+	_, captured := w.RaidFaction(a, 0, 1_000_000, 0, 0)
+	if captured != 0 {
+		t.Errorf("landless faction should capture no regions, got %d", captured)
+	}
+	if a.Land != beforeLand {
+		t.Errorf("attacker land must be unchanged, got %d want %d", a.Land, beforeLand)
+	}
+}
+
 func TestPiratesSkipProtectedEmpires(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AICount = 0

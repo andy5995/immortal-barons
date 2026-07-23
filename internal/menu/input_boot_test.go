@@ -13,7 +13,7 @@ import (
 // second idle cycle). See the region-picker report.
 func TestPromptsPropagateIdleBoot(t *testing.T) {
 	prompts := map[string]func(session.Session) int{
-		"promptRegionType":    promptRegionType,
+		"promptRegionType":    func(s session.Session) int { return promptRegionType(s, "Your choice?") },
 		"promptBuyRegionType": promptBuyRegionType,
 	}
 	for name, fn := range prompts {

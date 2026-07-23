@@ -56,9 +56,11 @@ func printRegionTable(s session.Session, p *game.Empire) {
 }
 
 // promptRegionType reads a single-letter region choice (case-insensitive),
-// returning its 0-based index or -1 to cancel.
-func promptRegionType(s session.Session) int {
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice?"), ansi.Reset)
+// returning its 0-based index or -1 to cancel. prompt is the already-translated
+// label (the captured-region picker uses BRE's "[N Regions left] Your choice?",
+// distinct from the plain "Your choice?" of the sell/buy screens).
+func promptRegionType(s session.Session, prompt string) int {
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, prompt, ansi.Reset)
 	for {
 		r, err := readKey(s)
 		if err != nil {
@@ -193,13 +195,13 @@ func allocateCaptured(s session.Session, w *ctx, n int) {
 	alloc := make([]int, len(regionTypeNames))
 	remaining := n
 	for remaining > 0 {
-		fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan,
-			fmt.Sprintf(tr(s, "%d regions left to assign."), remaining), ansi.Reset)
-		t := promptRegionType(s)
+		// BRE's captured-region prompt: "[N Regions left] Your choice?" then
+		// "How many <Type> regions? (0; N)" — distinct from the buy/sell screens.
+		t := promptRegionType(s, fmt.Sprintf(tr(s, "[%d Regions left] Your choice?"), remaining))
 		if t < 0 { // 0/Enter: assign the rest as Coastal and finish
 			break
 		}
-		got := promptSuggested(s, fmt.Sprintf("How many as %s?", regionTypeNames[t]), remaining, remaining)
+		got := promptSuggested(s, fmt.Sprintf("How many %s regions?", regionTypeNames[t]), remaining, remaining)
 		if got <= 0 {
 			continue
 		}
@@ -224,7 +226,7 @@ func sellLand(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "NOTE: You cannot sell Regions, only drop them..."), ansi.Reset)
 	printRegionTable(s, p)
-	t := promptRegionType(s)
+	t := promptRegionType(s, tr(s, "Your choice?"))
 	if t < 0 {
 		return Stay
 	}

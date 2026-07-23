@@ -118,19 +118,24 @@ func TestBiologicalStrike(t *testing.T) {
 func TestRaidFactionWinLose(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
 
-	// An overwhelming force against the easiest faction (Humans, index 0)
-	// wins and gains land; the Land/Regions invariant must still hold.
+	// An overwhelming force against the easiest faction (Humans, index 0) wins
+	// against a landed faction: the captured land is DEFERRED (returned for the
+	// menu picker), so the attacker's own land does not change here (#21).
 	a.Troopers = 1_000_000
 	a.Jets = 0
 	a.Tanks = 0
+	w.Pirates[0].Land = 400 // ensure the faction holds land to capture
 	beforeLand := a.Land
 
-	report := w.RaidFaction(a, 0, 1_000_000, 0, 0)
+	report, captured := w.RaidFaction(a, 0, 1_000_000, 0, 0)
 	if report == "" {
 		t.Error("expected a non-empty report")
 	}
-	if a.Land <= beforeLand {
-		t.Errorf("expected land gained on a win, before=%d after=%d", beforeLand, a.Land)
+	if captured <= 0 {
+		t.Errorf("expected a positive captured-land count on a win, got %d", captured)
+	}
+	if a.Land != beforeLand {
+		t.Errorf("captured land must be deferred, not auto-added: before=%d after=%d", beforeLand, a.Land)
 	}
 	if a.Land != a.Regions.Total() {
 		t.Errorf("Land/Regions invariant broken: Land=%d Regions.Total()=%d", a.Land, a.Regions.Total())
@@ -141,7 +146,7 @@ func TestRaidFactionWinLose(t *testing.T) {
 	a.Troopers = 10
 	beforeTroopers := a.Troopers
 
-	report = w.RaidFaction(a, 8, 10, 0, 0)
+	report, _ = w.RaidFaction(a, 8, 10, 0, 0)
 	if report == "" {
 		t.Error("expected a non-empty report")
 	}
