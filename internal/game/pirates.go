@@ -35,15 +35,16 @@ type PirateFaction struct {
 // (marked "binary" below); the rest are reconstructed from play data (see
 // docs/mechanics-reference.md).
 const (
-	pirateForcesMin   = 150 // seed-strength range, randomized (no faction ladder)
-	pirateForcesMax   = 600
-	pirateSeedLandMax = 20
-	PirateRaidChance  = 35    // % chance a faction raids on a given maintenance day
-	PirateRaidUnitPct = 5     // % of a victim's holdings a raid carries off
-	PirateRaidMaxTake = 24999 // binary: constant is 25000; observed max take is 24999
-	PirateRaidLandMax = 15    // regions the game grants a raiding faction (grows toward the cap)
-	PirateReclaimPct  = 20    // % of on-hand reclaimed per winning hit (~a fifth; several hits to drain)
-	pirateRaidLossPct = 15    // % of committed force lost on a failed raid
+	pirateForcesMin         = 150 // seed-strength range, randomized (no faction ladder)
+	pirateForcesMax         = 600
+	pirateSeedLandMax       = 20
+	PirateRaidChancePerTurn = 20    // % chance an empire suffers a pirate raid on a given turn (BRE ~1-in-5, random)
+	PirateSecondRaidChance  = 5     // % chance of a SECOND raid by a DIFFERENT faction, once a first has landed
+	PirateRaidUnitPct       = 5     // % of a victim's holdings a raid carries off
+	PirateRaidMaxTake       = 24999 // binary: constant is 25000; observed max take is 24999
+	PirateRaidLandMax       = 15    // regions the game grants a raiding faction (grows toward the cap)
+	PirateReclaimPct        = 20    // % of on-hand reclaimed per winning hit (~a fifth; several hits to drain)
+	pirateRaidLossPct       = 15    // % of committed force lost on a failed raid
 
 	// Hard caps on faction holdings. No bombers/carriers (absent from the caps).
 	// Verified against the BRE.EXE caps table at 0x14ede
@@ -96,24 +97,27 @@ func capAdd(cur, delta, cap int) int {
 	return cur
 }
 
-// piratesRaid runs one day of pirate activity: each faction may raid a random
-// living empire.
-func (w *World) piratesRaid() {
-	var victims []*Empire
-	for _, e := range w.Empires {
-		// New-realm protection wards off pirate raids too.
-		if e.Alive && e.Protection <= 0 {
-			victims = append(victims, e)
-		}
-	}
-	if len(victims) == 0 {
+// maybePirateRaid gives one empire a per-turn chance of suffering a pirate raid
+// (#21 — BRE raids hit ~1-in-5 turns, randomly, not once per day): a
+// PirateRaidChancePerTurn% roll for a raid by a random faction, and — only if
+// that lands — a further PirateSecondRaidChance% roll for a SECOND raid by a
+// DIFFERENT faction the same turn. New-realm protection wards it off. Called
+// from PlayTurn so it applies uniformly to human and AI empires; a human
+// victim's notice surfaces at the next turn's income (BRE's "since your last
+// play" timing).
+func (w *World) maybePirateRaid(e *Empire) {
+	if !e.Alive || e.Protection > 0 || len(w.Pirates) == 0 {
 		return
 	}
-	for i := range w.Pirates {
-		if w.rng.Intn(100) >= PirateRaidChance {
-			continue
-		}
-		w.pirateRaidVictim(&w.Pirates[i], victims[w.rng.Intn(len(victims))])
+	if w.rng.Intn(100) >= PirateRaidChancePerTurn {
+		return
+	}
+	first := w.rng.Intn(len(w.Pirates))
+	w.pirateRaidVictim(&w.Pirates[first], e)
+	if len(w.Pirates) > 1 && w.rng.Intn(100) < PirateSecondRaidChance {
+		// Pick a DIFFERENT faction: step past `first` into the remaining ones.
+		second := (first + 1 + w.rng.Intn(len(w.Pirates)-1)) % len(w.Pirates)
+		w.pirateRaidVictim(&w.Pirates[second], e)
 	}
 }
 

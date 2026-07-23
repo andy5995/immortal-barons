@@ -118,13 +118,41 @@ func TestPiratesSkipProtectedEmpires(t *testing.T) {
 	exposed.Troopers = 1_000_000
 
 	for i := 0; i < 200; i++ {
-		w.piratesRaid()
+		w.maybePirateRaid(safe)
+		w.maybePirateRaid(exposed)
 	}
 	if len(safe.PirateRaids) != 0 {
 		t.Errorf("empire under protection was raided %d times, want 0", len(safe.PirateRaids))
 	}
 	if len(exposed.PirateRaids) == 0 {
 		t.Error("unprotected empire should have been raided at least once")
+	}
+}
+
+// The per-turn raid roll fires ~PirateRaidChancePerTurn% of turns (BRE ~1-in-5),
+// far from the old near-certain daily sweep. Over many turns an unprotected
+// empire is raided sometimes but not almost every turn.
+func TestPirateRaidPerTurnFrequency(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("e", "Empire")
+	e.Protection = 0
+	e.Troopers = 1_000_000
+
+	const turns = 1000
+	raidTurns := 0
+	for i := 0; i < turns; i++ {
+		before := len(e.PirateRaids)
+		w.maybePirateRaid(e)
+		if len(e.PirateRaids) > before {
+			raidTurns++
+		}
+	}
+	// Expect ~20% of turns to raid; allow a wide band for RNG (well under the
+	// old daily model's near-100%, and clearly non-zero).
+	if raidTurns < turns*10/100 || raidTurns > turns*32/100 {
+		t.Errorf("raided on %d/%d turns; want roughly %d%%", raidTurns, turns, PirateRaidChancePerTurn)
 	}
 }
 

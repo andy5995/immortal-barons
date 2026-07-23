@@ -16,7 +16,8 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	// BRE score: each turn played awards a flat amount. processEconomy may then
 	// subtract small riot/spoilage penalties.
 	e.Score += ScorePerTurn
-	w.advanceTech(e) // Technology bonus builds up a little each turn (not instant)
+	w.maybePirateRaid(e) // ~1-in-5-turns pirate raid; notice surfaces next turn's income (#21)
+	w.advanceTech(e)     // Technology bonus builds up a little each turn (not instant)
 	w.processEconomy(e)
 	if e.Score < 0 {
 		e.Score = 0
@@ -89,7 +90,9 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 			}
 		}
 		w.aiPlay(w.LastMaintDate)
-		w.piratesRaid()
+		// Pirate raids are per-turn now (maybePirateRaid in PlayTurn), not a daily
+		// sweep — so they land randomly across turns (~1-in-5) instead of clustering
+		// on the day's first turn (#21).
 		for _, e := range w.Empires {
 			if e.Alive {
 				maybeRandomEvent(w, e)
