@@ -59,8 +59,17 @@ Key files inside:
 ## Running BRE headless (tmux + dosemu2 harness)
 
 Proven working (2026-07): BRE can be driven scriptably and its screens scraped
-as plain UTF-8 text. Good for menu text/layout/flow (NOT colors — capture-pane
-drops them; use a screenshot for colors, or `capture-pane -e` untested).
+as plain UTF-8 text with `tmux capture-pane -p` (menu text/layout/flow). For
+**colors**, `tmux capture-pane -ep | cat -v` is PROVEN (2026-07): the `-e` flag
+keeps the ANSI escapes, and `cat -v` renders them readably as `^[[NNm` SGR codes
+— this is the headless way to read BRE's colors (no screenshot needed; the old
+"use a screenshot for colors" note is superseded).
+
+**Record literal captures in `docs/dev/bre-screens.md`, not here.** That doc is
+the durable catalog of BRE's exact output — wording, borders/decorations,
+numeric prompts, and the ANSI color of every element — so implementations don't
+re-drive the binary each time. Add to it whenever you capture a new screen; keep
+this skill about *how* to drive/scrape, and put the *captured data* in that doc.
 
 **Prerequisites — check first; do NOT assume or auto-install.** This harness
 needs three things:
