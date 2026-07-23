@@ -112,18 +112,19 @@ func gatherAdvisorData(w *ctx) advisorData {
 	return d
 }
 
-// advisorGreeting is the advisor's first-person opening line (BRE's advisors
-// speak in first person, e.g. "Hi, I'm your military advisor").
+// advisorGreeting is the advisor's first-person opening line. BRE's advisors are
+// named and speak in first person ("Hi, I'm Joe, your military advisor"); IB's
+// carry their own coined names and a light, dry touch of character.
 func advisorGreeting(s session.Session, d advisorDomain) string {
 	switch d {
 	case advisorCivilian:
-		return tr(s, "I am your Civilian advisor, Sire.")
+		return tr(s, "Odris, your civilian advisor, Sire. I keep an ear to the people and an eye on the granary.")
 	case advisorEconomic:
-		return tr(s, "I am your Economic advisor, Sire.")
+		return tr(s, "Vell, your treasurer, Sire. I count the coin twice — once for hope, once for the truth.")
 	case advisorMilitary:
-		return tr(s, "I am your Military advisor, Sire.")
+		return tr(s, "Krane, your war advisor, Sire. I will be brief; the enemy rarely is.")
 	default:
-		return tr(s, "I am your Technology advisor, Sire.")
+		return tr(s, "Sable, your technology advisor, Sire. I tend the labs and the small miracles they leak.")
 	}
 }
 
@@ -230,7 +231,12 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []string
 // menu loop so tests can render an advisor without a pause.
 func renderAdvisor(s session.Session, w *ctx, d advisorDomain) {
 	data := gatherAdvisorData(w)
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, advisorGreeting(s, d), ansi.Reset)
+	fmt.Fprint(s, "\n")
+	// Wrap the greeting too (it now carries a name + a line of character, so it can
+	// run past 80 columns).
+	for _, gl := range strings.Split(help.Wrap(advisorGreeting(s, d), 78), "\n") {
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightCyan, gl, ansi.Reset)
+	}
 	for _, line := range advisorReport(s, data, d) {
 		// Word-wrap each report line to the screen width (78) less the 2-space
 		// indent, so a long sentence breaks at spaces instead of mid-word at col 80.

@@ -217,8 +217,8 @@ func TestAdvisorsMenuSelectsAdvisor(t *testing.T) {
 	out := f.out.String()
 	for _, want := range []string{
 		"Civilian", "Economic", "Military", "Technology", // the submenu list
-		"I am your Military advisor", // first-person greeting
-		"Desertion is a real risk",   // the Military advisor's advice
+		"Krane, your war advisor",  // the named military advisor's greeting
+		"Desertion is a real risk", // the Military advisor's advice
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected %q in advisor output; got:\n%s", want, out)
