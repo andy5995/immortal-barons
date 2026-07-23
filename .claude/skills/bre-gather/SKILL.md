@@ -202,8 +202,13 @@ The landmines:
   brand-new empire under that name. Use this to gather under a throwaway empire
   without touching Andy's own (his is under `Andy`); each distinct name is a
   separate realm in the shared game data.
-- Quit cleanly: `0` at the main menu (+ `y` confirm), then `EXITEMU` at `C:\>`,
-  then `tmux kill-session`.
+- **ALWAYS quit BRE normally, the way a human would — never `tmux kill-session`
+  while BRE is still running.** A normal quit is what clears `inuse.flg` AND
+  flushes each empire's state to disk so realms persist; killing the pane mid-run
+  leaves a stale lock and can lose the just-played turn. The clean path: `0` at
+  the main menu (+ `y` confirm if prompted), let it return to `C:\>`, then
+  `EXITEMU`, and only THEN `tmux kill-session` (the pane is already back at the
+  DOS prompt, so nothing is lost).
 
 ### Driving turns and reading the in-game economy (2026-07-14, proven)
 
