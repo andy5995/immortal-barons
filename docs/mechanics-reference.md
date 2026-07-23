@@ -511,7 +511,13 @@ league ran tax 85%, interest 75%).
   per-turn coin-flip (`RiverFishChance`, ~50/50 in live BRE). On a fishing turn
   the rivers yield `River × RiverFishFood (124)` food and **no** river gold that
   turn; on a hydropower turn, gold and no river food. (Constants in `balance.go`;
-  the exact chance/rates are tunable, live-sampled.)
+  the exact chance/rates are tunable, live-sampled.) **Caveat (2026-07-23):** a
+  10-turn color capture of a *food-surplus* BRE empire showed its 24 rivers running
+  hydropower on **every** turn (0 fishing across ~240 river-turns) — inconsistent
+  with an unconditional ~50/50 flip. This suggests BRE fishing may be **much rarer**
+  than 50%, or **conditional on a food shortage** (this empire never needed food).
+  `RiverFishChance = 50` is therefore unconfirmed and likely too high; the
+  disassembly or a food-short capture would settle it.
 - **Food growth is a *turn-start* credit (matches BRE).** This turn's food yield
   (`Agricultural × 300` + river fishing) is added to the granary at the **start**
   of the turn — alongside military production and gold income, exactly what the
@@ -519,6 +525,16 @@ league ran tax 85%, interest 75%).
   **sell or spend this turn's growth the same turn**. (Earlier IB deferred the
   growth to the end-of-turn economy step, where it arrived after the food market
   and was always subject to spoilage — corrected 2026-07-20 after driving BRE.)
+- **Food consumption:** each turn the population eats
+  `People × PeopleFoodPerThousand (75) / 1000` and the army eats
+  `(Troopers + Jets×2 + Tanks×2) / ArmyFoodDivisor (200)` — about **1 food per 200
+  troops**, with jets and tanks counting double. The army rate is **live-verified**
+  against BRE (2026-07 IBBS capture: 42,259 troopers → "Armed Forces Require 211").
+  So a large standing army is nearly food-free, as in BRE — food pressure comes from
+  population, not the army. (Both constants in `balance.go`. The **people** rate is
+  IB's own reconstruction at IB's population scale; it lands lighter than BRE's
+  ~1.5 food per million people, so population food is somewhat easier than BRE.
+  Fixed 2026-07-23: the army was previously billed 1 food/trooper, ~200× too heavy.)
 - **Food spoilage:** **5% of the food remaining after growth and consumption**
   spoils each turn — `floor(0.05 × food)` — with **no floor** below which nothing
   spoils, reduced by Technology regions. **Re-verified by driving the original
@@ -791,6 +807,17 @@ pirate-raid outcomes (PIRATEWIN / PIRATELOSS), and tax riots (RIOTS). IP strike
 results post to the bulletin too. Not yet generated: CIVILWAR (the clone has no
 civil-war collapse mechanic) and BRE's finer-grained interplanetary news
 categories (individual vs. group vs. whole-BBS, attack vs. return).
+
+**Keep news prose translatable.** News lines go through the PO catalogs, so each
+line must be a *whole sentence* chosen by event category, with only clearly
+delimited placeholder substitutions (the `%F`/`%T`/`%N`/`%P`/`%C` style). Do not
+build a line by concatenating fragments, and do not interpolate a name or number
+mid-clause in a way that assumes English word order or agreement — German case
+and Russian gender/number make a translator rewrite the whole sentence, and a
+fragment-glued line can't be reordered at all. The safest unit for a translator
+is one self-contained sentence per variant with the substitutions at the edges.
+Prefer more flavor *variants* (separate whole sentences) over grammatically
+clever single lines.
 
 ## How Immortal Barons differs right now
 

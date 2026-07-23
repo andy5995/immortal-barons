@@ -329,6 +329,453 @@ NOTE: Technology levels are relative to the number of regions
 
 ---
 
+## Second capture (full IBBS turn, 2026-07)
+
+The sections below were added from a second live capture: a complete play-turn on
+a 4-board InterBBS game (v0.988), scraped with ANSI escapes intact. All real
+empire, player, planet, board, and operator names — and the operator locations in
+the Spy Database — are **placeholders** here; only BRE's own UI text, layout, and
+colors are ground truth. This was an InterBBS game with **local player-vs-player
+attacks disabled**, so the Attack Menu is the reduced variant (see below).
+
+### Per-menu accent color
+
+The menu grammar from the top of this file (border + `(`key`)` + white label +
+`Choice> Quit`) is constant, but **each menu recolors the accent** (the border
+and the parens/hotkey). The title text inside `[ ]` is always `97` bright-white;
+the accent is:
+
+| Menu | Accent |
+|------|--------|
+| Opening menu (`Barren Realms Elite`) | `35` magenta |
+| See Scores / Regions buy / Attack Menu / Advisors | `35` magenta |
+| Diplomacy Menu | `36` cyan |
+| Crazy Gold Bank / Food Unlimited | `36` cyan |
+| Spending Menu / Industrial Production / Trading / Specialization | `31` red |
+| System Menu | `34` blue |
+| InterPlanetary Operations | `33` yellow |
+| InterBBS Scores / Attack Pirates | `90` bright-black (gray) |
+| Sell Menu | `32` green |
+
+Data-value convention (status, income, bank, food, end-of-turn): the **numbers**
+are `96` bright-cyan, the surrounding label text `37` white. Maintenance-paid /
+food-consumed lines and the Spending-Menu Price/#Owned columns use `97`
+bright-white numbers instead.
+
+### Opening menu (top-level)
+
+Shown after login and after each news screen. Magenta accent; two columns.
+
+```
+─────────────[Barren Realms Elite]─────────────
+(1) Play Game             (8) Game Bulletins
+(2) See Status            (9) InterPlanetary Ops
+(3) See Scores            (A) Game Instructions
+(4) See Today's News      (B) Help Database
+(5) See Yesterday's News  (P) Preferences
+(6) Read Messages         (0) Quit
+(7) Send Messages
+────────────────────────────────────────────────
+Choice> Play Game
+```
+
+### Daily News File / Daily Bulletin
+
+Header line: `93` bright-yellow `Barren Realms Elite ` + `97` `v0.988` + `37`
+`: News File` with the date right-aligned. Then a blank line, then a **centered**
+banner: `31` red `──` + `91` bright-red `»` + `97` bright-white
+`The Queen's Quadrant` + `91` `«` + `31` `──`, then a full-width `33` yellow rule.
+
+The Daily Bulletin box has a `34` blue border with `97` bright-white
+`Daily Bulletin` in the top edge. Three rows; label `37` white, value `36` cyan,
+`Change:` `37` white. **Positive** change = `92` bright-green `+` then `96`
+bright-cyan value; **negative** change = `96` bright-cyan for the whole thing
+(minus sign included — direction is not color-coded).
+
+```
+                        ──»The Queen's Quadrant«──
+───────────────────────────────────────────────────────────────────────────
+    ╔══════════════════════════Daily Bulletin══════════════════════════╗
+    ║  Total Population: 185,861             Change: +19243              ║
+    ║  Total Regions:    25,283              Change: +1167               ║
+    ║  Total Net Worth:  2720k               Change: +616k               ║
+    ╚═══════════════════════════════════════════════════════════════════╝
+```
+
+Below the box, the news items. Each item starts with `31` red `──` + `91`
+bright-red `─` arrow, then `37` white body; wrapped continuation lines indent 5
+spaces. **A blank line separates every item.** In-line highlights: your own
+empire `93` bright-yellow, other empires `97` bright-white or `93`, planet names
+`96` bright-cyan, numbers `93` bright-yellow, timestamps `97` bright-white, the
+`The Queen Royale` actor `91` bright-red. Today's News and Yesterday's News use
+this same layout. (IB is free to reword the prose — clean-room — this records
+BRE's wording and coloring only.)
+
+### See Scores (local planet)
+
+Title `-*` `91` red + `97` bright-white `Barren Realms Elite` + `*-` red. Column
+header row `97` bright-white. The border mixes single `─` and a `══` double-line
+accent over the name column. Each row: `35`(`(`)` + `97` key + `35`)` + a flag
+column (`+` = participating this reset, space = not) + `37` white name + `95`
+bright-magenta Territory + `97` bright-white Score + `37` white Net Worth.
+
+```
+-*Barren Realms Elite*-
+
+Id  Empire Name                          Territory     Score    Net Worth
+─────══════════─────────────────────────────────────────────────────────
+(A)+Empire One                               6936    536115     1344439
+(B)+Empire Two                               5749    442683      692769
+(E) Your Empire                              1140      4260       24814
+─────══════════─────────────────────────────────────────────────────────
+```
+
+### Turn income, status block, maintenance
+
+At turn start BRE prints the income lines (numbers `96` bright-cyan), then the
+status block bordered by `34` blue rules (single/double mix), then the
+maintenance-paid lines (`97` bright-white numbers).
+
+```
+227,717 gold was earned in taxes.
+19,510 gold was produced from the Ore Mines.
+4,380,288 gold was earned in Tourism.
+15,490 gold was earned by Solar Power Generators.
+120,384 gold was created by Hydropower.
+4228 Food units were grown.
+
+-*Your Empire*-
+Turns: 10
+Score: 4473
+Gold: 6,156,219
+Bank: 7,255,312
+Population: 3386 Million (Tax Rate: 12%)
+Popular Support: 100%
+Food: 6441
+Military: [42,259 Troopers]
+          [100% Morale]
+Regions:  [24 Rivers] [14 Agricultural] [5 Desert] [4 Urban]
+          [5 Mountains] [1088 Coastal]
+You have 100 Years of Protection Left.
+```
+
+The status title `-*name*-` uses `96` bright-cyan `-*`/`*-` with `97` bright-white
+name; every field value is `96` bright-cyan, labels `37` white.
+
+### Crazy Gold Bank
+
+Cyan accent, two columns. Followed by the gold-in-hand / in-bank line (both
+figures `97` bright-white).
+
+```
+──────────────────────[Crazy Gold Bank]──────────────────────
+(C) Cash Relief / Loans       (L) List Investments / Loans
+(D) Deposit Funds             (V) View Bank Rates
+(W) Withdraw Funds            (0) Quit
+(I) Investments
+──────────────────────────────────────────────────────────────
+You have 4,582,875 gold in hand and 7,255,312 gold in the bank.
+Choice> Quit
+```
+
+Deposit / Withdraw prompt form: `Withdraw how many gold? (0; 7,255,312)` — the
+parenthetical is `(minimum; maximum)`.
+
+### Spending Menu
+
+Red accent. Decoration line is **44 columns wide** (14 fill + `[Spending Menu]` +
+15 fill). Columnar: `Key Item / Price / # Owned` header (`37` white); each row has
+`31`(`(`)` + `91` key + `31`)` + `37` white label, then `97` bright-white Price
+and `37` white # Owned right-aligned. `(*) System Menu`, `(S) Sell`,
+`(V) Visit Bank`, `(?) Help`, `(0) Quit` carry no price/count.
+
+```
+──────────────[Spending Menu]───────────────
+Key Item                 Price       # Owned
+(*) System Menu
+(1) Troopers              250         42259
+(2) Jets                  318             0
+(3) Turrets               359             0
+(4) Bombers              3006             0
+(5) HeadQuarters         6580             0
+(6) Regions             38537          1140
+(7) Covert Agents         895             0
+(8) Tanks                2020             0
+(9) Carriers             5315             0
+(S) Sell
+(V) Visit Bank
+(?) Help
+(0) Quit
+────────────────────────────────────────────
+You have 4,582,875 gold and 9 turns.
+```
+
+Prices drift turn to turn (region-cost-change setting); `# Owned` is live.
+
+### Regions buy screen (Spending → Regions)
+
+```
+There are 138,322 Regions available.
+Note: Region prices are constantly changing.  Therefore, the region price
+      shown is only the price for the first piece of territory you buy.
+You can afford 274 regions.
+
+Key Name            Owned
+─────────────────────────
+(C) Coastal          1088
+(R) River              24
+(A) Agricultural       14
+(D) Desert              5
+(I) Industrial          0
+(U) Urban               4
+(M) Mountain            5
+(T) Technology          0
+(*) Advisors
+─────────────────────────
+Your choice?
+```
+
+Picking a region type prints its one-paragraph blurb, then
+`Buy how many <Type> regions? (0; <max>)`.
+
+### Diplomacy Menu
+
+Cyan accent, single column. (Reached pre-turn in this build, and from the System
+Menu.)
+
+```
+──────[Diplomacy Menu]──────
+(1) Tariff Trade Agreement
+(2) Protective Trade
+(3) Free Trade Agreement
+(4) Terrorist Prevention
+(5) Intelligence Alliance
+(6) Technology Agreement
+(7) Full Defense Alliance
+(8) Declaration Of War
+(9) View Treaties
+(?) Help
+(0) Quit
+────────────────────────────
+Choice> Quit
+```
+
+### Industrial Production (Change Production display)
+
+Red accent. Shown before the `Change Production? (y/N)` prompt.
+
+```
+───────────[Industrial Production]────────────
+Troopers        :   0%       (0 per year)
+Jets            :   0%       (0 per year)
+Turrets         :   0%       (0 per year)
+Bombers         :   0%       (0 per year)
+Tanks           :   0%       (0 per year)
+Carriers        :   0%       (0 per year)
+──────────────────────────────────────────────
+Change Production? (y/N) No
+```
+
+### InterPlanetary Operations
+
+Yellow accent, two columns. `Terrorist Ops` shows a running cost figure next to
+the label.
+
+```
+─────────────────[InterPlanetary Operations]──────────────────
+(1) View IPScores              (9) Gooie Kablooie Ops
+(2) Terrorist Ops       72,960 (A) SDI Program
+(3) Send Trade Deal            (D) Diplomacy List
+(4) Create Group Attack        (S) Spy Database
+(5) Join Group Attack          (T) Travel Times
+(6) Indiv. Attack Force        (V) Visit Bank
+(7) Send Message               (?) Help
+(8) Special Operations         (0) Quit
+──────────────────────────────────────────────────────────────
+You have 0 gold.
+```
+
+Gates seen: `Sorry....You are under New Realm Protection!` (Terrorist / Special
+Ops while protected), `There are not any attack parties at this time.` (Join
+Group Attack).
+
+**Travel Times** (T): `Average Turn Around Times to All BBSes`, one
+`planet    N.NN hours` row per board.
+
+**SDI Program** (A):
+```
+Total Funding: 0,000 Gold
+Yearly Maintenance: 0 Gold
+Funding / Region: 0,000 Gold
+Current SDI Strength: 0%
+
+Maximum productive spending this year is: 250,000 Gold.
+Note: You should only fund the SDI in increments of 1000 Gold.
+Add how much gold for funding? (0; 0)
+```
+
+**Diplomacy List** (D): `»Planetary Treaties«` box, one
+`( n) <planet>    <relation>` row per board.
+
+**Spy Database** (S): prompts `Select Planet to view players:` /
+`Enter Planet Name or Number (? for list):`. `?` lists planets with an operator
+location column (`## Planet Name   Location`); selecting one prints
+`Our current relations with <planet>: <relation>` then any known players.
+
+### InterBBS Scores (IP Ops → View IPScores)
+
+Gray accent. A menu of eight ranking views + Quit; each opens a `»Planetary
+Post«` table.
+
+```
+──────────[InterBBS Scores]───────────
+(1) Top Planets by Score
+(2) Top Planets by Net Worth
+(3) Top Planets by Land
+(4) Top Planets by Net Worth Density
+(5) Top Players by Score
+(6) Top Players by Net Worth
+(7) Top Players by Land
+(8) Top Players by Net Worth Density
+(0) Quit
+──────────────────────────────────────
+```
+
+Planet table: `(  n) <name>   <value>` (value right-aligned; header names the
+metric, e.g. `Score`, `Net Worth`, `Land`, `Net Worth / Region`). Player tables
+add a `Planet` column.
+
+```
+Barren Realms Elite: Top Planets by Score
+
+                          »Planetary Post«
+
+      Name                               Score
+────────────────────────────────────────────────────
+(  1) Planet A                         1321561
+(  2) Planet B                         1254755
+```
+
+### Attack Menu (InterBBS, local attacks OFF)
+
+With local player-vs-player attacks disabled, the Attack Menu collapses to just
+the pirate/alliance options (contrast the full Attack Menu near the top of this
+file, which lists Regular/Nuclear/Chemical/Biological). Magenta accent.
+
+```
+─────[Attack Menu]─────
+(P) Attack Pirates
+(A) Alliance Strength
+(V) Visit Bank
+(?) Help
+(0) Quit
+───────────────────────
+```
+
+**Attack Pirates** (gray accent) — BRE's nine faction names (IB renames these):
+
+```
+[Attack Pirates]
+(1) Humans
+(2) Barbarians
+(3) Solarians
+(4) Sharks
+(5) Mechanoids
+(6) Rexxogans
+(7) Xandorians
+(8) Monitorians
+(9) Spacians
+(0) Quit
+```
+
+**Alliance Strength** (A): a `Name / Troopers / Tanks / Agents` table ending in a
+`Total Forces  NONE  NONE  NONE` line when you have no allies.
+
+### End of Turn Statistics
+
+Blue border rules. Opens with a support-flavor line, then population change and
+food spoilage (numbers `96` bright-cyan), then `Do you wish to continue? (Y/n)`.
+
+```
+End of Turn Statistics
+───────────────────────────────────────────────────────────────────────────
+Your people have great faith in you as an excellent ruler!
+
+Your dominion gained 380 million people.
+57 units of food spoiled.
+───────────────────────────────────────────────────────────────────────────
+Do you wish to continue? (Y/n) Yes
+```
+
+### Food Unlimited (Food Market)
+
+Cyan accent, single row of options. Preceded by the market line (`available`,
+`buying for`, `selling for` — all figures `96` bright-cyan).
+
+```
+We have 6,851,917 units of food available today.
+We are buying for 9 and selling for 26.
+
+────────────────────────[Food Unlimited]────────────────────────
+(B) Buy Food    (S) Sell Food   (V) Visit Bank  (0) Quit
+─────────────────────────────────────────────────────────────────
+You have 3,229,328 gold and 5321 units of food.
+```
+
+Then the per-turn feed prompts: `Your People Need N units of food` /
+`How much will you give? (N; N)` and `Your Armed Forces Require N units of food`.
+
+### System Menu (InterBBS grid)
+
+Blue accent, three columns. In InterBBS mode it carries two extra rows —
+`(G) Game Setup` and `(I) InterBBS Scores` — beyond the base set.
+
+```
+───────────────────────────────[System Menu]───────────────────────────────
+(#) Abdicate             (M) Messages             (W) Write Macros
+(A) Visit Advisors       (P) Preferences          (1) Set Industries
+(D) Diplomacy            (R) Set Tax Rate         (2) Show Instructions
+(E) Empire Status        (S) See Scores           (3) Specialize Industry
+(F) Food Market          (T) Trading              (4) Spy Database
+(G) Game Setup           (V) Visit Bank           (0) Quit
+(I) InterBBS Scores
+────────────────────────────────────────────────────────────────────────────
+```
+
+- **Set Tax Rate** (R): `New Tax Rate [0-100, Current Tax Rate = 20]?`
+- **Game Setup** (G): the read-only ruleset dump —
+
+```
+Game Started:        7/8/2026
+Turns per day:       10
+Protection Turns:    120
+Daily Land Creation: 3000
+Planetary Tax Rate:  10.0%
+Maximum Players:     25
+Bank Interest Rate:  10.0%
+Investment Rate:     8.0%
+Maintenance Costs:   Medium          Region Cost Change:  Medium
+Trade Deal Costs:    Medium          Attack Damage:       Medium
+Attack Rewards:      Medium
+Military purchasing: Enabled
+This game is setup in InterBBS mode with 4 boards in the game.
+Attack Costs:        Medium          Terrorism Costs:       Medium
+Maximum Individual Attacks Per Day: 2
+Maximum Group Attacks Per Day:      2
+Maximum Terrorist Ops Per Day:      15
+Maximum Bombing Operations Per Day: 5
+Days before "lost" forces returned: 1
+Gooie Kablooies: Enabled     Bombing Ops: Enabled     Missile Ops: Enabled
+```
+
+- **Specialize Industry** (3): a blurb, then a red-accent `[Specialization]` menu
+  (Troopers/Jets/Turrets/Bombers/Tanks/Carriers/Quit); declining prints
+  `Your industries have not been specialized.`
+- **Trading** (T): a small red-accent menu — `(1) Trading` `(2) Trading Market`
+  `(V) Visit Bank` `(0) Quit`.
+
+---
+
 ## Clean-room note
 
 BRE is proprietary (John Dailey Software; design by Mehul Patel). This file
