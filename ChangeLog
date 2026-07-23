@@ -1,8 +1,12 @@
 (in-progress:)
-  * Winning a Regular Attack now lets you choose the types of the regions you capture (#58)
-  * Winning a pirate raid that seizes land lets you choose its region types too (#21)
-  * Pirate raids now happen randomly across turns (about 1 in 5) instead of all at once each day (#21)
-  * "Since your last play" events now show after you start your turn, not before the main menu
+  * Winning a Regular Attack now lets you choose the types of the
+    regions you capture (#58)
+  * Winning a pirate raid that seizes land lets you choose its region
+    types too (#21)
+  * Pirate raids now happen randomly across turns (about 1 in 5)
+    instead of all at once each day (#21)
+  * "Since your last play" events now show after you start your turn,
+    not before the main menu
 
 2026-07-22
   * v0.0.1 released
