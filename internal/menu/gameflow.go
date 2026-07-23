@@ -106,7 +106,7 @@ func showBulletinYesterday(s session.Session, w *ctx) Result { return showBullet
 func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 	var bulletin game.DailyBulletin
 	var news []string
-	var boardID string
+	var boardID, date string
 	w.With(func() {
 		if yesterday {
 			bulletin, news = w.BulletinYesterday, w.NewsYesterday
@@ -114,14 +114,21 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 			bulletin, news = w.BulletinToday, w.NewsToday
 		}
 		boardID = w.Config.BoardID
+		date = w.LastMaintDate
 	})
+	if yesterday {
+		date = prevISODate(date)
+	}
+	renderNewsMasthead(s, newsDate(date))
 	renderDailyBulletin(s, bulletin, boardID)
 	if len(news) == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "No planetary bulletins."))
 	} else {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
+		// Each item led by the red arrow, blank-line separated, with empire /
+		// faction / number highlights over a white body (BRE layout).
+		terms := newsHighlightTerms(w)
 		for _, b := range news {
-			fmt.Fprintf(s, "  %s\n", hiNums(b))
+			fmt.Fprintf(s, "\n%s %s\n", newsItemArrow, hiNewsItem(b, terms))
 		}
 	}
 	pause(s)

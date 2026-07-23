@@ -387,6 +387,57 @@ func TestShowBulletinTodayVsYesterday(t *testing.T) {
 	}
 }
 
+func TestShowBulletinMastheadAndBox(t *testing.T) {
+	w := newWorld()
+	w.BulletinToday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 111}}
+	w.NewsToday = []string{"alpha-line", "beta-line"}
+	f := &fakeSession{keys: []rune(" ")}
+	showBulletinToday(f, w)
+	out := f.out.String()
+
+	for _, want := range []string{
+		"News File",      // masthead header line
+		newsBannerName,   // centered masthead banner
+		"Daily Bulletin", // box title
+		"alpha-line", "beta-line",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("expected news screen to contain %q, got:\n%s", want, out)
+		}
+	}
+	// The Daily Bulletin is now drawn as a box, not a solid bar.
+	if !strings.Contains(out, "╔") || !strings.Contains(out, "║") || !strings.Contains(out, "╚") {
+		t.Errorf("expected a boxed Daily Bulletin (╔ ║ ╚), got:\n%s", out)
+	}
+	// Each news item is led by the red arrow and the items are blank-line
+	// separated, so the arrow appears once per item.
+	if n := strings.Count(out, newsItemArrow); n != 2 {
+		t.Errorf("expected 2 news-item arrows (one per item), got %d:\n%s", n, out)
+	}
+}
+
+func TestNewsItemHighlights(t *testing.T) {
+	w := newWorld()
+	self := w.Player().Name
+	w.NewsToday = []string{
+		self + " routed the " + game.PirateFactions[0] + " and took 1,375 regions; now Planetary Master!",
+	}
+	f := &fakeSession{keys: []rune(" ")}
+	showBulletinToday(f, w)
+	out := f.out.String()
+
+	for what, want := range map[string]string{
+		"own empire bright-yellow": ansi.FgBrightYellow + self,
+		"faction bright-cyan":      ansi.FgBrightCyan + game.PirateFactions[0],
+		"title bright-white":       ansi.FgBrightWhite + "Planetary Master",
+		"number bright-yellow":     ansi.FgBrightYellow + "1,375",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("%s: expected %q in output:\n%s", what, want, out)
+		}
+	}
+}
+
 func TestShowBulletinEmptyNewsShowsNoBulletinsNote(t *testing.T) {
 	w := newWorld()
 	w.NewsToday = nil
