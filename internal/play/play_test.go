@@ -108,7 +108,10 @@ func TestReturningPlayerNotPrompted(t *testing.T) {
 	}
 }
 
-func TestEventsShownThenCleared(t *testing.T) {
+// Events are no longer consumed before the opening menu: a caller who logs in
+// and quits without playing keeps them, so they surface at their first Play
+// under "Since your last play" (BRE flow — see gameflow_test for the display).
+func TestEventsPersistUntilPlayed(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	// create + save an empire with a pending event
 	w := game.NewWorld(cfg)
@@ -116,13 +119,13 @@ func TestEventsShownThenCleared(t *testing.T) {
 	e.Events = []string{"Enemy raided you!"}
 	store.Save(w, cfg)
 
-	f := &fakeSession{keys: []rune(" 0")}
+	f := &fakeSession{keys: []rune(" 0")} // log in, quit without playing
 	Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03")
-	if !strings.Contains(f.out.String(), "raided") {
-		t.Error("pending event should be shown on login")
+	if strings.Contains(f.out.String(), "raided") {
+		t.Error("events must not be shown before the opening menu; only after Play")
 	}
 	w2, _ := store.Load(cfg)
-	if len(w2.FindByOwner("khan").Events) != 0 {
-		t.Error("events should be cleared after being shown")
+	if len(w2.FindByOwner("khan").Events) != 1 {
+		t.Error("events must persist through a login without Play, not be consumed")
 	}
 }

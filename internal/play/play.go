@@ -225,7 +225,9 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			}
 		}
 	}
-	showEvents(s, w, id.Handle)
+	// The "since your last play" events are shown by runTurn after the caller
+	// hits Play (their first turn of the day), matching BRE — not here before the
+	// opening menu.
 
 	// io.EOF means the caller dropped the connection or was booted; still persist
 	// state below.
@@ -333,31 +335,6 @@ func onboard(s session.Session, w *game.World, handle, lang string) (name string
 		}
 		return name, false
 	}
-}
-
-func showEvents(s session.Session, w *game.World, handle string) {
-	var events []string
-	// Re-resolve the empire by handle inside the transaction: an empire captured
-	// by an earlier separate w.With can rebind to another realm's data after a
-	// reload reshapes the empire set, so reading/clearing Events off a stale
-	// pointer could wipe the wrong empire's events.
-	w.With(func() {
-		e := w.FindByOwner(handle)
-		if e == nil {
-			return
-		}
-		events = e.Events
-		e.Events = nil
-	})
-	if len(events) == 0 {
-		return
-	}
-	fmt.Fprintf(s, "%sWhile you were away:%s\n", ansi.FgBrightCyan, ansi.Reset)
-	for _, ev := range events {
-		fmt.Fprintf(s, "  %s\n", ev)
-	}
-	fmt.Fprintf(s, "\n%s-=<Paused>=-%s", ansi.FgBrightGreen, ansi.Reset)
-	s.ReadKey() // intentional wait-for-keypress; result unused
 }
 
 func alnum(s string) int {
