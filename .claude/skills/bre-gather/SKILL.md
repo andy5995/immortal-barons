@@ -460,6 +460,22 @@ never redistribute.) Not legal advice; absence of a clause ≠ affirmative
 permission, and jurisdictions differ — the clean-room "no copying expression"
 posture above is the safe line regardless.
 
+**BRE is shareware** (60-day evaluation + registration key), and under US law
+disassembling software to reach its *unprotected functional elements* (ideas,
+mechanics, constants) is settled **fair use** — *Sega v. Accolade*, 977 F.2d
+1510 (9th Cir. 1992) and *Sony v. Connectix*, 203 F.3d 596 (9th Cir. 2000): the
+"intermediate copying" that disassembly requires is fair use when it's the only
+way to get at the functional ideas and the result is an independent
+implementation (exactly the clean-room clone here). The one live caveat is DMCA
+§1201 anti-circumvention — but that bites only if you defeat the registration
+"key system," which we never do (we read game math, not the key). Interpol is
+irrelevant (a police-coordination body, not a lawmaker); cross-border norms come
+from treaties (Berne/TRIPS) and the EU Software Directive 2009/24/EC, which
+*expressly* permits decompilation for interoperability. Verified current 2026-07;
+no ruling has disturbed Sega/Sony. Sources: EFF Coders' Rights Reverse
+Engineering FAQ (`eff.org/issues/coders/reverse-engineering-faq`), *Sega v.
+Accolade* (Wikipedia / BitLaw), *Sony v. Connectix* (digital-law-online.info).
+
 Not legal advice. The idea/expression line above reflects general copyright
 principles, not a ruling on any specific case. When unsure whether something has
 crossed from *mechanic* into *expression*, ask a project maintainer or check the
