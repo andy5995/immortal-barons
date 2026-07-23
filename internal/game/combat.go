@@ -84,7 +84,9 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	var b strings.Builder
 	fmt.Fprintf(&b, "%s attacks %s!\n\n", a.Name, d.Name)
 
+	bomberLoss := 0 // folded into the attacker's casualty breakdown below
 	if kills, lost := w.bombingRun(a, d, f.Bombers); kills > 0 || lost > 0 {
+		bomberLoss = lost
 		fmt.Fprintf(&b, "Your bombers hit the airfields: %d enemy jets destroyed", kills)
 		if lost > 0 {
 			fmt.Fprintf(&b, ", %d bombers lost to anti-air", lost)
@@ -116,12 +118,24 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		aLoss, dLoss = winnerLoss, loserLoss
 	}
 	aloss := loseCommitted(a, f, aLoss)
+	aloss.Bombers = bomberLoss // bombers fall to anti-air in the bombing run, not the ground clash
 	dloss := loseForces(d, dLoss)
 
 	// Score (IB's own): the award scales with the forces used up in the battle.
 	// The winner gains; the loser loses a bit less; a successful defense is worth
 	// more than a successful attack.
-	battle := aloss + dloss
+	battle := aloss.Total() + dloss.Total()
+
+	// Casualty lines list each side's losses by unit type (BRE shows the same
+	// breakdown). The field order mirrors what each side fields: the attacker
+	// commits troopers/jets/tanks/bombers, the defender holds troopers/turrets/
+	// tanks/jets.
+	attackerCas := func(u UnitLoss) string {
+		return fmt.Sprintf("%d troopers, %d jets, %d tanks, %d bombers", u.Troopers, u.Jets, u.Tanks, u.Bombers)
+	}
+	defenderCas := func(u UnitLoss) string {
+		return fmt.Sprintf("%d troopers, %d turrets, %d tanks, %d jets", u.Troopers, u.Turrets, u.Tanks, u.Jets)
+	}
 
 	if attackerWins {
 		// BRE's Normal Attack yields LAND ONLY — "a successful assault brings you
@@ -152,7 +166,8 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		addScore(d, -gain*CombatLoserPenaltyPct/100)
 
 		fmt.Fprintf(&b, "Victory! You captured %d regions.\n", captured)
-		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
+		fmt.Fprintf(&b, "Your casualties: %s.\n", attackerCas(aloss))
+		fmt.Fprintf(&b, "The enemy lost: %s.\n", defenderCas(dloss))
 		if gain > 0 {
 			fmt.Fprintf(&b, "Your score rose by %d.\n", gain)
 		}
@@ -165,7 +180,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 			d.DiedDay = w.GameDay
 			fmt.Fprintf(&b, "\nYou crushed %s completely and seized the remains of its military!\n", d.Name)
 		}
-		d.Events = append(d.Events, fmt.Sprintf("%s attacked you: you lost %d regions and %d units.", a.Name, captured, dloss))
+		d.Events = append(d.Events, fmt.Sprintf("%s attacked you: you lost %d regions and %d units.", a.Name, captured, dloss.Total()))
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
 		gain := battle / CombatScoreDivisor * DefenseWinBonusPct / 100
@@ -173,8 +188,9 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		addScore(a, -gain*CombatLoserPenaltyPct/100)
 
 		fmt.Fprintf(&b, "Defeat! Your forces returned exhausted.\n")
-		fmt.Fprintf(&b, "You lost %d units; the enemy lost %d.\n", aloss, dloss)
-		d.Events = append(d.Events, fmt.Sprintf("%s attacked you but was repelled. You lost %d units; your score rose by %d.", a.Name, dloss, gain))
+		fmt.Fprintf(&b, "Your casualties: %s.\n", attackerCas(aloss))
+		fmt.Fprintf(&b, "The enemy lost: %s.\n", defenderCas(dloss))
+		d.Events = append(d.Events, fmt.Sprintf("%s attacked you but was repelled. You lost %d units; your score rose by %d.", a.Name, dloss.Total(), gain))
 		w.postCombatNews(a, d, false, false)
 	}
 	return b.String(), captured
@@ -193,18 +209,32 @@ func absorbMilitary(a, d *Empire) {
 	d.Troopers, d.Jets, d.Turrets, d.Tanks, d.Carriers, d.Bombers = 0, 0, 0, 0, 0, 0
 }
 
-// loseForces removes pct% of an empire's combat units and returns the
-// total number lost.
-func loseForces(e *Empire, pct int) int {
-	t := e.Troopers * pct / 100
-	j := e.Jets * pct / 100
-	u := e.Turrets * pct / 100
-	k := e.Tanks * pct / 100
-	e.Troopers -= t
-	e.Jets -= j
-	e.Turrets -= u
-	e.Tanks -= k
-	return t + j + u + k
+// UnitLoss is a per-type casualty breakdown, so a battle report can show each
+// side's losses by unit type (as BRE does) instead of one lump total.
+type UnitLoss struct {
+	Troopers, Jets, Turrets, Tanks, Bombers int
+}
+
+// Total is the combined casualty count, for the score math and event lines that
+// only care about the aggregate.
+func (u UnitLoss) Total() int {
+	return u.Troopers + u.Jets + u.Turrets + u.Tanks + u.Bombers
+}
+
+// loseForces removes pct% of an empire's combat units and returns the per-type
+// breakdown lost (the defender fights with everything, so all four types bleed).
+func loseForces(e *Empire, pct int) UnitLoss {
+	l := UnitLoss{
+		Troopers: e.Troopers * pct / 100,
+		Jets:     e.Jets * pct / 100,
+		Turrets:  e.Turrets * pct / 100,
+		Tanks:    e.Tanks * pct / 100,
+	}
+	e.Troopers -= l.Troopers
+	e.Jets -= l.Jets
+	e.Turrets -= l.Turrets
+	e.Tanks -= l.Tanks
+	return l
 }
 
 // AttackForce (defined in ibbs.go for group attacks — Troopers/Jets/Tanks/Bombers)
@@ -244,17 +274,20 @@ func (f AttackForce) groundOffense(e *Empire) int {
 	return sum * (100 + e.TechFactor()) / 100
 }
 
-// loseCommitted removes pct% of the committed troopers/jets/tanks from e (bombers
-// are spent in the bombing run) and returns the total lost — so holding units
-// back keeps them out of harm's way.
-func loseCommitted(e *Empire, f AttackForce, pct int) int {
-	t := f.Troopers * pct / 100
-	j := f.Jets * pct / 100
-	k := f.Tanks * pct / 100
-	e.Troopers -= t
-	e.Jets -= j
-	e.Tanks -= k
-	return t + j + k
+// loseCommitted removes pct% of the committed troopers/jets/tanks from e and
+// returns the per-type breakdown — so holding units back keeps them out of harm's
+// way. Bomber losses come from the bombing run, not here, and are folded in by
+// the caller.
+func loseCommitted(e *Empire, f AttackForce, pct int) UnitLoss {
+	l := UnitLoss{
+		Troopers: f.Troopers * pct / 100,
+		Jets:     f.Jets * pct / 100,
+		Tanks:    f.Tanks * pct / 100,
+	}
+	e.Troopers -= l.Troopers
+	e.Jets -= l.Jets
+	e.Tanks -= l.Tanks
+	return l
 }
 
 func clampInt(n, lo, hi int) int {
