@@ -10,6 +10,8 @@
   * Renamed the pirate factions to original names
   * The army now eats far less food, matching the original game — a
     large standing army is no longer food-crippling
+  * Windows door: works when the BBS hands over a non-blocking socket
+    (MagicBBS)
 
 2026-07-22
   * v0.0.1 released
