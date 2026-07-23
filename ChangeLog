@@ -1,4 +1,6 @@
 (in-progress:)
+  * Winning a Regular Attack now lets you choose the types of the regions you capture (#58)
+  * Winning a pirate raid that seizes land lets you choose its region types too (#21)
 
 2026-07-22
   * v0.0.1 released
