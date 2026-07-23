@@ -48,10 +48,12 @@ func printRegionTable(s session.Session, p *game.Empire) {
 	fmt.Fprintf(s, "%s%-5s%-15s%s%s\n", ansi.FgBrightWhite, tr(s, "Key"), tr(s, "Name"), tr(s, "Owned"), ansi.Reset)
 	regionRule(s)
 	for i, name := range regionTypeNames {
-		fmt.Fprintf(s, " %s(%c)%s %s%-14s%s %5d\n",
-			ansi.FgBrightMagenta, regionTypeKeys[i], ansi.Reset,
+		// BRE's region table (docs/dev/bre-screens.md): magenta parens, a
+		// bright-white key letter, a bright-yellow name, a bright-white Owned count.
+		fmt.Fprintf(s, " %s(%s%c%s)%s %s%-14s%s %s%5d%s\n",
+			ansi.FgMagenta, ansi.FgBrightWhite, regionTypeKeys[i], ansi.FgMagenta, ansi.Reset,
 			ansi.FgBrightYellow, name, ansi.Reset,
-			*regionField(p, i))
+			ansi.FgBrightWhite, *regionField(p, i), ansi.Reset)
 	}
 }
 
@@ -141,7 +143,7 @@ func buyLand(s session.Session, w *ctx) Result {
 		fmt.Fprintf(s, "%s\n", tr(s, "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."))
 		fmt.Fprintf(s, tr(s, "You can afford %s%d%s regions.")+"\n\n", ansi.FgBrightCyan, w.MaxAffordableRegions(p), ansi.Reset)
 		printRegionTable(s, p)
-		fmt.Fprintf(s, " %s(*)%s %s%s%s\n", ansi.FgBrightMagenta, ansi.Reset, ansi.FgBrightYellow, tr(s, "Advisors"), ansi.Reset)
+		fmt.Fprintf(s, " %s(%s*%s)%s %s%s%s\n", ansi.FgMagenta, ansi.FgBrightWhite, ansi.FgMagenta, ansi.Reset, ansi.FgBrightYellow, tr(s, "Advisors"), ansi.Reset)
 		regionRule(s)
 	}
 	showMenu()
