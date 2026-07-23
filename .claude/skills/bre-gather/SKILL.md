@@ -445,6 +445,21 @@ with, or endorsed by" the original authors (README "Heritage").
 `BRE.OVR`, its data files, or any asset extracted from them. They stay in your
 own local reference copy only.
 
+**What BRE's own license says (scanned 2026-07, `docs/bre.doc` — the license
+lives only there; `register.doc`/`whatsnew.doc`/`*.hlp`/`breins.txt` add no
+terms).** The BRE "SOFTWARE LICENSE AGREEMENT" has **no anti-disassembly or
+anti-reverse-engineering clause** — reading/disassembling the binary for study
+is not addressed. What it *does* forbid: "You may not **alter** the
+machine-readable object files or program documentation files" (esp. to defeat
+the registration key or modify the copyright/text), removing/modifying the
+copyright notice, and selling or bundling-for-fee. So disassembling BRE to learn
+a constant/formula for OUR own implementation is not prohibited by its license;
+altering `BRE.EXE`/`BRE.OVR` is. (Editing a local *save* file — `game.dat` — for
+study is a different thing from altering the object files, but revert it and
+never redistribute.) Not legal advice; absence of a clause ≠ affirmative
+permission, and jurisdictions differ — the clean-room "no copying expression"
+posture above is the safe line regardless.
+
 Not legal advice. The idea/expression line above reflects general copyright
 principles, not a ruling on any specific case. When unsure whether something has
 crossed from *mechanic* into *expression*, ask a project maintainer or check the
