@@ -23,9 +23,9 @@ func TestAttackPiratesColorsFactions(t *testing.T) {
 		color, name string
 	}{
 		{ansi.FgBrightGreen, "Humans"},
-		{ansi.FgMagenta, "Mechanoids"},
-		{ansi.FgBrightMagenta, "Rexxogans"},
-		{ansi.FgBrightCyan, "Spacians"},
+		{ansi.FgRed, "Sharks"},
+		{ansi.FgBrightMagenta, "Trilobarians"},
+		{ansi.FgBrightCyan, "Ammonians"},
 	}
 	for _, w := range wants {
 		if !strings.Contains(out, w.color+w.name) {

@@ -244,19 +244,20 @@ func biologicalAttack(s session.Session, w *ctx) Result {
 	return localAttack(s, w, "Biological Attack", game.BioCost, true, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
 }
 
-// pirateColors are BRE's per-faction name colors, in game.PirateFactions order.
-// Verified from BRE.EXE's color table (the 9 bytes right after the faction-name
-// array): 0a 0e 0c 04 05 0d 09 03 0b.
+// pirateColors are the per-faction name colors, in game.PirateFactions order.
+// The palette is BRE's, verified from BRE.EXE's color table (the 9 bytes right
+// after the faction-name array): 0a 0e 0c 04 05 0d 09 03 0b. The names are IB's
+// own; the comments track which slot each color paints.
 var pirateColors = []string{
-	ansi.FgBrightGreen,   // Humans      (10 light green)
-	ansi.FgBrightYellow,  // Barbarians  (14 yellow)
-	ansi.FgBrightRed,     // Solarians   (12 light red)
-	ansi.FgRed,           // Sharks      (4 red)
-	ansi.FgMagenta,       // Mechanoids  (5 magenta)
-	ansi.FgBrightMagenta, // Rexxogans   (13 light magenta)
-	ansi.FgBrightBlue,    // Xandorians  (9 light blue)
-	ansi.FgCyan,          // Monitorians (3 cyan)
-	ansi.FgBrightCyan,    // Spacians    (11 light cyan)
+	ansi.FgBrightGreen,   // Humans       (10 light green)
+	ansi.FgBrightYellow,  // Barbarians   (14 yellow)
+	ansi.FgBrightRed,     // Nightjackals (12 light red)
+	ansi.FgRed,           // Sharks       (4 red)
+	ansi.FgMagenta,       // Dunkleoids   (5 magenta)
+	ansi.FgBrightMagenta, // Trilobarians (13 light magenta)
+	ansi.FgBrightBlue,    // Raptorians   (9 light blue)
+	ansi.FgCyan,          // Gorgonoids   (3 cyan)
+	ansi.FgBrightCyan,    // Ammonians    (11 light cyan)
 }
 
 func attackPirates(s session.Session, w *ctx) Result {

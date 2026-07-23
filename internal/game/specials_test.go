@@ -141,7 +141,7 @@ func TestRaidFactionWinLose(t *testing.T) {
 		t.Errorf("Land/Regions invariant broken: Land=%d Regions.Total()=%d", a.Land, a.Regions.Total())
 	}
 
-	// A token force against the hardest faction (Spacians, index 8) loses
+	// A token force against the last faction (Ammonians, index 8) loses
 	// and the committed troopers drop.
 	a.Troopers = 10
 	beforeTroopers := a.Troopers

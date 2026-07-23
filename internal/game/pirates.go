@@ -8,9 +8,14 @@ import (
 // PirateFactions are the nine raidable pirate factions. Their strength is
 // randomized per game (NOT an easiest-to-hardest ladder), so any faction can
 // turn out the strongest.
+// The three generic words (Humans, Barbarians, Sharks) are kept; the rest are
+// IB-original names, mostly adapted from Devonian sea life — fitting, since the
+// kept "Sharks" are themselves Devonian survivors — plus Nightjackals. BRE's
+// distinctive faction names are its own creative expression, so we don't reuse
+// them (clean-room — see the bre-gather skill's license notes).
 var PirateFactions = []string{
-	"Humans", "Barbarians", "Solarians", "Sharks", "Mechanoids",
-	"Rexxogans", "Xandorians", "Monitorians", "Spacians",
+	"Humans", "Barbarians", "Nightjackals", "Sharks", "Dunkleoids",
+	"Trilobarians", "Raptorians", "Gorgonoids", "Ammonians",
 }
 
 // PirateFaction is a living pirate band. It raids empires — carrying off a
