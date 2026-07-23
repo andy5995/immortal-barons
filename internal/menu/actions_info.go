@@ -128,18 +128,35 @@ func advisorGreeting(s session.Session, d advisorDomain) string {
 	}
 }
 
+// advisorLine is one line an advisor speaks, with the color its FIGURES take.
+// BRE varies this: the Civilian advisor reports its tallies in bright-white but
+// flags a food shortfall in bright-yellow; hi carries that per-line choice.
+type advisorLine struct {
+	Text string
+	Hi   string // figure highlight color for this line
+}
+
 // advisorReport builds the lines one advisor speaks: the figures for its domain
 // (mirroring BRE's advisor reports — the populace and food, the treasury and
 // income, the armed forces, and technology's effects) plus any advice that
-// applies. Kept separate from rendering so tests can inspect the lines.
-func advisorReport(s session.Session, d advisorData, dom advisorDomain) []string {
+// applies. Kept separate from rendering so tests can inspect the lines. The
+// per-line figure color follows BRE (docs/dev/bre-screens.md): Economic and
+// Technology figures are bright-yellow, the Civilian/Military tallies are
+// bright-white, and a Civilian food shortfall is flagged bright-yellow.
+func advisorReport(s session.Session, d advisorData, dom advisorDomain) []advisorLine {
 	num := func(n int) string { return formatGold(n, sessionLang(s)) }
 	p := &d.p
-	var out []string
+	fig := ansi.FgBrightWhite
+	if dom == advisorEconomic || dom == advisorTechnology {
+		fig = ansi.FgBrightYellow
+	}
+	var out []advisorLine
+	add := func(text string) { out = append(out, advisorLine{text, fig}) }
+	warn := func(text string) { out = append(out, advisorLine{text, ansi.FgBrightYellow}) }
 	switch dom {
 	case advisorCivilian:
-		out = append(out, fmt.Sprintf(tr(s, "Our people number %s, and their support stands at %d%%."), num(p.People), p.Support))
-		out = append(out, fmt.Sprintf(tr(s, "We grow %s food each turn and consume %s."), num(d.foodGrown), num(d.foodEaten)))
+		add(fmt.Sprintf(tr(s, "Our people number %s, and their support stands at %d%%."), num(p.People), p.Support))
+		add(fmt.Sprintf(tr(s, "We grow %s food each turn and consume %s."), num(d.foodGrown), num(d.foodEaten)))
 		net := d.foodGrown - d.foodEaten
 		// Food is credited at turn start, so p.Food already includes this turn's
 		// growth. The projections below are written against the pre-growth stock, so
@@ -149,32 +166,33 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []string
 		case stock+net < 0:
 			// Even with this turn's growth already in, stores can't cover this turn's
 			// consumption, so the turn ends with negative food (turn.go starvation step).
-			out = append(out, tr(s, "Our food will not last the turn. Buy or grow more."))
+			warn(tr(s, "Our food will not last the turn. Buy or grow more."))
 		case net < 0:
-			out = append(out, fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), num(-net), stock/(-net)))
+			warn(fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), num(-net), stock/(-net)))
 		case d.foodAtCap > d.foodGrown:
 			// Fed now, but the populace is still growing toward a support-driven
 			// capacity whose food need outruns production (see issue #35).
-			out = append(out, fmt.Sprintf(tr(s, "We have a surplus now, but our people are still growing. At full size they will eat about %s food each turn, more than we grow. Add agricultural regions before then."), num(d.foodAtCap)))
+			warn(fmt.Sprintf(tr(s, "We have a surplus now, but our people are still growing. At full size they will eat about %s food each turn, more than we grow. Add agricultural regions before then."), num(d.foodAtCap)))
 		default:
-			out = append(out, fmt.Sprintf(tr(s, "That leaves a surplus of %s. Our stores are secure."), num(net)))
+			// The food bottom line pops in yellow whether short or in surplus (BRE).
+			warn(fmt.Sprintf(tr(s, "That leaves a surplus of %s. Our stores are secure."), num(net)))
 		}
 		if p.Support < 50 {
-			out = append(out, tr(s, "The people grow restless. Lower taxes or spend on their support."))
+			warn(tr(s, "The people grow restless. Lower taxes or spend on their support."))
 		}
 		if p.Tax > 20 {
-			out = append(out, tr(s, "Taxes are high enough to risk riots. Consider lowering them."))
+			warn(tr(s, "Taxes are high enough to risk riots. Consider lowering them."))
 		}
 	case advisorEconomic:
-		out = append(out, fmt.Sprintf(tr(s, "Our treasury holds %s gold, with %s more in the bank."), num(p.Gold), num(p.Bank)))
+		add(fmt.Sprintf(tr(s, "Our treasury holds %s gold, with %s more in the bank."), num(p.Gold), num(p.Bank)))
 		if p.Debt > 0 {
-			out = append(out, fmt.Sprintf(tr(s, "We owe %s gold in debt, which grows each turn."), num(p.Debt)))
+			add(fmt.Sprintf(tr(s, "We owe %s gold in debt, which grows each turn."), num(p.Debt)))
 		}
 		share := 0
 		if d.worldIncome > 0 {
 			share = d.income * 100 / d.worldIncome
 		}
-		out = append(out, fmt.Sprintf(tr(s, "We earn about %s gold each turn, %d%% of the world total."), num(d.income), share))
+		add(fmt.Sprintf(tr(s, "We earn about %s gold each turn, %d%% of the world total."), num(d.income), share))
 		perRegion, avg := 0, 0
 		if p.Land > 0 {
 			perRegion = d.income / p.Land
@@ -182,46 +200,46 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []string
 		if d.worldLand > 0 {
 			avg = d.worldIncome / d.worldLand
 		}
-		out = append(out, fmt.Sprintf(tr(s, "That is %s gold per region; the world average is %s."), num(perRegion), num(avg)))
+		add(fmt.Sprintf(tr(s, "That is %s gold per region; the world average is %s."), num(perRegion), num(avg)))
 		if p.Gold <= 0 && p.Bank <= 0 {
-			out = append(out, tr(s, "Our treasury is empty, Sire. We should raise gold soon."))
+			add(tr(s, "Our treasury is empty, Sire. We should raise gold soon."))
 		}
 	case advisorMilitary:
-		out = append(out, fmt.Sprintf(tr(s, "Our forces: %s troopers, %s jets, %s turrets, %s tanks, %s bombers, %s carriers."),
+		add(fmt.Sprintf(tr(s, "Our forces: %s troopers, %s jets, %s turrets, %s tanks, %s bombers, %s carriers."),
 			num(p.Troopers), num(p.Jets), num(p.Turrets), num(p.Tanks), num(p.Bombers), num(p.Carriers)))
 		switch {
 		case p.HQ == 0:
-			out = append(out, tr(s, "We have no HeadQuarters. Building one would strengthen our tanks."))
+			add(tr(s, "We have no HeadQuarters. Building one would strengthen our tanks."))
 		case p.HQ < 100:
-			out = append(out, fmt.Sprintf(tr(s, "Our HeadQuarters is %d%% built."), p.HQ))
+			add(fmt.Sprintf(tr(s, "Our HeadQuarters is %d%% built."), p.HQ))
 		default:
-			out = append(out, tr(s, "Our HeadQuarters is fully built."))
+			add(tr(s, "Our HeadQuarters is fully built."))
 		}
 		if p.Carriers*100 < p.Jets {
-			out = append(out, tr(s, "We have more jets than our carriers can carry. Build more carriers."))
+			add(tr(s, "We have more jets than our carriers can carry. Build more carriers."))
 		}
-		out = append(out, fmt.Sprintf(tr(s, "Troop morale stands at %d%%."), p.Morale))
+		add(fmt.Sprintf(tr(s, "Troop morale stands at %d%%."), p.Morale))
 		if p.Morale < 50 {
-			out = append(out, tr(s, "Morale is low. Desertion is a real risk before our next battle."))
+			warn(tr(s, "Morale is low. Desertion is a real risk before our next battle."))
 		}
 		if p.Agents == 0 {
-			out = append(out, tr(s, "We have no covert agents. Recruit some for spying and sabotage."))
+			add(tr(s, "We have no covert agents. Recruit some for spying and sabotage."))
 		} else {
-			out = append(out, fmt.Sprintf(tr(s, "We keep %s covert agents."), num(p.Agents)))
+			add(fmt.Sprintf(tr(s, "We keep %s covert agents."), num(p.Agents)))
 		}
 	case advisorTechnology:
 		tf := p.TechFactor()
 		switch {
 		case p.Regions.Technology == 0:
-			out = append(out, tr(s, "We have no Technology regions."))
-			out = append(out, tr(s, "Building some would raise our military strength, income, and food output, and lower our upkeep — a benefit that builds up over time."))
+			add(tr(s, "We have no Technology regions."))
+			add(tr(s, "Building some would raise our military strength, income, and food output, and lower our upkeep — a benefit that builds up over time."))
 		case tf == 0:
-			out = append(out, tr(s, "Our Technology regions are new. Their benefits will build up as we hold them."))
+			add(tr(s, "Our Technology regions are new. Their benefits will build up as we hold them."))
 		default:
-			out = append(out, fmt.Sprintf(tr(s, "Technology stands at %d%%."), tf))
-			out = append(out, fmt.Sprintf(tr(s, "It raises our military strength, income, and food output by %d%%."), tf))
-			out = append(out, fmt.Sprintf(tr(s, "It lowers unit and region upkeep, and food spoilage, to %d%% of normal."), 100-tf))
-			out = append(out, tr(s, "The bonus builds up the longer we hold Technology regions."))
+			add(fmt.Sprintf(tr(s, "Technology stands at %d%%."), tf))
+			add(fmt.Sprintf(tr(s, "It raises our military strength, income, and food output by %d%%."), tf))
+			add(fmt.Sprintf(tr(s, "It lowers unit and region upkeep, and food spoilage, to %d%% of normal."), 100-tf))
+			add(tr(s, "The bonus builds up the longer we hold Technology regions."))
 		}
 	}
 	return out
@@ -237,11 +255,18 @@ func renderAdvisor(s session.Session, w *ctx, d advisorDomain) {
 	for _, gl := range strings.Split(help.Wrap(advisorGreeting(s, d), 78), "\n") {
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightCyan, gl, ansi.Reset)
 	}
+	// Body text is regular/off-white (37); the figures are the only bright things
+	// on the line — bright-white (97) or yellow (93) per the line's Hi — so they
+	// pop, the way BRE's advisors read (docs/dev/bre-screens.md). Without the dim
+	// base, bright-white figures would blend into a terminal's default-white text.
+	base := ansi.FgWhite
 	for _, line := range advisorReport(s, data, d) {
 		// Word-wrap each report line to the screen width (78) less the 2-space
-		// indent, so a long sentence breaks at spaces instead of mid-word at col 80.
-		for _, wl := range strings.Split(help.Wrap(line, 76), "\n") {
-			fmt.Fprintf(s, "  %s\n", wl)
+		// indent (wrap the plain text, then color), so a long sentence breaks at
+		// spaces instead of mid-word at col 80. A figure returns to the off-white
+		// base after its highlight, not the terminal default.
+		for _, wl := range strings.Split(help.Wrap(line.Text, 76), "\n") {
+			fmt.Fprintf(s, "  %s%s%s\n", base, hiNumsReset(wl, line.Hi, base), ansi.Reset)
 		}
 	}
 }
@@ -250,13 +275,23 @@ func renderAdvisor(s session.Session, w *ctx, d advisorDomain) {
 // domain's counsel, or 0 to leave. Shared by the System menu's "Visit Advisors"
 // action and the Buy Regions "(*) Advisors" entry.
 func advisorsMenu(s session.Session, w *ctx) {
+	// item colors match BRE's Advisors menu (docs/dev/bre-screens.md): magenta
+	// parens, a bright-magenta key, a white label.
+	item := func(n int, label string) {
+		fmt.Fprintf(s, "  %s(%s%d%s)%s %s%s%s\n",
+			ansi.FgMagenta, ansi.FgBrightMagenta, n, ansi.FgMagenta, ansi.Reset,
+			ansi.FgWhite, tr(s, label), ansi.Reset)
+	}
 	for {
-		titleBar(s, tr(s, "Visit Advisors"))
-		fmt.Fprintf(s, "  1) %s\n", tr(s, "Civilian"))
-		fmt.Fprintf(s, "  2) %s\n", tr(s, "Economic"))
-		fmt.Fprintf(s, "  3) %s\n", tr(s, "Military"))
-		fmt.Fprintf(s, "  4) %s\n", tr(s, "Technology"))
-		fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
+		// BRE frames this menu with a magenta bracketed rule ("──[Advisors]──"),
+		// not IB's lightbar (docs/dev/bre-screens.md).
+		fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgMagenta, tr(s, "Advisors")))
+		item(1, "Civilian")
+		item(2, "Economic")
+		item(3, "Military")
+		item(4, "Technology")
+		item(0, "Quit")
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
 		n := choiceQuit(s, 4)
 		if n < 1 {
 			return
@@ -349,8 +384,8 @@ func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) 
 			sign = "-"
 			abs = -change
 		}
-		fmt.Fprintf(s, "  %s%s:%s %s    %s%s:%s %s%s%s%s\n",
-			ansi.FgWhite, tr(s, label), ansi.Reset, fmtNum(total),
+		fmt.Fprintf(s, "  %s%s:%s %s%s%s    %s%s:%s %s%s%s%s\n",
+			ansi.FgWhite, tr(s, label), ansi.Reset, ansi.FgBrightWhite, fmtNum(total), ansi.Reset,
 			ansi.FgWhite, tr(s, "Change"), ansi.Reset, clr, sign, fmtNum(abs), ansi.Reset)
 	}
 

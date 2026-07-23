@@ -5,6 +5,15 @@ import (
 	"testing"
 )
 
+// joinAdvisor joins an advisor report's line texts, for substring assertions.
+func joinAdvisor(lines []advisorLine) string {
+	var texts []string
+	for _, l := range lines {
+		texts = append(texts, l.Text)
+	}
+	return strings.Join(texts, "\n")
+}
+
 // Food is credited at turn start now, so d.p.Food already includes this turn's
 // growth. The Civilian advisor's food projection must not add the growth a
 // second time. Here the post-growth stock cannot cover this turn's consumption,
@@ -17,7 +26,7 @@ func TestCivilianAdvisorFoodProjectionDoesNotDoubleCountGrowth(t *testing.T) {
 	d.p.Support = 100
 
 	s := &fakeSession{}
-	joined := strings.Join(advisorReport(s, d, advisorCivilian), "\n")
+	joined := joinAdvisor(advisorReport(s, d, advisorCivilian))
 	if !strings.Contains(joined, "will not last the turn") {
 		t.Errorf("post-growth stock below this turn's consumption should warn it won't last the turn, got:\n%s", joined)
 	}
@@ -34,7 +43,7 @@ func TestCivilianAdvisorRunOutUsesPreGrowthStock(t *testing.T) {
 	d.p.Support = 100
 
 	s := &fakeSession{}
-	joined := strings.Join(advisorReport(s, d, advisorCivilian), "\n")
+	joined := joinAdvisor(advisorReport(s, d, advisorCivilian))
 	if !strings.Contains(joined, "run out") || !strings.Contains(joined, "8 turns") {
 		t.Errorf("run-out should be pre-growth stock / shortfall = 8 turns, got:\n%s", joined)
 	}

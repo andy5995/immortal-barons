@@ -206,7 +206,7 @@ func TestBuyLandAdvisorsThenContinuesLoop(t *testing.T) {
 		t.Errorf("expected land %d, got %d", before+4, w.Player().Land)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "Visit Advisors") {
+	if !strings.Contains(out, "[Advisors]") {
 		t.Errorf("expected Advisors output, got:\n%s", out)
 	}
 	if !strings.Contains(out, "Coastal") {
@@ -230,7 +230,7 @@ func TestBuyLandCapBlocksButLoopContinues(t *testing.T) {
 		t.Fatalf("want 5 regions bought before hitting the cap, got %d", got)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "Visit Advisors") {
+	if !strings.Contains(out, "[Advisors]") {
 		t.Errorf("expected Advisors to still be reachable after the cap blocked further buys, got:\n%s", out)
 	}
 }

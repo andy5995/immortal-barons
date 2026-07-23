@@ -66,7 +66,7 @@ func allianceStrength(s session.Session, w *ctx) Result {
 	} else {
 		fmt.Fprintf(s, "  "+tr(s, "Allies: %s")+"\n", strings.Join(allies, ", "))
 	}
-	fmt.Fprintf(s, "  "+tr(s, "Combined offense: %d")+"\n  "+tr(s, "Combined defense: %d")+"\n", off, def)
+	fmt.Fprintf(s, "  %s\n  %s\n", hiNums(fmt.Sprintf(tr(s, "Combined offense: %d"), off)), hiNums(fmt.Sprintf(tr(s, "Combined defense: %d"), def)))
 	pause(s)
 	return Stay
 }

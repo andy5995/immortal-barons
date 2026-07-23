@@ -121,7 +121,7 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 	} else {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
 		for _, b := range news {
-			fmt.Fprintf(s, "  %s\n", b)
+			fmt.Fprintf(s, "  %s\n", hiNums(b))
 		}
 	}
 	pause(s)
@@ -195,7 +195,7 @@ func showTurnEvents(s session.Session, w *ctx) {
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Since your last play, this has happened:"), ansi.Reset)
 	for _, ev := range events {
-		fmt.Fprintf(s, "  %s\n", ev)
+		fmt.Fprintf(s, "  %s\n", hiNums(ev))
 	}
 	pause(s)
 }
@@ -407,7 +407,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		}) {
 			return
 		}
-		fmt.Fprintf(s, "\n"+tr(s, "Maintenance paid: %d gold to your forces, %d to your regions.")+"\n", forces, regions)
+		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "Maintenance paid: %d gold to your forces, %d to your regions."), forces, regions)))
 		return
 	}
 
@@ -468,7 +468,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	}
 
 	if support < 100 && gold > 0 {
-		fmt.Fprintf(s, "\n"+tr(s, "%d gold is requested to boost popular support.")+"\n", (100-support)*game.SupportPerBoostGold)
+		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to boost popular support."), (100-support)*game.SupportPerBoostGold)))
 		supportGold := promptSuggested(s, "How much will you give?", 0, gold)
 		var pts int
 		if !withPlayer(w, func(p *game.Empire) {
@@ -478,19 +478,19 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 			return
 		}
 		if pts > 0 {
-			fmt.Fprintf(s, tr(s, "Popular support rose %d points.")+"\n", pts)
+			fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Popular support rose %d points."), pts)))
 		}
 	}
 
 	if morale < 100 && gold > 0 {
-		fmt.Fprintf(s, "\n"+tr(s, "%d gold is requested to improve military morale.")+"\n", (100-morale)*game.MoralePerBoostGold)
+		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to improve military morale."), (100-morale)*game.MoralePerBoostGold)))
 		moraleGold := promptSuggested(s, "How much will you give?", 0, gold)
 		var pts int
 		if !withPlayer(w, func(p *game.Empire) { pts = w.World.BoostMorale(p, moraleGold) }) {
 			return
 		}
 		if pts > 0 {
-			fmt.Fprintf(s, tr(s, "Military morale rose %d points.")+"\n", pts)
+			fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Military morale rose %d points."), pts)))
 		}
 	}
 }
@@ -532,7 +532,7 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 		if !withPlayer(w, func(p *game.Empire) { need, have = p.FoodUpkeep(), p.Food }) {
 			return nil
 		}
-		fmt.Fprintf(s, "\n"+tr(s, "Your people need %s units of food.")+"\n", comma(need))
+		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "Your people need %s units of food."), comma(need))))
 		give := promptSuggested(s, "How much will you give?", min(have, need), min(have, need))
 		if give >= need {
 			return nil // fed the full amount — proceed

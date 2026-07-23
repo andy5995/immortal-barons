@@ -43,7 +43,7 @@ func cashRelief(s session.Session, w *ctx) Result {
 	// Overdue debt (from a defaulted loan) is settled here too — Cash Relief covers
 	// both borrowing and paying down what you already owe.
 	if p.Debt > 0 {
-		fmt.Fprintf(s, "\n"+tr(s, "You owe %s gold in overdue debt (it grows each turn).")+"\n", comma(p.Debt))
+		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "You owe %s gold in overdue debt (it grows each turn)."), comma(p.Debt))))
 		if AskYesNo(s, "Repay some now?", false) {
 			if n := promptSuggested(s, "How much to repay?", 0, min(p.Gold, p.Debt)); n > 0 {
 				if err := w.mutatePlayer(func(p *game.Empire) error { return w.World.Repay(p, n) }); err != nil {
@@ -56,10 +56,10 @@ func cashRelief(s session.Session, w *ctx) Result {
 	if days < game.LoanMinDays {
 		days = game.LoanMinDays
 	}
-	fmt.Fprintf(s, "\n"+tr(s, "The loan rate will be %s%% per day, totalling %s%% interest overall.")+"\n",
-		tenthsPct(game.LoanRateTenths(days)), tenthsPct(game.LoanOverallTenths(days)))
+	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "The loan rate will be %s%% per day, totalling %s%% interest overall."),
+		tenthsPct(game.LoanRateTenths(days)), tenthsPct(game.LoanOverallTenths(days)))))
 	ceiling := w.LoanCeiling(p)
-	fmt.Fprintf(s, tr(s, "We will provide up to %s gold.")+"\n", comma(ceiling))
+	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "We will provide up to %s gold."), comma(ceiling))))
 	amount := promptSuggested(s, "How many would you like to borrow?", 0, ceiling)
 	if amount <= 0 {
 		return Stay
@@ -74,7 +74,7 @@ func cashRelief(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	fmt.Fprintf(s, "\n  "+tr(s, "You owe %s gold in %d Days.")+"\n", comma(owed), days)
+	fmt.Fprintf(s, "\n  %s\n", hiNums(fmt.Sprintf(tr(s, "You owe %s gold in %d Days."), comma(owed), days)))
 	okNoPause(s, "Note that late payments will incur additional penalties.")
 	return Stay
 }
@@ -86,8 +86,8 @@ func tenthsPct(t int) string { return fmt.Sprintf("%d.%d", t/10, t%10) }
 // and locks the gold via w.Invest.
 func investFunds(s session.Session, w *ctx) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n"+tr(s, "The current interest returns on investments are %d%%.")+"\n", w.InvestRate)
-	fmt.Fprintf(s, tr(s, "There is a %d-day minimum on investments.")+"\n", game.MinInvestDays)
+	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "The current interest returns on investments are %d%%."), w.InvestRate)))
+	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "There is a %d-day minimum on investments."), game.MinInvestDays)))
 	days := promptSuggested(s, "How many days would you like to invest for?", game.MinInvestDays, game.MaxInvestDays)
 	if days < game.MinInvestDays {
 		days = game.MinInvestDays
@@ -97,7 +97,7 @@ func investFunds(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	expected := game.ExpectedReturn(amount, w.InvestRate, days)
-	fmt.Fprintf(s, "\n  "+tr(s, "Returns expected to be approximately %s gold.")+"\n", comma(expected))
+	fmt.Fprintf(s, "\n  %s\n", hiNums(fmt.Sprintf(tr(s, "Returns expected to be approximately %s gold."), comma(expected))))
 	if !AskYesNo(s, "Accept?", true) {
 		return Stay
 	}
@@ -166,10 +166,10 @@ func listInvestments(s session.Session, w *ctx) Result {
 	}
 	for _, day := range days {
 		r := byDay[day]
-		fmt.Fprintf(s, "  %-12s %-20s %s\n", w.DateForDay(day), dollar(r.inv), dollar(r.loan))
+		fmt.Fprintf(s, "  %-12s %s%-20s %s%s\n", w.DateForDay(day), ansi.FgBrightWhite, dollar(r.inv), dollar(r.loan), ansi.Reset)
 	}
 	if debt > 0 {
-		fmt.Fprintf(s, "\n  "+tr(s, "Overdue debt: $%s (grows each turn until repaid)")+"\n", comma(debt))
+		fmt.Fprintf(s, "\n  %s\n", hiNums(fmt.Sprintf(tr(s, "Overdue debt: $%s (grows each turn until repaid)"), comma(debt))))
 	}
 	pause(s)
 	return Stay
@@ -179,8 +179,8 @@ func listInvestments(s session.Session, w *ctx) Result {
 // Interest Rate knob read as a daily percent (config/10, e.g. 50 → 5.0%);
 // investing is the current floating rate.
 func bankRates(s session.Session, w *ctx) Result {
-	fmt.Fprintf(s, "\n  %-25s%s%%\n", tr(s, "Savings Interest Rate:"), tenthsPct(w.Config.InterestRate))
-	fmt.Fprintf(s, "  %-25s%s%%\n", tr(s, "Investing Interest Rate:"), tenthsPct(w.InvestRate*10))
+	fmt.Fprintf(s, "\n  %-25s%s%s%%%s\n", tr(s, "Savings Interest Rate:"), ansi.FgBrightYellow, tenthsPct(w.Config.InterestRate), ansi.Reset)
+	fmt.Fprintf(s, "  %-25s%s%s%%%s\n", tr(s, "Investing Interest Rate:"), ansi.FgBrightYellow, tenthsPct(w.InvestRate*10), ansi.Reset)
 	pause(s)
 	return Stay
 }

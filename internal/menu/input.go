@@ -220,7 +220,13 @@ func promptProduction(s session.Session, label string, labelW, suggested, max in
 	if pad < 0 {
 		pad = 0
 	}
-	prefix := fmt.Sprintf("%s%s%s (%3d; %3d):%s ", ansi.FgBrightWhite, label, strings.Repeat(" ", pad), suggested, max, ansi.Reset)
+	// Same blue/cyan "(suggested; max)" scheme BRE uses (docs/dev/bre-screens.md),
+	// matching promptSuggestedTight; the %3d keeps the input column aligned.
+	prefix := fmt.Sprintf("%s%s%s %s(%s%3d%s; %s%3d%s)%s:%s ",
+		ansi.FgWhite, label, strings.Repeat(" ", pad),
+		ansi.FgBrightBlue, ansi.FgBrightCyan, suggested, ansi.FgBrightBlue,
+		ansi.FgCyan, max, ansi.FgBrightBlue,
+		ansi.FgWhite, ansi.Reset)
 	fmt.Fprint(s, prefix)
 	return editAmount(s, prefix, suggested, max)
 }

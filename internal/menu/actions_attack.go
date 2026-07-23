@@ -10,6 +10,45 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
+// hiNumsReset returns s with each run of digits (keeping grouping commas that
+// sit between digits) wrapped in numColor and then restored to resetColor, so
+// figures pop against a colored line — BRE highlights numbers throughout its
+// screens (docs/dev/bre-screens.md). resetColor is what the text returns to after
+// a number (ansi.Reset for plain lines, or the line's own base color when the
+// surrounding text is itself colored, e.g. the white Technology advisor). The
+// game builds reports as plain text (it stays display-agnostic), so the coloring
+// happens here at the display layer.
+func hiNumsReset(s, numColor, resetColor string) string {
+	var b strings.Builder
+	inNum := false
+	for _, r := range s {
+		digit := r >= '0' && r <= '9'
+		if inNum && r == ',' {
+			b.WriteRune(r) // 1,000 — a comma between digits stays inside the run
+			continue
+		}
+		if digit && !inNum {
+			b.WriteString(numColor)
+			inNum = true
+		} else if !digit && inNum {
+			b.WriteString(resetColor)
+			inNum = false
+		}
+		b.WriteRune(r)
+	}
+	if inNum {
+		b.WriteString(resetColor)
+	}
+	return b.String()
+}
+
+// hiNumsIn highlights figures in the given color on an otherwise-plain line.
+func hiNumsIn(s, color string) string { return hiNumsReset(s, color, ansi.Reset) }
+
+// hiNums highlights figures in bright-yellow — BRE's default figure color for
+// battle/raid/economy reports.
+func hiNums(s string) string { return hiNumsIn(s, ansi.FgBrightYellow) }
+
 // targetRow snapshots the identity plus displayed fields of one living rival,
 // taken under the world lock so the picker list can be rendered and prompted
 // over safely (the snapshot ranges the shared w.Empires slice). The realm name
@@ -131,7 +170,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s\n", report)
+	fmt.Fprintf(s, "\n%s\n", hiNums(report))
 	if captured > 0 {
 		allocateCaptured(s, w, captured)
 	}
@@ -224,7 +263,7 @@ func localAttack(s session.Session, w *ctx, label string, cost int, endsTurn boo
 		fail(s, err)
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s\n", report)
+	fmt.Fprintf(s, "\n%s\n", hiNums(report))
 	pause(s)
 	if endsTurn {
 		return Back // one War-menu attack per turn (see regularAttack)
@@ -307,7 +346,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s\n", report)
+	fmt.Fprintf(s, "\n%s\n", hiNums(report))
 	// A pirate win with land opens the same type picker a Regular Attack uses; a
 	// landless faction wins gold/military only, so no picker appears (#21, BRE).
 	if captured > 0 {
@@ -322,7 +361,7 @@ func sdiProgram(s session.Session, w *ctx) Result {
 	// BRE's SDI screen shows "Current SDI Strength" and the funding step; IB
 	// funds whole per-point steps (SDIStep gold each) up to SDIMax.
 	fmt.Fprintf(s, "\n%s"+tr(s, "Current SDI Strength: %d%%")+"%s\n", ansi.FgBrightCyan, p.SDI, ansi.Reset)
-	fmt.Fprintf(s, "%s\n", fmt.Sprintf(tr(s, "Each +1%% costs %s gold (max %d%%); fund in whole increments of that."), comma(game.SDIStep), game.SDIMax))
+	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Each +1%% costs %s gold (max %d%%); fund in whole increments of that."), comma(game.SDIStep), game.SDIMax)))
 	gold := promptInt(s, "Fund SDI — gold to spend?")
 	if gold <= 0 {
 		return Stay
@@ -362,7 +401,7 @@ func doomerKaboomer(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s\n", report)
+	fmt.Fprintf(s, "\n%s\n", hiNums(report))
 	pause(s)
 	return Stay
 }

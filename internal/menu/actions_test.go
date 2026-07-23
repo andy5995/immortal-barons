@@ -4,6 +4,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
@@ -33,6 +34,21 @@ func TestShowInstructionsQuitsEarly(t *testing.T) {
 	}
 	if strings.Contains(out, "Troopers") {
 		t.Error("Q on the first page should stop before the topic sections")
+	}
+}
+
+// hiNums highlights numeric runs (BRE makes figures pop) and leaves words alone;
+// a grouping comma between digits stays inside one highlighted run.
+func TestHiNumsHighlightsFigures(t *testing.T) {
+	out := hiNums("You broke the Sharks and recovered 848 troopers, 9,999 gold.")
+	if !strings.Contains(out, ansi.FgBrightYellow+"848"+ansi.Reset) {
+		t.Errorf("848 should be a highlighted run; got %q", out)
+	}
+	if !strings.Contains(out, ansi.FgBrightYellow+"9,999"+ansi.Reset) {
+		t.Errorf("grouped 9,999 should be one highlighted run; got %q", out)
+	}
+	if strings.Contains(out, ansi.FgBrightYellow+"Sharks") {
+		t.Errorf("words must not be highlighted; got %q", out)
 	}
 }
 
