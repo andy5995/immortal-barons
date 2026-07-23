@@ -149,7 +149,9 @@ All four constants live in `balance.go`; Score never drops below 0.
   artifact of comparing victims of different *sizes* across resets — the count
   sweep corrected it.) The **loser only loses regions if it is the defender** — a
   losing attacker never loses land. In BRE the **winner then picks which region
-  *types*** to take (a region picker); IB currently captures an automatic mix (#58).
+  *types*** to take (a region picker); IB does the same on the human path (#58) —
+  the winning attacker chooses the captured composition, decoupled from the
+  proportional mix the loser bleeds, while the AI and group attacks auto-allocate.
   Like BRE, the attacker first picks a **committed force** — how many
   Troopers/Jets/Tanks/Bombers to send (jets usable only up to `Carriers × 100`).
   Only the committed units add offense, and only they take the loss; held-back
@@ -173,13 +175,19 @@ All four constants live in `balance.go`; Score never drops below 0.
 - **Biological attack** — hurts people and troopers, but not land.
 - **Attack pirates** — the nine pirate factions are living bands, not a
   fixed difficulty ladder: their strength is random (any faction can be the
-  strongest). Pirates raid players at random, carrying off a share of the
-  victim's **troopers, jets, turrets, tanks, agents, and gold** — but never
-  bombers or carriers, and never the victim's regions; the game grants a
-  raiding pirate new regions instead, so a pirate that just raided is fatter.
+  strongest). Their **names are IB-original** (BRE's coined names are its own
+  creative work). Pirates raid players at random: IB rolls a **20%** chance per
+  turn that an empire is raided, plus a further **5%** chance of a *second* raid
+  by a different faction the same turn — about 1 turn in 5, matching the felt
+  frequency in BRE (the exact BRE rate is not measured). A raid carries off a
+  share of the victim's **troopers, jets, turrets, tanks, agents, and gold** —
+  but never bombers or carriers, and never the victim's regions; the game grants
+  a raiding pirate new regions instead, so a pirate that just raided is fatter.
   A single raid takes at most **24,999** of any one thing (BRE.EXE constant is
   25,000). Beating a pirate reclaims ~a fifth of its hoard per hit, so it
-  takes several hits to fully recover your goods.
+  takes several hits to fully recover your goods; **a winning raid that seizes
+  pirate-held land opens the same region-type picker a Regular Attack uses
+  (#21)**, while a raid on a landless band yields only gold and military.
 
   Hard caps on what a faction can hold (✓ = verified against the BRE.EXE caps
   table at 0x14ede — `5000,25000,50000,80000,80000,100000,100000,200000,600000`):

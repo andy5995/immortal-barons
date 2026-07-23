@@ -81,8 +81,14 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   name. Only structural literals (`0`, `1`, `100` for percent math) stay inline.
 - Tests use a scripted fake `Session` (see `internal/menu/menu_test.go`) and
   a fixed RNG seed via `game.NewSeed` for determinism.
-- Keep combat/economy numbers matching `docs/mechanics-reference.md`; when
-  they diverge, update the doc in the same change.
+- **`docs/mechanics-reference.md` is the authoritative spec — refresh it in the
+  same change that touches a mechanic.** This is where the numbers *and* the
+  build-status notes live, not CLAUDE.md. When you implement or change a
+  mechanic — especially when you **complete an issue** — update the doc: correct
+  the numbers, and flip any "IB currently does X / not yet built (#N)" note to
+  the new reality when #N lands. A mechanic's entry must never still say it's
+  unbuilt after you build it (the #58 region picker is how this drifted). Don't
+  restate these numbers in CLAUDE.md — point to the spec.
 - **Single-source help details.** In the in-game help (`internal/help/content/`),
   each specific mechanic/unit fact (a ratio, a number, a unit property) belongs
   in ONE canonical file — the unit's or feature's own doc. Other help files that
@@ -98,24 +104,25 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
 
 ## Mechanics fidelity
 
-`docs/mechanics-reference.md` is the authoritative spec, built from the
-original binary strings plus public strategy guides and the GameBanshee
-manual overview. It covers units (offense/defense values, maintenance,
-net-worth), covert ops, region types, economy, caps, the new-player start
-flow, combat percentages, and the news feeds. Values cross-referenced against the actual BRE
-files (`~/.dosemu/drive_c/games/bre-dos/`) are noted there and in the
-`bre-binary-verified-math` memory; a disassembly of the original binary is
-authoritative for exact constants.
+`docs/mechanics-reference.md` is the authoritative spec — how every mechanic
+works *and* its numbers: units (offense/defense, maintenance, net-worth),
+combat, pirate raids, covert ops, region types, economy, caps, the new-player
+start flow, and the news feeds. It is built from the original binary strings
+plus public strategy guides and the GameBanshee manual overview; values
+cross-referenced against the actual BRE files (`~/.dosemu/drive_c/games/bre-dos/`)
+are noted there and in the `bre-binary-verified-math` memory, and a disassembly
+of the original binary is authoritative for exact constants.
 
-Combat uses a split offense/defense model (trooper 1/1, jet 2/0, turret
-0/2, tank 4/4); jets need carriers to attack. A regular attack captures 20%
-of the loser's regions and costs both sides 15% losses (per `attack.hlp`).
-Bank interest is ~1%/turn with the 1.599-billion interest cap and 2-billion
-money cap. Net-worth and maintenance use BRE's per-unit tables (net worth in
-thousandths for exactness; bombers now carry upkeep). Pirate gold cap is
-600,000 (BRE.EXE caps table).
+**Mechanics live in that spec, not in this guide.** Don't describe how a
+mechanic works, or restate any of its numbers, here — this file just points to
+the spec, which is the single source (the same rule as balance.go for constants).
 
-## Status (v0.0.1)
+`docs/dev/` holds deeper reference material: `bre-screens.md` (BRE's literal
+on-screen output, layout, and ANSI colors, captured live — the source of truth
+for UI fidelity), `bre-save-format.md` (its binary `game.dat` layout, mapped by
+differential diffing), and `ibbs-packet-format.md`.
+
+## Status (v0.0.1 released 2026-07-22; v0.0.2 in development)
 
 Persistent, multi-user door game. One shared JSON world; concurrent multi-node
 door play (each action reloads/re-validates/mutates/saves under a brief
@@ -127,21 +134,27 @@ and new-realm protection; an event log for asynchronous play. Front-ends:
 (experimental browser).
 
 Implemented gameplay: conventional combat (offense/defense, turrets, carriers,
-jets, bomber airfield strikes), nuclear/chemical/biological strikes, pirate
-raids, covert operations (spy, stir revolts, set up, support dissensions,
+jets, bomber airfield strikes; a winning attacker chooses the captured region
+types and both sides' casualties are reported by unit type), nuclear/chemical/
+biological strikes, pirate raids (now rolled per turn, not once a day; the nine
+factions carry IB-original names, not BRE's), covert operations (spy, stir revolts, set up,
+support dissensions,
 demoralize forces, bribery, expose enemy ops, and a Bomb Enemy Targets
 submenu — incl. R5-Slappenheimer, the clone's rename of BRE's S3-Sabre),
 diplomacy treaties, trading, region types + food market, SDI, Doomer Kaboomer
 (BRE's Gooie Kablooie), player mail + a BRE-style multi-line message editor +
 planetary bulletin, banking (deposit/withdraw/loan/invest), Set Industries +
-Specialize, Write Macros, an About screen, a first-run language picker, and a
+Specialize, Write Macros, four named advisors (Civilian/Economic/Military/
+Technology), an About screen, a first-run language picker, and a
 rising land-market price (expansion self-limiting). The menu tree mirrors BRE:
 the Diplomacy, Covert, and InterPlanetary Operations menus are matched
 item-for-item where a mechanic exists (recorded-but-inert items are flagged in
 `docs/mechanics-reference.md`). Menus share a uniform exit — `'0'` labeled
 "Quit" with a `DefaultOnEnter` hook so Enter triggers the default (Play/Quit on
-the opening menu; Quit on submenus). A **Play** turn opens once with BRE's
-pre-turn flow (event log → Diplomacy → Change Production). A **daily news
+the opening menu; Quit on submenus). A **Play** turn opens with the
+"since your last play" event log — shown when you start your turn, not before
+the opening menu; Diplomacy and Change Production are no longer pre-turn stops
+(they moved to the System menu, #70). A **daily news
 system** renders a Daily Bulletin header (planet totals with day-over-day
 change) and a Today/Yesterday split of planet news (battles, WMD strikes,
 pirate raids, riots, bank-rate moves, Planetary Master changes — original
@@ -156,6 +169,11 @@ dirs; the sysop's transport moves them; `-planetary` processes inbound, launches
 group attacks, and exports scores/news. **Localization**: help docs (po4a) and
 UI strings (`internal/i18n`) render in the caller's language; de/ru are seeded
 and grow via the `.po` catalogs.
+
+**Screen fidelity**: menus, tables, prompts, combat/raid reports, and the four
+advisor pages match BRE's captured layout and ANSI colors — figures are
+highlighted (bright-white or yellow) against dimmer body text, per
+`docs/dev/bre-screens.md`.
 
 Key gameplay knobs (unit values, maintenance, prices, `LandPriceStep`) are
 constants — tune freely; keep them matching `docs/mechanics-reference.md`.
