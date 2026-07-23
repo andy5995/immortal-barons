@@ -64,5 +64,26 @@ and holds an exclusive lock on it while it runs — the same lock
   of empires. Nothing a web player does affects the door's world, and vice
   versa.
 
+### Known limitation: concurrent play
+
+Several browser sessions can share one world when they point at the same data
+directory. The server locks every change to the world, and every change checks
+its conditions again before it runs. But a few places still *read* your own
+empire's values — such as your troops or your protection status — without taking
+the lock, only to decide whether an action is allowed.
+
+While the once-a-day maintenance runs, or while another player attacks you, one
+of those unlocked reads can catch a value in the middle of a change. The effect
+is small. The values are simple whole numbers, a half-read number corrects
+itself, and every real change is locked and re-checked, so a stale read cannot
+break the world. At worst, one action is briefly shown or offered when it should
+not be, and it then fails cleanly.
+
+So the shared world is safe to play, but it is not provably free of these read
+races. The fix, if it ever matters — many players at once, or head-to-head play
+where exact timing changes an outcome — is to hold the world lock through all of
+a turn's work and release it only while waiting for the player to type. This is
+tracked in issue #2.
+
 Run `immortal-barons-web -help` to see all the command-line options. The
 [Command Reference](command-reference.md) explains every option in one place.
