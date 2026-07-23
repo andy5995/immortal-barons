@@ -241,6 +241,12 @@ const (
 	// food comfortably covers it. Was an unscaled 1:1 with People, which starved a
 	// BRE-faithful 1000-food start. Tunable.
 	PeopleFoodPerThousand = 75
+	// ArmyFoodDivisor: the army eats ~1 food per this many army-units. Live-verified
+	// against BRE (2026-07 IBBS capture): 42,259 troopers → "Armed Forces Require 211
+	// units of food" (42,259/200 = 211). Jets and tanks weigh 2× a trooper (crews +
+	// fuel). Was 1 food/trooper — ~200× too heavy, which made a standing army
+	// food-crippling instead of nearly free as in BRE. Tunable.
+	ArmyFoodDivisor = 200
 
 	// --- Industry (live-verified; one capacity pool per region, split between
 	// units and gold — see World.industrialGold / ProjectedProduction) ---

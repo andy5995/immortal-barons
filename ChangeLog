@@ -8,6 +8,8 @@
   * "Since your last play" events now show after you start your turn,
     not before the main menu
   * Renamed the pirate factions to original names
+  * The army now eats far less food, matching the original game — a
+    large standing army is no longer food-crippling
 
 2026-07-22
   * v0.0.1 released

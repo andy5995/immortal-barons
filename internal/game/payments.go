@@ -80,10 +80,11 @@ func (w *World) RegionsDue(e *Empire) int {
 }
 
 // FoodUpkeep is the food the population and army eat per turn. The population's
-// share is scaled (BRE bills "People Need ~150 food", not one-per-person); jets
-// and tanks eat double (crews plus fuel/rations).
+// share is scaled (BRE bills "People Need ~150 food", not one-per-person); the
+// army eats ~1 food per ArmyFoodDivisor units, with jets and tanks weighing
+// double (crews plus fuel/rations).
 func (e *Empire) FoodUpkeep() int {
-	return e.People*PeopleFoodPerThousand/1000 + e.Troopers + e.Jets*2 + e.Tanks*2
+	return e.People*PeopleFoodPerThousand/1000 + (e.Troopers+e.Jets*2+e.Tanks*2)/ArmyFoodDivisor
 }
 
 // FoodUpkeepAtCapacity projects FoodUpkeep to the empire's population carrying
@@ -97,7 +98,7 @@ func (e *Empire) FoodUpkeepAtCapacity() int {
 	if cap := e.popCapacity(); cap > people {
 		people = cap
 	}
-	return people*PeopleFoodPerThousand/1000 + e.Troopers + e.Jets*2 + e.Tanks*2
+	return people*PeopleFoodPerThousand/1000 + (e.Troopers+e.Jets*2+e.Tanks*2)/ArmyFoodDivisor
 }
 
 // clampGive limits a payment to what the empire can actually afford and
