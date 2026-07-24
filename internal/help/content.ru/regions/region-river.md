@@ -2,7 +2,7 @@
 category: regions
 in_game: true
 order: 5
-title: 'River Regions'
+title: River
 ---
 
 # River Regions

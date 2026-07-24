@@ -2,7 +2,7 @@
 category: regions
 in_game: true
 order: 2
-title: 'Coastal Regions'
+title: Coastal
 ---
 
 # Coastal Regions

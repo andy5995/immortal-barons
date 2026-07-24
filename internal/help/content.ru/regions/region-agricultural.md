@@ -2,7 +2,7 @@
 category: regions
 in_game: true
 order: 6
-title: 'Agricultural Regions'
+title: Agricultural
 ---
 
 # Agricultural Regions

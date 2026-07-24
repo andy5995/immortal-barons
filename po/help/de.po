@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-19 21:14-0500\n"
+"POT-Creation-Date: 2026-07-24 16:33-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -294,20 +294,38 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/covert/overview.md:18
 msgid ""
+"Each operation also costs gold. The menu shows the price next to each one, "
+"and the footer shows how much gold and how many agents you have. You pay the "
+"gold when you send the operation. If you cannot pay, the operation does not "
+"run."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:22
+msgid ""
+"You may run only one covert operation that affects an enemy per turn. After "
+"you run one, the others are blocked until your next turn. Send Spy and Spy "
+"on Relations only gather information, so they do not count against this "
+"limit."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:26
+msgid ""
 "When an operation fails, your agent is caught and lost, and the target may "
 "be warned. The operations are secret, so the report the victim sees does not "
 "name you."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:21
+#: internal/help/content/covert/overview.md:29
 msgid ""
 "Each operation has its own topic. The bombing operations also need Bombers "
 "to deliver their payloads."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:23
+#: internal/help/content/covert/overview.md:31
 msgid ""
 "The Covert Operations menu appears during your turn, after the Attack menu. "
 "If you do not see it, turn on \"Visit Covert Menu\" in the Preferences menu."
@@ -1397,8 +1415,13 @@ msgid ""
 "so you can both defend and attack."
 msgstr ""
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-agricultural.md:1
+#, no-wrap
+msgid "Agricultural"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-agricultural.md:8
 #, no-wrap
 msgid "Agricultural Regions"
@@ -1416,8 +1439,14 @@ msgstr ""
 "Baut Nahrung an. Das ist Ihre Hauptquelle für Nahrung, wenn Sie sie nicht "
 "kaufen."
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-coastal.md:1
+#, fuzzy, no-wrap
+#| msgid "Regions"
+msgid "Coastal"
+msgstr "Gebiete"
+
+#. type: Title #
 #: internal/help/content/regions/region-coastal.md:8
 #, fuzzy, no-wrap
 #| msgid "Regions"
@@ -1438,8 +1467,14 @@ msgstr ""
 "Am besten für Tourismuseinnahmen. In guten Zeiten bringt es das meiste Gold. "
 "Aber bei geringer Zustimmung des Volkes bricht Ihr Tourismus ein."
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-desert.md:1
+#, fuzzy, no-wrap
+#| msgid "Regions"
+msgid "Desert"
+msgstr "Gebiete"
+
+#. type: Title #
 #: internal/help/content/regions/region-desert.md:8
 #, fuzzy, no-wrap
 #| msgid "Regions"
@@ -1459,8 +1494,14 @@ msgstr ""
 "Gut für Solarenergie. Die Einnahmen schwanken je nach Bedingungen, liegen im "
 "Schnitt aber über den Bergen und unter der Küste."
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-industrial.md:1
+#, fuzzy, no-wrap
+#| msgid "Industry"
+msgid "Industrial"
+msgstr "Industrie"
+
+#. type: Title #
 #: internal/help/content/regions/region-industrial.md:8
 #, no-wrap
 msgid "Industrial Regions"
@@ -1480,8 +1521,14 @@ msgstr ""
 "Baut jede Runde Militär. In manchen Spielen ist dies Ihr einziger Weg zu "
 "neuen Einheiten. Eine gute Grundlage an Bergen steigert die Ausbeute."
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-mountain.md:1
+#, fuzzy, no-wrap
+#| msgid "Regions"
+msgid "Mountain"
+msgstr "Gebiete"
+
+#. type: Title #
 #: internal/help/content/regions/region-mountain.md:8
 #, fuzzy, no-wrap
 #| msgid "Regions"
@@ -1503,8 +1550,13 @@ msgstr ""
 "Baut Bodenschätze ab. Die Einnahmen sind im Schnitt niedriger, aber stabil — "
 "kaum etwas beeinflusst sie. Berge steigern zudem die Industrieleistung."
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-river.md:1
+#, no-wrap
+msgid "River"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-river.md:8
 #, fuzzy, no-wrap
 #| msgid "Regions"
@@ -1540,8 +1592,14 @@ msgstr ""
 "Land besteht aus Gebieten. Sie kaufen Gebiete auf einem Markt, und der Preis "
 "steigt, je mehr Sie kaufen. Es gibt mehrere Arten."
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-technology.md:1
+#, fuzzy, no-wrap
+#| msgid "Technology Agreement"
+msgid "Technology"
+msgstr "Technologieabkommen"
+
+#. type: Title #
 #: internal/help/content/regions/region-technology.md:8
 #, fuzzy, no-wrap
 #| msgid "Technology Agreement"
@@ -1602,8 +1660,13 @@ msgid ""
 "a long game they pay off."
 msgstr ""
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-urban.md:1
+#, no-wrap
+msgid "Urban"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-urban.md:8
 #, fuzzy, no-wrap
 #| msgid "Regions"

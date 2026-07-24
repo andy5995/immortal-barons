@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-19 21:14-0500\n"
+"POT-Creation-Date: 2026-07-24 16:33-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -267,13 +267,33 @@ msgstr ""
 #: internal/help/content/covert/overview.md:18
 #, markdown-text
 msgid ""
+"Each operation also costs gold. The menu shows the price next to each one, "
+"and the footer shows how much gold and how many agents you have. You pay the "
+"gold when you send the operation. If you cannot pay, the operation does not "
+"run."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:22
+#, markdown-text
+msgid ""
+"You may run only one covert operation that affects an enemy per turn. After "
+"you run one, the others are blocked until your next turn. Send Spy and Spy "
+"on Relations only gather information, so they do not count against this "
+"limit."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:26
+#, markdown-text
+msgid ""
 "When an operation fails, your agent is caught and lost, and the target may "
 "be warned. The operations are secret, so the report the victim sees does not "
 "name you."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:21
+#: internal/help/content/covert/overview.md:29
 #, markdown-text
 msgid ""
 "Each operation has its own topic. The bombing operations also need Bombers "
@@ -281,7 +301,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:23
+#: internal/help/content/covert/overview.md:31
 #, markdown-text
 msgid ""
 "The Covert Operations menu appears during your turn, after the Attack "
@@ -1324,8 +1344,13 @@ msgid ""
 "so you can both defend and attack."
 msgstr ""
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-agricultural.md:1
+#, no-wrap
+msgid "Agricultural"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-agricultural.md:8
 #, markdown-text, no-wrap
 msgid "Agricultural Regions"
@@ -1339,8 +1364,13 @@ msgid ""
 "not buying it from the market."
 msgstr ""
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-coastal.md:1
+#, no-wrap
+msgid "Coastal"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-coastal.md:8
 #, markdown-text, no-wrap
 msgid "Coastal Regions"
@@ -1355,8 +1385,13 @@ msgid ""
 "interest and tourism income drops sharply."
 msgstr ""
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-desert.md:1
+#, no-wrap
+msgid "Desert"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-desert.md:8
 #, markdown-text, no-wrap
 msgid "Desert Regions"
@@ -1370,8 +1405,13 @@ msgid ""
 "conditions, but on average it beats mountains and trails good Coastal land."
 msgstr ""
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-industrial.md:1
+#, no-wrap
+msgid "Industrial"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-industrial.md:8
 #, markdown-text, no-wrap
 msgid "Industrial Regions"
@@ -1386,8 +1426,13 @@ msgid ""
 "industry produce more."
 msgstr ""
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-mountain.md:1
+#, no-wrap
+msgid "Mountain"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-mountain.md:8
 #, markdown-text, no-wrap
 msgid "Mountain Regions"
@@ -1402,8 +1447,13 @@ msgid ""
 "Industrial regions produce."
 msgstr ""
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-river.md:1
+#, no-wrap
+msgid "River"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-river.md:8
 #, markdown-text, no-wrap
 msgid "River Regions"
@@ -1433,8 +1483,13 @@ msgid ""
 "job. Each type has its own topic."
 msgstr ""
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-technology.md:1
+#, no-wrap
+msgid "Technology"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-technology.md:8
 #, markdown-text, no-wrap
 msgid "Technology Regions"
@@ -1495,8 +1550,13 @@ msgid ""
 "a long game they pay off."
 msgstr ""
 
-#. type: Title #
+#. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-urban.md:1
+#, no-wrap
+msgid "Urban"
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/regions/region-urban.md:8
 #, markdown-text, no-wrap
 msgid "Urban Regions"
