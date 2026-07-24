@@ -1,17 +1,21 @@
-(in-progress:)
+2026-07-24
   * Winning a Regular Attack now lets you choose the types of the
     regions you capture (#58)
   * Winning a pirate raid that seizes land lets you choose its region
     types too (#21)
+  * Combat reports now break down casualties by unit type for both
+    the attacker and the defender
   * Pirate raids now happen randomly across turns (about 1 in 5)
     instead of all at once each day (#21)
-  * "Since your last play" events now show after you start your turn,
-    not before the main menu
-  * Renamed the pirate factions to original names
   * The army now eats far less food, matching the original game — a
     large standing army is no longer food-crippling
+  * Renamed the pirate factions to original names
+  * Screens follow BRE more closely — highlighted figures, the news
+    masthead/bulletin layout, and region-table colors
+  * "Since your last play" events now show after you start your turn,
+    not before the main menu
   * Windows door: works when the BBS hands over a non-blocking socket
-    (MagicBBS)
+    (MagicBBS) (#37)
 
 2026-07-22
   * v0.0.1 released
