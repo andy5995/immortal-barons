@@ -167,6 +167,47 @@ func TestAIAggressorDemoralizesBeforeWar(t *testing.T) {
 	}
 }
 
+// Expansion must not collapse the moment New Realm Protection lapses. Two AIs
+// identical except for Protection (one shielded, one exposed), both food-healthy
+// and budget-limited, should buy the SAME amount of land in a turn: the exposed
+// one additionally funds a defensive force, but that must come out of what's left
+// AFTER expansion, not out of the expansion budget. Regression guard for the
+// "strong first day, stalls afterwards" behavior — the AI was skimming half its
+// gold for military before the land step, starving the compounding land engine
+// right when protection ended.
+func TestAIExpansionSurvivesProtectionLapse(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	build := func(owner string, protection int) *Empire {
+		e := w.AddHuman(owner, owner)
+		e.AISkill = AISkillSharp                // no dull throttle
+		e.AIProfile = AIProfileDiplomat         // non-aggressor: no agent buys to muddy the compare
+		e.Regions = RegionMix{Agricultural: 50} // food-healthy: reaches the land step
+		e.syncLand()
+		e.People = 1000
+		e.Food = 1_000_000
+		e.Gold = 500_000 // below the per-turn region cap, so the budget (not the cap) sets land bought
+		e.Protection = protection
+		e.Investments = nil
+		return e
+	}
+	protected := build("prot", 20) // shielded: skips military, all surplus to land
+	exposed := build("expo", 0)    // out of protection: also builds a force
+	protBefore, expoBefore := protected.Land, exposed.Land
+
+	w.aiManageEconomy(protected)
+	w.aiManageEconomy(exposed)
+
+	protBought, expoBought := protected.Land-protBefore, exposed.Land-expoBefore
+	if protBought <= 0 {
+		t.Fatalf("precondition: protected AI should expand, bought %d", protBought)
+	}
+	if expoBought < protBought {
+		t.Errorf("expansion collapsed when protection lapsed: protected bought %d, exposed bought %d "+
+			"(exposed should expand at least as much, funding military from the remainder)",
+			protBought, expoBought)
+	}
+}
+
 // A dull-skill AI throttles its land-buying, so it expands less than a sharp one
 // from the same position (both still expand). Two tiers give a game a mix of
 // strong and weak rivals.

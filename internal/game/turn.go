@@ -255,17 +255,18 @@ func (w *World) aiManageEconomy(e *Empire) {
 		}
 	}
 
-	// 3. Food-healthy. Under New Realm Protection the AI can't be attacked, so it
-	//    goes all-in on land like a strong human (community strategy guides: plow
-	//    every coin into money-making regions during protection, compounding
-	//    land -> income -> land). Once protection lapses it buys a defensive force
-	//    and an HQ first, then keeps expanding with what's left. Surplus above the
-	//    reserve after land is capped is invested (aiInvestIdle), not hoarded.
+	// 3. Food-healthy: expand land FIRST, every turn, protected or not (community
+	//    strategy guides: plow every coin into money-making regions, compounding
+	//    land -> income -> land). Expansion running before military is what keeps a
+	//    realm growing after New Realm Protection lapses — funding a defensive force
+	//    ahead of it skimmed half the treasury off the top and stalled the land
+	//    engine right when protection ended. Once exposed, the force and an HQ come
+	//    out of what land buying leaves; the remaining surplus is invested, not hoarded.
+	w.aiExpandLand(e)
 	if e.Protection == 0 {
 		w.aiBuildForces(e)
 		w.aiStartHQ(e)
 	}
-	w.aiExpandLand(e)
 	w.aiInvestIdle(e)
 }
 
