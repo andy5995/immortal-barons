@@ -2,6 +2,7 @@ package play
 
 import (
 	"bytes"
+	"errors"
 	"io"
 	"strings"
 	"testing"
@@ -25,6 +26,42 @@ func (f *fakeSession) ReadKey() (rune, error) {
 	return r, nil
 }
 func (f *fakeSession) Write(p []byte) (int, error) { return f.out.Write(p) }
+
+// errAfterSession replays keys, then returns a fixed non-EOF error (a stand-in
+// for a winsock read error) once they run out — to exercise the splash/
+// onboarding session.End path.
+type errAfterSession struct {
+	keys []rune
+	pos  int
+	out  bytes.Buffer
+	err  error
+}
+
+func (f *errAfterSession) ReadKey() (rune, error) {
+	if f.pos >= len(f.keys) {
+		return 0, f.err
+	}
+	r := f.keys[f.pos]
+	f.pos++
+	return r, nil
+}
+func (f *errAfterSession) Write(p []byte) (int, error) { return f.out.Write(p) }
+
+// A read error during onboarding (here at the realm-name Confirm? prompt)
+// unwinds via session.End; play.Run must record WHY in the reason, not just
+// "disconnect" (so the door log shows the underlying socket error).
+func TestReadErrorDuringOnboardingSurfacesInReason(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	// splash dismiss, Enter (English), realm name, then the Confirm? read errors.
+	f := &errAfterSession{
+		keys: []rune(" \rTestrealm\r"),
+		err:  errors.New("winsock-boom-10054"),
+	}
+	reason, _ := Run(f, Identity{Handle: "Khan"}, cfg, "2026-07-03")
+	if !strings.Contains(reason, "winsock-boom-10054") {
+		t.Errorf("expected the underlying read error in the reason, got %q", reason)
+	}
+}
 
 func cfgIn(dir string) game.Config {
 	c := game.DefaultConfig()

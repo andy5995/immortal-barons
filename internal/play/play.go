@@ -109,12 +109,20 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	// session ends cleanly and the world is still saved.
 	defer func() {
 		if r := recover(); r != nil {
-			if _, ok := session.AsEnd(r); !ok {
+			endErr, ok := session.AsEnd(r)
+			if !ok {
 				panic(r)
 			}
 			reason = d.Reason()
 			if reason == "" {
 				reason = "disconnect"
+			}
+			// Surface a genuine read error (e.g. a winsock errno hit during the
+			// splash/onboarding, before GameLoop installs its own guard) in the
+			// reason, so the door log records WHY the session ended and not just
+			// "disconnect". A clean EOF/boot carries no extra detail.
+			if endErr != nil && !errors.Is(endErr, io.EOF) {
+				reason = fmt.Sprintf("%s (%v)", reason, endErr)
 			}
 			err = save()
 		}
