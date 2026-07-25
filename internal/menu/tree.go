@@ -428,10 +428,12 @@ func ibbsHidden(w *ctx) bool { return !w.Config.InterBBSEnabled() }
 
 // spendingStatus is the Spending menu footer: gold on hand and turns left.
 // It runs inside draw's world-lock section, so the reads need no separate
-// locking.
+// locking. Like BRE, the count is the turns remaining AFTER the current one, so
+// the last turn of the day reads 0 (Empire Status still shows the inclusive
+// count). The Spending menu only renders during a turn, so TurnsLeft >= 1 here.
 func spendingStatus(w *ctx) string {
 	p := w.Player()
-	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d turns."), formatGold(p.Gold, playerLang(w)), p.TurnsLeft)
+	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d turns."), formatGold(p.Gold, playerLang(w)), p.TurnsLeft-1)
 }
 
 // covertStatus is the Covert Operations footer: gold on hand and agents held

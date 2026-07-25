@@ -512,6 +512,10 @@ You have 4,582,875 gold and 9 turns.
 
 Prices drift turn to turn (region-cost-change setting); `# Owned` is live.
 
+The footer's turn count is the turns remaining **after** the current one, so it
+is one less than the Empire Status "Turns:" line (10 there, "9 turns" here); the
+last turn of the day reads "0 turns".
+
 ### Regions buy screen (Spending → Regions)
 
 ```
