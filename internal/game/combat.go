@@ -33,6 +33,19 @@ const (
 	RegularAttackCapturePct   = 10
 	RegularAttackCaptureFloor = 15
 
+	// Capture-density modifier (IB-original): a Normal attack takes more regions
+	// from a defender whose net worth is spread thinner over its land than the
+	// ATTACKER's — cheap, lightly-held land falls faster — and fewer from a
+	// denser, better-developed realm. The multiplier is the attacker's
+	// net-worth-per-region over the defender's, as a percent, clamped to
+	// [CaptureDensityMin, CaptureDensityMax]; equal density gives CaptureDensityBase
+	// (no change). No BRE-verified density formula exists — public strategy guides
+	// describe the *tactic* of preying on high-region, low-net-worth realms, not a
+	// number — so this is IB's own and may change. Tune freely.
+	CaptureDensityBase = 100 // percent: equal-density result
+	CaptureDensityMin  = 50  // percent (0.5x): densest targets
+	CaptureDensityMax  = 200 // percent (2.0x): softest targets
+
 	// LandDefenseBonus is the defensive strength each region adds on top of the
 	// defender's units (terrain the attacker must take). Used in the battle math
 	// and by the AI when judging whether a target is winnable (#36).
@@ -57,6 +70,31 @@ func (w *World) bombingRun(a, d *Empire, bombers int) (int, int) {
 	d.Jets -= kills
 	a.Bombers -= lost
 	return kills, lost
+}
+
+// captureDensityFactor returns the percent multiplier on a Normal attack's
+// region capture (see the CaptureDensity constants): the attacker's
+// net-worth-per-region over the defender's, clamped, so a defender softer than
+// the attacker bleeds more land and a denser one less. A bankrupt/undefended
+// defender counts as maximally soft; a landless or worthless attacker gets the
+// neutral base.
+func (w *World) captureDensityFactor(a, d *Empire) int {
+	nwA, nwD := w.NetWorth(a), w.NetWorth(d)
+	if d.Land <= 0 || nwD <= 0 {
+		return CaptureDensityMax
+	}
+	if a.Land <= 0 || nwA <= 0 {
+		return CaptureDensityBase
+	}
+	// (nwA/a.Land) / (nwD/d.Land) * 100, cross-multiplied to stay integer.
+	factor := int64(nwA) * int64(d.Land) * 100 / (int64(a.Land) * int64(nwD))
+	if factor < CaptureDensityMin {
+		return CaptureDensityMin
+	}
+	if factor > CaptureDensityMax {
+		return CaptureDensityMax
+	}
+	return int(factor)
 }
 
 // CanAttack reports whether e may launch another individual (conventional)
@@ -143,9 +181,10 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		// path). One attack always captures the same SHARE of regions no matter how
 		// lopsided the strength: a far stronger army takes ground faster over many
 		// attacks, it does not annihilate an empire in a single blow.
-		// max(floor, capture% of the loser's land), then scaled by Attack Rewards.
-		// The floor makes a decisive win on a small realm take (up to) all of it.
-		captured = d.Land * RegularAttackCapturePct / 100
+		// max(floor, capture% of the loser's land), scaled by the loser's
+		// net-worth density relative to the attacker, then by Attack Rewards. The
+		// floor makes a decisive win on a small realm take (up to) all of it.
+		captured = int(int64(d.Land) * RegularAttackCapturePct * int64(w.captureDensityFactor(a, d)) / 10000)
 		if captured < RegularAttackCaptureFloor {
 			captured = RegularAttackCaptureFloor
 		}

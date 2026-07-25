@@ -139,7 +139,15 @@ All four constants live in `balance.go`; Score never drops below 0.
     the group-attack docs).
 
   Region **capture** follows `max(RegularAttackCaptureFloor, RegularAttackCapturePct%
-  × loser regions)`, scaled by Attack Rewards. A **live region-count sweep**
+  × loser regions × density factor)`, scaled by Attack Rewards. The **density
+  factor** is IB-original (no BRE-verified formula): the attacker's
+  net-worth-per-region over the defender's, clamped to `[CaptureDensityMin,
+  CaptureDensityMax]` = 50–200% (`CaptureDensityBase` 100% at equal density). A
+  defender whose net worth is spread thin over its land (cheap, lightly-held
+  regions) bleeds up to 2× the base; a denser, developed realm as little as half.
+  Public strategy guides describe the *tactic* of preying on high-region,
+  low-net-worth targets, not a number, so IB supplies its own — expect tuning.
+  The base rate comes from a **live region-count sweep**
   (2026-07-21, Attack Rewards = Medium, five points 30–574 regions) gave a clean
   formula: **a ~15-region floor** below ~150 regions, **~10% above** — and it is
   **independent of the strength ratio** (verified 1.3×–4×). So a small realm loses
