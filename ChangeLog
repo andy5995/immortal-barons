@@ -1,4 +1,8 @@
 (in-progress:)
+  * Updating from an earlier version requires a game reset (-reset)
+  * Read Messages now shows one message at a time (Reply/Delete/Ignore/
+    Quit), matching the original — Ignore keeps a message for next time,
+    only Delete removes it
 
 2026-07-24
   * Winning a Regular Attack now lets you choose the types of the

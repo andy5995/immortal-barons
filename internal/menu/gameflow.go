@@ -227,16 +227,7 @@ func showUnreadMail(s session.Session, w *ctx) {
 	if !AskYesNo(s, "Read them now?", true) {
 		return
 	}
-	var mail []string
-	withPlayer(w, func(p *game.Empire) {
-		mail = p.Mail
-		p.Mail = nil
-	})
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your messages:"), ansi.Reset)
-	for _, m := range mail {
-		fmt.Fprintf(s, "  %s\n", m)
-	}
-	pause(s)
+	mailReader(s, w)
 }
 
 // incomeReport itemizes p's per-turn income by source. It shows exactly the

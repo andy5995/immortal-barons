@@ -157,7 +157,11 @@ func (w *World) ProposeTreatyWithMessage(from, to *Empire, ttype, message string
 		}
 	}
 	to.TreatyOffers = append(to.TreatyOffers, TreatyOffer{From: from.Name, Type: ttype, Message: message})
-	to.Mail = append(to.Mail, fmt.Sprintf("%s proposes a %s (respond in the Diplomacy menu).", from.Name, ttype))
+	w.SendMail(from, to, Message{
+		To:   w.EmpireLetter(to),
+		When: w.DateForDay(w.GameDay),
+		Body: fmt.Sprintf("Proposes a %s (respond in the Diplomacy menu).", ttype),
+	})
 }
 
 // AcceptTreaty forms the treaty if `me` has a matching pending offer, consuming

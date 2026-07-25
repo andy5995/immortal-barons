@@ -841,7 +841,10 @@ Now matching this reference (as of v0.0.1):
   instant planet-wide strike rather than the original's multi-day build/decay,
   and SDI is a flat percentage damage-reducer)
 - Covert agents with spying and sabotage (success scales with agent count)
-- Player mail and a planetary bulletin
+- Player mail — a BRE-style per-message reader (Reply / Delete / Ignore /
+  Quit), where Ignore keeps a message for next time (it can be ignored
+  indefinitely) and only Delete removes it; Reply quotes the original — plus a
+  planetary bulletin
 - Multiple turns per day, new-realm protection, and daily maintenance
 - A rising land-market price (expansion is self-limiting)
 

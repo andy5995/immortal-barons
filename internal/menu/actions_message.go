@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -11,35 +12,25 @@ import (
 )
 
 func readMessages(s session.Session, w *ctx) Result {
-	// Snapshot the mailbox and today's news under the world lock, clearing the
-	// mailbox in the same critical section. An unlocked read of p.Mail would
-	// race a concurrent sender, and reading-then-clearing separately could wipe
-	// a message that arrived mid-display; a message that arrives after the
-	// snapshot stays in p.Mail for next time. p is re-resolved inside the lock so
-	// a reload can't rebind it to another empire's private mail. (issues #2, #5)
-	var mail, news []string
+	var hadMail bool
+	var news []string
 	w.With(func() {
 		news = append([]string(nil), w.NewsToday...)
-		p := w.Player()
-		if p == nil {
-			return
+		if p := w.Player(); p != nil {
+			hadMail = len(p.Mail) > 0
 		}
-		mail = p.Mail
-		p.Mail = nil
 	})
-	if len(mail) == 0 {
-		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no messages."))
-	} else {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your messages:"), ansi.Reset)
-		for _, m := range mail {
-			fmt.Fprintf(s, "  %s\n", m)
-		}
-	}
+	// Per-message BRE reader (Reply/Delete/Ignore/Quit). The mailbox is no longer
+	// cleared on read: Ignore keeps a message for next time, only Delete removes.
+	mailReader(s, w)
 	if len(news) > 0 {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
 		for _, b := range news {
 			fmt.Fprintf(s, "  %s\n", b)
 		}
+	}
+	if !hadMail && len(news) == 0 {
+		fmt.Fprintf(s, "\n%s\n", tr(s, "You have no messages."))
 	}
 	pause(s)
 	return Stay
@@ -233,13 +224,20 @@ func sendMessage(s session.Session, w *ctx) Result {
 		text, send := composeMessage(s)
 		if send && strings.TrimSpace(text) != "" {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Saving..."), ansi.Reset)
+			when := time.Now().Format("01/02/2006  15:04:05")
 			// Re-resolve sender and recipient by handle/name against the freshly
 			// reloaded world, so a concurrent send to the same inbox appends (both
 			// messages land) and a vanished recipient aborts.
 			err := w.mutatePlayer(func(p *game.Empire) error {
 				if all {
-					for _, e := range recipients(w) {
-						w.World.SendMail(p, e, text)
+					recips := recipients(w)
+					var letters strings.Builder
+					for _, e := range recips {
+						letters.WriteString(w.EmpireLetter(e))
+					}
+					to := letters.String()
+					for _, e := range recips {
+						w.World.SendMail(p, e, game.Message{To: to, When: when, Body: text})
 					}
 					return nil
 				}
@@ -247,7 +245,7 @@ func sendMessage(s session.Session, w *ctx) Result {
 				if recip == nil || recip == p {
 					return errTargetGone
 				}
-				w.World.SendMail(p, recip, text)
+				w.World.SendMail(p, recip, game.Message{To: w.EmpireLetter(recip), When: when, Body: text})
 				return nil
 			})
 			if err != nil {

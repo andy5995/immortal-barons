@@ -3,27 +3,33 @@ package menu
 import (
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 // TestShowUnreadMailReadsInline: a player with mail sees the notice and, on
-// 'y', reads the messages inline; the mailbox is then cleared (#3).
+// 'y', reads the messages inline in the per-message reader; Deleting both
+// empties the inbox (#3).
 func TestShowUnreadMailReadsInline(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
-	p.Mail = []string{"Alice: hi", "Bob: gg"}
+	p.Mail = []game.Message{
+		{From: "Alice", To: "A", When: "07/24/2026", Body: "hi"},
+		{From: "Bob", To: "A", When: "07/24/2026", Body: "gg"},
+	}
 
-	f := &fakeSession{keys: []rune("y ")} // y=read, space=pause key
+	f := &fakeSession{keys: []rune("ydd")} // y=read, then Delete each
 	showUnreadMail(f, w)
 
 	out := f.out.String()
 	if !strings.Contains(out, "2 new messages") {
 		t.Errorf("expected new-mail notice, got: %q", out)
 	}
-	if !strings.Contains(out, "Alice: hi") || !strings.Contains(out, "Bob: gg") {
-		t.Errorf("expected messages read inline, got: %q", out)
+	if !strings.Contains(out, "Alice") || !strings.Contains(out, "Bob") {
+		t.Errorf("expected both senders shown, got: %q", out)
 	}
 	if len(p.Mail) != 0 {
-		t.Errorf("mail should be cleared after reading, got %v", p.Mail)
+		t.Errorf("deleting both should empty the inbox, got %v", p.Mail)
 	}
 }
 
@@ -32,7 +38,7 @@ func TestShowUnreadMailReadsInline(t *testing.T) {
 func TestShowUnreadMailDeclineKeepsMail(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
-	p.Mail = []string{"Alice: hi"}
+	p.Mail = []game.Message{{From: "Alice", Body: "hi"}}
 
 	f := &fakeSession{keys: []rune("n")}
 	showUnreadMail(f, w)

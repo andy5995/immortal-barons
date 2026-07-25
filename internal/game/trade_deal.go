@@ -128,7 +128,11 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	from.Carriers -= TradeDealCarriers // the transport carrier is consumed
 	from.Gold -= cost                  // pay the per-day transit fee
 	to.TradeDeals = append(to.TradeDeals, TradeDeal{From: from.Name, Send: send, Demand: demand})
-	to.Mail = append(to.Mail, fmt.Sprintf("%s sent you a trade deal (respond in the Trading menu).", from.Name))
+	w.SendMail(from, to, Message{
+		To:   w.EmpireLetter(to),
+		When: w.DateForDay(w.GameDay),
+		Body: "Sent you a trade deal (respond in the Trading menu).",
+	})
 	return nil
 }
 
@@ -171,7 +175,11 @@ func (w *World) AcceptTradeDeal(to *Empire, fromName string) error {
 	subBasket(to, d.Demand)   // recipient pays the demand
 	addBasket(from, d.Demand) // sender receives the demand
 	to.removeDeal(i)
-	from.Mail = append(from.Mail, fmt.Sprintf("%s accepted your trade deal.", to.Name))
+	w.SendMail(to, from, Message{
+		To:   w.EmpireLetter(from),
+		When: w.DateForDay(w.GameDay),
+		Body: "Accepted your trade deal.",
+	})
 	return nil
 }
 

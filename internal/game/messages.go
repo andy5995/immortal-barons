@@ -1,8 +1,32 @@
 package game
 
-// SendMail appends a message from `from` to `to`'s inbox.
-func (w *World) SendMail(from, to *Empire, text string) {
-	to.Mail = append(to.Mail, from.Name+": "+text)
+// Message is one piece of empire mail: who sent it, the recipient letter(s) it
+// was addressed to, when it was sent, and the body. Body lines beginning with
+// "> " are quoted text — a reply quotes the message it answers.
+type Message struct {
+	From string
+	To   string
+	When string
+	Body string
+}
+
+// SendMail delivers m from `from` to `to`'s inbox. From is stamped from the
+// sender, so callers only fill To/When/Body.
+func (w *World) SendMail(from, to *Empire, m Message) {
+	m.From = from.Name
+	to.Mail = append(to.Mail, m)
+}
+
+// EmpireLetter is the display letter (A, B, …) for e, from its slot in the
+// world's empire list — the way BRE addresses mail recipients. Returns "?" for
+// an empire not in the world.
+func (w *World) EmpireLetter(e *Empire) string {
+	for i, x := range w.Empires {
+		if x == e {
+			return string(rune('A' + i))
+		}
+	}
+	return "?"
 }
 
 // PostBulletin adds a line to the planetary bulletin, keeping the most

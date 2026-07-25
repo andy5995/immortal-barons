@@ -50,7 +50,7 @@ func TestConcurrentMailBothLand(t *testing.T) {
 		hook: func() { // another node drops a message into the same inbox first
 			commitOnFile(t, cfg, func(w *game.World) {
 				v := w.FindByOwner("victim")
-				v.Mail = append(v.Mail, "from another node")
+				v.Mail = append(v.Mail, game.Message{From: "Other", Body: "from another node"})
 			})
 		},
 	}
@@ -59,10 +59,10 @@ func TestConcurrentMailBothLand(t *testing.T) {
 	v := committedEmpire(t, cfg, "victim")
 	var gotOther, gotMine bool
 	for _, m := range v.Mail {
-		if strings.Contains(m, "from another node") {
+		if strings.Contains(m.Body, "from another node") {
 			gotOther = true
 		}
-		if strings.Contains(m, "Alethia: hi") {
+		if m.From == "Alethia" && strings.Contains(m.Body, "hi") {
 			gotMine = true
 		}
 	}
