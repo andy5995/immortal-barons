@@ -35,13 +35,14 @@ func regionField(p *game.Empire, idx int) *int {
 
 // printRegionTable renders the BRE-style region picker: a Key / Name / Owned
 // table, colored (magenta keys, yellow names) so buy and drop share one look.
-// regionRule is the BRE-style separator around the region table: a short magenta
-// accent segment above a longer white rule ("a partial quarter line above the
-// longer line"). Both use only the box-drawing horizontal, which transcodes
-// cleanly to CP437.
+// regionRule is BRE's region-table separator: a single bright-magenta line with
+// a short `═` accent inset near the left (─────═════──────────────────, see
+// docs/dev/bre-screens.md). Box-drawing only, so it transcodes cleanly to CP437.
 func regionRule(s session.Session) {
-	fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightMagenta, strings.Repeat("─", 12), ansi.Reset)
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, strings.Repeat("─", 36), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s%s%s\n",
+		ansi.FgBrightMagenta,
+		strings.Repeat("─", 5), strings.Repeat("═", 5), strings.Repeat("─", 18),
+		ansi.Reset)
 }
 
 func printRegionTable(s session.Session, p *game.Empire) {
