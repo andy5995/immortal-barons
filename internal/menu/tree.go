@@ -39,7 +39,7 @@ func quitOnEnter(m *Menu) func(*ctx) *Item {
 // then wired, so submenus can reference each other (e.g. several menus
 // offer "Visit Bank").
 func BuildMenus() *Menus {
-	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus}
+	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus, Width: 44}
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan, Columns: 2}
 	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
@@ -433,7 +433,12 @@ func ibbsHidden(w *ctx) bool { return !w.Config.InterBBSEnabled() }
 // count). The Spending menu only renders during a turn, so TurnsLeft >= 1 here.
 func spendingStatus(w *ctx) string {
 	p := w.Player()
-	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d turns."), formatGold(p.Gold, playerLang(w)), p.TurnsLeft-1)
+	lang := playerLang(w)
+	turns := p.TurnsLeft - 1
+	if turns == 1 {
+		return fmt.Sprintf(i18n.T(lang, "You have %s gold and 1 turn."), formatGold(p.Gold, lang))
+	}
+	return fmt.Sprintf(i18n.T(lang, "You have %s gold and %d turns."), formatGold(p.Gold, lang), turns)
 }
 
 // covertStatus is the Covert Operations footer: gold on hand and agents held

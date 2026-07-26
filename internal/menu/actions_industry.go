@@ -26,7 +26,7 @@ func prodField(p *game.Empire, idx int) *int {
 func setIndustries(s session.Session, w *ctx) Result {
 	p := w.Player()
 	proj := w.ProjectedProduction(p)
-	fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgBrightRed, tr(s, "Industrial Production")))
+	fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgBrightRed, tr(s, "Industrial Production"), len([]rune(rule))))
 	allocated := 0
 	for i, name := range prodTypeNames {
 		allocated += *prodField(p, i)

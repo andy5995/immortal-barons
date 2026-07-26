@@ -229,6 +229,20 @@ type Menu struct {
 	// lay the selectable items out row-major across that many columns. Only
 	// used for menus without Price/# Owned columns.
 	Columns int
+	// Width overrides the decoration-rule width (title rule + status divider) in
+	// columns. 0 uses the default full width; BRE draws some screens narrower
+	// (the Spending Menu is 44) so its rules hug the content instead of running
+	// past it.
+	Width int
+}
+
+// ruleWidth is the menu's decoration-rule width: its Width override, or the
+// default full rule width.
+func (m *Menu) ruleWidth() int {
+	if m.Width > 0 {
+		return m.Width
+	}
+	return len([]rune(rule))
 }
 
 // selectable reports whether it is a visible, choosable item (not a
@@ -377,17 +391,42 @@ const rule = "──────────────────────
 // one screen. IB currently uses it to frame the Macro Editor.
 var insetRule = strings.Repeat("─", 5) + strings.Repeat("═", 15) + strings.Repeat("─", len([]rune(rule))-20)
 
+// dimAccent maps each bright menu accent to its normal-intensity twin. BRE draws
+// the rule dashes and the item parentheses in the normal color and reserves the
+// bright color for the bracketed key characters (live capture).
+var dimAccent = map[string]string{
+	ansi.FgBrightRed:     ansi.FgRed,
+	ansi.FgBrightGreen:   ansi.FgGreen,
+	ansi.FgBrightYellow:  ansi.FgYellow,
+	ansi.FgBrightBlue:    ansi.FgBlue,
+	ansi.FgBrightMagenta: ansi.FgMagenta,
+	ansi.FgBrightCyan:    ansi.FgCyan,
+	ansi.FgBrightWhite:   ansi.FgWhite,
+}
+
+// dim returns the normal-intensity twin of a bright accent, or the color
+// unchanged if it has none.
+func dim(color string) string {
+	if d, ok := dimAccent[color]; ok {
+		return d
+	}
+	return color
+}
+
 // titleRule renders a BRE-style header: the bracketed menu title centered on a
-// rule line, e.g. "──────[Goldie Luck's Bank]──────", all in the menu color.
-func titleRule(color, title string) string {
+// rule line, e.g. "──────[Goldie Luck's Bank]──────". Per BRE (live capture) the
+// dashes are the normal accent, the brackets the bright accent, and the title
+// itself bright white.
+func titleRule(color, title string, width int) string {
 	label := "[" + title + "]"
-	width := len([]rune(rule))
 	if len([]rune(label)) >= width {
 		return color + label + ansi.Reset
 	}
 	left := (width - len([]rune(label))) / 2
 	right := width - left - len([]rune(label))
-	return color + strings.Repeat("─", left) + label + strings.Repeat("─", right) + ansi.Reset
+	return dim(color) + strings.Repeat("─", left) +
+		color + "[" + ansi.FgBrightWhite + title + color + "]" +
+		dim(color) + strings.Repeat("─", right) + ansi.Reset
 }
 
 // hasColumns reports whether any visible item carries a Price/Owned column, so
@@ -433,15 +472,15 @@ func draw(s session.Session, g *ctx, m *Menu) {
 			col = ansi.FgBrightCyan
 		}
 		lang := playerLang(g)
-		fmt.Fprintf(&b, "%s\n", titleRule(col, i18n.T(lang, m.Title)))
+		fmt.Fprintf(&b, "%s\n", titleRule(col, i18n.T(lang, m.Title), m.ruleWidth()))
 		cols := m.hasColumns(g)
 		ownedCol := cols && m.hasOwnedColumn(g)
 		if cols && ownedCol {
 			fmt.Fprintf(&b, "%s  Key %-18s %8s %9s%s\n",
-				col, i18n.T(lang, "Item"), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
+				ansi.FgWhite, i18n.T(lang, "Item"), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
 		} else if cols {
 			fmt.Fprintf(&b, "%s  Key %-18s %8s%s\n",
-				col, i18n.T(lang, "Item"), i18n.T(lang, "Price"), ansi.Reset)
+				ansi.FgWhite, i18n.T(lang, "Item"), i18n.T(lang, "Price"), ansi.Reset)
 		}
 		if m.Columns >= 2 && !cols {
 			drawItemsColumns(&b, g, m, col, lang, m.Columns)
@@ -485,7 +524,11 @@ func draw(s session.Session, g *ctx, m *Menu) {
 			}
 		}
 		if m.Status != nil {
-			fmt.Fprintf(&b, "%s\n%s%s%s\n", rule, ansi.FgBrightYellow, m.Status(g), ansi.Reset)
+			// BRE (live capture): a normal-accent bottom rule, then a white footer
+			// with figures in bright-white — not a single accent color.
+			footer := hiNumsReset(m.Status(g), ansi.FgBrightWhite, ansi.FgWhite)
+			fmt.Fprintf(&b, "%s%s%s\n%s%s%s\n",
+				dim(col), strings.Repeat("─", m.ruleWidth()), ansi.Reset, ansi.FgWhite, footer, ansi.Reset)
 		}
 		b.WriteString("\n")
 	})

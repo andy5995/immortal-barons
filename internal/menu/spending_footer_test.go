@@ -21,4 +21,11 @@ func TestSpendingFooterShowsTurnsAfterCurrent(t *testing.T) {
 	if got := spendingStatus(w); !strings.Contains(got, "4 turns") {
 		t.Errorf("5 turns left should read 4 in the spending footer, got %q", got)
 	}
+
+	// Correct singular — not BRE's "1 turns".
+	p.TurnsLeft = 2 // one turn remaining after this one
+	got := spendingStatus(w)
+	if !strings.Contains(got, "1 turn.") || strings.Contains(got, "1 turns") {
+		t.Errorf("one remaining turn should read \"1 turn\", got %q", got)
+	}
 }

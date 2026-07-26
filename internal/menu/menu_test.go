@@ -206,7 +206,7 @@ func TestBuyLandAdvisorsThenContinuesLoop(t *testing.T) {
 		t.Errorf("expected land %d, got %d", before+4, w.Player().Land)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "[Advisors]") {
+	if !strings.Contains(out, ansi.FgBrightWhite+"Advisors") {
 		t.Errorf("expected Advisors output, got:\n%s", out)
 	}
 	if !strings.Contains(out, "Coastal") {
@@ -230,7 +230,7 @@ func TestBuyLandCapBlocksButLoopContinues(t *testing.T) {
 		t.Fatalf("want 5 regions bought before hitting the cap, got %d", got)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "[Advisors]") {
+	if !strings.Contains(out, ansi.FgBrightWhite+"Advisors") {
 		t.Errorf("expected Advisors to still be reachable after the cap blocked further buys, got:\n%s", out)
 	}
 }
@@ -372,9 +372,11 @@ func TestMenuColorRendersTitleAndHotkeys(t *testing.T) {
 		t.Fatalf("got %v", err)
 	}
 	out := f.out.String()
-	// The title is centered within a colored rule line: "──[Colorful Menu]──".
-	if !strings.Contains(out, "[Colorful Menu]") {
-		t.Errorf("expected bracketed title in output, got:\n%s", out)
+	// The title is centered within a colored rule line; per BRE the brackets are
+	// the bright accent and the title itself is bright white, so the parts are
+	// separated by color codes rather than a contiguous "[Colorful Menu]".
+	if !strings.Contains(out, "Colorful Menu") {
+		t.Errorf("expected the title in output, got:\n%s", out)
 	}
 	if !strings.Contains(out, ansi.FgBrightMagenta) {
 		t.Error("expected menu color code in drawn output")

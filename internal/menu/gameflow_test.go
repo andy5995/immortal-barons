@@ -279,7 +279,7 @@ func TestRunTurnHasNoPreTurnDiplomacyOrProduction(t *testing.T) {
 	if eventsAt > incomeAt {
 		t.Errorf("event log should precede the Income Report, got offsets %d, %d", eventsAt, incomeAt)
 	}
-	if strings.Contains(out, "[Diplomacy]") {
+	if strings.Contains(out, ansi.FgBrightWhite+"Diplomacy") {
 		t.Errorf("Diplomacy should not appear in the Play flow (System menu only):\n%s", out)
 	}
 	if strings.Contains(out, "Change Production?") {
@@ -308,7 +308,7 @@ func TestRunTurnPlaysTwoTurnsWithoutDiplomacy(t *testing.T) {
 	if got := w.Player().TurnsLeft; got != left-2 {
 		t.Fatalf("expected two turns consumed, TurnsLeft %d -> %d", left, got)
 	}
-	if strings.Contains(out, "[Diplomacy]") {
+	if strings.Contains(out, ansi.FgBrightWhite+"Diplomacy") {
 		t.Errorf("Diplomacy should not appear in the Play flow:\n%s", out)
 	}
 	if n := strings.Count(out, "Income Report"); n != 2 {

@@ -286,7 +286,7 @@ func advisorsMenu(s session.Session, w *ctx) {
 	for {
 		// BRE frames this menu with a magenta bracketed rule ("──[Advisors]──"),
 		// not IB's lightbar (docs/dev/bre-screens.md).
-		fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgMagenta, tr(s, "Advisors")))
+		fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgMagenta, tr(s, "Advisors"), len([]rune(rule))))
 		item(1, "Civilian")
 		item(2, "Economic")
 		item(3, "Military")
