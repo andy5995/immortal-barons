@@ -1,9 +1,17 @@
 package menu
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 )
+
+// ansiEsc matches SGR/cursor escape sequences.
+var ansiEsc = regexp.MustCompile("\x1b\\[[0-9;]*[A-Za-z]")
+
+// stripANSI removes escape sequences so structural checks can match "(K)" key
+// markers that the menu now colors piece by piece (dim parens, bright key).
+func stripANSI(s string) string { return ansiEsc.ReplaceAllString(s, "") }
 
 // lineWithBoth reports whether any single line of out contains both a and b.
 func lineWithBoth(out, a, b string) bool {
@@ -46,7 +54,7 @@ func TestGameMenuTwoColumn(t *testing.T) {
 
 	f := &fakeSession{}
 	draw(f, w, menus.Game)
-	out := f.out.String()
+	out := stripANSI(f.out.String())
 	if maxItemsPerLine(out) < 2 {
 		t.Errorf("Game menu should have two columns:\n%s", out)
 	}
@@ -60,7 +68,7 @@ func TestGameMenuTwoColumn(t *testing.T) {
 
 	f = &fakeSession{}
 	draw(f, w, menus.Attack)
-	if lineWithBoth(f.out.String(), "(R)", "(N)") {
+	if lineWithBoth(stripANSI(f.out.String()), "(R)", "(N)") {
 		t.Errorf("Attack menu should draw one item per line:\n%s", f.out.String())
 	}
 }
@@ -91,7 +99,7 @@ func TestSystemMenuTwoColumn(t *testing.T) {
 
 	f := &fakeSession{}
 	draw(f, w, menus.System)
-	out := f.out.String()
+	out := stripANSI(f.out.String())
 	if maxItemsPerLine(out) < 2 {
 		t.Errorf("System menu should place two items on one line:\n%s", out)
 	}
@@ -108,7 +116,7 @@ func TestGameMenuMessagesAndHelp(t *testing.T) {
 
 	f := &fakeSession{}
 	draw(f, w, menus.Game)
-	out := f.out.String()
+	out := stripANSI(f.out.String())
 	if !strings.Contains(out, "Messages") {
 		t.Errorf("Game menu should contain a Messages item:\n%s", out)
 	}

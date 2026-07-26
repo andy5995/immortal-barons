@@ -502,15 +502,15 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					if it.Owned != nil {
 						owned = formatGold(it.Owned(g), lang)
 					}
-					// BRE renders the Price column bright-white and the Owned column
-					// white (#17 menu audit); the key is the menu accent color.
+					// BRE (live capture): normal-accent parens with a bright-accent key,
+					// white label, bright-white Price, white Owned.
 					if ownedCol {
-						fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %s%8s%s %s%9s%s\n",
-							col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset,
+						fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%-18s%s %s%8s%s %s%9s%s\n",
+							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset,
 							ansi.FgBrightWhite, price, ansi.Reset, ansi.FgWhite, owned, ansi.Reset)
 					} else {
-						fmt.Fprintf(&b, "  %s(%c)%s %s%-18s%s %s%8s%s\n",
-							col, it.Key, ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset,
+						fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%-18s%s %s%8s%s\n",
+							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset,
 							ansi.FgBrightWhite, price, ansi.Reset)
 					}
 					continue
@@ -519,8 +519,8 @@ func draw(s session.Session, g *ctx, m *Menu) {
 				if it.Color != "" {
 					kcol, lcol = it.Color, it.Color
 				}
-				fmt.Fprintf(&b, "  %s(%c)%s %s%s%s\n",
-					kcol, it.Key, ansi.Reset, lcol, it.displayLabel(g, lang), ansi.Reset)
+				fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%s%s\n",
+					dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, it.displayLabel(g, lang), ansi.Reset)
 			}
 		}
 		if m.Status != nil {
@@ -555,7 +555,7 @@ func drawItemsColumns(b *strings.Builder, g *ctx, m *Menu, col, lang string, nco
 		if it.Color != "" {
 			kcol, lcol = it.Color, it.Color
 		}
-		s := fmt.Sprintf("  %s(%c)%s %s%s%s", kcol, it.Key, ansi.Reset, lcol, label, ansi.Reset)
+		s := fmt.Sprintf("  %s(%s%c%s)%s %s%s%s", dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, label, ansi.Reset)
 		return s, 6 + utf8.RuneCountInString(label) // "  (K) " is 6 visible cols
 	}
 	// renderBlock lays a run of items out column-major. With nrows =
