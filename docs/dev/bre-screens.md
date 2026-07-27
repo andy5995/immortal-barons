@@ -788,3 +788,42 @@ is not a copy of BRE's source or assets. Distinctive coined strings/names (e.g.
 pirate faction names) are recorded here for fidelity analysis but should be
 **renamed** in IB, as with Gooie Kablooie → Doomer Kaboomer and S3-Sabre →
 R5-Slappenheimer.
+
+## Full Defense Alliance — Diplomacy, Alliance Strength, battle (captured live 2026-07-27)
+
+### Diplomacy Menu (opens every turn before income, and via System Menu -> D)
+Items: (1) Tariff Trade Agreement, (2) Protective Trade, (3) Free Trade Agreement,
+(4) Terrorist Prevention, (5) Intelligence Alliance, (6) Technology Agreement,
+(7) Full Defense Alliance, (8) Declaration Of War, (9) View Treaties, (?) Help,
+(0) Quit.
+
+### Proposing (7) Full Defense Alliance
+Shows the treaty blurb then `(A-Y,Z=All,?=List) Send to:` -> pick target letter
+-> `Would you like to attach a message? (y/N)`. Recipient sees at next login:
+`<Name> proposes a Full Defense Alliance.` / `Regions: N; Net Worth: N; Score: N;
+Accept? (Y/n)`. (9) View Treaties -> `-*Relations*-` table: each empire letter +
+name + Relations ("None" / "Full Defense Alliance").
+
+### Attack Menu -> (A) Alliance Strength
+```
+Your allies will send the following to aid you in defense:
+Name                   Troopers     Tanks    Agents
+Carbon                      29      3271      NONE
+Total Forces                29      3271      NONE
+```
+(= 30% of the ally's troopers/tanks/agents; no jets/turrets/bombers/carriers.)
+
+### Regular Attack flow + battle report (attacker's view)
+Attack Menu -> (R) -> `Choose a Target [A-Y,?=List RETURN to Abort]` -> letter ->
+`You have N Troopers, N usable Jets, N Tanks, and N Bombers` ->
+`Send how many Troopers? (def; max)` / `How many Jets?` / `How many Tanks?` /
+`How many Bombers?` (`>`=max; all-zero aborts). A losing attack against an allied
+defender:
+```
+The empire's allies send 29 Troopers and 3271 Tanks.
+And the battle begins.......
+Your forces have returned..Exhausted from battle...
+You lost 0 Troopers, 0 Jets, 2206 Tanks, and 0 Bombers.
+You destroyed 14 Troopers, 0 Turrets, 1948 Tanks, and 0 Jets.
+You lost the battle!
+```

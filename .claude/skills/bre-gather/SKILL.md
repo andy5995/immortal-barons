@@ -490,6 +490,128 @@ doubt, don't copy.
   terminal. Our clone emits UTF-8 — never paste raw CP437 bytes; map to the
   Unicode glyph.
 
+## Driving a BRE turn (v0.988, verified live)
+
+Verified live against BRE v0.988 in local mode. A consolidated, step-by-step
+account of launching the door, enrolling a caller, and driving one full turn.
+Complements the tmux/dosemu harness notes above — this is the *game flow*, that
+is the *emulator plumbing*.
+
+### Launch sequence (from the `C:\` DOS prompt)
+
+- `cd \GAMES\BRE-DOS`, then run **`SRDOOR local` FIRST**, THEN run **`BRE`**.
+  `SRDOOR local` prompts `Name:` — type the caller/realm name one key at a time
+  (same pacing as any BRE prompt), then Enter; it writes `doorfile.sr`. Running
+  `BRE` *without* `SRDOOR local` first gives a Turbo-Pascal `Run-Time error #106
+  Invalid numeric format while reading a file`. `local.bat` does exactly
+  `SRDOOR local` then `BRE`.
+- **Set the DOS `DATE` to >= the game's last-recorded date**, or BRE exits with
+  "Computer Clock has been tampered with." This world's inception is 8-1-2026,
+  so `07-27-2026` tripped the check and `12-01-2026` cleared it. Reaching `C:\>`
+  never invokes the check — only running `BRE` does.
+- `doorfile.sr` layout: the caller name is on **line 1 AND the last line**; lines
+  2-7 are numeric (ANSI flag, IBM-chars flag, page length, baud, COM port,
+  time-left). **Prefer generating it via `SRDOOR local`** over hand-editing —
+  hand-editing risks mangling the DOS CRLF line endings.
+
+### New-caller enrollment flow
+
+hints screen `Continue? (Y/n)` (Enter) -> `Name your Realm:` (type name, Enter)
+-> `Name Your Empire X? (Y/n)` (Enter = Yes) -> `Would you like Instructions?
+(y/N)` (`n`) -> ANSI splash "Paused" (Enter) -> daily maintenance runs -> main
+menu. A new empire is assigned the next free empire **LETTER** (existing empires
+took the earlier letters).
+
+### Main menu
+
+(1) Play Game, (2) See Status, (3) See Scores, (4) Today's News,
+(5) Yesterday's News, (6) Read Messages, (7) Send Messages, (8) Game Bulletins,
+(9) InterPlanetary Ops, (A) Game Instructions, (B) Help Database,
+(P) Preferences, (0) Quit.
+
+### One turn's flow (after preferences are streamlined)
+
+1. (1) Play Game.
+2. **FIRST TURN ONLY:** event-log "Paused" (Enter) -> Diplomacy Menu (`0` to
+   quit).
+3. Industrial Production screen -> `Change Production? (y/N)` -> `n` (or `y` to
+   set a production %, e.g. Tanks).
+4. Income "Paused": lines for taxes / Ore Mines / Tourism / Solar Power / Food
+   grown (Enter).
+5. Status + a maintenance summary; prompt `Do you wish to visit the Bank?
+   (y/N)` -> `n`. With Auto-Pay Maintenance + Auto-Feed ON, this shows
+   "0 Gold paid / N units of Food consumed" and does NOT prompt for payment or
+   food.
+6. Crazy Gold Bank menu (`0` to quit).
+7. **Spending Menu** — the buy hub: (*) System Menu, (1) Troopers, (2) Jets,
+   (3) Turrets, (4) Bombers, (5) HeadQuarters, (6) Regions, (7) Covert Agents,
+   (8) Tanks, (9) Carriers, (S) Sell, (V) Visit Bank, (0) Quit. Shows the current
+   price and count owned per item, plus "You have X gold and N turns."
+8. **Attack Menu** (`0` to quit): (R) Regular, (N) Nuclear, (C) Chemical,
+   (B) Biological, (P) Attack Pirates, (A) Alliance Strength, (V) Visit Bank,
+   (0) Quit.
+9. **InterPlanetary Ops menu** (`0` to quit): View IPScores, Terrorist Ops, Send
+   Trade Deal, Create/Join Group Attack, Indiv. Attack Force, Send Message,
+   Special Operations, Gooie Kablooie Ops, SDI Program, Diplomacy List, Spy
+   Database, Travel Times, Visit Bank, Quit.
+10. End of Turn Statistics -> `Do you wish to continue? (Y/n)`. **`Y` starts the
+    NEXT turn immediately (chains turns without returning to the main menu); `n`
+    returns to the scores table then the main menu.**
+
+**Turns:** 20 turns/day. When turns are exhausted, advance the DOS `DATE` by a
+day and relaunch for 20 more.
+
+### Setting preferences (streamline for scripted play)
+
+From the Spending Menu press (*) System Menu, then (P) Preferences. Each numbered
+line is a toggle — press the number to flip Yes/No:
+
+- (1) Visit Covert Menu -> No
+- (2) Visit Trading Menu -> No
+- (3) Visit Message Menu -> No
+- (4) Use Enter To Exit BUY Menu -> leave Yes
+- (5) Deposit gold at End of Turn -> No (keeps Auto-Pay silent — depositing
+  sweeps gold to the bank and makes Auto-Pay re-prompt)
+- (6) Auto-Pay Maintenance -> Yes
+- (7) Auto-Feed Empire -> Yes
+- (0) to quit.
+
+**Set tax rate:** System Menu -> (R) Set Tax Rate -> enter a number. 12% never
+triggers tax riots while still earning tax income.
+
+**System Menu also has:** (D) Diplomacy, (1) Set Industries, (3) Specialize
+Industry, (E) Empire Status, (W) Write Macros, etc.
+
+### Buying regions (Spending Menu -> 6)
+
+Shows "There are N Regions available", warns that the region price shown is only
+the price for the FIRST piece bought (prices change constantly), and "You can
+afford N regions." Region types with hotkeys: (C) Coastal, (R) River,
+(A) Agricultural, (D) Desert, (I) Industrial, (U) Urban, (M) Mountain,
+(T) Technology, plus (*) Advisors. Select a type -> `Buy how many X regions?
+(0; MAX)` -> press `>` for max, Enter to confirm. The marginal price RISES as you
+buy within a single purchase AND ratchets up persistently across the turn
+(observed 1412 -> 2402 after buying 30 in one go).
+
+### Input model (recap)
+
+Menu selections take ONE key with no Enter; numeric prompts need Enter; y/N
+prompts take a single key; "Paused" screens continue on any key; at numeric
+prompts `>` = max and `m`/`k` append 6/3 zeros. Enter triggers the default
+everywhere.
+
+### Headless driving (recap)
+
+Capture via `script -q -c "dosemu -t" <file>.cap` to a `*.cap` in the repo root
+(gitignored) — this preserves ANSI color (SGR codes); `script` block-buffers, so
+the file flushes on a clean exit (quit BRE with `0`, then `EXITEMU`). `tmux
+capture-pane -p` gives plain text (no color). Reusable driver scripts live in
+`~/.claude/projects/-home-andy-src-andy5995-immortal-barons/scripts/`
+(`bre-launch.sh`, `bre-key.sh`, `bre-type.sh`, `bre-name.sh`, `bre-play.sh`,
+`bre-drive.sh`). A robust turn-driver keys off the active bottom line (last
+non-empty line excluding the F2 status bar), not a fixed key count, so it
+survives conditional prompts.
+
 ## After gathering
 
 State the source and confidence in the reply, e.g. "from BRE.OVR string table
@@ -497,3 +619,12 @@ State the source and confidence in the reply, e.g. "from BRE.OVR string table
 `docs/mechanics-reference.md` when a verified value changes, and record durable
 findings in the relevant memory (`bre-binary-verified-math`,
 `check-bre-strings-when-unsure`).
+
+**Keep this skill current.** When you discover something new about *how to gather
+from BRE* — a driving/scraping technique, a harness landmine and its fix, a
+menu-input quirk, a build-up/strategy method for staging a scenario, a source
+that turned out authoritative (or not) — fold it back into this skill so the next
+run starts from it instead of re-learning. (Verified mechanic *values* still go
+to `docs/mechanics-reference.md`; play/build-up technique goes to
+`docs/dev/bre-buildup-strategy.md`; this skill captures the *gathering method*.)
+Update the skill in the same pass that produced the discovery, not "later."
