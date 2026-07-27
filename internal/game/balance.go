@@ -292,6 +292,14 @@ const (
 	CombatScoreDivisor    = 2   // Score award = (units lost by both sides) / this
 	CombatLoserPenaltyPct = 80  // the loser loses this % of the winner's gain
 	DefenseWinBonusPct    = 150 // a defender's win awards this % of an attacker's win
+	// AllyDefenseContribPct is the share of a Full Defense Alliance partner's
+	// MOBILE forces (troopers + tanks — not turrets/jets/bombers/carriers) that it
+	// sends to reinforce an ally under attack. BRE-verified live (2026-07): an ally
+	// sent exactly 30% of its troopers, tanks, and agents to the defender's aid.
+	// See docs/mechanics-reference.md "Diplomacy" and the bre-binary-verified-math
+	// memory. The sent detachment adds to the defender's battle power and takes the
+	// same casualty rate as the defender.
+	AllyDefenseContribPct = 30
 	// PirateScoreDivisor keeps raids on pirate factions worth only a little Score
 	// (win or lose) — far less than a battle against another empire.
 	PirateScoreDivisor = 50

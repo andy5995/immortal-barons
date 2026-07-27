@@ -126,16 +126,55 @@ func (w *World) techAgreementCeiling(e *Empire) int {
 	return best * TechAgreementCapPct / 100
 }
 
-// AllianceStrength returns e's combined offense and defense with its Full
-// Defense Alliance partners, plus the ally names.
-func (w *World) AllianceStrength(e *Empire) (offense, defense int, allies []string) {
-	offense, defense = e.Offense(), e.Defense()
+// AllyContribution is the detachment a Full Defense Alliance partner sends to aid
+// an ally under attack — BRE-verified as 30% of the ally's troopers, tanks, and
+// agents (turrets/jets/bombers/carriers stay home). Mirrors BRE's Alliance
+// Strength screen.
+type AllyContribution struct {
+	Name                    string
+	Troopers, Tanks, Agents int
+}
+
+// AllyDefenders returns what each of e's Full Defense Alliance partners will send
+// to reinforce e in defense: AllyDefenseContribPct% of their troopers, tanks, and
+// agents. Empty if e holds no such alliance.
+func (w *World) AllyDefenders(e *Empire) []AllyContribution {
+	var out []AllyContribution
 	for _, ally := range w.alliesOf(e, fullDefenseAlliance) {
-		offense += ally.Offense()
-		defense += ally.Defense()
-		allies = append(allies, ally.Name)
+		out = append(out, AllyContribution{
+			Name:     ally.Name,
+			Troopers: ally.Troopers * AllyDefenseContribPct / 100,
+			Tanks:    ally.Tanks * AllyDefenseContribPct / 100,
+			Agents:   ally.Agents * AllyDefenseContribPct / 100,
+		})
 	}
-	return offense, defense, allies
+	return out
+}
+
+// allyDefenseBoost is the extra battle power d's Full Defense Alliance partners
+// add when d is attacked: each sends 30% of its troopers + tanks (agents are
+// covert, turrets stay home), valued exactly as the ally's own Defense() weighs
+// those units (tanks ×4 with HQ, then morale- and tech-scaled).
+func (w *World) allyDefenseBoost(d *Empire) int {
+	sum := 0
+	for _, ally := range w.alliesOf(d, fullDefenseAlliance) {
+		troopers := ally.Troopers * AllyDefenseContribPct / 100
+		tanks := ally.Tanks * AllyDefenseContribPct / 100
+		base := troopers + tanks*4*(100+ally.HQ)/100
+		v := base * moraleFactor(ally.Morale) / 100
+		sum += v * (100 + ally.TechFactor()) / 100
+	}
+	return sum
+}
+
+// bleedAllies applies pct% casualties to each Full Defense Alliance partner's
+// committed detachment (its sent 30% of troopers + tanks) after a battle in which
+// d was defended — the reinforcements bleed at the same rate as the defender.
+func (w *World) bleedAllies(d *Empire, pct int) {
+	for _, ally := range w.alliesOf(d, fullDefenseAlliance) {
+		ally.Troopers -= ally.Troopers * AllyDefenseContribPct / 100 * pct / 100
+		ally.Tanks -= ally.Tanks * AllyDefenseContribPct / 100 * pct / 100
+	}
 }
 
 // ProposeTreaty records a pending offer of ttype from `from` to `to` with no

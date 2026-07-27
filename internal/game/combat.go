@@ -122,6 +122,18 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	var b strings.Builder
 	fmt.Fprintf(&b, "%s attacks %s!\n\n", a.Name, d.Name)
 
+	// Full Defense Alliance: each of the defender's partners sends 30% of its
+	// troopers and tanks to reinforce the defense (BRE-verified). Reported to the
+	// attacker, matching BRE's "the empire's allies send N Troopers and M Tanks".
+	allyTroopers, allyTanks := 0, 0
+	for _, ally := range w.alliesOf(d, fullDefenseAlliance) {
+		allyTroopers += ally.Troopers * AllyDefenseContribPct / 100
+		allyTanks += ally.Tanks * AllyDefenseContribPct / 100
+	}
+	if allyTroopers+allyTanks > 0 {
+		fmt.Fprintf(&b, "%s's allies send %d troopers and %d tanks to aid the defense.\n\n", d.Name, allyTroopers, allyTanks)
+	}
+
 	bomberLoss := 0 // folded into the attacker's casualty breakdown below
 	if kills, lost := w.bombingRun(a, d, f.Bombers); kills > 0 || lost > 0 {
 		bomberLoss = lost
@@ -141,7 +153,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	// bonus is terrain, not troops, so morale doesn't touch it).
 	// Only the COMMITTED force adds offense; the defender fights with everything.
 	ap := w.jitter(f.groundOffense(a) * moraleFactor(a.Morale) / 100)
-	dp := w.jitter(d.Defense()*moraleFactor(d.Morale)/100 + d.Land*LandDefenseBonus)
+	dp := w.jitter(d.Defense()*moraleFactor(d.Morale)/100 + d.Land*LandDefenseBonus + w.allyDefenseBoost(d))
 
 	// BRE's Normal Attack (attack.hlp): the winner captures a share of the loser's
 	// regions. Losses are ASYMMETRIC (BRE live): the LOSER bleeds ~20%, the WINNER
@@ -158,6 +170,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	aloss := loseCommitted(a, f, aLoss)
 	aloss.Bombers = bomberLoss // bombers fall to anti-air in the bombing run, not the ground clash
 	dloss := loseForces(d, dLoss)
+	w.bleedAllies(d, dLoss) // the allies' committed 30% bleeds at the defender's rate
 
 	// Score (IB's own): the award scales with the forces used up in the battle.
 	// The winner gains; the loser loses a bit less; a successful defense is worth

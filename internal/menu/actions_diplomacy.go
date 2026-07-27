@@ -53,20 +53,24 @@ func reviewTreatyOffers(s session.Session, w *ctx) {
 	}
 }
 
-// allianceStrength shows the player's combined offense and defense with their
-// Full Defense Alliance partners.
+// allianceStrength shows what each Full Defense Alliance partner will send to aid
+// the player's defense — 30% of its troopers, tanks, and agents (BRE's Alliance
+// Strength screen).
 func allianceStrength(s session.Session, w *ctx) Result {
 	p := w.Player()
-	var off, def int
-	var allies []string
-	w.With(func() { off, def, allies = w.AllianceStrength(p) })
+	var defenders []game.AllyContribution
+	w.With(func() { defenders = w.AllyDefenders(p) })
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Alliance Strength"), ansi.Reset)
-	if len(allies) == 0 {
+	if len(defenders) == 0 {
 		fmt.Fprintf(s, "  %s\n", tr(s, "You have no defense allies."))
-	} else {
-		fmt.Fprintf(s, "  "+tr(s, "Allies: %s")+"\n", strings.Join(allies, ", "))
+		pause(s)
+		return Stay
 	}
-	fmt.Fprintf(s, "  %s\n  %s\n", hiNums(fmt.Sprintf(tr(s, "Combined offense: %d"), off)), hiNums(fmt.Sprintf(tr(s, "Combined defense: %d"), def)))
+	fmt.Fprintf(s, "  %s\n", tr(s, "Your allies will send the following to aid you in defense:"))
+	fmt.Fprintf(s, "  %-20s %9s %9s %9s\n", tr(s, "Name"), tr(s, "Troopers"), tr(s, "Tanks"), tr(s, "Agents"))
+	for _, d := range defenders {
+		fmt.Fprintf(s, "  %-20s %9s %9s %9s\n", d.Name, comma(d.Troopers), comma(d.Tanks), comma(d.Agents))
+	}
 	pause(s)
 	return Stay
 }
@@ -76,7 +80,7 @@ func allianceStrength(s session.Session, w *ctx) Result {
 // blurb before the send-to list). Wording is IB's own (not copied from BRE) and
 // describes IB's actual mechanics (see internal/game/diplomacy.go).
 var treatyDescriptions = map[string]string{
-	"Full Defense Alliance":  "Neither realm may attack the other, and your armies stand together — your combined offense and defense count in every battle.",
+	"Full Defense Alliance":  "Neither realm may attack the other. If either is attacked, the ally sends 30% of its troopers and tanks to reinforce the defense.",
 	"Tariff Trade Agreement": "Opens a taxed trade route. Both realms earn a modest income each turn, scaled to population.",
 	"Free Trade Agreement":   "Opens an open trade route. Both realms earn a larger income each turn — about double a tariff — scaled to population.",
 	"Protective Trade":       "Shields both realms' trade routes and markets from covert sabotage.",

@@ -737,8 +737,25 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 Seven treaty types are proposed / accepted / broken through the Diplomacy menu,
 and each carries a gameplay effect (#11 wired the last two):
 
-- **Full Defense Alliance** — blocks attacks between the two realms and combines
-  their offense and defense (`AreAllied`, `AllianceStrength`).
+- **Full Defense Alliance** — blocks attacks between the two realms; when either
+  is attacked, its ally **sends 30% of its mobile forces** — troopers, tanks, and
+  agents only (*not* jets/turrets/bombers/carriers) — to reinforce the defender in
+  that battle (`AreAllied`, `AllianceStrength`). **Verified live against BRE
+  (2026-07):** an ally holding 10,903 tanks / 97 troopers contributed exactly
+  3,271 tanks / 29 troopers = 30.0% (Attack Menu → Alliance Strength screen), and
+  a losing attacker's report opens "The empire's allies send N Troopers and M
+  Tanks." BRE in-game text: "the most balanced and powerful alliance… puts forth a
+  large amount of all of your forces in defending an ally in need. NOTE: effective
+  only in Local Games." **IB implements this** (`allyDefenseBoost` / `AllyDefenders`
+  in `internal/game/diplomacy.go`, `AllyDefenseContribPct = 30` in `balance.go`):
+  when a realm is attacked, each Full Defense Alliance partner adds 30% of its
+  troopers + tanks to the defender's battle power (valued as the ally's own
+  `Defense()` weighs them — tanks ×4 with HQ, morale- and tech-scaled; turrets
+  stay home, agents are covert); the attacker's battle report notes the
+  reinforcements, and the committed detachment bleeds at the defender's casualty
+  rate (`bleedAllies`). The Alliance Strength screen (`allianceStrength`) shows
+  each ally's sent troopers/tanks/agents. See the `bre-binary-verified-math`
+  memory.
 - **Tariff Trade Agreement** / **Free Trade Agreement** — per-turn trade income
   scaled by population; Free earns more than Tariff (`tradeIncome`).
 - **Intelligence Alliance** / **Terrorist Prevention** — lend half an ally's

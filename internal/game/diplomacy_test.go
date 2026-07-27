@@ -232,19 +232,32 @@ func names(es []*Empire) []string {
 	return r
 }
 
-func TestAllianceStrengthSumsAllies(t *testing.T) {
+// A Full Defense Alliance partner sends exactly AllyDefenseContribPct% (30%,
+// BRE-verified) of its troopers, tanks, and agents to aid the defender, and that
+// detachment bleeds at the defender's casualty rate.
+func TestAllyDefenders30Pct(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
-	a.Troopers, b.Troopers = 100, 50
+	b.Troopers, b.Tanks, b.Agents = 1000, 500, 100
 	w.ProposeTreaty(a, b, fullDefenseAlliance)
 	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
 
-	off, _, allies := w.AllianceStrength(a)
-	if len(allies) != 1 || allies[0] != "Beta" {
-		t.Errorf("want Beta as the ally, got %v", allies)
+	d := w.AllyDefenders(a)
+	if len(d) != 1 || d[0].Name != "Beta" {
+		t.Fatalf("want Beta as the sole defender, got %v", d)
 	}
-	if want := a.Offense() + b.Offense(); off != want {
-		t.Errorf("combined offense: want %d, got %d", want, off)
+	if d[0].Troopers != 300 || d[0].Tanks != 150 || d[0].Agents != 30 {
+		t.Errorf("want 30%% sent (300/150/30), got %d/%d/%d", d[0].Troopers, d[0].Tanks, d[0].Agents)
+	}
+	if w.allyDefenseBoost(a) <= 0 {
+		t.Error("ally defense boost should be positive with a tank-holding ally")
+	}
+
+	// The committed 30% (300 troopers / 150 tanks) bleeds at, say, a 20% rate:
+	// 60 troopers and 30 tanks lost from Beta.
+	w.bleedAllies(a, 20)
+	if b.Troopers != 940 || b.Tanks != 470 {
+		t.Errorf("bleedAllies(20%%): want Beta 940 troopers / 470 tanks, got %d / %d", b.Troopers, b.Tanks)
 	}
 }
