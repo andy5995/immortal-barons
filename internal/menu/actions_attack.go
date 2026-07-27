@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -21,7 +22,21 @@ import (
 func hiNumsReset(s, numColor, resetColor string) string {
 	var b strings.Builder
 	inNum := false
-	for _, r := range s {
+	for i := 0; i < len(s); {
+		// Pass an escape sequence through untouched — its digits (the "96" in
+		// ESC[96m) are not figures, and wrapping them in a color code produces a
+		// malformed sequence the terminal prints as literal text.
+		if n := csiLen(s[i:]); n > 0 {
+			if inNum {
+				b.WriteString(resetColor)
+				inNum = false
+			}
+			b.WriteString(s[i : i+n])
+			i += n
+			continue
+		}
+		r, size := utf8.DecodeRuneInString(s[i:])
+		i += size
 		digit := r >= '0' && r <= '9'
 		if inNum && r == ',' {
 			b.WriteRune(r) // 1,000 — a comma between digits stays inside the run
@@ -40,6 +55,20 @@ func hiNumsReset(s, numColor, resetColor string) string {
 		b.WriteString(resetColor)
 	}
 	return b.String()
+}
+
+// csiLen returns the byte length of the ANSI CSI sequence at the head of s, or
+// 0 if s does not start with one.
+func csiLen(s string) int {
+	if len(s) < 2 || s[0] != 0x1b || s[1] != '[' {
+		return 0
+	}
+	for i := 2; i < len(s); i++ {
+		if s[i] >= 0x40 && s[i] <= 0x7e {
+			return i + 1
+		}
+	}
+	return 0
 }
 
 // hiNumsIn highlights figures in the given color on an otherwise-plain line.

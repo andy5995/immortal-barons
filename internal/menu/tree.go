@@ -143,8 +143,9 @@ func BuildMenus() *Menus {
 	bank.Status = func(w *ctx) string {
 		p := w.Player()
 		lang := playerLang(w)
-		return fmt.Sprintf("You have %s%s%s gold in hand and %s%s%s gold in the bank.",
-			ansi.FgBrightCyan, formatGold(p.Gold, lang), ansi.FgBrightYellow, ansi.FgBrightCyan, formatGold(p.Bank, lang), ansi.FgBrightYellow)
+		// Plain text: the menu footer highlights the figures itself.
+		return fmt.Sprintf("You have %s gold in hand and %s gold in the bank.",
+			formatGold(p.Gold, lang), formatGold(p.Bank, lang))
 	}
 
 	attack.Items = []Item{
