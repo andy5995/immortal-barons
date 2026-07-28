@@ -759,10 +759,9 @@ func chooseDropfile(s session.Session, current string) (string, bool) {
 		for i, f := range door.Formats {
 			cur := ""
 			if f.ID == current {
-				cur = ansi.FgBrightWhite + "  (current)" + ansi.Reset
+				cur = ansi.FgWhite + "  (current)" + ansi.Reset
 			}
-			fmt.Fprintf(s, "  %s%d)%s %-13s %s%s%s%s\n",
-				ansi.FgBrightYellow, i+1, ansi.Reset, f.Name, ansi.FgWhite, f.Note, ansi.Reset, cur)
+			fmt.Fprintf(s, "  %s%d)%s %s%s\n", ansi.FgBrightYellow, i+1, ansi.Reset, f.Name, cur)
 		}
 		fmt.Fprintf(s, "  %s0)%s Quit (leave unchanged)\n", ansi.FgBrightYellow, ansi.Reset)
 		fmt.Fprint(s, "\nChoice> ")

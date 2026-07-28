@@ -26,21 +26,20 @@ import (
 )
 
 // Format identifies a dropfile format the door can read. ID is what the sysop's
-// config stores (door.json); Name/File are for display and for
-// working-directory auto-detection; Note is the one-line -set-dropfile description.
+// config stores (door.json); Name is for display; File is the canonical filename
+// for working-directory auto-detection.
 type Format struct {
 	ID   string
 	Name string
 	File string
-	Note string
 }
 
 // Formats lists the supported dropfile formats in menu order.
 var Formats = []Format{
-	{ID: "door32", Name: "DOOR32.SYS", File: "DOOR32.SYS", Note: "Synchronet, Mystic — cleanly encodes socket/stdio (recommended)"},
-	{ID: "doorsys", Name: "DOOR.SYS", File: "DOOR.SYS", Note: "widely-supported text drop file"},
-	{ID: "pcboard", Name: "PCBOARD.SYS", File: "PCBOARD.SYS", Note: "PCBoard binary drop file; also written by BBBS"},
-	{ID: "dorinfo", Name: "DORINFO1.DEF", File: "DORINFO1.DEF", Note: "RBBS/QuickBBS/RemoteAccess text drop file; also written by BBBS"},
+	{ID: "door32", Name: "DOOR32.SYS", File: "DOOR32.SYS"},
+	{ID: "doorsys", Name: "DOOR.SYS", File: "DOOR.SYS"},
+	{ID: "pcboard", Name: "PCBOARD.SYS", File: "PCBOARD.SYS"},
+	{ID: "dorinfo", Name: "DORINFO1.DEF", File: "DORINFO1.DEF"},
 }
 
 // FormatByID returns the Format with the given ID.
