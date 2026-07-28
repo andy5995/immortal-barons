@@ -224,6 +224,35 @@ func TestParseRejectsMissingCallerName(t *testing.T) {
 	}
 }
 
+// Text in a numeric slot means the file is corrupt or is not the format we were
+// told to read. The headline case: the sysop selects DOOR32.SYS but the BBS
+// writes DOOR.SYS, whose line 1 is "COM0:STDIO" where a comm type belongs.
+func TestParseRejectsNonNumericField(t *testing.T) {
+	doorSysContent := "COM0:STDIO\n38400\n8\n1\n38400\nY\nY\nY\nY\nKhan Noonien\nCity\n" +
+		"1\n1\n50\n1\n1\n1\n1800\n30\nGR\n24\n"
+	cases := []struct{ name, format, content string }{
+		{"door.sys read as door32", "door32", doorSysContent},
+		{"garbage comm type", "door32", "xyz\n7\n38400\nBBS\n1\nR\nKhan\n10\n30\n1\n1\n"},
+		{"garbage time left", "dorinfo", "B\ns\ns\nCOM1\nb\n0\nKhan\nNoonien\ncity\n1\n10\nsoon\n"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			p := write(t, "drop.tmp", c.content)
+			if _, err := ParseDropfileAs(p, c.format); err == nil {
+				t.Error("expected an error for a non-numeric value in a numeric field")
+			}
+		})
+	}
+}
+
+// Socket mode with no handle would attach to fd 0 (stdin) rather than the caller.
+func TestParseDoor32RejectsSocketModeWithoutHandle(t *testing.T) {
+	p := write(t, "door32.sys", "2\n0\n38400\nBBS\n1\nReal Name\nKhan\n10\n30\n1\n1\n")
+	if _, err := ParseDropfile(p); err == nil {
+		t.Error("expected an error for socket mode with handle 0")
+	}
+}
+
 func TestUnsupportedDropfile(t *testing.T) {
 	p := write(t, "chain.txt", "whatever\n")
 	if _, err := ParseDropfile(p); err == nil {
