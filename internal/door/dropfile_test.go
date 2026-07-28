@@ -147,6 +147,35 @@ func TestParsePCBoard(t *testing.T) {
 	}
 }
 
+// The spec lets a writer truncate PCBOARD.SYS to the 128-byte core block, which
+// omits the Use-ANSI byte at offset 128; ANSI then comes from Graphics Mode at
+// offset 11, inside the block.
+func TestParsePCBoardTruncatedToCoreBlock(t *testing.T) {
+	b := make([]byte, 128)
+	for i := range b {
+		b[i] = ' '
+	}
+	b[11] = 'Y' // Graphics Mode = yes
+	copy(b[84:], []byte("Baron Sahara"))
+	binary.LittleEndian.PutUint16(b[109:], uint16(int16(45)))
+	b[111] = 3
+
+	p := filepath.Join(t.TempDir(), "PCBOARD.SYS")
+	if err := os.WriteFile(p, b, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	c, err := ParseDropfile(p)
+	if err != nil {
+		t.Fatalf("a 128-byte PCBOARD.SYS is spec-legal: %v", err)
+	}
+	if c.Handle != "Baron Sahara" || c.SecondsLeft != 45*60 || c.Node != 3 {
+		t.Errorf("got %+v, want Baron Sahara/2700s/node 3", c)
+	}
+	if !c.ANSI {
+		t.Error("Graphics Mode 'Y' should mean ANSI on when offset 128 is absent")
+	}
+}
+
 func TestParsePCBoardTooShort(t *testing.T) {
 	p := write(t, "PCBOARD.SYS", "short")
 	if _, err := ParseDropfile(p); err == nil {

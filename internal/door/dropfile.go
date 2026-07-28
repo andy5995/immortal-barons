@@ -248,8 +248,11 @@ func parseDorInfo(l []string) (*Caller, error) {
 // documented PCBoard standard, which any conformant writer follows for the core
 // block, but a smoke test against BBBS output is still worthwhile.
 func parsePCBoard(b []byte) (*Caller, error) {
-	if len(b) < 129 {
-		return nil, fmt.Errorf("PCBOARD.SYS too short: %d bytes, want >=129", len(b))
+	// The spec allows a writer to truncate the file to the 128-byte core block,
+	// so require only through the last core field we read (node, offset 111) and
+	// treat anything past the block as optional.
+	if len(b) < 112 {
+		return nil, fmt.Errorf("PCBOARD.SYS too short: %d bytes, want >=112", len(b))
 	}
 	name := strings.TrimSpace(string(b[84:109]))                          // User's Full Name (offset 84, 25 bytes)
 	minutes := max(int(int16(binary.LittleEndian.Uint16(b[109:111]))), 0) // Minutes remaining (offset 109)
@@ -257,9 +260,9 @@ func parsePCBoard(b []byte) (*Caller, error) {
 	if b[111] == ' ' {
 		node = 0
 	}
-	ansi := b[128] == 1 || b[128] == '1' // Use ANSI (offset 128)
-	if !ansi && (b[11] == 'Y' || b[11] == 'y') {
-		ansi = true // Graphics Mode (offset 11) as a backup
+	ansi := b[11] == 'Y' || b[11] == 'y' // Graphics Mode (offset 11), always in the core block
+	if len(b) > 128 && (b[128] == 1 || b[128] == '1') {
+		ansi = true // Use ANSI (offset 128), only when the file extends past the core block
 	}
 	return &Caller{
 		Handle:      name,
