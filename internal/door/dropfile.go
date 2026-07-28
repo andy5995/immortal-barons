@@ -300,7 +300,8 @@ func parseDoorSys(l []string) (*Caller, error) {
 //	10 graphics (1=ANSI)  11 access level  12 minutes left
 //
 // No node number or screen-length field. Offsets match the Synchronet wiki
-// DORINFO reference, BRE's INSTALL.CFG map, and BBBS's opendoor.bz writer. Like
+// DORINFO reference (https://wiki.synchro.net/ref:dorinfo1.def), BRE's
+// INSTALL.CFG map, and BBBS's opendoor.bz writer. Like
 // PCBOARD.SYS it carries no socket/stdio indicator, so I/O defaults to stdio
 // (COM0 => local; both are stdio on a *nix door).
 func parseDorInfo(l []string) (*Caller, error) {
@@ -332,14 +333,15 @@ func parseDorInfo(l []string) (*Caller, error) {
 // is a packed binary record. The fields the game needs all sit in the stable
 // 128-byte core block (plus the Use-ANSI byte at offset 128), so this is robust
 // across PCBoard versions 12/14/15 — later versions only append fields. Byte
-// offsets follow the Synchronet wiki PCBOARD.SYS reference. PCBOARD.SYS carries
+// offsets follow the Synchronet wiki PCBOARD.SYS reference
+// (https://wiki.synchro.net/ref:pcboard.sys). PCBOARD.SYS carries
 // no socket/stdio indicator, so I/O defaults to stdio: a *nix BBS pipes the
 // caller to stdin/stdout. A Windows winsock socket door needs DOOR32.SYS, which
 // carries the handle.
 //
-// Not yet validated against a real BBBS-generated PCBOARD.SYS; the layout is the
-// documented PCBoard standard, which any conformant writer follows for the core
-// block, but a smoke test against BBBS output is still worthwhile.
+// Not yet validated against a real BBBS-generated PCBOARD.SYS (#76): the layout
+// is the documented PCBoard standard, and BBBS writes the v12/v14 shape, so the
+// "later versions only append" assumption above is the part still unverified.
 func parsePCBoard(b []byte) (*Caller, error) {
 	// The spec allows a writer to truncate the file to the 128-byte core block,
 	// so require only through the last core field we read (node, offset 111) and
