@@ -64,7 +64,8 @@ then exit.
   is set yet, it runs the `-set-dropfile` chooser first.
 - **`-reset-from-config`** — Start a new game using the current `config.json`,
   without opening the editor. It clears all empires and rebuilds the world. The
-  old world is saved first.
+  old world is saved first. Like `-reset`, it runs the `-set-dropfile` chooser
+  first if no drop file format is set yet.
 - **`-add-ai N`** — Add N computer barons to the running game, then exit.
 - **`-maint`** — Run the daily maintenance step, then exit. Run this once a day
   (for example, from a nightly scheduled task).

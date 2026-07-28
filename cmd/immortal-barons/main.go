@@ -36,6 +36,24 @@ import (
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
+// errCancelled reports that the sysop backed out of an interactive step. The
+// reason is already on screen, so exitOn adds no second message — but the exit
+// status must still be non-zero, so an unattended run (a drop file chooser with
+// no one to answer it, say) can tell that the reset did not happen.
+var errCancelled = errors.New("cancelled")
+
+// exitOn reports a mode's failure and exits non-zero, staying quiet for a
+// cancellation the sysop already saw.
+func exitOn(mode string, err error) {
+	if err == nil {
+		return
+	}
+	if !errors.Is(err, errCancelled) {
+		fmt.Fprintln(os.Stderr, "immortal-barons "+mode+":", err)
+	}
+	os.Exit(1)
+}
+
 func main() {
 	// -help/usage text is translated to the environment's locale (there is no
 	// player context at flag-parse time). i18n.T falls back to English for lang "".
@@ -148,26 +166,17 @@ func main() {
 	}
 
 	if *reset {
-		if err := runReset(cfg, false); err != nil {
-			fmt.Fprintln(os.Stderr, "immortal-barons -reset:", err)
-			os.Exit(1)
-		}
+		exitOn("-reset", runReset(cfg, false))
 		return
 	}
 
 	if *resetFromConfig {
-		if err := runReset(cfg, true); err != nil {
-			fmt.Fprintln(os.Stderr, "immortal-barons -reset-from-config:", err)
-			os.Exit(1)
-		}
+		exitOn("-reset-from-config", runReset(cfg, true))
 		return
 	}
 
 	if *setDrop {
-		if err := runSetDrop(cfg.DataDir); err != nil {
-			fmt.Fprintln(os.Stderr, "immortal-barons -set-dropfile:", err)
-			os.Exit(1)
-		}
+		exitOn("-set-dropfile", runSetDrop(cfg.DataDir))
 		return
 	}
 
@@ -507,7 +516,7 @@ func runReset(cfg game.Config, fromConfig bool) error {
 		c.Close()
 		if !ok {
 			fmt.Println("\nCancelled. The game was left unchanged.")
-			return nil
+			return errCancelled
 		}
 		dc.DropfileFormat = format
 		if err := store.SaveDoorConfig(cfg.DataDir, dc); err != nil {
@@ -568,7 +577,7 @@ func runReset(cfg game.Config, fromConfig bool) error {
 
 	if !saved {
 		fmt.Println("\nCancelled. The game was left unchanged.")
-		return nil
+		return errCancelled
 	}
 
 	w.Reset()
@@ -745,7 +754,7 @@ func runSetDrop(dataDir string) error {
 	c.Close()
 	if !ok {
 		fmt.Println("\nDrop file format left unchanged.")
-		return nil
+		return errCancelled
 	}
 	dc.DropfileFormat = format
 	if err := store.SaveDoorConfig(dataDir, dc); err != nil {

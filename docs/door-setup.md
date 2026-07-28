@@ -48,8 +48,10 @@ Set up the game as an external program (a "door") in your BBS software.
   you have it. The setting is saved in `door.json` (separate from the game
   settings, so it is never changed by a reset). Until you set it, the door
   refuses to start.
-  - `-reset` runs this chooser for you the first time, before the settings
-    editor.
+  - `-reset` and `-reset-from-config` run this chooser for you when no format
+    is set yet.
+  - If you are updating from an earlier version, run `-set-dropfile` once after
+    you install the update. Earlier versions did not have this setting.
 - Point the game at the drop file with `-dropfile`, or let it search the current
   directory for the configured format.
 - The caller's handle from the drop file becomes the name of their realm.
