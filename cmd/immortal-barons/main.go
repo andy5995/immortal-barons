@@ -42,6 +42,11 @@ import (
 // no one to answer it, say) can tell that the reset did not happen.
 var errCancelled = errors.New("cancelled")
 
+// dropfileUnsetMsg is what both places that notice an unconfigured drop file
+// say: the note after a reset, and the door's own refusal to start. One string
+// so the two never drift into telling the sysop different things.
+const dropfileUnsetMsg = "No drop file format is set. If you intend to run this as a BBS door, run -set-dropfile to choose the format your BBS writes."
+
 // exitOn reports a mode's failure and exits non-zero, staying quiet for a
 // cancellation the sysop already saw.
 func exitOn(mode string, err error) {
@@ -211,8 +216,7 @@ func main() {
 		os.Exit(1)
 	}
 	if doorCfg.DropfileFormat == "" {
-		fmt.Fprintln(os.Stderr, "immortal-barons: no drop file format configured.")
-		fmt.Fprintln(os.Stderr, "Run 'immortal-barons -set-dropfile' once to tell the door which drop file your BBS writes.")
+		fmt.Fprintln(os.Stderr, "immortal-barons:", dropfileUnsetMsg)
 		os.Exit(2)
 	}
 
@@ -500,30 +504,9 @@ func runLeagueConfig(cfg game.Config) error {
 // fromConfig=true (-reset-from-config) it skips the editor and keeps the current
 // config.json as-is. Either way the world is wiped and re-seeded.
 func runReset(cfg game.Config, fromConfig bool) error {
-	// A drop file format must be configured before the door can run. If the sysop
-	// hasn't chosen one yet, run the -set-dropfile chooser first (writing door.json,
-	// which is independent of the game data this reset rebuilds), then continue
-	// into the reset (BRE asks the drop file type during its one-time install too).
-	// Both reset paths ask: door.json is not the config.json that -reset-from-config
-	// preserves, and either path otherwise leaves a game no caller can reach.
-	dc, err := store.LoadDoorConfig(cfg.DataDir)
-	if err != nil {
-		return err
-	}
-	if dc.DropfileFormat == "" {
-		c := session.NewConsole()
-		format, ok := chooseDropfile(c, "")
-		c.Close()
-		if !ok {
-			fmt.Println("\nCancelled. The game was left unchanged.")
-			return errCancelled
-		}
-		dc.DropfileFormat = format
-		if err := store.SaveDoorConfig(cfg.DataDir, dc); err != nil {
-			return err
-		}
-	}
-
+	// No drop file prompt here: a reset seeds the world for the web front-end and
+	// -local play too, neither of which reads a drop file. The door names
+	// -set-dropfile when it needs it.
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
@@ -550,6 +533,7 @@ func runReset(cfg game.Config, fromConfig bool) error {
 		if backedUp {
 			fmt.Println("The previous world was backed up to world.json.bak.")
 		}
+		noteDropfileUnset(cfg.DataDir)
 		return nil
 	}
 
@@ -588,7 +572,18 @@ func runReset(cfg game.Config, fromConfig bool) error {
 	if backedUp {
 		fmt.Println("The previous world was backed up to world.json.bak.")
 	}
+	noteDropfileUnset(cfg.DataDir)
 	return nil
+}
+
+// noteDropfileUnset reminds the sysop after a reset that the door still needs a
+// drop file format. A note, not a prompt: the world it just seeded is also what
+// the web front-end and -local play use, and neither reads a drop file. A
+// door.json that can't be read is left to the door to report.
+func noteDropfileUnset(dataDir string) {
+	if dc, err := store.LoadDoorConfig(dataDir); err == nil && dc.DropfileFormat == "" {
+		fmt.Println(dropfileUnsetMsg)
+	}
 }
 
 // runAddAI injects up to n new AI barons into the running world (no reset),

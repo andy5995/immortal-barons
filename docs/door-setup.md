@@ -50,9 +50,8 @@ Set up the game as an external program (a "door") in your BBS software.
   DOOR32.SYS is the one most modern BBS software writes and the best choice when
   you have it. The setting is saved in `door.json` (separate from the game
   settings, so it is never changed by a reset). Until you set it, the door
-  refuses to start.
-  - `-reset` and `-reset-from-config` run this chooser for you when no format
-    is set yet.
+  refuses to start. Only the door needs it: the web front-end and `-local` play
+  do not read a drop file.
   - If you are updating from an earlier version, run `-set-dropfile` once after
     you install the update. Earlier versions did not have this setting.
 - Point the game at the drop file with `-dropfile`, or let it search the current
