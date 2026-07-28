@@ -216,6 +216,13 @@ func main() {
 		path = findDropfile(doorCfg.DropfileFormat)
 	}
 	if path == "" {
+		// Log to ib-door.log too: with a live caller this is a silent bounce
+		// (issue #37) — the BBS didn't write the drop file where we looked.
+		want := doorCfg.DropfileFormat
+		if f, ok := door.FormatByID(want); ok {
+			want = f.File
+		}
+		doorLog(cfg.DataDir, "no drop file found: format=%q searched cwd for %s (pass -dropfile PATH)", doorCfg.DropfileFormat, want)
 		fmt.Fprintln(os.Stderr, "immortal-barons: no dropfile found.")
 		fmt.Fprintln(os.Stderr, "Run it as a BBS door with -dropfile PATH, or play in your terminal with -local.")
 		fmt.Fprintln(os.Stderr)
@@ -224,6 +231,10 @@ func main() {
 	}
 	caller, err := door.ParseDropfileAs(path, doorCfg.DropfileFormat)
 	if err != nil {
+		// Log to ib-door.log too: a parse failure with a live caller is the
+		// silent no-splash bounce issue #37 is about, and stderr isn't the
+		// caller's connection under a BBS, so without this it leaves no trace.
+		doorLog(cfg.DataDir, "drop file parse failed: path=%q format=%q err=%v", path, doorCfg.DropfileFormat, err)
 		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
 		os.Exit(1)
 	}
