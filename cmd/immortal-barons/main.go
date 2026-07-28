@@ -495,23 +495,23 @@ func runReset(cfg game.Config, fromConfig bool) error {
 	// hasn't chosen one yet, run the -set-dropfile chooser first (writing door.json,
 	// which is independent of the game data this reset rebuilds), then continue
 	// into the reset (BRE asks the drop file type during its one-time install too).
-	if !fromConfig {
-		dc, err := store.LoadDoorConfig(cfg.DataDir)
-		if err != nil {
-			return err
+	// Both reset paths ask: door.json is not the config.json that -reset-from-config
+	// preserves, and either path otherwise leaves a game no caller can reach.
+	dc, err := store.LoadDoorConfig(cfg.DataDir)
+	if err != nil {
+		return err
+	}
+	if dc.DropfileFormat == "" {
+		c := session.NewConsole()
+		format, ok := chooseDropfile(c, "")
+		c.Close()
+		if !ok {
+			fmt.Println("\nCancelled. The game was left unchanged.")
+			return nil
 		}
-		if dc.DropfileFormat == "" {
-			c := session.NewConsole()
-			format, ok := chooseDropfile(c, "")
-			c.Close()
-			if !ok {
-				fmt.Println("\nCancelled. The game was left unchanged.")
-				return nil
-			}
-			dc.DropfileFormat = format
-			if err := store.SaveDoorConfig(cfg.DataDir, dc); err != nil {
-				return err
-			}
+		dc.DropfileFormat = format
+		if err := store.SaveDoorConfig(cfg.DataDir, dc); err != nil {
+			return err
 		}
 	}
 
