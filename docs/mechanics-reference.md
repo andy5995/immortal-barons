@@ -324,7 +324,7 @@ different economic role:
   37% support).
 - **Mountain** — lowest income of the money regions, but the most stable
   (never fails); also boosts industrial output.
-- **Desert** — solar income; swings widely (~3,000–4,500 per region; live-recal 2026-07).
+- **Desert** — solar income; swings widely (~1,900–3,000 per region).
 - **River** — highest income on a cash turn (hydroelectric), but every so
   often it produces food instead — never rely on it for either alone.
 - **Agriculture** — grows food; food self-sufficiency.
@@ -355,7 +355,7 @@ this band — the earlier 1.0–1.5 reconstruction ran ~15–30% high):
 |--------|-----:|-----:|-------|
 | Mountain (ore) | 400 | 3,550 | smallest swing → most stable |
 | Coastal (tourism) | 1,000 | 3,750 | × support factor `0.10 + 0.90·(Support/100)` — floor ~375/region at 0% support, never zero. **Live-verified (#31):** a headless BRE sweep of Tourism income across Support 0→100 (coastal count held at 3) fits `factor = 0.099 + 0.901·(Support/100)`, matching this curve to ~1% on both floor and slope |
-| Desert (solar) | 2,900 | 2,160 | widest swing; **live-recal 2026-07** (3 turns, per-desert 3034/4485/3826) — supersedes the never-live-confirmed disassembled 2000/3000; re-check vs disassembly |
+| Desert (solar) | 2,000 | 3,000 | widest swing |
 | River (hydro) | 100 | 5,000 | highest base; a river fishes instead some turns (#29) |
 
 **Industrial** regions don't use a fixed rate/base — each is one shared capacity

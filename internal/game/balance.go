@@ -26,19 +26,9 @@ package game
 const (
 	MountainRate, MountainBase = 400, 3550  // ore — smallest Rate, most stable
 	CoastalRate, CoastalBase   = 1000, 3750 // tourism — × support factor
-	DesertRate, DesertBase     = 2900, 2160 // solar — widest swing (live-recal, see below)
+	DesertRate, DesertBase     = 2000, 3000 // solar — widest swing
 	RiverRate, RiverBase       = 100, 5000  // hydro — highest base, occasional bad-year dud
 )
-
-// Desert (Solar) recalibration (LIVE, 2026-07, Medium config, empire "Sahara"
-// with 5 desert): per-desert Solar over 3 turns = 3034 / 4485 / 3826. Reading
-// the low/high as the yield-band edges gives Rate≈2902, Base≈2163 (turn 3's
-// implied yield 57.3 falls inside [30,80], validating the fit). The old
-// 2000/3000 came from the disassembly but was never live-confirmed and
-// mispredicts these (it implies a floor of 3600, above the observed 3034) — the
-// live sample supersedes it here. Only ~3 turns, so treat as a first-cut recal;
-// re-check the desert Rate/Base against the disassembly (BRE.OVR ~0x342C0) when
-// possible. See the bre-binary-verified-math memory.
 
 // Yield band (live-calibrated). Each turn a planet-wide year factor is drawn in
 // this band and multiplies each region's Rate on top of its Base. Live BRE data
