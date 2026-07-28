@@ -83,17 +83,17 @@ func ParseDropfileAs(path, format string) (*Caller, error) {
 	case "":
 		return ParseDropfile(path)
 	case "door32":
-		return parseLineFile(path, parseDoor32)
+		return checkCaller(parseLineFile(path, parseDoor32))
 	case "doorsys":
-		return parseLineFile(path, parseDoorSys)
+		return checkCaller(parseLineFile(path, parseDoorSys))
 	case "dorinfo":
-		return parseLineFile(path, parseDorInfo)
+		return checkCaller(parseLineFile(path, parseDorInfo))
 	case "pcboard":
 		b, err := os.ReadFile(path)
 		if err != nil {
 			return nil, err
 		}
-		return parsePCBoard(b)
+		return checkCaller(parsePCBoard(b))
 	default:
 		return nil, fmt.Errorf("unknown dropfile format %q", format)
 	}
@@ -102,28 +102,47 @@ func ParseDropfileAs(path, format string) (*Caller, error) {
 // ParseDropfile reads the dropfile at path, dispatching on its filename. Used
 // when the format isn't configured (a bare path).
 func ParseDropfile(path string) (*Caller, error) {
-	name := strings.ToLower(filepath.Base(path))
-	if name == "pcboard.sys" {
-		b, err := os.ReadFile(path)
-		if err != nil {
-			return nil, err
-		}
-		return parsePCBoard(b)
-	}
-	lines, err := readLines(path)
+	format, err := formatFromFilename(filepath.Base(path))
 	if err != nil {
 		return nil, err
 	}
+	return ParseDropfileAs(path, format)
+}
+
+// formatFromFilename guesses a Format ID from a drop file's name.
+func formatFromFilename(base string) (string, error) {
+	name := strings.ToLower(base)
 	switch {
 	case name == "door32.sys":
-		return parseDoor32(lines)
+		return "door32", nil
 	case name == "door.sys":
-		return parseDoorSys(lines)
+		return "doorsys", nil
+	case name == "pcboard.sys":
+		return "pcboard", nil
 	case strings.HasPrefix(name, "dorinfo") && strings.HasSuffix(name, ".def"):
-		return parseDorInfo(lines) // BBBS names it dorinfo<node>.def
-	default:
-		return nil, fmt.Errorf("unsupported dropfile %q (want DOOR32.SYS, DOOR.SYS, PCBOARD.SYS, or DORINFO1.DEF)", filepath.Base(path))
+		return "dorinfo", nil // BBBS names it dorinfo<node>.def
 	}
+	names := make([]string, len(Formats))
+	for i, f := range Formats {
+		names[i] = f.Name
+	}
+	return "", fmt.Errorf("unsupported dropfile %q (want %s)", base, strings.Join(names, ", "))
+}
+
+// checkCaller rejects a drop file that parsed structurally but carries no usable
+// caller identity. A drop file is written by another program, so it is a real
+// boundary: a corrupt or wrong-format file can satisfy the length checks and
+// still yield an empty name. Without this the empty name falls back to a
+// node-numbered handle, so every caller with a malformed drop file would share
+// one empire. Fail the launch instead — the sysop sees it in ib-door.log.
+func checkCaller(c *Caller, err error) (*Caller, error) {
+	if err != nil {
+		return nil, err
+	}
+	if c.Handle == "" {
+		return nil, fmt.Errorf("drop file has no caller name (corrupt, or not the configured format)")
+	}
+	return c, nil
 }
 
 // parseLineFile reads a line-based dropfile and hands its lines to parse.

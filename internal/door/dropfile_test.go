@@ -206,6 +206,24 @@ func TestParseDorInfo(t *testing.T) {
 	}
 }
 
+// A drop file can satisfy the length checks and still carry no caller name
+// (corrupt, or the wrong format for its name). Reject it rather than inventing a
+// node-numbered handle, which would put every such caller in one shared empire.
+func TestParseRejectsMissingCallerName(t *testing.T) {
+	cases := []struct{ name, file, content string }{
+		{"door32", "door32.sys", "2\n7\n38400\nBBS\n1\n\n\n10\n30\n1\n1\n"},
+		{"dorinfo", "dorinfo1.def", "B\ns\ns\nCOM1\nb\n0\n\n\ncity\n1\n10\n30\n"},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			p := write(t, c.file, c.content)
+			if _, err := ParseDropfile(p); err == nil {
+				t.Error("expected an error for a drop file with no caller name")
+			}
+		})
+	}
+}
+
 func TestUnsupportedDropfile(t *testing.T) {
 	p := write(t, "chain.txt", "whatever\n")
 	if _, err := ParseDropfile(p); err == nil {
