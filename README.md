@@ -108,7 +108,15 @@ game (`immortal-barons -reset`).
 ## Running in a browser (experimental)
 
 Immortal Barons also has an experimental browser front-end (`immortal-barons-web`),
-separate from the BBS door. See the
+separate from the BBS door.
+
+**Note its security review status:** the server code was written mostly by an AI
+language model, and nobody who works in server security has reviewed it. Putting
+it on a public address exposes code whose security has never been checked by a
+qualified person. You may choose to run it on your own computer or on your local
+network, but even that may be unsafe.
+
+See the
 [Web Server Guide](https://andy5995.github.io/immortal-barons/web-server/) for
 how to build and run it, how players are tracked, the full list of options, and
 why its world is separate from a BBS door's world.
@@ -164,3 +172,4 @@ Free software under the [MIT License](LICENSE).
 * [Shurato's Heavenly Sphere BBS](https://shsbbs.net/ad.html)
 * [X-Bit BBS](https://x-bit.org/info)
 * [LibreGaming](https://libregaming.org/)
+* [BBSlink](https://bbslink.net/)

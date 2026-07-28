@@ -1,5 +1,17 @@
 # Web Server Guide — Running Immortal Barons in a Browser
 
+!!! danger "Security review status"
+
+    The web server code was written mostly by an AI language model. Nobody who
+    works in server security has reviewed it.
+
+    Putting it on a public address therefore exposes code whose security has
+    never been checked by a qualified person. You may choose to run it on your
+    own computer or on your local network, but even that may be unsafe.
+
+    Specific known problems are tracked in the issue tracker, but fixing those
+    is not the same as a security review.
+
 This is experimental. The web front-end (`immortal-barons-web`) lets someone play the
 game in a normal web browser, using [xterm.js](https://xtermjs.org/) to draw
 the terminal screen. It is a separate program from `immortal-barons`; it does not

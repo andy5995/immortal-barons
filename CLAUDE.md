@@ -133,6 +133,24 @@ and new-realm protection; an event log for asynchronous play. Front-ends:
 `cmd/immortal-barons` (door + `-local` local play) and `cmd/immortal-barons-web`
 (experimental browser).
 
+**Network-facing front-ends: security posture.** Any mode that listens on a
+socket and lets a stranger reach game code — today the web front-end, later the
+SSH one (#84) — was written mostly by an LLM and has had no review by anyone who
+works in server security. That fact belongs in the user docs for each such mode
+(`docs/webserver.md` today, plus README and FAQ) and must stay there until such a
+review happens. Closing the hardening issues (#82 and its children) does not
+retire it: they fix specific known problems rather than substitute for a review,
+and an LLM self-review — mine included — is not the missing review, so don't
+present one as clearing the bar.
+
+Using SSH narrows the question but does not remove it: `x/crypto/ssh` carries the
+crypto, transport, and authentication, but session lifetime, resource limits, and
+concurrent mutation of the shared world stay IB's own code and IB's own risk.
+
+Phrasing: state the fact and the risk, and leave the decision to the operator.
+Don't tell them whether to run it — including for a LAN, which is not
+automatically safe either.
+
 Implemented gameplay: conventional combat (offense/defense, turrets, carriers,
 jets, bomber airfield strikes; a winning attacker chooses the captured region
 types and both sides' casualties are reported by unit type), nuclear/chemical/
