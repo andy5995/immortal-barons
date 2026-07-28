@@ -42,7 +42,8 @@ See "Starting a fresh game" below — it is the same command.
 Set up the game as an external program (a "door") in your BBS software.
 
 - Run `-set-dropfile` once to tell the game which drop file your BBS writes.
-  The supported formats are **DOOR32.SYS**, **DOOR.SYS**, and **PCBOARD.SYS**.
+  The supported formats are **DOOR32.SYS**, **DOOR.SYS**, **PCBOARD.SYS**, and
+  **DORINFO1.DEF**.
   DOOR32.SYS is the one most modern BBS software writes and the best choice when
   you have it. The setting is saved in `door.json` (separate from the game
   settings, so it is never changed by a reset). Until you set it, the door

@@ -3,10 +3,11 @@
 // it tells the door who the caller is and how to talk to them.
 //
 // DOOR32.SYS is the primary format (both Synchronet and Mystic write it,
-// and it cleanly encodes the I/O method). DOOR.SYS and PCBOARD.SYS are
-// supported as widely-used alternatives. Field positions were cross-checked
-// against the Synchronet source (src/xpdoor/dropfiles.c), the Synchronet wiki
-// PCBOARD.SYS reference, and BRE's own INSTALL.CFG.
+// and it cleanly encodes the I/O method). DOOR.SYS, PCBOARD.SYS, and
+// DORINFO1.DEF are supported as widely-used alternatives. Field positions were
+// cross-checked against the Synchronet source (src/xpdoor/dropfiles.c), the
+// Synchronet wiki PCBOARD.SYS and DORINFO1.DEF references, and BRE's own
+// INSTALL.CFG.
 //
 // The sysop declares which format their BBS writes once (stored in door.json,
 // set with -set-dropfile); ParseDropfileAs then reads that format regardless of
@@ -39,6 +40,7 @@ var Formats = []Format{
 	{ID: "door32", Name: "DOOR32.SYS", File: "DOOR32.SYS", Note: "Synchronet, Mystic — cleanly encodes socket/stdio (recommended)"},
 	{ID: "doorsys", Name: "DOOR.SYS", File: "DOOR.SYS", Note: "widely-supported text drop file"},
 	{ID: "pcboard", Name: "PCBOARD.SYS", File: "PCBOARD.SYS", Note: "PCBoard binary drop file; also written by BBBS"},
+	{ID: "dorinfo", Name: "DORINFO1.DEF", File: "DORINFO1.DEF", Note: "RBBS/QuickBBS/RemoteAccess text drop file; also written by BBBS"},
 }
 
 // FormatByID returns the Format with the given ID.
@@ -85,6 +87,8 @@ func ParseDropfileAs(path, format string) (*Caller, error) {
 		return parseLineFile(path, parseDoor32)
 	case "doorsys":
 		return parseLineFile(path, parseDoorSys)
+	case "dorinfo":
+		return parseLineFile(path, parseDorInfo)
 	case "pcboard":
 		b, err := os.ReadFile(path)
 		if err != nil {
@@ -111,13 +115,15 @@ func ParseDropfile(path string) (*Caller, error) {
 	if err != nil {
 		return nil, err
 	}
-	switch name {
-	case "door32.sys":
+	switch {
+	case name == "door32.sys":
 		return parseDoor32(lines)
-	case "door.sys":
+	case name == "door.sys":
 		return parseDoorSys(lines)
+	case strings.HasPrefix(name, "dorinfo") && strings.HasSuffix(name, ".def"):
+		return parseDorInfo(lines) // BBBS names it dorinfo<node>.def
 	default:
-		return nil, fmt.Errorf("unsupported dropfile %q (want DOOR32.SYS, DOOR.SYS, or PCBOARD.SYS)", filepath.Base(path))
+		return nil, fmt.Errorf("unsupported dropfile %q (want DOOR32.SYS, DOOR.SYS, PCBOARD.SYS, or DORINFO1.DEF)", filepath.Base(path))
 	}
 }
 
@@ -196,6 +202,36 @@ func parseDoorSys(l []string) (*Caller, error) {
 	c.ANSI = strings.ToUpper(field(l, 20)) == "GR"
 	if c.Rows == 0 {
 		c.Rows = 25
+	}
+	return c, nil
+}
+
+// DORINFO1.DEF (RBBS/QuickBBS/RemoteAccess): 12+ CRLF-delimited lines.
+//
+//	1 BBS name          2 sysop first     3 sysop last
+//	4 COM port          5 baud string     6 reserved
+//	7 caller first      8 caller last     9 caller city
+//	10 graphics (1=ANSI)  11 access level  12 minutes left
+//
+// No node number or screen-length field. Offsets match the Synchronet wiki
+// DORINFO reference, BRE's INSTALL.CFG map, and BBBS's opendoor.bz writer. Like
+// PCBOARD.SYS it carries no socket/stdio indicator, so I/O defaults to stdio
+// (COM0 => local; both are stdio on a *nix door).
+func parseDorInfo(l []string) (*Caller, error) {
+	if len(l) < 12 {
+		return nil, fmt.Errorf("DORINFO1.DEF too short: %d lines, want >=12", len(l))
+	}
+	handle := strings.TrimSpace(field(l, 7) + " " + field(l, 8))
+	c := &Caller{
+		Handle:      handle,
+		RealName:    handle,
+		SecondsLeft: atoi(field(l, 12)) * 60,
+		ANSI:        atoi(field(l, 10)) >= 1,
+		Rows:        25,
+		IO:          IOStdio,
+	}
+	if strings.HasPrefix(strings.ToUpper(field(l, 4)), "COM0") {
+		c.IO = IOLocal
 	}
 	return c, nil
 }

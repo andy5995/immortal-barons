@@ -154,8 +154,31 @@ func TestParsePCBoardTooShort(t *testing.T) {
 	}
 }
 
+func TestParseDorInfo(t *testing.T) {
+	// 1 BBS  2 sysop-first  3 sysop-last  4 COM0  5 baud  6 reserved
+	// 7 Khan  8 Noonien  9 city  10 graphics=1  11 level  12 minutes=30
+	lines := "My BBS\nThe\nSysop\nCOM0\n0 BAUD,N,8,1\n0\nKhan\nNoonien\nSeti Alpha V\n1\n50\n30\n-1\n"
+	p := write(t, "dorinfo1.def", lines)
+	c, err := ParseDropfile(p)
+	if err != nil {
+		t.Fatalf("ParseDropfile: %v", err)
+	}
+	if c.Handle != "Khan Noonien" {
+		t.Errorf("Handle = %q, want %q", c.Handle, "Khan Noonien")
+	}
+	if c.SecondsLeft != 30*60 {
+		t.Errorf("SecondsLeft = %d, want %d", c.SecondsLeft, 30*60)
+	}
+	if !c.ANSI {
+		t.Error("graphics=1 should mean ANSI on")
+	}
+	if c.IO != IOLocal {
+		t.Errorf("IO = %v, want IOLocal (COM0)", c.IO)
+	}
+}
+
 func TestUnsupportedDropfile(t *testing.T) {
-	p := write(t, "dorinfo1.def", "whatever\n")
+	p := write(t, "chain.txt", "whatever\n")
 	if _, err := ParseDropfile(p); err == nil {
 		t.Error("expected error for unsupported dropfile type")
 	}
