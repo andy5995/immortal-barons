@@ -1,12 +1,20 @@
 (in-progress:)
   * Updating from an earlier version requires a game reset (-reset)
+  * Updating also requires running "immortal-barons -set-dropfile" once:
+    the door now needs to know which drop file your BBS writes, and will
+    not start until it is set
+  * PCBOARD.SYS and DORINFO1.DEF drop files are now supported, along
+    with DOOR32.SYS and DOOR.SYS
+  * An ally in a Full Defense Alliance now sends 30% of its mobile
+    forces to help defend you
+  * Desert regions earn more, matching the original game
   * Read Messages now shows one message at a time (Reply/Delete/Ignore/
     Quit), matching the original — Ignore keeps a message for next time,
     only Delete removes it
   * A Regular Attack captures more regions from a target whose net worth
     is spread thin over its land, and fewer from a dense, developed one
 
-2026-07-24
+2026-07-24 (v0.0.2)
   * Winning a Regular Attack now lets you choose the types of the
     regions you capture (#58)
   * Winning a pirate raid that seizes land lets you choose its region
