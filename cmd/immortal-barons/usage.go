@@ -19,7 +19,7 @@ var usageGroups = []struct {
 }{
 	{"Play", []string{"local", "name", "dropfile", "data"}},
 	{"Character set (output)", []string{"utf8", "cp437"}},
-	{"Sysop / game admin", []string{"reset", "reset-from-config", "add-ai", "maint", "dump"}},
+	{"Sysop / game admin", []string{"set-dropfile", "reset", "reset-from-config", "add-ai", "maint", "dump"}},
 	{"Inter-BBS", []string{"planetary", "league-config", "export", "import"}},
 	{"Info", []string{"version"}},
 }

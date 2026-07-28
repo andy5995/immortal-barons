@@ -3,19 +3,53 @@
 // it tells the door who the caller is and how to talk to them.
 //
 // DOOR32.SYS is the primary format (both Synchronet and Mystic write it,
-// and it cleanly encodes the I/O method). DOOR.SYS is supported as a
-// widely-used fallback. Field positions were cross-checked against the
-// Synchronet source (src/xpdoor/dropfiles.c) and BRE's own INSTALL.CFG.
+// and it cleanly encodes the I/O method). DOOR.SYS and PCBOARD.SYS are
+// supported as widely-used alternatives. Field positions were cross-checked
+// against the Synchronet source (src/xpdoor/dropfiles.c), the Synchronet wiki
+// PCBOARD.SYS reference, and BRE's own INSTALL.CFG.
+//
+// The sysop declares which format their BBS writes once (stored in door.json,
+// set with -set-dropfile); ParseDropfileAs then reads that format regardless of
+// the file's name. ParseDropfile still auto-dispatches on the filename for a
+// bare path.
 package door
 
 import (
 	"bufio"
+	"encoding/binary"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 )
+
+// Format identifies a dropfile format the door can read. ID is what the sysop's
+// config stores (door.json); Name/File are for display and for
+// working-directory auto-detection; Note is the one-line -set-dropfile description.
+type Format struct {
+	ID   string
+	Name string
+	File string
+	Note string
+}
+
+// Formats lists the supported dropfile formats in menu order.
+var Formats = []Format{
+	{ID: "door32", Name: "DOOR32.SYS", File: "DOOR32.SYS", Note: "Synchronet, Mystic — cleanly encodes socket/stdio (recommended)"},
+	{ID: "doorsys", Name: "DOOR.SYS", File: "DOOR.SYS", Note: "widely-supported text drop file"},
+	{ID: "pcboard", Name: "PCBOARD.SYS", File: "PCBOARD.SYS", Note: "PCBoard binary drop file; also written by BBBS"},
+}
+
+// FormatByID returns the Format with the given ID.
+func FormatByID(id string) (Format, bool) {
+	for _, f := range Formats {
+		if f.ID == id {
+			return f, true
+		}
+	}
+	return Format{}, false
+}
 
 // IOMode is how the BBS expects the door to talk to the caller.
 type IOMode int
@@ -40,20 +74,60 @@ type Caller struct {
 	BBSID       string // BBS software name/version, if provided
 }
 
-// ParseDropfile reads the dropfile at path, dispatching on its filename.
+// ParseDropfileAs reads the dropfile at path as the named format (a Format ID).
+// An empty format falls back to dispatching on the filename, preserving the old
+// auto-detect behavior for a bare -dropfile path.
+func ParseDropfileAs(path, format string) (*Caller, error) {
+	switch format {
+	case "":
+		return ParseDropfile(path)
+	case "door32":
+		return parseLineFile(path, parseDoor32)
+	case "doorsys":
+		return parseLineFile(path, parseDoorSys)
+	case "pcboard":
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		return parsePCBoard(b)
+	default:
+		return nil, fmt.Errorf("unknown dropfile format %q", format)
+	}
+}
+
+// ParseDropfile reads the dropfile at path, dispatching on its filename. Used
+// when the format isn't configured (a bare path).
 func ParseDropfile(path string) (*Caller, error) {
+	name := strings.ToLower(filepath.Base(path))
+	if name == "pcboard.sys" {
+		b, err := os.ReadFile(path)
+		if err != nil {
+			return nil, err
+		}
+		return parsePCBoard(b)
+	}
 	lines, err := readLines(path)
 	if err != nil {
 		return nil, err
 	}
-	switch strings.ToLower(filepath.Base(path)) {
+	switch name {
 	case "door32.sys":
 		return parseDoor32(lines)
 	case "door.sys":
 		return parseDoorSys(lines)
 	default:
-		return nil, fmt.Errorf("unsupported dropfile %q (want DOOR32.SYS or DOOR.SYS)", filepath.Base(path))
+		return nil, fmt.Errorf("unsupported dropfile %q (want DOOR32.SYS, DOOR.SYS, or PCBOARD.SYS)", filepath.Base(path))
 	}
+}
+
+// parseLineFile reads a line-based dropfile and hands its lines to parse.
+func parseLineFile(path string, parse func([]string) (*Caller, error)) (*Caller, error) {
+	lines, err := readLines(path)
+	if err != nil {
+		return nil, err
+	}
+	return parse(lines)
 }
 
 // DOOR32.SYS: 11 lines.
@@ -124,6 +198,43 @@ func parseDoorSys(l []string) (*Caller, error) {
 		c.Rows = 25
 	}
 	return c, nil
+}
+
+// parsePCBoard reads a PCBOARD.SYS drop file. Unlike the line-based formats it
+// is a packed binary record. The fields the game needs all sit in the stable
+// 128-byte core block (plus the Use-ANSI byte at offset 128), so this is robust
+// across PCBoard versions 12/14/15 — later versions only append fields. Byte
+// offsets follow the Synchronet wiki PCBOARD.SYS reference. PCBOARD.SYS carries
+// no socket/stdio indicator, so I/O defaults to stdio: a *nix BBS pipes the
+// caller to stdin/stdout. A Windows winsock socket door needs DOOR32.SYS, which
+// carries the handle.
+//
+// Not yet validated against a real BBBS-generated PCBOARD.SYS; the layout is the
+// documented PCBoard standard, which any conformant writer follows for the core
+// block, but a smoke test against BBBS output is still worthwhile.
+func parsePCBoard(b []byte) (*Caller, error) {
+	if len(b) < 129 {
+		return nil, fmt.Errorf("PCBOARD.SYS too short: %d bytes, want >=129", len(b))
+	}
+	name := strings.TrimSpace(string(b[84:109]))                          // User's Full Name (offset 84, 25 bytes)
+	minutes := max(int(int16(binary.LittleEndian.Uint16(b[109:111]))), 0) // Minutes remaining (offset 109)
+	node := int(b[111])                                                   // Node number (offset 111; ' ' when no network)
+	if b[111] == ' ' {
+		node = 0
+	}
+	ansi := b[128] == 1 || b[128] == '1' // Use ANSI (offset 128)
+	if !ansi && (b[11] == 'Y' || b[11] == 'y') {
+		ansi = true // Graphics Mode (offset 11) as a backup
+	}
+	return &Caller{
+		Handle:      name,
+		RealName:    name,
+		Node:        node,
+		SecondsLeft: minutes * 60,
+		ANSI:        ansi,
+		Rows:        25, // no screen-length field in PCBOARD.SYS (it lives in USERS.SYS)
+		IO:          IOStdio,
+	}, nil
 }
 
 func readLines(path string) ([]string, error) {

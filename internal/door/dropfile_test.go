@@ -1,6 +1,7 @@
 package door
 
 import (
+	"encoding/binary"
 	"os"
 	"path/filepath"
 	"testing"
@@ -106,6 +107,50 @@ func TestParseDoorSysSocket(t *testing.T) {
 	}
 	if c.ANSI {
 		t.Error("NG should mean ANSI off")
+	}
+}
+
+func TestParsePCBoard(t *testing.T) {
+	// A 200-byte space-filled PCBOARD.SYS with the core fields the game reads:
+	// Full Name @84, minutes-left @109, node @111, Use-ANSI @128.
+	b := make([]byte, 200)
+	for i := range b {
+		b[i] = ' '
+	}
+	copy(b[84:], []byte("Baron Sahara"))
+	binary.LittleEndian.PutUint16(b[109:], uint16(int16(45))) // 45 minutes left
+	b[111] = 3                                                // node 3
+	b[128] = 1                                                // ANSI on
+
+	p := filepath.Join(t.TempDir(), "PCBOARD.SYS")
+	if err := os.WriteFile(p, b, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	c, err := ParseDropfile(p)
+	if err != nil {
+		t.Fatalf("ParseDropfile: %v", err)
+	}
+	if c.Handle != "Baron Sahara" {
+		t.Errorf("Handle = %q, want %q", c.Handle, "Baron Sahara")
+	}
+	if c.SecondsLeft != 45*60 {
+		t.Errorf("SecondsLeft = %d, want %d", c.SecondsLeft, 45*60)
+	}
+	if c.Node != 3 {
+		t.Errorf("Node = %d, want 3", c.Node)
+	}
+	if !c.ANSI {
+		t.Error("ANSI should be on")
+	}
+	if c.IO != IOStdio {
+		t.Errorf("IO = %v, want IOStdio", c.IO)
+	}
+}
+
+func TestParsePCBoardTooShort(t *testing.T) {
+	p := write(t, "PCBOARD.SYS", "short")
+	if _, err := ParseDropfile(p); err == nil {
+		t.Error("expected error for a truncated PCBOARD.SYS")
 	}
 }
 

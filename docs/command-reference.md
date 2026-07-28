@@ -15,9 +15,9 @@ Run it like this:
 immortal-barons [options]
 ```
 
-With no options, it runs as a BBS door: it looks for a dropfile
-(`DOOR32.SYS` or `DOOR.SYS`) in the current folder and plays over the BBS
-connection. The options below change that.
+With no options, it runs as a BBS door: it looks for the drop file your BBS
+writes (the format you chose with `-set-dropfile`) in the current folder and
+plays over the BBS connection. The options below change that.
 
 ### Play
 
@@ -27,8 +27,9 @@ These options are for playing the game.
   testing or for a single player on the same machine.
 - **`-name NAME`** — Set your player name. Only used with `-local`. Without it,
   the game uses your system login name.
-- **`-dropfile PATH`** — Path to the BBS dropfile (`DOOR32.SYS` or `DOOR.SYS`).
-  Your BBS software writes this file and tells the door where it is.
+- **`-dropfile PATH`** — Path to the BBS drop file. Your BBS software writes this
+  file and tells the door where it is. The format is the one you set with
+  `-set-dropfile` (see the door setup guide for the supported formats).
 - **`-data DIR`** — The folder that holds the game data. The default is `./data`,
   which is **relative to the directory you run the command from**, not to where
   the program file is. Run the game from a different folder and it looks for
@@ -52,9 +53,15 @@ These options choose how the game draws its screens. See
 These options are for the person who runs the game. Most of them do one job and
 then exit.
 
+- **`-set-dropfile`** — Choose which drop file format your BBS writes, save it,
+  then exit. Run this once when you set the door up. The choice is stored in
+  `door.json`, apart from the game settings, so a reset never changes it. Until
+  it is set, the door refuses to start. See the door setup guide for the
+  supported formats.
 - **`-reset`** — Start a new game. First it opens the settings editor so you can
   change the rules, then it clears all empires and rebuilds the world. The old
-  world is saved first. This also rewrites `config.json`.
+  world is saved first. This also rewrites `config.json`. If no drop file format
+  is set yet, it runs the `-set-dropfile` chooser first.
 - **`-reset-from-config`** — Start a new game using the current `config.json`,
   without opening the editor. It clears all empires and rebuilds the world. The
   old world is saved first.

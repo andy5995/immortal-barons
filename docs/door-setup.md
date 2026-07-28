@@ -41,10 +41,17 @@ See "Starting a fresh game" below — it is the same command.
 
 Set up the game as an external program (a "door") in your BBS software.
 
-- The game reads **DOOR32.SYS** (the dropfile most BBS software writes) or
-  **DOOR.SYS**. Point the game at it with `-dropfile`, or let it search the
-  current directory.
-- The caller's handle from the dropfile becomes the name of their realm.
+- Run `-set-dropfile` once to tell the game which drop file your BBS writes.
+  The supported formats are **DOOR32.SYS**, **DOOR.SYS**, and **PCBOARD.SYS**.
+  DOOR32.SYS is the one most modern BBS software writes and the best choice when
+  you have it. The setting is saved in `door.json` (separate from the game
+  settings, so it is never changed by a reset). Until you set it, the door
+  refuses to start.
+  - `-reset` runs this chooser for you the first time, before the settings
+    editor.
+- Point the game at the drop file with `-dropfile`, or let it search the current
+  directory for the configured format.
+- The caller's handle from the drop file becomes the name of their realm.
 
 A typical command line (use the full path to `immortal-barons` only if it is not
 installed on your `PATH`):

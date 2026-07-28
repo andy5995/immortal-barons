@@ -8,7 +8,9 @@
 //
 //	immortal-barons -dropfile /path/to/node/DOOR32.SYS
 //
-// With no -dropfile it looks for DOOR32.SYS or DOOR.SYS in the working directory.
+// The sysop first runs -set-dropfile once to declare which drop file the BBS
+// writes; with no -dropfile the door then looks for that file in the working
+// directory.
 package main
 
 import (
@@ -20,9 +22,11 @@ import (
 	"os/user"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/door"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/i18n"
@@ -37,9 +41,14 @@ func main() {
 	// -help/usage text is translated to the environment's locale (there is no
 	// player context at flag-parse time). i18n.T falls back to English for lang "".
 	lang := helpLang()
+	// The -dropfile help text names the configured format (or points to
+	// -set-dropfile), so peek door.json before defining flags. Best-effort: -data
+	// may override the data dir, but it isn't parsed yet.
+	preDoor, _ := store.LoadDoorConfig(peekDataDir())
 	local := flag.Bool("local", false, i18n.T(lang, "play in your own terminal, not as a BBS door"))
 	name := flag.String("name", defaultName(), i18n.T(lang, "your player name (only used with -local)"))
-	dropPath := flag.String("dropfile", "", i18n.T(lang, "path to the BBS dropfile (DOOR32.SYS or DOOR.SYS)"))
+	dropPath := flag.String("dropfile", "", dropfileUsage(lang, preDoor.DropfileFormat))
+	setDrop := flag.Bool("set-dropfile", false, i18n.T(lang, "choose which drop file format your BBS writes, save it, then exit"))
 	dataDir := flag.String("data", "./data", i18n.T(lang, "folder that holds the game data"))
 	maint := flag.Bool("maint", false, i18n.T(lang, "run the daily maintenance, then exit"))
 	export := flag.String("export", "", i18n.T(lang, "write this board's score packet to FILE, then exit"))
@@ -73,7 +82,7 @@ func main() {
 	// stray word alongside one is a mistake — flag it instead of silently ignoring
 	// it. (Unknown -flags are already rejected by the flag package.)
 	explicitMode := *maint || *planetary || *leagueConfig || *reset || *resetFromConfig ||
-		*addAI > 0 || *dump || *local || *export != "" || *imp != ""
+		*addAI > 0 || *dump || *local || *export != "" || *imp != "" || *setDrop
 	if flag.NArg() > 0 && explicitMode {
 		fmt.Fprintf(os.Stderr, "immortal-barons: unknown argument %q\n\n", flag.Arg(0))
 		flag.Usage() // show -help, the common convention for a bad invocation
@@ -155,6 +164,14 @@ func main() {
 		return
 	}
 
+	if *setDrop {
+		if err := runSetDrop(cfg.DataDir); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -set-dropfile:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	if *addAI > 0 {
 		if err := runAddAI(cfg, *addAI); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -add-ai:", err)
@@ -176,12 +193,27 @@ func main() {
 		return
 	}
 
+	// Running as a door: the sysop must have declared which drop file the BBS
+	// writes (run -set-dropfile once, stored in door.json). Hard-error rather than
+	// guess — a wrong guess silently misreads the caller. -help and every other
+	// mode returned above, so this gates only real door launches.
+	doorCfg, err := store.LoadDoorConfig(cfg.DataDir)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "immortal-barons: door.json:", err)
+		os.Exit(1)
+	}
+	if doorCfg.DropfileFormat == "" {
+		fmt.Fprintln(os.Stderr, "immortal-barons: no drop file format configured.")
+		fmt.Fprintln(os.Stderr, "Run 'immortal-barons -set-dropfile' once to tell the door which drop file your BBS writes.")
+		os.Exit(2)
+	}
+
 	path := *dropPath
 	if path == "" && flag.NArg() > 0 {
 		path = flag.Arg(0)
 	}
 	if path == "" {
-		path = findDropfile()
+		path = findDropfile(doorCfg.DropfileFormat)
 	}
 	if path == "" {
 		fmt.Fprintln(os.Stderr, "immortal-barons: no dropfile found.")
@@ -190,7 +222,7 @@ func main() {
 		flag.Usage()
 		os.Exit(2)
 	}
-	caller, err := door.ParseDropfile(path)
+	caller, err := door.ParseDropfileAs(path, doorCfg.DropfileFormat)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "immortal-barons:", err)
 		os.Exit(1)
@@ -449,6 +481,30 @@ func runLeagueConfig(cfg game.Config) error {
 // fromConfig=true (-reset-from-config) it skips the editor and keeps the current
 // config.json as-is. Either way the world is wiped and re-seeded.
 func runReset(cfg game.Config, fromConfig bool) error {
+	// A drop file format must be configured before the door can run. If the sysop
+	// hasn't chosen one yet, run the -set-dropfile chooser first (writing door.json,
+	// which is independent of the game data this reset rebuilds), then continue
+	// into the reset (BRE asks the drop file type during its one-time install too).
+	if !fromConfig {
+		dc, err := store.LoadDoorConfig(cfg.DataDir)
+		if err != nil {
+			return err
+		}
+		if dc.DropfileFormat == "" {
+			c := session.NewConsole()
+			format, ok := chooseDropfile(c, "")
+			c.Close()
+			if !ok {
+				fmt.Println("\nCancelled. The game was left unchanged.")
+				return nil
+			}
+			dc.DropfileFormat = format
+			if err := store.SaveDoorConfig(cfg.DataDir, dc); err != nil {
+				return err
+			}
+		}
+	}
+
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
@@ -621,11 +677,109 @@ func runImport(cfg game.Config, path string) error {
 	return nil
 }
 
-func findDropfile() string {
-	for _, n := range []string{"door32.sys", "DOOR32.SYS", "door.sys", "DOOR.SYS"} {
+// findDropfile looks in the working directory for the configured format's drop
+// file (either letter case), a convenience for when -dropfile isn't given. The
+// real door invocation passes -dropfile explicitly.
+func findDropfile(format string) string {
+	f, ok := door.FormatByID(format)
+	if !ok {
+		return ""
+	}
+	for _, n := range []string{f.File, strings.ToLower(f.File)} {
 		if _, err := os.Stat(n); err == nil {
 			return n
 		}
 	}
 	return ""
+}
+
+// peekDataDir scans os.Args for -data/--data so the -dropfile help text can name
+// the configured format before flag.Parse runs. Best-effort; defaults to ./data.
+func peekDataDir() string {
+	args := os.Args[1:]
+	for i, a := range args {
+		switch {
+		case a == "-data" || a == "--data":
+			if i+1 < len(args) {
+				return args[i+1]
+			}
+		case strings.HasPrefix(a, "-data="):
+			return strings.TrimPrefix(a, "-data=")
+		case strings.HasPrefix(a, "--data="):
+			return strings.TrimPrefix(a, "--data=")
+		}
+	}
+	return "./data"
+}
+
+// dropfileUsage builds the -dropfile help text: it names the configured format,
+// or points an unconfigured sysop at -set-dropfile.
+func dropfileUsage(lang, format string) string {
+	base := i18n.T(lang, "path to the BBS drop file")
+	if f, ok := door.FormatByID(format); ok {
+		return base + " (" + f.Name + ")"
+	}
+	return base + " (" + i18n.T(lang, "run -set-dropfile first") + ")"
+}
+
+// runSetDrop lets the sysop choose which drop file format the BBS writes and
+// saves it to door.json (BRE asks this during its one-time install). The door
+// then reads that format; -reset runs this automatically when it isn't set yet.
+func runSetDrop(dataDir string) error {
+	dc, err := store.LoadDoorConfig(dataDir)
+	if err != nil {
+		return err
+	}
+	c := session.NewConsole()
+	format, ok := chooseDropfile(c, dc.DropfileFormat)
+	c.Close()
+	if !ok {
+		fmt.Println("\nDrop file format left unchanged.")
+		return nil
+	}
+	dc.DropfileFormat = format
+	if err := store.SaveDoorConfig(dataDir, dc); err != nil {
+		return err
+	}
+	f, _ := door.FormatByID(format)
+	fmt.Printf("\nDrop file format set to %s. Configure your BBS to launch the door with the %s path.\n", f.Name, f.File)
+	return nil
+}
+
+// chooseDropfile shows the drop file-format selection screen (styled like the
+// reset screens: a BRE-style separator, a numbered list, a Choice> prompt) and
+// returns the chosen Format ID. ok is false if the sysop quits. current is the
+// presently-configured format, marked in the list.
+func chooseDropfile(s session.Session, current string) (string, bool) {
+	sep := strings.Repeat("─", 5) + strings.Repeat("═", 15) + strings.Repeat("─", 40)
+	for {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, sep, ansi.Reset)
+		fmt.Fprintf(s, "%s  Drop File Format%s\n\n", ansi.FgBrightWhite, ansi.Reset)
+		fmt.Fprintf(s, "  Which drop file does your BBS write when it launches a door?\n\n")
+		for i, f := range door.Formats {
+			cur := ""
+			if f.ID == current {
+				cur = ansi.FgBrightWhite + "  (current)" + ansi.Reset
+			}
+			fmt.Fprintf(s, "  %s%d)%s %-13s %s%s%s%s\n",
+				ansi.FgBrightYellow, i+1, ansi.Reset, f.Name, ansi.FgWhite, f.Note, ansi.Reset, cur)
+		}
+		fmt.Fprintf(s, "  %s0)%s Quit (leave unchanged)\n", ansi.FgBrightYellow, ansi.Reset)
+		fmt.Fprint(s, "\nChoice> ")
+
+		line, err := session.ReadLine(s)
+		if err != nil {
+			return "", false
+		}
+		line = strings.TrimSpace(line)
+		if line == "" || line == "0" {
+			return "", false
+		}
+		n, err := strconv.Atoi(line)
+		if err != nil || n < 1 || n > len(door.Formats) {
+			fmt.Fprintf(s, "  %sPlease enter a number from 0 to %d.%s\n", ansi.FgBrightRed, len(door.Formats), ansi.Reset)
+			continue
+		}
+		return door.Formats[n-1].ID, true
+	}
 }
