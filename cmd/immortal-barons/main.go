@@ -22,7 +22,6 @@ import (
 	"os/user"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -758,38 +757,28 @@ func runSetDrop(dataDir string) error {
 }
 
 // chooseDropfile shows the drop file-format selection screen (styled like the
-// reset screens: a BRE-style separator, a numbered list, a Choice> prompt) and
-// returns the chosen Format ID. ok is false if the sysop quits. current is the
-// presently-configured format, marked in the list.
+// reset screens: the BRE inset rule, a numbered list, the shared menu prompt)
+// and returns the chosen Format ID. ok is false if the sysop quits. current is
+// the presently-configured format, marked in the list.
 func chooseDropfile(s session.Session, current string) (string, bool) {
-	sep := strings.Repeat("─", 5) + strings.Repeat("═", 15) + strings.Repeat("─", 40)
-	for {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, sep, ansi.Reset)
-		fmt.Fprintf(s, "%s  Drop File Format%s\n\n", ansi.FgBrightWhite, ansi.Reset)
-		fmt.Fprintf(s, "  Which drop file does your BBS write when it launches a door?\n\n")
-		for i, f := range door.Formats {
-			cur := ""
-			if f.ID == current {
-				cur = ansi.FgWhite + "  (current)" + ansi.Reset
-			}
-			fmt.Fprintf(s, "  %s%d)%s %s%s\n", ansi.FgBrightYellow, i+1, ansi.Reset, f.Name, cur)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, menu.InsetRule, ansi.Reset)
+	fmt.Fprintf(s, "%s  Drop File Format%s\n\n", ansi.FgBrightWhite, ansi.Reset)
+	fmt.Fprint(s, "  Which drop file does your BBS write when it launches a door?\n\n")
+	for i, f := range door.Formats {
+		cur := ""
+		if f.ID == current {
+			cur = ansi.FgWhite + "  (current)" + ansi.Reset
 		}
-		fmt.Fprintf(s, "  %s0)%s Quit (leave unchanged)\n", ansi.FgBrightYellow, ansi.Reset)
-		fmt.Fprint(s, "\nChoice> ")
-
-		line, err := session.ReadLine(s)
-		if err != nil {
-			return "", false
-		}
-		line = strings.TrimSpace(line)
-		if line == "" || line == "0" {
-			return "", false
-		}
-		n, err := strconv.Atoi(line)
-		if err != nil || n < 1 || n > len(door.Formats) {
-			fmt.Fprintf(s, "  %sPlease enter a number from 0 to %d.%s\n", ansi.FgBrightRed, len(door.Formats), ansi.Reset)
-			continue
-		}
-		return door.Formats[n-1].ID, true
+		fmt.Fprintf(s, "  %s%d)%s %s%s\n", ansi.FgBrightYellow, i+1, ansi.Reset, f.Name, cur)
 	}
+	fmt.Fprintf(s, "  %s0)%s Quit (leave unchanged)\n", ansi.FgBrightYellow, ansi.Reset)
+
+	// The shared prompt the menu engine uses for every numbered list, so this
+	// screen reads and behaves like the rest of the game (one keypress, Enter
+	// selects the shown Quit default).
+	n := menu.ChoiceQuit(s, len(door.Formats))
+	if n == 0 {
+		return "", false
+	}
+	return door.Formats[n-1].ID, true
 }

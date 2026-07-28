@@ -100,12 +100,12 @@ func TestWriteMacrosFramesListWithInsetRule(t *testing.T) {
 	f := &fakeSession{keys: []rune{'0'}} // '0' isn't a macro key: draw the list, then exit
 	writeMacros(f, w)
 	out := f.out.String()
-	if n := strings.Count(out, insetRule); n != 2 {
+	if n := strings.Count(out, InsetRule); n != 2 {
 		t.Errorf("macro list should be framed by the inset rule top and bottom (want 2), got %d:\n%s", n, out)
 	}
 	// The list must sit between the two rules, not outside them.
-	first := strings.Index(out, insetRule)
-	last := strings.LastIndex(out, insetRule)
+	first := strings.Index(out, InsetRule)
+	last := strings.LastIndex(out, InsetRule)
 	if ctrl := strings.Index(out, "Ctrl-D:"); !(first < ctrl && ctrl < last) {
 		t.Errorf("Ctrl-D slot should fall between the two rules (first=%d ctrl=%d last=%d)", first, ctrl, last)
 	}

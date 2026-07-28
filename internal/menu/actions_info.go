@@ -293,7 +293,7 @@ func advisorsMenu(s session.Session, w *ctx) {
 		item(4, "Technology")
 		item(0, "Quit")
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
-		n := choiceQuit(s, 4)
+		n := ChoiceQuit(s, 4)
 		if n < 1 {
 			return
 		}
@@ -315,8 +315,7 @@ func about(s session.Session, w *ctx) Result {
 	// (─────═════…, docs/dev/bre-screens.md) rather than a title panel; the About
 	// screen follows that look — no blue title bar, the name/version below is the
 	// only headline.
-	sep := strings.Repeat("─", 5) + strings.Repeat("═", 15) + strings.Repeat("─", len([]rune(rule))-20)
-	fmt.Fprintf(s, "\n%s%s%s\n", dim(ansi.FgBrightRed), sep, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", dim(ansi.FgBrightRed), InsetRule, ansi.Reset)
 	centered(s, ansi.FgBrightWhite, "Immortal Barons  v"+game.VersionString())
 	centered(s, ansi.FgBrightCyan, "https://andy5995.github.io/immortal-barons/")
 	fmt.Fprint(s, "\n")

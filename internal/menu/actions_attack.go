@@ -350,7 +350,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 		fmt.Fprintf(s, "  %d) %s%s%s\n", i+1, color, name, ansi.Reset)
 	}
 	fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
-	f := choiceQuit(s, len(names))
+	f := ChoiceQuit(s, len(names))
 	if f < 1 {
 		return Stay
 	}
