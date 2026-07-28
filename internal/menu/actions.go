@@ -218,6 +218,15 @@ func titleBar(s session.Session, text string) {
 	fmt.Fprintf(s, "\n%s%s%s%s\n", ansi.BgBlue, ansi.FgBrightWhite, bar, ansi.Reset)
 }
 
+// centered prints text centered on the rule's display width in the given color.
+func centered(s session.Session, color, text string) {
+	pad := (len([]rune(rule)) - len([]rune(text))) / 2
+	if pad < 0 {
+		pad = 0
+	}
+	fmt.Fprintf(s, "%s%s%s%s\n", strings.Repeat(" ", pad), color, text, ansi.Reset)
+}
+
 func setTaxRate(s session.Session, w *ctx) Result {
 	p := w.Player()
 	maxRate := w.Config.MaxTaxRate
