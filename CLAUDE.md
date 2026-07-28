@@ -248,3 +248,13 @@ source (`~/src/sbbs/src/xpdoor/dropfiles.c`).
 One-line subject by default; body only for a non-obvious *why*. End with the
 `Co-Authored-By: Claude ...` trailer. Do not add any `claude.ai` session
 trailer.
+
+## Issue titles: no category prefix
+
+New issue and discussion titles are a plain statement of the problem — no `AI:`,
+`InterBBS:`, `Web:` prefix. Labels carry the category (`AI`, `InterBBS`,
+`ssh-frontend`, `windows`, …; `gh label list` for the current set), and GitHub
+shows them beside the title anyway. Commit subjects keep their prefixes
+(`balance:`, `menu:`, `door:`) — git has no labels. Existing titles are left as
+they are; if the right label doesn't exist, say so rather than putting the
+category back in the title.
