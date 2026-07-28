@@ -186,6 +186,18 @@ Full tables (including tee/cross junctions and mixed single/double joints) are
 in `references/glyphs.md`. A colored title bar is often just a run of spaces
 with a background color set, plus text — see the embedding section.
 
+Two header treatments, pick by weight:
+- **Filled title bar** (a run of spaces with a background color + text) — heavy,
+  formal, draws the eye. Good for a top-of-screen banner. But a solid *blue*
+  panel in particular can read as dated/clunky; if it feels off, try the rule.
+- **Box-drawing separator rule** — a line of `─` with a short `═` (double-line)
+  accent inset near the left, e.g. `─────═════──────────────────`. Lighter and
+  more authentic to classic BBS doors (this is how BRE frames its status
+  blocks); transcodes to CP437 safely (box-drawing only), and it lets the
+  content below (a bright name/version headline) be the only bright thing
+  instead of competing with a filled bar. Framing content with the *same* rule
+  top and bottom reads as a clean panel without any solid fill.
+
 ## Raised panels and 3D tables (functional UI, not just art)
 
 Data tables and status panels in a terminal app can be given a **raised,
@@ -306,3 +318,14 @@ original art.)
   depth math concretely, or use it to drop an orb into a piece. Note the
   aspect fix inside: it uses ~2× as many columns as rows because terminal
   cells are ~1:2, so a symmetric loop renders a tall ellipse, not a circle.
+
+## Keeping this skill current
+
+Whenever you learn something new about ANSI/ASCII art while using this skill — a
+glyph or shading trick, an encoding gotcha, a header/border treatment that reads
+better, a palette or contrast rule, a terminal-rendering quirk, a technique that
+worked or clearly failed — **fold it back into the relevant section here in the
+same pass**, with the concrete glyph / escape code / example, not a vague note.
+This skill is meant to accumulate hard-won text-mode craft so the next piece
+starts ahead of where the last one did (the same discipline the bre-gather skill
+uses). Update it as part of the work that produced the insight, not "later."
