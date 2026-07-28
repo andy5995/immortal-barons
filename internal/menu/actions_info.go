@@ -311,13 +311,25 @@ func visitAdvisors(s session.Session, w *ctx) Result {
 // about shows a short project panel: name, version, website, and the BRE
 // heritage note (reachable from both the Game and System menus, #66).
 func about(s session.Session, w *ctx) Result {
-	titleBar(s, tr(s, "About"))
-	fmt.Fprintf(s, "  %s\n", "Immortal Barons v"+game.VersionString())
-	fmt.Fprintf(s, "  %s\n", "https://andy5995.github.io/immortal-barons/")
-	for _, wl := range strings.Split(help.Wrap(tr(s, "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and later maintained by John Dailey. No original BRE code, text, or art is used."), 76), "\n") {
-		fmt.Fprintf(s, "  %s\n", wl)
+	// BRE frames its status blocks with a dashes-and-double-line separator
+	// (─────═════…, docs/dev/bre-screens.md) rather than a title panel; the About
+	// screen follows that look — no blue title bar, the name/version below is the
+	// only headline.
+	sep := strings.Repeat("─", 5) + strings.Repeat("═", 15) + strings.Repeat("─", len([]rune(rule))-20)
+	fmt.Fprintf(s, "\n%s%s%s\n", dim(ansi.FgBrightRed), sep, ansi.Reset)
+	centered(s, ansi.FgBrightWhite, "Immortal Barons  v"+game.VersionString())
+	centered(s, ansi.FgBrightCyan, "https://andy5995.github.io/immortal-barons/")
+	fmt.Fprint(s, "\n")
+	// Body prose is off-white so the name/version headline above stays the only
+	// bright thing on the panel, per docs/dev/bre-screens.md. Wrap to the rule's
+	// width less the 2-space indent.
+	for _, wl := range strings.Split(help.Wrap(tr(s, "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and later maintained by John Dailey. No original BRE code, text, or art is used."), len([]rune(rule))-2), "\n") {
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgWhite, wl, ansi.Reset)
 	}
-	fmt.Fprintf(s, "  %s\n", "Free software under the MIT License. Copyright (c) 2026 Andy Alt.")
+	fmt.Fprint(s, "\n")
+	fmt.Fprintf(s, "  %s%s%s\n", ansi.FgWhite, tr(s, "Free software under the MIT License."), ansi.Reset)
+	fmt.Fprintf(s, "  %s%s%s\n", ansi.FgWhite, "Copyright (c) 2026 Andy Alt", ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), rule, ansi.Reset)
 	pause(s)
 	return Stay
 }
