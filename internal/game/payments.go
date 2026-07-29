@@ -136,7 +136,8 @@ func (w *World) PayCrownTax(e *Empire, given int) {
 		return
 	}
 	e.MaintUnderpaid = true
-	e.adjustSupport(-((req - given) * CrownTaxSupportPenalty / (req + 1)))
+	// Deferred to turn rollover (see PendingSupportPenalty), matching BRE.
+	e.PendingSupportPenalty += (req - given) * CrownTaxSupportPenalty / (req + 1)
 }
 
 // PayForces applies a payment toward armed-forces upkeep. A shortfall makes

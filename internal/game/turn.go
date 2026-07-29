@@ -19,6 +19,12 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	w.maybePirateRaid(e) // ~1-in-5-turns pirate raid; notice surfaces next turn's income (#21)
 	w.advanceTech(e)     // Technology bonus builds up a little each turn (not instant)
 	w.processEconomy(e)
+	// Maintenance shortfalls charged during this turn land now, at rollover, so
+	// the drop shows on the next turn's display — BRE's own ordering.
+	if e.PendingSupportPenalty > 0 {
+		e.adjustSupport(-e.PendingSupportPenalty)
+		e.PendingSupportPenalty = 0
+	}
 	if e.Score < 0 {
 		e.Score = 0
 	}
@@ -478,7 +484,7 @@ func (w *World) riverGold(e *Empire) int {
 }
 
 // IncomeThisTurn itemizes e's income for the current turn. Each region's gold
-// is BRE's perRegion = yield*Rate/100 + Base times its region count; Coastal is
+// is BRE's perRegion = Base + [0, Rate) times its region count; Coastal is
 // additionally scaled by a support floor (0.10 + 0.90·support, so tourism never
 // zeroes out). TechFactor scales every gold source (the tech-factor's role as
 // an income multiplier is otherwise deferred to #20). Products are widened to

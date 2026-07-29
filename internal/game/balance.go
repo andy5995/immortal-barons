@@ -46,7 +46,7 @@ const (
 // half. Kept at the ~10% the game has always used.
 //
 // UNVERIFIED, and the live evidence is against it: across roughly 29 captured
-// hydropower turns every figure was a clean yield*Rate/100 + Base, with no
+// hydropower turns every figure was a clean Base + [0, Rate) draw, with no
 // halved value. That is not conclusive on its own (a true 10% rate survives 29
 // samples about 5% of the time), so the mechanic is left in place rather than
 // removed on borderline evidence — but it should be settled before anyone tunes
@@ -275,14 +275,14 @@ const (
 
 	// --- Industry (live-verified; one capacity pool per region, split between
 	// units and gold — see World.industrialGold / ProjectedProduction) ---
-	// Industrial GOLD uses the same yield×Rate/100 + Base shape as every other
-	// region (binary-verified, BRE.OVR 0x34545–0x345D1), giving 2,500–2,555 per
-	// region. It is paid only on the share NOT allocated to units.
+	// Industrial GOLD uses the same Base + [0, Rate) shape as every other region
+	// (binary-verified, BRE.OVR 0x34545–0x345D1), giving 2,500–2,554 per region.
+	// It is paid only on the share NOT allocated to units.
 	IndustryGoldRate, IndustryGoldBase = 55, 2500
 	// UnitPointsPerRegion is the separate, smaller pool BRE spends on UNITS.
 	// Verified in BRE.OVR (0x34F49-0x3517A): each unit type's multiplier is
 	// exactly 2100/cost (21, 15, 14, 4.2, 1.4, 1.2). Gold and units do NOT share
-	// one pool size — gold uses IndustryPointsPerRegion above.
+	// one pool size — gold uses IndustryGoldRate/IndustryGoldBase above.
 	UnitPointsPerRegion = 2100
 	// Mountain regions boost unit manufacturing: the pool is multiplied by
 	// 1 + MountainIndustryNum*Mountain/TotalRegions, capped at
@@ -404,9 +404,17 @@ const (
 	// (BRE-verified via live play: the bonus ramps up slowly and saturates,
 	// faster when tech is a denser share of the realm). These shape IB's own
 	// reconstructed curve — tune freely; see advanceTech and TechFactor.
-	// Each played turn adds share²/TechGainDiv (in tenths of a %) to TechLevel,
-	// capped at share×TechCeilMul tenths (i.e. the bonus tops out near the tech
-	// share), and hard-capped at TechFactorCap.
+	// IB's own simplification of Technology: one accumulating level rather than
+	// BRE's fifteen research slots. Each played turn adds share²/TechGainDiv (in
+	// tenths of a %) to TechLevel, capped at share×TechCeilMul tenths, and
+	// hard-capped at TechFactorCap.
+	//
+	// The real mechanic is now known in full and written up in
+	// docs/mechanics-reference.md ("Technology (binary-verified)"): 15 slots of
+	// which 9 do nothing, research quadratic in tech regions and inverse-linear in
+	// realm size, an exponential level→factor curve with a per-effect ceiling, and
+	// no decay when the regions are sold. These three constants are the stand-in
+	// until that is implemented; they are IB's, not BRE's.
 	TechGainDiv   = 250 // per-turn TechLevel gain (tenths %) = share² / this
 	TechCeilMul   = 10  // per-share TechLevel ceiling (tenths %) = share × this
 	TechFactorCap = 60  // max % bonus/reduction Technology grants (was 40, pre-cumulative)

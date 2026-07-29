@@ -49,7 +49,8 @@ func TestCrownTaxIsASink(t *testing.T) {
 }
 
 // Underpaying the crown tax costs popular support, scaled by how short the
-// payment was. BRE-verified formula and multiplier.
+// payment was. BRE-verified formula and multiplier — and, as in BRE, the hit is
+// deferred to turn rollover rather than applied on the spot.
 func TestCrownTaxShortfallCostsSupport(t *testing.T) {
 	newE := func() (*World, *Empire) {
 		w := NewWorldSeed(DefaultConfig(), 1)
@@ -66,26 +67,39 @@ func TestCrownTaxShortfallCostsSupport(t *testing.T) {
 		t.Fatal("test realm should owe a crown tax")
 	}
 
-	w.PayCrownTax(e, req) // paid in full: no penalty
-	if e.Support != 100 {
-		t.Errorf("full payment should not cost support, got %d", e.Support)
+	w.PayCrownTax(e, req) // paid in full: nothing owed
+	if e.PendingSupportPenalty != 0 || e.Support != 100 {
+		t.Errorf("full payment should cost nothing, pending=%d support=%d",
+			e.PendingSupportPenalty, e.Support)
 	}
 
 	w, e = newE()
-	w.PayCrownTax(e, 0) // paid nothing: the largest penalty
+	w.PayCrownTax(e, 0)
+	// Not applied yet — that is the point of deferring it.
+	if e.Support != 100 {
+		t.Errorf("penalty must not land until rollover, support already %d", e.Support)
+	}
+	want := req * CrownTaxSupportPenalty / (req + 1)
+	if e.PendingSupportPenalty != want {
+		t.Errorf("pending penalty %d, want %d", e.PendingSupportPenalty, want)
+	}
 	// BRE's (paid+1)/(required+1) means even paying zero never costs the full
 	// CrownTaxSupportPenalty — it approaches it from below.
-	if want := 100 - req*CrownTaxSupportPenalty/(req+1); e.Support != want {
-		t.Errorf("paying nothing: support %d, want %d", e.Support, want)
+	if want >= CrownTaxSupportPenalty {
+		t.Errorf("penalty %d should stay under the %d cap", want, CrownTaxSupportPenalty)
 	}
-	if e.Support <= 100-CrownTaxSupportPenalty {
-		t.Errorf("penalty should stay under the %d cap, support %d", CrownTaxSupportPenalty, e.Support)
+
+	w.PlayTurn(e, "2026-07-29") // rollover applies and clears it
+	if e.Support != 100-want {
+		t.Errorf("after rollover support %d, want %d", e.Support, 100-want)
+	}
+	if e.PendingSupportPenalty != 0 {
+		t.Errorf("rollover should clear the pending penalty, got %d", e.PendingSupportPenalty)
 	}
 
 	w, e = newE()
-	w.PayCrownTax(e, req/2) // half: a partial penalty, and never negative
-	if e.Support >= 100 || e.Support <= 100-CrownTaxSupportPenalty {
-		t.Errorf("half payment: support %d should sit between %d and 100",
-			e.Support, 100-CrownTaxSupportPenalty)
+	w.PayCrownTax(e, req/2) // half: a partial penalty
+	if p := e.PendingSupportPenalty; p <= 0 || p >= want {
+		t.Errorf("half payment pending %d should sit between 0 and %d", p, want)
 	}
 }

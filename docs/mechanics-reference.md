@@ -97,10 +97,11 @@ flow runs in this order:
    For calibration, BRE's three shortfall penalties: forces ×40 against
    **morale**, regions ×50 against support, crown tax ×15 against support.
 
-   **IB implements this**, with two deliberate divergences: the rate is stored as
-   a whole percent (default 5, maximum 20) rather than BRE's tenths, so the
-   config editor and the stored value use one unit; and the underpayment path is
-   IB's existing one, shared with forces and regions.
+   **IB implements this**, including the deferral: the penalty accumulates during
+   maintenance and lands at turn rollover, so the drop surfaces on the next turn's
+   display as it does in the original. One deliberate divergence — the rate is
+   stored as a whole percent (default 5, maximum 20) rather than BRE's tenths, so
+   the config editor and the stored value use one unit rather than two.
 
    One original bug not copied: BRE's *region* shortfall computes
    `1 − ratio×50` rather than `(1 − ratio)×50`, which goes negative for any
@@ -478,8 +479,8 @@ income, military and land.
 **Urban and Technology produce no direct gold** (BRE-verified): Urban is
 population housing, Technology is an efficiency multiplier (see the Technology
 region above). Food output: `Agricultural × 300` grown, then raised by the
-Technology factor (#20); rivers fish `× 124` on a fishing turn (else hydropower
-gold), see the Rivers section. These income numbers, the caps (2B money / 1.599B
+Technology factor (#20); rivers fish on a fishing turn (else hydropower gold),
+see the Rivers section. These income numbers, the caps (2B money / 1.599B
 interest), the pirate caps table, and the net-worth weights are BRE-scale;
 **unit prices, the tax per-capita coefficient, and the yield band are IB's own
 reconstructions** anchored to this scale (BRE computes prices/maintenance inline
@@ -628,16 +629,29 @@ league ran tax 85%, interest 75%).
   live BRE (97 Agri → 29,197; 16 Agri → 4,864, both no River).
 - **Rivers — hydropower *or* fishing (issue #29, live-verified):** each turn an
   empire's rivers do EITHER hydropower (gold, as usual) OR fishing, chosen by a
-  per-turn coin-flip (`RiverFishChance`, ~50/50 in live BRE). On a fishing turn
-  the rivers yield `River × RiverFishFood (124)` food and **no** river gold that
-  turn; on a hydropower turn, gold and no river food. (Constants in `balance.go`;
-  the exact chance/rates are tunable, live-sampled.) **Caveat (2026-07-23):** a
-  10-turn color capture of a *food-surplus* BRE empire showed its 24 rivers running
-  hydropower on **every** turn (0 fishing across ~240 river-turns) — inconsistent
-  with an unconditional ~50/50 flip. This suggests BRE fishing may be **much rarer**
-  than 50%, or **conditional on a food shortage** (this empire never needed food).
-  `RiverFishChance = 50` is therefore unconfirmed and likely too high; the
-  disassembly or a food-short capture would settle it.
+  per-turn coin-flip. On a fishing turn the rivers yield food and **no** river
+  gold that turn; on a hydropower turn, gold and no river food — the two are
+  strictly exclusive (43/43 captured turns).
+
+  **Live measurements (2026-07-28, 43 turns across four captures):** rivers
+  fished on **14 of 43 turns, ~33%**, so IB's `RiverFishChance = 50` is high;
+  it is left alone pending more turns. Fishing yield per river is
+  `110 + [0, ~20)` — Base 110 is firm (the Civilian advisor quotes it as the
+  minimum) but the Rate is not pinned. **IB uses a flat `RiverFishFood = 124`**,
+  which sits inside that range, so the defect is the flatness rather than the
+  magnitude.
+
+  **Superseded (was recorded here as a caveat on 2026-07-23):** an earlier reading
+  of "0 fishing across ~240 river-turns" was a counting error, not a finding — the
+  captures are `\r`-separated, so `grep -c` reported one line where six fishing
+  turns were present, and the fishing line is announced separately from the
+  food-grown line. Fishing was happening all along. Count these captures with
+  `grep -oc`.
+
+  **Fishing is NOT gated on food need**, which that error had suggested. A
+  controlled test — the same empire driven through a food deficit and then a
+  surplus — fished on 4 of 9 short turns versus 3 of 11 surplus turns (Fisher
+  exact, p = 0.64). See issue #67.
 - **Food growth is a *turn-start* credit (matches BRE).** This turn's food yield
   (`Agricultural × 300` + river fishing) is added to the granary at the **start**
   of the turn — alongside military production and gold income, exactly what the

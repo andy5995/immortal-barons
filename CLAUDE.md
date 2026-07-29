@@ -113,6 +113,18 @@ cross-referenced against the actual BRE files (`~/.dosemu/drive_c/games/bre-dos/
 are noted there and in the `bre-binary-verified-math` memory, and a disassembly
 of the original binary is authoritative for exact constants.
 
+**Disassembling BRE is a routine, productive move — reach for it early.** The
+binary is at `~/.dosemu/drive_c/games/bre-dos/` (`BRE.OVR` holds the gameplay
+overlays, `BRE.EXE` the rest); `ndisasm`, `radare2` and `ghidra` are installed.
+Several mechanics that resisted inference from play — the coastal support curve,
+industrial gold and unit production, the crown tax, and the whole technology
+system — were read straight out of it in minutes. Method, the empire/config
+record layout mapped so far, and a Turbo Pascal real-constant decoder live in
+`~/.claude/projects/<this project>/scripts/bre-tpreal.py`; the economy-capture
+parser is `bre-econ.py` beside it. Prefer reading the code to fitting a curve:
+a fit needs dozens of samples and can still be wrong, and two separate BRE
+constants were mis-set this way before the disassembly corrected them.
+
 **Mechanics live in that spec, not in this guide.** Don't describe how a
 mechanic works, or restate any of its numbers, here — this file just points to
 the spec, which is the single source (the same rule as balance.go for constants).
@@ -193,12 +205,20 @@ advisor pages match BRE's captured layout and ANSI colors — figures are
 highlighted (bright-white or yellow) against dimmer body text, per
 `docs/dev/bre-screens.md`.
 
-Key gameplay knobs (unit values, maintenance, prices, `LandPriceStep`) are
-constants — tune freely; keep them matching `docs/mechanics-reference.md`.
+Key gameplay knobs are constants in `balance.go`, but they are no longer all
+free to tune: a growing set is **binary-verified** and marked as such in that
+file (region Rate/Base pairs, the coastal support curve, unit costs and the
+specialization modifiers, industrial gold and the unit pool, the crown tax).
+Those are the fidelity contract — changing one means the game stops matching the
+original, so it needs new evidence, not taste. The rest (prices, `LandPriceStep`,
+AI behaviour, IB's own additions) are the playtest knobs. Keep both matching
+`docs/mechanics-reference.md`.
 
-Stubbed / not built: leagues auto-reset (a daily Planetary Master leader is
-tracked, `CurrentMaster`, and `endGame` crowns `LastMaster`, but timed
-auto-reset is not built), the Quick-Strike / Extended-Battle attack variants,
+Stubbed / not built: **BRE's technology system** (the full mechanic is in the
+spec, but IB still uses a single accumulating `TechFactor` stand-in), leagues
+auto-reset (a daily Planetary Master leader is tracked, `CurrentMaster`, and
+`endGame` crowns `LastMaster`, but timed auto-reset is not built), the
+Quick-Strike / Extended-Battle attack variants,
 civil-war collapse, an interplanetary individual-attack force (`Indiv. Attack
 Force` is a stub), and BRE's finer interplanetary news subtypes. A few
 covert/diplomacy items are recorded-but-inert pending fuller subsystems (flagged

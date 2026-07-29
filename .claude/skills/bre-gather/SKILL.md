@@ -412,6 +412,60 @@ breins.txt` → exit 1; `grep -a` and `ack -i tech` → match.)
 mechanic AND the "Technology Agreement" diplomacy treaty. Read the whole entry
 (to its `^END`) and don't conflate two entries that share a keyword.
 
+## Reading the disassembly — the method that works (2026-07-29, proven)
+
+Several mechanics that resisted inference from play were read straight out of the
+binary in minutes: the coastal support curve, industrial gold, unit production,
+the crown tax, and the whole technology system. **Reach for this early rather
+than fitting a curve** — a fit needs dozens of samples and can still be wrong,
+and two BRE constants were mis-set that way before the disassembly corrected
+them.
+
+Tools: `ndisasm`, `radare2`, `ghidra` are installed. Copy `BRE.OVR` / `BRE.EXE`
+somewhere writable first; never work on the originals.
+
+The loop that keeps paying off:
+
+1. **Find the message string.** Turbo Pascal strings are length-prefixed and sit
+   in one contiguous table, and the routine that uses them very often begins
+   IMMEDIATELY AFTER the table ends, at `55 89 E5` (push bp; mov bp,sp).
+2. **Disassemble around it:**
+   `dd if=BRE.OVR bs=1 skip=$((0xADDR)) count=$((0x100)) of=x.bin && ndisasm -b16 -o0xADDR x.bin`
+3. **Find a constant** by searching `struct.pack("<H", value)` and checking the
+   preceding byte for an imm16 opcode (`b8` mov ax, `05` add ax, `b9` mov cx …).
+4. **Decode float constants.** Reals are 6-byte Turbo Pascal, loaded into a
+   register triple right before the runtime call that consumes them. Use
+   `scripts/bre-tpreal.py --scan FILE 0xSTART 0xLEN` (in this project's Claude
+   dir) — its docstring carries the format, the empire/config record layout
+   mapped so far, and the known runtime helper addresses.
+5. **Validate against play.** A candidate reading is not a finding until it
+   reproduces captured figures exactly. Rounding vs truncation and the order of
+   operations both change results by a unit — the two real→int helpers differ
+   only in that, and picking the wrong one is easy.
+
+Record layout and helper addresses live in `docs/dev/bre-save-format.md`; extend
+that file rather than re-deriving.
+
+## Parsing a `.cap` capture — three traps that produced wrong findings
+
+The economy parser is `scripts/bre-econ.py` in this project's Claude dir (per-turn
+income, region counts, purchase markers, back-computed yields). Prefer it to
+ad-hoc greps. Its `--shapes` mode censuses every distinct message form in a file
+— **run that first**, so no relevant line escapes notice.
+
+- **Count with `grep -oc`, never `grep -c`.** These captures are `\r`-separated,
+  so a whole screen can be one "line": `grep -c` reported 1 fishing turn in a
+  capture that contained 6.
+- **Never pipe a survey through `head`.** A truncated survey once "proved" that
+  rivers never produce food, when the line was simply below the cut.
+- **The Regions display WRAPS onto a second line.** Parsing only the first loses
+  Mountains, Coastal and Technology — that mistake hid 18 tourism samples.
+
+**And before explaining any per-unit figure, check whether the count you divided
+by changed that turn.** Purchases land between the report and the Regions
+display, so a total can print next to a STALE count. Twice in one session a
+changed denominator was mistaken for a changed mechanic.
+
 ## License boundaries — BRE is proprietary, not open source
 
 Barren Realms Elite is copyrighted (John Dailey Software; original design by

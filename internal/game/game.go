@@ -185,21 +185,26 @@ type Empire struct {
 	Specialized     string // "" = none, else a unit type name; specialization concentrates output
 
 	// Transient per-turn stats for the end-of-turn report; not persisted.
-	LastSpoiled         int  `json:"-"`
-	LastPopGrowth       int  `json:"-"`
-	LastStarved         int  `json:"-"` // people who left this turn from a food shortfall
-	MaintUnderpaid      bool `json:"-"` // forces/regions maintenance was underpaid this turn (blocks the well-run support boost)
-	LastRiot            bool `json:"-"`
-	LastMoraleDesertion int  `json:"-"`
-	MadeTroopers        int  `json:"-"`
-	MadeJets            int  `json:"-"`
-	MadeTurrets         int  `json:"-"`
-	MadeBombers         int  `json:"-"`
-	MadeTanks           int  `json:"-"`
-	MadeCarriers        int  `json:"-"`
-	IndustryGold        int  `json:"-"`
-	LastGoldPaid        int  `json:"-"`
-	LastFoodConsumed    int  `json:"-"`
+	LastSpoiled    int  `json:"-"`
+	LastPopGrowth  int  `json:"-"`
+	LastStarved    int  `json:"-"` // people who left this turn from a food shortfall
+	MaintUnderpaid bool `json:"-"` // forces/regions maintenance was underpaid this turn (blocks the well-run support boost)
+	// PendingSupportPenalty is popular support owed but not yet deducted. BRE
+	// accumulates shortfall penalties during the maintenance sequence and applies
+	// them at turn rollover, not on the spot, so the drop surfaces on the next
+	// turn's display. Persisted so it survives a mid-turn save.
+	PendingSupportPenalty int  `json:"pendingSupportPenalty,omitempty"`
+	LastRiot              bool `json:"-"`
+	LastMoraleDesertion   int  `json:"-"`
+	MadeTroopers          int  `json:"-"`
+	MadeJets              int  `json:"-"`
+	MadeTurrets           int  `json:"-"`
+	MadeBombers           int  `json:"-"`
+	MadeTanks             int  `json:"-"`
+	MadeCarriers          int  `json:"-"`
+	IndustryGold          int  `json:"-"`
+	LastGoldPaid          int  `json:"-"`
+	LastFoodConsumed      int  `json:"-"`
 }
 
 // TurnProgress marks the stages of the current turn that have already completed,

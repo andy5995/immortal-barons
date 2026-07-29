@@ -729,6 +729,47 @@ You have 3,229,328 gold and 5321 units of food.
 Then the per-turn feed prompts: `Your People Need N units of food` /
 `How much will you give? (N; N)` and `Your Armed Forces Require N units of food`.
 
+### Gold maintenance sequence (captured live 2026-07-29)
+
+Runs at the start of a turn with Auto-Pay Maintenance off, in this exact order.
+Each figure is bright cyan against plain white body text, with the `(…; …)` pair
+bright blue / bright cyan / dark cyan as elsewhere.
+
+```
+Your Armed Forces Require 682 gold.
+How much will you give? (682; 682)
+
+267,340 gold is required to maintain your regions.
+How much will you give? (267,340; 267,340)
+
+50,386 gold is requested to boost popular support.
+How much will you give? (50,386; 75,579)
+
+The Queen Royale requires 52,415 gold for Taxes.
+How much will you give? (52,415; 780,295)
+```
+
+Two things to note in the prompt pairs:
+
+- Forces and regions pass `(required; required)` — the maximum **is** the amount
+  owed, so a solvent baron cannot overpay them.
+- The crown tax passes `(required; gold on hand)` — you may hand the Queen far
+  more than she asks. The support boost is similar but capped at 1.5x requested.
+- The low number is a **suggestion, not a floor**: typing `0` at any of these is
+  accepted, and was confirmed live at the crown-tax prompt.
+
+Underpaying any required item raises, after the sequence:
+
+```
+Your actions may lead to DISASTEROUS results.
+Would you like to reconsider? (Y/n)
+```
+
+`DISASTEROUS` is the original's own spelling and capitalisation, recorded here
+for fidelity reference; IB uses its own wording (see the clean-room note).
+Answering yes restarts the whole sequence from the bank prompt.
+
+
 ### System Menu (InterBBS grid)
 
 Blue accent, three columns. In InterBBS mode it carries two extra rows —
