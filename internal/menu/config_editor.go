@@ -108,6 +108,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		p(7, "* Standard Investment Rate", fmt.Sprintf("%d", c.StdInvestRate))
 		p(8, "* Steady Investment Rate", enabledStr(c.SteadyInvest))
 		p(9, "* Max Tax Rate", fmt.Sprintf("%d", c.MaxTaxRate))
+		p(28, "* Planetary Tax Rate", fmt.Sprintf("%d%%", c.PlanetaryTaxRate))
 		p(10, "* Max Purchasable Regions", fmt.Sprintf("%d", c.MaxRegions))
 		p(11, "* Max Players Per BBS", fmt.Sprintf("%d", c.MaxPlayers))
 		p(12, "* Buy Military", c.BuyMilitary.String())
@@ -164,7 +165,9 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		case 8:
 			c.SteadyInvest = !c.SteadyInvest
 		case 9:
-			c.MaxTaxRate = promptSuggested(s, "Max Tax Rate", c.MaxTaxRate, game.MaxPlanetaryTaxRate)
+			c.MaxTaxRate = promptSuggested(s, "Max Tax Rate", c.MaxTaxRate, game.MaxPlayerTaxRate)
+		case 28:
+			c.PlanetaryTaxRate = promptSuggested(s, "Planetary Tax Rate (%)", c.PlanetaryTaxRate, game.MaxPlanetaryTaxRate)
 		case 10:
 			c.MaxRegions = promptSuggested(s, "Max Purchasable Regions", c.MaxRegions, game.MaxPurchasableRegions)
 		case 11:

@@ -397,6 +397,28 @@ func (b IncomeBreakdown) Gold() int {
 	return b.Taxes + b.Ore + b.Tourism + b.Solar + b.Rivers + b.Industrial + b.Trade
 }
 
+// CrownTaxBase is the income the crown tax is levied on: the six region/tax
+// income lines, excluding Trade. BRE accumulates its base at exactly six sites,
+// one per income line, and trading proceeds are not among them.
+func (b IncomeBreakdown) CrownTaxBase() int {
+	return b.Taxes + b.Ore + b.Tourism + b.Solar + b.Rivers + b.Industrial
+}
+
+// CrownTax is the Queen Royale's per-turn tax: a flat share of the turn's gross
+// gold income, and a pure sink — no recipient treasury. Binary-verified against
+// BRE (cost function at BRE.OVR 0x2EA09), where it reproduces 28 of 28 captured
+// charges exactly:
+//
+//	crownTax = trunc(goldEarnedThisTurn * PlanetaryTaxRate / 100)
+//
+// The base is income alone — not gold on hand, bank balance, net worth, score,
+// or units. BRE stores its rate in tenths of a percent (its default is 50,
+// shown as 5.0%); IB stores whole percent instead, so a sysop and the config
+// editor deal in one unit rather than two. Same arithmetic, one fewer trap.
+func (w *World) CrownTax(e *Empire) int {
+	return w.IncomeThisTurn(e).CrownTaxBase() * w.Config.PlanetaryTaxRate / 100
+}
+
 // regionYield returns this turn's income yield (percent, YieldMin..YieldMax)
 // for empire e's region type identified by salt. It is deterministic in
 // (w.GameDay, e.Name, salt) — NOT a fresh RNG draw — so IncomeThisTurn stays
@@ -413,26 +435,34 @@ func (w *World) regionYield(e *Empire, salt int) int {
 	return YieldMin + int(h.Sum32()%uint32(span))
 }
 
-// industrialGold is the gold one Industrial region yields this turn. BRE (live-
-// verified) splits each region's capacity by the production percentages: the
-// UNALLOCATED share ("The remaining N% will be used to produce Gold") pays out
-// 1 gold per point. Units and gold come from ONE pool — allocating to units is a
-// direct trade-off against industrial gold. So a realm at 100% allocation earns
-// no industrial gold; leaving a remainder is how you buy gold.
+// industrialGold is the empire's TOTAL industrial gold this turn (not per
+// region). The UNALLOCATED share of production — what is left after the six unit
+// percentages — is paid out as gold, so allocating to units trades directly
+// against it and a realm at 100% allocation earns none.
+//
+// Binary-verified (BRE.OVR 0x34545–0x345D1), including the order of operations:
+//
+//	perRegion = yield*IndustryGoldRate/100 + IndustryGoldBase
+//	total     = perRegion * count / 100 * unallocated%
+//
+// Dividing by 100 before applying the percentage is BRE's own order, and it is
+// why industry is the one region type whose total does not divide evenly by its
+// region count — the division discards the remainder.
 func (w *World) industrialGold(e *Empire) int {
 	allocated := e.ProdTroopers + e.ProdJets + e.ProdTurrets + e.ProdBombers + e.ProdTanks + e.ProdCarriers
 	unalloc := 100 - allocated
 	if unalloc < 0 {
 		unalloc = 0
 	}
-	return IndustryPointsPerRegion * unalloc / 100
+	perRegion := w.regionYield(e, 5)*IndustryGoldRate/100 + IndustryGoldBase
+	return perRegion * e.Regions.Industrial / 100 * unalloc
 }
 
 // riverGold is one River region's gold this turn. Rivers have the highest base
 // but an occasional "bad year" (a small deterministic chance, keyed off a
 // separate yield salt) that halves the take.
 func (w *World) riverGold(e *Empire) int {
-	if w.regionYield(e, 40) < YieldMin+5 { // ~10% bad-year dud (tunable)
+	if w.regionYield(e, 40) < YieldMin+RiverDudChancePct {
 		return RiverBase / 2
 	}
 	return w.regionYield(e, 4)*RiverRate/100 + RiverBase
@@ -461,7 +491,7 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 		Tourism:    scale(int64(perRegion(2, CoastalRate, CoastalBase)) * int64(support) / 100 * int64(e.Regions.Coastal)),
 		Solar:      scale(int64(perRegion(3, DesertRate, DesertBase)) * int64(e.Regions.Desert)),
 		Rivers:     scale(int64(riverGold) * int64(e.Regions.River)),
-		Industrial: scale(int64(w.industrialGold(e)) * int64(e.Regions.Industrial)),
+		Industrial: scale(int64(w.industrialGold(e))),
 		Trade:      w.tradeIncome(e), // trade-treaty bonus (population-scaled)
 		Food:       e.FoodProduced(),
 		RiverFood:  w.riverFood(e),
@@ -760,7 +790,7 @@ func (w *World) ProjectedProduction(e *Empire) [6]int {
 // (#71). Industrial GOLD is not credited here — it flows through IncomeThisTurn
 // (see industrialGold); e.IndustryGold is set for the report only.
 func (w *World) Manufacture(e *Empire) {
-	e.IndustryGold = w.industrialGold(e) * e.Regions.Industrial
+	e.IndustryGold = w.industrialGold(e)
 
 	p := w.ProjectedProduction(e)
 	e.MadeTroopers, e.MadeJets, e.MadeTurrets = p[0], p[1], p[2]

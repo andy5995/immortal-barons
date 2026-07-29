@@ -112,7 +112,8 @@ type Config struct {
 	StdInvestRate         int               // standard investment rate (BRE: % over 10 days)
 	SteadyInvest          bool              // steady (fixed) investment rate instead of floating
 	FoodUnlimited         bool              // food market has no daily supply limit (BRE "Food Unlimited"; default false = limited)
-	MaxTaxRate            int               // highest tax rate a player may set
+	MaxTaxRate            int               // highest tax rate a player may set (IB divergence: BRE caps nothing)
+	PlanetaryTaxRate      int               // crown tax on each turn's gold income, as a whole percent (5 = 5%)
 	MaxRegions            int               // most regions a player may own
 	MaxIndividualAttacks  int               // most individual (conventional) attacks a player may launch per day; 0 = unlimited (BRE "Maximum Individual Attacks Per Day")
 	MaxPlayers            int               // most human empires per board (0 = unlimited)
@@ -134,7 +135,8 @@ const (
 	MaxLandPerDay         = 5000  // Daily Land Creation ceiling (default 1000)
 	MaxInitialMarketLand  = 50000 // Initial Market Land ceiling (default 0)
 	MaxPurchasableRegions = 10000 // Max Purchasable Regions ceiling (default 500)
-	MaxPlanetaryTaxRate   = 200   // Tax Rate ceiling (default 50)
+	MaxPlanetaryTaxRate   = 20    // Planetary (crown) Tax Rate ceiling, whole percent (default 5)
+	MaxPlayerTaxRate      = 50    // ceiling for MaxTaxRate (IB's own cap; BRE has none, its prompt is [0-100])
 	MaxBankInterest       = 200   // Bank Interest Rate ceiling (default 50; 200 = 20%/day)
 	MaxStdInvestRate      = 100   // Standard Investment Rate ceiling (default 35; 100 = 10%/day)
 )
@@ -183,6 +185,7 @@ func DefaultConfig() Config {
 		StdInvestRate:         35,
 		SteadyInvest:          false,
 		MaxTaxRate:            50,
+		PlanetaryTaxRate:      5,
 		MaxRegions:            500,
 		MaxIndividualAttacks:  3, // Andy's choice for the modern door; BRE has the setting but its stock default is unverified
 		MaxPlayers:            25,

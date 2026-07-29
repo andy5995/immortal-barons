@@ -58,7 +58,7 @@ func TestManufactureSplitsByPercent(t *testing.T) {
 
 	// Industrial gold is credited via IncomeThisTurn now; Manufacture only sets
 	// e.IndustryGold (for the report) and must NOT credit gold itself.
-	wantGold := w.industrialGold(e) * e.Regions.Industrial
+	wantGold := w.industrialGold(e)
 	if e.IndustryGold != wantGold {
 		t.Errorf("IndustryGold = %d, want %d", e.IndustryGold, wantGold)
 	}

@@ -150,7 +150,7 @@ func TestPaymentStageAutoPays(t *testing.T) {
 	p := w.Player()
 	p.Gold = 100000
 	before := p.Gold
-	want := p.ForcesUpkeep() + p.RegionUpkeep()
+	want := p.ForcesUpkeep() + p.RegionUpkeep() + w.World.CrownTax(p)
 
 	paymentStage(f, w, BuildMenus().Bank)
 
@@ -163,14 +163,14 @@ func TestPaymentStageAutoPays(t *testing.T) {
 }
 
 func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
-	f := &fakeSession{keys: []rune("n\r\r")} // decline bank, accept suggested (full) for forces then regions
+	f := &fakeSession{keys: []rune("n\r\r\r")} // decline bank, accept suggested (full) for forces, regions, crown tax
 	w := newWorld()
 	w.AutoPayMaint = false
 	p := w.Player()
 	p.Gold = 100000
 	p.Support = 100 // skips the optional support-boost prompt
 	beforeTroopers := p.Troopers
-	want := p.ForcesUpkeep() + p.RegionUpkeep()
+	want := p.ForcesUpkeep() + p.RegionUpkeep() + w.World.CrownTax(p)
 	before := p.Gold
 
 	paymentStage(f, w, BuildMenus().Bank)
@@ -184,7 +184,7 @@ func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
 }
 
 func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
-	f := &fakeSession{keys: []rune("n0\r0\r")} // decline bank, give 0 to forces then 0 to regions
+	f := &fakeSession{keys: []rune("n0\r0\r0\r")} // decline bank, give 0 to forces, regions and crown tax
 	w := newWorld()
 	w.AutoPayMaint = false
 	p := w.Player()

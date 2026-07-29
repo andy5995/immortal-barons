@@ -64,8 +64,8 @@ func TestIndustrialGoldCreditedOnce(t *testing.T) {
 	if e.Gold != wantIndustrial {
 		t.Errorf("CollectIncome credited %d, want the single Industrial figure %d", e.Gold, wantIndustrial)
 	}
-	if want := w.industrialGold(e) * 20; wantIndustrial != want {
-		t.Errorf("Industrial income = %d, want industrialGold*count = %d", wantIndustrial, want)
+	if want := w.industrialGold(e); wantIndustrial != want {
+		t.Errorf("Industrial income = %d, want the industrialGold total %d", wantIndustrial, want)
 	}
 }
 

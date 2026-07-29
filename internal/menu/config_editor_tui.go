@@ -57,6 +57,7 @@ const (
 	helpStdInvest     = "The baseline investment return over 10 days. Unless Steady Investment Rate is on, the real rate drifts each day around this value based on how much everyone is investing. The maximum (100) is 10% per day; a low value (under about 50) keeps the economy balanced."
 	helpSteadyInvest  = "When on, the investment return stays fixed at the Standard Investment Rate instead of drifting each day with total investment."
 	helpMaxTax        = "The highest tax rate a player is allowed to set."
+	helpPlanetaryTax  = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold leaves the economy entirely — nobody receives it."
 	helpFoodUnlimited = "When on, the food market never runs short — its daily supply is unlimited."
 	helpBuyMilitary   = "Whether players may buy military units: freely (Yes), not at all (No), or a limited amount each day (Limited)."
 	helpMaintCosts    = "Upkeep cost for regions and forces: High, Medium, Low, or None."
@@ -147,7 +148,8 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addInt(econ, true, "Interest Rate", helpInterest, c.InterestRate, 0, game.MaxBankInterest, func(c *game.Config, n int) { c.InterestRate = n })
 	t.addInt(econ, true, "Standard Investment Rate", helpStdInvest, c.StdInvestRate, 0, game.MaxStdInvestRate, func(c *game.Config, n int) { c.StdInvestRate = n })
 	t.addBool(econ, true, "Steady Investment Rate", helpSteadyInvest, c.SteadyInvest, func(c *game.Config, b bool) { c.SteadyInvest = b })
-	t.addInt(econ, true, "Max Tax Rate", helpMaxTax, c.MaxTaxRate, 0, game.MaxPlanetaryTaxRate, func(c *game.Config, n int) { c.MaxTaxRate = n })
+	t.addInt(econ, true, "Max Tax Rate", helpMaxTax, c.MaxTaxRate, 0, game.MaxPlayerTaxRate, func(c *game.Config, n int) { c.MaxTaxRate = n })
+	t.addInt(econ, true, "Planetary Tax Rate (%)", helpPlanetaryTax, c.PlanetaryTaxRate, 0, game.MaxPlanetaryTaxRate, func(c *game.Config, n int) { c.PlanetaryTaxRate = n })
 	t.addBool(econ, true, "Food Unlimited", helpFoodUnlimited, c.FoodUnlimited, func(c *game.Config, b bool) { c.FoodUnlimited = b })
 
 	mil := tview.NewForm()

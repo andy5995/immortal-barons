@@ -39,6 +39,64 @@ offset 0xE94  Mountain
 offset 0xE98  Technology
 ```
 
+## Runtime record layout (from the disassembly)
+
+The offsets above came from differential diffing the file. These come from
+reading `BRE.OVR`, where the empire record is reached through a far pointer
+loaded with `les di,[0x28d8]` and the config record with `les di,[0x28b4]`.
+Offsets are **relative to the record base**, which sits **0x20 before** the
+`ShortString` name the file-offset map above uses as its origin.
+
+The two maps agree where they overlap: the region block is `name + 118` above
+and `base + 0x96` (150) here, and 150 − 32 = 118.
+
+```
+empire record (les di,[0x28d8])
+  +0x6a  int32  bank balance
+                (+0x66 is NOT gold on hand: the turn routine zeroes it every
+                 turn and it reads 0 in the save. The maintenance routine loads
+                 gold from it into a local, so it is a per-turn working field.)
+  +0x72  int32  gold earned this turn  (see below)
+  +0x8e  int32  military morale
+  +0x92  int32  popular support
+  +0x96  int32  region block starts (Coastal first, Buy-Regions order); the
+                nine counts +0x96..+0xb6 are what "total regions" sums
+  +0xa6  int32  Industrial count
+  +0xae  int32  Mountain count
+  +0xbe  int32  technology levels: FIFTEEN counters, +0xbe .. +0xf9, one per
+                research slot. Only slots 0-5 do anything; 6-14 are pure
+                dilution. Never decremented anywhere in the binary.
+  +0x129 .. +0x12e   six bytes: Set-Industries allocation percentages, in
+                     menu order (Troopers, Jets, Turrets, Bombers, Tanks,
+                     Carriers)
+
+config record (les di,[0x28b4])
+  +0x42  int16  Planetary Tax Rate, tenths of a percent (default 50 = 5.0%,
+                editor maximum 200 = 20.0%)
+```
+
+**`+0x72` is a per-turn accumulator, not a running total.** It is zeroed at the
+start of the income phase and added to at exactly six sites, one per income
+line — population tax, ore, tourism, solar, industrial, hydro. Nothing else in
+the binary writes it, so bank interest, food sales and plunder do not enter it.
+This is the base for the crown tax (issue #52).
+
+Runtime helpers worth recognising when reading this code:
+
+```
+0c03:0ed0   Random(n)                   0fd0:178e   int -> real
+0c03:0f10   add32 through a pointer     0fd0:177a   real multiply
+0fd0:0ecc   32-bit multiply             0fd0:1780   real divide
+0fd0:0f09   32-bit divide               0fd0:1768   real add
+0851:0288   int32 -> "1,234,567"        0fd0:178a   real compare
+056d:1a07   technology factor: 1 + (cap-1)*(1 - exp(-level[sel]/(regions+1)))
+0fd0:193e   Ln          0fd0:19e7   Exp          0fd0:1774   square
+056d:0ec6   sum of the nine region counts (total regions)
+0fd0:1792   real -> int, TRUNCATES
+0fd0:179a   real -> int, ROUNDS      <- the two are easy to confuse; which one a
+                                        routine uses changes results by one unit
+```
+
 ## ⚠ Integrity check — direct edits are rejected
 
 Patching Coastal from 32 to 200 directly in `game.dat` (with BRE closed) and

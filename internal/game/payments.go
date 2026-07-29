@@ -116,6 +116,29 @@ func (e *Empire) clampGive(given int) int {
 	return given
 }
 
+// PayCrownTax applies a payment toward the Queen Royale's per-turn tax. The gold
+// is a pure sink — it leaves the economy with no recipient.
+//
+// A shortfall costs popular support, up to CrownTaxSupportPenalty points.
+// Binary-verified, including the operation order: BRE computes
+// (1 - ratio) * K, not 1 - ratio*K. (Its own region-maintenance branch has the
+// operands the other way round, which goes negative for any shortfall under 98%
+// and would *raise* support — a parenthesisation bug in the original. IB follows
+// the tax branch, which is the correct one.)
+//
+// In BRE a solvent baron cannot underpay at all: the prompt's minimum is the
+// amount required. IB lets a player underpay any obligation, as it already does
+// for forces and regions, and takes the penalty instead.
+func (w *World) PayCrownTax(e *Empire, given int) {
+	req := w.CrownTax(e)
+	given = e.clampGive(given)
+	if req <= 0 || given >= req {
+		return
+	}
+	e.MaintUnderpaid = true
+	e.adjustSupport(-((req - given) * CrownTaxSupportPenalty / (req + 1)))
+}
+
 // PayForces applies a payment toward armed-forces upkeep. A shortfall makes
 // units desert proportionally and lowers popular support. Returns the number
 // of units lost to desertion.

@@ -30,14 +30,43 @@ const (
 	RiverRate, RiverBase       = 100, 5000  // hydro — highest base, occasional bad-year dud
 )
 
-// Yield band (live-calibrated). Each turn a planet-wide year factor is drawn in
-// this band and multiplies each region's Rate on top of its Base. Live BRE data
-// (mountain 7 turns, coastal 3, river 2 — all with the disassembled Bases) pins
-// the band to ~[0.30, 0.80], NOT the earlier reconstructed [1.0, 1.5]. Integer
-// percents so the math stays in integers.
+// RiverDudChancePct is the chance a River's hydropower has a "bad year" and pays
+// half. Kept at the ~10% the game has always used, restated as a percentage now
+// that the yield band is [0,100] (it was written as YieldMin+5 against the old
+// 51-wide band).
+//
+// UNVERIFIED, and the live evidence is against it: across roughly 29 captured
+// hydropower turns every figure was a clean yield*Rate/100 + Base, with no
+// halved value. That is not conclusive on its own (a true 10% rate survives 29
+// samples about 5% of the time), so the mechanic is left in place rather than
+// removed on borderline evidence — but it should be settled before anyone tunes
+// it. Removing it entirely is the likelier correct answer.
+const RiverDudChancePct = 10
+
+// CrownTaxSupportPenalty bounds the popular support a baron loses by failing to
+// pay the Queen's tax in full. It is a ceiling the penalty approaches but never
+// reaches: the +1 on each side means paying nothing costs 14 points, not 15.
+// Binary-verified (BRE.OVR 0x2FA90–0x2FAEE):
+//
+//	penalty = trunc((1 - (paid+1)/(required+1)) * CrownTaxSupportPenalty)
+//
+// BRE uses the same channel for region-maintenance shortfall but at 50, and
+// docks morale rather than support at 40 for unpaid forces. The tax is the
+// mildest of the three.
+const CrownTaxSupportPenalty = 15
+
+// Yield band. Each region type draws its OWN factor in this band per turn, which
+// multiplies that region's Rate on top of its Base — it is not one planet-wide
+// year factor (same turn, live: desert drew 0.97 while agriculture drew 0.00).
+//
+// The band is the full [0, 100]. Live-verified across four region types and two
+// separate games, back-computing the yield from the disassembled Rate/Base:
+// desert 2.6–99.8, tourism 0.4–99.8, ore 0.5–99.8, hydro 2.0–99.0. An earlier
+// reading of [30, 80] came from 7 mountain + 3 coastal + 2 river turns — the
+// sample size that makes any uniform look narrow.
 const (
-	YieldMin = 30 // live-verified: mountain/coastal/river all land in [30, 80]
-	YieldMax = 80
+	YieldMin = 0
+	YieldMax = 100
 )
 
 // --- New-realm starting setup ---
@@ -250,9 +279,10 @@ const (
 
 	// --- Industry (live-verified; one capacity pool per region, split between
 	// units and gold — see World.industrialGold / ProjectedProduction) ---
-	// IndustryPointsPerRegion is the gold-valued capacity each Industrial region
-	// yields per turn (live BRE ~2,548/region; IB uses a round 2,600).
-	IndustryPointsPerRegion = 2600
+	// Industrial GOLD uses the same yield×Rate/100 + Base shape as every other
+	// region (binary-verified, BRE.OVR 0x34545–0x345D1), giving 2,500–2,555 per
+	// region. It is paid only on the share NOT allocated to units.
+	IndustryGoldRate, IndustryGoldBase = 55, 2500
 	// UnitPointsPerRegion is the separate, smaller pool BRE spends on UNITS.
 	// Verified in BRE.OVR (0x34F49-0x3517A): each unit type's multiplier is
 	// exactly 2100/cost (21, 15, 14, 4.2, 1.4, 1.2). Gold and units do NOT share

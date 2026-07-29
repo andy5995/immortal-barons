@@ -76,7 +76,36 @@ flow runs in this order:
    overpay); if you can't afford it, the max is your gold.
 3. **Crown tax** — a per-turn tax to the Queen Royale (a non-player NPC monarch)
    that is a pure sink (no recipient); its prompt max is your available gold.
-   *(Not built in IB yet — issue #52; the amount formula needs the disassembly.)*
+   The amount is **binary-verified**:
+   `crownTax = trunc(goldEarnedThisTurn × PlanetaryTaxRate / 1000)`, where the
+   rate is a sysop field in tenths of a percent (default 50 = **5% of the turn's
+   gross gold income**, editor maximum 200). The base is that turn's six income
+   lines only — not gold on hand, bank, net worth, score, or unit value. It
+   reproduces 28 of 28 live charges exactly.
+
+   **Underpaying is allowed** and costs **popular support**, applied at day
+   rollover, by
+   `trunc((1 − (paid+1)/(required+1)) × 15)` — a ceiling of 15 that the +1s stop
+   it from ever reaching (paying nothing costs 14). No land loss, no unit loss,
+   and the debt is not carried forward.
+
+   **Live-confirmed:** paying 0 dropped support 100→86, then 100→86, 86→72 and
+   72→58 across four turns of a captured game — exactly 14 each time, matching
+   the formula with no fitting. (The prompt's low number is a suggestion, not a
+   floor; typing 0 is accepted.)
+
+   For calibration, BRE's three shortfall penalties: forces ×40 against
+   **morale**, regions ×50 against support, crown tax ×15 against support.
+
+   **IB implements this**, with two deliberate divergences: the rate is stored as
+   a whole percent (default 5, maximum 20) rather than BRE's tenths, so the
+   config editor and the stored value use one unit; and the underpayment path is
+   IB's existing one, shared with forces and regions.
+
+   One original bug not copied: BRE's *region* shortfall computes
+   `1 − ratio×50` rather than `(1 − ratio)×50`, which goes negative for any
+   shortfall under 98% and would *raise* support. The forces and tax branches use
+   the correct ordering; IB follows those.
 4. Conditional: SDI maintenance (with SDI), waste-region decontamination (with
    waste regions), then the popular-support and military-morale boosts (shown
    only below 100). Support/morale are *requested* (optional), not required.
@@ -87,9 +116,15 @@ flow runs in this order:
 Prompt colors (from a color capture): text plain white; the required and
 suggested amounts bright cyan, the max dark cyan, the `(…; …)` parens bright blue.
 
-IB implements steps 1, 2, the support/morale part of 4, and 5, with the
-required-capped prompts and these colors. SDI/waste maintenance and the crown tax
-(step 3) are not built (crown tax tracked in #52).
+IB implements steps 1, 2, 3, the support/morale part of 4, and 5, with the
+required-capped prompts and these colors. SDI and waste-region maintenance are
+not built.
+
+IB's config field **Max Tax Rate** is *not* BRE's Planetary Tax Rate, despite
+having started life as a misreading of it. BRE caps nothing — its own prompt
+offers `New Tax Rate [0-100]` regardless of that config value. IB keeps a player
+cap as a deliberate divergence (ceiling `MaxPlayerTaxRate`, 50), separate from
+the crown tax rate (`PlanetaryTaxRate`).
 
 ## Score (distinct from Net Worth)
 
@@ -324,7 +359,8 @@ different economic role:
   37% support).
 - **Mountain** — lowest income of the money regions, but the most stable
   (never fails); also boosts industrial output.
-- **Desert** — solar income; swings widely (~1,900–3,000 per region).
+- **Desert** — solar income; swings widely (3,000–5,000 per region — the
+  widest band of any region).
 - **River** — highest income on a cash turn (hydroelectric), but every so
   often it produces food instead — never rely on it for either alone.
 - **Agriculture** — grows food; food self-sufficiency.
@@ -346,15 +382,22 @@ of new land.
 
 **Region gold income (BRE-verified — disassembly of BRE.OVR, offsets
 0x342C0–0x34A4E).** Each gold region yields, per turn,
-`perRegion = yield×Rate/100 + Base`, times its region count, where `yield` is a
-per-(game-day), planet-wide factor in the band **0.30–0.80** (live-calibrated:
-mountain, coastal, and river income all reconcile with the disassembled Bases at
-this band — the earlier 1.0–1.5 reconstruction ran ~15–30% high):
+`perRegion = yield×Rate/100 + Base`, times its region count. `yield` is a
+per-(game-day) percentage in the band **0–100**, drawn **independently for each
+region type** — it is not one planet-wide factor (in a single live turn, desert
+drew 0.97 while agriculture drew 0.00).
+
+The band is live-verified across four region types in two separate games, by
+back-computing the yield from the disassembled Rate/Base: desert 2.6–99.8,
+tourism 0.4–99.8, ore 0.5–99.8, hydro 2.0–99.0. Two earlier readings were wrong
+and are recorded here so they are not re-derived: a reconstructed 1.0–1.5 ran
+high, and a later 0.30–0.80 came from 7 mountain + 3 coastal + 2 river turns —
+the sample size at which any uniform distribution looks narrow.
 
 | Region | Rate | Base | Notes |
 |--------|-----:|-----:|-------|
 | Mountain (ore) | 400 | 3,550 | smallest swing → most stable |
-| Coastal (tourism) | 1,000 | 3,750 | × support factor `0.10 + 0.90·(Support/100)` — floor ~375/region at 0% support, never zero. **Live-verified (#31):** a headless BRE sweep of Tourism income across Support 0→100 (coastal count held at 3) fits `factor = 0.099 + 0.901·(Support/100)`, matching this curve to ~1% on both floor and slope |
+| Coastal (tourism) | 1,000 | 3,750 | × support factor `0.1 + 0.9·(Support/100)` — floor 375/region at 0% support, never zero. **Binary-verified:** the three constants decode to exactly 100.0, 0.9 and 0.1 in the coastal-only float sequence, so this is read from the original rather than fitted. An earlier headless sweep (#31) fitted `0.099 + 0.901·(Support/100)` — that was fit noise around the round values |
 | Desert (solar) | 2,000 | 3,000 | widest swing |
 | River (hydro) | 100 | 5,000 | highest base; a river fishes instead some turns (#29) |
 
