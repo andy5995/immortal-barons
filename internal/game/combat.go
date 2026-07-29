@@ -323,7 +323,7 @@ func (f AttackForce) clampTo(e *Empire) AttackForce {
 // clash. (Distinct from offense(), which values a group-attack detachment flat.)
 func (f AttackForce) groundOffense(e *Empire) int {
 	sum := f.Troopers + f.Jets*2 + f.Tanks*4*(100+e.HQ)/100
-	return sum * (100 + e.TechFactor()) / 100
+	return techRaise(sum, e.TechMilitaryFactor())
 }
 
 // loseCommitted removes pct% of the committed troopers/jets/tanks from e and

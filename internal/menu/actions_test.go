@@ -250,7 +250,7 @@ func TestAdvisorsHealthyEmpire(t *testing.T) {
 	p.HQ = 100
 	p.Land = 100
 	p.Regions.Technology = 20
-	p.TechLevel = 200 // 20% bonus, ramped → "Technology stands at 20%"
+	p.TechSlots[game.TechSlotGold] = 200 // well-researched: the advisor reports each effect
 	p.Agents = 5
 	p.Support = 100
 	p.Tax = 10
@@ -267,7 +267,7 @@ func TestAdvisorsHealthyEmpire(t *testing.T) {
 	out := f.out.String()
 	// The informational report is always present.
 	for _, want := range []string{
-		"Our people number", "We earn about", "Our forces:", "Technology stands at",
+		"Our people number", "We earn about", "Our forces:", "Our gold producing regions are at",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected the report line %q; output:\n%s", want, out)

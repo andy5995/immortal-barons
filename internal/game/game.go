@@ -4,6 +4,7 @@
 package game
 
 import (
+	"math"
 	"math/rand"
 	"runtime/debug"
 	"strings"
@@ -127,14 +128,11 @@ type Empire struct {
 	// Seeded 0. Matches BRE live data (a standard realm scored a flat +213/turn,
 	// 8 turns = 1704).
 	Score int
-	// TechLevel is the empire's accumulated Technology bonus, in TENTHS of a
-	// percent (600 = 60.0%). Unlike a raw region-share ratio it BUILDS UP over
-	// turns the empire holds Technology regions and saturates at a share-scaled
-	// cap — BRE-verified: the bonus is not instantaneous but ramps slowly, and
-	// faster the denser the tech share (see advanceTech, TechFactor). Seeded 0,
-	// so a realm's tech advantage grows with sustained investment, not a single
-	// purchase.
-	TechLevel        int
+	// TechSlots holds the empire's research, one counter per slot. Only the six
+	// slots named in balance.go do anything; the rest are dilution, exactly as in
+	// the original. Research NEVER decays — selling Technology regions stops it
+	// accumulating and freezes what is banked (see advanceTech).
+	TechSlots        [TechSlotCount]int
 	LastPlayed       string
 	Events           []string
 	Mail             []Message
@@ -289,67 +287,89 @@ func (e *Empire) Offense() int {
 
 func (e *Empire) Defense() int {
 	sum := e.Troopers + e.Turrets*2 + e.Tanks*4*(100+e.HQ)/100
-	return sum * (100 + e.TechFactor()) / 100
+	return techRaise(sum, e.TechMilitaryFactor())
 }
 
-// techShare is the percent of the empire's land that is Technology regions
-// (0..100). It sets how fast TechLevel accumulates and how high it saturates,
-// so bigger empires need proportionally more Technology for the same bonus.
-func (e *Empire) techShare() int {
-	if e.Land <= 0 {
-		return 0
+// techFactor is the multiplier slot `slot` currently grants, given that effect's
+// ceiling in hundredths (150 == x1.50), returned in TechFactorUnit fixed point.
+//
+// BRE: factor = 1 + (cap-1) * (1 - exp(-level / (totalRegions+1))). The
+// denominator is why expanding dilutes technology, and why the same research
+// reads as more effective in a smaller realm.
+func (e *Empire) techFactor(slot, capPct int) int {
+	lvl := e.TechSlots[slot]
+	total := e.Regions.Total()
+	if lvl <= 0 || capPct <= 100 || total < 0 {
+		return TechFactorUnit
 	}
-	return e.Regions.Technology * 100 / e.Land
-}
-
-// TechFactor is the empire's current Technology bonus percent, derived from the
-// accumulated TechLevel (advanceTech ramps it up over turns). It is NOT the
-// instantaneous tech share — a realm has to hold Technology regions for a while
-// before the bonus builds up.
-func (e *Empire) TechFactor() int {
-	f := e.TechLevel / 10
-	if f > TechFactorCap {
-		f = TechFactorCap
+	x := float64(lvl) / float64(total+1)
+	if x > TechExpClamp {
+		x = TechExpClamp
 	}
-	return f
+	f := 1 + (float64(capPct)/100-1)*(1-math.Exp(-x))
+	return int(f * TechFactorUnit)
 }
 
-// advanceTech ramps the empire's TechLevel one turn's worth toward its
-// share-scaled ceiling. Called once per turn played. The per-turn gain grows
-// with the square of the tech share (a tech-dense realm advances much faster),
-// and the ceiling scales with the share (so the bonus tops out near the share).
-// Selling Technology regions lowers the ceiling and settles the level back down.
+// The eight Technology effects. Three of them share slot 0 with different
+// ceilings, exactly as the original does.
+func (e *Empire) TechGoldFactor() int  { return e.techFactor(TechSlotGold, TechCapGold) }
+func (e *Empire) TechFoodFactor() int  { return e.techFactor(TechSlotGold, TechCapFood) }
+func (e *Empire) TechUnitFactor() int  { return e.techFactor(TechSlotGold, TechCapUnits) }
+func (e *Empire) TechSDIFactor() int   { return e.techFactor(TechSlotSDI, TechCapSDI) }
+func (e *Empire) TechTaxFactor() int   { return e.techFactor(TechSlotTax, TechCapTax) }
+func (e *Empire) TechMaintFactor() int { return e.techFactor(TechSlotMaint, TechCapMaint) }
+func (e *Empire) TechDecayFactor() int { return e.techFactor(TechSlotDecay, TechCapDecay) }
+func (e *Empire) TechMilitaryFactor() int {
+	return e.techFactor(TechSlotMilitary, TechCapMilitary)
+}
+
+// techRaise scales v up by a Technology factor; techLower scales it down (used
+// for costs and decay, which the original divides by the factor rather than
+// multiplying).
+func techRaise(v, factor int) int { return v * factor / TechFactorUnit }
+func techLower(v, factor int) int { return v * TechFactorUnit / factor }
+
+// TechPercent renders a factor the way the in-game advisor does: a raised effect
+// as round(100*f), a lowered one as round(100/f).
+func TechPercent(factor int, lowered bool) int {
+	if lowered {
+		return (TechFactorUnit*100 + factor/2) / factor
+	}
+	return (factor*100 + TechFactorUnit/2) / TechFactorUnit
+}
+
+// advanceTech runs one turn of research. Called once per turn played.
+//
+// BRE-verified: points are quadratic in Technology regions and only
+// inverse-linear in realm size, so a dense tech block in a small realm
+// out-researches the same block in a large one. Each point lands in a slot
+// chosen uniformly at random, and nine of the fifteen slots do nothing — the
+// waste is the mechanic, not a bug. A Technology Agreement partner adds an
+// unmultiplied contribution capped by whichever of the two holds less tech.
+//
+// With no Technology regions this returns immediately: research stops and the
+// banked levels FREEZE. They are never decremented anywhere.
 func (w *World) advanceTech(e *Empire) {
-	share := e.techShare()
-	ceil := share * TechCeilMul
-	if hardCap := TechFactorCap * 10; ceil > hardCap {
-		ceil = hardCap
-	}
-	// A Technology Agreement raises the ceiling toward a capped share of a
-	// higher-tech partner's level, so you gain some of their advances even with
-	// little Technology of your own (#11).
-	agCeil := w.techAgreementCeiling(e)
-	if agCeil > ceil {
-		ceil = agCeil
-	}
-	if e.TechLevel >= ceil {
-		e.TechLevel = ceil // sold-off tech / broken treaty / shrunk share: settle to the ceiling
+	tech := e.Regions.Technology
+	total := e.Regions.Total()
+	if tech <= 0 || total <= 0 {
 		return
 	}
-	gain := share * share / TechGainDiv
-	if agCeil > e.TechLevel { // a partner pulls a low-Technology realm upward
-		catchUp := (agCeil - e.TechLevel) / TechAgreementGainDiv
-		if catchUp < 1 {
-			catchUp = 1
-		}
-		if catchUp > gain {
-			gain = catchUp
-		}
+	points := TechResearchMul * techResearchPoints(tech, total)
+	for _, ally := range w.alliesOf(e, "Technology Agreement") {
+		points += techResearchPoints(min(tech, ally.Regions.Technology), total)
 	}
-	e.TechLevel += gain
-	if e.TechLevel > ceil {
-		e.TechLevel = ceil
+	for range points {
+		e.TechSlots[w.rng.Intn(TechSlotCount)]++
 	}
+}
+
+// techResearchPoints is round((n^2 / total)^0.75), the original's own shape.
+func techResearchPoints(n, total int) int {
+	if n <= 0 || total <= 0 {
+		return 0
+	}
+	return int(math.Round(math.Pow(float64(n)*float64(n)/float64(total), 0.75)))
 }
 
 type Prices struct {

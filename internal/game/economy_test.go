@@ -446,7 +446,10 @@ func TestTechBoostsIncomeAndCutsMaintenance(t *testing.T) {
 	// smaller base; tech's payoff is the multiplier/upkeep/combat, not more land.)
 	wBase, base := setup(RegionMix{Coastal: 100})
 	wTech, tech := setup(RegionMix{Coastal: 100})
-	tech.TechLevel = 400 // 40% bonus, fully ramped (decoupled from the turn-by-turn ramp)
+	// Research both the income slot and the maintenance slot: this test asserts
+	// higher income AND lower upkeep, which are separate slots in BRE.
+	tech.TechSlots[TechSlotGold] = 200
+	tech.TechSlots[TechSlotMaint] = 200
 
 	wBase.CollectIncome(base)
 	wTech.CollectIncome(tech)

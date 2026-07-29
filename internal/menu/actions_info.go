@@ -229,18 +229,38 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			add(fmt.Sprintf(tr(s, "We keep %s covert agents."), num(p.Agents)))
 		}
 	case advisorTechnology:
-		tf := p.TechFactor()
+		// One line per effect, as BRE's Technology advisor reports them: raised
+		// effects as 100xfactor, lowered ones as 100/factor. Research never decays,
+		// so a realm that has sold its Technology regions still reports what it
+		// banked.
+		gold := game.TechPercent(p.TechGoldFactor(), false)
+		food := game.TechPercent(p.TechFoodFactor(), false)
+		units := game.TechPercent(p.TechUnitFactor(), false)
+		mil := game.TechPercent(p.TechMilitaryFactor(), false)
+		maint := game.TechPercent(p.TechMaintFactor(), true)
+		sdi := game.TechPercent(p.TechSDIFactor(), true)
+		decay := game.TechPercent(p.TechDecayFactor(), true)
+		researched := gold > 100 || food > 100 || units > 100 || mil > 100 ||
+			maint < 100 || sdi < 100 || decay < 100
 		switch {
-		case p.Regions.Technology == 0:
+		case !researched && p.Regions.Technology == 0:
 			add(tr(s, "We have no Technology regions."))
 			add(tr(s, "Building some would raise our military strength, income, and food output, and lower our upkeep — a benefit that builds up over time."))
-		case tf == 0:
+		case !researched:
 			add(tr(s, "Our Technology regions are new. Their benefits will build up as we hold them."))
 		default:
-			add(fmt.Sprintf(tr(s, "Technology stands at %d%%."), tf))
-			add(fmt.Sprintf(tr(s, "It raises our military strength, income, and food output by %d%%."), tf))
-			add(fmt.Sprintf(tr(s, "It lowers unit and region upkeep, and food spoilage, to %d%% of normal."), 100-tf))
-			add(tr(s, "The bonus builds up the longer we hold Technology regions."))
+			add(fmt.Sprintf(tr(s, "Our military forces are functioning at %d%% strength."), mil))
+			add(fmt.Sprintf(tr(s, "Our gold producing regions are at %d%% of normal production."), gold))
+			add(fmt.Sprintf(tr(s, "Our food production techniques increased efficiency to %d%%."), food))
+			add(fmt.Sprintf(tr(s, "Our industries are running at %d%% efficiency."), units))
+			add(fmt.Sprintf(tr(s, "Our maintenance costs have been reduced to %d%% of standard costs."), maint))
+			add(fmt.Sprintf(tr(s, "Our SDI yearly funding needs have been lowered to %d%% normal expenses."), sdi))
+			add(fmt.Sprintf(tr(s, "Food decay is at %d%% of standard levels."), decay))
+			if p.Regions.Technology == 0 {
+				add(tr(s, "We hold no Technology regions, so our research has halted — but what we have already learned is not lost."))
+			} else {
+				add(tr(s, "Technology is relative to the size of the empire: a larger realm needs more of it to keep the same efficiency."))
+			}
 		}
 	}
 	return out

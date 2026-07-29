@@ -417,9 +417,8 @@ the end.
 
 ## Technology (binary-verified)
 
-Read from the original binary and confirmed against live play. **IB does not
-implement this yet** — it uses one accumulating factor instead — so treat this
-section as the target, not a description of IB.
+Read from the original binary and confirmed against live play. **IB implements
+this**, including the 15 slots, the random distribution, and the freeze.
 
 **It is fifteen counters, not one level.** The empire record holds 15 research
 slots. Only **six** do anything; the other nine are pure dilution, so 9 of every
@@ -472,9 +471,14 @@ level frozen at zero Technology regions, buying 500 regions moved food decay fro
 Together those two properties mean a player can bank research cheaply while
 small, then liquidate the regions and keep the benefit — but cannot expand
 afterwards without giving most of it back. **IB keeps this behaviour
-deliberately** (see the tech-regions notes): the exploit is self-limiting,
-because a realm that stays small to preserve its technology pays for that in
-income, military and land.
+deliberately**: the exploit is self-limiting, because a realm that stays small to
+preserve its technology pays for that in income, military and land.
+
+**Technology Agreement (#11).** A partner adds an unmultiplied research
+contribution, bounded by whichever side holds *less* Technology. So the pact
+accelerates a realm that is already researching and does nothing for one holding
+no Technology at all — IB previously let a tech-less realm inherit a partner's
+level, which the original does not.
 
 **Urban and Technology produce no direct gold** (BRE-verified): Urban is
 population housing, Technology is an efficiency multiplier (see the Technology

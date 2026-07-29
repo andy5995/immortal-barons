@@ -5,30 +5,57 @@ import (
 	"testing"
 )
 
-// A Technology Agreement lets a low-Technology realm gain some of a high-tech
-// partner's advances, up to a capped share of the partner's level (#11).
+// A Technology Agreement adds a partner's research to your own (#11). BRE bounds
+// the contribution by whichever side holds LESS Technology, so the pact
+// accelerates a realm that is already researching — it is not a substitute for
+// holding Technology regions.
 func TestTechnologyAgreementSharesTech(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	a := w.AddHuman("a", "Alpha") // no Technology regions of its own
-	b := w.AddHuman("b", "Beta")
-	b.TechLevel = 500 // 50.0% tech (tenths)
-
-	// Without a treaty, a realm with no Technology regions never advances.
-	w.advanceTech(a)
-	if a.TechLevel != 0 {
-		t.Fatalf("no treaty: TechLevel should stay 0, got %d", a.TechLevel)
+	banked := func(e *Empire) int {
+		n := 0
+		for _, v := range e.TechSlots {
+			n += v
+		}
+		return n
 	}
 
+	// A realm with no Technology regions gains nothing, treaty or not.
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	a.Regions = RegionMix{Coastal: 100}
+	a.Land = a.Regions.Total()
+	b := w.AddHuman("b", "Beta")
+	b.Regions = RegionMix{Coastal: 60, Technology: 40}
+	b.Land = b.Regions.Total()
 	w.ProposeTreaty(a, b, "Technology Agreement")
 	if !w.AcceptTreaty(b, a.Name, "Technology Agreement") {
 		t.Fatal("AcceptTreaty failed")
 	}
-	for i := 0; i < 200; i++ {
+	for range 20 {
 		w.advanceTech(a)
 	}
-	want := b.TechLevel * TechAgreementCapPct / 100 // capped share of the partner's tech
-	if a.TechLevel != want {
-		t.Errorf("with treaty: TechLevel = %d, want the capped share %d of the partner's %d", a.TechLevel, want, b.TechLevel)
+	if banked(a) != 0 {
+		t.Errorf("a realm holding no Technology gains nothing from the pact, got %d", banked(a))
+	}
+
+	// Two realms that both research: the one with a partner advances faster.
+	mix := RegionMix{Coastal: 60, Technology: 40}
+	w2 := NewWorldSeed(DefaultConfig(), 1)
+	solo := w2.AddHuman("s", "Solo")
+	solo.Regions, solo.Land = mix, mix.Total()
+	paired := w2.AddHuman("p", "Paired")
+	paired.Regions, paired.Land = mix, mix.Total()
+	partner := w2.AddHuman("q", "Partner")
+	partner.Regions, partner.Land = mix, mix.Total()
+	w2.ProposeTreaty(paired, partner, "Technology Agreement")
+	if !w2.AcceptTreaty(partner, paired.Name, "Technology Agreement") {
+		t.Fatal("AcceptTreaty failed")
+	}
+	for range 20 {
+		w2.advanceTech(solo)
+		w2.advanceTech(paired)
+	}
+	if banked(paired) <= banked(solo) {
+		t.Errorf("the pact should accelerate research: solo=%d paired=%d", banked(solo), banked(paired))
 	}
 }
 

@@ -9,12 +9,9 @@ func TestTechnologyLowersRegionUpkeep(t *testing.T) {
 	e := w.AddHuman("me", "Mine")
 	e.Regions = RegionMix{Agricultural: 80, Technology: 20}
 	e.Land = e.Regions.Total() // 100
-	e.TechLevel = 200          // 20% bonus, ramped
-	if tf := e.TechFactor(); tf != 20 {
-		t.Fatalf("expected TechFactor 20, got %d", tf)
-	}
+	e.TechSlots[TechSlotMaint] = 40
 	base := e.Land * RegionUpkeepPerLand
-	if want, got := base*(100-20)/100, e.RegionUpkeep(); got != want {
+	if want, got := techLower(base, e.TechMaintFactor()), e.RegionUpkeep(); got != want {
 		t.Errorf("RegionUpkeep with tech: want %d, got %d", want, got)
 	}
 	if e.RegionUpkeep() >= base {
@@ -29,9 +26,9 @@ func TestTechnologyRaisesFoodProduced(t *testing.T) {
 	e := w.AddHuman("me", "Mine")
 	e.Regions = RegionMix{Agricultural: 80, Technology: 20}
 	e.Land = e.Regions.Total()
-	e.TechLevel = 200 // 20% bonus, ramped
+	e.TechSlots[TechSlotGold] = 40
 	base := e.Regions.foodProduced()
-	if want, got := base*(100+20)/100, e.FoodProduced(); got != want {
+	if want, got := techRaise(base, e.TechFoodFactor()), e.FoodProduced(); got != want {
 		t.Errorf("FoodProduced with tech: want %d, got %d", want, got)
 	}
 	if e.FoodProduced() <= base {

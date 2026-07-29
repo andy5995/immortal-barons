@@ -400,24 +400,50 @@ const (
 // --- Other economy tunables ---
 const (
 	DebtGrowthPct = 10 // % a loan's outstanding debt grows each turn
-	// Technology now ACCUMULATES over turns rather than applying instantly
-	// (BRE-verified via live play: the bonus ramps up slowly and saturates,
-	// faster when tech is a denser share of the realm). These shape IB's own
-	// reconstructed curve — tune freely; see advanceTech and TechFactor.
-	// IB's own simplification of Technology: one accumulating level rather than
-	// BRE's fifteen research slots. Each played turn adds share²/TechGainDiv (in
-	// tenths of a %) to TechLevel, capped at share×TechCeilMul tenths, and
-	// hard-capped at TechFactorCap.
+	// --- Technology (BRE-verified: BRE.OVR 0x33E85-0x34029 and 056d:1a07) ---
 	//
-	// The real mechanic is now known in full and written up in
-	// docs/mechanics-reference.md ("Technology (binary-verified)"): 15 slots of
-	// which 9 do nothing, research quadratic in tech regions and inverse-linear in
-	// realm size, an exponential level→factor curve with a per-effect ceiling, and
-	// no decay when the regions are sold. These three constants are the stand-in
-	// until that is implemented; they are IB's, not BRE's.
-	TechGainDiv   = 250 // per-turn TechLevel gain (tenths %) = share² / this
-	TechCeilMul   = 10  // per-share TechLevel ceiling (tenths %) = share × this
-	TechFactorCap = 60  // max % bonus/reduction Technology grants (was 40, pre-cumulative)
+	// Research is fifteen independent counters, of which only six do anything —
+	// the other nine are pure dilution, so 9 of every 15 points are wasted. Per
+	// turn an empire earns
+	//
+	//	TechResearchMul * round( (techRegions^2 / totalRegions)^0.75 )
+	//
+	// points, each landing in a slot chosen uniformly at random, plus a smaller
+	// unmultiplied contribution per Technology Agreement partner. The level NEVER
+	// decays: selling the regions stops research and freezes what you have. The
+	// benefit divides by total regions, so expanding dilutes it.
+	//
+	// See docs/mechanics-reference.md, "Technology (binary-verified)".
+	TechSlotCount   = 15 // research slots; only the six named below have effects
+	TechResearchMul = 4  // own-research multiplier (ally contributions are unmultiplied)
+	// TechExpClamp bounds level/(regions+1) before exp(), as the original does.
+	TechExpClamp = 50
+
+	// The six slots that do anything. Slot 0 drives three separate effects, each
+	// with its own ceiling; slots 6-14 exist only to dilute research.
+	TechSlotGold     = 0 // gold income, food production and unit production
+	TechSlotSDI      = 1
+	TechSlotTax      = 2 // population tax income
+	TechSlotMaint    = 3
+	TechSlotDecay    = 4 // food spoilage
+	TechSlotMilitary = 5
+
+	// Effect ceilings, in hundredths (150 = x1.50). A factor approaches its
+	// ceiling but never reaches it. Food decay has by far the most headroom,
+	// which is why it moves first and furthest — at low levels Technology is
+	// effectively a spoilage technology.
+	TechCapGold     = 150
+	TechCapTax      = 150
+	TechCapFood     = 200
+	TechCapUnits    = 135
+	TechCapMaint    = 140
+	TechCapDecay    = 500
+	TechCapSDI      = 200
+	TechCapMilitary = 140
+
+	// TechFactorUnit is the fixed-point scale the factor helpers return:
+	// 10000 == x1.0. Kept off floating point so money stays integral.
+	TechFactorUnit = 10000
 
 	// Technology Agreement treaty (#11): BRE's manual says the pact "allows an
 	// empire to gain some of the technological advances of its partner" — a

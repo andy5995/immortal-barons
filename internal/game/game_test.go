@@ -151,50 +151,102 @@ func TestHQBoostsTanks(t *testing.T) {
 	}
 }
 
-func TestTechFactor(t *testing.T) {
-	// The bonus is the accumulated TechLevel, NOT the instantaneous share: an
-	// empire with Technology regions but no ramp yet still reads 0.
+func TestTechFactorShape(t *testing.T) {
+	// The benefit comes from banked research, not from holding regions: an empire
+	// with Technology regions but no research yet reads exactly 100%.
 	e := &Empire{Land: 100, Regions: RegionMix{Coastal: 80, Technology: 20}}
-	if got := e.TechFactor(); got != 0 {
-		t.Errorf("un-ramped Technology: want 0, got %d", got)
+	if got := e.TechGoldFactor(); got != TechFactorUnit {
+		t.Errorf("un-researched Technology: want %d, got %d", TechFactorUnit, got)
 	}
 
-	e.TechLevel = 200 // TechLevel is tenths of a percent → 20%
-	if got := e.TechFactor(); got != 20 {
-		t.Errorf("TechLevel 200 → 20%%: want 20, got %d", got)
+	// It rises with the level and approaches, but never reaches, the ceiling.
+	e.TechSlots[TechSlotGold] = 50
+	mid := e.TechGoldFactor()
+	if mid <= TechFactorUnit {
+		t.Errorf("research should raise the factor, got %d", mid)
+	}
+	e.TechSlots[TechSlotGold] = 500 // more research, still short of saturation
+	high := e.TechGoldFactor()
+	ceiling := TechCapGold * TechFactorUnit / 100
+	if high <= mid {
+		t.Errorf("more research should not lower the factor: %d -> %d", mid, high)
+	}
+	if high >= ceiling {
+		t.Errorf("factor %d should still be under its %d ceiling at this level", high, ceiling)
+	}
+	// The exponent is clamped, as in the original, so absurd research saturates
+	// exactly at the ceiling rather than growing without bound.
+	e.TechSlots[TechSlotGold] = 100_000_000
+	if got := e.TechGoldFactor(); got != ceiling {
+		t.Errorf("saturated factor = %d, want the %d ceiling", got, ceiling)
 	}
 
-	e.TechLevel = 10000 // well over the cap
-	if got := e.TechFactor(); got != TechFactorCap {
-		t.Errorf("TechFactor should cap at %d, got %d", TechFactorCap, got)
+	// The same slot drives three effects with different ceilings.
+	if e.TechFoodFactor() <= e.TechGoldFactor() {
+		t.Error("food production has a higher ceiling than gold, so it must read higher")
+	}
+	if e.TechUnitFactor() >= e.TechGoldFactor() {
+		t.Error("unit production has a lower ceiling than gold, so it must read lower")
 	}
 }
 
-// TestTechRampsOverTurns: a fresh empire with Technology regions starts at 0
-// bonus and builds up (never decreasing) as it plays turns.
-func TestTechRampsOverTurns(t *testing.T) {
+// The benefit divides by total regions, so expanding dilutes banked research.
+func TestTechDilutesAsTheRealmGrows(t *testing.T) {
+	small := &Empire{Regions: RegionMix{Coastal: 80, Technology: 20}}
+	small.TechSlots[TechSlotDecay] = 30
+	big := &Empire{Regions: RegionMix{Coastal: 980, Technology: 20}}
+	big.TechSlots[TechSlotDecay] = 30 // same research, larger realm
+
+	if big.TechDecayFactor() >= small.TechDecayFactor() {
+		t.Errorf("a larger realm should get less from the same research: small=%d big=%d",
+			small.TechDecayFactor(), big.TechDecayFactor())
+	}
+}
+
+// Research accumulates while Technology regions are held, and FREEZES when they
+// are sold — it is never decremented.
+func TestTechAccumulatesThenFreezes(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
-	e.Regions = RegionMix{Coastal: 40, Technology: 60} // 60% tech share
+	e.Regions = RegionMix{Coastal: 40, Technology: 60}
 	e.Land = e.Regions.Total()
-	if e.TechFactor() != 0 {
-		t.Fatalf("fresh Technology empire should start at 0 bonus, got %d", e.TechFactor())
+
+	total := func() int {
+		n := 0
+		for _, v := range e.TechSlots {
+			n += v
+		}
+		return n
+	}
+	if total() != 0 {
+		t.Fatalf("fresh empire should have no research, got %d", total())
 	}
 	prev := 0
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		w.advanceTech(e)
-		if e.TechFactor() < prev {
-			t.Errorf("TechFactor should not decrease while holding tech: %d -> %d", prev, e.TechFactor())
+		if total() < prev {
+			t.Fatalf("research must never decrease: %d -> %d", prev, total())
 		}
-		prev = e.TechFactor()
+		prev = total()
 	}
-	if e.TechFactor() <= 0 {
-		t.Errorf("TechFactor should have ramped above 0 after 10 turns, got %d", e.TechFactor())
+	if prev <= 0 {
+		t.Fatal("ten turns of Technology regions should have banked research")
+	}
+
+	// Sell every Technology region: research stops, the bank is untouched.
+	e.Regions.Technology = 0
+	e.Land = e.Regions.Total()
+	for range 10 {
+		w.advanceTech(e)
+	}
+	if total() != prev {
+		t.Errorf("selling Technology must freeze research, not lose it: %d -> %d", prev, total())
 	}
 }
 
-// TestTechHigherShareRampsFaster: a tech-denser realm advances faster.
-func TestTechHigherShareRampsFaster(t *testing.T) {
+// A denser tech block out-researches a sparse one: points are quadratic in
+// Technology regions and only inverse-linear in realm size.
+func TestTechDenserBlockResearchesFaster(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	lo := w.AddHuman("lo", "Lo")
 	lo.Regions = RegionMix{Coastal: 74, Technology: 26}
@@ -202,34 +254,28 @@ func TestTechHigherShareRampsFaster(t *testing.T) {
 	hi := w.AddHuman("hi", "Hi")
 	hi.Regions = RegionMix{Coastal: 40, Technology: 60}
 	hi.Land = hi.Regions.Total()
-	for i := 0; i < 10; i++ {
+	sum := func(e *Empire) int {
+		n := 0
+		for _, v := range e.TechSlots {
+			n += v
+		}
+		return n
+	}
+	for range 10 {
 		w.advanceTech(lo)
 		w.advanceTech(hi)
 	}
-	if hi.TechFactor() <= lo.TechFactor() {
-		t.Errorf("denser tech should ramp faster: lo(26%%)=%d hi(60%%)=%d", lo.TechFactor(), hi.TechFactor())
-	}
-}
-
-// TestTechSaturatesAtShareCeiling: the bonus tops out near the tech share.
-func TestTechSaturatesAtShareCeiling(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	e := w.AddHuman("me", "Mine")
-	e.Regions = RegionMix{Coastal: 74, Technology: 26} // ceiling ≈ 26%
-	e.Land = e.Regions.Total()
-	for i := 0; i < 1000; i++ {
-		w.advanceTech(e)
-	}
-	if got := e.TechFactor(); got != 26 {
-		t.Errorf("26%% tech share should saturate at 26%% bonus, got %d", got)
+	if sum(hi) <= sum(lo) {
+		t.Errorf("denser tech should research faster: lo(26%%)=%d hi(60%%)=%d", sum(lo), sum(hi))
 	}
 }
 
 func TestTechBoostsMilitary(t *testing.T) {
 	base := &Empire{Land: 100, Regions: RegionMix{Coastal: 100},
 		Troopers: 100, Jets: 20, Carriers: 1, Turrets: 30, Tanks: 10}
-	tech := &Empire{Land: 100, Regions: RegionMix{Technology: 40}, TechLevel: 400, // 40% ramped
+	tech := &Empire{Land: 100, Regions: RegionMix{Technology: 40},
 		Troopers: 100, Jets: 20, Carriers: 1, Turrets: 30, Tanks: 10}
+	tech.TechSlots[TechSlotMilitary] = 200 // well-researched military
 
 	if tech.Offense() <= base.Offense() {
 		t.Errorf("Offense should rise with Technology regions: base=%d tech=%d", base.Offense(), tech.Offense())

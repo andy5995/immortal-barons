@@ -214,9 +214,7 @@ original, so it needs new evidence, not taste. The rest (prices, `LandPriceStep`
 AI behaviour, IB's own additions) are the playtest knobs. Keep both matching
 `docs/mechanics-reference.md`.
 
-Stubbed / not built: **BRE's technology system** (the full mechanic is in the
-spec, but IB still uses a single accumulating `TechFactor` stand-in), leagues
-auto-reset (a daily Planetary Master leader is tracked, `CurrentMaster`, and
+Stubbed / not built: leagues auto-reset (a daily Planetary Master leader is tracked, `CurrentMaster`, and
 `endGame` crowns `LastMaster`, but timed auto-reset is not built), the
 Quick-Strike / Extended-Battle attack variants,
 civil-war collapse, an interplanetary individual-attack force (`Indiv. Attack

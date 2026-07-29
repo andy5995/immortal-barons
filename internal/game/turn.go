@@ -490,8 +490,12 @@ func (w *World) riverGold(e *Empire) int {
 // an income multiplier is otherwise deferred to #20). Products are widened to
 // int64 so they stay correct on 32-bit builds even at money-cap scale.
 func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
-	tf := e.TechFactor()
-	scale := func(n int64) int { return int(n * int64(100+tf) / 100) }
+	// Region income and population tax draw on DIFFERENT research slots in BRE,
+	// so they scale independently.
+	gold := int64(e.TechGoldFactor())
+	scale := func(n int64) int { return int(n * gold / TechFactorUnit) }
+	tax := int64(e.TechTaxFactor())
+	scaleTax := func(n int64) int { return int(n * tax / TechFactorUnit) }
 	perRegion := func(salt, rate, base int) int { return w.regionDraw(e, salt, rate) + base }
 
 	support := 10 + 90*e.Support/100 // support factor ×100: 0.10 + 0.90·(Support/100)
@@ -501,7 +505,7 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 		riverGold = w.riverGold(e)
 	}
 	return IncomeBreakdown{
-		Taxes:      scale(int64(e.People) * int64(e.Tax) / 100 * TaxGoldPerCapita),
+		Taxes:      scaleTax(int64(e.People) * int64(e.Tax) / 100 * TaxGoldPerCapita),
 		Ore:        scale(int64(perRegion(1, MountainRate, MountainBase)) * int64(e.Regions.Mountain)),
 		Tourism:    scale(int64(perRegion(2, CoastalRate, CoastalBase)) * int64(support) / 100 * int64(e.Regions.Coastal)),
 		Solar:      scale(int64(perRegion(3, DesertRate, DesertBase)) * int64(e.Regions.Desert)),
@@ -568,8 +572,6 @@ func (w *World) CollectIncome(e *Empire) {
 }
 
 func (w *World) processEconomy(e *Empire) {
-	tf := e.TechFactor()
-
 	// Savings interest (BRE-faithful, config-help verified): the Interest Rate knob
 	// is "the interest the bank gives in 10 days", so config/10 is the DAILY rate
 	// (shown in View Bank Rates: config 50 → 5.0%/day). BRE credits it "at the end
@@ -633,7 +635,7 @@ func (w *World) processEconomy(e *Empire) {
 	// then the listing.
 	listedFood := w.MarketForSale(e.Owner, "Food")
 	if total := e.Food + listedFood; total > 0 {
-		spoiled := total * FoodSpoilPct / 100 * (100 - tf) / 100
+		spoiled := techLower(total*FoodSpoilPct/100, e.TechDecayFactor())
 		e.LastSpoiled = spoiled
 		fromGranary := spoiled
 		if fromGranary > e.Food {
@@ -784,8 +786,8 @@ func (w *World) ProjectedProduction(e *Empire) [6]int {
 			spec = 100 - SpecialtyPenaltyPct
 		}
 		n := int64(e.Regions.Industrial) * UnitPointsPerRegion *
-			int64(pct) * int64(spec) * int64(boostNum)
-		d := int64(cost) * 100 * 100 * int64(boostDen)
+			int64(pct) * int64(spec) * int64(boostNum) * int64(e.TechUnitFactor())
+		d := int64(cost) * 100 * 100 * int64(boostDen) * TechFactorUnit
 		return int((n + d/2) / d)
 	}
 	return [6]int{

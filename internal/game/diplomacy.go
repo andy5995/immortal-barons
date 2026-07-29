@@ -112,19 +112,10 @@ func (w *World) tradeIncome(e *Empire) int {
 	return tariff*e.People/40 + free*e.People/20
 }
 
-// techAgreementCeiling is the TechLevel an empire may reach from its Technology
-// Agreement partners alone (#11): a capped share of the highest-tech partner's
-// level, so even a realm with little Technology of its own gains some of a strong
-// partner's advances. Zero if it holds no such treaty. See advanceTech.
-func (w *World) techAgreementCeiling(e *Empire) int {
-	best := 0
-	for _, ally := range w.alliesOf(e, "Technology Agreement") {
-		if ally.TechLevel > best {
-			best = ally.TechLevel
-		}
-	}
-	return best * TechAgreementCapPct / 100
-}
+// A Technology Agreement lets a partner's research help your own (#11). BRE adds
+// an unmultiplied research contribution per partner, bounded by whichever side
+// holds less Technology — so a pact with a strong partner helps, but does not
+// substitute for holding tech yourself. Applied in advanceTech.
 
 // AllyContribution is the detachment a Full Defense Alliance partner sends to aid
 // an ally under attack — BRE-verified as 30% of the ally's troopers, tanks, and
@@ -162,7 +153,7 @@ func (w *World) allyDefenseBoost(d *Empire) int {
 		tanks := ally.Tanks * AllyDefenseContribPct / 100
 		base := troopers + tanks*4*(100+ally.HQ)/100
 		v := base * moraleFactor(ally.Morale) / 100
-		sum += v * (100 + ally.TechFactor()) / 100
+		sum += techRaise(v, ally.TechMilitaryFactor())
 	}
 	return sum
 }

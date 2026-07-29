@@ -26,13 +26,12 @@ func TestProcessEconomyConsumesAndSpoilsButDoesNotGrow(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("a", "A")
 	e.Food = 100_000 // stock already includes this turn's growth
-	tf := e.TechFactor()
 	consume := e.FoodUpkeep()
 
 	w.processEconomy(e)
 
 	afterConsume := 100_000 - consume
-	wantSpoil := afterConsume * FoodSpoilPct / 100 * (100 - tf) / 100
+	wantSpoil := techLower(afterConsume*FoodSpoilPct/100, e.TechDecayFactor())
 	want := afterConsume - wantSpoil
 	if e.Food != want {
 		t.Errorf("processEconomy should consume+spoil only, no growth re-add: Food = %d, want %d", e.Food, want)

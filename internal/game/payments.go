@@ -35,14 +35,15 @@ const (
 // Turret 0.90, Bomber 1.30, Tank 0.60, Carrier 0.10 gold/turn) scaled ×10, so
 // the ratios match the original exactly. Bombers were previously omitted.
 func (e *Empire) ForcesUpkeep() int {
-	return (e.Troopers*MaintTrooper + e.Jets*MaintJet + e.Turrets*MaintTurret + e.Bombers*MaintBomber + e.Tanks*MaintTank + e.Carriers*MaintCarrier) * (100 - e.TechFactor()) / 100
+	base := e.Troopers*MaintTrooper + e.Jets*MaintJet + e.Turrets*MaintTurret + e.Bombers*MaintBomber + e.Tanks*MaintTank + e.Carriers*MaintCarrier
+	return techLower(base, e.TechMaintFactor())
 }
 
 // RegionUpkeep is the gold required to maintain the empire's regions. Technology
 // lowers it (same factor military upkeep uses); BRE lists "maintenance costs on
 // regions" among technology's effects (#20).
 func (e *Empire) RegionUpkeep() int {
-	return e.Land * RegionUpkeepPerLand * (100 - e.TechFactor()) / 100
+	return techLower(e.Land*RegionUpkeepPerLand, e.TechMaintFactor())
 }
 
 // FoodProduced is the empire's food-region output this turn, raised by the
@@ -50,7 +51,7 @@ func (e *Empire) RegionUpkeep() int {
 // which technology improves (#20). River fishing (riverFood) is a separate
 // mechanic and is not scaled here.
 func (e *Empire) FoodProduced() int {
-	return e.Regions.foodProduced() * (100 + e.TechFactor()) / 100
+	return techRaise(e.Regions.foodProduced(), e.TechFoodFactor())
 }
 
 // ForcesDue and RegionsDue apply the league's Maintenance Costs knob to the
@@ -73,7 +74,7 @@ func (w *World) listedForcesUpkeep(e *Empire) int {
 		w.MarketForSale(e.Owner, "Bomber")*MaintBomber +
 		w.MarketForSale(e.Owner, "Tank")*MaintTank +
 		w.MarketForSale(e.Owner, "Carrier")*MaintCarrier
-	return up * (100 - e.TechFactor()) / 100
+	return techLower(up, e.TechMaintFactor())
 }
 func (w *World) RegionsDue(e *Empire) int {
 	return e.RegionUpkeep() * w.Config.MaintCosts.Percent() / 100
