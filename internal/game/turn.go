@@ -692,31 +692,56 @@ func (w *World) processEconomy(e *Empire) {
 // Industrial production tuning (v1, tunable — see docs/mechanics-reference.md).
 // Industrial gold is credited via IncomeThisTurn (see industrialGold); this
 // governs unit production only.
+// industryMountainBoost is the multiplier Mountain regions give to unit
+// manufacturing, returned as an exact fraction num/den: BRE computes
+// 1 + MountainIndustryNum*Mountain/Total in floating point and truncates only
+// the final unit count, so rounding it to whole percent here costs real units.
+//
+// BRE ties industrial output to the *share* of the realm that is mountains, so
+// the boost dilutes as an empire expands elsewhere — a realm cannot hold the cap
+// without buying mountains alongside everything else.
+func industryMountainBoost(r RegionMix) (num, den int) {
+	total := r.Total()
+	if total == 0 {
+		return 1, 1
+	}
+	// Capped once MountainIndustryNum*Mountain/Total exceeds the cap's fraction.
+	if (100 + MountainIndustryNum*100*r.Mountain/total) > MountainIndustryCapPct {
+		return MountainIndustryCapPct, 100
+	}
+	return total + MountainIndustryNum*r.Mountain, total
+}
+
 // ProjectedProduction computes the units e would manufacture this turn at its
 // current Industrial regions, percentages, and specialization — without
 // applying them. Order matches the Set Industries screen: Troopers, Jets,
 // Turrets, Bombers, Tanks, Carriers.
 //
 // The percentage split always governs how points are allocated. On top of that,
-// specialization (per BRE's help: "increases the ability of your industries to
-// develop a specific type of military unit ... decreases your ability to
-// produce all other equipment") applies a per-unit efficiency modifier — a
-// bonus to the specialized unit, a penalty to everything else. The magnitudes
-// are reconstructed and tunable; the exact BRE values would come from a
-// disassembly of the original binary.
+// specialization applies a per-unit efficiency modifier — a bonus to the
+// specialized unit, a penalty to everything else — and Mountain regions boost
+// the whole pool (see industryMountainBoost).
+//
+// Binary-verified against BRE.OVR: the unit pool is UnitPointsPerRegion, which
+// is NOT the gold pool, and BRE keeps the whole chain in floating point and
+// ROUNDS once at the end. All three matter — using the gold pool overproduces by
+// ~24%, rounding the mountain boost to whole percent loses up to 0.3%, and
+// truncating instead of rounding is off by one unit whenever the fraction
+// exceeds a half (which is what the 1086-industrial live sample caught).
 func (w *World) ProjectedProduction(e *Empire) [6]int {
-	pts := e.Regions.Industrial * IndustryPointsPerRegion
+	boostNum, boostDen := industryMountainBoost(e.Regions)
 	made := func(name string, pct, cost int) int {
-		units := (pts * pct / 100) / cost
+		spec := 100
 		switch {
-		case e.Specialized == "" || e.Specialized == name:
-			if e.Specialized == name {
-				units = units * (100 + SpecialtyBonusPct) / 100
-			}
-		default:
-			units = units * (100 - SpecialtyPenaltyPct) / 100
+		case e.Specialized == name:
+			spec = 100 + SpecialtyBonusPct
+		case e.Specialized != "":
+			spec = 100 - SpecialtyPenaltyPct
 		}
-		return units
+		n := int64(e.Regions.Industrial) * UnitPointsPerRegion *
+			int64(pct) * int64(spec) * int64(boostNum)
+		d := int64(cost) * 100 * 100 * int64(boostDen)
+		return int((n + d/2) / d)
 	}
 	return [6]int{
 		made("Troopers", e.ProdTroopers, CostTrooper),

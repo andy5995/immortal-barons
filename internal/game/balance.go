@@ -253,18 +253,31 @@ const (
 	// IndustryPointsPerRegion is the gold-valued capacity each Industrial region
 	// yields per turn (live BRE ~2,548/region; IB uses a round 2,600).
 	IndustryPointsPerRegion = 2600
+	// UnitPointsPerRegion is the separate, smaller pool BRE spends on UNITS.
+	// Verified in BRE.OVR (0x34F49-0x3517A): each unit type's multiplier is
+	// exactly 2100/cost (21, 15, 14, 4.2, 1.4, 1.2). Gold and units do NOT share
+	// one pool size — gold uses IndustryPointsPerRegion above.
+	UnitPointsPerRegion = 2100
+	// Mountain regions boost unit manufacturing: the pool is multiplied by
+	// 1 + MountainIndustryNum*Mountain/TotalRegions, capped at
+	// MountainIndustryCapPct. Read from BRE.OVR and validated against 11 of 11
+	// live turret figures across three captures.
+	MountainIndustryNum    = 3
+	MountainIndustryCapPct = 150
 	// DefaultProdPct is each unit type's default production percentage — BRE's
 	// default is all six at 15% (90% to units, 10% remainder → industrial gold).
 	DefaultProdPct = 15
-	// Point cost to manufacture one unit, from live BRE (114 ind @ 15% →
-	// 455/325/303/30/91/26 → ratios 1 : 1.4 : 1.5 : 15 : 5 : 17.5).
+	// Point cost to manufacture one unit. BINARY-VERIFIED: BRE stores the
+	// reciprocal (units per point) as 21 / 15 / 14 / 4.2 / 1.4 / 1.2, which is
+	// exactly UnitPointsPerRegion/cost for these six values.
 	CostTrooper = 100
 	CostJet     = 140
 	CostTurret  = 150
 	CostTank    = 500
 	CostBomber  = 1500
 	CostCarrier = 1750
-	// Specialization efficiency (live BRE: specialize a unit → it +25%, others −15%).
+	// Specialization efficiency. BINARY-VERIFIED: the multipliers are exactly
+	// 1.25 for the specialized unit and 0.85 for every other.
 	SpecialtyBonusPct   = 25
 	SpecialtyPenaltyPct = 15
 

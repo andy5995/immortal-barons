@@ -358,11 +358,21 @@ this band — the earlier 1.0–1.5 reconstruction ran ~15–30% high):
 | Desert (solar) | 2,000 | 3,000 | widest swing |
 | River (hydro) | 100 | 5,000 | highest base; a river fishes instead some turns (#29) |
 
-**Industrial** regions don't use a fixed rate/base — each is one shared capacity
-pool (~2,600 gold-valued points/region, live-verified). The production
-percentages buy units (costs: trooper 100 / jet 140 / turret 150 / tank 500 /
-bomber 1,500 / carrier 1,750); the **unallocated %** pays out as gold 1:1.
-Specialize: +25% to the chosen unit, −15% to the rest.
+**Industrial** regions run **two separate pools**, both binary-verified against
+BRE.OVR:
+
+- **Gold** — `yield×55/100 + 2,500` per region, paid on the **unallocated %**
+  only (so allocating everything to units earns no industrial gold).
+- **Units** — a flat **2,100** points per region, unaffected by the yield draw,
+  which is why unit output is identical turn to turn while gold varies.
+  Costs: trooper 100 / jet 140 / turret 150 / tank 500 / bomber 1,500 /
+  carrier 1,750. Specialize: ×1.25 to the chosen unit, ×0.85 to the rest.
+
+The unit pool is multiplied by the **Mountain boost**,
+`min(1.5, 1 + 3 × Mountain / TotalRegions)` — mountains raise manufacturing by
+up to half, but the boost is a *share* of the realm, so it dilutes as an empire
+expands elsewhere. BRE keeps the whole chain in floating point and rounds once at
+the end.
 
 **Urban and Technology produce no direct gold** (BRE-verified): Urban is
 population housing, Technology is an efficiency multiplier (see the Technology
@@ -438,7 +448,8 @@ it flags "our people are still growing… add agricultural regions before then"
 set production percentages across trooper/jet/turret/tank/bomber/carrier.
 A common money tip: set industry to 100% carriers and *sell* the carriers
 — more profitable than producing gold directly. Mountain regions boost
-industrial output and are the most war-stable.
+industrial output (see the region table for the formula) and are the most
+war-stable.
 
 Guide region mixes for orientation: early game leans money regions
 (coastal + river, ~1:1, plus ~5–10% agricultural); a war build leans

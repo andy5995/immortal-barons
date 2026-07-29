@@ -108,7 +108,7 @@ func TestIndustryGoldIsUnallocatedCapacity(t *testing.T) {
 		t.Errorf("industrial gold/region at 90%% allocation: want %d, got %d", want, got)
 	}
 	p := w.ProjectedProduction(e)
-	if want := 114 * IndustryPointsPerRegion * 15 / 100 / CostTrooper; p[0] != want {
+	if want := 114 * UnitPointsPerRegion * 15 / 100 / CostTrooper; p[0] != want {
 		t.Errorf("troopers made: want %d, got %d", want, p[0])
 	}
 	if p[5] >= p[0] { // carriers cost far more -> far fewer than troopers
