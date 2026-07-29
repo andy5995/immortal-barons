@@ -365,15 +365,9 @@ different economic role:
   often it produces food instead — never rely on it for either alone.
 - **Agriculture** — grows food; food self-sufficiency.
 - **Urban** — more population, tax revenue, and trade capacity.
-- **Technology** — long-term efficiency, applied as the `TechFactor` percent. It
-  is **cumulative** (BRE-verified via live play): a per-empire `TechLevel`
-  accumulates each turn Technology regions are held (gain ∝ tech-share², ceiling
-  ∝ tech-share, hard cap `TechFactorCap`), so the bonus **ramps up over turns**
-  and is not the instantaneous share. `TechFactor` raises army strength, all gold
-  income (incl. tax), and food-region output by `tf`%; lowers upkeep on units
-  **and regions** (#20) and food spoilage to `100−tf`%. Produces no direct gold.
-  Constants (`TechGainDiv`, `TechCeilMul`, `TechFactorCap`) are IB's own tunable
-  reconstruction; see the `bre-binary-verified-math` notes for the live data.
+- **Technology** — long-term efficiency. Produces no direct gold. See the full
+  mechanic below; IB currently models it as a single accumulating `TechFactor`
+  percent, which is the right *shape* but not the original's structure.
 - **Industrial** — produces military goods; vital when buying arms is
   disabled and you must *build* instead. Also yields gold.
 
@@ -419,6 +413,67 @@ The unit pool is multiplied by the **Mountain boost**,
 up to half, but the boost is a *share* of the realm, so it dilutes as an empire
 expands elsewhere. BRE keeps the whole chain in floating point and rounds once at
 the end.
+
+## Technology (binary-verified)
+
+Read from the original binary and confirmed against live play. **IB does not
+implement this yet** — it uses one accumulating factor instead — so treat this
+section as the target, not a description of IB.
+
+**It is fifteen counters, not one level.** The empire record holds 15 research
+slots. Only **six** do anything; the other nine are pure dilution, so 9 of every
+15 research points are wasted.
+
+**Research per turn**, run just before the income phase:
+
+```
+if techRegions <= 0:  nothing happens at all
+points = 4 × round( (techRegions² / totalRegions)^0.75 )
+  + for each ally who also holds Technology:
+        round( (min(myTech, allyTech)² / totalRegions)^0.75 )     [not ×4]
+each point:  slot[random 0..14] += 1
+```
+
+So research is **quadratic in Technology regions and only inverse-linear in
+realm size** — it rewards a large tech block in a small realm.
+
+**Effect of a level**, per slot:
+
+```
+factor = 1 + (cap − 1) × (1 − exp( −level / (totalRegions + 1) ))
+```
+
+| effect | cap | applied as |
+|---|---:|---|
+| food decay | 5.0 | `100/factor` |
+| food production | 2.0 | `100×factor` |
+| SDI funding | 2.0 | `100/factor` |
+| gold income | 1.5 | `100×factor` |
+| population tax | 1.5 | `100×factor` |
+| military strength | 1.4 | `100×factor` |
+| maintenance costs | 1.4 | `100/factor` |
+| unit production | 1.35 | `100×factor` |
+
+Food decay has by far the largest ceiling, which is why it moves first and
+furthest — at low levels Technology is effectively a spoilage technology.
+
+**There is no decay.** The binary has exactly one write site and it only
+increments. Selling Technology regions makes research stop; the level itself
+**freezes permanently**. Confirmed live: a realm that dropped to zero Technology
+regions held identical advisor percentages across four further turns.
+
+**But the benefit dilutes as the realm grows**, since total regions is the
+denominator — which is what the in-game note means by "larger empires need more
+advanced technology to maintain the same efficiency." Confirmed live: with the
+level frozen at zero Technology regions, buying 500 regions moved food decay from
+72% to 89%, matching the formula's prediction exactly.
+
+Together those two properties mean a player can bank research cheaply while
+small, then liquidate the regions and keep the benefit — but cannot expand
+afterwards without giving most of it back. **IB keeps this behaviour
+deliberately** (see the tech-regions notes): the exploit is self-limiting,
+because a realm that stays small to preserve its technology pays for that in
+income, military and land.
 
 **Urban and Technology produce no direct gold** (BRE-verified): Urban is
 population housing, Technology is an efficiency multiplier (see the Technology
