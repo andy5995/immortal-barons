@@ -419,20 +419,29 @@ func (w *World) CrownTax(e *Empire) int {
 	return w.IncomeThisTurn(e).CrownTaxBase() * w.Config.PlanetaryTaxRate / 100
 }
 
-// regionYield returns this turn's income yield (percent, YieldMin..YieldMax)
-// for empire e's region type identified by salt. It is deterministic in
+// regionDraw returns this turn's income draw for empire e's region type
+// identified by salt: a uniform integer in [0, n). It is deterministic in
 // (w.GameDay, e.Name, salt) — NOT a fresh RNG draw — so IncomeThisTurn stays
 // pure and the income report always equals what CollectIncome credits. The
-// variance is per game-day: a good/bad "year" lasts the whole day.
-func (w *World) regionYield(e *Empire, salt int) int {
+// variance is per game-day: a good/bad "year" lasts the whole day, and each
+// region type draws independently.
+//
+// BRE draws the same way, straight over the Rate: its income sites call
+// Random(Rate) and add the Base, so per-region income is Base + [0, Rate). IB
+// used to draw a 0–100 percent and scale it, which could only land on multiples
+// of Rate/100 — the same range and mean, but coarser. Live play shows the finer
+// steps (one ore turn came out at Base + 279, which is not a multiple of 4).
+func (w *World) regionDraw(e *Empire, salt, n int) int {
+	if n <= 0 {
+		return 0
+	}
 	h := fnv.New32a()
 	var buf [8]byte
 	binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
 	binary.LittleEndian.PutUint32(buf[4:8], uint32(salt))
 	h.Write(buf[:])
 	io.WriteString(h, e.Name)
-	span := YieldMax - YieldMin + 1
-	return YieldMin + int(h.Sum32()%uint32(span))
+	return int(h.Sum32() % uint32(n))
 }
 
 // industrialGold is the empire's TOTAL industrial gold this turn (not per
@@ -442,7 +451,7 @@ func (w *World) regionYield(e *Empire, salt int) int {
 //
 // Binary-verified (BRE.OVR 0x34545–0x345D1), including the order of operations:
 //
-//	perRegion = yield*IndustryGoldRate/100 + IndustryGoldBase
+//	perRegion = [0, IndustryGoldRate) + IndustryGoldBase
 //	total     = perRegion * count / 100 * unallocated%
 //
 // Dividing by 100 before applying the percentage is BRE's own order, and it is
@@ -454,7 +463,7 @@ func (w *World) industrialGold(e *Empire) int {
 	if unalloc < 0 {
 		unalloc = 0
 	}
-	perRegion := w.regionYield(e, 5)*IndustryGoldRate/100 + IndustryGoldBase
+	perRegion := w.regionDraw(e, 5, IndustryGoldRate) + IndustryGoldBase
 	return perRegion * e.Regions.Industrial / 100 * unalloc
 }
 
@@ -462,10 +471,10 @@ func (w *World) industrialGold(e *Empire) int {
 // but an occasional "bad year" (a small deterministic chance, keyed off a
 // separate yield salt) that halves the take.
 func (w *World) riverGold(e *Empire) int {
-	if w.regionYield(e, 40) < YieldMin+RiverDudChancePct {
+	if w.regionDraw(e, 40, 100) < RiverDudChancePct {
 		return RiverBase / 2
 	}
-	return w.regionYield(e, 4)*RiverRate/100 + RiverBase
+	return w.regionDraw(e, 4, RiverRate) + RiverBase
 }
 
 // IncomeThisTurn itemizes e's income for the current turn. Each region's gold
@@ -477,7 +486,7 @@ func (w *World) riverGold(e *Empire) int {
 func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 	tf := e.TechFactor()
 	scale := func(n int64) int { return int(n * int64(100+tf) / 100) }
-	perRegion := func(salt, rate, base int) int { return w.regionYield(e, salt)*rate/100 + base }
+	perRegion := func(salt, rate, base int) int { return w.regionDraw(e, salt, rate) + base }
 
 	support := 10 + 90*e.Support/100 // support factor ×100: 0.10 + 0.90·(Support/100)
 	// Rivers do hydropower (gold) OR fishing (food) this turn, not both (#29).

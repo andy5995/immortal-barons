@@ -105,7 +105,7 @@ func TestIndustryGoldIsUnallocatedCapacity(t *testing.T) {
 	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 15, 15, 15
 	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 15, 15, 15
 	// 10%% unallocated of a 114-region pool, at whatever yield this game-day drew.
-	perRegion := w.regionYield(e, 5)*IndustryGoldRate/100 + IndustryGoldBase
+	perRegion := w.regionDraw(e, 5, IndustryGoldRate) + IndustryGoldBase
 	if got, want := w.industrialGold(e), perRegion*114/100*10; got != want {
 		t.Errorf("industrial gold at 90%% allocation: want %d, got %d", want, got)
 	}

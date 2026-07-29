@@ -382,17 +382,20 @@ of new land.
 
 **Region gold income (BRE-verified — disassembly of BRE.OVR, offsets
 0x342C0–0x34A4E).** Each gold region yields, per turn,
-`perRegion = yield×Rate/100 + Base`, times its region count. `yield` is a
-per-(game-day) percentage in the band **0–100**, drawn **independently for each
-region type** — it is not one planet-wide factor (in a single live turn, desert
-drew 0.97 while agriculture drew 0.00).
+`perRegion = Base + Random(Rate)` — a uniform integer draw over the **whole**
+of `[0, Rate)` — times its region count. So Base is the floor and Rate is the
+full width of the swing. Each region type draws **independently**; there is no
+planet-wide year factor (in one live turn desert drew near the top of its band
+while agriculture drew zero).
 
-The band is live-verified across four region types in two separate games, by
-back-computing the yield from the disassembled Rate/Base: desert 2.6–99.8,
-tourism 0.4–99.8, ore 0.5–99.8, hydro 2.0–99.0. Two earlier readings were wrong
-and are recorded here so they are not re-derived: a reconstructed 1.0–1.5 ran
-high, and a later 0.30–0.80 came from 7 mountain + 3 coastal + 2 river turns —
-the sample size at which any uniform distribution looks narrow.
+The draw is over every integer in the range, not a coarse percentage: one live
+ore turn came out at Base + **279**, which is not a multiple of Rate/100.
+
+Live-verified across four region types in two separate games, expressed as a
+share of Rate: desert 2.6–99.8%, tourism 0.4–99.8%, ore 0.5–99.8%, hydro
+2.0–99.0%. Two earlier readings were wrong and are recorded here so they are not
+re-derived: a reconstructed 1.0–1.5 multiplier ran high, and a later 0.30–0.80
+band came from 12 turns — the sample size at which any uniform looks narrow.
 
 | Region | Rate | Base | Notes |
 |--------|-----:|-----:|-------|

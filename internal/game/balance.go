@@ -19,10 +19,22 @@ package game
 
 // --- Region income (BRE-verified: BRE.OVR 0x342C0–0x34A4E) ---
 //
-// Per region, per turn: perRegion = yield*Rate/100 + Base, where yield is a
-// per-(game-day, empire, region) percent in [YieldMin, YieldMax]. Coastal is
-// additionally multiplied by a support factor (see IncomeThisTurn); Urban and
-// Technology produce NO direct gold (housing / maintenance-reduction only).
+// Per region, per turn: perRegion = Base + a uniform draw in [0, Rate), so Rate
+// is the full width of the swing and Base its floor (see World.regionDraw, which
+// mirrors BRE's Random(Rate) + Base). Each region type draws independently —
+// there is no planet-wide year factor; in one live turn desert drew near the top
+// of its band while agriculture drew zero.
+//
+// The band is live-verified across four region types in two separate games, by
+// back-computing the draw from these Rate/Base pairs: desert 2.6–99.8% of Rate,
+// tourism 0.4–99.8, ore 0.5–99.8, hydro 2.0–99.0. Two earlier readings were
+// wrong and are recorded so nobody re-derives them: a reconstructed 1.0–1.5
+// multiplier ran high, and a later 0.30–0.80 band came from 12 turns — the
+// sample size at which any uniform looks narrow.
+//
+// Coastal is additionally multiplied by a support factor (see IncomeThisTurn);
+// Urban and Technology produce NO direct gold (housing / maintenance-reduction
+// only).
 const (
 	MountainRate, MountainBase = 400, 3550  // ore — smallest Rate, most stable
 	CoastalRate, CoastalBase   = 1000, 3750 // tourism — × support factor
@@ -31,9 +43,7 @@ const (
 )
 
 // RiverDudChancePct is the chance a River's hydropower has a "bad year" and pays
-// half. Kept at the ~10% the game has always used, restated as a percentage now
-// that the yield band is [0,100] (it was written as YieldMin+5 against the old
-// 51-wide band).
+// half. Kept at the ~10% the game has always used.
 //
 // UNVERIFIED, and the live evidence is against it: across roughly 29 captured
 // hydropower turns every figure was a clean yield*Rate/100 + Base, with no
@@ -54,20 +64,6 @@ const RiverDudChancePct = 10
 // docks morale rather than support at 40 for unpaid forces. The tax is the
 // mildest of the three.
 const CrownTaxSupportPenalty = 15
-
-// Yield band. Each region type draws its OWN factor in this band per turn, which
-// multiplies that region's Rate on top of its Base — it is not one planet-wide
-// year factor (same turn, live: desert drew 0.97 while agriculture drew 0.00).
-//
-// The band is the full [0, 100]. Live-verified across four region types and two
-// separate games, back-computing the yield from the disassembled Rate/Base:
-// desert 2.6–99.8, tourism 0.4–99.8, ore 0.5–99.8, hydro 2.0–99.0. An earlier
-// reading of [30, 80] came from 7 mountain + 3 coastal + 2 river turns — the
-// sample size that makes any uniform look narrow.
-const (
-	YieldMin = 0
-	YieldMax = 100
-)
 
 // --- New-realm starting setup ---
 //
