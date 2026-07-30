@@ -71,6 +71,21 @@ then exit.
   *after* the game loads it (old saves are migrated and missing fields filled
   in), so it can differ from the raw `world.json` file. Useful for scripts and
   for checking game balance.
+- **`-spectate N`** — Play the game forward N days with no human players, then
+  exit, printing a summary of each day and a final table of every realm. It does
+  not reset the game first, so pair it with `-reset-from-config` for a clean run:
+
+    ```
+    immortal-barons -data ./sandbox -reset-from-config
+    immortal-barons -data ./sandbox -spectate 30
+    ```
+
+    This is a balance-checking tool, not something a board needs to run. It
+    exists so the computer barons can be watched playing against each other, to
+    see whether they expand sensibly, whether wars happen, and whether the game
+    collapses to one realm too quickly. **It plays real turns and saves the
+    result**, so only use it on a game you are willing to advance — never on a
+    live board.
 
 ### Inter-BBS
 
