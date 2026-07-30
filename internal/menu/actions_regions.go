@@ -179,6 +179,10 @@ func buyLand(s session.Session, w *ctx) Result {
 				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
 					fmt.Sprintf(tr(s, "%d %s regions purchased. Gold: %d"), n, regionTypeNames[t], gold), ansi.Reset)
 			}
+			// A concurrent node may have hit this empire while the player was
+			// buying (region losses change the rising land price); surface it
+			// here rather than waiting for the next menu redraw.
+			flushSessionNews(s, w)
 			p = w.Player() // refresh the display pointer for the next iteration
 		}
 	}

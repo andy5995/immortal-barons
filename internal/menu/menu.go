@@ -37,6 +37,13 @@ type ctx struct {
 	cached    *game.Empire
 	cachedGen uint64
 	cachedSet bool
+	// seenEvents high-water-marks how many of the active empire's Events this
+	// session has already accounted for, so the post-action check can show only
+	// the ones another node appended while the player sat at a menu. The first
+	// check baselines (backlog belongs to the turn-start recap); see
+	// takeSessionNews.
+	seenEvents    int
+	seenEventsSet bool
 	// UTF8 reports whether this session can display UTF-8. When false (a CP437
 	// door/terminal) all output is forced to English, since non-English text
 	// cannot be represented in CP437.
@@ -335,6 +342,17 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 // ReadKey error otherwise.
 func Run(s session.Session, g *ctx, root *Menu) error {
 	s = &langSession{Session: s, c: g}
+	// Baseline the mid-session news marker before the first draw, so an event
+	// arriving during the very first action counts as news rather than being
+	// mistaken for pre-session backlog. Guarded: only the outermost Run pays the
+	// extra transaction.
+	if !g.seenEventsSet {
+		g.With(func() {
+			if p := g.Player(); p != nil {
+				g.takeSessionNews(p)
+			}
+		})
+	}
 	stack := []*Menu{root}
 	for len(stack) > 0 {
 		cur := stack[len(stack)-1]
@@ -357,12 +375,17 @@ func Run(s session.Session, g *ctx, root *Menu) error {
 		case kindGoto:
 			stack = append(stack, res.target)
 		}
-		// Eliminated mid-session: another node's attack (or a WMD strike) can kill
-		// this empire while the caller is playing. Once dead — or gone entirely —
-		// the caller may not keep playing the corpse. End the whole session via
-		// session.End so the unwind reaches GameLoop even from a nested Run (e.g.
-		// the pre-turn Diplomacy menu); the collapse notice prints once.
-		if eliminated(g) {
+		// One post-action transaction covers both mid-session hazards: events
+		// another node appended while the player sat here (an attack, a covert
+		// strike — shown as a notice so they aren't acting on stale numbers), and
+		// elimination (another node's attack or a WMD strike killed this empire —
+		// the caller may not keep playing the corpse). The news prints first so a
+		// collapsing player sees what killed them; End unwinds the whole session
+		// via session.End so it reaches GameLoop even from a nested Run (e.g. the
+		// pre-turn Diplomacy menu); the collapse notice prints once.
+		news, dead := postActionCheck(g)
+		printSessionNews(s, news)
+		if dead {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
 				tr(s, "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."),
 				ansi.Reset)
@@ -372,16 +395,71 @@ func Run(s session.Session, g *ctx, root *Menu) error {
 	return nil
 }
 
-// eliminated reports whether the active empire is gone or dead, read under the
-// world lock so a concurrent maintenance tick (web front-end) can't race the
-// Alive check. A nil Player (removed) counts as eliminated too.
-func eliminated(g *ctx) bool {
-	dead := false
+// postActionCheck runs the shared after-every-action inspection under one world
+// transaction (on the door that is a reload, so it sees other nodes' commits):
+// events that arrived mid-session, and whether the empire is gone or dead. A
+// nil Player (removed) counts as eliminated too.
+func postActionCheck(g *ctx) (news []string, dead bool) {
 	g.With(func() {
 		p := g.Player()
-		dead = p == nil || !p.Alive
+		if p == nil {
+			dead = true
+			return
+		}
+		dead = !p.Alive
+		news = g.takeSessionNews(p)
 	})
-	return dead
+	return news, dead
+}
+
+// takeSessionNews returns the events appended to p since this session last
+// looked, and removes them from p.Events so the turn-start recap won't repeat
+// them. Must run under the world lock, with p freshly resolved. The first call
+// only baselines: the backlog that existed before the session's first action
+// belongs to the "since your last play" recap, not to a mid-session notice.
+func (c *ctx) takeSessionNews(p *game.Empire) []string {
+	if !c.seenEventsSet {
+		c.seenEvents, c.seenEventsSet = len(p.Events), true
+		return nil
+	}
+	if len(p.Events) < c.seenEvents {
+		// The turn-start recap printed and cleared them; start over from here.
+		c.seenEvents = len(p.Events)
+	}
+	if len(p.Events) == c.seenEvents {
+		return nil
+	}
+	news := append([]string(nil), p.Events[c.seenEvents:]...)
+	p.Events = p.Events[:c.seenEvents]
+	return news
+}
+
+// printSessionNews renders the mid-session notice: what other nodes did to this
+// empire while its player sat at a menu or prompt. Printed after the action, so
+// it lands above the next redraw (menus don't clear the screen) — the player
+// sees it before they act again.
+func printSessionNews(s session.Session, news []string) {
+	if len(news) == 0 {
+		return
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
+		tr(s, "While you were at the menus, this has happened:"), ansi.Reset)
+	for _, ev := range news {
+		fmt.Fprintf(s, "  %s\n", hiNums(ev))
+	}
+}
+
+// flushSessionNews shows any mid-session news immediately, for long in-action
+// loops (Buy Regions) where the player may not return to a menu redraw for many
+// prompts. Runs its own transaction; safe to call between prompts.
+func flushSessionNews(s session.Session, g *ctx) {
+	var news []string
+	g.With(func() {
+		if p := g.Player(); p != nil {
+			news = g.takeSessionNews(p)
+		}
+	})
+	printSessionNews(s, news)
 }
 
 // 62 columns wide, matching BRE's main menu rules (from a live capture).

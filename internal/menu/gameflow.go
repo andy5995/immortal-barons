@@ -196,6 +196,10 @@ func showTurnEvents(s session.Session, w *ctx) {
 	withPlayer(w, func(p *game.Empire) {
 		events = p.Events
 		p.Events = nil
+		// The recap consumed everything; re-baseline the mid-session notice so an
+		// event appended right after this clear still shows (takeSessionNews's
+		// shrink-reset alone couldn't tell it from part of the cleared backlog).
+		w.seenEvents, w.seenEventsSet = 0, true
 	})
 	if len(events) == 0 {
 		return

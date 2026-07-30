@@ -182,6 +182,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 
 	var report string
 	var captured int
+	var trimmed bool
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		d := findTarget(w, p, name)
 		if d == nil {
@@ -190,6 +191,11 @@ func regularAttack(s session.Session, w *ctx) Result {
 		if !w.CanAttack(p) {
 			return errAttacksExhausted
 		}
+		// The committed force was typed against the pre-prompt holdings; if a
+		// concurrent node's strike thinned them meanwhile, clampTo in Attack sends
+		// only what remains — note it so the player learns the numbers moved.
+		trimmed = force.Troopers > p.Troopers || force.Tanks > p.Tanks ||
+			force.Bombers > p.Bombers || force.Jets > min(p.Jets, p.Carriers*game.JetsPerCarrier)
 		// Deferred capture (autoCapture=false): the defender bleeds its regions but
 		// the attacker gains none yet, so the human can pick the types below (#58).
 		report, captured = w.World.Attack(p, d, force, false)
@@ -198,6 +204,11 @@ func regularAttack(s session.Session, w *ctx) Result {
 	if err != nil {
 		fail(s, err)
 		return Stay
+	}
+	if trimmed {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
+			tr(s, "Your forces changed while you prepared the attack — only units still under your command were sent."),
+			ansi.Reset)
 	}
 	fmt.Fprintf(s, "\n%s\n", hiNums(report))
 	if captured > 0 {

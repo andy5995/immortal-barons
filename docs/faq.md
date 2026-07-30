@@ -71,5 +71,8 @@ See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset
 - Each action reads and writes the shared game file under a brief lock, so
   nodes wait for each other only for the instant of a change, not for a whole
   session.
+- If your empire is attacked while you are at the menus, a notice appears the
+  next time you press a key. Orders you already typed are adjusted to what you
+  still hold, and the game tells you when that happens.
 - The web version also serves several players at once (as its own separate
   game, not as a BBS door).

@@ -7,6 +7,8 @@
     with DOOR32.SYS and DOOR.SYS
   * An ally in a Full Defense Alliance now sends 30% of its mobile
     forces to help defend you
+  * A player attacked while at the menus now sees a notice at their next
+    keypress, and attack/sell orders trimmed by concurrent losses say so
   * Desert regions earn more, matching the original game
   * Read Messages now shows one message at a time (Reply/Delete/Ignore/
     Quit), matching the original — Ignore keeps a message for next time,
