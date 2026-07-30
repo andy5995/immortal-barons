@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -405,7 +406,7 @@ func BuildMenus() *Menus {
 		}
 		return gameMenu.byKey(rune(key), w)
 	}
-	gameMenu.Status = gameMenuStatus
+	gameMenu.Header = gameMenuStatus
 
 	return &Menus{
 		Spending:       buy,
@@ -460,18 +461,31 @@ func foodMarketStatus(w *ctx) string {
 	return fmt.Sprintf(i18n.T(lang, "%s  You have %s gold."), supply, formatGold(w.Player().Gold, lang))
 }
 
-// gameMenuStatus shows the game's start date on the opening menu (BRE displays it
-// there) plus the current game day. Before the start date arrives it announces
-// when the game begins; an immediate-start game (no configured date) shows only
-// the day.
+// gameMenuStatus is the line ABOVE the opening menu's title rule, where BRE puts
+// it: "Game started on 7-8-2026". The game day is deliberately absent — BRE does
+// not show it there, and it used to sit in a footer under the menu.
+//
+// Before the start date arrives it announces when the game begins instead. A
+// game with no configured start date has nothing to report, so the line is
+// omitted entirely rather than inventing one.
 func gameMenuStatus(w *ctx) string {
 	lang := playerLang(w)
 	d := w.Config.GameStartDate
 	if d == "" {
-		return fmt.Sprintf(i18n.T(lang, "Game Day %d"), w.GameDay)
+		return ""
 	}
 	if w.Today != "" && !w.Config.GameStarted(w.Today) {
 		return fmt.Sprintf(i18n.T(lang, "The game begins %s."), d)
 	}
-	return fmt.Sprintf(i18n.T(lang, "Game started %s  ·  Day %d"), d, w.GameDay)
+	return fmt.Sprintf(i18n.T(lang, "Game started on %s"), breDate(d))
+}
+
+// breDate renders an ISO date the way BRE writes it on that line: M-D-YYYY with
+// no leading zeros (a live capture shows "7-8-2026").
+func breDate(iso string) string {
+	t, err := time.Parse("2006-01-02", iso)
+	if err != nil {
+		return iso
+	}
+	return fmt.Sprintf("%d-%d-%d", int(t.Month()), t.Day(), t.Year())
 }

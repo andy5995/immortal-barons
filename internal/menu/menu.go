@@ -224,6 +224,9 @@ type Menu struct {
 	// return means no default this time. Takes priority over ExitOnEnter.
 	DefaultOnEnter func(*ctx) *Item
 	Status         func(*ctx) string // optional status bar under the menu
+	// Header is an optional line drawn ABOVE the title rule. BRE puts the game's
+	// start date there, over the opening menu, rather than in a footer.
+	Header func(*ctx) string
 	// Columns opts a menu into a multi-column item block (BRE draws its menus
 	// in columns). 0 or 1 keeps the default one-item-per-line layout; 2 or 3
 	// lay the selectable items out row-major across that many columns. Only
@@ -472,6 +475,13 @@ func draw(s session.Session, g *ctx, m *Menu) {
 			col = ansi.FgBrightCyan
 		}
 		lang := playerLang(g)
+		if m.Header != nil {
+			if h := m.Header(g); h != "" {
+				// Figures in bright-white against white body text, the same accent the
+				// footer uses.
+				fmt.Fprintf(&b, "%s%s%s\n", ansi.FgWhite, hiNumsReset(h, ansi.FgBrightWhite, ansi.FgWhite), ansi.Reset)
+			}
+		}
 		fmt.Fprintf(&b, "%s\n", titleRule(col, i18n.T(lang, m.Title), m.ruleWidth()))
 		cols := m.hasColumns(g)
 		ownedCol := cols && m.hasOwnedColumn(g)
