@@ -2,7 +2,6 @@ package menu
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -462,30 +461,21 @@ func foodMarketStatus(w *ctx) string {
 }
 
 // gameMenuStatus is the line ABOVE the opening menu's title rule, where BRE puts
-// it: "Game started on 7-8-2026". The game day is deliberately absent — BRE does
-// not show it there, and it used to sit in a footer under the menu.
+// it. The game day is deliberately absent — BRE does not show it there, and it
+// used to sit in a footer under the menu.
 //
-// Before the start date arrives it announces when the game begins instead. A
-// game with no configured start date has nothing to report, so the line is
-// omitted entirely rather than inventing one.
+// It reports World.StartedDate, the day the game actually began, NOT
+// Config.GameStartDate: the latter is the date a sysop scheduled the game for
+// and is empty on the common "start immediately" setup, which left the line
+// blank on any default board. Before a scheduled start arrives it announces when
+// the game begins instead.
 func gameMenuStatus(w *ctx) string {
 	lang := playerLang(w)
-	d := w.Config.GameStartDate
-	if d == "" {
-		return ""
-	}
-	if w.Today != "" && !w.Config.GameStarted(w.Today) {
+	if d := w.Config.GameStartDate; d != "" && w.Today != "" && !w.Config.GameStarted(w.Today) {
 		return fmt.Sprintf(i18n.T(lang, "The game begins %s."), d)
 	}
-	return fmt.Sprintf(i18n.T(lang, "Game started on %s"), breDate(d))
-}
-
-// breDate renders an ISO date the way BRE writes it on that line: M-D-YYYY with
-// no leading zeros (a live capture shows "7-8-2026").
-func breDate(iso string) string {
-	t, err := time.Parse("2006-01-02", iso)
-	if err != nil {
-		return iso
+	if w.StartedDate == "" {
+		return "" // no maintenance has run yet, so the game has not begun
 	}
-	return fmt.Sprintf("%d-%d-%d", int(t.Month()), t.Day(), t.Year())
+	return fmt.Sprintf(i18n.T(lang, "Game started on %s"), w.StartedDate)
 }

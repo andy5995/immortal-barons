@@ -457,6 +457,12 @@ type World struct {
 	// FoodMarketDailySupply each day's maintenance (issue #19).
 	FoodMarketSupply int
 	LastMaintDate    string
+	// StartedDate is the real date the game actually began — the first day
+	// maintenance ran with the game underway. Config.GameStartDate is the date a
+	// sysop SCHEDULED it for and is usually empty (start immediately), so it
+	// cannot answer "when did this game start?" on its own. The opening menu
+	// shows this, the way BRE prints its start date above the menu.
+	StartedDate string
 	// LastMaintRun is the REAL date maintenance last actually ran, as distinct
 	// from LastMaintDate, which is the game's own clock. The two diverge whenever
 	// a game sits idle: maintenance advances the game clock by at most one day per
@@ -559,6 +565,7 @@ func (w *World) initFreshGame() {
 	w.FoodMarketSupply = FoodMarketDailySupply
 	w.LastMaintDate = ""
 	w.LastMaintRun = ""
+	w.StartedDate = ""
 	w.NewsToday = nil
 	w.NewsYesterday = nil
 	w.BulletinToday = DailyBulletin{}

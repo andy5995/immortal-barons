@@ -140,3 +140,43 @@ func TestAIBaronsAreNeverReaped(t *testing.T) {
 		t.Errorf("AI barons should never be reaped: %d -> %d", before, got)
 	}
 }
+
+// The world records the day the game actually began, which is what the opening
+// menu reports. Config.GameStartDate cannot answer that on its own: it is the
+// date a sysop SCHEDULED the game for, and is empty on the common
+// start-immediately setup.
+func TestStartedDateRecordedAtFirstMaintenance(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	if w.StartedDate != "" {
+		t.Fatalf("a fresh world has not started yet, got %q", w.StartedDate)
+	}
+
+	w.DailyMaintenance("2026-07-30")
+	if w.StartedDate != "2026-07-30" {
+		t.Errorf("StartedDate: want 2026-07-30, got %q", w.StartedDate)
+	}
+
+	// It is the day the game BEGAN, so later days must not move it.
+	w.DailyMaintenance("2026-07-31")
+	if w.StartedDate != "2026-07-30" {
+		t.Errorf("StartedDate should not move with the clock, got %q", w.StartedDate)
+	}
+}
+
+// A game scheduled for a future date has not begun, so nothing is recorded
+// until the start date arrives.
+func TestStartedDateWaitsForScheduledStart(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.GameStartDate = "2026-08-10"
+	w := NewWorldSeed(cfg, 1)
+
+	w.DailyMaintenance("2026-08-01")
+	if w.StartedDate != "" {
+		t.Errorf("the game has not started yet, got %q", w.StartedDate)
+	}
+
+	w.DailyMaintenance("2026-08-10")
+	if w.StartedDate != "2026-08-10" {
+		t.Errorf("StartedDate should be the scheduled start, got %q", w.StartedDate)
+	}
+}

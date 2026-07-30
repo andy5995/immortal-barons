@@ -80,6 +80,10 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		w.LastMaintDate = today
 		return MaintReport{NotStarted: true}
 	}
+	// The first maintenance that runs with the game underway is the day it began.
+	if w.StartedDate == "" {
+		w.StartedDate = today
+	}
 	if w.LastMaintDate == "" {
 		// First maintenance of a fresh game: play the AI barons' opening turns (they
 		// were seeded with a full day's TurnsLeft) so the first human to log in meets
