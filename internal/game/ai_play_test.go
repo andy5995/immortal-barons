@@ -188,3 +188,101 @@ func TestAICovertSparesAllies(t *testing.T) {
 		t.Error("an AI should not run covert ops against its own defense-pact partner")
 	}
 }
+
+// A pair of empires holds exactly ONE relation, matching BRE's enum (#88).
+// Forming a new one replaces whatever stood before, so diplomacy is a choice
+// rather than an accumulation.
+func TestOneRelationPerPair(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+
+	form := func(ttype string) {
+		w.ProposeTreaty(a, b, ttype)
+		if !w.AcceptTreaty(b, a.Name, ttype) {
+			t.Fatalf("setup: %s was not accepted", ttype)
+		}
+	}
+	form("Full Defense Alliance")
+	if !w.AreAllied(a, b) {
+		t.Fatal("setup: the defense alliance did not take effect")
+	}
+
+	form("Tariff Trade Agreement")
+	if got := w.TreatiesBetween(a, b); len(got) != 1 || got[0] != "Tariff Trade Agreement" {
+		t.Errorf("a second pact should replace the first, got %v", got)
+	}
+	if w.AreAllied(a, b) {
+		t.Error("trading away a defense alliance should end it")
+	}
+}
+
+// Declaring war ends the agreement and costs no popular support; BRE's manual
+// says that is the whole point of the option.
+func TestDeclareWarCostsNoSupport(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	w.ProposeTreaty(a, b, "Free Trade Agreement")
+	w.AcceptTreaty(b, a.Name, "Free Trade Agreement")
+	a.Support = 90
+
+	w.DeclareWar(a, b)
+
+	if got := w.Relation(a, b); got != RelationEnemy {
+		t.Errorf("relation after declaring war: want %q, got %q", RelationEnemy, got)
+	}
+	if a.Support != 90 {
+		t.Errorf("declaring war should cost no support, 90 -> %d", a.Support)
+	}
+}
+
+// Breaking a pact by attacking instead of declaring war causes the "internal
+// troubles" the manual contrasts a Declaration Of War against.
+func TestAttackingAPartnerBreachesAndCostsSupport(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	w.ProposeTreaty(a, b, "Tariff Trade Agreement")
+	w.AcceptTreaty(b, a.Name, "Tariff Trade Agreement")
+	a.Support, a.Protection, b.Protection = 90, 0, 0
+
+	w.Attack(a, b, FullForce(a), true)
+
+	if got := w.Relation(a, b); got != RelationEnemy {
+		t.Errorf("attacking a partner should leave the pair at %q, got %q", RelationEnemy, got)
+	}
+	if a.Support != 90-TreatyBreachSupportPenalty {
+		t.Errorf("breaching should cost %d support: 90 -> %d", TreatyBreachSupportPenalty, a.Support)
+	}
+	// Attacking a realm you had no pact with is not a breach.
+	c := w.AddHuman("c", "Gamma")
+	c.Protection = 0
+	a.Support = 90
+	w.Attack(a, c, FullForce(a), true)
+	if a.Support != 90 {
+		t.Errorf("attacking a non-partner is no breach, 90 -> %d", a.Support)
+	}
+}
+
+// A save written before #88 could stack several relations on one pair; loading
+// must collapse each pair to a single one.
+func TestEnsureTreatiesCollapsesStackedPairs(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Treaties = []Treaty{
+		{Type: "Full Defense Alliance", A: "Alpha", B: "Beta"},
+		{Type: "Tariff Trade Agreement", A: "Alpha", B: "Beta"},
+		{Type: "Free Trade Agreement", A: "Alpha", B: "Gamma"},
+	}
+
+	w.EnsureTreaties()
+
+	if len(w.Treaties) != 2 {
+		t.Fatalf("want one relation per pair (2 pairs), got %v", w.Treaties)
+	}
+	for _, tr := range w.Treaties {
+		if tr.A == "Alpha" && tr.B == "Beta" && tr.Type != "Tariff Trade Agreement" {
+			t.Errorf("the last recorded relation should win, got %q", tr.Type)
+		}
+	}
+}

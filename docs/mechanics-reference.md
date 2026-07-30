@@ -961,10 +961,11 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 
 ## Diplomacy
 
-**IB and BRE differ in cardinality — see #88.** The original stores ONE relation
-value per pair of empires, so forming a pact replaces whatever stood before. IB
-stores a *list*, so the same two realms may hold several treaties at once. The
-relation enum, decoded from BRE.OVR's value→name dispatch (table at 0x1C0E3):
+**One relation per pair (BRE-faithful, #88).** Two empires hold exactly ONE
+relation at a time, so forming a pact **replaces** whatever stood before —
+trading a Full Defense Alliance for a Tariff Trade Agreement gives up the
+alliance. IB previously kept a list and let realms stack every benefit at once.
+The relation enum, decoded from BRE.OVR's value→name dispatch (table at 0x1C0E3):
 
 | value | relation | | value | relation |
 |---:|---|---|---:|---|
@@ -975,9 +976,30 @@ relation enum, decoded from BRE.OVR's value→name dispatch (table at 0x1C0E3):
 | 3 | Free Trade Agreement | | 8 | Declaration Of War |
 
 This is also the independent confirmation that **6 is Technology Agreement**, the
-value the Technology Agreement research bonus keys on. Note the original's two
-hostile states, **Enemy** and **Declaration Of War**, which IB does not model at
-all: BRE treats hostility as a formal relation, not just the absence of a pact.
+value the Technology Agreement research bonus keys on. Menu index equals relation
+value for 1–8, so the Diplomacy menu's numbering *is* the enum.
+
+**Declaration Of War is the formal way to end an agreement, not a separate war
+system.** BRE's own instructions: *"This is used to break an agreement with
+another empire without causing internal troubles in your realm. The treaty is not
+officially broken until the other realm is notified."* Two consequences, both
+implemented:
+
+- **Declaring war costs nothing at home** and leaves the pair at **Enemy**
+  (`World.DeclareWar`), mailing the other realm.
+- **Breaking a pact any other way does cost you.** Attacking a realm you hold an
+  agreement with breaches it: the pair drops to Enemy and the breaker loses
+  `TreatyBreachSupportPenalty` popular support (`World.breachTreaty`, called from
+  `Attack`). The original does not publish the size of that penalty, so the
+  figure is IB's own.
+
+**Known simplification:** the original says a treaty "is not officially broken
+until the other realm is notified", implying the old pact still binds until the
+message lands. IB breaks it immediately and mails the notice in the same step;
+that delay window is not modelled.
+
+A save written before this held stacked relations; `EnsureTreaties` collapses
+each pair to the last one recorded on load.
 
 Seven treaty types are proposed / accepted / broken through the Diplomacy menu,
 and each carries a gameplay effect (#11 wired the last two):

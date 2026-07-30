@@ -211,7 +211,14 @@ func (w *World) aiProposeTreaty(e *Empire) {
 	// realm, which is the one worth binding by treaty rather than by arms.
 	var to *Empire
 	for _, other := range w.Empires {
-		if other == e || !other.Alive || w.HasTreaty(e, other, ttype) {
+		// A pair holds one relation (#88), so proposing to a realm it is already
+		// bound to would REPLACE that pact. An AI should not churn its own
+		// diplomacy; it only courts realms it has no agreement with, or ones it is
+		// currently at war with (suing for peace).
+		if other == e || !other.Alive {
+			continue
+		}
+		if rel := w.Relation(e, other); rel != "" && rel != RelationEnemy {
 			continue
 		}
 		if to == nil || w.NetWorth(other) > w.NetWorth(to) {

@@ -192,6 +192,13 @@ const (
 // funny.
 const ProclamationChancePct = 35
 
+// TreatyBreachSupportPenalty is the popular support a baron loses for ending an
+// agreement by attacking a partner instead of declaring war first. BRE's manual
+// says Declaration Of War breaks a pact "without causing internal troubles in
+// your realm", so the route that skips it must cause them — the original does
+// not publish the size, and this is IB's own figure. Tunable.
+const TreatyBreachSupportPenalty = 10
+
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income
 // as an inline "6 − f(tax)" × Population shape that was only partially
 // recovered. Calibrated to BRE's first-turn income report: a new realm

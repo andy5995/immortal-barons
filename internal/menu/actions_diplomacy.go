@@ -288,10 +288,11 @@ func declareWar(s session.Session, w *ctx) Result {
 			err = errTargetGone
 			return
 		}
-		for _, tt := range w.World.TreatiesBetween(p, target) {
-			w.World.BreakTreaty(p, target, tt)
-			broke = append(broke, tt)
-		}
+		// One relation per pair (#88), so this ends whatever stood and leaves the
+		// two realms hostile. DeclareWar is the route that costs no popular
+		// support — breaking a pact by attacking instead does (breachTreaty).
+		broke = w.World.TreatiesBetween(p, target)
+		w.World.DeclareWar(p, target)
 	})
 	if err != nil {
 		fail(s, err)
@@ -300,7 +301,7 @@ func declareWar(s session.Session, w *ctx) Result {
 	if len(broke) == 0 {
 		ok(s, "You declared war on %s.", targetName)
 	} else {
-		ok(s, "You declared war on %s. Treaties broken: %s", targetName, strings.Join(broke, ", "))
+		ok(s, "You declared war on %s. Agreement ended: %s", targetName, strings.Join(broke, ", "))
 	}
 	return Stay
 }

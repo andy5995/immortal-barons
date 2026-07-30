@@ -98,9 +98,13 @@ func TestNegotiateTreatyAcceptsMatchingOffer(t *testing.T) {
 	}
 }
 
-// TestDeclareWarBreaksAllTreaties checks BRE's Declaration Of War ends every
-// standing treaty with the chosen target in one action.
-func TestDeclareWarBreaksAllTreaties(t *testing.T) {
+// TestDeclareWarEndsTheRelation checks BRE's Declaration Of War ends the
+// standing agreement with the chosen target, leaving the pair hostile.
+//
+// A pair holds exactly ONE relation (#88), so this also pins the replacement
+// rule: accepting a second pact supersedes the first rather than stacking with
+// it. The test used to assert two treaties could be held at once.
+func TestDeclareWarEndsTheRelation(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
 	var target *game.Empire
@@ -117,15 +121,15 @@ func TestDeclareWarBreaksAllTreaties(t *testing.T) {
 	w.World.AcceptTreaty(target, p.Name, "Full Defense Alliance")
 	w.World.ProposeTreaty(p, target, "Free Trade Agreement")
 	w.World.AcceptTreaty(target, p.Name, "Free Trade Agreement")
-	if held := w.World.TreatiesBetween(p, target); len(held) != 2 {
-		t.Fatalf("setup: want 2 treaties held, got %v", held)
+	if got := w.World.Relation(p, target); got != "Free Trade Agreement" {
+		t.Fatalf("the later pact should replace the earlier one, got %q", got)
 	}
 
 	f := &fakeSession{keys: []rune("1\ry")} // pick the empire, then confirm
 	if res := declareWar(f, w); res != Stay {
 		t.Fatalf("declareWar = %v, want Stay", res)
 	}
-	if held := w.World.TreatiesBetween(p, target); len(held) != 0 {
-		t.Errorf("want all treaties broken after Declaration Of War, got %v", held)
+	if got := w.World.Relation(p, target); got != game.RelationEnemy {
+		t.Errorf("after a Declaration Of War the pair should be %q, got %q", game.RelationEnemy, got)
 	}
 }

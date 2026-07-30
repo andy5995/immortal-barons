@@ -28,8 +28,21 @@ var TreatyTypes = []string{
 
 const fullDefenseAlliance = "Full Defense Alliance"
 
-// Treaty is a standing agreement of a given type between two empires. A and B
-// are the empire names in canonical (sorted) order so a pair has one key.
+// RelationEnemy is the hostile state a pair falls into when one side declares
+// war or breaks a pact by attacking. It is stored as a Treaty row like any other
+// relation so a pair always has exactly one entry (see setRelation); it is not a
+// treaty and confers nothing.
+//
+// BRE keeps ONE relation value per pair — its enum runs -1 Enemy, 0 None, then
+// 1..7 for the seven pacts and 8 Declaration Of War (BRE.OVR value->name
+// dispatch, table at 0x1C0E3). IB used to keep a LIST, so the same two realms
+// could stack a trade pact, an intelligence alliance and a defense alliance at
+// once and collect every benefit. Forming a relation now REPLACES whatever stood
+// before, which is what makes diplomacy a choice (#88).
+const RelationEnemy = "Enemy"
+
+// Treaty is the single standing relation between two empires. A and B are the
+// empire names in canonical (sorted) order so a pair has one key.
 type Treaty struct {
 	Type string
 	A, B string
@@ -65,16 +78,46 @@ func (w *World) HasTreaty(a, b *Empire, ttype string) bool {
 	return hasTreatyRaw(w.Treaties, ttype, x, y)
 }
 
-// TreatiesBetween returns the types of treaty a and b currently share.
+// TreatiesBetween returns the relation a and b currently hold, as a slice so
+// existing callers and displays are unchanged. A pair has at most one, so this
+// returns zero or one element.
 func (w *World) TreatiesBetween(a, b *Empire) []string {
 	x, y := treatyPair(a.Name, b.Name)
-	var out []string
 	for _, t := range w.Treaties {
 		if t.A == x && t.B == y {
-			out = append(out, t.Type)
+			return []string{t.Type}
 		}
 	}
-	return out
+	return nil
+}
+
+// Relation returns the single relation between a and b, or "" when they have
+// none. This is the accessor that matches BRE's model; TreatiesBetween is the
+// list-shaped view kept for display code.
+func (w *World) Relation(a, b *Empire) string {
+	x, y := treatyPair(a.Name, b.Name)
+	for _, t := range w.Treaties {
+		if t.A == x && t.B == y {
+			return t.Type
+		}
+	}
+	return ""
+}
+
+// setRelation makes ttype the ONLY relation between a and b, replacing whatever
+// stood before. Passing "" clears the pair to no relation at all (BRE's 0/None).
+func (w *World) setRelation(aName, bName, ttype string) {
+	x, y := treatyPair(aName, bName)
+	out := w.Treaties[:0]
+	for _, t := range w.Treaties {
+		if !(t.A == x && t.B == y) {
+			out = append(out, t)
+		}
+	}
+	w.Treaties = out
+	if ttype != "" {
+		w.Treaties = append(w.Treaties, Treaty{Type: ttype, A: x, B: y})
+	}
 }
 
 // AreAllied reports a standing Full Defense Alliance — the pact that blocks
@@ -210,10 +253,9 @@ func (w *World) AcceptTreaty(me *Empire, fromName, ttype string) bool {
 	if !found {
 		return false
 	}
-	x, y := treatyPair(me.Name, fromName)
-	if !hasTreatyRaw(w.Treaties, ttype, x, y) {
-		w.Treaties = append(w.Treaties, Treaty{Type: ttype, A: x, B: y})
-	}
+	// A pair holds one relation, so accepting REPLACES whatever stood before —
+	// taking a trade pact with an ally gives up the defense alliance.
+	w.setRelation(me.Name, fromName, ttype)
 	return true
 }
 
@@ -234,16 +276,47 @@ func (w *World) DeclineTreaty(me *Empire, fromName, ttype string) bool {
 	return found
 }
 
-// BreakTreaty ends a treaty of ttype between a and b.
+// BreakTreaty ends a treaty of ttype between a and b, leaving them with no
+// relation. A no-op when that is not the relation they hold.
 func (w *World) BreakTreaty(a, b *Empire, ttype string) {
-	x, y := treatyPair(a.Name, b.Name)
-	out := w.Treaties[:0]
-	for _, t := range w.Treaties {
-		if !(t.Type == ttype && t.A == x && t.B == y) {
-			out = append(out, t)
-		}
+	if w.Relation(a, b) == ttype {
+		w.setRelation(a.Name, b.Name, "")
 	}
-	w.Treaties = out
+}
+
+// DeclareWar is BRE's Declaration Of War: the formal way to end an agreement.
+// Its manual is explicit that this breaks a pact "without causing internal
+// troubles in your realm" — so unlike breaching a treaty by attacking
+// (breachTreaty), it costs no popular support. The pair is left at Enemy and the
+// other realm is notified by mail.
+//
+// SIMPLIFICATION, flagged rather than hidden: the original says "the treaty is
+// not officially broken until the other realm is notified", implying the old
+// pact still stands until the message lands. IB breaks it at once and mails the
+// notice in the same step; the delayed-break window is not modelled.
+func (w *World) DeclareWar(a, b *Empire) {
+	w.setRelation(a.Name, b.Name, RelationEnemy)
+	w.SendMail(a, b, Message{
+		To:   w.EmpireLetter(b),
+		When: w.DateForDay(w.GameDay),
+		Body: "Declares war on your realm. Any agreement between us is ended.",
+	})
+}
+
+// breachTreaty ends a pact the dishonourable way — by attacking a realm you had
+// an agreement with. BRE's manual describes Declaration Of War as the route that
+// avoids "internal troubles in your realm", so the route that skips it must
+// cause them: the breaker loses popular support. A pair already at Enemy, or
+// with no relation, is not a breach and costs nothing.
+func (w *World) breachTreaty(a, b *Empire) {
+	rel := w.Relation(a, b)
+	if rel == "" || rel == RelationEnemy {
+		return
+	}
+	w.setRelation(a.Name, b.Name, RelationEnemy)
+	a.adjustSupport(-TreatyBreachSupportPenalty)
+	a.Events = append(a.Events, fmt.Sprintf("Breaking the %s with %s without declaring war cost you popular support.", rel, b.Name))
+	b.Events = append(b.Events, fmt.Sprintf("%s attacked you, breaking the %s between your realms.", a.Name, rel))
 }
 
 // EnsureTreaties migrates a save that predates typed treaties: old untyped
@@ -267,4 +340,25 @@ func (w *World) EnsureTreaties() {
 		}
 		e.AllianceOffers = nil
 	}
+
+	// Collapse any pair that carries more than one relation. Saves written before
+	// #88 could stack several treaties on one pair; the model now allows exactly
+	// one, so keep the LAST recorded and discard the rest — the most recently
+	// agreed relation is the one that would have replaced the others.
+	seen := map[[2]string]bool{}
+	kept := make([]Treaty, 0, len(w.Treaties))
+	for i := len(w.Treaties) - 1; i >= 0; i-- {
+		t := w.Treaties[i]
+		key := [2]string{t.A, t.B}
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		kept = append(kept, t)
+	}
+	// kept is in reverse order; restore the original ordering for stable output.
+	for l, r := 0, len(kept)-1; l < r; l, r = l+1, r-1 {
+		kept[l], kept[r] = kept[r], kept[l]
+	}
+	w.Treaties = kept
 }

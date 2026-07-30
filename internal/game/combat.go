@@ -119,6 +119,11 @@ func (w *World) CanAttack(e *Empire) bool {
 func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report string, captured int) {
 	a.AttacksToday++ // counts against the daily individual-attack cap (both human and AI)
 	f = f.clampTo(a) // only units the attacker actually holds can be committed
+	// Attacking a realm you hold an agreement with ends it the dishonourable way
+	// and costs popular support at home — the "internal troubles" BRE's manual
+	// says a Declaration Of War avoids (#88). Runs before the battle so the
+	// alliance reinforcement below sees the broken relation.
+	w.breachTreaty(a, d)
 	var b strings.Builder
 	fmt.Fprintf(&b, "%s attacks %s!\n\n", a.Name, d.Name)
 
