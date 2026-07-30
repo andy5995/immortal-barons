@@ -205,11 +205,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	if trimmed {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
-			tr(s, "Your forces changed while you prepared the attack — only units still under your command were sent."),
-			ansi.Reset)
-	}
+	warnTrimmedForce(s, trimmed)
 	fmt.Fprintf(s, "\n%s\n", hiNums(report))
 	if captured > 0 {
 		allocateCaptured(s, w, captured)
@@ -218,6 +214,18 @@ func regularAttack(s session.Session, w *ctx) Result {
 	// One attack per turn: leave the War menu so the turn moves forward (BRE-
 	// style — the player can't keep attacking until their next turn).
 	return Back
+}
+
+// warnTrimmedForce tells the player their committed force was clamped because
+// a concurrent node's strike thinned their holdings between the prompt and the
+// launch (regular attacks and pirate raids both clamp silently at game level).
+func warnTrimmedForce(s session.Session, trimmed bool) {
+	if !trimmed {
+		return
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
+		tr(s, "Your forces changed while you prepared the attack — only units still under your command were sent."),
+		ansi.Reset)
 }
 
 // pickAttackTarget renders the living rivals in IB's familiar scores-table
@@ -378,7 +386,11 @@ func attackPirates(s session.Session, w *ctx) Result {
 	// after a concurrent node's reload, and clamps against the fresh stock.
 	var report string
 	var captured int
+	var trimmed bool
 	err := w.mutatePlayer(func(fp *game.Empire) error {
+		// Like regularAttack: the committed force was typed against pre-prompt
+		// holdings; RaidFaction clamps to the fresh stock, so say when it did.
+		trimmed = troopers > fp.Troopers || jets > fp.Jets || tanks > fp.Tanks
 		report, captured = w.World.RaidFaction(fp, f-1, troopers, jets, tanks)
 		return nil
 	})
@@ -386,6 +398,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
+	warnTrimmedForce(s, trimmed)
 	fmt.Fprintf(s, "\n%s\n", hiNums(report))
 	// A pirate win with land opens the same type picker a Regular Attack uses; a
 	// landless faction wins gold/military only, so no picker appears (#21, BRE).

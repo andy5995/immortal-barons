@@ -27,11 +27,7 @@ func TestAttackedWhileOnlineDefenderBuysConsistently(t *testing.T) {
 		p.Troopers = 10000
 		p.Gold = game.PriceTrooper * 1000
 	})
-	commitOnFile(t, cfg, func(w *game.World) {
-		m := w.AddHuman("mallory", "Malloria")
-		m.Protection = 0
-		m.Troopers = 1_000_000
-	})
+	addMallory(t, cfg, 1_000_000)
 	startLand := committedEmpire(t, cfg, "bob").Land
 
 	var postAttackTroopers, postAttackLand int
@@ -73,11 +69,9 @@ func TestAllyBledWhileOnlineBuysConsistently(t *testing.T) {
 	commitOnFile(t, cfg, func(w *game.World) {
 		d := w.AddHuman("bob", "Defendia")
 		d.Protection = 0
-		m := w.AddHuman("mallory", "Malloria")
-		m.Protection = 0
-		m.Troopers = 1_000_000
 		w.Treaties = append(w.Treaties, game.Treaty{Type: "Full Defense Alliance", A: "Carolia", B: "Defendia"})
 	})
+	addMallory(t, cfg, 1_000_000)
 
 	var postBleedTroopers int
 	fb := &hookSession{
@@ -112,11 +106,7 @@ func TestCrushedWhileOnlineEndsSessionFileBacked(t *testing.T) {
 		p.Protection = 0
 		p.Troopers = 0
 	})
-	commitOnFile(t, cfg, func(w *game.World) {
-		m := w.AddHuman("mallory", "Malloria")
-		m.Protection = 0
-		m.Troopers = 1_000_000
-	})
+	addMallory(t, cfg, 1_000_000)
 
 	fb := &hookSession{
 		fakeSession: fakeSession{keys: []rune("x")},

@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
@@ -121,13 +122,23 @@ func TestBuyRegionsVanishedEmpireConflict(t *testing.T) {
 	commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("alice")) }) // another node removes it
 
 	fb := &fakeSession{keys: []rune("C1\r0")}
-	buyLand(fb, b)
+	// The post-purchase flush now ends the session outright when the realm is
+	// gone (the player may not keep shopping as a corpse), so buyLand unwinds
+	// via session.End instead of returning.
+	var err error
+	func() {
+		defer session.GuardEnd(&err)
+		buyLand(fb, b)
+	}()
 
 	if d := committedEmpire(t, cfg, "decoy"); d.Regions.Coastal != startDecoy {
 		t.Fatalf("decoy coastal = %d, want %d — a stale pointer bought regions for the wrong empire", d.Regions.Coastal, startDecoy)
 	}
 	if out := fb.out.String(); !strings.Contains(out, "realm has changed") {
 		t.Fatalf("node B should have aborted with the realm-changed notice, got: %q", out)
+	}
+	if err == nil {
+		t.Fatal("a session whose realm vanished must end at the flush, not keep the Buy Regions loop open")
 	}
 }
 

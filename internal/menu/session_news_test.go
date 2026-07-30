@@ -22,14 +22,15 @@ func commitAttackOn(t *testing.T, cfg game.Config, handle string) {
 	})
 }
 
-func addMallory(t *testing.T, cfg game.Config) {
+// addMallory commits the attacking node's realm with the given army. 40k wins
+// against a 10k defender but wounds rather than crushes; 1M crushes a
+// starting-size realm outright (the capture floor alone can take all its land).
+func addMallory(t *testing.T, cfg game.Config, troopers int) {
 	t.Helper()
 	commitOnFile(t, cfg, func(w *game.World) {
 		m := w.AddHuman("mallory", "Malloria")
 		m.Protection = 0
-		// Strong enough to win, weak enough that one attack wounds rather than
-		// crushes — a crushed player ends the session, which is a different test.
-		m.Troopers = 40_000
+		m.Troopers = troopers
 	})
 }
 
@@ -48,7 +49,7 @@ func TestMidSessionAttackNoticeShownOnce(t *testing.T) {
 		e := w.FindByOwner("bob")
 		w.GrantRegions(e, &e.Regions.Coastal, 300)
 	})
-	addMallory(t, cfg)
+	addMallory(t, cfg, 40_000)
 
 	ticks := 0
 	m := &Menu{Title: "Idle Test", Items: []Item{
@@ -119,7 +120,12 @@ func TestBuyLandFlushesNewsMidLoop(t *testing.T) {
 		p.Gold = 10_000_000
 		p.LandAvailable = 100
 	})
-	addMallory(t, cfg)
+	// Enough territory to be wounded, not crushed (see the notice test above).
+	commitOnFile(t, cfg, func(w *game.World) {
+		e := w.FindByOwner("bob")
+		w.GrantRegions(e, &e.Regions.Coastal, 300)
+	})
+	addMallory(t, cfg, 40_000)
 	postActionCheck(b) // stand in for the menu navigation that precedes buyLand
 
 	fb := &hookSession{
@@ -161,6 +167,72 @@ func TestRegularAttackReportsTrimmedForce(t *testing.T) {
 
 	if out := fb.out.String(); !strings.Contains(out, "only units still under your command were sent") {
 		t.Fatalf("expected the trimmed-force notice, got: %q", out)
+	}
+}
+
+// TestPirateRaidReportsTrimmedForce: RaidFaction clamps the committed force to
+// fresh stock just like a Regular Attack does — the raider must be told too.
+func TestPirateRaidReportsTrimmedForce(t *testing.T) {
+	_, b, cfg := twoNodeWorld(t, "bob", "Defendia", nil, func(p *game.Empire) {
+		p.Protection = 0
+		p.Troopers = 10000
+	})
+
+	fb := &hookSession{
+		// Faction 1, commit 10000 troopers, defaults for jets/tanks.
+		fakeSession: fakeSession{keys: []rune("110000\r\r\r")},
+		marker:      "Commit how many Troopers?",
+		hook: func() {
+			commitOnFile(t, cfg, func(w *game.World) { w.FindByOwner("bob").Troopers = 100 })
+		},
+	}
+	attackPirates(fb, b)
+
+	if out := fb.out.String(); !strings.Contains(out, "only units still under your command were sent") {
+		t.Fatalf("expected the trimmed-force notice, got: %q", out)
+	}
+}
+
+// TestBuyLandEndsCrushedSession: a player crushed to total conquest while
+// inside the Buy Regions loop must be stopped at the next flush, not left
+// shopping with the corpse's gold until they choose to leave.
+func TestBuyLandEndsCrushedSession(t *testing.T) {
+	_, b, cfg := twoNodeWorld(t, "bob", "Defendia", nil, func(p *game.Empire) {
+		p.Protection = 0
+		p.Gold = 10_000_000
+		p.LandAvailable = 100
+	})
+	addMallory(t, cfg, 1_000_000)
+	postActionCheck(b) // stand in for the menu navigation that precedes buyLand
+
+	fb := &hookSession{
+		// Coastal, quantity 5 — the crush lands mid-prompt; the post-purchase
+		// flush must end the session before another prompt is offered.
+		fakeSession: fakeSession{keys: []rune("C5\r0")},
+		marker:      "Buy how many Coastal regions?",
+		hook: func() {
+			commitOnFile(t, cfg, func(w *game.World) {
+				a, d := w.FindByOwner("mallory"), w.FindByOwner("bob")
+				for i := 0; d.Alive && i < 200; i++ {
+					w.Attack(a, d, game.FullForce(a), true)
+				}
+				if d.Alive {
+					t.Fatal("could not crush the defender in 200 attacks — test setup is wrong")
+				}
+			})
+		},
+	}
+	var err error
+	func() {
+		defer session.GuardEnd(&err)
+		buyLand(fb, b)
+	}()
+
+	if err == nil {
+		t.Fatalf("a crushed player must not keep buying; buyLand returned normally: %q", fb.out.String())
+	}
+	if !strings.Contains(fb.out.String(), "collapsed") {
+		t.Errorf("expected the collapse notice, got %q", fb.out.String())
 	}
 }
 

@@ -386,10 +386,7 @@ func Run(s session.Session, g *ctx, root *Menu) error {
 		news, dead := postActionCheck(g)
 		printSessionNews(s, news)
 		if dead {
-			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
-				tr(s, "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."),
-				ansi.Reset)
-			session.End(io.EOF)
+			endCollapsed(s)
 		}
 	}
 	return nil
@@ -449,17 +446,26 @@ func printSessionNews(s session.Session, news []string) {
 	}
 }
 
-// flushSessionNews shows any mid-session news immediately, for long in-action
+// endCollapsed prints the elimination notice and unwinds the whole session via
+// session.End, so it reaches GameLoop even from a nested Run or from inside an
+// action loop.
+func endCollapsed(s session.Session) {
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
+		tr(s, "Your empire has collapsed — you have been eliminated. Return on a later day to build a new realm."),
+		ansi.Reset)
+	session.End(io.EOF)
+}
+
+// flushSessionNews runs the post-action check immediately, for long in-action
 // loops (Buy Regions) where the player may not return to a menu redraw for many
-// prompts. Runs its own transaction; safe to call between prompts.
+// prompts: mid-session news prints between prompts, and a player whose empire
+// was crushed mid-loop stops here instead of shopping on as a corpse.
 func flushSessionNews(s session.Session, g *ctx) {
-	var news []string
-	g.With(func() {
-		if p := g.Player(); p != nil {
-			news = g.takeSessionNews(p)
-		}
-	})
+	news, dead := postActionCheck(g)
 	printSessionNews(s, news)
+	if dead {
+		endCollapsed(s)
+	}
 }
 
 // 62 columns wide, matching BRE's main menu rules (from a live capture).
