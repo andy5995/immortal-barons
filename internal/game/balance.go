@@ -374,7 +374,7 @@ const (
 	FoodPerAgri = 300
 	// Rivers produce BOTH gold and food every turn — a DELIBERATE DIVERGENCE.
 	// In BRE a river does hydropower OR fishing each turn, never both, and it
-	// fished on 19 of 63 captured turns (~30%). IB pays the same expected value
+	// fished on 21 of 73 captured turns (~29%). IB pays the same expected value
 	// with none of the swing: RiverFishShare of a river's output is taken as
 	// food, the rest as hydropower gold. A player committed to rivers otherwise
 	// watches millions of gold appear and vanish turn to turn with no way to plan
@@ -519,20 +519,35 @@ const (
 	GroupAttackLossPct = 15
 )
 
-// --- Upkeep / maintenance (reconstructed / tunable) ---
+// --- Upkeep / maintenance (BRE-verified — live capture, Maintenance Costs
+// "Medium") ---
 //
-// Per-unit gold maintenance per turn (Technology reduces the total via
-// TechFactor — see Empire.ForcesUpkeep). Ratios follow BRE's guide table
-// (×10 of the 0.60/1.20/0.90/1.30/0.60/0.10 figures).
+// Per-unit maintenance per turn, in TENTHS of a gold (Technology reduces the
+// total via TechFactor — see Empire.ForcesUpkeep). The guide table's
+// 0.60/1.20/0.90/1.30/0.60/0.10 figures are literal gold, not a ratio to scale:
+// a live capture of a turret-only empire was charged exactly
+// trunc(0.9 × turrets) at five army sizes from 49,691 turrets (44,721 gold) to
+// 219,032 (197,128). IB previously charged these as whole gold — ten times
+// BRE's rate. Only the turret rate is live-confirmed; the other five come from
+// the same guide table and move with it.
 const (
-	MaintTrooper = 6
-	MaintJet     = 12
-	MaintTurret  = 9
-	MaintBomber  = 13
-	MaintTank    = 6
-	MaintCarrier = 1
+	MaintTrooperTenths = 6
+	MaintJetTenths     = 12
+	MaintTurretTenths  = 9
+	MaintBomberTenths  = 13
+	MaintTankTenths    = 6
+	MaintCarrierTenths = 1
 
-	RegionUpkeepPerLand = 2 // gold per region of land, per turn
+	MaintTenthsPerGold = 10
+
+	// RegionUpkeepPerLand is gold per region of land, per turn — flat, with no
+	// dependence on region type or empire size. Live-verified across four empire
+	// sizes in two separate games, exact every time: 15 regions → 13,695 gold,
+	// 5,917 → 5,402,221, 6,397 → 5,840,461, 6,837 → 6,242,181. Region upkeep is
+	// the dominant drain in BRE (that last empire owed 6.2M on land against
+	// 197k on a 219,032-turret army); IB's old figure of 2 made expansion
+	// effectively free.
+	RegionUpkeepPerLand = 913
 )
 
 // --- Net-worth weights (BRE-verified — guide net-worth table) ---

@@ -151,6 +151,21 @@ The same decomposition recovered per-unit maintenance as a by-product: on the
 turret-producing turns the per-region figure sits at 920.375 rather than 913, and
 the gap is 44,392 turrets × 0.9 — matching the Medium maintenance table.
 
+Both figures were later confirmed **directly**, without the decomposition, by a
+capture taken with Auto-Pay off: the itemised `N gold is required to maintain
+your regions` line divides exactly by 913 at four empire sizes from 15 regions
+(13,695 gold) to 6,837 (6,242,181), across two separate games and every region
+mix — so the rate is flat, with no dependence on type or size. On the same
+capture a turret-only army was charged exactly `trunc(0.9 × turrets)` at four
+sizes up to 219,032 turrets (197,128 gold), confirming the Medium table's
+figures are literal gold rather than a ratio.
+
+Region upkeep is the dominant drain: that 6,837-region empire owed 6.2M on land
+against 197k on a 219,032-strong army. IB charges both figures as of the
+constants in `balance.go` (`RegionUpkeepPerLand`, `Maint*Tenths`); before that it
+charged 2 gold per region and ten times BRE's per-unit rate, which made expansion
+effectively free and armies disproportionately expensive.
+
 IB's config field **Max Tax Rate** is *not* BRE's Planetary Tax Rate, despite
 having started life as a misreading of it. BRE caps nothing — its own prompt
 offers `New Tax Rate [0-100]` regardless of that config value. IB keeps a player

@@ -183,10 +183,42 @@ func TestForcesUpkeepFormula(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
 	// newEmpire has Troopers=100 and no other units, no Technology regions => no
-	// TechFactor reduction.
-	want := 100*6 + 0*12 + 0*9 + 0*13 + 0*6 + 0*1
+	// TechFactor reduction. Rates are tenths of a gold, truncated on the total.
+	want := (100*6 + 0*12 + 0*9 + 0*13 + 0*6 + 0*1) / 10
 	if got := e.ForcesUpkeep(); got != want {
 		t.Errorf("ForcesUpkeep: want %d, got %d", want, got)
+	}
+}
+
+// TestUpkeepMatchesLiveBRE pins both upkeep rates to figures captured from the
+// original at Maintenance Costs "Medium". These are the fidelity contract: a
+// failure here means IB has stopped charging what BRE charged, not that the
+// test needs updating.
+func TestUpkeepMatchesLiveBRE(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+
+	forces := []struct{ turrets, want int }{
+		{49691, 44721}, {99382, 89443}, {159207, 143286}, {219032, 197128},
+	}
+	for _, c := range forces {
+		e := w.AddHuman("f"+string(rune(c.turrets%26+'a')), "Fortress")
+		e.Troopers, e.Turrets = 0, c.turrets
+		if got := e.ForcesUpkeep(); got != c.want {
+			t.Errorf("ForcesUpkeep(%d turrets) = %d, want %d", c.turrets, got, c.want)
+		}
+	}
+
+	// Flat per region, whatever the type mix or empire size.
+	regions := []struct{ land, want int }{
+		{15, 13695}, {5917, 5402221}, {6397, 5840461}, {6837, 6242181},
+	}
+	for _, c := range regions {
+		e := w.AddHuman("r"+string(rune(c.land%26+'a')), "Realm")
+		e.Regions = RegionMix{Coastal: c.land}
+		e.Land = c.land
+		if got := e.RegionUpkeep(); got != c.want {
+			t.Errorf("RegionUpkeep(%d regions) = %d, want %d", c.land, got, c.want)
+		}
 	}
 }
 

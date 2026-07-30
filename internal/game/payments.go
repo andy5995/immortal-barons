@@ -32,11 +32,12 @@ const (
 // regions lower it (same factor income uses); this is the formula the old
 // auto-deducted maintenance used.
 // Per-unit maintenance follows BRE's Medium table (Trooper 0.60, Jet 1.20,
-// Turret 0.90, Bomber 1.30, Tank 0.60, Carrier 0.10 gold/turn) scaled ×10, so
-// the ratios match the original exactly. Bombers were previously omitted.
+// Turret 0.90, Bomber 1.30, Tank 0.60, Carrier 0.10 gold/turn), held in tenths
+// and truncated once on the total — BRE charged exactly trunc(0.9 × turrets)
+// for a turret-only army.
 func (e *Empire) ForcesUpkeep() int {
-	base := e.Troopers*MaintTrooper + e.Jets*MaintJet + e.Turrets*MaintTurret + e.Bombers*MaintBomber + e.Tanks*MaintTank + e.Carriers*MaintCarrier
-	return techLower(base, e.TechMaintFactor())
+	tenths := e.Troopers*MaintTrooperTenths + e.Jets*MaintJetTenths + e.Turrets*MaintTurretTenths + e.Bombers*MaintBomberTenths + e.Tanks*MaintTankTenths + e.Carriers*MaintCarrierTenths
+	return techLower(tenths/MaintTenthsPerGold, e.TechMaintFactor())
 }
 
 // RegionUpkeep is the gold required to maintain the empire's regions. Technology
@@ -68,13 +69,13 @@ func (w *World) ForcesDue(e *Empire) int {
 // maintenance doesn't work. Same per-unit rates and Technology scaling as
 // ForcesUpkeep; food and agents have no upkeep.
 func (w *World) listedForcesUpkeep(e *Empire) int {
-	up := w.MarketForSale(e.Owner, "Trooper")*MaintTrooper +
-		w.MarketForSale(e.Owner, "Jet")*MaintJet +
-		w.MarketForSale(e.Owner, "Turret")*MaintTurret +
-		w.MarketForSale(e.Owner, "Bomber")*MaintBomber +
-		w.MarketForSale(e.Owner, "Tank")*MaintTank +
-		w.MarketForSale(e.Owner, "Carrier")*MaintCarrier
-	return techLower(up, e.TechMaintFactor())
+	tenths := w.MarketForSale(e.Owner, "Trooper")*MaintTrooperTenths +
+		w.MarketForSale(e.Owner, "Jet")*MaintJetTenths +
+		w.MarketForSale(e.Owner, "Turret")*MaintTurretTenths +
+		w.MarketForSale(e.Owner, "Bomber")*MaintBomberTenths +
+		w.MarketForSale(e.Owner, "Tank")*MaintTankTenths +
+		w.MarketForSale(e.Owner, "Carrier")*MaintCarrierTenths
+	return techLower(tenths/MaintTenthsPerGold, e.TechMaintFactor())
 }
 func (w *World) RegionsDue(e *Empire) int {
 	return e.RegionUpkeep() * w.Config.MaintCosts.Percent() / 100

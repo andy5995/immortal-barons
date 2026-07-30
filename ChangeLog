@@ -9,6 +9,9 @@
     forces to help defend you
   * A player attacked while at the menus now sees a notice at their next
     keypress, and attack/sell orders trimmed by concurrent losses say so
+  * Land maintenance now costs what it does in the original — much more
+    than before, so holding a large realm is a real expense; military
+    maintenance is ten times cheaper, also matching the original
   * Desert regions earn more, matching the original game
   * Read Messages now shows one message at a time (Reply/Delete/Ignore/
     Quit), matching the original — Ignore keeps a message for next time,
