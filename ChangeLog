@@ -13,6 +13,37 @@
     only Delete removes it
   * A Regular Attack captures more regions from a target whose net worth
     is spread thin over its land, and fewer from a dense, developed one
+  * Technology regions now work as in the original: research builds up
+    over many turns across fifteen areas, and selling the regions keeps
+    what you have already learned
+  * The Queen Royale now takes a tax from each turn's income; paying her
+    short costs popular support (#52)
+  * Rivers now produce gold and food every turn, instead of one or the
+    other (#67)
+  * Popular support now follows the original's math: a tax rate under
+    30% wins support back every turn, and riots cost more the harder you
+    tax
+  * The gold asked for to boost popular support now grows with your
+    population
+  * Land is no longer unlimited — each realm gets a daily allowance of
+    new land it may buy ("Land Created / Day" in the game settings)
+  * Two empires now hold one agreement at a time, as in the original: a
+    new pact replaces the one before it (#88)
+  * Declaration Of War ends an agreement with no cost at home; attacking
+    a realm you have an agreement with breaks it and costs you popular
+    support instead (#88)
+  * Computer barons play far better — they build a mix of region types,
+    manufacture their own units, set their tax rate, propose treaties,
+    run covert operations, and turn to defense when threatened (#69)
+  * A realm whose owner never played a turn is removed at the next
+    maintenance, and so is any realm left unplayed for 10 days; you can
+    always start a new realm afterwards (#83)
+  * Maintenance now advances the game at most one day at a time, so the
+    computer barons cannot race ahead while nobody is playing
+  * The date the game started now appears above the main menu
+  * The Queen Royale now makes proclamations in the daily news
+  * Sysops: "immortal-barons -spectate N" plays a computer-only game for
+    N days and prints a per-day summary, for balance testing (#42)
 
 2026-07-24 (v0.0.2)
   * Winning a Regular Attack now lets you choose the types of the
