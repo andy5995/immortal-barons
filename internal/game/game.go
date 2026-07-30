@@ -304,7 +304,7 @@ func (e *Empire) Offense() int {
 }
 
 func (e *Empire) Defense() int {
-	sum := e.Troopers + e.Turrets*2 + e.Tanks*4*(100+e.HQ)/100
+	sum := e.Troopers + e.Turrets*2 + tankStrength(e.Tanks, e.HQ)
 	return techRaise(sum, e.TechMilitaryFactor())
 }
 

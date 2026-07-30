@@ -141,13 +141,53 @@ func TestHQBoostsTanks(t *testing.T) {
 		t.Errorf("Defense should rise with HQ=100: base=%d boosted=%d", baseDefense, boostedDefense)
 	}
 
-	wantOffenseDelta := e.Tanks * 4
-	if boostedOffense-baseOffense != wantOffenseDelta {
-		t.Errorf("Offense delta: want %d (tanks doubled), got %d", wantOffenseDelta, boostedOffense-baseOffense)
+	// BRE weighs a tank at 3 troopers with no HQ and 5 with a finished one, so a
+	// completed HQ adds 2 troopers' worth per tank — not the 4 IB used to add.
+	wantDelta := e.Tanks * 2
+	if boostedOffense-baseOffense != wantDelta {
+		t.Errorf("Offense delta: want %d, got %d", wantDelta, boostedOffense-baseOffense)
 	}
-	wantDefenseDelta := e.Tanks * 4
-	if boostedDefense-baseDefense != wantDefenseDelta {
-		t.Errorf("Defense delta: want %d (tanks doubled), got %d", wantDefenseDelta, boostedDefense-baseDefense)
+	if boostedDefense-baseDefense != wantDelta {
+		t.Errorf("Defense delta: want %d, got %d", wantDelta, boostedDefense-baseDefense)
+	}
+}
+
+// TestTankStrengthMatchesLiveBRE pins the curve read out of the original: a tank
+// is worth 3 troopers at HQ 0, 4 at 50 (breins.txt's "equivalent of four
+// Troopers"), and 5 at 100. Fidelity contract — a failure means IB has stopped
+// matching, not that the numbers need updating.
+func TestTankStrengthMatchesLiveBRE(t *testing.T) {
+	for _, c := range []struct{ hq, want int }{{0, 300}, {25, 350}, {50, 400}, {75, 450}, {100, 500}} {
+		if got := tankStrength(100, c.hq); got != c.want {
+			t.Errorf("tankStrength(100 tanks, HQ %d) = %d troopers, want %d", c.hq, got, c.want)
+		}
+	}
+}
+
+// TestHQBuildRate: BRE starts a bought HeadQuarters at 5% and adds 5 at the end
+// of every turn while it sits in 1..99. The purchase happens during the spending
+// phase, so the buying turn's own end-of-turn advance counts — 5 goes to 10 that
+// same turn, and the build finishes 19 turns after the purchase.
+func TestHQBuildRate(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	e.Gold = HQCost
+	if err := w.StartHQ(e); err != nil {
+		t.Fatalf("StartHQ: %v", err)
+	}
+	if e.HQ != HQBuildStart {
+		t.Fatalf("a new HeadQuarters starts at %d%%, got %d", HQBuildStart, e.HQ)
+	}
+	turns := 0
+	for e.HQ < 100 {
+		w.PlayTurn(e, "2026-07-03")
+		turns++
+		if turns > 50 {
+			t.Fatalf("HeadQuarters stalled at %d%%", e.HQ)
+		}
+	}
+	if turns != 19 {
+		t.Errorf("HeadQuarters took %d turns to finish, want 19", turns)
 	}
 }
 

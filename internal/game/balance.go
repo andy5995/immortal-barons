@@ -340,9 +340,42 @@ const BombMarketLossPct = 25
 // tunable once the real figure is known.
 const MarketCommissionPct = 0
 
+// --- HeadQuarters (BRE-verified: BRE.OVR 0xD010, 0x12C8C, 0x40241/0x4043D) ---
+//
+// A tank's strength in hundredths of a trooper, rising with HQ completion:
+// 300 at HQ 0%, 400 at 50%, 500 at 100%. BRE computes it as the real
+// (1.5 + HQ/100) against a trooper's 0.5 and a jet's/turret's 1.0 — the same
+// 1 : 2 : 3..5 ratio in whole troopers. breins.txt calls a tank "about the
+// equivalent of four Troopers", which is the HQ-50 value, not a base: the
+// manual and the binary agree once the HQ term is read.
+//
+// IB previously used 4 rising to 8, which both started a third too high and
+// doubled the HQ's marginal value.
+const (
+	TankStrengthPctBase  = 300
+	TankStrengthPctPerHQ = 2
+)
+
+// tankStrength values n tanks in troopers, given HQ completion percent.
+func tankStrength(n, hq int) int {
+	return n * (TankStrengthPctBase + TankStrengthPctPerHQ*hq) / 100
+}
+
+// HQBuildStart is the completion percent a newly bought HeadQuarters begins at,
+// and HQBuildPerTurn is what it gains each turn until it reaches 100 — so it
+// takes 20 turns. Both read from the original (the turn routine advances the
+// field only while it sits in 1..99, then clamps to [0,100]).
+const (
+	HQBuildStart   = 5
+	HQBuildPerTurn = 5
+)
+
 // --- Misc gold costs (reconstructed / tunable) ---
 const (
-	HQCost = 5104 // gold to start HeadQuarters construction (BRE live snapshot)
+	// HQCost is a fixed price, which is an IB simplification: BRE's HQ price
+	// drifts upward with every other unit price (5,039 … 12,649 across the
+	// captures). Set to the low end of the observed range.
+	HQCost = 5104
 
 	// Food market (issue #19). BRE food prices vary daily within buy∈[20,60] /
 	// sell∈[7,20] with sell=buy/3. IB's economy is BRE-native scale (units at the

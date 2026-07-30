@@ -29,7 +29,7 @@ func (w *World) PlayTurn(e *Empire, today string) {
 		e.Score = 0
 	}
 	if e.HQ > 0 && e.HQ < 100 {
-		e.HQ += 5
+		e.HQ += HQBuildPerTurn
 		if e.HQ > 100 {
 			e.HQ = 100
 		}

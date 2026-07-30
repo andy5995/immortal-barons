@@ -446,6 +446,36 @@ The loop that keeps paying off:
 Record layout and helper addresses live in `docs/dev/bre-save-format.md`; extend
 that file rather than re-deriving.
 
+### Finding an UNKNOWN record field: scan the opcode, not the string
+
+When you don't yet know a mechanic's field offset, don't hunt for its message
+string — scan for the *shape of the code that touches it*. Empire-record fields
+are reached as `es:`-prefixed ops on `[di+disp16]`, so a regex over the raw file
+for `26 83 (85|bd) <disp16> <imm8>` (es: add/cmp word [di+d16], imm8) filtered to
+plausible immediates finds every candidate in seconds. HeadQuarters fell out of
+this immediately: `cmp word [es:di+0x26b],100` was the only `cmp …,100` at an
+unmapped offset, and it sat inside the end-of-turn routine — which gave the
+field, the build rate, and the clamp in one disassembly.
+
+Once you have the offset, `re.finditer` for the packed disp16 (`6b 02`) lists
+*every* site that reads or writes it, which separates the purchase path, the
+per-turn advance, and the combat use without any further searching.
+
+### The docs entry is the cheapest way to identify a field
+
+Before inferring what a record field holds from its arithmetic weight, read the
+`breins.txt` entry for the mechanic — it usually names the unit outright. The HQ
+entry says "gives tanks better coordination", which identified `+0x86` as Tanks
+in one grep, after a net-worth-constant hunt failed to. This is the skill's own
+"read the docs FIRST" rule; skipping it cost a detour.
+
+**A doc figure may be a mid-curve value, not a base.** `breins.txt` calls a tank
+"about the equivalent of four Troopers", but the binary weighs it `1.5 + HQ/100`
+against a trooper's `0.5` — so 4 is what a tank is worth at HQ **50%**, and the
+real range is 3 to 5. When the prose gives a flat number for something the same
+prose says "scales", suspect a mid-curve sample and check the disassembly before
+hard-coding it. This is the variant-string trap in a different costume.
+
 ## Parsing a `.cap` capture — three traps that produced wrong findings
 
 The economy parser is `scripts/bre-econ.py` in this project's Claude dir (per-turn

@@ -323,11 +323,11 @@ func (f AttackForce) clampTo(e *Empire) AttackForce {
 }
 
 // groundOffense is the committed force's regular-attack strength, mirroring
-// Empire.Offense on the sent units (troopers 1, jets 2, tanks 4×HQ), scaled by
+// Empire.Offense on the sent units (troopers 1, jets 2, tanks 3–5 by HQ), scaled by
 // Technology. Bombers are excluded — they fly the bombing run, not the ground
 // clash. (Distinct from offense(), which values a group-attack detachment flat.)
 func (f AttackForce) groundOffense(e *Empire) int {
-	sum := f.Troopers + f.Jets*2 + f.Tanks*4*(100+e.HQ)/100
+	sum := f.Troopers + f.Jets*2 + tankStrength(f.Tanks, e.HQ)
 	return techRaise(sum, e.TechMilitaryFactor())
 }
 

@@ -47,7 +47,7 @@ func (w *World) StartHQ(e *Empire) error {
 		return ErrCantAfford
 	}
 	e.Gold -= HQCost
-	e.HQ = 5
+	e.HQ = HQBuildStart
 	return nil
 }
 

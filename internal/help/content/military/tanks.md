@@ -8,8 +8,8 @@ in_game: true
 # Tanks
 
 Tanks are the strongest general-purpose unit, powerful on both attack and
-defense. They have an offense of 4 and a defense of 4 — the strength of four
-troopers in a single unit.
+defense. A tank is worth three troopers on its own. With a finished
+HeadQuarters it is worth five, on both attack and defense.
 
 They cost a lot to buy but little to keep. A tank army is expensive to build and
 cheap to maintain, so over a long game tanks are the most efficient force.

@@ -188,13 +188,13 @@ func (w *World) AllyDefenders(e *Empire) []AllyContribution {
 // allyDefenseBoost is the extra battle power d's Full Defense Alliance partners
 // add when d is attacked: each sends 30% of its troopers + tanks (agents are
 // covert, turrets stay home), valued exactly as the ally's own Defense() weighs
-// those units (tanks ×4 with HQ, then morale- and tech-scaled).
+// those units (tanks 3–5 troopers by HQ, then morale- and tech-scaled).
 func (w *World) allyDefenseBoost(d *Empire) int {
 	sum := 0
 	for _, ally := range w.alliesOf(d, fullDefenseAlliance) {
 		troopers := ally.Troopers * AllyDefenseContribPct / 100
 		tanks := ally.Tanks * AllyDefenseContribPct / 100
-		base := troopers + tanks*4*(100+ally.HQ)/100
+		base := troopers + tankStrength(tanks, ally.HQ)
 		v := base * moraleFactor(ally.Morale) / 100
 		sum += techRaise(v, ally.TechMilitaryFactor())
 	}

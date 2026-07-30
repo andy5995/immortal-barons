@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-30 18:19-0500\n"
+"POT-Creation-Date: 2026-07-30 18:36-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1241,8 +1241,8 @@ msgstr "Танки"
 #: internal/help/content/military/tanks.md:13
 msgid ""
 "Tanks are the strongest general-purpose unit, powerful on both attack and "
-"defense. They have an offense of 4 and a defense of 4 — the strength of four "
-"troopers in a single unit."
+"defense. A tank is worth three troopers on its own. With a finished "
+"HeadQuarters it is worth five, on both attack and defense."
 msgstr ""
 
 #. type: Plain text

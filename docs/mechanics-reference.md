@@ -18,13 +18,40 @@ settings from a real league, so they are defaults, not fixed rules.
 | Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy R5-Slappenheimer likelier to backfire. |
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). SDI cuts jet strength 25–30%. |
 | Turret | **0** | 2 | Defense only — the defensive **counterpart to jets**: it shoots down attacking jets (and blows up tanks / kills troops). Also helps intercept nuclear missiles. Cannot be destroyed by terrorist ops. |
-| Tank | 4 | 4 | Best all-round. Low upkeep, high buy cost. Strength scales with HQ and morale. Helps defend vs. chemical missiles. |
+| Tank | **3–5** | **3–5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (3 at 0%, 4 at 50%, 5 at 100%) and with morale. Helps defend vs. chemical missiles. The guide's flat "4" is the HQ-50 value — see HeadQuarters below. |
 | Bomber | 0 | 0 | Carries bombs / special-ops; destroys enemy *grounded* jets when sent in an attack. |
 | Carrier | 0 | 0 | Support: moves jets to battle and goods for trade. |
 | HeadQuarters | — | — | Raises tank effectiveness; enemies bomb it to weaken your tanks. |
 
 So combat must track a separate **offense score** and **defense score**,
 not one shared value. Jets add only offense; turrets add only defense.
+
+### HeadQuarters (BRE-verified — disassembly + `breins.txt`)
+
+HQ is an `int32` at empire record `+0x26b`, holding percent complete.
+
+- **Buying it sets the field to 5** (`BRE.OVR 0x12C8C`), after refusing when it
+  is already above 0. Confirmed live: bre-3 prints "You have started work on your
+  HeadQuarters." and the buy menu's `# Owned` column then reads 5. That column
+  *is* the completion percent — it reads 100 on a finished HQ.
+- **It advances +5 at end of turn while it sits in 1…99, then clamps to [0,100]**
+  (`0xD010`). The buying turn's own end-of-turn advance counts, so it finishes
+  19 turns after the purchase.
+- **A tank's strength is `1.5 + HQ/100`** where a trooper is `0.5` and a
+  jet/turret is `1.0` (`0x40241`, `0x4043D` — the float constants decode exactly
+  to 1.5, 100.0, 0.5, 175.0, 2.0). In whole troopers that is **3 at HQ 0, 4 at
+  50, 5 at 100**. `breins.txt` calls a tank "about the equivalent of four
+  Troopers" — the HQ-50 value, which is how the manual and the binary reconcile.
+  IB used 4 rising to 8 until 2026-07-30.
+- The same expression scales the whole sum by `0.5 + morale/175` and divides by
+  2. IB's morale curve (0.5 → 1.0, versus BRE's 0.5 → 1.07) is left as is: the
+  constant ÷2 and the small top-end difference cancel between attacker and
+  defender.
+- Bombers are excluded from the sum and accumulated separately, matching
+  `breins.txt` ("no offensive or defensive strength").
+- **The HQ price is not fixed in BRE** — it drifts with every other unit price
+  (5,039 … 12,649 across the captures). IB's `HQCost` is a fixed low-end figure,
+  a deliberate simplification.
 
 Terminology note: some BRE guides call the defensive unit a **"Missile
 Base"** rather than a "Turret" (same defensive role: it shoots down jets,
@@ -1056,7 +1083,7 @@ and each carries a gameplay effect (#11 wired the last two):
   in `internal/game/diplomacy.go`, `AllyDefenseContribPct = 30` in `balance.go`):
   when a realm is attacked, each Full Defense Alliance partner adds 30% of its
   troopers + tanks to the defender's battle power (valued as the ally's own
-  `Defense()` weighs them — tanks ×4 with HQ, morale- and tech-scaled; turrets
+  `Defense()` weighs them — tanks 3–5 troopers by HQ, morale- and tech-scaled; turrets
   stay home, agents are covert); the attacker's battle report notes the
   reinforcements, and the committed detachment bleeds at the defender's casualty
   rate (`bleedAllies`). The Alliance Strength screen (`allianceStrength`) shows
