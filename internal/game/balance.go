@@ -248,10 +248,6 @@ const (
 	FoodShortfallSupportDrop   = 70 // support points lost per turn at 100% unfed
 	FoodShortfallMoraleDrop    = 80 // morale points lost per turn at 100% unfed (hungry troops demoralize faster than the public, as under pay shortfall)
 	FoodShortfallEmigrationPct = 10 // % of population that leaves per turn at 100% unfed
-	// SupportFedBoost: a well-run realm (people fed AND maintenance paid in full)
-	// recovers this many points of popular support per turn, for free — a
-	// placeholder for BRE's pay-to-boost-support mechanic (#39), not yet built.
-	SupportFedBoost = 5
 	// Food production per region per turn. Agri calibrated to live BRE (97 Agri
 	// → 29,197 and 16 Agri → 4,864 food → ~300/Agri, no flat base).
 	FoodPerAgri = 300
@@ -278,6 +274,29 @@ const (
 	// fuel). Was 1 food/trooper — ~200× too heavy, which made a standing army
 	// food-crippling instead of nearly free as in BRE. Tunable.
 	ArmyFoodDivisor = 200
+
+	// --- Popular support: tax drift, riots, and the pay-to-boost prompt ---
+	// BINARY-VERIFIED against BRE.OVR's end-of-turn routine (0xCE97) and the
+	// maintenance routine (0x2EEBB), and reproduced exactly by a live capture
+	// (tax 12, riot: 100 − 12/3 − (12−30)/10 = 97).
+	//
+	// Every turn:  Support = clamp(Support − riotPenalty − (Tax−30)/10, 0, 100)
+	// so a rate under SupportTaxNeutral recovers support for free and a high one
+	// bleeds it. Integer division truncates toward zero in both Go and the
+	// original's Pascal, so the two agree on negative values.
+	SupportTaxNeutral  = 30 // tax rate at which the per-turn drift is zero
+	SupportTaxDivisor  = 10 // tax points per point of drift either side of neutral
+	RiotTaxFloor       = 10 // riots need Tax strictly above this
+	RiotSupportDivisor = 3  // a riot costs Tax/this many support points
+	RiotPeopleDivisor  = 15 // a riot costs People/this many people
+	RiotChanceDenom    = 10000
+	// Below LowTaxSupportCeil, a rate under RiotTaxFloor additionally buys back
+	// (RiotTaxFloor − Tax) points — BRE's reward for taxing very lightly while
+	// unpopular. It does nothing to an already-content realm.
+	LowTaxSupportCeil = 85
+	// Very low support demoralizes the army: below MoraleDrainSupport, morale
+	// falls by the shortfall each turn.
+	MoraleDrainSupport = 10
 
 	// --- Industry (live-verified; one capacity pool per region, split between
 	// units and gold — see World.industrialGold / ProjectedProduction) ---

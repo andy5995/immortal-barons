@@ -571,14 +571,30 @@ interest-earning savings and loans; investment rates move over time.
 
 **Popular support and military morale** are 0–100 stats. Each turn's payment
 stage prompts for both when they are below 100 ("N gold is requested to boost
-popular support / improve military morale"); a single turn's payment only
-raises each by a capped amount, so full recovery takes several turns.
-Underpaying maintenance lowers them (and taxes erode support). Low popular
-support cuts Coastal income and, at the extreme, brings riots. Low military
-morale scales down combat effectiveness, and below a threshold troops desert
-each turn. The exact request/boost/decay constants are not in BRE's released
-files (the empire record layout was deliberately withheld); the values in
-`internal/game/payments.go` are reconstructed placeholders, tunable.
+popular support / improve military morale"). Underpaying maintenance lowers
+them. Low popular support cuts Coastal income and, at the extreme, brings riots.
+Low military morale scales down combat effectiveness, and below a threshold
+troops desert each turn.
+
+**The support boost — binary-verified (BRE.OVR 0x2F4C4 and 0x2F740):**
+
+```
+deficit = min(100 - Support, 15)
+cost    = deficit × (3 × People + 500)          # People in millions
+points  = deficit × (given + 1) / (cost + 1)    # truncated
+maximum payable = cost × 3 / 2
+```
+
+Reproduced exactly by two live prompts: 216,366 gold at 23,874M people and
+218,139 at 24,071M, both three points short, each restoring exactly 3 points.
+Note the deficit **charged for** is capped at 15, but the award is a plain ratio
+of what you paid — so **overpaying by half buys 22 points, not 15**. That is the
+original's behaviour, not an IB addition. The `+1` on each side is the same shape
+the crown-tax penalty uses.
+
+**Military morale's** request and cap (`MoralePerBoostGold`,
+`MaxMoraleBoostPerTurn` in `internal/game/payments.go`) are **not** verified —
+they remain reconstructed placeholders, tunable.
 
 **Riots and emigration — verified against a BRE.OVR disassembly (HIGH confidence):**
 
@@ -587,9 +603,23 @@ files (the empire record layout was deliberately withheld); the values in
   (quadratic, not linear). Samples: tax 15 → 2.25%, 20 → 4%, 30 → 9%,
   50 → 25%, 71 → ~50%, 100 → 100%.
 - **Riot effect:** each riot removes **`People div 15`** (~6.67%) of the
-  population, and cancels that turn's population growth (a suppression
-  accumulator bumped by `tax div 3`). (Recovered by identifying the 32-bit
-  divide/subtract runtime helpers across 138 call sites.)
+  population and docks **`tax div 3`** popular support. (An earlier reading had
+  the `tax div 3` term cancelling population growth — wrong; it is the support
+  penalty, confirmed by live capture below.)
+- **Support drifts with the tax rate every turn, riot or not:**
+
+  ```
+  Support = clamp(Support - riotPenalty - (tax - 30) / 10, 0, 100)
+  if Support < 10:              Morale -= (10 - Support)
+  if tax < 10 and Support < 85: Support += (10 - tax)
+  ```
+
+  Integer division truncates toward zero, so a rate **below 30 recovers support
+  for free** (+1/turn at tax 12–29) and one above 40 bleeds it. This is why a
+  low-tax realm sits pinned at 100. **Live confirmation:** at tax 12 a riot took
+  support 100 → 97 on two separate turns — exactly `100 − 12/3 − (12−30)/10`.
+  Both turns also show that riots at a *low* rate are real, just rare: 12² /
+  10000 = 1.4% a turn.
 - **Emigration is NOT a gameplay mechanic.** BRE's tiered civil-revolt /
   "most of your empire has left your rule" / troops-fleeing system is gated on
   a severity byte whose *only* nonzero setter is BRE's **crack/registration
@@ -604,9 +634,12 @@ files (the empire record layout was deliberately withheld); the values in
   these as random per-empire events (`internal/game/events_random.go`,
   `eventPeople`).
 
-The clone implements the verified riot trigger/chance and the `People div 15`
-loss (`internal/game/turn.go`); the Support hit on a riot is the clone's own
-addition, not from BRE. The growth-cancel (`tax div 3`) is not yet modeled.
+The clone implements all of the above (`internal/game/turn.go`): the trigger and
+chance, the `People div 15` loss, the `tax div 3` support hit, the per-turn tax
+drift, the low-support morale drain, and the low-tax buy-back. IB's earlier
+invented model — a drift toward `100 − (tax−15)×3` plus a free 5-point boost for
+a "well-run realm" — has been removed; the tax drift covers free recovery, as it
+does in the original.
 
 Tax rate, bank interest, and investment rates are configurable (a real
 league ran tax 85%, interest 75%).
@@ -671,7 +704,7 @@ league ran tax 85%, interest 75%).
   surplus — fished on 4 of 9 short turns versus 3 of 11 surplus turns (Fisher
   exact, p = 0.64). See issue #67.
 - **Food growth is a *turn-start* credit (matches BRE).** This turn's food yield
-  (`Agricultural × 300` + the rivers' food share) is added to the granary at the **start**
+  (`Agricultural × 300` + river fishing) is added to the granary at the **start**
   of the turn — alongside military production and gold income, exactly what the
   start-of-turn income report announces (`World.GrowFood`). So the player can
   **sell or spend this turn's growth the same turn**. (Earlier IB deferred the

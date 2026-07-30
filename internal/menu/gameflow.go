@@ -477,8 +477,12 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	}
 
 	if support < 100 && gold > 0 {
-		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to boost popular support."), (100-support)*game.SupportPerBoostGold)))
-		supportGold := promptSuggested(s, "How much will you give?", 0, gold)
+		var cost, maxGive int
+		if !withPlayer(w, func(p *game.Empire) { cost, maxGive = p.SupportBoostCost(), min(p.SupportBoostMax(), p.Gold) }) {
+			return
+		}
+		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to boost popular support."), cost)))
+		supportGold := promptSuggested(s, "How much will you give?", min(cost, maxGive), maxGive)
 		var pts int
 		if !withPlayer(w, func(p *game.Empire) {
 			pts = w.World.BoostSupport(p, supportGold)

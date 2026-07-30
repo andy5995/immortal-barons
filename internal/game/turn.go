@@ -352,13 +352,6 @@ func (w *World) aiInvestIdle(e *Empire) {
 	}
 }
 
-// Support tuning (v1, tunable — see docs/mechanics-reference.md).
-const (
-	SupportStableTax = 15 // tax rate at which support holds at 100
-	SupportDrift     = 3  // points support moves toward its target per turn
-	RiotTaxFloor     = 10 // no riots at/below this tax rate (BRE.OVR: riots need tax > 10)
-)
-
 // Population model (IB's own tuning). BRE uses the same logistic shape —
 // growth toward a carrying capacity — but with a runaway 50%/turn ceiling
 // (recovered from a BRE.OVR disassembly). IB keeps the self-limiting shape and
@@ -650,42 +643,27 @@ func (w *World) processEconomy(e *Empire) {
 		e.LastPopGrowth = growth
 	}
 
-	// Support drifts toward a tax-based target (higher tax => lower target).
-	target := 100 - (e.Tax-SupportStableTax)*3
-	if target > 100 {
-		target = 100
-	}
-	if target < 0 {
-		target = 0
-	}
-	if e.Support < target {
-		e.Support += min(SupportDrift, target-e.Support)
-	} else if e.Support > target {
-		e.Support -= min(SupportDrift, e.Support-target)
-	}
-
-	// A well-run realm — people fed AND maintenance paid in full — recovers some
-	// popular support for free each turn (placeholder for BRE's pay-to-boost-support
-	// mechanic, #39). LastStarved is 0 when fed (set above); MaintUnderpaid is set by
-	// PayForces/PayRegions when an obligation is underpaid.
-	if !e.MaintUnderpaid && e.LastStarved == 0 {
-		e.Support = min(100, e.Support+SupportFedBoost)
-	}
-
-	// Riots: verified against a BRE.OVR disassembly — a riot fires iff
-	// tax > 10 AND tax*tax >= Random(10000), i.e. probability = tax^2 / 10000
-	// (quadratic, not linear), and each riot removes People div 15 (~6.67%).
-	// BRE also cancels that turn's population growth via tax/3 (not modeled
-	// here); the Support hit is IB's own reconstruction, not from BRE.
+	// Taxes, riots and popular support, verified against a BRE.OVR disassembly
+	// (end-of-turn routine at 0xCE97) and reproduced exactly by a live capture.
+	// A riot fires iff tax > RiotTaxFloor AND tax² >= Random(10000) — quadratic,
+	// so 1.4% a turn at 12% tax but 15% at 39% — and costs both people and
+	// support. On top of any riot, support always drifts by -(tax-30)/10, which
+	// is a free gain below SupportTaxNeutral and a bleed above it.
 	e.LastRiot = false
-	if e.Tax > RiotTaxFloor && e.Tax*e.Tax >= w.rng.Intn(10000) {
+	riotPenalty := 0
+	if e.Tax > RiotTaxFloor && e.Tax*e.Tax >= w.rng.Intn(RiotChanceDenom) {
 		e.LastRiot = true
 		w.postRiotNews(e)
-		e.Support -= 15
-		if e.Support < 0 {
-			e.Support = 0
-		}
-		e.People -= e.People / 15 // BRE (disassembly): People div 15 lost per riot
+		riotPenalty = e.Tax / RiotSupportDivisor
+		e.People -= e.People / RiotPeopleDivisor
+	}
+	e.adjustSupport(-riotPenalty - (e.Tax-SupportTaxNeutral)/SupportTaxDivisor)
+	if e.Support < MoraleDrainSupport {
+		e.adjustMorale(-(MoraleDrainSupport - e.Support))
+	}
+	// Taxing very lightly buys back support, but only while the realm is unhappy.
+	if e.Tax < RiotTaxFloor && e.Support < LowTaxSupportCeil {
+		e.adjustSupport(RiotTaxFloor - e.Tax)
 	}
 
 	// Morale slowly recovers toward 100 each turn (a paid, quiet army regains

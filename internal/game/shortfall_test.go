@@ -50,8 +50,8 @@ func TestWellRunRealmRecoversSupport(t *testing.T) {
 		return e
 	}
 	fedPaid := mk(true, true)
-	if fedPaid.Support < 50+SupportFedBoost {
-		t.Errorf("fed+paid realm should gain the %d-point boost from 50, got %d", SupportFedBoost, fedPaid.Support)
+	if fedPaid.Support <= 50 {
+		t.Errorf("a fed realm at a low tax rate should gain support from 50, got %d", fedPaid.Support)
 	}
 	if s := mk(false, true).Support; s >= fedPaid.Support {
 		t.Errorf("starving realm should not get the boost (and loses support): got %d vs %d", s, fedPaid.Support)

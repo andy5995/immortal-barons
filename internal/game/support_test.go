@@ -18,14 +18,41 @@ func TestSupportDriftsWithTax(t *testing.T) {
 
 	w2 := NewWorldSeed(DefaultConfig(), 1)
 	stable := w2.AddHuman("stable", "Stable Realm")
-	stable.Tax = SupportStableTax
-	stable.Support = 50 // start low to confirm it drifts back up
-	for i := 0; i < 20; i++ {
+	stable.Tax = SupportTaxNeutral - SupportTaxDivisor // one point of free recovery a turn
+	stable.Support = 50                                // start low to confirm it drifts back up
+	for i := 0; i < 60; i++ {
 		w2.GrowFood(stable) // keep it fed so Support returns from tax stability, not starving
 		w2.PlayTurn(stable, "2026-07-03")
 	}
 	if stable.Support < 90 {
-		t.Errorf("stable tax rate should hold/return Support near 100, got %d", stable.Support)
+		t.Errorf("a modest tax rate should return Support near 100, got %d", stable.Support)
+	}
+}
+
+// The per-turn drift pivots on SupportTaxNeutral: below it a realm recovers
+// support for free, above it the realm bleeds support even without a riot.
+// Binary-verified — Support -= (Tax - 30) / 10 every turn.
+func TestSupportDriftPivotsOnNeutralTax(t *testing.T) {
+	run := func(tax, turns int) int {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		e := w.AddHuman("e", "E")
+		e.Tax, e.Support = tax, 50
+		for range turns {
+			w.GrowFood(e)
+			w.PlayTurn(e, "2026-07-03")
+		}
+		return e.Support
+	}
+	// At the neutral rate the drift is zero, and the rate is low enough that
+	// riots are the only thing that can move support.
+	if got := run(SupportTaxNeutral, 1); got != 50 {
+		t.Errorf("at the neutral rate support should not drift, got %d", got)
+	}
+	if got := run(SupportTaxNeutral-2*SupportTaxDivisor, 1); got != 52 {
+		t.Errorf("two divisors below neutral should gain 2 points, got %d", got)
+	}
+	if got := run(SupportTaxNeutral+2*SupportTaxDivisor, 1); got > 48 {
+		t.Errorf("two divisors above neutral should lose at least 2 points, got %d", got)
 	}
 }
 

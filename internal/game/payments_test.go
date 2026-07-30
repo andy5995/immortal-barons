@@ -99,12 +99,48 @@ func TestBoostSupportCapsAt100(t *testing.T) {
 	e.Support = 95
 	e.Gold = 1_000_000
 
-	pts := w.BoostSupport(e, 100*SupportPerBoostGold) // enough for 100 points
+	pts := w.BoostSupport(e, e.SupportBoostMax()) // overpay the request by half
 	if e.Support != 100 {
 		t.Errorf("support should cap at 100, got %d", e.Support)
 	}
-	if pts <= 0 {
-		t.Error("expected support points gained")
+	if pts != 5 {
+		t.Errorf("boost from 95 should report the 5 points actually gained, got %d", pts)
+	}
+}
+
+// Paying the full request restores the whole deficit; paying half restores about
+// half. Both the cost and the payment-to-points ratio are binary-verified.
+func TestSupportBoostCostAndAward(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Support, e.People = 97, 23874
+	if want := 3 * (3*23874 + 500); e.SupportBoostCost() != want {
+		t.Errorf("cost want %d, got %d", want, e.SupportBoostCost())
+	}
+	full := *e
+	full.Gold = 1_000_000
+	if pts := w.BoostSupport(&full, full.SupportBoostCost()); pts != 3 || full.Support != 100 {
+		t.Errorf("full payment should buy all 3 points, got %d (support %d)", pts, full.Support)
+	}
+	half := *e
+	half.Gold = 1_000_000
+	if pts := w.BoostSupport(&half, half.SupportBoostCost()/2); pts != 1 {
+		t.Errorf("half payment should buy 1 of 3 points, got %d", pts)
+	}
+	// A collapsed realm cannot buy its way back to 100 in one turn: the crown only
+	// charges for MaxSupportBoostPerTurn points at a time.
+	low := *e
+	low.Support, low.Gold = 20, 1_000_000_000
+	if pts := w.BoostSupport(&low, low.SupportBoostCost()); pts != MaxSupportBoostPerTurn {
+		t.Errorf("full payment should buy the %d-point cap, got %d", MaxSupportBoostPerTurn, pts)
+	}
+	// Overpaying scales the award past that cap — the ratio, not the cap, is what
+	// the payment multiplies. Half again the request buys half again the points.
+	over := *e
+	over.Support, over.Gold = 20, 1_000_000_000
+	want := MaxSupportBoostPerTurn * SupportBoostMaxNum / SupportBoostMaxDen
+	if pts := w.BoostSupport(&over, over.SupportBoostMax()); pts != want {
+		t.Errorf("overpaying by half should buy %d points, got %d", want, pts)
 	}
 }
 

@@ -8,16 +8,27 @@ package game
 // rates live in compiled code, so the constants below are reconstructed and
 // tunable.
 const (
-	ArmyDesertRate      = 25  // % of the army that deserts at full non-payment
-	RegionRevoltRate    = 15  // % of land that revolts at full non-payment
-	SupportPerBoostGold = 100 // gold to raise popular support by one point
-	MoralePerBoostGold  = 100 // gold to raise military morale by one point
+	ArmyDesertRate     = 25  // % of the army that deserts at full non-payment
+	RegionRevoltRate   = 15  // % of land that revolts at full non-payment
+	MoralePerBoostGold = 100 // gold to raise military morale by one point
 
 	// A single turn's payment cannot fully restore support/morale — paying the
 	// whole requested amount only buys a bounded number of points, so recovery
-	// takes several turns (per observed BRE behavior). Placeholder — tunable.
-	MaxSupportBoostPerTurn = 20
+	// takes several turns. BINARY-VERIFIED for support (BRE.OVR 0x2F4C4): the
+	// deficit the prompt charges for is capped at 15. Morale is unverified.
+	MaxSupportBoostPerTurn = 15
 	MaxMoraleBoostPerTurn  = 20
+
+	// The support boost costs a flat amount per missing point plus a share of the
+	// population — a big realm pays more to please the same fraction of it.
+	// BINARY-VERIFIED: cost = deficit × (3×People + 500), reproduced exactly by
+	// two live prompts (216,366 at 23,874M people and 218,139 at 24,071M, both
+	// three points short).
+	SupportBoostPerPerson = 3
+	SupportBoostFlat      = 500
+	// A baron may overpay the request by half, which buys proportionally more
+	// support — up to the cap, since support stops at 100.
+	SupportBoostMaxNum, SupportBoostMaxDen = 3, 2
 
 	// Military morale effects (placeholders, tunable). Below the floor, combat
 	// effectiveness is scaled by moraleFactor; below the desert threshold, a
@@ -188,14 +199,42 @@ func (w *World) PayRegions(e *Empire, given int) int {
 	return lost
 }
 
-// BoostSupport spends gold to raise popular support (the optional
-// "requested" obligation). One turn's boost is capped, so it takes several
-// turns of payment to fully recover. Returns the support points gained.
+// SupportBoostDeficit is the number of support points this turn's boost can buy
+// back — the shortfall from 100, capped at MaxSupportBoostPerTurn.
+func (e *Empire) SupportBoostDeficit() int {
+	return min(100-e.Support, MaxSupportBoostPerTurn)
+}
+
+// SupportBoostCost is the gold the crown requests to restore SupportBoostDeficit
+// points of popular support. Zero when support is already full.
+func (e *Empire) SupportBoostCost() int {
+	return e.SupportBoostDeficit() * (SupportBoostPerPerson*e.People + SupportBoostFlat)
+}
+
+// SupportBoostMax is the most a baron may put toward the boost — half again the
+// request. Paying past the request does buy more support, but support caps at
+// 100, so the surplus is usually wasted.
+func (e *Empire) SupportBoostMax() int {
+	return e.SupportBoostCost() * SupportBoostMaxNum / SupportBoostMaxDen
+}
+
+// BoostSupport spends gold to raise popular support (the optional "requested"
+// obligation). Paying the full request buys the whole deficit; paying part of it
+// buys proportionally less. One turn's boost is capped, so a badly unpopular
+// realm takes several turns to recover. Returns the support points gained.
+//
+// Binary-verified, including the +1 on each side of the ratio (BRE.OVR 0x2F740),
+// which is the same shape the crown-tax penalty uses.
 func (w *World) BoostSupport(e *Empire, given int) int {
+	cost := e.SupportBoostCost()
 	given = e.clampGive(given)
-	pts := min(given/SupportPerBoostGold, MaxSupportBoostPerTurn)
+	if cost <= 0 {
+		return 0
+	}
+	pts := e.SupportBoostDeficit() * (given + 1) / (cost + 1)
+	before := e.Support
 	e.adjustSupport(pts)
-	return pts
+	return e.Support - before
 }
 
 // BoostMorale spends gold to raise military morale, mirroring BoostSupport
