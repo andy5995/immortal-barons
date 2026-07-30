@@ -10,8 +10,10 @@ in_game: true
 River regions give you gold from hydroelectric power. They also fish, so every
 river grows a small amount of food each turn. You get both together.
 
-Rivers pay the highest gold of any region, and they barely swing from turn to
-turn. That makes them the most reliable income you can buy.
+A river pays less gold than a Coastal, Desert or Mountain region, because part
+of its output goes to fishing instead. What it gives you in return is
+steadiness: river gold barely swings from turn to turn, while the others can
+have a poor turn.
 
 The food is a bonus, not a food supply. One river grows about an eighth of what
 one agricultural region grows. Buy rivers for the gold and the steadiness; buy

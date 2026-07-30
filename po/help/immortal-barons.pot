@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-24 16:33-0500\n"
+"POT-Creation-Date: 2026-07-30 18:18-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -675,40 +675,6 @@ msgid ""
 "Food you hold beyond about two turns' worth of eating spoils each turn. A "
 "high technology level slows spoilage. Use or sell surplus food rather than "
 "hoard it."
-msgstr ""
-
-#. type: Title #
-#: internal/help/content/economy/industry.md:1
-#: internal/help/content/economy/industry.md:8
-#, markdown-text, no-wrap
-msgid "Industry"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/industry.md:12
-#, markdown-text
-msgid ""
-"Each Industrial region makes gold and production points every turn. The "
-"points are built into units."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/industry.md:15
-#, markdown-text
-msgid ""
-"Use Set Industries to split your production across unit types by "
-"percentage. You can change the split at any time."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/industry.md:20
-#, markdown-text
-msgid ""
-"Specialize marks one unit type as your focus. It does not replace your "
-"percentage split. Your industries make more of the specialized unit and "
-"fewer of every other unit. Specializing cannot be undone, so choose with "
-"care.  Trading with other specialized empires is the most efficient way to "
-"get the units you no longer make well."
 msgstr ""
 
 #. type: Title #
@@ -1421,9 +1387,37 @@ msgstr ""
 #: internal/help/content/regions/region-industrial.md:12
 #, markdown-text
 msgid ""
-"Industrial regions build military units each turn. In some games this is "
-"your only way to get new units. A good base of Mountain regions makes your "
-"industry produce more."
+"Industrial regions build military units for you each turn. A good base of "
+"Mountain regions makes your industry produce more."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-industrial.md:16
+#, markdown-text
+msgid ""
+"Use Set Industries to say which units they build. You give each unit type a "
+"percentage of your industry. The screen shows how many of each unit that "
+"percentage builds. You can change it at any time."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-industrial.md:20
+#, markdown-text
+msgid ""
+"The percentages do not have to add up to 100. Any share you leave unassigned "
+"earns gold instead. So the choice is units or gold: if you assign the full "
+"100% to units, your industry earns no gold."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-industrial.md:25
+#, markdown-text
+msgid ""
+"Specialize marks one unit type as your focus. It does not replace your "
+"percentage split. Your industries make more of the specialized unit and "
+"fewer of every other unit. Specializing cannot be undone, so choose with "
+"care. Trading with other specialized empires is the most efficient way to "
+"get the units you no longer make well."
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
@@ -1460,11 +1454,30 @@ msgid "River Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/regions/region-river.md:11
+#: internal/help/content/regions/region-river.md:12
 #, markdown-text
 msgid ""
-"River regions provide a steady income each turn. They do not swing with "
-"conditions, so they are a reliable base."
+"River regions give you gold from hydroelectric power. They also fish, so "
+"every river grows a small amount of food each turn. You get both together."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-river.md:17
+#, markdown-text
+msgid ""
+"A river pays less gold than a Coastal, Desert or Mountain region, because "
+"part of its output goes to fishing instead. What it gives you in return is "
+"steadiness: river gold barely swings from turn to turn, while the others can "
+"have a poor turn."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-river.md:20
+#, markdown-text
+msgid ""
+"The food is a bonus, not a food supply. One river grows about an eighth of "
+"what one agricultural region grows. Buy rivers for the gold and the "
+"steadiness; buy agricultural regions when you need to feed people."
 msgstr ""
 
 #. type: Title #
@@ -1475,12 +1488,21 @@ msgid "Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/regions/regions.md:12
+#: internal/help/content/regions/regions.md:13
 #, markdown-text
 msgid ""
 "Land is made of regions. You buy regions from a market, and the price rises "
 "as you buy more. There are eight region types, each with a different "
 "job. Each type has its own topic."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/regions.md:16
+#, markdown-text
+msgid ""
+"Every region you own costs gold to maintain, every turn. The cost is the "
+"same for all region types, and it is large. It is often the biggest bill you "
+"pay.  Technology regions lower the cost."
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
@@ -1563,11 +1585,21 @@ msgid "Urban Regions"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/regions/region-urban.md:11
+#: internal/help/content/regions/region-urban.md:12
 #, markdown-text
 msgid ""
 "Urban regions are home to your people. The more urban regions you own, the "
 "more people can live in your empire."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-urban.md:16
+#, markdown-text
+msgid ""
+"An urban region earns no gold by itself, but it still costs the same "
+"maintenance as every other region. Its worth is indirect: more people means "
+"more tax income. More people also eat more food, so grow your Agricultural "
+"land alongside your Urban land."
 msgstr ""
 
 #. type: Title #
@@ -1650,13 +1682,33 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-regular.md:24
+#: internal/help/content/warfare/attack-regular.md:25
 #, markdown-text
 msgid ""
 "If you win, you capture a share of the enemy's regions. You do not take "
 "their gold. A Regular Attack gives you land, not money. A small empire can "
 "lose all of its regions in one attack. A large empire loses only part, so "
 "you must attack it again and again to take it down."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-regular.md:30
+#, markdown-text
+msgid ""
+"How big that share is also depends on how developed the enemy is. Compare "
+"its net worth to its number of regions. An enemy with low net worth for its "
+"size has cheap, lightly held land, and you capture more of it. An enemy with "
+"high net worth for its size is well developed, and you capture less."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-regular.md:33
+#, markdown-text
+msgid ""
+"Strategy hint: a large empire with low net worth is a soft target. It has "
+"much land but little strength to defend it. You win the battle easily and "
+"take a big piece of land. A small, dense empire gives you less land for the "
+"same effort."
 msgstr ""
 
 #. type: Title #
@@ -1667,12 +1719,21 @@ msgid "Attacks"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attacks.md:11
+#: internal/help/content/warfare/attacks.md:12
 #, markdown-text
 msgid ""
 "You can strike other empires in several ways, from a direct assault with "
 "your army to missiles and planet-wide weapons. Each kind of attack has its "
 "own topic."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attacks.md:15
+#, markdown-text
+msgid ""
+"You can also be attacked while you are playing. If that happens, a notice "
+"appears the next time you press a key. An order you already typed is reduced "
+"to what you still hold, and the game tells you when it does that."
 msgstr ""
 
 #. type: Title #

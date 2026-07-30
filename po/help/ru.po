@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-24 16:33-0500\n"
+"POT-Creation-Date: 2026-07-30 18:18-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -745,55 +745,6 @@ msgstr ""
 "технологий замедляет порчу."
 
 #. type: Title #
-#: internal/help/content/economy/industry.md:1
-#: internal/help/content/economy/industry.md:8
-#, no-wrap
-msgid "Industry"
-msgstr "Промышленность"
-
-#. type: Plain text
-#: internal/help/content/economy/industry.md:12
-msgid ""
-"Each Industrial region makes gold and production points every turn. The "
-"points are built into units."
-msgstr ""
-"Каждый промышленный регион каждый ход даёт золото и очки производства. Очки "
-"превращаются в юниты."
-
-#. type: Plain text
-#: internal/help/content/economy/industry.md:15
-#, fuzzy
-#| msgid ""
-#| "Use Set Industries to split your production across unit types by "
-#| "percentage. Or use Specialize to send all of your production into one "
-#| "unit type. Specializing cannot be undone, so choose with care."
-msgid ""
-"Use Set Industries to split your production across unit types by percentage. "
-"You can change the split at any time."
-msgstr ""
-"В «Задать производство» распределите выпуск по типам юнитов в процентах. "
-"Либо через «Специализацию» выберите один тип для большего выпуска — но потом "
-"ничего другого строить нельзя."
-
-#. type: Plain text
-#: internal/help/content/economy/industry.md:20
-#, fuzzy
-#| msgid ""
-#| "Use Set Industries to split your production across unit types by "
-#| "percentage. Or use Specialize to send all of your production into one "
-#| "unit type. Specializing cannot be undone, so choose with care."
-msgid ""
-"Specialize marks one unit type as your focus. It does not replace your "
-"percentage split. Your industries make more of the specialized unit and "
-"fewer of every other unit. Specializing cannot be undone, so choose with "
-"care.  Trading with other specialized empires is the most efficient way to "
-"get the units you no longer make well."
-msgstr ""
-"В «Задать производство» распределите выпуск по типам юнитов в процентах. "
-"Либо через «Специализацию» выберите один тип для большего выпуска — но потом "
-"ничего другого строить нельзя."
-
-#. type: Title #
 #: internal/help/content/economy/net-worth.md:1
 #: internal/help/content/economy/net-worth.md:8
 #, no-wrap
@@ -1505,12 +1456,45 @@ msgstr ""
 #| "Builds military each turn. In some games this is your only way to get new "
 #| "units.  A good base of Mountain regions makes your industry produce more."
 msgid ""
-"Industrial regions build military units each turn. In some games this is "
-"your only way to get new units. A good base of Mountain regions makes your "
-"industry produce more."
+"Industrial regions build military units for you each turn. A good base of "
+"Mountain regions makes your industry produce more."
 msgstr ""
 "Строит военных каждый ход. В некоторых играх это единственный способ "
 "получить новые юниты. Хорошая база из гор повышает выпуск."
+
+#. type: Plain text
+#: internal/help/content/regions/region-industrial.md:16
+msgid ""
+"Use Set Industries to say which units they build. You give each unit type a "
+"percentage of your industry. The screen shows how many of each unit that "
+"percentage builds. You can change it at any time."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-industrial.md:20
+msgid ""
+"The percentages do not have to add up to 100. Any share you leave unassigned "
+"earns gold instead. So the choice is units or gold: if you assign the full "
+"100% to units, your industry earns no gold."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-industrial.md:25
+#, fuzzy
+#| msgid ""
+#| "Use Set Industries to split your production across unit types by "
+#| "percentage. Or use Specialize to send all of your production into one "
+#| "unit type. Specializing cannot be undone, so choose with care."
+msgid ""
+"Specialize marks one unit type as your focus. It does not replace your "
+"percentage split. Your industries make more of the specialized unit and "
+"fewer of every other unit. Specializing cannot be undone, so choose with "
+"care. Trading with other specialized empires is the most efficient way to "
+"get the units you no longer make well."
+msgstr ""
+"В «Задать производство» распределите выпуск по типам юнитов в процентах. "
+"Либо через «Специализацию» выберите один тип для большего выпуска — но потом "
+"ничего другого строить нельзя."
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-mountain.md:1
@@ -1555,10 +1539,27 @@ msgid "River Regions"
 msgstr "Регионы"
 
 #. type: Plain text
-#: internal/help/content/regions/region-river.md:11
+#: internal/help/content/regions/region-river.md:12
 msgid ""
-"River regions provide a steady income each turn. They do not swing with "
-"conditions, so they are a reliable base."
+"River regions give you gold from hydroelectric power. They also fish, so "
+"every river grows a small amount of food each turn. You get both together."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-river.md:17
+msgid ""
+"A river pays less gold than a Coastal, Desert or Mountain region, because "
+"part of its output goes to fishing instead. What it gives you in return is "
+"steadiness: river gold barely swings from turn to turn, while the others can "
+"have a poor turn."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-river.md:20
+msgid ""
+"The food is a bonus, not a food supply. One river grows about an eighth of "
+"what one agricultural region grows. Buy rivers for the gold and the "
+"steadiness; buy agricultural regions when you need to feed people."
 msgstr ""
 
 #. type: Title #
@@ -1569,7 +1570,7 @@ msgid "Regions"
 msgstr "Регионы"
 
 #. type: Plain text
-#: internal/help/content/regions/regions.md:12
+#: internal/help/content/regions/regions.md:13
 #, fuzzy
 #| msgid ""
 #| "Land is made of regions. You buy regions from a market, and the price "
@@ -1582,6 +1583,14 @@ msgid ""
 msgstr ""
 "Земля состоит из регионов. Их покупают на рынке, и цена растёт с каждой "
 "покупкой. Есть несколько видов."
+
+#. type: Plain text
+#: internal/help/content/regions/regions.md:16
+msgid ""
+"Every region you own costs gold to maintain, every turn. The cost is the "
+"same for all region types, and it is large. It is often the biggest bill you "
+"pay.  Technology regions lower the cost."
+msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/regions/region-technology.md:1
@@ -1665,7 +1674,7 @@ msgid "Urban Regions"
 msgstr "Регионы"
 
 #. type: Plain text
-#: internal/help/content/regions/region-urban.md:11
+#: internal/help/content/regions/region-urban.md:12
 #, fuzzy
 #| msgid ""
 #| "Home to your people. More urban regions means more people can live in "
@@ -1676,6 +1685,15 @@ msgid ""
 msgstr ""
 "Дом вашего народа. Чем больше городских регионов, тем больше людей может "
 "жить в империи."
+
+#. type: Plain text
+#: internal/help/content/regions/region-urban.md:16
+msgid ""
+"An urban region earns no gold by itself, but it still costs the same "
+"maintenance as every other region. Its worth is indirect: more people means "
+"more tax income. More people also eat more food, so grow your Agricultural "
+"land alongside your Urban land."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/warfare/attack-biological.md:1
@@ -1774,12 +1792,30 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-regular.md:24
+#: internal/help/content/warfare/attack-regular.md:25
 msgid ""
 "If you win, you capture a share of the enemy's regions. You do not take "
 "their gold. A Regular Attack gives you land, not money. A small empire can "
 "lose all of its regions in one attack. A large empire loses only part, so "
 "you must attack it again and again to take it down."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-regular.md:30
+msgid ""
+"How big that share is also depends on how developed the enemy is. Compare "
+"its net worth to its number of regions. An enemy with low net worth for its "
+"size has cheap, lightly held land, and you capture more of it. An enemy with "
+"high net worth for its size is well developed, and you capture less."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-regular.md:33
+msgid ""
+"Strategy hint: a large empire with low net worth is a soft target. It has "
+"much land but little strength to defend it. You win the battle easily and "
+"take a big piece of land. A small, dense empire gives you less land for the "
+"same effort."
 msgstr ""
 
 #. type: Title #
@@ -1790,11 +1826,19 @@ msgid "Attacks"
 msgstr "Атаки"
 
 #. type: Plain text
-#: internal/help/content/warfare/attacks.md:11
+#: internal/help/content/warfare/attacks.md:12
 msgid ""
 "You can strike other empires in several ways, from a direct assault with "
 "your army to missiles and planet-wide weapons. Each kind of attack has its "
 "own topic."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attacks.md:15
+msgid ""
+"You can also be attacked while you are playing. If that happens, a notice "
+"appears the next time you press a key. An order you already typed is reduced "
+"to what you still hold, and the game tells you when it does that."
 msgstr ""
 
 #. type: Title #
@@ -1895,6 +1939,30 @@ msgid ""
 msgstr ""
 "Щит, который вы финансируете. По завершении он уничтожает около половины "
 "выпущенных по вам ракет и ослабляет вражеские истребители и бомбардировщики."
+
+#, no-wrap
+#~ msgid "Industry"
+#~ msgstr "Промышленность"
+
+#~ msgid ""
+#~ "Each Industrial region makes gold and production points every turn. The "
+#~ "points are built into units."
+#~ msgstr ""
+#~ "Каждый промышленный регион каждый ход даёт золото и очки производства. "
+#~ "Очки превращаются в юниты."
+
+#, fuzzy
+#~| msgid ""
+#~| "Use Set Industries to split your production across unit types by "
+#~| "percentage. Or use Specialize to send all of your production into one "
+#~| "unit type. Specializing cannot be undone, so choose with care."
+#~ msgid ""
+#~ "Use Set Industries to split your production across unit types by "
+#~ "percentage. You can change the split at any time."
+#~ msgstr ""
+#~ "В «Задать производство» распределите выпуск по типам юнитов в процентах. "
+#~ "Либо через «Специализацию» выберите один тип для большего выпуска — но "
+#~ "потом ничего другого строить нельзя."
 
 #~ msgid ""
 #~ "Take Loan — borrow gold, up to a limit based on how much land you own. A "
