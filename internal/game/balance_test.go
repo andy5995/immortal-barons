@@ -74,13 +74,16 @@ func TestIndustrialGoldCreditedOnce(t *testing.T) {
 func TestRiverBadYearDud(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("h", "Realm")
+	// riverGold is net of the food share (RiverFishShare), so both branches are
+	// scaled the same way.
+	share := func(n int) int { return n * (100 - RiverFishShare) / 100 }
 	sawDud, sawNormal := false, false
 	for day := 0; day < 200 && !(sawDud && sawNormal); day++ {
 		w.GameDay = day
 		switch g := w.riverGold(e); {
-		case g == RiverBase/2:
+		case g == share(RiverBase/2):
 			sawDud = true
-		case g >= RiverBase:
+		case g >= share(RiverBase):
 			sawNormal = true
 		default:
 			t.Fatalf("day %d: riverGold=%d outside expected values", day, g)

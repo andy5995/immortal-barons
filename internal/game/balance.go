@@ -255,11 +255,17 @@ const (
 	// Food production per region per turn. Agri calibrated to live BRE (97 Agri
 	// → 29,197 and 16 Agri → 4,864 food → ~300/Agri, no flat base).
 	FoodPerAgri = 300
-	// Rivers do EITHER hydropower (gold, as usual) OR fishing (food) each turn —
-	// an either/or the empire flips per turn (BRE #29; live: ~50/50, fishing
-	// yields ~124 food/river and gives NO river gold that turn). Tunable.
-	RiverFishFood   = 124 // food per River region on a fishing turn
-	RiverFishChance = 50  // percent chance the rivers fish (vs hydropower) each turn
+	// Rivers produce BOTH gold and food every turn — a DELIBERATE DIVERGENCE.
+	// In BRE a river does hydropower OR fishing each turn, never both, and it
+	// fished on 19 of 63 captured turns (~30%). IB pays the same expected value
+	// with none of the swing: RiverFishShare of a river's output is taken as
+	// food, the rest as hydropower gold. A player committed to rivers otherwise
+	// watches millions of gold appear and vanish turn to turn with no way to plan
+	// around it, and an un-plannable food source is close to useless.
+	//
+	// One constant drives both halves so they cannot drift apart when tuned.
+	RiverFishShare = 30  // % of a river's output taken as food; the rest is gold
+	RiverFishFood  = 124 // food per River region at a full (100%) fishing turn
 	// PeopleFoodPerThousand is the food the population eats per 1000 people per
 	// turn. BRE's maintenance shows "Your People Need ~150 units of food"; at IB's
 	// ~2000-person start that lands on ~150 (2000×75/1000), so a fresh realm's 1000

@@ -473,14 +473,16 @@ func (w *World) industrialGold(e *Empire) int {
 	return perRegion * e.Regions.Industrial / 100 * unalloc
 }
 
-// riverGold is one River region's gold this turn. Rivers have the highest base
-// but an occasional "bad year" (a small deterministic chance, keyed off a
+// riverGold is one River region's hydropower gold this turn: the full yield
+// less the share taken as food (see RiverFishShare). Rivers have the highest
+// base but an occasional "bad year" (a small deterministic chance, keyed off a
 // separate yield salt) that halves the take.
 func (w *World) riverGold(e *Empire) int {
+	yield := w.regionDraw(e, 4, RiverRate) + RiverBase
 	if w.regionDraw(e, 40, 100) < RiverDudChancePct {
-		return RiverBase / 2
+		yield = RiverBase / 2
 	}
-	return w.regionDraw(e, 4, RiverRate) + RiverBase
+	return yield * (100 - RiverFishShare) / 100
 }
 
 // IncomeThisTurn itemizes e's income for the current turn. Each region's gold
@@ -499,11 +501,7 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 	perRegion := func(salt, rate, base int) int { return w.regionDraw(e, salt, rate) + base }
 
 	support := 10 + 90*e.Support/100 // support factor ×100: 0.10 + 0.90·(Support/100)
-	// Rivers do hydropower (gold) OR fishing (food) this turn, not both (#29).
-	riverGold := 0
-	if !w.riversFish(e) {
-		riverGold = w.riverGold(e)
-	}
+	riverGold := w.riverGold(e)
 	return IncomeBreakdown{
 		Taxes:      scaleTax(int64(e.People) * int64(e.Tax) / 100 * TaxGoldPerCapita),
 		Ore:        scale(int64(perRegion(1, MountainRate, MountainBase)) * int64(e.Regions.Mountain)),
@@ -517,28 +515,12 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 	}
 }
 
-// riversFish reports whether e's rivers fish for food (vs run hydropower for
-// gold) this turn. In BRE (#29) a "year" is one turn and the empire's people
-// pick one or the other for that year, so ALL of e's rivers do the same thing
-// and the choice is redrawn every turn. Deterministic in (GameDay, TurnsLeft,
-// empire) so the income report matches what's credited within the turn.
-func (w *World) riversFish(e *Empire) bool {
-	h := fnv.New32a()
-	var buf [8]byte
-	binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
-	binary.LittleEndian.PutUint32(buf[4:8], uint32(e.TurnsLeft))
-	h.Write(buf[:])
-	io.WriteString(h, e.Name)
-	return int(h.Sum32()%100) < RiverFishChance
-}
-
-// riverFood is the food e's rivers fish this turn: RiverFishFood per River on a
-// fishing turn, 0 on a hydropower turn.
+// riverFood is the food e's rivers fish this turn. Unlike BRE, where a river
+// runs hydropower OR fishes and the empire finds out which only when the income
+// report prints, IB's rivers always do both — RiverFishShare of the yield as
+// food, the rest as gold (see riverGold).
 func (w *World) riverFood(e *Empire) int {
-	if w.riversFish(e) {
-		return e.Regions.River * RiverFishFood
-	}
-	return 0
+	return e.Regions.River * RiverFishFood * RiverFishShare / 100
 }
 
 // FoodGrown is the empire's total food production this turn: its tech-boosted

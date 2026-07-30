@@ -18,6 +18,13 @@
   settings are stored in a `config.json` file. Running
   `immortal-barons -reset-from-config` clears the world but reuses that file, so
   you do not have to choose the settings again each time you reset.
+- River regions pay gold **and** food every turn. In BRE, a river does only one
+  of the two each turn, and you do not know which one until the turn's report
+  appears. Over many turns a river earns the same total either way, so this
+  removes the surprise, not the value. The reason is planning: a player with many
+  rivers could see millions of gold appear one turn and vanish the next, and a
+  food supply that only arrives about one turn in three is hard to count on when
+  people are hungry.
 - Some game values — such as attack rewards, unit prices, and economy rates —
   may not match BRE exactly. The game aims to get as close as it can, using
   BRE's own numbers where they are known. A few mechanics are still being built.

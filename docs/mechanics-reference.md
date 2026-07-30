@@ -362,8 +362,9 @@ different economic role:
   (never fails); also boosts industrial output.
 - **Desert** — solar income; swings widely (3,000–5,000 per region — the
   widest band of any region).
-- **River** — highest income on a cash turn (hydroelectric), but every so
-  often it produces food instead — never rely on it for either alone.
+- **River** — the highest and steadiest gold of any region (hydroelectric), and
+  it grows a little food alongside it every turn. In BRE a river does one or the
+  other; IB pays both (see Rivers below).
 - **Agriculture** — grows food; food self-sufficiency.
 - **Urban** — more population, tax revenue, and trade capacity.
 - **Technology** — long-term efficiency. Produces no direct gold. See the full
@@ -397,7 +398,7 @@ band came from 12 turns — the sample size at which any uniform looks narrow.
 | Mountain (ore) | 400 | 3,550 | smallest swing → most stable |
 | Coastal (tourism) | 1,000 | 3,750 | × support factor `0.1 + 0.9·(Support/100)` — floor 375/region at 0% support, never zero. **Binary-verified:** the three constants decode to exactly 100.0, 0.9 and 0.1 in the coastal-only float sequence, so this is read from the original rather than fitted. An earlier headless sweep (#31) fitted `0.099 + 0.901·(Support/100)` — that was fit noise around the round values |
 | Desert (solar) | 2,000 | 3,000 | widest swing |
-| River (hydro) | 100 | 5,000 | highest base; a river fishes instead some turns (#29) |
+| River (hydro) | 100 | 5,000 | **Binary-scale-verified** — 44 captured figures all divided exactly by the river count, 5,002–5,099. IB pays `(100 − RiverFishShare)%` of this as gold and the rest as food (#29) |
 
 **Industrial** regions run **two separate pools**, both binary-verified against
 BRE.OVR:
@@ -483,7 +484,7 @@ level, which the original does not.
 **Urban and Technology produce no direct gold** (BRE-verified): Urban is
 population housing, Technology is an efficiency multiplier (see the Technology
 region above). Food output: `Agricultural × 300` grown, then raised by the
-Technology factor (#20); rivers fish on a fishing turn (else hydropower gold),
+Technology factor (#20); rivers add a share of their yield as food every turn,
 see the Rivers section. These income numbers, the caps (2B money / 1.599B
 interest), the pirate caps table, and the net-worth weights are BRE-scale;
 **unit prices, the tax per-capita coefficient, and the yield band are IB's own
@@ -498,7 +499,7 @@ clamped to ±`PriceWalkBandPct`% (30%) of the base, so prices drift like BRE but
 run away. The stored value is what the Spending menu shows and what a buy/sell charges
 within the turn (shown == charged; buy and sell route through the same accessor, sell =
 buy/3, agents flat), and it persists across days via the save. Steps are deterministic
-(keyed per empire and turn, same `GameDay`/`TurnsLeft` basis as river fishing) so play
+(keyed per empire and turn, the same `GameDay`/`TurnsLeft` basis region yields use) so play
 is reproducible and concurrency-safe. This matches a live 14-turn sample (2026-07-15):
 each price drifted across turns and days, and the walk is per-empire — a fresh empire
 created the same day a veteran had drifted saw prices back at base. AI empires walk
@@ -631,19 +632,32 @@ league ran tax 85%, interest 75%).
   scale; `FoodBuyPriceMin = 20` in `balance.go`).
 - **Food production:** `Agricultural × FoodPerAgri (300)` per turn, calibrated to
   live BRE (97 Agri → 29,197; 16 Agri → 4,864, both no River).
-- **Rivers — hydropower *or* fishing (issue #29, live-verified):** each turn an
-  empire's rivers do EITHER hydropower (gold, as usual) OR fishing, chosen by a
-  per-turn coin-flip. On a fishing turn the rivers yield food and **no** river
-  gold that turn; on a hydropower turn, gold and no river food — the two are
-  strictly exclusive (43/43 captured turns).
+- **Rivers — IB pays gold *and* food every turn (DELIBERATE DIVERGENCE, #29).**
+  In BRE each turn an empire's rivers do EITHER hydropower (gold) OR fishing,
+  never both — strictly exclusive across 63/63 captured turns. **IB pays both
+  every turn instead**, splitting a river's yield by `RiverFishShare` (30%): 70%
+  of the hydropower gold plus 30% of a full fishing haul, every turn.
 
-  **Live measurements (2026-07-28, 43 turns across four captures):** rivers
-  fished on **14 of 43 turns, ~33%**, so IB's `RiverFishChance = 50` is high;
-  it is left alone pending more turns. Fishing yield per river is
+  The split is **expectation-preserving** — it is BRE's average, not a buff or a
+  nerf — so no rebalancing follows from it. What it removes is the variance. At
+  24 rivers the swing is ~121,000 gold present or absent; a player who commits to
+  rivers at scale faces millions of gold appearing and vanishing with no way to
+  plan around it, and a food source that shows up 30% of the time is close to
+  useless for covering consumption. One constant drives both halves so they
+  cannot drift apart when tuned.
+
+  **Live measurements (63 turns across five captures):** rivers fished on **19 of
+  63 turns, 30%** — the source of `RiverFishShare`. Hydropower gold is a clean
+  `5,000 + Random(100)` per region (every one of 44 captured figures divided
+  exactly by the river count, 5,002–5,099). Fishing yield per river is
   `110 + [0, ~20)` — Base 110 is firm (the Civilian advisor quotes it as the
   minimum) but the Rate is not pinned. **IB uses a flat `RiverFishFood = 124`**,
-  which sits inside that range, so the defect is the flatness rather than the
-  magnitude.
+  which sits inside that range, so the remaining defect is the flatness rather
+  than the magnitude.
+
+  This does **not** make rivers a food region: 30% of 124 is ~37 food per region
+  per turn against an Agricultural region's 300, about an eighth. It is a steady
+  garnish, not a substitute for farmland.
 
   **Superseded (was recorded here as a caveat on 2026-07-23):** an earlier reading
   of "0 fishing across ~240 river-turns" was a counting error, not a finding — the
@@ -657,7 +671,7 @@ league ran tax 85%, interest 75%).
   surplus — fished on 4 of 9 short turns versus 3 of 11 surplus turns (Fisher
   exact, p = 0.64). See issue #67.
 - **Food growth is a *turn-start* credit (matches BRE).** This turn's food yield
-  (`Agricultural × 300` + river fishing) is added to the granary at the **start**
+  (`Agricultural × 300` + the rivers' food share) is added to the granary at the **start**
   of the turn — alongside military production and gold income, exactly what the
   start-of-turn income report announces (`World.GrowFood`). So the player can
   **sell or spend this turn's growth the same turn**. (Earlier IB deferred the

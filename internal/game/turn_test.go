@@ -69,30 +69,40 @@ func TestScoreUnaffectedBySpoilage(t *testing.T) {
 	}
 }
 
-func TestRiversFishOrHydropowerNotBoth(t *testing.T) {
+// Rivers pay gold AND food every turn — IB's divergence from BRE, where a river
+// does one or the other (see RiverFishShare). Both halves must show up on every
+// single turn, or a player who committed to rivers is back to guessing.
+func TestRiversPayGoldAndFoodEveryTurn(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("t", "T")
 	e.Regions = RegionMix{River: 24}
 	e.syncLand()
-	sawFish, sawGold := false, false
+	wantFood := 24 * RiverFishFood * RiverFishShare / 100
 	for d := 0; d < 40; d++ {
 		w.GameDay = d
 		b := w.IncomeThisTurn(e)
-		fish, gold := b.RiverFood > 0, b.Rivers > 0
-		if fish == gold {
-			t.Fatalf("day %d: rivers should do exactly one of fish/hydropower (fish=%v gold=%v)", d, fish, gold)
+		if b.Rivers <= 0 {
+			t.Fatalf("day %d: rivers should always pay hydropower gold, got %d", d, b.Rivers)
 		}
-		if fish {
-			sawFish = true
-			if b.RiverFood != 24*RiverFishFood {
-				t.Errorf("day %d: river food want %d, got %d", d, 24*RiverFishFood, b.RiverFood)
-			}
-		} else {
-			sawGold = true
+		if b.RiverFood != wantFood {
+			t.Fatalf("day %d: river food want %d, got %d", d, wantFood, b.RiverFood)
 		}
 	}
-	if !sawFish || !sawGold {
-		t.Errorf("over 40 days expected both fishing and hydropower turns (fish=%v gold=%v)", sawFish, sawGold)
+}
+
+// The split is expectation-preserving: a river's gold is the full yield less the
+// food share, so the two halves must reconstruct the undivided yield.
+func TestRiverSplitPreservesYield(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("t", "T")
+	e.Regions = RegionMix{River: 1}
+	e.syncLand()
+	gold := w.riverGold(e)
+	if lo, hi := RiverBase/2*(100-RiverFishShare)/100, (RiverBase+RiverRate)*(100-RiverFishShare)/100; gold < lo || gold > hi {
+		t.Errorf("river gold %d outside the share-scaled yield band [%d, %d]", gold, lo, hi)
+	}
+	if got, want := w.riverFood(e), RiverFishFood*RiverFishShare/100; got != want {
+		t.Errorf("river food want %d, got %d", want, got)
 	}
 }
 
