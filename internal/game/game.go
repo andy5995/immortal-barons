@@ -104,6 +104,19 @@ type Empire struct {
 	Morale   int    // 0-100, military morale; low morale weakens combat and causes desertion
 	Language string // help/UI language ("" = English; "de", "ru")
 
+	// LandAvailable is how much unclaimed land this realm may still buy — BRE's
+	// "Daily Land Creation" allowance. BINARY-VERIFIED as a PER-EMPIRE field
+	// (BRE.OVR 0x12D30 bounds a purchase against it; 0x12EF9 subtracts the number
+	// bought), not a shared planet pool: each realm gets its own allowance topped
+	// up every day, so nobody races anyone else for land.
+	//
+	// Config.LandPerDay and InitialMarketLand were editable, shown on the Game
+	// Setup screen and broadcast over inter-BBS, but nothing consumed them, so
+	// land was infinite. A beaten realm then rebuilt faster than any war could
+	// take land from it — a 60-day bot game reached 267,000 regions with not one
+	// realm ever conquered.
+	LandAvailable int
+
 	TurnsLeft int
 	// RegionsBoughtThisTurn counts regions bought since the turn began,
 	// enforcing Config.MaxRegions cumulatively across every Buy Regions visit
@@ -692,6 +705,10 @@ func newEmpire(name, owner string, cfg Config) *Empire {
 		Regions:  regions,
 		Troopers: StartTroopers, Tax: StartTax, Support: 100, Morale: 100,
 		TurnsLeft: cfg.TurnsPerDay, Protection: cfg.ProtectionTurns,
+		// A new realm opens with one day's land allowance already granted, plus
+		// whatever the sysop seeded the market with, so it can expand on day one
+		// before its first Daily Land Creation arrives.
+		LandAvailable: cfg.InitialMarketLand + cfg.LandPerDay,
 		// BRE default: all six at DefaultProdPct (15% → 90% units, 10% remainder → gold).
 		ProdTroopers: DefaultProdPct, ProdJets: DefaultProdPct, ProdTurrets: DefaultProdPct,
 		ProdBombers: DefaultProdPct, ProdTanks: DefaultProdPct, ProdCarriers: DefaultProdPct,

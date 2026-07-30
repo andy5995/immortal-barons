@@ -15,6 +15,7 @@ var (
 	ErrHQExists     = errors.New("Your HeadQuarters is already under construction or built.")
 	ErrRegionCap    = errors.New("You have reached your region purchase limit for this turn.")
 	ErrNoFoodSupply = errors.New("The food market is out of food for today.")
+	ErrNoLand       = errors.New("There is no unclaimed land left on the planet today.")
 )
 
 // FoodBuyPrice is today's price to buy one unit of food, varying planet-wide
@@ -126,6 +127,9 @@ func (w *World) BuyRegions(e *Empire, field *int, n int) error {
 	if n > w.regionBuyLimit(e) {
 		return ErrRegionCap
 	}
+	if n > e.LandAvailable {
+		return ErrNoLand // this realm's Daily Land Creation allowance is used up
+	}
 	total := 0
 	for i := 0; i < n; i++ {
 		total += w.regionCost(e.Land + i)
@@ -136,6 +140,7 @@ func (w *World) BuyRegions(e *Empire, field *int, n int) error {
 	e.Gold -= total
 	*field += n
 	e.RegionsBoughtThisTurn += n
+	e.LandAvailable -= n
 	e.syncLand()
 	return nil
 }

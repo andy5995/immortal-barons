@@ -94,41 +94,86 @@ const (
 	AIFoodBufferTurns = 8  // turns of food consumption the AI keeps on hand (enough to ride out 5% per-turn spoilage without starving mid-day)
 	AIAgriBuyMax      = 40 // Agricultural regions the AI buys per turn to keep food output ahead of a growing population
 
-	// Force mix (#36): once food-healthy, the AI spends this share of its gold
-	// on military each turn, split by gold-value across a defensive-capable mix
-	// instead of buying only troopers. Troopers are versatile (1 offense / 1
-	// defense), turrets give cheap defense (0/2) the old trooper-only AI lacked,
-	// and tanks (4/4) add punch when it can afford them. Shares sum to 100.
+	// Force mix: once food-healthy, the AI spends AIMilitaryBudgetPct of its gold
+	// on military each turn, split by gold-value across a mix chosen by its
+	// personality (#36, #71, #72). Each profile's five shares sum to 100.
+	//
+	//   diplomat  — never attacks, so it buys defense and wastes nothing on punch
+	//   balanced  — mixed; strikes only when overwhelmingly favoured
+	//   aggressor — offense-heavy, and funds agents for pre-war covert work
+	//
+	// Carriers are NOT a share: jets cannot fight without them (JetsPerCarrier),
+	// so the AI derives how many it needs from the jets it holds and buys those
+	// first. Before this the AI bought no carriers at all and its seeded jets sat
+	// inert for the life of the realm (#72).
 	AIMilitaryBudgetPct = 50 // % of gold spent on military when food-healthy
-	AIForceTrooperPct   = 50 // % of the military budget spent on troopers
-	AIForceTurretPct    = 30 // % on turrets (defense)
-	AIForceTankPct      = 20 // % on tanks
+
+	AIForceTrooperPct = 30 // diplomat: defensive mix
+	AIForceTurretPct  = 45
+	AIForceTankPct    = 10
+	AIForceJetPct     = 10
+	AIForceAgentPct   = 5
+
+	AIForceTrooperPctMixed = 35 // balanced: can defend, can punish a weak neighbour
+	AIForceTurretPctMixed  = 25
+	AIForceTankPctMixed    = 25
+	AIForceJetPctMixed     = 10
+	AIForceAgentPctMixed   = 5
+
+	AIForceTrooperPctWar = 35 // aggressor: offense-heavy
+	AIForceTurretPctWar  = 5
+	AIForceTankPctWar    = 40
+	AIForceJetPctWar     = 12
+	AIForceAgentPctWar   = 8
 
 	// Banking (#36): rather than hoard the gold left after buying food and
 	// military, the AI parks the clear surplus above a working reserve in
 	// investments so idle gold earns instead of sitting.
-	AIGoldReserve = 50_000 // gold kept on hand for food/maintenance/expansion
-	AIInvestPct   = 50     // % of the surplus above the reserve to invest
+	AIInvestPct = 50 // % of the surplus above the reserve to invest
+	// The working reserve is AIReserveTurns turns of actual upkeep, floored at
+	// AIGoldReserveMin so a tiny realm still keeps something back (#70). It was a
+	// flat 50,000, which a grown realm earns back in a fraction of a turn — the
+	// same threshold gated both land buying and investing however large the
+	// economy got, so it stopped meaning anything.
+	AIReserveTurns   = 3
+	AIGoldReserveMin = 50_000
 	// AIDullLandBuyPct is the share of the affordable land-buy budget a dull-skill
 	// AI spends each turn (a sharp AI spends it all). Because expansion compounds,
 	// this is tuned empirically so a dull baron reaches ~700 regions over a day's
 	// 15 turns against a sharp baron's ~1300. See aiExpandLand / aiSkill.
 	AIDullLandBuyPct = 45
 
-	// War (#36): aggressor-profile AIs lean into offense (tanks + troopers, few
-	// turrets) so they can actually wage the wars they start, where the other
-	// profiles keep the defensive default mix above. They also fund a few agents
-	// for pre-war covert ops. The four shares sum to 100.
-	AIForceTrooperPctWar = 40
-	AIForceTurretPctWar  = 5
-	AIForceTankPctWar    = 45
-	AIForceAgentPctWar   = 10 // aggressors buy agents to demoralize a target first
+	// AIAgentsPerRegion caps covert stockpiling: agents are bought as a share of
+	// the military budget, which on a large realm compounds into hundreds of
+	// thousands of them with nothing to spend them on. A 30-day bot game left one
+	// aggressor holding 360,000. The AI stops buying once it holds this many per
+	// region it owns (#57).
+	AIAgentsPerRegion = 2
 
-	// AIWarOffenseMargin gates aggression: an aggressor attacks the weakest valid
-	// target only when its offense exceeds the target's effective defense (units
-	// + land bonus) by this %, so it picks winnable fights instead of throwing
-	// its army away.
-	AIWarOffenseMargin = 130
+	// Aggression gates: an AI attacks the weakest valid target only when its
+	// offense exceeds that target's effective defense (units + land bonus) by this
+	// %, so it picks winnable fights. Aggressors need a modest edge; balanced
+	// realms need an overwhelming one, which is what makes them opportunists
+	// rather than warmongers (#71). Diplomats never attack at all.
+	AIWarOffenseMargin         = 130
+	AIWarOffenseMarginCautious = 300
+
+	// Tax policy (#73). The AI used to sit on its starting rate forever. Popular
+	// support drifts by -(Tax-SupportTaxNeutral)/SupportTaxDivisor each turn, so
+	// anything below the neutral rate GAINS support for free while riot risk is
+	// Tax^2/10000 — a sharp baron therefore taxes just under neutral, where income
+	// is highest and support still climbs. A dull one leaves money on the table.
+	// The AI backs off to the recovery rate whenever support falls below the floor.
+	AITaxSharp     = 28
+	AITaxDull      = 18
+	AITaxRecover   = 8 // below LowTaxBonusBelow, which buys support back outright
+	AISupportFloor = 75
+
+	// Diplomacy (#73). AI diplomacy was respond-only: it answered offers but never
+	// made one, so a bot-only planet formed zero treaties. Each turn an AI may
+	// propose one pact to one realm, at this percent chance, keeping the planet's
+	// mail volume sane while pacts still accumulate over a game.
+	AIProposeTreatyPct = 20
 )
 
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income

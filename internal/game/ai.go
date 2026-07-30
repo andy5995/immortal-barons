@@ -67,15 +67,38 @@ func aiAcceptsTreaty(profile, ttype string) bool {
 	}
 }
 
-// aiForceShares returns the trooper/turret/tank gold shares an AI of the given
-// profile spends its military budget on (#36). Aggressors lean into offense
-// (tanks + troopers, few turrets); every other profile keeps the defensive
-// default (turret-heavy). Each triple sums to 100.
-func aiForceShares(profile string) (trooper, turret, tank int) {
-	if profile == AIProfileAggressor {
-		return AIForceTrooperPctWar, AIForceTurretPctWar, AIForceTankPctWar
+// aiForceMix is how one personality splits its military budget by gold value.
+// The five shares sum to 100; carriers are derived from jets, not shared for.
+type aiForceMix struct{ trooper, turret, tank, jet, agent int }
+
+// aiForceShares returns the gold shares an AI of the given profile spends its
+// military budget on (#36, #71, #72). A diplomat never attacks, so it buys
+// defense; an aggressor leans into offense; a balanced realm sits between and
+// can punish a weak neighbour.
+func aiForceShares(profile string) aiForceMix {
+	switch profile {
+	case AIProfileAggressor:
+		return aiForceMix{AIForceTrooperPctWar, AIForceTurretPctWar, AIForceTankPctWar, AIForceJetPctWar, AIForceAgentPctWar}
+	case AIProfileBalanced:
+		return aiForceMix{AIForceTrooperPctMixed, AIForceTurretPctMixed, AIForceTankPctMixed, AIForceJetPctMixed, AIForceAgentPctMixed}
+	default: // diplomat
+		return aiForceMix{AIForceTrooperPct, AIForceTurretPct, AIForceTankPct, AIForceJetPct, AIForceAgentPct}
 	}
-	return AIForceTrooperPct, AIForceTurretPct, AIForceTankPct
+}
+
+// aiWarMargin is how far ahead an AI must be before it attacks, as a % of the
+// target's effective defense. A diplomat returns 0, meaning it never attacks
+// (#71) — its budget goes to defense instead, so it is passive by choice rather
+// than by hoarding offense it never uses.
+func aiWarMargin(profile string) int {
+	switch profile {
+	case AIProfileAggressor:
+		return AIWarOffenseMargin
+	case AIProfileBalanced:
+		return AIWarOffenseMarginCautious
+	default:
+		return 0
+	}
 }
 
 // effectiveDefense is a realm's total defensive strength as the battle math
@@ -85,14 +108,15 @@ func effectiveDefense(e *Empire) int {
 	return e.Defense() + e.Land*LandDefenseBonus
 }
 
-// aiWageWar lets an aggressor-profile AI strike the weakest valid target when it
-// is clearly favored (#36). It reuses World.Targets (which already excludes
-// dead, protected, and allied realms) and only commits when its offense beats
-// the target's effective defense by AIWarOffenseMargin, so it starts winnable
-// wars rather than suicidal ones. Non-aggressors and protected AIs never start a
-// war. At most one attack per call (one per turn, BRE-style).
+// aiWageWar lets an AI strike the weakest valid target when it is clearly
+// favored (#36, #71). It reuses World.Targets (which already excludes dead,
+// protected, and allied realms) and only commits when its offense beats the
+// target's effective defense by its profile's margin, so it starts winnable
+// wars rather than suicidal ones. Diplomats and protected AIs never start a war.
+// At most one attack per call (one per turn, BRE-style).
 func (w *World) aiWageWar(e *Empire) {
-	if e.Protection > 0 || e.aiProfile() != AIProfileAggressor {
+	margin := aiWarMargin(e.aiProfile())
+	if e.Protection > 0 || margin == 0 {
 		return
 	}
 	if !w.CanAttack(e) {
@@ -107,7 +131,7 @@ func (w *World) aiWageWar(e *Empire) {
 	if target == nil {
 		return
 	}
-	if e.Offense() > effectiveDefense(target)*AIWarOffenseMargin/100 {
+	if e.Offense() > effectiveDefense(target)*margin/100 {
 		// Soften the target with a covert strike first: demoralized forces defend
 		// worse, so the aggressor's agents pave the way for the attack (#36). The
 		// op now carries a gold fee, so only attempt it when the AI can pay.
@@ -133,4 +157,68 @@ func (w *World) aiHandleDiplomacy(e *Empire) {
 		}
 	}
 	e.TreatyOffers = nil // discard any the AI declined
+}
+
+// aiSetTax picks the AI's tax rate each turn (#73). It never touched the rate
+// before, so every bot realm ran its starting 15% for the life of the game.
+//
+// The choice follows the support model rather than a fixed number: support
+// drifts by -(Tax-SupportTaxNeutral)/SupportTaxDivisor per turn, so a rate just
+// under neutral earns the most gold while still gaining support, and riot risk
+// (Tax²/10000) stays low there. When support slips below AISupportFloor the AI
+// drops to AITaxRecover, under LowTaxBonusBelow, where the original hands back
+// support outright — so a realm in trouble buys its way out instead of taxing
+// itself into a riot spiral. Skill decides how well it plays this: a dull baron
+// under-taxes even when healthy.
+func (w *World) aiSetTax(e *Empire) {
+	want := AITaxDull
+	if e.aiSkill() == AISkillSharp {
+		want = AITaxSharp
+	}
+	if e.Support < AISupportFloor {
+		want = AITaxRecover
+	}
+	if cap := w.Config.MaxTaxRate; cap > 0 && want > cap {
+		want = cap
+	}
+	e.Tax = want
+}
+
+// aiProposeTreaty lets an AI open diplomacy instead of only answering it (#73).
+// It offers one pact per call, and only one its own personality would accept —
+// an aggressor does not sue for a defense pact it would refuse if offered, so
+// the planet's treaty web still reflects who these realms are.
+//
+// Chance-gated so pacts accumulate over a game rather than all forming on turn
+// one, and keyed to the empire and turn so a replayed turn proposes the same
+// thing (the same determinism the region yields use).
+func (w *World) aiProposeTreaty(e *Empire) {
+	if w.regionDraw(e, 91, 100) >= AIProposeTreatyPct {
+		return
+	}
+	profile := e.aiProfile()
+	var wanted []string
+	for _, t := range TreatyTypes {
+		if aiAcceptsTreaty(profile, t) {
+			wanted = append(wanted, t)
+		}
+	}
+	if len(wanted) == 0 {
+		return
+	}
+	ttype := wanted[w.regionDraw(e, 92, len(wanted))]
+	// Offer to the realm it is least likely to be fighting: the strongest other
+	// realm, which is the one worth binding by treaty rather than by arms.
+	var to *Empire
+	for _, other := range w.Empires {
+		if other == e || !other.Alive || w.HasTreaty(e, other, ttype) {
+			continue
+		}
+		if to == nil || w.NetWorth(other) > w.NetWorth(to) {
+			to = other
+		}
+	}
+	if to != nil {
+		w.ProposeTreaty(e, to, ttype)
+	}
 }

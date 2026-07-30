@@ -39,6 +39,7 @@ func (w *World) postCombatNews(a, d *Empire, won, conquered bool) {
 			fmt.Sprintf("The wars grind on: %s overran %s in battle.", a.Name, d.Name),
 			fmt.Sprintf("%s broke through the defenses of %s today.", a.Name, d.Name),
 			fmt.Sprintf("%s claimed a hard-won victory over %s.", a.Name, d.Name),
+			fmt.Sprintf("%s got thrashed by %s.", d.Name, a.Name),
 		}
 	default:
 		lines = []string{

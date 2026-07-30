@@ -89,6 +89,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		w.FoodMarketSupply = FoodMarketDailySupply // refill the food market for the new day (#19)
 		for _, e := range w.Empires {
 			if e.Alive {
+				e.LandAvailable += w.Config.LandPerDay // Daily Land Creation
 				e.TurnsLeft = w.Config.TurnsPerDay
 				e.AttacksToday = 0              // fresh day: the individual-attack allotment resets
 				e.TurnProgress = TurnProgress{} // abandon any turn left uncommitted at rollover (#10)
@@ -204,8 +205,10 @@ func (w *World) aiPlay(today string) {
 			e.LastGoldPaid = 0
 			w.PayForces(e, w.ForcesDue(e))
 			w.PayRegions(e, w.RegionsDue(e))
+			w.aiSetTax(e)        // reactive tax policy (#73)
 			w.aiManageEconomy(e) // discretionary spending: food, military, land
-			w.aiWageWar(e)       // aggressors strike a weak neighbour when clearly favored (#36)
+			w.aiProposeTreaty(e) // open diplomacy, not just answer it (#73)
+			w.aiWageWar(e)       // strike a weak neighbour when clearly favored (#36, #71)
 			w.PlayTurn(e, today)
 		}
 	}
@@ -252,10 +255,14 @@ func (w *World) aiManageEconomy(e *Empire) {
 		if n > AIAgriBuyMax {
 			n = AIAgriBuyMax
 		}
+		if n > e.LandAvailable {
+			n = e.LandAvailable // this realm's land allowance is finite
+		}
 		if n > 0 {
 			e.Regions.Agricultural += n
 			e.syncLand()
 			e.Gold -= n * w.Prices.Land
+			e.LandAvailable -= n
 			return
 		}
 	}
@@ -275,22 +282,32 @@ func (w *World) aiManageEconomy(e *Empire) {
 	w.aiInvestIdle(e)
 }
 
+// aiReserve is the gold an AI keeps back for food and maintenance before it
+// will expand or invest: AIReserveTurns turns of its actual upkeep, floored so a
+// tiny realm still holds something (#70). A flat figure did not track realm size
+// — a grown realm earned it back in a fraction of a turn, so the same threshold
+// gated both land buying and investing however large the economy became.
+func (w *World) aiReserve(e *Empire) int {
+	return max(AIGoldReserveMin, (w.ForcesDue(e)+w.RegionsDue(e))*AIReserveTurns)
+}
+
 // aiExpandLand plows the AI's surplus gold into Coastal regions — the compounding
 // land rush a strong human runs under protection (community strategy guides:
 // Coastal is the early pick while popular support is high). It buys through the
 // same BuyRegions path a human uses, so the per-turn region cap and the rising
-// holdings-based price apply identically. Gold below AIGoldReserve is left for
-// food/maintenance; when the per-turn cap is hit the caller's aiInvestIdle parks
-// the remainder instead of hoarding it.
+// holdings-based price apply identically. Gold below the working reserve is left
+// for food/maintenance; when the per-turn cap is hit the caller's aiInvestIdle
+// parks the remainder instead of hoarding it.
 func (w *World) aiExpandLand(e *Empire) {
-	if e.Gold <= AIGoldReserve {
+	reserve := w.aiReserve(e)
+	if e.Gold <= reserve {
 		return
 	}
-	budget := e.Gold - AIGoldReserve
+	budget := e.Gold - reserve
 	if e.aiSkill() == AISkillDull {
 		budget = budget * AIDullLandBuyPct / 100 // dull barons hold back and grow slower
 	}
-	limit := w.regionBuyLimit(e)
+	limit := min(w.regionBuyLimit(e), e.LandAvailable)
 	n, total := 0, 0
 	for n < limit {
 		cost := w.regionCost(e.Land + n)
@@ -316,9 +333,17 @@ func (w *World) aiStartHQ(e *Empire) {
 }
 
 // aiBuildForces spends a share of the AI's gold on military each turn, split by
-// gold-value across troopers, turrets, and tanks (#36). The old AI bought only
-// troopers, so its realms had no turret defense; this gives them a real
-// defensive posture while still fielding offense. Shares come from balance.go.
+// gold-value across the mix its personality calls for (#36, #71, #72). Shares
+// come from balance.go.
+//
+// Carriers come first and are not a share: jets cannot reach a battle without
+// them (JetsPerCarrier), so buying jets while owning no carriers is buying
+// nothing. The AI covers the jets it already holds, then buys more jets with its
+// share — so the lift always arrives before the aircraft.
+//
+// Agents stop at AIAgentsPerRegion per region. As a pure percentage they
+// compounded into six-figure stockpiles on a large realm with nothing to spend
+// them on (#57).
 func (w *World) aiBuildForces(e *Empire) {
 	budget := e.Gold * AIMilitaryBudgetPct / 100
 	buy := func(share, price int, count *int) {
@@ -330,12 +355,37 @@ func (w *World) aiBuildForces(e *Empire) {
 			e.Gold -= n * price
 		}
 	}
-	trooperPct, turretPct, tankPct := aiForceShares(e.aiProfile())
-	buy(trooperPct, w.TrooperPrice(e), &e.Troopers)
-	buy(turretPct, w.TurretPrice(e), &e.Turrets)
-	buy(tankPct, w.TankPrice(e), &e.Tanks)
-	if e.aiProfile() == AIProfileAggressor {
-		buy(AIForceAgentPctWar, w.AgentPrice(e), &e.Agents) // agents for pre-war covert ops (#36)
+	mix := aiForceShares(e.aiProfile())
+	w.aiBuyCarriers(e)
+	buy(mix.trooper, w.TrooperPrice(e), &e.Troopers)
+	buy(mix.turret, w.TurretPrice(e), &e.Turrets)
+	buy(mix.tank, w.TankPrice(e), &e.Tanks)
+	buy(mix.jet, w.JetPrice(e), &e.Jets)
+	if want := e.Land * AIAgentsPerRegion; e.Agents < want {
+		buy(mix.agent, w.AgentPrice(e), &e.Agents)
+	}
+}
+
+// aiBuyCarriers buys the lift the AI's jets need, one carrier per JetsPerCarrier
+// jets, paid straight from gold rather than from a budget share — an uncarried
+// jet contributes nothing, so this is the highest-value military gold the AI can
+// spend. Capped at the shortfall so it never over-buys hulls.
+func (w *World) aiBuyCarriers(e *Empire) {
+	price := w.CarrierPrice(e)
+	if price <= 0 {
+		return
+	}
+	need := (e.Jets + JetsPerCarrier - 1) / JetsPerCarrier
+	short := need - e.Carriers
+	if short <= 0 {
+		return
+	}
+	if afford := e.Gold / price; short > afford {
+		short = afford
+	}
+	if short > 0 {
+		e.Carriers += short
+		e.Gold -= short * price
 	}
 }
 
@@ -343,10 +393,11 @@ func (w *World) aiBuildForces(e *Empire) {
 // idle treasury earns rather than sitting (#36). Runs after food, expansion,
 // and military spending, so only a genuine surplus is locked away.
 func (w *World) aiInvestIdle(e *Empire) {
-	if e.Gold <= AIGoldReserve {
+	reserve := w.aiReserve(e)
+	if e.Gold <= reserve {
 		return
 	}
-	if amt := (e.Gold - AIGoldReserve) * AIInvestPct / 100; amt > 0 {
+	if amt := (e.Gold - reserve) * AIInvestPct / 100; amt > 0 {
 		w.Invest(e, amt, MinInvestDays)
 	}
 }
