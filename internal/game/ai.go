@@ -311,3 +311,79 @@ func (w *World) aiIsLeader(e *Empire) bool {
 	}
 	return true
 }
+
+// aiRegionMix is one personality's target share of land per region type. The
+// five shares sum to 100; Agricultural is deliberately not among them because
+// the food logic buys it on demand.
+type aiRegionMix struct{ coastal, desert, mountain, industrial, river int }
+
+// aiRegionShares returns the land mix an AI of the given profile builds toward.
+// An aggressor leans industrial (it manufactures its own army) and holds enough
+// mountains to cap the industry boost; a diplomat leans on income regions.
+func aiRegionShares(profile string) aiRegionMix {
+	switch profile {
+	case AIProfileAggressor:
+		return aiRegionMix{AIRegionCoastalPctWar, AIRegionDesertPctWar, AIRegionMountainPctWar, AIRegionIndustrialPctWar, AIRegionRiverPctWar}
+	case AIProfileBalanced:
+		return aiRegionMix{AIRegionCoastalPctMixed, AIRegionDesertPctMixed, AIRegionMountainPctMixed, AIRegionIndustrialPctMixed, AIRegionRiverPctMixed}
+	default:
+		return aiRegionMix{AIRegionCoastalPct, AIRegionDesertPct, AIRegionMountainPct, AIRegionIndustrialPct, AIRegionRiverPct}
+	}
+}
+
+// aiNextRegionType picks which region type the AI should buy this turn: the one
+// whose share of its land is furthest below the target for its personality.
+// Buying the whole turn's purchase into that one type converges on the target
+// over several turns and keeps each purchase a single BuyRegions call, so the
+// per-turn cap and rising price apply exactly as they do for a human.
+func (e *Empire) aiNextRegionType() *int {
+	mix := aiRegionShares(e.aiProfile())
+	total := max(1, e.Land)
+	type want struct {
+		field *int
+		gap   int
+	}
+	// Gap is measured in regions, not percentage points, so a type that is short
+	// by a lot of land outranks one short by a large fraction of very little.
+	candidates := []want{
+		{&e.Regions.Coastal, mix.coastal*total/100 - e.Regions.Coastal},
+		{&e.Regions.Desert, mix.desert*total/100 - e.Regions.Desert},
+		{&e.Regions.Mountain, mix.mountain*total/100 - e.Regions.Mountain},
+		{&e.Regions.Industrial, mix.industrial*total/100 - e.Regions.Industrial},
+		{&e.Regions.River, mix.river*total/100 - e.Regions.River},
+	}
+	best := candidates[0]
+	for _, c := range candidates[1:] {
+		if c.gap > best.gap {
+			best = c
+		}
+	}
+	if best.gap <= 0 {
+		return &e.Regions.Coastal // at target everywhere: keep growing the income base
+	}
+	return best.field
+}
+
+// aiSetProduction points the AI's industry at the units its personality
+// actually fields, replacing BRE's even 15%-to-everything default. Carriers are
+// never manufactured: aiBuyCarriers buys precisely the lift the jets need, so
+// industrial capacity spent guessing at it is wasted (see balance.go).
+//
+// Whatever the shares leave unallocated is paid out as industrial gold, so a
+// defensive realm converts more of its industry to cash and an aggressor turns
+// nearly all of it into an army.
+func (w *World) aiSetProduction(e *Empire) {
+	switch e.aiProfile() {
+	case AIProfileAggressor:
+		e.ProdTroopers, e.ProdJets, e.ProdTurrets = AIProdTrooperPctWar, AIProdJetPctWar, AIProdTurretPctWar
+		e.ProdBombers, e.ProdTanks = AIProdBomberPctWar, AIProdTankPctWar
+	case AIProfileBalanced:
+		e.ProdTroopers, e.ProdJets, e.ProdTurrets = AIProdTrooperPctMixed, AIProdJetPctMixed, AIProdTurretPctMixed
+		e.ProdBombers, e.ProdTanks = AIProdBomberPctMixed, AIProdTankPctMixed
+	default:
+		e.ProdTroopers, e.ProdJets, e.ProdTurrets = AIProdTrooperPct, AIProdJetPct, AIProdTurretPct
+		e.ProdBombers, e.ProdTanks = AIProdBomberPct, AIProdTankPct
+	}
+	e.ProdCarriers = 0
+	e.ProdInitialized = true
+}

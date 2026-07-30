@@ -200,9 +200,10 @@ func (w *World) aiPlay(today string) {
 			// (the old order) let the AI blow its treasury on expansion and new
 			// military it then couldn't maintain, so its forces deserted and its
 			// regions revolted every turn — a self-inflicted boom-bust.
-			w.Manufacture(e)   // industry production at turn start (#71)
-			w.CollectIncome(e) // income in hand before anything is spent
-			w.GrowFood(e)      // food credited at turn start too, so aiManageEconomy sees it (matches the human flow)
+			w.aiSetProduction(e) // point industry at units this profile uses, not BRE's even split
+			w.Manufacture(e)     // industry production at turn start (#71)
+			w.CollectIncome(e)   // income in hand before anything is spent
+			w.GrowFood(e)        // food credited at turn start too, so aiManageEconomy sees it (matches the human flow)
 			e.LastGoldPaid = 0
 			w.PayForces(e, w.ForcesDue(e))
 			w.PayRegions(e, w.RegionsDue(e))
@@ -293,9 +294,10 @@ func (w *World) aiReserve(e *Empire) int {
 	return max(AIGoldReserveMin, (w.ForcesDue(e)+w.RegionsDue(e))*AIReserveTurns)
 }
 
-// aiExpandLand plows the AI's surplus gold into Coastal regions — the compounding
-// land rush a strong human runs under protection (community strategy guides:
-// Coastal is the early pick while popular support is high). It buys through the
+// aiExpandLand plows the AI's surplus gold into land — the compounding land rush
+// a strong human runs (community strategy guides: plow every coin into
+// money-making regions). Which TYPE it buys is whichever its personality is
+// furthest short of (aiNextRegionType); it used to buy Coastal and nothing else. It buys through the
 // same BuyRegions path a human uses, so the per-turn region cap and the rising
 // holdings-based price apply identically. Gold below the working reserve is left
 // for food/maintenance; when the per-turn cap is hit the caller's aiInvestIdle
@@ -320,7 +322,7 @@ func (w *World) aiExpandLand(e *Empire) {
 		n++
 	}
 	if n > 0 {
-		w.BuyRegions(e, &e.Regions.Coastal, n)
+		w.BuyRegions(e, e.aiNextRegionType(), n)
 	}
 }
 

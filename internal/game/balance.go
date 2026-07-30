@@ -150,6 +150,40 @@ const (
 	// region it owns (#57).
 	AIAgentsPerRegion = 2
 
+	// Region strategy (#69 follow-on). The AI used to buy Coastal and nothing
+	// else: a 30-day game left every baron at ~99% Coastal with ZERO Industrial,
+	// zero River and only its five starting Mountains — so it manufactured no
+	// units at all and never touched the mountain industry boost. Its whole army
+	// was bought with gold.
+	//
+	// Each profile has a target share of its land per region type, and the AI buys
+	// whichever type it is furthest below. Shares sum to 100. Agricultural is
+	// absent on purpose: the food logic buys it on demand, so pinning a share too
+	// would fight that.
+	//
+	// Mountain targets sit near 1/6 because the industry boost is
+	// 1 + MountainIndustryNum*Mountain/Total capped at MountainIndustryCapPct —
+	// at 3 and 150 that caps out at Mountain/Total = 1/6, and land past it buys
+	// no more boost.
+	AIRegionCoastalPct, AIRegionDesertPct, AIRegionMountainPct, AIRegionIndustrialPct, AIRegionRiverPct                          = 47, 25, 10, 8, 10
+	AIRegionCoastalPctMixed, AIRegionDesertPctMixed, AIRegionMountainPctMixed, AIRegionIndustrialPctMixed, AIRegionRiverPctMixed = 37, 20, 15, 18, 10
+	AIRegionCoastalPctWar, AIRegionDesertPctWar, AIRegionMountainPctWar, AIRegionIndustrialPctWar, AIRegionRiverPctWar           = 28, 15, 17, 30, 10
+
+	// Production split (Set Industries). The AI never touched this and ran BRE's
+	// default of 15% to every unit type, which is badly wrong once it owns
+	// industry: a carrier costs 1,750 points against a jet's 140, so an even split
+	// builds roughly one carrier per twelve jets when the fleet needs one per
+	// hundred. A 60-day game left one baron holding 236,660 carriers for 389,667
+	// jets, all of it drawing maintenance.
+	//
+	// Carriers are deliberately 0 here — aiBuyCarriers buys exactly the lift the
+	// jets need, which is computable, so spending industrial capacity guessing at
+	// it is waste. Each profile's shares total under 100; the remainder is paid as
+	// industrial gold.
+	AIProdTrooperPct, AIProdJetPct, AIProdTurretPct, AIProdBomberPct, AIProdTankPct                          = 15, 10, 45, 0, 5
+	AIProdTrooperPctMixed, AIProdJetPctMixed, AIProdTurretPctMixed, AIProdBomberPctMixed, AIProdTankPctMixed = 20, 15, 30, 0, 20
+	AIProdTrooperPctWar, AIProdJetPctWar, AIProdTurretPctWar, AIProdBomberPctWar, AIProdTankPctWar           = 20, 25, 5, 10, 35
+
 	// Aggression gates: an AI attacks the weakest valid target only when its
 	// offense exceeds that target's effective defense (units + land bonus) by this
 	// %, so it picks winnable fights. Aggressors need a modest edge; balanced

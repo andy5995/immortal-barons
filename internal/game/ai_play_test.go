@@ -286,3 +286,66 @@ func TestEnsureTreatiesCollapsesStackedPairs(t *testing.T) {
 		}
 	}
 }
+
+// The AI builds a mixed realm rather than buying one region type forever. It
+// used to buy only Coastal, ending a 30-day game at ~99% Coastal with zero
+// Industrial and only its five starting Mountains.
+func TestAIRegionSharesSumTo100(t *testing.T) {
+	for _, p := range []string{AIProfileDiplomat, AIProfileBalanced, AIProfileAggressor} {
+		m := aiRegionShares(p)
+		if sum := m.coastal + m.desert + m.mountain + m.industrial + m.river; sum != 100 {
+			t.Errorf("%s region shares sum to %d, want 100", p, sum)
+		}
+	}
+	if aiRegionShares(AIProfileAggressor).industrial <= aiRegionShares(AIProfileDiplomat).industrial {
+		t.Error("an aggressor should build more industry than a diplomat: it manufactures its army")
+	}
+	// Mountain targets should not overshoot the industry-boost cap, which tops out
+	// at Mountain/Total = MountainIndustryCapPct-100 over MountainIndustryNum*100.
+	capShare := (MountainIndustryCapPct - 100) / MountainIndustryNum
+	for _, p := range []string{AIProfileDiplomat, AIProfileBalanced, AIProfileAggressor} {
+		if got := aiRegionShares(p).mountain; got > capShare+2 {
+			t.Errorf("%s targets %d%% mountain, past the ~%d%% where the boost caps", p, got, capShare)
+		}
+	}
+}
+
+// The AI buys whichever type it is furthest short of, so a realm of nothing but
+// Coastal expands into something else next.
+func TestAIBuysTheTypeItIsShortOf(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.AIProfile = AIProfileAggressor
+	e.Regions = RegionMix{Coastal: 1000}
+	e.syncLand()
+
+	if got := e.aiNextRegionType(); got == &e.Regions.Coastal {
+		t.Error("an all-Coastal realm should buy something other than Coastal next")
+	}
+	// Industry is the aggressor's largest target, so it should be first in line.
+	if got := e.aiNextRegionType(); got != &e.Regions.Industrial {
+		t.Error("an aggressor short of everything should buy Industrial first")
+	}
+}
+
+// Industry must not manufacture carriers: aiBuyCarriers buys exactly the lift
+// the jets need. BRE's even 15% default built roughly one carrier per twelve
+// jets when one per hundred is needed.
+func TestAIProductionNeverBuildsCarriers(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	for _, p := range []string{AIProfileDiplomat, AIProfileBalanced, AIProfileAggressor} {
+		e := w.AddHuman("h"+p, "Realm "+p)
+		e.AIProfile = p
+		w.aiSetProduction(e)
+		if e.ProdCarriers != 0 {
+			t.Errorf("%s allocates %d%% to carriers; aiBuyCarriers owns that", p, e.ProdCarriers)
+		}
+		sum := e.ProdTroopers + e.ProdJets + e.ProdTurrets + e.ProdBombers + e.ProdTanks + e.ProdCarriers
+		if sum > 100 {
+			t.Errorf("%s allocates %d%% of industry, over 100", p, sum)
+		}
+		if sum == 100 {
+			t.Errorf("%s leaves nothing for industrial gold", p)
+		}
+	}
+}
