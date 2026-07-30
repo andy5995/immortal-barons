@@ -961,6 +961,24 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 
 ## Diplomacy
 
+**IB and BRE differ in cardinality — see #88.** The original stores ONE relation
+value per pair of empires, so forming a pact replaces whatever stood before. IB
+stores a *list*, so the same two realms may hold several treaties at once. The
+relation enum, decoded from BRE.OVR's value→name dispatch (table at 0x1C0E3):
+
+| value | relation | | value | relation |
+|---:|---|---|---:|---|
+| −1 | Enemy | | 4 | Terrorist Prevention |
+| 0 | None | | 5 | Intelligence Alliance |
+| 1 | Tariff Trade Agreement | | 6 | Technology Agreement |
+| 2 | Protective Trade | | 7 | Full Defense Alliance |
+| 3 | Free Trade Agreement | | 8 | Declaration Of War |
+
+This is also the independent confirmation that **6 is Technology Agreement**, the
+value the Technology Agreement research bonus keys on. Note the original's two
+hostile states, **Enemy** and **Declaration Of War**, which IB does not model at
+all: BRE treats hostility as a formal relation, not just the absence of a pact.
+
 Seven treaty types are proposed / accepted / broken through the Diplomacy menu,
 and each carries a gameplay effect (#11 wired the last two):
 
