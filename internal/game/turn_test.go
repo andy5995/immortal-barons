@@ -90,9 +90,11 @@ func TestRiversPayGoldAndFoodEveryTurn(t *testing.T) {
 	}
 }
 
-// The split is expectation-preserving: a river's gold is the full yield less the
-// food share, so the two halves must reconstruct the undivided yield.
-func TestRiverSplitPreservesYield(t *testing.T) {
+// Both halves are scaled by RiverFishShare: the gold lands inside the
+// share-scaled yield band, and the food is exactly the share of a full haul.
+// (This checks the scaling, not the expectation-preservation claim behind the
+// choice of share — that rests on the measured 30% fishing rate, not on code.)
+func TestRiverYieldSplitByShare(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("t", "T")
 	e.Regions = RegionMix{River: 1}

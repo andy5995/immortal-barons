@@ -49,7 +49,6 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	// turns straight through PlayTurn — without this the AI's cap accumulates across
 	// the day and strands it at MaxRegions total instead of MaxRegions per turn.
 	e.RegionsBoughtThisTurn = 0
-	e.MaintUnderpaid = false        // cleared for next turn; set again by PayForces/PayRegions on underpayment
 	e.TurnProgress = TurnProgress{} // turn committed: the next turn starts with a clean slate (#10)
 	e.LastPlayed = today
 }
@@ -662,8 +661,8 @@ func (w *World) processEconomy(e *Empire) {
 		e.adjustMorale(-(MoraleDrainSupport - e.Support))
 	}
 	// Taxing very lightly buys back support, but only while the realm is unhappy.
-	if e.Tax < RiotTaxFloor && e.Support < LowTaxSupportCeil {
-		e.adjustSupport(RiotTaxFloor - e.Tax)
+	if e.Tax < LowTaxBonusBelow && e.Support < LowTaxSupportCeil {
+		e.adjustSupport(LowTaxBonusBelow - e.Tax)
 	}
 
 	// Morale slowly recovers toward 100 each turn (a paid, quiet army regains

@@ -290,13 +290,36 @@ const (
 	RiotSupportDivisor = 3  // a riot costs Tax/this many support points
 	RiotPeopleDivisor  = 15 // a riot costs People/this many people
 	RiotChanceDenom    = 10000
-	// Below LowTaxSupportCeil, a rate under RiotTaxFloor additionally buys back
-	// (RiotTaxFloor − Tax) points — BRE's reward for taxing very lightly while
-	// unpopular. It does nothing to an already-content realm.
+	// Below LowTaxSupportCeil, a rate under LowTaxBonusBelow additionally buys
+	// back (LowTaxBonusBelow − Tax) points — BRE's reward for taxing very lightly
+	// while unpopular. It does nothing to an already-content realm.
+	//
+	// LowTaxBonusBelow is 10 in the original, the same value as RiotTaxFloor, but
+	// it is a separate mechanic and must stay a separate constant: sharing one
+	// would make a change to the riot threshold silently move a support gift.
+	LowTaxBonusBelow  = 10
 	LowTaxSupportCeil = 85
 	// Very low support demoralizes the army: below MoraleDrainSupport, morale
 	// falls by the shortfall each turn.
 	MoraleDrainSupport = 10
+
+	// The pay-to-boost-support prompt. Cost is a flat amount per missing point
+	// plus a share of the population, so a big realm pays more to please the same
+	// fraction of it. BINARY-VERIFIED (BRE.OVR 0x2F4C4 / 0x2F740), reproduced
+	// exactly by two live prompts (216,366 gold at 23,874M people and 218,139 at
+	// 24,071M, both three points short):
+	//
+	//	deficit = min(100 − Support, MaxSupportBoostPerTurn)
+	//	cost    = deficit × (SupportBoostPerPerson × People + SupportBoostFlat)
+	//	points  = deficit × (given + 1) / (cost + 1)
+	//
+	// The cap is on the deficit the crown CHARGES for, not on the award — paying
+	// the SupportBoostMaxPct maximum buys proportionally more. That is the
+	// original's behaviour; a test pins it so it does not get "fixed".
+	MaxSupportBoostPerTurn = 15
+	SupportBoostPerPerson  = 3
+	SupportBoostFlat       = 500
+	SupportBoostMaxPct     = 150 // most a baron may pay, as a % of the request
 
 	// --- Industry (live-verified; one capacity pool per region, split between
 	// units and gold — see World.industrialGold / ProjectedProduction) ---

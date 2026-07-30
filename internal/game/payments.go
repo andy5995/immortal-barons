@@ -12,23 +12,12 @@ const (
 	RegionRevoltRate   = 15  // % of land that revolts at full non-payment
 	MoralePerBoostGold = 100 // gold to raise military morale by one point
 
-	// A single turn's payment cannot fully restore support/morale — paying the
-	// whole requested amount only buys a bounded number of points, so recovery
-	// takes several turns. BINARY-VERIFIED for support (BRE.OVR 0x2F4C4): the
-	// deficit the prompt charges for is capped at 15. Morale is unverified.
-	MaxSupportBoostPerTurn = 15
-	MaxMoraleBoostPerTurn  = 20
-
-	// The support boost costs a flat amount per missing point plus a share of the
-	// population — a big realm pays more to please the same fraction of it.
-	// BINARY-VERIFIED: cost = deficit × (3×People + 500), reproduced exactly by
-	// two live prompts (216,366 at 23,874M people and 218,139 at 24,071M, both
-	// three points short).
-	SupportBoostPerPerson = 3
-	SupportBoostFlat      = 500
-	// A baron may overpay the request by half, which buys proportionally more
-	// support — up to the cap, since support stops at 100.
-	SupportBoostMaxNum, SupportBoostMaxDen = 3, 2
+	// A single turn's payment cannot fully restore morale — paying the whole
+	// requested amount only buys a bounded number of points, so recovery takes
+	// several turns. Unverified placeholder, unlike its support counterpart
+	// (MaxSupportBoostPerTurn and the rest of the support-boost model live in
+	// balance.go, where they are binary-verified).
+	MaxMoraleBoostPerTurn = 20
 
 	// Military morale effects (placeholders, tunable). Below the floor, combat
 	// effectiveness is scaled by moraleFactor; below the desert threshold, a
@@ -147,7 +136,6 @@ func (w *World) PayCrownTax(e *Empire, given int) {
 	if req <= 0 || given >= req {
 		return
 	}
-	e.MaintUnderpaid = true
 	// Deferred to turn rollover (see PendingSupportPenalty), matching BRE.
 	e.PendingSupportPenalty += (req - given) * CrownTaxSupportPenalty / (req + 1)
 }
@@ -161,7 +149,6 @@ func (w *World) PayForces(e *Empire, given int) int {
 	if given >= req {
 		return 0
 	}
-	e.MaintUnderpaid = true              // underpaid this obligation; blocks the well-run support boost
 	fracPct := (req - given) * 100 / req // req > 0 here (else given >= req)
 	desertPct := fracPct * ArmyDesertRate / 100
 	lost := 0
@@ -188,7 +175,6 @@ func (w *World) PayRegions(e *Empire, given int) int {
 	if given >= req {
 		return 0
 	}
-	e.MaintUnderpaid = true              // underpaid this obligation; blocks the well-run support boost
 	fracPct := (req - given) * 100 / req // req > 0 here (else given >= req)
 	lost := e.Land * fracPct / 100 * RegionRevoltRate / 100
 	if lost > 0 {
@@ -199,23 +185,23 @@ func (w *World) PayRegions(e *Empire, given int) int {
 	return lost
 }
 
-// SupportBoostDeficit is the number of support points this turn's boost can buy
+// supportBoostDeficit is the number of support points this turn's boost can buy
 // back — the shortfall from 100, capped at MaxSupportBoostPerTurn.
-func (e *Empire) SupportBoostDeficit() int {
+func (e *Empire) supportBoostDeficit() int {
 	return min(100-e.Support, MaxSupportBoostPerTurn)
 }
 
-// SupportBoostCost is the gold the crown requests to restore SupportBoostDeficit
-// points of popular support. Zero when support is already full.
+// SupportBoostCost is the gold the crown requests to restore this turn's
+// recoverable support. Zero when support is already full.
 func (e *Empire) SupportBoostCost() int {
-	return e.SupportBoostDeficit() * (SupportBoostPerPerson*e.People + SupportBoostFlat)
+	return e.supportBoostDeficit() * (SupportBoostPerPerson*e.People + SupportBoostFlat)
 }
 
-// SupportBoostMax is the most a baron may put toward the boost — half again the
-// request. Paying past the request does buy more support, but support caps at
-// 100, so the surplus is usually wasted.
+// SupportBoostMax is the most a baron may put toward the boost. Paying past the
+// request does buy more support, but support caps at 100, so the surplus is
+// usually wasted.
 func (e *Empire) SupportBoostMax() int {
-	return e.SupportBoostCost() * SupportBoostMaxNum / SupportBoostMaxDen
+	return e.SupportBoostCost() * SupportBoostMaxPct / 100
 }
 
 // BoostSupport spends gold to raise popular support (the optional "requested"
@@ -231,7 +217,7 @@ func (w *World) BoostSupport(e *Empire, given int) int {
 	if cost <= 0 {
 		return 0
 	}
-	pts := e.SupportBoostDeficit() * (given + 1) / (cost + 1)
+	pts := e.supportBoostDeficit() * (given + 1) / (cost + 1)
 	before := e.Support
 	e.adjustSupport(pts)
 	return e.Support - before

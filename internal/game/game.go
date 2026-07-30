@@ -183,10 +183,9 @@ type Empire struct {
 	Specialized     string // "" = none, else a unit type name; specialization concentrates output
 
 	// Transient per-turn stats for the end-of-turn report; not persisted.
-	LastSpoiled    int  `json:"-"`
-	LastPopGrowth  int  `json:"-"`
-	LastStarved    int  `json:"-"` // people who left this turn from a food shortfall
-	MaintUnderpaid bool `json:"-"` // forces/regions maintenance was underpaid this turn (blocks the well-run support boost)
+	LastSpoiled   int `json:"-"`
+	LastPopGrowth int `json:"-"`
+	LastStarved   int `json:"-"` // people who left this turn from a food shortfall
 	// PendingSupportPenalty is popular support owed but not yet deducted. BRE
 	// accumulates shortfall penalties during the maintenance sequence and applies
 	// them at turn rollover, not on the spot, so the drop surfaces on the next

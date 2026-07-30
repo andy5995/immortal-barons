@@ -138,7 +138,7 @@ func TestSupportBoostCostAndAward(t *testing.T) {
 	// the payment multiplies. Half again the request buys half again the points.
 	over := *e
 	over.Support, over.Gold = 20, 1_000_000_000
-	want := MaxSupportBoostPerTurn * SupportBoostMaxNum / SupportBoostMaxDen
+	want := MaxSupportBoostPerTurn * SupportBoostMaxPct / 100
 	if pts := w.BoostSupport(&over, over.SupportBoostMax()); pts != want {
 		t.Errorf("overpaying by half should buy %d points, got %d", want, pts)
 	}

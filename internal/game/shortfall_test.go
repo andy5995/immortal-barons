@@ -29,11 +29,10 @@ func TestFoodShortfallPenaltyScales(t *testing.T) {
 	}
 }
 
-// A well-run realm (people fed, maintenance paid in full) recovers popular
-// support for free each turn (#39 placeholder), but an underfed or underpaid one
-// does not get the boost.
-func TestWellRunRealmRecoversSupport(t *testing.T) {
-	mk := func(fed, paid bool) *Empire {
+// A fed realm at a low tax rate recovers popular support each turn from the tax
+// drift, while a starving one loses it faster than the drift returns it.
+func TestFedRealmRecoversSupport(t *testing.T) {
+	mk := func(fed bool) *Empire {
 		w := NewWorldSeed(DefaultConfig(), 1)
 		e := w.AddHuman("me", "Mine")
 		e.Support, e.Tax = 50, 0
@@ -45,15 +44,14 @@ func TestWellRunRealmRecoversSupport(t *testing.T) {
 		} else {
 			e.Food = 0 // will go short of consumption -> starves
 		}
-		e.MaintUnderpaid = !paid
 		w.PlayTurn(e, "2026-07-03")
 		return e
 	}
-	fedPaid := mk(true, true)
-	if fedPaid.Support <= 50 {
-		t.Errorf("a fed realm at a low tax rate should gain support from 50, got %d", fedPaid.Support)
+	fed := mk(true)
+	if fed.Support <= 50 {
+		t.Errorf("a fed realm at a low tax rate should gain support from 50, got %d", fed.Support)
 	}
-	if s := mk(false, true).Support; s >= fedPaid.Support {
-		t.Errorf("starving realm should not get the boost (and loses support): got %d vs %d", s, fedPaid.Support)
+	if s := mk(false).Support; s >= fed.Support {
+		t.Errorf("starving realm should lose support instead: got %d vs %d", s, fed.Support)
 	}
 }
