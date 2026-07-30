@@ -126,13 +126,14 @@ for the options and how to test each one.
 
 ## Daily maintenance
 
-Maintenance advances the game one day for every day that has passed. It lets the
-AI barons take their turns, runs pirate raids, and refreshes each player's turns.
+Maintenance moves the game forward one day. It lets the AI barons take their
+turns, runs pirate raids, and refreshes each player's turns.
 
 **You usually do not need to schedule this.** Maintenance runs on its own the
-first time a player logs in on a new day. If several days passed with no play,
-the next login catches up all of them at once. A board that is not played every
-day needs no nightly event.
+first time a player logs in on a new day. A board that is not played every day
+needs no nightly event; days with no play are skipped, and the game picks up
+where it left off. If you would rather the game keep moving on quiet days, run
+it from a nightly event.
 
 Run it by hand only if you want the game to move forward while no one is playing:
 

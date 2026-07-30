@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestDailyMaintenanceEndsGameAtGameLength(t *testing.T) {
 	cfg := DefaultConfig()
@@ -15,7 +18,10 @@ func TestDailyMaintenanceEndsGameAtGameLength(t *testing.T) {
 	for _, e := range w.Empires {
 		endedNames[e.Name] = true
 	}
-	w.DailyMaintenance("2026-06-30")
+	// Maintenance advances one day per real day, so drive each day in turn.
+	for _, d := range []string{"2026-06-28", "2026-06-29", "2026-06-30"} {
+		w.DailyMaintenance(d)
+	}
 
 	if w.LastMaster == "" {
 		t.Fatal("expected LastMaster to be set after game ended")
@@ -36,7 +42,10 @@ func TestDailyMaintenanceEndlessByDefault(t *testing.T) {
 	cfg.AICount = 2
 	w := NewWorldSeed(cfg, 1)
 	w.LastMaintDate = "2026-06-20"
-	w.DailyMaintenance("2026-06-30")
+	// One game day per real day: ten days of play takes ten daily runs.
+	for d := 21; d <= 30; d++ {
+		w.DailyMaintenance(fmt.Sprintf("2026-06-%02d", d))
+	}
 
 	// GameLength==0 means endless play: no league end, so endGame never
 	// runs and LastMaster stays unset. The daily standing goes to

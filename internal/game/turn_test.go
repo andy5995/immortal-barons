@@ -201,21 +201,46 @@ func TestDailyMaintenanceInitialisesDate(t *testing.T) {
 	}
 }
 
-func TestDailyMaintenanceCatchesUpAndRefills(t *testing.T) {
+// Maintenance never advances more than ONE game day, however long the game sat
+// idle: missed days are lost, not banked. Catching them all up at once meant a
+// returning player met several days of raids, riots and AI turns in one login.
+func TestDailyMaintenanceAdvancesOneDayOnly(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 1)
 	w.LastMaintDate = "2026-07-01"
 	me := w.AddHuman("me", "Mine")
 	me.TurnsLeft = 0
-	w.DailyMaintenance("2026-07-03") // two days missed
-	if w.LastMaintDate != "2026-07-03" {
-		t.Errorf("should catch up to today, got %q", w.LastMaintDate)
+
+	// Four days with nobody playing, then one run.
+	if r := w.DailyMaintenance("2026-07-05"); r.Days != 1 {
+		t.Errorf("a four-day gap should still advance one day, reported %d", r.Days)
 	}
-	if w.GameDay != 2 {
-		t.Errorf("two days should advance GameDay to 2, got %d", w.GameDay)
+	if w.GameDay != 1 {
+		t.Errorf("GameDay should advance by exactly 1, got %d", w.GameDay)
+	}
+	if w.LastMaintDate != "2026-07-02" {
+		t.Errorf("the game clock should step one day, got %q", w.LastMaintDate)
 	}
 	if me.TurnsLeft != cfg.TurnsPerDay {
 		t.Errorf("turns should be refilled to %d, got %d", cfg.TurnsPerDay, me.TurnsLeft)
+	}
+
+	// A second login the same real day must not advance another game day, even
+	// though the game clock is still behind.
+	me.TurnsLeft = 0
+	if r := w.DailyMaintenance("2026-07-05"); r.Days != 0 {
+		t.Errorf("a second run the same day should do nothing, reported %d", r.Days)
+	}
+	if w.GameDay != 1 {
+		t.Errorf("GameDay should stay at 1 on a same-day rerun, got %d", w.GameDay)
+	}
+
+	// The next real day advances one more.
+	if r := w.DailyMaintenance("2026-07-06"); r.Days != 1 {
+		t.Errorf("the next real day should advance one day, reported %d", r.Days)
+	}
+	if w.GameDay != 2 {
+		t.Errorf("GameDay should be 2 after a second day, got %d", w.GameDay)
 	}
 }
 

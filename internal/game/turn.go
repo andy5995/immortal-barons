@@ -62,10 +62,16 @@ type MaintReport struct {
 	NotStarted bool
 }
 
-// DailyMaintenance advances the world to `today`, running one pass per
-// missed day. It is idempotent (no-op if already current) and self-catching
-// up (loops over multiple missed days). The first call on a brand-new world
-// just records the date. It returns a MaintReport summarizing what it did.
+// DailyMaintenance advances the world by AT MOST ONE game day per real day,
+// however long the game has sat idle. A realm nobody has touched for four days
+// comes back to one day of change, not four: skipped days are lost, not banked.
+// Catching up all of them at once meant a returning player met four days of
+// pirate raids, riots, AI turns and price moves in a single login, which is both
+// unreadable and unfair to whoever was actually playing.
+//
+// It is idempotent within a real day (LastMaintRun), so several callers logging
+// in on the same day run it once between them. The first call on a brand-new
+// world just records the date. Returns a MaintReport summarizing what it did.
 func (w *World) DailyMaintenance(today string) MaintReport {
 	// Before the configured Game Start Date, players may sign up but the game
 	// does not advance. Pin the clock to today so it doesn't catch up when the
@@ -83,8 +89,13 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		w.LastMaintDate = today
 		return MaintReport{}
 	}
-	days := 0
-	for w.LastMaintDate < today {
+	// One game day per real day. LastMaintRun is the real date this last ran;
+	// LastMaintDate is the game clock, which falls behind while nobody plays.
+	if w.LastMaintRun == today || w.LastMaintDate >= today {
+		w.removeDeadHusks()
+		return MaintReport{}
+	}
+	{
 		w.settleMarketProceeds()                   // "Depositing trading market money" — pay sellers at day-end (#17)
 		w.FoodMarketSupply = FoodMarketDailySupply // refill the food market for the new day (#19)
 		for _, e := range w.Empires {
@@ -134,19 +145,18 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		if w.Config.GameLength > 0 && w.GameDay >= w.Config.GameLength {
 			w.endGame()
 		}
-		days++
-		next := w.nextDate(w.LastMaintDate)
-		if next == w.LastMaintDate {
-			w.LastMaintDate = today // malformed date; snap to today to stop repeating
-			break
+		w.LastMaintRun = today
+		if next := w.nextDate(w.LastMaintDate); next != w.LastMaintDate {
+			w.LastMaintDate = next
+		} else {
+			w.LastMaintDate = today // malformed date; snap to today rather than stall
 		}
-		w.LastMaintDate = next
 	}
 	// Sweep stale husks even when no day rolled over (e.g. a same-day -maint on
 	// an already-current world), so past-day dead realms don't linger. A realm
 	// that died today (DiedDay == GameDay) is kept by removeDeadHusks.
 	w.removeDeadHusks()
-	return MaintReport{Days: days}
+	return MaintReport{Days: 1}
 }
 
 // rollNews snapshots the day's planet totals into BulletinToday (rolling the

@@ -451,6 +451,14 @@ type World struct {
 	// FoodMarketDailySupply each day's maintenance (issue #19).
 	FoodMarketSupply int
 	LastMaintDate    string
+	// LastMaintRun is the REAL date maintenance last actually ran, as distinct
+	// from LastMaintDate, which is the game's own clock. The two diverge whenever
+	// a game sits idle: maintenance advances the game clock by at most one day per
+	// real day, so a realm left alone for a week comes back to one day's worth of
+	// change, not seven. Without a separate record of when it last ran, every
+	// login on the same real day would advance another game day while the clock
+	// was still behind.
+	LastMaintRun string
 
 	// NewsToday/NewsYesterday split the planetary news feed by day; the JSON
 	// key stays "Bulletin" (the field's old name) so old saves load their
@@ -544,6 +552,7 @@ func (w *World) initFreshGame() {
 	w.InvestRate = DefaultInvestRate
 	w.FoodMarketSupply = FoodMarketDailySupply
 	w.LastMaintDate = ""
+	w.LastMaintRun = ""
 	w.NewsToday = nil
 	w.NewsYesterday = nil
 	w.BulletinToday = DailyBulletin{}
