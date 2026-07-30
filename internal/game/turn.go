@@ -129,6 +129,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		}
 		w.adjustInvestRate()
 		w.postMasterNews()
+		w.postProclamationNews()
 		w.rollNews()
 		if w.Config.GameLength > 0 && w.GameDay >= w.Config.GameLength {
 			w.endGame()

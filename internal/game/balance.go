@@ -186,6 +186,12 @@ const (
 	AIExposeOpsPct = 10
 )
 
+// ProclamationChancePct is how often the Queen Royale's daily proclamation
+// appears in the planetary news (see news_quotes.go). Flavour only — it moves
+// nothing in the economy, so it is tuned purely for how often a joke stays
+// funny.
+const ProclamationChancePct = 35
+
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income
 // as an inline "6 − f(tax)" × Population shape that was only partially
 // recovered. Calibrated to BRE's first-turn income report: a new realm
