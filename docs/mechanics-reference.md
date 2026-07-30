@@ -83,6 +83,12 @@ flow runs in this order:
    lines only — not gold on hand, bank, net worth, score, or unit value. It
    reproduces 28 of 28 live charges exactly.
 
+   **The industrial-gold line is in the base — capture-confirmed**, not only read
+   from the binary. It matters because a baron who sells manufactured units
+   instead of taking industrial gold pays no crown tax on the proceeds: a unit
+   sale is a spending-menu transaction, not income. At a 10% rate that is a 10%
+   edge to produce-and-sell before any other consideration.
+
    **Underpaying is allowed** and costs **popular support**, applied at day
    rollover, by
    `trunc((1 − (paid+1)/(required+1)) × 15)` — a ceiling of 15 that the +1s stop
@@ -120,6 +126,30 @@ suggested amounts bright cyan, the max dark cyan, the `(…; …)` parens bright
 IB implements steps 1, 2, 3, the support/morale part of 4, and 5, with the
 required-capped prompts and these colors. SDI and waste-region maintenance are
 not built.
+
+**Method — the Auto-Pay line is a better probe than the prompts.** With Auto-Pay
+Maintenance on, BRE collapses the whole sequence into one `N Gold paid.` line.
+That single number is *more* useful than the itemised prompts, because every
+component has to reconcile against it at once:
+
+```
+Gold paid = RegionUpkeepPerRegion × regions      (constant for a given realm)
+          + perUnitMaint × units held
+          + trunc(turn income × PlanetaryTaxRate / 1000)
+```
+
+Two unknowns can be separated by playing turns where one of them moves. This is
+how the industrial-gold question above was settled: over ten captured turns,
+assuming industry **is** taxed leaves a region-maintenance figure of exactly
+913.000 per region on every turn across three different region counts (4,417 →
+4,917 → 5,417), while assuming it is **not** leaves a figure that drifts with
+income (974.8, 975.0, 981.3, 991.6…). A constant that survives a changing
+denominator is the signal; see also the standing warning about checking whether
+the denominator moved before explaining any per-unit figure.
+
+The same decomposition recovered per-unit maintenance as a by-product: on the
+turret-producing turns the per-region figure sits at 920.375 rather than 913, and
+the gap is 44,392 turrets × 0.9 — matching the Medium maintenance table.
 
 IB's config field **Max Tax Rate** is *not* BRE's Planetary Tax Rate, despite
 having started life as a misreading of it. BRE caps nothing — its own prompt

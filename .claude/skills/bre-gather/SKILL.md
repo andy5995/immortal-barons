@@ -466,6 +466,35 @@ by changed that turn.** Purchases land between the report and the Regions
 display, so a total can print next to a STALE count. Twice in one session a
 changed denominator was mistaken for a changed mechanic.
 
+### Auto-Pay turns are a stronger probe than the itemised prompts
+
+With **Auto-Pay Maintenance ON**, BRE collapses the whole maintenance sequence
+into a single `N Gold paid.` line. That is *more* informative than the separate
+prompts, not less, because every component has to reconcile against one number at
+once:
+
+```
+Gold paid = regionUpkeepPerRegion × regions      (constant for a given realm)
+          + perUnitMaint × units held
+          + trunc(turn income × PlanetaryTaxRate / 1000)
+```
+
+Guess one unknown, solve for another, then check whether the answer stays
+constant across turns where the *first* quantity moved. **A constant that
+survives a changing denominator is the signal; a "constant" that drifts with
+income is a wrong assumption.** This settled whether industrial gold is inside
+the crown-tax base in ten turns of already-captured data: assuming it is taxed
+leaves region maintenance at exactly 913.000/region across three different region
+counts, assuming it is not leaves a figure wandering 974–992.
+
+It also yields per-unit maintenance for free — on turns holding manufactured
+units the per-region figure sits slightly above the constant, and the gap is
+`units × perUnitMaint`.
+
+So when a capture is needed to settle an arithmetic question, **ask for Auto-Pay
+ON**, not off. Auto-Pay OFF is for learning the prompt *sequence*, wording, and
+colours (see the maintenance-flow section of `docs/mechanics-reference.md`).
+
 ## License boundaries — BRE is proprietary, not open source
 
 Barren Realms Elite is copyrighted (John Dailey Software; original design by

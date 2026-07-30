@@ -769,6 +769,17 @@ Would you like to reconsider? (Y/n)
 for fidelity reference; IB uses its own wording (see the clean-room note).
 Answering yes restarts the whole sequence from the bank prompt.
 
+With Auto-Pay Maintenance **on** and enough gold on hand, the entire sequence
+above collapses to two lines in the post-status block, with no prompts at all:
+
+```
+5,707,154 Gold paid.
+29,164 units of Food consumed.
+```
+
+That single total is the best arithmetic probe in the game — see the Auto-Pay
+section of the `bre-gather` skill for how to decompose it.
+
 
 ### System Menu (InterBBS grid)
 
