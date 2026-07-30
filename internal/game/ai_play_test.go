@@ -442,3 +442,34 @@ func TestThreatResponseReachesBuildForces(t *testing.T) {
 		t.Errorf("a threatened aggressor should buy fewer tanks: calm %d, threatened %d", calm.Tanks, scared.Tanks)
 	}
 }
+
+// A winning AI allocates the land it captures into the type it is short of,
+// the way a human does at the capture prompt, rather than inheriting whatever
+// mix the loser happened to hold.
+func TestAIAllocatesCapturedLand(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Attacker")
+	a.AIProfile, a.AISkill = AIProfileAggressor, AISkillSharp
+	a.Protection, a.Gold = 0, 10_000_000
+	a.Regions = RegionMix{Coastal: 400} // nothing but Coastal: short of industry
+	a.syncLand()
+	a.Troopers, a.Tanks = 500_000, 200_000
+
+	d := w.AddHuman("d", "Defender")
+	d.Protection = 0
+	d.Regions = RegionMix{Desert: 300} // the loser holds only Desert
+	d.syncLand()
+	d.Troopers, d.Turrets, d.Tanks = 1, 0, 0
+
+	beforeIndustrial, beforeDesert := a.Regions.Industrial, a.Regions.Desert
+	w.aiWageWar(a)
+
+	if a.Regions.Industrial <= beforeIndustrial {
+		t.Errorf("captured land should go where the realm is short (Industrial), got %d -> %d",
+			beforeIndustrial, a.Regions.Industrial)
+	}
+	if a.Regions.Desert != beforeDesert {
+		t.Errorf("the attacker should not simply inherit the loser's Desert: %d -> %d",
+			beforeDesert, a.Regions.Desert)
+	}
+}

@@ -138,7 +138,13 @@ func (w *World) aiWageWar(e *Empire) {
 		if e.Agents > 0 && e.Gold >= CostDemoralizeForces {
 			w.DemoralizeForces(e, target)
 		}
-		w.Attack(e, target, FullForce(e), true) // the AI commits its whole army
+		// autoCapture is false so the AI ALLOCATES what it takes, the way a human
+		// does at the capture prompt (#58), instead of inheriting whatever mix the
+		// loser happened to hold. Captured land goes into whichever type this realm
+		// is furthest short of, the same judgement it uses when buying.
+		if _, captured := w.Attack(e, target, FullForce(e), false); captured > 0 {
+			w.GrantRegions(e, e.aiNextRegionType(), captured)
+		}
 	}
 }
 
