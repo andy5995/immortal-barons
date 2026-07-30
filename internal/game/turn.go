@@ -132,6 +132,10 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		// that died today (DiedDay == GameDay before the increment above) is
 		// removed on this pass; the owner rebuilds on a later login.
 		w.removeDeadHusks()
+		// A caller who created a realm and never played a turn is erased; they may
+		// start fresh whenever they next log in.
+		w.removeUnplayedEmpires()
+		w.removeIdleEmpires(today) // abandoned realms fade out (#83)
 		for _, e := range w.Empires {
 			if e.Alive {
 				w.matureInvestments(e)

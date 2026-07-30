@@ -106,6 +106,7 @@ type Config struct {
 	TurnsPerDay           int               // turns each player gets per day
 	ProtectionTurns       int               // New Realm Protection length
 	GameLength            int               // days before the league ends and resets; 0 = endless
+	IdleDaysRemove        int               // days a realm may go unplayed before it is removed; 0 = never
 	InitialMarketLand     int               // land on the market at reset
 	LandPerDay            int               // land added to the market each day
 	InterestRate          int               // bank interest (BRE: % over 10 days; 200 = 20%/day)
@@ -132,6 +133,7 @@ type Config struct {
 const (
 	MaxTurnsPerDay        = 20    // turns-per-day ceiling (default 8)
 	MaxProtectionTurns    = 200   // Turns of Protection ceiling (default 20)
+	MaxIdleDaysRemove     = 365   // Idle-removal ceiling (default 10; 0 = never remove)
 	MaxLandPerDay         = 5000  // Daily Land Creation ceiling (default 1000)
 	MaxInitialMarketLand  = 50000 // Initial Market Land ceiling (default 0)
 	MaxPurchasableRegions = 10000 // Max Purchasable Regions ceiling (default 500)
@@ -179,6 +181,7 @@ func DefaultConfig() Config {
 		TurnsPerDay:           15,
 		ProtectionTurns:       20,
 		GameLength:            0,
+		IdleDaysRemove:        10,
 		InitialMarketLand:     0,
 		LandPerDay:            1000,
 		InterestRate:          50,

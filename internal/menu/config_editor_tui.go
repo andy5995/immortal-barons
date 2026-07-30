@@ -48,6 +48,7 @@ const (
 	helpTurnsPerDay   = "How many turns each player may take per day."
 	helpProtection    = "New-realm protection: turns a fresh empire cannot attack and cannot be attacked, giving newcomers time to get established."
 	helpGameLength    = "Days before the league ends and resets. 0 keeps it running with no scheduled end."
+	helpIdleRemove    = "Days a realm may go unplayed before it is removed from the game. Also removes a realm whose owner created it and never played a turn. 0 never removes anything."
 	helpStartDate     = "The game begins on this date; until then, daily maintenance is paused. Blank starts it right away."
 	helpJoinDate      = "New players may not join after this date. Blank leaves joining open."
 	helpAICount       = "Number of computer-run empires seeded when the world is reset."
@@ -138,6 +139,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addInt(timing, true, "Turns per day", helpTurnsPerDay, c.TurnsPerDay, 1, game.MaxTurnsPerDay, func(c *game.Config, n int) { c.TurnsPerDay = n })
 	t.addInt(timing, true, "Turns of Protection", helpProtection, c.ProtectionTurns, 0, game.MaxProtectionTurns, func(c *game.Config, n int) { c.ProtectionTurns = n })
 	t.addInt(timing, true, "Game length (days, 0=endless)", helpGameLength, c.GameLength, 0, 100000, func(c *game.Config, n int) { c.GameLength = n })
+	t.addInt(timing, true, "Remove idle realms (days, 0=never)", helpIdleRemove, c.IdleDaysRemove, 0, game.MaxIdleDaysRemove, func(c *game.Config, n int) { c.IdleDaysRemove = n })
 	t.addDate(timing, true, "Game Start Date (YYYY-MM-DD)", helpStartDate, c.GameStartDate, func(c *game.Config, v string) { c.GameStartDate = v })
 	t.addDate(timing, true, "Join Cutoff Date (YYYY-MM-DD)", helpJoinDate, c.JoinDate, func(c *game.Config, v string) { c.JoinDate = v })
 	t.addInt(timing, false, "AI empires", helpAICount, c.AICount, 0, 5, func(c *game.Config, n int) { c.AICount = n })

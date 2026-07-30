@@ -102,6 +102,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		p(1, "* Turns per day", fmt.Sprintf("%d", c.TurnsPerDay))
 		p(2, "* Turns of Protection", fmt.Sprintf("%d", c.ProtectionTurns))
 		p(3, "* Game length (days)", fmt.Sprintf("%d (0 = endless)", c.GameLength))
+		p(29, "* Remove idle realms (days)", fmt.Sprintf("%d (0 = never)", c.IdleDaysRemove))
 		p(4, "* Initial Market Land", fmt.Sprintf("%d", c.InitialMarketLand))
 		p(5, "* Land Created / Day", fmt.Sprintf("%d", c.LandPerDay))
 		p(6, "* Interest Rate", fmt.Sprintf("%d", c.InterestRate))
@@ -154,6 +155,8 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 			c.ProtectionTurns = promptSuggested(s, "Turns of Protection", c.ProtectionTurns, game.MaxProtectionTurns)
 		case 3:
 			c.GameLength = promptSuggested(s, "Game length in days (0 = endless)", c.GameLength, 100000)
+		case 29:
+			c.IdleDaysRemove = promptSuggested(s, "Remove a realm unplayed for how many days (0 = never)", c.IdleDaysRemove, game.MaxIdleDaysRemove)
 		case 4:
 			c.InitialMarketLand = promptSuggested(s, "Initial Market Land", c.InitialMarketLand, game.MaxInitialMarketLand)
 		case 5:

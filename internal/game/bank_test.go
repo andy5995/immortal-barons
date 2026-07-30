@@ -56,6 +56,7 @@ func TestInvestmentMaturesInMaintenance(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.LastMaintDate = "2026-01-01"
 	e := w.AddHuman("tester", "Testland")
+	e.LastPlayed = "2026-01-01" // has played; otherwise maintenance erases an unplayed realm
 	e.Gold = 0
 	e.Investments = []Investment{
 		{Amount: 1000, Return: 1150, MaturesDay: 1}, // matures this maintenance

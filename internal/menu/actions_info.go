@@ -361,6 +361,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "  "+tr(s, "Turns per day:      %d")+"\n", c.TurnsPerDay)
 	fmt.Fprintf(s, "  "+tr(s, "Protection turns:   %d")+"\n", c.ProtectionTurns)
 	fmt.Fprintf(s, "  "+tr(s, "Game length (days): %d  (0 = endless)")+"\n", c.GameLength)
+	fmt.Fprintf(s, "  "+tr(s, "Removed if unplayed: %d days  (0 = never)")+"\n", c.IdleDaysRemove)
 	fmt.Fprintf(s, "  "+tr(s, "Inter-BBS play:     %s")+"\n", onOffStr(c.IBBS))
 	pause(s)
 	return Stay

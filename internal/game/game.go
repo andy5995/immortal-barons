@@ -4,6 +4,7 @@
 package game
 
 import (
+	"fmt"
 	"math"
 	"math/rand"
 	"runtime/debug"
@@ -145,7 +146,12 @@ type Empire struct {
 	// slots named in balance.go do anything; the rest are dilution, exactly as in
 	// the original. Research NEVER decays — selling Technology regions stops it
 	// accumulating and freezes what is banked (see advanceTech).
-	TechSlots        [TechSlotCount]int
+	TechSlots [TechSlotCount]int
+	// CreatedDay is the GameDay this realm was founded. It is what keeps the
+	// never-played sweep from erasing a realm the same day it was created — its
+	// owner is entitled to the day they joined, and on a multi-node board another
+	// caller's login can roll the day over while they are still at the menu.
+	CreatedDay       int
 	LastPlayed       string
 	Events           []string
 	Mail             []Message
@@ -652,7 +658,7 @@ func (w *World) newAIName(used map[string]bool) (string, bool) {
 // addAIEmpire appends one AI empire (Owner "") with the standard AI starting
 // setup and returns it. Shared by seedAIEmpires and AddAIEmpires.
 func (w *World) addAIEmpire(name string) *Empire {
-	e := newEmpire(name, "", w.Config)
+	e := newEmpire(name, "", w.Config, w.GameDay)
 	e.Jets = 5
 	e.Turrets = 40
 	// Spread personalities evenly across the AI pool (#36) so a game gets a mix
@@ -703,7 +709,7 @@ func defaultPrices() Prices {
 	return Prices{Land: PriceLand, Trooper: PriceTrooper, Jet: PriceJet, Turret: PriceTurret, Tank: PriceTank, Carrier: PriceCarrier, Agent: PriceAgent, Bomber: PriceBomber}
 }
 
-func newEmpire(name, owner string, cfg Config) *Empire {
+func newEmpire(name, owner string, cfg Config, day int) *Empire {
 	// BRE's starting realm (verified from a live BRE new-empire screen): 15
 	// regions — 2 Agricultural, 5 Desert, 5 Mountain, 3 Coastal — with 100
 	// troopers, 1000 food, full morale, and no other units.
@@ -714,6 +720,7 @@ func newEmpire(name, owner string, cfg Config) *Empire {
 		Regions:  regions,
 		Troopers: StartTroopers, Tax: StartTax, Support: 100, Morale: 100,
 		TurnsLeft: cfg.TurnsPerDay, Protection: cfg.ProtectionTurns,
+		CreatedDay: day,
 		// A new realm opens with one day's land allowance already granted, plus
 		// whatever the sysop seeded the market with, so it can expand on day one
 		// before its first Daily Land Creation arrives.
@@ -744,7 +751,7 @@ func (w *World) BoardFull() bool {
 
 // AddHuman creates and registers a human empire keyed by handle.
 func (w *World) AddHuman(handle, realm string) *Empire {
-	e := newEmpire(realm, strings.ToLower(strings.TrimSpace(handle)), w.Config)
+	e := newEmpire(realm, strings.ToLower(strings.TrimSpace(handle)), w.Config, w.GameDay)
 	w.Empires = append(w.Empires, e)
 	return e
 }
@@ -808,6 +815,76 @@ func (w *World) removeDeadHusks() {
 	kept := w.Empires[:0]
 	for _, e := range w.Empires {
 		if !e.Alive && w.GameDay > e.DiedDay {
+			continue
+		}
+		kept = append(kept, e)
+	}
+	w.Empires = kept
+}
+
+// removeUnplayedEmpires erases a human realm whose owner created it and then
+// never took a single turn. It is removed outright rather than left as a husk,
+// so the same caller can build a fresh realm normally the next time they show
+// up — nothing is held against them.
+//
+// Governed by Config.IdleDaysRemove: 0 disables realm removal entirely.
+//
+// Only human realms are eligible: AI barons are driven by aiPlay and always have
+// LastPlayed set, and an empty Owner is what marks a baron as AI.
+//
+// The timing works because onboarding runs AFTER maintenance in the login flow
+// (internal/play): a realm created today survives to its first turn, and it is
+// the NEXT day's maintenance that collects it if nothing was ever played. For
+// the same reason this must only run on a day that actually advances, never on
+// the already-ran-today path, or a second login would erase a realm the player
+// had not had a chance to play yet.
+func (w *World) removeUnplayedEmpires() {
+	// One switch governs whether this board reaps realms at all: a sysop who sets
+	// Config.IdleDaysRemove to 0 ("never remove") keeps abandoned AND never-played
+	// realms alike.
+	if w.Config.IdleDaysRemove <= 0 {
+		return
+	}
+	kept := w.Empires[:0]
+	for _, e := range w.Empires {
+		if e.Owner != "" && e.LastPlayed == "" && w.GameDay > e.CreatedDay {
+			continue
+		}
+		kept = append(kept, e)
+	}
+	w.Empires = kept
+}
+
+// removeIdleEmpires removes a human realm nobody has played for
+// Config.IdleDaysRemove days, so an abandoned realm does not sit in the
+// rankings forever or grow the world file without bound (#83). 0 means never
+// remove, matching how GameLength already treats 0 as endless.
+//
+// The realm is removed outright, like a never-played one, so the same caller may
+// build fresh whenever they return. Its land is NOT returned to anyone's Daily
+// Land Creation allowance: allowances are per-empire, so there is no shared pool
+// for it to go back to.
+//
+// AI barons are exempt — they are played by aiPlay every day by definition, and
+// an empty Owner is what marks a baron as AI.
+// `today` is the REAL date maintenance is running for, not the game clock: a
+// human's LastPlayed is stamped with the real date they played, so "unplayed for
+// N days" is measured in real days away from the board. The two can differ,
+// since the game clock advances at most one day per real day.
+func (w *World) removeIdleEmpires(today string) {
+	days := w.Config.IdleDaysRemove
+	if days <= 0 {
+		return
+	}
+	cutoff, err := time.Parse("2006-01-02", today)
+	if err != nil {
+		return // unparseable clock: remove nobody rather than guess
+	}
+	limit := cutoff.AddDate(0, 0, -days).Format("2006-01-02")
+	kept := w.Empires[:0]
+	for _, e := range w.Empires {
+		if e.Owner != "" && e.LastPlayed != "" && e.LastPlayed < limit {
+			w.postNews(fmt.Sprintf("%s has been abandoned by its ruler and fades from the map.", e.Name))
 			continue
 		}
 		kept = append(kept, e)
