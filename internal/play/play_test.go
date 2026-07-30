@@ -66,6 +66,12 @@ func TestReadErrorDuringOnboardingSurfacesInReason(t *testing.T) {
 func cfgIn(dir string) game.Config {
 	c := game.DefaultConfig()
 	c.DataDir = dir
+	// Realm reaping off for session tests. These drive sessions that onboard and
+	// quit without ever playing a turn, alongside a writer goroutine rolling the
+	// day over — so a realm is legitimately erased moments after it is created,
+	// and any assertion counting onboarded realms fails intermittently. Reaping
+	// itself is covered in internal/game (idle_test.go); nothing here is about it.
+	c.IdleDaysRemove = 0
 	// Load now errors on a missing world, so stand one up first — as a real
 	// deployment does with -reset before the first caller plays.
 	if err := store.Save(store.NewGame(c), c); err != nil {

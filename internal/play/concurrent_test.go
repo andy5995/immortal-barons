@@ -17,11 +17,6 @@ import (
 // read the World unlocked while the ticker mutates it.
 func TestConcurrentSessionsShareWorld(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
-	// This test is about LOCK safety, not realm reaping: the writer below rolls
-	// the day over constantly, and a realm that onboards and quits without
-	// playing is legitimately erased at the next rollover. Turning removal off
-	// keeps the onboarding count a valid invariant.
-	cfg.IdleDaysRemove = 0
 	w := game.NewWorldSeed(cfg, 1)
 	w.Today = "2026-07-05"
 
