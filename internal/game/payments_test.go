@@ -27,12 +27,12 @@ func TestTechnologyRaisesFoodProduced(t *testing.T) {
 	e.Regions = RegionMix{Agricultural: 80, Technology: 20}
 	e.Land = e.Regions.Total()
 	e.TechSlots[TechSlotGold] = 40
-	base := e.Regions.foodProduced()
-	if want, got := techRaise(base, e.TechFoodFactor()), e.FoodProduced(); got != want {
+	base := e.Regions.foodProduced(w.agriFood(e))
+	if want, got := techRaise(base, e.TechFoodFactor()), w.FoodProduced(e); got != want {
 		t.Errorf("FoodProduced with tech: want %d, got %d", want, got)
 	}
-	if e.FoodProduced() <= base {
-		t.Errorf("technology should raise food output: %d not > %d", e.FoodProduced(), base)
+	if w.FoodProduced(e) <= base {
+		t.Errorf("technology should raise food output: %d not > %d", w.FoodProduced(e), base)
 	}
 }
 

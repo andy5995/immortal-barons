@@ -269,7 +269,7 @@ func (w *World) aiManageEconomy(e *Empire) {
 	//    outran its food into starvation; the food buffer in step 1 rides out the
 	//    turn while this closes the gap.
 	if produced < upkeep && e.Gold > w.Prices.Land {
-		n := (upkeep-produced)/FoodPerAgri + 1
+		n := (upkeep-produced)/FoodAgriBase + 1 // conservative: the floor of the yield band
 		if afford := e.Gold / w.Prices.Land; n > afford {
 			n = afford
 		}
@@ -582,7 +582,7 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 		Rivers:     scale(int64(riverGold) * int64(e.Regions.River)),
 		Industrial: scale(int64(w.industrialGold(e))),
 		Trade:      w.tradeIncome(e), // trade-treaty bonus (population-scaled)
-		Food:       e.FoodProduced(),
+		Food:       w.FoodProduced(e),
 		RiverFood:  w.riverFood(e),
 	}
 }
@@ -599,7 +599,7 @@ func (w *World) riverFood(e *Empire) int {
 // food-region output (FoodProduced) plus river fishing. The single source of
 // truth for produced food, so the turn engine, the AI, and the advisors agree.
 func (w *World) FoodGrown(e *Empire) int {
-	return e.FoodProduced() + w.riverFood(e)
+	return w.FoodProduced(e) + w.riverFood(e)
 }
 
 // CollectIncome credits this turn's gold income (see IncomeThisTurn) at the

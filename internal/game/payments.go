@@ -51,8 +51,15 @@ func (e *Empire) RegionUpkeep() int {
 // Technology bonus — BRE counts food regions under "increased region output",
 // which technology improves (#20). River fishing (riverFood) is a separate
 // mechanic and is not scaled here.
-func (e *Empire) FoodProduced() int {
-	return techRaise(e.Regions.foodProduced(), e.TechFoodFactor())
+func (w *World) FoodProduced(e *Empire) int {
+	return techRaise(e.Regions.foodProduced(w.agriFood(e)), e.TechFoodFactor())
+}
+
+// agriFood is this turn's food yield per Agricultural region: BRE's
+// Base + Random(Rate), one roll per turn shared by every Agricultural region
+// (so the printed total always divides exactly by the region count).
+func (w *World) agriFood(e *Empire) int {
+	return FoodAgriBase + w.regionDraw(e, 6, FoodAgriRate)
 }
 
 // ForcesDue and RegionsDue apply the league's Maintenance Costs knob to the

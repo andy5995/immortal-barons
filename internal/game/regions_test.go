@@ -7,8 +7,9 @@ func TestRegionMixTotalIncomeFood(t *testing.T) {
 	if got, want := r.Total(), 18; got != want {
 		t.Errorf("Total: want %d, got %d", want, got)
 	}
-	wantFood := 4 * FoodPerAgri // Agricultural only; river fishing is conditional (World.riverFood, #29)
-	if got := r.foodProduced(); got != wantFood {
+	// Agricultural only; river fishing is conditional (World.riverFood, #29).
+	wantFood := 4 * FoodAgriBase
+	if got := r.foodProduced(FoodAgriBase); got != wantFood {
 		t.Errorf("foodProduced: want %d, got %d", wantFood, got)
 	}
 }

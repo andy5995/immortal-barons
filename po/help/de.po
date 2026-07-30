@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-30 18:18-0500\n"
+"POT-Creation-Date: 2026-07-30 18:19-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -740,14 +740,22 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:21
+#: internal/help/content/economy/food.md:23
 msgid ""
-"Food you hold beyond about two turns' worth of eating spoils each turn. A "
-"high technology level slows spoilage. Use or sell surplus food rather than "
-"hoard it."
+"Each turn your people eat first, and then part of whatever food is still in "
+"store spoils. There is no safe amount. Even a small store loses some, and a "
+"large one loses more."
 msgstr ""
-"Nahrung, die über etwa zwei Runden Verbrauch hinausgeht, verdirbt jede "
-"Runde. Ein hoher Technologiestand verlangsamt den Verderb."
+
+#. type: Plain text
+#: internal/help/content/economy/food.md:28
+msgid ""
+"This turn's harvest arrives at the start of the turn, so you can sell it the "
+"same turn. Selling your surplus down each turn, instead of hoarding it, is "
+"how you lose nothing to spoilage. Food you have listed on the Trading Market "
+"spoils too, so listing it is not a way to store it. A high technology level "
+"slows spoilage."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/economy/net-worth.md:1
@@ -1952,6 +1960,14 @@ msgstr ""
 "Ein Schild, den Sie finanzieren. Wenn er fertig ist, zerstört er etwa die "
 "Hälfte der auf Sie abgefeuerten Raketen und schwächt feindliche Jets und "
 "Bomber."
+
+#~ msgid ""
+#~ "Food you hold beyond about two turns' worth of eating spoils each turn. A "
+#~ "high technology level slows spoilage. Use or sell surplus food rather "
+#~ "than hoard it."
+#~ msgstr ""
+#~ "Nahrung, die über etwa zwei Runden Verbrauch hinausgeht, verdirbt jede "
+#~ "Runde. Ein hoher Technologiestand verlangsamt den Verderb."
 
 #, no-wrap
 #~ msgid "Industry"

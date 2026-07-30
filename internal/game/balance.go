@@ -369,9 +369,14 @@ const (
 	FoodShortfallSupportDrop   = 70 // support points lost per turn at 100% unfed
 	FoodShortfallMoraleDrop    = 80 // morale points lost per turn at 100% unfed (hungry troops demoralize faster than the public, as under pay shortfall)
 	FoodShortfallEmigrationPct = 10 // % of population that leaves per turn at 100% unfed
-	// Food production per region per turn. Agri calibrated to live BRE (97 Agri
-	// → 29,197 and 16 Agri → 4,864 food → ~300/Agri, no flat base).
-	FoodPerAgri = 300
+	// Agricultural food follows the same Base + [0, Rate) draw the gold regions
+	// use — one roll per turn, multiplied by the region count. BRE-verified: over
+	// six captures and nine different region counts (2 … 194) every printed total
+	// divided exactly by its count, and the per-region figure landed on exactly
+	// 300, 301, 302, 303 or 304 — all five values, so the width is 5 and the floor
+	// is 300. IB previously paid a flat 300, i.e. always the floor of the band.
+	FoodAgriBase = 300
+	FoodAgriRate = 5
 	// Rivers produce BOTH gold and food every turn — a DELIBERATE DIVERGENCE.
 	// In BRE a river does hydropower OR fishing each turn, never both, and it
 	// fished on 21 of 73 captured turns (~29%). IB pays the same expected value

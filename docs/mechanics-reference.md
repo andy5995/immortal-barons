@@ -748,8 +748,15 @@ league ran tax 85%, interest 75%).
   controlled test — the same empire driven through a food deficit and then a
   surplus — fished on 4 of 9 short turns versus 3 of 11 surplus turns (Fisher
   exact, p = 0.64). See issue #67.
+- **Agricultural output is a draw, not a flat rate (BRE-verified).** Per region
+  per turn it is `FoodAgriBase (300) + Random(FoodAgriRate (5))` — one roll per
+  turn shared by every Agricultural region, exactly like the gold regions. Across
+  six captures and nine region counts (2 … 194) every printed total divided
+  exactly by its region count, and the per-region figure landed on 300, 301, 302,
+  303 and 304 — all five, so the width is 5 and the floor is 300. (IB paid a flat
+  300 until 2026-07-30, i.e. always the bottom of the band.)
 - **Food growth is a *turn-start* credit (matches BRE).** This turn's food yield
-  (`Agricultural × 300` + river fishing) is added to the granary at the **start**
+  (Agricultural draw + river fishing) is added to the granary at the **start**
   of the turn — alongside military production and gold income, exactly what the
   start-of-turn income report announces (`World.GrowFood`). So the player can
   **sell or spend this turn's growth the same turn**. (Earlier IB deferred the
@@ -761,15 +768,32 @@ league ran tax 85%, interest 75%).
   troops**, with jets and tanks counting double. The army rate is **live-verified**
   against BRE (2026-07 IBBS capture: 42,259 troopers → "Armed Forces Require 211").
   So a large standing army is nearly food-free, as in BRE — food pressure comes from
-  population, not the army. (Both constants in `balance.go`. The **people** rate is
-  IB's own reconstruction at IB's population scale; it lands lighter than BRE's
-  ~1.5 food per million people, so population food is somewhat easier than BRE.
+  population, not the army. (Both constants in `balance.go`.
   Fixed 2026-07-23: the army was previously billed 1 food/trooper, ~200× too heavy.)
+
+  The **people** rate is BRE's, not a reconstruction, once the population scales
+  are lined up. BRE charges exactly `1.5` food per million people — nine samples
+  across five captures, from 100M to 34,600M, all exact under truncation
+  (4,081M → 6,121, i.e. `trunc(6121.5)`). IB's population counter runs 20× BRE's
+  displayed millions (a fresh realm is 2,000 to BRE's 100M), and `75/1000` is
+  `1.5/20`, so the two charge the same food for the same realm. An earlier note
+  here claimed IB's rate was lighter; it is identical.
+
+  **Turrets eat too, and IB does not charge them.** A turret-only empire was
+  billed 4 food at 44,392 turrets and 9 at 99,382 — about **1 food per 10,000
+  turrets** (the two samples bound the divisor to 9,939 … 11,042, so 10,000 is a
+  fit, not a pin). It is 0.02% of that realm's food bill, which is why IB's
+  omission has never shown up; worth closing only alongside a capture that pins
+  the divisor. No capture yet covers jets, tanks, bombers or carriers, so IB's
+  ×2 weight for jets and tanks remains unverified in both directions.
 - **Food spoilage:** **5% of the food remaining after growth and consumption**
   spoils each turn — `floor(0.05 × food)` — with **no floor** below which nothing
   spoils, reduced by Technology regions. **Re-verified by driving the original
   (2026-07-20):** spoilage matched `floor(5% × food-after-grow-and-consume)` to
-  the unit at three stocks (1,452→72, 2,668→133, 0→0). Because growth is credited
+  the unit at three stocks (1,452→72, 2,668→133, 0→0). **Re-verified again at
+  scale (2026-07-30)** over every capture: 62 of 63 turns matched to the unit,
+  once food sold or bought at the market between the stock line and the spoilage
+  line is counted. Truncation, not rounding (29,759 → 1,487, from 1,487.95). Because growth is credited
   at turn start (above), selling the surplus down to next-turn consumption drains
   the granary to ~0 after feeding, yielding **zero spoilage** — BRE's "sell excess
   → no decay" behavior. (`FoodSpoilPct` in `balance.go`. An earlier 2026-07-11

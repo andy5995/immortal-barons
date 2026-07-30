@@ -167,6 +167,33 @@ func TestCollectIncomeCoversStartingMaintenance(t *testing.T) {
 	}
 }
 
+// TestAgriFoodBandMatchesLiveBRE: BRE's Agricultural output is one Base+draw
+// roll per turn shared by every Agricultural region, so the printed total always
+// divides exactly by the region count and the per-region figure spans exactly
+// 300..304. Both properties are captured facts, not IB choices.
+func TestAgriFoodBandMatchesLiveBRE(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("t", "T")
+	e.Regions = RegionMix{Agricultural: 144}
+	e.syncLand()
+	seen := map[int]bool{}
+	for d := 0; d < 400; d++ {
+		w.GameDay = d
+		total := w.FoodProduced(e)
+		if total%144 != 0 {
+			t.Fatalf("day %d: total %d does not divide by the region count — the draw is not shared", d, total)
+		}
+		per := total / 144
+		if per < FoodAgriBase || per >= FoodAgriBase+FoodAgriRate {
+			t.Fatalf("day %d: per-region %d outside the captured band [%d, %d]", d, per, FoodAgriBase, FoodAgriBase+FoodAgriRate-1)
+		}
+		seen[per] = true
+	}
+	if len(seen) != FoodAgriRate {
+		t.Errorf("draw reached %d of %d values in the band: %v", len(seen), FoodAgriRate, seen)
+	}
+}
+
 func TestProcessEconomyTracksConsumed(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")

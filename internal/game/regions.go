@@ -25,13 +25,12 @@ func (r *RegionMix) fields() []*int {
 		&r.Agricultural, &r.Urban, &r.Industrial, &r.Technology}
 }
 
-// foodProduced is the per-turn food GROWN by Agricultural regions (constants in
-// balance.go). Calibrated to live BRE (97 Agri→29,197 and 16 Agri→4,864 food) =
-// ~300 food/Agri, no flat per-region base. River fishing food is separate and
-// conditional (World.riverFood, #29), since rivers fish OR run hydropower each
-// turn, not both.
-func (r RegionMix) foodProduced() int {
-	return r.Agricultural * FoodPerAgri
+// foodProduced is the per-turn food GROWN by Agricultural regions, given this
+// turn's per-region yield (World.agriFood draws it). River fishing food is
+// separate and conditional (World.riverFood, #29), since rivers fish OR run
+// hydropower each turn, not both.
+func (r RegionMix) foodProduced(perRegion int) int {
+	return r.Agricultural * perRegion
 }
 
 // remove takes n regions away, spread proportionally across the mix (largest
