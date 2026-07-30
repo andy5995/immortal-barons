@@ -360,6 +360,13 @@ func (w *World) aiBuildForces(e *Empire) {
 		}
 	}
 	mix := aiForceShares(e.aiProfile())
+	// Under threat the realm stops building the army it wants and buys the one it
+	// needs: a bigger slice of gold, spent turret-heavy.
+	if w.aiUnderThreat(e) {
+		budget = e.Gold * AIThreatBudgetPct / 100
+		mix = aiForceMix{AIForceTrooperPctPanic, AIForceTurretPctPanic, AIForceTankPctPanic, AIForceJetPctPanic, AIForceAgentPctPanic}
+	}
+	w.aiSellIdleCarriers(e)
 	w.aiBuyCarriers(e)
 	buy(mix.trooper, w.TrooperPrice(e), &e.Troopers)
 	buy(mix.turret, w.TurretPrice(e), &e.Turrets)

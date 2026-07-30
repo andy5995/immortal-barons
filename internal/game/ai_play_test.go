@@ -349,3 +349,96 @@ func TestAIProductionNeverBuildsCarriers(t *testing.T) {
 		}
 	}
 }
+
+// A realm that a rival can beat shifts to defense; skill decides how early it
+// notices. A dull baron waits until the rival is several times stronger.
+func TestAIThreatResponseBySkill(t *testing.T) {
+	mk := func(skill string) (*World, *Empire, *Empire) {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		me := w.AddHuman("me", "Mine")
+		me.AISkill, me.Troopers, me.Turrets, me.Tanks = skill, 0, 0, 0
+		me.Regions = RegionMix{Coastal: 10}
+		me.syncLand()
+		bully := w.AddHuman("b", "Bully")
+		bully.Troopers = 1
+		return w, me, bully
+	}
+	// A rival just strong enough to win: the sharp baron sees it, the dull one not.
+	w, sharp, bully := mk(AISkillSharp)
+	bully.Troopers = effectiveDefense(sharp) + 1
+	if !w.aiUnderThreat(sharp) {
+		t.Error("a sharp baron should react as soon as a rival can beat it")
+	}
+	w2, dull, bully2 := mk(AISkillDull)
+	bully2.Troopers = effectiveDefense(dull) + 1
+	if w2.aiUnderThreat(dull) {
+		t.Error("a dull baron should not yet react to a rival only just ahead")
+	}
+	bully2.Troopers = effectiveDefense(dull)*AIDullThreatFactor + 1
+	if !w2.aiUnderThreat(dull) {
+		t.Error("a dull baron should react once badly outgunned")
+	}
+
+	// An ally is never a threat, or defense pacts would be pointless.
+	w3, e, ally := mk(AISkillSharp)
+	ally.Troopers = effectiveDefense(e) * 100
+	w3.ProposeTreaty(e, ally, "Full Defense Alliance")
+	w3.AcceptTreaty(ally, e.Name, "Full Defense Alliance")
+	if w3.aiUnderThreat(e) {
+		t.Error("a defense-pact partner should not count as a threat")
+	}
+}
+
+// Jets lost in battle strand their carriers, which keep drawing maintenance and
+// lift nothing. The AI sells the surplus back.
+func TestAISellsIdleCarriers(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	e.Jets, e.Carriers, e.Gold = 0, 50, 0
+
+	w.aiSellIdleCarriers(e)
+
+	if e.Carriers != 0 {
+		t.Errorf("carriers with no jets are useless; want 0 kept, got %d", e.Carriers)
+	}
+	if e.Gold <= 0 {
+		t.Error("selling the surplus should return gold")
+	}
+	// It must keep the lift the jets it still has need.
+	e.Jets, e.Carriers = 150, 10
+	w.aiSellIdleCarriers(e)
+	if want := (150 + JetsPerCarrier - 1) / JetsPerCarrier; e.Carriers != want {
+		t.Errorf("should keep %d carriers for 150 jets, kept %d", want, e.Carriers)
+	}
+}
+
+// Exercises the real call path: a threatened realm going through aiBuildForces
+// must come out turret-heavy. The unit tests above call aiUnderThreat directly,
+// so they kept passing when the call site in aiBuildForces was accidentally
+// reverted and the behaviour became unreachable from actual play.
+func TestThreatResponseReachesBuildForces(t *testing.T) {
+	build := func(threatened bool) *Empire {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		e := w.AddHuman("me", "Mine")
+		e.AIProfile, e.AISkill = AIProfileAggressor, AISkillSharp
+		e.Regions = RegionMix{Coastal: 50}
+		e.syncLand()
+		e.Troopers, e.Turrets, e.Tanks, e.Jets = 0, 0, 0, 0
+		e.Gold = 50_000_000
+		bully := w.AddHuman("b", "Bully")
+		if threatened {
+			bully.Troopers = effectiveDefense(e) * 10
+		} else {
+			bully.Troopers = 0
+		}
+		w.aiBuildForces(e)
+		return e
+	}
+	calm, scared := build(false), build(true)
+	if scared.Turrets <= calm.Turrets {
+		t.Errorf("a threatened aggressor should buy more turrets: calm %d, threatened %d", calm.Turrets, scared.Turrets)
+	}
+	if scared.Tanks >= calm.Tanks {
+		t.Errorf("a threatened aggressor should buy fewer tanks: calm %d, threatened %d", calm.Tanks, scared.Tanks)
+	}
+}

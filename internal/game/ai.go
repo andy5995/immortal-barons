@@ -387,3 +387,37 @@ func (w *World) aiSetProduction(e *Empire) {
 	e.ProdCarriers = 0
 	e.ProdInitialized = true
 }
+
+// aiUnderThreat reports whether some rival can currently beat this realm's
+// defense. A sharp baron treats "a rival could win" as the trigger; a dull one
+// waits until the rival is several times stronger, which is usually too late —
+// the same skill split that governs how hard each expands.
+//
+// Allies are excluded: a Full Defense Alliance partner is not a threat, and
+// panicking about one would make defense pacts pointless.
+func (w *World) aiUnderThreat(e *Empire) bool {
+	trigger := effectiveDefense(e)
+	if e.aiSkill() == AISkillDull {
+		trigger *= AIDullThreatFactor
+	}
+	for _, other := range w.Empires {
+		if other == e || !other.Alive || w.AreAllied(e, other) {
+			continue
+		}
+		if other.Offense() > trigger {
+			return true
+		}
+	}
+	return false
+}
+
+// aiSellIdleCarriers converts hulls the realm cannot use back into gold. Jets
+// lost in battle leave their carriers behind, still drawing maintenance and
+// lifting nothing; one carrier per JetsPerCarrier jets is all that is ever
+// useful. Small, but it is gold the AI was simply burning.
+func (w *World) aiSellIdleCarriers(e *Empire) {
+	need := (e.Jets + JetsPerCarrier - 1) / JetsPerCarrier
+	if surplus := e.Carriers - need; surplus > 0 {
+		w.SellCarriers(e, surplus) // same sell path a human uses (buy price / 3)
+	}
+}

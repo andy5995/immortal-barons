@@ -184,6 +184,25 @@ const (
 	AIProdTrooperPctMixed, AIProdJetPctMixed, AIProdTurretPctMixed, AIProdBomberPctMixed, AIProdTankPctMixed = 20, 15, 30, 0, 20
 	AIProdTrooperPctWar, AIProdJetPctWar, AIProdTurretPctWar, AIProdBomberPctWar, AIProdTankPctWar           = 20, 25, 5, 10, 35
 
+	// Threat response. The AI built the same force mix whether or not a neighbour
+	// could flatten it. When the strongest rival's offense outweighs this realm's
+	// effective defense, it spends AIThreatBudgetPct of its gold on military
+	// instead of the usual share, and buys the emergency mix below — turret-heavy,
+	// because turrets are the cheapest defense per gold.
+	//
+	// Skill decides how early it notices: a sharp baron reacts as soon as a rival
+	// can beat it, a dull one not until the rival is AIDullThreatFactor times
+	// stronger, by which point it is usually too late. That is the difference
+	// between a sharp and a dull realm under pressure.
+	AIThreatBudgetPct  = 80
+	AIDullThreatFactor = 2
+
+	AIForceTrooperPctPanic = 25
+	AIForceTurretPctPanic  = 65
+	AIForceTankPctPanic    = 5
+	AIForceJetPctPanic     = 0
+	AIForceAgentPctPanic   = 5
+
 	// Aggression gates: an AI attacks the weakest valid target only when its
 	// offense exceeds that target's effective defense (units + land bonus) by this
 	// %, so it picks winnable fights. Aggressors need a modest edge; balanced
