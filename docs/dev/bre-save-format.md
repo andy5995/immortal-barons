@@ -69,6 +69,11 @@ empire record (les di,[0x28d8])
   +0x129 .. +0x12e   six bytes: Set-Industries allocation percentages, in
                      menu order (Troopers, Jets, Turrets, Bombers, Tanks,
                      Carriers)
+  +0x331 int32  land still available to BUY — the Daily Land Creation allowance.
+                PER-EMPIRE, not a planet-wide pool: 0x12D30 bounds a region
+                purchase against it and 0x12EF9 subtracts the number bought
+                (pointer + sub32 helper 0c03:0fe3). Exhausting it produces
+                "No land is available at this time."
 
 config record (les di,[0x28b4])
   +0x42  int16  Planetary Tax Rate, tenths of a percent (default 50 = 5.0%,

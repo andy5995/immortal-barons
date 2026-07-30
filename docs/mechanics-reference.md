@@ -771,9 +771,29 @@ league ran tax 85%, interest 75%).
   calibrated to a live BRE point: ~73% short dropped support ~50 points in one
   turn. breins.txt confirms the direction: *"Without food, morale and public
   support will [decline]."*
-- **Land market:** starts with a pool of about 5,000 regions; you may buy
-  at most **500 regions per turn**; the per-region price rises as you own
-  more (about 1,100 coins/region when you hold only 2).
+- **Land market:** you may buy at most **500 regions per turn**, and the
+  per-region price rises as you own more (about 1,100 coins/region when you hold
+  only 2). Land is also **finite**: see Daily Land Creation below.
+- **Daily Land Creation — a PER-EMPIRE allowance (BINARY-VERIFIED).** A realm may
+  only buy land its own allowance covers, and each purchase draws that allowance
+  down; every daily maintenance grants `Config.LandPerDay` more. When it is used
+  up the original answers *"No land is available at this time."*
+
+  It is **not** a shared planet-wide pool. `BRE.OVR 0x12D30` bounds a purchase
+  against a field at `+0x331` on the **empire** record (the same record that
+  holds gold and popular support), and `0x12EF9` subtracts the number bought
+  through the sub-32 helper. IB modelled it as one contested planet pool first;
+  the disassembly disproved that, and the difference matters — a shared pool
+  makes realms race each other for land, a per-realm allowance does not.
+
+  IB had the config fields (`LandPerDay`, `InitialMarketLand`) since before this:
+  editable in the Configuration Editor, shown on the Game Setup screen, and
+  broadcast over inter-BBS — but **nothing read them**, so land was effectively
+  infinite. That is why a beaten realm could rebuild faster than any war could
+  take land from it; a 60-day bot game reached 267,000 regions with not one realm
+  ever conquered. A new realm opens with `InitialMarketLand + LandPerDay` so it
+  can expand on its first day.
+
 - **Loans** from the bank scale with how many regions you own.
 - **Trade deals** can send gold from one player to another (used by teams
   to stack bank interest across many players).

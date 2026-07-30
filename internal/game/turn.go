@@ -208,6 +208,7 @@ func (w *World) aiPlay(today string) {
 			w.aiSetTax(e)        // reactive tax policy (#73)
 			w.aiManageEconomy(e) // discretionary spending: food, military, land
 			w.aiProposeTreaty(e) // open diplomacy, not just answer it (#73)
+			w.aiCovertOps(e)     // spy/agitate/shield, not just one pre-war demoralize (#57)
 			w.aiWageWar(e)       // strike a weak neighbour when clearly favored (#36, #71)
 			w.PlayTurn(e, today)
 		}

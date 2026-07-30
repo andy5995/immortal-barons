@@ -222,3 +222,85 @@ func (w *World) aiProposeTreaty(e *Empire) {
 		w.ProposeTreaty(e, to, ttype)
 	}
 }
+
+// aiCovertOps gives the AI a covert repertoire beyond the single pre-war
+// demoralize it used to run (#57). Once a turn it may spend agents and gold on
+// one operation, chosen by personality:
+//
+//   - an aggressor softens the realm it is most likely to hit next, stirring
+//     revolts to cut the target's popular support (which cuts its income) or
+//     demoralizing its forces to make them defend worse
+//   - a balanced realm agitates whoever is ahead of it on net worth, which is
+//     the cheapest way to slow a leader it cannot yet fight
+//   - a diplomat plays defense only, shielding itself when it is the realm worth
+//     attacking
+//
+// Everything is gated on affordability against the AI's working reserve, so
+// covert spending never eats the food and maintenance budget. Chance-gated and
+// keyed to the empire and turn, matching the determinism the rest of AI play
+// uses.
+func (w *World) aiCovertOps(e *Empire) {
+	if e.Agents <= 0 || w.regionDraw(e, 93, 100) >= AICovertOpPct {
+		return
+	}
+	spare := e.Gold - w.aiReserve(e)
+
+	// A diplomat plays defense only. It shields itself when it is the realm worth
+	// attacking, and never runs an offensive op — the same personality line that
+	// stops it starting wars.
+	if e.aiProfile() == AIProfileDiplomat {
+		if w.aiIsLeader(e) && spare >= CostExposeEnemyOps && e.ShieldedUntilDay <= w.GameDay &&
+			w.regionDraw(e, 94, 100) < AIExposeOpsPct {
+			// ExposeEnemyOps shields the CALLER and ignores its target argument
+			// entirely, so there is no rival to name here.
+			w.ExposeEnemyOps(e, e)
+		}
+		return
+	}
+
+	target := w.aiCovertTarget(e)
+	if target == nil {
+		return
+	}
+	// Revolts are the cheaper op and hit income through popular support;
+	// demoralizing is the pre-battle one and is reserved for a realm this AI
+	// could actually follow up against.
+	if spare >= CostDemoralizeForces && e.Offense() > effectiveDefense(target) {
+		w.DemoralizeForces(e, target)
+		return
+	}
+	if spare >= CostStirRevolts {
+		w.StirRevolts(e, target)
+	}
+}
+
+// aiCovertTarget picks who an AI works against: the realm it would attack if it
+// could, else the strongest rival it is not bound to by treaty. Allies are never
+// targeted — an AI that knifes its own treaty partners makes diplomacy
+// meaningless.
+func (w *World) aiCovertTarget(e *Empire) *Empire {
+	var weakest, strongest *Empire
+	for _, t := range w.Targets(e) {
+		if weakest == nil || effectiveDefense(t) < effectiveDefense(weakest) {
+			weakest = t
+		}
+		if strongest == nil || w.NetWorth(t) > w.NetWorth(strongest) {
+			strongest = t
+		}
+	}
+	if e.aiProfile() == AIProfileAggressor && weakest != nil {
+		return weakest
+	}
+	return strongest
+}
+
+// aiIsLeader reports whether e currently tops the planet on net worth — the
+// realm every aggressor is measuring itself against.
+func (w *World) aiIsLeader(e *Empire) bool {
+	for _, other := range w.Empires {
+		if other != e && other.Alive && w.NetWorth(other) > w.NetWorth(e) {
+			return false
+		}
+	}
+	return true
+}

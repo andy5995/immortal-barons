@@ -174,6 +174,16 @@ const (
 	// propose one pact to one realm, at this percent chance, keeping the planet's
 	// mail volume sane while pacts still accumulate over a game.
 	AIProposeTreatyPct = 20
+
+	// Covert (#57). The AI's only covert act was one demoralize immediately
+	// before an attack, so agents piled up unused. Each turn it may run one op,
+	// at this chance, against a rival — softening a war target if it has one, or
+	// otherwise agitating the realm ahead of it on the scoreboard. It only spends
+	// gold it can spare, so covert never starves food or maintenance.
+	AICovertOpPct = 25
+	// A realm shields itself when it is worth attacking: covert defense is worth
+	// buying once a realm leads, since it is then everyone's target.
+	AIExposeOpsPct = 10
 )
 
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income

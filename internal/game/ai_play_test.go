@@ -141,3 +141,50 @@ func TestDailyLandCreationTopsUpAllowance(t *testing.T) {
 		t.Errorf("a day of maintenance should grant %d land, got %d", cfg.LandPerDay, e.LandAvailable)
 	}
 }
+
+// The AI runs covert operations of its own accord, not just one demoralize
+// immediately before an attack (#57).
+func TestAIAggressorRunsCovertOps(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Aggressor")
+	a.AIProfile, a.Agents, a.Gold = AIProfileAggressor, 50, 1_000_000_000
+	a.Regions = RegionMix{Coastal: 500}
+	a.syncLand()
+	victim := w.AddHuman("v", "Victim")
+	victim.Regions = RegionMix{Coastal: 10}
+	victim.syncLand()
+	victim.Protection, victim.Support = 0, 100
+
+	// Drive several turns' worth of the chance gate so the op fires.
+	fired := false
+	for day := 0; day < 40 && !fired; day++ {
+		w.GameDay = day
+		before := victim.Support
+		w.aiCovertOps(a)
+		if victim.Support != before || len(victim.Events) > 0 {
+			fired = true
+		}
+	}
+	if !fired {
+		t.Error("an aggressor with agents and gold never ran a covert op across 40 turns")
+	}
+}
+
+// Covert targets are never treaty partners: an AI that knifes its own allies
+// makes diplomacy meaningless.
+func TestAICovertSparesAllies(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Aggressor")
+	a.AIProfile = AIProfileAggressor
+	ally := w.AddHuman("b", "Ally")
+	ally.Protection = 0
+	w.ProposeTreaty(a, ally, "Full Defense Alliance")
+	w.AcceptTreaty(ally, a.Name, "Full Defense Alliance")
+	if !w.HasTreaty(a, ally, "Full Defense Alliance") {
+		t.Fatal("test setup: the defense pact did not form")
+	}
+
+	if got := w.aiCovertTarget(a); got == ally {
+		t.Error("an AI should not run covert ops against its own defense-pact partner")
+	}
+}
