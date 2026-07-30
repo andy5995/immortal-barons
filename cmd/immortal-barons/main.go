@@ -80,6 +80,7 @@ func main() {
 	reset := flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"))
 	resetFromConfig := flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)"))
 	addAI := flag.Int("add-ai", 0, i18n.T(lang, "add N computer barons to the running game, then exit"))
+	spectate := flag.Int("spectate", 0, i18n.T(lang, "step the game forward N days with no players, printing a per-day summary and final standings, then exit (a balance probe for computer barons)"))
 	dump := flag.Bool("dump", false, i18n.T(lang, "print the normalized game world as JSON, then exit (after load-time migration; for scripts and balance checks)"))
 	utf8 := flag.Bool("utf8", false, i18n.T(lang, "force UTF-8 output (needed for non-English languages; -local detects this from your locale)"))
 	cp437 := flag.Bool("cp437", false, i18n.T(lang, "force CP437 output (the door default; overrides the -local locale detection)"))
@@ -104,7 +105,7 @@ func main() {
 	// stray word alongside one is a mistake — flag it instead of silently ignoring
 	// it. (Unknown -flags are already rejected by the flag package.)
 	explicitMode := *maint || *planetary || *leagueConfig || *reset || *resetFromConfig ||
-		*addAI > 0 || *dump || *local || *export != "" || *imp != "" || *setDrop
+		*addAI > 0 || *dump || *spectate > 0 || *local || *export != "" || *imp != "" || *setDrop
 	if flag.NArg() > 0 && explicitMode {
 		fmt.Fprintf(os.Stderr, "immortal-barons: unknown argument %q\n\n", flag.Arg(0))
 		flag.Usage() // show -help, the common convention for a bad invocation
@@ -188,6 +189,14 @@ func main() {
 	if *addAI > 0 {
 		if err := runAddAI(cfg, *addAI); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -add-ai:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if *spectate > 0 {
+		if err := runSpectate(cfg, *spectate); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -spectate:", err)
 			os.Exit(1)
 		}
 		return

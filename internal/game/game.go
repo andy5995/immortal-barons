@@ -448,6 +448,13 @@ type World struct {
 	BulletinToday     DailyBulletin
 	BulletinYesterday DailyBulletin
 
+	// BattlesTotal/ConquestsTotal count conventional battles and outright
+	// conquests for the lifetime of the process. Not persisted: they exist so the
+	// -spectate balance probe can report whether AI aggression actually fires,
+	// without parsing the news prose.
+	BattlesTotal   int `json:"-"`
+	ConquestsTotal int `json:"-"`
+
 	Alliances     []string // legacy (pre-typed-treaties); migrated by EnsureTreaties
 	Treaties      []Treaty
 	LastMaster    string // crowned at league end (endGame); shown as "Last Planetary Master"

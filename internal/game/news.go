@@ -19,6 +19,13 @@ func (w *World) postNews(line string) {
 
 // postCombatNews broadcasts the outcome of a regular attack to the planet.
 func (w *World) postCombatNews(a, d *Empire, won, conquered bool) {
+	// Every conventional battle funnels through here, so this is the honest place
+	// to tally them for the -spectate balance probe. Counting them by matching the
+	// news prose below would break the moment the wording changes.
+	w.BattlesTotal++
+	if conquered {
+		w.ConquestsTotal++
+	}
 	var lines []string
 	switch {
 	case conquered:
