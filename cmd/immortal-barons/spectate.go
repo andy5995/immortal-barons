@@ -18,6 +18,11 @@ import (
 // run. Dates are synthesized forward from the world's own clock, so it needs no
 // system-clock changes and no IB_GAME_DATE.
 func runSpectate(cfg game.Config, days int) error {
+	// This advances the world and saves it. Said at the point of use, because the
+	// only other place it is written down is the website manual, which nobody is
+	// reading at the moment they run this.
+	fmt.Printf("Playing %d day(s) with no human players. This advances the game and SAVES the result — do not run it on a live board.\n\n", days)
+
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err

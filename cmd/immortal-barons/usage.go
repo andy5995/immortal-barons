@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"strings"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/i18n"
 )
@@ -19,8 +21,11 @@ var usageGroups = []struct {
 }{
 	{"Play", []string{"local", "name", "dropfile", "data"}},
 	{"Character set (output)", []string{"utf8", "cp437"}},
-	{"Sysop / game admin", []string{"set-dropfile", "reset", "reset-from-config", "add-ai", "maint", "dump", "spectate"}},
+	{"Sysop / game admin", []string{"set-dropfile", "reset", "reset-from-config", "add-ai", "maint"}},
 	{"Inter-BBS", []string{"planetary", "league-config", "export", "import"}},
+	// Development tools, kept out of the sysop section: a board never needs
+	// these, and both of them advance or expose game state.
+	{"Testing and balance", []string{"dump", "spectate"}},
 	{"Info", []string{"version"}},
 }
 
@@ -70,9 +75,20 @@ func groupedUsage(fs *flag.FlagSet, lang string) func() {
 	}
 }
 
+// Help output is written for an 80-column BBS terminal. Descriptions used to run
+// past 140 characters on one line, which wraps raggedly on a real caller's
+// screen. helpIndent is a fixed run of spaces rather than Go's "    \t": a tab's
+// width varies by terminal, so wrapping to a column budget cannot be done
+// correctly with one.
+const (
+	helpWidth  = 78
+	helpIndent = "      "
+)
+
 // printUsageFlag prints one flag in the two-line style Go's flag package uses:
-// the flag and its value placeholder, then an indented description with the
-// default value when it is meaningful (not the empty/false/zero default).
+// the flag and its value placeholder, then the description, wrapped and
+// indented, with the default value when it is meaningful (not the empty, false
+// or zero default).
 func printUsageFlag(w io.Writer, f *flag.Flag) {
 	valueName, usage := flag.UnquoteUsage(f)
 	line := "  -" + f.Name
@@ -80,9 +96,31 @@ func printUsageFlag(w io.Writer, f *flag.Flag) {
 		line += " " + valueName
 	}
 	fmt.Fprintln(w, line)
-	fmt.Fprintf(w, "    \t%s", usage)
 	if f.DefValue != "" && f.DefValue != "false" && f.DefValue != "0" {
-		fmt.Fprintf(w, " (default %q)", f.DefValue)
+		usage += fmt.Sprintf(" (default %q)", f.DefValue)
 	}
-	fmt.Fprintln(w)
+	for _, l := range wrapText(usage, helpWidth-len(helpIndent)) {
+		fmt.Fprintf(w, "%s%s\n", helpIndent, l)
+	}
+}
+
+// wrapText breaks text into lines of at most width runes, on spaces. A word
+// longer than width gets its own line rather than being split, so a long flag
+// name or URL stays selectable.
+func wrapText(text string, width int) []string {
+	words := strings.Fields(text)
+	if len(words) == 0 {
+		return []string{""}
+	}
+	var lines []string
+	cur := words[0]
+	for _, word := range words[1:] {
+		if utf8.RuneCountInString(cur)+1+utf8.RuneCountInString(word) <= width {
+			cur += " " + word
+			continue
+		}
+		lines = append(lines, cur)
+		cur = word
+	}
+	return append(lines, cur)
 }

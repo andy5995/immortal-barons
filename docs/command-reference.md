@@ -67,6 +67,12 @@ then exit.
 - **`-add-ai N`** — Add N computer barons to the running game, then exit.
 - **`-maint`** — Run the daily maintenance step, then exit. Run this once a day
   (for example, from a nightly scheduled task).
+
+### Testing and balance
+
+These are development tools. A board never needs them, and both advance or
+expose game state.
+
 - **`-dump`** — Print the game world as JSON, then exit. The output is the world
   *after* the game loads it (old saves are migrated and missing fields filled
   in), so it can differ from the raw `world.json` file. Useful for scripts and
