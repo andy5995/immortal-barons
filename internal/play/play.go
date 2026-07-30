@@ -320,7 +320,12 @@ func onboard(s session.Session, w *game.World, handle, lang string) (name string
 		fmt.Fprintf(s, "\n%s%s, %s%s ", ansi.FgBrightWhite, handle, i18n.T(lang, "Name your Realm:"), ansi.Reset)
 		line, err := session.ReadLine(s)
 		if err != nil {
-			return handle, false // stream ended; fall back to the handle
+			// Stream ended mid-prompt: fall back to the handle as the realm name.
+			// ReadLine echoes the newline when Enter is pressed, but not on this
+			// path, so close the line here or whatever renders next lands on top of
+			// the prompt.
+			fmt.Fprint(s, "\n")
+			return handle, false
 		}
 		name = strings.TrimSpace(line)
 		if name == "" {
