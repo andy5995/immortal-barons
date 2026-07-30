@@ -80,7 +80,7 @@ func main() {
 	reset := flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"))
 	resetFromConfig := flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)"))
 	addAI := flag.Int("add-ai", 0, i18n.T(lang, "add N computer barons to the running game, then exit"))
-	spectate := flag.Int("spectate", 0, i18n.T(lang, "step the game forward N days with no players, printing a per-day summary and final standings, then exit (a balance probe for computer barons)"))
+	spectate := flag.Int("spectate", 0, i18n.T(lang, "play the game forward N days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms"))
 	dump := flag.Bool("dump", false, i18n.T(lang, "print the normalized game world as JSON, then exit (after load-time migration; for scripts and balance checks)"))
 	utf8 := flag.Bool("utf8", false, i18n.T(lang, "force UTF-8 output (needed for non-English languages; -local detects this from your locale)"))
 	cp437 := flag.Bool("cp437", false, i18n.T(lang, "force CP437 output (the door default; overrides the -local locale detection)"))

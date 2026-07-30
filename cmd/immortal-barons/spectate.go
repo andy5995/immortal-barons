@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -18,10 +21,14 @@ import (
 // run. Dates are synthesized forward from the world's own clock, so it needs no
 // system-clock changes and no IB_GAME_DATE.
 func runSpectate(cfg game.Config, days int) error {
-	// This advances the world and saves it. Said at the point of use, because the
-	// only other place it is written down is the website manual, which nobody is
-	// reading at the moment they run this.
-	fmt.Printf("Playing %d day(s) with no human players. This advances the game and SAVES the result — do not run it on a live board.\n\n", days)
+	// Confirm BEFORE taking the world lock, so a prompt waiting on a person never
+	// blocks another node's maintenance or a caller's login.
+	fmt.Printf("Play %d day(s) of computer-baron turns? This advances the game and SAVES the result. (y/N) ", days)
+	answer, _ := bufio.NewReader(os.Stdin).ReadString('\n')
+	if a := strings.ToLower(strings.TrimSpace(answer)); a != "y" && a != "yes" {
+		fmt.Println("Cancelled; the game is unchanged.")
+		return nil
+	}
 
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
@@ -31,6 +38,25 @@ func runSpectate(cfg game.Config, days int) error {
 	w, err := store.Load(cfg)
 	if err != nil {
 		return err
+	}
+
+	// REFUSE on a world that has human realms. This advances the game and saves
+	// it, so pointing it at a live board plays other people's realms for them and
+	// can eliminate them outright. A printed warning cannot undo that — by the
+	// time it is read the turns have been taken.
+	var humans []string
+	for _, e := range w.Empires {
+		if e.Owner != "" && e.Alive {
+			humans = append(humans, e.Name)
+		}
+	}
+	if len(humans) > 0 {
+		return fmt.Errorf("this game has %d human realm(s) (%s).\n"+
+			"-spectate plays turns and SAVES the result, so it would advance them.\n"+
+			"Run it on a scratch copy instead:\n"+
+			"  immortal-barons -data ./sandbox -reset-from-config\n"+
+			"  immortal-barons -data ./sandbox -spectate %d",
+			len(humans), strings.Join(humans, ", "), days)
 	}
 
 	date, err := time.Parse("2006-01-02", w.LastMaintDate)
@@ -44,7 +70,10 @@ func runSpectate(cfg game.Config, days int) error {
 
 	fmt.Printf("%-4s %5s %9s %11s %13s %9s %9s %7s %6s %5s\n",
 		"day", "alive", "land", "people", "gold+bank", "offense", "defense", "treaty", "elim", "wars")
-	prevAlive, prevBattles := len(w.AIEmpires()), w.BattlesTotal
+	// Seed from the same snapshot the loop uses, so the "elim" column is a real
+	// delta. Seeding it from AIEmpires() while comparing against a total that
+	// counts every living realm produced nonsense on the first row.
+	prevAlive, prevBattles := spectateSnapshot(w).alive, w.BattlesTotal
 	for i := 0; i < days; i++ {
 		date = date.AddDate(0, 0, 1)
 		w.DailyMaintenance(date.Format("2006-01-02"))

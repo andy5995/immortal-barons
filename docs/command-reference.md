@@ -89,9 +89,12 @@ expose game state.
     This is a balance-checking tool, not something a board needs to run. It
     exists so the computer barons can be watched playing against each other, to
     see whether they expand sensibly, whether wars happen, and whether the game
-    collapses to one realm too quickly. **It plays real turns and saves the
-    result**, so only use it on a game you are willing to advance — never on a
-    live board.
+    collapses to one realm too quickly.
+
+    **It plays real turns and saves the result.** Two things guard against
+    running it by mistake: it asks before starting, and the default answer is
+    no; and it refuses outright on a game that has any human realm, since
+    advancing someone else's realm is not something a warning can undo.
 
 ### Inter-BBS
 
