@@ -211,7 +211,12 @@ func TestForcesUpkeepFormula(t *testing.T) {
 	e := w.AddHuman("tester", "Testland")
 	// newEmpire has Troopers=100 and no other units, no Technology regions => no
 	// TechFactor reduction. Rates are tenths of a gold, truncated on the total.
-	want := (100*6 + 0*12 + 0*9 + 0*13 + 0*6 + 0*1) / 10
+	// 100 troopers -> 40 gold is the live BRE figure, not a derived one.
+	want := (100*MaintTrooperTenths + 0*MaintJetTenths + 0*MaintTurretTenths +
+		0*MaintBomberTenths + 0*MaintTankTenths + 0*MaintCarrierTenths) / MaintTenthsPerGold
+	if want != 40 {
+		t.Fatalf("a 100-trooper realm should owe the captured 40 gold, not %d", want)
+	}
 	if got := e.ForcesUpkeep(); got != want {
 		t.Errorf("ForcesUpkeep: want %d, got %d", want, got)
 	}

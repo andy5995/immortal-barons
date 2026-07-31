@@ -84,11 +84,17 @@ Rough buy-cost ratio: about **7 troopers = 1 tank**, and about **6 jets =
 1 tank**. So a tank has the offense of 4 troopers but costs ~7 — troopers
 are cheaper short-term, tanks win long-term (lower upkeep).
 
-Maintenance per unit per turn, at the sysop's low / medium / high setting:
+Maintenance per unit per turn, at the sysop's low / medium / high setting.
+**The guide's Medium column is not reliable** — a live 100-trooper realm at
+Medium was charged 40 gold, i.e. 0.40 per trooper, not the 0.60 printed here.
+The turret figure IS confirmed (0.9, across five army sizes). The other four
+Medium values are unmeasured and should be treated as suspect rather than as
+fidelity contract; each needs a realm holding that unit type alone, read off
+"Your Armed Forces Require".
 
 | Unit | Low | Medium | High |
 |------|-----|--------|------|
-| Trooper | 0.10 | 0.60 | 1.60 |
+| Trooper | 0.10 | ~~0.60~~ **0.40 measured** | 1.60 |
 | Jet | 0.30 | 1.20 | 4.80 |
 | Turret | 0.255 | 0.90 | 3.60 |
 | Bomber | 0.32 | 1.30 | 5.20 |

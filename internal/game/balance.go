@@ -580,20 +580,25 @@ const (
 // "Medium") ---
 //
 // Per-unit maintenance per turn, in TENTHS of a gold (Technology reduces the
-// total via TechFactor — see Empire.ForcesUpkeep). The guide table's
-// 0.60/1.20/0.90/1.30/0.60/0.10 figures are literal gold, not a ratio to scale:
-// a live capture of a turret-only empire was charged exactly
-// trunc(0.9 × turrets) at five army sizes from 49,691 turrets (44,721 gold) to
-// 219,032 (197,128). IB previously charged these as whole gold — ten times
-// BRE's rate. Only the turret rate is live-confirmed; the other five come from
-// the same guide table and move with it.
+// total via TechFactor — see Empire.ForcesUpkeep). These are literal gold, not a
+// ratio to scale: a turret-only empire was charged exactly trunc(0.9 × turrets)
+// at five army sizes from 49,691 turrets (44,721 gold) to 219,032 (197,128).
+//
+// TWO RATES ARE LIVE-VERIFIED and the rest are not. The turret figure above
+// matches the guide table, but a live 100-trooper realm was charged 40 gold —
+// 0.40 per trooper, where the guide's Medium column says 0.60. Both readings
+// come from games whose config reads "Maintenance Costs: Medium" and whose
+// region upkeep is the verified 913, so the settings are the same and the guide
+// is simply wrong on that row. Treat the three unmeasured rates below as
+// SUSPECT for the same reason, not as fidelity contract: measuring them needs a
+// realm holding one unit type at a time and reading "Your Armed Forces Require".
 const (
-	MaintTrooperTenths = 6
-	MaintJetTenths     = 12
-	MaintTurretTenths  = 9
-	MaintBomberTenths  = 13
-	MaintTankTenths    = 6
-	MaintCarrierTenths = 1
+	MaintTrooperTenths = 4  // live-verified: 100 troopers → 40 gold
+	MaintJetTenths     = 12 // guide table, UNVERIFIED
+	MaintTurretTenths  = 9  // live-verified across five army sizes
+	MaintBomberTenths  = 13 // guide table, UNVERIFIED
+	MaintTankTenths    = 6  // guide table, UNVERIFIED
+	MaintCarrierTenths = 1  // guide table, UNVERIFIED
 
 	MaintTenthsPerGold = 10
 
