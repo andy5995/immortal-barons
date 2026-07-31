@@ -518,6 +518,41 @@ Once you have the offset, `re.finditer` for the packed disp16 (`6b 02`) lists
 *every* site that reads or writes it, which separates the purchase path, the
 per-turn advance, and the combat use without any further searching.
 
+### Counting references is evidence — use it before hypothesising
+
+Two cheap counts settle questions that otherwise invite a guess. Both come from
+the Queen Royale tax-refund routine (2026-07-31), where they killed a hypothesis
+I had already stated publicly.
+
+- **Count a called function's call sites before assuming it is special-purpose.**
+  A refund was gated by a predicate, and "this is the once-per-day check" was an
+  attractive reading. Counting the far-call bytes found it invoked **27 times**
+  across unrelated contexts — menu key handling among them — with several sites
+  passing a byte from a local parameter rather than the global. That is a generic
+  per-empire guard, not an event gate. One `re.finditer` overturned the guess.
+- **A global read many times and never written is an index, not a tunable.**
+  `[0x28dc]` had 104 `mov al,[0x28dc]` reads and zero writes anywhere in the
+  overlay — the current empire index, set elsewhere and passed as an argument.
+  Grep for the store opcodes (`a2`, `c6 06`, `88 26`) as well as the loads; the
+  read:write ratio tells you what kind of thing it is.
+
+### Check where a conditional jump actually lands
+
+A `jz` inside a routine usually skips a *sub-block*, not the routine. In the
+refund code the predicate's `jz` targeted a label past the cap computation but
+before the crediting and output, so a false predicate meant **"pay uncapped"**,
+not **"pay nothing"** — the opposite of what I reported. Resolve every branch
+target against the surrounding structure before describing what a test controls.
+
+### Absence of Random() is itself a finding
+
+If a routine contains no `Random()` call (`0c03:0ed0`), it is deterministic: when
+invoked it always acts. So an event that sometimes does not appear is not a dice
+roll inside the routine — the decision lives in the **caller**. Combining that
+with one live observation ("no second refund on re-entry the same day") proved
+the routine was never called, without locating the caller at all. Cheap
+deductions like this beat hunting for a gate you have not found yet.
+
 **Then OPEN every one of those sites before you state a mechanic's scope.** The
 list is cheap to produce and cheap to skim, and skipping it is how a confident
 wrong claim gets made. Real miss: "HQ affects only tanks" was asserted from the
