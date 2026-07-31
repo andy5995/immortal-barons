@@ -542,6 +542,25 @@ Your choice?
 Picking a region type prints its one-paragraph blurb, then
 `Buy how many <Type> regions? (0; <max>)`.
 
+After a purchase, BRE stays on the region-type picker (`Your choice?`) so more
+types can be bought in the same visit — **unless no further region could be
+bought**, in which case it returns to the Spending Menu. Two separate causes were
+observed: gold exhausted (five max-affordable buys, each exiting), and the
+planet's land pool exhausted (a 51-region buy that left 668,204 gold against a
+24,281 price, and still exited). A partial buy with both gold and land remaining
+(15 of 44) stayed on the picker. So the trigger is "cannot buy another region",
+not "bought the maximum offered" and not gold alone.
+
+Land is a **shared planetary pool**, stated at the top of the buy screen
+(`There are 49,451 Regions available`). When it is empty, selecting `(6) Regions`
+prints `no land is available at this time` above a redrawn Spending Menu — the
+region screen never appears, and `You can afford N` is bounded by the remaining
+pool rather than by gold.
+
+IB's `buyLand` (`internal/menu/actions_regions.go`) loops the picker until the
+player quits with `0`, which matches the partial-purchase case but keeps looping
+when gold runs out.
+
 ### Diplomacy Menu
 
 Cyan accent, single column. (Reached pre-turn in this build, and from the System

@@ -11,6 +11,15 @@ description: >-
 
 # Gathering ground truth from Barren Realms Elite
 
+**Companion skill: `play-bre` (user-scoped, `~/.claude/skills/play-bre/`).** This
+skill covers *reading* ground truth from a local BRE binary under dosemu, where a
+wrecked game costs nothing. When the session is instead a **live game on a real
+BBS over syncterm** — Andy attached to a shared tmux session, real opponents,
+every keypress permanent — use `play-bre` instead. It carries the syncterm/tmux
+harness, the take-over protocol, the traps specific to a live board (the Enter
+cascade, Alt combos being swallowed in curses mode, no scrollback), and the
+in-game strategy math. The turn flow is the one part the two share.
+
 Immortal Barons is a faithful clone. When a task is "make this match BRE" —
 a menu's items/order, a mechanic's numbers, a screen's layout or colors — the
 authoritative answer is in BRE's own files, not memory. Check the source, cite
