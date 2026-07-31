@@ -17,6 +17,15 @@ authoritative answer is in BRE's own files, not memory. Check the source, cite
 which source, state the confidence. Guessing drifts the clone away from the
 original and costs a round-trip when it's caught in review.
 
+**This skill self-updates — that is part of using it, not an optional extra.**
+Every gathering run that teaches you something about *how to gather* ends with an
+edit to this file, in the same pass, without being asked. The full rule is in
+"Keep this skill current" at the bottom; it is repeated here because it was
+buried at the end and got skipped twice — once for the HQ price hunt, once for
+the reference-list lesson, both of which had to be prompted for. If you finish a
+run and this file is unchanged, that is a decision you should be able to justify,
+not a default.
+
 ## Getting the original BRE
 
 You need your own copy of the **original BRE distribution** (the DOS door
@@ -460,6 +469,66 @@ field, the build rate, and the clamp in one disassembly.
 Once you have the offset, `re.finditer` for the packed disp16 (`6b 02`) lists
 *every* site that reads or writes it, which separates the purchase path, the
 per-turn advance, and the combat use without any further searching.
+
+**Then OPEN every one of those sites before you state a mechanic's scope.** The
+list is cheap to produce and cheap to skim, and skipping it is how a confident
+wrong claim gets made. Real miss: "HQ affects only tanks" was asserted from the
+two combat sites plus the manual, with four unexamined reads still on the list —
+Andy caught it. Opening all nine confirmed the claim (the rest were an advisor
+nag's zero-test, the status display, and the buy menu's `# Owned` pointer), but
+that was luck, not method. A field's reference list IS the mechanic's scope;
+until every entry is identified, "only X is affected" is a hypothesis.
+
+Reading them all also finds sites you did not know to look for: the third combat
+site (`0xF2E4`) computes the same strength expression over **locals** rather than
+record fields — that is the *committed attack force*, and it is what confirmed
+IB's three call sites map one-for-one onto BRE's.
+
+### Prices: find the table write, not the buy handler
+
+Item prices are NOT computed where they are spent. The buy routine reads a global
+`int32` table at `DS:0x2216` indexed by the menu key (`price = [0x2216 + key*4]`,
+so HeadQuarters `'5'` is `0x22EA`), and that table is filled once per turn from
+per-empire record fields (`+0x113`, `+0x117`, `+0x11b`, …). So to find how a
+price is *derived*, search for the WRITE to its table slot (`a3 <lo> <hi>` =
+`mov [addr],ax`), not for the purchase path. The HQ price formula sat 20 bytes
+above its slot write and nowhere near the buy handler.
+
+That per-empire storage is itself worth knowing: BRE keeps unit prices per
+empire, not planet-wide.
+
+### Compare ALL siblings before theorising about one
+
+When one quantity looks like it is drifting, extract the same series for every
+sibling item in the same screen and put them side by side. One item's sequence in
+isolation reads as noise; the contrast is the finding. Pulling all eight buy-menu
+prices at once made it immediate that seven random-walk around a stable base
+(up in one capture, down in another) while HeadQuarters rose in *every* capture —
+which is what turned "the HQ price drifts" into "the HQ price is a ratchet, and
+it is the only one."
+
+### Kill hypotheses with the captures, then disassemble
+
+Captures are good at *falsifying* a driver cheaply, even when they cannot pin the
+formula. For the HQ price, two plausible drivers died in one query each: **realm
+size** (at a fixed 791 regions the price still climbed 5,697 → 7,682, and a
+1,140-region realm was cheaper than a 791-region one) and **Score** (the ratio
+ran 23.8 → 0.59 across the range). That is the signal to stop fitting and go to
+the binary — which gave `5000 + 75×turnsPlayed + Random(300)`, capped at
+`100000 − Random(1000)`, in minutes.
+
+**Beware the proxy trap.** Score rises a flat 213 per turn, so it correlates with
+anything driven by turns played and looks like a cause. BRE's actual driver was a
+separate lifetime turn counter (`+0x281`). When two quantities advance in lockstep
+every turn, a correlation cannot tell them apart — the binary can. (It mattered
+for the clone too: IB's Score is *not* a usable stand-in, because combat adjusts
+it, so IB needed its own counter.)
+
+**Then re-validate the recovered formula against every capture at once**, not the
+handful you derived it from: 163 distinct captured HQ prices, 161 inside the
+300-wide jitter window and spread flat across it. Dedupe first — a repeated
+screen inflates the sample and skews any distribution check (the raw count was
+1,618 with a badly skewed mean; the 163 distinct values were flat).
 
 ### The docs entry is the cheapest way to identify a field
 
