@@ -494,15 +494,18 @@ const (
 	// food comfortably covers it. Was an unscaled 1:1 with People, which starved a
 	// BRE-faithful 1000-food start. Tunable.
 	PeopleFoodPerThousand = 75
-	// ArmyFoodDivisor: TROOPERS eat ~1 food per this many, and no other unit eats
-	// at all. Live-verified twice over: 42,259 troopers → 211 food (42,259/200), and
-	// a second realm billed 36 food for 7,212 troopers that stayed at 36 after
-	// adding 1,000 jets and 533 tanks — so jets and tanks contribute nothing.
-	// 14,685 troopers with the same jets and tanks billed 73 (14,685/200).
+	// ArmyFoodDivisor: TROOPERS eat ~1 food per this many. Live-verified twice:
+	// 42,259 troopers → 211 food (42,259/200), and a second realm billed 36 for
+	// 7,212 troopers. breins.txt agrees in prose: troopers have "the added need
+	// for food, as compared to other units" — comparative, not exclusive.
 	//
-	// IB weighed jets and tanks 2× here until 2026-07-30, which would have billed
-	// 51 for that army. breins.txt agrees with the measurement in prose: troopers
-	// have "the added need for food, as compared to other units".
+	// Troopers are NOT the only unit that eats. BRE also charges turrets and tanks
+	// at 1 food per 10,000 each, BINARY-VERIFIED as one accumulator truncated once
+	// (BRE.OVR cs:0x41) and pinned in play: 30,000 tanks bill 3 and 29,999 bill 2.
+	// IB does not charge them — the amount is ~0.02% of a realm's food bill. Jets,
+	// bombers and carriers are untested, not known-free; an earlier test that
+	// "cleared" jets and tanks used counts that truncate to zero at this rate.
+	// See docs/mechanics-reference.md and issue #91.
 	ArmyFoodDivisor = 200
 
 	// --- Popular support: tax drift, riots, and the pay-to-boost prompt ---

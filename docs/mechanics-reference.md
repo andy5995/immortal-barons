@@ -821,16 +821,22 @@ league ran tax 85%, interest 75%).
   and was always subject to spoilage — corrected 2026-07-20 after driving BRE.)
 - **Food consumption:** each turn the population eats
   `People × PeopleFoodPerThousand (75) / 1000` and the army eats
-  `Troopers / ArmyFoodDivisor (200)` — about **1 food per 200 troopers**, and
-  **only troopers eat**. Live-verified twice: 42,259 troopers → 211, and a realm
-  billed 36 food for 7,212 troopers that stayed at **36** after 1,000 jets and
-  533 tanks were added (14,685 troopers with the same air/armour billed 73).
-  IB weighed jets and tanks 2× until 2026-07-30, which would have billed 51 for
-  that army; `breins.txt` agrees with the measurement, giving troopers "the added
-  need for food, as compared to other units".
-  So a large standing army is nearly food-free, as in BRE — food pressure comes from
+  `Troopers / ArmyFoodDivisor (200)` — about **1 food per 200 troopers**.
+  Live-verified twice: 42,259 troopers → 211, and a realm billed 36 food for
+  7,212 troopers. `breins.txt` gives troopers "the added need for food, as
+  compared to other units", which is comparative, not exclusive: **troopers are
+  not the only unit that eats** (see the turret/tank rate below). A large
+  standing army is still nearly food-free, as in BRE — food pressure comes from
   population, not the army. (Both constants in `balance.go`.
   Fixed 2026-07-23: the army was previously billed 1 food/trooper, ~200× too heavy.)
+
+  **The two terms are truncated separately, then summed** — the total is
+  `trunc(population food) + trunc(army food)`, not one accumulator truncated
+  once. Four turns of a combined `N units of Food consumed` line discriminate
+  the models (25,865M + 49,840 turrets billed 38,801, where a single
+  accumulator gives 38,802); the same holds at 219,032 and 278,857 turrets.
+  Summing the two terms before truncating reads one unit high whenever both
+  have a fractional part.
 
   The **people** rate is BRE's, not a reconstruction, once the population scales
   are lined up. BRE charges exactly `1.5` food per million people — nine samples
@@ -840,12 +846,25 @@ league ran tax 85%, interest 75%).
   `1.5/20`, so the two charge the same food for the same realm. An earlier note
   here claimed IB's rate was lighter; it is identical.
 
-  **Turrets eat a trace amount, and IB does not charge them.** A turret-only
-  empire was billed 4 food at 44,392 turrets and 9 at 99,382 — about **1 food per
-  10,000 turrets** (the two samples bound the divisor to 9,939 … 11,042, so
-  10,000 is a fit, not a pin). It is 0.02% of that realm's food bill, which is
-  why IB's omission has never shown up. Jets and tanks, by contrast, are now
-  measured to eat **nothing at all** (above).
+  **Turrets and tanks each eat 1 food per 10,000 units, and IB does not charge
+  them.** The divisor is **10,000 exactly**, not a fit. Ten army-food prompts
+  from a turret-only empire (99,382 up to 816,657 turrets) bracket it to
+  9,966.5 … 10,082.2, and a tank-only empire drove it shut: with production
+  frozen and the count sold to an exact figure, **30,000 tanks billed 3 and
+  29,999 billed 2**, which allows only 9,999.67 … 10,000. The same pair proves
+  **truncation, not rounding** (2.9999 → 2). Fifteen further tank readings from
+  10,194 to 56,197 are all consistent.
+
+  Tanks and turrets therefore carry the same weight, so the rate is a property
+  of the army, not of the unit type. An earlier note here recorded tanks and
+  jets as eating **nothing**; that test added 1,000 jets and 533 tanks, both of
+  which truncate to zero at this rate, so it had no power to detect them.
+  **Jets, bombers and carriers remain untested — not known-free.** Covert agents
+  are bounded below 1 food per 300 agents (a 50-agent purchase moved nothing),
+  which rules out the trooper rate but not the turret/tank one.
+
+  The charge stays 0.02% of a realm's food bill, which is why IB's omission has
+  never shown up in play.
 - **Food spoilage:** **5% of the food remaining after growth and consumption**
   spoils each turn — `floor(0.05 × food)` — with **no floor** below which nothing
   spoils, reduced by Technology regions. **Re-verified by driving the original
