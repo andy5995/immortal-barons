@@ -473,3 +473,152 @@ func TestAIAllocatesCapturedLand(t *testing.T) {
 			beforeDesert, a.Regions.Desert)
 	}
 }
+
+// --- AI economic levers (#69): market, loans, region rebalancing ---
+
+// TestAIBuysBelowShopPrice: the AI ignored the general market entirely, so a
+// human's listings never sold and it paid shop price for stock it could get
+// cheaper. It should take a clearly-undercut listing.
+func TestAIBuysBelowShopPrice(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	seller := w.AddHuman("seller", "Sellville")
+	seller.Troopers = 5000
+	ai := w.AddAIEmpires(1)
+	_ = ai
+	bot := w.Empires[len(w.Empires)-1]
+	bot.Protection, bot.Gold = 0, 10_000_000
+	before := bot.Troopers
+
+	cheap := w.TrooperPrice(bot) / 2 // well under the discount threshold
+	if err := w.SetMarketListing(seller, "Trooper", 1000, cheap); err != nil {
+		t.Fatalf("list: %v", err)
+	}
+	w.aiShopMarket(bot)
+
+	if bot.Troopers <= before {
+		t.Errorf("the AI should buy troopers listed at half the shop price (had %d, now %d)", before, bot.Troopers)
+	}
+	if w.MarketForSale("seller", "Trooper") == 1000 {
+		t.Error("the seller's listing should have been drawn down")
+	}
+}
+
+// It must NOT buy a listing priced at or above the shop — that is strictly worse
+// than the shop, and buying it would make the market a trap for the AI.
+func TestAIIgnoresOverpricedListings(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	seller := w.AddHuman("seller", "Sellville")
+	seller.Troopers = 5000
+	w.AddAIEmpires(1)
+	bot := w.Empires[len(w.Empires)-1]
+	bot.Protection, bot.Gold = 0, 10_000_000
+	before := bot.Troopers
+
+	w.SetMarketListing(seller, "Trooper", 1000, w.TrooperPrice(bot)*2)
+	w.aiShopMarket(bot)
+
+	if bot.Troopers != before {
+		t.Errorf("the AI must not pay above shop price on the market (had %d, now %d)", before, bot.Troopers)
+	}
+}
+
+// TestAIBorrowsToCoverShortfall: rather than eat desertion and revolts, the AI
+// takes a short loan when it cannot meet the turn's maintenance.
+func TestAIBorrowsToCoverShortfall(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
+	bot := w.Empires[0]
+	bot.Regions = RegionMix{Coastal: 500}
+	bot.syncLand()
+	bot.Gold = 0 // cannot pay a thing
+
+	w.aiManageDebt(bot)
+
+	if len(bot.Loans) == 0 {
+		t.Fatal("a broke AI facing maintenance should borrow")
+	}
+	if bot.Gold <= 0 {
+		t.Errorf("the loan should have credited gold, got %d", bot.Gold)
+	}
+	// It borrows what the ceiling allowed, which may not cover the whole bill:
+	// LoanCeiling is 8 x net worth, and a region's net worth (12.5) is tiny beside
+	// its 913 upkeep, so a land-heavy realm cannot borrow its way out entirely.
+	// Partial cover still buys down the desertion/revolt penalty. (The ceiling
+	// reads 0 afterwards because the loan it just took is now outstanding.)
+	if got, want := bot.Loans[0].Principal, bot.Gold; got != want {
+		t.Errorf("gold %d should equal the %d borrowed", want, got)
+	}
+	if bot.Loans[0].Principal <= 0 {
+		t.Error("borrowed nothing")
+	}
+}
+
+// A solvent AI must not borrow — debt it does not need still compounds.
+func TestAISolventDoesNotBorrow(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
+	bot := w.Empires[0]
+	bot.Gold = 100_000_000
+
+	w.aiManageDebt(bot)
+
+	if len(bot.Loans) != 0 {
+		t.Error("a solvent AI should not take a loan")
+	}
+}
+
+// TestAISellsRegionsWhenStarving: an AI whose population outgrew its farmland
+// and which cannot afford more should convert surplus land into gold rather
+// than starve holding it.
+func TestAISellsRegionsWhenStarving(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
+	bot := w.Empires[0]
+	bot.Regions = RegionMix{Coastal: 400, Agricultural: 1}
+	bot.syncLand()
+	bot.People = 5_000_000
+	bot.Gold = 0
+	bot.LandAvailable = 100
+	coastalBefore := bot.Regions.Coastal
+
+	if w.FoodGrown(bot) >= bot.FoodUpkeep() {
+		t.Fatal("test setup: the realm is not actually food-short")
+	}
+	w.aiRebalanceRegions(bot)
+
+	if bot.Regions.Coastal >= coastalBefore {
+		t.Errorf("a starving, broke AI should sell surplus regions (coastal %d -> %d)", coastalBefore, bot.Regions.Coastal)
+	}
+	if bot.Gold <= 0 {
+		t.Errorf("selling regions should raise gold, got %d", bot.Gold)
+	}
+}
+
+// A well-fed AI must not sell land — that would dismantle a healthy realm.
+func TestAIWellFedKeepsItsRegions(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
+	bot := w.Empires[0]
+	bot.Regions = RegionMix{Coastal: 100, Agricultural: 200}
+	bot.syncLand()
+	bot.People = 1000
+	before := bot.Regions.Coastal
+
+	w.aiRebalanceRegions(bot)
+
+	if bot.Regions.Coastal != before {
+		t.Errorf("a well-fed AI must keep its regions (%d -> %d)", before, bot.Regions.Coastal)
+	}
+}

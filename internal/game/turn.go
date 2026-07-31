@@ -224,10 +224,21 @@ func (w *World) aiPlay(today string) {
 			w.CollectIncome(e)   // income in hand before anything is spent
 			w.GrowFood(e)        // food credited at turn start too, so aiManageEconomy sees it (matches the human flow)
 			e.LastGoldPaid = 0
+			// Borrow BEFORE paying: a loan taken after the shortfall has already
+			// cost desertion and revolts is worth nothing.
+			w.aiManageDebt(e) // cover a shortfall, or repay from surplus (#69)
 			w.PayForces(e, w.ForcesDue(e))
 			w.PayRegions(e, w.RegionsDue(e))
-			w.aiSetTax(e)        // reactive tax policy (#73)
+			w.aiSetTax(e)           // reactive tax policy (#73)
+			w.aiRebalanceRegions(e) // sell surplus land to fund farmland when starving (#69)
+			// The market steps sit HERE, not inside aiManageEconomy: that function
+			// returns early on its food-emergency branch, which fires on most turns,
+			// so anything placed after it effectively never runs. Shop the market
+			// before paying shop prices, and list the surplus once the turn's buying
+			// has settled so the surplus is the real one.
+			w.aiShopMarket(e)    // prefer a listing that undercuts the shop (#69)
 			w.aiManageEconomy(e) // discretionary spending: food, military, land
+			w.aiListSurplus(e)   // offer what it cannot use instead of paying upkeep on it (#69)
 			w.aiProposeTreaty(e) // open diplomacy, not just answer it (#73)
 			w.aiCovertOps(e)     // spy/agitate/shield, not just one pre-war demoralize (#57)
 			w.aiWageWar(e)       // strike a weak neighbour when clearly favored (#36, #71)
@@ -417,6 +428,157 @@ func (w *World) aiBuyCarriers(e *Empire) {
 		e.Carriers += short
 		e.Gold -= short * price
 	}
+}
+
+// aiShopMarket buys from the general Trading Market before paying shop prices
+// (#69). The AI ignored the market entirely, which had two bad effects: a human
+// could list goods that no one would ever buy, and the AI passed up cheaper
+// stock sitting in plain sight. It takes only listings that undercut the shop by
+// AIMarketBuyDiscountPct, spends at most AIMarketBuyBudgetPct of its surplus, and
+// buys through the same BuyFromMarket path a human uses — so escrow, the
+// self-purchase refusal, and the seller's proceeds all behave identically.
+func (w *World) aiShopMarket(e *Empire) {
+	reserve := w.aiReserve(e)
+	if e.Gold <= reserve {
+		return
+	}
+	budget := (e.Gold - reserve) * AIMarketBuyBudgetPct / 100
+	for _, good := range MarketGoods {
+		shop := w.shopPrice(e, good)
+		if shop <= 0 {
+			continue
+		}
+		want := shop * (100 - AIMarketBuyDiscountPct) / 100
+		for _, l := range w.MarketSellers(good, e.Owner) {
+			if l.Price > want || l.Price <= 0 {
+				continue
+			}
+			n := min(l.Qty, budget/l.Price)
+			if n <= 0 {
+				continue
+			}
+			if w.BuyFromMarket(e, l.Owner, good, n) == nil {
+				budget -= n * l.Price
+			}
+		}
+	}
+}
+
+// aiListSurplus puts goods the AI holds more of than it can use on the market,
+// priced just under the shop so they actually sell (#69).
+//
+// Jets beyond carrier lift are the reliable case: a jet with no carrier cannot
+// reach a battle, so it is pure upkeep, and a growing AI runs a few thousand of
+// them. Listing them is strictly better than the shop's third-price sell-back
+// AND gives the other barons something worth buying, which is what makes
+// aiShopMarket more than decoration.
+//
+// Food only qualifies when production has outrun consumption, which the food
+// buffer in aiManageEconomy usually prevents — it is handled anyway so a
+// farming-heavy realm does not sit on a granary that only spoils.
+func (w *World) aiListSurplus(e *Empire) {
+	list := func(good string, surplus, shop int) {
+		if surplus <= 0 || shop <= 0 {
+			return
+		}
+		// Do NOT stack onto an existing listing: the surplus is recomputed every
+		// turn, so adding to it each time grows the escrow without bound (a sim ran
+		// one baron to 600k jets listed). One offer at a time, replaced only once
+		// the last has cleared.
+		if w.MarketForSale(e.Owner, good) > 0 {
+			return
+		}
+		if qty := surplus * AIMarketListPct / 100; qty > 0 {
+			w.SetMarketListing(e, good, qty, shop*(100-AIMarketUndercutPct)/100)
+		}
+	}
+	list("Jet", e.Jets-e.Carriers*JetsPerCarrier, w.JetPrice(e))
+	list("Food", e.Food-e.FoodUpkeep()*AIFoodBufferTurns, w.FoodBuyPrice())
+}
+
+// shopPrice is what e would pay the shop for one unit of a market good, or 0 for
+// goods the shop does not sell at a per-unit price.
+func (w *World) shopPrice(e *Empire, good string) int {
+	switch good {
+	case "Trooper":
+		return w.TrooperPrice(e)
+	case "Jet":
+		return w.JetPrice(e)
+	case "Turret":
+		return w.TurretPrice(e)
+	case "Bomber":
+		return w.BomberPrice(e)
+	case "Tank":
+		return w.TankPrice(e)
+	case "Carrier":
+		return w.CarrierPrice(e)
+	case "Agent":
+		return w.AgentPrice(e)
+	case "Food":
+		return w.FoodBuyPrice()
+	}
+	return 0
+}
+
+// aiManageDebt borrows to cover a maintenance shortfall and repays out of a
+// clear surplus (#69). The AI never touched Cash Relief, so a bad turn cost it
+// desertion and revolts even when a short loan would have carried it. It borrows
+// ONLY for the shortfall — funding expansion on credit compounds debt it cannot
+// service — and only what the ceiling allows.
+func (w *World) aiManageDebt(e *Empire) {
+	due := w.ForcesDue(e) + w.RegionsDue(e)
+	if short := due - e.Gold; short > 0 {
+		want := short * AILoanHeadroomPct / 100
+		if ceiling := w.LoanCeiling(e); want > ceiling {
+			want = ceiling
+		}
+		if want > 0 {
+			w.TakeLoan(e, want, AILoanDays)
+		}
+		return
+	}
+	// Solvent: put part of the clear surplus toward any defaulted debt.
+	if e.Debt <= 0 {
+		return
+	}
+	surplus := e.Gold - w.aiReserve(e)
+	if surplus < AIMinSurplusToRepay {
+		return
+	}
+	pay := min(surplus*AIDebtRepayPct/100, e.Debt)
+	w.Repay(e, pay)
+}
+
+// aiRebalanceRegions sells regions the AI holds in surplus to fund the farmland
+// it is short of (#69). It never sold regions at all, so a realm whose
+// population outgrew its agriculture could starve while sitting on plenty of
+// land it could have converted. Only fires when food production genuinely falls
+// short AND it cannot pay for the farmland outright.
+func (w *World) aiRebalanceRegions(e *Empire) {
+	if w.FoodGrown(e) >= e.FoodUpkeep() {
+		return
+	}
+	if e.Gold >= w.LandPrice(e) || e.LandAvailable <= 0 {
+		return // it can already afford land, or there is none to buy
+	}
+	// Sell from whichever non-food type it holds most of, so the mix evens out
+	// rather than gutting one specialty.
+	biggest, field := 0, (*int)(nil)
+	for _, c := range []struct {
+		n int
+		f *int
+	}{
+		{e.Regions.Coastal, &e.Regions.Coastal}, {e.Regions.Desert, &e.Regions.Desert},
+		{e.Regions.Mountain, &e.Regions.Mountain}, {e.Regions.Urban, &e.Regions.Urban},
+	} {
+		if c.n > biggest {
+			biggest, field = c.n, c.f
+		}
+	}
+	if field == nil || biggest <= 0 {
+		return
+	}
+	w.SellRegions(e, field, min(biggest/2, AIRebalanceSellMax))
 }
 
 // aiInvestIdle parks the AI's gold above a working reserve into investments so

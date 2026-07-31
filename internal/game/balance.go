@@ -137,6 +137,33 @@ const (
 	// economy got, so it stopped meaning anything.
 	AIReserveTurns   = 3
 	AIGoldReserveMin = 50_000
+
+	// Trading Market (#69). The AI used to ignore the market completely, so a
+	// human's listings never sold and the AI never took the cheaper of two
+	// prices. It now shops there first: it buys a good listed below what the
+	// shop charges, capped so one baron cannot corner a listing, and it lists a
+	// slice of its own surplus slightly under the shop price so the goods
+	// actually move.
+	AIMarketBuyDiscountPct = 10 // only buy when a listing undercuts the shop by at least this
+	AIMarketBuyBudgetPct   = 25 // % of gold above the reserve spendable on market goods per turn
+	AIMarketListPct        = 20 // % of a surplus good it will put up for sale
+	// The undercut MUST exceed AIMarketBuyDiscountPct or no baron will ever meet
+	// another's asking price and the market stays a museum piece — a sim with 5%
+	// against a 10% threshold produced listings that nothing could ever buy.
+	AIMarketUndercutPct = 15
+
+	// Cash Relief loans (#69). The AI borrows only to cover a maintenance
+	// shortfall — the thing that otherwise costs it desertion and revolts — and
+	// never to fund expansion, which would compound debt it cannot service.
+	AILoanDays          = 5   // term to borrow for; short, so the compounding stays small
+	AILoanHeadroomPct   = 150 // borrow up to this % of the shortfall, for a small cushion
+	AIDebtRepayPct      = 50  // % of the surplus above the reserve put toward debt
+	AIMinSurplusToRepay = 10_000
+
+	// Region rebalancing (#69). A realm that cannot feed itself and cannot
+	// afford farmland is stuck; selling regions it has in surplus funds the
+	// farmland instead of starving. Only fires when genuinely food-short.
+	AIRebalanceSellMax = 50 // most regions sold in one rebalancing turn
 	// AIDullLandBuyPct is the share of the affordable land-buy budget a dull-skill
 	// AI spends each turn (a sharp AI spends it all). Because expansion compounds,
 	// this is tuned empirically so a dull baron reaches ~700 regions over a day's
