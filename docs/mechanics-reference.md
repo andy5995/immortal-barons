@@ -1147,8 +1147,14 @@ Market`. Any empire can list goods for other empires to buy:
   Empire · For Sale · Price`), and buy. You cannot buy your own listing. The
   buyer pays the full price immediately (verified live — no markup); the seller's
   proceeds are deposited at **day-end maintenance** (`settleMarketProceeds` —
-  BRE's "Depositing trading market money" step), minus a `MarketCommissionPct`
-  tunable (default 0 — BRE's real cut was too noisy to isolate live).
+  BRE's "Depositing trading market money" step). **There is NO commission**
+  (`MarketCommissionPct = 0`), measured 2026-07-30 (#43): a 200-trooper listing
+  at 1,000 cost the buyer exactly 200,000 and put exactly 200,000 in the seller's
+  bank. The bank read 201,250 the next day because it accrues interest —
+  confirmed by watching it reach 205,048 with no further deposit, which is
+  `201,250 x 1.00625^3` to the coin. Full pass-through, verified from both ends.
+- **Bank interest is per TURN, not per day:** 0.625% a turn under a 5.0% daily
+  rate at 8 turns/day, compounding — the daily rate divided by turns per day.
 - **Protection-gated:** a realm under new-realm protection cannot use the market.
 - **Escrowed goods are safe from pirates and attacks** — an intended BRE strategy
   (community guide: park military to evade pirates). But listing does **not** dodge

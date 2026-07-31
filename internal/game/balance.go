@@ -361,10 +361,25 @@ const (
 const BombMarketLossPct = 25
 
 // MarketCommissionPct is the cut (percent) the general Trading Market takes from
-// a seller's proceeds at day-end settlement (#17). BRE's exact value was not
-// observable live (a real cross-empire sale needs two non-protected empires,
-// which the protection grind + self-buy refusal blocked), so it defaults to 0 —
-// tunable once the real figure is known.
+// a seller's proceeds at day-end settlement (#17). It is ZERO, and that is now
+// measured rather than assumed (#43, 2026-07-30).
+//
+// The experiment the ticket asked for, run at last: two empires driven past the
+// twenty turns of new-realm protection that gate trading, seller with "Deposit
+// gold at End of Turn" OFF so its bank could only move from the sale. Selby
+// listed 200 troopers at 1,000; Buyar bought all 200.
+//
+//	buyer  1,014,956 -> 814,956 gold — paid exactly 200,000, no markup
+//	seller bank 0 -> 201,250 after the day rolled
+//
+// The 1,250 is bank interest, not a bonus: the balance then grew to 205,048 with
+// no further deposit, which is 201,250 x 1.00625^3 exactly — 0.625% per turn,
+// i.e. the config's 5.0% daily rate over 8 turns per day, compounding. So the
+// deposit itself was 200,000 to the coin. A commission could only ever make the
+// seller's side SMALLER, so full pass-through is confirmed from both ends.
+//
+// Corroborating: breins.txt describes selling "at any price you choose" with no
+// mention of a cut, and the market code region carries no percentage arithmetic.
 const MarketCommissionPct = 0
 
 // --- HeadQuarters (BRE-verified: BRE.OVR 0xD010, 0x12C8C, 0x40241/0x4043D) ---
