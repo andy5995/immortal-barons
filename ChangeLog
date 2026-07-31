@@ -1,4 +1,5 @@
 (in-progress:)
+  * A day is now 10 turns by default, down from 15
 
 2026-07-31 (v0.0.3)
   * Updating from an earlier version requires a game reset (-reset)

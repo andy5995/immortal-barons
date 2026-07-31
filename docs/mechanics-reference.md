@@ -1009,8 +1009,8 @@ its validation rule.
 
 ## Turn structure
 
-Turns per day: 15 (config). New players get protection turns at the start
-(config: 60). A turn walks through a sequence of menus:
+Turns per day: 10 (config; BRE's own default is 8). New players get protection
+turns at the start (config: 60). A turn walks through a sequence of menus:
 
 1. Diplomacy (first turn only)
 2. Status screen
