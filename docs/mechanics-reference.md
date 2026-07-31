@@ -1259,6 +1259,18 @@ Still missing against the reference:
 
 These are the slices that would move it closer to the real game.
 
+### Deliberately not implemented
+
+- **Lottery.** BRE offers a ticket at the start of a turn
+  (`Would you like to buy a lottery ticket? (Y/n)`), takes six letters, draws six,
+  and pays winnings into the bank — one observed draw picked `ABCDEF` against
+  `OZDQEF` and paid 500,000. No ticket cost was shown or charged. The match rule
+  is unresolved: that draw scores 2 by position (E, F) or 3 by set intersection
+  (D, E, F), and both fit the payout. **Not planned** — it is a pure
+  random-gold faucet with no decision content. Revisit only if players ask for it,
+  in which case the match rule needs pinning down first with a shuffled-letter
+  ticket.
+
 ## Sources
 
 - Barren Realms Elite gameplay overview — The Realm of Serion BBS:

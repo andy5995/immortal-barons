@@ -545,17 +545,24 @@ Picking a region type prints its one-paragraph blurb, then
 After a purchase, BRE stays on the region-type picker (`Your choice?`) so more
 types can be bought in the same visit — **unless no further region could be
 bought**, in which case it returns to the Spending Menu. Two separate causes were
-observed: gold exhausted (five max-affordable buys, each exiting), and the
-planet's land pool exhausted (a 51-region buy that left 668,204 gold against a
-24,281 price, and still exited). A partial buy with both gold and land remaining
+observed: gold exhausted (five max-affordable buys, each exiting), and the land
+allowance exhausted (a 51-region buy that left 668,204 gold against a 24,281
+price, and still exited). A partial buy with both gold and allowance remaining
 (15 of 44) stayed on the picker. So the trigger is "cannot buy another region",
 not "bought the maximum offered" and not gold alone.
 
-Land is a **shared planetary pool**, stated at the top of the buy screen
-(`There are 49,451 Regions available`). When it is empty, selecting `(6) Regions`
-prints `no land is available at this time` above a redrawn Spending Menu — the
-region screen never appears, and `You can afford N` is bounded by the remaining
-pool rather than by gold.
+The buy screen states the land remaining (`There are 49,451 Regions available`).
+This is the realm's **own Daily Land Creation allowance**, not a shared planetary
+pool — see the binary-verified note on `Empire.LandAvailable` in
+`internal/game/game.go`. Live captures agree: the figure fell 49,623 → 49,451
+across a 172-region purchase, i.e. by exactly what this realm bought.
+
+Once the allowance is spent, selecting `(6) Regions` prints
+`no land is available at this time` above a redrawn Spending Menu — the region
+screen never appears. Observed to persist across a turn boundary, so the top-up
+comes with daily maintenance rather than each turn. `You can afford N` is
+`min(affordable, allowance remaining)`, so a quoted N is not by itself evidence
+about price.
 
 IB's `buyLand` (`internal/menu/actions_regions.go`) loops the picker until the
 player quits with `0`, which matches the partial-purchase case but keeps looping
