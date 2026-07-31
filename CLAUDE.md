@@ -134,7 +134,7 @@ on-screen output, layout, and ANSI colors, captured live — the source of truth
 for UI fidelity), `bre-save-format.md` (its binary `game.dat` layout, mapped by
 differential diffing), and `ibbs-packet-format.md`.
 
-## Status (v0.0.1 released 2026-07-22; v0.0.2 in development)
+## Status (v0.0.3 released 2026-07-31; v0.0.4 in development)
 
 Persistent, multi-user door game. One shared JSON world; concurrent multi-node
 door play (each action reloads/re-validates/mutates/saves under a brief
