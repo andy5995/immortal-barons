@@ -2,20 +2,32 @@ package game
 
 import "testing"
 
-// Army food is billed at ~1 per ArmyFoodDivisor army-units, live-verified against
-// BRE: an empire with 42,259 troopers (no jets/tanks) shows "Armed Forces Require
-// 211 units of food" — 42,259/200 = 211. Jets and tanks weigh 2× a trooper.
+// Army food is TROOPERS ONLY, ~1 per ArmyFoodDivisor of them — live-verified: an
+// empire with 42,259 troopers shows "Armed Forces Require 211 units of food"
+// (42,259/200 = 211).
 func TestFoodUpkeepArmyRate(t *testing.T) {
 	var e Empire
 	e.Troopers = 42259
 	if got := e.FoodUpkeep(); got != 211 {
 		t.Errorf("42,259 troopers should eat 211 food (BRE-verified), got %d", got)
 	}
+}
 
-	// Jets and tanks count double against the divisor.
-	e = Empire{Troopers: 200, Jets: 100, Tanks: 100} // (200 + 200 + 200)/200 = 3
-	if got := e.FoodUpkeep(); got != 3 {
-		t.Errorf("weighted army units 600/200 should eat 3 food, got %d", got)
+// Only troopers eat. Measured on a live realm: 7,212 troopers were billed 36
+// food, and the bill stayed at 36 after 1,000 jets and 533 tanks were added.
+// IB used to weigh jets and tanks double, which would bill 51 for that army.
+func TestFoodUpkeepOnlyTroopersEat(t *testing.T) {
+	plain := Empire{Troopers: 7212}
+	if got := plain.FoodUpkeep(); got != 36 {
+		t.Errorf("7,212 troopers should eat 36 food, got %d", got)
+	}
+	withAir := Empire{Troopers: 7212, Jets: 1000, Tanks: 533}
+	if got := withAir.FoodUpkeep(); got != 36 {
+		t.Errorf("jets and tanks must eat nothing: want 36 food, got %d", got)
+	}
+	bigger := Empire{Troopers: 14685, Jets: 1000, Tanks: 533}
+	if got := bigger.FoodUpkeep(); got != 73 {
+		t.Errorf("14,685 troopers (same jets/tanks) should eat 73 food, got %d", got)
 	}
 }
 

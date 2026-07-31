@@ -821,9 +821,13 @@ league ran tax 85%, interest 75%).
   and was always subject to spoilage — corrected 2026-07-20 after driving BRE.)
 - **Food consumption:** each turn the population eats
   `People × PeopleFoodPerThousand (75) / 1000` and the army eats
-  `(Troopers + Jets×2 + Tanks×2) / ArmyFoodDivisor (200)` — about **1 food per 200
-  troops**, with jets and tanks counting double. The army rate is **live-verified**
-  against BRE (2026-07 IBBS capture: 42,259 troopers → "Armed Forces Require 211").
+  `Troopers / ArmyFoodDivisor (200)` — about **1 food per 200 troopers**, and
+  **only troopers eat**. Live-verified twice: 42,259 troopers → 211, and a realm
+  billed 36 food for 7,212 troopers that stayed at **36** after 1,000 jets and
+  533 tanks were added (14,685 troopers with the same air/armour billed 73).
+  IB weighed jets and tanks 2× until 2026-07-30, which would have billed 51 for
+  that army; `breins.txt` agrees with the measurement, giving troopers "the added
+  need for food, as compared to other units".
   So a large standing army is nearly food-free, as in BRE — food pressure comes from
   population, not the army. (Both constants in `balance.go`.
   Fixed 2026-07-23: the army was previously billed 1 food/trooper, ~200× too heavy.)
@@ -836,13 +840,12 @@ league ran tax 85%, interest 75%).
   `1.5/20`, so the two charge the same food for the same realm. An earlier note
   here claimed IB's rate was lighter; it is identical.
 
-  **Turrets eat too, and IB does not charge them.** A turret-only empire was
-  billed 4 food at 44,392 turrets and 9 at 99,382 — about **1 food per 10,000
-  turrets** (the two samples bound the divisor to 9,939 … 11,042, so 10,000 is a
-  fit, not a pin). It is 0.02% of that realm's food bill, which is why IB's
-  omission has never shown up; worth closing only alongside a capture that pins
-  the divisor. No capture yet covers jets, tanks, bombers or carriers, so IB's
-  ×2 weight for jets and tanks remains unverified in both directions.
+  **Turrets eat a trace amount, and IB does not charge them.** A turret-only
+  empire was billed 4 food at 44,392 turrets and 9 at 99,382 — about **1 food per
+  10,000 turrets** (the two samples bound the divisor to 9,939 … 11,042, so
+  10,000 is a fit, not a pin). It is 0.02% of that realm's food bill, which is
+  why IB's omission has never shown up. Jets and tanks, by contrast, are now
+  measured to eat **nothing at all** (above).
 - **Food spoilage:** **5% of the food remaining after growth and consumption**
   spoils each turn — `floor(0.05 × food)` — with **no floor** below which nothing
   spoils, reduced by Technology regions. **Re-verified by driving the original

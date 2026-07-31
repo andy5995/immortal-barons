@@ -494,11 +494,15 @@ const (
 	// food comfortably covers it. Was an unscaled 1:1 with People, which starved a
 	// BRE-faithful 1000-food start. Tunable.
 	PeopleFoodPerThousand = 75
-	// ArmyFoodDivisor: the army eats ~1 food per this many army-units. Live-verified
-	// against BRE (2026-07 IBBS capture): 42,259 troopers → "Armed Forces Require 211
-	// units of food" (42,259/200 = 211). Jets and tanks weigh 2× a trooper (crews +
-	// fuel). Was 1 food/trooper — ~200× too heavy, which made a standing army
-	// food-crippling instead of nearly free as in BRE. Tunable.
+	// ArmyFoodDivisor: TROOPERS eat ~1 food per this many, and no other unit eats
+	// at all. Live-verified twice over: 42,259 troopers → 211 food (42,259/200), and
+	// a second realm billed 36 food for 7,212 troopers that stayed at 36 after
+	// adding 1,000 jets and 533 tanks — so jets and tanks contribute nothing.
+	// 14,685 troopers with the same jets and tanks billed 73 (14,685/200).
+	//
+	// IB weighed jets and tanks 2× here until 2026-07-30, which would have billed
+	// 51 for that army. breins.txt agrees with the measurement in prose: troopers
+	// have "the added need for food, as compared to other units".
 	ArmyFoodDivisor = 200
 
 	// --- Popular support: tax drift, riots, and the pay-to-boost prompt ---
