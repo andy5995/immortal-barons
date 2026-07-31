@@ -404,17 +404,86 @@ func about(s session.Session, w *ctx) Result {
 }
 
 // gameSetup shows the current game rules (read-only; the sysop edits them with
-// the -reset Configuration Editor).
+// the -reset Configuration Editor). Two screens with a pause between them: the
+// full ruleset does not fit an 80x25 terminal, and a player reading it wants
+// the turn/economy rules and the war/trade rules apart anyway.
 func gameSetup(s session.Session, w *ctx) Result {
 	c := w.Config
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Game Rules"), ansi.Reset)
-	fmt.Fprintf(s, "  "+tr(s, "Turns per day:      %d")+"\n", c.TurnsPerDay)
-	fmt.Fprintf(s, "  "+tr(s, "Protection turns:   %d")+"\n", c.ProtectionTurns)
-	fmt.Fprintf(s, "  "+tr(s, "Game length (days): %d  (0 = endless)")+"\n", c.GameLength)
-	fmt.Fprintf(s, "  "+tr(s, "Removed if unplayed: %d days  (0 = never)")+"\n", c.IdleDaysRemove)
-	fmt.Fprintf(s, "  "+tr(s, "Inter-BBS play:     %s")+"\n", onOffStr(c.IBBS))
+	// Label in body white, figure in bright white — the highlight convention from
+	// docs/dev/bre-screens.md, so the numbers a player is scanning for stand out.
+	row := func(label, value string) {
+		fmt.Fprintf(s, "  %s%-24s%s %s%s%s\n",
+			ansi.FgWhite, tr(s, label), ansi.Reset, ansi.FgBrightWhite, value, ansi.Reset)
+	}
+	// countOr renders a limit, naming what its zero means rather than printing a
+	// bare 0 the player has to interpret.
+	countOr := func(n int, unlimited string) string {
+		if n <= 0 {
+			return tr(s, unlimited)
+		}
+		return comma(n)
+	}
+	daysOr := func(n int, forever string) string {
+		if n <= 0 {
+			return tr(s, forever)
+		}
+		return fmt.Sprintf(tr(s, "%s days"), comma(n))
+	}
+
+	titleBar(s, tr(s, "Game Setup: Turns, Land and Money"))
+	row("Turns per day", comma(c.TurnsPerDay))
+	row("New realm protection", fmt.Sprintf(tr(s, "%s turns"), comma(c.ProtectionTurns)))
+	row("Game length", daysOr(c.GameLength, "Endless"))
+	row("Removed if unplayed", daysOr(c.IdleDaysRemove, "Never"))
+	row("Maximum regions", countOr(c.MaxRegions, "Unlimited"))
+	row("Maximum tax rate", fmt.Sprintf("%d%%", c.MaxTaxRate))
+	row("Crown tax on income", fmt.Sprintf("%d%%", c.PlanetaryTaxRate))
+	row("Land on the market", comma(c.InitialMarketLand))
+	row("Land created each day", comma(c.LandPerDay))
+	row("Bank interest", fmt.Sprintf(tr(s, "%d%% over 10 days"), c.InterestRate))
+	row("Investment rate", investRateStr(s, c))
+	row("Food market", foodMarketStr(s, c))
+	row("Region costs", tr(s, c.RegionCosts.String()))
+	pause(s)
+
+	titleBar(s, tr(s, "Game Setup: War, Trade and Board"))
+	row("Buy military", tr(s, c.BuyMilitary.String()))
+	row("Maintenance costs", tr(s, c.MaintCosts.String()))
+	row("Trade costs", tr(s, c.TradeCosts.String()))
+	row("Attack damage", tr(s, c.AttackDamage.String()))
+	row("Attack rewards", tr(s, c.AttackRewards.String()))
+	row("Attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"))
+	row("R5-Slappenheimer", tr(s, c.SlappenheimerHandling.String()))
+	row("Players per board", countOr(c.MaxPlayers, "Unlimited"))
+	row("Inter-BBS play", onOffStr(c.IBBS))
+	if c.IBBS {
+		row("This board", c.BoardID)
+	}
+	if c.GameStartDate != "" {
+		row("Game starts", c.GameStartDate)
+	}
+	if c.JoinDate != "" {
+		row("Joining closes", c.JoinDate)
+	}
 	pause(s)
 	return Stay
+}
+
+// investRateStr names the investment rate and whether it is pinned there.
+func investRateStr(s session.Session, c game.Config) string {
+	rate := fmt.Sprintf(tr(s, "%d%% over 10 days"), c.StdInvestRate)
+	if c.SteadyInvest {
+		return rate + tr(s, " (steady)")
+	}
+	return rate + tr(s, " (floating)")
+}
+
+// foodMarketStr says whether the market's daily supply runs out.
+func foodMarketStr(s session.Session, c game.Config) string {
+	if c.FoodUnlimited {
+		return tr(s, "Unlimited")
+	}
+	return tr(s, "Limited daily supply")
 }
 
 // playerList shows every living empire (Coordinator tool).
