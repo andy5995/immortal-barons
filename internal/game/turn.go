@@ -16,6 +16,7 @@ func (w *World) PlayTurn(e *Empire, today string) {
 	// BRE score: each turn played awards a flat amount. processEconomy may then
 	// subtract small riot/spoilage penalties.
 	e.Score += ScorePerTurn
+	e.TurnsPlayed++      // lifetime count; the HeadQuarters price rises with it
 	w.maybePirateRaid(e) // ~1-in-5-turns pirate raid; notice surfaces next turn's income (#21)
 	w.advanceTech(e)     // Technology bonus builds up a little each turn (not instant)
 	w.processEconomy(e)
@@ -349,7 +350,7 @@ func (w *World) aiExpandLand(e *Empire) {
 // to amplify. StartHQ re-checks affordability, and HQ then advances on its own
 // each turn (see PlayTurn), so this fires once and needs no further management.
 func (w *World) aiStartHQ(e *Empire) {
-	if e.HQ == 0 && e.Tanks > 0 && e.Gold > HQCost {
+	if e.HQ == 0 && e.Tanks > 0 && e.Gold > w.HQPrice(e) {
 		w.StartHQ(e)
 	}
 }

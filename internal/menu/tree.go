@@ -95,7 +95,7 @@ func BuildMenus() *Menus {
 			Do: buyUnit("Turrets", true, priceTurret, (*game.World).BuildTurrets)},
 		{Key: '4', Label: "Bombers", Price: priceBomber, Owned: owned(bombers),
 			Do: buyUnit("Bombers", true, priceBomber, (*game.World).BuildBombers)},
-		{Key: '5', Label: "HeadQuarters", Price: func(w *ctx) int { return game.HQCost }, Owned: owned(func(p *game.Empire) int { return p.HQ }), Do: buildHQ},
+		{Key: '5', Label: "HeadQuarters", Price: func(w *ctx) int { return w.HQPrice(w.Player()) }, Owned: owned(func(p *game.Empire) int { return p.HQ }), Do: buildHQ},
 		{Key: '6', Label: "Regions", Price: func(w *ctx) int { return w.LandPrice(w.Player()) }, Owned: owned(land), Do: buyLand},
 		{Key: '7', Label: "Covert Agents", Price: priceAgent, Owned: owned(agents),
 			Do: buyUnit("Covert Agents", false, priceAgent, (*game.World).RecruitAgents)},

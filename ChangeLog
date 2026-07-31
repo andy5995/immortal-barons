@@ -11,6 +11,8 @@
     keypress, and attack/sell orders trimmed by concurrent losses say so
   * Agricultural regions grow a little more food in a good year, instead
     of the same amount every turn, matching the original
+  * A HeadQuarters costs more the longer your realm has been playing,
+    matching the original — build one early
   * A tank is now worth three troopers with no Headquarters, rising to
     five with a finished one, matching the original — it used to be four
     rising to eight

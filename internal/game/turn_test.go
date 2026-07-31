@@ -375,7 +375,7 @@ func TestDailyMaintenanceHandlesMalformedDate(t *testing.T) {
 func TestHQAdvancesEachTurn(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
-	e.Gold = HQCost
+	e.Gold = w.HQPrice(e)
 	if err := w.StartHQ(e); err != nil {
 		t.Fatalf("StartHQ: %v", err)
 	}

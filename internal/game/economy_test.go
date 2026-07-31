@@ -349,13 +349,13 @@ func TestSellFoodClampedToOwned(t *testing.T) {
 func TestStartHQ(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
-	e.Gold = HQCost
+	e.Gold = w.HQPrice(e)
 
 	if err := w.StartHQ(e); err != nil {
 		t.Fatalf("StartHQ: %v", err)
 	}
-	if e.HQ != 5 {
-		t.Errorf("HQ: want 5, got %d", e.HQ)
+	if e.HQ != HQBuildStart {
+		t.Errorf("HQ: want %d, got %d", HQBuildStart, e.HQ)
 	}
 	if e.Gold != 0 {
 		t.Errorf("Gold: want 0, got %d", e.Gold)
@@ -365,7 +365,7 @@ func TestStartHQ(t *testing.T) {
 func TestStartHQAlreadyStarted(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
-	e.Gold = HQCost * 2
+	e.Gold = w.HQPrice(e) * 2
 	if err := w.StartHQ(e); err != nil {
 		t.Fatalf("StartHQ: %v", err)
 	}
@@ -381,7 +381,8 @@ func TestStartHQAlreadyStarted(t *testing.T) {
 func TestStartHQCantAfford(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
-	e.Gold = HQCost - 1
+	short := w.HQPrice(e) - 1
+	e.Gold = short
 
 	if err := w.StartHQ(e); err != ErrCantAfford {
 		t.Errorf("StartHQ: want ErrCantAfford, got %v", err)
@@ -389,7 +390,7 @@ func TestStartHQCantAfford(t *testing.T) {
 	if e.HQ != 0 {
 		t.Errorf("HQ should remain 0, got %d", e.HQ)
 	}
-	if e.Gold != HQCost-1 {
+	if e.Gold != short {
 		t.Errorf("Gold should be unchanged, got %d", e.Gold)
 	}
 }

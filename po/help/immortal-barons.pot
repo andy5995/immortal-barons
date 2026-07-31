@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-30 18:36-0500\n"
+"POT-Creation-Date: 2026-07-30 19:40-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1118,7 +1118,16 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/headquarters.md:15
+#: internal/help/content/military/headquarters.md:16
+#, markdown-text
+msgid ""
+"Build it early. The price goes up every turn you play, so the longer you "
+"wait, the more it costs. The price does not depend on how large your realm "
+"is — only on how long you have been playing."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/military/headquarters.md:19
 #, markdown-text
 msgid ""
 "While it is being built — and more so once it is finished — it raises how "

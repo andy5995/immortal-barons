@@ -370,12 +370,31 @@ const (
 	HQBuildPerTurn = 5
 )
 
+// The HeadQuarters price rises with the empire's lifetime turn count — unlike
+// every other unit price, which random-walks around a fixed base. BRE.OVR
+// 0x128BA computes it as:
+//
+//	min(HQPriceBase + HQPricePerTurn×TurnsPlayed + Random(HQPriceJitter),
+//	    HQPriceCap − Random(HQPriceCapJitter))
+//
+// Checked against 163 distinct captured prices over seven captures and two
+// empires: 161 land inside the jitter window and are spread flat across it. The
+// two strays sit one turn's worth outside, from a day-boundary off-by-one in the
+// score-to-turns derivation used to check them, not from the formula.
+//
+// So an old realm pays far more for a HeadQuarters than a young one — the
+// building rewards committing early, and the cap keeps a very old realm from
+// being priced out entirely.
+const (
+	HQPriceBase      = 5000
+	HQPricePerTurn   = 75
+	HQPriceJitter    = 300
+	HQPriceCap       = 100_000
+	HQPriceCapJitter = 1000
+)
+
 // --- Misc gold costs (reconstructed / tunable) ---
 const (
-	// HQCost is a fixed price, which is an IB simplification: BRE's HQ price
-	// drifts upward with every other unit price (5,039 … 12,649 across the
-	// captures). Set to the low end of the observed range.
-	HQCost = 5104
 
 	// Food market (issue #19). BRE food prices vary daily within buy∈[20,60] /
 	// sell∈[7,20] with sell=buy/3. IB's economy is BRE-native scale (units at the

@@ -49,9 +49,23 @@ HQ is an `int32` at empire record `+0x26b`, holding percent complete.
   defender.
 - Bombers are excluded from the sum and accumulated separately, matching
   `breins.txt` ("no offensive or defensive strength").
-- **The HQ price is not fixed in BRE** — it drifts with every other unit price
-  (5,039 … 12,649 across the captures). IB's `HQCost` is a fixed low-end figure,
-  a deliberate simplification.
+- **The price rises with the empire's lifetime turn count**, which is what makes
+  HQ unlike every other item: the unit prices random-walk around a fixed base,
+  while HQ only ever climbs (5,039 … 12,649 across the captures). `BRE.OVR
+  0x128BA`:
+
+      price = min(5000 + 75 x turnsPlayed + Random(300),
+                  100000 - Random(1000))
+
+  The turn counter is its own `int32` at record `+0x281` — not the Score, which
+  merely happens to track it at a flat 213/turn. Checked against 163 distinct
+  captured prices over seven captures and two empires: 161 fall inside the
+  300-wide window and are spread flat across it; the two strays are one turn's
+  worth out, from a day-boundary off-by-one in the score-to-turns derivation used
+  to check them. So a HeadQuarters rewards committing early, and the cap stops a
+  very old realm being priced out. IB mirrors this with `Empire.TurnsPlayed` and
+  `World.HQPrice` (`HQPrice*` in `balance.go`); it charged a flat 5,104 until
+  2026-07-30.
 
 Terminology note: some BRE guides call the defensive unit a **"Missile
 Base"** rather than a "Turret" (same defensive role: it shoots down jets,

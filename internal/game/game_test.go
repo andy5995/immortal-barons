@@ -164,6 +164,44 @@ func TestTankStrengthMatchesLiveBRE(t *testing.T) {
 	}
 }
 
+// TestHQPriceRisesWithTurnsPlayed pins the price curve read from the original:
+// base + 75 per lifetime turn, plus a draw under 300, capped near 100,000. The
+// captured prices are checked against exactly this, so the window is the
+// fidelity contract.
+func TestHQPriceRisesWithTurnsPlayed(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+
+	for _, turns := range []int{0, 1, 30, 91, 500} {
+		e.TurnsPlayed = turns
+		got := w.HQPrice(e)
+		lo := HQPriceBase + HQPricePerTurn*turns
+		if got < lo || got >= lo+HQPriceJitter {
+			t.Errorf("HQPrice at %d turns = %d, want [%d, %d)", turns, got, lo, lo+HQPriceJitter)
+		}
+	}
+
+	// The cap keeps a very old realm from being priced out entirely.
+	e.TurnsPlayed = 100_000
+	if got := w.HQPrice(e); got > HQPriceCap || got <= HQPriceCap-HQPriceCapJitter {
+		t.Errorf("HQPrice for an ancient realm = %d, want just under the %d cap", got, HQPriceCap)
+	}
+
+	// Shown == charged: the price is stable across reads within one turn.
+	e.TurnsPlayed = 40
+	if a, b := w.HQPrice(e), w.HQPrice(e); a != b {
+		t.Errorf("HQPrice is not stable within a turn: %d then %d", a, b)
+	}
+
+	// And it actually moves as the empire plays on.
+	e.TurnsPlayed = 0
+	young := w.HQPrice(e)
+	e.TurnsPlayed = 100
+	if old := w.HQPrice(e); old <= young {
+		t.Errorf("an old realm should pay more: %d turns-0 vs %d turns-100", young, old)
+	}
+}
+
 // TestHQBuildRate: BRE starts a bought HeadQuarters at 5% and adds 5 at the end
 // of every turn while it sits in 1..99. The purchase happens during the spending
 // phase, so the buying turn's own end-of-turn advance counts — 5 goes to 10 that
@@ -171,7 +209,7 @@ func TestTankStrengthMatchesLiveBRE(t *testing.T) {
 func TestHQBuildRate(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
-	e.Gold = HQCost
+	e.Gold = w.HQPrice(e)
 	if err := w.StartHQ(e); err != nil {
 		t.Fatalf("StartHQ: %v", err)
 	}

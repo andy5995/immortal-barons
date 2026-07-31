@@ -98,12 +98,15 @@ type Empire struct {
 	Bombers  int
 	Agents   int
 
-	Tax      int
-	SDI      int    // 0-75, percentage reduction of incoming strike damage
-	HQ       int    // 0 = none/not started; 1-100 = percent complete
-	Support  int    // 0-100, popular support; erodes with high tax, slashes Coastal income when low
-	Morale   int    // 0-100, military morale; low morale weakens combat and causes desertion
-	Language string // help/UI language ("" = English; "de", "ru")
+	Tax int
+	SDI int // 0-75, percentage reduction of incoming strike damage
+	HQ  int // 0 = none/not started; 1-100 = percent complete
+	// TurnsPlayed is the empire's lifetime turn count. BRE keeps the same counter
+	// (record +0x281) and prices the HeadQuarters off it — see World.HQPrice.
+	TurnsPlayed int
+	Support     int    // 0-100, popular support; erodes with high tax, slashes Coastal income when low
+	Morale      int    // 0-100, military morale; low morale weakens combat and causes desertion
+	Language    string // help/UI language ("" = English; "de", "ru")
 
 	// LandAvailable is how much unclaimed land this realm may still buy — BRE's
 	// "Daily Land Creation" allowance. BINARY-VERIFIED as a PER-EMPIRE field

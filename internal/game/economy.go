@@ -35,18 +35,46 @@ func (w *World) FoodBuyPrice() int {
 // sell ≈ buy/3, band ~[7,20]).
 func (w *World) FoodSellPrice() int { return w.FoodBuyPrice() / 3 }
 
-// HQCost is the gold price to start HeadQuarters construction (see balance.go).
+// HQPrice is the gold it costs e to start a HeadQuarters right now. Unlike the
+// unit prices, which walk around a fixed base, this climbs with the empire's
+// lifetime turn count — the constants and the shape are BRE's (see balance.go).
+// The jitter is keyed per empire and turn, like stepPrice, so the price a player
+// is shown is the price they are charged.
+func (w *World) HQPrice(e *Empire) int {
+	price := HQPriceBase + HQPricePerTurn*e.TurnsPlayed + w.priceJitter(e, "hq", HQPriceJitter)
+	if cap := HQPriceCap - w.priceJitter(e, "hqcap", HQPriceCapJitter); price > cap {
+		price = cap
+	}
+	return price
+}
 
-// StartHQ begins HeadQuarters construction (5% the first turn); it then
-// advances during daily play. Errors if already started/built or unaffordable.
+// priceJitter is a deterministic draw in [0, n) for empire e this turn.
+func (w *World) priceJitter(e *Empire, tag string, n int) int {
+	if n <= 0 {
+		return 0
+	}
+	h := fnv.New32a()
+	var buf [8]byte
+	binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
+	binary.LittleEndian.PutUint32(buf[4:8], uint32(e.TurnsPlayed))
+	h.Write(buf[:])
+	io.WriteString(h, tag)
+	io.WriteString(h, e.Name)
+	return int(h.Sum32() % uint32(n))
+}
+
+// StartHQ begins HeadQuarters construction (HQBuildStart% the first turn); it
+// then advances during daily play. Errors if already started/built or
+// unaffordable.
 func (w *World) StartHQ(e *Empire) error {
 	if e.HQ > 0 {
 		return ErrHQExists
 	}
-	if e.Gold < HQCost {
+	price := w.HQPrice(e)
+	if e.Gold < price {
 		return ErrCantAfford
 	}
-	e.Gold -= HQCost
+	e.Gold -= price
 	e.HQ = HQBuildStart
 	return nil
 }
