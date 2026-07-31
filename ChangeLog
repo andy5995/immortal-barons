@@ -9,6 +9,9 @@
     forces to help defend you
   * A player attacked while at the menus now sees a notice at their next
     keypress, and attack/sell orders trimmed by concurrent losses say so
+  * Only troopers eat food now, matching the original — jets and tanks
+    were being charged for rations they never needed, so an armored
+    realm was paying about 40% too much food
   * Agricultural regions grow a little more food in a good year, instead
     of the same amount every turn, matching the original
   * A HeadQuarters costs more the longer your realm has been playing,

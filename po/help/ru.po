@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-30 20:09-0500\n"
+"POT-Creation-Date: 2026-07-30 21:59-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1298,19 +1298,21 @@ msgstr ""
 #: internal/help/content/military/troopers.md:16
 msgid ""
 "They are cheap to buy and cheap to keep. About seven troopers cost as much "
-"as one tank, but one tank has the strength of four troopers. Troopers are "
+"as one tank, but a tank is worth several troopers in a fight. Troopers are "
 "the better value early in the game, and tanks become stronger later."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/troopers.md:19
+#: internal/help/content/military/troopers.md:21
 msgid ""
-"Troopers eat more food than any other unit, so a large trooper army needs a "
-"strong food supply."
+"Troopers are the only unit that eats. Jets, tanks, turrets, bombers and "
+"carriers cost you nothing to feed, so food pressure comes from your people "
+"and your troopers alone. A large trooper army needs a strong food supply; a "
+"large armored one does not."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/troopers.md:24
+#: internal/help/content/military/troopers.md:26
 msgid ""
 "A large trooper army also discourages enemy R5-Slappenheimer strikes. The "
 "more troopers you hold, the more likely that missile is to backfire onto the "
@@ -1319,7 +1321,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/troopers.md:25
+#: internal/help/content/military/troopers.md:27
 msgid ""
 "Buy troopers early to survive, and build more tanks as your economy grows."
 msgstr ""
