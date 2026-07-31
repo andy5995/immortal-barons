@@ -439,11 +439,13 @@ func gameSetup(s session.Session, w *ctx) Result {
 		if fill < 0 {
 			fill = 0
 		}
-		fmt.Fprintf(s, "%s── %s %s%s\n",
+		// The leading blank line is what separates one group from the rows above
+		// it — and it is also what puts the first group of a panel clear of the
+		// pause prompt the previous panel ended on.
+		fmt.Fprintf(s, "\n%s── %s %s%s\n",
 			dim(ansi.FgBrightCyan), text, strings.Repeat("─", fill), ansi.Reset)
 	}
 
-	titleBar(s, tr(s, "Game Setup: Turns, Land and Money"))
 	group("The day and the game")
 	row("Turns per day", comma(c.TurnsPerDay))
 	row("New realm protection", fmt.Sprintf(tr(s, "%s turns"), comma(c.ProtectionTurns)))
@@ -462,7 +464,6 @@ func gameSetup(s session.Session, w *ctx) Result {
 	row("Food market", foodMarketStr(s, c))
 	pause(s)
 
-	titleBar(s, tr(s, "Game Setup: War, Trade and Board"))
 	group("Forces and trade")
 	row("Buy military", tr(s, c.BuyMilitary.String()))
 	row("Maintenance costs", tr(s, c.MaintCosts.String()))
