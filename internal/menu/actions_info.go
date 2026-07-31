@@ -475,14 +475,29 @@ func gameSetup(s session.Session, w *ctx) Result {
 	group("This board")
 	row("Players per board", countOr(c.MaxPlayers, "Unlimited"))
 	row("Inter-BBS play", onOffStr(c.IBBS))
-	if c.IBBS {
-		row("Board name", c.BoardID)
-	}
 	if c.GameStartDate != "" {
 		row("Game starts", c.GameStartDate)
 	}
 	if c.JoinDate != "" {
 		row("Joining closes", c.JoinDate)
+	}
+	if c.IBBS {
+		var boards int
+		var declaration string
+		w.With(func() {
+			boards = len(w.LeagueNodes)
+			declaration = w.LeagueDiplomacy
+		})
+		group("The league")
+		row("This planet", c.BoardID)
+		row("Planets in the league", countOr(boards, "Roster not loaded"))
+		// The rules above are not this sysop's to set once a board joins a league:
+		// the Coordinator broadcasts the whole ruleset (see LeagueConfig), so a
+		// player asking their own sysop to change one is asking the wrong person.
+		row("Rules come from", tr(s, "The league Coordinator"))
+		if declaration != "" {
+			row("League declaration", declaration)
+		}
 	}
 	pause(s)
 	return Stay
