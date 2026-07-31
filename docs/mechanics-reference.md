@@ -1155,6 +1155,9 @@ Market`. Any empire can list goods for other empires to buy:
   `201,250 x 1.00625^3` to the coin. Full pass-through, verified from both ends.
 - **Bank interest is per TURN, not per day:** 0.625% a turn under a 5.0% daily
   rate at 8 turns/day, compounding — the daily rate divided by turns per day.
+  This was a by-product of the commission test and it **confirms IB's existing
+  formula** (`Bank x InterestRate / (1000 x TurnsPerDay)`, `processEconomy`),
+  which until now rested on the config help text alone.
 - **Protection-gated:** a realm under new-realm protection cannot use the market.
 - **Escrowed goods are safe from pirates and attacks** — an intended BRE strategy
   (community guide: park military to evade pirates). But listing does **not** dodge
