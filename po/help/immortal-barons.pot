@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-07-30 20:03-0500\n"
+"POT-Creation-Date: 2026-07-30 20:09-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1211,22 +1211,19 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/tanks.md:20
+#: internal/help/content/military/tanks.md:18
 #, markdown-text
-msgid ""
-"A strong HeadQuarters and high military morale make your tanks even more "
-"effective, so keep both high. Enemies will bomb your HeadQuarters to weaken "
-"your tanks."
+msgid "High military morale also makes your tanks more effective, so keep it up."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/tanks.md:22
+#: internal/help/content/military/tanks.md:20
 #, markdown-text
 msgid "Tanks also help defend your empire against chemical missile attacks."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/tanks.md:24
+#: internal/help/content/military/tanks.md:22
 #, markdown-text
 msgid ""
 "Grow your economy first, and then turn your gold into tanks for a force that "

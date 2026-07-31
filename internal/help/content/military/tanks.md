@@ -14,9 +14,7 @@ HeadQuarters it is worth five, on both attack and defense.
 They cost a lot to buy but little to keep. A tank army is expensive to build and
 cheap to maintain, so over a long game tanks are the most efficient force.
 
-A strong HeadQuarters and high military morale make your tanks even more
-effective, so keep both high. Enemies will bomb your HeadQuarters to weaken your
-tanks.
+High military morale also makes your tanks more effective, so keep it up.
 
 Tanks also help defend your empire against chemical missile attacks.
 
