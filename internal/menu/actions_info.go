@@ -210,7 +210,10 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			num(p.Troopers), num(p.Jets), num(p.Turrets), num(p.Tanks), num(p.Bombers), num(p.Carriers)))
 		switch {
 		case p.HQ == 0:
-			add(tr(s, "We have no HeadQuarters. Building one would strengthen our tanks."))
+			// The price climbs with every turn played (World.HQPrice), so "soon" is
+			// the actionable half of this advice. The figure itself belongs to the
+			// Spending Menu, which quotes the live price.
+			add(tr(s, "We have no HeadQuarters. Building one would strengthen our tanks, and it costs more with every turn we wait."))
 		case p.HQ < 100:
 			add(fmt.Sprintf(tr(s, "Our HeadQuarters is %d%% built."), p.HQ))
 		default:
