@@ -113,7 +113,12 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 		} else {
 			bulletin, news = w.BulletinToday, w.NewsToday
 		}
-		boardID = w.Config.BoardID
+		// Only name the board in a league, where several planets file news into
+		// one feed. On a stand-alone board the prefix is noise — and the default
+		// name makes it read "local — Daily Bulletin" (#68).
+		if w.Config.IBBS {
+			boardID = w.Config.BoardID
+		}
 		date = w.LastMaintDate
 	})
 	if yesterday {

@@ -504,3 +504,23 @@ func TestFeedStageWarnsButNoMarketWhenAutoFeedOff(t *testing.T) {
 		t.Errorf("Auto-Feed off must NOT open the market; got:\n%s", out)
 	}
 }
+
+// The board name belongs in the bulletin title only in a league, where several
+// planets file into one feed. A stand-alone board would otherwise read
+// "local — Daily Bulletin" (#68).
+func TestBulletinNamesTheBoardOnlyInALeague(t *testing.T) {
+	show := func(ibbs bool) string {
+		f := &fakeSession{keys: []rune(" ")}
+		w := newWorld()
+		w.Config.IBBS = ibbs
+		w.Config.BoardID = "wildside"
+		showBulletin(f, w, false)
+		return f.out.String()
+	}
+	if out := show(false); strings.Contains(out, "wildside") {
+		t.Errorf("stand-alone board should not name itself in the bulletin:\n%s", out)
+	}
+	if out := show(true); !strings.Contains(out, "wildside") {
+		t.Errorf("league board should name itself in the bulletin:\n%s", out)
+	}
+}

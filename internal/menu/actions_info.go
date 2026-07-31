@@ -561,8 +561,9 @@ const (
 )
 
 // renderDailyBulletin draws the boxed blue Daily Bulletin: planet-wide totals
-// with day-over-day change, colored green/red/neutral for +/-/0. title is
-// Config.BoardID, or "" to show just "Daily Bulletin".
+// with day-over-day change, colored green/red/neutral for +/-/0. title is the
+// board name in a league, or "" for a stand-alone board, which shows just
+// "Daily Bulletin".
 func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) {
 	head := tr(s, "Daily Bulletin")
 	if title != "" {

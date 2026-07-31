@@ -1,6 +1,8 @@
 (in-progress:)
   * A day is now 10 turns by default, down from 15
   * Game Setup now shows the whole ruleset over two screens, not five lines
+  * The Daily Bulletin no longer prefixes its title with the board name on
+    a stand-alone board
 
 2026-07-31 (v0.0.3)
   * Updating from an earlier version requires a game reset (-reset)
