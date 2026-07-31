@@ -193,7 +193,7 @@ func (w *World) BuyLand(e *Empire, n int) error {
 }
 
 // Food market prices (FoodBuyPrice / FoodSellPrice) live in balance.go: the
-// market sells food to you dearer than it buys.
+// market sells food to you for more than it pays to buy it back.
 
 // BuyFoodMarket buys n units of food at today's FoodBuyPrice. Unless the sysop's
 // Food Unlimited toggle is on, purchases draw from the shared planet-wide daily
