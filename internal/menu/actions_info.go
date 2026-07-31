@@ -132,9 +132,45 @@ func advisorGreeting(s session.Session, d advisorDomain) string {
 // advisorLine is one line an advisor speaks, with the color its FIGURES take.
 // BRE varies this: the Civilian advisor reports its tallies in bright-white but
 // flags a food shortfall in bright-yellow; hi carries that per-line choice.
+//
+// A phrase wrapped in {braces} in Text is a KEY TERM, rendered in Emph — BRE
+// pulls one phrase out of an advisor sentence and leaves the rest plain: the
+// unit type in a piece of military advice ("...the strength of your Tanks",
+// bright-yellow) and the aspect name in a Technology report ("Our military
+// forces are functioning at...", bright-white). Translators keep the braces;
+// they are stripped at render.
 type advisorLine struct {
 	Text string
 	Hi   string // figure highlight color for this line
+	Emph string // color for {braced} key terms ("" = none)
+}
+
+// hiTerms replaces each {braced} run in s with emph-colored text, returning to
+// base afterwards. Runs after word-wrapping (a braced phrase has no spaces, so
+// it can never straddle a wrap) and before hiNumsReset, which passes the escape
+// sequences this inserts through untouched.
+func hiTerms(s, emph, base string) string {
+	if emph == "" || !strings.ContainsRune(s, '{') {
+		return strings.NewReplacer("{", "", "}", "").Replace(s)
+	}
+	var b strings.Builder
+	for {
+		i := strings.IndexByte(s, '{')
+		if i < 0 {
+			break
+		}
+		j := strings.IndexByte(s[i:], '}')
+		if j < 0 {
+			break
+		}
+		b.WriteString(s[:i])
+		b.WriteString(emph)
+		b.WriteString(s[i+1 : i+j])
+		b.WriteString(base)
+		s = s[i+j+1:]
+	}
+	b.WriteString(s)
+	return strings.NewReplacer("{", "", "}", "").Replace(b.String())
 }
 
 // advisorReport builds the lines one advisor speaks: the figures for its domain
@@ -151,9 +187,20 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 	if dom == advisorEconomic || dom == advisorTechnology {
 		fig = ansi.FgBrightYellow
 	}
+	// Key terms take bright-yellow in the Military advisor's advice (BRE colors
+	// the unit type it names) and bright-white in the Technology report (BRE
+	// colors the aspect name, leaving the percentage yellow). The other two
+	// advisors mark none.
+	emph := ""
+	switch dom {
+	case advisorMilitary:
+		emph = ansi.FgBrightYellow
+	case advisorTechnology:
+		emph = ansi.FgBrightWhite
+	}
 	var out []advisorLine
-	add := func(text string) { out = append(out, advisorLine{text, fig}) }
-	warn := func(text string) { out = append(out, advisorLine{text, ansi.FgBrightYellow}) }
+	add := func(text string) { out = append(out, advisorLine{text, fig, emph}) }
+	warn := func(text string) { out = append(out, advisorLine{text, ansi.FgBrightYellow, emph}) }
 	switch dom {
 	case advisorCivilian:
 		add(fmt.Sprintf(tr(s, "Our people number %s, and their support stands at %d%%."), num(p.People), p.Support))
@@ -213,21 +260,21 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			// The price climbs with every turn played (World.HQPrice), so "soon" is
 			// the actionable half of this advice. The figure itself belongs to the
 			// Spending Menu, which quotes the live price.
-			add(tr(s, "We have no HeadQuarters. Building one would strengthen our tanks, and it costs more with every turn we wait."))
+			add(tr(s, "We have no {HeadQuarters}. Building one would strengthen our {tanks}, and it costs more with every turn we wait."))
 		case p.HQ < 100:
-			add(fmt.Sprintf(tr(s, "Our HeadQuarters is %d%% built."), p.HQ))
+			add(fmt.Sprintf(tr(s, "Our {HeadQuarters} is %d%% built."), p.HQ))
 		default:
-			add(tr(s, "Our HeadQuarters is fully built."))
+			add(tr(s, "Our {HeadQuarters} is fully built."))
 		}
 		if p.Carriers*100 < p.Jets {
-			add(tr(s, "We have more jets than our carriers can carry. Build more carriers."))
+			add(tr(s, "We have more {jets} than our {carriers} can carry. Build more {carriers}."))
 		}
 		add(fmt.Sprintf(tr(s, "Troop morale stands at %d%%."), p.Morale))
 		if p.Morale < 50 {
 			warn(tr(s, "Morale is low. Desertion is a real risk before our next battle."))
 		}
 		if p.Agents == 0 {
-			add(tr(s, "We have no covert agents. Recruit some for spying and sabotage."))
+			add(tr(s, "We have no {covert agents}. Recruit some for spying and sabotage."))
 		} else {
 			add(fmt.Sprintf(tr(s, "We keep %s covert agents."), num(p.Agents)))
 		}
@@ -252,13 +299,13 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		case !researched:
 			add(tr(s, "Our Technology regions are new. Their benefits will build up as we hold them."))
 		default:
-			add(fmt.Sprintf(tr(s, "Our military forces are functioning at %d%% strength."), mil))
-			add(fmt.Sprintf(tr(s, "Our gold producing regions are at %d%% of normal production."), gold))
-			add(fmt.Sprintf(tr(s, "Our food production techniques increased efficiency to %d%%."), food))
-			add(fmt.Sprintf(tr(s, "Our industries are running at %d%% efficiency."), units))
-			add(fmt.Sprintf(tr(s, "Our maintenance costs have been reduced to %d%% of standard costs."), maint))
-			add(fmt.Sprintf(tr(s, "Our SDI yearly funding needs have been lowered to %d%% normal expenses."), sdi))
-			add(fmt.Sprintf(tr(s, "Food decay is at %d%% of standard levels."), decay))
+			add(fmt.Sprintf(tr(s, "Our {military forces} are functioning at %d%% strength."), mil))
+			add(fmt.Sprintf(tr(s, "Our {gold producing regions} are at %d%% of normal production."), gold))
+			add(fmt.Sprintf(tr(s, "Our {food production techniques} increased efficiency to %d%%."), food))
+			add(fmt.Sprintf(tr(s, "Our {industries} are running at %d%% efficiency."), units))
+			add(fmt.Sprintf(tr(s, "Our {maintenance costs} have been reduced to %d%% of standard costs."), maint))
+			add(fmt.Sprintf(tr(s, "Our {SDI yearly funding} needs have been lowered to %d%% normal expenses."), sdi))
+			add(fmt.Sprintf(tr(s, "{Food decay} is at %d%% of standard levels."), decay))
 			if p.Regions.Technology == 0 {
 				add(tr(s, "We hold no Technology regions, so our research has halted — but what we have already learned is not lost."))
 			} else {
@@ -290,7 +337,7 @@ func renderAdvisor(s session.Session, w *ctx, d advisorDomain) {
 		// spaces instead of mid-word at col 80. A figure returns to the off-white
 		// base after its highlight, not the terminal default.
 		for _, wl := range strings.Split(help.Wrap(line.Text, 76), "\n") {
-			fmt.Fprintf(s, "  %s%s%s\n", base, hiNumsReset(wl, line.Hi, base), ansi.Reset)
+			fmt.Fprintf(s, "  %s%s%s\n", base, hiNumsReset(hiTerms(wl, line.Emph, base), line.Hi, base), ansi.Reset)
 		}
 	}
 }

@@ -244,6 +244,47 @@ func TestAdvisorsMenuSelectsAdvisor(t *testing.T) {
 
 // TestAdvisorsHealthyEmpire checks that a healthy empire's advisors report their
 // figures and raise none of the warning lines.
+// TestAdvisorKeyTermColors pins BRE's advisor highlighting (captured live, see
+// docs/dev/bre-screens.md): the Military advisor colors the unit type it names
+// in a piece of ADVICE bright-yellow, while the force tally leaves unit names
+// plain and colors only the counts; the Technology advisor colors the aspect
+// name bright-white and the percentage bright-yellow.
+func TestAdvisorKeyTermColors(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Tanks, p.Troopers, p.Agents = 10, 100, 5
+	p.HQ = 0 // triggers the "no HeadQuarters" advice
+	p.Land = 100
+	p.Regions.Technology = 20
+	p.TechSlots[game.TechSlotGold] = 200 // researched, so the effect lines print
+
+	f := &fakeSession{}
+	renderAdvisor(f, w, advisorMilitary)
+	renderAdvisor(f, w, advisorTechnology)
+	out := f.out.String()
+
+	// Advice: the named unit is bright-yellow.
+	if !strings.Contains(out, ansi.FgBrightYellow+"tanks") {
+		t.Errorf("the unit named in military advice should be bright-yellow; got:\n%s", out)
+	}
+	// The force tally is the exception — BRE leaves those names plain and colors
+	// the counts bright-white.
+	if strings.Contains(out, ansi.FgBrightYellow+"troopers") {
+		t.Errorf("force-tally unit names must stay plain; got:\n%s", out)
+	}
+	if !strings.Contains(out, ansi.FgBrightWhite+"100") {
+		t.Errorf("force-tally counts should be bright-white; got:\n%s", out)
+	}
+	// Technology: aspect name bright-white, percentage bright-yellow.
+	if !strings.Contains(out, ansi.FgBrightWhite+"gold producing regions") {
+		t.Errorf("a Technology aspect name should be bright-white; got:\n%s", out)
+	}
+	// Braces are display markup and must never reach the player.
+	if strings.ContainsAny(stripANSI(out), "{}") {
+		t.Errorf("key-term braces leaked into the output:\n%s", stripANSI(out))
+	}
+}
+
 func TestAdvisorsHealthyEmpire(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
@@ -264,7 +305,10 @@ func TestAdvisorsHealthyEmpire(t *testing.T) {
 	for _, d := range []advisorDomain{advisorCivilian, advisorEconomic, advisorMilitary, advisorTechnology} {
 		renderAdvisor(f, w, d)
 	}
-	out := f.out.String()
+	// Match against the visible text: key terms are wrapped in color codes now
+	// (BRE highlights the unit type in advice and the aspect name in a Technology
+	// report), which would otherwise split a plain substring in two.
+	out := stripANSI(f.out.String())
 	// The informational report is always present.
 	for _, want := range []string{
 		"Our people number", "We earn about", "Our forces:", "Our gold producing regions are at",

@@ -85,11 +85,11 @@ msgstr ""
 msgid "(A-%c%s, 0=cancel) %s"
 msgstr ""
 
-#: internal/menu/actions_info.go:393
+#: internal/menu/actions_info.go:440
 msgid "(AI)"
 msgstr ""
 
-#: internal/menu/actions_info.go:661
+#: internal/menu/actions_info.go:708
 msgid "(dead)"
 msgstr ""
 
@@ -125,7 +125,7 @@ msgstr ""
 msgid "1 day ago"
 msgstr ""
 
-#: internal/menu/actions_info.go:488
+#: internal/menu/actions_info.go:535
 msgid ": News File"
 msgstr ""
 
@@ -169,7 +169,7 @@ msgstr ""
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
 msgstr ""
 
-#: internal/menu/actions_info.go:312
+#: internal/menu/actions_info.go:359
 msgid "Advisors"
 msgstr ""
 
@@ -185,7 +185,7 @@ msgstr ""
 msgid "Alliance Strength"
 msgstr ""
 
-#: internal/menu/actions_info.go:348
+#: internal/menu/actions_info.go:395
 msgid "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and later maintained by John Dailey. No original BRE code, text, or art is used."
 msgstr ""
 
@@ -261,7 +261,7 @@ msgstr ""
 msgid "Bribery"
 msgstr ""
 
-#: internal/menu/actions_info.go:251
+#: internal/menu/actions_info.go:298
 msgid "Building some would raise our military strength, income, and food output, and lower our upkeep — a benefit that builds up over time."
 msgstr ""
 
@@ -301,7 +301,7 @@ msgstr ""
 msgid "Cash Relief / Loans"
 msgstr ""
 
-#: internal/menu/actions_info.go:439
+#: internal/menu/actions_info.go:486
 msgid "Change"
 msgstr ""
 
@@ -389,7 +389,7 @@ msgstr ""
 msgid "Current tax rate: %d%%"
 msgstr ""
 
-#: internal/menu/actions_info.go:416
+#: internal/menu/actions_info.go:463
 msgid "Daily Bulletin"
 msgstr ""
 
@@ -469,11 +469,11 @@ msgstr ""
 msgid "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit."
 msgstr ""
 
-#: internal/menu/actions_info.go:389
+#: internal/menu/actions_info.go:436
 msgid "Empire"
 msgstr ""
 
-#: internal/menu/actions_info.go:655
+#: internal/menu/actions_info.go:702
 msgid "Empire Name"
 msgstr ""
 
@@ -497,10 +497,6 @@ msgstr ""
 msgid "Food Market"
 msgstr ""
 
-#: internal/menu/actions_info.go:261
-msgid "Food decay is at %d%% of standard levels."
-msgstr ""
-
 #: internal/menu/actions_market.go:81
 msgid "For Sale"
 msgstr ""
@@ -509,7 +505,7 @@ msgstr ""
 msgid "Free Trade Agreement"
 msgstr ""
 
-#: internal/menu/actions_info.go:352
+#: internal/menu/actions_info.go:399
 msgid "Free software under the MIT License."
 msgstr ""
 
@@ -525,7 +521,7 @@ msgstr ""
 msgid "Game Bulletins"
 msgstr ""
 
-#: internal/menu/actions_info.go:363
+#: internal/menu/actions_info.go:410
 msgid "Game Rules"
 msgstr ""
 
@@ -533,7 +529,7 @@ msgstr ""
 msgid "Game Setup"
 msgstr ""
 
-#: internal/menu/actions_info.go:366
+#: internal/menu/actions_info.go:413
 msgid "Game length (days): %d  (0 = endless)"
 msgstr ""
 
@@ -609,7 +605,7 @@ msgstr ""
 msgid "How much would you like to invest?"
 msgstr ""
 
-#: internal/menu/actions_info.go:655
+#: internal/menu/actions_info.go:702
 msgid "Id"
 msgstr ""
 
@@ -629,7 +625,7 @@ msgstr ""
 msgid "Ignore, or"
 msgstr ""
 
-#: internal/menu/actions_info.go:488
+#: internal/menu/actions_info.go:535
 msgid "Immortal Barons"
 msgstr ""
 
@@ -673,7 +669,7 @@ msgstr ""
 msgid "Intelligence Alliance"
 msgstr ""
 
-#: internal/menu/actions_info.go:368
+#: internal/menu/actions_info.go:415
 msgid "Inter-BBS play:     %s"
 msgstr ""
 
@@ -733,7 +729,7 @@ msgstr ""
 msgid "Krane, your war advisor, Sire. I will be brief; the enemy rarely is."
 msgstr ""
 
-#: internal/menu/actions_info.go:389
+#: internal/menu/actions_info.go:436
 msgid "Land"
 msgstr ""
 
@@ -753,7 +749,7 @@ msgstr ""
 msgid "Language:"
 msgstr ""
 
-#: internal/menu/actions_info.go:676
+#: internal/menu/actions_info.go:723
 msgid "Last Planetary Master: %s"
 msgstr ""
 
@@ -833,7 +829,7 @@ msgstr ""
 msgid "Modify League Diplomacy"
 msgstr ""
 
-#: internal/menu/actions_info.go:227
+#: internal/menu/actions_info.go:274
 msgid "Morale is low. Desertion is a real risk before our next battle."
 msgstr ""
 
@@ -853,7 +849,7 @@ msgstr ""
 msgid "Negotiate with which empire (0 to cancel)?"
 msgstr ""
 
-#: internal/menu/actions_info.go:389
+#: internal/menu/actions_info.go:436
 msgid "Net Worth"
 msgstr ""
 
@@ -929,60 +925,60 @@ msgstr ""
 msgid "Other"
 msgstr ""
 
-#: internal/menu/actions_info.go:218
-msgid "Our HeadQuarters is %d%% built."
-msgstr ""
-
-#: internal/menu/actions_info.go:220
-msgid "Our HeadQuarters is fully built."
-msgstr ""
-
-#: internal/menu/actions_info.go:260
-msgid "Our SDI yearly funding needs have been lowered to %d%% normal expenses."
-msgstr ""
-
-#: internal/menu/actions_info.go:253
+#: internal/menu/actions_info.go:300
 msgid "Our Technology regions are new. Their benefits will build up as we hold them."
 msgstr ""
 
-#: internal/menu/actions_info.go:257
-msgid "Our food production techniques increased efficiency to %d%%."
-msgstr ""
-
-#: internal/menu/actions_info.go:170
+#: internal/menu/actions_info.go:217
 msgid "Our food will not last the turn. Buy or grow more."
 msgstr ""
 
-#: internal/menu/actions_info.go:209
+#: internal/menu/actions_info.go:256
 msgid "Our forces: %s troopers, %s jets, %s turrets, %s tanks, %s bombers, %s carriers."
 msgstr ""
 
-#: internal/menu/actions_info.go:256
-msgid "Our gold producing regions are at %d%% of normal production."
-msgstr ""
-
-#: internal/menu/actions_info.go:258
-msgid "Our industries are running at %d%% efficiency."
-msgstr ""
-
-#: internal/menu/actions_info.go:259
-msgid "Our maintenance costs have been reduced to %d%% of standard costs."
-msgstr ""
-
-#: internal/menu/actions_info.go:255
-msgid "Our military forces are functioning at %d%% strength."
-msgstr ""
-
-#: internal/menu/actions_info.go:159
+#: internal/menu/actions_info.go:206
 msgid "Our people number %s, and their support stands at %d%%."
 msgstr ""
 
-#: internal/menu/actions_info.go:188
+#: internal/menu/actions_info.go:235
 msgid "Our treasury holds %s gold, with %s more in the bank."
 msgstr ""
 
-#: internal/menu/actions_info.go:206
+#: internal/menu/actions_info.go:253
 msgid "Our treasury is empty, Sire. We should raise gold soon."
+msgstr ""
+
+#: internal/menu/actions_info.go:265
+msgid "Our {HeadQuarters} is %d%% built."
+msgstr ""
+
+#: internal/menu/actions_info.go:267
+msgid "Our {HeadQuarters} is fully built."
+msgstr ""
+
+#: internal/menu/actions_info.go:307
+msgid "Our {SDI yearly funding} needs have been lowered to %d%% normal expenses."
+msgstr ""
+
+#: internal/menu/actions_info.go:304
+msgid "Our {food production techniques} increased efficiency to %d%%."
+msgstr ""
+
+#: internal/menu/actions_info.go:303
+msgid "Our {gold producing regions} are at %d%% of normal production."
+msgstr ""
+
+#: internal/menu/actions_info.go:305
+msgid "Our {industries} are running at %d%% efficiency."
+msgstr ""
+
+#: internal/menu/actions_info.go:306
+msgid "Our {maintenance costs} have been reduced to %d%% of standard costs."
+msgstr ""
+
+#: internal/menu/actions_info.go:302
+msgid "Our {military forces} are functioning at %d%% strength."
 msgstr ""
 
 #: internal/menu/actions_bank.go:172
@@ -993,7 +989,7 @@ msgstr ""
 msgid "Owned"
 msgstr ""
 
-#: internal/menu/actions_info.go:389
+#: internal/menu/actions_info.go:436
 msgid "Owner"
 msgstr ""
 
@@ -1021,7 +1017,7 @@ msgstr ""
 msgid "Play"
 msgstr ""
 
-#: internal/menu/actions_info.go:388
+#: internal/menu/actions_info.go:435
 msgid "Player List"
 msgstr ""
 
@@ -1049,7 +1045,7 @@ msgstr ""
 msgid "Proposed a %s to %s."
 msgstr ""
 
-#: internal/menu/actions_info.go:365
+#: internal/menu/actions_info.go:412
 msgid "Protection turns:   %d"
 msgstr ""
 
@@ -1097,7 +1093,7 @@ msgstr ""
 msgid "Remove a realm unplayed for how many days (0 = never)"
 msgstr ""
 
-#: internal/menu/actions_info.go:367
+#: internal/menu/actions_info.go:414
 msgid "Removed if unplayed: %d days  (0 = never)"
 msgstr ""
 
@@ -1141,7 +1137,7 @@ msgstr ""
 msgid "Savings Interest Rate:"
 msgstr ""
 
-#: internal/menu/actions_info.go:656
+#: internal/menu/actions_info.go:703
 msgid "Score"
 msgstr ""
 
@@ -1301,7 +1297,7 @@ msgstr ""
 msgid "Tax rate set to %d%%."
 msgstr ""
 
-#: internal/menu/actions_info.go:185
+#: internal/menu/actions_info.go:232
 msgid "Taxes are high enough to risk riots. Consider lowering them."
 msgstr ""
 
@@ -1309,11 +1305,11 @@ msgstr ""
 msgid "Technology Agreement"
 msgstr ""
 
-#: internal/menu/actions_info.go:265
+#: internal/menu/actions_info.go:312
 msgid "Technology is relative to the size of the empire: a larger realm needs more of it to keep the same efficiency."
 msgstr ""
 
-#: internal/menu/actions_info.go:656
+#: internal/menu/actions_info.go:703
 msgid "Territory"
 msgstr ""
 
@@ -1333,7 +1329,7 @@ msgstr ""
 msgid "That interplanetary operation is not yet available."
 msgstr ""
 
-#: internal/menu/actions_info.go:204
+#: internal/menu/actions_info.go:251
 msgid "That is %s gold per region; the world average is %s."
 msgstr ""
 
@@ -1341,7 +1337,7 @@ msgstr ""
 msgid "That is not traded on the market."
 msgstr ""
 
-#: internal/menu/actions_info.go:179
+#: internal/menu/actions_info.go:226
 msgid "That leaves a surplus of %s. Our stores are secure."
 msgstr ""
 
@@ -1377,7 +1373,7 @@ msgstr ""
 msgid "The loan rate will be %s%% per day, totalling %s%% interest overall."
 msgstr ""
 
-#: internal/menu/actions_info.go:182
+#: internal/menu/actions_info.go:229
 msgid "The people grow restless. Lower taxes or spend on their support."
 msgstr ""
 
@@ -1449,7 +1445,7 @@ msgstr ""
 msgid "Travel Times"
 msgstr ""
 
-#: internal/menu/actions_info.go:225
+#: internal/menu/actions_info.go:272
 msgid "Troop morale stands at %d%%."
 msgstr ""
 
@@ -1469,7 +1465,7 @@ msgstr ""
 msgid "Turns per day"
 msgstr ""
 
-#: internal/menu/actions_info.go:364
+#: internal/menu/actions_info.go:411
 msgid "Turns per day:      %d"
 msgstr ""
 
@@ -1545,47 +1541,47 @@ msgstr ""
 msgid "War / Attack"
 msgstr ""
 
-#: internal/menu/actions_info.go:196
+#: internal/menu/actions_info.go:243
 msgid "We earn about %s gold each turn, %d%% of the world total."
 msgstr ""
 
-#: internal/menu/actions_info.go:160
+#: internal/menu/actions_info.go:207
 msgid "We grow %s food each turn and consume %s."
 msgstr ""
 
-#: internal/menu/actions_info.go:176
+#: internal/menu/actions_info.go:223
 msgid "We have a surplus now, but our people are still growing. At full size they will eat about %s food each turn, more than we grow. Add agricultural regions before then."
 msgstr ""
 
-#: internal/menu/actions_info.go:223
-msgid "We have more jets than our carriers can carry. Build more carriers."
+#: internal/menu/actions_info.go:270
+msgid "We have more {jets} than our {carriers} can carry. Build more {carriers}."
 msgstr ""
 
-#: internal/menu/actions_info.go:216
-msgid "We have no HeadQuarters. Building one would strengthen our tanks, and it costs more with every turn we wait."
-msgstr ""
-
-#: internal/menu/actions_info.go:250
+#: internal/menu/actions_info.go:297
 msgid "We have no Technology regions."
 msgstr ""
 
-#: internal/menu/actions_info.go:230
-msgid "We have no covert agents. Recruit some for spying and sabotage."
+#: internal/menu/actions_info.go:263
+msgid "We have no {HeadQuarters}. Building one would strengthen our {tanks}, and it costs more with every turn we wait."
 msgstr ""
 
-#: internal/menu/actions_info.go:263
+#: internal/menu/actions_info.go:277
+msgid "We have no {covert agents}. Recruit some for spying and sabotage."
+msgstr ""
+
+#: internal/menu/actions_info.go:310
 msgid "We hold no Technology regions, so our research has halted — but what we have already learned is not lost."
 msgstr ""
 
-#: internal/menu/actions_info.go:232
+#: internal/menu/actions_info.go:279
 msgid "We keep %s covert agents."
 msgstr ""
 
-#: internal/menu/actions_info.go:190
+#: internal/menu/actions_info.go:237
 msgid "We owe %s gold in debt, which grows each turn."
 msgstr ""
 
-#: internal/menu/actions_info.go:172
+#: internal/menu/actions_info.go:219
 msgid "We run a shortfall of %s; our stores will run out in about %d turns."
 msgstr ""
 
@@ -1995,6 +1991,10 @@ msgstr ""
 
 #: cmd/immortal-barons/main.go:71
 msgid "your player name (only used with -local)"
+msgstr ""
+
+#: internal/menu/actions_info.go:308
+msgid "{Food decay} is at %d%% of standard levels."
 msgstr ""
 
 #: internal/menu/helpbrowse.go:144
