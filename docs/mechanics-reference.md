@@ -1271,6 +1271,14 @@ These are the slices that would move it closer to the real game.
   in which case the match rule needs pinning down first with a shuffled-letter
   ticket.
 
+  The ticket is offered **once per day per empire**, not on every entry into the
+  game — re-entering the same day brings no second offer. It shares that gating
+  with the Queen Royale tax refund (#93): both fire in the "since your last play"
+  block on the day's first play, and their code sits ~400 bytes apart in
+  `BRE.OVR`. So the two are one **first-play-of-the-day event block**, and
+  whichever is built first should add the hook both hang off rather than model
+  either as a standalone random event.
+
 ## Sources
 
 - Barren Realms Elite gameplay overview — The Realm of Serion BBS:
