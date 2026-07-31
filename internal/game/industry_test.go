@@ -15,12 +15,12 @@ func TestManufactureSplitsByPercent(t *testing.T) {
 
 	w.Manufacture(e)
 
-	pts := 100 * UnitPointsPerRegion
-	wantTroopers := (pts * e.ProdTroopers / 100) / CostTrooper
-	wantJets := (pts * e.ProdJets / 100) / CostJet
-	wantTurrets := (pts * e.ProdTurrets / 100) / CostTurret
-	wantTanks := (pts * e.ProdTanks / 100) / CostTank
-	wantCarriers := (pts * e.ProdCarriers / 100) / CostCarrier
+	// Take the expectation from ProjectedProduction rather than re-deriving it:
+	// a second hand-rolled formula here truncated where production rounds, and
+	// disagreed by one unit whenever a percentage left a fraction.
+	want := w.ProjectedProduction(e)
+	wantTroopers, wantJets, wantTurrets := want[0], want[1], want[2]
+	wantTanks, wantCarriers := want[4], want[5]
 
 	if e.MadeTroopers != wantTroopers {
 		t.Errorf("MadeTroopers = %d, want %d", e.MadeTroopers, wantTroopers)
@@ -139,9 +139,34 @@ func TestProdMigration(t *testing.T) {
 	e := &Empire{}
 	e.EnsureProduction()
 
-	if e.ProdTroopers != DefaultProdPct || e.ProdJets != DefaultProdPct || e.ProdTurrets != DefaultProdPct ||
-		e.ProdBombers != DefaultProdPct || e.ProdTanks != DefaultProdPct || e.ProdCarriers != DefaultProdPct {
+	if e.ProdTroopers != DefaultProdTroopersPct || e.ProdJets != DefaultProdJetsPct || e.ProdTurrets != DefaultProdTurretsPct ||
+		e.ProdBombers != DefaultProdBombersPct || e.ProdTanks != DefaultProdTanksPct || e.ProdCarriers != DefaultProdCarriersPct {
 		t.Errorf("EnsureProduction gave unexpected defaults: %+v", e)
+	}
+}
+
+// TestDefaultProdLiftsItsJets: the default split must build carriers at exactly
+// the rate its jets need lifting — output is pct/cost, so jets/carriers must
+// come to JetsPerCarrier. A change to either constant that misses this ratio
+// wastes points on the most expensive unit in the table.
+func TestDefaultProdLiftsItsJets(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("me", "Mine")
+	// Enough industry that the round-to-nearest on each unit type is noise; the
+	// ratio itself does not depend on the count.
+	e.Regions = RegionMix{Industrial: 10000}
+	e.Land = e.Regions.Total()
+
+	made := w.ProjectedProduction(e)
+	jets, carriers := made[1], made[5]
+	if carriers == 0 || jets/carriers != JetsPerCarrier {
+		t.Errorf("default production made %d jets and %d carriers; want %d jets per carrier",
+			jets, carriers, JetsPerCarrier)
+	}
+	total := DefaultProdTroopersPct + DefaultProdJetsPct + DefaultProdTurretsPct +
+		DefaultProdBombersPct + DefaultProdTanksPct + DefaultProdCarriersPct
+	if total != 100 {
+		t.Errorf("default percentages total %d%%, want the whole pool spent on units", total)
 	}
 }
 
@@ -150,7 +175,7 @@ func TestProdMigration(t *testing.T) {
 // load-time EnsureProduction repair.
 func TestProdKeepsIntentionalZero(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
-	e := w.AddHuman("me", "Mine") // created initialized, at the 15% defaults
+	e := w.AddHuman("me", "Mine") // created initialized, at the default split
 	e.ProdTroopers, e.ProdJets, e.ProdTurrets = 0, 0, 0
 	e.ProdBombers, e.ProdTanks, e.ProdCarriers = 0, 0, 0
 

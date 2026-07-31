@@ -655,6 +655,12 @@ it flags "our people are still growing… add agricultural regions before then"
 
 **Industrial production:** industrial regions output military units. You
 set production percentages across trooper/jet/turret/tank/bomber/carrier.
+BRE starts every type at 15%, leaving 10% to fall through to industrial gold.
+**IB spends the whole pool on units**: jets 16%, carriers 2%, turrets and tanks
+21% each, troopers and bombers 20%. Because a type's output is `pct/cost`, a
+flat split builds one carrier per 12.5 jets while a carrier lifts 100 — IB's
+share makes the two rates meet exactly (`DefaultProdPct` and friends in
+`balance.go`).
 A common money tip: set industry to 100% carriers and *sell* the carriers
 — more profitable than producing gold directly. Mountain regions boost
 industrial output (see the region table for the formula) and are the most

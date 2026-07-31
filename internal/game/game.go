@@ -295,8 +295,8 @@ func (e *Empire) EnsureProduction() {
 	}
 	e.ProdInitialized = true
 	if e.ProdTroopers+e.ProdJets+e.ProdTurrets+e.ProdBombers+e.ProdTanks+e.ProdCarriers == 0 {
-		e.ProdTroopers, e.ProdJets, e.ProdTurrets = DefaultProdPct, DefaultProdPct, DefaultProdPct
-		e.ProdBombers, e.ProdTanks, e.ProdCarriers = DefaultProdPct, DefaultProdPct, DefaultProdPct
+		e.ProdTroopers, e.ProdJets, e.ProdTurrets = DefaultProdTroopersPct, DefaultProdJetsPct, DefaultProdTurretsPct
+		e.ProdBombers, e.ProdTanks, e.ProdCarriers = DefaultProdBombersPct, DefaultProdTanksPct, DefaultProdCarriersPct
 	}
 }
 
@@ -735,9 +735,10 @@ func newEmpire(name, owner string, cfg Config, day int) *Empire {
 		// whatever the sysop seeded the market with, so it can expand on day one
 		// before its first Daily Land Creation arrives.
 		LandAvailable: cfg.InitialMarketLand + cfg.LandPerDay,
-		// BRE default: all six at DefaultProdPct (15% → 90% units, 10% remainder → gold).
-		ProdTroopers: DefaultProdPct, ProdJets: DefaultProdPct, ProdTurrets: DefaultProdPct,
-		ProdBombers: DefaultProdPct, ProdTanks: DefaultProdPct, ProdCarriers: DefaultProdPct,
+		// The full pool goes to units, split so carrier output matches jet lift
+		// (see DefaultProdTroopersPct); BRE defaults to 90% units, 10% gold.
+		ProdTroopers: DefaultProdTroopersPct, ProdJets: DefaultProdJetsPct, ProdTurrets: DefaultProdTurretsPct,
+		ProdBombers: DefaultProdBombersPct, ProdTanks: DefaultProdTanksPct, ProdCarriers: DefaultProdCarriersPct,
 		ProdInitialized: true, // so a player's later all-zero setting isn't overwritten
 	}
 }

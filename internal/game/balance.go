@@ -571,9 +571,25 @@ const (
 	// live turret figures across three captures.
 	MountainIndustryNum    = 3
 	MountainIndustryCapPct = 150
-	// DefaultProdPct is each unit type's default production percentage — BRE's
-	// default is all six at 15% (90% to units, 10% remainder → industrial gold).
-	DefaultProdPct = 15
+	// A new realm's production split, one constant per unit type, totalling 100%.
+	//
+	// DELIBERATE DIVERGENCE FROM BRE, which defaults all six to 15% and lets the
+	// remaining 10% fall through to industrial gold. Two changes here: the whole
+	// pool goes to units, and jets and carriers are matched to each other.
+	// Because a unit's output is pct/cost, a flat split builds one carrier per
+	// 12.5 jets while a carrier lifts JetsPerCarrier (100) — eight times the lift
+	// the jets can use, spent at the most expensive unit in the table. Carriers
+	// therefore take an eighth of the jet share, which 16 and 2 satisfy exactly.
+	//
+	// The 82% left over cannot divide four ways evenly, so the odd points go to
+	// turrets and tanks — the units that are useful the turn they are built,
+	// without an escort or a target worth bombing.
+	DefaultProdTroopersPct = 20
+	DefaultProdJetsPct     = 16
+	DefaultProdTurretsPct  = 21
+	DefaultProdBombersPct  = 20
+	DefaultProdTanksPct    = 21
+	DefaultProdCarriersPct = 2
 	// Point cost to manufacture one unit. BINARY-VERIFIED: BRE stores the
 	// reciprocal (units per point) as 21 / 15 / 14 / 4.2 / 1.4 / 1.2, which is
 	// exactly UnitPointsPerRegion/cost for these six values.
