@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 // Diplomats never attack (#71): their budget goes to defense instead, so they
 // are passive by choice rather than by hoarding offense they never use.
@@ -620,5 +623,51 @@ func TestAIWellFedKeepsItsRegions(t *testing.T) {
 
 	if bot.Regions.Coastal != before {
 		t.Errorf("a well-fed AI must keep its regions (%d -> %d)", before, bot.Regions.Coastal)
+	}
+}
+
+// TestGroundDownRealmsGetFinished guards the #87 balance fix: a realm beaten
+// down to a few hundred regions must actually die, rather than rebuy land faster
+// than attackers can take it and linger as a permanently-farmed "zombie".
+//
+// When #87 was filed, a bot-only probe ran 60 days with ~12 battles a day and
+// eliminated NOBODY — the weakest realm sat at a few hundred regions for dozens
+// of days. What changed is not the capture rule (10% + a 15-region floor is
+// BRE-verified and ratio-independent, so it is not a knob) but the cost of
+// holding land: at 913 gold per region per turn, a stripped realm can no longer
+// afford to rebuild, so the death spiral now completes.
+//
+// Fixed seed, so this is a deterministic balance assertion rather than a flaky
+// one. If it fails, the economy has drifted back to making conquest impossible.
+func TestGroundDownRealmsGetFinished(t *testing.T) {
+	cfg := DefaultConfig()
+	w := NewWorldSeed(cfg, 23)
+	w.AddAIEmpires(8)
+	start := len(w.Empires)
+
+	lowest := map[string]int{}
+	for d := 1; d <= 60; d++ {
+		w.DailyMaintenance(fmt.Sprintf("2026-%02d-%02d", 8+d/28, 1+d%28))
+		for _, e := range w.Empires {
+			if e.Alive && (lowest[e.Name] == 0 || e.Land < lowest[e.Name]) {
+				lowest[e.Name] = e.Land
+			}
+		}
+	}
+
+	alive := map[string]bool{}
+	for _, e := range w.Empires {
+		if e.Alive {
+			alive[e.Name] = true
+		}
+	}
+	if start-len(alive) == 0 {
+		t.Fatalf("60 days and %d battles eliminated nobody — wars cannot conclude again (#87)", w.BattlesTotal)
+	}
+	// The specific zombie signature: ground down small, yet still standing.
+	for name, low := range lowest {
+		if low < 200 && alive[name] {
+			t.Errorf("%s was reduced to %d regions and still survived 60 days — that is the #87 zombie", name, low)
+		}
 	}
 }
