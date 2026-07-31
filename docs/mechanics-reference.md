@@ -84,13 +84,22 @@ Rough buy-cost ratio: about **7 troopers = 1 tank**, and about **6 jets =
 1 tank**. So a tank has the offense of 4 troopers but costs ~7 — troopers
 are cheaper short-term, tanks win long-term (lower upkeep).
 
-Maintenance per unit per turn, at the sysop's low / medium / high setting.
-**The guide's Medium column is not reliable** — a live 100-trooper realm at
-Medium was charged 40 gold, i.e. 0.40 per trooper, not the 0.60 printed here.
-The turret figure IS confirmed (0.9, across five army sizes). The other four
-Medium values are unmeasured and should be treated as suspect rather than as
-fidelity contract; each needs a realm holding that unit type alone, read off
-"Your Armed Forces Require".
+Maintenance per unit per turn, at the sysop's low / medium / high setting. The
+**Medium column is measured**, not taken from the guide: a controlled capture
+held one unit type at a time with no Technology reduction and read
+"Your Armed Forces Require" each turn —
+
+| held | charged | rate |
+|------|---------|------|
+| 100 / 50 troopers | 40 / 20 | 0.40 |
+| 20 / 60 jets | 24 / 72 | 1.20 |
+| 20 / 60 turrets | 18 / 54 | 0.90 |
+| 20 bombers | 26 | 1.30 |
+| 20 carriers | 2 | 0.10 |
+
+The guide is right on every row **except troopers**, where it prints 0.60 against
+a measured 0.40 — so treat it as usable but not authoritative. **Tanks are still
+unmeasured** (that realm never held one); 0.60 below is the guide's figure.
 
 | Unit | Low | Medium | High |
 |------|-----|--------|------|
@@ -98,7 +107,7 @@ fidelity contract; each needs a realm holding that unit type alone, read off
 | Jet | 0.30 | 1.20 | 4.80 |
 | Turret | 0.255 | 0.90 | 3.60 |
 | Bomber | 0.32 | 1.30 | 5.20 |
-| Tank | 0.15 | 0.60 | 2.40 |
+| Tank | 0.15 | 0.60 *(unmeasured)* | 2.40 |
 | Carrier | 0.025 | 0.10 | 0.40 |
 
 Net-worth value contributed per unit (from the guide's net-worth table):

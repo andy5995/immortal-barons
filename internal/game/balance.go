@@ -626,21 +626,26 @@ const (
 // ratio to scale: a turret-only empire was charged exactly trunc(0.9 × turrets)
 // at five army sizes from 49,691 turrets (44,721 gold) to 219,032 (197,128).
 //
-// TWO RATES ARE LIVE-VERIFIED and the rest are not. The turret figure above
-// matches the guide table, but a live 100-trooper realm was charged 40 gold —
-// 0.40 per trooper, where the guide's Medium column says 0.60. Both readings
-// come from games whose config reads "Maintenance Costs: Medium" and whose
-// region upkeep is the verified 913, so the settings are the same and the guide
-// is simply wrong on that row. Treat the three unmeasured rates below as
-// SUSPECT for the same reason, not as fidelity contract: measuring them needs a
-// realm holding one unit type at a time and reading "Your Armed Forces Require".
+// ALL BUT THE TANK RATE ARE LIVE-VERIFIED, from a controlled capture that held
+// one unit type at a time with no Technology reduction (Maintenance Costs
+// "Medium", tech maintenance factor reading 100%):
+//
+//	100 troopers → 40 gold      50 troopers → 20     ⇒ 0.40
+//	 20 jets     → 24            60 jets     → 72    ⇒ 1.20
+//	 20 turrets  → 18            60 turrets  → 54    ⇒ 0.90
+//	 20 bombers  → 26                               ⇒ 1.30
+//	 20 carriers →  2                               ⇒ 0.10
+//
+// The guide table is right on every row EXCEPT troopers, where it prints 0.60
+// against a measured 0.40 — so it is usable but not authoritative, which is why
+// the tank rate below is still flagged. That capture's realm never held a tank.
 const (
-	MaintTrooperTenths = 4  // live-verified: 100 troopers → 40 gold
-	MaintJetTenths     = 12 // guide table, UNVERIFIED
-	MaintTurretTenths  = 9  // live-verified across five army sizes
-	MaintBomberTenths  = 13 // guide table, UNVERIFIED
-	MaintTankTenths    = 6  // guide table, UNVERIFIED
-	MaintCarrierTenths = 1  // guide table, UNVERIFIED
+	MaintTrooperTenths = 4  // live-verified (two army sizes) — guide says 6, wrongly
+	MaintJetTenths     = 12 // live-verified (two army sizes)
+	MaintTurretTenths  = 9  // live-verified (two army sizes, plus five earlier)
+	MaintBomberTenths  = 13 // live-verified
+	MaintTankTenths    = 6  // guide table, STILL UNVERIFIED — needs a tank-only realm
+	MaintCarrierTenths = 1  // live-verified
 
 	MaintTenthsPerGold = 10
 
