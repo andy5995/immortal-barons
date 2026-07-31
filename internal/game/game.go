@@ -586,13 +586,19 @@ func (w *World) initFreshGame() {
 	w.Outbox = nil
 	w.SpyDatabase = nil
 	w.LeagueDiplomacy = ""
+	// Preferences, in the order the Preferences menu lists them. These are IB's
+	// defaults, not BRE's: BRE opens with the three Visit menus and the two buy/
+	// deposit toggles on and the two automations off, so an untouched realm walks
+	// through every optional menu and answers the same maintenance and food
+	// prompts by hand each turn. IB starts with the walk-through menus off and
+	// the automations on, leaving the prompts to players who turn them back on.
+	w.VisitCovert = false
+	w.VisitTrading = false
+	w.VisitMessage = false
 	w.EnterExitsBuy = false
-	w.DepositEndTurn = false
-	w.AutoPayMaint = false
-	w.AutoFeed = false
-	w.VisitCovert = true
-	w.VisitTrading = true
-	w.VisitMessage = true
+	w.DepositEndTurn = true
+	w.AutoPayMaint = true
+	w.AutoFeed = true
 	w.seedAIEmpires()
 	w.seedPirates()
 }

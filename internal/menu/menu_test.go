@@ -250,6 +250,7 @@ func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 	menus := BuildMenus()
 	f := &fakeSession{keys: []rune("P7")} // P = Preferences, 7 = Auto-Feed Empire
 	w := newWorld()
+	w.AutoFeed = false // default is on, so toggle it off first and expect it back on
 	if err := Run(f, w, menus.System); err != io.EOF {
 		t.Fatalf("expected EOF after script, got %v", err)
 	}

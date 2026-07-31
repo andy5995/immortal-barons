@@ -228,6 +228,7 @@ func TestRunTurnCovertGatedBeforeSpending(t *testing.T) {
 	f := &fakeSession{keys: []rune("0\r   0000nn")}
 	w := newWorld()
 	w.AutoPayMaint = true
+	w.VisitCovert, w.VisitTrading, w.VisitMessage = true, true, true // this test walks every optional menu
 	w.Player().Agents = 1
 	runTurn(f, w)
 	out := f.out.String()
@@ -243,6 +244,7 @@ func TestRunTurnCovertGatedBeforeSpending(t *testing.T) {
 	f2 := &fakeSession{keys: []rune("0\r   000nn")}
 	w2 := newWorld()
 	w2.AutoPayMaint = true
+	w2.VisitCovert, w2.VisitTrading, w2.VisitMessage = true, true, true
 	w2.Player().Agents = 0
 	runTurn(f2, w2)
 	out2 := f2.out.String()
@@ -265,7 +267,8 @@ func TestRunTurnHasNoPreTurnDiplomacyOrProduction(t *testing.T) {
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true
-	w.Player().Agents = 1 // hold an agent so the Covert stage runs (it now gates on that)
+	w.VisitCovert, w.VisitTrading, w.VisitMessage = true, true, true // this test walks every optional menu
+	w.Player().Agents = 1                                            // hold an agent so the Covert stage runs (it now gates on that)
 	w.Player().Events = []string{"A dragon attacked your regions."}
 
 	runTurn(f, w)
@@ -299,7 +302,8 @@ func TestRunTurnPlaysTwoTurnsWithoutDiplomacy(t *testing.T) {
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true
-	w.Player().Agents = 1 // hold an agent so the Covert stage runs (it now gates on that)
+	w.VisitCovert, w.VisitTrading, w.VisitMessage = true, true, true // this test walks every optional menu
+	w.Player().Agents = 1                                            // hold an agent so the Covert stage runs (it now gates on that)
 	left := w.Player().TurnsLeft
 
 	runTurn(f, w)
