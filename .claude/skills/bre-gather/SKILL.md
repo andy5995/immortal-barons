@@ -214,6 +214,17 @@ The landmines:
   DOORFILE.SR caller name in the sysop's actual game data — tell Andy so he can
   re-`reset`, and never run this against data he cares about. Don't run while
   his own dosemu session is up (single-instance conflicts).
+- **`SRDOOR local` prompts `Name:` and it must be TYPED — never just Enter.**
+  An empty answer writes an EMPTY caller name; BRE then treats you as a brand-new
+  caller, asks "Name your Realm:", and exits on the empty answer, silently
+  ending a scripted run. `bre-nextday.sh` reads the name back out of
+  `doorfile.sr` line 1 and types it a key at a time for this reason.
+- **A whole-pane grep for the main menu outranks a pending prompt.** BRE leaves
+  the main menu on screen while the event log scrolls in beneath it, so a driver
+  that checks `grep '(1) Play Game'` against the WHOLE pane will keep re-sending
+  "1" and never answer the lottery / send-a-message prompt sitting on the active
+  line. Answer active-line prompts BEFORE any whole-pane guard — this hung a
+  grind until it was found. Fixed in `bre-drive.sh`.
 - **Fresh test player = edit the name in DOORFILE.SR, then run BRE.** The caller
   name appears in **two** places in `doorfile.sr`: **line 1 and the last line**
   (both were `Andy`). Change BOTH to a new name and launch `BRE` — BRE enrolls a
@@ -291,6 +302,34 @@ Once inside a turn you can scrape income/status numbers per turn. Hard-won rules
 - **`0` at the main menu quit straight to `C:\>` with NO `y` confirm** in this
   run (v0.988). The earlier "+ y confirm" note may be version/preference
   dependent — check the active line rather than blind-sending a `y`.
+
+### New-realm PROTECTION gates trading, not just combat (2026-07-30)
+
+The config editor's own help for "Turns Of Protection" reads: a new empire is
+"unable to attack, **trade**, and be attacked." So the Trading Market refuses a
+protected realm with "Your dominion is still under protection." — which blocks
+any market experiment until protection is burned off. Twenty turns at eight
+turns/day is three game days PER EMPIRE, and a cross-empire sale needs two.
+
+Two ways round it, one of which does NOT work:
+
+- **Editing `data/game.dat` directly FAILS.** The config record sits at the top
+  of the file and is easy to read — `+0x36` turns/day, `+0x38` turns of
+  protection, `+0x3e` land created/day, `+0x40` interest, `+0x42` planetary tax
+  (tenths of a percent, matching `bre-save-format.md`), `+0x6a` max purchasable
+  regions. But BRE checksums it: patching protection to 0 produced
+  `Error: Status File has been tampered with! Game will not run.` on the next
+  launch. Restore from a backup copy and use the game instead. Those offsets are
+  still worth having for READING a game's settings without driving the UI.
+- **The Configuration Editor would not accept edits in a headless pane.**
+  `BRE RESET` opens it, arrow keys move the highlight and PG-DN pages, but on a
+  numeric field none of typing digits, Left/Right, `+`/`-`, `e`/`E`, Backspace,
+  Space or Tab changed the value; Enter shows that field's help. Unresolved —
+  if you find the edit key, record it here. Until then, assume the editor is
+  read-only under `dosemu -t` and plan to burn protection with the driver.
+
+So: **budget three game days per empire before any trade/attack experiment**,
+and start the grind early rather than discovering the gate mid-run.
 
 ### Setting up an efficient test run (2026-07-21, proven)
 
