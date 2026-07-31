@@ -422,7 +422,13 @@ const (
 // Checked against 163 distinct captured prices over seven captures and two
 // empires: 161 land inside the jitter window and are spread flat across it. The
 // two strays sit one turn's worth outside, from a day-boundary off-by-one in the
-// score-to-turns derivation used to check them, not from the formula.
+// score-to-turns derivation used to check them, not from the formula. Re-checked
+// on a third, unrelated game (5/5), which included a brand-new realm priced at
+// exactly 5,000 — the base with a zero draw.
+//
+// Note the price does NOT rise every single turn: the trend is +75 but the draw
+// spans 300, so consecutive turns can dip. It climbs unmistakably over many
+// turns, which is what makes building early worth it.
 //
 // So an old realm pays far more for a HeadQuarters than a young one — the
 // building rewards committing early, and the cap keeps a very old realm from
@@ -626,26 +632,27 @@ const (
 // ratio to scale: a turret-only empire was charged exactly trunc(0.9 × turrets)
 // at five army sizes from 49,691 turrets (44,721 gold) to 219,032 (197,128).
 //
-// ALL BUT THE TANK RATE ARE LIVE-VERIFIED, from a controlled capture that held
-// one unit type at a time with no Technology reduction (Maintenance Costs
-// "Medium", tech maintenance factor reading 100%):
+// EVERY RATE IS LIVE-VERIFIED, from controlled captures that held one unit type
+// at a time with no Technology reduction (Maintenance Costs "Medium", tech
+// maintenance factor reading 100%), most at two different army sizes:
 //
 //	100 troopers → 40 gold      50 troopers → 20     ⇒ 0.40
 //	 20 jets     → 24            60 jets     → 72    ⇒ 1.20
 //	 20 turrets  → 18            60 turrets  → 54    ⇒ 0.90
-//	 20 bombers  → 26                               ⇒ 1.30
-//	 20 carriers →  2                               ⇒ 0.10
+//	 20 tanks    → 12            40 tanks    → 24    ⇒ 0.60
+//	 20 bombers  → 26                                ⇒ 1.30
+//	 20 carriers →  2                                ⇒ 0.10
 //
-// The guide table is right on every row EXCEPT troopers, where it prints 0.60
-// against a measured 0.40 — so it is usable but not authoritative, which is why
-// the tank rate below is still flagged. That capture's realm never held a tank.
+// The guide table turns out to be right on every row EXCEPT troopers, where it
+// prints 0.60 against a measured 0.40 (seen in three separate games). Trust the
+// figures here, not the table.
 const (
-	MaintTrooperTenths = 4  // live-verified (two army sizes) — guide says 6, wrongly
-	MaintJetTenths     = 12 // live-verified (two army sizes)
-	MaintTurretTenths  = 9  // live-verified (two army sizes, plus five earlier)
-	MaintBomberTenths  = 13 // live-verified
-	MaintTankTenths    = 6  // guide table, STILL UNVERIFIED — needs a tank-only realm
-	MaintCarrierTenths = 1  // live-verified
+	MaintTrooperTenths = 4  // measured, 3 games — the guide's 6 is wrong
+	MaintJetTenths     = 12 // measured, two army sizes
+	MaintTurretTenths  = 9  // measured, two army sizes, plus five earlier
+	MaintBomberTenths  = 13 // measured
+	MaintTankTenths    = 6  // measured, two army sizes
+	MaintCarrierTenths = 1  // measured
 
 	MaintTenthsPerGold = 10
 

@@ -94,12 +94,13 @@ held one unit type at a time with no Technology reduction and read
 | 100 / 50 troopers | 40 / 20 | 0.40 |
 | 20 / 60 jets | 24 / 72 | 1.20 |
 | 20 / 60 turrets | 18 / 54 | 0.90 |
+| 20 / 40 tanks | 12 / 24 | 0.60 |
 | 20 bombers | 26 | 1.30 |
 | 20 carriers | 2 | 0.10 |
 
 The guide is right on every row **except troopers**, where it prints 0.60 against
-a measured 0.40 — so treat it as usable but not authoritative. **Tanks are still
-unmeasured** (that realm never held one); 0.60 below is the guide's figure.
+a measured 0.40 (seen in three separate games). Trust the measurements, not the
+table.
 
 | Unit | Low | Medium | High |
 |------|-----|--------|------|
@@ -107,7 +108,7 @@ unmeasured** (that realm never held one); 0.60 below is the guide's figure.
 | Jet | 0.30 | 1.20 | 4.80 |
 | Turret | 0.255 | 0.90 | 3.60 |
 | Bomber | 0.32 | 1.30 | 5.20 |
-| Tank | 0.15 | 0.60 *(unmeasured)* | 2.40 |
+| Tank | 0.15 | 0.60 | 2.40 |
 | Carrier | 0.025 | 0.10 | 0.40 |
 
 Net-worth value contributed per unit (from the guide's net-worth table):
