@@ -429,35 +429,54 @@ func gameSetup(s session.Session, w *ctx) Result {
 		}
 		return fmt.Sprintf(tr(s, "%s days"), comma(n))
 	}
+	// group heads a run of related settings with a captioned divider. BRE's own
+	// Configuration Editor is one long ungrouped list; these dividers are IB's,
+	// and they are what makes a screen this dense scannable. Dim, so the figures
+	// stay the brightest thing on the panel.
+	group := func(caption string) {
+		text := tr(s, caption)
+		fill := len([]rune(rule)) - len([]rune(text)) - 6
+		if fill < 0 {
+			fill = 0
+		}
+		fmt.Fprintf(s, "%s── %s %s%s\n",
+			dim(ansi.FgBrightCyan), text, strings.Repeat("─", fill), ansi.Reset)
+	}
 
 	titleBar(s, tr(s, "Game Setup: Turns, Land and Money"))
+	group("The day and the game")
 	row("Turns per day", comma(c.TurnsPerDay))
 	row("New realm protection", fmt.Sprintf(tr(s, "%s turns"), comma(c.ProtectionTurns)))
 	row("Game length", daysOr(c.GameLength, "Endless"))
 	row("Removed if unplayed", daysOr(c.IdleDaysRemove, "Never"))
+	group("Land")
 	row("Maximum regions", countOr(c.MaxRegions, "Unlimited"))
+	row("Land at game start", comma(c.InitialMarketLand))
+	row("New land per realm/day", comma(c.LandPerDay))
+	row("Region costs", tr(s, c.RegionCosts.String()))
+	group("Money")
 	row("Maximum tax rate", fmt.Sprintf("%d%%", c.MaxTaxRate))
 	row("Crown tax on income", fmt.Sprintf("%d%%", c.PlanetaryTaxRate))
-	row("Land on the market", comma(c.InitialMarketLand))
-	row("Land created each day", comma(c.LandPerDay))
 	row("Bank interest", fmt.Sprintf(tr(s, "%d%% over 10 days"), c.InterestRate))
 	row("Investment rate", investRateStr(s, c))
 	row("Food market", foodMarketStr(s, c))
-	row("Region costs", tr(s, c.RegionCosts.String()))
 	pause(s)
 
 	titleBar(s, tr(s, "Game Setup: War, Trade and Board"))
+	group("Forces and trade")
 	row("Buy military", tr(s, c.BuyMilitary.String()))
 	row("Maintenance costs", tr(s, c.MaintCosts.String()))
 	row("Trade costs", tr(s, c.TradeCosts.String()))
+	group("Attacking")
 	row("Attack damage", tr(s, c.AttackDamage.String()))
 	row("Attack rewards", tr(s, c.AttackRewards.String()))
 	row("Attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"))
 	row("R5-Slappenheimer", tr(s, c.SlappenheimerHandling.String()))
+	group("This board")
 	row("Players per board", countOr(c.MaxPlayers, "Unlimited"))
 	row("Inter-BBS play", onOffStr(c.IBBS))
 	if c.IBBS {
-		row("This board", c.BoardID)
+		row("Board name", c.BoardID)
 	}
 	if c.GameStartDate != "" {
 		row("Game starts", c.GameStartDate)

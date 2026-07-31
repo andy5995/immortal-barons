@@ -19,7 +19,7 @@ func TestGameSetupPagesAndNamesZeroLimits(t *testing.T) {
 
 	for _, want := range []string{
 		"Turns, Land and Money", "War, Trade and Board", // both panels
-		"Turns per day", "Land created each day", // page one
+		"Turns per day", "New land per realm/day", // page one
 		"Buy military", "Attack damage", // page two
 		"Endless", "Unlimited", "7 days",
 	} {
