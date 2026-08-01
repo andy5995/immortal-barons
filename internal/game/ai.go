@@ -160,9 +160,12 @@ func (w *World) aiHandleDiplomacy(e *Empire) {
 	for _, o := range append([]TreatyOffer(nil), e.TreatyOffers...) {
 		if aiAcceptsTreaty(profile, o.Type) {
 			w.AcceptTreaty(e, o.From, o.Type) // matches, consumes the offer, forms the treaty
+		} else {
+			// Through DeclineTreaty, not a bare discard: that is what notifies the
+			// proposer of the rejection.
+			w.DeclineTreaty(e, o.From, o.Type)
 		}
 	}
-	e.TreatyOffers = nil // discard any the AI declined
 }
 
 // aiSetTax picks the AI's tax rate each turn (#73). It never touched the rate

@@ -3,6 +3,8 @@
   * Game Setup now shows the whole ruleset over two screens, not five lines
   * The Daily Bulletin no longer prefixes its title with the board name on
     a stand-alone board
+  * When you propose a treaty, you are now told whether the other realm
+    accepted or rejected it
   * The "since your last play" list now numbers each item and shows the
     date and time it happened, like the original
 

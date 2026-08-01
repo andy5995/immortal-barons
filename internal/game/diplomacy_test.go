@@ -141,6 +141,46 @@ func TestAcceptTreatyFormsItAndConsumesOffer(t *testing.T) {
 	}
 }
 
+// A reply must reach the proposer's event log — BRE files "X accepted your ...
+// proposal." there, and without it a proposal is answered with silence.
+func TestTreatyReplyNotifiesTheProposer(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	c := w.AddHuman("c", "Gamma")
+
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+	w.ProposeTreaty(a, c, fullDefenseAlliance)
+	w.DeclineTreaty(c, a.Name, fullDefenseAlliance)
+
+	want := []string{
+		"Beta accepted your Full Defense Alliance proposal.",
+		"Gamma rejected your Full Defense Alliance proposal.",
+	}
+	if len(a.Events) != 2 || a.Events[0].Text != want[0] || a.Events[1].Text != want[1] {
+		t.Errorf("proposer's events = %v, want %v", a.Events, want)
+	}
+	if len(b.Events) != 0 || len(c.Events) != 0 {
+		t.Errorf("only the proposer is notified, got b=%v c=%v", b.Events, c.Events)
+	}
+}
+
+// A reply with no matching offer is not a reply — it must not manufacture a
+// notice on the named empire's log.
+func TestTreatyReplyWithNoOfferNotifiesNobody(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+	w.DeclineTreaty(b, a.Name, fullDefenseAlliance)
+
+	if len(a.Events) != 0 {
+		t.Errorf("want no events, got %v", a.Events)
+	}
+}
+
 func TestAcceptTreatyWithNoOfferFails(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")

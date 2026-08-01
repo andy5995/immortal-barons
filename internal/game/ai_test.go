@@ -45,6 +45,10 @@ func TestAIAggressorRejectsDefensePact(t *testing.T) {
 	if len(ai.TreatyOffers) != 0 {
 		t.Error("declined offer should be discarded, not left pending")
 	}
+	want := "AI rejected your Full Defense Alliance proposal."
+	if len(human.Events) != 1 || human.Events[0].Text != want {
+		t.Errorf("proposer's events = %v, want [%q]", human.Events, want)
+	}
 }
 
 func TestAIAggressorAcceptsTradePact(t *testing.T) {

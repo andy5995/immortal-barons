@@ -1125,7 +1125,17 @@ that delay window is not modelled.
 A save written before this held stacked relations; `EnsureTreaties` collapses
 each pair to the last one recorded on load.
 
-The turn-start recap is styled as BRE styles it: each entry sits under its own
+**The proposer is told how the offer was answered.** A pending offer sits on the
+target realm until it plays, so the reply is asynchronous — it lands on the
+proposer's "since your last play" log whenever the other side gets around to
+answering. **Captured live from a league game (2026-07):** seven replies over
+about three and a half hours, each one line, in BRE's wording —
+`X accepted your Full Defense Alliance proposal.` /
+`X rejected your Full Defense Alliance proposal.` (note *rejected*, not
+"declined"). IB files the same two lines (`notifyProposer` in
+`internal/game/diplomacy.go`), for AI answers as well as human ones.
+
+The recap itself is styled as BRE styles it: each entry sits under its own
 76-column rule carrying a 1-based counter and the real date and time the thing
 happened (`eventRule` in `internal/menu/gameflow.go`; layout and colors in
 `docs/dev/bre-screens.md`). Events are therefore stamped when they are filed

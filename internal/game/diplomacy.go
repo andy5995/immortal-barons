@@ -256,6 +256,7 @@ func (w *World) AcceptTreaty(me *Empire, fromName, ttype string) bool {
 	// A pair holds one relation, so accepting REPLACES whatever stood before —
 	// taking a trade pact with an ally gives up the defense alliance.
 	w.setRelation(me.Name, fromName, ttype)
+	w.notifyProposer(me, fromName, "accepted", ttype)
 	return true
 }
 
@@ -273,7 +274,22 @@ func (w *World) DeclineTreaty(me *Empire, fromName, ttype string) bool {
 		}
 	}
 	me.TreatyOffers = kept
+	if found {
+		w.notifyProposer(me, fromName, "rejected", ttype)
+	}
 	return found
+}
+
+// notifyProposer tells the empire that sent an offer how it was answered. BRE
+// files this on the proposer's "since your last play" log — one line per reply,
+// arriving whenever the other realm got around to playing — so a proposal is
+// never met with silence. Wording is BRE's, driven live on a league game.
+func (w *World) notifyProposer(me *Empire, fromName, verb, ttype string) {
+	from := w.FindByName(fromName)
+	if from == nil {
+		return
+	}
+	from.addEvent(fmt.Sprintf("%s %s your %s proposal.", me.Name, verb, ttype))
 }
 
 // BreakTreaty ends a treaty of ttype between a and b, leaving them with no
