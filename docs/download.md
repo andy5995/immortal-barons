@@ -32,8 +32,6 @@ run the file inside it.
   SmartScreen may say the file is not recognised. This is expected.
 - **macOS may block the file** the first time, for the same reason. Open it
   from the Finder with a right-click, then choose Open.
-- **Characters look wrong?** See the
-  [Character Set](charset.md) guide.
 
 ## Build it yourself
 
