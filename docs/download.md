@@ -3,8 +3,7 @@
 ## Tagged releases
 
 Stable versions are on the
-[releases page](https://github.com/andy5995/immortal-barons/releases). Pick the
-newest one unless you have a reason not to.
+[releases page](https://github.com/andy5995/immortal-barons/releases).
 
 ## Development snapshots
 
