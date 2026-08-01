@@ -11,9 +11,13 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-// mailBoxWidth is the inner width of a message box, matching BRE's ~74-column
-// frame.
-const mailBoxWidth = 74
+// Message-box geometry, measured off a live BRE capture: the top rule runs 76
+// columns, and the rule under the headers is a short 41 — it does not span the
+// box.
+const (
+	mailBoxWidth = 76
+	mailSepWidth = 41
+)
 
 type mailReply struct {
 	toName string
@@ -22,8 +26,8 @@ type mailReply struct {
 
 // mailReader shows the player's inbox one message at a time in a BRE-style box
 // and acts on a single keypress each: [R]eply, [D]elete, [I]gnore, [Q]uit.
-// Ignore (also Enter) keeps the message for next time — BRE lets a message be
-// ignored indefinitely — and only Delete removes it. Deletions and replies are
+// Ignore keeps the message for next time — BRE lets a message be ignored
+// indefinitely — and only Delete removes it. Deletions and replies are
 // collected during the read and applied under the world lock afterwards, so the
 // lock is never held while waiting on the player and a message that arrives
 // mid-read survives (issues #2, #5).
@@ -64,7 +68,7 @@ func applyMailActions(w *ctx, deleted []game.Message, replies []mailReply) {
 	if len(deleted) == 0 && len(replies) == 0 {
 		return
 	}
-	when := time.Now().Format("01/02/2006  15:04:05")
+	when := time.Now().Format(game.StampFormat)
 	w.mutatePlayer(func(p *game.Empire) error {
 		for _, d := range deleted {
 			for i, m := range p.Mail {
@@ -105,18 +109,16 @@ func quoteReply(m game.Message) string {
 	return b.String()
 }
 
-// mailChoice reads a single-key command at the message prompt. Enter defaults
-// to Ignore (the safe skip); unrecognized keys are ignored until a valid one
+// mailChoice reads a single-key command at the message prompt. Unlike every
+// other prompt in the game, Enter does NOTHING here: a message is read once and
+// then gone, and a player holding Enter through the pre-turn stops would skip
+// past it before it registered. Unrecognized keys are ignored until a valid one
 // arrives; a dead session quits.
 func mailChoice(s session.Session) rune {
 	for {
 		r, err := readKey(s)
 		if err != nil {
 			return 'Q'
-		}
-		if r == '\r' || r == '\n' {
-			fmt.Fprintf(s, "%s\n", tr(s, "Ignore"))
-			return 'I'
 		}
 		switch unicode.ToUpper(r) {
 		case 'R':
@@ -151,7 +153,7 @@ func renderMessage(s session.Session, m game.Message) {
 		ansi.FgCyan, ansi.FgWhite, tr(s, "Message From: "), ansi.FgBrightCyan, m.From, ansi.Reset)
 	fmt.Fprintf(s, "%s│ %s%s%s%s%s\n",
 		ansi.FgCyan, ansi.FgWhite, tr(s, "Message To  : "), ansi.FgBrightGreen, m.To, ansi.Reset)
-	dash := mailBoxWidth - 1 - 5 - 8
+	dash := mailSepWidth - 1 - 5 - 8
 	if dash < 0 {
 		dash = 0
 	}

@@ -224,7 +224,7 @@ func sendMessage(s session.Session, w *ctx) Result {
 		text, send := composeMessage(s)
 		if send && strings.TrimSpace(text) != "" {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Saving..."), ansi.Reset)
-			when := time.Now().Format("01/02/2006  15:04:05")
+			when := time.Now().Format(game.StampFormat)
 			// Re-resolve sender and recipient by handle/name against the freshly
 			// reloaded world, so a concurrent send to the same inbox appends (both
 			// messages land) and a vanished recipient aborts.

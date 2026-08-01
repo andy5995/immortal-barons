@@ -7,6 +7,11 @@
     accepted or rejected it
   * The "since your last play" list now numbers each item and shows the
     date and time it happened, like the original
+  * New mail is now shown at the start of a turn instead of asking first.
+    Enter no longer answers the message prompt, so you cannot skip past an
+    unread message by accident; use R, D, I or Q
+  * Message boxes now match the original's size, and show the time a
+    message was sent, not only the date
 
 2026-07-31 (v0.0.3)
   * Updating from an earlier version requires a game reset (-reset)

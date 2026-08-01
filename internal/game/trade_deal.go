@@ -130,7 +130,6 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	to.TradeDeals = append(to.TradeDeals, TradeDeal{From: from.Name, Send: send, Demand: demand})
 	w.SendMail(from, to, Message{
 		To:   w.EmpireLetter(to),
-		When: w.DateForDay(w.GameDay),
 		Body: "Sent you a trade deal (respond in the Trading menu).",
 	})
 	return nil
@@ -177,7 +176,6 @@ func (w *World) AcceptTradeDeal(to *Empire, fromName string) error {
 	to.removeDeal(i)
 	w.SendMail(to, from, Message{
 		To:   w.EmpireLetter(from),
-		When: w.DateForDay(w.GameDay),
 		Body: "Accepted your trade deal.",
 	})
 	return nil

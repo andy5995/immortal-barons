@@ -1027,6 +1027,23 @@ turns at the start (config: 60). A turn walks through a sequence of menus:
 
 If a player is cut off mid-turn, they resume where they left off.
 
+**Mail arrives at the head of a turn, unasked.** In BRE the recap runs straight
+into the inbox: each message is drawn in its box and read on one keypress
+(`[R]eply / [D]elete / [I]gnore / [Q]uit`), and an empty inbox prints *"You have
+no messages."* in that same spot. There is no count line and no "read them now?"
+gate — IB had both and dropped them. Two deliberate differences remain:
+
+- **IB re-checks each turn, BRE once per play.** Another node can deliver mail
+  while a session is in progress (#3), so a later turn opens the reader again;
+  it stays silent on an empty inbox so the line is not repeated all day.
+- **Enter does nothing at the message prompt.** Every other prompt in the game
+  treats Enter as the default, which here would skip an unread message for a
+  player holding Enter through the pre-turn stops. Only R/D/I/Q act.
+
+Box geometry, measured from a live capture: a 76-column top rule carrying the
+date and time, and a short 41-column rule under the From/To headers (it does not
+span the box). Colors are in `docs/dev/bre-screens.md`.
+
 ## Menu fidelity vs BRE
 
 IB's menus match BRE's layout, item order, and hotkeys where practical (#17 menu

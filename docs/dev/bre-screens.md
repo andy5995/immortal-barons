@@ -933,3 +933,29 @@ Colors:
 
 Treaty replies read `<Realm> accepted your <Treaty> proposal.` and
 `<Realm> rejected your <Treaty> proposal.` — **rejected**, not "declined".
+
+### Message box inside the recap (same capture)
+
+Mail is read as part of the recap, straight after the numbered event rules — no
+count line, no "read them now?" gate. An empty inbox prints `You have no
+messages.` in that spot instead.
+
+```
+Since your last play, this has happened:
+
+┌──────────────────────────────────────────────────07/30/2026  00:24:05─────
+│ Message From: <realm>
+│ Message To  : ABCE
+├─────════════───────────────────────────
+│ Savings full. Investments start coming in 8/1.
+[R] Reply, [D] Delete, [I] Ignore, or [Q] Quit> Delete
+```
+
+Measurements: the top rule is **76** columns (`┌` + 50 `─` + the 20-column stamp
++ 5 `─`); the header separator is a short **41** (`├` + 5 `─` + 8 `═` + 27 `─`)
+and does NOT span the box. `Message To` carries the recipient empire letters.
+
+Colors: frame cyan `36`; timestamp bright-white `1;37`; the `Message From:` /
+`Message To  :` labels white `37`; sender bright-cyan `1;36`; recipient letters
+bright-green `1;32`; body white, quoted lines bright-blue `1;34`; the action keys
+bright-cyan `1;36` inside blue `34` brackets.

@@ -237,7 +237,7 @@ func eventRule(n int, when time.Time) string {
 	plain := len([]rune(fmt.Sprintf("─────(%d)", n)))
 	stamp := ""
 	if !when.IsZero() {
-		stamp = when.Format("01/02/2006  15:04:05")
+		stamp = when.Format(game.StampFormat)
 	}
 	fill := eventStampColumn - plain
 	if fill < 1 {
@@ -251,24 +251,22 @@ func eventRule(n int, when time.Time) string {
 		strings.Repeat("─", fill) + stamp + strings.Repeat("─", tail) + ansi.Reset
 }
 
-// showUnreadMail is a pre-turn stop: when the player has unread mail, note the
-// count and offer to read it inline. It lives in the shared pre-turn flow so
-// every front-end (web + door) gets the same notice for free (#3). Declining
-// leaves the mail for the Messages menu. Count/read-and-clear happen under w's
-// lock so a concurrent sender can't slip a message between the check and the
-// read.
-func showUnreadMail(s session.Session, w *ctx) {
+// readTurnMail is the mail stop at the head of a turn. BRE asks nothing: the
+// messages simply follow the recap, each read in its own box, and an empty inbox
+// says so. IB used to state a count and gate the reader behind "Read them now?
+// (Y/n)", which is not what the original does.
+//
+// announceEmpty is true only for the first turn of a session — the spot BRE
+// prints "You have no messages." A later turn re-checks so mail arriving from
+// another node mid-session is seen (#3), but stays quiet when there is none
+// rather than repeating the line up to ten times a day.
+func readTurnMail(s session.Session, w *ctx, announceEmpty bool) {
 	var count int
 	withPlayer(w, func(p *game.Empire) { count = len(p.Mail) })
 	if count == 0 {
-		return
-	}
-	if count == 1 {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "You have a new message."), ansi.Reset)
-	} else {
-		fmt.Fprintf(s, "\n%s"+tr(s, "You have %d new messages.")+"%s\n", ansi.FgBrightCyan, count, ansi.Reset)
-	}
-	if !AskYesNo(s, "Read them now?", true) {
+		if announceEmpty {
+			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "You have no messages."), ansi.Reset)
+		}
 		return
 	}
 	mailReader(s, w)
@@ -630,6 +628,7 @@ func runTurn(s session.Session, w *ctx) Result {
 	reviewTreatyOffers(s, w) // BRE surfaces pending treaty offers here, with proposer stats + accept/decline
 	reviewTradeDeals(s, w)   // and pending trade-deal barters (accept/decline)
 
+	firstTurn := true
 	for {
 		if !withPlayer(w, func(p *game.Empire) { turnsLeft = p.TurnsLeft }) {
 			return abort()
@@ -642,7 +641,8 @@ func runTurn(s session.Session, w *ctx) Result {
 
 		// New mail may arrive between turns (from another node), so check each
 		// turn, not just once in the pre-turn flow (#3).
-		showUnreadMail(s, w)
+		readTurnMail(s, w, firstTurn)
+		firstTurn = false
 
 		// Capture whether this is a replay BEFORE collecting income (which sets the
 		// flag), so the intro screens can be skipped on a booted-turn replay.

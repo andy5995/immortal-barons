@@ -232,7 +232,6 @@ func (w *World) ProposeTreatyWithMessage(from, to *Empire, ttype, message string
 	to.TreatyOffers = append(to.TreatyOffers, TreatyOffer{From: from.Name, Type: ttype, Message: message})
 	w.SendMail(from, to, Message{
 		To:   w.EmpireLetter(to),
-		When: w.DateForDay(w.GameDay),
 		Body: fmt.Sprintf("Proposes a %s (respond in the Diplomacy menu).", ttype),
 	})
 }
@@ -314,7 +313,6 @@ func (w *World) DeclareWar(a, b *Empire) {
 	w.setRelation(a.Name, b.Name, RelationEnemy)
 	w.SendMail(a, b, Message{
 		To:   w.EmpireLetter(b),
-		When: w.DateForDay(w.GameDay),
 		Body: "Declares war on your realm. Any agreement between us is ended.",
 	})
 }
