@@ -8,8 +8,7 @@ Stable versions are on the
 ## Development snapshots
 
 Snapshots are built automatically from the latest source. They change often,
-and they may be less stable than a tagged release. Use one if you want the
-newest changes and do not mind the risk. Get them from the
+and they may be less stable than a tagged release. Get them from the
 [snapshot release](https://github.com/andy5995/immortal-barons/releases/tag/snapshot).
 
 ## Which file do I need?
@@ -34,5 +33,5 @@ run the file inside it.
 
 ## Build it yourself
 
-You do not need to download a binary. You can build the game from source with
-Go 1.26 or newer. The [README](../README.md) explains how.
+You can build the game from source with Go 1.26 or newer. The
+[README](../README.md) explains how.
