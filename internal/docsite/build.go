@@ -64,15 +64,18 @@ type navNode struct {
 }
 
 // buildNav assembles the site nav from the English help topics (which fix the
-// Guide's structure) plus the fixed Home / Door Setup / Web Server / Developers
-// sections. Nav paths are relative to a language folder; the i18n plugin
+// section's structure) plus the fixed Home / Door Setup / Developers sections.
+// The topic section is titled "Game Instructions" to match what the player sees
+// in-game: showInstructions renders these exact topics, and it is BRE's own
+// opening-menu wording. Nav paths are relative to a language folder; the i18n plugin
 // resolves them per language.
 func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	nav := []navNode{{title: "Home", path: "index.md"}}
 	// FAQ sits right after Home so it is easy to find in the nav/tabs.
 	nav = append(nav, navNode{title: "FAQ", path: "faq/index.md"})
 
-	// Guide: an overview, then a group per category in the help's fixed order.
+	// Game Instructions: an overview, then a group per category in the help's
+	// fixed order. It is the one deep section, so it collapses in the sidebar.
 	guide := []navNode{{title: "Overview", path: "guide/index.md"}}
 	byCat := map[string][]topic{}
 	for _, t := range enTopics {
@@ -87,10 +90,9 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 		}
 		guide = append(guide, navNode{title: help.CategoryName(cat), children: leaves})
 	}
-	nav = append(nav, navNode{title: "Guide", children: guide})
+	nav = append(nav, navNode{title: "Game Instructions", children: guide})
 
 	nav = append(nav, navNode{title: "Door Setup", path: "door-setup/index.md"})
-	nav = append(nav, navNode{title: "Web Server", path: "web-server/index.md"})
 	nav = append(nav, navNode{title: "Character Set", path: "charset/index.md"})
 	nav = append(nav, navNode{title: "Command Reference", path: "command-reference/index.md"})
 	nav = append(nav, navNode{title: "Translating", path: "translating/index.md"})

@@ -19,9 +19,12 @@ import (
 	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
-// extraCSS makes in-content links obviously links. Material for MkDocs only
-// colors body links by default (no underline), so a link in a sentence is easy
-// to miss; underline them and give them a clearer color.
+// extraCSS makes in-content links obviously links, and gives the left-hand nav
+// a clear hierarchy: top-level destinations read as headings, the nested Game
+// Instructions topics read as a quieter list beneath their category. Everything here
+// uses Material's own CSS variables, so both palettes (light/slate) follow, and
+// nothing is keyed to a viewport width — the same rules serve the desktop
+// sidebar and the mobile drawer.
 const extraCSS = `/* Underline in-content links so they read as links, not just tinted text. */
 .md-typeset a {
   text-decoration: underline;
@@ -29,6 +32,33 @@ const extraCSS = `/* Underline in-content links so they read as links, not just 
 }
 .md-typeset a:hover {
   text-decoration: underline;
+}
+
+/* --- Left-hand navigation ------------------------------------------------ */
+
+/* Top level (Home, FAQ, Player Guide, Door Setup, …): the site's main
+   destinations, so give them weight and room to breathe. */
+.md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link {
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  padding-block: 0.25rem;
+}
+
+/* The active top-level entry gets a spine on the leading edge, so where you are
+   is readable at a glance without adding any color of our own. */
+.md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link--active {
+  border-inline-start: 2px solid var(--md-accent-fg-color);
+  padding-inline-start: 0.5rem;
+}
+
+/* Nested levels are supporting detail: lighter than their parent, and the
+   category headings (Controls, Economy, …) sit between the two. */
+.md-nav--primary .md-nav .md-nav__link {
+  font-weight: 400;
+}
+.md-nav--primary .md-nav .md-nav__item--nested > .md-nav__link {
+  font-weight: 600;
+  color: var(--md-default-fg-color--light);
 }
 `
 
@@ -78,7 +108,6 @@ func Assemble(repoRoot, outDir string) error {
 			{homeSource(repoRoot, lang.code), filepath.Join(langDir, "index.md"), "index.md"},
 			{guideIntroSource(repoRoot, lang.code), filepath.Join(langDir, "guide", "index.md"), "guide/index.md"},
 			{doorSetupSource(repoRoot, lang.code), filepath.Join(langDir, "door-setup", "index.md"), "door-setup/index.md"},
-			{webserverSource(repoRoot, lang.code), filepath.Join(langDir, "web-server", "index.md"), "web-server/index.md"},
 			{charsetSource(repoRoot, lang.code), filepath.Join(langDir, "charset", "index.md"), "charset/index.md"},
 			{cmdRefSource(repoRoot, lang.code), filepath.Join(langDir, "command-reference", "index.md"), "command-reference/index.md"},
 			{faqSource(repoRoot, lang.code), filepath.Join(langDir, "faq", "index.md"), "faq/index.md"},
@@ -183,7 +212,7 @@ func loadTopics(repoRoot, lang string) ([]topic, error) {
 	return topics, nil
 }
 
-// homeSource / guideIntroSource / doorSetupSource / webserverSource resolve a
+// homeSource / guideIntroSource / doorSetupSource resolve a
 // doc's file for a language: <base>.md for English, <base>.<lang>.md otherwise.
 func homeSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "README.md"), lang)
@@ -193,9 +222,6 @@ func guideIntroSource(repoRoot, lang string) string {
 }
 func doorSetupSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "docs", "door-setup.md"), lang)
-}
-func webserverSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "webserver.md"), lang)
 }
 func charsetSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "docs", "charset.md"), lang)

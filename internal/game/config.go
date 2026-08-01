@@ -118,7 +118,6 @@ type Config struct {
 	MaxRegions            int               // most regions a player may own
 	MaxIndividualAttacks  int               // most individual (conventional) attacks a player may launch per day; 0 = unlimited (BRE "Maximum Individual Attacks Per Day")
 	MaxPlayers            int               // most human empires per board (0 = unlimited)
-	MaxConcurrentSessions int               // max live browser sessions at once
 	BuyMilitary           BuyMode           // Yes / No / Limited
 	MaintCosts            Level             // maintenance costs (regions + forces)
 	TradeCosts            Level             // trade-deal costs
@@ -192,7 +191,6 @@ func DefaultConfig() Config {
 		MaxRegions:            500,
 		MaxIndividualAttacks:  3, // Andy's choice for the modern door; BRE has the setting but its stock default is unverified
 		MaxPlayers:            25,
-		MaxConcurrentSessions: 4,
 		BuyMilitary:           BuyYes,
 		MaintCosts:            Medium,
 		TradeCosts:            Medium,

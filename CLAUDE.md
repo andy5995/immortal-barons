@@ -50,9 +50,8 @@ stream). Front-ends attach different streams; the engine is unchanged.
 
 - `cmd/immortal-barons` — the door + local terminal front-end (stdio + dropfile;
   `-local`, `-maint`, `-planetary`, `-league-config`, `-reset`, …)
-- `cmd/immortal-barons-web` — experimental browser front-end (SSE + xterm.js)
-- `internal/session` — the `Session` byte-stream abstraction + console/stdio/web
-  implementations, shared `ReadLine`, and the Ctrl-key macro expander
+- `internal/session` — the `Session` byte-stream abstraction + console/stdio/
+  socket implementations, shared `ReadLine`, and the Ctrl-key macro expander
 - `internal/ansi` — ANSI escape helpers (one rendering path for all front-ends)
 - `internal/menu` — the generic menu engine (`menu.go`) plus the BRE menu
   tree and actions (`tree.go`, `actions.go`, `input.go`)
@@ -157,17 +156,20 @@ differential diffing), and `ibbs-packet-format.md`.
 Persistent, multi-user door game. One shared JSON world; concurrent multi-node
 door play (each action reloads/re-validates/mutates/saves under a brief
 exclusive flock — a pluggable `Store`: file-per-action for the door, in-memory
-for the web; #5); per-caller empires keyed by BBS handle; per-turn economy
+by default; #5); per-caller empires keyed by BBS handle; per-turn economy
 (idle empires stagnate) split from a daily maintenance step; turns-per-day
-and new-realm protection; an event log for asynchronous play. Front-ends:
-`cmd/immortal-barons` (door + `-local` local play) and `cmd/immortal-barons-web`
-(experimental browser).
+and new-realm protection; an event log for asynchronous play. Sole front-end:
+`cmd/immortal-barons` (door + `-local` local play).
 
-**Network-facing front-ends: security posture.** Any mode that listens on a
-socket and lets a stranger reach game code — today the web front-end, later the
-SSH one (#84) — was written mostly by an LLM and has had no review by anyone who
+**Network-facing front-ends: security posture.** The experimental browser
+front-end was REMOVED (2026-08-01); an SSH front-end (#84) is under
+consideration to replace it. The posture below is dormant, not retired — it
+applies again the moment any mode listens on a socket and lets a stranger reach
+game code.
+
+Such a mode is written mostly by an LLM and has had no review by anyone who
 works in server security. That fact belongs in the user docs for each such mode
-(`docs/webserver.md` today, plus README and FAQ) and must stay there until such a
+(README and FAQ, plus the mode's own guide) and must stay there until such a
 review happens. Closing the hardening issues (#82 and its children) does not
 retire it: they fix specific known problems rather than substitute for a review,
 and an LLM self-review — mine included — is not the missing review, so don't
@@ -202,7 +204,17 @@ item-for-item where a mechanic exists (recorded-but-inert items are flagged in
 the opening menu; Quit on submenus). A **Play** turn opens with the
 "since your last play" event log — shown when you start your turn, not before
 the opening menu; Diplomacy and Change Production are no longer pre-turn stops
-(they moved to the System menu, #70). A **daily news
+(they moved to the System menu, #70). Each recap entry sits under its own
+numbered, timestamped rule, as BRE draws it, and any pending treaty offer is
+prompted right after the recap with the proposer's stats inline. Mail then
+follows unasked — BRE has no "read them now?" gate — one message per box, and
+Enter is inert at the `[R]/[D]/[I]/[Q]` prompt so a held key cannot skip an
+unread message. **v0.0.4 diplomacy additions:** the proposer is told whether an
+offer was accepted or rejected (BRE's wording, filed asynchronously on their
+recap); View Treaties renders BRE's `-*Relations*-` roster of every living
+realm; and IB additionally lists the offers YOU sent, which BRE shows nowhere
+(#92) — a new proposal to the same realm replaces the pending one, and
+proposals do not expire (#95 tracks whether BRE expires them). A **daily news
 system** renders a Daily Bulletin header (planet totals with day-over-day
 change) and a Today/Yesterday split of planet news (battles, WMD strikes,
 pirate raids, riots, bank-rate moves, Planetary Master changes — original
@@ -277,8 +289,7 @@ The stage decomposes into:
 Remaining toward the goal: validation of the door under real BBS software
 (Synchronet/Mystic on Windows for the socket backend; needs Andy's env),
 including confirming the assumption that the BBS performs telnet negotiation
-before launching the door (the socket backend does no IAC handling). Scheduled
-after the multiplayer web server lands.
+before launching the door (the socket backend does no IAC handling).
 
 Dropfile field maps and the I/O contract are documented in
 `docs/mechanics-reference.md` and cross-checked against the Synchronet

@@ -1,6 +1,5 @@
 # Built binaries (one per front-end in cmd/)
 /immortal-barons
-/immortal-barons-web
 
 # Go test and profiling output
 *.test

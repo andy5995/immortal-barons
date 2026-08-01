@@ -1,8 +1,7 @@
 # Command Reference
 
 This page lists every command-line option for Immortal Barons in one place. It
-covers the game program (`immortal-barons`) and the web server
-(`immortal-barons-web`).
+covers the game program (`immortal-barons`).
 
 Run `immortal-barons -help` to see the same options in your terminal. This page
 and the `-help` output use the same groups.
@@ -113,17 +112,3 @@ These options are for games that link several BBSes together (a "league"). See
 - **`-version`** — Print the version, then exit.
 - **`-help`** — Print the grouped list of options, then exit.
 
-## The web server: `immortal-barons-web`
-
-The web server lets people play in a browser. It always uses UTF-8. See
-[Web Server](webserver.md) for setup.
-
-```
-immortal-barons-web [options]
-```
-
-- **`-addr ADDRESS`** — The address to listen on. The default is `:8080`.
-- **`-data DIR`** — The folder that holds the game data. The default is `./data`,
-  relative to the directory you run the command from (see the note under the game
-  program's `-data` above). Point it at the same folder the game program uses to
-  share one world.

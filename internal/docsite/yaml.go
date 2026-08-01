@@ -51,8 +51,14 @@ use_directory_urls: true
 theme:
   name: material
   features:
-    - navigation.sections
+    # navigation.sections is deliberately NOT set: with it, a top-level group is
+    # a flat always-open label, and Game Instructions' ~40 topics push every
+    # page below it off-screen. Without it Material renders the group as a
+    # collapsible item, which is also its mobile drawer default — so the
+    # sidebar and the phone drawer behave the same way.
     - navigation.top
+    - navigation.tracking
+    - toc.follow
     - search.suggest
     - content.code.copy
   palette:

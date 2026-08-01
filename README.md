@@ -105,22 +105,6 @@ covers the details: registering the door, the dropfile, daily maintenance
 (`immortal-barons -maint`), the node list, inter-BBS play, and starting a fresh
 game (`immortal-barons -reset`).
 
-## Running in a browser (experimental)
-
-Immortal Barons also has an experimental browser front-end (`immortal-barons-web`),
-separate from the BBS door.
-
-**Note its security review status:** the server code was written mostly by an AI
-language model, and nobody who works in server security has reviewed it. Putting
-it on a public address exposes code whose security has never been checked by a
-qualified person. You may choose to run it on your own computer or on your local
-network, but even that may be unsafe.
-
-See the
-[Web Server Guide](https://andy5995.github.io/immortal-barons/web-server/) for
-how to build and run it, how players are tracked, the full list of options, and
-why its world is separate from a BBS door's world.
-
 ## How to play
 
 See the [player's guide](https://andy5995.github.io/immortal-barons/guide/).

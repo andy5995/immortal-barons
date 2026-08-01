@@ -6,9 +6,8 @@
   "registered" or "unregistered" version.
 - Several BBS nodes can play the same game at the same time, which BRE could not
   do. See [Can several people play as a door at the same time?](#can-several-people-play-as-a-door-at-the-same-time).
-- It has a [web browser version](https://andy5995.github.io/immortal-barons/web-server/),
-  which BRE does not. It also plays in a local terminal. The web server has not
-  had a security review — see the note at the top of that guide.
+- It also plays in a local terminal, without a BBS, so you can try it on your
+  own computer.
 - It does not run under DOS. It is a modern native program that runs as a door
   under BBS software on any platform Go supports.
 - A new player can end their own new-realm protection early, from the System

@@ -9,7 +9,6 @@ This page explains the difference, which one to use, and how to choose.
   Use `-utf8` for UTF-8, or `-cp437` to force CP437.
 - **`-local`** auto-detects from your locale — UTF-8 when your locale is UTF-8
   (common today) — so local play usually needs no option.
-- **The web browser version** always uses UTF-8.
 
 ## The two character sets
 

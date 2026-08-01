@@ -20,6 +20,8 @@
   * View Treaties now lists the treaty offers you have sent that nobody
     has answered yet, which the original never shows you (#92). Sending a
     different offer to the same realm replaces the one still waiting
+  * The web server has been removed (considering replacing it with an SSH
+    server)
 
 2026-07-31 (v0.0.3)
   * Updating from an earlier version requires a game reset (-reset)
