@@ -93,26 +93,3 @@ func TestTrimTrailingBlank(t *testing.T) {
 		}
 	}
 }
-
-// daysAgoLocalized formats a day delta; with the test fakeSession (no language)
-// the tr() calls fall back to the English msgids.
-func TestDaysAgoLocalized(t *testing.T) {
-	const now = "2026-07-09"
-	cases := []struct {
-		name string
-		then string
-		want string
-	}{
-		{"same day", "2026-07-09", "today"},
-		{"one day", "2026-07-08", "1 day ago"},
-		{"several days", "2026-07-04", "5 days ago"},
-		{"future clamps to today", "2026-07-10", "today"},
-		{"unparseable then falls back verbatim", "not-a-date", "not-a-date"},
-	}
-	for _, c := range cases {
-		f := &fakeSession{}
-		if got := daysAgoLocalized(f, c.then, now); got != c.want {
-			t.Errorf("%s: daysAgoLocalized(%q, %q) = %q, want %q", c.name, c.then, now, got, c.want)
-		}
-	}
-}

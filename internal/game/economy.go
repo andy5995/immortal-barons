@@ -318,56 +318,42 @@ func (w *World) stepPrices(e *Empire) {
 	e.Prices.Agent = w.stepPrice(e, e.Prices.Agent, w.Prices.Agent, PriceWalkStepAgent, "agent")
 }
 
-func (w *World) Recruit(e *Empire, n int) error {
-	if err := e.spend(n, w.TrooperPrice(e)); err != nil {
+// buyUnit buys n of a unit at its current price, the mirror of sellUnit: spend
+// (which validates n and affordability), then credit the stock.
+func buyUnit(stock *int, n, price int, e *Empire) error {
+	if err := e.spend(n, price); err != nil {
 		return err
 	}
-	e.Troopers += n
+	*stock += n
 	return nil
+}
+
+func (w *World) Recruit(e *Empire, n int) error {
+	return buyUnit(&e.Troopers, n, w.TrooperPrice(e), e)
 }
 
 func (w *World) BuildJets(e *Empire, n int) error {
-	if err := e.spend(n, w.JetPrice(e)); err != nil {
-		return err
-	}
-	e.Jets += n
-	return nil
+	return buyUnit(&e.Jets, n, w.JetPrice(e), e)
 }
 
 func (w *World) BuildTurrets(e *Empire, n int) error {
-	if err := e.spend(n, w.TurretPrice(e)); err != nil {
-		return err
-	}
-	e.Turrets += n
-	return nil
+	return buyUnit(&e.Turrets, n, w.TurretPrice(e), e)
 }
 
 func (w *World) BuildCarriers(e *Empire, n int) error {
-	if err := e.spend(n, w.CarrierPrice(e)); err != nil {
-		return err
-	}
-	e.Carriers += n
-	return nil
+	return buyUnit(&e.Carriers, n, w.CarrierPrice(e), e)
 }
 
 func (w *World) BuildTanks(e *Empire, n int) error {
-	if err := e.spend(n, w.TankPrice(e)); err != nil {
-		return err
-	}
-	e.Tanks += n
-	return nil
+	return buyUnit(&e.Tanks, n, w.TankPrice(e), e)
 }
 
 func (w *World) RecruitAgents(e *Empire, n int) error {
-	if err := e.spend(n, w.AgentPrice(e)); err != nil {
-		return err
-	}
-	e.Agents += n
-	return nil
+	return buyUnit(&e.Agents, n, w.AgentPrice(e), e)
 }
 
-// sellUnit sells n of a unit back to the market for half its buy price,
-// clamped to what's owned (*stock).
+// sellUnit sells n of a unit back to the market for a third of its buy price
+// (BRE's rate), clamped to what's owned (*stock).
 func sellUnit(stock *int, n, price int, e *Empire) error {
 	if n <= 0 {
 		return nil
@@ -391,11 +377,7 @@ func (w *World) SellJets(e *Empire, n int) error {
 // BuildBombers buys n bombers directly (they can also be produced by Industrial
 // regions). Old saves lacking a Bomber price default to it via NewWorld.
 func (w *World) BuildBombers(e *Empire, n int) error {
-	if err := e.spend(n, w.BomberPrice(e)); err != nil {
-		return err
-	}
-	e.Bombers += n
-	return nil
+	return buyUnit(&e.Bombers, n, w.BomberPrice(e), e)
 }
 
 func (w *World) SellBombers(e *Empire, n int) error {

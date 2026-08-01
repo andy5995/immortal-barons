@@ -56,12 +56,8 @@ func TestManufactureSplitsByPercent(t *testing.T) {
 		t.Errorf("expected more troopers made than tanks (cheaper unit), got troopers=%d tanks=%d", wantTroopers, wantTanks)
 	}
 
-	// Industrial gold is credited via IncomeThisTurn now; Manufacture only sets
-	// e.IndustryGold (for the report) and must NOT credit gold itself.
-	wantGold := w.industrialGold(e)
-	if e.IndustryGold != wantGold {
-		t.Errorf("IndustryGold = %d, want %d", e.IndustryGold, wantGold)
-	}
+	// Industrial gold is credited via IncomeThisTurn; Manufacture must NOT
+	// credit gold itself.
 	if e.Gold != goldBefore {
 		t.Errorf("Manufacture must not credit gold: before=%d after=%d", goldBefore, e.Gold)
 	}
@@ -79,9 +75,6 @@ func TestManufactureZeroWithoutIndustrial(t *testing.T) {
 	if e.MadeTroopers != 0 || e.MadeJets != 0 || e.MadeTurrets != 0 ||
 		e.MadeBombers != 0 || e.MadeTanks != 0 || e.MadeCarriers != 0 {
 		t.Errorf("expected all Made* to be 0, got %+v", e)
-	}
-	if e.IndustryGold != 0 {
-		t.Errorf("IndustryGold = %d, want 0", e.IndustryGold)
 	}
 }
 

@@ -221,7 +221,6 @@ type Empire struct {
 	MadeBombers           int  `json:"-"`
 	MadeTanks             int  `json:"-"`
 	MadeCarriers          int  `json:"-"`
-	IndustryGold          int  `json:"-"`
 	LastGoldPaid          int  `json:"-"`
 	LastFoodConsumed      int  `json:"-"`
 }

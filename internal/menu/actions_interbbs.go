@@ -318,24 +318,6 @@ func planetaryTreaties(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// daysAgoLocalized renders how long ago (in days) the ISO date `then` was
-// relative to `now`, in the session's language, for inter-BBS packet latency.
-func daysAgoLocalized(s session.Session, then, now string) string {
-	t1, e1 := time.Parse("2006-01-02", then)
-	t2, e2 := time.Parse("2006-01-02", now)
-	if e1 != nil || e2 != nil {
-		return then
-	}
-	switch d := int(t2.Sub(t1).Hours() / 24); {
-	case d <= 0:
-		return tr(s, "today")
-	case d == 1:
-		return tr(s, "1 day ago")
-	default:
-		return fmt.Sprintf(tr(s, "%d days ago"), d)
-	}
-}
-
 // pickRemoteTarget prompts for a planet then a baron on it, returning the
 // board, the baron's name, and its imported score. found is false if the caller
 // cancels or no planets/barons are known.

@@ -1007,9 +1007,8 @@ func (w *World) ProjectedProduction(e *Empire) [6]int {
 // Specialization applies a per-unit efficiency bonus/penalty on top; it never
 // overrides the percentage split. Called at turn start, alongside CollectIncome
 // (#71). Industrial GOLD is not credited here — it flows through IncomeThisTurn
-// (see industrialGold); e.IndustryGold is set for the report only.
+// (see industrialGold).
 func (w *World) Manufacture(e *Empire) {
-	e.IndustryGold = w.industrialGold(e)
 
 	p := w.ProjectedProduction(e)
 	e.MadeTroopers, e.MadeJets, e.MadeTurrets = p[0], p[1], p[2]
