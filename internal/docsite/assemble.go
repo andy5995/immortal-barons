@@ -21,7 +21,8 @@ import (
 
 // extraCSS makes in-content links obviously links, and gives the left-hand nav
 // a clear hierarchy: top-level destinations read as headings, the nested Game
-// Instructions topics read as a quieter list beneath their category. Everything here
+// Instructions topics read as a quieter list beneath their category, and the
+// page under the pointer gets a small tan tank, tracks rolling. Everything here
 // uses Material's own CSS variables, so both palettes (light/slate) follow, and
 // nothing is keyed to a viewport width — the same rules serve the desktop
 // sidebar and the mobile drawer.
@@ -48,7 +49,6 @@ const extraCSS = `/* Underline in-content links so they read as links, not just 
    is readable at a glance without adding any color of our own. */
 .md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link--active {
   border-inline-start: 2px solid var(--md-accent-fg-color);
-  padding-inline-start: 0.5rem;
 }
 
 /* Nested levels are supporting detail: lighter than their parent, and the
@@ -59,6 +59,88 @@ const extraCSS = `/* Underline in-content links so they read as links, not just 
 .md-nav--primary .md-nav .md-nav__item--nested > .md-nav__link {
   font-weight: 600;
   color: var(--md-default-fg-color--light);
+}
+
+/* A small tank rolls in at the trailing edge of whichever nav page is under
+   the pointer. It is a MASKED pseudo-element, not an <img>: the mask carries
+   the shape and CSS carries the color, so one asset serves both palettes.
+   Absolutely positioned, so it can never reflow the label it decorates; empty
+   content and pointer-events:none, so assistive tech and clicks pass through.
+   Only <a> links get one — a nested section's toggle already owns that corner
+   with its chevron. */
+:root {
+  --ib-tank-w: 1.84rem;   /* one sprite frame == the element's width */
+  --ib-tank-frames: 6;
+  --ib-tank: url("data:image/svg+xml,<svg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20192%2020'><defs><linearGradient%20id='t'%20x1='0'%20y1='0'%20x2='0'%20y2='1'><stop%20offset='0'%20stop-color='%2375603f'/><stop%20offset='.55'%20stop-color='%2354422a'/><stop%20offset='1'%20stop-color='%233c2e1c'/></linearGradient><linearGradient%20id='h'%20x1='0'%20y1='0'%20x2='0'%20y2='1'><stop%20offset='0'%20stop-color='%23cbab77'/><stop%20offset='.45'%20stop-color='%23a5804a'/><stop%20offset='1'%20stop-color='%237a5f35'/></linearGradient><linearGradient%20id='u'%20x1='0'%20y1='0'%20x2='0'%20y2='1'><stop%20offset='0'%20stop-color='%23d4b482'/><stop%20offset='.5'%20stop-color='%23ad8850'/><stop%20offset='1'%20stop-color='%23836540'/></linearGradient><linearGradient%20id='b'%20x1='0'%20y1='0'%20x2='0'%20y2='1'><stop%20offset='0'%20stop-color='%23856a42'/><stop%20offset='.32'%20stop-color='%23e8d3a8'/><stop%20offset='.62'%20stop-color='%23ab8752'/><stop%20offset='1'%20stop-color='%2363512f'/></linearGradient></defs><path%20fill='url%28%23t%29'%20fill-rule='evenodd'%20d='M4.25%2013.5H27.75A2.75%202.75%200%201%201%2027.75%2019H4.25A2.75%202.75%200%201%201%204.25%2013.5ZM4.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM9.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM14.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM19.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM24.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM0.0%2017.7h1.15v1.9h-1.15ZM3.0%2017.7h1.15v1.9h-1.15ZM6.0%2017.7h1.15v1.9h-1.15ZM9.0%2017.7h1.15v1.9h-1.15ZM12.0%2017.7h1.15v1.9h-1.15ZM15.0%2017.7h1.15v1.9h-1.15ZM18.0%2017.7h1.15v1.9h-1.15ZM21.0%2017.7h1.15v1.9h-1.15ZM24.0%2017.7h1.15v1.9h-1.15ZM27.0%2017.7h1.15v1.9h-1.15ZM30.0%2017.7h1.15v1.9h-1.15Z'/><path%20fill='url%28%23h%29'%20d='M3%2013V9.8h3.2l2.2-2.4h13.6l2.2%202.4H29V13Z'/><path%20fill='%23ecd9b0'%20opacity='.45'%20d='M6.2%209.8l2.2-2.4h13.6l.6.65H8.9l-1.9%201.75Z'/><path%20fill='%233c2e1c'%20opacity='.5'%20d='M3%2012.55h26v.45h-26Z'/><path%20fill='url%28%23u%29'%20d='M11%207.4V4.8q0-1%201-1h6q1%200%201%201v2.6Z'/><path%20fill='%23eddcbc'%20opacity='.45'%20d='M11.6%207.4V4.9q0-.55.55-.55h.7V7.4Z'/><path%20fill='url%28%23u%29'%20d='M13.1%202.4h2.6a.6.6%200%200%201%20.6.6v.8h-3.8V3a.6.6%200%200%201%20.6-.6Z'/><path%20fill='%236f5533'%20d='M18.4%204.9h1.5v2.1h-1.5Z'/><path%20fill='url%28%23b%29'%20d='M19.6%205.4h9.1v1.1h-9.1Z'/><path%20fill='url%28%23b%29'%20d='M28.2%204.8h2.3v2.3h-2.3Z'/><path%20fill='url%28%23t%29'%20fill-rule='evenodd'%20d='M36.25%2013.5H59.75A2.75%202.75%200%201%201%2059.75%2019H36.25A2.75%202.75%200%201%201%2036.25%2013.5ZM36.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM41.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM46.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM51.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM56.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM32.5%2017.7h1.15v1.9h-1.15ZM35.5%2017.7h1.15v1.9h-1.15ZM38.5%2017.7h1.15v1.9h-1.15ZM41.5%2017.7h1.15v1.9h-1.15ZM44.5%2017.7h1.15v1.9h-1.15ZM47.5%2017.7h1.15v1.9h-1.15ZM50.5%2017.7h1.15v1.9h-1.15ZM53.5%2017.7h1.15v1.9h-1.15ZM56.5%2017.7h1.15v1.9h-1.15ZM59.5%2017.7h1.15v1.9h-1.15Z'/><path%20fill='url%28%23h%29'%20d='M35%2013V9.8h3.2l2.2-2.4h13.6l2.2%202.4H61V13Z'/><path%20fill='%23ecd9b0'%20opacity='.45'%20d='M38.2%209.8l2.2-2.4h13.6l.6.65H40.9l-1.9%201.75Z'/><path%20fill='%233c2e1c'%20opacity='.5'%20d='M35%2012.55h26v.45h-26Z'/><path%20fill='url%28%23u%29'%20d='M43%207.4V4.8q0-1%201-1h6q1%200%201%201v2.6Z'/><path%20fill='%23eddcbc'%20opacity='.45'%20d='M43.6%207.4V4.9q0-.55.55-.55h.7V7.4Z'/><path%20fill='url%28%23u%29'%20d='M45.1%202.4h2.6a.6.6%200%200%201%20.6.6v.8h-3.8V3a.6.6%200%200%201%20.6-.6Z'/><path%20fill='%236f5533'%20d='M50.4%204.9h1.5v2.1h-1.5Z'/><path%20fill='url%28%23b%29'%20d='M51.6%205.4h9.1v1.1h-9.1Z'/><path%20fill='url%28%23b%29'%20d='M60.2%204.8h2.3v2.3h-2.3Z'/><path%20fill='url%28%23t%29'%20fill-rule='evenodd'%20d='M68.25%2013.5H91.75A2.75%202.75%200%201%201%2091.75%2019H68.25A2.75%202.75%200%201%201%2068.25%2013.5ZM68.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM73.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM78.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM83.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM88.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM65.0%2017.7h1.15v1.9h-1.15ZM68.0%2017.7h1.15v1.9h-1.15ZM71.0%2017.7h1.15v1.9h-1.15ZM74.0%2017.7h1.15v1.9h-1.15ZM77.0%2017.7h1.15v1.9h-1.15ZM80.0%2017.7h1.15v1.9h-1.15ZM83.0%2017.7h1.15v1.9h-1.15ZM86.0%2017.7h1.15v1.9h-1.15ZM89.0%2017.7h1.15v1.9h-1.15ZM92.0%2017.7h1.15v1.9h-1.15Z'/><path%20fill='url%28%23h%29'%20d='M67%2013V9.8h3.2l2.2-2.4h13.6l2.2%202.4H93V13Z'/><path%20fill='%23ecd9b0'%20opacity='.45'%20d='M70.2%209.8l2.2-2.4h13.6l.6.65H72.9l-1.9%201.75Z'/><path%20fill='%233c2e1c'%20opacity='.5'%20d='M67%2012.55h26v.45h-26Z'/><path%20fill='url%28%23u%29'%20d='M75%207.4V4.8q0-1%201-1h6q1%200%201%201v2.6Z'/><path%20fill='%23eddcbc'%20opacity='.45'%20d='M75.6%207.4V4.9q0-.55.55-.55h.7V7.4Z'/><path%20fill='url%28%23u%29'%20d='M77.1%202.4h2.6a.6.6%200%200%201%20.6.6v.8h-3.8V3a.6.6%200%200%201%20.6-.6Z'/><path%20fill='%236f5533'%20d='M82.4%204.9h1.5v2.1h-1.5Z'/><path%20fill='url%28%23b%29'%20d='M83.6%205.4h9.1v1.1h-9.1Z'/><path%20fill='url%28%23b%29'%20d='M92.2%204.8h2.3v2.3h-2.3Z'/><path%20fill='url%28%23t%29'%20fill-rule='evenodd'%20d='M100.25%2013.5H123.75A2.75%202.75%200%201%201%20123.75%2019H100.25A2.75%202.75%200%201%201%20100.25%2013.5ZM100.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM105.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM110.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM115.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM120.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM97.5%2017.7h1.15v1.9h-1.15ZM100.5%2017.7h1.15v1.9h-1.15ZM103.5%2017.7h1.15v1.9h-1.15ZM106.5%2017.7h1.15v1.9h-1.15ZM109.5%2017.7h1.15v1.9h-1.15ZM112.5%2017.7h1.15v1.9h-1.15ZM115.5%2017.7h1.15v1.9h-1.15ZM118.5%2017.7h1.15v1.9h-1.15ZM121.5%2017.7h1.15v1.9h-1.15ZM124.5%2017.7h1.15v1.9h-1.15Z'/><path%20fill='url%28%23h%29'%20d='M99%2013V9.8h3.2l2.2-2.4h13.6l2.2%202.4H125V13Z'/><path%20fill='%23ecd9b0'%20opacity='.45'%20d='M102.2%209.8l2.2-2.4h13.6l.6.65H104.9l-1.9%201.75Z'/><path%20fill='%233c2e1c'%20opacity='.5'%20d='M99%2012.55h26v.45h-26Z'/><path%20fill='url%28%23u%29'%20d='M107%207.4V4.8q0-1%201-1h6q1%200%201%201v2.6Z'/><path%20fill='%23eddcbc'%20opacity='.45'%20d='M107.6%207.4V4.9q0-.55.55-.55h.7V7.4Z'/><path%20fill='url%28%23u%29'%20d='M109.1%202.4h2.6a.6.6%200%200%201%20.6.6v.8h-3.8V3a.6.6%200%200%201%20.6-.6Z'/><path%20fill='%236f5533'%20d='M114.4%204.9h1.5v2.1h-1.5Z'/><path%20fill='url%28%23b%29'%20d='M115.6%205.4h9.1v1.1h-9.1Z'/><path%20fill='url%28%23b%29'%20d='M124.2%204.8h2.3v2.3h-2.3Z'/><path%20fill='url%28%23t%29'%20fill-rule='evenodd'%20d='M132.25%2013.5H155.75A2.75%202.75%200%201%201%20155.75%2019H132.25A2.75%202.75%200%201%201%20132.25%2013.5ZM132.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM137.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM142.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM147.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM152.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM130.0%2017.7h1.15v1.9h-1.15ZM133.0%2017.7h1.15v1.9h-1.15ZM136.0%2017.7h1.15v1.9h-1.15ZM139.0%2017.7h1.15v1.9h-1.15ZM142.0%2017.7h1.15v1.9h-1.15ZM145.0%2017.7h1.15v1.9h-1.15ZM148.0%2017.7h1.15v1.9h-1.15ZM151.0%2017.7h1.15v1.9h-1.15ZM154.0%2017.7h1.15v1.9h-1.15ZM157.0%2017.7h1.15v1.9h-1.15Z'/><path%20fill='url%28%23h%29'%20d='M131%2013V9.8h3.2l2.2-2.4h13.6l2.2%202.4H157V13Z'/><path%20fill='%23ecd9b0'%20opacity='.45'%20d='M134.2%209.8l2.2-2.4h13.6l.6.65H136.9l-1.9%201.75Z'/><path%20fill='%233c2e1c'%20opacity='.5'%20d='M131%2012.55h26v.45h-26Z'/><path%20fill='url%28%23u%29'%20d='M139%207.4V4.8q0-1%201-1h6q1%200%201%201v2.6Z'/><path%20fill='%23eddcbc'%20opacity='.45'%20d='M139.6%207.4V4.9q0-.55.55-.55h.7V7.4Z'/><path%20fill='url%28%23u%29'%20d='M141.1%202.4h2.6a.6.6%200%200%201%20.6.6v.8h-3.8V3a.6.6%200%200%201%20.6-.6Z'/><path%20fill='%236f5533'%20d='M146.4%204.9h1.5v2.1h-1.5Z'/><path%20fill='url%28%23b%29'%20d='M147.6%205.4h9.1v1.1h-9.1Z'/><path%20fill='url%28%23b%29'%20d='M156.2%204.8h2.3v2.3h-2.3Z'/><path%20fill='url%28%23t%29'%20fill-rule='evenodd'%20d='M164.25%2013.5H187.75A2.75%202.75%200%201%201%20187.75%2019H164.25A2.75%202.75%200%201%201%20164.25%2013.5ZM164.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM169.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM174.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM179.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM184.55%2016.25a1.45%201.45%200%201%200%202.9%200a1.45%201.45%200%201%200%20-2.9%200ZM162.5%2017.7h1.15v1.9h-1.15ZM165.5%2017.7h1.15v1.9h-1.15ZM168.5%2017.7h1.15v1.9h-1.15ZM171.5%2017.7h1.15v1.9h-1.15ZM174.5%2017.7h1.15v1.9h-1.15ZM177.5%2017.7h1.15v1.9h-1.15ZM180.5%2017.7h1.15v1.9h-1.15ZM183.5%2017.7h1.15v1.9h-1.15ZM186.5%2017.7h1.15v1.9h-1.15ZM189.5%2017.7h1.15v1.9h-1.15Z'/><path%20fill='url%28%23h%29'%20d='M163%2013V9.8h3.2l2.2-2.4h13.6l2.2%202.4H189V13Z'/><path%20fill='%23ecd9b0'%20opacity='.45'%20d='M166.2%209.8l2.2-2.4h13.6l.6.65H168.9l-1.9%201.75Z'/><path%20fill='%233c2e1c'%20opacity='.5'%20d='M163%2012.55h26v.45h-26Z'/><path%20fill='url%28%23u%29'%20d='M171%207.4V4.8q0-1%201-1h6q1%200%201%201v2.6Z'/><path%20fill='%23eddcbc'%20opacity='.45'%20d='M171.6%207.4V4.9q0-.55.55-.55h.7V7.4Z'/><path%20fill='url%28%23u%29'%20d='M173.1%202.4h2.6a.6.6%200%200%201%20.6.6v.8h-3.8V3a.6.6%200%200%201%20.6-.6Z'/><path%20fill='%236f5533'%20d='M178.4%204.9h1.5v2.1h-1.5Z'/><path%20fill='url%28%23b%29'%20d='M179.6%205.4h9.1v1.1h-9.1Z'/><path%20fill='url%28%23b%29'%20d='M188.2%204.8h2.3v2.3h-2.3Z'/></svg>");
+}
+
+/* The tank parks in a gutter reserved on the leading edge. The gutter is
+   PERMANENT (not added on hover) — that is the whole point: the label never
+   moves when the tank appears or leaves. Every primary nav link gets it, at
+   every depth, so the left edge of the text stays on one vertical line. */
+.md-nav--primary .md-nav__link {
+  padding-inline-start: 2.2rem;
+}
+
+/* Gated on a real pointer: a touch device would otherwise leave the tank stuck
+   on the last-tapped item with no way to un-hover it. */
+@media (hover: hover) {
+  .md-nav--primary a.md-nav__link {
+    position: relative;
+  }
+  .md-nav--primary a.md-nav__link::after {
+    content: "";
+    position: absolute;
+    inset-inline-start: 0.25rem;
+    top: 50%;
+    width: var(--ib-tank-w);
+    height: 1.15rem; /* deliberately taller than the label — it fills the
+                        vertical gap between items rather than sitting in the
+                        text's own line box */
+    opacity: 0;
+    transform: translate(-0.35rem, -50%);
+    /* A horizontal SPRITE: --ib-tank-frames copies of the tank, each with its
+       tread notches advanced a fraction of one tooth. Sized so exactly one
+       frame fills the element; the animation steps background-position frame
+       by frame, and the tracks appear to roll. Animating the SVG's own innards
+       is not an option — an SVG used as a CSS image is rendered statically, so
+       SMIL/CSS inside it never runs.
+
+       This is a background-image, NOT a mask: a mask is single-channel alpha,
+       so it can only ever paint one flat colour. The shading (gradient-lit
+       hull, a cylinder-shaded gun, a contact shadow under the hull) has to
+       live in the artwork, which means the colour is baked in rather than
+       themed from a CSS variable. Desert tan, darkened one step so the hull,
+       turret and gun — the largest areas — each clear WCAG 1.4.11's 3:1
+       non-text contrast against BOTH the white and the slate background
+       (measured, not eyeballed: 3.3-3.6:1 either way). */
+    background-image: var(--ib-tank);
+    background-repeat: no-repeat;
+    background-size: calc(var(--ib-tank-frames) * var(--ib-tank-w)) 100%;
+    background-position: 0 center;
+    transition: opacity 120ms ease, transform 120ms ease;
+    pointer-events: none;
+  }
+  /* Drives in from behind the leading edge, gun forward, tracks rolling. The
+     animation is attached on hover only, so it is not burning frames on ~50
+     invisible pseudo-elements. */
+  .md-nav--primary a.md-nav__link:hover::after {
+    opacity: 1;
+    transform: translate(0, -50%);
+    animation: ib-tank-tracks 2s steps(var(--ib-tank-frames)) infinite;
+  }
+  @keyframes ib-tank-tracks {
+    from { background-position: 0 center; }
+    to   { background-position: calc(-1 * var(--ib-tank-frames) * var(--ib-tank-w)) center; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .md-nav--primary a.md-nav__link::after,
+    .md-nav--primary a.md-nav__link:hover::after {
+      transition: opacity 120ms ease;
+      transform: translate(0, -50%);
+      animation: none; /* a parked tank for anyone who asked for less motion */
+    }
+  }
 }
 `
 
