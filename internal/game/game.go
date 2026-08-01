@@ -156,7 +156,7 @@ type Empire struct {
 	// caller's login can roll the day over while they are still at the menu.
 	CreatedDay       int
 	LastPlayed       string
-	Events           []string
+	Events           []Event
 	Mail             []Message
 	PirateRaids      []string // raids suffered since last play; shown in the income report
 	ImmuneFrom       []string // empires whose covert ops against us auto-fail (we bribed their agents)

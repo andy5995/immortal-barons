@@ -426,7 +426,10 @@ func (c *ctx) takeSessionNews(p *game.Empire) []string {
 	if len(p.Events) == c.seenEvents {
 		return nil
 	}
-	news := append([]string(nil), p.Events[c.seenEvents:]...)
+	var news []string
+	for _, ev := range p.Events[c.seenEvents:] {
+		news = append(news, ev.Text)
+	}
 	p.Events = p.Events[:c.seenEvents]
 	return news
 }

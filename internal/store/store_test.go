@@ -36,7 +36,7 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	w := game.NewWorldSeed(cfg, 1)
 	e := w.AddHuman("khan", "Khan's Realm")
 	e.Gold = 4242
-	e.Events = []string{"hello"}
+	e.Events = []game.Event{{Text: "hello"}}
 	e.Investments = []game.Investment{{Amount: 1000, Return: 1150, MaturesDay: 5}}
 	w.GameDay = 7
 	w.LastMaintDate = "2026-07-03"

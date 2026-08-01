@@ -174,5 +174,5 @@ func maybeRandomEvent(w *World, e *Empire) {
 	}
 
 	line := lines[w.rng.Intn(len(lines))]
-	e.Events = append(e.Events, fmt.Sprintf(line, amount))
+	e.addEvent(fmt.Sprintf(line, amount))
 }

@@ -315,8 +315,8 @@ func (w *World) breachTreaty(a, b *Empire) {
 	}
 	w.setRelation(a.Name, b.Name, RelationEnemy)
 	a.adjustSupport(-TreatyBreachSupportPenalty)
-	a.Events = append(a.Events, fmt.Sprintf("Breaking the %s with %s without declaring war cost you popular support.", rel, b.Name))
-	b.Events = append(b.Events, fmt.Sprintf("%s attacked you, breaking the %s between your realms.", a.Name, rel))
+	a.addEvent(fmt.Sprintf("Breaking the %s with %s without declaring war cost you popular support.", rel, b.Name))
+	b.addEvent(fmt.Sprintf("%s attacked you, breaking the %s between your realms.", a.Name, rel))
 }
 
 // EnsureTreaties migrates a save that predates typed treaties: old untyped

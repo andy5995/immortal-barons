@@ -62,11 +62,11 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 	if len(d.Events) != before+1 {
 		t.Fatalf("victim should get one event, got %d new", len(d.Events)-before)
 	}
-	if !strings.Contains(d.Events[len(d.Events)-1], a.Name) {
-		t.Errorf("event should name the attacker: %q", d.Events[len(d.Events)-1])
+	if !strings.Contains(d.Events[len(d.Events)-1].Text, a.Name) {
+		t.Errorf("event should name the attacker: %q", d.Events[len(d.Events)-1].Text)
 	}
-	if !strings.Contains(d.Events[len(d.Events)-1], "attacked you") {
-		t.Errorf("event should be victim-perspective: %q", d.Events[len(d.Events)-1])
+	if !strings.Contains(d.Events[len(d.Events)-1].Text, "attacked you") {
+		t.Errorf("event should be victim-perspective: %q", d.Events[len(d.Events)-1].Text)
 	}
 }
 

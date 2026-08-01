@@ -1125,6 +1125,13 @@ that delay window is not modelled.
 A save written before this held stacked relations; `EnsureTreaties` collapses
 each pair to the last one recorded on load.
 
+The turn-start recap is styled as BRE styles it: each entry sits under its own
+76-column rule carrying a 1-based counter and the real date and time the thing
+happened (`eventRule` in `internal/menu/gameflow.go`; layout and colors in
+`docs/dev/bre-screens.md`). Events are therefore stamped when they are filed
+(`game.Event`), not when they are read. Entries carried over from a save written
+before the stamp existed draw an unbroken rule with no time.
+
 Seven treaty types are proposed / accepted / broken through the Diplomacy menu,
 and each carries a gameplay effect (#11 wired the last two):
 

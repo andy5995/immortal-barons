@@ -69,7 +69,7 @@ func (w *World) SendSpy(a, d *Empire) (string, error) {
 			d.Name, d.Land, d.Troopers, d.Turrets, d.Tanks, d.Offense(), d.Defense(), d.Gold, d.Agents), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your counter-intelligence caught an enemy spy.")
+	d.addEvent("Your counter-intelligence caught an enemy spy.")
 	return "Your spy was caught and did not return.", nil
 }
 
@@ -83,11 +83,11 @@ func (w *World) SupportDissensions(a, d *Empire) (string, error) {
 	if w.covertSuccess(a, d) {
 		lost := d.Troopers / 10
 		d.Troopers -= lost
-		d.Events = append(d.Events, fmt.Sprintf("Saboteurs struck your army — %d troopers lost.", lost))
+		d.addEvent(fmt.Sprintf("Saboteurs struck your army — %d troopers lost.", lost))
 		return fmt.Sprintf("Your agents sowed dissension in %s: %d troopers eliminated.", d.Name, lost), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy sabotage attempt.")
+	d.addEvent("Your security foiled an enemy sabotage attempt.")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -100,11 +100,11 @@ func (w *World) DemoralizeForces(a, d *Empire) (string, error) {
 	}
 	if w.covertSuccess(a, d) {
 		d.adjustMorale(-15)
-		d.Events = append(d.Events, "Agents demoralized your forces — morale fell.")
+		d.addEvent("Agents demoralized your forces — morale fell.")
 		return fmt.Sprintf("You demoralized %s's forces, lowering their morale.", d.Name), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy attempt to demoralize your forces.")
+	d.addEvent("Your security foiled an enemy attempt to demoralize your forces.")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -120,13 +120,13 @@ func (w *World) SetUp(a, d *Empire) (string, error) {
 		if allies := w.alliesOf(d, fullDefenseAlliance); len(allies) > 0 {
 			partner := allies[0]
 			w.BreakTreaty(d, partner, fullDefenseAlliance)
-			d.Events = append(d.Events, fmt.Sprintf("Agents tricked you and %s into believing you had declared war — your alliance is void.", partner.Name))
+			d.addEvent(fmt.Sprintf("Agents tricked you and %s into believing you had declared war — your alliance is void.", partner.Name))
 			return fmt.Sprintf("You tricked %s and %s into voiding their Full Defense Alliance.", d.Name, partner.Name), nil
 		}
 		return fmt.Sprintf("%s holds no alliance for us to unravel.", d.Name), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy attempt to set us up.")
+	d.addEvent("Your security foiled an enemy attempt to set us up.")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -172,7 +172,7 @@ func (w *World) SpyOnRelations(a, d *Empire) (string, error) {
 		return fmt.Sprintf("Treaties of %s:\n%s", d.Name, strings.Join(lines, "\n")), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your counter-intelligence caught a spy probing your relations.")
+	d.addEvent("Your counter-intelligence caught a spy probing your relations.")
 	return "Your spy was caught and did not return.", nil
 }
 
@@ -189,11 +189,11 @@ func (w *World) Bribery(a, d *Empire) (string, error) {
 			}
 		}
 		a.ImmuneFrom = append(a.ImmuneFrom, d.Name)
-		d.Events = append(d.Events, "A rival power bribed one of your agents.")
+		d.addEvent("A rival power bribed one of your agents.")
 		return fmt.Sprintf("You bribed an agent in %s. Their covert ops against you will now fail.", d.Name), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled a bribery attempt.")
+	d.addEvent("Your security foiled a bribery attempt.")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -206,11 +206,11 @@ func (w *World) StirRevolts(a, d *Empire) (string, error) {
 	}
 	if w.covertSuccess(a, d) {
 		d.adjustSupport(-15)
-		d.Events = append(d.Events, "Agitators stirred revolts — your popular support fell.")
+		d.addEvent("Agitators stirred revolts — your popular support fell.")
 		return fmt.Sprintf("You stirred revolts in %s, lowering its popular support.", d.Name), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy agitation attempt.")
+	d.addEvent("Your security foiled an enemy agitation attempt.")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -223,11 +223,11 @@ func (w *World) BombFood(a, d *Empire) (string, error) {
 	if w.covertSuccess(a, d) {
 		lost := d.Food / 2
 		d.Food -= lost
-		d.Events = append(d.Events, fmt.Sprintf("Saboteurs torched your food stores — %d units lost.", lost))
+		d.addEvent(fmt.Sprintf("Saboteurs torched your food stores — %d units lost.", lost))
 		return fmt.Sprintf("You destroyed %d units of %s's food.", lost, d.Name), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy raid on your food stores.")
+	d.addEvent("Your security foiled an enemy raid on your food stores.")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -256,14 +256,14 @@ func (w *World) BombTradingMarket(a, d *Empire) (string, error) {
 		if goods == 0 && proceeds == 0 {
 			lost := d.Gold / 4
 			d.Gold -= lost
-			d.Events = append(d.Events, fmt.Sprintf("Saboteurs disrupted your trading market — %d gold lost.", lost))
+			d.addEvent(fmt.Sprintf("Saboteurs disrupted your trading market — %d gold lost.", lost))
 			return fmt.Sprintf("You disrupted %s's trading market: %d gold lost.", d.Name, lost), nil
 		}
-		d.Events = append(d.Events, fmt.Sprintf("Saboteurs wrecked your trading market — %d listed goods and %d gold in proceeds destroyed.", goods, proceeds))
+		d.addEvent(fmt.Sprintf("Saboteurs wrecked your trading market — %d listed goods and %d gold in proceeds destroyed.", goods, proceeds))
 		return fmt.Sprintf("You wrecked %s's trading market: %d listed goods and %d gold destroyed.", d.Name, goods, proceeds), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy strike on your trading market.")
+	d.addEvent("Your security foiled an enemy strike on your trading market.")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -288,14 +288,14 @@ func (w *World) BombTradeRoutes(a, d *Empire) (string, error) {
 			if allies := w.alliesOf(d, ttype); len(allies) > 0 {
 				partner := allies[0]
 				w.BreakTreaty(d, partner, ttype)
-				d.Events = append(d.Events, fmt.Sprintf("Saboteurs severed your %s with %s.", ttype, partner.Name))
+				d.addEvent(fmt.Sprintf("Saboteurs severed your %s with %s.", ttype, partner.Name))
 				return fmt.Sprintf("You severed %s's %s with %s.", d.Name, ttype, partner.Name), nil
 			}
 		}
 		return fmt.Sprintf("%s has no trade routes to sever.", d.Name), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy attempt to sever your trade routes.")
+	d.addEvent("Your security foiled an enemy attempt to sever your trade routes.")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -317,11 +317,11 @@ func (w *World) UndermineInvestments(a, d *Empire) (string, error) {
 			d.Investments[i].Return -= cut
 			lost += cut
 		}
-		d.Events = append(d.Events, fmt.Sprintf("Saboteurs undermined your investments — %d gold in principal lost.", lost))
+		d.addEvent(fmt.Sprintf("Saboteurs undermined your investments — %d gold in principal lost.", lost))
 		return fmt.Sprintf("You undermined %s's investments: %d gold lost.", d.Name, lost), nil
 	}
 	a.Agents--
-	d.Events = append(d.Events, "Your security foiled an enemy attempt to undermine your investments.")
+	d.addEvent("Your security foiled an enemy attempt to undermine your investments.")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -418,7 +418,7 @@ func (w *World) SlappenheimerStrike(a, d *Empire) (string, error) {
 	}
 	if !w.covertSuccess(a, d) {
 		a.Agents--
-		d.Events = append(d.Events, "Your security foiled an enemy R5-Slappenheimer strike.")
+		d.addEvent("Your security foiled an enemy R5-Slappenheimer strike.")
 		return "The operation failed and your agent was lost.", nil
 	}
 	if w.rng.Intn(100) < d.SDI {
@@ -439,6 +439,6 @@ func (w *World) SlappenheimerStrike(a, d *Empire) (string, error) {
 	if hit == "" {
 		return fmt.Sprintf("Your R5-Slappenheimer reached %s but did negligible damage.", d.Name), nil
 	}
-	d.Events = append(d.Events, "An R5-Slappenheimer struck your empire — lost "+hit+".")
+	d.addEvent("An R5-Slappenheimer struck your empire — lost " + hit + ".")
 	return fmt.Sprintf("Your R5-Slappenheimer hit %s: %s destroyed.", d.Name, hit), nil
 }

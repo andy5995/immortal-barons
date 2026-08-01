@@ -237,7 +237,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 			d.DiedDay = w.GameDay
 			fmt.Fprintf(&b, "\nYou crushed %s completely and seized the remains of its military!\n", d.Name)
 		}
-		d.Events = append(d.Events, fmt.Sprintf("%s attacked you: you lost %d regions and %d units.", a.Name, captured, dloss.Total()))
+		d.addEvent(fmt.Sprintf("%s attacked you: you lost %d regions and %d units.", a.Name, captured, dloss.Total()))
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
 		gain := battle / CombatScoreDivisor * DefenseWinBonusPct / 100
@@ -247,7 +247,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		fmt.Fprintf(&b, "Defeat! Your forces returned exhausted.\n")
 		fmt.Fprintf(&b, "Your casualties: %s.\n", attackerCas(aloss))
 		fmt.Fprintf(&b, "The enemy lost: %s.\n", defenderCas(dloss))
-		d.Events = append(d.Events, fmt.Sprintf("%s attacked you but was repelled. You lost %d units; your score rose by %d.", a.Name, dloss.Total(), gain))
+		d.addEvent(fmt.Sprintf("%s attacked you but was repelled. You lost %d units; your score rose by %d.", a.Name, dloss.Total(), gain))
 		w.postCombatNews(a, d, false, false)
 	}
 	return b.String(), captured

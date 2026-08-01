@@ -40,8 +40,8 @@ func TestNuclearStrike(t *testing.T) {
 	if len(d.Events) != beforeEvents+1 {
 		t.Fatalf("expected one victim event, got %d new", len(d.Events)-beforeEvents)
 	}
-	if !strings.Contains(d.Events[len(d.Events)-1], "nuclear") {
-		t.Errorf("victim event should mention nuclear: %q", d.Events[len(d.Events)-1])
+	if !strings.Contains(d.Events[len(d.Events)-1].Text, "nuclear") {
+		t.Errorf("victim event should mention nuclear: %q", d.Events[len(d.Events)-1].Text)
 	}
 }
 

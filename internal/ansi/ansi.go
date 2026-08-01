@@ -23,6 +23,7 @@ const (
 	FgCyan    = esc + "36m"
 	FgWhite   = esc + "37m"
 
+	FgBrightBlack   = esc + "90m" // gray — BRE's rules and separators (its 1;30)
 	FgBrightRed     = esc + "91m"
 	FgBrightGreen   = esc + "92m"
 	FgBrightYellow  = esc + "93m"

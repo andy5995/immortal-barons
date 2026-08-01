@@ -94,7 +94,7 @@ func TestSessionBacklogNotShownAsNews(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "bob", "Defendia", nil, nil)
 	commitOnFile(t, cfg, func(w *game.World) {
 		e := w.FindByOwner("bob")
-		e.Events = append(e.Events, "Ancient backlog item.")
+		e.Events = append(e.Events, game.Event{Text: "Ancient backlog item."})
 	})
 
 	m := &Menu{Title: "Idle Test", Items: []Item{

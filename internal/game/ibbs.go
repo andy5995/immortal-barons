@@ -416,7 +416,7 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	}
 	res.TargetEmpire = target.Name
 	if target.Protection > 0 {
-		target.Events = append(target.Events, fmt.Sprintf("Terrorists from %s were stopped by your New Realm Protection.", t.FromBoard))
+		target.addEvent(fmt.Sprintf("Terrorists from %s were stopped by your New Realm Protection.", t.FromBoard))
 		return res
 	}
 	// BRE terror: each committed agent is an independent hit that removes a
@@ -431,10 +431,10 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 		destroyed += loss
 	}
 	if destroyed == 0 {
-		target.Events = append(target.Events, fmt.Sprintf("Terrorists from %s struck but destroyed nothing.", t.FromBoard))
+		target.addEvent(fmt.Sprintf("Terrorists from %s struck but destroyed nothing.", t.FromBoard))
 		return res
 	}
-	target.Events = append(target.Events, fmt.Sprintf("Terrorists from %s destroyed %d of your forces!", t.FromBoard, destroyed))
+	target.addEvent(fmt.Sprintf("Terrorists from %s destroyed %d of your forces!", t.FromBoard, destroyed))
 	res.LandTaken = destroyed
 	res.Won = true
 	return res
@@ -503,12 +503,12 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// terror op (resolveRemoteTerror). Protection counts down in transit, so this
 	// arrival-time check — not the sender's view days earlier — is authoritative.
 	if target.Protection > 0 {
-		target.Events = append(target.Events, fmt.Sprintf("An interplanetary strike from %s was stopped by your New Realm Protection.", atk.FromBoard))
+		target.addEvent(fmt.Sprintf("An interplanetary strike from %s was stopped by your New Realm Protection.", atk.FromBoard))
 		return res
 	}
 	def := target.Defense()
 	if atk.Offense <= def {
-		target.Events = append(target.Events, fmt.Sprintf("You repelled an interplanetary strike from %s.", atk.FromBoard))
+		target.addEvent(fmt.Sprintf("You repelled an interplanetary strike from %s.", atk.FromBoard))
 		return res
 	}
 	// Overwhelmed: take a bite of land proportional to the margin (capped).
@@ -521,7 +521,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		target.Regions.remove(land)
 		target.syncLand()
 	}
-	target.Events = append(target.Events, fmt.Sprintf("An interplanetary strike from %s took %d regions!", atk.FromBoard, land))
+	target.addEvent(fmt.Sprintf("An interplanetary strike from %s took %d regions!", atk.FromBoard, land))
 	res.LandTaken = land
 	res.Won = true
 	return res

@@ -905,3 +905,31 @@ You lost 0 Troopers, 0 Jets, 2206 Tanks, and 0 Bombers.
 You destroyed 14 Troopers, 0 Turrets, 1948 Tanks, and 0 Jets.
 You lost the battle!
 ```
+
+## "Since your last play" event log (captured live 2026-07-31, league game)
+
+The recap shown at the start of a turn. Every entry is wrapped in its own rule
+carrying a **1-based counter and a timestamp**; entries are separated by a blank
+line.
+
+```
+Since your last play, this has happened:
+
+─────(1)────────────────────────────────────────07/31/2026  07:43:11────────
+Opium accepted your Full Defense Alliance proposal.
+
+─────(2)────────────────────────────────────────07/31/2026  09:07:07────────
+DTF accepted your Full Defense Alliance proposal.
+```
+
+Colors:
+
+- Header line `Since your last play, this has happened:` — plain white `37`.
+- The rule, both sides of the counter and the date/time inside it — bright-black
+  `1;30` (dim gray). The `(` `)` around the counter are yellow `0;40;33`; the
+  counter digit itself is bright-yellow `1;33`.
+- Body: realm name and treaty type bright-cyan `1;36`; the connecting words
+  plain white `0;40;37`.
+
+Treaty replies read `<Realm> accepted your <Treaty> proposal.` and
+`<Realm> rejected your <Treaty> proposal.` — **rejected**, not "declined".

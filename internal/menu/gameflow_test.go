@@ -269,7 +269,7 @@ func TestRunTurnHasNoPreTurnDiplomacyOrProduction(t *testing.T) {
 	w.AutoPayMaint = true
 	w.VisitCovert, w.VisitTrading, w.VisitMessage = true, true, true // this test walks every optional menu
 	w.Player().Agents = 1                                            // hold an agent so the Covert stage runs (it now gates on that)
-	w.Player().Events = []string{"A dragon attacked your regions."}
+	w.Player().Events = []game.Event{{Text: "A dragon attacked your regions."}}
 
 	runTurn(f, w)
 	out := f.out.String()

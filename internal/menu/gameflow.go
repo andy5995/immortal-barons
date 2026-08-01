@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -197,7 +198,7 @@ func withPlayer(w *ctx, fn func(p *game.Empire)) bool {
 // maintenance tick or another session's action can't append between the two,
 // and the empire is re-resolved inside the lock so a reload can't rebind it.
 func showTurnEvents(s session.Session, w *ctx) {
-	var events []string
+	var events []game.Event
 	withPlayer(w, func(p *game.Empire) {
 		events = p.Events
 		p.Events = nil
@@ -209,11 +210,45 @@ func showTurnEvents(s session.Session, w *ctx) {
 	if len(events) == 0 {
 		return
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Since your last play, this has happened:"), ansi.Reset)
-	for _, ev := range events {
-		fmt.Fprintf(s, "  %s\n", hiNums(ev))
+	fmt.Fprintf(s, "\n%s%s%s\n\n", ansi.FgWhite, tr(s, "Since your last play, this has happened:"), ansi.Reset)
+	for i, ev := range events {
+		fmt.Fprintf(s, "%s\n%s\n\n", eventRule(i+1, ev.When), hiNums(ev.Text))
 	}
 	pause(s)
+}
+
+// Recap-rule geometry, measured off a live BRE capture: the rule runs 76 columns
+// and the timestamp always starts at column 48.
+const (
+	eventRuleWidth   = 76
+	eventStampColumn = 48
+)
+
+// eventRule is the numbered, timestamped rule BRE draws above each recap entry:
+//
+//	─────(1)────────────────────────────────────────07/31/2026  07:43:11────────
+//
+// The stamp sits at a fixed column so the times line up however many entries
+// there are; a world saved before events carried one draws an unbroken rule.
+// The capture only shows single-digit counters, so which of the two the original
+// holds fixed past nine — the column or the 76-column width — is a guess.
+func eventRule(n int, when time.Time) string {
+	head := fmt.Sprintf("─────%s(%s%d%s)", dim(ansi.FgBrightYellow), ansi.FgBrightYellow, n, dim(ansi.FgBrightYellow))
+	plain := len([]rune(fmt.Sprintf("─────(%d)", n)))
+	stamp := ""
+	if !when.IsZero() {
+		stamp = when.Format("01/02/2006  15:04:05")
+	}
+	fill := eventStampColumn - plain
+	if fill < 1 {
+		fill = 1
+	}
+	tail := eventRuleWidth - eventStampColumn - len([]rune(stamp))
+	if tail < 0 {
+		tail = 0
+	}
+	return ansi.FgBrightBlack + head + ansi.FgBrightBlack +
+		strings.Repeat("─", fill) + stamp + strings.Repeat("─", tail) + ansi.Reset
 }
 
 // showUnreadMail is a pre-turn stop: when the player has unread mail, note the

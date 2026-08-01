@@ -159,7 +159,7 @@ func TestEventsPersistUntilPlayed(t *testing.T) {
 	// create + save an empire with a pending event
 	w := game.NewWorld(cfg)
 	e := w.AddHuman("khan", "Khanate")
-	e.Events = []string{"Enemy raided you!"}
+	e.Events = []game.Event{{Text: "Enemy raided you!"}}
 	store.Save(w, cfg)
 
 	f := &fakeSession{keys: []rune(" 0")} // log in, quit without playing

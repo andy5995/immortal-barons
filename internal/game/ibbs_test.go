@@ -190,7 +190,7 @@ func TestRemoteAttackBlockedByProtection(t *testing.T) {
 	if result.Results[0].Won || result.Results[0].LandTaken != 0 {
 		t.Errorf("remote attack against a protected target should not win, got %+v", result.Results[0])
 	}
-	if n := len(target.Events); n == 0 || !strings.Contains(target.Events[n-1], "New Realm Protection") {
+	if n := len(target.Events); n == 0 || !strings.Contains(target.Events[n-1].Text, "New Realm Protection") {
 		t.Errorf("protected target should be told the strike was stopped, events: %v", target.Events)
 	}
 }

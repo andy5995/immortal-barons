@@ -112,7 +112,7 @@ func (w *World) matureLoans(e *Empire) {
 		if owed > 0 {
 			e.Debt += owed + owed*LoanDefaultPenaltyPct/100
 			e.adjustSupport(-LoanDefaultSupportDrop)
-			e.Events = append(e.Events, fmt.Sprintf("A Cash Relief loan came due and you could not repay %d gold — it was added to your debt with a %d%% penalty.", owed, LoanDefaultPenaltyPct))
+			e.addEvent(fmt.Sprintf("A Cash Relief loan came due and you could not repay %d gold — it was added to your debt with a %d%% penalty.", owed, LoanDefaultPenaltyPct))
 		}
 	}
 	e.Loans = remaining
