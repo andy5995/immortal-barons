@@ -41,6 +41,10 @@ const extraCSS = `/* Underline in-content links so they read as links, not just 
    destinations, so give them weight and room to breathe. */
 .md-nav--primary > .md-nav__list > .md-nav__item > .md-nav__link {
   font-weight: 700;
+  font-size: 1.25em;  /* 125% — top level only; nested links keep their size
+                         because the nested <nav> is a sibling of this link,
+                         not a descendant of it */
+  line-height: 1.4;
   letter-spacing: 0.01em;
   padding-block: 0.25rem;
 }
