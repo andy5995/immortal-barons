@@ -90,6 +90,16 @@ func TestRegularAttackLossesAreAsymmetric(t *testing.T) {
 	if aLostPct >= dLostPct {
 		t.Errorf("the winner should lose a smaller share than the loser: winner %d%%, loser %d%%", aLostPct, dLostPct)
 	}
+	// Golden literals: in this overwhelming win the damage factor resolves to
+	// the full committed force, so the losses are exactly the live-observed
+	// 8% / 20% pair. Retuning either constant must fail here and force new
+	// evidence — the ordering check alone would follow a retune silently.
+	if got := aBefore - a.Troopers; got != 8000 {
+		t.Errorf("winner losses: got %d, want 8000 (8%% of 100,000, BRE live)", got)
+	}
+	if got := dBefore - d.Troopers; got != 200 {
+		t.Errorf("loser losses: got %d, want 200 (20%% of 1,000, BRE live)", got)
+	}
 }
 
 // A won Normal attack captures max(floor, ~10% of the loser's regions) — a
@@ -103,18 +113,23 @@ func TestRegularAttackCaptureFloorAndPercent(t *testing.T) {
 		return w, a, d
 	}
 
+	// Golden literals, not the balance constants: the 10% and the 15-region
+	// floor are live-verified against BRE (see balance.go), so retuning either
+	// constant must FAIL here and force new evidence — a want computed from the
+	// constant would follow the retune silently.
+
 	// Large defender: ~10% (500 → capture 50).
 	w, a, d := newFight(500)
 	w.Attack(a, d, FullForce(a), true)
-	if got := 500 - d.Land; got != 500*RegularAttackCapturePct/100 {
-		t.Errorf("large defender: captured %d, want %d (%d%%)", got, 500*RegularAttackCapturePct/100, RegularAttackCapturePct)
+	if got := 500 - d.Land; got != 50 {
+		t.Errorf("large defender: captured %d, want 50 (10%%, BRE-verified)", got)
 	}
 
 	// Small defender: the floor dominates (100 regions → 10% = 10 < floor 15).
 	w, a, d = newFight(100)
 	w.Attack(a, d, FullForce(a), true)
-	if got := 100 - d.Land; got != RegularAttackCaptureFloor {
-		t.Errorf("small defender: captured %d, want the floor %d", got, RegularAttackCaptureFloor)
+	if got := 100 - d.Land; got != 15 {
+		t.Errorf("small defender: captured %d, want the floor 15 (BRE-verified)", got)
 	}
 }
 

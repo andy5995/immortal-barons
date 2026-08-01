@@ -31,11 +31,12 @@ func TestMaybeRandomEventDeterministicWithFixedSeed(t *testing.T) {
 	}
 }
 
-// TestMaybeRandomEventNeverGoesNegativeOrLiesAboutZero exercises many
-// seeds/iterations to hit every category and both gain/lose branches, and
-// checks the two hard rules: a resource never drops below 0, and an empire
-// with 0 of a resource is never told it lost that resource.
-func TestMaybeRandomEventNeverGoesNegativeOrLiesAboutZero(t *testing.T) {
+// TestMaybeRandomEventNeverGoesNegative exercises many seeds/iterations to hit
+// every category and both gain/lose branches, and checks the hard rule that a
+// resource never drops below 0. (The don't-report-a-loss-you-couldn't-take rule
+// is guarded numerically by TestMaybeRandomEventSkipsLoseOnZeroResource below —
+// the event TEXT is not inspected anywhere.)
+func TestMaybeRandomEventNeverGoesNegative(t *testing.T) {
 	for seed := int64(0); seed < 200; seed++ {
 		w := NewWorldSeed(DefaultConfig(), seed)
 		e := &Empire{} // every resource starts at 0

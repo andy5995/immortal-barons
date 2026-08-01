@@ -377,50 +377,6 @@ func TestDailyMaintenanceHandlesMalformedDate(t *testing.T) {
 	}
 }
 
-func TestHQAdvancesEachTurn(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	e := w.AddHuman("me", "Mine")
-	e.Gold = w.HQPrice(e)
-	if err := w.StartHQ(e); err != nil {
-		t.Fatalf("StartHQ: %v", err)
-	}
-	if e.HQ != 5 {
-		t.Fatalf("HQ after start: want 5, got %d", e.HQ)
-	}
-
-	want := []int{10, 15, 20}
-	for _, w2 := range want {
-		w.PlayTurn(e, "2026-07-03")
-		if e.HQ != w2 {
-			t.Errorf("HQ after turn: want %d, got %d", w2, e.HQ)
-		}
-	}
-
-	e.HQ = 100
-	w.PlayTurn(e, "2026-07-03")
-	if e.HQ != 100 {
-		t.Errorf("HQ should cap at 100, got %d", e.HQ)
-	}
-}
-
-func TestFoodSpoilageAboveBuffer(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	e := w.AddHuman("me", "Mine")
-	e.People = 0
-	e.Troopers = 0
-	e.Jets = 0
-	e.Tanks = 0
-	e.Regions = RegionMix{}
-	e.Land = 0
-	e.Food = 100000
-
-	w.PlayTurn(e, "2026-07-03")
-
-	if e.LastSpoiled <= 0 {
-		t.Errorf("expect food spoilage above buffer, got LastSpoiled=%d", e.LastSpoiled)
-	}
-}
-
 // BRE-verified (2026-07-16): 5% of the ENTIRE food stock spoils each turn, with
 // NO floor below which nothing spoils.
 func TestFoodSpoils5PctNoFloor(t *testing.T) {

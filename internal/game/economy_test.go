@@ -526,17 +526,20 @@ func TestRegionPurchaseCapIsCumulativePerTurn(t *testing.T) {
 	}
 }
 
+// The estimate the sell prompt shows must be the same figure the turn engine
+// eats: population at 75/1000, troopers at 1/200, and jets/tanks eating NOTHING
+// (they were once billed double rations — the golden below fails if that comes
+// back).
 func TestFoodNeededNextTurn(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
-	e.People = 100
-	e.Troopers = 10
-	e.Jets = 5
-	e.Tanks = 3
+	e.People = 2000
+	e.Troopers = 400
+	e.Jets = 500
+	e.Tanks = 300
 
-	want := 100*PeopleFoodPerThousand/1000 + (10+5*2+3*2)/ArmyFoodDivisor
-	if got := w.FoodNeededNextTurn(e); got != want {
-		t.Errorf("FoodNeededNextTurn: want %d, got %d", want, got)
+	if got := w.FoodNeededNextTurn(e); got != 152 { // 2000×75/1000 + 400/200
+		t.Errorf("FoodNeededNextTurn: want 152, got %d", got)
 	}
 }
 

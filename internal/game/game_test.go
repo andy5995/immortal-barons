@@ -227,6 +227,12 @@ func TestHQBuildRate(t *testing.T) {
 	if turns != 19 {
 		t.Errorf("HeadQuarters took %d turns to finish, want 19", turns)
 	}
+
+	// A finished HeadQuarters stays finished — no advance past 100.
+	w.PlayTurn(e, "2026-07-03")
+	if e.HQ != 100 {
+		t.Errorf("HQ should cap at 100, got %d", e.HQ)
+	}
 }
 
 func TestTechFactorShape(t *testing.T) {

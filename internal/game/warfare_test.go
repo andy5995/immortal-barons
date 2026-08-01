@@ -52,12 +52,18 @@ func TestNuclearStrikeSDIReducesDamage(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AICount = 1
 
+	// The defenders need REAL regions, not a bare Land figure: the strike ends
+	// in syncLand, which recomputes Land from the mix, so a fixture that only
+	// sets Land measures the fixture's lie, wipes the realm in both worlds, and
+	// makes the two losses equal no matter what SDI does (the old shape of this
+	// test).
 	w1 := NewWorldSeed(cfg, 42)
 	a1 := w1.AddHuman("att", "Attacker")
 	a1.Gold = 10_000_000
 	d1 := w1.Empires[0]
 	d1.Protection, a1.Protection = 0, 0
-	d1.Land = 1000
+	d1.Regions = RegionMix{Agricultural: 1000}
+	d1.syncLand()
 	d1.SDI = 0
 
 	w2 := NewWorldSeed(cfg, 42)
@@ -65,7 +71,8 @@ func TestNuclearStrikeSDIReducesDamage(t *testing.T) {
 	a2.Gold = 10_000_000
 	d2 := w2.Empires[0]
 	d2.Protection, a2.Protection = 0, 0
-	d2.Land = 1000
+	d2.Regions = RegionMix{Agricultural: 1000}
+	d2.syncLand()
 	d2.SDI = 50
 
 	beforeLand1, beforeLand2 := d1.Land, d2.Land
@@ -83,8 +90,11 @@ func TestNuclearStrikeSDIReducesDamage(t *testing.T) {
 	if loss1 <= 0 {
 		t.Errorf("expected SDI=0 defender to lose land, lost %d", loss1)
 	}
-	if loss2 > loss1 {
-		t.Errorf("expected SDI=50 defender to lose no more land than SDI=0 defender: loss2=%d loss1=%d", loss2, loss1)
+	// Strictly less: both worlds share seed 42 and an identical call sequence,
+	// so if the SDI mitigation were deleted the losses would be EQUAL and a
+	// non-strict check would pass with the mechanic gone.
+	if loss2 >= loss1 {
+		t.Errorf("expected SDI=50 defender to lose strictly less land than SDI=0 defender: loss2=%d loss1=%d", loss2, loss1)
 	}
 }
 

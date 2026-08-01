@@ -89,6 +89,12 @@ func TestAdjustInvestRateClamps(t *testing.T) {
 			t.Fatalf("InvestRate out of bounds: %d", w.InvestRate)
 		}
 	}
+	// The endpoint proves the nudge actually moves: with the mechanic a no-op
+	// the rate would still sit at MinInvestRate+1 and the bounds alone would
+	// pass. Deterministic under seed 42.
+	if w.InvestRate != MinInvestRate {
+		t.Errorf("heavy investing should drive the rate to the floor %d, got %d", MinInvestRate, w.InvestRate)
+	}
 
 	// Drive the rate up with no investing.
 	e.Investments = nil
@@ -98,6 +104,9 @@ func TestAdjustInvestRateClamps(t *testing.T) {
 		if w.InvestRate < MinInvestRate || w.InvestRate > MaxInvestRate {
 			t.Fatalf("InvestRate out of bounds: %d", w.InvestRate)
 		}
+	}
+	if w.InvestRate != MaxInvestRate {
+		t.Errorf("no investing should drive the rate to the ceiling %d, got %d", MaxInvestRate, w.InvestRate)
 	}
 }
 
