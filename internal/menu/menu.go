@@ -474,12 +474,20 @@ func flushSessionNews(s session.Session, g *ctx) {
 // 62 columns wide, matching BRE's main menu rules (from a live capture).
 const rule = "──────────────────────────────────────────────────────────────"
 
-// InsetRule is BRE's inset section divider (live capture): a double-line (═)
-// segment set into the single-line rule — 5 single, 15 double, then single to
-// the rule width. BRE uses it broadly — around the Macro Editor list, and as a
-// full-width divider on the income, status, and end-of-turn screens — not just
-// one screen. IB currently uses it to frame the Macro Editor.
-var InsetRule = strings.Repeat("─", 5) + strings.Repeat("═", 15) + strings.Repeat("─", len([]rune(rule))-20)
+// insetRule draws BRE's inset section divider (live capture) at a given width: a
+// double-line (═) segment set into a single-line rule — 5 single, `double`
+// double, then single to `width`. The two runs are not fixed across screens:
+// Relations is 75 wide with 15 double, Alliance Strength 51 with 10.
+func insetRule(width, double int) string {
+	return strings.Repeat("─", 5) + strings.Repeat("═", double) +
+		strings.Repeat("─", width-5-double)
+}
+
+// InsetRule is that divider at the menu rule's width. BRE uses it broadly —
+// around the Macro Editor list, and as a full-width divider on the income,
+// status, and end-of-turn screens — not just one screen. IB currently uses it to
+// frame the Macro Editor.
+var InsetRule = insetRule(len([]rune(rule)), 15)
 
 // dimAccent maps each bright menu accent to its normal-intensity twin. BRE draws
 // the rule dashes and the item parentheses in the normal color and reserves the

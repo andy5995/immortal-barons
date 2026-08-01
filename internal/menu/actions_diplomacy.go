@@ -13,8 +13,16 @@ import (
 // start, BRE-style: the proposer's Regions / Net Worth / Score inline with an
 // Accept? (Y/n) prompt, instead of making the player hunt for it in the Diplomacy
 // menu. Accepting forms the treaty; declining removes the offer so it does not
-// re-prompt. Wording matches the original (driven live); colors are IB house
-// style, since capture-pane cannot read BRE's.
+// re-prompt.
+//
+// Wording, layout and colors are the original's, from a live capture: only the
+// realm name and the treaty type are bright cyan (the connecting words stay
+// white), the three figures are bright yellow, and the whole stats line runs
+// unindented into the prompt — "…; Score: N; Accept? (Y/n)". The figures are
+// comma-grouped, which BRE does NOT do here (see readability divergence below).
+// BRE files these after the numbered recap entries and before the mail, which is
+// where gameflow calls it; unlike a recap entry an offer carries no rule or
+// timestamp, since it is a prompt rather than a log line.
 func reviewTreatyOffers(s session.Session, w *ctx) {
 	var offers []game.TreatyOffer
 	withPlayer(w, func(p *game.Empire) {
@@ -36,16 +44,16 @@ func reviewTreatyOffers(s session.Session, w *ctx) {
 			withPlayer(w, func(p *game.Empire) { w.World.DeclineTreaty(p, o.From, o.Type) })
 			continue
 		}
-		fmt.Fprintf(s, "\n%s"+tr(s, "%s proposes a %s.")+"%s\n",
-			ansi.FgBrightCyan, o.From, tr(s, o.Type), ansi.Reset)
+		name := ansi.FgBrightCyan + o.From + ansi.FgWhite
+		pact := ansi.FgBrightCyan + tr(s, o.Type) + ansi.FgWhite
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s proposes a %s.")+"%s\n", ansi.FgWhite, name, pact, ansi.Reset)
 		if o.Message != "" {
 			fmt.Fprintf(s, "  %s\"%s\"%s\n", ansi.Dim, o.Message, ansi.Reset)
 		}
-		// No trailing newline: AskYesNo begins on its own line, so this avoids a
-		// blank gap between the stats and the "Accept? (Y/n)" prompt.
-		fmt.Fprintf(s, "  "+tr(s, "Regions: %s; Net Worth: %s; Score: %s"),
-			comma(regions), comma(netWorth), comma(score))
-		if AskYesNo(s, "Accept?", true) {
+		fig := func(n int) string { return ansi.FgBrightYellow + comma(n) + ansi.FgWhite }
+		fmt.Fprintf(s, "%s"+tr(s, "Regions: %s │ Net Worth: %s │ Score: %s")+" │ ",
+			ansi.FgWhite, fig(regions), fig(netWorth), fig(score))
+		if askYesNoHere(s, "Accept?", true) {
 			withPlayer(w, func(p *game.Empire) { w.World.AcceptTreaty(p, o.From, o.Type) })
 		} else {
 			withPlayer(w, func(p *game.Empire) { w.World.DeclineTreaty(p, o.From, o.Type) })
@@ -53,26 +61,71 @@ func reviewTreatyOffers(s session.Session, w *ctx) {
 	}
 }
 
+// Alliance-Strength geometry. BRE's is a 51-column inset rule over a 21-column
+// name field and 9/10/10 number columns (its heading row is one column wider on
+// Troopers than its figures, an off-by-one in the original). IB's numbers are
+// comma-grouped, so the columns are 12 wide to fit eight digits with a gap, and
+// the heading uses the same width as the figures; the rule follows to match.
+const (
+	allyNameWidth   = 21
+	allyColumnWidth = 12
+	allyRuleWidth   = allyNameWidth + 3*allyColumnWidth
+	allyRuleDouble  = 10
+)
+
 // allianceStrength shows what each Full Defense Alliance partner will send to aid
 // the player's defense — 30% of its troopers, tanks, and agents (BRE's Alliance
-// Strength screen).
+// Strength screen). Layout and colors are the original's: white headings over a
+// red rule, ally names bright white, figures bright yellow, a zero shown as
+// "NONE", and a Total Forces line under a second rule.
+//
+// READABILITY DIVERGENCE: BRE prints these figures ungrouped ("963016"); IB
+// comma-groups them, here and on the treaty-offer stats line, because a
+// seven-digit run is hard to read at a glance. The columns are widened to fit.
+// BRE itself groups elsewhere (the Queen Royale's refund line), so this is not a
+// house style it holds to.
 func allianceStrength(s session.Session, w *ctx) Result {
 	p := w.Player()
 	var defenders []game.AllyContribution
 	w.With(func() { defenders = w.AllyDefenders(p) })
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Alliance Strength"), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s\n", ansi.FgWhite, tr(s, "Your allies will send the following to aid you in defense:"))
 	if len(defenders) == 0 {
-		fmt.Fprintf(s, "  %s\n", tr(s, "You have no defense allies."))
+		fmt.Fprintf(s, "%s%s\n", tr(s, "You have no defense allies."), ansi.Reset)
 		pause(s)
 		return Stay
 	}
-	fmt.Fprintf(s, "  %s\n", tr(s, "Your allies will send the following to aid you in defense:"))
-	fmt.Fprintf(s, "  %-20s %9s %9s %9s\n", tr(s, "Name"), tr(s, "Troopers"), tr(s, "Tanks"), tr(s, "Agents"))
+	fmt.Fprintf(s, "%-*s%*s%*s%*s%s\n", allyNameWidth, tr(s, "Name"),
+		allyColumnWidth, tr(s, "Troopers"), allyColumnWidth, tr(s, "Tanks"),
+		allyColumnWidth, tr(s, "Agents"), ansi.Reset)
+	rule := ansi.FgRed + insetRule(allyRuleWidth, allyRuleDouble) + ansi.Reset
+	fmt.Fprintln(s, rule)
+	var total game.AllyContribution
 	for _, d := range defenders {
-		fmt.Fprintf(s, "  %-20s %9s %9s %9s\n", d.Name, comma(d.Troopers), comma(d.Tanks), comma(d.Agents))
+		allyRow(s, d.Name, d.Troopers, d.Tanks, d.Agents)
+		total.Troopers += d.Troopers
+		total.Tanks += d.Tanks
+		total.Agents += d.Agents
 	}
+	fmt.Fprintln(s, rule)
+	allyRow(s, tr(s, "Total Forces"), total.Troopers, total.Tanks, total.Agents)
 	pause(s)
 	return Stay
+}
+
+// allyRow prints one line of the Alliance Strength table.
+func allyRow(s session.Session, name string, troopers, tanks, agents int) {
+	fmt.Fprintf(s, "%s%-*s%s%*s%*s%*s%s\n", ansi.FgBrightWhite, allyNameWidth, name,
+		ansi.FgBrightYellow, allyColumnWidth, allyFigure(s, troopers),
+		allyColumnWidth, allyFigure(s, tanks),
+		allyColumnWidth, allyFigure(s, agents), ansi.Reset)
+}
+
+// allyFigure renders a contribution, showing a zero as BRE's "NONE".
+func allyFigure(s session.Session, n int) string {
+	if n == 0 {
+		return tr(s, "NONE")
+	}
+	return comma(n)
 }
 
 // treatyDescriptions explains, in plain English, what each pact does in IB —
@@ -345,38 +398,50 @@ func pickFromList(s session.Session, msg string, list []string) string {
 	return list[i-1]
 }
 
+// Relations-screen geometry, measured off a live BRE capture: a 75-column inset
+// rule, and a row of "[X]  " then the realm name in a 40-column field.
+const (
+	relationsRuleWidth  = 75
+	relationsRuleDouble = 15
+	relationsNameWidth  = 40
+)
+
+// viewDiplomacy is BRE's View Treaties — its "-*Relations*-" screen. It lists
+// EVERY living realm with the pact held, "None" included, not just the ones under
+// treaty, so the roster doubles as the empire-letter key. Colors are the
+// original's: the brackets and rules blue, the letter bright white, the name
+// bright cyan, the relation bright blue.
 func viewDiplomacy(s session.Session, w *ctx) Result {
 	p := w.Player()
-	type row struct{ name, treaties string }
+	type row struct{ id, name, treaties string }
 	var rows []row
-	var offers []game.TreatyOffer
 	w.With(func() {
 		for _, e := range w.Empires {
 			if e == p || !e.Alive {
 				continue
 			}
-			if held := w.TreatiesBetween(p, e); len(held) > 0 {
-				rows = append(rows, row{e.Name, strings.Join(held, ", ")})
+			held := w.TreatiesBetween(p, e)
+			named := make([]string, len(held))
+			for i, t := range held {
+				named[i] = tr(s, t)
 			}
+			relations := tr(s, "None")
+			if len(named) > 0 {
+				relations = strings.Join(named, ", ")
+			}
+			rows = append(rows, row{w.EmpireLetter(e), e.Name, relations})
 		}
-		offers = append([]game.TreatyOffer(nil), p.TreatyOffers...)
 	})
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Your treaties:"), ansi.Reset)
-	if len(rows) == 0 {
-		fmt.Fprintf(s, "  %s\n", tr(s, "(none)"))
-	} else {
-		for _, r := range rows {
-			fmt.Fprintf(s, "  %s: %s\n", r.name, r.treaties)
-		}
+	rule := ansi.FgBlue + insetRule(relationsRuleWidth, relationsRuleDouble) + ansi.Reset
+	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n", ansi.FgBlue, ansi.FgBrightWhite, tr(s, "Relations"), ansi.FgBlue, ansi.Reset)
+	fmt.Fprintf(s, "%s%-5s%-*s%s%s\n", ansi.FgBrightWhite,
+		tr(s, "Id"), relationsNameWidth, tr(s, "Empire Name"), tr(s, "Relations"), ansi.Reset)
+	fmt.Fprintln(s, rule)
+	for _, r := range rows {
+		fmt.Fprintf(s, "%s[%s%s%s]%s  %-*s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
+			ansi.FgBrightCyan, relationsNameWidth, r.name, ansi.FgBrightBlue, r.treaties, ansi.Reset)
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Pending offers received:"), ansi.Reset)
-	if len(offers) == 0 {
-		fmt.Fprintf(s, "  %s\n", tr(s, "(none)"))
-	} else {
-		for _, o := range offers {
-			fmt.Fprintf(s, "  %s — %s\n", o.From, o.Type)
-		}
-	}
+	fmt.Fprintln(s, rule)
 	pause(s)
 	return Stay
 }

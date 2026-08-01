@@ -79,14 +79,34 @@ config record (les di,[0x28b4])
   +0x1c  int32  Daily food pool, planet-wide (seeded 0xF4240 = 1,000,000 at
                 game init; buying depletes it, selling replenishes it)
   +0x24  int32  Pool the Queen Royale tax refund is paid out of, planet-wide.
-                The refund routine (BRE.OVR 98944, just past its message string)
-                reads it, pays min(V x rate, 1,000,000) to the empire via
-                0c03:0f10 into empire +0x66, then writes V x (1 - rate) back.
-                rate = 0.02, or 0.07 once V > 100,000,000. The 1,000,000 cap is
+                Seeded 0x000186A0 = 100,000 at game init (0x44CE6, beside the
+                food pool's 1,000,000). The refund routine (BRE.OVR 98944, just
+                past its message string) reads it, pays min(V x rate, 1,000,000)
+                to the empire via 0c03:0f10 into empire +0x66, then writes
+                V x (1 - rate) back. rate = 0.02, or 0.07 once V > 100,000,000
+                (the threshold is a literal cmp against 0x05F5E100; all three
+                reals decode exactly: 0.02, +0.05, cap 1,000,000). The cap is
                 applied by overwriting rate with 1,000,000/V, and is itself
                 gated by a per-empire predicate (056d:19b5) — when that is false
-                the payout is uncapped. What FEEDS the pool is not yet traced.
-                See issue #93.
+                the payout is uncapped. That predicate is still unread, and no
+                capture shows a payout above the cap, so nothing observed
+                distinguishes the two branches.
+
+                The pool is FED by the crown tax: the tax routine at 0x2FAF1 —
+                the same one that charges the Queen Royale tax and computes the
+                underpayment support penalty — adds the empire's tax figure
+                straight into V. Whether it banks the amount DUE or the amount
+                actually PAID is not settled; the value added is recomputed at
+                0x2FA81 from 056d:01bf after the payment prompt.
+
+                Play data confirms the seed and the writeback independently: a
+                fresh game's first refund is 2,000 (2% of 100,000) and the next
+                is 1,960 (2% of 98,000 = V x 0.98). Two refunds captured on a
+                third board (an A-Net game server) fit the same 2% branch on a
+                mature pool: 375,090 and 384,673 put V in the 18.7-19.3M range,
+                well under both the 100M rate threshold and the cap, so no
+                capture yet exercises the 0.07 branch or the cap gate. See
+                issue #93.
   +0x42  int16  Planetary Tax Rate, tenths of a percent (default 50 = 5.0%,
                 editor maximum 200 = 20.0%)
 ```

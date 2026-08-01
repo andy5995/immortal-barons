@@ -12,6 +12,11 @@
     unread message by accident; use R, D, I or Q
   * Message boxes now match the original's size, and show the time a
     message was sent, not only the date
+  * An incoming treaty offer, the Relations list (View Treaties) and the
+    Alliance Strength table now match the original's layout and colors.
+    Relations lists every realm, not only the ones you have a pact with,
+    and Alliance Strength gained a Total Forces line. Large numbers keep
+    their commas, which the original does not use on these screens
 
 2026-07-31 (v0.0.3)
   * Updating from an earlier version requires a game reset (-reset)

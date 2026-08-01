@@ -153,12 +153,7 @@ func renderMessage(s session.Session, m game.Message) {
 		ansi.FgCyan, ansi.FgWhite, tr(s, "Message From: "), ansi.FgBrightCyan, m.From, ansi.Reset)
 	fmt.Fprintf(s, "%s│ %s%s%s%s%s\n",
 		ansi.FgCyan, ansi.FgWhite, tr(s, "Message To  : "), ansi.FgBrightGreen, m.To, ansi.Reset)
-	dash := mailSepWidth - 1 - 5 - 8
-	if dash < 0 {
-		dash = 0
-	}
-	fmt.Fprintf(s, "%s├%s%s%s%s\n",
-		ansi.FgCyan, strings.Repeat("─", 5), strings.Repeat("═", 8), strings.Repeat("─", dash), ansi.Reset)
+	fmt.Fprintf(s, "%s├%s%s\n", ansi.FgCyan, insetRule(mailSepWidth-1, 8), ansi.Reset)
 	for _, line := range strings.Split(m.Body, "\n") {
 		body := ansi.FgWhite
 		if strings.HasPrefix(line, ">") {

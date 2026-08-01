@@ -891,6 +891,60 @@ Total Forces                29      3271      NONE
 ```
 (= 30% of the ally's troopers/tanks/agents; no jets/turrets/bombers/carriers.)
 
+### Measurements and colors for those three (captured live 2026-08-01, league game)
+
+**Incoming proposal**, in the "since your last play" block — after the numbered
+recap entries and before the mail. It carries NO rule and NO timestamp: unlike a
+recap entry it is a prompt, not a log line. Two lines, unindented, the second
+running straight into the prompt; the figures are NOT comma-grouped:
+```
+<Name> proposes a <Treaty>.
+Regions: 19445; Net Worth: 146868315; Score: 2442093; Accept? (Y/n) Yes
+```
+Colors: realm name and treaty type bright cyan (`1;36`), every connecting word
+white (`0;40;37`), the three figures bright yellow (`1;33`). The y/n hint is
+BRE's usual cyan parens (`36`) around bright-cyan letters, and the answer echoes
+as the whole word (`Yes`/`No`) in bright white (`1;37`).
+
+**View Treaties -> `-*Relations*-`.** Lists EVERY living realm, "None" included —
+the roster doubles as the empire-letter key. Title `-*`/`*-` blue (`0;40;34`)
+around a bright-white word; heading bright white; a **75-column** inset rule
+(5 `─`, 15 `═`, 55 `─`) in blue above and below the rows. A row is `[X]  ` then
+the name in a **40-column** field: brackets blue, letter bright white, name
+bright cyan (`1;36`), relation bright blue (`1;34`).
+```
+Id   Empire Name                             Relations
+─────═══════════════───────────────────────────────────────────────────────
+[A]  Endor                                   None
+[F]  Opium                                   Full Defense Alliance
+```
+
+**Alliance Strength.** White headings, a **51-column** inset rule (5 `─`, 10 `═`,
+36 `─`) in red above the rows and above the total, ally names bright white,
+figures bright yellow and ungrouped, a zero shown as `NONE`. Data columns are
+name 21, then 9 / 10 / 10; BRE's *heading* row is one column wider on Troopers
+(10), so the headings sit one column right of the figures.
+
+**IB deviates on readability (deliberate, Andy's call).** Two changes, both to
+make a dense line scan faster:
+
+- **Number grouping.** BRE prints the figures on both of these screens ungrouped
+  — `19445`, `963016`. IB comma-groups them; the Alliance Strength columns are
+  widened to 12 and its rule follows, and the heading drops BRE's off-by-one.
+  BRE is not consistent about this itself — its Queen Royale refund line groups.
+- **Field separator.** The offer's stats line uses `│` where BRE uses `; `, so
+  the three figures read as separate fields rather than as prose. It costs the
+  same width as the semicolon (one glyph per gap), which bracketing the values
+  would not — `[…]` reaches 78 columns with a 9-digit net worth and wraps at 10.
+
+Everything else on the two screens is the original's.
+
+**Do not raise the y/n prompt mismatch.** Two known differences in the shared
+`AskYesNo`: BRE echoes the whole word (`Yes`/`No`) in bright white where IB
+echoes `y`/`n`, and BRE's hint parens are plain cyan (`36`) where IB uses bright
+blue. Both are recorded here so the capture stays accurate. Andy has parked
+them — leave them alone unless he brings them up.
+
 ### Regular Attack flow + battle report (attacker's view)
 Attack Menu -> (R) -> `Choose a Target [A-Y,?=List RETURN to Abort]` -> letter ->
 `You have N Troopers, N usable Jets, N Tanks, and N Bombers` ->

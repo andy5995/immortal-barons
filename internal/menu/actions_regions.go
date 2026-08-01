@@ -2,7 +2,6 @@ package menu
 
 import (
 	"fmt"
-	"strings"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -39,10 +38,7 @@ func regionField(p *game.Empire, idx int) *int {
 // a short `═` accent inset near the left (─────═════──────────────────, see
 // docs/dev/bre-screens.md). Box-drawing only, so it transcodes cleanly to CP437.
 func regionRule(s session.Session) {
-	fmt.Fprintf(s, "%s%s%s%s%s\n",
-		ansi.FgBrightMagenta,
-		strings.Repeat("─", 5), strings.Repeat("═", 5), strings.Repeat("─", 18),
-		ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightMagenta, insetRule(28, 5), ansi.Reset)
 }
 
 func printRegionTable(s session.Session, p *game.Empire) {

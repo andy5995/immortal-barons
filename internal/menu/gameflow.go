@@ -145,13 +145,21 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 // defYes) and reads a single keypress — no Enter required. 'y'/'Y' returns
 // true, 'n'/'N' returns false; Enter or any other key returns defYes.
 func AskYesNo(s session.Session, msg string, defYes bool) bool {
+	fmt.Fprint(s, "\n")
+	return askYesNoHere(s, msg, defYes)
+}
+
+// askYesNoHere is AskYesNo without the leading newline, for a prompt BRE puts at
+// the end of a line it has already started — the treaty-offer stats line ends
+// "…; Score: N; Accept? (Y/n)".
+func askYesNoHere(s session.Session, msg string, defYes bool) bool {
 	letters := "y/N"
 	if defYes {
 		letters = "Y/n"
 	}
 	// BRE colors the y/n hint: the letters cyan, the parens a slightly darker blue.
 	hint := ansi.FgBrightBlue + "(" + ansi.FgBrightCyan + letters + ansi.FgBrightBlue + ")" + ansi.Reset
-	fmt.Fprintf(s, "\n%s %s ", i18n.T(sessionLang(s), msg), hint)
+	fmt.Fprintf(s, "%s %s ", i18n.T(sessionLang(s), msg), hint)
 	for {
 		r, err := readKey(s)
 		if err != nil {
