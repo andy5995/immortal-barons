@@ -1,0 +1,29 @@
+{
+  "Empires": [
+    {
+      "Name": "Khan's Realm",
+      "Owner": "khan",
+      "Alive": true,
+      "Gold": 4242,
+      "Bank": 900,
+      "Food": 1000,
+      "Land": 15,
+      "Regions": {
+        "Coastal": 3,
+        "Mountain": 5,
+        "Desert": 5,
+        "Agricultural": 2
+      },
+      "People": 2000,
+      "Troopers": 100,
+      "Tax": 15,
+      "Support": 0,
+      "Morale": 100,
+      "Events": ["A dragon attacked your regions."]
+    }
+  ],
+  "GameDay": 7,
+  "LastMaintDate": "2026-07-28",
+  "Bulletin": ["A bulletin line from an old save"],
+  "InvestRate": 12
+}

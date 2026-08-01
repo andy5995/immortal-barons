@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"reflect"
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -27,7 +28,11 @@ func TestLoadConfig_MissingFile_ReturnsDefaults(t *testing.T) {
 func TestSaveConfig_LoadConfig_RoundTrip(t *testing.T) {
 	dir := t.TempDir()
 
+	// Fill EVERY field non-default (same helper as the world round trip), so a
+	// Config field that stops serializing cannot hide by round-tripping as the
+	// default the test happened not to change.
 	cfg := game.DefaultConfig()
+	fillValue(reflect.ValueOf(&cfg).Elem())
 	cfg.DataDir = dir
 	cfg.TurnsPerDay = 15
 	cfg.AICount = 3

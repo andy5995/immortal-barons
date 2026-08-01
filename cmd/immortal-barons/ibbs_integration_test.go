@@ -83,6 +83,14 @@ func TestThreeBoardIBBSExchange(t *testing.T) {
 			}
 			if len(rb.Scores) != 3 { // AICount empires, all alive
 				t.Errorf("%s: remote board %q has %d scores, want 3", dst.id, src.id, len(rb.Scores))
+				continue
+			}
+			// Content, not just count: zeroed points or blank empire names
+			// would travel undetected on a count alone.
+			for _, sc := range rb.Scores {
+				if sc.Empire == "" || sc.NetWorth == 0 {
+					t.Errorf("%s: remote board %q carries a degraded score: %+v", dst.id, src.id, sc)
+				}
 			}
 		}
 	}

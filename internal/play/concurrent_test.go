@@ -2,6 +2,7 @@ package play
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"testing"
 
@@ -139,19 +140,22 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 		}(i)
 	}
 
-	// The turn-playing session: splash, realm name, Play Game, accept the
-	// suggested forces/regions maintenance payment, detour through
-	// System Menu -> Diplomacy -> View Treaties (ranges w.Empires), back
-	// out through Attack/Covert/Trading, decline the message prompt and the
-	// next-turn prompt, then quit from the Game Menu. Keys verified against
-	// internal/menu/tree.go's hotkeys and the proven sequence in
-	// internal/menu/gameflow_test.go's TestRunTurnConsumesATurn.
-	turnKeys := " \rTurnPlayer\r" + "1 \r\r *D9 000000n\r n\r0"
+	// The turn-playing session: splash, Enter for English at the first-run
+	// language picker, realm name + confirm, Play Game, dismiss the income/
+	// status/maintenance pauses (auto-pay covers the payments), detour through
+	// System Menu -> Diplomacy -> View Treaties (ranges w.Empires), then quit
+	// back out and let the script run dry. Derived by DRIVING the current flow
+	// (not from memory); the assertions at the bottom fail if this script
+	// stops reaching View Treaties or completing a turn, so it can no longer
+	// rot silently — the previous script predated the language picker and had
+	// been dead for its race-coverage purpose without any test noticing.
+	turnKeys := " \rTurnPlayer\ry" + "1   *D9 000000nn0"
 	sessions.Add(1)
+	var turnOut *fakeSession
 	go func() {
 		defer sessions.Done()
-		f := &fakeSession{keys: []rune(turnKeys)}
-		if _, err := Session(f, Identity{Handle: "turnplayer"}, w, cfg, "", game.MaintReport{}, save); err != nil {
+		turnOut = &fakeSession{keys: []rune(turnKeys)}
+		if _, err := Session(turnOut, Identity{Handle: "turnplayer"}, w, cfg, "", game.MaintReport{}, save); err != nil {
 			t.Errorf("turn-playing session: %v", err)
 		}
 	}()
@@ -182,5 +186,15 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 	// valid, non-negative value.
 	if tp.TurnsLeft < 0 {
 		t.Errorf("turn player's TurnsLeft went negative: %d", tp.TurnsLeft)
+	}
+	// The key script must have REACHED the screens it exists to race: this
+	// test's -race value is the View Treaties walk over w.Empires, and a menu
+	// hotkey change would silently end the script early (EOF ends the session
+	// cleanly) leaving nothing racing. TurnsPlayed pins that the turn ran.
+	if !strings.Contains(turnOut.out.String(), "Relations") {
+		t.Error("the scripted session never reached View Treaties — its race coverage is gone")
+	}
+	if tp.TurnsPlayed == 0 {
+		t.Error("the scripted session never completed a turn")
 	}
 }

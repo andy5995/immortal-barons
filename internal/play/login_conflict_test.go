@@ -55,13 +55,14 @@ func TestConcurrentOnboardSameRealmName(t *testing.T) {
 	}
 }
 
-// TestLoginMaintenanceRunsOnceForRollover has two callers log in at the same
-// time on a date that has rolled over since the last maintenance. The
-// date-rollover DailyMaintenance runs inside a FileStore transaction (reload →
-// maintain → save), and DailyMaintenance is idempotent for an already-current
-// date, so the file-lock plus the reload guarantee only ONE node advances the
-// day: GameDay climbs by exactly one, not once per node.
-func TestLoginMaintenanceRunsOnceForRollover(t *testing.T) {
+// TestLoginMaintenanceIdempotentOnRollover has two callers log in at the same
+// time on a date that has rolled over since the last maintenance, and asserts
+// GameDay climbs by exactly one. Be honest about what that proves: it is the
+// IDEMPOTENCE of DailyMaintenance for an already-current date. It is NOT a
+// lock test — with the flock removed, both racers would load day 5, both
+// compute 6, both save 6, and the assertion still passes; lock coverage lives
+// in store's lock tests and the cross-process test.
+func TestLoginMaintenanceIdempotentOnRollover(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	w := game.NewWorld(cfg)
 	w.AddHuman("alice", "Alicia")

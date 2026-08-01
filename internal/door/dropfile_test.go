@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -18,9 +19,11 @@ func write(t *testing.T, name, content string) string {
 
 func TestParseDoor32(t *testing.T) {
 	// comm=2(socket) handle=7 baud bbsid rec real=John Q handle=Khan
-	// level time=30min emu=1(ansi) node=1
+	// level time=30min emu=1(ansi) node=4 — node is DISTINCT from the
+	// emulation line above it, so an off-by-one line read fails the Node
+	// assert instead of coincidentally passing on identical "1"s.
 	p := write(t, "door32.sys",
-		"2\n7\n57600\nImmortal BBS\n42\nJohn Q Sysop\nKhan\n80\n30\n1\n1\n")
+		"2\n7\n57600\nImmortal BBS\n42\nJohn Q Sysop\nKhan\n80\n30\n1\n4\n")
 	c, err := ParseDropfile(p)
 	if err != nil {
 		t.Fatal(err)
@@ -37,8 +40,8 @@ func TestParseDoor32(t *testing.T) {
 	if !c.ANSI {
 		t.Error("ANSI should be true (emulation 1)")
 	}
-	if c.Node != 1 {
-		t.Errorf("node: want 1, got %d", c.Node)
+	if c.Node != 4 {
+		t.Errorf("node: want 4, got %d", c.Node)
 	}
 	if c.IO != IOSocket || c.Socket != 7 {
 		t.Errorf("io: want socket/7, got %v/%d", c.IO, c.Socket)
@@ -185,8 +188,11 @@ func TestParsePCBoardTooShort(t *testing.T) {
 
 func TestParseDorInfo(t *testing.T) {
 	// 1 BBS  2 sysop-first  3 sysop-last  4 COM0  5 baud  6 reserved
-	// 7 Khan  8 Noonien  9 city  10 graphics=1  11 level  12 minutes=30
-	lines := "My BBS\nThe\nSysop\nCOM0\n0 BAUD,N,8,1\n0\nKhan\nNoonien\nSeti Alpha V\n1\n50\n30\n-1\n"
+	// 7 Khan  8 Noonien  9 city  10 graphics=1  11 level=0  12 minutes=30
+	// level is 0 ON PURPOSE: ANSI is graphics >= 1, and with a truthy level
+	// beside a truthy graphics line, a one-line offset in the read would
+	// still yield ANSI=true and hide the regression.
+	lines := "My BBS\nThe\nSysop\nCOM0\n0 BAUD,N,8,1\n0\nKhan\nNoonien\nSeti Alpha V\n1\n0\n30\n-1\n"
 	p := write(t, "dorinfo1.def", lines)
 	c, err := ParseDropfile(p)
 	if err != nil {
@@ -263,5 +269,23 @@ func TestUnsupportedDropfile(t *testing.T) {
 func TestMissingDropfile(t *testing.T) {
 	if _, err := ParseDropfile("/no/such/door32.sys"); err == nil {
 		t.Error("expected error for missing file")
+	}
+}
+
+// Each line format must reject a file one line too short with an error, not a
+// zero-filled config (PCBOARD's truncation was covered; these were not).
+func TestParseTooShortFilesError(t *testing.T) {
+	cases := []struct{ name, content string }{
+		{"door32.sys", "2\n7\n57600\nImmortal BBS\n42\nJohn Q Sysop\nKhan\n80\n30\n1\n"}, // 10 lines, needs 11
+		{"door.sys", strings.Repeat("x\n", 20)},                                          // 20 lines, needs 21
+		{"dorinfo1.def", strings.Repeat("x\n", 11)},                                      // 11 lines, needs 12
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			p := write(t, c.name, c.content)
+			if _, err := ParseDropfile(p); err == nil {
+				t.Errorf("%s one line short should error", c.name)
+			}
+		})
 	}
 }

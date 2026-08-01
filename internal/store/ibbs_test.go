@@ -1,7 +1,9 @@
 package store
 
 import (
+	"encoding/json"
 	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -67,9 +69,33 @@ func TestRunPlanetaryExportsScores(t *testing.T) {
 	if err := RunPlanetary(w, in, out); err != nil {
 		t.Fatalf("RunPlanetary: %v", err)
 	}
-	// A broadcast score packet should have been written to the outbound dir.
+	// A broadcast score packet should have been written to the outbound dir —
+	// and it must CARRY the scores: an empty or corrupt packet also makes the
+	// dir non-empty, so unmarshal and check the content.
 	entries, _ := os.ReadDir(out)
 	if len(entries) == 0 {
 		t.Fatal("RunPlanetary should have written a score packet")
+	}
+	var found bool
+	for _, ent := range entries {
+		b, err := os.ReadFile(filepath.Join(out, ent.Name()))
+		if err != nil {
+			t.Fatal(err)
+		}
+		var pkt game.Packet
+		if err := json.Unmarshal(b, &pkt); err != nil {
+			t.Fatalf("outbound %s is not a packet: %v", ent.Name(), err)
+		}
+		if pkt.FromBoard != "boardA" {
+			t.Errorf("packet FromBoard = %q, want boardA", pkt.FromBoard)
+		}
+		for _, sc := range pkt.Scores {
+			if sc.Empire == "Player" {
+				found = true
+			}
+		}
+	}
+	if !found {
+		t.Error(`no outbound packet scored the "Player" empire`)
 	}
 }
