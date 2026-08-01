@@ -524,3 +524,36 @@ func TestBulletinNamesTheBoardOnlyInALeague(t *testing.T) {
 		t.Errorf("league board should name itself in the bulletin:\n%s", out)
 	}
 }
+
+// TestRunTurnSurfacesOffersDealsAndMail guards the WIRING of the three
+// turn-start stops — treaty offers, trade-deal barters, and the mail reader —
+// into runTurn. Each is well tested in isolation; without this test, deleting
+// any of the three calls in runTurn passes the whole suite while the player
+// never sees offers or mail again.
+func TestRunTurnSurfacesOffersDealsAndMail(t *testing.T) {
+	w := newWorld()
+	w.AutoPayMaint = true
+	rival := recipients(w)[0]
+	w.World.ProposeTreaty(rival, w.Player(), "Free Trade Agreement")
+	w.Player().TradeDeals = []game.TradeDeal{{From: rival.Name}}
+	w.Player().Mail = []game.Message{{From: "Postmaster", To: "A", When: "07/24/2026  09:00:00", Body: "hi"}}
+	w.Player().Events = []game.Event{{Text: "A dragon attacked your regions."}}
+
+	// One key per stop — recap pause, decline the offer, decline the deal,
+	// quit the mail reader — then filler for however much of the turn runs
+	// before the script ends (the session ending mid-turn is fine: the three
+	// stops have already rendered by then).
+	f := &fakeSession{keys: []rune(" nnq   0000nn")}
+	runTurn(f, w)
+	out := f.out.String()
+
+	for _, marker := range []string{
+		"proposes a",              // reviewTreatyOffers
+		"offers you a trade deal", // reviewTradeDeals
+		"Postmaster",              // readTurnMail's message box
+	} {
+		if !strings.Contains(out, marker) {
+			t.Errorf("runTurn should surface %q, got:\n%s", marker, out)
+		}
+	}
+}

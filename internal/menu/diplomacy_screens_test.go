@@ -66,9 +66,12 @@ func TestRelationsScreenMatchesBRE(t *testing.T) {
 	if findLine(lines, "-*Relations*-") == "" {
 		t.Error("expected BRE's -*Relations*- title")
 	}
+	// Golden literal, not a measure against relationsRuleWidth: the renderer
+	// builds from that same constant, so measuring against it passes even if
+	// the constant drifts off BRE's captured 75 (5─, 15═, 55─).
 	rule := findLine(lines, "═")
-	if n := len([]rune(rule)); n != relationsRuleWidth {
-		t.Errorf("rule is %d columns, want %d: %q", n, relationsRuleWidth, rule)
+	if want := "─────═══════════════───────────────────────────────────────────────────────"; rule != want {
+		t.Errorf("rule:\n got %q\nwant %q", rule, want)
 	}
 	var listed int
 	for _, l := range lines {

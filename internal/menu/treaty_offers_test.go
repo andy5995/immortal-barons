@@ -25,10 +25,12 @@ func TestReviewTreatyOffersAcceptFormsTreatyWithStats(t *testing.T) {
 	if !strings.Contains(out, other.Name) || !strings.Contains(out, "proposes") {
 		t.Errorf("offer notice should name the proposer, got:\n%s", out)
 	}
-	for _, stat := range []string{"Regions", "15", "Net Worth", "Score", "213"} {
-		if !strings.Contains(out, stat) {
-			t.Errorf("offer notice should show the proposer's %q, got:\n%s", stat, out)
-		}
+	// The stats layout itself is pinned exactly by TestTreatyOfferMatchesBRE;
+	// here just tie each figure to its label so a value swapped between fields
+	// fails (a bare Contains("15") matched any number on the screen).
+	plain := sgr.ReplaceAllString(out, "")
+	if !strings.Contains(plain, "Regions: 15 ") || !strings.Contains(plain, "Score: 213 ") {
+		t.Errorf("offer notice should show Regions: 15 and Score: 213, got:\n%s", plain)
 	}
 	if !w.World.HasTreaty(p, other, "Free Trade Agreement") {
 		t.Error("accepting should form the treaty")

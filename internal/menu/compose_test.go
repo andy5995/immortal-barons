@@ -3,37 +3,34 @@ package menu
 import "testing"
 
 // The message editor advertises /S=save /A=abort /C=clear in its header, so a
-// line that is exactly one of those commands must act on it (the reported bug
-// was that only a bare "/" did anything, so "/S" got added as text).
-
-func TestComposeMessageSlashSSaves(t *testing.T) {
-	f := &fakeSession{keys: []rune("Hello\r/S\r")}
-	msg, ok := composeMessage(f)
-	if !ok {
-		t.Fatal("/S should save the message")
+// line that is exactly one of those commands — either case — must act on it
+// (the reported bug was that only a bare "/" did anything, so "/S" got added
+// as text). One table covers the command set; the upper/lowercase rows are the
+// case-folding check.
+func TestComposeMessageCommands(t *testing.T) {
+	cases := []struct {
+		name     string
+		keys     string
+		wantSend bool
+		wantText string // checked only when wantSend
+	}{
+		{"save /S", "hello\rworld\r/S", true, "hello\nworld"},
+		{"save /s lowercase", "Hello\r/s\r", true, "Hello"},
+		{"abort /A", "secret\r/A", false, ""},
+		{"abort /a lowercase", "Hi\r/a\r", false, ""},
+		{"clear /C then save", "oops\r/Ckeep\r/S", true, "keep"},
 	}
-	if msg != "Hello" {
-		t.Fatalf("msg = %q, want %q", msg, "Hello")
-	}
-}
-
-func TestComposeMessageSlashALowercaseAborts(t *testing.T) {
-	f := &fakeSession{keys: []rune("Hi\r/a\r")}
-	msg, ok := composeMessage(f)
-	if ok {
-		t.Fatalf("/a should abort, got ok=true msg=%q", msg)
-	}
-}
-
-func TestComposeMessageSlashCClears(t *testing.T) {
-	// Type a line, clear it, type another, then save: only the second survives.
-	f := &fakeSession{keys: []rune("first\r/Csecond\r/S")}
-	msg, ok := composeMessage(f)
-	if !ok {
-		t.Fatal("/S after /C should save")
-	}
-	if msg != "second" {
-		t.Fatalf("msg = %q, want %q (/C should have cleared 'first')", msg, "second")
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			f := &fakeSession{keys: []rune(c.keys)}
+			text, send := composeMessage(f)
+			if send != c.wantSend {
+				t.Fatalf("send = %v, want %v (text %q)", send, c.wantSend, text)
+			}
+			if c.wantSend && text != c.wantText {
+				t.Errorf("text = %q, want %q", text, c.wantText)
+			}
+		})
 	}
 }
 

@@ -75,11 +75,11 @@ func TestRenderMessageBoxGeometry(t *testing.T) {
 			sep = line
 		}
 	}
-	if n := len([]rune(top)); n != mailBoxWidth {
-		t.Errorf("top rule is %d columns, want %d: %q", n, mailBoxWidth, top)
-	}
-	if !strings.Contains(top, "07/30/2026  00:24:05") {
-		t.Errorf("top rule should carry the stamp, got %q", top)
+	// Golden literal, not a measure against mailBoxWidth: the renderer builds
+	// from that same constant, so measuring against it passes even if the
+	// constant drifts off BRE's captured 76.
+	if want := "┌──────────────────────────────────────────────────07/30/2026  00:24:05─────"; top != want {
+		t.Errorf("top rule:\n got %q\nwant %q", top, want)
 	}
 	if n := len([]rune(sep)); n != mailSepWidth {
 		t.Errorf("separator is %d columns, want %d: %q", n, mailSepWidth, sep)

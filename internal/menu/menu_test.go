@@ -58,10 +58,17 @@ func TestQuitFromGameMenu(t *testing.T) {
 	}
 }
 
-func TestQuitIsCaseInsensitive(t *testing.T) {
+// Hotkeys are letters on some menus, and dispatch is case-folded
+// (unicode.ToUpper in readChoice) — prove it with a lowercase letter. (This
+// test once fed "0", a keystroke with no case, and could not fail.)
+func TestHotkeysAreCaseInsensitive(t *testing.T) {
 	menus := BuildMenus()
-	if _, _, err := run(t, "0", menus.Game); err != nil {
-		t.Fatalf("lowercase quit should work, got %v", err)
+	f, _, err := run(t, "g  0", menus.Game) // lowercase 'g' -> (G) Game Setup, dismiss its pauses, quit
+	if err != nil {
+		t.Fatalf("lowercase hotkey run failed: %v", err)
+	}
+	if !strings.Contains(f.out.String(), "Turns per day") {
+		t.Errorf("lowercase 'g' should open Game Setup, got:\n%s", f.out.String())
 	}
 }
 
@@ -382,6 +389,11 @@ func TestMenuColorRendersTitleAndHotkeys(t *testing.T) {
 	if !strings.Contains(out, ansi.FgBrightMagenta) {
 		t.Error("expected menu color code in drawn output")
 	}
+	// The hotkey half of this test's name: the item's key renders in the
+	// dim-accent parenthesized form, "(" + bright key + ")".
+	if !strings.Contains(sgr.ReplaceAllString(out, ""), "(0) Return") {
+		t.Errorf("expected the (0) hotkey beside its label, got:\n%s", out)
+	}
 }
 
 func TestSetTaxRateViaSystemMenu(t *testing.T) {
@@ -519,8 +531,11 @@ func TestHelpBrowseShowsControls(t *testing.T) {
 	if !strings.Contains(out, "Controls") {
 		t.Error("help browser should list the Controls category")
 	}
-	if !strings.Contains(out, "Moving Through the Menus") && !strings.Contains(out, "Entering Numbers") {
-		t.Error("help browser should render a controls topic")
+	// A BODY phrase, not a topic title: titles are printed by the topic
+	// lightbar before RenderANSI runs, so a title match passes with the render
+	// call deleted.
+	if !strings.Contains(out, "You do not press Enter to pick a menu item") {
+		t.Error("help browser should render the topic body, not just list titles")
 	}
 }
 
@@ -656,12 +671,12 @@ func TestSubmenusUseQuitNotReturn(t *testing.T) {
 // way '0' does.
 func TestEnterActivatesSubmenuQuit(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "\r", menus.Bank)
+	// The real assertion is err == nil: with the DefaultOnEnter hook removed,
+	// Enter is swallowed, the script runs dry, and Run returns io.EOF. (A bare
+	// Contains("Quit") could never fail — the menu always draws that label.)
+	_, _, err := run(t, "\r", menus.Bank)
 	if err != nil {
-		t.Fatalf("got %v", err)
-	}
-	if !strings.Contains(f.out.String(), "Quit") {
-		t.Errorf("expected Enter to show/select Quit, got:\n%s", f.out.String())
+		t.Fatalf("Enter should trigger the default Quit and end Run cleanly, got %v", err)
 	}
 }
 
@@ -687,33 +702,6 @@ func TestEnterExitsSpendingRespectsPreference(t *testing.T) {
 		t.Fatal(err)
 	} else if it == nil || it.Key != '0' {
 		t.Errorf("pref off: Enter should be ignored (not select Quit), then '0' selects; got %v", it)
-	}
-}
-
-func TestComposeMessageSaves(t *testing.T) {
-	f := &fakeSession{keys: []rune("hello\rworld\r/S")} // two lines, then /S
-	text, send := composeMessage(f)
-	if !send {
-		t.Fatal("expected save")
-	}
-	if text != "hello\nworld" {
-		t.Errorf("text = %q, want %q", text, "hello\nworld")
-	}
-}
-
-func TestComposeMessageAborts(t *testing.T) {
-	f := &fakeSession{keys: []rune("secret\r/A")} // one line, then /A
-	_, send := composeMessage(f)
-	if send {
-		t.Error("expected abort (send=false)")
-	}
-}
-
-func TestComposeMessageClearThenSave(t *testing.T) {
-	f := &fakeSession{keys: []rune("oops\r/Ckeep\r/S")} // clear, then one line, save
-	text, send := composeMessage(f)
-	if !send || text != "keep" {
-		t.Errorf("after clear: text=%q send=%v, want %q true", text, send, "keep")
 	}
 }
 
