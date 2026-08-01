@@ -126,3 +126,32 @@ func TestAllianceStrengthMatchesBRE(t *testing.T) {
 		t.Errorf("Total Forces must line up with the ally rows:\n%q\n%q", row, total)
 	}
 }
+
+// Relations gains an "Awaiting a reply" list of the proposals YOU sent — BRE
+// shows them nowhere, so a request you made looks identical to one you never
+// sent (#92).
+func TestRelationsShowsOutgoingProposals(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	target := recipients(w)[0]
+	w.World.ProposeTreaty(p, target, "Free Trade Agreement")
+
+	f := &fakeSession{}
+	viewDiplomacy(f, w)
+	out := sgr.ReplaceAllString(f.out.String(), "")
+
+	if !strings.Contains(out, "Awaiting a reply:") {
+		t.Fatalf("expected the outgoing-proposal list, got:\n%s", out)
+	}
+	if !strings.Contains(out, target.Name+" — Free Trade Agreement") {
+		t.Errorf("expected the target and pact, got:\n%s", out)
+	}
+
+	// Once answered it disappears.
+	w.World.DeclineTreaty(target, p.Name, "Free Trade Agreement")
+	f2 := &fakeSession{}
+	viewDiplomacy(f2, w)
+	if strings.Contains(f2.out.String(), "Awaiting a reply:") {
+		t.Error("an answered proposal should stop being listed")
+	}
+}

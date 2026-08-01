@@ -25,6 +25,11 @@
   rivers could see millions of gold appear one turn and vanish the next, and a
   food supply that only arrives about one turn in three is hard to count on when
   people are hungry.
+- View Treaties shows the treaty offers you have sent and nobody has answered
+  yet. In BRE you cannot see them at all: a realm you asked for a pact looks the
+  same as a realm you never wrote to, so it is easy to send the same request
+  twice, or to wait for a reply to a request you never sent. This tells you only
+  about your own offers, so it does not show you anything about other players.
 - Some game values — such as attack rewards, unit prices, and economy rates —
   may not match BRE exactly. The game aims to get as close as it can, using
   BRE's own numbers where they are known. A few mechanics are still being built.

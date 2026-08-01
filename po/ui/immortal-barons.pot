@@ -233,6 +233,10 @@ msgstr ""
 msgid "Average Turn Around Times to All BBSes"
 msgstr ""
 
+#: internal/menu/actions_diplomacy.go:456
+msgid "Awaiting a reply:"
+msgstr ""
+
 #: internal/menu/helpbrowse.go:245
 msgid "Back"
 msgstr ""
@@ -1085,7 +1089,7 @@ msgstr ""
 msgid "Regular Attack"
 msgstr ""
 
-#: internal/menu/actions_diplomacy.go:436
+#: internal/menu/actions_diplomacy.go:446
 msgid "Relations"
 msgstr ""
 

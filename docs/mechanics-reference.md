@@ -1152,6 +1152,21 @@ about three and a half hours, each one line, in BRE's wording —
 "declined"). IB files the same two lines (`notifyProposer` in
 `internal/game/diplomacy.go`), for AI answers as well as human ones.
 
+**IB shows the proposals you sent; BRE shows them nowhere (#92, DELIBERATE
+DIVERGENCE).** A proposal is stored on the *recipient*, so in BRE the sender's
+View Treaties still reads `None` for that realm — indistinguishable from one they
+never contacted. IB derives the sender's list by scanning (`ProposalsFrom`) and
+prints it as an "Awaiting a reply" block under the Relations table; no new state
+is stored, so the two views cannot drift. Safe because your own outgoing offers
+are information you already hold — nothing about another realm is revealed.
+
+Two rules go with it. A proposal **does not expire**: it stands until the target
+accepts, rejects, or is eliminated. And a **new proposal to the same realm
+replaces the pending one**, for the same reason a pair holds one relation at a
+time (#88) — only one can ever be agreed, so leaving both live would let a realm
+accept a pact the proposer had already thought better of. Re-sending the
+*identical* type is still a no-op and does not mail them twice.
+
 The recap itself is styled as BRE styles it: each entry sits under its own
 76-column rule carrying a 1-based counter and the real date and time the thing
 happened (`eventRule` in `internal/menu/gameflow.go`; layout and colors in

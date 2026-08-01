@@ -219,21 +219,58 @@ func (w *World) ProposeTreaty(from, to *Empire, ttype string) {
 
 // ProposeTreatyWithMessage records a pending offer of ttype from `from` to `to`
 // with an optional attached message, and mails the target. No-op if they already
-// hold that treaty or an identical offer is pending.
+// hold that treaty.
+//
+// A new proposal REPLACES any other still-unanswered proposal to the same realm
+// (#92), for the same reason a pair holds one relation at a time (#88): only one
+// of them can ever be agreed, so leaving both pending would let a realm answer a
+// pact you had already thought better of.
 func (w *World) ProposeTreatyWithMessage(from, to *Empire, ttype, message string) {
 	if w.HasTreaty(from, to, ttype) {
 		return
 	}
 	for _, o := range to.TreatyOffers {
 		if o.From == from.Name && o.Type == ttype {
-			return
+			return // already asked for exactly this; don't mail them twice
 		}
 	}
-	to.TreatyOffers = append(to.TreatyOffers, TreatyOffer{From: from.Name, Type: ttype, Message: message})
+	kept := to.TreatyOffers[:0]
+	for _, o := range to.TreatyOffers {
+		if o.From != from.Name {
+			kept = append(kept, o)
+		}
+	}
+	to.TreatyOffers = append(kept, TreatyOffer{From: from.Name, Type: ttype, Message: message})
 	w.SendMail(from, to, Message{
 		To:   w.EmpireLetter(to),
 		Body: fmt.Sprintf("Proposes a %s (respond in the Diplomacy menu).", ttype),
 	})
+}
+
+// PendingProposal is one treaty offer YOU sent that has not been answered yet.
+type PendingProposal struct {
+	To   string
+	Type string
+}
+
+// ProposalsFrom returns the still-unanswered offers `from` has sent. A proposal
+// is stored on the RECIPIENT, so the sender's own list is derived by scanning
+// rather than by keeping a second copy that could drift out of step (#92).
+// Proposals do not expire: they stand until the other realm accepts, rejects, or
+// is eliminated.
+func (w *World) ProposalsFrom(from *Empire) []PendingProposal {
+	var out []PendingProposal
+	for _, e := range w.Empires {
+		if !e.Alive || e == from {
+			continue
+		}
+		for _, o := range e.TreatyOffers {
+			if o.From == from.Name {
+				out = append(out, PendingProposal{To: e.Name, Type: o.Type})
+			}
+		}
+	}
+	return out
 }
 
 // AcceptTreaty forms the treaty if `me` has a matching pending offer, consuming

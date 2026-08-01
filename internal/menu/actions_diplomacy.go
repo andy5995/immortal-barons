@@ -411,11 +411,21 @@ const (
 // treaty, so the roster doubles as the empire-letter key. Colors are the
 // original's: the brackets and rules blue, the letter bright white, the name
 // bright cyan, the relation bright blue.
+//
+// IB ADDS a short "Awaiting a reply" list under the table (#92). In BRE a
+// proposal you sent is invisible — the target still reads "None", exactly like a
+// realm you never contacted — so there is no way to tell a request you made from
+// one you only meant to make. It is a safe divergence: your own outgoing
+// proposals are information you already have, so it reveals nothing about anyone
+// else. It sits below the table rather than in the Relations column because a
+// pact plus a pending type would overflow 80 columns.
 func viewDiplomacy(s session.Session, w *ctx) Result {
 	p := w.Player()
 	type row struct{ id, name, treaties string }
 	var rows []row
+	var pending []game.PendingProposal
 	w.With(func() {
+		pending = w.ProposalsFrom(p)
 		for _, e := range w.Empires {
 			if e == p || !e.Alive {
 				continue
@@ -442,6 +452,13 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 			ansi.FgBrightCyan, relationsNameWidth, r.name, ansi.FgBrightBlue, r.treaties, ansi.Reset)
 	}
 	fmt.Fprintln(s, rule)
+	if len(pending) > 0 {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "Awaiting a reply:"), ansi.Reset)
+		for _, o := range pending {
+			fmt.Fprintf(s, "  %s%s%s — %s%s%s\n", ansi.FgBrightCyan, o.To, ansi.FgWhite,
+				ansi.FgBrightYellow, tr(s, o.Type), ansi.Reset)
+		}
+	}
 	pause(s)
 	return Stay
 }

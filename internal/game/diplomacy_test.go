@@ -328,3 +328,41 @@ func TestAllyDefenders30Pct(t *testing.T) {
 		t.Errorf("bleedAllies(20%%): want Beta 940 troopers / 470 tanks, got %d / %d", b.Troopers, b.Tanks)
 	}
 }
+
+// A proposal is stored on the recipient, so the sender's pending list is derived
+// by scanning (#92).
+func TestProposalsFromListsWhatYouSent(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	c := w.AddHuman("c", "Gamma")
+
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.ProposeTreaty(c, a, fullDefenseAlliance) // incoming, not ours
+
+	got := w.ProposalsFrom(a)
+	if len(got) != 1 || got[0].To != b.Name || got[0].Type != fullDefenseAlliance {
+		t.Fatalf("want only the offer a sent to b, got %v", got)
+	}
+	if w.AcceptTreaty(b, a.Name, fullDefenseAlliance); len(w.ProposalsFrom(a)) != 0 {
+		t.Error("an answered proposal should leave the pending list")
+	}
+}
+
+// Proposing a different pact to the same realm replaces the pending one, since
+// only one can ever be agreed (#88/#92).
+func TestSecondProposalReplacesThePending(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.ProposeTreaty(a, b, "Free Trade Agreement")
+
+	if len(b.TreatyOffers) != 1 || b.TreatyOffers[0].Type != "Free Trade Agreement" {
+		t.Fatalf("want only the newer offer pending, got %v", b.TreatyOffers)
+	}
+	if got := w.ProposalsFrom(a); len(got) != 1 || got[0].Type != "Free Trade Agreement" {
+		t.Errorf("sender's list should follow, got %v", got)
+	}
+}
