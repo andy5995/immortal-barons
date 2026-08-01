@@ -62,6 +62,12 @@ stream). Front-ends attach different streams; the engine is unchanged.
 - `internal/door` — dropfile parsing (`DOOR32.SYS`/`DOOR.SYS`)
 - `internal/help` — embedded categorized Markdown help + Markdown→ANSI renderer,
   per-language content (`content/`, `content.de/`, `content.ru/`)
+- `internal/docsite` + `cmd/barons-docs` — assembles the documentation website
+  from the committed Markdown, so the site and the in-game help share one
+  source. `go run ./cmd/barons-docs -out build/docs` writes `site-src/` and a
+  generated `mkdocs.yml`; **`build/` is gitignored, so edit the generator, never
+  its output.** The site's topic section is titled "Game Instructions" to match
+  the in-game menu — it renders the same `internal/help` topics.
 - `internal/i18n` — dependency-free gettext-PO reader for UI strings
 
 `menu.go` is the framework; `tree.go` is content. That split is the seam
@@ -94,6 +100,19 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   `want := 500*RegularAttackCapturePct/100` follows a retune silently; `want :=
   50` fails and forces new evidence, which is the point of the fidelity
   contract. Mirroring a `balance.go` constant is fine only for a playtest knob.
+- **A fixed-seed test may only assert what holds on OTHER seeds.** A macro
+  balance outcome ("nobody is eliminated", "no realm survives below N regions")
+  is a property of the whole simulation, and one seed is one trajectory.
+  `TestGroundDownRealmsGetFinished` asserted a second claim that was false about
+  0.9 times per run across 24 seeds; it passed only because its chosen seed
+  never hit it, and that surfaced only when an unrelated config change
+  reshuffled the run (f783c13). Run several seeds and assert the property, or
+  assert an exact computed figure — those stay deterministic.
+- **When deleting a component, grep the whole tree with NO extension filter.**
+  An `--include=*.go --include=*.md --include=*.yml` sweep cannot match a `.sh`
+  file, which is how the web removal left `scripts/build-archives.sh` building a
+  deleted command and broke every release build (37a897e). Shell scripts,
+  Makefiles and CI YAML all reference paths.
 - **Save-format back-compat needs a frozen fixture**, not a struct the test
   zeroes and re-saves: the same marshaller on both sides can't catch a renamed
   JSON key. See `internal/store/testdata/world-v0.0.3.json`, which pins the
