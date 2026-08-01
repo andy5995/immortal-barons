@@ -130,14 +130,20 @@ const macroMaxLen = 127
 // same Ctrl-<letter> to end the edit. In game the macro replays when the player
 // presses Ctrl-<letter> (see session.MacroExpander).
 func writeMacros(s session.Session, w *ctx) Result {
-	p := w.Player()
-	if p.Macros == nil {
-		p.Macros = map[string]string{}
-	}
+	// Snapshot for display only — no unlocked writes to the shared empire. The
+	// save path (mutatePlayer below) does its own nil-map init under the lock,
+	// and delete on a nil map is a no-op, so nothing here needs to initialize
+	// p.Macros.
+	macros := map[string]string{}
+	withPlayer(w, func(p *game.Empire) {
+		for k, v := range p.Macros {
+			macros[k] = v
+		}
+	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Macro Editor"), ansi.Reset)
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightCyan, InsetRule, ansi.Reset)
 	for _, k := range macroKeys {
-		val := p.Macros[string(k)]
+		val := macros[string(k)]
 		if val == "" {
 			val = tr(s, "None")
 		}
