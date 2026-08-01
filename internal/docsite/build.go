@@ -73,6 +73,9 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	nav := []navNode{{title: "Home", path: "index.md"}}
 	// FAQ sits right after Home so it is easy to find in the nav/tabs.
 	nav = append(nav, navNode{title: "FAQ", path: "faq/index.md"})
+	// Command Reference next: it is the page a returning sysop wants fastest,
+	// so it sits above the long Game Instructions section rather than below it.
+	nav = append(nav, navNode{title: "Command Reference", path: "command-reference/index.md"})
 
 	// Game Instructions: an overview, then a group per category in the help's
 	// fixed order. It is the one deep section, so it collapses in the sidebar.
@@ -94,7 +97,6 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 
 	nav = append(nav, navNode{title: "Door Setup", path: "door-setup/index.md"})
 	nav = append(nav, navNode{title: "Character Set", path: "charset/index.md"})
-	nav = append(nav, navNode{title: "Command Reference", path: "command-reference/index.md"})
 	nav = append(nav, navNode{title: "Translating", path: "translating/index.md"})
 
 	// Developers: one leaf per English dev doc, titled from its first heading.
