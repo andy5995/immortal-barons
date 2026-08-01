@@ -7,9 +7,9 @@ Stable versions are on the
 
 ## Development snapshots
 
-Snapshots are built automatically from the latest source. They change often,
-and they may be less stable than a tagged release. Get them from the
-[snapshot release](https://github.com/andy5995/immortal-barons/releases/tag/snapshot).
+[Snapshots](https://github.com/andy5995/immortal-barons/releases/tag/snapshot)
+are built automatically from the latest source. They change often and may be
+less stable than a tagged release.
 
 ## Which file do I need?
 
