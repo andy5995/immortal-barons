@@ -28,14 +28,12 @@ for target in windows/386 windows/amd64 linux/amd64 linux/arm64 darwin/amd64 dar
 	dir="immortal-barons-${ver}-${os}-${arch}"
 	echo "==> building $name ($dir)"
 	mkdir -p "$dir"
-	for cmd in immortal-barons immortal-barons-web; do
-		GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags "-s -w" \
-			-o "$dir/${cmd}${ext}" "./cmd/$cmd"
-	done
+	GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags "-s -w" \
+		-o "$dir/immortal-barons${ext}" ./cmd/immortal-barons
 	cp LICENSE README.md "$dir/"
 	mkdir -p "$dir/docs"
 	cp docs/faq.md docs/playing.md docs/command-reference.md docs/door-setup.md \
-		docs/charset.md docs/webserver.md docs/translating.md "$dir/docs/"
+		docs/charset.md docs/download.md docs/translating.md "$dir/docs/"
 	if [ "$os" = windows ]; then
 		zip -qr "dist/${name}.zip" "$dir"
 	else
