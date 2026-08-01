@@ -53,17 +53,12 @@ below.
 
 ## Download
 
-Tagged releases are on the
-[releases page](https://github.com/andy5995/immortal-barons/releases).
+Tagged releases and development snapshots are on the
+[releases page](https://github.com/andy5995/immortal-barons/releases). Builds
+are provided for Windows, Linux, and macOS.
 
-**Development snapshots** are also available. Snapshots are rebuilt
-automatically from the latest source, so they change often and may be less
-stable than a tagged release. Get them from the
-[snapshot release](https://github.com/andy5995/immortal-barons/releases/tag/snapshot).
-
-Builds are provided for Windows (32-bit and 64-bit), Linux (x86-64 and ARM64),
-and macOS (Intel and Apple Silicon). The binaries are not signed, so Windows may
-show a SmartScreen warning the first time you run one.
+See [Download](docs/download.md) for which file to pick, and what to expect the
+first time you run it.
 
 To build from source instead, see below.
 

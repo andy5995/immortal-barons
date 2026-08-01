@@ -15,6 +15,7 @@ func writeFixture(t *testing.T, root string) {
 		"docs/playing.md":                             "# Playing\n\nHow to play.\n",
 		"docs/door-setup.md":                          "# Door Setup\n\nSetup.\n",
 		"docs/command-reference.md":                   "# Command Reference\n\nAll options.\n",
+		"docs/download.md":                            "# Download\n\nReleases and snapshots.\n",
 		"docs/faq.md":                                 "# FAQ\n\nQuestions.\n",
 		"docs/translating.md":                         "# Translating\n\nHow to translate.\n",
 		"docs/dev/packets.md":                         "# Packet Format\n\nDev reference.\n",
@@ -54,6 +55,7 @@ func TestAssembleLayout(t *testing.T) {
 		"site-src/en/guide/controls/interface.md", // help topic
 		"site-src/en/door-setup/index.md",         // door setup (was sysop guide)
 		"site-src/en/command-reference/index.md",  // command reference (#34)
+		"site-src/en/download/index.md",           // download page
 		"site-src/en/faq/index.md",                // faq
 		"site-src/en/translating/index.md",        // translating guide
 		"site-src/en/developers/packets.md",       // dev doc (en only)
@@ -99,6 +101,7 @@ func TestAssembleNavAndConfig(t *testing.T) {
 		`- "Game Instructions":`, // the one collapsible nav section; matches the in-game label
 		`- "Door Setup": door-setup/index.md`,
 		`- "Command Reference": command-reference/index.md`,
+		`- "Download": download/index.md`,
 		`- "FAQ": faq/index.md`,
 		`- "Translating": translating/index.md`,
 		`- "Packet Format": developers/packets.md`, // dev nav titled from its H1

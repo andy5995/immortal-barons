@@ -76,6 +76,7 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	// Command Reference next: it is the page a returning sysop wants fastest,
 	// so it sits above the long Game Instructions section rather than below it.
 	nav = append(nav, navNode{title: "Command Reference", path: "command-reference/index.md"})
+	nav = append(nav, navNode{title: "Download", path: "download/index.md"})
 
 	// Game Instructions: an overview, then a group per category in the help's
 	// fixed order. It is the one deep section, so it collapses in the sidebar.
