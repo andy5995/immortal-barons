@@ -27,12 +27,15 @@ generic.
 ```
 go build ./...
 go test ./...
+go test ./internal/play/ -race        # the concurrency tests — run these when touching the store
 go run ./cmd/immortal-barons -local   # play locally in your terminal
 gofmt -w .                 # always run before committing
+python3 scripts/gen-ui-pot.py && scripts/merge-ui-po.sh   # after changing ANY tr() string
 ```
 
-Go 1.26. Prefer the standard library, but a dependency is fine when it
-clearly earns its place (current deps: `golang.org/x/term`, `golang.org/x/sys`).
+Go 1.26. Prefer the standard library, but a dependency is fine when it clearly
+earns its place (current deps: `golang.org/x/term`, `golang.org/x/text`,
+`golang.org/x/sys`, and `tcell/v2` + `tview` for the config-editor TUI).
 Keep the set small and justified. Commit `go.mod`/`go.sum`; do NOT commit
 `vendor/` (distros build against their own packaged deps or fetch at build); a
 release tarball may `go mod vendor` for offline builds. i18n uses gettext/PO:
@@ -81,6 +84,21 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   name. Only structural literals (`0`, `1`, `100` for percent math) stay inline.
 - Tests use a scripted fake `Session` (see `internal/menu/menu_test.go`) and
   a fixed RNG seed via `game.NewSeed` for determinism.
+- **A scripted key sequence must assert it REACHED the screen it tests.** When
+  the script runs dry the session ends *cleanly*, so any flow change upstream
+  (a new prompt, a re-mapped hotkey) leaves the test green while it never gets
+  to the code it covers. Two tests had rotted this way — one for weeks, after a
+  first-run language picker ate one key and shifted every key after it. Assert a
+  marker unique to the target screen plus a state effect (`TurnsPlayed`
+  increased, the treaty formed), never just "produced some output".
+- **Assert BRE-verified numbers as golden literals, not as the constant.**
+  `want := 500*RegularAttackCapturePct/100` follows a retune silently; `want :=
+  50` fails and forces new evidence, which is the point of the fidelity
+  contract. Mirroring a `balance.go` constant is fine only for a playtest knob.
+- **Save-format back-compat needs a frozen fixture**, not a struct the test
+  zeroes and re-saves: the same marshaller on both sides can't catch a renamed
+  JSON key. See `internal/store/testdata/world-v0.0.3.json`, which pins the
+  legacy `Bulletin` alias and string-form events.
 - **`docs/mechanics-reference.md` is the authoritative spec — refresh it in the
   same change that touches a mechanic.** This is where the numbers *and* the
   build-status notes live, not CLAUDE.md. When you implement or change a
@@ -200,10 +218,15 @@ group attacks, and exports scores/news. **Localization**: help docs (po4a) and
 UI strings (`internal/i18n`) render in the caller's language; de/ru are seeded
 and grow via the `.po` catalogs.
 
-**Screen fidelity**: menus, tables, prompts, combat/raid reports, and the four
-advisor pages match BRE's captured layout and ANSI colors — figures are
-highlighted (bright-white or yellow) against dimmer body text, per
-`docs/dev/bre-screens.md`.
+**Screen fidelity**: menus, tables, prompts, combat/raid reports, the four
+advisor pages, and the diplomacy screens (incoming treaty offer, View Treaties'
+`-*Relations*-` roster, Alliance Strength) match BRE's captured layout and ANSI
+colors — figures are highlighted (bright-white or yellow) against dimmer body
+text, per `docs/dev/bre-screens.md`. Two **deliberate readability divergences**
+are recorded there and must not be "corrected" back: IB comma-groups figures BRE
+prints bare, and the offer's stats line separates fields with `│` where BRE uses
+`; `. IB also lists the treaty offers you have SENT, which BRE shows nowhere
+(#92).
 
 Key gameplay knobs are constants in `balance.go`, but they are no longer all
 free to tune: a growing set is **binary-verified** and marked as such in that

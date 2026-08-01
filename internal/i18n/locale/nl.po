@@ -36,12 +36,8 @@ msgstr ""
 msgid "%d %s purchased."
 msgstr ""
 
-#: internal/menu/actions_regions.go:180
+#: internal/menu/actions_regions.go:176
 msgid "%d %s regions purchased. Gold: %d"
-msgstr ""
-
-#: internal/menu/actions_interbbs.go:335
-msgid "%d days ago"
 msgstr ""
 
 #: internal/menu/gameflow.go:534
@@ -68,7 +64,7 @@ msgstr ""
 msgid "%s  You have %s gold."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:412
+#: internal/menu/actions_interbbs.go:394
 msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
 msgstr ""
 
@@ -132,7 +128,7 @@ msgstr ""
 msgid "(the whole planet)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:494
+#: internal/menu/actions_interbbs.go:476
 msgid "(your current vote)"
 msgstr ""
 
@@ -142,10 +138,6 @@ msgstr ""
 
 #: internal/menu/actions_message.go:149
 msgid "/-Command?"
-msgstr ""
-
-#: internal/menu/actions_interbbs.go:333
-msgid "1 day ago"
 msgstr ""
 
 #: internal/menu/actions_info.go:640
@@ -307,7 +299,7 @@ msgstr "Kopen"
 msgid "Buy Food"
 msgstr "Voedsel kopen"
 
-#: internal/menu/actions_regions.go:143
+#: internal/menu/actions_regions.go:139
 msgid "Buy Regions — %d gold each."
 msgstr ""
 
@@ -416,11 +408,11 @@ msgstr "Groepsaanval maken"
 msgid "Current SDI Strength: %d%%"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:543
+#: internal/menu/actions_interbbs.go:525
 msgid "Current league diplomacy:"
 msgstr ""
 
-#: internal/menu/actions.go:242
+#: internal/menu/actions.go:248
 msgid "Current tax rate: %d%%"
 msgstr ""
 
@@ -448,7 +440,7 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: internal/menu/mailreader.go:174
+#: internal/menu/mailreader.go:169
 msgid "Delete,"
 msgstr ""
 
@@ -496,11 +488,11 @@ msgstr ""
 msgid "Edit which (S = save & exit, Q = cancel)?"
 msgstr ""
 
-#: internal/menu/actions.go:148
+#: internal/menu/actions.go:154
 msgid "Edit which macro [D,E,F,R,I,O,K,L]?"
 msgstr ""
 
-#: internal/menu/actions.go:171
+#: internal/menu/actions.go:177
 msgid "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit."
 msgstr ""
 
@@ -596,7 +588,7 @@ msgstr ""
 msgid "How many %s?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:462
+#: internal/menu/actions_interbbs.go:444
 msgid "How many agents to send?"
 msgstr ""
 
@@ -648,7 +640,7 @@ msgstr ""
 msgid "Ignore"
 msgstr ""
 
-#: internal/menu/mailreader.go:175
+#: internal/menu/mailreader.go:170
 msgid "Ignore, or"
 msgstr ""
 
@@ -745,7 +737,7 @@ msgstr "Deelnemen aan groepsaanval"
 msgid "Join which attack?"
 msgstr ""
 
-#: internal/menu/actions_regions.go:49
+#: internal/menu/actions_regions.go:45
 msgid "Key"
 msgstr ""
 
@@ -777,7 +769,7 @@ msgstr "Taal:"
 msgid "Last Planetary Master: %s"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:561
+#: internal/menu/actions_interbbs.go:543
 msgid "League diplomacy updated. It will be broadcast to the league."
 msgstr ""
 
@@ -797,15 +789,15 @@ msgstr "Investeringen / Leningen weergeven"
 msgid "Loans Due"
 msgstr ""
 
-#: internal/menu/actions.go:213
+#: internal/menu/actions.go:219
 msgid "Macro Ctrl-%c cleared."
 msgstr ""
 
-#: internal/menu/actions.go:211
+#: internal/menu/actions.go:217
 msgid "Macro Ctrl-%c saved."
 msgstr ""
 
-#: internal/menu/actions.go:137
+#: internal/menu/actions.go:143
 msgid "Macro Editor"
 msgstr ""
 
@@ -870,11 +862,11 @@ msgstr ""
 msgid "NONE"
 msgstr ""
 
-#: internal/menu/actions_regions.go:234
+#: internal/menu/actions_regions.go:230
 msgid "NOTE: You cannot sell Regions, only drop them..."
 msgstr ""
 
-#: internal/menu/actions_regions.go:49
+#: internal/menu/actions_regions.go:45
 msgid "Name"
 msgstr ""
 
@@ -894,11 +886,11 @@ msgstr ""
 msgid "New amount of %s for sale"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:544
+#: internal/menu/actions_interbbs.go:526
 msgid "New league diplomacy declaration (blank to keep)"
 msgstr ""
 
-#: internal/menu/actions.go:245
+#: internal/menu/actions.go:251
 msgid "New tax rate?"
 msgstr ""
 
@@ -906,7 +898,7 @@ msgstr ""
 msgid "No Data"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:363
+#: internal/menu/actions_interbbs.go:345
 msgid "No barons are known on that planet yet."
 msgstr ""
 
@@ -930,7 +922,7 @@ msgstr ""
 msgid "No planetary bulletins."
 msgstr ""
 
-#: internal/menu/actions.go:142
+#: internal/menu/actions.go:148
 msgid "None"
 msgstr ""
 
@@ -939,7 +931,7 @@ msgid ""
 "None of these realms can be attacked — they are protected or allied with you."
 msgstr ""
 
-#: internal/menu/actions_regions.go:144
+#: internal/menu/actions_regions.go:140
 msgid ""
 "Note: Region prices rise as you expand, so the price shown is only\n"
 "      the cost of the first region you buy."
@@ -959,7 +951,7 @@ msgid ""
 "on the granary."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:540
+#: internal/menu/actions_interbbs.go:522
 msgid "Only the BBS Coordinator may set league diplomacy."
 msgstr ""
 
@@ -1031,7 +1023,7 @@ msgstr ""
 msgid "Overdue debt: $%s (grows each turn until repaid)"
 msgstr ""
 
-#: internal/menu/actions_regions.go:49
+#: internal/menu/actions_regions.go:45
 msgid "Owned"
 msgstr ""
 
@@ -1138,7 +1130,7 @@ msgstr ""
 msgid "Repay some now?"
 msgstr ""
 
-#: internal/menu/mailreader.go:173
+#: internal/menu/mailreader.go:168
 msgid "Reply,"
 msgstr ""
 
@@ -1290,7 +1282,7 @@ msgstr "Uitgavenmenu"
 msgid "Spy Database"
 msgstr "Spionagedatabase"
 
-#: internal/menu/actions_interbbs.go:410
+#: internal/menu/actions_interbbs.go:392
 msgid "Spy Database:"
 msgstr ""
 
@@ -1334,7 +1326,7 @@ msgstr ""
 msgid "Tariff Trade Agreement"
 msgstr "Tariefhandelsverdrag"
 
-#: internal/menu/actions.go:251
+#: internal/menu/actions.go:257
 msgid "Tax rate set to %d%%."
 msgstr ""
 
@@ -1368,7 +1360,7 @@ msgstr "Terreurpreventie"
 msgid "That empire has none of those for sale."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:399
+#: internal/menu/actions_interbbs.go:381
 msgid "That interplanetary operation is not yet available."
 msgstr ""
 
@@ -1392,7 +1384,7 @@ msgstr ""
 msgid "The R5-Slappenheimer is disabled."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:507
+#: internal/menu/actions_interbbs.go:489
 msgid "The current BBS Coordinator is %s."
 msgstr ""
 
@@ -1428,11 +1420,11 @@ msgstr ""
 msgid "The remaining %d%% is turned into gold."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:407
+#: internal/menu/actions_interbbs.go:389
 msgid "The spy database is empty. Spy on empires on other planets to fill it."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:503
+#: internal/menu/actions_interbbs.go:485
 msgid "There are no barons to vote for yet."
 msgstr ""
 
@@ -1587,7 +1579,7 @@ msgstr "Handelsmenu tonen"
 msgid "Visit the Food Market to feed them, or they will starve."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:513
+#: internal/menu/actions_interbbs.go:495
 msgid "Vote for (0 to cancel)?"
 msgstr ""
 
@@ -1659,7 +1651,7 @@ msgstr ""
 msgid "While you were at the menus, this has happened:"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:509
+#: internal/menu/actions_interbbs.go:491
 msgid "Who should be the BBS Coordinator?"
 msgstr ""
 
@@ -1691,7 +1683,7 @@ msgstr ""
 msgid "You broke the %s with %s."
 msgstr ""
 
-#: internal/menu/actions_regions.go:145
+#: internal/menu/actions_regions.go:141
 msgid "You can afford %s%d%s regions."
 msgstr ""
 
@@ -1707,7 +1699,7 @@ msgstr ""
 msgid "You cannot cover all your maintenance this turn."
 msgstr ""
 
-#: internal/menu/actions_regions.go:199
+#: internal/menu/actions_regions.go:195
 msgid "You captured %d regions — choose which types to hold them as."
 msgstr ""
 
@@ -1835,7 +1827,7 @@ msgstr ""
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:444
+#: internal/menu/actions_interbbs.go:426
 msgid "Your agents infiltrated %s on %s; the report is in the Spy Database."
 msgstr ""
 
@@ -1847,7 +1839,7 @@ msgstr ""
 msgid "Your armed forces require %s gold."
 msgstr ""
 
-#: internal/menu/actions_regions.go:103
+#: internal/menu/actions_regions.go:99
 msgid "Your choice?"
 msgstr ""
 
@@ -1915,15 +1907,15 @@ msgstr ""
 msgid "Your realm will be named %s."
 msgstr "Je rijk krijgt de naam %s."
 
-#: internal/menu/actions_interbbs.go:473
+#: internal/menu/actions_interbbs.go:455
 msgid "Your terrorists depart for %s on %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:525
+#: internal/menu/actions_interbbs.go:507
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 
-#: internal/menu/actions_regions.go:207
+#: internal/menu/actions_regions.go:203
 msgid "[%d Regions left] Your choice?"
 msgstr ""
 
@@ -2052,10 +2044,6 @@ msgstr ""
 
 #: internal/menu/actions_interbbs.go:147
 msgid "the whole planet"
-msgstr ""
-
-#: internal/menu/actions_interbbs.go:331
-msgid "today"
 msgstr ""
 
 #: internal/menu/gameflow.go:409
