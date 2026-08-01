@@ -1,27 +1,22 @@
 (in-progress:)
-  * config-during-reset: A day is now 10 turns by default, down from 15
-  * Game Setup now shows the whole ruleset over two screens, not five lines
-  * The Daily Bulletin no longer prefixes its title with the board name on
-    a stand-alone board
-  * When you propose a treaty, you are now told whether the other realm
-    accepted or rejected it
-  * The "since your last play" list now numbers each item and shows the
-    date and time it happened, like the original
-  * New mail is now shown at the start of a turn instead of asking first.
-    Enter no longer answers the message prompt, so you cannot skip past an
-    unread message by accident; use R, D, I or Q
-  * Message boxes now match the original's size, and show the time a
-    message was sent, not only the date
-  * An incoming treaty offer, the Relations list (View Treaties) and the
-    Alliance Strength table now match the original's layout and colors.
-    Relations lists every realm, not only the ones you have a pact with,
-    and Alliance Strength gained a Total Forces line. Large numbers keep
-    their commas, which the original does not use on these screens
-  * View Treaties now lists the treaty offers you have sent that nobody
-    has answered yet, which the original never shows you (#92). Sending a
-    different offer to the same realm replaces the one still waiting
-  * The web server has been removed (considering replacing it with an SSH
-    server)
+  * config-during-reset: A day is now 10 turns by default, and a new realm
+    gets 15 turns of protection
+  * Game Setup now shows the whole ruleset
+  * The Daily Bulletin title omits the board name on a stand-alone board
+  * You are now told whether a realm accepted or rejected your treaty offer
+  * Each "since your last play" item is now numbered and timestamped
+  * New mail is shown at the start of a turn instead of asking first
+  * Enter is now ignored at the message prompt, so you cannot skip an
+    unread message by accident
+  * Message boxes match the original's size and show when a message was sent
+  * Treaty offers, View Treaties and Alliance Strength match the original's
+    layout and colors
+  * View Treaties lists every realm
+  * Alliance Strength gained a Total Forces line
+  * View Treaties now lists the treaty offers you have sent that nobody has
+    answered yet (#92)
+  * A new treaty offer to the same realm replaces the one still waiting
+  * The web server has been removed (an SSH server may replace it)
 
 2026-07-31 (v0.0.3)
   * Updating from an earlier version requires a game reset (-reset)

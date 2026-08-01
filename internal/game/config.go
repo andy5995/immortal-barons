@@ -131,7 +131,7 @@ type Config struct {
 // each field as "(default; max)". Confirmed by Andy against the game.
 const (
 	MaxTurnsPerDay        = 20    // turns-per-day ceiling (default 8)
-	MaxProtectionTurns    = 200   // Turns of Protection ceiling (default 20)
+	MaxProtectionTurns    = 200   // Turns of Protection ceiling (default 15)
 	MaxIdleDaysRemove     = 365   // Idle-removal ceiling (default 10; 0 = never remove)
 	MaxLandPerDay         = 5000  // Daily Land Creation ceiling (default 1000)
 	MaxInitialMarketLand  = 50000 // Initial Market Land ceiling (default 0)
@@ -178,7 +178,7 @@ func DefaultConfig() Config {
 		// Defaults from BRE's reset-init code and Configuration Help screens,
 		// except TurnsPerDay, raised from BRE's 8 to 10 for the modern door.
 		TurnsPerDay:           10,
-		ProtectionTurns:       20,
+		ProtectionTurns:       15,
 		GameLength:            0,
 		IdleDaysRemove:        10,
 		InitialMarketLand:     0,
