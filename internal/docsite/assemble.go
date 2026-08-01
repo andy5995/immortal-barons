@@ -85,6 +85,17 @@ const extraCSS = `/* Underline in-content links so they read as links, not just 
   --md-toc-icon: var(--md-nav-icon--next);
 }
 
+/* The sidebar repeats the site name directly above the first nav entry, where
+   the header already shows it two centimetres higher. Hide that duplicate — but
+   ONLY on the desktop sidebar. Below Material's 76.25em breakpoint the same
+   element is the mobile drawer's header and carries the logo button that
+   navigates home, so removing it there would leave a headerless panel. */
+@media screen and (min-width: 76.25em) {
+  .md-nav--primary > .md-nav__title {
+    display: none;
+  }
+}
+
 /* Sub-menu items fly a jet instead, at 75% of the tank. */
 .md-nav--primary .md-nav .md-nav__link {
   --ib-art: var(--ib-jet);
