@@ -366,3 +366,25 @@ func TestSecondProposalReplacesThePending(t *testing.T) {
 		t.Errorf("sender's list should follow, got %v", got)
 	}
 }
+
+// Rejecting a NEW offer must not disturb the treaty already in place: only
+// accepting replaces a relation (#88). Proposing a trade pact to a standing ally
+// and being turned down leaves the alliance intact.
+func TestRejectingANewOfferKeepsTheOldTreaty(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+
+	w.ProposeTreaty(a, b, "Free Trade Agreement")
+	w.DeclineTreaty(b, a.Name, "Free Trade Agreement")
+
+	if !w.HasTreaty(a, b, fullDefenseAlliance) {
+		t.Errorf("the alliance should stand, got %v", w.TreatiesBetween(a, b))
+	}
+	if len(b.TreatyOffers) != 0 {
+		t.Errorf("the rejected offer should be gone, got %v", b.TreatyOffers)
+	}
+}
