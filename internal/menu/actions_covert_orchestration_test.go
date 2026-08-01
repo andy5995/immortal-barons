@@ -192,29 +192,34 @@ func TestSlappenheimerUserSelectPromptsDial(t *testing.T) {
 
 // --- real delegators (wiring check) -------------------------------------
 
+// The wiring claim needs the op's own report on screen, not just "some
+// output": these tests once fed "1\r" to a prompt that wants a LETTER, so
+// they aborted at target selection, never invoked the op, and passed on the
+// target table alone.
 func TestSendSpyDelegates(t *testing.T) {
 	w, _ := covertWorld()
 	w.Player().Agents = 100
-	f := &fakeSession{keys: []rune("1\r")}
+	f := &fakeSession{keys: []rune("a")} // target A
 
 	if got := sendSpy(f, w); got != Stay {
 		t.Errorf("sendSpy returned %v, want Stay", got)
 	}
-	if f.out.Len() == 0 {
-		t.Error("sendSpy produced no output")
+	if out := f.out.String(); !strings.Contains(out, "Intel on Gale Horde") {
+		t.Errorf("sendSpy should deliver the spy's intel report, got:\n%s", out)
 	}
 }
 
 func TestBombFoodMarketDelegates(t *testing.T) {
 	w, _ := covertWorld()
 	w.Player().Agents = 100
+	w.Player().Gold = 10_000_000 // the op has a gold cost; broke = "cannot afford", op never runs
 	w.Player().Bombers = game.BombingBombersRequired
-	f := &fakeSession{keys: []rune("1\r")}
+	f := &fakeSession{keys: []rune("a")}
 
 	if got := bombFoodMarket(f, w); got != Stay {
 		t.Errorf("bombFoodMarket returned %v, want Stay", got)
 	}
-	if f.out.Len() == 0 {
-		t.Error("bombFoodMarket produced no output")
+	if out := f.out.String(); !strings.Contains(out, "food") {
+		t.Errorf("bombFoodMarket should report the food strike outcome, got:\n%s", out)
 	}
 }

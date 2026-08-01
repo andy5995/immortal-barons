@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -49,12 +50,27 @@ func TestPacketFileRoundTrip(t *testing.T) {
 		t.Fatalf("WriteOutbox B: %v", err)
 	}
 
-	// Board A reads the result back; its bulletin records the outcome.
+	// The launch must have debited the committed force from the leader.
+	if leader.Troopers != 900_000 {
+		t.Errorf("leader should hold 900,000 troopers after committing 100,000, got %d", leader.Troopers)
+	}
+
+	// Board A reads the result back; its bulletin records the outcome, and the
+	// survivors come home. Content, not just presence: a result packet that
+	// lost its outcome fields would still land "a bulletin line".
 	if _, err := ReadInbound(wA, exchange); err != nil {
 		t.Fatalf("ReadInbound A: %v", err)
 	}
 	if len(wA.NewsToday) == 0 {
-		t.Errorf("board A should have a bulletin entry for the strike outcome")
+		t.Fatalf("board A should have a bulletin entry for the strike outcome")
+	}
+	if news := wA.NewsToday[0]; !strings.Contains(news, "Victim") || !strings.Contains(news, "boardB") {
+		t.Errorf("bulletin should name the target and board, got %q", news)
+	}
+	// 15% casualties on the committed 100,000, survivors returned: 900,000 +
+	// 85,000. Deterministic under seed 1.
+	if leader.Troopers != 985_000 {
+		t.Errorf("leader should hold 985,000 troopers after the survivors return, got %d", leader.Troopers)
 	}
 	_ = ga
 }

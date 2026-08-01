@@ -44,3 +44,24 @@ func TestParseBoardConfig(t *testing.T) {
 		t.Errorf("board config mismatch: %+v", cfg)
 	}
 }
+
+// A sysop-edited brnodes.dat with a broken block must not take the good ones
+// down with it: the parser's documented tolerance is to SKIP a block whose
+// node number is not numeric or that is truncated, and keep parsing.
+func TestParseNodeListSkipsMalformedBlocks(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "brnodes.dat")
+	content := "one\nBad Number BBS\n1/2\nTown\nST\nUSA\n\n" + // non-numeric node number
+		"9\nTruncated BBS\n3/4\n\n" + // 3 lines, needs 6
+		"5\nGood BBS\n260/249\nRochester\nNY\nUSA\n\n"
+	if err := os.WriteFile(path, []byte(content), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	nodes, err := ParseNodeList(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(nodes) != 1 || nodes[0].Number != 5 || nodes[0].Name != "Good BBS" {
+		t.Errorf("want only the good block parsed, got %+v", nodes)
+	}
+}

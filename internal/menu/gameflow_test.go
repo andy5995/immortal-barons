@@ -203,20 +203,26 @@ func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 }
 
 // TestRunTurnConsumesATurn scripts a full pass through the pipeline for one
-// turn: Quit ('0') out of the pre-turn Diplomacy stop, decline Change
-// Production, income/status pauses, Quit ('0') out of Spending, Attack,
-// Covert, and Trading, decline the message prompt, then decline "continue"
-// to stop after one turn.
+// turn. Key map, derived by driving the current flow (the old script and its
+// comment described the pre-#70 pre-turn Diplomacy stop): three pauses
+// (income, status, maintenance-paid), Quit Spending, Quit Attack — the Covert/
+// Trading/Message stops are Preferences-gated and off by default — then
+// decline "Continue to your next turn?" to stop after one turn.
 func TestRunTurnConsumesATurn(t *testing.T) {
-	keys := "0\r   0000nn"
+	keys := "   00n"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true // pay maintenance silently; this test is about the turn loop
-	w.Player().Agents = 1 // hold an agent so the Covert stage runs (it now gates on that)
 	left := w.Player().TurnsLeft
 	runTurn(f, w)
 	if w.Player().TurnsLeft != left-1 {
 		t.Errorf("expected TurnsLeft %d, got %d", left-1, w.Player().TurnsLeft)
+	}
+	// The script must have ended by DECLINING the continue prompt, not by
+	// running dry mid-turn — running dry also leaves TurnsLeft at left-1 and
+	// hides a re-mapped key.
+	if !strings.Contains(f.out.String(), "Continue to your next turn?") {
+		t.Errorf("script never reached the continue prompt:\n%s", f.out.String())
 	}
 }
 

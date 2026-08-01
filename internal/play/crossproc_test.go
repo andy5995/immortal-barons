@@ -60,14 +60,19 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 	}
 
 	// Splash dismiss, realm name + confirm, Play, three pauses (income, status,
-	// military+maintenance), Spending: buy N troopers then quit, quit Attack,
-	// decline "continue", quit the Game menu. Every prompt gets its own explicit
-	// key — single-key prompts drain a trailing line terminator (the Enter-leak
-	// fix), so a script may not lean on a stray "\r" reaching the next prompt.
-	// -cp437 keeps the session English (no language picker), so the script is
+	// military+maintenance), Spending: buy N troopers THREE separate times
+	// (each buy is its own reload/mutate/save transaction, so each process
+	// contends for the lock three times — one buy each made a lost update
+	// nearly undetectable when the two processes' windows happened not to
+	// interleave), quit Spending, quit Attack, decline "continue", quit the
+	// Game menu. Every prompt gets its own explicit key — single-key prompts
+	// drain a trailing line terminator (the Enter-leak fix), so a script may
+	// not lean on a stray "\r" reaching the next prompt. -cp437 keeps the
+	// session English (no language picker), so the script is
 	// locale-independent.
 	script := func(realm string, buy int) string {
-		return " " + realm + "\ry1   1" + strconv.Itoa(buy) + "\r00n0"
+		b := "1" + strconv.Itoa(buy) + "\r"
+		return " " + realm + "\ry1   " + b + b + b + "00n0"
 	}
 
 	type player struct {
@@ -95,9 +100,9 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 	}
 	wg.Wait()
 
-	// Reload the shared world from disk and assert BOTH purchases survived. A
+	// Reload the shared world from disk and assert ALL purchases survived. A
 	// new empire starts with 100 troopers and no Industrial regions, so nothing
-	// but the buy changes the count — the final value is exactly 100 + buy.
+	// but the buys changes the count — the final value is exactly 100 + 3×buy.
 	w, err := store.Load(cfg)
 	if err != nil {
 		t.Fatalf("reload world: %v", err)
@@ -110,7 +115,7 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 		if e.Name != p.realm {
 			t.Errorf("%s realm = %q, want %q", p.handle, e.Name, p.realm)
 		}
-		if want := 100 + p.buy; e.Troopers != want {
+		if want := 100 + 3*p.buy; e.Troopers != want {
 			t.Errorf("%s troopers = %d, want %d (its purchase was lost or clobbered by the other node)", p.handle, e.Troopers, want)
 		}
 	}
