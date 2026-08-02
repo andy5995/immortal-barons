@@ -101,8 +101,25 @@ func (w *World) captureDensityFactor(a, d *Empire) int {
 // attack today. Config.MaxIndividualAttacks <= 0 means unlimited (matching the
 // MaxRegions "<= 0 = no cap" convention).
 func (w *World) CanAttack(e *Empire) bool {
-	limit := w.Config.MaxIndividualAttacks
-	return limit <= 0 || e.AttacksToday < limit
+	return underDailyCap(e.AttacksToday, w.Config.MaxIndividualAttacks)
+}
+
+// underDailyCap reports whether one more of something is allowed today. A limit
+// of 0 or less means no cap, matching the MaxRegions convention.
+func underDailyCap(used, limit int) bool { return limit <= 0 || used < limit }
+
+// CanGroupAttack, CanTerrorOp and CanBombingOp are the interplanetary
+// equivalents of CanAttack, against their own per-day allowances.
+func (w *World) CanGroupAttack(e *Empire) bool {
+	return underDailyCap(e.GroupAttacksToday, w.Config.MaxGroupAttacks)
+}
+
+func (w *World) CanTerrorOp(e *Empire) bool {
+	return underDailyCap(e.TerrorOpsToday, w.Config.MaxTerrorOps)
+}
+
+func (w *World) CanBombingOp(e *Empire) bool {
+	return underDailyCap(e.BombingOpsToday, w.Config.MaxBombingOps)
 }
 
 // Attack resolves a battle between attacker a and defender d, mutating

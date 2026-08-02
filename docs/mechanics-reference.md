@@ -138,8 +138,10 @@ Bombers and carriers are integer multiplies (3 and 1); the rest are Turbo Pascal
   when the result packet returns, so net worth dips for the round trip. What
   fills BRE's array is **not read** — only the routine that scales it down with
   losses (`BRE.OVR 0xC358`) and this one, which reads it.
-- **A dead realm returns 0** rather than a computed figure. IB has no eliminated
-  flag on `Empire`, so this is not implemented either.
+- **A dead realm is worth 0** rather than a computed figure. IB does this on the
+  scores screen rather than inside `NetWorth`, because IB's combat math reads
+  `NetWorth` too (capture density) and a zero there would change battles rather
+  than a display.
 
 A vestigial `+0x125` is added at the end. It is read here and **nowhere else in
 either binary, and never written**, so it is always zero.

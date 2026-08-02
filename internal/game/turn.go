@@ -107,7 +107,11 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 			if e.Alive {
 				e.LandAvailable += w.Config.LandPerDay // Daily Land Creation
 				e.TurnsLeft = w.Config.TurnsPerDay
-				e.AttacksToday = 0              // fresh day: the individual-attack allotment resets
+				// Fresh day: every per-day attack allotment resets.
+				e.AttacksToday = 0
+				e.GroupAttacksToday = 0
+				e.TerrorOpsToday = 0
+				e.BombingOpsToday = 0
 				e.TurnProgress = TurnProgress{} // abandon any turn left uncommitted at rollover (#10)
 			}
 		}

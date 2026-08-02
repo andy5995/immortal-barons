@@ -149,7 +149,17 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 	// stops reaching View Treaties or completing a turn, so it can no longer
 	// rot silently — the previous script predated the language picker and had
 	// been dead for its race-coverage purpose without any test noticing.
-	turnKeys := " \rTurnPlayer\ry" + "1   *D9 000000nn0"
+	//
+	// The run of spaces before '*' is deliberately longer than the pauses it has
+	// to dismiss. The writer goroutine advances the game day underneath this
+	// session, and each extra day adds recap entries, so the number of pauses
+	// varies from run to run. A space is not a valid menu choice, so a spare one
+	// is simply re-prompted and costs nothing — whereas one too few lets '*'
+	// dismiss a pause instead of opening the System Menu, and the rest of the
+	// script lands in whatever menu happens to be on screen. Three spaces used to
+	// be enough and stopped being so when unit prices changed; do not trim them
+	// back to the minimum that passes today.
+	turnKeys := " \rTurnPlayer\ry" + "1        *D9 000000nn0"
 	sessions.Add(1)
 	var turnOut *fakeSession
 	go func() {

@@ -14,6 +14,10 @@ import (
 var (
 	ErrNoAttack = errors.New("no such group attack")
 	ErrDeparted = errors.New("that attack force has already left")
+	// The per-day interplanetary allowances (Config.MaxGroupAttacks and
+	// MaxTerrorOps), the counterparts of the individual-attack cap.
+	ErrGroupAttacksExhausted = errors.New("You have already launched all of your group attacks for today.")
+	ErrTerrorOpsExhausted    = errors.New("You have already launched all of your terrorist operations for today.")
 )
 
 // Packet carries inter-BBS actions from one board to another (or, with an empty
@@ -288,9 +292,13 @@ func (e *Empire) commitForce(f AttackForce) error {
 // on targetBoard, leaving on departDay. e commits the detachment f (deducted
 // from its army); ErrCantAfford if it lacks the units.
 func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, departDay int, f AttackForce) (*GroupAttack, error) {
+	if !w.CanGroupAttack(e) {
+		return nil, ErrGroupAttacksExhausted
+	}
 	if err := e.commitForce(f); err != nil {
 		return nil, err
 	}
+	e.GroupAttacksToday++
 	w.NextAttackID++
 	w.GroupAttacks = append(w.GroupAttacks, GroupAttack{
 		ID:           w.NextAttackID,
@@ -313,9 +321,13 @@ func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 		if w.GameDay >= ga.DepartDay {
 			return ErrDeparted
 		}
+		if !w.CanGroupAttack(e) {
+			return ErrGroupAttacksExhausted
+		}
 		if err := e.commitForce(f); err != nil {
 			return err
 		}
+		e.GroupAttacksToday++
 		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, AttackForce: f})
 		return nil
 	}
@@ -411,10 +423,14 @@ func (w *World) enqueue(toBoard string, atk RemoteAttack) {
 // SendTerror queues a terror op against targetEmpire on targetBoard, committing
 // agents (deducted now). It resolves on the target board's next packet run.
 func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents int) error {
+	if !w.CanTerrorOp(e) {
+		return ErrTerrorOpsExhausted
+	}
 	if e.Agents < agents {
 		return ErrNoAgents
 	}
 	e.Agents -= agents
+	e.TerrorOpsToday++
 	w.NextAttackID++
 	t := RemoteTerror{ID: w.NextAttackID, FromBoard: w.Config.BoardID, TargetEmpire: targetEmpire, Agents: agents}
 	for i := range w.Outbox {

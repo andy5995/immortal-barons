@@ -109,7 +109,7 @@ msgstr ""
 msgid "(AI)"
 msgstr ""
 
-#: internal/menu/actions_info.go:838
+#: internal/menu/actions_info.go:841
 msgid "(dead)"
 msgstr ""
 
@@ -145,7 +145,11 @@ msgstr ""
 msgid "< 1 day"
 msgstr ""
 
-#: internal/menu/config_editor.go:206
+#: internal/menu/config_editor.go:207
+msgid "A league board has no computer barons."
+msgstr ""
+
+#: internal/menu/config_editor.go:209
 msgid "AI empires"
 msgstr ""
 
@@ -241,7 +245,7 @@ msgstr ""
 msgid "Biological Attack"
 msgstr ""
 
-#: internal/menu/config_editor.go:210
+#: internal/menu/config_editor.go:214
 msgid "Board ID:"
 msgstr ""
 
@@ -413,7 +417,7 @@ msgstr ""
 msgid "Date"
 msgstr ""
 
-#: internal/menu/config_editor.go:228
+#: internal/menu/config_editor.go:232
 msgid "Days before lost forces return (0 = never)"
 msgstr ""
 
@@ -497,7 +501,7 @@ msgstr ""
 msgid "Empire"
 msgstr ""
 
-#: internal/menu/actions_info.go:832
+#: internal/menu/actions_info.go:835
 msgid "Empire Name"
 msgstr ""
 
@@ -621,15 +625,15 @@ msgstr ""
 msgid "How much would you like to invest?"
 msgstr ""
 
-#: internal/menu/actions_info.go:832
+#: internal/menu/actions_info.go:835
 msgid "Id"
 msgstr ""
 
-#: internal/menu/config_editor.go:214
+#: internal/menu/config_editor.go:218
 msgid "Idle timeout in seconds (0 = never)"
 msgstr ""
 
-#: internal/menu/config_editor.go:216
+#: internal/menu/config_editor.go:220
 msgid "Idle warnings before boot"
 msgstr ""
 
@@ -761,7 +765,7 @@ msgstr ""
 msgid "Language:"
 msgstr ""
 
-#: internal/menu/actions_info.go:853
+#: internal/menu/actions_info.go:856
 msgid "Last Planetary Master: %s"
 msgstr ""
 
@@ -805,15 +809,15 @@ msgstr ""
 msgid "Maintenance:"
 msgstr ""
 
-#: internal/menu/config_editor.go:226
+#: internal/menu/config_editor.go:230
 msgid "Max Bombing Ops/Day (0 = unlimited)"
 msgstr ""
 
-#: internal/menu/config_editor.go:222
+#: internal/menu/config_editor.go:226
 msgid "Max Group Attacks/Day (0 = unlimited)"
 msgstr ""
 
-#: internal/menu/config_editor.go:220
+#: internal/menu/config_editor.go:224
 msgid "Max Individual Attacks/Day (0 = unlimited)"
 msgstr ""
 
@@ -829,7 +833,7 @@ msgstr ""
 msgid "Max Tax Rate"
 msgstr ""
 
-#: internal/menu/config_editor.go:224
+#: internal/menu/config_editor.go:228
 msgid "Max Terrorist Ops/Day (0 = unlimited)"
 msgstr ""
 
@@ -1161,7 +1165,7 @@ msgstr ""
 msgid "Savings Interest Rate:"
 msgstr ""
 
-#: internal/menu/actions_info.go:833
+#: internal/menu/actions_info.go:836
 msgid "Score"
 msgstr ""
 
@@ -1333,7 +1337,7 @@ msgstr ""
 msgid "Technology is relative to the size of the empire: a larger realm needs more of it to keep the same efficiency."
 msgstr ""
 
-#: internal/menu/actions_info.go:833
+#: internal/menu/actions_info.go:836
 msgid "Territory"
 msgstr ""
 
@@ -1731,6 +1735,14 @@ msgstr ""
 
 #: internal/menu/actions_attack.go:151
 msgid "You have already launched all %d of your attacks for today."
+msgstr ""
+
+#: internal/game/ibbs.go:19
+msgid "You have already launched all of your group attacks for today."
+msgstr ""
+
+#: internal/game/ibbs.go:20
+msgid "You have already launched all of your terrorist operations for today."
 msgstr ""
 
 #: internal/menu/actions_bank.go:136

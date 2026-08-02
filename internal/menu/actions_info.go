@@ -813,6 +813,9 @@ func printScores(s session.Session, w *ctx) {
 		rows = make([]row, 0, len(w.Empires))
 		for _, e := range w.Empires {
 			nw := w.NetWorth(e)
+			if !e.Alive {
+				nw = 0 // BRE's scores screen values a dead realm at nothing
+			}
 			// Net Worth is the asset value (land + military). Score is BRE's
 			// cumulative metric (Empire.Score): the day-start net worth awarded per
 			// turn played, minus small riot/spoilage dings — separate from wealth.

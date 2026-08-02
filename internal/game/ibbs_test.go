@@ -346,3 +346,28 @@ func distinctFrom(t *testing.T, v reflect.Value) reflect.Value {
 	}
 	return out
 }
+
+// A league board never gets computer barons, and none can be injected into one
+// later — an inter-BBS game is played between the boards' human realms.
+func TestLeagueBoardGetsNoAIBarons(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	cfg.AICount = 5
+	w := NewWorldSeed(cfg, 1)
+	if got := len(w.Empires); got != 0 {
+		t.Errorf("a league board seeded %d empires, want 0", got)
+	}
+	if added := w.AddAIEmpires(3); added != 0 {
+		t.Errorf("injected %d AI barons into a league board, want 0", added)
+	}
+	if got := len(w.Empires); got != 0 {
+		t.Errorf("league board has %d empires after an injection attempt, want 0", got)
+	}
+
+	// The same config off a league seeds normally, so the guard is the league
+	// flag and not something else.
+	cfg.IBBS = false
+	if solo := NewWorldSeed(cfg, 1); len(solo.Empires) != 5 {
+		t.Errorf("stand-alone board seeded %d AI barons, want 5", len(solo.Empires))
+	}
+}

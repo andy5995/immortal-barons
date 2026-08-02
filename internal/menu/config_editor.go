@@ -121,7 +121,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		p(18, "* R5-Slappenheimer Handling", c.SlappenheimerHandling.String())
 		p(19, "* Game Start Date", dateOr(c.GameStartDate, "starts immediately"))
 		p(20, "* Join Cutoff Date", dateOr(c.JoinDate, "always open"))
-		p(21, "AI empires", fmt.Sprintf("%d", c.AICount))
+		p(21, "AI empires", aiCountStr(c))
 		p(22, "Inter-BBS play", onOffStr(c.IBBS))
 		p(23, "Board ID", c.BoardID)
 		p(24, "Idle timeout (sec)", fmt.Sprintf("%d (0 = never)", c.IdleTimeoutSecs))
@@ -203,7 +203,11 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		case 20:
 			c.JoinDate = promptDate(s, "Join Cutoff Date", c.JoinDate)
 		case 21:
-			c.AICount = promptSuggested(s, "AI empires", c.AICount, 5)
+			if c.IBBS {
+				ok(s, "A league board has no computer barons.")
+			} else {
+				c.AICount = promptSuggested(s, "AI empires", c.AICount, 5)
+			}
 		case 22:
 			c.IBBS = !c.IBBS
 		case 23:
@@ -238,6 +242,14 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 			c.DoomerKaboomer = !c.DoomerKaboomer
 		}
 	}
+}
+
+// aiCountStr renders the AI-baron count, or says why a league board has none.
+func aiCountStr(c *game.Config) string {
+	if c.IBBS {
+		return "0 (none in a league)"
+	}
+	return fmt.Sprintf("%d", c.AICount)
 }
 
 // dateOr renders an ISO date, or a placeholder when it is unset.

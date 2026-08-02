@@ -132,6 +132,11 @@ type Empire struct {
 	// Persisted so it survives the per-action reload/save cycle of door play; reset
 	// to 0 at daily maintenance (see DailyMaintenance).
 	AttacksToday int
+	// The interplanetary allowances, counted and reset the same way as
+	// AttacksToday, against Config.MaxGroupAttacks / MaxTerrorOps / MaxBombingOps.
+	GroupAttacksToday int
+	TerrorOpsToday    int
+	BombingOpsToday   int
 	// TurnProgress records which stages of the current turn have already completed,
 	// so a turn REPLAYED after an idle-boot skips what was done — no double income
 	// or double charge, and no re-showing a menu the player already exited (GH #10).
@@ -699,7 +704,16 @@ func (w *World) seedAIEmpires() {
 // matrix names not already used by any existing empire (dead or alive,
 // case-insensitive). It returns the count actually added, which is less than n
 // only if every name combination is already taken.
+//
+// A league board gets none, ever, and adds none later: an inter-BBS game is
+// played between the boards' human realms, and a computer baron would take a
+// share of the planet's standing in a league it cannot be held accountable in.
+// The guard is here rather than only in the editor so no path — reset, seeding,
+// or a later injection — can slip one in.
 func (w *World) AddAIEmpires(n int) int {
+	if w.Config.IBBS {
+		return 0
+	}
 	used := make(map[string]bool, len(w.Empires))
 	for _, e := range w.Empires {
 		used[strings.ToLower(e.Name)] = true
