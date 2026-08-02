@@ -111,7 +111,9 @@ table.
 | Tank | 0.15 | 0.60 | 2.40 |
 | Carrier | 0.025 | 0.10 | 0.40 |
 
-Net-worth value contributed per unit (from the guide's net-worth table):
+Net-worth value contributed per unit — **binary-verified** 2026-08-01, read out of
+`056d:0F43` (`BRE.EXE 0x8F53`), the function the See Scores screen calls for its
+Net Worth column:
 
 | Item | Value | Item | Value |
 |------|-------|------|-------|
@@ -119,6 +121,30 @@ Net-worth value contributed per unit (from the guide's net-worth table):
 | Jet | 0.325 | Bomber | 3.000 |
 | Turret | 0.425 | Carrier | 1.000 |
 | Agent | 0.500 | Region | 12.50 |
+
+Every weight matches what IB already had from the strategy guide, to the digit.
+Bombers and carriers are integer multiplies (3 and 1); the rest are Turbo Pascal
+6-byte reals, and the region term multiplies the same nine-region sum
+(`056d:0EC6`) the Territory column uses. Three details IB does not have:
+
+- **Units away from home still count.** Each unit term adds a second count from a
+  parallel array at record `+0x211` (troopers, jets, turrets, bombers, …, agents,
+  tanks, carriers, 4 bytes apart) before applying the weight. That is the "lost"
+  attacking-force pool that returns after a few days, so a realm mid-attack does
+  not appear to shrink.
+- **A dead realm returns 0** rather than a computed figure.
+- **There is no debt subtraction.** IB subtracts `Debt/100`.
+
+A vestigial `+0x125` is added at the end. It is read here and **nowhere else in
+either binary, and never written**, so it is always zero.
+
+*Unreconciled:* pairing the See Scores figure 4,526,733 in
+`cap/eots-covert-agents.cap` with the unit counts on screen around it gives about
+464,000, roughly a factor of ten out. The disassembly is not in doubt — the
+weights are literal constants — so the mismatch is in how that screen's snapshot
+lines up with those counts (it refreshes daily, and its "Territory" column does
+not equal the Spending menu's regions-owned). Worth settling before treating any
+absolute net-worth figure as calibrated.
 
 ### Maintenance payment flow (BRE-verified)
 
@@ -636,9 +662,9 @@ population housing, Technology is an efficiency multiplier (see the Technology
 region above). Food output: `Agricultural × 300` grown, then raised by the
 Technology factor (#20); rivers add a share of their yield as food every turn,
 see the Rivers section. These income numbers, the caps (2B money / 1.599B
-interest), the pirate caps table, and the net-worth weights are BRE-scale; **the
-tax per-capita coefficient and the yield band are IB's own reconstructions**
-anchored to this scale. All tunables live in `internal/game/balance.go`.
+interest) and the pirate caps table are BRE-scale, and the net-worth weights are
+binary-verified; **the tax per-capita coefficient and the yield band are IB's own
+reconstructions** anchored to this scale. All tunables live in `internal/game/balance.go`.
 
 **Per-turn price walk (#30), binary-verified.** Every empire stores its own price
 for each of the six military units (`Empire.Prices`) and steps it once per turn

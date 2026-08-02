@@ -730,10 +730,14 @@ const (
 	RegionUpkeepPerLand = 913
 )
 
-// --- Net-worth weights (BRE-verified — guide net-worth table) ---
+// --- Net-worth weights (BINARY-VERIFIED) ---
 //
 // Contribution to net worth per unit / per region, in thousandths of a gold
-// (World.NetWorth divides by 1000 for exactness).
+// (World.NetWorth divides by 1000 for exactness). Read out of BRE's own net-worth
+// function, 056d:0F43 (BRE.EXE 0x8F53), on 2026-08-01: every weight below matches
+// to the digit. Bombers and carriers are integer multiplies there; the rest are
+// Turbo Pascal reals. See docs/mechanics-reference.md for what BRE counts that IB
+// does not.
 const (
 	NetWorthLand    = 12500
 	NetWorthTrooper = 250
