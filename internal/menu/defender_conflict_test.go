@@ -25,7 +25,7 @@ func TestAttackedWhileOnlineDefenderBuysConsistently(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "bob", "Defendia", nil, func(p *game.Empire) {
 		p.Protection = 0
 		p.Troopers = 10000
-		p.Gold = game.PriceTrooper * 1000
+		p.Gold = game.PriceHiTrooper * 1000
 	})
 	addMallory(t, cfg, 1_000_000)
 	startLand := committedEmpire(t, cfg, "bob").Land
@@ -64,7 +64,7 @@ func TestAttackedWhileOnlineDefenderBuysConsistently(t *testing.T) {
 func TestAllyBledWhileOnlineBuysConsistently(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "carol", "Carolia", nil, func(p *game.Empire) {
 		p.Troopers = 10000
-		p.Gold = game.PriceTrooper * 1000
+		p.Gold = game.PriceHiTrooper * 1000
 	})
 	commitOnFile(t, cfg, func(w *game.World) {
 		d := w.AddHuman("bob", "Defendia")

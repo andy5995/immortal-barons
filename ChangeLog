@@ -16,6 +16,8 @@
   * View Treaties now lists the treaty offers you have sent that nobody has
     answered yet (#92)
   * A new treaty offer to the same realm replaces the one still waiting
+  * Covert agents cost more the longer your realm has been playing
+  * Unit prices now move within the original's price ranges
   * The web server has been removed (an SSH server may replace it)
 
 2026-07-31 (v0.0.3)

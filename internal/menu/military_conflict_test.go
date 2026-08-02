@@ -16,11 +16,11 @@ import (
 // re-resolve finds no realm and aborts with the realm-changed notice instead.
 func TestBuyTroopersVanishedEmpireConflict(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
-		p.Gold = game.PriceTrooper * 100
+		p.Gold = game.PriceHiTrooper * 100
 	})
 	commitOnFile(t, cfg, func(w *game.World) {
 		d := w.AddHuman("decoy", "Decoyland")
-		d.Gold = game.PriceTrooper * 100
+		d.Gold = game.PriceHiTrooper * 100
 	})
 	startTroopers := committedEmpire(t, cfg, "decoy").Troopers
 

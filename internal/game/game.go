@@ -393,7 +393,7 @@ func techResearchPoints(n, total int) int {
 }
 
 type Prices struct {
-	Land, Trooper, Jet, Turret, Tank, Carrier, Agent, Bomber int
+	Land, Trooper, Jet, Turret, Tank, Carrier, Bomber int
 }
 
 // Investment is a term deposit: an amount locked until MaturesDay, paying
@@ -719,9 +719,19 @@ func (w *World) AddAIEmpires(n int) int {
 
 // defaultPrices is the world's starting price table, from balance.go. Used at
 // world creation and re-applied on -reset, so a reset always installs the
-// current prices instead of carrying the old world's stale ones.
+// current prices instead of carrying the old world's stale ones. Each unit starts
+// at the centre of its walk band, which is where BRE's mean-reverting walk keeps
+// pulling it back to anyway.
 func defaultPrices() Prices {
-	return Prices{Land: PriceLand, Trooper: PriceTrooper, Jet: PriceJet, Turret: PriceTurret, Tank: PriceTank, Carrier: PriceCarrier, Agent: PriceAgent, Bomber: PriceBomber}
+	return Prices{
+		Land:    PriceLand,
+		Trooper: midPrice(PriceLoTrooper, PriceHiTrooper),
+		Jet:     midPrice(PriceLoJet, PriceHiJet),
+		Turret:  midPrice(PriceLoTurret, PriceHiTurret),
+		Tank:    midPrice(PriceLoTank, PriceHiTank),
+		Carrier: midPrice(PriceLoCarrier, PriceHiCarrier),
+		Bomber:  midPrice(PriceLoBomber, PriceHiBomber),
+	}
 }
 
 func newEmpire(name, owner string, cfg Config, day int) *Empire {

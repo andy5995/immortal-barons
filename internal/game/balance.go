@@ -287,29 +287,49 @@ const TreatyBreachSupportPenalty = 10
 // BRE), not the runaway 360k the old 1200 produced. Top playtest knob.
 const TaxGoldPerCapita = 17
 
-// --- Unit / land / food prices (reconstructed / tunable) ---
+// --- Unit / land / food prices ---
 //
-// BRE does not store these as constants (they're computed inline), so they are
-// IB's reconstructed values, re-anchored to the BRE income magnitude while
-// preserving IB's ratios (which match BRE: ~7 troopers per tank, ~6 jets per
-// tank). Used as the DefaultConfig / NewWorldSeed price defaults.
+// The six military units are BINARY-VERIFIED. BRE gives every empire its own
+// stored price per unit and walks it one step per turn inside a fixed band. The
+// three tables below are three arrays of six words in BRE.EXE's data segment
+// (DS:0x508 step, DS:0x514 low, DS:0x520 high), read by the walk at BRE.OVR
+// 0x12633. Sell price is buy/3 (see sellUnit), except agents (SellAgentPrice).
+//
+// Part of the fidelity contract: retuning one of these needs new evidence. Every
+// buy price across the 30-turn capture `cap/eots-covert-agents.cap` lands inside
+// its band, and they cluster near the middle rather than spreading out — that is
+// the walk's mean reversion (see PriceWalkDampMax).
 const (
-	// Unit buy prices — BRE early-game live snapshot (2026-07-11). These are the
-	// BASE each empire's per-turn price walk starts from and stays near (see the
-	// PriceWalkStep*/PriceWalkBandPct block below and World.stepPrices, #30). Sell
-	// price is buy/3 (see sellUnit), except agents (SellAgentPrice).
-	PriceTrooper = 263
-	PriceJet     = 345
-	PriceTurret  = 380
-	PriceTank    = 2172
-	PriceCarrier = 5943
-	PriceAgent   = 608
-	PriceBomber  = 2572
+	PriceLoTrooper = 200
+	PriceLoJet     = 250
+	PriceLoTurret  = 300
+	PriceLoBomber  = 2500
+	PriceLoTank    = 1125
+	PriceLoCarrier = 4750
+
+	PriceHiTrooper = 350
+	PriceHiJet     = 400
+	PriceHiTurret  = 475
+	PriceHiBomber  = 5000
+	PriceHiTank    = 2250
+	PriceHiCarrier = 6000
+
+	PriceStepTrooper = 25
+	PriceStepJet     = 25
+	PriceStepTurret  = 25
+	PriceStepBomber  = 125
+	PriceStepTank    = 75
+	PriceStepCarrier = 125
+)
+
+const (
 	// Region price rises with land owned: BRE ≈ 917 + Land×33 (live-sampled). See
 	// World.LandPrice. PriceLand is the base; LandPerRegion the per-owned climb.
 	PriceLand     = 917
 	LandPerRegion = 33
 	// SellAgentPrice: agents sell at a flat 100 in BRE, not buy/3 like other units.
+	// Binary-verified — the Sell menu's agent column is the literal 100 pushed at
+	// BRE.OVR 0x16AEB, and every sell capture shows it.
 	SellAgentPrice = 100
 )
 
@@ -330,30 +350,33 @@ const (
 	CostExposeEnemyOps     = 600_000
 )
 
-// Per-turn price WALK (#30). BRE recomputes each unit's buy price every turn as a
-// persistent random walk with per-empire state — confirmed live (2026-07-15): a
-// fresh empire started at base while a veteran on the same day had drifted (bomber
-// +22%, agent +100%), and the drift carried across the day boundary. IB matches
-// that: each empire stores its own current prices (Empire.Prices) and steps them
-// once per turn in PlayTurn (World.stepPrices). A step moves a price up or down by
-// up to PriceWalkStep*% of its base, clamped to ±PriceWalkBandPct% of the base so
-// it drifts like BRE but can't run away. The stored price is what the Spending menu
-// shows AND what a buy/sell charges within the turn (shown == charged); it persists
-// across days via the save. Steps are deterministic (keyed per empire+turn like
-// riversFish) so play is reproducible and concurrency-safe. Cheap units take small
-// steps; agents step wider (matching the calibration). Regions do NOT walk — their
-// price is holdings-only (917+owned×33), which BRE held exact every turn. Tunable.
+// Per-turn price WALK (#30), BINARY-VERIFIED from BRE.OVR 0x12633. Each empire
+// stores its own price for each of the six military units and steps it once per
+// turn in PlayTurn (World.stepPrices):
+//
+//	up, down := 1, 1
+//	if price < mid  { down = Random(PriceWalkDampMax) + 1 }
+//	if price > mid  { up   = Random(PriceWalkDampMax) + 1 }
+//	price += Random(step) / up
+//	price -= Random(step) / down
+//	if price < lo   { price = lo + Random(PriceFloorJitter) }
+//	if price > hi   { price = hi - Random(PriceCeilJitter) }
+//
+// mid is the band's midpoint. Whichever side of it a price sits on, the move that
+// would carry the price further out is divided by 1..3 while the move back is
+// taken in full, so the walk is pulled towards the centre of a band it is free to
+// roam. Captured prices sit near mid for exactly this reason.
+//
+// The stored price is what the Spending menu shows AND what a buy/sell charges
+// within the turn (shown == charged); it persists across days via the save. Steps
+// are deterministic (keyed per empire+turn like riversFish) so play is
+// reproducible and concurrency-safe. Regions do NOT walk — their price is
+// holdings-only (917+owned×33), which BRE held exact every turn. Neither do covert
+// agents, which ratchet with lifetime turns instead (see AgentPriceBase).
 const (
-	PriceWalkStepTrooper = 3
-	PriceWalkStepJet     = 3
-	PriceWalkStepTurret  = 3
-	PriceWalkStepTank    = 3
-	PriceWalkStepBomber  = 3
-	PriceWalkStepCarrier = 3
-	PriceWalkStepAgent   = 8
-	// PriceWalkBandPct caps how far any price may drift from its base. BRE's bomber
-	// reached ~+22% in a 14-turn sample and was still climbing, so keep it generous.
-	PriceWalkBandPct = 30
+	PriceWalkDampMax = 3
+	PriceFloorJitter = 60
+	PriceCeilJitter  = 100
 )
 
 // BombMarketLossPct is the share (percent) of a target's listed goods and pending
@@ -439,6 +462,24 @@ const (
 	HQPriceJitter    = 300
 	HQPriceCap       = 100_000
 	HQPriceCapJitter = 1000
+)
+
+// Covert agents price the same way as a HeadQuarters, off the same counter.
+// BRE.OVR 0x1293E reads the empire's lifetime turn count and computes
+// AgentPriceBase + AgentPricePerTurn×TurnsPlayed + Random(AgentPriceJitter), with
+// no cap. Agents therefore take no part in the unit walk: their price ratchets for
+// as long as the realm keeps playing and never comes back down, so a covert
+// programme started late costs 20 gold a turn more than one started early, for
+// every agent, forever.
+//
+// The 30 consecutive turns in `cap/eots-covert-agents.cap` pin it. Solving each
+// turn's agent AND HeadQuarters price for a shared turn count leaves exactly one
+// integer feasible per turn, and it advances by one every turn, day boundary
+// included. Binary-verified; do not retune.
+const (
+	AgentPriceBase    = 450
+	AgentPricePerTurn = 20
+	AgentPriceJitter  = 300
 )
 
 // --- Misc gold costs (reconstructed / tunable) ---

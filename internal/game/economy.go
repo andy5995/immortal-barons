@@ -269,38 +269,60 @@ func (w *World) TurretPrice(e *Empire) int  { return curPrice(e.Prices.Turret, w
 func (w *World) TankPrice(e *Empire) int    { return curPrice(e.Prices.Tank, w.Prices.Tank) }
 func (w *World) BomberPrice(e *Empire) int  { return curPrice(e.Prices.Bomber, w.Prices.Bomber) }
 func (w *World) CarrierPrice(e *Empire) int { return curPrice(e.Prices.Carrier, w.Prices.Carrier) }
-func (w *World) AgentPrice(e *Empire) int   { return curPrice(e.Prices.Agent, w.Prices.Agent) }
 
-// stepPrice advances one stored per-empire price one walk step: it moves by up to
-// stepPct% of the base (deterministic, keyed per empire+turn like riversFish) and
-// is clamped to ±PriceWalkBandPct% of the base so the walk drifts but can't run
-// away. A zero `stored` seeds from base first (fresh empire / pre-feature save).
-func (w *World) stepPrice(e *Empire, stored, base, stepPct int, tag string) int {
-	if base <= 0 {
-		return stored
+// AgentPrice is what a covert agent costs e right now. Agents take no walk: like
+// the HeadQuarters price this climbs with the empire's lifetime turn count, but
+// with no cap, so a long-lived realm pays steadily more to recruit (balance.go).
+func (w *World) AgentPrice(e *Empire) int {
+	return AgentPriceBase + AgentPricePerTurn*e.TurnsPlayed + w.priceJitter(e, "agent", AgentPriceJitter)
+}
+
+// midPrice is a band's centre — the point BRE's walk reverts towards.
+func midPrice(lo, hi int) int { return (lo + hi) / 2 }
+
+// walkRoll is a deterministic draw in [0, n) for the k-th random number BRE's
+// price walk needs for one unit this turn. Keyed per empire and turn (like
+// priceJitter and riversFish) so the walk is reproducible and needs no shared RNG.
+func (w *World) walkRoll(e *Empire, tag string, k, n int) int {
+	if n <= 0 {
+		return 0
 	}
+	h := fnv.New32a()
+	var buf [12]byte
+	binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
+	binary.LittleEndian.PutUint32(buf[4:8], uint32(e.TurnsLeft))
+	binary.LittleEndian.PutUint32(buf[8:12], uint32(k))
+	h.Write(buf[:])
+	io.WriteString(h, tag)
+	io.WriteString(h, e.Name)
+	return int(h.Sum32() % uint32(n))
+}
+
+// stepPrice advances one stored per-empire price by one turn of BRE's walk (the
+// exact shape is in balance.go). It is mean-reverting: the move away from the
+// band's midpoint is divided by 1..PriceWalkDampMax while the move back is not,
+// so a price wanders but keeps being pulled towards the middle. A zero `stored`
+// seeds from the band floor the way BRE's own floor clamp does (fresh empire, or
+// a save from before per-empire prices existed).
+func (w *World) stepPrice(e *Empire, stored, lo, hi, step int, tag string) int {
 	if stored <= 0 {
-		stored = base
+		stored = lo + w.walkRoll(e, tag, 0, PriceFloorJitter)
 	}
-	if stepMax := base * stepPct / 100; stepMax > 0 {
-		h := fnv.New32a()
-		var buf [8]byte
-		binary.LittleEndian.PutUint32(buf[0:4], uint32(w.GameDay))
-		binary.LittleEndian.PutUint32(buf[4:8], uint32(e.TurnsLeft))
-		h.Write(buf[:])
-		io.WriteString(h, tag)
-		io.WriteString(h, e.Name)
-		stored += int(h.Sum32()%uint32(2*stepMax+1)) - stepMax
+	mid := midPrice(lo, hi)
+	up, down := 1, 1
+	if stored < mid {
+		down = w.walkRoll(e, tag, 1, PriceWalkDampMax) + 1
 	}
-	band := base * PriceWalkBandPct / 100
-	if stored > base+band {
-		stored = base + band
+	if stored > mid {
+		up = w.walkRoll(e, tag, 2, PriceWalkDampMax) + 1
 	}
-	if stored < base-band {
-		stored = base - band
+	stored += w.walkRoll(e, tag, 3, step) / up
+	stored -= w.walkRoll(e, tag, 4, step) / down
+	if stored < lo {
+		stored = lo + w.walkRoll(e, tag, 5, PriceFloorJitter)
 	}
-	if stored < 1 {
-		stored = 1
+	if stored > hi {
+		stored = hi - w.walkRoll(e, tag, 6, PriceCeilJitter)
 	}
 	return stored
 }
@@ -309,13 +331,12 @@ func (w *World) stepPrice(e *Empire, stored, base, stepPct int, tag string) int 
 // turn from PlayTurn (after the turn's buys), so a price is stable during a turn
 // (shown == charged) and drifts turn to turn, persisting across days via the save.
 func (w *World) stepPrices(e *Empire) {
-	e.Prices.Trooper = w.stepPrice(e, e.Prices.Trooper, w.Prices.Trooper, PriceWalkStepTrooper, "trooper")
-	e.Prices.Jet = w.stepPrice(e, e.Prices.Jet, w.Prices.Jet, PriceWalkStepJet, "jet")
-	e.Prices.Turret = w.stepPrice(e, e.Prices.Turret, w.Prices.Turret, PriceWalkStepTurret, "turret")
-	e.Prices.Tank = w.stepPrice(e, e.Prices.Tank, w.Prices.Tank, PriceWalkStepTank, "tank")
-	e.Prices.Bomber = w.stepPrice(e, e.Prices.Bomber, w.Prices.Bomber, PriceWalkStepBomber, "bomber")
-	e.Prices.Carrier = w.stepPrice(e, e.Prices.Carrier, w.Prices.Carrier, PriceWalkStepCarrier, "carrier")
-	e.Prices.Agent = w.stepPrice(e, e.Prices.Agent, w.Prices.Agent, PriceWalkStepAgent, "agent")
+	e.Prices.Trooper = w.stepPrice(e, e.Prices.Trooper, PriceLoTrooper, PriceHiTrooper, PriceStepTrooper, "trooper")
+	e.Prices.Jet = w.stepPrice(e, e.Prices.Jet, PriceLoJet, PriceHiJet, PriceStepJet, "jet")
+	e.Prices.Turret = w.stepPrice(e, e.Prices.Turret, PriceLoTurret, PriceHiTurret, PriceStepTurret, "turret")
+	e.Prices.Tank = w.stepPrice(e, e.Prices.Tank, PriceLoTank, PriceHiTank, PriceStepTank, "tank")
+	e.Prices.Bomber = w.stepPrice(e, e.Prices.Bomber, PriceLoBomber, PriceHiBomber, PriceStepBomber, "bomber")
+	e.Prices.Carrier = w.stepPrice(e, e.Prices.Carrier, PriceLoCarrier, PriceHiCarrier, PriceStepCarrier, "carrier")
 }
 
 // buyUnit buys n of a unit at its current price, the mirror of sellUnit: spend

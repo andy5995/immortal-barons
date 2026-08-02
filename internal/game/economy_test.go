@@ -63,7 +63,6 @@ func TestUnitPriceWalk(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("alice", "Alethia")
 	base := w.Prices.Trooper
-	band := base * PriceWalkBandPct / 100
 
 	// A fresh empire is unseeded → sits at the world base, and reads are stable
 	// within a turn (no step between two reads).
@@ -74,15 +73,15 @@ func TestUnitPriceWalk(t *testing.T) {
 		t.Fatalf("price not stable within a turn: %d vs %d", a, b)
 	}
 
-	// Walk 60 turns: it moves off base but stays clamped inside the band.
+	// Walk 60 turns: it moves off base but never leaves BRE's band.
 	moved := false
 	seen := map[int]bool{}
 	for i := 0; i < 60; i++ {
 		w.GameDay, e.TurnsLeft = i/16, i%16
 		w.stepPrices(e)
 		p := w.TrooperPrice(e)
-		if p < base-band || p > base+band {
-			t.Errorf("step %d: price %d out of band [%d,%d]", i, p, base-band, base+band)
+		if p < PriceLoTrooper || p > PriceHiTrooper {
+			t.Errorf("step %d: price %d out of band [%d,%d]", i, p, PriceLoTrooper, PriceHiTrooper)
 		}
 		if p != base {
 			moved = true
@@ -563,5 +562,56 @@ func TestBuildAndSellBombers(t *testing.T) {
 	}
 	if e.Gold <= before {
 		t.Error("selling bombers should add gold")
+	}
+}
+
+// TestAgentPriceRatchet pins BRE's covert-agent price: a fixed base, plus 20 per
+// lifetime turn played, plus a draw under 300, and no cap. The windows are golden
+// figures rather than the constants, so a retune fails here and has to bring new
+// evidence with it.
+func TestAgentPriceRatchet(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("alice", "Alethia")
+
+	for _, tc := range []struct{ turns, lo, hi int }{
+		{0, 450, 749},
+		{90, 2250, 2549}, // cap/eots-covert-agents.cap shows 2335 at this turn count
+		{300, 6450, 6749},
+	} {
+		e.TurnsPlayed = tc.turns
+		if got := w.AgentPrice(e); got < tc.lo || got > tc.hi {
+			t.Errorf("TurnsPlayed %d: agent price %d, want in [%d,%d]", tc.turns, got, tc.lo, tc.hi)
+		}
+	}
+
+	// It ratchets. Fifteen turns of climb outrun the widest possible draw, and no
+	// cap flattens the curve later, so a veteran's price keeps pulling away from a
+	// newcomer's.
+	e.TurnsPlayed = 0
+	fresh := w.AgentPrice(e)
+	e.TurnsPlayed = 15
+	if veteran := w.AgentPrice(e); veteran <= fresh {
+		t.Errorf("price after 15 turns is %d, not above the fresh realm's %d", veteran, fresh)
+	}
+}
+
+// TestPriceWalkRevertsToMid checks the damping that makes BRE's walk cluster
+// prices near the centre of a band they are free to roam. Several empires, since
+// the claim is about the walk and one empire is one trajectory.
+func TestPriceWalkRevertsToMid(t *testing.T) {
+	mid := midPrice(PriceLoBomber, PriceHiBomber)
+	const turns = 400
+	for _, name := range []string{"Alethia", "Bobland", "Corvus", "Dynoland"} {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		e := w.AddHuman(name, name)
+		sum := 0
+		for i := 0; i < turns; i++ {
+			w.GameDay, e.TurnsLeft = i/16, i%16
+			w.stepPrices(e)
+			sum += w.BomberPrice(e)
+		}
+		if avg := sum / turns; avg < mid*9/10 || avg > mid*11/10 {
+			t.Errorf("%s: mean bomber price %d over %d turns, want within 10%% of mid %d", name, avg, turns, mid)
+		}
 	}
 }

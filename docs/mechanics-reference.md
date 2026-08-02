@@ -49,10 +49,10 @@ HQ is an `int32` at empire record `+0x26b`, holding percent complete.
   defender.
 - Bombers are excluded from the sum and accumulated separately, matching
   `breins.txt` ("no offensive or defensive strength").
-- **The price rises with the empire's lifetime turn count**, which is what makes
-  HQ unlike every other item: the unit prices random-walk around a fixed base,
-  while HQ only ever climbs (5,039 … 12,649 across the captures). `BRE.OVR
-  0x128BA`:
+- **The price rises with the empire's lifetime turn count.** The military units
+  walk around the centre of a fixed band; a HeadQuarters only ever climbs (5,039
+  … 12,649 across the captures). Covert agents price the same way — see the
+  covert-agent entry under the price walk below. `BRE.OVR 0x128BA`:
 
       price = min(5000 + 75 x turnsPlayed + Random(300),
                   100000 - Random(1000))
@@ -588,25 +588,65 @@ population housing, Technology is an efficiency multiplier (see the Technology
 region above). Food output: `Agricultural × 300` grown, then raised by the
 Technology factor (#20); rivers add a share of their yield as food every turn,
 see the Rivers section. These income numbers, the caps (2B money / 1.599B
-interest), the pirate caps table, and the net-worth weights are BRE-scale;
-**unit prices, the tax per-capita coefficient, and the yield band are IB's own
-reconstructions** anchored to this scale (BRE computes prices/maintenance inline
-— not stored as constants). All tunables live in `internal/game/balance.go`.
+interest), the pirate caps table, and the net-worth weights are BRE-scale; **the
+tax per-capita coefficient and the yield band are IB's own reconstructions**
+anchored to this scale. All tunables live in `internal/game/balance.go`.
 
-**Per-turn price walk (#30).** Each unit's buy price follows a *persistent random
-walk*, per empire: every empire stores its own current prices (`Empire.Prices`) and
-steps them once per turn (`World.stepPrices`, from `PlayTurn`). A step moves a price
-up or down by up to `PriceWalkStep*`% of its base (cheap units 3%, agents 8%) and is
-clamped to ±`PriceWalkBandPct`% (30%) of the base, so prices drift like BRE but can't
-run away. The stored value is what the Spending menu shows and what a buy/sell charges
-within the turn (shown == charged; buy and sell route through the same accessor, sell =
-buy/3, agents flat), and it persists across days via the save. Steps are deterministic
-(keyed per empire and turn, the same `GameDay`/`TurnsLeft` basis region yields use) so play
-is reproducible and concurrency-safe. This matches a live 14-turn sample (2026-07-15):
-each price drifted across turns and days, and the walk is per-empire — a fresh empire
-created the same day a veteran had drifted saw prices back at base. AI empires walk
-independently too (each keyed on its own name). **Regions do not walk** — their price
-rises purely with holdings (`917 + owned×33`), which BRE held exact every turn.
+**Per-turn price walk (#30), binary-verified.** Every empire stores its own price
+for each of the six military units (`Empire.Prices`) and steps it once per turn
+(`World.stepPrices`, from `PlayTurn`). BRE's walk, at `BRE.OVR 0x12633`:
+
+    up, down := 1, 1
+    if price < mid  then down := Random(3) + 1
+    if price > mid  then up   := Random(3) + 1
+    price := price + Random(step) div up
+    price := price - Random(step) div down
+    if price < lo   then price := lo + Random(60)
+    if price > hi   then price := hi - Random(100)
+
+`mid` is the midpoint of `[lo, hi]`. Whichever side of it a price sits on, the
+move that would carry the price further out is divided by 1..3 while the move
+back is taken in full, so the walk is **mean-reverting** and prices sit near the
+centre of a band they are free to roam.
+
+The three tables are arrays of six words in `BRE.EXE`'s data segment (`DS:0x508`
+step, `DS:0x514` low, `DS:0x520` high):
+
+| Unit | Low | High | Mid | Step |
+| --- | ---: | ---: | ---: | ---: |
+| Troopers | 200 | 350 | 275 | 25 |
+| Jets | 250 | 400 | 325 | 25 |
+| Turrets | 300 | 475 | 387 | 25 |
+| Bombers | 2,500 | 5,000 | 3,750 | 125 |
+| Tanks | 1,125 | 2,250 | 1,687 | 75 |
+| Carriers | 4,750 | 6,000 | 5,375 | 125 |
+
+Checked against `cap/eots-covert-agents.cap`, 30 consecutive turns: every buy
+price is inside its band, the observed spread stays close to mid (troopers
+226–305, carriers 5,257–5,457), and no turn-to-turn move reaches the unit's step.
+
+The stored value is what the Spending menu shows and what a buy/sell charges
+within the turn (shown == charged; buy and sell route through the same accessor,
+sell = buy/3 truncated), and it persists across days via the save. Steps are
+deterministic (keyed per empire and turn, the same `GameDay`/`TurnsLeft` basis
+region yields use) so play is reproducible and concurrency-safe. The walk is
+per-empire, AI empires included — each is keyed on its own name.
+
+**Covert agents do not walk.** Their price ratchets with the empire's lifetime
+turn count instead, the same shape as a HeadQuarters and read off the same
+counter (`BRE.OVR 0x1293E`, record `+0x281`), with no cap:
+
+    price = 450 + 20 x turnsPlayed + Random(300)
+
+So a realm 100 turns old pays about 2,450–2,749 per agent where a new one pays
+450–749, and the price never comes back down. Pinned by the same capture:
+solving each turn's agent *and* HeadQuarters price for a shared turn count leaves
+exactly one integer feasible per turn, and it advances by one every turn, day
+boundary included. Constants are `AgentPrice*` in `balance.go`; **agents sell at
+a flat 100** (`SellAgentPrice`, the literal at `BRE.OVR 0x16AEB`), not buy/3.
+
+**Regions do not walk either** — their price rises purely with holdings
+(`917 + owned×33`), which BRE held exact every turn.
 
 **Population and tax** are a major income engine. The per-capita coefficient
 (`TaxGoldPerCapita`) is calibrated so a new realm's first-turn taxes (~5,100)
