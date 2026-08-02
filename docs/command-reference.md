@@ -104,6 +104,16 @@ These options are for games that link several BBSes together (a "league"). See
   run the group attacks, and write outgoing packets.
 - **`-league-config`** — Send this board's league settings to the whole league,
   then exit. Only the league coordinator (node #1) uses this.
+- **`-gen-coord-key`** — Create this league's coordinator key, then exit. Only
+  the coordinator runs this, once. It prints a line to give every other board.
+  The private half is written to `coord.key` in the data folder; keep it secret,
+  and copy it if you ever hand coordinatorship to another sysop.
+- **`-coord-key KEY`** — Record the coordinator's public key on this board, then
+  exit. Every board in the league needs this. Without it, a board cannot check
+  that league orders really came from the coordinator, and will refuse them.
+- **`-league-reset DATE`** — Start a new season across the whole league on DATE,
+  then exit. Only the coordinator uses this. It resets this board and sends a
+  signed order for the other boards to reset on their next `-planetary` run.
 - **`-export FILE`** — Write this board's score packet to FILE, then exit.
 - **`-import FILE`** — Read a score packet from FILE, then exit.
 

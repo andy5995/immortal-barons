@@ -524,8 +524,23 @@ type World struct {
 	// another board has told us about — visible while it is being built and while
 	// it is in the air, which is what gives the jets something to shoot at (#16,
 	// #63).
-	Doomer          *DoomerKaboomerWeapon
-	Incoming        *DoomerKaboomerWeapon
+	Doomer   *DoomerKaboomerWeapon
+	Incoming *DoomerKaboomerWeapon
+
+	// League packet authentication (#53). CoordKey is the ed25519 private key,
+	// held only by the Coordinator's board; CoordPub is the matching public key,
+	// held by every board. Both load from files rather than saving with the
+	// world, so a world file that leaks does not leak the league's key.
+	CoordKey []byte `json:"-"`
+	CoordPub []byte `json:"-"`
+	// OutSeq numbers this board's outbound packets. HighSeq and SeenPackets are
+	// what an inbound packet is checked against, so nothing is applied twice.
+	OutSeq      uint64
+	HighSeq     map[string]uint64
+	SeenPackets map[string]bool
+	// Season counts league-wide resets, so a board can tell the Coordinator's new
+	// order from one it has already carried out (#65).
+	Season          int
 	LeagueDiplomacy string       // coordinator's league-wide diplomacy declaration
 	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from ibnodes.dat at startup
 
@@ -575,6 +590,24 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 // be seeded at creation but forgotten on reset — the drift that stranded the
 // old prices (and would silently carry pirates, news, and the master across a
 // reset). Add any new creation-time world default here, not in NewWorldSeed.
+// ResetForNewSeason wipes this board's world and starts it over, keeping only
+// what identifies the board in its league — the roster, the keys, the season
+// count and the packet history that stops an old order being replayed. Used by
+// the Coordinator's league-wide reset (#65); a stand-alone board resets through
+// -reset instead.
+func (w *World) ResetForNewSeason(startDate string) {
+	nodes, key, pub := w.LeagueNodes, w.CoordKey, w.CoordPub
+	season, outSeq, high, seen := w.Season, w.OutSeq, w.HighSeq, w.SeenPackets
+	outbox := w.Outbox
+	w.initFreshGame()
+	w.LeagueNodes, w.CoordKey, w.CoordPub = nodes, key, pub
+	w.Season, w.OutSeq, w.HighSeq, w.SeenPackets = season, outSeq, high, seen
+	w.Outbox = outbox // an order queued for the other boards must still go out
+	w.StartedDate = startDate
+	w.LastMaintDate = startDate
+	w.seedAIEmpires() // a no-op on a league board, which never has any
+}
+
 func (w *World) initFreshGame() {
 	w.Empires = nil
 	w.Prices = defaultPrices()

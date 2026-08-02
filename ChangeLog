@@ -42,6 +42,13 @@
   * A planet is warned about a Doomer Kaboomer aimed at it, both while it is
     being built and while it is in the air, and can send jets to shoot it
     down — only jets can reach it (#63)
+  * League orders now carry the coordinator's signature, and a board refuses
+    any it cannot check, so no board can dictate the league's rules by
+    naming itself the coordinator (#53)
+  * A packet that arrives twice is now ignored instead of being applied
+    again (#53)
+  * Sysops: "-gen-coord-key" and "-coord-key" set up the league's coordinator
+    key, and "-league-reset DATE" starts a new season on every board (#65)
   * A dead realm is worth nothing on the scores screen
   * Debt no longer lowers your net worth
   * Covert agents cost more the longer your realm has been playing

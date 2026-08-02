@@ -43,6 +43,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string) error {
 	w.ExportScores()
 	w.ExportNodeList()
 	w.ExportDoomerStatus()
+	w.StampOutbox()
 	return WriteOutbox(w, outboundDir)
 }
 

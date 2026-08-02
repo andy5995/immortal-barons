@@ -1,6 +1,8 @@
 package game
 
 import (
+	"crypto/ed25519"
+	"crypto/rand"
 	"reflect"
 	"strings"
 	"testing"
@@ -277,7 +279,10 @@ func TestLeagueConfigOnlyFromCoordinator(t *testing.T) {
 	if !wA.IsLeagueCoordinator() {
 		t.Fatal("Alpha (node #1) should be the League Coordinator")
 	}
+	priv, pub := testCoordKeys(t)
+	wA.CoordKey, wA.CoordPub = priv, pub
 	wA.ExportLeagueConfig()
+	wA.StampOutbox() // numbers and signs it, as the planetary step does
 	pkt := wA.Outbox[0]
 
 	// Member board (Bravo) adopts the coordinator's config.
@@ -285,6 +290,7 @@ func TestLeagueConfigOnlyFromCoordinator(t *testing.T) {
 	cfgB.BoardID, cfgB.GameLength, cfgB.TurnsPerDay = "BravoBBS", 0, 10
 	wB := NewWorldSeed(cfgB, 1)
 	wB.LeagueNodes = roster
+	wB.CoordPub = pub
 	wB.ApplyPacket(pkt)
 	if wB.Config.GameLength != 42 || wB.Config.TurnsPerDay != 15 {
 		t.Errorf("member should adopt LC config, got length=%d turns=%d", wB.Config.GameLength, wB.Config.TurnsPerDay)
@@ -467,7 +473,10 @@ func TestCoordinatorBroadcastsTheRoster(t *testing.T) {
 	cfg.BoardID = "GraveyardBBS" // node 1 = the Coordinator
 	lc := NewWorldSeed(cfg, 1)
 	lc.LeagueNodes = roster
+	priv, pub := testCoordKeys(t)
+	lc.CoordKey, lc.CoordPub = priv, pub
 	lc.ExportNodeList()
+	lc.StampOutbox()
 	if len(lc.Outbox) != 1 || len(lc.Outbox[0].LeagueNodes) != 2 {
 		t.Fatalf("coordinator queued %d packets, want 1 carrying the roster", len(lc.Outbox))
 	}
@@ -476,6 +485,7 @@ func TestCoordinatorBroadcastsTheRoster(t *testing.T) {
 	memberCfg.BoardID = "Wildside"
 	member := NewWorldSeed(memberCfg, 1)
 	member.LeagueNodes = roster // knows the roster well enough to name the LC
+	member.CoordPub = pub
 	member.ApplyPacket(lc.Outbox[0])
 	if len(member.LeagueNodes) != 2 || member.LeagueNodes[1].Name != "Wildside" {
 		t.Errorf("member did not adopt the roster: %+v", member.LeagueNodes)
@@ -725,5 +735,134 @@ func TestDoomerDetonationHitsThePlanet(t *testing.T) {
 	}
 	if w.Incoming != nil {
 		t.Error("the weapon was not consumed on arrival")
+	}
+}
+
+// testCoordKeys makes a throwaway Coordinator key pair for the league tests.
+func testCoordKeys(t *testing.T) (priv, pub []byte) {
+	t.Helper()
+	pk, sk, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatalf("generating a coordinator key: %v", err)
+	}
+	return sk, pk
+}
+
+// Only the Coordinator can give the league orders, and only once. An unsigned
+// order, one signed with the wrong key, and a replayed copy of a genuine one are
+// all refused (#53).
+func TestLeagueOrdersNeedTheCoordinatorsSignature(t *testing.T) {
+	roster := []LeagueNode{{Number: 1, Name: "AlphaBBS"}, {Number: 2, Name: "BravoBBS"}}
+	priv, pub := testCoordKeys(t)
+
+	newMember := func() *World {
+		cfg := DefaultConfig()
+		cfg.BoardID, cfg.IBBS, cfg.GameLength = "BravoBBS", true, 7
+		w := NewWorldSeed(cfg, 1)
+		w.LeagueNodes = roster
+		w.CoordPub = pub
+		return w
+	}
+
+	// Unsigned, but claiming to be the Coordinator.
+	m := newMember()
+	m.ApplyPacket(Packet{FromBoard: "AlphaBBS", Seq: 1, LeagueConfig: &LeagueConfig{GameLength: 99}})
+	if m.Config.GameLength != 7 {
+		t.Errorf("an unsigned order was obeyed: game length %d", m.Config.GameLength)
+	}
+
+	// Signed with a key that is not the league's.
+	other, _ := testCoordKeys(t)
+	forged := Packet{FromBoard: "AlphaBBS", Seq: 2, LeagueConfig: &LeagueConfig{GameLength: 98}}
+	forgedWorld := newMember()
+	forgedWorld.CoordKey = other
+	_ = forgedWorld.SignAsCoordinator(&forged)
+	m = newMember()
+	m.ApplyPacket(forged)
+	if m.Config.GameLength != 7 {
+		t.Errorf("an order signed with the wrong key was obeyed: game length %d", m.Config.GameLength)
+	}
+
+	// Genuine: signed by the Coordinator's key.
+	genuine := Packet{FromBoard: "AlphaBBS", Seq: 3, LeagueConfig: &LeagueConfig{GameLength: 42, TurnsPerDay: 15}}
+	signer := newMember()
+	signer.CoordKey = priv
+	if err := signer.SignAsCoordinator(&genuine); err != nil {
+		t.Fatalf("signing: %v", err)
+	}
+	m = newMember()
+	m.ApplyPacket(genuine)
+	if m.Config.GameLength != 42 {
+		t.Fatalf("a genuine order was refused: game length %d", m.Config.GameLength)
+	}
+
+	// The same packet a second time changes nothing.
+	m.Config.GameLength = 7
+	m.ApplyPacket(genuine)
+	if m.Config.GameLength != 7 {
+		t.Errorf("a replayed order was obeyed a second time: game length %d", m.Config.GameLength)
+	}
+
+	// An older sequence number from the same board is a replay too.
+	m2 := newMember()
+	m2.ApplyPacket(genuine)
+	stale := Packet{FromBoard: "AlphaBBS", Seq: 2, LeagueConfig: &LeagueConfig{GameLength: 5}}
+	signer.Outbox = nil
+	_ = signer.SignAsCoordinator(&stale)
+	m2.ApplyPacket(stale)
+	if m2.Config.GameLength != 42 {
+		t.Errorf("a stale order was obeyed: game length %d", m2.Config.GameLength)
+	}
+}
+
+// The Coordinator can start a new season across the league, and a board carries
+// it out once (#65).
+func TestLeagueWideReset(t *testing.T) {
+	roster := []LeagueNode{{Number: 1, Name: "AlphaBBS"}, {Number: 2, Name: "BravoBBS"}}
+	priv, pub := testCoordKeys(t)
+
+	cfgA := DefaultConfig()
+	cfgA.BoardID, cfgA.IBBS = "AlphaBBS", true
+	lc := NewWorldSeed(cfgA, 1)
+	lc.LeagueNodes = roster
+	lc.CoordKey, lc.CoordPub = priv, pub
+	lc.AddHuman("alice", "Alethia")
+
+	if err := lc.DeclareLeagueReset("2026-09-01", "Season two begins."); err != nil {
+		t.Fatalf("DeclareLeagueReset: %v", err)
+	}
+	if len(lc.Empires) != 0 {
+		t.Errorf("the Coordinator's own board kept %d realms through the reset", len(lc.Empires))
+	}
+	if len(lc.LeagueNodes) != 2 || len(lc.CoordKey) == 0 {
+		t.Error("the reset threw away the league identity it must keep")
+	}
+	var order Packet
+	for _, p := range lc.Outbox {
+		if p.Reset != nil {
+			order = p
+		}
+	}
+	if order.Reset == nil {
+		t.Fatal("no reset order was queued for the other boards")
+	}
+
+	cfgB := DefaultConfig()
+	cfgB.BoardID, cfgB.IBBS = "BravoBBS", true
+	m := NewWorldSeed(cfgB, 1)
+	m.LeagueNodes = roster
+	m.CoordPub = pub
+	m.AddHuman("bob", "Bobland")
+	m.ApplyPacket(order)
+	if len(m.Empires) != 0 {
+		t.Errorf("member board kept %d realms through the league reset", len(m.Empires))
+	}
+	if m.Season != order.Reset.Season {
+		t.Errorf("member is on season %d, the league is on %d", m.Season, order.Reset.Season)
+	}
+
+	// A member cannot start a season itself.
+	if err := m.DeclareLeagueReset("2026-10-01", ""); err != ErrNotCoordinator {
+		t.Errorf("a member board declared a league reset: %v", err)
 	}
 }

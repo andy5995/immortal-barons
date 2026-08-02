@@ -37,6 +37,25 @@ type Packet struct {
 	Recon        []ReconRequest // scouting asked of ToBoard (#61)
 	ReconReports []SpyReport    // answers coming back to the origin (#61)
 	Doomer       *DoomerStatus  // a doomsday weapon aimed at ToBoard (#63)
+	// Seq numbers this board's outbound packets so the far side can spot one it
+	// has already applied, and Signature authenticates the parts only the
+	// Coordinator may author (#53).
+	Seq       uint64
+	Signature []byte
+	Reset     *LeagueReset // Coordinator's order to start a new season (#65)
+}
+
+// LeagueReset is the Coordinator's order for every board to wipe and start a new
+// season together. BRE lets the Coordinator reset the whole league in one step;
+// without it a new season means every sysop being told out of band and doing it
+// by hand on the same evening (#65).
+//
+// It is one of the payloads the Coordinator has to sign, because a forged one
+// would destroy every world in the league.
+type LeagueReset struct {
+	Season    int    // increments each reset, so a board can tell a new order from an old one
+	OnDate    string // ISO date the new season begins
+	Announced string // the Coordinator's message to the league
 }
 
 // DoomerStatus tells a planet about a Doomer Kaboomer aimed at it — while it is
@@ -603,17 +622,31 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 // ApplyPacket applies an inbound packet to this board and returns a result
 // packet (attack outcomes) addressed back to the origin.
 func (w *World) ApplyPacket(p Packet) Packet {
-	// League settings are accepted only from the coordinator board (node #1),
-	// so a member board can't push rules onto the league. The LC ignores its
-	// own echo.
-	if p.LeagueConfig != nil && p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID() && !w.IsLeagueCoordinator() {
+	// Applying the same packet twice would pay out a strike's results, a
+	// broadcast or a reset all over again, so a packet already seen here is
+	// dropped whole (#53).
+	if w.SeenPacket(p) {
+		return Packet{}
+	}
+	// Anything that dictates to this board has to be signed by the Coordinator.
+	// Positional trust — believing whoever names themselves node 1 — is what this
+	// replaces, because the board name in a packet is just a string a file can
+	// claim (#53).
+	orders := w.fromCoordinator(p) && w.VerifyCoordinatorOrders(p)
+	if p.LeagueConfig != nil && orders {
 		w.Config.applyLeagueRuleset(p.LeagueConfig)
 		w.postNews("The League Coordinator updated the league settings.")
 	}
 	// The roster travels the same way and under the same guard (#64).
-	if len(p.LeagueNodes) > 0 && p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID() && !w.IsLeagueCoordinator() {
+	if len(p.LeagueNodes) > 0 && orders {
 		w.LeagueNodes = append([]LeagueNode(nil), p.LeagueNodes...)
 		w.postNews("The League Coordinator updated the league roster.")
+	}
+	if p.Reset != nil && orders {
+		w.applyLeagueReset(p.Reset)
+	}
+	if carriesCoordinatorOrders(p) && !orders {
+		w.postNews(fmt.Sprintf("A packet from %s claimed to carry League Coordinator orders and was refused.", p.FromBoard))
 	}
 	if len(p.Scores) > 0 {
 		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores})
@@ -921,4 +954,51 @@ func (w *World) ArriveDoomer() {
 	intact := w.Incoming.Intact
 	w.Incoming = nil
 	w.DetonateDoomer(intact)
+}
+
+// fromCoordinator reports whether p claims to come from the Coordinator's board,
+// and that this board is not the Coordinator hearing its own echo. It is only
+// half the check — the signature is the half that cannot be faked.
+func (w *World) fromCoordinator(p Packet) bool {
+	return p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID() && !w.IsLeagueCoordinator()
+}
+
+// applyLeagueReset carries out the Coordinator's order to start a new season.
+// The order names the season it starts, so a board that already ran it — or one
+// replaying an old packet — does nothing (#65).
+func (w *World) applyLeagueReset(r *LeagueReset) {
+	if r.Season <= w.Season {
+		return
+	}
+	w.Season = r.Season
+	w.ResetForNewSeason(r.OnDate)
+	if r.Announced != "" {
+		w.LeagueDiplomacy = r.Announced
+	}
+	w.postNews(fmt.Sprintf("The League Coordinator has begun season %d. Every realm starts again.", r.Season))
+}
+
+// DeclareLeagueReset is the Coordinator ordering a new season. It resets this
+// board too and queues the order for every other, signed so no other board can
+// issue one (#65).
+func (w *World) DeclareLeagueReset(onDate, announcement string) error {
+	if !w.IsLeagueCoordinator() {
+		return ErrNotCoordinator
+	}
+	if len(w.CoordKey) == 0 {
+		return ErrNoCoordKey
+	}
+	w.Season++
+	r := &LeagueReset{Season: w.Season, OnDate: onDate, Announced: announcement}
+	p := Packet{FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Seq: w.NextSeq(), Reset: r}
+	if err := w.SignAsCoordinator(&p); err != nil {
+		return err
+	}
+	w.Outbox = append(w.Outbox, p)
+	w.ResetForNewSeason(onDate)
+	if announcement != "" {
+		w.LeagueDiplomacy = announcement
+	}
+	w.postNews(fmt.Sprintf("Season %d begins. Every realm starts again.", w.Season))
+	return nil
 }

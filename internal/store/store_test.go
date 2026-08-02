@@ -162,6 +162,8 @@ func fillValue(v reflect.Value) {
 	switch v.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		v.SetInt(7)
+	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+		v.SetUint(7)
 	case reflect.Bool:
 		v.SetBool(true)
 	case reflect.String:

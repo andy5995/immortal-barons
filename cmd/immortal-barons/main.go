@@ -77,6 +77,9 @@ func main() {
 	imp := flag.String("import", "", i18n.T(lang, "read a score packet from FILE, then exit"))
 	planetary := flag.Bool("planetary", false, i18n.T(lang, "run the inter-BBS step: read incoming packets, run group attacks, write outgoing packets, then exit"))
 	leagueConfig := flag.Bool("league-config", false, i18n.T(lang, "send this board's league settings to the whole league (node #1 only), then exit"))
+	genCoordKey := flag.Bool("gen-coord-key", false, i18n.T(lang, "create this league's Coordinator key, print the public half to give the other boards, then exit (node #1 only)"))
+	coordPub := flag.String("coord-key", "", i18n.T(lang, "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"))
+	leagueReset := flag.String("league-reset", "", i18n.T(lang, "start a new season across the whole league on DATE (node #1 only), then exit"))
 	reset := flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"))
 	resetFromConfig := flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)"))
 	addAI := flag.Int("add-ai", 0, i18n.T(lang, "add N computer barons to the running game, then exit"))
@@ -166,6 +169,38 @@ func main() {
 	if *leagueConfig {
 		if err := runLeagueConfig(cfg); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -league-config:", err)
+			os.Exit(1)
+		}
+		return
+	}
+	if *genCoordKey {
+		pub, err := store.GenerateCoordKey(cfg.DataDir)
+		if err != nil {
+			if os.IsExist(err) {
+				fmt.Fprintln(os.Stderr, "immortal-barons -gen-coord-key: this board already has a Coordinator key. Delete", filepath.Join(cfg.DataDir, store.CoordKeyFile), "only if you mean to lock every other board out.")
+			} else {
+				fmt.Fprintln(os.Stderr, "immortal-barons -gen-coord-key:", err)
+			}
+			os.Exit(1)
+		}
+		fmt.Println("Coordinator key created. Give every other board in the league this line:")
+		fmt.Println()
+		fmt.Println("    immortal-barons -coord-key", pub)
+		fmt.Println()
+		fmt.Println("Keep", filepath.Join(cfg.DataDir, store.CoordKeyFile), "secret. Copying it is how coordinatorship is handed on.")
+		return
+	}
+	if *coordPub != "" {
+		if err := store.InstallCoordPub(cfg.DataDir, *coordPub); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -coord-key:", err)
+			os.Exit(1)
+		}
+		fmt.Println("Coordinator key recorded. League orders will be checked against it.")
+		return
+	}
+	if *leagueReset != "" {
+		if err := runLeagueReset(cfg, *leagueReset); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -league-reset:", err)
 			os.Exit(1)
 		}
 		return
@@ -477,6 +512,27 @@ func runMaint(cfg game.Config, today string) error {
 		}
 	}
 	return store.Save(w, cfg)
+}
+
+// runLeagueReset is the Coordinator starting a new season for the whole league:
+// this board resets, and a signed order goes out for every other board to do the
+// same on its next planetary run.
+func runLeagueReset(cfg game.Config, date string) error {
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	if err := w.DeclareLeagueReset(date, ""); err != nil {
+		return err
+	}
+	if err := store.RunPlanetary(w, cfg.InboundDir, cfg.OutboundDir); err != nil {
+		return err
+	}
+	if err := store.Save(w, cfg); err != nil {
+		return err
+	}
+	fmt.Printf("Season %d declared, starting %s. The order is in the outbound folder for the other boards.\n", w.Season, date)
+	return nil
 }
 
 // runLeagueConfig broadcasts this board's league rules (turns, protection,

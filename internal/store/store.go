@@ -23,6 +23,7 @@ var ErrNoWorld = errors.New("no game found — run with -reset to create one")
 func NewGame(cfg game.Config) *game.World {
 	w := game.NewWorld(cfg)
 	loadLeagueNodes(w, cfg)
+	loadLeagueKeys(w, cfg)
 	return w
 }
 
@@ -63,6 +64,7 @@ func repair(w *game.World, cfg game.Config) {
 	w.EnsureNews()
 	w.Config = cfg
 	loadLeagueNodes(w, cfg)
+	loadLeagueKeys(w, cfg)
 }
 
 // NodeListFile is the league roster filename. The clone isn't binary-compatible

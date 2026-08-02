@@ -1547,3 +1547,30 @@ These are the slices that would move it closer to the real game.
     commanders, tax cap, pirate retaliation, trade-deal tactics): faqs/1571
   - "Cash-On-Wheels FAQ" by Anonymous (interest/money caps, region income
     figures, investment cycling, pirate evasion via the Trading Market)
+
+## Inter-BBS packet integrity (#53)
+
+BRE guarded its league traffic with CRCs, duplicate detection and a binary
+`COORD.KEY` that authenticated the League Coordinator; its own error strings name
+the threats ("Invalid CRC in incoming Gooie Kablooie from BBS #", "Duplicate or
+Late Attack Return Recieved - Packet Deleted", "Illegal Route Found from BBS #").
+IB's transport is a direct file drop with no relays, so it implements the two
+that still bite:
+
+- **Coordinator authentication.** The Coordinator's board holds an ed25519
+  private key (`coord.key`, created with `-gen-coord-key`); every board holds the
+  public half (`coord.pub`, installed with `-coord-key`). Everything that
+  dictates to another board — the league ruleset, the roster, a league-wide reset
+  — is signed, and a board that cannot verify a signature refuses the order
+  rather than trusting it. A shared secret could not do this job: every member
+  would hold it and could sign with it.
+- **Anti-replay.** Each outbound packet carries a sequence number. A board tracks
+  the highest it has seen from each sender and a set of packets already applied,
+  and drops anything it has processed before or that arrives with a stale number.
+  Without it a saved packet could be dropped back in to pay a strike's results
+  out twice, or re-run a reset.
+
+**What this does not do**, and BRE could not do either: stop a sysop inventing
+their own board's figures. Scores and strikes are self-reported and deliberately
+unsigned — signing them would imply a guarantee nothing can give. The point is to
+stop one board dictating to the others, and to stop a packet landing twice.

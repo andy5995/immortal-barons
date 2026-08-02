@@ -2027,7 +2027,7 @@ msgstr ""
 msgid "[%d Regions left] Your choice?"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:82
+#: cmd/immortal-barons/main.go:85
 msgid "add N computer barons to the running game, then exit"
 msgstr "voeg N computerbaronnen toe aan het lopende spel en sluit af"
 
@@ -2035,18 +2035,24 @@ msgstr "voeg N computerbaronnen toe aan het lopende spel en sluit af"
 msgid "choose which drop file format your BBS writes, save it, then exit"
 msgstr ""
 
+#: cmd/immortal-barons/main.go:80
+msgid ""
+"create this league's Coordinator key, print the public half to give the "
+"other boards, then exit (node #1 only)"
+msgstr ""
+
 #: cmd/immortal-barons/main.go:74
 msgid "folder that holds the game data"
 msgstr "map met de spelgegevens"
 
-#: cmd/immortal-barons/main.go:86
+#: cmd/immortal-barons/main.go:89
 msgid ""
 "force CP437 output (the door default; overrides the -local locale detection)"
 msgstr ""
 "forceer CP437-uitvoer (de standaard voor doors; overschrijft de locale-"
 "herkenning van -local)"
 
-#: cmd/immortal-barons/main.go:85
+#: cmd/immortal-barons/main.go:88
 msgid ""
 "force UTF-8 output (needed for non-English languages; -local detects this "
 "from your locale)"
@@ -2062,6 +2068,10 @@ msgstr ""
 msgid "in return for %s."
 msgstr ""
 
+#: internal/game/ibbs_auth.go:32
+msgid "no coordinator key is loaded"
+msgstr ""
+
 #: internal/game/ibbs.go:15
 msgid "no such group attack"
 msgstr ""
@@ -2070,7 +2080,11 @@ msgstr ""
 msgid "nothing"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:741
+#: internal/game/ibbs_auth.go:33
+msgid "packet signature does not verify"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:797
 #, fuzzy
 msgid "path to the BBS drop file"
 msgstr "pad naar het BBS-dropbestand (DOOR32.SYS of DOOR.SYS)"
@@ -2083,14 +2097,14 @@ msgstr ""
 msgid "play in your own terminal, not as a BBS door"
 msgstr "speel in je eigen terminal, niet als BBS-door"
 
-#: cmd/immortal-barons/main.go:83
+#: cmd/immortal-barons/main.go:86
 msgid ""
 "play the game forward N days of computer-baron turns, printing a per-day "
 "summary and final standings, then exit (a balance probe). ADVANCES AND SAVES "
 "the game, so it asks first and refuses on a game that has human realms"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:84
+#: cmd/immortal-barons/main.go:87
 #, fuzzy
 msgid ""
 "print the normalized game world as JSON, then exit (after load-time "
@@ -2098,7 +2112,7 @@ msgid ""
 msgstr ""
 "print de spelwereld als JSON en sluit af (voor scripts en balanscontroles)"
 
-#: cmd/immortal-barons/main.go:87
+#: cmd/immortal-barons/main.go:90
 msgid "print the version, then exit"
 msgstr "print de versie en sluit af"
 
@@ -2106,7 +2120,13 @@ msgstr "print de versie en sluit af"
 msgid "read a score packet from FILE, then exit"
 msgstr "lees een scorepakket uit FILE en sluit af"
 
-#: cmd/immortal-barons/main.go:745
+#: cmd/immortal-barons/main.go:81
+msgid ""
+"record the league Coordinator's public key (the value -gen-coord-key "
+"printed), then exit"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:801
 msgid "run -set-dropfile first"
 msgstr ""
 
@@ -2130,7 +2150,7 @@ msgstr ""
 "stuur de liga-instellingen van dit board naar de hele liga (alleen node #1) "
 "en sluit af"
 
-#: cmd/immortal-barons/main.go:81
+#: cmd/immortal-barons/main.go:84
 msgid ""
 "start a new game from the current config.json without the editor: clear all "
 "empires and rebuild the world (the old world is saved first)"
@@ -2138,7 +2158,7 @@ msgstr ""
 "start een nieuw spel met de huidige config.json zonder editor: wis alle "
 "rijken en bouw de wereld opnieuw op (de oude wereld wordt eerst opgeslagen)"
 
-#: cmd/immortal-barons/main.go:80
+#: cmd/immortal-barons/main.go:83
 msgid ""
 "start a new game: change the settings, then clear all empires and rebuild "
 "the world (the old world is saved first)"
@@ -2146,12 +2166,24 @@ msgstr ""
 "start een nieuw spel: wijzig de instellingen, wis daarna alle rijken en bouw "
 "de wereld opnieuw op (de oude wereld wordt eerst opgeslagen)"
 
+#: cmd/immortal-barons/main.go:82
+#, fuzzy
+msgid ""
+"start a new season across the whole league on DATE (node #1 only), then exit"
+msgstr ""
+"stuur de liga-instellingen van dit board naar de hele liga (alleen node #1) "
+"en sluit af"
+
 #: internal/game/ibbs.go:16
 msgid "that attack force has already left"
 msgstr ""
 
 #: internal/menu/actions_interbbs.go:147
 msgid "the whole planet"
+msgstr ""
+
+#: internal/game/ibbs_auth.go:31
+msgid "this board is not the League Coordinator"
 msgstr ""
 
 #: internal/menu/gameflow.go:409
