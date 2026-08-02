@@ -26,6 +26,9 @@
   * Group attacks, terrorist ops and bombing ops now have their own per-day
     limits
   * A board in a league has no computer barons, and none can be added to one
+  * Forces sent to another board now come home if no result arrives within the
+    number of days the game settings allow, instead of being lost with the
+    packet (#96)
   * A dead realm is worth nothing on the scores screen
   * Debt no longer lowers your net worth
   * Covert agents cost more the longer your realm has been playing

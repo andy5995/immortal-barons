@@ -26,6 +26,9 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string) error {
 	if err := SaveConfig(w.Config); err != nil {
 		return err
 	}
+	// After the inbound packets, so a result that arrived this run is never
+	// overtaken by the recovery timer.
+	w.ReturnLostForces()
 	w.LaunchDueGroupAttacks()
 	w.ExportScores()
 	return WriteOutbox(w, outboundDir)

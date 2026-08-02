@@ -511,8 +511,12 @@ type World struct {
 	// Inter-BBS (interplanetary) play — see ibbs.go. GroupAttacks assemble
 	// locally until they depart; Outbox holds packets queued for other boards;
 	// SpyDatabase holds spy reports shared across the planet.
-	GroupAttacks    []GroupAttack
-	NextAttackID    int
+	GroupAttacks []GroupAttack
+	NextAttackID int
+	// InFlight holds strikes that have left this board and are waiting for a
+	// result packet. A result clears the matching entry; one that waits too long
+	// has its forces given back instead (Config.LostForcesDays, #96).
+	InFlight        []InFlightStrike
 	Outbox          []Packet
 	SpyDatabase     []SpyReport
 	LeagueDiplomacy string       // coordinator's league-wide diplomacy declaration

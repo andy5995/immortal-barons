@@ -395,11 +395,14 @@ regions lower its upkeep). When complete it destroys about half of incoming
 missiles and cuts attacking jets' effectiveness by ~25–30%.
 
 Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
-"Days before 'lost' forces returned" (config, default 3) is an **inter-BBS**
-setting, not a local-combat one. A strike sent to another board is away for the
-whole packet round trip, and packets go missing; the setting gives a detachment
-back to its owner when no result has come home in that many days. IB has no such
-recovery — see #96.
+"Days before 'lost' forces returned" (`Config.LostForcesDays`, default 3) is an
+**inter-BBS** setting, not a local-combat one. A strike sent to another board is
+away for the whole packet round trip, and packets go missing; the setting gives a
+detachment back to its owner when no result has come home in that many days. IB
+implements this (#96): `World.InFlight` records every strike that leaves, a
+returning result clears it, and `ReturnLostForces` — run from the planetary step
+after inbound packets are applied — hands back anything that has waited too long
+and posts news. 0 turns the recovery off.
 
 ## Covert operations
 

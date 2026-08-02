@@ -275,6 +275,22 @@ type RemoteTerror struct {
 	Agents       int // agents committed; scales the forces destroyed
 }
 
+// InFlightStrike is a strike that has left this board and has not been answered.
+// An inter-BBS attack is away for a whole packet round trip — out on this board's
+// schedule, resolved on the target's, home again on theirs — and packets go
+// missing. Holding the committed forces here lets them be given back when no
+// result arrives (#96), rather than being lost with the packet.
+type InFlightStrike struct {
+	ID           int
+	Kind         string // "attack" or "terror"
+	TargetBoard  string
+	TargetEmpire string
+	LaunchedDay  int
+	Contributors []Contribution // an attack's detachments, by owner
+	Owner        string         // a terror op's sender
+	Agents       int            // a terror op's committed agents
+}
+
 // commitForce deducts the detachment f from e's army; ErrCantAfford if e lacks
 // any unit type.
 func (e *Empire) commitForce(f AttackForce) error {
@@ -349,6 +365,14 @@ func (w *World) LaunchDueGroupAttacks() {
 			FromBoard:    w.Config.BoardID,
 			TargetEmpire: ga.TargetEmpire,
 			Offense:      ga.Offense(),
+			Contributors: ga.Contributors,
+		})
+		w.InFlight = append(w.InFlight, InFlightStrike{
+			ID:           ga.ID,
+			Kind:         "attack",
+			TargetBoard:  ga.TargetBoard,
+			TargetEmpire: ga.TargetEmpire,
+			LaunchedDay:  w.GameDay,
 			Contributors: ga.Contributors,
 		})
 	}
@@ -433,6 +457,15 @@ func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents i
 	e.TerrorOpsToday++
 	w.NextAttackID++
 	t := RemoteTerror{ID: w.NextAttackID, FromBoard: w.Config.BoardID, TargetEmpire: targetEmpire, Agents: agents}
+	w.InFlight = append(w.InFlight, InFlightStrike{
+		ID:           t.ID,
+		Kind:         "terror",
+		TargetBoard:  targetBoard,
+		TargetEmpire: targetEmpire,
+		LaunchedDay:  w.GameDay,
+		Owner:        e.Owner,
+		Agents:       agents,
+	})
 	for i := range w.Outbox {
 		if w.Outbox[i].ToBoard == targetBoard {
 			w.Outbox[i].Terrors = append(w.Outbox[i].Terrors, t)
@@ -498,6 +531,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	}
 	// Outcomes of our own strikes, returning from the target board.
 	for _, res := range p.Results {
+		w.clearInFlight(res.ID) // answered, so it can no longer time out
 		switch {
 		case res.Kind == "terror" && res.Won:
 			w.postNews(fmt.Sprintf("Our terror op on %s (%s) destroyed %d troopers!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
@@ -604,4 +638,62 @@ func (w *World) remoteTarget(name string) *Empire {
 		}
 	}
 	return best
+}
+
+// clearInFlight drops the strike with this ID from the waiting list, because its
+// result has come home.
+func (w *World) clearInFlight(id int) {
+	for i, f := range w.InFlight {
+		if f.ID == id {
+			w.InFlight = append(w.InFlight[:i], w.InFlight[i+1:]...)
+			return
+		}
+	}
+}
+
+// ReturnLostForces gives back the forces of any strike still unanswered after
+// Config.LostForcesDays, and reports how many strikes it recovered. This is what
+// stops a lost packet — a board that stops running transfers, a sysop who drops
+// out — from costing a player their army for good (#96). A LostForcesDays of 0
+// or less turns the recovery off, and the forces wait indefinitely.
+//
+// Run from the planetary step, after inbound packets have been applied, so a
+// result that did arrive this run is never overtaken by the timer.
+func (w *World) ReturnLostForces() int {
+	days := w.Config.LostForcesDays
+	if days <= 0 {
+		return 0
+	}
+	var waiting []InFlightStrike
+	recovered := 0
+	for _, f := range w.InFlight {
+		if w.GameDay-f.LaunchedDay < days {
+			waiting = append(waiting, f)
+			continue
+		}
+		recovered++
+		if f.Kind == "terror" {
+			if e := w.FindByOwner(f.Owner); e != nil {
+				e.Agents += f.Agents
+				e.addEvent(fmt.Sprintf("No word came back from %s. Your %d agents have returned home.", f.TargetBoard, f.Agents))
+			}
+			continue
+		}
+		for _, c := range f.Contributors {
+			e := w.FindByOwner(c.Owner)
+			if e == nil {
+				continue
+			}
+			e.Troopers += c.Troopers
+			e.Jets += c.Jets
+			e.Tanks += c.Tanks
+			e.Bombers += c.Bombers
+			e.addEvent(fmt.Sprintf("No word came back from %s. Your force sent against %s has returned home.", f.TargetBoard, f.TargetEmpire))
+		}
+	}
+	w.InFlight = waiting
+	if recovered > 0 {
+		w.postNews(fmt.Sprintf("%d interplanetary force(s) gave up waiting and came home.", recovered))
+	}
+	return recovered
 }

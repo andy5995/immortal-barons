@@ -371,3 +371,85 @@ func TestLeagueBoardGetsNoAIBarons(t *testing.T) {
 		t.Errorf("stand-alone board seeded %d AI barons, want 5", len(solo.Empires))
 	}
 }
+
+// A strike whose result packet never comes home gives its forces back after the
+// configured wait, so a lost packet does not cost a player their army (#96).
+func TestLostForcesComeHome(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	cfg.LostForcesDays = 3
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("alice", "Alethia")
+	e.Troopers, e.Tanks, e.Agents = 1000, 40, 20
+
+	f := AttackForce{Troopers: 600, Tanks: 25}
+	if _, err := w.CreateGroupAttack(e, "faraway", "Rome", w.GameDay, f); err != nil {
+		t.Fatalf("CreateGroupAttack: %v", err)
+	}
+	if err := w.SendTerror(e, "faraway", "Rome", 5); err != nil {
+		t.Fatalf("SendTerror: %v", err)
+	}
+	w.LaunchDueGroupAttacks()
+	if e.Troopers != 400 || e.Tanks != 15 || e.Agents != 15 {
+		t.Fatalf("after launching: troopers=%d tanks=%d agents=%d, want 400/15/15", e.Troopers, e.Tanks, e.Agents)
+	}
+	if len(w.InFlight) != 2 {
+		t.Fatalf("in flight = %d, want 2 (the strike and the terror op)", len(w.InFlight))
+	}
+
+	// Too soon: the forces are still out there.
+	w.GameDay += 2
+	if got := w.ReturnLostForces(); got != 0 {
+		t.Errorf("recovered %d strikes after 2 days, want 0 — the wait is %d", got, cfg.LostForcesDays)
+	}
+	if e.Troopers != 400 {
+		t.Errorf("troopers came home early: %d, want 400", e.Troopers)
+	}
+
+	// The wait is up and nothing came back, so everything returns.
+	w.GameDay++
+	if got := w.ReturnLostForces(); got != 2 {
+		t.Errorf("recovered %d strikes, want 2", got)
+	}
+	if e.Troopers != 1000 || e.Tanks != 40 || e.Agents != 20 {
+		t.Errorf("after recovery: troopers=%d tanks=%d agents=%d, want 1000/40/20", e.Troopers, e.Tanks, e.Agents)
+	}
+	if len(w.InFlight) != 0 {
+		t.Errorf("%d strikes still waiting after recovery, want 0", len(w.InFlight))
+	}
+}
+
+// A result that does arrive clears the strike, so the timer never fires for it
+// and the forces are not returned twice.
+func TestAnsweredStrikeDoesNotAlsoTimeOut(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	cfg.LostForcesDays = 1
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("alice", "Alethia")
+	e.Troopers = 500
+
+	if _, err := w.CreateGroupAttack(e, "faraway", "Rome", w.GameDay, AttackForce{Troopers: 300}); err != nil {
+		t.Fatalf("CreateGroupAttack: %v", err)
+	}
+	w.LaunchDueGroupAttacks()
+	id := w.InFlight[0].ID
+
+	w.ApplyPacket(Packet{
+		FromBoard: "faraway",
+		Results: []AttackResult{{
+			ID: id, TargetBoard: "faraway", TargetEmpire: "Rome",
+			Survivors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 200}}},
+		}},
+	})
+	if e.Troopers != 400 {
+		t.Fatalf("survivors returned: troopers=%d, want 400 (200 home, 100 lost)", e.Troopers)
+	}
+	w.GameDay += 5
+	if got := w.ReturnLostForces(); got != 0 {
+		t.Errorf("an answered strike timed out anyway (%d recovered)", got)
+	}
+	if e.Troopers != 400 {
+		t.Errorf("troopers returned twice: %d, want 400", e.Troopers)
+	}
+}
