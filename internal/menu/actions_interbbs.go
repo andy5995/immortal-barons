@@ -202,13 +202,66 @@ func promptAttackForce(s session.Session, p *game.Empire) game.AttackForce {
 	return f
 }
 
-// indivAttackForce is BRE's "Indiv. Attack Force" InterPlanetary Operations
-// item. IB has no interplanetary individual-attack mechanic yet (unlike
-// Create/Join Group Attack, which do); this is a recorded-but-inert stub so
-// the menu's item set matches BRE's while the mechanic itself is unbuilt.
+// indivAttackForce is BRE's "Indiv. Attack Force": one baron striking one named
+// baron on another planet. It leaves at once rather than assembling like a group
+// attack, and it spends one of the day's individual attacks (#62).
 func indivAttackForce(s session.Session, w *ctx) Result {
-	ok(s, "Individual attack forces are not yet available; use Create Group Attack.")
+	if blockedByProtection(s, w) {
+		return Stay
+	}
+	board, target := pickRemoteBaron(s, w)
+	if board == "" || target == "" {
+		return Stay
+	}
+	force := promptAttackForce(s, w.Player())
+	if force.Empty() {
+		return Stay
+	}
+	var id int
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		n, e := w.World.CreateIndividualAttack(p, board, target, force)
+		id = n
+		return e
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	ok(s, "Attack force #%d is on its way to %s on %s.", id, target, board)
 	return Stay
+}
+
+// pickRemoteBaron asks for a planet and then a named baron on it. Unlike the
+// group-attack picker it offers no whole-planet choice, because an individual
+// attack has to name its target. Empty strings mean the player backed out.
+func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
+	var boards []string
+	var scores map[string][]string
+	w.With(func() {
+		scores = map[string][]string{}
+		for _, b := range w.RemoteBoards {
+			boards = append(boards, b.BoardID)
+			for _, sc := range b.Scores {
+				scores[b.BoardID] = append(scores[b.BoardID], sc.Empire)
+			}
+		}
+	})
+	if len(boards) == 0 {
+		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
+		return "", ""
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
+	board = pickFromList(s, "Planet", boards)
+	if board == "" {
+		return "", ""
+	}
+	if len(scores[board]) == 0 {
+		ok(s, "No barons are known on that planet yet.")
+		return "", ""
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
+	baron = pickFromList(s, "Baron", scores[board])
+	return board, baron
 }
 
 // travelTimes shows the round-trip time to each known planet, matching BRE's

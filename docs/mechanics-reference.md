@@ -348,7 +348,11 @@ All four constants live in `balance.go`; Score never drops below 0.
   default **3**; `0` = unlimited). The count resets at daily maintenance and is
   shared across all of the day's turns, so it caps total aggression, not
   attacks-per-turn. Only conventional/regular attacks count — WMD strikes and
-  pirate raids are not limited by it.
+  pirate raids are not limited by it. An **individual interplanetary attack**
+  (BRE's "Indiv. Attack Force", #62) draws on the same allowance: one baron
+  striking one named baron on another planet, leaving at once rather than
+  assembling like a group attack. Group attacks, terrorist ops and bombing ops
+  have their own separate per-day allowances.
 - **Nuclear attack** — turns enemy regions into waste (high cost).
 - **Chemical attack** — damages fewer regions but kills a lot of people
   (and troopers).

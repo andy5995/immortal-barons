@@ -495,3 +495,42 @@ func TestCoordinatorBroadcastsTheRoster(t *testing.T) {
 		t.Errorf("member adopted a roster from a non-coordinator board: %+v", member.LeagueNodes)
 	}
 }
+
+// An individual interplanetary attack leaves at once, spends one of the day's
+// individual attacks, and must name its target (#62).
+func TestIndividualInterplanetaryAttack(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	cfg.MaxIndividualAttacks = 1
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("alice", "Alethia")
+	e.Troopers, e.Tanks = 900, 30
+
+	if _, err := w.CreateIndividualAttack(e, "faraway", "", AttackForce{Troopers: 100}); err != ErrNoTarget {
+		t.Errorf("a whole-planet individual attack should be refused, got %v", err)
+	}
+
+	id, err := w.CreateIndividualAttack(e, "faraway", "Rome", AttackForce{Troopers: 500, Tanks: 20})
+	if err != nil {
+		t.Fatalf("CreateIndividualAttack: %v", err)
+	}
+	if e.Troopers != 400 || e.Tanks != 10 {
+		t.Errorf("force not committed: troopers=%d tanks=%d, want 400/10", e.Troopers, e.Tanks)
+	}
+	// It is away immediately — queued for the target board, and on the waiting
+	// list so it can time out like any other strike.
+	if len(w.Outbox) != 1 || len(w.Outbox[0].Attacks) != 1 || w.Outbox[0].Attacks[0].ID != id {
+		t.Fatalf("strike was not queued for the target board: %+v", w.Outbox)
+	}
+	if len(w.InFlight) != 1 || w.InFlight[0].ID != id {
+		t.Errorf("strike is not on the waiting list: %+v", w.InFlight)
+	}
+
+	// The day's one individual attack is spent.
+	if _, err := w.CreateIndividualAttack(e, "faraway", "Rome", AttackForce{Troopers: 10}); err != ErrAttacksExhausted {
+		t.Errorf("second attack should exhaust the daily allowance, got %v", err)
+	}
+	if e.Troopers != 400 {
+		t.Errorf("a refused attack still took troopers: %d, want 400", e.Troopers)
+	}
+}

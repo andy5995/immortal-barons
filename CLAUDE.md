@@ -271,8 +271,7 @@ AI behaviour, IB's own additions) are the playtest knobs. Keep both matching
 Stubbed / not built: leagues auto-reset (a daily Planetary Master leader is tracked, `CurrentMaster`, and
 `endGame` crowns `LastMaster`, but timed auto-reset is not built), the
 Quick-Strike / Extended-Battle attack variants,
-civil-war collapse, an interplanetary individual-attack force (`Indiv. Attack
-Force` is a stub), and BRE's finer interplanetary news subtypes. A few
+civil-war collapse, and BRE's finer interplanetary news subtypes. A few
 covert/diplomacy items are recorded-but-inert pending fuller subsystems (flagged
 in `docs/mechanics-reference.md`).
 

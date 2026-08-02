@@ -18,6 +18,8 @@ var (
 	// MaxTerrorOps), the counterparts of the individual-attack cap.
 	ErrGroupAttacksExhausted = errors.New("You have already launched all of your group attacks for today.")
 	ErrTerrorOpsExhausted    = errors.New("You have already launched all of your terrorist operations for today.")
+	ErrAttacksExhausted      = errors.New("You have already launched all of your attacks for today.")
+	ErrNoTarget              = errors.New("An individual attack must name a baron to strike.")
 )
 
 // Packet carries inter-BBS actions from one board to another (or, with an empty
@@ -340,6 +342,44 @@ func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, d
 		Contributors: []Contribution{{Owner: e.Owner, AttackForce: f}},
 	})
 	return &w.GroupAttacks[len(w.GroupAttacks)-1], nil
+}
+
+// CreateIndividualAttack sends one baron's detachment against one named remote
+// baron, BRE's "Indiv. Attack Force". Unlike a group attack it assembles nothing
+// and waits for nobody: the force leaves on this run and the strike is in flight
+// straight away. It spends one of the day's individual attacks, the same
+// allowance a conventional attack at home draws on, and it must name a target —
+// there is no whole-planet form.
+func (w *World) CreateIndividualAttack(e *Empire, targetBoard, targetEmpire string, f AttackForce) (int, error) {
+	if targetEmpire == "" {
+		return 0, ErrNoTarget
+	}
+	if !w.CanAttack(e) {
+		return 0, ErrAttacksExhausted
+	}
+	if err := e.commitForce(f); err != nil {
+		return 0, err
+	}
+	e.AttacksToday++
+	w.NextAttackID++
+	id := w.NextAttackID
+	contributors := []Contribution{{Owner: e.Owner, AttackForce: f}}
+	w.enqueue(targetBoard, RemoteAttack{
+		ID:           id,
+		FromBoard:    w.Config.BoardID,
+		TargetEmpire: targetEmpire,
+		Offense:      f.offense(),
+		Contributors: contributors,
+	})
+	w.InFlight = append(w.InFlight, InFlightStrike{
+		ID:           id,
+		Kind:         "attack",
+		TargetBoard:  targetBoard,
+		TargetEmpire: targetEmpire,
+		LaunchedDay:  w.GameDay,
+		Contributors: contributors,
+	})
+	return id, nil
 }
 
 // JoinGroupAttack commits e's detachment f to a pending group attack (before it
