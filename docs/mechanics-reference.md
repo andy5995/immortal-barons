@@ -125,15 +125,20 @@ Net Worth column:
 Every weight matches what IB already had from the strategy guide, to the digit.
 Bombers and carriers are integer multiplies (3 and 1); the rest are Turbo Pascal
 6-byte reals, and the region term multiplies the same nine-region sum
-(`056d:0EC6`) the Territory column uses. Three details IB does not have:
+(`056d:0EC6`) the Territory column uses. Three further details:
 
+- **There is no debt subtraction.** IB subtracted `Debt/100` until 2026-08-01 and
+  no longer does. This slightly raises the loan ceiling, which is a multiple of
+  net worth.
 - **Units away from home still count.** Each unit term adds a second count from a
   parallel array at record `+0x211` (troopers, jets, turrets, bombers, …, agents,
   tanks, carriers, 4 bytes apart) before applying the weight. That is the "lost"
   attacking-force pool that returns after a few days, so a realm mid-attack does
-  not appear to shrink.
-- **A dead realm returns 0** rather than a computed figure.
-- **There is no debt subtraction.** IB subtracts `Debt/100`.
+  not appear to shrink. **IB has no equivalent and this term is not implemented**
+  — attacks resolve within the turn here, so no force is ever in transit. It
+  becomes implementable only if the lost-forces pool is built.
+- **A dead realm returns 0** rather than a computed figure. IB has no eliminated
+  flag on `Empire`, so this is not implemented either.
 
 A vestigial `+0x125` is added at the end. It is read here and **nowhere else in
 either binary, and never written**, so it is always zero.
@@ -420,7 +425,12 @@ player, the global empire letter at `DS:0x28DC`); `d` is the chosen target;
         if total > 1e9 then total := 1e9
         result := trunc(total)
 
-`Random(A+B) < A` is the shape IB already uses. Three things differ:
+**IB reproduces this for Send Spy** (`spySuccess` in `internal/game/covert.go`),
+defect included, on Andy's call. The effect ops keep `covertSuccess` — its
+attacker-against-defender roll — because BRE does not resolve them through this
+routine at all, so extending the defect to them would invent a bug the original
+does not have. Both paths now share `covertStrength` and so pick up the verified
+40/50 ally shares. What differs between the two:
 
 - **The defender's agents never enter the roll.** Both `covertStrength` calls
   pass `a`; the bytes are identical (`8A 46 10`) at `0x4BAE7` and `0x4BB03`, only
@@ -430,18 +440,22 @@ player, the global empire letter at `DS:0x28DC`); `d` is the chosen target;
   is called correctly elsewhere (`0x4AA5E` passes a different empire with mode 1),
   so the Send Spy site looks like a copy-paste bug in the original rather than a
   design.
-- **The two alliance weights are not equal**: 0.5 for treaty type 4, 0.4 for
-  type 5. IB lends half in both directions.
+- **The two alliance weights are not equal**: 0.5 on the defending side, 0.4 on
+  the attacking one. IB lent half in both directions until this was read. Which
+  treaty number is which is inferred from the documented effect (an Intelligence
+  Alliance helps the attacker, a Terrorist Prevention treaty the defender), not
+  read from a name table.
 - **A Terrorist-Prevention treaty raises `B`**, which lowers the holder's *own*
-  success — a direct consequence of the bug above.
+  spy success — a direct consequence of the defect above.
+- **One roll in ten succeeds before any of this**, and a bribed attacker still
+  slips through one time in ten instead of failing outright. A fourth branch
+  (`r = 10`) is dead code: `Random(10)` returns 0..9.
 
-Also read, and not yet reflected in IB: an effect op **spends an agent up front**
-(`BRE.OVR 0x17957` decrements agents before resolving) and records itself in a
-per-op byte at record `+0xFD + op`, which is how "Limit one try per turn!" is
-enforced. IB charges the agent only on failure. The effect ops do not call the
-Send Spy roll at all — how they resolve is **not yet read**.
-
-Nothing here has been changed in IB. See `covertSuccess` in `internal/game/covert.go`.
+Two more things read here, **not** reflected in IB: an effect op **spends an
+agent up front** (`BRE.OVR 0x17957` decrements agents before resolving) where IB
+charges it only on failure, and it records itself in a per-op byte at record
+`+0xFD + op`, which is how "Limit one try per turn!" is enforced. How the effect
+ops resolve is still unread.
 
 **Each op charges a gold fee up front** (on top of the agent risk), shown as
 a cost column on the menu. The fees below are live-sampled from BRE's default

@@ -16,6 +16,9 @@
   * View Treaties now lists the treaty offers you have sent that nobody has
     answered yet (#92)
   * A new treaty offer to the same realm replaces the one still waiting
+  * Send Spy now succeeds just over half the time, whatever agents either
+    side holds
+  * Debt no longer lowers your net worth
   * Covert agents cost more the longer your realm has been playing
   * Unit prices now move within the original's price ranges
   * The web server has been removed (an SSH server may replace it)

@@ -10,7 +10,8 @@ in_game: true
 Covert operations are secret missions run by your agents. Your chance of success
 depends on how many agents you have compared to the target. More agents give you
 a better chance. Keeping many agents also protects you, because it lowers the
-chance that enemy operations against you succeed.
+chance that enemy operations against you succeed. Send Spy works differently —
+see its own topic.
 
 Each operation also costs gold. The menu shows the price next to each one, and
 the footer shows how much gold and how many agents you have. You pay the gold

@@ -970,6 +970,11 @@ func (w *World) ImportBoard(b RemoteBoard) {
 // Jet 0.325, Turret 0.425, Tank 1.250, Bomber 3.000, Carrier 1.000, Agent
 // 0.500, Region 12.50). Computed in thousandths so the 0.x25 values are exact
 // (tenths rounded Trooper/Jet/Turret/Tank down).
+//
+// Debt is NOT deducted: BRE's own function adds the weighted assets and stops
+// there (BRE.EXE 0x8F53, read 2026-08-01). BRE also folds in each unit's
+// away-on-attack pool, which IB has no equivalent for — attacks here resolve
+// within the turn, so no force is ever in transit.
 func (w *World) NetWorth(e *Empire) int {
 	// int64 intermediate: e.Land*12500 (and the unit terms) overflow int32 on a
 	// 32-bit build for a large realm. Weights are BRE-exact and unchanged; only
@@ -977,5 +982,5 @@ func (w *World) NetWorth(e *Empire) int {
 	thou := int64(e.Land)*NetWorthLand +
 		int64(e.Troopers)*NetWorthTrooper + int64(e.Jets)*NetWorthJet + int64(e.Turrets)*NetWorthTurret + int64(e.Bombers)*NetWorthBomber +
 		int64(e.Agents)*NetWorthAgent + int64(e.Tanks)*NetWorthTank + int64(e.Carriers)*NetWorthCarrier
-	return int(thou/1000 - int64(e.Debt)/100)
+	return int(thou / 1000)
 }

@@ -26,7 +26,11 @@ var TreatyTypes = []string{
 	"Technology Agreement",
 }
 
-const fullDefenseAlliance = "Full Defense Alliance"
+const (
+	fullDefenseAlliance  = "Full Defense Alliance"
+	intelligenceAlliance = "Intelligence Alliance"
+	terroristPrevention  = "Terrorist Prevention"
+)
 
 // RelationEnemy is the hostile state a pair falls into when one side declares
 // war or breaks a pact by attacking. It is stored as a Treaty row like any other

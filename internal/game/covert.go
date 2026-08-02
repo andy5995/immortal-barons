@@ -20,15 +20,54 @@ func (w *World) covertSuccess(a, d *Empire) bool {
 			return false
 		}
 	}
-	// Intelligence Alliance lends half an ally's agents to the attacker's
-	// covert strength; Terrorist Prevention lends half to the defender's.
-	aAgents := a.Agents + w.allyAgents(a, "Intelligence Alliance")/2
-	dAgents := d.Agents + w.allyAgents(d, "Terrorist Prevention")/2
+	aAgents := w.covertStrength(a, true)
+	dAgents := w.covertStrength(d, false)
 	total := aAgents + dAgents
 	if total == 0 {
 		return false
 	}
 	return w.rng.Intn(total) < aAgents
+}
+
+// covertStrength is one side of a covert roll for e: its own agents plus a share
+// of each ally's. An Intelligence Alliance lends to the attacking side, a
+// Terrorist Prevention treaty to the defending one, and the two shares differ
+// (BRE.OVR 0x4CAB7).
+func (w *World) covertStrength(e *Empire, offense bool) int {
+	if offense {
+		return e.Agents + w.allyAgents(e, intelligenceAlliance)*CovertAllyOffensePct/100
+	}
+	return e.Agents + w.allyAgents(e, terroristPrevention)*CovertAllyDefensePct/100
+}
+
+// spySuccess is BRE's Send Spy roll, reproduced as the original computes it —
+// including the defect that BOTH sides of the comparison are drawn from the
+// attacker (BRE.OVR 0x4BA48 loads the same argument for each). The target's
+// agents therefore never enter it, the attacker's cancel, and a spy lands about
+// 55% of the time however either realm is stocked. The effect ops are resolved
+// elsewhere in BRE and keep covertSuccess until that path is read.
+//
+// A bribed agent almost always gives the attempt away, and one roll in ten
+// succeeds before any of this is weighed.
+func (w *World) spySuccess(a, d *Empire) bool {
+	if d.ShieldedUntilDay > 0 && w.GameDay <= d.ShieldedUntilDay {
+		return false
+	}
+	for _, name := range d.ImmuneFrom {
+		if name == a.Name && w.rng.Intn(CovertBribeSlipOdds) != 0 {
+			return false
+		}
+	}
+	if w.rng.Intn(CovertAutoSuccessOdds) == 0 {
+		return true
+	}
+	offense := w.covertStrength(a, true) / SpyDifficulty
+	defense := w.covertStrength(a, false)
+	total := offense + defense
+	if total <= 0 {
+		return false
+	}
+	return w.rng.Intn(total) < offense
 }
 
 // ErrCovertCapReached is returned when an EFFECT covert op is attempted after
@@ -64,7 +103,7 @@ func (w *World) SendSpy(a, d *Empire) (string, error) {
 	if err := w.covertCost(a, CostSendSpy, false); err != nil {
 		return "", err
 	}
-	if w.covertSuccess(a, d) {
+	if w.spySuccess(a, d) {
 		return fmt.Sprintf("Intel on %s — Land %d, Troops %d, Turrets %d, Tanks %d, Offense %d, Defense %d, Gold %d, Agents %d",
 			d.Name, d.Land, d.Troopers, d.Turrets, d.Tanks, d.Offense(), d.Defense(), d.Gold, d.Agents), nil
 	}

@@ -338,6 +338,25 @@ const (
 // setup, 2026-07-21 — other BRE setups scale these; tune here as needed). Bomb
 // Enemy Targets is one 100k menu entry in BRE; IB splits it into a submenu and
 // charges each variant CostBombEnemyTargets.
+// The covert roll, BINARY-VERIFIED from BRE.OVR 0x4BA48 (the roll) and 0x4CAB7
+// (the agent pools). docs/mechanics-reference.md carries the full routine and the
+// evidence, including the defect IB now reproduces for Send Spy.
+const (
+	// CovertAutoSuccessOdds: one roll in this many succeeds before agents are
+	// weighed at all.
+	CovertAutoSuccessOdds = 10
+	// CovertBribeSlipOdds: an attacker whose agent has been bribed still slips
+	// through one time in this many instead of failing outright.
+	CovertBribeSlipOdds = 10
+	// SpyDifficulty divides the attacker's pool. BRE passes 1 for Send Spy, which
+	// is the only op reached through this roll; a harder op would pass more.
+	SpyDifficulty = 1
+	// An ally's agents count for less on the attacking side than the defending
+	// one. The two shares live in the same BRE function and are not equal.
+	CovertAllyOffensePct = 40
+	CovertAllyDefensePct = 50
+)
+
 const (
 	CostSendSpy            = 5_000
 	CostStirRevolts        = 25_000
