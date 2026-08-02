@@ -132,11 +132,12 @@ Bombers and carriers are integer multiplies (3 and 1); the rest are Turbo Pascal
   net worth.
 - **Units away from home still count.** Each unit term adds a second count from a
   parallel array at record `+0x211` (troopers, jets, turrets, bombers, …, agents,
-  tanks, carriers, 4 bytes apart) before applying the weight. That is the "lost"
-  attacking-force pool that returns after a few days, so a realm mid-attack does
-  not appear to shrink. **IB has no equivalent and this term is not implemented**
-  — attacks resolve within the turn here, so no force is ever in transit. It
-  becomes implementable only if the lost-forces pool is built.
+  tanks, carriers, 4 bytes apart) before applying the weight, so a realm with a
+  strike in flight does not look poorer for it. **Not implemented in IB** (#96):
+  an inter-BBS detachment is subtracted outright by `commitForce` and restored
+  when the result packet returns, so net worth dips for the round trip. What
+  fills BRE's array is **not read** — only the routine that scales it down with
+  losses (`BRE.OVR 0xC358`) and this one, which reads it.
 - **A dead realm returns 0** rather than a computed figure. IB has no eliminated
   flag on `Empire`, so this is not implemented either.
 
@@ -392,7 +393,11 @@ regions lower its upkeep). When complete it destroys about half of incoming
 missiles and cuts attacking jets' effectiveness by ~25–30%.
 
 Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
-"Lost" attacking forces return after 3 days (config).
+"Days before 'lost' forces returned" (config, default 3) is an **inter-BBS**
+setting, not a local-combat one. A strike sent to another board is away for the
+whole packet round trip, and packets go missing; the setting gives a detachment
+back to its owner when no result has come home in that many days. IB has no such
+recovery — see #96.
 
 ## Covert operations
 

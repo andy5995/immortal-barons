@@ -972,9 +972,10 @@ func (w *World) ImportBoard(b RemoteBoard) {
 // (tenths rounded Trooper/Jet/Turret/Tank down).
 //
 // Debt is NOT deducted: BRE's own function adds the weighted assets and stops
-// there (BRE.EXE 0x8F53, read 2026-08-01). BRE also folds in each unit's
-// away-on-attack pool, which IB has no equivalent for — attacks here resolve
-// within the turn, so no force is ever in transit.
+// there (BRE.EXE 0x8F53, read 2026-08-01). BRE also folds in a second per-unit
+// count for forces that are away from home, so a realm with a strike in flight
+// does not look poorer for it. IB's inter-BBS detachments are simply subtracted
+// until they come back, so net worth dips for the round trip (#96).
 func (w *World) NetWorth(e *Empire) int {
 	// int64 intermediate: e.Land*12500 (and the unit terms) overflow int32 on a
 	// 32-bit build for a large realm. Weights are BRE-exact and unchanged; only
