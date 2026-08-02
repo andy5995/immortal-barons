@@ -369,6 +369,54 @@ Success depends on how many agents you have compared to the target: more
 agents relative to the enemy means a higher success rate. Keeping many
 agents on hand also *defends* you against incoming terrorist ops.
 
+**What the binary actually does — Send Spy (`BRE.OVR 0x4BA48`, reached through
+overlay stub `0x4DC:0x3E`).** Read 2026-08-01. `a` is the attacker (the current
+player, the global empire letter at `DS:0x28DC`); `d` is the chosen target;
+`kind` is a difficulty divisor the caller passes, and Send Spy passes 1:
+
+    if bribed[d][a] > threshold then
+        if Random(10) <> 0 then { caught; fail }        { 90% auto-fail }
+    r := Random(10)
+    if r = 0 then success                               { 10% auto-succeed }
+    if r = 10 then { caught; fail }                     { dead code: Random(10) is 0..9 }
+    A := covertStrength(a, 0) div kind
+    B := covertStrength(a, 1)
+    if allied[a][d] = 1 then A := A * 2
+    while A > 32767 or B > 32767 do begin A := A div 2; B := B div 2 end
+    if Random(A + B) < A then begin score[a] := score[a] + Random(30); success end
+    else { caught; fail }
+
+    covertStrength(e, mode):
+        total := e.Agents
+        for x := 'A' to 'Y' do
+            if e.treaty[x] = 4 and mode <> 0 then total := total + x.Agents * 0.5
+            if e.treaty[x] = 5 and mode = 0  then total := total + x.Agents * 0.4
+        if total > 1e9 then total := 1e9
+        result := trunc(total)
+
+`Random(A+B) < A` is the shape IB already uses. Three things differ:
+
+- **The defender's agents never enter the roll.** Both `covertStrength` calls
+  pass `a`; the bytes are identical (`8A 46 10`) at `0x4BAE7` and `0x4BB03`, only
+  the mode byte changes. With no alliances `A = agents div kind` and
+  `B = agents`, the agent count cancels, and Send Spy is a flat
+  `0.1 + 0.9 x 1/(1+1)` = **55%** whatever either side holds. The same function
+  is called correctly elsewhere (`0x4AA5E` passes a different empire with mode 1),
+  so the Send Spy site looks like a copy-paste bug in the original rather than a
+  design.
+- **The two alliance weights are not equal**: 0.5 for treaty type 4, 0.4 for
+  type 5. IB lends half in both directions.
+- **A Terrorist-Prevention treaty raises `B`**, which lowers the holder's *own*
+  success — a direct consequence of the bug above.
+
+Also read, and not yet reflected in IB: an effect op **spends an agent up front**
+(`BRE.OVR 0x17957` decrements agents before resolving) and records itself in a
+per-op byte at record `+0xFD + op`, which is how "Limit one try per turn!" is
+enforced. IB charges the agent only on failure. The effect ops do not call the
+Send Spy roll at all — how they resolve is **not yet read**.
+
+Nothing here has been changed in IB. See `covertSuccess` in `internal/game/covert.go`.
+
 **Each op charges a gold fee up front** (on top of the agent risk), shown as
 a cost column on the menu. The fees below are live-sampled from BRE's default
 (medium) game setup on 2026-07-21 — other BRE setups scale them, so IB keeps
@@ -624,6 +672,15 @@ step, `DS:0x514` low, `DS:0x520` high):
 Checked against `cap/eots-covert-agents.cap`, 30 consecutive turns: every buy
 price is inside its band, the observed spread stays close to mid (troopers
 226–305, carriers 5,257–5,457), and no turn-to-turn move reaches the unit's step.
+
+BRE seeds a new empire's prices deliberately outside the bands (`BRE.EXE 0x8DEC`:
+troopers 1,000, jets 15,000, turrets 1,400, bombers 2,000, tanks 6,000, carriers
+18,000), so the first walk step snaps each one to a band edge. IB seeds at the
+floor instead, which lands in the same place for bombers and one clamp lower for
+the rest; it washes out within a few turns either way. The same initializer
+confirms the starting realm (3 Coastal, 2 Agricultural, 5 Desert, 5 Mountain, 100
+troopers, morale and support 100) and sets each of the six Set-Industries
+allocations to 15%.
 
 The stored value is what the Spending menu shows and what a buy/sell charges
 within the turn (shown == charged; buy and sell route through the same accessor,
