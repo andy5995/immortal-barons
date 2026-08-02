@@ -453,3 +453,45 @@ func TestAnsweredStrikeDoesNotAlsoTimeOut(t *testing.T) {
 		t.Errorf("troopers returned twice: %d, want 400", e.Troopers)
 	}
 }
+
+// The Coordinator broadcasts the league roster and members adopt it, so boards
+// joining or moving do not mean every sysop editing their own node list (#64).
+func TestCoordinatorBroadcastsTheRoster(t *testing.T) {
+	roster := []LeagueNode{
+		{Number: 1, Name: "GraveyardBBS", Address: "1:20/100", City: "Graveyard", State: "XX", Country: "USA"},
+		{Number: 2, Name: "Wildside", Address: "1:20/101", City: "Testville", State: "XX", Country: "USA"},
+	}
+
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	cfg.BoardID = "GraveyardBBS" // node 1 = the Coordinator
+	lc := NewWorldSeed(cfg, 1)
+	lc.LeagueNodes = roster
+	lc.ExportNodeList()
+	if len(lc.Outbox) != 1 || len(lc.Outbox[0].LeagueNodes) != 2 {
+		t.Fatalf("coordinator queued %d packets, want 1 carrying the roster", len(lc.Outbox))
+	}
+
+	memberCfg := cfg
+	memberCfg.BoardID = "Wildside"
+	member := NewWorldSeed(memberCfg, 1)
+	member.LeagueNodes = roster // knows the roster well enough to name the LC
+	member.ApplyPacket(lc.Outbox[0])
+	if len(member.LeagueNodes) != 2 || member.LeagueNodes[1].Name != "Wildside" {
+		t.Errorf("member did not adopt the roster: %+v", member.LeagueNodes)
+	}
+
+	// A member must not be able to push a roster onto other boards.
+	member.Outbox = nil
+	member.ExportNodeList()
+	if len(member.Outbox) != 0 {
+		t.Errorf("a member board broadcast a roster: %+v", member.Outbox)
+	}
+
+	// Nor may a roster from anyone but the Coordinator be adopted.
+	before := len(member.LeagueNodes)
+	member.ApplyPacket(Packet{FromBoard: "Impostor", LeagueNodes: []LeagueNode{{Number: 9, Name: "Bogus"}}})
+	if len(member.LeagueNodes) != before {
+		t.Errorf("member adopted a roster from a non-coordinator board: %+v", member.LeagueNodes)
+	}
+}

@@ -18,8 +18,17 @@ const packetExt = ".brp"
 // come, exports this board's scores to the league, and writes the outbox. Run
 // it on a schedule (or on the door's -maint pass) — can run several times a day.
 func RunPlanetary(w *game.World, inboundDir, outboundDir string) error {
+	before := w.LeagueNodes
 	if _, err := ReadInbound(w, inboundDir); err != nil {
 		return err
+	}
+	// A member board that just adopted the Coordinator's roster has to persist
+	// it: the roster is read from ibnodes.dat at startup, not from the world
+	// file (#64).
+	if !sameRoster(before, w.LeagueNodes) {
+		if err := WriteNodeList(filepath.Join(w.Config.DataDir, NodeListFile), w.LeagueNodes); err != nil {
+			return err
+		}
 	}
 	// An inbound league-config packet may have updated w.Config; persist it so
 	// the adopted settings survive the next load (config.json is authoritative).
@@ -31,6 +40,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string) error {
 	w.ReturnLostForces()
 	w.LaunchDueGroupAttacks()
 	w.ExportScores()
+	w.ExportNodeList()
 	return WriteOutbox(w, outboundDir)
 }
 
@@ -108,4 +118,18 @@ func ReadInbound(w *game.World, dir string) (int, error) {
 func sanitize(s string) string {
 	r := strings.NewReplacer("/", "_", "\\", "_", " ", "_", ":", "_")
 	return r.Replace(s)
+}
+
+// sameRoster reports whether two league rosters are identical, so the node-list
+// file is only rewritten when a broadcast actually changed it.
+func sameRoster(a, b []game.LeagueNode) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
 }

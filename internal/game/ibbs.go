@@ -31,6 +31,7 @@ type Packet struct {
 	Terrors      []RemoteTerror // terror ops landing on ToBoard
 	Results      []AttackResult // outcomes returning to the origin
 	LeagueConfig *LeagueConfig  // LC-authored league settings (nil if absent)
+	LeagueNodes  []LeagueNode   // LC-authored league roster (nil if absent, #64)
 }
 
 // LeagueConfig is the set of game rules the League Coordinator sets for the
@@ -170,6 +171,21 @@ func (w *World) ExportLeagueConfig() {
 		FromBoard:    w.Config.BoardID,
 		Date:         w.LastMaintDate,
 		LeagueConfig: w.Config.leagueRuleset(),
+	})
+}
+
+// ExportNodeList queues a broadcast of the league roster. Only the Coordinator
+// sends it, and only members adopt it, so the roster stays in one sysop's hands
+// instead of every board editing its own copy as boards join or move (#64). A
+// no-op when this board has no roster loaded.
+func (w *World) ExportNodeList() {
+	if !w.IsLeagueCoordinator() || len(w.LeagueNodes) == 0 {
+		return
+	}
+	w.Outbox = append(w.Outbox, Packet{
+		FromBoard:   w.Config.BoardID,
+		Date:        w.LastMaintDate,
+		LeagueNodes: append([]LeagueNode(nil), w.LeagueNodes...),
 	})
 }
 
@@ -525,6 +541,11 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	if p.LeagueConfig != nil && p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID() && !w.IsLeagueCoordinator() {
 		w.Config.applyLeagueRuleset(p.LeagueConfig)
 		w.postNews("The League Coordinator updated the league settings.")
+	}
+	// The roster travels the same way and under the same guard (#64).
+	if len(p.LeagueNodes) > 0 && p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID() && !w.IsLeagueCoordinator() {
+		w.LeagueNodes = append([]LeagueNode(nil), p.LeagueNodes...)
+		w.postNews("The League Coordinator updated the league roster.")
 	}
 	if len(p.Scores) > 0 {
 		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores})

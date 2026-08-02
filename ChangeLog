@@ -29,6 +29,8 @@
   * Forces sent to another board now come home if no result arrives within the
     number of days the game settings allow, instead of being lost with the
     packet (#96)
+  * The league Coordinator now sends the roster of boards to every board, so
+    sysops no longer keep their own copies in step by hand (#64)
   * A dead realm is worth nothing on the scores screen
   * Debt no longer lowers your net worth
   * Covert agents cost more the longer your realm has been playing

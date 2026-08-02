@@ -2,7 +2,9 @@ package store
 
 import (
 	"bufio"
+	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -102,4 +104,26 @@ func ParseBoardConfig(path string) (BoardConfig, error) {
 		League:     league,
 		Mailer:     get(6),
 	}, nil
+}
+
+// WriteNodeList writes the roster back in the same block format ParseNodeList
+// reads. A member board calls this after adopting the Coordinator's broadcast
+// (#64), so the roster survives a restart — World.LeagueNodes is not part of the
+// saved world, it is loaded from this file.
+func WriteNodeList(path string, nodes []game.LeagueNode) error {
+	var b strings.Builder
+	for i, n := range nodes {
+		if i > 0 {
+			b.WriteString("\n")
+		}
+		fmt.Fprintf(&b, "%d\n%s\n%s\n%s\n%s\n%s\n", n.Number, n.Name, n.Address, n.City, n.State, n.Country)
+	}
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
+		return err
+	}
+	tmp := path + ".tmp"
+	if err := os.WriteFile(tmp, []byte(b.String()), 0o644); err != nil {
+		return err
+	}
+	return os.Rename(tmp, path)
 }
