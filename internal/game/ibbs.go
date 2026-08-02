@@ -48,11 +48,20 @@ type LeagueConfig struct {
 	PlanetaryTaxRate      int
 	MaxRegions            int
 	MaxIndividualAttacks  int
+	MaxGroupAttacks       int
+	MaxTerrorOps          int
+	MaxBombingOps         int
+	LostForcesDays        int
+	BombingOps            bool
+	MissileOps            bool
+	DoomerKaboomer        bool
 	MaxPlayers            int
 	BuyMilitary           BuyMode
 	MaintCosts            Level
 	TradeCosts            Level
 	RegionCosts           Level
+	AttackCosts           Level
+	TerrorCosts           Level
 	AttackDamage          Level
 	AttackRewards         Level
 	SlappenheimerHandling SlappenheimerMode
@@ -77,11 +86,20 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		PlanetaryTaxRate:      c.PlanetaryTaxRate,
 		MaxRegions:            c.MaxRegions,
 		MaxIndividualAttacks:  c.MaxIndividualAttacks,
+		MaxGroupAttacks:       c.MaxGroupAttacks,
+		MaxTerrorOps:          c.MaxTerrorOps,
+		MaxBombingOps:         c.MaxBombingOps,
+		LostForcesDays:        c.LostForcesDays,
+		BombingOps:            c.BombingOps,
+		MissileOps:            c.MissileOps,
+		DoomerKaboomer:        c.DoomerKaboomer,
 		MaxPlayers:            c.MaxPlayers,
 		BuyMilitary:           c.BuyMilitary,
 		MaintCosts:            c.MaintCosts,
 		TradeCosts:            c.TradeCosts,
 		RegionCosts:           c.RegionCosts,
+		AttackCosts:           c.AttackCosts,
+		TerrorCosts:           c.TerrorCosts,
 		AttackDamage:          c.AttackDamage,
 		AttackRewards:         c.AttackRewards,
 		SlappenheimerHandling: c.SlappenheimerHandling,
@@ -105,11 +123,20 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.PlanetaryTaxRate = lc.PlanetaryTaxRate
 	c.MaxRegions = lc.MaxRegions
 	c.MaxIndividualAttacks = lc.MaxIndividualAttacks
+	c.MaxGroupAttacks = lc.MaxGroupAttacks
+	c.MaxTerrorOps = lc.MaxTerrorOps
+	c.MaxBombingOps = lc.MaxBombingOps
+	c.LostForcesDays = lc.LostForcesDays
+	c.BombingOps = lc.BombingOps
+	c.MissileOps = lc.MissileOps
+	c.DoomerKaboomer = lc.DoomerKaboomer
 	c.MaxPlayers = lc.MaxPlayers
 	c.BuyMilitary = lc.BuyMilitary
 	c.MaintCosts = lc.MaintCosts
 	c.TradeCosts = lc.TradeCosts
 	c.RegionCosts = lc.RegionCosts
+	c.AttackCosts = lc.AttackCosts
+	c.TerrorCosts = lc.TerrorCosts
 	c.AttackDamage = lc.AttackDamage
 	c.AttackRewards = lc.AttackRewards
 	c.SlappenheimerHandling = lc.SlappenheimerHandling

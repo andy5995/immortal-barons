@@ -379,6 +379,14 @@ target and read the *victim* side, enroll a SECOND realm (edit both the first
 and last line of `doorfile.sr` to a new caller name, launch, name the realm),
 then switch back. Repeat the doorfile swap to alternate attacker/victim.
 
+### Two-board InterBBS runs
+
+Anything needing two BRE installs talking to each other — interplanetary attacks,
+recon exchange, coordinator broadcasts, packet loss — is in
+`references/interbbs.md`. Both boards are already installed and paired on this
+machine, and the findings from the earlier league run are in GitHub issues #60
+through #65 rather than in this skill.
+
 ## What the strings give you — and what they DON'T
 
 BRE is Turbo Pascal. Menu items are **length-prefixed ShortStrings stored

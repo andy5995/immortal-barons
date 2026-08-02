@@ -117,11 +117,20 @@ type Config struct {
 	PlanetaryTaxRate      int               // crown tax on each turn's gold income, as a whole percent (5 = 5%)
 	MaxRegions            int               // most regions a player may own
 	MaxIndividualAttacks  int               // most individual (conventional) attacks a player may launch per day; 0 = unlimited (BRE "Maximum Individual Attacks Per Day")
+	MaxGroupAttacks       int               // most group (interplanetary) attacks a player may join or lead per day; 0 = unlimited
+	MaxTerrorOps          int               // most terrorist ops a player may launch per day; 0 = unlimited
+	MaxBombingOps         int               // most bombing ops a player may launch per day; 0 = unlimited
+	LostForcesDays        int               // days before a strike with no result packet gives its forces back (#96); 0 = never
+	BombingOps            bool              // Bomb Enemy Targets is offered
+	MissileOps            bool              // nuclear/chemical/biological strikes are offered
+	DoomerKaboomer        bool              // the doomsday weapon may be built
 	MaxPlayers            int               // most human empires per board (0 = unlimited)
 	BuyMilitary           BuyMode           // Yes / No / Limited
 	MaintCosts            Level             // maintenance costs (regions + forces)
 	TradeCosts            Level             // trade-deal costs
 	RegionCosts           Level             // region purchase price
+	AttackCosts           Level             // gold an attack costs to launch
+	TerrorCosts           Level             // gold a terrorist op costs to launch
 	AttackDamage          Level             // damage attacks inflict (never None)
 	AttackRewards         Level             // land/goods gained from a win (never None)
 	SlappenheimerHandling SlappenheimerMode // R5-Slappenheimer missile handling
@@ -137,6 +146,7 @@ const (
 	MaxInitialMarketLand  = 50000 // Initial Market Land ceiling (default 0)
 	MaxPurchasableRegions = 10000 // Max Purchasable Regions ceiling (default 500)
 	MaxPlanetaryTaxRate   = 20    // Planetary (crown) Tax Rate ceiling, whole percent (default 5)
+	MaxLostForcesDays     = 30    // "Days before lost forces returned" ceiling (default 3; 0 = never return)
 	MaxPlayerTaxRate      = 50    // ceiling for MaxTaxRate (IB's own cap; BRE has none, its prompt is [0-100])
 	MaxBankInterest       = 200   // Bank Interest Rate ceiling (default 50; 200 = 20%/day)
 	MaxStdInvestRate      = 100   // Standard Investment Rate ceiling (default 35; 100 = 10%/day)
@@ -190,11 +200,20 @@ func DefaultConfig() Config {
 		PlanetaryTaxRate:      5,
 		MaxRegions:            500,
 		MaxIndividualAttacks:  3, // Andy's choice for the modern door; BRE has the setting but its stock default is unverified
+		MaxGroupAttacks:       4,
+		MaxTerrorOps:          25,
+		MaxBombingOps:         4,
+		LostForcesDays:        3,
+		BombingOps:            true,
+		MissileOps:            true,
+		DoomerKaboomer:        true,
 		MaxPlayers:            25,
 		BuyMilitary:           BuyYes,
 		MaintCosts:            Medium,
 		TradeCosts:            Medium,
 		RegionCosts:           Medium,
+		AttackCosts:           Medium,
+		TerrorCosts:           Medium,
 		AttackDamage:          Medium,
 		AttackRewards:         Medium,
 		SlappenheimerHandling: SlappenheimerUserSelect,

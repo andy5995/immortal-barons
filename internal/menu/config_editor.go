@@ -128,6 +128,15 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		p(25, "Idle warnings before boot", fmt.Sprintf("%d", c.MaxIdleWarnings))
 		p(26, "* Food Unlimited", onOffStr(c.FoodUnlimited))
 		p(27, "* Max Individual Attacks/Day", fmt.Sprintf("%d (0 = unlimited)", c.MaxIndividualAttacks))
+		p(30, "* Max Group Attacks/Day", fmt.Sprintf("%d (0 = unlimited)", c.MaxGroupAttacks))
+		p(31, "* Max Terrorist Ops/Day", fmt.Sprintf("%d (0 = unlimited)", c.MaxTerrorOps))
+		p(32, "* Max Bombing Ops/Day", fmt.Sprintf("%d (0 = unlimited)", c.MaxBombingOps))
+		p(33, "* Days before lost forces return", fmt.Sprintf("%d (0 = never)", c.LostForcesDays))
+		p(34, "* Attack Costs", c.AttackCosts.String())
+		p(35, "* Terrorism Costs", c.TerrorCosts.String())
+		p(36, "* Bombing Ops", onOffStr(c.BombingOps))
+		p(37, "* Missile Ops", onOffStr(c.MissileOps))
+		p(38, "* Doomer Kaboomer", onOffStr(c.DoomerKaboomer))
 		fmt.Fprintf(s, "%s\n%s* = league ruleset (Coordinator broadcasts with -league-config)%s\n",
 			rule, ansi.FgWhite, ansi.Reset)
 
@@ -209,6 +218,24 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 			c.FoodUnlimited = !c.FoodUnlimited
 		case 27:
 			c.MaxIndividualAttacks = promptSuggested(s, "Max Individual Attacks/Day (0 = unlimited)", c.MaxIndividualAttacks, 100)
+		case 30:
+			c.MaxGroupAttacks = promptSuggested(s, "Max Group Attacks/Day (0 = unlimited)", c.MaxGroupAttacks, 100)
+		case 31:
+			c.MaxTerrorOps = promptSuggested(s, "Max Terrorist Ops/Day (0 = unlimited)", c.MaxTerrorOps, 100)
+		case 32:
+			c.MaxBombingOps = promptSuggested(s, "Max Bombing Ops/Day (0 = unlimited)", c.MaxBombingOps, 100)
+		case 33:
+			c.LostForcesDays = promptSuggested(s, "Days before lost forces return (0 = never)", c.LostForcesDays, game.MaxLostForcesDays)
+		case 34:
+			c.AttackCosts = cycleCost(c.AttackCosts)
+		case 35:
+			c.TerrorCosts = cycleCost(c.TerrorCosts)
+		case 36:
+			c.BombingOps = !c.BombingOps
+		case 37:
+			c.MissileOps = !c.MissileOps
+		case 38:
+			c.DoomerKaboomer = !c.DoomerKaboomer
 		}
 	}
 }

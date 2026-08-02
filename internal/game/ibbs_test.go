@@ -1,6 +1,7 @@
 package game
 
 import (
+	"reflect"
 	"strings"
 	"testing"
 )
@@ -298,4 +299,50 @@ func TestLeagueConfigOnlyFromCoordinator(t *testing.T) {
 	if wC.Config.GameLength != 5 {
 		t.Errorf("config from a non-coordinator board must be ignored, got %d", wC.Config.GameLength)
 	}
+}
+
+// TestLeagueRulesetCarriesEveryField guards the one silent failure this mapping
+// has: a field added to LeagueConfig but missed in leagueRuleset or
+// applyLeagueRuleset still compiles, and simply never reaches the other boards.
+// Walking the struct by reflection means a field added later is covered the day
+// it is added, without anyone remembering to extend a list.
+func TestLeagueRulesetCarriesEveryField(t *testing.T) {
+	lc := reflect.TypeOf(LeagueConfig{})
+	for i := 0; i < lc.NumField(); i++ {
+		name := lc.Field(i).Name
+		src := DefaultConfig()
+		field := reflect.ValueOf(&src).Elem().FieldByName(name)
+		if !field.IsValid() {
+			t.Errorf("LeagueConfig.%s has no Config field of the same name", name)
+			continue
+		}
+		want := distinctFrom(t, field)
+		field.Set(want)
+
+		var dst Config
+		dst.applyLeagueRuleset(src.leagueRuleset())
+
+		got := reflect.ValueOf(dst).FieldByName(name)
+		if !reflect.DeepEqual(got.Interface(), want.Interface()) {
+			t.Errorf("%s does not survive the league broadcast: got %v, want %v", name, got, want)
+		}
+	}
+}
+
+// distinctFrom returns a value of v's type that differs from what v holds, so a
+// field that is silently dropped cannot pass by coincidence.
+func distinctFrom(t *testing.T, v reflect.Value) reflect.Value {
+	t.Helper()
+	out := reflect.New(v.Type()).Elem()
+	switch v.Kind() {
+	case reflect.Bool:
+		out.SetBool(!v.Bool())
+	case reflect.Int:
+		out.SetInt(v.Int() + 4242)
+	case reflect.String:
+		out.SetString(v.String() + "-broadcast-probe")
+	default:
+		t.Fatalf("distinctFrom: unhandled kind %s", v.Kind())
+	}
+	return out
 }

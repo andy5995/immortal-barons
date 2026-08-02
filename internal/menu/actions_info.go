@@ -472,7 +472,14 @@ func gameSetup(s session.Session, w *ctx) Result {
 	row("Attack damage", tr(s, c.AttackDamage.String()))
 	row("Attack rewards", tr(s, c.AttackRewards.String()))
 	row("Attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"))
+	row("Attack costs", tr(s, c.AttackCosts.String()))
 	row("R5-Slappenheimer", tr(s, c.SlappenheimerHandling.String()))
+	if !c.MissileOps {
+		row("Missile ops", tr(s, "Disabled"))
+	}
+	if !c.BombingOps {
+		row("Bombing ops", tr(s, "Disabled"))
+	}
 	group("This board")
 	row("Players per board", countOr(c.MaxPlayers, "Unlimited"))
 	row("Inter-BBS play", onOffStr(c.IBBS))
@@ -499,9 +506,27 @@ func gameSetup(s session.Session, w *ctx) Result {
 		if declaration != "" {
 			row("League declaration", declaration)
 		}
+		// The interplanetary rules only mean anything once this board is in a
+		// league, so they stay hidden on a stand-alone board.
+		group("Interplanetary")
+		row("Group attacks per day", countOr(c.MaxGroupAttacks, "Unlimited"))
+		row("Terrorist ops per day", countOr(c.MaxTerrorOps, "Unlimited"))
+		row("Bombing ops per day", countOr(c.MaxBombingOps, "Unlimited"))
+		row("Terrorism costs", tr(s, c.TerrorCosts.String()))
+		row("Lost forces return after", lostForcesStr(s, c))
+		row("Doomer Kaboomer", onOffStr(c.DoomerKaboomer))
 	}
 	pause(s)
 	return Stay
+}
+
+// lostForcesStr says how long a strike waits for a result before its forces are
+// given back, or that they never are.
+func lostForcesStr(s session.Session, c game.Config) string {
+	if c.LostForcesDays <= 0 {
+		return tr(s, "Never")
+	}
+	return fmt.Sprintf(tr(s, "%d days"), c.LostForcesDays)
 }
 
 // investRateStr names the investment rate and whether it is pinned there.

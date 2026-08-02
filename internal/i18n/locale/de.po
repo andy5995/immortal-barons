@@ -8,11 +8,11 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: internal/menu/actions_info.go:513
+#: internal/menu/actions_info.go:538
 msgid " (floating)"
 msgstr ""
 
-#: internal/menu/actions_info.go:511
+#: internal/menu/actions_info.go:536
 msgid " (steady)"
 msgstr ""
 
@@ -36,6 +36,11 @@ msgstr ""
 #: internal/menu/actions_regions.go:176
 msgid "%d %s regions purchased. Gold: %d"
 msgstr ""
+
+#: internal/menu/actions_info.go:529
+#, fuzzy
+msgid "%d days"
+msgstr "vor %d Tagen"
 
 #: internal/menu/gameflow.go:534
 #, fuzzy
@@ -111,11 +116,11 @@ msgstr "(%d pro Jahr)"
 msgid "(A-%c%s, 0=cancel) %s"
 msgstr ""
 
-#: internal/menu/actions_info.go:544
+#: internal/menu/actions_info.go:569
 msgid "(AI)"
 msgstr "(KI)"
 
-#: internal/menu/actions_info.go:813
+#: internal/menu/actions_info.go:838
 msgid "(dead)"
 msgstr "(tot)"
 
@@ -143,7 +148,7 @@ msgstr ""
 msgid "/-Command?"
 msgstr "/-Befehl?"
 
-#: internal/menu/actions_info.go:640
+#: internal/menu/actions_info.go:665
 msgid ": News File"
 msgstr ""
 
@@ -152,7 +157,7 @@ msgstr ""
 msgid "< 1 day"
 msgstr "vor 1 Tag"
 
-#: internal/menu/config_editor.go:197
+#: internal/menu/config_editor.go:206
 #, fuzzy
 msgid "AI empires"
 msgstr "Imperium"
@@ -257,7 +262,7 @@ msgstr ""
 msgid "Biological Attack"
 msgstr ""
 
-#: internal/menu/config_editor.go:201
+#: internal/menu/config_editor.go:210
 msgid "Board ID:"
 msgstr ""
 
@@ -323,7 +328,7 @@ msgstr "Nahrungsmarkt"
 msgid "Buy how many %s"
 msgstr ""
 
-#: internal/menu/config_editor.go:144
+#: internal/menu/config_editor.go:153
 msgid "Cancelled — no changes were saved."
 msgstr ""
 
@@ -339,7 +344,7 @@ msgstr "Träger wurden in Industriezonen hergestellt."
 msgid "Cash Relief / Loans"
 msgstr ""
 
-#: internal/menu/actions_info.go:591
+#: internal/menu/actions_info.go:616
 msgid "Change"
 msgstr ""
 
@@ -430,13 +435,17 @@ msgstr ""
 msgid "Current tax rate: %d%%"
 msgstr "Aktueller Steuersatz: %d%%"
 
-#: internal/menu/actions_info.go:568
+#: internal/menu/actions_info.go:593
 #, fuzzy
 msgid "Daily Bulletin"
 msgstr "Spielaushänge"
 
 #: internal/menu/actions_bank.go:160
 msgid "Date"
+msgstr ""
+
+#: internal/menu/config_editor.go:228
+msgid "Days before lost forces return (0 = never)"
 msgstr ""
 
 #: internal/menu/tree.go:274
@@ -481,6 +490,10 @@ msgstr "Diplomatie"
 msgid "Diplomacy List"
 msgstr "Diplomatie"
 
+#: internal/menu/actions_info.go:478
+msgid "Disabled"
+msgstr ""
+
 #: internal/menu/actions_message.go:255
 msgid "Do you wish to send another message?"
 msgstr "Möchtest du eine weitere Nachricht senden?"
@@ -502,7 +515,7 @@ msgstr ""
 msgid "Each +1%% costs %s gold (max %d%%); fund in whole increments of that."
 msgstr ""
 
-#: internal/menu/config_editor.go:134
+#: internal/menu/config_editor.go:143
 msgid "Edit which (S = save & exit, Q = cancel)?"
 msgstr ""
 
@@ -514,11 +527,11 @@ msgstr ""
 msgid "Editing Macro Ctrl-%c    Press Ctrl-%c to end edit."
 msgstr ""
 
-#: internal/menu/actions_info.go:540
+#: internal/menu/actions_info.go:565
 msgid "Empire"
 msgstr "Imperium"
 
-#: internal/menu/actions_info.go:807
+#: internal/menu/actions_info.go:832
 #, fuzzy
 msgid "Empire Name"
 msgstr "Imperium"
@@ -572,7 +585,7 @@ msgstr "Spielaushänge"
 msgid "Game Setup"
 msgstr ""
 
-#: internal/menu/config_editor.go:157
+#: internal/menu/config_editor.go:166
 msgid "Game length in days (0 = endless)"
 msgstr ""
 
@@ -644,15 +657,15 @@ msgstr ""
 msgid "How much would you like to invest?"
 msgstr ""
 
-#: internal/menu/actions_info.go:807
+#: internal/menu/actions_info.go:832
 msgid "Id"
 msgstr ""
 
-#: internal/menu/config_editor.go:205
+#: internal/menu/config_editor.go:214
 msgid "Idle timeout in seconds (0 = never)"
 msgstr ""
 
-#: internal/menu/config_editor.go:207
+#: internal/menu/config_editor.go:216
 msgid "Idle warnings before boot"
 msgstr ""
 
@@ -664,7 +677,7 @@ msgstr ""
 msgid "Ignore, or"
 msgstr ""
 
-#: internal/menu/actions_info.go:640
+#: internal/menu/actions_info.go:665
 msgid "Immortal Barons"
 msgstr ""
 
@@ -699,7 +712,7 @@ msgstr "Industrieproduktion"
 msgid "Industry production percentages updated."
 msgstr "Industrieproduktions-Prozentsätze aktualisiert."
 
-#: internal/menu/config_editor.go:161
+#: internal/menu/config_editor.go:170
 msgid "Initial Market Land"
 msgstr ""
 
@@ -725,7 +738,7 @@ msgstr "Planetenaushang:"
 msgid "InterPlanetary Ops"
 msgstr ""
 
-#: internal/menu/config_editor.go:165
+#: internal/menu/config_editor.go:174
 msgid "Interest Rate"
 msgstr ""
 
@@ -772,11 +785,11 @@ msgstr ""
 msgid "Krane, your war advisor, Sire. I will be brief; the enemy rarely is."
 msgstr ""
 
-#: internal/menu/actions_info.go:540
+#: internal/menu/actions_info.go:565
 msgid "Land"
 msgstr "Land"
 
-#: internal/menu/config_editor.go:163
+#: internal/menu/config_editor.go:172
 msgid "Land Created / Day"
 msgstr ""
 
@@ -793,7 +806,7 @@ msgstr "Sprache auf %s gesetzt."
 msgid "Language:"
 msgstr "Sprache:"
 
-#: internal/menu/actions_info.go:828
+#: internal/menu/actions_info.go:853
 msgid "Last Planetary Master: %s"
 msgstr "Letzter Planetenmeister: %s"
 
@@ -805,7 +818,7 @@ msgstr ""
 msgid "Leave in how many days?"
 msgstr ""
 
-#: internal/menu/actions_info.go:521
+#: internal/menu/actions_info.go:546
 msgid "Limited daily supply"
 msgstr ""
 
@@ -840,22 +853,34 @@ msgstr ""
 msgid "Maintenance:"
 msgstr "Unterhalt:"
 
-#: internal/menu/config_editor.go:211
+#: internal/menu/config_editor.go:226
+msgid "Max Bombing Ops/Day (0 = unlimited)"
+msgstr ""
+
+#: internal/menu/config_editor.go:222
+msgid "Max Group Attacks/Day (0 = unlimited)"
+msgstr ""
+
+#: internal/menu/config_editor.go:220
 msgid "Max Individual Attacks/Day (0 = unlimited)"
 msgstr ""
 
-#: internal/menu/config_editor.go:177
+#: internal/menu/config_editor.go:186
 msgid "Max Players Per BBS (0 = unlimited)"
 msgstr ""
 
-#: internal/menu/config_editor.go:175
+#: internal/menu/config_editor.go:184
 msgid "Max Purchasable Regions"
 msgstr ""
 
-#: internal/menu/config_editor.go:171
+#: internal/menu/config_editor.go:180
 #, fuzzy
 msgid "Max Tax Rate"
 msgstr "Steuersatz"
+
+#: internal/menu/config_editor.go:224
+msgid "Max Terrorist Ops/Day (0 = unlimited)"
+msgstr ""
 
 #: internal/menu/mailreader.go:153
 #, fuzzy
@@ -909,9 +934,13 @@ msgstr "Benenne dein Reich:"
 msgid "Negotiate with which empire (0 to cancel)?"
 msgstr ""
 
-#: internal/menu/actions_info.go:540
+#: internal/menu/actions_info.go:565
 msgid "Net Worth"
 msgstr "Reinvermögen"
+
+#: internal/menu/actions_info.go:527
+msgid "Never"
+msgstr ""
 
 #: internal/menu/actions_market.go:108
 msgid "New amount of %s for sale"
@@ -1059,7 +1088,7 @@ msgstr ""
 msgid "Owned"
 msgstr "# Besitz"
 
-#: internal/menu/actions_info.go:540
+#: internal/menu/actions_info.go:565
 msgid "Owner"
 msgstr "Besitzer"
 
@@ -1072,7 +1101,7 @@ msgstr "Planetenaushang:"
 msgid "Planetary Post"
 msgstr "Planetenaushang:"
 
-#: internal/menu/config_editor.go:173
+#: internal/menu/config_editor.go:182
 #, fuzzy
 msgid "Planetary Tax Rate (%)"
 msgstr "Steuersatz setzen"
@@ -1088,7 +1117,7 @@ msgstr "Planetenaushang:"
 msgid "Play"
 msgstr "Spielen"
 
-#: internal/menu/actions_info.go:539
+#: internal/menu/actions_info.go:564
 msgid "Player List"
 msgstr ""
 
@@ -1160,7 +1189,7 @@ msgstr "Regionen"
 msgid "Relations: "
 msgstr "Regionen"
 
-#: internal/menu/config_editor.go:159
+#: internal/menu/config_editor.go:168
 msgid "Remove a realm unplayed for how many days (0 = never)"
 msgstr ""
 
@@ -1208,7 +1237,7 @@ msgstr "Speichern..."
 msgid "Savings Interest Rate:"
 msgstr "Investitionen anzeigen"
 
-#: internal/menu/actions_info.go:808
+#: internal/menu/actions_info.go:833
 msgid "Score"
 msgstr "Punkte"
 
@@ -1335,7 +1364,7 @@ msgstr "Hilfe-Datenbank"
 msgid "Spy on Relations"
 msgstr ""
 
-#: internal/menu/config_editor.go:167
+#: internal/menu/config_editor.go:176
 #, fuzzy
 msgid "Standard Investment Rate"
 msgstr "Investitionen anzeigen"
@@ -1390,7 +1419,7 @@ msgid ""
 "of it to keep the same efficiency."
 msgstr ""
 
-#: internal/menu/actions_info.go:808
+#: internal/menu/actions_info.go:833
 msgid "Territory"
 msgstr ""
 
@@ -1452,7 +1481,7 @@ msgstr ""
 msgid "The game begins %s."
 msgstr ""
 
-#: internal/menu/actions_info.go:498
+#: internal/menu/actions_info.go:505
 #, fuzzy
 msgid "The league Coordinator"
 msgstr "Koordinatormenü"
@@ -1555,12 +1584,12 @@ msgstr "Soldaten"
 msgid "Troopers were trained by Industrial Zones."
 msgstr "Soldaten wurden in Industriezonen ausgebildet."
 
-#: internal/menu/config_editor.go:155
+#: internal/menu/config_editor.go:164
 #, fuzzy
 msgid "Turns of Protection"
 msgstr "Du hast noch %s%s Züge Schutz."
 
-#: internal/menu/config_editor.go:153
+#: internal/menu/config_editor.go:162
 #, fuzzy
 msgid "Turns per day"
 msgstr "Verbleibende Züge heute: %d"
@@ -1582,7 +1611,7 @@ msgstr ""
 msgid "Undermine Investments"
 msgstr "Investitionen anzeigen"
 
-#: internal/menu/actions_info.go:519
+#: internal/menu/actions_info.go:544
 msgid "Unlimited"
 msgstr ""
 
@@ -1854,7 +1883,7 @@ msgstr ""
 msgid "You joined group attack #%d."
 msgstr ""
 
-#: internal/game/covert.go:37
+#: internal/game/covert.go:76
 msgid "You may run only one covert operation per turn."
 msgstr ""
 

@@ -18,6 +18,11 @@
   * A new treaty offer to the same realm replaces the one still waiting
   * Send Spy now succeeds just over half the time, whatever agents either
     side holds
+  * The Configuration Editor gained the interplanetary settings: per-day caps
+    for group attacks, terrorist ops and bombing ops, attack and terrorism
+    costs, switches for bombing, missile and Doomer Kaboomer operations, and
+    how long a strike waits for a result before its forces come home
+  * Game Setup shows the interplanetary rules when the board is in a league
   * Debt no longer lowers your net worth
   * Covert agents cost more the longer your realm has been playing
   * Unit prices now move within the original's price ranges

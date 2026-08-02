@@ -44,36 +44,45 @@ var fieldBgColor = tcell.NewHexColor(0x0d2b50)
 // BRE's (rates, caps, behaviour); the wording is our own — BRE's help text is
 // copyrighted, so it is paraphrased, not copied.
 const (
-	defaultHelp       = "Move with Tab / Shift-Tab; each field's help appears here."
-	helpTurnsPerDay   = "How many turns each player may take per day."
-	helpProtection    = "New-realm protection: turns a fresh empire cannot attack and cannot be attacked, giving newcomers time to get established."
-	helpGameLength    = "Days before the league ends and resets. 0 keeps it running with no scheduled end."
-	helpIdleRemove    = "Days a realm may go unplayed before it is removed from the game. Also removes a realm whose owner created it and never played a turn. 0 never removes anything."
-	helpStartDate     = "The game begins on this date; until then, daily maintenance is paused. Blank starts it right away."
-	helpJoinDate      = "New players may not join after this date. Blank leaves joining open."
-	helpAICount       = "Number of computer-run empires seeded when the world is reset."
-	helpInitialLand   = "Land for sale on the market when the game resets."
-	helpLandPerDay    = "Land added to the market each day."
-	helpInterest      = "Bank interest paid over 10 days, credited at the end of each turn. The maximum (200) works out to 20% per day. High rates let banking dominate the game, so a low value (under about 40) keeps play balanced."
-	helpStdInvest     = "The baseline investment return over 10 days. Unless Steady Investment Rate is on, the real rate drifts each day around this value based on how much everyone is investing. The maximum (100) is 10% per day; a low value (under about 50) keeps the economy balanced."
-	helpSteadyInvest  = "When on, the investment return stays fixed at the Standard Investment Rate instead of drifting each day with total investment."
-	helpMaxTax        = "The highest tax rate a player is allowed to set."
-	helpPlanetaryTax  = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold leaves the economy entirely — nobody receives it."
-	helpFoodUnlimited = "When on, the food market never runs short — its daily supply is unlimited."
-	helpBuyMilitary   = "Whether players may buy military units: freely (Yes), not at all (No), or a limited amount each day (Limited)."
-	helpMaintCosts    = "Upkeep cost for regions and forces: High, Medium, Low, or None."
-	helpTradeCosts    = "Cost of trade deals: High, Medium, Low, or None."
-	helpRegionCosts   = "Price of buying regions: High, Medium, Low, or None."
-	helpAttackDamage  = "How much a conventional attack destroys on both sides: High, Medium, or Low."
-	helpAttackRewards = "How much land and goods the winner of an attack gains: High, Medium, or Low."
-	helpSlappenheimer = "How R5-Slappenheimer missiles behave when fired."
-	helpMaxAttacks    = "The most conventional attacks a player may launch in one day. 0 means no limit."
-	helpMaxRegions    = "The most regions a single player may own."
-	helpMaxPlayers    = "The most human empires allowed on this board. 0 means no limit."
-	helpIBBS          = "Take part in inter-BBS play across multiple boards. This turns on the interplanetary menus."
-	helpBoardID       = "The name this board uses in inter-BBS packets."
-	helpIdleTimeout   = "End a session after this many seconds with no keypress, freeing the shared world lock. 0 never times out."
-	helpIdleWarnings  = "How many idle warnings a session receives before it is disconnected."
+	defaultHelp         = "Move with Tab / Shift-Tab; each field's help appears here."
+	helpTurnsPerDay     = "How many turns each player may take per day."
+	helpProtection      = "New-realm protection: turns a fresh empire cannot attack and cannot be attacked, giving newcomers time to get established."
+	helpGameLength      = "Days before the league ends and resets. 0 keeps it running with no scheduled end."
+	helpIdleRemove      = "Days a realm may go unplayed before it is removed from the game. Also removes a realm whose owner created it and never played a turn. 0 never removes anything."
+	helpStartDate       = "The game begins on this date; until then, daily maintenance is paused. Blank starts it right away."
+	helpJoinDate        = "New players may not join after this date. Blank leaves joining open."
+	helpAICount         = "Number of computer-run empires seeded when the world is reset."
+	helpInitialLand     = "Land for sale on the market when the game resets."
+	helpLandPerDay      = "Land added to the market each day."
+	helpInterest        = "Bank interest paid over 10 days, credited at the end of each turn. The maximum (200) works out to 20% per day. High rates let banking dominate the game, so a low value (under about 40) keeps play balanced."
+	helpStdInvest       = "The baseline investment return over 10 days. Unless Steady Investment Rate is on, the real rate drifts each day around this value based on how much everyone is investing. The maximum (100) is 10% per day; a low value (under about 50) keeps the economy balanced."
+	helpSteadyInvest    = "When on, the investment return stays fixed at the Standard Investment Rate instead of drifting each day with total investment."
+	helpMaxTax          = "The highest tax rate a player is allowed to set."
+	helpPlanetaryTax    = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold leaves the economy entirely — nobody receives it."
+	helpFoodUnlimited   = "When on, the food market never runs short — its daily supply is unlimited."
+	helpBuyMilitary     = "Whether players may buy military units: freely (Yes), not at all (No), or a limited amount each day (Limited)."
+	helpMaintCosts      = "Upkeep cost for regions and forces: High, Medium, Low, or None."
+	helpTradeCosts      = "Cost of trade deals: High, Medium, Low, or None."
+	helpRegionCosts     = "Price of buying regions: High, Medium, Low, or None."
+	helpAttackDamage    = "How much a conventional attack destroys on both sides: High, Medium, or Low."
+	helpAttackRewards   = "How much land and goods the winner of an attack gains: High, Medium, or Low."
+	helpSlappenheimer   = "How R5-Slappenheimer missiles behave when fired."
+	helpMaxAttacks      = "The most conventional attacks a player may launch in one day. 0 means no limit."
+	helpMaxGroupAttacks = "The most group (interplanetary) attacks a player may lead or join in one day. 0 means no limit."
+	helpMaxTerrorOps    = "The most terrorist operations a player may launch in one day. 0 means no limit."
+	helpMaxBombingOps   = "The most bombing operations a player may launch in one day. 0 means no limit."
+	helpLostForcesDays  = "How long forces sent to another board wait for a result before they are given back. Packets go missing; this stops an army being lost for good. 0 means they never come back."
+	helpAttackCosts     = "How much gold an attack costs to launch."
+	helpTerrorCosts     = "How much gold a terrorist operation costs to launch."
+	helpBombingOps      = "Whether Bomb Enemy Targets is offered at all."
+	helpMissileOps      = "Whether nuclear, chemical and biological strikes are offered at all."
+	helpDoomerKaboomer  = "Whether the Doomer Kaboomer doomsday weapon may be built."
+	helpMaxRegions      = "The most regions a single player may own."
+	helpMaxPlayers      = "The most human empires allowed on this board. 0 means no limit."
+	helpIBBS            = "Take part in inter-BBS play across multiple boards. This turns on the interplanetary menus."
+	helpBoardID         = "The name this board uses in inter-BBS packets."
+	helpIdleTimeout     = "End a session after this many seconds with no keypress, freeing the shared world lock. 0 never times out."
+	helpIdleWarnings    = "How many idle warnings a session receives before it is disconnected."
 )
 
 // configTUI holds the tview app and the widget read-back closures. Each field's
@@ -163,6 +172,15 @@ func newConfigTUI(w *game.World) *configTUI {
 	addChoice(t, mil, true, "Attack Rewards", helpAttackRewards, dmgOpts, dmgVals, c.AttackRewards, func(c *game.Config, v game.Level) { c.AttackRewards = v })
 	addChoice(t, mil, true, "R5-Slappenheimer Handling", helpSlappenheimer, slapOpts, slapVals, c.SlappenheimerHandling, func(c *game.Config, v game.SlappenheimerMode) { c.SlappenheimerHandling = v })
 	t.addInt(mil, true, "Max Individual Attacks/Day (0=unlimited)", helpMaxAttacks, c.MaxIndividualAttacks, 0, 100, func(c *game.Config, n int) { c.MaxIndividualAttacks = n })
+	t.addInt(mil, true, "Max Group Attacks/Day (0=unlimited)", helpMaxGroupAttacks, c.MaxGroupAttacks, 0, 100, func(c *game.Config, n int) { c.MaxGroupAttacks = n })
+	t.addInt(mil, true, "Max Terrorist Ops/Day (0=unlimited)", helpMaxTerrorOps, c.MaxTerrorOps, 0, 100, func(c *game.Config, n int) { c.MaxTerrorOps = n })
+	t.addInt(mil, true, "Max Bombing Ops/Day (0=unlimited)", helpMaxBombingOps, c.MaxBombingOps, 0, 100, func(c *game.Config, n int) { c.MaxBombingOps = n })
+	t.addInt(mil, true, "Days before lost forces return (0=never)", helpLostForcesDays, c.LostForcesDays, 0, game.MaxLostForcesDays, func(c *game.Config, n int) { c.LostForcesDays = n })
+	addChoice(t, mil, true, "Attack Costs", helpAttackCosts, costOpts, costVals, c.AttackCosts, func(c *game.Config, v game.Level) { c.AttackCosts = v })
+	addChoice(t, mil, true, "Terrorism Costs", helpTerrorCosts, costOpts, costVals, c.TerrorCosts, func(c *game.Config, v game.Level) { c.TerrorCosts = v })
+	t.addBool(mil, true, "Bombing Ops", helpBombingOps, c.BombingOps, func(c *game.Config, b bool) { c.BombingOps = b })
+	t.addBool(mil, true, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
+	t.addBool(mil, true, "Doomer Kaboomer", helpDoomerKaboomer, c.DoomerKaboomer, func(c *game.Config, b bool) { c.DoomerKaboomer = b })
 
 	caps := tview.NewForm()
 	t.addInt(caps, true, "Max Purchasable Regions", helpMaxRegions, c.MaxRegions, 0, game.MaxPurchasableRegions, func(c *game.Config, n int) { c.MaxRegions = n })
