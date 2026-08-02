@@ -516,9 +516,16 @@ type World struct {
 	// InFlight holds strikes that have left this board and are waiting for a
 	// result packet. A result clears the matching entry; one that waits too long
 	// has its forces given back instead (Config.LostForcesDays, #96).
-	InFlight        []InFlightStrike
-	Outbox          []Packet
-	SpyDatabase     []SpyReport
+	InFlight    []InFlightStrike
+	Outbox      []Packet
+	SpyDatabase []SpyReport
+	// Doomer is this planet's own doomsday weapon, one at a time, from the day a
+	// baron starts it until it flies. Incoming is one aimed AT this planet that
+	// another board has told us about — visible while it is being built and while
+	// it is in the air, which is what gives the jets something to shoot at (#16,
+	// #63).
+	Doomer          *DoomerKaboomerWeapon
+	Incoming        *DoomerKaboomerWeapon
 	LeagueDiplomacy string       // coordinator's league-wide diplomacy declaration
 	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from ibnodes.dat at startup
 

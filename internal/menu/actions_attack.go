@@ -436,25 +436,104 @@ func sdiProgram(s session.Session, w *ctx) Result {
 	return Stay
 }
 
+// doomerKaboomer is the planet's doomsday-weapon desk, BRE's "Gooie Kablooie
+// Ops": start one, put money in, launch it, or scrap it. A planet builds one at
+// a time and the barons fund it between them (#16).
 func doomerKaboomer(s session.Session, w *ctx) Result {
 	if blockedByProtection(s, w) {
 		return Stay
 	}
-	answer := promptInt(s, fmt.Sprintf("A Doomer Kaboomer costs %d gold. Launch? (1 = yes)", game.DoomerCost))
-	if answer != 1 {
-		return Stay
-	}
-	var report string
-	err := w.mutatePlayer(func(p *game.Empire) error {
-		var e error
-		report, e = w.World.DoomerKaboomer(p)
-		return e
+	var d *game.DoomerKaboomerWeapon
+	var enabled bool
+	w.With(func() {
+		enabled = w.Config.DoomerKaboomer
+		if w.Doomer != nil {
+			c := *w.Doomer
+			d = &c
+		}
 	})
-	if err != nil {
-		fail(s, err)
+	if !enabled {
+		ok(s, "Doomer Kaboomer operations are switched off in this game.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s\n", hiNums(report))
-	pause(s)
+	if d == nil {
+		return startDoomer(s, w)
+	}
+	showDoomer(s, w, d)
+	switch {
+	case d.Launched:
+		ok(s, "The Doomer Kaboomer is on its way. Nothing more can be done with it.")
+	case d.Funded:
+		if AskYesNo(s, "Launch it now?", false) {
+			runDoomer(s, w, func(p *game.Empire) error { return w.World.LaunchDoomer(p) }, "Launched.")
+		} else if AskYesNo(s, "Dismantle it?", false) {
+			runDoomer(s, w, func(p *game.Empire) error { return w.World.DismantleDoomer(p) }, "Dismantled.")
+		}
+	default:
+		millions := promptSuggested(s, "How many million gold do you wish to put in?", 0, d.CostMillion-d.PaidMillion)
+		if millions > 0 {
+			var put int
+			err := w.mutatePlayer(func(p *game.Empire) error {
+				var e error
+				put, e = w.World.FundDoomer(p, millions)
+				return e
+			})
+			if err != nil {
+				fail(s, err)
+			} else {
+				ok(s, "You put in %d million gold.", put)
+			}
+		}
+	}
 	return Stay
+}
+
+// startDoomer offers to begin construction, quoting what the planet will have to
+// raise for the target it picks.
+func startDoomer(s session.Session, w *ctx) Result {
+	ok(s, "This planet has no Doomer Kaboomer.")
+	if !AskYesNo(s, "Would you like to begin construction?", false) {
+		return Stay
+	}
+	var boards []string
+	w.With(func() {
+		for _, b := range w.RemoteBoards {
+			boards = append(boards, b.BoardID)
+		}
+	})
+	if len(boards) == 0 {
+		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
+	board := pickFromList(s, "Planet", boards)
+	if board == "" {
+		return Stay
+	}
+	var quote int
+	w.With(func() { quote = w.DoomerQuote(board) })
+	if !AskYesNo(s, fmt.Sprintf(tr(s, "It will cost your planet %s million gold to fund. Accept?"), comma(quote)), false) {
+		return Stay
+	}
+	runDoomer(s, w, func(p *game.Empire) error { return w.World.StartDoomer(p, board) }, "Construction started.")
+	return Stay
+}
+
+// showDoomer prints the weapon's status board, matching the original's
+// Target / Total Cost / Cost Left / Creator lines.
+func showDoomer(s session.Session, w *ctx, d *game.DoomerKaboomerWeapon) {
+	fmt.Fprintf(s, "\n%sTarget:     %s%s\n", ansi.FgWhite, ansi.FgBrightWhite, d.TargetBoard)
+	fmt.Fprintf(s, "%sTotal Cost: %s%s mil gold%s   Cost Left: %s%s mil gold%s\n",
+		ansi.FgWhite, ansi.FgBrightWhite, comma(d.CostMillion), ansi.FgWhite,
+		ansi.FgBrightWhite, comma(d.CostMillion-d.PaidMillion), ansi.Reset)
+	fmt.Fprintf(s, "%sCreator:    %s%s%s\n", ansi.FgWhite, ansi.FgBrightWhite, d.Creator, ansi.Reset)
+}
+
+// runDoomer applies one weapon action under the player lock and reports it.
+func runDoomer(s session.Session, w *ctx, act func(*game.Empire) error, done string) {
+	if err := w.mutatePlayer(act); err != nil {
+		fail(s, err)
+		return
+	}
+	ok(s, done)
 }

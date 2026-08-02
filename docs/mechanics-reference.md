@@ -383,15 +383,36 @@ All four constants live in `balance.go`; Score never drops below 0.
   a group attack shares the returns.
 
 **Doomer Kaboomer** (the clone's equivalent of BRE's *Gooie Kablooie*) — the
-ultimate weapon, aimed at an entire enemy planet/BBS rather than one empire. It is community-funded (all members of
-the attacking board contribute; funding scales with the target's size) and
-only one can exist at a time. After funding it takes a few days to build,
-then launches. On arrival it destroys 10% of *all* regions on the target
-planet, then 5% more per day. After 5 days it exhausts itself — so the
-defenders must send jets to shoot it down before then. It can also be
-dismantled by its owner. The original's turn log and prompts confirm the
-lifecycle: begin construction → fund (millions of gold) → complete →
-awaiting launch → inbound processing.
+ultimate weapon, aimed at an entire enemy planet rather than one empire, and one
+per planet at a time. IB implements the original's lifecycle (#16): begin
+construction against a named planet → any baron funds it a million gold at a time
+→ complete → awaiting launch → in flight → arrival. Its creator may dismantle it
+instead, and the gold is not refunded.
+
+The **funding cost is binary-verified** from BRE.OVR's overlay unit at 0x27441
+(the routine at 0x277A0-0x27950), in millions of gold:
+
+    cost  = round(targetPlanetLand x 0.0044743) + 100     { land floored at 1000 }
+    cost  = min(cost, 5000)
+    ratio = targetPlanetLand / ourPlanetLand
+    cost  = cost x 2.0   if ratio > 4
+            cost x 1.5   if ratio > 2
+            cost x 1.2   if ratio > 1
+
+so the weapon is priced against how much bigger the target planet is than yours.
+The constants are `Doomer*` in `balance.go`.
+
+The rest is **IB's reconstruction**, following the original's prompts rather than
+its code: two days in flight, 10% of each realm's regions on arrival scaled by how
+much of the weapon survived, and interception by **jets only** (the original is
+explicit that nothing else can reach it) at one percent knocked off per 250 jets,
+spent whether they connect or not. SDI reduces the damage.
+
+The target planet is told about it — while it is under construction and again in
+flight, with the arrival time in hours — which is what makes interception
+possible (#63). BRE does the same, and its own strings carry the wording:
+"Gooie Kablooie destined for our planet is under construction at ...",
+"Gooie Kablooie arrives from ... in N Hours."
 
 **SDI Defense** — a funded anti-missile/anti-jet shield (spend up to ~2
 billion; percent-complete scales with your region count, and Technology
@@ -1462,9 +1483,8 @@ Now matching this reference (as of v0.0.1):
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and 2-billion money cap
 - Nuclear / chemical / biological strikes and pirate raids
-- Doomer Kaboomer and SDI defense (v1 simplification: the Doomer Kaboomer is an
-  instant planet-wide strike rather than the original's multi-day build/decay,
-  and SDI is a flat percentage damage-reducer)
+- Doomer Kaboomer, with the original's fund-build-launch-intercept lifecycle,
+  and SDI defense (a flat percentage damage-reducer)
 - Covert agents with spying and sabotage (success scales with agent count)
 - Player mail — a BRE-style per-message reader (Reply / Delete / Ignore /
   Quit), where Ignore keeps a message for next time (it can be ignored

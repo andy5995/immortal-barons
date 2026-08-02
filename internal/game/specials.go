@@ -2,7 +2,6 @@ package game
 
 import (
 	"fmt"
-	"strings"
 )
 
 // Strike/SDI gold costs (NukeCost, ChemCost, BioCost, DoomerCost, SDIStep)
@@ -116,39 +115,6 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 		report += fmt.Sprintf("\n%s has been utterly conquered!", d.Name)
 	}
 	return report, nil
-}
-
-// DoomerKaboomer is a planet-wide superweapon: for a very high cost it
-// destroys ~10% of EVERY other living empire's land at once (reduced by each
-// target's SDI). v1 simplification of the original's multi-day build/decay.
-func (w *World) DoomerKaboomer(a *Empire) (string, error) {
-	if a.Gold < DoomerCost {
-		return "", ErrCantAfford
-	}
-	a.Gold -= DoomerCost
-	var b strings.Builder
-	b.WriteString("Your Doomer Kaboomer detonates across the planet!\n")
-	for _, d := range w.Empires {
-		if d == a || !d.Alive {
-			continue
-		}
-		regions := d.Land / 10 * (100 - d.SDI) / 100
-		if regions < 1 {
-			regions = 1
-		}
-		if regions > d.Land {
-			regions = d.Land
-		}
-		d.Regions.remove(regions)
-		d.syncLand()
-		if d.Land <= 0 || d.People <= 0 {
-			d.Alive = false
-			d.DiedDay = w.GameDay
-		}
-		d.addEvent(fmt.Sprintf("A Doomer Kaboomer struck the planet — you lost %d regions.", regions))
-		fmt.Fprintf(&b, "  %s lost %d regions.\n", d.Name, regions)
-	}
-	return b.String(), nil
 }
 
 // clamp caps n so subtracting it from total never goes negative.

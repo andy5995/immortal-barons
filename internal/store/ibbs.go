@@ -39,8 +39,10 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string) error {
 	// overtaken by the recovery timer.
 	w.ReturnLostForces()
 	w.LaunchDueGroupAttacks()
+	w.ArriveDoomer() // a weapon whose flight is over lands before anything else moves
 	w.ExportScores()
 	w.ExportNodeList()
+	w.ExportDoomerStatus()
 	return WriteOutbox(w, outboundDir)
 }
 

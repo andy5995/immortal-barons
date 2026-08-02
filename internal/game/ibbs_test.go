@@ -581,3 +581,149 @@ func TestReconRoundTrip(t *testing.T) {
 		t.Errorf("Spy Database did not receive the report: %+v", asker.SpyDatabase)
 	}
 }
+
+// The Doomer Kaboomer runs the original's whole lifecycle: a planet starts one,
+// its barons fund it between them, and only then can it launch (#16).
+func TestDoomerKaboomerLifecycle(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	cfg.BoardID = "Wildside"
+	w := NewWorldSeed(cfg, 1)
+	founder := w.AddHuman("alice", "Alethia")
+	backer := w.AddHuman("bob", "Bobland")
+	founder.Land, backer.Land = 5000, 5000
+	w.ImportBoard(RemoteBoard{BoardID: "faraway", Scores: []RemoteScore{{Empire: "Rome", Land: 20000}}})
+
+	if err := w.StartDoomer(founder, "faraway"); err != nil {
+		t.Fatalf("StartDoomer: %v", err)
+	}
+	if err := w.StartDoomer(founder, "faraway"); err != ErrDoomerExists {
+		t.Errorf("a planet built a second weapon: %v", err)
+	}
+	cost := w.Doomer.CostMillion
+	if cost <= 0 {
+		t.Fatalf("weapon costs %d million", cost)
+	}
+	// It cannot fly on a promise.
+	if err := w.LaunchDoomer(founder); err != ErrDoomerUnfunded {
+		t.Errorf("an unfunded weapon launched: %v", err)
+	}
+
+	// Two barons fund it between them — that is the point of the thing.
+	founder.Gold = cost / 2 * DoomerMillion
+	backer.Gold = cost * DoomerMillion
+	if _, err := w.FundDoomer(founder, cost/2); err != nil {
+		t.Fatalf("founder funding: %v", err)
+	}
+	if w.Doomer.Funded {
+		t.Error("weapon reported complete while only half paid for")
+	}
+	if _, err := w.FundDoomer(backer, cost); err != nil {
+		t.Fatalf("backer funding: %v", err)
+	}
+	if !w.Doomer.Funded {
+		t.Fatal("weapon is fully paid for but not complete")
+	}
+	if w.Doomer.PaidMillion != cost {
+		t.Errorf("took %d million, want exactly %d", w.Doomer.PaidMillion, cost)
+	}
+
+	// Only its creator may launch it.
+	if err := w.LaunchDoomer(backer); err != ErrNotYours {
+		t.Errorf("a baron launched someone else's weapon: %v", err)
+	}
+	if err := w.LaunchDoomer(founder); err != nil {
+		t.Fatalf("LaunchDoomer: %v", err)
+	}
+	if w.Doomer.ArrivesDay != w.GameDay+DoomerFlightDays {
+		t.Errorf("arrives day %d, want %d", w.Doomer.ArrivesDay, w.GameDay+DoomerFlightDays)
+	}
+	if err := w.DismantleDoomer(founder); err != ErrDoomerFlying {
+		t.Errorf("a weapon in flight was dismantled: %v", err)
+	}
+}
+
+// The target planet is told the weapon exists while it is still being built, and
+// again when it launches, and its jets can shoot it down in flight (#63, #16).
+func TestDoomerIsVisibleAndCanBeShotDown(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	cfg.BoardID = "faraway"
+	target := NewWorldSeed(cfg, 1)
+	defender := target.AddHuman("bob", "Rome")
+	defender.Land, defender.Jets = 9000, 30_000
+
+	// Under construction: a warning, and nothing to shoot at yet.
+	target.ApplyPacket(Packet{FromBoard: "Wildside", Doomer: &DoomerStatus{FromBoard: "Wildside"}})
+	if target.Incoming == nil {
+		t.Fatal("target was not told about the weapon being built")
+	}
+	if target.Incoming.Launched {
+		t.Error("a weapon still under construction is marked as flying")
+	}
+
+	// Launched: now it is in the air.
+	target.ApplyPacket(Packet{FromBoard: "Wildside", Doomer: &DoomerStatus{
+		FromBoard: "Wildside", Funded: true, Launched: true, ArrivesDay: target.GameDay + 2, Intact: 100,
+	}})
+	if !target.Incoming.Launched {
+		t.Fatal("target does not know the weapon has launched")
+	}
+
+	// Jets, and only jets, whittle it down.
+	knocked, err := target.InterceptDoomer(defender, 5000)
+	if err != nil {
+		t.Fatalf("InterceptDoomer: %v", err)
+	}
+	if knocked != 5000/DoomerJetsPerPercent {
+		t.Errorf("5,000 jets knocked %d%% off, want %d%%", knocked, 5000/DoomerJetsPerPercent)
+	}
+	if defender.Jets != 25_000 {
+		t.Errorf("jets not spent: %d, want 25,000", defender.Jets)
+	}
+	if target.Incoming.Intact != 100-knocked {
+		t.Errorf("weapon is %d%% intact, want %d%%", target.Incoming.Intact, 100-knocked)
+	}
+
+	// Enough jets destroy it outright, and then nothing arrives.
+	defender.Jets = 100_000
+	if _, err := target.InterceptDoomer(defender, 100_000); err != nil {
+		t.Fatalf("InterceptDoomer: %v", err)
+	}
+	if target.Incoming != nil {
+		t.Fatalf("weapon survived a full interception: %+v", target.Incoming)
+	}
+	before := defender.Land
+	target.GameDay += 5
+	target.ArriveDoomer()
+	if defender.Land != before {
+		t.Errorf("a destroyed weapon still detonated: land %d, was %d", defender.Land, before)
+	}
+}
+
+// A weapon that gets through takes a share of every realm's land, less its SDI.
+func TestDoomerDetonationHitsThePlanet(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	w := NewWorldSeed(cfg, 1)
+	plain := w.AddHuman("bob", "Rome")
+	shielded := w.AddHuman("carol", "Carthage")
+	for _, e := range []*Empire{plain, shielded} {
+		e.Regions = RegionMix{Agricultural: 10_000}
+		e.syncLand()
+	}
+	shielded.SDI = 50
+
+	w.Incoming = &DoomerKaboomerWeapon{Creator: "Wildside", Launched: true, ArrivesDay: w.GameDay, Intact: 100}
+	w.ArriveDoomer()
+
+	if plain.Land != 9000 {
+		t.Errorf("unshielded realm has %d land, want 9,000 (10%% lost)", plain.Land)
+	}
+	if shielded.Land != 9500 {
+		t.Errorf("shielded realm has %d land, want 9,500 (SDI halved the hit)", shielded.Land)
+	}
+	if w.Incoming != nil {
+		t.Error("the weapon was not consumed on arrival")
+	}
+}

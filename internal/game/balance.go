@@ -664,11 +664,10 @@ const (
 	SpecialtyBonusPct   = 25
 	SpecialtyPenaltyPct = 15
 
-	NukeCost   = 7_500_000
-	ChemCost   = 6_000_000
-	BioCost    = 6_000_000
-	DoomerCost = 75_000_000
-	SDIStep    = 1_500_000 // gold per +1% SDI
+	NukeCost = 7_500_000
+	ChemCost = 6_000_000
+	BioCost  = 6_000_000
+	SDIStep  = 1_500_000 // gold per +1% SDI
 	// TerrorUnitLossDenom: each successful terror hit removes 1/N of one random
 	// unit type. BRE's disassembled hit applier uses a 6/7 ratio (removes ~1/7),
 	// so N = 7.
@@ -861,4 +860,52 @@ const (
 	TradeDealGoldPerDay = 100_000 // gold cost per day of transit
 	TradeDealMinDays    = 2       // shortest a deal may be sent for
 	TradeDealMaxDays    = 5       // longest a deal may be sent for
+)
+
+// The Doomer Kaboomer, IB's rename of BRE's Gooie Kablooie. It is not a purchase
+// but a public works: one planet funds one weapon, in millions of gold, over as
+// many days as it takes to raise the money, and the target planet can see it
+// coming and shoot at it.
+//
+// The funding cost is BINARY-VERIFIED from the construction routine in BRE.OVR's
+// overlay unit at 0x27441 (0x277A0-0x27950):
+//
+//	cost := round(targetPlanetLand * DoomerCostPerLand) + DoomerCostBase
+//	cost = min(cost, DoomerCostCap)
+//	switch ratio := targetPlanetLand / ourPlanetLand; {
+//	case ratio > 4: cost *= 2
+//	case ratio > 2: cost *= 1.5   // DoomerSurchargeBigPct
+//	case ratio > 1: cost *= 1.2   // DoomerSurchargeAheadPct
+//	}
+//
+// where targetPlanetLand is the sum of every living realm's regions on the target
+// planet, floored at DoomerMinTargetLand. So the weapon is priced against how
+// much bigger than you the planet you are aiming at is: attacking upward is
+// affordable, and a giant planet flattening a small one pays the most.
+//
+// Everything below the cost is IB's own reconstruction — the build, decay and
+// interception numbers were not read from the binary. They follow what the
+// original's help describes and are ordinary playtest knobs.
+const (
+	DoomerCostPerLand       = 44743   // per region of the target planet, in millionths of a million
+	DoomerCostPerLandDenom  = 1000000 // ... so the rate is 0.0044743
+	DoomerCostBase          = 100     // million gold, added after the per-land part
+	DoomerCostCap           = 5000    // million gold, before the size surcharge
+	DoomerMinTargetLand     = 1000    // a tiny planet still costs as if it were this big
+	DoomerSurchargeAheadPct = 120     // target is larger than us
+	DoomerSurchargeBigPct   = 150     // more than twice our size
+	DoomerSurchargeHugePct  = 200     // more than four times our size
+	DoomerMillion           = 1_000_000
+
+	// Flight and decay (reconstructed). The weapon is visible to its target for
+	// the whole flight, which is what makes shooting it down possible.
+	DoomerFlightDays = 2
+	// On arrival it destroys DoomerDamagePct of each realm's land, and a strike
+	// that is only partly intact does proportionally less.
+	DoomerDamagePct = 10
+
+	// Interception (reconstructed). Only jets can reach it — the original is
+	// explicit that nothing else can — and each sortie of DoomerJetsPerPercent
+	// jets knocks one percent off it. The jets are spent either way.
+	DoomerJetsPerPercent = 250
 )

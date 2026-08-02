@@ -200,9 +200,12 @@ func fillValue(v reflect.Value) {
 			}
 		}
 	case reflect.Pointer:
-		if !v.IsNil() {
-			fillValue(v.Elem())
+		// A nil pointer field would round-trip as nil and read as "lost", so
+		// allocate one and fill it — that is what actually exercises the save.
+		if v.IsNil() {
+			v.Set(reflect.New(v.Type().Elem()))
 		}
+		fillValue(v.Elem())
 	}
 }
 

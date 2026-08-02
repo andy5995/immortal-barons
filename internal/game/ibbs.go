@@ -36,6 +36,21 @@ type Packet struct {
 	LeagueNodes  []LeagueNode   // LC-authored league roster (nil if absent, #64)
 	Recon        []ReconRequest // scouting asked of ToBoard (#61)
 	ReconReports []SpyReport    // answers coming back to the origin (#61)
+	Doomer       *DoomerStatus  // a doomsday weapon aimed at ToBoard (#63)
+}
+
+// DoomerStatus tells a planet about a Doomer Kaboomer aimed at it — while it is
+// still being built, and again while it is in the air. BRE broadcasts the same
+// thing ("Updating Outgoing Gooie Kablooie Status"), and it is the whole reason a
+// target can scramble jets: a weapon nobody can see is one nobody can shoot at
+// (#63).
+type DoomerStatus struct {
+	FromBoard  string
+	Funded     bool
+	Launched   bool
+	ArrivesDay int
+	Intact     int
+	Dismantled bool // the builders scrapped it; stop watching for it
 }
 
 // ReconRequest asks another board what it knows about one of its own barons.
@@ -628,6 +643,9 @@ func (w *World) ApplyPacket(p Packet) Packet {
 			e.Bombers += sv.Bombers
 		}
 	}
+	if p.Doomer != nil && p.FromBoard != "" {
+		w.applyDoomerStatus(p.Doomer)
+	}
 	// Scouting answers coming home. They land in the planet-wide Spy Database,
 	// so the whole board benefits from one baron's agent (#61).
 	for _, r := range p.ReconReports {
@@ -819,4 +837,88 @@ func (w *World) SendRecon(e *Empire, targetBoard, targetEmpire string) error {
 		Recon:     []ReconRequest{req},
 	})
 	return nil
+}
+
+// ExportDoomerStatus tells the targeted planet about this one's weapon, whether
+// it is still being funded or already in the air (#63).
+func (w *World) ExportDoomerStatus() {
+	if w.Doomer == nil {
+		return
+	}
+	d := w.Doomer
+	w.enqueueDoomer(d.TargetBoard, &DoomerStatus{
+		FromBoard:  w.Config.BoardID,
+		Funded:     d.Funded,
+		Launched:   d.Launched,
+		ArrivesDay: d.ArrivesDay,
+		Intact:     d.Intact,
+	})
+}
+
+// ExportDoomerGone tells the targeted planet to stop watching, because the
+// weapon aimed at it was dismantled.
+func (w *World) ExportDoomerGone(board string) {
+	w.enqueueDoomer(board, &DoomerStatus{FromBoard: w.Config.BoardID, Dismantled: true})
+}
+
+func (w *World) enqueueDoomer(board string, st *DoomerStatus) {
+	for i := range w.Outbox {
+		if w.Outbox[i].ToBoard == board {
+			w.Outbox[i].Doomer = st
+			return
+		}
+	}
+	w.Outbox = append(w.Outbox, Packet{
+		FromBoard: w.Config.BoardID,
+		ToBoard:   board,
+		Date:      w.LastMaintDate,
+		Doomer:    st,
+	})
+}
+
+// applyDoomerStatus takes in what another planet says about the weapon it is
+// pointing at us, and posts the warning its barons need.
+func (w *World) applyDoomerStatus(st *DoomerStatus) {
+	if st.Dismantled {
+		if w.Incoming != nil && w.Incoming.Creator == st.FromBoard {
+			w.Incoming = nil
+			w.postNews(fmt.Sprintf("The Doomer Kaboomer being built at %s has been dismantled.", st.FromBoard))
+		}
+		return
+	}
+	first := w.Incoming == nil
+	if first {
+		w.Incoming = &DoomerKaboomerWeapon{Creator: st.FromBoard, Intact: 100}
+	}
+	in := w.Incoming
+	wasFlying := in.Launched
+	in.TargetBoard = w.Config.BoardID
+	in.ArrivesDay = st.ArrivesDay
+	if st.Launched {
+		in.Launched = true
+	}
+	if st.Intact > 0 && st.Intact < in.Intact {
+		in.Intact = st.Intact
+	}
+	switch {
+	case st.Launched && !wasFlying:
+		hours := (st.ArrivesDay - w.GameDay) * 24
+		if hours < 0 {
+			hours = 0
+		}
+		w.postNews(fmt.Sprintf("A Doomer Kaboomer arrives from %s in %d hours.", st.FromBoard, hours))
+	case first:
+		w.postNews(fmt.Sprintf("A Doomer Kaboomer destined for our planet is under construction at %s.", st.FromBoard))
+	}
+}
+
+// ArriveDoomer detonates an incoming weapon whose flight is over. Run from the
+// planetary step, so the jets get every day of the flight to shoot at it.
+func (w *World) ArriveDoomer() {
+	if w.Incoming == nil || !w.Incoming.Launched || w.GameDay < w.Incoming.ArrivesDay {
+		return
+	}
+	intact := w.Incoming.Intact
+	w.Incoming = nil
+	w.DetonateDoomer(intact)
 }

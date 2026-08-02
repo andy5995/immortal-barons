@@ -506,6 +506,10 @@ msgstr "Дипломатия"
 msgid "Disabled"
 msgstr ""
 
+#: internal/menu/actions_attack.go:469
+msgid "Dismantle it?"
+msgstr ""
+
 #: internal/menu/actions_message.go:255
 msgid "Do you wish to send another message?"
 msgstr "Хотите отправить ещё одно сообщение?"
@@ -521,6 +525,10 @@ msgstr ""
 
 #: internal/menu/tree.go:190
 msgid "Doomer Kaboomer Ops"
+msgstr ""
+
+#: internal/menu/actions_attack.go:456
+msgid "Doomer Kaboomer operations are switched off in this game."
 msgstr ""
 
 #: internal/menu/actions_attack.go:417
@@ -645,6 +653,10 @@ msgstr ""
 msgid "How many days would you like to invest for?"
 msgstr ""
 
+#: internal/menu/actions_attack.go:473
+msgid "How many million gold do you wish to put in?"
+msgstr ""
+
 #: internal/menu/actions_bank.go:63
 msgid "How many would you like to borrow?"
 msgstr ""
@@ -762,6 +774,10 @@ msgstr ""
 msgid "Investments"
 msgstr "Инвестиции"
 
+#: internal/menu/actions_attack.go:515
+msgid "It will cost your planet %s million gold to fund. Accept?"
+msgstr ""
+
 #: internal/menu/menu.go:585
 msgid "Item"
 msgstr ""
@@ -814,6 +830,10 @@ msgstr "Язык:"
 #: internal/menu/actions_info.go:856
 msgid "Last Planetary Master: %s"
 msgstr "Последний Мастер Планеты: %s"
+
+#: internal/menu/actions_attack.go:467
+msgid "Launch it now?"
+msgstr ""
 
 #: internal/menu/actions_interbbs.go:588
 msgid "League diplomacy updated. It will be broadcast to the league."
@@ -979,7 +999,7 @@ msgstr ""
 msgid "No other planets are known yet."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:71
+#: internal/menu/actions_attack.go:505
 msgid "No other planets are known yet. Wait for inter-BBS scores to arrive."
 msgstr ""
 
@@ -1018,6 +1038,10 @@ msgstr ""
 
 #: internal/menu/actions_interbbs.go:567
 msgid "Only the BBS Coordinator may set league diplomacy."
+msgstr ""
+
+#: internal/game/doomer.go:39
+msgid "Only the baron who started it may do that."
 msgstr ""
 
 #: cmd/immortal-barons/usage.go:70
@@ -1398,7 +1422,7 @@ msgstr "танков произведено промышленными зона�
 msgid "Target which baron?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:78
+#: internal/menu/actions_attack.go:508
 msgid "Target which planet?"
 msgstr ""
 
@@ -1455,6 +1479,22 @@ msgstr ""
 
 #: internal/menu/actions_info.go:226
 msgid "That leaves a surplus of %s. Our stores are secure."
+msgstr ""
+
+#: internal/game/doomer.go:37
+msgid "The Doomer Kaboomer has already launched."
+msgstr ""
+
+#: internal/game/doomer.go:35
+msgid "The Doomer Kaboomer is already paid for."
+msgstr ""
+
+#: internal/game/doomer.go:36
+msgid "The Doomer Kaboomer is not paid for yet."
+msgstr ""
+
+#: internal/menu/actions_attack.go:465
+msgid "The Doomer Kaboomer is on its way. Nothing more can be done with it."
 msgstr ""
 
 #: internal/menu/gameflow.go:495
@@ -1537,6 +1577,14 @@ msgstr ""
 
 #: internal/menu/actions_trade.go:89
 msgid "This deal needs %d carrier(s); you own %d."
+msgstr ""
+
+#: internal/menu/actions_attack.go:494
+msgid "This planet has no Doomer Kaboomer."
+msgstr ""
+
+#: internal/game/doomer.go:33
+msgid "This planet is already building a Doomer Kaboomer."
 msgstr ""
 
 #: internal/menu/tree.go:388
@@ -1751,6 +1799,10 @@ msgstr ""
 msgid "Withdraw Funds"
 msgstr "Снять средства"
 
+#: internal/menu/actions_attack.go:495
+msgid "Would you like to begin construction?"
+msgstr ""
+
 #: internal/menu/gameflow.go:504
 msgid "Would you like to reconsider?"
 msgstr ""
@@ -1910,6 +1962,10 @@ msgstr ""
 
 #: internal/menu/actions_bank.go:46
 msgid "You owe %s gold in overdue debt (it grows each turn)."
+msgstr ""
+
+#: internal/menu/actions_attack.go:484
+msgid "You put in %d million gold."
 msgstr ""
 
 #: internal/menu/actions_trade.go:191

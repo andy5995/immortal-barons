@@ -35,6 +35,13 @@
     your own, without waiting for a group to form (#62)
   * Spying on another planet now asks that planet and brings back real
     figures, instead of repeating what the score table already showed (#61)
+  * The Doomer Kaboomer is now built the way the original builds it: your
+    planet funds one together a million gold at a time, its price depends on
+    how big the target planet is, and the baron who started it launches or
+    scraps it (#16)
+  * A planet is warned about a Doomer Kaboomer aimed at it, both while it is
+    being built and while it is in the air, and can send jets to shoot it
+    down — only jets can reach it (#63)
   * A dead realm is worth nothing on the scores screen
   * Debt no longer lowers your net worth
   * Covert agents cost more the longer your realm has been playing
