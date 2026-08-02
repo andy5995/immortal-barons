@@ -451,32 +451,24 @@ func spyDatabase(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// sendSpy infiltrates a baron on another planet, filing intel into the
-// planet-wide Spy Database. v1 intel is drawn from imported score data; a
-// caught spy is lost.
+// sendRemoteSpy scouts a baron on another planet. The request travels in the
+// outbound packet and the answer comes back with real figures read on the target
+// board, which is the point of the exchange — a shared score table already gives
+// everyone land and net worth (#61). It costs an agent, and the report lands in
+// the planet-wide Spy Database where every baron here can read it.
 func sendRemoteSpy(s session.Session, w *ctx) {
-	board, baron, sc, found := pickRemoteTarget(s, w, "Spy on which planet?", "Spy on which baron?")
+	board, baron, _, found := pickRemoteTarget(s, w, "Spy on which planet?", "Spy on which baron?")
 	if !found {
 		return
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		if p.Agents < 1 { // re-check the agent against fresh state
-			return game.ErrNoAgents
-		}
-		p.Agents--
-		w.SpyDatabase = append(w.SpyDatabase, game.SpyReport{
-			Board:  board,
-			Empire: baron,
-			Date:   w.LastMaintDate,
-			Land:   sc.Land,
-		})
-		return nil
+		return w.World.SendRecon(p, board, baron)
 	})
 	if err != nil {
 		fail(s, err)
 		return
 	}
-	ok(s, "Your agents infiltrated %s on %s; the report is in the Spy Database.", baron, board)
+	ok(s, "Your agents are on their way to %s on %s. Their report will reach the Spy Database when word comes back.", baron, board)
 }
 
 // terroristOps sends agents to destroy an enemy baron's forces on another

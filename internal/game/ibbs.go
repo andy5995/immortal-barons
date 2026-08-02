@@ -34,6 +34,19 @@ type Packet struct {
 	Results      []AttackResult // outcomes returning to the origin
 	LeagueConfig *LeagueConfig  // LC-authored league settings (nil if absent)
 	LeagueNodes  []LeagueNode   // LC-authored league roster (nil if absent, #64)
+	Recon        []ReconRequest // scouting asked of ToBoard (#61)
+	ReconReports []SpyReport    // answers coming back to the origin (#61)
+}
+
+// ReconRequest asks another board what it knows about one of its own barons.
+// BRE exchanges these as "Global Recon Requests" out and "Local Recon Info"
+// back; the answer is real figures read on the target's board, which is what
+// separates it from reading a shared score table (#61).
+type ReconRequest struct {
+	ID           int
+	FromBoard    string
+	FromOwner    string // the baron who paid the agent, so the answer can reach them
+	TargetEmpire string
 }
 
 // LeagueConfig is the set of game rules the League Coordinator sets for the
@@ -615,7 +628,28 @@ func (w *World) ApplyPacket(p Packet) Packet {
 			e.Bombers += sv.Bombers
 		}
 	}
+	// Scouting answers coming home. They land in the planet-wide Spy Database,
+	// so the whole board benefits from one baron's agent (#61).
+	for _, r := range p.ReconReports {
+		w.SpyDatabase = append(w.SpyDatabase, r)
+		w.postNews(fmt.Sprintf("Our agents reported back on %s of %s.", r.Empire, r.Board))
+	}
 	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
+	// Scouting asked of us: answer with what is true here and now.
+	for _, req := range p.Recon {
+		if e := w.remoteTarget(req.TargetEmpire); e != nil {
+			result.ReconReports = append(result.ReconReports, SpyReport{
+				Board:   w.Config.BoardID,
+				Empire:  e.Name,
+				Date:    w.LastMaintDate,
+				Land:    e.Land,
+				Offense: e.Offense(),
+				Defense: e.Defense(),
+				Gold:    e.Gold,
+			})
+			e.addEvent("Foreign agents were seen taking an interest in your realm.")
+		}
+	}
 	for _, atk := range p.Attacks {
 		result.Results = append(result.Results, w.resolveRemoteAttack(atk))
 	}
@@ -757,4 +791,32 @@ func (w *World) ReturnLostForces() int {
 		w.postNews(fmt.Sprintf("%d interplanetary force(s) gave up waiting and came home.", recovered))
 	}
 	return recovered
+}
+
+// SendRecon queues a scouting request at targetEmpire on targetBoard, spending
+// one of e's agents. The answer arrives with a later packet and lands in the
+// planet-wide Spy Database (#61).
+func (w *World) SendRecon(e *Empire, targetBoard, targetEmpire string) error {
+	if e.Agents < 1 {
+		return ErrNoAgents
+	}
+	if targetEmpire == "" {
+		return ErrNoTarget
+	}
+	e.Agents--
+	w.NextAttackID++
+	req := ReconRequest{ID: w.NextAttackID, FromBoard: w.Config.BoardID, FromOwner: e.Owner, TargetEmpire: targetEmpire}
+	for i := range w.Outbox {
+		if w.Outbox[i].ToBoard == targetBoard {
+			w.Outbox[i].Recon = append(w.Outbox[i].Recon, req)
+			return nil
+		}
+	}
+	w.Outbox = append(w.Outbox, Packet{
+		FromBoard: w.Config.BoardID,
+		ToBoard:   targetBoard,
+		Date:      w.LastMaintDate,
+		Recon:     []ReconRequest{req},
+	})
+	return nil
 }

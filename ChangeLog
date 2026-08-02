@@ -33,6 +33,8 @@
     sysops no longer keep their own copies in step by hand (#64)
   * Indiv. Attack Force works: strike one named baron on another planet on
     your own, without waiting for a group to form (#62)
+  * Spying on another planet now asks that planet and brings back real
+    figures, instead of repeating what the score table already showed (#61)
   * A dead realm is worth nothing on the scores screen
   * Debt no longer lowers your net worth
   * Covert agents cost more the longer your realm has been playing

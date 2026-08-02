@@ -136,7 +136,7 @@ msgstr ""
 msgid "(the whole planet)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:529
+#: internal/menu/actions_interbbs.go:521
 msgid "(your current vote)"
 msgstr ""
 
@@ -439,7 +439,7 @@ msgstr ""
 msgid "Current SDI Strength: %d%%"
 msgstr "Текущая налоговая ставка: %d%%"
 
-#: internal/menu/actions_interbbs.go:578
+#: internal/menu/actions_interbbs.go:570
 msgid "Current league diplomacy:"
 msgstr ""
 
@@ -633,7 +633,7 @@ msgstr ""
 msgid "How many %s?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:497
+#: internal/menu/actions_interbbs.go:489
 msgid "How many agents to send?"
 msgstr ""
 
@@ -815,7 +815,7 @@ msgstr "Язык:"
 msgid "Last Planetary Master: %s"
 msgstr "Последний Мастер Планеты: %s"
 
-#: internal/menu/actions_interbbs.go:596
+#: internal/menu/actions_interbbs.go:588
 msgid "League diplomacy updated. It will be broadcast to the league."
 msgstr ""
 
@@ -951,7 +951,7 @@ msgstr ""
 msgid "New amount of %s for sale"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:579
+#: internal/menu/actions_interbbs.go:571
 msgid "New league diplomacy declaration (blank to keep)"
 msgstr ""
 
@@ -1016,7 +1016,7 @@ msgid ""
 "on the granary."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:575
+#: internal/menu/actions_interbbs.go:567
 msgid "Only the BBS Coordinator may set league diplomacy."
 msgstr ""
 
@@ -1465,7 +1465,7 @@ msgstr ""
 msgid "The R5-Slappenheimer is disabled."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:542
+#: internal/menu/actions_interbbs.go:534
 msgid "The current BBS Coordinator is %s."
 msgstr ""
 
@@ -1506,7 +1506,7 @@ msgstr ""
 msgid "The spy database is empty. Spy on empires on other planets to fill it."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:538
+#: internal/menu/actions_interbbs.go:530
 #, fuzzy
 msgid "There are no barons to vote for yet."
 msgstr "Не осталось вражеских империй для атаки."
@@ -1670,7 +1670,7 @@ msgstr ""
 msgid "Visit the Food Market to feed them, or they will starve."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:548
+#: internal/menu/actions_interbbs.go:540
 msgid "Vote for (0 to cancel)?"
 msgstr ""
 
@@ -1743,7 +1743,7 @@ msgstr ""
 msgid "While you were at the menus, this has happened:"
 msgstr "С вашего последнего хода произошло следующее:"
 
-#: internal/menu/actions_interbbs.go:544
+#: internal/menu/actions_interbbs.go:536
 msgid "Who should be the BBS Coordinator?"
 msgstr ""
 
@@ -1937,8 +1937,10 @@ msgstr "Ваши сообщения:"
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:479
-msgid "Your agents infiltrated %s on %s; the report is in the Spy Database."
+#: internal/menu/actions_interbbs.go:471
+msgid ""
+"Your agents are on their way to %s on %s. Their report will reach the Spy "
+"Database when word comes back."
 msgstr ""
 
 #: internal/menu/actions_diplomacy.go:91
@@ -2019,11 +2021,11 @@ msgstr ""
 msgid "Your realm will be named %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:508
+#: internal/menu/actions_interbbs.go:500
 msgid "Your terrorists depart for %s on %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:560
+#: internal/menu/actions_interbbs.go:552
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 
