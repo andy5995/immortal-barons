@@ -285,6 +285,40 @@ func drop(names []string, skip map[string]bool) []string {
 	return out
 }
 
+// TestLoadFrozenV002Fixture pins the shape BEFORE v0.0.3, where mail was a list
+// of bare strings. be48fb2 gave the field a struct element type with no way back,
+// so a board that had not reset since v0.0.2 could not load its world at all —
+// and neither could -reset, which reads the world before wiping it. Same rule as
+// the v0.0.3 fixture: fix the loader, never the fixture.
+func TestLoadFrozenV002Fixture(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	fixture, err := os.ReadFile("testdata/world-v0.0.2.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(cfg.DataDir, "world.json"), fixture, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	e := got.FindByOwner("khan")
+	if e == nil {
+		t.Fatal("empire from the old save not found")
+	}
+	if len(e.Mail) != 2 {
+		t.Fatalf("want 2 messages from the old save, got %d", len(e.Mail))
+	}
+	if e.Mail[0].Body != "Meet me at the border." || e.Mail[1].Body != "Your realm is next." {
+		t.Errorf("legacy string mail must decode as the body, got %+v", e.Mail)
+	}
+	if e.Mail[0].From != "" || e.Mail[0].When != "" {
+		t.Errorf("legacy mail carries no sender or stamp, got %+v", e.Mail[0])
+	}
+}
+
 // TestLoadFrozenV003Fixture loads a world.json FROZEN at the v0.0.3 shape —
 // committed bytes, not one this test wrote — so a JSON key rename breaks it
 // even though save and load share the tag and every same-marshaller round trip

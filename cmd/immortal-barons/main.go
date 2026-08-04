@@ -468,6 +468,16 @@ func openSession(caller *door.Caller) (session.Session, func(), error) {
 	return st, st.Close, nil // Close restores a pty stdin's mode (no-op for a pipe)
 }
 
+// isMalformedWorld reports whether err is the world file failing to parse rather
+// than failing to be read. Only the first is safe for a reset to discard: an
+// unparseable world is exactly what a reset replaces, while a permission or I/O
+// error is a problem that wiping the world would hide.
+func isMalformedWorld(err error) bool {
+	var syn *json.SyntaxError
+	var typ *json.UnmarshalTypeError
+	return errors.As(err, &syn) || errors.As(err, &typ)
+}
+
 // runDump prints the loaded game world as indented JSON to stdout — a read-only
 // snapshot for scripting and balance checks (pipe to jq). It reads the last
 // committed world.json (written atomically), so it needs no lock and doesn't
@@ -582,9 +592,16 @@ func runReset(cfg game.Config, fromConfig bool) error {
 		return err
 	}
 	w, err := store.Load(cfg)
-	if errors.Is(err, store.ErrNoWorld) {
+	switch {
+	case errors.Is(err, store.ErrNoWorld):
 		w = store.NewGame(cfg) // first-ever reset: no prior world to load
-	} else if err != nil {
+	case isMalformedWorld(err):
+		// A reset is the sysop's way out of a world the game can no longer read,
+		// so refusing to run because of what it is about to discard leaves them
+		// stuck. The old file survives as world.json.bak, backed up just above.
+		fmt.Printf("\nThe existing world could not be read (%v).\nStarting from a fresh one; the unreadable file was kept as world.json.bak.\n", err)
+		w = store.NewGame(cfg)
+	case err != nil:
 		return err
 	}
 

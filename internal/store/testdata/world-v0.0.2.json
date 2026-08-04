@@ -1,0 +1,20 @@
+{
+  "Empires": [
+    {
+      "Name": "Khan's Realm",
+      "Owner": "khan",
+      "Alive": true,
+      "Gold": 4242,
+      "Land": 15,
+      "People": 2000,
+      "Tax": 15,
+      "Support": 80,
+      "Morale": 100,
+      "Events": ["A dragon attacked your regions."],
+      "Mail": ["Meet me at the border.", "Your realm is next."]
+    }
+  ],
+  "GameDay": 7,
+  "LastMaintDate": "2026-07-28",
+  "InvestRate": 12
+}
