@@ -220,6 +220,13 @@ columns: `34` blue `(` + `94` bright-blue key + `34` `) ` + `37` white label.
 Choice> Quit
 ```
 
+`(C) Covert Operations` sits between `(A) Visit Advisors` and `(D) Diplomacy`
+when the realm holds at least one covert agent; it is absent above because that
+capture had none. Verified across the `cap/` captures: the item appears at the
+exact point agents go from 0 to nonzero (eots, shsbbs, bre-9-eots), and it shows
+even with the "Visit Covert Menu" preference set to No, so the preference gates
+only the per-turn step.
+
 ---
 
 ## Set Industries (System Menu → 1)

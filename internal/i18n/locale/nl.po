@@ -64,7 +64,7 @@ msgstr ""
 msgid "%d%% over 10 days"
 msgstr ""
 
-#: internal/menu/tree.go:464
+#: internal/menu/tree.go:467
 msgid "%s  You have %s gold."
 msgstr ""
 
@@ -96,7 +96,7 @@ msgstr ""
 msgid "%s turns"
 msgstr ""
 
-#: internal/menu/tree.go:462
+#: internal/menu/tree.go:465
 msgid "%s units of food available today."
 msgstr ""
 
@@ -404,7 +404,7 @@ msgstr ""
 msgid "Coordinator Menu"
 msgstr "Coördinatormenu"
 
-#: internal/menu/tree.go:375
+#: internal/menu/tree.go:378
 msgid "Coordinator Vote"
 msgstr "Coördinatorstemming"
 
@@ -536,7 +536,7 @@ msgstr ""
 msgid "Empire Name"
 msgstr ""
 
-#: internal/menu/tree.go:350
+#: internal/menu/tree.go:353
 msgid "Empire Status"
 msgstr "Rijksstatus"
 
@@ -552,7 +552,7 @@ msgstr ""
 msgid "Expose Enemy Ops"
 msgstr "Vijandelijke operaties onthullen"
 
-#: internal/menu/tree.go:351
+#: internal/menu/tree.go:354
 msgid "Food Market"
 msgstr "Voedselmarkt"
 
@@ -576,11 +576,11 @@ msgstr "Volledig defensiebondgenootschap"
 msgid "Fund SDI — gold to spend?"
 msgstr ""
 
-#: internal/menu/tree.go:391
+#: internal/menu/tree.go:394
 msgid "Game Bulletins"
 msgstr "Spelbulletins"
 
-#: internal/menu/tree.go:398
+#: internal/menu/tree.go:401
 msgid "Game Setup"
 msgstr "Spelinstellingen"
 
@@ -588,7 +588,7 @@ msgstr "Spelinstellingen"
 msgid "Game length in days (0 = endless)"
 msgstr ""
 
-#: internal/menu/tree.go:484
+#: internal/menu/tree.go:487
 msgid "Game started on %s"
 msgstr ""
 
@@ -684,7 +684,7 @@ msgstr ""
 msgid "Immortal Barons"
 msgstr ""
 
-#: internal/menu/tree.go:383
+#: internal/menu/tree.go:386
 msgid "Immortal Barons — Game Menu"
 msgstr "Immortal Barons — Spelmenu"
 
@@ -712,7 +712,7 @@ msgstr ""
 msgid "Initial Market Land"
 msgstr ""
 
-#: internal/menu/tree.go:393
+#: internal/menu/tree.go:396
 msgid "Instructions"
 msgstr "Instructies"
 
@@ -728,7 +728,7 @@ msgstr "InterBBS-scores"
 msgid "InterPlanetary Operations"
 msgstr "Interplanetaire operaties"
 
-#: internal/menu/tree.go:392
+#: internal/menu/tree.go:395
 msgid "InterPlanetary Ops"
 msgstr "Interplanetaire operaties"
 
@@ -1107,7 +1107,7 @@ msgstr "Belastingtarief instellen"
 msgid "Planetary Treaties"
 msgstr ""
 
-#: internal/menu/tree.go:385
+#: internal/menu/tree.go:388
 msgid "Play"
 msgstr "Spelen"
 
@@ -1231,11 +1231,11 @@ msgstr ""
 msgid "Score"
 msgstr ""
 
-#: internal/menu/tree.go:358
+#: internal/menu/tree.go:361
 msgid "See Scores"
 msgstr "Scores bekijken"
 
-#: internal/menu/tree.go:386
+#: internal/menu/tree.go:389
 msgid "See Status"
 msgstr "Status bekijken"
 
@@ -1285,11 +1285,11 @@ msgstr ""
 msgid "Set %s price"
 msgstr ""
 
-#: internal/menu/tree.go:362
+#: internal/menu/tree.go:365
 msgid "Set Industries"
 msgstr "Industrieën instellen"
 
-#: internal/menu/tree.go:357
+#: internal/menu/tree.go:360
 msgid "Set Tax Rate"
 msgstr "Belastingtarief instellen"
 
@@ -1301,7 +1301,7 @@ msgstr "In de val lokken"
 msgid "Set the R5-Slappenheimer dial (0-10)"
 msgstr ""
 
-#: internal/menu/tree.go:363
+#: internal/menu/tree.go:366
 msgid "Show Instructions"
 msgstr "Instructies tonen"
 
@@ -1317,7 +1317,7 @@ msgstr "Sorry, u hebt vandaag al uw beurten gebruikt."
 msgid "Special Operations"
 msgstr "Speciale operaties"
 
-#: internal/menu/tree.go:364
+#: internal/menu/tree.go:367
 msgid "Specialize Industry"
 msgstr "Industrie specialiseren"
 
@@ -1475,7 +1475,7 @@ msgstr ""
 msgid "The food market is out of food for today."
 msgstr ""
 
-#: internal/menu/tree.go:479
+#: internal/menu/tree.go:482
 msgid "The game begins %s."
 msgstr ""
 
@@ -1539,7 +1539,7 @@ msgstr ""
 msgid "This planet is already building a Doomer Kaboomer."
 msgstr ""
 
-#: internal/menu/tree.go:388
+#: internal/menu/tree.go:391
 msgid "Today's News"
 msgstr "Nieuws van vandaag"
 
@@ -1612,7 +1612,7 @@ msgstr "Investeringen ondermijnen"
 msgid "Unlimited"
 msgstr ""
 
-#: internal/menu/tree.go:460
+#: internal/menu/tree.go:463
 msgid "Unlimited supply today."
 msgstr ""
 
@@ -1750,11 +1750,11 @@ msgstr ""
 msgid "Would you like to reconsider?"
 msgstr ""
 
-#: internal/menu/tree.go:361
+#: internal/menu/tree.go:364
 msgid "Write Macros"
 msgstr "Macro's schrijven"
 
-#: internal/menu/tree.go:389
+#: internal/menu/tree.go:392
 msgid "Yesterday's News"
 msgstr "Nieuws van gisteren"
 
@@ -1826,15 +1826,15 @@ msgstr ""
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr ""
 
-#: internal/menu/tree.go:453
+#: internal/menu/tree.go:456
 msgid "You have %s gold and %d agents."
 msgstr ""
 
-#: internal/menu/tree.go:446
+#: internal/menu/tree.go:449
 msgid "You have %s gold and %d turns."
 msgstr ""
 
-#: internal/menu/tree.go:444
+#: internal/menu/tree.go:447
 msgid "You have %s gold and 1 turn."
 msgstr ""
 
@@ -2084,7 +2084,7 @@ msgstr ""
 msgid "packet signature does not verify"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:797
+#: cmd/immortal-barons/main.go:801
 #, fuzzy
 msgid "path to the BBS drop file"
 msgstr "pad naar het BBS-dropbestand (DOOR32.SYS of DOOR.SYS)"
@@ -2126,7 +2126,7 @@ msgid ""
 "printed), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:801
+#: cmd/immortal-barons/main.go:805
 msgid "run -set-dropfile first"
 msgstr ""
 

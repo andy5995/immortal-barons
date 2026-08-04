@@ -346,6 +346,13 @@ func BuildMenus() *Menus {
 			// Only relevant while the realm is still under new-realm protection.
 			Hidden: func(w *ctx) bool { return w.Player().Protection <= 0 }},
 		{Key: 'A', Label: "Visit Advisors", Do: visitAdvisors},
+		// BRE lists Covert Operations here too, and hides it until the realm holds
+		// an agent — the same gate as the per-turn covert step, and independent of
+		// the Visit Covert Menu preference (captures show it listed with the
+		// preference off). Verified in cap/: the item appears the moment agents go
+		// 0 -> nonzero, in three separate sessions.
+		{Key: 'C', Label: "Covert Operations", Do: gotoMenu(covert),
+			Hidden: func(w *ctx) bool { return w.Player().Agents < 1 }},
 		{Key: 'D', Label: "Diplomacy", Do: gotoMenu(diplomacy)},
 		{Key: 'E', Label: "Empire Status", Do: empireStatus},
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},

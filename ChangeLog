@@ -1,4 +1,5 @@
 (in-progress:)
+  * The System menu now lists Covert Operations
   * Windows: the game now turns on the console's ANSI handling itself, and
     falls back to a plain-text Configuration Editor on the legacy console,
     which cannot do ANSI at all — so the "ForceV2" registry setting no longer
