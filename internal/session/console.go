@@ -17,8 +17,10 @@ import (
 // the menu instead. This matches how door play already behaves (the BBS hands
 // us a raw stream).
 type Console struct {
-	r       *bufio.Reader
-	restore func()
+	r         *bufio.Reader
+	restore   func()
+	restoreVT func()
+	plain     bool // console can't render ANSI: strip it rather than show it
 }
 
 func NewConsole() *Console {
@@ -29,9 +31,14 @@ func NewConsole() *Console {
 	if st, err := term.MakeRaw(fd); err == nil {
 		restore = func() { term.Restore(fd, st) }
 	}
+	// A Windows console prints our ANSI literally until asked not to, and the
+	// legacy console cannot be asked at all — there, send plain text (issue #98).
+	vtOK, restoreVT := EnableVirtualTerminal()
 	return &Console{
-		r:       bufio.NewReader(os.Stdin),
-		restore: restore,
+		r:         bufio.NewReader(os.Stdin),
+		restore:   restore,
+		restoreVT: restoreVT,
+		plain:     !vtOK,
 	}
 }
 
@@ -45,7 +52,11 @@ func (c *Console) ReadKey() (rune, error) {
 func (c *Console) DrainInput() { drainTerminators(c.r) }
 
 func (c *Console) Write(p []byte) (int, error) {
-	if _, err := os.Stdout.Write(toCRLF(p)); err != nil {
+	out := toCRLF(p)
+	if c.plain {
+		out = stripEscapes(out)
+	}
+	if _, err := os.Stdout.Write(out); err != nil {
 		return 0, err
 	}
 	return len(p), nil
@@ -56,5 +67,9 @@ func (c *Console) Close() {
 	if c.restore != nil {
 		c.restore()
 		c.restore = nil
+	}
+	if c.restoreVT != nil {
+		c.restoreVT()
+		c.restoreVT = nil
 	}
 }

@@ -610,9 +610,13 @@ func runReset(cfg game.Config, fromConfig bool) error {
 	w.Config = def
 
 	// On a real terminal use the tabbed tview editor (issue #7); fall back to the
-	// line-based editor when stdin is piped/redirected or the TUI can't init.
+	// line-based editor when stdin is piped/redirected, the console cannot render
+	// ANSI at all (a legacy Windows console — issue #98; tcell writes the escapes
+	// regardless and never notices they came out as text), or the TUI can't init.
 	saved, usedTUI := false, false
-	if session.StdinIsTerminal() {
+	vtOK, restoreVT := session.EnableVirtualTerminal()
+	defer restoreVT()
+	if session.StdinIsTerminal() && vtOK {
 		if s, err := menu.ConfigEditorTUI(w); err == nil {
 			saved, usedTUI = s, true
 		}

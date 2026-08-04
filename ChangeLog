@@ -1,4 +1,8 @@
 (in-progress:)
+  * Windows: the game now turns on the console's ANSI handling itself, and
+    falls back to a plain-text Configuration Editor on the legacy console,
+    which cannot do ANSI at all — so the "ForceV2" registry setting no longer
+    has to be changed to run "-reset" (#98)
   * config-during-reset: A day is now 10 turns by default, and a new realm
     gets 15 turns of protection
   * Game Setup now shows the whole ruleset
