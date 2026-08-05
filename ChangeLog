@@ -1,73 +1,73 @@
 2026-08-05 (v0.0.4)
+  * The web server has been removed (an SSH server may replace it)
   * 32-bit builds charged the wrong region maintenance above 235 regions, often
     a negative amount, and misspent a computer baron's gold above 43 million
-  * A door caller whose BBS reports no ANSI support is sent plain text (#101)
-  * Lists that cannot show a moving highlight are numbered instead, and the
-    highlighted row is marked with a character as well as a color (#99)
-  * The line-based Configuration Editor is split across four pages, moved
-    through with N and P (#100)
-  * Added "-ascii" for a terminal that reads neither CP437 nor UTF-8
-  * Added "-no-ansi" to send plain text on a terminal that could render it
-  * The title screen fits a 24-row terminal, and its prompt sits directly
-    below the art
-  * Maintenance paid under Auto-Pay is reported as one total, as the original
-    reports it
-  * Messages longer than the screen break between words
-  * A failed action is marked with a character, so it is not told from a
-    successful one by color alone
-  * German and Russian said food had SPOILED where it was consumed
-  * Implemented Queen Royale tax refund (#93)
-  * Worlds saved before v0.0.3 load again, with their mail text preserved
-  * "-reset" works on a world the game can no longer read
-  * The System menu lists Covert Operations
   * Windows: console ANSI handling is enabled automatically, and the
     Configuration Editor falls back to plain text on the legacy console, so
     "-reset" no longer needs the "ForceV2" registry setting (#98)
   * config-during-reset: a day is 10 turns by default; a new realm gets 15
     turns of protection
-  * Game Setup shows the whole ruleset
-  * The Daily Bulletin title omits the board name on a stand-alone board
-  * A treaty proposer is told whether the offer was accepted or rejected
-  * "Since your last play" items are numbered and timestamped
-  * New mail is shown at the start of a turn instead of being offered first
-  * Enter is ignored at the message prompt
-  * Message boxes match the original's size and show the send time
-  * Treaty offers, View Treaties and Alliance Strength match the original's
-    layout and colors
-  * View Treaties lists every realm
-  * Alliance Strength gained a Total Forces line
-  * View Treaties lists sent treaty offers that are still unanswered (#92)
-  * A new treaty offer to the same realm replaces the one still waiting
-  * Send Spy succeeds just over half the time, whatever agents either side
-    holds
+  * Worlds saved before v0.0.3 load again, with their mail text preserved
+  * "-reset" works on a world the game can no longer read
+  * A door caller whose BBS reports no ANSI support is sent plain text (#101)
+  * Added "-no-ansi" to send plain text on a terminal that could render it
+  * Added "-ascii" for a terminal that reads neither CP437 nor UTF-8
+  * Sysops: "-gen-coord-key" and "-coord-key" set up the league coordinator
+    key; "-league-reset DATE" starts a new season on every board (#65)
+  * The league Coordinator sends the roster of boards to every board (#64)
+  * A board in a league has no computer barons, and none can be added
+  * League orders carry the coordinator's signature, and a board refuses any
+    it cannot check (#53)
+  * A packet that arrives twice is ignored (#53)
   * The Configuration Editor gained the interplanetary settings: per-day caps
     for group attacks, terrorist ops and bombing ops, attack and terrorism
     costs, switches for bombing, missile and Doomer Kaboomer operations, and
     how long a strike waits for a result before its forces come home
+  * The line-based Configuration Editor is split across four pages, moved
+    through with N and P (#100)
+  * Game Setup shows the whole ruleset
   * Game Setup shows the interplanetary rules on a league board
-  * Group attacks, terrorist ops and bombing ops have their own per-day limits
-  * A board in a league has no computer barons, and none can be added
-  * Forces sent to another board come home if no result arrives within the
-    number of days the game settings allow (#96)
-  * The league Coordinator sends the roster of boards to every board (#64)
-  * Implemented Indiv. Attack Force: strike one named baron on another planet
-    without waiting for a group to form (#62)
-  * Spying on another planet queries that planet and returns real figures (#61)
   * The Doomer Kaboomer is built the way the original builds it: funded a
     million gold at a time, priced by the target planet's size, and launched
     or scrapped by the baron who started it (#16)
   * A planet is warned about a Doomer Kaboomer aimed at it while it is being
     built and while it is in the air, and can send jets to intercept (#63)
-  * League orders carry the coordinator's signature, and a board refuses any
-    it cannot check (#53)
-  * A packet that arrives twice is ignored (#53)
-  * Sysops: "-gen-coord-key" and "-coord-key" set up the league coordinator
-    key; "-league-reset DATE" starts a new season on every board (#65)
-  * A dead realm is worth nothing on the scores screen
-  * Debt no longer lowers net worth
+  * Implemented Indiv. Attack Force: strike one named baron on another planet
+    without waiting for a group to form (#62)
+  * Spying on another planet queries that planet and returns real figures (#61)
+  * Group attacks, terrorist ops and bombing ops have their own per-day limits
+  * Forces sent to another board come home if no result arrives within the
+    number of days the game settings allow (#96)
+  * Implemented Queen Royale tax refund (#93)
+  * A treaty proposer is told whether the offer was accepted or rejected
+  * View Treaties lists every realm
+  * View Treaties lists sent treaty offers that are still unanswered (#92)
+  * A new treaty offer to the same realm replaces the one still waiting
+  * Alliance Strength gained a Total Forces line
+  * Send Spy succeeds just over half the time, whatever agents either side
+    holds
   * Covert agents cost more the longer a realm has been playing
   * Unit prices move within the original's price ranges
-  * The web server has been removed (an SSH server may replace it)
+  * Debt no longer lowers net worth
+  * A dead realm is worth nothing on the scores screen
+  * Lists that cannot show a moving highlight are numbered instead, and the
+    highlighted row is marked with a character as well as a color (#99)
+  * A failed action is marked with a character, so it is not told from a
+    successful one by color alone
+  * Messages longer than the screen break between words
+  * The title screen fits a 24-row terminal, and its prompt sits directly
+    below the art
+  * New mail is shown at the start of a turn instead of being offered first
+  * Enter is ignored at the message prompt
+  * Message boxes match the original's size and show the send time
+  * "Since your last play" items are numbered and timestamped
+  * Treaty offers, View Treaties and Alliance Strength match the original's
+    layout and colors
+  * Maintenance paid under Auto-Pay is reported as one total, as the original
+    reports it
+  * The Daily Bulletin title omits the board name on a stand-alone board
+  * The System menu lists Covert Operations
+  * German and Russian said food had SPOILED where it was consumed
 
 2026-07-31 (v0.0.3)
   * Updating from an earlier version requires a game reset (-reset)
