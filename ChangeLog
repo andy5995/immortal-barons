@@ -1,4 +1,4 @@
-(in-progress:)
+2026-08-05 (v0.0.4)
   * 32-bit builds charged the wrong region maintenance above 235 regions, often
     a negative amount, and misspent a computer baron's gold above 43 million
   * A door caller whose BBS reports no ANSI support is sent plain text (#101)
