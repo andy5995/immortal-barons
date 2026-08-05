@@ -1,67 +1,55 @@
 (in-progress:)
   * Implemented Queen Royale tax refund (#93)
-  * Worlds saved before v0.0.3 load again; their old mail keeps its text
-  * "-reset" now works on a world the game can no longer read, instead of
-    stopping with the error that made the reset necessary
-  * The System menu now lists Covert Operations
-  * Windows: the game now turns on the console's ANSI handling itself, and
-    falls back to a plain-text Configuration Editor on the legacy console,
-    which cannot do ANSI at all — so the "ForceV2" registry setting no longer
-    has to be changed to run "-reset" (#98)
-  * config-during-reset: A day is now 10 turns by default, and a new realm
-    gets 15 turns of protection
-  * Game Setup now shows the whole ruleset
+  * Worlds saved before v0.0.3 load again, with their mail text preserved
+  * "-reset" works on a world the game can no longer read
+  * The System menu lists Covert Operations
+  * Windows: console ANSI handling is enabled automatically, and the
+    Configuration Editor falls back to plain text on the legacy console, so
+    "-reset" no longer needs the "ForceV2" registry setting (#98)
+  * config-during-reset: a day is 10 turns by default; a new realm gets 15
+    turns of protection
+  * Game Setup shows the whole ruleset
   * The Daily Bulletin title omits the board name on a stand-alone board
-  * You are now told whether a realm accepted or rejected your treaty offer
-  * Each "since your last play" item is now numbered and timestamped
-  * New mail is shown at the start of a turn instead of asking first
-  * Enter is now ignored at the message prompt, so you cannot skip an
-    unread message by accident
-  * Message boxes match the original's size and show when a message was sent
+  * A treaty proposer is told whether the offer was accepted or rejected
+  * "Since your last play" items are numbered and timestamped
+  * New mail is shown at the start of a turn instead of being offered first
+  * Enter is ignored at the message prompt
+  * Message boxes match the original's size and show the send time
   * Treaty offers, View Treaties and Alliance Strength match the original's
     layout and colors
   * View Treaties lists every realm
   * Alliance Strength gained a Total Forces line
-  * View Treaties now lists the treaty offers you have sent that nobody has
-    answered yet (#92)
+  * View Treaties lists sent treaty offers that are still unanswered (#92)
   * A new treaty offer to the same realm replaces the one still waiting
-  * Send Spy now succeeds just over half the time, whatever agents either
-    side holds
+  * Send Spy succeeds just over half the time, whatever agents either side
+    holds
   * The Configuration Editor gained the interplanetary settings: per-day caps
     for group attacks, terrorist ops and bombing ops, attack and terrorism
     costs, switches for bombing, missile and Doomer Kaboomer operations, and
     how long a strike waits for a result before its forces come home
-  * Game Setup shows the interplanetary rules when the board is in a league
-  * Group attacks, terrorist ops and bombing ops now have their own per-day
-    limits
-  * A board in a league has no computer barons, and none can be added to one
-  * Forces sent to another board now come home if no result arrives within the
-    number of days the game settings allow, instead of being lost with the
-    packet (#96)
-  * The league Coordinator now sends the roster of boards to every board, so
-    sysops no longer keep their own copies in step by hand (#64)
-  * Indiv. Attack Force works: strike one named baron on another planet on
-    your own, without waiting for a group to form (#62)
-  * Spying on another planet now asks that planet and brings back real
-    figures, instead of repeating what the score table already showed (#61)
-  * The Doomer Kaboomer is now built the way the original builds it: your
-    planet funds one together a million gold at a time, its price depends on
-    how big the target planet is, and the baron who started it launches or
-    scraps it (#16)
-  * A planet is warned about a Doomer Kaboomer aimed at it, both while it is
-    being built and while it is in the air, and can send jets to shoot it
-    down — only jets can reach it (#63)
-  * League orders now carry the coordinator's signature, and a board refuses
-    any it cannot check, so no board can dictate the league's rules by
-    naming itself the coordinator (#53)
-  * A packet that arrives twice is now ignored instead of being applied
-    again (#53)
-  * Sysops: "-gen-coord-key" and "-coord-key" set up the league's coordinator
-    key, and "-league-reset DATE" starts a new season on every board (#65)
+  * Game Setup shows the interplanetary rules on a league board
+  * Group attacks, terrorist ops and bombing ops have their own per-day limits
+  * A board in a league has no computer barons, and none can be added
+  * Forces sent to another board come home if no result arrives within the
+    number of days the game settings allow (#96)
+  * The league Coordinator sends the roster of boards to every board (#64)
+  * Implemented Indiv. Attack Force: strike one named baron on another planet
+    without waiting for a group to form (#62)
+  * Spying on another planet queries that planet and returns real figures (#61)
+  * The Doomer Kaboomer is built the way the original builds it: funded a
+    million gold at a time, priced by the target planet's size, and launched
+    or scrapped by the baron who started it (#16)
+  * A planet is warned about a Doomer Kaboomer aimed at it while it is being
+    built and while it is in the air, and can send jets to intercept (#63)
+  * League orders carry the coordinator's signature, and a board refuses any
+    it cannot check (#53)
+  * A packet that arrives twice is ignored (#53)
+  * Sysops: "-gen-coord-key" and "-coord-key" set up the league coordinator
+    key; "-league-reset DATE" starts a new season on every board (#65)
   * A dead realm is worth nothing on the scores screen
-  * Debt no longer lowers your net worth
-  * Covert agents cost more the longer your realm has been playing
-  * Unit prices now move within the original's price ranges
+  * Debt no longer lowers net worth
+  * Covert agents cost more the longer a realm has been playing
+  * Unit prices move within the original's price ranges
   * The web server has been removed (an SSH server may replace it)
 
 2026-07-31 (v0.0.3)
