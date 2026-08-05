@@ -42,6 +42,15 @@ func NewConsole() *Console {
 	}
 }
 
+// ANSI reports whether this console interprets escape sequences. False on a
+// legacy Windows console, where Write strips them (issue #98) and the menu code
+// offers numbered lists in place of lightbars (issue #99).
+func (c *Console) ANSI() bool { return !c.plain }
+
+// SetPlain forces the escapes off regardless of what the console reports, for
+// -no-ansi (testing the non-ANSI path on a terminal that is perfectly capable).
+func (c *Console) SetPlain() { c.plain = true }
+
 func (c *Console) ReadKey() (rune, error) {
 	r, _, err := c.r.ReadRune()
 	return r, err

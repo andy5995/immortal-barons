@@ -87,6 +87,7 @@ func main() {
 	dump := flag.Bool("dump", false, i18n.T(lang, "print the normalized game world as JSON, then exit (after load-time migration; for scripts and balance checks)"))
 	utf8 := flag.Bool("utf8", false, i18n.T(lang, "force UTF-8 output (needed for non-English languages; -local detects this from your locale)"))
 	cp437 := flag.Bool("cp437", false, i18n.T(lang, "force CP437 output (the door default; overrides the -local locale detection)"))
+	noANSI := flag.Bool("no-ansi", false, i18n.T(lang, "send plain text with no ANSI escapes, as a terminal that cannot render them gets (for testing that path on a terminal that can)"))
 	version := flag.Bool("version", false, i18n.T(lang, "print the version, then exit"))
 	// Group -help by audience (Play / Character set / Sysop / Inter-BBS / Info)
 	// instead of the flat alphabetical default; mirrors docs/command-reference.md (#34).
@@ -246,7 +247,7 @@ func main() {
 	}
 
 	if *local {
-		runLocal(cfg, *name, today, wantUTF8(*utf8, *cp437, true))
+		runLocal(cfg, *name, today, wantUTF8(*utf8, *cp437, true), *noANSI)
 		return
 	}
 
@@ -299,8 +300,8 @@ func main() {
 	// no other trace, so record what the dropfile gave us at launch — the I/O mode,
 	// time-left, and socket handle name the environment. A file (not stderr) so a
 	// remote tester needs no door-config change to capture it.
-	doorLog(cfg.DataDir, "launch handle=%q node=%d io=%s seconds-left=%d socket=%d os=%s stdin-tty=%v",
-		caller.Handle, caller.Node, ioModeName(caller.IO), caller.SecondsLeft, caller.Socket, runtime.GOOS, session.StdinIsTerminal())
+	doorLog(cfg.DataDir, "launch handle=%q node=%d io=%s seconds-left=%d socket=%d os=%s stdin-tty=%v ansi=%v",
+		caller.Handle, caller.Node, ioModeName(caller.IO), caller.SecondsLeft, caller.Socket, runtime.GOOS, session.StdinIsTerminal(), caller.ANSI)
 
 	s, closeSession, err := openSession(caller)
 	if err != nil {
@@ -317,6 +318,13 @@ func main() {
 	// the sysop forces UTF-8.
 	if !wantUTF8(*utf8, *cp437, false) {
 		s = session.NewCP437Writer(s)
+	}
+	// A caller at the far end of a socket cannot be probed for ANSI the way a
+	// local console can, so the dropfile flag their BBS profile filled in is the
+	// only signal (issue #101). Without ANSI they would otherwise read every
+	// escape as literal text.
+	if !caller.ANSI || *noANSI {
+		s = session.NewPlain(s)
 	}
 
 	handle := caller.Handle
@@ -377,9 +385,15 @@ func ioModeName(m door.IOMode) string {
 
 // runLocal plays Immortal Barons locally in the caller's terminal against the
 // shared persistent world, for someone testing or playing outside a BBS.
-func runLocal(cfg game.Config, name, today string, utf8 bool) {
+func runLocal(cfg game.Config, name, today string, utf8, noANSI bool) {
 	c := session.NewConsole()
 	defer c.Close()
+
+	// -no-ansi forces the console's own plain mode, which a legacy Windows console
+	// selects for itself (issue #98) — so the same one path is exercised.
+	if noANSI {
+		c.SetPlain()
+	}
 
 	// utf8 was resolved from the flags and the locale by wantUTF8.
 	var s session.Session = c

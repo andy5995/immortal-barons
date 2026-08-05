@@ -61,6 +61,10 @@ func (c *cp437Writer) Write(p []byte) (int, error) {
 // UTF8 reports that this session is NOT UTF-8 — it emits CP437.
 func (c *cp437Writer) UTF8() bool { return false }
 
+// ANSI forwards the inner session's capability marker, so this wrapper can sit
+// on either side of the plain writer without hiding it from HasANSI.
+func (c *cp437Writer) ANSI() bool { return HasANSI(c.Session) }
+
 // CP437Encodable reports whether s can be rendered on a CP437 session with no
 // loss — every rune maps to a CP437 code point. Used to decide whether a
 // translated catalog is safe to show on a CP437 terminal (German maps; Cyrillic
