@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -42,8 +43,11 @@ func lightbarSelect(s session.Session, title string, items []string, backLabel s
 		fmt.Fprintf(s, "%s%s%s%s\n%s\n", ansi.EraseLine, ansi.FgBrightCyan, title, ansi.Reset, ansi.EraseLine)
 		for i, it := range all {
 			fmt.Fprint(s, ansi.EraseLine)
+			// The ">" marker carries the selection on its own: reverse video alone
+			// says nothing on a monochrome terminal or to a reader with a colour
+			// vision deficiency. Both rows put the title in the same column.
 			if i == sel {
-				fmt.Fprintf(s, "  %s %s %s\n", ansi.Reverse, it, ansi.Reset)
+				fmt.Fprintf(s, "  %s>%s %s%s%s\n", ansi.FgBrightWhite, ansi.Reset, ansi.Reverse, it, ansi.Reset)
 			} else {
 				fmt.Fprintf(s, "    %s\n", it)
 			}
@@ -82,6 +86,47 @@ func lightbarSelect(s session.Session, title string, items []string, backLabel s
 	}
 }
 
+// chooseFromList picks one of items, returning its 0-based index or -1 for
+// back. It is the lightbar on an ANSI terminal and a numbered list where the
+// escapes cannot be rendered (issue #99) — that session gets no highlight to
+// move and no in-place repaint, so the lightbar would append a fresh copy of
+// the whole list on every arrow key.
+func chooseFromList(s session.Session, plain bool, title string, items []string, backLabel string) int {
+	if plain {
+		return numberedSelect(s, title, items, backLabel)
+	}
+	return lightbarSelect(s, title, items, backLabel)
+}
+
+// numberedSelect is the non-ANSI list: print it once, read a number. It follows
+// the menu convention — a "0) <back>" line and the bare ">" prompt readChoice
+// uses — but reads a whole line rather than one key, since the list runs past
+// nine items.
+func numberedSelect(s session.Session, title string, items []string, backLabel string) int {
+	fmt.Fprintf(s, "\n%s\n\n", title)
+	for i, it := range items {
+		fmt.Fprintf(s, "  %2d) %s\n", i+1, it)
+	}
+	fmt.Fprintf(s, "   0) %s\n", backLabel)
+	for {
+		in := strings.TrimSpace(prompt(s, ">"))
+		if in == "" {
+			continue
+		}
+		if q := unicode.ToLower([]rune(in)[0]); q == 'q' { // Q leaves, as in the lightbar
+			return -1
+		}
+		n, err := strconv.Atoi(in)
+		if err != nil || n < 0 || n > len(items) {
+			continue
+		}
+		if n == 0 {
+			return -1
+		}
+		return n - 1
+	}
+}
+
 // prefixMatch returns the index of the first item whose title, lowercased,
 // starts with p, or -1 if none does.
 func prefixMatch(items []string, p string) int {
@@ -106,7 +151,7 @@ func helpBrowse(s session.Session, w *ctx) Result {
 			items = append(items, help.CategoryName(c))
 		}
 		items = append(items, tr(s, "About"))
-		i := lightbarSelect(s, tr(s, "Help — choose a category:"), items, tr(s, "Quit"))
+		i := chooseFromList(s, w.Plain, tr(s, "Help — choose a category:"), items, tr(s, "Quit"))
 		if i < 0 {
 			return Stay
 		}
@@ -117,7 +162,7 @@ func helpBrowse(s session.Session, w *ctx) Result {
 		// playerLang, not the raw stored language: it applies the CP437 guard, so
 		// a CP437 door reads help in English (or a CP437-safe language) instead
 		// of substitution glyphs when the stored language can't be shown.
-		browseCategory(s, cats[i], playerLang(w))
+		browseCategory(s, w.Plain, cats[i], playerLang(w))
 	}
 }
 
@@ -235,14 +280,14 @@ func pickLanguage(s session.Session, w *ctx) Result {
 // browseCategory lists a category's topics as a lightbar and renders the chosen
 // one, paged. The lightbar reaches any number of topics (covert has 15), so no
 // single-key-vs-Enter compromise is needed.
-func browseCategory(s session.Session, cat, lang string) {
+func browseCategory(s session.Session, plain bool, cat, lang string) {
 	for {
 		topics := help.Topics(cat, lang)
 		titles := make([]string, len(topics))
 		for i, t := range topics {
 			titles[i] = t.Title
 		}
-		i := lightbarSelect(s, help.CategoryName(cat)+tr(s, " — choose a topic:"), titles, tr(s, "Back"))
+		i := chooseFromList(s, plain, help.CategoryName(cat)+tr(s, " — choose a topic:"), titles, tr(s, "Back"))
 		if i < 0 {
 			return
 		}

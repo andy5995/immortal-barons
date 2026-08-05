@@ -97,10 +97,11 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	if id.TimeLeft > 0 {
 		hard = time.Now().Add(id.TimeLeft)
 	}
-	// Read the charset capability before wrapping s in the Deadline (which does
-	// not forward the marker): CP437 sessions get English-only, UTF-8 sessions
-	// may use any language.
-	utf8 := session.IsUTF8(s)
+	// Read the terminal capabilities before wrapping s in the Deadline (which does
+	// not forward the markers): CP437 sessions get English-only, UTF-8 sessions
+	// may use any language, and a session that cannot render ANSI gets numbered
+	// lists in place of lightbars.
+	term := menu.Term{UTF8: session.IsUTF8(s), Plain: !session.HasANSI(s)}
 	d := session.NewDeadline(s, time.Duration(cfg.IdleTimeoutSecs)*time.Second, cfg.MaxIdleWarnings, hard)
 	s = d
 
@@ -187,7 +188,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 		// CP437-representable language (e.g. German) sets it later from the
 		// in-game Preferences menu, keeping the common English signup unchanged.
 		lang := ""
-		if utf8 {
+		if term.UTF8 {
 			lang = selectLanguage(s)
 		}
 		if lang != "" {
@@ -239,7 +240,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 
 	// io.EOF means the caller dropped the connection or was booted; still persist
 	// state below.
-	gameErr := menu.GameLoop(s, w, e.Owner, utf8)
+	gameErr := menu.GameLoop(s, w, e.Owner, term)
 	reason = d.Reason()
 	if reason == "" {
 		if errors.Is(gameErr, io.EOF) {

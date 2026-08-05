@@ -16,12 +16,12 @@ import (
 // playing THIS session — per-session state, not shared World state, so the web
 // front-end can run concurrent sessions against one World, and re-resolved each
 // transaction so it survives the door's per-action world reload.
-func GameLoop(s session.Session, w *game.World, handle string, utf8 bool) (err error) {
+func GameLoop(s session.Session, w *game.World, handle string, t Term) (err error) {
 	// A prompt read failing mid-turn (idle boot or dropped connection) unwinds
 	// the whole session via session.End; catch it here and report it as io.EOF,
 	// which the caller (play.Session) treats as a clean save-and-exit end.
 	defer session.GuardEnd(&err)
-	c := &ctx{World: w, handle: handle, UTF8: utf8}
+	c := &ctx{World: w, handle: handle, UTF8: t.UTF8, Plain: t.Plain}
 	// Seed the active-empire cache under the raw world lock so the first resolve
 	// can't race a concurrent AddHuman (web onboarding). Later resolves are
 	// cache hits until a reload bumps the generation.

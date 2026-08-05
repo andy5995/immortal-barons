@@ -48,6 +48,21 @@ type ctx struct {
 	// door/terminal) all output is forced to English, since non-English text
 	// cannot be represented in CP437.
 	UTF8 bool
+	// Plain reports that the session CANNOT render ANSI escapes (a legacy Windows
+	// console, or a door caller whose dropfile clears the ANSI flag). The escapes
+	// are stripped before they reach such a caller, so any screen that depends on
+	// them for more than colour — the lightbar, which also repaints in place —
+	// needs a plain alternative. Negative so the zero value is the capable,
+	// ordinary case.
+	Plain bool
+}
+
+// Term is what the caller's terminal can do — the two independent axes a
+// front-end resolves before a session starts: which character set the terminal
+// reads, and whether it interprets ANSI escapes at all.
+type Term struct {
+	UTF8  bool // the session emits UTF-8 rather than CP437
+	Plain bool // the session cannot render ANSI escapes
 }
 
 // Player is the active empire for this session (nil before onboarding / after
