@@ -101,7 +101,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	// not forward the markers): CP437 sessions get English-only, UTF-8 sessions
 	// may use any language, and a session that cannot render ANSI gets numbered
 	// lists in place of lightbars.
-	term := menu.Term{UTF8: session.IsUTF8(s), Plain: !session.HasANSI(s)}
+	term := menu.Term{UTF8: session.IsUTF8(s), ASCII: session.IsASCII(s), Plain: !session.HasANSI(s)}
 	d := session.NewDeadline(s, time.Duration(cfg.IdleTimeoutSecs)*time.Second, cfg.MaxIdleWarnings, hard)
 	s = d
 

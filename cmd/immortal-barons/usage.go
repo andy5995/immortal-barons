@@ -20,7 +20,7 @@ var usageGroups = []struct {
 	flags []string
 }{
 	{"Play", []string{"local", "name", "dropfile", "data"}},
-	{"Character set (output)", []string{"utf8", "cp437"}},
+	{"Terminal (output)", []string{"utf8", "cp437", "ascii", "no-ansi"}},
 	{"Sysop / game admin", []string{"set-dropfile", "reset", "reset-from-config", "add-ai", "maint"}},
 	{"Inter-BBS", []string{"planetary", "league-config", "export", "import"}},
 	// Development tools, kept out of the sysop section: a board never needs

@@ -53,8 +53,8 @@ func twoNodeWorld(t *testing.T, handle, realm string, cfgSetup func(*game.Config
 	wb.SetStore(store.NewFileStore(wb, cfg))
 
 	h := strings.ToLower(handle)
-	a = &ctx{World: wa, handle: h, UTF8: true}
-	b = &ctx{World: wb, handle: h, UTF8: true}
+	a = &ctx{World: wa, handle: h, Term: Term{UTF8: true}}
+	b = &ctx{World: wb, handle: h, Term: Term{UTF8: true}}
 	return a, b, cfg
 }
 

@@ -87,6 +87,7 @@ func main() {
 	dump := flag.Bool("dump", false, i18n.T(lang, "print the normalized game world as JSON, then exit (after load-time migration; for scripts and balance checks)"))
 	utf8 := flag.Bool("utf8", false, i18n.T(lang, "force UTF-8 output (needed for non-English languages; -local detects this from your locale)"))
 	cp437 := flag.Bool("cp437", false, i18n.T(lang, "force CP437 output (the door default; overrides the -local locale detection)"))
+	asciiOut := flag.Bool("ascii", false, i18n.T(lang, "force plain 7-bit ASCII output, for a terminal that is neither CP437 nor UTF-8 (box rules and accents degrade to ASCII look-alikes)"))
 	noANSI := flag.Bool("no-ansi", false, i18n.T(lang, "send plain text with no ANSI escapes, as a terminal that cannot render them gets (for testing that path on a terminal that can)"))
 	version := flag.Bool("version", false, i18n.T(lang, "print the version, then exit"))
 	// Group -help by audience (Play / Character set / Sysop / Inter-BBS / Info)
@@ -99,8 +100,8 @@ func main() {
 		return
 	}
 
-	if *utf8 && *cp437 {
-		fmt.Fprintln(os.Stderr, "immortal-barons: use only one of -utf8 and -cp437")
+	if n := btoi(*utf8) + btoi(*cp437) + btoi(*asciiOut); n > 1 {
+		fmt.Fprintln(os.Stderr, "immortal-barons: use only one of -utf8, -cp437 and -ascii")
 		os.Exit(2)
 	}
 
@@ -247,7 +248,7 @@ func main() {
 	}
 
 	if *local {
-		runLocal(cfg, *name, today, wantUTF8(*utf8, *cp437, true), *noANSI)
+		runLocal(cfg, *name, today, wantCharset(*utf8, *cp437, *asciiOut, true), *noANSI)
 		return
 	}
 
@@ -315,10 +316,8 @@ func main() {
 	defer closeSession()
 
 	// Traditional BBS terminals expect CP437, so transcode UTF-8 -> CP437 unless
-	// the sysop forces UTF-8.
-	if !wantUTF8(*utf8, *cp437, false) {
-		s = session.NewCP437Writer(s)
-	}
+	// the sysop forces another charset.
+	s = encodeFor(s, wantCharset(*utf8, *cp437, *asciiOut, false))
 	// A caller at the far end of a socket cannot be probed for ANSI the way a
 	// local console can, so the dropfile flag their BBS profile filled in is the
 	// only signal (issue #101). Without ANSI they would otherwise read every
@@ -385,7 +384,7 @@ func ioModeName(m door.IOMode) string {
 
 // runLocal plays Immortal Barons locally in the caller's terminal against the
 // shared persistent world, for someone testing or playing outside a BBS.
-func runLocal(cfg game.Config, name, today string, utf8, noANSI bool) {
+func runLocal(cfg game.Config, name, today string, cs charset, noANSI bool) {
 	c := session.NewConsole()
 	defer c.Close()
 
@@ -395,11 +394,8 @@ func runLocal(cfg game.Config, name, today string, utf8, noANSI bool) {
 		c.SetPlain()
 	}
 
-	// utf8 was resolved from the flags and the locale by wantUTF8.
-	var s session.Session = c
-	if !utf8 {
-		s = session.NewCP437Writer(c)
-	}
+	// cs was resolved from the flags and the locale by wantCharset.
+	s := encodeFor(session.Session(c), cs)
 	if _, err := play.Run(s, play.Identity{Handle: name}, cfg, today); err != nil {
 		fmt.Fprintln(os.Stderr, "immortal-barons -local:", err)
 		return // no sign-off after a startup failure (e.g. no game — run -reset)
@@ -407,20 +403,55 @@ func runLocal(cfg game.Config, name, today string, utf8, noANSI bool) {
 	fmt.Fprint(s, "\nUntil next turn, Baron.\n")
 }
 
-// wantUTF8 resolves the output charset. An explicit -utf8/-cp437 always wins;
-// otherwise a local session follows the process locale, and a door assumes
-// CP437 (its locale reflects the BBS server, not the caller's terminal).
-func wantUTF8(forceUTF8, forceCP437, local bool) bool {
+// charset is what the caller's terminal reads. CP437 is the BBS tradition,
+// UTF-8 the modern default, and ASCII the fallback for a terminal that is
+// neither and would render either as mojibake.
+type charset int
+
+const (
+	charsetCP437 charset = iota
+	charsetUTF8
+	charsetASCII
+)
+
+// wantCharset resolves the output charset. An explicit -utf8/-cp437/-ascii
+// always wins (in that order when more than one is given); otherwise a local
+// session follows the process locale, and a door assumes CP437 (its locale
+// reflects the BBS server, not the caller's terminal).
+func wantCharset(forceUTF8, forceCP437, forceASCII, local bool) charset {
 	switch {
 	case forceUTF8:
-		return true
+		return charsetUTF8
 	case forceCP437:
-		return false
-	case local:
-		return session.LocaleIsUTF8()
+		return charsetCP437
+	case forceASCII:
+		return charsetASCII
+	case local && session.LocaleIsUTF8():
+		return charsetUTF8
 	default:
-		return false
+		return charsetCP437
 	}
+}
+
+// encodeFor wraps s in the writer for cs. UTF-8 needs none: it is what the
+// engine already emits.
+func encodeFor(s session.Session, cs charset) session.Session {
+	switch cs {
+	case charsetCP437:
+		return session.NewCP437Writer(s)
+	case charsetASCII:
+		return session.NewASCIIWriter(s)
+	default:
+		return s
+	}
+}
+
+// btoi counts a set flag, for the "only one of these" check.
+func btoi(b bool) int {
+	if b {
+		return 1
+	}
+	return 0
 }
 
 func defaultName() string {

@@ -40,7 +40,7 @@ func TestGroupedUsageShowsSections(t *testing.T) {
 	groupedUsage(fs, "")()
 	out := buf.String()
 
-	for _, section := range []string{"Play", "Character set"} {
+	for _, section := range []string{"Play", "Terminal"} {
 		if !strings.Contains(out, section) {
 			t.Errorf("expected section heading %q in -help\n%s", section, out)
 		}

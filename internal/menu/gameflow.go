@@ -21,7 +21,7 @@ func GameLoop(s session.Session, w *game.World, handle string, t Term) (err erro
 	// the whole session via session.End; catch it here and report it as io.EOF,
 	// which the caller (play.Session) treats as a clean save-and-exit end.
 	defer session.GuardEnd(&err)
-	c := &ctx{World: w, handle: handle, UTF8: t.UTF8, Plain: t.Plain}
+	c := &ctx{World: w, handle: handle, Term: t}
 	// Seed the active-empire cache under the raw world lock so the first resolve
 	// can't race a concurrent AddHuman (web onboarding). Later resolves are
 	// cache hits until a reload bumps the generation.

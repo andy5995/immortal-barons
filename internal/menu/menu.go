@@ -44,10 +44,20 @@ type ctx struct {
 	// takeSessionNews.
 	seenEvents    int
 	seenEventsSet bool
-	// UTF8 reports whether this session can display UTF-8. When false (a CP437
-	// door/terminal) all output is forced to English, since non-English text
-	// cannot be represented in CP437.
+	Term
+}
+
+// Term is what the caller's terminal can do — the two independent axes a
+// front-end resolves before a session starts: which character set the terminal
+// reads, and whether it interprets ANSI escapes at all.
+type Term struct {
+	// UTF8 reports whether this session can display UTF-8. When false (a CP437 or
+	// ASCII door/terminal) any language whose catalog does not survive the
+	// transcoding falls back to English.
 	UTF8 bool
+	// ASCII reports that output is reduced to 7-bit ASCII (-ascii), for a terminal
+	// that is neither CP437 nor UTF-8 and would render either as mojibake.
+	ASCII bool
 	// Plain reports that the session CANNOT render ANSI escapes (a legacy Windows
 	// console, or a door caller whose dropfile clears the ANSI flag). The escapes
 	// are stripped before they reach such a caller, so any screen that depends on
@@ -55,14 +65,6 @@ type ctx struct {
 	// needs a plain alternative. Negative so the zero value is the capable,
 	// ordinary case.
 	Plain bool
-}
-
-// Term is what the caller's terminal can do — the two independent axes a
-// front-end resolves before a session starts: which character set the terminal
-// reads, and whether it interprets ANSI escapes at all.
-type Term struct {
-	UTF8  bool // the session emits UTF-8 rather than CP437
-	Plain bool // the session cannot render ANSI escapes
 }
 
 // Player is the active empire for this session (nil before onboarding / after
@@ -115,6 +117,32 @@ var cp437SafeLangs = func() map[string]bool {
 // cp437SafeLang reports whether lang's catalog can be shown on a CP437 terminal.
 func cp437SafeLang(lang string) bool { return cp437SafeLangs[lang] }
 
+// asciiSafeLangs is the same test for an ASCII session (-ascii). A letter that
+// merely loses its accent still reads, so German qualifies; a catalog that would
+// come out as question marks (Cyrillic, CJK) does not.
+var asciiSafeLangs = func() map[string]bool {
+	m := map[string]bool{"": true}
+	for _, l := range i18n.Languages {
+		m[l.Code] = session.ASCIIEncodable(l.Name) &&
+			session.AllASCIIEncodable(i18n.Strings(l.Code))
+	}
+	return m
+}()
+
+// langFits reports whether lang's catalog can be shown on this session's
+// charset — every language on a UTF-8 session, and only what survives the
+// transcoding on a CP437 or ASCII one.
+func langFits(t Term, lang string) bool {
+	switch {
+	case t.UTF8:
+		return true
+	case t.ASCII:
+		return asciiSafeLangs[lang]
+	default:
+		return cp437SafeLang(lang)
+	}
+}
+
 // playerLang is the active caller's UI language ("" = English), used to
 // localize menu chrome at render time.
 func playerLang(c *ctx) string {
@@ -125,12 +153,12 @@ func playerLang(c *ctx) string {
 	if p == nil || p.Language == "" {
 		return ""
 	}
-	// A UTF-8 session renders any language. A CP437 session renders only a
-	// catalog that maps entirely to CP437 (e.g. German); anything else (Cyrillic,
-	// CJK) falls back to English rather than mojibake. This one render-time guard
+	// A UTF-8 session renders any language. A CP437 or ASCII session renders only
+	// a catalog that survives the transcoding (e.g. German); anything else
+	// (Cyrillic, CJK) falls back to English rather than mojibake. This one render-time guard
 	// also keeps a language set via the UTF-8 web front-end from breaking when the
 	// same empire is later reached through a CP437 door.
-	if c.UTF8 || cp437SafeLang(p.Language) {
+	if langFits(c.Term, p.Language) {
 		return p.Language
 	}
 	return ""
