@@ -154,4 +154,4 @@ Free software under the [MIT License](LICENSE).
 * [Shurato's Heavenly Sphere BBS](https://shsbbs.net/ad.html)
 * [X-Bit BBS](https://x-bit.org/info)
 * [LibreGaming](https://libregaming.org/)
-* [r/BBS](BBS-related subreddit)
+* [r/BBS](https://www.reddit.com/r/bbs/)
