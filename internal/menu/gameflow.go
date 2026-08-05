@@ -457,7 +457,12 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		}) {
 			return
 		}
-		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "Maintenance paid: %d gold to your forces, %d to your regions, %d to the crown."), forces, regions, crown)))
+		// BRE's auto-pay summary is a single comma-grouped total ("5,707,154 Gold
+		// paid."), matching the food line under it; the per-item breakdown is what
+		// the pay-by-hand path shows, prompt by prompt, exactly as the original
+		// does (docs/dev/bre-screens.md).
+		fmt.Fprint(s, "\n")
+		statLine(s, due, "Gold paid.")
 		return
 	}
 

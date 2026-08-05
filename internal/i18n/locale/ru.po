@@ -16,11 +16,11 @@ msgstr ""
 msgid " (steady)"
 msgstr ""
 
-#: internal/menu/helpbrowse.go:245
+#: internal/menu/helpbrowse.go:290
 msgid " — choose a topic:"
 msgstr ""
 
-#: internal/menu/menu.go:585
+#: internal/menu/menu.go:628
 msgid "# Owned"
 msgstr "# Есть"
 
@@ -42,21 +42,21 @@ msgstr ""
 msgid "%d days"
 msgstr "%d дн. назад"
 
-#: internal/menu/gameflow.go:534
+#: internal/menu/gameflow.go:539
 #, fuzzy
 msgid "%d gold is requested to boost popular support."
 msgstr "%s золота требуется на содержание ваших регионов."
 
-#: internal/menu/gameflow.go:549
+#: internal/menu/gameflow.go:554
 #, fuzzy
 msgid "%d gold is requested to improve military morale."
 msgstr "%s золота требуется на содержание ваших регионов."
 
-#: internal/menu/gameflow.go:526
+#: internal/menu/gameflow.go:531
 msgid "%d regions revolted for lack of upkeep."
 msgstr "%d регионов взбунтовалось из-за нехватки содержания."
 
-#: internal/menu/gameflow.go:523
+#: internal/menu/gameflow.go:528
 msgid "%d units deserted for lack of pay."
 msgstr "%d единиц дезертировало из-за отсутствия жалованья."
 
@@ -77,7 +77,7 @@ msgstr ""
 msgid "%s days"
 msgstr "%d дн. назад"
 
-#: internal/menu/gameflow.go:488
+#: internal/menu/gameflow.go:493
 msgid "%s gold is required to maintain your regions."
 msgstr "%s золота требуется на содержание ваших регионов."
 
@@ -157,11 +157,15 @@ msgstr ""
 msgid "< 1 day"
 msgstr "1 день назад"
 
-#: internal/menu/config_editor.go:207
+#: internal/menu/helpbrowse.go:112
+msgid ">"
+msgstr ""
+
+#: internal/menu/config_editor.go:221
 msgid "A league board has no computer barons."
 msgstr ""
 
-#: internal/menu/config_editor.go:209
+#: internal/menu/config_editor.go:224
 #, fuzzy
 msgid "AI empires"
 msgstr "Империя"
@@ -183,7 +187,7 @@ msgstr ""
 msgid "Abort"
 msgstr "Отмена"
 
-#: internal/menu/helpbrowse.go:108
+#: internal/menu/helpbrowse.go:153
 msgid "About"
 msgstr ""
 
@@ -266,7 +270,7 @@ msgstr ""
 msgid "Awaiting a reply:"
 msgstr ""
 
-#: internal/menu/helpbrowse.go:245
+#: internal/menu/helpbrowse.go:290
 msgid "Back"
 msgstr ""
 
@@ -274,7 +278,7 @@ msgstr ""
 msgid "Biological Attack"
 msgstr ""
 
-#: internal/menu/config_editor.go:214
+#: internal/menu/config_editor.go:326
 msgid "Board ID:"
 msgstr ""
 
@@ -340,7 +344,7 @@ msgstr "Рынок еды"
 msgid "Buy how many %s"
 msgstr ""
 
-#: internal/menu/config_editor.go:153
+#: internal/menu/config_editor.go:131
 msgid "Cancelled — no changes were saved."
 msgstr ""
 
@@ -380,7 +384,7 @@ msgstr ""
 msgid "Choice?"
 msgstr ""
 
-#: internal/menu/helpbrowse.go:217
+#: internal/menu/helpbrowse.go:262
 msgid "Choose (0 to keep current)?"
 msgstr "Выберите (0 — оставить текущий)?"
 
@@ -404,11 +408,11 @@ msgstr ""
 msgid "Clear"
 msgstr "Очистить"
 
-#: internal/play/play.go:346
+#: internal/play/play.go:347
 msgid "Confirm?"
 msgstr ""
 
-#: internal/menu/gameflow.go:784
+#: internal/menu/gameflow.go:789
 msgid "Continue to your next turn?"
 msgstr ""
 
@@ -456,7 +460,7 @@ msgstr "Бюллетени"
 msgid "Date"
 msgstr ""
 
-#: internal/menu/config_editor.go:232
+#: internal/menu/config_editor.go:299
 msgid "Days before lost forces return (0 = never)"
 msgstr ""
 
@@ -514,7 +518,7 @@ msgstr ""
 msgid "Do you wish to send another message?"
 msgstr "Хотите отправить ещё одно сообщение?"
 
-#: internal/menu/gameflow.go:477
+#: internal/menu/gameflow.go:482
 #, fuzzy
 msgid "Do you wish to visit the bank?"
 msgstr "Хотите отправить ещё одно сообщение?"
@@ -535,8 +539,8 @@ msgstr ""
 msgid "Each +1%% costs %s gold (max %d%%); fund in whole increments of that."
 msgstr ""
 
-#: internal/menu/config_editor.go:143
-msgid "Edit which (S = save & exit, Q = cancel)?"
+#: internal/menu/config_editor.go:115
+msgid "Edit which (N = next page, P = previous, S = save & exit, Q = cancel)?"
 msgstr ""
 
 #: internal/menu/actions.go:154
@@ -605,13 +609,17 @@ msgstr "Бюллетени"
 msgid "Game Setup"
 msgstr ""
 
-#: internal/menu/config_editor.go:166
+#: internal/menu/config_editor.go:203
 msgid "Game length in days (0 = endless)"
 msgstr ""
 
 #: internal/menu/tree.go:491
 msgid "Game started on %s"
 msgstr ""
+
+#: internal/menu/gameflow.go:465
+msgid "Gold paid."
+msgstr "золота уплачено."
 
 #: internal/menu/tree.go:44
 msgid "Goldie Luck's Bank"
@@ -633,7 +641,7 @@ msgstr "Штаб"
 msgid "Help"
 msgstr "Помощь"
 
-#: internal/menu/helpbrowse.go:109
+#: internal/menu/helpbrowse.go:154
 msgid "Help — choose a category:"
 msgstr ""
 
@@ -673,7 +681,7 @@ msgstr ""
 msgid "How much to repay?"
 msgstr ""
 
-#: internal/menu/gameflow.go:486
+#: internal/menu/gameflow.go:491
 msgid "How much will you give?"
 msgstr ""
 
@@ -685,11 +693,11 @@ msgstr ""
 msgid "Id"
 msgstr ""
 
-#: internal/menu/config_editor.go:218
+#: internal/menu/config_editor.go:333
 msgid "Idle timeout in seconds (0 = never)"
 msgstr ""
 
-#: internal/menu/config_editor.go:220
+#: internal/menu/config_editor.go:338
 msgid "Idle warnings before boot"
 msgstr ""
 
@@ -731,10 +739,6 @@ msgstr "Промышленное производство"
 msgid "Industry production percentages updated."
 msgstr "Проценты промышленного производства обновлены."
 
-#: internal/menu/config_editor.go:170
-msgid "Initial Market Land"
-msgstr ""
-
 #: internal/menu/tree.go:400
 msgid "Instructions"
 msgstr "Инструкции"
@@ -757,11 +761,7 @@ msgstr "Планетарный бюллетень:"
 msgid "InterPlanetary Ops"
 msgstr ""
 
-#: internal/menu/config_editor.go:174
-msgid "Interest Rate"
-msgstr ""
-
-#: internal/play/play.go:340
+#: internal/play/play.go:341
 msgid "Invalid: at least 3 letters/numbers, not matching another realm."
 msgstr "Неверно: не менее 3 букв или цифр, не совпадает с другим королевством."
 
@@ -778,7 +778,7 @@ msgstr "Инвестиции"
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr ""
 
-#: internal/menu/menu.go:585
+#: internal/menu/menu.go:628
 msgid "Item"
 msgstr ""
 
@@ -810,20 +810,16 @@ msgstr ""
 msgid "Land"
 msgstr "Земля"
 
-#: internal/menu/config_editor.go:172
-msgid "Land Created / Day"
-msgstr ""
-
 # Language picker
 #: internal/menu/tree.go:311
 msgid "Language"
 msgstr "Язык"
 
-#: internal/menu/helpbrowse.go:231
+#: internal/menu/helpbrowse.go:276
 msgid "Language set to %s."
 msgstr "Язык установлен на %s."
 
-#: internal/menu/helpbrowse.go:213
+#: internal/menu/helpbrowse.go:258
 msgid "Language:"
 msgstr "Язык:"
 
@@ -868,42 +864,23 @@ msgstr ""
 msgid "Macro Editor"
 msgstr ""
 
-#: internal/menu/gameflow.go:460
-msgid ""
-"Maintenance paid: %d gold to your forces, %d to your regions, %d to the "
-"crown."
-msgstr ""
-
-#: internal/menu/gameflow.go:464
+#: internal/menu/gameflow.go:469
 msgid "Maintenance:"
 msgstr "Содержание:"
 
-#: internal/menu/config_editor.go:230
+#: internal/menu/config_editor.go:294
 msgid "Max Bombing Ops/Day (0 = unlimited)"
 msgstr ""
 
-#: internal/menu/config_editor.go:226
+#: internal/menu/config_editor.go:284
 msgid "Max Group Attacks/Day (0 = unlimited)"
 msgstr ""
 
-#: internal/menu/config_editor.go:224
+#: internal/menu/config_editor.go:279
 msgid "Max Individual Attacks/Day (0 = unlimited)"
 msgstr ""
 
-#: internal/menu/config_editor.go:186
-msgid "Max Players Per BBS (0 = unlimited)"
-msgstr ""
-
-#: internal/menu/config_editor.go:184
-msgid "Max Purchasable Regions"
-msgstr ""
-
-#: internal/menu/config_editor.go:180
-#, fuzzy
-msgid "Max Tax Rate"
-msgstr "Налоговая ставка"
-
-#: internal/menu/config_editor.go:228
+#: internal/menu/config_editor.go:289
 msgid "Max Terrorist Ops/Day (0 = unlimited)"
 msgstr ""
 
@@ -927,7 +904,7 @@ msgstr "Читать сообщения"
 msgid "Messages"
 msgstr "Читать сообщения"
 
-#: internal/menu/gameflow.go:556
+#: internal/menu/gameflow.go:561
 msgid "Military morale rose %d points."
 msgstr ""
 
@@ -951,7 +928,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: internal/play/play.go:320
+#: internal/play/play.go:321
 msgid "Name your Realm:"
 msgstr "Назовите своё королевство:"
 
@@ -1130,7 +1107,7 @@ msgstr "Планетарный бюллетень:"
 msgid "Planetary Post"
 msgstr "Планетарный бюллетень:"
 
-#: internal/menu/config_editor.go:182
+#: internal/menu/config_editor.go:250
 #, fuzzy
 msgid "Planetary Tax Rate (%)"
 msgstr "Налоговая ставка"
@@ -1150,7 +1127,7 @@ msgstr "Играть"
 msgid "Player List"
 msgstr ""
 
-#: internal/menu/gameflow.go:544
+#: internal/menu/gameflow.go:549
 #, fuzzy
 msgid "Popular support rose %d points."
 msgstr "Поддержка народа"
@@ -1179,11 +1156,11 @@ msgstr ""
 msgid "Protective Trade"
 msgstr ""
 
-#: internal/menu/input.go:328
+#: internal/menu/input.go:329
 msgid "Quit"
 msgstr "Выход"
 
-#: internal/play/play.go:334
+#: internal/play/play.go:335
 #, fuzzy
 msgid "Quit?"
 msgstr "Выход"
@@ -1218,7 +1195,7 @@ msgstr "Регионы"
 msgid "Relations: "
 msgstr "Регионы"
 
-#: internal/menu/config_editor.go:168
+#: internal/menu/config_editor.go:208
 msgid "Remove a realm unplayed for how many days (0 = never)"
 msgstr ""
 
@@ -1307,7 +1284,7 @@ msgstr ""
 msgid "Send Trade Deal"
 msgstr ""
 
-#: internal/menu/gameflow.go:763
+#: internal/menu/gameflow.go:768
 #, fuzzy
 msgid "Send a message?"
 msgstr "Отправить сообщение"
@@ -1350,7 +1327,7 @@ msgstr "Инструкции"
 msgid "Since your last play, this has happened:"
 msgstr "С вашего последнего хода произошло следующее:"
 
-#: internal/menu/gameflow.go:650
+#: internal/menu/gameflow.go:655
 msgid "Sorry, you have used all of your turns today."
 msgstr ""
 
@@ -1392,11 +1369,6 @@ msgstr "База помощи"
 #: internal/menu/tree.go:210
 msgid "Spy on Relations"
 msgstr ""
-
-#: internal/menu/config_editor.go:176
-#, fuzzy
-msgid "Standard Investment Rate"
-msgstr "Инвестиции"
 
 #: internal/menu/tree.go:206
 msgid "Stir Revolts"
@@ -1497,11 +1469,11 @@ msgstr ""
 msgid "The Doomer Kaboomer is on its way. Nothing more can be done with it."
 msgstr ""
 
-#: internal/menu/gameflow.go:626
+#: internal/menu/gameflow.go:631
 msgid "The Queen Royale opens her coffers and refunds you %s gold in taxes!"
 msgstr ""
 
-#: internal/menu/gameflow.go:495
+#: internal/menu/gameflow.go:500
 msgid "The Queen Royale requires %s gold for Taxes."
 msgstr ""
 
@@ -1638,12 +1610,7 @@ msgstr "Солдаты"
 msgid "Troopers were trained by Industrial Zones."
 msgstr "солдат обучено промышленными зонами."
 
-#: internal/menu/config_editor.go:164
-#, fuzzy
-msgid "Turns of Protection"
-msgstr "У вас осталось %s%s ходов защиты."
-
-#: internal/menu/config_editor.go:162
+#: internal/menu/config_editor.go:195
 #, fuzzy
 msgid "Turns per day"
 msgstr "Осталось ходов сегодня: %d"
@@ -1718,7 +1685,7 @@ msgstr ""
 msgid "Visit Trading Menu"
 msgstr ""
 
-#: internal/menu/gameflow.go:582
+#: internal/menu/gameflow.go:587
 msgid "Visit the Food Market to feed them, or they will starve."
 msgstr ""
 
@@ -1790,7 +1757,7 @@ msgstr ""
 msgid "When do you wish to pay your loan back [# of Days]?"
 msgstr ""
 
-#: internal/menu/menu.go:446
+#: internal/menu/menu.go:489
 #, fuzzy
 msgid "While you were at the menus, this has happened:"
 msgstr "С вашего последнего хода произошло следующее:"
@@ -1807,7 +1774,7 @@ msgstr "Снять средства"
 msgid "Would you like to begin construction?"
 msgstr ""
 
-#: internal/menu/gameflow.go:504
+#: internal/menu/gameflow.go:509
 msgid "Would you like to reconsider?"
 msgstr ""
 
@@ -1844,7 +1811,7 @@ msgstr "Вам это не по карману."
 msgid "You cannot buy from your own listing."
 msgstr ""
 
-#: internal/menu/gameflow.go:466
+#: internal/menu/gameflow.go:471
 msgid "You cannot cover all your maintenance this turn."
 msgstr "Вы не можете покрыть всё содержание в этот ход."
 
@@ -1993,7 +1960,7 @@ msgstr ""
 msgid "Your Prices"
 msgstr "Ваши сообщения:"
 
-#: internal/menu/gameflow.go:503
+#: internal/menu/gameflow.go:508
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
@@ -2008,7 +1975,7 @@ msgid "Your allies will send the following to aid you in defense:"
 msgstr ""
 
 # Turn pipeline — maintenance
-#: internal/menu/gameflow.go:484
+#: internal/menu/gameflow.go:489
 msgid "Your armed forces require %s gold."
 msgstr "Вашим вооружённым силам требуется %s золота."
 
@@ -2024,7 +1991,7 @@ msgstr ""
 msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
-#: internal/menu/menu.go:457
+#: internal/menu/menu.go:500
 msgid ""
 "Your empire has collapsed — you have been eliminated. Return on a later day "
 "to build a new realm."
@@ -2060,11 +2027,11 @@ msgstr ""
 msgid "Your new-realm protection will end when this turn does."
 msgstr ""
 
-#: internal/menu/gameflow.go:580
+#: internal/menu/gameflow.go:585
 msgid "Your people need %s units of food and you have only %s."
 msgstr ""
 
-#: internal/menu/gameflow.go:598
+#: internal/menu/gameflow.go:603
 msgid "Your people need %s units of food."
 msgstr ""
 
@@ -2073,11 +2040,11 @@ msgstr ""
 msgid "Your realm has %d turns of new-realm protection left."
 msgstr "У вас осталось %s%s ходов защиты."
 
-#: internal/menu/gameflow.go:642
+#: internal/menu/gameflow.go:647
 msgid "Your realm is no longer active."
 msgstr ""
 
-#: internal/play/play.go:345
+#: internal/play/play.go:346
 msgid "Your realm will be named %s."
 msgstr ""
 
@@ -2122,6 +2089,12 @@ msgid ""
 "from your locale)"
 msgstr ""
 
+#: cmd/immortal-barons/main.go:90
+msgid ""
+"force plain 7-bit ASCII output, for a terminal that is neither CP437 nor "
+"UTF-8 (box rules and accents degrade to ASCII look-alikes)"
+msgstr ""
+
 #: cmd/immortal-barons/usage.go:40
 msgid "immortal-barons — a Barren Realms Elite clone. Options:"
 msgstr ""
@@ -2146,7 +2119,7 @@ msgstr ""
 msgid "packet signature does not verify"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:818
+#: cmd/immortal-barons/main.go:863
 msgid "path to the BBS drop file"
 msgstr ""
 
@@ -2171,7 +2144,7 @@ msgid ""
 "migration; for scripts and balance checks)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:90
+#: cmd/immortal-barons/main.go:92
 msgid "print the version, then exit"
 msgstr ""
 
@@ -2185,7 +2158,7 @@ msgid ""
 "printed), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:822
+#: cmd/immortal-barons/main.go:867
 msgid "run -set-dropfile first"
 msgstr ""
 
@@ -2197,6 +2170,12 @@ msgstr ""
 msgid ""
 "run the inter-BBS step: read incoming packets, run group attacks, write "
 "outgoing packets, then exit"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:91
+msgid ""
+"send plain text with no ANSI escapes, as a terminal that cannot render them "
+"gets (for testing that path on a terminal that can)"
 msgstr ""
 
 #: cmd/immortal-barons/main.go:79
@@ -2239,10 +2218,10 @@ msgstr "Меню координатора"
 msgid "troops deserted due to low morale."
 msgstr ""
 
-#: internal/menu/gameflow.go:706
+#: internal/menu/gameflow.go:711
 #, fuzzy
 msgid "units of Food consumed."
-msgstr "единиц еды испортилось."
+msgstr "единиц еды потреблено."
 
 #: internal/menu/gameflow.go:405
 msgid "units of food spoiled."
@@ -2260,13 +2239,25 @@ msgstr ""
 msgid "{Food decay} is at %d%% of standard levels."
 msgstr ""
 
-#: internal/menu/helpbrowse.go:144
+#: internal/menu/helpbrowse.go:189
 msgid "─»>Enter to continue, Q to quit<«─"
 msgstr ""
 
-#: internal/menu/input.go:354
+#: internal/menu/input.go:356
 msgid "─»>Paused<«─"
 msgstr "─»>Пауза<«─"
+
+#, fuzzy
+#~ msgid "Max Tax Rate"
+#~ msgstr "Налоговая ставка"
+
+#, fuzzy
+#~ msgid "Standard Investment Rate"
+#~ msgstr "Инвестиции"
+
+#, fuzzy
+#~ msgid "Turns of Protection"
+#~ msgstr "У вас осталось %s%s ходов защиты."
 
 #~ msgid "%d days ago"
 #~ msgstr "%d дн. назад"

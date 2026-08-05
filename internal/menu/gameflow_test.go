@@ -157,8 +157,9 @@ func TestPaymentStageAutoPays(t *testing.T) {
 	if p.Gold != before-want {
 		t.Errorf("auto-pay should deduct %d, gold %d -> %d", want, before, p.Gold)
 	}
-	if !strings.Contains(f.out.String(), "Maintenance paid") {
-		t.Error("expected the auto-pay confirmation line")
+	// BRE's auto-pay summary: one comma-grouped total, then "Gold paid."
+	if !strings.Contains(f.out.String(), comma(want)+"\x1b[0m Gold paid.") {
+		t.Errorf("expected the auto-pay total line for %s gold, got:\n%s", comma(want), f.out.String())
 	}
 }
 

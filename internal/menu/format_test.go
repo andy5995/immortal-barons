@@ -1,8 +1,10 @@
 package menu
 
 import (
+	"strings"
 	"testing"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
@@ -91,5 +93,28 @@ func TestTrimTrailingBlank(t *testing.T) {
 		if got := trimTrailingBlank(c.lines); got != c.want {
 			t.Errorf("%s: trimTrailingBlank(%q) = %q, want %q", c.name, c.lines, got, c.want)
 		}
+	}
+}
+
+// A message longer than the terminal must break at a space, not wherever the
+// terminal edge lands, and every line carries the indent.
+func TestWrapIndented(t *testing.T) {
+	long := "Your forces changed while you prepared the attack — only units still under your command were sent."
+	got := wrapIndented(long, "  ")
+	for _, line := range strings.Split(got, "\n") {
+		if !strings.HasPrefix(line, "  ") {
+			t.Errorf("line lost its indent: %q", line)
+		}
+		if len([]rune(line)) >= ansi.ScreenCols {
+			t.Errorf("line is %d columns, wider than the screen: %q", len([]rune(line)), line)
+		}
+	}
+	if !strings.Contains(got, "\n") {
+		t.Error("a 99-character message should have wrapped")
+	}
+	// Wrapping must not lose or split a word.
+	flat := strings.Join(strings.Fields(got), " ")
+	if flat != strings.Join(strings.Fields(long), " ") {
+		t.Errorf("wrapping changed the text:\n%q\n%q", flat, long)
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
+	"github.com/andy5995/immortal-barons/internal/help"
 	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
@@ -428,6 +429,18 @@ func statLine(s session.Session, n int, text string) {
 	fmt.Fprintf(s, "  %s%s%s %s\n", ansi.FgBrightCyan, comma(n), ansi.Reset, i18n.T(sessionLang(s), text))
 }
 
+// wrapIndented breaks text at word boundaries to the screen width, indenting
+// every line by indent. Without it a message longer than the terminal is broken
+// by the terminal itself, mid-word and flush against the left margin — and a
+// translated string is often half again as long as the English it came from.
+func wrapIndented(text, indent string) string {
+	lines := strings.Split(help.Wrap(text, ansi.ScreenCols-len(indent)-1), "\n")
+	for i, l := range lines {
+		lines[i] = indent + l
+	}
+	return strings.Join(lines, "\n")
+}
+
 // ok and fail translate their message text by the caller's language, so every
 // call site becomes translatable just by adding the string to the catalogs.
 func ok(s session.Session, format string, a ...any) {
@@ -438,10 +451,11 @@ func ok(s session.Session, format string, a ...any) {
 // okNoPause is ok without the trailing wait-for-keypress, for a success message
 // that a following screen or prompt makes the pause redundant.
 func okNoPause(s session.Session, format string, a ...any) {
-	fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgBrightWhite, fmt.Sprintf(i18n.T(sessionLang(s), format), a...), ansi.Reset)
+	msg := fmt.Sprintf(i18n.T(sessionLang(s), format), a...)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightWhite, wrapIndented(msg, "  "), ansi.Reset)
 }
 
 func fail(s session.Session, err error) {
-	fmt.Fprintf(s, "\n  %s%s%s", ansi.FgBrightRed, i18n.T(sessionLang(s), err.Error()), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightRed, wrapIndented(i18n.T(sessionLang(s), err.Error()), "  "), ansi.Reset)
 	pause(s)
 }
