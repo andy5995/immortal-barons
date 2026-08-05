@@ -3,6 +3,7 @@ package menu
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -36,5 +37,72 @@ func TestConfigEditorTurnsFloorAtOne(t *testing.T) {
 
 	if w.Config.TurnsPerDay != 1 {
 		t.Errorf("turns per day should floor at 1, got %d", w.Config.TurnsPerDay)
+	}
+}
+
+// Every field survives the split into pages, and each page fits an 80x24 screen
+// — the whole point of paging it (issue #100).
+func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
+	pages := configPages()
+	seen := map[int]string{}
+	for _, g := range pages {
+		// Title rule, page heading, closing rule, legend, and the prompt take five
+		// rows on top of the fields.
+		const chrome = 5
+		if rows := len(g.fields) + chrome; rows > 24 {
+			t.Errorf("page %q needs %d rows, more than an 80x24 screen", g.title, rows)
+		}
+		for _, f := range g.fields {
+			if where, dup := seen[f.n]; dup {
+				t.Errorf("field %d appears on both %q and %q", f.n, where, g.title)
+			}
+			seen[f.n] = g.title
+			if f.value == nil || f.edit == nil {
+				t.Errorf("field %d (%s) is missing a value or edit function", f.n, f.label)
+			}
+		}
+	}
+	// The identifiers ran 1..38 before the pages existed and must still, so no
+	// sysop's habit or note breaks.
+	for n := 1; n <= 38; n++ {
+		if _, ok := seen[n]; !ok {
+			t.Errorf("field %d is on no page", n)
+		}
+	}
+	if len(seen) != 38 {
+		t.Errorf("got %d fields, want 38", len(seen))
+	}
+}
+
+// A field number reaches its field from any page: the numbers identify fields,
+// not rows on the current screen.
+func TestConfigEditorEditsAcrossPages(t *testing.T) {
+	dir := t.TempDir()
+	w := newWorld()
+	w.Config.DataDir = dir
+	w.Config.MaxTaxRate = 30
+
+	// N to the Economy page, N again past it, then edit 9 (Max Tax Rate, back on
+	// Economy) from where we stand, and save.
+	f := &fakeSession{keys: []rune("n\rn\r9\r25\rs\r ")}
+	ConfigEditor(f, w.World)
+
+	if w.Config.MaxTaxRate != 25 {
+		t.Errorf("expected max tax rate 25, got %d", w.Config.MaxTaxRate)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "page 3 of 4") {
+		t.Errorf("two N presses should reach page 3, got:\n%s", out)
+	}
+}
+
+// P wraps backwards off the first page, so a sysop who overshoots gets back.
+func TestConfigEditorPreviousPageWraps(t *testing.T) {
+	w := newWorld()
+	w.Config.DataDir = t.TempDir()
+	f := &fakeSession{keys: []rune("p\rq\r ")}
+	ConfigEditor(f, w.World)
+	if out := f.out.String(); !strings.Contains(out, "page 4 of 4") {
+		t.Errorf("P on the first page should wrap to the last, got:\n%s", out)
 	}
 }
