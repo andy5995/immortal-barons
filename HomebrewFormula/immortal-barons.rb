@@ -11,8 +11,8 @@ class ImmortalBarons < Formula
   # This is the vendored-source tarball the release workflow publishes, not the
   # auto-generated tag archive: the repo does not commit vendor/, so only this
   # asset lets the build skip a module download.
-  url "https://github.com/andy5995/immortal-barons/releases/download/v0.0.3/immortal-barons-v0.0.3-vendored-source.tar.gz"
-  sha256 "6cd94c3d4956ccdfd8b4dceeb1ed3c693a6ed37232119fee79668db4d36ee29b"
+  url "https://github.com/andy5995/immortal-barons/releases/download/v0.0.4/immortal-barons-v0.0.4-vendored-source.tar.gz"
+  sha256 "b88352fe2a3629a6e183d1bf2b6bb09cd09634e0ef8663b6ce414746cc69feaa"
   license "MIT"
   head "https://github.com/andy5995/immortal-barons.git", branch: "trunk"
 
@@ -20,13 +20,13 @@ class ImmortalBarons < Formula
 
   def install
     system "go", "build", *std_go_args, "./cmd/immortal-barons"
-    # This is the doc set scripts/build-archives.sh shipped at v0.0.3, the
-    # release this formula pins -- not the current list on trunk, which has
-    # since gained/lost files (e.g. docs/webserver.md was removed with the web
-    # front-end; docs/download.md is newer than v0.0.3).
+    # This is the doc set scripts/build-archives.sh shipped at v0.0.4, the
+    # release this formula pins -- not the current list on trunk, which drifts
+    # as docs are added and removed. Check it against
+    # "git show <tag>:scripts/build-archives.sh" whenever the pin moves.
     doc.install "LICENSE", "README.md", "docs/faq.md", "docs/playing.md",
                 "docs/command-reference.md", "docs/door-setup.md",
-                "docs/charset.md", "docs/webserver.md", "docs/translating.md"
+                "docs/charset.md", "docs/download.md", "docs/translating.md"
   end
 
   def caveats
