@@ -433,10 +433,18 @@ func statLine(s session.Session, n int, text string) {
 // every line by indent. Without it a message longer than the terminal is broken
 // by the terminal itself, mid-word and flush against the left margin — and a
 // translated string is often half again as long as the English it came from.
-func wrapIndented(text, indent string) string {
-	lines := strings.Split(help.Wrap(text, ansi.ScreenCols-len(indent)-1), "\n")
+func wrapIndented(text, indent string) string { return wrapHanging(text, indent, indent) }
+
+// wrapHanging is wrapIndented with a different lead on the first line, so a
+// marker can sit outside the text and the continuation still lines up under it.
+func wrapHanging(text, first, cont string) string {
+	lines := strings.Split(help.Wrap(text, ansi.ScreenCols-len(cont)-1), "\n")
 	for i, l := range lines {
-		lines[i] = indent + l
+		if i == 0 {
+			lines[i] = first + l
+			continue
+		}
+		lines[i] = cont + l
 	}
 	return strings.Join(lines, "\n")
 }
@@ -456,6 +464,9 @@ func okNoPause(s session.Session, format string, a ...any) {
 }
 
 func fail(s session.Session, err error) {
-	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightRed, wrapIndented(i18n.T(sessionLang(s), err.Error()), "  "), ansi.Reset)
+	// The "!" is what tells a failure from a success on a terminal that shows no
+	// colour, or to a reader who cannot tell this red from the white above it.
+	// ok() prints the same shape without it.
+	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightRed, wrapHanging(i18n.T(sessionLang(s), err.Error()), "  ! ", "    "), ansi.Reset)
 	pause(s)
 }

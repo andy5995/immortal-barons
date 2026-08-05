@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"errors"
 	"strings"
 	"testing"
 
@@ -116,5 +117,24 @@ func TestWrapIndented(t *testing.T) {
 	flat := strings.Join(strings.Fields(got), " ")
 	if flat != strings.Join(strings.Fields(long), " ") {
 		t.Errorf("wrapping changed the text:\n%q\n%q", flat, long)
+	}
+}
+
+// A failure must be distinguishable from a success without colour: on a
+// monochrome terminal, or one the escapes were stripped for, the two otherwise
+// print identically.
+func TestFailureIsMarkedWithoutColour(t *testing.T) {
+	fs := &fakeSession{keys: []rune(" ")}
+	fail(fs, errors.New("not enough gold"))
+	fo := &fakeSession{}
+	okNoPause(fo, "the deal is struck")
+
+	strip := func(s string) string { return anyEscape.ReplaceAllString(s, "") }
+	bad, good := strip(fs.out.String()), strip(fo.out.String())
+	if !strings.Contains(bad, "! not enough gold") {
+		t.Errorf("a failure should carry a marker of its own, got %q", bad)
+	}
+	if strings.Contains(good, "!") {
+		t.Errorf("a success should not carry the failure marker, got %q", good)
 	}
 }

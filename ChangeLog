@@ -13,6 +13,8 @@
   * Maintenance paid under Auto-Pay is reported as one total, as the original
     reports it
   * Messages longer than the screen break between words
+  * A failed action is marked with a character, so it is not told from a
+    successful one by color alone
   * German and Russian said food had SPOILED where it was consumed
   * Implemented Queen Royale tax refund (#93)
   * Worlds saved before v0.0.3 load again, with their mail text preserved
