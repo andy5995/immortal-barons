@@ -112,6 +112,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 				e.GroupAttacksToday = 0
 				e.TerrorOpsToday = 0
 				e.BombingOpsToday = 0
+				e.RefundTaken = false
 				e.TurnProgress = TurnProgress{} // abandon any turn left uncommitted at rollover (#10)
 			}
 		}

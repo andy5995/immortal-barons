@@ -131,7 +131,11 @@ func (e *Empire) clampGive(given int) int {
 }
 
 // PayCrownTax applies a payment toward the Queen Royale's per-turn tax. The gold
-// is a pure sink — it leaves the economy with no recipient.
+// leaves the payer's hands for the Queen's own purse (World.RefundPool), which
+// she pays back out a share at a time — see QueenRefund. BINARY-VERIFIED that
+// what she banks is the gold ACTUALLY PAID, not the sum demanded: the same
+// figure the shortfall penalty is computed from is the one added to the pool
+// (BRE.OVR 0x2FAF1).
 //
 // A shortfall costs popular support, up to CrownTaxSupportPenalty points.
 // Binary-verified, including the operation order: BRE computes
@@ -146,11 +150,42 @@ func (e *Empire) clampGive(given int) int {
 func (w *World) PayCrownTax(e *Empire, given int) {
 	req := w.CrownTax(e)
 	given = e.clampGive(given)
+	w.RefundPool += given
 	if req <= 0 || given >= req {
 		return
 	}
 	// Deferred to turn rollover (see PendingSupportPenalty), matching BRE.
 	e.PendingSupportPenalty += (req - given) * CrownTaxSupportPenalty / (req + 1)
+}
+
+// QueenRefund pays e its share of the Queen's purse and returns the amount, or
+// 0 when there is nothing to give. The caller decides WHEN this happens: BRE
+// calls it once per realm per game day, from the "since your last play" recap of
+// the day's first session, and the routine itself holds no random draw — so a
+// realm that logs in is paid.
+//
+// The share is QueenRefundRate percent of the pool, rising to QueenRefundHighRate
+// once the pool is over QueenRefundHighPool, and is capped at QueenRefundCap
+// while the realm is still under New Realm Protection. See the constants for the
+// binary provenance.
+func (w *World) QueenRefund(e *Empire) int {
+	if w.RefundPool <= 0 {
+		return 0
+	}
+	rate := QueenRefundRate
+	if w.RefundPool > QueenRefundHighPool {
+		rate = QueenRefundHighRate
+	}
+	pay := w.RefundPool * rate / 100
+	if e.Protection > 0 && pay > QueenRefundCap {
+		pay = QueenRefundCap
+	}
+	if pay <= 0 {
+		return 0
+	}
+	w.RefundPool -= pay
+	e.Gold += pay
+	return pay
 }
 
 // PayForces applies a payment toward armed-forces upkeep. A shortfall makes

@@ -137,6 +137,14 @@ type Empire struct {
 	GroupAttacksToday int
 	TerrorOpsToday    int
 	BombingOpsToday   int
+	// RefundTaken records that this realm has already drawn the Queen's tax
+	// refund today (#93), and is cleared with the counters above.
+	//
+	// BRE spells the same gate as two tests in its recap: no turn part-way
+	// through (its turn-stage counter is 0) and none taken today. IB has no
+	// equivalent counter to test — TurnProgress is a set of named flags, not
+	// BRE's 0-20 stage number — so it records the day's draw directly.
+	RefundTaken bool
 	// TurnProgress records which stages of the current turn have already completed,
 	// so a turn REPLAYED after an idle-boot skips what was done — no double income
 	// or double charge, and no re-showing a menu the player already exited (GH #10).
@@ -463,7 +471,12 @@ type World struct {
 	// today; buying depletes it, selling replenishes it, and it resets to
 	// FoodMarketDailySupply each day's maintenance (issue #19).
 	FoodMarketSupply int
-	LastMaintDate    string
+	// RefundPool is the planet-wide purse the Queen Royale's tax refund is paid
+	// out of (#93). Crown tax paid flows in; each realm's first login of a game
+	// day draws a share back out. Seeded at QueenRefundPoolSeed; a world saved
+	// before the refund existed loads with 0 and fills from the next tax payment.
+	RefundPool    int
+	LastMaintDate string
 	// StartedDate is the real date the game actually began — the first day
 	// maintenance ran with the game underway. Config.GameStartDate is the date a
 	// sysop SCHEDULED it for and is usually empty (start immediately), so it
@@ -614,6 +627,7 @@ func (w *World) initFreshGame() {
 	w.GameDay = 0
 	w.InvestRate = DefaultInvestRate
 	w.FoodMarketSupply = FoodMarketDailySupply
+	w.RefundPool = QueenRefundPoolSeed
 	w.LastMaintDate = ""
 	w.LastMaintRun = ""
 	w.StartedDate = ""

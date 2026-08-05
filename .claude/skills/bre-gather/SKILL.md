@@ -578,6 +578,65 @@ with one live observation ("no second refund on re-entry the same day") proved
 the routine was never called, without locating the caller at all. Cheap
 deductions like this beat hunting for a gate you have not found yet.
 
+### Name a field from ALL its sites, never from the two in front of you
+
+An `inc` and a matching `dec` around a block look exactly like a re-entrancy
+guard, and calling one that was the wrong reading behind a claim Andy caught.
+Empire `+0x2b8` really is the **turn-stage counter**: the same byte is compared
+against 1 and against 20 elsewhere, reset to 0 at turn commit, and dispatched on
+by a loop head. Two of its eleven sites happened to be an inc/dec pair.
+
+The rule the reference-list entry above already states, in the case it is easiest
+to skip: **a field's meaning comes from the whole access list**, and the list is
+one regex away. The tell that you are about to get this wrong is a field in the
+PERSISTED record doing a job a local variable would do — BRE has no reason to
+spend save-file bytes on a guard, so if it looks like one, you have misread it.
+Grep the disp16 in both files, sort by opcode, and read every site.
+
+### Finding an overlaid routine's CALLER — walk the overlay stubs
+
+"Who calls this?" looks unanswerable in an overlay, because a near-call scan for
+the routine's file offset finds nothing: every call to overlaid code goes through
+an **INT 3Fh stub in `BRE.EXE`**, so callers far-call the stub, not the routine.
+The chain is mechanical, four steps, and it turned the Queen Royale refund's
+trigger from "unknown" into one unique call site in minutes:
+
+1. **Parse the overlay segment headers.** They start at `BRE.EXE` 0x3b00 on
+   16-byte boundaries: `cd 3f 00 00 | dword file offset in BRE.OVR | word code
+   size | word fixup size | …`. Find the header whose `[fo, fo+size)` contains
+   your routine; `routineOffset = fileOffset − fo`.
+2. **Find the stub.** Immediately after each header sit 5-byte stubs,
+   `cd 3f <word offset> 00`. Match `routineOffset`.
+3. **Convert the stub's EXE file offset to a load-image linear:** subtract
+   `hdrParas × 16` (the word at EXE offset 8 — 660 paragraphs, 0x2940, here).
+4. **Scan both files for `9a <off> <seg>` where `seg × 16 + off` equals that
+   linear.** Those are the callers. Pre-relocation logical segments linearize
+   exactly, which is also why helper addresses are quoted as `0fd0:178e` style.
+
+The same arithmetic runs backwards: given a far-call target from a disassembly,
+`seg×16 + off + 0x2940` is the file offset to read, and if the bytes there are
+`cd 3f` it is a stub — follow it into the overlay instead of disassembling it.
+
+### Name a predicate from its OTHER call sites, not the one you are reading
+
+A boolean helper reveals nothing where you found it. Look at the site where its
+result gates a **message string** — that names it. `056d:19b5` was "some
+per-empire predicate" for two sessions; one of its 27 call sites
+(`BRE.OVR 0x1771a`) prints "Our empire is in protection, my lord." on a true
+result, which settles it in one disassembly. Sort the call-site list by which one
+is nearest a string table and read that one first.
+
+### Calibrating "empire N's field" accesses
+
+Fields of an *arbitrary* empire are reached as `mov al,<index>; mov dx,0x42d;
+mul dx; les di,[0x28b0]; add di,ax`, then a large NEGATIVE `disp16` — a different
+origin from the current-empire `les di,[0x28d8]` map. Convert with
+`offset = disp + 3949`. Derive that constant rather than trusting it: grep the
+displacement list for a run of **eighteen consecutive `cmp word` sites stepping
+by 2** — the nine region counts — and anchor its start to the known `+0x96`.
+Collecting every such access at once (regex the whole `ba 2d 04 f7 e2 c4 3e b0
+28 03 f8 26` prefix) also gives the record's field census for free.
+
 **Then OPEN every one of those sites before you state a mechanic's scope.** The
 list is cheap to produce and cheap to skim, and skipping it is how a confident
 wrong claim gets made. Real miss: "HQ affects only tanks" was asserted from the

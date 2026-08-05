@@ -69,6 +69,17 @@ empire record (les di,[0x28d8])
   +0x129 .. +0x12e   six bytes: Set-Industries allocation percentages, in
                      menu order (Troopers, Jets, Turrets, Bombers, Tanks,
                      Carriers)
+  +0x281 int32  lifetime turns played. Drives the HeadQuarters price ratchet and,
+                against config +0x38, whether the realm is still protected.
+  +0x285 byte   turns remaining today. Reset to config +0x36 at rollover; zero is
+                what produces "Sorry, you have used all of your turns today."
+  +0x2b8 byte   stage counter for the turn in progress. The turn is a state
+                machine: the loop head at BRE.EXE 0x6236 dispatches on this byte,
+                each stage advances it, and at 20 (0x685f) the turn commits —
+                +0x281 increments, +0x285 decrements, and this resets to 0
+                (0x688e). It lives in the record, not on the stack, so an
+                abandoned turn resumes where it stopped; the same job as IB's
+                TurnProgress.
   +0x331 int32  land still available to BUY — the Daily Land Creation allowance.
                 PER-EMPIRE, not a planet-wide pool: 0x12D30 bounds a region
                 purchase against it and 0x12EF9 subtracts the number bought
@@ -87,21 +98,39 @@ config record (les di,[0x28b4])
                 (the threshold is a literal cmp against 0x05F5E100; all three
                 reals decode exactly: 0.02, +0.05, cap 1,000,000). The cap is
                 applied by overwriting rate with 1,000,000/V, and is itself
-                gated by a per-empire predicate (056d:19b5) — when that is false
-                the payout is uncapped. That predicate is still unread, but the
-                uncapped branch DOES occur in play: a census of all 47 refunds in
-                cap/ found payouts of 12,581,639 to 14,000,000 on two boards,
-                more than ten times the cap, alongside eighteen at the cap
-                (1,000,000, or 999,999 where the rate substitution loses a unit).
-                So the predicate is false at least sometimes; what selects it is
-                still open.
+                gated by the per-empire predicate at 056d:19b5 — when that is
+                false the payout is uncapped. The uncapped branch is common in
+                play: a census of all 47 refunds in cap/ found payouts of
+                12,581,639 to 14,000,000 on two boards, alongside eighteen at the
+                cap (1,000,000, or 999,999 where the rate substitution loses a
+                unit).
+
+                THE PREDICATE IS "is this empire still under New Realm
+                Protection?" It reads config +0x38 (Turns Of Protection) and the
+                empire's lifetime turn counter +0x281 and returns
+                turnsPlayed < turnsOfProtection. Identified from its other call
+                sites: at BRE.OVR 0x1771a the same call gates the covert message
+                "Our empire is in protection, my lord." So the 1,000,000 ceiling
+                is a newcomer guard — a fresh realm on a mature planet cannot
+                open with a 14-million windfall.
+
+                THE CALLER is BRE.EXE 0x61dd, the only one, inside the "Since
+                your last play" recap. It runs when the turn-stage counter
+                (+0x2b8) is zero AND turnsRemaining (+0x285) >= config +0x36
+                (turns per day) — no turn part-way through and none taken today,
+                i.e. the player's first play of a game day. The routine holds no
+                Random(), so it always pays when reached. The call immediately
+                after it is the lottery (its strings are at BRE.OVR 0x18531), so
+                the two share one first-play-of-the-day event block.
 
                 The pool is FED by the crown tax: the tax routine at 0x2FAF1 —
                 the same one that charges the Queen Royale tax and computes the
                 underpayment support penalty — adds the empire's tax figure
-                straight into V. Whether it banks the amount DUE or the amount
-                actually PAID is not settled; the value added is recomputed at
-                0x2FA81 from 056d:01bf after the payment prompt.
+                straight into V. It banks the amount actually PAID, not the
+                amount due: the value added ([bp-0x10], from 056d:01bf at
+                0x2FA7C) is the same one the shortfall penalty divides by the
+                amount due at 0x2FA94, which only makes the penalty positive if
+                it is the paid figure.
 
                 Play data confirms the seed and the writeback independently: a
                 fresh game's first refund is 2,000 (2% of 100,000) and the next
@@ -111,6 +140,8 @@ config record (les di,[0x28b4])
                 well under both the 100M rate threshold and the cap, so no
                 capture yet exercises the 0.07 branch or the cap gate. See
                 issue #93.
+  +0x36  int16  Turns per day
+  +0x38  int16  Turns of Protection (compared against empire +0x281)
   +0x42  int16  Planetary Tax Rate, tenths of a percent (default 50 = 5.0%,
                 editor maximum 200 = 20.0%)
 ```

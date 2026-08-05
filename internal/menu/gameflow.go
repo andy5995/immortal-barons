@@ -607,6 +607,26 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 	}
 }
 
+// showQueenRefund hands the realm its share of the Queen's purse, once per game
+// day, and announces it. BRE prints this in the opening recap right after the
+// mail, which is where this sits. Silent when the realm has already drawn today
+// or the purse has nothing in it — a fresh planet that has collected no tax yet.
+func showQueenRefund(s session.Session, w *ctx) {
+	var paid int
+	withPlayer(w, func(p *game.Empire) {
+		if p.RefundTaken {
+			return
+		}
+		p.RefundTaken = true
+		paid = w.World.QueenRefund(p)
+	})
+	if paid <= 0 {
+		return
+	}
+	fmt.Fprintf(s, "\n%s"+tr(s, "The Queen Royale opens her coffers and refunds you %s gold in taxes!")+"%s\n",
+		ansi.FgWhite, ansi.FgBrightYellow+comma(paid)+ansi.FgWhite, ansi.Reset)
+}
+
 // runTurn is the "Play Game" action. It shows the event log, then walks the
 // per-turn pipeline (industry production, income report, status,
 // spending/attack/covert/trading/message stages, then end-of-turn) for as
@@ -650,6 +670,9 @@ func runTurn(s session.Session, w *ctx) Result {
 		// New mail may arrive between turns (from another node), so check each
 		// turn, not just once in the pre-turn flow (#3).
 		readTurnMail(s, w, firstTurn)
+		if firstTurn {
+			showQueenRefund(s, w)
+		}
 		firstTurn = false
 
 		// Capture whether this is a replay BEFORE collecting income (which sets the

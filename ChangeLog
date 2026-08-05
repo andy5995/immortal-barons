@@ -1,4 +1,5 @@
 (in-progress:)
+  * Implemented Queen Royale tax refund (#93)
   * Worlds saved before v0.0.3 load again; their old mail keeps its text
   * "-reset" now works on a world the game can no longer read, instead of
     stopping with the error that made the reset necessary

@@ -58,7 +58,7 @@ const (
 	helpStdInvest       = "The baseline investment return over 10 days. Unless Steady Investment Rate is on, the real rate drifts each day around this value based on how much everyone is investing. The maximum (100) is 10% per day; a low value (under about 50) keeps the economy balanced."
 	helpSteadyInvest    = "When on, the investment return stays fixed at the Standard Investment Rate instead of drifting each day with total investment."
 	helpMaxTax          = "The highest tax rate a player is allowed to set."
-	helpPlanetaryTax    = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold leaves the economy entirely — nobody receives it."
+	helpPlanetaryTax    = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold goes to the Queen's purse, which she refunds a share of to each baron at the start of their playing day."
 	helpFoodUnlimited   = "When on, the food market never runs short — its daily supply is unlimited."
 	helpBuyMilitary     = "Whether players may buy military units: freely (Yes), not at all (No), or a limited amount each day (Limited)."
 	helpMaintCosts      = "Upkeep cost for regions and forces: High, Medium, Low, or None."

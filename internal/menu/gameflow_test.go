@@ -563,3 +563,37 @@ func TestRunTurnSurfacesOffersDealsAndMail(t *testing.T) {
 		}
 	}
 }
+
+// The Queen's tax refund is paid once per game day, at the head of the first
+// turn of the session, and never twice — playing a second turn must not draw it
+// again (#93). The realm here is out of protection, so the figure is the plain
+// 2% of the purse rather than the newcomer's capped share.
+func TestQueenRefundPaidOncePerDay(t *testing.T) {
+	perTurn := "   0000n" // income/status pauses, quit Spending/Attack/Covert/Trading, decline message
+	keys := perTurn + "y" + perTurn + "n"
+	f := &fakeSession{keys: []rune(keys)}
+	w := newWorld()
+	w.AutoPayMaint = true
+	w.VisitCovert, w.VisitTrading, w.VisitMessage = true, true, true
+	w.Player().Agents = 1
+	w.Player().Protection = 0
+	w.RefundPool = 500_000
+
+	runTurn(f, w)
+	out := f.out.String()
+
+	if n := strings.Count(out, "refunds you"); n != 1 {
+		t.Fatalf("expected the refund exactly once across two turns, got %d\n%s", n, out)
+	}
+	if !strings.Contains(out, "10,000") {
+		t.Errorf("expected 2%% of a 500,000 purse (10,000) in:\n%s", out)
+	}
+	// The purse lost the 10,000 it paid, then took back the crown tax these two
+	// turns handed over — so it lands between the two figures, not on either.
+	if w.RefundPool < 490_000 || w.RefundPool >= 500_000 {
+		t.Errorf("purse = %d, want 490,000 plus the tax paid since", w.RefundPool)
+	}
+	if !w.Player().RefundTaken {
+		t.Error("the realm should be marked as having drawn today's refund")
+	}
+}

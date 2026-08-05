@@ -165,8 +165,10 @@ flow runs in this order:
 2. **Armed-forces upkeep**, then **region maintenance** — each a "how much will
    you give?" prompt. The prompt's max is the amount **required** (you cannot
    overpay); if you can't afford it, the max is your gold.
-3. **Crown tax** — a per-turn tax to the Queen Royale (a non-player NPC monarch)
-   that is a pure sink (no recipient); its prompt max is your available gold.
+3. **Crown tax** — a per-turn tax to the Queen Royale (a non-player NPC monarch);
+   its prompt max is your available gold. The gold is not destroyed: it goes into
+   a planet-wide purse the Queen refunds out of (see **The Queen Royale's tax
+   refund** below).
    The amount is **binary-verified**:
    `crownTax = trunc(goldEarnedThisTurn × PlanetaryTaxRate / 1000)`, where the
    rate is a sysop field in tenths of a percent (default 50 = **5% of the turn's
@@ -204,6 +206,52 @@ flow runs in this order:
    `1 − ratio×50` rather than `(1 − ratio)×50`, which goes negative for any
    shortfall under 98% and would *raise* support. The forces and tax branches use
    the correct ordering; IB follows those.
+   ### The Queen Royale's tax refund (#93)
+
+   The crown tax is a redistribution, not a sink. Every gold **actually paid**
+   (not the sum demanded) is banked in a planet-wide purse — an `int32` in the
+   config record at `+0x24`, seeded 100,000 at game init — and the Queen hands a
+   share of it back. **Fully binary-verified** (`BRE.OVR 0x18280`, called once
+   from `BRE.EXE 0x61dd`; the feed is at `BRE.OVR 0x2FAF1`):
+
+   ```
+   rate    = 0.02, or 0.07 once purse > 100,000,000
+   payout  = trunc(purse × rate)          capped at 1,000,000 while protected
+   purse   = trunc(purse × (1 − rate))
+   ```
+
+   **When it fires.** The routine holds no `Random()`, so it pays whenever it is
+   called, and it has one caller: the "since your last play" recap, behind two
+   tests — the turn-stage counter (`+0x2b8`) is zero and `turnsRemaining ≥
+   turnsPerDay`. That is **no turn part-way through and none taken today**: the
+   player's first play of a game day. It is not a random event. The routine
+   called immediately after it is the **lottery**, which confirms the
+   first-play-of-the-day event block the lottery entry below predicts.
+
+   **The cap is a newcomer guard.** It applies only when a per-empire predicate
+   holds; that predicate (`056d:19b5`) compares the realm's lifetime turn counter
+   (record `+0x281`) against the config's **Turns Of Protection** (`+0x38`) — it
+   is BRE's own "is this realm still under New Realm Protection?" test, the same
+   one that prints "Our empire is in protection, my lord." on a covert op. So a
+   newcomer to a mature planet is held to 1,000,000 while an established realm
+   takes the full share. Captured payouts run 354 to 14,000,000, with eighteen at
+   the cap.
+
+   **Because the purse is read fresh each time**, the first baron to play on a
+   given day takes the largest cut and everyone after them draws on what is left.
+
+   **IB implements this**, constants in `balance.go`. One divergence: IB pays
+   exactly 1,000,000 where BRE usually pays 999,999. BRE caps by substituting
+   `1000000 / purse` for the rate and multiplying back by the purse; the round
+   trip through a six-byte real loses the last unit. That is its float format,
+   not a rule.
+
+   IB expresses the trigger as a per-day flag on the empire (`RefundTaken`,
+   cleared with the other daily counters) rather than re-deriving BRE's two
+   tests, since it has no turn-stage counter to test — `TurnProgress` is a set of
+   named flags, not a 0–20 counter. The two agree on every path traced through
+   the original.
+
 4. Conditional: SDI maintenance (with SDI), waste-region decontamination (with
    waste regions), then the popular-support and military-morale boosts (shown
    only below 100). Support/morale are *requested* (optional), not required.
@@ -1518,11 +1566,11 @@ These are the slices that would move it closer to the real game.
 
   The ticket is offered **once per day per empire**, not on every entry into the
   game — re-entering the same day brings no second offer. It shares that gating
-  with the Queen Royale tax refund (#93): both fire in the "since your last play"
-  block on the day's first play, and their code sits ~400 bytes apart in
-  `BRE.OVR`. So the two are one **first-play-of-the-day event block**, and
-  whichever is built first should add the hook both hang off rather than model
-  either as a standalone random event.
+  with the Queen Royale tax refund (#93), and the disassembly settles it: the
+  recap calls the refund and the lottery back to back, both behind the same
+  `turnsRemaining ≥ turnsPerDay` test (`BRE.EXE 0x61dd`). So the two are one
+  **first-play-of-the-day event block**. The refund is built (see its entry
+  above); a lottery would hang off the same hook rather than be a random event.
 
 ## Sources
 

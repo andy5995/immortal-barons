@@ -65,6 +65,37 @@ const RiverDudChancePct = 10
 // mildest of the three.
 const CrownTaxSupportPenalty = 15
 
+// --- The Queen Royale's tax refund (#93) ---
+//
+// The crown tax is not destroyed. Every gold actually paid is banked in a
+// planet-wide pool, and the Queen hands a share of that pool back to each realm
+// at the start of its first session of a game day. The refund is deterministic:
+// the routine holds no random draw, so a realm that logs in gets it.
+//
+// BINARY-VERIFIED (BRE.OVR 0x18280, called from BRE.EXE 0x61dd):
+//
+//	rate    = QueenRefundRate, or QueenRefundHighRate once pool > QueenRefundHighPool
+//	payout  = trunc(pool * rate)          capped at QueenRefundCap while protected
+//	pool   -= payout
+//
+// The cap is gated on the realm still being under New Realm Protection, so a
+// newcomer joining a mature planet cannot open with a many-million-gold windfall
+// while an established realm takes the full share. Because the pool is read
+// fresh each time, the first baron to play on a given day takes the largest cut
+// and everyone after them draws on what is left.
+//
+// IB pays exactly QueenRefundCap where BRE often pays 999,999: the original caps
+// by substituting cap/pool for the rate and multiplying back, and the round trip
+// through a six-byte real loses the last unit. That is an artifact of its float
+// format, not a rule.
+const (
+	QueenRefundPoolSeed = 100_000     // the pool a fresh game starts with
+	QueenRefundRate     = 2           // percent of the pool paid out
+	QueenRefundHighRate = 7           // percent once the pool is over QueenRefundHighPool
+	QueenRefundHighPool = 100_000_000 // the threshold that selects the higher rate
+	QueenRefundCap      = 1_000_000   // ceiling while the realm is still protected
+)
+
 // --- New-realm starting setup ---
 //
 // A fresh realm's regions and units. The region mix, trooper count, and food

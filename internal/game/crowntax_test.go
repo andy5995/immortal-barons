@@ -2,7 +2,7 @@ package game
 
 import "testing"
 
-// The crown tax is a flat share of the turn's gross gold income and a pure sink.
+// The crown tax is a flat share of the turn's gross gold income.
 // Verified against BRE, where the same formula reproduces 28 of 28 live charges.
 func TestCrownTaxIsShareOfIncome(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
@@ -26,7 +26,9 @@ func TestCrownTaxIsShareOfIncome(t *testing.T) {
 	}
 }
 
-// Paying the tax removes the gold from the game — no recipient gains it.
+// Paying the tax takes the gold out of every realm's hands. It is not destroyed
+// — it goes to the Queen's purse, which she pays back out a share at a time (see
+// TestCrownTaxFillsTheRefundPool) — but no rival empire is any richer for it.
 func TestCrownTaxIsASink(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("t", "T")
@@ -44,7 +46,7 @@ func TestCrownTaxIsASink(t *testing.T) {
 		t.Errorf("payer gold = %d, want 9750", e.Gold)
 	}
 	if after := total(); after != before-250 {
-		t.Errorf("world gold %d -> %d: the tax must leave the economy", before, after)
+		t.Errorf("world gold %d -> %d: the tax must leave every realm's hands", before, after)
 	}
 }
 
