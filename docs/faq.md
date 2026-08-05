@@ -69,6 +69,8 @@ normally use a moving highlight are numbered in that mode, so they stay usable.
 - Once in the game, the AI barons take their turns on their own during daily
   maintenance. See [Daily maintenance](https://andy5995.github.io/immortal-barons/door-setup/#daily-maintenance)
   for when that runs.
+- A board in a league game has no AI barons, and none can be added. League play
+  is between the boards' own players.
 
 ## What happens when my empire is destroyed?
 

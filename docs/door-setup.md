@@ -193,7 +193,8 @@ immortal-barons -add-ai N -data /path/to/data
 
 This adds N new AI barons and exits. It leaves existing players and AI alone.
 (To set the AI count for a brand-new game instead, use the Configuration Editor
-via `-reset`.)
+via `-reset`.) A board in a league game has no AI barons, and this command
+adds none.
 
 ## Inter-BBS (league) play
 
