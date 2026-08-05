@@ -1,4 +1,19 @@
 (in-progress:)
+  * 32-bit builds charged a negative amount for region maintenance, and left a
+    rich computer baron unable to buy anything
+  * A door caller whose BBS reports no ANSI support is sent plain text (#101)
+  * Lists that cannot show a moving highlight are numbered instead, and the
+    highlighted row is marked with a character as well as a color (#99)
+  * The line-based Configuration Editor is split across four pages, moved
+    through with N and P (#100)
+  * Added "-ascii" for a terminal that reads neither CP437 nor UTF-8
+  * Added "-no-ansi" to send plain text on a terminal that could render it
+  * The title screen fits a 24-row terminal, and its prompt sits directly
+    below the art
+  * Maintenance paid under Auto-Pay is reported as one total, as the original
+    reports it
+  * Messages longer than the screen break between words
+  * German and Russian said food had SPOILED where it was consumed
   * Implemented Queen Royale tax refund (#93)
   * Worlds saved before v0.0.3 load again, with their mail text preserved
   * "-reset" works on a world the game can no longer read
