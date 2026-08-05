@@ -31,6 +31,23 @@ run the file inside it.
 - **macOS may block the file** the first time, for the same reason. Open it
   from the Finder with a right-click, then choose Open.
 
+## Install with Homebrew
+
+This repository is also a [Homebrew](https://brew.sh) tap, for macOS and
+Linuxbrew:
+
+```
+brew tap andy5995/immortal-barons https://github.com/andy5995/immortal-barons
+brew trust andy5995/immortal-barons
+brew install immortal-barons
+```
+
+Homebrew does not load formulas from a third-party tap until you mark the tap
+as trusted. That is what the `brew trust` line does.
+
+Homebrew builds the game from source, so the first install takes a little
+longer. macOS does not block a game installed this way.
+
 ## Build it yourself
 
 You can build the game from source with Go 1.26 or newer. The

@@ -60,6 +60,9 @@ are provided for Windows, Linux, and macOS.
 See [Download](docs/download.md) for which file to pick, and what to expect the
 first time you run it.
 
+This repository is also a Homebrew tap, for macOS and Linuxbrew. See
+[Download](docs/download.md#install-with-homebrew) for how to install from it.
+
 To build from source instead, see below.
 
 ## Build

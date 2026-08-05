@@ -12,6 +12,7 @@
   * A door caller whose BBS reports no ANSI support is sent plain text (#101)
   * Added "-no-ansi" to send plain text on a terminal that could render it
   * Added "-ascii" for a terminal that reads neither CP437 nor UTF-8
+  * The game can be installed with Homebrew on macOS and Linux
   * Sysops: "-gen-coord-key" and "-coord-key" set up the league coordinator
     key; "-league-reset DATE" starts a new season on every board (#65)
   * The league Coordinator sends the roster of boards to every board (#64)
