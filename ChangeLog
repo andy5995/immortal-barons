@@ -1,6 +1,6 @@
 (in-progress:)
-  * 32-bit builds charged a negative amount for region maintenance, and left a
-    rich computer baron unable to buy anything
+  * 32-bit builds charged the wrong region maintenance above 235 regions, often
+    a negative amount, and misspent a computer baron's gold above 43 million
   * A door caller whose BBS reports no ANSI support is sent plain text (#101)
   * Lists that cannot show a moving highlight are numbered instead, and the
     highlighted row is marked with a character as well as a color (#99)
