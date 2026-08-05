@@ -39,3 +39,15 @@ const (
 	BgRow         = esc + "48;5;236m" // darker gray (256-color), for zebra table value rows
 	BgShadow      = esc + "48;5;238m" // dark-but-not-black gray, for a raised right-edge shadow
 )
+
+// The screen a BBS caller is assumed to have. DOS text mode is 80x25 and that
+// is what the original targeted, but the terminals reaching a door today are
+// mostly VT100-derived and default to 24 rows, and a BBS often reserves the
+// bottom row for its own status line. Designing to 24 therefore costs one row
+// on a genuine DOS terminal and saves a scrolled-away header everywhere else,
+// so a screen that must be read in one piece — the splash, a menu, a page of
+// settings — is built to fit ScreenRows INCLUDING its own prompt.
+const (
+	ScreenCols = 80
+	ScreenRows = 24
+)
