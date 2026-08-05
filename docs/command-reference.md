@@ -36,16 +36,30 @@ These options are for playing the game.
   `-data /home/bbs/immortal-barons/data`). All modes use this option to find the
   shared world.
 
-### Character set (output)
+### Terminal (output)
 
 These options choose how the game draws its screens. See
-[Character Set](charset.md) for the full explanation.
+[Character Set](charset.md) for the full explanation of the first three.
 
 - **`-utf8`** — Force UTF-8 output. Needed for non-English languages. With
   `-local`, the game already detects UTF-8 from your locale, so you rarely need
   this.
 - **`-cp437`** — Force CP437 output (the classic BBS character set). This is the
   door default. Use it to override the `-local` locale detection.
+- **`-ascii`** — Force plain 7-bit ASCII output, for a terminal that reads
+  neither CP437 nor UTF-8. Box rules become `-`, `|` and `+`, shaded blocks
+  become `#`, and an accented letter loses its accent. Nothing can be
+  mis-decoded, at the cost of the artwork. Only English and German are offered
+  in this mode; a language that would come out as question marks is not.
+- **`-no-ansi`** — Send plain text with no color and no cursor control, as a
+  terminal that cannot render escape sequences receives. Lists that normally
+  use a moving highlight are numbered instead. The door does this on its own
+  when the caller's BBS reports no ANSI support, so this option is for testing
+  that path on a terminal that could render it.
+
+Use only one of `-utf8`, `-cp437` and `-ascii`. `-no-ansi` is separate and
+combines with any of them: the character set and whether escapes render are
+two different questions about a terminal.
 
 ### Sysop and game admin
 

@@ -23,4 +23,9 @@ so you can see what Enter will do. On a turn menu, this only happens if you
 turn on "Enter exits Buy menu" in Preferences; on a side menu, Enter always
 chooses Quit.
 
+The help browser and other pick-a-topic lists move a highlight with the arrow
+keys: Enter chooses the marked row, typing a few letters jumps to a title, and
+Backspace or `Q` goes back. If your terminal cannot show colour and cursor
+control, those lists are numbered instead — type the number and press Enter.
+
 Press `?` at a menu to open this help.

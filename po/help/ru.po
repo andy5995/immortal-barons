@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-07-30 21:59-0500\n"
+"POT-Creation-Date: 2026-08-05 03:15-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -71,7 +71,17 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:26
+#: internal/help/content/controls/interface.md:30
+msgid ""
+"The help browser and other pick-a-topic lists move a highlight with the "
+"arrow keys: Enter chooses the marked row, typing a few letters jumps to a "
+"title, and Backspace or `Q` goes back. If your terminal cannot show colour "
+"and cursor control, those lists are numbered instead — type the number and "
+"press Enter."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:31
 msgid "Press `?` at a menu to open this help."
 msgstr "Нажмите `?` в любом меню, чтобы открыть эту справку."
 
@@ -221,14 +231,15 @@ msgid "Bribery"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bribery.md:11
+#: internal/help/content/covert/bribery.md:12
 #, fuzzy
 #| msgid ""
 #| "Bribery — buy off an agent inside the enemy, so that their covert "
 #| "operations against you fail from then on."
 msgid ""
 "Bribery pays one of the enemy's own agents to work for you. From then on, "
-"that enemy's covert operations against you fail."
+"that enemy's covert operations against you almost always fail. Their spies "
+"still get through now and then, but nothing else does."
 msgstr ""
 "Подкуп — купить агента внутри вражеского государства, чтобы его тайные "
 "операции против вас впредь проваливались."
@@ -270,7 +281,7 @@ msgid "Covert Operations"
 msgstr "Тайные операции"
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:14
+#: internal/help/content/covert/overview.md:15
 #, fuzzy
 #| msgid ""
 #| "Covert operations are secret missions run by your agents. Success depends "
@@ -281,14 +292,15 @@ msgid ""
 "Covert operations are secret missions run by your agents. Your chance of "
 "success depends on how many agents you have compared to the target. More "
 "agents give you a better chance. Keeping many agents also protects you, "
-"because it lowers the chance that enemy operations against you succeed."
+"because it lowers the chance that enemy operations against you succeed. Send "
+"Spy works differently — see its own topic."
 msgstr ""
 "Тайные операции — это секретные миссии ваших агентов. Успех зависит от того, "
 "сколько у вас агентов по сравнению с целью. Больше агентов — выше шанс. "
 "Множество агентов также защищает вас от вражеских тайных операций."
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:18
+#: internal/help/content/covert/overview.md:19
 msgid ""
 "Each operation also costs gold. The menu shows the price next to each one, "
 "and the footer shows how much gold and how many agents you have. You pay the "
@@ -297,7 +309,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:22
+#: internal/help/content/covert/overview.md:23
 msgid ""
 "You may run only one covert operation that affects an enemy per turn. After "
 "you run one, the others are blocked until your next turn. Send Spy and Spy "
@@ -306,7 +318,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:26
+#: internal/help/content/covert/overview.md:27
 msgid ""
 "When an operation fails, your agent is caught and lost, and the target may "
 "be warned. The operations are secret, so the report the victim sees does not "
@@ -314,14 +326,14 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:29
+#: internal/help/content/covert/overview.md:30
 msgid ""
 "Each operation has its own topic. The bombing operations also need Bombers "
 "to deliver their payloads."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:31
+#: internal/help/content/covert/overview.md:32
 msgid ""
 "The Covert Operations menu appears during your turn, after the Attack menu. "
 "If you do not see it, turn on \"Visit Covert Menu\" in the Preferences menu."
@@ -357,11 +369,19 @@ msgid "Send Spy"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/send-spy.md:12
+#: internal/help/content/covert/send-spy.md:13
 msgid ""
 "Send Spy gathers military intelligence on an enemy. It reveals their land, "
 "troops, defenses, gold, and more, so you can plan an attack. If the mission "
 "fails, your spy is caught and does not return."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/send-spy.md:16
+msgid ""
+"Send Spy is the one operation where agents do not change your chance. "
+"Neither your agents nor the enemy's count here. Just over half of all spies "
+"get through, whoever you send them against."
 msgstr ""
 
 #. type: Title #
@@ -464,12 +484,21 @@ msgstr ""
 "когда другая сторона его принимает. Вот их виды."
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:16
+#: internal/help/content/diplomacy/treaties.md:18
 msgid ""
 "Two related actions also live on the Diplomacy menu. A Declaration of War "
 "ends an agreement without causing trouble at home; the treaty is not truly "
 "broken until the other realm is told. View Treaties shows your current "
-"relations with the other rulers in the game."
+"relations with the other rulers in the game, and below that, the offers you "
+"have sent that nobody has answered yet."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:21
+msgid ""
+"An offer waits until the other ruler plays a turn. It does not run out. If "
+"you send a second, different offer to the same ruler, it takes the place of "
+"the first one, because two realms can hold only one agreement at a time."
 msgstr ""
 
 #. type: Title #
@@ -802,7 +831,7 @@ msgstr ""
 "Умеренная стабильная ставка держит её высокой."
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:18
+#: internal/help/content/economy/taxes.md:19
 msgid ""
 "Riots grow more likely as your tax rate climbs past a safe level. A riot "
 "crashes your Support and drives off part of your population. Raise taxes "
@@ -810,6 +839,35 @@ msgid ""
 msgstr ""
 "Бунты становятся вероятнее по мере роста налога выше безопасного уровня. "
 "Бунт обрушивает поддержку и прогоняет часть народа."
+
+#. type: Title ##
+#: internal/help/content/economy/taxes.md:20
+#, no-wrap
+msgid "The Queen Royale's tax"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:24
+msgid ""
+"The Queen takes a share of what you earn each turn. You may pay her less "
+"than she asks, but a short payment costs Popular Support."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:29
+msgid ""
+"Every coin she collects goes into her purse, and she gives part of that "
+"purse back. She pays you the first time you play each day: 2% of the purse, "
+"or 7% once it holds more than 100 million gold. A realm still under New "
+"Realm Protection gets at most 1 million."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:31
+msgid ""
+"All barons draw on the same purse, and each refund empties it a little. The "
+"first to play on a given day takes the largest share, so play early."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/economy/trading.md:1
@@ -1859,21 +1917,51 @@ msgid "Doomer Kaboomer"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/doomer-kaboomer.md:13
-#, fuzzy
-#| msgid ""
-#| "The ultimate weapon, aimed at a whole enemy planet rather than one "
-#| "empire. The whole board funds it, and only one can exist at a time. It "
-#| "takes a few days to build, then strikes every empire on the target "
-#| "planet. Defenders can send jets to shoot it down before it finishes."
+#: internal/help/content/warfare/doomer-kaboomer.md:12
 msgid ""
-"The Doomer Kaboomer is the ultimate weapon, aimed at a whole enemy planet "
-"rather than one empire. The whole board funds it, and only one can exist at "
-"a time. It takes a few days to build, then strikes every empire on the "
-"target planet.  Defenders can send jets to shoot it down before it finishes."
+"The Doomer Kaboomer is the ultimate weapon. It is aimed at a whole enemy "
+"planet rather than at one baron, and your planet can only have one at a time."
 msgstr ""
-"Абсолютное оружие, нацеленное на целую вражескую планету, а не на одну "
-"империю. Его финансирует вся планета, а урон огромен."
+
+#. type: Plain text
+#: internal/help/content/warfare/doomer-kaboomer.md:17
+msgid ""
+"Nobody buys the weapon alone. One baron starts the work and names the target "
+"planet. After that, any baron here can put money in, a million gold at a "
+"time.  The price depends on the size of the target planet: aiming at a "
+"planet much larger than yours costs more."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/doomer-kaboomer.md:20
+msgid ""
+"When the money is all in, the weapon is ready. Only the baron who started "
+"the work can launch it. They can scrap it instead, but the gold is spent "
+"either way."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/doomer-kaboomer.md:25
+msgid ""
+"The target planet can see the weapon coming. They are told while the work is "
+"going on, and told again at launch, with the hours left before it lands. "
+"Their barons can send jets, and only jets — nothing else can reach it. Every "
+"wave takes a piece out of the weapon, and enough waves destroy it in the air."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/doomer-kaboomer.md:28
+msgid ""
+"Whatever survives the flight strikes every realm on that planet and takes a "
+"share of their regions. SDI reduces the damage."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/doomer-kaboomer.md:30
+msgid ""
+"If a Doomer Kaboomer is ever aimed at your planet, you will hear about it in "
+"the news. Send jets."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/warfare/pirates.md:1
@@ -1949,6 +2037,22 @@ msgid ""
 msgstr ""
 "Щит, который вы финансируете. По завершении он уничтожает около половины "
 "выпущенных по вам ракет и ослабляет вражеские истребители и бомбардировщики."
+
+#, fuzzy
+#~| msgid ""
+#~| "The ultimate weapon, aimed at a whole enemy planet rather than one "
+#~| "empire. The whole board funds it, and only one can exist at a time. It "
+#~| "takes a few days to build, then strikes every empire on the target "
+#~| "planet. Defenders can send jets to shoot it down before it finishes."
+#~ msgid ""
+#~ "The Doomer Kaboomer is the ultimate weapon, aimed at a whole enemy planet "
+#~ "rather than one empire. The whole board funds it, and only one can exist "
+#~ "at a time. It takes a few days to build, then strikes every empire on the "
+#~ "target planet.  Defenders can send jets to shoot it down before it "
+#~ "finishes."
+#~ msgstr ""
+#~ "Абсолютное оружие, нацеленное на целую вражескую планету, а не на одну "
+#~ "империю. Его финансирует вся планета, а урон огромен."
 
 #, fuzzy
 #~| msgid ""

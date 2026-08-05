@@ -44,7 +44,17 @@
 
 ## The characters look wrong. What can I do?
 
-See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset/).
+Try `-ascii`, which sends plain 7-bit ASCII that no terminal can mis-decode.
+See the [Character Set guide](https://andy5995.github.io/immortal-barons/charset/)
+for what each setting does.
+
+## The screen is full of things like `[94m`. What can I do?
+
+That is a terminal printing the game's colour codes instead of acting on them.
+The door sends plain text on its own when your BBS reports that a caller has no
+ANSI support, so first check that the caller has graphics turned on in their BBS
+profile. To see the plain version yourself, run with `-no-ansi`. Lists that
+normally use a moving highlight are numbered in that mode, so they stay usable.
 
 ## How do I add AI barons (computer opponents)?
 

@@ -16,3 +16,16 @@ Steuersatz vorgibt. Ein stetiger, mäßiger Steuersatz hält sie hoch.
 Aufstände werden wahrscheinlicher, je weiter Ihr Steuersatz über ein
 sicheres Maß steigt. Ein Aufstand lässt Ihre Zustimmung einbrechen und
 vertreibt einen Teil Ihres Volkes.
+
+## The Queen Royale's tax
+
+The Queen takes a share of what you earn each turn. You may pay her less
+than she asks, but a short payment costs Popular Support.
+
+Every coin she collects goes into her purse, and she gives part of that
+purse back. She pays you the first time you play each day: 2% of the purse,
+or 7% once it holds more than 100 million gold. A realm still under New
+Realm Protection gets at most 1 million.
+
+All barons draw on the same purse, and each refund empties it a little. The
+first to play on a given day takes the largest share, so play early.
