@@ -348,6 +348,15 @@ func ChoiceQuit(s session.Session, max int) int {
 	return n
 }
 
+// pauseTight is pause with no blank line before the prompt, for a screen that
+// already ends on its own line — BRE puts its "Paused" bar directly under the
+// splash's last line, not a row below it.
+func pauseTight(s session.Session) {
+	fmt.Fprintf(s, "%s%s%s", ansi.FgBrightCyan, i18n.T(sessionLang(s), "─»>Paused<«─"), ansi.Reset)
+	readKey(s)
+	drainInput(s)
+}
+
 func pause(s session.Session) {
 	// A boot/disconnect during the pause must unwind (readKey handles it); a
 	// bare io.EOF (test stream) falls through.

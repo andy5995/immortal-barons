@@ -23,5 +23,5 @@ var splashANS []byte
 // encoder re-encodes to CP437 for a CP437 door.
 func Splash(s session.Session) {
 	fmt.Fprint(s, screen.FromCP437(splashANS))
-	pause(s)
+	pauseTight(s) // the art ends on its own line; BRE's prompt sits right under it
 }
