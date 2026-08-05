@@ -1515,7 +1515,7 @@ clever single lines.
 
 ## How Immortal Barons differs right now
 
-Now matching this reference (as of v0.0.1):
+Now matching this reference (as of v0.0.4):
 
 - Offense/defense split in combat, with the correct unit values
   (trooper 1/1, jet 2/0, turret 0/2, tank 4/4)
@@ -1540,17 +1540,29 @@ Now matching this reference (as of v0.0.1):
   planetary bulletin
 - Multiple turns per day, new-realm protection, and daily maintenance
 - A rising land-market price (expansion is self-limiting)
+- Region types, with the reference Rate/Base pairs, and the food market
+- Diplomacy: treaty offers, the one-agreement-at-a-time rule, Declaration Of
+  War, and the `-*Relations*-` roster
+- The covert menu, including Spy on Relations, the Spy Database, bribery,
+  expose enemy ops, and the Bomb Enemy Targets submenu
+- The InterBBS (interplanetary) layer: file-drop packets, group and individual
+  attacks, spying another planet, a Doomer Kaboomer aimed across planets, and
+  league orders signed by the coordinator
+- A daily Planetary Master, crowned as `LastMaster` when a season ends
 
 Still missing against the reference:
 
-- Region types (we still model land as one flat resource) and a food market
-- Diplomacy (treaties) and trading between empires
-- The remaining covert ops (Spy on Relations, Spy Database, Bribery) pending
-  the diplomacy/database subsystems
-- Leagues that end and reset with a Planetary Master
-- The InterBBS (interplanetary) layer
+- A league season that ends on a schedule. A Planetary Master is crowned each
+  day and the Coordinator can start a new season with `-league-reset`, but
+  nothing times one.
+- Negotiated empire-to-empire trade deals carrying goods with demands (see the
+  trading section above; `Send Trade Deal` sends gold only)
+- The Quick-Strike and Extended-Battle attack variants
+- Civil-war collapse
+- BRE's finer interplanetary news subtypes
 
-These are the slices that would move it closer to the real game.
+A few Diplomacy and Covert menu items are recorded but inert, pending fuller
+subsystems. Each is flagged where it is described above.
 
 ### Deliberately not implemented
 
