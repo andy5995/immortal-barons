@@ -1,3 +1,5 @@
+(in-progress:)
+
 2026-08-05 (v0.0.4)
   * The web server has been removed (an SSH server may replace it)
   * 32-bit builds charged the wrong region maintenance above 235 regions, often
