@@ -209,7 +209,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		gotU := p.LootTurrets * PirateReclaimPct / 100
 		gotK := p.LootTanks * PirateReclaimPct / 100
 		gotA := p.LootAgents * PirateReclaimPct / 100
-		gotG := p.Gold * PirateReclaimPct / 100
+		gotG := pctOf(p.Gold, PirateReclaimPct)
 		gotLand := p.Land * PirateReclaimPct / 100
 
 		p.LootTroopers -= gotT

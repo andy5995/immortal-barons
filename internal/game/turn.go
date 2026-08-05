@@ -384,12 +384,12 @@ func (w *World) aiStartHQ(e *Empire) {
 // compounded into six-figure stockpiles on a large realm with nothing to spend
 // them on (#57).
 func (w *World) aiBuildForces(e *Empire) {
-	budget := e.Gold * AIMilitaryBudgetPct / 100
+	budget := pctOf(e.Gold, AIMilitaryBudgetPct)
 	buy := func(share, price int, count *int) {
 		if price <= 0 {
 			return
 		}
-		if n := (budget * share / 100) / price; n > 0 {
+		if n := pctOf(budget, share) / price; n > 0 {
 			*count += n
 			e.Gold -= n * price
 		}
@@ -398,7 +398,7 @@ func (w *World) aiBuildForces(e *Empire) {
 	// Under threat the realm stops building the army it wants and buys the one it
 	// needs: a bigger slice of gold, spent turret-heavy.
 	if w.aiUnderThreat(e) {
-		budget = e.Gold * AIThreatBudgetPct / 100
+		budget = pctOf(e.Gold, AIThreatBudgetPct)
 		mix = aiForceMix{AIForceTrooperPctPanic, AIForceTurretPctPanic, AIForceTankPctPanic, AIForceJetPctPanic, AIForceAgentPctPanic}
 	}
 	w.aiSellIdleCarriers(e)
@@ -594,7 +594,7 @@ func (w *World) aiInvestIdle(e *Empire) {
 	if e.Gold <= reserve {
 		return
 	}
-	if amt := (e.Gold - reserve) * AIInvestPct / 100; amt > 0 {
+	if amt := pctOf(e.Gold-reserve, AIInvestPct); amt > 0 {
 		w.Invest(e, amt, MinInvestDays)
 	}
 }

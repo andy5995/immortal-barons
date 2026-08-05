@@ -434,7 +434,7 @@ func (w *World) slappenheimerDamage(e *Empire) string {
 			parts = append(parts, fmt.Sprintf("%d Regions", lost))
 			continue
 		}
-		lost := *res[i].val * pct / 100
+		lost := pctOf(*res[i].val, pct)
 		if lost <= 0 {
 			continue
 		}

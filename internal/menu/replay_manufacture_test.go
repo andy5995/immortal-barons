@@ -15,8 +15,8 @@ func TestReplayDoesNotDoubleManufactureOrAdvanceTurn(t *testing.T) {
 	p.ProdBombers, p.ProdTanks, p.ProdCarriers = 0, 100, 0
 	p.Specialized = ""
 	p.ProdInitialized = true
-	p.Food = 1_000_000_000 // fed: no food-market prompt
-	p.Gold = 10_000_000_000
+	p.Food = 1_000_000_000         // fed: no food-market prompt
+	p.Gold = 2_000_000_000         // rich enough for any purchase, and within a 32-bit int
 	p.Support, p.Morale = 100, 100 // no support/morale boost prompts
 	p.Agents = 0                   // skip the covert stage
 	p.TurnsLeft = 5

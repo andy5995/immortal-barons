@@ -59,6 +59,25 @@ jobs:
       - name: go test
         run: go test ./...
 
+  # A 32-bit build has 32-bit ints, and a Win32 BBS door is a real target. Money
+  # and upkeep products pass 2^31 at ordinary empire sizes, so the arithmetic
+  # silently went negative there while every 64-bit build stayed correct — one
+  # door billed a 710-region realm -210,763 gold in maintenance. GOARCH=386
+  # binaries run on the amd64 runner, so this is a plain test run.
+  build-test-32bit:
+    runs-on: ubuntu-latest
+    env:
+      GOARCH: "386"
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+      - name: go vet (32-bit)
+        run: go vet ./...
+      - name: go test (32-bit)
+        run: go test ./...
+
   # The race detector guards the concurrent web-server model (one shared world
   # across sessions). It needs a C toolchain, so run it once on Linux rather
   # than across the matrix; ubuntu has gcc preinstalled.

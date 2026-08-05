@@ -359,8 +359,19 @@ func (e *Empire) TechMilitaryFactor() int {
 // techRaise scales v up by a Technology factor; techLower scales it down (used
 // for costs and decay, which the original divides by the factor rather than
 // multiplying).
-func techRaise(v, factor int) int { return v * factor / TechFactorUnit }
-func techLower(v, factor int) int { return v * TechFactorUnit / factor }
+// int64 intermediates: both multiply by a factor around 10,000, so any v past
+// ~215,000 overflows int32 on a 32-bit build. Region upkeep reaches that at 235
+// regions — one report on a 32-bit door showed a 710-region realm billed
+// -210,763 gold. The 64-bit build was never affected, which is why it survived
+// so long. Same for NetWorth (see World.NetWorth).
+func techRaise(v, factor int) int { return int(int64(v) * int64(factor) / TechFactorUnit) }
+
+// pctOf is v * p / 100 with an int64 intermediate, for a percentage taken of a
+// quantity that can reach money scale. A plain v*p/100 overflows int32 on a
+// 32-bit build once v passes ~21 million, which turns a rich empire's spending
+// budget negative and makes it buy nothing at all.
+func pctOf(v, p int) int          { return int(int64(v) * int64(p) / 100) }
+func techLower(v, factor int) int { return int(int64(v) * TechFactorUnit / int64(factor)) }
 
 // TechPercent renders a factor the way the in-game advisor does: a raised effect
 // as round(100*f), a lowered one as round(100/f).
