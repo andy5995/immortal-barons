@@ -88,9 +88,13 @@ config record (les di,[0x28b4])
                 reals decode exactly: 0.02, +0.05, cap 1,000,000). The cap is
                 applied by overwriting rate with 1,000,000/V, and is itself
                 gated by a per-empire predicate (056d:19b5) — when that is false
-                the payout is uncapped. That predicate is still unread, and no
-                capture shows a payout above the cap, so nothing observed
-                distinguishes the two branches.
+                the payout is uncapped. That predicate is still unread, but the
+                uncapped branch DOES occur in play: a census of all 47 refunds in
+                cap/ found payouts of 12,581,639 to 14,000,000 on two boards,
+                more than ten times the cap, alongside eighteen at the cap
+                (1,000,000, or 999,999 where the rate substitution loses a unit).
+                So the predicate is false at least sometimes; what selects it is
+                still open.
 
                 The pool is FED by the crown tax: the tax routine at 0x2FAF1 —
                 the same one that charges the Queen Royale tax and computes the

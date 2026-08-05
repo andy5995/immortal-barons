@@ -503,6 +503,14 @@ The loop that keeps paying off:
    `scripts/bre-tpreal.py --scan FILE 0xSTART 0xLEN` (in this project's Claude
    dir) — its docstring carries the format, the empire/config record layout
    mapped so far, and the known runtime helper addresses.
+
+   **Always run the script; never decode a real by hand.** Doing the exponent
+   arithmetic mentally is one off-by-one away from a clean-looking wrong answer,
+   and the answer looks plausible either way. Decoding the Queen Royale refund
+   constants by hand gave 0.025 / 0.01 / 500,000 — every one exactly half the
+   truth, because the bias was applied one step out. The script returned
+   0.05 / 0.02 / 1,000,000. Both sets are round numbers, so nothing about the
+   hand result invited a second look; only the tool catches it.
 5. **Validate against play.** A candidate reading is not a finding until it
    reproduces captured figures exactly. Rounding vs truncation and the order of
    operations both change results by a unit — the two real→int helpers differ
@@ -510,6 +518,15 @@ The loop that keeps paying off:
 
 Record layout and helper addresses live in `docs/dev/bre-save-format.md`; extend
 that file rather than re-deriving.
+
+**Read that file's entry for the mechanic BEFORE opening a disassembler — every
+time, even when the task arrives as fresh evidence to analyse.** A whole session
+went into recovering the Queen Royale refund formula from the binary when the
+pool offset, both rates, the cap, the gating predicate and the crown-tax feed
+were already written down there from an earlier pass. The trigger for the miss is
+worth recognising: new data (a pile of captures) makes the question feel new, so
+the notes never get checked. Grep the file for the mechanic's noun first; it
+costs one command and tells you what is genuinely unanswered.
 
 ### Finding an UNKNOWN record field: scan the opcode, not the string
 
@@ -597,6 +614,28 @@ prices at once made it immediate that seven random-walk around a stable base
 (up in one capture, down in another) while HeadQuarters rose in *every* capture —
 which is what turned "the HQ price drifts" into "the HQ price is a ratchet, and
 it is the only one."
+
+### Census every instance in the captures BEFORE disassembling
+
+An event's *distribution* across the captures tells you which branch of the code
+you are about to read, and it costs one grep. The Queen Royale refund had been
+filed from a single observation of 1,000,000, which reads as a fixed sum. The
+captures held 47 payouts ranging from 354 to 14,000,000 — and fourteen of them
+were exactly 1,000,000, which is the shape of a **cap**, not of a formula. Going
+in knowing a cap existed made the routine's structure obvious on first read.
+
+Two signatures worth recognising in a value list:
+
+- **The same value many times, with others spread around it** — a clamp.
+- **A value one below a round number** (999,999 beside many 1,000,000s) — a cap
+  implemented by substituting `limit / x` for a rate and multiplying back by `x`.
+  The round trip through a six-byte real loses the last unit and truncation keeps
+  it. Do not chase it as a separate case.
+
+Predictions from the recovered formula should then be tested against the whole
+list, not the samples that suggested it: a two-rate mechanic with a threshold
+implies a **gap** in the achievable payouts, and finding that no observation lands
+in the gap is real evidence.
 
 ### Kill hypotheses with the captures, then disassemble
 
