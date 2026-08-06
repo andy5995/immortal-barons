@@ -4,6 +4,14 @@ on:
   push:
     branches: [trunk, main]
   pull_request:
+  # The X-News headlines are fetched at build time, not in the reader's browser:
+  # x-bit.org sends no Access-Control-Allow-Origin header, so a live fetch from
+  # this site's origin is blocked. A daily rebuild is what keeps them current
+  # between pushes. GitHub disables a schedule after 60 days without repository
+  # activity; re-enable it from the Actions tab.
+  schedule:
+    - cron: '17 5 * * *'
+  workflow_dispatch:
 
 # Cancel superseded runs for the same PR / commit (repo convention).
 concurrency:
@@ -39,7 +47,9 @@ jobs:
   # Deploy the built site to GitHub Pages (pushes to the default branch only).
   # Requires Settings -> Pages -> Source = "GitHub Actions". No gh-pages branch.
   deploy:
-    if: github.event_name == 'push'
+    # Everything except a pull request: pushes, the nightly headline refresh,
+    # and a manual run. A PR builds to prove it still builds, and stops there.
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     permissions:

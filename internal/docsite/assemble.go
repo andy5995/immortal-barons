@@ -27,7 +27,7 @@ const overridesMain = `{% extends "base.html" %}
 
 {% block extrahead %}
   <link rel="alternate" type="application/atom+xml" title="Immortal Barons releases" href="https://github.com/andy5995/immortal-barons/releases.atom">
-  <link rel="alternate" type="application/rss+xml" title="X-Bit BBS" href="https://x-bit.org/rss/rss.xml">
+  <link rel="alternate" type="application/rss+xml" title="X-News" href="https://x-bit.org/rss/rss.xml">
 {% endblock %}
 `
 
@@ -190,6 +190,64 @@ const extraCSS = `/* Underline in-content links so they read as links, not just 
     }
   }
 }
+
+/* --- BBS news block (under the table of contents) ------------------------ */
+
+/* The rule is the separator between the page's own contents and someone else's
+   headlines. It is decoration — the block also has its own heading and its own
+   aria-label — so it is drawn from the palette's lightest foreground rather
+   than being held to the 3:1 that a meaningful graphic would need. */
+.ib-news__rule {
+  border: none;
+  border-top: 1px solid var(--md-default-fg-color--lighter);
+  margin: 1.2rem 0 0.6rem;
+}
+
+/* The heading is a link to the source site, so it carries the same underline as
+   every other link here: color is never the only thing marking a link. */
+.ib-news__title {
+  display: block;
+  font-weight: 700;
+  color: var(--md-typeset-a-color);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+  margin-bottom: 0.3rem;
+}
+
+/* Headlines wrap rather than truncate: a clipped headline is unreadable, and the
+   column is narrow. */
+.ib-news__item {
+  margin-bottom: 0.5rem;
+}
+.ib-news__link {
+  display: block;
+  white-space: normal;
+  line-height: 1.35;
+  color: var(--md-typeset-a-color);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.ib-news__date {
+  display: block;
+  font-size: 0.68rem;
+  color: var(--md-default-fg-color--light);
+}
+.ib-news__more {
+  display: inline-block;
+  margin-top: 0.2rem;
+  color: var(--md-typeset-a-color);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* In the phone drawer this same block is nested under the current page, where
+   the theme indents everything; pull it back so the headlines get the drawer's
+   full width. */
+@media screen and (max-width: 76.1875em) {
+  .ib-news {
+    padding-inline: 0.6rem;
+  }
+}
 `
 
 // siteLang is one language column of the site: its code, its endonym (shown in
@@ -212,8 +270,10 @@ var languages = func() []siteLang {
 }()
 
 // Assemble reads the doc sources under repoRoot and writes the MkDocs source
-// tree + mkdocs.yml under outDir (which is cleared first).
-func Assemble(repoRoot, outDir string) error {
+// tree + mkdocs.yml under outDir (which is cleared first). feedURL is the news
+// feed rendered on the News page; an empty string builds that page without
+// fetching anything, which is what the tests and an offline build want.
+func Assemble(repoRoot, outDir, feedURL string) error {
 	siteSrc := filepath.Join(outDir, "site-src")
 	if err := os.RemoveAll(outDir); err != nil {
 		return err
@@ -278,13 +338,30 @@ func Assemble(repoRoot, outDir string) error {
 		return err
 	}
 
-	// The custom_dir sits beside mkdocs.yml, not under docs_dir.
-	mainPath := filepath.Join(outDir, "overrides", "main.html")
-	if err := os.MkdirAll(filepath.Dir(mainPath), 0o755); err != nil {
+	// One fetch feeds both renderings: the News page and the sidebar block.
+	feed := loadNews(feedURL)
+
+	// The News page is English-only; the other languages fall back to it.
+	newsPath := filepath.Join(siteSrc, "en", "news", "index.md")
+	if err := os.MkdirAll(filepath.Dir(newsPath), 0o755); err != nil {
 		return err
 	}
-	if err := os.WriteFile(mainPath, []byte(overridesMain), 0o644); err != nil {
+	if err := os.WriteFile(newsPath, []byte(newsPageMarkdown(feed)), 0o644); err != nil {
 		return err
+	}
+
+	// The custom_dir sits beside mkdocs.yml, not under docs_dir.
+	for _, f := range []struct{ rel, body string }{
+		{"main.html", overridesMain},
+		{filepath.Join("partials", "toc.html"), tocOverride(feed)},
+	} {
+		p := filepath.Join(outDir, "overrides", f.rel)
+		if err := os.MkdirAll(filepath.Dir(p), 0o755); err != nil {
+			return err
+		}
+		if err := os.WriteFile(p, []byte(f.body), 0o644); err != nil {
+			return err
+		}
 	}
 
 	nav, err := buildNav(repoRoot, enTopics)

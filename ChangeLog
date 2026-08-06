@@ -1,4 +1,5 @@
 (in-progress:)
+  * The website carries the latest X-News headlines, rebuilt daily
 
 2026-08-05 (v0.0.4)
   * The web server has been removed (an SSH server may replace it)

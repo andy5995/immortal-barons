@@ -99,6 +99,8 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	nav = append(nav, navNode{title: "Door Setup", path: "door-setup/index.md"})
 	nav = append(nav, navNode{title: "Character Set", path: "charset/index.md"})
 	nav = append(nav, navNode{title: "Translating", path: "translating/index.md"})
+	// The full headline list the sidebar block links to.
+	nav = append(nav, navNode{title: XBitNewsName, path: "news/index.md"})
 
 	// Developers: one leaf per English dev doc, titled from its first heading.
 	dev, err := devNav(repoRoot)

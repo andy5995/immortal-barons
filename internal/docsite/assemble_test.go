@@ -44,7 +44,7 @@ func TestAssembleLayout(t *testing.T) {
 	out := t.TempDir()
 	writeFixture(t, root)
 
-	if err := Assemble(root, out); err != nil {
+	if err := Assemble(root, out, ""); err != nil {
 		t.Fatal(err)
 	}
 
@@ -81,7 +81,7 @@ func TestAssembleNavAndConfig(t *testing.T) {
 	root := t.TempDir()
 	out := t.TempDir()
 	writeFixture(t, root)
-	if err := Assemble(root, out); err != nil {
+	if err := Assemble(root, out, ""); err != nil {
 		t.Fatal(err)
 	}
 	yml, err := os.ReadFile(filepath.Join(out, "mkdocs.yml"))
