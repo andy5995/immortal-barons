@@ -1285,6 +1285,12 @@ purpose:
   Enter wipes the allocation; IB suggests the unit's **current** % instead, so Enter
   leaves it unchanged. Both cap the running total at 100% via a shrinking max (the
   remainder becomes gold). The order and per-unit prompt otherwise match BRE.
+- **Send Message can address all allies.** BRE's picker takes one realm or `Z`
+  for all of them; IB adds `*`, which writes to every realm the sender holds a
+  standing treaty with, of any type (Enemy is a relation, not a treaty, so an
+  enemy is never included). The key is offered only while they hold one.
+- **Diplomacy is on the opening menu as well as System.** BRE lists it under
+  System alone.
 - **About lives in the Help browser** (keyed `A`), not on the Game/System menus,
   so `I` stays BRE's InterBBS Scores key.
 - **Menu items carry a 2-space left margin** where BRE's start at column 0 — a

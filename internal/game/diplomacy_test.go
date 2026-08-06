@@ -388,3 +388,26 @@ func TestRejectingANewOfferKeepsTheOldTreaty(t *testing.T) {
 		t.Errorf("the rejected offer should be gone, got %v", b.TreatyOffers)
 	}
 }
+
+// A treaty of any type makes a partner; Enemy is a relation, not a treaty.
+func TestTreatyPartnersCountsEveryTreatyType(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Aland")
+	b := w.AddHuman("b", "Bland")
+	c := w.AddHuman("c", "Cland")
+	d := w.AddHuman("d", "Dland")
+
+	w.setRelation(a.Name, b.Name, "Free Trade Agreement")
+	w.setRelation(a.Name, c.Name, fullDefenseAlliance)
+	w.setRelation(a.Name, d.Name, RelationEnemy)
+
+	got := w.TreatyPartners(a)
+	if len(got) != 2 {
+		t.Fatalf("TreatyPartners = %d realms, want 2", len(got))
+	}
+	for _, e := range got {
+		if e == d {
+			t.Errorf("TreatyPartners included the enemy %q", e.Name)
+		}
+	}
+}

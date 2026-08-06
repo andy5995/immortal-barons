@@ -3,6 +3,8 @@ package menu
 import (
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 func TestRecipientsExcludesPlayerAndDead(t *testing.T) {
@@ -66,9 +68,9 @@ func TestPickRecipientSelectsByLetter(t *testing.T) {
 		t.Skip("no recipients seeded")
 	}
 	f := &fakeSession{keys: []rune{'A'}}
-	got, all := pickRecipient(f, w, "Send to:", true)
-	if all {
-		t.Fatalf("pickRecipient with 'A' returned all=true")
+	got, target := pickRecipient(f, w, "Send to:", true)
+	if target != targetOne {
+		t.Fatalf("pickRecipient('A') target = %v, want targetOne", target)
 	}
 	if got != rs[0] {
 		t.Errorf("pickRecipient('A') = %v, want %v", got, rs[0])
@@ -101,9 +103,9 @@ func TestPickRecipientAll(t *testing.T) {
 		t.Skip("no recipients seeded")
 	}
 	f := &fakeSession{keys: []rune{'Z'}}
-	got, all := pickRecipient(f, w, "Send to:", true)
-	if !all || got != nil {
-		t.Errorf("pickRecipient('Z') = (%v, %v), want (nil, true)", got, all)
+	got, target := pickRecipient(f, w, "Send to:", true)
+	if target != targetAll || got != nil {
+		t.Errorf("pickRecipient('Z') = (%v, %v), want (nil, targetAll)", got, target)
 	}
 }
 
@@ -113,8 +115,73 @@ func TestPickRecipientCancel(t *testing.T) {
 		t.Skip("no recipients seeded")
 	}
 	f := &fakeSession{keys: []rune{'0'}}
-	got, all := pickRecipient(f, w, "Send to:", true)
-	if all || got != nil {
-		t.Errorf("pickRecipient('0') = (%v, %v), want (nil, false)", got, all)
+	got, target := pickRecipient(f, w, "Send to:", true)
+	if target != targetNone || got != nil {
+		t.Errorf("pickRecipient('0') = (%v, %v), want (nil, targetNone)", got, target)
+	}
+}
+
+// treatyWith makes the player and e hold a standing treaty, the state that
+// unlocks the all-allies target.
+func treatyWith(w *ctx, e *game.Empire) {
+	p := w.Player()
+	w.World.ProposeTreaty(e, p, "Free Trade Agreement")
+	w.World.AcceptTreaty(p, e.Name, "Free Trade Agreement")
+}
+
+func TestPickRecipientAllAllies(t *testing.T) {
+	w := newWorld()
+	rs := recipients(w)
+	if len(rs) == 0 {
+		t.Skip("no recipients seeded")
+	}
+	treatyWith(w, rs[0])
+	f := &fakeSession{keys: []rune{'*'}}
+	got, target := pickRecipient(f, w, "Send to:", true)
+	if target != targetAllies || got != nil {
+		t.Errorf("pickRecipient('*') = (%v, %v), want (nil, targetAllies)", got, target)
+	}
+	if !strings.Contains(f.out.String(), "*=All Allies") {
+		t.Errorf("prompt should offer *=All Allies:\n%s", f.out.String())
+	}
+}
+
+// With no treaty there is nobody to reach that way, so the target is not
+// offered and the key is not live.
+func TestPickRecipientAllAlliesHiddenWithoutTreaty(t *testing.T) {
+	w := newWorld()
+	if len(recipients(w)) == 0 {
+		t.Skip("no recipients seeded")
+	}
+	f := &fakeSession{keys: []rune{'*'}}
+	got, target := pickRecipient(f, w, "Send to:", true)
+	if target != targetNone || got != nil {
+		t.Errorf("pickRecipient('*') without a treaty = (%v, %v), want (nil, targetNone)", got, target)
+	}
+	if strings.Contains(f.out.String(), "All Allies") {
+		t.Errorf("prompt should not offer All Allies without a treaty:\n%s", f.out.String())
+	}
+}
+
+// The all-allies send reaches every treaty partner and nobody else.
+func TestSendMessageToAllAllies(t *testing.T) {
+	w := newWorld()
+	w.With(func() { w.AddAIEmpires(2) })
+	rs := recipients(w)
+	if len(rs) < 3 {
+		t.Fatalf("need 3 recipients, got %d", len(rs))
+	}
+	ally, other := rs[0], rs[1]
+	treatyWith(w, ally)
+	body := "Muster at the river."
+	f := &fakeSession{keys: []rune("*" + body + "\r/s")}
+	sendMessage(f, w)
+	if len(ally.Mail) != 1 {
+		t.Errorf("ally got %d messages, want 1", len(ally.Mail))
+	} else if !strings.Contains(ally.Mail[0].Body, body) {
+		t.Errorf("ally message = %q, want it to carry %q", ally.Mail[0].Body, body)
+	}
+	if len(other.Mail) != 0 {
+		t.Errorf("a realm with no treaty got %d messages, want 0", len(other.Mail))
 	}
 }

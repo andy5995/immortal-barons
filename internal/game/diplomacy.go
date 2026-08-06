@@ -130,6 +130,22 @@ func (w *World) AreAllied(a, b *Empire) bool {
 	return w.HasTreaty(a, b, fullDefenseAlliance)
 }
 
+// TreatyPartners returns every living empire holding a standing relation with e
+// of any treaty type. Enemy is stored as a relation but is not a treaty (see
+// RelationEnemy), so an enemy is not a partner.
+func (w *World) TreatyPartners(e *Empire) []*Empire {
+	var out []*Empire
+	for _, other := range w.Empires {
+		if other == e || !other.Alive {
+			continue
+		}
+		if rel := w.Relation(e, other); rel != "" && rel != RelationEnemy {
+			out = append(out, other)
+		}
+	}
+	return out
+}
+
 // alliesOf returns every living empire that shares a treaty of ttype with e.
 func (w *World) alliesOf(e *Empire, ttype string) []*Empire {
 	var out []*Empire

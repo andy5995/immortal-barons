@@ -16,6 +16,9 @@ the other realm is told. View Treaties shows your current relations with the
 other rulers in the game, and below that, the offers you have sent that nobody
 has answered yet.
 
+Once you hold a treaty, Send Message offers to write to all your allies at once.
+It reaches every ruler you have an agreement with, whatever kind it is.
+
 An offer waits until the other ruler plays a turn. It does not run out. If you
 send a second, different offer to the same ruler, it takes the place of the first
 one, because two realms can hold only one agreement at a time.

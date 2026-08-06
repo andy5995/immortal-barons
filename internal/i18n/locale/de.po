@@ -72,7 +72,7 @@ msgstr "%d Einheiten desertierten mangels Sold."
 msgid "%d%% over 10 days"
 msgstr ""
 
-#: internal/menu/tree.go:486
+#: internal/menu/tree.go:491
 msgid "%s  You have %s gold."
 msgstr ""
 
@@ -97,7 +97,7 @@ msgstr ""
 msgid "%s offers you a trade deal."
 msgstr ""
 
-#: internal/menu/mailreader.go:201
+#: internal/menu/mailreader.go:197
 msgid "%s on %s"
 msgstr ""
 
@@ -111,7 +111,7 @@ msgstr ""
 msgid "%s turns"
 msgstr "Züge"
 
-#: internal/menu/tree.go:484
+#: internal/menu/tree.go:489
 #, fuzzy
 msgid "%s units of food available today."
 msgstr "Nahrungseinheiten sind verdorben."
@@ -124,7 +124,7 @@ msgstr ""
 msgid "(%d per year)"
 msgstr "(%d pro Jahr)"
 
-#: internal/menu/actions_message.go:103
+#: internal/menu/actions_message.go:120
 msgid "(A-%c%s, 0=cancel) %s"
 msgstr ""
 
@@ -152,11 +152,15 @@ msgstr ""
 msgid "(your current vote)"
 msgstr ""
 
-#: internal/menu/actions_message.go:101
+#: internal/menu/actions_message.go:118
+msgid ", *=All Allies"
+msgstr ""
+
+#: internal/menu/actions_message.go:115
 msgid ", Z=All"
 msgstr ""
 
-#: internal/menu/actions_message.go:165
+#: internal/menu/actions_message.go:186
 msgid "/-Command?"
 msgstr "/-Befehl?"
 
@@ -190,7 +194,7 @@ msgstr ""
 msgid "Abdication cancelled."
 msgstr ""
 
-#: internal/menu/actions_message.go:173
+#: internal/menu/actions_message.go:194
 msgid "Abort"
 msgstr "Abbrechen"
 
@@ -220,8 +224,12 @@ msgstr "Berater besuchen"
 msgid "Agents"
 msgstr "Agenten"
 
-#: internal/menu/actions_message.go:109
+#: internal/menu/actions_message.go:126
 msgid "All"
+msgstr ""
+
+#: internal/menu/actions_message.go:130
+msgid "All Allies"
 msgstr ""
 
 #: internal/menu/tree.go:208
@@ -419,7 +427,7 @@ msgstr ""
 msgid "Chopper's Fair Market"
 msgstr ""
 
-#: internal/menu/actions_message.go:179
+#: internal/menu/actions_message.go:200
 msgid "Clear"
 msgstr "Löschen"
 
@@ -491,11 +499,11 @@ msgstr ""
 msgid "Declare war? This breaks all treaties with them."
 msgstr ""
 
-#: internal/menu/mailreader.go:174
+#: internal/menu/mailreader.go:170
 msgid "Delete"
 msgstr ""
 
-#: internal/menu/mailreader.go:220
+#: internal/menu/mailreader.go:216
 msgid "Delete,"
 msgstr ""
 
@@ -529,7 +537,7 @@ msgstr ""
 msgid "Dismantle it?"
 msgstr ""
 
-#: internal/menu/actions_message.go:271
+#: internal/menu/actions_message.go:298
 msgid "Do you wish to send another message?"
 msgstr "Möchtest du eine weitere Nachricht senden?"
 
@@ -624,7 +632,7 @@ msgstr ""
 msgid "Game Bulletins"
 msgstr "Spielaushänge"
 
-#: internal/menu/tree.go:420
+#: internal/menu/tree.go:425
 msgid "Game Setup"
 msgstr ""
 
@@ -632,7 +640,7 @@ msgstr ""
 msgid "Game length in days (0 = endless)"
 msgstr ""
 
-#: internal/menu/tree.go:506
+#: internal/menu/tree.go:511
 msgid "Game started on %s"
 msgstr ""
 
@@ -725,11 +733,11 @@ msgstr ""
 msgid "Idle warnings before boot"
 msgstr ""
 
-#: internal/menu/mailreader.go:177
+#: internal/menu/mailreader.go:173
 msgid "Ignore"
 msgstr ""
 
-#: internal/menu/mailreader.go:221
+#: internal/menu/mailreader.go:217
 msgid "Ignore, or"
 msgstr ""
 
@@ -919,12 +927,12 @@ msgstr ""
 msgid "Max Terrorist Ops/Day (0 = unlimited)"
 msgstr ""
 
-#: internal/menu/mailreader.go:204
+#: internal/menu/mailreader.go:200
 #, fuzzy
 msgid "Message From: "
 msgstr "Nachrichten lesen"
 
-#: internal/menu/mailreader.go:206
+#: internal/menu/mailreader.go:202
 #, fuzzy
 msgid "Message To  : "
 msgstr "Nachrichten lesen"
@@ -1181,11 +1189,11 @@ msgstr ""
 msgid "Popular support rose %d points."
 msgstr "Rückhalt"
 
-#: internal/menu/actions_message.go:278
+#: internal/menu/actions_message.go:305
 msgid "Post to the planet:"
 msgstr ""
 
-#: internal/menu/actions_message.go:290
+#: internal/menu/actions_message.go:317
 msgid "Posted."
 msgstr ""
 
@@ -1218,7 +1226,7 @@ msgstr "Beenden"
 msgid "Quit?"
 msgstr "Beenden"
 
-#: internal/menu/mailreader.go:121
+#: internal/menu/mailreader.go:123
 #, fuzzy
 msgid "Quote Message?"
 msgstr "Nachricht senden"
@@ -1262,7 +1270,7 @@ msgstr ""
 msgid "Repay some now?"
 msgstr "Kredit zurückzahlen"
 
-#: internal/menu/mailreader.go:219
+#: internal/menu/mailreader.go:215
 msgid "Reply,"
 msgstr ""
 
@@ -1288,7 +1296,7 @@ msgid ""
 "they leak."
 msgstr ""
 
-#: internal/menu/actions_message.go:176
+#: internal/menu/actions_message.go:197
 msgid "Save"
 msgstr "Speichern"
 
@@ -1564,7 +1572,7 @@ msgstr ""
 msgid "The food market is out of food for today."
 msgstr ""
 
-#: internal/menu/tree.go:501
+#: internal/menu/tree.go:506
 msgid "The game begins %s."
 msgstr ""
 
@@ -1612,7 +1620,7 @@ msgstr ""
 msgid "There is no one to negotiate with."
 msgstr ""
 
-#: internal/menu/actions_message.go:80
+#: internal/menu/actions_message.go:93
 msgid "There is no one to reach."
 msgstr ""
 
@@ -1709,7 +1717,7 @@ msgstr "Investitionen anzeigen"
 msgid "Unlimited"
 msgstr ""
 
-#: internal/menu/tree.go:482
+#: internal/menu/tree.go:487
 msgid "Unlimited supply today."
 msgstr ""
 
@@ -1932,20 +1940,20 @@ msgstr ""
 msgid "You have %d Troopers, %d usable Jets, %d Tanks, and %d Bombers."
 msgstr ""
 
-#: internal/menu/actions_message.go:138
+#: internal/menu/actions_message.go:159
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr ""
 
-#: internal/menu/tree.go:475
+#: internal/menu/tree.go:480
 #, fuzzy
 msgid "You have %s gold and %d agents."
 msgstr "Du hast keine Nachrichten."
 
-#: internal/menu/tree.go:468
+#: internal/menu/tree.go:473
 msgid "You have %s gold and %d turns."
 msgstr ""
 
-#: internal/menu/tree.go:466
+#: internal/menu/tree.go:471
 msgid "You have %s gold and 1 turn."
 msgstr ""
 
@@ -1987,7 +1995,7 @@ msgstr "Du hast keine Nachrichten."
 msgid "You have reached your region purchase limit for this turn."
 msgstr ""
 
-#: internal/menu/actions_message.go:218
+#: internal/menu/actions_message.go:239
 msgid "You have used all %d lines."
 msgstr ""
 
@@ -2207,7 +2215,7 @@ msgstr ""
 msgid "packet signature does not verify"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:871
+#: cmd/immortal-barons/main.go:875
 msgid "path to the BBS drop file"
 msgstr ""
 
@@ -2246,7 +2254,7 @@ msgid ""
 "printed), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:875
+#: cmd/immortal-barons/main.go:879
 msgid "run -set-dropfile first"
 msgstr ""
 

@@ -1,5 +1,6 @@
 (in-progress:)
   * Diplomacy is on the opening menu as well as the System menu
+  * Send Message can address every realm the sender holds a treaty with
   * Implemented IP mail
   * A reply asks which lines of the message to quote, and opens with them
   * "-reset" honours "-no-ansi", "-ascii" and "-cp437"

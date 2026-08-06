@@ -60,25 +60,38 @@ func recipientIndex(r rune, n int) int {
 	return idx
 }
 
+// sendTarget is what a pickRecipient keypress resolved to.
+type sendTarget int
+
+const (
+	targetNone   sendTarget = iota // cancelled
+	targetOne                      // the empire pickRecipient returned
+	targetAll                      // every living realm
+	targetAllies                   // every realm the sender holds a treaty with
+)
+
 // pickRecipient shows a lettered columns table (Id / Empire / Land / Score /
 // Net Worth) and reads a SINGLE keypress: a letter A.. selects that empire;
-// '0' cancels (returns nil, false). If allowAll, 'Z' returns (nil, true)
-// meaning "all". Returns (empire, all).
-func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*game.Empire, bool) {
+// '0' cancels. If allowAll, 'Z' means every realm, and '*' means every realm
+// the sender holds a treaty with — offered only when they hold one. The
+// all-allies target is IB's, not BRE's, which sends to one realm or to all.
+func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*game.Empire, sendTarget) {
 	type row struct {
 		e               *game.Empire
 		name            string
 		land, score, nw int
 	}
 	var rows []row
+	allies := 0
 	w.With(func() {
 		for _, e := range recipients(w) {
 			rows = append(rows, row{e, e.Name, e.Land, e.Score, w.NetWorth(e)})
 		}
+		allies = len(w.TreatyPartners(w.Player()))
 	})
 	if len(rows) == 0 {
 		ok(s, "There is no one to reach.")
-		return nil, false
+		return nil, targetNone
 	}
 	// Same visual language as the scores board (printScores): magenta rule,
 	// colored and right-aligned numeric columns.
@@ -96,26 +109,34 @@ func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*ga
 			ansi.FgBrightWhite, r.score, ansi.Reset,
 			ansi.FgWhite, r.nw, ansi.Reset)
 	}
+	offerAllies := allowAll && allies > 0
 	extra := ""
 	if allowAll {
 		extra = tr(s, ", Z=All")
 	}
+	if offerAllies {
+		extra += tr(s, ", *=All Allies")
+	}
 	fmt.Fprintf(s, "\n%s"+tr(s, "(A-%c%s, 0=cancel) %s")+"%s ", ansi.FgBrightWhite, 'A'+min(len(rows), 25)-1, extra, tr(s, prompt), ansi.Reset)
 	r, err := readKey(s)
 	if err != nil {
-		return nil, false
+		return nil, targetNone
 	}
 	if allowAll && (r == 'z' || r == 'Z') {
 		fmt.Fprintf(s, "%s\n", tr(s, "All"))
-		return nil, true
+		return nil, targetAll
+	}
+	if offerAllies && r == '*' {
+		fmt.Fprintf(s, "%s\n", tr(s, "All Allies"))
+		return nil, targetAllies
 	}
 	idx := recipientIndex(r, len(rows))
 	if idx < 0 {
 		fmt.Fprint(s, "\n")
-		return nil, false
+		return nil, targetNone
 	}
 	fmt.Fprintf(s, "%s\n", rows[idx].name)
-	return rows[idx].e, false
+	return rows[idx].e, targetOne
 }
 
 // msgMaxLines is how many lines a single message may hold (BRE: 20).
@@ -229,8 +250,8 @@ func trimTrailingBlank(lines []string) string {
 
 func sendMessage(s session.Session, w *ctx) Result {
 	for {
-		to, all := pickRecipient(s, w, "Send to:", true)
-		if !all && to == nil {
+		to, target := pickRecipient(s, w, "Send to:", true)
+		if target == targetNone {
 			return Stay
 		}
 		var toName string
@@ -245,8 +266,14 @@ func sendMessage(s session.Session, w *ctx) Result {
 			// reloaded world, so a concurrent send to the same inbox appends (both
 			// messages land) and a vanished recipient aborts.
 			err := w.mutatePlayer(func(p *game.Empire) error {
-				if all {
+				if target != targetOne {
 					recips := recipients(w)
+					if target == targetAllies {
+						recips = w.TreatyPartners(p)
+					}
+					if len(recips) == 0 {
+						return errTargetGone
+					}
 					var letters strings.Builder
 					for _, e := range recips {
 						letters.WriteString(w.EmpireLetter(e))
