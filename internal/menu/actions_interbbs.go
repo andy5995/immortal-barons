@@ -2,9 +2,9 @@ package menu
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -264,67 +264,62 @@ func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 	return board, baron
 }
 
-// travelTimes shows the round-trip time to each known planet, matching BRE's
-// "Average Turn Around Times to All BBSes" screen: each BBS with its turnaround
-// coloured green (sub-day), cyan (days), or red ("No Data"). BRE averages many
-// exchanges; IB has only the last packet's date per board, so the figure is the
-// latency of the most recent exchange rather than a running average.
+// Travel Times geometry, measured off a live BRE capture: a 75-column inset
+// rule above and below the list, and each planet's name in a 30-column field
+// with the turnaround right after it.
+const (
+	travelRuleWidth  = 75
+	travelRuleDouble = 15
+	travelNameWidth  = 30
+)
+
+// travelTimes is BRE's "Average Turn Around Times to All BBSes": every other
+// planet in the league with the average round trip a packet makes to it and
+// back — the figure that says whether a strike aimed there lands tonight or
+// next week. A board that has not yet answered a probe reads "No Data".
+//
+// The averaging is game.recordTravelTime's; this screen only renders it, in
+// BRE's units and colors — hours in green under two days, days in cyan at or
+// above it, "No Data" in red.
 func travelTimes(s session.Session, w *ctx) Result {
-	type planet struct{ name, date string }
+	type planet struct {
+		name string
+		days float64
+	}
 	var planets []planet
-	var now string
 	w.With(func() {
-		now = w.Today
-		if now == "" {
-			now = w.LastMaintDate
-		}
-		at := map[string]int{}
-		add := func(name, date string) {
-			if i, ok := at[name]; ok {
-				if date != "" {
-					planets[i].date = date
-				}
-				return
-			}
-			at[name] = len(planets)
-			planets = append(planets, planet{name, date})
-		}
-		for _, n := range w.LeagueNodes {
-			add(n.Name, "")
-		}
-		for _, b := range w.RemoteBoards {
-			add(b.BoardID, b.Date)
+		for _, name := range w.KnownBoards() {
+			planets = append(planets, planet{name, w.TravelTimes[name]})
 		}
 	})
 	if len(planets) == 0 {
 		ok(s, "No other planets are known yet.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Average Turn Around Times to All BBSes"), ansi.Reset)
+	rule := ansi.FgBrightBlack + insetRule(travelRuleWidth, travelRuleDouble) + ansi.Reset
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "Average Turn Around Times to All BBSes"), ansi.Reset)
+	fmt.Fprintf(s, "%s\n", rule)
 	for _, p := range planets {
-		label, col := turnaroundLabel(s, p.date, now)
-		fmt.Fprintf(s, "  %-24s %s%s%s\n", p.name, col, label, ansi.Reset)
+		label, col := turnaroundLabel(s, p.days)
+		fmt.Fprintf(s, "%s%-*s%s%s%s\n", ansi.FgWhite, travelNameWidth, p.name, col, label, ansi.Reset)
 	}
+	fmt.Fprintf(s, "%s\n", rule)
 	pause(s)
 	return Stay
 }
 
-// turnaroundLabel renders a planet's round-trip time and its colour from the
-// last packet date, matching BRE's Travel Times colouring: red "No Data" when
-// no packet has arrived, green under a day, cyan for whole days.
-func turnaroundLabel(s session.Session, then, now string) (string, string) {
-	if then == "" {
-		return tr(s, "No Data"), ansi.FgBrightRed
+// turnaroundLabel renders one average round trip and its color. BRE quantizes
+// before printing — hours to a tenth, days to a hundredth — so the figures land
+// on the same values the original shows.
+func turnaroundLabel(s session.Session, days float64) (string, string) {
+	if days <= 0 {
+		return tr(s, "No Data"), ansi.FgRed
 	}
-	t1, e1 := time.Parse("2006-01-02", then)
-	t2, e2 := time.Parse("2006-01-02", now)
-	if e1 != nil || e2 != nil {
-		return tr(s, "No Data"), ansi.FgBrightRed
+	if days < game.TravelHoursCutoff {
+		hours := math.Round(days*24*10) / 10
+		return fmt.Sprintf(tr(s, "%.2f hours"), hours), ansi.FgBrightGreen
 	}
-	if days := t2.Sub(t1).Hours() / 24; days >= 1 {
-		return fmt.Sprintf(tr(s, "%.1f days"), days), ansi.FgBrightCyan
-	}
-	return tr(s, "< 1 day"), ansi.FgBrightGreen
+	return fmt.Sprintf(tr(s, "%.2f days"), math.Round(days*100)/100), ansi.FgCyan
 }
 
 // planetaryTreaties is the InterPlanetary Ops "Diplomacy List": BRE's

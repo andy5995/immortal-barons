@@ -42,6 +42,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string) error {
 	w.ArriveDoomer() // a weapon whose flight is over lands before anything else moves
 	w.ExportScores()
 	w.ExportNodeList()
+	w.PingTravelTimes()
 	w.ExportDoomerStatus()
 	w.StampOutbox()
 	return WriteOutbox(w, outboundDir)
@@ -106,7 +107,7 @@ func ReadInbound(w *game.World, dir string) (int, error) {
 			continue // not for us; leave it for the transport to route onward
 		}
 		result := w.ApplyPacket(p)
-		if len(result.Results) > 0 || len(result.Attacks) > 0 || len(result.Scores) > 0 {
+		if result.HasPayload() {
 			w.Outbox = append(w.Outbox, result)
 		}
 		if err := os.Remove(path); err != nil {

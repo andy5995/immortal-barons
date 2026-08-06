@@ -37,12 +37,23 @@ type Packet struct {
 	Recon        []ReconRequest // scouting asked of ToBoard (#61)
 	ReconReports []SpyReport    // answers coming back to the origin (#61)
 	Doomer       *DoomerStatus  // a doomsday weapon aimed at ToBoard (#63)
+	TimeChecks   []TimeCheck    // round-trip probes, out and echoed back (Travel Times)
 	// Seq numbers this board's outbound packets so the far side can spot one it
 	// has already applied, and Signature authenticates the parts only the
 	// Coordinator may author (#53).
 	Seq       uint64
 	Signature []byte
 	Reset     *LeagueReset // Coordinator's order to start a new season (#65)
+}
+
+// HasPayload reports whether p carries anything worth sending. The transport
+// asks before queueing a reply packet, so an answer that is only recon reports
+// or only an echoed probe still goes out.
+func (p Packet) HasPayload() bool {
+	return len(p.Scores) > 0 || len(p.Attacks) > 0 || len(p.Terrors) > 0 ||
+		len(p.Results) > 0 || len(p.Recon) > 0 || len(p.ReconReports) > 0 ||
+		len(p.TimeChecks) > 0 ||
+		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Doomer != nil || p.Reset != nil
 }
 
 // LeagueReset is the Coordinator's order for every board to wipe and start a new
@@ -303,6 +314,49 @@ type LeagueNode struct {
 	City    string
 	State   string
 	Country string
+}
+
+// LeaguePlanets lists the league's planets in the order the screens show them:
+// the coordinator's roster first, which is what carries the numbers and
+// locations a sysop configured, and then any board that has only ever been
+// heard from over a packet, numbered on after the roster. THIS board is in the
+// list, as it is in BRE's own "List of Planets"; KnownBoards is the view that
+// leaves it out.
+func (w *World) LeaguePlanets() []LeagueNode {
+	var planets []LeagueNode
+	seen := map[string]bool{}
+	next := 0
+	for _, n := range w.LeagueNodes {
+		if n.Name == "" || seen[n.Name] {
+			continue
+		}
+		seen[n.Name] = true
+		planets = append(planets, n)
+		if n.Number > next {
+			next = n.Number
+		}
+	}
+	for _, b := range w.RemoteBoards {
+		if b.BoardID == "" || seen[b.BoardID] {
+			continue
+		}
+		seen[b.BoardID] = true
+		next++
+		planets = append(planets, LeagueNode{Number: next, Name: b.BoardID})
+	}
+	return planets
+}
+
+// KnownBoards names every planet BUT this one — who a packet can be addressed
+// to, and who Travel Times measures.
+func (w *World) KnownBoards() []string {
+	var boards []string
+	for _, p := range w.LeaguePlanets() {
+		if p.Name != w.Config.BoardID {
+			boards = append(boards, p.Name)
+		}
+	}
+	return boards
 }
 
 // SpyReport is intel on a remote empire, stored in the planet-wide Spy
@@ -684,6 +738,8 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		w.postNews(fmt.Sprintf("Our agents reported back on %s of %s.", r.Empire, r.Board))
 	}
 	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
+	// A probe naming us goes straight back; one of ours coming home is measured.
+	result.TimeChecks = w.applyTimeChecks(p.TimeChecks)
 	// Scouting asked of us: answer with what is true here and now.
 	for _, req := range p.Recon {
 		if e := w.remoteTarget(req.TargetEmpire); e != nil {

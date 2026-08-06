@@ -504,17 +504,23 @@ func TestIPScoresMatchesBRE(t *testing.T) {
 	}
 }
 
-// TestTravelTimesMatchesBRE checks the Travel Times screen uses BRE's header and
-// shows a turnaround (days) for a board with a packet and "No Data" for one
-// without.
+// TestTravelTimesMatchesBRE checks the Travel Times screen uses BRE's header
+// and its two units — hours under two days, days above — with "No Data" for a
+// board that has never answered a probe. The figures are golden literals: 3.6
+// hours is 0.15 days and 2.50 days is 2.5, both as BRE quantizes them.
 func TestTravelTimesMatchesBRE(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")}
-	w := newWorld() // Today = 2026-07-03
-	w.RemoteBoards = []game.RemoteBoard{{BoardID: "ZZap BBS", Date: "2026-06-30"}}
+	w := newWorld()
+	w.RemoteBoards = []game.RemoteBoard{{BoardID: "ZZap BBS"}, {BoardID: "Far Star BBS"}}
 	w.LeagueNodes = []game.LeagueNode{{Number: 5, Name: "Sky Rocket BBS"}}
+	w.TravelTimes = map[string]float64{"ZZap BBS": 0.15, "Far Star BBS": 2.5}
 	travelTimes(f, w)
 	out := f.out.String()
-	for _, want := range []string{"Average Turn Around Times to All BBSes", "ZZap BBS", "days", "Sky Rocket BBS", "No Data"} {
+	for _, want := range []string{
+		"Average Turn Around Times to All BBSes",
+		"ZZap BBS", "3.60 hours", "Far Star BBS", "2.50 days",
+		"Sky Rocket BBS", "No Data",
+	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("travelTimes missing %q:\n%s", want, out)
 		}

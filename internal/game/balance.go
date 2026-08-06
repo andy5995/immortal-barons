@@ -940,3 +940,13 @@ const (
 	// jets knocks one percent off it. The jets are spent either way.
 	DoomerJetsPerPercent = 250
 )
+
+// Travel Times — how the average packet round trip to another board is kept.
+// BINARY-VERIFIED from BRE.OVR's TIME_CHECK handler (0x44745-0x44772): each
+// completed round trip folds in as avg = (avg + 2*elapsed) / 3, and the display
+// routine (0x23D70) reads in hours below two days and in days at or above it.
+const (
+	TravelAvgNewWeight = 2 // weight on the newest sample
+	TravelAvgDenom     = 3 // ... over (old + weight*new) / denom
+	TravelHoursCutoff  = 2 // days; under this the screen reads in hours
+)

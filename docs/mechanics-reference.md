@@ -1320,6 +1320,37 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 - **SDI** — funds whole per-point steps of `SDIStep` gold up to `SDIMax` (50%,
   per BRE's "up to 50%" missile interception).
 
+### Travel Times (binary-verified)
+
+BRE's "Average Turn Around Times to All BBSes" is a measurement of the
+*transport*, kept per node in `DATA\TIMES.BR` (255 six-byte reals, indexed by
+node number, in days). Read from the overlay routines at `BRE.OVR`
+0x445B0-0x44770 (the loader/saver and the `TIME_CHECK` handler) and 0x23D70 (the
+display):
+
+- **The probe.** A record of `{fromNode, toNode, sentStamp}` is sent to every
+  other active node. The receiving board's only job is to send it back
+  **unchanged**, with the two node bytes swapped; the stamp is never rewritten,
+  so what the originator finally measures is a full round trip.
+- **The average**, folded in when the echo comes home:
+  `avg = (avg + 2*elapsed) / 3` — weighted two-to-one toward the newest sample,
+  so a transport that changes speed is reflected within a few exchanges rather
+  than being diluted by every trip ever made. A board with `avg == 0` has never
+  completed one and reads "No Data".
+- **The display** quantizes before printing: under two days it shows
+  `round(days*240)/10` as `N.NN hours`; at two days or over,
+  `round(days*100)/100` as `N.NN days`. Colors are BRE's — bright green for
+  hours, cyan for days, red for "No Data" — and each row is the planet name in a
+  30-column field with the figure straight after, between two 75-column inset
+  rules.
+
+IB implements the mechanic as described. Constants: `TravelAvgNewWeight`,
+`TravelAvgDenom`, `TravelHoursCutoff` in `balance.go`. The probes ride along with
+whatever else the inter-BBS run is sending, once per game day
+(`World.PingTravelTimes`); the stamp is RFC3339, so boards in different time
+zones measure the same interval. What BRE keys off a configurable day interval,
+IB fixes at one day.
+
 ## Diplomacy
 
 **One relation per pair (BRE-faithful, #88).** Two empires hold exactly ONE

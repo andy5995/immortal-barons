@@ -526,6 +526,12 @@ type World struct {
 	RemoteBoards  []RemoteBoard
 	Pirates       []PirateFaction
 
+	// TravelTimes is the average packet round trip to each other board, in days,
+	// and LastTravelPing the game day the probes for it last went out — see
+	// ibbs_travel.go.
+	TravelTimes    map[string]float64
+	LastTravelPing string
+
 	// Market holds every empire's listings on the general Trading Market (#17);
 	// listed goods are escrowed out of the owner's inventory. MarketProceeds
 	// accrues each seller's unpaid sale gold, deposited at daily maintenance.

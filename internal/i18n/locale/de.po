@@ -24,10 +24,14 @@ msgstr ""
 msgid "# Owned"
 msgstr "# Besitz"
 
-#: internal/menu/actions_interbbs.go:325
+#: internal/menu/actions_interbbs.go:322
 #, fuzzy
-msgid "%.1f days"
+msgid "%.2f days"
 msgstr "vor %d Tagen"
+
+#: internal/menu/actions_interbbs.go:320
+msgid "%.2f hours"
+msgstr ""
 
 #: internal/menu/actions.go:65
 msgid "%d %s purchased."
@@ -68,7 +72,7 @@ msgstr ""
 msgid "%s  You have %s gold."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:447
+#: internal/menu/actions_interbbs.go:442
 msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
 msgstr ""
 
@@ -136,7 +140,7 @@ msgstr ""
 msgid "(the whole planet)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:521
+#: internal/menu/actions_interbbs.go:516
 msgid "(your current vote)"
 msgstr ""
 
@@ -151,11 +155,6 @@ msgstr "/-Befehl?"
 #: internal/menu/actions_info.go:665
 msgid ": News File"
 msgstr ""
-
-#: internal/menu/actions_interbbs.go:327
-#, fuzzy
-msgid "< 1 day"
-msgstr "vor 1 Tag"
 
 #: internal/menu/helpbrowse.go:112
 msgid ">"
@@ -262,7 +261,7 @@ msgstr ""
 msgid "Auto-Pay Maintenance"
 msgstr "Unterhalt:"
 
-#: internal/menu/actions_interbbs.go:303
+#: internal/menu/actions_interbbs.go:300
 msgid "Average Turn Around Times to All BBSes"
 msgstr ""
 
@@ -443,7 +442,7 @@ msgstr ""
 msgid "Current SDI Strength: %d%%"
 msgstr "Aktueller Steuersatz: %d%%"
 
-#: internal/menu/actions_interbbs.go:570
+#: internal/menu/actions_interbbs.go:565
 msgid "Current league diplomacy:"
 msgstr ""
 
@@ -649,7 +648,7 @@ msgstr ""
 msgid "How many %s?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:489
+#: internal/menu/actions_interbbs.go:484
 msgid "How many agents to send?"
 msgstr ""
 
@@ -833,7 +832,7 @@ msgstr "Letzter Planetenmeister: %s"
 msgid "Launch it now?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:588
+#: internal/menu/actions_interbbs.go:583
 msgid "League diplomacy updated. It will be broadcast to the league."
 msgstr ""
 
@@ -950,7 +949,7 @@ msgstr ""
 msgid "New amount of %s for sale"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:571
+#: internal/menu/actions_interbbs.go:566
 msgid "New league diplomacy declaration (blank to keep)"
 msgstr ""
 
@@ -958,7 +957,7 @@ msgstr ""
 msgid "New tax rate?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:317
+#: internal/menu/actions_interbbs.go:316
 msgid "No Data"
 msgstr ""
 
@@ -974,7 +973,7 @@ msgstr ""
 msgid "No inter-BBS scores have been imported yet."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:300
+#: internal/menu/actions_interbbs.go:296
 msgid "No other planets are known yet."
 msgstr ""
 
@@ -1015,7 +1014,7 @@ msgid ""
 "on the granary."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:567
+#: internal/menu/actions_interbbs.go:562
 msgid "Only the BBS Coordinator may set league diplomacy."
 msgstr ""
 
@@ -1114,7 +1113,7 @@ msgstr "Planetenaushang:"
 msgid "Planetary Tax Rate (%)"
 msgstr "Steuersatz setzen"
 
-#: internal/menu/actions_interbbs.go:366
+#: internal/menu/actions_interbbs.go:361
 #, fuzzy
 msgid "Planetary Treaties"
 msgstr "Planetenaushang:"
@@ -1363,7 +1362,7 @@ msgstr "Ausgabenmenü"
 msgid "Spy Database"
 msgstr "Hilfe-Datenbank"
 
-#: internal/menu/actions_interbbs.go:445
+#: internal/menu/actions_interbbs.go:440
 #, fuzzy
 msgid "Spy Database:"
 msgstr "Hilfe-Datenbank"
@@ -1440,7 +1439,7 @@ msgid "That empire has none of those for sale."
 msgstr ""
 "Es sind keine gegnerischen Imperien mehr übrig, die du angreifen kannst."
 
-#: internal/menu/actions_interbbs.go:434
+#: internal/menu/actions_interbbs.go:429
 msgid "That interplanetary operation is not yet available."
 msgstr ""
 
@@ -1484,7 +1483,7 @@ msgstr ""
 msgid "The R5-Slappenheimer is disabled."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:534
+#: internal/menu/actions_interbbs.go:529
 msgid "The current BBS Coordinator is %s."
 msgstr ""
 
@@ -1521,11 +1520,11 @@ msgstr ""
 msgid "The remaining %d%% is turned into gold."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:442
+#: internal/menu/actions_interbbs.go:437
 msgid "The spy database is empty. Spy on empires on other planets to fill it."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:530
+#: internal/menu/actions_interbbs.go:525
 #, fuzzy
 msgid "There are no barons to vote for yet."
 msgstr ""
@@ -1694,7 +1693,7 @@ msgstr ""
 msgid "Visit the Food Market to feed them, or they will starve."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:540
+#: internal/menu/actions_interbbs.go:535
 msgid "Vote for (0 to cancel)?"
 msgstr ""
 
@@ -1767,7 +1766,7 @@ msgstr ""
 msgid "While you were at the menus, this has happened:"
 msgstr "Seit deinem letzten Zug ist Folgendes geschehen:"
 
-#: internal/menu/actions_interbbs.go:536
+#: internal/menu/actions_interbbs.go:531
 msgid "Who should be the BBS Coordinator?"
 msgstr ""
 
@@ -1970,7 +1969,7 @@ msgstr "Deine Nachrichten:"
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:471
+#: internal/menu/actions_interbbs.go:466
 msgid ""
 "Your agents are on their way to %s on %s. Their report will reach the Spy "
 "Database when word comes back."
@@ -2054,11 +2053,11 @@ msgstr ""
 msgid "Your realm will be named %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:500
+#: internal/menu/actions_interbbs.go:495
 msgid "Your terrorists depart for %s on %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:552
+#: internal/menu/actions_interbbs.go:547
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 
@@ -2252,6 +2251,10 @@ msgstr ""
 #: internal/menu/input.go:356
 msgid "─»>Paused<«─"
 msgstr "─»>Pause<«─"
+
+#, fuzzy
+#~ msgid "< 1 day"
+#~ msgstr "vor 1 Tag"
 
 #, fuzzy
 #~ msgid "Max Tax Rate"

@@ -14,6 +14,10 @@ matters.
 - Group Attack — several rulers on your board join one strike against a distant
   enemy. The gains are shared among those who take part.
 - IP Scores — see how the boards rank against each other.
+- Travel Times — how long a message or a strike actually takes to reach each
+  planet and get an answer back. Boards trade mail on their sysops' schedule, so
+  check it before you aim anything: against a planet three days away, you are
+  committing forces you will not hear about until the weekend.
 
 A league game has a set length. When it ends, the world resets and a new game
 begins.
