@@ -19,6 +19,18 @@ import (
 	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
+// overridesMain is Material's custom_dir template. Extending base.html and
+// filling the extrahead block is the only hook the theme gives for adding
+// markup inside <head>, so anything that belongs there goes in this one file
+// and reaches every page in every language.
+const overridesMain = `{% extends "base.html" %}
+
+{% block extrahead %}
+  <link rel="alternate" type="application/atom+xml" title="Immortal Barons releases" href="https://github.com/andy5995/immortal-barons/releases.atom">
+  <link rel="alternate" type="application/rss+xml" title="X-Bit BBS" href="https://x-bit.org/rss/rss.xml">
+{% endblock %}
+`
+
 // extraCSS makes in-content links obviously links, and gives the left-hand nav
 // a clear hierarchy: top-level destinations read as headings, the nested Game
 // Instructions topics read as a quieter list beneath their category, and the
@@ -263,6 +275,15 @@ func Assemble(repoRoot, outDir string) error {
 		return err
 	}
 	if err := os.WriteFile(cssPath, []byte(extraCSS), 0o644); err != nil {
+		return err
+	}
+
+	// The custom_dir sits beside mkdocs.yml, not under docs_dir.
+	mainPath := filepath.Join(outDir, "overrides", "main.html")
+	if err := os.MkdirAll(filepath.Dir(mainPath), 0o755); err != nil {
+		return err
+	}
+	if err := os.WriteFile(mainPath, []byte(overridesMain), 0o644); err != nil {
 		return err
 	}
 

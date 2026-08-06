@@ -50,6 +50,7 @@ use_directory_urls: true
 
 theme:
   name: material
+  custom_dir: overrides
   features:
     # navigation.sections is deliberately NOT set: with it, a top-level group is
     # a flat always-open label, and Game Instructions' ~40 topics push every
