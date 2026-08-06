@@ -30,8 +30,7 @@
   twice, or to wait for a reply to a request you never sent. This tells you only
   about your own offers, so it does not show you anything about other players.
 - Send Message can write to all your allies at once — every realm on your board
-  that you hold a treaty with, of any kind. BRE writes to one realm or to all of
-  them, with nothing in between.
+  that you hold a treaty with, of any kind.
 - Some game values — such as attack rewards, unit prices, and economy rates —
   may not match BRE exactly. The game aims to get as close as it can, using
   BRE's own numbers where they are known. A few mechanics are still being built.
