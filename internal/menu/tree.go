@@ -413,6 +413,11 @@ func BuildMenus() *Menus {
 		{Key: '8', Label: "Game Bulletins", Do: showBulletinToday},
 		{Key: '9', Label: "InterPlanetary Ops", Do: gotoMenu(interplanetary), Hidden: ibbsHidden, Color: interplanetary.Color},
 		{Key: 'A', Label: "Instructions", Do: showInstructions},
+		// Also on the System menu, as Messages is. BRE has no Diplomacy item here
+		// at all — it sits two menus in, under System — but a treaty is answered
+		// between turns, like mail, so it belongs beside it on the way in (#70
+		// took it out of the pre-turn flow; this is where it lands instead).
+		{Key: 'D', Label: "Diplomacy", Do: gotoMenu(diplomacy)},
 		// MOVED here from the System menu, a divergence from BRE, which keeps it
 		// under System. A player wants the board's rules — turns per day,
 		// protection, how long they may stay away — before starting a turn, not two
