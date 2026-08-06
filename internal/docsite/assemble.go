@@ -240,6 +240,53 @@ const extraCSS = `/* Underline in-content links so they read as links, not just 
   text-underline-offset: 0.15em;
 }
 
+/* The News page's own list. It reuses what the sidebar block already
+   established — the hairline rule as the separator, the palette's lighter
+   foreground for the date, underlined links — rather than introducing a second
+   treatment for the same feed on the same screen.
+
+   The date is set in the monospace face: this site documents a game read in a
+   terminal, its pages are full of CP437 screens, and a BBS message header is
+   where a reader here has met a date line before. Measured against both
+   palettes, --md-default-fg-color--light is 4.6:1 on white and 5.0:1 on slate,
+   so the dimmer line still clears 4.5:1 as body text must. The blurb itself is
+   full-strength foreground: it is content now, not a label. */
+.md-typeset .ib-newslist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.md-typeset .ib-newslist__entry {
+  padding-bottom: 1.1rem;
+  margin-bottom: 1.1rem;
+  border-bottom: 1px solid var(--md-default-fg-color--lighter);
+}
+.md-typeset .ib-newslist__entry:last-child {
+  border-bottom: none;
+}
+.md-typeset .ib-newslist__title {
+  display: block;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--md-typeset-a-color);
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+.md-typeset .ib-newslist__date {
+  margin: 0.15rem 0 0.35rem;
+  font-family: var(--md-code-font-family);
+  font-size: 0.7rem;
+  color: var(--md-default-fg-color--light);
+}
+/* pre-line keeps the author's own line breaks — this feed is not hard-wrapped,
+   so its newlines separate a lead from a list of changes rather than being
+   wrap artifacts — while still collapsing stray runs of spaces and wrapping
+   long lines to the column. */
+.md-typeset .ib-newslist__summary {
+  margin: 0;
+  white-space: pre-line;
+}
+
 /* In the phone drawer this same block is nested under the current page, where
    the theme indents everything; pull it back so the headlines get the drawer's
    full width. */

@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -49,9 +50,10 @@ type rssChannel struct {
 }
 
 type rssItem struct {
-	Title   string `xml:"title"`
-	Link    string `xml:"link"`
-	PubDate string `xml:"pubDate"`
+	Title       string `xml:"title"`
+	Link        string `xml:"link"`
+	PubDate     string `xml:"pubDate"`
+	Description string `xml:"description"`
 }
 
 // news is a feed reduced to what the site renders, already validated.
@@ -60,9 +62,10 @@ type news struct {
 }
 
 type newsItem struct {
-	date  string
-	title string
-	link  string
+	date    string
+	title   string
+	link    string
+	summary string // the feed's own blurb, shown on the News page only
 }
 
 // loadNews fetches and validates the feed. A feed that cannot be read is not an
@@ -85,12 +88,60 @@ func loadNews(feedURL string) news {
 		if !ok || title == "" {
 			continue
 		}
-		out.items = append(out.items, newsItem{date: itemDate(it.PubDate), title: title, link: link})
+		out.items = append(out.items, newsItem{
+			date:    itemDate(it.PubDate),
+			title:   title,
+			link:    link,
+			summary: summarize(it.Description),
+		})
 		if len(out.items) == pageItems {
 			break
 		}
 	}
 	return out
+}
+
+// readMoreTail matches how the feed ends most of its blurbs: an invitation and
+// one or more bracketed links to the item's own page. Both are noise here — the
+// headline above the blurb is already a link there.
+var (
+	// readMoreTail is how the feed ends most blurbs: an optional invitation and
+	// one or more bracketed links back to the item's own page. The headline above
+	// already links there, so it is repetition on every entry.
+	readMoreTail = regexp.MustCompile(`(?is)\s*(would you like to know more\??)?(\s*\[\s*https?://[^\]]*\])+\s*$`)
+	blankLines   = regexp.MustCompile(`\n{3,}`)
+)
+
+// summarize tidies a feed blurb without rewriting it. Runs of spaces collapse
+// and the "read more" tail comes off, but the author's LINE BREAKS are kept:
+// nothing in this feed is hard-wrapped (its longest lines run past 200
+// characters), so every newline in it was put there on purpose — a lead
+// paragraph, a numbered list of what changed. The page renders them with
+// white-space: pre-line rather than reflowing the text into one block.
+//
+// The tail comes off only when what remains still reads as finished prose. Some
+// authors write the link INTO a sentence ("For more info and to download
+// visit:"), and taking it away there leaves the blurb hanging on a colon, which
+// reads like a truncation bug — worse than the repetition it was meant to save.
+//
+// The result is escaped by the caller: this is somebody else's text.
+func summarize(desc string) string {
+	full := tidyLines(desc)
+	trimmed := tidyLines(readMoreTail.ReplaceAllString(desc, ""))
+	if trimmed == "" || strings.HasSuffix(trimmed, ":") {
+		return full
+	}
+	return trimmed
+}
+
+// tidyLines collapses runs of spaces within each line and runs of blank lines
+// between them, leaving the line structure otherwise as written.
+func tidyLines(s string) string {
+	lines := strings.Split(strings.ReplaceAll(s, "\r\n", "\n"), "\n")
+	for i, l := range lines {
+		lines[i] = strings.Join(strings.Fields(l), " ")
+	}
+	return strings.TrimSpace(blankLines.ReplaceAllString(strings.Join(lines, "\n"), "\n\n"))
 }
 
 func fetchFeed(feedURL string) (*rssChannel, error) {
@@ -128,9 +179,22 @@ func newsPageMarkdown(n news) string {
 	b.WriteString("Headlines from [" + XBitNewsAlt + "](" + XBitNewsURL + "), a feed about\n")
 	b.WriteString("BBSes, BBS software, door games and the scene. The list is rebuilt once a\n")
 	b.WriteString("day.\n\n")
+	// Written as HTML rather than Markdown bullets: each entry is a headline, a
+	// date and the feed's own blurb, and the blurb is somebody else's text that
+	// has to be escaped anyway. Escaping it into HTML is one rule instead of two
+	// (Markdown's escapes AND the theme's). No headings, so twenty entries do not
+	// flood the page's table of contents.
+	b.WriteString(`<ul class="ib-newslist">` + "\n")
 	for _, it := range n.items {
-		b.WriteString("* " + it.date + " — [" + mdEscape(it.title) + "](" + it.link + ")\n")
+		b.WriteString(`  <li class="ib-newslist__entry">` + "\n")
+		b.WriteString(`    <a class="ib-newslist__title" href="` + htmlAttr(it.link) + `">` + htmlText(it.title) + `</a>` + "\n")
+		b.WriteString(`    <p class="ib-newslist__date">` + htmlText(it.date) + `</p>` + "\n")
+		if it.summary != "" {
+			b.WriteString(`    <p class="ib-newslist__summary">` + htmlText(it.summary) + `</p>` + "\n")
+		}
+		b.WriteString("  </li>\n")
 	}
+	b.WriteString("</ul>\n")
 	return b.String()
 }
 
