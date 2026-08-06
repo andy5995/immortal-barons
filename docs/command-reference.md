@@ -61,6 +61,11 @@ Use only one of `-utf8`, `-cp437` and `-ascii`. `-no-ansi` is separate and
 combines with any of them: the character set and whether escapes render are
 two different questions about a terminal.
 
+All four also apply to `-reset`. Because the full-screen Configuration Editor
+is drawn with escape sequences and cannot be drawn without them, `-no-ansi`
+opens the plain line-by-line editor instead — the same one a terminal that
+cannot render ANSI gets.
+
 ### Sysop and game admin
 
 These options are for the person who runs the game. Most of them do one job and

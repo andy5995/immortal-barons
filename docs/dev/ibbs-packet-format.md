@@ -29,21 +29,36 @@ transport that fans out must copy a broadcast to every other board's inbound.
 
 The JSON is `game.Packet`:
 
+Every field is optional; one packet carries whatever the run had to send. The
+authority is `game.Packet` — this is a reader's map of it, not a second
+definition.
+
 ```json
 {
   "FromBoard": "AlphaBBS",
-  "ToBoard": "",                 // "" = broadcast to the whole league
-  "Date": "2026-07-04",          // ISO; used for observed travel-time display
-  "Scores":  [ RemoteScore ],    // score share (feeds IP scores / attack targets)
-  "Attacks": [ RemoteAttack ],   // strikes landing on ToBoard
-  "Results": [ AttackResult ]    // outcomes returning to the origin
+  "ToBoard": "",                    // "" = broadcast to the whole league
+  "Date": "2026-07-04",             // ISO game date the packet was written
+  "Scores":  [ RemoteScore ],       // score share (feeds IP scores / attack targets)
+  "Attacks": [ RemoteAttack ],      // strikes landing on ToBoard
+  "Terrors": [ RemoteTerror ],      // terrorist ops landing on ToBoard
+  "Results": [ AttackResult ],      // outcomes returning to the origin
+  "Recon":   [ ReconRequest ],      // scouting asked of ToBoard (#61)
+  "ReconReports": [ SpyReport ],    // answers coming back to the origin (#61)
+  "Doomer":  DoomerStatus,          // a doomsday weapon aimed at ToBoard (#63)
+  "TimeChecks": [ TimeCheck ],      // round-trip probes, out and echoed back
+  "IPMessages": [ IPMessage ],      // interplanetary mail for ToBoard's barons
+  "LeagueConfig": LeagueConfig,     // coordinator's ruleset (signed)
+  "LeagueNodes": [ LeagueNode ],    // coordinator's roster (signed, #64)
+  "Reset": LeagueReset,             // coordinator's new-season order (signed, #65)
+  "Seq": 7,                         // per-sender sequence, for replay detection (#53)
+  "Signature": "base64"             // ed25519 over the coordinator-authored parts
 }
 ```
 
 Component types:
 
 ```json
-RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100 }
+RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940 }
 
 RemoteAttack  { "ID": 1, "FromBoard": "AlphaBBS", "TargetEmpire": "Victim",
                 "Offense": 150000, "Contributors": [ Contribution ] }
@@ -53,14 +68,31 @@ Contribution  { "Owner": "andy", "Offense": 100000 }   // for splitting spoils
 
 AttackResult  { "ID": 1, "TargetBoard": "BravoBBS", "TargetEmpire": "Victim",
                 "LandTaken": 12, "Won": true }
+
+TimeCheck     { "From": "AlphaBBS", "To": "BravoBBS",
+                "Sent": "2026-07-04T18:02:11+10:00" }
+                // From is the only board that reads the elapsed time; To echoes
+                // the record back UNCHANGED. RFC3339, so the two clocks may sit
+                // in different zones.
+
+IPMessage     { "FromBoard": "AlphaBBS", "FromEmpire": "Asgard",
+                "ToCoordinator": false, "ToEmpire": "",
+                "When": "07/04/2026  18:02:11", "Body": "..." }
+                // neither To* set = every realm on ToBoard reads it
 ```
 
 Processing (`World.ApplyPacket`): a packet addressed to this board (or a
-broadcast) is applied — scores import into `RemoteBoards`; attacks resolve
-against the named empire (offense vs defense, a capped land bite) and produce an
-`AttackResult` returned to the origin; incoming results post to the planetary
-bulletin. A packet addressed to a different board is left in place for the
-transport to route onward.
+broadcast) is applied — scores import into `RemoteBoards`; attacks and terror
+ops resolve and produce results returned to the origin; incoming results post to
+the planetary bulletin; recon requests are answered from live figures; IP
+messages are delivered to the mailboxes they name; and a time-check naming this
+board is echoed back untouched, while one of our own coming home is folded into
+`World.TravelTimes`. A packet addressed to a different board is left in place for
+the transport to route onward.
+
+A reply packet is written whenever it carries anything at all
+(`Packet.HasPayload`) — an answer that is only an echoed probe, or only recon
+reports, still has to go out.
 
 ## Node list: `ibnodes.dat`
 

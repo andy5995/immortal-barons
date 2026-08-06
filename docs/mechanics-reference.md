@@ -1320,6 +1320,23 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 - **SDI** — funds whole per-point steps of `SDIStep` gold up to `SDIMax` (50%,
   per BRE's "up to 50%" missile interception).
 
+**Picking a planet is one prompt everywhere.** BRE asks
+`Enter Planet Name or Number (? for list)` on every screen that needs a planet —
+the Spy Database's viewer and the IP Messages screens both, from the live
+capture — and `?` draws the red-ruled "List of Planets" table of number, planet
+name and location. The number is the planet's **roster** number (`ibnodes.dat`,
+BRE's BRNODES.DAT), so a planet keeps the same number on every screen; a board
+heard from over a packet but absent from the roster is numbered on after it.
+The list includes the board you are calling from.
+
+IB routes every planet pick through it (`pickPlanetNamed`): Create Group Attack,
+Indiv. Attack Force, the spy and terrorist targeting, the Doomer Kaboomer, and
+IP Messages. A name must be typed in full (case-insensitively) — whether BRE
+accepts an abbreviation was never observed, and guessing would risk sending to
+the wrong planet. An IB divergence: a message addressed to your OWN board is
+delivered locally rather than queued as a packet, which would otherwise leave
+for a transport with nowhere to take it.
+
 ### Travel Times (binary-verified)
 
 BRE's "Average Turn Around Times to All BBSes" is a measurement of the
@@ -1353,32 +1370,42 @@ IB fixes at one day.
 
 ### IP Messages
 
-BRE's interplanetary mail is addressed to a **planet**: it lands in the mailbox
-of everyone on the receiving side, so nothing sent over it is private. The menu
-(live capture) is Single
-Planet, Select Planets, All Planets, Allied Planets, Planet Coordinator, Quit,
-drawn as a 25-column cyan box. Naming a planet shows "Our current relations with
-X" first; the text is then written in the same 20-line editor local mail uses.
+Interplanetary mail is addressed to a **planet**, not to a baron: it lands in
+the mailbox of every realm on the receiving side. The menu (live capture) is
+Single Planet, Select Planets, All Planets, Allied Planets, Planet Coordinator,
+Quit, drawn as a 25-column cyan box. Naming a planet shows "Our current
+relations with X" first; the text is then written in the same 20-line editor
+local mail uses.
+
+Two addresses are narrower than a planet. **Planet Coordinator** reaches the
+receiving planet's elected Coordinator alone — BRE heads such a message
+`Message To  : Coordinator`. And a **reply** may be sent to its author alone;
+see below.
 
 IB implements all of it except **Allied Planets**, which has no list to draw
 from: IB models treaties between realms, not between planets, so the item says
 so rather than doing nothing (the same reason the Diplomacy List shows every
-planet as "None"). Delivery is to every living realm on the target planet;
-`Planet Coordinator` narrows it to the elected `BBSCoordinator`, and posts a news
-line if that planet has elected none.
+planet as "None"). A message to a planet reaches every living realm there,
+computer barons included, which is the same reach the local "send to all" has;
+a coordinator message with no Coordinator elected posts a news line instead.
 
-**Replying is BRE's own.** It ships a SECOND message reader for
-interplanetary mail (`DATA\MSG.BRF`, strings at `BRE.OVR` 0x1F94C), separate
-from the local one (`DATA\MSGS.DAT`, 0x1DC0E). It heads the box
-`Message From: <realm> on <planet>` (and `Message To  : Coordinator` for a
-coordinator message), offers the same R/D/I/Q, and asks **`Public Reply?`** —
-yes sends the answer to the whole of the author's planet, no to the author
-alone. It then offers `Quote Message?` with a first and last line to quote.
+**Replying is BRE's own.** It ships a SECOND message reader for interplanetary
+mail (`DATA\MSG.BRF`, strings at `BRE.OVR` 0x1F94C), separate from the local one
+(`DATA\MSGS.DAT`, 0x1DC0E). It heads the box `Message From: <realm> on <planet>`,
+offers the same R/D/I/Q, and asks **`Public Reply?`** — yes sends the answer to
+the whole of the author's planet, no to the author alone. It then offers
+`Quote Message?` with a first and last line to quote, and quotes under a
+`Quote From <realm> Of <planet>` header.
 
-IB implements the addressing (`IPMessage.ToEmpire` carries an author-only
-reply, `Message.FromBoard` the route home) and the "Public Reply?" prompt. It
-does not offer the line-range quote — IB quotes the whole message, as it already
-does for local mail.
+IB implements the addressing (`IPMessage.ToEmpire` carries an author-only reply,
+`Message.FromBoard` the route home), the "Public Reply?" prompt, and both
+headers. Two divergences:
+
+- **One reader, not two.** IB has a single mail reader that names the planet
+  when a message came from one, where BRE keeps a separate interplanetary
+  reader. The screens read the same; the duplication is not worth reproducing.
+- **No line-range quote.** `Quote Message?` with a first and last line is not
+  offered — IB quotes the whole message, as it already does for local mail.
 
 ## Diplomacy
 
@@ -1608,6 +1635,10 @@ Now matching this reference (as of v0.0.4):
 - The InterBBS (interplanetary) layer: file-drop packets, group and individual
   attacks, spying another planet, a Doomer Kaboomer aimed across planets, and
   league orders signed by the coordinator
+- IP Messages: mail addressed to a planet, to its Coordinator, or back to one
+  author, written in the same editor local mail uses
+- Travel Times: the average round trip to each planet, measured by a probe the
+  far board echoes back
 - A daily Planetary Master, crowned as `LastMaster` when a season ends
 
 Still missing against the reference:
