@@ -531,20 +531,28 @@ func (w *World) ExportScores() {
 	w.Outbox = append(w.Outbox, Packet{FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores})
 }
 
-// enqueue appends atk to the outbound packet for toBoard, creating it if needed.
-func (w *World) enqueue(toBoard string, atk RemoteAttack) {
+// outboxFor returns the queued packet bound for board, creating it if this is
+// the first payload addressed there this run. The pointer is only good until
+// the next call — appending to the Outbox can move the packets — so fill it in
+// before asking for another.
+func (w *World) outboxFor(board string) *Packet {
 	for i := range w.Outbox {
-		if w.Outbox[i].ToBoard == toBoard {
-			w.Outbox[i].Attacks = append(w.Outbox[i].Attacks, atk)
-			return
+		if w.Outbox[i].ToBoard == board {
+			return &w.Outbox[i]
 		}
 	}
 	w.Outbox = append(w.Outbox, Packet{
 		FromBoard: w.Config.BoardID,
-		ToBoard:   toBoard,
+		ToBoard:   board,
 		Date:      w.LastMaintDate,
-		Attacks:   []RemoteAttack{atk},
 	})
+	return &w.Outbox[len(w.Outbox)-1]
+}
+
+// enqueue appends atk to the outbound packet for toBoard, creating it if needed.
+func (w *World) enqueue(toBoard string, atk RemoteAttack) {
+	p := w.outboxFor(toBoard)
+	p.Attacks = append(p.Attacks, atk)
 }
 
 // SendTerror queues a terror op against targetEmpire on targetBoard, committing
@@ -569,18 +577,8 @@ func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents i
 		Owner:        e.Owner,
 		Agents:       agents,
 	})
-	for i := range w.Outbox {
-		if w.Outbox[i].ToBoard == targetBoard {
-			w.Outbox[i].Terrors = append(w.Outbox[i].Terrors, t)
-			return nil
-		}
-	}
-	w.Outbox = append(w.Outbox, Packet{
-		FromBoard: w.Config.BoardID,
-		ToBoard:   targetBoard,
-		Date:      w.LastMaintDate,
-		Terrors:   []RemoteTerror{t},
-	})
+	p := w.outboxFor(targetBoard)
+	p.Terrors = append(p.Terrors, t)
 	return nil
 }
 
@@ -857,18 +855,8 @@ func (w *World) SendRecon(e *Empire, targetBoard, targetEmpire string) error {
 	e.Agents--
 	w.NextAttackID++
 	req := ReconRequest{ID: w.NextAttackID, FromBoard: w.Config.BoardID, FromOwner: e.Owner, TargetEmpire: targetEmpire}
-	for i := range w.Outbox {
-		if w.Outbox[i].ToBoard == targetBoard {
-			w.Outbox[i].Recon = append(w.Outbox[i].Recon, req)
-			return nil
-		}
-	}
-	w.Outbox = append(w.Outbox, Packet{
-		FromBoard: w.Config.BoardID,
-		ToBoard:   targetBoard,
-		Date:      w.LastMaintDate,
-		Recon:     []ReconRequest{req},
-	})
+	p := w.outboxFor(targetBoard)
+	p.Recon = append(p.Recon, req)
 	return nil
 }
 
@@ -895,18 +883,7 @@ func (w *World) ExportDoomerGone(board string) {
 }
 
 func (w *World) enqueueDoomer(board string, st *DoomerStatus) {
-	for i := range w.Outbox {
-		if w.Outbox[i].ToBoard == board {
-			w.Outbox[i].Doomer = st
-			return
-		}
-	}
-	w.Outbox = append(w.Outbox, Packet{
-		FromBoard: w.Config.BoardID,
-		ToBoard:   board,
-		Date:      w.LastMaintDate,
-		Doomer:    st,
-	})
+	w.outboxFor(board).Doomer = st
 }
 
 // applyDoomerStatus takes in what another planet says about the weapon it is
