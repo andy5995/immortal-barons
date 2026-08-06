@@ -1351,6 +1351,35 @@ whatever else the inter-BBS run is sending, once per game day
 zones measure the same interval. What BRE keys off a configurable day interval,
 IB fixes at one day.
 
+### IP Messages
+
+BRE's interplanetary mail is addressed to a **planet**: it lands in the mailbox
+of everyone on the receiving side, so nothing sent over it is private. The menu
+(live capture) is Single
+Planet, Select Planets, All Planets, Allied Planets, Planet Coordinator, Quit,
+drawn as a 25-column cyan box. Naming a planet shows "Our current relations with
+X" first; the text is then written in the same 20-line editor local mail uses.
+
+IB implements all of it except **Allied Planets**, which has no list to draw
+from: IB models treaties between realms, not between planets, so the item says
+so rather than doing nothing (the same reason the Diplomacy List shows every
+planet as "None"). Delivery is to every living realm on the target planet;
+`Planet Coordinator` narrows it to the elected `BBSCoordinator`, and posts a news
+line if that planet has elected none.
+
+**Replying is BRE's own.** It ships a SECOND message reader for
+interplanetary mail (`DATA\MSG.BRF`, strings at `BRE.OVR` 0x1F94C), separate
+from the local one (`DATA\MSGS.DAT`, 0x1DC0E). It heads the box
+`Message From: <realm> on <planet>` (and `Message To  : Coordinator` for a
+coordinator message), offers the same R/D/I/Q, and asks **`Public Reply?`** —
+yes sends the answer to the whole of the author's planet, no to the author
+alone. It then offers `Quote Message?` with a first and last line to quote.
+
+IB implements the addressing (`IPMessage.ToEmpire` carries an author-only
+reply, `Message.FromBoard` the route home) and the "Public Reply?" prompt. It
+does not offer the line-range quote — IB quotes the whole message, as it already
+does for local mail.
+
 ## Diplomacy
 
 **One relation per pair (BRE-faithful, #88).** Two empires hold exactly ONE

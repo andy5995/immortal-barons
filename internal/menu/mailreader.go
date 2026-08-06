@@ -21,6 +21,13 @@ const (
 
 type mailReply struct {
 	toName string
+	// board names the planet an interplanetary reply goes back to, and is empty
+	// for local mail. The author of an IP message is not a realm anyone here can
+	// look up, so without it the reply would quietly go nowhere.
+	board string
+	// public sends an interplanetary reply to the whole of that planet rather
+	// than to its author — BRE's "Public Reply?".
+	public bool
 	body   string
 }
 
@@ -51,9 +58,12 @@ func mailReader(s session.Session, w *ctx) {
 		case 'D':
 			deleted = append(deleted, m)
 		case 'R':
+			// An interplanetary reply is answered before it is written, as the
+			// original asks it: to that planet at large, or to its author alone.
+			public := m.FromBoard != "" && AskYesNo(s, "Public Reply?", false)
 			body, send := composeMessage(s)
 			if send && strings.TrimSpace(body) != "" {
-				replies = append(replies, mailReply{m.From, quoteReply(m) + "\n" + body})
+				replies = append(replies, mailReply{m.From, m.FromBoard, public, quoteReply(m) + "\n" + body})
 			}
 		}
 		// 'I' (and any default): keep the message and advance.
@@ -79,6 +89,10 @@ func applyMailActions(w *ctx, deleted []game.Message, replies []mailReply) {
 			}
 		}
 		for _, r := range replies {
+			if r.board != "" {
+				w.World.ReplyIPMessage(p, r.board, r.toName, r.body, r.public)
+				continue
+			}
 			recip := findRealm(w, r.toName)
 			if recip == nil || recip == p {
 				continue
@@ -99,7 +113,13 @@ func applyMailActions(w *ctx, deleted []game.Message, replies []mailReply) {
 // message being answered.
 func quoteReply(m game.Message) string {
 	var b strings.Builder
-	fmt.Fprintf(&b, "> Quote From %s", m.From)
+	// The interplanetary reader names the planet as well, as BRE's does
+	// ("Quote From <realm> Of <planet>").
+	if m.FromBoard != "" {
+		fmt.Fprintf(&b, "> Quote From %s Of %s", m.From, m.FromBoard)
+	} else {
+		fmt.Fprintf(&b, "> Quote From %s", m.From)
+	}
 	for _, line := range strings.Split(m.Body, "\n") {
 		if strings.HasPrefix(line, ">") {
 			continue
@@ -149,8 +169,12 @@ func renderMessage(s session.Session, m game.Message) {
 		ansi.FgCyan, strings.Repeat("─", fill),
 		ansi.FgBrightWhite, when,
 		ansi.FgCyan, strings.Repeat("─", 5), ansi.Reset)
+	from := m.From
+	if m.FromBoard != "" {
+		from = fmt.Sprintf(tr(s, "%s on %s"), m.From, m.FromBoard)
+	}
 	fmt.Fprintf(s, "%s│ %s%s%s%s%s\n",
-		ansi.FgCyan, ansi.FgWhite, tr(s, "Message From: "), ansi.FgBrightCyan, m.From, ansi.Reset)
+		ansi.FgCyan, ansi.FgWhite, tr(s, "Message From: "), ansi.FgBrightCyan, from, ansi.Reset)
 	fmt.Fprintf(s, "%s│ %s%s%s%s%s\n",
 		ansi.FgCyan, ansi.FgWhite, tr(s, "Message To  : "), ansi.FgBrightGreen, m.To, ansi.Reset)
 	fmt.Fprintf(s, "%s├%s%s\n", ansi.FgCyan, insetRule(mailSepWidth-1, 8), ansi.Reset)

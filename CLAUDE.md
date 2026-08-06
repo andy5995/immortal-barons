@@ -245,7 +245,9 @@ etc.); a league Coordinator broadcasts the whole ruleset over inter-BBS.
 
 **Inter-BBS ("Option A")**: file-drop `.brp` JSON packets in Inbound/Outbound
 dirs; the sysop's transport moves them; `-planetary` processes inbound, launches
-group attacks, and exports scores/news. **Localization**: help docs (po4a) and
+group attacks, and exports scores/news. IP Messages (planet-addressed mail, with
+an IB-only reply path) and Travel Times (measured round trips, kept by a probe
+that rides the packets) ride the same transport. **Localization**: help docs (po4a) and
 UI strings (`internal/i18n`) render in the caller's language; de/ru are seeded
 and grow via the `.po` catalogs.
 

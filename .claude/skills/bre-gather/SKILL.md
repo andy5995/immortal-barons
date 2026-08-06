@@ -425,6 +425,33 @@ order.
 `len("View IPScores")`. A run of 16-bit little-endian values before a menu
 cluster is usually a Pascal case/jump table, not data you want.
 
+**Never claim BRE LACKS a feature from the screen you happened to look at.**
+Saying "the original has no X" is a claim about the WHOLE binary, and it needs a
+search of the whole binary — one `strings | grep -i` for the feature's verb costs
+one command. Real miss (2026-08-06, caught by Andy): I built interplanetary
+messages, saw no reply path in the IP Messages *sending* menu, and wrote into a
+commit message and the spec that "BRE gives no way to answer one". One
+`strings BRE.OVR | grep -i repl` found `Reply, / Delete, / Ignore, / Quit`
+**twice** — because BRE has TWO message readers, and the second is the
+interplanetary one. It even has a prompt the local reader does not:
+
+- **local reader** — `DATA\MSGS.DAT` (BRE.OVR ~0x1DC0E): `Message From: ` /
+  `Message To  : `, R/D/I/Q, then `Public Reply, ` / `Author only, or ` /
+  `Select Destinations? `.
+- **interplanetary reader** — `DATA\MSG.BRF` (~0x1F94C): `Message From: ` +
+  ` on ` + `Unknown on ` (realm ON planet), `Message To  : ` + `Coordinator`,
+  R/D/I/Q, then a two-way **`Public Reply?`** — the answer goes to the whole
+  planet or to the author alone — plus `Quote Message?` with first/last line.
+
+Two lessons, both cheap to apply. **BRE duplicates whole subsystems rather than
+parameterising them**, so the local and interplanetary versions of a feature sit
+in different overlay units with near-identical strings; finding one tells you
+nothing about the other, and the interplanetary twin is usually the one you
+skipped. And **absence of evidence in one menu is not evidence of absence** —
+before writing "BRE does not do X" into a commit, a doc, or the spec, grep for
+X's own words, and say "not found in the sending menu; not searched further" if
+that is all you did.
+
 **The variant-string trap (a number in a string may be the WRONG variant's
 number).** A literal value baked into a string is only authoritative for *that
 call site*, and BRE often has several near-identical strings for variants of one

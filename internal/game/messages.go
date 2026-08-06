@@ -17,6 +17,10 @@ type Message struct {
 	To   string
 	When string
 	Body string
+	// FromBoard names the sending planet on an interplanetary message, and is
+	// empty on local mail. It is what lets a reply find its way back off this
+	// planet, since the sender is not a realm anyone here can look up.
+	FromBoard string `json:",omitempty"`
 }
 
 // UnmarshalJSON accepts a bare string as well as an object, so a world saved

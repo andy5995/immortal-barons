@@ -47,6 +47,9 @@ func BuildMenus() *Menus {
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightGreen, ExitOnEnter: true, Status: covertStatus}
 	bombTargets := &Menu{Title: "Bomb Enemy Targets", Color: ansi.FgBrightGreen, ExitOnEnter: true}
 	ipSpecial := &Menu{Title: "Special Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
+	// BRE draws IP Messages as a narrow single-column box (25 columns, from a
+	// live capture) rather than at the full menu width.
+	ipMessages := &Menu{Title: "IP Messages", Color: ansi.FgBrightCyan, ExitOnEnter: true, Width: 25}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
 	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
 	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
@@ -184,7 +187,7 @@ func BuildMenus() *Menus {
 		{Key: '4', Label: "Create Group Attack", Do: createGroupAttack},
 		{Key: '5', Label: "Join Group Attack", Do: joinGroupAttack},
 		{Key: '6', Label: "Indiv. Attack Force", Do: indivAttackForce},
-		{Key: '7', Label: "Send Message", Do: sendMessage},
+		{Key: '7', Label: "Send Message", Do: gotoMenu(ipMessages)},
 		{Key: '8', Label: "Special Operations", Do: gotoMenu(ipSpecial)},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'K', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer},
@@ -196,6 +199,18 @@ func BuildMenus() *Menus {
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	interplanetary.DefaultOnEnter = quitOnEnter(interplanetary)
+
+	// IP Messages: BRE's interplanetary mail, addressed to planets rather than
+	// to barons. Items, order and hotkeys are the original's.
+	ipMessages.Items = []Item{
+		{Key: '1', Label: "Single Planet", Do: ipMessageSingle},
+		{Key: '2', Label: "Select Planets", Do: ipMessageSelect},
+		{Key: '3', Label: "All Planets", Do: ipMessageAll},
+		{Key: '4', Label: "Allied Planets", Do: ipMessageAllied},
+		{Key: '5', Label: "Planet Coordinator", Do: ipMessageCoordinator},
+		{Key: '0', Label: "Quit", Do: back},
+	}
+	ipMessages.DefaultOnEnter = quitOnEnter(ipMessages)
 
 	// Order, numeric hotkeys, and per-op gold costs match BRE's live Covert
 	// Operations menu (2026-07-21); costs are the balance.go Cost* constants

@@ -38,6 +38,7 @@ type Packet struct {
 	ReconReports []SpyReport    // answers coming back to the origin (#61)
 	Doomer       *DoomerStatus  // a doomsday weapon aimed at ToBoard (#63)
 	TimeChecks   []TimeCheck    // round-trip probes, out and echoed back (Travel Times)
+	IPMessages   []IPMessage    // interplanetary mail for ToBoard's barons
 	// Seq numbers this board's outbound packets so the far side can spot one it
 	// has already applied, and Signature authenticates the parts only the
 	// Coordinator may author (#53).
@@ -52,7 +53,7 @@ type Packet struct {
 func (p Packet) HasPayload() bool {
 	return len(p.Scores) > 0 || len(p.Attacks) > 0 || len(p.Terrors) > 0 ||
 		len(p.Results) > 0 || len(p.Recon) > 0 || len(p.ReconReports) > 0 ||
-		len(p.TimeChecks) > 0 ||
+		len(p.TimeChecks) > 0 || len(p.IPMessages) > 0 ||
 		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Doomer != nil || p.Reset != nil
 }
 
@@ -736,6 +737,9 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	for _, r := range p.ReconReports {
 		w.SpyDatabase = append(w.SpyDatabase, r)
 		w.postNews(fmt.Sprintf("Our agents reported back on %s of %s.", r.Empire, r.Board))
+	}
+	for _, m := range p.IPMessages {
+		w.deliverIPMessage(m)
 	}
 	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
 	// A probe naming us goes straight back; one of ours coming home is measured.
