@@ -105,6 +105,10 @@ func main() {
 		os.Exit(2)
 	}
 
+	// Every mode that draws at THIS terminal resolves the charset the same way;
+	// only the door reads it from the caller's BBS instead (encodeFor, below).
+	localCS := wantCharset(*utf8, *cp437, *asciiOut, true)
+
 	// Only the default door front-end takes a positional argument (a dropfile path
 	// when -dropfile isn't given). Every explicit-mode flag consumes none, so a
 	// stray word alongside one is a mistake — flag it instead of silently ignoring
@@ -209,12 +213,12 @@ func main() {
 	}
 
 	if *reset {
-		exitOn("-reset", runReset(cfg, false))
+		exitOn("-reset", runReset(cfg, false, localCS, *noANSI))
 		return
 	}
 
 	if *resetFromConfig {
-		exitOn("-reset-from-config", runReset(cfg, true))
+		exitOn("-reset-from-config", runReset(cfg, true, localCS, *noANSI))
 		return
 	}
 
@@ -248,7 +252,7 @@ func main() {
 	}
 
 	if *local {
-		runLocal(cfg, *name, today, wantCharset(*utf8, *cp437, *asciiOut, true), *noANSI)
+		runLocal(cfg, *name, today, localCS, *noANSI)
 		return
 	}
 
@@ -623,7 +627,7 @@ func runLeagueConfig(cfg game.Config) error {
 // settings editor seeded from defaults and saves the edited config.json. With
 // fromConfig=true (-reset-from-config) it skips the editor and keeps the current
 // config.json as-is. Either way the world is wiped and re-seeded.
-func runReset(cfg game.Config, fromConfig bool) error {
+func runReset(cfg game.Config, fromConfig bool, cs charset, noANSI bool) error {
 	// No drop file prompt here: a reset seeds the world for the web front-end and
 	// -local play too, neither of which reads a drop file. The door names
 	// -set-dropfile when it needs it.
@@ -674,19 +678,27 @@ func runReset(cfg game.Config, fromConfig bool) error {
 	// On a real terminal use the tabbed tview editor (issue #7); fall back to the
 	// line-based editor when stdin is piped/redirected, the console cannot render
 	// ANSI at all (a legacy Windows console — issue #98; tcell writes the escapes
-	// regardless and never notices they came out as text), or the TUI can't init.
+	// regardless and never notices they came out as text), the sysop asked for no
+	// ANSI, or the TUI can't init. -no-ansi has to bypass the TUI rather than be
+	// applied to it: tview draws with escapes and offers no way not to.
 	saved, usedTUI := false, false
 	vtOK, restoreVT := session.EnableVirtualTerminal()
 	defer restoreVT()
-	if session.StdinIsTerminal() && vtOK {
+	if session.StdinIsTerminal() && vtOK && !noANSI {
 		if s, err := menu.ConfigEditorTUI(w); err == nil {
 			saved, usedTUI = s, true
 		}
 	}
 	if !usedTUI {
 		c := session.NewConsole()
-		fmt.Fprint(c, "\r\nConfigure the game below (starting from defaults). Choose S to save the settings and start a fresh game, or Q to cancel.\r\n")
-		saved = menu.ConfigEditor(c, w)
+		if noANSI {
+			c.SetPlain()
+		}
+		// The editor honours the same charset flags the rest of the game does, so
+		// a terminal that reads neither CP437 nor UTF-8 gets its rules in ASCII.
+		s := encodeFor(session.Session(c), cs)
+		fmt.Fprint(s, "\r\nConfigure the game below (starting from defaults). Choose S to save the settings and start a fresh game, or Q to cancel.\r\n")
+		saved = menu.ConfigEditor(s, w)
 		c.Close()
 	}
 
