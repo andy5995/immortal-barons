@@ -103,3 +103,34 @@ func TestIPMessageAbortSendsNothing(t *testing.T) {
 		t.Errorf("an aborted message was queued: %+v", w.Outbox)
 	}
 }
+
+// TestRemoteTargetUsesBREPlanetPrompt covers the picker every targeting screen
+// shares after #1 of the slop audit: BRE asks for a planet by name or number
+// with "?" for the list, and the number is the planet's ROSTER number, not its
+// position in whatever subset a screen can reach. Terrorist Ops stands in for
+// the four screens that go through pickRemoteTarget.
+func TestRemoteTargetUsesBREPlanetPrompt(t *testing.T) {
+	w := ipWorld()
+	w.RemoteBoards = []game.RemoteBoard{
+		{BoardID: "The Eclipse", Scores: []game.RemoteScore{{Empire: "Iron Dominion", Land: 900}}},
+	}
+	p := w.Player()
+	p.Agents, p.Protection = 50, 0
+	// "?" lists the planets, "4" names The Eclipse by its ROSTER number (it is
+	// third in the roster and the only reachable board, so a positional picker
+	// would have wanted "1"), then the baron and 10 agents.
+	f := &fakeSession{keys: []rune("?\r4\r1\r10\r ")}
+	terroristOps(f, w)
+	out := f.out.String()
+	for _, want := range []string{"Enter Planet Name or Number", "List of Planets", "Terrorize which baron?"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("Terrorist Ops missing %q:\n%s", want, out)
+		}
+	}
+	if len(w.Outbox) != 1 || len(w.Outbox[0].Terrors) != 1 {
+		t.Fatalf("no terror op was queued: %+v", w.Outbox)
+	}
+	if got := w.Outbox[0].ToBoard; got != "The Eclipse" {
+		t.Errorf("queued against %q, want The Eclipse", got)
+	}
+}

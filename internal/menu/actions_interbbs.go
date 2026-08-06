@@ -76,7 +76,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 		boards[i] = b.BoardID
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
-	board := pickFromList(s, "Planet", boards)
+	board := pickPlanetNamed(s, w, boards)
 	if board == "" {
 		return Stay
 	}
@@ -251,7 +251,7 @@ func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 		return "", ""
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
-	board = pickFromList(s, "Planet", boards)
+	board = pickPlanetNamed(s, w, boards)
 	if board == "" {
 		return "", ""
 	}
@@ -327,40 +327,14 @@ func turnaroundLabel(s session.Session, days float64) (string, string) {
 // treaty in force. IB has no inter-BBS treaty mechanic yet, so each shows
 // "None" — which is what the observed BRE board displayed as well.
 func planetaryTreaties(s session.Session, w *ctx) Result {
-	type row struct {
-		num  int
-		name string
-	}
-	var rows []row
-	w.With(func() {
-		seen := map[string]bool{}
-		maxNum := 1
-		for _, n := range w.LeagueNodes {
-			if seen[n.Name] {
-				continue
-			}
-			seen[n.Name] = true
-			rows = append(rows, row{n.Number, n.Name})
-			if n.Number > maxNum {
-				maxNum = n.Number
-			}
-		}
-		for _, b := range w.RemoteBoards {
-			if seen[b.BoardID] {
-				continue
-			}
-			seen[b.BoardID] = true
-			maxNum++
-			rows = append(rows, row{maxNum, b.BoardID})
-		}
-	})
+	rows := knownPlanets(w)
 	if len(rows) == 0 {
 		ok(s, "No other planets are known yet.")
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Planetary Treaties"), ansi.Reset)
 	for _, r := range rows {
-		fmt.Fprintf(s, "  %s(%2d)%s %-24s %s\n", ansi.FgBrightRed, r.num, ansi.Reset, r.name, tr(s, "None"))
+		fmt.Fprintf(s, "  %s(%2d)%s %-24s %s\n", ansi.FgBrightRed, r.Number, ansi.Reset, r.Name, planetRelation(s))
 	}
 	pause(s)
 	return Stay
@@ -379,7 +353,7 @@ func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt strin
 		boards[i] = b.BoardID
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, planetPrompt), ansi.Reset)
-	board = pickFromList(s, "Planet", boards)
+	board = pickPlanetNamed(s, w, boards)
 	if board == "" {
 		return "", "", sc, false
 	}

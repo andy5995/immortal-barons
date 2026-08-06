@@ -506,7 +506,7 @@ func startDoomer(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
-	board := pickFromList(s, "Planet", boards)
+	board := pickPlanetNamed(s, w, boards)
 	if board == "" {
 		return Stay
 	}

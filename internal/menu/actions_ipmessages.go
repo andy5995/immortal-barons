@@ -33,6 +33,19 @@ func knownPlanets(w *ctx) []game.LeagueNode {
 	return planets
 }
 
+// planetsNamed keeps the league planets whose names are in want, so a screen
+// that can only target boards it has scores for still shows them with their
+// roster number and location.
+func planetsNamed(w *ctx, want []string) []game.LeagueNode {
+	var list []game.LeagueNode
+	for _, p := range knownPlanets(w) {
+		if slices.Contains(want, p.Name) {
+			list = append(list, p)
+		}
+	}
+	return list
+}
+
 // nodeLocation joins a roster entry's city/state/country the way BRE's planet
 // list prints it, skipping the parts a sysop left blank.
 func nodeLocation(n game.LeagueNode) string {
@@ -111,15 +124,34 @@ func matchPlanet(planets []game.LeagueNode, typed string) *game.LeagueNode {
 	return nil
 }
 
+// pickPlanetNamed is the whole prompt for a screen that already knows which
+// planets it may target: BRE asks for a planet the same way everywhere, so
+// every targeting screen goes through here. Returns "" if the caller cancels or
+// none of the named planets is known.
+func pickPlanetNamed(s session.Session, w *ctx, want []string) string {
+	list := planetsNamed(w, want)
+	if len(list) == 0 {
+		return ""
+	}
+	if p := pickPlanet(s, list); p != nil {
+		return p.Name
+	}
+	return ""
+}
+
+// planetRelation is this planet's standing with another one. IB has no
+// planet-to-planet treaty mechanic, so it is always "None" — as it read on the
+// observed BRE board too. Both screens that show a relation go through here, so
+// the day planets can hold treaties there is one place to change.
+func planetRelation(s session.Session) string { return tr(s, "None") }
+
 // showRelation prints BRE's "Our current relations with X" line, which it shows
-// before a message goes to a named planet. IB has no planet-to-planet treaty
-// mechanic, so the answer is always "None" — as it read on the observed BRE
-// board too.
+// before a message goes to a named planet.
 func showRelation(s session.Session, planet string) {
 	fmt.Fprintf(s, "%s%s %s%s%s: %s%s\n",
 		ansi.FgWhite, tr(s, "Our current relations with"),
 		ansi.FgBrightWhite, planet, ansi.FgWhite,
-		tr(s, "None"), ansi.Reset)
+		planetRelation(s), ansi.Reset)
 }
 
 // The five IP Messages items: one planet, as many as the sender keeps naming,

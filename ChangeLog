@@ -1,6 +1,7 @@
 (in-progress:)
   * Implemented IP mail
   * Travel Times shows the measured round trip to each planet, in hours or days
+  * Every screen asks for a planet by name or number, with "?" for the list
   * The website carries the latest X-News headlines, rebuilt daily
 
 2026-08-05 (v0.0.4)
