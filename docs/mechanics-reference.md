@@ -1398,14 +1398,40 @@ the whole of the author's planet, no to the author alone. It then offers
 `Quote From <realm> Of <planet>` header.
 
 IB implements the addressing (`IPMessage.ToEmpire` carries an author-only reply,
-`Message.FromBoard` the route home), the "Public Reply?" prompt, and both
-headers. Two divergences:
+`Message.FromBoard` the route home), the "Public Reply?" prompt, both headers,
+and the quote (below). One divergence: IB has a **single mail reader** that
+names the planet when a message came from one, where BRE keeps a separate
+interplanetary reader. The screens read the same; the duplication is not worth
+reproducing.
 
-- **One reader, not two.** IB has a single mail reader that names the planet
-  when a message came from one, where BRE keeps a separate interplanetary
-  reader. The screens read the same; the duplication is not worth reproducing.
-- **No line-range quote.** `Quote Message?` with a first and last line is not
-  offered — IB quotes the whole message, as it already does for local mail.
+### Quoting a reply
+
+Both of BRE's readers offer the same quote, and IB's one reader does it for
+local and interplanetary mail alike (captured live, `cap/eots-ibbs.cap`):
+
+- **`Quote Message? (Y/n)`** — default **Yes**.
+- **`First Line to Quote:`** and **`Last Line to Quote:`**, in the message's own
+  line numbers. The bounds are forgiving, not strict: the captured reply answered
+  20 for a message one line long and was quoted without complaint. In IB a line
+  past the end meets the same clamp-and-confirm every over-max entry does (#9) —
+  the figure is corrected to the message's length on screen and a **second Enter**
+  commits it, so an over-range answer costs one extra keypress rather than an
+  error.
+- The chosen lines open the editor **already in it**, each prefixed `> ` under a
+  `> Quote From <realm>` header (`> Quote From <realm> Of <planet>` on the
+  interplanetary side). They are ordinary editor lines from there on — numbered,
+  counted against the 20-line limit, and cleared by `/C` with everything else.
+  BRE numbers them in blue where a line being typed is green, and IB does the
+  same.
+- A line that was **already** quoted carries over like any other, nesting as
+  `> > `. Choosing the range is what keeps a long exchange from growing without
+  bound — IB used to drop previously-quoted lines instead, which it no longer
+  needs to do now that the range is asked for.
+
+IB's own additions to the range prompts are the `(suggested; max)` hint every
+other numeric prompt carries — BRE pre-fills the field with the value instead,
+which IB's line reader cannot do — and no quoting at all when the message being
+answered is empty.
 
 ## Diplomacy
 
@@ -1623,7 +1649,8 @@ Now matching this reference (as of v0.0.4):
 - Covert agents with spying and sabotage (success scales with agent count)
 - Player mail — a BRE-style per-message reader (Reply / Delete / Ignore /
   Quit), where Ignore keeps a message for next time (it can be ignored
-  indefinitely) and only Delete removes it; Reply quotes the original — plus a
+  indefinitely) and only Delete removes it; Reply quotes a chosen line range of
+  the original — plus a
   planetary bulletin
 - Multiple turns per day, new-realm protection, and daily maintenance
 - A rising land-market price (expansion is self-limiting)

@@ -121,11 +121,18 @@ func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*ga
 // msgMaxLines is how many lines a single message may hold (BRE: 20).
 const msgMaxLines = 20
 
-// composeMessage runs BRE's multi-line message editor: up to msgMaxLines lines
-// under a column ruler. Entering "/" on a line opens the command prompt
+// composeMessage runs the editor with nothing in it.
+func composeMessage(s session.Session) (string, bool) { return composeMessageFrom(s, nil) }
+
+// composeMessageFrom runs BRE's multi-line message editor: up to msgMaxLines
+// lines under a column ruler. Entering "/" on a line opens the command prompt
 // [A]bort / [S]ave / [C]lear. Returns the joined text and whether to send it
 // (false = aborted).
-func composeMessage(s session.Session) (string, bool) {
+//
+// A reply starts with the quoted lines already IN the editor, as BRE starts one
+// — they are ordinary lines from there on, numbered, counted against the limit,
+// and cleared by /C along with everything else.
+func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 	// The banner and ruler are uniformly bright cyan in BRE (verified from a
 	// live message-editor screenshot); the line-number prompts below are green.
 	fmt.Fprintf(s, "\n    %s"+tr(s, "You have %d lines for your message.  /S=save /A=abort /C=clear")+"%s\n",
@@ -133,7 +140,16 @@ func composeMessage(s session.Session) (string, bool) {
 	ruler := "[" + "---+----|" + strings.Repeat("----+----|", 6) + "]"
 	fmt.Fprintf(s, "    %s%s%s\n", ansi.FgBrightCyan, ruler, ansi.Reset)
 
-	var lines []string
+	lines := make([]string, 0, len(initial))
+	for _, q := range initial {
+		if len(lines) >= msgMaxLines {
+			break
+		}
+		lines = append(lines, q)
+		// Quoted lines are numbered in blue where a line being typed is green, so
+		// what was carried over is told from what is being written.
+		fmt.Fprintf(s, "%s%2d>%s %s\n", ansi.FgBrightBlue, len(lines), ansi.Reset, q)
+	}
 	for len(lines) < msgMaxLines {
 		fmt.Fprintf(s, "%s%2d>%s ", ansi.FgBrightGreen, len(lines)+1, ansi.Reset)
 

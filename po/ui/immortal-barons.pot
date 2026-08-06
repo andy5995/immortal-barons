@@ -89,7 +89,7 @@ msgstr ""
 msgid "%s offers you a trade deal."
 msgstr ""
 
-#: internal/menu/mailreader.go:174
+#: internal/menu/mailreader.go:201
 msgid "%s on %s"
 msgstr ""
 
@@ -145,7 +145,7 @@ msgstr ""
 msgid ", Z=All"
 msgstr ""
 
-#: internal/menu/actions_message.go:149
+#: internal/menu/actions_message.go:165
 msgid "/-Command?"
 msgstr ""
 
@@ -177,7 +177,7 @@ msgstr ""
 msgid "Abdication cancelled."
 msgstr ""
 
-#: internal/menu/actions_message.go:157
+#: internal/menu/actions_message.go:173
 msgid "Abort"
 msgstr ""
 
@@ -393,7 +393,7 @@ msgstr ""
 msgid "Chopper's Fair Market"
 msgstr ""
 
-#: internal/menu/actions_message.go:163
+#: internal/menu/actions_message.go:179
 msgid "Clear"
 msgstr ""
 
@@ -461,11 +461,11 @@ msgstr ""
 msgid "Declare war? This breaks all treaties with them."
 msgstr ""
 
-#: internal/menu/mailreader.go:147
+#: internal/menu/mailreader.go:174
 msgid "Delete"
 msgstr ""
 
-#: internal/menu/mailreader.go:193
+#: internal/menu/mailreader.go:220
 msgid "Delete,"
 msgstr ""
 
@@ -497,7 +497,7 @@ msgstr ""
 msgid "Dismantle it?"
 msgstr ""
 
-#: internal/menu/actions_message.go:255
+#: internal/menu/actions_message.go:271
 msgid "Do you wish to send another message?"
 msgstr ""
 
@@ -689,11 +689,11 @@ msgstr ""
 msgid "Idle warnings before boot"
 msgstr ""
 
-#: internal/menu/mailreader.go:150
+#: internal/menu/mailreader.go:177
 msgid "Ignore"
 msgstr ""
 
-#: internal/menu/mailreader.go:194
+#: internal/menu/mailreader.go:221
 msgid "Ignore, or"
 msgstr ""
 
@@ -873,11 +873,11 @@ msgstr ""
 msgid "Max Terrorist Ops/Day (0 = unlimited)"
 msgstr ""
 
-#: internal/menu/mailreader.go:177
+#: internal/menu/mailreader.go:204
 msgid "Message From: "
 msgstr ""
 
-#: internal/menu/mailreader.go:179
+#: internal/menu/mailreader.go:206
 msgid "Message To  : "
 msgstr ""
 
@@ -1113,11 +1113,11 @@ msgstr ""
 msgid "Popular support rose %d points."
 msgstr ""
 
-#: internal/menu/actions_message.go:262
+#: internal/menu/actions_message.go:278
 msgid "Post to the planet:"
 msgstr ""
 
-#: internal/menu/actions_message.go:274
+#: internal/menu/actions_message.go:290
 msgid "Posted."
 msgstr ""
 
@@ -1137,7 +1137,7 @@ msgstr ""
 msgid "Protective Trade"
 msgstr ""
 
-#: internal/menu/mailreader.go:63
+#: internal/menu/mailreader.go:64
 msgid "Public Reply?"
 msgstr ""
 
@@ -1147,6 +1147,10 @@ msgstr ""
 
 #: internal/play/play.go:335
 msgid "Quit?"
+msgstr ""
+
+#: internal/menu/mailreader.go:121
+msgid "Quote Message?"
 msgstr ""
 
 #: internal/menu/tree.go:242
@@ -1185,7 +1189,7 @@ msgstr ""
 msgid "Repay some now?"
 msgstr ""
 
-#: internal/menu/mailreader.go:192
+#: internal/menu/mailreader.go:219
 msgid "Reply,"
 msgstr ""
 
@@ -1209,7 +1213,7 @@ msgstr ""
 msgid "Sable, your technology advisor, Sire. I tend the labs and the small miracles they leak."
 msgstr ""
 
-#: internal/menu/actions_message.go:160
+#: internal/menu/actions_message.go:176
 msgid "Save"
 msgstr ""
 
@@ -1813,7 +1817,7 @@ msgstr ""
 msgid "You have %d Troopers, %d usable Jets, %d Tanks, and %d Bombers."
 msgstr ""
 
-#: internal/menu/actions_message.go:131
+#: internal/menu/actions_message.go:138
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr ""
 
@@ -1865,7 +1869,7 @@ msgstr ""
 msgid "You have reached your region purchase limit for this turn."
 msgstr ""
 
-#: internal/menu/actions_message.go:202
+#: internal/menu/actions_message.go:218
 msgid "You have used all %d lines."
 msgstr ""
 
@@ -2069,7 +2073,7 @@ msgstr ""
 msgid "packet signature does not verify"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:863
+#: cmd/immortal-barons/main.go:871
 msgid "path to the BBS drop file"
 msgstr ""
 
@@ -2101,7 +2105,7 @@ msgstr ""
 msgid "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:867
+#: cmd/immortal-barons/main.go:875
 msgid "run -set-dropfile first"
 msgstr ""
 

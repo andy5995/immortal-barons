@@ -58,12 +58,13 @@ func mailReader(s session.Session, w *ctx) {
 		case 'D':
 			deleted = append(deleted, m)
 		case 'R':
-			// An interplanetary reply is answered before it is written, as the
-			// original asks it: to that planet at large, or to its author alone.
+			// Both questions come before the editor opens, as the original asks
+			// them: who the reply is addressed to, then how much of the message it
+			// carries over.
 			public := m.FromBoard != "" && AskYesNo(s, "Public Reply?", false)
-			body, send := composeMessage(s)
+			body, send := composeMessageFrom(s, askQuote(s, m))
 			if send && strings.TrimSpace(body) != "" {
-				replies = append(replies, mailReply{m.From, m.FromBoard, public, quoteReply(m) + "\n" + body})
+				replies = append(replies, mailReply{toName: m.From, board: m.FromBoard, public: public, body: body})
 			}
 		}
 		// 'I' (and any default): keep the message and advance.
@@ -107,26 +108,48 @@ func applyMailActions(w *ctx, deleted []game.Message, replies []mailReply) {
 	})
 }
 
-// quoteReply builds the quoted prefix a reply carries: a "Quote From" line plus
-// each un-quoted line of m marked with "> ". Lines already quoted (an older
-// reply) are dropped so quotes don't nest without bound — BRE quotes only the
-// message being answered.
-func quoteReply(m game.Message) string {
-	var b strings.Builder
-	// The interplanetary reader names the planet as well, as BRE's does
-	// ("Quote From <realm> Of <planet>").
+// askQuote runs BRE's "Quote Message?" and its line range, returning the lines
+// to open the editor with (nil for none). The range is asked in the message's
+// own line numbers and defaults to the whole of it.
+//
+// A line past the end needs no guard here: promptSuggestedTight caps at the
+// message's length, and does it the way BRE does everywhere (#9) — the entry is
+// rewritten to the maximum on screen and a SECOND Enter commits it. Only the low
+// end can come back out of range, as 0 for an empty or unparseable answer.
+func askQuote(s session.Session, m game.Message) []string {
+	if strings.TrimSpace(m.Body) == "" {
+		return nil
+	}
+	if !AskYesNo(s, "Quote Message?", true) {
+		return nil
+	}
+	n := len(strings.Split(m.Body, "\n"))
+	first := max(1, promptSuggestedTight(s, "First Line to Quote", 1, n))
+	last := promptSuggestedTight(s, "Last Line to Quote", n, n)
+	if last < first {
+		return nil
+	}
+	return quoteLines(m, first, last)
+}
+
+// quoteLines builds the quoted block a reply opens with: a "Quote From" header
+// and lines first..last of m, each marked "> ". The interplanetary reader names
+// the planet as well, as BRE's does ("Quote From <realm> Of <planet>").
+//
+// Lines that were themselves quoted are carried over like any other, nesting as
+// "> > ". Choosing the range is what keeps a thread from growing without bound,
+// which is the job BRE gives it.
+func quoteLines(m game.Message, first, last int) []string {
+	header := fmt.Sprintf("> Quote From %s", m.From)
 	if m.FromBoard != "" {
-		fmt.Fprintf(&b, "> Quote From %s Of %s", m.From, m.FromBoard)
-	} else {
-		fmt.Fprintf(&b, "> Quote From %s", m.From)
+		header = fmt.Sprintf("> Quote From %s Of %s", m.From, m.FromBoard)
 	}
-	for _, line := range strings.Split(m.Body, "\n") {
-		if strings.HasPrefix(line, ">") {
-			continue
-		}
-		fmt.Fprintf(&b, "\n> %s", line)
+	out := []string{header}
+	body := strings.Split(m.Body, "\n")
+	for _, line := range body[first-1 : last] {
+		out = append(out, "> "+line)
 	}
-	return b.String()
+	return out
 }
 
 // mailChoice reads a single-key command at the message prompt. Unlike every
