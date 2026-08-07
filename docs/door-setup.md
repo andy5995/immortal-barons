@@ -217,10 +217,16 @@ Set these on the **Caps & Node** page:
 
 The two directories are relative to your data directory, so the defaults
 `inbound` and `outbound` need no editing on most boards. Give a full path
-instead if your transport drops packets somewhere else. A reset creates them
-for you, and warns if either still holds packets from the game it just
-cleared — the next `-planetary` run would apply those to the new game, so
-delete them first.
+instead if your transport drops packets somewhere else.
+
+A reset creates them for you, and warns if either still holds packets from the
+game it just cleared — the next `-planetary` run would apply those to the new
+game, so delete them first.
+
+On Windows a full path means one with a drive letter (`C:\bbs\inbound`) or a
+UNC share (`\\server\bbs\inbound`). A path that only starts with a backslash,
+like `\bbs\inbound`, is not a full path, and is read as being inside your data
+directory.
 
 Ask your League Coordinator for the node list and add it to your data directory
 as **`ibnodes.dat`** (see the format below).
@@ -318,11 +324,14 @@ A member board's sysop does not set the league rules — the Coordinator does, a
 they arrive over the wire. What a member has to do is get on the wire, then
 create the game.
 
-**Ask the League Coordinator for four things:**
+**Tell the League Coordinator what you want your board called** — that is your
+choice, not theirs. They add it to the roster and give it a node number.
+
+**Then you need four things back from them:**
 
 | What | Why |
 |---|---|
-| Your board's name and node number | They must match the node list exactly. The name is your board's Board ID. |
+| Your node number, and your name exactly as they recorded it | The game matches boards by name, so the spelling and spacing in the roster are what your Board ID has to be. |
 | The `ibnodes.dat` file | The league roster. Put it in your data directory. |
 | The Coordinator's key | One line, from their `-gen-coord-key`. Without it your board refuses league orders. |
 | The mailer details for your uplink | Their address, host and port, and the session password. This is your BBS's business, not the game's. |
