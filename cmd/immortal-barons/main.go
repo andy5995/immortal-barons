@@ -81,6 +81,9 @@ func main() {
 	coordPub := flag.String("coord-key", "", i18n.T(lang, "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"))
 	leagueReset := flag.String("league-reset", "", i18n.T(lang, "start a new season across the whole league on DATE (node #1 only), then exit"))
 	reset := flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"))
+	boardID := flag.String("board-id", "", i18n.T(lang, "this board's name in the league, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator"))
+	inboundDir := flag.String("inbound", "", i18n.T(lang, "directory where packets from the other boards arrive, for -ibbs-reset (default \"inbound\", under the data directory)"))
+	outboundDir := flag.String("outbound", "", i18n.T(lang, "directory the game writes packets to for the other boards, for -ibbs-reset (default \"outbound\", under the data directory)"))
 	ibbsReset := flag.Bool("ibbs-reset", false, i18n.T(lang, "start a new game as a board in an inter-BBS league: like -reset, but the settings editor also asks the league settings"))
 	resetFromConfig := flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)"))
 	addAI := flag.Int("add-ai", 0, i18n.T(lang, "add N computer barons to the running game, then exit"))
@@ -213,19 +216,28 @@ func main() {
 		return
 	}
 
+	if *boardID != "" || *inboundDir != "" || *outboundDir != "" {
+		if !*ibbsReset {
+			fmt.Fprintln(os.Stderr, "immortal-barons: -board-id, -inbound and -outbound are settings for -ibbs-reset")
+			os.Exit(2)
+		}
+	}
+
 	if *reset || *ibbsReset {
 		mode := "-reset"
+		var league *leagueSetup
 		if *ibbsReset {
 			mode = "-ibbs-reset"
+			league = &leagueSetup{BoardID: *boardID, Inbound: *inboundDir, Outbound: *outboundDir}
 		}
-		exitOn(mode, runReset(cfg, false, *ibbsReset, localCS, *noANSI))
+		exitOn(mode, runReset(cfg, false, league, localCS, *noANSI))
 		return
 	}
 
 	if *resetFromConfig {
 		// The ibbs argument seeds the editor, which this mode never opens: it
 		// keeps whatever config.json already says, league board or not.
-		exitOn("-reset-from-config", runReset(cfg, true, false, localCS, *noANSI))
+		exitOn("-reset-from-config", runReset(cfg, true, nil, localCS, *noANSI))
 		return
 	}
 
@@ -626,15 +638,26 @@ func runLeagueConfig(cfg game.Config) error {
 	return store.Save(w, cfg)
 }
 
+// leagueSetup is the per-board half of a league reset (-ibbs-reset): the
+// settings no Coordinator can broadcast, because they name this board and its
+// own directories. A nil *leagueSetup means a stand-alone board. Naming the
+// board on the command line skips the settings editor, so a member sysop sets
+// up in one command and takes the ruleset from the Coordinator's next
+// broadcast.
+type leagueSetup struct {
+	BoardID  string
+	Inbound  string
+	Outbound string
+}
+
 // runReset is BRE's sysop reset: present the game-settings menu (the
 // Configuration Editor) so the sysop sets up the new game, then wipe all
 // empires (humans re-onboard on their next login), re-seed AI, and save. The
 // old world is backed up first. It does not crown a winner.
-// runReset starts a fresh game. With fromConfig=false (-reset) it opens the
-// settings editor seeded from defaults and saves the edited config.json. With
-// fromConfig=true (-reset-from-config) it skips the editor and keeps the current
-// config.json as-is. Either way the world is wiped and re-seeded.
-func runReset(cfg game.Config, fromConfig, ibbs bool, cs charset, noANSI bool) error {
+//
+// With fromConfig=true (-reset-from-config) it skips the editor and keeps the
+// current config.json as-is. Either way the world is wiped and re-seeded.
+func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset, noANSI bool) error {
 	// No drop file prompt here: a reset seeds the world for the web front-end and
 	// -local play too, neither of which reads a drop file. The door names
 	// -set-dropfile when it needs it.
@@ -684,8 +707,37 @@ func runReset(cfg game.Config, fromConfig, ibbs bool, cs charset, noANSI bool) e
 	// Whether this board is in a league is chosen by which reset command was run,
 	// not by a setting: it decides which questions the editor asks, and BRE's own
 	// model is that the ruleset is fixed at reset and never edited mid-game.
-	def.IBBS = ibbs
+	def.IBBS = league != nil
+	if league != nil {
+		if league.Inbound != "" {
+			def.InboundDir = league.Inbound
+		}
+		if league.Outbound != "" {
+			def.OutboundDir = league.Outbound
+		}
+	}
 	w.Config = def
+
+	// A board named on the command line has said everything the editor would
+	// ask that is its own to answer, so it is not opened.
+	if league != nil && league.BoardID != "" {
+		w.Config.BoardID = league.BoardID
+		if err := store.SaveConfig(w.Config); err != nil {
+			return err
+		}
+		w.Reset()
+		if err := store.Save(w, cfg); err != nil {
+			return err
+		}
+		fmt.Printf("\nBoard %q is set up for league play. Empires cleared and a fresh world seeded.\n", league.BoardID)
+		if backedUp {
+			fmt.Println("The previous world was backed up to world.json.bak.")
+		}
+		fmt.Println("The league rules arrive from the Coordinator on the next -planetary run.")
+		noteDropfileUnset(cfg.DataDir)
+		preparePacketDirs(w.Config)
+		return nil
+	}
 
 	// On a real terminal use the tabbed tview editor (issue #7); fall back to the
 	// line-based editor when stdin is piped/redirected, the console cannot render

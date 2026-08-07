@@ -279,6 +279,11 @@ USA
 The six lines are: node number, board (planet) name, network address, city,
 state or province, and country. Board number 1 is the League Coordinator.
 
+All six lines must have something on them. A blank line is what separates one
+board from the next, so a board written with an empty field is read as a broken
+entry and skipped. Only the first three matter to the game; put anything you
+like in the last three.
+
 ## League-wide rules (Coordinator only)
 
 The League Coordinator sets the rules that must match across the whole league.
@@ -306,3 +311,196 @@ There are two different "coordinator" ideas, and they are not the same thing:
 - **BBS Coordinator** — a *player* your board elects. Players vote in the
   System menu, and the player with the most votes gets the Coordinator menu.
   Votes can change at any time.
+
+## Joining a league (member boards)
+
+A member board's sysop does not set the league rules — the Coordinator does, and
+they arrive over the wire. What a member has to do is get on the wire, then
+create the game.
+
+**Ask the League Coordinator for four things:**
+
+| What | Why |
+|---|---|
+| Your board's name and node number | They must match the node list exactly. The name is your board's Board ID. |
+| The `ibnodes.dat` file | The league roster. Put it in your data directory. |
+| The Coordinator's key | One line, from their `-gen-coord-key`. Without it your board refuses league orders. |
+| The mailer details for your uplink | Their address, host and port, and the session password. This is your BBS's business, not the game's. |
+
+**All four arrive by hand — email, a message on their board, a download.** None
+of it can come over the league's own link, because none of the link exists yet:
+the mailer details are what build it, and the key is what proves a packet came
+from the Coordinator, so a key that arrived in a packet would prove nothing. It
+is a public key, so there is no harm in it travelling in the clear; it lets your
+board *check* the Coordinator's orders, not issue them.
+
+After that first hand-off the roster keeps itself current: the Coordinator
+broadcasts it, and a board updates its own copy when a signed roster arrives.
+The key is a one-time exchange, unless the league changes Coordinator.
+
+**Then, in this order:**
+
+1. **Set up the mail link and test it.** Your BBS and your mailer, not the game.
+   Do not go on until a poll connects.
+2. **Put `ibnodes.dat` in your data directory**, and record the Coordinator's
+   key:
+
+    ```
+    immortal-barons -coord-key THEIR_KEY -data /path/to/data
+    ```
+
+3. **Create the game.** One command, no settings editor — the rules are not
+   yours to choose:
+
+    ```
+    immortal-barons -ibbs-reset -board-id "Your Board" -inbound /path/to/ftn/inbound -outbound /path/to/filebox -data /path/to/data
+    ```
+
+    Quote the board name if it has spaces. `-inbound` is where your mailer
+    delivers incoming files; `-outbound` is the filebox for your uplink. Both
+    may be left out, in which case the game uses `inbound` and `outbound` inside
+    its data directory and you move the files yourself.
+
+4. **Run the inter-BBS step once:**
+
+    ```
+    immortal-barons -planetary -data /path/to/data
+    ```
+
+    Until the Coordinator's settings packet arrives, your board is running
+    default rules. Turns per day and the rest will change when it lands, so do
+    not be alarmed at the first `Game Setup` screen, and do not let players on
+    before it.
+
+5. **Put `-planetary` on a schedule**, and let your callers in.
+
+Step 3 does not need the Coordinator's rules to have arrived, so 2 and 3 can
+happen in either order — but the key must be recorded before step 4, or the
+settings packet is refused as unsigned.
+
+## Example: a two-board league, step by step
+
+This is a worked example of setting up a league from nothing. It uses two
+boards on one machine, both running **Mystic BBS**, with Mystic's own binkp
+mailer moving the packets. The addresses are made up: nothing here touches
+FidoNet or any other real network.
+
+Another BBS package, or another mailer, changes the details but not the shape.
+The game only reads and writes files in two directories; everything else is
+your BBS and your mailer.
+
+The two boards in the example:
+
+| | first board | second board |
+|---|---|---|
+| Install | `~/a-mystic` | `~/b-mystic` |
+| Board ID (planet) | `AlphaBBS` | `BravoBBS` |
+| Node number | 1 (League Coordinator) | 2 |
+| Network address | `1:1/1` | `1:1/2` |
+| binkp port | 24554 | 24555 |
+
+### Step 1 — choose the names and addresses
+
+Settle these before touching anything, because they appear in three places: the
+game's Board ID, the game's node list, and your BBS's mail configuration. The
+Board ID is fixed when you create the game, and it must match the node list
+exactly.
+
+Node 1 is the League Coordinator. The network addresses belong to your mailer,
+not to the game — the game never opens a connection, so it never uses them. Two
+boards on one machine need different binkp ports; 24554 is the standard one.
+
+### Step 2 — give each board its own network address
+
+In Mystic: `mystic -cfg`, then **Networking → Echomail Addresses**. Add an
+address on each board:
+
+| | first board | second board |
+|---|---|---|
+| Zone / Net / Node / Point | 1 / 1 / 1 / 0 | 1 / 1 / 2 / 0 |
+| Domain | `iblocal` | `iblocal` |
+| Primary | Yes | Yes |
+
+The domain is the name of your network and must be the same on both boards. Add
+your address on an empty row: the first row is a reserved placeholder, and
+Mystic only lets you edit its description.
+
+### Step 3 — point each board at the other
+
+In Mystic: **Networking → Echomail Nodes**. The list starts empty; press `/`
+for the command list, then **Insert**. Each board gets one entry, for the board
+it connects to:
+
+| Field | on the first board | on the second board |
+|---|---|---|
+| Address | `1:1/2` | `1:1/1` |
+| Domain | `iblocal` | `iblocal` |
+| Session type | BinkP | BinkP |
+| binkp hostname | `127.0.0.1:24555` | `127.0.0.1:24554` |
+| binkp password | the same on both | the same on both |
+| Use filebox | Yes | Yes |
+| Active | Yes | Yes |
+
+Mystic spreads these over several pages: the address, domain and session type
+are on page 1, and the hostname and password are on the BINKP page, which takes
+the host and port together as `host:port`. Watch the title bar — it shows the
+address and domain you have entered so far, so `0:0/0@` means page 1 is still
+empty.
+
+The port is the one this board **dials**, so it is the other board's port. The
+password must match on both sides. Leave the archive, export, crash and size
+settings alone: no echomail is flowing here, only files.
+
+Set **Use Filebox** to Yes and let Mystic generate the default path. A filebox
+is a directory whose contents your BBS hands to that node at the next session,
+and it is how the game's packets travel. Mystic names it after the network and
+the node's address, so the first board gets
+`~/a-mystic/filebox/iblocal_z1n1n2` — its outbox for the second board — and the
+second board gets `~/b-mystic/filebox/iblocal_z1n1n1`. Note both paths: a later
+step points the game's outbound directory at them.
+
+A larger league does not mean more of these. Boards route through the League
+Coordinator, so a member board configures one link — its uplink — and mail for
+every other board goes out over it.
+
+### Step 4 — let each board answer
+
+So far each board knows how to dial the other. Now each needs to listen. In
+Mystic: **Servers → BINKP**.
+
+| | first board | second board |
+|---|---|---|
+| Server | active | active |
+| Port | 24554 | 24555 |
+
+A board listens on its **own** port, which is the port the other board dials.
+Then run Mystic's server on both boards (`./mis server`) and leave them
+running. Each writes to `logs/mis.log` in its own install; check there that the
+binkp server bound its port and did not report the address as already in use.
+
+### Step 5 — prove the link
+
+From the first board, poll the second:
+
+```
+./mis poll 1:1/2
+```
+
+Then the other way round, from the second board:
+
+```
+./mis poll 1:1/1
+```
+
+**Test both directions.** They use different settings, so one working says
+nothing about the other.
+
+`./mis poll LIST` shows the nodes it knows about. A session that connects and
+finishes with nothing to transfer is the result you want: it means the address,
+the port and the password all agree.
+
+Read the log rather than the last line: "Polled 1 systems" is printed whether
+the session worked or not. A wrong port reports **"Authorization failed"**,
+which sounds like a password problem but is not — nothing answered, so there was
+nothing to authorize. The line above it names the port it dialled, and that is
+the one to check against the other board's binkp server.

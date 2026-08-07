@@ -15,6 +15,12 @@ import (
 // six lines — number, name, FidoNet address, city, state, country — separated
 // by one or more blank lines (matching docs/brnodes.sam in the original). Nodes
 // with an unparseable number are skipped.
+//
+// Every one of the six lines must carry a value. The format cannot express an
+// empty field: a blank line is what ends a block, so a roster written with one
+// missing (no city, say) loses that board here. That is deliberate — the loss
+// happens on the Coordinator's own board, where they notice, rather than
+// silently on everyone else's.
 func ParseNodeList(path string) ([]game.LeagueNode, error) {
 	f, err := os.Open(path)
 	if err != nil {

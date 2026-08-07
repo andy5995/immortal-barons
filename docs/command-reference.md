@@ -125,6 +125,12 @@ These options are for games that link several BBSes together (a "league"). See
   `-reset`, except the settings editor also asks the league settings (board
   name, packet directories, and the interplanetary rules), and it creates the
   packet directories.
+- **`-board-id NAME`**, **`-inbound DIR`**, **`-outbound DIR`** — Settings for
+  `-ibbs-reset`. Giving `-board-id` skips the settings editor, so a member board
+  is set up in one command. Use this when the League Coordinator sets the rules:
+  they arrive in the Coordinator's next broadcast and replace whatever this board
+  starts with. `-inbound` and `-outbound` default to `inbound` and `outbound`
+  inside the data directory.
 - **`-planetary`** — Run the inter-BBS step, then exit: read incoming packets,
   run the group attacks, and write outgoing packets.
 - **`-league-config`** — Send this board's league settings to the whole league,

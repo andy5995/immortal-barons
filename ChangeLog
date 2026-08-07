@@ -1,6 +1,8 @@
 (in-progress:)
-  * Sysops: "-ibbs-reset" starts a new game as a league board; a plain "-reset"
-    makes a stand-alone one and no longer asks the league settings
+  * Sysops: "-ibbs-reset" starts a new game as a league board and a plain
+    "-reset" a stand-alone one, which is no longer asked the league settings;
+    adding "-board-id" sets a member board up in one command, without the
+    settings editor
   * The Configuration Editor sets the inter-BBS inbound and outbound
     directories, which now sit inside the data directory; a reset creates them
     and warns about packets left from the cleared game
