@@ -30,7 +30,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string) (PlanetaryRun, 
 	// A member board that just adopted the Coordinator's roster has to persist
 	// it: the roster is read from ibnodes.dat at startup, not from the world
 	// file (#64).
-	if !sameRoster(before, w.LeagueNodes) {
+	if !game.SameRoster(before, w.LeagueNodes) {
 		if err := WriteNodeList(filepath.Join(w.Config.DataDir, NodeListFile), w.LeagueNodes); err != nil {
 			return run, err
 		}
@@ -138,18 +138,4 @@ func ReadInbound(w *game.World, dir string) (int, error) {
 func sanitize(s string) string {
 	r := strings.NewReplacer("/", "_", "\\", "_", " ", "_", ":", "_")
 	return r.Replace(s)
-}
-
-// sameRoster reports whether two league rosters are identical, so the node-list
-// file is only rewritten when a broadcast actually changed it.
-func sameRoster(a, b []game.LeagueNode) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
 }

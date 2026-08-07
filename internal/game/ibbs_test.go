@@ -866,3 +866,45 @@ func TestLeagueWideReset(t *testing.T) {
 		t.Errorf("a member board declared a league reset: %v", err)
 	}
 }
+
+// The Coordinator rebroadcasts the roster and ruleset on every run, so a board
+// that already holds them must not post a news line each time — six identical
+// "updated the league roster" lines in one day is what this prevents.
+func TestUnchangedLeagueBroadcastIsQuiet(t *testing.T) {
+	roster := []LeagueNode{{Number: 1, Name: "Alpha BBS"}, {Number: 2, Name: "Bravo BBS"}}
+	priv, pub := testCoordKeys(t)
+
+	lc := NewWorldSeed(DefaultConfig(), 1)
+	lc.Config.BoardID = "Alpha BBS"
+	lc.LeagueNodes = roster
+	lc.CoordKey, lc.CoordPub = priv, pub
+
+	member := NewWorldSeed(DefaultConfig(), 1)
+	member.Config.BoardID = "Bravo BBS"
+	member.LeagueNodes = roster
+	member.CoordPub = pub
+
+	broadcast := func() {
+		lc.Outbox = nil
+		lc.ExportLeagueConfig()
+		lc.ExportNodeList()
+		lc.StampOutbox()
+		for _, pkt := range lc.Outbox {
+			member.ApplyPacket(pkt)
+		}
+	}
+	broadcast() // first one adopts and reports
+	member.NewsToday = nil
+	broadcast() // second carries nothing new
+
+	for _, line := range member.NewsToday {
+		t.Errorf("an unchanged broadcast posted news: %q", line)
+	}
+
+	// A roster that really changed is still reported.
+	member.LeagueNodes = roster[:1]
+	broadcast()
+	if len(member.NewsToday) == 0 {
+		t.Error("a roster that actually changed should be reported")
+	}
+}

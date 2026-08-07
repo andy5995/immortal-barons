@@ -589,6 +589,21 @@ func (w *World) ExportScores() {
 	w.Outbox = append(w.Outbox, Packet{FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores})
 }
 
+// SameRoster reports whether two league rosters hold the same boards in the
+// same order. Lives here beside LeagueNode so both the packet reader and the
+// store's node-list writer ask one question one way.
+func SameRoster(a, b []LeagueNode) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // outboxFor returns the queued packet bound for board, creating it if this is
 // the first payload addressed there this run. The pointer is only good until
 // the next call — appending to the Outbox can move the packets — so fill it in
@@ -689,12 +704,17 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// replaces, because the board name in a packet is just a string a file can
 	// claim (#53).
 	orders := w.fromCoordinator(p) && w.VerifyCoordinatorOrders(p)
+	// The Coordinator rebroadcasts on every run, so the news only carries what
+	// actually changed here — otherwise a quiet league fills the planet's paper
+	// with the same line once per exchange.
 	if p.LeagueConfig != nil && orders {
-		w.Config.applyLeagueRuleset(p.LeagueConfig)
-		w.postNews("The League Coordinator updated the league settings.")
+		if *p.LeagueConfig != *w.Config.leagueRuleset() {
+			w.Config.applyLeagueRuleset(p.LeagueConfig)
+			w.postNews("The League Coordinator updated the league settings.")
+		}
 	}
 	// The roster travels the same way and under the same guard (#64).
-	if len(p.LeagueNodes) > 0 && orders {
+	if len(p.LeagueNodes) > 0 && orders && !SameRoster(w.LeagueNodes, p.LeagueNodes) {
 		w.LeagueNodes = append([]LeagueNode(nil), p.LeagueNodes...)
 		w.postNews("The League Coordinator updated the league roster.")
 	}
