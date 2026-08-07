@@ -155,3 +155,30 @@ func TestConfigPagesHideLeagueFieldsOffLeague(t *testing.T) {
 		t.Error("Turns per day should be offered either way")
 	}
 }
+
+// Game Setup is the third place that knows which rules are league-only, and it
+// is what a player reads. A rule the editor only asks a league board must not
+// be reported to a stand-alone one, where the figure is whatever the default
+// happened to be.
+func TestGameSetupHidesLeagueRulesOffLeague(t *testing.T) {
+	show := func(ibbs bool) string {
+		w := newWorld()
+		w.Config.IBBS = ibbs
+		f := &fakeSession{keys: []rune(" ")}
+		gameSetup(f, w)
+		return f.out.String()
+	}
+	off, on := show(false), show(true)
+
+	for _, label := range []string{
+		"Group attacks per day", "Terrorist ops per day", "Bombing ops per day",
+		"Terrorism costs", "Lost forces return after", "Doomer Kaboomer", "This planet",
+	} {
+		if strings.Contains(off, label) {
+			t.Errorf("Game Setup shows %q on a stand-alone board", label)
+		}
+		if !strings.Contains(on, label) {
+			t.Errorf("Game Setup omits %q on a league board", label)
+		}
+	}
+}

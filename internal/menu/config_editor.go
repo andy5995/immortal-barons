@@ -365,8 +365,11 @@ func configPages(ibbs bool) []cfgPage {
 }
 
 // ibbsOnlyFields are the settings that mean nothing on a stand-alone board, so
-// only -ibbs-reset offers them. The same set Game Setup hides (see gameSetup):
-// the two screens must agree, or a sysop reads a rule they were never asked.
+// only -ibbs-reset offers them. Two other places know the same set — the tview
+// editor, which branches on it, and Game Setup, which reports it — and each has
+// a test holding it to this one (TestBothEditorsHideTheSameLeagueFields,
+// TestGameSetupHidesLeagueRulesOffLeague). A sysop must never read a rule they
+// were never asked.
 var ibbsOnlyFields = map[int]bool{
 	23: true, // Board ID
 	39: true, // Inbound Dir

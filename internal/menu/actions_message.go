@@ -87,7 +87,9 @@ func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*ga
 		for _, e := range recipients(w) {
 			rows = append(rows, row{e, e.Name, e.Land, e.Score, w.NetWorth(e)})
 		}
-		allies = len(w.TreatyPartners(w.Player()))
+		if allowAll { // the only caller that can offer the all-allies target
+			allies = len(w.TreatyPartners(w.Player()))
+		}
 	})
 	if len(rows) == 0 {
 		ok(s, "There is no one to reach.")
@@ -109,7 +111,7 @@ func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*ga
 			ansi.FgBrightWhite, r.score, ansi.Reset,
 			ansi.FgWhite, r.nw, ansi.Reset)
 	}
-	offerAllies := allowAll && allies > 0
+	offerAllies := allies > 0
 	extra := ""
 	if allowAll {
 		extra = tr(s, ", Z=All")

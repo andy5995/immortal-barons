@@ -116,3 +116,75 @@ func TestConfigTUIKeepsPacketDirWhenCleared(t *testing.T) {
 		t.Errorf("InboundDir = %q, want the opening /srv/in", got.InboundDir)
 	}
 }
+
+// tuiLabels is every field label the tview editor builds for a config, with the
+// ★/spacer prefix and any " [lo-hi]" hint stripped, so it can be matched against
+// the line editor's labels.
+func tuiLabels(c game.Config) []string {
+	w := newWorld()
+	w.Config = c
+	tui := newConfigTUI(w.World)
+	var out []string
+	for _, form := range tui.forms {
+		for i := 0; i < form.GetFormItemCount(); i++ {
+			label := form.GetFormItem(i).GetLabel()
+			label = strings.TrimPrefix(strings.TrimPrefix(label, star), noStar)
+			if j := strings.Index(label, " ["); j >= 0 {
+				label = label[:j]
+			}
+			out = append(out, strings.TrimSpace(label))
+		}
+	}
+	return out
+}
+
+// The two editors must hide the same settings off a league. They keep separate
+// field lists — the line editor filters by number, the tview one by branch — so
+// without this a setting added to one is shown by the other to a board that was
+// never asked it.
+func TestBothEditorsHideTheSameLeagueFields(t *testing.T) {
+	c := distinctConfig()
+	c.IBBS = true
+	withLeague := tuiLabels(c)
+	c.IBBS = false
+	standalone := map[string]bool{}
+	for _, l := range tuiLabels(c) {
+		standalone[l] = true
+	}
+
+	var hidden []string
+	for _, l := range withLeague {
+		if !standalone[l] {
+			hidden = append(hidden, l)
+		}
+	}
+
+	// The line editor's own hidden set, by label.
+	want := map[string]bool{}
+	for _, page := range configPages(true) {
+		for _, f := range page.fields {
+			if ibbsOnlyFields[f.n] {
+				want[f.label] = true
+			}
+		}
+	}
+
+	if len(hidden) != len(want) {
+		t.Errorf("the tview editor hides %d fields off a league, the line editor %d:\n tview: %v\n line:  %v",
+			len(hidden), len(want), hidden, want)
+	}
+	for _, l := range hidden {
+		// The tview labels carry the "(0=unlimited)" hints the line editor puts in
+		// its prompt instead, so match on the shared prefix.
+		matched := false
+		for w := range want {
+			if strings.HasPrefix(l, w) {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			t.Errorf("the tview editor hides %q off a league; the line editor still offers it", l)
+		}
+	}
+}

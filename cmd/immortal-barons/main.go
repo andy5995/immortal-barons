@@ -223,7 +223,9 @@ func main() {
 	}
 
 	if *resetFromConfig {
-		exitOn("-reset-from-config", runReset(cfg, true, cfg.IBBS, localCS, *noANSI))
+		// The ibbs argument seeds the editor, which this mode never opens: it
+		// keeps whatever config.json already says, league board or not.
+		exitOn("-reset-from-config", runReset(cfg, true, false, localCS, *noANSI))
 		return
 	}
 
