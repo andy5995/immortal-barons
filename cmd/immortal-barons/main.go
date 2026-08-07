@@ -585,9 +585,11 @@ func runMaint(cfg game.Config, today string) error {
 		fmt.Println("Maintenance has already been run today.")
 	}
 	if cfg.IBBS {
-		if err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound()); err != nil {
+		run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound())
+		if err != nil {
 			return err
 		}
+		reportPlanetary(cfg, run)
 	}
 	return store.Save(w, cfg)
 }
@@ -603,9 +605,11 @@ func runLeagueReset(cfg game.Config, date string) error {
 	if err := w.DeclareLeagueReset(date, ""); err != nil {
 		return err
 	}
-	if err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound()); err != nil {
+	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound())
+	if err != nil {
 		return err
 	}
+	reportPlanetary(cfg, run)
 	if err := store.Save(w, cfg); err != nil {
 		return err
 	}
@@ -867,10 +871,37 @@ func runPlanetary(cfg game.Config) error {
 	if err != nil {
 		return err
 	}
-	if err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound()); err != nil {
+	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound())
+	if err != nil {
 		return err
 	}
+	reportPlanetary(cfg, run)
 	return store.Save(w, cfg)
+}
+
+// reportPlanetary says what the inter-BBS step did. Silence is the wrong answer
+// for a command whose whole job is moving mail: a sysop cannot tell a run that
+// had nothing to do from one that read the wrong directory.
+func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
+	switch run.Applied {
+	case 0:
+		fmt.Printf("No packets waiting in %s\n", cfg.Inbound())
+	case 1:
+		fmt.Printf("Applied 1 packet from %s\n", cfg.Inbound())
+	default:
+		fmt.Printf("Applied %d packets from %s\n", run.Applied, cfg.Inbound())
+	}
+	if run.RosterUpdated {
+		fmt.Println("The League Coordinator's roster replaced this board's copy.")
+	}
+	switch run.Sent {
+	case 0:
+		fmt.Println("Nothing to send.")
+	case 1:
+		fmt.Printf("Wrote 1 packet to %s\n", cfg.Outbound())
+	default:
+		fmt.Printf("Wrote %d packets to %s\n", run.Sent, cfg.Outbound())
+	}
 }
 
 // runExport writes this board's alive-empire scores to path as an inter-BBS

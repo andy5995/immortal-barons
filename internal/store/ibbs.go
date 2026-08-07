@@ -17,23 +17,27 @@ const packetExt = ".brp"
 // reads and applies inbound packets, launches any group attacks whose day has
 // come, exports this board's scores to the league, and writes the outbox. Run
 // it on a schedule (or on the door's -maint pass) — can run several times a day.
-func RunPlanetary(w *game.World, inboundDir, outboundDir string) error {
+func RunPlanetary(w *game.World, inboundDir, outboundDir string) (PlanetaryRun, error) {
+	var run PlanetaryRun
 	before := w.LeagueNodes
-	if _, err := ReadInbound(w, inboundDir); err != nil {
-		return err
+	applied, err := ReadInbound(w, inboundDir)
+	if err != nil {
+		return run, err
 	}
+	run.Applied = applied
 	// A member board that just adopted the Coordinator's roster has to persist
 	// it: the roster is read from ibnodes.dat at startup, not from the world
 	// file (#64).
 	if !sameRoster(before, w.LeagueNodes) {
 		if err := WriteNodeList(filepath.Join(w.Config.DataDir, NodeListFile), w.LeagueNodes); err != nil {
-			return err
+			return run, err
 		}
+		run.RosterUpdated = true
 	}
 	// An inbound league-config packet may have updated w.Config; persist it so
 	// the adopted settings survive the next load (config.json is authoritative).
 	if err := SaveConfig(w.Config); err != nil {
-		return err
+		return run, err
 	}
 	// After the inbound packets, so a result that arrived this run is never
 	// overtaken by the recovery timer.
@@ -45,7 +49,17 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string) error {
 	w.PingTravelTimes()
 	w.ExportDoomerStatus()
 	w.StampOutbox()
-	return WriteOutbox(w, outboundDir)
+	run.Sent = len(w.Outbox)
+	return run, WriteOutbox(w, outboundDir)
+}
+
+// PlanetaryRun is what one inter-BBS step did, so the command line can report
+// it: a run that says nothing is indistinguishable from one that failed to find
+// its directories.
+type PlanetaryRun struct {
+	Applied       int  // packets read from the inbound directory
+	Sent          int  // packets written to the outbound directory
+	RosterUpdated bool // the Coordinator's roster replaced this board's copy
 }
 
 // WriteOutbox writes each queued packet to a JSON file in dir and clears the

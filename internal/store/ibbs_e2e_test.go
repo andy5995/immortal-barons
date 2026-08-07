@@ -36,7 +36,7 @@ func newBoard(t *testing.T, dir, name string, roster []game.LeagueNode) *board {
 
 func (b *board) run(t *testing.T) {
 	t.Helper()
-	if err := RunPlanetary(b.w, b.inbound, b.outbound); err != nil {
+	if _, err := RunPlanetary(b.w, b.inbound, b.outbound); err != nil {
 		t.Fatal(err)
 	}
 }

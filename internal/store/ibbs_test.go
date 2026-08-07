@@ -82,7 +82,7 @@ func TestRunPlanetaryExportsScores(t *testing.T) {
 	w := game.NewWorldSeed(cfg, 1)
 	w.AddHuman("p", "Player")
 
-	if err := RunPlanetary(w, in, out); err != nil {
+	if _, err := RunPlanetary(w, in, out); err != nil {
 		t.Fatalf("RunPlanetary: %v", err)
 	}
 	// A broadcast score packet should have been written to the outbound dir —
