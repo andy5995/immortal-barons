@@ -807,8 +807,21 @@ func preparePacketDirs(cfg game.Config) {
 			fmt.Printf("Could not create the packet directory %s: %v\n", dir, err)
 			continue
 		}
-		if entries, err := os.ReadDir(dir); err == nil && len(entries) > 0 {
-			stale = append(stale, fmt.Sprintf("%s (%d)", dir, len(entries)))
+		// Count only game packets: an inbound directory is usually the BBS's own
+		// FTN inbound, which holds mail bundles and subdirectories that are none
+		// of the game's business.
+		n := 0
+		entries, err := os.ReadDir(dir)
+		if err != nil {
+			continue
+		}
+		for _, e := range entries {
+			if !e.IsDir() && filepath.Ext(e.Name()) == store.PacketExt {
+				n++
+			}
+		}
+		if n > 0 {
+			stale = append(stale, fmt.Sprintf("%s (%d)", dir, n))
 		}
 	}
 	if len(stale) == 0 {

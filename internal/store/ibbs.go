@@ -10,8 +10,10 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// packetExt is the file extension for inter-BBS packet files.
-const packetExt = ".brp"
+// PacketExt is the file extension for inter-BBS packet files. Exported because
+// an inbound directory is usually shared with the BBS's own mail, so anything
+// inspecting it has to tell a game packet from a mail bundle.
+const PacketExt = ".brp"
 
 // RunPlanetary is the inter-BBS maintenance step (BRE's "BRE PLANETARY"): it
 // reads and applies inbound packets, launches any group attacks whose day has
@@ -82,7 +84,7 @@ func WriteOutbox(w *game.World, dir string) error {
 		if to == "" {
 			to = "all"
 		}
-		name := fmt.Sprintf("%s-to-%s-%s-%d%s", sanitize(w.Config.BoardID), sanitize(to), sanitize(p.Date), i, packetExt)
+		name := fmt.Sprintf("%s-to-%s-%s-%d%s", sanitize(w.Config.BoardID), sanitize(to), sanitize(p.Date), i, PacketExt)
 		if err := os.WriteFile(filepath.Join(dir, name), data, 0o644); err != nil {
 			return err
 		}
@@ -105,7 +107,7 @@ func ReadInbound(w *game.World, dir string) (int, error) {
 	}
 	applied := 0
 	for _, e := range entries {
-		if e.IsDir() || filepath.Ext(e.Name()) != packetExt {
+		if e.IsDir() || filepath.Ext(e.Name()) != PacketExt {
 			continue
 		}
 		path := filepath.Join(dir, e.Name())
