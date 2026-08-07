@@ -310,16 +310,35 @@ func travelTimes(s session.Session, w *ctx) Result {
 
 // turnaroundLabel renders one average round trip and its color. BRE quantizes
 // before printing — hours to a tenth, days to a hundredth — so the figures land
-// on the same values the original shows.
+// on the same values the original shows. The seconds and minutes tiers are IB's
+// own: BRE never needed them, but a link that answers in under a minute would
+// otherwise print 0.00 hours and read as no measurement at all.
 func turnaroundLabel(s session.Session, days float64) (string, string) {
-	if days <= 0 {
+	switch {
+	case days <= 0:
 		return tr(s, "No Data"), ansi.FgRed
-	}
-	if days < game.TravelHoursCutoff {
+	case days < game.TravelSecondsCutoff:
+		// Never round a real measurement down to zero — that is the reading this
+		// tier exists to avoid.
+		return plural(s, math.Max(1, math.Round(days*24*60*60)), "1 second", "%.0f seconds"), ansi.FgBrightGreen
+	case days < game.TravelMinutesCutoff:
+		return plural(s, math.Round(days*24*60), "1 minute", "%.0f minutes"), ansi.FgBrightGreen
+	case days < game.TravelHoursCutoff:
 		hours := math.Round(days*24*10) / 10
 		return fmt.Sprintf(tr(s, "%.2f hours"), hours), ansi.FgBrightGreen
 	}
 	return fmt.Sprintf(tr(s, "%.2f days"), math.Round(days*100)/100), ansi.FgCyan
+}
+
+// plural renders a whole-number count, picking the singular wording at one. The
+// two forms are separate translatable strings because a PO catalogue cannot
+// derive one from the other, and languages do not agree on where the plural
+// starts.
+func plural(s session.Session, n float64, one, many string) string {
+	if n == 1 {
+		return tr(s, one)
+	}
+	return fmt.Sprintf(tr(s, many), n)
 }
 
 // planetaryTreaties is the InterPlanetary Ops "Diplomacy List": BRE's

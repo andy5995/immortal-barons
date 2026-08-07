@@ -25,11 +25,19 @@ msgstr ""
 msgid "##"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:322
+#: internal/menu/actions_interbbs.go:325
+msgid "%.0f minutes"
+msgstr ""
+
+#: internal/menu/actions_interbbs.go:323
+msgid "%.0f seconds"
+msgstr ""
+
+#: internal/menu/actions_interbbs.go:330
 msgid "%.2f days"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:320
+#: internal/menu/actions_interbbs.go:328
 msgid "%.2f hours"
 msgstr ""
 
@@ -69,7 +77,7 @@ msgstr ""
 msgid "%s  You have %s gold."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:416
+#: internal/menu/actions_interbbs.go:435
 msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
 msgstr ""
 
@@ -113,7 +121,7 @@ msgstr ""
 msgid "(%d per year)"
 msgstr ""
 
-#: internal/menu/actions_message.go:120
+#: internal/menu/actions_message.go:122
 msgid "(A-%c%s, 0=cancel) %s"
 msgstr ""
 
@@ -137,20 +145,28 @@ msgstr ""
 msgid "(the whole planet)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:490
+#: internal/menu/actions_interbbs.go:509
 msgid "(your current vote)"
 msgstr ""
 
-#: internal/menu/actions_message.go:118
+#: internal/menu/actions_message.go:120
 msgid ", *=All Allies"
 msgstr ""
 
-#: internal/menu/actions_message.go:115
+#: internal/menu/actions_message.go:117
 msgid ", Z=All"
 msgstr ""
 
-#: internal/menu/actions_message.go:186
+#: internal/menu/actions_message.go:188
 msgid "/-Command?"
+msgstr ""
+
+#: internal/menu/actions_interbbs.go:325
+msgid "1 minute"
+msgstr ""
+
+#: internal/menu/actions_interbbs.go:323
+msgid "1 second"
 msgstr ""
 
 #: internal/menu/actions_info.go:665
@@ -181,7 +197,7 @@ msgstr ""
 msgid "Abdication cancelled."
 msgstr ""
 
-#: internal/menu/actions_message.go:194
+#: internal/menu/actions_message.go:196
 msgid "Abort"
 msgstr ""
 
@@ -209,11 +225,11 @@ msgstr ""
 msgid "Agents"
 msgstr ""
 
-#: internal/menu/actions_message.go:126
+#: internal/menu/actions_message.go:128
 msgid "All"
 msgstr ""
 
-#: internal/menu/actions_message.go:130
+#: internal/menu/actions_message.go:132
 msgid "All Allies"
 msgstr ""
 
@@ -401,7 +417,7 @@ msgstr ""
 msgid "Chopper's Fair Market"
 msgstr ""
 
-#: internal/menu/actions_message.go:200
+#: internal/menu/actions_message.go:202
 msgid "Clear"
 msgstr ""
 
@@ -437,7 +453,7 @@ msgstr ""
 msgid "Current SDI Strength: %d%%"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:539
+#: internal/menu/actions_interbbs.go:558
 msgid "Current league diplomacy:"
 msgstr ""
 
@@ -505,7 +521,7 @@ msgstr ""
 msgid "Dismantle it?"
 msgstr ""
 
-#: internal/menu/actions_message.go:298
+#: internal/menu/actions_message.go:300
 msgid "Do you wish to send another message?"
 msgstr ""
 
@@ -641,7 +657,7 @@ msgstr ""
 msgid "How many %s?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:458
+#: internal/menu/actions_interbbs.go:477
 msgid "How many agents to send?"
 msgstr ""
 
@@ -825,7 +841,7 @@ msgstr ""
 msgid "Launch it now?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:557
+#: internal/menu/actions_interbbs.go:576
 msgid "League diplomacy updated. It will be broadcast to the league."
 msgstr ""
 
@@ -945,7 +961,7 @@ msgstr ""
 msgid "New amount of %s for sale"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:540
+#: internal/menu/actions_interbbs.go:559
 msgid "New league diplomacy declaration (blank to keep)"
 msgstr ""
 
@@ -953,7 +969,7 @@ msgstr ""
 msgid "New tax rate?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:316
+#: internal/menu/actions_interbbs.go:319
 msgid "No Data"
 msgstr ""
 
@@ -1005,7 +1021,7 @@ msgstr ""
 msgid "Odris, your civilian advisor, Sire. I keep an ear to the people and an eye on the granary."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:536
+#: internal/menu/actions_interbbs.go:555
 msgid "Only the BBS Coordinator may set league diplomacy."
 msgstr ""
 
@@ -1113,7 +1129,7 @@ msgstr ""
 msgid "Planetary Tax Rate (%)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:335
+#: internal/menu/actions_interbbs.go:354
 msgid "Planetary Treaties"
 msgstr ""
 
@@ -1129,11 +1145,11 @@ msgstr ""
 msgid "Popular support rose %d points."
 msgstr ""
 
-#: internal/menu/actions_message.go:305
+#: internal/menu/actions_message.go:307
 msgid "Post to the planet:"
 msgstr ""
 
-#: internal/menu/actions_message.go:317
+#: internal/menu/actions_message.go:319
 msgid "Posted."
 msgstr ""
 
@@ -1229,7 +1245,7 @@ msgstr ""
 msgid "Sable, your technology advisor, Sire. I tend the labs and the small miracles they leak."
 msgstr ""
 
-#: internal/menu/actions_message.go:197
+#: internal/menu/actions_message.go:199
 msgid "Save"
 msgstr ""
 
@@ -1361,7 +1377,7 @@ msgstr ""
 msgid "Spy Database"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:414
+#: internal/menu/actions_interbbs.go:433
 msgid "Spy Database:"
 msgstr ""
 
@@ -1433,7 +1449,7 @@ msgstr ""
 msgid "That empire has none of those for sale."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:403
+#: internal/menu/actions_interbbs.go:422
 msgid "That interplanetary operation is not yet available."
 msgstr ""
 
@@ -1477,7 +1493,7 @@ msgstr ""
 msgid "The R5-Slappenheimer is disabled."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:503
+#: internal/menu/actions_interbbs.go:522
 msgid "The current BBS Coordinator is %s."
 msgstr ""
 
@@ -1513,11 +1529,11 @@ msgstr ""
 msgid "The remaining %d%% is turned into gold."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:411
+#: internal/menu/actions_interbbs.go:430
 msgid "The spy database is empty. Spy on empires on other planets to fill it."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:499
+#: internal/menu/actions_interbbs.go:518
 msgid "There are no barons to vote for yet."
 msgstr ""
 
@@ -1537,7 +1553,7 @@ msgstr ""
 msgid "There is no one to negotiate with."
 msgstr ""
 
-#: internal/menu/actions_message.go:93
+#: internal/menu/actions_message.go:95
 msgid "There is no one to reach."
 msgstr ""
 
@@ -1677,7 +1693,7 @@ msgstr ""
 msgid "Visit the Food Market to feed them, or they will starve."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:509
+#: internal/menu/actions_interbbs.go:528
 msgid "Vote for (0 to cancel)?"
 msgstr ""
 
@@ -1745,7 +1761,7 @@ msgstr ""
 msgid "While you were at the menus, this has happened:"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:505
+#: internal/menu/actions_interbbs.go:524
 msgid "Who should be the BBS Coordinator?"
 msgstr ""
 
@@ -1833,7 +1849,7 @@ msgstr ""
 msgid "You have %d Troopers, %d usable Jets, %d Tanks, and %d Bombers."
 msgstr ""
 
-#: internal/menu/actions_message.go:159
+#: internal/menu/actions_message.go:161
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr ""
 
@@ -1885,7 +1901,7 @@ msgstr ""
 msgid "You have reached your region purchase limit for this turn."
 msgstr ""
 
-#: internal/menu/actions_message.go:239
+#: internal/menu/actions_message.go:241
 msgid "You have used all %d lines."
 msgstr ""
 
@@ -1941,7 +1957,7 @@ msgstr ""
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:440
+#: internal/menu/actions_interbbs.go:459
 msgid "Your agents are on their way to %s on %s. Their report will reach the Spy Database when word comes back."
 msgstr ""
 
@@ -2021,11 +2037,11 @@ msgstr ""
 msgid "Your realm will be named %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:469
+#: internal/menu/actions_interbbs.go:488
 msgid "Your terrorists depart for %s on %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:521
+#: internal/menu/actions_interbbs.go:540
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 
@@ -2033,7 +2049,7 @@ msgstr ""
 msgid "[%d Regions left] Your choice?"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:86
+#: cmd/immortal-barons/main.go:89
 msgid "add N computer barons to the running game, then exit"
 msgstr ""
 
@@ -2045,6 +2061,14 @@ msgstr ""
 msgid "create this league's Coordinator key, print the public half to give the other boards, then exit (node #1 only)"
 msgstr ""
 
+#: cmd/immortal-barons/main.go:86
+msgid "directory the game writes packets to for the other boards, for -ibbs-reset (default \"outbound\", under the data directory)"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:85
+msgid "directory where packets from the other boards arrive, for -ibbs-reset (default \"inbound\", under the data directory)"
+msgstr ""
+
 #: cmd/immortal-barons/main.go:74
 msgid "folder that holds the game data"
 msgstr ""
@@ -2053,15 +2077,15 @@ msgstr ""
 msgid "for list"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:90
+#: cmd/immortal-barons/main.go:93
 msgid "force CP437 output (the door default; overrides the -local locale detection)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:89
+#: cmd/immortal-barons/main.go:92
 msgid "force UTF-8 output (needed for non-English languages; -local detects this from your locale)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:91
+#: cmd/immortal-barons/main.go:94
 msgid "force plain 7-bit ASCII output, for a terminal that is neither CP437 nor UTF-8 (box rules and accents degrade to ASCII look-alikes)"
 msgstr ""
 
@@ -2089,7 +2113,7 @@ msgstr ""
 msgid "packet signature does not verify"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:918
+#: cmd/immortal-barons/main.go:1020
 msgid "path to the BBS drop file"
 msgstr ""
 
@@ -2101,15 +2125,15 @@ msgstr ""
 msgid "play in your own terminal, not as a BBS door"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:87
+#: cmd/immortal-barons/main.go:90
 msgid "play the game forward N days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:88
+#: cmd/immortal-barons/main.go:91
 msgid "print the normalized game world as JSON, then exit (after load-time migration; for scripts and balance checks)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:93
+#: cmd/immortal-barons/main.go:96
 msgid "print the version, then exit"
 msgstr ""
 
@@ -2121,7 +2145,7 @@ msgstr ""
 msgid "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:922
+#: cmd/immortal-barons/main.go:1024
 msgid "run -set-dropfile first"
 msgstr ""
 
@@ -2133,7 +2157,7 @@ msgstr ""
 msgid "run the inter-BBS step: read incoming packets, run group attacks, write outgoing packets, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:92
+#: cmd/immortal-barons/main.go:95
 msgid "send plain text with no ANSI escapes, as a terminal that cannot render them gets (for testing that path on a terminal that can)"
 msgstr ""
 
@@ -2141,11 +2165,11 @@ msgstr ""
 msgid "send this board's league settings to the whole league (node #1 only), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:84
+#: cmd/immortal-barons/main.go:87
 msgid "start a new game as a board in an inter-BBS league: like -reset, but the settings editor also asks the league settings"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:85
+#: cmd/immortal-barons/main.go:88
 msgid "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)"
 msgstr ""
 
@@ -2167,6 +2191,10 @@ msgstr ""
 
 #: internal/game/ibbs_auth.go:31
 msgid "this board is not the League Coordinator"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:84
+msgid "this board's name in the league, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator"
 msgstr ""
 
 #: internal/menu/gameflow.go:409

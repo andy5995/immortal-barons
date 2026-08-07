@@ -1367,6 +1367,14 @@ display):
   30-column field with the figure straight after, between two 75-column inset
   rules.
 
+**IB adds two smaller units** (`TravelSecondsCutoff`, `TravelMinutesCutoff`): a
+round trip under a minute reads in seconds, under an hour in minutes, and a real
+measurement is never rounded down to zero. BRE never needed them — a league
+polling a few times a day is measured in hours — but a modern always-on link
+answers in seconds, where BRE's format prints `0.00 hours` and reads as "never
+measured". The stored figure and the averaging are unchanged; this is the
+display only, and it is a deliberate readability divergence.
+
 IB implements the mechanic as described. Constants: `TravelAvgNewWeight`,
 `TravelAvgDenom`, `TravelHoursCutoff` in `balance.go`. The probes ride along with
 whatever else the inter-BBS run is sending, once per game day

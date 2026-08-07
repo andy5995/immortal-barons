@@ -6,6 +6,7 @@ The game localizes UI strings through a small set of call sites, so we scan for
 their string-literal arguments:
 
   - tr(s, "...")                      direct-print helper
+  - plural(s, n, "one", "many")       both wordings of a counted figure
   - ok(s, "..." / fail via errors     feedback
   - prompt / promptInt / promptSuggested / askYesNo / askYesNoDefaultNo
   - i18n.T(lang, "...")               explicit lookups (menu draw)
@@ -41,6 +42,11 @@ CALL_PATTERNS = [
 ]
 ERR_PATTERN = re.compile(r'errors\.New\(' + STR + r'\)')
 
+# plural(s, n, "one", "many") carries BOTH wordings, and the count argument may
+# itself contain commas (math.Max(1, ...)), so match the last two literals in
+# the call rather than counting arguments.
+PLURAL_PATTERN = re.compile(r'\bplural\(s,.*?' + STR + r',\s*' + STR + r'\)')
+
 def go_files(*subdirs):
     for sub in subdirs:
         for path in glob.glob(os.path.join(ROOT, sub, "**", "*.go"), recursive=True):
@@ -62,6 +68,9 @@ def extract():
             for pat in CALL_PATTERNS:
                 for m in pat.finditer(line):
                     add(m.group(1), f"{rel}:{n}")
+            for m in PLURAL_PATTERN.finditer(line):
+                add(m.group(1), f"{rel}:{n}")
+                add(m.group(2), f"{rel}:{n}")
     for path in go_files("internal/game"):
         rel = os.path.relpath(path, ROOT)
         for n, line in enumerate(open(path, encoding="utf-8"), 1):

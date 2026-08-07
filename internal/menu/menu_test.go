@@ -527,6 +527,32 @@ func TestTravelTimesMatchesBRE(t *testing.T) {
 	}
 }
 
+// A round trip is reported in the largest unit that still shows a figure. The
+// seconds and minutes tiers are IB's own: a link answering in under a minute
+// printed 0.00 hours, which reads as "never measured" rather than "fast".
+func TestTurnaroundLabelUnits(t *testing.T) {
+	const day = 1.0
+	cases := []struct {
+		days float64
+		want string
+	}{
+		{0, "No Data"},
+		{0.5 / (24 * 60 * 60), "1 second"}, // half a second still reads as a measurement
+		{36.0 / (24 * 60 * 60), "36 seconds"},
+		{90.0 / (24 * 60 * 60), "2 minutes"},
+		{60.0 / (24 * 60 * 60), "1 minute"},
+		{30.0 / (24 * 60), "30 minutes"},
+		{3.0 / 24, "3.00 hours"},
+		{3 * day, "3.00 days"},
+	}
+	f := &fakeSession{}
+	for _, c := range cases {
+		if got, _ := turnaroundLabel(f, c.days); got != c.want {
+			t.Errorf("turnaroundLabel(%v days) = %q, want %q", c.days, got, c.want)
+		}
+	}
+}
+
 func TestHelpBrowseShowsControls(t *testing.T) {
 	// lightbar: type 'c' (jumps to Controls) -> Enter -> Enter (first topic) ->
 	// dismiss pause (z) -> q (back to categories) -> q (leave help)

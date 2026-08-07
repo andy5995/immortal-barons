@@ -949,4 +949,10 @@ const (
 	TravelAvgNewWeight = 2 // weight on the newest sample
 	TravelAvgDenom     = 3 // ... over (old + weight*new) / denom
 	TravelHoursCutoff  = 2 // days; under this the screen reads in hours
+	// Below an hour BRE's hours figure rounds to 0.00, which reads as "never
+	// measured" rather than "fast". A modern always-on link is routinely under a
+	// minute, so IB adds two tiers BRE has no need of. A readability divergence,
+	// not a mechanic — the stored figure is unchanged.
+	TravelMinutesCutoff = 1.0 / 24        // days; under this the screen reads in minutes
+	TravelSecondsCutoff = 1.0 / (24 * 60) // days; under this the screen reads in seconds
 )
