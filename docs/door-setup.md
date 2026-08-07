@@ -198,13 +198,18 @@ adds none.
 
 ## Inter-BBS (league) play
 
-A league is a group of boards whose players compete against each other. To join
-one, turn on inter-BBS play and give your board a name.
+A league is a group of boards whose players compete against each other.
 
-Open the Configuration Editor with `-reset` and set these on the **Caps & Node**
-page:
+Set the board up with `-ibbs-reset` instead of `-reset`:
 
-- **Inter-BBS play** — turn on the inter-BBS menus.
+```
+immortal-barons -ibbs-reset -data /path/to/data
+```
+
+It works like `-reset` — the settings editor, then a fresh world — but the
+editor also asks the league settings, which a stand-alone board is never shown.
+Set these on the **Caps & Node** page:
+
 - **Board ID** — a short unique name for your board (your "planet").
 - **Inbound Dir** — the directory where packets from other boards arrive.
 - **Outbound Dir** — the directory where the game writes packets for other

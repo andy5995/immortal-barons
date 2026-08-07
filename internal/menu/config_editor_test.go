@@ -43,7 +43,7 @@ func TestConfigEditorTurnsFloorAtOne(t *testing.T) {
 // Every field survives the split into pages, and each page fits an 80x24 screen
 // — the whole point of paging it (issue #100).
 func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
-	pages := configPages()
+	pages := configPages(true)
 	seen := map[int]string{}
 	for _, g := range pages {
 		// Title rule, page heading, closing rule, legend, and the prompt take five
@@ -63,9 +63,13 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 		}
 	}
 	// The identifiers ran 1..38 before the pages existed and must still, so no
-	// sysop's habit or note breaks. Later fields are appended above that.
-	const fields = 40
-	for n := 1; n <= fields; n++ {
+	// sysop's habit or note breaks. Later fields are appended above that. 22 was
+	// the Inter-BBS toggle, replaced by the -ibbs-reset command.
+	const fields = 39
+	for n := 1; n <= 40; n++ {
+		if n == 22 {
+			continue
+		}
 		if _, ok := seen[n]; !ok {
 			t.Errorf("field %d is on no page", n)
 		}
@@ -113,6 +117,7 @@ func TestConfigEditorPreviousPageWraps(t *testing.T) {
 func TestConfigEditorSetsPacketDirs(t *testing.T) {
 	w := newWorld()
 	w.Config.DataDir = t.TempDir()
+	w.Config.IBBS = true // the packet directories are only asked of a league board
 	w.Config.InboundDir = "./data/inbound"
 	w.Config.OutboundDir = "./data/outbound"
 
@@ -130,5 +135,23 @@ func TestConfigEditorSetsPacketDirs(t *testing.T) {
 	ConfigEditor(f, w.World)
 	if w.Config.InboundDir != "/srv/in" {
 		t.Errorf("an empty answer changed InboundDir to %q", w.Config.InboundDir)
+	}
+}
+
+// A stand-alone reset never asks the league settings; -ibbs-reset does. The two
+// sets must be the same ones Game Setup shows and hides.
+func TestConfigPagesHideLeagueFieldsOffLeague(t *testing.T) {
+	has := func(ibbs bool, n int) bool { return findConfigField(configPages(ibbs), n) != nil }
+	for n := range ibbsOnlyFields {
+		if has(false, n) {
+			t.Errorf("field %d is offered on a stand-alone board", n)
+		}
+		if !has(true, n) {
+			t.Errorf("field %d is missing from an -ibbs-reset", n)
+		}
+	}
+	// A setting that is not league-only stays on both.
+	if !has(false, 1) || !has(true, 1) {
+		t.Error("Turns per day should be offered either way")
 	}
 }

@@ -78,7 +78,9 @@ then exit.
   supported formats.
 - **`-reset`** — Start a new game. First it opens the settings editor so you can
   change the rules, then it clears all empires and rebuilds the world. The old
-  world is saved first. This also rewrites `config.json`.
+  world is saved first. This also rewrites `config.json`. It sets up a
+  stand-alone board, so the editor leaves out the league settings; use
+  `-ibbs-reset` for a board that joins a league.
 - **`-reset-from-config`** — Start a new game using the current `config.json`,
   without opening the editor. It clears all empires and rebuilds the world. The
   old world is saved first.
@@ -119,6 +121,10 @@ expose game state.
 These options are for games that link several BBSes together (a "league"). See
 [Door Setup](door-setup.md) for how inter-BBS play works.
 
+- **`-ibbs-reset`** — Start a new game as a board in a league. The same as
+  `-reset`, except the settings editor also asks the league settings (board
+  name, packet directories, and the interplanetary rules), and it creates the
+  packet directories.
 - **`-planetary`** — Run the inter-BBS step, then exit: read incoming packets,
   run the group attacks, and write outgoing packets.
 - **`-league-config`** — Send this board's league settings to the whole league,

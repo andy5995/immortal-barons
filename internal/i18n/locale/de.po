@@ -301,7 +301,7 @@ msgstr ""
 msgid "Biological Attack"
 msgstr ""
 
-#: internal/menu/config_editor.go:326
+#: internal/menu/config_editor.go:323
 msgid "Board ID:"
 msgstr ""
 
@@ -725,11 +725,11 @@ msgstr "Nachrichten lesen"
 msgid "Id"
 msgstr ""
 
-#: internal/menu/config_editor.go:347
+#: internal/menu/config_editor.go:344
 msgid "Idle timeout in seconds (0 = never)"
 msgstr ""
 
-#: internal/menu/config_editor.go:352
+#: internal/menu/config_editor.go:349
 msgid "Idle warnings before boot"
 msgstr ""
 
@@ -753,8 +753,8 @@ msgstr ""
 msgid "In Deal"
 msgstr ""
 
-#: internal/menu/config_editor.go:333
-msgid "Inbound Dir:"
+#: internal/menu/config_editor.go:330
+msgid "Inbound Dir (relative to the data directory):"
 msgstr ""
 
 # Turn pipeline — headers
@@ -1136,8 +1136,8 @@ msgstr ""
 msgid "Our {military forces} are functioning at %d%% strength."
 msgstr ""
 
-#: internal/menu/config_editor.go:340
-msgid "Outbound Dir:"
+#: internal/menu/config_editor.go:337
+msgid "Outbound Dir (relative to the data directory):"
 msgstr ""
 
 #: internal/menu/actions_bank.go:172
@@ -2160,7 +2160,7 @@ msgstr ""
 msgid "[%d Regions left] Your choice?"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:85
+#: cmd/immortal-barons/main.go:86
 msgid "add N computer barons to the running game, then exit"
 msgstr ""
 
@@ -2182,18 +2182,18 @@ msgstr ""
 msgid "for list"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:89
+#: cmd/immortal-barons/main.go:90
 msgid ""
 "force CP437 output (the door default; overrides the -local locale detection)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:88
+#: cmd/immortal-barons/main.go:89
 msgid ""
 "force UTF-8 output (needed for non-English languages; -local detects this "
 "from your locale)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:90
+#: cmd/immortal-barons/main.go:91
 msgid ""
 "force plain 7-bit ASCII output, for a terminal that is neither CP437 nor "
 "UTF-8 (box rules and accents degrade to ASCII look-alikes)"
@@ -2223,7 +2223,7 @@ msgstr ""
 msgid "packet signature does not verify"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:875
+#: cmd/immortal-barons/main.go:918
 msgid "path to the BBS drop file"
 msgstr ""
 
@@ -2235,20 +2235,20 @@ msgstr ""
 msgid "play in your own terminal, not as a BBS door"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:86
+#: cmd/immortal-barons/main.go:87
 msgid ""
 "play the game forward N days of computer-baron turns, printing a per-day "
 "summary and final standings, then exit (a balance probe). ADVANCES AND SAVES "
 "the game, so it asks first and refuses on a game that has human realms"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:87
+#: cmd/immortal-barons/main.go:88
 msgid ""
 "print the normalized game world as JSON, then exit (after load-time "
 "migration; for scripts and balance checks)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:92
+#: cmd/immortal-barons/main.go:93
 msgid "print the version, then exit"
 msgstr ""
 
@@ -2262,7 +2262,7 @@ msgid ""
 "printed), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:879
+#: cmd/immortal-barons/main.go:922
 msgid "run -set-dropfile first"
 msgstr ""
 
@@ -2276,7 +2276,7 @@ msgid ""
 "outgoing packets, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:91
+#: cmd/immortal-barons/main.go:92
 msgid ""
 "send plain text with no ANSI escapes, as a terminal that cannot render them "
 "gets (for testing that path on a terminal that can)"
@@ -2289,6 +2289,12 @@ msgid ""
 msgstr ""
 
 #: cmd/immortal-barons/main.go:84
+msgid ""
+"start a new game as a board in an inter-BBS league: like -reset, but the "
+"settings editor also asks the league settings"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:85
 msgid ""
 "start a new game from the current config.json without the editor: clear all "
 "empires and rebuild the world (the old world is saved first)"

@@ -81,6 +81,7 @@ func main() {
 	coordPub := flag.String("coord-key", "", i18n.T(lang, "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"))
 	leagueReset := flag.String("league-reset", "", i18n.T(lang, "start a new season across the whole league on DATE (node #1 only), then exit"))
 	reset := flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"))
+	ibbsReset := flag.Bool("ibbs-reset", false, i18n.T(lang, "start a new game as a board in an inter-BBS league: like -reset, but the settings editor also asks the league settings"))
 	resetFromConfig := flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)"))
 	addAI := flag.Int("add-ai", 0, i18n.T(lang, "add N computer barons to the running game, then exit"))
 	spectate := flag.Int("spectate", 0, i18n.T(lang, "play the game forward N days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms"))
@@ -113,7 +114,7 @@ func main() {
 	// when -dropfile isn't given). Every explicit-mode flag consumes none, so a
 	// stray word alongside one is a mistake — flag it instead of silently ignoring
 	// it. (Unknown -flags are already rejected by the flag package.)
-	explicitMode := *maint || *planetary || *leagueConfig || *reset || *resetFromConfig ||
+	explicitMode := *maint || *planetary || *leagueConfig || *reset || *resetFromConfig || *ibbsReset ||
 		*addAI > 0 || *dump || *spectate > 0 || *local || *export != "" || *imp != "" || *setDrop
 	if flag.NArg() > 0 && explicitMode {
 		fmt.Fprintf(os.Stderr, "immortal-barons: unknown argument %q\n\n", flag.Arg(0))
@@ -212,13 +213,17 @@ func main() {
 		return
 	}
 
-	if *reset {
-		exitOn("-reset", runReset(cfg, false, localCS, *noANSI))
+	if *reset || *ibbsReset {
+		mode := "-reset"
+		if *ibbsReset {
+			mode = "-ibbs-reset"
+		}
+		exitOn(mode, runReset(cfg, false, *ibbsReset, localCS, *noANSI))
 		return
 	}
 
 	if *resetFromConfig {
-		exitOn("-reset-from-config", runReset(cfg, true, localCS, *noANSI))
+		exitOn("-reset-from-config", runReset(cfg, true, cfg.IBBS, localCS, *noANSI))
 		return
 	}
 
@@ -627,7 +632,7 @@ func runLeagueConfig(cfg game.Config) error {
 // settings editor seeded from defaults and saves the edited config.json. With
 // fromConfig=true (-reset-from-config) it skips the editor and keeps the current
 // config.json as-is. Either way the world is wiped and re-seeded.
-func runReset(cfg game.Config, fromConfig bool, cs charset, noANSI bool) error {
+func runReset(cfg game.Config, fromConfig, ibbs bool, cs charset, noANSI bool) error {
 	// No drop file prompt here: a reset seeds the world for the web front-end and
 	// -local play too, neither of which reads a drop file. The door names
 	// -set-dropfile when it needs it.
@@ -674,6 +679,10 @@ func runReset(cfg game.Config, fromConfig bool, cs charset, noANSI bool) error {
 	// config.json on exit (S); Q cancels the whole reset.
 	def := game.DefaultConfig()
 	def.DataDir = cfg.DataDir
+	// Whether this board is in a league is chosen by which reset command was run,
+	// not by a setting: it decides which questions the editor asks, and BRE's own
+	// model is that the ruleset is fixed at reset and never edited mid-game.
+	def.IBBS = ibbs
 	w.Config = def
 
 	// On a real terminal use the tabbed tview editor (issue #7); fall back to the

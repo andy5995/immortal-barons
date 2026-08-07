@@ -79,7 +79,6 @@ const (
 	helpDoomerKaboomer  = "Whether the Doomer Kaboomer doomsday weapon may be built."
 	helpMaxRegions      = "The most regions a single player may own."
 	helpMaxPlayers      = "The most human empires allowed on this board. 0 means no limit."
-	helpIBBS            = "Take part in inter-BBS play across multiple boards. This turns on the interplanetary menus."
 	helpBoardID         = "The name this board uses in inter-BBS packets."
 	helpInboundDir      = "Where packets from the other boards arrive. Relative to the data directory unless you give a full path."
 	helpOutboundDir     = "Where the game writes packets for the other boards. Relative to the data directory unless you give a full path."
@@ -136,6 +135,9 @@ func ConfigEditorTUI(w *game.World) (saved bool, err error) {
 func newConfigTUI(w *game.World) *configTUI {
 	t := &configTUI{app: tview.NewApplication(), world: w, base: w.Config}
 	c := w.Config
+	// A stand-alone board is never asked the league settings (see
+	// ibbsOnlyFields); -ibbs-reset is what turns them on.
+	ibbs := c.IBBS
 
 	costOpts := []string{"High", "Medium", "Low", "None"}
 	costVals := []game.Level{game.High, game.Medium, game.Low, game.None}
@@ -174,33 +176,40 @@ func newConfigTUI(w *game.World) *configTUI {
 	addChoice(t, mil, true, "Attack Rewards", helpAttackRewards, dmgOpts, dmgVals, c.AttackRewards, func(c *game.Config, v game.Level) { c.AttackRewards = v })
 	addChoice(t, mil, true, "R5-Slappenheimer Handling", helpSlappenheimer, slapOpts, slapVals, c.SlappenheimerHandling, func(c *game.Config, v game.SlappenheimerMode) { c.SlappenheimerHandling = v })
 	t.addInt(mil, true, "Max Individual Attacks/Day (0=unlimited)", helpMaxAttacks, c.MaxIndividualAttacks, 0, 100, func(c *game.Config, n int) { c.MaxIndividualAttacks = n })
-	t.addInt(mil, true, "Max Group Attacks/Day (0=unlimited)", helpMaxGroupAttacks, c.MaxGroupAttacks, 0, 100, func(c *game.Config, n int) { c.MaxGroupAttacks = n })
-	t.addInt(mil, true, "Max Terrorist Ops/Day (0=unlimited)", helpMaxTerrorOps, c.MaxTerrorOps, 0, 100, func(c *game.Config, n int) { c.MaxTerrorOps = n })
-	t.addInt(mil, true, "Max Bombing Ops/Day (0=unlimited)", helpMaxBombingOps, c.MaxBombingOps, 0, 100, func(c *game.Config, n int) { c.MaxBombingOps = n })
-	t.addInt(mil, true, "Days before lost forces return (0=never)", helpLostForcesDays, c.LostForcesDays, 0, game.MaxLostForcesDays, func(c *game.Config, n int) { c.LostForcesDays = n })
+	if ibbs {
+		t.addInt(mil, true, "Max Group Attacks/Day (0=unlimited)", helpMaxGroupAttacks, c.MaxGroupAttacks, 0, 100, func(c *game.Config, n int) { c.MaxGroupAttacks = n })
+		t.addInt(mil, true, "Max Terrorist Ops/Day (0=unlimited)", helpMaxTerrorOps, c.MaxTerrorOps, 0, 100, func(c *game.Config, n int) { c.MaxTerrorOps = n })
+		t.addInt(mil, true, "Max Bombing Ops/Day (0=unlimited)", helpMaxBombingOps, c.MaxBombingOps, 0, 100, func(c *game.Config, n int) { c.MaxBombingOps = n })
+		t.addInt(mil, true, "Days before lost forces return (0=never)", helpLostForcesDays, c.LostForcesDays, 0, game.MaxLostForcesDays, func(c *game.Config, n int) { c.LostForcesDays = n })
+	}
 	addChoice(t, mil, true, "Attack Costs", helpAttackCosts, costOpts, costVals, c.AttackCosts, func(c *game.Config, v game.Level) { c.AttackCosts = v })
-	addChoice(t, mil, true, "Terrorism Costs", helpTerrorCosts, costOpts, costVals, c.TerrorCosts, func(c *game.Config, v game.Level) { c.TerrorCosts = v })
+	if ibbs {
+		addChoice(t, mil, true, "Terrorism Costs", helpTerrorCosts, costOpts, costVals, c.TerrorCosts, func(c *game.Config, v game.Level) { c.TerrorCosts = v })
+	}
 	t.addBool(mil, true, "Bombing Ops", helpBombingOps, c.BombingOps, func(c *game.Config, b bool) { c.BombingOps = b })
 	t.addBool(mil, true, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
-	t.addBool(mil, true, "Doomer Kaboomer", helpDoomerKaboomer, c.DoomerKaboomer, func(c *game.Config, b bool) { c.DoomerKaboomer = b })
+	if ibbs {
+		t.addBool(mil, true, "Doomer Kaboomer", helpDoomerKaboomer, c.DoomerKaboomer, func(c *game.Config, b bool) { c.DoomerKaboomer = b })
+	}
 
 	caps := tview.NewForm()
 	t.addInt(caps, true, "Max Purchasable Regions", helpMaxRegions, c.MaxRegions, 0, game.MaxPurchasableRegions, func(c *game.Config, n int) { c.MaxRegions = n })
 	t.addInt(caps, true, "Max Players Per BBS (0=unlimited)", helpMaxPlayers, c.MaxPlayers, 0, 100000, func(c *game.Config, n int) { c.MaxPlayers = n })
-	t.addBool(caps, false, "Inter-BBS play", helpIBBS, c.IBBS, func(c *game.Config, b bool) { c.IBBS = b })
-	t.addText(caps, false, 16, "Board ID", helpBoardID, c.BoardID, func(c *game.Config, v string) { c.BoardID = v })
-	// A cleared path field keeps the current one: the inter-BBS step has nowhere
-	// to read or write with an empty directory.
-	t.addText(caps, false, 40, "Inbound Dir", helpInboundDir, c.InboundDir, func(c *game.Config, v string) {
-		if v != "" {
-			c.InboundDir = v
-		}
-	})
-	t.addText(caps, false, 40, "Outbound Dir", helpOutboundDir, c.OutboundDir, func(c *game.Config, v string) {
-		if v != "" {
-			c.OutboundDir = v
-		}
-	})
+	if ibbs {
+		t.addText(caps, false, 16, "Board ID", helpBoardID, c.BoardID, func(c *game.Config, v string) { c.BoardID = v })
+		// A cleared path field keeps the current one: the inter-BBS step has nowhere
+		// to read or write with an empty directory.
+		t.addText(caps, false, 40, "Inbound Dir", helpInboundDir, c.InboundDir, func(c *game.Config, v string) {
+			if v != "" {
+				c.InboundDir = v
+			}
+		})
+		t.addText(caps, false, 40, "Outbound Dir", helpOutboundDir, c.OutboundDir, func(c *game.Config, v string) {
+			if v != "" {
+				c.OutboundDir = v
+			}
+		})
+	}
 	t.addInt(caps, false, "Idle timeout (sec, 0=never)", helpIdleTimeout, c.IdleTimeoutSecs, 0, 86400, func(c *game.Config, n int) { c.IdleTimeoutSecs = n })
 	t.addInt(caps, false, "Idle warnings before boot", helpIdleWarnings, c.MaxIdleWarnings, 1, 100, func(c *game.Config, n int) { c.MaxIdleWarnings = n })
 

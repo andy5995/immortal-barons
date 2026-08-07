@@ -96,7 +96,7 @@ func ConfigEditor(s session.Session, w *game.World) (saved bool) {
 // daily maintenance; AICount does not retroactively add or remove AI empires).
 func runConfigEditor(s session.Session, w *game.World) bool {
 	c := &w.Config
-	pages := configPages()
+	pages := configPages(c.IBBS)
 	page := 0
 	for {
 		g := pages[page]
@@ -164,7 +164,7 @@ type cfgPage struct {
 // uses as tabs, so a sysop sees one layout whichever editor they land in — and,
 // unlike the single 38-field list this replaces, each page fits an 80x24 screen
 // (issue #100).
-func configPages() []cfgPage {
+func configPages(ibbs bool) []cfgPage {
 	// Shorthands: most fields either prompt for a number or cycle a choice.
 	num := func(n int, label string, prompt string, get func(*game.Config) int, set func(*game.Config, int), maxV int) cfgField {
 		return cfgField{
@@ -317,9 +317,6 @@ func configPages() []cfgPage {
 		num(11, "Max Players Per BBS", "Max Players Per BBS (0 = unlimited)",
 			func(c *game.Config) int { return c.MaxPlayers },
 			func(c *game.Config, v int) { c.MaxPlayers = v }, 100000),
-		{n: 22, label: "Inter-BBS play",
-			value: func(c *game.Config) string { return onOffStr(c.IBBS) },
-			edit:  func(_ session.Session, c *game.Config) { c.IBBS = !c.IBBS }},
 		{n: 23, label: "Board ID",
 			value: func(c *game.Config) string { return c.BoardID },
 			edit: func(s session.Session, c *game.Config) {
@@ -353,12 +350,43 @@ func configPages() []cfgPage {
 			}},
 	}
 
-	return []cfgPage{
+	pages := []cfgPage{
 		{configTabTitles[0], timing},
 		{configTabTitles[1], econ},
 		{configTabTitles[2], mil},
 		{configTabTitles[3], caps},
 	}
+	if !ibbs {
+		for i := range pages {
+			pages[i].fields = withoutIBBSFields(pages[i].fields)
+		}
+	}
+	return pages
+}
+
+// ibbsOnlyFields are the settings that mean nothing on a stand-alone board, so
+// only -ibbs-reset offers them. The same set Game Setup hides (see gameSetup):
+// the two screens must agree, or a sysop reads a rule they were never asked.
+var ibbsOnlyFields = map[int]bool{
+	23: true, // Board ID
+	39: true, // Inbound Dir
+	40: true, // Outbound Dir
+	30: true, // Max Group Attacks/Day
+	31: true, // Max Terrorist Ops/Day
+	32: true, // Max Bombing Ops/Day
+	33: true, // Days before lost forces return
+	35: true, // Terrorism Costs
+	38: true, // Doomer Kaboomer
+}
+
+func withoutIBBSFields(fields []cfgField) []cfgField {
+	out := make([]cfgField, 0, len(fields))
+	for _, f := range fields {
+		if !ibbsOnlyFields[f.n] {
+			out = append(out, f)
+		}
+	}
+	return out
 }
 
 // findConfigField returns the field with identifier n, or nil if there is none.
