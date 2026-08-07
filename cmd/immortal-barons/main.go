@@ -630,6 +630,10 @@ func runLeagueConfig(cfg game.Config) error {
 		return fmt.Errorf("this board (%q) is not the League Coordinator (node #1 in %s)", cfg.BoardID, store.NodeListFile)
 	}
 	w.ExportLeagueConfig()
+	// Sign and number it. Every other outbound path reaches this through
+	// RunPlanetary; this one writes the outbox directly, and an unsigned ruleset
+	// is refused by every board that receives it.
+	w.StampOutbox()
 	if err := store.WriteOutbox(w, cfg.Outbound()); err != nil {
 		return err
 	}
