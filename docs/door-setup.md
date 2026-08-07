@@ -583,15 +583,15 @@ immortal-barons -planetary -data /path/to/member/data
 ```
 
 Watch the packet as it goes: it appears in the filebox, then in the other
-board's inbound, then disappears as the game consumes it. The member board's
-news should say **"The League Coordinator updated the league settings."** If it
-instead says a packet "claimed to carry League Coordinator orders and was
-refused", the key in step 7 did not take.
+board's inbound, then disappears as the game reads it. The member board's news
+should then say **"The League Coordinator updated the league settings."** If it
+says a packet "claimed to carry League Coordinator orders and was refused"
+instead, the key in step 7 did not take.
 
 ### Step 9 — put it on a schedule
 
-Nobody polls by hand twice a day forever. Each board needs one job on a timer,
-doing the two steps in order:
+You should not have to run this by hand every day. Each board needs one job on
+a timer, doing the two steps in order:
 
 ```
 immortal-barons -planetary -data /path/to/data && cd /path/to/bbs && ./mis poll 1:1/2
@@ -599,16 +599,16 @@ immortal-barons -planetary -data /path/to/data && cd /path/to/bbs && ./mis poll 
 
 The game step reads and writes packet files; the mail step carries them. The
 game never moves a file between boards, and your mailer knows nothing about the
-game, so both have to run, and in that order — polling before the game has
-written its outbox sends yesterday's mail.
+game, so both have to run. The order matters: polling before the game has
+written its outbox sends the packets from the run before.
 
-Run it from cron, or from your BBS's own event scheduler. How often is a
-judgement call: every exchange is a round trip, and the Travel Times screen in
-the game reports what your players actually experience. A league where the
-boards poll hourly plays very differently from one where they poll at 3am.
+Run it from cron, or from your BBS's own event scheduler. How often is up to
+you. Every exchange is a round trip, and the Travel Times screen in the game
+reports how long your players actually wait. A league whose boards poll each hour
+plays very differently from one that polls at 3am.
 
-**You may already have some of this.** Daily maintenance runs the inter-BBS step
-itself when inter-BBS play is on, and maintenance runs on its own at the first
-login of a new day. So a board with callers already reads and writes packets
-once a day with nothing scheduled. What the timer adds is doing it more often
-than daily, and the poll — which the game cannot do for you at all.
+**You may already have some of this.** Daily maintenance runs the inter-BBS
+step itself when inter-BBS play is on. Maintenance also runs on its own at the
+first login of a new day, so a board with callers already reads and writes
+packets once a day with nothing scheduled. What the timer adds is doing it more
+often than daily, and the poll — which the game cannot do for you at all.
