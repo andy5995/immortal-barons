@@ -513,3 +513,102 @@ the session worked or not. A wrong port reports **"Authorization failed"**,
 which sounds like a password problem but is not — nothing answered, so there was
 nothing to authorize. The line above it names the port it dialled, and that is
 the one to check against the other board's binkp server.
+
+### Step 6 — create the two games
+
+The Coordinator's board sets the league rules, so it is the one that opens the
+settings editor:
+
+```
+immortal-barons -ibbs-reset -data /path/to/coordinator/data
+```
+
+On the **Caps & Node** page, set the Board ID to the board's name, and the two
+packet directories:
+
+| | value |
+|---|---|
+| Inbound Dir | your BBS's FTN inbound, e.g. `~/a-mystic/echomail/in` |
+| Outbound Dir | the filebox for the other board, from step 3 |
+
+The member board takes no editor at all — its rules arrive from the Coordinator:
+
+```
+immortal-barons -ibbs-reset -board-id "Bravo BBS" -inbound ~/b-mystic/echomail/in -outbound ~/b-mystic/filebox/iblocal_z1n1n1 -data /path/to/member/data
+```
+
+Quote a board name that has spaces in it.
+
+### Step 7 — the roster and the key
+
+Write `ibnodes.dat` once and put a copy in **both** data directories. The names
+must match the Board IDs exactly:
+
+```
+1
+Alpha BBS
+1:1/1
+Local
+XX
+USA
+
+2
+Bravo BBS
+1:1/2
+Local
+XX
+USA
+```
+
+Then create the Coordinator's key on the first board, and record the public half
+on the second:
+
+```
+immortal-barons -gen-coord-key -data /path/to/coordinator/data
+immortal-barons -coord-key THE_KEY_IT_PRINTED -data /path/to/member/data
+```
+
+Without the key the member board refuses the Coordinator's orders, and the
+league rules never arrive.
+
+### Step 8 — the first exchange
+
+From the Coordinator's board, broadcast the rules, carry them over, and apply
+them:
+
+```
+immortal-barons -league-config -data /path/to/coordinator/data
+cd ~/a-mystic && ./mis poll 1:1/2
+immortal-barons -planetary -data /path/to/member/data
+```
+
+Watch the packet as it goes: it appears in the filebox, then in the other
+board's inbound, then disappears as the game consumes it. The member board's
+news should say **"The League Coordinator updated the league settings."** If it
+instead says a packet "claimed to carry League Coordinator orders and was
+refused", the key in step 7 did not take.
+
+### Step 9 — put it on a schedule
+
+Nobody polls by hand twice a day forever. Each board needs one job on a timer,
+doing the two steps in order:
+
+```
+immortal-barons -planetary -data /path/to/data && cd /path/to/bbs && ./mis poll 1:1/2
+```
+
+The game step reads and writes packet files; the mail step carries them. The
+game never moves a file between boards, and your mailer knows nothing about the
+game, so both have to run, and in that order — polling before the game has
+written its outbox sends yesterday's mail.
+
+Run it from cron, or from your BBS's own event scheduler. How often is a
+judgement call: every exchange is a round trip, and the Travel Times screen in
+the game reports what your players actually experience. A league where the
+boards poll hourly plays very differently from one where they poll at 3am.
+
+**You may already have some of this.** Daily maintenance runs the inter-BBS step
+itself when inter-BBS play is on, and maintenance runs on its own at the first
+login of a new day. So a board with callers already reads and writes packets
+once a day with nothing scheduled. What the timer adds is doing it more often
+than daily, and the poll — which the game cannot do for you at all.
