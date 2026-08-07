@@ -83,3 +83,55 @@ func TestJoinGroupAttackDepartedWindow(t *testing.T) {
 		t.Fatalf("node B should have aborted with the departed notice, got: %q", out)
 	}
 }
+
+// A scores packet says which realms are still under New Realm Protection, so
+// the boards that read it can leave them off their target lists. The target
+// board still refuses an arriving strike on its own authority — this only stops
+// a baron spending forces on a realm already known to be untouchable.
+func TestProtectedRealmsAreNotOfferedAsTargets(t *testing.T) {
+	scores := []game.RemoteScore{
+		{Empire: "Fresh Meat", Protected: true},
+		{Empire: "Fair Game"},
+		{Empire: "Also New", Protected: true},
+	}
+	names, hidden := attackableBarons(scores, hostile)
+	if len(names) != 1 || names[0] != "Fair Game" {
+		t.Errorf("attackable = %v, want just Fair Game", names)
+	}
+	if hidden != 2 {
+		t.Errorf("hidden = %d, want 2", hidden)
+	}
+	// Spying is not stopped by protection, so an observer sees everyone.
+	if seen, held := attackableBarons(scores, observing); len(seen) != 3 || held != 0 {
+		t.Errorf("observing = %v (%d held), want all three", seen, held)
+	}
+}
+
+// Export carries the flag, so the far side has something to read.
+func TestExportedScoresCarryProtection(t *testing.T) {
+	w := newWorld()
+	w.Config.IBBS = true
+	w.Config.BoardID = "Alpha BBS"
+	var scores []game.RemoteScore
+	w.With(func() {
+		p := w.Player()
+		p.Protection = 5
+		w.World.Outbox = nil
+		w.World.ExportScores()
+		for _, pk := range w.World.Outbox {
+			scores = append(scores, pk.Scores...)
+		}
+	})
+	found := false
+	for _, sc := range scores {
+		if sc.Empire == w.Player().Name {
+			found = true
+			if !sc.Protected {
+				t.Error("a realm under protection was exported as attackable")
+			}
+		}
+	}
+	if !found {
+		t.Fatalf("the player was not in the exported scores: %+v", scores)
+	}
+}

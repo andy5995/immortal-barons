@@ -62,7 +62,13 @@ definition.
 Component types:
 
 ```json
-RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940 }
+RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940,
+                "Protected": true }
+                // Protected = still under New Realm Protection, so the boards
+                // that read this leave it off their target lists. Absent in a
+                // packet written before the field existed, which reads as
+                // unprotected. Advisory: the target board still refuses an
+                // arriving strike on its own authority.
 
 RemoteAttack  { "ID": 1, "FromBoard": "AlphaBBS", "TargetEmpire": "Victim",
                 "Offense": 150000, "Contributors": [ Contribution ] }

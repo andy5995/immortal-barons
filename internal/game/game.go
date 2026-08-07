@@ -448,6 +448,14 @@ type RemoteScore struct {
 	NetWorth int
 	Land     int
 	Score    int // BRE cumulative score (Empire.Score); 0 in pre-Score packets
+	// Protected marks a realm still under New Realm Protection, so the boards
+	// that read this packet can leave it off their target lists — the same
+	// courtesy a local attack list extends. It can go stale in transit (a strike
+	// takes days, protection counts down), so the target board still refuses an
+	// arriving strike on its own authority; this only stops a baron spending
+	// forces on a target that was already known to be untouchable. Absent from a
+	// packet written before this field existed, which reads as unprotected.
+	Protected bool `json:",omitempty"`
 }
 
 // RemoteBoard is a snapshot of another board's scores, imported via an

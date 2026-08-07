@@ -25,19 +25,19 @@ msgstr ""
 msgid "##"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:325
+#: internal/menu/actions_interbbs.go:369
 msgid "%.0f minutes"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:323
+#: internal/menu/actions_interbbs.go:367
 msgid "%.0f seconds"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:330
+#: internal/menu/actions_interbbs.go:374
 msgid "%.2f days"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:328
+#: internal/menu/actions_interbbs.go:372
 msgid "%.2f hours"
 msgstr ""
 
@@ -77,7 +77,7 @@ msgstr ""
 msgid "%s  You have %s gold."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:435
+#: internal/menu/actions_interbbs.go:481
 msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
 msgstr ""
 
@@ -141,11 +141,11 @@ msgstr ""
 msgid "(offers this to you)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:89
+#: internal/menu/actions_interbbs.go:95
 msgid "(the whole planet)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:509
+#: internal/menu/actions_interbbs.go:555
 msgid "(your current vote)"
 msgstr ""
 
@@ -161,11 +161,11 @@ msgstr ""
 msgid "/-Command?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:325
+#: internal/menu/actions_interbbs.go:369
 msgid "1 minute"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:323
+#: internal/menu/actions_interbbs.go:367
 msgid "1 second"
 msgstr ""
 
@@ -257,7 +257,7 @@ msgstr ""
 msgid "Attach a message?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:161
+#: internal/menu/actions_interbbs.go:164
 msgid "Attack (0 to cancel)?"
 msgstr ""
 
@@ -265,7 +265,7 @@ msgstr ""
 msgid "Attack Pirates"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:230
+#: internal/menu/actions_interbbs.go:233
 msgid "Attack force #%d is on its way to %s on %s."
 msgstr ""
 
@@ -281,7 +281,7 @@ msgstr ""
 msgid "Auto-Pay Maintenance"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:300
+#: internal/menu/actions_interbbs.go:344
 msgid "Average Turn Around Times to All BBSes"
 msgstr ""
 
@@ -453,7 +453,7 @@ msgstr ""
 msgid "Current SDI Strength: %d%%"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:558
+#: internal/menu/actions_interbbs.go:604
 msgid "Current league diplomacy:"
 msgstr ""
 
@@ -581,6 +581,10 @@ msgstr ""
 msgid "Enter Planet Name or Number"
 msgstr ""
 
+#: internal/menu/actions_interbbs.go:299
+msgid "Every realm known on that planet is under New Realm Protection."
+msgstr ""
+
 #: internal/menu/tree.go:228
 msgid "Expose Enemy Ops"
 msgstr ""
@@ -637,7 +641,7 @@ msgstr ""
 msgid "Good"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:123
+#: internal/menu/actions_interbbs.go:126
 msgid "Group attack #%d formed against %s on %s, leaving day %d."
 msgstr ""
 
@@ -657,7 +661,7 @@ msgstr ""
 msgid "How many %s?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:477
+#: internal/menu/actions_interbbs.go:523
 msgid "How many agents to send?"
 msgstr ""
 
@@ -805,7 +809,7 @@ msgstr ""
 msgid "Join Group Attack"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:157
+#: internal/menu/actions_interbbs.go:160
 msgid "Join which attack?"
 msgstr ""
 
@@ -841,11 +845,11 @@ msgstr ""
 msgid "Launch it now?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:576
+#: internal/menu/actions_interbbs.go:622
 msgid "League diplomacy updated. It will be broadcast to the league."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:106
+#: internal/menu/actions_interbbs.go:109
 msgid "Leave in how many days?"
 msgstr ""
 
@@ -961,7 +965,7 @@ msgstr ""
 msgid "New amount of %s for sale"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:559
+#: internal/menu/actions_interbbs.go:605
 msgid "New league diplomacy declaration (blank to keep)"
 msgstr ""
 
@@ -969,15 +973,15 @@ msgstr ""
 msgid "New tax rate?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:319
+#: internal/menu/actions_interbbs.go:363
 msgid "No Data"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:259
+#: internal/menu/actions_interbbs.go:301
 msgid "No barons are known on that planet yet."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:154
+#: internal/menu/actions_interbbs.go:157
 msgid "No group attacks are forming right now."
 msgstr ""
 
@@ -1021,7 +1025,7 @@ msgstr ""
 msgid "Odris, your civilian advisor, Sire. I keep an ear to the people and an eye on the granary."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:555
+#: internal/menu/actions_interbbs.go:601
 msgid "Only the BBS Coordinator may set league diplomacy."
 msgstr ""
 
@@ -1129,7 +1133,7 @@ msgstr ""
 msgid "Planetary Tax Rate (%)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:354
+#: internal/menu/actions_interbbs.go:398
 msgid "Planetary Treaties"
 msgstr ""
 
@@ -1377,7 +1381,7 @@ msgstr ""
 msgid "Spy Database"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:433
+#: internal/menu/actions_interbbs.go:479
 msgid "Spy Database:"
 msgstr ""
 
@@ -1405,7 +1409,7 @@ msgstr ""
 msgid "Tanks were manufactured by Industrial Zones."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:93
+#: internal/menu/actions_interbbs.go:96
 msgid "Target which baron?"
 msgstr ""
 
@@ -1449,7 +1453,7 @@ msgstr ""
 msgid "That empire has none of those for sale."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:422
+#: internal/menu/actions_interbbs.go:468
 msgid "That interplanetary operation is not yet available."
 msgstr ""
 
@@ -1493,7 +1497,7 @@ msgstr ""
 msgid "The R5-Slappenheimer is disabled."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:522
+#: internal/menu/actions_interbbs.go:568
 msgid "The current BBS Coordinator is %s."
 msgstr ""
 
@@ -1529,11 +1533,11 @@ msgstr ""
 msgid "The remaining %d%% is turned into gold."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:430
+#: internal/menu/actions_interbbs.go:476
 msgid "The spy database is empty. Spy on empires on other planets to fill it."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:518
+#: internal/menu/actions_interbbs.go:564
 msgid "There are no barons to vote for yet."
 msgstr ""
 
@@ -1693,7 +1697,7 @@ msgstr ""
 msgid "Visit the Food Market to feed them, or they will starve."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:528
+#: internal/menu/actions_interbbs.go:574
 msgid "Vote for (0 to cancel)?"
 msgstr ""
 
@@ -1761,7 +1765,7 @@ msgstr ""
 msgid "While you were at the menus, this has happened:"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:524
+#: internal/menu/actions_interbbs.go:570
 msgid "Who should be the BBS Coordinator?"
 msgstr ""
 
@@ -1909,7 +1913,7 @@ msgstr ""
 msgid "You hold a %s with %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:180
+#: internal/menu/actions_interbbs.go:183
 msgid "You joined group attack #%d."
 msgstr ""
 
@@ -1957,7 +1961,7 @@ msgstr ""
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:459
+#: internal/menu/actions_interbbs.go:505
 msgid "Your agents are on their way to %s on %s. Their report will reach the Spy Database when word comes back."
 msgstr ""
 
@@ -2037,11 +2041,11 @@ msgstr ""
 msgid "Your realm will be named %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:488
+#: internal/menu/actions_interbbs.go:534
 msgid "Your terrorists depart for %s on %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:540
+#: internal/menu/actions_interbbs.go:586
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 
@@ -2185,7 +2189,7 @@ msgstr ""
 msgid "that attack force has already left"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:147
+#: internal/menu/actions_interbbs.go:150
 msgid "the whole planet"
 msgstr ""
 

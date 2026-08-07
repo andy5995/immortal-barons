@@ -1313,10 +1313,19 @@ works the same way.
 InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 (verified against a disassembly of the original binary):
 
-- **Group Attack** — commit real forces, not gold. Each baron sends troopers
-  (deducted from their army); the pooled troopers are the strike's offense
-  (1 each). BRE also lets you send jets/tanks/bombers and returns survivors;
-  IB's v1 commits troopers only.
+- **Group Attack** — commit real forces, not gold. Each baron sends troopers,
+  jets, tanks and bombers (deducted from their army); the pooled detachments are
+  the strike's offense, valued by the combat table (trooper 1, jet 2, tank 4,
+  bomber `GroupAttackBomberOffense`). Survivors return to each contributor,
+  reduced by `GroupAttackLossPct` — including when the strike is refused, so
+  attacking a realm that turns out to be protected still costs a slice of the
+  force. **Indiv. Attack Force** commits the same four types (#62).
+- **Protection crosses the league.** A scores packet marks each realm still
+  under New Realm Protection, and the attack and terror target lists leave those
+  realms out — matching the local attack list, which hides them too. The target
+  board still refuses an arriving strike itself, since the flag can go stale
+  while the strike is in transit. Spying is not blocked by protection, so the
+  spy target list shows every realm.
 - **Terrorist Ops** — a force-destroying strike (not intel). Commit agents; the
   op is queued and resolves on the target board's next packet run. Each agent is
   one hit that removes ~1/`TerrorUnitLossDenom` (7, from BRE's disassembled 6/7
