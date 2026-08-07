@@ -41,6 +41,8 @@ func distinctConfig() game.Config {
 	c.MaxPlayers = 14
 	c.IBBS = true
 	c.BoardID = "TESTBBS"
+	c.InboundDir = "/srv/in"
+	c.OutboundDir = "/srv/out"
 	c.IdleTimeoutSecs = 15
 	c.MaxIdleWarnings = 16
 	return c
@@ -99,4 +101,18 @@ func setField(t *testing.T, tui *configTUI, tab int, labelPrefix string, edit fu
 		return
 	}
 	t.Fatalf("no form field with label prefix %q on tab %d", labelPrefix, tab)
+}
+
+// Clearing a packet-directory field keeps the current path: -planetary has
+// nowhere to read or write with an empty one.
+func TestConfigTUIKeepsPacketDirWhenCleared(t *testing.T) {
+	w := newWorld()
+	w.Config = distinctConfig()
+	tui := newConfigTUI(w.World)
+
+	setField(t, tui, 3, noStar+"Inbound Dir", func(f *tview.InputField) { f.SetText("  ") })
+
+	if got := tui.collect(); got.InboundDir != "/srv/in" {
+		t.Errorf("InboundDir = %q, want the opening /srv/in", got.InboundDir)
+	}
 }

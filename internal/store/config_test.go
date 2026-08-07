@@ -78,3 +78,23 @@ func TestLoadConfig_PartialFile_KeepsDefaultsForMissingFields(t *testing.T) {
 		t.Errorf("LoadConfig(partial) = %+v, want %+v", got, want)
 	}
 }
+
+// A config written before the packet directories became data-relative still
+// points at the right place: the old default is migrated, a custom path is not.
+func TestLoadConfigMigratesOldPacketDirDefaults(t *testing.T) {
+	dir := t.TempDir()
+	body := `{"InboundDir":"./data/inbound","OutboundDir":"/var/spool/out"}`
+	if err := os.WriteFile(filepath.Join(dir, "config.json"), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if cfg.InboundDir != "inbound" {
+		t.Errorf("InboundDir = %q, want the new default %q", cfg.InboundDir, "inbound")
+	}
+	if cfg.OutboundDir != "/var/spool/out" {
+		t.Errorf("a custom OutboundDir should be left alone, got %q", cfg.OutboundDir)
+	}
+}

@@ -201,13 +201,21 @@ adds none.
 A league is a group of boards whose players compete against each other. To join
 one, turn on inter-BBS play and give your board a name.
 
-Edit `config.json` and set:
+Open the Configuration Editor with `-reset` and set these on the **Caps & Node**
+page:
 
-- `"IBBS": true` — turn on the inter-BBS menus.
-- `"BoardID"` — a short unique name for your board (your "planet").
-- `"InboundDir"` — the directory where packets from other boards arrive.
-- `"OutboundDir"` — the directory where the game writes packets for other
+- **Inter-BBS play** — turn on the inter-BBS menus.
+- **Board ID** — a short unique name for your board (your "planet").
+- **Inbound Dir** — the directory where packets from other boards arrive.
+- **Outbound Dir** — the directory where the game writes packets for other
   boards.
+
+The two directories are relative to your data directory, so the defaults
+`inbound` and `outbound` need no editing on most boards. Give a full path
+instead if your transport drops packets somewhere else. A reset creates them
+for you, and warns if either still holds packets from the game it just
+cleared — the next `-planetary` run would apply those to the new game, so
+delete them first.
 
 Ask your League Coordinator for the node list and add it to your data directory
 as **`ibnodes.dat`** (see the format below).

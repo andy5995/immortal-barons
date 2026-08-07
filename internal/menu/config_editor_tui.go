@@ -81,6 +81,8 @@ const (
 	helpMaxPlayers      = "The most human empires allowed on this board. 0 means no limit."
 	helpIBBS            = "Take part in inter-BBS play across multiple boards. This turns on the interplanetary menus."
 	helpBoardID         = "The name this board uses in inter-BBS packets."
+	helpInboundDir      = "Where packets from the other boards arrive. Relative to the data directory unless you give a full path."
+	helpOutboundDir     = "Where the game writes packets for the other boards. Relative to the data directory unless you give a full path."
 	helpIdleTimeout     = "End a session after this many seconds with no keypress, freeing the shared world lock. 0 never times out."
 	helpIdleWarnings    = "How many idle warnings a session receives before it is disconnected."
 )
@@ -186,7 +188,19 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addInt(caps, true, "Max Purchasable Regions", helpMaxRegions, c.MaxRegions, 0, game.MaxPurchasableRegions, func(c *game.Config, n int) { c.MaxRegions = n })
 	t.addInt(caps, true, "Max Players Per BBS (0=unlimited)", helpMaxPlayers, c.MaxPlayers, 0, 100000, func(c *game.Config, n int) { c.MaxPlayers = n })
 	t.addBool(caps, false, "Inter-BBS play", helpIBBS, c.IBBS, func(c *game.Config, b bool) { c.IBBS = b })
-	t.addText(caps, false, "Board ID", helpBoardID, c.BoardID, func(c *game.Config, v string) { c.BoardID = v })
+	t.addText(caps, false, 16, "Board ID", helpBoardID, c.BoardID, func(c *game.Config, v string) { c.BoardID = v })
+	// A cleared path field keeps the current one: the inter-BBS step has nowhere
+	// to read or write with an empty directory.
+	t.addText(caps, false, 40, "Inbound Dir", helpInboundDir, c.InboundDir, func(c *game.Config, v string) {
+		if v != "" {
+			c.InboundDir = v
+		}
+	})
+	t.addText(caps, false, 40, "Outbound Dir", helpOutboundDir, c.OutboundDir, func(c *game.Config, v string) {
+		if v != "" {
+			c.OutboundDir = v
+		}
+	})
 	t.addInt(caps, false, "Idle timeout (sec, 0=never)", helpIdleTimeout, c.IdleTimeoutSecs, 0, 86400, func(c *game.Config, n int) { c.IdleTimeoutSecs = n })
 	t.addInt(caps, false, "Idle warnings before boot", helpIdleWarnings, c.MaxIdleWarnings, 1, 100, func(c *game.Config, n int) { c.MaxIdleWarnings = n })
 
@@ -453,8 +467,8 @@ func (t *configTUI) addBool(form *tview.Form, leagueRuleset bool, label, help st
 	t.binders = append(t.binders, func(c *game.Config) { set(c, f.IsChecked()) })
 }
 
-func (t *configTUI) addText(form *tview.Form, leagueRuleset bool, label, help, val string, set func(*game.Config, string)) {
-	f := tview.NewInputField().SetLabel(mark(leagueRuleset) + label).SetText(val).SetFieldWidth(16)
+func (t *configTUI) addText(form *tview.Form, leagueRuleset bool, width int, label, help, val string, set func(*game.Config, string)) {
+	f := tview.NewInputField().SetLabel(mark(leagueRuleset) + label).SetText(val).SetFieldWidth(width)
 	f.SetFocusFunc(func() { t.showHelp(help) })
 	form.AddFormItem(zebra(form, f))
 	t.resetters = append(t.resetters, func() { f.SetText(val) })

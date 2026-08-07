@@ -1,5 +1,7 @@
 package game
 
+import "path/filepath"
+
 // Level is a cost/damage/reward preset, as BRE's Configuration Editor uses
 // ([H,M,L,N]). Medium is the baseline. Percent() gives the multiplier applied
 // to the underlying value. None (0×) is valid only for the cost knobs; the
@@ -95,8 +97,8 @@ type Config struct {
 	DataDir         string
 	BoardID         string // name of this board in exported inter-BBS packets
 	IBBS            bool   // participate in inter-BBS play (gates the interplanetary menus)
-	InboundDir      string // inter-BBS packets arrive here (RunPlanetary reads them)
-	OutboundDir     string // inter-BBS packets are written here for the transport to move
+	InboundDir      string // inter-BBS packets arrive here (RunPlanetary reads them); relative to DataDir
+	OutboundDir     string // inter-BBS packets are written here for the transport to move; relative to DataDir
 	IdleTimeoutSecs int    // boot a session after this many seconds with no keypress (0 = never), freeing the world lock
 	MaxIdleWarnings int    // idle warnings a session may collect before a hard boot
 
@@ -162,6 +164,24 @@ func (c Config) InterBBSEnabled() bool {
 	return c.IBBS
 }
 
+// Inbound and Outbound are the packet directories as paths on disk. A relative
+// setting is relative to the DATA directory, not to the working directory: a
+// door is launched from wherever the BBS happens to put it (a node temp dir on
+// Mystic), so anything relative to the CWD lands somewhere different on every
+// call. An absolute setting is used as given, for a board whose transport drops
+// packets outside the data directory.
+func (c Config) Inbound() string { return c.resolveDir(c.InboundDir) }
+
+// Outbound is Inbound's counterpart; see it for how a path is resolved.
+func (c Config) Outbound() string { return c.resolveDir(c.OutboundDir) }
+
+func (c Config) resolveDir(p string) string {
+	if filepath.IsAbs(p) {
+		return p
+	}
+	return filepath.Join(c.DataDir, p)
+}
+
 // GameStarted reports whether the game has begun as of ISO date `today`. An
 // empty GameStartDate (the default) means it started immediately. ISO dates
 // sort chronologically as strings, so a plain comparison works.
@@ -180,8 +200,8 @@ func DefaultConfig() Config {
 		AICount:         0,
 		DataDir:         "./data",
 		BoardID:         "local",
-		InboundDir:      "./data/inbound",
-		OutboundDir:     "./data/outbound",
+		InboundDir:      "inbound",
+		OutboundDir:     "outbound",
 		IdleTimeoutSecs: 300,
 		MaxIdleWarnings: 3,
 

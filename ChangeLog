@@ -1,4 +1,7 @@
 (in-progress:)
+  * The Configuration Editor sets the inter-BBS inbound and outbound
+    directories, which now sit inside the data directory; a reset creates them
+    and warns about packets left from the cleared game
   * Diplomacy is on the opening menu as well as the System menu
   * Send Message can address every realm the sender holds a treaty with
   * Implemented IP mail

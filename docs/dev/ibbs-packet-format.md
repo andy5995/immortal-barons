@@ -11,10 +11,14 @@ plain-text `BRNODES.DAT` layout (under the clone's own filename `ibnodes.dat`).
 ## Transport model (Option A, file-drop)
 
 The game only reads and writes packet files in two directories, set per board in
-`config.json`:
+the Configuration Editor and stored in `config.json`:
 
 - `InboundDir` — packets from other boards arrive here.
 - `OutboundDir` — the game writes packets for other boards here.
+
+Both are resolved against `DataDir` unless absolute (`Config.Inbound()` /
+`Config.Outbound()`) — a door is launched from whatever working directory the
+BBS chooses, so a CWD-relative path lands somewhere different on every call.
 
 Moving files between boards is external to the game (a mailer, a sync tool, scp,
 a shared mount). `RunPlanetary` (`immortal-barons -planetary`, also folded into

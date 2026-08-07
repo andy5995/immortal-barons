@@ -705,11 +705,11 @@ msgstr "Berichten"
 msgid "Id"
 msgstr ""
 
-#: internal/menu/config_editor.go:333
+#: internal/menu/config_editor.go:347
 msgid "Idle timeout in seconds (0 = never)"
 msgstr ""
 
-#: internal/menu/config_editor.go:338
+#: internal/menu/config_editor.go:352
 msgid "Idle warnings before boot"
 msgstr ""
 
@@ -731,6 +731,10 @@ msgstr "Immortal Barons — Spelmenu"
 
 #: internal/menu/actions_trade.go:60
 msgid "In Deal"
+msgstr ""
+
+#: internal/menu/config_editor.go:333
+msgid "Inbound Dir:"
 msgstr ""
 
 #: internal/menu/gameflow.go:326
@@ -1099,6 +1103,10 @@ msgstr ""
 
 #: internal/menu/actions_info.go:302
 msgid "Our {military forces} are functioning at %d%% strength."
+msgstr ""
+
+#: internal/menu/config_editor.go:340
+msgid "Outbound Dir:"
 msgstr ""
 
 #: internal/menu/actions_bank.go:172

@@ -327,6 +327,20 @@ func configPages() []cfgPage {
 					c.BoardID = v
 				}
 			}},
+		{n: 39, label: "Inbound Dir",
+			value: func(c *game.Config) string { return c.InboundDir },
+			edit: func(s session.Session, c *game.Config) {
+				if v := strings.TrimSpace(prompt(s, "Inbound Dir (relative to the data directory):")); v != "" {
+					c.InboundDir = v
+				}
+			}},
+		{n: 40, label: "Outbound Dir",
+			value: func(c *game.Config) string { return c.OutboundDir },
+			edit: func(s session.Session, c *game.Config) {
+				if v := strings.TrimSpace(prompt(s, "Outbound Dir (relative to the data directory):")); v != "" {
+					c.OutboundDir = v
+				}
+			}},
 		{n: 24, label: "Idle timeout (sec)",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = never)", c.IdleTimeoutSecs) },
 			edit: func(s session.Session, c *game.Config) {

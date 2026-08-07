@@ -13,7 +13,8 @@ func configPath(dataDir string) string { return filepath.Join(dataDir, "config.j
 // LoadConfig reads <dataDir>/config.json, falling back to defaults for the
 // file (or any field) that is absent. DataDir is always set to dataDir.
 func LoadConfig(dataDir string) (game.Config, error) {
-	cfg := game.DefaultConfig()
+	def := game.DefaultConfig()
+	cfg := def
 	cfg.DataDir = dataDir
 	data, err := os.ReadFile(configPath(dataDir))
 	if os.IsNotExist(err) {
@@ -26,6 +27,15 @@ func LoadConfig(dataDir string) (game.Config, error) {
 		return cfg, err
 	}
 	cfg.DataDir = dataDir
+	// The packet directories used to be read relative to the working directory
+	// and defaulted to "./data/inbound". They now hang off the data directory, so
+	// a config still holding the old default would resolve to <data>/data/inbound.
+	if cfg.InboundDir == "./data/inbound" {
+		cfg.InboundDir = def.InboundDir
+	}
+	if cfg.OutboundDir == "./data/outbound" {
+		cfg.OutboundDir = def.OutboundDir
+	}
 	return cfg, nil
 }
 

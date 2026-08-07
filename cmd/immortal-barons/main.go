@@ -566,7 +566,7 @@ func runMaint(cfg game.Config, today string) error {
 		fmt.Println("Maintenance has already been run today.")
 	}
 	if cfg.IBBS {
-		if err := store.RunPlanetary(w, cfg.InboundDir, cfg.OutboundDir); err != nil {
+		if err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound()); err != nil {
 			return err
 		}
 	}
@@ -584,7 +584,7 @@ func runLeagueReset(cfg game.Config, date string) error {
 	if err := w.DeclareLeagueReset(date, ""); err != nil {
 		return err
 	}
-	if err := store.RunPlanetary(w, cfg.InboundDir, cfg.OutboundDir); err != nil {
+	if err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound()); err != nil {
 		return err
 	}
 	if err := store.Save(w, cfg); err != nil {
@@ -611,11 +611,11 @@ func runLeagueConfig(cfg game.Config) error {
 		return fmt.Errorf("this board (%q) is not the League Coordinator (node #1 in %s)", cfg.BoardID, store.NodeListFile)
 	}
 	w.ExportLeagueConfig()
-	if err := store.WriteOutbox(w, cfg.OutboundDir); err != nil {
+	if err := store.WriteOutbox(w, cfg.Outbound()); err != nil {
 		return err
 	}
 	fmt.Printf("Broadcast league config (turns/day=%d, protection=%d, length=%d) to %s\n",
-		cfg.TurnsPerDay, cfg.ProtectionTurns, cfg.GameLength, cfg.OutboundDir)
+		cfg.TurnsPerDay, cfg.ProtectionTurns, cfg.GameLength, cfg.Outbound())
 	return store.Save(w, cfg)
 }
 
@@ -665,6 +665,7 @@ func runReset(cfg game.Config, fromConfig bool, cs charset, noANSI bool) error {
 			fmt.Println("The previous world was backed up to world.json.bak.")
 		}
 		noteDropfileUnset(cfg.DataDir)
+		preparePacketDirs(w.Config)
 		return nil
 	}
 
@@ -716,7 +717,40 @@ func runReset(cfg game.Config, fromConfig bool, cs charset, noANSI bool) error {
 		fmt.Println("The previous world was backed up to world.json.bak.")
 	}
 	noteDropfileUnset(cfg.DataDir)
+	preparePacketDirs(w.Config)
 	return nil
+}
+
+// preparePacketDirs creates the inter-BBS packet directories the reset just
+// configured, and warns if either still holds packets. Files left over from the
+// previous season are applied to the fresh world by the next -planetary run —
+// dead realms' attacks landing on a game that has just started — so the warning
+// goes last, where a sysop watching the reset scroll past will see it.
+func preparePacketDirs(cfg game.Config) {
+	if !cfg.InterBBSEnabled() {
+		return
+	}
+	var stale []string
+	for _, dir := range []string{cfg.Inbound(), cfg.Outbound()} {
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			fmt.Printf("Could not create the packet directory %s: %v\n", dir, err)
+			continue
+		}
+		if entries, err := os.ReadDir(dir); err == nil && len(entries) > 0 {
+			stale = append(stale, fmt.Sprintf("%s (%d)", dir, len(entries)))
+		}
+	}
+	if len(stale) == 0 {
+		return
+	}
+	fmt.Println("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+	fmt.Println("!! WARNING: packets are still sitting in your inter-BBS directories:")
+	for _, s := range stale {
+		fmt.Printf("!!   %s\n", s)
+	}
+	fmt.Println("!! They belong to the game you just cleared. The next -planetary run")
+	fmt.Println("!! will apply them to the new one. Delete them before it does.")
+	fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 }
 
 // noteDropfileUnset reminds the sysop after a reset that the door still needs a
@@ -766,7 +800,7 @@ func runPlanetary(cfg game.Config) error {
 	if err != nil {
 		return err
 	}
-	if err := store.RunPlanetary(w, cfg.InboundDir, cfg.OutboundDir); err != nil {
+	if err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound()); err != nil {
 		return err
 	}
 	return store.Save(w, cfg)

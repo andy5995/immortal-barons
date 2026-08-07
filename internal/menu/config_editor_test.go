@@ -63,14 +63,15 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 		}
 	}
 	// The identifiers ran 1..38 before the pages existed and must still, so no
-	// sysop's habit or note breaks.
-	for n := 1; n <= 38; n++ {
+	// sysop's habit or note breaks. Later fields are appended above that.
+	const fields = 40
+	for n := 1; n <= fields; n++ {
 		if _, ok := seen[n]; !ok {
 			t.Errorf("field %d is on no page", n)
 		}
 	}
-	if len(seen) != 38 {
-		t.Errorf("got %d fields, want 38", len(seen))
+	if len(seen) != fields {
+		t.Errorf("got %d fields, want %d", len(seen), fields)
 	}
 }
 
@@ -104,5 +105,30 @@ func TestConfigEditorPreviousPageWraps(t *testing.T) {
 	ConfigEditor(f, w.World)
 	if out := f.out.String(); !strings.Contains(out, "page 4 of 4") {
 		t.Errorf("P on the first page should wrap to the last, got:\n%s", out)
+	}
+}
+
+// The packet directories are set in the editor, not by hand in config.json, so
+// both must be reachable and a cleared answer must keep the current one.
+func TestConfigEditorSetsPacketDirs(t *testing.T) {
+	w := newWorld()
+	w.Config.DataDir = t.TempDir()
+	w.Config.InboundDir = "./data/inbound"
+	w.Config.OutboundDir = "./data/outbound"
+
+	f := &fakeSession{keys: []rune("39\r/srv/in\r40\r/srv/out\rs\r ")}
+	ConfigEditor(f, w.World)
+
+	if w.Config.InboundDir != "/srv/in" {
+		t.Errorf("InboundDir = %q, want /srv/in", w.Config.InboundDir)
+	}
+	if w.Config.OutboundDir != "/srv/out" {
+		t.Errorf("OutboundDir = %q, want /srv/out", w.Config.OutboundDir)
+	}
+
+	f = &fakeSession{keys: []rune("39\r\rs\r ")}
+	ConfigEditor(f, w.World)
+	if w.Config.InboundDir != "/srv/in" {
+		t.Errorf("an empty answer changed InboundDir to %q", w.Config.InboundDir)
 	}
 }
