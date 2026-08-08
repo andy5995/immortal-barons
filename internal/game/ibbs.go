@@ -28,17 +28,17 @@ type Packet struct {
 	FromBoard    string
 	ToBoard      string
 	Date         string
-	Scores       []RemoteScore  // score share (feeds RemoteBoards / IP scores)
-	Attacks      []RemoteAttack // strikes landing on ToBoard
-	Terrors      []RemoteTerror // terror ops landing on ToBoard
-	Results      []AttackResult // outcomes returning to the origin
-	LeagueConfig *LeagueConfig  // LC-authored league settings (nil if absent)
-	LeagueNodes  []LeagueNode   // LC-authored league roster (nil if absent, #64)
-	Recon        []ReconRequest // scouting asked of ToBoard (#61)
-	ReconReports []SpyReport    // answers coming back to the origin (#61)
-	Doomer       *DoomerStatus  // a doomsday weapon aimed at ToBoard (#63)
-	TimeChecks   []TimeCheck    // round-trip probes, out and echoed back (Travel Times)
-	IPMessages   []IPMessage    // interplanetary mail for ToBoard's barons
+	Scores       []RemoteScore      // score share (feeds RemoteBoards / IP scores)
+	Attacks      []RemoteAttack     // strikes landing on ToBoard
+	Terrors      []RemoteTerror     // terror ops landing on ToBoard
+	Results      []AttackResult     // outcomes returning to the origin
+	LeagueConfig *LeagueConfig      // LC-authored league settings (nil if absent)
+	LeagueNodes  []LeagueNode       // LC-authored league roster (nil if absent, #64)
+	Recon        []ReconRequest     // scouting asked of ToBoard (#61)
+	ReconReports []SpyReport        // answers coming back to the origin (#61)
+	Annihilator  *AnnihilatorStatus // a doomsday weapon aimed at ToBoard (#63)
+	TimeChecks   []TimeCheck        // round-trip probes, out and echoed back (Travel Times)
+	IPMessages   []IPMessage        // interplanetary mail for ToBoard's barons
 	// Seq numbers this board's outbound packets so the far side can spot one it
 	// has already applied, and Signature authenticates the parts only the
 	// Coordinator may author (#53).
@@ -54,7 +54,7 @@ func (p Packet) HasPayload() bool {
 	return len(p.Scores) > 0 || len(p.Attacks) > 0 || len(p.Terrors) > 0 ||
 		len(p.Results) > 0 || len(p.Recon) > 0 || len(p.ReconReports) > 0 ||
 		len(p.TimeChecks) > 0 || len(p.IPMessages) > 0 ||
-		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Doomer != nil || p.Reset != nil
+		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Annihilator != nil || p.Reset != nil
 }
 
 // LeagueReset is the Coordinator's order for every board to wipe and start a new
@@ -70,12 +70,12 @@ type LeagueReset struct {
 	Announced string // the Coordinator's message to the league
 }
 
-// DoomerStatus tells a planet about a Doomer Kaboomer aimed at it — while it is
+// AnnihilatorStatus tells a planet about a Clingy Annihilator aimed at it — while it is
 // still being built, and again while it is in the air. BRE broadcasts the same
 // thing ("Updating Outgoing Gooie Kablooie Status"), and it is the whole reason a
 // target can scramble jets: a weapon nobody can see is one nobody can shoot at
 // (#63).
-type DoomerStatus struct {
+type AnnihilatorStatus struct {
 	FromBoard  string
 	Funded     bool
 	Launched   bool
@@ -120,7 +120,7 @@ type LeagueConfig struct {
 	LostForcesDays        int
 	BombingOps            bool
 	MissileOps            bool
-	DoomerKaboomer        bool
+	ClingyAnnihilator     bool
 	MaxPlayers            int
 	BuyMilitary           BuyMode
 	MaintCosts            Level
@@ -158,7 +158,7 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		LostForcesDays:        c.LostForcesDays,
 		BombingOps:            c.BombingOps,
 		MissileOps:            c.MissileOps,
-		DoomerKaboomer:        c.DoomerKaboomer,
+		ClingyAnnihilator:     c.ClingyAnnihilator,
 		MaxPlayers:            c.MaxPlayers,
 		BuyMilitary:           c.BuyMilitary,
 		MaintCosts:            c.MaintCosts,
@@ -195,7 +195,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.LostForcesDays = lc.LostForcesDays
 	c.BombingOps = lc.BombingOps
 	c.MissileOps = lc.MissileOps
-	c.DoomerKaboomer = lc.DoomerKaboomer
+	c.ClingyAnnihilator = lc.ClingyAnnihilator
 	c.MaxPlayers = lc.MaxPlayers
 	c.BuyMilitary = lc.BuyMilitary
 	c.MaintCosts = lc.MaintCosts
@@ -752,8 +752,8 @@ func (w *World) ApplyPacket(p Packet) Packet {
 			e.Bombers += sv.Bombers
 		}
 	}
-	if p.Doomer != nil && p.FromBoard != "" {
-		w.applyDoomerStatus(p.Doomer)
+	if p.Annihilator != nil && p.FromBoard != "" {
+		w.applyAnnihilatorStatus(p.Annihilator)
 	}
 	// Scouting answers coming home. They land in the planet-wide Spy Database,
 	// so the whole board benefits from one baron's agent (#61).
@@ -943,14 +943,14 @@ func (w *World) SendRecon(e *Empire, targetBoard, targetEmpire string) error {
 	return nil
 }
 
-// ExportDoomerStatus tells the targeted planet about this one's weapon, whether
+// ExportAnnihilatorStatus tells the targeted planet about this one's weapon, whether
 // it is still being funded or already in the air (#63).
-func (w *World) ExportDoomerStatus() {
-	if w.Doomer == nil {
+func (w *World) ExportAnnihilatorStatus() {
+	if w.Annihilator == nil {
 		return
 	}
-	d := w.Doomer
-	w.enqueueDoomer(d.TargetBoard, &DoomerStatus{
+	d := w.Annihilator
+	w.enqueueAnnihilator(d.TargetBoard, &AnnihilatorStatus{
 		FromBoard:  w.Config.BoardID,
 		Funded:     d.Funded,
 		Launched:   d.Launched,
@@ -959,29 +959,29 @@ func (w *World) ExportDoomerStatus() {
 	})
 }
 
-// ExportDoomerGone tells the targeted planet to stop watching, because the
+// ExportAnnihilatorGone tells the targeted planet to stop watching, because the
 // weapon aimed at it was dismantled.
-func (w *World) ExportDoomerGone(board string) {
-	w.enqueueDoomer(board, &DoomerStatus{FromBoard: w.Config.BoardID, Dismantled: true})
+func (w *World) ExportAnnihilatorGone(board string) {
+	w.enqueueAnnihilator(board, &AnnihilatorStatus{FromBoard: w.Config.BoardID, Dismantled: true})
 }
 
-func (w *World) enqueueDoomer(board string, st *DoomerStatus) {
-	w.outboxFor(board).Doomer = st
+func (w *World) enqueueAnnihilator(board string, st *AnnihilatorStatus) {
+	w.outboxFor(board).Annihilator = st
 }
 
-// applyDoomerStatus takes in what another planet says about the weapon it is
+// applyAnnihilatorStatus takes in what another planet says about the weapon it is
 // pointing at us, and posts the warning its barons need.
-func (w *World) applyDoomerStatus(st *DoomerStatus) {
+func (w *World) applyAnnihilatorStatus(st *AnnihilatorStatus) {
 	if st.Dismantled {
 		if w.Incoming != nil && w.Incoming.Creator == st.FromBoard {
 			w.Incoming = nil
-			w.postNews(fmt.Sprintf("The Doomer Kaboomer being built at %s has been dismantled.", st.FromBoard))
+			w.postNews(fmt.Sprintf("The Clingy Annihilator being built at %s has been dismantled.", st.FromBoard))
 		}
 		return
 	}
 	first := w.Incoming == nil
 	if first {
-		w.Incoming = &DoomerKaboomerWeapon{Creator: st.FromBoard, Intact: 100}
+		w.Incoming = &Annihilator{Creator: st.FromBoard, Intact: 100}
 	}
 	in := w.Incoming
 	wasFlying := in.Launched
@@ -999,21 +999,21 @@ func (w *World) applyDoomerStatus(st *DoomerStatus) {
 		if hours < 0 {
 			hours = 0
 		}
-		w.postNews(fmt.Sprintf("A Doomer Kaboomer arrives from %s in %d hours.", st.FromBoard, hours))
+		w.postNews(fmt.Sprintf("A Clingy Annihilator arrives from %s in %d hours.", st.FromBoard, hours))
 	case first:
-		w.postNews(fmt.Sprintf("A Doomer Kaboomer destined for our planet is under construction at %s.", st.FromBoard))
+		w.postNews(fmt.Sprintf("A Clingy Annihilator destined for our planet is under construction at %s.", st.FromBoard))
 	}
 }
 
-// ArriveDoomer detonates an incoming weapon whose flight is over. Run from the
+// ArriveAnnihilator detonates an incoming weapon whose flight is over. Run from the
 // planetary step, so the jets get every day of the flight to shoot at it.
-func (w *World) ArriveDoomer() {
+func (w *World) ArriveAnnihilator() {
 	if w.Incoming == nil || !w.Incoming.Launched || w.GameDay < w.Incoming.ArrivesDay {
 		return
 	}
 	intact := w.Incoming.Intact
 	w.Incoming = nil
-	w.DetonateDoomer(intact)
+	w.DetonateAnnihilator(intact)
 }
 
 // fromCoordinator reports whether p claims to come from the Coordinator's board,

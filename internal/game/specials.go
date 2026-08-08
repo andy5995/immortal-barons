@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// Strike/SDI gold costs (NukeCost, ChemCost, BioCost, DoomerCost, SDIStep)
+// Strike/SDI gold costs (NukeCost, ChemCost, BioCost, AnnihilatorCost, SDIStep)
 // live in balance.go. SDIMax is a level cap, not a cost, so it stays here.
 // SDIMax caps SDI at 50%: BRE's SDI destroys "up to 50%" of incoming missiles
 // (breins.txt), so the level tops out there.

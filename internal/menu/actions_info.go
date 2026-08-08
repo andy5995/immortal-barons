@@ -514,7 +514,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 		row("Bombing ops per day", countOr(c.MaxBombingOps, "Unlimited"))
 		row("Terrorism costs", tr(s, c.TerrorCosts.String()))
 		row("Lost forces return after", lostForcesStr(s, c))
-		row("Doomer Kaboomer", onOffStr(c.DoomerKaboomer))
+		row("Clingy Annihilator", onOffStr(c.ClingyAnnihilator))
 	}
 	pause(s)
 	return Stay

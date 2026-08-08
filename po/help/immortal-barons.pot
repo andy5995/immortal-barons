@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-08-08 14:20-0500\n"
+"POT-Creation-Date: 2026-08-08 14:50-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1946,23 +1946,23 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/warfare/doomer-kaboomer.md:1
-#: internal/help/content/warfare/doomer-kaboomer.md:8
+#: internal/help/content/warfare/clingy-annihilator.md:1
+#: internal/help/content/warfare/clingy-annihilator.md:8
 #, markdown-text, no-wrap
-msgid "Doomer Kaboomer"
+msgid "Clingy Annihilator"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/doomer-kaboomer.md:12
+#: internal/help/content/warfare/clingy-annihilator.md:12
 #, markdown-text
 msgid ""
-"The Doomer Kaboomer is the ultimate weapon. It is aimed at a whole enemy "
+"The Clingy Annihilator is the ultimate weapon. It is aimed at a whole enemy "
 "planet rather than at one baron, and your planet can only have one at a "
 "time."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/doomer-kaboomer.md:17
+#: internal/help/content/warfare/clingy-annihilator.md:17
 #, markdown-text
 msgid ""
 "Nobody buys the weapon alone. One baron starts the work and names the target "
@@ -1972,7 +1972,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/doomer-kaboomer.md:20
+#: internal/help/content/warfare/clingy-annihilator.md:20
 #, markdown-text
 msgid ""
 "When the money is all in, the weapon is ready. Only the baron who started "
@@ -1981,7 +1981,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/doomer-kaboomer.md:25
+#: internal/help/content/warfare/clingy-annihilator.md:25
 #, markdown-text
 msgid ""
 "The target planet can see the weapon coming. They are told while the work is "
@@ -1992,7 +1992,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/doomer-kaboomer.md:28
+#: internal/help/content/warfare/clingy-annihilator.md:28
 #, markdown-text
 msgid ""
 "Whatever survives the flight strikes every realm on that planet and takes a "
@@ -2000,11 +2000,11 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/doomer-kaboomer.md:30
+#: internal/help/content/warfare/clingy-annihilator.md:30
 #, markdown-text
 msgid ""
-"If a Doomer Kaboomer is ever aimed at your planet, you will hear about it in "
-"the news. Send jets."
+"If a Clingy Annihilator is ever aimed at your planet, you will hear about it "
+"in the news. Send jets."
 msgstr ""
 
 #. type: Title #

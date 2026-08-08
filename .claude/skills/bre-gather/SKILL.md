@@ -833,7 +833,7 @@ strictly limited. The idea/expression line:
 - **ANSI art, logos, splash/end screens** (`game/bre.ans`, `breend.ans`, etc.).
 - **Distinctive flavor names.** Reconstruct BRE's distinctive labels in IB's own
   words rather than copy them verbatim; IB renamed the "Gooie Kablooie" weapon to
-  "Doomer Kaboomer".
+  "Clingy Annihilator".
 
 **Trademark / branding:** do not present the project as "Barren Realms Elite" or
 use its name/logo as our branding. IB is an independent tribute, "not affiliated

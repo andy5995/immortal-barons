@@ -1,13 +1,13 @@
 ---
-title: Doomer Kaboomer
+title: Clingy Annihilator
 category: warfare
 order: 6
 in_game: true
 ---
 
-# Doomer Kaboomer
+# Clingy Annihilator
 
-The Doomer Kaboomer is the ultimate weapon. It is aimed at a whole enemy planet
+The Clingy Annihilator is the ultimate weapon. It is aimed at a whole enemy planet
 rather than at one baron, and your planet can only have one at a time.
 
 Nobody buys the weapon alone. One baron starts the work and names the target
@@ -26,5 +26,5 @@ takes a piece out of the weapon, and enough waves destroy it in the air.
 Whatever survives the flight strikes every realm on that planet and takes a
 share of their regions. SDI reduces the damage.
 
-If a Doomer Kaboomer is ever aimed at your planet, you will hear about it in the
+If a Clingy Annihilator is ever aimed at your planet, you will hear about it in the
 news. Send jets.

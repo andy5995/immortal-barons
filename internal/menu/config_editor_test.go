@@ -172,7 +172,7 @@ func TestGameSetupHidesLeagueRulesOffLeague(t *testing.T) {
 
 	for _, label := range []string{
 		"Group attacks per day", "Terrorist ops per day", "Bombing ops per day",
-		"Terrorism costs", "Lost forces return after", "Doomer Kaboomer", "This planet",
+		"Terrorism costs", "Lost forces return after", "Clingy Annihilator", "This planet",
 	} {
 		if strings.Contains(off, label) {
 			t.Errorf("Game Setup shows %q on a stand-alone board", label)

@@ -125,7 +125,7 @@ type Config struct {
 	LostForcesDays        int               // days before a strike with no result packet gives its forces back (#96); 0 = never
 	BombingOps            bool              // Bomb Enemy Targets is offered
 	MissileOps            bool              // nuclear/chemical/biological strikes are offered
-	DoomerKaboomer        bool              // the doomsday weapon may be built
+	ClingyAnnihilator     bool              // the doomsday weapon may be built
 	MaxPlayers            int               // most human empires per board (0 = unlimited)
 	BuyMilitary           BuyMode           // Yes / No / Limited
 	MaintCosts            Level             // maintenance costs (regions + forces)
@@ -226,7 +226,7 @@ func DefaultConfig() Config {
 		LostForcesDays:        3,
 		BombingOps:            true,
 		MissileOps:            true,
-		DoomerKaboomer:        true,
+		ClingyAnnihilator:     true,
 		MaxPlayers:            25,
 		BuyMilitary:           BuyYes,
 		MaintCosts:            Medium,

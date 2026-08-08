@@ -562,13 +562,13 @@ type World struct {
 	InFlight    []InFlightStrike
 	Outbox      []Packet
 	SpyDatabase []SpyReport
-	// Doomer is this planet's own doomsday weapon, one at a time, from the day a
+	// Annihilator is this planet's own doomsday weapon, one at a time, from the day a
 	// baron starts it until it flies. Incoming is one aimed AT this planet that
 	// another board has told us about — visible while it is being built and while
 	// it is in the air, which is what gives the jets something to shoot at (#16,
 	// #63).
-	Doomer   *DoomerKaboomerWeapon
-	Incoming *DoomerKaboomerWeapon
+	Annihilator *Annihilator
+	Incoming    *Annihilator
 
 	// League packet authentication (#53). CoordKey is the ed25519 private key,
 	// held only by the Coordinator's board; CoordPub is the matching public key,

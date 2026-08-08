@@ -468,6 +468,14 @@ msgstr ""
 msgid "Clear"
 msgstr "Löschen"
 
+#: internal/menu/tree.go:191
+msgid "Clingy Annihilator Ops"
+msgstr ""
+
+#: internal/menu/actions_attack.go:482
+msgid "Clingy Annihilator operations are switched off in this game."
+msgstr ""
+
 #: internal/play/play.go:347
 msgid "Confirm?"
 msgstr ""
@@ -591,14 +599,6 @@ msgstr "Möchtest du eine weitere Nachricht senden?"
 
 #: internal/menu/actions_trade.go:92
 msgid "Done"
-msgstr ""
-
-#: internal/menu/tree.go:191
-msgid "Doomer Kaboomer Ops"
-msgstr ""
-
-#: internal/menu/actions_attack.go:482
-msgid "Doomer Kaboomer operations are switched off in this game."
 msgstr ""
 
 #: internal/menu/config_editor.go:115
@@ -1099,7 +1099,7 @@ msgstr ""
 msgid "Only the BBS Coordinator may set planetary diplomacy."
 msgstr ""
 
-#: internal/game/doomer.go:39
+#: internal/game/annihilator.go:39
 msgid "Only the baron who started it may do that."
 msgstr ""
 
@@ -1567,20 +1567,20 @@ msgstr ""
 msgid "That leaves a surplus of %s. Our stores are secure."
 msgstr ""
 
-#: internal/game/doomer.go:37
-msgid "The Doomer Kaboomer has already launched."
+#: internal/game/annihilator.go:37
+msgid "The Clingy Annihilator has already launched."
 msgstr ""
 
-#: internal/game/doomer.go:35
-msgid "The Doomer Kaboomer is already paid for."
+#: internal/game/annihilator.go:35
+msgid "The Clingy Annihilator is already paid for."
 msgstr ""
 
-#: internal/game/doomer.go:36
-msgid "The Doomer Kaboomer is not paid for yet."
+#: internal/game/annihilator.go:36
+msgid "The Clingy Annihilator is not paid for yet."
 msgstr ""
 
 #: internal/menu/actions_attack.go:491
-msgid "The Doomer Kaboomer is on its way. Nothing more can be done with it."
+msgid "The Clingy Annihilator is on its way. Nothing more can be done with it."
 msgstr ""
 
 #: internal/menu/gameflow.go:641
@@ -1672,11 +1672,11 @@ msgid "This deal needs %d carrier(s); you own %d."
 msgstr ""
 
 #: internal/menu/actions_attack.go:520
-msgid "This planet has no Doomer Kaboomer."
+msgid "This planet has no Clingy Annihilator."
 msgstr ""
 
-#: internal/game/doomer.go:33
-msgid "This planet is already building a Doomer Kaboomer."
+#: internal/game/annihilator.go:33
+msgid "This planet is already building a Clingy Annihilator."
 msgstr ""
 
 #: internal/menu/actions_ipmessages.go:210

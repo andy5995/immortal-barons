@@ -18,7 +18,7 @@
   * Partially implemented the SDI Program: its funding allowance, its upkeep and
     its screen now match the original; how much shield that funding buys is
     still IB's own figure
-  * Doomer Kaboomer Ops answers to 9 on the InterPlanetary Operations menu, and
+  * Clingy Annihilator Ops answers to 9 on the InterPlanetary Operations menu, and
     the interplanetary Special Operations menu is numbered, both as in the
     original
   * The InterPlanetary Operations and Special Operations menus show the gold on
@@ -58,16 +58,16 @@
   * A packet that arrives twice is ignored (#53)
   * The Configuration Editor gained the interplanetary settings: per-day caps
     for group attacks, terrorist ops and bombing ops, attack and terrorism
-    costs, switches for bombing, missile and Doomer Kaboomer operations, and
+    costs, switches for bombing, missile and Clingy Annihilator operations, and
     how long a strike waits for a result before its forces come home
   * The line-based Configuration Editor is split across four pages, moved
     through with N and P (#100)
   * Game Setup shows the whole ruleset
   * Game Setup shows the interplanetary rules on a league board
-  * The Doomer Kaboomer is built the way the original builds it: funded a
+  * The Clingy Annihilator is built the way the original builds it: funded a
     million gold at a time, priced by the target planet's size, and launched
     or scrapped by the baron who started it (#16)
-  * A planet is warned about a Doomer Kaboomer aimed at it while it is being
+  * A planet is warned about a Clingy Annihilator aimed at it while it is being
     built and while it is in the air, and can send jets to intercept (#63)
   * Implemented Indiv. Attack Force: strike one named baron on another planet
     without waiting for a group to form (#62)

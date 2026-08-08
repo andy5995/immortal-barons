@@ -441,7 +441,7 @@ func TestInterPlanetaryMenuMatchesBRE(t *testing.T) {
 	for _, want := range []string{
 		"View IPScores", "Terrorist Ops", "Send Trade Deal", "Create Group Attack",
 		"Join Group Attack", "Indiv. Attack Force", "Send Message", "Special Operations",
-		"SDI Program", "Doomer Kaboomer Ops", "Diplomacy List", "Spy Database",
+		"SDI Program", "Clingy Annihilator Ops", "Diplomacy List", "Spy Database",
 		"Travel Times", "Visit Bank", "Help", "Quit",
 	} {
 		if !strings.Contains(out, want) {

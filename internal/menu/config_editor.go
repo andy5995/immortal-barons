@@ -306,8 +306,8 @@ func configPages(ibbs bool) []cfgPage {
 			func(c *game.Config, v bool) { c.BombingOps = v }),
 		toggle(37, "Missile Ops", func(c *game.Config) bool { return c.MissileOps },
 			func(c *game.Config, v bool) { c.MissileOps = v }),
-		toggle(38, "Doomer Kaboomer", func(c *game.Config) bool { return c.DoomerKaboomer },
-			func(c *game.Config, v bool) { c.DoomerKaboomer = v }),
+		toggle(38, "Clingy Annihilator", func(c *game.Config) bool { return c.ClingyAnnihilator },
+			func(c *game.Config, v bool) { c.ClingyAnnihilator = v }),
 	}
 
 	caps := []cfgField{
@@ -379,7 +379,7 @@ var ibbsOnlyFields = map[int]bool{
 	32: true, // Max Bombing Ops/Day
 	33: true, // Days before lost forces return
 	35: true, // Terrorism Costs
-	38: true, // Doomer Kaboomer
+	38: true, // Clingy Annihilator
 }
 
 func withoutIBBSFields(fields []cfgField) []cfgField {

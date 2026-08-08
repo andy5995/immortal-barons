@@ -1,6 +1,7 @@
 package store
 
 import (
+	"bytes"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -35,6 +36,14 @@ func LoadConfig(dataDir string) (game.Config, error) {
 	}
 	if cfg.OutboundDir == "./data/outbound" {
 		cfg.OutboundDir = def.OutboundDir
+	}
+	// The doomsday weapon's switch used to be called DoomerKaboomer. A renamed
+	// key is not a missing one to a sysop: unmarshalling would leave the default
+	// (on) in place and quietly re-enable a weapon they had turned off.
+	var legacy struct{ DoomerKaboomer *bool }
+	if json.Unmarshal(data, &legacy) == nil && legacy.DoomerKaboomer != nil &&
+		!bytes.Contains(data, []byte(`"ClingyAnnihilator"`)) {
+		cfg.ClingyAnnihilator = *legacy.DoomerKaboomer
 	}
 	return cfg, nil
 }

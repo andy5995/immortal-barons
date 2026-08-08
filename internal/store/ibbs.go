@@ -45,11 +45,11 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string) (PlanetaryRun, 
 	// overtaken by the recovery timer.
 	w.ReturnLostForces()
 	w.LaunchDueGroupAttacks()
-	w.ArriveDoomer() // a weapon whose flight is over lands before anything else moves
+	w.ArriveAnnihilator() // a weapon whose flight is over lands before anything else moves
 	w.ExportScores()
 	w.ExportNodeList()
 	w.PingTravelTimes()
-	w.ExportDoomerStatus()
+	w.ExportAnnihilatorStatus()
 	w.StampOutbox()
 	run.Sent = len(w.Outbox)
 	return run, WriteOutbox(w, outboundDir)

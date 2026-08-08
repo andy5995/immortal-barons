@@ -888,7 +888,7 @@ BRE is proprietary (John Dailey Software; design by Mehul Patel). This file
 records *observed* screen behavior to guide an independent reimplementation; it
 is not a copy of BRE's source or assets. Distinctive coined strings/names (e.g.
 pirate faction names) are recorded here for fidelity analysis but should be
-**renamed** in IB, as with Gooie Kablooie → Doomer Kaboomer and S3-Sabre →
+**renamed** in IB, as with Gooie Kablooie → Clingy Annihilator and S3-Sabre →
 R5-Slappenheimer.
 
 ## Full Defense Alliance — Diplomacy, Alliance Strength, battle (captured live 2026-07-27)

@@ -48,7 +48,7 @@ definition.
   "Results": [ AttackResult ],      // outcomes returning to the origin
   "Recon":   [ ReconRequest ],      // scouting asked of ToBoard (#61)
   "ReconReports": [ SpyReport ],    // answers coming back to the origin (#61)
-  "Doomer":  DoomerStatus,          // a doomsday weapon aimed at ToBoard (#63)
+  "Annihilator": AnnihilatorStatus,          // a doomsday weapon aimed at ToBoard (#63)
   "TimeChecks": [ TimeCheck ],      // round-trip probes, out and echoed back
   "IPMessages": [ IPMessage ],      // interplanetary mail for ToBoard's barons
   "LeagueConfig": LeagueConfig,     // coordinator's ruleset (signed)
@@ -165,10 +165,10 @@ The transport differs; the *contents* are what fidelity is judged on.
 
 **Packet contents (BRE's PLANETARY stages).** Local recon info; global recon
 requests; routing data; node list; group attacks; individual IP-attack info;
-Gooie-Kablooie (Doomer Kaboomer) status; scores/news; coordinator config +
+Gooie-Kablooie (Clingy Annihilator) status; scores/news; coordinator config +
 reset. IB currently carries scores, group attacks, terror ops, results, and the
 `LeagueConfig` ruleset broadcast; the recon exchange, individual interplanetary
-attacks, cross-board Doomer status, node-list broadcast, and league-wide reset
+attacks, cross-board Clingy Annihilator status, node-list broadcast, and league-wide reset
 are the open gaps under #60.
 
 **Config field set.** BRE's coordinator config editor (the `LeagueConfig`

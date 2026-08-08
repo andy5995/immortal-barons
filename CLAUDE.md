@@ -210,7 +210,7 @@ factions carry IB-original names, not BRE's), covert operations (spy, stir revol
 support dissensions,
 demoralize forces, bribery, expose enemy ops, and a Bomb Enemy Targets
 submenu — incl. R5-Slappenheimer, the clone's rename of BRE's S3-Sabre),
-diplomacy treaties, trading, region types + food market, SDI, Doomer Kaboomer
+diplomacy treaties, trading, region types + food market, SDI, Clingy Annihilator
 (BRE's Gooie Kablooie), player mail + a BRE-style multi-line message editor +
 planetary bulletin, banking (deposit/withdraw/loan/invest), Set Industries +
 Specialize, Write Macros, four named advisors (Civilian/Economic/Military/

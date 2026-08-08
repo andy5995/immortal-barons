@@ -905,7 +905,7 @@ const (
 	TradeDealMaxDays    = 5       // longest a deal may be sent for
 )
 
-// The Doomer Kaboomer, IB's rename of BRE's Gooie Kablooie. It is not a purchase
+// The Clingy Annihilator, IB's rename of BRE's Gooie Kablooie. It is not a purchase
 // but a public works: one planet funds one weapon, in millions of gold, over as
 // many days as it takes to raise the money, and the target planet can see it
 // coming and shoot at it.
@@ -913,16 +913,16 @@ const (
 // The funding cost is BINARY-VERIFIED from the construction routine in BRE.OVR's
 // overlay unit at 0x27441 (0x277A0-0x27950):
 //
-//	cost := round(targetPlanetLand * DoomerCostPerLand) + DoomerCostBase
-//	cost = min(cost, DoomerCostCap)
+//	cost := round(targetPlanetLand * AnnihilatorCostPerLand) + AnnihilatorCostBase
+//	cost = min(cost, AnnihilatorCostCap)
 //	switch ratio := targetPlanetLand / ourPlanetLand; {
 //	case ratio > 4: cost *= 2
-//	case ratio > 2: cost *= 1.5   // DoomerSurchargeBigPct
-//	case ratio > 1: cost *= 1.2   // DoomerSurchargeAheadPct
+//	case ratio > 2: cost *= 1.5   // AnnihilatorSurchargeBigPct
+//	case ratio > 1: cost *= 1.2   // AnnihilatorSurchargeAheadPct
 //	}
 //
 // where targetPlanetLand is the sum of every living realm's regions on the target
-// planet, floored at DoomerMinTargetLand. So the weapon is priced against how
+// planet, floored at AnnihilatorMinTargetLand. So the weapon is priced against how
 // much bigger than you the planet you are aiming at is: attacking upward is
 // affordable, and a giant planet flattening a small one pays the most.
 //
@@ -930,27 +930,27 @@ const (
 // interception numbers were not read from the binary. They follow what the
 // original's help describes and are ordinary playtest knobs.
 const (
-	DoomerCostPerLand       = 44743   // per region of the target planet, in millionths of a million
-	DoomerCostPerLandDenom  = 1000000 // ... so the rate is 0.0044743
-	DoomerCostBase          = 100     // million gold, added after the per-land part
-	DoomerCostCap           = 5000    // million gold, before the size surcharge
-	DoomerMinTargetLand     = 1000    // a tiny planet still costs as if it were this big
-	DoomerSurchargeAheadPct = 120     // target is larger than us
-	DoomerSurchargeBigPct   = 150     // more than twice our size
-	DoomerSurchargeHugePct  = 200     // more than four times our size
-	DoomerMillion           = 1_000_000
+	AnnihilatorCostPerLand       = 44743   // per region of the target planet, in millionths of a million
+	AnnihilatorCostPerLandDenom  = 1000000 // ... so the rate is 0.0044743
+	AnnihilatorCostBase          = 100     // million gold, added after the per-land part
+	AnnihilatorCostCap           = 5000    // million gold, before the size surcharge
+	AnnihilatorMinTargetLand     = 1000    // a tiny planet still costs as if it were this big
+	AnnihilatorSurchargeAheadPct = 120     // target is larger than us
+	AnnihilatorSurchargeBigPct   = 150     // more than twice our size
+	AnnihilatorSurchargeHugePct  = 200     // more than four times our size
+	AnnihilatorMillion           = 1_000_000
 
 	// Flight and decay (reconstructed). The weapon is visible to its target for
 	// the whole flight, which is what makes shooting it down possible.
-	DoomerFlightDays = 2
-	// On arrival it destroys DoomerDamagePct of each realm's land, and a strike
+	AnnihilatorFlightDays = 2
+	// On arrival it destroys AnnihilatorDamagePct of each realm's land, and a strike
 	// that is only partly intact does proportionally less.
-	DoomerDamagePct = 10
+	AnnihilatorDamagePct = 10
 
 	// Interception (reconstructed). Only jets can reach it — the original is
-	// explicit that nothing else can — and each sortie of DoomerJetsPerPercent
+	// explicit that nothing else can — and each sortie of AnnihilatorJetsPerPercent
 	// jets knocks one percent off it. The jets are spent either way.
-	DoomerJetsPerPercent = 250
+	AnnihilatorJetsPerPercent = 250
 )
 
 // Travel Times — how the average packet round trip to another board is kept.

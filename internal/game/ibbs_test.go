@@ -592,9 +592,9 @@ func TestReconRoundTrip(t *testing.T) {
 	}
 }
 
-// The Doomer Kaboomer runs the original's whole lifecycle: a planet starts one,
+// The Clingy Annihilator runs the original's whole lifecycle: a planet starts one,
 // its barons fund it between them, and only then can it launch (#16).
-func TestDoomerKaboomerLifecycle(t *testing.T) {
+func TestClingyAnnihilatorLifecycle(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.IBBS = true
 	cfg.BoardID = "Wildside"
@@ -604,58 +604,58 @@ func TestDoomerKaboomerLifecycle(t *testing.T) {
 	founder.Land, backer.Land = 5000, 5000
 	w.ImportBoard(RemoteBoard{BoardID: "faraway", Scores: []RemoteScore{{Empire: "Rome", Land: 20000}}})
 
-	if err := w.StartDoomer(founder, "faraway"); err != nil {
-		t.Fatalf("StartDoomer: %v", err)
+	if err := w.StartAnnihilator(founder, "faraway"); err != nil {
+		t.Fatalf("StartAnnihilator: %v", err)
 	}
-	if err := w.StartDoomer(founder, "faraway"); err != ErrDoomerExists {
+	if err := w.StartAnnihilator(founder, "faraway"); err != ErrAnnihilatorExists {
 		t.Errorf("a planet built a second weapon: %v", err)
 	}
-	cost := w.Doomer.CostMillion
+	cost := w.Annihilator.CostMillion
 	if cost <= 0 {
 		t.Fatalf("weapon costs %d million", cost)
 	}
 	// It cannot fly on a promise.
-	if err := w.LaunchDoomer(founder); err != ErrDoomerUnfunded {
+	if err := w.LaunchAnnihilator(founder); err != ErrAnnihilatorUnfunded {
 		t.Errorf("an unfunded weapon launched: %v", err)
 	}
 
 	// Two barons fund it between them — that is the point of the thing.
-	founder.Gold = cost / 2 * DoomerMillion
-	backer.Gold = cost * DoomerMillion
-	if _, err := w.FundDoomer(founder, cost/2); err != nil {
+	founder.Gold = cost / 2 * AnnihilatorMillion
+	backer.Gold = cost * AnnihilatorMillion
+	if _, err := w.FundAnnihilator(founder, cost/2); err != nil {
 		t.Fatalf("founder funding: %v", err)
 	}
-	if w.Doomer.Funded {
+	if w.Annihilator.Funded {
 		t.Error("weapon reported complete while only half paid for")
 	}
-	if _, err := w.FundDoomer(backer, cost); err != nil {
+	if _, err := w.FundAnnihilator(backer, cost); err != nil {
 		t.Fatalf("backer funding: %v", err)
 	}
-	if !w.Doomer.Funded {
+	if !w.Annihilator.Funded {
 		t.Fatal("weapon is fully paid for but not complete")
 	}
-	if w.Doomer.PaidMillion != cost {
-		t.Errorf("took %d million, want exactly %d", w.Doomer.PaidMillion, cost)
+	if w.Annihilator.PaidMillion != cost {
+		t.Errorf("took %d million, want exactly %d", w.Annihilator.PaidMillion, cost)
 	}
 
 	// Only its creator may launch it.
-	if err := w.LaunchDoomer(backer); err != ErrNotYours {
+	if err := w.LaunchAnnihilator(backer); err != ErrNotYours {
 		t.Errorf("a baron launched someone else's weapon: %v", err)
 	}
-	if err := w.LaunchDoomer(founder); err != nil {
-		t.Fatalf("LaunchDoomer: %v", err)
+	if err := w.LaunchAnnihilator(founder); err != nil {
+		t.Fatalf("LaunchAnnihilator: %v", err)
 	}
-	if w.Doomer.ArrivesDay != w.GameDay+DoomerFlightDays {
-		t.Errorf("arrives day %d, want %d", w.Doomer.ArrivesDay, w.GameDay+DoomerFlightDays)
+	if w.Annihilator.ArrivesDay != w.GameDay+AnnihilatorFlightDays {
+		t.Errorf("arrives day %d, want %d", w.Annihilator.ArrivesDay, w.GameDay+AnnihilatorFlightDays)
 	}
-	if err := w.DismantleDoomer(founder); err != ErrDoomerFlying {
+	if err := w.DismantleAnnihilator(founder); err != ErrAnnihilatorFlying {
 		t.Errorf("a weapon in flight was dismantled: %v", err)
 	}
 }
 
 // The target planet is told the weapon exists while it is still being built, and
 // again when it launches, and its jets can shoot it down in flight (#63, #16).
-func TestDoomerIsVisibleAndCanBeShotDown(t *testing.T) {
+func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.IBBS = true
 	cfg.BoardID = "faraway"
@@ -664,7 +664,7 @@ func TestDoomerIsVisibleAndCanBeShotDown(t *testing.T) {
 	defender.Land, defender.Jets = 9000, 30_000
 
 	// Under construction: a warning, and nothing to shoot at yet.
-	target.ApplyPacket(Packet{FromBoard: "Wildside", Doomer: &DoomerStatus{FromBoard: "Wildside"}})
+	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{FromBoard: "Wildside"}})
 	if target.Incoming == nil {
 		t.Fatal("target was not told about the weapon being built")
 	}
@@ -673,7 +673,7 @@ func TestDoomerIsVisibleAndCanBeShotDown(t *testing.T) {
 	}
 
 	// Launched: now it is in the air.
-	target.ApplyPacket(Packet{FromBoard: "Wildside", Doomer: &DoomerStatus{
+	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{
 		FromBoard: "Wildside", Funded: true, Launched: true, ArrivesDay: target.GameDay + 2, Intact: 100,
 	}})
 	if !target.Incoming.Launched {
@@ -681,12 +681,12 @@ func TestDoomerIsVisibleAndCanBeShotDown(t *testing.T) {
 	}
 
 	// Jets, and only jets, whittle it down.
-	knocked, err := target.InterceptDoomer(defender, 5000)
+	knocked, err := target.InterceptAnnihilator(defender, 5000)
 	if err != nil {
-		t.Fatalf("InterceptDoomer: %v", err)
+		t.Fatalf("InterceptAnnihilator: %v", err)
 	}
-	if knocked != 5000/DoomerJetsPerPercent {
-		t.Errorf("5,000 jets knocked %d%% off, want %d%%", knocked, 5000/DoomerJetsPerPercent)
+	if knocked != 5000/AnnihilatorJetsPerPercent {
+		t.Errorf("5,000 jets knocked %d%% off, want %d%%", knocked, 5000/AnnihilatorJetsPerPercent)
 	}
 	if defender.Jets != 25_000 {
 		t.Errorf("jets not spent: %d, want 25,000", defender.Jets)
@@ -697,22 +697,22 @@ func TestDoomerIsVisibleAndCanBeShotDown(t *testing.T) {
 
 	// Enough jets destroy it outright, and then nothing arrives.
 	defender.Jets = 100_000
-	if _, err := target.InterceptDoomer(defender, 100_000); err != nil {
-		t.Fatalf("InterceptDoomer: %v", err)
+	if _, err := target.InterceptAnnihilator(defender, 100_000); err != nil {
+		t.Fatalf("InterceptAnnihilator: %v", err)
 	}
 	if target.Incoming != nil {
 		t.Fatalf("weapon survived a full interception: %+v", target.Incoming)
 	}
 	before := defender.Land
 	target.GameDay += 5
-	target.ArriveDoomer()
+	target.ArriveAnnihilator()
 	if defender.Land != before {
 		t.Errorf("a destroyed weapon still detonated: land %d, was %d", defender.Land, before)
 	}
 }
 
 // A weapon that gets through takes a share of every realm's land, less its SDI.
-func TestDoomerDetonationHitsThePlanet(t *testing.T) {
+func TestAnnihilatorDetonationHitsThePlanet(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.IBBS = true
 	w := NewWorldSeed(cfg, 1)
@@ -724,8 +724,8 @@ func TestDoomerDetonationHitsThePlanet(t *testing.T) {
 	}
 	shielded.SDI = 50
 
-	w.Incoming = &DoomerKaboomerWeapon{Creator: "Wildside", Launched: true, ArrivesDay: w.GameDay, Intact: 100}
-	w.ArriveDoomer()
+	w.Incoming = &Annihilator{Creator: "Wildside", Launched: true, ArrivesDay: w.GameDay, Intact: 100}
+	w.ArriveAnnihilator()
 
 	if plain.Land != 9000 {
 		t.Errorf("unshielded realm has %d land, want 9,000 (10%% lost)", plain.Land)

@@ -431,7 +431,7 @@ All four constants live in `balance.go`; Score never drops below 0.
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
 
-**Doomer Kaboomer** (the clone's equivalent of BRE's *Gooie Kablooie*) — the
+**Clingy Annihilator** (the clone's equivalent of BRE's *Gooie Kablooie*) — the
 ultimate weapon, aimed at an entire enemy planet rather than one empire, and one
 per planet at a time. IB implements the original's lifecycle (#16): begin
 construction against a named planet → any baron funds it a million gold at a time
@@ -449,7 +449,7 @@ The **funding cost is binary-verified** from BRE.OVR's overlay unit at 0x27441
             cost x 1.2   if ratio > 1
 
 so the weapon is priced against how much bigger the target planet is than yours.
-The constants are `Doomer*` in `balance.go`.
+The constants are `Clingy Annihilator*` in `balance.go`.
 
 The rest is **IB's reconstruction**, following the original's prompts rather than
 its code: two days in flight, 10% of each realm's regions on arrival scaled by how
@@ -1418,7 +1418,7 @@ as IB's own until someone reads the original's code:
 - IB already contains two different models: an R5-Slappenheimer is intercepted
   on a roll against the SDI percentage, while nuclear, chemical and biological
   damage is scaled by it. Nothing justifies the split. (#113)
-- IB reduces Doomer Kaboomer damage by the defender's SDI. It should not: the
+- IB reduces Clingy Annihilator damage by the defender's SDI. It should not: the
   original says jets are "the only way to destroy this thing", and the doomsday
   weapon is not among the three things SDI is documented to work on. (#111)
 
@@ -1432,7 +1432,7 @@ heard from over a packet but absent from the roster is numbered on after it.
 The list includes the board you are calling from.
 
 IB routes every planet pick through it (`pickPlanetNamed`): Create Group Attack,
-Indiv. Attack Force, the spy and terrorist targeting, the Doomer Kaboomer, and
+Indiv. Attack Force, the spy and terrorist targeting, the Clingy Annihilator, and
 IP Messages. A name must be typed in full (case-insensitively) — whether BRE
 accepts an abbreviation was never observed, and guessing would risk sending to
 the wrong planet. An IB divergence: a message addressed to your OWN board is
@@ -1783,7 +1783,7 @@ Now matching this reference (as of v0.0.4):
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and 2-billion money cap
 - Nuclear / chemical / biological strikes and pirate raids
-- Doomer Kaboomer, with the original's fund-build-launch-intercept lifecycle,
+- Clingy Annihilator, with the original's fund-build-launch-intercept lifecycle,
   and SDI defense (a flat percentage damage-reducer)
 - Covert agents with spying and sabotage (success scales with agent count)
 - Player mail — a BRE-style per-message reader (Reply / Delete / Ignore /
@@ -1799,7 +1799,7 @@ Now matching this reference (as of v0.0.4):
 - The covert menu, including Spy on Relations, the Spy Database, bribery,
   expose enemy ops, and the Bomb Enemy Targets submenu
 - The InterBBS (interplanetary) layer: file-drop packets, group and individual
-  attacks, spying another planet, a Doomer Kaboomer aimed across planets, and
+  attacks, spying another planet, a Clingy Annihilator aimed across planets, and
   league orders signed by the coordinator
 - IP Messages: mail addressed to a planet, to its Coordinator, or back to one
   author, written in the same editor local mail uses

@@ -173,7 +173,7 @@ func BuildMenus() *Menus {
 	// opening-menu entry is tinted to match.
 	// Order and
 	// hotkeys match BRE.OVR's full InterPlanetary Operations string table
-	// (#75); Doomer Kaboomer Ops is IB's equivalent of BRE's Gooie Kablooie
+	// (#75); Clingy Annihilator Ops is IB's equivalent of BRE's Gooie Kablooie
 	// item, on its '9' as a later capture showed it. Send Trade Deal and Send Message reuse the same actions
 	// as the Trading and Messages menus; Special Operations opens the separate
 	// interplanetary Special Operations menu (BRE's cross-planet covert set, not
@@ -188,7 +188,7 @@ func BuildMenus() *Menus {
 		{Key: '6', Label: "Indiv. Attack Force", Do: indivAttackForce},
 		{Key: '7', Label: "Send Message", Do: gotoMenu(ipMessages)},
 		{Key: '8', Label: "Special Operations", Do: gotoMenu(ipSpecial)},
-		{Key: '9', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer},
+		{Key: '9', Label: "Clingy Annihilator Ops", Do: clingyAnnihilator},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
 		{Key: 'S', Label: "Spy Database", Do: spyDatabase},
