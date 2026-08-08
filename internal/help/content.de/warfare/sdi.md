@@ -17,9 +17,11 @@ The program is a pot of gold, not something you buy once. Each turn you may
 add up to a set amount: a fifth of what is already in the pot, and never
 less than 250,000 gold. Gold goes in only in whole thousands.
 
-That limit means a shield takes many turns to build, however rich you
-are. You cannot buy one the turn you need it, so start early if you expect
-missiles.
+That amount is your allowance for the whole turn, not for each
+visit. Leaving the screen and coming back does not give you a second one.
+
+So a shield takes many turns to build, however rich you are. You cannot buy
+one the turn you need it, so start early if you expect missiles.
 
 ## Paying for it
 

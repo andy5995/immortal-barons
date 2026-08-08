@@ -172,3 +172,32 @@ func TestEnsureSDIFundingKeepsALegacyLevel(t *testing.T) {
 		t.Errorf("a legacy SDI of 4 became %d", e.SDI)
 	}
 }
+
+// One allowance per turn, not per visit: re-entering the SDI screen keeps
+// drawing on the same allowance until the turn ends, so a baron cannot walk in
+// and out of it funding the shield as much as their gold allows.
+func TestSDIAllowanceIsPerTurnNotPerVisit(t *testing.T) {
+	w, a, _ := newAttackerAndTarget(t)
+	a.Gold = 100_000_000
+	a.TurnsLeft = 5
+
+	for visit := range 4 {
+		if _, err := w.FundSDI(a, SDIMinSpend); err != nil {
+			t.Fatalf("visit %d: %v", visit, err)
+		}
+	}
+	if a.SDIFunding != SDIMinSpend {
+		t.Errorf("four visits in one turn funded %d, want one allowance of %d", a.SDIFunding, SDIMinSpend)
+	}
+
+	w.PlayTurn(a, "2026-08-08")
+	if got := w.SDISpendAllowance(a); got != SDIMinSpend {
+		t.Errorf("allowance after the turn ended = %d, want it refilled to %d", got, SDIMinSpend)
+	}
+	if _, err := w.FundSDI(a, SDIMinSpend); err != nil {
+		t.Fatal(err)
+	}
+	if a.SDIFunding != 2*SDIMinSpend {
+		t.Errorf("funding after a second turn = %d, want %d", a.SDIFunding, 2*SDIMinSpend)
+	}
+}

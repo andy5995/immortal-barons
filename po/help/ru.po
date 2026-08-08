@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-08 12:51-0500\n"
+"POT-Creation-Date: 2026-08-08 14:20-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2169,26 +2169,32 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/warfare/sdi.md:22
 msgid ""
-"That limit means a shield takes many turns to build, however rich you are. "
-"You cannot buy one the turn you need it, so start early if you expect "
-"missiles."
+"That amount is your allowance for the whole turn, not for each visit. "
+"Leaving the screen and coming back does not give you a second one."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:25
+msgid ""
+"So a shield takes many turns to build, however rich you are. You cannot buy "
+"one the turn you need it, so start early if you expect missiles."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:23
+#: internal/help/content/warfare/sdi.md:26
 #, no-wrap
 msgid "Paying for it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:27
+#: internal/help/content/warfare/sdi.md:30
 msgid ""
 "Every turn the program asks for **4% of its total funding** as upkeep, in "
 "the maintenance prompts, after your regions and before the Queen's tax."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:30
+#: internal/help/content/warfare/sdi.md:33
 msgid ""
 "Pay it in full. If you pay short, the program shrinks to what you did pay "
 "for, and the shield weakens with it. A large pot is a large bill every turn, "
