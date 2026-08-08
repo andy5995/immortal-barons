@@ -188,8 +188,8 @@ func BuildMenus() *Menus {
 		{Key: '6', Label: "Indiv. Attack Force", Do: indivAttackForce},
 		{Key: '7', Label: "Send Message", Do: gotoMenu(ipMessages)},
 		{Key: '8', Label: "Special Operations", Do: gotoMenu(ipSpecial)},
-		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: '9', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer},
+		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
 		{Key: 'S', Label: "Spy Database", Do: spyDatabase},
 		{Key: 'T', Label: "Travel Times", Do: travelTimes},
@@ -197,6 +197,7 @@ func BuildMenus() *Menus {
 		{Key: '?', Label: "Help", Do: helpBrowse},
 		{Key: '0', Label: "Quit", Do: back},
 	}
+	interplanetary.Status = goldStatus
 	interplanetary.DefaultOnEnter = quitOnEnter(interplanetary)
 
 	// IP Messages: BRE's interplanetary mail, addressed to planets rather than
@@ -265,6 +266,7 @@ func BuildMenus() *Menus {
 		{Key: '8', Label: "Send SpyGuy", Do: sendSpyGuy},
 		{Key: '0', Label: "Quit", Do: back},
 	}
+	ipSpecial.Status = goldStatus
 	ipSpecial.DefaultOnEnter = quitOnEnter(ipSpecial)
 
 	trading.Items = []Item{
@@ -475,6 +477,13 @@ func spendingStatus(w *ctx) string {
 
 // covertStatus is the Covert Operations footer: gold on hand and agents held
 // (BRE: "You have <gold> gold and <N> agents.").
+// goldStatus is BRE's plainest footer, "You have N gold." — what the
+// InterPlanetary and Special Operations menus carry.
+func goldStatus(w *ctx) string {
+	lang := playerLang(w)
+	return fmt.Sprintf(i18n.T(lang, "You have %s gold."), formatGold(w.Player().Gold, lang))
+}
+
 func covertStatus(w *ctx) string {
 	p := w.Player()
 	return fmt.Sprintf(i18n.T(playerLang(w), "You have %s gold and %d agents."), formatGold(p.Gold, playerLang(w)), p.Agents)

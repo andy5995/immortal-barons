@@ -671,12 +671,15 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, it.displayLabel(g, lang), ansi.Reset)
 			}
 		}
+		// BRE closes every menu box with a normal-accent rule, whether or not the
+		// menu carries a status line under it (live capture: the Attack Menu has
+		// the rule and no status, the InterPlanetary menu has both).
+		fmt.Fprintf(&b, "%s%s%s\n", dim(col), strings.Repeat("─", m.ruleWidth()), ansi.Reset)
 		if m.Status != nil {
-			// BRE (live capture): a normal-accent bottom rule, then a white footer
-			// with figures in bright-white — not a single accent color.
+			// The footer is white with its figures in bright-white — not a single
+			// accent color.
 			footer := hiNumsReset(m.Status(g), ansi.FgBrightWhite, ansi.FgWhite)
-			fmt.Fprintf(&b, "%s%s%s\n%s%s%s\n",
-				dim(col), strings.Repeat("─", m.ruleWidth()), ansi.Reset, ansi.FgWhite, footer, ansi.Reset)
+			fmt.Fprintf(&b, "%s%s%s\n", ansi.FgWhite, footer, ansi.Reset)
 		}
 		b.WriteString("\n")
 	})

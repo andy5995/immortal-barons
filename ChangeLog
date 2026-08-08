@@ -15,6 +15,10 @@
   * Doomer Kaboomer Ops answers to 9 on the InterPlanetary Operations menu, and
     the interplanetary Special Operations menu is numbered, both as in the
     original
+  * Every menu closes with a rule, as the original draws them; before, only a
+    menu with a status line under it had one
+  * The InterPlanetary Operations and Special Operations menus show the gold on
+    hand
   * Sysops: "-ibbs-reset" starts a new game as a league board and a plain
     "-reset" a stand-alone one, which is no longer asked the league settings;
     adding "-board-id" sets a member board up in one command, without the

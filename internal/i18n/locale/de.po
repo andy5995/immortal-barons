@@ -80,7 +80,7 @@ msgstr "%d Einheiten desertierten mangels Sold."
 msgid "%d%% over 10 days"
 msgstr ""
 
-#: internal/menu/tree.go:491
+#: internal/menu/tree.go:500
 msgid "%s  You have %s gold."
 msgstr ""
 
@@ -124,7 +124,7 @@ msgstr ""
 msgid "%s turns"
 msgstr "Züge"
 
-#: internal/menu/tree.go:489
+#: internal/menu/tree.go:498
 #, fuzzy
 msgid "%s units of food available today."
 msgstr "Nahrungseinheiten sind verdorben."
@@ -207,7 +207,7 @@ msgid "AI empires"
 msgstr "Imperium"
 
 # System menu
-#: internal/menu/tree.go:359
+#: internal/menu/tree.go:361
 msgid "Abdicate"
 msgstr "Abdanken"
 
@@ -261,7 +261,7 @@ msgstr ""
 msgid "All Allies"
 msgstr ""
 
-#: internal/menu/tree.go:207
+#: internal/menu/tree.go:208
 msgid "All Planets"
 msgstr ""
 
@@ -269,7 +269,7 @@ msgstr ""
 msgid "Alliance Strength"
 msgstr ""
 
-#: internal/menu/tree.go:208
+#: internal/menu/tree.go:209
 msgid "Allied Planets"
 msgstr ""
 
@@ -305,11 +305,11 @@ msgstr ""
 msgid "Attack which realm? (letter, RETURN to abort)"
 msgstr ""
 
-#: internal/menu/tree.go:320
+#: internal/menu/tree.go:322
 msgid "Auto-Feed Empire"
 msgstr ""
 
-#: internal/menu/tree.go:318
+#: internal/menu/tree.go:320
 #, fuzzy
 msgid "Auto-Pay Maintenance"
 msgstr "Unterhalt:"
@@ -338,16 +338,16 @@ msgstr ""
 msgid "Bomb Enemy Targets"
 msgstr ""
 
-#: internal/menu/tree.go:235
+#: internal/menu/tree.go:236
 #, fuzzy
 msgid "Bomb Food Market"
 msgstr "Nahrungsmarkt"
 
-#: internal/menu/tree.go:237
+#: internal/menu/tree.go:238
 msgid "Bomb Trade Routes"
 msgstr ""
 
-#: internal/menu/tree.go:236
+#: internal/menu/tree.go:237
 #, fuzzy
 msgid "Bomb Trading Market"
 msgstr "Nahrungsmarkt"
@@ -364,7 +364,7 @@ msgstr "Bomber wurden in Industriezonen hergestellt."
 msgid "Break this treaty?"
 msgstr ""
 
-#: internal/menu/tree.go:226
+#: internal/menu/tree.go:227
 msgid "Bribery"
 msgstr ""
 
@@ -378,7 +378,7 @@ msgstr ""
 msgid "Buy"
 msgstr "Kaufen"
 
-#: internal/menu/tree.go:347
+#: internal/menu/tree.go:349
 #, fuzzy
 msgid "Buy Food"
 msgstr "Nahrung"
@@ -432,7 +432,7 @@ msgstr ""
 msgid "Chemical Attack"
 msgstr ""
 
-#: internal/menu/tree.go:240
+#: internal/menu/tree.go:241
 msgid "Chemical Bombing"
 msgstr ""
 
@@ -476,7 +476,7 @@ msgstr ""
 msgid "Coordinator Menu"
 msgstr "Koordinatormenü"
 
-#: internal/menu/tree.go:397
+#: internal/menu/tree.go:399
 #, fuzzy
 msgid "Coordinator Vote"
 msgstr "Koordinatormenü"
@@ -516,7 +516,7 @@ msgstr ""
 msgid "Days before lost forces return (0 = never)"
 msgstr ""
 
-#: internal/menu/tree.go:289
+#: internal/menu/tree.go:291
 msgid "Declaration Of War"
 msgstr ""
 
@@ -536,7 +536,7 @@ msgstr ""
 msgid "Delete,"
 msgstr ""
 
-#: internal/menu/tree.go:223
+#: internal/menu/tree.go:224
 msgid "Demoralize Forces"
 msgstr ""
 
@@ -545,7 +545,7 @@ msgstr ""
 msgid "Deposit Funds"
 msgstr "Einzahlen"
 
-#: internal/menu/tree.go:316
+#: internal/menu/tree.go:318
 msgid "Deposit gold at End of Turn"
 msgstr ""
 
@@ -584,7 +584,7 @@ msgstr "Möchtest du eine weitere Nachricht senden?"
 msgid "Done"
 msgstr ""
 
-#: internal/menu/tree.go:192
+#: internal/menu/tree.go:191
 msgid "Doomer Kaboomer Ops"
 msgstr ""
 
@@ -613,11 +613,11 @@ msgstr "Imperium"
 msgid "Empire Name"
 msgstr "Imperium"
 
-#: internal/menu/tree.go:372
+#: internal/menu/tree.go:374
 msgid "Empire Status"
 msgstr "Imperiumsstatus"
 
-#: internal/menu/tree.go:360
+#: internal/menu/tree.go:362
 #, fuzzy
 msgid "End Protection"
 msgstr "Du hast noch %s%s Züge Schutz."
@@ -634,11 +634,11 @@ msgstr ""
 msgid "Every realm known on that planet is under New Realm Protection."
 msgstr ""
 
-#: internal/menu/tree.go:227
+#: internal/menu/tree.go:228
 msgid "Expose Enemy Ops"
 msgstr ""
 
-#: internal/menu/tree.go:373
+#: internal/menu/tree.go:375
 msgid "Food Market"
 msgstr "Nahrungsmarkt"
 
@@ -646,7 +646,7 @@ msgstr "Nahrungsmarkt"
 msgid "For Sale"
 msgstr ""
 
-#: internal/menu/tree.go:284
+#: internal/menu/tree.go:286
 msgid "Free Trade Agreement"
 msgstr ""
 
@@ -654,15 +654,15 @@ msgstr ""
 msgid "Free software under the MIT License."
 msgstr ""
 
-#: internal/menu/tree.go:288
+#: internal/menu/tree.go:290
 msgid "Full Defense Alliance"
 msgstr ""
 
-#: internal/menu/tree.go:413
+#: internal/menu/tree.go:415
 msgid "Game Bulletins"
 msgstr "Spielaushänge"
 
-#: internal/menu/tree.go:425
+#: internal/menu/tree.go:427
 msgid "Game Setup"
 msgstr ""
 
@@ -670,7 +670,7 @@ msgstr ""
 msgid "Game length in days (0 = endless)"
 msgstr ""
 
-#: internal/menu/tree.go:511
+#: internal/menu/tree.go:520
 msgid "Game started on %s"
 msgstr ""
 
@@ -775,7 +775,7 @@ msgstr ""
 msgid "Immortal Barons"
 msgstr ""
 
-#: internal/menu/tree.go:405
+#: internal/menu/tree.go:407
 msgid "Immortal Barons — Game Menu"
 msgstr ""
 
@@ -805,11 +805,11 @@ msgstr "Industrieproduktion"
 msgid "Industry production percentages updated."
 msgstr "Industrieproduktions-Prozentsätze aktualisiert."
 
-#: internal/menu/tree.go:415
+#: internal/menu/tree.go:417
 msgid "Instructions"
 msgstr "Anleitung"
 
-#: internal/menu/tree.go:286
+#: internal/menu/tree.go:288
 msgid "Intelligence Alliance"
 msgstr ""
 
@@ -823,7 +823,7 @@ msgstr "Punkte ansehen"
 msgid "InterPlanetary Operations"
 msgstr "Planetenaushang:"
 
-#: internal/menu/tree.go:414
+#: internal/menu/tree.go:416
 msgid "InterPlanetary Ops"
 msgstr ""
 
@@ -879,7 +879,7 @@ msgid "Land"
 msgstr "Land"
 
 # Language picker
-#: internal/menu/tree.go:326
+#: internal/menu/tree.go:328
 msgid "Language"
 msgstr "Sprache"
 
@@ -1072,7 +1072,7 @@ msgstr ""
 msgid "Note: You should only fund the SDI in increments of %d Gold."
 msgstr ""
 
-#: internal/menu/tree.go:239
+#: internal/menu/tree.go:240
 msgid "Nuclear Assault"
 msgstr ""
 
@@ -1179,7 +1179,7 @@ msgstr "# Besitz"
 msgid "Owner"
 msgstr "Besitzer"
 
-#: internal/menu/tree.go:209
+#: internal/menu/tree.go:210
 #, fuzzy
 msgid "Planet Coordinator"
 msgstr "Koordinatormenü"
@@ -1193,7 +1193,7 @@ msgstr "Planetenaushang:"
 msgid "Planetary Bulletin:"
 msgstr "Planetenaushang:"
 
-#: internal/menu/tree.go:299
+#: internal/menu/tree.go:301
 #, fuzzy
 msgid "Planetary Post"
 msgstr "Planetenaushang:"
@@ -1209,7 +1209,7 @@ msgid "Planetary Treaties"
 msgstr "Planetenaushang:"
 
 # Main game menu
-#: internal/menu/tree.go:407
+#: internal/menu/tree.go:409
 #, fuzzy
 msgid "Play"
 msgstr "Spielen"
@@ -1243,7 +1243,7 @@ msgstr ""
 msgid "Proposed a %s to %s."
 msgstr ""
 
-#: internal/menu/tree.go:283
+#: internal/menu/tree.go:285
 msgid "Protective Trade"
 msgstr ""
 
@@ -1265,11 +1265,11 @@ msgstr "Beenden"
 msgid "Quote Message?"
 msgstr "Nachricht senden"
 
-#: internal/menu/tree.go:241
+#: internal/menu/tree.go:242
 msgid "R5-Slappenheimer"
 msgstr ""
 
-#: internal/menu/tree.go:297
+#: internal/menu/tree.go:299
 msgid "Read Messages"
 msgstr "Nachrichten lesen"
 
@@ -1316,7 +1316,7 @@ msgstr ""
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Aufstände sind wegen hoher Steuern ausgebrochen!"
 
-#: internal/menu/tree.go:191
+#: internal/menu/tree.go:192
 msgid "SDI Program"
 msgstr ""
 
@@ -1343,15 +1343,15 @@ msgstr "Investitionen anzeigen"
 msgid "Score"
 msgstr "Punkte"
 
-#: internal/menu/tree.go:380
+#: internal/menu/tree.go:382
 msgid "See Scores"
 msgstr "Punkte ansehen"
 
-#: internal/menu/tree.go:408
+#: internal/menu/tree.go:410
 msgid "See Status"
 msgstr "Status ansehen"
 
-#: internal/menu/tree.go:206
+#: internal/menu/tree.go:207
 msgid "Select Planets"
 msgstr ""
 
@@ -1359,7 +1359,7 @@ msgstr ""
 msgid "Sell"
 msgstr "Verkaufen"
 
-#: internal/menu/tree.go:349
+#: internal/menu/tree.go:351
 #, fuzzy
 msgid "Sell Food"
 msgstr "Nahrung"
@@ -1372,11 +1372,11 @@ msgstr "Verkaufsmenü"
 msgid "Send Message"
 msgstr "Nachricht senden"
 
-#: internal/menu/tree.go:219
+#: internal/menu/tree.go:220
 msgid "Send Spy"
 msgstr ""
 
-#: internal/menu/tree.go:265
+#: internal/menu/tree.go:266
 msgid "Send SpyGuy"
 msgstr ""
 
@@ -1402,15 +1402,15 @@ msgstr ""
 msgid "Set %s price"
 msgstr "Industrie einstellen"
 
-#: internal/menu/tree.go:384
+#: internal/menu/tree.go:386
 msgid "Set Industries"
 msgstr "Industrie einstellen"
 
-#: internal/menu/tree.go:379
+#: internal/menu/tree.go:381
 msgid "Set Tax Rate"
 msgstr "Steuersatz setzen"
 
-#: internal/menu/tree.go:221
+#: internal/menu/tree.go:222
 msgid "Set Up"
 msgstr ""
 
@@ -1418,7 +1418,7 @@ msgstr ""
 msgid "Set the R5-Slappenheimer dial (0-10)"
 msgstr ""
 
-#: internal/menu/tree.go:385
+#: internal/menu/tree.go:387
 #, fuzzy
 msgid "Show Instructions"
 msgstr "Anleitung"
@@ -1427,7 +1427,7 @@ msgstr "Anleitung"
 msgid "Since your last play, this has happened:"
 msgstr "Seit deinem letzten Zug ist Folgendes geschehen:"
 
-#: internal/menu/tree.go:205
+#: internal/menu/tree.go:206
 msgid "Single Planet"
 msgstr ""
 
@@ -1439,7 +1439,7 @@ msgstr ""
 msgid "Special Operations"
 msgstr ""
 
-#: internal/menu/tree.go:386
+#: internal/menu/tree.go:388
 msgid "Specialize Industry"
 msgstr "Industrie spezialisieren"
 
@@ -1470,15 +1470,15 @@ msgstr "Hilfe-Datenbank"
 msgid "Spy Database:"
 msgstr "Hilfe-Datenbank"
 
-#: internal/menu/tree.go:224
+#: internal/menu/tree.go:225
 msgid "Spy on Relations"
 msgstr ""
 
-#: internal/menu/tree.go:220
+#: internal/menu/tree.go:221
 msgid "Stir Revolts"
 msgstr ""
 
-#: internal/menu/tree.go:222
+#: internal/menu/tree.go:223
 msgid "Support Dissensions"
 msgstr ""
 
@@ -1502,7 +1502,7 @@ msgstr ""
 msgid "Target which planet?"
 msgstr ""
 
-#: internal/menu/tree.go:282
+#: internal/menu/tree.go:284
 msgid "Tariff Trade Agreement"
 msgstr ""
 
@@ -1514,7 +1514,7 @@ msgstr "Steuersatz auf %d%% gesetzt."
 msgid "Taxes are high enough to risk riots. Consider lowering them."
 msgstr ""
 
-#: internal/menu/tree.go:287
+#: internal/menu/tree.go:289
 msgid "Technology Agreement"
 msgstr ""
 
@@ -1532,7 +1532,7 @@ msgstr ""
 msgid "Terrorist Ops"
 msgstr ""
 
-#: internal/menu/tree.go:285
+#: internal/menu/tree.go:287
 msgid "Terrorist Prevention"
 msgstr ""
 
@@ -1602,7 +1602,7 @@ msgstr ""
 msgid "The food market is out of food for today."
 msgstr ""
 
-#: internal/menu/tree.go:506
+#: internal/menu/tree.go:515
 msgid "The game begins %s."
 msgstr ""
 
@@ -1674,7 +1674,7 @@ msgstr ""
 msgid "To end selection, hit enter at the prompt."
 msgstr ""
 
-#: internal/menu/tree.go:410
+#: internal/menu/tree.go:412
 msgid "Today's News"
 msgstr "Heutige Nachrichten"
 
@@ -1738,7 +1738,7 @@ msgstr "Türme wurden in Industriezonen hergestellt."
 msgid "Type your realm name (%s) to confirm, or anything else to cancel"
 msgstr ""
 
-#: internal/menu/tree.go:238
+#: internal/menu/tree.go:239
 #, fuzzy
 msgid "Undermine Investments"
 msgstr "Investitionen anzeigen"
@@ -1747,11 +1747,11 @@ msgstr "Investitionen anzeigen"
 msgid "Unlimited"
 msgstr ""
 
-#: internal/menu/tree.go:487
+#: internal/menu/tree.go:496
 msgid "Unlimited supply today."
 msgstr ""
 
-#: internal/menu/tree.go:314
+#: internal/menu/tree.go:316
 msgid "Use Enter To Exit BUY Menu"
 msgstr ""
 
@@ -1770,12 +1770,12 @@ msgstr "Bankzinsen ansehen"
 msgid "View IPScores"
 msgstr "Punkte ansehen"
 
-#: internal/menu/tree.go:290
+#: internal/menu/tree.go:292
 #, fuzzy
 msgid "View Treaties"
 msgstr "Bankzinsen ansehen"
 
-#: internal/menu/tree.go:351
+#: internal/menu/tree.go:353
 msgid "Visit Advisors"
 msgstr "Berater besuchen"
 
@@ -1783,16 +1783,16 @@ msgstr "Berater besuchen"
 msgid "Visit Bank"
 msgstr "Bank besuchen"
 
-#: internal/menu/tree.go:308
+#: internal/menu/tree.go:310
 #, fuzzy
 msgid "Visit Covert Menu"
 msgstr "Agenten"
 
-#: internal/menu/tree.go:312
+#: internal/menu/tree.go:314
 msgid "Visit Message Menu"
 msgstr ""
 
-#: internal/menu/tree.go:310
+#: internal/menu/tree.go:312
 msgid "Visit Trading Menu"
 msgstr ""
 
@@ -1894,7 +1894,7 @@ msgstr ""
 msgid "Would you like to reconsider?"
 msgstr ""
 
-#: internal/menu/tree.go:383
+#: internal/menu/tree.go:385
 msgid "Write Macros"
 msgstr "Makros schreiben"
 
@@ -1902,7 +1902,7 @@ msgstr "Makros schreiben"
 msgid "Writing to:"
 msgstr ""
 
-#: internal/menu/tree.go:411
+#: internal/menu/tree.go:413
 msgid "Yesterday's News"
 msgstr "Gestrige Nachrichten"
 
@@ -1982,18 +1982,23 @@ msgstr ""
 msgid "You have %d lines for your message.  /S=save /A=abort /C=clear"
 msgstr ""
 
-#: internal/menu/tree.go:480
+#: internal/menu/tree.go:489
 #, fuzzy
 msgid "You have %s gold and %d agents."
 msgstr "Du hast keine Nachrichten."
 
-#: internal/menu/tree.go:473
+#: internal/menu/tree.go:475
 msgid "You have %s gold and %d turns."
 msgstr ""
 
-#: internal/menu/tree.go:471
+#: internal/menu/tree.go:473
 msgid "You have %s gold and 1 turn."
 msgstr ""
+
+#: internal/menu/tree.go:484
+#, fuzzy
+msgid "You have %s gold."
+msgstr "Du hast keine Nachrichten."
 
 #: internal/menu/actions_attack.go:152
 msgid "You have already launched all %d of your attacks for today."
