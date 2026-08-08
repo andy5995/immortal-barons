@@ -468,6 +468,13 @@ destroys about half of incoming missiles and cuts attacking jets' effectiveness
 by ~25–30%. See "The SDI program" below for how it is funded.
 
 Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
+
+**Gold costs on these menus are a gap.** BRE prices a terrorist op in the
+InterPlanetary Operations menu's own cost column, and prices four of the Special
+Operations entries on theirs (figures in `docs/dev/bre-screens.md`). IB charges
+gold for neither: the `TerrorCosts` setting is editable, broadcast and displayed,
+but nothing consumes it. The terror figure grew over the capture and three
+readings do not establish what it scales with.
 "Days before 'lost' forces returned" (`Config.LostForcesDays`, default 3) is an
 **inter-BBS** setting, not a local-combat one. A strike sent to another board is
 away for the whole packet round trip, and packets go missing; the setting gives a

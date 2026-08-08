@@ -656,6 +656,18 @@ Colors: labels white `37`, every figure bright-yellow `1;33`, the Note line gray
 again. See the SDI section at the end of this file for the seventeen captured
 funding levels and what they establish.
 
+The menu's own keys, from the capture: Gooie Kablooie Ops is **9**, not a
+letter, and Terrorist Ops carries a gold cost in the menu's price column
+(471,360 / 532,544 / 533,568 across the capture — it grows with something, and
+three points do not say what).
+
+**Special Operations** (8) is numbered **1-8** with no Help item, and prices its
+first four entries: Bomb Food Market 10,000,000; Bomb Trading Market 25,000,000;
+Bomb Trade Routes 25,000,000; Undermine Investments 75,000,000. Nuclear Assault,
+Chemical Bombing, S3-Sabre and Send SpyGuy show no price on the menu — Send
+SpyGuy quotes its own ("A SpyGuy will cost 10,810,500 gold per day") after the
+target is named.
+
 **Diplomacy List** (D): the `Planetary Treaties` chart — see the section at the
 end of this file for its measurements, colors and the screen that edits it.
 

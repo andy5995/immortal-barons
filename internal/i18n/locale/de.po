@@ -88,7 +88,7 @@ msgstr ""
 msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
 msgstr ""
 
-#: internal/menu/actions_attack.go:457
+#: internal/menu/actions_attack.go:460
 #, fuzzy
 msgid "%s Gold added."
 msgstr "Gold bezahlt."
@@ -239,7 +239,7 @@ msgstr ""
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
 msgstr ""
 
-#: internal/menu/actions_attack.go:440
+#: internal/menu/actions_attack.go:443
 msgid "Add how much gold for funding?"
 msgstr ""
 
@@ -261,7 +261,7 @@ msgstr ""
 msgid "All Allies"
 msgstr ""
 
-#: internal/menu/tree.go:208
+#: internal/menu/tree.go:207
 msgid "All Planets"
 msgstr ""
 
@@ -269,7 +269,7 @@ msgstr ""
 msgid "Alliance Strength"
 msgstr ""
 
-#: internal/menu/tree.go:209
+#: internal/menu/tree.go:208
 msgid "Allied Planets"
 msgstr ""
 
@@ -338,16 +338,16 @@ msgstr ""
 msgid "Bomb Enemy Targets"
 msgstr ""
 
-#: internal/menu/tree.go:236
+#: internal/menu/tree.go:235
 #, fuzzy
 msgid "Bomb Food Market"
 msgstr "Nahrungsmarkt"
 
-#: internal/menu/tree.go:238
+#: internal/menu/tree.go:237
 msgid "Bomb Trade Routes"
 msgstr ""
 
-#: internal/menu/tree.go:237
+#: internal/menu/tree.go:236
 #, fuzzy
 msgid "Bomb Trading Market"
 msgstr "Nahrungsmarkt"
@@ -364,7 +364,7 @@ msgstr "Bomber wurden in Industriezonen hergestellt."
 msgid "Break this treaty?"
 msgstr ""
 
-#: internal/menu/tree.go:227
+#: internal/menu/tree.go:226
 msgid "Bribery"
 msgstr ""
 
@@ -432,7 +432,7 @@ msgstr ""
 msgid "Chemical Attack"
 msgstr ""
 
-#: internal/menu/tree.go:241
+#: internal/menu/tree.go:240
 msgid "Chemical Bombing"
 msgstr ""
 
@@ -490,11 +490,11 @@ msgstr "Agenten"
 msgid "Covert Operations"
 msgstr "Agenten"
 
-#: internal/menu/tree.go:187
+#: internal/menu/tree.go:186
 msgid "Create Group Attack"
 msgstr ""
 
-#: internal/menu/actions_attack.go:458
+#: internal/menu/actions_attack.go:461
 #, fuzzy
 msgid "Current SDI Strength: %s%%"
 msgstr "Aktueller Steuersatz: %d%%"
@@ -536,7 +536,7 @@ msgstr ""
 msgid "Delete,"
 msgstr ""
 
-#: internal/menu/tree.go:224
+#: internal/menu/tree.go:223
 msgid "Demoralize Forces"
 msgstr ""
 
@@ -553,7 +553,7 @@ msgstr ""
 msgid "Diplomacy"
 msgstr "Diplomatie"
 
-#: internal/menu/tree.go:194
+#: internal/menu/tree.go:193
 #, fuzzy
 msgid "Diplomacy List"
 msgstr "Diplomatie"
@@ -567,7 +567,7 @@ msgstr "Diplomatie"
 msgid "Disabled"
 msgstr ""
 
-#: internal/menu/actions_attack.go:492
+#: internal/menu/actions_attack.go:495
 msgid "Dismantle it?"
 msgstr ""
 
@@ -584,11 +584,11 @@ msgstr "Möchtest du eine weitere Nachricht senden?"
 msgid "Done"
 msgstr ""
 
-#: internal/menu/tree.go:193
+#: internal/menu/tree.go:192
 msgid "Doomer Kaboomer Ops"
 msgstr ""
 
-#: internal/menu/actions_attack.go:479
+#: internal/menu/actions_attack.go:482
 msgid "Doomer Kaboomer operations are switched off in this game."
 msgstr ""
 
@@ -634,7 +634,7 @@ msgstr ""
 msgid "Every realm known on that planet is under New Realm Protection."
 msgstr ""
 
-#: internal/menu/tree.go:228
+#: internal/menu/tree.go:227
 msgid "Expose Enemy Ops"
 msgstr ""
 
@@ -718,7 +718,7 @@ msgstr ""
 msgid "How many days would you like to invest for?"
 msgstr ""
 
-#: internal/menu/actions_attack.go:496
+#: internal/menu/actions_attack.go:499
 msgid "How many million gold do you wish to put in?"
 msgstr ""
 
@@ -793,7 +793,7 @@ msgstr ""
 msgid "Income Report"
 msgstr "Einkommensbericht:"
 
-#: internal/menu/tree.go:189
+#: internal/menu/tree.go:188
 msgid "Indiv. Attack Force"
 msgstr ""
 
@@ -842,7 +842,7 @@ msgstr ""
 msgid "Investments"
 msgstr "Investitionen anzeigen"
 
-#: internal/menu/actions_attack.go:538
+#: internal/menu/actions_attack.go:541
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr ""
 
@@ -858,7 +858,7 @@ msgstr "Jets"
 msgid "Jets were manufactured by Industrial Zones."
 msgstr "Jets wurden in Industriezonen hergestellt."
 
-#: internal/menu/tree.go:188
+#: internal/menu/tree.go:187
 msgid "Join Group Attack"
 msgstr ""
 
@@ -895,7 +895,7 @@ msgstr "Sprache:"
 msgid "Last Planetary Master: %s"
 msgstr "Letzter Planetenmeister: %s"
 
-#: internal/menu/actions_attack.go:490
+#: internal/menu/actions_attack.go:493
 msgid "Launch it now?"
 msgstr ""
 
@@ -957,7 +957,7 @@ msgstr ""
 msgid "Max Terrorist Ops/Day (0 = unlimited)"
 msgstr ""
 
-#: internal/menu/actions_attack.go:437
+#: internal/menu/actions_attack.go:438
 msgid "Maximum productive spending this year is: %s Gold."
 msgstr ""
 
@@ -1045,7 +1045,7 @@ msgstr ""
 msgid "No other planets are known yet."
 msgstr ""
 
-#: internal/menu/actions_attack.go:528
+#: internal/menu/actions_attack.go:531
 msgid "No other planets are known yet. Wait for inter-BBS scores to arrive."
 msgstr ""
 
@@ -1068,11 +1068,11 @@ msgid ""
 "      the cost of the first region you buy."
 msgstr ""
 
-#: internal/menu/actions_attack.go:439
-msgid "Note: You should only fund the SDI in increments of %s Gold."
+#: internal/menu/actions_attack.go:442
+msgid "Note: You should only fund the SDI in increments of %d Gold."
 msgstr ""
 
-#: internal/menu/tree.go:240
+#: internal/menu/tree.go:239
 msgid "Nuclear Assault"
 msgstr ""
 
@@ -1179,7 +1179,7 @@ msgstr "# Besitz"
 msgid "Owner"
 msgstr "Besitzer"
 
-#: internal/menu/tree.go:210
+#: internal/menu/tree.go:209
 #, fuzzy
 msgid "Planet Coordinator"
 msgstr "Koordinatormenü"
@@ -1265,7 +1265,7 @@ msgstr "Beenden"
 msgid "Quote Message?"
 msgstr "Nachricht senden"
 
-#: internal/menu/tree.go:242
+#: internal/menu/tree.go:241
 msgid "R5-Slappenheimer"
 msgstr ""
 
@@ -1316,7 +1316,7 @@ msgstr ""
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Aufstände sind wegen hoher Steuern ausgebrochen!"
 
-#: internal/menu/tree.go:192
+#: internal/menu/tree.go:191
 msgid "SDI Program"
 msgstr ""
 
@@ -1351,7 +1351,7 @@ msgstr "Punkte ansehen"
 msgid "See Status"
 msgstr "Status ansehen"
 
-#: internal/menu/tree.go:207
+#: internal/menu/tree.go:206
 msgid "Select Planets"
 msgstr ""
 
@@ -1368,19 +1368,19 @@ msgstr "Nahrung"
 msgid "Sell Menu"
 msgstr "Verkaufsmenü"
 
-#: internal/menu/tree.go:190
+#: internal/menu/tree.go:189
 msgid "Send Message"
 msgstr "Nachricht senden"
 
-#: internal/menu/tree.go:220
+#: internal/menu/tree.go:219
 msgid "Send Spy"
 msgstr ""
 
-#: internal/menu/tree.go:264
+#: internal/menu/tree.go:265
 msgid "Send SpyGuy"
 msgstr ""
 
-#: internal/menu/tree.go:186
+#: internal/menu/tree.go:185
 msgid "Send Trade Deal"
 msgstr ""
 
@@ -1410,7 +1410,7 @@ msgstr "Industrie einstellen"
 msgid "Set Tax Rate"
 msgstr "Steuersatz setzen"
 
-#: internal/menu/tree.go:222
+#: internal/menu/tree.go:221
 msgid "Set Up"
 msgstr ""
 
@@ -1427,7 +1427,7 @@ msgstr "Anleitung"
 msgid "Since your last play, this has happened:"
 msgstr "Seit deinem letzten Zug ist Folgendes geschehen:"
 
-#: internal/menu/tree.go:206
+#: internal/menu/tree.go:205
 msgid "Single Planet"
 msgstr ""
 
@@ -1460,7 +1460,7 @@ msgstr ""
 msgid "Spending Menu"
 msgstr "Ausgabenmenü"
 
-#: internal/menu/tree.go:195
+#: internal/menu/tree.go:194
 #, fuzzy
 msgid "Spy Database"
 msgstr "Hilfe-Datenbank"
@@ -1470,15 +1470,15 @@ msgstr "Hilfe-Datenbank"
 msgid "Spy Database:"
 msgstr "Hilfe-Datenbank"
 
-#: internal/menu/tree.go:225
+#: internal/menu/tree.go:224
 msgid "Spy on Relations"
 msgstr ""
 
-#: internal/menu/tree.go:221
+#: internal/menu/tree.go:220
 msgid "Stir Revolts"
 msgstr ""
 
-#: internal/menu/tree.go:223
+#: internal/menu/tree.go:222
 msgid "Support Dissensions"
 msgstr ""
 
@@ -1498,7 +1498,7 @@ msgstr "Panzer wurden in Industriezonen hergestellt."
 msgid "Target which baron?"
 msgstr ""
 
-#: internal/menu/actions_attack.go:531
+#: internal/menu/actions_attack.go:534
 msgid "Target which planet?"
 msgstr ""
 
@@ -1528,7 +1528,7 @@ msgstr ""
 msgid "Territory"
 msgstr ""
 
-#: internal/menu/tree.go:185
+#: internal/menu/tree.go:184
 msgid "Terrorist Ops"
 msgstr ""
 
@@ -1570,7 +1570,7 @@ msgstr ""
 msgid "The Doomer Kaboomer is not paid for yet."
 msgstr ""
 
-#: internal/menu/actions_attack.go:488
+#: internal/menu/actions_attack.go:491
 msgid "The Doomer Kaboomer is on its way. Nothing more can be done with it."
 msgstr ""
 
@@ -1662,7 +1662,7 @@ msgstr ""
 msgid "This deal needs %d carrier(s); you own %d."
 msgstr ""
 
-#: internal/menu/actions_attack.go:517
+#: internal/menu/actions_attack.go:520
 msgid "This planet has no Doomer Kaboomer."
 msgstr ""
 
@@ -1703,7 +1703,7 @@ msgstr "Handel"
 msgid "Trading Market"
 msgstr "Nahrungsmarkt"
 
-#: internal/menu/tree.go:196
+#: internal/menu/tree.go:195
 msgid "Travel Times"
 msgstr ""
 
@@ -1738,7 +1738,7 @@ msgstr "Türme wurden in Industriezonen hergestellt."
 msgid "Type your realm name (%s) to confirm, or anything else to cancel"
 msgstr ""
 
-#: internal/menu/tree.go:239
+#: internal/menu/tree.go:238
 #, fuzzy
 msgid "Undermine Investments"
 msgstr "Investitionen anzeigen"
@@ -1765,7 +1765,7 @@ msgstr ""
 msgid "View Bank Rates"
 msgstr "Bankzinsen ansehen"
 
-#: internal/menu/tree.go:184
+#: internal/menu/tree.go:183
 #, fuzzy
 msgid "View IPScores"
 msgstr "Punkte ansehen"
@@ -1886,7 +1886,7 @@ msgstr ""
 msgid "Withdraw Funds"
 msgstr "Abheben"
 
-#: internal/menu/actions_attack.go:518
+#: internal/menu/actions_attack.go:521
 msgid "Would you like to begin construction?"
 msgstr ""
 
@@ -2061,7 +2061,7 @@ msgstr ""
 msgid "You owe %s gold in overdue debt (it grows each turn)."
 msgstr ""
 
-#: internal/menu/actions_attack.go:507
+#: internal/menu/actions_attack.go:510
 msgid "You put in %d million gold."
 msgstr ""
 

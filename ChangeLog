@@ -12,6 +12,9 @@
     the other maintenance; paying short shrinks the program
   * The SDI screen shows total funding, upkeep, funding per region and strength,
     matching the original's layout and colors
+  * Doomer Kaboomer Ops answers to 9 on the InterPlanetary Operations menu, and
+    the interplanetary Special Operations menu is numbered, both as in the
+    original
   * Sysops: "-ibbs-reset" starts a new game as a league board and a plain
     "-reset" a stand-alone one, which is no longer asked the league settings;
     adding "-board-id" sets a member board up in one command, without the

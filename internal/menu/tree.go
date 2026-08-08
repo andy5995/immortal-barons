@@ -173,9 +173,8 @@ func BuildMenus() *Menus {
 	// opening-menu entry is tinted to match.
 	// Order and
 	// hotkeys match BRE.OVR's full InterPlanetary Operations string table
-	// (#75); Doomer Kaboomer Ops ('K') is IB's equivalent of the Gooie
-	// Kablooie item BRE's own table carries but the observed board had
-	// config-hidden. Send Trade Deal and Send Message reuse the same actions
+	// (#75); Doomer Kaboomer Ops is IB's equivalent of BRE's Gooie Kablooie
+	// item, on its '9' as a later capture showed it. Send Trade Deal and Send Message reuse the same actions
 	// as the Trading and Messages menus; Special Operations opens the separate
 	// interplanetary Special Operations menu (BRE's cross-planet covert set, not
 	// the local Covert menu). Indiv. Attack Force ('6') has no interplanetary
@@ -190,7 +189,7 @@ func BuildMenus() *Menus {
 		{Key: '7', Label: "Send Message", Do: gotoMenu(ipMessages)},
 		{Key: '8', Label: "Special Operations", Do: gotoMenu(ipSpecial)},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
-		{Key: 'K', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer},
+		{Key: '9', Label: "Doomer Kaboomer Ops", Do: doomerKaboomer},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
 		{Key: 'S', Label: "Spy Database", Do: spyDatabase},
 		{Key: 'T', Label: "Travel Times", Do: travelTimes},
@@ -253,16 +252,17 @@ func BuildMenus() *Menus {
 	// SpyGuy is wired; the bombing/WMD variants are recorded-but-inert until
 	// interplanetary covert strikes are built. ('?'/'0' are IB's menu convention;
 	// BRE exits via ESC/Q with no listed items.)
+	// Numbered 1-8 with no Help item, as the live capture draws it — unlike the
+	// local Bomb Enemy Targets submenu above, which is lettered.
 	ipSpecial.Items = []Item{
-		{Key: 'F', Label: "Bomb Food Market", Do: ipSpecialStub},
-		{Key: 'T', Label: "Bomb Trading Market", Do: ipSpecialStub},
-		{Key: 'R', Label: "Bomb Trade Routes", Do: ipSpecialStub},
-		{Key: 'U', Label: "Undermine Investments", Do: ipSpecialStub},
-		{Key: 'N', Label: "Nuclear Assault", Do: ipSpecialStub},
-		{Key: 'C', Label: "Chemical Bombing", Do: ipSpecialStub},
-		{Key: 'S', Label: "R5-Slappenheimer", Do: ipSpecialStub},
-		{Key: 'G', Label: "Send SpyGuy", Do: sendSpyGuy},
-		{Key: '?', Label: "Help", Do: helpBrowse},
+		{Key: '1', Label: "Bomb Food Market", Do: ipSpecialStub},
+		{Key: '2', Label: "Bomb Trading Market", Do: ipSpecialStub},
+		{Key: '3', Label: "Bomb Trade Routes", Do: ipSpecialStub},
+		{Key: '4', Label: "Undermine Investments", Do: ipSpecialStub},
+		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialStub},
+		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialStub},
+		{Key: '7', Label: "R5-Slappenheimer", Do: ipSpecialStub},
+		{Key: '8', Label: "Send SpyGuy", Do: sendSpyGuy},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	ipSpecial.DefaultOnEnter = quitOnEnter(ipSpecial)
