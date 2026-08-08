@@ -19,7 +19,7 @@ const SDIMax = 50
 // disassembled.
 
 // SDIMaintenance is the upkeep e owes on its program this turn.
-func (w *World) SDIMaintenance(e *Empire) int { return e.SDIFunding * SDIMaintPct / 100 }
+func (w *World) SDIMaintenance(e *Empire) int { return pctOf(e.SDIFunding, SDIMaintPct) }
 
 // SDIFundingPerRegion is the program's spending spread over the land it covers,
 // which the original prints on the same screen. It printed 0 there in every
@@ -36,7 +36,7 @@ func (w *World) SDIFundingPerRegion(e *Empire) int {
 // a share of what is already in it, never less than the floor, less whatever has
 // gone in already this turn.
 func (w *World) SDISpendAllowance(e *Empire) int {
-	allowed := e.SDIFunding * SDISpendPct / 100
+	allowed := pctOf(e.SDIFunding, SDISpendPct)
 	if allowed < SDIMinSpend {
 		allowed = SDIMinSpend
 	}
@@ -75,7 +75,10 @@ func (w *World) PaySDI(e *Empire, gold int) {
 	if gold >= due || due <= 0 {
 		return
 	}
-	e.SDIFunding = e.SDIFunding * gold / due
+	// int64 throughout: a program funded into the millions times a part-payment
+	// in the thousands passes 2^31, which wrapped to a negative funding total on
+	// a 32-bit door.
+	e.SDIFunding = int(int64(e.SDIFunding) * int64(gold) / int64(due))
 	e.syncSDI()
 }
 

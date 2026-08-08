@@ -60,3 +60,30 @@ func TestRichAIStillBuysForces(t *testing.T) {
 		t.Errorf("spending drove gold negative: %d", e.Gold)
 	}
 }
+
+// The SDI program multiplies its funding total by a percentage and by a
+// part-payment, both of which pass 2^31 at ordinary funding levels. A 32-bit
+// build reported a funding total of -36,870 after a half-paid upkeep bill on a
+// million-gold program.
+func TestSDIMathSurvivesFundingScale(t *testing.T) {
+	w := NewWorld(DefaultConfig())
+	e := &Empire{}
+	for _, funding := range []int{1_000_000, 75_000_000, 500_000_000} {
+		e.SDIFunding = funding
+		e.TurnProgress.SDIFunded = 0
+		if got, want := w.SDIMaintenance(e), funding/25; got != want {
+			t.Errorf("funding=%d: upkeep %d, want %d", funding, got, want)
+		}
+		if got, want := w.SDISpendAllowance(e), max(SDIMinSpend, funding/5); got != want {
+			t.Errorf("funding=%d: allowance %d, want %d", funding, got, want)
+		}
+	}
+
+	// Paying half the upkeep halves the program, and never goes negative.
+	e.SDIFunding = 1_000_000
+	e.Gold = 100_000
+	w.PaySDI(e, w.SDIMaintenance(e)/2)
+	if e.SDIFunding != 500_000 {
+		t.Errorf("funding after a half payment = %d, want 500,000", e.SDIFunding)
+	}
+}
