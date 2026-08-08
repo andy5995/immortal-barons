@@ -457,15 +457,32 @@ much of the weapon survived, and interception by **jets only** (the original is
 explicit that nothing else can reach it) at one percent knocked off per 250 jets,
 spent whether they connect or not. SDI reduces the damage.
 
+**That reconstruction is known to be wrong in two ways** — it needs a live game,
+or the original's code, before it can be called done:
+
+- **The weapon should not detonate once and vanish.** The original's own
+  instructions describe a siege: 10% of the planet's regions instantly on
+  arrival, "every day of it's existance after the first day, another 5% ... up
+  to a max of 5 days at which time it will self-destruct", with jets battling it
+  the whole time it sits there. IB has no post-arrival phase at all, so the
+  weapon costs a planet a tenth of its land instead of up to a third, and the
+  cooperative defence the original is built around never happens. (#112)
+- **SDI should not blunt it.** The original says jets are "the only way to
+  destroy this thing", and the doomsday weapon is not among the three things SDI
+  is documented to work on. IB subtracts the defender's SDI anyway, which
+  contradicts the interception note in the line above. (#111)
+
 The target planet is told about it — while it is under construction and again in
 flight, with the arrival time in hours — which is what makes interception
 possible (#63). BRE does the same, and its own strings carry the wording:
 "Gooie Kablooie destined for our planet is under construction at ...",
 "Gooie Kablooie arrives from ... in N Hours."
 
-**SDI Defense** — a funded anti-missile/anti-jet shield. When complete it
-destroys about half of incoming missiles and cuts attacking jets' effectiveness
-by ~25–30%. See "The SDI program" below for how it is funded.
+**SDI Defense** — a funded anti-missile/anti-jet shield. The original names
+three separate ceilings: it destroys **up to 50%** of incoming missiles, and
+reduces attacking **jets by up to 30%** and **bombers by up to 20%**
+(`game/breins.txt`). See "The SDI program" below for how it is funded, and
+"What the shield actually does is not verified" for how much of that IB has.
 
 Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
 
@@ -1379,6 +1396,31 @@ Two things are **not** established:
 The original printed `Funding / Region: 0,000 Gold` at every funding level,
 including seven million. That is unexplained and most likely a defect in it, so
 IB shows the figure the label describes.
+
+The original's own instructions confirm what the screen's per-region line hints
+at: "The more territory you control, the larger your program will need to be as
+well." So the strength curve is a function of funding AND land, which is why a
+funding-only table cannot give it.
+
+#### What the shield actually does is not verified
+
+The funding side above came off a live capture and is exact. **The combat side
+did not.** It arrived with the feature, carries no provenance, and does not
+match the original's documented figures — treat every number in this paragraph
+as IB's own until someone reads the original's code:
+
+- IB scales missile damage by the defender's SDI percentage. The original
+  describes *destroying* up to half of incoming missiles, which is interception,
+  not a discount — and one strike is one missile, where the two models disagree
+  most. (#113)
+- IB applies the SDI percentage to jet effectiveness and has no bomber term. The
+  original caps jets at 30% and bombers at 20%, separately. (#113)
+- IB already contains two different models: an R5-Slappenheimer is intercepted
+  on a roll against the SDI percentage, while nuclear, chemical and biological
+  damage is scaled by it. Nothing justifies the split. (#113)
+- IB reduces Doomer Kaboomer damage by the defender's SDI. It should not: the
+  original says jets are "the only way to destroy this thing", and the doomsday
+  weapon is not among the three things SDI is documented to work on. (#111)
 
 **Picking a planet is one prompt everywhere.** BRE asks
 `Enter Planet Name or Number (? for list)` on every screen that needs a planet —
