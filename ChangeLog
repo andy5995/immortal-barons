@@ -1,4 +1,13 @@
 (in-progress:)
+  * Every menu closes with a rule, as the original draws them; before, only a
+    menu with a status line under it had one
+  * The Attack and Diplomacy menus carry the original's titles
+  * Diplomacy is on the opening menu as well as the System menu
+  * Send Message can address every realm the sender holds a treaty with
+  * A reply asks which lines of the message to quote, and opens with them
+  * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
+
+  Inter-BBS (league play only):
   * The Diplomacy List carries a real standing with each planet — Enemy, None,
     Peace or Allied — which the BBS Coordinator sets on a new Diplomacy
     Modification screen, replacing the free-text league declaration; it binds
@@ -10,16 +19,18 @@
     fifth of what it already holds or 250,000 gold, whichever is larger;
     reopening the screen in the same turn draws on the same allowance
   * The SDI Program charges upkeep of 4% of its funding every turn, asked with
-    the other maintenance; paying short shrinks the program
+    the other maintenance; paying short shrinks the program. A shield funded
+    before this release starts carrying that upkeep
   * The SDI screen shows total funding, upkeep, funding per region and strength,
     matching the original's layout and colors
   * Doomer Kaboomer Ops answers to 9 on the InterPlanetary Operations menu, and
     the interplanetary Special Operations menu is numbered, both as in the
     original
-  * Every menu closes with a rule, as the original draws them; before, only a
-    menu with a status line under it had one
   * The InterPlanetary Operations and Special Operations menus show the gold on
     hand
+  * Implemented IP mail
+  * Travel Times shows the measured round trip to each planet, in hours or days
+  * Every screen asks for a planet by name or number, with "?" for the list
   * Sysops: "-ibbs-reset" starts a new game as a league board and a plain
     "-reset" a stand-alone one, which is no longer asked the league settings;
     adding "-board-id" sets a member board up in one command, without the
@@ -27,15 +38,6 @@
   * The Configuration Editor sets the inter-BBS inbound and outbound
     directories, which now sit inside the data directory; a reset creates them
     and warns about packets left from the cleared game
-  * Diplomacy is on the opening menu as well as the System menu
-  * Send Message can address every realm the sender holds a treaty with
-  * Implemented IP mail
-  * A reply asks which lines of the message to quote, and opens with them
-  * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
-  * Travel Times shows the measured round trip to each planet, in hours or days
-  * Every screen asks for a planet by name or number, with "?" for the list
-  * The website carries the latest X-News headlines, rebuilt daily, each with
-    the feed's own summary
 
 2026-08-05 (v0.0.4)
   * The web server has been removed (an SSH server may replace it)
