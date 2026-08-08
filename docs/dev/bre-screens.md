@@ -1083,8 +1083,23 @@ color as above.
 Not reachable in the capture — the caller was not the elected Coordinator — so
 this is read from the binary rather than observed. `BRE.EXE` 0x14e5b defines a
 `Coordinator Ops` menu with eight hotkeys (`DEFRIOKL`), reached from the System
-Menu's `Coordinator Menu` item (`BRE.OVR` 0x13920). Which of the eight is the
-diplomacy item is **not** established; IB uses `D`.
+Menu's `Coordinator Menu` item (`BRE.OVR` 0x13920).
+
+Four of its item labels sit together at `BRE.OVR` 0x15dc0, immediately before
+the BBS Coordinator strings:
+
+```
+Dismantle Gooie
+Modify Diplomacy
+Global Recon Request
+View Diplomacy
+```
+
+So the menu **item** is `Modify Diplomacy`; `Diplomacy Modification` is the title
+of the screen it opens. The other four items are unknown, and the eight hotkeys
+are not the labels' initials, so which key opens what is **not** established.
+IB uses `D` for Modify Diplomacy, which is probably the original's key for
+`Dismantle Gooie` (#45) — expect to move it when that lands.
 
 `BRE.OVR` 0x23530 carries the screen: the title `Diplomacy Modification`, the
 prompt `Change status to War, None, Peace, or Ally?` (keys `WNPAU` at 0x23594,

@@ -22,12 +22,8 @@ either way.
 
 The target planet can see the weapon coming. They are told while the work is
 going on, and told again at launch, with the hours left before it
-lands. Their barons can send jets, and only jets — nothing else can reach
-it. Every wave takes a piece out of the weapon, and enough waves destroy it
-in the air.
+lands. Only jets can reach it. Every wave takes a piece out of the weapon,
+and enough waves destroy it in the air.
 
 Whatever survives the flight strikes every realm on that planet and takes a
 share of their regions. SDI reduces the damage.
-
-If a Clingy Annihilator is ever aimed at your planet, you will hear about it
-in the news. Send jets.

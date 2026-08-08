@@ -941,6 +941,10 @@ msgstr ""
 msgid "Military morale rose %d points."
 msgstr ""
 
+#: internal/menu/tree.go:337
+msgid "Modify Diplomacy"
+msgstr ""
+
 #: internal/menu/actions_info.go:274
 msgid "Morale is low. Desertion is a real risk before our next battle."
 msgstr ""

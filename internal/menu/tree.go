@@ -334,7 +334,7 @@ func BuildMenus() *Menus {
 	// The Coordinator Menu belongs to the elected BBS Coordinator (see the
 	// System menu gate below); it holds the planet-coordination functions.
 	coord.Items = []Item{
-		{Key: 'D', Label: "Diplomacy Modification", Do: diplomacyModification},
+		{Key: 'D', Label: "Modify Diplomacy", Do: diplomacyModification},
 		{Key: 'P', Label: "Player List", Do: playerList},
 		{Key: '0', Label: "Quit", Do: back},
 	}

@@ -961,6 +961,11 @@ msgstr "Berichten"
 msgid "Military morale rose %d points."
 msgstr ""
 
+#: internal/menu/tree.go:337
+#, fuzzy
+msgid "Modify Diplomacy"
+msgstr "Ligadiplomatie wijzigen"
+
 #: internal/menu/actions_info.go:274
 msgid "Morale is low. Desertion is a real risk before our next battle."
 msgstr ""
@@ -2370,9 +2375,6 @@ msgstr ""
 
 #~ msgid "War / Attack"
 #~ msgstr "Oorlog / Aanval"
-
-#~ msgid "Modify League Diplomacy"
-#~ msgstr "Ligadiplomatie wijzigen"
 
 #~ msgid "Buy / Sell"
 #~ msgstr "Kopen / Verkopen"
