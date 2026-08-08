@@ -1,4 +1,11 @@
 (in-progress:)
+  * The Diplomacy List carries a real standing with each planet — Enemy, None,
+    Peace or Allied — which the BBS Coordinator sets on a new Diplomacy
+    Modification screen, replacing the free-text league declaration; it binds
+    nothing and is never sent to the other planets, as in the original
+  * The standing appears beside every planet named on any interplanetary screen
+  * Allied Planets writes to every planet the chart marks Allied
+  * The Planetary Treaties chart matches the original's layout and colors
   * Sysops: "-ibbs-reset" starts a new game as a league board and a plain
     "-reset" a stand-alone one, which is no longer asked the league settings;
     adding "-board-id" sets a member board up in one command, without the

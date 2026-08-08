@@ -579,8 +579,12 @@ type World struct {
 	// Season counts league-wide resets, so a board can tell the Coordinator's new
 	// order from one it has already carried out (#65).
 	Season          int
-	LeagueDiplomacy string       // coordinator's league-wide diplomacy declaration
+	LeagueDiplomacy string       // coordinator's league-wide declaration, made with a season reset
 	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from ibnodes.dat at startup
+	// PlanetDiplomacy is this board's own chart of where it stands with each
+	// other planet — an annotation the BBS Coordinator keeps for their players,
+	// binding nothing and never sent anywhere. See ibbs_diplomacy.go.
+	PlanetDiplomacy map[string]PlanetRelation
 
 	// Player preferences (kept on the world for now; per-empire is a later
 	// refinement). Referenced by the Preferences menu.
@@ -673,6 +677,7 @@ func (w *World) initFreshGame() {
 	w.Outbox = nil
 	w.SpyDatabase = nil
 	w.LeagueDiplomacy = ""
+	w.PlanetDiplomacy = nil
 	// Preferences, in the order the Preferences menu lists them. These are IB's
 	// defaults, not BRE's: BRE opens with the three Visit menus and the two buy/
 	// deposit toggles on and the two automations off, so an untouched realm walks

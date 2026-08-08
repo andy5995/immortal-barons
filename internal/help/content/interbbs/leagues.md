@@ -18,6 +18,8 @@ matters.
   it is the place for a warning, an offer, or a call for help; you can also write
   to one planet's Coordinator alone. A reply asks whether it is public: yes and
   the sender's whole planet reads it, no and only the baron who wrote does.
+- Diplomacy List — where your board says it stands with each other planet. It
+  binds nobody, but it is your Coordinator telling you who to watch.
 - Travel Times — how long a message or a strike actually takes to reach each
   planet and get an answer back. Boards trade mail on their sysops' schedule, so
   check it before you aim anything: against a planet three days away, you are

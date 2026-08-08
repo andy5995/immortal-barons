@@ -1411,10 +1411,9 @@ receiving planet's elected Coordinator alone — BRE heads such a message
 `Message To  : Coordinator`. And a **reply** may be sent to its author alone;
 see below.
 
-IB implements all of it except **Allied Planets**, which has no list to draw
-from: IB models treaties between realms, not between planets, so the item says
-so rather than doing nothing (the same reason the Diplomacy List shows every
-planet as "None"). A message to a planet reaches every living realm there,
+**Allied Planets** writes to every planet the board's own diplomacy chart calls
+Allied (see Planetary diplomacy, below) — the one thing that chart drives rather
+than describes. A message to a planet reaches every living realm there,
 computer barons included, which is the same reach the local "send to all" has;
 a coordinator message with no Coordinator elected posts a news line instead.
 
@@ -1432,6 +1431,36 @@ and the quote (below). One divergence: IB has a **single mail reader** that
 names the planet when a message came from one, where BRE keeps a separate
 interplanetary reader. The screens read the same; the duplication is not worth
 reproducing.
+
+### Planetary diplomacy
+
+Each board keeps a chart of where it stands with every other planet: **Enemy**,
+**None**, **Peace** or **Allied**. It is shown by InterPlanetary Ops → Diplomacy
+List, and beside every planet a player names ("Our current relations with X").
+
+It is **not** a treaty system, and BRE says so on the screen that edits it
+(`BRE.OVR` 0x23425): the chart "is *not* official… None of the info in this
+chart is official. (ie, none of this is forced nor reported to the other
+planets.)" So:
+
+- The value binds nothing. Calling a planet an Enemy does not stop a treaty,
+  a trade or an attack, in either direction.
+- It never rides a packet. Two boards can hold contradictory views of the same
+  pair and neither will ever learn of the other's.
+- Only the elected **BBS Coordinator** may change it, on a Diplomacy
+  Modification screen: pick a planet, then answer `Change status to War, None,
+  Peace, or Ally?`. *War* files Enemy and *Ally* files Allied — the prompt's
+  words and the display words are two different tables in the original
+  (`BRE.OVR` 0x23530 and `BRE.EXE` 0x158b5).
+
+One thing reads it rather than displaying it: **Allied Planets** on the IP
+Messages menu addresses the planets it calls Allied.
+
+IB implements all of this. Two things are not established from the original: the
+color it prints **Enemy** in (the capture only ever showed the other three, so
+IB infers bright red), and which hotkey on BRE's eight-item Coordinator Ops menu
+opens the screen (IB uses `D`). A new season clears the chart, since the
+Coordinator who filed it is cleared with every other empire.
 
 ### Quoting a reply
 

@@ -651,8 +651,8 @@ Note: You should only fund the SDI in increments of 1000 Gold.
 Add how much gold for funding? (0; 0)
 ```
 
-**Diplomacy List** (D): `»Planetary Treaties«` box, one
-`( n) <planet>    <relation>` row per board.
+**Diplomacy List** (D): the `Planetary Treaties` chart — see the section at the
+end of this file for its measurements, colors and the screen that edits it.
 
 **Spy Database** (S): prompts `Select Planet to view players:` /
 `Enter Planet Name or Number (? for list):`. `?` lists planets with an operator
@@ -1020,3 +1020,66 @@ Colors: frame cyan `36`; timestamp bright-white `1;37`; the `Message From:` /
 `Message To  :` labels white `37`; sender bright-cyan `1;36`; recipient letters
 bright-green `1;32`; body white, quoted lines bright-blue `1;34`; the action keys
 bright-cyan `1;36` inside blue `34` brackets.
+
+## Planetary diplomacy (captured live 2026-08-08, league game)
+
+Two screens and one line, all reading the same per-board chart. It is a local
+annotation, not a treaty system — the editing screen says so itself.
+
+### Diplomacy List (InterPlanetary Ops → D)
+
+```
+──═Planetary Treaties═──
+─────══════════───────────────────────────────────
+( 1) Nova Hub                           None
+( 2) Starship Junkyard                  Allied
+( 4) The Eclipse                        Peace
+─────══════════───────────────────────────────────
+```
+
+Measurements: the rule is **50** columns (5 `─`, 10 `═`, 35 `─`); each row is
+`(` + a 2-column number + `) ` then the planet name in **35** columns, with the
+status after it. The board the player is on is **not** listed (the capture is
+from planet 3 and jumps from 2 to 4).
+
+Colors: the title's `──` red `31` and its `═` bright-red `1;31` around a
+bright-white `1;37` title; the rules gray `1;30`; the row parentheses gray
+`1;30` around a bright-white number; the planet name bright-white `1;37`. The
+status carries its own color — **None** white `37`, **Peace** bright-green
+`1;32`, **Allied** bright-blue `1;34`. **Enemy** never appeared in the capture,
+so IB's bright-red for it is an inference, not an observation.
+
+### The relations line
+
+Printed by the shared planet prompt, so it follows **every** planet the player
+names — a terror op, an IP message, a Spy Database lookup:
+
+```
+Our current relations with Starship Junkyard: Allied
+```
+
+White `37` body, the planet name bright-white `1;37`, the status in its own
+color as above.
+
+### Diplomacy Modification (BBS Coordinator only)
+
+Not reachable in the capture — the caller was not the elected Coordinator — so
+this is read from the binary rather than observed. `BRE.EXE` 0x14e5b defines a
+`Coordinator Ops` menu with eight hotkeys (`DEFRIOKL`), reached from the System
+Menu's `Coordinator Menu` item (`BRE.OVR` 0x13920). Which of the eight is the
+diplomacy item is **not** established; IB uses `D`.
+
+`BRE.OVR` 0x23530 carries the screen: the title `Diplomacy Modification`, the
+prompt `Change status to War, None, Peace, or Ally?` (keys `WNPAU` at 0x23594,
+with the tails `ar, ` / `one, ` / `eace, or ` / `lly? ` stored separately, so
+each key character is printed highlighted ahead of the rest of its word), and
+at 0x23425 the note that governs the whole mechanic:
+
+> NOTE:  Planetary Diplomacy is *not* official.  This is used for you to
+> allow the gamers to learn of your status with other Planets.  None
+> of the info in this chart is official.  (ie, none of this is forced
+> nor reported to the other planets.
+
+The four display words are a table at `BRE.EXE` 0x158b5: `Enemy`, `None`,
+`Peace`, `Allied` — so the prompt's *War* files *Enemy* and its *Ally* files
+*Allied*.

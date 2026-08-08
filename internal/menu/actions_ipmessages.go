@@ -76,8 +76,9 @@ func showPlanetList(s session.Session, planets []game.LeagueNode) {
 
 // pickPlanet runs BRE's planet prompt: a name or a number, "?" for the list,
 // and an empty line to stop (which the original answers "None"). It returns nil
-// when the caller is done choosing.
-func pickPlanet(s session.Session, planets []game.LeagueNode) *game.LeagueNode {
+// when the caller is done choosing. A chosen planet is followed by the standing
+// with it, which is where the original prints that line.
+func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.LeagueNode {
 	for {
 		fmt.Fprintf(s, "\n%s%s %s(%s?%s %s%s)%s: ",
 			ansi.FgWhite, tr(s, "Enter Planet Name or Number"),
@@ -97,6 +98,7 @@ func pickPlanet(s session.Session, planets []game.LeagueNode) *game.LeagueNode {
 			continue
 		}
 		if p := matchPlanet(planets, line); p != nil {
+			showRelation(s, w, p.Name)
 			return p
 		}
 	}
@@ -133,25 +135,44 @@ func pickPlanetNamed(s session.Session, w *ctx, want []string) string {
 	if len(list) == 0 {
 		return ""
 	}
-	if p := pickPlanet(s, list); p != nil {
+	if p := pickPlanet(s, w, list); p != nil {
 		return p.Name
 	}
 	return ""
 }
 
-// planetRelation is this planet's standing with another one. IB has no
-// planet-to-planet treaty mechanic, so it is always "None" — as it read on the
-// observed BRE board too. Both screens that show a relation go through here, so
-// the day planets can hold treaties there is one place to change.
-func planetRelation(s session.Session) string { return tr(s, "None") }
+// relationColor is the color BRE prints each planetary status in (live
+// capture): peace green, an alliance blue, and no standing in the body color.
+// Enemy is the one value the capture never showed, so its red is IB's
+// inference from the palette the rest of the game uses for hostility.
+func relationColor(r game.PlanetRelation) string {
+	switch r {
+	case game.PlanetAllied:
+		return ansi.FgBrightBlue
+	case game.PlanetPeace:
+		return ansi.FgBrightGreen
+	case game.PlanetEnemy:
+		return ansi.FgBrightRed
+	}
+	return ansi.FgWhite
+}
 
-// showRelation prints BRE's "Our current relations with X" line, which it shows
-// before a message goes to a named planet.
-func showRelation(s session.Session, planet string) {
+// relationColored is one status ready to print. The word carries the meaning on
+// its own, so a reader who cannot tell the colors apart loses nothing.
+func relationColored(s session.Session, r game.PlanetRelation) string {
+	return relationColor(r) + tr(s, string(r))
+}
+
+// showRelation prints BRE's "Our current relations with X" line. The original
+// prints it from the shared planet prompt, so it follows every planet a player
+// names — a message, a terror op, a database lookup.
+func showRelation(s session.Session, w *ctx, planet string) {
+	var r game.PlanetRelation
+	w.With(func() { r = w.PlanetRelationWith(planet) })
 	fmt.Fprintf(s, "%s%s %s%s%s: %s%s\n",
 		ansi.FgWhite, tr(s, "Our current relations with"),
 		ansi.FgBrightWhite, planet, ansi.FgWhite,
-		planetRelation(s), ansi.Reset)
+		relationColored(s, r), ansi.Reset)
 }
 
 // The five IP Messages items: one planet, as many as the sender keeps naming,
@@ -173,11 +194,10 @@ func ipMessageToOnePlanet(s session.Session, w *ctx, toCoordinator bool) Result 
 		ok(s, "No other planets are known yet.")
 		return Stay
 	}
-	p := pickPlanet(s, planets)
+	p := pickPlanet(s, w, planets)
 	if p == nil {
 		return Stay
 	}
-	showRelation(s, p.Name)
 	return composeIPMessage(s, w, []string{p.Name}, toCoordinator)
 }
 
@@ -190,7 +210,7 @@ func ipMessageSelect(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "To end selection, hit enter at the prompt."), ansi.Reset)
 	var chosen []string
 	for {
-		p := pickPlanet(s, planets)
+		p := pickPlanet(s, w, planets)
 		if p == nil {
 			break
 		}
@@ -217,13 +237,18 @@ func ipMessageAll(s session.Session, w *ctx) Result {
 	return composeIPMessage(s, w, all, false)
 }
 
-// ipMessageAllied is BRE's Allied Planets item. IB models treaties between
-// realms, not between planets, so there is no allied-planet list to write to
-// yet; the item stays on the menu because the menu matches BRE's, and it says
-// so rather than silently doing nothing.
+// ipMessageAllied writes to every planet the Coordinator's diplomacy chart
+// calls Allied. It is the one thing that chart drives rather than describes.
 func ipMessageAllied(s session.Session, w *ctx) Result {
-	ok(s, "We have no planetary alliances — planets here hold no treaties with one another.")
-	return Stay
+	var allied []string
+	w.With(func() { allied = w.AlliedPlanetNames() })
+	if len(allied) == 0 {
+		ok(s, "We have no allied planets.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s %s%s%s\n", ansi.FgWhite, tr(s, "Writing to:"),
+		ansi.FgBrightWhite, strings.Join(allied, ", "), ansi.Reset)
+	return composeIPMessage(s, w, allied, false)
 }
 
 // composeIPMessage runs the same multi-line editor local mail uses and queues

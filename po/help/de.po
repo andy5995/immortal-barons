@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-05 03:15-0500\n"
+"POT-Creation-Date: 2026-08-08 12:43-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -500,6 +500,14 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/diplomacy/treaties.md:21
 msgid ""
+"Once you hold a treaty, Send Message offers to write to all your allies at "
+"once.  It reaches every ruler you have an agreement with, whatever kind it "
+"is."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:24
+msgid ""
 "An offer waits until the other ruler plays a turn. It does not run out. If "
 "you send a second, different offer to the same ruler, it takes the place of "
 "the first one, because two realms can hold only one agreement at a time."
@@ -910,7 +918,7 @@ msgstr ""
 "über die lokalen Herrscher zum Sieg über andere Planeten."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:17
+#: internal/help/content/interbbs/leagues.md:27
 msgid ""
 "Group Attack — several rulers on your board join one strike against a "
 "distant enemy. The gains are shared among those who take part."
@@ -920,12 +928,38 @@ msgstr ""
 "geteilt."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:17
+#: internal/help/content/interbbs/leagues.md:27
 msgid "IP Scores — see how the boards rank against each other."
 msgstr "IP-Punkte — sehen, wie die Boards zueinander stehen."
 
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/leagues.md:27
+msgid ""
+"Send Message — write to another planet. Everyone there reads what you send, "
+"so it is the place for a warning, an offer, or a call for help; you can also "
+"write to one planet's Coordinator alone. A reply asks whether it is public: "
+"yes and the sender's whole planet reads it, no and only the baron who wrote "
+"does."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/leagues.md:27
+msgid ""
+"Diplomacy List — where your board says it stands with each other planet. It "
+"binds nobody, but it is your Coordinator telling you who to watch."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/leagues.md:27
+msgid ""
+"Travel Times — how long a message or a strike actually takes to reach each "
+"planet and get an answer back. Boards trade mail on their sysops' schedule, "
+"so check it before you aim anything: against a planet three days away, you "
+"are committing forces you will not hear about until the weekend."
+msgstr ""
+
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:20
+#: internal/help/content/interbbs/leagues.md:30
 msgid ""
 "A league game has a set length. When it ends, the world resets and a new "
 "game begins."
@@ -934,13 +968,93 @@ msgstr ""
 "zurückgesetzt und ein neues Spiel beginnt."
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:21
+#: internal/help/content/interbbs/leagues.md:31
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
 "play."
 msgstr ""
 "Diese Funktionen erscheinen nur, wenn das Spiel für Inter-BBS- oder "
 "Ligaspiel eingerichtet ist."
+
+#. type: Title #
+#: internal/help/content/interbbs/planetary-diplomacy.md:1
+#: internal/help/content/interbbs/planetary-diplomacy.md:8
+#, no-wrap
+msgid "Planetary Diplomacy"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/planetary-diplomacy.md:15
+msgid ""
+"Your board keeps a short list of where it stands with each of the other "
+"planets. Each one is marked **Enemy**, **None**, **Peace** or **Allied**. "
+"Open it from InterPlanetary Operations with **Diplomacy List**. You also see "
+"the mark for a planet whenever you name one, on the line that reads \"Our "
+"current relations with...\"."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/planetary-diplomacy.md:18
+msgid ""
+"Only your board's Coordinator can change the list. It is on the Coordinator "
+"Menu, under Diplomacy Modification."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/planetary-diplomacy.md:19
+#, no-wrap
+msgid "What it does and does not do"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/planetary-diplomacy.md:23
+msgid ""
+"The list is a note from your Coordinator to the barons on your own board. It "
+"tells you what your board thinks of a planet. It does nothing else:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/planetary-diplomacy.md:28
+msgid ""
+"It stops nothing. A planet marked Enemy can still trade with you, and you "
+"can still attack a planet marked Allied."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/planetary-diplomacy.md:28
+msgid ""
+"The other planets never see it. They keep their own list, and it may say "
+"something quite different about you."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/planetary-diplomacy.md:31
+msgid ""
+"One thing does use it. When you write to **Allied Planets** from the IP "
+"Messages menu, your message goes to every planet the list marks Allied."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/planetary-diplomacy.md:32
+#, no-wrap
+msgid "Using it"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/planetary-diplomacy.md:38
+msgid ""
+"Read the list before you commit forces. Your Coordinator marks a planet "
+"Enemy after seeing something you may not have seen — a raid on a neighbour, "
+"a strike on your own board, a message that went badly. It is the cheapest "
+"warning you will get."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/planetary-diplomacy.md:40
+msgid ""
+"If you disagree with a mark, say so. The Coordinator is elected, and the "
+"list follows whoever holds the post."
+msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
 #: internal/help/content/introduction/overview.md:1
