@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-08-08 12:43-0500\n"
+"POT-Creation-Date: 2026-08-08 12:51-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -2066,10 +2066,57 @@ msgid "SDI Program"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:12
+#: internal/help/content/warfare/sdi.md:13
 #, markdown-text
 msgid ""
 "The SDI Program is a shield you fund. When it is complete, it destroys about "
 "half of the missiles fired at you and cuts attacking jets' strength by about "
 "a quarter. Technology regions lower its upkeep."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/sdi.md:14
+#, markdown-text, no-wrap
+msgid "Funding it"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:19
+#, markdown-text
+msgid ""
+"The program is a pot of gold, not something you buy once. Each turn you may "
+"add up to a set amount: a fifth of what is already in the pot, and never "
+"less than 250,000 gold. Gold goes in only in whole thousands."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:22
+#, markdown-text
+msgid ""
+"That limit means a shield takes many turns to build, however rich you "
+"are. You cannot buy one the turn you need it, so start early if you expect "
+"missiles."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/sdi.md:23
+#, markdown-text, no-wrap
+msgid "Paying for it"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:27
+#, markdown-text
+msgid ""
+"Every turn the program asks for **4% of its total funding** as upkeep, in "
+"the maintenance prompts, after your regions and before the Queen's tax."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:30
+#, markdown-text
+msgid ""
+"Pay it in full. If you pay short, the program shrinks to what you did pay "
+"for, and the shield weakens with it. A large pot is a large bill every turn, "
+"so grow it at a pace your income can carry."
 msgstr ""

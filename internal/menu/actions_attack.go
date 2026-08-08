@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -410,12 +411,36 @@ func attackPirates(s session.Session, w *ctx) Result {
 }
 
 func sdiProgram(s session.Session, w *ctx) Result {
-	p := w.Player()
-	// BRE's SDI screen shows "Current SDI Strength" and the funding step; IB
-	// funds whole per-point steps (SDIStep gold each) up to SDIMax.
-	fmt.Fprintf(s, "\n%s"+tr(s, "Current SDI Strength: %d%%")+"%s\n", ansi.FgBrightCyan, p.SDI, ansi.Reset)
-	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Each +1%% costs %s gold (max %d%%); fund in whole increments of that."), comma(game.SDIStep), game.SDIMax)))
-	gold := promptInt(s, "Fund SDI — gold to spend?")
+	// BRE's SDI screen: four figures, then the turn's allowance and the
+	// increments note, then the funding prompt. Labels white, figures
+	// bright-yellow, the note gray (docs/dev/bre-screens.md).
+	var funding, maint, perRegion, strength, allowance, gold int
+	w.With(func() {
+		p := w.Player()
+		funding, strength = p.SDIFunding, p.SDI
+		maint = w.SDIMaintenance(p)
+		perRegion = w.SDIFundingPerRegion(p)
+		allowance = min(w.SDISpendAllowance(p), p.Gold)
+	})
+	fmt.Fprintln(s)
+	for _, row := range []struct {
+		label string
+		value string
+	}{
+		{"Total Funding: %s Gold", comma(funding)},
+		{"Yearly Maintenance: %s Gold", comma(maint)},
+		{"Funding / Region: %s Gold", comma(perRegion)},
+		{"Current SDI Strength: %s%%", strconv.Itoa(strength)},
+	} {
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgWhite, hiNumsReset(fmt.Sprintf(tr(s, row.label), row.value), ansi.FgBrightYellow, ansi.FgWhite), ansi.Reset)
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite,
+		hiNumsReset(fmt.Sprintf(tr(s, "Maximum productive spending this year is: %s Gold."), comma(allowance)), ansi.FgBrightYellow, ansi.FgWhite), ansi.Reset)
+	// The original prints this figure ungrouped ("1000 Gold"), unlike every other
+	// number on the screen.
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightBlack,
+		fmt.Sprintf(tr(s, "Note: You should only fund the SDI in increments of %d Gold."), game.SDIIncrement), ansi.Reset)
+	gold = promptSuggested(s, "Add how much gold for funding?", 0, allowance)
 	if gold <= 0 {
 		return Stay
 	}
@@ -432,7 +457,8 @@ func sdiProgram(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "SDI is now %d%%.", level)
+	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "%s Gold added."), comma(gold))))
+	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Current SDI Strength: %s%%"), strconv.Itoa(level))))
 	return Stay
 }
 

@@ -100,7 +100,11 @@ type Empire struct {
 
 	Tax int
 	SDI int // 0-75, percentage reduction of incoming strike damage
-	HQ  int // 0 = none/not started; 1-100 = percent complete
+	// SDIFunding is the gold in the program to date, which is what the original
+	// stores and what its upkeep and spending allowance are both figured from.
+	// SDI above is derived from it. See specials.go.
+	SDIFunding int
+	HQ         int // 0 = none/not started; 1-100 = percent complete
 	// TurnsPlayed is the empire's lifetime turn count. BRE keeps the same counter
 	// (record +0x281) and prices the HeadQuarters off it — see World.HQPrice.
 	TurnsPlayed int
@@ -246,6 +250,7 @@ type Empire struct {
 type TurnProgress struct {
 	IncomeCollected    bool // turn-start Manufacture + CollectIncome + regions-cap reset done
 	MaintPaid          bool // paymentStage done (set with the forces/regions charge)
+	SDIFunded          int  // gold put into the SDI program this turn, against its allowance
 	Fed                bool // feedStage done
 	CovertDone         bool
 	CovertOpUsed       bool // an EFFECT covert op ran this turn (BRE's one-per-turn cap; info ops exempt)

@@ -249,6 +249,9 @@ func TestSaveLoadRoundTripAllFields(t *testing.T) {
 	fillValue(reflect.ValueOf(e).Elem())
 	fillValue(reflect.ValueOf(w).Elem())
 	e.Land = e.Regions.Total() // EnsureRegions reconciles the mix against Land on load
+	// SDI is likewise derived on load, from SDIFunding — which needs a value big
+	// enough to show as at least 1%, or the derived field reads as lost.
+	e.SDIFunding, e.SDI = game.SDIStep, 1
 
 	// Legacy fields the EnsureTreaties migration deliberately nils on load —
 	// zero after a round trip is their correct state, not a loss.

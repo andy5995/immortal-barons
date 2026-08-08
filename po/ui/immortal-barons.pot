@@ -53,19 +53,19 @@ msgstr ""
 msgid "%d days"
 msgstr ""
 
-#: internal/menu/gameflow.go:539
+#: internal/menu/gameflow.go:549
 msgid "%d gold is requested to boost popular support."
 msgstr ""
 
-#: internal/menu/gameflow.go:554
+#: internal/menu/gameflow.go:564
 msgid "%d gold is requested to improve military morale."
 msgstr ""
 
-#: internal/menu/gameflow.go:531
+#: internal/menu/gameflow.go:541
 msgid "%d regions revolted for lack of upkeep."
 msgstr ""
 
-#: internal/menu/gameflow.go:528
+#: internal/menu/gameflow.go:538
 msgid "%d units deserted for lack of pay."
 msgstr ""
 
@@ -81,11 +81,15 @@ msgstr ""
 msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
 msgstr ""
 
+#: internal/menu/actions_attack.go:457
+msgid "%s Gold added."
+msgstr ""
+
 #: internal/menu/actions_info.go:430
 msgid "%s days"
 msgstr ""
 
-#: internal/menu/gameflow.go:493
+#: internal/menu/gameflow.go:495
 msgid "%s gold is required to maintain your regions."
 msgstr ""
 
@@ -113,7 +117,7 @@ msgstr ""
 msgid "%s units of food available today."
 msgstr ""
 
-#: internal/menu/actions_attack.go:294
+#: internal/menu/actions_attack.go:295
 msgid "%s — %d gold."
 msgstr ""
 
@@ -221,6 +225,10 @@ msgstr ""
 msgid "Accept? [Y]es, [N]o, [I]gnore for now"
 msgstr ""
 
+#: internal/menu/actions_attack.go:440
+msgid "Add how much gold for funding?"
+msgstr ""
+
 #: internal/menu/actions_info.go:359
 msgid "Advisors"
 msgstr ""
@@ -265,7 +273,7 @@ msgstr ""
 msgid "Attack (0 to cancel)?"
 msgstr ""
 
-#: internal/menu/actions_attack.go:363
+#: internal/menu/actions_attack.go:364
 msgid "Attack Pirates"
 msgstr ""
 
@@ -273,7 +281,7 @@ msgstr ""
 msgid "Attack force #%d is on its way to %s on %s."
 msgstr ""
 
-#: internal/menu/actions_attack.go:159
+#: internal/menu/actions_attack.go:160
 msgid "Attack which realm? (letter, RETURN to abort)"
 msgstr ""
 
@@ -413,7 +421,7 @@ msgstr ""
 msgid "Choose a Target (0 to cancel)?"
 msgstr ""
 
-#: internal/menu/actions_attack.go:296
+#: internal/menu/actions_attack.go:297
 msgid "Choose a target (letter, RETURN to abort)"
 msgstr ""
 
@@ -433,7 +441,7 @@ msgstr ""
 msgid "Confirm?"
 msgstr ""
 
-#: internal/menu/gameflow.go:789
+#: internal/menu/gameflow.go:799
 msgid "Continue to your next turn?"
 msgstr ""
 
@@ -457,8 +465,8 @@ msgstr ""
 msgid "Create Group Attack"
 msgstr ""
 
-#: internal/menu/actions_attack.go:416
-msgid "Current SDI Strength: %d%%"
+#: internal/menu/actions_attack.go:458
+msgid "Current SDI Strength: %s%%"
 msgstr ""
 
 #: internal/menu/actions.go:248
@@ -525,7 +533,7 @@ msgstr ""
 msgid "Disabled"
 msgstr ""
 
-#: internal/menu/actions_attack.go:469
+#: internal/menu/actions_attack.go:492
 msgid "Dismantle it?"
 msgstr ""
 
@@ -533,7 +541,7 @@ msgstr ""
 msgid "Do you wish to send another message?"
 msgstr ""
 
-#: internal/menu/gameflow.go:482
+#: internal/menu/gameflow.go:484
 msgid "Do you wish to visit the bank?"
 msgstr ""
 
@@ -545,12 +553,8 @@ msgstr ""
 msgid "Doomer Kaboomer Ops"
 msgstr ""
 
-#: internal/menu/actions_attack.go:456
+#: internal/menu/actions_attack.go:479
 msgid "Doomer Kaboomer operations are switched off in this game."
-msgstr ""
-
-#: internal/menu/actions_attack.go:417
-msgid "Each +1%% costs %s gold (max %d%%); fund in whole increments of that."
 msgstr ""
 
 #: internal/menu/config_editor.go:115
@@ -617,10 +621,6 @@ msgstr ""
 msgid "Full Defense Alliance"
 msgstr ""
 
-#: internal/menu/actions_attack.go:418
-msgid "Fund SDI — gold to spend?"
-msgstr ""
-
 #: internal/menu/tree.go:413
 msgid "Game Bulletins"
 msgstr ""
@@ -637,7 +637,7 @@ msgstr ""
 msgid "Game started on %s"
 msgstr ""
 
-#: internal/menu/gameflow.go:465
+#: internal/menu/gameflow.go:467
 msgid "Gold paid."
 msgstr ""
 
@@ -681,7 +681,7 @@ msgstr ""
 msgid "How many days would you like to invest for?"
 msgstr ""
 
-#: internal/menu/actions_attack.go:473
+#: internal/menu/actions_attack.go:496
 msgid "How many million gold do you wish to put in?"
 msgstr ""
 
@@ -701,7 +701,7 @@ msgstr ""
 msgid "How much to repay?"
 msgstr ""
 
-#: internal/menu/gameflow.go:491
+#: internal/menu/gameflow.go:493
 msgid "How much will you give?"
 msgstr ""
 
@@ -797,7 +797,7 @@ msgstr ""
 msgid "Investments"
 msgstr ""
 
-#: internal/menu/actions_attack.go:515
+#: internal/menu/actions_attack.go:538
 msgid "It will cost your planet %s million gold to fund. Accept?"
 msgstr ""
 
@@ -849,7 +849,7 @@ msgstr ""
 msgid "Last Planetary Master: %s"
 msgstr ""
 
-#: internal/menu/actions_attack.go:467
+#: internal/menu/actions_attack.go:490
 msgid "Launch it now?"
 msgstr ""
 
@@ -889,7 +889,7 @@ msgstr ""
 msgid "Macro Editor"
 msgstr ""
 
-#: internal/menu/gameflow.go:469
+#: internal/menu/gameflow.go:471
 msgid "Maintenance:"
 msgstr ""
 
@@ -909,6 +909,10 @@ msgstr ""
 msgid "Max Terrorist Ops/Day (0 = unlimited)"
 msgstr ""
 
+#: internal/menu/actions_attack.go:437
+msgid "Maximum productive spending this year is: %s Gold."
+msgstr ""
+
 #: internal/menu/mailreader.go:200
 msgid "Message From: "
 msgstr ""
@@ -925,7 +929,7 @@ msgstr ""
 msgid "Messages"
 msgstr ""
 
-#: internal/menu/gameflow.go:561
+#: internal/menu/gameflow.go:571
 msgid "Military morale rose %d points."
 msgstr ""
 
@@ -989,7 +993,7 @@ msgstr ""
 msgid "No other planets are known yet."
 msgstr ""
 
-#: internal/menu/actions_attack.go:505
+#: internal/menu/actions_attack.go:528
 msgid "No other planets are known yet. Wait for inter-BBS scores to arrive."
 msgstr ""
 
@@ -1001,12 +1005,16 @@ msgstr ""
 msgid "None"
 msgstr ""
 
-#: internal/menu/actions_attack.go:260
+#: internal/menu/actions_attack.go:261
 msgid "None of these realms can be attacked — they are protected or allied with you."
 msgstr ""
 
 #: internal/menu/actions_regions.go:140
 msgid "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."
+msgstr ""
+
+#: internal/menu/actions_attack.go:439
+msgid "Note: You should only fund the SDI in increments of %s Gold."
 msgstr ""
 
 #: internal/menu/tree.go:240
@@ -1141,7 +1149,7 @@ msgstr ""
 msgid "Player List"
 msgstr ""
 
-#: internal/menu/gameflow.go:549
+#: internal/menu/gameflow.go:559
 msgid "Popular support rose %d points."
 msgstr ""
 
@@ -1237,10 +1245,6 @@ msgstr ""
 msgid "SDI Program"
 msgstr ""
 
-#: internal/menu/actions_attack.go:435
-msgid "SDI is now %d%%."
-msgstr ""
-
 #: internal/menu/actions_info.go:128
 msgid "Sable, your technology advisor, Sire. I tend the labs and the small miracles they leak."
 msgstr ""
@@ -1301,7 +1305,7 @@ msgstr ""
 msgid "Send Trade Deal"
 msgstr ""
 
-#: internal/menu/gameflow.go:768
+#: internal/menu/gameflow.go:778
 msgid "Send a message?"
 msgstr ""
 
@@ -1345,7 +1349,7 @@ msgstr ""
 msgid "Single Planet"
 msgstr ""
 
-#: internal/menu/gameflow.go:655
+#: internal/menu/gameflow.go:665
 msgid "Sorry, you have used all of your turns today."
 msgstr ""
 
@@ -1409,7 +1413,7 @@ msgstr ""
 msgid "Target which baron?"
 msgstr ""
 
-#: internal/menu/actions_attack.go:508
+#: internal/menu/actions_attack.go:531
 msgid "Target which planet?"
 msgstr ""
 
@@ -1477,15 +1481,15 @@ msgstr ""
 msgid "The Doomer Kaboomer is not paid for yet."
 msgstr ""
 
-#: internal/menu/actions_attack.go:465
+#: internal/menu/actions_attack.go:488
 msgid "The Doomer Kaboomer is on its way. Nothing more can be done with it."
 msgstr ""
 
-#: internal/menu/gameflow.go:631
+#: internal/menu/gameflow.go:641
 msgid "The Queen Royale opens her coffers and refunds you %s gold in taxes!"
 msgstr ""
 
-#: internal/menu/gameflow.go:500
+#: internal/menu/gameflow.go:509
 msgid "The Queen Royale requires %s gold for Taxes."
 msgstr ""
 
@@ -1537,7 +1541,7 @@ msgstr ""
 msgid "There are no barons to vote for yet."
 msgstr ""
 
-#: internal/menu/actions_attack.go:156
+#: internal/menu/actions_attack.go:157
 msgid "There are no rival empires left to attack."
 msgstr ""
 
@@ -1565,7 +1569,7 @@ msgstr ""
 msgid "This deal needs %d carrier(s); you own %d."
 msgstr ""
 
-#: internal/menu/actions_attack.go:494
+#: internal/menu/actions_attack.go:517
 msgid "This planet has no Doomer Kaboomer."
 msgstr ""
 
@@ -1689,7 +1693,7 @@ msgstr ""
 msgid "Visit Trading Menu"
 msgstr ""
 
-#: internal/menu/gameflow.go:587
+#: internal/menu/gameflow.go:597
 msgid "Visit the Food Market to feed them, or they will starve."
 msgstr ""
 
@@ -1769,11 +1773,11 @@ msgstr ""
 msgid "Withdraw Funds"
 msgstr ""
 
-#: internal/menu/actions_attack.go:495
+#: internal/menu/actions_attack.go:518
 msgid "Would you like to begin construction?"
 msgstr ""
 
-#: internal/menu/gameflow.go:509
+#: internal/menu/gameflow.go:518
 msgid "Would you like to reconsider?"
 msgstr ""
 
@@ -1793,7 +1797,7 @@ msgstr ""
 msgid "You accepted the %s with %s."
 msgstr ""
 
-#: internal/menu/actions_attack.go:140
+#: internal/menu/actions_attack.go:141
 msgid "You are under New Realm Protection and cannot attack yet."
 msgstr ""
 
@@ -1817,7 +1821,7 @@ msgstr ""
 msgid "You cannot buy from your own listing."
 msgstr ""
 
-#: internal/menu/gameflow.go:471
+#: internal/menu/gameflow.go:473
 msgid "You cannot cover all your maintenance this turn."
 msgstr ""
 
@@ -1825,7 +1829,7 @@ msgstr ""
 msgid "You captured %d regions — choose which types to hold them as."
 msgstr ""
 
-#: internal/menu/actions_attack.go:179
+#: internal/menu/actions_attack.go:180
 msgid "You committed no forces; the attack is called off."
 msgstr ""
 
@@ -1853,7 +1857,7 @@ msgstr ""
 msgid "You give:    %s"
 msgstr ""
 
-#: internal/menu/actions_attack.go:170
+#: internal/menu/actions_attack.go:171
 msgid "You have %d Troopers, %d usable Jets, %d Tanks, and %d Bombers."
 msgstr ""
 
@@ -1873,7 +1877,7 @@ msgstr ""
 msgid "You have %s gold and 1 turn."
 msgstr ""
 
-#: internal/menu/actions_attack.go:151
+#: internal/menu/actions_attack.go:152
 msgid "You have already launched all %d of your attacks for today."
 msgstr ""
 
@@ -1937,7 +1941,7 @@ msgstr ""
 msgid "You owe %s gold in overdue debt (it grows each turn)."
 msgstr ""
 
-#: internal/menu/actions_attack.go:484
+#: internal/menu/actions_attack.go:507
 msgid "You put in %d million gold."
 msgstr ""
 
@@ -1961,7 +1965,11 @@ msgstr ""
 msgid "Your Prices"
 msgstr ""
 
-#: internal/menu/gameflow.go:508
+#: internal/menu/gameflow.go:500
+msgid "Your SDI Program requires %s gold."
+msgstr ""
+
+#: internal/menu/gameflow.go:517
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
@@ -1973,7 +1981,7 @@ msgstr ""
 msgid "Your allies will send the following to aid you in defense:"
 msgstr ""
 
-#: internal/menu/gameflow.go:489
+#: internal/menu/gameflow.go:491
 msgid "Your armed forces require %s gold."
 msgstr ""
 
@@ -1997,7 +2005,7 @@ msgstr ""
 msgid "Your empire is no more. Return on a later day to build a new realm."
 msgstr ""
 
-#: internal/menu/actions_attack.go:227
+#: internal/menu/actions_attack.go:228
 msgid "Your forces changed while you prepared the attack — only units still under your command were sent."
 msgstr ""
 
@@ -2025,11 +2033,11 @@ msgstr ""
 msgid "Your new-realm protection will end when this turn does."
 msgstr ""
 
-#: internal/menu/gameflow.go:585
+#: internal/menu/gameflow.go:595
 msgid "Your people need %s units of food and you have only %s."
 msgstr ""
 
-#: internal/menu/gameflow.go:603
+#: internal/menu/gameflow.go:613
 msgid "Your people need %s units of food."
 msgstr ""
 
@@ -2037,7 +2045,7 @@ msgstr ""
 msgid "Your realm has %d turns of new-realm protection left."
 msgstr ""
 
-#: internal/menu/gameflow.go:647
+#: internal/menu/gameflow.go:657
 msgid "Your realm is no longer active."
 msgstr ""
 
@@ -2213,7 +2221,7 @@ msgstr ""
 msgid "troops deserted due to low morale."
 msgstr ""
 
-#: internal/menu/gameflow.go:711
+#: internal/menu/gameflow.go:721
 msgid "units of Food consumed."
 msgstr ""
 

@@ -2,36 +2,60 @@ package game
 
 import "testing"
 
-func TestFundSDI(t *testing.T) {
+// The program takes gold a turn at a time, in whole thousands, and no more than
+// the turn's allowance permits.
+func TestFundSDIRespectsTheTurnAllowance(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
 	a.Gold = 100_000_000
 
-	level, err := w.FundSDI(a, 3*SDIStep)
-	if err != nil {
+	if _, err := w.FundSDI(a, 400_000); err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if level != 3 {
-		t.Errorf("expected SDI 3, got %d", level)
+	// A fresh program's allowance is the floor, so only that much goes in.
+	if a.SDIFunding != SDIMinSpend {
+		t.Errorf("funding = %d, want the allowance %d", a.SDIFunding, SDIMinSpend)
 	}
-	if want := 100_000_000 - 3*SDIStep; a.Gold != want {
-		t.Errorf("expected gold %d, got %d", want, a.Gold)
+	if want := 100_000_000 - SDIMinSpend; a.Gold != want {
+		t.Errorf("gold = %d, want %d", a.Gold, want)
+	}
+	// The allowance is spent for the turn.
+	if got := w.SDISpendAllowance(a); got != 0 {
+		t.Errorf("allowance left = %d, want 0", got)
+	}
+	if _, err := w.FundSDI(a, 250_000); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if a.SDIFunding != SDIMinSpend {
+		t.Errorf("a second payment got past the allowance: funding = %d", a.SDIFunding)
 	}
 }
 
+// Odd gold is rounded down to a whole thousand, as the screen's note says.
+func TestFundSDIRoundsToWholeThousands(t *testing.T) {
+	w, a, _ := newAttackerAndTarget(t)
+	a.Gold = 100_000_000
+
+	if _, err := w.FundSDI(a, 1_750); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if a.SDIFunding != 1_000 {
+		t.Errorf("funding = %d, want 1000", a.SDIFunding)
+	}
+}
+
+// Strength stops at the cap however much gold the program holds.
 func TestFundSDICapsAtMax(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
-	a.Gold = 200_000_000
+	a.Gold = 1_000_000_000
+	a.SDIFunding = SDIMax * SDIStep
+	a.syncSDI()
 
-	level, err := w.FundSDI(a, 200_000_000)
+	level, err := w.FundSDI(a, SDIStep)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 	if level != SDIMax {
 		t.Errorf("expected SDI capped at %d, got %d", SDIMax, level)
-	}
-	wantSpent := SDIMax * SDIStep
-	if a.Gold != 200_000_000-wantSpent {
-		t.Errorf("expected only %d gold spent, gold now %d", wantSpent, a.Gold)
 	}
 }
 
@@ -39,12 +63,52 @@ func TestFundSDICantAfford(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
 	a.Gold = 100
 
-	_, err := w.FundSDI(a, 3*SDIStep)
+	_, err := w.FundSDI(a, SDIMinSpend)
 	if err != ErrCantAfford {
 		t.Fatalf("expected ErrCantAfford, got %v", err)
 	}
 	if a.Gold != 100 {
 		t.Errorf("gold should be unchanged, got %d", a.Gold)
+	}
+}
+
+// The upkeep and the allowance against the figures BRE printed, as golden
+// literals rather than as the constants — the point of the fidelity contract is
+// that a retune has to answer to new evidence (docs/dev/bre-screens.md).
+func TestSDIUpkeepAndAllowanceMatchBRE(t *testing.T) {
+	w, a, _ := newAttackerAndTarget(t)
+	for _, c := range []struct{ funding, maint, allowance int }{
+		{0, 0, 250_000},
+		{250_000, 10_000, 250_000},
+		{1_250_000, 50_000, 250_000},
+		{1_500_000, 60_000, 300_000},
+		{2_592_000, 103_680, 518_400},
+		{7_078_000, 283_120, 1_415_600},
+	} {
+		a.SDIFunding = c.funding
+		a.TurnProgress.SDIFunded = 0
+		if got := w.SDIMaintenance(a); got != c.maint {
+			t.Errorf("upkeep on %d = %d, want %d", c.funding, got, c.maint)
+		}
+		if got := w.SDISpendAllowance(a); got != c.allowance {
+			t.Errorf("allowance on %d = %d, want %d", c.funding, got, c.allowance)
+		}
+	}
+}
+
+// Paying the upkeep short scales the program back to what was funded.
+func TestPaySDIShortfallShrinksTheProgram(t *testing.T) {
+	w, a, _ := newAttackerAndTarget(t)
+	a.SDIFunding = 1_000_000
+	a.syncSDI()
+	a.Gold = 100_000
+
+	w.PaySDI(a, 20_000) // half of the 40,000 due
+	if a.SDIFunding != 500_000 {
+		t.Errorf("funding after paying half = %d, want 500000", a.SDIFunding)
+	}
+	if a.Gold != 80_000 {
+		t.Errorf("gold = %d, want 80000", a.Gold)
 	}
 }
 
@@ -95,5 +159,16 @@ func TestNuclearStrikeSDIReducesDamage(t *testing.T) {
 	// non-strict check would pass with the mechanic gone.
 	if loss2 >= loss1 {
 		t.Errorf("expected SDI=50 defender to lose strictly less land than SDI=0 defender: loss2=%d loss1=%d", loss2, loss1)
+	}
+}
+
+// A save written before the program kept a funding pool keeps the SDI it paid
+// for: the backfill runs on load, so the first recompute does not wipe it.
+func TestEnsureSDIFundingKeepsALegacyLevel(t *testing.T) {
+	e := &Empire{SDI: 4}
+	e.EnsureSDIFunding()
+	e.syncSDI()
+	if e.SDI != 4 {
+		t.Errorf("a legacy SDI of 4 became %d", e.SDI)
 	}
 }

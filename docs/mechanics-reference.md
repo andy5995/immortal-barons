@@ -262,9 +262,10 @@ flow runs in this order:
 Prompt colors (from a color capture): text plain white; the required and
 suggested amounts bright cyan, the max dark cyan, the `(…; …)` parens bright blue.
 
-IB implements steps 1, 2, 3, the support/morale part of 4, and 5, with the
-required-capped prompts and these colors. SDI and waste-region maintenance are
-not built.
+IB implements steps 1, 2, 3, the SDI and support/morale parts of 4, and 5, with
+the required-capped prompts and these colors. Waste-region decontamination is not
+built. The SDI prompt is `Your SDI Program requires N gold.`, asked after the
+region maintenance and before the crown tax (live capture).
 
 **Method — the Auto-Pay line is a better probe than the prompts.** With Auto-Pay
 Maintenance on, BRE collapses the whole sequence into one `N Gold paid.` line.
@@ -462,10 +463,9 @@ possible (#63). BRE does the same, and its own strings carry the wording:
 "Gooie Kablooie destined for our planet is under construction at ...",
 "Gooie Kablooie arrives from ... in N Hours."
 
-**SDI Defense** — a funded anti-missile/anti-jet shield (spend up to ~2
-billion; percent-complete scales with your region count, and Technology
-regions lower its upkeep). When complete it destroys about half of incoming
-missiles and cuts attacking jets' effectiveness by ~25–30%.
+**SDI Defense** — a funded anti-missile/anti-jet shield. When complete it
+destroys about half of incoming missiles and cuts attacking jets' effectiveness
+by ~25–30%. See "The SDI program" below for how it is funded.
 
 Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
 "Days before 'lost' forces returned" (`Config.LostForcesDays`, default 3) is an
@@ -1338,8 +1338,40 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   ratio) of one randomly chosen unit type. New Realm Protection blocks it.
 - **Spy** — send an agent to a remote baron; intel lands in the planet-wide Spy
   Database. Reached from the Spy Database screen.
-- **SDI** — funds whole per-point steps of `SDIStep` gold up to `SDIMax` (50%,
-  per BRE's "up to 50%" missile interception).
+- **SDI** — puts gold into the program, capped at `SDIMax` (50%, per BRE's "up
+  to 50%" missile interception). See "The SDI program" below.
+
+### The SDI program
+
+The shield is a pot of gold rather than a level bought outright. Its screen
+shows four figures — Total Funding, Yearly Maintenance, Funding / Region,
+Current SDI Strength — then the turn's allowance and the funding prompt.
+
+Two of its rules are **capture-verified**, fitting all seventeen consecutive SDI
+screens in a live league game exactly, from an empty program to just over seven
+million gold (`docs/dev/bre-screens.md`):
+
+- **Upkeep** = 4% of total funding, billed every turn even though the screen
+  calls it yearly.
+- **Spending allowance** = 20% of total funding, never less than 250,000, and
+  refilled every turn. Gold goes in only in whole thousands, which the screen
+  says outright.
+
+Two things are **not** established:
+
+- **How funding converts to strength.** The captured game's region count moved
+  under the figures too much to read a curve off seventeen points, and the
+  strategy guides say the percentage scales with region count, which the screen's
+  own "Funding / Region" line hints at. IB keeps its own `SDIStep` until the
+  original's rule is disassembled, so its strength curve is NOT a fidelity claim.
+- **What underpaying the upkeep does.** The captured player always paid in full.
+  IB scales the program back to what was funded; without some consequence the
+  upkeep would be optional and an unmaintained shield would defend as well as a
+  maintained one.
+
+The original printed `Funding / Region: 0,000 Gold` at every funding level,
+including seven million. That is unexplained and most likely a defect in it, so
+IB shows the figure the label describes.
 
 **Picking a planet is one prompt everywhere.** BRE asks
 `Enter Planet Name or Number (? for list)` on every screen that needs a planet —

@@ -435,23 +435,25 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		return
 	}
 
-	var forces, regions, crown, gold int
+	var forces, regions, sdi, crown, gold int
 	var autoPay bool
 	if !withPlayer(w, func(p *game.Empire) {
 		forces = w.ForcesDue(p)
 		regions = w.RegionsDue(p)
+		sdi = w.SDIMaintenance(p)
 		crown = w.World.CrownTax(p)
 		gold = p.Gold
 		autoPay = w.AutoPayMaint
 	}) {
 		return
 	}
-	due := forces + regions + crown
+	due := forces + regions + sdi + crown
 
 	if autoPay && gold >= due {
 		if !withPlayer(w, func(p *game.Empire) {
 			w.World.PayForces(p, forces)
 			w.World.PayRegions(p, regions)
+			w.World.PaySDI(p, sdi)
 			w.World.PayCrownTax(p, crown)
 			p.TurnProgress.MaintPaid = true // record the charge atomically so a later boot can't replay it (#10)
 		}) {
@@ -474,7 +476,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	// Gather the player's intended payments without applying them, so that if
 	// they underpay a required obligation we can warn ("DISASTEROUS results")
 	// and let them reconsider before the consequences land.
-	var forcesGold, regionsGold, crownGold int
+	var forcesGold, regionsGold, sdiGold, crownGold int
 	for {
 		// BRE opens the manual flow with a bank visit so a baron short on hand can
 		// draw savings to cover upkeep; the reconsider below loops back here. Gold
@@ -494,15 +496,22 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 			ansi.FgWhite, ansi.FgBrightCyan+comma(regions)+ansi.FgWhite, ansi.Reset)
 		regionsGold = promptSuggested(s, "How much will you give?", min(regions, gold-forcesGold), min(regions, gold-forcesGold))
 
+		if sdi > 0 {
+			fmt.Fprintf(s, "\n%s"+tr(s, "Your SDI Program requires %s gold.")+"%s\n",
+				ansi.FgWhite, ansi.FgBrightCyan+comma(sdi)+ansi.FgWhite, ansi.Reset)
+			afford := min(sdi, gold-forcesGold-regionsGold)
+			sdiGold = promptSuggested(s, "How much will you give?", afford, afford)
+		}
+
 		// The crown tax comes last, and unlike the two above its prompt maximum is
 		// everything still in hand rather than the amount required — BRE lets a
 		// baron hand the Queen more than she asked for.
 		fmt.Fprintf(s, "\n%s"+tr(s, "The Queen Royale requires %s gold for Taxes.")+"%s\n",
 			ansi.FgWhite, ansi.FgBrightCyan+comma(crown)+ansi.FgWhite, ansi.Reset)
-		left := gold - forcesGold - regionsGold
+		left := gold - forcesGold - regionsGold - sdiGold
 		crownGold = promptSuggested(s, "How much will you give?", min(crown, left), left)
 
-		if forcesGold >= forces && regionsGold >= regions && crownGold >= crown {
+		if forcesGold >= forces && regionsGold >= regions && sdiGold >= sdi && crownGold >= crown {
 			break // fully paid — no warning
 		}
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
@@ -516,6 +525,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	if !withPlayer(w, func(p *game.Empire) {
 		forcesLost = w.World.PayForces(p, forcesGold)
 		regionsLost = w.World.PayRegions(p, regionsGold)
+		w.World.PaySDI(p, sdiGold)
 		w.World.PayCrownTax(p, crownGold)
 		p.TurnProgress.MaintPaid = true // required charge committed; a later boot must not replay it (#10)
 		gold = p.Gold

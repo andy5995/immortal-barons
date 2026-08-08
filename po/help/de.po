@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-08 12:43-0500\n"
+"POT-Creation-Date: 2026-08-08 12:51-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2149,7 +2149,7 @@ msgid "SDI Program"
 msgstr "SDI-Programm"
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:12
+#: internal/help/content/warfare/sdi.md:13
 #, fuzzy
 #| msgid ""
 #| "A shield you fund. When it is complete, it destroys about half of the "
@@ -2163,6 +2163,49 @@ msgstr ""
 "Ein Schild, den Sie finanzieren. Wenn er fertig ist, zerstört er etwa die "
 "Hälfte der auf Sie abgefeuerten Raketen und schwächt feindliche Jets und "
 "Bomber."
+
+#. type: Title ##
+#: internal/help/content/warfare/sdi.md:14
+#, no-wrap
+msgid "Funding it"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:19
+msgid ""
+"The program is a pot of gold, not something you buy once. Each turn you may "
+"add up to a set amount: a fifth of what is already in the pot, and never "
+"less than 250,000 gold. Gold goes in only in whole thousands."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:22
+msgid ""
+"That limit means a shield takes many turns to build, however rich you are. "
+"You cannot buy one the turn you need it, so start early if you expect "
+"missiles."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/sdi.md:23
+#, no-wrap
+msgid "Paying for it"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:27
+msgid ""
+"Every turn the program asks for **4% of its total funding** as upkeep, in "
+"the maintenance prompts, after your regions and before the Queen's tax."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:30
+msgid ""
+"Pay it in full. If you pay short, the program shrinks to what you did pay "
+"for, and the shield weakens with it. A large pot is a large bill every turn, "
+"so grow it at a pace your income can carry."
+msgstr ""
 
 #, fuzzy
 #~| msgid ""

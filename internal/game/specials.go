@@ -10,20 +10,89 @@ import (
 // (breins.txt), so the level tops out there.
 const SDIMax = 50
 
-// FundSDI raises e's SDI defense level. Only whole SDIStep chunks of gold
-// are spent (leftover gold under SDIStep is not charged), and the level is
-// capped at SDIMax. Returns the new SDI level.
+// The SDI program is a pot of gold rather than a level bought outright: gold
+// goes in a turn at a time against an allowance, the pot carries an upkeep every
+// turn, and the strength is read off the total. The allowance and the upkeep are
+// the original's (see balance.go); how the total converts to a percentage is
+// NOT — the captured game's region count moved under it too much to read a curve
+// off seventeen points, so IB keeps its own SDIStep until the original's rule is
+// disassembled.
+
+// SDIMaintenance is the upkeep e owes on its program this turn.
+func (w *World) SDIMaintenance(e *Empire) int { return e.SDIFunding * SDIMaintPct / 100 }
+
+// SDIFundingPerRegion is the program's spending spread over the land it covers,
+// which the original prints on the same screen. It printed 0 there in every
+// capture, at every funding level — unexplained, and most likely a defect in the
+// original, so IB shows the figure the label describes.
+func (w *World) SDIFundingPerRegion(e *Empire) int {
+	if e.Land <= 0 {
+		return 0
+	}
+	return e.SDIFunding / e.Land
+}
+
+// SDISpendAllowance is the most gold e may still put into the program this turn:
+// a share of what is already in it, never less than the floor, less whatever has
+// gone in already this turn.
+func (w *World) SDISpendAllowance(e *Empire) int {
+	allowed := e.SDIFunding * SDISpendPct / 100
+	if allowed < SDIMinSpend {
+		allowed = SDIMinSpend
+	}
+	return max(0, allowed-e.TurnProgress.SDIFunded)
+}
+
+// FundSDI puts gold into the program, in whole thousands and no more than the
+// turn's allowance allows. Returns the new SDI strength.
 func (w *World) FundSDI(e *Empire, gold int) (int, error) {
+	gold = min(gold, w.SDISpendAllowance(e))
+	gold -= gold % SDIIncrement
+	if gold <= 0 {
+		return e.SDI, nil
+	}
 	if e.Gold < gold {
 		return 0, ErrCantAfford
 	}
-	steps := gold / SDIStep
-	if e.SDI+steps > SDIMax {
-		steps = SDIMax - e.SDI
-	}
-	e.Gold -= steps * SDIStep
-	e.SDI += steps
+	e.Gold -= gold
+	e.SDIFunding += gold
+	e.TurnProgress.SDIFunded += gold
+	e.syncSDI()
 	return e.SDI, nil
+}
+
+// PaySDI settles the turn's upkeep with the gold given. Paying short scales the
+// program back to what was funded — the original was never observed underpaying
+// it, so the shortfall rule is IB's: without one the upkeep would be optional,
+// and a program nobody maintains would defend as well as one they do.
+func (w *World) PaySDI(e *Empire, gold int) {
+	due := w.SDIMaintenance(e)
+	gold = min(gold, e.Gold)
+	if gold < 0 {
+		gold = 0
+	}
+	e.Gold -= gold
+	if gold >= due || due <= 0 {
+		return
+	}
+	e.SDIFunding = e.SDIFunding * gold / due
+	e.syncSDI()
+}
+
+// syncSDI recomputes the strength from the funding total. Every place that
+// changes SDIFunding must call it.
+func (e *Empire) syncSDI() {
+	e.SDI = min(SDIMax, e.SDIFunding/SDIStep)
+}
+
+// EnsureSDIFunding backfills the funding pool on a save written before the
+// program kept one. Without it the first thing to call syncSDI would read a
+// zero pool and wipe an SDI the player had already paid for.
+func (e *Empire) EnsureSDIFunding() {
+	if e.SDIFunding == 0 && e.SDI > 0 {
+		e.SDIFunding = e.SDI * SDIStep
+	}
+	e.syncSDI() // funding is the authoritative figure once it exists
 }
 
 // NuclearStrike destroys some of the defender's regions, turning them to

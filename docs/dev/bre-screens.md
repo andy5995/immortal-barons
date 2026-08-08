@@ -651,6 +651,11 @@ Note: You should only fund the SDI in increments of 1000 Gold.
 Add how much gold for funding? (0; 0)
 ```
 
+Colors: labels white `37`, every figure bright-yellow `1;33`, the Note line gray
+`1;30`. After funding it prints `N Gold added.` then `Current SDI Strength: N%`
+again. See the SDI section at the end of this file for the seventeen captured
+funding levels and what they establish.
+
 **Diplomacy List** (D): the `Planetary Treaties` chart — see the section at the
 end of this file for its measurements, colors and the screen that edits it.
 
@@ -1083,3 +1088,60 @@ at 0x23425 the note that governs the whole mechanic:
 The four display words are a table at `BRE.EXE` 0x158b5: `Enemy`, `None`,
 `Peace`, `Allied` — so the prompt's *War* files *Enemy* and its *Ally* files
 *Allied*.
+
+## SDI program funding (captured live 2026-08-08, league game)
+
+Seventeen consecutive SDI Program screens across one game, from an empty program
+to just over seven million gold. Funding is the screen's Total Funding; upkeep
+its Yearly Maintenance; allowance its "Maximum productive spending this year".
+
+| Funding | Upkeep | Allowance | Strength |
+|---|---|---|---|
+| 0 | 0 | 250,000 | 0% |
+| 250,000 | 10,000 | 250,000 | 1% |
+| 500,000 | 20,000 | 250,000 | 2% |
+| 750,000 | 30,000 | 250,000 | 3% |
+| 1,000,000 | 40,000 | 250,000 | 3% |
+| 1,250,000 | 50,000 | 250,000 | 3% |
+| 1,500,000 | 60,000 | 300,000 | 4% |
+| 1,800,000 | 72,000 | 360,000 | 4% |
+| 2,160,000 | 86,400 | 432,000 | 5% |
+| 2,592,000 | 103,680 | 518,400 | 5% |
+| 3,110,000 | 124,400 | 622,000 | 6% |
+| 3,732,000 | 149,280 | 746,400 | 6% |
+| 4,478,000 | 179,120 | 895,600 | 7% |
+| 5,373,000 | 214,920 | 1,074,600 | 8% |
+| 5,899,000 | 235,960 | 1,179,800 | 8% |
+| 7,078,000 | 283,120 | 1,415,600 | 9% |
+
+Two exact fits across every row:
+
+- **upkeep = 4% of funding**
+- **allowance = max(250,000, 20% of funding)**
+
+Both are per **turn**, not per game year: the allowance dropped to 0 immediately
+after being spent and was back at its full value the next turn, and the upkeep
+was billed in every turn's maintenance sequence.
+
+The funding column is truncated to whole thousands — adding a 518,400 allowance
+to 2,592,000 gives 3,110,400 but the next screen reads 3,110,000 — which matches
+the screen's own note about funding in increments of 1000.
+
+**Strength is NOT determined by this table.** The player's region count grew
+throughout the capture, and the strategy guides say the percentage scales with
+region count, so the funding column alone cannot separate the two. Reading the
+curve wants a disassembly, not a fit.
+
+The upkeep is billed in the maintenance sequence between the region maintenance
+and the crown tax:
+
+```
+6,724,245 gold is required to maintain your regions.
+How much will you give? (6,724,245; 6,724,245)
+Your SDI Program requires 10,000 gold.
+How much will you give? (10,000; 10,000)
+The Queen Royale requires 2,409,303 gold for Taxes.
+```
+
+Figures in that prompt are bright-cyan `1;36` on white `37`, like the region and
+crown lines around it.

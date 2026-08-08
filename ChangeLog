@@ -6,6 +6,12 @@
   * The standing appears beside every planet named on any interplanetary screen
   * Allied Planets writes to every planet the chart marks Allied
   * The Planetary Treaties chart matches the original's layout and colors
+  * The SDI Program is funded a turn at a time, in whole thousands, up to a
+    fifth of what it already holds or 250,000 gold, whichever is larger
+  * The SDI Program charges upkeep of 4% of its funding every turn, asked with
+    the other maintenance; paying short shrinks the program
+  * The SDI screen shows total funding, upkeep, funding per region and strength,
+    matching the original's layout and colors
   * Sysops: "-ibbs-reset" starts a new game as a league board and a plain
     "-reset" a stand-alone one, which is no longer asked the league settings;
     adding "-board-id" sets a member board up in one command, without the

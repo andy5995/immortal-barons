@@ -698,7 +698,19 @@ const (
 	NukeCost = 7_500_000
 	ChemCost = 6_000_000
 	BioCost  = 6_000_000
-	SDIStep  = 1_500_000 // gold per +1% SDI
+	SDIStep  = 1_500_000 // gold of total funding per +1% SDI
+	// The SDI program's two running figures, CAPTURE-VERIFIED: seventeen
+	// consecutive SDI Program screens from a live league game (2026-08-08, see
+	// docs/dev/bre-screens.md) fit both exactly, across funding from 0 to just
+	// over 7 million.
+	//
+	// The original bills the upkeep every turn even though the screen calls it
+	// yearly, and refills the spending allowance every turn too — a turn is its
+	// "year" here.
+	SDIMaintPct  = 4       // per-turn upkeep, as a percent of total funding
+	SDISpendPct  = 20      // per-turn funding allowance, as a percent of total funding
+	SDIMinSpend  = 250_000 // floor under that allowance, so a new program can start
+	SDIIncrement = 1_000   // funding is accepted only in whole thousands
 	// TerrorUnitLossDenom: each successful terror hit removes 1/N of one random
 	// unit type. BRE's disassembled hit applier uses a 6/7 ratio (removes ~1/7),
 	// so N = 7.

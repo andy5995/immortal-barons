@@ -66,8 +66,8 @@ func TestFundSDIVanishedFunderConflict(t *testing.T) {
 	})
 
 	fb := &hookSession{
-		fakeSession: fakeSession{keys: []rune("6000000\r")}, // 4 SDIStep chunks
-		marker:      "Fund SDI",
+		fakeSession: fakeSession{keys: []rune("250000\r")}, // a turn's whole allowance
+		marker:      "Add how much gold for funding?",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("alice")) })
 		},

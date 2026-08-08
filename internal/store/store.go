@@ -57,6 +57,7 @@ func repair(w *game.World, cfg game.Config) {
 		e.EnsureSupport()
 		e.EnsureMorale()
 		e.EnsureProduction()
+		e.EnsureSDIFunding()
 	}
 	w.EnsureInvestRate()
 	w.EnsurePirates()
