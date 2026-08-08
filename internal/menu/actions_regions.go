@@ -180,8 +180,23 @@ func buyLand(s session.Session, w *ctx) Result {
 			// here rather than waiting for the next menu redraw.
 			flushSessionNews(s, w)
 			p = w.Player() // refresh the display pointer for the next iteration
+			// Out of gold, so stop asking. BRE keeps prompting; a player who has
+			// just spent their last gold would have to read the "you can afford
+			// 0" line and quit by hand. Reaching the day's region cap is NOT
+			// this case — a capped player may still want the Advisors entry on
+			// this screen, so the loop stays open for them.
+			if err == nil && w.MaxAffordableRegions(p) == 0 && !regionCapReached(w, p) {
+				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgBrightWhite, tr(s, "You cannot afford another region."), ansi.Reset)
+				return Stay
+			}
 		}
 	}
+}
+
+// regionCapReached reports whether the day's region allowance is spent, which
+// zeroes the affordable count for a reason gold has nothing to do with.
+func regionCapReached(w *ctx, p *game.Empire) bool {
+	return w.Config.MaxRegions > 0 && p.RegionsBoughtThisTurn >= w.Config.MaxRegions
 }
 
 // allocateCaptured lets a winning attacker choose the region types for the land

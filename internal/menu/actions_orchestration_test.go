@@ -222,3 +222,28 @@ func TestBuyLandAdvisorsThenReturns(t *testing.T) {
 		t.Errorf("expected the region menu redrawn after Advisors, got %d draws", n)
 	}
 }
+
+// Buying the last region a player can afford ends the visit: BRE would ask
+// again, leaving them to read "you can afford 0" and quit by hand. The keys
+// deliberately run past the purchase — anything still being read means the
+// screen did not let go.
+func TestBuyLandLeavesWhenNothingIsAffordable(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Gold = w.LandPrice(p) // exactly one region's worth
+	before := p.Regions.Coastal
+	f := &fakeSession{keys: []rune("C1\rC1\rC1\r")}
+
+	buyLand(f, w)
+
+	if p.Regions.Coastal != before+1 {
+		t.Fatalf("Coastal = %d, want %d", p.Regions.Coastal, before+1)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "You cannot afford another region.") {
+		t.Errorf("no reason given for leaving:\n%s", out)
+	}
+	if f.pos != 3 { // "C", "1", Enter — and no more
+		t.Errorf("read %d keys, want 3 — the screen kept prompting after the last purchase", f.pos)
+	}
+}

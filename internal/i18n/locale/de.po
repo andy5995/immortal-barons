@@ -987,7 +987,7 @@ msgstr ""
 msgid "NONE"
 msgstr ""
 
-#: internal/menu/actions_regions.go:230
+#: internal/menu/actions_regions.go:245
 msgid "NOTE: You cannot sell Regions, only drop them..."
 msgstr ""
 
@@ -1919,6 +1919,11 @@ msgstr ""
 msgid "You can afford %s%d%s regions."
 msgstr "Das kannst du dir nicht leisten."
 
+#: internal/menu/actions_regions.go:189
+#, fuzzy
+msgid "You cannot afford another region."
+msgstr "Das kannst du dir nicht leisten."
+
 #: internal/game/economy.go:11
 msgid "You cannot afford that."
 msgstr "Das kannst du dir nicht leisten."
@@ -1931,7 +1936,7 @@ msgstr ""
 msgid "You cannot cover all your maintenance this turn."
 msgstr "Du kannst diesen Zug nicht deinen gesamten Unterhalt decken."
 
-#: internal/menu/actions_regions.go:195
+#: internal/menu/actions_regions.go:210
 msgid "You captured %d regions — choose which types to hold them as."
 msgstr ""
 
@@ -2176,7 +2181,7 @@ msgstr ""
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 
-#: internal/menu/actions_regions.go:203
+#: internal/menu/actions_regions.go:218
 msgid "[%d Regions left] Your choice?"
 msgstr ""
 

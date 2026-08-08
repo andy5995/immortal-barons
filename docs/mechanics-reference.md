@@ -1291,6 +1291,12 @@ purpose:
   enemy is never included). The key is offered only while they hold one.
 - **Diplomacy is on the opening menu as well as System.** BRE lists it under
   System alone.
+- **Buy Regions closes itself when the gold runs out.** A purchase that leaves
+  the player unable to afford another region says so and returns to the Spending
+  menu; BRE asks again, so a player who has just spent their last gold reads
+  "You can afford 0 regions" and quits by hand. Reaching the day's region cap
+  does not close the screen — a capped player may still want its Advisors
+  entry.
 - **About lives in the Help browser** (keyed `A`), not on the Game/System menus,
   so `I` stays BRE's InterBBS Scores key.
 - **Menu items carry a 2-space left margin** where BRE's start at column 0 — a
