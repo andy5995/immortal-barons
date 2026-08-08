@@ -273,6 +273,10 @@ msgstr ""
 msgid "Attack (0 to cancel)?"
 msgstr ""
 
+#: internal/menu/tree.go:45
+msgid "Attack Menu"
+msgstr ""
+
 #: internal/menu/actions_attack.go:364
 msgid "Attack Pirates"
 msgstr ""
@@ -517,12 +521,16 @@ msgstr ""
 msgid "Deposit gold at End of Turn"
 msgstr ""
 
-#: internal/menu/tree.go:54
+#: internal/menu/tree.go:373
 msgid "Diplomacy"
 msgstr ""
 
 #: internal/menu/tree.go:193
 msgid "Diplomacy List"
+msgstr ""
+
+#: internal/menu/tree.go:54
+msgid "Diplomacy Menu"
 msgstr ""
 
 #: internal/menu/actions_interbbs.go:633
@@ -1699,10 +1707,6 @@ msgstr ""
 
 #: internal/menu/actions_interbbs.go:606
 msgid "Vote for (0 to cancel)?"
-msgstr ""
-
-#: internal/menu/tree.go:45
-msgid "War / Attack"
 msgstr ""
 
 #: internal/menu/actions_info.go:243

@@ -42,7 +42,7 @@ func BuildMenus() *Menus {
 	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus, Width: 44}
 	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan, Columns: 2}
-	attack := &Menu{Title: "War / Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
+	attack := &Menu{Title: "Attack Menu", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
 	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightGreen, ExitOnEnter: true, Status: covertStatus}
 	bombTargets := &Menu{Title: "Bomb Enemy Targets", Color: ansi.FgBrightGreen, ExitOnEnter: true}
@@ -51,7 +51,7 @@ func BuildMenus() *Menus {
 	// live capture) rather than at the full menu width.
 	ipMessages := &Menu{Title: "IP Messages", Color: ansi.FgBrightCyan, ExitOnEnter: true, Width: 25}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
-	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
+	diplomacy := &Menu{Title: "Diplomacy Menu", Color: ansi.FgBrightGreen}
 	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
 	prefs := &Menu{Title: "Preferences", Color: ansi.FgBrightCyan}
 	coord := &Menu{Title: "Coordinator Menu", Color: ansi.FgBrightBlue}

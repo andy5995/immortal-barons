@@ -285,6 +285,10 @@ msgstr "Bericht versturen"
 msgid "Attack (0 to cancel)?"
 msgstr ""
 
+#: internal/menu/tree.go:45
+msgid "Attack Menu"
+msgstr "Aanvalsmenu"
+
 #: internal/menu/actions_attack.go:364
 msgid "Attack Pirates"
 msgstr "Piraten aanvallen"
@@ -532,13 +536,17 @@ msgstr "Geld storten"
 msgid "Deposit gold at End of Turn"
 msgstr "Goud storten aan einde beurt"
 
-#: internal/menu/tree.go:54
+#: internal/menu/tree.go:373
 msgid "Diplomacy"
 msgstr "Diplomatie"
 
 #: internal/menu/tree.go:193
 msgid "Diplomacy List"
 msgstr "Diplomatielijst"
+
+#: internal/menu/tree.go:54
+msgid "Diplomacy Menu"
+msgstr "Diplomatiemenu"
 
 #: internal/menu/actions_interbbs.go:633
 #, fuzzy
@@ -1744,10 +1752,6 @@ msgstr ""
 msgid "Vote for (0 to cancel)?"
 msgstr ""
 
-#: internal/menu/tree.go:45
-msgid "War / Attack"
-msgstr "Oorlog / Aanval"
-
 #: internal/menu/actions_info.go:243
 msgid "We earn about %s gold each turn, %d%% of the world total."
 msgstr ""
@@ -2363,6 +2367,9 @@ msgstr ""
 #: internal/menu/input.go:356
 msgid "─»>Paused<«─"
 msgstr ""
+
+#~ msgid "War / Attack"
+#~ msgstr "Oorlog / Aanval"
 
 #~ msgid "Modify League Diplomacy"
 #~ msgstr "Ligadiplomatie wijzigen"
