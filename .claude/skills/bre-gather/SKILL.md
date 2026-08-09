@@ -192,9 +192,36 @@ The landmines:
   uses the host date, but the game data may have been written under a dosemu
   session whose clock ran ahead. Fix: `DATE <late-enough-date>` before `BRE`.
   If BRE dies silently right after "Probation/Reprieve Area Size", it's this.
+  **The stored date is not discoverable — probe for it.** It is not the mtime of
+  `game.dat` (2026-08-09: mtime was a week in the past while the stored date was
+  months in the future), and `strings game.dat` finds no date, because it is
+  packed binary. Loop a few candidate dates, launching BRE after each and
+  grepping the pane for `tampered`, stopping at the first that clears. Start
+  close to today and step outward — every day skipped is a day of maintenance
+  BRE runs on the next launch, and a jump of months can idle-remove the realms
+  you were about to test with. That is exactly what happened on 2026-08-09.
+  **When nothing in the game is worth keeping, `BRE RESET` at the real system
+  date beats probing.** It re-stamps the stored date to today, so the trap stops
+  firing for good and no maintenance days are burned. Probe forward only to reach
+  an existing game you need intact.
 - **Key pacing.** A burst (`send-keys "Andy" Enter`) crashes dosemu `-t` /
   overflows the 16-byte BIOS keyboard buffer. Send ONE key per send-keys call
-  with ~0.25–0.3s sleeps between; Enter as its own call.
+  with ~0.25–0.3s sleeps between; Enter as its own call. Use **`send-keys -l`**
+  for a literal character, so a key that shares a name with a tmux key (`0`,
+  `y`, `n` are fine, but `Space`, `Enter`, `BSpace` are not) is never
+  reinterpreted.
+- **NEVER run two drivers against one tmux session at the same time.** They
+  interleave keystrokes into the same keyboard and each one reads a screen the
+  other is changing, so both misfire and the trace looks like BRE behaving
+  randomly. Cost two failed runs on 2026-08-09: the first driver was still
+  looping when the second launched BRE again, and the first driver's leftover
+  Enters answered the second's prompts. Before starting a driver, `pgrep -f` the
+  previous one and kill it; a driver that has "finished" from your point of view
+  may still be mid-`sleep`.
+- **A generic `Enter` fallback in a driver is dangerous, not a safe default.**
+  At `Name your Realm:` an empty answer makes BRE exit immediately, so the
+  catch-all branch silently ends the run. Match every prompt the flow can reach
+  explicitly, and make the fallback *capture and stop* rather than press a key.
 - **ESC needs the raw byte, not `send-keys Escape`.** On S-Lang "ESC to Save &
   Quit" screens — BRE's Configuration Editor (from `BRE RESET`) is the one that
   bit us — `tmux send-keys Escape` is silently swallowed: S-Lang holds a lone

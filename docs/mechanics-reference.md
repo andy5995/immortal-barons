@@ -1919,6 +1919,17 @@ Divergences, all forced by the transport rather than chosen:
   it. BRE's "Illegal Route Found from BBS #" says it had the same problem.
 
 **What this does not do**, and BRE could not do either: stop a sysop inventing
-their own board's figures. Scores and strikes are self-reported and deliberately
-unsigned — signing them would imply a guarantee nothing can give. The point is to
-stop one board dictating to the others, and to stop a packet landing twice.
+their own board's figures. Scores and strikes are self-reported and unsigned;
+signing them would imply a guarantee about the *numbers* that nothing can give.
+What is implemented stops one board dictating to the others, and stops a packet
+landing twice.
+
+**Origin is a separate question, and is open (#118).** Whether a packet really
+came from the board it names is not the same as whether that board's figures are
+honest, and the second being unfixable does not make the first so. Today nothing
+checks the sender: a packet written into an inbound directory is applied on the
+strength of a name it carries. Every transport a league actually uses makes
+that check itself — a mailer authenticates the session behind a netmail, a hub
+binds an upload to an account — but IB neither requires nor reads the result, and
+the plain file drop it documents as the default supplies nothing. Sysop answers
+in discussion #117 are what surfaced this.
