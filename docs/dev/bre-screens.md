@@ -246,6 +246,15 @@ Title `31` red rule + `91` bright-red `[` + `97` `Industrial Production` + `91`
 + `%` white + `31` red `(` + `91` bright-red (per-year count) + `37` ` per year`
 + `31` `)`. `Specialized` tag in `93` bright-yellow.
 
+**IB divergences:** IB writes `* * *` in bright-yellow where BRE
+writes `Specialized`, in the same position at the end of the row — a marker with
+no word to translate. IB also lists a **Gold** row last, with no per-year figure,
+so capacity can be reserved for gold rather than only left over; it starts at 0%,
+and unallocated capacity still pays gold as before. The Gold row carries a
+per-year figure like the units, from the same function that credits it. Figures
+in that column are comma-grouped, which BRE does not do — the same divergence
+recorded for figures elsewhere. Gold is not offered as a specialization.
+
 ```
 ───────────[Industrial Production]────────────
 Troopers        :   0%       (0 per year)

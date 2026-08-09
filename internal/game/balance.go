@@ -681,6 +681,7 @@ const (
 	DefaultProdBombersPct  = 20
 	DefaultProdTanksPct    = 21
 	DefaultProdCarriersPct = 2
+	DefaultProdGoldPct     = 0 // capacity explicitly reserved for gold; the remainder pays gold anyway
 	// Point cost to manufacture one unit. BINARY-VERIFIED: BRE stores the
 	// reciprocal (units per point) as 21 / 15 / 14 / 4.2 / 1.4 / 1.2, which is
 	// exactly UnitPointsPerRegion/cost for these six values.

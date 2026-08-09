@@ -9,13 +9,20 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-// prodTypeNames and prodField describe the 6 unit types Industrial regions
-// can be set to build, in the order shown to the player.
-var prodTypeNames = []string{"Troopers", "Jets", "Turrets", "Bombers", "Tanks", "Carriers"}
+// prodTypeNames and prodField describe the rows of the Set Industries screen in
+// the order the player sees them: the 6 unit types Industrial regions can build,
+// then Gold. Gold is last and starts at 0 — capacity left unallocated pays gold
+// anyway, so the row is for reserving it deliberately.
+var prodTypeNames = []string{"Troopers", "Jets", "Turrets", "Bombers", "Tanks", "Carriers", "Gold"}
+
+// prodUnitCount is how many of those rows are units, and so how many have a
+// per-year production figure. Gold sits past the end of ProjectedProduction.
+const prodUnitCount = 6
 
 func prodField(p *game.Empire, idx int) *int {
 	fields := []*int{
 		&p.ProdTroopers, &p.ProdJets, &p.ProdTurrets, &p.ProdBombers, &p.ProdTanks, &p.ProdCarriers,
+		&p.ProdGold,
 	}
 	return fields[idx]
 }
@@ -30,16 +37,25 @@ func setIndustries(s session.Session, w *ctx) Result {
 	allocated := 0
 	for i, name := range prodTypeNames {
 		allocated += *prodField(p, i)
-		fmt.Fprintf(s, "%-10s : %s%3d%%%s      %s"+tr(s, "(%d per year)")+"%s\n",
-			tr(s, name), ansi.FgBrightYellow, *prodField(p, i), ansi.Reset, ansi.FgRed, proj[i], ansi.Reset)
+		fmt.Fprintf(s, "%-10s : %s%3d%%%s", tr(s, name), ansi.FgBrightYellow, *prodField(p, i), ansi.Reset)
+		// Units come from the projection; the Gold row asks the same function
+		// that will pay it, so the figure shown is the one credited.
+		per := w.ProjectedIndustrialGold(p, *prodField(p, i))
+		if i < prodUnitCount {
+			per = proj[i]
+		}
+		fmt.Fprintf(s, "      %s"+tr(s, "(%s per year)")+"%s", ansi.FgRed, comma(per), ansi.Reset)
+		// The original tags the specialized row at the end of the line, where it
+		// wrote "Specialized"; three spaced asterisks say the same thing without
+		// a word to translate or to run past the margin.
+		if p.Specialized == name {
+			fmt.Fprintf(s, "  %s* * *%s", ansi.FgBrightYellow, ansi.Reset)
+		}
+		fmt.Fprint(s, "\n")
 	}
 	if gold := 100 - allocated; gold > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "The remaining %d%% is turned into gold.")+"%s\n",
 			ansi.FgBrightCyan, gold, ansi.Reset)
-	}
-	if p.Specialized != "" {
-		fmt.Fprintf(s, "\n%s"+tr(s, "Specialized in %s: more of it, less of everything else.")+"%s\n",
-			ansi.FgBrightCyan, tr(s, p.Specialized), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", rule)
 	if !AskYesNo(s, "Change Production?", false) {
@@ -93,11 +109,13 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Specialize Industry — choose a unit type. This is PERMANENT:"), ansi.Reset)
-	for i, name := range prodTypeNames {
+	// Units only. Gold is a row on Set Industries but not a unit, and there is
+	// nothing for a specialization's efficiency modifier to apply to.
+	for i, name := range prodTypeNames[:prodUnitCount] {
 		fmt.Fprintf(s, "  %d) %s\n", i+1, tr(s, name))
 	}
 	t := promptInt(s, "Specialize in which unit (0 to cancel)?")
-	if t < 1 || t > len(prodTypeNames) {
+	if t < 1 || t > prodUnitCount {
 		return Stay
 	}
 	var already bool

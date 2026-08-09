@@ -128,8 +128,8 @@ msgstr ""
 msgid "%s — %d gold."
 msgstr ""
 
-#: internal/menu/actions_industry.go:33
-msgid "(%d per year)"
+#: internal/menu/actions_industry.go:47
+msgid "(%s per year)"
 msgstr ""
 
 #: internal/menu/actions_message.go:122
@@ -407,7 +407,7 @@ msgstr "Noodkrediet / Leningen"
 msgid "Change"
 msgstr ""
 
-#: internal/menu/actions_industry.go:45
+#: internal/menu/actions_industry.go:61
 #, fuzzy
 msgid "Change Production?"
 msgstr "Bescherming beëindigen"
@@ -782,11 +782,11 @@ msgstr ""
 msgid "Indiv. Attack Force"
 msgstr "Individuele aanvalsmacht"
 
-#: internal/menu/actions_industry.go:29
+#: internal/menu/actions_industry.go:36
 msgid "Industrial Production"
 msgstr ""
 
-#: internal/menu/actions_industry.go:82
+#: internal/menu/actions_industry.go:98
 msgid "Industry production percentages updated."
 msgstr ""
 
@@ -1416,16 +1416,12 @@ msgstr "Speciale operaties"
 msgid "Specialize Industry"
 msgstr "Industrie specialiseren"
 
-#: internal/menu/actions_industry.go:95
+#: internal/menu/actions_industry.go:111
 msgid "Specialize Industry — choose a unit type. This is PERMANENT:"
 msgstr ""
 
-#: internal/menu/actions_industry.go:99
+#: internal/menu/actions_industry.go:117
 msgid "Specialize in which unit (0 to cancel)?"
-msgstr ""
-
-#: internal/menu/actions_industry.go:41
-msgid "Specialized in %s: more of it, less of everything else."
 msgstr ""
 
 #: internal/menu/tree.go:42
@@ -1586,7 +1582,7 @@ msgstr ""
 msgid "The people grow restless. Lower taxes or spend on their support."
 msgstr ""
 
-#: internal/menu/actions_industry.go:37
+#: internal/menu/actions_industry.go:57
 msgid "The remaining %d%% is turned into gold."
 msgstr ""
 
@@ -2090,15 +2086,15 @@ msgstr ""
 msgid "Your holdings changed while you decided — only what remained was sold."
 msgstr ""
 
-#: internal/menu/actions_industry.go:92
+#: internal/menu/actions_industry.go:108
 msgid "Your industry is already specialized in %s."
 msgstr ""
 
-#: internal/menu/actions_industry.go:119
+#: internal/menu/actions_industry.go:137
 msgid "Your industry is already specialized."
 msgstr ""
 
-#: internal/menu/actions_industry.go:122
+#: internal/menu/actions_industry.go:140
 msgid "Your industry is now permanently specialized in %s."
 msgstr ""
 

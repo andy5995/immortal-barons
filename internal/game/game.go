@@ -213,6 +213,11 @@ type Empire struct {
 	ProdBombers  int
 	ProdTanks    int
 	ProdCarriers int
+	// ProdGold is capacity the player has explicitly set aside for gold rather
+	// than units. Capacity left unallocated pays out as gold too, so this is a
+	// way of reserving it deliberately instead of by subtraction. 0 by default,
+	// which leaves an existing empire producing exactly what it did before.
+	ProdGold int
 	// ProdInitialized distinguishes an empire whose production has been set up
 	// (at creation, or by the player) from a pre-feature save whose Prod* are
 	// all zero because the fields didn't exist. Without it, a player who sets
@@ -314,6 +319,7 @@ func (e *Empire) EnsureProduction() {
 	if e.ProdTroopers+e.ProdJets+e.ProdTurrets+e.ProdBombers+e.ProdTanks+e.ProdCarriers == 0 {
 		e.ProdTroopers, e.ProdJets, e.ProdTurrets = DefaultProdTroopersPct, DefaultProdJetsPct, DefaultProdTurretsPct
 		e.ProdBombers, e.ProdTanks, e.ProdCarriers = DefaultProdBombersPct, DefaultProdTanksPct, DefaultProdCarriersPct
+		e.ProdGold = DefaultProdGoldPct
 	}
 }
 
@@ -869,6 +875,7 @@ func newEmpire(name, owner string, cfg Config, day int) *Empire {
 		// (see DefaultProdTroopersPct); BRE defaults to 90% units, 10% gold.
 		ProdTroopers: DefaultProdTroopersPct, ProdJets: DefaultProdJetsPct, ProdTurrets: DefaultProdTurretsPct,
 		ProdBombers: DefaultProdBombersPct, ProdTanks: DefaultProdTanksPct, ProdCarriers: DefaultProdCarriersPct,
+		ProdGold:        DefaultProdGoldPct,
 		ProdInitialized: true, // so a player's later all-zero setting isn't overwritten
 	}
 }

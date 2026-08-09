@@ -705,12 +705,25 @@ func (w *World) regionDraw(e *Empire, salt, n int) int {
 // region count — the division discards the remainder.
 func (w *World) industrialGold(e *Empire) int {
 	allocated := e.ProdTroopers + e.ProdJets + e.ProdTurrets + e.ProdBombers + e.ProdTanks + e.ProdCarriers
+	// Whatever is not building units pays gold, whether the player set it aside
+	// on the Gold row or simply left it unallocated.
 	unalloc := 100 - allocated
 	if unalloc < 0 {
 		unalloc = 0
 	}
+	return w.ProjectedIndustrialGold(e, unalloc)
+}
+
+// ProjectedIndustrialGold is the gold that pct% of this empire's industrial
+// capacity pays out this turn. Shared with the Set Industries screen so the
+// figure a player is shown is the one industrialGold will credit — regionDraw
+// varies by empire and game day, not per call, so the two always agree.
+func (w *World) ProjectedIndustrialGold(e *Empire, pct int) int {
+	if pct <= 0 {
+		return 0
+	}
 	perRegion := w.regionDraw(e, 5, IndustryGoldRate) + IndustryGoldBase
-	return perRegion * e.Regions.Industrial / 100 * unalloc
+	return perRegion * e.Regions.Industrial / 100 * pct
 }
 
 // riverGold is one River region's hydropower gold this turn: the full yield
