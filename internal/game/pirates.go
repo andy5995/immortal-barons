@@ -162,7 +162,8 @@ func (w *World) pirateRaidVictim(p *PirateFaction, v *Empire) {
 	}
 }
 
-// lootList joins the non-zero amounts into a readable phrase.
+// lootList joins the non-zero amounts into a readable phrase. Used for the raid
+// a player SUFFERS, which BRE reports nowhere — the wording is IB's own.
 func lootList(troopers, jets, turrets, tanks, agents, gold int) string {
 	var parts []string
 	add := func(n int, label string) {
@@ -177,6 +178,85 @@ func lootList(troopers, jets, turrets, tanks, agents, gold int) string {
 	add(agents, "agents")
 	add(gold, "gold")
 	return strings.Join(parts, ", ")
+}
+
+// breTally renders a raid tally the way BRE writes one: capitalised unit names
+// in a fixed order, comma separated, with "and" before the last. Zero entries
+// are kept, so the same fields appear every time and a missing one means the
+// unit does not take part rather than that none were lost.
+//
+//	You took 78000 Gold, 8 Regions, 525 Troopers, 481 Jets, 606 Turrets, and 175 Tanks.
+func breTally(parts []string) string {
+	switch len(parts) {
+	case 0:
+		return "nothing"
+	case 1:
+		return parts[0]
+	case 2:
+		return parts[0] + " and " + parts[1]
+	}
+	return strings.Join(parts[:len(parts)-1], ", ") + ", and " + parts[len(parts)-1]
+}
+
+// raidLoot is the "You took" tally. The order is BRE's, from the captured
+// screen in docs/dev/bre-screens.md. Regions are omitted when the faction holds
+// no land, which that capture records as BRE's own behaviour; Agents have no
+// BRE counterpart and follow the units it does list.
+func raidLoot(gold, regions, troopers, jets, turrets, tanks, agents int) string {
+	parts := []string{fmt.Sprintf("%d Gold", gold)}
+	if regions > 0 {
+		parts = append(parts, fmt.Sprintf("%d Regions", regions))
+	}
+	parts = append(parts,
+		fmt.Sprintf("%d Troopers", troopers),
+		fmt.Sprintf("%d Jets", jets),
+		fmt.Sprintf("%d Turrets", turrets),
+		fmt.Sprintf("%d Tanks", tanks))
+	if agents > 0 {
+		parts = append(parts, fmt.Sprintf("%d Agents", agents))
+	}
+	return breTally(parts)
+}
+
+// raidWinLines and raidFailLines are the headlines a raid may draw, picked at
+// random so a player raiding the same faction all day is not told the same
+// sentence every time. The first of each is BRE's own, verbatim from BRE.OVR;
+// the rest are IB's, kept to its register and near enough its length that no one
+// line stands out as the "real" one — and short enough not to force a wrap.
+var raidWinLines = []string{
+	"Your efforts against %s have brought you success!",
+	"Your forces broke the %s and came home loaded.",
+	"The %s scattered before your assault.",
+	"You overran the %s and took back what you could.",
+	"The %s could not hold what they had taken.",
+}
+
+var raidFailLines = []string{
+	"You could not successfully raid %s.",
+	"Your raid on the %s came to nothing.",
+	"The %s drove your forces back.",
+	"Your attack on the %s was beaten off.",
+	"The %s held against everything you sent.",
+}
+
+// raidWin renders a winning raid under an already-chosen headline (the caller
+// owns the RNG). The losses line appears only when the raid actually cost
+// something; see the note at the call site.
+func raidWin(headline, loot string, troopers, jets, tanks int) string {
+	report := fmt.Sprintf("%s\nYou took %s.", headline, loot)
+	if troopers > 0 || jets > 0 || tanks > 0 {
+		report += fmt.Sprintf("\nYou lost %s.", raidLosses(troopers, jets, tanks))
+	}
+	return report
+}
+
+// raidLosses is the "You lost" tally — the three types a raid may commit.
+func raidLosses(troopers, jets, tanks int) string {
+	return breTally([]string{
+		fmt.Sprintf("%d Troopers", troopers),
+		fmt.Sprintf("%d Jets", jets),
+		fmt.Sprintf("%d Tanks", tanks),
+	})
 }
 
 // RaidFaction resolves a player's attack on a pirate faction. The attacker
@@ -231,19 +311,21 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		// region-type picker so the player chooses the composition (#21). Reclaimed
 		// gold/military above land immediately; only the regions wait.
 		capturedLand = gotLand
-		loot := lootList(gotT, gotJ, gotU, gotK, gotA, gotG)
-		if gotLand > 0 {
-			if loot != "" {
-				loot += ", "
-			}
-			loot += fmt.Sprintf("%d regions", gotLand)
-		}
-		if loot == "" {
-			loot = "nothing of value"
-		}
 		addScore(a, startForces/PirateScoreDivisor)
 		w.postPirateNews(a, p.Name, true)
-		return fmt.Sprintf("You broke the %s and recovered %s.", p.Name, loot), capturedLand
+		// BRE's wording, verbatim from BRE.OVR ("Your efforts against ",
+		// " have brought you success!", "You took ", "You lost "). Three short
+		// lines rather than IB's old single sentence — though a full tally can
+		// still pass 80 columns, because BRE abbreviates gold ("78k Gold") where
+		// IB prints the figure, so the display still wraps it.
+		//
+		// BRE's captured screen carries a third line, "You lost ...", because a
+		// winning raid still costs the attacker there. IB charges a winner
+		// nothing, so raidWin leaves the line out rather than print a tally of
+		// zeroes — the gap is a mechanic, not wording, and setting a loss rate
+		// needs evidence rather than a guess.
+		headline := fmt.Sprintf(raidWinLines[w.rng.Intn(len(raidWinLines))], p.Name)
+		return raidWin(headline, raidLoot(gotG, gotLand, gotT, gotJ, gotU, gotK, gotA), 0, 0, 0), capturedLand
 	}
 
 	tLost := troopers * pirateRaidLossPct / 100
@@ -254,6 +336,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 	a.Tanks -= kLost
 	addScore(a, -startForces/PirateScoreDivisor)
 	w.postPirateNews(a, p.Name, false)
-	return fmt.Sprintf("You could not break the %s. You lost %d Troopers, %d Jets, and %d Tanks.",
-		p.Name, tLost, jLost, kLost), 0
+	return fmt.Sprintf("%s\nYou lost %s.",
+		fmt.Sprintf(raidFailLines[w.rng.Intn(len(raidFailLines))], p.Name),
+		raidLosses(tLost, jLost, kLost)), 0
 }

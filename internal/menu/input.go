@@ -435,6 +435,25 @@ func statLine(s session.Session, n int, text string) {
 // translated string is often half again as long as the English it came from.
 func wrapIndented(text, indent string) string { return wrapHanging(text, indent, indent) }
 
+// wrapReport word-wraps a multi-line report, keeping the line breaks it already
+// has. help.Wrap collapses all whitespace, newlines included, so passing a whole
+// combat or raid report through it would run every line into one paragraph —
+// each line has to be wrapped on its own.
+//
+// Wrap BEFORE colouring. hiNums and friends insert escape sequences that no
+// terminal displays but every length count sees, so a report wrapped afterwards
+// breaks far short of the margin.
+func wrapReport(text string) string {
+	lines := strings.Split(text, "\n")
+	for i, l := range lines {
+		if strings.TrimSpace(l) == "" {
+			continue // a blank line is the report's own spacing
+		}
+		lines[i] = help.Wrap(l, ansi.ScreenCols-1)
+	}
+	return strings.Join(lines, "\n")
+}
+
 // wrapHanging is wrapIndented with a different lead on the first line, so a
 // marker can sit outside the text and the continuation still lines up under it.
 func wrapHanging(text, first, cont string) string {

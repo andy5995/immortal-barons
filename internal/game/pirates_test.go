@@ -1,6 +1,10 @@
 package game
 
-import "testing"
+import (
+	"fmt"
+	"strings"
+	"testing"
+)
 
 func TestSeedPiratesRandomStrengthNoLadder(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
@@ -255,5 +259,87 @@ func TestPirateTakeCappedAtMax(t *testing.T) {
 func TestPirateHoldingClampsToCap(t *testing.T) {
 	if got := capAdd(PirateCapTanks-10, 1000, PirateCapTanks); got != PirateCapTanks {
 		t.Errorf("holdings should clamp to cap %d, got %d", PirateCapTanks, got)
+	}
+}
+
+// The raid result follows BRE's captured shape: a headline, a "You took" tally
+// with capitalised units and "and" before the last, and short lines that never
+// need wrapping. Wording is verbatim from BRE.OVR.
+func TestRaidReportMatchesBREsShape(t *testing.T) {
+	got := raidWin(fmt.Sprintf(raidWinLines[0], "Dunkleoids"), raidLoot(4999, 6, 104, 62, 116, 19, 4), 0, 0, 0)
+	want := "Your efforts against Dunkleoids have brought you success!\n" +
+		"You took 4999 Gold, 6 Regions, 104 Troopers, 62 Jets, 116 Turrets, 19 Tanks, and 4 Agents."
+	if got != want {
+		t.Errorf("raid win report:\n got %q\nwant %q", got, want)
+	}
+	// Width is not asserted here. BRE's line fits because it abbreviates gold
+	// ("78k"); IB prints the figure in full, so a full tally can pass 80 columns
+	// and is wrapped where it is displayed — see TestReportsWrapAtWordBoundaries.
+}
+
+// Regions drop out when the faction holds no land — recorded from BRE's own
+// screen — while the unit fields stay put so the tally reads the same every time.
+func TestRaidLootOmitsRegionsWhenTheFactionHoldsNoLand(t *testing.T) {
+	with := raidLoot(500, 8, 1, 2, 3, 4, 0)
+	without := raidLoot(500, 0, 1, 2, 3, 4, 0)
+	if !strings.Contains(with, "8 Regions") {
+		t.Errorf("regions missing when the faction holds land: %q", with)
+	}
+	if strings.Contains(without, "Regions") {
+		t.Errorf("regions named when the faction holds none: %q", without)
+	}
+	if !strings.Contains(without, "and 4 Tanks") {
+		t.Errorf("tally should still end with \"and\": %q", without)
+	}
+}
+
+// Every headline names the faction and leaves room for it inside 80 columns —
+// a line that only fits the short faction names would wrap for the long ones.
+func TestRaidHeadlinesNameTheFactionAndFit(t *testing.T) {
+	longest := ""
+	for _, n := range PirateFactions {
+		if len(n) > len(longest) {
+			longest = n
+		}
+	}
+	for _, pool := range [][]string{raidWinLines, raidFailLines} {
+		for _, f := range pool {
+			if !strings.Contains(f, "%s") {
+				t.Errorf("headline %q never names the faction", f)
+				continue
+			}
+			if n := len(fmt.Sprintf(f, longest)); n >= 80 {
+				t.Errorf("headline %q is %d columns with the longest faction name", f, n)
+			}
+		}
+	}
+}
+
+// A losing raid uses one of the failure headlines and reports what it cost.
+func TestRaidLossReport(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("owner", "Raider")
+	a.Troopers, a.Jets, a.Tanks = 10, 10, 10
+	w.Pirates[0].Forces = 1 << 30 // unbeatable, so the loss branch is certain
+
+	report, land := w.RaidFaction(a, 0, 10, 10, 10)
+	if land != 0 {
+		t.Errorf("a lost raid captured %d regions", land)
+	}
+	headline := strings.SplitN(report, "\n", 2)[0]
+	if !strings.Contains(headline, w.Pirates[0].Name) {
+		t.Errorf("headline %q should name the faction", headline)
+	}
+	found := false
+	for _, f := range raidFailLines {
+		if headline == fmt.Sprintf(f, w.Pirates[0].Name) {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("headline %q is not one of the failure lines", headline)
+	}
+	if !strings.Contains(report, "\nYou lost ") {
+		t.Errorf("a lost raid should report its cost on its own line: %q", report)
 	}
 }

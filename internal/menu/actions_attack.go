@@ -207,7 +207,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	warnTrimmedForce(s, trimmed)
-	fmt.Fprintf(s, "\n%s\n", hiNums(report))
+	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
 	if captured > 0 {
 		allocateCaptured(s, w, captured)
 	}
@@ -312,7 +312,7 @@ func localAttack(s session.Session, w *ctx, label string, cost int, endsTurn boo
 		fail(s, err)
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s\n", hiNums(report))
+	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
 	pause(s)
 	if endsTurn {
 		return Back // one War-menu attack per turn (see regularAttack)
@@ -400,7 +400,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	warnTrimmedForce(s, trimmed)
-	fmt.Fprintf(s, "\n%s\n", hiNums(report))
+	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
 	// A pirate win with land opens the same type picker a Regular Attack uses; a
 	// landless faction wins gold/military only, so no picker appears (#21, BRE).
 	if captured > 0 {

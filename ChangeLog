@@ -6,6 +6,12 @@
   * Send Message can address every realm the sender holds a treaty with
   * A reply asks which lines of the message to quote, and opens with them
   * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
+  * Combat reports, pirate raid results and "since your last play" events break
+    between words instead of being cut by the terminal, which was splitting
+    figures in half
+  * A pirate raid reports its outcome the way the original does: a headline, the
+    loot taken, and what the raid cost. The headline is one of five, chosen at
+    random
 
   Inter-BBS (league play only):
   * This board's own settings — its name, league number and packet directories

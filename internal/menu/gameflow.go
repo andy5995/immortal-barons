@@ -220,7 +220,7 @@ func showTurnEvents(s session.Session, w *ctx) {
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n\n", ansi.FgWhite, tr(s, "Since your last play, this has happened:"), ansi.Reset)
 	for i, ev := range events {
-		fmt.Fprintf(s, "%s\n%s\n\n", eventRule(i+1, ev.When), hiNums(ev.Text))
+		fmt.Fprintf(s, "%s\n%s\n\n", eventRule(i+1, ev.When), hiNums(wrapReport(ev.Text)))
 	}
 	pause(s)
 }
@@ -343,7 +343,7 @@ func incomeReport(s session.Session, w *ctx) {
 		amt(ansi.FgBrightCyan, b.RiverFood, "Food units were fished from the rivers.")
 	}
 	for _, r := range raids {
-		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, r, ansi.Reset)
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed, wrapIndented(r, "  "), ansi.Reset)
 	}
 	statLine(s, madeTroopers, "Troopers were trained by Industrial Zones.")
 	statLine(s, madeJets, "Jets were manufactured by Industrial Zones.")

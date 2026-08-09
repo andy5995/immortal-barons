@@ -488,7 +488,7 @@ func printSessionNews(s session.Session, news []string) {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed,
 		tr(s, "While you were at the menus, this has happened:"), ansi.Reset)
 	for _, ev := range news {
-		fmt.Fprintf(s, "  %s\n", hiNums(ev))
+		fmt.Fprintf(s, "%s\n", hiNums(wrapIndented(ev, "  ")))
 	}
 }
 

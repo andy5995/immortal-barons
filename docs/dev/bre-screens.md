@@ -199,6 +199,16 @@ You lost 150 Troopers, 350 Jets, and 1000 Tanks.
 
 Then the captured-region picker (above) opens for the won regions.
 
+**IB status (2026-08-09):** matched, with three recorded divergences. IB prints
+the gold figure in full where BRE abbreviates it (`78k Gold`), so a full tally
+can pass 80 columns and is wrapped at display; IB adds an `Agents` field, which
+BRE's raid has no counterpart for; and IB omits the `You lost` line on a win,
+because a winning raid costs the attacker nothing here — BRE charges one, and
+setting a rate needs evidence rather than a guess. The headline is one of five
+picked at random (`raidWinLines` / `raidFailLines` in `internal/game/pirates.go`),
+BRE's own wording first and four of IB's after it — a deliberate divergence, so
+a player raiding the same faction repeatedly is not read the same sentence.
+
 ---
 
 ## System Menu
