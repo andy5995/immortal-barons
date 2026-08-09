@@ -80,6 +80,7 @@ const (
 	helpMaxRegions        = "The most regions a single player may own."
 	helpMaxPlayers        = "The most human empires allowed on this board. 0 means no limit."
 	helpBoardID           = "The name this board uses in inter-BBS packets."
+	helpLeagueNumber      = "The League Coordinator's number for this league, 1-999. It keeps two leagues apart when they share one inbound directory."
 	helpInboundDir        = "Where packets from the other boards arrive. Relative to the data directory unless you give a full path."
 	helpOutboundDir       = "Where the game writes packets for the other boards. Relative to the data directory unless you give a full path."
 	helpIdleTimeout       = "End a session after this many seconds with no keypress, freeing the shared world lock. 0 never times out."
@@ -197,6 +198,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addInt(caps, true, "Max Players Per BBS (0=unlimited)", helpMaxPlayers, c.MaxPlayers, 0, 100000, func(c *game.Config, n int) { c.MaxPlayers = n })
 	if ibbs {
 		t.addText(caps, false, 16, "Board ID", helpBoardID, c.BoardID, func(c *game.Config, v string) { c.BoardID = v })
+		t.addInt(caps, false, "League Number (0=unset)", helpLeagueNumber, c.LeagueNumber, 0, game.MaxLeagueNumber, func(c *game.Config, n int) { c.LeagueNumber = n })
 		// A cleared path field keeps the current one: the inter-BBS step has nowhere
 		// to read or write with an empty directory.
 		t.addText(caps, false, 40, "Inbound Dir", helpInboundDir, c.InboundDir, func(c *game.Config, v string) {

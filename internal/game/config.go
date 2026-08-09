@@ -93,14 +93,21 @@ func (m SlappenheimerMode) String() string {
 // from BRE's reset-init code and Configuration Help screens.
 type Config struct {
 	// Per-board (not part of the league ruleset).
-	AICount         int
-	DataDir         string
-	BoardID         string // name of this board in exported inter-BBS packets
-	IBBS            bool   // participate in inter-BBS play (gates the interplanetary menus)
-	InboundDir      string // inter-BBS packets arrive here (RunPlanetary reads them); relative to DataDir
-	OutboundDir     string // inter-BBS packets are written here for the transport to move; relative to DataDir
-	IdleTimeoutSecs int    // boot a session after this many seconds with no keypress (0 = never), freeing the world lock
-	MaxIdleWarnings int    // idle warnings a session may collect before a hard boot
+	AICount int
+	DataDir string
+	IBBS    bool // participate in inter-BBS play (gates the interplanetary menus)
+
+	// This board's own identity and packet directories. Stored in bbs.cfg, not
+	// config.json — a Coordinator's broadcast rewrites config.json, and these are
+	// nobody's business but this sysop's. See store.BoardConfigFile.
+	BoardID      string         `json:"-"` // name of this board in exported inter-BBS packets
+	InboundDir   string         `json:"-"` // inter-BBS packets arrive here (RunPlanetary reads them); relative to DataDir
+	OutboundDir  string         `json:"-"` // inter-BBS packets are written here for the transport to move; relative to DataDir
+	OutboundDirs map[int]string `json:"-"` // per-neighbour override of OutboundDir, keyed by roster node number (#106)
+	LeagueNumber int            `json:"-"` // the Coordinator's league number, 1-999; tells two leagues apart in one inbound directory
+
+	IdleTimeoutSecs int // boot a session after this many seconds with no keypress (0 = never), freeing the world lock
+	MaxIdleWarnings int // idle warnings a session may collect before a hard boot
 
 	// League ruleset (BRE Configuration Editor fields).
 	GameStartDate         string            // ISO date the game begins; before it, maintenance doesn't advance ("" = already started)
@@ -154,6 +161,12 @@ const (
 	MaxStdInvestRate      = 100   // Standard Investment Rate ceiling (default 35; 100 = 10%/day)
 )
 
+// MaxLeagueNumber is the League Number ceiling. Not from a Configuration Help
+// screen like the bounds above — BRE asks for it during InterBBS setup, and the
+// range is stated in its BBS.CFG documentation ("any number between 1 and 999").
+// 0 means the number was never set.
+const MaxLeagueNumber = 999
+
 // InterBBSEnabled reports whether inter-BBS / interplanetary features (group
 // attacks, IP scores, travel times, terrorist ops, planetary Gooie/SDI) should
 // be offered. In BRE these live on a separate "InterPlanetary Operations" menu
@@ -174,6 +187,16 @@ func (c Config) Inbound() string { return c.resolveDir(c.InboundDir) }
 
 // Outbound is Inbound's counterpart; see it for how a path is resolved.
 func (c Config) Outbound() string { return c.resolveDir(c.OutboundDir) }
+
+// OutboundLink is this board's own link to one neighbour, and reports whether
+// one is configured at all. Only a board that HOSTs others needs any: everything
+// a leaf board sends goes to its uplink, which is the plain Outbound directory.
+func (c Config) OutboundLink(node int) (string, bool) {
+	if dir, ok := c.OutboundDirs[node]; ok && dir != "" {
+		return c.resolveDir(dir), true
+	}
+	return "", false
+}
 
 func (c Config) resolveDir(p string) string {
 	if filepath.IsAbs(p) {

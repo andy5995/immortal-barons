@@ -34,7 +34,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	}
 	wA.GameDay++
 	wA.LaunchDueGroupAttacks()
-	if err := WriteOutbox(wA, exchange); err != nil {
+	if _, err := WriteOutbox(wA, exchange); err != nil {
 		t.Fatalf("WriteOutbox A: %v", err)
 	}
 
@@ -46,7 +46,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	if target.Land >= 100 {
 		t.Errorf("target should have lost land, has %d", target.Land)
 	}
-	if err := WriteOutbox(wB, exchange); err != nil {
+	if _, err := WriteOutbox(wB, exchange); err != nil {
 		t.Fatalf("WriteOutbox B: %v", err)
 	}
 

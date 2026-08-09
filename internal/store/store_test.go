@@ -189,7 +189,9 @@ func fillValue(v reflect.Value) {
 		m := reflect.MakeMap(v.Type())
 		mv := reflect.New(v.Type().Elem()).Elem()
 		fillValue(mv)
-		m.SetMapIndex(reflect.ValueOf("k").Convert(v.Type().Key()), mv)
+		mk := reflect.New(v.Type().Key()).Elem()
+		fillValue(mk)
+		m.SetMapIndex(mk, mv)
 		v.Set(m)
 	case reflect.Array:
 		for i := 0; i < v.Len(); i++ {

@@ -177,11 +177,14 @@ the current settings and only want to clear the world.
 
 ### The config file is portable
 
-All the game settings live in `config.json` in the data directory. This file can be
-copied. You can back it up to another place, and you can copy it into any data
-directory to reuse the same settings there. To carry your settings to a new install
-or a fresh game, copy your saved `config.json` into the data directory, then run
-`-reset-from-config`.
+The game's rules live in `config.json` in the data directory, and that file can be
+copied. Back it up somewhere, or copy it into any data directory to reuse the same
+settings there. To carry your settings to a new install or a fresh game, copy your
+saved `config.json` into the data directory, then run `-reset-from-config`.
+
+It holds the rules only. Anything naming this particular board — its name in a
+league, its packet directories — is in `bbs.cfg`, so a config copied to another
+machine does not drag the old board's directories along with it.
 
 ## Adding AI barons to a running game
 
@@ -211,9 +214,16 @@ editor also asks the league settings, which a stand-alone board is never shown.
 Set these on the **Caps & Node** page:
 
 - **Board ID** — a short unique name for your board (your "planet").
+- **League Number** — the number your Coordinator picked for this league, 1 to
+  999. Leave it at 0 if they have not given you one. It matters when one board
+  plays in two leagues that share an inbound directory: each game ignores the
+  other's packets, and marks its own files `L042-`.
 - **Inbound Dir** — the directory where packets from other boards arrive.
 - **Outbound Dir** — the directory where the game writes packets for other
   boards.
+
+These four are written to **`bbs.cfg`** in your data directory, a plain text
+file you can edit instead of opening the editor. See below.
 
 The two directories are relative to your data directory, so the defaults
 `inbound` and `outbound` need no editing on most boards. Give a full path
@@ -230,6 +240,29 @@ directory.
 
 Ask your League Coordinator for the node list and add it to your data directory
 as **`ibnodes.dat`** (see the format below).
+
+## Your board's own settings: `bbs.cfg`
+
+Everything that describes *this* board rather than the game lives in `bbs.cfg`
+in your data directory. It is plain text, one setting per line, and you can edit
+it in anything:
+
+```
+BoardID       Avalon
+LeagueNumber  900
+Inbound       /home/bbs/ftn/in
+Outbound      /home/bbs/filebox/uplink
+```
+
+Lines starting with `#` or `;` are comments, and the game writes a commented copy
+for you. Keywords are matched whatever their capitalisation.
+
+These settings sit apart from `config.json` because `config.json` holds the
+league's rules, and those are overwritten when the Coordinator's settings packet
+arrives. Nothing outside your board ever changes `bbs.cfg`.
+
+A board that forwards packets for its neighbours adds a line per neighbour —
+see "Routing" below.
 
 ## How packets move (you choose the schedule)
 
@@ -251,10 +284,15 @@ A common setup:
 
 1. A caller plays the game.
 2. After the caller exits, or on a schedule you pick, run `-planetary`.
-3. Your transport script copies each file from your outbound directory to the
-   inbound directory of every other board (over FidoNet, a sync tool, scp, a
+3. Your transport carries each file from your outbound directory to the inbound
+   directory of the board it is meant for (over FidoNet, a sync tool, scp, a
    shared mount — whatever you use).
-4. The next `-planetary` run on each board reads and applies those files.
+4. The next `-planetary` run on that board reads and applies those files.
+
+In a small league every board links to every other one, and your transport
+copies each packet to all of them. That is the default, and nothing below
+changes it until your Coordinator says otherwise. A large league routes instead
+— see the next section but one.
 
 Run it as often as you like. More often means shorter travel times between
 planets. The in-game "Travel Times" screen shows players how recently packets
@@ -289,6 +327,83 @@ All six lines must have something on them. A blank line is what separates one
 board from the next, so a board written with an empty field is read as a broken
 entry and skipped. Only the first three matter to the game; put anything you
 like in the last three.
+
+## Routing: one link instead of nineteen
+
+A league of twenty boards where every board links to every other one costs each
+sysop nineteen links to configure, and one board joining costs all twenty an
+edit. So the Coordinator can arrange the league as a tree instead, and every
+board works out from the roster which neighbour to hand a packet to.
+
+The Coordinator writes the tree into the node list, on each board's **first
+line**: the board's own number, the word `HOST`, and the numbers it forwards
+for. Board 2 collecting boards 3, 5, 7 and 8 begins its entry with:
+
+```
+2 HOST 3 5 7 8
+```
+
+For this shape —
+
+```
+                    1
+              /           \
+             2             4
+          / | | \        / | \
+         3  5 7  8      6  9  11
+                              |
+                             10
+```
+
+— the first lines across the whole roster are `1 HOST 2 4`, `2 HOST 3 5 7 8`,
+`4 HOST 6 9 11`, `11 HOST 10`, and a bare number for everyone else. A board that
+hosts nobody carries no routing information at all.
+
+Board 3 then links only to board 2. Everything it sends, wherever it is
+addressed, goes to board 2, and board 2 passes it on. When a board joins, the
+Coordinator edits one roster and broadcasts it, and only the new board's uplink
+touches its own setup.
+
+Check what your board makes of the roster it has:
+
+```
+immortal-barons -league-routes -data /path/to/data
+```
+
+It prints every planet, the board your packets for it are handed to, and the
+directory they are written in.
+
+### A board that hosts others
+
+A board forwarding for its neighbours has a separate link to each of them, and a
+mailer usually wants each link's files in its own directory. Add a `Link` line
+to `bbs.cfg` for each, giving the neighbour's node number and the directory:
+
+```
+Link 3  /home/bbs/filebox/league_node3
+Link 5  /home/bbs/filebox/league_node5
+```
+
+Anything with no `Link` line of its own goes to **Outbound**, which is what a
+board's link to its own uplink should be. A board that hosts nobody needs none
+of this.
+
+### Overriding the Coordinator's routing
+
+A board that wants to send some traffic its own way can put an `ibroute.cfg`
+file in its data directory. Each line is `ROUTE`, the board to send to, and the
+board to send it through; `*` stands for every board, and sending a board
+through itself restores a direct link. Lines starting with `;` are comments.
+
+```
+; everything through board 8, except board 5, which we reach directly
+ROUTE * 8
+ROUTE 5 5
+```
+
+The file overrides what the roster says. Later lines win over earlier ones, so
+write the general rule first. A league whose Coordinator keeps the routing in the
+roster needs no such file on any board.
 
 ## League-wide rules (Coordinator only)
 
@@ -334,6 +449,7 @@ choice, not theirs. They add it to the roster and give it a node number.
 | Your node number, and your name exactly as they recorded it | The game matches boards by name, so the spelling and spacing in the roster are what your Board ID has to be. |
 | The `ibnodes.dat` file | The league roster. Put it in your data directory. |
 | The Coordinator's key | One line, from their `-gen-coord-key`. Without it your board refuses league orders. |
+| The league number, if they use one | A number from 1 to 999. It only matters if your board plays in two leagues that share an inbound directory, but ask anyway — a packet stamped with the wrong one is ignored. |
 | The mailer details for your uplink | Their address, host and port, and the session password. This is your BBS's business, not the game's. |
 
 **All four arrive by hand — email, a message on their board, a download.** None
@@ -369,6 +485,26 @@ The key is a one-time exchange, unless the league changes Coordinator.
     delivers incoming files; `-outbound` is the filebox for your uplink. Both
     may be left out, in which case the game uses `inbound` and `outbound` inside
     its data directory and you move the files yourself.
+
+    This writes `bbs.cfg`. If your Coordinator gave you a league number, add it
+    there — the command has no flag for it:
+
+    ```
+    LeagueNumber 900
+    ```
+
+    **Converting a board that already plays BRE?** Point the command at your old
+    `BBS.CFG` instead and it takes the board name, incoming-files directory and
+    league number from it, printing what it read:
+
+    ```
+    immortal-barons -ibbs-reset -import-bbs-cfg /path/to/bre/BBS.CFG -data /path/to/data
+    ```
+
+    It leaves behind the three lines the game has no use for — your name, your
+    node address, and your mailer — and does **not** read your netmail directory
+    as the outbound directory. BRE puts `.MSG` files there; the game writes
+    packets, which is a different thing in the same neighbourhood.
 
 4. **Run the inter-BBS step once:**
 

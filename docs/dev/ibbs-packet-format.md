@@ -15,6 +15,10 @@ the Configuration Editor and stored in `config.json`:
 
 - `InboundDir` — packets from other boards arrive here.
 - `OutboundDir` — the game writes packets for other boards here.
+- `OutboundDirs` — per-neighbour override of `OutboundDir`, keyed by roster node
+  number (`Config.OutboundLink`). Only a board that HOSTs others needs any.
+
+They are stored in `bbs.cfg`, not `config.json` — see below.
 
 Both are resolved against `DataDir` unless absolute (`Config.Inbound()` /
 `Config.Outbound()`) — a door is launched from whatever working directory the
@@ -28,8 +32,14 @@ group attacks, exports this board's scores, and writes the outbox.
 ## Packet files (`*.brp`)
 
 Each packet is one JSON file. Filename:
-`<from>-to-<to>-<date>-<n>.brp`, where `<to>` is `all` for a broadcast. A
+`[L<nnn>-]<from>-to-<to>-<date>-<seq>-<n>.brp`, where `<to>` is `all` for a
+broadcast and the `L<nnn>` prefix is the league number when one is set. A
 transport that fans out must copy a broadcast to every other board's inbound.
+
+`<to>` is the packet's FINAL destination, not the board the file is handed to.
+Where the file is written is the routing decision (`World.NextHop`); the name
+records who it is ultimately for, which is what makes a directory of packets
+readable to a sysop chasing one.
 
 The JSON is `game.Packet`:
 
@@ -55,7 +65,9 @@ definition.
   "LeagueNodes": [ LeagueNode ],    // coordinator's roster (signed, #64)
   "Reset": LeagueReset,             // coordinator's new-season order (signed, #65)
   "Seq": 7,                         // per-sender sequence, for replay detection (#53)
-  "Signature": "base64"             // ed25519 over the coordinator-authored parts
+  "Signature": "base64",            // ed25519 over the coordinator-authored parts
+  "League": 42,                     // league number; a board in two leagues ignores the other's
+  "Hops": 0                         // boards that have forwarded this; capped by MaxPacketHops
 }
 ```
 
@@ -97,8 +109,15 @@ ops resolve and produce results returned to the origin; incoming results post to
 the planetary bulletin; recon requests are answered from live figures; IP
 messages are delivered to the mailboxes they name; and a time-check naming this
 board is echoed back untouched, while one of our own coming home is folded into
-`World.TravelTimes`. A packet addressed to a different board is left in place for
-the transport to route onward.
+`World.TravelTimes`. In a routed league (`World.Routed` — the roster carries HOST
+lines, or this board has route rules) a packet addressed to a different board is
+taken from the inbound directory and queued on `World.Transit`, to be written out
+again on the link for its next hop (#106). In an unrouted league it is left
+alone: the transport there copies every packet to every board, so it is one the
+addressee already has. It is forwarded byte for byte apart from `Hops`:
+its `Seq` and `Signature` belong to the board that wrote it, so a hub that
+re-stamped one would be vouching for another board's orders. A packet carrying a
+different league's number is left alone.
 
 A reply packet is written whenever it carries anything at all
 (`Packet.HasPayload`) — an answer that is only an echoed probe, or only recon
@@ -110,7 +129,7 @@ Plain text, one board per six-line block, blank line between blocks (BRE's
 `BRNODES.DAT` layout). Loaded at startup into `World.LeagueNodes`.
 
 ```
-1              node number (1 = League Coordinator)
+1              node number (1 = League Coordinator), optionally "1 HOST 2 4"
 Avalon         board / planet name
 363/277        network address
 Orlando        city
@@ -118,19 +137,71 @@ FL             state / province
 USA            country
 ```
 
-## Board config: `BBS.CFG`
+The first line may carry BRE's HOST routing: the node's own number, `HOST`, then
+the numbers it forwards for. The roster is the league's routing table, and it is
+signed and broadcast by the Coordinator (#64), so every board gets the tree
+without any sysop editing anything.
 
-Optional, seven lines (`store.ParseBoardConfig`): sysop name, planet name, node
-address, inbound-file dir, netmail dir, league number, mailer. The clone's
-own `config.json` (`BoardID`, `IBBS`, `InboundDir`, `OutboundDir`) is the
-authoritative runtime config; the BBS.CFG parser exists for importing a board's
-identity from an existing BRE-style setup.
+Nothing below applies until a roster carries a HOST line or a board has an
+`ibroute.cfg`. Until then a league is a mesh and the transport fans packets out,
+which is what every existing board does.
+
+## Routing overrides: `ibroute.cfg`
+
+Optional, in the data directory (`store.ParseRouteFile`, BRE's `ROUTE.CFG`).
+`ROUTE <dest|*> <via>`, `;` comments, last matching rule wins. Overrides the HOST
+tree. BRE's `CRASH` / `HOLD` / `NORMAL` lines set a FidoNet mailer's send
+priority and are read and ignored — with a file drop that is the transport's
+business, not the game's.
+
+## Board config: `bbs.cfg`
+
+The per-board settings — `BoardID`, `LeagueNumber`, `InboundDir`, `OutboundDir`,
+`OutboundDirs` — live here rather than in `config.json`, and are marked
+`json:"-"` on `game.Config` so they cannot land in both. `config.json` is
+rewritten by a Coordinator's ruleset broadcast, which is no place for settings
+that describe one board's own machine.
+
+Keyword per line, `store.LoadBoardConfig` / `SaveBoardConfig`, comments with `#`
+or `;`, keywords matched case-insensitively, unknown keywords ignored:
+
+```
+BoardID       Avalon
+LeagueNumber  900
+Inbound       /home/bbs/ftn/in
+Outbound      /home/bbs/filebox/uplink
+Link 3        /home/bbs/filebox/node3
+```
+
+Not BRE's positional seven lines (sysop, planet, address, inbound, netmail dir,
+league, mailer). Positional cannot express `Link` at all, and a blank field
+shifts every field after it — which is what most of BRE's own InterBBS
+troubleshooting section is about. IB stores no FTN address or mailer name
+because it addresses nothing and writes no netmail.
+
+`store.ParseBoardConfig` reads BRE's own positional format, wired to
+`-ibbs-reset -import-bbs-cfg PATH` for a sysop converting a league they already
+run. It takes the planet name, the incoming-files directory and the league
+number. The sysop name, FTN address and mailer have no counterpart here, and the
+netmail directory is deliberately not read as `OutboundDir` — BRE puts `.MSG`
+files there, while IB's outbound holds the packets themselves.
+
+The path is explicit rather than a scan of the data directory: `BBS.CFG` and
+`bbs.cfg` are the same filename on macOS and Windows, so a scan would find the
+board's own config and parse it positionally.
+
+**Migration.** A board set up before the split has these in `config.json` and
+nowhere else, so `LoadConfig` reads them back from the raw JSON before applying
+`bbs.cfg` over the top; the next `SaveConfig` writes `bbs.cfg` and drops them
+from `config.json`. A sysop who opens neither file sees nothing happen.
 
 ## Code map
 
 - `internal/game/ibbs.go` — packet types, group attacks, resolution, scores.
 - `internal/store/ibbs.go` — `WriteOutbox`, `ReadInbound`, `RunPlanetary`.
+- `internal/game/ibbs_route.go` — `NextHop`, `ForwardPacket`, the HOST tree.
 - `internal/store/league.go` — `ParseNodeList`, `ParseBoardConfig`.
+- `internal/store/route.go` — `ParseRouteFile`.
 - `scripts/ibbs-smoke.sh` — end-to-end 3-board exchange with the real binary.
 
 ## Verified against real BRE (2026-07-22)

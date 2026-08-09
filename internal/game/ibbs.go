@@ -45,6 +45,12 @@ type Packet struct {
 	Seq       uint64
 	Signature []byte
 	Reset     *LeagueReset // Coordinator's order to start a new season (#65)
+	// League is the Coordinator's league number, so a board playing in two
+	// leagues that share one inbound directory can tell the traffic apart.
+	League int
+	// Hops counts the boards that have forwarded this packet. Outside the
+	// signed payload, because every hub changes it.
+	Hops int
 }
 
 // HasPayload reports whether p carries anything worth sending. The transport
@@ -210,14 +216,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 
 // CoordinatorBoardID is the name of node #1 in the roster — the League
 // Coordinator's board. Empty if no roster is loaded.
-func (w *World) CoordinatorBoardID() string {
-	for _, n := range w.LeagueNodes {
-		if n.Number == 1 {
-			return n.Name
-		}
-	}
-	return ""
-}
+func (w *World) CoordinatorBoardID() string { return w.NodeName(1) }
 
 // IsLeagueCoordinator reports whether this board is node #1 (the LC).
 func (w *World) IsLeagueCoordinator() bool {
@@ -315,6 +314,11 @@ type LeagueNode struct {
 	City    string
 	State   string
 	Country string
+	// Hosts are the node numbers this board forwards packets for — BRE's HOST
+	// routing, written on the roster's first line as "2 HOST 3 4 8". The
+	// Coordinator maintains it for the whole league, so a member board
+	// configures one link to its uplink instead of one to every other board.
+	Hosts []int
 }
 
 // LeaguePlanets lists the league's planets in the order the screens show them:
@@ -597,7 +601,21 @@ func SameRoster(a, b []LeagueNode) bool {
 		return false
 	}
 	for i := range a {
-		if a[i] != b[i] {
+		if !sameNode(a[i], b[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func sameNode(a, b LeagueNode) bool {
+	if a.Number != b.Number || a.Name != b.Name || a.Address != b.Address ||
+		a.City != b.City || a.State != b.State || a.Country != b.Country ||
+		len(a.Hosts) != len(b.Hosts) {
+		return false
+	}
+	for i := range a.Hosts {
+		if a.Hosts[i] != b.Hosts[i] {
 			return false
 		}
 	}

@@ -586,6 +586,13 @@ type World struct {
 	Season          int
 	LeagueDiplomacy string       // coordinator's league-wide declaration, made with a season reset
 	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from ibnodes.dat at startup
+	Routes          []RouteRule  `json:"-"` // this board's routing overrides, loaded from ibroute.cfg at startup
+	// Transit holds packets that arrived here addressed to another board and are
+	// waiting to be handed on. Kept apart from the Outbox because they must go
+	// out exactly as they came in — see ForwardPacket. Saved with the world, as
+	// the Outbox is: the inbound file is gone by now, so a run that dies before
+	// writing would otherwise lose someone else's packet for good.
+	Transit []Packet
 	// PlanetDiplomacy is this board's own chart of where it stands with each
 	// other planet — an annotation the BBS Coordinator keeps for their players,
 	// binding nothing and never sent anywhere. See ibbs_diplomacy.go.
@@ -645,11 +652,11 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 func (w *World) ResetForNewSeason(startDate string) {
 	nodes, key, pub := w.LeagueNodes, w.CoordKey, w.CoordPub
 	season, outSeq, high, seen := w.Season, w.OutSeq, w.HighSeq, w.SeenPackets
-	outbox := w.Outbox
+	outbox, transit := w.Outbox, w.Transit
 	w.initFreshGame()
 	w.LeagueNodes, w.CoordKey, w.CoordPub = nodes, key, pub
 	w.Season, w.OutSeq, w.HighSeq, w.SeenPackets = season, outSeq, high, seen
-	w.Outbox = outbox // an order queued for the other boards must still go out
+	w.Outbox, w.Transit = outbox, transit // mail for the other boards must still go out
 	w.StartedDate = startDate
 	w.LastMaintDate = startDate
 	w.seedAIEmpires() // a no-op on a league board, which never has any
@@ -680,6 +687,7 @@ func (w *World) initFreshGame() {
 	w.GroupAttacks = nil
 	w.NextAttackID = 0
 	w.Outbox = nil
+	w.Transit = nil
 	w.SpyDatabase = nil
 	w.LeagueDiplomacy = ""
 	w.PlanetDiplomacy = nil

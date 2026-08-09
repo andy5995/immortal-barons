@@ -32,10 +32,11 @@ func ParseNodeList(path string) ([]game.LeagueNode, error) {
 	var block []string
 	flush := func() {
 		if len(block) >= 6 {
-			n, err := strconv.Atoi(strings.TrimSpace(block[0]))
+			n, hosts, err := parseNodeNumber(block[0])
 			if err == nil {
 				nodes = append(nodes, game.LeagueNode{
 					Number:  n,
+					Hosts:   hosts,
 					Name:    strings.TrimSpace(block[1]),
 					Address: strings.TrimSpace(block[2]),
 					City:    strings.TrimSpace(block[3]),
@@ -58,6 +59,29 @@ func ParseNodeList(path string) ([]game.LeagueNode, error) {
 	}
 	flush()
 	return nodes, sc.Err()
+}
+
+// parseNodeNumber reads a roster block's first line: a node number, optionally
+// followed by "HOST" and the numbers this board forwards for ("2 HOST 3 4 8").
+func parseNodeNumber(line string) (int, []int, error) {
+	fields := strings.Fields(line)
+	if len(fields) == 0 {
+		return 0, nil, strconv.ErrSyntax
+	}
+	n, err := strconv.Atoi(fields[0])
+	if err != nil {
+		return 0, nil, err
+	}
+	var hosts []int
+	for i := 1; i < len(fields); i++ {
+		if strings.EqualFold(fields[i], "HOST") {
+			continue
+		}
+		if h, err := strconv.Atoi(fields[i]); err == nil {
+			hosts = append(hosts, h)
+		}
+	}
+	return n, hosts, nil
 }
 
 // BoardConfig is a board's inter-BBS configuration (BRE's BBS.CFG): the
@@ -122,7 +146,14 @@ func WriteNodeList(path string, nodes []game.LeagueNode) error {
 		if i > 0 {
 			b.WriteString("\n")
 		}
-		fmt.Fprintf(&b, "%d\n%s\n%s\n%s\n%s\n%s\n", n.Number, n.Name, n.Address, n.City, n.State, n.Country)
+		fmt.Fprintf(&b, "%d", n.Number)
+		if len(n.Hosts) > 0 {
+			b.WriteString(" HOST")
+			for _, h := range n.Hosts {
+				fmt.Fprintf(&b, " %d", h)
+			}
+		}
+		fmt.Fprintf(&b, "\n%s\n%s\n%s\n%s\n%s\n", n.Name, n.Address, n.City, n.State, n.Country)
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err

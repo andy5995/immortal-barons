@@ -65,8 +65,8 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 	// The identifiers ran 1..38 before the pages existed and must still, so no
 	// sysop's habit or note breaks. Later fields are appended above that. 22 was
 	// the Inter-BBS toggle, replaced by the -ibbs-reset command.
-	const fields = 39
-	for n := 1; n <= 40; n++ {
+	const fields = 40
+	for n := 1; n <= 41; n++ {
 		if n == 22 {
 			continue
 		}

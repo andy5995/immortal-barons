@@ -20,7 +20,7 @@ func TestLoadConfig_MissingFile_ReturnsDefaults(t *testing.T) {
 
 	want := game.DefaultConfig()
 	want.DataDir = dir
-	if cfg != want {
+	if !reflect.DeepEqual(cfg, want) {
 		t.Errorf("LoadConfig(%q) = %+v, want %+v", dir, cfg, want)
 	}
 }
@@ -46,7 +46,7 @@ func TestSaveConfig_LoadConfig_RoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadConfig: %v", err)
 	}
-	if got != cfg {
+	if !reflect.DeepEqual(got, cfg) {
 		t.Errorf("round trip = %+v, want %+v", got, cfg)
 	}
 	if got.DataDir != dir {
@@ -74,7 +74,7 @@ func TestLoadConfig_PartialFile_KeepsDefaultsForMissingFields(t *testing.T) {
 	want.DataDir = dir
 	want.TurnsPerDay = 20
 
-	if got != want {
+	if !reflect.DeepEqual(got, want) {
 		t.Errorf("LoadConfig(partial) = %+v, want %+v", got, want)
 	}
 }

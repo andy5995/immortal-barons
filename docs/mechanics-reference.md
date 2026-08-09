@@ -1871,8 +1871,9 @@ BRE guarded its league traffic with CRCs, duplicate detection and a binary
 `COORD.KEY` that authenticated the League Coordinator; its own error strings name
 the threats ("Invalid CRC in incoming Gooie Kablooie from BBS #", "Duplicate or
 Late Attack Return Recieved - Packet Deleted", "Illegal Route Found from BBS #").
-IB's transport is a direct file drop with no relays, so it implements the two
-that still bite:
+IB implements the two that still bite. Both hold across a relay: a forwarded
+packet is passed on byte for byte, so the Coordinator's signature and the
+origin's sequence number are still the ones the destination checks.
 
 - **Coordinator authentication.** The Coordinator's board holds an ed25519
   private key (`coord.key`, created with `-gen-coord-key`); every board holds the
@@ -1886,6 +1887,36 @@ that still bite:
   and drops anything it has processed before or that arrives with a stale number.
   Without it a saved packet could be dropped back in to pay a strike's results
   out twice, or re-run a reset.
+
+## Inter-BBS packet routing (#106)
+
+BRE routes a league as a tree rather than a mesh, and the Coordinator owns the
+shape of it. The routing is written into the roster itself, on each board's first
+line — the node number, `HOST`, then the numbers it forwards for (`2 HOST 3 5 7
+8`) — and `docs/bre.doc` tells members to ask their Coordinator whether they need
+routing of their own at all, "in which case you may skip this step". A board may
+override the answer with its own `ROUTE.CFG`, whose rules the manual says
+"override anything else assumed by the BRNODES.DAT file".
+
+IB reads the same HOST lines out of `ibnodes.dat` and the same rules out of
+`ibroute.cfg` (`ROUTE <dest|*> <via>`, last match wins). What this buys is the
+reason BRE did it: a leaf board configures one link, to its uplink, whatever the
+size of the league, and a board joining costs one sysop an edit instead of all of
+them. `-league-routes` prints the resulting table, as BRE's `BRE TEST` does.
+
+Divergences, all forced by the transport rather than chosen:
+
+- **BRE's ROUTE.CFG also sets a FidoNet mailer's send priority** (`CRASH`,
+  `HOLD`, `NORMAL`). IB reads and ignores those: a packet is a file in a
+  directory, and what the transport does with it is configured in the transport.
+- **A broadcast is addressed per planet before it is written**, one file each,
+  because only the game knows the tree and the transport cannot fan out along
+  it. An unrouted league still writes the single broadcast, and its transport
+  fans that out as before — a league only changes behaviour once its Coordinator
+  writes a HOST line, so no existing board is affected.
+- **A hop count caps forwarding** (`MaxPacketHops`). A cycle typed into a roster
+  is one sysop's mistake that every board obeys, and nothing else would notice
+  it. BRE's "Illegal Route Found from BBS #" says it had the same problem.
 
 **What this does not do**, and BRE could not do either: stop a sysop inventing
 their own board's figures. Scores and strikes are self-reported and deliberately

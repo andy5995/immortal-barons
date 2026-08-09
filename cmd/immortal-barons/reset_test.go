@@ -100,3 +100,75 @@ func TestLeagueConfigBroadcastIsSigned(t *testing.T) {
 		t.Error("the broadcast has no sequence number, so it is exempt from replay detection")
 	}
 }
+
+// A sysop converting a league they already run points -ibbs-reset at their
+// existing BRE BBS.CFG rather than retyping it. Its layout is BRE's own, from
+// docs/BBS.SAM in the original distribution.
+func TestIBBSResetImportsABREBoardConfig(t *testing.T) {
+	dir := t.TempDir()
+	cfg, err := store.LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(dir, "BBS.CFG.orig")
+	body := "John Smith\nAvalon\n363/277\n" + filepath.Join(dir, "fd-files") +
+		"\n" + filepath.Join(dir, "fd-netmail") + "\n900\nFRONTDOOR\n"
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// No -board-id: the imported name is what skips the editor, which a test
+	// has no terminal for.
+	if err := runReset(cfg, false, &leagueSetup{ImportPath: path}, charsetUTF8, true); err != nil {
+		t.Fatalf("runReset: %v", err)
+	}
+
+	got, err := store.LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.BoardID != "Avalon" {
+		t.Errorf("BoardID = %q, want Avalon", got.BoardID)
+	}
+	if got.LeagueNumber != 900 {
+		t.Errorf("LeagueNumber = %d, want 900", got.LeagueNumber)
+	}
+	if got.Inbound() != filepath.Join(dir, "fd-files") {
+		t.Errorf("Inbound = %q, want the file's incoming-files directory", got.Inbound())
+	}
+	// BRE's netmail directory holds .MSG files; IB's outbound holds the packets
+	// themselves. Reading one as the other would point the board at a directory
+	// its mailer treats as something else entirely.
+	if got.Outbound() == filepath.Join(dir, "fd-netmail") {
+		t.Error("the netmail directory was read as the outbound directory")
+	}
+}
+
+// An explicit flag beats the file, so a sysop can import the rest and still
+// rename the board.
+func TestBoardIDFlagBeatsTheImportedName(t *testing.T) {
+	dir := t.TempDir()
+	cfg, err := store.LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(dir, "BBS.CFG.orig")
+	if err := os.WriteFile(path, []byte("Sysop\nOld Name\n1:1/1\nin\nnet\n900\nBINKLEY\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	league := &leagueSetup{BoardID: "New Name", ImportPath: path}
+	if err := runReset(cfg, false, league, charsetUTF8, true); err != nil {
+		t.Fatalf("runReset: %v", err)
+	}
+	got, err := store.LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got.BoardID != "New Name" {
+		t.Errorf("BoardID = %q, want the flag to win", got.BoardID)
+	}
+	if got.LeagueNumber != 900 {
+		t.Errorf("LeagueNumber = %d, want the imported 900", got.LeagueNumber)
+	}
+}

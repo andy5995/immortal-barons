@@ -324,6 +324,11 @@ func configPages(ibbs bool) []cfgPage {
 					c.BoardID = v
 				}
 			}},
+		{n: 41, label: "League Number",
+			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unset)", c.LeagueNumber) },
+			edit: func(s session.Session, c *game.Config) {
+				c.LeagueNumber = promptSuggested(s, "League Number (1-999, 0 = unset)", c.LeagueNumber, game.MaxLeagueNumber)
+			}},
 		{n: 39, label: "Inbound Dir",
 			value: func(c *game.Config) string { return c.InboundDir },
 			edit: func(s session.Session, c *game.Config) {
@@ -372,6 +377,7 @@ func configPages(ibbs bool) []cfgPage {
 // were never asked.
 var ibbsOnlyFields = map[int]bool{
 	23: true, // Board ID
+	41: true, // League Number
 	39: true, // Inbound Dir
 	40: true, // Outbound Dir
 	30: true, // Max Group Attacks/Day

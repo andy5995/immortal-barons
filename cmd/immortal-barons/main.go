@@ -80,10 +80,12 @@ func main() {
 	genCoordKey := flag.Bool("gen-coord-key", false, i18n.T(lang, "create this league's Coordinator key, print the public half to give the other boards, then exit (node #1 only)"))
 	coordPub := flag.String("coord-key", "", i18n.T(lang, "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"))
 	leagueReset := flag.String("league-reset", "", i18n.T(lang, "start a new season across the whole league on DATE (node #1 only), then exit"))
+	leagueRoutes := flag.Bool("league-routes", false, i18n.T(lang, "print which board each planet's packets are handed to, and the directory they are written in, then exit"))
 	reset := flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"))
 	boardID := flag.String("board-id", "", i18n.T(lang, "this board's name in the league, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator"))
 	inboundDir := flag.String("inbound", "", i18n.T(lang, "directory where packets from the other boards arrive, for -ibbs-reset (default \"inbound\", under the data directory)"))
 	outboundDir := flag.String("outbound", "", i18n.T(lang, "directory the game writes packets to for the other boards, for -ibbs-reset (default \"outbound\", under the data directory)"))
+	importBoardCfg := flag.String("import-bbs-cfg", "", i18n.T(lang, "take this board's name, inbound directory and league number from an original Barren Realms Elite BBS.CFG at PATH, for -ibbs-reset"))
 	ibbsReset := flag.Bool("ibbs-reset", false, i18n.T(lang, "start a new game as a board in an inter-BBS league: like -reset, but the settings editor also asks the league settings"))
 	resetFromConfig := flag.Bool("reset-from-config", false, i18n.T(lang, "start a new game from the current config.json without the editor: clear all empires and rebuild the world (the old world is saved first)"))
 	addAI := flag.Int("add-ai", 0, i18n.T(lang, "add N computer barons to the running game, then exit"))
@@ -117,7 +119,7 @@ func main() {
 	// when -dropfile isn't given). Every explicit-mode flag consumes none, so a
 	// stray word alongside one is a mistake — flag it instead of silently ignoring
 	// it. (Unknown -flags are already rejected by the flag package.)
-	explicitMode := *maint || *planetary || *leagueConfig || *reset || *resetFromConfig || *ibbsReset ||
+	explicitMode := *maint || *planetary || *leagueConfig || *leagueRoutes || *reset || *resetFromConfig || *ibbsReset ||
 		*addAI > 0 || *dump || *spectate > 0 || *local || *export != "" || *imp != "" || *setDrop
 	if flag.NArg() > 0 && explicitMode {
 		fmt.Fprintf(os.Stderr, "immortal-barons: unknown argument %q\n\n", flag.Arg(0))
@@ -183,6 +185,13 @@ func main() {
 		}
 		return
 	}
+	if *leagueRoutes {
+		if err := runLeagueRoutes(cfg); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -league-routes:", err)
+			os.Exit(1)
+		}
+		return
+	}
 	if *genCoordKey {
 		pub, err := store.GenerateCoordKey(cfg.DataDir)
 		if err != nil {
@@ -216,9 +225,9 @@ func main() {
 		return
 	}
 
-	if *boardID != "" || *inboundDir != "" || *outboundDir != "" {
+	if *boardID != "" || *inboundDir != "" || *outboundDir != "" || *importBoardCfg != "" {
 		if !*ibbsReset {
-			fmt.Fprintln(os.Stderr, "immortal-barons: -board-id, -inbound and -outbound are settings for -ibbs-reset")
+			fmt.Fprintln(os.Stderr, "immortal-barons: -board-id, -inbound, -outbound and -import-bbs-cfg are settings for -ibbs-reset")
 			os.Exit(2)
 		}
 	}
@@ -228,7 +237,7 @@ func main() {
 		var league *leagueSetup
 		if *ibbsReset {
 			mode = "-ibbs-reset"
-			league = &leagueSetup{BoardID: *boardID, Inbound: *inboundDir, Outbound: *outboundDir}
+			league = &leagueSetup{BoardID: *boardID, Inbound: *inboundDir, Outbound: *outboundDir, ImportPath: *importBoardCfg}
 		}
 		exitOn(mode, runReset(cfg, false, league, localCS, *noANSI))
 		return
@@ -617,6 +626,46 @@ func runLeagueReset(cfg game.Config, date string) error {
 	return nil
 }
 
+// runLeagueRoutes reports where this board sends each planet's packets — BRE's
+// "BRE TEST", whose whole job is letting a sysop see the routing the roster
+// gives them before they wonder why nothing arrives.
+func runLeagueRoutes(cfg game.Config) error {
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	planets := w.LeaguePlanets()
+	if len(planets) == 0 {
+		fmt.Printf("No league roster loaded (%s). Every packet goes straight to the board it names, in %s\n",
+			filepath.Join(cfg.DataDir, store.NodeListFile), cfg.Outbound())
+		return nil
+	}
+	fmt.Printf("This board: %s (node %d), league %s\n", cfg.BoardID, w.NodeNumber(cfg.BoardID), leagueLabel(cfg.LeagueNumber))
+	if !w.Routed() {
+		fmt.Println("The roster carries no HOST routing, so this board links to every other one.")
+	}
+	fmt.Printf("\n%-24s %-24s %s\n", "PLANET", "HANDED TO", "WRITTEN IN")
+	for _, p := range planets {
+		if p.Name == cfg.BoardID {
+			continue
+		}
+		hop := w.NextHop(p.Name)
+		dir, ok := cfg.OutboundLink(w.NodeNumber(hop))
+		if !ok {
+			dir = cfg.Outbound()
+		}
+		fmt.Printf("%-24s %-24s %s\n", p.Name, hop, dir)
+	}
+	return nil
+}
+
+func leagueLabel(n int) string {
+	if n <= 0 {
+		return "(number not set)"
+	}
+	return fmt.Sprintf("#%d", n)
+}
+
 // runLeagueConfig broadcasts this board's league rules (turns, protection,
 // game length) to the league. Only the League Coordinator (node #1 in the
 // roster) may author it; member boards adopt it on their next PLANETARY run.
@@ -638,7 +687,7 @@ func runLeagueConfig(cfg game.Config) error {
 	// RunPlanetary; this one writes the outbox directly, and an unsigned ruleset
 	// is refused by every board that receives it.
 	w.StampOutbox()
-	if err := store.WriteOutbox(w, cfg.Outbound()); err != nil {
+	if _, err := store.WriteOutbox(w, cfg.Outbound()); err != nil {
 		return err
 	}
 	fmt.Printf("Broadcast league config (turns/day=%d, protection=%d, length=%d) to %s\n",
@@ -653,9 +702,51 @@ func runLeagueConfig(cfg game.Config) error {
 // up in one command and takes the ruleset from the Coordinator's next
 // broadcast.
 type leagueSetup struct {
-	BoardID  string
-	Inbound  string
-	Outbound string
+	BoardID    string
+	Inbound    string
+	Outbound   string
+	ImportPath string // an original BRE BBS.CFG to take this board's identity from
+}
+
+// importBoardConfig takes what an original BRE BBS.CFG can tell us into cfg.
+// A sysop converting a league they already run has typed all of this once
+// already, and the node numbers and directories are exactly what is tedious to
+// re-enter correctly.
+//
+// Three of BRE's seven lines have no counterpart here and are left behind: the
+// sysop's name, the FTN address, and the mailer's name, none of which IB uses
+// because it addresses nothing and writes no netmail. The netmail directory is
+// deliberately NOT read as the outbound directory — BRE puts .MSG files there,
+// while IB's outbound holds the packets themselves, so the two mean different
+// things despite sitting next to each other in the original.
+// Returns the board name it read, so the caller can treat an imported name the
+// same as one given with -board-id.
+func importBoardConfig(path string, cfg *game.Config) (string, error) {
+	bc, err := store.ParseBoardConfig(path)
+	if err != nil {
+		return "", err
+	}
+	var took []string
+	if bc.PlanetName != "" {
+		cfg.BoardID = bc.PlanetName
+		took = append(took, fmt.Sprintf("board name %q", bc.PlanetName))
+	}
+	if bc.InboundDir != "" {
+		cfg.InboundDir = bc.InboundDir
+		took = append(took, "inbound directory "+bc.InboundDir)
+	}
+	if bc.League > 0 {
+		cfg.LeagueNumber = bc.League
+		took = append(took, fmt.Sprintf("league number %d", bc.League))
+	}
+	if len(took) == 0 {
+		return "", fmt.Errorf("%s holds none of the settings this reads", path)
+	}
+	// Printed rather than assumed: the file is positional, so a line out of
+	// place produces a plausible-looking wrong answer, and the sysop is the only
+	// one who can tell.
+	fmt.Printf("From %s: %s\n", path, strings.Join(took, ", "))
+	return bc.PlanetName, nil
 }
 
 // runReset is BRE's sysop reset: present the game-settings menu (the
@@ -717,6 +808,17 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 	// model is that the ruleset is fixed at reset and never edited mid-game.
 	def.IBBS = league != nil
 	if league != nil {
+		if league.ImportPath != "" {
+			name, err := importBoardConfig(league.ImportPath, &def)
+			if err != nil {
+				return err
+			}
+			// A board named in the imported file has answered what the editor
+			// would ask, exactly as -board-id does; an explicit flag still wins.
+			if league.BoardID == "" {
+				league.BoardID = name
+			}
+		}
 		if league.Inbound != "" {
 			def.InboundDir = league.Inbound
 		}
@@ -904,16 +1006,27 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 	default:
 		fmt.Printf("Applied %d packets from %s\n", run.Applied, cfg.Inbound())
 	}
+	if run.Forwarded == 1 {
+		fmt.Println("Passed 1 packet on towards the board it is addressed to.")
+	} else if run.Forwarded > 1 {
+		fmt.Printf("Passed %d packets on towards the boards they are addressed to.\n", run.Forwarded)
+	}
 	if run.RosterUpdated {
 		fmt.Println("The League Coordinator's roster replaced this board's copy.")
+	}
+	// Where the files went is only one directory when this board has no
+	// per-neighbour links; naming it otherwise would be wrong for most of them.
+	where := " to " + cfg.Outbound()
+	if len(cfg.OutboundDirs) > 0 {
+		where = ""
 	}
 	switch run.Sent {
 	case 0:
 		fmt.Println("Nothing to send.")
 	case 1:
-		fmt.Printf("Wrote 1 packet to %s\n", cfg.Outbound())
+		fmt.Printf("Wrote 1 packet%s\n", where)
 	default:
-		fmt.Printf("Wrote %d packets to %s\n", run.Sent, cfg.Outbound())
+		fmt.Printf("Wrote %d packets%s\n", run.Sent, where)
 	}
 }
 

@@ -130,11 +130,21 @@ These options are for games that link several BBSes together (a "league"). See
   is set up in one command. Use this when the League Coordinator sets the rules:
   they arrive in the Coordinator's next broadcast and replace whatever this board
   starts with. `-inbound` and `-outbound` default to `inbound` and `outbound`
-  inside the data directory.
+  inside the data directory. All three are written to `bbs.cfg`, a plain text
+  file you can edit afterwards instead of opening the editor.
+- **`-import-bbs-cfg PATH`** — Take this board's name, incoming-files directory
+  and league number from an original Barren Realms Elite `BBS.CFG`, for
+  `-ibbs-reset`. Use it when converting a league you already run, so you do not
+  retype what that file already says. It prints what it read. `-board-id` and
+  `-inbound` override it, and naming the board in the file skips the settings
+  editor just as `-board-id` does.
 - **`-planetary`** — Run the inter-BBS step, then exit: read incoming packets,
   run the group attacks, and write outgoing packets.
 - **`-league-config`** — Send this board's league settings to the whole league,
   then exit. Only the league coordinator (node #1) uses this.
+- **`-league-routes`** — Print which board each planet's packets are handed to,
+  and the directory they are written in, then exit. Use it to check a roster the
+  coordinator has just sent.
 - **`-gen-coord-key`** — Create this league's coordinator key, then exit. Only
   the coordinator runs this, once. It prints a line to give every other board.
   The private half is written to `coord.key` in the data folder; keep it secret,

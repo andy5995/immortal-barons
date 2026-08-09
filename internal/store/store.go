@@ -23,6 +23,7 @@ var ErrNoWorld = errors.New("no game found — run with -reset to create one")
 func NewGame(cfg game.Config) *game.World {
 	w := game.NewWorld(cfg)
 	loadLeagueNodes(w, cfg)
+	loadRoutes(w, cfg)
 	loadLeagueKeys(w, cfg)
 	return w
 }
@@ -65,6 +66,7 @@ func repair(w *game.World, cfg game.Config) {
 	w.EnsureNews()
 	w.Config = cfg
 	loadLeagueNodes(w, cfg)
+	loadRoutes(w, cfg)
 	loadLeagueKeys(w, cfg)
 }
 
@@ -78,6 +80,14 @@ const NodeListFile = "ibnodes.dat"
 func loadLeagueNodes(w *game.World, cfg game.Config) {
 	if nodes, err := ParseNodeList(filepath.Join(cfg.DataDir, NodeListFile)); err == nil {
 		w.LeagueNodes = nodes
+	}
+}
+
+// loadRoutes loads this board's routing overrides. Most boards have no such
+// file: a league whose Coordinator keeps HOST routing in the roster needs none.
+func loadRoutes(w *game.World, cfg game.Config) {
+	if rules, err := ParseRouteFile(filepath.Join(cfg.DataDir, RouteFile)); err == nil {
+		w.Routes = rules
 	}
 }
 

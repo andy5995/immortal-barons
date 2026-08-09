@@ -8,6 +8,24 @@
   * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
 
   Inter-BBS (league play only):
+  * This board's own settings — its name, league number and packet directories
+    — moved out of config.json into "bbs.cfg", a plain text file that can be
+    edited without the settings editor. An existing board is migrated on its
+    next save with nothing for the sysop to do
+  * "-ibbs-reset -import-bbs-cfg" takes a board's name, incoming-files
+    directory and league number from an original Barren Realms Elite BBS.CFG
+  * A league can be arranged as a tree instead of every board linking to every
+    other one: the Coordinator writes the routing into the node list, and a
+    member board then links only to its uplink (#106)
+  * On a board that forwards for others, a packet arriving for another board is
+    passed on instead of being left in the inbound directory (#106)
+  * A board that forwards for its neighbours can give each one its own outbound
+    directory, with "OutboundDirs" in config.json
+  * A board may route some traffic its own way with an "ibroute.cfg" file
+  * Added "-league-routes", which prints where this board sends each planet's
+    packets
+  * Sysops: a League Number keeps two leagues apart when they share one inbound
+    directory
   * The Diplomacy List carries a real standing with each planet — Enemy, None,
     Peace or Allied — which the BBS Coordinator sets on a new Diplomacy
     Modification screen, replacing the free-text league declaration; it binds

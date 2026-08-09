@@ -153,6 +153,7 @@ func packetKey(p Packet) string {
 // than at each enqueue means nothing can be queued unnumbered (#53).
 func (w *World) StampOutbox() {
 	for i := range w.Outbox {
+		w.Outbox[i].League = w.Config.LeagueNumber
 		if w.Outbox[i].Seq == 0 {
 			w.Outbox[i].Seq = w.NextSeq()
 		}

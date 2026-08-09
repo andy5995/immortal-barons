@@ -28,6 +28,22 @@ func LoadConfig(dataDir string) (game.Config, error) {
 		return cfg, err
 	}
 	cfg.DataDir = dataDir
+	// The per-board settings moved from config.json to bbs.cfg. A board set up
+	// before that still has them in config.json and nowhere else, so they are
+	// read back here; bbs.cfg then overwrites whatever it names. A sysop who
+	// never opens either file notices nothing.
+	var moved struct {
+		BoardID      *string
+		InboundDir   *string
+		OutboundDir  *string
+		LeagueNumber *int
+	}
+	if json.Unmarshal(data, &moved) == nil {
+		setIf(&cfg.BoardID, moved.BoardID)
+		setIf(&cfg.InboundDir, moved.InboundDir)
+		setIf(&cfg.OutboundDir, moved.OutboundDir)
+		setIf(&cfg.LeagueNumber, moved.LeagueNumber)
+	}
 	// The packet directories used to be read relative to the working directory
 	// and defaulted to "./data/inbound". They now hang off the data directory, so
 	// a config still holding the old default would resolve to <data>/data/inbound.
@@ -45,12 +61,28 @@ func LoadConfig(dataDir string) (game.Config, error) {
 		!bytes.Contains(data, []byte(`"ClingyAnnihilator"`)) {
 		cfg.ClingyAnnihilator = *legacy.DoomerKaboomer
 	}
+	if err := LoadBoardConfig(dataDir, &cfg); err != nil {
+		return cfg, err
+	}
 	return cfg, nil
 }
 
-// SaveConfig writes cfg to <dataDir>/config.json atomically.
+func setIf[T any](dst *T, src *T) {
+	if src != nil {
+		*dst = *src
+	}
+}
+
+// SaveConfig writes cfg to <dataDir>/config.json atomically, and the per-board
+// settings alongside it in bbs.cfg. Both are written together because a caller
+// holds one Config and has no way to know which half it changed — and because
+// writing bbs.cfg is what completes the migration for a board set up before the
+// two files were split.
 func SaveConfig(cfg game.Config) error {
 	if err := os.MkdirAll(cfg.DataDir, 0o755); err != nil {
+		return err
+	}
+	if err := SaveBoardConfig(cfg); err != nil {
 		return err
 	}
 	data, err := json.MarshalIndent(cfg, "", "  ")
