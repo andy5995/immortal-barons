@@ -157,7 +157,8 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   the attack doc just says jets need carriers to fight). Duplicated numbers drift
   out of sync when tuned — this is the prose analogue of the balance.go rule.
 - **Menu prompts are consistent.** A numbered selection list ends with a
-  `0) Quit` line and the standard `Choice> Quit` prompt (use `choiceQuit`),
+  `0) Quit` line and the standard `> Quit` prompt (use `ChoiceQuit`, which
+  prints the bare `>` and echoes the translated `Quit` as the Enter default),
   matching the menu engine's `readChoice` — not a one-off `promptInt("… 0 to
   cancel?")`. Keep new lists on this convention unless a specific case calls for
   something else.

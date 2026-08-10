@@ -64,3 +64,38 @@ func TestSpecializedRowIsMarkedWithAsterisks(t *testing.T) {
 		t.Error("the explanatory sentence should be gone")
 	}
 }
+
+// Specialize Industry is drawn as a menu, not a bare list: the original gives it
+// a red-accent [Specialization] frame with a Quit item, and IB's own convention
+// is a numbered list ending in "0) Quit" read by ChoiceQuit — never a one-off
+// "0 to cancel" prompt. Asserts the frame AND the state effect, so a flow change
+// upstream cannot leave this green while never reaching the screen.
+func TestSpecializeIsAStandardMenu(t *testing.T) {
+	w := newWorld()
+	f := &fakeSession{keys: []rune("5 ")} // 5 = Tanks, then dismiss the confirmation
+	specializeIndustry(f, w)
+
+	out := stripANSI(f.out.String())
+	for _, want := range []string{"[Specialization]", "5) Tanks", "0) Quit"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("screen is missing %q:\n%s", want, out)
+		}
+	}
+	if got := w.Player().Specialized; got != "Tanks" {
+		t.Errorf("Specialized = %q, want Tanks — the choice never took effect", got)
+	}
+}
+
+// Declining says so rather than returning in silence, as the original does.
+func TestSpecializeDeclineIsReported(t *testing.T) {
+	w := newWorld()
+	f := &fakeSession{keys: []rune("0 ")}
+	specializeIndustry(f, w)
+
+	if got := w.Player().Specialized; got != "" {
+		t.Errorf("Specialized = %q, want nothing set", got)
+	}
+	if out := stripANSI(f.out.String()); !strings.Contains(out, "left unspecialized") {
+		t.Errorf("declining should say so:\n%s", out)
+	}
+}

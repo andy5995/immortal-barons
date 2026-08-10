@@ -465,6 +465,11 @@ msgstr ""
 msgid "Choose an empire:"
 msgstr ""
 
+#: internal/menu/actions_industry.go:111
+msgid ""
+"Choose one unit type. The choice is permanent and cannot be changed later."
+msgstr ""
+
 #: internal/menu/tree.go:62
 msgid "Chopper's Fair Market"
 msgstr ""
@@ -1462,17 +1467,14 @@ msgstr ""
 msgid "Special Operations"
 msgstr ""
 
+#: internal/menu/actions_industry.go:114
+#, fuzzy
+msgid "Specialization"
+msgstr "Regionen"
+
 #: internal/menu/tree.go:388
 msgid "Specialize Industry"
 msgstr "Industrie spezialisieren"
-
-#: internal/menu/actions_industry.go:111
-msgid "Specialize Industry — choose a unit type. This is PERMANENT:"
-msgstr ""
-
-#: internal/menu/actions_industry.go:117
-msgid "Specialize in which unit (0 to cancel)?"
-msgstr ""
 
 # Menu titles
 #: internal/menu/tree.go:42
@@ -2167,12 +2169,16 @@ msgstr ""
 msgid "Your industry is already specialized in %s."
 msgstr ""
 
-#: internal/menu/actions_industry.go:137
+#: internal/menu/actions_industry.go:145
 msgid "Your industry is already specialized."
 msgstr ""
 
-#: internal/menu/actions_industry.go:140
+#: internal/menu/actions_industry.go:148
 msgid "Your industry is now permanently specialized in %s."
+msgstr ""
+
+#: internal/menu/actions_industry.go:126
+msgid "Your industry was left unspecialized."
 msgstr ""
 
 #: internal/menu/actions_ipmessages.go:272

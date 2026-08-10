@@ -108,14 +108,22 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 		ok(s, "Your industry is already specialized in %s.", p.Specialized)
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Specialize Industry — choose a unit type. This is PERMANENT:"), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose one unit type. The choice is permanent and cannot be changed later."), ansi.Reset)
+	// The original draws this as a red-accent menu, so it matches the rest of the
+	// game rather than reading as a bare list (docs/dev/bre-screens.md).
+	fmt.Fprintf(s, "%s\n", titleRule(ansi.FgBrightRed, tr(s, "Specialization"), len([]rune(rule))))
 	// Units only. Gold is a row on Set Industries but not a unit, and there is
 	// nothing for a specialization's efficiency modifier to apply to.
 	for i, name := range prodTypeNames[:prodUnitCount] {
 		fmt.Fprintf(s, "  %d) %s\n", i+1, tr(s, name))
 	}
-	t := promptInt(s, "Specialize in which unit (0 to cancel)?")
-	if t < 1 || t > prodUnitCount {
+	fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
+	// The original closes every menu box with a rule, whether or not a status
+	// line follows it (see the menu engine's draw).
+	fmt.Fprintf(s, "%s\n", rule)
+	t := ChoiceQuit(s, prodUnitCount)
+	if t < 1 {
+		ok(s, "Your industry was left unspecialized.")
 		return Stay
 	}
 	var already bool
