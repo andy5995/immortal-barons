@@ -466,7 +466,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 	// Whole billions, not the 4-decimal display form: the cap is SET in billions,
 	// so the fraction is always zeros.
 	row("Most gold you can hold", fmt.Sprintf(tr(s, "%sB in hand, and again in the bank"),
-		comma(w.MoneyCap()/1_000_000_000)))
+		comma(w.MoneyCapBillions())))
 	row("Bank interest", fmt.Sprintf(tr(s, "%d%% over 10 days"), c.InterestRate))
 	row("Investment rate", investRateStr(s, c))
 	row("Food market", foodMarketStr(s, c))

@@ -29,6 +29,18 @@ const (
 	noStar = "  "
 )
 
+// footerKeys is the status bar under the editor. The star's legend is only
+// included on a league board: a stand-alone one is never shown an inter-BBS
+// field, so the star never appears and the legend would explain a mark that is
+// not on screen.
+func footerKeys(ibbs bool) string {
+	keys := " F1–F4 / Ctrl-N,P: tabs · Tab/Shift-Tab: move · ↑↓ or click: change a choice · Ctrl-S: save · Esc: cancel"
+	if ibbs {
+		keys += " · ★ = inter-BBS option"
+	}
+	return keys
+}
+
 // mark prefixes a field label with BRE's star, which means "inter-BBS option"
 // — a setting that does nothing on a stand-alone board. The set comes from the
 // line editor's ibbsOnlyFields, matched by label, so the two editors cannot
@@ -45,21 +57,22 @@ func mark(label string) string {
 	return noStar
 }
 
-var ibbsOnlyLabelSet map[string]bool
-
-func ibbsOnlyLabels() map[string]bool {
-	if ibbsOnlyLabelSet == nil {
-		ibbsOnlyLabelSet = map[string]bool{}
-		for _, page := range configPages(true) {
-			for _, f := range page.fields {
-				if ibbsOnlyFields[f.n] {
-					ibbsOnlyLabelSet[f.label] = true
-				}
+// Built once at startup rather than memoised on first use: it reads only the
+// static field tables, so there is nothing to defer and no shared state to
+// write from whichever session gets there first.
+var ibbsOnlyLabelSet = func() map[string]bool {
+	m := map[string]bool{}
+	for _, page := range configPages(true) {
+		for _, f := range page.fields {
+			if ibbsOnlyFields[f.n] {
+				m[f.label] = true
 			}
 		}
 	}
-	return ibbsOnlyLabelSet
-}
+	return m
+}()
+
+func ibbsOnlyLabels() map[string]bool { return ibbsOnlyLabelSet }
 
 // fieldBgColor darkens the input background; tview's default (ColorBlue) leaves
 // white field text washed out (Andy's contrast note).
@@ -120,21 +133,20 @@ const (
 // into a Config on Save, so collect() needs no per-field wiring at the call site
 // and is testable without a live screen.
 type configTUI struct {
-	app        *tview.Application
-	pages      *tview.Pages
-	tabs       *tview.TextView
-	help       *tview.TextView // right-hand pane; shows the focused field's help
-	forms      []*tview.Form
-	root       tview.Primitive // the main layout, restored after a modal
-	world      *game.World
-	footerText string
-	base       game.Config
-	binders    []func(*game.Config)
-	resetters  []func() // restore each widget to its opening (default) value
-	aligns     []rangeField
-	cur        int
-	saved      bool
-	modalUp    bool // a confirm/error modal owns the screen; global keys stand down
+	app       *tview.Application
+	pages     *tview.Pages
+	tabs      *tview.TextView
+	help      *tview.TextView // right-hand pane; shows the focused field's help
+	forms     []*tview.Form
+	root      tview.Primitive // the main layout, restored after a modal
+	world     *game.World
+	base      game.Config
+	binders   []func(*game.Config)
+	resetters []func() // restore each widget to its opening (default) value
+	aligns    []rangeField
+	cur       int
+	saved     bool
+	modalUp   bool // a confirm/error modal owns the screen; global keys stand down
 }
 
 // rangeField remembers an int field so alignRanges can right-align its [lo-hi]
@@ -290,14 +302,7 @@ func rootLayout(t *configTUI) tview.Primitive {
 	t.help.SetBorder(true).SetTitle(" Help ")
 	t.showHelp("")
 
-	keys := " F1–F4 / Ctrl-N,P: tabs · Tab/Shift-Tab: move · ↑↓ or click: change a choice · Ctrl-S: save · Esc: cancel"
-	// A stand-alone board is never shown an inter-BBS field, so the star never
-	// appears and its legend would explain a mark that is not on screen.
-	if t.base.IBBS {
-		keys += " · ★ = inter-BBS option"
-	}
-	t.footerText = keys
-	footer := tview.NewTextView().SetDynamicColors(true).SetWordWrap(true).SetText(keys)
+	footer := tview.NewTextView().SetDynamicColors(true).SetWordWrap(true).SetText(footerKeys(t.base.IBBS))
 
 	t.app.SetInputCapture(t.onKey)
 

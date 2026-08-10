@@ -25,8 +25,22 @@ type Number interface{ ~int | ~int64 }
 const (
 	billion         = 1_000_000_000
 	billionDecimals = 4
-	billionDivisor  = 100_000 // 10^(9-4): scales the sub-billion remainder to 4 digits
 )
+
+// billionDivisor scales the sub-billion remainder down to billionDecimals
+// digits. Derived rather than written out: the two must move together, and a
+// hand-written 100_000 goes stale the moment the decimal count changes. A
+// constant expression cannot call pow10, so this is computed at startup.
+var billionDivisor = billion / pow10(billionDecimals)
+
+// pow10 is 10^n for a small non-negative n.
+func pow10(n int) int64 {
+	p := int64(1)
+	for ; n > 0; n-- {
+		p *= 10
+	}
+	return p
+}
 
 // groupSep maps a UI language to its thousands separator. All three are ASCII,
 // so they are CP437-safe (and CP437 mode forces English anyway). Unknown

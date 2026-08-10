@@ -903,6 +903,10 @@ const (
 	//
 	// The ceiling is 999 because MoneyCapMax is the widest figure the abbreviated
 	// billions display renders in three digits before the point (999.0000B).
+	// GoldPerBillion names the unit the cap is set in, so the multiplier is not
+	// respelled at each site that converts between the two.
+	GoldPerBillion = 1_000_000_000
+
 	MoneyCapMinBillions = 2
 	MoneyCapMaxBillions = 999
 
@@ -910,7 +914,7 @@ const (
 	// future figure (ExpectedReturn, LoanTotalOwed) clamp to it as an overflow
 	// guard; what a realm actually holds is clamped to the configured cap when
 	// the gold lands.
-	MoneyCapMax int64 = MoneyCapMaxBillions * 1_000_000_000
+	MoneyCapMax int64 = MoneyCapMaxBillions * GoldPerBillion
 
 	// MaxInvestment is the most gold ONE investment may lock away. Deposits and
 	// withdrawals are deliberately unbounded (up to the money cap) — nothing gates the

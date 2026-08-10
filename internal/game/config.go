@@ -266,10 +266,14 @@ func DefaultConfig() Config {
 }
 
 // MoneyCap is the most gold a realm may hold, on hand or in the bank — the
-// sysop's MoneyCapBillions knob, in gold. Clamped on read rather than on load so
-// a config written before the knob existed (or edited by hand to nonsense) still
-// yields a legal cap: a zero or missing field comes back as BRE's own 2 billion.
-func (w *World) MoneyCap() int64 {
+// sysop's MoneyCapBillions knob, in gold.
+func (w *World) MoneyCap() int64 { return int64(w.MoneyCapBillions()) * GoldPerBillion }
+
+// MoneyCapBillions is the cap in the unit the sysop sets it in, clamped to the
+// legal range. Clamped on read rather than on load so a config written before
+// the knob existed (or edited by hand to nonsense) still yields a legal cap: a
+// zero or missing field comes back as BRE's own 2 billion.
+func (w *World) MoneyCapBillions() int {
 	b := w.Config.MoneyCapBillions
 	if b < MoneyCapMinBillions {
 		b = MoneyCapMinBillions
@@ -277,5 +281,5 @@ func (w *World) MoneyCap() int64 {
 	if b > MoneyCapMaxBillions {
 		b = MoneyCapMaxBillions
 	}
-	return int64(b) * 1_000_000_000
+	return b
 }

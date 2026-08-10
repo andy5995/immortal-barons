@@ -234,18 +234,9 @@ func TestOnlyInterBBSFieldsAreStarred(t *testing.T) {
 // editor's footer and the tview status bar leave the legend off there.
 func TestStarLegendOnlyOnALeagueBoard(t *testing.T) {
 	for _, ibbs := range []bool{true, false} {
-		c := distinctConfig()
-		c.IBBS = ibbs
-		w := newWorld()
-		w.Config = c
-		got := footerTextOf(newConfigTUI(w.World))
+		got := footerKeys(ibbs)
 		if has := strings.Contains(got, "inter-BBS option"); has != ibbs {
 			t.Errorf("IBBS=%v: legend present=%v, want %v (footer: %q)", ibbs, has, ibbs, got)
 		}
 	}
-}
-
-func footerTextOf(t *configTUI) string {
-	rootLayout(t)
-	return t.footerText
 }

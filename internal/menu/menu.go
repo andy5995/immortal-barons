@@ -547,6 +547,14 @@ var dimAccent = map[string]string{
 
 // dim returns the normal-intensity twin of a bright accent, or the color
 // unchanged if it has none.
+// closingRule is the rule that closes a menu box: the accent in its dim form,
+// at the box's width. BRE closes every menu box this way whether or not a
+// status line follows (live capture), so a screen that draws its own box calls
+// this rather than printing the bare `rule` constant.
+func closingRule(accent string, width int) string {
+	return dim(accent) + strings.Repeat("─", width) + ansi.Reset
+}
+
 func dim(color string) string {
 	if d, ok := dimAccent[color]; ok {
 		return d
@@ -674,7 +682,7 @@ func draw(s session.Session, g *ctx, m *Menu) {
 		// BRE closes every menu box with a normal-accent rule, whether or not the
 		// menu carries a status line under it (live capture: the Attack Menu has
 		// the rule and no status, the InterPlanetary menu has both).
-		fmt.Fprintf(&b, "%s%s%s\n", dim(col), strings.Repeat("─", m.ruleWidth()), ansi.Reset)
+		fmt.Fprintf(&b, "%s\n", closingRule(col, m.ruleWidth()))
 		if m.Status != nil {
 			// The footer is white with its figures in bright-white — not a single
 			// accent color.

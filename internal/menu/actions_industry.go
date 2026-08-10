@@ -2,7 +2,6 @@ package menu
 
 import (
 	"fmt"
-	"strings"
 	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -33,11 +32,9 @@ const industryRuleWidth = 46
 // Production / Trading / Specialization is red (docs/dev/bre-screens.md).
 var industryAccent = ansi.FgBrightRed
 
-// industryRule is the box's closing rule. The engine draws a menu's closing rule
-// in the dim accent, not in the terminal default — a bare rule here is what made
-// this screen look unlike every other one.
+// industryRule is the box's closing rule, at this screen's width.
 func industryRule() string {
-	return dim(industryAccent) + strings.Repeat("─", industryRuleWidth) + ansi.Reset
+	return closingRule(industryAccent, industryRuleWidth)
 }
 
 func prodField(p *game.Empire, idx int) *int {

@@ -111,7 +111,7 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		}
 		// A stand-alone board never sees a starred field (withoutIBBSFields drops
 		// them), so the legend would explain a mark that is not on the screen.
-		fmt.Fprintf(s, "%s\n", rule)
+		fmt.Fprintf(s, "%s\n", closingRule(ansi.FgBrightBlue, len([]rune(rule))))
 		if c.IBBS {
 			fmt.Fprintf(s, "%s* = inter-BBS option%s\n", ansi.FgWhite, ansi.Reset)
 		}
