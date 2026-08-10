@@ -30,16 +30,17 @@ func empireStatusFields(s session.Session, w *ctx) (map[string]string, func(stri
 		netWorth = w.NetWorth(w.Player())
 	})
 	pct := func(n int) string { return fmt.Sprintf("%d%%", n) }
-	money := func(n int) string { return formatGold(n, p.Language) }
+	money := func(n int64) string { return formatGold(n, p.Language) }
+	count := func(n int) string { return formatGold(n, p.Language) }
 	f := map[string]string{
 		"name":       p.Name,
 		"turns":      comma(p.TurnsLeft),
-		"score":      money(netWorth),
+		"score":      count(netWorth),
 		"gold":       money(p.Gold),
 		"bank":       money(p.Bank),
-		"food":       money(p.Food),
+		"food":       count(p.Food),
 		"debt":       money(p.Debt),
-		"population": money(p.People),
+		"population": count(p.People),
 		"tax":        pct(p.Tax),
 		"support":    pct(p.Support),
 		"morale":     pct(p.Morale),

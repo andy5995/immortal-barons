@@ -374,7 +374,7 @@ type SpyReport struct {
 	Land    int
 	Offense int
 	Defense int
-	Gold    int
+	Gold    int64
 }
 
 // AttackResult returns to the origin board after a remote strike resolves. For

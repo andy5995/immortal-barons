@@ -29,7 +29,7 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 	// (the per-turn fluctuating TrooperPrice; constant here since no turn is
 	// played), so gold accounting reconciles exactly.
 	unitPrice := w.TrooperPrice(p)
-	initialGold := unitPrice * iterations // enough to fund every buy
+	initialGold := int64(unitPrice * iterations) // enough to fund every buy
 	p.Gold = initialGold
 
 	// Two SESSIONS over one world: each goroutine drives its own ctx (the active
@@ -69,7 +69,7 @@ func TestConcurrentBuyIsRaceFree(t *testing.T) {
 	}
 	// Every gold piece spent must be accounted for by a trooper gained.
 	bought := p.Troopers - startTroopers
-	if spent := initialGold - p.Gold; spent != bought*unitPrice {
+	if spent := initialGold - p.Gold; spent != int64(bought*unitPrice) {
 		t.Fatalf("gold/troopers mismatch: spent %d gold but bought %d troopers at %d each",
 			spent, bought, unitPrice)
 	}

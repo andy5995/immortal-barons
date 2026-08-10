@@ -12,6 +12,17 @@
   * A pirate raid reports its outcome the way the original does: a headline, the
     loot taken, and what the raid cost. The headline is one of five, chosen at
     random
+  * config-during-reset: a new Money Cap setting sets how much gold a realm may
+    hold, on hand and again in the bank — two billion (the original's own limit)
+    up to 999 billion
+  * A bank at the Money Cap pays its interest into gold in hand instead of
+    losing it; destroyed gold is reported in the event log
+  * One investment still locks away at most two billion; deposits and
+    withdrawals have no size limit
+  * A withdrawal takes only as much gold as will fit in hand, leaving the rest
+    in the bank
+  * Figures of a billion or more are shown as "1.0000B" rather than in full
+  * Amounts may be typed with a "b" suffix, as they already could with "k"/"m"
 
   Inter-BBS (league play only):
   * This board's own settings — its name, league number and packet directories

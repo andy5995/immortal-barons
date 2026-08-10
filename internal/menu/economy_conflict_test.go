@@ -95,7 +95,7 @@ func commitOnFile(t *testing.T, cfg game.Config, mutate func(*game.World)) {
 // a later slice slot so that, once the acting empire ahead of it is removed, the
 // pointer-reuse-by-index reload maps the acting empire's cached pointer onto the
 // decoy's data — the trap the re-resolve defends against.
-func addDecoy(t *testing.T, cfg game.Config, gold, bank int) int {
+func addDecoy(t *testing.T, cfg game.Config, gold, bank int64) int {
 	t.Helper()
 	commitOnFile(t, cfg, func(w *game.World) {
 		d := w.AddHuman("decoy", "Decoyland")

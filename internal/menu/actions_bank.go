@@ -11,7 +11,7 @@ import (
 
 // money wraps a bank action that moves a gold amount, offering max as the
 // largest sensible value for that action (e.g. Withdraw's max is p.Bank).
-func money(label string, max func(*game.Empire) int, apply func(*game.World, *game.Empire, int) error) Action {
+func money(label string, max func(*game.Empire) int64, apply func(*game.World, *game.Empire, int64) error) Action {
 	return func(s session.Session, w *ctx) Result {
 		p := w.Player()
 		n := promptSuggested(s, label+" how many gold?", 0, max(p))
@@ -64,7 +64,7 @@ func cashRelief(s session.Session, w *ctx) Result {
 	if amount <= 0 {
 		return Stay
 	}
-	var owed int
+	var owed int64
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		l, e := w.World.TakeLoan(p, amount, days)
 		owed = l.Owed
@@ -92,7 +92,7 @@ func investFunds(s session.Session, w *ctx) Result {
 	if days < game.MinInvestDays {
 		days = game.MinInvestDays
 	}
-	amount := promptSuggested(s, "How much would you like to invest?", 0, p.Gold)
+	amount := promptSuggested(s, "How much would you like to invest?", 0, min(p.Gold, game.MaxInvestment))
 	if amount <= 0 {
 		return Stay
 	}
@@ -122,7 +122,7 @@ func investFunds(s session.Session, w *ctx) Result {
 func listInvestments(s session.Session, w *ctx) Result {
 	var invs []game.Investment
 	var loans []game.Loan
-	var debt int
+	var debt int64
 	w.With(func() {
 		p := w.Player()
 		if p == nil {
@@ -137,7 +137,7 @@ func listInvestments(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	// Aggregate by day: maturing investment returns and loan amounts due.
-	type row struct{ inv, loan int }
+	type row struct{ inv, loan int64 }
 	byDay := map[int]*row{}
 	var days []int
 	at := func(day int) *row {
@@ -158,7 +158,7 @@ func listInvestments(s session.Session, w *ctx) Result {
 	sort.Ints(days)
 
 	fmt.Fprintf(s, "\n  %s%-12s %-20s %s%s\n", ansi.FgBrightCyan, tr(s, "Date"), tr(s, "Investments"), tr(s, "Loans Due"), ansi.Reset)
-	dollar := func(n int) string {
+	dollar := func(n int64) string {
 		if n <= 0 {
 			return ""
 		}

@@ -80,7 +80,7 @@ var ErrCovertCapReached = errors.New("You may run only one covert operation per 
 // When capped, it also enforces BRE's one-effect-op-per-turn limit and marks the
 // op as used. The agent check comes first so a broke-but-agentless caller still
 // sees ErrNoAgents. No state changes when it returns an error.
-func (w *World) covertCost(a *Empire, cost int, capped bool) error {
+func (w *World) covertCost(a *Empire, cost int64, capped bool) error {
 	if a.Agents < 1 {
 		return ErrNoAgents
 	}
@@ -349,7 +349,7 @@ func (w *World) UndermineInvestments(a, d *Empire) (string, error) {
 		if len(d.Investments) == 0 {
 			return fmt.Sprintf("%s has no investments to undermine.", d.Name), nil
 		}
-		var lost int
+		var lost int64
 		for i := range d.Investments {
 			cut := d.Investments[i].Amount / 4
 			d.Investments[i].Amount -= cut
@@ -381,7 +381,9 @@ const (
 )
 
 // slappenheimerResource pairs a strikeable field with its display name. BRE hid
-// which asset each effect hit, so IB picks its own spread of targets.
+// which asset each effect hit, so IB picks its own spread of targets. Land and
+// Gold are not in this list — Land has to move through the RegionMix and Gold is
+// held in money width — so slappenheimerDamage handles both beside the loop.
 type slappenheimerResource struct {
 	name string
 	val  *int
@@ -396,7 +398,6 @@ func slappenheimerResources(e *Empire) []slappenheimerResource {
 		{"Bombers", &e.Bombers},
 		{"Carriers", &e.Carriers},
 		{"Agents", &e.Agents},
-		{"Gold", &e.Gold},
 		{"Food", &e.Food},
 	}
 }
@@ -410,7 +411,8 @@ func slappenheimerResources(e *Empire) []slappenheimerResource {
 // than by touching e.Land directly.
 func (w *World) slappenheimerDamage(e *Empire) string {
 	res := slappenheimerResources(e)
-	landIdx := len(res) // one past the plain-int assets: Land
+	landIdx := len(res)    // one past the plain-int assets: Land
+	goldIdx := landIdx + 1 // and Gold, in money width
 	hits := 1
 	if w.rng.Intn(SlappenheimerMultiHitOdds) == 0 {
 		hits = 2 + w.rng.Intn(3) // 2-4 assets at once
@@ -418,7 +420,7 @@ func (w *World) slappenheimerDamage(e *Empire) string {
 	seen := make(map[int]bool, hits)
 	var parts []string
 	for k := 0; k < hits; k++ {
-		i := w.rng.Intn(landIdx + 1)
+		i := w.rng.Intn(goldIdx + 1)
 		if seen[i] {
 			continue
 		}
@@ -432,6 +434,15 @@ func (w *World) slappenheimerDamage(e *Empire) string {
 			e.Regions.remove(lost)
 			e.syncLand()
 			parts = append(parts, fmt.Sprintf("%d Regions", lost))
+			continue
+		}
+		if i == goldIdx {
+			lost := pctOf(e.Gold, pct)
+			if lost <= 0 {
+				continue
+			}
+			e.Gold -= lost
+			parts = append(parts, fmt.Sprintf("%d Gold", lost))
 			continue
 		}
 		lost := pctOf(*res[i].val, pct)

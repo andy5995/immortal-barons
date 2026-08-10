@@ -11,7 +11,7 @@ func TestCrownTaxIsShareOfIncome(t *testing.T) {
 	e.syncLand()
 
 	b := w.IncomeThisTurn(e)
-	if want := b.CrownTaxBase() * w.Config.PlanetaryTaxRate / 100; w.CrownTax(e) != want {
+	if want := int64(b.CrownTaxBase() * w.Config.PlanetaryTaxRate / 100); w.CrownTax(e) != want {
 		t.Errorf("CrownTax = %d, want %d", w.CrownTax(e), want)
 	}
 	// Trading proceeds are outside the base — BRE accumulates it at the six
@@ -33,8 +33,8 @@ func TestCrownTaxIsASink(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("t", "T")
 	e.Gold = 10000
-	total := func() int {
-		n := 0
+	total := func() int64 {
+		var n int64
 		for _, x := range w.Empires {
 			n += x.Gold
 		}
@@ -81,7 +81,7 @@ func TestCrownTaxShortfallCostsSupport(t *testing.T) {
 	if e.Support != 100 {
 		t.Errorf("penalty must not land until rollover, support already %d", e.Support)
 	}
-	want := req * CrownTaxSupportPenalty / (req + 1)
+	want := int(req * CrownTaxSupportPenalty / (req + 1))
 	if e.PendingSupportPenalty != want {
 		t.Errorf("pending penalty %d, want %d", e.PendingSupportPenalty, want)
 	}

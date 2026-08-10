@@ -3,6 +3,8 @@ package menu
 import (
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 // The Game Setup screen is paged: the full ruleset does not fit 80x25, so it
@@ -56,5 +58,31 @@ func TestGameSetupNamesTheLeague(t *testing.T) {
 	gameSetup(f2, w2)
 	if strings.Contains(f2.out.String(), "Coordinator") {
 		t.Error("league group should not appear on a standalone board")
+	}
+}
+
+// Game Setup reports the money cap. A player who does not know the figure only
+// discovers it by losing gold to it, and the sysop can set it to anything from
+// two billion up, so it cannot be assumed.
+func TestGameSetupShowsTheMoneyCap(t *testing.T) {
+	for _, c := range []struct {
+		billions int
+		want     string
+	}{
+		{game.MoneyCapMinBillions, "2B"},
+		{50, "50B"},
+		{game.MoneyCapMaxBillions, "999B"},
+	} {
+		w := newWorld()
+		w.Config.MoneyCapBillions = c.billions
+		f := &fakeSession{keys: []rune("     ")}
+		gameSetup(f, w)
+		out := anyEscape.ReplaceAllString(f.out.String(), "")
+		if !strings.Contains(out, "Most gold you can hold") {
+			t.Fatal("Game Setup omits the money cap row")
+		}
+		if !strings.Contains(out, c.want) {
+			t.Errorf("cap %dB: screen should show %q", c.billions, c.want)
+		}
 	}
 }

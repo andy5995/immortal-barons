@@ -11,7 +11,7 @@ import (
 
 func TestAbbrevMoney(t *testing.T) {
 	cases := []struct {
-		n    int
+		n    int64
 		want string
 	}{
 		{0, "0"},
@@ -20,11 +20,11 @@ func TestAbbrevMoney(t *testing.T) {
 		{1_000, "1k"},
 		{34_833_289, "34,833k"},
 		{999_999_999, "999,999k"},
-		{1_000_000_000, "1,000m"},
-		{1_373_000_000, "1,373m"},
+		{1_000_000_000, "1.0000B"},
+		{1_373_000_000, "1.3730B"},
 		{-500, "-500"},
 		{-34_833_289, "-34,833k"},
-		{-1_000_000_000, "-1,000m"},
+		{-1_000_000_000, "-1.0000B"},
 	}
 	for _, c := range cases {
 		if got := abbrevMoney(c.n); got != c.want {
@@ -35,13 +35,13 @@ func TestAbbrevMoney(t *testing.T) {
 
 func TestFormatGoldLocale(t *testing.T) {
 	cases := []struct {
-		n    int
+		n    int64
 		lang string
 		want string
 	}{
-		{1847392104, "de", "1.847.392.104"},
-		{1847392104, "ru", "1 847 392 104"},
-		{1847392104, "en", "1,847,392,104"},
+		{847392104, "de", "847.392.104"},
+		{847392104, "ru", "847 392 104"},
+		{847392104, "en", "847,392,104"},
 		{-1234567, "en", "-1,234,567"},
 		{-1234567, "", "-1,234,567"}, // "" defaults to the English comma
 		{1234567, "xx", "1,234,567"}, // unknown language falls back to comma
@@ -54,6 +54,44 @@ func TestFormatGoldLocale(t *testing.T) {
 	}
 	if comma(1234567) != "1,234,567" {
 		t.Errorf("comma should equal English formatGold, got %q", comma(1234567))
+	}
+}
+
+// A figure a billion or over is printed as a fixed 4-decimal "B" form, so it
+// fits a screen column BRE only ever sized for nine digits. Everything below a
+// billion keeps its full digits.
+func TestFormatGoldBillions(t *testing.T) {
+	cases := []struct {
+		n    int64
+		lang string
+		want string
+	}{
+		{999_999_999, "en", "999,999,999"}, // just under: unchanged
+		{1_000_000_000, "en", "1.0000B"},
+		{1_847_392_104, "en", "1.8473B"},     // truncated, never rounded up
+		{1_999_999_999, "en", "1.9999B"},     // a hair under two billion is not "2.0000B"
+		{2_000_000_000, "en", "2.0000B"},     // the figure the old cap silently ate
+		{999_999_999_999, "en", "999.9999B"}, // game.MoneyCap, the widest this form renders
+		{-1_847_392_104, "en", "-1.8473B"},
+		{1_847_392_104, "de", "1,8473B"}, // German takes the comma as its decimal mark
+		{1_847_392_104, "ru", "1,8473B"},
+		{1_500_000_000_000, "en", "1,500.0000B"}, // past the cap the whole part still groups
+	}
+	for _, c := range cases {
+		if got := formatGold(c.n, c.lang); got != c.want {
+			t.Errorf("formatGold(%d, %q) = %q, want %q", c.n, c.lang, got, c.want)
+		}
+	}
+}
+
+// The same helper serves counts, not just gold — that is the point of it being
+// generic. A plain int caller gets the identical rendering.
+func TestFormatGoldTakesCounts(t *testing.T) {
+	if got := comma(int(1_500_000_000)); got != "1.5000B" {
+		t.Errorf("a count of 1.5 billion formatted as %q, want %q", got, "1.5000B")
+	}
+	if got := comma(7212); got != "7,212" {
+		t.Errorf("a small count formatted as %q, want %q", got, "7,212")
 	}
 }
 

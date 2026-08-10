@@ -13,7 +13,7 @@ func TestLoanMathMatchesBRE(t *testing.T) {
 		{500, 10, 1296, 1594}, // 10.0%/day → 159.4% overall
 	}
 	for _, c := range cases {
-		if got := LoanTotalOwed(c.amount, c.days); got != c.wantOwed {
+		if got := LoanTotalOwed(int64(c.amount), c.days); got != int64(c.wantOwed) {
 			t.Errorf("LoanTotalOwed(%d, %d) = %d, want %d (BRE-verified)", c.amount, c.days, got, c.wantOwed)
 		}
 		if got := LoanOverallTenths(c.days); got != c.wantOverallTenths {
@@ -60,7 +60,7 @@ func TestTakeLoanAndDefault(t *testing.T) {
 	if len(e.Loans) != 0 {
 		t.Errorf("loan should be cleared after maturing, got %d", len(e.Loans))
 	}
-	wantDebt := 1175 + 1175*LoanDefaultPenaltyPct/100
+	wantDebt := int64(1175 + 1175*LoanDefaultPenaltyPct/100)
 	if e.Debt != wantDebt {
 		t.Errorf("defaulted debt: want %d, got %d", wantDebt, e.Debt)
 	}

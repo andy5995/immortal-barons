@@ -44,13 +44,15 @@ func (b TradeBasket) IsEmpty() bool { return b == TradeBasket{} }
 
 // goodPtrs returns pointers to an empire's fields for each basket good, in a
 // fixed order, so add/subtract/ownership can loop uniformly.
-func goodPtrs(e *Empire) [9]*int {
-	return [9]*int{&e.Troopers, &e.Jets, &e.Turrets, &e.Bombers, &e.Food, &e.Gold, &e.Agents, &e.Tanks, &e.Carriers}
+// Gold is not among them: it is the one basket good held in money width, so the
+// three routines below handle it beside the loop rather than inside it.
+func goodPtrs(e *Empire) [8]*int {
+	return [8]*int{&e.Troopers, &e.Jets, &e.Turrets, &e.Bombers, &e.Food, &e.Agents, &e.Tanks, &e.Carriers}
 }
 
 // basketVals returns a basket's amounts in the same fixed order as goodPtrs.
-func basketVals(b TradeBasket) [9]int {
-	return [9]int{b.Troopers, b.Jets, b.Turrets, b.Bombers, b.Food, b.Gold, b.Agents, b.Tanks, b.Carriers}
+func basketVals(b TradeBasket) [8]int {
+	return [8]int{b.Troopers, b.Jets, b.Turrets, b.Bombers, b.Food, b.Agents, b.Tanks, b.Carriers}
 }
 
 // empireHasBasket reports whether e owns at least everything in b.
@@ -61,19 +63,18 @@ func empireHasBasket(e *Empire, b TradeBasket) bool {
 			return false
 		}
 	}
-	return true
+	return e.Gold >= int64(b.Gold)
 }
 
 // addBasket / subBasket move a basket's goods onto / off of e. Gold is clamped
-// to MoneyCap on the way in (excess is lost, as when any gold overflows the cap).
-func addBasket(e *Empire, b TradeBasket) {
+// to the money cap on the way in (excess is lost, as when any gold overflows the
+// cap), which is why addBasket needs the World and subBasket does not.
+func (w *World) addBasket(e *Empire, b TradeBasket) {
 	ptrs, vals := goodPtrs(e), basketVals(b)
 	for i := range ptrs {
 		*ptrs[i] += vals[i]
 	}
-	if e.Gold > MoneyCap {
-		e.Gold = MoneyCap
-	}
+	w.creditGold(e, int64(b.Gold), "a trade deal")
 }
 
 func subBasket(e *Empire, b TradeBasket) {
@@ -81,6 +82,7 @@ func subBasket(e *Empire, b TradeBasket) {
 	for i := range ptrs {
 		*ptrs[i] -= vals[i]
 	}
+	e.Gold -= int64(b.Gold)
 }
 
 // TradeDeal is a pending barter offer recorded on the target empire: the sender
@@ -114,14 +116,14 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	if send.IsEmpty() && demand.IsEmpty() {
 		return fmt.Errorf("A trade deal must offer or request something.")
 	}
-	cost := TradeDealCost(days)
+	cost := int64(TradeDealCost(days))
 	if !empireHasBasket(from, send) {
 		return ErrCantAfford
 	}
 	if from.Carriers < send.Carriers+TradeDealCarriers {
 		return ErrTradeNeedsCarrier
 	}
-	if from.Gold < send.Gold+cost {
+	if from.Gold < int64(send.Gold)+cost {
 		return ErrCantAfford
 	}
 	subBasket(from, send)              // escrow the offered goods
@@ -170,9 +172,9 @@ func (w *World) AcceptTradeDeal(to *Empire, fromName string) error {
 		to.removeDeal(i)
 		return ErrTradeSenderGone
 	}
-	addBasket(to, d.Send)     // deliver the offered goods (escrow released to recipient)
-	subBasket(to, d.Demand)   // recipient pays the demand
-	addBasket(from, d.Demand) // sender receives the demand
+	w.addBasket(to, d.Send)     // deliver the offered goods (escrow released to recipient)
+	subBasket(to, d.Demand)     // recipient pays the demand
+	w.addBasket(from, d.Demand) // sender receives the demand
 	to.removeDeal(i)
 	w.SendMail(to, from, Message{
 		To:   w.EmpireLetter(from),
@@ -190,7 +192,7 @@ func (w *World) DeclineTradeDeal(to *Empire, fromName string) bool {
 	}
 	d := to.TradeDeals[i]
 	if from := w.FindByName(fromName); from != nil {
-		addBasket(from, d.Send) // return the escrow
+		w.addBasket(from, d.Send) // return the escrow
 	}
 	to.removeDeal(i)
 	return true

@@ -620,8 +620,8 @@ func TestClingyAnnihilatorLifecycle(t *testing.T) {
 	}
 
 	// Two barons fund it between them — that is the point of the thing.
-	founder.Gold = cost / 2 * AnnihilatorMillion
-	backer.Gold = cost * AnnihilatorMillion
+	founder.Gold = int64(cost / 2 * AnnihilatorMillion)
+	backer.Gold = int64(cost * AnnihilatorMillion)
 	if _, err := w.FundAnnihilator(founder, cost/2); err != nil {
 		t.Fatalf("founder funding: %v", err)
 	}

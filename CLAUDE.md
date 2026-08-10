@@ -31,6 +31,7 @@ go test ./internal/play/ -race        # the concurrency tests — run these when
 go run ./cmd/immortal-barons -local   # play locally in your terminal
 gofmt -w .                 # always run before committing
 python3 scripts/gen-ui-pot.py && scripts/merge-ui-po.sh   # after changing ANY tr() string
+scripts/gen-help-translations.sh   # after changing ANY internal/help/content/ file
 ```
 
 Go 1.26. Prefer the standard library, but a dependency is fine when it clearly
@@ -40,7 +41,12 @@ Keep the set small and justified. Commit `go.mod`/`go.sum`; do NOT commit
 `vendor/` (distros build against their own packaged deps or fetch at build); a
 release tarball may `go mod vendor` for offline builds. i18n uses gettext/PO:
 **po4a** for the help docs and a small **in-house PO reader** (`internal/i18n`,
-no runtime dependency) for UI strings.
+no runtime dependency) for UI strings. **These are two separate generation
+passes and editing one kind of string does not regenerate the other** — a help
+topic needs `gen-help-translations.sh` (which rewrites `content.de/`,
+`content.ru/` and `po/help/`), a `tr()` string needs the `gen-ui-pot.py` pair.
+Running only the UI one after editing a help topic leaves the German and Russian
+copies of that topic stale, with nothing failing to say so.
 
 ## Architecture
 
@@ -69,6 +75,10 @@ stream). Front-ends attach different streams; the engine is unchanged.
   its output.** The site's topic section is titled "Game Instructions" to match
   the in-game menu — it renders the same `internal/help` topics.
 - `internal/i18n` — dependency-free gettext-PO reader for UI strings
+- `internal/numfmt` — renders large numbers for display (locale thousands
+  separator; a 4-decimal `1.8473B` form at a billion). It sits below both
+  `game` and `menu` because the engine writes player-visible event text and
+  cannot import `menu`
 
 `menu.go` is the framework; `tree.go` is content. That split is the seam
 that lets the menu tree grow without touching the engine. Language is threaded
@@ -78,6 +88,20 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
 ## Conventions
 
 - Run `gofmt -w .` before every commit; keep `go vet` clean.
+- **Money is `int64`, everywhere.** `Empire.Gold`/`Bank`/`Debt`, investments,
+  loans, prices that can reach money scale. Plain `int` is 32 bits on the
+  32-bit door builds this project supports, which is what once capped gold in
+  hand at 2 billion and silently discarded the rest. A new money field or a
+  function returning gold takes `int64`; unit counts stay `int`. `goldCost` and
+  `unitsAffordable` convert between the two widths without wrapping. Run
+  `GOARCH=386 go test ./...` when touching money math — it catches overflows
+  the 64-bit build hides.
+- **Every path that pays gold in goes through `World.creditGold`.** It holds
+  gold in hand at the configured cap (`World.MoneyCap`, the sysop's
+  `MoneyCapBillions`) and files an event naming what was lost and where it came
+  from. `Withdraw` is the one exception: it draws only what fits and leaves the
+  remainder banked, so it destroys nothing. A credit site that assigns
+  `e.Gold +=` directly reintroduces the silent loss this replaced.
 - **Separate data from code: every tunable gameplay/economy number is a named
   constant in a dedicated data file, not a bare literal in the formula code.**
   Today that file is `internal/game/balance.go`; as the set grows it's fine to

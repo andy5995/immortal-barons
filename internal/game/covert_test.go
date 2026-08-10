@@ -350,13 +350,13 @@ func TestSlappenheimerStrikeDamagesTarget(t *testing.T) {
 	// strikeable resource. Only ~3 in 10 launches land, so fire many.
 	a.Agents, d.Agents, d.Troopers, d.SDI = 50, 0, 0, 0
 	d.Jets, d.Turrets, d.Tanks, d.Bombers, d.Carriers, d.Gold, d.Food = 1000, 1000, 1000, 1000, 1000, 1000, 1000
-	before := d.Jets + d.Turrets + d.Tanks + d.Bombers + d.Carriers + d.Agents + d.Gold + d.Food
+	before := int64(d.Jets+d.Turrets+d.Tanks+d.Bombers+d.Carriers+d.Agents+d.Food) + d.Gold
 	for i := 0; i < 100; i++ {
 		if _, err := w.SlappenheimerStrike(a, d); err != nil {
 			t.Fatal(err)
 		}
 	}
-	after := d.Jets + d.Turrets + d.Tanks + d.Bombers + d.Carriers + d.Agents + d.Gold + d.Food
+	after := int64(d.Jets+d.Turrets+d.Tanks+d.Bombers+d.Carriers+d.Agents+d.Food) + d.Gold
 	if after >= before {
 		t.Errorf("expected R5-Slappenheimer strikes to reduce the target's resources, before=%d after=%d", before, after)
 	}
@@ -402,4 +402,23 @@ func TestBriberyGrantsImmunity(t *testing.T) {
 	if a.Troopers != before {
 		t.Errorf("d's ops should fail from a's bribery immunity, troopers %d -> %d", before, a.Troopers)
 	}
+}
+
+// Gold is one of the R5-Slappenheimer's targets. It is held in money width, so
+// it sits outside the loop over the count-width assets — easy to leave out of
+// the target roll entirely, which would quietly make the weapon weaker.
+func TestSlappenheimerCanStrikeGold(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents, d.Troopers, d.SDI = 50, 0, 0, 0
+	d.Gold = 1_000_000
+	before := d.Gold
+	for i := 0; i < 300; i++ {
+		if _, err := w.SlappenheimerStrike(a, d); err != nil {
+			t.Fatal(err)
+		}
+		if d.Gold < before {
+			return // it reached gold at least once
+		}
+	}
+	t.Errorf("300 landed-or-fizzled launches never touched gold (still %d)", d.Gold)
 }

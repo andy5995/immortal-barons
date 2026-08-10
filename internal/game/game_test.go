@@ -209,7 +209,7 @@ func TestHQPriceRisesWithTurnsPlayed(t *testing.T) {
 func TestHQBuildRate(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
-	e.Gold = w.HQPrice(e)
+	e.Gold = int64(w.HQPrice(e))
 	if err := w.StartHQ(e); err != nil {
 		t.Fatalf("StartHQ: %v", err)
 	}

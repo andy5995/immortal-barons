@@ -10,7 +10,7 @@ func TestTechnologyLowersRegionUpkeep(t *testing.T) {
 	e.Regions = RegionMix{Agricultural: 80, Technology: 20}
 	e.Land = e.Regions.Total() // 100
 	e.TechSlots[TechSlotMaint] = 40
-	base := e.Land * RegionUpkeepPerLand
+	base := int64(e.Land * RegionUpkeepPerLand)
 	if want, got := techLower(base, e.TechMaintFactor()), e.RegionUpkeep(); got != want {
 		t.Errorf("RegionUpkeep with tech: want %d, got %d", want, got)
 	}
@@ -114,7 +114,7 @@ func TestSupportBoostCostAndAward(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
 	e.Support, e.People = 97, 23874
-	if want := 3 * (3*23874 + 500); e.SupportBoostCost() != want {
+	if want := int64(3 * (3*23874 + 500)); e.SupportBoostCost() != want {
 		t.Errorf("cost want %d, got %d", want, e.SupportBoostCost())
 	}
 	full := *e

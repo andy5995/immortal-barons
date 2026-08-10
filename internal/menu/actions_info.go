@@ -181,7 +181,9 @@ func hiTerms(s, emph, base string) string {
 // Technology figures are bright-yellow, the Civilian/Military tallies are
 // bright-white, and a Civilian food shortfall is flagged bright-yellow.
 func advisorReport(s session.Session, d advisorData, dom advisorDomain) []advisorLine {
-	num := func(n int) string { return formatGold(n, sessionLang(s)) }
+	num := func(n int64) string { return formatGold(n, sessionLang(s)) }
+	// count is num for figures held in count width (people, food, units).
+	count := func(n int) string { return formatGold(n, sessionLang(s)) }
 	p := &d.p
 	fig := ansi.FgBrightWhite
 	if dom == advisorEconomic || dom == advisorTechnology {
@@ -203,8 +205,8 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 	warn := func(text string) { out = append(out, advisorLine{text, ansi.FgBrightYellow, emph}) }
 	switch dom {
 	case advisorCivilian:
-		add(fmt.Sprintf(tr(s, "Our people number %s, and their support stands at %d%%."), num(p.People), p.Support))
-		add(fmt.Sprintf(tr(s, "We grow %s food each turn and consume %s."), num(d.foodGrown), num(d.foodEaten)))
+		add(fmt.Sprintf(tr(s, "Our people number %s, and their support stands at %d%%."), count(p.People), p.Support))
+		add(fmt.Sprintf(tr(s, "We grow %s food each turn and consume %s."), count(d.foodGrown), count(d.foodEaten)))
 		net := d.foodGrown - d.foodEaten
 		// Food is credited at turn start, so p.Food already includes this turn's
 		// growth. The projections below are written against the pre-growth stock, so
@@ -216,14 +218,14 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			// consumption, so the turn ends with negative food (turn.go starvation step).
 			warn(tr(s, "Our food will not last the turn. Buy or grow more."))
 		case net < 0:
-			warn(fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), num(-net), stock/(-net)))
+			warn(fmt.Sprintf(tr(s, "We run a shortfall of %s; our stores will run out in about %d turns."), count(-net), stock/(-net)))
 		case d.foodAtCap > d.foodGrown:
 			// Fed now, but the populace is still growing toward a support-driven
 			// capacity whose food need outruns production (see issue #35).
-			warn(fmt.Sprintf(tr(s, "We have a surplus now, but our people are still growing. At full size they will eat about %s food each turn, more than we grow. Add agricultural regions before then."), num(d.foodAtCap)))
+			warn(fmt.Sprintf(tr(s, "We have a surplus now, but our people are still growing. At full size they will eat about %s food each turn, more than we grow. Add agricultural regions before then."), count(d.foodAtCap)))
 		default:
 			// The food bottom line pops in yellow whether short or in surplus (BRE).
-			warn(fmt.Sprintf(tr(s, "That leaves a surplus of %s. Our stores are secure."), num(net)))
+			warn(fmt.Sprintf(tr(s, "That leaves a surplus of %s. Our stores are secure."), count(net)))
 		}
 		if p.Support < 50 {
 			warn(tr(s, "The people grow restless. Lower taxes or spend on their support."))
@@ -240,7 +242,7 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		if d.worldIncome > 0 {
 			share = d.income * 100 / d.worldIncome
 		}
-		add(fmt.Sprintf(tr(s, "We earn about %s gold each turn, %d%% of the world total."), num(d.income), share))
+		add(fmt.Sprintf(tr(s, "We earn about %s gold each turn, %d%% of the world total."), count(d.income), share))
 		perRegion, avg := 0, 0
 		if p.Land > 0 {
 			perRegion = d.income / p.Land
@@ -248,13 +250,13 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		if d.worldLand > 0 {
 			avg = d.worldIncome / d.worldLand
 		}
-		add(fmt.Sprintf(tr(s, "That is %s gold per region; the world average is %s."), num(perRegion), num(avg)))
+		add(fmt.Sprintf(tr(s, "That is %s gold per region; the world average is %s."), count(perRegion), count(avg)))
 		if p.Gold <= 0 && p.Bank <= 0 {
 			add(tr(s, "Our treasury is empty, Sire. We should raise gold soon."))
 		}
 	case advisorMilitary:
 		add(fmt.Sprintf(tr(s, "Our forces: %s troopers, %s jets, %s turrets, %s tanks, %s bombers, %s carriers."),
-			num(p.Troopers), num(p.Jets), num(p.Turrets), num(p.Tanks), num(p.Bombers), num(p.Carriers)))
+			count(p.Troopers), count(p.Jets), count(p.Turrets), count(p.Tanks), count(p.Bombers), count(p.Carriers)))
 		switch {
 		case p.HQ == 0:
 			// The price climbs with every turn played (World.HQPrice), so "soon" is
@@ -276,7 +278,7 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		if p.Agents == 0 {
 			add(tr(s, "We have no {covert agents}. Recruit some for spying and sabotage."))
 		} else {
-			add(fmt.Sprintf(tr(s, "We keep %s covert agents."), num(p.Agents)))
+			add(fmt.Sprintf(tr(s, "We keep %s covert agents."), count(p.Agents)))
 		}
 	case advisorTechnology:
 		// One line per effect, as BRE's Technology advisor reports them: raised
@@ -459,6 +461,12 @@ func gameSetup(s session.Session, w *ctx) Result {
 	group("Money")
 	row("Maximum tax rate", fmt.Sprintf("%d%%", c.MaxTaxRate))
 	row("Crown tax on income", fmt.Sprintf("%d%%", c.PlanetaryTaxRate))
+	// Worth a line of its own: gold earned past this is destroyed, and a player
+	// who does not know the figure only finds out by losing some.
+	// Whole billions, not the 4-decimal display form: the cap is SET in billions,
+	// so the fraction is always zeros.
+	row("Most gold you can hold", fmt.Sprintf(tr(s, "%sB in hand, and again in the bank"),
+		comma(w.MoneyCap()/1_000_000_000)))
 	row("Bank interest", fmt.Sprintf(tr(s, "%d%% over 10 days"), c.InterestRate))
 	row("Investment rate", investRateStr(s, c))
 	row("Food market", foodMarketStr(s, c))

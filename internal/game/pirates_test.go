@@ -227,9 +227,9 @@ func TestPirateRaidStealsAllButBombersAndCarriers(t *testing.T) {
 	if v.Bombers != 500 || v.Carriers != 500 {
 		t.Errorf("pirates must not take bombers/carriers: bombers=%d carriers=%d", v.Bombers, v.Carriers)
 	}
-	stolen := map[string]int{
-		"troopers": v.Troopers, "jets": v.Jets, "turrets": v.Turrets,
-		"tanks": v.Tanks, "agents": v.Agents, "gold": v.Gold,
+	stolen := map[string]int64{
+		"troopers": int64(v.Troopers), "jets": int64(v.Jets), "turrets": int64(v.Turrets),
+		"tanks": int64(v.Tanks), "agents": int64(v.Agents), "gold": v.Gold,
 	}
 	for name, got := range stolen {
 		if got != 950 { // 1000 - 5%

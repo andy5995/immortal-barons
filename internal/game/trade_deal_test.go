@@ -24,7 +24,7 @@ func TestSendTradeDealChargesAndAcceptTransfersBaskets(t *testing.T) {
 	if from.Carriers != 0 {
 		t.Errorf("send should consume the transport carrier: %d, want 0", from.Carriers)
 	}
-	if from.Gold != 300_000-fee {
+	if from.Gold != int64(300_000-fee) {
 		t.Errorf("send should charge the fee: Gold = %d, want %d", from.Gold, 300_000-fee)
 	}
 	if len(to.TradeDeals) != 1 {
@@ -37,7 +37,7 @@ func TestSendTradeDealChargesAndAcceptTransfersBaskets(t *testing.T) {
 	if to.Tanks != 100 || to.Gold != 95_000 {
 		t.Errorf("accept should deliver 100 tanks and take 5000 gold: Tanks=%d Gold=%d", to.Tanks, to.Gold)
 	}
-	if from.Gold != 300_000-fee+5_000 {
+	if from.Gold != int64(300_000-fee+5_000) {
 		t.Errorf("accept should pay the demanded gold to the sender: %d", from.Gold)
 	}
 }
@@ -132,14 +132,14 @@ func TestAcceptTradeDealClampsGoldToMoneyCap(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
-	from.Carriers, from.Gold = 1, MoneyCap
-	to.Gold = MoneyCap - 50
+	from.Carriers, from.Gold = 1, w.MoneyCap()
+	to.Gold = w.MoneyCap() - 50
 
 	w.SendTradeDeal(from, to, TradeBasket{Gold: 1_000}, TradeBasket{}, TradeDealMinDays)
 	if err := w.AcceptTradeDeal(to, "Fromland"); err != nil {
 		t.Fatalf("accept: %v", err)
 	}
-	if to.Gold != MoneyCap {
-		t.Errorf("delivered gold should clamp to MoneyCap: %d, want %d", to.Gold, MoneyCap)
+	if to.Gold != w.MoneyCap() {
+		t.Errorf("delivered gold should clamp to the money cap: %d, want %d", to.Gold, w.MoneyCap())
 	}
 }

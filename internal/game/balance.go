@@ -887,11 +887,42 @@ const (
 	TechAgreementGainDiv = 20 // per-turn catch-up = (partner ceiling − yours) / this
 )
 
-// Money ceilings (BRE-scale). Kept under int32 max so 32-bit door builds stay
-// correct — do not raise past ~2.1e9 without widening the money fields to int64.
+// Money ceilings. The money fields are int64 (Empire.Gold and friends), so what
+// a realm may hold is a game rule rather than a machine-word limit: a 32-bit
+// door build holds the same range as a 64-bit one. The ceiling used to be a
+// hard-coded 2 billion because plain int is 32 bits on a 32-bit build, and every
+// gold credit past it was silently discarded.
 const (
-	InterestCap = 1_599_999_999 // bank balance above this earns no more interest
-	MoneyCap    = 2_000_000_000 // hard cap on gold on hand / in bank
+	InterestCap int64 = 1_599_999_999 // bank balance above this earns no more interest
+
+	// What a realm may HOLD, on hand or in the bank, is the sysop's call:
+	// Config.MoneyCapBillions, read through World.MoneyCap. The default is BRE's
+	// own 2 billion; a league that wants a longer game raises it. These are the
+	// bounds of that knob, in whole billions so the Configuration Editor's field
+	// stays three digits and fits an int on a 32-bit door.
+	//
+	// The ceiling is 999 because MoneyCapMax is the widest figure the abbreviated
+	// billions display renders in three digits before the point (999.0000B).
+	MoneyCapMinBillions = 2
+	MoneyCapMaxBillions = 999
+
+	// MoneyCapMax is the highest that knob can reach. Pure helpers that project a
+	// future figure (ExpectedReturn, LoanTotalOwed) clamp to it as an overflow
+	// guard; what a realm actually holds is clamped to the configured cap when
+	// the gold lands.
+	MoneyCapMax int64 = MoneyCapMaxBillions * 1_000_000_000
+
+	// MaxInvestment is the most gold ONE investment may lock away. Deposits and
+	// withdrawals are deliberately unbounded (up to the money cap) — nothing gates the
+	// bank per turn, so a per-action limit there only cost keystrokes. Locking
+	// gold away is the case worth bounding, and a baron may still open as many
+	// investments as they like.
+	MaxInvestment = 2_000_000_000
+
+	// MaxCountField is the largest value a figure held in COUNT width (a plain
+	// int, 32 bits on a 32-bit door) may take: a per-unit market price, a
+	// trade-basket amount. Money is int64 and bounded by MoneyCap instead.
+	MaxCountField = 2_000_000_000
 )
 
 // Trade-deal sending (BRE-verified live, 2026-07-21): sending a trade deal

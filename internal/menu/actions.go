@@ -3,6 +3,7 @@ package menu
 import (
 	"errors"
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -42,7 +43,7 @@ func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.
 		price := unit(w)
 		max := 0
 		if price > 0 {
-			max = p.Gold / price
+			max = int(min(p.Gold/int64(price), math.MaxInt32))
 		}
 		n := promptSuggested(s, fmt.Sprintf("%s — %d gold each. How many?", label, price), 0, max)
 		if n <= 0 {
@@ -78,7 +79,8 @@ func sellUnit(label string, owned func(*game.Empire) int, apply func(*game.World
 		if n <= 0 {
 			return Stay
 		}
-		var gold, sold int
+		var sold int
+		var gold int64
 		err := w.mutatePlayer(func(p *game.Empire) error {
 			// The game-level sell clamps to the CURRENT stock, which a concurrent
 			// node's strike may have thinned since the prompt was drawn — report

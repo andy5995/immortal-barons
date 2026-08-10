@@ -53,7 +53,7 @@ func TestQueenRefundIsCappedOnlyWhileProtected(t *testing.T) {
 	if got := w.QueenRefund(e); got != 1_000_000 {
 		t.Errorf("protected realm: refund = %d, want the 1,000,000 cap", got)
 	}
-	if want := 200_000_000 - 1_000_000; w.RefundPool != want {
+	if want := int64(200_000_000 - 1_000_000); w.RefundPool != want {
 		t.Errorf("purse = %d, want %d — it loses exactly what it paid", w.RefundPool, want)
 	}
 	e.Protection = 0

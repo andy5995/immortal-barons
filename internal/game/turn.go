@@ -268,12 +268,12 @@ func (w *World) aiManageEconomy(e *Empire) {
 	if target := upkeep * AIFoodBufferTurns; e.Food < target {
 		if price := w.FoodBuyPrice(); price > 0 {
 			buy := target - e.Food
-			if buy > (e.Gold/2)/price {
-				buy = (e.Gold / 2) / price
+			if afford := unitsAffordable(e.Gold/2, price); buy > afford {
+				buy = afford
 			}
 			if buy > 0 {
 				e.Food += buy
-				e.Gold -= buy * price
+				e.Gold -= goldCost(buy, price)
 			}
 		}
 	}
@@ -285,9 +285,9 @@ func (w *World) aiManageEconomy(e *Empire) {
 	//    turn, so the old 5-region trickle never caught up and the population
 	//    outran its food into starvation; the food buffer in step 1 rides out the
 	//    turn while this closes the gap.
-	if produced < upkeep && e.Gold > w.Prices.Land {
+	if produced < upkeep && e.Gold > int64(w.Prices.Land) {
 		n := (upkeep-produced)/FoodAgriBase + 1 // conservative: the floor of the yield band
-		if afford := e.Gold / w.Prices.Land; n > afford {
+		if afford := unitsAffordable(e.Gold, w.Prices.Land); n > afford {
 			n = afford
 		}
 		if n > AIAgriBuyMax {
@@ -299,7 +299,7 @@ func (w *World) aiManageEconomy(e *Empire) {
 		if n > 0 {
 			e.Regions.Agricultural += n
 			e.syncLand()
-			e.Gold -= n * w.Prices.Land
+			e.Gold -= goldCost(n, w.Prices.Land)
 			e.LandAvailable -= n
 			return
 		}
@@ -325,7 +325,7 @@ func (w *World) aiManageEconomy(e *Empire) {
 // tiny realm still holds something (#70). A flat figure did not track realm size
 // — a grown realm earned it back in a fraction of a turn, so the same threshold
 // gated both land buying and investing however large the economy became.
-func (w *World) aiReserve(e *Empire) int {
+func (w *World) aiReserve(e *Empire) int64 {
 	return max(AIGoldReserveMin, (w.ForcesDue(e)+w.RegionsDue(e))*AIReserveTurns)
 }
 
@@ -347,9 +347,9 @@ func (w *World) aiExpandLand(e *Empire) {
 		budget = budget * AIDullLandBuyPct / 100 // dull barons hold back and grow slower
 	}
 	limit := min(w.regionBuyLimit(e), e.LandAvailable)
-	n, total := 0, 0
+	n, total := 0, int64(0)
 	for n < limit {
-		cost := w.regionCost(e.Land + n)
+		cost := int64(w.regionCost(e.Land + n))
 		if total+cost > budget {
 			break
 		}
@@ -366,7 +366,7 @@ func (w *World) aiExpandLand(e *Empire) {
 // to amplify. StartHQ re-checks affordability, and HQ then advances on its own
 // each turn (see PlayTurn), so this fires once and needs no further management.
 func (w *World) aiStartHQ(e *Empire) {
-	if e.HQ == 0 && e.Tanks > 0 && e.Gold > w.HQPrice(e) {
+	if e.HQ == 0 && e.Tanks > 0 && e.Gold > int64(w.HQPrice(e)) {
 		w.StartHQ(e)
 	}
 }
@@ -389,9 +389,9 @@ func (w *World) aiBuildForces(e *Empire) {
 		if price <= 0 {
 			return
 		}
-		if n := pctOf(budget, share) / price; n > 0 {
+		if n := unitsAffordable(pctOf(budget, share), price); n > 0 {
 			*count += n
-			e.Gold -= n * price
+			e.Gold -= goldCost(n, price)
 		}
 	}
 	mix := aiForceShares(e.aiProfile())
@@ -426,12 +426,12 @@ func (w *World) aiBuyCarriers(e *Empire) {
 	if short <= 0 {
 		return
 	}
-	if afford := e.Gold / price; short > afford {
+	if afford := unitsAffordable(e.Gold, price); short > afford {
 		short = afford
 	}
 	if short > 0 {
 		e.Carriers += short
-		e.Gold -= short * price
+		e.Gold -= goldCost(short, price)
 	}
 }
 
@@ -458,12 +458,12 @@ func (w *World) aiShopMarket(e *Empire) {
 			if l.Price > want || l.Price <= 0 {
 				continue
 			}
-			n := min(l.Qty, budget/l.Price)
+			n := min(l.Qty, unitsAffordable(budget, l.Price))
 			if n <= 0 {
 				continue
 			}
 			if w.BuyFromMarket(e, l.Owner, good, n) == nil {
-				budget -= n * l.Price
+				budget -= goldCost(n, l.Price)
 			}
 		}
 	}
@@ -563,7 +563,7 @@ func (w *World) aiRebalanceRegions(e *Empire) {
 	if w.FoodGrown(e) >= e.FoodUpkeep() {
 		return
 	}
-	if e.Gold >= w.LandPrice(e) || e.LandAvailable <= 0 {
+	if e.Gold >= int64(w.LandPrice(e)) || e.LandAvailable <= 0 {
 		return // it can already afford land, or there is none to buy
 	}
 	// Sell from whichever non-food type it holds most of, so the mix evens out
@@ -661,8 +661,8 @@ func (b IncomeBreakdown) CrownTaxBase() int {
 // or units. BRE stores its rate in tenths of a percent (its default is 50,
 // shown as 5.0%); IB stores whole percent instead, so a sysop and the config
 // editor deal in one unit rather than two. Same arithmetic, one fewer trap.
-func (w *World) CrownTax(e *Empire) int {
-	return w.IncomeThisTurn(e).CrownTaxBase() * w.Config.PlanetaryTaxRate / 100
+func (w *World) CrownTax(e *Empire) int64 {
+	return pctOf(int64(w.IncomeThisTurn(e).CrownTaxBase()), w.Config.PlanetaryTaxRate)
 }
 
 // regionDraw returns this turn's income draw for empire e's region type
@@ -803,7 +803,7 @@ func (w *World) GrowFood(e *Empire) {
 }
 
 func (w *World) CollectIncome(e *Empire) {
-	e.Gold += w.IncomeThisTurn(e).Gold()
+	w.creditGold(e, int64(w.IncomeThisTurn(e).Gold()), "this turn's income")
 }
 
 func (w *World) processEconomy(e *Empire) {
@@ -819,11 +819,17 @@ func (w *World) processEconomy(e *Empire) {
 	if tpd < 1 {
 		tpd = 1
 	}
-	newBank := int64(e.Bank) + int64(min(e.Bank, InterestCap))*int64(w.Config.InterestRate)/(1000*tpd)
-	if newBank > MoneyCap {
-		newBank = MoneyCap
+	e.Bank += min(e.Bank, InterestCap) * int64(w.Config.InterestRate) / (1000 * tpd)
+	// A bank sitting at the cap pays its interest into the treasury rather than
+	// having it destroyed: the cap limits what one purse holds, and a full purse
+	// is no reason to burn the earnings. Gold has the same cap, so a baron whose
+	// hand is full too still loses the overflow — the clamp at the end of this
+	// function. Whether the original does this is unverified; IB chooses it
+	// because the alternative silently deletes money the player earned.
+	if over := e.Bank - w.MoneyCap(); over > 0 {
+		e.Bank = w.MoneyCap()
+		w.creditGold(e, over, "bank interest")
 	}
-	e.Bank = int(newBank)
 	if e.Debt > 0 {
 		e.Debt += e.Debt * DebtGrowthPct / 100
 	}
@@ -948,11 +954,11 @@ func (w *World) processEconomy(e *Empire) {
 		e.LastMoraleDesertion = 0
 	}
 
-	if e.Gold > MoneyCap {
-		e.Gold = MoneyCap
+	if e.Gold > w.MoneyCap() {
+		e.Gold = w.MoneyCap()
 	}
-	if e.Bank > MoneyCap {
-		e.Bank = MoneyCap
+	if e.Bank > w.MoneyCap() {
+		e.Bank = w.MoneyCap()
 	}
 }
 

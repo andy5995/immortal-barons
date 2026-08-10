@@ -105,7 +105,8 @@ func runSpectate(cfg game.Config, days int) error {
 
 // spectateSnapshot totals the living realms for one day's summary line.
 type spectateTotals struct {
-	alive, land, people, gold, offense, defense int
+	alive, land, people, offense, defense int
+	gold                                  int64
 }
 
 func spectateSnapshot(w *game.World) spectateTotals {

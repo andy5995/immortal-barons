@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-08-08 15:05-0500\n"
+"POT-Creation-Date: 2026-08-10 03:16-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -93,13 +93,13 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/controls/numbers.md:18
+#: internal/help/content/controls/numbers.md:19
 #, markdown-text
 msgid "The left number is a suggested value. Press Enter to accept it."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/controls/numbers.md:18
+#: internal/help/content/controls/numbers.md:19
 #, markdown-text
 msgid ""
 "The right number is the most you can pick. Type `>` to fill the box with "
@@ -107,23 +107,47 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/controls/numbers.md:18
+#: internal/help/content/controls/numbers.md:19
 #, markdown-text
 msgid "`k` adds three zeros as you type. Press `1` then `k` and you see `1000`."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/controls/numbers.md:18
+#: internal/help/content/controls/numbers.md:19
 #, markdown-text
 msgid "`m` adds six zeros. Press `2` then `m` and you see `2000000`."
 msgstr ""
 
+#. type: Bullet: '- '
+#: internal/help/content/controls/numbers.md:19
+#, markdown-text
+msgid "`b` adds nine zeros. Press `3` then `b` and you see `3000000000`."
+msgstr ""
+
 #. type: Plain text
-#: internal/help/content/controls/numbers.md:20
+#: internal/help/content/controls/numbers.md:22
 #, markdown-text
 msgid ""
 "If you type a number larger than the maximum, the game lowers it to the "
 "maximum when you press Enter."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/controls/numbers.md:23
+#, markdown-text, no-wrap
+msgid "Very large numbers"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/numbers.md:30
+#, markdown-text
+msgid ""
+"A number of a billion or more is shown in short form with a capital `B`, to "
+"keep it inside its column: `1.0000B` is one billion, and `1.8473B` is a "
+"little over one and four fifths of a billion. The four digits after the "
+"point are the part below a billion, cut off rather than rounded up, so a "
+"figure just short of the next billion never looks like it got there. You "
+"still type these numbers in full, or with the `b` key above."
 msgstr ""
 
 #. type: Title #
@@ -633,14 +657,47 @@ msgstr ""
 msgid "Cash Relief / Loans — borrow gold, or pay back what you already owe."
 msgstr ""
 
+#. type: Plain text
+#: internal/help/content/economy/banking.md:19
+#, markdown-text
+msgid ""
+"Deposits and withdrawals have no size limit. One investment locks away at "
+"most two billion gold, though you may open as many as you like."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:23
+#, markdown-text
+msgid ""
+"Your sysop sets a limit on how much gold you can hold — two billion to begin "
+"with, in hand and the same again in the bank. Gold you earn above that is "
+"lost.  Spend it before you get there."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:26
+#, markdown-text
+msgid ""
+"A full bank still pays its interest, into your gold in hand rather than the "
+"bank. Once both are full, it goes nowhere."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:29
+#, markdown-text
+msgid ""
+"The game tells you when gold is lost this way. Your event log names the "
+"amount and where it came from."
+msgstr ""
+
 #. type: Title ##
-#: internal/help/content/economy/banking.md:17
+#: internal/help/content/economy/banking.md:30
 #, markdown-text, no-wrap
 msgid "Cash Relief / Loans"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:23
+#: internal/help/content/economy/banking.md:36
 #, markdown-text
 msgid ""
 "When you borrow, you first pick how many days you have to pay it back (1 to "
@@ -651,7 +708,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:28
+#: internal/help/content/economy/banking.md:41
 #, markdown-text
 msgid ""
 "You must repay the full amount on the due date. The bank takes it from your "
@@ -661,13 +718,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/banking.md:29
+#: internal/help/content/economy/banking.md:42
 #, markdown-text, no-wrap
 msgid "Investments"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:35
+#: internal/help/content/economy/banking.md:48
 #, markdown-text
 msgid ""
 "You can lock gold away as an investment for 2 to 10 days. It pays back your "

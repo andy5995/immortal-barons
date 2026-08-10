@@ -414,7 +414,8 @@ func sdiProgram(s session.Session, w *ctx) Result {
 	// BRE's SDI screen: four figures, then the turn's allowance and the
 	// increments note, then the funding prompt. Labels white, figures
 	// bright-yellow, the note gray (docs/dev/bre-screens.md).
-	var funding, maint, perRegion, strength, allowance, gold int
+	var funding, maint, perRegion, allowance, gold int64
+	var strength int
 	w.With(func() {
 		p := w.Player()
 		funding, strength = p.SDIFunding, p.SDI

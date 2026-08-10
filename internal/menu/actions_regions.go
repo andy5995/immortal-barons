@@ -158,7 +158,7 @@ func buyLand(s session.Session, w *ctx) Result {
 			if n <= 0 {
 				continue
 			}
-			var gold int
+			var gold int64
 			// Re-resolve inside the transaction: BuyRegions re-checks gold and the
 			// per-turn region cap against fresh state, and the region field pointer
 			// must index the reloaded empire, not the stale gather.

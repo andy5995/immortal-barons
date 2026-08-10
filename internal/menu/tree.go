@@ -135,8 +135,8 @@ func BuildMenus() *Menus {
 
 	bank.Items = []Item{
 		{Key: 'C', Label: "Cash Relief / Loans", Do: cashRelief},
-		{Key: 'D', Label: "Deposit Funds", Do: money("Deposit", func(p *game.Empire) int { return p.Gold }, (*game.World).Deposit)},
-		{Key: 'W', Label: "Withdraw Funds", Do: money("Withdraw", func(p *game.Empire) int { return p.Bank }, (*game.World).Withdraw)},
+		{Key: 'D', Label: "Deposit Funds", Do: money("Deposit", func(p *game.Empire) int64 { return p.Gold }, (*game.World).Deposit)},
+		{Key: 'W', Label: "Withdraw Funds", Do: money("Withdraw", func(p *game.Empire) int64 { return p.Bank }, (*game.World).Withdraw)},
 		{Key: 'I', Label: "Investments", Do: investFunds},
 		{Key: 'L', Label: "List Investments / Loans", Do: listInvestments},
 		{Key: 'V', Label: "View Bank Rates", Do: bankRates},

@@ -3,11 +3,12 @@ package menu
 import (
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
+	"math"
 )
 
 func buyFoodMarket(s session.Session, w *ctx) Result {
 	p := w.Player()
-	maxBuy := p.Gold / w.FoodBuyPrice()
+	maxBuy := int(min(p.Gold/int64(w.FoodBuyPrice()), math.MaxInt32))
 	if !w.Config.FoodUnlimited && w.FoodMarketSupply < maxBuy {
 		maxBuy = w.FoodMarketSupply // can't buy more than the market has today
 	}

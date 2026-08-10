@@ -24,7 +24,9 @@ var tradeGoods = []struct {
 	{'3', "Turrets", func(b *game.TradeBasket) *int { return &b.Turrets }, func(e *game.Empire) int { return e.Turrets }},
 	{'4', "Bombers", func(b *game.TradeBasket) *int { return &b.Bombers }, func(e *game.Empire) int { return e.Bombers }},
 	{'5', "Food", func(b *game.TradeBasket) *int { return &b.Food }, func(e *game.Empire) int { return e.Food }},
-	{'6', "Gold", func(b *game.TradeBasket) *int { return &b.Gold }, func(e *game.Empire) int { return e.Gold }},
+	// A trade deal moves at most MaxCountField gold, so the basket holds the
+	// amount in count width even though a treasury does not.
+	{'6', "Gold", func(b *game.TradeBasket) *int { return &b.Gold }, func(e *game.Empire) int { return int(min(e.Gold, game.MaxCountField)) }},
 	{'7', "Agents", func(b *game.TradeBasket) *int { return &b.Agents }, func(e *game.Empire) int { return e.Agents }},
 	{'8', "Tanks", func(b *game.TradeBasket) *int { return &b.Tanks }, func(e *game.Empire) int { return e.Tanks }},
 	{'9', "Carriers", func(b *game.TradeBasket) *int { return &b.Carriers }, func(e *game.Empire) int { return e.Carriers }},

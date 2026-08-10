@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"math"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -106,7 +107,9 @@ func marketChangeSetup(s session.Session, w *ctx, good string) {
 	p := w.Player()
 	max := marketFieldValue(p, good) + w.MarketForSale(p.Owner, good)
 	qty := promptSuggested(s, fmt.Sprintf(tr(s, "New amount of %s for sale"), tr(s, good)), w.MarketForSale(p.Owner, good), max)
-	price := promptSuggested(s, fmt.Sprintf(tr(s, "Set %s price"), tr(s, good)), w.MarketPrice(p.Owner, good), game.MoneyCap)
+	// A per-unit price is held in count width, so it is bounded by what one
+	// transaction may move rather than by what a treasury may hold.
+	price := promptSuggested(s, fmt.Sprintf(tr(s, "Set %s price"), tr(s, good)), w.MarketPrice(p.Owner, good), game.MaxCountField)
 	err := w.mutatePlayer(func(pp *game.Empire) error {
 		return w.World.SetMarketListing(pp, good, qty, price)
 	})
@@ -152,7 +155,7 @@ func marketBuy(s session.Session, w *ctx, good string) {
 	price := target.Price
 	max := target.Qty
 	if price > 0 {
-		if afford := p.Gold / price; afford < max {
+		if afford := int(min(p.Gold/int64(price), math.MaxInt32)); afford < max {
 			max = afford
 		}
 	}

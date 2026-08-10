@@ -28,3 +28,20 @@ func TestEmpireStatusLabelsFitEveryLanguage(t *testing.T) {
 		}
 	}
 }
+
+// A treasury past a billion reaches the status screen in the abbreviated form.
+// The formatter is unit-tested on its own; this pins that the screen actually
+// routes gold through it, which is where the digits used to run past the column.
+func TestEmpireStatusAbbreviatesBillions(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Gold, p.Bank = 1_847_392_104, 12_500_000_000
+
+	fields, _ := empireStatusFields(&fakeSession{}, w)
+	if got := fields["gold"]; got != "1.8473B" {
+		t.Errorf("gold rendered %q, want %q", got, "1.8473B")
+	}
+	if got := fields["bank"]; got != "12.5000B" {
+		t.Errorf("bank rendered %q, want %q", got, "12.5000B")
+	}
+}

@@ -16,7 +16,7 @@ func TestRegionUpkeepStaysPositiveAtDoorScale(t *testing.T) {
 		if got := e.RegionUpkeep(); got <= 0 {
 			t.Errorf("land=%d: region upkeep came out %d, want a positive charge", land, got)
 		}
-		if want := land * RegionUpkeepPerLand; e.RegionUpkeep() != want {
+		if want := int64(land * RegionUpkeepPerLand); e.RegionUpkeep() != want {
 			t.Errorf("land=%d: region upkeep %d, want %d with no technology", land, e.RegionUpkeep(), want)
 		}
 	}
@@ -68,7 +68,7 @@ func TestRichAIStillBuysForces(t *testing.T) {
 func TestSDIMathSurvivesFundingScale(t *testing.T) {
 	w := NewWorld(DefaultConfig())
 	e := &Empire{}
-	for _, funding := range []int{1_000_000, 75_000_000, 500_000_000} {
+	for _, funding := range []int64{1_000_000, 75_000_000, 500_000_000} {
 		e.SDIFunding = funding
 		e.TurnProgress.SDIFunded = 0
 		if got, want := w.SDIMaintenance(e), funding/25; got != want {

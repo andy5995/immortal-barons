@@ -27,7 +27,7 @@ type PirateFaction struct {
 	Name         string
 	Forces       int // combat strength (its defense when attacked)
 	Land         int // regions it holds (game-granted on raids; capturable)
-	Gold         int
+	Gold         int64
 	LootTroopers int
 	LootJets     int
 	LootTurrets  int
@@ -85,8 +85,8 @@ func (w *World) EnsurePirates() {
 
 // pirateTake is how much of a holding of size `have` a single raid carries
 // off: a small percentage, but never more than the per-raid take cap.
-func pirateTake(have int) int {
-	t := have * PirateRaidUnitPct / 100
+func pirateTake[T number](have T) T {
+	t := pctOf(have, PirateRaidUnitPct)
 	if t > PirateRaidMaxTake {
 		t = PirateRaidMaxTake
 	}
@@ -94,7 +94,7 @@ func pirateTake(have int) int {
 }
 
 // capAdd adds delta to cur, clamped to cap.
-func capAdd(cur, delta, cap int) int {
+func capAdd[T number](cur, delta, cap T) T {
 	cur += delta
 	if cur > cap {
 		cur = cap
@@ -164,18 +164,18 @@ func (w *World) pirateRaidVictim(p *PirateFaction, v *Empire) {
 
 // lootList joins the non-zero amounts into a readable phrase. Used for the raid
 // a player SUFFERS, which BRE reports nowhere — the wording is IB's own.
-func lootList(troopers, jets, turrets, tanks, agents, gold int) string {
+func lootList(troopers, jets, turrets, tanks, agents int, gold int64) string {
 	var parts []string
-	add := func(n int, label string) {
+	add := func(n int64, label string) {
 		if n > 0 {
 			parts = append(parts, fmt.Sprintf("%d %s", n, label))
 		}
 	}
-	add(troopers, "troopers")
-	add(jets, "jets")
-	add(turrets, "turrets")
-	add(tanks, "tanks")
-	add(agents, "agents")
+	add(int64(troopers), "troopers")
+	add(int64(jets), "jets")
+	add(int64(turrets), "turrets")
+	add(int64(tanks), "tanks")
+	add(int64(agents), "agents")
 	add(gold, "gold")
 	return strings.Join(parts, ", ")
 }
@@ -306,7 +306,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		a.Turrets += gotU
 		a.Tanks += gotK
 		a.Agents += gotA
-		a.Gold += gotG
+		w.creditGold(a, gotG, "reclaimed pirate loot")
 		// The captured land is DEFERRED, not auto-added: the caller opens the
 		// region-type picker so the player chooses the composition (#21). Reclaimed
 		// gold/military above land immediately; only the regions wait.

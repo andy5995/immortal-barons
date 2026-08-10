@@ -9,8 +9,8 @@ import (
 // Owed gold (Principal compounded at the term's daily rate) is due on DueDay. It
 // mirrors Investment. Unpaid at DueDay, the remainder rolls into open-ended Debt.
 type Loan struct {
-	Principal int
-	Owed      int
+	Principal int64
+	Owed      int64
 	DueDay    int
 }
 
@@ -31,12 +31,12 @@ func loanFactor(days int) float64 {
 // LoanTotalOwed is the amount to repay for borrowing `amount` for `days` days:
 // the daily rate compounded daily, truncated once at the end. Matches BRE
 // (verified: 1000@2d=1175, 616@5d=947, 500@10d=1296).
-func LoanTotalOwed(amount, days int) int {
+func LoanTotalOwed(amount int64, days int) int64 {
 	v := float64(amount) * loanFactor(days)
-	if v > float64(MoneyCap) {
-		return MoneyCap
+	if v > float64(MoneyCapMax) {
+		return MoneyCapMax
 	}
-	return int(v)
+	return int64(v)
 }
 
 // LoanOverallTenths is the total interest over the whole term in tenths of a
@@ -47,8 +47,8 @@ func LoanOverallTenths(days int) int {
 }
 
 // LoansOwed is the total an empire owes across its active term loans.
-func (e *Empire) LoansOwed() int {
-	total := 0
+func (e *Empire) LoansOwed() int64 {
+	var total int64
 	for _, l := range e.Loans {
 		total += l.Owed
 	}
@@ -58,15 +58,15 @@ func (e *Empire) LoansOwed() int {
 // LoanCeiling is the most gold e may borrow right now — BRE's "We will provide up
 // to N gold." IB reconstruction: a multiple of net worth, less everything already
 // owed (active loans + defaulted debt). BRE's exact formula is unverified.
-func (w *World) LoanCeiling(e *Empire) int {
-	return max(0, w.NetWorth(e)*LoanCeilingMultiple-e.LoansOwed()-e.Debt)
+func (w *World) LoanCeiling(e *Empire) int64 {
+	return max(0, int64(w.NetWorth(e))*LoanCeilingMultiple-e.LoansOwed()-e.Debt)
 }
 
 // TakeLoan borrows `amount` for `days` days (clamped to [LoanMinDays,
 // LoanMaxDays]), crediting the gold now and recording the compounded amount due
 // on DueDay. Returns the new loan, or ErrCantAfford if `amount` exceeds the
 // current ceiling.
-func (w *World) TakeLoan(e *Empire, amount, days int) (Loan, error) {
+func (w *World) TakeLoan(e *Empire, amount int64, days int) (Loan, error) {
 	if days < LoanMinDays {
 		days = LoanMinDays
 	}
@@ -80,10 +80,7 @@ func (w *World) TakeLoan(e *Empire, amount, days int) (Loan, error) {
 		return Loan{}, ErrCantAfford
 	}
 	l := Loan{Principal: amount, Owed: LoanTotalOwed(amount, days), DueDay: w.GameDay + days}
-	e.Gold += amount
-	if e.Gold > MoneyCap {
-		e.Gold = MoneyCap
-	}
+	w.creditGold(e, amount, "a loan")
 	e.Loans = append(e.Loans, l)
 	return l, nil
 }

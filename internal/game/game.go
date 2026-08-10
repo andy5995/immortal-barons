@@ -82,9 +82,12 @@ type Empire struct {
 	// day. Daily maintenance and the login path remove husks once GameDay > DiedDay.
 	DiedDay int
 
-	Gold    int
-	Bank    int
-	Debt    int
+	// Money is int64 so a 32-bit door build holds the same range as a 64-bit one:
+	// plain int is 32 bits there, which is what capped the treasury at 2 billion
+	// and silently discarded anything above it. See MoneyCap.
+	Gold    int64
+	Bank    int64
+	Debt    int64
 	Food    int
 	Land    int
 	Regions RegionMix
@@ -103,7 +106,7 @@ type Empire struct {
 	// SDIFunding is the gold in the program to date, which is what the original
 	// stores and what its upkeep and spending allowance are both figured from.
 	// SDI above is derived from it. See specials.go.
-	SDIFunding int
+	SDIFunding int64
 	HQ         int // 0 = none/not started; 1-100 = percent complete
 	// TurnsPlayed is the empire's lifetime turn count. BRE keeps the same counter
 	// (record +0x281) and prices the HeadQuarters off it — see World.HQPrice.
@@ -234,17 +237,17 @@ type Empire struct {
 	// accumulates shortfall penalties during the maintenance sequence and applies
 	// them at turn rollover, not on the spot, so the drop surfaces on the next
 	// turn's display. Persisted so it survives a mid-turn save.
-	PendingSupportPenalty int  `json:"pendingSupportPenalty,omitempty"`
-	LastRiot              bool `json:"-"`
-	LastMoraleDesertion   int  `json:"-"`
-	MadeTroopers          int  `json:"-"`
-	MadeJets              int  `json:"-"`
-	MadeTurrets           int  `json:"-"`
-	MadeBombers           int  `json:"-"`
-	MadeTanks             int  `json:"-"`
-	MadeCarriers          int  `json:"-"`
-	LastGoldPaid          int  `json:"-"`
-	LastFoodConsumed      int  `json:"-"`
+	PendingSupportPenalty int   `json:"pendingSupportPenalty,omitempty"`
+	LastRiot              bool  `json:"-"`
+	LastMoraleDesertion   int   `json:"-"`
+	MadeTroopers          int   `json:"-"`
+	MadeJets              int   `json:"-"`
+	MadeTurrets           int   `json:"-"`
+	MadeBombers           int   `json:"-"`
+	MadeTanks             int   `json:"-"`
+	MadeCarriers          int   `json:"-"`
+	LastGoldPaid          int64 `json:"-"`
+	LastFoodConsumed      int   `json:"-"`
 }
 
 // TurnProgress marks the stages of the current turn that have already completed,
@@ -253,10 +256,10 @@ type Empire struct {
 // re-applying a resource effect; the rest prevent re-showing a menu the player
 // already exited. All are cleared at turn-commit (PlayTurn) and daily rollover.
 type TurnProgress struct {
-	IncomeCollected    bool // turn-start Manufacture + CollectIncome + regions-cap reset done
-	MaintPaid          bool // paymentStage done (set with the forces/regions charge)
-	SDIFunded          int  // gold put into the SDI program this turn, against its allowance
-	Fed                bool // feedStage done
+	IncomeCollected    bool  // turn-start Manufacture + CollectIncome + regions-cap reset done
+	MaintPaid          bool  // paymentStage done (set with the forces/regions charge)
+	SDIFunded          int64 // gold put into the SDI program this turn, against its allowance
+	Fed                bool  // feedStage done
 	CovertDone         bool
 	CovertOpUsed       bool // an EFFECT covert op ran this turn (BRE's one-per-turn cap; info ops exempt)
 	SpendingDone       bool
@@ -375,14 +378,34 @@ func (e *Empire) TechMilitaryFactor() int {
 // regions — one report on a 32-bit door showed a 710-region realm billed
 // -210,763 gold. The 64-bit build was never affected, which is why it survived
 // so long. Same for NetWorth (see World.NetWorth).
-func techRaise(v, factor int) int { return int(int64(v) * int64(factor) / TechFactorUnit) }
+func techRaise[T number](v T, factor int) T { return T(int64(v) * int64(factor) / TechFactorUnit) }
+
+// number is the numeric width these scaling helpers accept: plain counts (int)
+// and money (int64). One generic body keeps the int64 intermediate — and so the
+// 32-bit correctness the comment above describes — for both.
+type number interface{ ~int | ~int64 }
 
 // pctOf is v * p / 100 with an int64 intermediate, for a percentage taken of a
 // quantity that can reach money scale. A plain v*p/100 overflows int32 on a
 // 32-bit build once v passes ~21 million, which turns a rich empire's spending
 // budget negative and makes it buy nothing at all.
-func pctOf(v, p int) int          { return int(int64(v) * int64(p) / 100) }
-func techLower(v, factor int) int { return int(int64(v) * TechFactorUnit / int64(factor)) }
+func pctOf[T number](v T, p int) T { return T(int64(v) * int64(p) / 100) }
+
+// goldCost is the price of n units at `unit` gold each, in money width. Always
+// int64: a large order at a high price passes 2^31, which on a 32-bit door
+// wrapped the bill negative and handed the goods over for free.
+func goldCost(n, unit int) int64 { return int64(n) * int64(unit) }
+
+// unitsAffordable is how many units at `price` gold each `gold` buys. The divide
+// happens in money width; the count comes back in count width, clamped so a vast
+// treasury against a cheap unit cannot wrap int on a 32-bit door.
+func unitsAffordable(gold int64, price int) int {
+	if price <= 0 {
+		return 0
+	}
+	return int(min(gold/int64(price), math.MaxInt32))
+}
+func techLower[T number](v T, factor int) T { return T(int64(v) * TechFactorUnit / int64(factor)) }
 
 // TechPercent renders a factor the way the in-game advisor does: a raised effect
 // as round(100*f), a lowered one as round(100/f).
@@ -434,9 +457,9 @@ type Prices struct {
 // Investment is a term deposit: an amount locked until MaturesDay, paying
 // out Return (principal + interest at the rate in effect when invested).
 type Investment struct {
-	Amount     int // principal locked
-	Return     int // total paid out at maturity (principal + interest)
-	MaturesDay int // GameDay at/after which it pays out
+	Amount     int64 // principal locked
+	Return     int64 // total paid out at maturity (principal + interest)
+	MaturesDay int   // GameDay at/after which it pays out
 }
 
 // Investment tuning (v1, tunable — see docs/mechanics-reference.md).
@@ -505,7 +528,7 @@ type World struct {
 	// out of (#93). Crown tax paid flows in; each realm's first login of a game
 	// day draws a share back out. Seeded at QueenRefundPoolSeed; a world saved
 	// before the refund existed loads with 0 and fills from the next tax payment.
-	RefundPool    int
+	RefundPool    int64
 	LastMaintDate string
 	// StartedDate is the real date the game actually began — the first day
 	// maintenance ran with the game underway. Config.GameStartDate is the date a
@@ -555,7 +578,7 @@ type World struct {
 	// listed goods are escrowed out of the owner's inventory. MarketProceeds
 	// accrues each seller's unpaid sale gold, deposited at daily maintenance.
 	Market         []MarketListing
-	MarketProceeds map[string]int
+	MarketProceeds map[string]int64
 
 	// Inter-BBS (interplanetary) play — see ibbs.go. GroupAttacks assemble
 	// locally until they depart; Outbox holds packets queued for other boards;

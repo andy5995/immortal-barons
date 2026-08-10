@@ -14,6 +14,19 @@ kann nicht von Piraten oder Angriffen geraubt werden.
 - Abheben — Gold von der Bank zurück in Ihre Schatzkammer holen.
 - Cash Relief / Loans — borrow gold, or pay back what you already owe.
 
+Deposits and withdrawals have no size limit. One investment locks away at
+most two billion gold, though you may open as many as you like.
+
+Your sysop sets a limit on how much gold you can hold — two billion to begin
+with, in hand and the same again in the bank. Gold you earn above that is
+lost.  Spend it before you get there.
+
+A full bank still pays its interest, into your gold in hand rather than the
+bank. Once both are full, it goes nowhere.
+
+The game tells you when gold is lost this way. Your event log names the
+amount and where it came from.
+
 ## Cash Relief / Loans
 
 When you borrow, you first pick how many days you have to pay it back (1 to

@@ -35,16 +35,16 @@ const (
 // Turret 0.90, Bomber 1.30, Tank 0.60, Carrier 0.10 gold/turn), held in tenths
 // and truncated once on the total — BRE charged exactly trunc(0.9 × turrets)
 // for a turret-only army.
-func (e *Empire) ForcesUpkeep() int {
+func (e *Empire) ForcesUpkeep() int64 {
 	tenths := e.Troopers*MaintTrooperTenths + e.Jets*MaintJetTenths + e.Turrets*MaintTurretTenths + e.Bombers*MaintBomberTenths + e.Tanks*MaintTankTenths + e.Carriers*MaintCarrierTenths
-	return techLower(tenths/MaintTenthsPerGold, e.TechMaintFactor())
+	return techLower(int64(tenths/MaintTenthsPerGold), e.TechMaintFactor())
 }
 
 // RegionUpkeep is the gold required to maintain the empire's regions. Technology
 // lowers it (same factor military upkeep uses); BRE lists "maintenance costs on
 // regions" among technology's effects (#20).
-func (e *Empire) RegionUpkeep() int {
-	return techLower(e.Land*RegionUpkeepPerLand, e.TechMaintFactor())
+func (e *Empire) RegionUpkeep() int64 {
+	return techLower(int64(e.Land)*RegionUpkeepPerLand, e.TechMaintFactor())
 }
 
 // FoodProduced is the empire's food-region output this turn, raised by the
@@ -66,8 +66,8 @@ func (w *World) agriFood(e *Empire) int {
 // base upkeep (Medium = 100% = unchanged; None = 0 = free upkeep). These are
 // the amounts actually charged and displayed; the Empire methods above give
 // the unscaled baseline.
-func (w *World) ForcesDue(e *Empire) int {
-	return (e.ForcesUpkeep() + w.listedForcesUpkeep(e)) * w.Config.MaintCosts.Percent() / 100
+func (w *World) ForcesDue(e *Empire) int64 {
+	return pctOf(e.ForcesUpkeep()+w.listedForcesUpkeep(e), w.Config.MaintCosts.Percent())
 }
 
 // listedForcesUpkeep is the maintenance owed on this empire's military units that
@@ -75,17 +75,17 @@ func (w *World) ForcesDue(e *Empire) int {
 // inventory, but it still costs upkeep — so parking an army on the market to dodge
 // maintenance doesn't work. Same per-unit rates and Technology scaling as
 // ForcesUpkeep; food and agents have no upkeep.
-func (w *World) listedForcesUpkeep(e *Empire) int {
+func (w *World) listedForcesUpkeep(e *Empire) int64 {
 	tenths := w.MarketForSale(e.Owner, "Trooper")*MaintTrooperTenths +
 		w.MarketForSale(e.Owner, "Jet")*MaintJetTenths +
 		w.MarketForSale(e.Owner, "Turret")*MaintTurretTenths +
 		w.MarketForSale(e.Owner, "Bomber")*MaintBomberTenths +
 		w.MarketForSale(e.Owner, "Tank")*MaintTankTenths +
 		w.MarketForSale(e.Owner, "Carrier")*MaintCarrierTenths
-	return techLower(tenths/MaintTenthsPerGold, e.TechMaintFactor())
+	return techLower(int64(tenths/MaintTenthsPerGold), e.TechMaintFactor())
 }
-func (w *World) RegionsDue(e *Empire) int {
-	return e.RegionUpkeep() * w.Config.MaintCosts.Percent() / 100
+func (w *World) RegionsDue(e *Empire) int64 {
+	return pctOf(e.RegionUpkeep(), w.Config.MaintCosts.Percent())
 }
 
 // FoodUpkeep is the food the population and army eat per turn. The population's
@@ -118,7 +118,7 @@ func (e *Empire) FoodUpkeepAtCapacity() int {
 // clampGive limits a payment to what the empire can actually afford and
 // deducts it, recording it in the turn's LastGoldPaid tally. Returns the
 // amount actually paid.
-func (e *Empire) clampGive(given int) int {
+func (e *Empire) clampGive(given int64) int64 {
 	if given > e.Gold {
 		given = e.Gold
 	}
@@ -147,7 +147,7 @@ func (e *Empire) clampGive(given int) int {
 // In BRE a solvent baron cannot underpay at all: the prompt's minimum is the
 // amount required. IB lets a player underpay any obligation, as it already does
 // for forces and regions, and takes the penalty instead.
-func (w *World) PayCrownTax(e *Empire, given int) {
+func (w *World) PayCrownTax(e *Empire, given int64) {
 	req := w.CrownTax(e)
 	given = e.clampGive(given)
 	w.RefundPool += given
@@ -155,7 +155,7 @@ func (w *World) PayCrownTax(e *Empire, given int) {
 		return
 	}
 	// Deferred to turn rollover (see PendingSupportPenalty), matching BRE.
-	e.PendingSupportPenalty += (req - given) * CrownTaxSupportPenalty / (req + 1)
+	e.PendingSupportPenalty += int((req - given) * CrownTaxSupportPenalty / (req + 1))
 }
 
 // QueenRefund pays e its share of the Queen's purse and returns the amount, or
@@ -168,7 +168,7 @@ func (w *World) PayCrownTax(e *Empire, given int) {
 // once the pool is over QueenRefundHighPool, and is capped at QueenRefundCap
 // while the realm is still under New Realm Protection. See the constants for the
 // binary provenance.
-func (w *World) QueenRefund(e *Empire) int {
+func (w *World) QueenRefund(e *Empire) int64 {
 	if w.RefundPool <= 0 {
 		return 0
 	}
@@ -176,7 +176,7 @@ func (w *World) QueenRefund(e *Empire) int {
 	if w.RefundPool > QueenRefundHighPool {
 		rate = QueenRefundHighRate
 	}
-	pay := w.RefundPool * rate / 100
+	pay := pctOf(w.RefundPool, rate)
 	if e.Protection > 0 && pay > QueenRefundCap {
 		pay = QueenRefundCap
 	}
@@ -184,20 +184,20 @@ func (w *World) QueenRefund(e *Empire) int {
 		return 0
 	}
 	w.RefundPool -= pay
-	e.Gold += pay
+	w.creditGold(e, pay, "the Queen's refund")
 	return pay
 }
 
 // PayForces applies a payment toward armed-forces upkeep. A shortfall makes
 // units desert proportionally and lowers popular support. Returns the number
 // of units lost to desertion.
-func (w *World) PayForces(e *Empire, given int) int {
+func (w *World) PayForces(e *Empire, given int64) int {
 	req := w.ForcesDue(e)
 	given = e.clampGive(given)
 	if given >= req {
 		return 0
 	}
-	fracPct := (req - given) * 100 / req // req > 0 here (else given >= req)
+	fracPct := int((req - given) * 100 / req) // req > 0 here (else given >= req)
 	desertPct := fracPct * ArmyDesertRate / 100
 	lost := 0
 	desert := func(n *int) {
@@ -217,13 +217,13 @@ func (w *World) PayForces(e *Empire, given int) int {
 // PayRegions applies a payment toward region maintenance. A shortfall makes
 // regions revolt (land is lost) and lowers popular support. Returns the
 // number of regions lost.
-func (w *World) PayRegions(e *Empire, given int) int {
+func (w *World) PayRegions(e *Empire, given int64) int {
 	req := w.RegionsDue(e)
 	given = e.clampGive(given)
 	if given >= req {
 		return 0
 	}
-	fracPct := (req - given) * 100 / req // req > 0 here (else given >= req)
+	fracPct := int((req - given) * 100 / req) // req > 0 here (else given >= req)
 	lost := e.Land * fracPct / 100 * RegionRevoltRate / 100
 	if lost > 0 {
 		e.Regions.remove(lost)
@@ -241,14 +241,14 @@ func (e *Empire) supportBoostDeficit() int {
 
 // SupportBoostCost is the gold the crown requests to restore this turn's
 // recoverable support. Zero when support is already full.
-func (e *Empire) SupportBoostCost() int {
-	return e.supportBoostDeficit() * (SupportBoostPerPerson*e.People + SupportBoostFlat)
+func (e *Empire) SupportBoostCost() int64 {
+	return int64(e.supportBoostDeficit()) * int64(SupportBoostPerPerson*e.People+SupportBoostFlat)
 }
 
 // SupportBoostMax is the most a baron may put toward the boost. Paying past the
 // request does buy more support, but support caps at 100, so the surplus is
 // usually wasted.
-func (e *Empire) SupportBoostMax() int {
+func (e *Empire) SupportBoostMax() int64 {
 	return e.SupportBoostCost() * SupportBoostMaxPct / 100
 }
 
@@ -259,13 +259,13 @@ func (e *Empire) SupportBoostMax() int {
 //
 // Binary-verified, including the +1 on each side of the ratio (BRE.OVR 0x2F740),
 // which is the same shape the crown-tax penalty uses.
-func (w *World) BoostSupport(e *Empire, given int) int {
+func (w *World) BoostSupport(e *Empire, given int64) int {
 	cost := e.SupportBoostCost()
 	given = e.clampGive(given)
 	if cost <= 0 {
 		return 0
 	}
-	pts := e.supportBoostDeficit() * (given + 1) / (cost + 1)
+	pts := int(int64(e.supportBoostDeficit()) * (given + 1) / (cost + 1))
 	before := e.Support
 	e.adjustSupport(pts)
 	return e.Support - before
@@ -273,9 +273,9 @@ func (w *World) BoostSupport(e *Empire, given int) int {
 
 // BoostMorale spends gold to raise military morale, mirroring BoostSupport
 // (capped per turn). Returns the morale points gained.
-func (w *World) BoostMorale(e *Empire, given int) int {
+func (w *World) BoostMorale(e *Empire, given int64) int {
 	given = e.clampGive(given)
-	pts := min(given/MoralePerBoostGold, MaxMoraleBoostPerTurn)
+	pts := min(int(given/MoralePerBoostGold), MaxMoraleBoostPerTurn)
 	e.adjustMorale(pts)
 	return pts
 }

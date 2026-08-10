@@ -435,7 +435,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		return
 	}
 
-	var forces, regions, sdi, crown, gold int
+	var forces, regions, sdi, crown, gold int64
 	var autoPay bool
 	if !withPlayer(w, func(p *game.Empire) {
 		forces = w.ForcesDue(p)
@@ -476,7 +476,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	// Gather the player's intended payments without applying them, so that if
 	// they underpay a required obligation we can warn ("DISASTEROUS results")
 	// and let them reconsider before the consequences land.
-	var forcesGold, regionsGold, sdiGold, crownGold int
+	var forcesGold, regionsGold, sdiGold, crownGold int64
 	for {
 		// BRE opens the manual flow with a bank visit so a baron short on hand can
 		// draw savings to cover upkeep; the reconsider below loops back here. Gold
@@ -542,7 +542,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	}
 
 	if support < 100 && gold > 0 {
-		var cost, maxGive int
+		var cost, maxGive int64
 		if !withPlayer(w, func(p *game.Empire) { cost, maxGive = p.SupportBoostCost(), min(p.SupportBoostMax(), p.Gold) }) {
 			return
 		}
@@ -627,7 +627,7 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 // mail, which is where this sits. Silent when the realm has already drawn today
 // or the purse has nothing in it — a fresh planet that has collected no tax yet.
 func showQueenRefund(s session.Session, w *ctx) {
-	var paid int
+	var paid int64
 	withPlayer(w, func(p *game.Empire) {
 		if p.RefundTaken {
 			return

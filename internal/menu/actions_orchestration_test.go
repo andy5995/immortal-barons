@@ -230,7 +230,7 @@ func TestBuyLandAdvisorsThenReturns(t *testing.T) {
 func TestBuyLandLeavesWhenNothingIsAffordable(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
-	p.Gold = w.LandPrice(p) // exactly one region's worth
+	p.Gold = int64(w.LandPrice(p)) // exactly one region's worth
 	before := p.Regions.Coastal
 	f := &fakeSession{keys: []rune("C1\rC1\rC1\r")}
 

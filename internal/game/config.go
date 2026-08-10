@@ -118,6 +118,7 @@ type Config struct {
 	IdleDaysRemove        int               // days a realm may go unplayed before it is removed; 0 = never
 	InitialMarketLand     int               // land on the market at reset
 	LandPerDay            int               // land added to the market each day
+	MoneyCapBillions      int               // most gold a realm may hold, on hand and again in the bank, in whole billions (BRE's own limit is 2)
 	InterestRate          int               // bank interest (BRE: % over 10 days; 200 = 20%/day)
 	StdInvestRate         int               // standard investment rate (BRE: % over 10 days)
 	SteadyInvest          bool              // steady (fixed) investment rate instead of floating
@@ -236,6 +237,7 @@ func DefaultConfig() Config {
 		IdleDaysRemove:        10,
 		InitialMarketLand:     0,
 		LandPerDay:            1000,
+		MoneyCapBillions:      MoneyCapMinBillions, // BRE's own ceiling; a sysop may raise it to MoneyCapMaxBillions
 		InterestRate:          50,
 		StdInvestRate:         35,
 		SteadyInvest:          false,
@@ -261,4 +263,19 @@ func DefaultConfig() Config {
 		AttackRewards:         Medium,
 		SlappenheimerHandling: SlappenheimerUserSelect,
 	}
+}
+
+// MoneyCap is the most gold a realm may hold, on hand or in the bank — the
+// sysop's MoneyCapBillions knob, in gold. Clamped on read rather than on load so
+// a config written before the knob existed (or edited by hand to nonsense) still
+// yields a legal cap: a zero or missing field comes back as BRE's own 2 billion.
+func (w *World) MoneyCap() int64 {
+	b := w.Config.MoneyCapBillions
+	if b < MoneyCapMinBillions {
+		b = MoneyCapMinBillions
+	}
+	if b > MoneyCapMaxBillions {
+		b = MoneyCapMaxBillions
+	}
+	return int64(b) * 1_000_000_000
 }

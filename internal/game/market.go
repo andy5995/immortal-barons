@@ -165,7 +165,7 @@ func (w *World) BuyFromMarket(buyer *Empire, sellerOwner, good string, n int) er
 	if n > l.Qty {
 		n = l.Qty
 	}
-	cost := n * l.Price
+	cost := goldCost(n, l.Price)
 	if buyer.Gold < cost {
 		return ErrCantAfford
 	}
@@ -173,7 +173,7 @@ func (w *World) BuyFromMarket(buyer *Empire, sellerOwner, good string, n int) er
 	*bf += n
 	l.Qty -= n
 	if w.MarketProceeds == nil {
-		w.MarketProceeds = map[string]int{}
+		w.MarketProceeds = map[string]int64{}
 	}
 	w.MarketProceeds[sellerOwner] += cost
 	if l.Qty == 0 {
@@ -204,7 +204,7 @@ func (w *World) spoilListedFood(owner string, n int) int {
 // its pending sale proceeds, returning the totals wiped. BRE's Bomb Enemy Trade
 // Market "destroys a portion of all goods stored in an opposing planet's trading
 // market" (community strategy guide).
-func (w *World) bombMarketPosition(d *Empire, pct int) (goods, proceeds int) {
+func (w *World) bombMarketPosition(d *Empire, pct int) (goods int, proceeds int64) {
 	for i := range w.Market {
 		if w.Market[i].Owner == d.Owner {
 			loss := w.Market[i].Qty * pct / 100
@@ -213,7 +213,7 @@ func (w *World) bombMarketPosition(d *Empire, pct int) (goods, proceeds int) {
 		}
 	}
 	if w.MarketProceeds != nil {
-		loss := w.MarketProceeds[d.Owner] * pct / 100
+		loss := pctOf(w.MarketProceeds[d.Owner], pct)
 		w.MarketProceeds[d.Owner] -= loss
 		proceeds += loss
 	}
@@ -231,10 +231,7 @@ func (w *World) settleMarketProceeds() {
 		if e == nil {
 			continue
 		}
-		e.Gold += gross * (100 - MarketCommissionPct) / 100
-		if e.Gold > MoneyCap {
-			e.Gold = MoneyCap
-		}
+		w.creditGold(e, pctOf(gross, 100-MarketCommissionPct), "the trading market")
 	}
 	w.MarketProceeds = nil
 }

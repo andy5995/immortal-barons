@@ -11,6 +11,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/help"
 	"github.com/andy5995/immortal-barons/internal/i18n"
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -152,31 +153,36 @@ func prompt(s session.Session, msg string) string {
 // parseAmount interprets a numeric input with BRE-style shortcuts:
 //
 //	">"        -> max
+//	"<n>b"     -> n * 1_000_000_000
 //	"<n>m"     -> n * 1_000_000
 //	"<n>k"     -> n * 1_000
 //	"<n>"      -> n
 //
-// Empty or unparseable -> 0. A magnitude suffix on ">" is ignored.
-func parseAmount(input string, max int) int {
+// Empty or unparseable -> 0. A magnitude suffix on ">" is ignored. The whole
+// parse runs in int64 so a nine- or ten-digit entry survives a 32-bit build.
+func parseAmount[T numfmt.Number](input string, max T) T {
 	s := strings.TrimSpace(strings.ToLower(input))
 	if s == ">" {
 		return max
 	}
-	mult := 1
-	if strings.HasSuffix(s, "m") {
+	var mult int64 = 1
+	switch {
+	case strings.HasSuffix(s, "b"):
+		mult, s = 1_000_000_000, strings.TrimSuffix(s, "b")
+	case strings.HasSuffix(s, "m"):
 		mult, s = 1_000_000, strings.TrimSuffix(s, "m")
-	} else if strings.HasSuffix(s, "k") {
+	case strings.HasSuffix(s, "k"):
 		mult, s = 1_000, strings.TrimSuffix(s, "k")
 	}
 	s = strings.TrimSpace(s)
 	if s == ">" {
 		return max
 	}
-	n, err := strconv.Atoi(s)
+	n, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return 0
 	}
-	return n * mult
+	return T(n * mult)
 }
 
 func promptInt(s session.Session, msg string) int {
@@ -192,7 +198,7 @@ func promptInt(s session.Session, msg string) int {
 // Empty input returns suggested; typing `>` first fills the field with max
 // (still editable); otherwise the typed number (k/m shortcuts) is used.
 // The result is clamped to [0, max].
-func promptSuggested(s session.Session, msg string, suggested, max int) int {
+func promptSuggested[T numfmt.Number](s session.Session, msg string, suggested, max T) T {
 	fmt.Fprint(s, "\n")
 	return promptSuggestedTight(s, msg, suggested, max)
 }
@@ -200,7 +206,7 @@ func promptSuggested(s session.Session, msg string, suggested, max int) int {
 // promptSuggestedTight is promptSuggested without the leading blank line, for a
 // run of prompts that should sit on consecutive lines — the attack force
 // selection (Troopers/Jets/Tanks/Bombers) after a single header line.
-func promptSuggestedTight(s session.Session, msg string, suggested, max int) int {
+func promptSuggestedTight[T numfmt.Number](s session.Session, msg string, suggested, max T) T {
 	// BRE colors the "(suggested; max)": bright-blue parens/semicolon, bright-cyan
 	// suggested, dark-cyan max (the same blue/cyan scheme as the y/n hint).
 	prefix := fmt.Sprintf("%s%s %s(%s%s%s; %s%s%s)%s:%s ",
@@ -238,7 +244,7 @@ func promptProduction(s session.Session, label string, labelW, suggested, max in
 // player sees what a bare Enter chose. An over-max entry is clamp-and-confirmed
 // (#9): the first Enter corrects the field to the max on screen and a second Enter
 // commits it — never a silent one-keystroke clamp.
-func editAmount(s session.Session, prefix string, suggested, max int) int {
+func editAmount[T numfmt.Number](s session.Session, prefix string, suggested, max T) T {
 	// Register the line being edited so an interrupting idle/time warning can
 	// reprint it and restore the cursor. A no-op for sessions with no Deadline
 	// (e.g. the test fakeSession), which don't implement InputLineSetter.
@@ -269,7 +275,7 @@ func editAmount(s session.Session, prefix string, suggested, max int) int {
 				// max on screen and needs a SECOND Enter to commit — feedback and a
 				// chance to reconsider, not a silent one-keystroke clamp. Rewrite the
 				// field to the max in place and keep waiting.
-				str := strconv.Itoa(max)
+				str := strconv.FormatInt(int64(max), 10)
 				for range b {
 					fmt.Fprint(s, "\b \b")
 				}
@@ -280,7 +286,7 @@ func editAmount(s session.Session, prefix string, suggested, max int) int {
 			fmt.Fprint(s, "\n")
 			return clampAmt(v, max)
 		case r == '>' && len(b) == 0:
-			str := strconv.Itoa(max)
+			str := strconv.FormatInt(int64(max), 10)
 			for _, c := range str {
 				b = append(b, c)
 			}
@@ -291,6 +297,9 @@ func editAmount(s session.Session, prefix string, suggested, max int) int {
 		case r == 'm' || r == 'M':
 			b = append(b, '0', '0', '0', '0', '0', '0')
 			fmt.Fprint(s, "000000")
+		case r == 'b' || r == 'B': // expand in place: 1 b -> 1000000000
+			b = append(b, '0', '0', '0', '0', '0', '0', '0', '0', '0')
+			fmt.Fprint(s, "000000000")
 		case r == 127 || r == 8: // backspace
 			if len(b) > 0 {
 				b = b[:len(b)-1]
@@ -311,7 +320,7 @@ func editAmount(s session.Session, prefix string, suggested, max int) int {
 	return clampAmt(suggested, max)
 }
 
-func clampAmt(n, max int) int {
+func clampAmt[T numfmt.Number](n, max T) T {
 	if n < 0 {
 		return 0
 	}
@@ -366,63 +375,10 @@ func pause(s session.Session) {
 	drainInput(s) // drop a trailing Enter sent in one burst with the dismissing key
 }
 
-// groupSep maps a UI language to its thousands separator. All three are ASCII,
-// so they are CP437-safe (and CP437 mode forces English anyway). Unknown
-// languages fall back to the comma.
-var groupSep = map[string]byte{"": ',', "en": ',', "de": '.', "ru": ' '}
-
-// formatGold groups n's thousands with lang's locale separator
-// (en 1,847,392,104 / de 1.847.392.104 / ru "1 847 392 104").
-func formatGold(n int, lang string) string {
-	sep, ok := groupSep[lang]
-	if !ok {
-		sep = ','
-	}
-	str := strconv.Itoa(n)
-	neg := n < 0
-	if neg {
-		str = str[1:]
-	}
-	var b strings.Builder
-	for i := 0; i < len(str); i++ {
-		if i > 0 && (len(str)-i)%3 == 0 {
-			b.WriteByte(sep)
-		}
-		b.WriteByte(str[i])
-	}
-	if neg {
-		return "-" + b.String()
-	}
-	return b.String()
-}
-
-// comma formats n with English thousands separators (478967 -> "478,967").
-func comma(n int) string { return formatGold(n, "") }
-
-// abbrevMoney formats large totals with a k/m suffix (34833289 -> "34,833k",
-// 1373000000 -> "1,373m") so a planet-wide total fits on one line. The switch
-// to "m" only kicks in at a billion, since gold/net-worth totals commonly run
-// into the tens of millions (still readable as "k") per the money caps in
-// docs/mechanics-reference.md. Below 1,000 it falls back to comma().
-func abbrevMoney(n int) string {
-	abs := n
-	if abs < 0 {
-		abs = -abs
-	}
-	switch {
-	case abs >= 1_000_000_000:
-		return comma(n/1_000_000) + "m"
-	case abs >= 1_000:
-		return comma(n/1_000) + "k"
-	default:
-		return comma(n)
-	}
-}
-
 // statLine prints one BRE-style result line — a highlighted, comma-formatted
 // number followed by text — and skips the line entirely when n is zero (BRE
 // only lists results that actually happened).
-func statLine(s session.Session, n int, text string) {
+func statLine[T numfmt.Number](s session.Session, n T, text string) {
 	if n == 0 {
 		return
 	}

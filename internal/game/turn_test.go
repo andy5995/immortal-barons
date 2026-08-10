@@ -212,8 +212,8 @@ func TestForcesUpkeepFormula(t *testing.T) {
 	// newEmpire has Troopers=100 and no other units, no Technology regions => no
 	// TechFactor reduction. Rates are tenths of a gold, truncated on the total.
 	// 100 troopers -> 40 gold is the live BRE figure, not a derived one.
-	want := (100*MaintTrooperTenths + 0*MaintJetTenths + 0*MaintTurretTenths +
-		0*MaintBomberTenths + 0*MaintTankTenths + 0*MaintCarrierTenths) / MaintTenthsPerGold
+	want := int64(100*MaintTrooperTenths+0*MaintJetTenths+0*MaintTurretTenths+
+		0*MaintBomberTenths+0*MaintTankTenths+0*MaintCarrierTenths) / MaintTenthsPerGold
 	if want != 40 {
 		t.Fatalf("a 100-trooper realm should owe the captured 40 gold, not %d", want)
 	}
@@ -229,7 +229,10 @@ func TestForcesUpkeepFormula(t *testing.T) {
 func TestUpkeepMatchesLiveBRE(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 
-	forces := []struct{ turrets, want int }{
+	forces := []struct {
+		turrets int
+		want    int64
+	}{
 		{49691, 44721}, {99382, 89443}, {159207, 143286}, {219032, 197128},
 	}
 	for _, c := range forces {
@@ -241,7 +244,10 @@ func TestUpkeepMatchesLiveBRE(t *testing.T) {
 	}
 
 	// Flat per region, whatever the type mix or empire size.
-	regions := []struct{ land, want int }{
+	regions := []struct {
+		land int
+		want int64
+	}{
 		{15, 13695}, {5917, 5402221}, {6397, 5840461}, {6837, 6242181},
 	}
 	for _, c := range regions {
@@ -426,7 +432,7 @@ func TestIncomeReportMatchesCredit(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("h", "Realm")
 	e.Gold = 0
-	sum := w.IncomeThisTurn(e).Gold()
+	sum := int64(w.IncomeThisTurn(e).Gold())
 	w.CollectIncome(e)
 	if e.Gold != sum {
 		t.Errorf("credited %d but the itemized breakdown sums to %d", e.Gold, sum)

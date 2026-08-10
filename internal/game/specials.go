@@ -19,23 +19,23 @@ const SDIMax = 50
 // disassembled.
 
 // SDIMaintenance is the upkeep e owes on its program this turn.
-func (w *World) SDIMaintenance(e *Empire) int { return pctOf(e.SDIFunding, SDIMaintPct) }
+func (w *World) SDIMaintenance(e *Empire) int64 { return pctOf(e.SDIFunding, SDIMaintPct) }
 
 // SDIFundingPerRegion is the program's spending spread over the land it covers,
 // which the original prints on the same screen. It printed 0 there in every
 // capture, at every funding level — unexplained, and most likely a defect in the
 // original, so IB shows the figure the label describes.
-func (w *World) SDIFundingPerRegion(e *Empire) int {
+func (w *World) SDIFundingPerRegion(e *Empire) int64 {
 	if e.Land <= 0 {
 		return 0
 	}
-	return e.SDIFunding / e.Land
+	return e.SDIFunding / int64(e.Land)
 }
 
 // SDISpendAllowance is the most gold e may still put into the program this turn:
 // a share of what is already in it, never less than the floor, less whatever has
 // gone in already this turn.
-func (w *World) SDISpendAllowance(e *Empire) int {
+func (w *World) SDISpendAllowance(e *Empire) int64 {
 	allowed := pctOf(e.SDIFunding, SDISpendPct)
 	if allowed < SDIMinSpend {
 		allowed = SDIMinSpend
@@ -45,7 +45,7 @@ func (w *World) SDISpendAllowance(e *Empire) int {
 
 // FundSDI puts gold into the program, in whole thousands and no more than the
 // turn's allowance allows. Returns the new SDI strength.
-func (w *World) FundSDI(e *Empire, gold int) (int, error) {
+func (w *World) FundSDI(e *Empire, gold int64) (int, error) {
 	gold = min(gold, w.SDISpendAllowance(e))
 	gold -= gold % SDIIncrement
 	if gold <= 0 {
@@ -65,7 +65,7 @@ func (w *World) FundSDI(e *Empire, gold int) (int, error) {
 // program back to what was funded — the original was never observed underpaying
 // it, so the shortfall rule is IB's: without one the upkeep would be optional,
 // and a program nobody maintains would defend as well as one they do.
-func (w *World) PaySDI(e *Empire, gold int) {
+func (w *World) PaySDI(e *Empire, gold int64) {
 	due := w.SDIMaintenance(e)
 	gold = min(gold, e.Gold)
 	if gold < 0 {
@@ -78,14 +78,14 @@ func (w *World) PaySDI(e *Empire, gold int) {
 	// int64 throughout: a program funded into the millions times a part-payment
 	// in the thousands passes 2^31, which wrapped to a negative funding total on
 	// a 32-bit door.
-	e.SDIFunding = int(int64(e.SDIFunding) * int64(gold) / int64(due))
+	e.SDIFunding = e.SDIFunding * gold / due
 	e.syncSDI()
 }
 
 // syncSDI recomputes the strength from the funding total. Every place that
 // changes SDIFunding must call it.
 func (e *Empire) syncSDI() {
-	e.SDI = min(SDIMax, e.SDIFunding/SDIStep)
+	e.SDI = min(SDIMax, int(e.SDIFunding/SDIStep))
 }
 
 // EnsureSDIFunding backfills the funding pool on a save written before the
@@ -93,7 +93,7 @@ func (e *Empire) syncSDI() {
 // zero pool and wipe an SDI the player had already paid for.
 func (e *Empire) EnsureSDIFunding() {
 	if e.SDIFunding == 0 && e.SDI > 0 {
-		e.SDIFunding = e.SDI * SDIStep
+		e.SDIFunding = int64(e.SDI) * SDIStep
 	}
 	e.syncSDI() // funding is the authoritative figure once it exists
 }

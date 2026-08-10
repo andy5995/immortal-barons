@@ -29,7 +29,7 @@ func TestConcurrentPerEmpirePricing(t *testing.T) {
 	const n = 200
 	p1, p2 := w.TrooperPrice(e1), w.TrooperPrice(e2)
 	e1.Troopers, e2.Troopers = 0, 0
-	e1.Gold, e2.Gold = n*p1, n*p2
+	e1.Gold, e2.Gold = int64(n*p1), int64(n*p2)
 
 	var wg sync.WaitGroup
 	wg.Add(2)
@@ -115,7 +115,7 @@ func TestUnitPriceWalk(t *testing.T) {
 	if err := w.Recruit(e, 3); err != nil {
 		t.Fatalf("Recruit: %v", err)
 	}
-	if spent := before - e.Gold; spent != 3*price {
+	if spent := before - e.Gold; spent != int64(3*price) {
 		t.Errorf("charged %d, shown price implies %d", spent, 3*price)
 	}
 }
@@ -161,7 +161,7 @@ func TestBuyLandIncremental(t *testing.T) {
 	if e.Land != n {
 		t.Errorf("Land: want %d, got %d", n, e.Land)
 	}
-	if want := startGold - total; e.Gold != want {
+	if want := startGold - int64(total); e.Gold != want {
 		t.Errorf("Gold: want %d, got %d", want, e.Gold)
 	}
 }
@@ -178,7 +178,7 @@ func TestBuyLandRejectsWhenBroke(t *testing.T) {
 	for i := 0; i < n; i++ {
 		total += w.regionCost(e.Land + i)
 	}
-	e.Gold = total - 1
+	e.Gold = int64(total - 1)
 	startGold := e.Gold
 
 	if err := w.BuyLand(e, n); err != ErrCantAfford {
@@ -228,7 +228,7 @@ func TestBuyFoodMarket(t *testing.T) {
 	if err := w.BuyFoodMarket(e, 10); err != nil {
 		t.Fatalf("BuyFoodMarket: %v", err)
 	}
-	if e.Gold != 100_000-10*w.FoodBuyPrice() {
+	if e.Gold != int64(100_000-10*w.FoodBuyPrice()) {
 		t.Errorf("Gold: want %d, got %d", 100_000-10*w.FoodBuyPrice(), e.Gold)
 	}
 	if e.Food != 10 {
@@ -320,7 +320,7 @@ func TestSellFood(t *testing.T) {
 	if err := w.SellFood(e, 30); err != nil {
 		t.Fatalf("SellFood: %v", err)
 	}
-	if e.Gold != 30*w.FoodSellPrice() {
+	if e.Gold != int64(30*w.FoodSellPrice()) {
 		t.Errorf("Gold: want %d, got %d", 30*w.FoodSellPrice(), e.Gold)
 	}
 	if e.Food != 70 {
@@ -340,7 +340,7 @@ func TestSellFoodClampedToOwned(t *testing.T) {
 	if e.Food != 0 {
 		t.Errorf("Food: want 0, got %d", e.Food)
 	}
-	if e.Gold != 5*w.FoodSellPrice() {
+	if e.Gold != int64(5*w.FoodSellPrice()) {
 		t.Errorf("Gold: want %d, got %d", 5*w.FoodSellPrice(), e.Gold)
 	}
 }
@@ -348,7 +348,7 @@ func TestSellFoodClampedToOwned(t *testing.T) {
 func TestStartHQ(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
-	e.Gold = w.HQPrice(e)
+	e.Gold = int64(w.HQPrice(e))
 
 	if err := w.StartHQ(e); err != nil {
 		t.Fatalf("StartHQ: %v", err)
@@ -364,7 +364,7 @@ func TestStartHQ(t *testing.T) {
 func TestStartHQAlreadyStarted(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
-	e.Gold = w.HQPrice(e) * 2
+	e.Gold = int64(w.HQPrice(e) * 2)
 	if err := w.StartHQ(e); err != nil {
 		t.Fatalf("StartHQ: %v", err)
 	}
@@ -380,7 +380,7 @@ func TestStartHQAlreadyStarted(t *testing.T) {
 func TestStartHQCantAfford(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
-	short := w.HQPrice(e) - 1
+	short := int64(w.HQPrice(e) - 1)
 	e.Gold = short
 
 	if err := w.StartHQ(e); err != ErrCantAfford {
@@ -407,7 +407,7 @@ func TestSellUnitsThirdPrice(t *testing.T) {
 	if e.Troopers != 0 {
 		t.Errorf("Troopers: want 0, got %d", e.Troopers)
 	}
-	wantGold := 10 * w.TrooperPrice(e) / 3
+	wantGold := int64(10 * w.TrooperPrice(e) / 3)
 	if e.Gold != wantGold {
 		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
 	}
@@ -421,7 +421,7 @@ func TestSellUnitsThirdPrice(t *testing.T) {
 	if e.Jets != 5 {
 		t.Errorf("Jets: want 5, got %d", e.Jets)
 	}
-	wantGold = 3 * w.JetPrice(e) / 3
+	wantGold = int64(3 * w.JetPrice(e) / 3)
 	if e.Gold != wantGold {
 		t.Errorf("Gold: want %d, got %d", wantGold, e.Gold)
 	}

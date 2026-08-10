@@ -15,7 +15,7 @@ func TestFundSDIRespectsTheTurnAllowance(t *testing.T) {
 	if a.SDIFunding != SDIMinSpend {
 		t.Errorf("funding = %d, want the allowance %d", a.SDIFunding, SDIMinSpend)
 	}
-	if want := 100_000_000 - SDIMinSpend; a.Gold != want {
+	if want := int64(100_000_000 - SDIMinSpend); a.Gold != want {
 		t.Errorf("gold = %d, want %d", a.Gold, want)
 	}
 	// The allowance is spent for the turn.
@@ -77,7 +77,7 @@ func TestFundSDICantAfford(t *testing.T) {
 // that a retune has to answer to new evidence (docs/dev/bre-screens.md).
 func TestSDIUpkeepAndAllowanceMatchBRE(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
-	for _, c := range []struct{ funding, maint, allowance int }{
+	for _, c := range []struct{ funding, maint, allowance int64 }{
 		{0, 0, 250_000},
 		{250_000, 10_000, 250_000},
 		{1_250_000, 50_000, 250_000},

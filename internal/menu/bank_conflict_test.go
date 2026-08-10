@@ -27,7 +27,7 @@ func TestWithdrawVanishedEmpireConflict(t *testing.T) {
 	_ = b.Player()
 	commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("alice")) })
 
-	withdraw := money("Withdraw", func(p *game.Empire) int { return p.Bank }, (*game.World).Withdraw)
+	withdraw := money("Withdraw", func(p *game.Empire) int64 { return p.Bank }, (*game.World).Withdraw)
 	fb := &fakeSession{keys: []rune("1000\r ")}
 	withdraw(fb, b)
 

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-08 15:05-0500\n"
+"POT-Creation-Date: 2026-08-10 03:16-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -102,13 +102,13 @@ msgstr ""
 "например `How many? (0; 40):`."
 
 #. type: Bullet: '- '
-#: internal/help/content/controls/numbers.md:18
+#: internal/help/content/controls/numbers.md:19
 msgid "The left number is a suggested value. Press Enter to accept it."
 msgstr ""
 "Левое число — рекомендуемое значение. Нажмите Enter, чтобы принять его."
 
 #. type: Bullet: '- '
-#: internal/help/content/controls/numbers.md:18
+#: internal/help/content/controls/numbers.md:19
 msgid ""
 "The right number is the most you can pick. Type `>` to fill the box with "
 "that maximum. You can still edit it."
@@ -117,7 +117,7 @@ msgstr ""
 "поле этим максимумом. После этого всё ещё можно ввести меньшее число."
 
 #. type: Bullet: '- '
-#: internal/help/content/controls/numbers.md:18
+#: internal/help/content/controls/numbers.md:19
 msgid ""
 "`k` adds three zeros as you type. Press `1` then `k` and you see `1000`."
 msgstr ""
@@ -125,19 +125,44 @@ msgstr ""
 "`1000`."
 
 #. type: Bullet: '- '
-#: internal/help/content/controls/numbers.md:18
+#: internal/help/content/controls/numbers.md:19
 msgid "`m` adds six zeros. Press `2` then `m` and you see `2000000`."
 msgstr ""
 "`m` добавляет шесть нулей. Нажмите `2`, затем `m` — и вы увидите `2000000`."
 
+#. type: Bullet: '- '
+#: internal/help/content/controls/numbers.md:19
+#, fuzzy
+#| msgid "`m` adds six zeros. Press `2` then `m` and you see `2000000`."
+msgid "`b` adds nine zeros. Press `3` then `b` and you see `3000000000`."
+msgstr ""
+"`m` добавляет шесть нулей. Нажмите `2`, затем `m` — и вы увидите `2000000`."
+
 #. type: Plain text
-#: internal/help/content/controls/numbers.md:20
+#: internal/help/content/controls/numbers.md:22
 msgid ""
 "If you type a number larger than the maximum, the game lowers it to the "
 "maximum when you press Enter."
 msgstr ""
 "Если ввести число больше максимума, игра снизит его до максимума при нажатии "
 "Enter."
+
+#. type: Title ##
+#: internal/help/content/controls/numbers.md:23
+#, no-wrap
+msgid "Very large numbers"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/numbers.md:30
+msgid ""
+"A number of a billion or more is shown in short form with a capital `B`, to "
+"keep it inside its column: `1.0000B` is one billion, and `1.8473B` is a "
+"little over one and four fifths of a billion. The four digits after the "
+"point are the part below a billion, cut off rather than rounded up, so a "
+"figure just short of the next billion never looks like it got there. You "
+"still type these numbers in full, or with the `b` key above."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/controls/turns.md:1
@@ -689,14 +714,43 @@ msgstr "Снять — вернуть золото из банка в казну
 msgid "Cash Relief / Loans — borrow gold, or pay back what you already owe."
 msgstr "Погасить заём — вернуть занятое."
 
+#. type: Plain text
+#: internal/help/content/economy/banking.md:19
+msgid ""
+"Deposits and withdrawals have no size limit. One investment locks away at "
+"most two billion gold, though you may open as many as you like."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:23
+msgid ""
+"Your sysop sets a limit on how much gold you can hold — two billion to begin "
+"with, in hand and the same again in the bank. Gold you earn above that is "
+"lost.  Spend it before you get there."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:26
+msgid ""
+"A full bank still pays its interest, into your gold in hand rather than the "
+"bank. Once both are full, it goes nowhere."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:29
+msgid ""
+"The game tells you when gold is lost this way. Your event log names the "
+"amount and where it came from."
+msgstr ""
+
 #. type: Title ##
-#: internal/help/content/economy/banking.md:17
+#: internal/help/content/economy/banking.md:30
 #, no-wrap
 msgid "Cash Relief / Loans"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:23
+#: internal/help/content/economy/banking.md:36
 msgid ""
 "When you borrow, you first pick how many days you have to pay it back (1 to "
 "10).  A longer term has a higher daily interest rate, and the interest "
@@ -706,7 +760,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:28
+#: internal/help/content/economy/banking.md:41
 msgid ""
 "You must repay the full amount on the due date. The bank takes it from your "
 "gold first, then from your savings. If you cannot pay it all, the rest "
@@ -715,13 +769,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/banking.md:29
+#: internal/help/content/economy/banking.md:42
 #, no-wrap
 msgid "Investments"
 msgstr "Инвестиции"
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:35
+#: internal/help/content/economy/banking.md:48
 #, fuzzy
 #| msgid ""
 #| "You can lock gold away as an investment for a number of days. It pays "

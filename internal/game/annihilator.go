@@ -137,7 +137,7 @@ func (w *World) FundAnnihilator(e *Empire, millions int) (int, error) {
 	if left := d.CostMillion - d.PaidMillion; millions > left {
 		millions = left
 	}
-	gold := millions * AnnihilatorMillion
+	gold := goldCost(millions, AnnihilatorMillion)
 	if e.Gold < gold {
 		return 0, ErrCantAfford
 	}

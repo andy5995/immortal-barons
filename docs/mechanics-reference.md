@@ -1004,9 +1004,50 @@ league ran tax 85%, interest 75%).
   default (50) yields ~1%/turn, matching this.
 - **Interest cap: 1,599,999,999.** Gold above this does not earn interest.
   At the cap, interest is roughly 25–35 million per turn.
-- **Absolute money cap: 2,000,000,000.** You cannot hold more than 2 billion
-  coins at once (in the bank or on hand) — a separate, higher ceiling than
-  the interest cap.
+- **Absolute money cap: 2,000,000,000 in BRE.** You cannot hold more than 2
+  billion coins at once (in the bank or on hand) — a separate, higher ceiling
+  than the interest cap.
+
+  **IB makes it a sysop knob, defaulting to BRE's figure.**
+  `Config.MoneyCapBillions` (Configuration Editor: "Money Cap (billions)") is
+  the cap in whole billions, read through `World.MoneyCap()`. It defaults to
+  `MoneyCapMinBillions` = 2, which reproduces BRE, and may be raised to
+  `MoneyCapMaxBillions` = 999. Gold credited above whatever it is set to is
+  still discarded — the knob moves the ceiling, it does not remove it.
+
+  BRE's own 2 billion is the largest a 32-bit signed integer holds, so it reads
+  as a machine limit rather than a design choice. IB's money fields are `int64`,
+  so the ceiling is now a game rule and behaves the same on a 32-bit door as on
+  a 64-bit one. The knob is in whole billions so the editor's field fits an
+  `int` on a 32-bit build, and 999 is the widest figure the abbreviated display
+  renders in three digits before the point.
+
+  Deposits and withdrawals are unbounded up to the cap — nothing gates the bank
+  per turn, so a per-action limit there only cost keystrokes. What IB does keep
+  at 2 billion is **one investment** (`MaxInvestment`); the number of
+  investments is not limited.
+- **A bank at the money cap pays its interest into gold in hand** rather than
+  having it clamped away (`processEconomy`). The cap limits what one purse
+  holds; a full purse is no reason to destroy the earnings. Gold in hand carries
+  the same cap, so a baron whose hand is also full still loses the overflow.
+  **Unverified against BRE** — IB chooses this because the alternative silently
+  deletes money the player earned.
+- **Gold destroyed by the cap raises an event**, naming the amount and its
+  source ("a matured investment", "this turn's income", "the trading market").
+  Every path that pays gold in runs through `World.creditGold`, which is what
+  holds gold in hand at the cap and files the notice; `Withdraw` is the
+  deliberate exception, since it draws only what fits and leaves the remainder
+  banked. BRE reports nothing here — it just stops counting.
+- **Figures of a billion or more are displayed abbreviated**, as a fixed
+  4-decimal form with a capital B: 1,000,000,000 renders `1.0000B`,
+  1,847,392,104 renders `1.8473B`, and `MoneyCapMax` renders `999.0000B`. The
+  fraction is truncated, never rounded, so a figure just under the next
+  billion never reads as having reached it. Below a billion nothing changes —
+  full digits with the locale thousands separator. The rule lives in one place
+  (`internal/numfmt`, which the engine and the menu layer both call) and applies
+  to any figure, not only gold, so a unit count that runs into the billions
+  abbreviates the same way. German and Russian take
+  the comma as the decimal mark.
 - **Food market (issue #19):** food is bought and sold against a **shared
   planet-wide pool** that starts each day at `FoodMarketDailySupply` (1,000,000
   units, from BRE's live "~1,001,452 available today"). Buying depletes the pool
@@ -1781,7 +1822,7 @@ Now matching this reference (as of v0.0.4):
   Maintenance pays it silently when affordable. (SDI upkeep, waste
   decontamination, and military morale are not yet modelled.)
 - Reference net-worth values and per-unit maintenance
-- Bank interest ~1% per turn, with the interest cap and 2-billion money cap
+- Bank interest ~1% per turn, with the interest cap and the money cap
 - Nuclear / chemical / biological strikes and pirate raids
 - Clingy Annihilator, with the original's fund-build-launch-intercept lifecycle,
   and SDI defense (a flat percentage damage-reducer)

@@ -70,7 +70,7 @@ func (w *World) StartHQ(e *Empire) error {
 	if e.HQ > 0 {
 		return ErrHQExists
 	}
-	price := w.HQPrice(e)
+	price := int64(w.HQPrice(e))
 	if e.Gold < price {
 		return ErrCantAfford
 	}
@@ -85,7 +85,7 @@ func (e *Empire) spend(n, unit int) error {
 	if n <= 0 {
 		return nil
 	}
-	cost := n * unit
+	cost := goldCost(n, unit)
 	if e.Gold < cost {
 		return ErrCantAfford
 	}
@@ -131,12 +131,12 @@ func (w *World) LandPrice(e *Empire) int {
 // overcounts — this sums the real climbing cost.
 func (w *World) MaxAffordableRegions(e *Empire) int {
 	limit := w.regionBuyLimit(e)
-	total := 0
+	var total int64
 	for n := 0; ; n++ {
 		if n >= limit {
 			return n
 		}
-		cost := w.regionCost(e.Land + n)
+		cost := int64(w.regionCost(e.Land + n))
 		if total+cost > e.Gold {
 			return n
 		}
@@ -158,9 +158,9 @@ func (w *World) BuyRegions(e *Empire, field *int, n int) error {
 	if n > e.LandAvailable {
 		return ErrNoLand // this realm's Daily Land Creation allowance is used up
 	}
-	total := 0
+	var total int64
 	for i := 0; i < n; i++ {
-		total += w.regionCost(e.Land + i)
+		total += int64(w.regionCost(e.Land + i))
 	}
 	if e.Gold < total {
 		return ErrCantAfford // must afford the whole purchase
@@ -211,7 +211,7 @@ func (w *World) BuyFoodMarket(e *Empire, n int) error {
 			n = w.FoodMarketSupply // buy what's left today
 		}
 	}
-	cost := n * w.FoodBuyPrice()
+	cost := goldCost(n, w.FoodBuyPrice())
 	if e.Gold < cost {
 		return ErrCantAfford
 	}
@@ -233,7 +233,7 @@ func (w *World) SellFood(e *Empire, n int) error {
 		n = e.Food
 	}
 	e.Food -= n
-	e.Gold += n * w.FoodSellPrice()
+	w.creditGold(e, goldCost(n, w.FoodSellPrice()), "a food sale")
 	if !w.Config.FoodUnlimited {
 		w.FoodMarketSupply += n
 	}
@@ -375,7 +375,7 @@ func (w *World) RecruitAgents(e *Empire, n int) error {
 
 // sellUnit sells n of a unit back to the market for a third of its buy price
 // (BRE's rate), clamped to what's owned (*stock).
-func sellUnit(stock *int, n, price int, e *Empire) error {
+func (w *World) sellUnit(stock *int, n, price int, e *Empire) error {
 	if n <= 0 {
 		return nil
 	}
@@ -383,16 +383,16 @@ func sellUnit(stock *int, n, price int, e *Empire) error {
 		n = *stock
 	}
 	*stock -= n
-	e.Gold += n * price / 3 // BRE: sell price is buy/3
+	w.creditGold(e, goldCost(n, price)/3, "a unit sale") // BRE: sell price is buy/3
 	return nil
 }
 
 func (w *World) SellTroopers(e *Empire, n int) error {
-	return sellUnit(&e.Troopers, n, w.TrooperPrice(e), e)
+	return w.sellUnit(&e.Troopers, n, w.TrooperPrice(e), e)
 }
 
 func (w *World) SellJets(e *Empire, n int) error {
-	return sellUnit(&e.Jets, n, w.JetPrice(e), e)
+	return w.sellUnit(&e.Jets, n, w.JetPrice(e), e)
 }
 
 // BuildBombers buys n bombers directly (they can also be produced by Industrial
@@ -402,19 +402,19 @@ func (w *World) BuildBombers(e *Empire, n int) error {
 }
 
 func (w *World) SellBombers(e *Empire, n int) error {
-	return sellUnit(&e.Bombers, n, w.BomberPrice(e), e)
+	return w.sellUnit(&e.Bombers, n, w.BomberPrice(e), e)
 }
 
 func (w *World) SellTurrets(e *Empire, n int) error {
-	return sellUnit(&e.Turrets, n, w.TurretPrice(e), e)
+	return w.sellUnit(&e.Turrets, n, w.TurretPrice(e), e)
 }
 
 func (w *World) SellTanks(e *Empire, n int) error {
-	return sellUnit(&e.Tanks, n, w.TankPrice(e), e)
+	return w.sellUnit(&e.Tanks, n, w.TankPrice(e), e)
 }
 
 func (w *World) SellCarriers(e *Empire, n int) error {
-	return sellUnit(&e.Carriers, n, w.CarrierPrice(e), e)
+	return w.sellUnit(&e.Carriers, n, w.CarrierPrice(e), e)
 }
 
 func (w *World) SellAgents(e *Empire, n int) error {
@@ -426,7 +426,7 @@ func (w *World) SellAgents(e *Empire, n int) error {
 		n = e.Agents
 	}
 	e.Agents -= n
-	e.Gold += n * SellAgentPrice
+	w.creditGold(e, goldCost(n, SellAgentPrice), "an agent sale")
 	return nil
 }
 
@@ -442,7 +442,7 @@ func (w *World) SellRegions(e *Empire, field *int, n int) error {
 	for i := 0; i < n; i++ {
 		*field--
 		e.syncLand()
-		e.Gold += w.LandPrice(e) / 2
+		w.creditGold(e, int64(w.LandPrice(e)/2), "a region sale")
 	}
 	return nil
 }
@@ -468,7 +468,7 @@ func (w *World) DropRegions(e *Empire, field *int, n int) error {
 	return nil
 }
 
-func (w *World) Deposit(e *Empire, n int) error {
+func (w *World) Deposit(e *Empire, n int64) error {
 	if n <= 0 {
 		return nil
 	}
@@ -477,7 +477,7 @@ func (w *World) Deposit(e *Empire, n int) error {
 	}
 	// Don't consume gold that won't fit under the money cap — only bank as
 	// much as there is room for.
-	if room := MoneyCap - e.Bank; n > room {
+	if room := w.MoneyCap() - e.Bank; n > room {
 		n = room
 	}
 	if n <= 0 {
@@ -488,19 +488,27 @@ func (w *World) Deposit(e *Empire, n int) error {
 	return nil
 }
 
-func (w *World) Withdraw(e *Empire, n int) error {
+func (w *World) Withdraw(e *Empire, n int64) error {
 	if n <= 0 {
 		return nil
 	}
 	if e.Bank < n {
 		return ErrNoBank
 	}
+	// Mirror Deposit: don't draw savings that won't fit under the money cap —
+	// take only as much as there is room for in hand, and leave the rest banked.
+	if room := w.MoneyCap() - e.Gold; n > room {
+		n = room
+	}
+	if n <= 0 {
+		return nil
+	}
 	e.Bank -= n
 	e.Gold += n
 	return nil
 }
 
-func (w *World) Repay(e *Empire, n int) error {
+func (w *World) Repay(e *Empire, n int64) error {
 	if n <= 0 {
 		return nil
 	}
