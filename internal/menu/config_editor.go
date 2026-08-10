@@ -89,8 +89,8 @@ func ConfigEditor(s session.Session, w *game.World) (saved bool) {
 // sets the league ruleset. It edits the world's Config in place and writes it
 // back to config.json. Defaults and the turns/day cap come from BRE's compiled
 // code; other caps are generous where BRE's exact max isn't confirmed. The
-// league ruleset fields (marked *) are the ones a Coordinator broadcasts to the
-// league with -league-config. Returns true if saved, false if cancelled.
+// inter-BBS fields (marked *, as the original marks them) are the ones that do
+// nothing on a stand-alone board. Returns true if saved, false if cancelled.
 //
 // Changes take effect going forward (a new TurnsPerDay applies at the next
 // daily maintenance; AICount does not retroactively add or remove AI empires).
@@ -104,13 +104,17 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 		fmt.Fprintf(s, "%s  %s  (page %d of %d)%s\n", ansi.FgBrightCyan, g.title, page+1, len(pages), ansi.Reset)
 		for _, f := range g.fields {
 			label := f.label
-			if f.league {
+			if ibbsOnlyFields[f.n] {
 				label = "* " + label
 			}
 			fmt.Fprintf(s, "  %2d) %-30s %s\n", f.n, label, f.value(c))
 		}
-		fmt.Fprintf(s, "%s\n%s* = league ruleset (Coordinator broadcasts with -league-config)%s\n",
-			rule, ansi.FgWhite, ansi.Reset)
+		// A stand-alone board never sees a starred field (withoutIBBSFields drops
+		// them), so the legend would explain a mark that is not on the screen.
+		fmt.Fprintf(s, "%s\n", rule)
+		if c.IBBS {
+			fmt.Fprintf(s, "%s* = inter-BBS option%s\n", ansi.FgWhite, ansi.Reset)
+		}
 
 		choice := strings.ToLower(strings.TrimSpace(prompt(s, "Edit which (N = next page, P = previous, S = save & exit, Q = cancel)?")))
 		switch choice {
@@ -147,11 +151,10 @@ func runConfigEditor(s session.Session, w *game.World) bool {
 // track the field's position, so regrouping the pages renumbers nothing (28 and
 // 29 already sat outside the printed sequence before there were pages).
 type cfgField struct {
-	n      int
-	label  string
-	league bool // part of the ruleset a Coordinator broadcasts (shown with *)
-	value  func(*game.Config) string
-	edit   func(session.Session, *game.Config)
+	n     int
+	label string
+	value func(*game.Config) string
+	edit  func(session.Session, *game.Config)
 }
 
 // cfgPage is one screenful of fields.
@@ -168,28 +171,28 @@ func configPages(ibbs bool) []cfgPage {
 	// Shorthands: most fields either prompt for a number or cycle a choice.
 	num := func(n int, label string, prompt string, get func(*game.Config) int, set func(*game.Config, int), maxV int) cfgField {
 		return cfgField{
-			n: n, label: label, league: true,
+			n: n, label: label,
 			value: func(c *game.Config) string { return fmt.Sprintf("%d", get(c)) },
 			edit:  func(s session.Session, c *game.Config) { set(c, promptSuggested(s, prompt, get(c), maxV)) },
 		}
 	}
 	toggle := func(n int, label string, get func(*game.Config) bool, set func(*game.Config, bool)) cfgField {
 		return cfgField{
-			n: n, label: label, league: true,
+			n: n, label: label,
 			value: func(c *game.Config) string { return onOffStr(get(c)) },
 			edit:  func(_ session.Session, c *game.Config) { set(c, !get(c)) },
 		}
 	}
 	cycle := func(n int, label string, get func(*game.Config) game.Level, set func(*game.Config, game.Level), step func(game.Level) game.Level) cfgField {
 		return cfgField{
-			n: n, label: label, league: true,
+			n: n, label: label,
 			value: func(c *game.Config) string { return get(c).String() },
 			edit:  func(_ session.Session, c *game.Config) { set(c, step(get(c))) },
 		}
 	}
 
 	timing := []cfgField{
-		{n: 1, label: "Turns per day", league: true,
+		{n: 1, label: "Turns per day",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d", c.TurnsPerDay) },
 			edit: func(s session.Session, c *game.Config) {
 				c.TurnsPerDay = max(1, promptSuggested(s, "Turns per day", c.TurnsPerDay, game.MaxTurnsPerDay))
@@ -197,22 +200,22 @@ func configPages(ibbs bool) []cfgPage {
 		num(2, "Turns of Protection", "Turns of Protection",
 			func(c *game.Config) int { return c.ProtectionTurns },
 			func(c *game.Config, v int) { c.ProtectionTurns = v }, game.MaxProtectionTurns),
-		{n: 3, label: "Game length (days)", league: true,
+		{n: 3, label: "Game length (days)",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = endless)", c.GameLength) },
 			edit: func(s session.Session, c *game.Config) {
 				c.GameLength = promptSuggested(s, "Game length in days (0 = endless)", c.GameLength, 100000)
 			}},
-		{n: 29, label: "Remove idle realms (days)", league: true,
+		{n: 29, label: "Remove idle realms (days)",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = never)", c.IdleDaysRemove) },
 			edit: func(s session.Session, c *game.Config) {
 				c.IdleDaysRemove = promptSuggested(s, "Remove a realm unplayed for how many days (0 = never)", c.IdleDaysRemove, game.MaxIdleDaysRemove)
 			}},
-		{n: 19, label: "Game Start Date", league: true,
+		{n: 19, label: "Game Start Date",
 			value: func(c *game.Config) string { return dateOr(c.GameStartDate, "starts immediately") },
 			edit: func(s session.Session, c *game.Config) {
 				c.GameStartDate = promptDate(s, "Game Start Date", c.GameStartDate)
 			}},
-		{n: 20, label: "Join Cutoff Date", league: true,
+		{n: 20, label: "Join Cutoff Date",
 			value: func(c *game.Config) string { return dateOr(c.JoinDate, "always open") },
 			edit:  func(s session.Session, c *game.Config) { c.JoinDate = promptDate(s, "Join Cutoff Date", c.JoinDate) }},
 		{n: 21, label: "AI empires", value: aiCountStr,
@@ -238,13 +241,13 @@ func configPages(ibbs bool) []cfgPage {
 		num(7, "Standard Investment Rate", "Standard Investment Rate",
 			func(c *game.Config) int { return c.StdInvestRate },
 			func(c *game.Config, v int) { c.StdInvestRate = v }, game.MaxStdInvestRate),
-		{n: 8, label: "Steady Investment Rate", league: true,
+		{n: 8, label: "Steady Investment Rate",
 			value: func(c *game.Config) string { return enabledStr(c.SteadyInvest) },
 			edit:  func(_ session.Session, c *game.Config) { c.SteadyInvest = !c.SteadyInvest }},
 		num(9, "Max Tax Rate", "Max Tax Rate",
 			func(c *game.Config) int { return c.MaxTaxRate },
 			func(c *game.Config, v int) { c.MaxTaxRate = v }, game.MaxPlayerTaxRate),
-		{n: 28, label: "Planetary Tax Rate", league: true,
+		{n: 28, label: "Planetary Tax Rate",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d%%", c.PlanetaryTaxRate) },
 			edit: func(s session.Session, c *game.Config) {
 				c.PlanetaryTaxRate = promptSuggested(s, "Planetary Tax Rate (%)", c.PlanetaryTaxRate, game.MaxPlanetaryTaxRate)
@@ -255,7 +258,7 @@ func configPages(ibbs bool) []cfgPage {
 	}
 
 	mil := []cfgField{
-		{n: 12, label: "Buy Military", league: true,
+		{n: 12, label: "Buy Military",
 			value: func(c *game.Config) string { return c.BuyMilitary.String() },
 			edit:  func(_ session.Session, c *game.Config) { c.BuyMilitary = cycleBuy(c.BuyMilitary) }},
 		cycle(13, "Maintenance Costs", func(c *game.Config) game.Level { return c.MaintCosts },
@@ -268,32 +271,32 @@ func configPages(ibbs bool) []cfgPage {
 			func(c *game.Config, v game.Level) { c.AttackDamage = v }, cycleHML),
 		cycle(17, "Attack Rewards", func(c *game.Config) game.Level { return c.AttackRewards },
 			func(c *game.Config, v game.Level) { c.AttackRewards = v }, cycleHML),
-		{n: 18, label: "R5-Slappenheimer Handling", league: true,
+		{n: 18, label: "R5-Slappenheimer Handling",
 			value: func(c *game.Config) string { return c.SlappenheimerHandling.String() },
 			edit: func(_ session.Session, c *game.Config) {
 				c.SlappenheimerHandling = cycleSlappenheimer(c.SlappenheimerHandling)
 			}},
-		{n: 27, label: "Max Individual Attacks/Day", league: true,
+		{n: 27, label: "Max Individual Attacks/Day",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxIndividualAttacks) },
 			edit: func(s session.Session, c *game.Config) {
 				c.MaxIndividualAttacks = promptSuggested(s, "Max Individual Attacks/Day (0 = unlimited)", c.MaxIndividualAttacks, 100)
 			}},
-		{n: 30, label: "Max Group Attacks/Day", league: true,
+		{n: 30, label: "Max Group Attacks/Day",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxGroupAttacks) },
 			edit: func(s session.Session, c *game.Config) {
 				c.MaxGroupAttacks = promptSuggested(s, "Max Group Attacks/Day (0 = unlimited)", c.MaxGroupAttacks, 100)
 			}},
-		{n: 31, label: "Max Terrorist Ops/Day", league: true,
+		{n: 31, label: "Max Terrorist Ops/Day",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxTerrorOps) },
 			edit: func(s session.Session, c *game.Config) {
 				c.MaxTerrorOps = promptSuggested(s, "Max Terrorist Ops/Day (0 = unlimited)", c.MaxTerrorOps, 100)
 			}},
-		{n: 32, label: "Max Bombing Ops/Day", league: true,
+		{n: 32, label: "Max Bombing Ops/Day",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxBombingOps) },
 			edit: func(s session.Session, c *game.Config) {
 				c.MaxBombingOps = promptSuggested(s, "Max Bombing Ops/Day (0 = unlimited)", c.MaxBombingOps, 100)
 			}},
-		{n: 33, label: "Days before lost forces return", league: true,
+		{n: 33, label: "Days before lost forces return",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = never)", c.LostForcesDays) },
 			edit: func(s session.Session, c *game.Config) {
 				c.LostForcesDays = promptSuggested(s, "Days before lost forces return (0 = never)", c.LostForcesDays, game.MaxLostForcesDays)

@@ -65,9 +65,9 @@ func TestConfigTUIClampsAndValidates(t *testing.T) {
 	tui := newConfigTUI(w.World)
 
 	// An over-max integer clamps to the field's ceiling.
-	setField(t, tui, 0, star+"Turns per day", func(f *tview.InputField) { f.SetText("99999") })
+	setField(t, tui, 0, noStar+"Turns per day", func(f *tview.InputField) { f.SetText("99999") })
 	// A malformed date is ignored, keeping the value the editor opened with.
-	setField(t, tui, 0, star+"Game Start Date (YYYY-MM-DD)", func(f *tview.InputField) { f.SetText("not-a-date") })
+	setField(t, tui, 0, noStar+"Game Start Date (YYYY-MM-DD)", func(f *tview.InputField) { f.SetText("not-a-date") })
 
 	got := tui.collect()
 	if got.TurnsPerDay != game.MaxTurnsPerDay {
@@ -110,7 +110,7 @@ func TestConfigTUIKeepsPacketDirWhenCleared(t *testing.T) {
 	w.Config = distinctConfig()
 	tui := newConfigTUI(w.World)
 
-	setField(t, tui, 3, noStar+"Inbound Dir", func(f *tview.InputField) { f.SetText("  ") })
+	setField(t, tui, 3, star+"Inbound Dir", func(f *tview.InputField) { f.SetText("  ") })
 
 	if got := tui.collect(); got.InboundDir != "/srv/in" {
 		t.Errorf("InboundDir = %q, want the opening /srv/in", got.InboundDir)
@@ -187,4 +187,65 @@ func TestBothEditorsHideTheSameLeagueFields(t *testing.T) {
 			t.Errorf("the tview editor hides %q off a league; the line editor still offers it", l)
 		}
 	}
+}
+
+// The star means "inter-BBS option", as it does in the original — not "part of
+// the league ruleset", which marked 25 of 32 fields and told a stand-alone sysop
+// the opposite of what BRE's star tells them. Asserts the exact set on BOTH
+// editors: the tview labels carry hints the line editor does not, and matching
+// them by equality silently starred only half the set while every test passed.
+func TestOnlyInterBBSFieldsAreStarred(t *testing.T) {
+	c := distinctConfig()
+	c.IBBS = true
+	w := newWorld()
+	w.Config = c
+	tui := newConfigTUI(w.World)
+
+	got := map[string]bool{}
+	for _, form := range tui.forms {
+		for i := 0; i < form.GetFormItemCount(); i++ {
+			if l := form.GetFormItem(i).GetLabel(); strings.HasPrefix(l, star) {
+				got[strings.TrimSpace(strings.TrimPrefix(l, star))] = true
+			}
+		}
+	}
+
+	want := ibbsOnlyLabels()
+	if len(got) != len(want) {
+		t.Errorf("tview editor stars %d fields, want the %d inter-BBS ones:\n got:  %v\n want: %v",
+			len(got), len(want), got, want)
+	}
+	for g := range got {
+		matched := false
+		for wl := range want {
+			if strings.HasPrefix(g, wl) {
+				matched = true
+				break
+			}
+		}
+		if !matched {
+			t.Errorf("%q is starred but is not an inter-BBS option", g)
+		}
+	}
+}
+
+// The star's legend only belongs on screen where a starred field can appear. A
+// stand-alone board is never shown an inter-BBS field, so both the line
+// editor's footer and the tview status bar leave the legend off there.
+func TestStarLegendOnlyOnALeagueBoard(t *testing.T) {
+	for _, ibbs := range []bool{true, false} {
+		c := distinctConfig()
+		c.IBBS = ibbs
+		w := newWorld()
+		w.Config = c
+		got := footerTextOf(newConfigTUI(w.World))
+		if has := strings.Contains(got, "inter-BBS option"); has != ibbs {
+			t.Errorf("IBBS=%v: legend present=%v, want %v (footer: %q)", ibbs, has, ibbs, got)
+		}
+	}
+}
+
+func footerTextOf(t *configTUI) string {
+	rootLayout(t)
+	return t.footerText
 }

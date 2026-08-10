@@ -16,7 +16,7 @@ import (
 // The tview Configuration Editor: the polished, tabbed form used when -reset
 // runs on a real terminal. Fields are grouped into four tabs so the whole
 // ruleset never overflows a screen (issue #7); a ★ marks the league-ruleset
-// fields (the ones a Coordinator broadcasts with -league-config). When stdin is
+// fields (the inter-BBS ones, marked as BRE marks them). When stdin is
 // not a terminal (piped -reset, CI) the caller falls back to the line-based
 // runConfigEditor, which shares the same clamping/validation intent.
 
@@ -29,11 +29,36 @@ const (
 	noStar = "  "
 )
 
-func mark(leagueRuleset bool) string {
-	if leagueRuleset {
-		return star
+// mark prefixes a field label with BRE's star, which means "inter-BBS option"
+// — a setting that does nothing on a stand-alone board. The set comes from the
+// line editor's ibbsOnlyFields, matched by label, so the two editors cannot
+// disagree about which fields carry it.
+func mark(label string) string {
+	// Prefix, not equality: these labels carry hints the line editor puts in its
+	// prompt instead ("Max Group Attacks/Day (0=unlimited)"), so an exact match
+	// silently missed half the set.
+	for l := range ibbsOnlyLabels() {
+		if strings.HasPrefix(label, l) {
+			return star
+		}
 	}
 	return noStar
+}
+
+var ibbsOnlyLabelSet map[string]bool
+
+func ibbsOnlyLabels() map[string]bool {
+	if ibbsOnlyLabelSet == nil {
+		ibbsOnlyLabelSet = map[string]bool{}
+		for _, page := range configPages(true) {
+			for _, f := range page.fields {
+				if ibbsOnlyFields[f.n] {
+					ibbsOnlyLabelSet[f.label] = true
+				}
+			}
+		}
+	}
+	return ibbsOnlyLabelSet
 }
 
 // fieldBgColor darkens the input background; tview's default (ColorBlue) leaves
@@ -95,20 +120,21 @@ const (
 // into a Config on Save, so collect() needs no per-field wiring at the call site
 // and is testable without a live screen.
 type configTUI struct {
-	app       *tview.Application
-	pages     *tview.Pages
-	tabs      *tview.TextView
-	help      *tview.TextView // right-hand pane; shows the focused field's help
-	forms     []*tview.Form
-	root      tview.Primitive // the main layout, restored after a modal
-	world     *game.World
-	base      game.Config
-	binders   []func(*game.Config)
-	resetters []func() // restore each widget to its opening (default) value
-	aligns    []rangeField
-	cur       int
-	saved     bool
-	modalUp   bool // a confirm/error modal owns the screen; global keys stand down
+	app        *tview.Application
+	pages      *tview.Pages
+	tabs       *tview.TextView
+	help       *tview.TextView // right-hand pane; shows the focused field's help
+	forms      []*tview.Form
+	root       tview.Primitive // the main layout, restored after a modal
+	world      *game.World
+	footerText string
+	base       game.Config
+	binders    []func(*game.Config)
+	resetters  []func() // restore each widget to its opening (default) value
+	aligns     []rangeField
+	cur        int
+	saved      bool
+	modalUp    bool // a confirm/error modal owns the screen; global keys stand down
 }
 
 // rangeField remembers an int field so alignRanges can right-align its [lo-hi]
@@ -153,71 +179,71 @@ func newConfigTUI(w *game.World) *configTUI {
 	slapVals := []game.SlappenheimerMode{game.SlappenheimerUserSelect, game.SlappenheimerNone, game.SlappenheimerRandom, game.SlappenheimerConstant}
 
 	timing := tview.NewForm()
-	t.addInt(timing, true, "Turns per day", helpTurnsPerDay, c.TurnsPerDay, 1, game.MaxTurnsPerDay, func(c *game.Config, n int) { c.TurnsPerDay = n })
-	t.addInt(timing, true, "Turns of Protection", helpProtection, c.ProtectionTurns, 0, game.MaxProtectionTurns, func(c *game.Config, n int) { c.ProtectionTurns = n })
-	t.addInt(timing, true, "Game length (days, 0=endless)", helpGameLength, c.GameLength, 0, 100000, func(c *game.Config, n int) { c.GameLength = n })
-	t.addInt(timing, true, "Remove idle realms (days, 0=never)", helpIdleRemove, c.IdleDaysRemove, 0, game.MaxIdleDaysRemove, func(c *game.Config, n int) { c.IdleDaysRemove = n })
-	t.addDate(timing, true, "Game Start Date (YYYY-MM-DD)", helpStartDate, c.GameStartDate, func(c *game.Config, v string) { c.GameStartDate = v })
-	t.addDate(timing, true, "Join Cutoff Date (YYYY-MM-DD)", helpJoinDate, c.JoinDate, func(c *game.Config, v string) { c.JoinDate = v })
-	t.addInt(timing, false, "AI empires", helpAICount, c.AICount, 0, 5, func(c *game.Config, n int) { c.AICount = n })
+	t.addInt(timing, "Turns per day", helpTurnsPerDay, c.TurnsPerDay, 1, game.MaxTurnsPerDay, func(c *game.Config, n int) { c.TurnsPerDay = n })
+	t.addInt(timing, "Turns of Protection", helpProtection, c.ProtectionTurns, 0, game.MaxProtectionTurns, func(c *game.Config, n int) { c.ProtectionTurns = n })
+	t.addInt(timing, "Game length (days, 0=endless)", helpGameLength, c.GameLength, 0, 100000, func(c *game.Config, n int) { c.GameLength = n })
+	t.addInt(timing, "Remove idle realms (days, 0=never)", helpIdleRemove, c.IdleDaysRemove, 0, game.MaxIdleDaysRemove, func(c *game.Config, n int) { c.IdleDaysRemove = n })
+	t.addDate(timing, "Game Start Date (YYYY-MM-DD)", helpStartDate, c.GameStartDate, func(c *game.Config, v string) { c.GameStartDate = v })
+	t.addDate(timing, "Join Cutoff Date (YYYY-MM-DD)", helpJoinDate, c.JoinDate, func(c *game.Config, v string) { c.JoinDate = v })
+	t.addInt(timing, "AI empires", helpAICount, c.AICount, 0, 5, func(c *game.Config, n int) { c.AICount = n })
 
 	econ := tview.NewForm()
-	t.addInt(econ, true, "Initial Market Land", helpInitialLand, c.InitialMarketLand, 0, game.MaxInitialMarketLand, func(c *game.Config, n int) { c.InitialMarketLand = n })
-	t.addInt(econ, true, "Land Created / Day", helpLandPerDay, c.LandPerDay, 0, game.MaxLandPerDay, func(c *game.Config, n int) { c.LandPerDay = n })
-	t.addInt(econ, true, "Interest Rate", helpInterest, c.InterestRate, 0, game.MaxBankInterest, func(c *game.Config, n int) { c.InterestRate = n })
-	t.addInt(econ, true, "Standard Investment Rate", helpStdInvest, c.StdInvestRate, 0, game.MaxStdInvestRate, func(c *game.Config, n int) { c.StdInvestRate = n })
-	t.addBool(econ, true, "Steady Investment Rate", helpSteadyInvest, c.SteadyInvest, func(c *game.Config, b bool) { c.SteadyInvest = b })
-	t.addInt(econ, true, "Max Tax Rate", helpMaxTax, c.MaxTaxRate, 0, game.MaxPlayerTaxRate, func(c *game.Config, n int) { c.MaxTaxRate = n })
-	t.addInt(econ, true, "Planetary Tax Rate (%)", helpPlanetaryTax, c.PlanetaryTaxRate, 0, game.MaxPlanetaryTaxRate, func(c *game.Config, n int) { c.PlanetaryTaxRate = n })
-	t.addInt(econ, true, "Money Cap (billions)", helpMoneyCap, c.MoneyCapBillions, game.MoneyCapMinBillions, game.MoneyCapMaxBillions, func(c *game.Config, n int) { c.MoneyCapBillions = n })
-	t.addBool(econ, true, "Food Unlimited", helpFoodUnlimited, c.FoodUnlimited, func(c *game.Config, b bool) { c.FoodUnlimited = b })
+	t.addInt(econ, "Initial Market Land", helpInitialLand, c.InitialMarketLand, 0, game.MaxInitialMarketLand, func(c *game.Config, n int) { c.InitialMarketLand = n })
+	t.addInt(econ, "Land Created / Day", helpLandPerDay, c.LandPerDay, 0, game.MaxLandPerDay, func(c *game.Config, n int) { c.LandPerDay = n })
+	t.addInt(econ, "Interest Rate", helpInterest, c.InterestRate, 0, game.MaxBankInterest, func(c *game.Config, n int) { c.InterestRate = n })
+	t.addInt(econ, "Standard Investment Rate", helpStdInvest, c.StdInvestRate, 0, game.MaxStdInvestRate, func(c *game.Config, n int) { c.StdInvestRate = n })
+	t.addBool(econ, "Steady Investment Rate", helpSteadyInvest, c.SteadyInvest, func(c *game.Config, b bool) { c.SteadyInvest = b })
+	t.addInt(econ, "Max Tax Rate", helpMaxTax, c.MaxTaxRate, 0, game.MaxPlayerTaxRate, func(c *game.Config, n int) { c.MaxTaxRate = n })
+	t.addInt(econ, "Planetary Tax Rate (%)", helpPlanetaryTax, c.PlanetaryTaxRate, 0, game.MaxPlanetaryTaxRate, func(c *game.Config, n int) { c.PlanetaryTaxRate = n })
+	t.addInt(econ, "Money Cap (billions)", helpMoneyCap, c.MoneyCapBillions, game.MoneyCapMinBillions, game.MoneyCapMaxBillions, func(c *game.Config, n int) { c.MoneyCapBillions = n })
+	t.addBool(econ, "Food Unlimited", helpFoodUnlimited, c.FoodUnlimited, func(c *game.Config, b bool) { c.FoodUnlimited = b })
 
 	mil := tview.NewForm()
-	addChoice(t, mil, true, "Buy Military", helpBuyMilitary, buyOpts, buyVals, c.BuyMilitary, func(c *game.Config, v game.BuyMode) { c.BuyMilitary = v })
-	addChoice(t, mil, true, "Maintenance Costs", helpMaintCosts, costOpts, costVals, c.MaintCosts, func(c *game.Config, v game.Level) { c.MaintCosts = v })
-	addChoice(t, mil, true, "Trade Deal Costs", helpTradeCosts, costOpts, costVals, c.TradeCosts, func(c *game.Config, v game.Level) { c.TradeCosts = v })
-	addChoice(t, mil, true, "Region Costs", helpRegionCosts, costOpts, costVals, c.RegionCosts, func(c *game.Config, v game.Level) { c.RegionCosts = v })
-	addChoice(t, mil, true, "Attack Damage", helpAttackDamage, dmgOpts, dmgVals, c.AttackDamage, func(c *game.Config, v game.Level) { c.AttackDamage = v })
-	addChoice(t, mil, true, "Attack Rewards", helpAttackRewards, dmgOpts, dmgVals, c.AttackRewards, func(c *game.Config, v game.Level) { c.AttackRewards = v })
-	addChoice(t, mil, true, "R5-Slappenheimer Handling", helpSlappenheimer, slapOpts, slapVals, c.SlappenheimerHandling, func(c *game.Config, v game.SlappenheimerMode) { c.SlappenheimerHandling = v })
-	t.addInt(mil, true, "Max Individual Attacks/Day (0=unlimited)", helpMaxAttacks, c.MaxIndividualAttacks, 0, 100, func(c *game.Config, n int) { c.MaxIndividualAttacks = n })
+	addChoice(t, mil, "Buy Military", helpBuyMilitary, buyOpts, buyVals, c.BuyMilitary, func(c *game.Config, v game.BuyMode) { c.BuyMilitary = v })
+	addChoice(t, mil, "Maintenance Costs", helpMaintCosts, costOpts, costVals, c.MaintCosts, func(c *game.Config, v game.Level) { c.MaintCosts = v })
+	addChoice(t, mil, "Trade Deal Costs", helpTradeCosts, costOpts, costVals, c.TradeCosts, func(c *game.Config, v game.Level) { c.TradeCosts = v })
+	addChoice(t, mil, "Region Costs", helpRegionCosts, costOpts, costVals, c.RegionCosts, func(c *game.Config, v game.Level) { c.RegionCosts = v })
+	addChoice(t, mil, "Attack Damage", helpAttackDamage, dmgOpts, dmgVals, c.AttackDamage, func(c *game.Config, v game.Level) { c.AttackDamage = v })
+	addChoice(t, mil, "Attack Rewards", helpAttackRewards, dmgOpts, dmgVals, c.AttackRewards, func(c *game.Config, v game.Level) { c.AttackRewards = v })
+	addChoice(t, mil, "R5-Slappenheimer Handling", helpSlappenheimer, slapOpts, slapVals, c.SlappenheimerHandling, func(c *game.Config, v game.SlappenheimerMode) { c.SlappenheimerHandling = v })
+	t.addInt(mil, "Max Individual Attacks/Day (0=unlimited)", helpMaxAttacks, c.MaxIndividualAttacks, 0, 100, func(c *game.Config, n int) { c.MaxIndividualAttacks = n })
 	if ibbs {
-		t.addInt(mil, true, "Max Group Attacks/Day (0=unlimited)", helpMaxGroupAttacks, c.MaxGroupAttacks, 0, 100, func(c *game.Config, n int) { c.MaxGroupAttacks = n })
-		t.addInt(mil, true, "Max Terrorist Ops/Day (0=unlimited)", helpMaxTerrorOps, c.MaxTerrorOps, 0, 100, func(c *game.Config, n int) { c.MaxTerrorOps = n })
-		t.addInt(mil, true, "Max Bombing Ops/Day (0=unlimited)", helpMaxBombingOps, c.MaxBombingOps, 0, 100, func(c *game.Config, n int) { c.MaxBombingOps = n })
-		t.addInt(mil, true, "Days before lost forces return (0=never)", helpLostForcesDays, c.LostForcesDays, 0, game.MaxLostForcesDays, func(c *game.Config, n int) { c.LostForcesDays = n })
+		t.addInt(mil, "Max Group Attacks/Day (0=unlimited)", helpMaxGroupAttacks, c.MaxGroupAttacks, 0, 100, func(c *game.Config, n int) { c.MaxGroupAttacks = n })
+		t.addInt(mil, "Max Terrorist Ops/Day (0=unlimited)", helpMaxTerrorOps, c.MaxTerrorOps, 0, 100, func(c *game.Config, n int) { c.MaxTerrorOps = n })
+		t.addInt(mil, "Max Bombing Ops/Day (0=unlimited)", helpMaxBombingOps, c.MaxBombingOps, 0, 100, func(c *game.Config, n int) { c.MaxBombingOps = n })
+		t.addInt(mil, "Days before lost forces return (0=never)", helpLostForcesDays, c.LostForcesDays, 0, game.MaxLostForcesDays, func(c *game.Config, n int) { c.LostForcesDays = n })
 	}
-	addChoice(t, mil, true, "Attack Costs", helpAttackCosts, costOpts, costVals, c.AttackCosts, func(c *game.Config, v game.Level) { c.AttackCosts = v })
+	addChoice(t, mil, "Attack Costs", helpAttackCosts, costOpts, costVals, c.AttackCosts, func(c *game.Config, v game.Level) { c.AttackCosts = v })
 	if ibbs {
-		addChoice(t, mil, true, "Terrorism Costs", helpTerrorCosts, costOpts, costVals, c.TerrorCosts, func(c *game.Config, v game.Level) { c.TerrorCosts = v })
+		addChoice(t, mil, "Terrorism Costs", helpTerrorCosts, costOpts, costVals, c.TerrorCosts, func(c *game.Config, v game.Level) { c.TerrorCosts = v })
 	}
-	t.addBool(mil, true, "Bombing Ops", helpBombingOps, c.BombingOps, func(c *game.Config, b bool) { c.BombingOps = b })
-	t.addBool(mil, true, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
+	t.addBool(mil, "Bombing Ops", helpBombingOps, c.BombingOps, func(c *game.Config, b bool) { c.BombingOps = b })
+	t.addBool(mil, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
 	if ibbs {
-		t.addBool(mil, true, "Clingy Annihilator", helpClingyAnnihilator, c.ClingyAnnihilator, func(c *game.Config, b bool) { c.ClingyAnnihilator = b })
+		t.addBool(mil, "Clingy Annihilator", helpClingyAnnihilator, c.ClingyAnnihilator, func(c *game.Config, b bool) { c.ClingyAnnihilator = b })
 	}
 
 	caps := tview.NewForm()
-	t.addInt(caps, true, "Max Purchasable Regions", helpMaxRegions, c.MaxRegions, 0, game.MaxPurchasableRegions, func(c *game.Config, n int) { c.MaxRegions = n })
-	t.addInt(caps, true, "Max Players Per BBS (0=unlimited)", helpMaxPlayers, c.MaxPlayers, 0, 100000, func(c *game.Config, n int) { c.MaxPlayers = n })
+	t.addInt(caps, "Max Purchasable Regions", helpMaxRegions, c.MaxRegions, 0, game.MaxPurchasableRegions, func(c *game.Config, n int) { c.MaxRegions = n })
+	t.addInt(caps, "Max Players Per BBS (0=unlimited)", helpMaxPlayers, c.MaxPlayers, 0, 100000, func(c *game.Config, n int) { c.MaxPlayers = n })
 	if ibbs {
-		t.addText(caps, false, 16, "Board ID", helpBoardID, c.BoardID, func(c *game.Config, v string) { c.BoardID = v })
-		t.addInt(caps, false, "League Number (0=unset)", helpLeagueNumber, c.LeagueNumber, 0, game.MaxLeagueNumber, func(c *game.Config, n int) { c.LeagueNumber = n })
+		t.addText(caps, 16, "Board ID", helpBoardID, c.BoardID, func(c *game.Config, v string) { c.BoardID = v })
+		t.addInt(caps, "League Number (0=unset)", helpLeagueNumber, c.LeagueNumber, 0, game.MaxLeagueNumber, func(c *game.Config, n int) { c.LeagueNumber = n })
 		// A cleared path field keeps the current one: the inter-BBS step has nowhere
 		// to read or write with an empty directory.
-		t.addText(caps, false, 40, "Inbound Dir", helpInboundDir, c.InboundDir, func(c *game.Config, v string) {
+		t.addText(caps, 40, "Inbound Dir", helpInboundDir, c.InboundDir, func(c *game.Config, v string) {
 			if v != "" {
 				c.InboundDir = v
 			}
 		})
-		t.addText(caps, false, 40, "Outbound Dir", helpOutboundDir, c.OutboundDir, func(c *game.Config, v string) {
+		t.addText(caps, 40, "Outbound Dir", helpOutboundDir, c.OutboundDir, func(c *game.Config, v string) {
 			if v != "" {
 				c.OutboundDir = v
 			}
 		})
 	}
-	t.addInt(caps, false, "Idle timeout (sec, 0=never)", helpIdleTimeout, c.IdleTimeoutSecs, 0, 86400, func(c *game.Config, n int) { c.IdleTimeoutSecs = n })
-	t.addInt(caps, false, "Idle warnings before boot", helpIdleWarnings, c.MaxIdleWarnings, 1, 100, func(c *game.Config, n int) { c.MaxIdleWarnings = n })
+	t.addInt(caps, "Idle timeout (sec, 0=never)", helpIdleTimeout, c.IdleTimeoutSecs, 0, 86400, func(c *game.Config, n int) { c.IdleTimeoutSecs = n })
+	t.addInt(caps, "Idle warnings before boot", helpIdleWarnings, c.MaxIdleWarnings, 1, 100, func(c *game.Config, n int) { c.MaxIdleWarnings = n })
 
 	t.forms = []*tview.Form{timing, econ, mil, caps}
 	t.pages = tview.NewPages()
@@ -264,8 +290,14 @@ func rootLayout(t *configTUI) tview.Primitive {
 	t.help.SetBorder(true).SetTitle(" Help ")
 	t.showHelp("")
 
-	footer := tview.NewTextView().SetDynamicColors(true).SetWordWrap(true).
-		SetText(" F1–F4 / Ctrl-N,P: tabs · Tab/Shift-Tab: move · ↑↓ or click: change a choice · Ctrl-S: save · Esc: cancel · ★ = league ruleset")
+	keys := " F1–F4 / Ctrl-N,P: tabs · Tab/Shift-Tab: move · ↑↓ or click: change a choice · Ctrl-S: save · Esc: cancel"
+	// A stand-alone board is never shown an inter-BBS field, so the star never
+	// appears and its legend would explain a mark that is not on screen.
+	if t.base.IBBS {
+		keys += " · ★ = inter-BBS option"
+	}
+	t.footerText = keys
+	footer := tview.NewTextView().SetDynamicColors(true).SetWordWrap(true).SetText(keys)
 
 	t.app.SetInputCapture(t.onKey)
 
@@ -417,8 +449,8 @@ func (t *configTUI) dismissModal() {
 }
 
 // addInt adds a digits-only field that clamps to [lo, hi] on read-back.
-func (t *configTUI) addInt(form *tview.Form, leagueRuleset bool, label, help string, val, lo, hi int, set func(*game.Config, int)) {
-	base := mark(leagueRuleset) + label
+func (t *configTUI) addInt(form *tview.Form, label, help string, val, lo, hi int, set func(*game.Config, int)) {
+	base := mark(label) + label
 	f := tview.NewInputField().
 		SetLabel(base).
 		SetText(strconv.Itoa(val)).
@@ -474,16 +506,16 @@ func (t *configTUI) alignRanges() {
 	}
 }
 
-func (t *configTUI) addBool(form *tview.Form, leagueRuleset bool, label, help string, val bool, set func(*game.Config, bool)) {
-	f := tview.NewCheckbox().SetLabel(mark(leagueRuleset) + label).SetChecked(val)
+func (t *configTUI) addBool(form *tview.Form, label, help string, val bool, set func(*game.Config, bool)) {
+	f := tview.NewCheckbox().SetLabel(mark(label) + label).SetChecked(val)
 	f.SetFocusFunc(func() { t.showHelp(help) })
 	form.AddFormItem(zebra(form, f))
 	t.resetters = append(t.resetters, func() { f.SetChecked(val) })
 	t.binders = append(t.binders, func(c *game.Config) { set(c, f.IsChecked()) })
 }
 
-func (t *configTUI) addText(form *tview.Form, leagueRuleset bool, width int, label, help, val string, set func(*game.Config, string)) {
-	f := tview.NewInputField().SetLabel(mark(leagueRuleset) + label).SetText(val).SetFieldWidth(width)
+func (t *configTUI) addText(form *tview.Form, width int, label, help, val string, set func(*game.Config, string)) {
+	f := tview.NewInputField().SetLabel(mark(label) + label).SetText(val).SetFieldWidth(width)
 	f.SetFocusFunc(func() { t.showHelp(help) })
 	form.AddFormItem(zebra(form, f))
 	t.resetters = append(t.resetters, func() { f.SetText(val) })
@@ -492,8 +524,8 @@ func (t *configTUI) addText(form *tview.Form, leagueRuleset bool, width int, lab
 
 // addDate adds an ISO-date field; an empty value clears it, a malformed one is
 // ignored (keeps the opening value), matching the line editor's promptDate.
-func (t *configTUI) addDate(form *tview.Form, leagueRuleset bool, label, help, val string, set func(*game.Config, string)) {
-	f := tview.NewInputField().SetLabel(mark(leagueRuleset) + label).SetText(val).SetFieldWidth(14)
+func (t *configTUI) addDate(form *tview.Form, label, help, val string, set func(*game.Config, string)) {
+	f := tview.NewInputField().SetLabel(mark(label) + label).SetText(val).SetFieldWidth(14)
 	f.SetFocusFunc(func() { t.showHelp(help) })
 	form.AddFormItem(zebra(form, f))
 	t.resetters = append(t.resetters, func() { f.SetText(val) })
@@ -508,14 +540,14 @@ func (t *configTUI) addDate(form *tview.Form, leagueRuleset bool, label, help, v
 // addChoice adds a cycle-through-options field (no dropdown popup — for a few
 // options, cycling in place reads better). A free function because Go methods
 // cannot carry type parameters.
-func addChoice[T comparable](t *configTUI, form *tview.Form, leagueRuleset bool, label, help string, opts []string, vals []T, cur T, set func(*game.Config, T)) {
+func addChoice[T comparable](t *configTUI, form *tview.Form, label, help string, opts []string, vals []T, cur T, set func(*game.Config, T)) {
 	idx := 0
 	for i, v := range vals {
 		if v == cur {
 			idx = i
 		}
 	}
-	cf := newCycleField(mark(leagueRuleset)+label, opts, idx, stripeBg(form))
+	cf := newCycleField(mark(label)+label, opts, idx, stripeBg(form))
 	cf.Box.SetFocusFunc(func() { t.showHelp(help) })
 	form.AddFormItem(cf)
 	t.resetters = append(t.resetters, func() { cf.index = idx })
