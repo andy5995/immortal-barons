@@ -39,10 +39,12 @@ func quitOnEnter(m *Menu) func(*ctx) *Item {
 // then wired, so submenus can reference each other (e.g. several menus
 // offer "Visit Bank").
 func BuildMenus() *Menus {
-	buy := &Menu{Title: "Spending Menu", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus, Width: 44}
-	sell := &Menu{Title: "Sell Menu", Color: ansi.FgBrightGreen}
+	buy := &Menu{Title: "Spending", Color: ansi.FgBrightRed, ExitOnEnter: true, Status: spendingStatus, Width: 44}
+	sell := &Menu{Title: "Sell", Color: ansi.FgBrightGreen}
 	bank := &Menu{Title: "Goldie Luck's Bank", Color: ansi.FgBrightCyan, Columns: 2}
-	attack := &Menu{Title: "Attack Menu", Color: ansi.FgBrightMagenta, ExitOnEnter: true}
+	// Width: BRE's captured Attack box is 23 columns and IB's content measures the
+	// same, so the box fits it exactly (docs/dev/bre-screens.md).
+	attack := &Menu{Title: "Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true, Width: 23}
 	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightGreen, ExitOnEnter: true, Status: covertStatus}
 	bombTargets := &Menu{Title: "Bomb Enemy Targets", Color: ansi.FgBrightGreen, ExitOnEnter: true}
@@ -51,14 +53,18 @@ func BuildMenus() *Menus {
 	// live capture) rather than at the full menu width.
 	ipMessages := &Menu{Title: "IP Messages", Color: ansi.FgBrightCyan, ExitOnEnter: true, Width: 25}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
-	diplomacy := &Menu{Title: "Diplomacy Menu", Color: ansi.FgBrightGreen}
+	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
 	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
 	prefs := &Menu{Title: "Preferences", Color: ansi.FgBrightCyan}
-	coord := &Menu{Title: "Coordinator Menu", Color: ansi.FgBrightBlue}
+	coord := &Menu{Title: "Coordinator", Color: ansi.FgBrightBlue}
 	// Two columns, not BRE's three: several labels ("Configuration Editor",
 	// "Specialize Industry") are already wide in English and grow when translated,
 	// so a 3-column row overflows 80 cols. The wider 2-column cell fits them.
-	system := &Menu{Title: "System Menu", Color: ansi.FgBrightBlue, Columns: 2}
+	// Width: sized to IB's own content, which is the rule BRE follows. Its own
+	// captures are 69 and 75 because it lays this menu out in THREE columns and
+	// its width tracks whichever items are showing; IB uses two, so it measures
+	// 59 at its widest (57 once Specialize Industry is spent).
+	system := &Menu{Title: "System", Color: ansi.FgBrightBlue, Columns: 2, Width: 59}
 	food := &Menu{Title: "Chopper's Fair Market", Color: ansi.FgBrightCyan}
 
 	// owned adapts a per-empire count into a menu column function.
@@ -404,7 +410,7 @@ func BuildMenus() *Menus {
 	}
 	system.DefaultOnEnter = quitOnEnter(system)
 
-	gameMenu := &Menu{Title: "Immortal Barons — Game Menu", Color: ansi.FgBrightMagenta, Columns: 2}
+	gameMenu := &Menu{Title: "Entry", Color: ansi.FgBrightMagenta, Columns: 2}
 	gameMenu.Items = []Item{
 		{Key: '1', Label: "Play", Do: runTurn},
 		{Key: '2', Label: "See Status", Do: empireStatus},

@@ -78,7 +78,7 @@ func TestEnterAndLeaveSpendingMenu(t *testing.T) {
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
-	if !strings.Contains(f.out.String(), "Spending Menu") {
+	if !strings.Contains(stripANSI(f.out.String()), "[Spending]") {
 		t.Error("expected Spending menu title in output")
 	}
 }
@@ -118,7 +118,7 @@ func TestBuyTroopersShowsConfirmationWithoutPause(t *testing.T) {
 	if !strings.Contains(out, "Troopers purchased") {
 		t.Errorf("expected purchase confirmation, got:\n%s", out)
 	}
-	if n := strings.Count(out, "Spending Menu"); n < 2 {
+	if n := strings.Count(stripANSI(out), "[Spending]"); n < 2 {
 		t.Errorf("expected the Spending menu to redraw after the purchase, got %d draws:\n%s", n, out)
 	}
 }
@@ -248,7 +248,7 @@ func TestReachSystemMenuFromSpending(t *testing.T) {
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
-	if !strings.Contains(f.out.String(), "System Menu") {
+	if !strings.Contains(stripANSI(f.out.String()), "[System]") {
 		t.Error("expected System Menu title in output")
 	}
 }
@@ -744,7 +744,7 @@ func TestMenuChromeTranslated(t *testing.T) {
 	w.Player().Language = "de"
 	draw(f, w, menus.Spending)
 	out := f.out.String()
-	for _, want := range []string{"Ausgabenmenü", "Soldaten", "Panzer"} {
+	for _, want := range []string{"Ausgaben", "Soldaten", "Panzer"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("German menu missing %q; output:\n%s", want, out)
 		}

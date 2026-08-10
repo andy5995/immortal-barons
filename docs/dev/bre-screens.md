@@ -371,6 +371,29 @@ The menu grammar from the top of this file (border + `(`key`)` + white label +
 and the parens/hotkey). The title text inside `[ ]` is always `97` bright-white;
 the accent is:
 
+**IB drops the word "Menu" from menu TITLES** — `[Attack]`, `[Spending]`,
+`[System]` where BRE writes `[Attack Menu]`, `[Spending Menu]`, `[System Menu]`,
+and the opening menu is `[Entry]` where BRE writes `[Barren Realms Elite]`. A deliberate divergence: the
+box is plainly a menu, so the word is a wasted word in every title and in every
+translation of it. The *items* that navigate to a menu keep it (`(*) System
+Menu`), since there the word says where the item goes. The German and Russian
+catalogs had already dropped their "Menü"/"Меню" element for Diplomacy before
+this change.
+
+**Box widths vary per screen** — BRE sizes each box to its content rather than
+to one house width. Measured across the captures in this file: 23 (Attack Menu),
+28 (Diplomacy), 38 (InterBBS Scores), 44 (Spending), 46 (Industrial Production),
+47 (opening), 61 (Crazy Gold Bank), 62 (InterPlanetary Ops), 64 (Food
+Unlimited), 69/75 (System Menu). IB's `rule` constant is 62; a screen that draws
+its own box should take its width from its own capture instead. IB sets `Width`
+per menu where a capture gives one: Attack 23 (its content measures 23 too, so
+the fit is exact), Spending 44, Industrial Production and Specialization 46.
+**System is 59, not BRE's 69/75** — BRE lays that menu out in three columns and
+its box tracks whichever items are showing, IB uses two, so IB follows the
+principle (size to content) rather than the number. Specialization
+is not captured — IB draws it at 46, matching Industrial Production beside it,
+which is a reasoned guess rather than a verified figure.
+
 | Menu | Accent |
 |------|--------|
 | Opening menu (`Barren Realms Elite`) | `35` magenta |

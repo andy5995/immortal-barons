@@ -1,7 +1,4 @@
 (in-progress:)
-  * Every menu closes with a rule, as the original draws them; before, only a
-    menu with a status line under it had one
-  * The Attack and Diplomacy menus carry the original's titles
   * Diplomacy is on the opening menu as well as the System menu
   * Send Message can address every realm the sender holds a treaty with
   * A reply asks which lines of the message to quote, and opens with them

@@ -239,7 +239,7 @@ func TestRunTurnCovertGatedBeforeSpending(t *testing.T) {
 	w.Player().Agents = 1
 	runTurn(f, w)
 	out := f.out.String()
-	cov, spend := strings.Index(out, "Covert Operations"), strings.Index(out, "Spending Menu")
+	cov, spend := strings.Index(stripANSI(out), "Covert Operations"), strings.Index(stripANSI(out), "[Spending]")
 	if cov == -1 || spend == -1 {
 		t.Fatalf("expected both the Covert and Spending menus; got:\n%s", out)
 	}
@@ -258,7 +258,7 @@ func TestRunTurnCovertGatedBeforeSpending(t *testing.T) {
 	if strings.Contains(out2, "Covert Operations") {
 		t.Errorf("Covert should be skipped with no agents; got:\n%s", out2)
 	}
-	if !strings.Contains(out2, "Spending Menu") {
+	if !strings.Contains(stripANSI(out2), "[Spending]") {
 		t.Error("Spending should still run with no agents")
 	}
 }

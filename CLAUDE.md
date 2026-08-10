@@ -156,6 +156,18 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   figure (e.g. the 100-jets-per-carrier ratio lives in `jets.md`/`carriers.md`;
   the attack doc just says jets need carriers to fight). Duplicated numbers drift
   out of sync when tuned — this is the prose analogue of the balance.go rule.
+- **A screen that draws its own box must match the menu engine's, and BRE's
+  width.** Two things are easy to get wrong on a hand-drawn screen, and both
+  make it look unlike the rest of the game. The **closing rule** is not
+  optional and is drawn in `dim(accent)`, never bare — the engine closes every
+  menu box that way, from a live capture (`menu.go`, `draw`). And **BRE sizes
+  each box to its own content**: its captures run 23 to 76 columns, so there is
+  no house width to reach for. Take the width from that screen's capture in
+  `docs/dev/bre-screens.md` (Industrial Production 46, Spending 44, System 75,
+  …), not from the 62-column `rule` constant, and keep every line — blurbs
+  included — inside it. Before calling a hand-drawn screen done, render it and
+  an engine-drawn menu side by side and compare; a checklist of fixes is not
+  the same as looking at the output.
 - **Menu prompts are consistent.** A numbered selection list ends with a
   `0) Quit` line and the standard `> Quit` prompt (use `ChoiceQuit`, which
   prints the bare `>` and echoes the translated `Quit` as the Enter default),

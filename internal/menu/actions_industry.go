@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -19,6 +20,26 @@ var prodTypeNames = []string{"Troopers", "Jets", "Turrets", "Bombers", "Tanks", 
 // per-year production figure. Gold sits past the end of ProjectedProduction.
 const prodUnitCount = 6
 
+// industryRuleWidth is the width of the box these two screens draw. BRE sizes
+// every menu box to its own content rather than to one house width — its
+// captures run from 23 to 76 columns — and Industrial Production is 46
+// (docs/dev/bre-screens.md). Specialization is not among the captures; it takes
+// the same width because it sits in the same red-accent family and lists the
+// same six units. UNVERIFIED for Specialization specifically.
+const industryRuleWidth = 46
+
+// industryAccent is the bright accent for both screens; the rules are drawn in
+// its dim form, as the menu engine does. BRE's accent for Spending / Industrial
+// Production / Trading / Specialization is red (docs/dev/bre-screens.md).
+var industryAccent = ansi.FgBrightRed
+
+// industryRule is the box's closing rule. The engine draws a menu's closing rule
+// in the dim accent, not in the terminal default — a bare rule here is what made
+// this screen look unlike every other one.
+func industryRule() string {
+	return dim(industryAccent) + strings.Repeat("─", industryRuleWidth) + ansi.Reset
+}
+
 func prodField(p *game.Empire, idx int) *int {
 	fields := []*int{
 		&p.ProdTroopers, &p.ProdJets, &p.ProdTurrets, &p.ProdBombers, &p.ProdTanks, &p.ProdCarriers,
@@ -33,18 +54,19 @@ func prodField(p *game.Empire, idx int) *int {
 func setIndustries(s session.Session, w *ctx) Result {
 	p := w.Player()
 	proj := w.ProjectedProduction(p)
-	fmt.Fprintf(s, "\n%s\n", titleRule(ansi.FgBrightRed, tr(s, "Industrial Production"), len([]rune(rule))))
+	fmt.Fprintf(s, "\n%s\n", titleRule(industryAccent, tr(s, "Industrial Production"), industryRuleWidth))
 	allocated := 0
 	for i, name := range prodTypeNames {
 		allocated += *prodField(p, i)
-		fmt.Fprintf(s, "%-10s : %s%3d%%%s", tr(s, name), ansi.FgBrightYellow, *prodField(p, i), ansi.Reset)
+		// Columns match BRE's capture: the colon at 16, the figure's paren at 29.
+		fmt.Fprintf(s, "%-16s: %s%3d%%%s", tr(s, name), ansi.FgBrightYellow, *prodField(p, i), ansi.Reset)
 		// Units come from the projection; the Gold row asks the same function
 		// that will pay it, so the figure shown is the one credited.
 		per := w.ProjectedIndustrialGold(p, *prodField(p, i))
 		if i < prodUnitCount {
 			per = proj[i]
 		}
-		fmt.Fprintf(s, "      %s"+tr(s, "(%s per year)")+"%s", ansi.FgRed, comma(per), ansi.Reset)
+		fmt.Fprintf(s, "       %s"+tr(s, "(%s per year)")+"%s", ansi.FgRed, comma(per), ansi.Reset)
 		// The original tags the specialized row at the end of the line, where it
 		// wrote "Specialized"; three spaced asterisks say the same thing without
 		// a word to translate or to run past the margin.
@@ -57,7 +79,7 @@ func setIndustries(s session.Session, w *ctx) Result {
 		fmt.Fprintf(s, "%s"+tr(s, "The remaining %d%% is turned into gold.")+"%s\n",
 			ansi.FgBrightCyan, gold, ansi.Reset)
 	}
-	fmt.Fprintf(s, "%s\n", rule)
+	fmt.Fprintf(s, "%s\n", industryRule())
 	if !AskYesNo(s, "Change Production?", false) {
 		return Stay
 	}
@@ -108,10 +130,10 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 		ok(s, "Your industry is already specialized in %s.", p.Specialized)
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose one unit type. The choice is permanent and cannot be changed later."), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "This choice is permanent and cannot be undone."), ansi.Reset)
 	// The original draws this as a red-accent menu, so it matches the rest of the
 	// game rather than reading as a bare list (docs/dev/bre-screens.md).
-	fmt.Fprintf(s, "%s\n", titleRule(ansi.FgBrightRed, tr(s, "Specialization"), len([]rune(rule))))
+	fmt.Fprintf(s, "%s\n", titleRule(industryAccent, tr(s, "Specialization"), industryRuleWidth))
 	// Units only. Gold is a row on Set Industries but not a unit, and there is
 	// nothing for a specialization's efficiency modifier to apply to.
 	for i, name := range prodTypeNames[:prodUnitCount] {
@@ -120,7 +142,7 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
 	// The original closes every menu box with a rule, whether or not a status
 	// line follows it (see the menu engine's draw).
-	fmt.Fprintf(s, "%s\n", rule)
+	fmt.Fprintf(s, "%s\n", industryRule())
 	t := ChoiceQuit(s, prodUnitCount)
 	if t < 1 {
 		ok(s, "Your industry was left unspecialized.")
