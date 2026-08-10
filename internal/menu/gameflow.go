@@ -134,7 +134,10 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 		// faction / number highlights over a white body (BRE layout).
 		terms := newsHighlightTerms(w)
 		for _, b := range news {
-			fmt.Fprintf(s, "\n%s %s\n", newsItemArrow, hiNewsItem(b, terms))
+			// Wrapped continuation lines indent 5 spaces, as BRE draws them
+			// (docs/dev/bre-screens.md). Wrap before colouring: hiNewsItem's
+			// escapes are invisible on screen but count against the margin.
+			fmt.Fprintf(s, "\n%s %s\n", newsItemArrow, hiNewsItem(wrapHanging(b, "", newsItemIndent), terms))
 		}
 	}
 	pause(s)
@@ -640,6 +643,7 @@ func showQueenRefund(s session.Session, w *ctx) {
 	}
 	fmt.Fprintf(s, "\n%s"+tr(s, "The Queen Royale opens her coffers and refunds you %s gold in taxes!")+"%s\n",
 		ansi.FgWhite, ansi.FgBrightYellow+comma(paid)+ansi.FgWhite, ansi.Reset)
+	pause(s)
 }
 
 // runTurn is the "Play Game" action. It shows the event log, then walks the

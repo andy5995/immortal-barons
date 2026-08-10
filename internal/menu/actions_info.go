@@ -589,8 +589,11 @@ const (
 	newsBannerName = "The Oligarchy Express"
 	// newsItemArrow leads each planetary-news item: red "──" + bright-red "─".
 	newsItemArrow = ansi.FgRed + "──" + ansi.FgBrightRed + "─" + ansi.Reset
-	newsBoxIndent = "    "
-	newsBoxInner  = 54 // printable columns between the box's ║ borders
+	// newsItemIndent is the hanging indent under that arrow, 5 spaces as BRE
+	// wraps it — a column wider than the arrow itself.
+	newsItemIndent = "     "
+	newsBoxIndent  = "    "
+	newsBoxInner   = 54 // printable columns between the box's ║ borders
 )
 
 // renderDailyBulletin draws the boxed blue Daily Bulletin: planet-wide totals

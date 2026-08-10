@@ -55,12 +55,16 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 	seed.VisitCovert = false
 	seed.VisitTrading = false
 	seed.VisitMessage = false
+	// A non-empty purse makes the Queen's refund fire on the first turn, so its
+	// pause is always in the script below rather than depending on how much tax
+	// the computer barons happen to have paid.
+	seed.RefundPool = 1_000_000
 	if err := store.Save(seed, cfg); err != nil {
 		t.Fatalf("seed world: %v", err)
 	}
 
-	// Splash dismiss, realm name + confirm, Play, three pauses (income, status,
-	// military+maintenance), Spending: buy N troopers THREE separate times
+	// Splash dismiss, realm name + confirm, Play, four pauses (the Queen's
+	// refund, income, status, military+maintenance), Spending: buy N troopers THREE separate times
 	// (each buy is its own reload/mutate/save transaction, so each process
 	// contends for the lock three times — one buy each made a lost update
 	// nearly undetectable when the two processes' windows happened not to
@@ -72,7 +76,7 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 	// locale-independent.
 	script := func(realm string, buy int) string {
 		b := "1" + strconv.Itoa(buy) + "\r"
-		return " " + realm + "\ry1   " + b + b + b + "00n0"
+		return " " + realm + "\ry1    " + b + b + b + "00n0"
 	}
 
 	type player struct {

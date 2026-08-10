@@ -65,3 +65,31 @@ func TestWrapBeforeColouringKeepsLinesFull(t *testing.T) {
 		t.Errorf("wrapped to %d lines, want 2 for a 106-column report", len(right))
 	}
 }
+
+// TestNewsItemWraps checks a long planetary-news line breaks between words and
+// indents its continuation under the arrow, rather than being cut at the
+// terminal margin mid-number (BRE wraps these with a 5-space hanging indent).
+func TestNewsItemWraps(t *testing.T) {
+	item := "The planet recoils as Immortal Baron hits Obsidian Sovereigns with nuclear missiles, costing 1,234,567 gold and 89,012 lives across the northern provinces."
+	lines := strings.Split(wrapHanging(item, "", newsItemIndent), "\n")
+	if len(lines) < 2 {
+		t.Fatalf("expected the line to wrap, got one line:\n%s", lines[0])
+	}
+	for i, l := range lines {
+		// The arrow and its space sit outside the wrap, so line one carries 4
+		// more printable columns than the string itself.
+		width := len([]rune(l))
+		if i == 0 {
+			width += 4
+		}
+		if width >= ansi.ScreenCols {
+			t.Errorf("line %d is %d columns, over the %d-column screen: %q", i+1, width, ansi.ScreenCols, l)
+		}
+		if i > 0 && !strings.HasPrefix(l, newsItemIndent) {
+			t.Errorf("continuation line %d is not indented: %q", i+1, l)
+		}
+	}
+	if got := strings.Join(strings.Fields(strings.Join(lines, " ")), " "); got != item {
+		t.Errorf("wrapping changed the text:\n got %q\nwant %q", got, item)
+	}
+}

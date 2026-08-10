@@ -205,12 +205,12 @@ func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 
 // TestRunTurnConsumesATurn scripts a full pass through the pipeline for one
 // turn. Key map, derived by driving the current flow (the old script and its
-// comment described the pre-#70 pre-turn Diplomacy stop): three pauses
-// (income, status, maintenance-paid), Quit Spending, Quit Attack — the Covert/
-// Trading/Message stops are Preferences-gated and off by default — then
-// decline "Continue to your next turn?" to stop after one turn.
+// comment described the pre-#70 pre-turn Diplomacy stop): four pauses (the
+// Queen's refund, income, status, maintenance-paid), Quit Spending, Quit
+// Attack — the Covert/Trading/Message stops are Preferences-gated and off by
+// default — then decline "Continue to your next turn?" to stop after one turn.
 func TestRunTurnConsumesATurn(t *testing.T) {
-	keys := "   00n"
+	keys := "    00n"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true // pay maintenance silently; this test is about the turn loop
@@ -305,7 +305,9 @@ func TestRunTurnHasNoPreTurnDiplomacyOrProduction(t *testing.T) {
 // Income Report each turn and no Diplomacy/Change Production stop anywhere.
 func TestRunTurnPlaysTwoTurnsWithoutDiplomacy(t *testing.T) {
 	perTurn := "   0000n" // income/status pauses, quit Spending/Attack/Covert/Trading, decline message
-	keys := perTurn + "y" + perTurn + "n"
+	// The Queen's refund is paid once a game day, so its pause is dismissed on
+	// the first turn only.
+	keys := " " + perTurn + "y" + perTurn + "n"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.AutoPayMaint = true
