@@ -107,19 +107,6 @@ game (`immortal-barons -reset`).
 
 See the [player's guide](https://andy5995.github.io/immortal-barons/guide/).
 
-## Design
-
-The code is split so that the game logic does not know how it is shown to
-the player. The engine only reads keypresses from, and writes text to, a
-`Session`. This makes it possible to add a BBS-door front-end and a web
-front-end later without changing the game rules.
-
-- `cmd/immortal-barons` — the door and local terminal front-end (`-local` for local play)
-- `internal/session` — the input/output abstraction
-- `internal/ansi` — terminal color and screen codes
-- `internal/menu` — the menu engine and the menu tree
-- `internal/game` — the world, economy, turn engine, and combat
-
 ## Heritage
 
 Immortal Barons is a tribute to *Barren Realms Elite*, created by Mehul
