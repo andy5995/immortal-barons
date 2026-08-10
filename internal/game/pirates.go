@@ -202,7 +202,7 @@ func breTally(parts []string) string {
 // screen in docs/dev/bre-screens.md. Regions are omitted when the faction holds
 // no land, which that capture records as BRE's own behaviour; Agents have no
 // BRE counterpart and follow the units it does list.
-func raidLoot(gold, regions, troopers, jets, turrets, tanks, agents int) string {
+func raidLoot(gold int64, regions, troopers, jets, turrets, tanks, agents int) string {
 	parts := []string{fmt.Sprintf("%d Gold", gold)}
 	if regions > 0 {
 		parts = append(parts, fmt.Sprintf("%d Regions", regions))
