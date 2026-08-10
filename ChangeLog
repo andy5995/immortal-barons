@@ -3,9 +3,11 @@
   * Send Message can address every realm the sender holds a treaty with
   * A reply asks which lines of the message to quote, and opens with them
   * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
-  * Combat reports, pirate raid results and "since your last play" events break
-    between words instead of being cut by the terminal, which was splitting
-    figures in half
+  * Combat reports, pirate raid results, planet news and "since your last play"
+    events break between words instead of being cut by the terminal, which was
+    splitting figures in half
+  * Proposing a treaty picks the realm the way Send Message does: a letter, "?"
+    for the list, and "Z" to offer it to every realm at once
   * A pirate raid reports its outcome the way the original does: a headline, the
     loot taken, and what the raid cost. The headline is one of five, chosen at
     random

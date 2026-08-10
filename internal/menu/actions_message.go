@@ -70,12 +70,34 @@ const (
 	targetAllies                   // every realm the sender holds a treaty with
 )
 
-// pickRecipient shows a lettered columns table (Id / Empire / Land / Score /
-// Net Worth) and reads a SINGLE keypress: a letter A.. selects that empire;
-// '0' cancels. If allowAll, 'Z' means every realm, and '*' means every realm
-// the sender holds a treaty with — offered only when they hold one. The
-// all-allies target is IB's, not BRE's, which sends to one realm or to all.
-func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*game.Empire, sendTarget) {
+// pickOpts configures pickRecipient for one call site.
+type pickOpts struct {
+	prompt   string // the trailing prompt text, e.g. "Send to:"
+	allowAll bool   // offer Z=All (and *=All Allies when the sender holds a treaty)
+}
+
+// Recipient-picker geometry, matching BRE's captured list (docs/dev/bre-screens.md,
+// the "?=List" roster): a 75-column inset rule over Id / Empire Name / Territory /
+// Score / Net Worth.
+const (
+	pickRuleWidth  = 75
+	pickRuleDouble = 15
+	pickNameWidth  = 26
+)
+
+// pickRecipient is BRE's shared "(A-Y,Z=All,?=List) Send to:" picker, used
+// wherever a realm is chosen — Send Messages, Send Trade Deal, and proposing a
+// treaty. It reads a SINGLE keypress: a letter selects that realm, '?' prints
+// the roster, and anything else cancels. With opts.allowAll, 'Z' means every
+// realm and '*' every realm the sender holds a treaty with.
+//
+// The roster prints ON DEMAND, as BRE prints it — the prompt comes first and
+// '?' lists.
+//
+// IB comma-groups the figures BRE prints bare, a recorded divergence
+// (docs/dev/bre-screens.md). The all-allies target is IB's too; BRE sends to one
+// realm or to all.
+func pickRecipient(s session.Session, w *ctx, opts pickOpts) (*game.Empire, sendTarget) {
 	type row struct {
 		e               *game.Empire
 		name            string
@@ -85,9 +107,9 @@ func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*ga
 	allies := 0
 	w.With(func() {
 		for _, e := range recipients(w) {
-			rows = append(rows, row{e, e.Name, e.Land, e.Score, w.NetWorth(e)})
+			rows = append(rows, row{e: e, name: e.Name, land: e.Land, score: e.Score, nw: w.NetWorth(e)})
 		}
-		if allowAll { // the only caller that can offer the all-allies target
+		if opts.allowAll { // the only callers that can offer the all-allies target
 			allies = len(w.TreatyPartners(w.Player()))
 		}
 	})
@@ -95,50 +117,79 @@ func pickRecipient(s session.Session, w *ctx, prompt string, allowAll bool) (*ga
 		ok(s, "There is no one to reach.")
 		return nil, targetNone
 	}
-	// Same visual language as the scores board (printScores): magenta rule,
-	// colored and right-aligned numeric columns.
-	fmt.Fprintf(s, "\n%s%-4s %-20s %10s %10s %11s%s\n",
-		ansi.FgBrightWhite, tr(s, "Id"), tr(s, "Empire"), tr(s, "Land"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, strings.Repeat("─", 58), ansi.Reset)
-	for i, r := range rows {
-		if i >= 25 { // A..Y
-			break
+	if len(rows) > 25 { // A..Y; Z is reserved for "All"
+		rows = rows[:25]
+	}
+	list := func() {
+		rule := ansi.FgMagenta + insetRule(pickRuleWidth, pickRuleDouble) + ansi.Reset
+		fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n",
+			ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.FgBrightMagenta, ansi.Reset)
+		fmt.Fprintf(s, "%s%-4s %-*s %10s %11s %11s%s\n%s\n", ansi.FgBrightWhite,
+			tr(s, "Id"), pickNameWidth, tr(s, "Empire Name"),
+			tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset, rule)
+		for i, r := range rows {
+			fmt.Fprintf(s, "%s(%c)%s %s%-*s%s %s%10s%s %s%11s%s %s%11s%s\n",
+				ansi.FgBrightMagenta, 'A'+i, ansi.Reset,
+				ansi.FgBrightWhite, pickNameWidth, r.name, ansi.Reset,
+				ansi.FgBrightMagenta, comma(r.land), ansi.Reset,
+				ansi.FgBrightWhite, comma(r.score), ansi.Reset,
+				ansi.FgWhite, comma(r.nw), ansi.Reset)
 		}
-		fmt.Fprintf(s, "%s(%c)%s %s%-20s%s %s%10d%s %s%10d%s %s%11d%s\n",
-			ansi.FgBrightMagenta, 'A'+i, ansi.Reset,
-			ansi.FgBrightWhite, r.name, ansi.Reset,
-			ansi.FgBrightMagenta, r.land, ansi.Reset,
-			ansi.FgBrightWhite, r.score, ansi.Reset,
-			ansi.FgWhite, r.nw, ansi.Reset)
+		fmt.Fprintln(s, rule)
 	}
-	offerAllies := allies > 0
-	extra := ""
-	if allowAll {
-		extra = tr(s, ", Z=All")
+	for {
+		// BRE colours this prompt piece by piece (captured in cap/bre-3-color.cap):
+		// bright-blue parens, bright-cyan selection keys, plain cyan for the
+		// connecting text, white for the trailing prompt, and the answer echoes
+		// bright cyan. Same scheme as its y/n hints.
+		var b strings.Builder
+		key := func(k string) { b.WriteString(ansi.FgBrightCyan + k + ansi.FgCyan) }
+		b.WriteString("\n" + ansi.FgBrightBlue + "(" + ansi.FgCyan)
+		key("A")
+		b.WriteString("-")
+		key(string(rune('A' + len(rows) - 1)))
+		if opts.allowAll {
+			b.WriteString(",")
+			key("Z")
+			b.WriteString(tr(s, "=All"))
+		}
+		if allies > 0 {
+			b.WriteString(",")
+			key("*")
+			b.WriteString(tr(s, "=All Allies"))
+		}
+		b.WriteString(",")
+		key("?")
+		b.WriteString(tr(s, "=List"))
+		b.WriteString(ansi.FgBrightBlue + ")" + ansi.FgWhite + " " + tr(s, opts.prompt) + " " + ansi.FgBrightCyan)
+		fmt.Fprint(s, b.String())
+		r, err := readKey(s)
+		if err != nil {
+			fmt.Fprint(s, ansi.Reset)
+			return nil, targetNone
+		}
+		echo := func(text string) { fmt.Fprintf(s, "%s%s\n", text, ansi.Reset) }
+		if r == '?' {
+			echo(tr(s, "List"))
+			list()
+			continue
+		}
+		if opts.allowAll && (r == 'z' || r == 'Z') {
+			echo(tr(s, "All"))
+			return nil, targetAll
+		}
+		if allies > 0 && r == '*' {
+			echo(tr(s, "All Allies"))
+			return nil, targetAllies
+		}
+		idx := recipientIndex(r, len(rows))
+		if idx < 0 {
+			echo("")
+			return nil, targetNone
+		}
+		echo(rows[idx].name)
+		return rows[idx].e, targetOne
 	}
-	if offerAllies {
-		extra += tr(s, ", *=All Allies")
-	}
-	fmt.Fprintf(s, "\n%s"+tr(s, "(A-%c%s, 0=cancel) %s")+"%s ", ansi.FgBrightWhite, 'A'+min(len(rows), 25)-1, extra, tr(s, prompt), ansi.Reset)
-	r, err := readKey(s)
-	if err != nil {
-		return nil, targetNone
-	}
-	if allowAll && (r == 'z' || r == 'Z') {
-		fmt.Fprintf(s, "%s\n", tr(s, "All"))
-		return nil, targetAll
-	}
-	if offerAllies && r == '*' {
-		fmt.Fprintf(s, "%s\n", tr(s, "All Allies"))
-		return nil, targetAllies
-	}
-	idx := recipientIndex(r, len(rows))
-	if idx < 0 {
-		fmt.Fprint(s, "\n")
-		return nil, targetNone
-	}
-	fmt.Fprintf(s, "%s\n", rows[idx].name)
-	return rows[idx].e, targetOne
 }
 
 // msgMaxLines is how many lines a single message may hold (BRE: 20).
@@ -252,7 +303,7 @@ func trimTrailingBlank(lines []string) string {
 
 func sendMessage(s session.Session, w *ctx) Result {
 	for {
-		to, target := pickRecipient(s, w, "Send to:", true)
+		to, target := pickRecipient(s, w, pickOpts{prompt: "Send to:", allowAll: true})
 		if target == targetNone {
 			return Stay
 		}
@@ -301,21 +352,4 @@ func sendMessage(s session.Session, w *ctx) Result {
 			return Stay
 		}
 	}
-}
-
-func planetaryPost(s session.Session, w *ctx) Result {
-	text := strings.TrimSpace(prompt(s, "Post to the planet:"))
-	if text == "" {
-		return Stay
-	}
-	err := w.mutatePlayer(func(p *game.Empire) error {
-		w.World.PostBulletin(p, text)
-		return nil
-	})
-	if err != nil {
-		fail(s, err)
-		return Stay
-	}
-	ok(s, "Posted.")
-	return Stay
 }

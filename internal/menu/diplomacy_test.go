@@ -51,7 +51,7 @@ func TestNegotiateTreatyProposesToTarget(t *testing.T) {
 	}
 
 	action := negotiateTreaty("Free Trade Agreement")
-	f := &fakeSession{keys: []rune("1")} // pick the first (only) listed empire
+	f := &fakeSession{keys: []rune("A")} // pick the first (only) listed empire, BRE's lettered Id
 	if res := action(f, w); res != Stay {
 		t.Fatalf("negotiateTreaty action = %v, want Stay", res)
 	}
@@ -89,7 +89,7 @@ func TestNegotiateTreatyAcceptsMatchingOffer(t *testing.T) {
 	w.World.ProposeTreaty(target, p, "Intelligence Alliance")
 
 	action := negotiateTreaty("Intelligence Alliance")
-	f := &fakeSession{keys: []rune("1\ry")} // pick the empire, then confirm accepting the offer
+	f := &fakeSession{keys: []rune("Ay")} // pick the empire, then confirm accepting the offer
 	if res := action(f, w); res != Stay {
 		t.Fatalf("negotiateTreaty action = %v, want Stay", res)
 	}

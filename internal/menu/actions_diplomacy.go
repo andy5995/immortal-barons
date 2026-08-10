@@ -148,57 +148,46 @@ var treatyDescriptions = map[string]string{
 // instead of hiding behind a single "Modify Diplomacy" item.
 func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 	return func(s session.Session, w *ctx) Result {
-		p := w.Player()
-		type row struct {
-			name      string
-			relations string // treaty types held with this empire (BRE's Relations column), or "None"
-			suffix    string
+		// Show what this pact does before choosing a partner, as BRE does — its
+		// blurb sits above the "Send to:" prompt.
+		if desc := treatyDescriptions[ttype]; desc != "" {
+			fmt.Fprintf(s, "\n%s%s%s\n%s%s%s\n",
+				ansi.FgBrightYellow, tr(s, ttype), ansi.Reset,
+				ansi.Dim, wrapIndented(tr(s, desc), "  "), ansi.Reset)
 		}
-		var rows []row
+		to, target := pickRecipient(s, w, pickOpts{prompt: "Send to:", allowAll: true})
+		switch target {
+		case targetNone:
+			return Stay
+		case targetOne:
+			negotiateWithType(s, w, to.Name, ttype)
+			return Stay
+		}
+		// Z=All: BRE sends one proposal to every realm at once. Each is the
+		// ordinary single proposal, so the existing rules hold — a new offer
+		// replaces a pending one, and a realm already holding this pact is left
+		// alone rather than asked to break it.
+		var names []string
 		w.With(func() {
-			for _, e := range w.Empires {
-				if !e.Alive || e == p {
-					continue
+			p := w.Player()
+			for _, e := range recipients(w) {
+				if !w.World.HasTreaty(p, e, ttype) {
+					names = append(names, e.Name)
 				}
-				relations := tr(s, "None")
-				if held := w.World.TreatiesBetween(p, e); len(held) > 0 {
-					named := make([]string, len(held))
-					for i, t := range held {
-						named[i] = tr(s, t)
-					}
-					relations = strings.Join(named, ", ")
-				}
-				suffix := ""
-				for _, o := range offersFrom(p, e.Name) {
-					if o == ttype {
-						suffix = "  " + tr(s, "(offers this to you)")
-					}
-				}
-				rows = append(rows, row{e.Name, relations, suffix})
 			}
 		})
-		if len(rows) == 0 {
-			ok(s, "There is no one to negotiate with.")
+		if len(names) == 0 {
+			ok(s, "There is no one left to offer that to.")
 			return Stay
 		}
-		// Show what this pact does, so the player sees its effect before choosing a
-		// partner (BRE shows a blurb here).
-		if desc := treatyDescriptions[ttype]; desc != "" {
-			fmt.Fprintf(s, "\n%s%s%s\n%s  %s%s\n",
-				ansi.FgBrightYellow, tr(s, ttype), ansi.Reset, ansi.Dim, tr(s, desc), ansi.Reset)
+		message := askTreatyMessage(s)
+		sent := 0
+		for _, name := range names {
+			if err := proposeTreatyTo(w, name, ttype, message); err == nil {
+				sent++
+			}
 		}
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose an empire:"), ansi.Reset)
-		// BRE's send-to list shows a Relations column (your standing with each
-		// empire) so you can see who you already have pacts with before choosing.
-		for i, r := range rows {
-			fmt.Fprintf(s, "  %d) %-22s %s%s%s%s\n",
-				i+1, r.name, ansi.Dim, tr(s, "Relations: ")+r.relations, ansi.Reset, r.suffix)
-		}
-		i := promptInt(s, "Negotiate with which empire (0 to cancel)?")
-		if i < 1 || i > len(rows) {
-			return Stay
-		}
-		negotiateWithType(s, w, rows[i-1].name, ttype)
+		ok(s, "Your proposal went to %d realms.", sent)
 		return Stay
 	}
 }
@@ -275,28 +264,40 @@ func negotiateWithType(s session.Session, w *ctx, ename, ttype string) {
 		}
 		ok(s, "You accepted the %s with %s.", ttype, ename)
 	default:
-		// BRE offers to attach a note to the proposal; the recipient sees it with
-		// the offer.
-		message := ""
-		if AskYesNo(s, "Attach a message?", false) {
-			message = prompt(s, "Message:")
-		}
-		var err error
-		w.With(func() {
-			p := w.Player()
-			e := findRealm(w, ename)
-			if p == nil || e == nil {
-				err = errTargetGone
-				return
-			}
-			w.World.ProposeTreatyWithMessage(p, e, ttype, message)
-		})
-		if err != nil {
+		if err := proposeTreatyTo(w, ename, ttype, askTreatyMessage(s)); err != nil {
 			fail(s, err)
 			return
 		}
 		ok(s, "Proposed a %s to %s.", ttype, ename)
 	}
+}
+
+// askTreatyMessage is BRE's "Would you like to attach a message? (y/N)", asked
+// once per proposal — or once per Z=All batch, which sends the same note to
+// every realm.
+func askTreatyMessage(s session.Session) string {
+	if !AskYesNo(s, "Attach a message?", false) {
+		return ""
+	}
+	return prompt(s, "Message:")
+}
+
+// proposeTreatyTo files one proposal. Silent, so the Z=All batch can report a
+// single total instead of pausing on every realm. Both empires are re-resolved
+// inside the transaction: a concurrent node that eliminates either between the
+// prompt and the write aborts this proposal cleanly.
+func proposeTreatyTo(w *ctx, ename, ttype, message string) error {
+	var err error
+	w.With(func() {
+		p := w.Player()
+		e := findRealm(w, ename)
+		if p == nil || e == nil {
+			err = errTargetGone
+			return
+		}
+		w.World.ProposeTreatyWithMessage(p, e, ttype, message)
+	})
+	return err
 }
 
 // declareWar is BRE's Declaration Of War: pick a target and, on confirmation,

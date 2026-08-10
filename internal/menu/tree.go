@@ -304,7 +304,6 @@ func BuildMenus() *Menus {
 	messages.Items = []Item{
 		{Key: 'R', Label: "Read Messages", Do: readMessages},
 		{Key: 'S', Label: "Send Message", Do: sendMessage},
-		{Key: 'P', Label: "Planetary Post", Do: planetaryPost},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	messages.DefaultOnEnter = quitOnEnter(messages)

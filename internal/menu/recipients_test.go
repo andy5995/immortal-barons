@@ -68,7 +68,7 @@ func TestPickRecipientSelectsByLetter(t *testing.T) {
 		t.Skip("no recipients seeded")
 	}
 	f := &fakeSession{keys: []rune{'A'}}
-	got, target := pickRecipient(f, w, "Send to:", true)
+	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
 	if target != targetOne {
 		t.Fatalf("pickRecipient('A') target = %v, want targetOne", target)
 	}
@@ -89,11 +89,13 @@ func TestPickRecipientShowsScoreNotLand(t *testing.T) {
 		rs[0].Land = 4242
 		rs[0].Score = 7777
 	})
-	f := &fakeSession{keys: []rune{'0'}} // 0 cancels; we only need the rendered list
-	pickRecipient(f, w, "Send to:", false)
+	f := &fakeSession{keys: []rune("?0")} // '?' prints the roster, then cancel
+	pickRecipient(f, w, pickOpts{prompt: "Send to:"})
 	out := f.out.String()
-	if !strings.Contains(out, "7777") {
-		t.Errorf("Score column should show the empire's Score (7777):\n%s", out)
+	// Comma-grouped: IB groups the figures BRE prints bare (a recorded
+	// divergence, docs/dev/bre-screens.md).
+	if !strings.Contains(out, "7,777") {
+		t.Errorf("Score column should show the empire's Score (7,777):\n%s", out)
 	}
 }
 
@@ -103,7 +105,7 @@ func TestPickRecipientAll(t *testing.T) {
 		t.Skip("no recipients seeded")
 	}
 	f := &fakeSession{keys: []rune{'Z'}}
-	got, target := pickRecipient(f, w, "Send to:", true)
+	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
 	if target != targetAll || got != nil {
 		t.Errorf("pickRecipient('Z') = (%v, %v), want (nil, targetAll)", got, target)
 	}
@@ -115,7 +117,7 @@ func TestPickRecipientCancel(t *testing.T) {
 		t.Skip("no recipients seeded")
 	}
 	f := &fakeSession{keys: []rune{'0'}}
-	got, target := pickRecipient(f, w, "Send to:", true)
+	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
 	if target != targetNone || got != nil {
 		t.Errorf("pickRecipient('0') = (%v, %v), want (nil, targetNone)", got, target)
 	}
@@ -137,11 +139,13 @@ func TestPickRecipientAllAllies(t *testing.T) {
 	}
 	treatyWith(w, rs[0])
 	f := &fakeSession{keys: []rune{'*'}}
-	got, target := pickRecipient(f, w, "Send to:", true)
+	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
 	if target != targetAllies || got != nil {
 		t.Errorf("pickRecipient('*') = (%v, %v), want (nil, targetAllies)", got, target)
 	}
-	if !strings.Contains(f.out.String(), "*=All Allies") {
+	// Strip the SGR runs: BRE colours each piece of this prompt separately, so
+	// the escape sequences sit between the '*' and its label.
+	if !strings.Contains(sgr.ReplaceAllString(f.out.String(), ""), "*=All Allies") {
 		t.Errorf("prompt should offer *=All Allies:\n%s", f.out.String())
 	}
 }
@@ -154,7 +158,7 @@ func TestPickRecipientAllAlliesHiddenWithoutTreaty(t *testing.T) {
 		t.Skip("no recipients seeded")
 	}
 	f := &fakeSession{keys: []rune{'*'}}
-	got, target := pickRecipient(f, w, "Send to:", true)
+	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
 	if target != targetNone || got != nil {
 		t.Errorf("pickRecipient('*') without a treaty = (%v, %v), want (nil, targetNone)", got, target)
 	}

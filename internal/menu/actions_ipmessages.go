@@ -80,11 +80,15 @@ func showPlanetList(s session.Session, planets []game.LeagueNode) {
 // with it, which is where the original prints that line.
 func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.LeagueNode {
 	for {
-		fmt.Fprintf(s, "\n%s%s %s(%s?%s %s%s)%s: ",
+		// Colors from a live capture (cap/eots-ibbs-01.cap): the label and the
+		// ": " white, the parens bright black, the "?" bright white, and what the
+		// caller types echoes bright yellow.
+		fmt.Fprintf(s, "\n%s%s %s(%s?%s %s%s)%s: %s",
 			ansi.FgWhite, tr(s, "Enter Planet Name or Number"),
 			ansi.FgBrightBlack, ansi.FgBrightWhite, ansi.FgWhite, tr(s, "for list"),
-			ansi.FgBrightBlack, ansi.Reset)
+			ansi.FgBrightBlack, ansi.FgWhite, ansi.FgBrightYellow)
 		line, err := session.ReadLine(s)
+		fmt.Fprint(s, ansi.Reset)
 		if err != nil {
 			return nil
 		}

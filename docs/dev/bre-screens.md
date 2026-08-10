@@ -718,6 +718,14 @@ end of this file for its measurements, colors and the screen that edits it.
 location column (`## Planet Name   Location`); selecting one prints
 `Our current relations with <planet>: <relation>` then any known players.
 
+The planet prompt is shared by every interplanetary screen that asks for one,
+and its colors are (from `cap/eots-ibbs-01.cap`): the label and the trailing
+`: ` white (`0;40;37`), the parens bright black (`1;30`), the `?` bright white
+(`1;37`), and what the caller types echoing bright yellow (`1;33`).
+```
+Enter Planet Name or Number (? for list): Starship Junkyard
+```
+
 ### InterBBS Scores (IP Ops → View IPScores)
 
 Gray accent. A menu of eight ranking views + Quit; each opens a `»Planetary
@@ -943,7 +951,19 @@ Items: (1) Tariff Trade Agreement, (2) Protective Trade, (3) Free Trade Agreemen
 
 ### Proposing (7) Full Defense Alliance
 Shows the treaty blurb then `(A-Y,Z=All,?=List) Send to:` -> pick target letter
--> `Would you like to attach a message? (y/N)`. Recipient sees at next login:
+-> `Would you like to attach a message? (y/N)`. `?` prints the shared realm
+roster and re-prompts (captured at a `Send to:` prompt in `cap/bre-3-color.cap`):
+```
+-*Barren Realms Elite*-
+Id  Empire Name                          Territory     Score    Net Worth
+─────═══════════════───────────────────────────────────────────────────────
+(A)+Dynoland                                  8391    687985     1883573
+(B) Bran The Warrior                          2135      6390       26687
+─────═══════════════───────────────────────────────────────────────────────
+(A-Y,Z=All,?=List) Send to:
+```
+The `+` marks a realm in the list; figures are ungrouped. This is the same table
+the Regular Attack picker lists, so one routine serves both. Recipient sees at next login:
 `<Name> proposes a Full Defense Alliance.` / `Regions: N; Net Worth: N; Score: N;
 Accept? (Y/n)`. (9) View Treaties -> `-*Relations*-` table: each empire letter +
 name + Relations ("None" / "Full Defense Alliance").
