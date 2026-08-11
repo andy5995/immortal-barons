@@ -141,9 +141,10 @@ func TestHQBoostsTanks(t *testing.T) {
 		t.Errorf("Defense should rise with HQ=100: base=%d boosted=%d", baseDefense, boostedDefense)
 	}
 
-	// BRE weighs a tank at 3 troopers with no HQ and 5 with a finished one, so a
-	// completed HQ adds 2 troopers' worth per tank — not the 4 IB used to add.
-	wantDelta := e.Tanks * 2
+	// A finished HeadQuarters adds one trooper's worth per tank: the binary's
+	// tank term is (1.75 + HQ/200) against a trooper's 0.5, so 0.5 of a tank
+	// over the full range, which is 1 trooper once both are doubled.
+	wantDelta := e.Tanks * 1
 	if boostedOffense-baseOffense != wantDelta {
 		t.Errorf("Offense delta: want %d, got %d", wantDelta, boostedOffense-baseOffense)
 	}
@@ -152,12 +153,15 @@ func TestHQBoostsTanks(t *testing.T) {
 	}
 }
 
-// TestTankStrengthMatchesLiveBRE pins the curve read out of the original: a tank
-// is worth 3 troopers at HQ 0, 4 at 50 (breins.txt's "equivalent of four
-// Troopers"), and 5 at 100. Fidelity contract — a failure means IB has stopped
-// matching, not that the numbers need updating.
-func TestTankStrengthMatchesLiveBRE(t *testing.T) {
-	for _, c := range []struct{ hq, want int }{{0, 300}, {25, 350}, {50, 400}, {75, 450}, {100, 500}} {
+// TestTankStrengthMatchesBRE pins the curve read out of the regular-attack
+// routine (BRE.OVR 0xF2E4): the tank term is (1.75 + HQ/200) against a
+// trooper's 0.5, so in whole troopers a tank is worth 3.5 at HQ 0, 4 at 50
+// (breins.txt's "equivalent of four Troopers"), and 4.5 at 100. Fidelity
+// contract — a failure means IB has stopped matching, not that the numbers need
+// updating. The earlier 3..5 curve came from reading the manual's "four
+// Troopers" as a base rather than as the mid-point of the HQ term.
+func TestTankStrengthMatchesBRE(t *testing.T) {
+	for _, c := range []struct{ hq, want int }{{0, 350}, {25, 375}, {50, 400}, {75, 425}, {100, 450}} {
 		if got := tankStrength(100, c.hq); got != c.want {
 			t.Errorf("tankStrength(100 tanks, HQ %d) = %d troopers, want %d", c.hq, got, c.want)
 		}

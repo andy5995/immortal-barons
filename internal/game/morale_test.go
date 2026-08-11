@@ -2,15 +2,13 @@ package game
 
 import "testing"
 
+// Golden literals from BRE.OVR 0xF37B: effectiveness is morale x 0.6 + 50, so a
+// fully motivated army fights ABOVE par at 110% and a broken one at 50%.
 func TestMoraleFactor(t *testing.T) {
-	if got := moraleFactor(100); got != 100 {
-		t.Errorf("moraleFactor(100) = %d, want 100", got)
-	}
-	if got := moraleFactor(0); got != MoraleCombatFloor {
-		t.Errorf("moraleFactor(0) = %d, want %d (floor)", got, MoraleCombatFloor)
-	}
-	if got := moraleFactor(50); got != (MoraleCombatFloor+100)/2 {
-		t.Errorf("moraleFactor(50) = %d, want %d", got, (MoraleCombatFloor+100)/2)
+	for _, c := range []struct{ morale, want int }{{0, 50}, {50, 80}, {100, 110}} {
+		if got := moraleFactor(c.morale); got != c.want {
+			t.Errorf("moraleFactor(%d) = %d, want %d", c.morale, got, c.want)
+		}
 	}
 }
 

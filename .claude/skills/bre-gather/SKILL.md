@@ -58,6 +58,43 @@ Key files inside:
 - `data/planet.bre`, `data/game.dat` — runtime save data (not menu/mechanic
   definitions).
 
+## Technology silently scales almost every number you capture
+
+**Before deriving ANY constant from a capture, establish the realm's technology
+factors.** Technology multiplies most of what a session shows — military
+strength up to 1.4x, unit production 1.35x, gold income and population tax 1.5x,
+food production 2.0x, maintenance down to 1/1.4, food decay down to 1/5. A
+combat or economy figure read off a capture from a teched realm is inflated by
+an unknown amount, and nothing on the status screen says so.
+
+**Zero Technology regions does NOT mean the factors are 1.0.** The research level
+**never decays and freezes permanently** when the regions are sold, so a realm
+that once held Technology carries the boost for the rest of the game with no
+Technology regions on screen. Region counts cannot tell you.
+
+**Ask for the Technology advisor screen with every capture.** It is the one
+place BRE states the factors outright, as percentages (BRE.OVR 0x32ac2 —
+"Because of technology... military forces are functioning at N% strength", plus
+lines for production, food, industry, expenses and decay). With that screen a
+capture is correctable: divide the observed figure by its factor. Without it,
+data from an unknown realm can only give ratios, never absolute constants.
+
+The factor itself, for cross-checking:
+
+```
+factor = 1 + (cap - 1) x (1 - exp( -level / (totalRegions + 1) ))
+```
+
+so a LARGE realm dilutes its own technology — two realms at the same research
+level do not share a factor. See docs/mechanics-reference.md, "Technology".
+
+**When gathering fresh data, prefer a realm that has never bought Technology**,
+and say in the notes which realm a figure came from and what its factors were.
+Historical note: most of this project's early testing ran with no Technology
+regions, so those constants are probably clean — but "probably" is doing work
+there, and any figure that disagrees with a later capture should have technology
+ruled out first.
+
 ## Source priority (most authoritative first)
 
 1. **A rendered screenshot from a live BRE session.** The ONLY authoritative

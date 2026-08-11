@@ -458,17 +458,22 @@ const MarketCommissionPct = 0
 // --- HeadQuarters (BRE-verified: BRE.OVR 0xD010, 0x12C8C, 0x40241/0x4043D) ---
 //
 // A tank's strength in hundredths of a trooper, rising with HQ completion:
-// 300 at HQ 0%, 400 at 50%, 500 at 100%. BRE computes it as the real
-// (1.5 + HQ/100) against a trooper's 0.5 and a jet's/turret's 1.0 — the same
-// 1 : 2 : 3..5 ratio in whole troopers. breins.txt calls a tank "about the
-// equivalent of four Troopers", which is the HQ-50 value, not a base: the
-// manual and the binary agree once the HQ term is read.
+// 350 at HQ 0%, 400 at 50%, 450 at 100%. BINARY-VERIFIED from the regular
+// attack routine (BRE.OVR 0xF2E4), which builds each side's strength as
 //
-// IB previously used 4 rising to 8, which both started a third too high and
-// doubled the HQ's marginal value.
+//	troopers x 0.5 + (jets | turrets) x 1 + tanks x (1.75 + HQ/200)
+//
+// against a trooper's 0.5, so in whole troopers that is 1 : 2 : 3.5..4.5. Only
+// the ratios matter, since both sides are scaled the same way. breins.txt calls
+// a tank "about the equivalent of four Troopers", which is the HQ-50 value —
+// the manual and the binary agree once the HQ term is read.
+//
+// An earlier reading had the base a half-trooper low and the HQ term twice too
+// steep (300 rising to 500), which undervalued tanks in a realm with no
+// HeadQuarters and overvalued them in one with a finished HeadQuarters.
 const (
-	TankStrengthPctBase  = 300
-	TankStrengthPctPerHQ = 2
+	TankStrengthPctBase  = 350 // binary
+	TankStrengthPctPerHQ = 1   // binary: HQ/200 doubled to trooper units
 )
 
 // tankStrength values n tanks in troopers, given HQ completion percent.
@@ -483,6 +488,13 @@ func tankStrength(n, hq int) int {
 const (
 	HQBuildStart   = 5
 	HQBuildPerTurn = 5
+
+	// What a lost defence costs the HeadQuarters: Random(3)+5 points off, then
+	// clamped at zero. BINARY-VERIFIED (BRE.OVR 0xFFA2, subtracted via the
+	// sub32 helper 0c03:0fe3). So a realm under repeated attack loses the tank
+	// bonus it spent 20 turns building, and a HeadQuarters is not permanent.
+	HQBattleLossMin    = 5 // binary
+	HQBattleLossJitter = 3 // binary: Random(3) added to the minimum
 )
 
 // The HeadQuarters price rises with the empire's lifetime turn count — unlike
@@ -599,11 +611,13 @@ const (
 	PopMoveJitter = 5 // binary: Random(5) added to the minimum
 
 	// A SHRINKING realm loses people faster the harder it taxes:
-	// growth × sqrt(tax) / 2. UNVERIFIED IN ONE RESPECT — the binary applies a
-	// System-unit real function (fd0:1841) to the tax rate here, and Sqrt and Ln
-	// are equally consistent with the call shape. Sqrt is the reading taken; the
-	// two differ by about 2x at tax 100, so a driven experiment comparing the
-	// decline at tax 25 against tax 100 would settle it.
+	// growth × sqrt(tax) / 2. The sqrt is BINARY-VERIFIED: the routine the
+	// overlay calls (fd0:1841) is at BRE.EXE 0x13e81 and is Newton-Raphson for
+	// square root — it seeds the guess by halving the real's biased exponent
+	// (add cl,0x80 / sar cl,1 / add cl,0x80), sets a 2^-20 tolerance
+	// (sub al,0x14), then loops divide-add-halve (the halve being dec al on the
+	// exponent byte) until it converges. Ln would carry a ln(2) polynomial and
+	// neither halve an exponent nor divide in a loop.
 	PopDeclineTaxDivisor = 2.0 // binary
 
 	// Churn either way, so a realm sitting exactly at capacity still moves:

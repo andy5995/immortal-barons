@@ -22,7 +22,12 @@ const (
 	// Military morale effects (placeholders, tunable). Below the floor, combat
 	// effectiveness is scaled by moraleFactor; below the desert threshold, a
 	// slice of the army deserts each turn morale stays that low.
-	MoraleCombatFloor     = 50 // combat effectiveness % at zero morale
+	// Combat effectiveness is MoraleCombatFloor + morale x MoraleCombatSlope/100
+	// percent. BINARY-VERIFIED (BRE.OVR 0xF37B): morale x 0.6 + 50, so a fully
+	// motivated army fights at 110%, not merely at par — IB previously derived
+	// the slope from the floor (100-floor = 50) and capped effectiveness at 100.
+	MoraleCombatFloor     = 50 // binary: effectiveness % at zero morale
+	MoraleCombatSlope     = 60 // binary
 	MoraleDesertThreshold = 30 // morale at/below which troops start deserting
 	MoraleDesertRate      = 5  // % of the army lost per turn while morale is that low
 	MoraleDrift           = 4  // points morale recovers toward 100 per turn

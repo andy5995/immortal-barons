@@ -307,7 +307,7 @@ func (e *Empire) EnsureMorale() {
 // Full morale fights at 100%; empty morale still fights at MoraleCombatFloor
 // (units don't become useless, just weaker). Placeholder curve — tunable.
 func moraleFactor(morale int) int {
-	return MoraleCombatFloor + (100-MoraleCombatFloor)*morale/100
+	return MoraleCombatFloor + MoraleCombatSlope*morale/100
 }
 
 // EnsureProduction repairs the production percentages after loading a save that
