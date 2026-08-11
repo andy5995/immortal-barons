@@ -12,6 +12,9 @@ title: 'Лиги и межсистемная (Inter-BBS) игра'
 
 - Групповая атака — несколько правителей вашей доски объединяются в один
   удар по дальнему врагу. Добыча делится по вкладу.
+- Indiv. Attack Force — your own strike against one named baron. You keep
+  the whole take rather than sharing it, and you choose how to press the
+  attack (see Attack Types).
 - Межпланетный счёт — посмотреть, как доски соотносятся друг с другом.
 - Send Message — write to another planet. Everyone there reads what you
   send, so it is the place for a warning, an offer, or a call for help; you

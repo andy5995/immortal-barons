@@ -824,6 +824,52 @@ const (
 	GroupAttackLossPct = 15
 )
 
+// --- Individual interplanetary attack variants (BRE-verified) ---
+//
+// BRE lets an individual strike be sent three ways, each trading attacking
+// strength against how much land it takes and how far both armies press before
+// retreating. Every figure below is quoted from the original's own in-game help,
+// game/attack.hlp, so these are fidelity contract, not playtest knobs. The wire
+// codes come from a disassembly of the IBBS attack unit in BRE.OVR, which stores
+// Quick=0, Normal=1, Extended=2 in the outbound attack record.
+//
+// Capture percentages are relative to a normal attack's take, which is how
+// attack.hlp states them ("50% of what you would in a normal attack").
+const (
+	// A quick strike buys surprise: it hits harder but takes far less land, and
+	// the disorganised battle breaks off early.
+	QuickStrikeStrengthPct = 110
+	QuickStrikeCapturePct  = 50
+	QuickStrikeLossPct     = 8
+
+	// The normal attack is the baseline the other two are quoted against.
+	NormalAttackStrengthPct = 100
+	NormalAttackCapturePct  = 100
+	NormalAttackLossPct     = GroupAttackLossPct
+
+	// An extended battle grinds: fatigue costs strength, but it takes the most
+	// land and both armies absorb the heaviest losses before retreating.
+	ExtendedBattleStrengthPct = 85
+	ExtendedBattleCapturePct  = 125
+	ExtendedBattleLossPct     = 20
+
+	// IndividualAttackGoldPerUnit is what launching an individual interplanetary
+	// strike costs, per unit sent. Captured live (2026-08-11): committing 100
+	// troopers and nothing else printed "This attack will cost 100 gold." The
+	// rate is confirmed for troopers only — whether jets, tanks and bombers cost
+	// the same per unit is NOT verified, so they use this rate until a capture
+	// says otherwise.
+	IndividualAttackGoldPerUnit = 1
+
+	// IndividualAttackReturnsPct is what an individual strike carries off
+	// relative to a group attack of the same weight. BRE's own docs state the
+	// trade in both places they describe the option: "You get twice as many
+	// returns if you send the attack yourself, but you can't attack an entire
+	// planet" (game/breins.txt and docs/bre.doc). Going alone is the reward for
+	// giving up the whole-planet target and the pooled forces.
+	IndividualAttackReturnsPct = 200
+)
+
 // --- Upkeep / maintenance (BRE-verified — live capture, Maintenance Costs
 // "Medium") ---
 //

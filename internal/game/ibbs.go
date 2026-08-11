@@ -260,7 +260,14 @@ type AttackForce struct {
 }
 
 // Empty reports whether no units were committed.
-func (f AttackForce) Empty() bool { return f.Troopers+f.Jets+f.Tanks+f.Bombers == 0 }
+func (f AttackForce) Empty() bool { return f.units() == 0 }
+
+// units counts the whole detachment, whatever the type.
+func (f AttackForce) units() int { return f.Troopers + f.Jets + f.Tanks + f.Bombers }
+
+// GoldCost is what launching this detachment as an individual strike costs.
+// BRE quotes it before asking to confirm ("This attack will cost 100 gold.").
+func (f AttackForce) GoldCost() int64 { return int64(f.units()) * IndividualAttackGoldPerUnit }
 
 // offense values the detachment by the combat table (trooper 1, jet 2, tank 4,
 // bomber GroupAttackBomberOffense).
@@ -295,6 +302,54 @@ func (g GroupAttack) Offense() int {
 	return total
 }
 
+// AttackKind is how an individual interplanetary strike is pressed. The values
+// are BRE's own: its IBBS attack record stores Quick=0, Normal=1, Extended=2,
+// so a packet stays readable to the original. The zero value is QuickStrike
+// rather than the common case, which is BRE's encoding and not a default —
+// every send names its kind.
+type AttackKind int
+
+const (
+	QuickStrike AttackKind = iota
+	NormalAttack
+	ExtendedBattle
+)
+
+// attackKindRates holds each variant's published figures in one row, so adding
+// a variant is one entry rather than an arm in four parallel switches. The
+// figures themselves live in balance.go; this only names them.
+var attackKindRates = map[AttackKind]struct {
+	name                    string
+	strength, capture, loss int
+}{
+	QuickStrike:    {"Quick Strike", QuickStrikeStrengthPct, QuickStrikeCapturePct, QuickStrikeLossPct},
+	NormalAttack:   {"Normal Attack", NormalAttackStrengthPct, NormalAttackCapturePct, NormalAttackLossPct},
+	ExtendedBattle: {"Extended Battle", ExtendedBattleStrengthPct, ExtendedBattleCapturePct, ExtendedBattleLossPct},
+}
+
+// rates returns k's row, falling back to the normal attack for a value that is
+// not one of the three — an unreadable kind in an arriving packet resolves as
+// an ordinary attack rather than crashing the far board's maintenance run.
+func (k AttackKind) rates() (name string, strength, capture, loss int) {
+	r, ok := attackKindRates[k]
+	if !ok {
+		r = attackKindRates[NormalAttack]
+	}
+	return r.name, r.strength, r.capture, r.loss
+}
+
+// String names the kind as BRE's screens and result headers do.
+func (k AttackKind) String() string { name, _, _, _ := k.rates(); return name }
+
+// strengthPct is how hard the attacker fights, as a percentage of its offense.
+func (k AttackKind) strengthPct() int { _, s, _, _ := k.rates(); return s }
+
+// capturePct is how much land the strike takes, relative to a normal attack.
+func (k AttackKind) capturePct() int { _, _, c, _ := k.rates(); return c }
+
+// lossPct is the share of each side's committed force spent before it retreats.
+func (k AttackKind) lossPct() int { _, _, _, l := k.rates(); return l }
+
 // RemoteAttack is a departed strike aimed at an empire on another board.
 type RemoteAttack struct {
 	ID           int
@@ -302,6 +357,15 @@ type RemoteAttack struct {
 	TargetEmpire string
 	Offense      int
 	Contributors []Contribution
+	// Kind is how an individual strike is pressed. A group attack leaves it at
+	// the zero value and is resolved as a normal attack (see Group below), which
+	// is why resolution reads Group first.
+	Kind AttackKind
+	// Group marks a strike assembled by CreateGroupAttack. BRE gives group
+	// attacks no type choice — only individual strikes pick one — so this
+	// distinguishes "a group attack" from "an individual quick strike", which
+	// share Kind's zero value.
+	Group bool
 }
 
 // LeagueNode is one board in the inter-BBS league, as listed in the
@@ -386,8 +450,11 @@ type AttackResult struct {
 	TargetEmpire string
 	LandTaken    int
 	Won          bool
-	Kind         string         // "" = regular strike, "terror" = terror op
 	Survivors    []Contribution // forces returning to their contributors (per owner)
+	// Kind is what came home: "terror" for a terror op, otherwise how the strike
+	// was pressed — "Quick Strike", "Normal Attack", "Extended Battle" or
+	// "Group Attack", which is what BRE heads each returning report with.
+	Kind string
 }
 
 // RemoteTerror is a terror strike sent to an empire on another board: BRE's
@@ -456,16 +523,25 @@ func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, d
 // straight away. It spends one of the day's individual attacks, the same
 // allowance a conventional attack at home draws on, and it must name a target —
 // there is no whole-planet form.
-func (w *World) CreateIndividualAttack(e *Empire, targetBoard, targetEmpire string, f AttackForce) (int, error) {
+//
+// kind picks how the strike is pressed; it scales the offense that leaves here
+// and travels with the packet so the target board can apply the matching
+// capture and casualty rates.
+func (w *World) CreateIndividualAttack(e *Empire, targetBoard, targetEmpire string, kind AttackKind, f AttackForce) (int, error) {
 	if targetEmpire == "" {
 		return 0, ErrNoTarget
 	}
 	if !w.CanAttack(e) {
 		return 0, ErrAttacksExhausted
 	}
+	cost := f.GoldCost()
+	if e.Gold < cost {
+		return 0, ErrCantAfford
+	}
 	if err := e.commitForce(f); err != nil {
 		return 0, err
 	}
+	e.Gold -= cost
 	e.AttacksToday++
 	w.NextAttackID++
 	id := w.NextAttackID
@@ -474,8 +550,9 @@ func (w *World) CreateIndividualAttack(e *Empire, targetBoard, targetEmpire stri
 		ID:           id,
 		FromBoard:    w.Config.BoardID,
 		TargetEmpire: targetEmpire,
-		Offense:      f.offense(),
+		Offense:      f.offense() * kind.strengthPct() / 100,
 		Contributors: contributors,
+		Kind:         kind,
 	})
 	w.InFlight = append(w.InFlight, InFlightStrike{
 		ID:           id,
@@ -528,6 +605,7 @@ func (w *World) LaunchDueGroupAttacks() {
 			TargetEmpire: ga.TargetEmpire,
 			Offense:      ga.Offense(),
 			Contributors: ga.Contributors,
+			Group:        true,
 		})
 		w.InFlight = append(w.InFlight, InFlightStrike{
 			ID:           ga.ID,
@@ -754,9 +832,9 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		case res.Kind == "terror":
 			w.postNews(fmt.Sprintf("Our terror op on %s (%s) was foiled.", res.TargetEmpire, res.TargetBoard))
 		case res.Won:
-			w.postNews(fmt.Sprintf("Our interplanetary strike on %s (%s) took %d regions!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
+			w.postNews(fmt.Sprintf("Our %s on %s (%s) took %d regions!", res.Kind, res.TargetEmpire, res.TargetBoard, res.LandTaken))
 		default:
-			w.postNews(fmt.Sprintf("Our interplanetary strike on %s (%s) was repelled.", res.TargetEmpire, res.TargetBoard))
+			w.postNews(fmt.Sprintf("Our %s on %s (%s) was repelled.", res.Kind, res.TargetEmpire, res.TargetBoard))
 		}
 		// Return each contributor's surviving forces to their army.
 		for _, sv := range res.Survivors {
@@ -814,9 +892,21 @@ func (w *World) ApplyPacket(p Packet) Packet {
 func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	target := w.remoteTarget(atk.TargetEmpire)
 	res := AttackResult{ID: atk.ID, TargetBoard: w.Config.BoardID, TargetEmpire: atk.TargetEmpire}
-	// Survivors return to their contributors whatever the outcome (a share is
-	// lost in the strike).
-	res.Survivors = survivorsOf(atk.Contributors)
+	kind := atk.Kind
+	// A group attack has no type of its own, so it fights on the normal
+	// attack's terms — and it is the baseline the individual strike's doubled
+	// returns are measured against.
+	returnsPct := 100
+	if atk.Group {
+		kind = NormalAttack
+		res.Kind = "Group Attack"
+	} else {
+		res.Kind = kind.String()
+		returnsPct = IndividualAttackReturnsPct
+	}
+	// Survivors return to their contributors whatever the outcome — both armies
+	// press until they have taken the kind's share of losses, then retreat.
+	res.Survivors = survivorsOf(atk.Contributors, kind.lossPct())
 	if target == nil {
 		return res
 	}
@@ -833,9 +923,12 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		target.addEvent(fmt.Sprintf("You repelled an interplanetary strike from %s.", atk.FromBoard))
 		return res
 	}
-	// Overwhelmed: take a bite of land proportional to the margin (capped).
-	frac := (atk.Offense - def) * 100 / max(atk.Offense, 1)
-	land := target.Land * frac / 100 / 4
+	// Overwhelmed: take a bite of land proportional to the margin, scaled by what
+	// this kind of strike can carry off (capped). The margin is widened to int64
+	// first: a league-sized strike can pass 21 million offense, and multiplying
+	// that by 100 wraps a 32-bit int on the door builds this project supports.
+	frac := int64(atk.Offense-def) * 100 / int64(max(atk.Offense, 1))
+	land := int(int64(target.Land) * frac / 100 / 4 * int64(kind.capturePct()) / 100 * int64(returnsPct) / 100)
 	if land > target.Land {
 		land = target.Land
 	}
@@ -849,10 +942,10 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	return res
 }
 
-// survivorsOf returns each contributor's detachment reduced by
-// GroupAttackLossPct — the forces that come home after the strike.
-func survivorsOf(cs []Contribution) []Contribution {
-	keep := 100 - GroupAttackLossPct
+// survivorsOf returns each contributor's detachment reduced by lossPct — the
+// forces that come home after the strike.
+func survivorsOf(cs []Contribution, lossPct int) []Contribution {
+	keep := 100 - lossPct
 	out := make([]Contribution, 0, len(cs))
 	for _, c := range cs {
 		out = append(out, Contribution{Owner: c.Owner, AttackForce: AttackForce{

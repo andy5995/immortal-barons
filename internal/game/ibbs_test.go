@@ -516,11 +516,11 @@ func TestIndividualInterplanetaryAttack(t *testing.T) {
 	e := w.AddHuman("alice", "Alethia")
 	e.Troopers, e.Tanks = 900, 30
 
-	if _, err := w.CreateIndividualAttack(e, "faraway", "", AttackForce{Troopers: 100}); err != ErrNoTarget {
+	if _, err := w.CreateIndividualAttack(e, "faraway", "", NormalAttack, AttackForce{Troopers: 100}); err != ErrNoTarget {
 		t.Errorf("a whole-planet individual attack should be refused, got %v", err)
 	}
 
-	id, err := w.CreateIndividualAttack(e, "faraway", "Rome", AttackForce{Troopers: 500, Tanks: 20})
+	id, err := w.CreateIndividualAttack(e, "faraway", "Rome", NormalAttack, AttackForce{Troopers: 500, Tanks: 20})
 	if err != nil {
 		t.Fatalf("CreateIndividualAttack: %v", err)
 	}
@@ -537,7 +537,7 @@ func TestIndividualInterplanetaryAttack(t *testing.T) {
 	}
 
 	// The day's one individual attack is spent.
-	if _, err := w.CreateIndividualAttack(e, "faraway", "Rome", AttackForce{Troopers: 10}); err != ErrAttacksExhausted {
+	if _, err := w.CreateIndividualAttack(e, "faraway", "Rome", NormalAttack, AttackForce{Troopers: 10}); err != ErrAttacksExhausted {
 		t.Errorf("second attack should exhaust the daily allowance, got %v", err)
 	}
 	if e.Troopers != 400 {

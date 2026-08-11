@@ -358,6 +358,40 @@ func ChoiceQuit(s session.Session, max int) int {
 	return n
 }
 
+// choiceQuitOrHelp is ChoiceQuit for a list that also offers a '?' Help item,
+// as BRE's attack-type menu does. Returns the chosen number 1..max (0 to quit),
+// and help=true when '?' was pressed, so the caller can render a topic and draw
+// the menu again.
+func choiceQuitOrHelp(s session.Session, max int) (n int, help bool) {
+	quit := i18n.T(sessionLang(s), "Quit")
+	// The bare ">" is the project's prompt, deliberately replacing BRE's
+	// "Choice>" because it needs no translation (see readChoice in menu.go).
+	fmt.Fprintf(s, "\n%s>%s %s", ansi.FgBrightWhite, ansi.Reset, quit)
+	r, err := readKey(s)
+	if err != nil {
+		return 0, false
+	}
+	drainInput(s)
+	if r == '\r' || r == '\n' || r == '0' {
+		fmt.Fprint(s, "\n")
+		return 0, false
+	}
+	for range []rune(quit) { // a real choice: erase the shown default first
+		fmt.Fprint(s, "\b \b")
+	}
+	if r == '?' {
+		fmt.Fprint(s, "?\n")
+		return 0, true
+	}
+	c := int(r - '0')
+	if r < '1' || r > '9' || c > max {
+		fmt.Fprint(s, "\n")
+		return 0, false
+	}
+	fmt.Fprintf(s, "%d\n", c)
+	return c, false
+}
+
 // pauseTight is pause with no blank line before the prompt, for a screen that
 // already ends on its own line — BRE puts its "Paused" bar directly under the
 // splash's last line, not a row below it.

@@ -354,10 +354,12 @@ All four constants live in `balance.go`; Score never drops below 0.
   actually **asymmetric — the LOSER bleeds ~20%, the WINNER ~8%** (scaled by the
   Attack Damage config). IB now uses `RegularAttackLoserLossPct` (20) /
   `RegularAttackWinnerLossPct` (8), deciding the winner first.
-  - **Quick Strike / Extended Battle** (`attack.hlp`): these are **IBBS
-    group-attack** variants, not local — a live local Regular Attack offers no
-    variant menu — so IB correctly does not offer them locally (verify against
-    the group-attack docs).
+  - **Quick Strike / Extended Battle** (`attack.hlp`): these belong to the
+    **IBBS individual attack**, not to local combat and not to group attacks. A
+    live local Regular Attack offers no variant menu, and `breins.txt` gives a
+    group attack no type choice either. A **disassembly of BRE.OVR's IBBS attack
+    unit** settles it: the three-item menu is drawn inside `Indiv. Attack Force`.
+    See "Individual attack variants" below.
 
   Region **capture** follows `max(RegularAttackCaptureFloor, RegularAttackCapturePct%
   × loser regions × density factor)`, scaled by Attack Rewards. The **density
@@ -1522,7 +1524,45 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   bomber `GroupAttackBomberOffense`). Survivors return to each contributor,
   reduced by `GroupAttackLossPct` — including when the strike is refused, so
   attacking a realm that turns out to be protected still costs a slice of the
-  force. **Indiv. Attack Force** commits the same four types (#62).
+  force. A group attack gets **no type choice** (confirmed by a live capture —
+  its picker goes straight from the target to the force prompts), so it fights
+  on the Normal Attack's terms. Its departure delay is set in **hours (12-120)**
+  in BRE; IB still asks for whole days, and its whole-planet option is a row in
+  a numbered list rather than BRE's `(O)ne Dominion or (A)ll?` keypress — both
+  recorded in `docs/dev/bre-screens.md` as open divergences. **Indiv. Attack Force** commits the same four types
+  (#62), picks a type (see below), and carries off
+  `IndividualAttackReturnsPct` (200%) of what a group attack of the same weight
+  would — BRE states the trade in both of its own docs: "You get twice as many
+  returns if you send the attack yourself, but you can't attack an entire
+  planet" (`game/breins.txt`, `docs/bre.doc`).
+- **Individual attack variants.** An individual strike is pressed one of three
+  ways. Every figure is quoted from BRE's own in-game help, `game/attack.hlp`,
+  so these are fidelity contract, not playtest knobs; the capture percentages
+  are relative to a Normal Attack's take, which is how that help states them.
+
+  | Type | Attacker strength | Land taken | Both sides retreat at |
+  | --- | --- | --- | --- |
+  | Quick Strike | 110% | 50% of normal | 8% losses |
+  | Normal Attack | 100% | 100% | 15% losses |
+  | Extended Battle | 85% | 125% of normal | 20% losses |
+
+  The strength multiplier is applied to the offense that leaves the sending
+  board; the capture and casualty rates are applied by the **target** board on
+  arrival, so the type travels in the packet. Its wire codes are BRE's own —
+  **Quick=0, Normal=1, Extended=2** — read from a disassembly of the IBBS attack
+  unit in `BRE.OVR`, which presets the type to Normal Attack before drawing the
+  menu and writes 0 for `2` and 2 for `3`.
+
+  The menu itself was **captured live end-to-end** (docs/dev/bre-screens.md):
+  a 21-column red box with a `(?) Help` item, and **Enter takes Quit**, the
+  ordinary menu default. (An earlier reading of the disassembly's `bp-0xa`
+  preset suggested Enter picked Normal Attack; the capture disproved it — that
+  preset is only the variable's initial value.) The quit key prints BRE's
+  `Attack aborted.` Launching also **costs `IndividualAttackGoldPerUnit`
+  (1) gold per unit sent** — "This attack will cost 100 gold." for 100 troopers,
+  verified for troopers only — and BRE confirms with `Send this Attack? (Y/n)`
+  before it goes. Its force prompts ask about **every** unit type, including
+  ones held at zero, each defaulting to 0.
 - **Protection crosses the league.** A scores packet marks each realm still
   under New Realm Protection, and the attack and terror target lists leave those
   realms out — matching the local attack list, which hides them too. The target
@@ -1993,7 +2033,6 @@ Still missing against the reference:
   nothing times one.
 - Negotiated empire-to-empire trade deals carrying goods with demands (see the
   trading section above; `Send Trade Deal` sends gold only)
-- The Quick-Strike and Extended-Battle attack variants
 - Civil-war collapse
 - BRE's finer interplanetary news subtypes
 

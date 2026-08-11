@@ -233,6 +233,11 @@ func Topics(category, lang string) []Topic {
 // "introduction/overview.md"), localized to lang, and whether it was found. It
 // reaches topics regardless of their InGame flag, so the Instructions assembler
 // can pull docs-only entries the ? browser hides.
+// TopicByPath finds one topic by its content-relative path (e.g.
+// "interbbs/attack-types.md"), localized to lang. A screen that wants to show a
+// specific topic looks it up this way rather than matching a translated title.
+func TopicByPath(path, lang string) (Topic, bool) { return topicByPath(path, lang) }
+
 func topicByPath(path, lang string) (Topic, bool) {
 	for _, t := range all {
 		if t.path == path {

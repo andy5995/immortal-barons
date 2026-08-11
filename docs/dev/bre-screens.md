@@ -1368,3 +1368,113 @@ The Queen Royale requires 2,409,303 gold for Taxes.
 
 Figures in that prompt are bright-cyan `1;36` on white `37`, like the region and
 crown lines around it.
+
+## Indiv. Attack Force, end to end (captured live 2026-08-11, two-board league)
+
+The first fully end-to-end interplanetary strike driven against the original:
+sent from ALPHA (node 1) at BRAVO (node 2), resolved on the far board, and the
+result read back in the sender's news. Everything below is literal output.
+
+**Gate.** The IP options refuse to open until a turn has been played this entry:
+
+```
+You must play at least one turn per entry in the game to access this option.
+```
+
+**Target picker** (the same `Enter Planet Name or Number` prompt BRE uses
+everywhere, then a lettered roster):
+
+```
+Enter Planet Name or Number (? for list): Test Planet Two
+Our current relations with Test Planet Two: None
+Choose a target[A-Y, ?, /Search, [ENTER]=Abort]
+-*Players at Test Planet Two*-
+Id   Empire Name                          Territory   Score   Networth
+─────═══════════════───────────────────────────────────────────────────────
+(A)  Bravo                                       15     426        212
+─────═══════════════───────────────────────────────────────────────────────
+                                                [BRE v0.988]   8/15/2026
+```
+
+**Attack Type menu.** A 21-column box, sized to its own content as BRE always
+does. Note the `(?) Help` item and that **Enter takes Quit**, not the first item:
+
+```
+────[Attack Type]────
+(1) Normal Attack
+(2) Quick Strike
+(3) Extended Battle
+(?) Help
+(0) Quit
+─────────────────────
+Choice> Quit
+```
+
+Colours: rules, parentheses and the closing rule are **red (31)**; the item
+digits and the `[` `]` around the title are **bright red (91)**; the title
+`Attack Type` is **bright white (97)**; item labels are **white (37)**. The
+prompt is `Choice` in white, `>` in bright white, and the `Quit` default in
+white — the ordinary menu-engine prompt.
+
+**Force prompts and confirmation.** Unlike the group-attack picker, this one
+asks about **every** unit type, including ones held at zero, and each default is
+0 rather than "send everything":
+
+```
+Choice> Quick Strike
+Send how many Troopers? (0; 100) 100
+Send how many Jets? (0; 0) 0
+Send how many Tanks? (0; 0) 0
+Send how many Bombers? (0; 0) 0
+This attack will cost 100 gold.
+Send this Attack? (Y/n) Yes
+```
+
+100 troopers cost 100 gold, so the rate is 1 gold per unit — **verified for
+troopers only**; whether the other three types cost the same is not known.
+
+**Result, in the sender's news after the round trip:**
+
+```
+───Alpha's forces have returned with news of failure from Bravo of Test
+     Planet Two!
+```
+
+**Deliberate divergences in IB.** IB keeps its own `(?) Help` content (the
+Attack Types topic) rather than BRE's `attack.hlp` wording, and comma-groups the
+gold figure, as it does everywhere.
+
+## Create Group Attack (captured live 2026-08-11, two-board league)
+
+Driven on the same pair, in a played turn. Literal output:
+
+```
+Choice> Create Group Attack
+Enter Planet Name or Number (? for list): Test Planet Two
+Our current relations with Test Planet Two: None
+Do you wish to target (O)ne Dominion or (A)ll? Entire Planet
+Wait how many Hours (12-120)? (12; 120) 12
+Send how many Troopers? (0; 89) 0
+Send how many Jets? (0; 0) 0
+Send how many Tanks? (0; 0) 0
+Send how many Bombers? (0; 0) 0
+Attack Aborted
+```
+
+**The force prompts are identical to the individual strike's** — all four unit
+types, including ones held at zero, every default 0. There is no attack-type
+menu here: a group attack has no type choice.
+
+**Two divergences IB has not yet closed**, recorded so they are not mistaken for
+settled behaviour:
+
+- **Whole-planet vs one baron** is a single keypress, `Do you wish to target
+  (O)ne Dominion or (A)ll?`, echoing "Entire Planet". IB instead offers "(the
+  whole planet)" as the first row of a numbered baron list.
+- **The departure delay is in HOURS**, `Wait how many Hours (12-120)?`, with a
+  12-hour floor and a 120-hour ceiling. IB asks "Leave in how many days?" and
+  stores whole days (`GameDay+days`), so it can express neither the floor nor
+  anything between days.
+
+An empty force prints `Attack Aborted` (capital A on both words), where the
+attack-type menu's quit path prints `Attack aborted.` with a period.

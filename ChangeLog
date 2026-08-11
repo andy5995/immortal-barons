@@ -43,6 +43,13 @@
   * Amounts may be typed with a "b" suffix, as they already could with "k"/"m"
 
   Inter-BBS (league play only):
+  * Individual interplanetary strikes choose an attack type — Normal Attack,
+    Quick Strike, or Extended Battle — trading strength against the land taken
+    and the losses both sides accept
+  * An individual strike takes twice the land a group attack of the same weight
+    would
+  * Individual strikes cost one gold per unit and ask for confirmation
+  * Added an Attack Types help topic
   * This board's own settings — its name, league number and packet directories
     — moved out of config.json into "bbs.cfg", a plain text file that can be
     edited without the settings editor. An existing board is migrated on its

@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"sort"
@@ -10,6 +11,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/help"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -186,24 +188,17 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// promptAttackForce asks how many of each unit type to commit to a group attack
-// (BRE's "Send how many Troopers?/Jets?/Tanks?/Bombers?"), skipping types the
-// baron has none of.
+// promptAttackForce asks how many of each unit type to commit. Captured live
+// from BRE (docs/dev/bre-screens.md): both the individual and the group picker
+// ask about every type, including ones held at zero — "Send how many Jets?
+// (0; 0)" — and every default is 0, never "send everything".
 func promptAttackForce(s session.Session, p *game.Empire) game.AttackForce {
 	var f game.AttackForce
 	fmt.Fprint(s, "\n")
-	if p.Troopers > 0 {
-		f.Troopers = promptSuggestedTight(s, "Send how many Troopers?", p.Troopers, p.Troopers)
-	}
-	if p.Jets > 0 {
-		f.Jets = promptSuggestedTight(s, "Send how many Jets?", 0, p.Jets)
-	}
-	if p.Tanks > 0 {
-		f.Tanks = promptSuggestedTight(s, "Send how many Tanks?", 0, p.Tanks)
-	}
-	if p.Bombers > 0 {
-		f.Bombers = promptSuggestedTight(s, "Send how many Bombers?", 0, p.Bombers)
-	}
+	f.Troopers = promptSuggestedTight(s, "Send how many Troopers?", 0, p.Troopers)
+	f.Jets = promptSuggestedTight(s, "Send how many Jets?", 0, p.Jets)
+	f.Tanks = promptSuggestedTight(s, "Send how many Tanks?", 0, p.Tanks)
+	f.Bombers = promptSuggestedTight(s, "Send how many Bombers?", 0, p.Bombers)
 	return f
 }
 
@@ -218,13 +213,22 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 	if board == "" || target == "" {
 		return Stay
 	}
+	kind, chose := promptAttackKind(s, w)
+	if !chose {
+		fail(s, errAttackAborted)
+		return Stay
+	}
 	force := promptAttackForce(s, w.Player())
 	if force.Empty() {
 		return Stay
 	}
+	okNoPause(s, "This attack will cost %s gold.", comma(force.GoldCost()))
+	if !askYesNoHere(s, "Send this Attack?", true) {
+		return Stay
+	}
 	var id int
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		n, e := w.World.CreateIndividualAttack(p, board, target, force)
+		n, e := w.World.CreateIndividualAttack(p, board, target, kind, force)
 		id = n
 		return e
 	})
@@ -232,8 +236,68 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "Attack force #%d is on its way to %s on %s.", id, target, board)
+	ok(s, "%s force #%d is on its way to %s on %s.", kind, id, target, board)
 	return Stay
+}
+
+// errAttackAborted is BRE's wording when the attack-type menu is quit out of.
+var errAttackAborted = errors.New("Attack aborted.")
+
+// showAttackTypeHelp renders the Attack Types topic, which is where the three
+// variants' figures live. BRE's own menu carries the same (?) Help item, and
+// its help shows the same numbers, so the topic is the single source rather
+// than a blurb duplicated onto the menu.
+func showAttackTypeHelp(s session.Session, w *ctx) {
+	lang := "en"
+	if p := w.Player(); p != nil && p.Language != "" {
+		lang = p.Language
+	}
+	t, found := help.TopicByPath("interbbs/attack-types.md", lang)
+	if !found {
+		return
+	}
+	fmt.Fprintf(s, "\n%s\n", t.RenderANSI(78))
+	pause(s)
+}
+
+// promptAttackKind is BRE's attack-type menu, the choice an individual strike
+// makes and a group attack does not. Captured live from the original
+// (docs/dev/bre-screens.md): a 21-column box in red, `────[Attack Type]────`
+// over the items, a Help item that shows the same figures the help topic
+// carries, and Enter taking Quit — the ordinary menu default, NOT Normal
+// Attack. chose is false when the baron quit out.
+func promptAttackKind(s session.Session, w *ctx) (kind game.AttackKind, chose bool) {
+	rows := []struct {
+		kind  game.AttackKind
+		label string
+	}{
+		{game.NormalAttack, "Normal Attack"},
+		{game.QuickStrike, "Quick Strike"},
+		{game.ExtendedBattle, "Extended Battle"},
+	}
+	for {
+		fmt.Fprintf(s, "\n%s────%s[%s%s%s]%s────%s\n",
+			ansi.FgRed, ansi.FgBrightRed, ansi.FgBrightWhite, tr(s, "Attack Type"),
+			ansi.FgBrightRed, ansi.FgRed, ansi.Reset)
+		for i, r := range rows {
+			fmt.Fprintf(s, "%s(%s%d%s) %s%s%s\n",
+				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
+				ansi.FgWhite, tr(s, r.label), ansi.Reset)
+		}
+		fmt.Fprintf(s, "%s(%s?%s) %s%s%s\n", ansi.FgRed, ansi.FgBrightRed, ansi.FgRed, ansi.FgWhite, tr(s, "Help"), ansi.Reset)
+		fmt.Fprintf(s, "%s(%s0%s) %s%s%s\n", ansi.FgRed, ansi.FgBrightRed, ansi.FgRed, ansi.FgWhite, tr(s, "Quit"), ansi.Reset)
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgRed, strings.Repeat("─", 21), ansi.Reset)
+
+		n, helpWanted := choiceQuitOrHelp(s, len(rows))
+		if helpWanted {
+			showAttackTypeHelp(s, w)
+			continue
+		}
+		if n < 1 {
+			return 0, false
+		}
+		return rows[n-1].kind, true
+	}
 }
 
 // hostile says whether a target list is being drawn for something New Realm
