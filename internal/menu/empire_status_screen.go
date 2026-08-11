@@ -53,12 +53,24 @@ func empireStatusFields(s session.Session, w *ctx) (map[string]string, func(stri
 		"bombers":    comma(p.Bombers),
 		"carriers":   comma(p.Carriers),
 		"agents":     comma(p.Agents),
-		"protection": comma(p.Protection),
+		"reign":      reignLine(s, &p),
 	}
 	for i, name := range regionTypeNames {
 		f[strings.ToLower(name)] = comma(*regionField(&p, i))
 	}
 	return f, func(id string) string { return tr(s, id) }
+}
+
+// reignLine states how long the realm has stood, as BRE does: one sentence that
+// counts down New Realm Protection while it lasts, then counts up. BRE's turn IS
+// its year (its own wording is "Years of Protection"), so both halves are turns.
+// It says "of your freedom" for the second, which reads as though the realm had
+// been captive; IB names the thing the turn count actually measures.
+func reignLine(s session.Session, p *game.Empire) string {
+	if p.Protection > 0 {
+		return fmt.Sprintf(tr(s, "You have %d years of protection left."), p.Protection)
+	}
+	return fmt.Sprintf(tr(s, "This is year %d of your reign."), p.TurnsPlayed)
 }
 
 // empireStatusPages are the template files, in display order.

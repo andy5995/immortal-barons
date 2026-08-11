@@ -292,11 +292,11 @@ and grow via the `.po` catalogs.
 advisor pages, and the diplomacy screens (incoming treaty offer, View Treaties'
 `-*Relations*-` roster, Alliance Strength) match BRE's captured layout and ANSI
 colors — figures are highlighted (bright-white or yellow) against dimmer body
-text, per `docs/dev/bre-screens.md`. Two **deliberate readability divergences**
-are recorded there and must not be "corrected" back: IB comma-groups figures BRE
-prints bare, and the offer's stats line separates fields with `│` where BRE uses
-`; `. IB also lists the treaty offers you have SENT, which BRE shows nowhere
-(#92).
+text, per `docs/dev/bre-screens.md`. **Deliberate divergences** are recorded
+there, each beside the screen it belongs to, and must not be "corrected" back —
+IB comma-groups figures BRE prints bare, and the offer's stats line separates
+fields with `│` where BRE uses `; `, among others. IB also lists the treaty
+offers you have SENT, which BRE shows nowhere (#92).
 
 Key gameplay knobs are constants in `balance.go`, but they are no longer all
 free to tune: a growing set is **binary-verified** and marked as such in that

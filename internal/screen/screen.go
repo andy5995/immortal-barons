@@ -12,6 +12,10 @@
 //	[value      ]  value slot — the trimmed content is a field key; the program
 //	               formats the value and right-justifies into the span.
 //
+// A leading space inside either token flips its default alignment: {  Label}
+// right-aligns a header over a column of numbers, and [ sentence ] left-aligns
+// a value that is prose rather than a figure.
+//
 // A literal delimiter is written by doubling it ({{ }} [[ ]]).
 package screen
 
@@ -68,13 +72,13 @@ func Render(template []byte, values map[string]string, translate func(string) st
 			content := string(runes[i+1 : end])
 			width := end - i + 1 // span width in columns, delimiters included
 			key := strings.TrimSpace(content)
+			// A leading space inside the token flips the default alignment:
+			// labels are left-aligned, values right-aligned (they are figures).
+			flip := strings.HasPrefix(content, " ")
 			if r == '{' {
-				// A leading space inside the braces right-aligns the label
-				// (for table headers over right-aligned numbers); the default
-				// is left-aligned.
-				b.WriteString(fit(translate(key), width, strings.HasPrefix(content, " ")))
+				b.WriteString(fit(translate(key), width, flip))
 			} else {
-				b.WriteString(fit(values[key], width, true))
+				b.WriteString(fit(values[key], width, !flip))
 			}
 			i = end
 		case '}', ']':

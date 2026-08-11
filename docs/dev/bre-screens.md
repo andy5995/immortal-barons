@@ -511,6 +511,13 @@ You have 100 Years of Protection Left.
 The status title `-*name*-` uses `96` bright-cyan `-*`/`*-` with `97` bright-white
 name; every field value is `96` bright-cyan, labels `37` white.
 
+The closing line is one of a pair — `BRE.OVR` holds `You have  Years of
+Protection Left.` beside `This is year  of your freedom.`, so the same slot
+counts protection down and then counts up. BRE's turn is its year: protection is
+a turn count it prints as years. **Deliberate divergence:** IB writes the second
+as `This is year N of your reign.` "Freedom" reads as though the realm had been
+captive, when what ended was the shield.
+
 ### Crazy Gold Bank
 
 Cyan accent, two columns. Followed by the gold-in-hand / in-bank line (both
