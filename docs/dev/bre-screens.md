@@ -511,6 +511,23 @@ You have 100 Years of Protection Left.
 The status title `-*name*-` uses `96` bright-cyan `-*`/`*-` with `97` bright-white
 name; every field value is `96` bright-cyan, labels `37` white.
 
+A pirate raid suffered since the last play is reported as the report's **last**
+line, after the Industrial Zones production lines and before the pause, at
+column 0:
+
+```
+Rexxogans has captured 927 Turrets
+```
+
+The faction name carries its own color (`1;35` here — the per-faction palette in
+`pirateColors`), `has captured ` is `37` white, the figure `1;36` bright cyan,
+the unit word white. No trailing punctuation. It names exactly ONE thing: the
+raid draws a single category (see `docs/mechanics-reference.md`). **Deliberate
+divergences:** IB writes "have captured", since the faction names are plural;
+indents the line two columns to sit with the rest of its income report; and puts
+a blank line above it, where BRE runs it straight on from the last production
+line.
+
 The closing line is one of a pair — `BRE.OVR` holds `You have  Years of
 Protection Left.` beside `This is year  of your freedom.`, so the same slot
 counts protection down and then counts up. BRE's turn is its year: protection is

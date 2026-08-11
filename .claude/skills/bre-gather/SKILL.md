@@ -222,6 +222,11 @@ The landmines:
   At `Name your Realm:` an empty answer makes BRE exit immediately, so the
   catch-all branch silently ends the run. Match every prompt the flow can reach
   explicitly, and make the fallback *capture and stop* rather than press a key.
+- **The Trading Market exits on ESC, not `0` or Enter.** Its screen lists no
+  Quit key and its `Your Choice?` prompt silently redraws on both, so a driver
+  that presses `0` until it sees a known screen loops forever. `tmux send-keys
+  -t bre -H 1b` leaves it (and pops the Trading submenu with it, landing on the
+  System Menu). Found while identifying the market escrow fields, 2026-08.
 - **ESC needs the raw byte, not `send-keys Escape`.** On S-Lang "ESC to Save &
   Quit" screens — BRE's Configuration Editor (from `BRE RESET`) is the one that
   bit us — `tmux send-keys Escape` is silently swallowed: S-Lang holds a lone

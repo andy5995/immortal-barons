@@ -131,14 +131,23 @@ func TestIncomeReportSurfacesAndClearsPirateRaids(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")} // one key for the pause
 	w := newWorld()
 	p := w.Player()
-	p.PirateRaids = []string{"The Sharks pirates raided you, carrying off 40 troopers, 0 jets, and 5 tanks!"}
+	// Slot 3 is the fourth band, painted plain red by BRE's palette. The colour
+	// is keyed on the slot, not the name, so a world with other names still
+	// gets it.
+	p.PirateHits = []game.PirateHit{{Faction: "Sharks", Slot: 3, Spoil: game.SpoilTanks, Amount: 7777}}
 
 	incomeReport(f, w)
 
-	if !strings.Contains(f.out.String(), "Sharks pirates raided you") {
-		t.Error("income report should show the pirate raid notice")
+	// The line names the faction, the figure and the one thing taken, as BRE's
+	// does; the figure is comma-grouped, which is IB's recorded divergence.
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Sharks have captured 7,777 Tanks") {
+		t.Errorf("income report should show BRE's raid line, got:\n%s", out)
 	}
-	if len(p.PirateRaids) != 0 {
+	if !strings.Contains(f.out.String(), ansi.FgRed+"Sharks") {
+		t.Error("the faction name should carry its own color")
+	}
+	if len(p.PirateHits) != 0 {
 		t.Error("income report should clear the raid notice after showing it")
 	}
 }

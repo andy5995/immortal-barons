@@ -7,19 +7,26 @@ in_game: true
 
 # Pirates
 
-Nine pirate factions live in the world. Their strength is random. Any faction
-can be the strongest, so do not assume the last one on the list is the hardest.
+Nine pirate factions live in the world. A faction owns nothing at the start of a
+game. Everything it has, it stole, and what it can put in the field is only what
+it holds. So the bands are all weak on day one, and the ones nobody fights are
+the dangerous ones later.
 
-Pirates raid players at random. When they raid you, they carry off some of your
-troopers, jets, turrets, tanks, agents, and gold. They never take bombers,
-carriers, or your regions. A single raid takes at most 24,999 of any one thing.
+Pirates raid players at random. A raid is not a battle — a band that owns
+nothing can still rob you. Each raid carries off **one** kind of thing: your
+troopers, jets, turrets, tanks, agents, or gold, about a thirtieth of it. They
+never take bombers, carriers, or your regions. The raid also gives the band new
+regions, so a pirate that just robbed someone holds more land.
 
-When a pirate raids, the game gives it new regions. So a pirate that just raided
-someone is fatter and holds more land. If no one fights them, pirates grow.
+You can attack a faction to take goods back. A win returns a third of its gold,
+regions, agents and troopers, and a quarter of its jets, turrets and tanks. One
+raid often recovers what a band took from you; two or three will if it is fat.
+Attacking costs you casualties whether you win or lose, so do not raid a band
+that holds nothing.
 
-You can attack a pirate faction to take goods back. A win gives you back about a
-fifth of what that faction holds — its stolen units, its gold, and some of its
-regions. It takes several hits to drain a fat faction. A loss costs you a share
-of the forces you sent.
+Listing military on the Trading Market does not hide it. Pirates raid your
+listing about as readily as your camp, so escrow protects goods from other
+barons, not from bandits.
 
-Tip: military parked in the Trading Market is safe from pirate raids.
+Tip: a band you keep beaten stays harmless, because its army is only what it has
+managed to steal. Big realms are raided more often than small ones.

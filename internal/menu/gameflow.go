@@ -287,12 +287,12 @@ func readTurnMail(s session.Session, w *ctx, announceEmpty bool) {
 // values CollectIncome credits: both derive from World.IncomeThisTurn.
 func incomeReport(s session.Session, w *ctx) {
 	var b game.IncomeBreakdown
-	var raids []string
+	var raids []game.PirateHit
 	var madeTroopers, madeJets, madeTurrets, madeBombers, madeTanks, madeCarriers int
 	if !withPlayer(w, func(p *game.Empire) {
 		b = w.IncomeThisTurn(p)
-		raids = p.PirateRaids
-		p.PirateRaids = nil
+		raids = p.PirateHits
+		p.PirateHits = nil
 		madeTroopers, madeJets, madeTurrets = p.MadeTroopers, p.MadeJets, p.MadeTurrets
 		madeBombers, madeTanks, madeCarriers = p.MadeBombers, p.MadeTanks, p.MadeCarriers
 	}) {
@@ -345,16 +345,49 @@ func incomeReport(s session.Session, w *ctx) {
 	if b.RiverFood > 0 {
 		amt(ansi.FgBrightCyan, b.RiverFood, "Food units were fished from the rivers.")
 	}
-	for _, r := range raids {
-		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed, wrapIndented(r, "  "), ansi.Reset)
-	}
 	statLine(s, madeTroopers, "Troopers were trained by Industrial Zones.")
 	statLine(s, madeJets, "Jets were manufactured by Industrial Zones.")
 	statLine(s, madeTurrets, "Turrets were manufactured by Industrial Zones.")
 	statLine(s, madeBombers, "Bombers were manufactured by Industrial Zones.")
 	statLine(s, madeTanks, "Tanks were manufactured by Industrial Zones.")
 	statLine(s, madeCarriers, "Carriers were manufactured by Industrial Zones.")
+	if len(raids) > 0 {
+		// A blank line before the raid notices. BRE runs them straight on from
+		// the production lines; separating them is IB's own readability choice
+		// (docs/dev/bre-screens.md).
+		fmt.Fprintln(s)
+		for _, r := range raids {
+			pirateHitLine(s, r)
+		}
+	}
 	pause(s)
+}
+
+// pirateSpoilNames label each spoil in BRE's own words, in PirateSpoil order.
+var pirateSpoilNames = [...]string{"Troopers", "Jets", "Turrets", "Tanks", "Gold", "Agents"}
+
+// pirateColor returns a band's color by its slot — pirateColors, the palette
+// the Attack Pirates menu paints. Keyed on the slot rather than the name so a
+// world whose bands carry other names still colors them.
+func pirateColor(slot int) string {
+	if slot >= 0 && slot < len(pirateColors) {
+		return pirateColors[slot]
+	}
+	return ansi.FgWhite
+}
+
+// pirateHitLine reports one raid the way BRE does: the faction in its own
+// color, then the single thing it carried off, its figure highlighted. BRE
+// writes "has captured" for every faction; IB uses "have", since the names are
+// plural.
+func pirateHitLine(s session.Session, h game.PirateHit) {
+	unit := pirateSpoilNames[0]
+	if int(h.Spoil) < len(pirateSpoilNames) {
+		unit = pirateSpoilNames[h.Spoil]
+	}
+	faction := pirateColor(h.Slot) + h.Faction + ansi.Reset
+	amount := ansi.FgBrightCyan + comma(h.Amount) + ansi.Reset
+	fmt.Fprintf(s, "  %s\n", fmt.Sprintf(tr(s, "%s have captured %s %s"), faction, amount, tr(s, unit)))
 }
 
 // peopleMood returns an end-of-turn flavor line keyed to popular support, in

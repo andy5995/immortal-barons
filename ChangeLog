@@ -1,4 +1,16 @@
 (in-progress:)
+  * A pirate raid carries off one kind of holding, named on its own line at the
+    end of the income report, and takes about a thirtieth of it rather than a
+    twentieth of everything
+  * Pirate factions start with no army and no land. What a band can field is
+    whatever it has stolen, so an untouched band grows and a drained one is
+    harmless
+  * Beating a band recovers a third of its gold, regions, agents and troopers
+    and a quarter of its jets, turrets and tanks
+  * A winning raid costs the attacker casualties, and reports them
+  * Pirates raid larger realms more often, and a turn can carry more than one
+    raid
+  * Military listed on the Trading Market is no longer hidden from pirates
   * Diplomacy is on the opening menu as well as the System menu
   * Send Message can address every realm the sender holds a treaty with
   * A reply asks which lines of the message to quote, and opens with them

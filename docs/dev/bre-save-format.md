@@ -44,8 +44,15 @@ offset 0xE98  Technology
 The offsets above came from differential diffing the file. These come from
 reading `BRE.OVR`, where the empire record is reached through a far pointer
 loaded with `les di,[0x28d8]` and the config record with `les di,[0x28b4]`.
-Offsets are **relative to the record base**, which sits **0x20 before** the
-`ShortString` name the file-offset map above uses as its origin.
+Offsets are **relative to the record base**, and the base **IS the offset of the
+`ShortString` name** — the length byte itself. (An earlier note here put the base
+0x20 *before* the name, reconciling the two maps by arithmetic rather than by
+measurement. A live check disproves it: with base = name, +0x281 read 2 after two
+turns played, +0x8e read 100 against 100% morale on screen, and the region block
+at +0x96 read `[3,0,2,5,0,0,5,0,0]` against a status screen showing 3 Coastal,
+2 Agricultural, 5 Desert, 5 Mountains. With base = name-0x20 none of those line
+up. The file-offset map above and this one therefore do NOT agree where they
+overlap, and this one is the measured one.)
 
 The two maps agree where they overlap: the region block is `name + 118` above
 and `base + 0x96` (150) here, and 150 − 32 = 118.
@@ -80,6 +87,15 @@ empire record (les di,[0x28d8])
                 (0x688e). It lives in the record, not on the stack, so an
                 abandoned turn resumes where it stopped; the same job as IB's
                 TurnProgress.
+  +0x211 .. +0x231   the Trading Market "For Sale" escrow, one int32 per slot in
+                     the market screen's own order: Trooper, Jet, Turret,
+                     Bomber, Food, (unused key 6), Agent, Tank, Carrier.
+                     MEASURED: listing 73 of 100 troopers put 73 at +0x211 and
+                     left 27 at +0x76. Net worth sums each of these with its
+                     home counterpart, and the pirate raid's category ladder
+                     reads them on five of its sixteen faces — so escrowed
+                     military is NOT hidden from pirates.
+  +0x26f int32  agents held (the market's escrowed agents are at +0x229)
   +0x331 int32  land still available to BUY — the Daily Land Creation allowance.
                 PER-EMPIRE, not a planet-wide pool: 0x12D30 bounds a region
                 purchase against it and 0x12EF9 subtracts the number bought

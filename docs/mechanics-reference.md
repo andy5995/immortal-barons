@@ -413,20 +413,74 @@ All four constants live in `balance.go`; Score never drops below 0.
   turn that an empire is raided, plus a further **5%** chance of a *second* raid
   by a different faction the same turn — about 1 turn in 5, matching the felt
   frequency in BRE (the exact BRE rate is not measured). A raid carries off a
-  share of the victim's **troopers, jets, turrets, tanks, agents, and gold** —
-  but never bombers or carriers, and never the victim's regions; the game grants
-  a raiding pirate new regions instead, so a pirate that just raided is fatter.
-  A single raid takes at most **24,999** of any one thing (BRE.EXE constant is
-  25,000). Beating a pirate reclaims ~a fifth of its hoard per hit, so it
-  takes several hits to fully recover your goods; **a winning raid that seizes
-  pirate-held land opens the same region-type picker a Regular Attack uses
-  (#21)**, while a raid on a landless band yields only gold and military.
+  share of **one** of the victim's holdings, drawn at random — never bombers or
+  carriers, and never the victim's regions; the game grants a raiding pirate new
+  regions instead, so a pirate that just raided is fatter. The draw is BINARY-
+  VERIFIED (`BRE.OVR` at `0x35e30`: one `Random(16)` feeding an eleven-way ladder
+  that selects a single victim field and a single name from the six-entry table
+  after `" has captured "`): **troopers, jets, turrets, tanks 3/16 each, gold and
+  agents 2/16 each**. Thirty-five raid notices across five captures never name
+  two things, which is this draw and not a display limit. **Faces 11-15 read the
+  victim's Trading Market listing instead of its inventory** — see the escrow
+  entry below.
 
-  Hard caps on what a faction can hold (✓ = verified against the BRE.EXE caps
-  table at 0x14ede — `5000,25000,50000,80000,80000,100000,100000,200000,600000`):
-  tanks **50,000** ✓, troopers/jets/turrets **100,000** ✓ each, agents
-  **65,000** ✓ (BRE.EXE ×3), regions **100** (play-data estimate), gold **600,000** ✓ — the
-  earlier "300,000 assumed" is absent from the binary; 600,000 is in the table.
+  **How often**: the roll is `Random(20) <= min(6, regions/1200 + 2)`
+  (`0x35db5`), so exposure RISES WITH THE REALM — 3-in-20 for a small realm up
+  to a 7-in-20 ceiling at 4,800 regions. Afterwards, landed or not, a 1-in-10
+  roll re-runs the whole routine with a freshly picked faction (`0x363ba`, a
+  recursive call), so a turn can carry several raids. IB's old flat 20% plus a
+  5% "second raid by a different faction" was a guess; neither shape is in the
+  binary.
+
+  How much it takes is BINARY-VERIFIED too (`BRE.OVR` at `0x35f66`: a 32-bit
+  divide by `0x21`, then a min against `0x5dc0 + Random(0x3e8)`):
+  **`min(holdings / 33, 24000 + Random(1000))`** — about 3%, with a *jittered*
+  cap. Six trooper notices in the captures reproduce `holdings / 33` exactly
+  (15 of 510, 16 of 528, 90 of 2,976, 88 of 2,909, 1,058 of 34,933, 1,551 of
+  51,187), and the three largest takes seen — 24,048 and 24,546 turrets,
+  24,415 tanks — land inside the 24,000–24,999 band rather than on one ceiling.
+  The earlier reconstructed "5%, capped at 24,999" was about two-thirds too
+  harsh and read the jitter's top as a flat cap.
+
+  One capture detail unexplained: **Gold** takes are tiny (38, 58, 258, 8,581)
+  against treasuries in the millions, so the field a raid draws gold from is not
+  the treasury at the moment shown. The likely reading is that the raid resolves
+  early in the turn, before the turn's income is credited, so it takes 1/33 of
+  whatever was left in hand — but that is inference, not read from the binary.
+  **A band's army is nothing but stolen goods.** BRE keeps no strength stat for
+  a faction: its defense is computed live from its loot as
+  **`tanks + turrets/2 + troopers/3`** (`BRE.OVR` `0x3671b`), and the only
+  writes to a faction's record anywhere in the overlay are the raid-steal path
+  and the raid-resolution path — nothing seeds one. A new game therefore opens
+  with nine empty bands. That is not a contradiction: **a raid on a player is
+  not a battle**, so an empty band robs you exactly as well as a fat one and
+  arms itself from the proceeds. Faction strength is consulted only when *you*
+  attack *them*.
+
+  A player's raid commits troopers/jets/tanks at **`troopers/2 + jets +
+  tanks*2`** and wins on strictly greater. **Both sides take casualties either
+  way**, computed before the win/loss test: the attacker loses
+  `Random(5)+2` percent of what it committed, the faction `Random(10)+4` percent
+  of what it holds. A winning raid is therefore never free (#119).
+
+  A win hands back **1/3** of the faction's gold, regions, agents and troopers
+  and **1/4** of its jets, turrets and tanks. Three consecutive raids on one
+  band in `cap/kde3-01.cap` confirm it: gold 3391→2261→1507 and agents
+  1460→973→649 decay by exactly 2/3, turrets 8516→6387→4790 by exactly 3/4,
+  while troopers and jets fall faster because they also pay battle losses. So
+  one raid recovers a third of what a band holds, two recover 5/9, three 70% —
+  which is why one attack sometimes suffices and two or three usually do.
+  **A winning raid that seizes pirate-held land opens the same region-type
+  picker a Regular Attack uses (#21)**, while a raid on a landless band yields
+  only gold and military.
+
+  Hard caps on what a faction can hold, read from the clamp sites themselves
+  (`BRE.OVR` `0x3629c` and `0x36a59`, each a min against a literal, applied at
+  the end of every raid and again after a player beats the band): troopers
+  **300,000**, jets **400,000**, turrets **400,000**, tanks **200,000**, agents
+  **200,000**, regions **300**, gold **600,000,000**. A raid also grants the
+  faction `Random(25)` regions. This supersedes the earlier reading of the
+  BRE.EXE table at `0x14ede` — that table is some other set of limits.
   Military parked in the Trading Market is safe from pirate raids.
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
@@ -1759,8 +1813,14 @@ Market`. Any empire can list goods for other empires to buy:
   formula** (`Bank x InterestRate / (1000 x TurnsPerDay)`, `processEconomy`),
   which until now rested on the config help text alone.
 - **Protection-gated:** a realm under new-realm protection cannot use the market.
-- **Escrowed goods are safe from pirates and attacks** — an intended BRE strategy
-  (community guide: park military to evade pirates). But listing does **not** dodge
+- **Escrowed goods are safe from attacks, but NOT from pirates.** The community
+  guide's "park military to evade pirates" is wrong about pirates, and IB now
+  follows the original: five of the sixteen faces of the raid's category ladder
+  read the Trading Market listing rather than the inventory (one per unit type —
+  gold is not traded). MEASURED by driving BRE: listing 73 of 100 troopers wrote
+  73 to record `+0x211`, the field bucket 11 reads, and left 27 at `+0x76`.
+  Escrowing therefore does not hide military; it moves about a third of the raid
+  risk onto the listing. Listing also does **not** dodge
   your own economy: escrowed **military units still cost maintenance** and escrowed
   **food still spoils**. `Bomb Trading Market` (covert) destroys a share
   (`BombMarketLossPct`) of a target's listed goods and pending proceeds.

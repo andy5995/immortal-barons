@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-10 03:16-0500\n"
+"POT-Creation-Date: 2026-08-11 07:12-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2143,51 +2143,54 @@ msgid "Pirates"
 msgstr "Piraten"
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:12
+#: internal/help/content/warfare/pirates.md:14
 msgid ""
-"Nine pirate factions live in the world. Their strength is random. Any "
-"faction can be the strongest, so do not assume the last one on the list is "
-"the hardest."
+"Nine pirate factions live in the world. A faction owns nothing at the start "
+"of a game. Everything it has, it stole, and what it can put in the field is "
+"only what it holds. So the bands are all weak on day one, and the ones "
+"nobody fights are the dangerous ones later."
 msgstr ""
-"Neun Piratenfraktionen leben in der Welt. Ihre Stärke ist zufällig. Jede "
-"Fraktion kann die stärkste sein, also prüfen Sie erst, bevor Sie angreifen."
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:16
+#: internal/help/content/warfare/pirates.md:20
+#, fuzzy
+#| msgid ""
+#| "Pirates raid players at random. When they raid you, they carry off some "
+#| "of your troopers, jets, turrets, tanks, agents, and gold. They never take "
+#| "bombers, carriers, or your regions. A single raid takes at most 24,999 of "
+#| "any one thing."
 msgid ""
-"Pirates raid players at random. When they raid you, they carry off some of "
-"your troopers, jets, turrets, tanks, agents, and gold. They never take "
-"bombers, carriers, or your regions. A single raid takes at most 24,999 of "
-"any one thing."
+"Pirates raid players at random. A raid is not a battle — a band that owns "
+"nothing can still rob you. Each raid carries off **one** kind of thing: your "
+"troopers, jets, turrets, tanks, agents, or gold, about a thirtieth of it. "
+"They never take bombers, carriers, or your regions. The raid also gives the "
+"band new regions, so a pirate that just robbed someone holds more land."
 msgstr "Piraten"
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:19
+#: internal/help/content/warfare/pirates.md:26
 msgid ""
-"When a pirate raids, the game gives it new regions. So a pirate that just "
-"raided someone is fatter and holds more land. If no one fights them, pirates "
-"grow."
+"You can attack a faction to take goods back. A win returns a third of its "
+"gold, regions, agents and troopers, and a quarter of its jets, turrets and "
+"tanks. One raid often recovers what a band took from you; two or three will "
+"if it is fat.  Attacking costs you casualties whether you win or lose, so do "
+"not raid a band that holds nothing."
 msgstr ""
-"Wenn ein Pirat überfällt, gibt ihm das Spiel neue Gebiete. Ein Pirat, der "
-"gerade jemanden überfallen hat, ist also fetter und ein besseres Ziel."
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:24
+#: internal/help/content/warfare/pirates.md:30
 msgid ""
-"You can attack a pirate faction to take goods back. A win gives you back "
-"about a fifth of what that faction holds — its stolen units, its gold, and "
-"some of its regions. It takes several hits to drain a fat faction. A loss "
-"costs you a share of the forces you sent."
+"Listing military on the Trading Market does not hide it. Pirates raid your "
+"listing about as readily as your camp, so escrow protects goods from other "
+"barons, not from bandits."
 msgstr ""
-"Sie können eine Piratenfraktion angreifen, um Güter zurückzuholen. Ein Sieg "
-"gibt Ihnen etwa ein Fünftel dessen zurück, was diese Fraktion besitzt."
 
 #. type: Plain text
-#: internal/help/content/warfare/pirates.md:25
-msgid "Tip: military parked in the Trading Market is safe from pirate raids."
+#: internal/help/content/warfare/pirates.md:32
+msgid ""
+"Tip: a band you keep beaten stays harmless, because its army is only what it "
+"has managed to steal. Big realms are raided more often than small ones."
 msgstr ""
-"Tipp: Militär, das im Handelsmarkt geparkt ist, ist vor Piratenüberfällen "
-"sicher."
 
 #. type: Title #
 #: internal/help/content/warfare/sdi.md:1
@@ -2260,6 +2263,39 @@ msgid ""
 "for, and the shield weakens with it. A large pot is a large bill every turn, "
 "so grow it at a pace your income can carry."
 msgstr ""
+
+#~ msgid ""
+#~ "Nine pirate factions live in the world. Their strength is random. Any "
+#~ "faction can be the strongest, so do not assume the last one on the list "
+#~ "is the hardest."
+#~ msgstr ""
+#~ "Neun Piratenfraktionen leben in der Welt. Ihre Stärke ist zufällig. Jede "
+#~ "Fraktion kann die stärkste sein, also prüfen Sie erst, bevor Sie "
+#~ "angreifen."
+
+#~ msgid ""
+#~ "When a pirate raids, the game gives it new regions. So a pirate that just "
+#~ "raided someone is fatter and holds more land. If no one fights them, "
+#~ "pirates grow."
+#~ msgstr ""
+#~ "Wenn ein Pirat überfällt, gibt ihm das Spiel neue Gebiete. Ein Pirat, der "
+#~ "gerade jemanden überfallen hat, ist also fetter und ein besseres Ziel."
+
+#~ msgid ""
+#~ "You can attack a pirate faction to take goods back. A win gives you back "
+#~ "about a fifth of what that faction holds — its stolen units, its gold, "
+#~ "and some of its regions. It takes several hits to drain a fat faction. A "
+#~ "loss costs you a share of the forces you sent."
+#~ msgstr ""
+#~ "Sie können eine Piratenfraktion angreifen, um Güter zurückzuholen. Ein "
+#~ "Sieg gibt Ihnen etwa ein Fünftel dessen zurück, was diese Fraktion "
+#~ "besitzt."
+
+#~ msgid ""
+#~ "Tip: military parked in the Trading Market is safe from pirate raids."
+#~ msgstr ""
+#~ "Tipp: Militär, das im Handelsmarkt geparkt ist, ist vor Piratenüberfällen "
+#~ "sicher."
 
 #, fuzzy
 #~| msgid ""

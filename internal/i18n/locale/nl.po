@@ -60,19 +60,19 @@ msgstr ""
 msgid "%d days"
 msgstr ""
 
-#: internal/menu/gameflow.go:552
+#: internal/menu/gameflow.go:581
 msgid "%d gold is requested to boost popular support."
 msgstr ""
 
-#: internal/menu/gameflow.go:567
+#: internal/menu/gameflow.go:596
 msgid "%d gold is requested to improve military morale."
 msgstr ""
 
-#: internal/menu/gameflow.go:544
+#: internal/menu/gameflow.go:573
 msgid "%d regions revolted for lack of upkeep."
 msgstr ""
 
-#: internal/menu/gameflow.go:541
+#: internal/menu/gameflow.go:570
 msgid "%d units deserted for lack of pay."
 msgstr ""
 
@@ -96,8 +96,12 @@ msgstr ""
 msgid "%s days"
 msgstr ""
 
-#: internal/menu/gameflow.go:498
+#: internal/menu/gameflow.go:527
 msgid "%s gold is required to maintain your regions."
+msgstr ""
+
+#: internal/menu/gameflow.go:386
+msgid "%s have captured %s %s"
 msgstr ""
 
 #: internal/menu/actions_diplomacy.go:247
@@ -350,7 +354,7 @@ msgstr "Handelsmarkt bombarderen"
 msgid "Bombers"
 msgstr "Bommenwerpers"
 
-#: internal/menu/gameflow.go:354
+#: internal/menu/gameflow.go:351
 msgid "Bombers were manufactured by Industrial Zones."
 msgstr ""
 
@@ -396,7 +400,7 @@ msgstr ""
 msgid "Carriers"
 msgstr "Vliegdekschepen"
 
-#: internal/menu/gameflow.go:356
+#: internal/menu/gameflow.go:353
 msgid "Carriers were manufactured by Industrial Zones."
 msgstr ""
 
@@ -469,7 +473,7 @@ msgstr ""
 msgid "Confirm?"
 msgstr "Bevestigen?"
 
-#: internal/menu/gameflow.go:803
+#: internal/menu/gameflow.go:832
 msgid "Continue to your next turn?"
 msgstr ""
 
@@ -575,7 +579,7 @@ msgstr ""
 msgid "Do you wish to send another message?"
 msgstr ""
 
-#: internal/menu/gameflow.go:487
+#: internal/menu/gameflow.go:516
 msgid "Do you wish to visit the bank?"
 msgstr ""
 
@@ -611,7 +615,7 @@ msgstr "Rijksstatus"
 msgid "End Protection"
 msgstr "Bescherming beëindigen"
 
-#: internal/menu/gameflow.go:400
+#: internal/menu/gameflow.go:429
 msgid "End of Turn Statistics:"
 msgstr ""
 
@@ -667,7 +671,7 @@ msgstr ""
 msgid "Game started on %s"
 msgstr ""
 
-#: internal/menu/gameflow.go:470
+#: internal/menu/gameflow.go:499
 msgid "Gold paid."
 msgstr ""
 
@@ -731,7 +735,7 @@ msgstr ""
 msgid "How much to repay?"
 msgstr ""
 
-#: internal/menu/gameflow.go:496
+#: internal/menu/gameflow.go:525
 msgid "How much will you give?"
 msgstr ""
 
@@ -836,7 +840,7 @@ msgstr ""
 msgid "Jets"
 msgstr "Straaljagers"
 
-#: internal/menu/gameflow.go:352
+#: internal/menu/gameflow.go:349
 msgid "Jets were manufactured by Industrial Zones."
 msgstr ""
 
@@ -924,7 +928,7 @@ msgstr ""
 msgid "Macro Editor"
 msgstr ""
 
-#: internal/menu/gameflow.go:474
+#: internal/menu/gameflow.go:503
 msgid "Maintenance:"
 msgstr ""
 
@@ -967,7 +971,7 @@ msgstr "Berichten"
 msgid "Messages"
 msgstr "Berichten"
 
-#: internal/menu/gameflow.go:574
+#: internal/menu/gameflow.go:603
 msgid "Military morale rose %d points."
 msgstr ""
 
@@ -1195,7 +1199,7 @@ msgstr "Spelen"
 msgid "Player List"
 msgstr "Spelerslijst"
 
-#: internal/menu/gameflow.go:562
+#: internal/menu/gameflow.go:591
 msgid "Popular support rose %d points."
 msgstr ""
 
@@ -1273,7 +1277,7 @@ msgstr ""
 msgid "Returns expected to be approximately %s gold."
 msgstr ""
 
-#: internal/menu/gameflow.go:410
+#: internal/menu/gameflow.go:439
 msgid "Riots have broken out due to high tax rates!"
 msgstr ""
 
@@ -1339,7 +1343,7 @@ msgstr "SpyGuy sturen"
 msgid "Send Trade Deal"
 msgstr "Handelsaanbod sturen"
 
-#: internal/menu/gameflow.go:782
+#: internal/menu/gameflow.go:811
 #, fuzzy
 msgid "Send a message?"
 msgstr "Bericht versturen"
@@ -1385,7 +1389,7 @@ msgstr ""
 msgid "Single Planet"
 msgstr ""
 
-#: internal/menu/gameflow.go:669
+#: internal/menu/gameflow.go:698
 msgid "Sorry, you have used all of your turns today."
 msgstr "Sorry, u hebt vandaag al uw beurten gebruikt."
 
@@ -1440,7 +1444,7 @@ msgstr "Systeemmenu"
 msgid "Tanks"
 msgstr "Tanks"
 
-#: internal/menu/gameflow.go:355
+#: internal/menu/gameflow.go:352
 msgid "Tanks were manufactured by Industrial Zones."
 msgstr ""
 
@@ -1522,11 +1526,11 @@ msgstr ""
 msgid "The Clingy Annihilator is on its way. Nothing more can be done with it."
 msgstr ""
 
-#: internal/menu/gameflow.go:644
+#: internal/menu/gameflow.go:673
 msgid "The Queen Royale opens her coffers and refunds you %s gold in taxes!"
 msgstr ""
 
-#: internal/menu/gameflow.go:512
+#: internal/menu/gameflow.go:541
 msgid "The Queen Royale requires %s gold for Taxes."
 msgstr ""
 
@@ -1667,7 +1671,7 @@ msgstr ""
 msgid "Troopers"
 msgstr "Soldaten"
 
-#: internal/menu/gameflow.go:351
+#: internal/menu/gameflow.go:348
 msgid "Troopers were trained by Industrial Zones."
 msgstr ""
 
@@ -1679,7 +1683,7 @@ msgstr ""
 msgid "Turrets"
 msgstr "Geschutstorens"
 
-#: internal/menu/gameflow.go:353
+#: internal/menu/gameflow.go:350
 msgid "Turrets were manufactured by Industrial Zones."
 msgstr ""
 
@@ -1741,7 +1745,7 @@ msgstr "Berichtenmenu tonen"
 msgid "Visit Trading Menu"
 msgstr "Handelsmenu tonen"
 
-#: internal/menu/gameflow.go:600
+#: internal/menu/gameflow.go:629
 msgid "Visit the Food Market to feed them, or they will starve."
 msgstr ""
 
@@ -1829,7 +1833,7 @@ msgstr "Geld opnemen"
 msgid "Would you like to begin construction?"
 msgstr ""
 
-#: internal/menu/gameflow.go:521
+#: internal/menu/gameflow.go:550
 msgid "Would you like to reconsider?"
 msgstr ""
 
@@ -1873,7 +1877,7 @@ msgstr ""
 msgid "You cannot buy from your own listing."
 msgstr ""
 
-#: internal/menu/gameflow.go:476
+#: internal/menu/gameflow.go:505
 msgid "You cannot cover all your maintenance this turn."
 msgstr ""
 
@@ -2028,11 +2032,11 @@ msgstr ""
 msgid "Your Prices"
 msgstr ""
 
-#: internal/menu/gameflow.go:503
+#: internal/menu/gameflow.go:532
 msgid "Your SDI Program requires %s gold."
 msgstr ""
 
-#: internal/menu/gameflow.go:520
+#: internal/menu/gameflow.go:549
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
@@ -2046,7 +2050,7 @@ msgstr ""
 msgid "Your allies will send the following to aid you in defense:"
 msgstr ""
 
-#: internal/menu/gameflow.go:494
+#: internal/menu/gameflow.go:523
 msgid "Your armed forces require %s gold."
 msgstr ""
 
@@ -2054,11 +2058,11 @@ msgstr ""
 msgid "Your choice?"
 msgstr ""
 
-#: internal/menu/gameflow.go:403
+#: internal/menu/gameflow.go:432
 msgid "Your dominion gained %s%s%s people."
 msgstr ""
 
-#: internal/menu/gameflow.go:405
+#: internal/menu/gameflow.go:434
 msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
@@ -2106,11 +2110,11 @@ msgstr ""
 msgid "Your new-realm protection will end when this turn does."
 msgstr ""
 
-#: internal/menu/gameflow.go:598
+#: internal/menu/gameflow.go:627
 msgid "Your people need %s units of food and you have only %s."
 msgstr ""
 
-#: internal/menu/gameflow.go:616
+#: internal/menu/gameflow.go:645
 msgid "Your people need %s units of food."
 msgstr ""
 
@@ -2122,7 +2126,7 @@ msgstr ""
 msgid "Your realm has %d turns of new-realm protection left."
 msgstr ""
 
-#: internal/menu/gameflow.go:661
+#: internal/menu/gameflow.go:690
 msgid "Your realm is no longer active."
 msgstr ""
 
@@ -2230,7 +2234,7 @@ msgstr ""
 msgid "path to the BBS drop file"
 msgstr "pad naar het BBS-dropbestand (DOOR32.SYS of DOOR.SYS)"
 
-#: internal/menu/gameflow.go:407
+#: internal/menu/gameflow.go:436
 msgid "people left your realm, unable to be fed."
 msgstr ""
 
@@ -2357,15 +2361,15 @@ msgid ""
 "settings editor, for a member board that takes its rules from the Coordinator"
 msgstr ""
 
-#: internal/menu/gameflow.go:412
+#: internal/menu/gameflow.go:441
 msgid "troops deserted due to low morale."
 msgstr ""
 
-#: internal/menu/gameflow.go:725
+#: internal/menu/gameflow.go:754
 msgid "units of Food consumed."
 msgstr ""
 
-#: internal/menu/gameflow.go:408
+#: internal/menu/gameflow.go:437
 msgid "units of food spoiled."
 msgstr ""
 

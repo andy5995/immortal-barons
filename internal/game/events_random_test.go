@@ -23,8 +23,11 @@ func TestMaybeRandomEventDeterministicWithFixedSeed(t *testing.T) {
 	if len(e1.Events) != len(e2.Events) {
 		t.Fatalf("event counts differ: %d vs %d", len(e1.Events), len(e2.Events))
 	}
-	if len(e1.Events) == 1 && e1.Events[0] != e2.Events[0] {
-		t.Errorf("same seed produced different events: %q vs %q", e1.Events[0], e2.Events[0])
+	// Compare the TEXT, not the Event: it carries a wall-clock stamp, so two
+	// runs never produce equal structs. The seed governs the wording and the
+	// deltas, which is what this test is about.
+	if len(e1.Events) == 1 && e1.Events[0].Text != e2.Events[0].Text {
+		t.Errorf("same seed produced different events: %q vs %q", e1.Events[0].Text, e2.Events[0].Text)
 	}
 	if *resourcePtr(e1, eventTroopers) != *resourcePtr(e2, eventTroopers) {
 		t.Errorf("same seed produced different resource deltas")

@@ -142,11 +142,13 @@ func TestRaidFactionWinLose(t *testing.T) {
 	}
 
 	// A token force against the last faction (Ammonians, index 8) loses
-	// and the committed troopers drop.
-	a.Troopers = 10
+	// and the committed troopers drop. Committed big enough that a 2-6% loss
+	// does not round to zero.
+	a.Troopers = 10_000
 	beforeTroopers := a.Troopers
 
-	report, _ = w.RaidFaction(a, 8, 10, 0, 0)
+	w.Pirates[8].LootTanks = 1 << 20 // far beyond what is sent, so the loss is certain
+	report, _ = w.RaidFaction(a, 8, 10_000, 0, 0)
 	if report == "" {
 		t.Error("expected a non-empty report")
 	}

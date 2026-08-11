@@ -58,21 +58,21 @@ msgstr ""
 msgid "%d days"
 msgstr "vor %d Tagen"
 
-#: internal/menu/gameflow.go:552
+#: internal/menu/gameflow.go:581
 #, fuzzy
 msgid "%d gold is requested to boost popular support."
 msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 
-#: internal/menu/gameflow.go:567
+#: internal/menu/gameflow.go:596
 #, fuzzy
 msgid "%d gold is requested to improve military morale."
 msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
 
-#: internal/menu/gameflow.go:544
+#: internal/menu/gameflow.go:573
 msgid "%d regions revolted for lack of upkeep."
 msgstr "%d Regionen rebellierten mangels Unterhalt."
 
-#: internal/menu/gameflow.go:541
+#: internal/menu/gameflow.go:570
 msgid "%d units deserted for lack of pay."
 msgstr "%d Einheiten desertierten mangels Sold."
 
@@ -98,9 +98,13 @@ msgstr "Gold bezahlt."
 msgid "%s days"
 msgstr "vor %d Tagen"
 
-#: internal/menu/gameflow.go:498
+#: internal/menu/gameflow.go:527
 msgid "%s gold is required to maintain your regions."
 msgstr "%s Gold werden benötigt, um deine Regionen zu unterhalten."
+
+#: internal/menu/gameflow.go:386
+msgid "%s have captured %s %s"
+msgstr ""
 
 #: internal/menu/actions_diplomacy.go:247
 msgid "%s offers you a %s."
@@ -361,7 +365,7 @@ msgstr "Nahrungsmarkt"
 msgid "Bombers"
 msgstr "Bomber"
 
-#: internal/menu/gameflow.go:354
+#: internal/menu/gameflow.go:351
 msgid "Bombers were manufactured by Industrial Zones."
 msgstr "Bomber wurden in Industriezonen hergestellt."
 
@@ -409,7 +413,7 @@ msgstr ""
 msgid "Carriers"
 msgstr "Träger"
 
-#: internal/menu/gameflow.go:356
+#: internal/menu/gameflow.go:353
 msgid "Carriers were manufactured by Industrial Zones."
 msgstr "Träger wurden in Industriezonen hergestellt."
 
@@ -481,7 +485,7 @@ msgstr ""
 msgid "Confirm?"
 msgstr ""
 
-#: internal/menu/gameflow.go:803
+#: internal/menu/gameflow.go:832
 msgid "Continue to your next turn?"
 msgstr ""
 
@@ -592,7 +596,7 @@ msgstr ""
 msgid "Do you wish to send another message?"
 msgstr "Möchtest du eine weitere Nachricht senden?"
 
-#: internal/menu/gameflow.go:487
+#: internal/menu/gameflow.go:516
 #, fuzzy
 msgid "Do you wish to visit the bank?"
 msgstr "Möchtest du eine weitere Nachricht senden?"
@@ -631,7 +635,7 @@ msgstr "Imperiumsstatus"
 msgid "End Protection"
 msgstr "Du hast noch %s%s Züge Schutz."
 
-#: internal/menu/gameflow.go:400
+#: internal/menu/gameflow.go:429
 msgid "End of Turn Statistics:"
 msgstr "Statistik am Zugende:"
 
@@ -687,7 +691,7 @@ msgstr ""
 msgid "Game started on %s"
 msgstr ""
 
-#: internal/menu/gameflow.go:470
+#: internal/menu/gameflow.go:499
 msgid "Gold paid."
 msgstr "Gold bezahlt."
 
@@ -751,7 +755,7 @@ msgstr ""
 msgid "How much to repay?"
 msgstr ""
 
-#: internal/menu/gameflow.go:496
+#: internal/menu/gameflow.go:525
 msgid "How much will you give?"
 msgstr ""
 
@@ -863,7 +867,7 @@ msgstr ""
 msgid "Jets"
 msgstr "Jets"
 
-#: internal/menu/gameflow.go:352
+#: internal/menu/gameflow.go:349
 msgid "Jets were manufactured by Industrial Zones."
 msgstr "Jets wurden in Industriezonen hergestellt."
 
@@ -954,7 +958,7 @@ msgstr ""
 msgid "Macro Editor"
 msgstr ""
 
-#: internal/menu/gameflow.go:474
+#: internal/menu/gameflow.go:503
 msgid "Maintenance:"
 msgstr "Unterhalt:"
 
@@ -998,7 +1002,7 @@ msgstr "Nachrichten lesen"
 msgid "Messages"
 msgstr "Nachrichten lesen"
 
-#: internal/menu/gameflow.go:574
+#: internal/menu/gameflow.go:603
 msgid "Military morale rose %d points."
 msgstr ""
 
@@ -1231,7 +1235,7 @@ msgstr "Spielen"
 msgid "Player List"
 msgstr ""
 
-#: internal/menu/gameflow.go:562
+#: internal/menu/gameflow.go:591
 #, fuzzy
 msgid "Popular support rose %d points."
 msgstr "Rückhalt"
@@ -1312,7 +1316,7 @@ msgstr ""
 msgid "Returns expected to be approximately %s gold."
 msgstr ""
 
-#: internal/menu/gameflow.go:410
+#: internal/menu/gameflow.go:439
 msgid "Riots have broken out due to high tax rates!"
 msgstr "Aufstände sind wegen hoher Steuern ausgebrochen!"
 
@@ -1380,7 +1384,7 @@ msgstr ""
 msgid "Send Trade Deal"
 msgstr ""
 
-#: internal/menu/gameflow.go:782
+#: internal/menu/gameflow.go:811
 #, fuzzy
 msgid "Send a message?"
 msgstr "Nachricht senden"
@@ -1427,7 +1431,7 @@ msgstr "Seit deinem letzten Zug ist Folgendes geschehen:"
 msgid "Single Planet"
 msgstr ""
 
-#: internal/menu/gameflow.go:669
+#: internal/menu/gameflow.go:698
 msgid "Sorry, you have used all of your turns today."
 msgstr ""
 
@@ -1483,7 +1487,7 @@ msgstr "Systemmenü"
 msgid "Tanks"
 msgstr "Panzer"
 
-#: internal/menu/gameflow.go:355
+#: internal/menu/gameflow.go:352
 msgid "Tanks were manufactured by Industrial Zones."
 msgstr "Panzer wurden in Industriezonen hergestellt."
 
@@ -1567,11 +1571,11 @@ msgstr ""
 msgid "The Clingy Annihilator is on its way. Nothing more can be done with it."
 msgstr ""
 
-#: internal/menu/gameflow.go:644
+#: internal/menu/gameflow.go:673
 msgid "The Queen Royale opens her coffers and refunds you %s gold in taxes!"
 msgstr ""
 
-#: internal/menu/gameflow.go:512
+#: internal/menu/gameflow.go:541
 msgid "The Queen Royale requires %s gold for Taxes."
 msgstr ""
 
@@ -1720,7 +1724,7 @@ msgstr "Steuersatz auf %d%% gesetzt."
 msgid "Troopers"
 msgstr "Soldaten"
 
-#: internal/menu/gameflow.go:351
+#: internal/menu/gameflow.go:348
 msgid "Troopers were trained by Industrial Zones."
 msgstr "Soldaten wurden in Industriezonen ausgebildet."
 
@@ -1733,7 +1737,7 @@ msgstr "Verbleibende Züge heute: %d"
 msgid "Turrets"
 msgstr "Türme"
 
-#: internal/menu/gameflow.go:353
+#: internal/menu/gameflow.go:350
 msgid "Turrets were manufactured by Industrial Zones."
 msgstr "Türme wurden in Industriezonen hergestellt."
 
@@ -1799,7 +1803,7 @@ msgstr ""
 msgid "Visit Trading Menu"
 msgstr ""
 
-#: internal/menu/gameflow.go:600
+#: internal/menu/gameflow.go:629
 msgid "Visit the Food Market to feed them, or they will starve."
 msgstr ""
 
@@ -1889,7 +1893,7 @@ msgstr "Abheben"
 msgid "Would you like to begin construction?"
 msgstr ""
 
-#: internal/menu/gameflow.go:521
+#: internal/menu/gameflow.go:550
 msgid "Would you like to reconsider?"
 msgstr ""
 
@@ -1936,7 +1940,7 @@ msgstr "Das kannst du dir nicht leisten."
 msgid "You cannot buy from your own listing."
 msgstr ""
 
-#: internal/menu/gameflow.go:476
+#: internal/menu/gameflow.go:505
 msgid "You cannot cover all your maintenance this turn."
 msgstr "Du kannst diesen Zug nicht deinen gesamten Unterhalt decken."
 
@@ -2096,12 +2100,12 @@ msgid "Your Prices"
 msgstr "Deine Nachrichten:"
 
 # Turn pipeline — maintenance
-#: internal/menu/gameflow.go:503
+#: internal/menu/gameflow.go:532
 #, fuzzy
 msgid "Your SDI Program requires %s gold."
 msgstr "Deine Streitkräfte benötigen %s Gold."
 
-#: internal/menu/gameflow.go:520
+#: internal/menu/gameflow.go:549
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
@@ -2116,7 +2120,7 @@ msgid "Your allies will send the following to aid you in defense:"
 msgstr ""
 
 # Turn pipeline — maintenance
-#: internal/menu/gameflow.go:494
+#: internal/menu/gameflow.go:523
 msgid "Your armed forces require %s gold."
 msgstr "Deine Streitkräfte benötigen %s Gold."
 
@@ -2124,11 +2128,11 @@ msgstr "Deine Streitkräfte benötigen %s Gold."
 msgid "Your choice?"
 msgstr ""
 
-#: internal/menu/gameflow.go:403
+#: internal/menu/gameflow.go:432
 msgid "Your dominion gained %s%s%s people."
 msgstr ""
 
-#: internal/menu/gameflow.go:405
+#: internal/menu/gameflow.go:434
 msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
@@ -2176,11 +2180,11 @@ msgstr ""
 msgid "Your new-realm protection will end when this turn does."
 msgstr ""
 
-#: internal/menu/gameflow.go:598
+#: internal/menu/gameflow.go:627
 msgid "Your people need %s units of food and you have only %s."
 msgstr ""
 
-#: internal/menu/gameflow.go:616
+#: internal/menu/gameflow.go:645
 msgid "Your people need %s units of food."
 msgstr ""
 
@@ -2193,7 +2197,7 @@ msgstr ""
 msgid "Your realm has %d turns of new-realm protection left."
 msgstr "Du hast noch %s%s Züge Schutz."
 
-#: internal/menu/gameflow.go:661
+#: internal/menu/gameflow.go:690
 msgid "Your realm is no longer active."
 msgstr ""
 
@@ -2296,7 +2300,7 @@ msgstr ""
 msgid "path to the BBS drop file"
 msgstr ""
 
-#: internal/menu/gameflow.go:407
+#: internal/menu/gameflow.go:436
 msgid "people left your realm, unable to be fed."
 msgstr ""
 
@@ -2411,16 +2415,16 @@ msgid ""
 "settings editor, for a member board that takes its rules from the Coordinator"
 msgstr ""
 
-#: internal/menu/gameflow.go:412
+#: internal/menu/gameflow.go:441
 msgid "troops deserted due to low morale."
 msgstr ""
 
-#: internal/menu/gameflow.go:725
+#: internal/menu/gameflow.go:754
 #, fuzzy
 msgid "units of Food consumed."
 msgstr "Nahrungseinheiten verbraucht."
 
-#: internal/menu/gameflow.go:408
+#: internal/menu/gameflow.go:437
 msgid "units of food spoiled."
 msgstr "Nahrungseinheiten sind verdorben."
 
