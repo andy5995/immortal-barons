@@ -15,7 +15,8 @@ func TestSplashRendersWordmark(t *testing.T) {
 	if !strings.Contains(out, "\x1b[38;5;136m") {
 		t.Error("splash is missing the gold-gradient color code")
 	}
-	if !strings.Contains(out, "█") {
+	// The art is a half-block pixel canvas, so every art cell is U+2580.
+	if !strings.Contains(out, "▀") {
 		t.Error("splash is missing its block glyphs (CP437 decode failed?)")
 	}
 }

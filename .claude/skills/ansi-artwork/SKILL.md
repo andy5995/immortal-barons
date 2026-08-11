@@ -153,9 +153,15 @@ consistent density ramp, assume a monospace grid, and test at the target width.
    shading look muddy and flat.
 4. **Add depth cues:** drop shadows (render a dark offset copy first, art on
    top), bevels, overlap. See the 3D section below.
-5. **Preview honestly.** Print it to a real terminal, or render to PNG with
-   **ansilove** (`ansilove -o out.png art.ans`) for docs instead of
-   screenshotting. See `references/formats-and-tools.md`.
+5. **Preview honestly, and LOOK at the render.** Print it to a real terminal, or
+   render to PNG — **ansilove** (`ansilove -o out.png art.ans`) for 16-color
+   CP437 pieces, **textimg** for 256-color/UTF-8 ones (ansilove renders the
+   legacy palette, so a 256-color ramp comes out wrong). CP437 source has to be
+   transcoded first: `python3 -c "import sys;sys.stdout.buffer.write(
+   open('art.ans','rb').read().decode('cp437').encode('utf-8'))" | textimg -o
+   out.png`. Then actually open the PNG — legibility faults (see the wordmark
+   section) are invisible in the source and obvious in the image.
+   See `references/formats-and-tools.md`.
 
 ## 3D and dimensional shading
 
@@ -166,6 +172,109 @@ surface, read `references/depth-and-3d.md`** — it has the step-by-step
 sphere-shading method, the bevel/extrusion recipe, chrome/glass/glow material
 looks, and concrete 16-color gradient ramps (e.g. synthesizing 6–7 perceived
 shades of red from just colors 0/4/12/15 + the shade blocks).
+
+## Planet / celestial surfaces: give a sphere terrain, not just a gradient
+
+A Lambert-shaded sphere with one color ramp reads as a billiard ball. Real
+worlds need **two ramps and a surface function**: an ocean ramp and a landmass
+ramp, chosen per pixel by thresholding a deterministic noise value over the
+surface point, then indexed by the same brightness the lighting already gave
+you. Layered trig is enough — no noise library:
+
+```python
+v  = sin(2.1*nx + seed) * cos(1.7*ny - seed)
+v += 0.70 * sin(3.1*nz + 1.7*seed)
+v += 0.40 * cos(4.3*nx*ny + seed*2.1)
+ramp = land if v > sealevel else sea      # then ramp[int(brightness*len(ramp))]
+```
+
+Three rules learned the hard way on the Immortal Barons splash:
+
+- **The land ramp must differ from the sea ramp in HUE *and* VALUE, and be the
+  darker of the two.** A land ramp that is brighter at equal brightness reads as
+  a lit patch of ocean — a shading artifact, not a continent. Basalt against
+  lava, olive against teal, tundra against deep blue.
+- **Vary `sealevel` per world** so they are not obviously the same function
+  reskinned: a scorched world mostly crust, an ocean world mostly water.
+- **Polar caps** are nearly free and sell the sphere instantly: swap in a third
+  ramp where `abs(ny) > ~0.8`, wobbled by the terrain value
+  (`> capfrom + 0.10*t`) so the ice line is ragged rather than a painted band.
+  A cap also proves the shape is a globe rather than a disc, because it curves
+  with the limb. **Its ramp has two constraints at once**, and missing either
+  one is visible: it must span the same brightness range as the sphere (a ramp
+  that starts light renders the shadowed pole as bright as the lit one — a flat
+  shelf stuck under the globe), *and* its floor must stay clearly paler than the
+  sea's floor (give it the sea's dark end and the shadowed pole vanishes into
+  deep water, so only one of the two caps reads as ice).
+
+### Anti-alias the limb, or the sides look flat
+
+Even with the aspect right, a binary inside/outside test staircases badly at the
+**left and right limbs**, where the circle's curve runs nearly vertical and
+several pixel rows land in the same column. That flat run is what a viewer
+reports as "the sides look flattened" — and it is worst on the SMALLEST sphere,
+where it is the largest fraction of the diameter (~31% of the height at r=11
+against ~25% at r=12.5).
+
+Sample each pixel on a 4x4 sub-grid, take the fraction inside the circle as
+coverage, and **multiply the brightness by it** so partly-covered pixels fall
+down the existing ramp instead of being fully lit or absent:
+
+```python
+cov = sum(1 for sy in range(4) for sx in range(4)
+          if ((x+(sx+.5)/4-.5-cx)/r)**2 + ((y+(sy+.5)/4-.5-cy)/ry)**2 <= 1) / 16
+if cov == 0: continue
+b = shade(nx, ny, nz) * cov
+```
+
+No new glyphs and no palette work — the ramp you already have does the fading.
+(The `░▒▓` shade ramp is the alternative when you only have 16 colors, but it
+costs the cell its second half-block pixel, so prefer coverage-dimming whenever
+you have 256 colors.)
+
+### Cell aspect: measure it, do not assume 2:1
+
+A sphere spanning `2r` columns and `r` character rows is round **only if a cell
+is exactly 2:1 (w:h)**. Real cells are taller, and the error is not subtle: a
+2.25:1 cell makes the circle 12% too tall, a 2.6:1 cell 30%. The tell is not
+"it looks tall" — it is **"the sides look flattened"**, because on a vertical
+ellipse the curve runs nearly vertical for longer at the left and right limbs.
+
+Ask the terminal instead of guessing:
+
+```sh
+printf "\e[14t\e[18t"; read -t 1 -d t A; read -t 1 -d t B; echo "px:$A chars:$B"
+```
+
+`\e[14t` reports the window in pixels, `\e[18t` in characters; divide to get the
+cell. Then squash the vertical radius by `ASPECT = 2 / (cell_h / cell_w)` —
+1.0 for a classic VGA 8x16, ~0.89 for a 12x27 cell.
+
+**Your PNG preview does not settle this.** ansilove/textimg render at their own
+font's cell aspect, so art tuned for the target terminal looks wrong in the
+preview and vice versa. Once tuned, re-stretch the preview to the measured
+aspect before judging it (`im.resize((w, int(h*cell_h/cell_w/2)), NEAREST)`).
+
+Keep the light direction identical to every other object in the piece; terrain
+must not fight the lighting.
+
+## Wordmarks at small sizes: a bitmap font beats a smaller FIGlet font
+
+When a block-font wordmark has to shrink, the obvious move — a shorter FIGlet
+font — usually abandons the solid-block look for line-art or ASCII (`Rectangles`,
+`Small`, `Small Block` all do), which changes the identity rather than the size.
+Draw the letters as a **5x7 bitmap on the same half-block canvas** instead: 7
+pixel rows is 4 character rows, against 6 for ANSI Shadow, and 6 columns per
+character, so an 8-letter word costs 47 columns instead of 68 — about 30% off
+both axes with the solid-block feel intact.
+
+**The drop shadow is what breaks legibility at this size.** A diagonal (+1,+1)
+shadow crosses the one-column letter gap and welds each letter to the next:
+"IMMORTAL" rendered as "INNORTAL", with the M's centre diagonal lost in the
+neighbouring shadow. Two fixes, both needed: put the shadow **directly beneath**
+(+0,+1) so it never enters the gap, and thin any glyph whose diagonal is only
+one pixel wide (an `M` apex on one row, not two). This is invisible in the
+source — only a render shows it.
 
 ## Logos and wordmarks
 

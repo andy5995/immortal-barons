@@ -33,6 +33,13 @@ func TestSplashFitsTheScreen(t *testing.T) {
 		t.Errorf("the splash and its prompt need %d rows, more than the %d assumed (trim rows from screens/splash.ans)",
 			rows, ansi.ScreenRows)
 	}
+	// Width matters as much as height and was never checked: one column over
+	// and the terminal wraps every art row, which shifts everything below it.
+	for i, l := range strings.Split(anyEscape.ReplaceAllString(f.out.String(), ""), "\n") {
+		if n := len([]rune(strings.TrimRight(l, "\r"))); n > ansi.ScreenCols {
+			t.Errorf("splash line %d is %d columns, more than the %d assumed", i+1, n, ansi.ScreenCols)
+		}
+	}
 }
 
 // The empire status pages are .ans templates, so their height is fixed by the
