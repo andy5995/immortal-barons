@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"hash/fnv"
 	"io"
+	"math"
 	"time"
 )
 
@@ -599,32 +600,32 @@ func (w *World) aiInvestIdle(e *Empire) {
 	}
 }
 
-// Population model (IB's own tuning). BRE uses the same logistic shape —
-// growth toward a carrying capacity — but with a runaway 50%/turn ceiling
-// (recovered from a BRE.OVR disassembly). IB keeps the self-limiting shape and
-// trades the ceiling for moderate rates; see docs/mechanics-reference.md.
-const (
-	PopGrowthCapPct   = 8  // max % of population gained or lost per turn
-	PopGrowthApproach = 12 // headroom is closed at ~1/12 per turn (before the cap)
-
-	// Carrying-capacity weights (per region / per support point). Land houses
-	// people, urban and agricultural regions add extra headroom, and popular
-	// support is the dominant lever — the same factor roles BRE uses.
-	PopCapPerLand    = 20
-	PopCapPerUrban   = 60
-	PopCapPerAgri    = 20
-	PopCapPerSupport = 30
-)
-
-// popCapacity is the carrying capacity the population grows toward. Selling
-// urban/agricultural land or losing support lowers it, so population then
-// drifts down toward the new capacity at the growth cap rather than via a
-// separate housing-loss hit. IB's own values; see docs/mechanics-reference.md.
+// popCapacity is the carrying capacity migration pulls the population toward.
+// BINARY-VERIFIED against BRE's end-of-turn routine (BRE.OVR 0xD08A-0xD213):
+//
+//	capacity = Σ(regions × PopCapWeight) × support/90 × 10/max(3, tax) + 50
+//
+// Three factors move it, which is what makes migration a lever rather than a
+// clock: WHAT you own (urban housing dwarfs everything else), how POPULAR you
+// are, and how hard you TAX — the last two multiplicatively, so a heavily taxed
+// realm with poor support has a fraction of the capacity its land could hold.
+// Selling urban land or losing support lowers the capacity and people then
+// drain away toward it, rather than via a separate housing-loss hit.
 func (e *Empire) popCapacity() int {
-	return e.Land*PopCapPerLand +
-		e.Regions.Urban*PopCapPerUrban +
-		e.Regions.Agricultural*PopCapPerAgri +
-		e.Support*PopCapPerSupport
+	cap := e.Regions.Coastal*PopCapCoastal +
+		e.Regions.River*PopCapRiver +
+		e.Regions.Agricultural*PopCapAgricultural +
+		e.Regions.Desert*PopCapDesert +
+		e.Regions.Industrial*PopCapIndustrial +
+		e.Regions.Urban*PopCapUrban +
+		e.Regions.Mountain*PopCapMountain +
+		e.Regions.Technology*PopCapTechnology
+	cap = cap * e.Support / PopCapSupportDivisor
+	tax := e.Tax
+	if tax < PopCapTaxFloor {
+		tax = PopCapTaxFloor
+	}
+	return cap*PopCapTaxNumerator/tax + PopCapBase
 }
 
 // IncomeBreakdown itemizes a turn's income by source (gold), plus the food
@@ -888,21 +889,39 @@ func (w *World) processEconomy(e *Empire) {
 		e.LastSpoiled = 0
 	}
 
-	// Population follows a logistic curve toward popCapacity, capped at
-	// PopGrowthCapPct%/turn in either direction (IB's own tuning; see the
-	// constants above and docs/mechanics-reference.md). Positive growth needs
-	// food; decline toward capacity — after selling land or losing support —
-	// always runs, which is why selling urban regions drains people gradually
-	// instead of via a separate housing-loss hit.
+	// Migration: the population moves a slice of the way toward its carrying
+	// capacity each turn. BINARY-VERIFIED shape (BRE.OVR 0xD219-0xD3CC); see
+	// popCapacity for the capacity itself and docs/mechanics-reference.md for
+	// the whole model.
 	e.LastPopGrowth = 0
-	growth := (e.popCapacity() - e.People) / PopGrowthApproach
-	if ceiling := e.People * PopGrowthCapPct / 100; growth > ceiling {
-		growth = ceiling
-	} else if growth < -ceiling {
-		growth = -ceiling
+	capacity := e.popCapacity()
+	// A percentage of the HEADROOM, not of the population, so a realm far below
+	// capacity fills fast and one near it barely moves.
+	growth := (capacity - e.People) * (w.rng.Intn(PopMoveJitter) + PopMoveMinPct) / 100
+	if growth < 0 {
+		// Leaving is faster than arriving, and taxes drive it: a shrinking realm
+		// loses people in proportion to the root of its tax rate.
+		growth = -int(math.Sqrt(float64(e.Tax)) * float64(-growth) / PopDeclineTaxDivisor)
+	}
+	// Churn, so an empire sitting exactly at capacity still moves a little.
+	growth += w.rng.Intn(max(1, capacity/PopChurnUpDivisor)) - w.rng.Intn(max(1, capacity/PopChurnDownDivisor))
+	if e.Tax > PopPunitiveTaxRate {
+		// Above a punitive rate people leave on top of everything else, whether
+		// the realm was growing or shrinking.
+		cut := growth * PopPunitiveTaxPct / 100
+		if cut < 0 {
+			cut = -cut
+		}
+		growth -= cut
+	}
+	if ceiling := e.People / PopGrowthCeilingDivisor; growth > ceiling {
+		growth = ceiling // no realm more than half again as big in one turn
 	}
 	if growth > 0 && e.Food <= 0 {
 		growth = 0 // starving realms don't grow; starvation attrition is separate
+	}
+	if e.People+growth < 0 {
+		growth = -e.People
 	}
 	if growth != 0 {
 		e.People += growth

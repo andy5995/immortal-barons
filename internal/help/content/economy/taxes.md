@@ -17,6 +17,11 @@ Low Support badly cuts your Coastal (tourism) income.
 Riots grow more likely as your tax rate climbs past a safe level. A riot crashes
 your Support and drives off part of your population. Raise taxes with care.
 
+Taxes also decide how many people your realm can hold. A low rate lets it hold
+many more, a high one far fewer, and past 50% people leave faster still. A realm
+that is already shrinking loses people quicker the harder it taxes. Support
+works the same way: the higher it stands, the more people your land can hold.
+
 ## The Queen Royale's tax
 
 The Queen takes a share of what you earn each turn. You may pay her less than

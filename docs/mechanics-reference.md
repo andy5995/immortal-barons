@@ -915,30 +915,58 @@ the main income. Set tax to 0% for a few turns to spike growth, then buy
 **urban** regions so people don't leave when you raise tax back to ~7–9%.
 Growing population needs enough **agricultural** regions to stay fed.
 
-**Population growth model — BRE's shape, the clone's own tuning.** A BRE.OVR
-disassembly (HIGH confidence on shape) shows BRE grows population **logistically
-toward a carrying capacity**, not at a flat birth rate:
-`capacity = (Σ region·weight + Support·90 + base) · taxFactor(tax)`, then
-`growth = min(capacity − People, People/2)` plus a small jitter (population is
-stored in *millions*). Capacity is dominated by **popular support**; **tax**
-lowers growth twice (a decreasing `taxFactor` multiplier *and* by dragging
-support down); **urban** is one of the weighted region types. That `People/2`
-term is a **50%/turn ceiling** — with high support a realm sits far below
-capacity and pins to it, which is BRE's characteristic explosive growth. The
-exact float `taxFactor(tax)` curve is the one value the disassembly could not
-recover (a relocated Turbo-Pascal FP routine).
+**Population / migration — BINARY-VERIFIED.** Read out of BRE's end-of-turn
+routine (`BRE.OVR` `0xD08A`–`0xD3CC`). This supersedes an earlier partial
+reading of the same routine, which had support as an *additive* `Support·90`
+term and could not recover the tax curve at all; both are resolved below. IB
+previously replaced the whole thing with its own logistic tuning
+(`Land·20 + Urban·60 + Agricultural·20 + Support·30`, `1/12` approach, ±8%/turn)
+— that is gone.
 
-The clone keeps the **self-limiting logistic shape** but replaces BRE's runaway
-ceiling with moderate rates (a deliberate balance choice, not a fidelity gap).
-In `internal/game/turn.go`: `popCapacity = Land·20 + Urban·60 + Agricultural·20
-+ Support·30`, growth closes headroom at `~1/12` per turn, clamped to
-**±8%/turn** (`PopGrowthCapPct`), and positive growth needs food. Support is the
-main lever, matching BRE's intent. Selling urban/agricultural land or losing
-support lowers capacity, so population then **drifts down gradually** toward the
-new capacity — the clone's answer to BRE's separate instant ~1M-per-urban
-housing loss on a land sell (one code path instead of two, and it makes the
-"no misrule emigration" result below correct by construction: being over
-capacity *is* the attrition). All weights are tunable constants.
+Carrying capacity:
+
+```
+capacity = Σ(regions × weight) × support/90 × 10/max(3, tax) + 50
+```
+
+with per-region weights **Coastal 7 · River 10 · Agricultural 8 · Desert 4 ·
+Industrial 9 · Urban 102 · Mountain 8 · Technology 7**. Raw land does not house
+anyone — the *mix* does, and **Urban outweighs every other type by more than
+ten to one**, so a realm that wants people buys Urban. Support and tax are
+**multiplicative**, not additive: 90% support is neutral and a 10% tax rate is
+neutral, so a realm at 45% support taxing at 20% carries a quarter of what its
+land could otherwise hold. The `+50` is a floor every realm gets regardless of
+holdings.
+
+Each turn the population moves toward that capacity:
+
+```
+move   = (capacity − People) × (Random(5)+5) / 100     -- 5-9% of the GAP
+if move < 0:  move = move × sqrt(tax) / 2              -- leaving is faster, and taxes drive it
+move  += Random(capacity/100) − Random(capacity/300)   -- churn, either way
+if tax > 50:  move -= abs(move × 0.25)                 -- punitive rate, on top
+if move > People/2:  move = People/2                   -- 50%/turn ceiling
+People += move  (floored at 0)
+```
+
+Because the movement is a share of the **gap** rather than of the population, a
+realm far below capacity fills quickly and one near it barely stirs. The
+`People/2` ceiling is BRE's characteristic explosive growth. Above a 50% tax
+rate the realm settles *below* its capacity rather than at it — measured at
+about 75-81% of capacity after 40 turns.
+
+**One unverified constant.** In the decline branch the binary applies a Turbo
+Pascal System-unit real function (`fd0:1841`) to the tax rate. `Sqrt` and `Ln`
+are equally consistent with the call shape, and the same routine is used in the
+combat-odds code at `0x4a81c`, which does not disambiguate them either. **Sqrt
+is the reading taken.** They differ by roughly 2× at tax 100, so driving BRE and
+comparing a shrinking realm's decline at tax 25 against tax 100 would settle it.
+
+**Deliberate divergence — millions.** BRE stores population as a **16-bit count
+of millions** (record `+0x62`; the status screen prints "Population: 101
+Million" and migration reports "gained N million people"). IB counts people
+directly. The weights above are BRE's numbers applied to IB's unit, not a
+rescaling of them.
 
 **Capacity is decoupled from food, as in BRE.** Carrying capacity is
 support-driven; food is a separate gate (positive growth needs stored food, and

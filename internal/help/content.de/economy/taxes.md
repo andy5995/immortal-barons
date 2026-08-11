@@ -17,6 +17,12 @@ Aufstände werden wahrscheinlicher, je weiter Ihr Steuersatz über ein
 sicheres Maß steigt. Ein Aufstand lässt Ihre Zustimmung einbrechen und
 vertreibt einen Teil Ihres Volkes.
 
+Taxes also decide how many people your realm can hold. A low rate lets it
+hold many more, a high one far fewer, and past 50% people leave faster
+still. A realm that is already shrinking loses people quicker the harder it
+taxes. Support works the same way: the higher it stands, the more people
+your land can hold.
+
 ## The Queen Royale's tax
 
 The Queen takes a share of what you earn each turn. You may pay her less

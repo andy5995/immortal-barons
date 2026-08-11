@@ -191,12 +191,14 @@ func TestAdvisorsNoFalseFoodWarning(t *testing.T) {
 func TestAdvisorsWarnGrowthOutrunsFood(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
-	p.People = 100                              // tiny now → current consumption is trivial
-	p.Support = 100                             // high support → large population capacity
-	p.Land = 200                                // capacity scales with land + support
-	p.Regions = game.RegionMix{Agricultural: 1} // barely any food production
-	p.Troopers, p.Jets, p.Tanks = 0, 0, 0       // isolate the population food need
-	p.Food = 10_000_000                         // stores comfortably cover this turn
+	p.People = 100  // tiny now → current consumption is trivial
+	p.Support = 100 // high support → large population capacity
+	// Capacity comes from the region MIX, and urban housing dominates it, so a
+	// realm of urban regions with one farm grows far past what it can feed.
+	p.Regions = game.RegionMix{Urban: 199, Agricultural: 1}
+	p.Land = p.Regions.Total()
+	p.Troopers, p.Jets, p.Tanks = 0, 0, 0 // isolate the population food need
+	p.Food = 10_000_000                   // stores comfortably cover this turn
 
 	f := &fakeSession{}
 	renderAdvisor(f, w, advisorCivilian)

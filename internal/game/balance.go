@@ -560,6 +560,66 @@ const (
 	FoodShortfallSupportDrop   = 70 // support points lost per turn at 100% unfed
 	FoodShortfallMoraleDrop    = 80 // morale points lost per turn at 100% unfed (hungry troops demoralize faster than the public, as under pay shortfall)
 	FoodShortfallEmigrationPct = 10 // % of population that leaves per turn at 100% unfed
+)
+
+// Population / migration. BINARY-VERIFIED against BRE's end-of-turn routine
+// (BRE.OVR 0xD08A-0xD3CC), which IB had previously replaced with its own
+// logistic tuning. The carrying capacity is
+//
+//	Σ(regions × weight) × support/90 × 10/max(3, tax) + 50
+//
+// and each turn the population moves 5-9% of the gap toward it, amplified when
+// it is shrinking, jittered, cut again above a punitive tax rate, and held to
+// half the realm's size. See popCapacity and processEconomy in turn.go.
+//
+// IB keeps ONE deliberate divergence: BRE stores population as a 16-bit count
+// of MILLIONS ("Population: 101 Million", record +0x62) and reports migration
+// as "gained N million people". IB counts people directly, so the same figures
+// are IB's own scale — the weights below are BRE's numbers applied to IB's
+// unit, not a rescaling of them.
+const (
+	// Carrying-capacity weight per region, by type. Urban housing dominates by
+	// more than a factor of ten — a realm that wants people buys Urban.
+	PopCapCoastal      = 7   // binary
+	PopCapRiver        = 10  // binary
+	PopCapAgricultural = 8   // binary
+	PopCapDesert       = 4   // binary
+	PopCapIndustrial   = 9   // binary
+	PopCapUrban        = 102 // binary
+	PopCapMountain     = 8   // binary
+	PopCapTechnology   = 7   // binary
+
+	PopCapSupportDivisor = 90 // binary: capacity scales by support/90, so 90% support is neutral
+	PopCapTaxNumerator   = 10 // binary: and by 10/tax, so a 10% rate is neutral
+	PopCapTaxFloor       = 3  // binary: max(3, tax) — the tax divisor never goes below 3
+	PopCapBase           = 50 // binary: a floor every realm gets regardless of holdings
+
+	// Per-turn movement toward the capacity: Random(5)+5 percent of the gap.
+	PopMoveMinPct = 5 // binary
+	PopMoveJitter = 5 // binary: Random(5) added to the minimum
+
+	// A SHRINKING realm loses people faster the harder it taxes:
+	// growth × sqrt(tax) / 2. UNVERIFIED IN ONE RESPECT — the binary applies a
+	// System-unit real function (fd0:1841) to the tax rate here, and Sqrt and Ln
+	// are equally consistent with the call shape. Sqrt is the reading taken; the
+	// two differ by about 2x at tax 100, so a driven experiment comparing the
+	// decline at tax 25 against tax 100 would settle it.
+	PopDeclineTaxDivisor = 2.0 // binary
+
+	// Churn either way, so a realm sitting exactly at capacity still moves:
+	// + Random(capacity/100) - Random(capacity/300).
+	PopChurnUpDivisor   = 100 // binary
+	PopChurnDownDivisor = 300 // binary
+
+	// Above this rate people leave on top of everything else.
+	PopPunitiveTaxRate = 50 // binary
+	PopPunitiveTaxPct  = 25 // binary: a further quarter off the turn's movement
+
+	// No realm grows by more than half its size in one turn.
+	PopGrowthCeilingDivisor = 2 // binary
+)
+
+const (
 	// Agricultural food follows the same Base + [0, Rate) draw the gold regions
 	// use — one roll per turn, multiplied by the region count. BRE-verified: over
 	// six captures and nine different region counts (2 … 194) every printed total

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-11 07:12-0500\n"
+"POT-Creation-Date: 2026-08-11 08:23-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -867,6 +867,79 @@ msgstr ""
 "и население не считаются по номиналу."
 
 #. type: Title #
+#: internal/help/content/economy/population.md:1
+#: internal/help/content/economy/population.md:8
+#, no-wrap
+msgid "Population"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/population.md:13
+msgid ""
+"Your people pay your taxes, so how many you hold is one of the things worth "
+"managing directly. Each turn some move in or move out, until the realm "
+"settles at the number it can support."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/population.md:15
+msgid "Three things set that number:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/population.md:24
+msgid ""
+"**What your land is.** Urban regions house far more people than any other "
+"type — more than ten times what a Coastal or Mountain region holds. Rivers "
+"and Industrial zones come next; Desert holds the fewest. Raw land does "
+"nothing on its own; it is the kind of region that counts."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/population.md:24
+msgid ""
+"**Popular Support.** The higher it stands, the more people your land holds."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/population.md:24
+msgid ""
+"**Your tax rate.** A low rate lets your realm hold many more people. A high "
+"one drives the number down sharply, and past 50% people keep leaving on top "
+"of that."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/population.md:27
+msgid ""
+"Support and taxes multiply together, so a realm with poor support and heavy "
+"taxes holds a small fraction of what its land could otherwise carry."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/population.md:32
+msgid ""
+"Movement each turn is a share of the gap, not of your population, so a realm "
+"far below its limit fills quickly while one already near it barely changes. "
+"A realm can grow by at most half its size in one turn. When people are "
+"leaving, they leave faster the harder you tax."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/population.md:35
+msgid ""
+"Selling Urban land lowers what your realm can hold, and the people then "
+"drain away over the following turns rather than all at once."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/population.md:37
+msgid ""
+"Tip: population growth outruns food if you buy Urban regions and no farms. "
+"Your civilian advisor warns you before that wall arrives."
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/economy/taxes.md:1
 #: internal/help/content/economy/taxes.md:8
 #, no-wrap
@@ -902,21 +975,31 @@ msgstr ""
 "Бунты становятся вероятнее по мере роста налога выше безопасного уровня. "
 "Бунт обрушивает поддержку и прогоняет часть народа."
 
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:24
+msgid ""
+"Taxes also decide how many people your realm can hold. A low rate lets it "
+"hold many more, a high one far fewer, and past 50% people leave faster "
+"still. A realm that is already shrinking loses people quicker the harder it "
+"taxes. Support works the same way: the higher it stands, the more people "
+"your land can hold."
+msgstr ""
+
 #. type: Title ##
-#: internal/help/content/economy/taxes.md:20
+#: internal/help/content/economy/taxes.md:25
 #, no-wrap
 msgid "The Queen Royale's tax"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:24
+#: internal/help/content/economy/taxes.md:29
 msgid ""
 "The Queen takes a share of what you earn each turn. You may pay her less "
 "than she asks, but a short payment costs Popular Support."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:29
+#: internal/help/content/economy/taxes.md:34
 msgid ""
 "Every coin she collects goes into her purse, and she gives part of that "
 "purse back. She pays you the first time you play each day: 2% of the purse, "
@@ -925,7 +1008,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:31
+#: internal/help/content/economy/taxes.md:36
 msgid ""
 "All barons draw on the same purse, and each refund empties it a little. The "
 "first to play on a given day takes the largest share, so play early."
