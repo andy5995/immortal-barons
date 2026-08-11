@@ -150,6 +150,31 @@ explanation only appears on some items: *"You must play at least one turn per
 entry in the game to access this option."* An inert IP menu item is far more
 likely to be this than a broken mechanic.
 
+### Disassembly: get real segment bases from a debugger, don't solve for them
+
+`BRE.OVR` is a Turbo Pascal **overlay** file, so a unit's string constants are
+addressed relative to a code-segment base that is not in the file. The habit of
+*solving* for that base — scoring candidate offsets by how many `mov di,imm16`
+land on plausible ShortString length bytes — works sometimes and fails silently
+otherwise. On 2026-08-11 it found the attack unit (0x2b783, 36 hits) but dead-
+ended completely on the IBBS inbound scanner and on the result-header strings,
+burning hours for nothing.
+
+**The better route, suggested by the BRE community: run the binary under a
+DOSBox build with the built-in debugger** (DOSBox-X or DOSBox-debug), let it
+load all the overlays, then **dump memory**. That gives the real, loaded segment
+addresses instead of inferred ones. From there, generate a map of branch targets
+starting at the program entry point, which separates code from data properly,
+and you get a clean disassembly to name things in. It can grind on that for a
+while and come back with something far more useful than `ndisasm` over a raw
+file offset.
+
+This does **not** replace dosemu2 for everything — dosemu2 is still the only way
+to scrape screens as text (see above), and that is most of what this skill does.
+The two are complementary: **dosemu2 for behaviour and screens, a DOSBox
+debugger for structure and constants.** Reach for the debugger the moment a
+base-solve fails to converge, rather than trying a fourth scoring heuristic.
+
 ## Source priority (most authoritative first)
 
 1. **A rendered screenshot from a live BRE session.** The ONLY authoritative
