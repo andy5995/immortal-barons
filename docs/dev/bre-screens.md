@@ -956,6 +956,116 @@ Gooie Kablooies: Enabled     Bombing Ops: Enabled     Missile Ops: Enabled
 
 ---
 
+## Configuration Editor (`BRE RESET`, captured live 2026-08-11)
+
+Reached by `BRE RESET` from the DOS prompt: `Are you sure you wish to reset the
+Game? (Y/n)` → the editor → `[ESC]` to save → `Would you like this to be a
+league-wide reset? (Y/n)` → `Your BRE game has been reset...Thank you!`
+
+**That league-wide prompt only appears on a board BRE recognises as a league
+member** (its `bbs.cfg` FTN address matching an entry in `BRNODES.DAT`). A
+standalone install never asks it, which makes it the quickest confirmation that
+an InterBBS test board is configured correctly.
+
+Two pages, moved through with **PG-DN / PG-UP**; `[ESC]` saves and quits. Fields
+are **colour-coded by type, and every value is the BRIGHT form of its label's
+colour** — labels `3x`, values `9x`:
+
+| field type | label | value | seen on |
+|---|---|---|---|
+| dates | `32` green | `92`/`97` bright | Game Start Date, Game Join Date |
+| numbers | `36` cyan | `96` bright-cyan | Turns Per Day, Turns of Protection, rates, caps |
+| presets | `35` magenta | `95` bright-magenta | Maintenance/Trade Deal/Region Costs, Attack Damage |
+
+The `: ` separator and the trailing pad are `37` white. A `*` prefix marks an
+InterBBS-only setting; the footer states it.
+
+```
+─────══Barren Realms Elite Configuration Editor══════───────────────────
+Game Start Date               : 08/11/2026  14:48:46
+Game Join Date                : 01/01/2999  00:00:00
+Turns Per Day                 : 8
+Turns of Protection           : 20
+Initial Market Land           : 0
+Land Created / Day            : 1000
+Interest Rate                 : 50
+Standard Investment Rate      : 35
+Steady Investment Rate        : Disabled
+Tax Rate                      : 50
+Max Purchasable Regions       : 500
+Max Players Per BBS           : 25
+Buy Military                  : Yes
+Maintenance Costs             : Medium
+Trade Deal Costs              : Medium
+Region Costs                  : Medium
+Attack Damage                 : Medium
+* = InterBBS Setting Only   [PG-DN] For More Options   [ESC] to Save & Quit
+```
+
+Page two — everything starred is InterBBS-only:
+
+```
+Attack Rewards                : Medium
+Sabre Handling                : User Select/Original Setting
+*Attack Costs                 : Medium
+*Terrorist Costs              : Medium
+*Individual Attacks / Day     : 1
+*Group Attacks / Day          : 1
+*Terrorist Attacks / Day      : 10
+*Bombings / Day               : 5
+*Days for "Lost Attacks"      : 7
+*Gooie Kablooies              : Enabled
+*Bombing Operations           : Enabled
+*Missile Operations           : Enabled
+*Local Attacks                : Enabled
+*Local Attack Scoring         : Disabled
+*Dupe Checking                : Enabled
+* = InterBBS Setting Only   [PG-UP] For More Options   [ESC] to Save & Quit
+```
+
+## Trading (System Menu → T) and the Trading Market
+
+The Trading submenu's accent is **red**: `31` red parens and rule, `91`
+bright-red key letter, `37` white label.
+
+```
+─────[Trading]──────
+(1) Trading
+(2) Trading Market
+(V) Visit Bank
+(0) Quit
+────────────────────
+Choice> Quit
+```
+
+The market itself lists the eight tradeable goods — note keys 1-5 and 7-9, with
+**no key 6** (regions are not tradeable):
+
+```
+Trading Market
+Key Name               Your Prices       Owned      For Sale   Total For Sale
+─────═══════════════──────────────────────────────────────────────────────────
+(1) Trooper                    500          27            73               73
+(2) Jet                          0           0             0                0
+(3) Turret                       0           0             0                0
+(4) Bomber                       0           0             0                0
+(5) *Food                        0        1840             0                0
+(7) Agent                        0           0             0                0
+(8) Tank                         0           0             0                0
+(9) Carrier                      0           0             0                0
+─────═══════════════──────────────────────────────────────────────────────────
+Your Choice?
+```
+
+Picking a good gives `[C] Change your setup, or [B] Buy from Market:`, then
+`Enter new amount of <Good> for sale:(MAX=n)` and `Set new <Good> price: (0)`.
+Listing moves the goods out of `Owned` into `For Sale` immediately.
+
+**The market exits on ESC — not `0`, not Enter.** Its screen lists no Quit key
+and the `Your Choice?` prompt silently redraws on both, so a driver that presses
+`0` until it recognises a screen will loop forever. `tmux send-keys -H 1b` leaves
+it, and pops the Trading submenu with it, landing on the System Menu.
+
 ## Clean-room note
 
 BRE is proprietary (John Dailey Software; design by Mehul Patel). This file
