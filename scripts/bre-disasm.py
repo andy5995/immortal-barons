@@ -25,7 +25,7 @@ import time
 import urllib.request
 
 
-VERSION = "0.4"
+VERSION = "0.5"
 OFFICIAL_URL = (
     "https://www.johndaileysoftware.com/download/"
     "?fileName=brev988.exe&id=220BRE"
@@ -191,6 +191,154 @@ RTL_SEMANTIC_EVIDENCE = {
 }
 
 NON_RETURNING_FAR_TARGETS = {(0x0FD0, 0x0116)}
+
+
+# Closed target sets for every indirect control transfer reached in BRE 0.988.
+# OVR sites and targets are canonical file offsets; EXE values are canonical
+# load-module offsets. The evidence is intentionally structural rather than a
+# transcription of private program text.
+CALCULATED_RESIDENT_ROOTS = {
+    (0x025D, 0x0CD8): ("resident_025d_0cd8", ["callback"]),
+    (0x025D, 0x0D43): ("resident_025d_0d43", ["callback"]),
+    (0x09BD, 0x026C): ("text_driver_close", ["rtl", "text-io", "callback"]),
+    (0x09BD, 0x02A6): ("text_driver_read", ["rtl", "text-io", "callback"]),
+    (0x09BD, 0x039F): ("text_driver_write", ["rtl", "text-io", "callback"]),
+    (0x09BD, 0x0554): ("text_driver_flush", ["rtl", "text-io", "callback"]),
+    (0x09BD, 0x0568): ("text_driver_open", ["rtl", "text-io", "callback"]),
+    (0x0F5B, 0x0268): ("load_overlay_from_file", ["overlay-loader", "callback"]),
+    (0x0F5B, 0x02E5): ("overlay_callback_noop", ["overlay-loader", "callback"]),
+    (0x0F5B, 0x06E0): ("load_overlay_from_ems", ["overlay-loader", "callback"]),
+    (0x0FD0, 0x00D6): ("default_heap_error_handler", ["rtl", "heap", "callback"]),
+    (0x0FD0, 0x081E): ("scan_text_line_end", ["rtl", "text-io", "callback"]),
+    (0x0FD0, 0x094C): ("scan_text_shortstring", ["rtl", "text-io", "callback"]),
+    (0x0FD0, 0x09C7): ("scan_text_i32", ["rtl", "text-io", "callback"]),
+    (0x0FD0, 0x0A59): ("scan_text_real48", ["rtl", "text-io", "callback"]),
+    (0x0FD0, 0x0AEF): ("scan_text_character", ["rtl", "text-io", "callback"]),
+}
+
+CALCULATED_TRANSFERS = [
+    {
+        "key": "network_record_normalizer",
+        "storage": "ovr",
+        "sites": [0x0036EA, 0x003751],
+        "targets": [("ovr", 0x003477)],
+        "model": "far procedure parameter",
+        "evidence": "all seven direct callers pass the same overlay procedure address",
+    },
+    {
+        "key": "problem_report_handler",
+        "storage": "ovr",
+        "sites": [0x03E819, 0x03E83B, 0x0519C0],
+        "targets": [("ovr", 0x048C81), ("ovr", 0x0519EE)],
+        "model": "global far-pointer slot",
+        "evidence": "the complete reachable write set contains two constant procedure addresses",
+    },
+    {
+        "key": "typed_file_error_handler",
+        "storage": "ovr",
+        "sites": [0x055253, 0x0552F9, 0x0553DF, 0x055571, 0x05569D, 0x055782],
+        "targets": [("ovr", 0x0558DE), ("ovr", 0x055A0E)],
+        "model": "global far-pointer slot",
+        "evidence": "the initializer and its sole setter call provide two constant assignments",
+    },
+    {
+        "key": "idle_callback",
+        "storage": "exe",
+        "sites": [0x09DDD],
+        "targets": [("exe", 0x032A8)],
+        "model": "global far-pointer slot",
+        "evidence": "the sole setter has one direct call site with a constant procedure argument",
+    },
+    {
+        "key": "multitasker_callbacks",
+        "storage": "exe",
+        "sites": [0x09D31],
+        "targets": [
+            ("exe", 0x03313),
+            ("ovr", 0x007584),
+            ("ovr", 0x058911),
+            ("ovr", 0x058924),
+            ("ovr", 0x05893A),
+        ],
+        "model": "heap-linked callback records",
+        "evidence": "all five calls to the sole record constructor pass constant procedure addresses",
+    },
+    {
+        "key": "text_output_idle_callback",
+        "storage": "exe",
+        "sites": [0x09FA4],
+        "targets": [("exe", 0x032A8)],
+        "model": "global far-pointer slot",
+        "evidence": "the sole setter has one direct call site with the same constant idle callback",
+    },
+    {
+        "key": "overlay_notification",
+        "storage": "exe",
+        "sites": [0x0F8DA],
+        "targets": [("exe", 0x0F895)],
+        "model": "global far-pointer slot",
+        "evidence": "zero-initialized storage receives one constant default callback",
+    },
+    {
+        "key": "overlay_reader",
+        "storage": "exe",
+        "sites": [0x0F95A, 0x0FC24],
+        "targets": [("exe", 0x0F818), ("exe", 0x0FC90)],
+        "model": "global far-pointer slot",
+        "evidence": "loader initialization selects exactly the file and EMS reader procedures",
+    },
+    {
+        "key": "heap_error_handler",
+        "storage": "exe",
+        "sites": [0x10102, 0x1010E],
+        "targets": [("exe", 0x0FDD6)],
+        "model": "global far-pointer slot",
+        "evidence": "runtime startup installs one constant handler and no other reachable write exists",
+    },
+    {
+        "key": "text_driver_methods",
+        "storage": "exe",
+        "sites": [0x10361],
+        "targets": [
+            ("exe", 0x09E3C),
+            ("exe", 0x09E76),
+            ("exe", 0x09F6F),
+            ("exe", 0x0A138),
+        ],
+        "model": "TextRec method fields selected by a bounded field offset",
+        "evidence": "three callers select fields 0x10, 0x14, or 0x1c and initialization writes four constant methods",
+    },
+    {
+        "key": "text_scanners",
+        "storage": "exe",
+        "sites": [0x10427],
+        "targets": [
+            ("exe", 0x1051E),
+            ("exe", 0x1064C),
+            ("exe", 0x106C7),
+            ("exe", 0x10759),
+            ("exe", 0x107EF),
+        ],
+        "model": "near procedure argument in AX",
+        "evidence": "all five direct callers load AX with a constant scanner entry",
+    },
+    {
+        "key": "text_input_method",
+        "storage": "exe",
+        "sites": [0x1057E],
+        "targets": [("exe", 0x09E76), ("exe", 0x09F6F)],
+        "model": "TextRec InOutFunc field",
+        "evidence": "text-open initialization assigns exactly two constant input methods",
+    },
+    {
+        "key": "text_flush_method",
+        "storage": "exe",
+        "sites": [0x1058C],
+        "targets": [("exe", 0x09F6F), ("exe", 0x0A124)],
+        "model": "TextRec FlushFunc field",
+        "evidence": "text-open initialization assigns exactly two constant flush methods",
+    },
+]
 
 
 # Named navigation landmarks already cited in this repository. A landmark may
@@ -1623,6 +1771,186 @@ def analyze_resident_image(
     }
 
 
+def attach_calculated_callees(
+    catalog_units: list[dict], resident_image: dict
+) -> list[dict]:
+    """Resolve the proven closed indirect-call sets into procedure edges."""
+    units_by_id = {unit["id"]: unit for unit in catalog_units}
+    roots_by_id = {
+        root["id"]: root
+        for unit in catalog_units
+        for root in unit["roots"]
+    }
+    roots_by_id.update({root["id"]: root for root in resident_image["roots"]})
+    result = []
+    decoded_site_ids = {
+        durable_id(
+            "site",
+            "ovr",
+            int(unit["ovr"]["code_offset"], 0) + int(transfer["at"], 0),
+        )
+        for unit in catalog_units
+        for transfer in unit["control_flow"]["unresolved_transfers"]
+    }
+    decoded_site_ids.update(
+        durable_id("site", "exe", int(transfer["at"], 0))
+        for transfer in resident_image["control_flow"]["unresolved_transfers"]
+    )
+    specified_site_ids = {
+        durable_id("site", specification["storage"], site)
+        for specification in CALCULATED_TRANSFERS
+        for site in specification["sites"]
+    }
+    if decoded_site_ids != specified_site_ids:
+        missing = sorted(decoded_site_ids - specified_site_ids)
+        extra = sorted(specified_site_ids - decoded_site_ids)
+        raise BREError(
+            f"calculated-transfer site set is stale; missing={missing}, extra={extra}"
+        )
+
+    def source_records(storage: str, absolute_site: int) -> list[tuple[str, dict, int]]:
+        if storage == "exe":
+            return [
+                ("resident_exe", root, absolute_site)
+                for root in resident_image["roots"]
+                if any(
+                    int(start, 0) <= absolute_site < int(end, 0)
+                    for start, end in root["body_ranges"]
+                )
+            ]
+        unit = next(
+            (
+                candidate
+                for candidate in catalog_units
+                if int(candidate["ovr"]["code_offset"], 0)
+                <= absolute_site
+                < int(candidate["ovr"]["fixup_offset"], 0)
+            ),
+            None,
+        )
+        if unit is None:
+            return []
+        base = int(unit["ovr"]["code_offset"], 0)
+        local_site = absolute_site - base
+        return [
+            (unit["id"], root, local_site)
+            for root in unit["roots"]
+            if any(
+                int(start, 0) <= local_site < int(end, 0)
+                for start, end in root["body_ranges"]
+            )
+        ]
+
+    for specification in CALCULATED_TRANSFERS:
+        dispatch_id = f"bre0988:dispatch:{specification['key']}"
+        targets = []
+        for storage, address in specification["targets"]:
+            target_id = durable_id("procedure", storage, address)
+            if target_id not in roots_by_id:
+                raise BREError(
+                    f"calculated transfer {dispatch_id}: target {target_id} is not a root"
+                )
+            target = roots_by_id[target_id]
+            targets.append(
+                {
+                    "id": target_id,
+                    "name": target["name"],
+                    "storage": storage,
+                    "address": (
+                        target["ovr_offset"]
+                        if storage == "ovr"
+                        else target["logical_address"]
+                    ),
+                }
+            )
+
+        uses: dict[tuple[str, str], dict] = {}
+        for absolute_site in specification["sites"]:
+            sources = source_records(specification["storage"], absolute_site)
+            if not sources:
+                raise BREError(
+                    f"calculated transfer {dispatch_id}: site {hx(absolute_site, 6)} has no owner"
+                )
+            for container, source, local_site in sources:
+                key = (container, source["id"])
+                use = uses.setdefault(
+                    key,
+                    {"container": container, "source": source, "sites": []},
+                )
+                use["sites"].append(local_site)
+
+        for use in uses.values():
+            sites = sorted(set(use["sites"]))
+            for target in targets:
+                use["source"]["callees"].append(
+                    {
+                        "kind": "calculated_call",
+                        "to": target["name"],
+                        "target_address": target["address"],
+                        "sites": [
+                            hx(site, 5) if use["container"] == "resident_exe" else hx(site)
+                            for site in sites
+                        ],
+                        "dispatch_id": dispatch_id,
+                    }
+                )
+
+        site_ids = [
+            durable_id("site", specification["storage"], site)
+            for site in specification["sites"]
+        ]
+        sources = []
+        for use in sorted(uses.values(), key=lambda item: item["source"]["id"]):
+            if use["container"] == "resident_exe":
+                source_site_ids = [
+                    durable_id("site", "exe", site)
+                    for site in sorted(set(use["sites"]))
+                ]
+            else:
+                base = int(units_by_id[use["container"]]["ovr"]["code_offset"], 0)
+                source_site_ids = [
+                    durable_id("site", "ovr", base + site)
+                    for site in sorted(set(use["sites"]))
+                ]
+            sources.append(
+                {
+                    "id": use["source"]["id"],
+                    "name": use["source"]["name"],
+                    "container": use["container"],
+                    "site_ids": source_site_ids,
+                }
+            )
+        result.append(
+            {
+                "id": dispatch_id,
+                "kind": "calculated_call",
+                "closed": True,
+                "model": specification["model"],
+                "site_ids": site_ids,
+                "sources": sources,
+                "targets": targets,
+                "evidence": specification["evidence"],
+            }
+        )
+
+    resolved_sites = specified_site_ids
+    for unit in catalog_units:
+        base = int(unit["ovr"]["code_offset"], 0)
+        unit["control_flow"]["unresolved_transfers"] = [
+            transfer
+            for transfer in unit["control_flow"]["unresolved_transfers"]
+            if durable_id("site", "ovr", base + int(transfer["at"], 0))
+            not in resolved_sites
+        ]
+    resident_image["control_flow"]["unresolved_transfers"] = [
+        transfer
+        for transfer in resident_image["control_flow"]["unresolved_transfers"]
+        if durable_id("site", "exe", int(transfer["at"], 0))
+        not in resolved_sites
+    ]
+    return result
+
+
 def attach_procedure_callers(catalog_units: list[dict], resident_image: dict) -> None:
     """Attach durable IDs to both directions of the procedure call graph."""
     procedures = []
@@ -1675,6 +2003,11 @@ def attach_procedure_callers(catalog_units: list[dict], resident_image: dict) ->
                     "kind": callee["kind"],
                     "sites": callee["sites"],
                     "site_ids": callee["site_ids"],
+                    **(
+                        {"dispatch_id": callee["dispatch_id"]}
+                        if "dispatch_id" in callee
+                        else {}
+                    ),
                 }
             )
     for _container, root in procedures:
@@ -1708,6 +2041,10 @@ def semantic_coverage(catalog_units: list[dict], resident_image: dict) -> dict:
 
 
 def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: bool):
+    pinned_release = (
+        hashlib.sha256(exe).hexdigest() == EXPECTED["exe"]["sha256"]
+        and hashlib.sha256(ovr).hexdigest() == EXPECTED["ovr"]["sha256"]
+    )
     descriptor_roots = {}
     for unit in units:
         for stub in unit.stubs:
@@ -2172,6 +2509,16 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                 "runtime trace normalized by the DOS load base",
             ),
         }
+        if pinned_release:
+            for address, (name, tags) in CALCULATED_RESIDENT_ROOTS.items():
+                resident_seeds.setdefault(
+                    address,
+                    (
+                        name,
+                        tags,
+                        "closed calculated-transfer target proven by complete static assignment tracing",
+                    ),
+                )
         for address, (name, tags) in RESIDENT_NAMES.items():
             semantic_evidence = RTL_SEMANTIC_EVIDENCE.get(address)
             resident_seeds[address] = (
@@ -2199,8 +2546,14 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             exe[mz.header_size :], mz, units, resident_seeds, descriptor_roots
         )
         resident = resident_image["roots"]
+        calculated_transfers = (
+            attach_calculated_callees(catalog_units, resident_image)
+            if pinned_release
+            else []
+        )
         attach_procedure_callers(catalog_units, resident_image)
     else:
+        calculated_transfers = []
         resident = [
             {
                 "name": name,
@@ -2218,7 +2571,7 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
     string_index.sort(key=lambda record: record["id"])
     catalog = {
         "format": "immortal-barons-bre-disassembly-map",
-        "format_version": 5,
+        "format_version": 6,
         "generator": f"scripts/bre-disasm.py {VERSION}",
         "release": {
             "name": "Barren Realms Elite 0.988",
@@ -2275,6 +2628,15 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                 for root in resident
                 for callee in root.get("callees", [])
             ),
+            "calculated_transfer_group_count": len(calculated_transfers),
+            "calculated_transfer_site_count": sum(
+                len(transfer["site_ids"])
+                for transfer in calculated_transfers
+            ),
+            "calculated_target_count": sum(
+                len(transfer["targets"])
+                for transfer in calculated_transfers
+            ),
             "ovr_payload_start": hx(8),
             "ovr_payload_end": hx(len(ovr), 6),
             "semantic_coverage": (
@@ -2286,6 +2648,7 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
         "resident_roots": resident,
         "landmarks": landmarks,
         "string_index": string_index,
+        "calculated_transfers": calculated_transfers,
         "units": catalog_units,
     }
     if resident_image:
@@ -2310,8 +2673,8 @@ def merged_spans(spans: list[tuple[int, int]], label: str) -> list[tuple[int, in
 
 
 def validate_catalog(catalog: dict) -> dict:
-    if catalog.get("format_version") != 5:
-        raise BREError("catalog format version is not 5")
+    if catalog.get("format_version") != 6:
+        raise BREError("catalog format version is not 6")
     names = {}
     ids = {}
 
@@ -2431,6 +2794,8 @@ def validate_catalog(catalog: dict) -> dict:
         validate_naming(unit["fixup_chunk"], unit["fixup_chunk"]["ovr_span"][0])
         if unit["control_flow"]["decode_conflicts"]:
             raise BREError(f"{unit_id}: decode-boundary conflicts remain")
+        if unit["control_flow"]["unresolved_transfers"]:
+            raise BREError(f"{unit_id}: unresolved transfers remain")
         overlay_blocks += len(unit["blocks"])
         overlay_data += len(unit["data_chunks"])
         overlay_roots += len(unit["roots"])
@@ -2502,6 +2867,8 @@ def validate_catalog(catalog: dict) -> dict:
         record_name(chunk["name"], f"exe:{chunk['load_span'][0]}")
     if resident["control_flow"]["decode_conflicts"]:
         raise BREError("resident decode-boundary conflicts remain")
+    if resident["control_flow"]["unresolved_transfers"]:
+        raise BREError("resident unresolved transfers remain")
 
     procedures_by_id = {
         root["id"]: root
@@ -2573,6 +2940,87 @@ def validate_catalog(catalog: dict) -> dict:
     if callee_edges != caller_edges:
         raise BREError("durable caller and callee edges are not reciprocal")
 
+    calculated_transfers = catalog.get("calculated_transfers", [])
+    calculated_site_ids = set()
+    calculated_target_count = 0
+    dispatch_ids = set()
+    expected_calculated_edges = set()
+    for transfer in calculated_transfers:
+        dispatch_id = transfer.get("id", "")
+        record_id(dispatch_id, dispatch_id)
+        if dispatch_id in dispatch_ids:
+            raise BREError(f"duplicate calculated transfer {dispatch_id}")
+        dispatch_ids.add(dispatch_id)
+        if transfer.get("kind") != "calculated_call" or not transfer.get("closed"):
+            raise BREError(f"calculated transfer {dispatch_id} is not closed")
+        if not transfer.get("site_ids") or not transfer.get("targets"):
+            raise BREError(f"calculated transfer {dispatch_id} is empty")
+        source_site_ids = set()
+        for source in transfer.get("sources", []):
+            source_id = source.get("id")
+            if source_id not in procedures_by_id:
+                raise BREError(
+                    f"calculated transfer {dispatch_id}: unknown source {source_id}"
+                )
+            if source.get("name") != procedures_by_id[source_id]["name"]:
+                raise BREError(
+                    f"calculated transfer {dispatch_id}: stale source name"
+                )
+            source_site_ids.update(source.get("site_ids", []))
+        for site_id in transfer["site_ids"]:
+            if not re.fullmatch(r"bre0988:(?:exe|ovr):site:[0-9a-f]+", site_id):
+                raise BREError(
+                    f"calculated transfer {dispatch_id}: malformed site {site_id}"
+                )
+            if site_id in calculated_site_ids:
+                raise BREError(f"calculated site {site_id} belongs to two groups")
+            calculated_site_ids.add(site_id)
+        for target in transfer["targets"]:
+            target_id = target.get("id")
+            if target_id not in procedures_by_id:
+                raise BREError(
+                    f"calculated transfer {dispatch_id}: unknown target {target_id}"
+                )
+            if target.get("name") != procedures_by_id[target_id]["name"]:
+                raise BREError(
+                    f"calculated transfer {dispatch_id}: stale target name"
+                )
+            calculated_target_count += 1
+            for source in transfer["sources"]:
+                expected_calculated_edges.add(
+                    (
+                        source["id"],
+                        target_id,
+                        dispatch_id,
+                        tuple(source["site_ids"]),
+                    )
+                )
+        if source_site_ids != set(transfer["site_ids"]):
+            raise BREError(
+                f"calculated transfer {dispatch_id}: source sites do not cover group"
+            )
+    graph_dispatch_ids = {
+        callee["dispatch_id"]
+        for root in procedures_by_id.values()
+        for callee in root["callees"]
+        if callee["kind"] == "calculated_call"
+    }
+    if graph_dispatch_ids != dispatch_ids:
+        raise BREError("calculated-transfer table and call graph do not agree")
+    actual_calculated_edges = {
+        (
+            root["id"],
+            callee["to_id"],
+            callee["dispatch_id"],
+            tuple(callee["site_ids"]),
+        )
+        for root in procedures_by_id.values()
+        for callee in root["callees"]
+        if callee["kind"] == "calculated_call"
+    }
+    if actual_calculated_edges != expected_calculated_edges:
+        raise BREError("calculated target memberships are absent or stale")
+
     blocks_by_id = {
         block["id"]: block
         for unit in catalog["units"]
@@ -2632,6 +3080,9 @@ def validate_catalog(catalog: dict) -> dict:
         "string_use_count": string_use_count,
         "call_edge_count": call_edge_count,
         "call_site_count": call_site_count,
+        "calculated_transfer_group_count": len(calculated_transfers),
+        "calculated_transfer_site_count": len(calculated_site_ids),
+        "calculated_target_count": calculated_target_count,
     }
     for key, value in expected_counts.items():
         if summary.get(key) != value:
@@ -2649,6 +3100,9 @@ def validate_catalog(catalog: dict) -> dict:
         "string_uses": string_use_count,
         "call_edges": call_edge_count,
         "call_sites": call_site_count,
+        "calculated_transfer_groups": len(calculated_transfers),
+        "calculated_transfer_sites": len(calculated_site_ids),
+        "calculated_targets": calculated_target_count,
     }
 
 
@@ -2719,7 +3173,11 @@ def command_check_catalog(args: argparse.Namespace) -> None:
 
 
 def catalog_records(catalog: dict, kind: str):
-    include = {kind} if kind != "all" else {"block", "data", "fixup"}
+    include = (
+        {kind}
+        if kind != "all"
+        else {"block", "data", "fixup", "dispatch"}
+    )
     for unit in catalog["units"]:
         if "procedure" in include:
             for root in unit["roots"]:
@@ -2824,6 +3282,27 @@ def catalog_records(catalog: dict, kind: str):
                 "evidence": chunk["classification"],
                 "naming": chunk["naming"],
             }
+    if "dispatch" in include:
+        for transfer in catalog.get("calculated_transfers", []):
+            yield {
+                "kind": "dispatch",
+                "id": transfer["id"],
+                "name": transfer["id"].removeprefix("bre0988:dispatch:"),
+                "address": transfer["site_ids"][0],
+                "container": "calculated_transfers",
+                "span": transfer["site_ids"],
+                "aliases": [],
+                "tags": ["calculated-transfer", "closed-target-set"],
+                "evidence": transfer["evidence"],
+                "naming": naming_metadata(
+                    "structural", "proven", transfer["evidence"]
+                ),
+                "closed": transfer["closed"],
+                "model": transfer["model"],
+                "site_ids": transfer["site_ids"],
+                "sources": transfer["sources"],
+                "targets": transfer["targets"],
+            }
 
 
 def list_rows(catalog: dict, pattern: str | None, kind: str, status: str | None):
@@ -2892,7 +3371,7 @@ def command_lookup(args: argparse.Namespace) -> None:
     needle = args.name.lower()
     matches = [
         record
-        for kind in ("procedure", "block", "data", "fixup")
+        for kind in ("procedure", "block", "data", "fixup", "dispatch")
         for record in catalog_records(catalog, kind)
         if needle == record["name"].lower()
         or needle == record.get("id", "").lower()
@@ -2910,7 +3389,7 @@ def command_lookup(args: argparse.Namespace) -> None:
 def command_find_string(args: argparse.Namespace) -> None:
     """Resolve a substring through the non-text catalog index and private binaries."""
     catalog = parse_catalog(args.catalog)
-    if catalog.get("format_version") != 5 or "string_index" not in catalog:
+    if catalog.get("format_version") != 6 or "string_index" not in catalog:
         raise BREError("catalog does not contain the durable string index")
     validate_catalog(catalog)
     _ep, _op, exe, ovr, mz, _units = load_release(args)
@@ -3288,7 +3767,7 @@ def build_parser() -> argparse.ArgumentParser:
     listing.add_argument("--filter")
     listing.add_argument(
         "--kind",
-        choices=("procedure", "block", "data", "fixup", "all"),
+        choices=("procedure", "block", "data", "fixup", "dispatch", "all"),
         default="procedure",
     )
     listing.add_argument(

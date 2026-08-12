@@ -228,32 +228,35 @@ class ParseTests(unittest.TestCase):
         if not catalog_path.exists():
             self.skipTest("generated catalog is not present")
         catalog = json.loads(catalog_path.read_text())
-        self.assertEqual(catalog["format_version"], 5)
+        self.assertEqual(catalog["format_version"], 6)
         self.assertEqual(catalog["summary"]["unit_count"], 103)
         self.assertEqual(catalog["summary"]["exported_root_count"], 414)
         self.assertEqual(catalog["summary"]["reachable_procedure_root_count"], 603)
         self.assertEqual(catalog["summary"]["basic_block_count"], 8495)
         self.assertEqual(catalog["summary"]["data_chunk_count"], 319)
-        self.assertEqual(catalog["summary"]["resident_procedure_root_count"], 356)
-        self.assertEqual(catalog["summary"]["resident_basic_block_count"], 2479)
-        self.assertEqual(catalog["summary"]["resident_data_chunk_count"], 236)
-        self.assertEqual(catalog["summary"]["referenced_string_count"], 2340)
-        self.assertEqual(catalog["summary"]["string_use_count"], 2554)
-        self.assertEqual(catalog["summary"]["call_edge_count"], 6374)
-        self.assertEqual(catalog["summary"]["call_site_count"], 19984)
+        self.assertEqual(catalog["summary"]["resident_procedure_root_count"], 389)
+        self.assertEqual(catalog["summary"]["resident_basic_block_count"], 2921)
+        self.assertEqual(catalog["summary"]["resident_data_chunk_count"], 231)
+        self.assertEqual(catalog["summary"]["referenced_string_count"], 2350)
+        self.assertEqual(catalog["summary"]["string_use_count"], 2571)
+        self.assertEqual(catalog["summary"]["call_edge_count"], 6541)
+        self.assertEqual(catalog["summary"]["call_site_count"], 20324)
+        self.assertEqual(catalog["summary"]["calculated_transfer_group_count"], 13)
+        self.assertEqual(catalog["summary"]["calculated_transfer_site_count"], 23)
+        self.assertEqual(catalog["summary"]["calculated_target_count"], 29)
         self.assertEqual(
             catalog["summary"]["semantic_coverage"],
             {
-                "procedures": {"identified": 386, "unclassified": 573},
+                "procedures": {"identified": 400, "unclassified": 592},
                 "blocks": {
-                    "contextual": 6763,
-                    "identified": 427,
-                    "unclassified": 3784,
+                    "contextual": 6862,
+                    "identified": 441,
+                    "unclassified": 4113,
                 },
                 "data_chunks": {
                     "identified": 282,
                     "structural": 103,
-                    "unclassified": 170,
+                    "unclassified": 165,
                 },
                 "fixup_chunks": {"structural": 103},
             },
@@ -275,30 +278,34 @@ class ParseTests(unittest.TestCase):
                 len(unit["control_flow"]["unresolved_transfers"])
                 for unit in catalog["units"]
             ),
-            11,
+            0,
         )
         self.assertEqual(
             len(catalog["resident_image"]["control_flow"]["unresolved_transfers"]),
-            11,
+            0,
         )
         self.assertEqual(
             bre.validate_catalog(catalog),
             {
-                "unique_names": 12231,
+                "unique_names": 12668,
                 "overlay_blocks": 8495,
                 "overlay_data_chunks": 319,
-                "resident_blocks": 2479,
-                "resident_data_chunks": 236,
-                "referenced_strings": 2340,
-                "string_uses": 2554,
-                "call_edges": 6374,
-                "call_sites": 19984,
+                "resident_blocks": 2921,
+                "resident_data_chunks": 231,
+                "referenced_strings": 2350,
+                "string_uses": 2571,
+                "call_edges": 6541,
+                "call_sites": 20324,
+                "calculated_transfer_groups": 13,
+                "calculated_transfer_sites": 23,
+                "calculated_targets": 29,
             },
         )
 
         procedures = [
             root for unit in catalog["units"] for root in unit["roots"]
         ] + catalog["resident_image"]["roots"]
+        procedure_ids = {root["id"] for root in procedures}
         by_name = {root["name"]: root for root in procedures}
         self.assertIn("run_bank", by_name)
         self.assertEqual(
@@ -315,6 +322,31 @@ class ParseTests(unittest.TestCase):
                 for caller in by_name["run_bank"]["callers"]
             )
         )
+        dispatches = catalog["calculated_transfers"]
+        self.assertEqual(len(dispatches), 13)
+        self.assertTrue(all(transfer["closed"] for transfer in dispatches))
+        self.assertEqual(
+            len(
+                {
+                    site_id
+                    for transfer in dispatches
+                    for site_id in transfer["site_ids"]
+                }
+            ),
+            23,
+        )
+        self.assertTrue(
+            all(
+                target["id"] in procedure_ids
+                for transfer in dispatches
+                for target in transfer["targets"]
+            )
+        )
+        dispatch_records = list(bre.catalog_records(catalog, "dispatch"))
+        self.assertEqual(len(dispatch_records), 13)
+        self.assertTrue(all(record["sources"] for record in dispatch_records))
+        self.assertTrue(all(record["targets"] for record in dispatch_records))
+        self.assertIn("scan_text_real48", by_name)
         self.assertTrue(
             all(
                 callee["to_id"].startswith("bre0988:")
@@ -350,7 +382,6 @@ class ParseTests(unittest.TestCase):
             ]["status"],
             "identified",
         )
-        procedure_ids = {root["id"] for root in procedures}
         block_ids = {block["id"] for block in blocks}
         self.assertTrue(catalog["string_index"])
         self.assertTrue(

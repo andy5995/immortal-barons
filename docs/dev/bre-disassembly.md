@@ -24,6 +24,7 @@ python3 scripts/bre-disasm.py verify --directory /path/to/bre
 python3 scripts/bre-disasm.py list --kind procedure --filter pirate
 python3 scripts/bre-disasm.py list --kind block --filter pirate
 python3 scripts/bre-disasm.py list --kind data --filter message
+python3 scripts/bre-disasm.py list --kind dispatch
 python3 scripts/bre-disasm.py lookup crown_tax
 
 # Find all functions and blocks referring to a Pascal string containing text.
@@ -222,7 +223,8 @@ The catalog therefore records:
 - the union of root-reachable instruction ranges for each unit;
 - a named partition of every complementary unreached range and every overlay
   fixup stream;
-- grouped far-call/overlay-call edges and every unresolved indirect transfer;
+- grouped direct and calculated call edges, including the complete closed target
+  set and assignment evidence for every reachable indirect transfer;
 - caller and callee lists, exact body ranges, and code-segment data references
   for every procedure, plus the inverse `referenced_by` relation on data;
 - a bidirectional procedure call graph whose caller, callee, and instruction
@@ -234,22 +236,20 @@ The catalog therefore records:
 Ranges use half-open bounds: `[start, end)`. They are intentionally not broad
 "from this prologue to the next prologue" envelopes. The current catalog has
 603 overlay procedure roots, 8,495 overlay basic blocks, 319 overlay data/code
-chunks, 356 resident procedure roots, 2,479 resident basic blocks, 236 resident
+chunks, 389 resident procedure roots, 2,921 resident basic blocks, 231 resident
 data/code chunks, and 103 named fixup streams containing 16,672 fixups. Its
-12,231 stable location names are unique. It indexes 2,340 directly referenced
-Pascal strings and 2,554 block-use records without retaining their text. The
-naming pass identifies 386 of the
-959 proven procedures and ties 282 of 555 complementary chunks to identified
-behavior. Of the basic blocks, 6,763 targets have procedure-context names and
-427 entries have behavior-specific names. The remaining 573 procedures and 170
+12,668 stable location names are unique. It indexes 2,350 directly referenced
+Pascal strings and 2,571 block-use records without retaining their text. The
+naming pass identifies 400 of the
+992 proven procedures and ties 282 of 550 complementary chunks to identified
+behavior. Of the basic blocks, 6,862 targets have procedure-context names and
+441 entries have behavior-specific names. The remaining 592 procedures and 165
 non-structural chunks are explicitly unclassified rather than being given
-speculative names. The procedure graph contains 6,374 grouped outgoing edges at
-19,984 call sites. All 6,356 direct edges resolve bidirectionally by durable ID;
-the remaining 18 are genuinely indirect calls without a target address. There
-are 11 unresolved indirect transfers in the overlays, 11 in the resident image,
-and zero decode-boundary conflicts.
-Consumers must not infer code behind an unresolved transfer without another
-static root or runtime evidence.
+speculative names. The procedure graph contains 6,541 grouped outgoing edges at
+20,324 call sites. All edges resolve bidirectionally by durable ID. Recursive
+target discovery reaches a fixed point with 13 closed calculated-transfer
+groups, 23 indirect call sites, 29 group-to-target memberships, zero unresolved
+transfers, and zero decode-boundary conflicts.
 
 `check-catalog` independently verifies that named block spans exactly cover all
 reachable bytes, named chunks exactly cover all remaining bytes, together they
@@ -259,7 +259,7 @@ summary counts agree. It also verifies that every durable ID matches its file
 address and that every indexed string use resolves to known block and procedure
 IDs. Known call edges must appear identically in the caller and callee directions,
 and call-site IDs are recomputed from their containing binary addresses.
-`list --kind procedure|block|data|fixup|all` emits TSV, Markdown, or JSON,
+`list --kind procedure|block|data|fixup|dispatch|all` emits TSV, Markdown, or JSON,
 and `--status identified|contextual|structural|unclassified` selects a naming
 state. `lookup NAME_OR_ID` returns the matching records, evidence, call graph,
 and data references for a stable name, semantic alias, or durable ID (a
@@ -270,8 +270,26 @@ Every procedure record is directly walkable as a graph node. Follow
 walk back to its callers; pass either ID to `lookup` to load the next node.
 Each grouped edge retains its kind and local `sites`, while `site_ids` identify
 the exact instructions as canonical EXE load offsets or OVR file offsets.
-Indirect calls have `to_id: null` because the static analysis has no target to
-invent.
+An indirect edge has kind `calculated_call` and a `dispatch_id` linking it to
+the closed-set proof described below.
+
+## Closed calculated transfers
+
+`calculated_transfers` records why every reachable indirect call is finite.
+Each durable dispatch record contains its exact instruction `site_ids`, source
+model, complete procedure target list, and concise assignment-tracing evidence.
+The models found in this linked release are far procedure parameters, fixed
+global procedure slots, a heap-linked callback list with a sole constructor,
+Turbo Pascal `TextRec` method fields, and a near scanner callback passed in AX.
+There are no reachable indirect jumps and no open-ended indirect calls.
+
+Target discovery is recursive. The original 22 indirect sites supplied roots
+for callback-only code; decoding those roots exposed one further indirect call
+inside the text driver. Resolving that site exposed no more, establishing the
+23-site fixed point. `check-catalog` requires every calculated target to be a
+procedure root, every dispatch to appear in the bidirectional call graph, every
+site to belong to exactly one group, and both unresolved-transfer lists to be
+empty.
 
 `find-string SUBSTRING` is the bridge from private binary text to the static
 map. It loads the committed table first, verifies the exact BRE 0.988 binaries,
@@ -290,6 +308,7 @@ python3 scripts/bre-disasm.py list --kind procedure --status identified
 python3 scripts/bre-disasm.py list --kind procedure --status unclassified
 python3 scripts/bre-disasm.py lookup resolve_received_trade_offer
 python3 scripts/bre-disasm.py lookup bre0988:ovr:procedure:0389d6
+python3 scripts/bre-disasm.py lookup bre0988:dispatch:text_scanners
 python3 scripts/bre-disasm.py find-string --directory /path/to/bre "trade"
 ```
 
