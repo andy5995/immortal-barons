@@ -196,11 +196,11 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(
             catalog["summary"]["semantic_coverage"],
             {
-                "procedures": {"identified": 344, "unclassified": 615},
+                "procedures": {"identified": 386, "unclassified": 573},
                 "blocks": {
-                    "contextual": 6689,
-                    "identified": 348,
-                    "unclassified": 3937,
+                    "contextual": 6763,
+                    "identified": 427,
+                    "unclassified": 3784,
                 },
                 "data_chunks": {
                     "identified": 282,
@@ -236,7 +236,7 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(
             bre.validate_catalog(catalog),
             {
-                "unique_names": 12205,
+                "unique_names": 12231,
                 "overlay_blocks": 8495,
                 "overlay_data_chunks": 319,
                 "resident_blocks": 2479,
@@ -261,6 +261,27 @@ class ParseTests(unittest.TestCase):
                 for caller in root["callers"]
             },
         )
+
+        blocks = [
+            block for unit in catalog["units"] for block in unit["blocks"]
+        ] + catalog["resident_image"]["blocks"]
+        blocks_by_name = {block["name"]: block for block in blocks}
+        self.assertIn(
+            "allocate_turn_budget__armed_forces_maintenance",
+            blocks_by_name,
+        )
+        self.assertIn(
+            "run_player_turn__dispatch_resume_stage",
+            blocks_by_name,
+        )
+        self.assertEqual(
+            blocks_by_name["allocate_turn_budget__armed_forces_maintenance"][
+                "naming"
+            ]["status"],
+            "identified",
+        )
+        self.assertIn("calculate_crown_tax", by_name)
+        self.assertIn("region_cost", by_name["calculate_crown_tax"]["aliases"])
 
 
 if __name__ == "__main__":

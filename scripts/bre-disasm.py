@@ -66,6 +66,8 @@ SEMANTIC_NAMES = load_semantic_names()
 
 # These are stable public-analysis names, not symbols recovered from BRE.
 RESIDENT_NAMES = {
+    (0x0FD0, 0x028A): ("get_mem", ["rtl", "heap"]),
+    (0x0FD0, 0x029F): ("free_mem", ["rtl", "heap"]),
     (0x0FD0, 0x04ED): ("get_io_result", ["rtl", "io"]),
     (0x0FD0, 0x04F4): ("check_io_result", ["rtl", "io", "error-check"]),
     (0x0FD0, 0x0530): ("check_stack_space", ["rtl", "stack", "error-check"]),
@@ -83,6 +85,16 @@ RESIDENT_NAMES = {
     (0x0FD0, 0x0990): ("text_read_i32", ["rtl", "text-io", "integer"]),
     (0x0FD0, 0x09EC): ("text_write_i32", ["rtl", "text-io", "integer"]),
     (0x0FD0, 0x0A20): ("text_read_real48", ["rtl", "text-io", "real48"]),
+    (0x0FD0, 0x0B14): ("assign_file", ["rtl", "file-io"]),
+    (0x0FD0, 0x0B4F): ("reset_file", ["rtl", "file-io"]),
+    (0x0FD0, 0x0B58): ("rewrite_file", ["rtl", "file-io"]),
+    (0x0FD0, 0x0BD0): ("close_file", ["rtl", "file-io"]),
+    (0x0FD0, 0x0C04): ("read_file_record", ["rtl", "file-io"]),
+    (0x0FD0, 0x0C3A): ("block_read", ["rtl", "file-io"]),
+    (0x0FD0, 0x0C41): ("block_write", ["rtl", "file-io"]),
+    (0x0FD0, 0x0CA2): ("seek_file", ["rtl", "file-io"]),
+    (0x0FD0, 0x0CD2): ("erase_file", ["rtl", "file-io"]),
+    (0x0FD0, 0x0E60): ("make_directory", ["rtl", "file-io"]),
     (0x0C03, 0x0ED0): ("random_u16", ["rng"]),
     (0x0C03, 0x0F10): ("add_i32_indirect", ["integer", "rtl"]),
     (0x0FD0, 0x0ECC): ("mul_i32", ["integer", "rtl"]),
@@ -98,6 +110,12 @@ RESIDENT_NAMES = {
     (0x0FD0, 0x1111): ("shortstring_from_char", ["shortstring", "rtl"]),
     (0x0FD0, 0x113E): ("shortstring_insert", ["shortstring", "rtl"]),
     (0x0FD0, 0x119D): ("shortstring_delete", ["shortstring", "rtl"]),
+    (0x0FD0, 0x1841): ("real_sqrt", ["real48", "rtl"]),
+    (0x0FD0, 0x1C27): ("random_bounded_u16", ["rng", "rtl"]),
+    (0x0FD0, 0x1C44): ("random_real", ["rng", "real48", "rtl"]),
+    (0x0FD0, 0x20F3): ("format_i32_width", ["integer", "shortstring", "rtl"]),
+    (0x0FD0, 0x2186): ("file_size_records", ["rtl", "file-io"]),
+    (0x0FD0, 0x221F): ("fill_char", ["rtl", "memory"]),
     (0x0FD0, 0x0116): ("runtime_halt", ["rtl", "non-returning"]),
     (0x0FD0, 0x1768): ("real_add", ["real48", "rtl"]),
     (0x0FD0, 0x176E): ("real_subtract", ["real48", "rtl"]),
@@ -123,6 +141,8 @@ RTL_SEMANTIC_EVIDENCE = {
         "Turbo Pascal System unit runtime entry corroborated by instruction behavior",
     )
     for address in {
+        (0x0FD0, 0x028A),
+        (0x0FD0, 0x029F),
         (0x0FD0, 0x04ED),
         (0x0FD0, 0x04F4),
         (0x0FD0, 0x0530),
@@ -140,6 +160,16 @@ RTL_SEMANTIC_EVIDENCE = {
         (0x0FD0, 0x0990),
         (0x0FD0, 0x09EC),
         (0x0FD0, 0x0A20),
+        (0x0FD0, 0x0B14),
+        (0x0FD0, 0x0B4F),
+        (0x0FD0, 0x0B58),
+        (0x0FD0, 0x0BD0),
+        (0x0FD0, 0x0C04),
+        (0x0FD0, 0x0C3A),
+        (0x0FD0, 0x0C41),
+        (0x0FD0, 0x0CA2),
+        (0x0FD0, 0x0CD2),
+        (0x0FD0, 0x0E60),
         (0x0FD0, 0x0FAF),
         (0x0FD0, 0x0FD2),
         (0x0FD0, 0x0FF5),
@@ -151,6 +181,12 @@ RTL_SEMANTIC_EVIDENCE = {
         (0x0FD0, 0x1111),
         (0x0FD0, 0x113E),
         (0x0FD0, 0x119D),
+        (0x0FD0, 0x1841),
+        (0x0FD0, 0x1C27),
+        (0x0FD0, 0x1C44),
+        (0x0FD0, 0x20F3),
+        (0x0FD0, 0x2186),
+        (0x0FD0, 0x221F),
     }
 }
 
@@ -172,7 +208,7 @@ LANDMARKS = {
     0x1F94C: ("interbbs_message_reader_strings", ["messages", "interbbs"]),
     0x23425: ("planetary_diplomacy", ["diplomacy", "interbbs"]),
     0x277A0: ("special_operation_funding", ["covert", "cost"]),
-    0x2EA09: ("region_cost", ["regions", "economy"]),
+    0x2EA09: ("calculate_crown_tax", ["queen", "tax", "economy"]),
     0x2F4C4: ("popular_support_boost", ["support", "economy"]),
     0x2F740: ("popular_support_boost_scaling", ["support", "economy"]),
     0x2FAF1: ("crown_tax", ["queen", "tax"]),
@@ -234,6 +270,12 @@ def annotation_naming(annotation: dict) -> dict:
         annotation["confidence"],
         "; ".join(annotation["evidence"]),
     )
+
+
+def annotation_aliases(annotation: dict | None) -> set[str]:
+    if not annotation:
+        return set()
+    return set(annotation.get("aliases", []))
 
 
 def sha256(path: Path) -> str:
@@ -1155,6 +1197,7 @@ def analyze_resident_image(
                 if item[0] != name
             }
             | ({fallback_name} if fallback_name != name else set())
+            | annotation_aliases(annotation)
         )
         root_names[linear] = name
         roots.append(
@@ -1223,6 +1266,9 @@ def analyze_resident_image(
         segment, offset = addresses[0]
         fallback_name = f"exe_{segment:04x}_loc_{offset:04x}"
         root = roots_by_linear.get(start)
+        block_annotation = semantic_annotation(
+            "blocks", f"{segment:04x}:{offset:04x}"
+        )
         semantic_owners = [
             candidate
             for entry, candidate in roots_by_linear.items()
@@ -1232,6 +1278,9 @@ def analyze_resident_image(
         if root:
             name = root["name"]
             block_naming = dict(root["naming"])
+        elif block_annotation:
+            name = block_annotation["name"]
+            block_naming = annotation_naming(block_annotation)
         elif len(semantic_owners) == 1:
             owner = semantic_owners[0]
             is_loop_head = any(
@@ -1277,9 +1326,10 @@ def analyze_resident_image(
                 "aliases": (
                     list(root.get("aliases", []))
                     if root
-                    else [fallback_name]
-                    if name != fallback_name
-                    else []
+                    else sorted(
+                        ({fallback_name} if name != fallback_name else set())
+                        | annotation_aliases(block_annotation)
+                    )
                 ),
                 "load_span": [hx(start, 5), hx(block_spans[start], 5)],
                 "exe_span": [
@@ -1536,7 +1586,10 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             )
             name = root_name(unit, stub.entry_offset)
             fallback_name = f"{unit.unit_id}_entry_{stub.entry_offset:04x}"
-            aliases = [fallback_name] if name != fallback_name else []
+            aliases = sorted(
+                ({fallback_name} if name != fallback_name else set())
+                | annotation_aliases(annotation)
+            )
             tags = ["overlay", "exported"]
             if absolute in LANDMARKS:
                 tags.extend(LANDMARKS[absolute][1])
@@ -1633,7 +1686,10 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                         "entry_span": [hx(entry), hx(block_details[entry]["end"])],
                         "ovr_offset": hx(absolute, 6),
                         "stub": None,
-                        "aliases": [fallback_name] if name != fallback_name else [],
+                        "aliases": sorted(
+                            ({fallback_name} if name != fallback_name else set())
+                            | annotation_aliases(annotation)
+                        ),
                         "tags": sorted(set(["overlay", "near-call-target", *semantic_tags])),
                         "confidence": "proven",
                         "evidence": "direct near call from exported-root-reachable code",
@@ -1697,6 +1753,9 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                 root = roots_by_entry.get(start)
                 absolute = unit.ovr_offset + start
                 landmark = LANDMARKS.get(absolute)
+                block_annotation = semantic_annotation(
+                    "blocks", hx(absolute, 6)
+                )
                 semantic_owners = [
                     candidate
                     for entry, candidate in roots_by_entry.items()
@@ -1706,6 +1765,9 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                 if root:
                     name = root["name"]
                     block_naming = dict(root["naming"])
+                elif block_annotation:
+                    name = block_annotation["name"]
+                    block_naming = annotation_naming(block_annotation)
                 elif landmark:
                     name = landmark[0]
                     block_naming = naming_metadata(
@@ -1760,9 +1822,10 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                         "aliases": (
                             list(root.get("aliases", []))
                             if root
-                            else [block_fallback]
-                            if name != block_fallback
-                            else []
+                            else sorted(
+                                ({block_fallback} if name != block_fallback else set())
+                                | annotation_aliases(block_annotation)
+                            )
                         ),
                         "naming": (
                             dict(root["naming"])

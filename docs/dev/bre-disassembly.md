@@ -157,11 +157,12 @@ procedure roots and receive:
 ovr_<six-digit-unit-file-offset>_proc_<four-digit-entry>
 ```
 
-Known routines get a semantic primary name such as `run_bank`,
-`resolve_received_trade_offer`, or `text_read_shortstring`; their old address
-name remains an alias. Curated names live in
-`scripts/bre-semantic-names.json`, separate from the reachability engine. Each
-record carries one of four honest naming states:
+Known routines and internal jump targets get semantic primary names such as
+`run_bank`, `calculate_crown_tax`,
+`allocate_turn_budget__armed_forces_maintenance`, or
+`text_read_shortstring`; their old address name remains an alias. Curated names
+live in `scripts/bre-semantic-names.json`, separate from the reachability
+engine. Each record carries one of four honest naming states:
 
 - `identified`: behavior is supported by call-graph, owned-data, instruction,
   public RTL, or existing repository evidence;
@@ -228,12 +229,13 @@ Ranges use half-open bounds: `[start, end)`. They are intentionally not broad
 603 overlay procedure roots, 8,495 overlay basic blocks, 319 overlay data/code
 chunks, 356 resident procedure roots, 2,479 resident basic blocks, 236 resident
 data/code chunks, and 103 named fixup streams containing 16,672 fixups. Its
-12,205 stable location names are unique. The naming pass identifies 344 of the
+12,231 stable location names are unique. The naming pass identifies 386 of the
 959 proven procedures and ties 282 of 555 complementary chunks to identified
-behavior; 6,689 internal targets have procedure-context names. The remaining
-615 procedures and 170 non-structural chunks are explicitly unclassified
-rather than being given speculative names. There are 11 unresolved indirect calls
-in the overlays, 11 in the resident image, and zero decode-boundary conflicts.
+behavior. Of the basic blocks, 6,763 targets have procedure-context names and
+427 entries have behavior-specific names. The remaining 573 procedures and 170
+non-structural chunks are explicitly unclassified rather than being given
+speculative names. There are 11 unresolved indirect calls in the overlays, 11
+in the resident image, and zero decode-boundary conflicts.
 Consumers must not infer code behind an unresolved transfer without another
 static root or runtime evidence.
 

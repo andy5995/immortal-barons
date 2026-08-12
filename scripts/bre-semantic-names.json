@@ -11,6 +11,9 @@
     },
     "call_graph": {
       "description": "Direct near/far caller and callee relationships from the pinned BRE 0.988 binaries"
+    },
+    "repository_docs": {
+      "description": "Mechanics, screen, save-layout, and Inter-BBS behavior documented in this repository and cross-checked against instruction and call-site behavior"
     }
   },
   "overlay_procedures": {
@@ -1433,6 +1436,92 @@
       "name": "select_bios_console_io",
       "confidence": "high",
       "evidence": ["binary_strings: BIOS console setting topic", "call_graph: executable-entry initialization path"]
+    },
+    "0x02e6b2": {
+      "name": "calculate_military_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: maintenance flow separately charges armed-forces upkeep using the documented per-unit table and technology reduction", "instruction_behavior: sums home and market-escrow unit counts with six Real48 maintenance weights, applies the configured maintenance level and cap", "call_graph: first required-cost helper in allocate_turn_budget"]
+    },
+    "0x02e8f4": {
+      "name": "calculate_region_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: region upkeep is a flat per-region charge modified by maintenance level and technology", "instruction_behavior: multiplies total_regions by the documented 913 rate, divides by the maintenance technology factor, applies the configured level and cap", "call_graph: helper immediately preceding the region-maintenance prompt"]
+    },
+    "0x02ea09": {
+      "name": "calculate_crown_tax",
+      "aliases": ["region_cost"],
+      "confidence": "high",
+      "evidence": ["repository_docs: crownTax is turn gold income times the configured Planetary Tax Rate divided by 1000", "instruction_behavior: reads empire +0x72 and config +0x42, performs that Real48 multiply/divide, then truncates", "call_graph: called immediately before the Queen Royale tax prompt; corrects the older region_cost landmark"]
+    },
+    "0x02ea63": {
+      "name": "calculate_sdi_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: SDI maintenance is the conditional cost after region maintenance and benefits from technology", "instruction_behavior: reads the SDI field at empire +0x33f, applies the SDI technology factor and a fixed Real48 divisor", "call_graph: called on both the displayed and automatic SDI-payment paths"]
+    },
+    "0x02eb0a": {
+      "name": "choose_waste_regions_to_decontaminate",
+      "confidence": "high",
+      "evidence": ["repository_docs: waste-region decontamination is the conditional payment stage after SDI", "instruction_behavior: reads the ninth region count at empire +0xb6, derives a bounded random count, and returns an int32", "call_graph: used only by the decontamination stage"]
+    },
+    "0x02eb63": {
+      "name": "calculate_waste_decontamination_cost",
+      "confidence": "high",
+      "evidence": ["repository_docs: the maintenance sequence quotes a gold cost for reviving waste regions", "instruction_behavior: combines the selected waste count, a region-cost helper, and a technology divisor into one rounded and capped amount", "call_graph: called on both the quote and payment paths beside choose_waste_regions_to_decontaminate"]
+    },
+    "0x033b64": {
+      "name": "calculate_agricultural_food_yield",
+      "confidence": "high",
+      "evidence": ["repository_docs: agricultural regions grow 300 food each before the food-production technology factor", "instruction_behavior: applies technology slot 0 and a 300-scale Real48 constant; callers then multiply by Agricultural count at empire +0x9e", "call_graph: shared by the civilian advisor and per-turn economic production"]
+    },
+    "0x033ba6": {
+      "name": "calculate_river_food_yield",
+      "confidence": "high",
+      "evidence": ["repository_docs: rivers contribute a separate food yield beside agricultural production", "instruction_behavior: applies the same food-production technology factor with the river food constant; callers multiply by River count at empire +0x9a", "call_graph: shared by the civilian advisor and per-turn economic production"]
+    },
+    "0x043b9d": {
+      "name": "lookup_packet_type_code",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE's Inter-BBS transport carries typed packet payloads", "instruction_behavior: compares an input ShortString against all 26 fixed packet-type records and returns the matching one-based code or zero", "call_graph: shared by every identified packet writer and result-record producer"]
+    },
+    "0x035cd6": {
+      "name": "format_pirate_faction_name",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE selects one of several named and colored pirate factions for a raid", "instruction_behavior: indexes parallel pirate color and fixed-width name tables, wraps the name in ANSI color sequences, and returns a ShortString", "call_graph: shared by pirate launch and resolution paths"]
+    },
+    "0x03f7a4": {
+      "name": "initialize_attack_record",
+      "confidence": "high",
+      "evidence": ["repository_docs: Inter-BBS attacks are persisted as fixed records before dispatch", "instruction_behavior: clears the complete 0x36b-byte attack record and initializes its trailing generated identifier/check value", "call_graph: called by group-attack creation and the Inter-BBS attack menu"]
+    },
+    "0x042589": {
+      "name": "validate_attack_record",
+      "confidence": "high",
+      "evidence": ["repository_docs: outgoing Inter-BBS attacks are validated before packet creation", "instruction_behavior: copies the full 0x36b-byte attack record, recomputes its check value, and dispatches validation result code 4", "call_graph: shared by run_interbbs_attack_menu and validate_outbound_attack_file"]
+    },
+    "0x046aed": {
+      "name": "reset_packet_compression_stats",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE compresses outbound and decompresses inbound packet payloads while reporting old/new sizes", "instruction_behavior: clears the four words consumed by adjacent compression reporting routines", "call_graph: called before outbound construction and inbound validation"]
+    },
+    "0x049fd7": {
+      "name": "write_bombing_packet",
+      "confidence": "high",
+      "evidence": ["repository_docs: bombing operations are typed Inter-BBS payloads", "instruction_behavior: copies a ten-byte bombing record, resolves the caller-supplied packet-type string, and sends both through write_interbbs_packet_file", "call_graph: shared by outgoing bombing checks and received-bombing result handling"]
+    },
+    "0x04fd0c": {
+      "name": "initialize_recon_update_record",
+      "confidence": "medium",
+      "evidence": ["repository_docs: BRE exchanges per-planet reconnaissance updates during planetary maintenance", "instruction_behavior: clears the full recon record then populates it for the selected planet through the adjacent recon-data helper", "call_graph: shared by build_recon_update_packet and write_recon_update_packet"]
+    },
+    "0x050dfb": {
+      "name": "clear_trade_offer_record",
+      "confidence": "high",
+      "evidence": ["repository_docs: trade offers are constructed and later processed as persistent records", "instruction_behavior: clears exactly one 0x97-byte trade-offer record", "call_graph: shared by create_trade_offer and process_trade_offer"]
+    },
+    "0x051738": {
+      "name": "format_planetary_relation",
+      "confidence": "high",
+      "evidence": ["repository_docs: planetary diplomacy displays a four-state relation value with status-specific color", "instruction_behavior: accepts relation values -1..2, indexes parallel label/color tables, appends the requested suffix color, and returns an empty string outside the enum", "call_graph: shared by planetary target selection, diplomacy help, and treaty display"]
     }
   },
   "overlay_data": {},
@@ -1456,7 +1545,245 @@
       "name": "run_player_turn",
       "confidence": "high",
       "evidence": ["call_graph: called from run_door_session and dispatches all interactive gameplay menus", "binary_strings: owned resident table contains turn-level player prompts"]
+    },
+    "0549:0064": {
+      "name": "write_interbbs_packet_file",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE writes typed binary Inter-BBS payload files for external transport", "instruction_behavior: selects a destination-node record, creates the output file, stores packet header fields, writes the header and caller-supplied payload, then closes it", "call_graph: common sink for every identified packet writer"]
+    },
+    "0851:00bf": {
+      "name": "draw_horizontal_rule",
+      "confidence": "high",
+      "evidence": ["repository_docs: captured BRE screens use width-specific CP437 horizontal rules", "instruction_behavior: sets a caller-supplied color, emits CP437 horizontal rule characters to the requested width, then restores the normal color", "call_graph: shared by menus, reports, advisors, messages, and status screens"]
+    },
+    "0980:012d": {
+      "name": "set_output_color",
+      "confidence": "high",
+      "evidence": ["repository_docs: screen captures document BRE color changes and ANSI output", "instruction_behavior: obtains the ANSI sequence for a numeric color, writes it to the active text output, and flushes the text runtime", "call_graph: ubiquitous display helper"]
+    },
+    "0980:01ca": {
+      "name": "format_ansi_color_sequence",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE screens use numeric DOS/ANSI color attributes", "instruction_behavior: when ANSI output is enabled, translates a color number into a ShortString sequence; otherwise returns an empty string", "call_graph: called by all styled display formatters"]
+    },
+    "0dc9:00f7": {
+      "name": "i32_to_shortstring",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: converts a signed DX:AX value through the Turbo Pascal numeric formatter and stores the result as a bounded ShortString", "call_graph: used wherever numbers are concatenated into filenames, reports, packet messages, and configuration text"]
+    },
+    "0c03:0bfb": {
+      "name": "crc32_buffer",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: initializes a 32-bit accumulator to all ones, shifts it eight bits per byte, and XORs through a 256-entry 32-bit table", "call_graph: used to initialize and validate attack, packet, and game-data records"]
+    },
+    "0c03:0ed0": {
+      "name": "random_bounded_i32",
+      "aliases": ["random_u16"],
+      "confidence": "high",
+      "evidence": ["repository_docs: runtime helper map identifies this address as Random(n)", "instruction_behavior: converts the signed 32-bit bound to Real48, multiplies it by the runtime random fraction, and truncates back to int32"]
+    },
+    "0c03:129b": {
+      "name": "max_i32",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: signed-compares two DX:AX arguments and returns the greater int32", "call_graph: used for economy, attack, and decontamination lower bounds"]
+    },
+    "0c03:12e1": {
+      "name": "min_i32",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: signed-compares two DX:AX arguments and returns the lesser int32", "call_graph: used for maintenance, economy, combat, trade, and spoil caps"]
     }
   },
-  "blocks": {}
+  "blocks": {
+    "0x00c313": {
+      "name": "resolve_civil_unrest__scale_deployed_forces_after_losses",
+      "confidence": "high",
+      "evidence": ["repository_docs: deployed market/attack units remain in the empire's parallel force array and are scaled down with losses", "instruction_behavior: block contains the documented loss scaling at OVR 0x00c358"]
+    },
+    "0x00d00b": {
+      "name": "process_end_of_turn__advance_headquarters_construction",
+      "confidence": "high",
+      "evidence": ["repository_docs: HeadQuarters advances five points per turn in the range 1..99 and clamps at 100", "instruction_behavior: block contains the documented update at OVR 0x00d010"]
+    },
+    "0x00efc8": {
+      "name": "resolve_regular_attack__calculate_force_strengths",
+      "confidence": "high",
+      "evidence": ["repository_docs: regular attack builds separate attacker and defender strengths from troop, jet/turret, tank, HQ, morale, technology, and alliance terms", "instruction_behavior: block contains the documented strength calculation beginning near OVR 0x00f130"]
+    },
+    "0x00f57c": {
+      "name": "resolve_regular_attack__add_allied_defenders",
+      "confidence": "high",
+      "evidence": ["repository_docs: Full Defense allies contribute thirty percent at their own morale curve", "instruction_behavior: block contains the documented allied-defense calculation at OVR 0x00f5d7"]
+    },
+    "0x00ff8c": {
+      "name": "resolve_regular_attack__damage_defender_headquarters",
+      "confidence": "high",
+      "evidence": ["repository_docs: a lost defense removes Random(3)+5 HeadQuarters points and clamps at zero", "instruction_behavior: block contains the documented subtraction at OVR 0x00ffa2"]
+    },
+    "0x01012b": {
+      "name": "resolve_regular_attack__transfer_defeated_military",
+      "confidence": "high",
+      "evidence": ["repository_docs: total victory transfers all six military unit types", "instruction_behavior: block contains the documented transfer sequence at OVR 0x0101e4..0x010294"]
+    },
+    "0x012862": {
+      "name": "market_price_walk__update_headquarters_price",
+      "confidence": "high",
+      "evidence": ["repository_docs: HeadQuarters price uses lifetime turns, a random 300-wide band, and an upper cap", "instruction_behavior: block contains the documented formula and turn-counter read at OVR 0x0128ba..0x01293e"]
+    },
+    "0x012c62": {
+      "name": "purchase_regions__start_headquarters_construction",
+      "confidence": "high",
+      "evidence": ["repository_docs: buying a HeadQuarters initializes completion to five percent", "instruction_behavior: block contains the documented store at OVR 0x012c8c"]
+    },
+    "0x012d26": {
+      "name": "purchase_regions__enforce_land_allowance",
+      "confidence": "high",
+      "evidence": ["repository_docs: land purchases are bounded by the per-empire allowance at record +0x331", "instruction_behavior: block contains the documented bound at OVR 0x012d30"]
+    },
+    "0x012edd": {
+      "name": "purchase_regions__debit_land_allowance",
+      "confidence": "high",
+      "evidence": ["repository_docs: each purchase subtracts its region count from the per-empire allowance", "instruction_behavior: block contains the documented subtract-through-pointer at OVR 0x012ef9"]
+    },
+    "0x01793c": {
+      "name": "run_covert_operations_menu__commit_agent",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE debits one covert agent before resolving the selected operation", "instruction_behavior: block contains the documented agent decrement at OVR 0x017957"]
+    },
+    "0x02eeca": {
+      "name": "allocate_turn_budget__restart_payment_sequence",
+      "confidence": "high",
+      "evidence": ["repository_docs: choosing to reconsider restarts the complete maintenance sequence at the bank prompt", "instruction_behavior: loop head dominates every payment stage and is the backward reconsider target"]
+    },
+    "0x02ef0f": {
+      "name": "allocate_turn_budget__armed_forces_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: armed-forces upkeep is the first required payment after the optional bank visit", "call_graph: block calls calculate_military_maintenance immediately before its documented prompt"]
+    },
+    "0x02f093": {
+      "name": "allocate_turn_budget__region_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: region maintenance follows armed-forces upkeep", "call_graph: block calls calculate_region_maintenance immediately before its documented prompt"]
+    },
+    "0x02f257": {
+      "name": "allocate_turn_budget__sdi_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: SDI maintenance is the first conditional payment after region upkeep", "call_graph: block calls calculate_sdi_maintenance on the quote and automatic-payment paths"]
+    },
+    "0x02f438": {
+      "name": "allocate_turn_budget__waste_decontamination",
+      "confidence": "high",
+      "evidence": ["repository_docs: waste decontamination is the conditional stage after SDI", "call_graph: block calls both waste selection and decontamination cost helpers beside the documented prompt"]
+    },
+    "0x02f49b": {
+      "name": "allocate_turn_budget__calculate_support_boost_request",
+      "confidence": "high",
+      "evidence": ["repository_docs: support request uses a deficit capped at 15 and cost deficit*(3*People+500)", "instruction_behavior: block contains the documented calculation at OVR 0x02f4c4"]
+    },
+    "0x02f503": {
+      "name": "allocate_turn_budget__prompt_support_boost",
+      "confidence": "high",
+      "evidence": ["repository_docs: popular-support funding is optional and appears only below 100", "binary_strings: block owns the support-boost request and payment prompt path"]
+    },
+    "0x02f6ca": {
+      "name": "allocate_turn_budget__apply_support_boost_payment",
+      "confidence": "high",
+      "evidence": ["repository_docs: awarded support is the truncated paid-to-cost ratio and can exceed the 15-point charged deficit", "instruction_behavior: block contains the documented scaling at OVR 0x02f740"]
+    },
+    "0x02f82c": {
+      "name": "allocate_turn_budget__prompt_morale_boost",
+      "confidence": "high",
+      "evidence": ["repository_docs: military-morale funding is an optional conditional payment after support", "binary_strings: block owns the military-morale request and payment prompt path"]
+    },
+    "0x02f9b8": {
+      "name": "allocate_turn_budget__prompt_crown_tax_payment",
+      "confidence": "high",
+      "evidence": ["repository_docs: Queen Royale tax follows required maintenance and accepts partial payment", "call_graph: block calls calculate_crown_tax immediately before the documented tax prompt"]
+    },
+    "0x02faf1": {
+      "name": "allocate_turn_budget__deposit_crown_tax",
+      "aliases": ["crown_tax"],
+      "confidence": "high",
+      "evidence": ["repository_docs: the amount actually paid is added to the planet-wide Queen Royale refund purse", "instruction_behavior: block contains the documented deposit at OVR 0x02faf1"]
+    },
+    "0x02fb15": {
+      "name": "allocate_turn_budget__offer_reconsideration",
+      "confidence": "high",
+      "evidence": ["repository_docs: any required-payment shortfall warns of disastrous results and offers to restart the sequence", "binary_strings: block owns the warning and reconsider prompt"]
+    },
+    "0x02fc49": {
+      "name": "allocate_turn_budget__revive_decontaminated_regions",
+      "confidence": "high",
+      "evidence": ["repository_docs: successful decontamination converts the selected waste regions back to usable land", "binary_strings: block reports the revived waste-region count"]
+    },
+    "0x03429c": {
+      "name": "process_economic_production__calculate_region_gold_income",
+      "confidence": "high",
+      "evidence": ["repository_docs: region gold is independently rolled as Base+Random(Rate) for Mountain, Coastal, Desert, River, and Industrial sources", "instruction_behavior: block contains the documented income sequence beginning at OVR 0x0342c0"]
+    },
+    "0x036229": {
+      "name": "resolve_pirate_attack__cap_spoils",
+      "confidence": "high",
+      "evidence": ["repository_docs: pirate spoil categories have explicit maximum losses", "instruction_behavior: block contains the documented cap application at OVR 0x03629c"]
+    },
+    "0x0363ba": {
+      "name": "resolve_pirate_attack__retry_spoil_selection",
+      "confidence": "high",
+      "evidence": ["repository_docs: an empty selected spoil category reruns the complete choice with a fresh faction", "instruction_behavior: documented retry target at OVR 0x0363ba"]
+    },
+    "0x036566": {
+      "name": "launch_pirate_raid__calculate_pirate_strength",
+      "confidence": "high",
+      "evidence": ["repository_docs: pirate defense uses tanks + turrets/2 + troopers/3", "instruction_behavior: block contains the documented strength expression at OVR 0x03671b"]
+    },
+    "0x036a39": {
+      "name": "launch_pirate_raid__cap_force_losses",
+      "confidence": "high",
+      "evidence": ["repository_docs: pirate combat applies literal caps to force losses", "instruction_behavior: block contains the documented second cap at OVR 0x036a59"]
+    },
+    "0x040221": {
+      "name": "resolve_received_invasion__calculate_attacker_strength",
+      "confidence": "high",
+      "evidence": ["repository_docs: received Inter-BBS attacks use the same HQ-dependent tank and morale strength expression", "instruction_behavior: block contains the documented attacker formula at OVR 0x040241"]
+    },
+    "0x040400": {
+      "name": "resolve_received_invasion__calculate_defender_strength",
+      "confidence": "high",
+      "evidence": ["repository_docs: received Inter-BBS attacks separately compute target defense", "instruction_behavior: block contains the parallel documented formula at OVR 0x04043d"]
+    },
+    "0x04a811": {
+      "name": "calculate_combat_odds__sqrt_strength_ratio",
+      "confidence": "high",
+      "evidence": ["repository_docs: combat odds call the same verified Real48 square-root routine used by population decline", "instruction_behavior: block contains the documented call at OVR 0x04a81c"]
+    },
+    "0x04bae7": {
+      "name": "send_spy__encode_source_and_target_indices",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE's Send Spy bug passes the source empire for both packet fields while only the instruction positions differ", "instruction_behavior: block contains both documented identical argument loads at OVR 0x04bae7 and 0x04bb03"]
+    },
+    "0x04aa51": {
+      "name": "resolve_received_covert_operation__encode_correct_spy_source",
+      "confidence": "high",
+      "evidence": ["repository_docs: the shared spy helper is called correctly from another covert path with a distinct empire and mode", "instruction_behavior: block contains the comparison call site at OVR 0x04aa5e"]
+    },
+    "0346:043d": {
+      "name": "run_player_turn__first_play_daily_events",
+      "confidence": "high",
+      "evidence": ["repository_docs: this block runs only with no resumed turn and a full daily turn allowance, then calls the Queen refund and lottery", "instruction_behavior: contains the sole documented Queen-refund call at BRE.EXE 0x61dd"]
+    },
+    "0346:0496": {
+      "name": "run_player_turn__dispatch_resume_stage",
+      "confidence": "high",
+      "evidence": ["repository_docs: empire +0x2b8 is a persistent turn-stage counter and BRE.EXE 0x6236 is its dispatch loop", "instruction_behavior: documented loop-head block dispatches the stage value"]
+    },
+    "0346:0abb": {
+      "name": "run_player_turn__commit_turn",
+      "confidence": "high",
+      "evidence": ["repository_docs: stage 20 commits the turn, increments lifetime turns, and decrements today's allowance at BRE.EXE 0x685f", "instruction_behavior: block contains those documented record updates"]
+    },
+    "0346:0ae1": {
+      "name": "run_player_turn__reset_resume_stage",
+      "confidence": "high",
+      "evidence": ["repository_docs: completed turns reset the persistent stage counter to zero at BRE.EXE 0x688e", "instruction_behavior: block contains the documented reset store"]
+    }
+  }
 }
