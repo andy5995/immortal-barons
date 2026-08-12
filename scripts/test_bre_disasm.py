@@ -131,19 +131,68 @@ class ParseTests(unittest.TestCase):
                 {
                     "kind": "overlay_call",
                     "to": "ovr_000100:ovr_000100_entry_0000",
+                    "logical_target": "0010:0020",
                     "sites": ["0x000b"],
                 }
             ],
         )
+
+    def test_cfg_records_every_direct_jump_target_and_fallthrough(self):
+        try:
+            bre.capstone_module()
+        except bre.BREError as exc:
+            self.skipTest(str(exc))
+        # jne +2 has two successors: the fallthrough NOP/RET block at 2 and
+        # the taken RET block at 4.
+        flow = bre.analyze_cfg(bytes.fromhex("750290c3c3"), {0}, {})
+        self.assertEqual(sorted(flow["_blocks"]), [0, 2, 4])
+        self.assertEqual(
+            flow["_blocks"][2]["sources"],
+            [(0, "conditional_fallthrough")],
+        )
+        self.assertEqual(
+            flow["_blocks"][4]["sources"],
+            [(0, "conditional_jump")],
+        )
+        self.assertEqual(flow["decode_conflicts"], [])
+
+    def test_synthetic_catalog_exhaustively_names_code_and_data(self):
+        try:
+            bre.capstone_module()
+        except bre.BREError as exc:
+            self.skipTest(str(exc))
+        exe, ovr = synthetic_release()
+        mz = bre.parse_mz(exe)
+        units = bre.parse_units(exe, ovr, mz)
+        catalog = bre.build_catalog(exe, ovr, mz, units, cfg=True)
+        result = bre.validate_catalog(catalog)
+        self.assertEqual(result["overlay_blocks"], 3)
+        self.assertEqual(result["overlay_data_chunks"], 1)
+        self.assertEqual(
+            catalog["units"][1]["data_chunks"][0]["name"],
+            "ovr_000012_data_0005",
+        )
+        self.assertEqual(
+            catalog["units"][1]["data_chunks"][0]["classification"],
+            "nop_padding",
+        )
+        records = list(bre.catalog_records(catalog, "all"))
+        self.assertEqual(len({record["name"] for record in records}), len(records))
 
     def test_committed_catalog_invariants(self):
         catalog_path = SCRIPT.parent.parent / "docs" / "dev" / "bre-v0988-disassembly.json"
         if not catalog_path.exists():
             self.skipTest("generated catalog is not present")
         catalog = json.loads(catalog_path.read_text())
+        self.assertEqual(catalog["format_version"], 2)
         self.assertEqual(catalog["summary"]["unit_count"], 103)
         self.assertEqual(catalog["summary"]["exported_root_count"], 414)
         self.assertEqual(catalog["summary"]["reachable_procedure_root_count"], 603)
+        self.assertEqual(catalog["summary"]["basic_block_count"], 8495)
+        self.assertEqual(catalog["summary"]["data_chunk_count"], 319)
+        self.assertEqual(catalog["summary"]["resident_procedure_root_count"], 356)
+        self.assertEqual(catalog["summary"]["resident_basic_block_count"], 2479)
+        self.assertEqual(catalog["summary"]["resident_data_chunk_count"], 236)
         self.assertEqual(
             catalog["release"]["artifacts"]["ovr"]["sha256"],
             bre.EXPECTED["ovr"]["sha256"],
@@ -154,6 +203,28 @@ class ParseTests(unittest.TestCase):
                 unit["control_flow"]["decode_conflicts"]
                 for unit in catalog["units"]
             )
+        )
+        self.assertFalse(catalog["resident_image"]["control_flow"]["decode_conflicts"])
+        self.assertEqual(
+            sum(
+                len(unit["control_flow"]["unresolved_transfers"])
+                for unit in catalog["units"]
+            ),
+            11,
+        )
+        self.assertEqual(
+            len(catalog["resident_image"]["control_flow"]["unresolved_transfers"]),
+            11,
+        )
+        self.assertEqual(
+            bre.validate_catalog(catalog),
+            {
+                "unique_names": 11632,
+                "overlay_blocks": 8495,
+                "overlay_data_chunks": 319,
+                "resident_blocks": 2479,
+                "resident_data_chunks": 236,
+            },
         )
 
 

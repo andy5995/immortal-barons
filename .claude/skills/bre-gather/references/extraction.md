@@ -67,15 +67,18 @@ silently misalign the decode:
 ```
 python3 scripts/bre-disasm.py verify --directory "$BRE"
 python3 scripts/bre-disasm.py map --directory "$BRE" --ovr-offset 0x4ba48
-python3 scripts/bre-disasm.py list --filter spy
+python3 scripts/bre-disasm.py list --kind procedure --filter spy
+python3 scripts/bre-disasm.py lookup send_spy
 python3 scripts/bre-disasm.py disasm --directory "$BRE" --unit ovr_04b9d0
 ```
 
 The committed catalog works without local binaries and gives stable names,
-exported/direct-call roots, entry basic-block spans, unit-wide reachable ranges,
-external targets, and unresolved indirect transfers. The loader, fixup format,
-Xvfb-backed DOSBox validation procedure, and catalog schema are in
-`docs/dev/bre-disassembly.md`.
+every exported/direct-call procedure and direct-jump/fallthrough block, named
+complementary chunks, fixup streams, resident targets, unit-wide reachable
+ranges, external targets, and unresolved indirect transfers. `disasm` uses the
+catalog to synchronize every block and skip every named non-code span. The
+loader, fixup format, Xvfb-backed DOSBox validation procedure, and catalog
+schema are in `docs/dev/bre-disassembly.md`.
 
 **Code masquerading as strings (a second length-prefix trap).** A run like
 `<1u <2u <3u <4u` right after a menu-name cluster (e.g. Civilian/Economic/

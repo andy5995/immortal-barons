@@ -555,18 +555,24 @@ them.
 Start with the repository's static map, not a guessed OVR slice:
 
 ```
-python3 scripts/bre-disasm.py list --filter technology
+python3 scripts/bre-disasm.py list --kind procedure --filter technology
+python3 scripts/bre-disasm.py lookup technology_report
 python3 scripts/bre-disasm.py map --directory "$BRE" --ovr-offset 0x32d1b
 python3 scripts/bre-disasm.py disasm --directory "$BRE" --unit ovr_031379
 ```
 
 `docs/dev/bre-disassembly.md` documents the file format and
 `docs/dev/bre-v0988-disassembly.json` is the machine-readable catalog. The map
-contains all 103 overlay units, every exported INT 3F stub, reachable direct-call
-roots, half-open reachable spans, resident RTL/Real48 names, external edges, and
-explicit unresolved indirect transfers. The tool verifies the exact v0.988
-hashes before reading a binary. Capstone 5 supplies typed 16-bit operands for
-the reachability pass; `ndisasm` is only the optional text renderer.
+contains all 103 overlay units and names every exported/direct-call procedure,
+direct-jump basic block, conditional fallthrough, complementary non-code chunk,
+fixup stream, resident target, and overlay descriptor record. Half-open spans,
+source edges, resident RTL/Real48 names, external edges, and explicit unresolved
+indirect transfers are attached to those records. `lookup NAME` finds one exact
+stable name or semantic alias; `list --kind procedure|block|data|fixup|all`
+searches record classes. `disasm` synchronizes at every cataloged block and
+skips cataloged non-code spans. The tool verifies the exact v0.988 hashes before
+reading a binary. Capstone 5 supplies typed 16-bit operands for the reachability
+pass; `ndisasm` is only the optional text renderer.
 
 The loop that keeps paying off:
 

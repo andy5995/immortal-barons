@@ -24,7 +24,7 @@ import time
 import urllib.request
 
 
-VERSION = "0.1"
+VERSION = "0.2"
 OFFICIAL_URL = (
     "https://www.johndaileysoftware.com/download/"
     "?fileName=brev988.exe&id=220BRE"
@@ -54,6 +54,7 @@ RESIDENT_NAMES = {
     (0x0C03, 0x0F10): ("add_i32_indirect", ["integer", "rtl"]),
     (0x0FD0, 0x0ECC): ("mul_i32", ["integer", "rtl"]),
     (0x0FD0, 0x0F09): ("div_i32", ["integer", "rtl"]),
+    (0x0FD0, 0x0116): ("runtime_halt", ["rtl", "non-returning"]),
     (0x0FD0, 0x1768): ("real_add", ["real48", "rtl"]),
     (0x0FD0, 0x176E): ("real_subtract", ["real48", "rtl"]),
     (0x0FD0, 0x1774): ("real_square", ["real48", "rtl"]),
@@ -71,6 +72,8 @@ RESIDENT_NAMES = {
     (0x056D, 0x1A07): ("technology_factor", ["technology"]),
     (0x056D, 0x19B5): ("is_under_protection", ["protection"]),
 }
+
+NON_RETURNING_FAR_TARGETS = {(0x0FD0, 0x0116)}
 
 
 # Named navigation landmarks already cited in this repository. A landmark may
@@ -324,7 +327,7 @@ def root_name(unit: Unit, entry: int) -> str:
     return f"{unit.unit_id}_entry_{entry:04x}"
 
 
-NDISASM_LINE = re.compile(r"^([0-9A-Fa-f]{8})\s+([0-9A-Fa-f]+)\s+(.+?)\s*$")
+NDISASM_LINE = re.compile(r"^([0-9A-Fa-f]{8})\s+")
 
 
 def capstone_module():
@@ -380,6 +383,7 @@ def analyze_cfg(
     edges = set()
     call_targets = set()
     block_targets = set(roots)
+    target_sources = {root: set() for root in roots}
     unresolved = set()
     conflicts = set()
     while queue:
@@ -413,7 +417,7 @@ def analyze_cfg(
         immediate_operands = [operand.imm for operand in decoded.operands if operand.type == X86_OP_IMM]
         far_target = None
         near_target = None
-        if is_call and mnemonic in {"lcall", "callf"} and len(immediate_operands) == 2:
+        if (is_call or is_jump) and mnemonic in {"lcall", "callf", "ljmp", "jmpf"} and len(immediate_operands) == 2:
             far_target = (immediate_operands[0] & 0xFFFF, immediate_operands[1] & 0xFFFF)
         elif (is_call or is_jump) and len(decoded.operands) == 1 and immediate_operands:
             near_target = immediate_operands[0] & 0xFFFF
@@ -422,35 +426,71 @@ def analyze_cfg(
             block_targets.add(near_target)
             if is_call:
                 call_targets.add(near_target)
+                target_kind = "near_call"
+            elif mnemonic in {"jmp", "ljmp"}:
+                target_kind = "unconditional_jump"
+            else:
+                target_kind = "conditional_jump"
+            target_sources.setdefault(near_target, set()).add((offset, target_kind))
             if near_target < len(code):
                 queue.append(near_target)
-        elif far_target is not None and is_call:
+            else:
+                unresolved.add((offset, f"target {hx(near_target)} is outside unit"))
+        elif far_target is not None:
             segment, destination = far_target
             resolved = descriptor_roots.get((segment, destination))
+            edge_kind = "overlay_call" if is_call else "overlay_jump"
             if resolved:
-                edges.add((offset, "overlay_call", f"{resolved[0]}:{resolved[1]}"))
+                edges.add(
+                    (
+                        offset,
+                        edge_kind,
+                        f"{resolved[0]}:{resolved[1]}",
+                        f"{segment:04x}:{destination:04x}",
+                    )
+                )
             else:
                 known = RESIDENT_NAMES.get((segment, destination))
                 label = known[0] if known else f"resident_{segment:04x}_{destination:04x}"
-                edges.add((offset, "far_call", label))
+                edges.add(
+                    (
+                        offset,
+                        "far_call" if is_call else "far_jump",
+                        label,
+                        f"{segment:04x}:{destination:04x}",
+                    )
+                )
         elif is_call or is_jump:
             unresolved.add((offset, f"{decoded.mnemonic} {decoded.op_str}".strip()))
 
         unconditional_jump = is_jump and mnemonic in {"jmp", "ljmp"}
         returns = decoded.group(capstone.CS_GRP_RET) or mnemonic == "iret"
-        falls_through = not (unconditional_jump or returns or mnemonic in {"int3", "hlt"})
+        non_returning_call = is_call and far_target in NON_RETURNING_FAR_TARGETS
+        falls_through = not (
+            unconditional_jump
+            or returns
+            or non_returning_call
+            or mnemonic in {"int3", "hlt"}
+        )
         if falls_through and offset + decoded.size < len(code):
-            queue.append(offset + decoded.size)
+            fallthrough = offset + decoded.size
+            queue.append(fallthrough)
+            if is_jump:
+                block_targets.add(fallthrough)
+                target_sources.setdefault(fallthrough, set()).add(
+                    (offset, "conditional_fallthrough")
+                )
 
     ranges = ranges_from_instructions(instructions, visited)
     procedure_roots = set(roots) | {target for target in call_targets if target in visited}
-    entry_spans = {}
-    for root in sorted(procedure_roots):
-        cursor = root
-        end = root
+    block_starts = {target for target in block_targets if target in visited}
+    block_spans = {}
+    for start in sorted(block_starts):
+        cursor = start
+        end = start
         seen = set()
         while cursor in visited and cursor not in seen:
-            if cursor != root and cursor in block_targets:
+            if cursor != start and cursor in block_starts:
                 break
             seen.add(cursor)
             instruction = instructions[cursor]
@@ -465,7 +505,7 @@ def analyze_cfg(
             ):
                 break
             cursor = end
-        entry_spans[root] = end
+        block_spans[start] = end
     holes = []
     cursor = 0
     for start, end in ranges:
@@ -475,8 +515,8 @@ def analyze_cfg(
     if cursor < len(code):
         holes.append([cursor, len(code)])
     grouped_edges = {}
-    for offset, kind, target in edges:
-        grouped_edges.setdefault((kind, target), []).append(offset)
+    for offset, kind, target, logical_target in edges:
+        grouped_edges.setdefault((kind, target, logical_target), []).append(offset)
     return {
         "reachable_ranges": [[hx(a), hx(b)] for a, b in ranges],
         "unreached_ranges": [[hx(a), hx(b)] for a, b in holes],
@@ -484,9 +524,10 @@ def analyze_cfg(
             {
                 "kind": kind,
                 "to": target,
+                "logical_target": logical_target,
                 "sites": [hx(site) for site in sorted(sites)],
             }
-            for (kind, target), sites in sorted(
+            for (kind, target, logical_target), sites in sorted(
                 grouped_edges.items(), key=lambda item: (item[0][0], str(item[0][1]))
             )
         ],
@@ -499,8 +540,436 @@ def analyze_cfg(
             for target, owner in sorted(conflicts)
         ],
         "_procedure_roots": sorted(procedure_roots),
-        "_block_roots": sorted(target for target in block_targets if target in visited),
-        "_entry_spans": entry_spans,
+        "_blocks": {
+            start: {
+                "end": block_spans[start],
+                "sources": sorted(target_sources.get(start, set())),
+            }
+            for start in sorted(block_starts)
+        },
+    }
+
+
+def classify_unreached(data: bytes) -> str:
+    if data and not any(data):
+        return "zero_fill"
+    if data and all(byte == 0x90 for byte in data):
+        return "nop_padding"
+    if data and all(byte == 0xCC for byte in data):
+        return "breakpoint_padding"
+    return "unreached_data_or_indirect_code"
+
+
+def data_chunks_for_unit(unit: Unit, code: bytes, ranges: list[list[str]]) -> list[dict]:
+    chunks = []
+    for encoded_start, encoded_end in ranges:
+        range_start, range_end = int(encoded_start, 0), int(encoded_end, 0)
+        split_points = {range_start, range_end}
+        for absolute in LANDMARKS:
+            relative = absolute - unit.ovr_offset
+            if range_start < relative < range_end:
+                split_points.add(relative)
+        points = sorted(split_points)
+        for start, end in zip(points, points[1:]):
+            absolute_start = unit.ovr_offset + start
+            absolute_end = unit.ovr_offset + end
+            landmark = LANDMARKS.get(absolute_start)
+            name = landmark[0] if landmark else f"{unit.unit_id}_data_{start:04x}"
+            contained_landmarks = [
+                landmark_name
+                for offset, (landmark_name, _tags) in sorted(LANDMARKS.items())
+                if absolute_start <= offset < absolute_end and landmark_name != name
+            ]
+            tags = ["overlay", "data-chunk"]
+            if landmark:
+                tags.extend(landmark[1])
+            chunks.append(
+                {
+                    "name": name,
+                    "unit_span": [hx(start), hx(end)],
+                    "ovr_span": [hx(absolute_start, 6), hx(absolute_end, 6)],
+                    "size": end - start,
+                    "classification": classify_unreached(code[start:end]),
+                    "aliases": contained_landmarks,
+                    "tags": sorted(set(tags)),
+                    "confidence": "proven-boundary",
+                    "evidence": (
+                        "bytes not decoded from any proven root, split at known landmarks; "
+                        "may contain code reachable only through an unresolved transfer"
+                    ),
+                }
+            )
+    return chunks
+
+
+def analyze_resident_image(
+    image: bytes,
+    mz: MZHeader,
+    units: list[Unit],
+    seed_targets: dict[tuple[int, int], tuple[str, list[str], str]],
+    overlay_targets: dict[tuple[int, int], tuple[str, str]],
+) -> dict:
+    capstone = capstone_module()
+    from capstone.x86 import X86_OP_IMM
+
+    decoder = capstone.Cs(capstone.CS_ARCH_X86, capstone.CS_MODE_16)
+    decoder.detail = True
+    excluded = []
+    for unit in units:
+        start = unit.descriptor_file_offset - mz.header_size
+        size = (0x20 + len(unit.stubs) * 5 + 15) & ~15
+        excluded.append((start, min(start + size, len(image)), unit))
+
+    def excluded_owner(offset: int):
+        return next((item for item in excluded if item[0] <= offset < item[1]), None)
+
+    instructions = {}
+    visited_states = set()
+    byte_owners = {}
+    procedure_roots = set()
+    block_targets = set()
+    target_sources = {}
+    logical_addresses = {}
+    seed_metadata = {}
+    queue = []
+    edges = set()
+    unresolved = set()
+    conflicts = set()
+
+    for (segment, offset), (name, tags, evidence) in sorted(seed_targets.items()):
+        linear = segment * 16 + offset
+        if not (0 <= linear < len(image)):
+            continue
+        logical_addresses.setdefault(linear, set()).add((segment, offset))
+        seed_metadata.setdefault(linear, []).append((name, tags, evidence, segment, offset))
+        procedure_roots.add(linear)
+        block_targets.add(linear)
+        target_sources.setdefault(linear, set()).add((None, "seed"))
+        queue.append((linear, segment))
+
+    while queue:
+        linear, cs_segment = queue.pop()
+        state = (linear, cs_segment)
+        if state in visited_states or not (0 <= linear < len(image)):
+            continue
+        visited_states.add(state)
+        blocked = excluded_owner(linear)
+        if blocked:
+            unresolved.add(
+                (linear, f"target enters overlay descriptor {blocked[2].unit_id}")
+            )
+            continue
+        owner = byte_owners.get(linear)
+        if owner is not None and owner != linear:
+            conflicts.add((linear, owner))
+            continue
+        logical_offset = (linear - cs_segment * 16) & 0xFFFF
+        decoded = next(
+            decoder.disasm(image[linear : linear + 15], logical_offset, count=1), None
+        )
+        if linear not in instructions:
+            if decoded is None:
+                unresolved.add((linear, "undecodable byte sequence"))
+                continue
+            overlap_excluded = next(
+                (
+                    item
+                    for byte in range(linear, linear + decoded.size)
+                    if (item := excluded_owner(byte))
+                ),
+                None,
+            )
+            if overlap_excluded:
+                unresolved.add(
+                    (linear, f"instruction overlaps overlay descriptor {overlap_excluded[2].unit_id}")
+                )
+                continue
+            overlapping = {
+                byte_owners[byte]
+                for byte in range(linear, linear + decoded.size)
+                if byte in byte_owners and byte_owners[byte] != linear
+            }
+            if overlapping:
+                conflicts.update((linear, existing) for existing in overlapping)
+                continue
+            instructions[linear] = decoded
+            for byte in range(linear, linear + decoded.size):
+                byte_owners[byte] = linear
+
+        elif decoded is None:
+            unresolved.add((linear, "undecodable byte sequence through segment alias"))
+            continue
+        logical_addresses.setdefault(linear, set()).add((cs_segment, logical_offset))
+        mnemonic = decoded.mnemonic.lower()
+        is_call = decoded.group(capstone.CS_GRP_CALL)
+        is_jump = decoded.group(capstone.CS_GRP_JUMP)
+        immediate_operands = [
+            operand.imm for operand in decoded.operands if operand.type == X86_OP_IMM
+        ]
+        far_target = None
+        near_target = None
+        if (
+            (is_call or is_jump)
+            and mnemonic in {"lcall", "callf", "ljmp", "jmpf"}
+            and len(immediate_operands) == 2
+        ):
+            far_target = (
+                immediate_operands[0] & 0xFFFF,
+                immediate_operands[1] & 0xFFFF,
+            )
+        elif (is_call or is_jump) and len(decoded.operands) == 1 and immediate_operands:
+            target_offset = immediate_operands[0] & 0xFFFF
+            near_target = (cs_segment * 16 + target_offset, cs_segment, target_offset)
+
+        if near_target is not None:
+            target_linear, target_segment, target_offset = near_target
+            kind = (
+                "near_call"
+                if is_call
+                else "unconditional_jump"
+                if mnemonic in {"jmp", "ljmp"}
+                else "conditional_jump"
+            )
+            if 0 <= target_linear < len(image):
+                block_targets.add(target_linear)
+                target_sources.setdefault(target_linear, set()).add((linear, kind))
+                logical_addresses.setdefault(target_linear, set()).add(
+                    (target_segment, target_offset)
+                )
+                if is_call:
+                    procedure_roots.add(target_linear)
+                queue.append((target_linear, target_segment))
+            else:
+                unresolved.add((linear, f"near target {target_segment:04x}:{target_offset:04x} outside image"))
+        elif far_target is not None:
+            target_segment, target_offset = far_target
+            target_linear = target_segment * 16 + target_offset
+            overlay = overlay_targets.get(far_target)
+            if overlay:
+                edges.add(
+                    (
+                        linear,
+                        "overlay_call" if is_call else "overlay_jump",
+                        f"{overlay[0]}:{overlay[1]}",
+                        f"{target_segment:04x}:{target_offset:04x}",
+                    )
+                )
+            elif 0 <= target_linear < len(image) and not excluded_owner(target_linear):
+                kind = "far_call" if is_call else "far_jump"
+                block_targets.add(target_linear)
+                target_sources.setdefault(target_linear, set()).add((linear, kind))
+                logical_addresses.setdefault(target_linear, set()).add(far_target)
+                if is_call:
+                    procedure_roots.add(target_linear)
+                queue.append((target_linear, target_segment))
+            else:
+                name = f"external_{target_segment:04x}_{target_offset:04x}"
+                edges.add(
+                    (
+                        linear,
+                        "external_far_call" if is_call else "external_far_jump",
+                        name,
+                        f"{target_segment:04x}:{target_offset:04x}",
+                    )
+                )
+        elif is_call or is_jump:
+            unresolved.add((linear, f"{decoded.mnemonic} {decoded.op_str}".strip()))
+
+        unconditional_jump = is_jump and mnemonic in {"jmp", "ljmp"}
+        returns = decoded.group(capstone.CS_GRP_RET) or mnemonic == "iret"
+        non_returning_call = is_call and far_target in NON_RETURNING_FAR_TARGETS
+        falls_through = not (
+            unconditional_jump
+            or returns
+            or non_returning_call
+            or mnemonic in {"int3", "hlt"}
+        )
+        if falls_through:
+            next_offset = (logical_offset + decoded.size) & 0xFFFF
+            next_linear = cs_segment * 16 + next_offset
+            if 0 <= next_linear < len(image):
+                queue.append((next_linear, cs_segment))
+                if is_jump:
+                    block_targets.add(next_linear)
+                    target_sources.setdefault(next_linear, set()).add(
+                        (linear, "conditional_fallthrough")
+                    )
+                    logical_addresses.setdefault(next_linear, set()).add(
+                        (cs_segment, next_offset)
+                    )
+
+    visited = set(instructions)
+    ranges = ranges_from_instructions(instructions, visited)
+    block_starts = {target for target in block_targets if target in visited}
+    block_spans = {}
+    for start in sorted(block_starts):
+        cursor, end, seen = start, start, set()
+        while cursor in visited and cursor not in seen:
+            if cursor != start and cursor in block_starts:
+                break
+            seen.add(cursor)
+            instruction = instructions[cursor]
+            end = cursor + instruction.size
+            mnemonic = instruction.mnemonic.lower()
+            if (
+                instruction.group(capstone.CS_GRP_JUMP)
+                or instruction.group(capstone.CS_GRP_RET)
+                or mnemonic in {"iret", "int3", "hlt"}
+            ):
+                break
+            cursor = end
+        block_spans[start] = end
+
+    roots = []
+    root_names = {}
+    for linear in sorted(procedure_roots & visited):
+        metadata = seed_metadata.get(linear, [])
+        preferred = next(
+            (item for item in metadata if not item[0].startswith("resident_")),
+            metadata[0] if metadata else None,
+        )
+        addresses = sorted(logical_addresses.get(linear, set()))
+        if preferred:
+            name, tags, evidence, segment, offset = preferred
+        else:
+            segment, offset = addresses[0]
+            name = f"exe_{segment:04x}_proc_{offset:04x}"
+            tags, evidence = ["resident", "procedure"], "direct call target"
+        aliases = sorted(
+            {
+                item[0]
+                for item in metadata
+                if item[0] != name
+            }
+        )
+        root_names[linear] = name
+        roots.append(
+            {
+                "name": name,
+                "aliases": aliases,
+                "logical_address": f"{segment:04x}:{offset:04x}",
+                "logical_aliases": [f"{seg:04x}:{off:04x}" for seg, off in addresses],
+                "load_offset": hx(linear, 5),
+                "exe_offset": hx(mz.header_size + linear, 6),
+                "entry_span": [hx(linear, 5), hx(block_spans[linear], 5)],
+                "tags": sorted(set(["resident", "procedure", *tags])),
+                "confidence": "proven",
+                "evidence": evidence,
+            }
+        )
+
+    blocks = []
+    for start in sorted(block_starts):
+        addresses = sorted(logical_addresses.get(start, set()))
+        segment, offset = addresses[0]
+        name = root_names.get(start, f"exe_{segment:04x}_loc_{offset:04x}")
+        sources = [
+            {"at": hx(source, 5) if source is not None else None, "kind": kind}
+            for source, kind in sorted(
+                target_sources.get(start, set()),
+                key=lambda item: (-1 if item[0] is None else item[0], item[1]),
+            )
+        ]
+        blocks.append(
+            {
+                "name": name,
+                "load_span": [hx(start, 5), hx(block_spans[start], 5)],
+                "exe_span": [
+                    hx(mz.header_size + start, 6),
+                    hx(mz.header_size + block_spans[start], 6),
+                ],
+                "logical_addresses": [f"{seg:04x}:{off:04x}" for seg, off in addresses],
+                "target_kinds": sorted({source["kind"] for source in sources}),
+                "sources": sources,
+                "tags": ["resident", "basic-block"],
+                "confidence": "proven",
+                "evidence": "resident seed or direct control-flow target",
+            }
+        )
+
+    holes = []
+    cursor = 0
+    for start, end in ranges:
+        if cursor < start:
+            holes.append([cursor, start])
+        cursor = max(cursor, end)
+    if cursor < len(image):
+        holes.append([cursor, len(image)])
+    data_chunks = []
+    for range_start, range_end in holes:
+        split_points = {range_start, range_end}
+        for start, end, _unit in excluded:
+            if range_start < start < range_end:
+                split_points.add(start)
+            if range_start < end < range_end:
+                split_points.add(end)
+        for linear in seed_metadata:
+            if range_start < linear < range_end:
+                split_points.add(linear)
+        points = sorted(split_points)
+        for start, end in zip(points, points[1:]):
+            descriptor = next(
+                (unit for ex_start, ex_end, unit in excluded if ex_start == start and ex_end == end),
+                None,
+            )
+            if descriptor:
+                name = f"{descriptor.unit_id}_descriptor_record"
+                classification = "overlay_descriptor_record"
+            else:
+                name = f"exe_data_{start:05x}"
+                classification = classify_unreached(image[start:end])
+            data_chunks.append(
+                {
+                    "name": name,
+                    "load_span": [hx(start, 5), hx(end, 5)],
+                    "exe_span": [
+                        hx(mz.header_size + start, 6),
+                        hx(mz.header_size + end, 6),
+                    ],
+                    "size": end - start,
+                    "classification": classification,
+                    "tags": ["resident", "data-chunk"],
+                    "confidence": "proven-boundary",
+                    "evidence": (
+                        "overlay descriptor boundary"
+                        if descriptor
+                        else "bytes not decoded from any proven resident root"
+                    ),
+                }
+            )
+
+    grouped_edges = {}
+    for source, kind, target, logical_target in edges:
+        grouped_edges.setdefault((kind, target, logical_target), []).append(source)
+    return {
+        "load_span": [hx(0, 5), hx(len(image), 5)],
+        "exe_span": [hx(mz.header_size, 6), hx(len(image) + mz.header_size, 6)],
+        "roots": roots,
+        "blocks": blocks,
+        "data_chunks": data_chunks,
+        "control_flow": {
+            "reachable_ranges": [[hx(start, 5), hx(end, 5)] for start, end in ranges],
+            "unreached_ranges": [[hx(start, 5), hx(end, 5)] for start, end in holes],
+            "external_edges": [
+                {
+                    "kind": kind,
+                    "to": target,
+                    "logical_target": logical_target,
+                    "sites": [hx(site, 5) for site in sorted(sites)],
+                }
+                for (kind, target, logical_target), sites in sorted(
+                    grouped_edges.items(), key=lambda item: (item[0][0], item[0][1])
+                )
+            ],
+            "unresolved_transfers": [
+                {"at": hx(offset, 5), "instruction": text}
+                for offset, text in sorted(unresolved)
+            ],
+            "decode_conflicts": [
+                {"target": hx(target, 5), "inside_instruction_at": hx(owner, 5)}
+                for target, owner in sorted(conflicts)
+            ],
+        },
     }
 
 
@@ -567,11 +1036,12 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             flow = analyze_cfg(
                 code, {stub.entry_offset for stub in unit.stubs}, descriptor_roots
             )
+            block_details = flow.pop("_blocks")
             exported = {stub.entry_offset for stub in unit.stubs}
             for entry in flow.pop("_procedure_roots"):
                 if entry in exported:
                     matching = next(root for root in roots if int(root["entry_offset"], 0) == entry)
-                    matching["entry_span"] = [hx(entry), hx(flow["_entry_spans"][entry])]
+                    matching["entry_span"] = [hx(entry), hx(block_details[entry]["end"])]
                     continue
                 absolute = unit.ovr_offset + entry
                 if absolute in LANDMARKS:
@@ -582,7 +1052,7 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                     {
                         "name": name,
                         "entry_offset": hx(entry),
-                        "entry_span": [hx(entry), hx(flow["_entry_spans"][entry])],
+                        "entry_span": [hx(entry), hx(block_details[entry]["end"])],
                         "ovr_offset": hx(absolute, 6),
                         "stub": None,
                         "aliases": [],
@@ -591,9 +1061,61 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                         "evidence": "direct near call from exported-root-reachable code",
                     }
                 )
-            flow.pop("_block_roots")
-            flow.pop("_entry_spans")
             roots.sort(key=lambda root: int(root["entry_offset"], 0))
+            roots_by_entry = {int(root["entry_offset"], 0): root for root in roots}
+            blocks = []
+            for start, details in block_details.items():
+                end = details["end"]
+                root = roots_by_entry.get(start)
+                absolute = unit.ovr_offset + start
+                landmark = LANDMARKS.get(absolute)
+                if root:
+                    name = root["name"]
+                elif landmark:
+                    name = landmark[0]
+                else:
+                    name = f"{unit.unit_id}_loc_{start:04x}"
+                sources = [
+                    {"at": hx(source), "kind": kind}
+                    for source, kind in details["sources"]
+                ]
+                if start in exported:
+                    sources.insert(0, {"at": None, "kind": "overlay_stub"})
+                tags = ["overlay", "basic-block"]
+                if root:
+                    tags.append("procedure-entry")
+                if landmark:
+                    tags.extend(landmark[1])
+                blocks.append(
+                    {
+                        "name": name,
+                        "unit_span": [hx(start), hx(end)],
+                        "ovr_span": [
+                            hx(unit.ovr_offset + start, 6),
+                            hx(unit.ovr_offset + end, 6),
+                        ],
+                        "target_kinds": sorted({source["kind"] for source in sources}),
+                        "sources": sources,
+                        "tags": sorted(set(tags)),
+                        "confidence": "proven",
+                        "evidence": (
+                            root["evidence"]
+                            if root
+                            else "direct jump target or conditional fallthrough"
+                        ),
+                    }
+                )
+            item["blocks"] = blocks
+            item["data_chunks"] = data_chunks_for_unit(
+                unit, code, flow["unreached_ranges"]
+            )
+            item["fixup_chunk"] = {
+                "name": f"{unit.unit_id}_fixups",
+                "ovr_span": [hx(unit.fixup_offset, 6), hx(unit.end_offset, 6)],
+                "size": unit.fixup_size,
+                "classification": "overlay_segment_relocation_offsets",
+                "confidence": "proven",
+            }
             item["control_flow"] = flow
         catalog_units.append(item)
 
@@ -614,18 +1136,57 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                 "evidence": "existing binary-analysis citation in this repository",
             }
         )
-    resident = [
-        {
-            "name": name,
-            "logical_address": f"{segment:04x}:{offset:04x}",
-            "tags": tags,
-            "confidence": "repository-cited",
+    resident_image = None
+    if cfg:
+        resident_seeds = {
+            (mz.entry_segment, mz.entry_offset): (
+                "exe_entry",
+                ["entry"],
+                "MZ entry point",
+            ),
+            (0x0F5B, 0x02E6): (
+                "overlay_interrupt_3f_handler",
+                ["overlay-loader", "interrupt-handler"],
+                "runtime trace normalized by the DOS load base",
+            ),
         }
-        for (segment, offset), (name, tags) in sorted(RESIDENT_NAMES.items())
-    ]
-    return {
+        for address, (name, tags) in RESIDENT_NAMES.items():
+            resident_seeds[address] = (
+                name,
+                tags,
+                "repository-cited resident helper",
+            )
+        for unit in catalog_units:
+            for edge in unit["control_flow"]["external_edges"]:
+                if edge["kind"] not in {"far_call", "far_jump"}:
+                    continue
+                segment_text, offset_text = edge["logical_target"].split(":", 1)
+                address = (int(segment_text, 16), int(offset_text, 16))
+                resident_seeds.setdefault(
+                    address,
+                    (
+                        edge["to"],
+                        ["linked-from-overlay"],
+                        "direct far target from exported-root-reachable overlay code",
+                    ),
+                )
+        resident_image = analyze_resident_image(
+            exe[mz.header_size :], mz, units, resident_seeds, descriptor_roots
+        )
+        resident = resident_image["roots"]
+    else:
+        resident = [
+            {
+                "name": name,
+                "logical_address": f"{segment:04x}:{offset:04x}",
+                "tags": tags,
+                "confidence": "repository-cited",
+            }
+            for (segment, offset), (name, tags) in sorted(RESIDENT_NAMES.items())
+        ]
+    catalog = {
         "format": "immortal-barons-bre-disassembly-map",
-        "format_version": 1,
+        "format_version": 2,
         "generator": f"scripts/bre-disasm.py {VERSION}",
         "release": {
             "name": "Barren Realms Elite 0.988",
@@ -655,6 +1216,11 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             "unit_count": len(units),
             "exported_root_count": sum(len(unit.stubs) for unit in units),
             "reachable_procedure_root_count": sum(len(unit["roots"]) for unit in catalog_units),
+            "basic_block_count": sum(len(unit.get("blocks", [])) for unit in catalog_units),
+            "data_chunk_count": sum(len(unit.get("data_chunks", [])) for unit in catalog_units),
+            "resident_procedure_root_count": len(resident_image["roots"]) if resident_image else len(resident),
+            "resident_basic_block_count": len(resident_image["blocks"]) if resident_image else 0,
+            "resident_data_chunk_count": len(resident_image["data_chunks"]) if resident_image else 0,
             "fixup_count": sum(len(unit.fixups) for unit in units),
             "ovr_payload_start": hx(8),
             "ovr_payload_end": hx(len(ovr), 6),
@@ -662,6 +1228,186 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
         "resident_roots": resident,
         "landmarks": landmarks,
         "units": catalog_units,
+    }
+    if resident_image:
+        catalog["resident_image"] = resident_image
+    return catalog
+
+
+def merged_spans(spans: list[tuple[int, int]], label: str) -> list[tuple[int, int]]:
+    merged = []
+    for start, end in sorted(spans):
+        if end < start:
+            raise BREError(f"{label}: reversed span {hx(start)}-{hx(end)}")
+        if start == end:
+            continue
+        if merged and start < merged[-1][1]:
+            raise BREError(f"{label}: overlapping spans at {hx(start)}")
+        if merged and start == merged[-1][1]:
+            merged[-1] = (merged[-1][0], end)
+        else:
+            merged.append((start, end))
+    return merged
+
+
+def validate_catalog(catalog: dict) -> dict:
+    if catalog.get("format_version") != 2:
+        raise BREError("catalog format version is not 2")
+    names = {}
+
+    def record_name(name: str, location: str) -> None:
+        previous = names.setdefault(name, location)
+        if previous != location:
+            raise BREError(f"name {name!r} maps to both {previous} and {location}")
+
+    overlay_blocks = overlay_data = 0
+    overlay_roots = exported_roots = fixups = 0
+    expected_ovr_offset = int(catalog["summary"]["ovr_payload_start"], 0)
+    for unit in catalog["units"]:
+        unit_id = unit["id"]
+        code_offset = int(unit["ovr"]["code_offset"], 0)
+        code_size = int(unit["ovr"]["code_size"], 0)
+        fixup_offset = int(unit["ovr"]["fixup_offset"], 0)
+        end_offset = int(unit["ovr"]["end_offset"], 0)
+        fixup_span = tuple(
+            int(value, 0) for value in unit["fixup_chunk"]["ovr_span"]
+        )
+        if code_offset != expected_ovr_offset:
+            raise BREError(f"{unit_id}: OVR units are not contiguous")
+        if fixup_offset != code_offset + code_size or fixup_span != (
+            fixup_offset,
+            end_offset,
+        ):
+            raise BREError(f"{unit_id}: code/fixup boundary is inconsistent")
+        if unit["fixup_chunk"]["size"] != end_offset - fixup_offset:
+            raise BREError(f"{unit_id}: fixup chunk size is inconsistent")
+        expected_ovr_offset = end_offset
+        reachable = [
+            tuple(int(value, 0) for value in span)
+            for span in unit["control_flow"]["reachable_ranges"]
+        ]
+        unreached = [
+            tuple(int(value, 0) for value in span)
+            for span in unit["control_flow"]["unreached_ranges"]
+        ]
+        if merged_spans(reachable + unreached, f"{unit_id} code partition") != [(0, code_size)]:
+            raise BREError(f"{unit_id}: reachable and unreached bytes do not cover the code area")
+        block_spans = [
+            tuple(int(value, 0) for value in block["unit_span"])
+            for block in unit["blocks"]
+        ]
+        if merged_spans(block_spans, f"{unit_id} blocks") != merged_spans(
+            reachable, f"{unit_id} reachable ranges"
+        ):
+            raise BREError(f"{unit_id}: named blocks do not exactly cover reachable code")
+        data_spans = [
+            tuple(int(value, 0) for value in chunk["unit_span"])
+            for chunk in unit["data_chunks"]
+        ]
+        if merged_spans(data_spans, f"{unit_id} data chunks") != merged_spans(
+            unreached, f"{unit_id} unreached ranges"
+        ):
+            raise BREError(f"{unit_id}: named data chunks do not exactly cover unreached bytes")
+        blocks_by_start = {
+            int(block["unit_span"][0], 0): block for block in unit["blocks"]
+        }
+        for root in unit["roots"]:
+            start = int(root["entry_offset"], 0)
+            if start not in blocks_by_start or blocks_by_start[start]["name"] != root["name"]:
+                raise BREError(f"{unit_id}: procedure root {root['name']} has no matching block")
+            record_name(root["name"], root["ovr_offset"])
+            for alias in root.get("aliases", []):
+                record_name(alias, root["ovr_offset"])
+            exported_roots += root.get("stub") is not None
+        for block in unit["blocks"]:
+            record_name(block["name"], block["ovr_span"][0])
+            if not block["target_kinds"]:
+                raise BREError(f"{unit_id}: block {block['name']} has no target evidence")
+        for chunk in unit["data_chunks"]:
+            record_name(chunk["name"], chunk["ovr_span"][0])
+            for alias in chunk.get("aliases", []):
+                record_name(alias, chunk["ovr_span"][0])
+        record_name(unit["fixup_chunk"]["name"], unit["fixup_chunk"]["ovr_span"][0])
+        if unit["control_flow"]["decode_conflicts"]:
+            raise BREError(f"{unit_id}: decode-boundary conflicts remain")
+        overlay_blocks += len(unit["blocks"])
+        overlay_data += len(unit["data_chunks"])
+        overlay_roots += len(unit["roots"])
+        fixups += unit["fixups"]["count"]
+
+    if expected_ovr_offset != int(catalog["summary"]["ovr_payload_end"], 0):
+        raise BREError("OVR unit/fixup spans do not cover the payload")
+
+    resident = catalog["resident_image"]
+    resident_size = int(resident["load_span"][1], 0)
+    resident_reachable = [
+        tuple(int(value, 0) for value in span)
+        for span in resident["control_flow"]["reachable_ranges"]
+    ]
+    resident_unreached = [
+        tuple(int(value, 0) for value in span)
+        for span in resident["control_flow"]["unreached_ranges"]
+    ]
+    if merged_spans(
+        resident_reachable + resident_unreached, "resident image partition"
+    ) != [(0, resident_size)]:
+        raise BREError("resident reachable and data bytes do not cover the load module")
+    resident_blocks = [
+        tuple(int(value, 0) for value in block["load_span"])
+        for block in resident["blocks"]
+    ]
+    if merged_spans(resident_blocks, "resident blocks") != merged_spans(
+        resident_reachable, "resident reachable ranges"
+    ):
+        raise BREError("resident named blocks do not exactly cover reachable code")
+    resident_data = [
+        tuple(int(value, 0) for value in chunk["load_span"])
+        for chunk in resident["data_chunks"]
+    ]
+    if merged_spans(resident_data, "resident data chunks") != merged_spans(
+        resident_unreached, "resident unreached ranges"
+    ):
+        raise BREError("resident named data chunks do not exactly cover unreached bytes")
+    resident_blocks_by_start = {
+        int(block["load_span"][0], 0): block for block in resident["blocks"]
+    }
+    for root in resident["roots"]:
+        start = int(root["load_offset"], 0)
+        if start not in resident_blocks_by_start or resident_blocks_by_start[start]["name"] != root["name"]:
+            raise BREError(f"resident root {root['name']} has no matching block")
+        record_name(root["name"], f"exe:{root['load_offset']}")
+        for alias in root.get("aliases", []):
+            record_name(alias, f"exe:{root['load_offset']}")
+    for block in resident["blocks"]:
+        record_name(block["name"], f"exe:{block['load_span'][0]}")
+        if not block["target_kinds"]:
+            raise BREError(f"resident block {block['name']} has no target evidence")
+    for chunk in resident["data_chunks"]:
+        record_name(chunk["name"], f"exe:{chunk['load_span'][0]}")
+    if resident["control_flow"]["decode_conflicts"]:
+        raise BREError("resident decode-boundary conflicts remain")
+
+    summary = catalog["summary"]
+    expected_counts = {
+        "unit_count": len(catalog["units"]),
+        "exported_root_count": exported_roots,
+        "reachable_procedure_root_count": overlay_roots,
+        "basic_block_count": overlay_blocks,
+        "data_chunk_count": overlay_data,
+        "resident_procedure_root_count": len(resident["roots"]),
+        "resident_basic_block_count": len(resident["blocks"]),
+        "resident_data_chunk_count": len(resident["data_chunks"]),
+        "fixup_count": fixups,
+    }
+    for key, value in expected_counts.items():
+        if summary.get(key) != value:
+            raise BREError(f"summary {key}={summary.get(key)}, actual={value}")
+    return {
+        "unique_names": len(names),
+        "overlay_blocks": overlay_blocks,
+        "overlay_data_chunks": overlay_data,
+        "resident_blocks": len(resident["blocks"]),
+        "resident_data_chunks": len(resident["data_chunks"]),
     }
 
 
@@ -710,6 +1456,8 @@ def command_verify(args: argparse.Namespace) -> None:
 def command_analyze(args: argparse.Namespace) -> None:
     _ep, _op, exe, ovr, mz, units = load_release(args)
     catalog = build_catalog(exe, ovr, mz, units, not args.no_cfg)
+    if not args.no_cfg:
+        catalog["validation"] = validate_catalog(catalog)
     rendered = json.dumps(catalog, indent=2, sort_keys=False) + "\n"
     if args.output:
         Path(args.output).write_text(rendered)
@@ -721,43 +1469,181 @@ def parse_catalog(path: str) -> dict:
     return json.loads(Path(path).read_text())
 
 
-def list_rows(catalog: dict, pattern: str | None):
-    needle = pattern.lower() if pattern else None
+def command_check_catalog(args: argparse.Namespace) -> None:
+    catalog = parse_catalog(args.catalog)
+    result = validate_catalog(catalog)
+    if catalog.get("validation") != result:
+        raise BREError("catalog validation record is absent or stale")
+    print("VALID " + " ".join(f"{key}={value}" for key, value in result.items()))
+
+
+def catalog_records(catalog: dict, kind: str):
+    include = {kind} if kind != "all" else {"block", "data", "fixup"}
     for unit in catalog["units"]:
-        ranges = unit.get("control_flow", {}).get("reachable_ranges", [])
-        span = ",".join(f"{start}-{end}" for start, end in ranges) or "not analyzed"
-        for root in unit["roots"]:
-            haystack = " ".join(
-                [root["name"], unit["id"], *root.get("aliases", []), *root.get("tags", [])]
-            ).lower()
-            if needle and needle not in haystack:
-                continue
-            yield (
-                root["name"],
-                root["ovr_offset"],
-                unit["id"],
-                root["entry_offset"],
-                root["stub"]["logical_target"] if root.get("stub") else "direct call",
-                "-".join(root.get("entry_span", [root["entry_offset"], root["entry_offset"]])),
-                span,
-            )
+        if "procedure" in include:
+            for root in unit["roots"]:
+                yield {
+                    "kind": "procedure",
+                    "name": root["name"],
+                    "address": root["ovr_offset"],
+                    "container": unit["id"],
+                    "span": root.get("entry_span", [root["entry_offset"], root["entry_offset"]]),
+                    "aliases": root.get("aliases", []),
+                    "tags": root.get("tags", []),
+                    "evidence": root["evidence"],
+                }
+        if "block" in include:
+            for block in unit.get("blocks", []):
+                yield {
+                    "kind": "block",
+                    "name": block["name"],
+                    "address": block["ovr_span"][0],
+                    "container": unit["id"],
+                    "span": block["unit_span"],
+                    "aliases": [],
+                    "tags": block["tags"],
+                    "evidence": ",".join(block["target_kinds"]),
+                }
+        if "data" in include:
+            for chunk in unit.get("data_chunks", []):
+                yield {
+                    "kind": "data",
+                    "name": chunk["name"],
+                    "address": chunk["ovr_span"][0],
+                    "container": unit["id"],
+                    "span": chunk["unit_span"],
+                    "aliases": chunk.get("aliases", []),
+                    "tags": chunk["tags"],
+                    "evidence": chunk["classification"],
+                }
+        if "fixup" in include:
+            chunk = unit.get("fixup_chunk")
+            if chunk:
+                yield {
+                    "kind": "fixup",
+                    "name": chunk["name"],
+                    "address": chunk["ovr_span"][0],
+                    "container": unit["id"],
+                    "span": chunk["ovr_span"],
+                    "aliases": [],
+                    "tags": ["overlay", "fixup"],
+                    "evidence": chunk["classification"],
+                }
+    resident = catalog.get("resident_image")
+    if not resident:
+        return
+    if "procedure" in include:
+        for root in resident["roots"]:
+            yield {
+                "kind": "procedure",
+                "name": root["name"],
+                "address": root["logical_address"],
+                "container": "resident_exe",
+                "span": root["entry_span"],
+                "aliases": root.get("aliases", []),
+                "tags": root["tags"],
+                "evidence": root["evidence"],
+            }
+    if "block" in include:
+        for block in resident["blocks"]:
+            yield {
+                "kind": "block",
+                "name": block["name"],
+                "address": block["logical_addresses"][0],
+                "container": "resident_exe",
+                "span": block["load_span"],
+                "aliases": [],
+                "tags": block["tags"],
+                "evidence": ",".join(block["target_kinds"]),
+            }
+    if "data" in include:
+        for chunk in resident["data_chunks"]:
+            yield {
+                "kind": "data",
+                "name": chunk["name"],
+                "address": chunk["exe_span"][0],
+                "container": "resident_exe",
+                "span": chunk["load_span"],
+                "aliases": [],
+                "tags": chunk["tags"],
+                "evidence": chunk["classification"],
+            }
+
+
+def list_rows(catalog: dict, pattern: str | None, kind: str):
+    needle = pattern.lower() if pattern else None
+    for record in catalog_records(catalog, kind):
+        haystack = " ".join(
+            [
+                record["name"],
+                record["container"],
+                record["evidence"],
+                *record["aliases"],
+                *record["tags"],
+            ]
+        ).lower()
+        if not needle or needle in haystack:
+            yield record
 
 
 def command_list(args: argparse.Namespace) -> None:
     catalog = parse_catalog(args.catalog)
-    rows = list(list_rows(catalog, args.filter))
+    rows = list(list_rows(catalog, args.filter, args.kind))
     if args.format == "json":
         print(json.dumps(rows, indent=2))
         return
     if args.format == "markdown":
-        print("| Name | OVR offset | Unit | Entry | Evidence | Entry span | Reachable unit ranges |")
-        print("|---|---:|---|---:|---|---|---|")
+        print("| Kind | Name | Address | Container | Span | Evidence |")
+        print("|---|---|---:|---|---|---|")
         for row in rows:
-            print("| " + " | ".join(row) + " |")
+            print(
+                "| "
+                + " | ".join(
+                    [
+                        row["kind"],
+                        row["name"],
+                        row["address"],
+                        row["container"],
+                        "-".join(row["span"]),
+                        row["evidence"],
+                    ]
+                )
+                + " |"
+            )
         return
-    print("name\tovr_offset\tunit\tentry\tevidence\tentry_span\treachable_unit_ranges")
+    print("kind\tname\taddress\tcontainer\tspan\tevidence")
     for row in rows:
-        print("\t".join(row))
+        print(
+            "\t".join(
+                [
+                    row["kind"],
+                    row["name"],
+                    row["address"],
+                    row["container"],
+                    "-".join(row["span"]),
+                    row["evidence"],
+                ]
+            )
+        )
+
+
+def command_lookup(args: argparse.Namespace) -> None:
+    catalog = parse_catalog(args.catalog)
+    needle = args.name.lower()
+    matches = [
+        record
+        for kind in ("procedure", "block", "data", "fixup")
+        for record in catalog_records(catalog, kind)
+        if needle == record["name"].lower()
+        or needle in {alias.lower() for alias in record["aliases"]}
+    ]
+    unique = {
+        (record["name"], record["address"], record["kind"]): record
+        for record in matches
+    }
+    if not unique:
+        raise BREError(f"no catalog name or alias matches {args.name!r}")
+    print(json.dumps(list(unique.values()), indent=2))
 
 
 def command_map(args: argparse.Namespace) -> None:
@@ -881,21 +1767,46 @@ def command_compare_dump(args: argparse.Namespace) -> None:
 def command_disasm(args: argparse.Namespace) -> None:
     _ep, _op, _exe, ovr, _mz, units = load_release(args)
     unit = select_unit(units, args.unit)
+    catalog = parse_catalog(args.catalog)
+    catalog_unit = next(
+        (item for item in catalog["units"] if item["id"] == unit.unit_id),
+        None,
+    )
+    if catalog_unit is None:
+        raise BREError(f"catalog has no record for {unit.unit_id}")
+    if not catalog_unit.get("blocks") or "data_chunks" not in catalog_unit:
+        raise BREError("catalog does not contain exhaustive block and data boundaries")
     code = materialized_code(ovr, unit, args.load_base)
     with tempfile.NamedTemporaryFile(prefix="bre-disasm-", suffix=".bin") as stream:
         stream.write(code)
         stream.flush()
         command = [shutil.which("ndisasm") or "ndisasm", "-b", "16", "-a"]
-        for stub in unit.stubs:
-            command += ["-s", str(stub.entry_offset)]
+        labels = {}
+        for block in catalog_unit["blocks"]:
+            start = int(block["unit_span"][0], 0)
+            labels[start] = block["name"]
+            command += ["-s", str(start)]
+        data_labels = {}
+        for chunk in catalog_unit["data_chunks"]:
+            start, end = (int(value, 0) for value in chunk["unit_span"])
+            data_labels[start] = chunk["name"]
+            command += ["-k", f"{start},{end - start}"]
         command.append(stream.name)
         result = subprocess.run(command, check=True, text=True, capture_output=True)
-    labels = {stub.entry_offset: root_name(unit, stub.entry_offset) for stub in unit.stubs}
+    announced_data = set()
     for line in result.stdout.splitlines():
         match = NDISASM_LINE.match(line)
-        if match and int(match.group(1), 16) in labels:
-            print(f"\n{labels[int(match.group(1), 16)]}:")
+        if match:
+            offset = int(match.group(1), 16)
+            if offset in labels:
+                print(f"\n{labels[offset]}:")
+            if offset in data_labels:
+                print(f"\n{data_labels[offset]}:")
+                announced_data.add(offset)
         print(line)
+    for offset, name in sorted(data_labels.items()):
+        if offset not in announced_data:
+            print(f"\n{name}: ; cataloged non-code span at {hx(offset)}")
 
 
 def command_debugger(args: argparse.Namespace) -> None:
@@ -981,11 +1892,27 @@ def build_parser() -> argparse.ArgumentParser:
     analyze.add_argument("--no-cfg", action="store_true", help="omit ndisasm reachability analysis")
     analyze.set_defaults(func=command_analyze)
 
-    listing = subparsers.add_parser("list", help="list roots from a generated catalog")
+    check = subparsers.add_parser(
+        "check-catalog", help="validate exhaustive names, spans, and coverage"
+    )
+    check.add_argument("--catalog", default="docs/dev/bre-v0988-disassembly.json")
+    check.set_defaults(func=command_check_catalog)
+
+    listing = subparsers.add_parser("list", help="list named records from a generated catalog")
     listing.add_argument("--catalog", default="docs/dev/bre-v0988-disassembly.json")
     listing.add_argument("--filter")
+    listing.add_argument(
+        "--kind",
+        choices=("procedure", "block", "data", "fixup", "all"),
+        default="procedure",
+    )
     listing.add_argument("--format", choices=("tsv", "markdown", "json"), default="tsv")
     listing.set_defaults(func=command_list)
+
+    lookup = subparsers.add_parser("lookup", help="look up an exact stable name or alias")
+    lookup.add_argument("name")
+    lookup.add_argument("--catalog", default="docs/dev/bre-v0988-disassembly.json")
+    lookup.set_defaults(func=command_lookup)
 
     mapping = subparsers.add_parser("map", help="map an EXE stub or OVR file offset")
     add_binary_arguments(mapping)
@@ -1008,10 +1935,13 @@ def build_parser() -> argparse.ArgumentParser:
     compare.add_argument("--dump", required=True)
     compare.set_defaults(func=command_compare_dump)
 
-    disasm = subparsers.add_parser("disasm", help="disassemble a unit at proven roots")
+    disasm = subparsers.add_parser(
+        "disasm", help="disassemble a unit at all named block boundaries"
+    )
     add_binary_arguments(disasm)
     disasm.add_argument("--unit", required=True)
     disasm.add_argument("--load-base", type=parse_int, default=0)
+    disasm.add_argument("--catalog", default="docs/dev/bre-v0988-disassembly.json")
     disasm.set_defaults(func=command_disasm)
 
     debugger = subparsers.add_parser("debugger", help="document or launch the Xvfb DOSBox debugger")

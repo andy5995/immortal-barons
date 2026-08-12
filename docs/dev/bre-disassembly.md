@@ -20,15 +20,21 @@ memory dumps, debugger logs, strings, or disassembly output to this repository.
 # Verify an existing copy.
 python3 scripts/bre-disasm.py verify --directory /path/to/bre
 
-# Find named code without having the binaries present.
-python3 scripts/bre-disasm.py list --filter pirate
+# Find procedures, basic blocks, or data chunks without having the binaries.
+python3 scripts/bre-disasm.py list --kind procedure --filter pirate
+python3 scripts/bre-disasm.py list --kind block --filter pirate
+python3 scripts/bre-disasm.py list --kind data --filter message
+python3 scripts/bre-disasm.py lookup crown_tax
 
 # Resolve a linked far-call target or an OVR file offset.
 python3 scripts/bre-disasm.py map --directory /path/to/bre --address 084d:0020
 python3 scripts/bre-disasm.py map --directory /path/to/bre --ovr-offset 0x4ba48
 
-# Disassemble one unit, synchronized at every proven exported root.
+# Disassemble one unit at every named boundary, skipping named non-code spans.
 python3 scripts/bre-disasm.py disasm --directory /path/to/bre --unit ovr_04b9d0
+
+# Verify that the committed names and spans exhaustively partition both files.
+python3 scripts/bre-disasm.py check-catalog
 ```
 
 Downloading is always explicit. `fetch` retrieves the official 0.988 archive,
@@ -136,7 +142,7 @@ python3 scripts/bre-disasm.py compare-dump \
   --directory /path/to/bre --unit ovr_0582d7 --dump /tmp/MEMDUMP.BIN
 ```
 
-## Roots, spans, and names
+## Procedures, blocks, chunks, and names
 
 The catalog gives every exported stub root a deterministic fallback name:
 
@@ -159,22 +165,65 @@ is useful.
 
 Reachability uses Capstone in 16-bit x86 mode. Decoding begins independently at
 every exported root and follows only fallthrough and typed direct-control-flow
-operands. Newly encountered direct calls become procedure roots. The catalog
-records:
+operands. Newly encountered direct calls become procedure roots. Every direct
+jump destination and every conditional fallthrough becomes a named basic-block
+boundary. Stable fallback names are:
 
-- an entry basic-block span for each exported or direct-call procedure root;
+```text
+ovr_<unit-file-offset>_loc_<unit-offset>
+exe_<logical-segment>_loc_<logical-offset>
+```
+
+The resident pass uses segmented 8086 addresses rather than pretending that
+the MZ load module is one flat code segment. It begins at the MZ entry point,
+the traced overlay loader, the known runtime helpers, and every direct resident
+far target found in reachable overlay code. Direct resident near and far calls
+and jumps then extend that graph. Overlay descriptor records are excluded from
+resident decoding and get their own names.
+
+Every byte not reached from those proven roots belongs to a named, contiguous
+complementary chunk:
+
+```text
+ovr_<unit-file-offset>_data_<unit-offset>
+exe_data_<load-offset>
+ovr_<unit-file-offset>_fixups
+ovr_<unit-file-offset>_descriptor_record
+```
+
+Pure zero, NOP, and breakpoint-fill chunks are classified as such. Other
+chunks are conservatively classified as `unreached_data_or_indirect_code`:
+they are safe boundaries for a rooted disassembly, but may contain code that
+can only be reached through one of the explicitly recorded indirect calls.
+Existing semantic landmarks split a chunk and supply its primary name.
+
+The catalog therefore records:
+
+- a stable name, source edge, and half-open span for every procedure and basic
+  block target;
 - the union of root-reachable instruction ranges for each unit;
-- the complementary unreached ranges, which may be data, padding, or code that
-  is reachable only through an unresolved indirect transfer;
+- a named partition of every complementary unreached range and every overlay
+  fixup stream;
 - grouped far-call/overlay-call edges and every unresolved indirect transfer;
 - any target that conflicts with an already decoded instruction boundary.
 
 Ranges use half-open bounds: `[start, end)`. They are intentionally not broad
 "from this prologue to the next prologue" envelopes. The current catalog has
-603 proven procedure roots, 353 disjoint reachable ranges, 11 unresolved
-indirect transfers, and zero decode-boundary conflicts. Consumers must not
-infer code behind an unresolved transfer without another static root or runtime
-evidence.
+603 overlay procedure roots, 8,495 overlay basic blocks, 319 overlay data/code
+chunks, 356 resident procedure roots, 2,479 resident basic blocks, 236 resident
+data/code chunks, and 103 named fixup streams containing 16,672 fixups. Its
+11,632 stable location names are unique. There are 11 unresolved indirect calls
+in the overlays, 11 in the resident image, and zero decode-boundary conflicts.
+Consumers must not infer code behind an unresolved transfer without another
+static root or runtime evidence.
+
+`check-catalog` independently verifies that named block spans exactly cover all
+reachable bytes, named chunks exactly cover all remaining bytes, together they
+cover each overlay code area and the complete resident load module, every
+procedure has a same-name entry block, names are unique, and the recorded
+summary counts agree. `list --kind procedure|block|data|fixup|all` emits TSV,
+Markdown, or JSON; `lookup NAME` returns the matching location records for a
+stable name or semantic alias (a procedure entry is also its first block).
 
 Capstone 5's Python binding and native library are required to regenerate
 reachable spans. On systems where the native library is in a nonstandard
@@ -186,6 +235,7 @@ Regenerate the catalog only from the pinned files:
 ```sh
 python3 scripts/bre-disasm.py analyze \
   --directory /path/to/bre --output docs/dev/bre-v0988-disassembly.json
+python3 scripts/bre-disasm.py check-catalog
 ```
 
 ## One-time debugger validation
