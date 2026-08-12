@@ -566,13 +566,19 @@ python3 scripts/bre-disasm.py disasm --directory "$BRE" --unit ovr_031379
 contains all 103 overlay units and names every exported/direct-call procedure,
 direct-jump basic block, conditional fallthrough, complementary non-code chunk,
 fixup stream, resident target, and overlay descriptor record. Half-open spans,
-source edges, resident RTL/Real48 names, external edges, and explicit unresolved
-indirect transfers are attached to those records. `lookup NAME` finds one exact
-stable name or semantic alias; `list --kind procedure|block|data|fixup|all`
-searches record classes. `disasm` synchronizes at every cataloged block and
-skips cataloged non-code spans. The tool verifies the exact v0.988 hashes before
-reading a binary. Capstone 5 supplies typed 16-bit operands for the reachability
-pass; `ndisasm` is only the optional text renderer.
+source edges, caller/callee graphs, procedure body ranges, code-segment data
+references, resident RTL/Real48 names, external edges, and explicit unresolved
+indirect transfers are attached to those records. Semantic names have an
+auditable `identified` status; internal targets use `contextual`, file-format
+records use `structural`, and address-only fallbacks are explicitly
+`unclassified`. `lookup NAME` finds one exact stable name or semantic alias.
+`list --kind procedure|block|data|fixup|all` searches record classes, and
+`--status identified|contextual|structural|unclassified` filters by naming
+state. Start with identified names, then inspect unclassified roots
+only when the desired behavior has no semantic match. `disasm` synchronizes at
+every cataloged block and skips cataloged non-code spans. The tool verifies the
+exact v0.988 hashes before reading a binary. Capstone 5 supplies typed 16-bit
+operands for the reachability pass; `ndisasm` is only the optional text renderer.
 
 The loop that keeps paying off:
 

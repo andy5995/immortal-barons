@@ -157,11 +157,25 @@ procedure roots and receive:
 ovr_<six-digit-unit-file-offset>_proc_<four-digit-entry>
 ```
 
-Known routines get a semantic primary name such as `send_spy`; their address,
-tags, confidence, and evidence remain in the same record. Interior addresses
-already cited by the project's mechanics work are recorded separately as
-landmarks. A landmark is not falsely promoted to a procedure merely because it
-is useful.
+Known routines get a semantic primary name such as `run_bank`,
+`resolve_received_trade_offer`, or `text_read_shortstring`; their old address
+name remains an alias. Curated names live in
+`scripts/bre-semantic-names.json`, separate from the reachability engine. Each
+record carries one of four honest naming states:
+
+- `identified`: behavior is supported by call-graph, owned-data, instruction,
+  public RTL, or existing repository evidence;
+- `contextual`: an internal loop, branch, join, or return is named within one
+  identified procedure without claiming more behavior than the CFG proves;
+- `structural`: an overlay fixup stream or descriptor boundary is proven by
+  the file format;
+- `unclassified`: only the stable address-derived fallback is known, and the
+  catalog says so explicitly.
+
+Interior addresses already cited by the project's mechanics work are recorded
+separately as landmarks. A landmark is not falsely promoted to a procedure
+merely because it is useful. The semantic manifest records paraphrased topics,
+not strings copied from the proprietary binary.
 
 Reachability uses Capstone in 16-bit x86 mode. Decoding begins independently at
 every exported root and follows only fallthrough and typed direct-control-flow
@@ -205,6 +219,8 @@ The catalog therefore records:
 - a named partition of every complementary unreached range and every overlay
   fixup stream;
 - grouped far-call/overlay-call edges and every unresolved indirect transfer;
+- caller and callee lists, exact body ranges, and code-segment data references
+  for every procedure, plus the inverse `referenced_by` relation on data;
 - any target that conflicts with an already decoded instruction boundary.
 
 Ranges use half-open bounds: `[start, end)`. They are intentionally not broad
@@ -212,7 +228,11 @@ Ranges use half-open bounds: `[start, end)`. They are intentionally not broad
 603 overlay procedure roots, 8,495 overlay basic blocks, 319 overlay data/code
 chunks, 356 resident procedure roots, 2,479 resident basic blocks, 236 resident
 data/code chunks, and 103 named fixup streams containing 16,672 fixups. Its
-11,632 stable location names are unique. There are 11 unresolved indirect calls
+12,205 stable location names are unique. The naming pass identifies 344 of the
+959 proven procedures and ties 282 of 555 complementary chunks to identified
+behavior; 6,689 internal targets have procedure-context names. The remaining
+615 procedures and 170 non-structural chunks are explicitly unclassified
+rather than being given speculative names. There are 11 unresolved indirect calls
 in the overlays, 11 in the resident image, and zero decode-boundary conflicts.
 Consumers must not infer code behind an unresolved transfer without another
 static root or runtime evidence.
@@ -222,8 +242,18 @@ reachable bytes, named chunks exactly cover all remaining bytes, together they
 cover each overlay code area and the complete resident load module, every
 procedure has a same-name entry block, names are unique, and the recorded
 summary counts agree. `list --kind procedure|block|data|fixup|all` emits TSV,
-Markdown, or JSON; `lookup NAME` returns the matching location records for a
-stable name or semantic alias (a procedure entry is also its first block).
+Markdown, or JSON, and `--status identified|contextual|structural|unclassified`
+selects a naming state. `lookup NAME` returns the matching records, evidence,
+call graph, and data references for a stable name or semantic alias (a
+procedure entry is also its first block).
+
+Useful audit queries are:
+
+```sh
+python3 scripts/bre-disasm.py list --kind procedure --status identified
+python3 scripts/bre-disasm.py list --kind procedure --status unclassified
+python3 scripts/bre-disasm.py lookup resolve_received_trade_offer
+```
 
 Capstone 5's Python binding and native library are required to regenerate
 reachable spans. On systems where the native library is in a nonstandard

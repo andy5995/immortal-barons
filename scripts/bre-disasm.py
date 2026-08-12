@@ -9,6 +9,7 @@ release with the ``fetch`` subcommand.
 from __future__ import annotations
 
 import argparse
+import collections
 import dataclasses
 import hashlib
 import json
@@ -47,13 +48,56 @@ EXPECTED = {
     },
 }
 
+SEMANTIC_NAMES_PATH = Path(__file__).with_name("bre-semantic-names.json")
+
+
+def load_semantic_names() -> dict:
+    try:
+        semantics = json.loads(SEMANTIC_NAMES_PATH.read_text())
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(f"cannot load {SEMANTIC_NAMES_PATH}: {exc}") from exc
+    if semantics.get("format_version") != 1:
+        raise RuntimeError("unsupported BRE semantic-name manifest version")
+    return semantics
+
+
+SEMANTIC_NAMES = load_semantic_names()
+
 
 # These are stable public-analysis names, not symbols recovered from BRE.
 RESIDENT_NAMES = {
+    (0x0FD0, 0x04ED): ("get_io_result", ["rtl", "io"]),
+    (0x0FD0, 0x04F4): ("check_io_result", ["rtl", "io", "error-check"]),
+    (0x0FD0, 0x0530): ("check_stack_space", ["rtl", "stack", "error-check"]),
+    (0x0FD0, 0x075A): ("text_write_padding", ["rtl", "text-io"]),
+    (0x0FD0, 0x07A9): ("text_write_buffer", ["rtl", "text-io"]),
+    (0x0FD0, 0x0800): ("text_read_line", ["rtl", "text-io"]),
+    (0x0FD0, 0x0840): ("text_write_line", ["rtl", "text-io"]),
+    (0x0FD0, 0x0861): ("text_write_end", ["rtl", "text-io"]),
+    (0x0FD0, 0x087C): ("text_refill_input_buffer", ["rtl", "text-io", "internal"]),
+    (0x0FD0, 0x088A): ("text_flush_output_buffer", ["rtl", "text-io", "internal"]),
+    (0x0FD0, 0x0898): ("text_read_char", ["rtl", "text-io"]),
+    (0x0FD0, 0x08DE): ("text_write_char", ["rtl", "text-io"]),
+    (0x0FD0, 0x0929): ("text_read_shortstring", ["rtl", "text-io", "shortstring"]),
+    (0x0FD0, 0x0964): ("text_write_shortstring", ["rtl", "text-io", "shortstring"]),
+    (0x0FD0, 0x0990): ("text_read_i32", ["rtl", "text-io", "integer"]),
+    (0x0FD0, 0x09EC): ("text_write_i32", ["rtl", "text-io", "integer"]),
+    (0x0FD0, 0x0A20): ("text_read_real48", ["rtl", "text-io", "real48"]),
     (0x0C03, 0x0ED0): ("random_u16", ["rng"]),
     (0x0C03, 0x0F10): ("add_i32_indirect", ["integer", "rtl"]),
     (0x0FD0, 0x0ECC): ("mul_i32", ["integer", "rtl"]),
     (0x0FD0, 0x0F09): ("div_i32", ["integer", "rtl"]),
+    (0x0FD0, 0x0FAF): ("shift_right_i32", ["integer", "rtl"]),
+    (0x0FD0, 0x0FD2): ("shift_left_i32", ["integer", "rtl"]),
+    (0x0FD0, 0x0FF5): ("shortstring_load", ["shortstring", "rtl"]),
+    (0x0FD0, 0x100F): ("shortstring_store", ["shortstring", "rtl"]),
+    (0x0FD0, 0x1033): ("shortstring_copy", ["shortstring", "rtl"]),
+    (0x0FD0, 0x1074): ("shortstring_concat", ["shortstring", "rtl"]),
+    (0x0FD0, 0x10A0): ("shortstring_position", ["shortstring", "rtl"]),
+    (0x0FD0, 0x10E6): ("shortstring_compare", ["shortstring", "rtl"]),
+    (0x0FD0, 0x1111): ("shortstring_from_char", ["shortstring", "rtl"]),
+    (0x0FD0, 0x113E): ("shortstring_insert", ["shortstring", "rtl"]),
+    (0x0FD0, 0x119D): ("shortstring_delete", ["shortstring", "rtl"]),
     (0x0FD0, 0x0116): ("runtime_halt", ["rtl", "non-returning"]),
     (0x0FD0, 0x1768): ("real_add", ["real48", "rtl"]),
     (0x0FD0, 0x176E): ("real_subtract", ["real48", "rtl"]),
@@ -71,6 +115,43 @@ RESIDENT_NAMES = {
     (0x056D, 0x0F43): ("net_worth", ["empire", "score"]),
     (0x056D, 0x1A07): ("technology_factor", ["technology"]),
     (0x056D, 0x19B5): ("is_under_protection", ["protection"]),
+}
+
+RTL_SEMANTIC_EVIDENCE = {
+    address: (
+        "high",
+        "Turbo Pascal System unit runtime entry corroborated by instruction behavior",
+    )
+    for address in {
+        (0x0FD0, 0x04ED),
+        (0x0FD0, 0x04F4),
+        (0x0FD0, 0x0530),
+        (0x0FD0, 0x075A),
+        (0x0FD0, 0x07A9),
+        (0x0FD0, 0x0800),
+        (0x0FD0, 0x0840),
+        (0x0FD0, 0x0861),
+        (0x0FD0, 0x087C),
+        (0x0FD0, 0x088A),
+        (0x0FD0, 0x0898),
+        (0x0FD0, 0x08DE),
+        (0x0FD0, 0x0929),
+        (0x0FD0, 0x0964),
+        (0x0FD0, 0x0990),
+        (0x0FD0, 0x09EC),
+        (0x0FD0, 0x0A20),
+        (0x0FD0, 0x0FAF),
+        (0x0FD0, 0x0FD2),
+        (0x0FD0, 0x0FF5),
+        (0x0FD0, 0x100F),
+        (0x0FD0, 0x1033),
+        (0x0FD0, 0x1074),
+        (0x0FD0, 0x10A0),
+        (0x0FD0, 0x10E6),
+        (0x0FD0, 0x1111),
+        (0x0FD0, 0x113E),
+        (0x0FD0, 0x119D),
+    }
 }
 
 NON_RETURNING_FAR_TARGETS = {(0x0FD0, 0x0116)}
@@ -122,6 +203,37 @@ def parse_int(value: str) -> int:
 
 def hx(value: int, width: int = 4) -> str:
     return f"0x{value:0{width}x}"
+
+
+def naming_metadata(
+    status: str,
+    confidence: str,
+    evidence: str,
+) -> dict:
+    return {
+        "status": status,
+        "confidence": confidence,
+        "evidence": evidence,
+    }
+
+
+UNKNOWN_NAMING = naming_metadata(
+    "unclassified",
+    "none",
+    "address-derived fallback; behavior has not yet been established",
+)
+
+
+def semantic_annotation(section: str, key: str) -> dict | None:
+    return SEMANTIC_NAMES.get(section, {}).get(key)
+
+
+def annotation_naming(annotation: dict) -> dict:
+    return naming_metadata(
+        "identified",
+        annotation["confidence"],
+        "; ".join(annotation["evidence"]),
+    )
 
 
 def sha256(path: Path) -> str:
@@ -322,9 +434,19 @@ def select_unit(units: list[Unit], selector: str) -> Unit:
 
 def root_name(unit: Unit, entry: int) -> str:
     absolute = unit.ovr_offset + entry
+    annotation = semantic_annotation("overlay_procedures", hx(absolute, 6))
+    if annotation:
+        return annotation["name"]
     if absolute in LANDMARKS:
         return LANDMARKS[absolute][0]
     return f"{unit.unit_id}_entry_{entry:04x}"
+
+
+def edge_target_name(target: str) -> str:
+    """Return the stable location name from an optional unit-qualified edge."""
+    if target.startswith("ovr_") and ":" in target:
+        return target.split(":", 1)[1]
+    return target
 
 
 NDISASM_LINE = re.compile(r"^([0-9A-Fa-f]{8})\s+")
@@ -366,6 +488,102 @@ def ranges_from_instructions(
     return merged
 
 
+def collect_procedure_bodies(
+    roots: set[int], visited: set[int], successors: dict[int, set[int]]
+) -> dict[int, set[int]]:
+    """Collect intraprocedural instruction membership from each proven entry.
+
+    Calls are deliberately not successors; conditional/unconditional branches
+    and ordinary fallthrough are. Shared tails can therefore belong to more
+    than one procedure without forcing a false single-owner decision.
+    """
+    bodies = {}
+    for root in sorted(roots & visited):
+        members = set()
+        pending = [root]
+        while pending:
+            offset = pending.pop()
+            if offset in members or offset not in visited:
+                continue
+            members.add(offset)
+            pending.extend(successors.get(offset, ()))
+        bodies[root] = members
+    return bodies
+
+
+def find_cs_pointer_references(
+    instructions: dict[int, object], candidate_ranges: list[list[int]]
+) -> list[tuple[int, int, str]]:
+    """Find compiler-shaped far pointers into same-segment unreached spans.
+
+    Turbo Pascal commonly emits ``mov reg, offset; push cs; push reg`` when
+    passing a Pascal string or other code-segment datum. A direct
+    ``push cs; push imm`` form is also accepted. Merely seeing an immediate
+    that happens to resemble an address is intentionally not enough.
+    """
+    capstone = capstone_module()
+    from capstone.x86 import X86_OP_IMM, X86_OP_REG, X86_REG_CS
+
+    def is_candidate(target: int) -> bool:
+        return any(start <= target < end for start, end in candidate_ranges)
+
+    references = set()
+    ordered = sorted(instructions)
+    positions = {offset: index for index, offset in enumerate(ordered)}
+    for source in ordered:
+        instruction = instructions[source]
+        operands = instruction.operands
+        if (
+            instruction.mnemonic.lower() == "mov"
+            and len(operands) == 2
+            and operands[0].type == X86_OP_REG
+            and operands[1].type == X86_OP_IMM
+        ):
+            pointer_register = operands[0].reg
+            target = operands[1].imm & 0xFFFF
+            saw_cs = saw_pointer = False
+            cursor = source + instruction.size
+            for _step in range(3):
+                following = instructions.get(cursor)
+                if following is None:
+                    break
+                if following.mnemonic.lower() == "push" and len(following.operands) == 1:
+                    operand = following.operands[0]
+                    saw_cs |= operand.type == X86_OP_REG and operand.reg == X86_REG_CS
+                    saw_pointer |= (
+                        operand.type == X86_OP_REG and operand.reg == pointer_register
+                    )
+                if following.group(capstone.CS_GRP_JUMP) or following.group(
+                    capstone.CS_GRP_RET
+                ):
+                    break
+                cursor += following.size
+            if saw_cs and saw_pointer and is_candidate(target):
+                references.add((source, target, "cs_offset_register_pair"))
+
+        if (
+            instruction.mnemonic.lower() == "push"
+            and len(operands) == 1
+            and operands[0].type == X86_OP_REG
+            and operands[0].reg == X86_REG_CS
+        ):
+            index = positions[source]
+            if index + 1 >= len(ordered):
+                continue
+            following = instructions[ordered[index + 1]]
+            if ordered[index + 1] != source + instruction.size:
+                continue
+            if (
+                following.mnemonic.lower() == "push"
+                and len(following.operands) == 1
+                and following.operands[0].type == X86_OP_IMM
+            ):
+                target = following.operands[0].imm & 0xFFFF
+                if is_candidate(target):
+                    references.add((source, target, "cs_immediate_pair"))
+    return sorted(references)
+
+
 def analyze_cfg(
     code: bytes,
     roots: set[int],
@@ -384,6 +602,8 @@ def analyze_cfg(
     call_targets = set()
     block_targets = set(roots)
     target_sources = {root: set() for root in roots}
+    direct_edges = set()
+    successors = {}
     unresolved = set()
     conflicts = set()
     while queue:
@@ -408,6 +628,7 @@ def analyze_cfg(
             continue
         instructions[offset] = decoded
         visited.add(offset)
+        successors.setdefault(offset, set())
         for byte in range(offset, offset + decoded.size):
             byte_owners[byte] = offset
 
@@ -432,8 +653,11 @@ def analyze_cfg(
             else:
                 target_kind = "conditional_jump"
             target_sources.setdefault(near_target, set()).add((offset, target_kind))
+            direct_edges.add((offset, target_kind, near_target))
             if near_target < len(code):
                 queue.append(near_target)
+                if not is_call:
+                    successors[offset].add(near_target)
             else:
                 unresolved.add((offset, f"target {hx(near_target)} is outside unit"))
         elif far_target is not None:
@@ -475,6 +699,7 @@ def analyze_cfg(
         if falls_through and offset + decoded.size < len(code):
             fallthrough = offset + decoded.size
             queue.append(fallthrough)
+            successors[offset].add(fallthrough)
             if is_jump:
                 block_targets.add(fallthrough)
                 target_sources.setdefault(fallthrough, set()).add(
@@ -483,8 +708,12 @@ def analyze_cfg(
 
     ranges = ranges_from_instructions(instructions, visited)
     procedure_roots = set(roots) | {target for target in call_targets if target in visited}
+    procedure_bodies = collect_procedure_bodies(
+        procedure_roots, visited, successors
+    )
     block_starts = {target for target in block_targets if target in visited}
     block_spans = {}
+    block_terminators = {}
     for start in sorted(block_starts):
         cursor = start
         end = start
@@ -506,6 +735,7 @@ def analyze_cfg(
                 break
             cursor = end
         block_spans[start] = end
+        block_terminators[start] = instruction.mnemonic.lower()
     holes = []
     cursor = 0
     for start, end in ranges:
@@ -514,6 +744,7 @@ def analyze_cfg(
         cursor = max(cursor, end)
     if cursor < len(code):
         holes.append([cursor, len(code)])
+    data_references = find_cs_pointer_references(instructions, holes)
     grouped_edges = {}
     for offset, kind, target, logical_target in edges:
         grouped_edges.setdefault((kind, target, logical_target), []).append(offset)
@@ -539,10 +770,24 @@ def analyze_cfg(
             {"target": hx(target), "inside_instruction_at": hx(owner)}
             for target, owner in sorted(conflicts)
         ],
+        "direct_edges": [
+            {"at": hx(source), "kind": kind, "to": hx(target)}
+            for source, kind, target in sorted(direct_edges)
+        ],
+        "data_references": [
+            {"at": hx(source), "to": hx(target), "kind": kind}
+            for source, target, kind in data_references
+        ],
         "_procedure_roots": sorted(procedure_roots),
+        "_procedure_bodies": procedure_bodies,
+        "_procedure_body_ranges": {
+            root: ranges_from_instructions(instructions, members)
+            for root, members in procedure_bodies.items()
+        },
         "_blocks": {
             start: {
                 "end": block_spans[start],
+                "terminator": block_terminators[start],
                 "sources": sorted(target_sources.get(start, set())),
             }
             for start in sorted(block_starts)
@@ -558,6 +803,19 @@ def classify_unreached(data: bytes) -> str:
     if data and all(byte == 0xCC for byte in data):
         return "breakpoint_padding"
     return "unreached_data_or_indirect_code"
+
+
+def looks_like_pascal_string(data: bytes, offset: int, end: int) -> bool:
+    if not (0 <= offset < end <= len(data)):
+        return False
+    length = data[offset]
+    if length == 0 or offset + 1 + length > end:
+        return False
+    payload = data[offset + 1 : offset + 1 + length]
+    display_bytes = sum(
+        byte in {9, 10, 13, 27} or 32 <= byte < 127 for byte in payload
+    )
+    return display_bytes * 5 >= length * 4
 
 
 def data_chunks_for_unit(unit: Unit, code: bytes, ranges: list[list[str]]) -> list[dict]:
@@ -586,6 +844,15 @@ def data_chunks_for_unit(unit: Unit, code: bytes, ranges: list[list[str]]) -> li
             chunks.append(
                 {
                     "name": name,
+                    "naming": (
+                        naming_metadata(
+                            "identified",
+                            "high",
+                            "existing repository-cited semantic landmark",
+                        )
+                        if landmark
+                        else dict(UNKNOWN_NAMING)
+                    ),
                     "unit_span": [hx(start), hx(end)],
                     "ovr_span": [hx(absolute_start, 6), hx(absolute_end, 6)],
                     "size": end - start,
@@ -629,6 +896,8 @@ def analyze_resident_image(
     procedure_roots = set()
     block_targets = set()
     target_sources = {}
+    direct_edges = set()
+    successors = {}
     logical_addresses = {}
     seed_metadata = {}
     queue = []
@@ -693,6 +962,7 @@ def analyze_resident_image(
                 conflicts.update((linear, existing) for existing in overlapping)
                 continue
             instructions[linear] = decoded
+            successors.setdefault(linear, set())
             for byte in range(linear, linear + decoded.size):
                 byte_owners[byte] = linear
 
@@ -730,6 +1000,14 @@ def analyze_resident_image(
                 if mnemonic in {"jmp", "ljmp"}
                 else "conditional_jump"
             )
+            direct_edges.add(
+                (
+                    linear,
+                    kind,
+                    target_linear,
+                    f"{target_segment:04x}:{target_offset:04x}",
+                )
+            )
             if 0 <= target_linear < len(image):
                 block_targets.add(target_linear)
                 target_sources.setdefault(target_linear, set()).add((linear, kind))
@@ -738,6 +1016,8 @@ def analyze_resident_image(
                 )
                 if is_call:
                     procedure_roots.add(target_linear)
+                else:
+                    successors.setdefault(linear, set()).add(target_linear)
                 queue.append((target_linear, target_segment))
             else:
                 unresolved.add((linear, f"near target {target_segment:04x}:{target_offset:04x} outside image"))
@@ -756,11 +1036,21 @@ def analyze_resident_image(
                 )
             elif 0 <= target_linear < len(image) and not excluded_owner(target_linear):
                 kind = "far_call" if is_call else "far_jump"
+                direct_edges.add(
+                    (
+                        linear,
+                        kind,
+                        target_linear,
+                        f"{target_segment:04x}:{target_offset:04x}",
+                    )
+                )
                 block_targets.add(target_linear)
                 target_sources.setdefault(target_linear, set()).add((linear, kind))
                 logical_addresses.setdefault(target_linear, set()).add(far_target)
                 if is_call:
                     procedure_roots.add(target_linear)
+                else:
+                    successors.setdefault(linear, set()).add(target_linear)
                 queue.append((target_linear, target_segment))
             else:
                 name = f"external_{target_segment:04x}_{target_offset:04x}"
@@ -789,6 +1079,7 @@ def analyze_resident_image(
             next_linear = cs_segment * 16 + next_offset
             if 0 <= next_linear < len(image):
                 queue.append((next_linear, cs_segment))
+                successors.setdefault(linear, set()).add(next_linear)
                 if is_jump:
                     block_targets.add(next_linear)
                     target_sources.setdefault(next_linear, set()).add(
@@ -800,8 +1091,12 @@ def analyze_resident_image(
 
     visited = set(instructions)
     ranges = ranges_from_instructions(instructions, visited)
+    procedure_bodies = collect_procedure_bodies(
+        procedure_roots, visited, successors
+    )
     block_starts = {target for target in block_targets if target in visited}
     block_spans = {}
+    block_terminators = {}
     for start in sorted(block_starts):
         cursor, end, seen = start, start, set()
         while cursor in visited and cursor not in seen:
@@ -819,6 +1114,7 @@ def analyze_resident_image(
                 break
             cursor = end
         block_spans[start] = end
+        block_terminators[start] = instruction.mnemonic.lower()
 
     roots = []
     root_names = {}
@@ -835,34 +1131,138 @@ def analyze_resident_image(
             segment, offset = addresses[0]
             name = f"exe_{segment:04x}_proc_{offset:04x}"
             tags, evidence = ["resident", "procedure"], "direct call target"
+        annotation = semantic_annotation(
+            "resident_procedures", f"{segment:04x}:{offset:04x}"
+        )
+        fallback_name = name
+        if annotation:
+            name = annotation["name"]
+        semantic_evidence = RTL_SEMANTIC_EVIDENCE.get((segment, offset))
+        if annotation:
+            naming = annotation_naming(annotation)
+        elif name.startswith(("exe_", "resident_")):
+            naming = dict(UNKNOWN_NAMING)
+        elif semantic_evidence:
+            naming = naming_metadata(
+                "identified", semantic_evidence[0], semantic_evidence[1]
+            )
+        else:
+            naming = naming_metadata("identified", "high", evidence)
         aliases = sorted(
             {
                 item[0]
                 for item in metadata
                 if item[0] != name
             }
+            | ({fallback_name} if fallback_name != name else set())
         )
         root_names[linear] = name
         roots.append(
             {
                 "name": name,
+                "naming": naming,
                 "aliases": aliases,
                 "logical_address": f"{segment:04x}:{offset:04x}",
                 "logical_aliases": [f"{seg:04x}:{off:04x}" for seg, off in addresses],
                 "load_offset": hx(linear, 5),
                 "exe_offset": hx(mz.header_size + linear, 6),
                 "entry_span": [hx(linear, 5), hx(block_spans[linear], 5)],
+                "body_ranges": [
+                    [hx(start, 5), hx(end, 5)]
+                    for start, end in ranges_from_instructions(
+                        instructions, procedure_bodies[linear]
+                    )
+                ],
                 "tags": sorted(set(["resident", "procedure", *tags])),
                 "confidence": "proven",
                 "evidence": evidence,
             }
         )
 
+    roots_by_linear = {
+        int(root["load_offset"], 0): root for root in roots
+    }
+    for entry, root in roots_by_linear.items():
+        members = procedure_bodies[entry]
+        grouped = {}
+        for source, kind, target, logical_target in direct_edges:
+            if source not in members or kind not in {"near_call", "far_call"}:
+                continue
+            target_root = roots_by_linear.get(target)
+            key = (
+                kind,
+                target_root["name"] if target_root else None,
+                logical_target,
+            )
+            grouped.setdefault(key, []).append(source)
+        for source, kind, target, logical_target in edges:
+            if source not in members or "call" not in kind:
+                continue
+            grouped.setdefault(
+                (kind, edge_target_name(target), logical_target), []
+            ).append(source)
+        for source, text in unresolved:
+            if source in members and text.split(" ", 1)[0] in {"call", "lcall", "callf"}:
+                grouped.setdefault(("indirect_call", None, None), []).append(source)
+        root["callees"] = [
+            {
+                "kind": kind,
+                "to": target,
+                "target_address": logical_target,
+                "sites": [hx(site, 5) for site in sorted(set(sites))],
+            }
+            for (kind, target, logical_target), sites in sorted(
+                grouped.items(), key=lambda item: str(item[0])
+            )
+        ]
+        root["callers"] = []
+
     blocks = []
     for start in sorted(block_starts):
         addresses = sorted(logical_addresses.get(start, set()))
         segment, offset = addresses[0]
-        name = root_names.get(start, f"exe_{segment:04x}_loc_{offset:04x}")
+        fallback_name = f"exe_{segment:04x}_loc_{offset:04x}"
+        root = roots_by_linear.get(start)
+        semantic_owners = [
+            candidate
+            for entry, candidate in roots_by_linear.items()
+            if candidate["naming"]["status"] == "identified"
+            and start in procedure_bodies[entry]
+        ]
+        if root:
+            name = root["name"]
+            block_naming = dict(root["naming"])
+        elif len(semantic_owners) == 1:
+            owner = semantic_owners[0]
+            is_loop_head = any(
+                kind not in {"near_call", "far_call"}
+                and target == start
+                and source > start
+                for source, kind, target, _logical in direct_edges
+            )
+            source_kinds = {
+                kind for _source, kind in target_sources.get(start, set())
+            }
+            if is_loop_head:
+                role = "loop_head"
+            elif block_terminators[start].startswith("ret"):
+                role = "return"
+            elif source_kinds & {"conditional_jump", "conditional_fallthrough"}:
+                role = "branch"
+            elif source_kinds & {"unconditional_jump", "far_jump"}:
+                role = "join"
+            else:
+                role = "block"
+            name = f"{owner['name']}__{role}_{offset:04x}"
+            block_naming = naming_metadata(
+                "contextual",
+                "structural",
+                f"intraprocedural {role.replace('_', ' ')} in identified procedure "
+                f"{owner['name']}",
+            )
+        else:
+            name = fallback_name
+            block_naming = dict(UNKNOWN_NAMING)
         sources = [
             {"at": hx(source, 5) if source is not None else None, "kind": kind}
             for source, kind in sorted(
@@ -873,6 +1273,14 @@ def analyze_resident_image(
         blocks.append(
             {
                 "name": name,
+                "naming": block_naming,
+                "aliases": (
+                    list(root.get("aliases", []))
+                    if root
+                    else [fallback_name]
+                    if name != fallback_name
+                    else []
+                ),
                 "load_span": [hx(start, 5), hx(block_spans[start], 5)],
                 "exe_span": [
                     hx(mz.header_size + start, 6),
@@ -895,6 +1303,14 @@ def analyze_resident_image(
         cursor = max(cursor, end)
     if cursor < len(image):
         holes.append([cursor, len(image)])
+    resident_data_references = set()
+    for source, target_offset, kind in find_cs_pointer_references(
+        instructions, [[0, 0x10000]]
+    ):
+        for segment, _logical_offset in logical_addresses.get(source, set()):
+            target = segment * 16 + target_offset
+            if any(start <= target < end for start, end in holes):
+                resident_data_references.add((source, target, kind))
     data_chunks = []
     for range_start, range_end in holes:
         split_points = {range_start, range_end}
@@ -915,12 +1331,19 @@ def analyze_resident_image(
             if descriptor:
                 name = f"{descriptor.unit_id}_descriptor_record"
                 classification = "overlay_descriptor_record"
+                naming = naming_metadata(
+                    "structural",
+                    "proven",
+                    "overlay descriptor parser supplies the exact record boundary",
+                )
             else:
                 name = f"exe_data_{start:05x}"
                 classification = classify_unreached(image[start:end])
+                naming = dict(UNKNOWN_NAMING)
             data_chunks.append(
                 {
                     "name": name,
+                    "naming": naming,
                     "load_span": [hx(start, 5), hx(end, 5)],
                     "exe_span": [
                         hx(mz.header_size + start, 6),
@@ -937,6 +1360,55 @@ def analyze_resident_image(
                     ),
                 }
             )
+
+    for chunk in data_chunks:
+        chunk["referenced_by"] = []
+    for entry, root in roots_by_linear.items():
+        members = procedure_bodies[entry]
+        grouped_references = {}
+        for source, target, kind in resident_data_references:
+            if source not in members:
+                continue
+            chunk = next(
+                (
+                    candidate
+                    for candidate in data_chunks
+                    if int(candidate["load_span"][0], 0)
+                    <= target
+                    < int(candidate["load_span"][1], 0)
+                ),
+                None,
+            )
+            if chunk:
+                grouped_references.setdefault((chunk["name"], target, kind), []).append(
+                    source
+                )
+        root["data_references"] = [
+            {
+                "to": chunk_name,
+                "target_address": hx(mz.header_size + target, 6),
+                "kind": kind,
+                "sites": [hx(site, 5) for site in sorted(set(sites))],
+            }
+            for (chunk_name, target, kind), sites in sorted(grouped_references.items())
+        ]
+        for reference in root["data_references"]:
+            chunk = next(
+                chunk for chunk in data_chunks if chunk["name"] == reference["to"]
+            )
+            chunk["referenced_by"].append(
+                {
+                    "from": root["name"],
+                    "kind": reference["kind"],
+                    "sites": reference["sites"],
+                }
+            )
+    for chunk in data_chunks:
+        chunk["referenced_by"].sort(
+            key=lambda reference: (
+                reference["from"], reference["kind"], reference["sites"]
+            )
+        )
 
     grouped_edges = {}
     for source, kind, target, logical_target in edges:
@@ -969,7 +1441,79 @@ def analyze_resident_image(
                 {"target": hx(target, 5), "inside_instruction_at": hx(owner, 5)}
                 for target, owner in sorted(conflicts)
             ],
+            "direct_edges": [
+                {
+                    "at": hx(source, 5),
+                    "kind": kind,
+                    "to": hx(target, 5),
+                    "logical_target": logical_target,
+                }
+                for source, kind, target, logical_target in sorted(direct_edges)
+            ],
+            "data_references": [
+                {
+                    "at": hx(source, 5),
+                    "to": hx(target, 5),
+                    "kind": kind,
+                }
+                for source, target, kind in sorted(resident_data_references)
+            ],
         },
+    }
+
+
+def attach_procedure_callers(catalog_units: list[dict], resident_image: dict) -> None:
+    """Invert the per-procedure callee lists into stable caller evidence."""
+    procedures = []
+    for unit in catalog_units:
+        procedures.extend((unit["id"], root) for root in unit["roots"])
+    procedures.extend(
+        ("resident_exe", root) for root in resident_image["roots"]
+    )
+    by_name = {root["name"]: (container, root) for container, root in procedures}
+    for _container, root in procedures:
+        root["callers"] = []
+    for caller_container, caller in procedures:
+        for callee in caller["callees"]:
+            target = callee.get("to")
+            if target not in by_name:
+                continue
+            _target_container, target_root = by_name[target]
+            target_root["callers"].append(
+                {
+                    "from": caller["name"],
+                    "container": caller_container,
+                    "kind": callee["kind"],
+                    "sites": callee["sites"],
+                }
+            )
+    for _container, root in procedures:
+        root["callers"].sort(
+            key=lambda caller: (
+                caller["container"], caller["from"], caller["kind"], caller["sites"]
+            )
+        )
+
+
+def semantic_coverage(catalog_units: list[dict], resident_image: dict) -> dict:
+    groups = {
+        "procedures": [
+            root for unit in catalog_units for root in unit["roots"]
+        ]
+        + resident_image["roots"],
+        "blocks": [block for unit in catalog_units for block in unit["blocks"]]
+        + resident_image["blocks"],
+        "data_chunks": [
+            chunk for unit in catalog_units for chunk in unit["data_chunks"]
+        ]
+        + resident_image["data_chunks"],
+        "fixup_chunks": [unit["fixup_chunk"] for unit in catalog_units],
+    }
+    return {
+        group: dict(sorted(collections.Counter(
+            record["naming"]["status"] for record in records
+        ).items()))
+        for group, records in groups.items()
     }
 
 
@@ -987,14 +1531,29 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
         roots = []
         for stub in unit.stubs:
             absolute = unit.ovr_offset + stub.entry_offset
+            annotation = semantic_annotation(
+                "overlay_procedures", hx(absolute, 6)
+            )
             name = root_name(unit, stub.entry_offset)
-            aliases = []
+            fallback_name = f"{unit.unit_id}_entry_{stub.entry_offset:04x}"
+            aliases = [fallback_name] if name != fallback_name else []
             tags = ["overlay", "exported"]
             if absolute in LANDMARKS:
                 tags.extend(LANDMARKS[absolute][1])
             roots.append(
                 {
                     "name": name,
+                    "naming": (
+                        annotation_naming(annotation)
+                        if annotation
+                        else naming_metadata(
+                            "identified",
+                            "high",
+                            "existing repository-cited semantic landmark",
+                        )
+                        if absolute in LANDMARKS
+                        else dict(UNKNOWN_NAMING)
+                    ),
                     "entry_offset": hx(stub.entry_offset),
                     "ovr_offset": hx(absolute, 6),
                     "stub": {
@@ -1037,6 +1596,8 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                 code, {stub.entry_offset for stub in unit.stubs}, descriptor_roots
             )
             block_details = flow.pop("_blocks")
+            procedure_bodies = flow.pop("_procedure_bodies")
+            procedure_body_ranges = flow.pop("_procedure_body_ranges")
             exported = {stub.entry_offset for stub in unit.stubs}
             for entry in flow.pop("_procedure_roots"):
                 if entry in exported:
@@ -1044,18 +1605,35 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                     matching["entry_span"] = [hx(entry), hx(block_details[entry]["end"])]
                     continue
                 absolute = unit.ovr_offset + entry
-                if absolute in LANDMARKS:
+                annotation = semantic_annotation(
+                    "overlay_procedures", hx(absolute, 6)
+                )
+                if annotation:
+                    name, semantic_tags = annotation["name"], []
+                elif absolute in LANDMARKS:
                     name, semantic_tags = LANDMARKS[absolute]
                 else:
                     name, semantic_tags = f"{unit.unit_id}_proc_{entry:04x}", []
+                fallback_name = f"{unit.unit_id}_proc_{entry:04x}"
                 roots.append(
                     {
                         "name": name,
+                        "naming": (
+                            annotation_naming(annotation)
+                            if annotation
+                            else naming_metadata(
+                                "identified",
+                                "high",
+                                "existing repository-cited semantic landmark",
+                            )
+                            if absolute in LANDMARKS
+                            else dict(UNKNOWN_NAMING)
+                        ),
                         "entry_offset": hx(entry),
                         "entry_span": [hx(entry), hx(block_details[entry]["end"])],
                         "ovr_offset": hx(absolute, 6),
                         "stub": None,
-                        "aliases": [],
+                        "aliases": [fallback_name] if name != fallback_name else [],
                         "tags": sorted(set(["overlay", "near-call-target", *semantic_tags])),
                         "confidence": "proven",
                         "evidence": "direct near call from exported-root-reachable code",
@@ -1063,18 +1641,108 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                 )
             roots.sort(key=lambda root: int(root["entry_offset"], 0))
             roots_by_entry = {int(root["entry_offset"], 0): root for root in roots}
+            for entry, root in roots_by_entry.items():
+                members = procedure_bodies[entry]
+                root["body_ranges"] = [
+                    [hx(start), hx(end)]
+                    for start, end in procedure_body_ranges[entry]
+                ]
+                grouped = {}
+                for edge in flow["direct_edges"]:
+                    source = int(edge["at"], 0)
+                    if source not in members or edge["kind"] != "near_call":
+                        continue
+                    target = int(edge["to"], 0)
+                    target_root = roots_by_entry.get(target)
+                    key = (
+                        edge["kind"],
+                        target_root["name"] if target_root else None,
+                        hx(unit.ovr_offset + target, 6),
+                    )
+                    grouped.setdefault(key, []).append(source)
+                for edge in flow["external_edges"]:
+                    if "call" not in edge["kind"]:
+                        continue
+                    sites = [int(site, 0) for site in edge["sites"]]
+                    owned_sites = [site for site in sites if site in members]
+                    if owned_sites:
+                        grouped.setdefault(
+                            (
+                                edge["kind"],
+                                edge_target_name(edge["to"]),
+                                edge["logical_target"],
+                            ),
+                            [],
+                        ).extend(owned_sites)
+                for transfer in flow["unresolved_transfers"]:
+                    source = int(transfer["at"], 0)
+                    mnemonic = transfer["instruction"].split(" ", 1)[0]
+                    if source in members and mnemonic in {"call", "lcall", "callf"}:
+                        grouped.setdefault(("indirect_call", None, None), []).append(source)
+                root["callees"] = [
+                    {
+                        "kind": kind,
+                        "to": target,
+                        "target_address": target_address,
+                        "sites": [hx(site) for site in sorted(set(sites))],
+                    }
+                    for (kind, target, target_address), sites in sorted(
+                        grouped.items(), key=lambda item: str(item[0])
+                    )
+                ]
+                root["callers"] = []
             blocks = []
             for start, details in block_details.items():
                 end = details["end"]
                 root = roots_by_entry.get(start)
                 absolute = unit.ovr_offset + start
                 landmark = LANDMARKS.get(absolute)
+                semantic_owners = [
+                    candidate
+                    for entry, candidate in roots_by_entry.items()
+                    if candidate["naming"]["status"] == "identified"
+                    and start in procedure_bodies[entry]
+                ]
                 if root:
                     name = root["name"]
+                    block_naming = dict(root["naming"])
                 elif landmark:
                     name = landmark[0]
+                    block_naming = naming_metadata(
+                        "identified",
+                        "high",
+                        "existing repository-cited semantic landmark",
+                    )
+                elif len(semantic_owners) == 1:
+                    owner = semantic_owners[0]
+                    is_loop_head = any(
+                        edge["kind"] != "near_call"
+                        and int(edge["to"], 0) == start
+                        and int(edge["at"], 0) > start
+                        for edge in flow["direct_edges"]
+                    )
+                    source_kinds = {kind for _source, kind in details["sources"]}
+                    if is_loop_head:
+                        role = "loop_head"
+                    elif details["terminator"].startswith("ret"):
+                        role = "return"
+                    elif source_kinds & {"conditional_jump", "conditional_fallthrough"}:
+                        role = "branch"
+                    elif "unconditional_jump" in source_kinds:
+                        role = "join"
+                    else:
+                        role = "block"
+                    name = f"{owner['name']}__{role}_{start:04x}"
+                    block_naming = naming_metadata(
+                        "contextual",
+                        "structural",
+                        f"intraprocedural {role.replace('_', ' ')} in identified procedure "
+                        f"{owner['name']}",
+                    )
                 else:
                     name = f"{unit.unit_id}_loc_{start:04x}"
+                    block_naming = dict(UNKNOWN_NAMING)
+                block_fallback = f"{unit.unit_id}_loc_{start:04x}"
                 sources = [
                     {"at": hx(source), "kind": kind}
                     for source, kind in details["sources"]
@@ -1089,6 +1757,18 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                 blocks.append(
                     {
                         "name": name,
+                        "aliases": (
+                            list(root.get("aliases", []))
+                            if root
+                            else [block_fallback]
+                            if name != block_fallback
+                            else []
+                        ),
+                        "naming": (
+                            dict(root["naming"])
+                            if root
+                            else block_naming
+                        ),
                         "unit_span": [hx(start), hx(end)],
                         "ovr_span": [
                             hx(unit.ovr_offset + start, 6),
@@ -1109,8 +1789,126 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             item["data_chunks"] = data_chunks_for_unit(
                 unit, code, flow["unreached_ranges"]
             )
+            for chunk in item["data_chunks"]:
+                chunk["referenced_by"] = []
+            for entry, root in roots_by_entry.items():
+                members = procedure_bodies[entry]
+                grouped_references = {}
+                for reference in flow["data_references"]:
+                    source = int(reference["at"], 0)
+                    target = int(reference["to"], 0)
+                    if source not in members:
+                        continue
+                    chunk = next(
+                        (
+                            candidate
+                            for candidate in item["data_chunks"]
+                            if int(candidate["unit_span"][0], 0)
+                            <= target
+                            < int(candidate["unit_span"][1], 0)
+                        ),
+                        None,
+                    )
+                    if chunk is None:
+                        continue
+                    key = (chunk["name"], target, reference["kind"])
+                    grouped_references.setdefault(key, []).append(source)
+                root["data_references"] = [
+                    {
+                        "to": chunk_name,
+                        "target_address": hx(unit.ovr_offset + target, 6),
+                        "kind": kind,
+                        "sites": [hx(site) for site in sorted(set(sites))],
+                    }
+                    for (chunk_name, target, kind), sites in sorted(
+                        grouped_references.items()
+                    )
+                ]
+                for reference in root["data_references"]:
+                    chunk = next(
+                        chunk
+                        for chunk in item["data_chunks"]
+                        if chunk["name"] == reference["to"]
+                    )
+                    chunk["referenced_by"].append(
+                        {
+                            "from": root["name"],
+                            "kind": reference["kind"],
+                            "sites": reference["sites"],
+                        }
+                    )
+            for chunk in item["data_chunks"]:
+                chunk["referenced_by"].sort(
+                    key=lambda reference: (
+                        reference["from"], reference["kind"], reference["sites"]
+                    )
+                )
+            renamed_chunks = {}
+            roots_by_name = {root["name"]: root for root in roots}
+            for chunk in item["data_chunks"]:
+                start, end = (
+                    int(value, 0) for value in chunk["unit_span"]
+                )
+                targets = {
+                    int(reference["target_address"], 0) - unit.ovr_offset
+                    for root in roots
+                    for reference in root["data_references"]
+                    if reference["to"] == chunk["name"]
+                }
+                valid_strings = sum(
+                    looks_like_pascal_string(code, target, end)
+                    for target in targets
+                )
+                chunk["content_kind"] = (
+                    "pascal_string_table"
+                    if targets and valid_strings * 5 >= len(targets) * 4
+                    else "code_segment_constants"
+                )
+                annotation = semantic_annotation(
+                    "overlay_data", chunk["ovr_span"][0]
+                )
+                owners = {reference["from"] for reference in chunk["referenced_by"]}
+                old_name = chunk["name"]
+                if annotation:
+                    new_name = annotation["name"]
+                    chunk["naming"] = annotation_naming(annotation)
+                elif (
+                    chunk["naming"]["status"] == "unclassified"
+                    and len(owners) == 1
+                    and roots_by_name[next(iter(owners))]["naming"]["status"]
+                    == "identified"
+                ):
+                    owner = next(iter(owners))
+                    suffix = (
+                        "strings"
+                        if chunk["content_kind"] == "pascal_string_table"
+                        else "constants"
+                    )
+                    new_name = f"{owner}_{suffix}"
+                    chunk["naming"] = naming_metadata(
+                        "identified",
+                        "high" if suffix == "strings" else "medium",
+                        f"exclusive code-segment references from identified procedure {owner}; "
+                        f"content classified as {chunk['content_kind']}",
+                    )
+                else:
+                    new_name = old_name
+                if new_name != old_name:
+                    chunk["name"] = new_name
+                    chunk.setdefault("aliases", []).append(old_name)
+                    renamed_chunks[old_name] = new_name
+            for root in roots:
+                for reference in root["data_references"]:
+                    reference["to"] = renamed_chunks.get(
+                        reference["to"], reference["to"]
+                    )
             item["fixup_chunk"] = {
                 "name": f"{unit.unit_id}_fixups",
+                "naming": naming_metadata(
+                    "structural",
+                    "proven",
+                    "overlay descriptor supplies the exact relocation stream boundary",
+                ),
                 "ovr_span": [hx(unit.fixup_offset, 6), hx(unit.end_offset, 6)],
                 "size": unit.fixup_size,
                 "classification": "overlay_segment_relocation_offsets",
@@ -1151,10 +1949,13 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             ),
         }
         for address, (name, tags) in RESIDENT_NAMES.items():
+            semantic_evidence = RTL_SEMANTIC_EVIDENCE.get(address)
             resident_seeds[address] = (
                 name,
                 tags,
-                "repository-cited resident helper",
+                semantic_evidence[1]
+                if semantic_evidence
+                else "repository-cited resident helper",
             )
         for unit in catalog_units:
             for edge in unit["control_flow"]["external_edges"]:
@@ -1174,6 +1975,7 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             exe[mz.header_size :], mz, units, resident_seeds, descriptor_roots
         )
         resident = resident_image["roots"]
+        attach_procedure_callers(catalog_units, resident_image)
     else:
         resident = [
             {
@@ -1186,7 +1988,7 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
         ]
     catalog = {
         "format": "immortal-barons-bre-disassembly-map",
-        "format_version": 2,
+        "format_version": 3,
         "generator": f"scripts/bre-disasm.py {VERSION}",
         "release": {
             "name": "Barren Realms Elite 0.988",
@@ -1224,6 +2026,11 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             "fixup_count": sum(len(unit.fixups) for unit in units),
             "ovr_payload_start": hx(8),
             "ovr_payload_end": hx(len(ovr), 6),
+            "semantic_coverage": (
+                semantic_coverage(catalog_units, resident_image)
+                if resident_image
+                else {}
+            ),
         },
         "resident_roots": resident,
         "landmarks": landmarks,
@@ -1251,14 +2058,28 @@ def merged_spans(spans: list[tuple[int, int]], label: str) -> list[tuple[int, in
 
 
 def validate_catalog(catalog: dict) -> dict:
-    if catalog.get("format_version") != 2:
-        raise BREError("catalog format version is not 2")
+    if catalog.get("format_version") != 3:
+        raise BREError("catalog format version is not 3")
     names = {}
 
     def record_name(name: str, location: str) -> None:
         previous = names.setdefault(name, location)
         if previous != location:
             raise BREError(f"name {name!r} maps to both {previous} and {location}")
+
+    def validate_naming(record: dict, location: str) -> None:
+        naming = record.get("naming")
+        if not naming or set(naming) != {"status", "confidence", "evidence"}:
+            raise BREError(f"{location}: missing semantic naming record")
+        if naming["status"] not in {
+            "identified",
+            "contextual",
+            "structural",
+            "unclassified",
+        }:
+            raise BREError(f"{location}: invalid naming status {naming['status']!r}")
+        if not all(isinstance(naming[key], str) and naming[key] for key in naming):
+            raise BREError(f"{location}: incomplete semantic naming evidence")
 
     overlay_blocks = overlay_data = 0
     overlay_roots = exported_roots = fixups = 0
@@ -1312,6 +2133,9 @@ def validate_catalog(catalog: dict) -> dict:
             int(block["unit_span"][0], 0): block for block in unit["blocks"]
         }
         for root in unit["roots"]:
+            validate_naming(root, f"{unit_id}:{root['entry_offset']}")
+            if not all(key in root for key in ("body_ranges", "callers", "callees", "data_references")):
+                raise BREError(f"{unit_id}: procedure {root['name']} lacks analysis evidence")
             start = int(root["entry_offset"], 0)
             if start not in blocks_by_start or blocks_by_start[start]["name"] != root["name"]:
                 raise BREError(f"{unit_id}: procedure root {root['name']} has no matching block")
@@ -1320,14 +2144,19 @@ def validate_catalog(catalog: dict) -> dict:
                 record_name(alias, root["ovr_offset"])
             exported_roots += root.get("stub") is not None
         for block in unit["blocks"]:
+            validate_naming(block, f"{unit_id}:{block['unit_span'][0]}")
             record_name(block["name"], block["ovr_span"][0])
             if not block["target_kinds"]:
                 raise BREError(f"{unit_id}: block {block['name']} has no target evidence")
         for chunk in unit["data_chunks"]:
+            validate_naming(chunk, f"{unit_id}:{chunk['unit_span'][0]}")
+            if "referenced_by" not in chunk or "content_kind" not in chunk:
+                raise BREError(f"{unit_id}: data chunk {chunk['name']} lacks analysis evidence")
             record_name(chunk["name"], chunk["ovr_span"][0])
             for alias in chunk.get("aliases", []):
                 record_name(alias, chunk["ovr_span"][0])
         record_name(unit["fixup_chunk"]["name"], unit["fixup_chunk"]["ovr_span"][0])
+        validate_naming(unit["fixup_chunk"], unit["fixup_chunk"]["ovr_span"][0])
         if unit["control_flow"]["decode_conflicts"]:
             raise BREError(f"{unit_id}: decode-boundary conflicts remain")
         overlay_blocks += len(unit["blocks"])
@@ -1372,6 +2201,9 @@ def validate_catalog(catalog: dict) -> dict:
         int(block["load_span"][0], 0): block for block in resident["blocks"]
     }
     for root in resident["roots"]:
+        validate_naming(root, f"resident:{root['logical_address']}")
+        if not all(key in root for key in ("body_ranges", "callers", "callees", "data_references")):
+            raise BREError(f"resident procedure {root['name']} lacks analysis evidence")
         start = int(root["load_offset"], 0)
         if start not in resident_blocks_by_start or resident_blocks_by_start[start]["name"] != root["name"]:
             raise BREError(f"resident root {root['name']} has no matching block")
@@ -1379,10 +2211,14 @@ def validate_catalog(catalog: dict) -> dict:
         for alias in root.get("aliases", []):
             record_name(alias, f"exe:{root['load_offset']}")
     for block in resident["blocks"]:
+        validate_naming(block, f"resident:{block['load_span'][0]}")
         record_name(block["name"], f"exe:{block['load_span'][0]}")
         if not block["target_kinds"]:
             raise BREError(f"resident block {block['name']} has no target evidence")
     for chunk in resident["data_chunks"]:
+        validate_naming(chunk, f"resident:{chunk['load_span'][0]}")
+        if "referenced_by" not in chunk:
+            raise BREError(f"resident data chunk {chunk['name']} lacks reference evidence")
         record_name(chunk["name"], f"exe:{chunk['load_span'][0]}")
     if resident["control_flow"]["decode_conflicts"]:
         raise BREError("resident decode-boundary conflicts remain")
@@ -1402,6 +2238,9 @@ def validate_catalog(catalog: dict) -> dict:
     for key, value in expected_counts.items():
         if summary.get(key) != value:
             raise BREError(f"summary {key}={summary.get(key)}, actual={value}")
+    expected_semantic_coverage = semantic_coverage(catalog["units"], resident)
+    if summary.get("semantic_coverage") != expected_semantic_coverage:
+        raise BREError("summary semantic coverage is absent or stale")
     return {
         "unique_names": len(names),
         "overlay_blocks": overlay_blocks,
@@ -1491,6 +2330,7 @@ def catalog_records(catalog: dict, kind: str):
                     "aliases": root.get("aliases", []),
                     "tags": root.get("tags", []),
                     "evidence": root["evidence"],
+                    "naming": root["naming"],
                 }
         if "block" in include:
             for block in unit.get("blocks", []):
@@ -1500,9 +2340,10 @@ def catalog_records(catalog: dict, kind: str):
                     "address": block["ovr_span"][0],
                     "container": unit["id"],
                     "span": block["unit_span"],
-                    "aliases": [],
+                    "aliases": block.get("aliases", []),
                     "tags": block["tags"],
                     "evidence": ",".join(block["target_kinds"]),
+                    "naming": block["naming"],
                 }
         if "data" in include:
             for chunk in unit.get("data_chunks", []):
@@ -1515,6 +2356,7 @@ def catalog_records(catalog: dict, kind: str):
                     "aliases": chunk.get("aliases", []),
                     "tags": chunk["tags"],
                     "evidence": chunk["classification"],
+                    "naming": chunk["naming"],
                 }
         if "fixup" in include:
             chunk = unit.get("fixup_chunk")
@@ -1528,6 +2370,7 @@ def catalog_records(catalog: dict, kind: str):
                     "aliases": [],
                     "tags": ["overlay", "fixup"],
                     "evidence": chunk["classification"],
+                    "naming": chunk["naming"],
                 }
     resident = catalog.get("resident_image")
     if not resident:
@@ -1543,6 +2386,7 @@ def catalog_records(catalog: dict, kind: str):
                 "aliases": root.get("aliases", []),
                 "tags": root["tags"],
                 "evidence": root["evidence"],
+                "naming": root["naming"],
             }
     if "block" in include:
         for block in resident["blocks"]:
@@ -1552,9 +2396,10 @@ def catalog_records(catalog: dict, kind: str):
                 "address": block["logical_addresses"][0],
                 "container": "resident_exe",
                 "span": block["load_span"],
-                "aliases": [],
+                "aliases": block.get("aliases", []),
                 "tags": block["tags"],
                 "evidence": ",".join(block["target_kinds"]),
+                "naming": block["naming"],
             }
     if "data" in include:
         for chunk in resident["data_chunks"]:
@@ -1567,10 +2412,11 @@ def catalog_records(catalog: dict, kind: str):
                 "aliases": [],
                 "tags": chunk["tags"],
                 "evidence": chunk["classification"],
+                "naming": chunk["naming"],
             }
 
 
-def list_rows(catalog: dict, pattern: str | None, kind: str):
+def list_rows(catalog: dict, pattern: str | None, kind: str, status: str | None):
     needle = pattern.lower() if pattern else None
     for record in catalog_records(catalog, kind):
         haystack = " ".join(
@@ -1582,19 +2428,21 @@ def list_rows(catalog: dict, pattern: str | None, kind: str):
                 *record["tags"],
             ]
         ).lower()
-        if not needle or needle in haystack:
+        if (not needle or needle in haystack) and (
+            status is None or record["naming"]["status"] == status
+        ):
             yield record
 
 
 def command_list(args: argparse.Namespace) -> None:
     catalog = parse_catalog(args.catalog)
-    rows = list(list_rows(catalog, args.filter, args.kind))
+    rows = list(list_rows(catalog, args.filter, args.kind, args.status))
     if args.format == "json":
         print(json.dumps(rows, indent=2))
         return
     if args.format == "markdown":
-        print("| Kind | Name | Address | Container | Span | Evidence |")
-        print("|---|---|---:|---|---|---|")
+        print("| Kind | Name | Status | Address | Container | Span | Evidence |")
+        print("|---|---|---|---:|---|---|---|")
         for row in rows:
             print(
                 "| "
@@ -1602,6 +2450,7 @@ def command_list(args: argparse.Namespace) -> None:
                     [
                         row["kind"],
                         row["name"],
+                        row["naming"]["status"],
                         row["address"],
                         row["container"],
                         "-".join(row["span"]),
@@ -1611,13 +2460,14 @@ def command_list(args: argparse.Namespace) -> None:
                 + " |"
             )
         return
-    print("kind\tname\taddress\tcontainer\tspan\tevidence")
+    print("kind\tname\tstatus\taddress\tcontainer\tspan\tevidence")
     for row in rows:
         print(
             "\t".join(
                 [
                     row["kind"],
                     row["name"],
+                    row["naming"]["status"],
                     row["address"],
                     row["container"],
                     "-".join(row["span"]),
@@ -1905,6 +2755,11 @@ def build_parser() -> argparse.ArgumentParser:
         "--kind",
         choices=("procedure", "block", "data", "fixup", "all"),
         default="procedure",
+    )
+    listing.add_argument(
+        "--status",
+        choices=("identified", "contextual", "structural", "unclassified"),
+        help="limit output to one semantic naming status",
     )
     listing.add_argument("--format", choices=("tsv", "markdown", "json"), default="tsv")
     listing.set_defaults(func=command_list)
