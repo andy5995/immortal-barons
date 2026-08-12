@@ -41,7 +41,7 @@ func TestSpecialAttackBlockedByProtection(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{}
 
-	localAttack(f, w, "Send Spy", 0, false, recordingStrike(&called, &a, &d))
+	localAttack(f, w, "Send Spy", nil, false, recordingStrike(&called, &a, &d))
 
 	if called {
 		t.Error("strike ran while under New Realm Protection")
@@ -58,7 +58,7 @@ func TestSpecialAttackNoTargets(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{}
 
-	localAttack(f, w, "Send Spy", 0, false, recordingStrike(&called, &a, &d))
+	localAttack(f, w, "Send Spy", nil, false, recordingStrike(&called, &a, &d))
 
 	if called {
 		t.Error("strike ran with no valid targets")
@@ -77,7 +77,7 @@ func TestSpecialAttackCancel(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{keys: []rune("0\r")}
 
-	localAttack(f, w, "Send Spy", 0, false, recordingStrike(&called, &a, &d))
+	localAttack(f, w, "Send Spy", nil, false, recordingStrike(&called, &a, &d))
 
 	if called {
 		t.Error("strike ran after the player cancelled")
@@ -90,7 +90,7 @@ func TestSpecialAttackInvalidIndex(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{keys: []rune("9\r")} // only one target exists
 
-	localAttack(f, w, "Send Spy", 0, false, recordingStrike(&called, &a, &d))
+	localAttack(f, w, "Send Spy", nil, false, recordingStrike(&called, &a, &d))
 
 	if called {
 		t.Error("strike ran for an out-of-range target index")
@@ -103,7 +103,7 @@ func TestSpecialAttackSuccess(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{keys: []rune("A")} // target A
 
-	localAttack(f, w, "Send Spy", 0, false, recordingStrike(&called, &a, &d))
+	localAttack(f, w, "Send Spy", nil, false, recordingStrike(&called, &a, &d))
 
 	if !called {
 		t.Fatal("strike did not run for a valid target")
@@ -120,12 +120,31 @@ func TestSpecialAttackShowsCost(t *testing.T) {
 	w, _ := covertWorld()
 	called := false
 	var a, d *game.Empire
-	f := &fakeSession{keys: []rune("0\r")} // cancel; we only check the cost header
+	// The price is quoted only once a target is named, so pick A and then decline
+	// the sale — we are checking the quote, not the strike.
+	f := &fakeSession{keys: []rune("An")}
 
-	localAttack(f, w, "Nuclear Assault", 50000, false, recordingStrike(&called, &a, &d))
+	localAttack(f, w, "Nuclear Assault", flatCost(50_000), false, recordingStrike(&called, &a, &d))
 
-	if !strings.Contains(f.out.String(), "50000") {
-		t.Errorf("expected the gold cost in the header; got:\n%s", f.out.String())
+	if !strings.Contains(f.out.String(), "50,000") {
+		t.Errorf("expected the gold cost in the quote; got:\n%s", f.out.String())
+	}
+	if called {
+		t.Error("strike ran after the sale was declined")
+	}
+}
+
+func TestSpecialAttackPricesOffTarget(t *testing.T) {
+	w, target := covertWorld()
+	called := false
+	var a, d *game.Empire
+	f := &fakeSession{keys: []rune("An")}
+
+	localAttack(f, w, "Nuclear Assault", game.NukeCostForLand, false, recordingStrike(&called, &a, &d))
+
+	want := comma(game.NukeCostForLand(target.Land))
+	if !strings.Contains(f.out.String(), want) {
+		t.Errorf("expected the target-sized price %s; got:\n%s", want, f.out.String())
 	}
 }
 
@@ -138,7 +157,7 @@ func TestBombingAttackRequiresBombers(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{keys: []rune("1\r")}
 
-	bombingAttack(f, w, "Bomb Food Market", 0, recordingStrike(&called, &a, &d))
+	bombingAttack(f, w, "Bomb Food Market", nil, recordingStrike(&called, &a, &d))
 
 	if called {
 		t.Error("strike ran without enough Bombers")
@@ -155,7 +174,7 @@ func TestBombingAttackProceedsWithBombers(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{keys: []rune("A")} // target A
 
-	bombingAttack(f, w, "Bomb Food Market", 0, recordingStrike(&called, &a, &d))
+	bombingAttack(f, w, "Bomb Food Market", nil, recordingStrike(&called, &a, &d))
 
 	if !called {
 		t.Error("strike did not run with enough Bombers")

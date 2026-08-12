@@ -132,7 +132,8 @@ func (w *World) CanBombingOp(e *Empire) bool {
 // false (the human menu path) leaves the attacker's regions untouched and
 // returns the captured count so the caller can let the player pick the types
 // (#58 — BRE decouples the loser's mix from the winner's freely-chosen
-// composition). captured is 0 on a loss or an auto-captured win.
+// composition). captured is 0 on a loss, and excludes any waste taken, which
+// transfers as waste on both paths because nobody chooses to hold ruin.
 func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report string, captured int) {
 	a.AttacksToday++ // counts against the daily individual-attack cap (both human and AI)
 	f = f.clampTo(a) // only units the attacker actually holds can be committed
@@ -240,17 +241,27 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		}
 		lost := d.Regions.remove(captured)
 		d.syncLand()
-		captured = lost.Total() // the actual count taken (remove caps at the defender's land)
+		// taken is every region that changed hands — what both reports quote.
+		// captured is the subset the winner still has to find a type for, which
+		// is what the caller feeds to the picker.
+		taken := lost.Total() // remove caps at the defender's land
+		captured = taken
 		if autoCapture {
 			a.Regions.addMix(lost)
 			a.syncLand()
+		} else if lost.Waste > 0 {
+			// Waste is not something a winner chooses to hold — it transfers as the
+			// ruin it is, and only the clean land reaches the picker.
+			a.Regions.Waste += lost.Waste
+			a.syncLand()
+			captured -= lost.Waste
 		}
 
 		gain := battle / CombatScoreDivisor
 		addScore(a, gain)
 		addScore(d, -gain*CombatLoserPenaltyPct/100)
 
-		fmt.Fprintf(&b, "Victory! You captured %d regions.\n", captured)
+		fmt.Fprintf(&b, "Victory! You captured %d regions.\n", taken)
 		fmt.Fprintf(&b, "Your casualties: %s.\n", attackerCas(aloss))
 		fmt.Fprintf(&b, "The enemy lost: %s.\n", defenderCas(dloss))
 		if gain > 0 {
@@ -265,7 +276,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 			d.DiedDay = w.GameDay
 			fmt.Fprintf(&b, "\nYou crushed %s completely and seized the remains of its military!\n", d.Name)
 		}
-		d.addEvent(fmt.Sprintf("%s attacked you: you lost %d regions and %d units.", a.Name, captured, dloss.Total()))
+		d.addEvent(fmt.Sprintf("%s attacked you: you lost %d regions and %d units.", a.Name, taken, dloss.Total()))
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
 		gain := battle / CombatScoreDivisor * DefenseWinBonusPct / 100

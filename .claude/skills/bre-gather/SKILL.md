@@ -879,6 +879,31 @@ The loop that keeps paying off:
    for a named body or `disasm --around SITE_ID` for local context. The latter
    synchronizes from the nearest preceding root and refuses non-code addresses;
    never decode a guessed linear slice from an arbitrary byte.
+
+   **Two things silently stop this working.** `disasm` needs the **capstone**
+   Python module, which is not in the repo's dependencies — without it every
+   `disasm` invocation exits 0 and prints NOTHING, which reads as "the tool found
+   no code" rather than "the tool cannot run". Check with `python3 -c "import
+   capstone"` before concluding anything about a procedure's contents, and put it
+   in a venv (`~/.venvs/immortal-barons-disasm`) rather than on the host.
+
+   And a **procedure record's `span` is its entry block, not its body** — the
+   nuclear strike's span is 38 bytes while its callee sites run to +0x290 — so
+   `--procedure` shows a fragment and `--around` can fail outright with "no
+   instruction follows". When that happens, take the unit and offset from
+   `lookup`, and read the bytes yourself at the canonical file offset:
+
+   ```
+   dd if="$BRE/BRE.OVR" bs=1 skip=$((0xe809+0x225e)) count=$((0x320)) of=/tmp/x.bin status=none
+   ndisasm -b 16 -o 0x225e /tmp/x.bin
+   ```
+
+   `-o` makes ndisasm's addresses unit-relative, so they line up with the
+   catalog's spans and site IDs and the call graph stays usable. Resident
+   (`BRE.EXE`) code is the same trick with the MZ header added: file offset =
+   `0x2940 + segment*16 + offset`. This is not "guessing a boundary" — the
+   catalog supplied the start — and it was the only way through on the nuclear
+   and decontamination routines.
 4. **Find a constant** by searching `struct.pack("<H", value)` and checking the
    preceding byte for an imm16 opcode (`b8` mov ax, `05` add ax, `b9` mov cx …).
 5. **Calculate Real48 exactly.** Reals are six-byte Turbo Pascal values loaded

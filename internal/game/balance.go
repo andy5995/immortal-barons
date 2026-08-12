@@ -770,10 +770,40 @@ const (
 	SpecialtyBonusPct   = 25
 	SpecialtyPenaltyPct = 15
 
-	NukeCost = 7_500_000
-	ChemCost = 6_000_000
-	BioCost  = 6_000_000
-	SDIStep  = 1_500_000 // gold of total funding per +1% SDI
+	// Nuclear strike. BINARY-VERIFIED (BRE.OVR launch_nuclear_attack, unit
+	// ovr_00e809 +0x225e): the missile is priced off the TARGET's size, not sold
+	// at a flat rate — cost = min(targetRegions * 3543, 50,000,000) — and it
+	// ruins `7 + Random(3) - Random(3)` percent of the target's regions, a 5-9%
+	// band centred on 7. Nothing in that routine reads the target's SDI or
+	// turrets, so a local nuclear strike is not intercepted; SDI's "up to 50% of
+	// incoming missiles" (breins.txt) is the interplanetary path.
+	NukeCostPerRegion = 3_543
+	NukeCostCap       = 50_000_000
+	NukeWastePct      = 7 // centre of the band
+	NukeWasteJitter   = 3 // each of the two Random(3) draws
+	// A successful strike also pays the attacker Random(NukeScoreAward) Score.
+	// BINARY-VERIFIED from the same routine, which adds it to empire field
+	// +0x286 — the field the scores table prints in its Score column and every
+	// aggressive action credits. The sibling awards, for #103: chemical
+	// Random(700), biological Random(400), a pirate raid Random(300) + 100, a
+	// spy Random(30). The two regular-attack awards multiply a battle figure by
+	// 192 and 82 and are gated behind a league config byte, so they need their
+	// own pass.
+	NukeScoreAward = 900
+	// Waste decontamination, BINARY-VERIFIED (BRE.OVR ovr_02e6b2 +0x458 and
+	// +0x4b1). A turn may clean min(max(waste/5, 10), waste) regions — 20% of
+	// what is ruined, but never fewer than 10 and never more than you hold — and
+	// each one costs the current region price divided by twice the empire's FOOD
+	// technology factor (the original passes `technology_factor(2.0, slot 0)`,
+	// the agricultural pair, not the maintenance one). So a realm with no
+	// technology cleans at half the price of new land, and a fully teched one at
+	// a quarter.
+	WasteDecontamDivisor  = 5  // 20% of the waste pile per turn
+	WasteDecontamFloor    = 10 // ...but at least this many
+	WasteDecontamPriceDiv = 2  // region price divided by this, before technology
+	ChemCost              = 6_000_000
+	BioCost               = 6_000_000
+	SDIStep               = 1_500_000 // gold of total funding per +1% SDI
 	// The SDI program's two running figures, CAPTURE-VERIFIED: seventeen
 	// consecutive SDI Program screens from a live league game (2026-08-08, see
 	// docs/dev/bre-screens.md) fit both exactly, across funding from 0 to just

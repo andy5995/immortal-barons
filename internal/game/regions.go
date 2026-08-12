@@ -2,6 +2,12 @@ package game
 
 // RegionMix is an empire's land broken down by type. Its Total must always
 // equal Empire.Land.
+//
+// Waste is land ruined by a nuclear or chemical strike. It is a region type in
+// its own right, not destroyed land: it stays on the books, still costs region
+// maintenance, and produces nothing until it is decontaminated. Nothing can buy
+// it, and no production path may read it — only Total, remove and the
+// decontamination step touch it.
 type RegionMix struct {
 	Coastal      int
 	Mountain     int
@@ -11,18 +17,21 @@ type RegionMix struct {
 	Urban        int
 	Industrial   int
 	Technology   int
+	Waste        int `json:"waste,omitempty"`
 }
 
 func (r RegionMix) Total() int {
 	return r.Coastal + r.Mountain + r.Desert + r.River +
-		r.Agricultural + r.Urban + r.Industrial + r.Technology
+		r.Agricultural + r.Urban + r.Industrial + r.Technology + r.Waste
 }
 
 // fields returns pointers to each count in a stable order, for generic
-// proportional add/remove.
+// proportional add/remove. Waste is included: the original spreads a loss over
+// every type it holds, waste among them, so a realm already carrying waste
+// absorbs part of the next strike with land that was ruined already.
 func (r *RegionMix) fields() []*int {
 	return []*int{&r.Coastal, &r.Mountain, &r.Desert, &r.River,
-		&r.Agricultural, &r.Urban, &r.Industrial, &r.Technology}
+		&r.Agricultural, &r.Urban, &r.Industrial, &r.Technology, &r.Waste}
 }
 
 // foodProduced is the per-turn food GROWN by Agricultural regions, given this

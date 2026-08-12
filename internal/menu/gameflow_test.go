@@ -609,3 +609,61 @@ func TestQueenRefundPaidOncePerDay(t *testing.T) {
 		t.Error("the realm should be marked as having drawn today's refund")
 	}
 }
+
+// The decontamination offer reaches the screen in the maintenance sequence and
+// spends what the player gives it. A held-together strike is only half a
+// mechanic if the defender is never shown the way out of it.
+func TestDecontaminateStageOffersAndSpends(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Regions = game.RegionMix{Coastal: 1000, Waste: 200}
+	p.Land = p.Regions.Total()
+	p.Gold = 1_000_000_000
+
+	cost := w.World.DecontaminateCost(p)
+	before := p.Land
+	// Accept the suggested amount, then send the cleaned land to Industrial.
+	f := &fakeSession{keys: []rune("\rI40\r")}
+
+	decontaminateStage(f, w)
+
+	out := f.out.String()
+	if !strings.Contains(out, "decontaminate") {
+		t.Fatalf("expected the decontamination offer; got:\n%s", out)
+	}
+	if !strings.Contains(out, "clean again") {
+		t.Fatalf("cleaned land should go through the type picker; got:\n%s", out)
+	}
+	p = w.Player()
+	if p.Regions.Waste != 160 {
+		t.Errorf("waste = %d after cleaning a turn's allowance of 40, want 160", p.Regions.Waste)
+	}
+	// Cleaned land has no type of its own — it is whatever the player named it.
+	if p.Regions.Industrial != 40 {
+		t.Errorf("Industrial = %d, want the 40 cleaned regions", p.Regions.Industrial)
+	}
+	// ...and it is not counted twice: the restore parked it in Coastal, the
+	// picker took it back out again.
+	if p.Regions.Coastal != 1000 {
+		t.Errorf("Coastal = %d, want 1000 — the reclaimed regions were double-counted", p.Regions.Coastal)
+	}
+	if p.Land != before {
+		t.Errorf("land changed across the clean-and-allocate round trip: %d -> %d", before, p.Land)
+	}
+	if p.Gold != 1_000_000_000-cost {
+		t.Errorf("gold = %d, want %d", p.Gold, 1_000_000_000-cost)
+	}
+}
+
+// A realm with no waste is not asked about it.
+func TestDecontaminateStageSilentWithoutWaste(t *testing.T) {
+	w := newWorld()
+	w.Player().Gold = 1_000_000
+	f := &fakeSession{}
+
+	decontaminateStage(f, w)
+
+	if out := f.out.String(); out != "" {
+		t.Errorf("expected no output with nothing to clean; got:\n%s", out)
+	}
+}

@@ -52,6 +52,15 @@ func printRegionTable(s session.Session, p *game.Empire) {
 			ansi.FgBrightYellow, name, ansi.Reset,
 			ansi.FgBrightWhite, *regionField(p, i), ansi.Reset)
 	}
+	// Waste has no key: it cannot be bought or sold, only decontaminated during
+	// maintenance. It is listed anyway so a baron can see what a strike left
+	// behind and what it is still paying upkeep on. The blank key column is
+	// sized from the "(X)" the rows above print, so the two stay aligned.
+	if p.Regions.Waste > 0 {
+		fmt.Fprintf(s, " %*s %s%-14s%s %s%5d%s\n",
+			len("(X)"), "", ansi.FgBrightRed, tr(s, "Waste"), ansi.Reset,
+			ansi.FgBrightRed, p.Regions.Waste, ansi.Reset)
+	}
 }
 
 // promptRegionType reads a single-letter region choice (case-insensitive),
@@ -201,13 +210,37 @@ func regionCapReached(w *ctx, p *game.Empire) bool {
 
 // allocateCaptured lets a winning attacker choose the region types for the land
 // captured in a Regular Attack (#58 — BRE decouples the winner's freely-chosen
-// composition from the proportional mix the loser bled). It reuses the Buy
-// Regions table and picker as an allocate-N loop (no gold): the player assigns
-// the n captured regions across types until none remain. Any left unassigned
-// when they quit early default to Coastal, so the captured land is never lost.
+// composition from the proportional mix the loser bled).
 func allocateCaptured(s session.Session, w *ctx, n int) {
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan,
-		fmt.Sprintf(tr(s, "You captured %d regions — choose which types to hold them as."), n), ansi.Reset)
+	allocateRegions(s, w, n, 0,
+		fmt.Sprintf(tr(s, "You captured %d regions — choose which types to hold them as."), n))
+}
+
+// allocateDecontaminated re-types land just cleaned of waste. The original pools
+// cleaned land with conquered land and asks the same question about both,
+// because neither has a type of its own until the owner gives it one. IB has
+// already restored the land as Coastal by this point — the gold is spent, so it
+// must not be in limbo if the session drops — hence reclaim: the n regions come
+// back out of Coastal and are shared out again.
+func allocateDecontaminated(s session.Session, w *ctx, n int) {
+	allocateRegions(s, w, n, n,
+		fmt.Sprintf(tr(s, "%d regions are clean again — choose which types to hold them as."), n))
+}
+
+// allocateRegions reuses the Buy Regions table and picker as an allocate-N loop
+// (no gold): the player assigns n untyped regions across types until none
+// remain. Any left unassigned when they quit early default to Coastal, so the
+// land is never lost.
+//
+// reclaim is how many of the n are ALREADY counted as Coastal and must be taken
+// back before they are shared out, so the total does not double. It is 0 for
+// land that has not been placed yet (a fresh conquest) and n for land restored
+// before the player was asked (decontamination).
+func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string) {
+	if n <= 0 {
+		return
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, headline, ansi.Reset)
 	printRegionTable(s, w.Player())
 
 	alloc := make([]int, len(regionTypeNames))
@@ -229,6 +262,9 @@ func allocateCaptured(s session.Session, w *ctx, n int) {
 	alloc[0] += remaining // regionTypeNames[0] == Coastal: soak up any unassigned remainder
 
 	if err := w.mutatePlayer(func(fp *game.Empire) error {
+		// Reclaim and re-grant inside ONE transaction: a save between the two would
+		// leave the land missing if the session dropped in the gap.
+		fp.Regions.Coastal -= min(reclaim, fp.Regions.Coastal)
 		for i, cnt := range alloc {
 			w.World.GrantRegions(fp, regionField(fp, i), cnt)
 		}
@@ -237,7 +273,7 @@ func allocateCaptured(s session.Session, w *ctx, n int) {
 		fail(s, err)
 		return
 	}
-	okNoPause(s, "Captured regions added to your empire. You now hold %d land.", w.Player().Land)
+	okNoPause(s, "Regions added to your empire. You now hold %d land.", w.Player().Land)
 }
 
 func sellLand(s session.Session, w *ctx) Result {

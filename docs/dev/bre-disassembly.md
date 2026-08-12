@@ -409,10 +409,69 @@ no FP overlay whose segment must be guessed.
 The exact operation surface, six-byte representation, BRE-linked constants,
 Python port, and calculator are documented in [bre-real48.md](bre-real48.md).
 
-## Scope and legal hygiene
+Two integer helpers in `0c03` the catalog does not name yet, identified from two
+independent call sites each while reading the nuclear strike and the waste
+decontamination routines:
 
-The map records mechanics of the file format, addresses, hashes, control-flow
-boundaries, and analysis names. It does not contain original code bytes,
-strings, display text, art, full disassembly, memory dumps, or debugger logs.
-Keep those out of commits. The static analysis names are project terminology,
-not claims about original compiler symbols.
+| Address     | Behaviour                                                        |
+|-------------|------------------------------------------------------------------|
+| `0c03:129b` | `max` of two int32 arguments                                     |
+| `0c03:12e1` | `min` of two int32 arguments                                     |
+
+The nuclear strike caps its price with `12e1` against 50,000,000, and the
+decontamination allowance is `min(max(waste / 5, 10), waste)` — one use of each,
+in the only arrangement that makes both routines sensible.
+
+## Empire record fields identified from their whole access list
+
+Both were found by scanning each binary for every `es:`-prefixed `[di+disp16]`
+access and every `add di,disp16` at the field's displacement, in the
+current-empire form (`disp`) and the arbitrary-empire form (`disp + 0xf093`),
+then naming the containing block for each hit. The method is the one the
+`bre-gather` skill describes; what makes it conclusive is reading *all* the
+sites, not the two nearest the question.
+
+**`+0x286` — Score** (int32). Fourteen sites. Written by `resolve_regular_attack`
+(two branches, gated on config record `+0x3d8`), `launch_nuclear_attack`,
+`launch_chemical_attack`, `launch_biological_attack`, `launch_pirate_raid`,
+`resolve_returning_attack` and `send_spy`; read by `show_empire_status`,
+`show_scores`, `build_recon_record`, and `format_player_ranking_line`. That last
+one settles it: the rankings line prints `total_regions`, then this field, then
+the net-worth function — Territory, Score, Net Worth, in the scores table's own
+column order.
+
+**`+0xba` — the unallocated-region pool** (int32). Credited by a won regular
+attack, a pirate raid, a returning interplanetary attack, and waste
+decontamination; drained by the picker that prompts `[N Regions left]` and
+`How many <Type> regions?`, which adds the named count to the chosen type's field
+and subtracts it here, looping until the pool is empty.
+
+`total_regions` (`056d:0ec6`) sums exactly the nine region counts at `+0x96`
+through `+0xb6+2` and does **not** include this pool, so unallocated land is not
+territory until it is placed.
+
+### A catalog name corrected
+
+`allocate_unassigned_regions` (`BRE.OVR 0x030ebb`) was catalogued as
+`select_regions_to_lose`, which the field access list contradicts: it returns
+immediately when the pool is empty, and its body adds the chosen count to a
+region type while subtracting the same from the pool. Its four callers are the
+three that credit the pool — a won regular attack, a pirate raid, waste
+decontamination — plus `run_player_turn`, which re-offers whatever is left. The
+key handling is the region-picker's: a type letter, `?` to redisplay the list,
+`*` for the advisors, Enter to leave.
+
+Renamed in the catalog with `select_regions_to_lose` retired to `aliases`, so
+the old name still resolves — the convention `calculate_crown_tax` already
+follows. Every record derived from the name (its 23 branch/loop/join blocks)
+was renamed with it, and the `"to"`/`"from"` call-graph references were rewritten
+to match.
+
+**Editing the catalog by hand:** it round-trips exactly through
+`json.dumps(catalog, indent=2)` plus a trailing newline, so a structural edit
+need not reformat the file — dumping with any other setting produces a
+million-line diff. The `validation` block at the end is a set of counters over
+the catalog's own contents and goes stale on any edit; recompute it with
+`validate_catalog` from `scripts/bre-disasm.py` and confirm with
+`bre-disasm.py check-catalog`. Retiring a name into `aliases` raises
+`unique_names` by one, because the old name stays resolvable.

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-11 18:38-0500\n"
+"POT-Creation-Date: 2026-08-12 11:47-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1730,7 +1730,8 @@ msgstr ""
 #: internal/help/content/military/turrets.md:16
 msgid ""
 "Turrets shoot down attacking jets, destroy attacking tanks, and kill "
-"attacking troops. They also help stop incoming nuclear missiles."
+"attacking troops. They do not stop a neighbour's nuclear missile — nothing "
+"does."
 msgstr ""
 
 #. type: Plain text
@@ -2090,6 +2091,80 @@ msgid ""
 "land alongside your Urban land."
 msgstr ""
 
+#. type: Yaml Front Matter Hash Value: title
+#: internal/help/content/regions/region-waste.md:1
+#, no-wrap
+msgid "Waste"
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/regions/region-waste.md:8
+#, fuzzy, no-wrap
+#| msgid "Regions"
+msgid "Waste Regions"
+msgstr "Регионы"
+
+#. type: Plain text
+#: internal/help/content/regions/region-waste.md:12
+msgid ""
+"Waste is land a nuclear or chemical strike has ruined. You cannot buy it and "
+"you cannot sell it — an enemy gives it to you."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-waste.md:16
+msgid ""
+"Waste stays on your books. It counts toward your territory, it costs the "
+"same upkeep as any other region, and it earns you nothing. A realm that "
+"takes several strikes and ignores them ends up paying for land that does no "
+"work."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-waste.md:19
+msgid ""
+"Cleaning it up is called decontamination, and it is offered during "
+"maintenance whenever you hold any. Two limits apply:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/regions/region-waste.md:25
+msgid ""
+"You can clean a **fifth of your waste each turn**, but never fewer than **10 "
+"regions** and never more than you actually hold. A big mess takes several "
+"turns to clear no matter how rich you are."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/regions/region-waste.md:25
+msgid ""
+"Each cleaned region costs **half the going price of new land**. Agricultural "
+"research cuts that further, down to a quarter."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-waste.md:28
+msgid ""
+"Paying part of the bill cleans part of the pile, so a short turn is not a "
+"wasted one."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-waste.md:31
+msgid ""
+"Cleaned land has no type until you give it one. You are asked to share it "
+"out across region types, the same way you share out land you have conquered."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/regions/region-waste.md:34
+msgid ""
+"Strategy: decontaminate early. The upkeep on ruined land runs every turn, so "
+"a pile you leave alone quietly taxes you for the rest of the game, and the "
+"clean-up rate means you cannot fix it all at once when you finally get round "
+"to it."
+msgstr ""
+
 #. type: Title #
 #: internal/help/content/warfare/attack-biological.md:1
 #: internal/help/content/warfare/attack-biological.md:8
@@ -2134,19 +2209,46 @@ msgid "Nuclear Attack"
 msgstr "Ядерная атака"
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-nuclear.md:12
-#, fuzzy
-#| msgid ""
-#| "Turns some of the enemy's regions into waste. It costs a lot, and the "
-#| "cost grows with the size of the target. Large numbers of enemy turrets "
-#| "can shoot down some of the missiles."
+#: internal/help/content/warfare/attack-nuclear.md:14
 msgid ""
-"A Nuclear Attack turns some of the enemy's regions into waste. It costs a "
-"lot, and the cost grows with the size of the target. Large numbers of enemy "
-"turrets can shoot down some of the missiles."
+"A Nuclear Attack ruins a slice of the enemy's regions, turning them to "
+"waste. It takes no land from them and kills nobody: the target keeps every "
+"region, pays upkeep on all of them, and earns nothing from the ruined ones "
+"until they are cleaned up."
 msgstr ""
-"Превращает часть регионов врага в пустошь. Стоит дорого, и цена растёт с "
-"размером цели."
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-nuclear.md:19
+msgid ""
+"You are quoted a price once you name a target, and you can walk away from "
+"it. The price is set by the size of the realm you are aiming at — a large "
+"neighbour needs a large warhead — up to a ceiling, so the very biggest "
+"realms are proportionally cheap to hit."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-nuclear.md:23
+msgid ""
+"About 7% of the target's land is ruined per strike, varying a couple of "
+"points either way. Nothing shoots the missile down: an SDI program defends "
+"against missiles arriving from another planet, not from a neighbour on your "
+"own."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-nuclear.md:25
+msgid ""
+"A successful strike raises your score, whether or not it did much damage."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-nuclear.md:29
+msgid ""
+"Strategy: a nuclear strike wears a rival down. It cannot finish one off and "
+"it hands you nothing you can use; it makes an enemy's territory expensive to "
+"hold while you build toward a real attack. Against a small realm the damage "
+"rounds away to almost nothing, so save the gold for a large one."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/warfare/attack-regular.md:1
@@ -2410,6 +2512,19 @@ msgid ""
 "for, and the shield weakens with it. A large pot is a large bill every turn, "
 "so grow it at a pace your income can carry."
 msgstr ""
+
+#, fuzzy
+#~| msgid ""
+#~| "Turns some of the enemy's regions into waste. It costs a lot, and the "
+#~| "cost grows with the size of the target. Large numbers of enemy turrets "
+#~| "can shoot down some of the missiles."
+#~ msgid ""
+#~ "A Nuclear Attack turns some of the enemy's regions into waste. It costs a "
+#~ "lot, and the cost grows with the size of the target. Large numbers of "
+#~ "enemy turrets can shoot down some of the missiles."
+#~ msgstr ""
+#~ "Превращает часть регионов врага в пустошь. Стоит дорого, и цена растёт с "
+#~ "размером цели."
 
 #~ msgid ""
 #~ "Nine pirate factions live in the world. Their strength is random. Any "

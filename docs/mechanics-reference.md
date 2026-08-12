@@ -262,9 +262,8 @@ flow runs in this order:
 Prompt colors (from a color capture): text plain white; the required and
 suggested amounts bright cyan, the max dark cyan, the `(…; …)` parens bright blue.
 
-IB implements steps 1, 2, 3, the SDI and support/morale parts of 4, and 5, with
-the required-capped prompts and these colors. Waste-region decontamination is not
-built. The SDI prompt is `Your SDI Program requires N gold.`, asked after the
+IB implements steps 1, 2, 3, all of 4, and 5, with the required-capped prompts
+and these colors. The SDI prompt is `Your SDI Program requires N gold.`, asked after the
 region maintenance and before the crown tax (live capture).
 
 **Method — the Auto-Pay line is a better probe than the prompts.** With Auto-Pay
@@ -404,7 +403,54 @@ All four constants live in `balance.go`; Score never drops below 0.
   striking one named baron on another planet, leaving at once rather than
   assembling like a group attack. Group attacks, terrorist ops and bombing ops
   have their own separate per-day allowances.
-- **Nuclear attack** — turns enemy regions into waste (high cost).
+- **Nuclear attack** — turns enemy regions into waste. BINARY-VERIFIED
+  (`BRE.OVR` `launch_nuclear_attack`, unit `ovr_00e809` +0x225e):
+
+  ```
+  cost    = min(targetRegions * 3543, 50,000,000)
+  percent = 7 + Random(3) - Random(3)          -- a 5-9% band, centred on 7
+  ruined  = targetRegions * percent / 100      -- truncated
+  ```
+
+  The ruined count is taken out of the target's mix proportionally — *including*
+  any waste it already holds, so a realm that is already half-ruined absorbs part
+  of the next strike with land that was ruined anyway — and the same number is
+  added back as Waste. **No land changes hands, nobody dies, and no realm can be
+  eliminated by a nuclear strike.** Against a small realm the truncation can
+  round the damage to zero.
+
+  **The strike is not intercepted.** Nothing in the routine reads the target's
+  SDI or turret count; its only reads of the target record are the realm name and
+  the region total. SDI's "up to 50% of incoming missiles" (breins.txt) is the
+  interplanetary path, and `whatsnew.doc`'s much older "Missile Bases now help
+  defend against incoming Nuclear Missiles" does not survive into v0.988's local
+  routine. IB previously scaled the damage by `(100 - SDI)`; that was IB's own
+  invention and is gone.
+
+  The price is quoted only after a target is named — all three missile screens
+  reach one shared arms-dealer routine that prints the figure and takes a yes
+  before deducting anything — so IB asks for the target first, then quotes.
+
+  The attacker also gains **`Random(900)` Score**. Empire field +0x286 is the
+  Score: it is written by eight aggressive actions and read by the empire status
+  screen, the scores table's middle column, and the recon record. The award is a
+  flat draw, not a share of the damage, so a strike that ruins nothing still
+  pays.
+
+  **The sibling awards, recovered in the same pass (for #103):**
+
+  | Action                          | Score award              |
+  |---------------------------------|--------------------------|
+  | Nuclear strike                  | `Random(900)`            |
+  | Chemical strike                 | `Random(700)`            |
+  | Biological strike               | `Random(400)`            |
+  | Pirate raid                     | `Random(300) + 100`      |
+  | Send spy                        | `Random(30)`             |
+  | Regular attack (two branches)   | a battle figure × 192, × 82 |
+  | Returning interplanetary attack | a battle figure × 233    |
+
+  The two regular-attack awards sit behind a league config byte (config record
+  +0x3d8) and need their own pass before IB adopts them.
 - **Chemical attack** — damages fewer regions but kills a lot of people
   (and troopers).
 - **Biological attack** — hurts people and troopers, but not land.
@@ -726,8 +772,51 @@ different economic role:
 - **Industrial** — produces military goods; vital when buying arms is
   disabled and you must *build* instead. Also yields gold.
 
-Waste regions (from enemy weapons) can be cleaned for less than the cost
-of new land.
+**Waste** is the ninth region type, not destroyed land. Nuclear and chemical
+strikes convert productive regions into it; it counts toward territory, costs the
+same region upkeep as anything else, produces nothing, and cannot be bought or
+sold. BINARY-VERIFIED (`BRE.OVR` `ovr_02e6b2` +0x458 and +0x4b1), decontamination
+is offered in the maintenance sequence — after the SDI upkeep, before the
+support and morale boosts — and is optional:
+
+```
+allowance = min(max(waste / 5, 10), waste)        -- a fifth per turn, floor 10
+perRegion = regionPrice / (2 * technologyFactor(2.0, slot 0))  -- the FOOD factor
+cost      = allowance * perRegion
+```
+
+The technology factor is the **food** one, not the maintenance one: the routine
+passes `(2.0, slot 0)`, the pair the agricultural yield uses, where region and
+military maintenance pass `(1.4, slot 3)` and SDI upkeep passes `(2.0, slot 1)`.
+Reading those four sibling call sites together is what pins it — and it
+independently confirms IB's whole slot/cap table. So an unteched realm cleans at
+half the price of new land and a fully teched one at a quarter.
+
+The original's `whatsnew.doc` records the per-turn share being raised from 10% to
+20%, which the disassembled `/ 5` confirms. Underpaying is the original's rule
+too, not IB's: it divides the gold given by the full bill and scales the count by
+the result, so part of the bill cleans part of the pile.
+
+**Cleaned land has no type of its own.** The original moves it to a pool of
+unallocated regions (empire field +0xba, an int32 that sits just past the nine
+region counts) and asks the owner to name the types, through the same
+`[N Regions left]` / `How many <Type> regions?` screen that shares out conquered
+land — the screen IB already implements as the #58 capture picker. Conquest,
+pirate spoils, a returning interplanetary attack and decontamination all feed
+that one pool.
+
+`total_regions` sums the nine region counts and **excludes** the pool, so
+unallocated land is not territory until it is placed: it does not count toward a
+nuclear strike's damage base, technology dilution, or the scores table's
+Territory column. IB's deferred-capture model already matches this.
+
+**Divergence:** IB has no persisted pool. It runs the picker at the moment the
+land is cleaned (or captured), and drops any remainder into Coastal if the player
+quits the picker early; the original keeps the pool on the empire record and
+re-offers it. Because the gold for decontamination is already spent, IB restores
+the cleaned land as Coastal *before* asking, and the picker reclaims it — so a
+session that drops between the payment and the question costs the player the
+choice of type, never the land.
 
 **Region gold income (BRE-verified — disassembly of BRE.OVR, offsets
 0x342C0–0x34A4E).** Each gold region yields, per turn,

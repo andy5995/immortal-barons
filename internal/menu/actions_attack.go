@@ -275,12 +275,22 @@ func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name 
 	return names[i], true
 }
 
+// flatCost adapts an op whose price does not depend on the target to the costOf
+// signature localAttack takes.
+func flatCost(gold int64) func(land int) int64 { return func(int) int64 { return gold } }
+
 // localAttack shares the target-selection loop used by the nuclear, chemical,
 // and biological attacks and by the covert/bomb ops — every attack aimed at a
 // realm on the local planet (as opposed to an interplanetary/group attack).
 // endsTurn is true only for the War-menu WMD (one attack per turn); covert ops
 // stay in their own menu.
-func localAttack(s session.Session, w *ctx, label string, cost int, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
+//
+// costOf prices a gold-fee op against the target's size; nil marks an op with
+// no fee. The original quotes the price only once a target is named — the three
+// missile screens all reach the same arms-dealer routine, which prints the
+// figure and asks for a yes before anything is deducted — so a warhead priced
+// off the target has somewhere to read that size from.
+func localAttack(s session.Session, w *ctx, label string, costOf func(land int) int64, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
 	if blockedByProtection(s, w) {
 		return Stay
 	}
@@ -289,14 +299,24 @@ func localAttack(s session.Session, w *ctx, label string, cost int, endsTurn boo
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	// BRE goes straight to the target prompt after the menu echoes the op; only a
-	// gold-fee op (WMD) shows a cost line first, since its price isn't on a menu.
-	if cost > 0 {
-		fmt.Fprintf(s, "\n%s"+tr(s, "%s — %d gold.")+"%s\n", ansi.FgBrightCyan, label, cost, ansi.Reset)
-	}
 	name, chosen := pickAttackTarget(s, rows, tr(s, "Choose a target (letter, RETURN to abort)"))
 	if !chosen {
 		return Stay
+	}
+	if costOf != nil {
+		land := 0
+		for _, r := range rows {
+			if r.name == name {
+				land = r.land
+			}
+		}
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s — an arms broker wants %s gold for the warhead.")+"%s\n",
+			ansi.FgBrightCyan, label, comma(costOf(land)), ansi.Reset)
+		// Default NO: a warhead can cost tens of millions, and Enter is the
+		// default-accept key everywhere else in the turn.
+		if !AskYesNo(s, "Buy it?", false) {
+			return Stay
+		}
 	}
 	var report string
 	err := w.mutatePlayer(func(p *game.Empire) error {
@@ -321,15 +341,15 @@ func localAttack(s session.Session, w *ctx, label string, cost int, endsTurn boo
 }
 
 func nuclearAttack(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Nuclear Attack", game.NukeCost, true, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
+	return localAttack(s, w, "Nuclear Attack", game.NukeCostForLand, true, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
 }
 
 func chemicalAttack(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Chemical Attack", game.ChemCost, true, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
+	return localAttack(s, w, "Chemical Attack", flatCost(game.ChemCost), true, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
 }
 
 func biologicalAttack(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Biological Attack", game.BioCost, true, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
+	return localAttack(s, w, "Biological Attack", flatCost(game.BioCost), true, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
 }
 
 // pirateColors are the per-faction name colors, in game.PirateFactions order.
