@@ -9,6 +9,9 @@
   * A nuclear strike raises the attacker's score
   * Decontaminated land is shared out across region types by its owner
   * Added a Waste help topic
+  * Inter-BBS packets carry the sending board's signature, and a board whose
+    key is in the league roster can no longer be impersonated
+  * Added "-gen-board-key" to create this board's packet-signing key
   * Population follows the original's model: how many people a realm holds is
     set by the kind of land it owns — Urban housing far outweighing every other
     type — multiplied by popular support and divided by the tax rate. Raw

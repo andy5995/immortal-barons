@@ -44,7 +44,11 @@ type Packet struct {
 	// Coordinator may author (#53).
 	Seq       uint64
 	Signature []byte
-	Reset     *LeagueReset // Coordinator's order to start a new season (#65)
+	// BoardSig is the sending board's own signature over this whole packet, so
+	// FromBoard is proven rather than claimed (#118). Verified against the
+	// public key the signed roster carries for that board.
+	BoardSig []byte
+	Reset    *LeagueReset // Coordinator's order to start a new season (#65)
 	// League is the Coordinator's league number, so a board playing in two
 	// leagues that share one inbound directory can tell the traffic apart.
 	League int
@@ -378,6 +382,12 @@ type LeagueNode struct {
 	City    string
 	State   string
 	Country string
+	// PublicKey is this board's ed25519 packet-signing key, hex-encoded, and is
+	// what makes FromBoard checkable (#118). The Coordinator records it and the
+	// signed roster carries it, so a member never has to trust a key it was
+	// handed by the board the key belongs to. Empty on a roster written before
+	// this existed.
+	PublicKey string
 	// Hosts are the node numbers this board forwards packets for — BRE's HOST
 	// routing, written on the roster's first line as "2 HOST 3 4 8". The
 	// Coordinator maintains it for the whole league, so a member board
@@ -789,6 +799,26 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 // ApplyPacket applies an inbound packet to this board and returns a result
 // packet (attack outcomes) addressed back to the origin.
 func (w *World) ApplyPacket(p Packet) Packet {
+	// Origin BEFORE anything is recorded about the packet, including replay
+	// bookkeeping (#118). SeenPacket raises HighSeq[FromBoard], so checking it
+	// first would let a forged packet with a large sequence number poison the
+	// counter and silently drop every genuine packet from the board it
+	// impersonates — a cheaper attack than the forgery this exists to stop.
+	//
+	// A packet from a board the roster names a key for has to prove it is that
+	// board, or none of it is applied. Everything below — scores, strikes,
+	// results, mail — was previously believed on the strength of the FromBoard
+	// string alone, so one file dropped in the inbound directory could grant a
+	// realm an army or take its regions.
+	//
+	// A board the roster names NO key for is still applied, because that is
+	// every league until its Coordinator publishes one, and refusing would break
+	// a working league on upgrade rather than securing it. That transition state
+	// is the remaining gap, and it closes as rosters gain keys.
+	if ok, checked := w.VerifyBoardOrigin(p); checked && !ok {
+		w.postNews(fmt.Sprintf("A packet claiming to be from %s did not match that board's key and was refused.", p.FromBoard))
+		return Packet{}
+	}
 	// Applying the same packet twice would pay out a strike's results, a
 	// broadcast or a reset all over again, so a packet already seen here is
 	// dropped whole (#53).

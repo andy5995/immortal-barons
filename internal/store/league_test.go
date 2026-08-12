@@ -65,3 +65,58 @@ func TestParseNodeListSkipsMalformedBlocks(t *testing.T) {
 		t.Errorf("want only the good block parsed, got %+v", nodes)
 	}
 }
+
+// TestNodeListKeyLineIsOptional pins the roster's back-compatibility both ways
+// (#118). The signing key is a SEVENTH line so an existing roster parses
+// unchanged and a keyless one is rewritten byte for byte — an older board reads
+// blocks by index and simply never looks at index six.
+func TestNodeListKeyLineIsOptional(t *testing.T) {
+	dir := t.TempDir()
+	old := filepath.Join(dir, "old.dat")
+	// A roster exactly as written before keys existed.
+	const legacy = "1 HOST 2\nAlpha\n1:1/1\nCity\nST\nUS\n\n2\nBravo\n1:1/2\nTown\nST\nUS\n"
+	if err := os.WriteFile(old, []byte(legacy), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	nodes, err := ParseNodeList(old)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(nodes) != 2 {
+		t.Fatalf("parsed %d nodes, want 2", len(nodes))
+	}
+	for _, n := range nodes {
+		if n.PublicKey != "" {
+			t.Errorf("%s got a key from a roster that has none: %q", n.Name, n.PublicKey)
+		}
+	}
+	// Rewriting must not change a keyless roster at all.
+	round := filepath.Join(dir, "round.dat")
+	if err := WriteNodeList(round, nodes); err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(round)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != legacy {
+		t.Errorf("keyless roster changed on rewrite:\n got %q\nwant %q", got, legacy)
+	}
+
+	// With a key, it survives the trip and lands on the right board.
+	nodes[1].PublicKey = "abc123"
+	keyed := filepath.Join(dir, "keyed.dat")
+	if err := WriteNodeList(keyed, nodes); err != nil {
+		t.Fatal(err)
+	}
+	back, err := ParseNodeList(keyed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if back[0].PublicKey != "" || back[1].PublicKey != "abc123" {
+		t.Errorf("keys after round trip: %q, %q", back[0].PublicKey, back[1].PublicKey)
+	}
+	if back[0].Hosts == nil || back[1].Name != "Bravo" {
+		t.Errorf("the key line disturbed the other fields: %+v", back)
+	}
+}

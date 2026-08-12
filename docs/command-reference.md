@@ -152,6 +152,12 @@ These options are for games that link several BBSes together (a "league"). See
 - **`-coord-key KEY`** — Record the coordinator's public key on this board, then
   exit. Every board in the league needs this. Without it, a board cannot check
   that league orders really came from the coordinator, and will refuse them.
+- **`-gen-board-key`** — Create this board's packet-signing key, then exit.
+  Every board in the league runs this once. It prints a line to send to the
+  league coordinator, who puts it in the roster; once it is there, other boards
+  can tell a packet from this board apart from one that only claims to be. The
+  private half is written to `board.key` in the data folder — anyone holding it
+  can send packets as this board.
 - **`-league-reset DATE`** — Start a new season across the whole league on DATE,
   then exit. Only the coordinator uses this. It resets this board and sends a
   signed order for the other boards to reset on their next `-planetary` run.

@@ -4,9 +4,11 @@ import (
 	"crypto/ed25519"
 	"crypto/sha256"
 	"encoding/binary"
+	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 )
 
 // League packet authentication (#53).
@@ -163,5 +165,103 @@ func (w *World) StampOutbox() {
 			// report here.
 			_ = w.SignAsCoordinator(&w.Outbox[i])
 		}
+		// The origin signature goes on LAST, so it covers the Coordinator
+		// signature just written and nothing can lift that onto another packet.
+		// A board with no key of its own sends unsigned, exactly as above: the
+		// far side applies it only while its roster names no key for us, which
+		// is the transition state, not an error to report from here.
+		w.Outbox[i].BoardSig = nil
+		_ = w.SignAsBoard(&w.Outbox[i])
 	}
+}
+
+// Per-board packet origin (#118).
+//
+// The Coordinator signature above answers "may this board dictate to me". It
+// says nothing about the rest of a packet, so scores, strikes, terror ops,
+// results and mail were applied on the strength of a plain FromBoard string —
+// the same string the comment above calls "just a string a file can claim".
+// Writing one file into an inbound directory was enough to grant a realm an
+// army, or take regions off one.
+//
+// So every board now signs every packet with a key of its own, and the roster
+// carries the matching public half. The two mechanisms have different jobs and
+// different trust roots on purpose:
+//
+//   - coord.key / coord.pub — recorded once by hand, and the anchor. It is what
+//     makes the ROSTER trustworthy.
+//   - board.key + LeagueNode.PublicKey — distributed inside that signed roster.
+//     It is what makes every OTHER packet trustworthy.
+//
+// The chain closes: a sysop records one key out of band, and every board key
+// after that arrives inside something already verifiable.
+//
+// What it still does not do, and cannot: vouch for the figures a board reports
+// about itself, or stop a transport quietly dropping traffic. Origin is not
+// honesty, and it is not delivery.
+
+// boardSigningBytes renders a packet for its origin signature: everything it
+// carries, with the two fields that legitimately change in transit zeroed.
+// BoardSig is the signature itself, and Hops is incremented by each forwarding
+// hub. The Coordinator's own Signature IS covered, so it cannot be lifted from
+// one packet onto another.
+func boardSigningBytes(p Packet) ([]byte, error) {
+	p.BoardSig = nil
+	p.Hops = 0
+	return json.Marshal(p)
+}
+
+// SignAsBoard stamps a packet with this board's origin signature.
+func (w *World) SignAsBoard(p *Packet) error {
+	if len(w.BoardKey) != ed25519.PrivateKeySize {
+		return errors.New("no board key is loaded")
+	}
+	msg, err := boardSigningBytes(*p)
+	if err != nil {
+		return err
+	}
+	p.BoardSig = ed25519.Sign(ed25519.PrivateKey(w.BoardKey), msg)
+	return nil
+}
+
+// BoardPublicKey returns the roster's public key for a board, and whether the
+// roster names one. A roster written before this existed carries none, which is
+// the difference between "cannot check" and "failed the check".
+func (w *World) BoardPublicKey(board string) (ed25519.PublicKey, bool) {
+	if board == "" {
+		return nil, false
+	}
+	for _, n := range w.LeagueNodes {
+		// Exact match, as fromCoordinator and IsLeagueCoordinator compare board
+		// names. A case-insensitive match here would answer "which board is
+		// this" differently from the two checks either side of it.
+		if n.Name != board {
+			continue
+		}
+		raw, err := hex.DecodeString(strings.TrimSpace(n.PublicKey))
+		if err != nil || len(raw) != ed25519.PublicKeySize {
+			return nil, false
+		}
+		return ed25519.PublicKey(raw), true
+	}
+	return nil, false
+}
+
+// VerifyBoardOrigin checks a packet against the sending board's roster key.
+// checked is false when the roster names no key for that board, which is the
+// state every league is in until its Coordinator publishes one — see
+// ApplyPacket for what is done about it.
+func (w *World) VerifyBoardOrigin(p Packet) (ok, checked bool) {
+	pub, found := w.BoardPublicKey(p.FromBoard)
+	if !found {
+		return false, false
+	}
+	if len(p.BoardSig) == 0 {
+		return false, true
+	}
+	msg, err := boardSigningBytes(p)
+	if err != nil {
+		return false, true
+	}
+	return ed25519.Verify(pub, msg, p.BoardSig), true
 }
