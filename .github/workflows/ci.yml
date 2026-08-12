@@ -90,3 +90,32 @@ jobs:
           go-version-file: go.mod
       - name: go test -race
         run: go test -race ./...
+
+  # The docs claim BSD support and sysops host doors on FreeBSD, but nothing
+  # tested it. The flock path is `//go:build unix`, so macOS already covers that
+  # file; what this leg adds is x/sys and x/term on a BSD kernel.
+  #
+  # Go comes from go.dev rather than pkg, so the version tracks go.mod instead
+  # of whatever the ports tree happens to carry. fetch(1) is base FreeBSD; curl
+  # is not installed. It unpacks under ~/sdk because ~/go is the default GOPATH,
+  # and a toolchain there makes every go command warn and puts the module cache
+  # inside GOROOT.
+  freebsd:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: go vet, build, and test on FreeBSD
+        uses: cross-platform-actions/action@v1.4.0
+        with:
+          operating_system: freebsd
+          version: '15.1'
+          run: |
+            version="$(awk '/^go /{print $2}' go.mod)"
+            fetch -o go.tar.gz "https://go.dev/dl/go$version.freebsd-amd64.tar.gz"
+            mkdir -p "$HOME/sdk"
+            tar -C "$HOME/sdk" -xzf go.tar.gz
+            export PATH="$HOME/sdk/go/bin:$PATH"
+            go version
+            go vet ./...
+            go build ./...
+            go test ./...
