@@ -409,6 +409,19 @@ no FP overlay whose segment must be guessed.
 The exact operation surface, six-byte representation, BRE-linked constants,
 Python port, and calculator are documented in [bre-real48.md](bre-real48.md).
 
+Two integer helpers in `0c03` the catalog does not name yet, identified from two
+independent call sites each while reading the nuclear strike and the waste
+decontamination routines:
+
+| Address     | Behaviour                                                        |
+|-------------|------------------------------------------------------------------|
+| `0c03:129b` | `max` of two int32 arguments                                     |
+| `0c03:12e1` | `min` of two int32 arguments                                     |
+
+The nuclear strike caps its price with `12e1` against 50,000,000, and the
+decontamination allowance is `min(max(waste / 5, 10), waste)` — one use of each,
+in the only arrangement that makes both routines sensible.
+
 ## Scope and legal hygiene
 
 The map records mechanics of the file format, addresses, hashes, control-flow
