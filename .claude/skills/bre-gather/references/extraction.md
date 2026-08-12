@@ -6,6 +6,22 @@ wherever you unpacked the original BRE distribution (see SKILL.md), e.g.
 
 ## 1. Find a menu's labels
 
+When the goal is to find code that uses text, start with the durable string
+reference index instead of flattening the binary with `strings`:
+
+```
+python3 scripts/bre-disasm.py find-string --directory "$BRE" "group attack"
+```
+
+The default result lists every cataloged function and block that directly
+references a matching Pascal string. Matching is case-insensitive. IDs such as
+`bre0988:ovr:procedure:...` are durable even if a semantic name improves. Pass
+a returned ID to `lookup` and walk `callees[].to_id` or `callers[].from_id`.
+Use `--details` only when exact private text and instruction sites are needed;
+never commit that output.
+
+Use raw `strings` when declaration order or unreferenced text is the question:
+
 ```
 strings -n 3 "$BRE/BRE.OVR" | grep -iE "group attack|travel time|terrorist|sdi|gooie|spy database"
 ```
@@ -61,14 +77,31 @@ the original binary. Do not try to infer them from the OVR.
 
 ## 6. Disassembling code (when strings aren't enough)
 
-Reading BRE's *code* (menu dispatch, the shape of a routine) with `ndisasm`:
+Use the static unit map so a convenient-looking prologue or data hole cannot
+silently misalign the decode:
 
 ```
-# function prologues are 55 89 E5 (push bp; mov bp,sp); find them:
-grep -aboF $'\x55\x89\xe5' "$BRE/BRE.OVR" | head
-# disassemble a slice as 16-bit real-mode from a file offset:
-ndisasm -b 16 -o <off> <(dd if="$BRE/BRE.OVR" bs=1 skip=<off> count=320 2>/dev/null)
+python3 scripts/bre-disasm.py verify --directory "$BRE"
+python3 scripts/bre-disasm.py check-catalog
+python3 scripts/bre-disasm.py find-string --directory "$BRE" "spy"
+python3 scripts/bre-disasm.py map --directory "$BRE" --ovr-offset 0x4ba48
+python3 scripts/bre-disasm.py list --kind procedure --filter spy
+python3 scripts/bre-disasm.py lookup send_spy
+python3 scripts/bre-disasm.py list --kind dispatch
+python3 scripts/bre-disasm.py disasm --directory "$BRE" --unit ovr_04b9d0
 ```
+
+The committed catalog works without local binaries and gives stable names,
+every exported/direct-call procedure and direct-jump/fallthrough block, named
+complementary chunks, fixup streams, resident targets, unit-wide reachable
+ranges, external targets, bidirectional caller/callee edges, string references,
+and 13 closed calculated-transfer sets. For the pinned v0.988 files there are no
+reachable indirect jumps, unresolved transfers, or decode conflicts. A
+`calculated_call` edge carries a `dispatch_id`; look it up for the complete
+target list and proof. `disasm` uses the catalog to synchronize every block and
+skip every named non-code span. The loader, fixup format, durable-ID schema,
+Xvfb-backed DOSBox validation procedure, and graph-walking examples are in
+`docs/dev/bre-disassembly.md`.
 
 **Code masquerading as strings (a second length-prefix trap).** A run like
 `<1u <2u <3u <4u` right after a menu-name cluster (e.g. Civilian/Economic/
@@ -79,27 +112,20 @@ prints it as `<1u` because those bytes are printable. So a "cluster" of tiny
 disassemble it to confirm the menu's item→routine order (which strings alone
 cannot give you — see SKILL.md on reachability).
 
-**The real-arithmetic wall — why exact magnitude formulas resist disassembly.**
-BRE is Turbo Pascal, and its 6-byte `Real` type is **software** floating point:
-add/mul/div/compare are done by **far calls to RTL helper routines** (the
-`call word 0xfd0:0x…` you'll see everywhere), not FPU ops or readable
-`imul`/`idiv`. Combined with overlay relocation (targets are fixed up at load
-time, so file offsets ≠ runtime segment:offset) and no symbols, a per-turn
-magnitude formula reads as RTL-call soup, not arithmetic. This is the same wall
-that blocked the **score formula**; the **tech-efficiency formula/cap** hit it
-too (the "Because of technology…" report routine at ~0x32D1B is pure display —
-it `call`s string-builders on already-computed percentages; the formula lives in
-a separate real-arithmetic unit).
-
-**So, for magnitudes: black-box, don't disassemble.** Recover the *effect list /
-structure* from strings + help + dispatch disassembly (all reliable), but get
-the *numbers* by varying inputs in live play and reading BRE's own reported
-output — e.g. vary Technology-vs-total regions and read the "% strength / %
-production" the tech report prints; fit the curve and the cap. This is exactly
-how the score formula was cracked (`Score += round(day-start net worth)`), and
-it beats reversing software-float assembly. If static reversing is truly needed,
-**Ghidra** (free, 16-bit decompiler) handles the segmentation far better than
-`ndisasm`; radare2 helps navigate but not with the software-float problem.
+**Real arithmetic is readable now; do not default to curve fitting.** BRE's
+six-byte Turbo Pascal `Real` type uses resident software helpers rather than x87
+instructions. The catalog names the complete linked `0fd0` conversion,
+arithmetic, comparison, standard-function, and random operation surface, and
+raw OVR far targets retain canonical logical segments because the fixup format
+is known. Follow those named calls,
+calculate six-byte constants and intermediates with
+`scripts/bre-real48.py`, reconstruct the expression, and then validate it
+against play. Always spell memory inputs `mem:hhhhhhhhhhhh`; the calculator
+decorates memory output the same way so it cannot be confused with a hex
+integer. It implements the exact operation surface and constants linked into
+BRE 0.988; do not substitute Python `float`, `math`, or a different TP runtime.
+See `docs/dev/bre-real48.md`. Black-box sampling remains a useful cross-check,
+not a substitute for static analysis.
 
 ## 7. Config-editor field bounds
 

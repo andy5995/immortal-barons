@@ -1,0 +1,1789 @@
+{
+  "format": "immortal-barons-bre-semantic-names",
+  "format_version": 1,
+  "sources": {
+    "tp_system": {
+      "description": "Turbo Pascal System unit declaration order, corroborated against decoded instruction behavior",
+      "url": "https://turbopascal.org/system-unit"
+    },
+    "binary_strings": {
+      "description": "Direct compiler-shaped references to private BRE Pascal string tables; only paraphrased topics are recorded"
+    },
+    "call_graph": {
+      "description": "Direct near/far caller and callee relationships from the pinned BRE 0.988 binaries"
+    },
+    "repository_docs": {
+      "description": "Mechanics, screen, save-layout, and Inter-BBS behavior documented in this repository and cross-checked against instruction and call-site behavior"
+    }
+  },
+  "overlay_procedures": {
+    "0x01351e": {
+      "name": "enter_system_menu",
+      "confidence": "high",
+      "evidence": ["call_graph: sole gameplay caller invokes this wrapper before run_system_menu", "call_graph: total-regions precheck before menu dispatch"]
+    },
+    "0x016c06": {
+      "name": "run_buy_sell_menu",
+      "confidence": "high",
+      "evidence": ["call_graph: called from run_system_menu and dispatches buy_empire_assets", "binary_strings: buy/sell unit and region menu topics in the owned table"]
+    },
+    "0x0179db": {
+      "name": "enter_covert_operations_menu",
+      "confidence": "high",
+      "evidence": ["call_graph: wrapper whose only gameplay callee is run_covert_operations_menu", "call_graph: reached from the main turn controller and game-settings/menu path"]
+    },
+    "0x0335ef": {
+      "name": "run_advisor_reports_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: civilian, economic, military, and technology report choices", "call_graph: dispatches the four corresponding report procedures"]
+    },
+    "0x04be9f": {
+      "name": "run_ai_covert_operations",
+      "confidence": "medium",
+      "evidence": ["call_graph: called only from daily maintenance and repeatedly invokes send_spy", "call_graph: uses RNG and covert-resolution helpers without interactive input"]
+    },
+    "0x000269": {
+      "name": "initialize_game_runtime",
+      "confidence": "medium",
+      "evidence": ["binary_strings: startup, reset, registration, and local-mode topics", "call_graph: top-level calls into configuration and maintenance overlays"]
+    },
+    "0x000ac1": {
+      "name": "format_planet_score_summary",
+      "confidence": "high",
+      "evidence": ["binary_strings: planet score, net-worth, land, and region topics", "call_graph: string construction only"]
+    },
+    "0x000c1e": {
+      "name": "create_planetary_post",
+      "confidence": "high",
+      "evidence": ["binary_strings: planetary-post creation topic", "call_graph: file and formatted-text output helpers"]
+    },
+    "0x0018e9": {
+      "name": "display_analysis_results_file",
+      "confidence": "high",
+      "evidence": ["binary_strings: analysis-results file topic", "call_graph: text output and I/O checking"]
+    },
+    "0x001c5c": {
+      "name": "configure_local_game",
+      "confidence": "high",
+      "evidence": ["binary_strings: local-game, modem, and basic-setup topics", "call_graph: invokes individual configuration editors"]
+    },
+    "0x001f90": {
+      "name": "configure_doorfile",
+      "confidence": "high",
+      "evidence": ["binary_strings: doorfile and last-player information topics", "call_graph: invokes configuration input helpers"]
+    },
+    "0x0020c3": {
+      "name": "configure_bbs_routing",
+      "confidence": "high",
+      "evidence": ["binary_strings: BBS routing and mailer-directory topics", "call_graph: formatted numeric and text input/output"]
+    },
+    "0x00242b": {
+      "name": "configure_interbbs_league",
+      "confidence": "high",
+      "evidence": ["binary_strings: Inter-BBS league, node, zone, and mailer topics", "call_graph: configuration input/output helpers"]
+    },
+    "0x002851": {
+      "name": "run_configuration_wizard",
+      "confidence": "medium",
+      "evidence": ["binary_strings: configuration-results topic", "call_graph: dispatches all local and Inter-BBS configuration stages"]
+    },
+    "0x002d80": {
+      "name": "configure_interplanetary_network",
+      "confidence": "high",
+      "evidence": ["binary_strings: interplanetary network, node, zone, and mailer topics", "call_graph: configuration and node-record helpers"]
+    },
+    "0x003be3": {
+      "name": "format_player_ranking_line",
+      "confidence": "medium",
+      "evidence": ["binary_strings: player name, empire, regions, and net-worth topics", "call_graph: total-regions and net-worth helpers"]
+    },
+    "0x003dec": {
+      "name": "draw_player_management_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: player-management menu choices", "call_graph: text menu output"]
+    },
+    "0x00405a": {
+      "name": "manage_players",
+      "confidence": "high",
+      "evidence": ["binary_strings: active-player selection, validation, and rename topics", "call_graph: player lookup and menu-input helpers"]
+    },
+    "0x0047a7": {
+      "name": "register_game",
+      "confidence": "high",
+      "evidence": ["binary_strings: registration and successful-registration topics", "call_graph: registration validation and persistent-write helpers"]
+    },
+    "0x004b24": {
+      "name": "reset_game_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: reset confirmation and data-file initialization topics", "call_graph: destructive initialization followed by runtime halt"]
+    },
+    "0x0063c5": {
+      "name": "draw_configuration_editor",
+      "confidence": "high",
+      "evidence": ["binary_strings: configuration-editor and additional-options topics", "call_graph: setting formatter and input helpers"]
+    },
+    "0x006807": {
+      "name": "show_configuration_help",
+      "confidence": "high",
+      "evidence": ["binary_strings: configuration-help file topic", "call_graph: help-file display routine"]
+    },
+    "0x006abb": {
+      "name": "run_configuration_editor",
+      "confidence": "high",
+      "evidence": ["binary_strings: game-start date and new-player settings", "call_graph: dispatches setting editors and editor screen"]
+    },
+    "0x007584": {
+      "name": "run_chat_mode",
+      "confidence": "high",
+      "evidence": ["binary_strings: chat-mode entry and exit topics", "call_graph: character input/output loop"]
+    },
+    "0x007aeb": {
+      "name": "update_planet_title",
+      "confidence": "medium",
+      "evidence": ["binary_strings: title changes following capture, gold, and rank events", "call_graph: total-regions and net-worth helpers"]
+    },
+    "0x00851c": {
+      "name": "run_daily_maintenance",
+      "confidence": "high",
+      "evidence": ["binary_strings: daily rates, investment, covert, and maintenance progress topics", "call_graph: economy, score, and empire-update helpers"]
+    },
+    "0x00a035": {
+      "name": "run_interbbs_maintenance",
+      "confidence": "high",
+      "evidence": ["binary_strings: attack, recon, and planetary maintenance topics", "call_graph: Inter-BBS record processing and economic helpers"]
+    },
+    "0x00b065": {
+      "name": "purge_system_messages",
+      "confidence": "high",
+      "evidence": ["binary_strings: system-message removal topic", "call_graph: message-file I/O helpers"]
+    },
+    "0x00b391": {
+      "name": "scan_duplicate_users",
+      "confidence": "high",
+      "evidence": ["binary_strings: duplicate-user scan topic", "call_graph: user-record comparison loop"]
+    },
+    "0x00b70e": {
+      "name": "report_duplicate_users",
+      "confidence": "high",
+      "evidence": ["binary_strings: duplicate-player report topic", "call_graph: duplicate scan and formatted report output"]
+    },
+    "0x00baa2": {
+      "name": "write_data_report",
+      "confidence": "high",
+      "evidence": ["binary_strings: data-report file topic", "call_graph: formatted report output"]
+    },
+    "0x00bdd5": {
+      "name": "show_midturn_status",
+      "confidence": "high",
+      "evidence": ["binary_strings: mid-turn status topic", "call_graph: status display helpers"]
+    },
+    "0x00c172": {
+      "name": "resolve_civil_unrest",
+      "confidence": "high",
+      "evidence": ["binary_strings: civil war, revolt, and lost-region topics", "call_graph: RNG, population, region, and loss calculations"]
+    },
+    "0x00ce97": {
+      "name": "process_end_of_turn",
+      "confidence": "high",
+      "evidence": ["binary_strings: public support, economy, and end-turn topics", "call_graph: turn settlement, RNG, and economic calculations"]
+    },
+    "0x00de52": {
+      "name": "describe_random_disaster",
+      "confidence": "medium",
+      "evidence": ["binary_strings: randomized destruction and capture descriptions", "call_graph: shortstring selection and RNG"]
+    },
+    "0x00df07": {
+      "name": "resolve_terrorist_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: stolen treasury and destroyed military-unit topics", "call_graph: RNG, protection check, and loss calculations"]
+    },
+    "0x00e3b3": {
+      "name": "resolve_random_game_event",
+      "confidence": "high",
+      "evidence": ["binary_strings: gain/loss event and local-news topics", "call_graph: randomized event dispatch and empire mutation"]
+    },
+    "0x00e81f": {
+      "name": "show_battle_start",
+      "confidence": "high",
+      "evidence": ["binary_strings: battle-start topic", "call_graph: battle display setup"]
+    },
+    "0x00ef90": {
+      "name": "resolve_regular_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: battle forces, losses, and captured-region topics", "call_graph: combat RNG, Real48 odds, and result persistence"]
+    },
+    "0x010873": {
+      "name": "offer_black_market_weapon",
+      "confidence": "high",
+      "evidence": ["binary_strings: weapon sale, price, and affordability topics", "call_graph: price formatting and purchase mutation"]
+    },
+    "0x010a67": {
+      "name": "launch_nuclear_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: nuclear assault and region-destruction topics", "call_graph: attack cost, RNG, and attack-record helpers"]
+    },
+    "0x010df9": {
+      "name": "launch_chemical_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: chemical assault and destruction topics", "call_graph: attack cost, RNG, and attack-record helpers"]
+    },
+    "0x0112cf": {
+      "name": "launch_biological_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: biological assault, famine, and casualty topics", "call_graph: attack cost, RNG, and attack-record helpers"]
+    },
+    "0x01177a": {
+      "name": "send_defensive_aid",
+      "confidence": "high",
+      "evidence": ["binary_strings: allied defensive-force aid topic", "call_graph: force totals and transfer calculations"]
+    },
+    "0x011e2a": {
+      "name": "run_attack_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: attack-type menu topics", "call_graph: dispatches regular, nuclear, chemical, biological, pirate, and aid routines"]
+    },
+    "0x012b92": {
+      "name": "purchase_regions",
+      "confidence": "high",
+      "evidence": ["binary_strings: headquarters, available regions, price, and purchase topics", "call_graph: region count, affordability, and purchase mutation"]
+    },
+    "0x0132b0": {
+      "name": "run_system_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: system-menu choices", "call_graph: dispatches region purchase, banking, and system actions"]
+    },
+    "0x013c44": {
+      "name": "show_game_settings",
+      "confidence": "medium",
+      "evidence": ["binary_strings: configured rates, limits, taxes, costs, and protection topics", "call_graph: read-only formatted settings output"]
+    },
+    "0x015242": {
+      "name": "edit_keyboard_macro",
+      "confidence": "high",
+      "evidence": ["binary_strings: macro editing, save, and abort topics", "call_graph: character-editing loop and macro persistence"]
+    },
+    "0x0155b6": {
+      "name": "run_macro_editor",
+      "confidence": "high",
+      "evidence": ["binary_strings: macro-editor menu topics", "call_graph: dispatches individual macro editing"]
+    },
+    "0x015bcc": {
+      "name": "load_player_macros",
+      "confidence": "medium",
+      "evidence": ["binary_strings: macro-data file topic", "call_graph: macro record initialization and loading"]
+    },
+    "0x015e3a": {
+      "name": "run_interbbs_operations_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: diplomacy, recon, dismantle, and global-request choices", "call_graph: dispatches corresponding Inter-BBS operations"]
+    },
+    "0x015ff0": {
+      "name": "run_coordinator_vote",
+      "confidence": "high",
+      "evidence": ["binary_strings: BBS coordinator and voting topics", "call_graph: vote selection and packet routines"]
+    },
+    "0x0166a9": {
+      "name": "sell_empire_assets",
+      "confidence": "medium",
+      "evidence": ["binary_strings: sell, headquarters, and region restrictions", "call_graph: unit/region sale dispatch and balance mutation"]
+    },
+    "0x0169c6": {
+      "name": "buy_empire_assets",
+      "confidence": "medium",
+      "evidence": ["binary_strings: buy, gold, and turn-cost topics", "call_graph: purchase dispatch and affordability checks"]
+    },
+    "0x016d67": {
+      "name": "report_spy_result",
+      "confidence": "high",
+      "evidence": ["binary_strings: successful spy and captured-agent outcomes", "call_graph: spy resolution and report output"]
+    },
+    "0x016ed6": {
+      "name": "choose_secondary_empire",
+      "confidence": "high",
+      "evidence": ["binary_strings: second-target selection restriction", "call_graph: empire selection helper"]
+    },
+    "0x01701b": {
+      "name": "bribe_enemy_agents",
+      "confidence": "high",
+      "evidence": ["binary_strings: bribed-agent and exposed-operation topics", "call_graph: agent selection and payment mutation"]
+    },
+    "0x017469": {
+      "name": "run_covert_operations_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: spy, revolt, support, dissension, and morale operations", "call_graph: dispatches covert-operation routines"]
+    },
+    "0x017d38": {
+      "name": "investigate_traitors",
+      "confidence": "high",
+      "evidence": ["binary_strings: investigation, payment, and traitor-execution topics", "call_graph: agent search, RNG, and payment helpers"]
+    },
+    "0x018610": {
+      "name": "run_lottery",
+      "confidence": "high",
+      "evidence": ["binary_strings: lottery ticket, winning letters, and prize topics", "call_graph: ticket purchase, RNG, and gold credit"]
+    },
+    "0x018a30": {
+      "name": "show_quick_menu_help",
+      "confidence": "medium",
+      "evidence": ["binary_strings: optional turn-menu skipping topic", "call_graph: explanatory output only"]
+    },
+    "0x018d66": {
+      "name": "run_visit_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: visit-menu, trading, banking, buying, and end-turn topics", "call_graph: dispatches visit actions"]
+    },
+    "0x0193b2": {
+      "name": "show_empire_status",
+      "confidence": "high",
+      "evidence": ["binary_strings: turns, score, treasury, population, tax, and support topics", "call_graph: formatted status output and protection checks"]
+    },
+    "0x01a336": {
+      "name": "show_scores",
+      "confidence": "high",
+      "evidence": ["binary_strings: player, territory, score, net-worth, and eliminated-player topics", "call_graph: reached from status and target-selection screens"]
+    },
+    "0x01a838": {
+      "name": "break_diplomatic_treaty",
+      "confidence": "high",
+      "evidence": ["binary_strings: treaty-break confirmation and resulting unrest/morale topics", "call_graph: called from target selection and mutates diplomatic state"]
+    },
+    "0x01aa99": {
+      "name": "choose_target_empire",
+      "confidence": "high",
+      "evidence": ["binary_strings: protected/dead-player filtering, target selection, return, and abort topics", "call_graph: shared by attack, diplomacy, trade, and covert operations"]
+    },
+    "0x01bc42": {
+      "name": "confirm_end_game",
+      "confidence": "high",
+      "evidence": ["binary_strings: end-game confirmation, cancellation, and farewell topics", "call_graph: called from game settings and the player-turn controller"]
+    },
+    "0x01c119": {
+      "name": "format_diplomatic_status",
+      "confidence": "high",
+      "evidence": ["binary_strings: alliance, war, treaty, and trade-policy status topics", "call_graph: shared formatter used by relation display and proposal routines"]
+    },
+    "0x01c2c2": {
+      "name": "show_diplomatic_relations",
+      "confidence": "high",
+      "evidence": ["binary_strings: relation name and status topics", "call_graph: used by spy reports, diplomacy, and target-selection flows"]
+    },
+    "0x01c800": {
+      "name": "run_diplomacy_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: trade, tariff, prevention, intelligence, alliance, and technology agreement topics", "call_graph: called from player turn and dispatches diplomatic actions"]
+    },
+    "0x01ccd9": {
+      "name": "attach_message_to_diplomatic_proposal",
+      "confidence": "high",
+      "evidence": ["binary_strings: proposal-message attachment topic", "call_graph: invoked only while constructing a diplomatic proposal"]
+    },
+    "0x01cf73": {
+      "name": "process_diplomatic_proposal",
+      "confidence": "high",
+      "evidence": ["binary_strings: proposal, acceptance, rejection, war, and treaty-result topics", "call_graph: player-turn handler for pending diplomatic state"]
+    },
+    "0x01d844": {
+      "name": "send_local_message",
+      "confidence": "high",
+      "evidence": ["binary_strings: local message file and send-another-message topics", "call_graph: message composer and local mailbox helpers"]
+    },
+    "0x01dcee": {
+      "name": "read_local_messages",
+      "confidence": "high",
+      "evidence": ["binary_strings: local-message reply, quote, delete, ignore, and quit topics", "call_graph: called from session and player-turn controllers"]
+    },
+    "0x01f335": {
+      "name": "send_interbbs_message",
+      "confidence": "high",
+      "evidence": ["binary_strings: planet-recipient, ally/coordinator, and send-result topics", "call_graph: Inter-BBS recipient selection and packet output"]
+    },
+    "0x01fa54": {
+      "name": "read_interbbs_messages",
+      "confidence": "high",
+      "evidence": ["binary_strings: Inter-BBS message reply, quote, delete, ignore, and coordinator topics", "call_graph: called directly from the player-turn controller"]
+    },
+    "0x020a12": {
+      "name": "enforce_interbbs_turn_requirement",
+      "confidence": "high",
+      "evidence": ["binary_strings: minimum-turn requirement for an Inter-BBS option", "call_graph: guard helper for the Inter-BBS menu"]
+    },
+    "0x020caf": {
+      "name": "run_interbbs_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: Inter-BBS attacks, defense funding, operations, messaging, and score topics", "call_graph: dispatches the corresponding network operations"]
+    },
+    "0x0216ca": {
+      "name": "format_planet_list",
+      "confidence": "medium",
+      "evidence": ["binary_strings: numbered planet-name list topic", "call_graph: helper used only by planet selection"]
+    },
+    "0x02189b": {
+      "name": "format_planet_location_list",
+      "confidence": "medium",
+      "evidence": ["binary_strings: planet-name and location-list topics", "call_graph: helper used only by planet selection"]
+    },
+    "0x021dd9": {
+      "name": "select_planet",
+      "confidence": "high",
+      "evidence": ["binary_strings: current relations, unavailable information, and planet-selection topics", "call_graph: shared by messaging, diplomacy, trade, attacks, and covert operations"]
+    },
+    "0x0224cf": {
+      "name": "show_player_list",
+      "confidence": "high",
+      "evidence": ["binary_strings: player, territory, score, and net-worth list topics", "call_graph: helper for player selection"]
+    },
+    "0x022a0c": {
+      "name": "select_player",
+      "confidence": "high",
+      "evidence": ["binary_strings: partial/full name search, target selection, and abort topics", "call_graph: shared by trade, bombing, covert, and group-attack flows"]
+    },
+    "0x023598": {
+      "name": "show_planetary_diplomacy_help",
+      "confidence": "high",
+      "evidence": ["binary_strings: planetary diplomacy status and informational disclaimer topics", "call_graph: reached from initialization and Inter-BBS operations"]
+    },
+    "0x02398d": {
+      "name": "show_planetary_treaties",
+      "confidence": "high",
+      "evidence": ["binary_strings: planetary-treaty topic", "call_graph: reached from Inter-BBS operations and network menu"]
+    },
+    "0x023d76": {
+      "name": "show_interbbs_turnaround_times",
+      "confidence": "high",
+      "evidence": ["binary_strings: average BBS turnaround in hours/days", "call_graph: reached from the Inter-BBS menu and time-record loader"]
+    },
+    "0x024212": {
+      "name": "send_trade_offer",
+      "confidence": "high",
+      "evidence": ["binary_strings: trade offer, shipping, cost, and insufficient-assets topics", "call_graph: Inter-BBS menu operation with target selection and packet output"]
+    },
+    "0x024d6b": {
+      "name": "process_trade_offer",
+      "confidence": "high",
+      "evidence": ["binary_strings: incoming trade acceptance, rejection, and response topics", "call_graph: called from player turn and mutates trade state"]
+    },
+    "0x025ab4": {
+      "name": "compose_trade_demand",
+      "confidence": "high",
+      "evidence": ["binary_strings: demanded assets, required warning, and ownership topics", "call_graph: used by trade-offer creation"]
+    },
+    "0x0260cd": {
+      "name": "create_trade_offer",
+      "confidence": "high",
+      "evidence": ["binary_strings: protection, pending-deal, demand, and sent-offer topics", "call_graph: called from trading menu and invokes trade-demand composer"]
+    },
+    "0x026e6a": {
+      "name": "run_trading_market_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: trading-market and bank choices", "call_graph: dispatches trade creation and market/bank actions"]
+    },
+    "0x027643": {
+      "name": "fund_gooie_kablooie",
+      "confidence": "high",
+      "evidence": ["binary_strings: construction, funding, completion, target, and launch-wait topics", "call_graph: protection, cost, project-state, and Inter-BBS record helpers"]
+    },
+    "0x02827b": {
+      "name": "launch_gooie_kablooie",
+      "confidence": "high",
+      "evidence": ["binary_strings: launch, target, attack, and project-availability topics", "call_graph: called from player turn and writes attack/network records"]
+    },
+    "0x028c76": {
+      "name": "dismantle_gooie_kablooie",
+      "confidence": "high",
+      "evidence": ["binary_strings: dismantling and project-existence topics", "call_graph: reached from initialization and Inter-BBS operations"]
+    },
+    "0x029193": {
+      "name": "check_bombing_operation_limit",
+      "confidence": "high",
+      "evidence": ["binary_strings: daily bombing-use and affordability topics", "call_graph: guard helper called only by bombing operations"]
+    },
+    "0x0294f6": {
+      "name": "prepare_bombing_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: attack cost, affordability, preparation, and launch topics", "call_graph: target selection and attack-record creation helper"]
+    },
+    "0x029ea9": {
+      "name": "run_bombing_operations_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: missile, chemical, bomber, payload, target, and defense topics", "call_graph: Inter-BBS menu operation dispatching bombing helpers"]
+    },
+    "0x02afbf": {
+      "name": "launch_terrorist_operation",
+      "confidence": "high",
+      "evidence": ["binary_strings: terrorist-operation cost, daily limit, intelligence, and morale topics", "call_graph: Inter-BBS operation using spy, target-selection, and covert-resolution helpers"]
+    },
+    "0x02b83c": {
+      "name": "configure_attack_forces",
+      "confidence": "high",
+      "evidence": ["binary_strings: committed forces, attack cost, affordability, and abort topics", "call_graph: shared by group and individual attack creators"]
+    },
+    "0x02c0df": {
+      "name": "create_group_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: target planet, travel hours, strike group, and launch topics", "call_graph: Inter-BBS menu operation producing a grouped attack record"]
+    },
+    "0x02c865": {
+      "name": "create_individual_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: party timing, target, force allocation, and departure topics", "call_graph: Inter-BBS menu operation producing an individual attack record"]
+    },
+    "0x02d4e4": {
+      "name": "run_interbbs_attack_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: group/individual, normal/quick/extended attack choices", "call_graph: dispatches attack-force, target, and attack-record routines"]
+    },
+    "0x02dbb0": {
+      "name": "show_player_intelligence",
+      "confidence": "high",
+      "evidence": ["binary_strings: player, BBS, date, regions, military forces, and morale topics", "call_graph: shared by attack targeting and player-information selection"]
+    },
+    "0x02e1e9": {
+      "name": "select_player_information",
+      "confidence": "high",
+      "evidence": ["binary_strings: player selection and unavailable-information topics", "call_graph: dispatches player-intelligence display"]
+    },
+    "0x02eebb": {
+      "name": "allocate_turn_budget",
+      "confidence": "high",
+      "evidence": ["binary_strings: bank visit and funding requests for forces, regions, defense, cleanup, support, morale, and taxes", "call_graph: dispatches all individual budget calculations and applies resulting empire changes"]
+    },
+    "0x02ff67": {
+      "name": "format_region_type_name",
+      "confidence": "high",
+      "evidence": ["binary_strings: all region-type names", "call_graph: shared formatter for region purchase, drop, loss, and display screens"]
+    },
+    "0x0305ea": {
+      "name": "show_region_list",
+      "confidence": "high",
+      "evidence": ["binary_strings: region key, name, ownership, and advisor topics", "call_graph: shared by region purchase, drop, and loss screens"]
+    },
+    "0x030749": {
+      "name": "run_buy_regions_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: region choices, purchase result, quit, and help topics", "call_graph: called from purchase_regions"]
+    },
+    "0x030b93": {
+      "name": "run_drop_regions_menu",
+      "confidence": "high",
+      "evidence": ["binary_strings: region drop, collapse, quit, and termination topics", "call_graph: called from asset sale and can terminate a realm"]
+    },
+    "0x030ebb": {
+      "name": "select_regions_to_lose",
+      "confidence": "high",
+      "evidence": ["binary_strings: regions remaining, selection, and quit topics", "call_graph: shared by combat, pirate, budget, and turn-loss paths"]
+    },
+    "0x0314d5": {
+      "name": "show_civilian_advisor_report",
+      "confidence": "high",
+      "evidence": ["binary_strings: food, population, rivers, and annual production topics", "call_graph: civilian branch of advisor reports menu"]
+    },
+    "0x0319fb": {
+      "name": "show_economic_advisor_report",
+      "confidence": "high",
+      "evidence": ["binary_strings: yearly income, world total, efficiency, and region averages", "call_graph: economic branch of advisor reports menu"]
+    },
+    "0x031ef3": {
+      "name": "show_military_advisor_report",
+      "confidence": "high",
+      "evidence": ["binary_strings: headquarters needs, forces, and attack-readiness topics", "call_graph: military branch of advisor reports menu"]
+    },
+    "0x033e62": {
+      "name": "process_economic_production",
+      "confidence": "high",
+      "evidence": ["binary_strings: tax, mining, tourism, energy, food, industrial-unit, investment, and loan results", "call_graph: technology, region, banking, production, and pirate-event calculations"]
+    },
+    "0x035d7e": {
+      "name": "resolve_pirate_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: pirate capture report across military units, treasury, and agents", "call_graph: RNG, protection, realm-size, and loss calculations with retry dispatch"]
+    },
+    "0x0364da": {
+      "name": "launch_pirate_raid",
+      "confidence": "high",
+      "evidence": ["binary_strings: committed raiding forces, success/failure, captured asset, and loss topics", "call_graph: called from attack menu and performs raid odds, spoils, and casualty calculations"]
+    },
+    "0x035516": {
+      "name": "allocate_industrial_production",
+      "confidence": "high",
+      "evidence": ["binary_strings: industrial production allocation across military units", "call_graph: called from settings/player turn and dispatches per-unit production allocation"]
+    },
+    "0x035936": {
+      "name": "choose_industrial_specialization",
+      "confidence": "high",
+      "evidence": ["binary_strings: industrial specialization, unit choice, and benefit topics", "call_graph: called from game settings"]
+    },
+    "0x03792a": {
+      "name": "trade_food",
+      "confidence": "high",
+      "evidence": ["binary_strings: daily food price, buying, selling, available units, and bank topics", "call_graph: food-market action called from settings and food allocation"]
+    },
+    "0x037fdf": {
+      "name": "allocate_food",
+      "confidence": "high",
+      "evidence": ["binary_strings: civilian and armed-force food needs plus underfunding consequences", "call_graph: player-turn food allocation and market dispatch"]
+    },
+    "0x0389d6": {
+      "name": "run_bank",
+      "confidence": "high",
+      "evidence": ["binary_strings: deposits, withdrawals, investments, loans, rates, and repayment topics", "call_graph: shared bank action from system, trading, attack, and covert menus"]
+    },
+    "0x03d0c8": {
+      "name": "draw_trading_market",
+      "confidence": "high",
+      "evidence": ["binary_strings: market sale, price, ownership, total, and choice topics", "call_graph: display helper for trading market"]
+    },
+    "0x03d3c8": {
+      "name": "run_trading_market",
+      "confidence": "high",
+      "evidence": ["binary_strings: buy/sell setup, protection, ownership, and exit topics", "call_graph: called from trading menu and dispatches market display and transactions"]
+    },
+    "0x03a39e": {
+      "name": "validate_outbound_data_file",
+      "confidence": "high",
+      "evidence": ["binary_strings: outbound-data tamper and deletion topic", "call_graph: validation stage of outbound packet creation"]
+    },
+    "0x03a4c0": {
+      "name": "build_recon_update_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: recon-update packet topic", "call_graph: outbound packet builder dispatch"]
+    },
+    "0x03a5be": {
+      "name": "build_configuration_update_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: configuration-update packet topic", "call_graph: outbound packet builder dispatch"]
+    },
+    "0x03a6bf": {
+      "name": "build_player_list_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: player-list packet topic", "call_graph: outbound packet builder dispatch"]
+    },
+    "0x03a7dc": {
+      "name": "build_routing_list_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: routing-list packet topic", "call_graph: outbound packet builder dispatch"]
+    },
+    "0x03a948": {
+      "name": "build_dummy_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: dummy-data packet topic", "call_graph: outbound packet builder dispatch"]
+    },
+    "0x03aab0": {
+      "name": "create_outbound_interbbs_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: outbound data, size, mail, node, and tamper topics", "call_graph: called from Inter-BBS maintenance and dispatches all outbound packet builders"]
+    },
+    "0x03b590": {
+      "name": "dispatch_incoming_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: packet type, reset, corruption, and processed-result topics", "call_graph: dispatches attack, trade, covert, Gooie, recon, and configuration packet handlers"]
+    },
+    "0x03b8ed": {
+      "name": "validate_incoming_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: truncation, duplication, CRC, size, and filename validation topics", "call_graph: validation gate before packet dispatch"]
+    },
+    "0x03bd64": {
+      "name": "process_incoming_interbbs_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: incoming node data, processing, and removal topics", "call_graph: called from Inter-BBS maintenance and invokes packet validation/dispatch"]
+    },
+    "0x03c05e": {
+      "name": "delete_inbound_packet_file",
+      "confidence": "high",
+      "evidence": ["binary_strings: inbound-file deletion error topic", "call_graph: packet cleanup helper"]
+    },
+    "0x03c15e": {
+      "name": "write_outbound_nodelist",
+      "confidence": "high",
+      "evidence": ["binary_strings: outbound node-list topic", "call_graph: node-list packet construction and packet output"]
+    },
+    "0x03c25d": {
+      "name": "process_nodelist_updates",
+      "confidence": "medium",
+      "evidence": ["binary_strings: node-list data topic", "call_graph: Inter-BBS maintenance wrapper around outbound node-list generation"]
+    },
+    "0x03c81b": {
+      "name": "dispatch_packet_by_type",
+      "confidence": "high",
+      "evidence": ["binary_strings: corrupt and unknown packet-type topics", "call_graph: central typed packet handler dispatch"]
+    },
+    "0x040012": {
+      "name": "resolve_received_invasion",
+      "confidence": "high",
+      "evidence": ["binary_strings: incoming invasion, battle result, unit losses, and captured-region topics", "call_graph: called from incoming-packet processing and mutates both sides of an Inter-BBS attack"]
+    },
+    "0x03f92a": {
+      "name": "validate_outbound_attack_file",
+      "confidence": "high",
+      "evidence": ["binary_strings: outbound attack-file validity and tamper topics", "call_graph: called from Inter-BBS maintenance before attack processing"]
+    },
+    "0x04136c": {
+      "name": "resolve_returning_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: returning forces, target results, duplicates, and late-result topics", "call_graph: incoming packet handler reconciling an attack result with the originating force record"]
+    },
+    "0x04223d": {
+      "name": "estimate_attack_arrival",
+      "confidence": "high",
+      "evidence": ["binary_strings: attack origin, destination, and travel-hour topics", "call_graph: time calculation called from attack-status packet output"]
+    },
+    "0x04288a": {
+      "name": "reconcile_missing_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: missing in-transit attack, returning forces, target, and result topics", "call_graph: Inter-BBS maintenance recovery path"]
+    },
+    "0x043570": {
+      "name": "handle_unknown_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: unknown-packet topic", "call_graph: fallback target from packet validation and dispatch"]
+    },
+    "0x043626": {
+      "name": "load_last_packet_record",
+      "confidence": "high",
+      "evidence": ["binary_strings: last-packet data topic", "call_graph: incoming-data processing helper"]
+    },
+    "0x04386a": {
+      "name": "update_last_packet_state",
+      "confidence": "high",
+      "evidence": ["binary_strings: last-packet file, BBS, date, and processed-list topics", "call_graph: initialized at startup and persists packet progress"]
+    },
+    "0x043cf9": {
+      "name": "write_trade_offer_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: trade-offer packet topic", "call_graph: called from send_trade_offer before packet output"]
+    },
+    "0x043df1": {
+      "name": "resolve_received_trade_offer",
+      "confidence": "high",
+      "evidence": ["binary_strings: arriving trade, duplication, sender, and shipped-assets topics", "call_graph: incoming packet handler updating trade state and reports"]
+    },
+    "0x04430c": {
+      "name": "write_packet_payload",
+      "confidence": "medium",
+      "evidence": ["binary_strings: generic packet-data topic", "call_graph: helper called from incoming packet validation"]
+    },
+    "0x044453": {
+      "name": "report_packet_crc_error",
+      "confidence": "high",
+      "evidence": ["binary_strings: CRC, filename, packet type, and source/destination BBS error topics", "call_graph: incoming packet dispatch error reporter"]
+    },
+    "0x0445ad": {
+      "name": "initialize_interbbs_time_state",
+      "confidence": "medium",
+      "evidence": ["call_graph: called directly from executable entry", "repository_analysis: adjacent routines load and persist the Inter-BBS time file"]
+    },
+    "0x04474f": {
+      "name": "write_interbbs_time_check_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: time-check packet tag", "call_graph: packet field setup followed by packet writer"]
+    },
+    "0x04460f": {
+      "name": "load_interbbs_times",
+      "confidence": "high",
+      "evidence": ["binary_strings: Inter-BBS times data topic", "call_graph: time-state loader"]
+    },
+    "0x04469f": {
+      "name": "save_interbbs_times",
+      "confidence": "high",
+      "evidence": ["binary_strings: Inter-BBS times data topic", "call_graph: shared by turnaround display and time-check processing"]
+    },
+    "0x0447b9": {
+      "name": "process_time_check_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: time-check packet topic", "call_graph: incoming packet handler using load/save time-state helpers"]
+    },
+    "0x044adf": {
+      "name": "clear_outbound_reports",
+      "confidence": "high",
+      "evidence": ["binary_strings: report and outbound-node data topics", "call_graph: reset workflow clearing network report files"]
+    },
+    "0x044e97": {
+      "name": "create_global_reset_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: global-reset packet topic", "call_graph: reset workflow packet creator"]
+    },
+    "0x044f7c": {
+      "name": "process_global_reset_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: global-reset packet topic", "call_graph: incoming Inter-BBS data handler"]
+    },
+    "0x04546e": {
+      "name": "resolve_received_sabre_strike",
+      "confidence": "high",
+      "evidence": ["binary_strings: incoming special strike, destroyed missile, and defense-system topics", "call_graph: incoming packet handler for special-operation result"]
+    },
+    "0x046045": {
+      "name": "process_sabre_return",
+      "confidence": "high",
+      "evidence": ["binary_strings: special-operation return and report topics", "call_graph: incoming packet handler"]
+    },
+    "0x046819": {
+      "name": "write_interbbs_player_list",
+      "confidence": "high",
+      "evidence": ["binary_strings: Inter-BBS player-list output and coordinator topics", "call_graph: initialization report action"]
+    },
+    "0x046b2d": {
+      "name": "compress_packet_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: compression and original-size topics", "call_graph: outbound packet construction helper"]
+    },
+    "0x046e12": {
+      "name": "decompress_packet_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: decompression and old/new-size topics", "call_graph: incoming packet validation helper"]
+    },
+    "0x0470c7": {
+      "name": "report_packet_compression",
+      "confidence": "high",
+      "evidence": ["binary_strings: compressed, decompressed, and original-size topics", "call_graph: shared by inbound and outbound packet paths"]
+    },
+    "0x04789c": {
+      "name": "process_gooie_launch",
+      "confidence": "high",
+      "evidence": ["binary_strings: Gooie launch topic", "call_graph: called from Inter-BBS maintenance and creates an in-transit project attack"]
+    },
+    "0x047a8c": {
+      "name": "validate_gooie_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: incoming Gooie packet, CRC, duplication, and source-BBS topics", "call_graph: incoming packet handler and project-state checks"]
+    },
+    "0x047c52": {
+      "name": "resolve_gooie_attack",
+      "confidence": "high",
+      "evidence": ["binary_strings: destroyed regions, attack, tamper recovery, and recreated project topics", "call_graph: daily maintenance attack resolver"]
+    },
+    "0x0482c8": {
+      "name": "write_gooie_results",
+      "confidence": "high",
+      "evidence": ["binary_strings: Gooie-result packet topic", "call_graph: result writer used by Gooie attack resolution"]
+    },
+    "0x048382": {
+      "name": "process_gooie_hit_result",
+      "confidence": "high",
+      "evidence": ["binary_strings: project hits, region destruction, and remaining-strength topics", "call_graph: incoming packet handler"]
+    },
+    "0x0485eb": {
+      "name": "verify_gooie_state",
+      "confidence": "high",
+      "evidence": ["binary_strings: illegal project state and recreation topics", "call_graph: shared by launch and attack handlers"]
+    },
+    "0x0486d7": {
+      "name": "show_gooie_arrival_time",
+      "confidence": "high",
+      "evidence": ["binary_strings: destination planet and approximate arrival-hour topics", "call_graph: attack-status display helper"]
+    },
+    "0x048a79": {
+      "name": "append_news_record",
+      "confidence": "high",
+      "evidence": ["binary_strings: news-data file topic", "call_graph: shared by gameplay event producers"]
+    },
+    "0x048b31": {
+      "name": "append_report_record",
+      "confidence": "high",
+      "evidence": ["binary_strings: report-record topic", "call_graph: report sink for received trade events"]
+    },
+    "0x048eca": {
+      "name": "write_interbbs_message_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: message-packet topic", "call_graph: used by Inter-BBS message send/read paths"]
+    },
+    "0x048f2f": {
+      "name": "process_interbbs_message_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: Inter-BBS message data file topic", "call_graph: incoming packet handler"]
+    },
+    "0x0492ba": {
+      "name": "compose_message",
+      "confidence": "high",
+      "evidence": ["binary_strings: message save, abort, clear, and restart topics", "call_graph: shared by local, Inter-BBS, and diplomatic message flows"]
+    },
+    "0x04a09a": {
+      "name": "resolve_received_bombing",
+      "confidence": "high",
+      "evidence": ["binary_strings: received bombing hit and result topics", "call_graph: incoming packet handler"]
+    },
+    "0x04a4a6": {
+      "name": "process_bombing_results",
+      "confidence": "high",
+      "evidence": ["binary_strings: bombing-results report topic", "call_graph: incoming packet handler"]
+    },
+    "0x04a69b": {
+      "name": "write_terrorist_operation_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: terrorist-operation packet topic", "call_graph: called from launch_terrorist_operation"]
+    },
+    "0x04a71e": {
+      "name": "format_terrorist_result",
+      "confidence": "high",
+      "evidence": ["binary_strings: terrorist-result topic", "call_graph: received covert-operation helper"]
+    },
+    "0x04b38a": {
+      "name": "process_terrorist_report",
+      "confidence": "high",
+      "evidence": ["binary_strings: target, agent detection, terrorist, date, and location topics", "call_graph: incoming packet report handler"]
+    },
+    "0x04a7a9": {
+      "name": "calculate_combat_odds",
+      "confidence": "high",
+      "evidence": ["repository_analysis: cited combat-odds implementation at OVR 0x4a81c inside this procedure", "call_graph: integer/Real48 scaling and RNG with no user-interface calls"]
+    },
+    "0x04a96b": {
+      "name": "resolve_received_covert_operation",
+      "confidence": "high",
+      "evidence": ["binary_strings: detected foreign agents and single/multiple terrorist-hit packet topics", "call_graph: incoming packet processing, agent detection, covert resolution, and report persistence"]
+    },
+    "0x0050a4": {
+      "name": "edit_level_setting",
+      "confidence": "high",
+      "evidence": ["binary_strings: high, medium, low, none, and disabled setting choices", "call_graph: configuration editor input helper"]
+    },
+    "0x005659": {
+      "name": "edit_selection_mode_setting",
+      "confidence": "high",
+      "evidence": ["binary_strings: disabled, user-select, random, constant, and new-value setting choices", "call_graph: configuration editor input helper"]
+    },
+    "0x005a65": {
+      "name": "edit_yes_limited_setting",
+      "confidence": "high",
+      "evidence": ["binary_strings: yes, limited, and new-value setting choices", "call_graph: configuration editor input helper"]
+    },
+    "0x005ce9": {
+      "name": "edit_date_setting",
+      "confidence": "high",
+      "evidence": ["binary_strings: day, month, and year prompts", "call_graph: configuration editor input helper"]
+    },
+    "0x005e3e": {
+      "name": "edit_numeric_setting",
+      "confidence": "high",
+      "evidence": ["binary_strings: new numeric value prompt", "call_graph: configuration editor input helper"]
+    },
+    "0x005f1c": {
+      "name": "format_configuration_choice",
+      "confidence": "high",
+      "evidence": ["binary_strings: textual forms for boolean, limited, disabled, user-select, random, and constant values", "call_graph: configuration editor display helper"]
+    },
+    "0x0061a0": {
+      "name": "edit_configuration_menu_selection",
+      "confidence": "medium",
+      "evidence": ["call_graph: shared by configuration-editor controller and display path", "repository_analysis: displays the selected setting through format_configuration_choice before accepting input"]
+    },
+    "0x015ca2": {
+      "name": "save_macros",
+      "confidence": "high",
+      "evidence": ["binary_strings: macro-data file topic", "call_graph: write-record path called by the macro editor"]
+    },
+    "0x016261": {
+      "name": "format_asset_category",
+      "confidence": "high",
+      "evidence": ["binary_strings: system, buy/sell, troop, jet, turret, and bomber categories", "call_graph: shared by system menu and asset purchase/sale paths"]
+    },
+    "0x01b0a3": {
+      "name": "prompt_local_recipients",
+      "confidence": "high",
+      "evidence": ["binary_strings: all, list, and recipient prompts", "call_graph: local message recipient-selection path"]
+    },
+    "0x01ba3b": {
+      "name": "format_no_recipient",
+      "confidence": "medium",
+      "evidence": ["binary_strings: no-recipient text", "call_graph: shared by coordinator-vote and session display paths"]
+    },
+    "0x01c5bc": {
+      "name": "prompt_diplomatic_message_attachment",
+      "confidence": "high",
+      "evidence": ["binary_strings: attach-message prompt and temporary-message file topic", "call_graph: diplomacy menu path invoking compose_message"]
+    },
+    "0x01ed14": {
+      "name": "prompt_interbbs_recipients",
+      "confidence": "high",
+      "evidence": ["binary_strings: all, list, and recipient prompts", "call_graph: Inter-BBS message recipient-selection path"]
+    },
+    "0x03cbf9": {
+      "name": "show_market_offers",
+      "confidence": "high",
+      "evidence": ["binary_strings: offer ID, empire, quantity, and price listing topics", "call_graph: market target-selection path"]
+    },
+    "0x03ce36": {
+      "name": "show_market_offer_detail",
+      "confidence": "medium",
+      "evidence": ["call_graph: trading-market display helper", "binary_strings: numbered offer formatting topic"]
+    },
+    "0x03e6e7": {
+      "name": "backup_game_files",
+      "confidence": "medium",
+      "evidence": ["call_graph: executable-entry path orchestrating recursive file enumeration and backup-directory helpers", "binary_strings: working-directory topic and encoded backup status tables"]
+    },
+    "0x03ee92": {
+      "name": "open_and_validate_game_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: version mismatch, outdated resource, game-data open failure, and reset guidance topics", "call_graph: startup validator called from executable entry and runtime initialization"]
+    },
+    "0x03f134": {
+      "name": "rotate_game_data_backup",
+      "confidence": "high",
+      "evidence": ["binary_strings: temporary, current, old, and backup game-data topics", "call_graph: standalone backup/recovery entry"]
+    },
+    "0x03f868": {
+      "name": "write_attack_results_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: attack-results packet topic", "call_graph: outbound result writer called by received-invasion resolution"]
+    },
+    "0x044291": {
+      "name": "write_spy_operation_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: spy-operation packet topic", "call_graph: outbound packet writer called by bombing/covert operations menu"]
+    },
+    "0x044978": {
+      "name": "remove_outbound_report_file",
+      "confidence": "medium",
+      "evidence": ["binary_strings: removal result topic", "call_graph: file-removal helper called by clear_outbound_reports"]
+    },
+    "0x0450b4": {
+      "name": "write_special_operation_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: special-operation packet topic", "call_graph: outbound packet writer called by bombing/covert operations menu"]
+    },
+    "0x04514f": {
+      "name": "write_special_operation_result",
+      "confidence": "high",
+      "evidence": ["binary_strings: special-result packet topic", "call_graph: outbound result writer called by received SABRE resolution"]
+    },
+    "0x04523e": {
+      "name": "format_sabre_strike_report",
+      "confidence": "medium",
+      "evidence": ["binary_strings: target, player, force, and attack template fields", "call_graph: report formatter called by received SABRE resolution"]
+    },
+    "0x045e53": {
+      "name": "format_sabre_return_report",
+      "confidence": "medium",
+      "evidence": ["binary_strings: target, player, force, and attack template fields", "call_graph: report formatter called by SABRE return processing"]
+    },
+    "0x04653b": {
+      "name": "save_duplicate_tracking_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: duplicate-tracking data file topic", "call_graph: write-record path in duplicate-user subsystem"]
+    },
+    "0x046664": {
+      "name": "load_duplicate_tracking_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: duplicate-tracking data file topic", "call_graph: read-record path shared by duplicate-user scans, reports, and player-list output"]
+    },
+    "0x047718": {
+      "name": "handle_corrupt_game_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: fatal corruption, backup restoration, reset, and tampering topics", "call_graph: validation failure path that logs news and terminates"]
+    },
+    "0x04798f": {
+      "name": "write_gooie_attack_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: Gooie-attack packet topic", "call_graph: outbound packet writer called by process_gooie_launch"]
+    },
+    "0x048c81": {
+      "name": "report_suspected_cheating",
+      "confidence": "high",
+      "evidence": ["binary_strings: suspected-cheating and BBS topics", "call_graph: standalone fatal reporter writing news and logs"]
+    },
+    "0x04903b": {
+      "name": "draw_message_line_prompt",
+      "confidence": "medium",
+      "evidence": ["binary_strings: message-line prompt prefix", "call_graph: message editor line-number output helper"]
+    },
+    "0x049145": {
+      "name": "draw_message_editor_header",
+      "confidence": "high",
+      "evidence": ["binary_strings: lines remaining, save, abort, clear, and ruler topics", "call_graph: compose_message editor display helper"]
+    },
+    "0x049b03": {
+      "name": "display_message_body",
+      "confidence": "medium",
+      "evidence": ["binary_strings: message terminator topic", "call_graph: shared by local and diplomatic message readers and attachment paths"]
+    },
+    "0x04bc05": {
+      "name": "format_ai_covert_report",
+      "confidence": "medium",
+      "evidence": ["binary_strings: target, user, force, and attack template fields", "call_graph: report formatter called only by AI covert-operation processing"]
+    },
+    "0x04cd9f": {
+      "name": "open_spy_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: spy-data file topic", "call_graph: shared file-opening helper for spy display and update paths"]
+    },
+    "0x04ce41": {
+      "name": "save_spy_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: spy-data file topic", "call_graph: write-record path called by update_spy_intelligence"]
+    },
+    "0x04cf14": {
+      "name": "load_spy_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: spy-data file topic", "call_graph: read-record path used by player-intelligence displays"]
+    },
+    "0x04cfc1": {
+      "name": "write_spy_report",
+      "confidence": "high",
+      "evidence": ["binary_strings: spy-report record topic", "call_graph: report writer called by update_spy_intelligence"]
+    },
+    "0x04d0c2": {
+      "name": "update_spy_intelligence",
+      "confidence": "high",
+      "evidence": ["binary_strings: military-intelligence fields and report topics", "call_graph: incoming packet handler that loads, updates, saves, and reports spy data"]
+    },
+    "0x04d5f0": {
+      "name": "write_configuration_update",
+      "confidence": "high",
+      "evidence": ["binary_strings: configuration-update packet topic", "call_graph: outbound configuration packet writer"]
+    },
+    "0x04d713": {
+      "name": "process_configuration_update",
+      "confidence": "high",
+      "evidence": ["binary_strings: invalid, excess-player, and ignored configuration-update topics", "call_graph: incoming configuration packet handler"]
+    },
+    "0x04db7c": {
+      "name": "ensure_news_file_open",
+      "confidence": "high",
+      "evidence": ["binary_strings: news-file open-error topic", "call_graph: shared by news record producers"]
+    },
+    "0x04dc1d": {
+      "name": "append_news_event",
+      "confidence": "high",
+      "evidence": ["call_graph: common sink called by twenty-three gameplay event producers", "repository_analysis: opens the news store and appends one event record"]
+    },
+    "0x04df8b": {
+      "name": "generate_daily_news_files",
+      "confidence": "high",
+      "evidence": ["binary_strings: daily news, ANSI, text, version, and output-filename topics", "call_graph: daily maintenance news formatter"]
+    },
+    "0x04e4c2": {
+      "name": "write_local_attack_news",
+      "confidence": "high",
+      "evidence": ["binary_strings: normal, total, and nuclear attack outcome tags", "call_graph: local combat news producer"]
+    },
+    "0x04e86a": {
+      "name": "write_interbbs_attack_news",
+      "confidence": "high",
+      "evidence": ["binary_strings: Inter-BBS group and individual attack outcome tags", "call_graph: received/returning attack news producer"]
+    },
+    "0x04ec7a": {
+      "name": "write_civil_war_news",
+      "confidence": "high",
+      "evidence": ["binary_strings: civil-war news tag", "call_graph: daily event news producer"]
+    },
+    "0x04ed4d": {
+      "name": "write_riot_news",
+      "confidence": "high",
+      "evidence": ["binary_strings: riot news tag", "call_graph: daily event news producer"]
+    },
+    "0x04f082": {
+      "name": "write_economic_policy_news",
+      "confidence": "high",
+      "evidence": ["binary_strings: defense donation, interest, inflation, and tax-policy news topics", "call_graph: end-of-turn economic news producer"]
+    },
+    "0x04f7a3": {
+      "name": "append_data_report",
+      "confidence": "high",
+      "evidence": ["binary_strings: report directory and report-data file topics", "call_graph: shared report persistence sink"]
+    },
+    "0x04f97b": {
+      "name": "delete_report_data",
+      "confidence": "medium",
+      "evidence": ["binary_strings: report-data file topic", "call_graph: maintenance caller and file-erasure runtime path"]
+    },
+    "0x04f9da": {
+      "name": "format_trade_report_record",
+      "confidence": "medium",
+      "evidence": ["call_graph: called only by resolve_received_trade_offer immediately before report persistence", "binary_strings: report-field formatting separators"]
+    },
+    "0x04fbd0": {
+      "name": "open_recon_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: reconnaissance-data file topic", "call_graph: shared recon file opener"]
+    },
+    "0x04fc5b": {
+      "name": "save_recon_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: reconnaissance-data file topic", "call_graph: write-record path used by outbound recon updates"]
+    },
+    "0x04fcc1": {
+      "name": "write_recon_request_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: reconnaissance-request packet topic", "call_graph: outbound packet construction path"]
+    },
+    "0x04fd45": {
+      "name": "write_recon_update_packet",
+      "confidence": "high",
+      "evidence": ["binary_strings: reconnaissance-update packet topic", "call_graph: outbound packet construction path"]
+    },
+    "0x04fecd": {
+      "name": "build_recon_record",
+      "confidence": "high",
+      "evidence": ["binary_strings: game-version topic", "call_graph: gathers planet, net-worth, region, and version fields for recon output"]
+    },
+    "0x0501a0": {
+      "name": "write_recon_information_list",
+      "confidence": "high",
+      "evidence": ["binary_strings: reconnaissance information listing, last-update, version, and output topics", "call_graph: Inter-BBS report action"]
+    },
+    "0x0504b4": {
+      "name": "initialize_planet_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: planet-data reinitialization and file topics", "call_graph: recovery target for missing or invalid planet data"]
+    },
+    "0x0505e3": {
+      "name": "load_planet_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: missing and fatal-open planet-data topics", "call_graph: read-record path called throughout gameplay and packet handling"]
+    },
+    "0x050744": {
+      "name": "save_planet_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: planet-data file and fatal-open topics", "call_graph: write-record path used by recon maintenance"]
+    },
+    "0x050901": {
+      "name": "initialize_location_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: location, replacement-location, and node-list data topics", "call_graph: startup data initialization path"]
+    },
+    "0x0509d0": {
+      "name": "load_coordinator_key",
+      "confidence": "high",
+      "evidence": ["binary_strings: coordinator-key file topic", "call_graph: read path used by reset and configuration-update construction"]
+    },
+    "0x050a6d": {
+      "name": "save_coordinator_key",
+      "confidence": "high",
+      "evidence": ["binary_strings: coordinator-key file topic", "call_graph: write path used by reset and initialization"]
+    },
+    "0x0517e5": {
+      "name": "load_alliance_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: alliance-data file topic", "call_graph: read-record path used by planetary diplomacy"]
+    },
+    "0x051886": {
+      "name": "save_alliance_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: alliance-data file topic", "call_graph: write-record path called after alliance changes"]
+    },
+    "0x051a3f": {
+      "name": "prompt_help_topic",
+      "confidence": "high",
+      "evidence": ["binary_strings: help-topic prompt and list-choice topics", "call_graph: help browser input helper"]
+    },
+    "0x051b5b": {
+      "name": "scan_help_topic",
+      "confidence": "high",
+      "evidence": ["binary_strings: help-section terminator topic", "call_graph: help-file reader and shortstring matcher"]
+    },
+    "0x051c7d": {
+      "name": "list_help_topics",
+      "confidence": "high",
+      "evidence": ["binary_strings: help-topic listing title", "call_graph: help browser output helper"]
+    },
+    "0x051de1": {
+      "name": "show_help_topic",
+      "confidence": "high",
+      "evidence": ["binary_strings: missing-topic and no-topic topics", "call_graph: orchestrates topic prompt, scan, and topic-list helpers"]
+    },
+    "0x0524ab": {
+      "name": "pause_for_continue",
+      "confidence": "high",
+      "evidence": ["binary_strings: pause directive and continue prompt topics", "call_graph: shared display-file pause handler"]
+    },
+    "0x0529b5": {
+      "name": "display_script_file",
+      "confidence": "medium",
+      "evidence": ["binary_strings: section terminator and directive-prefix topics", "call_graph: shared text/ANSI display engine using pause_for_continue"]
+    },
+    "0x053015": {
+      "name": "load_node_list",
+      "confidence": "high",
+      "evidence": ["binary_strings: node-list read errors, node number, validity, and host topics", "call_graph: used by incoming-data processing and BBS configuration parsing"]
+    },
+    "0x053626": {
+      "name": "parse_bbs_configuration",
+      "confidence": "high",
+      "evidence": ["binary_strings: BBS configuration and mailer-type topics", "call_graph: configuration parser invoking node-list and route parsers"]
+    },
+    "0x0539e1": {
+      "name": "write_mailer_packet",
+      "confidence": "medium",
+      "evidence": ["binary_strings: outbound directory, message extension, addressing, and mailer-flag topics", "call_graph: outbound Inter-BBS packet delivery path"]
+    },
+    "0x053d3e": {
+      "name": "load_node_data_file",
+      "confidence": "high",
+      "evidence": ["binary_strings: per-node data filename topic", "call_graph: BBS configuration helper reading one node data file"]
+    },
+    "0x0541f0": {
+      "name": "parse_routing_config",
+      "confidence": "high",
+      "evidence": ["binary_strings: routing configuration, illegal-line, crash, hold, and normal topics", "call_graph: configuration route parser"]
+    },
+    "0x05452a": {
+      "name": "save_route_list",
+      "confidence": "medium",
+      "evidence": ["binary_strings: route-list data file topic", "call_graph: write-record helper shared by route-list builders"]
+    },
+    "0x0545d9": {
+      "name": "build_route_list",
+      "confidence": "high",
+      "evidence": ["binary_strings: route-list build-failure topic", "call_graph: route-report path that opens source data then calls save_route_list"]
+    },
+    "0x0546ef": {
+      "name": "update_route_list",
+      "confidence": "medium",
+      "evidence": ["binary_strings: route-list data and build-failure topics", "call_graph: route update paths that call save_route_list"]
+    },
+    "0x0549f3": {
+      "name": "write_routing_information",
+      "confidence": "high",
+      "evidence": ["binary_strings: coordinator restriction, route-list outputs, missing information, and routing-path topics", "call_graph: Inter-BBS routing report action"]
+    },
+    "0x0551cd": {
+      "name": "rewrite_typed_file",
+      "confidence": "high",
+      "evidence": ["binary_strings: rewrite operation and error-number topics", "call_graph: generic file wrapper used by seventeen callers"]
+    },
+    "0x055285": {
+      "name": "erase_typed_file",
+      "confidence": "high",
+      "evidence": ["binary_strings: erase operation and error-number topics", "call_graph: generic file wrapper"]
+    },
+    "0x055345": {
+      "name": "rename_typed_file",
+      "confidence": "high",
+      "evidence": ["binary_strings: rename source, destination, and error-number topics", "call_graph: generic file wrapper"]
+    },
+    "0x055491": {
+      "name": "read_typed_record",
+      "confidence": "high",
+      "evidence": ["binary_strings: file-read, record-number, and error topics", "call_graph: generic record I/O wrapper"]
+    },
+    "0x0555bd": {
+      "name": "write_typed_record",
+      "confidence": "high",
+      "evidence": ["binary_strings: file-write, record-number, and error topics", "call_graph: generic record I/O wrapper"]
+    },
+    "0x0556e2": {
+      "name": "seek_typed_record",
+      "confidence": "high",
+      "evidence": ["binary_strings: seek target and error topics", "call_graph: generic record I/O wrapper"]
+    },
+    "0x055a0e": {
+      "name": "log_problem",
+      "confidence": "high",
+      "evidence": ["binary_strings: problem-log file topic", "call_graph: common error sink used by twenty-three callers"]
+    },
+    "0x056267": {
+      "name": "build_score_report",
+      "confidence": "high",
+      "evidence": ["binary_strings: score, net-worth, land, density, planet, and player ranking topics", "call_graph: bulletin-generation helper"]
+    },
+    "0x056502": {
+      "name": "generate_bulletins",
+      "confidence": "high",
+      "evidence": ["binary_strings: score, current-news, previous-news, ANSI, and text bulletin topics", "call_graph: maintenance bulletin generator"]
+    },
+    "0x056a03": {
+      "name": "load_display_name_settings",
+      "confidence": "high",
+      "evidence": ["binary_strings: market, bank, diplomacy, message, trading, covert-operation, and macro name settings", "call_graph: configuration reader using boolean/string setting helpers"]
+    },
+    "0x057215": {
+      "name": "load_pirate_settings",
+      "confidence": "high",
+      "evidence": ["binary_strings: pirate name and color setting topics", "call_graph: configuration reader"]
+    },
+    "0x057453": {
+      "name": "read_registration_data",
+      "confidence": "high",
+      "evidence": ["binary_strings: registration-data file topic", "call_graph: registration subsystem file reader"]
+    },
+    "0x0575b4": {
+      "name": "validate_registration",
+      "confidence": "high",
+      "evidence": ["binary_strings: registration-data and validation-token topics", "call_graph: startup registration check"]
+    },
+    "0x057cc4": {
+      "name": "release_node_lock",
+      "confidence": "high",
+      "evidence": ["binary_strings: in-use lock file topic", "call_graph: standalone lock cleanup entry using file erasure"]
+    },
+    "0x057e77": {
+      "name": "acquire_node_lock",
+      "confidence": "high",
+      "evidence": ["binary_strings: in-use lock, concurrent-session, and stale-lock guidance topics", "call_graph: session startup lock acquisition"]
+    },
+    "0x058181": {
+      "name": "report_runtime_error",
+      "confidence": "high",
+      "evidence": ["binary_strings: runtime error number and address topics", "call_graph: standalone runtime error reporting entry"]
+    },
+    "0x058332": {
+      "name": "parse_doorfile",
+      "confidence": "high",
+      "evidence": ["binary_strings: doorfile name, missing-doorfile, and locked-baud topics", "call_graph: session startup door environment parser"]
+    },
+    "0x058746": {
+      "name": "initialize_fossil_port",
+      "confidence": "high",
+      "evidence": ["binary_strings: FOSSIL and communications-port topics", "call_graph: door-session communications initialization"]
+    },
+    "0x058c0d": {
+      "name": "parse_boolean_setting",
+      "confidence": "high",
+      "evidence": ["binary_strings: affirmative and negative boolean spellings", "call_graph: shared configuration parser used by eight callers"]
+    },
+    "0x059074": {
+      "name": "select_bios_console_io",
+      "confidence": "high",
+      "evidence": ["binary_strings: BIOS console setting topic", "call_graph: executable-entry initialization path"]
+    },
+    "0x02e6b2": {
+      "name": "calculate_military_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: maintenance flow separately charges armed-forces upkeep using the documented per-unit table and technology reduction", "instruction_behavior: sums home and market-escrow unit counts with six Real48 maintenance weights, applies the configured maintenance level and cap", "call_graph: first required-cost helper in allocate_turn_budget"]
+    },
+    "0x02e8f4": {
+      "name": "calculate_region_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: region upkeep is a flat per-region charge modified by maintenance level and technology", "instruction_behavior: multiplies total_regions by the documented 913 rate, divides by the maintenance technology factor, applies the configured level and cap", "call_graph: helper immediately preceding the region-maintenance prompt"]
+    },
+    "0x02ea09": {
+      "name": "calculate_crown_tax",
+      "aliases": ["region_cost"],
+      "confidence": "high",
+      "evidence": ["repository_docs: crownTax is turn gold income times the configured Planetary Tax Rate divided by 1000", "instruction_behavior: reads empire +0x72 and config +0x42, performs that Real48 multiply/divide, then truncates", "call_graph: called immediately before the Queen Royale tax prompt; corrects the older region_cost landmark"]
+    },
+    "0x02ea63": {
+      "name": "calculate_sdi_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: SDI maintenance is the conditional cost after region maintenance and benefits from technology", "instruction_behavior: reads the SDI field at empire +0x33f, applies the SDI technology factor and a fixed Real48 divisor", "call_graph: called on both the displayed and automatic SDI-payment paths"]
+    },
+    "0x02eb0a": {
+      "name": "choose_waste_regions_to_decontaminate",
+      "confidence": "high",
+      "evidence": ["repository_docs: waste-region decontamination is the conditional payment stage after SDI", "instruction_behavior: reads the ninth region count at empire +0xb6, derives a bounded random count, and returns an int32", "call_graph: used only by the decontamination stage"]
+    },
+    "0x02eb63": {
+      "name": "calculate_waste_decontamination_cost",
+      "confidence": "high",
+      "evidence": ["repository_docs: the maintenance sequence quotes a gold cost for reviving waste regions", "instruction_behavior: combines the selected waste count, a region-cost helper, and a technology divisor into one rounded and capped amount", "call_graph: called on both the quote and payment paths beside choose_waste_regions_to_decontaminate"]
+    },
+    "0x033b64": {
+      "name": "calculate_agricultural_food_yield",
+      "confidence": "high",
+      "evidence": ["repository_docs: agricultural regions grow 300 food each before the food-production technology factor", "instruction_behavior: applies technology slot 0 and a 300-scale Real48 constant; callers then multiply by Agricultural count at empire +0x9e", "call_graph: shared by the civilian advisor and per-turn economic production"]
+    },
+    "0x033ba6": {
+      "name": "calculate_river_food_yield",
+      "confidence": "high",
+      "evidence": ["repository_docs: rivers contribute a separate food yield beside agricultural production", "instruction_behavior: applies the same food-production technology factor with the river food constant; callers multiply by River count at empire +0x9a", "call_graph: shared by the civilian advisor and per-turn economic production"]
+    },
+    "0x043b9d": {
+      "name": "lookup_packet_type_code",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE's Inter-BBS transport carries typed packet payloads", "instruction_behavior: compares an input ShortString against all 26 fixed packet-type records and returns the matching one-based code or zero", "call_graph: shared by every identified packet writer and result-record producer"]
+    },
+    "0x035cd6": {
+      "name": "format_pirate_faction_name",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE selects one of several named and colored pirate factions for a raid", "instruction_behavior: indexes parallel pirate color and fixed-width name tables, wraps the name in ANSI color sequences, and returns a ShortString", "call_graph: shared by pirate launch and resolution paths"]
+    },
+    "0x03f7a4": {
+      "name": "initialize_attack_record",
+      "confidence": "high",
+      "evidence": ["repository_docs: Inter-BBS attacks are persisted as fixed records before dispatch", "instruction_behavior: clears the complete 0x36b-byte attack record and initializes its trailing generated identifier/check value", "call_graph: called by group-attack creation and the Inter-BBS attack menu"]
+    },
+    "0x042589": {
+      "name": "validate_attack_record",
+      "confidence": "high",
+      "evidence": ["repository_docs: outgoing Inter-BBS attacks are validated before packet creation", "instruction_behavior: copies the full 0x36b-byte attack record, recomputes its check value, and dispatches validation result code 4", "call_graph: shared by run_interbbs_attack_menu and validate_outbound_attack_file"]
+    },
+    "0x046aed": {
+      "name": "reset_packet_compression_stats",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE compresses outbound and decompresses inbound packet payloads while reporting old/new sizes", "instruction_behavior: clears the four words consumed by adjacent compression reporting routines", "call_graph: called before outbound construction and inbound validation"]
+    },
+    "0x049fd7": {
+      "name": "write_bombing_packet",
+      "confidence": "high",
+      "evidence": ["repository_docs: bombing operations are typed Inter-BBS payloads", "instruction_behavior: copies a ten-byte bombing record, resolves the caller-supplied packet-type string, and sends both through write_interbbs_packet_file", "call_graph: shared by outgoing bombing checks and received-bombing result handling"]
+    },
+    "0x04fd0c": {
+      "name": "initialize_recon_update_record",
+      "confidence": "medium",
+      "evidence": ["repository_docs: BRE exchanges per-planet reconnaissance updates during planetary maintenance", "instruction_behavior: clears the full recon record then populates it for the selected planet through the adjacent recon-data helper", "call_graph: shared by build_recon_update_packet and write_recon_update_packet"]
+    },
+    "0x050dfb": {
+      "name": "clear_trade_offer_record",
+      "confidence": "high",
+      "evidence": ["repository_docs: trade offers are constructed and later processed as persistent records", "instruction_behavior: clears exactly one 0x97-byte trade-offer record", "call_graph: shared by create_trade_offer and process_trade_offer"]
+    },
+    "0x051738": {
+      "name": "format_planetary_relation",
+      "confidence": "high",
+      "evidence": ["repository_docs: planetary diplomacy displays a four-state relation value with status-specific color", "instruction_behavior: accepts relation values -1..2, indexes parallel label/color tables, appends the requested suffix color, and returns an empty string outside the enum", "call_graph: shared by planetary target selection, diplomacy help, and treaty display"]
+    }
+  },
+  "overlay_data": {},
+  "resident_procedures": {
+    "013a:093f": {
+      "name": "run_local_maintenance_mode",
+      "confidence": "medium",
+      "evidence": ["call_graph: main runtime dispatch target combining daily and Inter-BBS maintenance", "call_graph: includes duplicate scanning, macro loading, and maintenance reports"]
+    },
+    "013a:0aba": {
+      "name": "run_interbbs_maintenance_mode",
+      "confidence": "medium",
+      "evidence": ["call_graph: main runtime dispatch target centered on run_interbbs_maintenance", "call_graph: performs Inter-BBS setup and completion handling"]
+    },
+    "013a:0cf7": {
+      "name": "run_door_session",
+      "confidence": "high",
+      "evidence": ["call_graph: called directly from executable entry and dispatches maintenance or gameplay", "call_graph: performs player/session setup before entering the turn controller"]
+    },
+    "0346:0281": {
+      "name": "run_player_turn",
+      "confidence": "high",
+      "evidence": ["call_graph: called from run_door_session and dispatches all interactive gameplay menus", "binary_strings: owned resident table contains turn-level player prompts"]
+    },
+    "0549:0064": {
+      "name": "write_interbbs_packet_file",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE writes typed binary Inter-BBS payload files for external transport", "instruction_behavior: selects a destination-node record, creates the output file, stores packet header fields, writes the header and caller-supplied payload, then closes it", "call_graph: common sink for every identified packet writer"]
+    },
+    "0851:00bf": {
+      "name": "draw_horizontal_rule",
+      "confidence": "high",
+      "evidence": ["repository_docs: captured BRE screens use width-specific CP437 horizontal rules", "instruction_behavior: sets a caller-supplied color, emits CP437 horizontal rule characters to the requested width, then restores the normal color", "call_graph: shared by menus, reports, advisors, messages, and status screens"]
+    },
+    "0980:012d": {
+      "name": "set_output_color",
+      "confidence": "high",
+      "evidence": ["repository_docs: screen captures document BRE color changes and ANSI output", "instruction_behavior: obtains the ANSI sequence for a numeric color, writes it to the active text output, and flushes the text runtime", "call_graph: ubiquitous display helper"]
+    },
+    "0980:01ca": {
+      "name": "format_ansi_color_sequence",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE screens use numeric DOS/ANSI color attributes", "instruction_behavior: when ANSI output is enabled, translates a color number into a ShortString sequence; otherwise returns an empty string", "call_graph: called by all styled display formatters"]
+    },
+    "0dc9:00f7": {
+      "name": "i32_to_shortstring",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: converts a signed DX:AX value through the Turbo Pascal numeric formatter and stores the result as a bounded ShortString", "call_graph: used wherever numbers are concatenated into filenames, reports, packet messages, and configuration text"]
+    },
+    "0c03:0bfb": {
+      "name": "crc32_buffer",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: initializes a 32-bit accumulator to all ones, shifts it eight bits per byte, and XORs through a 256-entry 32-bit table", "call_graph: used to initialize and validate attack, packet, and game-data records"]
+    },
+    "0c03:0ed0": {
+      "name": "random_bounded_i32",
+      "aliases": ["random_u16"],
+      "confidence": "high",
+      "evidence": ["repository_docs: runtime helper map identifies this address as Random(n)", "instruction_behavior: converts the signed 32-bit bound to Real48, multiplies it by the runtime random fraction, and truncates back to int32"]
+    },
+    "0c03:129b": {
+      "name": "max_i32",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: signed-compares two DX:AX arguments and returns the greater int32", "call_graph: used for economy, attack, and decontamination lower bounds"]
+    },
+    "0c03:12e1": {
+      "name": "min_i32",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: signed-compares two DX:AX arguments and returns the lesser int32", "call_graph: used for maintenance, economy, combat, trade, and spoil caps"]
+    }
+  },
+  "blocks": {
+    "0x00c313": {
+      "name": "resolve_civil_unrest__scale_deployed_forces_after_losses",
+      "confidence": "high",
+      "evidence": ["repository_docs: deployed market/attack units remain in the empire's parallel force array and are scaled down with losses", "instruction_behavior: block contains the documented loss scaling at OVR 0x00c358"]
+    },
+    "0x00d00b": {
+      "name": "process_end_of_turn__advance_headquarters_construction",
+      "confidence": "high",
+      "evidence": ["repository_docs: HeadQuarters advances five points per turn in the range 1..99 and clamps at 100", "instruction_behavior: block contains the documented update at OVR 0x00d010"]
+    },
+    "0x00efc8": {
+      "name": "resolve_regular_attack__calculate_force_strengths",
+      "confidence": "high",
+      "evidence": ["repository_docs: regular attack builds separate attacker and defender strengths from troop, jet/turret, tank, HQ, morale, technology, and alliance terms", "instruction_behavior: block contains the documented strength calculation beginning near OVR 0x00f130"]
+    },
+    "0x00f57c": {
+      "name": "resolve_regular_attack__add_allied_defenders",
+      "confidence": "high",
+      "evidence": ["repository_docs: Full Defense allies contribute thirty percent at their own morale curve", "instruction_behavior: block contains the documented allied-defense calculation at OVR 0x00f5d7"]
+    },
+    "0x00ff8c": {
+      "name": "resolve_regular_attack__damage_defender_headquarters",
+      "confidence": "high",
+      "evidence": ["repository_docs: a lost defense removes Random(3)+5 HeadQuarters points and clamps at zero", "instruction_behavior: block contains the documented subtraction at OVR 0x00ffa2"]
+    },
+    "0x01012b": {
+      "name": "resolve_regular_attack__transfer_defeated_military",
+      "confidence": "high",
+      "evidence": ["repository_docs: total victory transfers all six military unit types", "instruction_behavior: block contains the documented transfer sequence at OVR 0x0101e4..0x010294"]
+    },
+    "0x012862": {
+      "name": "market_price_walk__update_headquarters_price",
+      "confidence": "high",
+      "evidence": ["repository_docs: HeadQuarters price uses lifetime turns, a random 300-wide band, and an upper cap", "instruction_behavior: block contains the documented formula and turn-counter read at OVR 0x0128ba..0x01293e"]
+    },
+    "0x012c62": {
+      "name": "purchase_regions__start_headquarters_construction",
+      "confidence": "high",
+      "evidence": ["repository_docs: buying a HeadQuarters initializes completion to five percent", "instruction_behavior: block contains the documented store at OVR 0x012c8c"]
+    },
+    "0x012d26": {
+      "name": "purchase_regions__enforce_land_allowance",
+      "confidence": "high",
+      "evidence": ["repository_docs: land purchases are bounded by the per-empire allowance at record +0x331", "instruction_behavior: block contains the documented bound at OVR 0x012d30"]
+    },
+    "0x012edd": {
+      "name": "purchase_regions__debit_land_allowance",
+      "confidence": "high",
+      "evidence": ["repository_docs: each purchase subtracts its region count from the per-empire allowance", "instruction_behavior: block contains the documented subtract-through-pointer at OVR 0x012ef9"]
+    },
+    "0x01793c": {
+      "name": "run_covert_operations_menu__commit_agent",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE debits one covert agent before resolving the selected operation", "instruction_behavior: block contains the documented agent decrement at OVR 0x017957"]
+    },
+    "0x02eeca": {
+      "name": "allocate_turn_budget__restart_payment_sequence",
+      "confidence": "high",
+      "evidence": ["repository_docs: choosing to reconsider restarts the complete maintenance sequence at the bank prompt", "instruction_behavior: loop head dominates every payment stage and is the backward reconsider target"]
+    },
+    "0x02ef0f": {
+      "name": "allocate_turn_budget__armed_forces_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: armed-forces upkeep is the first required payment after the optional bank visit", "call_graph: block calls calculate_military_maintenance immediately before its documented prompt"]
+    },
+    "0x02f093": {
+      "name": "allocate_turn_budget__region_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: region maintenance follows armed-forces upkeep", "call_graph: block calls calculate_region_maintenance immediately before its documented prompt"]
+    },
+    "0x02f257": {
+      "name": "allocate_turn_budget__sdi_maintenance",
+      "confidence": "high",
+      "evidence": ["repository_docs: SDI maintenance is the first conditional payment after region upkeep", "call_graph: block calls calculate_sdi_maintenance on the quote and automatic-payment paths"]
+    },
+    "0x02f438": {
+      "name": "allocate_turn_budget__waste_decontamination",
+      "confidence": "high",
+      "evidence": ["repository_docs: waste decontamination is the conditional stage after SDI", "call_graph: block calls both waste selection and decontamination cost helpers beside the documented prompt"]
+    },
+    "0x02f49b": {
+      "name": "allocate_turn_budget__calculate_support_boost_request",
+      "confidence": "high",
+      "evidence": ["repository_docs: support request uses a deficit capped at 15 and cost deficit*(3*People+500)", "instruction_behavior: block contains the documented calculation at OVR 0x02f4c4"]
+    },
+    "0x02f503": {
+      "name": "allocate_turn_budget__prompt_support_boost",
+      "confidence": "high",
+      "evidence": ["repository_docs: popular-support funding is optional and appears only below 100", "binary_strings: block owns the support-boost request and payment prompt path"]
+    },
+    "0x02f6ca": {
+      "name": "allocate_turn_budget__apply_support_boost_payment",
+      "confidence": "high",
+      "evidence": ["repository_docs: awarded support is the truncated paid-to-cost ratio and can exceed the 15-point charged deficit", "instruction_behavior: block contains the documented scaling at OVR 0x02f740"]
+    },
+    "0x02f82c": {
+      "name": "allocate_turn_budget__prompt_morale_boost",
+      "confidence": "high",
+      "evidence": ["repository_docs: military-morale funding is an optional conditional payment after support", "binary_strings: block owns the military-morale request and payment prompt path"]
+    },
+    "0x02f9b8": {
+      "name": "allocate_turn_budget__prompt_crown_tax_payment",
+      "confidence": "high",
+      "evidence": ["repository_docs: Queen Royale tax follows required maintenance and accepts partial payment", "call_graph: block calls calculate_crown_tax immediately before the documented tax prompt"]
+    },
+    "0x02faf1": {
+      "name": "allocate_turn_budget__deposit_crown_tax",
+      "aliases": ["crown_tax"],
+      "confidence": "high",
+      "evidence": ["repository_docs: the amount actually paid is added to the planet-wide Queen Royale refund purse", "instruction_behavior: block contains the documented deposit at OVR 0x02faf1"]
+    },
+    "0x02fb15": {
+      "name": "allocate_turn_budget__offer_reconsideration",
+      "confidence": "high",
+      "evidence": ["repository_docs: any required-payment shortfall warns of disastrous results and offers to restart the sequence", "binary_strings: block owns the warning and reconsider prompt"]
+    },
+    "0x02fc49": {
+      "name": "allocate_turn_budget__revive_decontaminated_regions",
+      "confidence": "high",
+      "evidence": ["repository_docs: successful decontamination converts the selected waste regions back to usable land", "binary_strings: block reports the revived waste-region count"]
+    },
+    "0x03429c": {
+      "name": "process_economic_production__calculate_region_gold_income",
+      "confidence": "high",
+      "evidence": ["repository_docs: region gold is independently rolled as Base+Random(Rate) for Mountain, Coastal, Desert, River, and Industrial sources", "instruction_behavior: block contains the documented income sequence beginning at OVR 0x0342c0"]
+    },
+    "0x036229": {
+      "name": "resolve_pirate_attack__cap_spoils",
+      "confidence": "high",
+      "evidence": ["repository_docs: pirate spoil categories have explicit maximum losses", "instruction_behavior: block contains the documented cap application at OVR 0x03629c"]
+    },
+    "0x0363ba": {
+      "name": "resolve_pirate_attack__retry_spoil_selection",
+      "confidence": "high",
+      "evidence": ["repository_docs: an empty selected spoil category reruns the complete choice with a fresh faction", "instruction_behavior: documented retry target at OVR 0x0363ba"]
+    },
+    "0x036566": {
+      "name": "launch_pirate_raid__calculate_pirate_strength",
+      "confidence": "high",
+      "evidence": ["repository_docs: pirate defense uses tanks + turrets/2 + troopers/3", "instruction_behavior: block contains the documented strength expression at OVR 0x03671b"]
+    },
+    "0x036a39": {
+      "name": "launch_pirate_raid__cap_force_losses",
+      "confidence": "high",
+      "evidence": ["repository_docs: pirate combat applies literal caps to force losses", "instruction_behavior: block contains the documented second cap at OVR 0x036a59"]
+    },
+    "0x040221": {
+      "name": "resolve_received_invasion__calculate_attacker_strength",
+      "confidence": "high",
+      "evidence": ["repository_docs: received Inter-BBS attacks use the same HQ-dependent tank and morale strength expression", "instruction_behavior: block contains the documented attacker formula at OVR 0x040241"]
+    },
+    "0x040400": {
+      "name": "resolve_received_invasion__calculate_defender_strength",
+      "confidence": "high",
+      "evidence": ["repository_docs: received Inter-BBS attacks separately compute target defense", "instruction_behavior: block contains the parallel documented formula at OVR 0x04043d"]
+    },
+    "0x04a811": {
+      "name": "calculate_combat_odds__sqrt_strength_ratio",
+      "confidence": "high",
+      "evidence": ["repository_docs: combat odds call the same verified Real48 square-root routine used by population decline", "instruction_behavior: block contains the documented call at OVR 0x04a81c"]
+    },
+    "0x04bae7": {
+      "name": "send_spy__encode_source_and_target_indices",
+      "confidence": "high",
+      "evidence": ["repository_docs: BRE's Send Spy bug passes the source empire for both packet fields while only the instruction positions differ", "instruction_behavior: block contains both documented identical argument loads at OVR 0x04bae7 and 0x04bb03"]
+    },
+    "0x04aa51": {
+      "name": "resolve_received_covert_operation__encode_correct_spy_source",
+      "confidence": "high",
+      "evidence": ["repository_docs: the shared spy helper is called correctly from another covert path with a distinct empire and mode", "instruction_behavior: block contains the comparison call site at OVR 0x04aa5e"]
+    },
+    "0346:043d": {
+      "name": "run_player_turn__first_play_daily_events",
+      "confidence": "high",
+      "evidence": ["repository_docs: this block runs only with no resumed turn and a full daily turn allowance, then calls the Queen refund and lottery", "instruction_behavior: contains the sole documented Queen-refund call at BRE.EXE 0x61dd"]
+    },
+    "0346:0496": {
+      "name": "run_player_turn__dispatch_resume_stage",
+      "confidence": "high",
+      "evidence": ["repository_docs: empire +0x2b8 is a persistent turn-stage counter and BRE.EXE 0x6236 is its dispatch loop", "instruction_behavior: documented loop-head block dispatches the stage value"]
+    },
+    "0346:0abb": {
+      "name": "run_player_turn__commit_turn",
+      "confidence": "high",
+      "evidence": ["repository_docs: stage 20 commits the turn, increments lifetime turns, and decrements today's allowance at BRE.EXE 0x685f", "instruction_behavior: block contains those documented record updates"]
+    },
+    "0346:0ae1": {
+      "name": "run_player_turn__reset_resume_stage",
+      "confidence": "high",
+      "evidence": ["repository_docs: completed turns reset the persistent stage counter to zero at BRE.EXE 0x688e", "instruction_behavior: block contains the documented reset store"]
+    }
+  }
+}

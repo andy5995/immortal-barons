@@ -5,6 +5,7 @@
 *.test
 *.out
 *.prof
+__pycache__/
 
 # Runtime game state (created by the binaries)
 data/
@@ -22,3 +23,11 @@ data/
 # Live BRE screen captures (dev reference). Verbatim proprietary BRE output and
 # may contain a live game's private numbers — never commit (clean-room rule).
 *.cap
+
+# Original BRE is proprietary. Analysis metadata may be committed; binaries,
+# dumps, and debugger output may not.
+BRE.EXE
+BRE.OVR
+brev988.exe
+MEMDUMP.BIN
+LOGCPU.TXT

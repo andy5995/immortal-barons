@@ -39,10 +39,22 @@ not a default.
 
 You need your own copy of the **original BRE distribution** (the DOS door
 release archive) — this skill never ships or bundles it (see the license
-section). If you don't already have it, obtain the archive from the John Dailey
-Software release or the BRE community (the project README links a BRE Discord),
-and unpack it somewhere local. Point a shell variable at that directory; every
-command in this skill uses it:
+section). If you don't already have it, use the repository's explicit fetcher;
+it downloads the official 0.988 archive, verifies pinned hashes, and extracts
+`BRE.EXE` and `BRE.OVR`. It never executes the archive or the DOS programs:
+
+```
+python3 scripts/bre-disasm.py fetch ~/path/to/private/bre-dos
+```
+
+Add `--include-docs` when the bundled help, instructions, samples, artwork, and
+template data are useful. The host extractor unpacks the nested `BREDATA.EXE`
+payload into `~/path/to/private/bre-dos/reference`; it does not run that DOS
+self-extractor.
+
+An existing copy can be checked with `python3 scripts/bre-disasm.py verify
+--directory ~/path/to/private/bre-dos`. Do not commit the downloaded files.
+Point a shell variable at that directory; every command in this skill uses it:
 
 ```
 BRE=~/path/to/bre-dos     # wherever you unpacked it, e.g. a DOSEMU drive_c/games/bre-dos
@@ -52,11 +64,19 @@ Key files inside:
 
 - **`BRE.OVR`** — the overlay; holds the bulk of menu strings, prompts, news
   text. First place to look for labels and menu order.
-- **`BRE.EXE`**, **`BREDATA.EXE`** — main binaries; some strings, the config
-  screens.
+- **`BRE.EXE`** — the main executable and its resident Turbo Pascal runtime;
+  holds some strings and configuration code.
 - **`game/*.hlp`, `game/breins.txt`, `game/bre.txt`, `docs/`** — help/prose.
 - `data/planet.bre`, `data/game.dat` — runtime save data (not menu/mechanic
   definitions).
+
+The distribution's **`BREDATA.EXE` is not a BRE runtime program**. It is an ARJ
+self-extracting installer payload (`BREDATA.ARJ`) containing 19 documentation,
+sample-configuration, help, ANSI-art, and initial/template data files. The
+stock `UNPACK.BAT` merely runs `BREDATA -Y` to extract them. Do not disassemble
+it as game code or look there for overlays, mechanics, or an FP library. This
+is why ordinary fetches extract only `BRE.EXE` and `BRE.OVR`; use the explicit
+`--include-docs` option when its non-runtime reference material is needed.
 
 ## Technology silently scales almost every number you capture
 
@@ -150,7 +170,7 @@ explanation only appears on some items: *"You must play at least one turn per
 entry in the game to access this option."* An inert IP menu item is far more
 likely to be this than a broken mechanic.
 
-### Disassembly: get real segment bases from a debugger, don't solve for them
+### Disassembly: use the static map; never guess segment bases
 
 `BRE.OVR` is a Turbo Pascal **overlay** file, so a unit's string constants are
 addressed relative to a code-segment base that is not in the file. The habit of
@@ -160,20 +180,36 @@ otherwise. On 2026-08-11 it found the attack unit (0x2b783, 36 hits) but dead-
 ended completely on the IBBS inbound scanner and on the result-header strings,
 burning hours for nothing.
 
-**The better route, suggested by the BRE community: run the binary under a
-DOSBox build with the built-in debugger** (DOSBox-X or DOSBox-debug), let it
-load all the overlays, then **dump memory**. That gives the real, loaded segment
-addresses instead of inferred ones. From there, generate a map of branch targets
-starting at the program entry point, which separates code from data properly,
-and you get a clean disassembly to name things in. It can grind on that for a
-while and come back with something far more useful than `ndisasm` over a raw
-file offset.
+The repository now does that mapping directly. `scripts/bre-disasm.py` parses
+the overlay descriptors and relocation streams, follows typed 8086 control
+flow, and ties each patched `INT 3Fh` stub back to its canonical `BRE.OVR`
+offset. Start with its `list`, `lookup`, `map`, and `disasm` commands; they do
+not need the unit's transient runtime segment and do not rely on a plausibility
+score. The detailed workflow and proof are in "Reading the disassembly" below
+and `docs/dev/bre-disassembly.md`. This map covers `BRE.EXE`, `BRE.OVR`, and the
+resident runtime linked into that executable. It does not need to cover
+`BREDATA.EXE`, which is only the installation self-extractor described above.
+
+The pinned v0.988 catalog reaches a fixed point for calculated control flow:
+all 23 reachable indirect-call sites belong to 13 proven closed target sets,
+with no reachable indirect jumps, unresolved transfers, or decode-boundary
+conflicts. When a call edge has `kind: calculated_call`, follow its
+`dispatch_id`; the dispatch record is the complete target set. Do not guess a
+target or launch an emulator merely because the source instruction is indirect.
+
+Use the repository's **Xvfb-backed DOSBox debugger** only when the overlay
+loader/materialized bytes need independent validation or new evidence falls
+outside the pinned catalog. `python3 scripts/bre-disasm.py debugger --directory
+"$BRE" --run` launches the debugger correctly under a private Xvfb. Memory
+dumps and traces contain original program material; keep them private and out
+of the repository.
 
 This does **not** replace dosemu2 for everything — dosemu2 is still the only way
 to scrape screens as text (see above), and that is most of what this skill does.
-The two are complementary: **dosemu2 for behaviour and screens, a DOSBox
-debugger for structure and constants.** Reach for the debugger the moment a
-base-solve fails to converge, rather than trying a fourth scoring heuristic.
+The two are complementary: **dosemu2 for behaviour and screens, the static map
+for normal structure and constants, and a DOSBox debugger for dynamic
+validation.** Static catalog lookup is the normal path; the debugger is an
+exceptional validation tool, not a prerequisite for following overlays.
 
 ## Source priority (most authoritative first)
 
@@ -204,12 +240,18 @@ Normal-Attack-on-Enter default, and the wire codes the help does not mention —
 but it should have been the *second* step, confirming and extending a cheap
 answer rather than substituting for one.
 
-Two cheap sweeps to run at the start of any mechanic hunt:
+Three cheap sweeps to run at the start of any mechanic hunt:
 
 ```
-grep -rain '<mechanic name>' game/ docs/ | head -40
-strings -a -t x BRE.OVR | grep -i '<mechanic name>'
+grep -rain '<mechanic name>' "$BRE/game/" "$BRE/docs/" | head -40
+python3 scripts/bre-disasm.py find-string --directory "$BRE" '<mechanic name>'
+strings -a -t x "$BRE/BRE.OVR" | grep -i '<mechanic name>'
 ```
+
+Prefer `find-string` for code discovery: it searches the private binary text
+but returns the cataloged functions and blocks that reference each match. Use
+raw `strings` only to inspect declaration order or text that has no indexed
+code reference.
 
 ## Running BRE headless (tmux + dosemu2 harness)
 
@@ -713,8 +755,8 @@ assume it's the mode you care about. Grep for sibling copies of the same banner
 a live screenshot of the *specific* feature before treating it as fact — the
 same source-1-beats-strings rule that already applies to colors.
 
-See `references/extraction.md` for the exact `strings` / `grep -abo` / `dd|xxd`
-commands and worked examples.
+See `references/extraction.md` for the catalog-first string-reference workflow
+and the raw `strings` / `grep -abo` / `dd|xxd` fallback commands.
 
 ## Cross-reference the docs, the overlay, AND a disassembly — never one alone
 
@@ -759,32 +801,108 @@ than fitting a curve** — a fit needs dozens of samples and can still be wrong,
 and two BRE constants were mis-set that way before the disassembly corrected
 them.
 
-Tools: `ndisasm`, `radare2`, `ghidra` are installed. Copy `BRE.OVR` / `BRE.EXE`
-somewhere writable first; never work on the originals.
+Start with the repository's static map, not a guessed OVR slice:
+
+```
+python3 scripts/bre-disasm.py check-catalog
+python3 scripts/bre-disasm.py find-string --directory "$BRE" "technology"
+python3 scripts/bre-disasm.py find-string --directory "$BRE" --function technology_report "technology"
+python3 scripts/bre-disasm.py list --kind procedure --filter technology
+python3 scripts/bre-disasm.py lookup technology_report
+python3 scripts/bre-disasm.py xrefs technology_report
+python3 scripts/bre-disasm.py list --kind dispatch
+python3 scripts/bre-disasm.py map --directory "$BRE" --ovr-offset 0x32d1b
+python3 scripts/bre-disasm.py disasm --directory "$BRE" --procedure technology_report
+python3 scripts/bre-disasm.py disasm --directory "$BRE" --around 0x32d1b --instructions 40
+```
+
+`docs/dev/bre-disassembly.md` documents the file format and
+`docs/dev/bre-v0988-disassembly.json` is the machine-readable catalog. The map
+contains all 103 overlay units and names every proven procedure, direct-jump
+basic block, conditional fallthrough, complementary chunk, fixup stream,
+resident target, and overlay descriptor record. Half-open spans, source edges,
+bidirectional caller/callee graphs, procedure body ranges, code-segment data
+references, the Pascal-string reference index, resident RTL/Real48 names, and
+closed calculated-transfer sets are attached to those records. Semantic names
+have an auditable `identified` status; internal targets use `contextual`,
+file-format records use `structural`, and address-only fallbacks are explicitly
+`unclassified`.
+
+Treat a record's `id` as its identity and `name` as its current human-friendly
+label. Names can improve; IDs are derived from canonical EXE/OVR addresses and
+keep call-graph and string-index links durable. `lookup NAME_OR_ID` accepts
+either. On a procedure result, follow `callees[].to_id` downward and
+`callers[].from_id` upward; `site_ids` identify the exact call instructions. If
+an edge is `calculated_call`, look up its `dispatch_id` to get the complete
+closed target list and assignment-tracing evidence. `list --kind
+procedure|block|data|fixup|dispatch|all` searches record classes, and
+`--status identified|contextual|structural|unclassified` filters by naming
+state. Store durable IDs in working notes or generated indexes and show the
+friendly name alongside them. Inspect a procedure's `data_references` and a
+data record's inverse `referenced_by` list when a field or table matters.
+
+`find-string --directory "$BRE" SUBSTRING` loads the committed index first,
+verifies the exact binaries, then returns every named procedure and block that
+directly references a matching Pascal string. Matching is case-insensitive by
+default. Add repeatable `--function NAME_OR_ID` filters after a broad search to
+limit uses to exact procedures. Add `--details` only when the original matching
+text and exact use sites are necessary; that output is proprietary and must not
+be committed.
+The catalog deliberately stores hashes, lengths, and durable references rather
+than original strings.
+
+Start with identified names, then inspect unclassified roots only when the
+desired behavior has no semantic match. `disasm --procedure NAME_OR_ID` prints
+exact catalogued body ranges. `disasm --around ADDRESS` accepts an OVR file
+offset, resident `SEGMENT:OFFSET`, durable site ID, or procedure, and safely
+synchronizes to the containing block's nearest preceding catalog root. The
+header names that anchor; an address in data is rejected rather than decoded
+from an arbitrary byte. Whole-unit and `--start/--end` views remain available.
+The tool skips catalogued non-code spans and verifies exact v0.988 hashes.
+Capstone 5 supplies typed 16-bit operands for reachability; `ndisasm` is only
+the optional text renderer.
 
 The loop that keeps paying off:
 
-1. **Find the message string.** Turbo Pascal strings are length-prefixed and sit
-   in one contiguous table, and the routine that uses them very often begins
-   IMMEDIATELY AFTER the table ends, at `55 89 E5` (push bp; mov bp,sp).
-2. **Disassemble around it:**
-   `dd if=BRE.OVR bs=1 skip=$((0xADDR)) count=$((0x100)) of=x.bin && ndisasm -b16 -o0xADDR x.bin`
-3. **Find a constant** by searching `struct.pack("<H", value)` and checking the
+1. **Find the message string's users.** Run `find-string` with a distinctive
+   substring and begin at its returned procedure IDs. Search sibling wording
+   too: duplicated subsystems and variant messages can lead to different code.
+   Fall back to raw string offsets only when the index has no direct reference.
+2. **Walk the graph by durable ID.** Use `xrefs NAME_OR_ID` or `lookup` on
+   callers and callees until the desired calculation or gate is reached. With
+   private binaries, add `--directory "$BRE" --show-sites --direction callers`
+   (or `callees`/`both`) for synchronized windows at exact site IDs. Follow
+   every calculated edge's `dispatch_id`; its targets are closed for this
+   release. Prefer a call site near an indexed string when several callers need
+   semantic identification.
+3. **Map and disassemble at proven boundaries.** Prefer `disasm --procedure`
+   for a named body or `disasm --around SITE_ID` for local context. The latter
+   synchronizes from the nearest preceding root and refuses non-code addresses;
+   never decode a guessed linear slice from an arbitrary byte.
+4. **Find a constant** by searching `struct.pack("<H", value)` and checking the
    preceding byte for an imm16 opcode (`b8` mov ax, `05` add ax, `b9` mov cx …).
-4. **Decode float constants.** Reals are 6-byte Turbo Pascal, loaded into a
-   register triple right before the runtime call that consumes them. Use
-   `scripts/bre-tpreal.py --scan FILE 0xSTART 0xLEN` (in this project's Claude
-   dir) — its docstring carries the format, the empire/config record layout
-   mapped so far, and the known runtime helper addresses.
+5. **Calculate Real48 exactly.** Reals are six-byte Turbo Pascal values loaded
+   into a register triple before the resident helper call. Pass constants and
+   intermediate values to the exact BRE-linked calculator, using an explicit
+   `mem:` prefix for memory bytes:
 
-   **Always run the script; never decode a real by hand.** Doing the exponent
-   arithmetic mentally is one off-by-one away from a clean-looking wrong answer,
-   and the answer looks plausible either way. Decoding the Queen Royale refund
-   constants by hand gave 0.025 / 0.01 / 500,000 — every one exactly half the
-   truth, because the bias was applied one step out. The script returned
-   0.05 / 0.02 / 1,000,000. Both sets are round numbers, so nothing about the
-   hand result invited a second look; only the tool catches it.
-5. **Validate against play.** A candidate reading is not a finding until it
+   ```
+   python3 scripts/bre-real48.py div 100 3
+   python3 scripts/bre-real48.py mul mem:870000000048 0.25 --output all
+   python3 scripts/bre-real48.py sqrt mem:820000000000
+   python3 scripts/bre-real48.py decode mem:810000000000 mem:800000000000
+   python3 scripts/bre-real48.py eval '100000 + (50 / 5)'
+   ```
+
+   Use `decode` for one or many stored values and `eval` for a compound
+   expression rounded to Real48 after every operation. The calculator accepts
+   decimal and `mem:hhhhhhhhhhhh` inputs, implements the complete arithmetic,
+   conversion, comparison, standard-function, and random operation surface
+   linked into BRE 0.988, and decorates every memory result with `mem:`. Never
+   decode a Real48 by hand, use Python `float`/`math`, or borrow constants from
+   another Turbo Pascal release. Read
+   `docs/dev/bre-real48.md` for representation, errors, and operation names.
+6. **Validate against play.** A candidate reading is not a finding until it
    reproduces captured figures exactly. Rounding vs truncation and the order of
    operations both change results by a unit — the two real→int helpers differ
    only in that, and picking the wrong one is easy.
@@ -866,29 +984,22 @@ PERSISTED record doing a job a local variable would do — BRE has no reason to
 spend save-file bytes on a guard, so if it looks like one, you have misread it.
 Grep the disp16 in both files, sort by opcode, and read every site.
 
-### Finding an overlaid routine's CALLER — walk the overlay stubs
+### Finding an overlaid routine's CALLER — map the overlay stubs
 
-"Who calls this?" looks unanswerable in an overlay, because a near-call scan for
-the routine's file offset finds nothing: every call to overlaid code goes through
-an **INT 3Fh stub in `BRE.EXE`**, so callers far-call the stub, not the routine.
-The chain is mechanical, four steps, and it turned the Queen Royale refund's
-trigger from "unknown" into one unique call site in minutes:
+"Who calls this?" looks unanswerable in an overlay, because callers far-call an
+**INT 3Fh stub in `BRE.EXE`**, not the OVR file offset. The static catalog now
+does the complete mapping and inverse call graph. First `lookup` the procedure
+and read `callers[].from_id` plus `site_ids`; recurse by ID to find the owning
+behavior. Given a raw far target, run `bre-disasm.py map --address SEG:OFF`;
+given an OVR address, run it with `--ovr-offset`. The descriptor's five-byte
+`cd 3f <entry> 00` stub maps exactly to `unit_file_offset + entry`.
 
-1. **Parse the overlay segment headers.** They start at `BRE.EXE` 0x3b00 on
-   16-byte boundaries: `cd 3f 00 00 | dword file offset in BRE.OVR | word code
-   size | word fixup size | …`. Find the header whose `[fo, fo+size)` contains
-   your routine; `routineOffset = fileOffset − fo`.
-2. **Find the stub.** Immediately after each header sit 5-byte stubs,
-   `cd 3f <word offset> 00`. Match `routineOffset`.
-3. **Convert the stub's EXE file offset to a load-image linear:** subtract
-   `hdrParas × 16` (the word at EXE offset 8 — 660 paragraphs, 0x2940, here).
-4. **Scan both files for `9a <off> <seg>` where `seg × 16 + off` equals that
-   linear.** Those are the callers. Pre-relocation logical segments linearize
-   exactly, which is also why helper addresses are quoted as `0fd0:178e` style.
-
-The same arithmetic runs backwards: given a far-call target from a disassembly,
-`seg×16 + off + 0x2940` is the file offset to read, and if the bytes there are
-`cd 3f` it is a stub — follow it into the overlay instead of disassembling it.
+For manual verification, the MZ header is `0x2940` bytes and a logical EXE
+address maps to `0x2940 + segment*16 + offset`. At runtime the INT 3F handler
+rewrites each stub to `ea <entry> <dynamic-unit-segment>`; the dynamic segment is
+irrelevant to the canonical OVR address. The OVR fixup stream is an array of
+word offsets, each relocated by adding the DOS EXE load segment. See the dev
+guide rather than re-deriving or guessing this layout.
 
 ### Name a predicate from its OTHER call sites, not the one you are reading
 
