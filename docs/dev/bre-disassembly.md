@@ -450,18 +450,28 @@ and subtracts it here, looping until the pool is empty.
 through `+0xb6+2` and does **not** include this pool, so unallocated land is not
 territory until it is placed.
 
-### One catalog name to revisit
+### A catalog name corrected
 
-`select_regions_to_lose` (`BRE.OVR 0x030ece`, status `identified`) is the
-region **allocation** picker described above, not a loss picker: it returns
-immediately when the unallocated pool is zero, and its body adds to a chosen
-region type while subtracting from the pool. The naming evidence was presumably
-a nearby string; the field access list points the other way.
+`allocate_unassigned_regions` (`BRE.OVR 0x030ebb`) was catalogued as
+`select_regions_to_lose`, which the field access list contradicts: it returns
+immediately when the pool is empty, and its body adds the chosen count to a
+region type while subtracting the same from the pool. Its four callers are the
+three that credit the pool — a won regular attack, a pirate raid, waste
+decontamination — plus `run_player_turn`, which re-offers whatever is left. The
+key handling is the region-picker's: a type letter, `?` to redisplay the list,
+`*` for the advisors, Enter to leave.
 
-## Scope and legal hygiene
+Renamed in the catalog with `select_regions_to_lose` retired to `aliases`, so
+the old name still resolves — the convention `calculate_crown_tax` already
+follows. Every record derived from the name (its 23 branch/loop/join blocks)
+was renamed with it, and the `"to"`/`"from"` call-graph references were rewritten
+to match.
 
-The map records mechanics of the file format, addresses, hashes, control-flow
-boundaries, and analysis names. It does not contain original code bytes,
-strings, display text, art, full disassembly, memory dumps, or debugger logs.
-Keep those out of commits. The static analysis names are project terminology,
-not claims about original compiler symbols.
+**Editing the catalog by hand:** it round-trips exactly through
+`json.dumps(catalog, indent=2)` plus a trailing newline, so a structural edit
+need not reformat the file — dumping with any other setting produces a
+million-line diff. The `validation` block at the end is a set of counters over
+the catalog's own contents and goes stale on any edit; recompute it with
+`validate_catalog` from `scripts/bre-disasm.py` and confirm with
+`bre-disasm.py check-catalog`. Retiring a name into `aliases` raises
+`unique_names` by one, because the old name stays resolvable.
