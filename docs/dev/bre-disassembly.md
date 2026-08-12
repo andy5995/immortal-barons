@@ -225,6 +225,8 @@ The catalog therefore records:
 - grouped far-call/overlay-call edges and every unresolved indirect transfer;
 - caller and callee lists, exact body ranges, and code-segment data references
   for every procedure, plus the inverse `referenced_by` relation on data;
+- a bidirectional procedure call graph whose caller, callee, and instruction
+  sites use durable address IDs rather than friendly names as their identity;
 - an index of directly referenced Pascal strings, keyed by durable address IDs
   and retaining only lengths, hashes, and durable code references;
 - any target that conflicts with an already decoded instruction boundary.
@@ -241,8 +243,11 @@ naming pass identifies 386 of the
 behavior. Of the basic blocks, 6,763 targets have procedure-context names and
 427 entries have behavior-specific names. The remaining 573 procedures and 170
 non-structural chunks are explicitly unclassified rather than being given
-speculative names. There are 11 unresolved indirect calls in the overlays, 11
-in the resident image, and zero decode-boundary conflicts.
+speculative names. The procedure graph contains 6,374 grouped outgoing edges at
+19,984 call sites. All 6,356 direct edges resolve bidirectionally by durable ID;
+the remaining 18 are genuinely indirect calls without a target address. There
+are 11 unresolved indirect transfers in the overlays, 11 in the resident image,
+and zero decode-boundary conflicts.
 Consumers must not infer code behind an unresolved transfer without another
 static root or runtime evidence.
 
@@ -252,11 +257,21 @@ cover each overlay code area and the complete resident load module, every
 procedure has a same-name entry block, names are unique, and the recorded
 summary counts agree. It also verifies that every durable ID matches its file
 address and that every indexed string use resolves to known block and procedure
-IDs. `list --kind procedure|block|data|fixup|all` emits TSV, Markdown, or JSON,
+IDs. Known call edges must appear identically in the caller and callee directions,
+and call-site IDs are recomputed from their containing binary addresses.
+`list --kind procedure|block|data|fixup|all` emits TSV, Markdown, or JSON,
 and `--status identified|contextual|structural|unclassified` selects a naming
 state. `lookup NAME_OR_ID` returns the matching records, evidence, call graph,
 and data references for a stable name, semantic alias, or durable ID (a
 procedure entry is also its first block).
+
+Every procedure record is directly walkable as a graph node. Follow
+`callees[].to_id` to descend into things it calls and `callers[].from_id` to
+walk back to its callers; pass either ID to `lookup` to load the next node.
+Each grouped edge retains its kind and local `sites`, while `site_ids` identify
+the exact instructions as canonical EXE load offsets or OVR file offsets.
+Indirect calls have `to_id: null` because the static analysis has no target to
+invent.
 
 `find-string SUBSTRING` is the bridge from private binary text to the static
 map. It loads the committed table first, verifies the exact BRE 0.988 binaries,
@@ -274,6 +289,7 @@ Useful audit queries are:
 python3 scripts/bre-disasm.py list --kind procedure --status identified
 python3 scripts/bre-disasm.py list --kind procedure --status unclassified
 python3 scripts/bre-disasm.py lookup resolve_received_trade_offer
+python3 scripts/bre-disasm.py lookup bre0988:ovr:procedure:0389d6
 python3 scripts/bre-disasm.py find-string --directory /path/to/bre "trade"
 ```
 

@@ -199,9 +199,11 @@ Real48 port and calculator are `scripts/bre_real48.py` and
 "substring"`; it loads the durable string-reference table and returns all
 currently named functions and blocks that refer to a matching Pascal string.
 Use `--details` only when the private string text and exact use sites are needed,
-and never commit that output. Prefer reading the code to fitting a curve: a fit
-needs dozens of samples and can still be wrong, and two separate BRE constants
-were mis-set this way before the disassembly corrected them.
+and never commit that output. To walk the call graph, `lookup NAME_OR_ID` returns
+durable `callers[].from_id` and `callees[].to_id` links plus exact `site_ids`;
+follow those IDs with another `lookup`. Prefer reading the code to fitting a
+curve: a fit needs dozens of samples and can still be wrong, and two separate
+BRE constants were mis-set this way before the disassembly corrected them.
 
 **Mechanics live in that spec, not in this guide.** Don't describe how a
 mechanic works, or restate any of its numbers, here — this file just points to

@@ -25,7 +25,7 @@ import time
 import urllib.request
 
 
-VERSION = "0.3"
+VERSION = "0.4"
 OFFICIAL_URL = (
     "https://www.johndaileysoftware.com/download/"
     "?fileName=brev988.exe&id=220BRE"
@@ -1624,28 +1624,57 @@ def analyze_resident_image(
 
 
 def attach_procedure_callers(catalog_units: list[dict], resident_image: dict) -> None:
-    """Invert the per-procedure callee lists into stable caller evidence."""
+    """Attach durable IDs to both directions of the procedure call graph."""
     procedures = []
     for unit in catalog_units:
         procedures.extend((unit["id"], root) for root in unit["roots"])
     procedures.extend(
         ("resident_exe", root) for root in resident_image["roots"]
     )
-    by_name = {root["name"]: (container, root) for container, root in procedures}
+    units_by_id = {unit["id"]: unit for unit in catalog_units}
+
+    def call_site_ids(container: str, sites: list[str]) -> list[str]:
+        if container == "resident_exe":
+            return [
+                durable_id("site", "exe", int(site, 0))
+                for site in sites
+            ]
+        base = int(units_by_id[container]["ovr"]["code_offset"], 0)
+        return [
+            durable_id("site", "ovr", base + int(site, 0))
+            for site in sites
+        ]
+
+    by_name = {
+        name: (container, root)
+        for container, root in procedures
+        for name in [root["name"], *root.get("aliases", [])]
+    }
     for _container, root in procedures:
         root["callers"] = []
     for caller_container, caller in procedures:
         for callee in caller["callees"]:
             target = callee.get("to")
-            if target not in by_name:
+            target_record = by_name.get(target)
+            callee["to_id"] = (
+                target_record[1]["id"] if target_record is not None else None
+            )
+            if target_record is not None:
+                callee["to"] = target_record[1]["name"]
+            callee["site_ids"] = call_site_ids(
+                caller_container, callee["sites"]
+            )
+            if target_record is None:
                 continue
-            _target_container, target_root = by_name[target]
+            _target_container, target_root = target_record
             target_root["callers"].append(
                 {
                     "from": caller["name"],
+                    "from_id": caller["id"],
                     "container": caller_container,
                     "kind": callee["kind"],
                     "sites": callee["sites"],
+                    "site_ids": callee["site_ids"],
                 }
             )
     for _container, root in procedures:
@@ -2189,7 +2218,7 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
     string_index.sort(key=lambda record: record["id"])
     catalog = {
         "format": "immortal-barons-bre-disassembly-map",
-        "format_version": 4,
+        "format_version": 5,
         "generator": f"scripts/bre-disasm.py {VERSION}",
         "release": {
             "name": "Barren Realms Elite 0.988",
@@ -2229,6 +2258,23 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             "string_use_count": sum(
                 len(record["used_by"]) for record in string_index
             ),
+            "call_edge_count": sum(
+                len(root.get("callees", []))
+                for unit in catalog_units
+                for root in unit["roots"]
+            )
+            + sum(len(root.get("callees", [])) for root in resident),
+            "call_site_count": sum(
+                len(callee["sites"])
+                for unit in catalog_units
+                for root in unit["roots"]
+                for callee in root.get("callees", [])
+            )
+            + sum(
+                len(callee["sites"])
+                for root in resident
+                for callee in root.get("callees", [])
+            ),
             "ovr_payload_start": hx(8),
             "ovr_payload_end": hx(len(ovr), 6),
             "semantic_coverage": (
@@ -2264,8 +2310,8 @@ def merged_spans(spans: list[tuple[int, int]], label: str) -> list[tuple[int, in
 
 
 def validate_catalog(catalog: dict) -> dict:
-    if catalog.get("format_version") != 4:
-        raise BREError("catalog format version is not 4")
+    if catalog.get("format_version") != 5:
+        raise BREError("catalog format version is not 5")
     names = {}
     ids = {}
 
@@ -2463,6 +2509,70 @@ def validate_catalog(catalog: dict) -> dict:
         for root in unit["roots"]
     }
     procedures_by_id.update({root["id"]: root for root in resident["roots"]})
+    procedure_contexts = {
+        root["id"]: ("ovr", int(unit["ovr"]["code_offset"], 0))
+        for unit in catalog["units"]
+        for root in unit["roots"]
+    }
+    procedure_contexts.update(
+        {root["id"]: ("exe", 0) for root in resident["roots"]}
+    )
+    call_edge_count = call_site_count = 0
+    callee_edges = set()
+    caller_edges = set()
+    for procedure_id, root in procedures_by_id.items():
+        storage, base = procedure_contexts[procedure_id]
+        for callee in root["callees"]:
+            call_edge_count += 1
+            call_site_count += len(callee["sites"])
+            expected_site_ids = [
+                durable_id("site", storage, base + int(site, 0))
+                for site in callee["sites"]
+            ]
+            if callee.get("site_ids") != expected_site_ids:
+                raise BREError(
+                    f"procedure {procedure_id}: stale callee call-site IDs"
+            )
+            target_id = callee.get("to_id")
+            if target_id is None:
+                continue
+            if target_id not in procedures_by_id:
+                raise BREError(
+                    f"procedure {procedure_id}: unknown callee {target_id}"
+                )
+            if callee.get("to") != procedures_by_id[target_id]["name"]:
+                raise BREError(
+                    f"procedure {procedure_id}: stale callee display name"
+                )
+            callee_edges.add(
+                (
+                    procedure_id,
+                    target_id,
+                    callee["kind"],
+                    tuple(callee["site_ids"]),
+                )
+            )
+        for caller in root["callers"]:
+            source_id = caller.get("from_id")
+            if source_id not in procedures_by_id:
+                raise BREError(
+                    f"procedure {procedure_id}: unknown caller {source_id}"
+                )
+            if caller.get("from") != procedures_by_id[source_id]["name"]:
+                raise BREError(
+                    f"procedure {procedure_id}: stale caller display name"
+                )
+            caller_edges.add(
+                (
+                    source_id,
+                    procedure_id,
+                    caller["kind"],
+                    tuple(caller.get("site_ids", [])),
+                )
+            )
+    if callee_edges != caller_edges:
+        raise BREError("durable caller and callee edges are not reciprocal")
+
     blocks_by_id = {
         block["id"]: block
         for unit in catalog["units"]
@@ -2520,6 +2630,8 @@ def validate_catalog(catalog: dict) -> dict:
         "fixup_count": fixups,
         "referenced_string_count": len(catalog.get("string_index", [])),
         "string_use_count": string_use_count,
+        "call_edge_count": call_edge_count,
+        "call_site_count": call_site_count,
     }
     for key, value in expected_counts.items():
         if summary.get(key) != value:
@@ -2535,6 +2647,8 @@ def validate_catalog(catalog: dict) -> dict:
         "resident_data_chunks": len(resident["data_chunks"]),
         "referenced_strings": len(catalog.get("string_index", [])),
         "string_uses": string_use_count,
+        "call_edges": call_edge_count,
+        "call_sites": call_site_count,
     }
 
 
@@ -2620,6 +2734,8 @@ def catalog_records(catalog: dict, kind: str):
                     "tags": root.get("tags", []),
                     "evidence": root["evidence"],
                     "naming": root["naming"],
+                    "callers": root.get("callers", []),
+                    "callees": root.get("callees", []),
                 }
         if "block" in include:
             for block in unit.get("blocks", []):
@@ -2678,6 +2794,8 @@ def catalog_records(catalog: dict, kind: str):
                 "tags": root["tags"],
                 "evidence": root["evidence"],
                 "naming": root["naming"],
+                "callers": root.get("callers", []),
+                "callees": root.get("callees", []),
             }
     if "block" in include:
         for block in resident["blocks"]:
@@ -2792,7 +2910,7 @@ def command_lookup(args: argparse.Namespace) -> None:
 def command_find_string(args: argparse.Namespace) -> None:
     """Resolve a substring through the non-text catalog index and private binaries."""
     catalog = parse_catalog(args.catalog)
-    if catalog.get("format_version") != 4 or "string_index" not in catalog:
+    if catalog.get("format_version") != 5 or "string_index" not in catalog:
         raise BREError("catalog does not contain the durable string index")
     validate_catalog(catalog)
     _ep, _op, exe, ovr, mz, _units = load_release(args)
@@ -3181,7 +3299,9 @@ def build_parser() -> argparse.ArgumentParser:
     listing.add_argument("--format", choices=("tsv", "markdown", "json"), default="tsv")
     listing.set_defaults(func=command_list)
 
-    lookup = subparsers.add_parser("lookup", help="look up an exact stable name or alias")
+    lookup = subparsers.add_parser(
+        "lookup", help="look up an exact stable name, durable ID, or alias"
+    )
     lookup.add_argument("name")
     lookup.add_argument("--catalog", default="docs/dev/bre-v0988-disassembly.json")
     lookup.set_defaults(func=command_lookup)

@@ -228,7 +228,7 @@ class ParseTests(unittest.TestCase):
         if not catalog_path.exists():
             self.skipTest("generated catalog is not present")
         catalog = json.loads(catalog_path.read_text())
-        self.assertEqual(catalog["format_version"], 4)
+        self.assertEqual(catalog["format_version"], 5)
         self.assertEqual(catalog["summary"]["unit_count"], 103)
         self.assertEqual(catalog["summary"]["exported_root_count"], 414)
         self.assertEqual(catalog["summary"]["reachable_procedure_root_count"], 603)
@@ -239,6 +239,8 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(catalog["summary"]["resident_data_chunk_count"], 236)
         self.assertEqual(catalog["summary"]["referenced_string_count"], 2340)
         self.assertEqual(catalog["summary"]["string_use_count"], 2554)
+        self.assertEqual(catalog["summary"]["call_edge_count"], 6374)
+        self.assertEqual(catalog["summary"]["call_site_count"], 19984)
         self.assertEqual(
             catalog["summary"]["semantic_coverage"],
             {
@@ -289,6 +291,8 @@ class ParseTests(unittest.TestCase):
                 "resident_data_chunks": 236,
                 "referenced_strings": 2340,
                 "string_uses": 2554,
+                "call_edges": 6374,
+                "call_sites": 19984,
             },
         )
 
@@ -304,6 +308,20 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(by_name["run_bank"]["naming"]["status"], "identified")
         self.assertTrue(by_name["run_bank"]["callers"])
         self.assertTrue(by_name["run_bank"]["callees"])
+        self.assertTrue(
+            all(
+                caller["from_id"].startswith("bre0988:")
+                and caller["site_ids"]
+                for caller in by_name["run_bank"]["callers"]
+            )
+        )
+        self.assertTrue(
+            all(
+                callee["to_id"].startswith("bre0988:")
+                and callee["site_ids"]
+                for callee in by_name["run_bank"]["callees"]
+            )
+        )
         self.assertTrue(by_name["run_bank"]["data_references"])
         self.assertIn(
             "run_bank",
@@ -347,6 +365,43 @@ class ParseTests(unittest.TestCase):
                 )
                 for record in catalog["string_index"]
                 for use in record["used_by"]
+            )
+        )
+        run_bank_record = next(
+            record
+            for record in bre.catalog_records(catalog, "procedure")
+            if record["id"] == by_name["run_bank"]["id"]
+        )
+        self.assertEqual(run_bank_record["callers"], by_name["run_bank"]["callers"])
+        self.assertEqual(run_bank_record["callees"], by_name["run_bank"]["callees"])
+        known_call_edges = {
+            (
+                root["id"],
+                callee["to_id"],
+                callee["kind"],
+                tuple(callee["site_ids"]),
+            )
+            for root in procedures
+            for callee in root["callees"]
+            if callee["to_id"] is not None
+        }
+        inverse_call_edges = {
+            (
+                caller["from_id"],
+                root["id"],
+                caller["kind"],
+                tuple(caller["site_ids"]),
+            )
+            for root in procedures
+            for caller in root["callers"]
+        }
+        self.assertEqual(known_call_edges, inverse_call_edges)
+        self.assertTrue(
+            all(
+                callee["to_id"] is not None
+                for root in procedures
+                for callee in root["callees"]
+                if callee["target_address"] is not None
             )
         )
         self.assertIn("calculate_crown_tax", by_name)
