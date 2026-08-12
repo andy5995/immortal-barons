@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-11 08:23-0500\n"
+"POT-Creation-Date: 2026-08-11 18:38-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -1032,6 +1032,74 @@ msgstr ""
 "подарок, без условий."
 
 #. type: Title #
+#: internal/help/content/interbbs/attack-types.md:1
+#: internal/help/content/interbbs/attack-types.md:8
+#, fuzzy, no-wrap
+#| msgid "Attacks"
+msgid "Attack Types"
+msgstr "Атаки"
+
+#. type: Plain text
+#: internal/help/content/interbbs/attack-types.md:13
+msgid ""
+"When you send your own strike force at a baron on another planet, you choose "
+"how to press the attack. Group attacks have no such choice — they always "
+"fight as a Normal Attack."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/attack-types.md:17
+msgid ""
+"Going alone also pays better: your own strike takes twice the land a group "
+"attack of the same weight would. What you give up is the whole-planet target "
+"and everyone else's forces."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/attack-types.md:27
+msgid ""
+"**Normal Attack** — your forces fight at full strength. Both sides break off "
+"once they have taken 15% losses, and you take the standard share of the "
+"defender's regions."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/attack-types.md:27
+msgid ""
+"**Quick Strike** — surprise lets you fight at 110% of your normal strength, "
+"but the battle is short and disorganised: both sides retreat at 8% losses, "
+"and you carry off only half the land a Normal Attack would."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/attack-types.md:27
+msgid ""
+"**Extended Battle** — a grinding assault. Fatigue drops your forces to 85% "
+"strength, but they press until both sides have taken 20% losses and bring "
+"home 125% of a Normal Attack's land."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/attack-types.md:34
+msgid ""
+"The choice is really about what you are short of. Land is the thing you "
+"cannot buy back quickly, so an Extended Battle is the one that changes the "
+"map — pay for it when you already have the men to spare and can afford to be "
+"weak for a day. A Quick Strike costs you least and hits above its weight, "
+"which makes it the honest answer when you are not sure you can win: you find "
+"out cheaply, and your army is still standing."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/attack-types.md:38
+msgid ""
+"Remember that your strength is measured on arrival, not on departure. "
+"Against a distant planet the defender has days to build turrets before your "
+"force lands, so the 10% a Quick Strike adds is worth less than it looks "
+"against a target you cannot reach quickly."
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/interbbs/leagues.md:1
 #: internal/help/content/interbbs/leagues.md:8
 #, no-wrap
@@ -1049,7 +1117,7 @@ msgstr ""
 "победы над местными правителями до победы над другими планетами."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:27
+#: internal/help/content/interbbs/leagues.md:30
 msgid ""
 "Group Attack — several rulers on your board join one strike against a "
 "distant enemy. The gains are shared among those who take part."
@@ -1058,12 +1126,20 @@ msgstr ""
 "по дальнему врагу. Добыча делится по вкладу."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:27
+#: internal/help/content/interbbs/leagues.md:30
+msgid ""
+"Indiv. Attack Force — your own strike against one named baron. You keep the "
+"whole take rather than sharing it, and you choose how to press the attack "
+"(see Attack Types)."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/leagues.md:30
 msgid "IP Scores — see how the boards rank against each other."
 msgstr "Межпланетный счёт — посмотреть, как доски соотносятся друг с другом."
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:27
+#: internal/help/content/interbbs/leagues.md:30
 msgid ""
 "Send Message — write to another planet. Everyone there reads what you send, "
 "so it is the place for a warning, an offer, or a call for help; you can also "
@@ -1073,14 +1149,14 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:27
+#: internal/help/content/interbbs/leagues.md:30
 msgid ""
 "Diplomacy List — where your board says it stands with each other planet. It "
 "binds nobody, but it is your Coordinator telling you who to watch."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:27
+#: internal/help/content/interbbs/leagues.md:30
 msgid ""
 "Travel Times — how long a message or a strike actually takes to reach each "
 "planet and get an answer back. Boards trade mail on their sysops' schedule, "
@@ -1089,7 +1165,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:30
+#: internal/help/content/interbbs/leagues.md:33
 msgid ""
 "A league game has a set length. When it ends, the world resets and a new "
 "game begins."
@@ -1098,7 +1174,7 @@ msgstr ""
 "и начинается новая игра."
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:31
+#: internal/help/content/interbbs/leagues.md:34
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
 "play."

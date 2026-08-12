@@ -304,3 +304,34 @@ func TestTotalConquestAbsorbsMilitary(t *testing.T) {
 		t.Errorf("attacker troopers = %d, want %d (own survivors + absorbed)", a.Troopers, wantTroopers)
 	}
 }
+
+// A beaten defender's HeadQuarters is knocked back 5-7 points and can be
+// flattened by repeated defeats (BRE.OVR 0xFFA2). Golden band, not a mirror of
+// the constants: the point is that a HeadQuarters is not permanent.
+func TestLostDefenceDamagesHQ(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 3)
+	a := w.AddHuman("me", "Mine")
+	d := w.AddHuman("you", "Yours")
+	for _, e := range []*Empire{a, d} {
+		e.Protection, e.Morale = 0, 100
+	}
+	a.Troopers, a.Tanks = 5_000_000, 500_000 // overwhelming, so the attacker wins
+	d.Troopers, d.Turrets, d.Tanks, d.Land = 10, 0, 0, 100
+	d.HQ = 100
+
+	before := d.HQ
+	w.Attack(a, d, AttackForce{Troopers: 5_000_000, Tanks: 500_000}, true)
+	lost := before - d.HQ
+	if lost < 5 || lost > 7 {
+		t.Fatalf("a lost defence cost the HeadQuarters %d points, want 5..7", lost)
+	}
+
+	// Repeated defeats flatten it, and it never goes negative.
+	for i := 0; i < 40; i++ {
+		d.Troopers = 10
+		w.Attack(a, d, AttackForce{Troopers: 5_000_000, Tanks: 500_000}, true)
+	}
+	if d.HQ != 0 {
+		t.Errorf("HeadQuarters = %d after 40 defeats, want 0", d.HQ)
+	}
+}

@@ -65,6 +65,130 @@ Key files inside:
 - `data/planet.bre`, `data/game.dat` — runtime save data (not menu/mechanic
   definitions).
 
+## Technology silently scales almost every number you capture
+
+**Before deriving ANY constant from a capture, establish the realm's technology
+factors.** Technology multiplies most of what a session shows — military
+strength up to 1.4x, unit production 1.35x, gold income and population tax 1.5x,
+food production 2.0x, maintenance down to 1/1.4, food decay down to 1/5. A
+combat or economy figure read off a capture from a teched realm is inflated by
+an unknown amount, and nothing on the status screen says so.
+
+**Zero Technology regions does NOT mean the factors are 1.0.** The research level
+**never decays and freezes permanently** when the regions are sold, so a realm
+that once held Technology carries the boost for the rest of the game with no
+Technology regions on screen. Region counts cannot tell you.
+
+**Ask for the Technology advisor screen with every capture.** It is the one
+place BRE states the factors outright, as percentages (BRE.OVR 0x32ac2 —
+"Because of technology... military forces are functioning at N% strength", plus
+lines for production, food, industry, expenses and decay). With that screen a
+capture is correctable: divide the observed figure by its factor. Without it,
+data from an unknown realm can only give ratios, never absolute constants.
+
+The factor itself, for cross-checking:
+
+```
+factor = 1 + (cap - 1) x (1 - exp( -level / (totalRegions + 1) ))
+```
+
+so a LARGE realm dilutes its own technology — two realms at the same research
+level do not share a factor. See docs/mechanics-reference.md, "Technology".
+
+**When gathering fresh data, prefer a realm that has never bought Technology**,
+and say in the notes which realm a figure came from and what its factors were.
+Historical note: most of this project's early testing ran with no Technology
+regions, so those constants are probably clean — but "probably" is doing work
+there, and any figure that disagrees with a later capture should have technology
+ruled out first.
+
+### Local InterBBS: the documented ring, and the case-collision that breaks it
+
+`docs/bre.doc` has a **"Local InterBBS Setup"** section for exactly the
+several-games-on-one-machine case. Read it before improvising a transport:
+
+- Each game's **inbound files directory** (bbs.cfg **line 4**, "Front End
+  Incoming FILE Directory") points at the **previous game's OUTBOUND** — a ring.
+  For two boards: A reads B's OUTBOUND, B reads A's OUTBOUND.
+- BRE always **writes** to `<its own dir>\OUTBOUND\`; line 4 only says where to
+  READ. Line 5 is the **netmail** dir, where the Binkley `.MSG` wrappers land —
+  seeing outgoing `.msg` files there is line 5 working, NOT the dirs being
+  swapped.
+- `ROUTE.CFG`: game 1 `ROUTE * 2`, game 2 `ROUTE * 1` (last routes back to #1).
+- **No file transfer step exists or is needed.** Run `BRE PLANETARY` on each
+  board in order; the docs say running the cycle **twice** gives immediate
+  results. `BRE INBOUND` runs only the inbound half, which is the fast way to
+  test ingestion.
+
+**The landmine that cost a whole session (2026-08-11):** the boards had BOTH an
+`OUTBOUND` and an empty lowercase `outbound` directory. dosemu's case-insensitive
+lookup resolved the DOS path `C:\GAMES\BRE-B\OUTBOUND` to the **empty
+lowercase one**, so BRE scanned a directory that never held a packet and
+reported nothing at all — no error, no "Unknown Node", just a silent no-op,
+while `DIR` from the DOS prompt happily showed the file in the *other* directory.
+
+**Never diagnose a "BRE ignores my file" problem by guessing at filename masks.
+Watch what it actually opens:**
+
+```
+inotifywait -m -r -e open,access,create,delete <bre-dirs> > /tmp/io.log &
+# ...run BRE INBOUND...
+grep -i outbound /tmp/io.log
+```
+
+That named the wrong directory in one run, after several dead-end hours spent
+base-solving the overlay to find the search mask. Reach for inotify the moment
+BRE appears to ignore a file. Success looks like:
+
+```
+    Processing Incoming Data from Node 2
+     Compressed: 334       Decompressed: 2488      %: 86.6%
+```
+
+and on the sending side:
+
+```
+     Outbound mail for Test Planet Two - Node 2 created.
+```
+
+**Also gating IP play:** most InterPlanetary Ops items silently do nothing until
+the caller has played a turn this entry — the menu redraws with no message. The
+explanation only appears on some items: *"You must play at least one turn per
+entry in the game to access this option."* An inert IP menu item is far more
+likely to be this than a broken mechanic.
+
+### Disassembly: use the static map; never guess segment bases
+
+`BRE.OVR` is a Turbo Pascal **overlay** file, so a unit's string constants are
+addressed relative to a code-segment base that is not in the file. The habit of
+*solving* for that base — scoring candidate offsets by how many `mov di,imm16`
+land on plausible ShortString length bytes — works sometimes and fails silently
+otherwise. On 2026-08-11 it found the attack unit (0x2b783, 36 hits) but dead-
+ended completely on the IBBS inbound scanner and on the result-header strings,
+burning hours for nothing.
+
+The repository now does that mapping directly. `scripts/bre-disasm.py` parses
+the overlay descriptors and relocation streams, follows typed 8086 control
+flow, and ties each patched `INT 3Fh` stub back to its canonical `BRE.OVR`
+offset. Start with its `list`, `lookup`, `map`, and `disasm` commands; they do
+not need the unit's transient runtime segment and do not rely on a plausibility
+score. The detailed workflow and proof are in "Reading the disassembly" below
+and `docs/dev/bre-disassembly.md`.
+
+Use a **DOSBox build with the built-in debugger** (DOSBox-X or DOSBox-debug)
+when a target is reached only through an unresolved indirect transfer, or when
+the loader/materialized bytes themselves need independent validation. Run it
+through the repository's Xvfb wrapper, let BRE load the relevant overlay, and
+dump memory. That supplies runtime evidence without reviving the failed
+base-solving heuristic.
+
+This does **not** replace dosemu2 for everything — dosemu2 is still the only way
+to scrape screens as text (see above), and that is most of what this skill does.
+The two are complementary: **dosemu2 for behaviour and screens, the static map
+for normal structure and constants, and a DOSBox debugger for dynamic
+validation.** If the static catalog records an unresolved transfer, reach for
+the debugger rather than trying a scoring heuristic.
+
 ## Source priority (most authoritative first)
 
 1. **A rendered screenshot from a live BRE session.** The ONLY authoritative
@@ -80,6 +204,26 @@ Key files inside:
 3. **`BRE.OVR` / `BRE.EXE` strings** — authoritative for menu **labels** and
    **declaration order** (which equals menu order). See the extraction cookbook.
 4. **`game/*.hlp`, `docs/`, `breins.txt`** — prose, help text, tutorial wording.
+
+**Grep the shipped help and docs FIRST, before driving the emulator or
+disassembling.** They are last in *authority* but first in *cost*, and BRE
+documents far more of its own mechanics than "prose" suggests — with numbers.
+The individual-attack variants (2026-08-11) are the case that earned this note:
+after a long stretch of failed emulator driving and a base-solving hunt through
+`BRE.OVR`, one `grep -i 'quick strike' -r .` turned up `game/attack.hlp` stating
+all nine figures outright (110%/50%/8%, 100%/100%/15%, 85%/125%/20%), and
+`docs/bre.doc` + `breins.txt` supplied the individual-vs-group returns ratio.
+The disassembly was still worth having — it gave the menu's item order, the
+Normal-Attack-on-Enter default, and the wire codes the help does not mention —
+but it should have been the *second* step, confirming and extending a cheap
+answer rather than substituting for one.
+
+Two cheap sweeps to run at the start of any mechanic hunt:
+
+```
+grep -rain '<mechanic name>' game/ docs/ | head -40
+strings -a -t x BRE.OVR | grep -i '<mechanic name>'
+```
 
 ## Running BRE headless (tmux + dosemu2 harness)
 
@@ -229,6 +373,83 @@ The landmines:
   At `Name your Realm:` an empty answer makes BRE exit immediately, so the
   catch-all branch silently ends the run. Match every prompt the flow can reach
   explicitly, and make the fallback *capture and stop* rather than press a key.
+- **`BRE PLANETARY` is the InterBBS packet pass — daily maintenance is NOT.**
+  Launching `BRE` on a new day runs "Daily Maintainence" (dead empires, news,
+  covert ops, trade deals) and writes NOTHING to the outbound directory. The
+  league traffic is a separate invocation:
+
+  ```
+  BRE PLANETARY
+  ```
+
+  which prints "Checking Daily Maintenance / Updating Local Recon Info /
+  Processing Incoming Data / Updating Routing Data / Updating NodeList /
+  Releasing Group Attacks / Packing Group Attacks / Packing IP Attack
+  Information / Updating Outgoing Gooie Kablooie Status / Processing Outbound
+  Data / Checking for Any Lost Attacks / Planetary Maintenance Complete".
+  This is what IB's own `-planetary` flag mirrors. If an outbound directory
+  stays empty while you are waiting for scores or an attack to ship, this is
+  almost certainly why. Order per board: play a turn -> `BRE PLANETARY` -> move
+  the file to the other board's inbound -> `BRE PLANETARY` there to ingest.
+- **`ROUTE.CFG` must point at the OTHER node, and a copied board gets it wrong.**
+  The stock file is a single line, `ROUTE * 2` — send everything to node 2. Copy
+  a board to make node 2 and it now routes to ITSELF, so `BRE PLANETARY`
+  completes normally and exports NOTHING, with no error. That silence is the
+  symptom. On node 1 use `ROUTE * 2`; on node 2 use `ROUTE * 1`.
+- **A working export looks like this**, in the outbound directory named by
+  `bbs.cfg` line 4:
+
+  ```
+  999b0102.002     the data packet
+  brnodes.999      the node list, redistributed with it
+  ```
+
+  `999b0102.002` = league 999, game `b` (BRE), from node 01, to node 02,
+  sequence `.002`. This is the filename scheme the transport discussion (GH
+  #117/#121) is about — league, game, source, dest, sequence.
+- **BRE reads inbound packets from the SAME directory it writes outbound to.**
+  `bbs.cfg` line 4 is the outbound netmail dir and line 5 the "inbound files"
+  dir, but dropping a received packet in the line-5 directory alone does
+  NOTHING — `BRE PLANETARY` completes and leaves it sitting there. Put it in the
+  line-4 (outbound) directory and it is consumed on the next pass. The stock
+  bbs.cfg hints at this: its line 5 points at a directory named `...\OUTBOUND`.
+  A successful ingest produces the reply packet plus an FTN netmail attach:
+
+  ```
+  OUTBOUND/999b0201.003    the reply, node 02 -> 01
+  INBOUND/2.msg            the .MSG netmail attach
+  ```
+
+  So a full round trip is: A `BRE PLANETARY` -> copy A/OUTBOUND/* into
+  B/OUTBOUND -> B `BRE PLANETARY` -> copy B/OUTBOUND/* into A/OUTBOUND -> ...
+  This also confirms BRE moves league traffic as ordinary FTN netmail with a
+  file attach, which is what GH #117 was asking about.
+- **Daily maintenance only fires when the DOS date has actually moved on**, and
+  a fresh reset can leave it stamped such that +1 day is not enough; +4 worked.
+  Verify with a bare `DATE` before concluding the advance took, and clear any
+  stray character left on the command line by a quit-confirm first.
+- **Configuration Editor: the "help" screen IS the edit screen.** Pressing Enter
+  on a field opens a full-screen page whose top is that field's help text — and
+  whose BOTTOM line is `Enter New Value: (current; max)`. Type the value and
+  press Enter to return to the field list. It is NOT a dead-end popup, and it
+  does not need dismissing. Full sequence:
+
+  ```
+  BRE RESET  ->  y  ->  Up/Down to the field  ->  Enter  ->  type value  ->  Enter
+  PG-DN / PG-UP change page;  ESC saves and quits;  then answer the
+  "Would you like this to be a league-wide reset?" prompt.
+  ```
+
+  **This cost two long detours before it was written down.** The trap is reading
+  only the top of the pane: the help text fills the screen and looks modal, so a
+  driver that captures `head` sees a popup and starts guessing dismiss keys.
+  ALWAYS CAPTURE THE BOTTOM OF THE PANE before concluding a screen is stuck —
+  `tmux capture-pane -p | tail -5`. Related trap: pressing a DIGIT on a field
+  also opens the same screen, which made it look like digits were "help" and
+  Enter was too.
+- **`inuse.flg` lives in the BOARD'S ROOT, not `data/`.** Deleting
+  `<board>/data/inuse.flg` clears nothing; the stale-lock error persists. It is
+  `<board>/inuse.flg`.
 - **The Trading Market exits on ESC, not `0` or Enter.** Its screen lists no
   Quit key and its `Your Choice?` prompt silently redraws on both, so a driver
   that presses `0` until it sees a known screen loops forever. `tmux send-keys

@@ -458,17 +458,22 @@ const MarketCommissionPct = 0
 // --- HeadQuarters (BRE-verified: BRE.OVR 0xD010, 0x12C8C, 0x40241/0x4043D) ---
 //
 // A tank's strength in hundredths of a trooper, rising with HQ completion:
-// 300 at HQ 0%, 400 at 50%, 500 at 100%. BRE computes it as the real
-// (1.5 + HQ/100) against a trooper's 0.5 and a jet's/turret's 1.0 — the same
-// 1 : 2 : 3..5 ratio in whole troopers. breins.txt calls a tank "about the
-// equivalent of four Troopers", which is the HQ-50 value, not a base: the
-// manual and the binary agree once the HQ term is read.
+// 350 at HQ 0%, 400 at 50%, 450 at 100%. BINARY-VERIFIED from the regular
+// attack routine (BRE.OVR 0xF2E4), which builds each side's strength as
 //
-// IB previously used 4 rising to 8, which both started a third too high and
-// doubled the HQ's marginal value.
+//	troopers x 0.5 + (jets | turrets) x 1 + tanks x (1.75 + HQ/200)
+//
+// against a trooper's 0.5, so in whole troopers that is 1 : 2 : 3.5..4.5. Only
+// the ratios matter, since both sides are scaled the same way. breins.txt calls
+// a tank "about the equivalent of four Troopers", which is the HQ-50 value —
+// the manual and the binary agree once the HQ term is read.
+//
+// An earlier reading had the base a half-trooper low and the HQ term twice too
+// steep (300 rising to 500), which undervalued tanks in a realm with no
+// HeadQuarters and overvalued them in one with a finished HeadQuarters.
 const (
-	TankStrengthPctBase  = 300
-	TankStrengthPctPerHQ = 2
+	TankStrengthPctBase  = 350 // binary
+	TankStrengthPctPerHQ = 1   // binary: HQ/200 doubled to trooper units
 )
 
 // tankStrength values n tanks in troopers, given HQ completion percent.
@@ -483,6 +488,13 @@ func tankStrength(n, hq int) int {
 const (
 	HQBuildStart   = 5
 	HQBuildPerTurn = 5
+
+	// What a lost defence costs the HeadQuarters: Random(3)+5 points off, then
+	// clamped at zero. BINARY-VERIFIED (BRE.OVR 0xFFA2, subtracted via the
+	// sub32 helper 0c03:0fe3). So a realm under repeated attack loses the tank
+	// bonus it spent 20 turns building, and a HeadQuarters is not permanent.
+	HQBattleLossMin    = 5 // binary
+	HQBattleLossJitter = 3 // binary: Random(3) added to the minimum
 )
 
 // The HeadQuarters price rises with the empire's lifetime turn count — unlike
@@ -599,11 +611,13 @@ const (
 	PopMoveJitter = 5 // binary: Random(5) added to the minimum
 
 	// A SHRINKING realm loses people faster the harder it taxes:
-	// growth × sqrt(tax) / 2. UNVERIFIED IN ONE RESPECT — the binary applies a
-	// System-unit real function (fd0:1841) to the tax rate here, and Sqrt and Ln
-	// are equally consistent with the call shape. Sqrt is the reading taken; the
-	// two differ by about 2x at tax 100, so a driven experiment comparing the
-	// decline at tax 25 against tax 100 would settle it.
+	// growth × sqrt(tax) / 2. The sqrt is BINARY-VERIFIED: the routine the
+	// overlay calls (fd0:1841) is at BRE.EXE 0x13e81 and is Newton-Raphson for
+	// square root — it seeds the guess by halving the real's biased exponent
+	// (add cl,0x80 / sar cl,1 / add cl,0x80), sets a 2^-20 tolerance
+	// (sub al,0x14), then loops divide-add-halve (the halve being dec al on the
+	// exponent byte) until it converges. Ln would carry a ln(2) polynomial and
+	// neither halve an exponent nor divide in a loop.
 	PopDeclineTaxDivisor = 2.0 // binary
 
 	// Churn either way, so a realm sitting exactly at capacity still moves:
@@ -808,6 +822,52 @@ const (
 	// GroupAttackLossPct is the share of a committed force lost in the strike;
 	// the rest returns. 15% matches attack.hlp's normal-attack losses.
 	GroupAttackLossPct = 15
+)
+
+// --- Individual interplanetary attack variants (BRE-verified) ---
+//
+// BRE lets an individual strike be sent three ways, each trading attacking
+// strength against how much land it takes and how far both armies press before
+// retreating. Every figure below is quoted from the original's own in-game help,
+// game/attack.hlp, so these are fidelity contract, not playtest knobs. The wire
+// codes come from a disassembly of the IBBS attack unit in BRE.OVR, which stores
+// Quick=0, Normal=1, Extended=2 in the outbound attack record.
+//
+// Capture percentages are relative to a normal attack's take, which is how
+// attack.hlp states them ("50% of what you would in a normal attack").
+const (
+	// A quick strike buys surprise: it hits harder but takes far less land, and
+	// the disorganised battle breaks off early.
+	QuickStrikeStrengthPct = 110
+	QuickStrikeCapturePct  = 50
+	QuickStrikeLossPct     = 8
+
+	// The normal attack is the baseline the other two are quoted against.
+	NormalAttackStrengthPct = 100
+	NormalAttackCapturePct  = 100
+	NormalAttackLossPct     = GroupAttackLossPct
+
+	// An extended battle grinds: fatigue costs strength, but it takes the most
+	// land and both armies absorb the heaviest losses before retreating.
+	ExtendedBattleStrengthPct = 85
+	ExtendedBattleCapturePct  = 125
+	ExtendedBattleLossPct     = 20
+
+	// IndividualAttackGoldPerUnit is what launching an individual interplanetary
+	// strike costs, per unit sent. Captured live (2026-08-11): committing 100
+	// troopers and nothing else printed "This attack will cost 100 gold." The
+	// rate is confirmed for troopers only — whether jets, tanks and bombers cost
+	// the same per unit is NOT verified, so they use this rate until a capture
+	// says otherwise.
+	IndividualAttackGoldPerUnit = 1
+
+	// IndividualAttackReturnsPct is what an individual strike carries off
+	// relative to a group attack of the same weight. BRE's own docs state the
+	// trade in both places they describe the option: "You get twice as many
+	// returns if you send the attack yourself, but you can't attack an entire
+	// planet" (game/breins.txt and docs/bre.doc). Going alone is the reward for
+	// giving up the whole-planet target and the pooled forces.
+	IndividualAttackReturnsPct = 200
 )
 
 // --- Upkeep / maintenance (BRE-verified — live capture, Maintenance Costs

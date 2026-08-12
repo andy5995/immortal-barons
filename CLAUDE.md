@@ -284,7 +284,10 @@ etc.); a league Coordinator broadcasts the whole ruleset over inter-BBS.
 dirs; the sysop's transport moves them; `-planetary` processes inbound, launches
 group attacks, and exports scores/news. IP Messages (planet-addressed mail, with
 an IB-only reply path) and Travel Times (measured round trips, kept by a probe
-that rides the packets) ride the same transport. **Localization**: help docs (po4a) and
+that rides the packets) ride the same transport. An individual strike picks its
+type — Normal Attack / Quick Strike / Extended Battle, BRE-verified from
+`game/attack.hlp` and a disassembly; a group attack gets no choice and fights as
+a Normal Attack. **Localization**: help docs (po4a) and
 UI strings (`internal/i18n`) render in the caller's language; de/ru are seeded
 and grow via the `.po` catalogs.
 
@@ -310,9 +313,7 @@ AI behaviour, IB's own additions) are the playtest knobs. Keep both matching
 Stubbed / not built: a TIMED league auto-reset (a daily Planetary Master leader
 is tracked, `CurrentMaster`, and `endGame` crowns `LastMaster`; the Coordinator
 can start a new season on demand with `-league-reset`, but nothing schedules
-one), the
-Quick-Strike / Extended-Battle attack variants,
-civil-war collapse, and BRE's finer interplanetary news subtypes. A few
+one), civil-war collapse, and BRE's finer interplanetary news subtypes. A few
 covert/diplomacy items are recorded-but-inert pending fuller subsystems (flagged
 in `docs/mechanics-reference.md`).
 

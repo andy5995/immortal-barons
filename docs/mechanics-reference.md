@@ -354,10 +354,12 @@ All four constants live in `balance.go`; Score never drops below 0.
   actually **asymmetric — the LOSER bleeds ~20%, the WINNER ~8%** (scaled by the
   Attack Damage config). IB now uses `RegularAttackLoserLossPct` (20) /
   `RegularAttackWinnerLossPct` (8), deciding the winner first.
-  - **Quick Strike / Extended Battle** (`attack.hlp`): these are **IBBS
-    group-attack** variants, not local — a live local Regular Attack offers no
-    variant menu — so IB correctly does not offer them locally (verify against
-    the group-attack docs).
+  - **Quick Strike / Extended Battle** (`attack.hlp`): these belong to the
+    **IBBS individual attack**, not to local combat and not to group attacks. A
+    live local Regular Attack offers no variant menu, and `breins.txt` gives a
+    group attack no type choice either. A **disassembly of BRE.OVR's IBBS attack
+    unit** settles it: the three-item menu is drawn inside `Indiv. Attack Force`.
+    See "Individual attack variants" below.
 
   Region **capture** follows `max(RegularAttackCaptureFloor, RegularAttackCapturePct%
   × loser regions × density factor)`, scaled by Attack Rewards. The **density
@@ -915,6 +917,52 @@ the main income. Set tax to 0% for a few turns to spike growth, then buy
 **urban** regions so people don't leave when you raise tax back to ~7–9%.
 Growing population needs enough **agricultural** regions to stay fed.
 
+**Regular attack strength — BINARY-VERIFIED.** Read out of the attack routine
+(`BRE.OVR` `0xF130`–`0xF3A0`), which builds both sides the same way:
+
+```
+attacker = troopers x 0.5 + jets    x 1 + tanks x (1.75 + HQ/200)
+defender = troopers x 0.5 + turrets x 1 + tanks x (1.75 + HQ/200)
+           x (morale x 0.6 + 50)/100 x techFactor(military, cap 1.4)
+```
+
+Only the ratios matter, since both sides are scaled identically, so IB doubles
+them into whole troopers: **1 : 2 : 3.5..4.5**. Notes:
+
+- **A finished HeadQuarters adds one trooper's worth per tank**, not two — the
+  HQ term spans 1.75 to 2.25, i.e. half a tank across the whole range. IB's
+  earlier 3..5 curve read *breins.txt*'s "a tank is about the equivalent of four
+  Troopers" as a base when it is the HQ-50 mid-point.
+- **Full morale fights ABOVE par**, at 110%, and a broken army at 50%. IB had
+  derived the slope from the floor (`100 - 50`), capping effectiveness at 100.
+- **Technology multiplies combat strength**, applied inside this computation via
+  the tech routine at `056d:1a07` with slot 5 and cap 1.4. This is why an attack
+  figure taken from a capture cannot be used as a constant unless the realm's
+  technology factors are known — see the `bre-gather` skill.
+- The empire record's military block is `+0x76` troopers, `+0x7a` **bombers**,
+  `+0x7e` jets, `+0x82` turrets, `+0x86` tanks, `+0x8a` carriers, `+0x8e`
+  morale, and HeadQuarters sits apart at `+0x26b` (all confirmed against the
+  Spending menu's key dispatch at `0x163d0`).
+- A separate pass scans every empire for treaty type **7** (Full Defense
+  Alliance) and contributes **30**, which matches IB's `AllyDefenseContribPct`.
+
+**A lost defence damages the HeadQuarters**: `Random(3)+5` points off, clamped
+at zero (`0xFFA2`, subtracted via `0c03:0fe3`). So a HeadQuarters is not
+permanent — a realm under repeated attack loses the tank bonus it spent 20 turns
+building. IB had no HQ damage at all.
+
+**A total victory takes the loser's whole military.** The "crushed the enemy
+completely" path transfers all six unit types — troopers, jets, turrets, tanks,
+bombers and carriers (`0x101E4`-`0x10294`) — which is what "you also get all the
+remains of your opponent's military" means literally.
+
+**Allied defenders contribute at their own morale**, on a different curve from
+the main one: `allyMorale/2 + 25`, so 25% at broken morale and 75% at full
+(`0xF5D7`).
+
+Not yet read out of the binary: the casualty rates and the region-capture share
+for a regular attack. IB's figures for those are still reconstructed from play.
+
 **Population / migration — BINARY-VERIFIED.** Read out of BRE's end-of-turn
 routine (`BRE.OVR` `0xD08A`–`0xD3CC`). This supersedes an earlier partial
 reading of the same routine, which had support as an *additive* `Support·90`
@@ -955,12 +1003,16 @@ realm far below capacity fills quickly and one near it barely stirs. The
 rate the realm settles *below* its capacity rather than at it — measured at
 about 75-81% of capacity after 40 turns.
 
-**One unverified constant.** In the decline branch the binary applies a Turbo
-Pascal System-unit real function (`fd0:1841`) to the tax rate. `Sqrt` and `Ln`
-are equally consistent with the call shape, and the same routine is used in the
-combat-odds code at `0x4a81c`, which does not disambiguate them either. **Sqrt
-is the reading taken.** They differ by roughly 2× at tax 100, so driving BRE and
-comparing a shrinking realm's decline at tax 25 against tax 100 would settle it.
+**The `sqrt` is verified, not assumed.** The decline branch calls a Turbo Pascal
+System-unit real routine (`fd0:1841`) on the tax rate, which the call shape alone
+does not distinguish from `Ln`. Resolved by reading the routine itself in the
+resident image at `BRE.EXE` `0x13e81`: it seeds its guess by halving the real's
+biased exponent (`add cl,0x80` / `sar cl,1` / `add cl,0x80`), sets a 2⁻²⁰
+tolerance (`sub al,0x14`), and loops divide → add → halve (`dec al` on the
+exponent byte) until convergence — Newton-Raphson for a square root. `Ln` would
+carry a `ln(2)` polynomial and would neither halve an exponent nor divide in a
+loop. The same routine backs the combat-odds code at `0x4a81c`, which is
+therefore also `sqrt`.
 
 **Deliberate divergence — millions.** BRE stores population as a **16-bit count
 of millions** (record `+0x62`; the status screen prints "Population: 101
@@ -1472,7 +1524,45 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   bomber `GroupAttackBomberOffense`). Survivors return to each contributor,
   reduced by `GroupAttackLossPct` — including when the strike is refused, so
   attacking a realm that turns out to be protected still costs a slice of the
-  force. **Indiv. Attack Force** commits the same four types (#62).
+  force. A group attack gets **no type choice** (confirmed by a live capture —
+  its picker goes straight from the target to the force prompts), so it fights
+  on the Normal Attack's terms. Its departure delay is set in **hours (12-120)**
+  in BRE; IB still asks for whole days, and its whole-planet option is a row in
+  a numbered list rather than BRE's `(O)ne Dominion or (A)ll?` keypress — both
+  recorded in `docs/dev/bre-screens.md` as open divergences. **Indiv. Attack Force** commits the same four types
+  (#62), picks a type (see below), and carries off
+  `IndividualAttackReturnsPct` (200%) of what a group attack of the same weight
+  would — BRE states the trade in both of its own docs: "You get twice as many
+  returns if you send the attack yourself, but you can't attack an entire
+  planet" (`game/breins.txt`, `docs/bre.doc`).
+- **Individual attack variants.** An individual strike is pressed one of three
+  ways. Every figure is quoted from BRE's own in-game help, `game/attack.hlp`,
+  so these are fidelity contract, not playtest knobs; the capture percentages
+  are relative to a Normal Attack's take, which is how that help states them.
+
+  | Type | Attacker strength | Land taken | Both sides retreat at |
+  | --- | --- | --- | --- |
+  | Quick Strike | 110% | 50% of normal | 8% losses |
+  | Normal Attack | 100% | 100% | 15% losses |
+  | Extended Battle | 85% | 125% of normal | 20% losses |
+
+  The strength multiplier is applied to the offense that leaves the sending
+  board; the capture and casualty rates are applied by the **target** board on
+  arrival, so the type travels in the packet. Its wire codes are BRE's own —
+  **Quick=0, Normal=1, Extended=2** — read from a disassembly of the IBBS attack
+  unit in `BRE.OVR`, which presets the type to Normal Attack before drawing the
+  menu and writes 0 for `2` and 2 for `3`.
+
+  The menu itself was **captured live end-to-end** (docs/dev/bre-screens.md):
+  a 21-column red box with a `(?) Help` item, and **Enter takes Quit**, the
+  ordinary menu default. (An earlier reading of the disassembly's `bp-0xa`
+  preset suggested Enter picked Normal Attack; the capture disproved it — that
+  preset is only the variable's initial value.) The quit key prints BRE's
+  `Attack aborted.` Launching also **costs `IndividualAttackGoldPerUnit`
+  (1) gold per unit sent** — "This attack will cost 100 gold." for 100 troopers,
+  verified for troopers only — and BRE confirms with `Send this Attack? (Y/n)`
+  before it goes. Its force prompts ask about **every** unit type, including
+  ones held at zero, each defaulting to 0.
 - **Protection crosses the league.** A scores packet marks each realm still
   under New Realm Protection, and the attack and terror target lists leave those
   realms out — matching the local attack list, which hides them too. The target
@@ -1943,7 +2033,6 @@ Still missing against the reference:
   nothing times one.
 - Negotiated empire-to-empire trade deals carrying goods with demands (see the
   trading section above; `Send Trade Deal` sends gold only)
-- The Quick-Strike and Extended-Battle attack variants
 - Civil-war collapse
 - BRE's finer interplanetary news subtypes
 

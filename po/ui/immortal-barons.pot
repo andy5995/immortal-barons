@@ -25,19 +25,19 @@ msgstr ""
 msgid "##"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:371
+#: internal/menu/actions_interbbs.go:435
 msgid "%.0f minutes"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:369
+#: internal/menu/actions_interbbs.go:433
 msgid "%.0f seconds"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:376
+#: internal/menu/actions_interbbs.go:440
 msgid "%.2f days"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:374
+#: internal/menu/actions_interbbs.go:438
 msgid "%.2f hours"
 msgstr ""
 
@@ -53,19 +53,19 @@ msgstr ""
 msgid "%d days"
 msgstr ""
 
-#: internal/menu/gameflow.go:581
+#: internal/menu/gameflow.go:585
 msgid "%d gold is requested to boost popular support."
 msgstr ""
 
-#: internal/menu/gameflow.go:596
+#: internal/menu/gameflow.go:600
 msgid "%d gold is requested to improve military morale."
 msgstr ""
 
-#: internal/menu/gameflow.go:573
+#: internal/menu/gameflow.go:577
 msgid "%d regions revolted for lack of upkeep."
 msgstr ""
 
-#: internal/menu/gameflow.go:570
+#: internal/menu/gameflow.go:574
 msgid "%d units deserted for lack of pay."
 msgstr ""
 
@@ -77,7 +77,7 @@ msgstr ""
 msgid "%s  You have %s gold."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:513
+#: internal/menu/actions_interbbs.go:577
 msgid "%s @ %s (%s): Land %s  Off %s  Def %s  Gold %s"
 msgstr ""
 
@@ -89,11 +89,15 @@ msgstr ""
 msgid "%s days"
 msgstr ""
 
-#: internal/menu/gameflow.go:527
+#: internal/menu/actions_interbbs.go:239
+msgid "%s force #%d is on its way to %s on %s."
+msgstr ""
+
+#: internal/menu/gameflow.go:531
 msgid "%s gold is required to maintain your regions."
 msgstr ""
 
-#: internal/menu/gameflow.go:386
+#: internal/menu/gameflow.go:390
 msgid "%s have captured %s %s"
 msgstr ""
 
@@ -145,15 +149,15 @@ msgstr ""
 msgid "(not enough carriers)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:97
+#: internal/menu/actions_interbbs.go:99
 msgid "(the whole planet)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:587
+#: internal/menu/actions_interbbs.go:651
 msgid "(your current vote)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:691
+#: internal/menu/actions_interbbs.go:755
 msgid ", "
 msgstr ""
 
@@ -161,11 +165,11 @@ msgstr ""
 msgid "/-Command?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:371
+#: internal/menu/actions_interbbs.go:435
 msgid "1 minute"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:369
+#: internal/menu/actions_interbbs.go:433
 msgid "1 second"
 msgstr ""
 
@@ -277,7 +281,7 @@ msgstr ""
 msgid "Attack"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:166
+#: internal/menu/actions_interbbs.go:168
 msgid "Attack (0 to cancel)?"
 msgstr ""
 
@@ -285,8 +289,8 @@ msgstr ""
 msgid "Attack Pirates"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:235
-msgid "Attack force #%d is on its way to %s on %s."
+#: internal/menu/actions_interbbs.go:280
+msgid "Attack Type"
 msgstr ""
 
 #: internal/menu/actions_attack.go:160
@@ -301,7 +305,7 @@ msgstr ""
 msgid "Auto-Pay Maintenance"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:346
+#: internal/menu/actions_interbbs.go:410
 msgid "Average Turn Around Times to All BBSes"
 msgstr ""
 
@@ -401,7 +405,7 @@ msgstr ""
 msgid "Change Production?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:688
+#: internal/menu/actions_interbbs.go:752
 msgid "Change status to"
 msgstr ""
 
@@ -457,7 +461,7 @@ msgstr ""
 msgid "Confirm?"
 msgstr ""
 
-#: internal/menu/gameflow.go:832
+#: internal/menu/gameflow.go:836
 msgid "Continue to your next turn?"
 msgstr ""
 
@@ -545,7 +549,7 @@ msgstr ""
 msgid "Diplomacy List"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:633
+#: internal/menu/actions_interbbs.go:697
 msgid "Diplomacy Modification"
 msgstr ""
 
@@ -561,7 +565,7 @@ msgstr ""
 msgid "Do you wish to send another message?"
 msgstr ""
 
-#: internal/menu/gameflow.go:516
+#: internal/menu/gameflow.go:520
 msgid "Do you wish to visit the bank?"
 msgstr ""
 
@@ -597,7 +601,7 @@ msgstr ""
 msgid "End Protection"
 msgstr ""
 
-#: internal/menu/gameflow.go:429
+#: internal/menu/gameflow.go:433
 msgid "End of Turn Statistics:"
 msgstr ""
 
@@ -609,7 +613,7 @@ msgstr ""
 msgid "Entry"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:301
+#: internal/menu/actions_interbbs.go:365
 msgid "Every realm known on that planet is under New Realm Protection."
 msgstr ""
 
@@ -653,7 +657,7 @@ msgstr ""
 msgid "Game started on %s"
 msgstr ""
 
-#: internal/menu/gameflow.go:499
+#: internal/menu/gameflow.go:503
 msgid "Gold paid."
 msgstr ""
 
@@ -665,7 +669,7 @@ msgstr ""
 msgid "Good"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:128
+#: internal/menu/actions_interbbs.go:130
 msgid "Group attack #%d formed against %s on %s, leaving day %d."
 msgstr ""
 
@@ -673,7 +677,7 @@ msgstr ""
 msgid "HeadQuarters"
 msgstr ""
 
-#: internal/menu/tree.go:117
+#: internal/menu/actions_interbbs.go:287
 msgid "Help"
 msgstr ""
 
@@ -685,7 +689,7 @@ msgstr ""
 msgid "How many %s?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:555
+#: internal/menu/actions_interbbs.go:619
 msgid "How many agents to send?"
 msgstr ""
 
@@ -717,7 +721,7 @@ msgstr ""
 msgid "How much to repay?"
 msgstr ""
 
-#: internal/menu/gameflow.go:525
+#: internal/menu/gameflow.go:529
 msgid "How much will you give?"
 msgstr ""
 
@@ -785,7 +789,7 @@ msgstr ""
 msgid "Intelligence Alliance"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:45
+#: internal/menu/actions_interbbs.go:47
 msgid "InterBBS Scores"
 msgstr ""
 
@@ -829,7 +833,7 @@ msgstr ""
 msgid "Join Group Attack"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:162
+#: internal/menu/actions_interbbs.go:164
 msgid "Join which attack?"
 msgstr ""
 
@@ -869,7 +873,7 @@ msgstr ""
 msgid "League Number (1-999, 0 = unset)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:111
+#: internal/menu/actions_interbbs.go:113
 msgid "Leave in how many days?"
 msgstr ""
 
@@ -909,7 +913,7 @@ msgstr ""
 msgid "Macro Editor"
 msgstr ""
 
-#: internal/menu/gameflow.go:503
+#: internal/menu/gameflow.go:507
 msgid "Maintenance:"
 msgstr ""
 
@@ -949,7 +953,7 @@ msgstr ""
 msgid "Messages"
 msgstr ""
 
-#: internal/menu/gameflow.go:603
+#: internal/menu/gameflow.go:607
 msgid "Military morale rose %d points."
 msgstr ""
 
@@ -993,19 +997,19 @@ msgstr ""
 msgid "New tax rate?"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:365
+#: internal/menu/actions_interbbs.go:429
 msgid "No Data"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:303
+#: internal/menu/actions_interbbs.go:367
 msgid "No barons are known on that planet yet."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:159
+#: internal/menu/actions_interbbs.go:161
 msgid "No group attacks are forming right now."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:39
+#: internal/menu/actions_interbbs.go:41
 msgid "No inter-BBS scores have been imported yet."
 msgstr ""
 
@@ -1049,7 +1053,7 @@ msgstr ""
 msgid "Odris, your civilian advisor, Sire. I keep an ear to the people and an eye on the granary."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:630
+#: internal/menu/actions_interbbs.go:694
 msgid "Only the BBS Coordinator may set planetary diplomacy."
 msgstr ""
 
@@ -1153,7 +1157,7 @@ msgstr ""
 msgid "Planetary Tax Rate (%)"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:424
+#: internal/menu/actions_interbbs.go:488
 msgid "Planetary Treaties"
 msgstr ""
 
@@ -1165,7 +1169,7 @@ msgstr ""
 msgid "Player List"
 msgstr ""
 
-#: internal/menu/gameflow.go:591
+#: internal/menu/gameflow.go:595
 msgid "Popular support rose %d points."
 msgstr ""
 
@@ -1241,7 +1245,7 @@ msgstr ""
 msgid "Returns expected to be approximately %s gold."
 msgstr ""
 
-#: internal/menu/gameflow.go:439
+#: internal/menu/gameflow.go:443
 msgid "Riots have broken out due to high tax rates!"
 msgstr ""
 
@@ -1305,7 +1309,7 @@ msgstr ""
 msgid "Send Trade Deal"
 msgstr ""
 
-#: internal/menu/gameflow.go:811
+#: internal/menu/gameflow.go:815
 msgid "Send a message?"
 msgstr ""
 
@@ -1349,7 +1353,7 @@ msgstr ""
 msgid "Single Planet"
 msgstr ""
 
-#: internal/menu/gameflow.go:698
+#: internal/menu/gameflow.go:702
 msgid "Sorry, you have used all of your turns today."
 msgstr ""
 
@@ -1373,7 +1377,7 @@ msgstr ""
 msgid "Spy Database"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:511
+#: internal/menu/actions_interbbs.go:575
 msgid "Spy Database:"
 msgstr ""
 
@@ -1405,7 +1409,7 @@ msgstr ""
 msgid "Tanks were manufactured by Industrial Zones."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:98
+#: internal/menu/actions_interbbs.go:100
 msgid "Target which baron?"
 msgstr ""
 
@@ -1449,7 +1453,7 @@ msgstr ""
 msgid "That empire has none of those for sale."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:500
+#: internal/menu/actions_interbbs.go:564
 msgid "That interplanetary operation is not yet available."
 msgstr ""
 
@@ -1481,11 +1485,11 @@ msgstr ""
 msgid "The Clingy Annihilator is on its way. Nothing more can be done with it."
 msgstr ""
 
-#: internal/menu/gameflow.go:673
+#: internal/menu/gameflow.go:677
 msgid "The Queen Royale opens her coffers and refunds you %s gold in taxes!"
 msgstr ""
 
-#: internal/menu/gameflow.go:541
+#: internal/menu/gameflow.go:545
 msgid "The Queen Royale requires %s gold for Taxes."
 msgstr ""
 
@@ -1493,7 +1497,7 @@ msgstr ""
 msgid "The R5-Slappenheimer is disabled."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:600
+#: internal/menu/actions_interbbs.go:664
 msgid "The current BBS Coordinator is %s."
 msgstr ""
 
@@ -1529,11 +1533,11 @@ msgstr ""
 msgid "The remaining %d%% is turned into gold."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:508
+#: internal/menu/actions_interbbs.go:572
 msgid "The spy database is empty. Spy on empires on other planets to fill it."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:596
+#: internal/menu/actions_interbbs.go:660
 msgid "There are no barons to vote for yet."
 msgstr ""
 
@@ -1697,11 +1701,11 @@ msgstr ""
 msgid "Visit Trading Menu"
 msgstr ""
 
-#: internal/menu/gameflow.go:629
+#: internal/menu/gameflow.go:633
 msgid "Visit the Food Market to feed them, or they will starve."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:606
+#: internal/menu/actions_interbbs.go:670
 msgid "Vote for (0 to cancel)?"
 msgstr ""
 
@@ -1765,7 +1769,7 @@ msgstr ""
 msgid "While you were at the menus, this has happened:"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:602
+#: internal/menu/actions_interbbs.go:666
 msgid "Who should be the BBS Coordinator?"
 msgstr ""
 
@@ -1777,7 +1781,7 @@ msgstr ""
 msgid "Would you like to begin construction?"
 msgstr ""
 
-#: internal/menu/gameflow.go:550
+#: internal/menu/gameflow.go:554
 msgid "Would you like to reconsider?"
 msgstr ""
 
@@ -1821,7 +1825,7 @@ msgstr ""
 msgid "You cannot buy from your own listing."
 msgstr ""
 
-#: internal/menu/gameflow.go:505
+#: internal/menu/gameflow.go:509
 msgid "You cannot cover all your maintenance this turn."
 msgstr ""
 
@@ -1929,7 +1933,7 @@ msgstr ""
 msgid "You hold a %s with %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:185
+#: internal/menu/actions_interbbs.go:187
 msgid "You joined group attack #%d."
 msgstr ""
 
@@ -1973,15 +1977,15 @@ msgstr ""
 msgid "Your Prices"
 msgstr ""
 
-#: internal/menu/gameflow.go:532
+#: internal/menu/gameflow.go:536
 msgid "Your SDI Program requires %s gold."
 msgstr ""
 
-#: internal/menu/gameflow.go:549
+#: internal/menu/gameflow.go:553
 msgid "Your actions may lead to disastrous results."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:537
+#: internal/menu/actions_interbbs.go:601
 msgid "Your agents are on their way to %s on %s. Their report will reach the Spy Database when word comes back."
 msgstr ""
 
@@ -1989,7 +1993,7 @@ msgstr ""
 msgid "Your allies will send the following to aid you in defense:"
 msgstr ""
 
-#: internal/menu/gameflow.go:523
+#: internal/menu/gameflow.go:527
 msgid "Your armed forces require %s gold."
 msgstr ""
 
@@ -1997,11 +2001,11 @@ msgstr ""
 msgid "Your choice?"
 msgstr ""
 
-#: internal/menu/gameflow.go:432
+#: internal/menu/gameflow.go:436
 msgid "Your dominion gained %s%s%s people."
 msgstr ""
 
-#: internal/menu/gameflow.go:434
+#: internal/menu/gameflow.go:438
 msgid "Your dominion lost %s%s%s people."
 msgstr ""
 
@@ -2045,11 +2049,11 @@ msgstr ""
 msgid "Your new-realm protection will end when this turn does."
 msgstr ""
 
-#: internal/menu/gameflow.go:627
+#: internal/menu/gameflow.go:631
 msgid "Your people need %s units of food and you have only %s."
 msgstr ""
 
-#: internal/menu/gameflow.go:645
+#: internal/menu/gameflow.go:649
 msgid "Your people need %s units of food."
 msgstr ""
 
@@ -2061,7 +2065,7 @@ msgstr ""
 msgid "Your realm has %d turns of new-realm protection left."
 msgstr ""
 
-#: internal/menu/gameflow.go:690
+#: internal/menu/gameflow.go:694
 msgid "Your realm is no longer active."
 msgstr ""
 
@@ -2069,11 +2073,11 @@ msgstr ""
 msgid "Your realm will be named %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:566
+#: internal/menu/actions_interbbs.go:630
 msgid "Your terrorists depart for %s on %s."
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:618
+#: internal/menu/actions_interbbs.go:682
 msgid "Your vote is recorded. You may change it any time."
 msgstr ""
 
@@ -2141,7 +2145,7 @@ msgstr ""
 msgid "nothing"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:694
+#: internal/menu/actions_interbbs.go:758
 msgid "or "
 msgstr ""
 
@@ -2153,7 +2157,7 @@ msgstr ""
 msgid "path to the BBS drop file"
 msgstr ""
 
-#: internal/menu/gameflow.go:436
+#: internal/menu/gameflow.go:440
 msgid "people left your realm, unable to be fed."
 msgstr ""
 
@@ -2229,7 +2233,7 @@ msgstr ""
 msgid "that attack force has already left"
 msgstr ""
 
-#: internal/menu/actions_interbbs.go:152
+#: internal/menu/actions_interbbs.go:154
 msgid "the whole planet"
 msgstr ""
 
@@ -2241,15 +2245,15 @@ msgstr ""
 msgid "this board's name in the league, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator"
 msgstr ""
 
-#: internal/menu/gameflow.go:441
+#: internal/menu/gameflow.go:445
 msgid "troops deserted due to low morale."
 msgstr ""
 
-#: internal/menu/gameflow.go:754
+#: internal/menu/gameflow.go:758
 msgid "units of Food consumed."
 msgstr ""
 
-#: internal/menu/gameflow.go:437
+#: internal/menu/gameflow.go:441
 msgid "units of food spoiled."
 msgstr ""
 
@@ -2269,7 +2273,7 @@ msgstr ""
 msgid "─»>Enter to continue, Q to quit<«─"
 msgstr ""
 
-#: internal/menu/input.go:365
+#: internal/menu/input.go:399
 msgid "─»>Paused<«─"
 msgstr ""
 

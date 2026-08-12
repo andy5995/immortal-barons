@@ -13,6 +13,9 @@ matters.
 
 - Group Attack — several rulers on your board join one strike against a distant
   enemy. The gains are shared among those who take part.
+- Indiv. Attack Force — your own strike against one named baron. You keep the
+  whole take rather than sharing it, and you choose how to press the attack (see
+  Attack Types).
 - IP Scores — see how the boards rank against each other.
 - Send Message — write to another planet. Everyone there reads what you send, so
   it is the place for a warning, an offer, or a call for help; you can also write

@@ -13,6 +13,9 @@ Manche Spiele verbinden viele Boards zu einer Welt. Ihr Ziel wächst vom Sieg
 - Gruppenangriff — mehrere Herrscher Ihres Boards schließen sich zu einem
   Schlag gegen einen fernen Feind zusammen. Die Beute wird nach Beitrag
   geteilt.
+- Indiv. Attack Force — your own strike against one named baron. You keep
+  the whole take rather than sharing it, and you choose how to press the
+  attack (see Attack Types).
 - IP-Punkte — sehen, wie die Boards zueinander stehen.
 - Send Message — write to another planet. Everyone there reads what you
   send, so it is the place for a warning, an offer, or a call for help; you

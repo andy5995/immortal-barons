@@ -194,6 +194,17 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	dloss := loseForces(d, dLoss)
 	w.bleedAllies(d, dLoss) // the allies' committed 30% bleeds at the defender's rate
 
+	// A beaten defender's HeadQuarters is knocked back, and can be flattened by
+	// repeated defeats. BINARY-VERIFIED (BRE.OVR 0xFFA2: Random(3)+5 subtracted
+	// from the defender's HQ field, then clamped at zero). IB had no HQ damage
+	// at all, which made a finished HeadQuarters permanent once built.
+	if attackerWins && d.HQ > 0 {
+		d.HQ -= HQBattleLossMin + w.rng.Intn(HQBattleLossJitter)
+		if d.HQ < 0 {
+			d.HQ = 0
+		}
+	}
+
 	// Score (IB's own): the award scales with the forces used up in the battle.
 	// The winner gains; the loser loses a bit less; a successful defense is worth
 	// more than a successful attack.
@@ -340,7 +351,7 @@ func (f AttackForce) clampTo(e *Empire) AttackForce {
 }
 
 // groundOffense is the committed force's regular-attack strength, mirroring
-// Empire.Offense on the sent units (troopers 1, jets 2, tanks 3–5 by HQ), scaled by
+// Empire.Offense on the sent units (troopers 1, jets 2, tanks 3.5–4.5 by HQ), scaled by
 // Technology. Bombers are excluded — they fly the bombing run, not the ground
 // clash. (Distinct from offense(), which values a group-attack detachment flat.)
 func (f AttackForce) groundOffense(e *Empire) int {
