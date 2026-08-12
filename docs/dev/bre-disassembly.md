@@ -9,7 +9,10 @@ instruction boundaries without first running BRE.
 The companion tool is `scripts/bre-disasm.py`; the generated catalog is
 `docs/dev/bre-v0988-disassembly.json`. Both are deliberately limited to the
 main runtime (`BRE.EXE`, `BRE.OVR`, and the resident Turbo Pascal runtime).
-`BREDATA.EXE` is outside this map.
+`BREDATA.EXE` is not another game executable: it is an ARJ self-extracting
+installation payload containing documentation, help, artwork, samples, and
+initial/template data. It has no role in runtime overlay or floating-point
+loading and therefore needs no disassembly map.
 
 ## Quick start
 

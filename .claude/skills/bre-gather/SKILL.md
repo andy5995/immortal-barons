@@ -59,11 +59,20 @@ Key files inside:
 
 - **`BRE.OVR`** — the overlay; holds the bulk of menu strings, prompts, news
   text. First place to look for labels and menu order.
-- **`BRE.EXE`**, **`BREDATA.EXE`** — main binaries; some strings, the config
-  screens.
+- **`BRE.EXE`** — the main executable and its resident Turbo Pascal runtime;
+  holds some strings and configuration code.
 - **`game/*.hlp`, `game/breins.txt`, `game/bre.txt`, `docs/`** — help/prose.
 - `data/planet.bre`, `data/game.dat` — runtime save data (not menu/mechanic
   definitions).
+
+The distribution's **`BREDATA.EXE` is not a BRE runtime program**. It is an ARJ
+self-extracting installer payload (`BREDATA.ARJ`) containing 19 documentation,
+sample-configuration, help, ANSI-art, and initial/template data files. The
+stock `UNPACK.BAT` merely runs `BREDATA -Y` to extract them. Do not disassemble
+it as game code or look there for overlays, mechanics, or an FP library. This
+is why the repository fetcher intentionally extracts only `BRE.EXE` and
+`BRE.OVR`; obtain the full distribution separately when its docs/resources are
+needed.
 
 ## Technology silently scales almost every number you capture
 
@@ -174,7 +183,8 @@ offset. Start with its `list`, `lookup`, `map`, and `disasm` commands; they do
 not need the unit's transient runtime segment and do not rely on a plausibility
 score. The detailed workflow and proof are in "Reading the disassembly" below
 and `docs/dev/bre-disassembly.md`. This map covers `BRE.EXE`, `BRE.OVR`, and the
-resident runtime linked into that executable; it does not cover `BREDATA.EXE`.
+resident runtime linked into that executable. It does not need to cover
+`BREDATA.EXE`, which is only the installation self-extractor described above.
 
 The pinned v0.988 catalog reaches a fixed point for calculated control flow:
 all 23 reachable indirect-call sites belong to 13 proven closed target sets,
