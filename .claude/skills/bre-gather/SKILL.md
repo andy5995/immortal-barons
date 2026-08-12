@@ -173,21 +173,29 @@ flow, and ties each patched `INT 3Fh` stub back to its canonical `BRE.OVR`
 offset. Start with its `list`, `lookup`, `map`, and `disasm` commands; they do
 not need the unit's transient runtime segment and do not rely on a plausibility
 score. The detailed workflow and proof are in "Reading the disassembly" below
-and `docs/dev/bre-disassembly.md`.
+and `docs/dev/bre-disassembly.md`. This map covers `BRE.EXE`, `BRE.OVR`, and the
+resident runtime linked into that executable; it does not cover `BREDATA.EXE`.
 
-Use a **DOSBox build with the built-in debugger** (DOSBox-X or DOSBox-debug)
-when a target is reached only through an unresolved indirect transfer, or when
-the loader/materialized bytes themselves need independent validation. Run it
-through the repository's Xvfb wrapper, let BRE load the relevant overlay, and
-dump memory. That supplies runtime evidence without reviving the failed
-base-solving heuristic.
+The pinned v0.988 catalog reaches a fixed point for calculated control flow:
+all 23 reachable indirect-call sites belong to 13 proven closed target sets,
+with no reachable indirect jumps, unresolved transfers, or decode-boundary
+conflicts. When a call edge has `kind: calculated_call`, follow its
+`dispatch_id`; the dispatch record is the complete target set. Do not guess a
+target or launch an emulator merely because the source instruction is indirect.
+
+Use the repository's **Xvfb-backed DOSBox debugger** only when the overlay
+loader/materialized bytes need independent validation or new evidence falls
+outside the pinned catalog. `python3 scripts/bre-disasm.py debugger --directory
+"$BRE" --run` launches the debugger correctly under a private Xvfb. Memory
+dumps and traces contain original program material; keep them private and out
+of the repository.
 
 This does **not** replace dosemu2 for everything — dosemu2 is still the only way
 to scrape screens as text (see above), and that is most of what this skill does.
 The two are complementary: **dosemu2 for behaviour and screens, the static map
 for normal structure and constants, and a DOSBox debugger for dynamic
-validation.** If the static catalog records an unresolved transfer, reach for
-the debugger rather than trying a scoring heuristic.
+validation.** Static catalog lookup is the normal path; the debugger is an
+exceptional validation tool, not a prerequisite for following overlays.
 
 ## Source priority (most authoritative first)
 
@@ -218,12 +226,18 @@ Normal-Attack-on-Enter default, and the wire codes the help does not mention —
 but it should have been the *second* step, confirming and extending a cheap
 answer rather than substituting for one.
 
-Two cheap sweeps to run at the start of any mechanic hunt:
+Three cheap sweeps to run at the start of any mechanic hunt:
 
 ```
-grep -rain '<mechanic name>' game/ docs/ | head -40
-strings -a -t x BRE.OVR | grep -i '<mechanic name>'
+grep -rain '<mechanic name>' "$BRE/game/" "$BRE/docs/" | head -40
+python3 scripts/bre-disasm.py find-string --directory "$BRE" '<mechanic name>'
+strings -a -t x "$BRE/BRE.OVR" | grep -i '<mechanic name>'
 ```
+
+Prefer `find-string` for code discovery: it searches the private binary text
+but returns the cataloged functions and blocks that reference each match. Use
+raw `strings` only to inspect declaration order or text that has no indexed
+code reference.
 
 ## Running BRE headless (tmux + dosemu2 harness)
 
@@ -727,8 +741,8 @@ assume it's the mode you care about. Grep for sibling copies of the same banner
 a live screenshot of the *specific* feature before treating it as fact — the
 same source-1-beats-strings rule that already applies to colors.
 
-See `references/extraction.md` for the exact `strings` / `grep -abo` / `dd|xxd`
-commands and worked examples.
+See `references/extraction.md` for the catalog-first string-reference workflow
+and the raw `strings` / `grep -abo` / `dd|xxd` fallback commands.
 
 ## Cross-reference the docs, the overlay, AND a disassembly — never one alone
 
@@ -776,55 +790,87 @@ them.
 Start with the repository's static map, not a guessed OVR slice:
 
 ```
+python3 scripts/bre-disasm.py check-catalog
+python3 scripts/bre-disasm.py find-string --directory "$BRE" "technology"
 python3 scripts/bre-disasm.py list --kind procedure --filter technology
 python3 scripts/bre-disasm.py lookup technology_report
+python3 scripts/bre-disasm.py list --kind dispatch
 python3 scripts/bre-disasm.py map --directory "$BRE" --ovr-offset 0x32d1b
 python3 scripts/bre-disasm.py disasm --directory "$BRE" --unit ovr_031379
 ```
 
 `docs/dev/bre-disassembly.md` documents the file format and
 `docs/dev/bre-v0988-disassembly.json` is the machine-readable catalog. The map
-contains all 103 overlay units and names every exported/direct-call procedure,
-direct-jump basic block, conditional fallthrough, complementary non-code chunk,
-fixup stream, resident target, and overlay descriptor record. Half-open spans,
-source edges, caller/callee graphs, procedure body ranges, code-segment data
-references, resident RTL/Real48 names, external edges, and explicit unresolved
-indirect transfers are attached to those records. Semantic names have an
-auditable `identified` status; internal targets use `contextual`, file-format
-records use `structural`, and address-only fallbacks are explicitly
-`unclassified`. `lookup NAME` finds one exact stable name or semantic alias.
-`list --kind procedure|block|data|fixup|all` searches record classes, and
+contains all 103 overlay units and names every proven procedure, direct-jump
+basic block, conditional fallthrough, complementary chunk, fixup stream,
+resident target, and overlay descriptor record. Half-open spans, source edges,
+bidirectional caller/callee graphs, procedure body ranges, code-segment data
+references, the Pascal-string reference index, resident RTL/Real48 names, and
+closed calculated-transfer sets are attached to those records. Semantic names
+have an auditable `identified` status; internal targets use `contextual`,
+file-format records use `structural`, and address-only fallbacks are explicitly
+`unclassified`.
+
+Treat a record's `id` as its identity and `name` as its current human-friendly
+label. Names can improve; IDs are derived from canonical EXE/OVR addresses and
+keep call-graph and string-index links durable. `lookup NAME_OR_ID` accepts
+either. On a procedure result, follow `callees[].to_id` downward and
+`callers[].from_id` upward; `site_ids` identify the exact call instructions. If
+an edge is `calculated_call`, look up its `dispatch_id` to get the complete
+closed target list and assignment-tracing evidence. `list --kind
+procedure|block|data|fixup|dispatch|all` searches record classes, and
 `--status identified|contextual|structural|unclassified` filters by naming
-state. Start with identified names, then inspect unclassified roots
-only when the desired behavior has no semantic match. `disasm` synchronizes at
-every cataloged block and skips cataloged non-code spans. The tool verifies the
-exact v0.988 hashes before reading a binary. Capstone 5 supplies typed 16-bit
-operands for the reachability pass; `ndisasm` is only the optional text renderer.
+state. Store durable IDs in working notes or generated indexes and show the
+friendly name alongside them. Inspect a procedure's `data_references` and a
+data record's inverse `referenced_by` list when a field or table matters.
+
+`find-string --directory "$BRE" SUBSTRING` loads the committed index first,
+verifies the exact binaries, then returns every named procedure and block that
+directly references a matching Pascal string. Matching is case-insensitive by
+default. Add `--details` only when the original matching text and exact use
+sites are necessary; that output is proprietary and must not be committed.
+The catalog deliberately stores hashes, lengths, and durable references rather
+than original strings.
+
+Start with identified names, then inspect unclassified roots only when the
+desired behavior has no semantic match. `disasm` synchronizes at every
+cataloged block and skips cataloged non-code spans. The tool verifies the exact
+v0.988 hashes before reading a binary. Capstone 5 supplies typed 16-bit operands
+for the reachability pass; `ndisasm` is only the optional text renderer.
 
 The loop that keeps paying off:
 
-1. **Find the message string.** Turbo Pascal strings are length-prefixed and sit
-   in one contiguous table, and the routine that uses them very often begins
-   IMMEDIATELY AFTER the table ends, at `55 89 E5` (push bp; mov bp,sp).
-2. **Map the file offset to its unit**, then disassemble that unit at proven
-   boundaries with `bre-disasm.py map` and `bre-disasm.py disasm`. Do not choose
-   a nearby prologue and assume a linear slice stays aligned.
-3. **Find a constant** by searching `struct.pack("<H", value)` and checking the
+1. **Find the message string's users.** Run `find-string` with a distinctive
+   substring and begin at its returned procedure IDs. Search sibling wording
+   too: duplicated subsystems and variant messages can lead to different code.
+   Fall back to raw string offsets only when the index has no direct reference.
+2. **Walk the graph by durable ID.** Use `lookup` on callers and callees until
+   the desired calculation or gate is reached. Follow every calculated edge's
+   `dispatch_id`; its targets are closed for this release. Prefer a call site
+   near an indexed string when several callers need semantic identification.
+3. **Map and disassemble at proven boundaries.** Use `map` for an address or OVR
+   offset and `disasm` for the containing unit. Do not choose a nearby prologue
+   and assume a linear slice stays aligned.
+4. **Find a constant** by searching `struct.pack("<H", value)` and checking the
    preceding byte for an imm16 opcode (`b8` mov ax, `05` add ax, `b9` mov cx …).
-4. **Decode float constants.** Reals are 6-byte Turbo Pascal, loaded into a
-   register triple right before the runtime call that consumes them. Use
-   `scripts/bre-tpreal.py --scan FILE 0xSTART 0xLEN` (in this project's Claude
-   dir) — its docstring carries the format, the empire/config record layout
-   mapped so far, and the known runtime helper addresses.
+5. **Calculate Real48 exactly.** Reals are six-byte Turbo Pascal values loaded
+   into a register triple before the resident helper call. Pass constants and
+   intermediate values to the exact BRE-linked calculator, using an explicit
+   `mem:` prefix for memory bytes:
 
-   **Always run the script; never decode a real by hand.** Doing the exponent
-   arithmetic mentally is one off-by-one away from a clean-looking wrong answer,
-   and the answer looks plausible either way. Decoding the Queen Royale refund
-   constants by hand gave 0.025 / 0.01 / 500,000 — every one exactly half the
-   truth, because the bias was applied one step out. The script returned
-   0.05 / 0.02 / 1,000,000. Both sets are round numbers, so nothing about the
-   hand result invited a second look; only the tool catches it.
-5. **Validate against play.** A candidate reading is not a finding until it
+   ```
+   python3 scripts/bre-real48.py div 100 3
+   python3 scripts/bre-real48.py mul mem:870000000048 0.25 --output all
+   python3 scripts/bre-real48.py sqrt mem:820000000000
+   ```
+
+   The calculator accepts decimal and `mem:hhhhhhhhhhhh` inputs, implements the
+   complete arithmetic, conversion, comparison, standard-function, and random
+   operation surface linked into BRE 0.988, and decorates every memory result
+   with `mem:`. Never decode a Real48 by hand, use Python `float`/`math`, or
+   borrow constants from another Turbo Pascal release. Read
+   `docs/dev/bre-real48.md` for representation, errors, and operation names.
+6. **Validate against play.** A candidate reading is not a finding until it
    reproduces captured figures exactly. Rounding vs truncation and the order of
    operations both change results by a unit — the two real→int helpers differ
    only in that, and picking the wrong one is easy.
@@ -910,9 +956,11 @@ Grep the disp16 in both files, sort by opcode, and read every site.
 
 "Who calls this?" looks unanswerable in an overlay, because callers far-call an
 **INT 3Fh stub in `BRE.EXE`**, not the OVR file offset. The static catalog now
-does the complete mapping. Given a far target, run `bre-disasm.py map --address
-SEG:OFF`; given an OVR address, run it with `--ovr-offset`. The descriptor's
-five-byte `cd 3f <entry> 00` stub maps exactly to `unit_file_offset + entry`.
+does the complete mapping and inverse call graph. First `lookup` the procedure
+and read `callers[].from_id` plus `site_ids`; recurse by ID to find the owning
+behavior. Given a raw far target, run `bre-disasm.py map --address SEG:OFF`;
+given an OVR address, run it with `--ovr-offset`. The descriptor's five-byte
+`cd 3f <entry> 00` stub maps exactly to `unit_file_offset + entry`.
 
 For manual verification, the MZ header is `0x2940` bytes and a logical EXE
 address maps to `0x2940 + segment*16 + offset`. At runtime the INT 3F handler

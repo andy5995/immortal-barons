@@ -6,6 +6,22 @@ wherever you unpacked the original BRE distribution (see SKILL.md), e.g.
 
 ## 1. Find a menu's labels
 
+When the goal is to find code that uses text, start with the durable string
+reference index instead of flattening the binary with `strings`:
+
+```
+python3 scripts/bre-disasm.py find-string --directory "$BRE" "group attack"
+```
+
+The default result lists every cataloged function and block that directly
+references a matching Pascal string. Matching is case-insensitive. IDs such as
+`bre0988:ovr:procedure:...` are durable even if a semantic name improves. Pass
+a returned ID to `lookup` and walk `callees[].to_id` or `callers[].from_id`.
+Use `--details` only when exact private text and instruction sites are needed;
+never commit that output.
+
+Use raw `strings` when declaration order or unreferenced text is the question:
+
 ```
 strings -n 3 "$BRE/BRE.OVR" | grep -iE "group attack|travel time|terrorist|sdi|gooie|spy database"
 ```
@@ -66,19 +82,26 @@ silently misalign the decode:
 
 ```
 python3 scripts/bre-disasm.py verify --directory "$BRE"
+python3 scripts/bre-disasm.py check-catalog
+python3 scripts/bre-disasm.py find-string --directory "$BRE" "spy"
 python3 scripts/bre-disasm.py map --directory "$BRE" --ovr-offset 0x4ba48
 python3 scripts/bre-disasm.py list --kind procedure --filter spy
 python3 scripts/bre-disasm.py lookup send_spy
+python3 scripts/bre-disasm.py list --kind dispatch
 python3 scripts/bre-disasm.py disasm --directory "$BRE" --unit ovr_04b9d0
 ```
 
 The committed catalog works without local binaries and gives stable names,
 every exported/direct-call procedure and direct-jump/fallthrough block, named
 complementary chunks, fixup streams, resident targets, unit-wide reachable
-ranges, external targets, and unresolved indirect transfers. `disasm` uses the
-catalog to synchronize every block and skip every named non-code span. The
-loader, fixup format, Xvfb-backed DOSBox validation procedure, and catalog
-schema are in `docs/dev/bre-disassembly.md`.
+ranges, external targets, bidirectional caller/callee edges, string references,
+and 13 closed calculated-transfer sets. For the pinned v0.988 files there are no
+reachable indirect jumps, unresolved transfers, or decode conflicts. A
+`calculated_call` edge carries a `dispatch_id`; look it up for the complete
+target list and proof. `disasm` uses the catalog to synchronize every block and
+skip every named non-code span. The loader, fixup format, durable-ID schema,
+Xvfb-backed DOSBox validation procedure, and graph-walking examples are in
+`docs/dev/bre-disassembly.md`.
 
 **Code masquerading as strings (a second length-prefix trap).** A run like
 `<1u <2u <3u <4u` right after a menu-name cluster (e.g. Civilian/Economic/
@@ -91,12 +114,18 @@ cannot give you — see SKILL.md on reachability).
 
 **Real arithmetic is readable now; do not default to curve fitting.** BRE's
 six-byte Turbo Pascal `Real` type uses resident software helpers rather than x87
-instructions. The catalog names the known `0fd0` conversion, arithmetic,
-comparison, `Ln`, and `Exp` targets, and raw OVR far targets retain canonical
-logical segments because the fixup format is known. Follow those named calls,
-decode six-byte constants with the existing Real48 helper, reconstruct the
-expression, and then validate it against play. Black-box sampling remains a
-useful cross-check, not a substitute for static analysis.
+instructions. The catalog names the complete linked `0fd0` conversion,
+arithmetic, comparison, standard-function, and random operation surface, and
+raw OVR far targets retain canonical logical segments because the fixup format
+is known. Follow those named calls,
+calculate six-byte constants and intermediates with
+`scripts/bre-real48.py`, reconstruct the expression, and then validate it
+against play. Always spell memory inputs `mem:hhhhhhhhhhhh`; the calculator
+decorates memory output the same way so it cannot be confused with a hex
+integer. It implements the exact operation surface and constants linked into
+BRE 0.988; do not substitute Python `float`, `math`, or a different TP runtime.
+See `docs/dev/bre-real48.md`. Black-box sampling remains a useful cross-check,
+not a substitute for static analysis.
 
 ## 7. Config-editor field bounds
 
