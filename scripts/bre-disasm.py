@@ -25,7 +25,7 @@ import time
 import urllib.request
 
 
-VERSION = "0.5"
+VERSION = "0.6"
 OFFICIAL_URL = (
     "https://www.johndaileysoftware.com/download/"
     "?fileName=brev988.exe&id=220BRE"
@@ -3113,6 +3113,8 @@ def command_fetch(args: argparse.Namespace) -> None:
     if not extractor:
         raise BREError("fetch requires 7zz or 7z to unpack the official ARJ SFX")
     with tempfile.TemporaryDirectory(prefix="bre-fetch-") as temporary:
+        staging = Path(temporary) / "release"
+        staging.mkdir()
         if args.archive:
             archive = Path(args.archive).resolve()
         else:
@@ -3124,17 +3126,41 @@ def command_fetch(args: argparse.Namespace) -> None:
             with urllib.request.urlopen(request) as response, archive.open("wb") as output:
                 shutil.copyfileobj(response, output)
         verify_one(archive, "archive")
+        members = ["BRE.EXE", "BRE.OVR"]
+        if args.include_docs:
+            members.append("BREDATA.EXE")
         result = subprocess.run(
-            [extractor, "e", "-y", f"-o{destination}", str(archive), "BRE.EXE", "BRE.OVR"],
+            [extractor, "e", "-y", f"-o{staging}", str(archive), *members],
             text=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.PIPE,
         )
         if result.returncode:
             raise BREError(f"extractor failed: {result.stderr.strip()}")
+        shutil.copy2(staging / "BRE.EXE", destination / "BRE.EXE")
+        shutil.copy2(staging / "BRE.OVR", destination / "BRE.OVR")
+        if args.include_docs:
+            documentation = destination / "reference"
+            documentation.mkdir(parents=True, exist_ok=True)
+            result = subprocess.run(
+                [extractor, "e", "-y", f"-o{documentation}", str(staging / "BREDATA.EXE")],
+                text=True,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.PIPE,
+            )
+            if result.returncode:
+                raise BREError(f"BREDATA extractor failed: {result.stderr.strip()}")
+            required = ("BRE.DOC", "BREINS.TXT", "RESET.HLP")
+            missing = [name for name in required if not (documentation / name).is_file()]
+            if missing:
+                raise BREError(
+                    "BREDATA extraction omitted expected reference files: "
+                    + ", ".join(missing)
+                )
     verify_one(destination / "BRE.EXE", "exe")
     verify_one(destination / "BRE.OVR", "ovr")
-    print(f"Verified BRE.EXE and BRE.OVR in {destination}")
+    suffix = " and extracted bundled reference files" if args.include_docs else ""
+    print(f"Verified BRE.EXE and BRE.OVR in {destination}{suffix}")
 
 
 def command_verify(args: argparse.Namespace) -> None:
@@ -3386,6 +3412,33 @@ def command_lookup(args: argparse.Namespace) -> None:
     print(json.dumps(list(unique.values()), indent=2))
 
 
+def resolve_procedure(catalog: dict, selector: str) -> tuple[str, dict]:
+    """Resolve one procedure without discarding its catalog-only span metadata."""
+    needle = selector.lower()
+    matches = []
+    for unit in catalog["units"]:
+        for root in unit["roots"]:
+            if (
+                needle == root["name"].lower()
+                or needle == root["id"].lower()
+                or needle in {alias.lower() for alias in root.get("aliases", [])}
+            ):
+                matches.append((unit["id"], root))
+    for root in catalog["resident_image"]["roots"]:
+        if (
+            needle == root["name"].lower()
+            or needle == root["id"].lower()
+            or needle in {alias.lower() for alias in root.get("aliases", [])}
+        ):
+            matches.append(("resident_exe", root))
+    unique = {(container, root["id"]): (container, root) for container, root in matches}
+    if not unique:
+        raise BREError(f"no procedure name, durable ID, or alias matches {selector!r}")
+    if len(unique) != 1:
+        raise BREError(f"procedure selector {selector!r} is ambiguous")
+    return next(iter(unique.values()))
+
+
 def command_find_string(args: argparse.Namespace) -> None:
     """Resolve a substring through the non-text catalog index and private binaries."""
     catalog = parse_catalog(args.catalog)
@@ -3414,6 +3467,12 @@ def command_find_string(args: argparse.Namespace) -> None:
             for root in catalog["resident_image"]["roots"]
         }
     )
+    function_ids = None
+    if args.function:
+        function_ids = {
+            resolve_procedure(catalog, selector)[1]["id"]
+            for selector in args.function
+        }
     blocks = {
         block["id"]: {
             "id": block["id"],
@@ -3461,6 +3520,11 @@ def command_find_string(args: argparse.Namespace) -> None:
         block_uses = {}
         procedure_ids = set()
         for use in record["used_by"]:
+            use_procedure_ids = set(use["procedure_ids"])
+            if function_ids is not None:
+                use_procedure_ids &= function_ids
+            if not use_procedure_ids:
+                continue
             block_use = block_uses.setdefault(
                 use["block_id"],
                 {**blocks[use["block_id"]], "sites": set(), "kinds": set()},
@@ -3468,7 +3532,9 @@ def command_find_string(args: argparse.Namespace) -> None:
             block_use["sites"].update(use["sites"])
             block_use["kinds"].add(use["kind"])
             matched_block_ids.add(use["block_id"])
-            procedure_ids.update(use["procedure_ids"])
+            procedure_ids.update(use_procedure_ids)
+        if not procedure_ids:
+            continue
         matched_procedure_ids.update(procedure_ids)
         matches.append(
             {
@@ -3499,6 +3565,7 @@ def command_find_string(args: argparse.Namespace) -> None:
     result = {
         "query": args.substring,
         "case_sensitive": args.case_sensitive,
+        "function_filter": sorted(function_ids) if function_ids is not None else None,
         "matching_strings": len(matches),
         "functions": [
             procedures[identifier] for identifier in sorted(matched_procedure_ids)
@@ -3628,49 +3695,272 @@ def command_compare_dump(args: argparse.Namespace) -> None:
     )
 
 
-def command_disasm(args: argparse.Namespace) -> None:
-    _ep, _op, _exe, ovr, _mz, units = load_release(args)
-    unit = select_unit(units, args.unit)
-    catalog = parse_catalog(args.catalog)
-    catalog_unit = next(
-        (item for item in catalog["units"] if item["id"] == unit.unit_id),
-        None,
-    )
-    if catalog_unit is None:
-        raise BREError(f"catalog has no record for {unit.unit_id}")
-    if not catalog_unit.get("blocks") or "data_chunks" not in catalog_unit:
-        raise BREError("catalog does not contain exhaustive block and data boundaries")
-    code = materialized_code(ovr, unit, args.load_base)
+def disassembly_contexts(
+    exe: bytes,
+    ovr: bytes,
+    mz: MZHeader,
+    units: list[Unit],
+    catalog: dict,
+    load_base: int,
+) -> list[dict]:
+    contexts = []
+    for catalog_unit in catalog["units"]:
+        unit = next((item for item in units if item.unit_id == catalog_unit["id"]), None)
+        if unit is None:
+            raise BREError(f"binary has no unit matching catalog {catalog_unit['id']}")
+        contexts.append(
+            {
+                "id": unit.unit_id,
+                "storage": "ovr",
+                "code": materialized_code(ovr, unit, load_base),
+                "absolute_base": unit.ovr_offset,
+                "blocks": catalog_unit["blocks"],
+                "data_chunks": catalog_unit["data_chunks"],
+                "unit": unit,
+                "catalog": catalog_unit,
+            }
+        )
+    resident = catalog.get("resident_image")
+    if resident:
+        contexts.append(
+            {
+                "id": "resident_exe",
+                "storage": "exe",
+                "code": exe[mz.header_size :],
+                "absolute_base": 0,
+                "blocks": resident["blocks"],
+                "data_chunks": resident["data_chunks"],
+                "catalog": resident,
+            }
+        )
+    return contexts
+
+
+def context_boundaries(context: dict) -> tuple[dict[int, str], list[tuple[int, int, str]]]:
+    if context["storage"] == "ovr":
+        labels = {
+            int(block["unit_span"][0], 0): block["name"]
+            for block in context["blocks"]
+        }
+        data = [
+            (int(chunk["unit_span"][0], 0), int(chunk["unit_span"][1], 0), chunk["name"])
+            for chunk in context["data_chunks"]
+        ]
+    else:
+        labels = {
+            int(block["load_span"][0], 0): block["name"]
+            for block in context["blocks"]
+        }
+        data = [
+            (int(chunk["load_span"][0], 0), int(chunk["load_span"][1], 0), chunk["name"])
+            for chunk in context["data_chunks"]
+        ]
+    return labels, data
+
+
+def ndisasm_context(context: dict) -> list[tuple[int, str]]:
+    labels, data = context_boundaries(context)
     with tempfile.NamedTemporaryFile(prefix="bre-disasm-", suffix=".bin") as stream:
-        stream.write(code)
+        stream.write(context["code"])
         stream.flush()
         command = [shutil.which("ndisasm") or "ndisasm", "-b", "16", "-a"]
-        labels = {}
-        for block in catalog_unit["blocks"]:
-            start = int(block["unit_span"][0], 0)
-            labels[start] = block["name"]
+        for start in labels:
             command += ["-s", str(start)]
-        data_labels = {}
-        for chunk in catalog_unit["data_chunks"]:
-            start, end = (int(value, 0) for value in chunk["unit_span"])
-            data_labels[start] = chunk["name"]
+        for start, end, _name in data:
             command += ["-k", f"{start},{end - start}"]
         command.append(stream.name)
         result = subprocess.run(command, check=True, text=True, capture_output=True)
-    announced_data = set()
+    lines = []
     for line in result.stdout.splitlines():
         match = NDISASM_LINE.match(line)
         if match:
-            offset = int(match.group(1), 16)
-            if offset in labels:
-                print(f"\n{labels[offset]}:")
-            if offset in data_labels:
-                print(f"\n{data_labels[offset]}:")
-                announced_data.add(offset)
+            lines.append((int(match.group(1), 16), line))
+    return lines
+
+
+def containing_code_block(context: dict, target: int) -> tuple[int, int, str]:
+    span_key = "unit_span" if context["storage"] == "ovr" else "load_span"
+    candidates = []
+    for block in context["blocks"]:
+        start, end = (int(value, 0) for value in block[span_key])
+        if start <= target < end:
+            candidates.append((start, end, block["name"]))
+    if not candidates:
+        raise BREError(
+            f"{context['id']} offset {hx(target, 5)} is not inside catalogued code; "
+            "refusing to guess a disassembly boundary"
+        )
+    return max(candidates, key=lambda item: item[0])
+
+
+def print_disassembly_lines(
+    context: dict,
+    lines: list[tuple[int, str]],
+    ranges: list[tuple[int, int]],
+) -> None:
+    labels, data = context_boundaries(context)
+    data_labels = {start: name for start, _end, name in data}
+    announced_data = set()
+    for offset, line in lines:
+        if not any(start <= offset < end for start, end in ranges):
+            continue
+        if offset in labels:
+            print(f"\n{labels[offset]}:")
+        if offset in data_labels:
+            print(f"\n{data_labels[offset]}:")
+            announced_data.add(offset)
         print(line)
     for offset, name in sorted(data_labels.items()):
-        if offset not in announced_data:
+        if offset not in announced_data and any(start <= offset < end for start, end in ranges):
             print(f"\n{name}: ; cataloged non-code span at {hx(offset)}")
+
+
+def around_range(
+    context: dict,
+    lines: list[tuple[int, str]],
+    target: int,
+    instructions: int,
+) -> tuple[tuple[int, int, str], list[tuple[int, str]], list[tuple[int, int]]]:
+    anchor = containing_code_block(context, target)
+    _labels, data = context_boundaries(context)
+    instruction_lines = [
+        item
+        for item in lines
+        if not any(start <= item[0] < end for start, end, _name in data)
+    ]
+    index = next(
+        (number for number, (offset, _line) in enumerate(instruction_lines) if offset >= target),
+        None,
+    )
+    if index is None:
+        raise BREError(f"no instruction follows {context['id']} offset {hx(target, 5)}")
+    before = instructions // 2
+    anchor_index = next(
+        number
+        for number, (offset, _line) in enumerate(instruction_lines)
+        if offset >= anchor[0]
+    )
+    first = max(anchor_index, index - before)
+    selected = instruction_lines[first : first + instructions]
+    if not selected:
+        raise BREError("empty disassembly window")
+    return anchor, selected, [(selected[0][0], selected[-1][0] + 16)]
+
+
+def resolve_disassembly_target(contexts: list[dict], catalog: dict, selector: str) -> tuple[dict, int]:
+    if selector.startswith("bre0988:ovr:site:"):
+        value = int(selector.rsplit(":", 1)[1], 16)
+    elif selector.startswith("bre0988:exe:site:"):
+        value = int(selector.rsplit(":", 1)[1], 16)
+        return next(item for item in contexts if item["storage"] == "exe"), value
+    elif ":" in selector and not selector.startswith("bre0988:"):
+        try:
+            segment_text, offset_text = selector.split(":", 1)
+            value = int(segment_text, 16) * 16 + int(offset_text, 16)
+        except ValueError as exc:
+            raise BREError("logical address must be hexadecimal SEGMENT:OFFSET") from exc
+        return next(item for item in contexts if item["storage"] == "exe"), value
+    else:
+        try:
+            value = int(selector, 0)
+        except ValueError:
+            container, root = resolve_procedure(catalog, selector)
+            context = next(item for item in contexts if item["id"] == container)
+            key = "entry_offset" if container != "resident_exe" else "load_offset"
+            return context, int(root[key], 0)
+    for context in contexts:
+        if context["storage"] != "ovr":
+            continue
+        start = context["absolute_base"]
+        if start <= value < start + len(context["code"]):
+            return context, value - start
+    raise BREError(f"OVR address {hx(value, 6)} is outside every code unit")
+
+
+def command_disasm(args: argparse.Namespace) -> None:
+    if args.instructions <= 0:
+        raise BREError("--instructions must be positive")
+    if not args.unit and (args.start is not None or args.end is not None):
+        raise BREError("--start and --end require --unit")
+    _ep, _op, exe, ovr, mz, units = load_release(args)
+    catalog = parse_catalog(args.catalog)
+    contexts = disassembly_contexts(exe, ovr, mz, units, catalog, args.load_base)
+    if args.unit:
+        unit = select_unit(units, args.unit)
+        context = next(item for item in contexts if item["id"] == unit.unit_id)
+        start = args.start if args.start is not None else 0
+        end = args.end if args.end is not None else len(context["code"])
+        if not 0 <= start < end <= len(context["code"]):
+            raise BREError("disassembly range is outside the selected unit")
+        ranges = [(start, end)]
+        target = None
+    elif args.procedure:
+        container, root = resolve_procedure(catalog, args.procedure)
+        context = next(item for item in contexts if item["id"] == container)
+        ranges = [(int(start, 0), int(end, 0)) for start, end in root["body_ranges"]]
+        target = None
+    else:
+        context, target = resolve_disassembly_target(contexts, catalog, args.around)
+        ranges = []
+    lines = ndisasm_context(context)
+    if target is not None:
+        anchor, selected, ranges = around_range(context, lines, target, args.instructions)
+        print(
+            f"; {context['id']} requested={hx(target, 5)} synchronized="
+            f"{hx(anchor[0], 5)} ({anchor[2]})"
+        )
+        lines = selected
+    print_disassembly_lines(context, lines, ranges)
+
+
+def command_xrefs(args: argparse.Namespace) -> None:
+    if args.context <= 0 or args.max_sites <= 0:
+        raise BREError("--context and --max-sites must be positive")
+    catalog = parse_catalog(args.catalog)
+    container, root = resolve_procedure(catalog, args.name)
+    record = next(
+        item
+        for item in catalog_records(catalog, "procedure")
+        if item["id"] == root["id"]
+    )
+    if not args.show_sites:
+        selected = dict(record)
+        if args.direction == "callers":
+            selected.pop("callees", None)
+        elif args.direction == "callees":
+            selected.pop("callers", None)
+        print(json.dumps(selected, indent=2))
+        return
+    if not args.directory and not args.exe:
+        raise BREError("--show-sites requires --directory or --exe/--ovr")
+    _ep, _op, exe, ovr, mz, units = load_release(args)
+    contexts = disassembly_contexts(exe, ovr, mz, units, catalog, 0)
+    edges = []
+    if args.direction in ("callers", "both"):
+        for edge in root.get("callers", []):
+            for site_id in edge["site_ids"]:
+                edges.append((f"caller {edge['from']} -> {root['name']} ({edge['kind']})", site_id))
+    if args.direction in ("callees", "both"):
+        for edge in root.get("callees", []):
+            for site_id in edge["site_ids"]:
+                edges.append((f"callee {root['name']} -> {edge['to']} ({edge['kind']})", site_id))
+    print(f"{root['name']} [{root['id']}] container={container}")
+    if len(edges) > args.max_sites:
+        print(f"; showing {args.max_sites} of {len(edges)} sites")
+        edges = edges[: args.max_sites]
+    cache = {}
+    for heading, site_id in edges:
+        context, target = resolve_disassembly_target(contexts, catalog, site_id)
+        if context["id"] not in cache:
+            cache[context["id"]] = ndisasm_context(context)
+        lines = cache[context["id"]]
+        anchor, selected, ranges = around_range(context, lines, target, args.context)
+        print(
+            f"\n## {heading} at {site_id}\n"
+            f"; {context['id']} requested={hx(target, 5)} synchronized="
+            f"{hx(anchor[0], 5)} ({anchor[2]})"
+        )
+        print_disassembly_lines(context, selected, ranges)
 
 
 def command_debugger(args: argparse.Namespace) -> None:
@@ -3734,6 +4024,13 @@ def add_binary_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--ovr", help="path to BRE.OVR")
 
 
+def add_optional_binary_arguments(parser: argparse.ArgumentParser) -> None:
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("--directory", help="directory containing BRE.EXE and BRE.OVR")
+    group.add_argument("--exe", help="path to BRE.EXE (also pass --ovr)")
+    parser.add_argument("--ovr", help="path to BRE.OVR")
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     subparsers = parser.add_subparsers(dest="command", required=True)
@@ -3743,6 +4040,11 @@ def build_parser() -> argparse.ArgumentParser:
     fetch.add_argument(
         "--archive",
         help="verify and extract an already-downloaded official archive instead of using the network",
+    )
+    fetch.add_argument(
+        "--include-docs",
+        action="store_true",
+        help="also extract the bundled BREDATA reference files into DESTINATION/reference",
     )
     fetch.set_defaults(func=command_fetch)
 
@@ -3796,6 +4098,11 @@ def build_parser() -> argparse.ArgumentParser:
     )
     find_string.add_argument("--case-sensitive", action="store_true")
     find_string.add_argument(
+        "--function",
+        action="append",
+        help="limit uses to an exact procedure name, durable ID, or alias (repeatable)",
+    )
+    find_string.add_argument(
         "--details",
         action="store_true",
         help="include matching private text and per-string use sites",
@@ -3824,13 +4131,41 @@ def build_parser() -> argparse.ArgumentParser:
     compare.set_defaults(func=command_compare_dump)
 
     disasm = subparsers.add_parser(
-        "disasm", help="disassemble a unit at all named block boundaries"
+        "disasm", help="disassemble a unit, procedure, or synchronized address window"
     )
     add_binary_arguments(disasm)
-    disasm.add_argument("--unit", required=True)
+    disasm_selector = disasm.add_mutually_exclusive_group(required=True)
+    disasm_selector.add_argument("--unit")
+    disasm_selector.add_argument("--procedure", help="exact name, durable ID, or alias")
+    disasm_selector.add_argument(
+        "--around",
+        help="OVR offset, resident SEG:OFF, site ID, or exact procedure selector",
+    )
+    disasm.add_argument("--start", type=parse_int, help="first unit-relative byte to print")
+    disasm.add_argument("--end", type=parse_int, help="exclusive unit-relative byte to print")
+    disasm.add_argument(
+        "--instructions",
+        type=int,
+        default=40,
+        help="total instructions in an --around window (default: 40)",
+    )
     disasm.add_argument("--load-base", type=parse_int, default=0)
     disasm.add_argument("--catalog", default="docs/dev/bre-v0988-disassembly.json")
     disasm.set_defaults(func=command_disasm)
+
+    xrefs = subparsers.add_parser(
+        "xrefs", help="show a procedure's call graph and synchronized call-site windows"
+    )
+    add_optional_binary_arguments(xrefs)
+    xrefs.add_argument("name", help="exact procedure name, durable ID, or alias")
+    xrefs.add_argument("--catalog", default="docs/dev/bre-v0988-disassembly.json")
+    xrefs.add_argument("--show-sites", action="store_true")
+    xrefs.add_argument("--context", type=int, default=12, help="instructions per site")
+    xrefs.add_argument(
+        "--direction", choices=("callers", "callees", "both"), default="both"
+    )
+    xrefs.add_argument("--max-sites", type=int, default=40)
+    xrefs.set_defaults(func=command_xrefs)
 
     debugger = subparsers.add_parser("debugger", help="document or launch the Xvfb DOSBox debugger")
     debugger.add_argument("--directory", required=True)

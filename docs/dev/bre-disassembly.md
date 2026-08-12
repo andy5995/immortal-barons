@@ -32,24 +32,44 @@ python3 scripts/bre-disasm.py lookup crown_tax
 
 # Find all functions and blocks referring to a Pascal string containing text.
 python3 scripts/bre-disasm.py find-string --directory /path/to/bre "bank"
+python3 scripts/bre-disasm.py find-string --directory /path/to/bre \
+  --function create_trade_offer "Trade Deal"
 
 # Resolve a linked far-call target or an OVR file offset.
 python3 scripts/bre-disasm.py map --directory /path/to/bre --address 084d:0020
 python3 scripts/bre-disasm.py map --directory /path/to/bre --ovr-offset 0x4ba48
 
-# Disassemble one unit at every named boundary, skipping named non-code spans.
+# Disassemble a named procedure, or a whole/ranged overlay unit.
+python3 scripts/bre-disasm.py disasm --directory /path/to/bre \
+  --procedure create_trade_offer
 python3 scripts/bre-disasm.py disasm --directory /path/to/bre --unit ovr_04b9d0
+python3 scripts/bre-disasm.py disasm --directory /path/to/bre \
+  --unit ovr_04b9d0 --start 0x1d50 --end 0x21a0
+
+# Show synchronized context around an OVR file offset, resident address, or site ID.
+python3 scripts/bre-disasm.py disasm --directory /path/to/bre \
+  --around 0x0268a1 --instructions 40
+python3 scripts/bre-disasm.py disasm --directory /path/to/bre \
+  --around 056d:01bf --instructions 24
+
+# Inspect a procedure's graph without binaries, then show its exact call sites.
+python3 scripts/bre-disasm.py xrefs create_trade_offer
+python3 scripts/bre-disasm.py xrefs create_trade_offer --directory /path/to/bre \
+  --show-sites --direction callers
 
 # Verify that the committed names and spans exhaustively partition both files.
 python3 scripts/bre-disasm.py check-catalog
 ```
 
 Downloading is always explicit. `fetch` retrieves the official 0.988 archive,
-checks its pinned SHA-256, extracts only `BRE.EXE` and `BRE.OVR`, and verifies
-both files. It never runs the archive or either DOS program.
+checks its pinned SHA-256, extracts `BRE.EXE` and `BRE.OVR`, and verifies both
+files. It never runs the archive or any DOS program. Add `--include-docs` to
+unpack the nested `BREDATA.EXE` archive into `DESTINATION/reference`; this uses
+the host extractor and does not execute the self-extracting DOS payload.
 
 ```sh
 python3 scripts/bre-disasm.py fetch /path/to/private/bre-0.988
+python3 scripts/bre-disasm.py fetch /path/to/private/bre-0.988 --include-docs
 ```
 
 The supported files are exact. A different release is rejected instead of
@@ -276,6 +296,12 @@ the exact instructions as canonical EXE load offsets or OVR file offsets.
 An indirect edge has kind `calculated_call` and a `dispatch_id` linking it to
 the closed-set proof described below.
 
+`xrefs NAME_OR_ID` is the compact graph lookup intended for this traversal. It
+needs only the committed catalog unless `--show-sites` is requested. With
+private binaries available, `--show-sites --direction callers|callees|both`
+renders bounded instruction windows at the recorded site IDs; `--context` and
+`--max-sites` control their size and count.
+
 ## Closed calculated transfers
 
 `calculated_transfers` records why every reachable indirect call is finite.
@@ -301,8 +327,23 @@ The default JSON lists every currently named function and basic block that uses
 a match. Address-derived IDs such as `bre0988:ovr:block:02ef0f` are stored in
 the table, so improving a friendly name does not break the relation. Add
 `--case-sensitive` for an exact-case search or `--details` to include the
-matching private text and instruction sites. Detailed output contains original
-program text and must not be committed.
+matching private text and instruction sites. Repeat `--function NAME_OR_ID` to
+restrict uses to one or more exact procedures after resolving their durable
+IDs. Detailed output contains original program text and must not be committed.
+
+`disasm` accepts three boundary-safe selectors. `--procedure` prints the exact
+catalogued body ranges for an overlay or resident procedure. `--unit` prints an
+overlay unit and optionally accepts a half-open, unit-relative `--start/--end`
+range. `--around` accepts a canonical OVR file offset, resident logical
+`SEGMENT:OFFSET`, durable site ID, or exact procedure selector.
+
+An `--around` address is never assumed to be an instruction boundary. The tool
+finds the containing catalogued code block, supplies all catalogued roots to
+the decoder, and anchors the window at the nearest containing/preceding root.
+It prints both the requested offset and synchronization anchor in the header,
+never prints instructions before that anchor, and rejects an address in a
+catalogued data span instead of guessing. This same synchronization is used by
+`xrefs --show-sites`.
 
 Useful audit queries are:
 
@@ -313,6 +354,11 @@ python3 scripts/bre-disasm.py lookup resolve_received_trade_offer
 python3 scripts/bre-disasm.py lookup bre0988:ovr:procedure:0389d6
 python3 scripts/bre-disasm.py lookup bre0988:dispatch:text_scanners
 python3 scripts/bre-disasm.py find-string --directory /path/to/bre "trade"
+python3 scripts/bre-disasm.py find-string --directory /path/to/bre \
+  --function resolve_received_trade_offer "trade"
+python3 scripts/bre-disasm.py xrefs resolve_received_trade_offer
+python3 scripts/bre-disasm.py disasm --directory /path/to/bre \
+  --around bre0988:ovr:site:03b7b0
 ```
 
 Capstone 5's Python binding and native library are required to regenerate

@@ -75,6 +75,47 @@ def synthetic_release():
 
 
 class ParseTests(unittest.TestCase):
+    def test_around_anchors_to_containing_catalog_block(self):
+        context = {
+            "id": "synthetic",
+            "storage": "ovr",
+            "blocks": [
+                {"name": "root_zero", "unit_span": ["0x0", "0x4"]},
+                {"name": "root_four", "unit_span": ["0x4", "0x8"]},
+            ],
+            "data_chunks": [
+                {"name": "data_eight", "unit_span": ["0x8", "0xa"]},
+            ],
+        }
+        lines = [(offset, f"{offset:08X}  90 nop") for offset in range(8)]
+        anchor, selected, _ranges = bre.around_range(context, lines, 5, 4)
+        self.assertEqual(anchor, (4, 8, "root_four"))
+        self.assertEqual([offset for offset, _line in selected], [4, 5, 6, 7])
+        with self.assertRaisesRegex(bre.BREError, "refusing to guess"):
+            bre.around_range(context, lines, 9, 4)
+
+    def test_new_disassembly_parser_selectors(self):
+        parser = bre.build_parser()
+        args = parser.parse_args(
+            [
+                "disasm",
+                "--directory",
+                "/private/bre",
+                "--around",
+                "056d:01bf",
+                "--instructions",
+                "24",
+            ]
+        )
+        self.assertEqual(args.around, "056d:01bf")
+        self.assertEqual(args.instructions, 24)
+        args = parser.parse_args(
+            ["xrefs", "create_trade_offer", "--direction", "callers"]
+        )
+        self.assertEqual(args.name, "create_trade_offer")
+        self.assertEqual(args.direction, "callers")
+        self.assertIsNone(args.directory)
+
     def test_descriptor_chain_and_roots(self):
         exe, ovr = synthetic_release()
         mz = bre.parse_mz(exe)

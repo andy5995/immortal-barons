@@ -41,11 +41,16 @@ You need your own copy of the **original BRE distribution** (the DOS door
 release archive) — this skill never ships or bundles it (see the license
 section). If you don't already have it, use the repository's explicit fetcher;
 it downloads the official 0.988 archive, verifies pinned hashes, and extracts
-only `BRE.EXE` and `BRE.OVR`. It never executes the archive or the DOS programs:
+`BRE.EXE` and `BRE.OVR`. It never executes the archive or the DOS programs:
 
 ```
 python3 scripts/bre-disasm.py fetch ~/path/to/private/bre-dos
 ```
+
+Add `--include-docs` when the bundled help, instructions, samples, artwork, and
+template data are useful. The host extractor unpacks the nested `BREDATA.EXE`
+payload into `~/path/to/private/bre-dos/reference`; it does not run that DOS
+self-extractor.
 
 An existing copy can be checked with `python3 scripts/bre-disasm.py verify
 --directory ~/path/to/private/bre-dos`. Do not commit the downloaded files.
@@ -70,9 +75,8 @@ self-extracting installer payload (`BREDATA.ARJ`) containing 19 documentation,
 sample-configuration, help, ANSI-art, and initial/template data files. The
 stock `UNPACK.BAT` merely runs `BREDATA -Y` to extract them. Do not disassemble
 it as game code or look there for overlays, mechanics, or an FP library. This
-is why the repository fetcher intentionally extracts only `BRE.EXE` and
-`BRE.OVR`; obtain the full distribution separately when its docs/resources are
-needed.
+is why ordinary fetches extract only `BRE.EXE` and `BRE.OVR`; use the explicit
+`--include-docs` option when its non-runtime reference material is needed.
 
 ## Technology silently scales almost every number you capture
 
@@ -802,11 +806,14 @@ Start with the repository's static map, not a guessed OVR slice:
 ```
 python3 scripts/bre-disasm.py check-catalog
 python3 scripts/bre-disasm.py find-string --directory "$BRE" "technology"
+python3 scripts/bre-disasm.py find-string --directory "$BRE" --function technology_report "technology"
 python3 scripts/bre-disasm.py list --kind procedure --filter technology
 python3 scripts/bre-disasm.py lookup technology_report
+python3 scripts/bre-disasm.py xrefs technology_report
 python3 scripts/bre-disasm.py list --kind dispatch
 python3 scripts/bre-disasm.py map --directory "$BRE" --ovr-offset 0x32d1b
-python3 scripts/bre-disasm.py disasm --directory "$BRE" --unit ovr_031379
+python3 scripts/bre-disasm.py disasm --directory "$BRE" --procedure technology_report
+python3 scripts/bre-disasm.py disasm --directory "$BRE" --around 0x32d1b --instructions 40
 ```
 
 `docs/dev/bre-disassembly.md` documents the file format and
@@ -837,16 +844,23 @@ data record's inverse `referenced_by` list when a field or table matters.
 `find-string --directory "$BRE" SUBSTRING` loads the committed index first,
 verifies the exact binaries, then returns every named procedure and block that
 directly references a matching Pascal string. Matching is case-insensitive by
-default. Add `--details` only when the original matching text and exact use
-sites are necessary; that output is proprietary and must not be committed.
+default. Add repeatable `--function NAME_OR_ID` filters after a broad search to
+limit uses to exact procedures. Add `--details` only when the original matching
+text and exact use sites are necessary; that output is proprietary and must not
+be committed.
 The catalog deliberately stores hashes, lengths, and durable references rather
 than original strings.
 
 Start with identified names, then inspect unclassified roots only when the
-desired behavior has no semantic match. `disasm` synchronizes at every
-cataloged block and skips cataloged non-code spans. The tool verifies the exact
-v0.988 hashes before reading a binary. Capstone 5 supplies typed 16-bit operands
-for the reachability pass; `ndisasm` is only the optional text renderer.
+desired behavior has no semantic match. `disasm --procedure NAME_OR_ID` prints
+exact catalogued body ranges. `disasm --around ADDRESS` accepts an OVR file
+offset, resident `SEGMENT:OFFSET`, durable site ID, or procedure, and safely
+synchronizes to the containing block's nearest preceding catalog root. The
+header names that anchor; an address in data is rejected rather than decoded
+from an arbitrary byte. Whole-unit and `--start/--end` views remain available.
+The tool skips catalogued non-code spans and verifies exact v0.988 hashes.
+Capstone 5 supplies typed 16-bit operands for reachability; `ndisasm` is only
+the optional text renderer.
 
 The loop that keeps paying off:
 
@@ -854,13 +868,17 @@ The loop that keeps paying off:
    substring and begin at its returned procedure IDs. Search sibling wording
    too: duplicated subsystems and variant messages can lead to different code.
    Fall back to raw string offsets only when the index has no direct reference.
-2. **Walk the graph by durable ID.** Use `lookup` on callers and callees until
-   the desired calculation or gate is reached. Follow every calculated edge's
-   `dispatch_id`; its targets are closed for this release. Prefer a call site
-   near an indexed string when several callers need semantic identification.
-3. **Map and disassemble at proven boundaries.** Use `map` for an address or OVR
-   offset and `disasm` for the containing unit. Do not choose a nearby prologue
-   and assume a linear slice stays aligned.
+2. **Walk the graph by durable ID.** Use `xrefs NAME_OR_ID` or `lookup` on
+   callers and callees until the desired calculation or gate is reached. With
+   private binaries, add `--directory "$BRE" --show-sites --direction callers`
+   (or `callees`/`both`) for synchronized windows at exact site IDs. Follow
+   every calculated edge's `dispatch_id`; its targets are closed for this
+   release. Prefer a call site near an indexed string when several callers need
+   semantic identification.
+3. **Map and disassemble at proven boundaries.** Prefer `disasm --procedure`
+   for a named body or `disasm --around SITE_ID` for local context. The latter
+   synchronizes from the nearest preceding root and refuses non-code addresses;
+   never decode a guessed linear slice from an arbitrary byte.
 4. **Find a constant** by searching `struct.pack("<H", value)` and checking the
    preceding byte for an imm16 opcode (`b8` mov ax, `05` add ax, `b9` mov cx …).
 5. **Calculate Real48 exactly.** Reals are six-byte Turbo Pascal values loaded
@@ -872,13 +890,17 @@ The loop that keeps paying off:
    python3 scripts/bre-real48.py div 100 3
    python3 scripts/bre-real48.py mul mem:870000000048 0.25 --output all
    python3 scripts/bre-real48.py sqrt mem:820000000000
+   python3 scripts/bre-real48.py decode mem:810000000000 mem:800000000000
+   python3 scripts/bre-real48.py eval '100000 + (50 / 5)'
    ```
 
-   The calculator accepts decimal and `mem:hhhhhhhhhhhh` inputs, implements the
-   complete arithmetic, conversion, comparison, standard-function, and random
-   operation surface linked into BRE 0.988, and decorates every memory result
-   with `mem:`. Never decode a Real48 by hand, use Python `float`/`math`, or
-   borrow constants from another Turbo Pascal release. Read
+   Use `decode` for one or many stored values and `eval` for a compound
+   expression rounded to Real48 after every operation. The calculator accepts
+   decimal and `mem:hhhhhhhhhhhh` inputs, implements the complete arithmetic,
+   conversion, comparison, standard-function, and random operation surface
+   linked into BRE 0.988, and decorates every memory result with `mem:`. Never
+   decode a Real48 by hand, use Python `float`/`math`, or borrow constants from
+   another Turbo Pascal release. Read
    `docs/dev/bre-real48.md` for representation, errors, and operation names.
 6. **Validate against play.** A candidate reading is not a finding until it
    reproduces captured figures exactly. Rounding vs truncation and the order of

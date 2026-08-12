@@ -61,6 +61,13 @@ python3 scripts/bre-real48.py div 100 3
 python3 scripts/bre-real48.py sqrt mem:820000000000
 python3 scripts/bre-real48.py mul mem:870000000048 0.25 --output memory
 python3 scripts/bre-real48.py random-real --seed 0x12345678
+
+# Decode one or several stored values without performing arithmetic.
+python3 scripts/bre-real48.py decode mem:810000000000 mem:800000000000
+
+# Round back to Real48 after every operator/function, like linked TP code.
+python3 scripts/bre-real48.py eval '100000 + (50 / 5)'
+python3 scripts/bre-real48.py eval 'trunc(mem:870000000048 * 0.25)' --output decimal
 ```
 
 The default JSON result includes a readable round-tripping decimal, its exact
@@ -70,6 +77,15 @@ LLM or person cannot mistake it for a hexadecimal integer. `--output` selects
 one of those forms. On input, compact hex that contains `a` through `f`, an
 explicit `0x` prefix, or a `mem:` prefix is a memory value; all-digit input is
 decimal so a twelve-digit decimal is not accidentally interpreted as bytes.
+
+`decode` is an identity conversion that is convenient for inspecting memory
+constants; multiple inputs produce a JSON list (or one selected field per
+line). `eval` accepts decimal and compact `mem:hhhhhhhhhhhh` literals,
+parentheses, unary signs, `+`, `-`, `*`, `/`, `square`, `trunc`, `round`,
+`int`, `frac`, `sqrt`, `sin`, `cos`, `ln`, `exp`, `atan`, and `compare(a,b)`.
+Each intermediate operation uses the port's Real48 result, preserving the
+linked library's precision and rounding order. The expression evaluator is a
+restricted arithmetic parser, not Python evaluation.
 
 The polynomial coefficients, range-reduction constants, Newton stopping rule,
 and RNG recurrence in this module are those embedded in this BRE executable.
