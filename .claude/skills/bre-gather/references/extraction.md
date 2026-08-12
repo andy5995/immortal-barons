@@ -61,14 +61,21 @@ the original binary. Do not try to infer them from the OVR.
 
 ## 6. Disassembling code (when strings aren't enough)
 
-Reading BRE's *code* (menu dispatch, the shape of a routine) with `ndisasm`:
+Use the static unit map so a convenient-looking prologue or data hole cannot
+silently misalign the decode:
 
 ```
-# function prologues are 55 89 E5 (push bp; mov bp,sp); find them:
-grep -aboF $'\x55\x89\xe5' "$BRE/BRE.OVR" | head
-# disassemble a slice as 16-bit real-mode from a file offset:
-ndisasm -b 16 -o <off> <(dd if="$BRE/BRE.OVR" bs=1 skip=<off> count=320 2>/dev/null)
+python3 scripts/bre-disasm.py verify --directory "$BRE"
+python3 scripts/bre-disasm.py map --directory "$BRE" --ovr-offset 0x4ba48
+python3 scripts/bre-disasm.py list --filter spy
+python3 scripts/bre-disasm.py disasm --directory "$BRE" --unit ovr_04b9d0
 ```
+
+The committed catalog works without local binaries and gives stable names,
+exported/direct-call roots, entry basic-block spans, unit-wide reachable ranges,
+external targets, and unresolved indirect transfers. The loader, fixup format,
+Xvfb-backed DOSBox validation procedure, and catalog schema are in
+`docs/dev/bre-disassembly.md`.
 
 **Code masquerading as strings (a second length-prefix trap).** A run like
 `<1u <2u <3u <4u` right after a menu-name cluster (e.g. Civilian/Economic/
@@ -79,27 +86,14 @@ prints it as `<1u` because those bytes are printable. So a "cluster" of tiny
 disassemble it to confirm the menu's item→routine order (which strings alone
 cannot give you — see SKILL.md on reachability).
 
-**The real-arithmetic wall — why exact magnitude formulas resist disassembly.**
-BRE is Turbo Pascal, and its 6-byte `Real` type is **software** floating point:
-add/mul/div/compare are done by **far calls to RTL helper routines** (the
-`call word 0xfd0:0x…` you'll see everywhere), not FPU ops or readable
-`imul`/`idiv`. Combined with overlay relocation (targets are fixed up at load
-time, so file offsets ≠ runtime segment:offset) and no symbols, a per-turn
-magnitude formula reads as RTL-call soup, not arithmetic. This is the same wall
-that blocked the **score formula**; the **tech-efficiency formula/cap** hit it
-too (the "Because of technology…" report routine at ~0x32D1B is pure display —
-it `call`s string-builders on already-computed percentages; the formula lives in
-a separate real-arithmetic unit).
-
-**So, for magnitudes: black-box, don't disassemble.** Recover the *effect list /
-structure* from strings + help + dispatch disassembly (all reliable), but get
-the *numbers* by varying inputs in live play and reading BRE's own reported
-output — e.g. vary Technology-vs-total regions and read the "% strength / %
-production" the tech report prints; fit the curve and the cap. This is exactly
-how the score formula was cracked (`Score += round(day-start net worth)`), and
-it beats reversing software-float assembly. If static reversing is truly needed,
-**Ghidra** (free, 16-bit decompiler) handles the segmentation far better than
-`ndisasm`; radare2 helps navigate but not with the software-float problem.
+**Real arithmetic is readable now; do not default to curve fitting.** BRE's
+six-byte Turbo Pascal `Real` type uses resident software helpers rather than x87
+instructions. The catalog names the known `0fd0` conversion, arithmetic,
+comparison, `Ln`, and `Exp` targets, and raw OVR far targets retain canonical
+logical segments because the fixup format is known. Follow those named calls,
+decode six-byte constants with the existing Real48 helper, reconstruct the
+expression, and then validate it against play. Black-box sampling remains a
+useful cross-check, not a substitute for static analysis.
 
 ## 7. Config-editor field bounds
 

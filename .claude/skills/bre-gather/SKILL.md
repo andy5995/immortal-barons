@@ -39,10 +39,17 @@ not a default.
 
 You need your own copy of the **original BRE distribution** (the DOS door
 release archive) — this skill never ships or bundles it (see the license
-section). If you don't already have it, obtain the archive from the John Dailey
-Software release or the BRE community (the project README links a BRE Discord),
-and unpack it somewhere local. Point a shell variable at that directory; every
-command in this skill uses it:
+section). If you don't already have it, use the repository's explicit fetcher;
+it downloads the official 0.988 archive, verifies pinned hashes, and extracts
+only `BRE.EXE` and `BRE.OVR`. It never executes the archive or the DOS programs:
+
+```
+python3 scripts/bre-disasm.py fetch ~/path/to/private/bre-dos
+```
+
+An existing copy can be checked with `python3 scripts/bre-disasm.py verify
+--directory ~/path/to/private/bre-dos`. Do not commit the downloaded files.
+Point a shell variable at that directory; every command in this skill uses it:
 
 ```
 BRE=~/path/to/bre-dos     # wherever you unpacked it, e.g. a DOSEMU drive_c/games/bre-dos
@@ -545,16 +552,30 @@ than fitting a curve** — a fit needs dozens of samples and can still be wrong,
 and two BRE constants were mis-set that way before the disassembly corrected
 them.
 
-Tools: `ndisasm`, `radare2`, `ghidra` are installed. Copy `BRE.OVR` / `BRE.EXE`
-somewhere writable first; never work on the originals.
+Start with the repository's static map, not a guessed OVR slice:
+
+```
+python3 scripts/bre-disasm.py list --filter technology
+python3 scripts/bre-disasm.py map --directory "$BRE" --ovr-offset 0x32d1b
+python3 scripts/bre-disasm.py disasm --directory "$BRE" --unit ovr_031379
+```
+
+`docs/dev/bre-disassembly.md` documents the file format and
+`docs/dev/bre-v0988-disassembly.json` is the machine-readable catalog. The map
+contains all 103 overlay units, every exported INT 3F stub, reachable direct-call
+roots, half-open reachable spans, resident RTL/Real48 names, external edges, and
+explicit unresolved indirect transfers. The tool verifies the exact v0.988
+hashes before reading a binary. Capstone 5 supplies typed 16-bit operands for
+the reachability pass; `ndisasm` is only the optional text renderer.
 
 The loop that keeps paying off:
 
 1. **Find the message string.** Turbo Pascal strings are length-prefixed and sit
    in one contiguous table, and the routine that uses them very often begins
    IMMEDIATELY AFTER the table ends, at `55 89 E5` (push bp; mov bp,sp).
-2. **Disassemble around it:**
-   `dd if=BRE.OVR bs=1 skip=$((0xADDR)) count=$((0x100)) of=x.bin && ndisasm -b16 -o0xADDR x.bin`
+2. **Map the file offset to its unit**, then disassemble that unit at proven
+   boundaries with `bre-disasm.py map` and `bre-disasm.py disasm`. Do not choose
+   a nearby prologue and assume a linear slice stays aligned.
 3. **Find a constant** by searching `struct.pack("<H", value)` and checking the
    preceding byte for an imm16 opcode (`b8` mov ax, `05` add ax, `b9` mov cx …).
 4. **Decode float constants.** Reals are 6-byte Turbo Pascal, loaded into a
@@ -652,29 +673,20 @@ PERSISTED record doing a job a local variable would do — BRE has no reason to
 spend save-file bytes on a guard, so if it looks like one, you have misread it.
 Grep the disp16 in both files, sort by opcode, and read every site.
 
-### Finding an overlaid routine's CALLER — walk the overlay stubs
+### Finding an overlaid routine's CALLER — map the overlay stubs
 
-"Who calls this?" looks unanswerable in an overlay, because a near-call scan for
-the routine's file offset finds nothing: every call to overlaid code goes through
-an **INT 3Fh stub in `BRE.EXE`**, so callers far-call the stub, not the routine.
-The chain is mechanical, four steps, and it turned the Queen Royale refund's
-trigger from "unknown" into one unique call site in minutes:
+"Who calls this?" looks unanswerable in an overlay, because callers far-call an
+**INT 3Fh stub in `BRE.EXE`**, not the OVR file offset. The static catalog now
+does the complete mapping. Given a far target, run `bre-disasm.py map --address
+SEG:OFF`; given an OVR address, run it with `--ovr-offset`. The descriptor's
+five-byte `cd 3f <entry> 00` stub maps exactly to `unit_file_offset + entry`.
 
-1. **Parse the overlay segment headers.** They start at `BRE.EXE` 0x3b00 on
-   16-byte boundaries: `cd 3f 00 00 | dword file offset in BRE.OVR | word code
-   size | word fixup size | …`. Find the header whose `[fo, fo+size)` contains
-   your routine; `routineOffset = fileOffset − fo`.
-2. **Find the stub.** Immediately after each header sit 5-byte stubs,
-   `cd 3f <word offset> 00`. Match `routineOffset`.
-3. **Convert the stub's EXE file offset to a load-image linear:** subtract
-   `hdrParas × 16` (the word at EXE offset 8 — 660 paragraphs, 0x2940, here).
-4. **Scan both files for `9a <off> <seg>` where `seg × 16 + off` equals that
-   linear.** Those are the callers. Pre-relocation logical segments linearize
-   exactly, which is also why helper addresses are quoted as `0fd0:178e` style.
-
-The same arithmetic runs backwards: given a far-call target from a disassembly,
-`seg×16 + off + 0x2940` is the file offset to read, and if the bytes there are
-`cd 3f` it is a stub — follow it into the overlay instead of disassembling it.
+For manual verification, the MZ header is `0x2940` bytes and a logical EXE
+address maps to `0x2940 + segment*16 + offset`. At runtime the INT 3F handler
+rewrites each stub to `ea <entry> <dynamic-unit-segment>`; the dynamic segment is
+irrelevant to the canonical OVR address. The OVR fixup stream is an array of
+word offsets, each relocated by adding the DOS EXE load segment. See the dev
+guide rather than re-deriving or guessing this layout.
 
 ### Name a predicate from its OTHER call sites, not the one you are reading
 
