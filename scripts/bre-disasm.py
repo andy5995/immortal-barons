@@ -25,7 +25,7 @@ import time
 import urllib.request
 
 
-VERSION = "0.2"
+VERSION = "0.3"
 OFFICIAL_URL = (
     "https://www.johndaileysoftware.com/download/"
     "?fileName=brev988.exe&id=220BRE"
@@ -848,16 +848,117 @@ def classify_unreached(data: bytes) -> str:
 
 
 def looks_like_pascal_string(data: bytes, offset: int, end: int) -> bool:
-    if not (0 <= offset < end <= len(data)):
+    payload = pascal_string_payload(data, offset, end)
+    if payload is None:
         return False
-    length = data[offset]
-    if length == 0 or offset + 1 + length > end:
-        return False
-    payload = data[offset + 1 : offset + 1 + length]
     display_bytes = sum(
         byte in {9, 10, 13, 27} or 32 <= byte < 127 for byte in payload
     )
-    return display_bytes * 5 >= length * 4
+    return display_bytes * 5 >= len(payload) * 4
+
+
+def pascal_string_payload(data: bytes, offset: int, end: int) -> bytes | None:
+    if not (0 <= offset < end <= len(data)):
+        return None
+    length = data[offset]
+    if length == 0 or offset + 1 + length > end:
+        return None
+    payload = data[offset + 1 : offset + 1 + length]
+    display_bytes = sum(
+        byte in {9, 10, 13, 27} or byte >= 32 for byte in payload
+    )
+    return payload if display_bytes * 5 >= length * 4 else None
+
+
+def durable_id(kind: str, storage: str, offset: int) -> str:
+    width = 6 if storage == "ovr" else 5
+    return f"bre0988:{storage}:{kind}:{offset:0{width}x}"
+
+
+def string_records(
+    storage: str,
+    data: bytes,
+    procedures: list[dict],
+    blocks: list[dict],
+    chunks: list[dict],
+    references: list[tuple[int, int, str]],
+    base_offset: int = 0,
+) -> list[dict]:
+    """Index directly referenced Pascal strings without retaining their text."""
+    block_span_key = "unit_span" if storage == "ovr" else "load_span"
+    chunk_span_key = "unit_span" if storage == "ovr" else "load_span"
+    grouped: dict[int, dict[tuple[str, str, tuple[str, ...]], set[int]]] = {}
+    payloads: dict[int, bytes] = {}
+    for source, target, kind in references:
+        block = next(
+            (
+                candidate
+                for candidate in blocks
+                if int(candidate[block_span_key][0], 0)
+                <= source
+                < int(candidate[block_span_key][1], 0)
+            ),
+            None,
+        )
+        chunk = next(
+            (
+                candidate
+                for candidate in chunks
+                if int(candidate[chunk_span_key][0], 0)
+                <= target
+                < int(candidate[chunk_span_key][1], 0)
+            ),
+            None,
+        )
+        if block is None or chunk is None:
+            continue
+        procedure_ids = tuple(
+            procedure["id"]
+            for procedure in procedures
+            if any(
+                int(span[0], 0) <= source < int(span[1], 0)
+                for span in procedure["body_ranges"]
+            )
+        )
+        payload = pascal_string_payload(
+            data, target, int(chunk[chunk_span_key][1], 0)
+        )
+        if payload is None:
+            continue
+        payloads[target] = payload
+        grouped.setdefault(target, {}).setdefault(
+            (block["id"], kind, procedure_ids), set()
+        ).add(source)
+    records = []
+    for target, uses in sorted(grouped.items()):
+        payload = payloads[target]
+        absolute = base_offset + target
+        address_key = "ovr_offset" if storage == "ovr" else "load_offset"
+        records.append(
+            {
+                "id": durable_id("string", storage, absolute),
+                "storage": storage,
+                address_key: hx(absolute, 6 if storage == "ovr" else 5),
+                "length": len(payload),
+                "sha256": hashlib.sha256(payload).hexdigest(),
+                "encoding": "cp437",
+                "used_by": [
+                    {
+                        "block_id": block_id,
+                        "procedure_ids": list(procedure_ids),
+                        "kind": kind,
+                        "sites": [
+                            hx(base_offset + site, 6 if storage == "ovr" else 5)
+                            for site in sorted(sites)
+                        ],
+                    }
+                    for (block_id, kind, procedure_ids), sites in sorted(
+                        uses.items()
+                    )
+                ],
+            }
+        )
+    return records
 
 
 def data_chunks_for_unit(unit: Unit, code: bytes, ranges: list[list[str]]) -> list[dict]:
@@ -1202,6 +1303,7 @@ def analyze_resident_image(
         root_names[linear] = name
         roots.append(
             {
+                "id": durable_id("procedure", "exe", linear),
                 "name": name,
                 "naming": naming,
                 "aliases": aliases,
@@ -1321,6 +1423,7 @@ def analyze_resident_image(
         ]
         blocks.append(
             {
+                "id": durable_id("block", "exe", start),
                 "name": name,
                 "naming": block_naming,
                 "aliases": (
@@ -1469,6 +1572,14 @@ def analyze_resident_image(
         "roots": roots,
         "blocks": blocks,
         "data_chunks": data_chunks,
+        "strings": string_records(
+            "exe",
+            image,
+            roots,
+            blocks,
+            data_chunks,
+            sorted(resident_data_references),
+        ),
         "control_flow": {
             "reachable_ranges": [[hx(start, 5), hx(end, 5)] for start, end in ranges],
             "unreached_ranges": [[hx(start, 5), hx(end, 5)] for start, end in holes],
@@ -1595,6 +1706,7 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                 tags.extend(LANDMARKS[absolute][1])
             roots.append(
                 {
+                    "id": durable_id("procedure", "ovr", absolute),
                     "name": name,
                     "naming": (
                         annotation_naming(annotation)
@@ -1670,6 +1782,7 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                 fallback_name = f"{unit.unit_id}_proc_{entry:04x}"
                 roots.append(
                     {
+                        "id": durable_id("procedure", "ovr", absolute),
                         "name": name,
                         "naming": (
                             annotation_naming(annotation)
@@ -1818,6 +1931,9 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                     tags.extend(landmark[1])
                 blocks.append(
                     {
+                        "id": durable_id(
+                            "block", "ovr", unit.ovr_offset + start
+                        ),
                         "name": name,
                         "aliases": (
                             list(root.get("aliases", []))
@@ -1965,6 +2081,22 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
                     reference["to"] = renamed_chunks.get(
                         reference["to"], reference["to"]
                     )
+            item["strings"] = string_records(
+                "ovr",
+                code,
+                roots,
+                blocks,
+                item["data_chunks"],
+                [
+                    (
+                        int(reference["at"], 0),
+                        int(reference["to"], 0),
+                        reference["kind"],
+                    )
+                    for reference in flow["data_references"]
+                ],
+                unit.ovr_offset,
+            )
             item["fixup_chunk"] = {
                 "name": f"{unit.unit_id}_fixups",
                 "naming": naming_metadata(
@@ -2049,9 +2181,15 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             }
             for (segment, offset), (name, tags) in sorted(RESIDENT_NAMES.items())
         ]
+    string_index = [
+        record for unit in catalog_units for record in unit.pop("strings", [])
+    ]
+    if resident_image:
+        string_index.extend(resident_image.pop("strings", []))
+    string_index.sort(key=lambda record: record["id"])
     catalog = {
         "format": "immortal-barons-bre-disassembly-map",
-        "format_version": 3,
+        "format_version": 4,
         "generator": f"scripts/bre-disasm.py {VERSION}",
         "release": {
             "name": "Barren Realms Elite 0.988",
@@ -2087,6 +2225,10 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
             "resident_basic_block_count": len(resident_image["blocks"]) if resident_image else 0,
             "resident_data_chunk_count": len(resident_image["data_chunks"]) if resident_image else 0,
             "fixup_count": sum(len(unit.fixups) for unit in units),
+            "referenced_string_count": len(string_index),
+            "string_use_count": sum(
+                len(record["used_by"]) for record in string_index
+            ),
             "ovr_payload_start": hx(8),
             "ovr_payload_end": hx(len(ovr), 6),
             "semantic_coverage": (
@@ -2097,6 +2239,7 @@ def build_catalog(exe: bytes, ovr: bytes, mz: MZHeader, units: list[Unit], cfg: 
         },
         "resident_roots": resident,
         "landmarks": landmarks,
+        "string_index": string_index,
         "units": catalog_units,
     }
     if resident_image:
@@ -2121,14 +2264,24 @@ def merged_spans(spans: list[tuple[int, int]], label: str) -> list[tuple[int, in
 
 
 def validate_catalog(catalog: dict) -> dict:
-    if catalog.get("format_version") != 3:
-        raise BREError("catalog format version is not 3")
+    if catalog.get("format_version") != 4:
+        raise BREError("catalog format version is not 4")
     names = {}
+    ids = {}
 
     def record_name(name: str, location: str) -> None:
         previous = names.setdefault(name, location)
         if previous != location:
             raise BREError(f"name {name!r} maps to both {previous} and {location}")
+
+    def record_id(identifier: str, location: str) -> None:
+        if not identifier.startswith("bre0988:"):
+            raise BREError(f"{location}: malformed durable ID {identifier!r}")
+        previous = ids.setdefault(identifier, location)
+        if previous != location:
+            raise BREError(
+                f"durable ID {identifier!r} maps to both {previous} and {location}"
+            )
 
     def validate_naming(record: dict, location: str) -> None:
         naming = record.get("naming")
@@ -2200,6 +2353,11 @@ def validate_catalog(catalog: dict) -> dict:
             if not all(key in root for key in ("body_ranges", "callers", "callees", "data_references")):
                 raise BREError(f"{unit_id}: procedure {root['name']} lacks analysis evidence")
             start = int(root["entry_offset"], 0)
+            record_id(root.get("id", ""), root["ovr_offset"])
+            if root["id"] != durable_id(
+                "procedure", "ovr", int(root["ovr_offset"], 0)
+            ):
+                raise BREError(f"{unit_id}: procedure durable ID is stale")
             if start not in blocks_by_start or blocks_by_start[start]["name"] != root["name"]:
                 raise BREError(f"{unit_id}: procedure root {root['name']} has no matching block")
             record_name(root["name"], root["ovr_offset"])
@@ -2209,6 +2367,11 @@ def validate_catalog(catalog: dict) -> dict:
         for block in unit["blocks"]:
             validate_naming(block, f"{unit_id}:{block['unit_span'][0]}")
             record_name(block["name"], block["ovr_span"][0])
+            record_id(block.get("id", ""), block["ovr_span"][0])
+            if block["id"] != durable_id(
+                "block", "ovr", int(block["ovr_span"][0], 0)
+            ):
+                raise BREError(f"{unit_id}: block durable ID is stale")
             if not block["target_kinds"]:
                 raise BREError(f"{unit_id}: block {block['name']} has no target evidence")
         for chunk in unit["data_chunks"]:
@@ -2268,6 +2431,9 @@ def validate_catalog(catalog: dict) -> dict:
         if not all(key in root for key in ("body_ranges", "callers", "callees", "data_references")):
             raise BREError(f"resident procedure {root['name']} lacks analysis evidence")
         start = int(root["load_offset"], 0)
+        record_id(root.get("id", ""), f"exe:{root['load_offset']}")
+        if root["id"] != durable_id("procedure", "exe", start):
+            raise BREError("resident procedure durable ID is stale")
         if start not in resident_blocks_by_start or resident_blocks_by_start[start]["name"] != root["name"]:
             raise BREError(f"resident root {root['name']} has no matching block")
         record_name(root["name"], f"exe:{root['load_offset']}")
@@ -2276,6 +2442,11 @@ def validate_catalog(catalog: dict) -> dict:
     for block in resident["blocks"]:
         validate_naming(block, f"resident:{block['load_span'][0]}")
         record_name(block["name"], f"exe:{block['load_span'][0]}")
+        record_id(block.get("id", ""), f"exe:{block['load_span'][0]}")
+        if block["id"] != durable_id(
+            "block", "exe", int(block["load_span"][0], 0)
+        ):
+            raise BREError("resident block durable ID is stale")
         if not block["target_kinds"]:
             raise BREError(f"resident block {block['name']} has no target evidence")
     for chunk in resident["data_chunks"]:
@@ -2285,6 +2456,56 @@ def validate_catalog(catalog: dict) -> dict:
         record_name(chunk["name"], f"exe:{chunk['load_span'][0]}")
     if resident["control_flow"]["decode_conflicts"]:
         raise BREError("resident decode-boundary conflicts remain")
+
+    procedures_by_id = {
+        root["id"]: root
+        for unit in catalog["units"]
+        for root in unit["roots"]
+    }
+    procedures_by_id.update({root["id"]: root for root in resident["roots"]})
+    blocks_by_id = {
+        block["id"]: block
+        for unit in catalog["units"]
+        for block in unit["blocks"]
+    }
+    blocks_by_id.update({block["id"]: block for block in resident["blocks"]})
+    string_use_count = 0
+    for string in catalog.get("string_index", []):
+        if string.get("storage") not in {"exe", "ovr"}:
+            raise BREError(f"string {string.get('id', 'unknown')}: invalid storage")
+        address_key = (
+            "ovr_offset" if string["storage"] == "ovr" else "load_offset"
+        )
+        if address_key not in string:
+            raise BREError(
+                f"string {string.get('id', 'unknown')}: missing {address_key}"
+            )
+        location = string.get("ovr_offset", string.get("load_offset", "unknown"))
+        record_id(string.get("id", ""), f"string:{location}")
+        expected_id = durable_id(
+            "string", string["storage"], int(location, 0)
+        )
+        if string["id"] != expected_id:
+            raise BREError(f"string {string['id']}: durable ID is stale")
+        if not re.fullmatch(r"[0-9a-f]{64}", string.get("sha256", "")):
+            raise BREError(f"string {string['id']}: malformed content hash")
+        if string.get("encoding") != "cp437" or string.get("length", 0) <= 0:
+            raise BREError(f"string {string['id']}: invalid format metadata")
+        for use in string["used_by"]:
+            if use["block_id"] not in blocks_by_id:
+                raise BREError(
+                    f"string {string['id']}: unknown block {use['block_id']}"
+                )
+            if any(
+                identifier not in procedures_by_id
+                for identifier in use["procedure_ids"]
+            ):
+                raise BREError(
+                    f"string {string['id']}: unknown procedure in use record"
+                )
+            if not use["sites"]:
+                raise BREError(f"string {string['id']}: use has no instruction site")
+            string_use_count += 1
 
     summary = catalog["summary"]
     expected_counts = {
@@ -2297,6 +2518,8 @@ def validate_catalog(catalog: dict) -> dict:
         "resident_basic_block_count": len(resident["blocks"]),
         "resident_data_chunk_count": len(resident["data_chunks"]),
         "fixup_count": fixups,
+        "referenced_string_count": len(catalog.get("string_index", [])),
+        "string_use_count": string_use_count,
     }
     for key, value in expected_counts.items():
         if summary.get(key) != value:
@@ -2310,6 +2533,8 @@ def validate_catalog(catalog: dict) -> dict:
         "overlay_data_chunks": overlay_data,
         "resident_blocks": len(resident["blocks"]),
         "resident_data_chunks": len(resident["data_chunks"]),
+        "referenced_strings": len(catalog.get("string_index", [])),
+        "string_uses": string_use_count,
     }
 
 
@@ -2386,6 +2611,7 @@ def catalog_records(catalog: dict, kind: str):
             for root in unit["roots"]:
                 yield {
                     "kind": "procedure",
+                    "id": root["id"],
                     "name": root["name"],
                     "address": root["ovr_offset"],
                     "container": unit["id"],
@@ -2399,6 +2625,7 @@ def catalog_records(catalog: dict, kind: str):
             for block in unit.get("blocks", []):
                 yield {
                     "kind": "block",
+                    "id": block["id"],
                     "name": block["name"],
                     "address": block["ovr_span"][0],
                     "container": unit["id"],
@@ -2442,6 +2669,7 @@ def catalog_records(catalog: dict, kind: str):
         for root in resident["roots"]:
             yield {
                 "kind": "procedure",
+                "id": root["id"],
                 "name": root["name"],
                 "address": root["logical_address"],
                 "container": "resident_exe",
@@ -2455,6 +2683,7 @@ def catalog_records(catalog: dict, kind: str):
         for block in resident["blocks"]:
             yield {
                 "kind": "block",
+                "id": block["id"],
                 "name": block["name"],
                 "address": block["logical_addresses"][0],
                 "container": "resident_exe",
@@ -2548,6 +2777,7 @@ def command_lookup(args: argparse.Namespace) -> None:
         for kind in ("procedure", "block", "data", "fixup")
         for record in catalog_records(catalog, kind)
         if needle == record["name"].lower()
+        or needle == record.get("id", "").lower()
         or needle in {alias.lower() for alias in record["aliases"]}
     ]
     unique = {
@@ -2557,6 +2787,130 @@ def command_lookup(args: argparse.Namespace) -> None:
     if not unique:
         raise BREError(f"no catalog name or alias matches {args.name!r}")
     print(json.dumps(list(unique.values()), indent=2))
+
+
+def command_find_string(args: argparse.Namespace) -> None:
+    """Resolve a substring through the non-text catalog index and private binaries."""
+    catalog = parse_catalog(args.catalog)
+    if catalog.get("format_version") != 4 or "string_index" not in catalog:
+        raise BREError("catalog does not contain the durable string index")
+    validate_catalog(catalog)
+    _ep, _op, exe, ovr, mz, _units = load_release(args)
+    procedures = {
+        root["id"]: {
+            "id": root["id"],
+            "name": root["name"],
+            "address": root["ovr_offset"],
+            "aliases": root.get("aliases", []),
+        }
+        for unit in catalog["units"]
+        for root in unit["roots"]
+    }
+    procedures.update(
+        {
+            root["id"]: {
+                "id": root["id"],
+                "name": root["name"],
+                "address": root["logical_address"],
+                "aliases": root.get("aliases", []),
+            }
+            for root in catalog["resident_image"]["roots"]
+        }
+    )
+    blocks = {
+        block["id"]: {
+            "id": block["id"],
+            "name": block["name"],
+            "address": block["ovr_span"][0],
+        }
+        for unit in catalog["units"]
+        for block in unit["blocks"]
+    }
+    blocks.update(
+        {
+            block["id"]: {
+                "id": block["id"],
+                "name": block["name"],
+                "address": block["logical_addresses"][0],
+            }
+            for block in catalog["resident_image"]["blocks"]
+        }
+    )
+    query = args.substring if args.case_sensitive else args.substring.casefold()
+    matches = []
+    matched_procedure_ids = set()
+    matched_block_ids = set()
+    for record in catalog["string_index"]:
+        if record["storage"] == "ovr":
+            address = int(record["ovr_offset"], 0)
+            source = ovr
+            display_address = record["ovr_offset"]
+        else:
+            load_offset = int(record["load_offset"], 0)
+            address = mz.header_size + load_offset
+            source = exe
+            display_address = record["load_offset"]
+        length = source[address]
+        payload = source[address + 1 : address + 1 + length]
+        content_hash = hashlib.sha256(payload).hexdigest()
+        if length != record["length"] or content_hash != record["sha256"]:
+            raise BREError(
+                f"catalog string {record['id']} does not match the pinned binary"
+            )
+        text_value = payload.decode("cp437")
+        haystack = text_value if args.case_sensitive else text_value.casefold()
+        if query not in haystack:
+            continue
+        block_uses = {}
+        procedure_ids = set()
+        for use in record["used_by"]:
+            block_use = block_uses.setdefault(
+                use["block_id"],
+                {**blocks[use["block_id"]], "sites": set(), "kinds": set()},
+            )
+            block_use["sites"].update(use["sites"])
+            block_use["kinds"].add(use["kind"])
+            matched_block_ids.add(use["block_id"])
+            procedure_ids.update(use["procedure_ids"])
+        matched_procedure_ids.update(procedure_ids)
+        matches.append(
+            {
+                "string_id": record["id"],
+                "storage": record["storage"],
+                "address": display_address,
+                "text": text_value,
+                "blocks": [
+                    {
+                        **{
+                            key: value
+                            for key, value in block.items()
+                            if key not in {"sites", "kinds"}
+                        },
+                        "sites": sorted(block["sites"]),
+                        "kinds": sorted(block["kinds"]),
+                    }
+                    for block in sorted(
+                        block_uses.values(), key=lambda item: item["id"]
+                    )
+                ],
+                "functions": [
+                    procedures[identifier]
+                    for identifier in sorted(procedure_ids)
+                ],
+            }
+        )
+    result = {
+        "query": args.substring,
+        "case_sensitive": args.case_sensitive,
+        "matching_strings": len(matches),
+        "functions": [
+            procedures[identifier] for identifier in sorted(matched_procedure_ids)
+        ],
+        "blocks": [blocks[identifier] for identifier in sorted(matched_block_ids)],
+    }
+    if args.details:
+        result["matches"] = matches
+    print(json.dumps(result, indent=2, ensure_ascii=False))
 
 
 def command_map(args: argparse.Namespace) -> None:
@@ -2831,6 +3185,23 @@ def build_parser() -> argparse.ArgumentParser:
     lookup.add_argument("name")
     lookup.add_argument("--catalog", default="docs/dev/bre-v0988-disassembly.json")
     lookup.set_defaults(func=command_lookup)
+
+    find_string = subparsers.add_parser(
+        "find-string",
+        help="find private-binary Pascal strings by substring and list referencing functions",
+    )
+    add_binary_arguments(find_string)
+    find_string.add_argument("substring")
+    find_string.add_argument(
+        "--catalog", default="docs/dev/bre-v0988-disassembly.json"
+    )
+    find_string.add_argument("--case-sensitive", action="store_true")
+    find_string.add_argument(
+        "--details",
+        action="store_true",
+        help="include matching private text and per-string use sites",
+    )
+    find_string.set_defaults(func=command_find_string)
 
     mapping = subparsers.add_parser("map", help="map an EXE stub or OVR file offset")
     add_binary_arguments(mapping)

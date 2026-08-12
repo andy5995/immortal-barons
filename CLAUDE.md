@@ -194,9 +194,14 @@ industrial gold and unit production, the crown tax, and the whole technology
 system — were read straight out of it in minutes. The method and mapped record
 layout live in `docs/dev/bre-disassembly.md`; the exact BRE-linked Turbo Pascal
 Real48 port and calculator are `scripts/bre_real48.py` and
-`scripts/bre-real48.py`. Prefer reading the code to fitting a curve: a fit needs
-dozens of samples and can still be wrong, and two separate BRE constants were
-mis-set this way before the disassembly corrected them.
+`scripts/bre-real48.py`. To locate code through original strings, run
+`python3 scripts/bre-disasm.py find-string --directory /path/to/bre
+"substring"`; it loads the durable string-reference table and returns all
+currently named functions and blocks that refer to a matching Pascal string.
+Use `--details` only when the private string text and exact use sites are needed,
+and never commit that output. Prefer reading the code to fitting a curve: a fit
+needs dozens of samples and can still be wrong, and two separate BRE constants
+were mis-set this way before the disassembly corrected them.
 
 **Mechanics live in that spec, not in this guide.** Don't describe how a
 mechanic works, or restate any of its numbers, here — this file just points to

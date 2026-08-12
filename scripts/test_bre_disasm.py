@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Synthetic tests for scripts/bre-disasm.py (no BRE binaries required)."""
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -156,6 +157,49 @@ class ParseTests(unittest.TestCase):
         )
         self.assertEqual(flow["decode_conflicts"], [])
 
+    def test_string_index_uses_durable_ids_without_retaining_text(self):
+        data = b"\x90\x90\x90\x90\x05Alpha"
+        procedures = [
+            {
+                "id": "bre0988:ovr:procedure:000008",
+                "body_ranges": [["0x0000", "0x0004"]],
+            }
+        ]
+        blocks = [
+            {
+                "id": "bre0988:ovr:block:000008",
+                "unit_span": ["0x0000", "0x0004"],
+            }
+        ]
+        chunks = [{"unit_span": ["0x0004", "0x000a"]}]
+        records = bre.string_records(
+            "ovr",
+            data,
+            procedures,
+            blocks,
+            chunks,
+            [(1, 4, "cs_offset_register_pair")],
+            base_offset=8,
+        )
+        self.assertEqual(len(records), 1)
+        record = records[0]
+        self.assertEqual(record["id"], "bre0988:ovr:string:00000c")
+        self.assertEqual(record["ovr_offset"], "0x00000c")
+        self.assertEqual(record["length"], 5)
+        self.assertEqual(record["sha256"], hashlib.sha256(b"Alpha").hexdigest())
+        self.assertNotIn("text", record)
+        self.assertEqual(
+            record["used_by"],
+            [
+                {
+                    "block_id": "bre0988:ovr:block:000008",
+                    "procedure_ids": ["bre0988:ovr:procedure:000008"],
+                    "kind": "cs_offset_register_pair",
+                    "sites": ["0x000009"],
+                }
+            ],
+        )
+
     def test_synthetic_catalog_exhaustively_names_code_and_data(self):
         try:
             bre.capstone_module()
@@ -184,7 +228,7 @@ class ParseTests(unittest.TestCase):
         if not catalog_path.exists():
             self.skipTest("generated catalog is not present")
         catalog = json.loads(catalog_path.read_text())
-        self.assertEqual(catalog["format_version"], 3)
+        self.assertEqual(catalog["format_version"], 4)
         self.assertEqual(catalog["summary"]["unit_count"], 103)
         self.assertEqual(catalog["summary"]["exported_root_count"], 414)
         self.assertEqual(catalog["summary"]["reachable_procedure_root_count"], 603)
@@ -193,6 +237,8 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(catalog["summary"]["resident_procedure_root_count"], 356)
         self.assertEqual(catalog["summary"]["resident_basic_block_count"], 2479)
         self.assertEqual(catalog["summary"]["resident_data_chunk_count"], 236)
+        self.assertEqual(catalog["summary"]["referenced_string_count"], 2340)
+        self.assertEqual(catalog["summary"]["string_use_count"], 2554)
         self.assertEqual(
             catalog["summary"]["semantic_coverage"],
             {
@@ -241,6 +287,8 @@ class ParseTests(unittest.TestCase):
                 "overlay_data_chunks": 319,
                 "resident_blocks": 2479,
                 "resident_data_chunks": 236,
+                "referenced_strings": 2340,
+                "string_uses": 2554,
             },
         )
 
@@ -249,6 +297,10 @@ class ParseTests(unittest.TestCase):
         ] + catalog["resident_image"]["roots"]
         by_name = {root["name"]: root for root in procedures}
         self.assertIn("run_bank", by_name)
+        self.assertEqual(
+            by_name["run_bank"]["id"],
+            "bre0988:ovr:procedure:0389d6",
+        )
         self.assertEqual(by_name["run_bank"]["naming"]["status"], "identified")
         self.assertTrue(by_name["run_bank"]["callers"])
         self.assertTrue(by_name["run_bank"]["callees"])
@@ -279,6 +331,23 @@ class ParseTests(unittest.TestCase):
                 "naming"
             ]["status"],
             "identified",
+        )
+        procedure_ids = {root["id"] for root in procedures}
+        block_ids = {block["id"] for block in blocks}
+        self.assertTrue(catalog["string_index"])
+        self.assertTrue(
+            all("text" not in record for record in catalog["string_index"])
+        )
+        self.assertTrue(
+            all(
+                use["block_id"] in block_ids
+                and all(
+                    identifier in procedure_ids
+                    for identifier in use["procedure_ids"]
+                )
+                for record in catalog["string_index"]
+                for use in record["used_by"]
+            )
         )
         self.assertIn("calculate_crown_tax", by_name)
         self.assertIn("region_cost", by_name["calculate_crown_tax"]["aliases"])

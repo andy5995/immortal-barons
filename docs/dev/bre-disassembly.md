@@ -26,6 +26,9 @@ python3 scripts/bre-disasm.py list --kind block --filter pirate
 python3 scripts/bre-disasm.py list --kind data --filter message
 python3 scripts/bre-disasm.py lookup crown_tax
 
+# Find all functions and blocks referring to a Pascal string containing text.
+python3 scripts/bre-disasm.py find-string --directory /path/to/bre "bank"
+
 # Resolve a linked far-call target or an OVR file offset.
 python3 scripts/bre-disasm.py map --directory /path/to/bre --address 084d:0020
 python3 scripts/bre-disasm.py map --directory /path/to/bre --ovr-offset 0x4ba48
@@ -222,6 +225,8 @@ The catalog therefore records:
 - grouped far-call/overlay-call edges and every unresolved indirect transfer;
 - caller and callee lists, exact body ranges, and code-segment data references
   for every procedure, plus the inverse `referenced_by` relation on data;
+- an index of directly referenced Pascal strings, keyed by durable address IDs
+  and retaining only lengths, hashes, and durable code references;
 - any target that conflicts with an already decoded instruction boundary.
 
 Ranges use half-open bounds: `[start, end)`. They are intentionally not broad
@@ -229,7 +234,9 @@ Ranges use half-open bounds: `[start, end)`. They are intentionally not broad
 603 overlay procedure roots, 8,495 overlay basic blocks, 319 overlay data/code
 chunks, 356 resident procedure roots, 2,479 resident basic blocks, 236 resident
 data/code chunks, and 103 named fixup streams containing 16,672 fixups. Its
-12,231 stable location names are unique. The naming pass identifies 386 of the
+12,231 stable location names are unique. It indexes 2,340 directly referenced
+Pascal strings and 2,554 block-use records without retaining their text. The
+naming pass identifies 386 of the
 959 proven procedures and ties 282 of 555 complementary chunks to identified
 behavior. Of the basic blocks, 6,763 targets have procedure-context names and
 427 entries have behavior-specific names. The remaining 573 procedures and 170
@@ -243,11 +250,23 @@ static root or runtime evidence.
 reachable bytes, named chunks exactly cover all remaining bytes, together they
 cover each overlay code area and the complete resident load module, every
 procedure has a same-name entry block, names are unique, and the recorded
-summary counts agree. `list --kind procedure|block|data|fixup|all` emits TSV,
-Markdown, or JSON, and `--status identified|contextual|structural|unclassified`
-selects a naming state. `lookup NAME` returns the matching records, evidence,
-call graph, and data references for a stable name or semantic alias (a
+summary counts agree. It also verifies that every durable ID matches its file
+address and that every indexed string use resolves to known block and procedure
+IDs. `list --kind procedure|block|data|fixup|all` emits TSV, Markdown, or JSON,
+and `--status identified|contextual|structural|unclassified` selects a naming
+state. `lookup NAME_OR_ID` returns the matching records, evidence, call graph,
+and data references for a stable name, semantic alias, or durable ID (a
 procedure entry is also its first block).
+
+`find-string SUBSTRING` is the bridge from private binary text to the static
+map. It loads the committed table first, verifies the exact BRE 0.988 binaries,
+materializes the indexed Pascal strings, and performs a case-insensitive search.
+The default JSON lists every currently named function and basic block that uses
+a match. Address-derived IDs such as `bre0988:ovr:block:02ef0f` are stored in
+the table, so improving a friendly name does not break the relation. Add
+`--case-sensitive` for an exact-case search or `--details` to include the
+matching private text and instruction sites. Detailed output contains original
+program text and must not be committed.
 
 Useful audit queries are:
 
@@ -255,6 +274,7 @@ Useful audit queries are:
 python3 scripts/bre-disasm.py list --kind procedure --status identified
 python3 scripts/bre-disasm.py list --kind procedure --status unclassified
 python3 scripts/bre-disasm.py lookup resolve_received_trade_offer
+python3 scripts/bre-disasm.py find-string --directory /path/to/bre "trade"
 ```
 
 Capstone 5's Python binding and native library are required to regenerate
