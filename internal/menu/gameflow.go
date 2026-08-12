@@ -501,6 +501,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		// does (docs/dev/bre-screens.md).
 		fmt.Fprint(s, "\n")
 		statLine(s, due, "Gold paid.")
+		decontaminateStage(s, w)
 		return
 	}
 
@@ -577,6 +578,11 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		fmt.Fprintf(s, "%s"+tr(s, "%d regions revolted for lack of upkeep.")+"%s\n", ansi.FgBrightRed, regionsLost, ansi.Reset)
 	}
 
+	decontaminateStage(s, w)
+	if !withPlayer(w, func(p *game.Empire) { gold = p.Gold }) {
+		return
+	}
+
 	if support < 100 && gold > 0 {
 		var cost, maxGive int64
 		if !withPlayer(w, func(p *game.Empire) { cost, maxGive = p.SupportBoostCost(), min(p.SupportBoostMax(), p.Gold) }) {
@@ -606,6 +612,39 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		if pts > 0 {
 			fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Military morale rose %d points."), pts)))
 		}
+	}
+}
+
+// decontaminateStage offers to clean waste regions, in the maintenance slot the
+// original puts it in — after the SDI upkeep and before the popular-support and
+// morale boosts. Like those two it is optional: paying nothing leaves the ruined
+// land ruined, costing upkeep and earning nothing, so it competes for gold
+// rather than being billed.
+func decontaminateStage(s session.Session, w *ctx) {
+	var waste, allowance int
+	var cost, gold int64
+	if !withPlayer(w, func(p *game.Empire) {
+		waste, allowance = p.Regions.Waste, w.World.DecontaminateAllowance(p)
+		cost, gold = w.World.DecontaminateCost(p), p.Gold
+	}) {
+		return
+	}
+	if waste <= 0 || allowance <= 0 || gold <= 0 {
+		return
+	}
+	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(
+		tr(s, "%s gold will decontaminate %s of your %s waste regions."),
+		comma(cost), comma(int64(allowance)), comma(int64(waste)))))
+	give := promptSuggested(s, "How much will you give?", min(cost, gold), min(cost, gold))
+	var cleaned int
+	if !withPlayer(w, func(p *game.Empire) { cleaned = w.World.Decontaminate(p, give) }) {
+		return
+	}
+	// Decontaminate restored the land as Coastal so the payment is never in
+	// limbo; the picker then re-types it, since cleaned land has no type of its
+	// own until the owner names one.
+	if cleaned > 0 {
+		allocateDecontaminated(s, w, cleaned)
 	}
 }
 

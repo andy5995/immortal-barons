@@ -235,6 +235,7 @@ func (w *World) aiPlay(today string) {
 			w.aiManageDebt(e) // cover a shortfall, or repay from surplus (#69)
 			w.PayForces(e, w.ForcesDue(e))
 			w.PayRegions(e, w.RegionsDue(e))
+			w.aiDecontaminate(e)    // clean up what a strike ruined, in the maintenance slot
 			w.aiSetTax(e)           // reactive tax policy (#73)
 			w.aiRebalanceRegions(e) // sell surplus land to fund farmland when starving (#69)
 			// The market steps sit HERE, not inside aiManageEconomy: that function
@@ -553,6 +554,22 @@ func (w *World) aiManageDebt(e *Empire) {
 	}
 	pay := min(surplus*AIDebtRepayPct/100, e.Debt)
 	w.Repay(e, pay)
+}
+
+// aiDecontaminate spends the AI's spare gold on cleaning waste regions. Without
+// it a struck AI realm carries the ruined land for the rest of the game, paying
+// upkeep on ground that earns nothing — a nuclear strike would be permanent
+// against an AI and merely inconvenient against a human. It buys what it can
+// afford above its working reserve, so it never cleans itself into starvation.
+func (w *World) aiDecontaminate(e *Empire) {
+	if w.DecontaminateAllowance(e) <= 0 {
+		return
+	}
+	spare := e.Gold - w.aiReserve(e)
+	if spare <= 0 {
+		return
+	}
+	w.Decontaminate(e, min(spare, w.DecontaminateCost(e)))
 }
 
 // aiRebalanceRegions sells regions the AI holds in surplus to fund the farmland

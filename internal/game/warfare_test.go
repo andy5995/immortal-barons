@@ -112,18 +112,16 @@ func TestPaySDIShortfallShrinksTheProgram(t *testing.T) {
 	}
 }
 
-func TestNuclearStrikeSDIReducesDamage(t *testing.T) {
+func TestNuclearStrikeIgnoresSDI(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AICount = 1
 
 	// The defenders need REAL regions, not a bare Land figure: the strike ends
 	// in syncLand, which recomputes Land from the mix, so a fixture that only
-	// sets Land measures the fixture's lie, wipes the realm in both worlds, and
-	// makes the two losses equal no matter what SDI does (the old shape of this
-	// test).
+	// sets Land measures the fixture's lie.
 	w1 := NewWorldSeed(cfg, 42)
 	a1 := w1.AddHuman("att", "Attacker")
-	a1.Gold = 10_000_000
+	a1.Gold = 100_000_000
 	d1 := w1.Empires[0]
 	d1.Protection, a1.Protection = 0, 0
 	d1.Regions = RegionMix{Agricultural: 1000}
@@ -132,14 +130,12 @@ func TestNuclearStrikeSDIReducesDamage(t *testing.T) {
 
 	w2 := NewWorldSeed(cfg, 42)
 	a2 := w2.AddHuman("att", "Attacker")
-	a2.Gold = 10_000_000
+	a2.Gold = 100_000_000
 	d2 := w2.Empires[0]
 	d2.Protection, a2.Protection = 0, 0
 	d2.Regions = RegionMix{Agricultural: 1000}
 	d2.syncLand()
-	d2.SDI = 50
-
-	beforeLand1, beforeLand2 := d1.Land, d2.Land
+	d2.SDI = SDIMax
 
 	if _, err := w1.NuclearStrike(a1, d1); err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -148,17 +144,19 @@ func TestNuclearStrikeSDIReducesDamage(t *testing.T) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	loss1 := beforeLand1 - d1.Land
-	loss2 := beforeLand2 - d2.Land
-
-	if loss1 <= 0 {
-		t.Errorf("expected SDI=0 defender to lose land, lost %d", loss1)
+	// A local nuclear strike is not intercepted — the original's routine never
+	// reads the target's SDI. Both worlds share seed 42 and an identical call
+	// sequence, so a mitigation reintroduced here would split these two figures.
+	if d1.Regions.Waste != d2.Regions.Waste {
+		t.Errorf("SDI changed nuclear damage: no-SDI ruined %d, max-SDI ruined %d",
+			d1.Regions.Waste, d2.Regions.Waste)
 	}
-	// Strictly less: both worlds share seed 42 and an identical call sequence,
-	// so if the SDI mitigation were deleted the losses would be EQUAL and a
-	// non-strict check would pass with the mechanic gone.
-	if loss2 >= loss1 {
-		t.Errorf("expected SDI=50 defender to lose strictly less land than SDI=0 defender: loss2=%d loss1=%d", loss2, loss1)
+	if d1.Regions.Waste <= 0 {
+		t.Errorf("expected the strike to ruin regions, ruined %d", d1.Regions.Waste)
+	}
+	// Ruined, not removed: the land stays on the books and keeps costing upkeep.
+	if d1.Land != 1000 {
+		t.Errorf("land should be unchanged at 1000, got %d", d1.Land)
 	}
 }
 

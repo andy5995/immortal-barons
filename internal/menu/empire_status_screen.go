@@ -58,6 +58,7 @@ func empireStatusFields(s session.Session, w *ctx) (map[string]string, func(stri
 	for i, name := range regionTypeNames {
 		f[strings.ToLower(name)] = comma(*regionField(&p, i))
 	}
+	f["waste"] = comma(p.Regions.Waste)
 	return f, func(id string) string { return tr(s, id) }
 }
 

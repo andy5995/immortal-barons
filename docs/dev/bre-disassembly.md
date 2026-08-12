@@ -422,6 +422,42 @@ The nuclear strike caps its price with `12e1` against 50,000,000, and the
 decontamination allowance is `min(max(waste / 5, 10), waste)` — one use of each,
 in the only arrangement that makes both routines sensible.
 
+## Empire record fields identified from their whole access list
+
+Both were found by scanning each binary for every `es:`-prefixed `[di+disp16]`
+access and every `add di,disp16` at the field's displacement, in the
+current-empire form (`disp`) and the arbitrary-empire form (`disp + 0xf093`),
+then naming the containing block for each hit. The method is the one the
+`bre-gather` skill describes; what makes it conclusive is reading *all* the
+sites, not the two nearest the question.
+
+**`+0x286` — Score** (int32). Fourteen sites. Written by `resolve_regular_attack`
+(two branches, gated on config record `+0x3d8`), `launch_nuclear_attack`,
+`launch_chemical_attack`, `launch_biological_attack`, `launch_pirate_raid`,
+`resolve_returning_attack` and `send_spy`; read by `show_empire_status`,
+`show_scores`, `build_recon_record`, and `format_player_ranking_line`. That last
+one settles it: the rankings line prints `total_regions`, then this field, then
+the net-worth function — Territory, Score, Net Worth, in the scores table's own
+column order.
+
+**`+0xba` — the unallocated-region pool** (int32). Credited by a won regular
+attack, a pirate raid, a returning interplanetary attack, and waste
+decontamination; drained by the picker that prompts `[N Regions left]` and
+`How many <Type> regions?`, which adds the named count to the chosen type's field
+and subtracts it here, looping until the pool is empty.
+
+`total_regions` (`056d:0ec6`) sums exactly the nine region counts at `+0x96`
+through `+0xb6+2` and does **not** include this pool, so unallocated land is not
+territory until it is placed.
+
+### One catalog name to revisit
+
+`select_regions_to_lose` (`BRE.OVR 0x030ece`, status `identified`) is the
+region **allocation** picker described above, not a loss picker: it returns
+immediately when the unallocated pool is zero, and its body adds to a chosen
+region type while subtracting from the pool. The naming evidence was presumably
+a nearby string; the field access list points the other way.
+
 ## Scope and legal hygiene
 
 The map records mechanics of the file format, addresses, hashes, control-flow

@@ -4,8 +4,10 @@ import (
 	"fmt"
 )
 
-// Strike/SDI gold costs (NukeCost, ChemCost, BioCost, AnnihilatorCost, SDIStep)
-// live in balance.go. SDIMax is a level cap, not a cost, so it stays here.
+// Strike/SDI gold costs (ChemCost, BioCost, AnnihilatorCost, SDIStep, and the
+// nuclear pricing constants) live in balance.go; the nuclear price itself is
+// computed per target, by NukeCostForLand below. SDIMax is a level cap, not a
+// cost, so it stays here.
 // SDIMax caps SDI at 50%: BRE's SDI destroys "up to 50%" of incoming missiles
 // (breins.txt), so the level tops out there.
 const SDIMax = 50
@@ -98,34 +100,111 @@ func (e *Empire) EnsureSDIFunding() {
 	e.syncSDI() // funding is the authoritative figure once it exists
 }
 
-// NuclearStrike destroys some of the defender's regions, turning them to
-// waste. It is a v1 gold-cost strike (no missile inventory yet).
+// NukeCostForLand is what a nuclear missile aimed at a realm of `land` regions
+// costs. The arms dealer prices the weapon off the target: a bigger realm needs
+// a bigger warhead, up to a cap (see balance.go). Taking land rather than an
+// *Empire lets the attack screen price the shot from its target list without
+// re-resolving the rival under the lock.
+func NukeCostForLand(land int) int64 {
+	return min(int64(land)*NukeCostPerRegion, NukeCostCap)
+}
+
+// NukeCost is what a nuclear missile aimed at d costs.
+func (w *World) NukeCost(d *Empire) int64 { return NukeCostForLand(d.Land) }
+
+// NuclearStrike ruins a band of the defender's regions, converting them to
+// waste. No land changes hands and nobody dies: the defender keeps every region
+// on its books, still pays upkeep on them, and earns nothing from them until
+// they are decontaminated (see DecontaminateAllowance).
+//
+// The strike is not intercepted. Nothing in the original's local nuclear path
+// consults the target's SDI or turrets — SDI shoots down interplanetary
+// missiles, not a neighbour's.
 func (w *World) NuclearStrike(a, d *Empire) (string, error) {
-	if a.Gold < NukeCost {
+	cost := w.NukeCost(d)
+	if a.Gold < cost {
 		return "", ErrCantAfford
 	}
-	a.Gold -= NukeCost
+	a.Gold -= cost
 
-	regions := w.jitter(d.Land/10) + 1
-	regions = regions * (100 - d.SDI) / 100
-	if regions > d.Land {
-		regions = d.Land
-	}
-	d.Regions.remove(regions)
+	// 7% ± a two-draw jitter, so the band is 5-9% and the extremes are rarer
+	// than the middle.
+	pct := NukeWastePct + w.rng.Intn(NukeWasteJitter) - w.rng.Intn(NukeWasteJitter)
+	// remove spreads the loss over every type the target holds, waste included,
+	// and the same count goes back on as waste — so land already ruined absorbs
+	// part of the strike and the realm's total never moves.
+	regions := d.Regions.remove(d.Land * pct / 100).Total()
+	d.Regions.Waste += regions
 	d.syncLand()
-	if d.Land <= 0 || d.People <= 0 {
-		d.Alive = false
-		d.DiedDay = w.GameDay
-	}
+
+	// The award is a flat draw, not a share of the damage: a strike on a small
+	// realm that ruined nothing still scores.
+	addScore(a, w.rng.Intn(NukeScoreAward))
 
 	d.addEvent(fmt.Sprintf("%s hit you with a nuclear strike: %d regions reduced to waste.", a.Name, regions))
 
 	w.postStrikeNews(a, d, "nuclear")
-	report := fmt.Sprintf("Nuclear strike! %d regions of %s reduced to waste.", regions, d.Name)
-	if !d.Alive {
-		report += fmt.Sprintf("\n%s has been utterly conquered!", d.Name)
+	return fmt.Sprintf("Nuclear strike! %d regions of %s are now waste.", regions, d.Name), nil
+}
+
+// DecontaminateAllowance is the most waste regions e may clean this turn: a
+// share of the pile, floored so a small mess is never left to trickle, and
+// never more waste than it actually holds.
+func (w *World) DecontaminateAllowance(e *Empire) int {
+	if e.Regions.Waste <= 0 {
+		return 0
 	}
-	return report, nil
+	return min(max(e.Regions.Waste/WasteDecontamDivisor, WasteDecontamFloor), e.Regions.Waste)
+}
+
+// DecontaminatePrice is the gold each cleaned region costs — the going region
+// price, halved, and reduced further by technology.
+//
+// The factor is the FOOD one, unintuitively: the original divides by
+// `technology_factor(2.0, slot 0)`, which is the pair its agricultural yield
+// uses, not the (1.4, slot 3) pair its maintenance costs use. Reading the four
+// sibling call sites is what settled it — the cost being maintenance-shaped is
+// not evidence about which research pays for it.
+//
+// One truncation, not two: the original divides the price by twice the factor
+// in a single real expression, so halving first would round a second time.
+func (w *World) DecontaminatePrice(e *Empire) int64 {
+	return int64(w.LandPrice(e)) * TechFactorUnit /
+		(WasteDecontamPriceDiv * int64(e.TechFoodFactor()))
+}
+
+// DecontaminateCost is the bill for cleaning this turn's whole allowance.
+func (w *World) DecontaminateCost(e *Empire) int64 {
+	return int64(w.DecontaminateAllowance(e)) * w.DecontaminatePrice(e)
+}
+
+// Decontaminate spends `gold` on cleaning waste and returns the regions
+// restored. Paying short cleans proportionally less rather than nothing — the
+// original divides the gold given by the full bill and scales the count by it,
+// so a baron who cannot cover the whole allowance still makes progress.
+//
+// Cleaned land has no type of its own in the original, which parks it in a pool
+// of unallocated regions until the owner names the types. IB has no such pool,
+// so the land comes back as Coastal and a caller with someone at the keyboard
+// offers to re-type it (see allocateDecontaminated). Restoring it here rather
+// than leaving it untyped is deliberate: gold has already changed hands, and a
+// session that drops between the payment and the picker must not take the land
+// with it.
+func (w *World) Decontaminate(e *Empire, gold int64) int {
+	price := w.DecontaminatePrice(e)
+	gold = min(gold, e.Gold)
+	if gold <= 0 || price <= 0 {
+		return 0
+	}
+	n := min(int(gold/price), w.DecontaminateAllowance(e))
+	if n <= 0 {
+		return 0
+	}
+	e.Gold -= int64(n) * price
+	e.Regions.Waste -= n
+	e.Regions.Coastal += n
+	e.syncLand()
+	return n
 }
 
 // ChemicalStrike kills people and troopers and damages some land.
