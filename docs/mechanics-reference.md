@@ -2231,12 +2231,42 @@ signing them would imply a guarantee about the *numbers* that nothing can give.
 What is implemented stops one board dictating to the others, and stops a packet
 landing twice.
 
-**Origin is a separate question, and is open (#118).** Whether a packet really
-came from the board it names is not the same as whether that board's figures are
-honest, and the second being unfixable does not make the first so. Today nothing
-checks the sender: a packet written into an inbound directory is applied on the
-strength of a name it carries. Every transport a league actually uses makes
-that check itself — a mailer authenticates the session behind a netmail, a hub
-binds an upload to an account — but IB neither requires nor reads the result, and
-the plain file drop it documents as the default supplies nothing. Sysop answers
-in discussion #117 are what surfaced this.
+**Origin is checked separately, and is (#118).** Whether a packet really came
+from the board it names is not the same as whether that board's figures are
+honest, and the second being unfixable does not make the first so. Before this,
+nothing checked the sender: a packet written into an inbound directory was
+applied on the strength of a name it carried, which was enough to hand a realm
+an army (a result packet's survivors) or take its regions (an attack packet's
+offense figure). Sysop answers in discussion #117 are what surfaced it.
+
+Every board now holds its own ed25519 key in `board.key` (`-gen-board-key`) and
+signs every outbound packet over its whole contents, with two fields excluded:
+the signature itself, and `Hops`, which each forwarding hub legitimately
+increments. The Coordinator's own signature IS covered, so a genuine order
+cannot be lifted out of one packet and grafted into another.
+
+The matching public key travels in the league roster, on an optional seventh
+line of each node block. That is what makes the distribution work without a new
+mechanism: the roster is already signed by the Coordinator key each sysop
+records once by hand, so a board never has to trust a key handed to it by the
+board the key belongs to. One out-of-band step anchors every key after it.
+
+The two key pairs answer different questions and are not interchangeable:
+
+| | `coord.key` / `coord.pub` | `board.key` + roster `PublicKey` |
+| --- | --- | --- |
+| Answers | May this board dictate league rules? | Did this packet come from the board it names? |
+| Held by | Coordinator (private), everyone (public) | Every board (private), roster (public) |
+| Distributed | Once, by hand | Inside the signed roster |
+| Covers | Ruleset, roster, season reset | The whole packet |
+
+**A roster entry with no key is applied unsigned**, which is every league until
+its Coordinator publishes keys. Refusing would break a working league on upgrade
+rather than securing it, so the check reports "cannot check" and "failed the
+check" as different things. That transition state is the remaining gap and it
+closes as rosters gain keys; a board whose roster key IS set can no longer be
+impersonated.
+
+**Still not addressed**: withholding. A signature proves where a packet came
+from and says nothing about one that never arrives, and a missing packet looks
+the same as a board that did not play.

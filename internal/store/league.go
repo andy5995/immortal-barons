@@ -13,8 +13,13 @@ import (
 
 // ParseNodeList reads a BRNODES-style league node list. Each node is a block of
 // six lines — number, name, FidoNet address, city, state, country — separated
-// by one or more blank lines (matching docs/brnodes.sam in the original). Nodes
-// with an unparseable number are skipped.
+// by one or more blank lines (matching docs/brnodes.sam in the original), with
+// an OPTIONAL seventh line carrying that board's packet-signing public key
+// (#118). Nodes with an unparseable number are skipped.
+//
+// The key line is seventh rather than woven in so a roster written before it
+// existed still parses unchanged, and one written with it is ignored gracefully
+// by an older board: the block is read by index, and index six is simply absent.
 //
 // Every one of the six lines must carry a value. The format cannot express an
 // empty field: a blank line is what ends a block, so a roster written with one
@@ -34,14 +39,19 @@ func ParseNodeList(path string) ([]game.LeagueNode, error) {
 		if len(block) >= 6 {
 			n, hosts, err := parseNodeNumber(block[0])
 			if err == nil {
+				var key string
+				if len(block) >= 7 {
+					key = strings.TrimSpace(block[6])
+				}
 				nodes = append(nodes, game.LeagueNode{
-					Number:  n,
-					Hosts:   hosts,
-					Name:    strings.TrimSpace(block[1]),
-					Address: strings.TrimSpace(block[2]),
-					City:    strings.TrimSpace(block[3]),
-					State:   strings.TrimSpace(block[4]),
-					Country: strings.TrimSpace(block[5]),
+					Number:    n,
+					Hosts:     hosts,
+					Name:      strings.TrimSpace(block[1]),
+					Address:   strings.TrimSpace(block[2]),
+					City:      strings.TrimSpace(block[3]),
+					State:     strings.TrimSpace(block[4]),
+					Country:   strings.TrimSpace(block[5]),
+					PublicKey: key,
 				})
 			}
 		}
@@ -154,6 +164,10 @@ func WriteNodeList(path string, nodes []game.LeagueNode) error {
 			}
 		}
 		fmt.Fprintf(&b, "\n%s\n%s\n%s\n%s\n%s\n", n.Name, n.Address, n.City, n.State, n.Country)
+		// Only written when set, so a keyless roster round-trips byte for byte.
+		if n.PublicKey != "" {
+			fmt.Fprintf(&b, "%s\n", n.PublicKey)
+		}
 	}
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return err

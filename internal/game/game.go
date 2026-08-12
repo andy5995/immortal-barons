@@ -605,6 +605,10 @@ type World struct {
 	// world, so a world file that leaks does not leak the league's key.
 	CoordKey []byte `json:"-"`
 	CoordPub []byte `json:"-"`
+	// BoardKey is this board's own ed25519 private key, which signs every
+	// outbound packet so other boards can prove where it came from (#118). Read
+	// from board.key at startup like the two above, never serialized.
+	BoardKey []byte `json:"-"`
 	// OutSeq numbers this board's outbound packets. HighSeq and SeenPackets are
 	// what an inbound packet is checked against, so nothing is applied twice.
 	OutSeq      uint64

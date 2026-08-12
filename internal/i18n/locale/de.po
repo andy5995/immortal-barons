@@ -2238,12 +2238,18 @@ msgstr ""
 msgid "[%d Regions left] Your choice?"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:91
+#: cmd/immortal-barons/main.go:92
 msgid "add N computer barons to the running game, then exit"
 msgstr ""
 
 #: cmd/immortal-barons/main.go:73
 msgid "choose which drop file format your BBS writes, save it, then exit"
+msgstr ""
+
+#: cmd/immortal-barons/main.go:82
+msgid ""
+"create this board's packet-signing key, print the public half to send to the "
+"League Coordinator, then exit"
 msgstr ""
 
 #: cmd/immortal-barons/main.go:80
@@ -2252,13 +2258,13 @@ msgid ""
 "other boards, then exit (node #1 only)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:87
+#: cmd/immortal-barons/main.go:88
 msgid ""
 "directory the game writes packets to for the other boards, for -ibbs-reset "
 "(default \"outbound\", under the data directory)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:86
+#: cmd/immortal-barons/main.go:87
 msgid ""
 "directory where packets from the other boards arrive, for -ibbs-reset "
 "(default \"inbound\", under the data directory)"
@@ -2272,18 +2278,18 @@ msgstr ""
 msgid "for list"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:95
+#: cmd/immortal-barons/main.go:96
 msgid ""
 "force CP437 output (the door default; overrides the -local locale detection)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:94
+#: cmd/immortal-barons/main.go:95
 msgid ""
 "force UTF-8 output (needed for non-English languages; -local detects this "
 "from your locale)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:96
+#: cmd/immortal-barons/main.go:97
 msgid ""
 "force plain 7-bit ASCII output, for a terminal that is neither CP437 nor "
 "UTF-8 (box rules and accents degrade to ASCII look-alikes)"
@@ -2297,7 +2303,11 @@ msgstr ""
 msgid "in return for %s."
 msgstr ""
 
-#: internal/game/ibbs_auth.go:32
+#: internal/game/ibbs_auth.go:201
+msgid "no board key is loaded"
+msgstr ""
+
+#: internal/game/ibbs_auth.go:34
 msgid "no coordinator key is loaded"
 msgstr ""
 
@@ -2313,11 +2323,11 @@ msgstr ""
 msgid "or "
 msgstr ""
 
-#: internal/game/ibbs_auth.go:33
+#: internal/game/ibbs_auth.go:35
 msgid "packet signature does not verify"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:1133
+#: cmd/immortal-barons/main.go:1153
 msgid "path to the BBS drop file"
 msgstr ""
 
@@ -2329,24 +2339,24 @@ msgstr ""
 msgid "play in your own terminal, not as a BBS door"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:92
+#: cmd/immortal-barons/main.go:93
 msgid ""
 "play the game forward N days of computer-baron turns, printing a per-day "
 "summary and final standings, then exit (a balance probe). ADVANCES AND SAVES "
 "the game, so it asks first and refuses on a game that has human realms"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:93
+#: cmd/immortal-barons/main.go:94
 msgid ""
 "print the normalized game world as JSON, then exit (after load-time "
 "migration; for scripts and balance checks)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:98
+#: cmd/immortal-barons/main.go:99
 msgid "print the version, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:83
+#: cmd/immortal-barons/main.go:84
 msgid ""
 "print which board each planet's packets are handed to, and the directory "
 "they are written in, then exit"
@@ -2362,7 +2372,7 @@ msgid ""
 "printed), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:1137
+#: cmd/immortal-barons/main.go:1157
 msgid "run -set-dropfile first"
 msgstr ""
 
@@ -2376,7 +2386,7 @@ msgid ""
 "outgoing packets, then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:97
+#: cmd/immortal-barons/main.go:98
 msgid ""
 "send plain text with no ANSI escapes, as a terminal that cannot render them "
 "gets (for testing that path on a terminal that can)"
@@ -2388,30 +2398,30 @@ msgid ""
 "exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:89
+#: cmd/immortal-barons/main.go:90
 msgid ""
 "start a new game as a board in an inter-BBS league: like -reset, but the "
 "settings editor also asks the league settings"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:90
+#: cmd/immortal-barons/main.go:91
 msgid ""
 "start a new game from the current config.json without the editor: clear all "
 "empires and rebuild the world (the old world is saved first)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:84
+#: cmd/immortal-barons/main.go:85
 msgid ""
 "start a new game: change the settings, then clear all empires and rebuild "
 "the world (the old world is saved first)"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:82
+#: cmd/immortal-barons/main.go:83
 msgid ""
 "start a new season across the whole league on DATE (node #1 only), then exit"
 msgstr ""
 
-#: cmd/immortal-barons/main.go:88
+#: cmd/immortal-barons/main.go:89
 msgid ""
 "take this board's name, inbound directory and league number from an original "
 "Barren Realms Elite BBS.CFG at PATH, for -ibbs-reset"
@@ -2425,12 +2435,12 @@ msgstr ""
 msgid "the whole planet"
 msgstr ""
 
-#: internal/game/ibbs_auth.go:31
+#: internal/game/ibbs_auth.go:33
 #, fuzzy
 msgid "this board is not the League Coordinator"
 msgstr "Koordinatormenü"
 
-#: cmd/immortal-barons/main.go:85
+#: cmd/immortal-barons/main.go:86
 msgid ""
 "this board's name in the league, for -ibbs-reset. Giving it skips the "
 "settings editor, for a member board that takes its rules from the Coordinator"

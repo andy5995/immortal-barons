@@ -23,14 +23,44 @@ import (
 const (
 	CoordKeyFile = "coord.key"
 	CoordPubFile = "coord.pub"
+	// BoardKeyFile is this board's own signing key (#118) — a different job from
+	// the two above. The Coordinator pair says who may dictate league rules;
+	// this one says which board a packet actually came from. A board that is not
+	// the Coordinator still needs it, and the Coordinator needs both.
+	BoardKeyFile = "board.key"
 )
 
 // GenerateCoordKey writes a new Coordinator key pair into dir and returns the
-// public half as hex, for the sysop to send to the other boards. Refuses to
-// overwrite an existing private key: doing so would orphan every board that
-// already holds the matching public one.
+// public half as hex, for the sysop to send to the other boards.
 func GenerateCoordKey(dir string) (string, error) {
-	priv := filepath.Join(dir, CoordKeyFile)
+	pub, err := generateKeyPair(dir, CoordKeyFile)
+	if err != nil {
+		return "", err
+	}
+	// The Coordinator alone also keeps its own public half on disk, so its board
+	// can verify the orders it broadcasts to itself.
+	if err := os.WriteFile(filepath.Join(dir, CoordPubFile), []byte(pub+"\n"), 0o644); err != nil {
+		return "", err
+	}
+	return pub, nil
+}
+
+// GenerateBoardKey writes this board's packet-signing key pair into dir and
+// returns the public half as hex, for the sysop to send to their League
+// Coordinator to put in the roster. Refuses to overwrite: a new key silently
+// invalidates every packet this board sends until the roster catches up, which
+// looks to the rest of the league like forgery.
+func GenerateBoardKey(dir string) (string, error) {
+	return generateKeyPair(dir, BoardKeyFile)
+}
+
+// generateKeyPair writes a new ed25519 private key into dir/name at 0600 and
+// returns the public half as hex. Refuses to overwrite an existing key: for
+// either pair, replacing one silently invalidates work already distributed —
+// the Coordinator's orphans every board holding the old public half, and a
+// board's makes its packets read as forgeries until the roster catches up.
+func generateKeyPair(dir, name string) (string, error) {
+	priv := filepath.Join(dir, name)
 	if _, err := os.Stat(priv); err == nil {
 		return "", os.ErrExist
 	}
@@ -42,9 +72,6 @@ func GenerateCoordKey(dir string) (string, error) {
 		return "", err
 	}
 	if err := os.WriteFile(priv, []byte(hex.EncodeToString(sec)+"\n"), 0o600); err != nil {
-		return "", err
-	}
-	if err := os.WriteFile(filepath.Join(dir, CoordPubFile), []byte(hex.EncodeToString(pub)+"\n"), 0o644); err != nil {
 		return "", err
 	}
 	return hex.EncodeToString(pub), nil
@@ -72,6 +99,7 @@ func InstallCoordPub(dir, hexKey string) error {
 func loadLeagueKeys(w *game.World, cfg game.Config) {
 	w.CoordKey = readHexKey(filepath.Join(cfg.DataDir, CoordKeyFile), ed25519.PrivateKeySize)
 	w.CoordPub = readHexKey(filepath.Join(cfg.DataDir, CoordPubFile), ed25519.PublicKeySize)
+	w.BoardKey = readHexKey(filepath.Join(cfg.DataDir, BoardKeyFile), ed25519.PrivateKeySize)
 }
 
 func readHexKey(path string, want int) []byte {

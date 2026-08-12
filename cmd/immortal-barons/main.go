@@ -79,6 +79,7 @@ func main() {
 	leagueConfig := flag.Bool("league-config", false, i18n.T(lang, "send this board's league settings to the whole league (node #1 only), then exit"))
 	genCoordKey := flag.Bool("gen-coord-key", false, i18n.T(lang, "create this league's Coordinator key, print the public half to give the other boards, then exit (node #1 only)"))
 	coordPub := flag.String("coord-key", "", i18n.T(lang, "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"))
+	genBoardKey := flag.Bool("gen-board-key", false, i18n.T(lang, "create this board's packet-signing key, print the public half to send to the League Coordinator, then exit"))
 	leagueReset := flag.String("league-reset", "", i18n.T(lang, "start a new season across the whole league on DATE (node #1 only), then exit"))
 	leagueRoutes := flag.Bool("league-routes", false, i18n.T(lang, "print which board each planet's packets are handed to, and the directory they are written in, then exit"))
 	reset := flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"))
@@ -207,6 +208,25 @@ func main() {
 		fmt.Println("    immortal-barons -coord-key", pub)
 		fmt.Println()
 		fmt.Println("Keep", filepath.Join(cfg.DataDir, store.CoordKeyFile), "secret. Copying it is how coordinatorship is handed on.")
+		return
+	}
+	if *genBoardKey {
+		pub, err := store.GenerateBoardKey(cfg.DataDir)
+		if err != nil {
+			if os.IsExist(err) {
+				fmt.Fprintln(os.Stderr, "immortal-barons -gen-board-key: this board already has a signing key. Replacing it makes every packet this board sends fail its neighbours' checks until the Coordinator publishes the new one, so delete", filepath.Join(cfg.DataDir, store.BoardKeyFile), "only if you mean to do that.")
+			} else {
+				fmt.Fprintln(os.Stderr, "immortal-barons -gen-board-key:", err)
+			}
+			os.Exit(1)
+		}
+		fmt.Println("Board signing key created. Send this line to your League Coordinator:")
+		fmt.Println()
+		fmt.Println("   ", cfg.BoardID, pub)
+		fmt.Println()
+		fmt.Println("They add it to the league roster, which is signed and broadcast, so every")
+		fmt.Println("board can check that a packet naming yours really came from it.")
+		fmt.Println("Keep", filepath.Join(cfg.DataDir, store.BoardKeyFile), "secret; anyone holding it can send packets as this board.")
 		return
 	}
 	if *coordPub != "" {
