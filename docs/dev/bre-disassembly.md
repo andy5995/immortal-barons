@@ -302,6 +302,9 @@ integer and Real48 helpers go to resident logical segments in `BRE.EXE` (notably
 `0fd0`). No separate floating-point library file is opened or loaded; there is
 no FP overlay whose segment must be guessed.
 
+The exact operation surface, six-byte representation, BRE-linked constants,
+Python port, and calculator are documented in [bre-real48.md](bre-real48.md).
+
 ## Scope and legal hygiene
 
 The map records mechanics of the file format, addresses, hashes, control-flow

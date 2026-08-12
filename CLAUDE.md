@@ -191,12 +191,12 @@ binary is at `~/.dosemu/drive_c/games/bre-dos/` (`BRE.OVR` holds the gameplay
 overlays, `BRE.EXE` the rest); `ndisasm`, `radare2` and `ghidra` are installed.
 Several mechanics that resisted inference from play — the coastal support curve,
 industrial gold and unit production, the crown tax, and the whole technology
-system — were read straight out of it in minutes. Method, the empire/config
-record layout mapped so far, and a Turbo Pascal real-constant decoder live in
-`~/.claude/projects/<this project>/scripts/bre-tpreal.py`; the economy-capture
-parser is `bre-econ.py` beside it. Prefer reading the code to fitting a curve:
-a fit needs dozens of samples and can still be wrong, and two separate BRE
-constants were mis-set this way before the disassembly corrected them.
+system — were read straight out of it in minutes. The method and mapped record
+layout live in `docs/dev/bre-disassembly.md`; the exact BRE-linked Turbo Pascal
+Real48 port and calculator are `scripts/bre_real48.py` and
+`scripts/bre-real48.py`. Prefer reading the code to fitting a curve: a fit needs
+dozens of samples and can still be wrong, and two separate BRE constants were
+mis-set this way before the disassembly corrected them.
 
 **Mechanics live in that spec, not in this guide.** Don't describe how a
 mechanic works, or restate any of its numbers, here — this file just points to
