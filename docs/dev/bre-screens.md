@@ -681,8 +681,18 @@ Change Production? (y/N) No
 
 ### InterPlanetary Operations
 
-Yellow accent, two columns. `Terrorist Ops` shows a running cost figure next to
-the label.
+Yellow accent, two columns. `Terrorist Ops` shows a cost figure next to the
+label — **the launcher's region count × 64**, so it climbs as the realm buys
+land. The `72,960` below is 1,140 regions; a second capture
+(`cap/eots-ibbs-01.cap`) gives 541,824 / 542,144 / 542,336 / 542,976 against
+8,466 / 8,471 / 8,474 / 8,484 regions, every one exact. The derivation and the
+one term still unpinned are in `docs/mechanics-reference.md`.
+
+Colors, from `cap/eots-ibbs-01.cap`: the rule is `33` yellow with the brackets
+`1;33` bright yellow and the title `1;37` bright white; each item is a `33`
+yellow paren around a `1;33` bright-yellow key, then a `37` white label, and the
+cost figure is `37` white. This is the same accent/dim/bright-white split the
+menu engine's `titleRule` already draws.
 
 ```
 ─────────────────[InterPlanetary Operations]──────────────────

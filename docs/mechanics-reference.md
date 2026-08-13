@@ -588,12 +588,36 @@ reduces attacking **jets by up to 30%** and **bombers by up to 20%**
 
 Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
 
-**Gold costs on these menus are a gap.** BRE prices a terrorist op in the
-InterPlanetary Operations menu's own cost column, and prices four of the Special
-Operations entries on theirs (figures in `docs/dev/bre-screens.md`). IB charges
-gold for neither: the `TerrorCosts` setting is editable, broadcast and displayed,
-but nothing consumes it. The terror figure grew over the capture and three
-readings do not establish what it scales with.
+**A terrorist op costs `total regions × 64` gold — BINARY-VERIFIED.** The
+InterPlanetary Operations menu prices the op in its own cost column, and the
+price scales with the launcher's **region count**, which is why it drifts upward
+as a realm buys land. Read from the binary and then confirmed against a capture:
+
+| Regions | × 64 | Price on the menu |
+| --- | --- | --- |
+| 8,466 | 541,824 | 541,824 |
+| 8,471 | 542,144 | 542,144 |
+| 8,474 | 542,336 | 542,336 |
+| 8,484 | 542,976 | 542,976 |
+
+Four readings, four exact matches, from one session as the realm's land grew.
+The chain: `launch_terrorist_operation` (`BRE.OVR 0x2afbf`) passes empire field
+`+0x276` to the pricing routine at `0x2aca8`, which clamps it with `max_i32(…,1)`
+then `min_i32(…,100)`, calls `total_regions` (`056d:0ec6`), and combines them
+through Real48. The result is compared against gold before the op is allowed.
+
+**What is not yet pinned** is the clamped `+0x276` term. That field is a per-day
+counter — written at `0x864f`, incremented at `0x2b603` after a launch, read by
+both the menu and the launcher, and separately tested against the configured cap
+at `[0x1040]`. All four readings above were taken with it at its floor, so they
+only prove the ×64-per-region term; whether the price also rises with each op
+already launched that day needs a capture with the counter above zero. Do not
+assume it is flat.
+
+IB does not charge for this yet: `TerrorCosts` is editable, broadcast and
+displayed, but nothing consumes it. BRE also prices four Special Operations
+entries on their own menu (figures in `docs/dev/bre-screens.md`), which is a
+separate gap.
 "Days before 'lost' forces returned" (`Config.LostForcesDays`, default 3) is an
 **inter-BBS** setting, not a local-combat one. A strike sent to another board is
 away for the whole packet round trip, and packets go missing; the setting gives a
