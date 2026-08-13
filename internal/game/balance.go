@@ -600,6 +600,13 @@ const (
 	PopCapUrban        = 102 // binary
 	PopCapMountain     = 8   // binary
 	PopCapTechnology   = 7   // binary
+	// PopCapWaste is ZERO, and that is a reading of the binary rather than an
+	// omission. BRE's capacity routine (BRE.OVR 0xD08A) loads eight region counts
+	// — `+0x96` through `+0xb2`, one per weight above — and stops. The ninth
+	// count, Waste at `+0xb6`, is never read: eight loads, seven adds. So ruined
+	// land houses nobody, which is what gives a nuclear strike its bite, since
+	// the target keeps every region and its upkeep but loses the people they held.
+	PopCapWaste = 0 // binary: absent from the capacity sum
 
 	PopCapSupportDivisor = 90 // binary: capacity scales by support/90, so 90% support is neutral
 	PopCapTaxNumerator   = 10 // binary: and by 10/tax, so a 10% rate is neutral

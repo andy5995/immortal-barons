@@ -1091,13 +1091,21 @@ capacity = Σ(regions × weight) × support/90 × 10/max(3, tax) + 50
 ```
 
 with per-region weights **Coastal 7 · River 10 · Agricultural 8 · Desert 4 ·
-Industrial 9 · Urban 102 · Mountain 8 · Technology 7**. Raw land does not house
-anyone — the *mix* does, and **Urban outweighs every other type by more than
-ten to one**, so a realm that wants people buys Urban. Support and tax are
+Industrial 9 · Urban 102 · Mountain 8 · Technology 7 · Waste 0**. Raw land does
+not house anyone — the *mix* does, and **Urban outweighs every other type by more
+than ten to one**, so a realm that wants people buys Urban. Support and tax are
 **multiplicative**, not additive: 90% support is neutral and a 10% tax rate is
 neutral, so a realm at 45% support taxing at 20% carries a quarter of what its
 land could otherwise hold. The `+50` is a floor every realm gets regardless of
 holdings.
+
+**Waste is zero, read from the binary rather than assumed.** The routine loads
+eight region counts — `+0x96` through `+0xb2`, one per weight above — and stops;
+the ninth count, Waste at `+0xb6`, is never read (eight loads, seven adds). Ruined
+land therefore houses nobody, which is where a nuclear strike gets its bite: the
+target keeps every region and goes on paying upkeep on it, but the people those
+regions held drain away as the population settles to a capacity that no longer
+counts them.
 
 Each turn the population moves toward that capacity:
 

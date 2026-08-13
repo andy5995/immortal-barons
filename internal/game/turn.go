@@ -636,7 +636,8 @@ func (e *Empire) popCapacity() int {
 		e.Regions.Industrial*PopCapIndustrial +
 		e.Regions.Urban*PopCapUrban +
 		e.Regions.Mountain*PopCapMountain +
-		e.Regions.Technology*PopCapTechnology
+		e.Regions.Technology*PopCapTechnology +
+		e.Regions.Waste*PopCapWaste // zero, and deliberately spelled out
 	cap = cap * e.Support / PopCapSupportDivisor
 	tax := e.Tax
 	if tax < PopCapTaxFloor {
