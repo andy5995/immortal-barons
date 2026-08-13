@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"fmt"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/screen"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
@@ -24,6 +25,14 @@ import (
 // Modern terminals and xterm.js render the 256-color ramps; a 16-color client
 // degrades gracefully.
 //
+// The art fills all 80 columns, which is only safe because Splash turns AUTOWRAP
+// OFF around it (ansi.WrapOff). Painting column 80 otherwise wraps the cursor by
+// itself and the row's own CR/LF advances a second time, leaving a blank line
+// between every row — which is how this art once reached SyncTERM as alternating
+// picture and black bands while looking perfect locally. Terminals disagree on
+// when that wrap fires (xfce defers it, SyncTERM does not), so a local check
+// cannot catch it. Leave the wrap toggle in place if the art stays full-width.
+//
 //go:embed screens/splash.ans
 var splashANS []byte
 
@@ -31,6 +40,8 @@ var splashANS []byte
 // FromCP437 decodes the .ans to the engine's internal UTF-8; the session's wire
 // encoder re-encodes to CP437 for a CP437 door.
 func Splash(s session.Session) {
-	fmt.Fprint(s, screen.FromCP437(splashANS))
+	// Autowrap off for the art: it fills all 80 columns, and column 80 would
+	// otherwise wrap the cursor on top of the row's own CR/LF. See ansi.WrapOff.
+	fmt.Fprint(s, ansi.WrapOff, screen.FromCP437(splashANS), ansi.WrapOn)
 	pauseTight(s) // the art ends on its own line; BRE's prompt sits right under it
 }

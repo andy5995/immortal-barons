@@ -9,7 +9,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/screen"
 )
 
-var anyEscape = regexp.MustCompile("\x1b\\[[0-9;]*[A-Za-z]")
+var anyEscape = regexp.MustCompile("\x1b\\[[0-9;?]*[A-Za-z]")
 
 // screenRows counts the rows a rendered screen occupies, ignoring colour.
 func screenRows(out string) int {

@@ -7,7 +7,7 @@ import (
 )
 
 // ansiEsc matches SGR/cursor escape sequences.
-var ansiEsc = regexp.MustCompile("\x1b\\[[0-9;]*[A-Za-z]")
+var ansiEsc = regexp.MustCompile("\x1b\\[[0-9;?]*[A-Za-z]")
 
 // stripANSI removes escape sequences so structural checks can match "(K)" key
 // markers that the menu now colors piece by piece (dim parens, bright key).

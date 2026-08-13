@@ -14,6 +14,17 @@ const (
 	Home      = esc + "H"              // cursor to top-left
 	Clear     = esc + "2J" + esc + "H" // clear screen, cursor home
 
+	// WrapOff/WrapOn toggle DECAWM, the terminal's automatic line wrap. Full-width
+	// art needs this: painting column 80 of an 80-column terminal wraps the cursor
+	// by itself, and the row's own CR/LF then advances a SECOND time, leaving a
+	// blank line between every row. Terminals differ on when that fires — xfce
+	// defers the wrap until the next character, SyncTERM takes it immediately — so
+	// art that looks right locally can come out banded over a BBS. With wrap off,
+	// column 80 simply leaves the cursor where it is and CR/LF does the line break,
+	// which behaves the same either way and at any width.
+	WrapOff = esc + "?7l"
+	WrapOn  = esc + "?7h"
+
 	FgBlack   = esc + "30m"
 	FgRed     = esc + "31m"
 	FgGreen   = esc + "32m"
