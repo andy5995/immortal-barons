@@ -1163,6 +1163,48 @@ by changed that turn.** Purchases land between the report and the Regions
 display, so a total can print next to a STALE count. Twice in one session a
 changed denominator was mistaken for a changed mechanic.
 
+### First ask whether the capture EXERCISED the feature at all
+
+A capture that mentions a feature thousands of times may never have used it
+once. BRE presents the Attack Menu and the InterPlanetary Ops menu **every
+turn, automatically**, so their item labels accumulate once per turn whether or
+not the player pressed anything. A 27 MB capture matched "Group Attack" 5,385
+times and looked like a goldmine; it contained no interplanetary attack at all.
+
+**The tell is equal counts across sibling items.** Count several items from the
+same menu at once — when `Regular Attack`, `Nuclear Attack`, `Attack Pirates`
+and `Alliance Strength` all land on 2,498, that is the menu being redrawn 2,498
+times, not four features being used. A number that *breaks* from the cluster is
+the one worth chasing (`Spy Database` at 13,155 against a 2,534 menu count is
+real use; the 317 non-menu `Group Attack` hits were `BRE PLANETARY` step lines).
+
+**Prove absence with the binary's own result strings, not with guessed wording.**
+Harvest the Pascal ShortStrings from `BRE.OVR`, filter to the mechanic's
+vocabulary, and test each against the capture — that answers "is this flow here"
+without depending on how you remember the prompt being worded:
+
+```
+python3 - "$BRE/BRE.OVR" plain.txt <<'EOF'
+import re,sys
+ovr=open(sys.argv[1],'rb').read(); cap=open(sys.argv[2],'rb').read()
+c=[m.group(2)[:m.group(1)[0]] for m in re.finditer(rb'([\x08-\x3c])([ -~]{8,60})',ovr)
+   if len(m.group(2)[:m.group(1)[0]])==m.group(1)[0]]
+kw=(b'attack',b'strike',b'battle')          # the mechanic's vocabulary
+for s in sorted({x for x in c if any(k in x.lower() for k in kw)} , key=lambda x:-cap.count(x)):
+    if cap.count(s): print(f"{cap.count(s):>6}  {s.decode('latin-1')}")
+EOF
+```
+
+Run this **before** planning a mining session. It takes one command and it is
+the difference between an afternoon of analysis and knowing in a minute that the
+data is not there.
+
+**`grep` calls these captures binary and silently reports nothing.** CP437 high
+bytes in a UTF-8 locale make GNU grep exit 1 with no output and no "Binary file
+matches" — the same trap the `breins.txt` section describes, in a new place. Use
+`LC_ALL=C` **and** `grep -a`; a bare grep returning zero on a capture is not
+evidence of absence until both are set.
+
 ### Auto-Pay turns are a stronger probe than the itemised prompts
 
 With **Auto-Pay Maintenance ON**, BRE collapses the whole maintenance sequence
