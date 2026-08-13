@@ -10,7 +10,12 @@ description: >-
   art to the splash screen", or "the header looks plain." Covers the
   CP437/Unicode block glyphs, the 16-color ANSI palette, half-block sub-pixel
   shading, 3D depth and lighting, the UTF-8-vs-CP437 encoding trap, and
-  embedding finished art into source code.
+  embedding finished art into source code. ALSO use this when existing art
+  renders WRONG on a terminal or BBS client — striping, banding, blank lines
+  between rows, a black gutter down one edge, art that "looks fine locally but
+  breaks over telnet/SyncTERM", wrapped or doubled rows, mojibake block
+  characters, or colors that come out flat — since the causes (autowrap at
+  column 80, CP437-vs-UTF-8, palette depth) are the same craft as authoring it.
 ---
 
 # ANSI / Text-Mode Artwork
@@ -29,7 +34,9 @@ renders. That constraint is the whole point.
 
 - **Canvas:** default to **80 columns** wide. It is the one width nearly every
   terminal and BBS client assumes without negotiation. Height is flexible; a
-  full DOS screen is 25 rows (or 50 in the tall mode).
+  full DOS screen is 25 rows (or 50 in the tall mode). **Painting column 80 is
+  the single biggest trap in the medium — read "Full-width art" below BEFORE
+  authoring anything that reaches the last column.**
 - **A cell** = glyph + foreground color + background color. Color is set with
   ANSI escape (SGR) codes and stays in effect until you change it.
 - **The palette is 16 colors** (8 normal + 8 bright). Backgrounds are often
@@ -103,6 +110,61 @@ interchangeable at the byte level.**
 
 `references/glyphs.md` has the full CP437-hex ↔ Unicode ↔ glyph table for every
 block, shade, and box-drawing character.
+
+## Full-width art: the column-80 autowrap trap (the #2 gotcha)
+
+**Symptom:** the piece renders perfectly in your local terminal and comes out of
+a BBS client as alternating bands — one row of picture, one row of black, all the
+way down. Or you dodge that by trimming the art and get a black gutter down the
+right edge instead.
+
+**Cause:** painting the last column of an N-column terminal triggers its
+automatic line wrap. The row's own CR/LF then advances a *second* time, so every
+full-width row is followed by a blank one. Terminals disagree about *when* the
+wrap fires — xterm/xfce-terminal DEFER it until the next printable character,
+SyncTERM takes it IMMEDIATELY — which is why the same bytes look right in one and
+banded in the other.
+
+**This is invisible to a local check.** A local terminal is usually wider than
+80, so nothing wraps at all. Reproduce it by resizing to exactly the target
+width; at 80 the art is fine and at 79 an 80-wide piece bands instantly. That
+one-step comparison beats any amount of reasoning about the file.
+
+**Do not diagnose this as a color problem.** Banding looks like lost background
+color, and with half-block art (`▀`, fg = top pixel, bg = bottom pixel) the
+"every other row is black" pattern is exactly what a dropped background would
+produce. Real case in this repo: two consecutive wrong diagnoses — "256-color
+unsupported", then "256-color *backgrounds* unsupported" — both disproved by a
+screenshot of another screen whose `48;5;` grays rendered fine. **The tell that
+it is geometry and not palette: "it looks fine locally." A palette does not
+change with terminal width.**
+
+Three ways to author full-width art. Pick one and be deliberate:
+
+1. **Turn autowrap off around the piece** — `ESC[?7l` before, `ESC[?7h` after
+   (DECAWM). Column 80 then leaves the cursor where it is and CR/LF does the
+   line break, so it behaves identically on deferred-wrap and immediate-wrap
+   terminals and at any width. **Verified working on SyncTERM.** This is the
+   fix to reach for when the art is already authored as rows plus newlines.
+2. **Emit no line breaks at all** and let the wrap create every row — the file is
+   one continuous stream of exactly `width × rows` cells. Small classic pieces do
+   this. It needs the terminal to be exactly the art's width; wider and the rows
+   run together.
+3. **Position every row explicitly** with `ESC[<row>;<col>H`, never relying on
+   wrap or newlines. This is what large scene pieces do — `DEBBIEDO.ANS` from
+   TradeWars carries 575 cursor moves beside its 268 CR/LF pairs, `STARTREK.ANS`
+   223 beside 80. Most robust, most bytes, and what art editors emit.
+
+Beware generalising from a sample: the *small* files in that same collection have
+zero newlines (technique 2) while the big ones are cursor-positioned (technique
+3). Check the specific file rather than the directory.
+
+**Keep a width guard in the test suite.** A test that strips escapes and asserts
+no rendered line exceeds the target width catches this the moment art changes.
+Make sure its escape-stripping regex covers PRIVATE-MODE sequences —
+`\x1b\[[0-9;]*[A-Za-z]` does **not** match `ESC[?7l`, so the `?` form gets
+counted as five visible columns and the guard fires a false positive. Use
+`\x1b\[[0-9;?]*[A-Za-z]`.
 
 ## Plain ASCII art (7-bit) — the portable sibling medium
 
