@@ -11,6 +11,8 @@
   * Inter-BBS packets carry the sending board's signature, and a board whose
     key is in the league roster can no longer be impersonated
   * Added "-gen-board-key" to create this board's packet-signing key
+  * See Scores, the attack target list and the View Treaties roster mark a
+    baron who is on the board with "(O)" beside their name
   * Population follows the original's model: the kind of land a realm owns —
     Urban far outweighing every other type — scaled by popular support and
     divided by the tax rate. Acreage alone no longer houses anyone

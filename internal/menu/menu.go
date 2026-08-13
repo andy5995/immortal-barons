@@ -437,8 +437,14 @@ func Run(s session.Session, g *ctx, root *Menu) error {
 
 // postActionCheck runs the shared after-every-action inspection under one world
 // transaction (on the door that is a reload, so it sees other nodes' commits):
-// events that arrived mid-session, and whether the empire is gone or dead. A
-// nil Player (removed) counts as eliminated too.
+// events that arrived mid-session, whether the empire is gone or dead, and the
+// presence stamp the roster screens read. A nil Player (removed) counts as
+// eliminated too.
+//
+// This is where the stamp is REFRESHED; play.Session sets it once more, before
+// the opening menu, so a caller who never acts is still on the roster. Being
+// the only per-action transaction, this refresh costs nothing beyond the write
+// already happening here.
 func postActionCheck(g *ctx) (news []string, dead bool) {
 	g.With(func() {
 		p := g.Player()
@@ -446,6 +452,7 @@ func postActionCheck(g *ctx) (news []string, dead bool) {
 			dead = true
 			return
 		}
+		p.MarkActive()
 		dead = !p.Alive
 		news = g.takeSessionNews(p)
 	})

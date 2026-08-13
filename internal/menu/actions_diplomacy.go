@@ -422,7 +422,10 @@ const (
 // pact plus a pending type would overflow 80 columns.
 func viewDiplomacy(s session.Session, w *ctx) Result {
 	p := w.Player()
-	type row struct{ id, name, treaties string }
+	type row struct {
+		id, name, treaties string
+		online             bool
+	}
 	var rows []row
 	var pending []game.PendingProposal
 	w.With(func() {
@@ -440,7 +443,7 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 			if len(named) > 0 {
 				relations = strings.Join(named, ", ")
 			}
-			rows = append(rows, row{w.EmpireLetter(e), e.Name, relations})
+			rows = append(rows, row{w.EmpireLetter(e), e.Name, relations, e.Online()})
 		}
 	})
 	rule := ansi.FgBlue + insetRule(relationsRuleWidth, relationsRuleDouble) + ansi.Reset
@@ -449,8 +452,17 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 		tr(s, "Id"), relationsNameWidth, tr(s, "Empire Name"), tr(s, "Relations"), ansi.Reset)
 	fmt.Fprintln(s, rule)
 	for _, r := range rows {
-		fmt.Fprintf(s, "%s[%s%s%s]%s  %-*s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
-			ansi.FgBrightCyan, relationsNameWidth, r.name, ansi.FgBrightBlue, r.treaties, ansi.Reset)
+		// The online mark takes the FIRST of the two spaces BRE leaves after
+		// "[X]", so the second still separates it from the name and every
+		// captured column holds: name field 40, Relations at 45. A headed column
+		// of its own — as the two score tables get — would move Relations, and
+		// this screen is one of the closest matches to the original. The cost is
+		// that the mark has no heading here; the Scores screen is where a player
+		// meets it labelled.
+		fmt.Fprintf(s, "%s[%s%s%s]%s  %s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
+			ansi.Reset,
+			nameCell(s, r.name, ansi.FgBrightCyan, r.online, relationsNameWidth),
+			ansi.FgBrightBlue, r.treaties, ansi.Reset)
 	}
 	fmt.Fprintln(s, rule)
 	if len(pending) > 0 {

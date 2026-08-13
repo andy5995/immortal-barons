@@ -1154,3 +1154,14 @@ const (
 	TravelMinutesCutoff = 1.0 / 24        // days; under this the screen reads in minutes
 	TravelSecondsCutoff = 1.0 / (24 * 60) // days; under this the screen reads in seconds
 )
+
+// Online indicator — how long after a baron's last menu action the roster
+// screens still mark them online. IB's own; BRE has no such display.
+//
+// Short on purpose. A clean logoff (and a caught disconnect) zeroes the stamp
+// outright, so this window only covers a session that died without unwinding —
+// a hard crash or a reset board. Of the two ways the indicator can be wrong,
+// showing an absent baron as online is the misleading one: it invites a player
+// to wait for a reply that is not coming, or to hold off a strike. Showing a
+// present baron as absent costs nothing.
+const OnlineWindowSecs = 300

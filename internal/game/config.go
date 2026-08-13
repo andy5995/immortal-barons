@@ -155,11 +155,19 @@ const (
 	MaxLandPerDay         = 5000  // Daily Land Creation ceiling (default 1000)
 	MaxInitialMarketLand  = 50000 // Initial Market Land ceiling (default 0)
 	MaxPurchasableRegions = 10000 // Max Purchasable Regions ceiling (default 500)
-	MaxPlanetaryTaxRate   = 20    // Planetary (crown) Tax Rate ceiling, whole percent (default 5)
-	MaxLostForcesDays     = 30    // "Days before lost forces returned" ceiling (default 3; 0 = never return)
-	MaxPlayerTaxRate      = 50    // ceiling for MaxTaxRate (IB's own cap; BRE has none, its prompt is [0-100])
-	MaxBankInterest       = 200   // Bank Interest Rate ceiling (default 50; 200 = 20%/day)
-	MaxStdInvestRate      = 100   // Standard Investment Rate ceiling (default 35; 100 = 10%/day)
+	// MaxPlayersPerBoard is the ceiling for Max Players Per BBS. A realm is
+	// addressed by a LETTER on every screen that lists one — See Scores, the
+	// attack picker, the recipient picker, Relations — and **Z is reserved for
+	// "All"** in the pickers ("(A-Y,Z=All,?=List) Send to:"). So realms may take
+	// A..Y only, which is 25 and is why the default has always been 25. The
+	// editor used to allow 100000, letting a sysop configure a board whose realms
+	// could not all be named — the picker silently truncated its roster at 25.
+	MaxPlayersPerBoard  = 25
+	MaxPlanetaryTaxRate = 20  // Planetary (crown) Tax Rate ceiling, whole percent (default 5)
+	MaxLostForcesDays   = 30  // "Days before lost forces returned" ceiling (default 3; 0 = never return)
+	MaxPlayerTaxRate    = 50  // ceiling for MaxTaxRate (IB's own cap; BRE has none, its prompt is [0-100])
+	MaxBankInterest     = 200 // Bank Interest Rate ceiling (default 50; 200 = 20%/day)
+	MaxStdInvestRate    = 100 // Standard Investment Rate ceiling (default 35; 100 = 10%/day)
 )
 
 // MaxLeagueNumber is the League Number ceiling. Not from a Configuration Help

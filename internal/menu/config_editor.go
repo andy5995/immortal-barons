@@ -317,9 +317,9 @@ func configPages(ibbs bool) []cfgPage {
 		num(10, "Max Purchasable Regions", "Max Purchasable Regions",
 			func(c *game.Config) int { return c.MaxRegions },
 			func(c *game.Config, v int) { c.MaxRegions = v }, game.MaxPurchasableRegions),
-		num(11, "Max Players Per BBS", "Max Players Per BBS (0 = unlimited)",
+		num(11, "Max Players Per BBS", "Max Players Per BBS (1-25; 0 = unlimited)",
 			func(c *game.Config) int { return c.MaxPlayers },
-			func(c *game.Config, v int) { c.MaxPlayers = v }, 100000),
+			func(c *game.Config, v int) { c.MaxPlayers = v }, game.MaxPlayersPerBoard),
 		{n: 23, label: "Board ID",
 			value: func(c *game.Config) string { return c.BoardID },
 			edit: func(s session.Session, c *game.Config) {

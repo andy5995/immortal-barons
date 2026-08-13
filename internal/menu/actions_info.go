@@ -555,9 +555,15 @@ func foodMarketStr(s session.Session, c game.Config) string {
 }
 
 // playerList shows every living empire (Coordinator tool).
+// playerListNameWidth holds a realm name AND the online suffix. The column was
+// 16 before the suffix existed; keeping it there would have clipped ordinary
+// names down to seven characters to make room.
+const playerListNameWidth = 25
+
 func playerList(s session.Session, w *ctx) Result {
 	type row struct {
 		name, owner string
+		online      bool
 		land, nw    int
 	}
 	var rows []row
@@ -566,17 +572,19 @@ func playerList(s session.Session, w *ctx) Result {
 			if !e.Alive {
 				continue
 			}
-			rows = append(rows, row{e.Name, e.Owner, e.Land, w.NetWorth(e)})
+			rows = append(rows, row{e.Name, e.Owner, e != w.Player() && e.Online(), e.Land, w.NetWorth(e)})
 		}
 	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightBlue, tr(s, "Player List"), ansi.Reset)
-	fmt.Fprintf(s, "  %-16s %-14s %-8s %s\n", tr(s, "Empire"), tr(s, "Owner"), tr(s, "Land"), tr(s, "Net Worth"))
+	fmt.Fprintf(s, "  %-*s %-14s %-8s %s\n", playerListNameWidth, tr(s, "Empire"), tr(s, "Owner"), tr(s, "Land"), tr(s, "Net Worth"))
 	for _, r := range rows {
 		owner := r.owner
 		if owner == "" {
 			owner = tr(s, "(AI)")
 		}
-		fmt.Fprintf(s, "  %-16s %-14s %-8d %d\n", r.name, owner, r.land, r.nw)
+		// The suffix rides in the name column, so the roster that names who owns
+		// each realm also says who is on without moving the columns beside it.
+		fmt.Fprintf(s, "  %s %-14s %-8d %d\n", nameCell(s, r.name, "", r.online, playerListNameWidth), owner, r.land, r.nw)
 	}
 	pause(s)
 	return Stay
@@ -814,9 +822,9 @@ func printScores(s session.Session, w *ctx) {
 	// Snapshot every empire's rank inputs together so the board reflects one
 	// consistent moment, even if another session mutates the world mid-render.
 	type row struct {
-		name            string
-		alive, isPlayer bool
-		land, score, nw int
+		name                    string
+		alive, isPlayer, online bool
+		land, score, nw         int
 	}
 	var rows []row
 	var lastMaster string
@@ -830,7 +838,13 @@ func printScores(s session.Session, w *ctx) {
 			// Net Worth is the asset value (land + military). Score is BRE's
 			// cumulative metric (Empire.Score): the day-start net worth awarded per
 			// turn played, minus small riot/spoilage dings — separate from wealth.
-			rows = append(rows, row{e.Name, e.Alive, e == w.Player(), e.Land, e.Score, nw})
+			// Never mark your own realm: you know you are here, and the row is
+			// already singled out by its bright-yellow name. Marking it would
+			// also be the one row whose stamp is guaranteed fresh, so it would
+			// read as the most reliable entry on a screen where it carries no
+			// information at all.
+			self := e == w.Player()
+			rows = append(rows, row{e.Name, e.Alive, self, !self && e.Online(), e.Land, e.Score, nw})
 		}
 		lastMaster = w.LastMaster
 	})
@@ -839,13 +853,9 @@ func printScores(s session.Session, w *ctx) {
 	// BRE-style scores screen (matches a live BRE scores screen): a game-name
 	// banner, lettered (A)/(B) ids, Id / Empire Name / Territory / Score /
 	// Net Worth columns, magenta header/footer rules. IB-branded.
-	rule := strings.Repeat("─", 72)
 	fmt.Fprintf(s, "\n%s-*%s%s%s%s*-%s\n\n",
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
-	fmt.Fprintf(s, "%s%-4s %-26s %10s %11s %11s%s\n",
-		ansi.FgBrightWhite, tr(s, "Id"), tr(s, "Empire Name"),
-		tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
+	scoreTableHead(s)
 	for i, r := range rows {
 		name := r.name
 		if !r.alive {
@@ -855,17 +865,109 @@ func printScores(s session.Session, w *ctx) {
 		if r.isPlayer {
 			nameColor = ansi.FgBrightYellow // highlight the caller's own realm
 		}
-		fmt.Fprintf(s, "%s%-4s%s %s%-26s%s %s%10d%s %s%11d%s %s%11d%s\n",
-			ansi.FgBrightMagenta, scoreID(i), ansi.Reset,
-			nameColor, name, ansi.Reset,
-			ansi.FgBrightMagenta, r.land, ansi.Reset,
-			ansi.FgBrightWhite, r.score, ansi.Reset,
-			ansi.FgWhite, r.nw, ansi.Reset)
+		scoreTableRow(s, scoreID(i), name, nameColor, r.online, r.land, r.score, r.nw)
 	}
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
+	scoreTableRule(s)
 	if lastMaster != "" {
 		fmt.Fprintf(s, "\n"+tr(s, "Last Planetary Master: %s")+"\n", lastMaster)
 	}
+}
+
+const (
+	scoreRuleWidth = 72
+	// scoreIDCellWidth is the id column. Three columns is the whole id: a realm
+	// is addressed by a letter, and Max Players Per BBS is capped at 26 for that
+	// reason (game.MaxPlayersPerBoard), so `(A)`..`(Z)` is every id there is. The
+	// attack picker leaves it EMPTY for a realm that cannot be attacked, which
+	// this still holds in place. A board configured "unlimited" can hand out
+	// `(27)`, which widens its own row and moves nothing else.
+	scoreIDCellWidth = 3
+	// scoreNameWidth is the name column. It carries the online suffix too, so
+	// the figures beside it do not move when a baron comes or goes.
+	scoreNameWidth  = 26
+	scoreOnlineMark = "O"
+)
+
+// onlineMark renders the indicator, or a blank of the same width. Both the
+// score tables and the Relations roster call it, so the two cannot drift into
+// showing the same thing two ways.
+//
+// It is drawn as an inverse-video cell — a lit key against the dim table —
+// rather than a colored glyph. Reverse plus a bright FOREGROUND is what gets a
+// bright background here: the `10x` bright-background codes are an aixterm
+// extension, and on the classic CP437 clients a BBS door actually meets, that
+// high-intensity background bit means blink. Black on bright yellow measures
+// 19.7:1 against the VGA palette and 19.6:1 against xterm's; plain `43m` yellow
+// would be 4.0:1 on VGA and fail. The `O` still carries the meaning on its own
+// for a monochrome or ANSI-less session.
+// onlineMark marks a baron who is on the board: "(O)" set immediately to the
+// LEFT of their name, or a blank of the same width so the name column holds in
+// both states.
+//
+// The LETTER takes the lighter gray and the parens the darker one, not the other
+// way round. Measured against a black background, gray (37) is 9.04:1 on the
+// VGA/CP437 palette and 11.54:1 on xterm's, while dark gray (90) is 2.82:1 and
+// 5.32:1 — so on the CP437 clients a BBS door actually meets, dark gray misses
+// the 4.5:1 target by a wide margin. The parens are decoration and can carry
+// that; the letter cannot, because it is the whole message.
+// markWidth is the mark's column cost — "(O)" and whatever a translation makes
+// of the letter — so headings and blanks can be sized from one place.
+func markWidth(s session.Session) int { return len([]rune(tr(s, scoreOnlineMark))) + 2 }
+
+func onlineMark(s session.Session, online bool) string {
+	if !online {
+		return strings.Repeat(" ", markWidth(s))
+	}
+	return ansi.FgBrightBlack + "(" + ansi.FgWhite + tr(s, scoreOnlineMark) +
+		ansi.FgBrightBlack + ")" + ansi.Reset
+}
+
+// nameCell renders the online mark hugging a realm's name on the left, then
+// pads the pair to width. It measures the PLAIN text: the mark carries escapes
+// that a width verb counts as characters, which is what would otherwise ragged
+// the column beside it.
+//
+// It also CLIPS a name too long for the cell. Nothing caps a realm's name at
+// onboarding — only a three-character minimum is enforced — so a long one used
+// to push the figures beside it out of true. The mark survives the clip: it is
+// the part carrying information the row cannot show twice.
+func nameCell(s session.Session, name, nameColor string, online bool, width int) string {
+	mark := markWidth(s)
+	if room := width - mark; len([]rune(name)) > room {
+		name = string([]rune(name)[:max(room, 0)])
+	}
+	return onlineMark(s, online) + nameColor + name + ansi.Reset +
+		strings.Repeat(" ", max(width-mark-len([]rune(name)), 0))
+}
+
+func idCell(id string, idColor string) string {
+	return idColor + id + ansi.Reset + strings.Repeat(" ", max(scoreIDCellWidth-len(id), 0))
+}
+
+// The scores table is drawn on three screens — the Scores display, the attack
+// target picker, and the recipient picker — so its geometry and colors live
+// here once. They previously carried a copy each of the same format strings,
+// which is how a change to one silently leaves the others behind.
+func scoreTableRule(s session.Session) {
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, strings.Repeat("─", scoreRuleWidth), ansi.Reset)
+}
+
+func scoreTableHead(s session.Session) {
+	// The heading sits over the names, which the online mark's gutter indents.
+	fmt.Fprintf(s, "%s%-*s%-*s %10s %11s %11s%s\n",
+		ansi.FgBrightWhite, scoreIDCellWidth, tr(s, "Id"),
+		scoreNameWidth, strings.Repeat(" ", markWidth(s))+tr(s, "Empire Name"),
+		tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
+	scoreTableRule(s)
+}
+
+func scoreTableRow(s session.Session, id, name, nameColor string, online bool, land, score, nw int) {
+	fmt.Fprintf(s, "%s%s %s%10d%s %s%11d%s %s%11d%s\n",
+		idCell(id, ansi.FgBrightMagenta),
+		nameCell(s, name, nameColor, online, scoreNameWidth),
+		ansi.FgBrightMagenta, land, ansi.Reset,
+		ansi.FgBrightWhite, score, ansi.Reset,
+		ansi.FgWhite, nw, ansi.Reset)
 }
 
 // scoreID is the lettered id for a scores row — (A), (B), … (Z), then (27)+ for
