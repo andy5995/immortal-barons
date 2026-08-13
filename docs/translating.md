@@ -70,10 +70,12 @@ msgstr "Regionen kaufen"
 
    This writes the translated Markdown under `internal/help/content.<lang>/`.
 
-## Refresh the catalogs after the English text changes
+## Refresh the catalogs when they fall behind
 
-When the game's English text changes, the catalogs need new entries. These
-commands add them; run them from the project root.
+The catalogs are refreshed in batches — before a release, when a language is
+added, or when you are about to translate — rather than after every English
+edit. A string that changed since the last refresh renders in English until
+then. Run these from the project root.
 
 ### Interface
 

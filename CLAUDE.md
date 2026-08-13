@@ -30,8 +30,8 @@ go test ./...
 go test ./internal/play/ -race        # the concurrency tests — run these when touching the store
 go run ./cmd/immortal-barons -local   # play locally in your terminal
 gofmt -w .                 # always run before committing
-python3 scripts/gen-ui-pot.py && scripts/merge-ui-po.sh   # after changing ANY tr() string
-scripts/gen-help-translations.sh   # after changing ANY internal/help/content/ file
+python3 scripts/gen-ui-pot.py && scripts/merge-ui-po.sh   # UI strings — see below
+scripts/gen-help-translations.sh   # help topics — see below
 ```
 
 Go 1.26. Prefer the standard library, but a dependency is fine when it clearly
@@ -41,12 +41,25 @@ Keep the set small and justified. Commit `go.mod`/`go.sum`; do NOT commit
 `vendor/` (distros build against their own packaged deps or fetch at build); a
 release tarball may `go mod vendor` for offline builds. i18n uses gettext/PO:
 **po4a** for the help docs and a small **in-house PO reader** (`internal/i18n`,
-no runtime dependency) for UI strings. **These are two separate generation
-passes and editing one kind of string does not regenerate the other** — a help
-topic needs `gen-help-translations.sh` (which rewrites `content.de/`,
-`content.ru/` and `po/help/`), a `tr()` string needs the `gen-ui-pot.py` pair.
-Running only the UI one after editing a help topic leaves the German and Russian
-copies of that topic stale, with nothing failing to say so.
+no runtime dependency) for UI strings. They are two separate generation passes —
+a help topic goes through `gen-help-translations.sh` (which rewrites
+`content.de/`, `content.ru/` and `po/help/`), a `tr()` string through the
+`gen-ui-pot.py` pair — and running one does not regenerate the other.
+
+**Do not regenerate translations as a matter of course.** Run these passes only
+when preparing a release, when a new translation is added, or when the parity
+test forces it (below). Reworded English with a stale translation still renders:
+the PO catalogs fall back per string, so the reader sees English for what has
+moved on, which is the intended behaviour and not a defect to chase. Running the
+passes on every text edit instead churns the `.po` files and the `content.de/`
+and `content.ru/` trees on unrelated commits.
+
+The one case that cannot wait: **adding, renaming, or removing a help topic
+requires `gen-help-translations.sh` in the same change.**
+`TestHelpTranslationParity` walks the language trees and fails when an English
+topic has no counterpart or a translated file has no English source, so a topic
+added without regenerating breaks `go test ./...`. That test checks structure
+only, never freshness, which is what makes deferring the rest safe.
 
 ## Architecture
 
