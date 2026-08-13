@@ -174,8 +174,12 @@ type Empire struct {
 	// never-played sweep from erasing a realm the same day it was created — its
 	// owner is entitled to the day they joined, and on a multi-node board another
 	// caller's login can roll the day over while they are still at the menu.
-	CreatedDay       int
-	LastPlayed       string
+	CreatedDay int
+	LastPlayed string
+	// LastActive is the unix time of this baron's most recent menu action, and
+	// feeds only the online indicator on the roster screens. Zeroed on a clean
+	// session end; see presence.go.
+	LastActive       int64 `json:"lastActive,omitempty"`
 	Events           []Event
 	Mail             []Message
 	PirateHits       []PirateHit // raids suffered since last play; shown in the income report

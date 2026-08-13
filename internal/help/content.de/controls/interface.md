@@ -31,4 +31,12 @@ title, and Backspace or `Q` goes back. If your terminal cannot show colour
 and cursor control, those lists are numbered instead — type the number and
 press Enter.
 
+## Who else is on
+
+An `O` beside a realm's letter — on See Scores, the attack and message
+target lists, and the View Treaties roster — means that baron is on the
+board with you. Your own realm never carries it. It clears when they log
+off, and also a few minutes after their last keypress, so someone sitting on
+one screen can drop off the list without having left.
+
 Drücken Sie `?` in einem Menü, um diese Hilfe zu öffnen.

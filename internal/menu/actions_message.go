@@ -101,13 +101,14 @@ func pickRecipient(s session.Session, w *ctx, opts pickOpts) (*game.Empire, send
 	type row struct {
 		e               *game.Empire
 		name            string
+		online          bool
 		land, score, nw int
 	}
 	var rows []row
 	allies := 0
 	w.With(func() {
 		for _, e := range recipients(w) {
-			rows = append(rows, row{e: e, name: e.Name, land: e.Land, score: e.Score, nw: w.NetWorth(e)})
+			rows = append(rows, row{e: e, name: e.Name, online: e.Online(), land: e.Land, score: e.Score, nw: w.NetWorth(e)})
 		}
 		if opts.allowAll { // the only callers that can offer the all-allies target
 			allies = len(w.TreatyPartners(w.Player()))
@@ -124,13 +125,15 @@ func pickRecipient(s session.Session, w *ctx, opts pickOpts) (*game.Empire, send
 		rule := ansi.FgMagenta + insetRule(pickRuleWidth, pickRuleDouble) + ansi.Reset
 		fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n",
 			ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.FgBrightMagenta, ansi.Reset)
-		fmt.Fprintf(s, "%s%-4s %-*s %10s %11s %11s%s\n%s\n", ansi.FgBrightWhite,
-			tr(s, "Id"), pickNameWidth, tr(s, "Empire Name"),
+		fmt.Fprintf(s, "%s%-*s%-*s %10s %11s %11s%s\n%s\n", ansi.FgBrightWhite,
+			scoreIDCellWidth, tr(s, "Id"), pickNameWidth, strings.Repeat(" ", markWidth(s))+tr(s, "Empire Name"),
 			tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset, rule)
 		for i, r := range rows {
-			fmt.Fprintf(s, "%s(%c)%s %s%-*s%s %s%10s%s %s%11s%s %s%11s%s\n",
-				ansi.FgBrightMagenta, 'A'+i, ansi.Reset,
-				ansi.FgBrightWhite, pickNameWidth, r.name, ansi.Reset,
+			// idCell also squares the roster with its own heading: the rows used
+			// to put the name one column left of where "Empire Name" starts.
+			fmt.Fprintf(s, "%s%s %s%10s%s %s%11s%s %s%11s%s\n",
+				idCell(fmt.Sprintf("(%c)", 'A'+i), ansi.FgBrightMagenta),
+				nameCell(s, r.name, ansi.FgBrightWhite, r.online, pickNameWidth),
 				ansi.FgBrightMagenta, comma(r.land), ansi.Reset,
 				ansi.FgBrightWhite, comma(r.score), ansi.Reset,
 				ansi.FgWhite, comma(r.nw), ansi.Reset)

@@ -16,6 +16,10 @@ msgstr ""
 msgid " (floating)"
 msgstr ""
 
+#: internal/menu/actions_info.go
+msgid "O"
+msgstr ""
+
 #: internal/menu/actions_info.go:544
 msgid " (steady)"
 msgstr ""

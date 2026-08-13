@@ -89,7 +89,7 @@ func hiNums(s string) string { return hiNumsIn(s, ansi.FgBrightYellow) }
 type targetRow struct {
 	name                  string
 	land, score, netWorth int
-	attackable            bool
+	attackable, online    bool
 }
 
 // snapshotTargets copies every LIVING rival (not just the attackable ones) under
@@ -109,7 +109,7 @@ func snapshotTargets(w *ctx) []targetRow {
 				continue
 			}
 			attackable := e.Protection == 0 && !w.AreAllied(p, e)
-			rows = append(rows, targetRow{e.Name, e.Land, e.Score, w.NetWorth(e), attackable})
+			rows = append(rows, targetRow{e.Name, e.Land, e.Score, w.NetWorth(e), attackable, e.Online()})
 		}
 	})
 	return rows
@@ -237,11 +237,7 @@ func warnTrimmedForce(s session.Session, trimmed bool) {
 // the diplomacy menus. Returns the chosen realm name, or chosen=false if the
 // player aborts (RETURN / any non-letter) or nothing is attackable.
 func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name string, chosen bool) {
-	rule := strings.Repeat("─", 72)
-	fmt.Fprintf(s, "%s%-4s %-26s %10s %11s %11s%s\n",
-		ansi.FgBrightWhite, tr(s, "Id"), tr(s, "Empire Name"),
-		tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
+	scoreTableHead(s)
 	var names []string
 	for _, r := range rows {
 		id := "" // no selection letter for a realm that can't be attacked
@@ -249,14 +245,9 @@ func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name 
 			id = scoreID(len(names))
 			names = append(names, r.name)
 		}
-		fmt.Fprintf(s, "%s%-4s%s %s%-26s%s %s%10d%s %s%11d%s %s%11d%s\n",
-			ansi.FgBrightMagenta, id, ansi.Reset,
-			ansi.FgBrightWhite, r.name, ansi.Reset,
-			ansi.FgBrightMagenta, r.land, ansi.Reset,
-			ansi.FgBrightWhite, r.score, ansi.Reset,
-			ansi.FgWhite, r.netWorth, ansi.Reset)
+		scoreTableRow(s, id, r.name, ansi.FgBrightWhite, r.online, r.land, r.score, r.netWorth)
 	}
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
+	scoreTableRule(s)
 	if len(names) == 0 {
 		ok(s, "None of these realms can be attacked — they are protected or allied with you.")
 		return "", false

@@ -125,6 +125,9 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			if endErr != nil && !errors.Is(endErr, io.EOF) {
 				reason = fmt.Sprintf("%s (%v)", reason, endErr)
 			}
+			// id.Handle, not e.Owner: this defer is installed before e is
+			// declared. FindByOwner lowercases and trims, so both resolve.
+			markOffline(w, id.Handle)
 			err = save()
 		}
 	}()
@@ -238,6 +241,13 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	// hits Play (their first turn of the day), matching BRE — not here before the
 	// opening menu.
 
+	// Put the caller on the online roster before the opening menu is drawn, not
+	// at their first action. Someone who has used their turns sits at that menu
+	// without acting, which is exactly when another baron wants to know they are
+	// reachable (#123) — waiting for an action would leave them invisible for
+	// the whole visit.
+	markActive(w, e.Owner)
+
 	// io.EOF means the caller dropped the connection or was booted; still persist
 	// state below.
 	gameErr := menu.GameLoop(s, w, e.Owner, term)
@@ -252,7 +262,32 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	if gameErr != nil && !errors.Is(gameErr, io.EOF) {
 		return reason, gameErr
 	}
+	markOffline(w, e.Owner)
 	return reason, save()
+}
+
+// markActive puts the caller on the online roster. It is re-resolved by handle
+// rather than reusing a bound *Empire because a reload may have replaced every
+// pointer since.
+func markActive(w *game.World, handle string) {
+	w.With(func() {
+		if e := w.FindByOwner(handle); e != nil {
+			e.MarkActive()
+		}
+	})
+}
+
+// markOffline drops the caller the moment their session ends rather than
+// leaving them there for OnlineWindowSecs. Both callers sit immediately before
+// a save, since an unsaved clear would not reach the other nodes. The one exit
+// that skips it is a genuine GameLoop error, which returns without saving at
+// all; that session falls back to the window.
+func markOffline(w *game.World, handle string) {
+	w.With(func() {
+		if e := w.FindByOwner(handle); e != nil {
+			e.MarkOffline()
+		}
+	})
 }
 
 // selectLanguage is shown once, to a brand-new player, after the splash and
