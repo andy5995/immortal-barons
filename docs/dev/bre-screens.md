@@ -1066,6 +1066,30 @@ and the `Your Choice?` prompt silently redraws on both, so a driver that presses
 `0` until it recognises a screen will loop forever. `tmux send-keys -H 1b` leaves
 it, and pops the Trading submenu with it, landing on the System Menu.
 
+**The `*` marks a good that is not a military unit.** It is part of the stored
+name, not something the draw routine adds: BRE's shared goods table lives in
+**`BRE.EXE` at 0x157b7** (fixed-width slots, Pascal ShortStrings) and reads
+
+```
+Trooper  Jet  Turret  Bomber  *Food  *Gold  Agent  Tank  Carrier
+```
+
+so the seven military units are bare and only **Food and Gold** carry the
+marker. Gold is not one of the market's eight rows, which is why the capture
+above shows exactly one `*`. Searching `BRE.OVR` for it finds nothing — the
+table is in the executable, not the overlay, which is the trap here.
+
+**IB status (2026-08-13):** matched, with one recorded divergence.
+
+- **The exit key.** IB leaves on ESC as BRE does, and *also* on `0` and Enter,
+  which BRE ignores. A screen that lists no Quit key and refuses the key every
+  other menu quits on is a trap for a player, not a fidelity detail worth
+  keeping; `0` quits everywhere else in IB.
+
+The column geometry above is pinned by `TestMarketTableMatchesTheCapturedGeometry`
+as golden literals (edges 33/45/59/76, and the 5/15/58 inset rule), so a change
+to the format must produce new evidence rather than quietly following the code.
+
 ## Clean-room note
 
 BRE is proprietary (John Dailey Software; design by Mehul Patel). This file

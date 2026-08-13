@@ -41,7 +41,11 @@ func tradingMarket(s session.Session, w *ctx) Result {
 		if err != nil {
 			return Stay
 		}
-		if r == '0' || r == '\r' {
+		// BRE leaves the market on ESC alone, silently redrawing on 0 and Enter
+		// (docs/dev/bre-screens.md). IB accepts ESC too, but keeps 0 and Enter
+		// working rather than leaving a screen with no visible way out — every
+		// other menu here quits on 0. Recorded as a divergence beside the capture.
+		if r == '0' || r == '\r' || r == 0x1b {
 			return Stay
 		}
 		gi := marketGoodByKey(byte(unicode.ToUpper(r)))
@@ -73,32 +77,53 @@ func tradingMarket(s session.Session, w *ctx) Result {
 // printMarketTable renders the player's Trading Market table with BRE's columns
 // and colors (parens yellow, key bright-yellow, name white, prices bright-white,
 // owned bright-cyan, for-sale/total bright-yellow).
+//
+// The column edges come from the capture in docs/dev/bre-screens.md: every
+// figure is right-aligned and the header label above it right-aligned to the
+// same edge, at columns 33, 45, 59 and 76.
 func printMarketTable(s session.Session, w *ctx) {
 	p := w.Player()
-	lang := playerLang(w)
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightWhite, tr(s, "Trading Market"), ansi.Reset)
-	fmt.Fprintf(s, "%s%-4s%-16s%12s %10s %13s %16s%s\n", ansi.FgBrightWhite,
+	fmt.Fprintf(s, "%s%-4s%-4s%26s%12s%14s%17s%s\n", ansi.FgBrightWhite,
 		tr(s, "Key"), tr(s, "Name"), tr(s, "Your Prices"), tr(s, "Owned"),
 		tr(s, "For Sale"), tr(s, "Total For Sale"), ansi.Reset)
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed, marketRule, ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), marketRule(), ansi.Reset)
 	for i, good := range game.MarketGoods {
 		owned := 0
 		if f := marketFieldValue(p, good); f >= 0 {
 			owned = f
 		}
-		fmt.Fprintf(s, "%s(%s%c%s)%s %s%-14s%s %s%10d%s %s%10d%s %s%13d%s %s%16d%s\n",
+		fmt.Fprintf(s, "%s(%s%c%s)%s %s%-11s%s%s%19d%s%s%12d%s%s%14d%s%s%17d%s\n",
 			ansi.FgYellow, ansi.FgBrightYellow, marketGoodKeys[i], ansi.FgYellow, ansi.Reset,
-			ansi.FgWhite, tr(s, good), ansi.Reset,
+			ansi.FgWhite, marketDisplayName(s, good), ansi.Reset,
 			ansi.FgBrightWhite, w.MarketPrice(p.Owner, good), ansi.Reset,
 			ansi.FgBrightCyan, owned, ansi.Reset,
 			ansi.FgBrightYellow, w.MarketForSale(p.Owner, good), ansi.Reset,
 			ansi.FgBrightYellow, w.MarketTotalForSale(good), ansi.Reset)
-		_ = lang
 	}
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed, marketRule, ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), marketRule(), ansi.Reset)
 }
 
-const marketRule = "──────────────────────────────────────────────────────────────────────────"
+// The market's rule is BRE's inset divider, not a bare line: 5 single, 15
+// double, then single to 78 (docs/dev/bre-screens.md). It takes the Trading
+// menu's accent in dim form, as every rule the menu engine draws does.
+const (
+	marketRuleWidth  = 78
+	marketRuleDouble = 15
+	marketAccent     = ansi.FgBrightRed
+)
+
+func marketRule() string { return insetRule(marketRuleWidth, marketRuleDouble) }
+
+// The seller list is IB's own screen — BRE's capture does not show one — so it
+// takes the same divider at its own narrower content width, per the rule that a
+// box is sized to what it holds.
+const (
+	sellerRuleWidth  = 43
+	sellerRuleDouble = 10
+)
+
+func sellerRule() string { return insetRule(sellerRuleWidth, sellerRuleDouble) }
 
 // marketChangeSetup adjusts the player's listing for good: new For Sale quantity
 // (max = owned + already listed) then price. The goods are escrowed by
@@ -129,7 +154,7 @@ func marketBuy(s session.Session, w *ctx, good string) {
 	}
 	fmt.Fprintf(s, "\n%s%-4s%-16s%12s %10s%s\n", ansi.FgBrightWhite,
 		tr(s, "Id"), tr(s, "Empire Name"), tr(s, "For Sale"), tr(s, "Price"), ansi.Reset)
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgYellow, marketRule, ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), sellerRule(), ansi.Reset)
 	for i, l := range sellers {
 		name := l.Owner
 		if e := w.FindByOwner(l.Owner); e != nil {
@@ -139,7 +164,7 @@ func marketBuy(s session.Session, w *ctx, good string) {
 			ansi.FgYellow, ansi.FgBrightWhite, byte('A'+i), ansi.FgYellow, ansi.Reset,
 			ansi.FgWhite, name, ansi.Reset, ansi.FgBrightYellow, l.Qty, l.Price, ansi.Reset)
 	}
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgYellow, marketRule, ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), sellerRule(), ansi.Reset)
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Choose a Target (0 to cancel)?"), ansi.Reset)
 	r, err := readKey(s)
 	if err != nil {
@@ -172,6 +197,20 @@ func marketBuy(s session.Session, w *ctx, good string) {
 		return
 	}
 	okNoPause(s, "%d %s bought.", n, tr(s, good))
+}
+
+// marketDisplayName is a good's name as the market lists it: the two goods that
+// are not military units carry a leading '*'. BRE stores the marker in the name
+// itself — its shared goods table (BRE.EXE 0x157b7) reads Trooper, Jet, Turret,
+// Bomber, *Food, *Gold, Agent, Tank, Carrier — so the seven units are bare and
+// only Food and Gold are marked. Gold is not listed on this screen, which is why
+// the capture shows a single '*'. The marker sits outside tr(): it is a symbol,
+// not a word to translate.
+func marketDisplayName(s session.Session, good string) string {
+	if good == "Food" || good == "Gold" {
+		return "*" + tr(s, good)
+	}
+	return tr(s, good)
 }
 
 // marketFieldValue returns p's inventory count for a market good, or -1 if the
