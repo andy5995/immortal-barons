@@ -1090,6 +1090,72 @@ The column geometry above is pinned by `TestMarketTableMatchesTheCapturedGeometr
 as golden literals (edges 33/45/59/76, and the 5/15/58 inset rule), so a change
 to the format must produce new evidence rather than quietly following the code.
 
+## Covert Operations (System Menu → C) — colors NOT captured
+
+**The menu's text is binary-verified; its colors and decorations are not.** The
+item labels and their order come from the overlay's string table, where Turbo
+Pascal stores them consecutively in declaration order, which is render order
+(`BRE.OVR 0x1731a` onward):
+
+```
+Send Spy · Stir Revolts · Set Up · Support Dissensions · Demoralize Forces
+Spy on Relations · Bomb Enemy Targets · Bribery · Expose Enemy Ops · Visit Bank
+```
+
+The status line under it is assembled from `'You have '` + gold + `' gold and '`
++ agents + `' agents.'`, and `'Limit one try per turn!'` sits just below in the
+same unit — the one-effect-op-per-turn cap.
+
+The **Bomb Enemy Targets** set and the interplanetary Special Operations menu
+share ONE table at `BRE.OVR 0x2981b`, in this order, with a zero-length entry
+between Nuclear Assault and Chemical Bombing that a naive ShortString walk will
+mistake for the end of the table:
+
+```
+Bomb Food Market · Bomb Trading Market · Bomb Trade Routes · Undermine
+Investments · Nuclear Assault · <len 0> · Chemical Bombing · S3-Sabre · Send SpyGuy
+```
+
+The local menu takes the first seven, the interplanetary one all eight. The
+500-bomber gate string follows immediately, which is where
+`BombingBombersRequired` comes from.
+
+**From the draw routine** (`run_covert_operations_menu`, `BRE.OVR 0x17469`),
+read directly rather than inferred:
+
+- **The hotkeys are binary-verified.** Each item block opens `mov al,<char>` with
+  `0x31`–`0x39` then `0x56` — `1`-`9` then `V`, in the same order as the strings.
+- **The per-op costs are a runtime table, not constants in the file.** Each item
+  pushes a different consecutive dword from `DS:0x63e`, stepping 4 bytes per item
+  (`[0x63e]`, `[0x642]`, …). That is why searching either binary for 5,000 or
+  600,000 finds nothing, and it confirms the note in `balance.go` that other BRE
+  setups scale these — IB's figures are the default setup sampled live, which is
+  the most that can be pinned without reproducing BRE's setup arithmetic.
+- **The entry gate is a signed 32-bit `agents > 0`** on the *held* agent count
+  (`+0x26f`), tested high word then low. Agents escrowed on the Trading Market
+  live at `+0x229` and are a separate field, so listing agents for sale can close
+  the menu — IB matches, since listing moves them out of `Empire.Agents`. The
+  per-turn covert step carries an extra gate on the byte at `DS:0x6d52`, which is
+  the preference; the System-menu item does not, matching what the captures show.
+
+**The colors are still unverified, and the disassembly does not settle them.**
+Neither binary contains a single literal ANSI escape, so BRE holds color as a
+Turbo Pascal attribute and builds the escape at write time; the draw routine
+passes only key, label and cost, and neither it nor `enter_covert_operations_menu`
+sets an attribute. The color therefore comes from the shared output helpers
+(`0dc9:0608` formats the line, `0735:0000` writes it), which every screen uses —
+so identifying it means tracing those and finding what sets the attribute
+per-screen, not reading this routine. IB draws the menu bright-green, which
+remains a choice rather than a finding. A `script`-wrapped live capture is still
+the cheap way to close it (see the `bre-gather` skill).
+
+Corroboration worth keeping: a 2012 public-board capture renders the Help "List
+of Topics" divider as CP437 `ÄÄÄÄÄÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÄÄÄ…` — 5 `─` then 15 `═` — the
+same inset rule recorded for the Relations table and the Trading Market, from an
+entirely separate board and year. That the ratio recurs across screens and
+releases is why `insetRule` is the shared helper rather than a per-screen
+constant.
+
 ## Clean-room note
 
 BRE is proprietary (John Dailey Software; design by Mehul Patel). This file
