@@ -1,30 +1,26 @@
 (in-progress:)
-  * A nuclear strike ruins land instead of destroying it: the target keeps every
-    region, still pays upkeep on it, and earns nothing from the ruined share
-  * Waste is a region type of its own, listed on the region tables, and can be
-    decontaminated during maintenance
+  * A nuclear strike ruins land rather than destroying it: the target keeps
+    every region and its upkeep but earns nothing from the ruined share
+  * Waste is a region type of its own, listed on the region tables; it is
+    decontaminated during maintenance and its owner shares the recovered land
+    out across region types
   * Nuclear missiles are priced by the size of the target, quoted after the
     target is chosen, and can be declined
   * SDI no longer reduces nuclear damage from a realm on the same planet
   * A nuclear strike raises the attacker's score
-  * Decontaminated land is shared out across region types by its owner
-  * Added a Waste help topic
   * Inter-BBS packets carry the sending board's signature, and a board whose
     key is in the league roster can no longer be impersonated
   * Added "-gen-board-key" to create this board's packet-signing key
-  * Population follows the original's model: how many people a realm holds is
-    set by the kind of land it owns — Urban housing far outweighing every other
-    type — multiplied by popular support and divided by the tax rate. Raw
-    acreage no longer houses anyone by itself
-  * People move a share of the way toward that number each turn, leave faster
-    the harder a realm taxes, and leave faster again above a 50% rate
-  * Added a Population help topic
-  * A pirate raid carries off one kind of holding, named on its own line at the
-    end of the income report, and takes about a thirtieth of it rather than a
-    twentieth of everything
-  * Pirate factions start with no army and no land. What a band can field is
-    whatever it has stolen, so an untouched band grows and a drained one is
-    harmless
+  * Population follows the original's model: the kind of land a realm owns —
+    Urban far outweighing every other type — scaled by popular support and
+    divided by the tax rate. Acreage alone no longer houses anyone
+  * People move a share of the way toward that number each turn, leaving faster
+    the harder a realm taxes and faster again above a 50% rate
+  * Added Waste and Population help topics
+  * A pirate raid takes about a thirtieth of one kind of holding, named on its
+    own line at the end of the income report
+  * Pirate bands start with no army and no land and can field only what they
+    have stolen, so an untouched band grows and a drained one is harmless
   * Beating a band recovers a third of its gold, regions, agents and troopers
     and a quarter of its jets, turrets and tanks
   * A winning raid costs the attacker casualties, and reports them
@@ -36,13 +32,11 @@
   * A reply asks which lines of the message to quote, and opens with them
   * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
   * Combat reports, pirate raid results, planet news and "since your last play"
-    events break between words instead of being cut by the terminal, which was
-    splitting figures in half
+    events wrap between words; the terminal was splitting figures in half
   * Proposing a treaty picks the realm the way Send Message does: a letter, "?"
     for the list, and "Z" to offer it to every realm at once
-  * A pirate raid reports its outcome the way the original does: a headline, the
-    loot taken, and what the raid cost. The headline is one of five, chosen at
-    random
+  * A pirate raid reports its outcome as the original does: one of five random
+    headlines, the loot taken, and what the raid cost
   * config-during-reset: a new Money Cap setting sets how much gold a realm may
     hold, on hand and again in the bank — two billion (the original's own limit)
     up to 999 billion
@@ -63,10 +57,9 @@
     would
   * Individual strikes cost one gold per unit and ask for confirmation
   * Added an Attack Types help topic
-  * This board's own settings — its name, league number and packet directories
-    — moved out of config.json into "bbs.cfg", a plain text file that can be
-    edited without the settings editor. An existing board is migrated on its
-    next save with nothing for the sysop to do
+  * This board's own settings — name, league number, packet directories — moved
+    out of config.json into "bbs.cfg", editable without the settings editor; an
+    existing board migrates on its next save with nothing for the sysop to do
   * "-ibbs-reset -import-bbs-cfg" takes a board's name, incoming-files
     directory and league number from an original Barren Realms Elite BBS.CFG
   * A league can be arranged as a tree instead of every board linking to every
@@ -81,10 +74,9 @@
     packets
   * Sysops: a League Number keeps two leagues apart when they share one inbound
     directory
-  * The Diplomacy List carries a real standing with each planet — Enemy, None,
-    Peace or Allied — which the BBS Coordinator sets on a new Diplomacy
-    Modification screen, replacing the free-text league declaration; it binds
-    nothing and is never sent to the other planets, as in the original
+  * The Diplomacy List carries a standing with each planet — Enemy, None, Peace
+    or Allied — set by the BBS Coordinator on a new Diplomacy Modification
+    screen; as in the original it binds nothing and is never transmitted
   * The standing appears beside every planet named on any interplanetary screen
   * Allied Planets writes to every planet the chart marks Allied
   * The Planetary Treaties chart matches the original's layout and colors
