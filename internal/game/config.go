@@ -61,6 +61,33 @@ func (l Level) AttackCapturePct() int {
 	}
 }
 
+// InterplanetaryLossPct is the share of its own force each side spends before
+// breaking off an INTERPLANETARY battle: the attack type's own published rate
+// (8/15/20%), rescaled by this Attack Damage level.
+//
+// BINARY-VERIFIED. BRE.OVR 0x405a8 (unit ovr_03f4a0 +0x1184) reads the same
+// config byte +0x181 the local resolver switches on at 0xF85E, but does
+// something different with it: it starts from the type's own survival constant
+// (0.92 / 0.85 / 0.80) and then leaves it alone at Medium, replaces it with 0.99
+// at None, halves the loss at Low ((1-X)/2) and doubles it at High ((1-X)*2).
+// So the sysop's Attack Damage knob reaches interplanetary strikes too — IB used
+// to apply the type's flat rate whatever the setting.
+func (l Level) InterplanetaryLossPct(kindLoss int) int {
+	switch l {
+	case None:
+		return AttackRetreatNonePct
+	case Low:
+		return kindLoss / 2
+	case High:
+		if kindLoss*2 > 100 {
+			return 100
+		}
+		return kindLoss * 2
+	default:
+		return kindLoss
+	}
+}
+
 func (l Level) AttackRetreatPct() int {
 	switch l {
 	case None:

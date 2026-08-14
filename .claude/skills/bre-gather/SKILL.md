@@ -268,6 +268,30 @@ but returns the cataloged functions and blocks that reference each match. Use
 raw `strings` only to inspect declaration order or text that has no indexed
 code reference.
 
+**`find-string` with an EMPTY query and a `--function` filter dumps every string
+one routine touches** — which reconstructs a screen's whole structure in one
+command, without disassembling anything:
+
+```
+python3 scripts/bre-disasm.py find-string --directory "$BRE" \
+  --function resolve_returning_attack --details "" | jq -r '.matches[].text'
+```
+
+That is how the interplanetary returning-attack report was recovered (header,
+four verdict words, per-unit lost/returned lines, enemy-destroyed line) in a
+single call. Do this BEFORE reading any code: the string list tells you what the
+routine's branches must be, so the disassembly is then confirming a shape rather
+than discovering one. `--details` output is proprietary — never commit it.
+
+**BRE's `game/*.dat` template files enumerate a feature's full category set for
+free.** `ipnews.dat` and `ipreport.dat` are plain-text news/report templates
+split by `^CATEGORY` headers, and the header names alone answer "how many
+distinct cases does this mechanic have" — the interplanetary attack turned out
+to have six news classes (individual / group-on-one-realm / group-on-whole-planet,
+each way, on both the arrival and the return side) plus a total-conquest one.
+`grep -a '^\^' "$BRE/game/"*.dat` lists every category in the game in one go.
+Cheaper than any other source and no disassembly can give it to you as fast.
+
 ## Running BRE headless (tmux + dosemu2 harness)
 
 BRE can be driven scriptably and its screens scraped as plain text

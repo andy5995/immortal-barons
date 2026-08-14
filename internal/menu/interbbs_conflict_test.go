@@ -3,6 +3,7 @@ package menu
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -23,7 +24,7 @@ func TestJoinGroupAttackVanishedActorConflict(t *testing.T) {
 		leader := w.AddHuman("leader", "Leaderland")
 		leader.Troopers = 10_000
 		w.GameDay = 0
-		w.CreateGroupAttack(leader, "Mars", "", 5, game.AttackForce{Troopers: 1000}) // departs day 5, still forming
+		w.CreateGroupAttack(leader, "Mars", "", game.GroupAttackHoursMax, game.AttackForce{Troopers: 1000}) // still forming
 	})
 	commitOnFile(t, cfg, func(w *game.World) { w.AddHuman("decoy", "Decoyland") })
 
@@ -49,9 +50,8 @@ func TestJoinGroupAttackVanishedActorConflict(t *testing.T) {
 }
 
 // TestJoinGroupAttackDepartedWindow proves the group-attack window is re-checked
-// against fresh state: if the attack departs (GameDay advances past DepartDay)
-// while B is entering its offense, the join aborts with the departed notice and
-// adds no contribution.
+// against fresh state: if the force leaves while B is entering its offense, the
+// join aborts with the departed notice and adds no contribution.
 func TestJoinGroupAttackDepartedWindow(t *testing.T) {
 	_, b, cfg := twoNodeWorld(t, "alice", "Alethia", nil, func(p *game.Empire) {
 		p.Troopers = 10_000
@@ -61,14 +61,16 @@ func TestJoinGroupAttackDepartedWindow(t *testing.T) {
 		leader := w.AddHuman("leader", "Leaderland")
 		leader.Troopers = 10_000
 		w.GameDay = 0
-		w.CreateGroupAttack(leader, "Mars", "", 5, game.AttackForce{Troopers: 1000})
+		w.CreateGroupAttack(leader, "Mars", "", game.GroupAttackHoursMax, game.AttackForce{Troopers: 1000})
 	})
 
 	fb := &hookSession{
 		fakeSession: fakeSession{keys: []rune("1\r500\r")},
 		marker:      "Send how many Troopers",
 		hook: func() {
-			commitOnFile(t, cfg, func(w *game.World) { w.GameDay = 10 }) // the force leaves
+			commitOnFile(t, cfg, func(w *game.World) {
+				w.GroupAttacks[0].DepartAt = time.Now().Add(-time.Hour) // the force leaves
+			})
 		},
 	}
 	joinGroupAttack(fb, b)

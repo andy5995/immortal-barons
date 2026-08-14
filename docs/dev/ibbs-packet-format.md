@@ -96,7 +96,17 @@ RemoteAttack  { "ID": 1, "FromBoard": "AlphaBBS", "TargetEmpire": "Victim",
 Contribution  { "Owner": "andy", "Offense": 100000 }   // for splitting spoils
 
 AttackResult  { "ID": 1, "TargetBoard": "BravoBBS", "TargetEmpire": "Victim",
-                "LandTaken": 12, "Won": true }
+                "LandTaken": 12, "Won": true, "Kind": "Normal Attack",
+                "Survivors": [ Contribution ],
+                "Outcome": "success",
+                "Enemy": { "Troopers": 900, "Turrets": 150, "Tanks": 40, "Jets": 0 } }
+                // Outcome is the verdict the origin reports to the baron:
+                // "success" / "failure" / "notfound" / "protected". Absent in a
+                // packet written before it existed, which reads as Won deciding
+                // between success and failure — how that packet was resolved.
+                // Enemy is what the strike destroyed, by unit type; absent
+                // likewise, and an absent one reports nothing destroyed rather
+                // than guessing.
 
 TimeCheck     { "From": "AlphaBBS", "To": "BravoBBS",
                 "Sent": "2026-07-04T18:02:11+10:00" }
@@ -120,8 +130,12 @@ game this board has since wiped by resetting (#104).
 
 Processing (`World.ApplyPacket`): a packet addressed to this board (or a
 broadcast) is applied — scores import into `RemoteBoards`; attacks and terror
-ops resolve and produce results returned to the origin; incoming results post to
-the planetary bulletin; recon requests are answered from live figures; IP
+ops resolve and produce results returned to the origin; incoming results give
+each contributor their survivors, a private report and their share of the
+captured land, and post a line to the planetary bulletin — unless nothing is
+waiting on that result's ID, in which case the whole result is discarded rather
+than paid out (the lost-forces timer has already returned the army, or this is a
+duplicate); recon requests are answered from live figures; IP
 messages are delivered to the mailboxes they name; and a time-check naming this
 board is echoed back untouched, while one of our own coming home is folded into
 `World.TravelTimes`. In a routed league (`World.Routed` — the roster carries HOST

@@ -260,6 +260,30 @@ The routine's own labels are cheap too: strings pushed as `mov di,<offset>` /
 unit*, so decoding `d[off]` bytes from the extracted unit names the routine
 without `find-string --details` and without anything private leaving the session.
 
+### A catalog block's NAME is a hypothesis; the field offsets are the evidence
+
+Semantic names in the catalog carry a `naming.status`, and even an `identified`
+one can be wrong about which side of a mechanic a block computes. Real case
+(2026-08-14): `resolve_received_invasion__calculate_attacker_strength` sums
+Turrets (+0x82) and military morale (+0x8e) — a *defence* expression, and it
+loops over empire indices rather than reading the arriving packet. The block that
+actually scales the attacker sits after it, in the type switch. Nothing was lost
+because the offsets were checked against `docs/dev/bre-save-format.md` first;
+taking the name at face value would have inverted the whole finding.
+
+So: read the record offsets before you read the name, and say "the block the
+catalog calls X" rather than "X" when reporting, until the offsets agree.
+
+### When the shipped help and the code disagree, the code wins — and say so
+
+`game/attack.hlp` advertises the quick strike at "110% of your normal strength";
+the resolver loads Real48 **1.2** and multiplies by it (BRE.OVR 0x4055a-0x405a8).
+The source ladder already puts a disassembly above prose, but this is the case
+where it bites, because the prose figure is specific enough to look authoritative
+and had been sitting in the clone as a verified constant. Record the disagreement
+next to the constant rather than silently replacing one number with another — the
+next reader will otherwise "correct" it back from the help.
+
 ### Name a field from ALL its sites, never from the two in front of you
 
 An `inc` and a matching `dec` around a block look exactly like a re-entrancy

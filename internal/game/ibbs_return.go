@@ -1,0 +1,209 @@
+package game
+
+import (
+	"fmt"
+	"strings"
+)
+
+// The origin board's half of an interplanetary strike: what happens when the
+// answer comes home. Until this existed a baron who sent a force abroad learned
+// nothing about it — the survivors reappeared in their army and one line went to
+// the planet's news, which every realm reads (#107).
+//
+// BRE files a private per-baron report instead, and its shape is read off the
+// original's returning-attack routine (BRE.OVR 0x04136c, unit ovr_03f4a0
+// +0x1ecc): a header naming the attack type and the target realm on its planet,
+// a verdict of SUCCESS / FAILURE / NOT FOUND / PROTECTED, one sentence saying
+// what happened, then per-unit-type lines for what was lost, what came back, and
+// what it destroyed. The wording below is IB's own; only the structure is the
+// original's.
+
+// applyAttackResult takes one returning result — an attack's or a terror op's —
+// and gives the baron who sent it their forces, their report, and their spoils.
+func (w *World) applyAttackResult(res AttackResult) {
+	sent, waiting := w.takeInFlight(res.ID)
+	if !waiting {
+		// Nothing was waiting on this ID, so the force it belongs to has already
+		// been given back by the lost-forces timer (or this is a second copy of a
+		// packet). Crediting the survivors now would hand the owner a second army,
+		// and BRE refuses the same case in the same place — its returning-attack
+		// routine prints "Duplicate or Late Attack Return Recieved - Packet
+		// Deleted" (BRE.OVR string 0x04115f), and reset.hlp's "Days for Lost
+		// Attacks" entry says a late return is processed as though the assault was
+		// never made.
+		w.postNews("A report reached us from a force we had already given up for lost. It was set aside.")
+		return
+	}
+	if res.Kind == "terror" {
+		w.applyTerrorResult(sent, res)
+		return
+	}
+	// Return each contributor's surviving forces to their army, and tell them
+	// what the strike cost and did.
+	for _, c := range sent.Contributors {
+		e := w.FindByOwner(c.Owner)
+		if e == nil {
+			continue
+		}
+		back := survivorFor(res.Survivors, c.Owner)
+		e.Troopers += back.Troopers
+		e.Jets += back.Jets
+		e.Tanks += back.Tanks
+		e.Bombers += back.Bombers
+		e.addEvent(strikeReport(sent, res, c.AttackForce, back))
+	}
+	// Captured land is parked rather than granted: the winner chooses the region
+	// types at home, exactly as they do after a Regular Attack (#58), and the
+	// result arrives while they are not in a session. The menu asks at the start
+	// of their next turn (menu.spoilsStage).
+	if res.LandTaken > 0 {
+		for _, share := range splitSpoils(sent.Contributors, res.LandTaken) {
+			if e := w.FindByOwner(share.Owner); e != nil {
+				e.PendingRegions += share.Land
+			}
+		}
+	}
+	w.postNews(returnNews(sent, res))
+}
+
+// applyTerrorResult is the returning half of a Terrorist Op: the agents are
+// spent either way, so only the report and the news line come home.
+func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult) {
+	if e := w.FindByOwner(sent.Owner); e != nil {
+		if res.Won {
+			e.addEvent(fmt.Sprintf("Your terrorists struck %s of %s and destroyed %d of its forces.",
+				res.TargetEmpire, res.TargetBoard, res.LandTaken))
+		} else {
+			e.addEvent(fmt.Sprintf("Your terrorists reached %s of %s and achieved nothing.",
+				res.TargetEmpire, res.TargetBoard))
+		}
+	}
+	if res.Won {
+		w.postNews(fmt.Sprintf("Our terror op on %s (%s) destroyed %d troopers!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
+		return
+	}
+	w.postNews(fmt.Sprintf("Our terror op on %s (%s) was foiled.", res.TargetEmpire, res.TargetBoard))
+}
+
+// survivorFor picks one owner's returning detachment out of the result. An owner
+// the target board did not answer for gets nothing back, which is the safe
+// reading: the alternative is inventing units.
+func survivorFor(cs []Contribution, owner string) AttackForce {
+	for _, c := range cs {
+		if c.Owner == owner {
+			return c.AttackForce
+		}
+	}
+	return AttackForce{}
+}
+
+// LandShare is one contributor's cut of a strike's captured regions.
+type LandShare struct {
+	Owner string
+	Land  int
+}
+
+// splitSpoils divides captured land between the barons who paid for it, in
+// proportion to the offense each committed. The remainder goes to the largest
+// contributor rather than being dropped — a group attack that takes 3 regions
+// between five barons must still hand over three.
+func splitSpoils(cs []Contribution, land int) []LandShare {
+	if land <= 0 || len(cs) == 0 {
+		return nil
+	}
+	total := 0
+	for _, c := range cs {
+		total += c.offense()
+	}
+	if total <= 0 { // a force of nothing captured something: split it evenly
+		total = len(cs)
+	}
+	shares := make([]LandShare, len(cs))
+	left, biggest := land, 0
+	for i, c := range cs {
+		weight := c.offense()
+		if weight <= 0 && total == len(cs) {
+			weight = 1
+		}
+		shares[i] = LandShare{Owner: c.Owner, Land: land * weight / total}
+		left -= shares[i].Land
+		if weight > cs[biggest].offense() {
+			biggest = i
+		}
+	}
+	shares[biggest].Land += left
+	return shares
+}
+
+// strikeReport is the private report one baron reads when their force comes
+// home: what it was, where it went, how it went, and what it cost them.
+func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackForce) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "%s results — %s.\n", res.Kind, strikeTarget(sent, res))
+	switch res.outcome() {
+	case OutcomeNotFound:
+		b.WriteString("Your forces crossed the void and found no such realm waiting.\n")
+	case OutcomeProtected:
+		b.WriteString("Your forces arrived to find the realm still under New Realm Protection, and turned back.\n")
+	case OutcomeWon:
+		fmt.Fprintf(&b, "Your forces broke the enemy and captured %d regions.\n", res.LandTaken)
+	default:
+		b.WriteString("Your forces were beaten off the field.\n")
+	}
+	fmt.Fprintf(&b, "You lost %s.\n", forceLosses(committed, back))
+	fmt.Fprintf(&b, "%s came home.\n", forceLine(back))
+	if res.Enemy.Total() > 0 {
+		fmt.Fprintf(&b, "You destroyed %d troopers, %d turrets, %d tanks, %d jets.",
+			res.Enemy.Troopers, res.Enemy.Turrets, res.Enemy.Tanks, res.Enemy.Jets)
+	}
+	return strings.TrimRight(b.String(), "\n")
+}
+
+// strikeTarget names what the strike was aimed at, which the answer alone
+// cannot: a whole-planet strike has no named realm on the way out, and one that
+// found nothing has none on the way back either.
+func strikeTarget(sent InFlightStrike, res AttackResult) string {
+	name := res.TargetEmpire
+	if name == "" {
+		name = sent.TargetEmpire
+	}
+	if sent.Whole || name == "" {
+		return fmt.Sprintf("the whole of %s", res.TargetBoard)
+	}
+	return fmt.Sprintf("%s of %s", name, res.TargetBoard)
+}
+
+// forceLosses renders what a detachment lost, by unit type.
+func forceLosses(committed, back AttackForce) string {
+	return forceLine(AttackForce{
+		Troopers: max(committed.Troopers-back.Troopers, 0),
+		Jets:     max(committed.Jets-back.Jets, 0),
+		Tanks:    max(committed.Tanks-back.Tanks, 0),
+		Bombers:  max(committed.Bombers-back.Bombers, 0),
+	})
+}
+
+// forceLine renders a detachment as the four unit counts, in the order the send
+// prompts ask for them.
+func forceLine(f AttackForce) string {
+	return fmt.Sprintf("%d troopers, %d jets, %d tanks, %d bombers", f.Troopers, f.Jets, f.Tanks, f.Bombers)
+}
+
+// returnNews is the planet-wide line about a strike of ours coming home. BRE
+// keeps six of these (game/ipnews.dat's IP-RET-INDIV / GROUPSINGLE / GROUPBBS,
+// each with a win and a loss form), because who to congratulate differs: a solo
+// baron is named, a group strike is the planet's doing, and a whole-planet raid
+// names no enemy realm at all. Each line is a whole translatable sentence.
+func returnNews(sent InFlightStrike, res AttackResult) string {
+	realm := strikeTarget(sent, res)
+	if !sent.Group {
+		if res.Won {
+			return fmt.Sprintf("Our forces have returned in triumph from %s, carrying off %d regions!", realm, res.LandTaken)
+		}
+		return fmt.Sprintf("Our forces have returned with news of failure from %s.", realm)
+	}
+	if res.Won {
+		return fmt.Sprintf("Our planet's forces have returned in triumph from %s and captured %d regions!", realm, res.LandTaken)
+	}
+	return fmt.Sprintf("Our planet's forces have returned in disarray from a loss against %s.", realm)
+}

@@ -1,4 +1,20 @@
 (in-progress:)
+  * A group attack's departure is set in hours, from 12 to 120, and the force
+    leaves at that hour rather than on a day boundary
+  * A baron who sends an interplanetary strike now gets a private report when it
+    returns: the attack type, the target realm and planet, whether it won, was
+    beaten, found no such realm or found it protected, what was lost and what
+    came home by unit type, and what it destroyed
+  * Land captured on another planet is held until its owner next plays, and the
+    region-type picker then asks what to hold it as; a group attack's land is
+    shared between the barons who committed to it
+  * An interplanetary strike costs the defender units, not only regions
+  * A returning report for a strike whose forces have already been given up as
+    lost is discarded instead of raising a second army
+  * The sysop's Attack Damage setting now reaches interplanetary strikes: None
+    makes them almost bloodless, Low halves the losses and High doubles them
+  * A Quick Strike fights at 120% strength, the figure the original's own code
+    applies rather than the 110% its help advertises
   * Computer-run realms no longer stop buying land permanently once upkeep
     catches up with income; land purchases and army funding now draw from the
     same gold surplus

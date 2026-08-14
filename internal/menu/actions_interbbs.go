@@ -6,6 +6,7 @@ import (
 	"math"
 	"sort"
 	"strings"
+	"time"
 	"unicode"
 	"unicode/utf8"
 
@@ -106,30 +107,39 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	if pick == choices[0] {
 		target = "" // whole planet
 	}
+	// BRE asks for the wait in HOURS, floor 12 and ceiling 120, before the force
+	// prompts (docs/dev/bre-screens.md, "Create Group Attack"). The window is what
+	// makes the timing a decision: a strike can be aimed to land before the
+	// target's next turn, which a whole-day delay cannot express (#124).
+	hours := promptSuggestedTight(s,
+		fmt.Sprintf(tr(s, "Wait how many Hours (%d-%d)?"), game.GroupAttackHoursMin, game.GroupAttackHoursMax),
+		game.GroupAttackHoursMin, game.GroupAttackHoursMax)
 	force := promptAttackForce(s, p)
 	if force.Empty() {
 		return Stay
 	}
-	days := promptInt(s, "Leave in how many days?")
-	if days < 1 {
-		days = 1
-	}
-	var id, departDay int
+	var id int
+	var departAt time.Time
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		ga, e := w.World.CreateGroupAttack(p, board, target, w.GameDay+days, force)
+		ga, e := w.World.CreateGroupAttack(p, board, target, hours, force)
 		if e != nil {
 			return e
 		}
-		id, departDay = ga.ID, ga.DepartDay
+		id, departAt = ga.ID, ga.DepartAt
 		return nil
 	})
 	if err != nil {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "Group attack #%d formed against %s on %s, leaving day %d.", id, pick, board, departDay)
+	ok(s, "Group attack #%d formed against %s on %s, leaving at %s.", id, pick, board, departAt.Format(departFormat))
 	return Stay
 }
+
+// departFormat is how a group attack's departure is shown. It is a wall-clock
+// instant rather than a game day, so the hour has to be on it — that is the
+// whole point of asking in hours.
+const departFormat = "01/02 15:04"
 
 // joinGroupAttack adds the player's offense to a group attack still forming.
 func joinGroupAttack(s session.Session, w *ctx) Result {
@@ -141,20 +151,21 @@ func joinGroupAttack(s session.Session, w *ctx) Result {
 		line string
 	}
 	var rows []gaRow
+	now := time.Now()
 	w.With(func() {
 		if w.Player() == nil {
 			return
 		}
 		for _, ga := range w.GroupAttacks {
-			if w.GameDay >= ga.DepartDay {
+			if ga.Due(now, w.GameDay) {
 				continue
 			}
 			tgt := ga.TargetEmpire
 			if tgt == "" {
 				tgt = tr(s, "the whole planet")
 			}
-			rows = append(rows, gaRow{ga.ID, fmt.Sprintf("#%d -> %s on %s (leaves day %d, %s offense)",
-				ga.ID, tgt, ga.TargetBoard, ga.DepartDay, comma(ga.Offense()))})
+			rows = append(rows, gaRow{ga.ID, fmt.Sprintf("#%d -> %s on %s (leaves %s, %s offense)",
+				ga.ID, tgt, ga.TargetBoard, ga.DepartAt.Format(departFormat), comma(ga.Offense()))})
 		}
 	})
 	if len(rows) == 0 {

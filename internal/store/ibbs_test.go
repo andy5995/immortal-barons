@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -28,12 +29,11 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0
 
 	// Board A launches a group attack and writes its outbox to the exchange.
-	ga, cErr := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, game.AttackForce{Troopers: 100_000})
+	ga, cErr := wA.CreateGroupAttack(leader, "boardB", "Victim", game.GroupAttackHoursMin, game.AttackForce{Troopers: 100_000})
 	if cErr != nil {
 		t.Fatalf("create: %v", cErr)
 	}
-	wA.GameDay++
-	wA.LaunchDueGroupAttacks()
+	wA.LaunchDueGroupAttacksAt(time.Now().Add((game.GroupAttackHoursMin + 1) * time.Hour))
 	if _, err := WriteOutbox(wA, exchange); err != nil {
 		t.Fatalf("WriteOutbox A: %v", err)
 	}

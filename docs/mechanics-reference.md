@@ -1879,25 +1879,46 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   attacking a realm that turns out to be protected still costs a slice of the
   force. A group attack gets **no type choice** (confirmed by a live capture —
   its picker goes straight from the target to the force prompts), so it fights
-  on the Normal Attack's terms. Its departure delay is set in **hours (12-120)**
-  in BRE; IB still asks for whole days, and its whole-planet option is a row in
-  a numbered list rather than BRE's `(O)ne Dominion or (A)ll?` keypress — both
-  recorded in `docs/dev/bre-screens.md` as open divergences. **Indiv. Attack Force** commits the same four types
+  on the Normal Attack's terms. Its departure delay is set in **hours, floor 12
+  and ceiling 120** — BINARY-VERIFIED (BRE.OVR 0x2c38a/0x2c391 push the bounds,
+  0x2c3ce/0x2c3d2 re-check the answer, 0x2c40b divides it by 24 and 0x2c41c adds
+  the quotient to the clock). BRE therefore stores an **instant** the force
+  leaves at, not a game day, and IB does the same (`GroupAttack.DepartAt`): the
+  planetary step runs several times a day, so a 12-hour wait really does leave
+  before a day-long one, and a strike can be timed to land before the target's
+  next turn (#124). Its whole-planet option is still a row in a numbered list
+  rather than BRE's `(O)ne Dominion or (A)ll?` keypress, recorded in
+  `docs/dev/bre-screens.md` as an open divergence. **Indiv. Attack Force** commits the same four types
   (#62), picks a type (see below), and carries off
   `IndividualAttackReturnsPct` (200%) of what a group attack of the same weight
   would — BRE states the trade in both of its own docs: "You get twice as many
   returns if you send the attack yourself, but you can't attack an entire
   planet" (`game/breins.txt`, `docs/bre.doc`).
 - **Individual attack variants.** An individual strike is pressed one of three
-  ways. Every figure is quoted from BRE's own in-game help, `game/attack.hlp`,
-  so these are fidelity contract, not playtest knobs; the capture percentages
-  are relative to a Normal Attack's take, which is how that help states them.
+  ways. Every figure is fidelity contract, not a playtest knob; the capture
+  percentages are relative to a Normal Attack's take, which is how BRE's own
+  in-game help (`game/attack.hlp`) states them.
 
   | Type | Attacker strength | Land taken | Both sides retreat at |
   | --- | --- | --- | --- |
-  | Quick Strike | 110% | 50% of normal | 8% losses |
+  | Quick Strike | 120% | 50% of normal | 8% losses |
   | Normal Attack | 100% | 100% | 15% losses |
   | Extended Battle | 85% | 125% of normal | 20% losses |
+
+  **Land and losses come from `attack.hlp`; the strength column comes from the
+  code, because the two disagree.** BRE's invasion resolver
+  (BRE.OVR 0x4055a-0x405a8) switches on the arriving type byte and scales the
+  incoming force by a Real48 constant: Quick loads **1.2**, Extended loads 0.85,
+  Normal is left alone. The help advertises the quick strike at "110%". The
+  disassembly is authoritative for exact constants, so IB applies 120% and the
+  in-game help says 120%.
+
+  **Attack Damage rescales the retreat share.** The 8/15/20% above is the
+  Medium reading. The same resolver then reads the sysop's Attack Damage byte
+  (+0x181, the one the local resolver reads at 0xF85E) and does something
+  different with it than the local table: **None** flattens survival to 0.99
+  (1% losses whatever the type), **Low** halves the type's loss, **Medium**
+  leaves it, **High** doubles it. `Level.InterplanetaryLossPct`.
 
   The strength multiplier is applied to the offense that leaves the sending
   board; the capture and casualty rates are applied by the **target** board on
@@ -1916,6 +1937,48 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   verified for troopers only — and BRE confirms with `Send this Attack? (Y/n)`
   before it goes. Its force prompts ask about **every** unit type, including
   ones held at zero, each defaulting to 0.
+- **The round trip.** An interplanetary strike is four steps, not one, and each
+  is on a different board's schedule (#107).
+  1. **It leaves.** An individual strike goes out on the sending board's next
+     planetary run; a group attack waits out its hours first. Either way the
+     committed units leave the baron's army at once and the strike is recorded
+     on `World.InFlight`, which is what makes step 4 possible.
+  2. **It lands.** The target board resolves it on its own planetary run
+     (`resolveRemoteAttack`): protection is re-checked *on arrival*, since it
+     can lapse in transit; both sides then spend the type's retreat share of
+     what they brought — the **defender bleeds units too**, by unit type,
+     through the local battle's own `loseForces` — and a winner takes land.
+  3. **The answer comes home.** The result carries the survivors per
+     contributor, what the strike destroyed (`Enemy`, a `UnitLoss`), the land
+     taken, and a **verdict**: BRE's returning report prints one of SUCCESS /
+     FAILURE / NOT FOUND / PROTECTED (BRE.OVR strings at 0x04123c-0x041256),
+     which `AttackResult.Outcome` carries. A strike that found no such realm is
+     not the same as one that was beaten, and the baron is told which.
+  4. **The baron reads it and places the land.** Each contributor gets a
+     **private event report** — the attack type, the target realm and planet,
+     the verdict, what was lost and what came home by unit type, and what it
+     destroyed. That is BRE's own report structure, read off its returning-
+     attack routine (BRE.OVR 0x04136c); IB's wording is its own. Captured land
+     is **parked** on `Empire.PendingRegions` and the **region picker** — the
+     same one a Regular Attack opens (#58) — runs at the start of the baron's
+     next turn, because the result arrives while they are not in a session. A
+     group attack's land is split between contributors in proportion to the
+     offense each committed, with the remainder to the largest.
+
+  **A late or duplicate return is discarded.** If nothing is waiting on the
+  result's ID, the lost-forces timer has already given the army back (or this is
+  a second copy of the packet), and paying the survivors out again would double
+  it. BRE refuses the same case in the same place — "Duplicate or Late Attack
+  Return Recieved - Packet Deleted" (BRE.OVR 0x04115f) — and `reset.hlp`'s
+  "Days for Lost Attacks" entry states the rule in prose: a late return is
+  processed as though the assault was never made.
+
+  **News.** BRE keeps six returning-strike lines (`game/ipnews.dat`'s
+  `IP-RET-INDIV`, `-GROUPSINGLE`, `-GROUPBBS`, each with a win and a loss form,
+  plus `IP-RET-KILL`), because who to congratulate differs: a solo baron is
+  named, a group strike is the planet's doing, and a whole-planet raid names no
+  enemy realm. IB distinguishes individual from group, win from loss, in its own
+  wording; the finer subtypes are still open.
 - **Protection crosses the league.** A scores packet marks each realm still
   under New Realm Protection, and the attack and terror target lists leave those
   realms out — matching the local attack list, which hides them too. The target
