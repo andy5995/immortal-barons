@@ -835,13 +835,14 @@ const (
 	// costs you ~29% of the percentage.
 	SDIStrengthLandDivisor = 10
 	SDIMax                 = 100 // the original's own clamp on the percentage
-	// What the shield actually does, BINARY-VERIFIED. The percentage is read in
-	// exactly four places: the two screens that print it, an arriving
-	// interplanetary attack (BRE.OVR ovr_03f4a0 +0xed6/+0x10aa), and an arriving
-	// S3-Sabre bombing op (ovr_0450a9 +0x481). Nothing local consults it —
-	// neither a neighbour's attack nor a nuclear, chemical or biological missile
-	// — so these three are its whole reach, and they are the three the original's
-	// own instructions name.
+	// What the shield actually does, BINARY-VERIFIED. Seven call instructions in
+	// four routines read the percentage, and that list is its whole reach: the two
+	// screens that print it, an arriving interplanetary attack (BRE.OVR
+	// ovr_03f4a0 +0xed6 for the planet-wide average, +0x10aa for the named
+	// defender), and an arriving S3-Sabre bombing op (ovr_0450a9 +0x481). Nothing
+	// local consults it — neither a neighbour's attack nor a nuclear, chemical or
+	// biological missile — so the three effects below are all of it, and they are
+	// the three the original's own instructions name.
 	//
 	// Against an arriving strike the reduction is linear in the percentage, and
 	// the published "up to 30% / 20%" figures are what it reaches at SDI 100:
@@ -1063,16 +1064,24 @@ const (
 	// 10000 == x1.0. Kept off floating point so money stays integral.
 	TechFactorUnit = 10000
 
-	// Technology Agreement treaty (#11): BRE's manual says the pact "allows an
-	// empire to gain some of the technological advances of its partner" — a
-	// tech-sharing effect. The magnitude isn't in the manual (and isn't
-	// disassembly-recovered), so these are IB's own reconstructed tunables. A
-	// Technology Agreement raises your TechLevel ceiling to TechAgreementCapPct%
-	// of your highest-tech partner's level, and you catch up 1/TechAgreementGainDiv
-	// of the remaining gap each turn — so even a low-Technology realm slowly gains
-	// from a strong partner. See advanceTech.
-	TechAgreementCapPct  = 60 // reach this % of the best partner's TechLevel
-	TechAgreementGainDiv = 20 // per-turn catch-up = (partner ceiling − yours) / this
+	// Technology Agreement treaty (#11), BINARY-VERIFIED end to end (BRE.OVR
+	// process_economic_production, unit ovr_033b64; the partner loop is +0x3c2 to
+	// +0x4cb). Each partner adds
+	//
+	//	round( (min(myTechRegions, partnerTechRegions)^2 / myTotalRegions)^0.75 )
+	//
+	// — the same expression as your own research, over the SAME denominator, and
+	// without the TechResearchMul. It carries no constants of its own, which is
+	// why none appear here: the bound is the smaller of the two Technology REGION
+	// counts (record field +0xb2 on both), so a pact accelerates a realm that is
+	// already researching and does nothing for one holding no Technology.
+	//
+	// The loop's two guards on a partner are both existence tests, not diplomacy
+	// conditions: it must hold Technology, and its record field +0x5d must be
+	// positive. +0x5d is the slot's in-use marker — every unoccupied slot in a
+	// live save reads -1 while the occupied one reads a positive serial, and the
+	// binary reads or tests it at 83 sites and writes it at none. IB's alliesOf
+	// filter on Alive is that same gate.
 )
 
 // Money ceilings. The money fields are int64 (Empire.Gold and friends), so what

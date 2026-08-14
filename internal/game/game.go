@@ -428,12 +428,20 @@ func TechPercent(factor int, lowered bool) int {
 
 // advanceTech runs one turn of research. Called once per turn played.
 //
-// BRE-verified: points are quadratic in Technology regions and only
-// inverse-linear in realm size, so a dense tech block in a small realm
-// out-researches the same block in a large one. Each point lands in a slot
-// chosen uniformly at random, and nine of the fifteen slots do nothing — the
-// waste is the mechanic, not a bug. A Technology Agreement partner adds an
-// unmultiplied contribution capped by whichever of the two holds less tech.
+// BINARY-VERIFIED against BRE.OVR process_economic_production (unit ovr_033b64
+// +0x2fe): points are quadratic in Technology regions and only inverse-linear in
+// realm size, so a dense tech block in a small realm out-researches the same
+// block in a large one. Each point lands in a slot chosen uniformly at random,
+// and nine of the fifteen slots do nothing — the waste is the mechanic, not a
+// bug.
+//
+// The partner term is the same expression over the SAME denominator — the
+// researcher's own total regions, not the partner's — bounded by the smaller of
+// the two Technology REGION counts, and it does not get the multiplier. The
+// original walks realms A..Y, skips its own slot, takes the relation from the
+// researcher's own row, and skips a partner that holds no Technology or whose
+// record slot is not in use; alliesOf's Alive filter is that second gate. Both
+// terms round separately before they are summed.
 //
 // With no Technology regions this returns immediately: research stops and the
 // banked levels FREEZE. They are never decremented anywhere.
@@ -452,7 +460,9 @@ func (w *World) advanceTech(e *Empire) {
 	}
 }
 
-// techResearchPoints is round((n^2 / total)^0.75), the original's own shape.
+// techResearchPoints is round((n^2 / total)^0.75), the original's own shape. It
+// computes the power as exp(ln(x) * 3 / 4) and rounds half away from zero, which
+// is what math.Pow and math.Round do here.
 func techResearchPoints(n, total int) int {
 	if n <= 0 || total <= 0 {
 		return 0

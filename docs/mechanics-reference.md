@@ -558,8 +558,8 @@ its code: two days in flight, 10% of each realm's regions on arrival scaled by h
 much of the weapon survived, and interception by **jets only** (the original is
 explicit that nothing else can reach it) at one percent knocked off per 250 jets,
 spent whether they connect or not. The SDI does not touch it: the original's SDI
-percentage is read in four places and this is not one of them (see "SDI Defense"),
-which matches its instructions saying jets are the only answer. IB scaled the
+percentage is read in four routines and this is not one of them (see "SDI
+Defense"), which matches its instructions saying jets are the only answer. IB scaled the
 damage by the defender's SDI until 2026-08-14; that was IB's own and is gone
 (#111).
 
@@ -946,11 +946,43 @@ afterwards without giving most of it back. **IB keeps this behaviour
 deliberately**: the exploit is self-limiting, because a realm that stays small to
 preserve its technology pays for that in income, military and land.
 
-**Technology Agreement (#11).** A partner adds an unmultiplied research
-contribution, bounded by whichever side holds *less* Technology. So the pact
-accelerates a realm that is already researching and does nothing for one holding
-no Technology at all — IB previously let a tech-less realm inherit a partner's
-level, which the original does not.
+**Technology Agreement (#11) — fully verified** (`BRE.OVR`
+`process_economic_production`, unit `ovr_033b64`; own research at `+0x34b`, the
+partner loop `+0x3c2`..`+0x4cb`). A partner adds an unmultiplied research
+contribution, bounded by whichever side holds *fewer Technology regions*:
+
+```
+per partner:  round( (min(myTech, partnerTech)^2 / myTotalRegions)^0.75 )
+```
+
+So the pact accelerates a realm that is already researching and does nothing for
+one holding no Technology at all — IB previously let a tech-less realm inherit a
+partner's level, which the original does not.
+
+The two details left open when the mechanic was first written up are settled:
+
+- **What the `min` keeps** — both operands are **Technology region counts**
+  (record field `+0xb2`, the eighth of the nine region counts): the researcher's
+  own, read through the current-empire pointer, and the partner's, read from its
+  record. The denominator is the **researcher's** total regions, not the
+  partner's, and the term does not get the ×4. IB's `advanceTech` already did
+  exactly this.
+- **The second condition on the partner** — the loop skips a partner whose
+  `+0x5d` is not positive. That is the slot's in-use marker, not a treaty or
+  activity flag. In a live `game.dat` every one of the 24 unoccupied slots reads
+  `-1` there while the one occupied slot reads a positive serial, and three saves
+  from different games give 921, 932 and 933 — a counter that advances as realms
+  are created (the second realm's value is the first's plus one). The binary
+  reads or tests the field at 83 sites, always through the indexed
+  other-empire pointer and always as `> 0`, and writes it nowhere. IB's
+  `alliesOf` filter on `Alive` is the same gate.
+
+The loop walks realms `A`..`Y` testing the **researcher's own** relation row
+(`+0xae + 2×index`) for value **6**, and skips the researcher's own slot; the
+treaty enum is the one recorded under Diplomacy above. The exponent is computed
+as `exp(ln(x) × 3 / 4)` and rounded half away from zero, and the own-research
+term's ×4 is an integer multiply on the rounded result — so the two terms round
+separately before they are summed and spent on random slots.
 
 **Urban and Technology produce no direct gold** (BRE-verified): Urban is
 population housing, Technology is an efficiency multiplier (see the Technology
@@ -1751,10 +1783,18 @@ One thing is still **not** established:
 
 #### What the shield reaches — BINARY-VERIFIED
 
-The percentage is read in exactly four places, which is the whole of the
-mechanic: the empire status screen, the SDI Program screen, an arriving
-interplanetary attack (`BRE.OVR ovr_03f4a0 +0xed6` and `+0x10aa`), and an
-arriving S3-Sabre bombing op (`ovr_0450a9 +0x481`).
+Every reader of the percentage calls the same resident routine, so its call list
+is the whole of the mechanic. There are **seven call instructions in four
+routines** — the earlier note here said "four call sites", which conflated the
+two counts:
+
+| where | site | what it does |
+|---|---|---|
+| `show_empire_status` | `BRE.OVR 0x19b48`, `0x19b7f` | tests `> 0` to decide whether to print the line, then formats the number |
+| `run_interbbs_menu` (SDI Program screen) | `0x212f3`, `0x215df` | prints the strength on entry and again after gold is added |
+| arriving interplanetary attack (`ovr_03f4a0`) | `+0xed6` | inside the A..Y loop that builds the planet-wide land-weighted average |
+| arriving interplanetary attack (`ovr_03f4a0`) | `+0x10aa` | the named defender's own shield, applied to the incoming force |
+| arriving S3-Sabre (`ovr_0450a9`) | `+0x481` | the interception roll |
 
 - **Jets** on an arriving strike fight at `1 - SDI x 0.3/100`, **bombers** at
   `1 - SDI x 0.2/100` (truncated). Linear in the percentage; the published "up to
@@ -2023,11 +2063,10 @@ and each carries a gameplay effect (#11 wired the last two):
 - **Intelligence Alliance** / **Terrorist Prevention** — lend half an ally's
   agents to your covert offense / defense (`covert.go`).
 - **Technology Agreement** — a tech-sharing pact (BRE: "gain some of the
-  technological advances of its partner"). A higher-tech partner raises your
-  `TechLevel` ceiling to `TechAgreementCapPct` (60%) of their level, and you catch
-  up `1/TechAgreementGainDiv` (1/20) of the gap each turn — so even a realm with
-  little Technology of its own gains from a strong partner (`techAgreementCeiling`,
-  `advanceTech`).
+  technological advances of its partner"). Each partner adds an unmultiplied
+  research term bounded by whichever side holds fewer Technology regions, so it
+  accelerates a realm that is already researching and does nothing for one
+  holding none (`advanceTech`; full derivation under Technology above).
 - **Protective Trade** — guards the two realms' trade (BRE: "preventing bombing
   of trade deals"): a partner cannot bomb the other's trade routes or trading
   market (`BombTradeRoutes` / `BombTradingMarket` refuse the op, no agent lost).

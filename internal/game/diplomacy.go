@@ -177,8 +177,9 @@ func (w *World) tradeIncome(e *Empire) int {
 
 // A Technology Agreement lets a partner's research help your own (#11). BRE adds
 // an unmultiplied research contribution per partner, bounded by whichever side
-// holds less Technology — so a pact with a strong partner helps, but does not
-// substitute for holding tech yourself. Applied in advanceTech.
+// holds fewer Technology REGIONS — so a pact with a strong partner helps, but
+// does not substitute for holding tech yourself. Binary-verified; applied in
+// advanceTech, where the provenance is.
 
 // AllyContribution is the detachment a Full Defense Alliance partner sends to aid
 // an ally under attack — BRE-verified as 30% of the ally's troopers, tanks, and

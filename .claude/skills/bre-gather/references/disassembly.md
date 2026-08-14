@@ -256,6 +256,53 @@ PERSISTED record doing a job a local variable would do — BRE has no reason to
 spend save-file bytes on a guard, so if it looks like one, you have misread it.
 Grep the disp16 in both files, sort by opcode, and read every site.
 
+### A live save names a field in one command, when 80 call sites will not
+
+The access list gives a field's *scope*; it often will not give its *meaning*.
+Technology Agreement `+0x5d` was read or tested at 83 sites — target pickers, net
+worth, the roster, the coordinator vote — all as `> 0`, none of them writing it,
+which is enough to say "a gate" and not enough to say what kind. `data/game.dat`
+settled it in one pass: records sit at a fixed stride after a header, so dump the
+field for every slot and compare an occupied one against an empty one.
+
+```
+BASE, STRIDE = 2489, 1069          # first record base, empire record stride
+r = data[BASE + i*STRIDE : ...]    # i = 0..24 for realms A..Y
+```
+
+Every unoccupied slot read `-1` and the one occupied slot read a positive serial;
+three saves from different games gave 921, 932, 933, with a second realm exactly
+one above the first. That is a slot-in-use counter, and no amount of reading call
+sites would have said so. **Find the record base by locating the realm-name
+ShortStrings and taking their spacing** — do not assume the header size.
+
+Note that BRE **initialises every unused slot with the starting template**, so an
+empty record still carries a plausible region mix and a plausible name-less
+header. Without the in-use marker every scan would see 25 live realms; that is
+exactly why the marker is tested everywhere.
+
+### The catalog's resident offsets omit the MZ header — both maps are right
+
+`disasm`/`list` report a resident block's `span` in **image** offsets
+(`segment*16 + offset`), while the manual `dd` recipe above needs **file**
+offsets (`0x2940 + segment*16 + offset`). The SDI strength routine is
+`0x06809` in the catalog and `0x9149` in the file, and the 0x2940 difference
+reads as the catalog disagreeing with the tool. It does not. Subtract or add the
+header before comparing the two, and check the arithmetic on a block whose
+neighbour you already know — two spans a fixed distance apart in both maps is the
+confirmation.
+
+### "Call sites" means instructions; a mechanic's reach means routines
+
+Say which you counted. The SDI percentage is read by **seven call instructions in
+four routines**, and writing that up as "four call sites" produced a claim that
+looked wrong against a `grep` for the far-call bytes and had to be re-derived.
+Two of the seven are one screen printing the figure twice (once as a `> 0` test,
+once formatted), and two more are one attack routine reading two different
+shields — a per-realm read inside a planet-average loop, and the named defender's
+own. The routine count is the mechanic's reach; the instruction count is what the
+next reader will find with a five-byte regex, so give both.
+
 ### Finding an overlaid routine's CALLER — map the overlay stubs
 
 "Who calls this?" looks unanswerable in an overlay, because callers far-call an
