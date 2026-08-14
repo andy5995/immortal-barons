@@ -378,6 +378,7 @@ func BuildMenus() *Menus {
 		{Key: 'D', Label: "Diplomacy", Do: gotoMenu(diplomacy)},
 		{Key: 'E', Label: "Empire Status", Do: empireStatus},
 		{Key: 'F', Label: "Food Market", Do: gotoMenu(food)},
+		{Key: 'G', Label: "Game Setup", Do: gameSetup},
 		// BRE reserves 'I' on the System Menu for InterBBS Scores; About (an IB
 		// addition) now lives in the Help browser, so the two don't collide (#17).
 		{Key: 'I', Label: "InterBBS Scores", Do: interbbsScores, Hidden: ibbsHidden},
@@ -425,10 +426,9 @@ func BuildMenus() *Menus {
 		// between turns, like mail, so it belongs beside it on the way in (#70
 		// took it out of the pre-turn flow; this is where it lands instead).
 		{Key: 'D', Label: "Diplomacy", Do: gotoMenu(diplomacy)},
-		// MOVED here from the System menu, a divergence from BRE, which keeps it
-		// under System. A player wants the board's rules — turns per day,
-		// protection, how long they may stay away — before starting a turn, not two
-		// menus in.
+		// Also on the System menu, where BRE keeps it. Listed here as well because
+		// a player wants the board's rules — turns per day, protection, how long
+		// they may stay away — before starting a turn, not two menus in.
 		{Key: 'G', Label: "Game Setup", Do: gameSetup},
 		{Key: '?', Label: "Help", Do: helpBrowse}, // About lives inside Help now (#17)
 		{Key: 'P', Label: "Preferences", Do: gotoMenu(prefs)},

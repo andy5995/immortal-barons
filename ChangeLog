@@ -30,6 +30,7 @@
     raid
   * Military listed on the Trading Market is no longer hidden from pirates
   * Diplomacy is on the opening menu as well as the System menu
+  * Game Setup is on the System menu as well as the opening menu
   * Send Message can address every realm the sender holds a treaty with
   * A reply asks which lines of the message to quote, and opens with them
   * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
