@@ -266,6 +266,36 @@ IB implements steps 1, 2, 3, all of 4, and 5, with the required-capped prompts
 and these colors. The SDI prompt is `Your SDI Program requires N gold.`, asked after the
 region maintenance and before the crown tax (live capture).
 
+**Auto-Pay Maintenance bypasses itself, per turn, on more than affordability
+— BINARY-VERIFIED.** The silent one-line total only fires when Auto-Pay is on
+*and* gold covers the bill *and* popular support is at its 100 cap *and*
+military morale is at its 100 cap *and* the realm holds no Waste regions. Any
+one of those failing falls through to the full manual sequence above for that
+turn — including the optional support/morale boost prompts and the
+waste-decontamination offer — even though the Auto-Pay *preference* itself is
+never touched. It is a per-turn bypass, re-checked fresh every turn, not a
+timed or persistent switch-off: once support and morale are back at 100 and
+any Waste is cleared, the very next turn collapses to the silent total again.
+
+Read from `BRE.OVR` procedure `allocate_turn_budget` (0x02eebb), the routine
+`run_player_turn` (`BRE.EXE` flat 0x36e1) calls once per turn. Its gate, at
+flat 0x3b12-0x3b6d: `real_compare` the gold on hand against the summed total
+due, then `cmp word [es:di+0x94],0` / `cmp word [es:di+0x92],0x64` (support's
+int32 at record `+0x92`, required == 100), `cmp word [es:di+0x90],0` /
+`cmp word [es:di+0x8e],0x64` (morale's int32 at `+0x8e`, required == 100),
+`or ax,[es:di+0xb6],[es:di+0xb8]` (the Waste count at `+0xb6`, required == 0),
+then `cmp byte [es:di+0x339],0` (the Auto-Pay preference flag). Any failure
+jumps to the block that calls `allocate_turn_budget` — the manual sequence;
+passing all five skips that call and prints the collapsed total instead. The
+`+0x339` preference byte is only ever read here, never written, which is why
+this is a bypass rather than the checkbox itself flipping off.
+
+IB implements this in `paymentStage` (`internal/menu/gameflow.go`): the same
+five conditions gate the silent branch, reusing the empire's existing
+`Support`, `Morale`, and `Regions.Waste` fields (0-100 support/morale is
+already a structural range in the code, so no new `balance.go` constant was
+needed for the 100 threshold).
+
 **Method — the Auto-Pay line is a better probe than the prompts.** With Auto-Pay
 Maintenance on, BRE collapses the whole sequence into one `N Gold paid.` line.
 That single number is *more* useful than the itemised prompts, because every

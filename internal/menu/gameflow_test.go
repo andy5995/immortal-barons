@@ -172,6 +172,74 @@ func TestPaymentStageAutoPays(t *testing.T) {
 	}
 }
 
+// TestPaymentStageBypassesAutoPayOnLowSupport is BRE-verified (BRE.OVR
+// `allocate_turn_budget`, 0x02eebb): the silent Auto-Pay total only fires
+// when popular support and military morale both sit at their 100 cap and the
+// realm holds no Waste regions. Below-full support bypasses Auto-Pay for
+// this turn only, even with the preference on and gold to spare.
+func TestPaymentStageBypassesAutoPayOnLowSupport(t *testing.T) {
+	f := &fakeSession{keys: []rune("n\r\r\r\r")} // decline bank, accept forces/regions/crown tax, accept the support-boost prompt
+	w := newWorld()
+	w.AutoPayMaint = true
+	p := w.Player()
+	p.Gold = 1_000_000
+	p.Support = 50
+
+	paymentStage(f, w, BuildMenus().Bank)
+
+	out := f.out.String()
+	if !strings.Contains(out, "Maintenance:") {
+		t.Errorf("expected the manual maintenance sequence to run with support below 100, got:\n%s", out)
+	}
+	if strings.Contains(out, "Gold paid.") {
+		t.Errorf("auto-pay should bypass its silent total while support is below 100:\n%s", out)
+	}
+}
+
+// TestPaymentStageBypassesAutoPayOnLowMorale is the morale twin of
+// TestPaymentStageBypassesAutoPayOnLowSupport.
+func TestPaymentStageBypassesAutoPayOnLowMorale(t *testing.T) {
+	f := &fakeSession{keys: []rune("n\r\r\r\r")} // decline bank, accept forces/regions/crown tax, accept the morale-boost prompt
+	w := newWorld()
+	w.AutoPayMaint = true
+	p := w.Player()
+	p.Gold = 1_000_000
+	p.Morale = 50
+
+	paymentStage(f, w, BuildMenus().Bank)
+
+	out := f.out.String()
+	if !strings.Contains(out, "Maintenance:") {
+		t.Errorf("expected the manual maintenance sequence to run with morale below 100, got:\n%s", out)
+	}
+	if strings.Contains(out, "Gold paid.") {
+		t.Errorf("auto-pay should bypass its silent total while morale is below 100:\n%s", out)
+	}
+}
+
+// TestPaymentStageBypassesAutoPayOnWaste is the Waste-region twin: any Waste
+// on the books bypasses Auto-Pay's silent total, the same as low
+// support/morale, so the decontamination offer in the manual flow still
+// reaches the player.
+func TestPaymentStageBypassesAutoPayOnWaste(t *testing.T) {
+	f := &fakeSession{keys: []rune("n\r\r\r\r")} // decline bank, accept forces/regions/crown tax, accept the decontamination offer
+	w := newWorld()
+	w.AutoPayMaint = true
+	p := w.Player()
+	p.Gold = 1_000_000
+	p.Regions.Waste = 50
+
+	paymentStage(f, w, BuildMenus().Bank)
+
+	out := f.out.String()
+	if !strings.Contains(out, "Maintenance:") {
+		t.Errorf("expected the manual maintenance sequence to run with Waste regions on hand, got:\n%s", out)
+	}
+	if strings.Contains(out, "Gold paid.") {
+		t.Errorf("auto-pay should bypass its silent total while Waste regions remain:\n%s", out)
+	}
+}
+
 func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
 	f := &fakeSession{keys: []rune("n\r\r\r")} // decline bank, accept suggested (full) for forces, regions, crown tax
 	w := newWorld()

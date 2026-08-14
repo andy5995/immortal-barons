@@ -447,12 +447,13 @@ func endOfTurnStats(s session.Session, w *ctx) {
 
 // paymentStage runs BRE's start-of-turn maintenance prompts. With Auto-Pay
 // Maintenance on and enough gold, everything is paid silently. Otherwise
-// (pref off, or can't afford a required cost) it runs BRE's manual flow: an
-// optional bank visit (draw savings to cover upkeep), then the required
-// armed-forces and region upkeep (underpayment causes desertion/revolt), then
-// optional support/morale boosts. Underpaying a required cost warns of
-// "disastrous results" and offers to reconsider, which loops back to the bank
-// visit — matching BRE, where "reconsider" restarts the sequence.
+// (pref off, can't afford a required cost, or the auto-pay bypass below
+// fires) it runs BRE's manual flow: an optional bank visit (draw savings to
+// cover upkeep), then the required armed-forces and region upkeep
+// (underpayment causes desertion/revolt), then optional support/morale
+// boosts. Underpaying a required cost warns of "disastrous results" and
+// offers to reconsider, which loops back to the bank visit — matching BRE,
+// where "reconsider" restarts the sequence.
 func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	// Skip entirely on a replayed turn whose maintenance was already paid before an
 	// idle-boot (#10). MaintPaid is set inside the charge transaction below, so
@@ -473,6 +474,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 
 	var forces, regions, sdi, crown, gold int64
 	var autoPay bool
+	var support, morale, waste int
 	if !withPlayer(w, func(p *game.Empire) {
 		forces = w.ForcesDue(p)
 		regions = w.RegionsDue(p)
@@ -480,12 +482,30 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		crown = w.World.CrownTax(p)
 		gold = p.Gold
 		autoPay = w.AutoPayMaint
+		support = p.Support
+		morale = p.Morale
+		waste = p.Regions.Waste
 	}) {
 		return
 	}
 	due := forces + regions + sdi + crown
 
-	if autoPay && gold >= due {
+	// BRE's silent one-line Auto-Pay total is gated on more than the
+	// preference and affordability: it also requires popular support and
+	// military morale to both be at their 100 cap and the realm to hold no
+	// Waste regions. If any of those fail, BRE bypasses Auto-Pay for this
+	// turn only — the preference itself is untouched — and falls through to
+	// the manual, itemised sequence below (which is also where the optional
+	// support/morale boosts and the waste-decontamination offer live).
+	// BRE.OVR `allocate_turn_budget` (0x02eebb), called from BRE.EXE
+	// `run_player_turn`: the gate at flat 0x3b12-0x3b6d compares gold to the
+	// total due, then checks empire-record fields +0x92 (support, ==100),
+	// +0x8e (morale, ==100), +0xb6 (Waste count, ==0) and +0x339 (the
+	// Auto-Pay flag itself) before taking the silent branch at 0x3b72; any
+	// failure falls to 0x3c16, which calls allocate_turn_budget instead.
+	autoPaySilent := autoPay && gold >= due && support >= 100 && morale >= 100 && waste <= 0
+
+	if autoPaySilent {
 		if !withPlayer(w, func(p *game.Empire) {
 			w.World.PayForces(p, forces)
 			w.World.PayRegions(p, regions)
@@ -506,7 +526,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	}
 
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Maintenance:"), ansi.Reset)
-	if autoPay {
+	if autoPay && gold < due {
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgYellow, tr(s, "You cannot cover all your maintenance this turn."), ansi.Reset)
 	}
 
@@ -558,7 +578,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		// Reconsider: loop back to the bank visit (gold is re-read at the top).
 	}
 
-	var forcesLost, regionsLost, support, morale int
+	var forcesLost, regionsLost int
 	if !withPlayer(w, func(p *game.Empire) {
 		forcesLost = w.World.PayForces(p, forcesGold)
 		regionsLost = w.World.PayRegions(p, regionsGold)
