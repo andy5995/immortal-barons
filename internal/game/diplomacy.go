@@ -234,8 +234,9 @@ func tradePactIncome(e, other *Empire, perHead, selfCut, partnerCut int) int64 {
 
 // A Technology Agreement lets a partner's research help your own (#11). BRE adds
 // an unmultiplied research contribution per partner, bounded by whichever side
-// holds less Technology — so a pact with a strong partner helps, but does not
-// substitute for holding tech yourself. Applied in advanceTech.
+// holds fewer Technology REGIONS — so a pact with a strong partner helps, but
+// does not substitute for holding tech yourself. Binary-verified; applied in
+// advanceTech, where the provenance is.
 
 // A Full Defense Alliance is LOCAL ONLY. BRE's manual says so of the treaty
 // itself — "effective only in Local Games" — and the binary matches: the

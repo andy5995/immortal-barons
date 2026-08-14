@@ -24,4 +24,5 @@ jets can reach it. Every wave takes a piece out of the weapon, and enough
 waves destroy it in the air.
 
 Whatever survives the flight strikes every realm on that planet and takes a
-share of their regions. SDI reduces the damage.
+share of their regions. An SDI program is no help against it — jets are the only
+thing that can reach the weapon.

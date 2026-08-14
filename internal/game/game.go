@@ -107,10 +107,11 @@ type Empire struct {
 	Agents   int
 
 	Tax int
-	SDI int // 0-75, percentage reduction of incoming strike damage
+	SDI int // 0-100, the shield percentage against strikes from another planet
 	// SDIFunding is the gold in the program to date, which is what the original
 	// stores and what its upkeep and spending allowance are both figured from.
-	// SDI above is derived from it. See specials.go.
+	// SDI above is derived from it and from the land it has to cover, so gameplay
+	// code changes the funding and lets syncSDI follow. See specials.go.
 	SDIFunding int64
 	HQ         int // 0 = none/not started; 1-100 = percent complete
 	// TurnsPlayed is the empire's lifetime turn count. BRE keeps the same counter
@@ -301,8 +302,13 @@ type TurnProgress struct {
 func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }
 
 // syncLand resyncs the authoritative Land total from Regions. Every place
-// that changes an empire's regions must call this afterward.
-func (e *Empire) syncLand() { e.Land = e.Regions.Total() }
+// that changes an empire's regions must call this afterward. The SDI follows,
+// because the shield's strength is its funding spread over the land it covers:
+// take land and your shield thins, lose land and it thickens.
+func (e *Empire) syncLand() {
+	e.Land = e.Regions.Total()
+	e.syncSDI()
+}
 
 // EnsureRegions repairs the Land/Regions invariant after loading a save that
 // predates region types (Regions zero) or is otherwise inconsistent. If the
@@ -447,12 +453,20 @@ func TechPercent(factor int, lowered bool) int {
 
 // advanceTech runs one turn of research. Called once per turn played.
 //
-// BRE-verified: points are quadratic in Technology regions and only
-// inverse-linear in realm size, so a dense tech block in a small realm
-// out-researches the same block in a large one. Each point lands in a slot
-// chosen uniformly at random, and nine of the fifteen slots do nothing — the
-// waste is the mechanic, not a bug. A Technology Agreement partner adds an
-// unmultiplied contribution capped by whichever of the two holds less tech.
+// BINARY-VERIFIED against BRE.OVR process_economic_production (unit ovr_033b64
+// +0x2fe): points are quadratic in Technology regions and only inverse-linear in
+// realm size, so a dense tech block in a small realm out-researches the same
+// block in a large one. Each point lands in a slot chosen uniformly at random,
+// and nine of the fifteen slots do nothing — the waste is the mechanic, not a
+// bug.
+//
+// The partner term is the same expression over the SAME denominator — the
+// researcher's own total regions, not the partner's — bounded by the smaller of
+// the two Technology REGION counts, and it does not get the multiplier. The
+// original walks realms A..Y, skips its own slot, takes the relation from the
+// researcher's own row, and skips a partner that holds no Technology or whose
+// record slot is not in use; alliesOf's Alive filter is that second gate. Both
+// terms round separately before they are summed.
 //
 // With no Technology regions this returns immediately: research stops and the
 // banked levels FREEZE. They are never decremented anywhere.
@@ -471,7 +485,9 @@ func (w *World) advanceTech(e *Empire) {
 	}
 }
 
-// techResearchPoints is round((n^2 / total)^0.75), the original's own shape.
+// techResearchPoints is round((n^2 / total)^0.75), the original's own shape. It
+// computes the power as exp(ln(x) * 3 / 4) and rounds half away from zero, which
+// is what math.Pow and math.Round do here.
 func techResearchPoints(n, total int) int {
 	if n <= 0 || total <= 0 {
 		return 0

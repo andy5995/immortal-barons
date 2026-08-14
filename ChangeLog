@@ -113,6 +113,15 @@
   * Nuclear, chemical and biological strikes raise the attacker's score
   * A warhead the gold in hand cannot cover is paid for out of the bank rather
     than refused
+  * SDI no longer reduces nuclear damage from a realm on the same planet
+  * SDI strength is its funding spread over the realm's land, so taking regions
+    thins the shield that covers them
+  * SDI answers only strikes from another planet: it blunts an arriving realm's
+    jets and bombers and intercepts incoming missiles, and no longer touches
+    chemical or biological strikes, a neighbour's bombing run, or the Clingy
+    Annihilator
+  * A group attack is not blunted by its target's SDI, as in the original
+  * A nuclear strike raises the attacker's score
   * Inter-BBS packets carry the sending board's signature, and a board whose
     key is in the league roster can no longer be impersonated
   * Added "-gen-board-key" to create this board's packet-signing key
@@ -188,9 +197,8 @@
   * The standing appears beside every planet named on any interplanetary screen
   * Allied Planets writes to every planet the chart marks Allied
   * The Planetary Treaties chart matches the original's layout and colors
-  * Partially implemented the SDI Program: its funding allowance, its upkeep and
-    its screen now match the original; how much shield that funding buys is
-    still IB's own figure
+  * Implemented the SDI Program: its funding allowance, its upkeep, its screen
+    and the strength its funding buys all match the original
   * Clingy Annihilator Ops answers to 9 on the InterPlanetary Operations menu, and
     the interplanetary Special Operations menu is numbered, both as in the
     original

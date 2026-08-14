@@ -717,7 +717,8 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 	}
 }
 
-// A weapon that gets through takes a share of every realm's land, less its SDI.
+// A weapon that gets through takes the same share of every realm's land. The
+// SDI is no defence against it: only jets can reach the thing (#111).
 func TestAnnihilatorDetonationHitsThePlanet(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.IBBS = true
@@ -728,7 +729,7 @@ func TestAnnihilatorDetonationHitsThePlanet(t *testing.T) {
 		e.Regions = RegionMix{Agricultural: 10_000}
 		e.syncLand()
 	}
-	shielded.SDI = 50
+	shielded.SDI = SDIMax
 
 	w.Incoming = &Annihilator{Creator: "Wildside", Launched: true, ArrivesDay: w.GameDay, Intact: 100}
 	w.ArriveAnnihilator()
@@ -736,8 +737,8 @@ func TestAnnihilatorDetonationHitsThePlanet(t *testing.T) {
 	if plain.Land != 9000 {
 		t.Errorf("unshielded realm has %d land, want 9,000 (10%% lost)", plain.Land)
 	}
-	if shielded.Land != 9500 {
-		t.Errorf("shielded realm has %d land, want 9,500 (SDI halved the hit)", shielded.Land)
+	if shielded.Land != 9000 {
+		t.Errorf("shielded realm has %d land, want 9,000 — the SDI must not blunt it", shielded.Land)
 	}
 	if w.Incoming != nil {
 		t.Error("the weapon was not consumed on arrival")

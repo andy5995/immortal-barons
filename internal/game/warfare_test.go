@@ -47,10 +47,11 @@ func TestFundSDIRoundsToWholeThousands(t *testing.T) {
 func TestFundSDICapsAtMax(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
 	a.Gold = 1_000_000_000
-	a.SDIFunding = SDIMax * SDIStep
+	// The funding that buys the cap over the land this realm holds, and then some.
+	a.SDIFunding = int64(SDIMax*SDIMax) * SDIStrengthLandDivisor * int64(a.Land+1)
 	a.syncSDI()
 
-	level, err := w.FundSDI(a, SDIStep)
+	level, err := w.FundSDI(a, SDIMinSpend)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -93,6 +94,84 @@ func TestSDIUpkeepAndAllowanceMatchBRE(t *testing.T) {
 		if got := w.SDISpendAllowance(a); got != c.allowance {
 			t.Errorf("allowance on %d = %d, want %d", c.funding, got, c.allowance)
 		}
+	}
+}
+
+// The funding-to-strength curve against the same captured game, as golden
+// literals. Every screen in that capture was read at 8,321 regions — the
+// Terrorist Ops price on the surrounding menu is regions x 64, which pins the
+// figure — and all sixteen land exactly.
+func TestSDIStrengthMatchesCapturedScreens(t *testing.T) {
+	const land = 8_321
+	for _, c := range []struct {
+		funding int64
+		want    int
+	}{
+		{0, 0},
+		{250_000, 1},
+		{500_000, 2},
+		{750_000, 3},
+		{1_000_000, 3},
+		{1_250_000, 3},
+		{1_500_000, 4},
+		{1_800_000, 4},
+		{2_160_000, 5},
+		{2_592_000, 5},
+		{3_110_000, 6},
+		{3_732_000, 6},
+		{4_478_000, 7},
+		{5_373_000, 8},
+		{5_899_000, 8},
+		{7_078_000, 9},
+	} {
+		if got := SDIStrength(c.funding, land); got != c.want {
+			t.Errorf("%d gold over %d regions = %d%%, want %d%%", c.funding, land, got, c.want)
+		}
+	}
+}
+
+// Land divides the shield, so the same program covers a bigger realm worse.
+func TestSDIStrengthThinsOverMoreLand(t *testing.T) {
+	if got := SDIStrength(7_078_000, 100); got != 83 {
+		t.Errorf("7,078,000 over 101 regions = %d%%, want 83%%", got)
+	}
+	if got := SDIStrength(7_078_000, 8_321); got != 9 {
+		t.Errorf("7,078,000 over 8,322 regions = %d%%, want 9%%", got)
+	}
+}
+
+// An arriving individual strike loses 30% of its jets' contribution and 20% of
+// its bombers' to a full shield, and keeps everything else.
+func TestSDIBluntsArrivingJetsAndBombers(t *testing.T) {
+	f := AttackForce{Troopers: 1_000, Jets: 1_000, Tanks: 1_000, Bombers: 1_000}
+	whole := f.offense()
+	jetLoss := 1_000 * 2 * 30 / 100
+	bomberLoss := 1_000 * GroupAttackBomberOffense * 20 / 100
+	if got, want := f.offenseAgainstSDI(SDIMax), whole-jetLoss-bomberLoss; got != want {
+		t.Errorf("offense against a full shield = %d, want %d", got, want)
+	}
+	if got := f.offenseAgainstSDI(0); got != whole {
+		t.Errorf("no shield changed the offense: %d, want %d", got, whole)
+	}
+}
+
+// A group attack faces no shield at all: the original averages the planet's
+// shields and then divides by 100 a second time, which can never reach 1.
+func TestGroupAttackIgnoresTheDefendersSDI(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.IBBS = true
+	w := NewWorldSeed(cfg, 1)
+	d := w.AddHuman("def", "Carthage")
+	d.SDI = SDIMax
+	f := AttackForce{Jets: 1_000, Bombers: 1_000}
+	contributors := []Contribution{{Owner: "att", AttackForce: f}}
+	group := RemoteAttack{Offense: f.offense(), Group: true, Contributors: contributors}
+	if got := group.offenseAgainstSDI(d); got != f.offense() {
+		t.Errorf("a group attack was blunted to %d, want its whole %d", got, f.offense())
+	}
+	solo := RemoteAttack{Offense: f.offense(), Kind: NormalAttack, Contributors: contributors}
+	if got := solo.offenseAgainstSDI(d); got >= f.offense() {
+		t.Errorf("an individual strike was not blunted: %d, want less than %d", got, f.offense())
 	}
 }
 

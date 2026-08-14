@@ -224,9 +224,11 @@ func (w *World) InterceptAnnihilator(e *Empire, jets int) (int, error) {
 	return knocked, nil
 }
 
-// DetonateAnnihilator applies an arrived weapon to this planet: every living realm
-// loses AnnihilatorDamagePct of its land, less its SDI, and scaled by how much of the
-// weapon survived the flight.
+// DetonateAnnihilator applies an arrived weapon to this planet: every living
+// realm loses AnnihilatorDamagePct of its land, scaled by how much of the weapon
+// survived the flight. The SDI does not blunt it — jets are the only thing that
+// can reach the weapon, and the original's own resolution never reads the shield
+// (#111).
 func (w *World) DetonateAnnihilator(intact int) string {
 	if intact <= 0 {
 		return ""
@@ -238,7 +240,6 @@ func (w *World) DetonateAnnihilator(intact int) string {
 			continue
 		}
 		pct := AnnihilatorDamagePct * intact / 100
-		pct -= pct * d.SDI / 100
 		lost := d.Land * pct / 100
 		if lost < 1 && pct > 0 {
 			lost = 1

@@ -472,7 +472,12 @@ func (w *World) SlappenheimerStrike(a, d *Empire) (string, error) {
 		d.addEvent("Your security foiled an enemy R5-Slappenheimer strike.")
 		return "The operation failed and your agent was lost.", nil
 	}
-	if w.rng.Intn(100) < d.SDI {
+	// BINARY-VERIFIED interception: the original rolls Random(100) against HALF
+	// the shield percentage and stops the missile when the roll does not clear it
+	// — inclusively, so a realm with no program still turns one shot in a hundred
+	// aside. A full program stops about half of them, which is where breins.txt's
+	// "up to 50% of incoming missiles" comes from.
+	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
 		return fmt.Sprintf("%s's SDI intercepted your R5-Slappenheimer.", d.Name), nil
 	}
 	if w.rng.Intn(SlappenheimerEffectRange) >= SlappenheimerEffectHits {

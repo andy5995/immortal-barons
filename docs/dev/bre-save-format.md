@@ -65,6 +65,16 @@ empire record (les di,[0x28d8])
                 million civilians were killed!" beside it after taking a
                 percentage of it. Both warheads also multiply it into their
                 price, so every per-head price in this binary is per million.
+  +0x5d  int32  slot-in-use serial. -1 in every unoccupied slot; a positive,
+                game-lifetime-increasing number in an occupied one (921 / 932 /
+                933 across three saves, the second realm exactly one above the
+                first). Read or tested `> 0` at 83 sites — target pickers, net
+                worth, the roster, the coordinator vote, the Technology
+                Agreement partner loop — always through the indexed
+                other-empire pointer, never written anywhere. It has to be
+                tested everywhere because BRE initialises every unused slot
+                with the STARTING TEMPLATE, so an empty record still carries a
+                plausible region mix.
   +0x6a  int32  bank balance
                 (+0x66 is NOT gold on hand: the turn routine zeroes it every
                  turn and it reads 0 in the save. The maintenance routine loads
@@ -161,6 +171,10 @@ empire record (les di,[0x28d8])
                 purge truncates it, adds the configured DeletionDays (a word at
                 DS:0x6f99, default 7) and deletes the slot when the sum falls
                 before today (a Real48 at DS:0x8606).
+  +0x33f int32  SDI program funding, in WHOLE THOUSANDS of gold. The strength
+                routine (BRE.EXE 056d:1139) reads it, multiplies by 1000 and
+                divides by 10 x (totalRegions + 1) before the square root; the
+                screen prints it followed by a literal ",000".
   +0x331 int32  land still available to BUY — the Daily Land Creation allowance.
                 PER-EMPIRE, not a planet-wide pool: 0x12D30 bounds a region
                 purchase against it and 0x12EF9 subtracts the number bought
@@ -267,12 +281,16 @@ Runtime helpers worth recognising when reading this code:
 0851:0288   int32 -> "1,234,567"        0fd0:178a   real compare
 056d:1a07   technology factor: 1 + (cap-1)*(1 - exp(-level[sel]/(regions+1)))
 0fd0:193e   Ln          0fd0:19e7   Exp          0fd0:1774   square
+0fd0:1841   real square root
+0c03:12e1   min(int32,int32)            0c03:129b   max(int32,int32)
 056d:0ec6   sum of the nine region counts (total regions)
 056d:18f0   ruin N regions: calls the proportional remover (056d:11f1) across the
             nine counts, then adds the same N to Waste at +0xb6. Both the
             nuclear and the chemical strike reach it; the biological one does
             not, which is why a plague leaves the land alone.
 056d:0d21   blank an empire record and seed the new-realm defaults
+056d:1139   SDI strength %: clamp(0..100, trunc(sqrt(funding[+0x33f] * 1000
+            / (totalRegions + 1) / 10)))
 0fd0:1792   real -> int, TRUNCATES
 0fd0:179a   real -> int, ROUNDS      <- the two are easy to confuse; which one a
                                         routine uses changes results by one unit

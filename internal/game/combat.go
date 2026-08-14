@@ -6,9 +6,10 @@ import (
 )
 
 // Bombing-run tuning: each bomber that survives the defender's anti-air
-// destroys up to BomberJetKills of the defender's grounded jets; the
-// defender shoots down one bomber per TurretsPerBomberDown turrets, and SDI
-// blunts the raid by its percentage.
+// destroys up to BomberJetKills of the defender's grounded jets, and the
+// defender shoots down one bomber per TurretsPerBomberDown turrets. The
+// defender's SDI does NOT come into it — the original reads the shield only
+// against an attack arriving from another planet, never against a neighbour.
 const (
 	BomberJetKills       = 3
 	TurretsPerBomberDown = 25
@@ -61,7 +62,7 @@ func (w *World) bombingRun(a, d *Empire, bombers int) (int, int) {
 	}
 	lost := min(bombers, d.Turrets/TurretsPerBomberDown)
 	survivors := bombers - lost
-	kills := survivors * BomberJetKills * (100 - d.SDI) / 100
+	kills := survivors * BomberJetKills
 	if kills > d.Jets {
 		kills = d.Jets
 	}

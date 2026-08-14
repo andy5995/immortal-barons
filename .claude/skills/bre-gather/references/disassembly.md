@@ -141,6 +141,44 @@ The loop that keeps paying off:
    operations both change results by a unit — the two real→int helpers differ
    only in that, and picking the wrong one is easy.
 
+### Real48 calls: which register triple is which operand
+
+A binary real op takes `dx:bx:ax` and `cx:si:di`, and **`RDiv`/`RSub` compute
+`dx:bx:ax OP cx:si:di`** — the triple `dx:bx:ax` is the left operand. Turbo
+Pascal evaluates the *right* operand first, so the pattern is: right operand →
+`push dx / push bx / push ax`, left operand computed into `dx:bx:ax`, then
+`pop cx / pop si / pop di` restores the right one. A constant right operand skips
+the push and is loaded straight into `cx:si:di` (`mov cx,0x8a / xor si,si / mov
+di,0x7a00`). Chains fall out correctly: `a / b / c` divides, then divides the
+result by the next constant.
+
+The register-to-byte mapping for those loads is `ax`=bytes 0-1, `bx`=2-3,
+`dx`=4-5, so `cx=0x008a, si=0, di=0x7a00` is `mem:8a000000007a`. Decode it,
+never eyeball it — `scripts/bre-real48.py decode mem:...`. **Getting a round
+number out (1000, 100, 0.3, 0.2) is the check that the mapping is right**; a
+garbage value means the bytes are in the wrong order, not that the constant is
+strange.
+
+Getting the divide backwards inverts a whole formula and the mistake survives
+plausibility checks, so confirm the direction against a *labelled* screen figure
+or a captured number before building on it.
+
+### A stored figure may not be in the units the screen prints
+
+BRE stores the SDI pot in **whole thousands** and the screen prints the stored
+value followed by a literal `,000` string. So `Total Funding: 7,078,000` is a
+record field holding `7078`, and a formula reading that field is a thousand times
+smaller than the displayed gold. The tell was a second line reading `Funding /
+Region: 0,000 Gold` at every funding level, which had been written up here as an
+unexplained defect in the original — it was the same `,000` suffix on a division
+that had genuinely truncated to zero.
+
+**When a formula comes out orders of magnitude wrong, suspect the field's units
+before suspecting the reading.** Dump the string constants the display routine
+pushes (they sit in the unit's code segment at the `cs`-relative offsets the
+`mov di,imm16 / push cs / push di` pairs name) and look for a suffix that is
+doing arithmetic.
+
 Record layout and helper addresses live in `docs/dev/bre-save-format.md`; extend
 that file rather than re-deriving.
 
@@ -374,6 +412,53 @@ one regex away. The tell that you are about to get this wrong is a field in the
 PERSISTED record doing a job a local variable would do — BRE has no reason to
 spend save-file bytes on a guard, so if it looks like one, you have misread it.
 Grep the disp16 in both files, sort by opcode, and read every site.
+
+### A live save names a field in one command, when 80 call sites will not
+
+The access list gives a field's *scope*; it often will not give its *meaning*.
+Technology Agreement `+0x5d` was read or tested at 83 sites — target pickers, net
+worth, the roster, the coordinator vote — all as `> 0`, none of them writing it,
+which is enough to say "a gate" and not enough to say what kind. `data/game.dat`
+settled it in one pass: records sit at a fixed stride after a header, so dump the
+field for every slot and compare an occupied one against an empty one.
+
+```
+BASE, STRIDE = 2489, 1069          # first record base, empire record stride
+r = data[BASE + i*STRIDE : ...]    # i = 0..24 for realms A..Y
+```
+
+Every unoccupied slot read `-1` and the one occupied slot read a positive serial;
+three saves from different games gave 921, 932, 933, with a second realm exactly
+one above the first. That is a slot-in-use counter, and no amount of reading call
+sites would have said so. **Find the record base by locating the realm-name
+ShortStrings and taking their spacing** — do not assume the header size.
+
+Note that BRE **initialises every unused slot with the starting template**, so an
+empty record still carries a plausible region mix and a plausible name-less
+header. Without the in-use marker every scan would see 25 live realms; that is
+exactly why the marker is tested everywhere.
+
+### The catalog's resident offsets omit the MZ header — both maps are right
+
+`disasm`/`list` report a resident block's `span` in **image** offsets
+(`segment*16 + offset`), while the manual `dd` recipe above needs **file**
+offsets (`0x2940 + segment*16 + offset`). The SDI strength routine is
+`0x06809` in the catalog and `0x9149` in the file, and the 0x2940 difference
+reads as the catalog disagreeing with the tool. It does not. Subtract or add the
+header before comparing the two, and check the arithmetic on a block whose
+neighbour you already know — two spans a fixed distance apart in both maps is the
+confirmation.
+
+### "Call sites" means instructions; a mechanic's reach means routines
+
+Say which you counted. The SDI percentage is read by **seven call instructions in
+four routines**, and writing that up as "four call sites" produced a claim that
+looked wrong against a `grep` for the far-call bytes and had to be re-derived.
+Two of the seven are one screen printing the figure twice (once as a `> 0` test,
+once formatted), and two more are one attack routine reading two different
+shields — a per-realm read inside a planet-average loop, and the named defender's
+own. The routine count is the mechanic's reach; the instruction count is what the
+next reader will find with a five-byte regex, so give both.
 
 ### Finding an overlaid routine's CALLER — map the overlay stubs
 

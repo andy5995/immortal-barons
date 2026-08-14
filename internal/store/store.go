@@ -54,11 +54,13 @@ func Load(cfg game.Config) (*game.World, error) {
 // this list.
 func repair(w *game.World, cfg game.Config) {
 	for _, e := range w.Empires {
+		// SDI first: it reads the saved percentage to rebuild a pre-pool save's
+		// funding, and EnsureRegions recomputes the percentage from the pool.
+		e.EnsureSDIFunding()
 		e.EnsureRegions()
 		e.EnsureSupport()
 		e.EnsureMorale()
 		e.EnsureProduction()
-		e.EnsureSDIFunding()
 	}
 	w.EnsureInvestRate()
 	w.EnsurePirates()

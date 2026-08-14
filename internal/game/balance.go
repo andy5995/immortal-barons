@@ -1083,6 +1083,39 @@ const (
 	SDISpendPct  = 20      // per-turn funding allowance, as a percent of total funding
 	SDIMinSpend  = 250_000 // floor under that allowance, so a new program can start
 	SDIIncrement = 1_000   // funding is accepted only in whole thousands
+	// How funding converts to strength, BINARY-VERIFIED (BRE.EXE resident
+	// 056d:1139, the routine every reader of the percentage calls):
+	//
+	//	strength% = trunc(sqrt(funding / (SDIStrengthLandDivisor * (regions + 1))))
+	//
+	// clamped to 0..SDIMax. The original stores the program in whole thousands
+	// and computes `thousands * 1000 / (regions+1) / 10` before the square root,
+	// which is the same figure. The curve reproduces all sixteen captured screens
+	// exactly at that game's 8,321 regions, so land is a divisor of the shield,
+	// not just of its cost: doubling your realm halves the funding-per-region and
+	// costs you ~29% of the percentage.
+	SDIStrengthLandDivisor = 10
+	SDIMax                 = 100 // the original's own clamp on the percentage
+	// What the shield actually does, BINARY-VERIFIED. Seven call instructions in
+	// four routines read the percentage, and that list is its whole reach: the two
+	// screens that print it, an arriving interplanetary attack (BRE.OVR
+	// ovr_03f4a0 +0xed6 for the planet-wide average, +0x10aa for the named
+	// defender), and an arriving S3-Sabre bombing op (ovr_0450a9 +0x481). Nothing
+	// local consults it — neither a neighbour's attack nor a nuclear, chemical or
+	// biological missile — so the three effects below are all of it, and they are
+	// the three the original's own instructions name.
+	//
+	// Against an arriving strike the reduction is linear in the percentage, and
+	// the published "up to 30% / 20%" figures are what it reaches at SDI 100:
+	// jets fight at `1 - SDI*0.3/100` and bombers at `1 - SDI*0.2/100`.
+	SDIJetReductionPct    = 30
+	SDIBomberReductionPct = 20
+	// The missile ceiling works differently: the S3-Sabre is INTERCEPTED on a
+	// roll — `Random(100) <= SDI * 0.5` — so a full program stops about half the
+	// missiles aimed at it rather than halving each one's damage. The comparison
+	// is inclusive in the original, so a realm with no program still intercepts
+	// on a zero roll (1%); that is faithful, not a rounding artifact.
+	SDIMissileInterceptPct = 50
 	// TerrorUnitLossDenom: each successful terror hit removes 1/N of one random
 	// unit type. BRE's disassembled hit applier uses a 6/7 ratio (removes ~1/7),
 	// so N = 7.
@@ -1394,16 +1427,24 @@ const (
 	// 10000 == x1.0. Kept off floating point so money stays integral.
 	TechFactorUnit = 10000
 
-	// Technology Agreement treaty (#11): BRE's manual says the pact "allows an
-	// empire to gain some of the technological advances of its partner" — a
-	// tech-sharing effect. The magnitude isn't in the manual (and isn't
-	// disassembly-recovered), so these are IB's own reconstructed tunables. A
-	// Technology Agreement raises your TechLevel ceiling to TechAgreementCapPct%
-	// of your highest-tech partner's level, and you catch up 1/TechAgreementGainDiv
-	// of the remaining gap each turn — so even a low-Technology realm slowly gains
-	// from a strong partner. See advanceTech.
-	TechAgreementCapPct  = 60 // reach this % of the best partner's TechLevel
-	TechAgreementGainDiv = 20 // per-turn catch-up = (partner ceiling − yours) / this
+	// Technology Agreement treaty (#11), BINARY-VERIFIED end to end (BRE.OVR
+	// process_economic_production, unit ovr_033b64; the partner loop is +0x3c2 to
+	// +0x4cb). Each partner adds
+	//
+	//	round( (min(myTechRegions, partnerTechRegions)^2 / myTotalRegions)^0.75 )
+	//
+	// — the same expression as your own research, over the SAME denominator, and
+	// without the TechResearchMul. It carries no constants of its own, which is
+	// why none appear here: the bound is the smaller of the two Technology REGION
+	// counts (record field +0xb2 on both), so a pact accelerates a realm that is
+	// already researching and does nothing for one holding no Technology.
+	//
+	// The loop's two guards on a partner are both existence tests, not diplomacy
+	// conditions: it must hold Technology, and its record field +0x5d must be
+	// positive. +0x5d is the slot's in-use marker — every unoccupied slot in a
+	// live save reads -1 while the occupied one reads a positive serial, and the
+	// binary reads or tests it at 83 sites and writes it at none. IB's alliesOf
+	// filter on Alive is that same gate.
 )
 
 // Money ceilings. The money fields are int64 (Empire.Gold and friends), so what

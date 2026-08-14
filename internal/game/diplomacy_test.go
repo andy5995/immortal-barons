@@ -59,6 +59,58 @@ func TestTechnologyAgreementSharesTech(t *testing.T) {
 	}
 }
 
+// The partner contribution's exact size, BINARY-VERIFIED (#86). One turn of
+// research for a realm holding 40 Technology of 100 regions is
+// 4*round((40^2/100)^0.75) = 4*8 = 32 points. Each Technology Agreement partner
+// adds round((min(mine, theirs)^2 / MY total)^0.75) on top, unmultiplied — so a
+// partner at or above 40 Technology is worth 8 more, one at 10 Technology is
+// worth 1, and the partner's own realm size never enters it. Golden literals: a
+// retune has to produce new evidence, not just follow the constants.
+func TestTechAgreementPartnerContributionSize(t *testing.T) {
+	banked := func(e *Empire) int {
+		n := 0
+		for _, v := range e.TechSlots {
+			n += v
+		}
+		return n
+	}
+	// partnerMix is nil for "no partner at all".
+	oneTurn := func(partnerMix *RegionMix) int {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		me := w.AddHuman("m", "Mine")
+		me.Regions = RegionMix{Coastal: 60, Technology: 40}
+		me.Land = me.Regions.Total()
+		if partnerMix != nil {
+			p := w.AddHuman("p", "Partner")
+			p.Regions = *partnerMix
+			p.Land = p.Regions.Total()
+			w.ProposeTreaty(me, p, "Technology Agreement")
+			if !w.AcceptTreaty(p, me.Name, "Technology Agreement") {
+				t.Fatal("AcceptTreaty failed")
+			}
+		}
+		w.advanceTech(me)
+		return banked(me)
+	}
+
+	if got := oneTurn(nil); got != 32 {
+		t.Errorf("own research alone: got %d points, want 32", got)
+	}
+	// A richer partner is bounded by MY Technology, and its 10,000 regions do not
+	// dilute the term — the denominator is the researcher's own total.
+	if got := oneTurn(&RegionMix{Coastal: 9800, Technology: 200}); got != 40 {
+		t.Errorf("with a richer partner: got %d points, want 40", got)
+	}
+	// A poorer partner is bounded by ITS Technology.
+	if got := oneTurn(&RegionMix{Coastal: 90, Technology: 10}); got != 33 {
+		t.Errorf("with a poorer partner: got %d points, want 33", got)
+	}
+	// A partner holding no Technology adds nothing.
+	if got := oneTurn(&RegionMix{Coastal: 100}); got != 32 {
+		t.Errorf("with a tech-less partner: got %d points, want 32", got)
+	}
+}
+
 // A Protective Trade agreement guards the two realms' trade, so a partner cannot
 // bomb the other's trade routes or market (#11).
 func TestProtectiveTradeGuardsTradeCovert(t *testing.T) {
