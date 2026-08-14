@@ -222,7 +222,7 @@ func indivAttackForce(s session.Session, w *ctx) Result {
 	if force.Empty() {
 		return Stay
 	}
-	okNoPause(s, "This attack will cost %s gold.", comma(force.GoldCost()))
+	okNoPause(s, "This attack will cost %s gold.", comma(w.AttackGoldCost(force)))
 	if !askYesNoHere(s, "Send this Attack?", true) {
 		return Stay
 	}
@@ -618,6 +618,12 @@ func terroristOps(s session.Session, w *ctx) Result {
 	}
 	agents := promptSuggested(s, "How many agents to send?", w.Player().Agents, w.Player().Agents)
 	if agents <= 0 {
+		return Stay
+	}
+	// BRE prices the op on the menu itself; quote it here too, since the price
+	// climbs with the launcher's own region count and is easy to be surprised by.
+	okNoPause(s, "This operation will cost %s gold.", comma(w.TerrorOpGoldCost(w.Player())))
+	if !askYesNoHere(s, "Send this Operation?", true) {
 		return Stay
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {

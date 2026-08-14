@@ -43,6 +43,24 @@ func (l Level) Percent() int {
 	}
 }
 
+// CostPercent is the multiplier the two ATTACK/TERRORISM cost levels apply, in
+// percent. BRE gives those two their own spread — None 0, Low 20, Medium 100,
+// High 300 — rather than the Percent() ladder above; see the balance.go block
+// for the binary evidence. Use this for AttackCosts and TerrorCosts, Percent()
+// for the rest.
+func (l Level) CostPercent() int {
+	switch l {
+	case None:
+		return CostLevelNonePct
+	case Low:
+		return CostLevelLowPct
+	case High:
+		return CostLevelHighPct
+	default:
+		return CostLevelMediumPct
+	}
+}
+
 // BuyMode controls military purchasing (BRE "Buy Military": Yes/No/Limited).
 type BuyMode int
 

@@ -907,6 +907,40 @@ const (
 	IndividualAttackReturnsPct = 200
 )
 
+// --- Attack Costs / Terrorist Costs levels (BINARY-VERIFIED) ---
+//
+// The sysop's two cost Levels scale what an interplanetary strike and a
+// terrorist op charge. They do NOT use the generic Level.Percent() ladder
+// (0/50/100/200): BRE keeps its own spread for these two, and High TRIPLES the
+// price while Low cuts it to a fifth.
+//
+// Read from BRE.OVR two independent ways, agreeing exactly. The attack site
+// (0x2bbc2, config byte 0x182) branches on the level and then divides the price
+// by Real48 5.0 or multiplies it by 3.0; the terrorist pricing routine
+// (0x2ad9f, config byte 0x184) states the same spread as literal percents —
+// 100, 0, 20, 300 — and a sibling site (0x2ad1a) repeats the ÷5 / ×3 form on
+// longints. BRE's own encoding of the byte is Medium 0, None 1, Low 2, High 3,
+// which is what ties each figure to its level.
+//
+// Fidelity contract, not playtest knobs.
+const (
+	CostLevelNonePct   = 0
+	CostLevelLowPct    = 20
+	CostLevelMediumPct = 100
+	CostLevelHighPct   = 300
+
+	// AttackCostCap is the ceiling BRE clamps an interplanetary strike's gold
+	// price to before quoting it (BRE.OVR 0x2bc45, a Real48 2e8 compared against
+	// the computed price and substituted for it when the price is larger).
+	AttackCostCap int64 = 200_000_000
+
+	// TerrorOpGoldPerRegion prices a terrorist op off the launcher's own realm:
+	// BINARY-VERIFIED at 64 gold per region and confirmed against four captured
+	// menu prices (docs/mechanics-reference.md, "A terrorist op costs total
+	// regions x 64 gold"). TerrorCosts scales it.
+	TerrorOpGoldPerRegion int64 = 64
+)
+
 // --- Upkeep / maintenance (BRE-verified — live capture, Maintenance Costs
 // "Medium") ---
 //

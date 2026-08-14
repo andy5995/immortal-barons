@@ -269,10 +269,6 @@ func (f AttackForce) Empty() bool { return f.units() == 0 }
 // units counts the whole detachment, whatever the type.
 func (f AttackForce) units() int { return f.Troopers + f.Jets + f.Tanks + f.Bombers }
 
-// GoldCost is what launching this detachment as an individual strike costs.
-// BRE quotes it before asking to confirm ("This attack will cost 100 gold.").
-func (f AttackForce) GoldCost() int64 { return int64(f.units()) * IndividualAttackGoldPerUnit }
-
 // offense values the detachment by the combat table (trooper 1, jet 2, tank 4,
 // bomber GroupAttackBomberOffense).
 func (f AttackForce) offense() int {
@@ -544,7 +540,7 @@ func (w *World) CreateIndividualAttack(e *Empire, targetBoard, targetEmpire stri
 	if !w.CanAttack(e) {
 		return 0, ErrAttacksExhausted
 	}
-	cost := f.GoldCost()
+	cost := w.AttackGoldCost(f)
 	if e.Gold < cost {
 		return 0, ErrCantAfford
 	}
@@ -743,6 +739,11 @@ func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents i
 	if e.Agents < agents {
 		return ErrNoAgents
 	}
+	cost := w.TerrorOpGoldCost(e)
+	if e.Gold < cost {
+		return ErrCantAfford
+	}
+	e.Gold -= cost
 	e.Agents -= agents
 	e.TerrorOpsToday++
 	w.NextAttackID++

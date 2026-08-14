@@ -1,4 +1,8 @@
 (in-progress:)
+  * The Attack Costs setting scales what an interplanetary strike charges, and
+    the price is capped at 200,000,000 gold
+  * A terrorist operation costs 64 gold per region the launcher owns, scaled by
+    the Terrorism Costs setting, quoted before it is sent
   * A nuclear strike ruins land rather than destroying it: the target keeps
     every region and its upkeep but earns nothing from the ruined share
   * Waste is a region type of its own, listed on the region tables; it is

@@ -614,10 +614,37 @@ only prove the ×64-per-region term; whether the price also rises with each op
 already launched that day needs a capture with the counter above zero. Do not
 assume it is flat.
 
-IB does not charge for this yet: `TerrorCosts` is editable, broadcast and
-displayed, but nothing consumes it. BRE also prices four Special Operations
-entries on their own menu (figures in `docs/dev/bre-screens.md`), which is a
-separate gap.
+IB charges it: `World.TerrorOpGoldCost` is `Land × TerrorOpGoldPerRegion (64)`
+scaled by `TerrorCosts`, quoted before the confirm and taken in `SendTerror`.
+BRE also prices four Special Operations entries on their own menu (figures in
+`docs/dev/bre-screens.md`), which is a separate gap.
+
+### The two cost levels (Attack Costs, Terrorism Costs) — BINARY-VERIFIED
+
+Both are inter-BBS-only settings: Attack Costs scales what an interplanetary
+strike charges, Terrorism Costs what a terrorist op charges. **Neither uses the
+generic Level ladder** the other presets use (0 / 50 / 100 / 200):
+
+| Level | Multiplier |
+| --- | --- |
+| None | 0% |
+| Low | 20% |
+| Medium | 100% |
+| High | 300% |
+
+Read out of `BRE.OVR` two independent ways that agree exactly. The attack site
+(`0x2bbc2`, config byte `0x182`) branches on the level and divides the price by
+Real48 `5.0` or multiplies it by `3.0`; the terrorist pricing routine (`0x2ad9f`,
+config byte `0x184`) writes the same spread as literal percents 100 / 0 / 20 /
+300, and a sibling site (`0x2ad1a`) repeats the ÷5 / ×3 form on longints. BRE
+encodes the byte Medium 0, None 1, Low 2, High 3, which is what ties each figure
+to its level; the direction also matches `game/reset.hlp`, which says a High
+Attack Costs setting "will make attacking more difficult".
+
+The figures live in `balance.go` as `CostLevel*Pct` and reach the two knobs
+through `Level.CostPercent()`. `Level.Percent()` stays for Maintenance / Trade /
+Region / Attack Damage / Attack Rewards.
+
 "Days before 'lost' forces returned" (`Config.LostForcesDays`, default 3) is an
 **inter-BBS** setting, not a local-combat one. A strike sent to another board is
 away for the whole packet round trip, and packets go missing; the setting gives a
@@ -1683,7 +1710,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   (1) gold per unit sent** — "This attack will cost 100 gold." for 100 troopers,
   verified for troopers only — and BRE confirms with `Send this Attack? (Y/n)`
   before it goes. Its force prompts ask about **every** unit type, including
-  ones held at zero, each defaulting to 0.
+  ones held at zero, each defaulting to 0. The sysop's **Attack Costs** level
+  scales that price and BRE clamps the result at `AttackCostCap`
+  (200,000,000 gold); see "The two cost levels" below.
 - **Protection crosses the league.** A scores packet marks each realm still
   under New Realm Protection, and the attack and terror target lists leave those
   realms out — matching the local attack list, which hides them too. The target
