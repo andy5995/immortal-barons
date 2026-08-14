@@ -64,6 +64,11 @@ func VersionString() string {
 type Empire struct {
 	Name  string
 	Owner string // normalized BBS handle; "" for AI
+	// DupeLockedBy names the league board that last reported this owner playing
+	// there too, or "" when no duplicate is known. See dupe.go; only consulted
+	// while Config.DupeChecking is on, so turning the switch off releases
+	// everyone without a sweep.
+	DupeLockedBy string `json:",omitempty"`
 	// AIProfile is the personality of an AI empire (#36): it shapes which treaty
 	// offers the AI accepts and its military posture. Empty on human empires and
 	// on AI empires saved before profiles existed (aiProfile() derives a stable
@@ -508,6 +513,11 @@ type RemoteScore struct {
 	// forces on a target that was already known to be untouchable. Absent from a
 	// packet written before this field existed, which reads as unprotected.
 	Protected bool `json:",omitempty"`
+	// OwnerHash identifies the baron behind this realm to the duplicate-user
+	// check without putting anyone's BBS handle in a file that crosses the
+	// league — see dupe.go. Sent only while the sending board has Dupe Checking
+	// on, and absent from packets written before the field existed.
+	OwnerHash string `json:",omitempty"`
 }
 
 // RemoteBoard is a snapshot of another board's scores, imported via an

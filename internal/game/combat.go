@@ -102,6 +102,21 @@ func (w *World) CanAttack(e *Empire) bool {
 	return underDailyCap(e.AttacksToday, w.Config.MaxIndividualAttacks)
 }
 
+// LocalAttacksAllowed reports whether barons on this board may attack each
+// other. The Local Attacks switch is a league setting and only bites in a league
+// game — BRE's help scopes it to "the ability to attack other local empires in
+// Interplanetary games" — so a stand-alone board always fights.
+func (w *World) LocalAttacksAllowed() bool {
+	return !w.Config.IBBS || w.Config.LocalAttacks
+}
+
+// localAttacksScore reports whether winning a local attack moves either side's
+// score. BRE's Local Attack Scoring is off by default so barons cannot farm
+// score off their neighbours; off a league it never applies.
+func (w *World) localAttacksScore() bool {
+	return !w.Config.IBBS || w.Config.LocalAttackScoring
+}
+
 // underDailyCap reports whether one more of something is allowed today. A limit
 // of 0 or less means no cap, matching the MaxRegions convention.
 func underDailyCap(used, limit int) bool { return limit <= 0 || used < limit }
@@ -247,6 +262,9 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		}
 
 		gain := battle / CombatScoreDivisor
+		if !w.localAttacksScore() {
+			gain = 0 // no score from local fighting, and the report stays silent about it
+		}
 		addScore(a, gain)
 		addScore(d, -gain*CombatLoserPenaltyPct/100)
 
@@ -270,6 +288,9 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
 		gain := battle / CombatScoreDivisor * DefenseWinBonusPct / 100
+		if !w.localAttacksScore() {
+			gain = 0
+		}
 		addScore(d, gain)
 		addScore(a, -gain*CombatLoserPenaltyPct/100)
 
@@ -277,7 +298,13 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		fmt.Fprintf(&b, "Your casualties: %s.\n\n", attackerCas(aloss))
 		fmt.Fprintf(&b, "The enemy lost: %s.\n\n", defenderCas(dloss))
 		fmt.Fprint(&b, "Defeat! Your forces took the field and could not hold it.\n")
-		d.addEvent(fmt.Sprintf("%s attacked you but was repelled. You lost %d units; your score rose by %d.", a.Name, dloss.Total(), gain))
+		// Local Attack Scoring can be off, in which case nobody's score moved and
+		// the victim must not be told otherwise.
+		repelled := fmt.Sprintf("%s attacked you but was repelled. You lost %d units.", a.Name, dloss.Total())
+		if gain > 0 {
+			repelled = fmt.Sprintf("%s attacked you but was repelled. You lost %d units; your score rose by %d.", a.Name, dloss.Total(), gain)
+		}
+		d.addEvent(repelled)
 		w.postCombatNews(a, d, false, false)
 	}
 	return b.String(), captured

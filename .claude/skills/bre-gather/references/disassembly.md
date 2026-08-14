@@ -196,6 +196,42 @@ Once you have the offset, `re.finditer` for the packed disp16 (`6b 02`) lists
 *every* site that reads or writes it, which separates the purchase path, the
 per-turn advance, and the combat use without any further searching.
 
+### A Configuration Editor knob: find its config byte, then its dispatch
+
+Every `[H,M,L,N]` preset is ONE byte in the config record, and the code that
+uses it is always the same four-way ladder:
+
+```
+les di,[0x28b4]              ; the config record
+mov al,[es:di+0x18N]         ; the knob
+cmp al,0 / 1 / 2 / 3 -> four arms, one per level
+```
+
+so one regex over the raw file for `26 8a 85 <disp16>` (es: mov al,[di+d16])
+lists every knob site at once. On BRE 0.988 the presets sit at **`0x180`-`0x186`
+in the reset.hlp topic order**: Maintenance Costs, Attack Damage, Attack Costs,
+Attack Rewards, Terrorist Costs, Region Costs, Trade Deal Costs. The bools
+(Gooie Kablooies, Bombing/Missile Operations, …) follow at `0x18a`-`0x18d`. The
+`0x4d4c4` and `0x144cb` clusters are the editor itself reading them all in a
+row; the lone hits elsewhere are the gameplay sites you want.
+
+**The byte encoding is Medium 0, None 1, Low 2, High 3** — NOT the H/M/L/N
+display order, and not IB's own `Level` iota. Read it off the arms: the arm that
+leaves the value untouched is Medium, the arm that zeroes it is None.
+
+**Each knob keeps its OWN spread; never assume one shared multiplier.** Attack
+Costs (`0x182`) and Terrorist Costs (`0x184`) both work out to 0 / 20 / 100 /
+300 percent, while Attack Damage (`0x181`) and Attack Rewards (`0x183`) run
+0 / 50 / 100 / 150. Two knobs agreeing tells you nothing about a third.
+
+**The same knob is often implemented twice, in two number formats**, and the
+second copy is the one to read. Terrorist Costs has a Real48 arm set (`0x2ad1a`:
+`RDiv` by 5.0, `RMul` by 3.0 — you must decode the packed `cx/si/di` constants)
+and a plain-integer arm set (`0x2ad9f`: `mov word [bp-0x6], 0x64 / 0 / 0x14 /
+0x12c`). The integer one states the percentages outright. Scan for both before
+settling in to decode floats: `re.finditer` for the level immediate patterns
+costs one command.
+
 ### Counting references is evidence — use it before hypothesising
 
 Two cheap counts settle questions that otherwise invite a guess. Both come from

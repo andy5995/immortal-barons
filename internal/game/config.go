@@ -101,6 +101,24 @@ func (l Level) AttackRetreatPct() int {
 	}
 }
 
+// CostPercent is the multiplier the two ATTACK/TERRORISM cost levels apply, in
+// percent. BRE gives those two their own spread — None 0, Low 20, Medium 100,
+// High 300 — rather than the Percent() ladder above; see the balance.go block
+// for the binary evidence. Use this for AttackCosts and TerrorCosts, Percent()
+// for the rest.
+func (l Level) CostPercent() int {
+	switch l {
+	case None:
+		return CostLevelNonePct
+	case Low:
+		return CostLevelLowPct
+	case High:
+		return CostLevelHighPct
+	default:
+		return CostLevelMediumPct
+	}
+}
+
 // BuyMode controls military purchasing (BRE "Buy Military": Yes/No/Limited).
 type BuyMode int
 
@@ -168,30 +186,38 @@ type Config struct {
 	MaxIdleWarnings int // idle warnings a session may collect before a hard boot
 
 	// League ruleset (BRE Configuration Editor fields).
-	GameStartDate         string            // ISO date the game begins; before it, maintenance doesn't advance ("" = already started)
-	JoinDate              string            // ISO date after which no new player may join ("" = no cutoff)
-	TurnsPerDay           int               // turns each player gets per day
-	ProtectionTurns       int               // New Realm Protection length
-	GameLength            int               // days before the league ends and resets; 0 = endless
-	IdleDaysRemove        int               // days a realm may go unplayed before it is removed; 0 = never
-	InitialMarketLand     int               // land on the market at reset
-	LandPerDay            int               // land added to the market each day
-	MoneyCapBillions      int               // most gold a realm may hold, on hand and again in the bank, in whole billions (BRE's own limit is 2)
-	InterestRate          int               // bank interest (BRE: % over 10 days; 200 = 20%/day)
-	StdInvestRate         int               // standard investment rate (BRE: % over 10 days)
-	SteadyInvest          bool              // steady (fixed) investment rate instead of floating
-	FoodUnlimited         bool              // food market has no daily supply limit (BRE "Food Unlimited"; default false = limited)
-	MaxTaxRate            int               // highest tax rate a player may set (IB divergence: BRE caps nothing)
-	PlanetaryTaxRate      int               // crown tax on each turn's gold income, as a whole percent (5 = 5%)
-	MaxRegions            int               // most regions a player may own
-	MaxIndividualAttacks  int               // most individual (conventional) attacks a player may launch per day; 0 = unlimited (BRE "Maximum Individual Attacks Per Day")
-	MaxGroupAttacks       int               // most group (interplanetary) attacks a player may join or lead per day; 0 = unlimited
-	MaxTerrorOps          int               // most terrorist ops a player may launch per day; 0 = unlimited
-	MaxBombingOps         int               // most bombing ops a player may launch per day; 0 = unlimited
-	LostForcesDays        int               // days before a strike with no result packet gives its forces back (#96); 0 = never
-	BombingOps            bool              // Bomb Enemy Targets is offered
-	MissileOps            bool              // nuclear/chemical/biological strikes are offered
-	ClingyAnnihilator     bool              // the doomsday weapon may be built
+	GameStartDate        string // ISO date the game begins; before it, maintenance doesn't advance ("" = already started)
+	JoinDate             string // ISO date after which no new player may join ("" = no cutoff)
+	TurnsPerDay          int    // turns each player gets per day
+	ProtectionTurns      int    // New Realm Protection length
+	GameLength           int    // days before the league ends and resets; 0 = endless
+	IdleDaysRemove       int    // days a realm may go unplayed before it is removed; 0 = never
+	InitialMarketLand    int    // land on the market at reset
+	LandPerDay           int    // land added to the market each day
+	MoneyCapBillions     int    // most gold a realm may hold, on hand and again in the bank, in whole billions (BRE's own limit is 2)
+	InterestRate         int    // bank interest (BRE: % over 10 days; 200 = 20%/day)
+	StdInvestRate        int    // standard investment rate (BRE: % over 10 days)
+	SteadyInvest         bool   // steady (fixed) investment rate instead of floating
+	FoodUnlimited        bool   // food market has no daily supply limit (BRE "Food Unlimited"; default false = limited)
+	MaxTaxRate           int    // highest tax rate a player may set (IB divergence: BRE caps nothing)
+	PlanetaryTaxRate     int    // crown tax on each turn's gold income, as a whole percent (5 = 5%)
+	MaxRegions           int    // most regions a player may own
+	MaxIndividualAttacks int    // most individual (conventional) attacks a player may launch per day; 0 = unlimited (BRE "Maximum Individual Attacks Per Day")
+	MaxGroupAttacks      int    // most group (interplanetary) attacks a player may join or lead per day; 0 = unlimited
+	MaxTerrorOps         int    // most terrorist ops a player may launch per day; 0 = unlimited
+	MaxBombingOps        int    // most bombing ops a player may launch per day; 0 = unlimited
+	LostForcesDays       int    // days before a strike with no result packet gives its forces back (#96); 0 = never
+	// The three league-play policies BRE groups with the switches above. All
+	// default ON except LocalAttackScoring, which BRE ships Disabled and its help
+	// recommends leaving there. They mean nothing off a league, so every use
+	// checks IBBS first.
+	LocalAttacks       bool // barons on this board may attack each other in a league game
+	LocalAttackScoring bool // ... and winning one moves score
+	DupeChecking       bool // a baron playing on another board in the league is locked out here
+
+	BombingOps            bool              // the four bombing ops are offered (Bomb Enemy Targets, Special Operations)
+	MissileOps            bool              // nuclear/chemical/biological strikes are offered (Attack, Bomb Enemy Targets, Special Operations)
+	ClingyAnnihilator     bool              // the doomsday weapon is offered
 	MaxPlayers            int               // most human empires per board (0 = unlimited)
 	BuyMilitary           BuyMode           // Yes / No / Limited
 	MaintCosts            Level             // maintenance costs (regions + forces)
@@ -318,6 +344,9 @@ func DefaultConfig() Config {
 		BombingOps:            true,
 		MissileOps:            true,
 		ClingyAnnihilator:     true,
+		LocalAttacks:          true,  // BRE's captured default, and its help "highly recommends" it
+		LocalAttackScoring:    false, // BRE ships this one Disabled, so score can't be farmed at home
+		DupeChecking:          true,  // BRE's captured default
 		MaxPlayers:            25,
 		BuyMilitary:           BuyYes,
 		MaintCosts:            Medium,

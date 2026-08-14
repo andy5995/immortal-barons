@@ -410,8 +410,10 @@ roster needs no such file on any board.
 The League Coordinator sets the rules that must match across the whole league.
 These are all the fields marked with a star in the Configuration Editor: turns
 per day, protection turns, game length, land market and daily land, interest
-and investment rates, tax and region and player limits, buy-military mode, and
-the cost, damage, and reward levels. Set them in the Coordinator's own
+and investment rates, tax and region and player limits, buy-military mode, the
+cost, damage, and reward levels, and the league policies — whether barons on one
+board may attack each other, whether such a battle scores, and whether a caller
+found playing on two boards is locked out. Set them in the Coordinator's own
 `config.json`, then broadcast them to every board:
 
 ```

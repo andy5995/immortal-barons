@@ -680,6 +680,55 @@ reduces attacking **jets by up to 30%** and **bombers by up to 20%**
 
 Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
 
+**The three special-attack switches remove their operations from the menus.**
+`game/reset.hlp` describes Bombing Operations, Missile Operations and Gooie
+Kablooies (IB's Clingy Annihilator) as classes of special attack a sysop may
+disable outright, so IB hides rather than refuses — `byKey` skips a hidden item,
+so the hotkey goes with the label:
+
+| Setting | What it hides |
+| --- | --- |
+| `BombingOps` | Bomb Food Market, Bomb Trading Market, Bomb Trade Routes, Undermine Investments — on Bomb Enemy Targets and on Special Operations |
+| `MissileOps` | Nuclear / Chemical / Biological Attack on the Attack menu, and Nuclear Assault / Chemical Bombing / R5-Slappenheimer on both submenus |
+| `ClingyAnnihilator` | Clingy Annihilator Ops on the InterPlanetary menu |
+
+With both of the first two off, the Bomb Enemy Targets entry itself goes, since
+its box would be empty. **IB's reading, not a capture:** BRE words both as
+inter-BBS settings about attacks sent to another board, and no capture of either
+one disabled exists, so which menus the original strips is unverified — but a
+switch the player is told about on Game Setup has to do something.
+
+### Local Attacks, Local Attack Scoring, Dupe Checking
+
+Three more inter-BBS-only settings, all from BRE's Configuration Editor page two
+and documented in `game/reset.hlp`. Each is off-league inert: IB checks
+`Config.IBBS` first, because BRE scopes all three to interplanetary games.
+
+- **Local Attacks** (default **Enabled**; the original's help "highly
+  recommends" leaving it on, "forcing BBS's to use teamwork to remove
+  troublemakers"). Disabled, barons on one board may not attack each other. The
+  Attack Menu then collapses to the pirate and alliance entries — **captured
+  live**, `docs/dev/bre-screens.md` "Attack Menu (InterBBS, local attacks OFF)" —
+  so Regular, Nuclear, Chemical and Biological all go, hotkeys with them. IB
+  binds its AI barons by the same switch.
+- **Local Attack Scoring** (default **Disabled**, which is how BRE ships it and
+  what its help recommends: "so that users cannot attack each other just to
+  build up score"). Disabled, a local battle moves neither side's score;
+  `whatsnew.doc` records the change as "score is no longer given for winning
+  local attacks". Whether BRE also suppresses the LOSER's penalty is unverified;
+  IB suppresses both, so the pair cannot be used to grind a rival down.
+- **Dupe Checking** (default **Enabled**). BRE looks "for users on your system
+  that may be playing on other BBSes and temporarily lock them out of the game
+  (until they delete one of their players)". IB does the same from the scores
+  packet, and **deliberately diverges on how**: BRE compares handles, IB compares
+  a 64-bit hash of the normalized handle (`RemoteScore.OwnerHash`), so a packet
+  that lands on every sysop's board carries nobody's handle. A locked baron is
+  refused at login with the board that reported them; the lock lifts when that
+  board stops listing them, or when the Coordinator turns the switch off —
+  `World.DupeLocked` reads the switch at the gate rather than clearing state.
+
+All three ride the `LeagueConfig` broadcast, since a league has to agree on them.
+
 **A terrorist op costs `total regions × 64` gold — BINARY-VERIFIED.** The
 InterPlanetary Operations menu prices the op in its own cost column, and the
 price scales with the launcher's **region count**, which is why it drifts upward
@@ -706,10 +755,37 @@ only prove the ×64-per-region term; whether the price also rises with each op
 already launched that day needs a capture with the counter above zero. Do not
 assume it is flat.
 
-IB does not charge for this yet: `TerrorCosts` is editable, broadcast and
-displayed, but nothing consumes it. BRE also prices four Special Operations
-entries on their own menu (figures in `docs/dev/bre-screens.md`), which is a
-separate gap.
+IB charges it: `World.TerrorOpGoldCost` is `Land × TerrorOpGoldPerRegion (64)`
+scaled by `TerrorCosts`, quoted before the confirm and taken in `SendTerror`.
+BRE also prices four Special Operations entries on their own menu (figures in
+`docs/dev/bre-screens.md`), which is a separate gap.
+
+### The two cost levels (Attack Costs, Terrorism Costs) — BINARY-VERIFIED
+
+Both are inter-BBS-only settings: Attack Costs scales what an interplanetary
+strike charges, Terrorism Costs what a terrorist op charges. **Neither uses the
+generic Level ladder** the other presets use (0 / 50 / 100 / 200):
+
+| Level | Multiplier |
+| --- | --- |
+| None | 0% |
+| Low | 20% |
+| Medium | 100% |
+| High | 300% |
+
+Read out of `BRE.OVR` two independent ways that agree exactly. The attack site
+(`0x2bbc2`, config byte `0x182`) branches on the level and divides the price by
+Real48 `5.0` or multiplies it by `3.0`; the terrorist pricing routine (`0x2ad9f`,
+config byte `0x184`) writes the same spread as literal percents 100 / 0 / 20 /
+300, and a sibling site (`0x2ad1a`) repeats the ÷5 / ×3 form on longints. BRE
+encodes the byte Medium 0, None 1, Low 2, High 3, which is what ties each figure
+to its level; the direction also matches `game/reset.hlp`, which says a High
+Attack Costs setting "will make attacking more difficult".
+
+The figures live in `balance.go` as `CostLevel*Pct` and reach the two knobs
+through `Level.CostPercent()`. `Level.Percent()` stays for Maintenance / Trade /
+Region / Attack Damage / Attack Rewards.
+
 "Days before 'lost' forces returned" (`Config.LostForcesDays`, default 3) is an
 **inter-BBS** setting, not a local-combat one. A strike sent to another board is
 away for the whole packet round trip, and packets go missing; the setting gives a
@@ -1979,6 +2055,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   named, a group strike is the planet's doing, and a whole-planet raid names no
   enemy realm. IB distinguishes individual from group, win from loss, in its own
   wording; the finer subtypes are still open.
+  ones held at zero, each defaulting to 0. The sysop's **Attack Costs** level
+  scales that price and BRE clamps the result at `AttackCostCap`
+  (200,000,000 gold); see "The two cost levels" below.
 - **Protection crosses the league.** A scores packet marks each realm still
   under New Realm Protection, and the attack and terror target lists leave those
   realms out — matching the local attack list, which hides them too. The target

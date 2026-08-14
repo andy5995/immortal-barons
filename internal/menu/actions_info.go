@@ -523,6 +523,9 @@ func gameSetup(s session.Session, w *ctx) Result {
 		row("Terrorism costs", tr(s, c.TerrorCosts.String()))
 		row("Lost forces return after", lostForcesStr(s, c))
 		row("Clingy Annihilator", onOffStr(c.ClingyAnnihilator))
+		row("Local attacks", onOffStr(c.LocalAttacks))
+		row("Local attack scoring", onOffStr(c.LocalAttackScoring))
+		row("Dupe checking", onOffStr(c.DupeChecking))
 	}
 	pause(s)
 	return Stay

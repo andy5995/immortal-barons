@@ -311,6 +311,10 @@ func configPages(ibbs bool) []cfgPage {
 			func(c *game.Config, v bool) { c.MissileOps = v }),
 		toggle(38, "Clingy Annihilator", func(c *game.Config) bool { return c.ClingyAnnihilator },
 			func(c *game.Config, v bool) { c.ClingyAnnihilator = v }),
+		toggle(42, "Local Attacks", func(c *game.Config) bool { return c.LocalAttacks },
+			func(c *game.Config, v bool) { c.LocalAttacks = v }),
+		toggle(43, "Local Attack Scoring", func(c *game.Config) bool { return c.LocalAttackScoring },
+			func(c *game.Config, v bool) { c.LocalAttackScoring = v }),
 	}
 
 	caps := []cfgField{
@@ -346,6 +350,8 @@ func configPages(ibbs bool) []cfgPage {
 					c.OutboundDir = v
 				}
 			}},
+		toggle(44, "Dupe Checking", func(c *game.Config) bool { return c.DupeChecking },
+			func(c *game.Config, v bool) { c.DupeChecking = v }),
 		{n: 24, label: "Idle timeout (sec)",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = never)", c.IdleTimeoutSecs) },
 			edit: func(s session.Session, c *game.Config) {
@@ -389,6 +395,9 @@ var ibbsOnlyFields = map[int]bool{
 	33: true, // Days before lost forces return
 	35: true, // Terrorism Costs
 	38: true, // Clingy Annihilator
+	42: true, // Local Attacks
+	43: true, // Local Attack Scoring
+	44: true, // Dupe Checking
 }
 
 func withoutIBBSFields(fields []cfgField) []cfgField {

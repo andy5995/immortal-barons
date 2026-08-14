@@ -98,3 +98,30 @@ func TestLoadConfigMigratesOldPacketDirDefaults(t *testing.T) {
 		t.Errorf("a custom OutboundDir should be left alone, got %q", cfg.OutboundDir)
 	}
 }
+
+// The three league-policy switches added after v0.0.4 default ON (Local Attack
+// Scoring off, as BRE ships it). A bool absent from an older config.json must
+// keep that default, not decode as false — a plain zero value here would
+// silently disable local combat on every board that upgrades.
+func TestLoadConfig_OlderFileKeepsTheLeaguePolicyDefaults(t *testing.T) {
+	dir := t.TempDir()
+	// A config.json written before the fields existed: real keys, none of them.
+	older := `{"TurnsPerDay":10,"ProtectionTurns":15,"MaxPlayers":25,"BombingOps":true}`
+	if err := os.WriteFile(filepath.Join(dir, "config.json"), []byte(older), 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	got, err := LoadConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	if !got.LocalAttacks {
+		t.Error("LocalAttacks decoded false from a config that never named it")
+	}
+	if !got.DupeChecking {
+		t.Error("DupeChecking decoded false from a config that never named it")
+	}
+	if got.LocalAttackScoring {
+		t.Error("LocalAttackScoring should default off, as BRE ships it")
+	}
+}

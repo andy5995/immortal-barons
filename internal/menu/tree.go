@@ -26,6 +26,31 @@ type Menus struct {
 	Food           *Menu
 }
 
+// noBombingOps, noMissileOps and noAnnihilator are the sysop's three special-
+// attack switches as menu gates. BRE's Configuration Editor turns each class of
+// special attack off outright (game/reset.hlp: "One of the special forms of
+// attacks in BRE is to send bombs / Nuclear, Chemical, and other special
+// missiles / a Gooie Kablooie... you may wish to disable this feature"), so a
+// disabled class leaves the menu rather than refusing at the prompt. byKey skips
+// a hidden item, so the hotkey stops working too.
+func noBombingOps(w *ctx) bool  { return !w.Config.BombingOps }
+func noMissileOps(w *ctx) bool  { return !w.Config.MissileOps }
+func noAnnihilator(w *ctx) bool { return !w.Config.ClingyAnnihilator }
+
+// noLocalAttacks hides the ways of striking a baron on this board. With Local
+// Attacks disabled BRE's Attack Menu collapses to the pirate and alliance
+// entries, captured live in docs/dev/bre-screens.md ("Attack Menu (InterBBS,
+// local attacks OFF)") — Regular, Nuclear, Chemical and Biological all go.
+func noLocalAttacks(w *ctx) bool { return !w.LocalAttacksAllowed() }
+
+// noLocalMissiles combines the two: a warhead aimed at a neighbour needs both
+// missiles and local fighting to be allowed.
+func noLocalMissiles(w *ctx) bool { return noMissileOps(w) || noLocalAttacks(w) }
+
+// noSpecialOps hides a menu whose whole contents are bombing and missile items,
+// so the player is not sent into an empty box.
+func noSpecialOps(w *ctx) bool { return noBombingOps(w) && noMissileOps(w) }
+
 // quitOnEnter makes Enter activate a menu's own '0' Quit item, so the prompt
 // shows and selects "Quit" uniformly across submenus (#62). The Spending
 // menu is the one exception: its Enter-to-exit stays gated behind the
@@ -158,10 +183,10 @@ func BuildMenus() *Menus {
 	}
 
 	attack.Items = []Item{
-		{Key: 'R', Label: "Regular Attack", Do: regularAttack},
-		{Key: 'N', Label: "Nuclear Attack", Do: nuclearAttack},
-		{Key: 'C', Label: "Chemical Attack", Do: chemicalAttack},
-		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack},
+		{Key: 'R', Label: "Regular Attack", Do: regularAttack, Hidden: noLocalAttacks},
+		{Key: 'N', Label: "Nuclear Attack", Do: nuclearAttack, Hidden: noLocalMissiles},
+		{Key: 'C', Label: "Chemical Attack", Do: chemicalAttack, Hidden: noLocalMissiles},
+		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack, Hidden: noLocalMissiles},
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates,
 			// Hidden while under new-realm protection — a protected realm can't raid.
 			Hidden: func(w *ctx) bool { return w.Player().Protection > 0 }},
@@ -193,8 +218,10 @@ func BuildMenus() *Menus {
 		{Key: '5', Label: "Join Group Attack", Do: joinGroupAttack},
 		{Key: '6', Label: "Indiv. Attack Force", Do: indivAttackForce},
 		{Key: '7', Label: "Send Message", Do: gotoMenu(ipMessages)},
+		// Send SpyGuy is the one item here the two switches do not govern, so the
+		// menu stays reachable even with both off.
 		{Key: '8', Label: "Special Operations", Do: gotoMenu(ipSpecial)},
-		{Key: '9', Label: "Clingy Annihilator Ops", Do: clingyAnnihilator},
+		{Key: '9', Label: "Clingy Annihilator Ops", Do: clingyAnnihilator, Hidden: noAnnihilator},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
 		{Key: 'S', Label: "Spy Database", Do: spyDatabase},
@@ -229,7 +256,7 @@ func BuildMenus() *Menus {
 		{Key: '4', Label: "Support Dissensions", Price: costOf(game.CostSupportDissensions), Do: supportDissensions},
 		{Key: '5', Label: "Demoralize Forces", Price: costOf(game.CostDemoralizeForces), Do: demoralizeForces},
 		{Key: '6', Label: "Spy on Relations", Price: costOf(game.CostSpyOnRelations), Do: spyRelations},
-		{Key: '7', Label: "Bomb Enemy Targets", Price: costOf(game.CostBombEnemyTargets), Do: gotoMenu(bombTargets)},
+		{Key: '7', Label: "Bomb Enemy Targets", Price: costOf(game.CostBombEnemyTargets), Do: gotoMenu(bombTargets), Hidden: noSpecialOps},
 		{Key: '8', Label: "Bribery", Price: costOf(game.CostBribery), Do: briberyOp},
 		{Key: '9', Label: "Expose Enemy Ops", Price: costOf(game.CostExposeEnemyOps), Do: exposeEnemyOps},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
@@ -239,13 +266,13 @@ func BuildMenus() *Menus {
 	covert.DefaultOnEnter = quitOnEnter(covert)
 
 	bombTargets.Items = []Item{
-		{Key: 'F', Label: "Bomb Food Market", Do: bombFoodMarket},
-		{Key: 'T', Label: "Bomb Trading Market", Do: bombTradingMarket},
-		{Key: 'R', Label: "Bomb Trade Routes", Do: bombTradeRoutes},
-		{Key: 'U', Label: "Undermine Investments", Do: undermineInvestments},
-		{Key: 'N', Label: "Nuclear Assault", Do: nuclearAssault},
-		{Key: 'C', Label: "Chemical Bombing", Do: chemicalBombing},
-		{Key: 'S', Label: "R5-Slappenheimer", Do: slappenheimerStrike},
+		{Key: 'F', Label: "Bomb Food Market", Do: bombFoodMarket, Hidden: noBombingOps},
+		{Key: 'T', Label: "Bomb Trading Market", Do: bombTradingMarket, Hidden: noBombingOps},
+		{Key: 'R', Label: "Bomb Trade Routes", Do: bombTradeRoutes, Hidden: noBombingOps},
+		{Key: 'U', Label: "Undermine Investments", Do: undermineInvestments, Hidden: noBombingOps},
+		{Key: 'N', Label: "Nuclear Assault", Do: nuclearAssault, Hidden: noMissileOps},
+		{Key: 'C', Label: "Chemical Bombing", Do: chemicalBombing, Hidden: noMissileOps},
+		{Key: 'S', Label: "R5-Slappenheimer", Do: slappenheimerStrike, Hidden: noMissileOps},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	bombTargets.DefaultOnEnter = quitOnEnter(bombTargets)
@@ -262,13 +289,13 @@ func BuildMenus() *Menus {
 	// Numbered 1-8 with no Help item, as the live capture draws it — unlike the
 	// local Bomb Enemy Targets submenu above, which is lettered.
 	ipSpecial.Items = []Item{
-		{Key: '1', Label: "Bomb Food Market", Do: ipSpecialStub},
-		{Key: '2', Label: "Bomb Trading Market", Do: ipSpecialStub},
-		{Key: '3', Label: "Bomb Trade Routes", Do: ipSpecialStub},
-		{Key: '4', Label: "Undermine Investments", Do: ipSpecialStub},
-		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialStub},
-		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialStub},
-		{Key: '7', Label: "R5-Slappenheimer", Do: ipSpecialStub},
+		{Key: '1', Label: "Bomb Food Market", Do: ipSpecialStub, Hidden: noBombingOps},
+		{Key: '2', Label: "Bomb Trading Market", Do: ipSpecialStub, Hidden: noBombingOps},
+		{Key: '3', Label: "Bomb Trade Routes", Do: ipSpecialStub, Hidden: noBombingOps},
+		{Key: '4', Label: "Undermine Investments", Do: ipSpecialStub, Hidden: noBombingOps},
+		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialStub, Hidden: noMissileOps},
+		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialStub, Hidden: noMissileOps},
+		{Key: '7', Label: "R5-Slappenheimer", Do: ipSpecialStub, Hidden: noMissileOps},
 		{Key: '8', Label: "Send SpyGuy", Do: sendSpyGuy},
 		{Key: '0', Label: "Quit", Do: back},
 	}

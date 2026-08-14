@@ -48,6 +48,23 @@
     than 30%, and pay the rest as gold
   * Attack Pirates marks a faction that raided you since your last play with
     "->" beside its name
+  * config-during-reset: added the Local Attacks (enabled), Local Attack
+    Scoring (disabled) and Dupe Checking (enabled) league settings, editable in
+    both Configuration Editors, shown on Game Setup and broadcast to the league
+  * With Local Attacks disabled, barons on one board can no longer attack each
+    other and the Attack menu keeps only the pirate and alliance entries
+  * With Local Attack Scoring disabled, a battle between barons on one board
+    moves neither side's score
+  * With Dupe Checking enabled, a caller found playing on another board in the
+    league is locked out until one of the realms goes. Scores packets carry a
+    hash of the handle for this, never the handle itself
+  * The Bombing Ops, Missile Ops and Clingy Annihilator settings take their
+    operations off the Attack, Covert and InterPlanetary menus when disabled,
+    hotkeys included
+  * The Attack Costs setting scales what an interplanetary strike charges, and
+    the price is capped at 200,000,000 gold
+  * A terrorist operation costs 64 gold per region the launcher owns, scaled by
+    the Terrorism Costs setting, quoted before it is sent
   * A nuclear strike ruins land rather than destroying it: the target keeps
     every region and its upkeep but earns nothing from the ruined share
   * Waste is a region type of its own, listed on the region tables; it is
