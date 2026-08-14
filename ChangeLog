@@ -48,6 +48,10 @@
     withdrawals have no size limit
   * A withdrawal takes only as much gold as will fit in hand, leaving the rest
     in the bank
+  * Empire Status is one unboxed block in the original's layout instead of two
+    boxed pages, listing only the fields the realm has something in
+  * Empire Status shows the cumulative score the scores board ranks on, where it
+    used to show net worth under that label
   * Figures of a billion or more are shown as "1.0000B" rather than in full
   * Amounts may be typed with a "b" suffix, as they already could with "k"/"m"
 

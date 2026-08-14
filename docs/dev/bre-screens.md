@@ -529,6 +529,62 @@ You have 100 Years of Protection Left.
 The status title `-*name*-` uses `96` bright-cyan `-*`/`*-` with `97` bright-white
 name; every field value is `96` bright-cyan, labels `37` white.
 
+**There is no box.** The block is a plain run of lines at column 0 — no border,
+no rule, no fill. IB drew it as two boxed pages of its own invention until
+v0.0.4; both are gone and IB now renders the block above.
+
+**The capture is of a realm that holds little, and the block is shorter than the
+field set.** The status routine (`BRE.OVR` `show_empire_status`, 0x193b2) is a
+straight run of `if figure > 0` guards, so a zero field prints nothing at all.
+Its string table declares every label in display order:
+
+```
+-*name*-  Turns  Score  Gold  Bank  Population (Tax Rate)  Popular Support
+Food  Agents  Headquarters (N% Complete)  Military  SDI Strength  Regions
+```
+
+Only Score, Population, Popular Support and Regions are unconditional; the rest
+appear when their figure leaves zero. `Military:` prints `None` for an empty
+army, and the Morale cell is left out entirely with it.
+
+The **Military and Regions rows** are cells of `[figure Label]`, and both break
+onto continuation lines indented ten columns — under the first bracket, since
+`Military: ` and `Regions:  ` are both ten wide. The break is by cell count, not
+width: a shared helper takes the threshold as an argument and is passed **3** for
+Military and **4** for Regions. It compares the running count for **equality**,
+so the row breaks exactly ONCE however many cells follow — a realm holding all
+nine region types gets four cells then five. Morale always sits alone on the
+line after the units.
+
+Military cells are declared Troopers, Jets, Turrets, Tanks, Bombers, Carriers.
+Region cells are Rivers, Agricultural, Desert, Industrial, Urban, Mountains,
+Coastal, Technology, **Waste** — the ninth count at record `+0xb6`, absent from
+this capture only because the realm held none. That row order is the status
+block's alone: the record itself, the Buy Regions screen and every other display
+lead with Coastal (`bre-save-format.md`, `+0x96`).
+
+**Deliberate divergences, all of them IB's:**
+
+- **Population is a head count, not millions.** BRE stores population as a count
+  of millions and writes `3386 Million`; IB counts people directly (see
+  `balance.go`, "Population / migration"), so the line reads
+  `Population: 3,386 (Tax Rate: 12%)` — the same figure the Civilian advisor and
+  the Daily Bulletin's Total Population row print, in the same unit.
+- **Figures are comma-grouped**, as everywhere else in IB.
+- **Regions run in IB's one region order** — the Buy Regions order the region
+  table, the pickers and the record all use, Waste last. BRE re-sorts this row
+  and nothing else; IB keeps a single order rather than carry a second one for
+  one screen.
+- **Region and unit names are IB's singular labels** (`[14 River]`), the same
+  strings the region table prints, rather than the plurals BRE writes here.
+- **The rows break every 3 / 4 cells, not once**, and break early when the next
+  cell would reach the 80th column. IB's figures carry thousands separators and
+  its region counts have passed 250,000 in a long game, where BRE's single break
+  overruns the line and the terminal wraps it on top of the next.
+- **Nothing is added.** IB shows BRE's field set and no more — no Debt, no net
+  worth. `Score:` is `Empire.Score`, the cumulative score the scores board
+  ranks on (BRE reads it from record `+0x286`), not net worth.
+
 A pirate raid suffered since the last play is reported as the report's **last**
 line, after the Industrial Zones production lines and before the pause, at
 column 0:
@@ -549,7 +605,9 @@ line.
 The closing line is one of a pair — `BRE.OVR` holds `You have  Years of
 Protection Left.` beside `This is year  of your freedom.`, so the same slot
 counts protection down and then counts up. BRE's turn is its year: protection is
-a turn count it prints as years. **Deliberate divergence:** IB writes the second
+a turn count it prints as years. **Deliberate divergences:** IB writes the first
+as `You have N turns of protection left.`, naming the unit `Empire.Protection`
+actually holds — Andy has confirmed the altered wording. And it writes the second
 as `This is year N of your reign.` "Freedom" reads as though the realm had been
 captive, when what ended was the shield.
 

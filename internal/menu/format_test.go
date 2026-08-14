@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
-	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 func TestAbbrevMoney(t *testing.T) {
@@ -92,25 +91,6 @@ func TestFormatGoldTakesCounts(t *testing.T) {
 	}
 	if got := comma(7212); got != "7,212" {
 		t.Errorf("a small count formatted as %q, want %q", got, "7,212")
-	}
-}
-
-func TestHQStatus(t *testing.T) {
-	cases := []struct {
-		hq   int
-		want string
-	}{
-		{0, "None"},
-		{1, "1%"},
-		{50, "50%"},
-		{99, "99%"},
-		{100, "Complete"},
-		{150, "Complete"},
-	}
-	for _, c := range cases {
-		if got := hqStatus(&game.Empire{HQ: c.hq}); got != c.want {
-			t.Errorf("hqStatus(HQ=%d) = %q, want %q", c.hq, got, c.want)
-		}
 	}
 }
 

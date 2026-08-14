@@ -793,23 +793,12 @@ func prevISODate(iso string) string {
 	return t.AddDate(0, 0, -1).Format("2006-01-02")
 }
 
-// empireStatus is the standalone status action (System menu): page through the
-// Empire Status screens, pausing on each so a wide screen is not scrolled past.
+// empireStatus is the standalone status action (System menu): draw the Empire
+// Status block, then pause so it is read before the menu redraws over it.
 func empireStatus(s session.Session, w *ctx) Result {
 	renderEmpireStatus(s, w)
 	pause(s)
 	return Stay
-}
-
-func hqStatus(p *game.Empire) string {
-	switch {
-	case p.HQ == 0:
-		return "None"
-	case p.HQ >= 100:
-		return "Complete"
-	default:
-		return fmt.Sprintf("%d%%", p.HQ)
-	}
 }
 
 func seeScores(s session.Session, w *ctx) Result {
