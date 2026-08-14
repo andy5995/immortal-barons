@@ -78,10 +78,13 @@ func TestNuclearStrikeCantAfford(t *testing.T) {
 
 func TestChemicalStrike(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	a.Gold = 10_000_000
-	beforePeople := d.People
-	beforeTroopers := d.Troopers
+	a.Gold, a.Bank = 100_000_000, 0
+	d.Regions = defaultRegionMix(500)
+	d.syncLand()
+	d.People, d.Morale, d.Support = 20_000, 100, 90
+	beforeLand := d.Land
 
+	cost := w.ChemCost(d)
 	report, err := w.ChemicalStrike(a, d)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -89,24 +92,56 @@ func TestChemicalStrike(t *testing.T) {
 	if report == "" {
 		t.Error("expected a non-empty attacker report")
 	}
-	if a.Gold != 10_000_000-ChemCost {
+	if a.Gold != 100_000_000-cost {
 		t.Errorf("gold not deducted: got %d", a.Gold)
 	}
-	if d.People >= beforePeople {
-		t.Errorf("expected people reduced, before=%d after=%d", beforePeople, d.People)
+	// A flat fifth of the population, with no roll behind it — golden literals,
+	// so a retune has to bring new evidence rather than follow the constants.
+	if d.People != 16_000 {
+		t.Errorf("people = %d, want 16000 (a fifth of 20000 gassed)", d.People)
 	}
-	if d.Troopers >= beforeTroopers {
-		t.Errorf("expected troopers reduced, before=%d after=%d", beforeTroopers, d.Troopers)
+	if d.Morale != 75 {
+		t.Errorf("morale = %d, want 75 (100 x 3/4)", d.Morale)
+	}
+	if d.Support != 60 {
+		t.Errorf("support = %d, want 60 (90 x 2/3)", d.Support)
+	}
+	// Land is ruined, not removed: the total holds and the difference is waste.
+	if d.Land != beforeLand {
+		t.Errorf("land should be unchanged, before=%d after=%d", beforeLand, d.Land)
+	}
+	if d.Regions.Waste <= 0 {
+		t.Errorf("expected waste regions, got %d", d.Regions.Waste)
+	}
+	if d.Regions.Total() != d.Land {
+		t.Errorf("region mix out of sync: total=%d land=%d", d.Regions.Total(), d.Land)
+	}
+	// Troopers are the biological weapon's business, not this one's.
+	if d.Troopers != 100 {
+		t.Errorf("troopers = %d, want the untouched 100", d.Troopers)
+	}
+}
+
+// The warhead is priced off the target's people AND its land, and the two terms
+// are golden literals read out of the original.
+func TestChemCostReadsPeopleAndLand(t *testing.T) {
+	// 200 BRE population units (20 IB people to each) and 500 regions.
+	if got, want := ChemCostForTarget(200*PopBREUnitScale, 500), int64(200*94+500*2037); got != want {
+		t.Errorf("chemical price = %d, want %d", got, want)
+	}
+	if got := ChemCostForTarget(1_000_000*PopBREUnitScale, 1_000_000); got != 50_000_000 {
+		t.Errorf("price against a huge realm = %d, want the 50,000,000 cap", got)
 	}
 }
 
 func TestBiologicalStrike(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	a.Gold = 10_000_000
-	beforePeople := d.People
-	beforeTroopers := d.Troopers
+	a.Gold, a.Bank = 100_000_000, 0
+	d.People, d.Troopers, d.Morale, d.Support = 20_000, 10_000, 100, 90
 	beforeLand := d.Land
+	beforeWaste := d.Regions.Waste
 
+	cost := w.BioCost(d)
 	report, err := w.BiologicalStrike(a, d)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
@@ -114,17 +149,103 @@ func TestBiologicalStrike(t *testing.T) {
 	if report == "" {
 		t.Error("expected a non-empty attacker report")
 	}
-	if a.Gold != 10_000_000-BioCost {
+	if a.Gold != 100_000_000-cost {
 		t.Errorf("gold not deducted: got %d", a.Gold)
 	}
-	if d.People >= beforePeople {
-		t.Errorf("expected people reduced, before=%d after=%d", beforePeople, d.People)
+	// 9-13% of the people and 12-20% of the troopers.
+	if d.People < 20_000-2_600 || d.People > 20_000-1_800 {
+		t.Errorf("people = %d, want 9-13%% of 20000 killed", d.People)
 	}
-	if d.Troopers >= beforeTroopers {
-		t.Errorf("expected troopers reduced, before=%d after=%d", beforeTroopers, d.Troopers)
+	if d.Troopers < 10_000-2_000 || d.Troopers > 10_000-1_200 {
+		t.Errorf("troopers = %d, want 12-20%% of 10000 killed", d.Troopers)
 	}
+	if d.Morale != 50 {
+		t.Errorf("morale = %d, want 50 (halved)", d.Morale)
+	}
+	if d.Support != 60 {
+		t.Errorf("support = %d, want 60 (90 x 2/3)", d.Support)
+	}
+	// The plague touches no land at all — not even by ruining it.
 	if d.Land != beforeLand {
 		t.Errorf("land should be unchanged, before=%d after=%d", beforeLand, d.Land)
+	}
+	if d.Regions.Waste != beforeWaste {
+		t.Errorf("waste = %d, want the untouched %d", d.Regions.Waste, beforeWaste)
+	}
+}
+
+// The biological warhead is priced off all three of the figures it hurts.
+func TestBioCostReadsTroopersPeopleAndLand(t *testing.T) {
+	got := BioCostForTarget(1_000, 200*PopBREUnitScale, 500)
+	if want := int64(1000*23 + 200*434 + 500*1237); got != want {
+		t.Errorf("biological price = %d, want %d", got, want)
+	}
+	if got := BioCostForTarget(1, 1_000_000*PopBREUnitScale, 1_000_000); got != 50_000_000 {
+		t.Errorf("price against a huge realm = %d, want the 50,000,000 cap", got)
+	}
+}
+
+// No warhead can finish a realm off: the chemical and biological strikes take
+// percentages, and the nuclear one leaves every region on the target's books.
+func TestStrikesCannotEliminateARealm(t *testing.T) {
+	for seed := int64(1); seed <= 20; seed++ {
+		cfg := DefaultConfig()
+		cfg.AICount = 1
+		w := NewWorldSeed(cfg, seed)
+		a := w.AddHuman("att", "Attacker")
+		a.Protection, a.Gold = 0, 1_000_000_000
+		d := w.Empires[0]
+		d.Protection = 0
+		d.Regions = defaultRegionMix(40)
+		d.syncLand()
+		d.People, d.Troopers = 60, 3
+
+		for range 20 {
+			a.Gold = 1_000_000_000
+			if _, err := w.ChemicalStrike(a, d); err != nil {
+				t.Fatalf("seed %d: chemical: %v", seed, err)
+			}
+			if _, err := w.BiologicalStrike(a, d); err != nil {
+				t.Fatalf("seed %d: biological: %v", seed, err)
+			}
+			if _, err := w.NuclearStrike(a, d); err != nil {
+				t.Fatalf("seed %d: nuclear: %v", seed, err)
+			}
+		}
+		if !d.Alive {
+			t.Errorf("seed %d: a realm was eliminated by missiles alone", seed)
+		}
+		if d.Land != 40 {
+			t.Errorf("seed %d: land = %d, want the untouched 40", seed, d.Land)
+		}
+	}
+}
+
+// The arms dealer takes what gold in hand cannot cover out of the bank rather
+// than refusing the sale.
+func TestWarheadDrawsOnTheBank(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	cost := w.NukeCost(d)
+	a.Gold, a.Bank = cost-1_000, 5_000
+
+	if _, err := w.NuclearStrike(a, d); err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if a.Gold != 0 {
+		t.Errorf("gold in hand = %d, want 0", a.Gold)
+	}
+	if a.Bank != 4_000 {
+		t.Errorf("bank = %d, want 4000 (the 1000 shortfall drawn out)", a.Bank)
+	}
+}
+
+// Gold plus bank still has to cover it.
+func TestWarheadRefusedWhenGoldAndBankFallShort(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Gold, a.Bank = 1, 1
+
+	if _, err := w.NuclearStrike(a, d); err != ErrCantAfford {
+		t.Fatalf("expected ErrCantAfford, got %v", err)
 	}
 }
 
@@ -248,11 +369,11 @@ func TestDecontaminateWithoutWaste(t *testing.T) {
 
 // The warhead is priced off the target, and the price stops climbing at the cap.
 func TestNukeCostScalesWithTarget(t *testing.T) {
-	if got, want := NukeCostForLand(1000), int64(1000*NukeCostPerRegion); got != want {
+	if got, want := NukeCostForLand(1000), int64(1000*3543); got != want {
 		t.Errorf("price for 1000 regions = %d, want %d", got, want)
 	}
-	if got := NukeCostForLand(1_000_000); got != NukeCostCap {
-		t.Errorf("price for a huge realm = %d, want the cap %d", got, NukeCostCap)
+	if got := NukeCostForLand(1_000_000); got != 50_000_000 {
+		t.Errorf("price for a huge realm = %d, want the 50,000,000 cap", got)
 	}
 }
 

@@ -78,6 +78,21 @@ it as game code or look there for overlays, mechanics, or an FP library. This
 is why ordinary fetches extract only `BRE.EXE` and `BRE.OVR`; use the explicit
 `--include-docs` option when its non-runtime reference material is needed.
 
+## A raw constant carries BRE's unit, not IB's — and the string beside it says which
+
+BRE counts **population in millions**; IB counts people, twenty to BRE's one
+(`PopBREUnitScale`). So a per-head price or weight lifted straight out of the
+binary is per MILLION and has to be converted before IB applies it. Percentages
+are unit-free and need no conversion — only absolute rates do. This has been got
+wrong three times, most recently on the chemical missile's price.
+
+**The cheapest way to settle a field's unit is the string printed beside it.**
+The chemical and biological strikes subtract a share of record `+0x62` and then
+print it with `" million civilians were killed!"`, which names the unit outright
+in the same routine. Before scaling anything, find where the field reaches the
+screen and read the label — one `find-string` — rather than inferring the unit
+from the magnitude.
+
 ## Technology silently scales almost every number you capture
 
 **Before deriving ANY constant from a capture, establish the realm's technology

@@ -428,9 +428,9 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 	p := &w.Pirates[faction]
 	startForces := p.Defense() // battle scale for Score, before any reclaim shrinks it
 
-	troopers = clamp(a.Troopers, troopers)
-	jets = clamp(a.Jets, jets)
-	tanks = clamp(a.Tanks, tanks)
+	troopers = clampInt(troopers, 0, a.Troopers)
+	jets = clampInt(jets, 0, a.Jets)
+	tanks = clampInt(tanks, 0, a.Tanks)
 
 	offense := troopers/2 + jets + tanks*2
 	defense := p.Defense()

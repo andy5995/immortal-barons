@@ -37,8 +37,20 @@
     out across region types
   * Nuclear missiles are priced by the size of the target, quoted after the
     target is chosen, and can be declined
-  * SDI no longer reduces nuclear damage from a realm on the same planet
-  * A nuclear strike raises the attacker's score
+  * A chemical strike ruins land into waste instead of destroying it, gasses a
+    fifth of the target's people, and knocks down its military morale and
+    popular support; it no longer kills troopers
+  * A biological strike kills a share of the target's people and troopers and
+    halves its military morale, and leaves the land alone
+  * Chemical and biological missiles are priced by the target as well: the
+    chemical one by its people and land, the biological one by its troopers,
+    people and land
+  * SDI no longer reduces nuclear, chemical or biological damage from a realm
+    on the same planet
+  * A chemical or biological strike can no longer wipe out a realm
+  * Nuclear, chemical and biological strikes raise the attacker's score
+  * A warhead the gold in hand cannot cover is paid for out of the bank rather
+    than refused
   * Inter-BBS packets carry the sending board's signature, and a board whose
     key is in the league roster can no longer be impersonated
   * Added "-gen-board-key" to create this board's packet-signing key

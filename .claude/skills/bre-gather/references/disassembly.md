@@ -153,6 +153,34 @@ worth recognising: new data (a pile of captures) makes the question feel new, so
 the notes never get checked. Grep the file for the mechanic's noun first; it
 costs one command and tells you what is genuinely unanswered.
 
+### Read the SIBLING routine you already understand, side by side
+
+When a mechanic has variants — three missiles, several attack kinds — dump the
+one already mapped next to the new one and diff them by eye. BRE duplicates
+whole subsystems rather than parameterising them, so the two routines are the
+same shape with different immediates, and every difference IS a finding. The
+chemical and biological strikes fell out in one pass this way: laid beside the
+nuclear routine, the shared prologue, arms-dealer call, RNG jitter pattern, news
+call and Score write all matched, which left only the immediates (94 / 2037,
+3 ± Random(3), a flat 20%, `3/4` and `2/3` on morale and support) to read. Doing
+it the other way round — reading the new routine cold — spends the same effort
+re-deriving the parts that were never in question.
+
+The corollary is that a MISSING call is evidence too: the biological routine
+never reaches the region-to-waste helper the other two share, which is the whole
+of "it does not damage land" with no further reading needed.
+
+### Anchoring an arbitrary-empire displacement: look for the record's own base
+
+The conversion `offset = disp + 3949` is easier to re-derive than the
+run-of-eighteen-`cmp` hunt suggests. `add di,0xf093` appears in every routine
+that passes a whole record to a helper (`total_regions` takes it) and is
+`di -= 3949`, i.e. **offset 0** — the record base. Find that one instruction in
+the routine you are reading and every other displacement in it converts by
+inspection. Cross-check against a current-empire site in the same routine, which
+reaches the same fields through `les di,[0x28d8]` with plain positive offsets
+(`+0x1f` name, `+0x286` Score); if the two disagree, the anchor is wrong.
+
 ### Finding an UNKNOWN record field: scan the opcode, not the string
 
 When you don't yet know a mechanic's field offset, don't hunt for its message

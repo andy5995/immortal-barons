@@ -110,9 +110,14 @@ func hiTokens(s string, words []string, color string) string {
 // pre-gathered pointer is not carried across the reload. attackable is false for
 // a realm the player can see in the list but cannot hit (shielded by New Realm
 // Protection or an alliance) — it is shown without a selection letter.
+//
+// people and troopers are NOT displayed: they are carried so a warhead can be
+// priced off the target without a second trip under the lock (the chemical and
+// biological missiles read both, see game.ChemCostForTarget).
 type targetRow struct {
 	name                  string
 	land, score, netWorth int
+	people, troopers      int
 	attackable, online    bool
 }
 
@@ -133,7 +138,11 @@ func snapshotTargets(w *ctx) []targetRow {
 				continue
 			}
 			attackable := e.Protection == 0 && !w.AreAllied(p, e)
-			rows = append(rows, targetRow{e.Name, e.Land, e.Score, w.NetWorth(e), attackable, e.Online()})
+			rows = append(rows, targetRow{
+				name: e.Name, land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
+				people: e.People, troopers: e.Troopers,
+				attackable: attackable, online: e.Online(),
+			})
 		}
 	})
 	return rows
@@ -290,9 +299,11 @@ func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name 
 	return names[i], true
 }
 
-// flatCost adapts an op whose price does not depend on the target to the costOf
-// signature localAttack takes.
-func flatCost(gold int64) func(land int) int64 { return func(int) int64 { return gold } }
+// costOf prices a gold-fee op against the target it is aimed at. The three
+// warheads read different fields of it — the nuclear missile only the land, the
+// chemical one the people too, the biological one the troopers as well — so
+// they are all handed the whole snapshotted row.
+type costOf func(t targetRow) int64
 
 // localAttack shares the target-selection loop used by the nuclear, chemical,
 // and biological attacks and by the covert/bomb ops — every attack aimed at a
@@ -300,12 +311,11 @@ func flatCost(gold int64) func(land int) int64 { return func(int) int64 { return
 // endsTurn is true only for the War-menu WMD (one attack per turn); covert ops
 // stay in their own menu.
 //
-// costOf prices a gold-fee op against the target's size; nil marks an op with
-// no fee. The original quotes the price only once a target is named — the three
-// missile screens all reach the same arms-dealer routine, which prints the
-// figure and asks for a yes before anything is deducted — so a warhead priced
-// off the target has somewhere to read that size from.
-func localAttack(s session.Session, w *ctx, label string, costOf func(land int) int64, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
+// price is nil for an op with no fee. The original quotes the figure only once
+// a target is named — the three missile screens all reach the same arms-dealer
+// routine, which prints it and asks for a yes before anything is deducted — so
+// a warhead priced off the target has somewhere to read that target from.
+func localAttack(s session.Session, w *ctx, label string, price costOf, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
 	if blockedByProtection(s, w) {
 		return Stay
 	}
@@ -318,15 +328,15 @@ func localAttack(s session.Session, w *ctx, label string, costOf func(land int) 
 	if !chosen {
 		return Stay
 	}
-	if costOf != nil {
-		land := 0
+	if price != nil {
+		var target targetRow
 		for _, r := range rows {
 			if r.name == name {
-				land = r.land
+				target = r
 			}
 		}
 		fmt.Fprintf(s, "\n%s"+tr(s, "%s — an arms broker wants %s gold for the warhead.")+"%s\n",
-			ansi.FgBrightCyan, label, comma(costOf(land)), ansi.Reset)
+			ansi.FgBrightCyan, label, comma(price(target)), ansi.Reset)
 		// Default NO: a warhead can cost tens of millions, and Enter is the
 		// default-accept key everywhere else in the turn.
 		if !AskYesNo(s, "Buy it?", false) {
@@ -355,16 +365,24 @@ func localAttack(s session.Session, w *ctx, label string, costOf func(land int) 
 	return Stay
 }
 
+// The three warhead prices, each reading only the target fields its own routine
+// reads in the original.
+func nukePrice(t targetRow) int64 { return game.NukeCostForLand(t.land) }
+func chemPrice(t targetRow) int64 { return game.ChemCostForTarget(t.people, t.land) }
+func bioPrice(t targetRow) int64 {
+	return game.BioCostForTarget(t.troopers, t.people, t.land)
+}
+
 func nuclearAttack(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Nuclear Attack", game.NukeCostForLand, true, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
+	return localAttack(s, w, "Nuclear Attack", nukePrice, true, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
 }
 
 func chemicalAttack(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Chemical Attack", flatCost(game.ChemCost), true, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
+	return localAttack(s, w, "Chemical Attack", chemPrice, true, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
 }
 
 func biologicalAttack(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Biological Attack", flatCost(game.BioCost), true, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
+	return localAttack(s, w, "Biological Attack", bioPrice, true, func(a, d *game.Empire) (string, error) { return w.BiologicalStrike(a, d) })
 }
 
 // pirateColors are the per-faction name colors, in game.PirateFactions order.

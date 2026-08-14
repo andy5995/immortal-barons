@@ -59,8 +59,12 @@ and `base + 0x96` (150) here, and 150 − 32 = 118.
 
 ```
 empire record (les di,[0x28d8])
-  +0x62  int32  population, counted in MILLIONS (the food routine at BRE.OVR
-                0x37418 multiplies it by 1.5 for "Your People Need N")
+  +0x62  int32  population, in MILLIONS. Two independent reads agree: the food
+                routine at BRE.OVR 0x37418 multiplies it by 1.5 for "Your People
+                Need N", and the chemical and biological strikes print "<N>
+                million civilians were killed!" beside it after taking a
+                percentage of it. Both warheads also multiply it into their
+                price, so every per-head price in this binary is per million.
   +0x6a  int32  bank balance
                 (+0x66 is NOT gold on hand: the turn routine zeroes it every
                  turn and it reads 0 in the save. The maintenance routine loads
@@ -199,6 +203,10 @@ Runtime helpers worth recognising when reading this code:
 056d:1a07   technology factor: 1 + (cap-1)*(1 - exp(-level[sel]/(regions+1)))
 0fd0:193e   Ln          0fd0:19e7   Exp          0fd0:1774   square
 056d:0ec6   sum of the nine region counts (total regions)
+056d:18f0   ruin N regions: calls the proportional remover (056d:11f1) across the
+            nine counts, then adds the same N to Waste at +0xb6. Both the
+            nuclear and the chemical strike reach it; the biological one does
+            not, which is why a plague leaves the land alone.
 0fd0:1792   real -> int, TRUNCATES
 0fd0:179a   real -> int, ROUNDS      <- the two are easy to confuse; which one a
                                         routine uses changes results by one unit

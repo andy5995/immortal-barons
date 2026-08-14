@@ -100,17 +100,83 @@ func (e *Empire) EnsureSDIFunding() {
 	e.syncSDI() // funding is the authoritative figure once it exists
 }
 
+// The arms dealer prices every warhead off the TARGET, so the three functions
+// below take the target's figures rather than an *Empire: the attack screen can
+// then quote a price straight from its snapshotted target list, without
+// re-resolving the rival under the world lock.
+
 // NukeCostForLand is what a nuclear missile aimed at a realm of `land` regions
-// costs. The arms dealer prices the weapon off the target: a bigger realm needs
-// a bigger warhead, up to a cap (see balance.go). Taking land rather than an
-// *Empire lets the attack screen price the shot from its target list without
-// re-resolving the rival under the lock.
+// costs — a bigger realm needs a bigger warhead, up to the shared cap.
 func NukeCostForLand(land int) int64 {
-	return min(int64(land)*NukeCostPerRegion, NukeCostCap)
+	return min(int64(land)*NukeCostPerRegion, StrikeCostCap)
 }
+
+// ChemCostForTarget is what a chemical missile aimed at a realm of `people`
+// people holding `land` regions costs. The population term is what makes a
+// crowded realm expensive to gas.
+func ChemCostForTarget(people, land int) int64 {
+	return min(brePop(people)*ChemCostPerPop+int64(land)*ChemCostPerRegion, StrikeCostCap)
+}
+
+// BioCostForTarget is what a biological missile aimed at a realm of `troopers`
+// troopers and `people` people holding `land` regions costs. All three of the
+// figures it hurts are in its price.
+func BioCostForTarget(troopers, people, land int) int64 {
+	return min(int64(troopers)*BioCostPerTrooper+
+		brePop(people)*BioCostPerPop+
+		int64(land)*BioCostPerRegion, StrikeCostCap)
+}
+
+// brePop converts IB's head count into the original's unit, which is one
+// million people. Every per-population PRICE below was read out of a binary
+// that counts in millions, so it has to be applied to the converted figure;
+// the damage percentages need no conversion, being unit-free.
+func brePop(people int) int64 { return int64(people) / PopBREUnitScale }
 
 // NukeCost is what a nuclear missile aimed at d costs.
 func (w *World) NukeCost(d *Empire) int64 { return NukeCostForLand(d.Land) }
+
+// ChemCost is what a chemical missile aimed at d costs.
+func (w *World) ChemCost(d *Empire) int64 { return ChemCostForTarget(d.People, d.Land) }
+
+// BioCost is what a biological missile aimed at d costs.
+func (w *World) BioCost(d *Empire) int64 {
+	return BioCostForTarget(d.Troopers, d.People, d.Land)
+}
+
+// payArmsDealer settles a warhead's price against gold in hand and then against
+// the bank. Drawing on the bank is the original's rule, not a convenience: the
+// affordability test it runs before confirming the sale compares the price
+// against gold PLUS bank, and the deduction that follows takes whatever gold in
+// hand cannot cover straight out of the bank rather than refusing the sale.
+func payArmsDealer(a *Empire, cost int64) error {
+	if a.Gold+a.Bank < cost {
+		return ErrCantAfford
+	}
+	a.Gold -= cost
+	if a.Gold < 0 {
+		a.Bank += a.Gold
+		a.Gold = 0
+	}
+	return nil
+}
+
+// ruinToWaste turns pct of d's regions into waste and returns how many. The
+// removal spreads over every type the target holds, waste included, so land
+// already ruined absorbs part of the strike, and the same count goes straight
+// back on as waste — the realm's total never moves. Both the nuclear and the
+// chemical missile reach this through one shared helper in the original.
+func ruinToWaste(d *Empire, pct int) int {
+	ruined := d.Regions.remove(d.Land * pct / 100).Total()
+	d.Regions.Waste += ruined
+	d.syncLand()
+	return ruined
+}
+
+// roundDiv is a/b rounded to nearest with halves going away from zero, which is
+// what the original's Real48 round does (verified against the linked runtime:
+// 1.5 rounds to 2, 2.5 to 3). Callers pass non-negative values.
+func roundDiv(a, b int) int { return (2*a + b) / (2 * b) }
 
 // NuclearStrike ruins a band of the defender's regions, converting them to
 // waste. No land changes hands and nobody dies: the defender keeps every region
@@ -121,21 +187,14 @@ func (w *World) NukeCost(d *Empire) int64 { return NukeCostForLand(d.Land) }
 // consults the target's SDI or turrets — SDI shoots down interplanetary
 // missiles, not a neighbour's.
 func (w *World) NuclearStrike(a, d *Empire) (string, error) {
-	cost := w.NukeCost(d)
-	if a.Gold < cost {
-		return "", ErrCantAfford
+	if err := payArmsDealer(a, w.NukeCost(d)); err != nil {
+		return "", err
 	}
-	a.Gold -= cost
 
 	// 7% ± a two-draw jitter, so the band is 5-9% and the extremes are rarer
 	// than the middle.
 	pct := NukeWastePct + w.rng.Intn(NukeWasteJitter) - w.rng.Intn(NukeWasteJitter)
-	// remove spreads the loss over every type the target holds, waste included,
-	// and the same count goes back on as waste — so land already ruined absorbs
-	// part of the strike and the realm's total never moves.
-	regions := d.Regions.remove(d.Land * pct / 100).Total()
-	d.Regions.Waste += regions
-	d.syncLand()
+	regions := ruinToWaste(d, pct)
 
 	// The award is a flat draw, not a share of the damage: a strike on a small
 	// realm that ruined nothing still scores.
@@ -207,74 +266,68 @@ func (w *World) Decontaminate(e *Empire, gold int64) int {
 	return n
 }
 
-// ChemicalStrike kills people and troopers and damages some land.
+// ChemicalStrike ruins a narrower band of the defender's regions than a nuke
+// does, and gasses a flat fifth of its people on top. Morale and popular
+// support both fall as well, which is the part that outlasts the casualties:
+// a gassed realm produces and fights worse for as long as it takes to win the
+// two back.
+//
+// Like the nuclear strike it is not intercepted — nothing in the original's
+// local chemical path reads the target's SDI, turrets or tanks — and it cannot
+// eliminate a realm: the land stays on the target's books as waste, and a
+// percentage of a population never reaches zero.
 func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
-	if a.Gold < ChemCost {
-		return "", ErrCantAfford
+	if err := payArmsDealer(a, w.ChemCost(d)); err != nil {
+		return "", err
 	}
-	a.Gold -= ChemCost
 
-	people := w.jitter(d.People*15/100) * (100 - d.SDI) / 100
-	troops := w.jitter(d.Troopers*20/100) * (100 - d.SDI) / 100
-	regions := d.Land / 20 * (100 - d.SDI) / 100
+	// 3% ± a two-draw jitter, so 1-5% — a third of the nuclear band.
+	pct := ChemWastePct + w.rng.Intn(ChemWasteJitter) - w.rng.Intn(ChemWasteJitter)
+	regions := ruinToWaste(d, pct)
 
-	people, troops, regions = clamp(d.People, people), clamp(d.Troopers, troops), clamp(d.Land, regions)
+	// The population kill has no roll behind it at all: it is a flat share.
+	// int64 through the multiply — a big urban realm's head count times a
+	// percentage passes 2^31 on the 32-bit door builds.
+	people := int(int64(d.People) * ChemPopKillPct / 100)
 	d.People -= people
-	d.Troopers -= troops
-	d.Regions.remove(regions)
-	d.syncLand()
+	d.Morale = roundDiv(d.Morale*ChemMoraleKeepNum, ChemMoraleKeepDen)
+	d.Support = roundDiv(d.Support*StrikeSupportKeepNum, StrikeSupportKeepDen)
 
-	if d.Land <= 0 || d.People <= 0 {
-		d.Alive = false
-		d.DiedDay = w.GameDay
-	}
+	addScore(a, w.rng.Intn(ChemScoreAward))
 
-	d.addEvent(fmt.Sprintf("%s hit you with a chemical strike: %d people, %d troopers, and %d regions lost.", a.Name, people, troops, regions))
+	d.addEvent(fmt.Sprintf("%s hit you with a chemical strike: %d regions reduced to waste and %d dead. Famine follows.", a.Name, regions, people))
 
 	w.postStrikeNews(a, d, "chemical")
-	report := fmt.Sprintf("Chemical strike! %s lost %d people, %d troopers, and %d regions.", d.Name, people, troops, regions)
-	if !d.Alive {
-		report += fmt.Sprintf("\n%s has been utterly conquered!", d.Name)
-	}
-	return report, nil
+	return fmt.Sprintf("Chemical strike! %d regions of %s are now waste.\nThe gas killed %d of its people, and its morale and support are broken.", regions, d.Name, people), nil
 }
 
-// BiologicalStrike kills people and troopers but leaves land untouched.
+// BiologicalStrike kills people and troopers and halves military morale. It
+// leaves the land alone entirely — the original's routine never reaches the
+// region-to-waste helper the other two share — and, like them, it cannot
+// eliminate a realm.
 func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
-	if a.Gold < BioCost {
-		return "", ErrCantAfford
+	if err := payArmsDealer(a, w.BioCost(d)); err != nil {
+		return "", err
 	}
-	a.Gold -= BioCost
+	// The Score lands on the sale, before any damage is rolled, so a plague
+	// that kills nobody still pays.
+	addScore(a, w.rng.Intn(BioScoreAward))
 
-	people := w.jitter(d.People*15/100) * (100 - d.SDI) / 100
-	troops := w.jitter(d.Troopers*20/100) * (100 - d.SDI) / 100
-
-	people, troops = clamp(d.People, people), clamp(d.Troopers, troops)
+	popPct := BioPopKillPct + w.rng.Intn(BioPopKillJitterUp) - w.rng.Intn(BioPopKillJitterDown)
+	people := int(int64(d.People) * int64(popPct) / 100) // int64: see ChemicalStrike
 	d.People -= people
+
+	troopPct := BioTroopKillPct + w.rng.Intn(BioTroopKillJitterUp) - w.rng.Intn(BioTroopKillJitterDn)
+	troops := d.Troopers * troopPct / 100
 	d.Troopers -= troops
 
-	if d.People <= 0 {
-		d.Alive = false
-		d.DiedDay = w.GameDay
-	}
+	// Morale is halved by an integer divide here, not the rounded real the
+	// chemical strike uses — the plague hits the barracks hardest.
+	d.Morale /= BioMoraleDivisor
+	d.Support = roundDiv(d.Support*StrikeSupportKeepNum, StrikeSupportKeepDen)
 
-	d.addEvent(fmt.Sprintf("%s hit you with a biological strike: %d people and %d troopers lost.", a.Name, people, troops))
+	d.addEvent(fmt.Sprintf("%s hit you with a biological strike: %d troopers and %d civilians dead. Famine follows.", a.Name, troops, people))
 
 	w.postStrikeNews(a, d, "biological")
-	report := fmt.Sprintf("Biological strike! %s lost %d people and %d troopers.", d.Name, people, troops)
-	if !d.Alive {
-		report += fmt.Sprintf("\n%s has been utterly conquered!", d.Name)
-	}
-	return report, nil
-}
-
-// clamp caps n so subtracting it from total never goes negative.
-func clamp(total, n int) int {
-	if n > total {
-		return total
-	}
-	if n < 0 {
-		return 0
-	}
-	return n
+	return fmt.Sprintf("Biological strike! The plague killed %d troopers of %s.\nIt also carried off %d civilians, and half the realm's morale with them.", troops, d.Name, people), nil
 }
