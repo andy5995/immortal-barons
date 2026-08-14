@@ -166,11 +166,16 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 		// Z=All: BRE sends one proposal to every realm at once. Each is the
 		// ordinary single proposal, so the existing rules hold — a new offer
 		// replaces a pending one, and a realm already holding this pact is left
-		// alone rather than asked to break it.
+		// alone rather than asked to break it. '*' is IB's own and narrows the
+		// same send to the sender's treaty partners.
 		var names []string
 		w.With(func() {
 			p := w.Player()
-			for _, e := range recipients(w) {
+			pool := recipients(w)
+			if target == targetAllies {
+				pool = w.TreatyPartners(p)
+			}
+			for _, e := range pool {
 				if !w.World.HasTreaty(p, e, ttype) {
 					names = append(names, e.Name)
 				}

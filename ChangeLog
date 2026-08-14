@@ -1,4 +1,9 @@
 (in-progress:)
+  * Send Message addresses a list of realms: a letter marks or unmarks one, "Z"
+    marks them all, and Enter closes the list and opens the editor
+  * Message target letters are the realm's own, so a fallen realm or the sender
+    leaves a gap; they match the letters a message records as its recipients
+  * The message editor's column ruler is 68 columns wide, as the original's is
   * A nuclear strike ruins land rather than destroying it: the target keeps
     every region and its upkeep but earns nothing from the ruined share
   * Waste is a region type of its own, listed on the region tables; it is

@@ -1359,6 +1359,66 @@ Colors: frame cyan `36`; timestamp bright-white `1;37`; the `Message From:` /
 bright-green `1;32`; body white, quoted lines bright-blue `1;34`; the action keys
 bright-cyan `1;36` inside blue `34` brackets.
 
+`Message To` is a run of letters, not a name — the reader loops `A`..`Y` over the
+message's own recipient table and prints every letter that is in it, so a message
+sent to several realms shows them all, in letter order, and every copy carries
+the same run.
+
+## Send Message: the recipient picker is MULTI-select (System Menu → M)
+
+The `(A-Y,Z=All,?=List) Send to:` prompt is **not** answered with one keypress.
+It is a toggling list, closed by RETURN. Read from a live capture and confirmed
+against the selection routine at `BRE.OVR` 0x1b65e and the per-letter toggle it
+calls at 0x1b575:
+
+```
+(A-Y,Z=All,?=List) Send to: EFHIJKMNOP
+
+    You have 20 lines for your message.  /S=save /A=abort /C=clear
+    [---+----|----+----|----+----|----+----|----+----|----+----|----+----]
+ 1> 
+```
+
+- **A letter toggles that realm.** Selecting echoes the letter in bright cyan
+  (`1;36`) and returns the colour to `37`; pressing it again writes `BS`/space/`BS`
+  to rub it out and re-draws the letters that are left (0x1034 adds and echoes,
+  0x10d2 removes and erases).
+- **`Z` toggles every letter A..Y in turn** — the same toggle applied to the whole
+  range (0x1427). It does not end the prompt, and on a list that already has
+  selections it *inverts* them.
+- **`?` prints the roster and re-draws the prompt.** Letters already chosen stay
+  chosen but are not re-echoed on the new line. The roster it prints depends on a
+  flag the caller passes: Send Message passes 1 and gets the See Scores table
+  (Id / Empire Name / Territory / Score / Net Worth); the Diplomacy menu passes 0
+  and gets the `-*Relations*-` table instead.
+- **RETURN closes the list**; with nothing selected that is a cancel and the flow
+  returns to the menu.
+- **Anything else is ignored with no echo** — including a letter with no living
+  realm behind it and the caller's own letter (0x12b2 rejects self, 0x12c8
+  rejects an empty slot).
+
+**The letter is the realm's SLOT, not its row number.** BRE indexes its empire
+array with the letter itself, so a dead realm or the caller's own leaves a **gap**
+— which is why the `-*Relations*-` capture above runs `[A] [C] [D] [E] [G] …`.
+The prompt therefore always names the full `A-Y` range whatever the realm count:
+the two-realm capture in the Full Defense Alliance section shows the same
+`(A-Y,Z=All,?=List)`.
+
+After a message is saved BRE asks `Do you wish to send another message? (y/N)`
+and loops straight back to the `Send to:` prompt.
+
+### The message editor
+
+20 lines, under a **68-column** ruler — note the last group is short, `----+----]`
+rather than a seventh `|`, so the whole ruler including brackets is 70 columns.
+Line prompts are ` 1> ` upward. `/` as the first key of a line opens
+`/-Command?  [A,S,C]`; BRE erases that prompt (20 columns of `BS`/space/`BS`)
+before printing the outcome, and prints an abort in red (`0;40;31`).
+
+IB divergences here, both cosmetic and deliberate: IB shows no block cursor while
+typing (BRE draws `█` then backspaces over it per character), and it prints the
+`/`-command outcome in place rather than erasing the prompt first.
+
 ## Planetary diplomacy (captured live 2026-08-08, league game)
 
 Two screens and one line, all reading the same per-board chart. It is a local

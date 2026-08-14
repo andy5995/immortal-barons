@@ -20,7 +20,9 @@ func TestSendMessageVanishedRecipientConflict(t *testing.T) {
 	commitOnFile(t, cfg, func(w *game.World) { w.AddHuman("decoy", "Decoyland") })
 
 	fb := &hookSession{
-		fakeSession: fakeSession{keys: []rune("Ahi\r/Sn")}, // pick (A) Victimville, type "hi", save, no more
+		// (B) Victimville — the picker letters realms by world slot and Alethia
+		// holds (A) — RETURN closes the recipient list, type "hi", save, no more
+		fakeSession: fakeSession{keys: []rune("B\rhi\r/Sn")},
 		marker:      "lines for your message",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("victim")) })
@@ -45,7 +47,7 @@ func TestConcurrentMailBothLand(t *testing.T) {
 	commitOnFile(t, cfg, func(w *game.World) { w.AddHuman("victim", "Victimville") })
 
 	fb := &hookSession{
-		fakeSession: fakeSession{keys: []rune("Ahi\r/Sn")}, // pick (A) Victimville, type "hi", save, no more
+		fakeSession: fakeSession{keys: []rune("B\rhi\r/Sn")}, // pick (B) Victimville, close the list, type "hi", save, no more
 		marker:      "lines for your message",
 		hook: func() { // another node drops a message into the same inbox first
 			commitOnFile(t, cfg, func(w *game.World) {
