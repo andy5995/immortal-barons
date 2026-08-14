@@ -65,6 +65,10 @@ func mailReader(s session.Session, w *ctx) {
 			body, send := composeMessageFrom(s, askQuote(s, m))
 			if send && strings.TrimSpace(body) != "" {
 				replies = append(replies, mailReply{toName: m.From, board: m.FromBoard, public: public, body: body})
+				// A message replied to is done with, like a Delete (#122) — but only
+				// once the reply actually went out; aborting the editor leaves the
+				// message in the inbox.
+				deleted = append(deleted, m)
 			}
 		}
 		// 'I' (and any default): keep the message and advance.

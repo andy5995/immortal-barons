@@ -74,9 +74,33 @@ func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
 	if !strings.Contains(got.Body, "thanks") {
 		t.Errorf("reply should carry the new text; body = %q", got.Body)
 	}
-	// The original stays — only Delete removes.
+	// A sent reply removes the original, like Delete (#122).
+	if got := len(w.Player().Mail); got != 0 {
+		t.Errorf("a sent reply should remove the original; player Mail len = %d, want 0", got)
+	}
+}
+
+// TestMailReaderAbortedReplyKeepsMessage checks the other half of #122: a reply
+// started, then aborted with /a, leaves the original message in the inbox — only
+// a reply that actually goes out removes it.
+func TestMailReaderAbortedReplyKeepsMessage(t *testing.T) {
+	// r, n (decline quote), /a (abort the editor).
+	f := &fakeSession{keys: []rune("rn/a")}
+	w := newWorld()
+	var sender *game.Empire
+	w.With(func() { sender = recipients(w)[0] })
+	seedMail(w, game.Message{From: sender.Name, To: "A", When: "07/24/2026", Body: "nice one"})
+
+	mailReader(f, w)
+
+	if !strings.Contains(f.out.String(), "You have") {
+		t.Fatalf("never reached the message editor:\n%s", f.out.String())
+	}
+	if len(sender.Mail) != 0 {
+		t.Fatalf("an aborted reply should not send mail; sender Mail len = %d, want 0", len(sender.Mail))
+	}
 	if got := len(w.Player().Mail); got != 1 {
-		t.Errorf("Reply should keep the original; player Mail len = %d, want 1", got)
+		t.Errorf("an aborted reply should keep the original; player Mail len = %d, want 1", got)
 	}
 }
 
