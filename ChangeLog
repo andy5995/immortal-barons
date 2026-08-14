@@ -28,6 +28,8 @@
   * River fishing follows the original's yield: a base of 110 plus a draw, and
     technology raises it; rivers take a quarter of their output as food rather
     than 30%, and pay the rest as gold
+  * Attack Pirates marks a faction that raided you since your last play with
+    "->" beside its name
   * A nuclear strike ruins land rather than destroying it: the target keeps
     every region and its upkeep but earns nothing from the ruined share
   * Waste is a region type of its own, listed on the region tables; it is

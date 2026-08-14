@@ -16,6 +16,10 @@ msgstr ""
 msgid "O"
 msgstr ""
 
+#: internal/menu/actions_attack.go
+msgid "->"
+msgstr ""
+
 #: internal/menu/actions_info.go:544
 msgid " (steady)"
 msgstr ""

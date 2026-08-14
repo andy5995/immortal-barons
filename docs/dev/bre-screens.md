@@ -199,6 +199,15 @@ You lost 150 Troopers, 350 Jets, and 1000 Tanks.
 
 Then the captured-region picker (above) opens for the won regions.
 
+**IB marks a faction that raided you since your last play.** BRE's list has
+no such flag. IB writes `->` immediately left of the name — same idiom and
+color treatment as the online mark (`(O)`, above): the shaft is `90` dark gray
+(decoration) and the arrowhead is `37` gray (the part that must carry the
+meaning alone), reserving the same width on every row so an unmarked faction's
+name still starts in the same column. The mark is cleared and reset each time
+the income report runs, so it flags only the raiders named in that turn's
+report, not an older one.
+
 **IB status (2026-08-09):** matched, with three recorded divergences. IB prints
 the gold figure in full where BRE abbreviates it (`78k Gold`), so a full tally
 can pass 80 columns and is wrapped at display; IB adds an `Agents` field, which
