@@ -982,6 +982,15 @@ const (
 // scales the incoming force by a Real48 constant: Quick loads 1.2, Extended
 // loads 0.85, Normal is left alone. attack.hlp advertises the quick strike at
 // "110%" — the binary applies 120%.
+//
+// What settles WHICH case is which — and so that the 1.2 really is the quick
+// strike's — is that the same switch loads a SECOND Real48 per case, the
+// survival fraction the battle breaks off at: 0.92, 0.85 and 0.80. Those are
+// losses of 8%, 15% and 20%, which is exactly what attack.hlp publishes for
+// quick, normal and extended. The help file is therefore right about three of
+// the four figures in that paragraph and wrong about the fourth, rather than
+// the case mapping being misread. Re-derived independently after the first
+// reading flagged itself as uncertain; do not "correct" 120 back to 110.
 const (
 	// A quick strike buys surprise: it hits harder but takes far less land, and
 	// the disorganised battle breaks off early.
