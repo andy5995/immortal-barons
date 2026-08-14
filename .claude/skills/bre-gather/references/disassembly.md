@@ -203,6 +203,35 @@ with one live observation ("no second refund on re-entry the same day") proved
 the routine was never called, without locating the caller at all. Cheap
 deductions like this beat hunting for a gate you have not found yet.
 
+### An unexplained multiplier is usually the TECHNOLOGY factor
+
+`0x56d:0x1a07` takes a Real48 cap and a byte slot index and returns that domain's
+technology factor. Grepping the raw file for its five call bytes
+(`9a 07 1a 6d 05`) and decoding the immediate loads just before each one prints
+the whole cap table in one command — 2.0 food, 1.5 gold, 1.4 military, 1.35
+production, 5.0 decay. Any routine that calls it is technology-scaled, and the
+cap says which domain it belongs to, which is often enough to name it.
+
+This matters most when reading a *capture*: a per-region figure that drifts
+across turns may be the factor creeping up, not a `Random()`. The agricultural
+yield looked like a five-wide band for exactly this reason, and only the
+disassembly separated the two — there the band was real, but the factor was
+sitting on the base underneath it. Read the routine before fitting a width.
+
+### Count the pushes to count the terms
+
+Turbo Pascal compiles one long real expression as: evaluate a term, `push dx/bx/ax`,
+evaluate the next, … then a run of `pop cx/si/di` + add. So the number of adds
+plus one is the number of terms, and the truncation at the end applies to the
+whole sum, once. Twelve pushed terms are what showed the armed-forces food bill
+covers six unit types in two places each — a reading that stopped at the first
+`les di` had concluded it was a single stored accumulator field.
+
+The routine's own labels are cheap too: strings pushed as `mov di,<offset>` /
+`push cs` are length-prefixed Pascal strings at that offset *inside the same
+unit*, so decoding `d[off]` bytes from the extracted unit names the routine
+without `find-string --details` and without anything private leaving the session.
+
 ### Name a field from ALL its sites, never from the two in front of you
 
 An `inc` and a matching `dec` around a block look exactly like a re-entrancy
