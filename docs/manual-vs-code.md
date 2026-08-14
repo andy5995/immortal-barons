@@ -7,7 +7,13 @@ expensive, because nothing in the text marks the wrong line.
 
 These are the places where the original's own documentation turned out to
 describe something the shipped program does not do, plus a couple of outright
-defects in the program itself. Each says what the clone does about it.
+defects in the program itself. Each says what the clone does about it — and in
+almost every case the answer is that it follows the program, not the paperwork.
+The exception is the last entry, where the original is not wrong so much as
+terse, and readability won.
+
+This page is not a list of the ways Immortal Barons differs from the original by
+choice; those are recorded per mechanic in the developer reference.
 
 The order of preference behind all of this: a screen captured from a running
 copy beats a reading of the compiled code, a reading of the code beats the text
@@ -67,12 +73,6 @@ the recipient's relation against the Protective Trade value and divides the
 per-day transit cost by three, before the span is chosen. The other half
 describes nothing — the cost routine is called from two sites, charged once up
 front, and no recurring trade cost exists anywhere in the program.
-
-While in there: the base rate is 100,000 gold a day (`0x05154e`), and the
-original adds a cargo-weighted term on top — the goods' weights summed and
-divided by five, with troopers, jets, turrets, tanks and carriers at 1, bombers
-at 3, agents at 0.5, food at 0.05 and gold at 0.01. The clone charges the flat
-base only.
 
 **Immortal Barons** implements the discount and does not invent an upkeep to
 discount.
@@ -163,9 +163,10 @@ strength = trunc( sqrt( funding / (10 x (regions + 1)) ) )     clamped to 0..100
 (`BRE.EXE` `056d:1139`). That formula reproduces all sixteen captured screens
 exactly — and only does so if the stored funding is read as thousands.
 
-**Immortal Barons** prints the gold figure the label describes. That is a
-deliberate difference, not a correction: the original is not wrong here, just
-terse.
+**Immortal Barons** prints the gold figure the label describes — the one place
+on this page where the clone does not follow the program. Nothing is being
+corrected: the original is right by its own convention, and a line that reads
+`0,000` at every funding level simply tells a player less than the number does.
 
 ## Reading this the right way
 
