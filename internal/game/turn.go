@@ -856,36 +856,11 @@ func (w *World) processEconomy(e *Empire) {
 	// Food growth was already credited at turn start (GrowFood); here we only
 	// consume and then spoil. (Was `Food += FoodGrown - consumed`, which grew the
 	// food at turn end where it couldn't be sold and always spoiled.)
-	e.LastFoodConsumed = e.FoodUpkeep()
-	e.Food -= e.LastFoodConsumed
-	if e.Food < 0 {
-		// Underfeeding hits popular support and drives people away, worse the
-		// hungrier the realm. shortPct is the % of this turn's food need left unmet.
-		// Our own reconstruction (BRE publishes no rate), calibrated to a live BRE
-		// point: ~73% short dropped support ~50 points in one turn.
-		shortPct := 100
-		if e.LastFoodConsumed > 0 {
-			shortPct = min(100, (-e.Food)*100/e.LastFoodConsumed)
-		}
-		e.Support -= shortPct * FoodShortfallSupportDrop / 100
-		if e.Support < 0 {
-			e.Support = 0
-		}
-		e.adjustMorale(-shortPct * FoodShortfallMoraleDrop / 100) // hungry troops lose heart too (breins.txt)
-		left := e.People * shortPct * FoodShortfallEmigrationPct / 10000
-		if left < 1 {
-			left = 1 // at least a token loss while starving
-		}
-		if left > e.People {
-			left = e.People
-		}
-		e.People -= left
-		e.LastStarved = left
-		e.Food = 0
-		w.postStarvationNews(e)
-	} else {
-		e.LastStarved = 0
-	}
+	// Feeding the realm, and what going short costs (see morale.go): popular
+	// support for the people's shortfall, military morale for the army's, and a
+	// civil war when the people got under two thirds of their need. Both penalties
+	// are filed and applied at rollover, as BRE files them.
+	w.feed(e)
 
 	// Food spoilage (BRE-verified by driving the original, 2026-07-16): FoodSpoilPct
 	// (5%) of the ENTIRE stored food spoils each turn — floor(0.05 × food) — with NO
@@ -952,6 +927,17 @@ func (w *World) processEconomy(e *Empire) {
 	// so 1.4% a turn at 12% tax but 15% at 39% — and costs both people and
 	// support. On top of any riot, support always drifts by -(tax-30)/10, which
 	// is a free gain below SupportTaxNeutral and a bleed above it.
+	//
+	// The civil-unrest step runs first, as it does in the original: the pending
+	// morale penalty lands, then the army deserts at a rate drawn from the morale
+	// it lands on, then a famine's civil war (if any) is spent.
+	if e.PendingMoralePenalty != 0 {
+		e.adjustMorale(-e.PendingMoralePenalty)
+		e.PendingMoralePenalty = 0
+	}
+	w.moraleDesertion(e)
+	w.resolveCivilWar(e)
+
 	e.LastRiot = false
 	riotPenalty := 0
 	if e.Tax > RiotTaxFloor && e.Tax*e.Tax >= w.rng.Intn(RiotChanceDenom) {
@@ -959,6 +945,10 @@ func (w *World) processEconomy(e *Empire) {
 		w.postRiotNews(e)
 		riotPenalty = e.Tax / RiotSupportDivisor
 		e.People -= e.People / RiotPeopleDivisor
+	} else if e.Support < LowSupportNewsCeil && w.rng.Intn(LowSupportNewsOdds) == 0 {
+		// An unpopular realm makes the planet news even in a turn with no tax
+		// riot, and this one costs nothing beyond the embarrassment.
+		w.postRiotNews(e)
 	}
 	e.adjustSupport(-riotPenalty - (e.Tax-SupportTaxNeutral)/SupportTaxDivisor)
 	if e.Support < MoraleDrainSupport {
@@ -967,28 +957,6 @@ func (w *World) processEconomy(e *Empire) {
 	// Taxing very lightly buys back support, but only while the realm is unhappy.
 	if e.Tax < LowTaxBonusBelow && e.Support < LowTaxSupportCeil {
 		e.adjustSupport(LowTaxBonusBelow - e.Tax)
-	}
-
-	// Morale slowly recovers toward 100 each turn (a paid, quiet army regains
-	// heart); paying forces short knocks it back down in PayForces. When morale
-	// stays very low, troops desert.
-	if e.Morale < 100 {
-		e.Morale = min(100, e.Morale+MoraleDrift)
-	}
-	if e.Morale <= MoraleDesertThreshold {
-		lost := 0
-		desert := func(n *int) {
-			d := *n * MoraleDesertRate / 100
-			*n -= d
-			lost += d
-		}
-		desert(&e.Troopers)
-		desert(&e.Jets)
-		desert(&e.Turrets)
-		desert(&e.Tanks)
-		e.LastMoraleDesertion = lost
-	} else {
-		e.LastMoraleDesertion = 0
 	}
 
 	if e.Gold > w.MoneyCap() {

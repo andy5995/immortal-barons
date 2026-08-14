@@ -1,4 +1,28 @@
 (in-progress:)
+  * Military morale is bought back the way popular support is: the request is
+    priced off the army's size, and paying part of it buys part of the points
+  * Military morale no longer recovers on its own; only the boost raises it
+  * Troopers, jets and tanks desert at a rate drawn from a band chosen by
+    morale, and stop deserting entirely at 40. Turrets, bombers and carriers
+    never desert
+  * A food shortfall bills the people's need and the army's need separately —
+    the first against popular support, the second against military morale — and
+    no longer drives anyone out of the realm
+  * Added civil war: a realm that feeds its people under two thirds of their
+    need, or pays under 90% of its land upkeep, loses half its popular support
+    and a share of its land and of every kind of unit it owns
+  * Underpaying the armed forces costs military morale alone, land upkeep
+    popular support alone, at the original's rates
+  * Maintenance shortfalls no longer land mid-turn; they surface at rollover
+  * Auto-Pay Maintenance stays silent only while popular support and military
+    morale both read 100
+  * Breaking a treaty by attacking a partner costs a quarter of both popular
+    support and military morale
+  * Chemical and biological strikes lower the target's morale and support
+  * Stir Revolts and Demoralize Forces scale their target's stat instead of
+    docking a flat number of points; an AI's covert op cannot push either below 5
+  * An unpopular realm reaches the planet news even in a turn without a riot
+  * Added a Morale and Support help topic
   * A nuclear strike ruins land rather than destroying it: the target keeps
     every region and its upkeep but earns nothing from the ruined share
   * Waste is a region type of its own, listed on the region tables; it is

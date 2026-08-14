@@ -168,6 +168,47 @@ Once you have the offset, `re.finditer` for the packed disp16 (`6b 02`) lists
 *every* site that reads or writes it, which separates the purchase path, the
 per-turn advance, and the combat use without any further searching.
 
+### Scan BOTH addressing forms in one pass, or you will map half a mechanic
+
+The field-access scan has two forms, and they answer different halves of the
+question. `[es:di+disp]` off `les di,[0x28d8]` is the **current empire** — what a
+realm does to itself. The arbitrary-empire form is the same field at
+`disp − 3949` as a **signed** word, so a small positive offset becomes a large
+negative displacement (`+0x8e` → `0xF121`), and that is where every *inter*-empire
+effect lives: WMD strikes on a victim, covert ops, treaty contagion, the AI's
+own limits. Scan for both displacements at once:
+
+```python
+mods = {0x80 + (r << 3) + 5 for r in range(8)}     # mod=10, rm=101 -> [di+disp16]
+for d in (off, off - 3949):
+    for m in re.finditer(re.escape(struct.pack("<h", d)), buf):
+        if buf[m.start()-1] in mods and buf[m.start()-3] == 0x26:   # es: prefix
+            ...
+```
+
+Morale and support (2026-08-14) came out as 62 `BRE.OVR` sites and 4 in
+`BRE.EXE`, and the arbitrary form was 30 of them — the chemical and biological
+warheads, both covert ops, the Free Trade contagion, and the AI's floor of 5.
+Scanning only the positive form would have found the economy and missed every
+weapon. Widening the modrm set to all `mod=10` registers found nothing new
+(ten hits, all `mov cx,imm`/`mov di,imm` false positives), so the `[di+disp16]`
+form really is the whole access surface — worth one extra command to prove.
+
+**Resolve the whole hit list to names in one go**, rather than `lookup`-ing each
+offset: load `docs/dev/bre-v0988-disassembly.json`, flatten every unit's
+`blocks` and `data_chunks` spans plus each root's `body_ranges` (offset by the
+unit's `ovr.code_offset`), and bisect. Sixty offsets become a table of procedure
+names in one run, and the table is what makes the scope argument.
+
+### A catalog block name is a label, not evidence — read the code under it
+
+`allocate_turn_budget__apply_support_boost_payment` computes the **morale**
+boost's cost. The naming pass had the right procedure and the wrong half of it,
+which is exactly what a `contextual`/`identified` status is allowed to be. The
+tell was arithmetic that made no sense for the name: the block summed four unit
+counts against Real48 weights, and support is priced off population. When a
+block's body does not match its name, believe the body.
+
 ### Counting references is evidence — use it before hypothesising
 
 Two cheap counts settle questions that otherwise invite a guess. Both come from

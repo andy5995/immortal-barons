@@ -248,15 +248,20 @@ func TestAttackingAPartnerBreachesAndCostsSupport(t *testing.T) {
 	b := w.AddHuman("b", "Beta")
 	w.ProposeTreaty(a, b, "Tariff Trade Agreement")
 	w.AcceptTreaty(b, a.Name, "Tariff Trade Agreement")
-	a.Support, a.Protection, b.Protection = 90, 0, 0
+	a.Support, a.Morale, a.Protection, b.Protection = 90, 80, 0, 0
 
 	w.Attack(a, b, FullForce(a), true)
 
 	if got := w.Relation(a, b); got != RelationEnemy {
 		t.Errorf("attacking a partner should leave the pair at %q, got %q", RelationEnemy, got)
 	}
-	if a.Support != 90-TreatyBreachSupportPenalty {
-		t.Errorf("breaching should cost %d support: 90 -> %d", TreatyBreachSupportPenalty, a.Support)
+	// Golden literals from BRE.OVR 0x1A881: a quarter off each, integer-divided
+	// before the multiply — 90 -> 66, not 67, and 80 -> 60.
+	if a.Support != 66 {
+		t.Errorf("breaching should cost a quarter of support: 90 -> %d, want 66", a.Support)
+	}
+	if a.Morale != 60 {
+		t.Errorf("breaching should cost a quarter of morale: 80 -> %d, want 60", a.Morale)
 	}
 	// Attacking a realm you had no pact with is not a breach.
 	c := w.AddHuman("c", "Gamma")

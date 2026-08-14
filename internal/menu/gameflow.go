@@ -437,10 +437,12 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	} else if p.LastPopGrowth < 0 {
 		fmt.Fprintf(s, "  "+tr(s, "Your dominion lost %s%s%s people.")+"\n", ansi.FgBrightRed, comma(-p.LastPopGrowth), ansi.Reset)
 	}
-	statLine(s, p.LastStarved, "people left your realm, unable to be fed.")
 	statLine(s, p.LastSpoiled, "units of food spoiled.")
 	if p.LastRiot {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, tr(s, "Riots have broken out due to high tax rates!"), ansi.Reset)
+	}
+	if p.LastCivilWar > 0 {
+		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, hiNums(fmt.Sprintf(tr(s, "Civil war! Famine cost you %d%% of your realm and its forces."), p.LastCivilWar)), ansi.Reset)
 	}
 	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
 }
@@ -472,7 +474,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	}
 
 	var forces, regions, sdi, crown, gold int64
-	var autoPay bool
+	var autoPay, content bool
 	if !withPlayer(w, func(p *game.Empire) {
 		forces = w.ForcesDue(p)
 		regions = w.RegionsDue(p)
@@ -480,12 +482,17 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		crown = w.World.CrownTax(p)
 		gold = p.Gold
 		autoPay = w.AutoPayMaint
+		// BRE gates its silent branch on popular support AND military morale both
+		// reading exactly 100 (BRE.EXE flat 0x3b12-0x3b6d), on top of affording the
+		// bill: a realm with either off 100 has a boost to be offered, so it goes
+		// through the manual sequence however much gold it holds.
+		content = p.Support >= 100 && p.Morale >= 100
 	}) {
 		return
 	}
 	due := forces + regions + sdi + crown
 
-	if autoPay && gold >= due {
+	if autoPay && content && gold >= due {
 		if !withPlayer(w, func(p *game.Empire) {
 			w.World.PayForces(p, forces)
 			w.World.PayRegions(p, regions)
@@ -603,8 +610,14 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	}
 
 	if morale < 100 && gold > 0 {
-		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to improve military morale."), (100-morale)*game.MoralePerBoostGold)))
-		moraleGold := promptSuggested(s, "How much will you give?", 0, gold)
+		var cost, maxGive int64
+		if !withPlayer(w, func(p *game.Empire) {
+			cost, maxGive = w.World.MoraleBoostCost(p), min(w.World.MoraleBoostMax(p), p.Gold)
+		}) {
+			return
+		}
+		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to improve military morale."), cost)))
+		moraleGold := promptSuggested(s, "How much will you give?", min(cost, maxGive), maxGive)
 		var pts int
 		if !withPlayer(w, func(p *game.Empire) { pts = w.World.BoostMorale(p, moraleGold) }) {
 			return

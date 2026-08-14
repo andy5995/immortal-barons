@@ -223,6 +223,10 @@ func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 	d.Troopers -= troops
 	d.Regions.remove(regions)
 	d.syncLand()
+	// The gas also breaks the survivors: a quarter off military morale and a
+	// third off popular support (binary-verified, BRE.OVR 0x110AE / 0x11109).
+	d.Morale = roundDiv(d.Morale*ChemMoraleKeepNum, ChemMoraleKeepDen)
+	d.Support = roundDiv(d.Support*WMDSupportKeepNum, WMDSupportKeepDen)
 
 	if d.Land <= 0 || d.People <= 0 {
 		d.Alive = false
@@ -252,6 +256,10 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 	people, troops = clamp(d.People, people), clamp(d.Troopers, troops)
 	d.People -= people
 	d.Troopers -= troops
+	// A plague is worse for the army than gas and the same for the public: morale
+	// halved, support cut by a third (BRE.OVR 0x115FE / 0x11645).
+	d.Morale /= BioMoraleDivisor
+	d.Support = roundDiv(d.Support*WMDSupportKeepNum, WMDSupportKeepDen)
 
 	if d.People <= 0 {
 		d.Alive = false

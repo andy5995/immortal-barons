@@ -70,8 +70,15 @@ func TestPayForcesShortfallDeserts(t *testing.T) {
 	if e.Troopers != wantTroopers {
 		t.Errorf("troopers: want %d, got %d", wantTroopers, e.Troopers)
 	}
-	if e.Support >= 100 {
-		t.Errorf("support should drop on non-payment, got %d", e.Support)
+	// The penalty is filed, not applied on the spot — BRE accumulates the whole
+	// payment stage and spends it at rollover — and it lands on MORALE alone.
+	// Golden literal from BRE.OVR 0x2F077: trunc((1 - 1/(due+1)) x 40) = 39 for
+	// any due above 39.
+	if e.PendingMoralePenalty != 39 {
+		t.Errorf("PendingMoralePenalty = %d, want 39", e.PendingMoralePenalty)
+	}
+	if e.PendingSupportPenalty != 0 {
+		t.Errorf("the forces shortfall must not touch support, got %d", e.PendingSupportPenalty)
 	}
 }
 

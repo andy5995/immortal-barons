@@ -377,16 +377,18 @@ func (w *World) DeclareWar(a, b *Empire) {
 // breachTreaty ends a pact the dishonourable way — by attacking a realm you had
 // an agreement with. BRE's manual describes Declaration Of War as the route that
 // avoids "internal troubles in your realm", so the route that skips it must
-// cause them: the breaker loses popular support. A pair already at Enemy, or
-// with no relation, is not a breach and costs nothing.
+// cause them: the breaker loses a quarter of BOTH popular support and military
+// morale (binary-verified, BRE.OVR 0x1A881). A pair already at Enemy, or with no
+// relation, is not a breach and costs nothing.
 func (w *World) breachTreaty(a, b *Empire) {
 	rel := w.Relation(a, b)
 	if rel == "" || rel == RelationEnemy {
 		return
 	}
 	w.setRelation(a.Name, b.Name, RelationEnemy)
-	a.adjustSupport(-TreatyBreachSupportPenalty)
-	a.addEvent(fmt.Sprintf("Breaking the %s with %s without declaring war cost you popular support.", rel, b.Name))
+	a.Support = a.Support / TreatyBreachKeepDen * TreatyBreachKeepNum
+	a.Morale = a.Morale / TreatyBreachKeepDen * TreatyBreachKeepNum
+	a.addEvent(fmt.Sprintf("Breaking the %s with %s without declaring war cost you popular support and morale.", rel, b.Name))
 	b.addEvent(fmt.Sprintf("%s attacked you, breaking the %s between your realms.", a.Name, rel))
 }
 

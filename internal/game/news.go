@@ -88,8 +88,16 @@ func (w *World) postRiotNews(e *Empire) {
 	w.postNews(lines[w.rng.Intn(len(lines))])
 }
 
-// postStarvationNews broadcasts an empire's food shortfall reducing its
-// population.
+// postCivilWarNews broadcasts a realm collapsing into civil war after a famine.
+func (w *World) postCivilWarNews(e *Empire) {
+	lines := []string{
+		fmt.Sprintf("Civil war breaks out in %s as the hungry turn on the crown.", e.Name),
+		fmt.Sprintf("The realm of %s tears itself apart over empty granaries.", e.Name),
+	}
+	w.postNews(lines[w.rng.Intn(len(lines))])
+}
+
+// postStarvationNews broadcasts an empire's food shortfall.
 func (w *World) postStarvationNews(e *Empire) {
 	lines := []string{
 		fmt.Sprintf("Famine grips %s as food stocks run out.", e.Name),

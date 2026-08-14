@@ -303,12 +303,20 @@ const (
 // funny.
 const ProclamationChancePct = 35
 
-// TreatyBreachSupportPenalty is the popular support a baron loses for ending an
-// agreement by attacking a partner instead of declaring war first. BRE's manual
-// says Declaration Of War breaks a pact "without causing internal troubles in
-// your realm", so the route that skips it must cause them — the original does
-// not publish the size, and this is IB's own figure. Tunable.
-const TreatyBreachSupportPenalty = 10
+// Breaking an agreement by attacking a partner instead of declaring war first
+// costs a QUARTER of both popular support and military morale, not a flat number
+// of points: BRE keeps three quarters of each, integer-divided.
+// BINARY-VERIFIED (BRE.OVR 0x1A881):
+//
+//	Support = Support / TreatyBreachKeepDen * TreatyBreachKeepNum
+//	Morale  = Morale  / TreatyBreachKeepDen * TreatyBreachKeepNum
+//
+// IB previously docked a flat 10 support and left morale alone, which made the
+// breach nearly free for an unpopular realm and free for its army.
+const (
+	TreatyBreachKeepNum = 3 // binary
+	TreatyBreachKeepDen = 4 // binary
+)
 
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income
 // as an inline "6 − f(tax)" × Population shape that was only partially
@@ -565,13 +573,44 @@ const (
 	// the unit across food stocks from 1.4k to 13.9k. Technology decreases it (via
 	// TechFactor). Was an unverified "4% of food above 1000" guess.
 	FoodSpoilPct = 5
-	// Food-shortfall penalties (IB reconstruction — BRE publishes no rate;
-	// calibrated to a live BRE point: ~73% short dropped support ~50 points in one
-	// turn). Scaled by how much of the turn's food need went unmet (0–100%): the
-	// hungrier the realm, the more popular support falls and the more people leave.
-	FoodShortfallSupportDrop   = 70 // support points lost per turn at 100% unfed
-	FoodShortfallMoraleDrop    = 80 // morale points lost per turn at 100% unfed (hungry troops demoralize faster than the public, as under pay shortfall)
-	FoodShortfallEmigrationPct = 10 // % of population that leaves per turn at 100% unfed
+	// Food-shortfall penalties. BINARY-VERIFIED against BRE's food-allocation
+	// routine (BRE.OVR 0x38104-0x381E5 for the people, 0x382E9-0x3832C for the
+	// army), which bills the two needs SEPARATELY and scores each on the same
+	// +1-on-both-sides ratio the crown tax uses:
+	//
+	//	r        = (given + 1) / (need + 1)
+	//	penalty  = trunc((1 − r) × StarvationPenaltyScale)
+	//
+	// The people's shortfall is charged to popular support and the army's to
+	// military morale, each filed as a pending penalty and applied at rollover.
+	// A people's ratio under CivilWarThresholdPct additionally lights the civil
+	// war (see CivilWarSeverityScale).
+	//
+	// BRE has NO starvation emigration: nobody leaves for want of food, and the
+	// three penalty bytes are the whole of it. IB's own 70/80/10 reconstruction —
+	// which also drove people out — is gone.
+	StarvationPenaltyScale = 40 // binary: penalty points at a total shortfall
+	// Below this percentage of the people's food need, the realm falls into civil
+	// war at round((1 − r) × CivilWarSeverityScale) percent severity.
+	// BINARY-VERIFIED (BRE.OVR 0x38196 holds 0.65, 0x381E5 holds 30).
+	FoodCivilWarThresholdPct = 65
+	CivilWarSeverityScale    = 30
+)
+
+// The two maintenance shortfalls are scored the same way as the food and crown-
+// tax ones — trunc((1 − (paid+1)/(due+1)) × scale) — but land on different
+// stats. BINARY-VERIFIED: the armed-forces branch at BRE.OVR 0x2F077 scales by
+// 40 against MORALE, the region branch at 0x2F196 by 50 against SUPPORT.
+// IB previously docked a flat fraction of the shortfall percentage instead
+// (support/5 and morale/4 on forces, support/10 on regions).
+//
+// Region maintenance ALSO lights a civil war, and on a far easier trigger than
+// famine does: anything under RegionCivilWarThresholdPct of what is due
+// (BRE.OVR 0x2F23C holds 0.9), at the same round((1 − r) × 30) severity.
+const (
+	ForcesShortfallMoraleScale  = 40 // binary
+	RegionShortfallSupportScale = 50 // binary
+	RegionCivilWarThresholdPct  = 90 // binary
 )
 
 // Population / migration. BINARY-VERIFIED against BRE's end-of-turn routine
@@ -725,6 +764,87 @@ const (
 	SupportBoostPerPerson  = 3
 	SupportBoostFlat       = 500
 	SupportBoostMaxPct     = 150 // most a baron may pay, as a % of the request
+
+	// --- Military morale ---
+	//
+	// The pay-to-boost-morale prompt is the same shape as the support one, but
+	// priced off the ARMY rather than the population — a realm with no soldiers
+	// buys morale for the flat fee. BINARY-VERIFIED (BRE.OVR 0x2F6BA for the
+	// deficit cap, 0x2F6CA for the cost, 0x2F82C for the ceiling, 0x2F91E for the
+	// award):
+	//
+	//	deficit = min(100 − Morale, MaxMoraleBoostPerTurn)
+	//	cost    = deficit × Σ(units × weight) + MoraleBoostFlat
+	//	points  = deficit × (given + 1) / (cost + 1)
+	//
+	// Weights are held in hundredths because the original computes them as
+	// Real48 fractions (0.10, 0.05, 0.10, 0.15). Bombers and Carriers are NOT
+	// priced — the original loads four unit counts and stops. Units escrowed on
+	// the Trading Market are counted, exactly as they are for maintenance.
+	// IB's earlier placeholder charged a flat 100 gold per point up to 20 points.
+	MaxMoraleBoostPerTurn = 15  // binary
+	MoraleBoostFlat       = 500 // binary
+	MoraleBoostMaxPct     = 150 // binary: most a baron may pay, as a % of the request
+	MoraleBoostWeightUnit = 100 // the weights below are hundredths of a gold
+	MoraleBoostTrooper    = 10  // binary: 0.10
+	MoraleBoostJet        = 5   // binary: 0.05
+	MoraleBoostTurret     = 10  // binary: 0.10
+	MoraleBoostTank       = 15  // binary: 0.15
+
+	// Desertion. BINARY-VERIFIED (BRE.OVR 0xC1F9-0xC2D5): the per-turn desertion
+	// RATE is drawn from a band chosen by morale, then each of Troopers, Jets and
+	// Tanks independently deserts that percentage with probability
+	// (MoraleDesertTypeOdds−1)/MoraleDesertTypeOdds. Turrets, Bombers and Carriers
+	// never desert. A realm at MoraleDesertBandTop or above loses nobody.
+	//
+	//	morale 0-9   → 22 + Random(7) − Random(17)
+	//	morale 10-19 → 17 + Random(5) − Random(12)
+	//	morale 20-29 → 10 + Random(3) − Random(8)
+	//	morale 30-39 →  5 + Random(2) − Random(5)
+	//
+	// so the rate can come out zero or negative in the milder bands, which is how
+	// a realm at 35 morale often loses nothing at all. IB's placeholder was a flat
+	// 5% of four unit types below morale 30.
+	MoraleDesertBandTop   = 40 // morale at/above which nothing deserts
+	MoraleDesertBandWidth = 10 // each band spans this many morale points
+	MoraleDesertTypeOdds  = 4  // one face in this many spares a unit type
+	MoraleDesertPerCent   = 100
+	// The bands themselves are MoraleDesertBands, below.
+	// There is NO free morale recovery in the original: nothing anywhere in the
+	// binary adds to morale except the boost the baron pays for. IB used to drift
+	// morale back toward 100 by 4 points a turn, which quietly hid the mechanic.
+
+	// --- Civil war (BRE.OVR 0xC59A) ---
+	//
+	// Severity is a percentage, filed by a food shortfall (see
+	// CivilWarSeverityScale). When it fires, the realm loses that percentage of
+	// every military unit type — held AND escrowed on the market — and of its
+	// regions, and popular support is divided by CivilWarSupportDivisor.
+	CivilWarSupportDivisor = 2   // binary: support is halved
+	CivilWarPerCent        = 100 // severity is a percentage of each holding
+
+	// Popular support below LowSupportNewsCeil puts a riot in the planet news with
+	// probability 1/LowSupportNewsOdds a turn — separate from the tax riot, which
+	// costs support and people. BINARY-VERIFIED (BRE.OVR 0xD5AD).
+	LowSupportNewsCeil = 35
+	LowSupportNewsOdds = 20
+
+	// An AI covert operation never pushes its victim below AICovertStatFloor
+	// popular support or military morale. BINARY-VERIFIED (BRE.OVR 0x4C02F for
+	// support, 0x4C2E0 for morale); a human's covert op has no such floor.
+	AICovertStatFloor = 5
+
+	// Covert operations and weapons scale the victim's stat rather than docking a
+	// flat number of points, so a broken realm cannot be broken much further.
+	// BINARY-VERIFIED: the covert resolver at BRE.OVR 0x4AC91 (Demoralize Forces)
+	// and 0x4AE61 (Stir Revolts); the chemical warhead at 0x110AE / 0x11109 and
+	// the biological one at 0x115FE / 0x11645. IB docked a flat 15 points for both
+	// covert ops and left both stats untouched on a WMD strike.
+	DemoralizeKeepNum, DemoralizeKeepDen   = 6, 7   // morale x 6/7
+	StirRevoltsKeepNum, StirRevoltsKeepDen = 11, 13 // support x 11/13
+	ChemMoraleKeepNum, ChemMoraleKeepDen   = 3, 4   // morale x 3/4, rounded
+	BioMoraleDivisor                       = 2      // morale halved
+	WMDSupportKeepNum, WMDSupportKeepDen   = 2, 3   // support x 2/3, rounded (both warheads)
 
 	// --- Industry (live-verified; one capacity pool per region, split between
 	// units and gold — see World.industrialGold / ProjectedProduction) ---
@@ -1172,3 +1292,19 @@ const (
 // to wait for a reply that is not coming, or to hold off a strike. Showing a
 // present baron as absent costs nothing.
 const OnlineWindowSecs = 300
+
+// MoraleDesertBands are the per-turn desertion rate draws, worst band first:
+// the rate is Base + Random(Up) − Random(Down), and the index is
+// morale/MoraleDesertBandWidth. BINARY-VERIFIED (BRE.OVR 0xC20C, 0xC245, 0xC27D
+// and 0xC2B5, one band each). The two draws are wide enough that the milder
+// bands often come out zero or negative, which costs nothing — a realm at 35
+// morale usually loses nobody, one at 5 always loses somebody.
+//
+// A var rather than a const only because Go has no constant arrays; treat it as
+// data, and do not tune it without new evidence.
+var MoraleDesertBands = [MoraleDesertBandTop / MoraleDesertBandWidth]struct{ Base, Up, Down int }{
+	{22, 7, 17}, // morale 0-9
+	{17, 5, 12}, // morale 10-19
+	{10, 3, 8},  // morale 20-29
+	{5, 2, 5},   // morale 30-39
+}
