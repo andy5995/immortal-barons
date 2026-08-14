@@ -284,7 +284,7 @@ func (w *World) BombTradingMarket(a, d *Empire) (string, error) {
 	// A Protective Trade agreement guards the two realms' trade, so a partner
 	// cannot bomb the other's market (#11; BRE: "preventing bombing of trade deals").
 	// Checked before the fee so a guarded strike costs nothing.
-	if w.HasTreaty(a, d, "Protective Trade") {
+	if w.HasTreaty(a, d, protectiveTrade) {
 		return fmt.Sprintf("%s's trade is guarded by your Protective Trade agreement — the strike cannot proceed.", d.Name), nil
 	}
 	if err := w.covertCost(a, CostBombEnemyTargets, true); err != nil {
@@ -308,7 +308,7 @@ func (w *World) BombTradingMarket(a, d *Empire) (string, error) {
 
 // tradeTreatyTypes are the treaty types BombTradeRoutes and SetUp look for
 // when severing d's standing agreements.
-var tradeTreatyTypes = []string{"Tariff Trade Agreement", "Free Trade Agreement", "Protective Trade"}
+var tradeTreatyTypes = []string{tariffTradeAgreement, freeTradeAgreement, protectiveTrade}
 
 // BombTradeRoutes severs one of d's standing trade treaties. On failure the
 // agent is lost.
@@ -316,7 +316,7 @@ func (w *World) BombTradeRoutes(a, d *Empire) (string, error) {
 	// A Protective Trade agreement guards the trade routes between the two realms,
 	// so a partner cannot bomb them (#11; BRE: "preventing bombing of trade deals").
 	// Checked before the fee so a guarded strike costs nothing.
-	if w.HasTreaty(a, d, "Protective Trade") {
+	if w.HasTreaty(a, d, protectiveTrade) {
 		return fmt.Sprintf("%s's trade routes are guarded by your Protective Trade agreement — the strike cannot proceed.", d.Name), nil
 	}
 	if err := w.covertCost(a, CostBombEnemyTargets, true); err != nil {

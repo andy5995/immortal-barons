@@ -15,7 +15,8 @@ import (
 //   - Technology Agreement shares a partner's tech (techAgreementCeiling,
 //     advanceTech).
 //   - Protective Trade guards the two realms' trade from covert bombing
-//     (BombTradeRoutes, BombTradingMarket).
+//     (BombTradeRoutes, BombTradingMarket) and cuts the cost of sending a trade
+//     deal between them (TradeDealGoldPerDayBetween).
 var TreatyTypes = []string{
 	"Full Defense Alliance",
 	"Tariff Trade Agreement",
@@ -30,6 +31,9 @@ const (
 	fullDefenseAlliance  = "Full Defense Alliance"
 	intelligenceAlliance = "Intelligence Alliance"
 	terroristPrevention  = "Terrorist Prevention"
+	protectiveTrade      = "Protective Trade"
+	tariffTradeAgreement = "Tariff Trade Agreement"
+	freeTradeAgreement   = "Free Trade Agreement"
 )
 
 // RelationEnemy is the hostile state a pair falls into when one side declares
@@ -167,18 +171,54 @@ func (w *World) allyAgents(e *Empire, ttype string) int {
 	return sum
 }
 
-// tradeIncome is the extra per-turn gold from trade treaties, scaled by
-// population: a Free Trade Agreement earns more than a Tariff Trade Agreement.
+// tradeIncome is the extra per-turn gold from trade treaties. Each partner pays
+// on the SMALLER of the two populations, so a pact with a tiny realm earns
+// little and neither side can farm a giant; a Free Trade Agreement is worth
+// nearly twice a Tariff. See TariffTradeGoldPerHead for the binary evidence and
+// — importantly — which population unit the rates are in.
 func (w *World) tradeIncome(e *Empire) int {
-	tariff := len(w.alliesOf(e, "Tariff Trade Agreement"))
-	free := len(w.alliesOf(e, "Free Trade Agreement"))
-	return tariff*e.People/40 + free*e.People/20
+	sum := int64(0)
+	for _, other := range w.alliesOf(e, tariffTradeAgreement) {
+		sum += tradePactIncome(e, other, TariffTradeGoldPerHead, TariffTradeProtectedSelfCut, TariffTradeProtectedPartnerCut)
+	}
+	for _, other := range w.alliesOf(e, freeTradeAgreement) {
+		sum += tradePactIncome(e, other, FreeTradeGoldPerHead, FreeTradeProtectedSelfCut, FreeTradeProtectedPartnerCut)
+	}
+	return int(sum)
+}
+
+// tradePactIncome is one trade partner's contribution: the smaller of the two
+// populations at the pact's per-head rate, with New Realm Protection on either
+// side cutting that rate.
+func tradePactIncome(e, other *Empire, perHead, selfCut, partnerCut int) int64 {
+	rate := perHead
+	if e.Protection > 0 {
+		rate -= selfCut
+	}
+	if other.Protection > 0 {
+		rate -= partnerCut
+	}
+	if rate < 0 {
+		rate = 0
+	}
+	// The rates are per BRE population unit, so the count goes back into that
+	// unit before they are applied. See TariffTradeGoldPerHead.
+	return int64(min(e.People, other.People)) / PopBREUnitScale * int64(rate)
 }
 
 // A Technology Agreement lets a partner's research help your own (#11). BRE adds
 // an unmultiplied research contribution per partner, bounded by whichever side
 // holds less Technology — so a pact with a strong partner helps, but does not
 // substitute for holding tech yourself. Applied in advanceTech.
+
+// A Full Defense Alliance is LOCAL ONLY. BRE's manual says so of the treaty
+// itself — "effective only in Local Games" — and the binary matches: the
+// relation row belongs to one planet's empire records and never rides an
+// inter-BBS packet. So the three helpers below feed the local battle
+// (combat.go's Attack) and the Alliance Strength screen, and nothing in the
+// interplanetary path may call them: resolveRemoteAttack meets an arriving
+// strike with the target's own Defense() alone. Pinned by
+// TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes.
 
 // AllyContribution is the detachment a Full Defense Alliance partner sends to aid
 // an ally under attack — BRE-verified as 30% of the ally's troopers, tanks, and
@@ -358,16 +398,23 @@ func (w *World) BreakTreaty(a, b *Empire, ttype string) {
 }
 
 // DeclareWar is BRE's Declaration Of War: the formal way to end an agreement.
-// Its manual is explicit that this breaks a pact "without causing internal
-// troubles in your realm" — so unlike breaching a treaty by attacking
-// (breachTreaty), it costs no popular support. The pair is left at Enemy and the
-// other realm is notified by mail.
+// Tearing up a pact in public costs a quarter of both popular support and
+// military morale — the original charges this even though its manual promises it
+// will not (see DeclareWarKeepNumerator). Only ending a real pact costs: BRE
+// offers the option at all only when a treaty stands, so declaring on a realm
+// you have no agreement with is free. The pair is left at Enemy and the other
+// realm is notified by mail.
 //
-// SIMPLIFICATION, flagged rather than hidden: the original says "the treaty is
-// not officially broken until the other realm is notified", implying the old
-// pact still stands until the message lands. IB breaks it at once and mails the
-// notice in the same step; the delayed-break window is not modelled.
+// The break is IMMEDIATE, and so is the original's, despite the manual's "the
+// treaty is not officially broken until the other realm is notified": BRE clears
+// both empires' relation rows in the same routine that prompts, with nothing
+// waiting on the message being read. There is no delayed-break window to model.
 func (w *World) DeclareWar(a, b *Empire) {
+	if rel := w.Relation(a, b); rel != "" && rel != RelationEnemy {
+		a.Support = a.Support / DeclareWarKeepDenominator * DeclareWarKeepNumerator
+		a.Morale = a.Morale / DeclareWarKeepDenominator * DeclareWarKeepNumerator
+		a.addEvent(fmt.Sprintf("Tearing up the %s with %s set off revolts at home; support and morale fell sharply.", rel, b.Name))
+	}
 	w.setRelation(a.Name, b.Name, RelationEnemy)
 	w.SendMail(a, b, Message{
 		To:   w.EmpireLetter(b),
@@ -376,10 +423,10 @@ func (w *World) DeclareWar(a, b *Empire) {
 }
 
 // breachTreaty ends a pact the dishonourable way — by attacking a realm you had
-// an agreement with. BRE's manual describes Declaration Of War as the route that
-// avoids "internal troubles in your realm", so the route that skips it must
-// cause them: the breaker loses popular support. A pair already at Enemy, or
-// with no relation, is not a breach and costs nothing.
+// an agreement with: the breaker loses popular support. This penalty is IB's
+// own; no attack path in the original reads the relation, so BRE charges nothing
+// for it (see TreatyBreachSupportPenalty). A pair already at Enemy, or with no
+// relation, is not a breach and costs nothing.
 func (w *World) breachTreaty(a, b *Empire) {
 	rel := w.Relation(a, b)
 	if rel == "" || rel == RelationEnemy {

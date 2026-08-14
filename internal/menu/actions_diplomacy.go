@@ -317,11 +317,9 @@ func proposeTreatyTo(w *ctx, ename, ttype, message string) error {
 
 // declareWar is BRE's Declaration Of War: mark the realms to declare on — the
 // same multi-select list every Diplomacy action uses — and, on confirmation,
-// break every treaty currently held with each in one action. Per
-// docs/mechanics-reference.md this is meant to skip the internal unrest a
-// normal treaty break causes — but IB does not yet model unrest on treaty
-// breaks at all, so there is no behavioral difference from breaking each
-// treaty individually today; this is a placeholder for when that lands.
+// end the agreement held with each. It is not the cheap way out: the original
+// takes a quarter of both popular support and military morale for it, once,
+// so the confirmation says as much (game.DeclareWar).
 func declareWar(s session.Session, w *ctx) Result {
 	picked := pickRecipients(s, w, diplomacyPickOpts)
 	if len(picked) == 0 {
@@ -333,7 +331,7 @@ func declareWar(s session.Session, w *ctx) Result {
 			names = append(names, e.Name)
 		}
 	})
-	if !AskYesNo(s, "Declare war? This breaks all treaties with them.", false) {
+	if !AskYesNo(s, "Declare war? Breaking an agreement costs a quarter of your support and morale.", false) {
 		return Stay
 	}
 	for _, name := range names {
@@ -346,9 +344,9 @@ func declareWar(s session.Session, w *ctx) Result {
 				err = errTargetGone
 				return
 			}
-			// One relation per pair (#88), so this ends whatever stood and leaves the
-			// two realms hostile. DeclareWar is the route that costs no popular
-			// support — breaking a pact by attacking instead does (breachTreaty).
+			// One relation per pair (#88), so this ends whatever stood and leaves
+			// the two realms hostile. Ending a real pact this way costs support and
+			// morale; declaring on a realm you held no agreement with is free.
 			broke = w.World.TreatiesBetween(p, target)
 			w.World.DeclareWar(p, target)
 		})

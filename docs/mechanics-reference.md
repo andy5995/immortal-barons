@@ -2316,8 +2316,28 @@ and each carries a gameplay effect (#11 wired the last two):
   rate (`bleedAllies`). The Alliance Strength screen (`allianceStrength`) shows
   each ally's sent troopers/tanks/agents. See the `bre-binary-verified-math`
   memory.
-- **Tariff Trade Agreement** / **Free Trade Agreement** — per-turn trade income
-  scaled by population; Free earns more than Tariff (`tradeIncome`).
+  **The "only in Local Games" note is a rule, not a caveat, and IB honours it**:
+  the relation lives in one planet's empire records and never rides a packet, so
+  an arriving interplanetary strike meets the target's own `Defense()` and
+  nothing more — `resolveRemoteAttack` does not consult `allyDefenseBoost`, and
+  `TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes` fails if it
+  ever starts to.
+- **Tariff Trade Agreement** / **Free Trade Agreement** — per-turn trade income.
+  BINARY-VERIFIED (BRE.OVR 0x03416b Tariff, 0x0341f0 Free Trade, both in
+  `process_economic_production`): each partner pays
+  `min(myPopulation, partnerPopulation) x rate`, with the rate assembled inline
+  from both realms' New Realm Protection flags —
+  `6 - 3*protectedSelf - 2*protectedPartner` for a Tariff,
+  `11 - 5*protectedSelf - 5*protectedPartner` for Free Trade. Paying on the
+  SMALLER population is what stops a pact with a giant from being free money, and
+  the protection cuts stop a sheltered newcomer farming one.
+  `TariffTradeGoldPerHead` / `FreeTradeGoldPerHead` and their cuts in
+  `balance.go`, applied by `tradeIncome`. The rates are **gold per head of IB's
+  own `People` count** — BRE counts population in millions and IB counts people,
+  and IB applies BRE's population-side figures to its own unit unchanged, as it
+  already does for the carrying-capacity weights. (IB previously paid
+  `People/40` and `People/20` off the holder's OWN population, roughly a
+  twelfth of the original and rounding to nothing at starting scale.)
 - **Intelligence Alliance** / **Terrorist Prevention** — lend half an ally's
   agents to your covert offense / defense (`covert.go`).
 - **Technology Agreement** — a tech-sharing pact (BRE: "gain some of the
@@ -2329,12 +2349,40 @@ and each carries a gameplay effect (#11 wired the last two):
 - **Protective Trade** — guards the two realms' trade (BRE: "preventing bombing
   of trade deals"): a partner cannot bomb the other's trade routes or trading
   market (`BombTradeRoutes` / `BombTradingMarket` refuse the op, no agent lost).
-  BRE also makes trade deals "cheaper to send and maintain" — deferred until IB's
-  trade deals carry costs (#17 Phase 2).
+  It also makes trade deals **cheaper to send**: the per-day transit rate is
+  divided by `ProtectiveTradeCostDivisor` (3) before the span is chosen, so a
+  guarded deal costs 33,333 a day instead of 100,000
+  (`TradeDealGoldPerDayBetween`). BINARY-VERIFIED — BRE.OVR 0x0268bc compares the
+  recipient's relation against 2 (Protective Trade) and divides the per-day cost
+  by three; the manual's "and maintain" has no separate charge behind it, because
+  the one up-front `days x rate` payment is the whole cost.
 
-Declaration of War breaks treaties without causing internal unrest. The two
-newly-wired treaties' magnitudes are IB tunables — BRE's manual gives the intent,
-not the numbers.
+**Declaration Of War** is the menu's formal way to end an agreement, and it is
+expensive. BINARY-VERIFIED (BRE.OVR 0x01a838, `break_diplomatic_treaty`): once
+confirmed, popular support (record `+0x92`) and military morale (`+0x8e`) are each
+divided by four and multiplied by three — a quarter off both — and only then are
+the relation rows on *both* empires cleared. The screen's own message speaks of
+revolts and of morale dropping severely. IB matches (`DeclareWarKeepNumerator` /
+`DeclareWarKeepDenominator`, `DeclareWar`), charging only when a real pact stood,
+as BRE does: the option is offered at all only when the relation is a treaty.
+
+Two manual statements about it are **wrong about the shipped game**, and are
+recorded here so they are not "fixed" back in:
+
+- "without causing internal troubles in your realm" — the code charges the two
+  quarters above. A disassembly outranks the docs, so IB follows the code.
+- "The treaty is not officially broken until the other realm is notified" — BRE
+  clears both rows in the same routine that prompts, with nothing waiting on the
+  message. There is no delayed-break window, and IB models none.
+
+Attacking a partner outright (`breachTreaty`, `TreatyBreachSupportPenalty`) is
+**IB's own addition**: no attack path in the original reads the relation, so BRE
+charges nothing for the dishonourable route. IB keeps a small support penalty
+there because a pact you can walk out of for free is not a pact — which does
+leave IB's two routes priced the opposite way round from BRE's.
+
+The two newly-wired treaties' magnitudes are IB tunables — BRE's manual gives the
+intent, not the numbers.
 
 ## Trading
 

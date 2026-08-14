@@ -264,18 +264,42 @@ func TestEnsureTreatiesMigratesLegacyAlliances(t *testing.T) {
 	}
 }
 
+// Trade income pays on the SMALLER of the two populations at a fixed rate, and
+// New Realm Protection cuts that rate. Golden literals from the binary — 11 a
+// head for Free Trade, 6 for a Tariff, less 5/5 and 3/2 respectively for a
+// protected self / partner.
+//
+// The rates are per BRE population unit, so the counts below are chosen to be
+// clean multiples of PopBREUnitScale and every expectation is written out as
+// "BRE-unit population x rate". Asserting the products of the raw People count
+// instead is how this pact came to pay twenty times its price.
 func TestTradeTreatyAddsIncome(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
-	a.People = 4000
+	a.People, b.People = 4000, 3000 // 200 and 150 in BRE's unit
+	a.Protection, b.Protection = 0, 0
 	if got := w.tradeIncome(a); got != 0 {
 		t.Fatalf("no treaties -> no trade income, got %d", got)
 	}
-	w.ProposeTreaty(a, b, "Free Trade Agreement")
-	w.AcceptTreaty(b, a.Name, "Free Trade Agreement")
-	if got := w.tradeIncome(a); got != 4000/20 {
-		t.Errorf("free trade should add People/20 = %d, got %d", 4000/20, got)
+
+	w.setRelation(a.Name, b.Name, freeTradeAgreement)
+	if got := w.tradeIncome(a); got != 150*11 {
+		t.Errorf("free trade on the smaller population: got %d, want 150 x 11 = %d", got, 150*11)
+	}
+	b.Protection = 5
+	if got := w.tradeIncome(a); got != 150*6 {
+		t.Errorf("a protected partner cuts the rate to 6: got %d, want %d", got, 150*6)
+	}
+
+	b.Protection = 0
+	w.setRelation(a.Name, b.Name, tariffTradeAgreement)
+	if got := w.tradeIncome(a); got != 150*6 {
+		t.Errorf("tariff trade: got %d, want 150 x 6 = %d", got, 150*6)
+	}
+	a.Protection = 5
+	if got := w.tradeIncome(a); got != 150*3 {
+		t.Errorf("protection of your own cuts a tariff to 3: got %d, want %d", got, 150*3)
 	}
 }
 
@@ -409,5 +433,71 @@ func TestTreatyPartnersCountsEveryTreatyType(t *testing.T) {
 		if e == d {
 			t.Errorf("TreatyPartners included the enemy %q", e.Name)
 		}
+	}
+}
+
+// A Full Defense Alliance is a LOCAL pact. BRE's manual says so outright of the
+// treaty ("effective only in Local Games"), and the binary agrees: the relation
+// row is read for the current player's own planet and never travels in a packet.
+// So an interplanetary strike meets the target's own defense and nothing else,
+// and the ally bleeds nothing for a battle it was not in.
+func TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	victim := w.AddHuman("bob", "Rome")
+	ally := w.AddHuman("carol", "Carthage")
+	victim.Protection, ally.Protection = 0, 0
+	victim.Troopers, victim.Turrets, victim.Tanks = 100, 10, 5
+	ally.Troopers, ally.Tanks = 1_000_000, 100_000
+	w.setRelation(victim.Name, ally.Name, fullDefenseAlliance)
+	if len(w.AllyDefenders(victim)) != 1 {
+		t.Fatal("the alliance must stand, or this proves nothing")
+	}
+
+	// One point over the victim's OWN defense. If the ally's detachment were
+	// counted the strike would be repelled instead.
+	res := w.resolveRemoteAttack(RemoteAttack{
+		ID: 1, FromBoard: "far", TargetEmpire: "Rome", Kind: NormalAttack,
+		Offense:      victim.Defense() + 1,
+		Contributors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 1000}}},
+	})
+	if !res.Won {
+		t.Error("a Full Defense Alliance reinforced an interplanetary defense; BRE keeps it to local games")
+	}
+	if ally.Troopers != 1_000_000 || ally.Tanks != 100_000 {
+		t.Errorf("the ally bled for a battle it is not in: %d troopers / %d tanks", ally.Troopers, ally.Tanks)
+	}
+}
+
+// Declaring war is the costly route, not the cheap one: BRE takes a quarter off
+// both popular support and military morale (v/4*3, truncating on the divide).
+// Golden literals from the binary — 99 keeps 72, not 74. Declaring on a realm
+// you hold no agreement with costs nothing, because BRE offers the option only
+// against a standing treaty.
+func TestDeclareWarCostsSupportAndMorale(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	c := w.AddHuman("c", "Gamma")
+	a.Support, a.Morale = 99, 100
+
+	w.DeclareWar(a, c) // no pact stood
+	if a.Support != 99 || a.Morale != 100 {
+		t.Errorf("declaring on a realm you had no pact with should be free: %d/%d", a.Support, a.Morale)
+	}
+
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+	w.DeclareWar(a, b)
+	if a.Support != 72 {
+		t.Errorf("support after declaring war = %d, want 72", a.Support)
+	}
+	if a.Morale != 75 {
+		t.Errorf("morale after declaring war = %d, want 75", a.Morale)
+	}
+	if w.AreAllied(a, b) {
+		t.Error("the alliance should end the moment war is declared, as BRE ends it")
+	}
+	if w.Relation(a, b) != RelationEnemy {
+		t.Errorf("relation = %q, want %q", w.Relation(a, b), RelationEnemy)
 	}
 }

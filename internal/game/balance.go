@@ -313,11 +313,59 @@ const (
 const ProclamationChancePct = 35
 
 // TreatyBreachSupportPenalty is the popular support a baron loses for ending an
-// agreement by attacking a partner instead of declaring war first. BRE's manual
-// says Declaration Of War breaks a pact "without causing internal troubles in
-// your realm", so the route that skips it must cause them — the original does
-// not publish the size, and this is IB's own figure. Tunable.
+// agreement by attacking a partner instead of declaring war first. The original
+// costs nothing for this route — no attack path reads the relation at all — so
+// the penalty is IB's own, kept because a pact you can walk out of for free is
+// not a pact. Deliberately far cheaper than declaring war (below), which is the
+// wrong way round against BRE and is the price of having the mechanic. Tunable.
 const TreatyBreachSupportPenalty = 10
+
+// Declaring war costs a quarter of BOTH popular support and military morale.
+// BINARY-VERIFIED (BRE.OVR 0x01a838, break_diplomatic_treaty): on the
+// confirmation, popular support at record +0x92 and military morale at +0x8e are
+// each divided by four and multiplied by three, in that order, before either
+// side's relation row is cleared. The truncation is on the divide, so 99 keeps
+// 72 rather than 74 — hence a numerator and denominator here instead of a
+// percentage.
+//
+// This CONTRADICTS the manual, which says the declaration breaks a pact
+// "without causing internal troubles in your realm". The binary's own message on
+// the same screen speaks of revolts and morale dropping severely, so the manual
+// is describing an intention the shipped game does not honour, and the code
+// wins (a disassembly outranks the docs for mechanics).
+const (
+	DeclareWarKeepNumerator   = 3
+	DeclareWarKeepDenominator = 4
+)
+
+// Trade-treaty income, per turn, per partner. BINARY-VERIFIED inside
+// process_economic_production: the Tariff branch at BRE.OVR 0x03416b and the
+// Free Trade branch at 0x0341f0 each take
+//
+//	min(myPopulation, partnerPopulation) x rate
+//
+// and add it to the turn's gold. The rate is assembled inline from the two
+// realms' New Realm Protection flags — 6 - 3*protected(self) - 2*protected(partner)
+// for a Tariff, 11 - 5*protected(self) - 5*protected(partner) for Free Trade —
+// so a sheltered newcomer cannot open a trade pact and farm it, and the pact is
+// worth less to you while YOU are the sheltered one.
+//
+// UNITS: these are gold per BRE population unit, i.e. per MILLION (record
+// +0x62), so tradePactIncome converts IB's count down through PopBREUnitScale
+// before applying them — the same way peopleFood and SupportBoostCost do. At
+// starting scale that is 600 gold a turn from an equal-sized tariff partner
+// against a 5,100-gold tax take, which is the "extra income... promising for
+// those empires with large numbers of people" the manual describes. Applying
+// them to IB's People count directly pays twenty times that.
+const (
+	TariffTradeGoldPerHead = 6  // binary
+	FreeTradeGoldPerHead   = 11 // binary
+
+	TariffTradeProtectedSelfCut    = 3 // binary
+	TariffTradeProtectedPartnerCut = 2 // binary
+	FreeTradeProtectedSelfCut      = 5 // binary
+	FreeTradeProtectedPartnerCut   = 5 // binary
+)
 
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income
 // as an inline "6 − f(tax)" × Population shape that was only partially
@@ -1260,13 +1308,25 @@ const (
 // Trade-deal sending (BRE-verified live, 2026-07-21): sending a trade deal
 // consumes one carrier to transport the goods and costs TradeDealGoldPerDay per
 // day for a chosen span of TradeDealMinDays..TradeDealMaxDays days; the offered
-// goods are escrowed and arrive on the recipient's next turn. (BRE adds a small
-// deal-size component on top of the 100,000/day base that IB does not model.)
+// goods are escrowed and arrive on the recipient's next turn. (BRE adds a
+// cargo-weighted component on top of the 100,000/day base that IB does not
+// model — BRE.OVR 0x0513e7 sums the nine goods against fixed weights, divides by
+// 5, and adds the base at 0x05154e.)
 const (
 	TradeDealCarriers   = 1       // carriers consumed to send one deal
-	TradeDealGoldPerDay = 100_000 // gold cost per day of transit
+	TradeDealGoldPerDay = 100_000 // binary: the flat part of the per-day transit cost
 	TradeDealMinDays    = 2       // shortest a deal may be sent for
 	TradeDealMaxDays    = 5       // longest a deal may be sent for
+
+	// ProtectiveTradeCostDivisor is what a Protective Trade agreement takes off
+	// the transit cost — the manual's "making trade deals cheaper to send and
+	// maintain". BINARY-VERIFIED (BRE.OVR 0x0268bc, create_trade_offer): the
+	// recipient's relation is compared against 2 (Protective Trade) and, when it
+	// matches, the PER-DAY cost is divided by three before the span is chosen and
+	// before days x cost is deducted. There is no separate upkeep charge in the
+	// binary — the one up-front payment is the whole cost, so "maintain" is
+	// covered by the same discount.
+	ProtectiveTradeCostDivisor = 3
 )
 
 // The Clingy Annihilator, IB's rename of BRE's Gooie Kablooie. It is not a purchase

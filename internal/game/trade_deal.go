@@ -95,16 +95,39 @@ type TradeDeal struct {
 	Demand TradeBasket // goods the sender wants back from the recipient
 }
 
-// TradeDealCost is the gold cost to send a deal for the given number of days,
-// clamped to the allowed span (BRE: TradeDealGoldPerDay per day, 2-5 days).
-func TradeDealCost(days int) int {
+// clampTradeDealDays holds a requested span to the allowed 2-5 days.
+func clampTradeDealDays(days int) int {
 	if days < TradeDealMinDays {
-		days = TradeDealMinDays
+		return TradeDealMinDays
 	}
 	if days > TradeDealMaxDays {
-		days = TradeDealMaxDays
+		return TradeDealMaxDays
 	}
-	return days * TradeDealGoldPerDay
+	return days
+}
+
+// TradeDealCost is the undiscounted gold cost to send a deal for the given
+// number of days, clamped to the allowed span (BRE: TradeDealGoldPerDay per day,
+// 2-5 days). Use TradeDealCostBetween for the price a specific pair pays.
+func TradeDealCost(days int) int64 {
+	return int64(clampTradeDealDays(days)) * TradeDealGoldPerDay
+}
+
+// TradeDealGoldPerDayBetween is the per-day transit cost `from` pays to send a
+// deal to `to`. A standing Protective Trade agreement puts guards on the route
+// and cuts the rate to a third (ProtectiveTradeCostDivisor).
+func (w *World) TradeDealGoldPerDayBetween(from, to *Empire) int64 {
+	if w.HasTreaty(from, to, protectiveTrade) {
+		return TradeDealGoldPerDay / ProtectiveTradeCostDivisor
+	}
+	return TradeDealGoldPerDay
+}
+
+// TradeDealCostBetween is what `from` actually pays to send `to` a deal over the
+// given span. BRE discounts the PER-DAY rate and then multiplies by the days, so
+// the truncation lands on the rate, not on the total.
+func (w *World) TradeDealCostBetween(from, to *Empire, days int) int64 {
+	return int64(clampTradeDealDays(days)) * w.TradeDealGoldPerDayBetween(from, to)
 }
 
 // SendTradeDeal sends a trade deal from `from` to `to` over `days` days: it
@@ -116,7 +139,7 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	if send.IsEmpty() && demand.IsEmpty() {
 		return fmt.Errorf("A trade deal must offer or request something.")
 	}
-	cost := int64(TradeDealCost(days))
+	cost := w.TradeDealCostBetween(from, to, days)
 	if !empireHasBasket(from, send) {
 		return ErrCantAfford
 	}
