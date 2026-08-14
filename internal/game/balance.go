@@ -312,13 +312,10 @@ const (
 // funny.
 const ProclamationChancePct = 35
 
-// TreatyBreachSupportPenalty is the popular support a baron loses for ending an
-// agreement by attacking a partner instead of declaring war first. The original
-// costs nothing for this route — no attack path reads the relation at all — so
-// the penalty is IB's own, kept because a pact you can walk out of for free is
-// not a pact. Deliberately far cheaper than declaring war (below), which is the
-// wrong way round against BRE and is the price of having the mechanic. Tunable.
-const TreatyBreachSupportPenalty = 10
+// Breaking a pact by ATTACKING a partner costs nothing — see breachTreaty. IB
+// used to charge 10 popular support here; the original charges nothing, because
+// no attack path reads the relation at all. Declaring war is the route that
+// costs (a quarter of both support and morale, DeclareWar).
 
 // Declaring war costs a quarter of BOTH popular support and military morale.
 // BINARY-VERIFIED (BRE.OVR 0x01a838, break_diplomatic_treaty): on the

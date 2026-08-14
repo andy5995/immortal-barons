@@ -423,18 +423,23 @@ func (w *World) DeclareWar(a, b *Empire) {
 }
 
 // breachTreaty ends a pact the dishonourable way — by attacking a realm you had
-// an agreement with: the breaker loses popular support. This penalty is IB's
-// own; no attack path in the original reads the relation, so BRE charges nothing
-// for it (see TreatyBreachSupportPenalty). A pair already at Enemy, or with no
-// relation, is not a breach and costs nothing.
+// an agreement with. It costs the breaker NOTHING, which is the original's
+// behaviour: no attack path in BRE reads the relation at all, so there is
+// nowhere for a penalty to be charged. IB used to take popular support here on
+// the reasoning that a pact you can walk out of for free is not a pact; that
+// priced the two exits the wrong way round, since BRE charges a quarter of both
+// support and morale for the honest route (DeclareWar) and nothing for this one.
+// The original's asymmetry is the point: declaring war is a public act with a
+// public cost, and a betrayal is punished by the other players, not the crown.
+//
+// A pair already at Enemy, or with no relation, is not a breach at all.
 func (w *World) breachTreaty(a, b *Empire) {
 	rel := w.Relation(a, b)
 	if rel == "" || rel == RelationEnemy {
 		return
 	}
 	w.setRelation(a.Name, b.Name, RelationEnemy)
-	a.adjustSupport(-TreatyBreachSupportPenalty)
-	a.addEvent(fmt.Sprintf("Breaking the %s with %s without declaring war cost you popular support.", rel, b.Name))
+	a.addEvent(fmt.Sprintf("You broke the %s with %s by attacking without declaring war.", rel, b.Name))
 	b.addEvent(fmt.Sprintf("%s attacked you, breaking the %s between your realms.", a.Name, rel))
 }
 

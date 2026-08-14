@@ -2308,13 +2308,12 @@ another empire without causing internal troubles in your realm. The treaty is no
 officially broken until the other realm is notified."* Two consequences, both
 implemented:
 
-- **Declaring war costs nothing at home** and leaves the pair at **Enemy**
-  (`World.DeclareWar`), mailing the other realm.
-- **Breaking a pact any other way does cost you.** Attacking a realm you hold an
-  agreement with breaches it: the pair drops to Enemy and the breaker loses
-  `TreatyBreachSupportPenalty` popular support (`World.breachTreaty`, called from
-  `Attack`). The original does not publish the size of that penalty, so the
-  figure is IB's own.
+- **Declaring war costs a quarter of both popular support and military morale**
+  and leaves the pair at **Enemy** (`World.DeclareWar`), mailing the other realm.
+- **Attacking a partner outright costs nothing.** It still breaches the pact —
+  the pair drops to Enemy (`World.breachTreaty`, called from `Attack`) — but the
+  breaker pays no price at home. The crown charges for the declaration, not for
+  the betrayal.
 
 **Every Diplomacy action that addresses a realm takes a LIST.** The Diplomacy
 menu calls the same toggling picker Send Message uses — the selection routine at
@@ -2454,11 +2453,13 @@ recorded here so they are not "fixed" back in:
   clears both rows in the same routine that prompts, with nothing waiting on the
   message. There is no delayed-break window, and IB models none.
 
-Attacking a partner outright (`breachTreaty`, `TreatyBreachSupportPenalty`) is
-**IB's own addition**: no attack path in the original reads the relation, so BRE
-charges nothing for the dishonourable route. IB keeps a small support penalty
-there because a pact you can walk out of for free is not a pact — which does
-leave IB's two routes priced the opposite way round from BRE's.
+Attacking a partner outright (`breachTreaty`) costs the breaker nothing, which
+is the original's behaviour: no attack path reads the relation, so there is
+nowhere for a penalty to be charged. IB charged 10 popular support here until
+the declaration routine was read, on the reasoning that a pact you can walk out
+of for free is not a pact. That priced the two exits the wrong way round. The
+original's asymmetry is deliberate — a declaration is a public act with a public
+cost, and a betrayal is punished by the other players rather than by the crown.
 
 The two newly-wired treaties' magnitudes are IB tunables — BRE's manual gives the
 intent, not the numbers.

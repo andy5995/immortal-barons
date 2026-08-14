@@ -220,11 +220,12 @@ func TestOneRelationPerPair(t *testing.T) {
 	}
 }
 
-// Breaking a pact by attacking instead of declaring war costs popular support.
-// IB's own rule — the original charges nothing for this route (see
-// TreatyBreachSupportPenalty); what it charges for is the declaration
-// (TestDeclareWarCostsSupportAndMorale).
-func TestAttackingAPartnerBreachesAndCostsSupport(t *testing.T) {
+// Breaking a pact by attacking a partner ends the relation and costs the
+// breaker NOTHING. That is the original's shape and it is deliberately the
+// opposite way round from intuition: the crown charges for the DECLARATION
+// (TestDeclareWarCostsSupportAndMorale), not for the betrayal, which the other
+// players are left to punish. IB charged 10 support here until it was read.
+func TestAttackingAPartnerBreachesAndCostsNothing(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
@@ -237,8 +238,8 @@ func TestAttackingAPartnerBreachesAndCostsSupport(t *testing.T) {
 	if got := w.Relation(a, b); got != RelationEnemy {
 		t.Errorf("attacking a partner should leave the pair at %q, got %q", RelationEnemy, got)
 	}
-	if a.Support != 90-TreatyBreachSupportPenalty {
-		t.Errorf("breaching should cost %d support: 90 -> %d", TreatyBreachSupportPenalty, a.Support)
+	if a.Support != 90 {
+		t.Errorf("breaching a pact should cost no support: 90 -> %d", a.Support)
 	}
 	// Attacking a realm you had no pact with is not a breach.
 	c := w.AddHuman("c", "Gamma")
