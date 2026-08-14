@@ -351,3 +351,18 @@ against a trooper's `0.5` — so 4 is what a tank is worth at HQ **50%**, and th
 real range is 3 to 5. When the prose gives a flat number for something the same
 prose says "scales", suspect a mid-curve sample and check the disassembly before
 hard-coding it. This is the variant-string trap in a different costume.
+
+### A displacement is only a field name once you subtract the index
+
+`[es:di+0x00ae]` reached through `les di,[0x28d8]` is the empire's Mountain
+count. The SAME displacement, when the two instructions before it are
+`shl ax,1; add di,ax`, is the diplomatic relation with empire `ax/2` — because
+BRE indexes that array by the raw ASCII letter (`'A'`..`'Y'`) and lets the
+compiler fold `base - 2*'A'` into the displacement. A scan that greps for a
+displacement and reads the hits as one field will therefore merge two unrelated
+mechanics, and both readings look plausible.
+
+The check costs one line: dump ~12 bytes BEFORE each hit as well as after, and
+sort the sites by whether an index was added. Here that split eight matches into
+three int32 region-count comparisons and five relation tests, and only the second
+group compared against the treaty enum's small values.

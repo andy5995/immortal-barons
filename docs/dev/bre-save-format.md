@@ -76,6 +76,27 @@ empire record (les di,[0x28d8])
   +0x129 .. +0x12e   six bytes: Set-Industries allocation percentages, in
                      menu order (Troopers, Jets, Turrets, Bombers, Tanks,
                      Carriers)
+  +0x130 .. +0x161   the DIPLOMATIC RELATION row: 25 words, one per empire
+                     letter A..Y. Values are -1 Enemy, 0 None, and 1..7 for the
+                     seven pacts in Diplomacy-menu order (1 Tariff Trade
+                     Agreement, 2 Protective Trade, 3 Free Trade Agreement,
+                     4 Terrorist Prevention, 5 Intelligence Alliance,
+                     6 Technology Agreement, 7 Full Defense Alliance); 8 and 9
+                     are menu items (Declaration Of War, View Treaties) that
+                     share the same name table and are never stored here.
+
+                     BRE indexes it by the RAW ASCII letter, so every access
+                     reads `[es:di + 2*letter + 0xae]` and the displacement
+                     collides with the Mountain count above — see the
+                     bre-gather skill's disassembly reference. Both rows are
+                     written: forming a pact writes the current player's, and
+                     break_diplomatic_treaty clears the partner's through the
+                     all-empires array as well.
+
+                     Only ELEVEN sites in the whole overlay touch it, all via
+                     the current-player pointer, which is itself the finding that
+                     a Full Defense Alliance cannot reach across planets: no
+                     interplanetary code path can read a relation row at all.
   +0x281 int32  lifetime turns played. Drives the HeadQuarters price ratchet and,
                 against config +0x38, whether the realm is still protected.
   +0x285 byte   turns remaining today. Reset to config +0x36 at rollover; zero is
