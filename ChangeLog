@@ -1,4 +1,7 @@
 (in-progress:)
+  * A realm removed from the game loses its Trading Market listings and any sale
+    gold it had not been paid, so the next realm built under the same handle no
+    longer inherits them
   * A group attack's departure is set in hours, from 12 to 120, and the force
     leaves at that hour rather than on a day boundary
   * A baron who sends an interplanetary strike now gets a private report when it
