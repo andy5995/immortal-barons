@@ -220,6 +220,37 @@ func (w *World) bombMarketPosition(d *Empire, pct int) (goods int, proceeds int6
 	return goods, proceeds
 }
 
+// forgetMarketPosition destroys what the market still holds for a departed
+// baron: the goods escrowed in their listings and the sale gold not yet paid
+// out. Called from dropEmpires for every removed realm — see the reasoning there
+// for why the owner handle makes this leak harder than the treaty rows.
+//
+// Both are destroyed rather than paid to anyone or left standing as unowned
+// stock, because deletion in BRE is a full wipe: it clears the departing
+// player's trade offers along with their messages and reports, and leaves them
+// nothing. Leaving the listings would be worse than untidy — the successor under
+// that handle can delist them straight into its own inventory, and any sale off
+// them accrues to the handle and settles into its pocket.
+//
+// An empty handle is skipped: every AI baron carries one, so their market state
+// is indistinguishable and wiping on it would take living barons' listings with
+// it. A dead baron's listing therefore outlives it, which is a symptom of AI
+// realms sharing one market key rather than of this removal.
+func (w *World) forgetMarketPosition(owner string) {
+	if owner == "" {
+		return
+	}
+	kept := w.Market[:0]
+	for _, l := range w.Market {
+		if l.Owner == owner {
+			continue
+		}
+		kept = append(kept, l)
+	}
+	w.Market = kept
+	delete(w.MarketProceeds, owner)
+}
+
 // settleMarketProceeds deposits each seller's accrued market proceeds (minus the
 // market's commission) and clears the pool. Called once per day from
 // DailyMaintenance — BRE settles at day rollover ("Depositing trading market

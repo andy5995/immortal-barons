@@ -2159,6 +2159,16 @@ pending `TreatyOffers` are keyed by realm NAME, and a freed name can be claimed
 by the next caller to onboard, so a leftover row would hand a reborn realm its
 predecessor's alliances and Enemy standing.
 
+**It clears the realm's Trading Market position too, and that one needs no name
+reuse.** IB's listings and unpaid sale proceeds are keyed by the OWNER HANDLE,
+which the same caller brings back with them, so a crushed realm's escrowed goods
+and unsettled gold reached the fresh realm they were onboarded on every single
+time. `forgetMarketPosition`, called from `dropEmpires` beside
+`forgetRelations`, destroys both — the goods are gone with the realm that owned
+them and the gold is paid to nobody, matching the full wipe BRE's delete path
+performs on the slot's trade offers. AI barons are exempt only because they all
+share the empty handle, so their market state cannot be told apart.
+
 ## Interplanetary operations (IB implementation)
 
 InterBBS ops run over file-drop packets. IB matches BRE's player-facing model

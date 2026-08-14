@@ -1049,30 +1049,39 @@ func (w *World) With(fn func()) {
 	fn()
 }
 
-// dropEmpires removes every empire `gone` selects and forgets the diplomacy each
-// removed realm was party to. EVERY removal path goes through here, because
+// dropEmpires removes every empire `gone` selects and forgets what the world
+// still holds on its behalf. EVERY removal path goes through here, because two
+// kinds of state outlive the record.
+//
 // w.Treaties rows and pending TreatyOffers are keyed by realm NAME: a name freed
 // by one removal can be claimed by the next caller to onboard, and the new realm
 // would then hold its predecessor's alliances and Enemy standing. The rows stay
 // invisible in the meantime — alliesOf and TreatyPartners skip the non-living —
 // so the leak only surfaces when the name comes back.
 //
-// BRE deletes an empire the same way: its delete path (BRE.OVR 0x0079c1) clears
-// the pair's relation in BOTH directions for every other realm (0x050d74) before
-// zeroing the record.
+// The trading market is keyed by OWNER HANDLE, which is worse: the handle is the
+// caller's, so it needs no name reuse at all. Whatever the dead realm had
+// escrowed on the market, and whatever sale gold it had not been paid, would
+// come across the rebirth to the fresh realm the same caller onboards.
+//
+// BRE deletes an empire the same way, and more completely: its delete path
+// (BRE.OVR 0x0079c1) clears the slot's messages, trade offers and reports by the
+// player id, zeroes the pair's relation in BOTH directions for every other realm
+// (0x050d74), and blanks the whole record before seeding a new realm into it.
 func (w *World) dropEmpires(gone func(*Empire) bool) {
 	kept := w.Empires[:0]
-	var forget []string
+	var forget []*Empire
 	for _, e := range w.Empires {
 		if gone(e) {
-			forget = append(forget, e.Name)
+			forget = append(forget, e)
 			continue
 		}
 		kept = append(kept, e)
 	}
 	w.Empires = kept
-	for _, name := range forget {
-		w.forgetRelations(name)
+	for _, e := range forget {
+		w.forgetRelations(e.Name)
+		w.forgetMarketPosition(e.Owner)
 	}
 }
 
