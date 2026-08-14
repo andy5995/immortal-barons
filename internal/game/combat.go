@@ -448,8 +448,3 @@ func addScore(e *Empire, n int) {
 		e.Score = 0
 	}
 }
-
-// jitter scales v by a random 0.8–1.2 factor.
-func (w *World) jitter(v int) int {
-	return int(float64(v) * (0.8 + w.rng.Float64()*0.4))
-}
