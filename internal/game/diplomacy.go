@@ -221,13 +221,14 @@ func (w *World) allyDefenseBoost(d *Empire) int {
 	return sum
 }
 
-// bleedAllies applies pct% casualties to each Full Defense Alliance partner's
-// committed detachment (its sent 30% of troopers + tanks) after a battle in which
-// d was defended — the reinforcements bleed at the same rate as the defender.
-func (w *World) bleedAllies(d *Empire, pct int) {
+// bleedAllies applies the given casualty fraction to each Full Defense Alliance
+// partner's committed detachment (its sent 30% of troopers + tanks) after a
+// battle in which d was defended — the reinforcements bleed at the same rate as
+// the defender.
+func (w *World) bleedAllies(d *Empire, frac float64) {
 	for _, ally := range w.alliesOf(d, fullDefenseAlliance) {
-		ally.Troopers -= ally.Troopers * AllyDefenseContribPct / 100 * pct / 100
-		ally.Tanks -= ally.Tanks * AllyDefenseContribPct / 100 * pct / 100
+		ally.Troopers -= shareOf(ally.Troopers*AllyDefenseContribPct/100, frac)
+		ally.Tanks -= shareOf(ally.Tanks*AllyDefenseContribPct/100, frac)
 	}
 }
 

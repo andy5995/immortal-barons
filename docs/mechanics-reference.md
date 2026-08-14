@@ -1073,8 +1073,58 @@ remains of your opponent's military" means literally.
 the main one: `allyMorale/2 + 25`, so 25% at broken morale and 75% at full
 (`0xF5D7`).
 
-Not yet read out of the binary: the casualty rates and the region-capture share
-for a regular attack. IB's figures for those are still reconstructed from play.
+**The regular attack's casualties and capture — BINARY-VERIFIED.** Both were
+reconstructed from play until 2026-08-14; they are now read out of the driver
+(`BRE.OVR` `0xEF90`) and the resolver it calls (`0xE81F`).
+
+Two sysop knobs drive it, and each has its own table — neither is the generic
+`Level.Percent` multiplier applied to a Medium baseline, which is how IB had
+modelled them:
+
+| Level | Attack Rewards: share of the defender's regions | Attack Damage: share a side loses before it retreats |
+|---|---|---|
+| None | 0% | 1% |
+| Low | 5% | 10% |
+| Medium | 10% | 20% |
+| High | **25%** | **30%** |
+
+The rewards table is loaded at `0xFFF9`–`0x10062` (default `0.10`, then a switch
+on the config byte at `+0x183`); the damage table at `0xF84F`–`0xF8B8` on the
+byte at `+0x181`, where the constants are what *survives* — `0.99`, `0.90`,
+`0.80`, `0.70` — so the losses are their complements. Note **None still costs 1%**,
+not nothing. `attack.hlp`'s flat "15%" and "20%" describe the interplanetary
+variants, not this table.
+
+Capture is `min(defenderRegions, max(15, round(defenderRegions × share)))` —
+the floor of **15** is pushed at `0x1009f` and the defender's own region count
+into the min at `0x100c3`. Capture depends on nothing else: not on the strength
+ratio, and not on any measure of how developed the land is.
+
+**Casualties are an outcome of the fight, not a rate.** The resolver runs a
+round at a time:
+
+```
+each round, while both sides are above their retreat threshold:
+    defender is hit with probability  attackerStrength / (attackerStrength + defenderStrength),
+                          or failing that on a flat 5% chance
+    attacker is hit the same way, on the defender's share, against the updated strengths
+    a hit multiplies that side by 0.99 and takes 1 more off the top
+loss reported = 1 - remaining/initial, or 100% for a side driven to nothing
+```
+
+So the side that breaks off has lost exactly the retreat share, and the other
+has lost only what the strength ratio cost it: an overwhelming attacker is
+almost never the side being hit and comes home nearly intact, while an evenly
+matched one pays nearly as much as the loser. IB previously handed the winner a
+flat 8% and the loser a flat 20% — about right for an even match, and wrong
+everywhere else. It also rolled a ±20% jitter over each side's strength before
+the fight; that is gone, because the variance belongs inside the battle.
+
+**IB divergence, now confirmed as one:** IB scales the capture by a net-worth
+*density* factor (softer, thinly-held land falls faster). The binary reads the
+defender's region count and the level constant and nothing else, so this is
+IB's own addition rather than an unverified reconstruction of something BRE
+does. It is kept deliberately; see `CaptureDensityBase` in `balance.go`.
 
 **Population / migration — BINARY-VERIFIED.** Read out of BRE's end-of-turn
 routine (`BRE.OVR` `0xD08A`–`0xD3CC`). This supersedes an earlier partial

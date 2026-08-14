@@ -1,4 +1,17 @@
 (in-progress:)
+  * A regular attack is fought out round by round: the side that breaks off
+    loses the share of its forces it will accept, and the winner loses only
+    what the strength ratio cost it, so a rout is cheap and an even fight is not
+  * Attack Rewards and Attack Damage follow the original's own tables — High
+    takes a quarter of the defender's regions and costs a third of the force,
+    and None still costs a little
+  * A battle report leads with what the fight cost both sides and closes with
+    the result
+  * Today's News counts the planet as it stands rather than as it stood at the
+    last maintenance, so a new board no longer reads as empty
+  * "Since your last play" recap entries color the realm name and treaty type
+    bright cyan, matching the original
+  * A message is removed from the inbox once it is replied to, like Delete
   * A nuclear strike ruins land rather than destroying it: the target keeps
     every region and its upkeep but earns nothing from the ruined share
   * Waste is a region type of its own, listed on the region tables; it is

@@ -323,9 +323,9 @@ func TestAllyDefenders30Pct(t *testing.T) {
 
 	// The committed 30% (300 troopers / 150 tanks) bleeds at, say, a 20% rate:
 	// 60 troopers and 30 tanks lost from Beta.
-	w.bleedAllies(a, 20)
+	w.bleedAllies(a, 0.20)
 	if b.Troopers != 940 || b.Tanks != 470 {
-		t.Errorf("bleedAllies(20%%): want Beta 940 troopers / 470 tanks, got %d / %d", b.Troopers, b.Tanks)
+		t.Errorf("bleedAllies(0.20): want Beta 940 troopers / 470 tanks, got %d / %d", b.Troopers, b.Tanks)
 	}
 }
 

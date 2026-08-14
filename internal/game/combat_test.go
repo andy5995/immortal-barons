@@ -70,35 +70,63 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 	}
 }
 
-// Regular-attack losses are asymmetric (BRE live): the winner loses a smaller
-// share of its forces than the loser. Here the attacker overwhelms and wins, so
-// it should bleed less than the defender it beats.
-func TestRegularAttackLossesAreAsymmetric(t *testing.T) {
+// A battle ends the moment one side has lost the share it will accept, so the
+// side that breaks off pays that share — the 20% Medium Attack Damage figure
+// read out of the binary — and only overshoots it by the single blow that
+// carried it past. Asserted against the golden 20 rather than the constant, so
+// a retune has to bring new evidence.
+func TestTheLoserPaysTheRetreatShare(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
-	a := &Empire{Name: "A", Troopers: 100000, Morale: 100, Alive: true}
-	d := &Empire{Name: "D", Troopers: 1000, Morale: 100, Land: 100,
-		Regions: RegionMix{Mountain: 100}, People: 100000, Alive: true}
-	aBefore, dBefore := a.Troopers, d.Troopers
+	for _, ratio := range []struct {
+		name   string
+		ap, dp int
+	}{
+		{"even", 10000, 10000},
+		{"five to one", 50000, 10000},
+		{"overwhelming", 5_000_000, 10000},
+	} {
+		won, aLost, dLost := w.battleAttrition(ratio.ap, ratio.dp, 20)
+		if !won {
+			t.Errorf("%s: the stronger side should win", ratio.name)
+		}
+		if dLost < 0.20 || dLost > 0.22 {
+			t.Errorf("%s: loser lost %.3f, want the 0.20 retreat share plus at most one blow", ratio.name, dLost)
+		}
+		if aLost >= dLost {
+			t.Errorf("%s: winner lost %.3f, loser %.3f — the winner must pay less", ratio.name, aLost, dLost)
+		}
+	}
+}
 
-	w.Attack(a, d, FullForce(a), true)
+// The winner's bill is set by the strength ratio, which is the whole reason the
+// fight is simulated instead of rated: an even match costs the winner nearly as
+// much as the loser, an overwhelming one costs it almost nothing. A fixed
+// winner rate — what IB had — cannot express either end. Averaged over seeds
+// because one battle is one trajectory.
+func TestALopsidedWinIsCheaperThanAnEvenOne(t *testing.T) {
+	mean := func(ap, dp int) float64 {
+		total := 0.0
+		for seed := int64(1); seed <= 20; seed++ {
+			w := NewWorldSeed(DefaultConfig(), seed)
+			_, aLost, _ := w.battleAttrition(ap, dp, 20)
+			total += aLost
+		}
+		return total / 20
+	}
+	even, lopsided := mean(10000, 10000), mean(5_000_000, 10000)
+	if even <= lopsided {
+		t.Errorf("an even fight cost the winner %.4f and a lopsided one %.4f; the ratio must drive it", even, lopsided)
+	}
+	if lopsided > 0.05 {
+		t.Errorf("a 500:1 attacker lost %.4f of its force; a rout should be close to free", lopsided)
+	}
+}
 
-	aLostPct := (aBefore - a.Troopers) * 100 / aBefore
-	dLostPct := (dBefore - d.Troopers) * 100 / dBefore
-	if aLostPct == 0 || dLostPct == 0 {
-		t.Fatalf("both sides should take losses: winner %d%%, loser %d%%", aLostPct, dLostPct)
-	}
-	if aLostPct >= dLostPct {
-		t.Errorf("the winner should lose a smaller share than the loser: winner %d%%, loser %d%%", aLostPct, dLostPct)
-	}
-	// Golden literals: in this overwhelming win the damage factor resolves to
-	// the full committed force, so the losses are exactly the live-observed
-	// 8% / 20% pair. Retuning either constant must fail here and force new
-	// evidence — the ordering check alone would follow a retune silently.
-	if got := aBefore - a.Troopers; got != 8000 {
-		t.Errorf("winner losses: got %d, want 8000 (8%% of 100,000, BRE live)", got)
-	}
-	if got := dBefore - d.Troopers; got != 200 {
-		t.Errorf("loser losses: got %d, want 200 (20%% of 1,000, BRE live)", got)
+// A side driven to nothing is a total loss, not a fractional one.
+func TestAnAnnihilatedSideLosesEverything(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	if _, _, dLost := w.battleAttrition(1_000_000, 0, 20); dLost != 1 {
+		t.Errorf("a defender with no forces lost %.3f, want 1", dLost)
 	}
 }
 
@@ -173,8 +201,10 @@ func TestAttackScoreAttackerWins(t *testing.T) {
 
 	w.Attack(a, d, FullForce(a), true)
 
-	// Attacker wins: aloss = winner% of 100000 troopers; dloss = loser% of 1000 turrets.
-	battle := 100000*RegularAttackWinnerLossPct/100 + 1000*RegularAttackLoserLossPct/100
+	// The award is the combined casualties over CombatScoreDivisor. Casualties
+	// come out of the battle rather than a fixed rate, so read what the fight
+	// actually cost instead of predicting it.
+	battle := (100000 - a.Troopers) + (1000 - d.Turrets)
 	gain := battle / CombatScoreDivisor
 	if a.Score != gain {
 		t.Errorf("attacker Score = %d, want %d", a.Score, gain)
@@ -190,13 +220,14 @@ func TestAttackScoreAttackerWins(t *testing.T) {
 
 func TestAttackScoreDefenderWinsWorthMore(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
-	a := &Empire{Name: "A", Troopers: 10, Morale: 100, Alive: true, Score: 1_000_000}
-	d := &Empire{Name: "D", Turrets: 100000, Morale: 100, Land: 100, People: 1000, Alive: true}
+	// Big enough forces that the score arithmetic does not vanish into integer
+	// truncation, but still a defence the attacker cannot break.
+	a := &Empire{Name: "A", Troopers: 200_000, Morale: 100, Alive: true, Score: 1_000_000}
+	d := &Empire{Name: "D", Turrets: 800_000, Morale: 100, Land: 100, People: 1000, Alive: true}
 
 	w.Attack(a, d, FullForce(a), true)
 
-	// Attacker loses: aloss = loser% of 10 troopers; dloss = winner% of 100000 turrets.
-	battle := 10*RegularAttackLoserLossPct/100 + 100000*RegularAttackWinnerLossPct/100
+	battle := (200_000 - a.Troopers) + (800_000 - d.Turrets)
 	gain := battle / CombatScoreDivisor * DefenseWinBonusPct / 100
 	if d.Score != gain {
 		t.Errorf("defending winner Score = %d, want %d", d.Score, gain)
@@ -247,10 +278,11 @@ func TestAttackUsesOnlyCommittedForce(t *testing.T) {
 		t.Errorf("full offense = %d, want 200", got)
 	}
 
-	// Commit only 50; a side loses at most the loser rate of what fought, so at
-	// most ~10 of the 50 committed troopers are lost and the 150 held back are safe.
+	// Commit only 50. No side loses more than the retreat share of what it
+	// committed — 20% at the default Attack Damage — so at most 10 of the 50 go,
+	// and the 150 held back are safe.
 	w.Attack(a, d, AttackForce{Troopers: 50}, true)
-	if a.Troopers < 200-50*RegularAttackLoserLossPct/100-1 {
+	if a.Troopers < 200-50*20/100 {
 		t.Errorf("held-back troopers were hit: 200 -> %d", a.Troopers)
 	}
 	if a.Troopers < 150 {
@@ -297,11 +329,16 @@ func TestTotalConquestAbsorbsMilitary(t *testing.T) {
 	if a.Carriers != 5 || a.Bombers != 10 {
 		t.Errorf("attacker should absorb the defender's 5 carriers and 10 bombers, got C%d B%d", a.Carriers, a.Bombers)
 	}
-	// a (winner) keeps its committed troopers minus the winner rate, plus the
-	// defender's (loser) surviving troopers.
-	wantTroopers := 1_000_000 - 1_000_000*RegularAttackWinnerLossPct/100 + (500 - 500*RegularAttackLoserLossPct/100)
-	if a.Troopers != wantTroopers {
-		t.Errorf("attacker troopers = %d, want %d (own survivors + absorbed)", a.Troopers, wantTroopers)
+	// The winner keeps its own survivors and absorbs the loser's. An attacker
+	// this far ahead is hardly ever the side taking the hit, so it should come
+	// home with far more than the 800,000 a 20% retreat share would leave, and it
+	// cannot end up with more than everyone started with.
+	if a.Troopers <= 950_000 {
+		t.Errorf("a 2000:1 attacker lost %d of 1,000,000 troopers; a lopsided win should be nearly free",
+			1_000_000-a.Troopers)
+	}
+	if a.Troopers > 1_000_500 {
+		t.Errorf("attacker troopers = %d, more than both sides brought", a.Troopers)
 	}
 }
 

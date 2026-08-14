@@ -43,6 +43,37 @@ func (l Level) Percent() int {
 	}
 }
 
+// AttackCapturePct is the share of a beaten defender's regions the winner
+// takes at this Attack Rewards level, and AttackRetreatPct the share of its own
+// force a side will lose before it breaks off at this Attack Damage level.
+// Both are read out of the binary and neither is Percent() applied to a
+// baseline — see the tables in balance.go for why that matters.
+func (l Level) AttackCapturePct() int {
+	switch l {
+	case None:
+		return AttackCaptureNonePct
+	case Low:
+		return AttackCaptureLowPct
+	case High:
+		return AttackCaptureHighPct
+	default:
+		return AttackCaptureMediumPct
+	}
+}
+
+func (l Level) AttackRetreatPct() int {
+	switch l {
+	case None:
+		return AttackRetreatNonePct
+	case Low:
+		return AttackRetreatLowPct
+	case High:
+		return AttackRetreatHighPct
+	default:
+		return AttackRetreatMediumPct
+	}
+}
+
 // BuyMode controls military purchasing (BRE "Buy Military": Yes/No/Limited).
 type BuyMode int
 

@@ -927,6 +927,49 @@ const (
 	IndividualAttackReturnsPct = 200
 )
 
+// The local Regular Attack. BINARY-VERIFIED against BRE's driver
+// (BRE.OVR 0xEF90) and the resolver it calls (0xE81F).
+//
+// Attack Rewards and Attack Damage are TWO INDEPENDENT TABLES, not the generic
+// Level.Percent multiplier IB used to apply to a Medium baseline. That
+// multiplier (0/50/100/200) happens to land on Low and Medium for both knobs
+// and is wrong at both ends: BRE's High takes two and a half times the Medium
+// capture, costs one and a half times the Medium force, and its None still
+// costs a side a token one percent.
+const (
+	// Share of the defender's regions a winning attack takes, by Attack Rewards.
+	// BRE.OVR 0xFFF9 loads 0.10 as the default, then switches on the config byte
+	// at +0x183 and loads a Real48 per level: 0.00, 0.05, 0.10, 0.25.
+	AttackCaptureNonePct   = 0
+	AttackCaptureLowPct    = 5
+	AttackCaptureMediumPct = 10
+	AttackCaptureHighPct   = 25
+
+	// Share of its own force a side will lose before it breaks off, by Attack
+	// Damage. Same switch shape at BRE.OVR 0xF84F on the byte at +0x181, except
+	// the constants are what SURVIVES — 0.99, 0.90, 0.80, 0.70 — so the losses
+	// are their complements. attack.hlp's flat "15%" describes the interplanetary
+	// variants, not this table.
+	AttackRetreatNonePct   = 1
+	AttackRetreatLowPct    = 10
+	AttackRetreatMediumPct = 20
+	AttackRetreatHighPct   = 30
+)
+
+// Per-round attrition inside a battle (BRE.OVR 0xE8F4-0xEA46). Each round, each
+// side is hit with a probability equal to its OPPONENT's share of the two
+// strengths, or failing that on a flat upset chance; a hit multiplies that side
+// by BattleRoundSurvival and takes one more point off the top. The loop runs
+// until a side reaches its retreat threshold above, and THAT is what makes the
+// winner's casualties an outcome rather than a rate: a lopsided attacker is
+// almost never the one hit, so it walks away having lost very little, while an
+// evenly matched one pays nearly the full retreat share.
+const (
+	BattleRoundSurvival = 0.99 // binary: Real48 0.99, both sides
+	BattleRoundFlatLoss = 1    // binary: the "- 1" after the multiply
+	BattleUpsetPct      = 5    // binary: Real48 0.05, the consolation roll
+)
+
 // --- Upkeep / maintenance (BRE-verified — live capture, Maintenance Costs
 // "Medium") ---
 //

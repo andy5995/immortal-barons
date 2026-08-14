@@ -17,20 +17,11 @@ const (
 	// beyond that are grounded (not "usable" — BRE's Offense/attack force screen).
 	JetsPerCarrier = 100
 
-	// A Normal attack costs the LOSER more than the WINNER (BRE live 2026-07-21,
-	// two samples: loser ~20% of forces, winner ~8% — asymmetric, not the flat
-	// 15% attack.hlp implies). Medium-setup values, scaled by AttackDamage; tune
-	// here. The exact ratio-dependence isn't pinned down yet — treated as fixed.
-	RegularAttackWinnerLossPct = 8
-	RegularAttackLoserLossPct  = 20
-
-	// A Normal attack captures max(RegularAttackCaptureFloor, capture% of the
-	// loser's regions). Live BRE (2026-07-21, Attack Rewards=Medium, five points
-	// 30-574 regions): ~10% of regions with a ~15-region floor — small realms lose
-	// a bigger share, large ones ~10%, and the outcome is independent of the
-	// strength ratio (verified 1.3x-4x). attack.hlp's "20%" is likely the High-
-	// rewards value; Medium is ~10%. Medium-setup constants; tune here.
-	RegularAttackCapturePct   = 10
+	// A Normal attack captures max(RegularAttackCaptureFloor, the Attack Rewards
+	// share of the loser's regions), capped at what the loser holds. The floor is
+	// BINARY-VERIFIED: BRE.OVR 0x1009f pushes 15 into the max, 0x100c3 the
+	// defender's own region count into the min. The share itself is a per-level
+	// table — see AttackCaptureMediumPct in balance.go.
 	RegularAttackCaptureFloor = 15
 
 	// Capture-density modifier (IB-original): a Normal attack takes more regions
@@ -51,6 +42,13 @@ const (
 	// and by the AI when judging whether a target is winnable (#36).
 	LandDefenseBonus = 2
 )
+
+// returningForces opens a battle report. BRE puts the casualties first and the
+// verdict last, under a line about the army coming home worn out, and it prints
+// the same opening whether the attack won or lost — so a player reads what the
+// fight cost before learning how it went. The wording is IB's own; only the
+// order and the per-unit breakdown are the original's (docs/dev/bre-screens.md).
+const returningForces = "Your forces have returned from the field, exhausted.\n"
 
 // bombingRun sends a's bombers against d's airfields before the ground
 // clash. It destroys grounded jets (which don't defend anyway, so this
@@ -167,29 +165,19 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		fmt.Fprint(&b, ".\n\n")
 	}
 
-	// AttackDamage scales how many units both sides lose; AttackRewards scales
-	// the winner's captured land and plunder. Medium = 100% = unchanged.
-	dmg := w.Config.AttackDamage.Percent()
-	rew := w.Config.AttackRewards.Percent()
-
 	// Military morale scales each side's unit effectiveness (the land defense
 	// bonus is terrain, not troops, so morale doesn't touch it).
 	// Only the COMMITTED force adds offense; the defender fights with everything.
-	ap := w.jitter(f.groundOffense(a) * moraleFactor(a.Morale) / 100)
-	dp := w.jitter(d.Defense()*moraleFactor(d.Morale)/100 + d.Land*LandDefenseBonus + w.allyDefenseBoost(d))
+	// There is no jitter on the inputs: the variance lives inside the battle,
+	// where BRE puts it, and rolling the strengths beforehand as well would
+	// double-count it.
+	ap := f.groundOffense(a) * moraleFactor(a.Morale) / 100
+	dp := d.Defense()*moraleFactor(d.Morale)/100 + d.Land*LandDefenseBonus + w.allyDefenseBoost(d)
 
-	// BRE's Normal Attack (attack.hlp): the winner captures a share of the loser's
-	// regions. Losses are ASYMMETRIC (BRE live): the LOSER bleeds ~20%, the WINNER
-	// ~8%, both scaled by AttackDamage. The attacker's losses fall only on the
-	// committed force (held-back units are safe). The winner is decided first so
-	// each side takes its own loss rate.
-	attackerWins := ap > dp
-	winnerLoss := RegularAttackWinnerLossPct * dmg / 100
-	loserLoss := RegularAttackLoserLossPct * dmg / 100
-	aLoss, dLoss := loserLoss, winnerLoss
-	if attackerWins {
-		aLoss, dLoss = winnerLoss, loserLoss
-	}
+	// Fight it out. Both sides grind each other down until one has lost the share
+	// of its force it is willing to lose, so the loser always pays the full
+	// retreat share and the winner pays whatever the strength ratio cost it.
+	attackerWins, aLoss, dLoss := w.battleAttrition(ap, dp, w.Config.AttackDamage.AttackRetreatPct())
 	aloss := loseCommitted(a, f, aLoss)
 	aloss.Bombers = bomberLoss // bombers fall to anti-air in the bombing run, not the ground clash
 	dloss := loseForces(d, dLoss)
@@ -228,14 +216,15 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		// path). One attack always captures the same SHARE of regions no matter how
 		// lopsided the strength: a far stronger army takes ground faster over many
 		// attacks, it does not annihilate an empire in a single blow.
-		// max(floor, capture% of the loser's land), scaled by the loser's
-		// net-worth density relative to the attacker, then by Attack Rewards. The
-		// floor makes a decisive win on a small realm take (up to) all of it.
-		captured = int(int64(d.Land) * RegularAttackCapturePct * int64(w.captureDensityFactor(a, d)) / 10000)
+		// min(the loser's land, max(floor, the Attack Rewards share of it)) — BRE's
+		// own order of operations, with IB's net-worth density modifier folded into
+		// the share before the floor is applied. The floor makes a decisive win on
+		// a small realm take (up to) all of it.
+		share := int64(w.Config.AttackRewards.AttackCapturePct()) * int64(w.captureDensityFactor(a, d))
+		captured = int(int64(d.Land) * share / 10000)
 		if captured < RegularAttackCaptureFloor {
 			captured = RegularAttackCaptureFloor
 		}
-		captured = captured * rew / 100
 		if captured > d.Land {
 			captured = d.Land
 		}
@@ -261,9 +250,10 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		addScore(a, gain)
 		addScore(d, -gain*CombatLoserPenaltyPct/100)
 
+		fmt.Fprint(&b, returningForces)
+		fmt.Fprintf(&b, "Your casualties: %s.\n\n", attackerCas(aloss))
+		fmt.Fprintf(&b, "The enemy lost: %s.\n\n", defenderCas(dloss))
 		fmt.Fprintf(&b, "Victory! You captured %d regions.\n", taken)
-		fmt.Fprintf(&b, "Your casualties: %s.\n", attackerCas(aloss))
-		fmt.Fprintf(&b, "The enemy lost: %s.\n", defenderCas(dloss))
 		if gain > 0 {
 			fmt.Fprintf(&b, "Your score rose by %d.\n", gain)
 		}
@@ -283,9 +273,10 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		addScore(d, gain)
 		addScore(a, -gain*CombatLoserPenaltyPct/100)
 
-		fmt.Fprintf(&b, "Defeat! Your forces returned exhausted.\n")
-		fmt.Fprintf(&b, "Your casualties: %s.\n", attackerCas(aloss))
-		fmt.Fprintf(&b, "The enemy lost: %s.\n", defenderCas(dloss))
+		fmt.Fprint(&b, returningForces)
+		fmt.Fprintf(&b, "Your casualties: %s.\n\n", attackerCas(aloss))
+		fmt.Fprintf(&b, "The enemy lost: %s.\n\n", defenderCas(dloss))
+		fmt.Fprint(&b, "Defeat! Your forces took the field and could not hold it.\n")
 		d.addEvent(fmt.Sprintf("%s attacked you but was repelled. You lost %d units; your score rose by %d.", a.Name, dloss.Total(), gain))
 		w.postCombatNews(a, d, false, false)
 	}
@@ -305,6 +296,51 @@ func absorbMilitary(a, d *Empire) {
 	d.Troopers, d.Jets, d.Turrets, d.Tanks, d.Carriers, d.Bombers = 0, 0, 0, 0, 0, 0
 }
 
+// battleAttrition fights a regular attack out and reports who won and what it
+// cost each side, as a fraction of what that side brought.
+//
+// BINARY-VERIFIED against BRE's resolver (BRE.OVR 0xE81F). Both armies grind
+// each other down a round at a time and the fight ends the moment EITHER side
+// has lost the share it is willing to lose (retreatPct, the sysop's Attack
+// Damage). That structure is the whole point: the side that breaks off has lost
+// exactly the retreat share, while the other has lost only what the strength
+// ratio cost it — so a lopsided attacker walks away almost intact and an evenly
+// matched one pays nearly as much as the loser. IB used to hand the winner a
+// flat 8% and the loser a flat 20%, which is roughly the even-match case applied
+// to every battle.
+//
+// Each round a side is hit with a probability equal to its OPPONENT's share of
+// the two strengths, and failing that on a flat BattleUpsetPct chance — so the
+// weaker army still lands blows. Termination is not in doubt: the two hit
+// probabilities sum to 1, so at least one side is hit with probability 0.77 or
+// better every round, and about 30 hits carry a side to the deepest threshold.
+func (w *World) battleAttrition(ap, dp, retreatPct int) (attackerWins bool, aLost, dLost float64) {
+	survive := float64(100-retreatPct) / 100
+	a0, d0 := float64(ap), float64(dp)
+	a, d := a0, d0
+	aFloor, dFloor := a0*survive, d0*survive
+	for a > aFloor && d > dFloor {
+		total := a + d
+		if w.rng.Float64()*total < a || w.rng.Intn(100) < BattleUpsetPct {
+			d = d*BattleRoundSurvival - BattleRoundFlatLoss
+		}
+		total = a + d // the second exchange sees the first one's damage
+		if w.rng.Float64()*total < d || w.rng.Intn(100) < BattleUpsetPct {
+			a = a*BattleRoundSurvival - BattleRoundFlatLoss
+		}
+	}
+	return a > aFloor, lossFraction(a0, a), lossFraction(d0, d)
+}
+
+// lossFraction is how much of a starting strength was ground away, counting a
+// side that was driven to nothing as a total loss.
+func lossFraction(start, left float64) float64 {
+	if left <= 0 || start <= 0 {
+		return 1
+	}
+	return 1 - left/start
+}
+
 // UnitLoss is a per-type casualty breakdown, so a battle report can show each
 // side's losses by unit type (as BRE does) instead of one lump total.
 type UnitLoss struct {
@@ -317,14 +353,18 @@ func (u UnitLoss) Total() int {
 	return u.Troopers + u.Jets + u.Turrets + u.Tanks + u.Bombers
 }
 
-// loseForces removes pct% of an empire's combat units and returns the per-type
-// breakdown lost (the defender fights with everything, so all four types bleed).
-func loseForces(e *Empire, pct int) UnitLoss {
+// loseForces removes the given fraction of an empire's combat units and returns
+// the per-type breakdown lost (the defender fights with everything, so all four
+// types bleed). The share is a fraction rather than whole percent because the
+// winner of a lopsided battle walks away having lost well under one percent —
+// rounding that to zero or one would erase the difference between a cheap win
+// and an expensive one.
+func loseForces(e *Empire, frac float64) UnitLoss {
 	l := UnitLoss{
-		Troopers: e.Troopers * pct / 100,
-		Jets:     e.Jets * pct / 100,
-		Turrets:  e.Turrets * pct / 100,
-		Tanks:    e.Tanks * pct / 100,
+		Troopers: shareOf(e.Troopers, frac),
+		Jets:     shareOf(e.Jets, frac),
+		Turrets:  shareOf(e.Turrets, frac),
+		Tanks:    shareOf(e.Tanks, frac),
 	}
 	e.Troopers -= l.Troopers
 	e.Jets -= l.Jets
@@ -374,16 +414,21 @@ func (f AttackForce) groundOffense(e *Empire) int {
 // returns the per-type breakdown — so holding units back keeps them out of harm's
 // way. Bomber losses come from the bombing run, not here, and are folded in by
 // the caller.
-func loseCommitted(e *Empire, f AttackForce, pct int) UnitLoss {
+func loseCommitted(e *Empire, f AttackForce, frac float64) UnitLoss {
 	l := UnitLoss{
-		Troopers: f.Troopers * pct / 100,
-		Jets:     f.Jets * pct / 100,
-		Tanks:    f.Tanks * pct / 100,
+		Troopers: shareOf(f.Troopers, frac),
+		Jets:     shareOf(f.Jets, frac),
+		Tanks:    shareOf(f.Tanks, frac),
 	}
 	e.Troopers -= l.Troopers
 	e.Jets -= l.Jets
 	e.Tanks -= l.Tanks
 	return l
+}
+
+// shareOf is frac of n, rounded down and never more than n.
+func shareOf(n int, frac float64) int {
+	return clampInt(int(float64(n)*frac), 0, n)
 }
 
 func clampInt(n, lo, hi int) int {
