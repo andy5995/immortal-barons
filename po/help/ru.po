@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-12 11:47-0500\n"
+"POT-Creation-Date: 2026-08-14 10:32-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -80,8 +80,24 @@ msgid ""
 "press Enter."
 msgstr ""
 
-#. type: Plain text
+#. type: Title ##
 #: internal/help/content/controls/interface.md:31
+#, no-wrap
+msgid "Who else is on"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:38
+msgid ""
+"An `O` beside a realm's letter — on See Scores, the attack and message "
+"target lists, and the View Treaties roster — means that baron is on the "
+"board with you. Your own realm never carries it. It clears when they log "
+"off, and also a few minutes after their last keypress, so someone sitting on "
+"one screen can drop off the list without having left."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:39
 msgid "Press `?` at a menu to open this help."
 msgstr "Нажмите `?` в любом меню, чтобы открыть эту справку."
 
@@ -828,19 +844,164 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/economy/food.md:23
 msgid ""
-"Each turn your people eat first, and then part of whatever food is still in "
-"store spoils. There is no safe amount. Even a small store loses some, and a "
-"large one loses more."
+"Each turn your people eat first, then your army, and then part of whatever "
+"food is still in store spoils. There is no safe amount. Even a small store "
+"loses some, and a large one loses more."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:28
+#: internal/help/content/economy/food.md:30
+msgid ""
+"Going short is billed twice, because the two needs are counted apart. "
+"Whatever your people go without costs Popular Support, and whatever your "
+"army goes without costs Military Morale. Nobody leaves your realm over it — "
+"but if your people get under about two thirds of what they need, the realm "
+"falls into civil war. A civil war halves your Support and destroys a share "
+"of your land and of every kind of unit you own, listed ones included."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/food.md:35
 msgid ""
 "This turn's harvest arrives at the start of the turn, so you can sell it the "
 "same turn. Selling your surplus down each turn, instead of hoarding it, is "
 "how you lose nothing to spoilage. Food you have listed on the Trading Market "
 "spoils too, so listing it is not a way to store it. A high technology level "
 "slows spoilage."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/economy/morale-and-support.md:1
+#: internal/help/content/economy/morale-and-support.md:8
+#, no-wrap
+msgid "Morale and Support"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/morale-and-support.md:12
+msgid ""
+"Your realm has two moods, each a number from 0 to 100. Popular Support is "
+"what your people think of you. Military Morale is what your army thinks of "
+"you."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/morale-and-support.md:16
+msgid ""
+"Both start at 100 when you found your realm. Nothing ever raises them for "
+"free.  They fall when you go short, and the only way back up is to pay for "
+"it at the maintenance stage each turn."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/morale-and-support.md:17
+#, fuzzy, no-wrap
+#| msgid "What you need"
+msgid "What they do"
+msgstr "Что нужно"
+
+#. type: Plain text
+#: internal/help/content/economy/morale-and-support.md:20
+msgid "Popular Support:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/morale-and-support.md:24
+msgid "sets your Coastal (tourism) income, which collapses when Support is low"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/morale-and-support.md:24
+msgid "sets how many people your land can hold"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/morale-and-support.md:24
+msgid "when it drops under 10, it starts pulling Morale down with it"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/morale-and-support.md:30
+msgid ""
+"Military Morale scales how hard your army fights, both attacking and "
+"defending.  A full-morale army fights above its paper strength. A broken one "
+"fights at about half. When Morale falls under 40, troopers, jets and tanks "
+"begin to desert each turn, and the lower it goes the more of them leave. "
+"Turrets, bombers and carriers never desert."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/morale-and-support.md:34
+msgid ""
+"There is one more effect that is easy to miss. Auto-Pay Maintenance only "
+"pays your bills silently while **both** numbers read exactly 100. Let either "
+"slip and you are back to answering the maintenance prompts by hand every "
+"turn."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/morale-and-support.md:35
+#, no-wrap
+msgid "What lowers them"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/morale-and-support.md:47
+msgid ""
+"Underpaying your armed forces costs Morale. Underpaying your land upkeep, "
+"the Queen's tax, or your people's food costs Support. Underfeeding the army "
+"costs Morale."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/morale-and-support.md:47
+msgid "A riot from high taxes costs Support."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/morale-and-support.md:47
+msgid ""
+"Breaking a treaty by attacking a partner, instead of declaring war first, "
+"costs you a quarter of each."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/morale-and-support.md:47
+msgid ""
+"A chemical or biological strike on your realm hurts both. The plague is far "
+"worse for your army than the gas is."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/morale-and-support.md:47
+msgid ""
+"Enemy agents can lower either one directly. See Stir Revolts and Demoralize "
+"Forces."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/morale-and-support.md:48
+#, no-wrap
+msgid "Paying them back"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/morale-and-support.md:54
+msgid ""
+"At the maintenance stage the crown asks for gold to buy back up to fifteen "
+"points of each. Support is priced by the size of your population, Morale by "
+"the size of your army — troopers, turrets and tanks cost most, jets least, "
+"bombers and carriers nothing. Units you have listed on the Trading Market "
+"still count."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/morale-and-support.md:58
+msgid ""
+"What you pay buys points in proportion, so paying half the request buys "
+"about half the points. You may pay up to half again as much as is asked, and "
+"that really does buy more than fifteen points. Neither number can pass 100, "
+"so overpaying a nearly-content realm wastes the difference."
 msgstr ""
 
 #. type: Title #
@@ -2801,10 +2962,6 @@ msgstr ""
 #~ "Это руководство для оператора BBS (сисопа). Оно объясняет, как настроить "
 #~ "игру на вашей доске и присоединиться к межсистемной лиге. Игрокам его "
 #~ "читать не нужно."
-
-#, no-wrap
-#~ msgid "What you need"
-#~ msgstr "Что нужно"
 
 #~ msgid ""
 #~ "The game is one program: `barons-door`. It runs as a native door under "

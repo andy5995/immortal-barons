@@ -85,8 +85,10 @@ func TestStarvationPostsCivilNews(t *testing.T) {
 	starving.Alive = true
 
 	w.processEconomy(starving)
-	if len(w.NewsToday) != 1 {
-		t.Fatalf("expected one starvation news line, got %v", w.NewsToday)
+	// Two lines: the famine itself, then the civil war it lights (BRE files a
+	// civil war whenever the people got under 65% of their food).
+	if len(w.NewsToday) != 2 {
+		t.Fatalf("expected a starvation and a civil-war news line, got %v", w.NewsToday)
 	}
 
 	w.NewsToday = nil

@@ -335,9 +335,10 @@ AI behaviour, IB's own additions) are the playtest knobs. Keep both matching
 Stubbed / not built: a TIMED league auto-reset (a daily Planetary Master leader
 is tracked, `CurrentMaster`, and `endGame` crowns `LastMaster`; the Coordinator
 can start a new season on demand with `-league-reset`, but nothing schedules
-one), civil-war collapse, and BRE's finer interplanetary news subtypes. A few
-covert/diplomacy items are recorded-but-inert pending fuller subsystems (flagged
-in `docs/mechanics-reference.md`).
+one), the Free Trade Agreement's morale/support contagion between partners
+(`BRE.OVR 0x99BF`, a daily-maintenance step), and BRE's finer interplanetary
+news subtypes. A few covert/diplomacy items are recorded-but-inert pending
+fuller subsystems (flagged in `docs/mechanics-reference.md`).
 
 ## Primary goal: run as a BBS door
 

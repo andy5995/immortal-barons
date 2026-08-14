@@ -231,8 +231,10 @@ func TestStirRevoltsLowersSupport(t *testing.T) {
 	if _, err := w.StirRevolts(a, d); err != nil {
 		t.Fatal(err)
 	}
-	if d.Support != 85 {
-		t.Errorf("expected support 85, got %d", d.Support)
+	// Golden literal from BRE.OVR 0x4AE61: support is SCALED by 11/13, not
+	// docked a flat number of points.
+	if d.Support != 84 {
+		t.Errorf("expected support 84, got %d", d.Support)
 	}
 }
 

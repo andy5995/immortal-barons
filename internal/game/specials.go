@@ -320,9 +320,9 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 	troopPct := BioTroopKillPct + w.rng.Intn(BioTroopKillJitterUp) - w.rng.Intn(BioTroopKillJitterDn)
 	troops := d.Troopers * troopPct / 100
 	d.Troopers -= troops
-
-	// Morale is halved by an integer divide here, not the rounded real the
-	// chemical strike uses — the plague hits the barracks hardest.
+	// A plague is worse for the army than gas and the same for the public: morale
+	// halved, support cut by a third (BRE.OVR 0x115FE / 0x11645). The halving is
+	// an integer divide, not the rounded real the chemical strike uses.
 	d.Morale /= BioMoraleDivisor
 	d.Support = roundDiv(d.Support*StrikeSupportKeepNum, StrikeSupportKeepDen)
 

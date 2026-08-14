@@ -131,14 +131,15 @@ func (w *World) SupportDissensions(a, d *Empire) (string, error) {
 }
 
 // DemoralizeForces lowers d's military morale on success, weakening combat
-// and risking desertion (see moraleFactor and MoraleDesertThreshold). On
-// failure the agent is lost.
+// and risking desertion (see moraleFactor and moraleDesertion). On failure the
+// agent is lost. BRE scales the stat rather than docking points, so the op bites
+// hardest on a well-motivated army (binary-verified, BRE.OVR 0x4AC91).
 func (w *World) DemoralizeForces(a, d *Empire) (string, error) {
 	if err := w.covertCost(a, CostDemoralizeForces, true); err != nil {
 		return "", err
 	}
 	if w.covertSuccess(a, d) {
-		d.adjustMorale(-15)
+		d.Morale = d.Morale * DemoralizeKeepNum / DemoralizeKeepDen
 		d.addEvent("Agents demoralized your forces — morale fell.")
 		return fmt.Sprintf("You demoralized %s's forces, lowering their morale.", d.Name), nil
 	}
@@ -238,13 +239,13 @@ func (w *World) Bribery(a, d *Empire) (string, error) {
 
 // StirRevolts spreads propaganda that lowers d's popular support (rioting and
 // revolt), weakening its economy and its troopers. On failure the agent is
-// lost.
+// lost. Scaled, not docked, as Demoralize Forces is (BRE.OVR 0x4AE61).
 func (w *World) StirRevolts(a, d *Empire) (string, error) {
 	if err := w.covertCost(a, CostStirRevolts, true); err != nil {
 		return "", err
 	}
 	if w.covertSuccess(a, d) {
-		d.adjustSupport(-15)
+		d.Support = d.Support * StirRevoltsKeepNum / StirRevoltsKeepDen
 		d.addEvent("Agitators stirred revolts — your popular support fell.")
 		return fmt.Sprintf("You stirred revolts in %s, lowering its popular support.", d.Name), nil
 	}

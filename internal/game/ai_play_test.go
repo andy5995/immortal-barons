@@ -231,7 +231,7 @@ func TestAttackingAPartnerBreachesAndCostsNothing(t *testing.T) {
 	b := w.AddHuman("b", "Beta")
 	w.ProposeTreaty(a, b, "Tariff Trade Agreement")
 	w.AcceptTreaty(b, a.Name, "Tariff Trade Agreement")
-	a.Support, a.Protection, b.Protection = 90, 0, 0
+	a.Support, a.Morale, a.Protection, b.Protection = 90, 80, 0, 0
 
 	w.Attack(a, b, FullForce(a), true)
 

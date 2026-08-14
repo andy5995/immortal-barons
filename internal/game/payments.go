@@ -8,29 +8,15 @@ package game
 // rates live in compiled code, so the constants below are reconstructed and
 // tunable.
 const (
-	ArmyDesertRate     = 25  // % of the army that deserts at full non-payment
-	RegionRevoltRate   = 15  // % of land that revolts at full non-payment
-	MoralePerBoostGold = 100 // gold to raise military morale by one point
+	ArmyDesertRate   = 25 // % of the army that deserts at full non-payment
+	RegionRevoltRate = 15 // % of land that revolts at full non-payment
 
-	// A single turn's payment cannot fully restore morale — paying the whole
-	// requested amount only buys a bounded number of points, so recovery takes
-	// several turns. Unverified placeholder, unlike its support counterpart
-	// (MaxSupportBoostPerTurn and the rest of the support-boost model live in
-	// balance.go, where they are binary-verified).
-	MaxMoraleBoostPerTurn = 20
-
-	// Military morale effects (placeholders, tunable). Below the floor, combat
-	// effectiveness is scaled by moraleFactor; below the desert threshold, a
-	// slice of the army deserts each turn morale stays that low.
 	// Combat effectiveness is MoraleCombatFloor + morale x MoraleCombatSlope/100
 	// percent. BINARY-VERIFIED (BRE.OVR 0xF37B): morale x 0.6 + 50, so a fully
 	// motivated army fights at 110%, not merely at par — IB previously derived
 	// the slope from the floor (100-floor = 50) and capped effectiveness at 100.
-	MoraleCombatFloor     = 50 // binary: effectiveness % at zero morale
-	MoraleCombatSlope     = 60 // binary
-	MoraleDesertThreshold = 30 // morale at/below which troops start deserting
-	MoraleDesertRate      = 5  // % of the army lost per turn while morale is that low
-	MoraleDrift           = 4  // points morale recovers toward 100 per turn
+	MoraleCombatFloor = 50 // binary: effectiveness % at zero morale
+	MoraleCombatSlope = 60 // binary
 )
 
 // ForcesUpkeep is the gold the armed forces require this turn. Technology
@@ -208,7 +194,7 @@ func (w *World) PayCrownTax(e *Empire, given int64) {
 		return
 	}
 	// Deferred to turn rollover (see PendingSupportPenalty), matching BRE.
-	e.PendingSupportPenalty += int((req - given) * CrownTaxSupportPenalty / (req + 1))
+	e.PendingSupportPenalty += shortfallPenalty(req, given, CrownTaxSupportPenalty)
 }
 
 // QueenRefund pays e its share of the Queen's purse and returns the amount, or
@@ -242,8 +228,9 @@ func (w *World) QueenRefund(e *Empire) int64 {
 }
 
 // PayForces applies a payment toward armed-forces upkeep. A shortfall makes
-// units desert proportionally and lowers popular support. Returns the number
-// of units lost to desertion.
+// units desert proportionally and costs military morale — only morale: the
+// original's armed-forces branch touches that stat and no other. Returns the
+// number of units lost to desertion.
 func (w *World) PayForces(e *Empire, given int64) int {
 	req := w.ForcesDue(e)
 	given = e.clampGive(given)
@@ -262,14 +249,23 @@ func (w *World) PayForces(e *Empire, given int64) int {
 	desert(&e.Jets)
 	desert(&e.Turrets)
 	desert(&e.Tanks)
-	e.adjustSupport(-fracPct / 5)
-	e.adjustMorale(-fracPct / 4) // unpaid troops lose heart faster than the public
+	// Deferred to turn rollover, as BRE defers every payment-stage penalty: the
+	// whole stage accumulates into two signed bytes on the empire record (+0x2b9
+	// morale, +0x2ba support) which the end-of-turn routines then apply.
+	e.PendingMoralePenalty += shortfallPenalty(req, given, ForcesShortfallMoraleScale)
 	return lost
 }
 
 // PayRegions applies a payment toward region maintenance. A shortfall makes
-// regions revolt (land is lost) and lowers popular support. Returns the
-// number of regions lost.
+// regions revolt (land is lost), costs popular support, and — below
+// RegionCivilWarThresholdPct of what was due — files a civil war. That last
+// trigger is far easier to hit than famine's, so letting land upkeep slide is
+// the fastest way to tear a realm apart.
+//
+// IB follows the CORRECT operation order here, as it does for the crown tax:
+// BRE's own region branch computes `1 − ratio×50` rather than `(1 − ratio)×50`,
+// which goes negative for any shortfall under 98% and would RAISE support.
+// Returns the number of regions lost.
 func (w *World) PayRegions(e *Empire, given int64) int {
 	req := w.RegionsDue(e)
 	given = e.clampGive(given)
@@ -282,7 +278,8 @@ func (w *World) PayRegions(e *Empire, given int64) int {
 		e.Regions.remove(lost)
 		e.syncLand()
 	}
-	e.adjustSupport(-fracPct / 10)
+	e.PendingSupportPenalty += shortfallPenalty(req, given, RegionShortfallSupportScale)
+	e.CivilWarSeverity += civilWarSeverity(req, given, RegionCivilWarThresholdPct)
 	return lost
 }
 
@@ -329,13 +326,53 @@ func (w *World) BoostSupport(e *Empire, given int64) int {
 	return e.Support - before
 }
 
-// BoostMorale spends gold to raise military morale, mirroring BoostSupport
-// (capped per turn). Returns the morale points gained.
+// moraleBoostDeficit is the number of morale points this turn's boost is priced
+// for — the shortfall from 100, capped at MaxMoraleBoostPerTurn.
+func (e *Empire) moraleBoostDeficit() int {
+	return min(100-e.Morale, MaxMoraleBoostPerTurn)
+}
+
+// moraleBoostUnits is the per-point price of morale in hundredths of a gold:
+// the army's weighted size, counting units escrowed on the Trading Market.
+// Bombers and carriers carry no weight in the original.
+func (w *World) moraleBoostUnits(e *Empire) int64 {
+	held := func(good string, n int) int64 {
+		return int64(n + w.MarketForSale(e.Owner, good))
+	}
+	return held("Trooper", e.Troopers)*MoraleBoostTrooper +
+		held("Jet", e.Jets)*MoraleBoostJet +
+		held("Turret", e.Turrets)*MoraleBoostTurret +
+		held("Tank", e.Tanks)*MoraleBoostTank
+}
+
+// MoraleBoostCost is the gold the crown requests to restore this turn's morale.
+// Zero when morale is already full.
+func (w *World) MoraleBoostCost(e *Empire) int64 {
+	d := e.moraleBoostDeficit()
+	if d <= 0 {
+		return 0
+	}
+	return int64(d)*w.moraleBoostUnits(e)/MoraleBoostWeightUnit + MoraleBoostFlat
+}
+
+// MoraleBoostMax is the most a baron may put toward the morale boost. As with
+// support, overpaying really does buy more than the charged deficit.
+func (w *World) MoraleBoostMax(e *Empire) int64 {
+	return w.MoraleBoostCost(e) * MoraleBoostMaxPct / 100
+}
+
+// BoostMorale spends gold to raise military morale, on the same ratio
+// BoostSupport uses. Returns the morale points gained.
 func (w *World) BoostMorale(e *Empire, given int64) int {
+	cost := w.MoraleBoostCost(e)
 	given = e.clampGive(given)
-	pts := min(int(given/MoralePerBoostGold), MaxMoraleBoostPerTurn)
+	if cost <= 0 {
+		return 0
+	}
+	pts := int(int64(e.moraleBoostDeficit()) * (given + 1) / (cost + 1))
+	before := e.Morale
 	e.adjustMorale(pts)
-	return pts
+	return e.Morale - before
 }
 
 // adjustSupport moves support by delta, clamped to [0, 100].

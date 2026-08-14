@@ -44,9 +44,11 @@ HQ is an `int32` at empire record `+0x26b`, holding percent complete.
   Troopers" — the HQ-50 value, which is how the manual and the binary reconcile.
   IB used 4 rising to 8 until 2026-07-30.
 - The same expression scales the whole sum by `0.5 + morale/175` and divides by
-  2. IB's morale curve (0.5 → 1.0, versus BRE's 0.5 → 1.07) is left as is: the
-  constant ÷2 and the small top-end difference cancel between attacker and
-  defender.
+  2 — that is the **interplanetary invasion** resolver (`0x402D6`,`0x404D2`),
+  and it is a *different* morale curve from the one a same-planet attack uses
+  (`morale × 0.6 + 50`, `0x0F37B`). IB implements the same-planet curve
+  (`moraleFactor`) on both paths; the two differ by at most 3% at full morale and
+  cancel between attacker and defender.
 - Bombers are excluded from the sum and accumulated separately, matching
   `breins.txt` ("no offensive or defensive strength").
 - **The price rises with the empire's lifetime turn count.** The military units
@@ -193,8 +195,19 @@ flow runs in this order:
    the formula with no fitting. (The prompt's low number is a suggestion, not a
    floor; typing 0 is accepted.)
 
-   For calibration, BRE's three shortfall penalties: forces ×40 against
-   **morale**, regions ×50 against support, crown tax ×15 against support.
+   BRE's five shortfall penalties all share this shape and differ only in scale
+   and target — **binary-verified**, and IB implements every one:
+
+   | Shortfall | Scale | Stat | Address |
+   |---|---:|---|---|
+   | Armed forces | 40 | military morale | `BRE.OVR 0x2F077` |
+   | Regions | 50 | popular support | `BRE.OVR 0x2F196` |
+   | Crown tax | 15 | popular support | `BRE.OVR 0x2FAF1` |
+   | Food, the people's share | 40 | popular support | `BRE.OVR 0x38104` |
+   | Food, the army's share | 40 | military morale | `BRE.OVR 0x382E9` |
+
+   The armed-forces branch touches morale **only** — not support — and the region
+   branch support only. Two of them additionally file a **civil war** (below).
 
    **IB implements this**, including the deferral: the penalty accumulates during
    maintenance and lands at turn rollover, so the drop surfaces on the next turn's
@@ -869,7 +882,8 @@ The menu's item order, labels, numeric hotkeys (1-9), and per-op costs are
 confirmed from BRE (BRE.OVR string table plus a live capture, #73):
 
 - **(1) Send Spy** — read the enemy's full status. Cost `CostSendSpy` (5,000).
-- **(2) Stir Revolts** — propaganda that sharply lowers popular support.
+- **(2) Stir Revolts** — propaganda that lowers popular support, SCALING it by
+  11/13 rather than docking points (`BRE.OVR 0x4AE61`).
   Cost `CostStirRevolts` (25,000).
 - **(3) Set Up** — trick d and one of its Full Defense Alliance partners into
   believing the other declared war, voiding the alliance between them
@@ -877,8 +891,9 @@ confirmed from BRE (BRE.OVR string table plus a live capture, #73):
   (50,000).
 - **(4) Support Dissensions** — agitate d's own troopers into fleeing (~10%
   trooper loss). Cost `CostSupportDissensions` (80,000).
-- **(5) Demoralize Forces** — lower enemy military morale; they fight worse
-  and, if low enough, units desert. Cost `CostDemoralizeForces` (80,000).
+- **(5) Demoralize Forces** — lower enemy military morale, scaling it by 6/7
+  (`BRE.OVR 0x4AC91`); they fight worse and, if low enough, units desert.
+  Cost `CostDemoralizeForces` (80,000).
 - **(6) Spy on Relations** — reveal the enemy's treaties. Cost
   `CostSpyOnRelations` (100,000).
 - **(7) Bomb Enemy Targets** — a submenu (see below). Cost
@@ -1407,12 +1422,80 @@ maintenance, tax payments, spending on public support/morale, and the food
 market (limited supply — relying on it is risky). Banking offers
 interest-earning savings and loans; investment rates move over time.
 
-**Popular support and military morale** are 0–100 stats. Each turn's payment
-stage prompts for both when they are below 100 ("N gold is requested to boost
-popular support / improve military morale"). Underpaying maintenance lowers
-them. Low popular support cuts Coastal income and, at the extreme, brings riots.
-Low military morale scales down combat effectiveness, and below a threshold
-troops desert each turn.
+**Popular support and military morale** are 0–100 stats, held as `int32`s on the
+empire record at `+0x92` and `+0x8e`. Each turn's payment stage prompts for both
+when they are below 100 ("N gold is requested to boost popular support / improve
+military morale").
+
+**Both must sit at exactly 100 for the silent Auto-Pay Maintenance branch to
+run** (`BRE.EXE` flat `0x3b12`–`0x3b6d`, alongside "gold ≥ due" and "no waste").
+So anything that nudges either off 100 puts the baron back through the manual
+payment sequence — which is why the two carry more weight in the original than a
+status-screen figure suggests. IB mirrors the gate (`internal/menu/gameflow.go`,
+`paymentStage`).
+
+Every input and effect below was read out of the binary by taking the **complete
+access list** for the two fields: 62 sites in `BRE.OVR` and 4 in `BRE.EXE`.
+
+**What raises them**
+
+| Input | Effect | Address |
+|---|---|---|
+| Founding a realm | both set to 100 | `BRE.EXE 0x8D99` / `0x8DA7` |
+| Paying the boost | see the formulas below | `BRE.OVR 0x2F740` / `0x2F91E` |
+| Tax under 10% while support < 85 | support `+ (10 − tax)` | `BRE.OVR 0xCE97` |
+| Tax under 30% | support `− (tax−30)/10`, i.e. a gain | `BRE.OVR 0xCE97` |
+
+**What lowers them**
+
+| Input | Effect | Address |
+|---|---|---|
+| Underpaying forces / regions / crown tax / food | the five shortfall penalties tabled above | — |
+| A tax riot | support `− tax/3` | `BRE.OVR 0xCE97` |
+| Support under 10 | morale `− (10 − support)` | `BRE.OVR 0xCF9C` |
+| Civil war | support halved | `BRE.OVR 0xC5C8` |
+| Breaking a treaty by attacking | both `× 3/4` (integer) | `BRE.OVR 0x1A881` |
+| Chemical strike on you | morale `× 3/4` rounded, support `× 2/3` rounded | `BRE.OVR 0x110AE`, `0x11109` |
+| Biological strike on you | morale halved, support `× 2/3` rounded | `BRE.OVR 0x115FE`, `0x11645` |
+| Demoralize Forces against you | morale `× 6/7` | `BRE.OVR 0x4AC91` |
+| Stir Revolts against you | support `× 11/13` | `BRE.OVR 0x4AE61` |
+| A Free Trade Agreement partner in worse shape | drags you toward them (NOT built in IB) | `BRE.OVR 0x99BF` |
+
+Both are clamped to `[0, 100]` where they are applied. An **AI's** covert op
+additionally floors its victim at **5** of either stat (`BRE.OVR 0x4C02F`,
+`0x4C2E0`); a human's op has no such mercy.
+
+**What they do**
+
+- Low popular support cuts **Coastal income** (`0.1 + 0.9 × support/100`) and
+  **population capacity** (`× support/90`), and below **35** it puts a riot line
+  in the planet news at 1-in-20 a turn (`BRE.OVR 0xD5AD`) — cosmetic, unlike the
+  tax riot.
+- Military morale scales **combat effectiveness** (`morale × 0.6 + 50`, so a
+  full-morale army fights at 110%) and drives **desertion**, below.
+- Both are shown on the status screen (`BRE.OVR 0x1969A`, `0x19B11`) and ride the
+  inter-BBS score packet (`BRE.OVR 0x4AB5A`).
+
+**Desertion — binary-verified (`BRE.OVR 0xC1F9`–`0xC2D5`).** Once per turn BRE
+draws a percentage from a band chosen by morale:
+
+| Morale | Rate |
+|---|---|
+| 0–9 | `22 + Random(7) − Random(17)` |
+| 10–19 | `17 + Random(5) − Random(12)` |
+| 20–29 | `10 + Random(3) − Random(8)` |
+| 30–39 | `5 + Random(2) − Random(5)` |
+| 40+ | none |
+
+A rate of zero or less costs nothing, which is why the milder bands often pass
+without a loss. Each of **Troopers, Jets and Tanks** then loses `count div 100 ×
+rate`, independently, with a 1-in-4 chance of being spared; the same is taken
+from anything of that type escrowed on the Trading Market. **Turrets, bombers and
+carriers never desert** — the routine loads three unit types and stops.
+
+**There is NO free morale recovery.** Nothing anywhere in the binary adds to
+morale except the boost the baron pays for. IB used to drift it back 4 points a
+turn; that is removed.
 
 **The support boost — binary-verified (BRE.OVR 0x2F4C4 and 0x2F740):**
 
@@ -1433,9 +1516,25 @@ of what you paid — so **overpaying by half buys 22 points, not 15**. That is t
 original's behaviour, not an IB addition. The `+1` on each side is the same shape
 the crown-tax penalty uses.
 
-**Military morale's** request and cap (`MoralePerBoostGold`,
-`MaxMoraleBoostPerTurn` in `internal/game/payments.go`) are **not** verified —
-they remain reconstructed placeholders, tunable.
+**The morale boost — binary-verified (BRE.OVR 0x2F6BA, 0x2F6CA, 0x2F82C and
+0x2F91E):** the same shape, priced off the ARMY rather than the population.
+
+```
+deficit = min(100 - Morale, 15)
+cost    = deficit × (0.10·Troopers + 0.05·Jets + 0.10·Turrets + 0.15·Tanks) + 500
+points  = deficit × (given + 1) / (cost + 1)          # truncated
+maximum payable = cost × 3 / 2
+```
+
+Three differences from the support boost worth noticing, all read from the code
+rather than inferred. **Bombers and carriers are not priced at all** — the
+routine loads four unit counts and stops. Units escrowed on the **Trading
+Market** are counted, exactly as they are for maintenance. And the flat 500 sits
+*outside* the multiply here, where the support boost has it inside
+(`deficit × (3·People + 500)`), so a realm with no army pays a flat 500 whatever
+its deficit. The cost is capped at 2,000,000,000 (`BRE.OVR 0x2F7E5`).
+
+IB's earlier placeholder charged a flat 100 gold a point up to 20 points a turn.
 
 **Riots and emigration — verified against a BRE.OVR disassembly (HIGH confidence):**
 
@@ -1461,12 +1560,21 @@ they remain reconstructed placeholders, tunable.
   support 100 → 97 on two separate turns — exactly `100 − 12/3 − (12−30)/10`.
   Both turns also show that riots at a *low* rate are real, just rare: 12² /
   10000 = 1.4% a turn.
-- **Emigration is NOT a gameplay mechanic.** BRE's tiered civil-revolt /
-  "most of your empire has left your rule" / troops-fleeing system is gated on
-  a severity byte whose *only* nonzero setter is BRE's **crack/registration
-  check** — it fires only when a *pirated* copy is detected. In a registered
-  BRE, misrule-driven emigration never happens; misrule attrition is **riots
-  (tax) and starvation (food) only**. So the clone models no misrule emigration.
+- **Emigration is NOT a gameplay mechanic.** Misrule attrition is **riots (tax)
+  and the civil war (food, land upkeep) only** — no realm ever loses people
+  merely for being badly run, and none loses people to starvation either.
+  BRE's tiered "most of your empire has left your rule" / troops-fleeing
+  *messages* sit in the block the **crack/registration check** reaches
+  (`BRE.OVR 0xC4F3`, behind three global flags), so they are seen only when a
+  pirated copy is detected.
+
+  **Correction to an earlier reading.** That check was previously recorded here
+  as the *only* nonzero setter of the civil-war severity byte (`+0x2bb`). It is
+  not: taking the byte's whole access list finds three setters, one of which is
+  the crack check (a flat 50) and two of which are ordinary play — see below.
+  The earlier note was made from the two sites nearest the question rather than
+  from the full list, which is exactly the failure mode
+  `.claude/skills/bre-gather/references/disassembly.md` warns about.
 - **Random population swings ARE real, though** — separate from the above.
   BRE's sysop-editable random events (`events.dat` `^GAINPEOPLE` / `^LOSEPEOPLE`:
   "people flee to your empire", "aliens drop off N million", "killed in bungee
@@ -1481,6 +1589,35 @@ drift, the low-support morale drain, and the low-tax buy-back. IB's earlier
 invented model — a drift toward `100 − (tax−15)×3` plus a free 5-point boost for
 a "well-run realm" — has been removed; the tax drift covers free recovery, as it
 does in the original.
+
+### Civil war — binary-verified, IMPLEMENTED
+
+BRE keeps a **civil-war severity percentage** on the empire record at `+0x2bb`,
+files into it during the turn, and spends it in the civil-unrest routine
+(`BRE.OVR 0xC59A`). It is not a separate subsystem so much as the severe end of
+the two shortfalls that can light it:
+
+- **Famine** — the people got under **65%** of their food need:
+  `severity += round((1 − r) × 30)` (`BRE.OVR 0x381E5`).
+- **Unpaid land upkeep** — under **90%** of region maintenance was paid:
+  the same `round((1 − r) × 30)` (`BRE.OVR 0x2F23C`). A far easier trigger than
+  famine, and letting land upkeep slide is the fastest way to tear a realm apart.
+- A third setter exists — the crack/registration check, a flat 50. Not a
+  gameplay input.
+
+When it fires, at severity `S` percent:
+
+- popular support is **halved** (`BRE.OVR 0xC5C8`);
+- `S`% of the realm's **regions** are destroyed, removed proportionally across
+  the nine types, and returned to the planet-wide land pool the game sells new
+  land from (config record `+0x20`);
+- `S`% of **every one of the six unit types** is destroyed — held *and* escrowed
+  on the Trading Market (`BRE.OVR 0xC663`), so a listing is no shelter.
+
+**IB implements all of this** (`internal/game/morale.go`, `resolveCivilWar`),
+with one divergence: IB has no planet-wide land pool — its Daily Land Creation
+allowance is per-empire — so the destroyed regions are simply gone rather than
+resold.
 
 Tax rate, bank interest, and investment rates are configurable (a real
 league ran tax 85%, interest 75%).
@@ -1714,6 +1851,19 @@ league ran tax 85%, interest 75%).
   one at severe ones. **Civil-war collapse is still unbuilt**, so swapping in
   BRE's rates without it would leave starvation weaker than either game intends;
   the two belong in one change.
+  Food Market opens automatically so the player can buy food. Going underfed hurts:
+  **BINARY-VERIFIED (`BRE.OVR 0x38104` / `0x381E5` / `0x382E9`).** BRE bills the
+  people's need and the army's need **separately** and scores each on the usual
+  `(paid+1)/(due+1)` ratio: the people's shortfall costs `trunc((1 − r) × 40)`
+  **popular support**, the army's costs the same in **military morale**, and a
+  people's ratio under 65% lights a **civil war** (above). IB feeds the people
+  first and the army from what is left, matching the order BRE prompts in.
+
+  **Nobody emigrates.** BRE has no starvation attrition at all — the three
+  penalty bytes are the whole of it. IB's own 70/80/10 reconstruction, which also
+  drove 10% of the population out, is removed. breins.txt agrees on direction:
+  *"Without food, morale and public support will [decline]"* — and says nothing
+  about people leaving.
 - **Land market:** you may buy at most **500 regions per turn**, and the
   per-region price rises as you own more (about 1,100 coins/region when you hold
   only 2). Land is also **finite**: see Daily Land Creation below.
@@ -2331,6 +2481,14 @@ rather than the score table. IB's rules on top of that:
   holds that pact, and asks the covering message once for the whole batch.
 - **A Declaration Of War takes one confirmation for the list** and reports each
   realm it ended a relation with.
+- **Declaring war costs nothing at home** and leaves the pair at **Enemy**
+  (`World.DeclareWar`), mailing the other realm.
+- **Breaking a pact any other way does cost you.** Attacking a realm you hold an
+  agreement with breaches it: the pair drops to Enemy and the breaker loses a
+  QUARTER of both popular support and military morale (`World.breachTreaty`,
+  called from `Attack`). BINARY-VERIFIED at `BRE.OVR 0x1A881`: each stat is
+  integer-divided by 4 and multiplied by 3, so 90 support becomes 66, not 67.
+  IB previously docked a flat 10 support and left morale untouched.
 
 **Known simplification:** the original says a treaty "is not officially broken
 until the other realm is notified", implying the old pact still binds until the
@@ -2560,9 +2718,9 @@ Now matching this reference (as of v0.0.4):
   and SDI
 - Interactive maintenance stage at turn start: pay armed-forces upkeep and
   region maintenance ("how much will you give?"), with underpayment causing
-  desertion / revolts, plus an optional popular-support boost. Auto-Pay
-  Maintenance pays it silently when affordable. (SDI upkeep, waste
-  decontamination, and military morale are not yet modelled.)
+  desertion / revolts, plus optional popular-support and military-morale boosts.
+  Auto-Pay Maintenance pays it silently when affordable — and, as in the
+  original, only while support and morale both read exactly 100.
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and the money cap
 - Nuclear / chemical / biological strikes and pirate raids
