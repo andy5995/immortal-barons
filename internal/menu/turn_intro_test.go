@@ -25,7 +25,9 @@ func TestTurnIntroSkipsIncomeButShowsStatusOnReplay(t *testing.T) {
 	if strings.Contains(out, "Income Report") {
 		t.Errorf("a replay should skip the income report, got:\n%s", out)
 	}
-	if !strings.Contains(out, "Empire Status") {
+	// "Popular Support:" is the status block's own line and appears nowhere else
+	// in the intro; the title carries the realm name rather than a screen name.
+	if !strings.Contains(out, "Popular Support:") {
 		t.Errorf("a replay should still show the empire status, got:\n%s", out)
 	}
 }
