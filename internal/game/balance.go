@@ -814,9 +814,14 @@ const (
 	// turrets, so a local nuclear strike is not intercepted; SDI's "up to 50% of
 	// incoming missiles" (breins.txt) is the interplanetary path.
 	NukeCostPerRegion = 3_543
-	NukeCostCap       = 50_000_000
 	NukeWastePct      = 7 // centre of the band
 	NukeWasteJitter   = 3 // each of the two Random(3) draws
+	// StrikeCostCap is the arms dealer's ceiling on a warhead, shared by all
+	// three missiles. BINARY-VERIFIED: each routine hands the same literal
+	// 50,000,000 to the resident min helper before it quotes a price (BRE.OVR
+	// +0x22ae nuclear, +0x266c chemical, +0x2b6e biological), so this is one
+	// fact rather than three.
+	StrikeCostCap = 50_000_000
 	// A successful strike also pays the attacker Random(NukeScoreAward) Score.
 	// BINARY-VERIFIED from the same routine, which adds it to empire field
 	// +0x286 — the field the scores table prints in its Score column and every
@@ -837,9 +842,60 @@ const (
 	WasteDecontamDivisor  = 5  // 20% of the waste pile per turn
 	WasteDecontamFloor    = 10 // ...but at least this many
 	WasteDecontamPriceDiv = 2  // region price divided by this, before technology
-	ChemCost              = 6_000_000
-	BioCost               = 6_000_000
-	SDIStep               = 1_500_000 // gold of total funding per +1% SDI
+
+	// Chemical strike. BINARY-VERIFIED (BRE.OVR launch_chemical_attack, unit
+	// ovr_00e809 +0x25f0). Like the nuclear missile it is priced off the target
+	// and ruins land into waste through the same helper, but it is priced off
+	// the target's PEOPLE as well as its land, ruins a third as much of it, and
+	// takes a flat bite out of the population, morale and popular support.
+	//
+	// ChemCostPerPop is per BRE population unit — one million — so a caller
+	// converts with PopBREUnitScale before applying it.
+	//
+	// Nothing in the routine reads the target's SDI, turrets or tanks: its only
+	// reads of the target record are the realm name, the region total, the
+	// population, morale and support. `whatsnew.doc`'s "Tanks now help defend
+	// against incoming Chemical Missiles" predates v0.988 and does not survive
+	// into the shipped local routine, the same way the nuclear entry's missile
+	// bases do not.
+	ChemCostPerPop    = 94
+	ChemCostPerRegion = 2_037
+	ChemWastePct      = 3  // centre of the band: 3 + Random(3) - Random(3), so 1-5%
+	ChemWasteJitter   = 3  // each of the two Random(3) draws
+	ChemPopKillPct    = 20 // a flat fifth of the population, with no roll at all
+	ChemMoraleKeepNum = 3  // morale  := round(morale  * 3/4)
+	ChemMoraleKeepDen = 4
+	ChemScoreAward    = 700
+
+	// Biological strike. BINARY-VERIFIED (BRE.OVR launch_biological_attack,
+	// unit ovr_00e809 +0x2ac6). It touches no land at all — the routine never
+	// calls the region-to-waste helper — and instead kills people and troopers
+	// and halves military morale. Its price reads three of the target's figures:
+	// troopers, population (in BRE's unit of a million, so PopBREUnitScale
+	// applies) and regions.
+	//
+	// The Score award lands right after the purchase, BEFORE any damage is
+	// rolled, so a strike that kills nothing still pays — the same as the
+	// nuclear one, by a different route.
+	BioCostPerTrooper    = 23
+	BioCostPerPop        = 434
+	BioCostPerRegion     = 1_237
+	BioPopKillPct        = 10 // 10 + Random(4) - Random(2), so a 9-13% band
+	BioPopKillJitterUp   = 4
+	BioPopKillJitterDown = 2
+	BioTroopKillPct      = 15 // 15 + Random(6) - Random(4), so a 12-20% band
+	BioTroopKillJitterUp = 6
+	BioTroopKillJitterDn = 4
+	BioMoraleDivisor     = 2 // morale := morale / 2, truncated (an integer divide, not a real one)
+	BioScoreAward        = 400
+
+	// Both the chemical and the biological strike leave popular support at
+	// round(support * 2/3). BINARY-VERIFIED from the same two routines, which
+	// run the identical real expression on field +0x92.
+	StrikeSupportKeepNum = 2
+	StrikeSupportKeepDen = 3
+
+	SDIStep = 1_500_000 // gold of total funding per +1% SDI
 	// The SDI program's two running figures, CAPTURE-VERIFIED: seventeen
 	// consecutive SDI Program screens from a live league game (2026-08-08, see
 	// docs/dev/bre-screens.md) fit both exactly, across funding from 0 to just

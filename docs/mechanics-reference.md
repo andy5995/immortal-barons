@@ -18,7 +18,7 @@ settings from a real league, so they are defaults, not fixed rules.
 | Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy R5-Slappenheimer likelier to backfire. |
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). SDI cuts jet strength 25–30%. |
 | Turret | **0** | 2 | Defense only — the defensive **counterpart to jets**: it shoots down attacking jets (and blows up tanks / kills troops). Also helps intercept nuclear missiles. Cannot be destroyed by terrorist ops. |
-| Tank | **3–5** | **3–5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (3 at 0%, 4 at 50%, 5 at 100%) and with morale. Helps defend vs. chemical missiles. The guide's flat "4" is the HQ-50 value — see HeadQuarters below. |
+| Tank | **3–5** | **3–5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (3 at 0%, 4 at 50%, 5 at 100%) and with morale. The guide's flat "4" is the HQ-50 value — see HeadQuarters below. (`whatsnew.doc` claims tanks help defend against chemical missiles; the shipped v0.988 routine never reads the tank count — see the chemical attack below.) |
 | Bomber | 0 | 0 | Carries bombs / special-ops; destroys enemy *grounded* jets when sent in an attack. |
 | Carrier | 0 | 0 | Support: moves jets to battle and goods for trade. |
 | HeadQuarters | — | — | Raises tank effectiveness; enemies bomb it to weaken your tanks. |
@@ -459,8 +459,13 @@ All four constants live in `balance.go`; Score never drops below 0.
   invention and is gone.
 
   The price is quoted only after a target is named — all three missile screens
-  reach one shared arms-dealer routine that prints the figure and takes a yes
-  before deducting anything — so IB asks for the target first, then quotes.
+  reach one shared arms-dealer routine (`offer_black_market_weapon`, +0x206a)
+  that prints the figure and takes a yes before deducting anything — so IB asks
+  for the target first, then quotes. **That routine settles the bill against
+  gold in hand PLUS the bank**: it compares the price against the sum, then takes
+  whatever gold on hand cannot cover straight out of the bank. IB used to refuse
+  a sale a banked fortune could have paid for; all three warheads now draw the
+  same way.
 
   The attacker also gains **`Random(900)` Score**. Empire field +0x286 is the
   Score: it is written by eight aggressive actions and read by the empire status
@@ -482,9 +487,65 @@ All four constants live in `balance.go`; Score never drops below 0.
 
   The two regular-attack awards sit behind a league config byte (config record
   +0x3d8) and need their own pass before IB adopts them.
-- **Chemical attack** — damages fewer regions but kills a lot of people
-  (and troopers).
-- **Biological attack** — hurts people and troopers, but not land.
+- **Chemical attack** — the nuclear missile's little brother: it ruins a third
+  as much land, and gasses the people, the morale and the popular support on top.
+  BINARY-VERIFIED (`BRE.OVR` `launch_chemical_attack`, unit `ovr_00e809` +0x25f0):
+
+  ```
+  cost    = min(targetPopulation * 94 + targetRegions * 2037, 50,000,000)
+  percent = 3 + Random(3) - Random(3)          -- a 1-5% band, centred on 3
+  ruined  = targetRegions * percent / 100      -- truncated, then made Waste
+  killed  = targetPopulation * 20 / 100        -- a FLAT fifth, no roll at all
+  morale  = round(morale  * 3/4)               -- record +0x8e
+  support = round(support * 2/3)               -- record +0x92
+  ```
+
+  `targetPopulation` is in the original's unit of **one million**, so IB divides
+  its own head count by `PopBREUnitScale` before pricing the shot. The damage
+  percentages need no such conversion, being unit-free.
+
+  The land damage goes through the very same region-to-waste helper the nuclear
+  strike uses (`056d:18f0` — remove the count proportionally across the nine
+  region fields, then add it to Waste at +0xb6), which is what `whatsnew.doc`
+  records as "Local Nuclear & Chemical Missiles … now makes regions into WASTE
+  regions instead of destroying them". **IB used to destroy the land outright**,
+  and to kill troopers, and to scale everything by `(100 - SDI)` — none of the
+  three is in the routine.
+
+  **Not intercepted either.** The routine's only reads of the target record are
+  the realm name, the region total, the population, morale and support: no SDI,
+  no turrets, and no tanks. `whatsnew.doc`'s "Tanks now help defend against
+  incoming Chemical Missiles" is an entry from before v0.988 and does not survive
+  into the shipped routine, exactly as its nuclear/missile-base twin does not.
+
+  Attacker sees the ruined-region count and the civilian toll, in that order;
+  the victim's log gets both plus the famine that follows. Score: `Random(700)`.
+- **Biological attack** — kills people and troopers, halves military morale, and
+  touches no land at all. BINARY-VERIFIED (`BRE.OVR` `launch_biological_attack`,
+  unit `ovr_00e809` +0x2ac6):
+
+  ```
+  cost      = min(targetTroopers * 23 + targetPopulation * 434
+                  + targetRegions * 1237, 50,000,000)
+  killed    = targetPopulation * (10 + Random(4) - Random(2)) / 100   -- 9-13%
+  troopers -= targetTroopers  * (15 + Random(6) - Random(4)) / 100    -- 12-20%
+  morale    = morale / 2                       -- an integer divide, truncating
+  support   = round(support * 2/3)
+  ```
+
+  Same population unit as the chemical missile. The routine never reaches the
+  region-to-waste helper, so the land is untouched — including its waste.
+
+  The **Score lands on the sale**, before any damage is rolled, so a plague that
+  kills nobody still pays its `Random(400)`.
+
+  Attacker sees the trooper toll and then the civilian one — the reverse of the
+  chemical report's order, which leads with land.
+
+  **None of the three can eliminate a realm.** The nuclear and chemical strikes
+  leave every region on the target's books as waste, and a percentage of a
+  population never reaches zero. IB used to declare a realm "utterly conquered"
+  on a chemical or biological strike; that was IB's own and is gone.
 - **Attack pirates** — the nine pirate factions are living bands, not a
   fixed difficulty ladder: their strength is random (any faction can be the
   strongest). Their **names are IB-original** (BRE's coined names are its own
@@ -1878,9 +1939,11 @@ as IB's own until someone reads the original's code:
   most. (#113)
 - IB applies the SDI percentage to jet effectiveness and has no bomber term. The
   original caps jets at 30% and bombers at 20%, separately. (#113)
-- IB already contains two different models: an R5-Slappenheimer is intercepted
-  on a roll against the SDI percentage, while nuclear, chemical and biological
-  damage is scaled by it. Nothing justifies the split. (#113)
+- An R5-Slappenheimer is intercepted on a roll against the SDI percentage. That
+  is now the only local weapon SDI touches: the nuclear, chemical and biological
+  routines were all read and none of the three consults it, so the damage
+  discount IB used to apply is gone (#103). Whether SDI should touch the
+  R5-Slappenheimer either is still unread. (#113)
 - IB reduces Clingy Annihilator damage by the defender's SDI. It should not: the
   original says jets are "the only way to destroy this thing", and the doomsday
   weapon is not among the three things SDI is documented to work on. (#111)

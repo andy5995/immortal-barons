@@ -124,7 +124,7 @@ func TestSpecialAttackShowsCost(t *testing.T) {
 	// the sale — we are checking the quote, not the strike.
 	f := &fakeSession{keys: []rune("An")}
 
-	localAttack(f, w, "Nuclear Assault", flatCost(50_000), false, recordingStrike(&called, &a, &d))
+	localAttack(f, w, "Nuclear Assault", func(targetRow) int64 { return 50_000 }, false, recordingStrike(&called, &a, &d))
 
 	if !strings.Contains(f.out.String(), "50,000") {
 		t.Errorf("expected the gold cost in the quote; got:\n%s", f.out.String())
@@ -140,7 +140,7 @@ func TestSpecialAttackPricesOffTarget(t *testing.T) {
 	var a, d *game.Empire
 	f := &fakeSession{keys: []rune("An")}
 
-	localAttack(f, w, "Nuclear Assault", game.NukeCostForLand, false, recordingStrike(&called, &a, &d))
+	localAttack(f, w, "Nuclear Assault", nukePrice, false, recordingStrike(&called, &a, &d))
 
 	want := comma(game.NukeCostForLand(target.Land))
 	if !strings.Contains(f.out.String(), want) {

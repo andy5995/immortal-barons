@@ -34,12 +34,12 @@ func stirRevolts(s session.Session, w *ctx) Result {
 // bombingAttack wraps localAttack with BRE's Bomb Enemy Targets 500-Bomber
 // payload requirement (BRE.OVR: "All missiles and bombs require 500 Bombers
 // to deliver their payloads").
-func bombingAttack(s session.Session, w *ctx, label string, costOf func(land int) int64, strike func(a, d *game.Empire) (string, error)) Result {
+func bombingAttack(s session.Session, w *ctx, label string, price costOf, strike func(a, d *game.Empire) (string, error)) Result {
 	if w.Player().Bombers < game.BombingBombersRequired {
 		fail(s, fmt.Errorf("you need at least %d Bombers to deliver a payload", game.BombingBombersRequired))
 		return Stay
 	}
-	return localAttack(s, w, label, costOf, false, strike)
+	return localAttack(s, w, label, price, false, strike)
 }
 
 func bombFoodMarket(s session.Session, w *ctx) Result {
@@ -59,11 +59,11 @@ func undermineInvestments(s session.Session, w *ctx) Result {
 }
 
 func nuclearAssault(s session.Session, w *ctx) Result {
-	return bombingAttack(s, w, "Nuclear Assault", game.NukeCostForLand, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
+	return bombingAttack(s, w, "Nuclear Assault", nukePrice, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
 }
 
 func chemicalBombing(s session.Session, w *ctx) Result {
-	return bombingAttack(s, w, "Chemical Bombing", flatCost(game.ChemCost), func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
+	return bombingAttack(s, w, "Chemical Bombing", chemPrice, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
 }
 
 func slappenheimerStrike(s session.Session, w *ctx) Result {

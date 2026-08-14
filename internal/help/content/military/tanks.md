@@ -16,7 +16,5 @@ cheap to maintain, so over a long game tanks are the most efficient force.
 
 High military morale also makes your tanks more effective, so keep it up.
 
-Tanks also help defend your empire against chemical missile attacks.
-
 Grow your economy first, and then turn your gold into tanks for a force that
 wins both attacks and defenses.
