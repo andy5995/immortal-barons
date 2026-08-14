@@ -220,28 +220,10 @@ func TestOneRelationPerPair(t *testing.T) {
 	}
 }
 
-// Declaring war ends the agreement and costs no popular support; BRE's manual
-// says that is the whole point of the option.
-func TestDeclareWarCostsNoSupport(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	a := w.AddHuman("a", "Alpha")
-	b := w.AddHuman("b", "Beta")
-	w.ProposeTreaty(a, b, "Free Trade Agreement")
-	w.AcceptTreaty(b, a.Name, "Free Trade Agreement")
-	a.Support = 90
-
-	w.DeclareWar(a, b)
-
-	if got := w.Relation(a, b); got != RelationEnemy {
-		t.Errorf("relation after declaring war: want %q, got %q", RelationEnemy, got)
-	}
-	if a.Support != 90 {
-		t.Errorf("declaring war should cost no support, 90 -> %d", a.Support)
-	}
-}
-
-// Breaking a pact by attacking instead of declaring war causes the "internal
-// troubles" the manual contrasts a Declaration Of War against.
+// Breaking a pact by attacking instead of declaring war costs popular support.
+// IB's own rule — the original charges nothing for this route (see
+// TreatyBreachSupportPenalty); what it charges for is the declaration
+// (TestDeclareWarCostsSupportAndMorale).
 func TestAttackingAPartnerBreachesAndCostsSupport(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")

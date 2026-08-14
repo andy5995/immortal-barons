@@ -2029,9 +2029,32 @@ and each carries a gameplay effect (#11 wired the last two):
   by three; the manual's "and maintain" has no separate charge behind it, because
   the one up-front `days x rate` payment is the whole cost.
 
-Declaration of War breaks treaties without causing internal unrest. The two
-newly-wired treaties' magnitudes are IB tunables — BRE's manual gives the intent,
-not the numbers.
+**Declaration Of War** is the menu's formal way to end an agreement, and it is
+expensive. BINARY-VERIFIED (BRE.OVR 0x01a838, `break_diplomatic_treaty`): once
+confirmed, popular support (record `+0x92`) and military morale (`+0x8e`) are each
+divided by four and multiplied by three — a quarter off both — and only then are
+the relation rows on *both* empires cleared. The screen's own message speaks of
+revolts and of morale dropping severely. IB matches (`DeclareWarKeepNumerator` /
+`DeclareWarKeepDenominator`, `DeclareWar`), charging only when a real pact stood,
+as BRE does: the option is offered at all only when the relation is a treaty.
+
+Two manual statements about it are **wrong about the shipped game**, and are
+recorded here so they are not "fixed" back in:
+
+- "without causing internal troubles in your realm" — the code charges the two
+  quarters above. A disassembly outranks the docs, so IB follows the code.
+- "The treaty is not officially broken until the other realm is notified" — BRE
+  clears both rows in the same routine that prompts, with nothing waiting on the
+  message. There is no delayed-break window, and IB models none.
+
+Attacking a partner outright (`breachTreaty`, `TreatyBreachSupportPenalty`) is
+**IB's own addition**: no attack path in the original reads the relation, so BRE
+charges nothing for the dishonourable route. IB keeps a small support penalty
+there because a pact you can walk out of for free is not a pact — which does
+leave IB's two routes priced the opposite way round from BRE's.
+
+The two newly-wired treaties' magnitudes are IB tunables — BRE's manual gives the
+intent, not the numbers.
 
 ## Trading
 

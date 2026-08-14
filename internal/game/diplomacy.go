@@ -370,16 +370,23 @@ func (w *World) BreakTreaty(a, b *Empire, ttype string) {
 }
 
 // DeclareWar is BRE's Declaration Of War: the formal way to end an agreement.
-// Its manual is explicit that this breaks a pact "without causing internal
-// troubles in your realm" — so unlike breaching a treaty by attacking
-// (breachTreaty), it costs no popular support. The pair is left at Enemy and the
-// other realm is notified by mail.
+// Tearing up a pact in public costs a quarter of both popular support and
+// military morale — the original charges this even though its manual promises it
+// will not (see DeclareWarKeepNumerator). Only ending a real pact costs: BRE
+// offers the option at all only when a treaty stands, so declaring on a realm
+// you have no agreement with is free. The pair is left at Enemy and the other
+// realm is notified by mail.
 //
-// SIMPLIFICATION, flagged rather than hidden: the original says "the treaty is
-// not officially broken until the other realm is notified", implying the old
-// pact still stands until the message lands. IB breaks it at once and mails the
-// notice in the same step; the delayed-break window is not modelled.
+// The break is IMMEDIATE, and so is the original's, despite the manual's "the
+// treaty is not officially broken until the other realm is notified": BRE clears
+// both empires' relation rows in the same routine that prompts, with nothing
+// waiting on the message being read. There is no delayed-break window to model.
 func (w *World) DeclareWar(a, b *Empire) {
+	if rel := w.Relation(a, b); rel != "" && rel != RelationEnemy {
+		a.Support = a.Support / DeclareWarKeepDenominator * DeclareWarKeepNumerator
+		a.Morale = a.Morale / DeclareWarKeepDenominator * DeclareWarKeepNumerator
+		a.addEvent(fmt.Sprintf("Tearing up the %s with %s set off revolts at home; support and morale fell sharply.", rel, b.Name))
+	}
 	w.setRelation(a.Name, b.Name, RelationEnemy)
 	w.SendMail(a, b, Message{
 		To:   w.EmpireLetter(b),
@@ -388,10 +395,10 @@ func (w *World) DeclareWar(a, b *Empire) {
 }
 
 // breachTreaty ends a pact the dishonourable way — by attacking a realm you had
-// an agreement with. BRE's manual describes Declaration Of War as the route that
-// avoids "internal troubles in your realm", so the route that skips it must
-// cause them: the breaker loses popular support. A pair already at Enemy, or
-// with no relation, is not a breach and costs nothing.
+// an agreement with: the breaker loses popular support. This penalty is IB's
+// own; no attack path in the original reads the relation, so BRE charges nothing
+// for it (see TreatyBreachSupportPenalty). A pair already at Enemy, or with no
+// relation, is not a breach and costs nothing.
 func (w *World) breachTreaty(a, b *Empire) {
 	rel := w.Relation(a, b)
 	if rel == "" || rel == RelationEnemy {

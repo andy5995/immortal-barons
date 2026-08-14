@@ -443,3 +443,37 @@ func TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes(t *testing
 		t.Errorf("the ally bled for a battle it is not in: %d troopers / %d tanks", ally.Troopers, ally.Tanks)
 	}
 }
+
+// Declaring war is the costly route, not the cheap one: BRE takes a quarter off
+// both popular support and military morale (v/4*3, truncating on the divide).
+// Golden literals from the binary — 99 keeps 72, not 74. Declaring on a realm
+// you hold no agreement with costs nothing, because BRE offers the option only
+// against a standing treaty.
+func TestDeclareWarCostsSupportAndMorale(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	c := w.AddHuman("c", "Gamma")
+	a.Support, a.Morale = 99, 100
+
+	w.DeclareWar(a, c) // no pact stood
+	if a.Support != 99 || a.Morale != 100 {
+		t.Errorf("declaring on a realm you had no pact with should be free: %d/%d", a.Support, a.Morale)
+	}
+
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+	w.DeclareWar(a, b)
+	if a.Support != 72 {
+		t.Errorf("support after declaring war = %d, want 72", a.Support)
+	}
+	if a.Morale != 75 {
+		t.Errorf("morale after declaring war = %d, want 75", a.Morale)
+	}
+	if w.AreAllied(a, b) {
+		t.Error("the alliance should end the moment war is declared, as BRE ends it")
+	}
+	if w.Relation(a, b) != RelationEnemy {
+		t.Errorf("relation = %q, want %q", w.Relation(a, b), RelationEnemy)
+	}
+}

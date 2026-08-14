@@ -304,11 +304,30 @@ const (
 const ProclamationChancePct = 35
 
 // TreatyBreachSupportPenalty is the popular support a baron loses for ending an
-// agreement by attacking a partner instead of declaring war first. BRE's manual
-// says Declaration Of War breaks a pact "without causing internal troubles in
-// your realm", so the route that skips it must cause them — the original does
-// not publish the size, and this is IB's own figure. Tunable.
+// agreement by attacking a partner instead of declaring war first. The original
+// costs nothing for this route — no attack path reads the relation at all — so
+// the penalty is IB's own, kept because a pact you can walk out of for free is
+// not a pact. Deliberately far cheaper than declaring war (below), which is the
+// wrong way round against BRE and is the price of having the mechanic. Tunable.
 const TreatyBreachSupportPenalty = 10
+
+// Declaring war costs a quarter of BOTH popular support and military morale.
+// BINARY-VERIFIED (BRE.OVR 0x01a838, break_diplomatic_treaty): on the
+// confirmation, popular support at record +0x92 and military morale at +0x8e are
+// each divided by four and multiplied by three, in that order, before either
+// side's relation row is cleared. The truncation is on the divide, so 99 keeps
+// 72 rather than 74 — hence a numerator and denominator here instead of a
+// percentage.
+//
+// This CONTRADICTS the manual, which says the declaration breaks a pact
+// "without causing internal troubles in your realm". The binary's own message on
+// the same screen speaks of revolts and morale dropping severely, so the manual
+// is describing an intention the shipped game does not honour, and the code
+// wins (a disassembly outranks the docs for mechanics).
+const (
+	DeclareWarKeepNumerator   = 3
+	DeclareWarKeepDenominator = 4
+)
 
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income
 // as an inline "6 − f(tax)" × Population shape that was only partially
