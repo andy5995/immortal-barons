@@ -35,6 +35,7 @@ func newLinker(repoRoot string, enTopics []topic) *linker {
 		"docs/command-reference.md": "command-reference/index.md",
 		"docs/download.md":          "download/index.md",
 		"docs/faq.md":               "faq/index.md",
+		"docs/manual-vs-code.md":    "manual-vs-code/index.md",
 		"docs/translating.md":       "translating/index.md",
 	}
 	for _, t := range enTopics {

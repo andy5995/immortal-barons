@@ -96,6 +96,10 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	}
 	nav = append(nav, navNode{title: "Game Instructions", children: guide})
 
+	// After the instructions, since it is about the ORIGINAL rather than about
+	// playing this one — of interest to a BRE player who wants the numbers.
+	nav = append(nav, navNode{title: "Manual vs. Code", path: "manual-vs-code/index.md"})
+
 	nav = append(nav, navNode{title: "Door Setup", path: "door-setup/index.md"})
 	nav = append(nav, navNode{title: "Character Set", path: "charset/index.md"})
 	nav = append(nav, navNode{title: "Translating", path: "translating/index.md"})
