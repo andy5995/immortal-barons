@@ -2,6 +2,54 @@ package game
 
 import "testing"
 
+// The starting realm sits just UNDER its carrying capacity, so a new baron who
+// changes nothing gains people rather than losing them. This is the whole point
+// of PopBREUnitScale: BRE's capacity weights are per million and IB counts
+// twenty people to that unit, so leaving the conversion out puts the same realm
+// sixteen times over capacity and drains ~300 people on turn one.
+//
+// The figures are BRE's, from a live new-realm capture: the identical region
+// mix reads "Population: 100 Million" against a capacity of 121, and BRE's own
+// first turn moves it by one.
+func TestANewRealmStartsBelowItsCapacity(t *testing.T) {
+	e := &Empire{Support: 100, Tax: StartTax, People: StartPeople}
+	e.Regions.Agricultural = StartAgricultural
+	e.Regions.Desert = StartDesert
+	e.Regions.Mountain = StartMountain
+	e.Regions.Coastal = StartCoastal
+
+	capacity := e.popCapacity()
+	if capacity <= e.People {
+		t.Errorf("a new realm holds %d people against a capacity of %d, so it drains from its first turn",
+			e.People, capacity)
+	}
+	// BRE's figure for that realm is 121 in its own unit. Asserted as the golden
+	// literal it converts to, so retuning a weight has to come with new evidence.
+	if want := 2436; capacity != want {
+		t.Errorf("capacity %d, want %d (BRE's 121 per million x %d)", capacity, want, PopBREUnitScale)
+	}
+}
+
+// The population moves TOWARD the capacity, on every seed rather than a lucky
+// one — a fixed seed is one trajectory and would not have caught the drain,
+// which held across all of them.
+func TestPopulationMovesTowardCapacity(t *testing.T) {
+	for seed := int64(1); seed <= 8; seed++ {
+		cfg := DefaultConfig()
+		cfg.AICount = 0
+		w := NewWorldSeed(cfg, seed)
+		e := w.AddHuman("tester", "Testland")
+		before := e.People
+		w.PlayTurn(e, "2026-08-14")
+		// Support can fall and a random event can take people, so this asserts
+		// the direction of migration itself rather than the turn's net figure.
+		if e.LastPopGrowth <= 0 {
+			t.Errorf("seed %d: a realm %d under capacity migrated by %d; it should be gaining",
+				seed, e.popCapacity()-before, e.LastPopGrowth)
+		}
+	}
+}
+
 // Waste houses nobody. BRE's capacity routine (BRE.OVR 0xD08A) loads eight
 // region counts and never reads the ninth, Waste at +0xb6 — so ruined land
 // contributes nothing to carrying capacity. Asserted as a golden literal rather

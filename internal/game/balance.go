@@ -584,11 +584,11 @@ const (
 // it is shrinking, jittered, cut again above a punitive tax rate, and held to
 // half the realm's size. See popCapacity and processEconomy in turn.go.
 //
-// IB keeps ONE deliberate divergence: BRE stores population as a 16-bit count
-// of MILLIONS ("Population: 101 Million", record +0x62) and reports migration
-// as "gained N million people". IB counts people directly, so the same figures
-// are IB's own scale — the weights below are BRE's numbers applied to IB's
-// unit, not a rescaling of them.
+// BRE and IB COUNT PEOPLE IN DIFFERENT UNITS, so the weights below have to be
+// converted rather than used raw. BRE stores population as a 16-bit count of
+// MILLIONS ("Population: 101 Million", record +0x62) and reports migration as
+// "gained N million people"; IB counts people directly, twenty to BRE's one.
+// See PopBREUnitScale.
 const (
 	// Carrying-capacity weight per region, by type. Urban housing dominates by
 	// more than a factor of ten — a realm that wants people buys Urban.
@@ -612,6 +612,22 @@ const (
 	PopCapTaxNumerator   = 10 // binary: and by 10/tax, so a 10% rate is neutral
 	PopCapTaxFloor       = 3  // binary: max(3, tax) — the tax divisor never goes below 3
 	PopCapBase           = 50 // binary: a floor every realm gets regardless of holdings
+
+	// PopBREUnitScale converts the weights and base above — all in BRE's unit of
+	// one million — into IB's, which counts twenty people to BRE's one. The
+	// factor is pinned by the two games starting the SAME realm: BRE's new realm
+	// (2 Agricultural, 5 Desert, 5 Mountain, 3 Coastal, 100 troopers, 1000 food,
+	// 100% support, 15% tax — IB's starting mix exactly) reads "Population: 100
+	// Million", and IB starts it at StartPeople = 2000.
+	//
+	// Leaving it out is what made a fresh realm bleed people from its first turn:
+	// the raw weights put its capacity at 121 against a population of 2000, so
+	// migration read a realm sixteen times over-full and drained ~300 a turn,
+	// while the same realm in BRE sits just under capacity and grows. The same
+	// factor is already baked into TaxGoldPerCapita — BRE's new realm earns 5183
+	// gold at 15%, about 345 per BRE unit, which is IB's 17 x 20 — so the two
+	// stay consistent only while both carry it.
+	PopBREUnitScale = 20
 
 	// Per-turn movement toward the capacity: Random(5)+5 percent of the gap.
 	PopMoveMinPct = 5 // binary
@@ -717,6 +733,10 @@ const (
 	//	deficit = min(100 − Support, MaxSupportBoostPerTurn)
 	//	cost    = deficit × (SupportBoostPerPerson × People + SupportBoostFlat)
 	//	points  = deficit × (given + 1) / (cost + 1)
+	//
+	// Those live prompts read BRE's population figure, which counts MILLIONS, so
+	// SupportBoostPerPerson is per BRE unit and SupportBoostCost converts IB's
+	// count back down by PopBREUnitScale before applying it.
 	//
 	// The cap is on the deficit the crown CHARGES for, not on the award — paying
 	// the SupportBoostMaxPct maximum buys proportionally more. That is the

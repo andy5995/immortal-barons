@@ -622,6 +622,8 @@ func (w *World) aiInvestIdle(e *Empire) {
 //
 //	capacity = Σ(regions × PopCapWeight) × support/90 × 10/max(3, tax) + 50
 //
+// converted from BRE's population unit to IB's by PopBREUnitScale.
+//
 // Three factors move it, which is what makes migration a lever rather than a
 // clock: WHAT you own (urban housing dwarfs everything else), how POPULAR you
 // are, and how hard you TAX — the last two multiplicatively, so a heavily taxed
@@ -638,12 +640,16 @@ func (e *Empire) popCapacity() int {
 		e.Regions.Mountain*PopCapMountain +
 		e.Regions.Technology*PopCapTechnology +
 		e.Regions.Waste*PopCapWaste // zero, and deliberately spelled out
+	// The weights are BRE's, one unit to a million; IB counts twenty people to
+	// that unit. Convert before the divisions rather than after, so the capacity
+	// keeps its granularity instead of rounding in steps of twenty.
+	cap *= PopBREUnitScale
 	cap = cap * e.Support / PopCapSupportDivisor
 	tax := e.Tax
 	if tax < PopCapTaxFloor {
 		tax = PopCapTaxFloor
 	}
-	return cap*PopCapTaxNumerator/tax + PopCapBase
+	return cap*PopCapTaxNumerator/tax + PopCapBase*PopBREUnitScale
 }
 
 // IncomeBreakdown itemizes a turn's income by source (gold), plus the food

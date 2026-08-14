@@ -1135,11 +1135,24 @@ carry a `ln(2)` polynomial and would neither halve an exponent nor divide in a
 loop. The same routine backs the combat-odds code at `0x4a81c`, which is
 therefore also `sqrt`.
 
-**Deliberate divergence — millions.** BRE stores population as a **16-bit count
-of millions** (record `+0x62`; the status screen prints "Population: 101
+**Unit conversion — millions to people.** BRE stores population as a **16-bit
+count of millions** (record `+0x62`; the status screen prints "Population: 101
 Million" and migration reports "gained N million people"). IB counts people
-directly. The weights above are BRE's numbers applied to IB's unit, not a
-rescaling of them.
+directly, and **twenty of IB's to one of BRE's** — so the weights and the `+50`
+above, all in BRE's unit, are multiplied by 20 (`PopBREUnitScale`) to give a
+capacity in IB's.
+
+The factor is pinned by the two games starting the same realm. BRE's new realm —
+2 Agricultural, 5 Desert, 5 Mountain, 3 Coastal, 100 troopers, 1000 food, 100%
+support, 15% tax, which is IB's starting mix exactly — reads "Population: 100
+Million" against a capacity of 121, so it opens just *under* capacity and grows.
+IB starts that realm at 2000 people. `TaxGoldPerCapita` already carries the same
+factor: BRE's new realm earns 5183 gold at 15% tax, about 345 per BRE unit,
+which is IB's 17 × 20.
+
+Leaving the conversion out was a real defect, not a theoretical one: it put the
+starting realm sixteen times over its own capacity, and a new baron who changed
+nothing lost about 300 people on their first turn.
 
 **Capacity is decoupled from food, as in BRE.** Carrying capacity is
 support-driven; food is a separate gate (positive growth needs stored food, and
@@ -1194,6 +1207,9 @@ maximum payable = cost × 3 / 2
 
 Reproduced exactly by two live prompts: 216,366 gold at 23,874M people and
 218,139 at 24,071M, both three points short, each restoring exactly 3 points.
+The `3 × People` term is per BRE unit, so IB divides its own count by
+`PopBREUnitScale` before applying it (see the population section) — without that
+the crown charges twenty times the price.
 Note the deficit **charged for** is capped at 15, but the award is a plain ratio
 of what you paid — so **overpaying by half buys 22 points, not 15**. That is the
 original's behaviour, not an IB addition. The `+1` on each side is the same shape

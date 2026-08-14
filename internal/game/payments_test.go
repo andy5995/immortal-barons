@@ -113,8 +113,11 @@ func TestBoostSupportCapsAt100(t *testing.T) {
 func TestSupportBoostCostAndAward(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
-	e.Support, e.People = 97, 23874
-	if want := int64(3 * (3*23874 + 500)); e.SupportBoostCost() != want {
+	// BRE's live prompt read 23,874 MILLION people and asked 216,366 gold, so the
+	// same realm is 23874 x PopBREUnitScale in IB's count and must be charged the
+	// same gold. Asserted as the golden literal, not as the formula.
+	e.Support, e.People = 97, 23874*PopBREUnitScale
+	if want := int64(216_366); e.SupportBoostCost() != want {
 		t.Errorf("cost want %d, got %d", want, e.SupportBoostCost())
 	}
 	full := *e

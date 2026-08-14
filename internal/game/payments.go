@@ -247,7 +247,12 @@ func (e *Empire) supportBoostDeficit() int {
 // SupportBoostCost is the gold the crown requests to restore this turn's
 // recoverable support. Zero when support is already full.
 func (e *Empire) SupportBoostCost() int64 {
-	return int64(e.supportBoostDeficit()) * int64(SupportBoostPerPerson*e.People+SupportBoostFlat)
+	// SupportBoostPerPerson was fitted to BRE's population figure, which counts
+	// millions — so the population goes back into BRE's unit before it is
+	// applied, or the crown charges twenty times what it should. See
+	// PopBREUnitScale.
+	people := e.People / PopBREUnitScale
+	return int64(e.supportBoostDeficit()) * int64(SupportBoostPerPerson*people+SupportBoostFlat)
 }
 
 // SupportBoostMax is the most a baron may put toward the boost. Paying past the
