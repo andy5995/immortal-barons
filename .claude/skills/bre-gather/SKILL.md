@@ -255,6 +255,32 @@ Normal-Attack-on-Enter default, and the wire codes the help does not mention —
 but it should have been the *second* step, confirming and extending a cheap
 answer rather than substituting for one.
 
+**But a shipped doc is a HYPOTHESIS, not an answer — confirm every figure you
+intend to implement.** The prose is cheap and usually right, which is what makes
+the exceptions dangerous: nothing in the text marks the wrong line. Four cases
+found on 2026-08-14 alone:
+
+- `attack.hlp` puts the quick strike at **110%**; the resolver loads **1.2**
+  (BRE.OVR 0x4055a). The same switch's retreat constants — 0.92/0.85/0.80, i.e.
+  8/15/20% losses — match the help exactly, so the help is right about three
+  numbers in that paragraph and wrong about the fourth.
+- `bre.doc` says a Declaration Of War breaks a pact "without causing internal
+  troubles" and is "not officially broken until the other realm is notified".
+  `break_diplomatic_treaty` (0x01a838) takes a quarter of BOTH support and
+  morale and clears both relation rows on the spot.
+- `bre.doc` says Protective Trade makes deals cheaper "to send and maintain".
+  The send discount is real (cost/3); there is no recurring cost in the binary
+  at all, so the second half describes nothing.
+- `whatsnew.doc` claims tanks defend against chemical missiles. No WMD routine
+  reads tanks, turrets or SDI. Note `whatsnew.doc` is a CHANGELOG — it may
+  faithfully describe a build that is not the one you have, which is a different
+  failure from the manual being wrong about its own release.
+
+So: sweep the prose first to learn **what to look for and roughly where**, then
+read the code for the number you will actually type into `balance.go`. When the
+two disagree, the code wins and the disagreement goes in the constant's comment
+— otherwise the next reader "fixes" the constant back to the doc's value.
+
 Three cheap sweeps to run at the start of any mechanic hunt:
 
 ```
