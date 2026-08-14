@@ -83,6 +83,8 @@
     boxed pages, listing only the fields the realm has something in
   * Empire Status shows the cumulative score the scores board ranks on, where it
     used to show net worth under that label
+  * Spending the last turn of the day says so, instead of returning to the
+    opening menu without a word
   * Today's News counts the planet live, so a new board's first day no longer
     reads as empty
   * "Since your last play" recap entries color the realm name and treaty type

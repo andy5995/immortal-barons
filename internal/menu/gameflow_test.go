@@ -793,3 +793,28 @@ func TestDecontaminateStageSilentWithoutWaste(t *testing.T) {
 		t.Errorf("expected no output with nothing to clean; got:\n%s", out)
 	}
 }
+
+// Running out of turns DURING play tells the player so. The loop used to fold
+// the check into the continue prompt's condition — `turnsLeft <= 0 || !AskYesNo`
+// — so the last turn ended by short-circuiting past both the prompt and any
+// message, dropping the player on the opening menu with no word about why.
+// Asserts it reached the end of a real turn as well as the message, so a key
+// script that runs dry early cannot pass this vacuously.
+func TestRunTurnSaysWhenTheLastTurnIsSpent(t *testing.T) {
+	f := &fakeSession{keys: []rune(strings.Repeat("\r0n ", 400)), boot: true}
+	w := newWorld()
+	w.Player().TurnsLeft = 1
+
+	func() {
+		defer func() { recover() }() // an exhausted script ends the session by panic
+		runTurn(f, w)
+	}()
+
+	out := f.out.String()
+	if !strings.Contains(out, "End of Turn Statistics") {
+		t.Fatalf("never reached the end of a turn, so the message could not be due:\n%s", out)
+	}
+	if !strings.Contains(out, "used all of your turns today") {
+		t.Error("spending the last turn should say so rather than returning silently")
+	}
+}

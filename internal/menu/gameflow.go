@@ -973,7 +973,16 @@ func runTurn(s session.Session, w *ctx) Result {
 		if !withPlayer(w, func(p *game.Empire) { turnsLeft = p.TurnsLeft }) {
 			return abort()
 		}
-		if turnsLeft <= 0 || !AskYesNo(s, "Continue to your next turn?", true) {
+		// Running out mid-play is told, not just acted on: the loop used to fold
+		// this into the prompt's own condition, so the last turn ended by
+		// short-circuiting past both the prompt and any message and dropped the
+		// player on the opening menu with no word about why. Same line someone
+		// sees who starts Play with nothing left.
+		if turnsLeft <= 0 {
+			ok(s, "Sorry, you have used all of your turns today.")
+			return Stay
+		}
+		if !AskYesNo(s, "Continue to your next turn?", true) {
 			return Stay
 		}
 	}
