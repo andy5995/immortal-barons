@@ -620,7 +620,15 @@ type World struct {
 	SeenPackets map[string]bool
 	// Season counts league-wide resets, so a board can tell the Coordinator's new
 	// order from one it has already carried out (#65).
-	Season          int
+	Season int
+	// Epoch counts every full reset of THIS board's own world — a solo -reset as
+	// well as a league-wide one — starting at 1. Every outbound packet is stamped
+	// with it (Packet.Epoch), so a packet already sitting in an inbound directory
+	// when this board resets is recognisable as belonging to a generation this
+	// world has moved past, and ApplyPacket discards it instead of applying it to
+	// empires that no longer exist (#104). 0 in a packet means it predates the
+	// field and is trusted, the same way a pre-#118 packet with no BoardSig is.
+	Epoch           int
 	LeagueDiplomacy string       // coordinator's league-wide declaration, made with a season reset
 	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from ibnodes.dat at startup
 	Routes          []RouteRule  `json:"-"` // this board's routing overrides, loaded from ibroute.cfg at startup
@@ -671,6 +679,7 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 	w := &World{Config: cfg, rng: rand.New(rand.NewSource(seed)), nameRng: rand.New(rand.NewSource(seed ^ 0x4149_6e61_6d65))}
 	w.store = &MemStore{w}
 	w.initFreshGame()
+	w.Epoch = 1 // this world's first generation; resetForNewGame/ResetForNewSeason advance it
 	return w
 }
 
@@ -685,11 +694,13 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 // what identifies the board in its league — the roster, the keys, the season
 // count and the packet history that stops an old order being replayed. Used by
 // the Coordinator's league-wide reset (#65); a stand-alone board resets through
-// -reset instead.
+// -reset instead. Epoch still advances, the same protection resetForNewGame
+// gives a solo reset (#104).
 func (w *World) ResetForNewSeason(startDate string) {
 	nodes, key, pub := w.LeagueNodes, w.CoordKey, w.CoordPub
 	season, outSeq, high, seen := w.Season, w.OutSeq, w.HighSeq, w.SeenPackets
 	outbox, transit := w.Outbox, w.Transit
+	w.Epoch++
 	w.initFreshGame()
 	w.LeagueNodes, w.CoordKey, w.CoordPub = nodes, key, pub
 	w.Season, w.OutSeq, w.HighSeq, w.SeenPackets = season, outSeq, high, seen
@@ -743,6 +754,16 @@ func (w *World) initFreshGame() {
 	w.AutoFeed = true
 	w.seedAIEmpires()
 	w.seedPirates()
+}
+
+// EnsureEpoch repairs Epoch after loading a save that predates the inter-BBS
+// staleness marker (#104): unset reads as 0, which a packet reads as "no
+// epoch info, trust it" (see ApplyPacket), so a save with no history yet
+// starts at 1, same as a freshly created world.
+func (w *World) EnsureEpoch() {
+	if w.Epoch == 0 {
+		w.Epoch = 1
+	}
 }
 
 // EnsureInvestRate repairs InvestRate after loading a save that predates

@@ -67,7 +67,10 @@ definition.
   "Seq": 7,                         // per-sender sequence, for replay detection (#53)
   "Signature": "base64",            // ed25519 over the coordinator-authored parts
   "League": 42,                     // league number; a board in two leagues ignores the other's
-  "Hops": 0                         // boards that have forwarded this; capped by MaxPacketHops
+  "Hops": 0,                        // boards that have forwarded this; capped by MaxPacketHops
+  "Epoch": 3                        // sender's World.Epoch, so a packet a reset has outlived is
+                                     // recognised as stale rather than applied (#104). 0 = sender
+                                     // predates the field, trusted rather than rejected.
 }
 ```
 
@@ -102,6 +105,10 @@ IPMessage     { "FromBoard": "AlphaBBS", "FromEmpire": "Asgard",
                 "When": "07/04/2026  18:02:11", "Body": "..." }
                 // neither To* set = every realm on ToBoard reads it
 ```
+
+A packet whose `Epoch` is older than this board's current `World.Epoch` is
+discarded before anything else runs: it was written for a game this board has
+since wiped by resetting (#104).
 
 Processing (`World.ApplyPacket`): a packet addressed to this board (or a
 broadcast) is applied — scores import into `RemoteBoards`; attacks and terror

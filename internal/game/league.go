@@ -30,4 +30,9 @@ func (w *World) endGame() {
 
 // resetForNewGame wipes all empires (humans re-onboard on next login) and
 // re-seeds AI, resetting per-game state. LastMaster and Bulletin persist.
-func (w *World) resetForNewGame() { w.initFreshGame() }
+// Epoch advances so a packet already sitting in an inbound directory, written
+// for the game just wiped, is recognised as stale rather than applied (#104).
+func (w *World) resetForNewGame() {
+	w.Epoch++
+	w.initFreshGame()
+}

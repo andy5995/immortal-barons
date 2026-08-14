@@ -156,6 +156,7 @@ func packetKey(p Packet) string {
 func (w *World) StampOutbox() {
 	for i := range w.Outbox {
 		w.Outbox[i].League = w.Config.LeagueNumber
+		w.Outbox[i].Epoch = w.Epoch
 		if w.Outbox[i].Seq == 0 {
 			w.Outbox[i].Seq = w.NextSeq()
 		}

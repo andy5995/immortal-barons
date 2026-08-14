@@ -64,6 +64,7 @@ func repair(w *game.World, cfg game.Config) {
 	w.EnsurePirates()
 	w.EnsureTreaties()
 	w.EnsureNews()
+	w.EnsureEpoch()
 	w.Config = cfg
 	loadLeagueNodes(w, cfg)
 	loadRoutes(w, cfg)

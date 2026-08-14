@@ -2302,3 +2302,20 @@ impersonated.
 **Still not addressed**: withholding. A signature proves where a packet came
 from and says nothing about one that never arrives, and a missing packet looks
 the same as a board that did not play.
+
+## Inter-BBS packet staleness (#104)
+
+Nothing in a packet said which game it belonged to, so a packet already sitting
+in the inbound directory when a board resets — most often its own leftovers,
+written by a peer before the reset and never read — was applied to the fresh
+world exactly as if it were current: a strike from a realm that no longer
+exists, scores for empires already wiped, mail addressed to barons who are
+gone.
+
+`World.Epoch` is this board's own generation counter, starting at 1 and
+advancing on every full reset — a stand-alone `-reset` as well as a
+league-wide one. Every outbound packet is stamped with the sender's Epoch at
+write time. `ApplyPacket` discards a packet whole when its Epoch is older than
+this board's current one, before anything in it is applied. A packet with no
+Epoch at all — one written before this existed — is trusted rather than
+rejected.

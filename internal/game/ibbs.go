@@ -55,6 +55,12 @@ type Packet struct {
 	// Hops counts the boards that have forwarded this packet. Outside the
 	// signed payload, because every hub changes it.
 	Hops int
+	// Epoch is the sending board's own generation counter (World.Epoch) at the
+	// moment this packet was written. A receiver that has since reset — its own
+	// Epoch has advanced past this — recognises the packet as belonging to a
+	// game it has already wiped and discards it (#104). 0 means the sender
+	// predates the field, and is trusted rather than rejected.
+	Epoch int
 }
 
 // HasPayload reports whether p carries anything worth sending. The transport
@@ -817,6 +823,17 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// is the remaining gap, and it closes as rosters gain keys.
 	if ok, checked := w.VerifyBoardOrigin(p); checked && !ok {
 		w.postNews(fmt.Sprintf("A packet claiming to be from %s did not match that board's key and was refused.", p.FromBoard))
+		return Packet{}
+	}
+	// A packet stamped with an Epoch older than this board's current one was
+	// written for a game this board has since wiped — most often its own
+	// unprocessed leftovers surviving a -reset. Applying it would grant units,
+	// take regions, or deliver mail against empires that no longer exist, so it
+	// is discarded whole rather than applied to the fresh world (#104). Checked
+	// before SeenPacket for the same reason as the origin check above: a stale
+	// packet should not get to poison the replay counter either.
+	if p.Epoch > 0 && p.Epoch < w.Epoch {
+		w.postNews(fmt.Sprintf("A packet from %s predates this world's current game and was discarded.", p.FromBoard))
 		return Packet{}
 	}
 	// Applying the same packet twice would pay out a strike's results, a

@@ -100,6 +100,8 @@
   * The Configuration Editor sets the inter-BBS inbound and outbound
     directories, which now sit inside the data directory; a reset creates them
     and warns about packets left from the cleared game
+  * A reset advances this board's own generation marker, so a packet left over
+    from the cleared game is discarded instead of applied to the new one
 
 2026-08-05 (v0.0.4)
   * The web server has been removed (an SSH server may replace it)
