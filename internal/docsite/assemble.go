@@ -10,6 +10,7 @@
 package docsite
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -350,6 +351,7 @@ func Assemble(repoRoot, outDir, feedURL string) error {
 			{downloadSource(repoRoot, lang.code), filepath.Join(langDir, "download", "index.md"), "download/index.md"},
 			{faqSource(repoRoot, lang.code), filepath.Join(langDir, "faq", "index.md"), "faq/index.md"},
 			{translatingSource(repoRoot, lang.code), filepath.Join(langDir, "translating", "index.md"), "translating/index.md"},
+			{manualVsCodeSource(repoRoot, lang.code), filepath.Join(langDir, "manual-vs-code", "index.md"), "manual-vs-code/index.md"},
 		} {
 			if err := copyIfExists(pg.src, pg.dst, srcRel(pg.src), pg.siteRel, lk); err != nil {
 				return err
@@ -415,7 +417,41 @@ func Assemble(repoRoot, outDir, feedURL string) error {
 	if err != nil {
 		return err
 	}
+	if err := checkNavResolves(nav, filepath.Join(siteSrc, "en")); err != nil {
+		return err
+	}
 	return os.WriteFile(filepath.Join(outDir, "mkdocs.yml"), []byte(mkdocsYAML(nav)), 0o644)
+}
+
+// checkNavResolves fails the assembly when a nav entry points at a page that was
+// never written. The nav is built unconditionally while the pages are copied
+// only if their source exists, so adding a nav entry and forgetting the copy
+// leaves a dangling reference — which MkDocs only reports at build time, in
+// strict mode, in CI. Catching it here turns that into a local error naming the
+// path. English is the fallback every language resolves through, so a page
+// missing there is missing everywhere.
+func checkNavResolves(nav []navNode, enDir string) error {
+	var missing []string
+	var walk func([]navNode)
+	walk = func(ns []navNode) {
+		for _, n := range ns {
+			if len(n.children) > 0 {
+				walk(n.children)
+				continue
+			}
+			if n.path == "" {
+				continue
+			}
+			if _, err := os.Stat(filepath.Join(enDir, filepath.FromSlash(n.path))); err != nil {
+				missing = append(missing, n.path)
+			}
+		}
+	}
+	walk(nav)
+	if len(missing) > 0 {
+		return fmt.Errorf("nav references pages that were not assembled: %s", strings.Join(missing, ", "))
+	}
+	return nil
 }
 
 // topic is a help article located on disk, with its path relative to the
@@ -500,6 +536,10 @@ func downloadSource(repoRoot, lang string) string {
 }
 func faqSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "docs", "faq.md"), lang)
+}
+
+func manualVsCodeSource(repoRoot, lang string) string {
+	return langFile(filepath.Join(repoRoot, "docs", "manual-vs-code.md"), lang)
 }
 func translatingSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "docs", "translating.md"), lang)

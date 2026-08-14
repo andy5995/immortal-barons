@@ -18,6 +18,8 @@ func writeFixture(t *testing.T, root string) {
 		"docs/download.md":                            "# Download\n\nReleases and snapshots.\n",
 		"docs/faq.md":                                 "# FAQ\n\nQuestions.\n",
 		"docs/translating.md":                         "# Translating\n\nHow to translate.\n",
+		"docs/charset.md":                             "# Character Set\n\nCP437 and UTF-8.\n",
+		"docs/manual-vs-code.md":                      "# Manual vs. Code\n\nWhere the original's docs and its code disagree.\n",
 		"docs/dev/packets.md":                         "# Packet Format\n\nDev reference.\n",
 		"internal/help/content/economy/regions.md":    "---\ntitle: Regions\ncategory: economy\norder: 1\nin_game: true\n---\n# Regions\n\nBuy land.\n",
 		"internal/help/content/controls/interface.md": "---\ntitle: Menus\ncategory: controls\norder: 1\nin_game: true\n---\n# Menus\n\nNavigate.\n",
