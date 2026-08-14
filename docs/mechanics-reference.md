@@ -620,7 +620,9 @@ All four constants live in `balance.go`; Score never drops below 0.
   and **1/4** of its jets, turrets and tanks. Three consecutive raids on one
   band in `cap/kde3-01.cap` confirm it: gold 3391→2261→1507 and agents
   1460→973→649 decay by exactly 2/3, turrets 8516→6387→4790 by exactly 3/4,
-  while troopers and jets fall faster because they also pay battle losses. So
+  while troopers, jets and tanks fall faster because they also pay battle
+  losses — those three are the types the faction commits to the fight, so they
+  are docked twice and turrets are not. So
   one raid recovers a third of what a band holds, two recover 5/9, three 70% —
   which is why one attack sometimes suffices and two or three usually do.
   **A winning raid that seizes pirate-held land opens the same region-type
