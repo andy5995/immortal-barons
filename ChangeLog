@@ -1,7 +1,7 @@
 (in-progress:)
-  * Computer barons keep expanding instead of freezing at the size their income
-    could no longer outgrow; they now fund their armies out of the same surplus
-    they buy land with
+  * Computer-run realms no longer stop buying land permanently once upkeep
+    catches up with income; land purchases and army funding now draw from the
+    same gold surplus
   * A regular attack is fought out round by round: the side that breaks off
     loses the share of its forces it will accept, and the winner loses only
     what the strength ratio cost it, so a rout is cheap and an even fight is not
@@ -10,10 +10,10 @@
     and None still costs a little
   * A battle report leads with what the fight cost both sides and closes with
     the result
-  * Today's News counts the planet as it stands rather than as it stood at the
-    last maintenance, so a new board no longer reads as empty
+  * Today's News now counts the planet live; a new board's first day no
+    longer shows as empty
   * "Since your last play" recap entries color the realm name and treaty type
-    bright cyan, matching the original
+    bright cyan
   * A message is removed from the inbox once it is replied to, like Delete
   * A nuclear strike ruins land rather than destroying it: the target keeps
     every region and its upkeep but earns nothing from the ruined share
