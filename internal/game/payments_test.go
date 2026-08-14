@@ -20,19 +20,27 @@ func TestTechnologyLowersRegionUpkeep(t *testing.T) {
 }
 
 // TestTechnologyRaisesFoodProduced locks #20: food-region output is raised by
-// the Technology factor ("increased region output").
+// the Technology factor ("increased region output"). BRE raises the 300 base
+// and leaves the per-turn draw alone, so the factor lands inside agriFood.
 func TestTechnologyRaisesFoodProduced(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
 	e.Regions = RegionMix{Agricultural: 80, Technology: 20}
 	e.Land = e.Regions.Total()
-	e.TechSlots[TechSlotGold] = 40
-	base := e.Regions.foodProduced(w.agriFood(e))
-	if want, got := techRaise(base, e.TechFoodFactor()), w.FoodProduced(e); got != want {
-		t.Errorf("FoodProduced with tech: want %d, got %d", want, got)
+	draw := w.regionDraw(e, 6, FoodAgriRate)
+	plain := w.agriFood(e)
+	if want := 300 + draw; plain != want { // 300 is BRE's, not a tunable
+		t.Errorf("unteched yield per region: want %d, got %d", want, plain)
 	}
-	if w.FoodProduced(e) <= base {
-		t.Errorf("technology should raise food output: %d not > %d", w.FoodProduced(e), base)
+	if got, want := w.FoodProduced(e), 80*plain; got != want {
+		t.Errorf("FoodProduced: want %d, got %d", want, got)
+	}
+	e.TechSlots[TechSlotGold] = 40
+	if want, got := techRaise(300, e.TechFoodFactor())+draw, w.agriFood(e); got != want {
+		t.Errorf("teched yield per region: want %d, got %d", want, got)
+	}
+	if w.agriFood(e) <= plain {
+		t.Errorf("technology should raise food output: %d not > %d", w.agriFood(e), plain)
 	}
 }
 
