@@ -157,6 +157,10 @@ func (w *World) StampOutbox() {
 	for i := range w.Outbox {
 		w.Outbox[i].League = w.Config.LeagueNumber
 		w.Outbox[i].Epoch = w.Epoch
+		w.Outbox[i].FromNode = w.NodeNumber(w.Config.BoardID)
+		if w.Outbox[i].ToBoard != "" {
+			w.Outbox[i].ToNode = w.NodeNumber(w.Outbox[i].ToBoard)
+		}
 		if w.Outbox[i].Seq == 0 {
 			w.Outbox[i].Seq = w.NextSeq()
 		}
@@ -226,17 +230,25 @@ func (w *World) SignAsBoard(p *Packet) error {
 }
 
 // BoardPublicKey returns the roster's public key for a board, and whether the
-// roster names one. A roster written before this existed carries none, which is
-// the difference between "cannot check" and "failed the check".
-func (w *World) BoardPublicKey(board string) (ed25519.PublicKey, bool) {
-	if board == "" {
+// roster names one. Matched by roster node number when the packet carries one
+// (#105) — a number cannot collide the way two boards sharing a name could,
+// and survives that board renaming — falling back to the name for a packet, or
+// a roster, that predates node identity. A roster written before either
+// existed carries no key at all, which is the difference between "cannot
+// check" and "failed the check".
+func (w *World) BoardPublicKey(board string, node int) (ed25519.PublicKey, bool) {
+	if board == "" && node == 0 {
 		return nil, false
 	}
 	for _, n := range w.LeagueNodes {
-		// Exact match, as fromCoordinator and IsLeagueCoordinator compare board
-		// names. A case-insensitive match here would answer "which board is
-		// this" differently from the two checks either side of it.
-		if n.Name != board {
+		if node != 0 {
+			if n.Number != node {
+				continue
+			}
+		} else if n.Name != board {
+			// Exact match, as fromCoordinator and IsLeagueCoordinator compare
+			// board names. A case-insensitive match here would answer "which
+			// board is this" differently from the two checks either side of it.
 			continue
 		}
 		raw, err := hex.DecodeString(strings.TrimSpace(n.PublicKey))
@@ -253,7 +265,7 @@ func (w *World) BoardPublicKey(board string) (ed25519.PublicKey, bool) {
 // state every league is in until its Coordinator publishes one — see
 // ApplyPacket for what is done about it.
 func (w *World) VerifyBoardOrigin(p Packet) (ok, checked bool) {
-	pub, found := w.BoardPublicKey(p.FromBoard)
+	pub, found := w.BoardPublicKey(p.FromBoard, p.FromNode)
 	if !found {
 		return false, false
 	}

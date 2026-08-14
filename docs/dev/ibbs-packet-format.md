@@ -68,9 +68,13 @@ definition.
   "Signature": "base64",            // ed25519 over the coordinator-authored parts
   "League": 42,                     // league number; a board in two leagues ignores the other's
   "Hops": 0,                        // boards that have forwarded this; capped by MaxPacketHops
-  "Epoch": 3                        // sender's World.Epoch, so a packet a reset has outlived is
+  "Epoch": 3,                       // sender's World.Epoch, so a packet a reset has outlived is
                                      // recognised as stale rather than applied (#104). 0 = sender
                                      // predates the field, trusted rather than rejected.
+  "FromNode": 2,                    // sender's roster node number, preferred over FromBoard for
+  "ToNode": 1                       // identity (auth, addressing, the Coordinator check, #105).
+                                     // 0 = unaddressed (ToNode) or no roster yet (FromNode);
+                                     // FromBoard/ToBoard are the fallback either way.
 }
 ```
 
@@ -106,9 +110,13 @@ IPMessage     { "FromBoard": "AlphaBBS", "FromEmpire": "Asgard",
                 // neither To* set = every realm on ToBoard reads it
 ```
 
-A packet whose `Epoch` is older than this board's current `World.Epoch` is
-discarded before anything else runs: it was written for a game this board has
-since wiped by resetting (#104).
+A packet addressed to a specific board (`ToBoard`/`ToNode`) is matched by
+`ToNode` first when both this board's own roster number and the packet's are
+known, falling back to `ToBoard` otherwise (`World.AddressedToMe`) — the same
+preference `VerifyBoardOrigin` and the Coordinator check give `FromNode` over
+`FromBoard` (#105). A packet whose `Epoch` is older than this board's current
+`World.Epoch` is discarded before anything else runs: it was written for a
+game this board has since wiped by resetting (#104).
 
 Processing (`World.ApplyPacket`): a packet addressed to this board (or a
 broadcast) is applied — scores import into `RemoteBoards`; attacks and terror

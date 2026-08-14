@@ -954,3 +954,41 @@ func TestResetForNewSeasonAlsoAdvancesEpoch(t *testing.T) {
 		t.Errorf("Epoch after ResetForNewSeason = %d, want %d", w.Epoch, before+1)
 	}
 }
+
+// TestCoordinatorRenameStillRecognizedByNode is #105's core claim: the
+// roster's node number is the identity, so a Coordinator that has renamed
+// itself is still obeyed by a member whose own roster copy has not caught up
+// with the new name yet.
+func TestCoordinatorRenameStillRecognizedByNode(t *testing.T) {
+	coordPub, coordSec, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	lc := NewWorldSeed(Config{BoardID: "NewCoordName"}, 1)
+	lc.CoordKey = coordSec
+	lc.LeagueNodes = []LeagueNode{{Number: 1, Name: "NewCoordName"}, {Number: 2, Name: "Member"}}
+	lc.Outbox = []Packet{{FromBoard: "NewCoordName", ToBoard: "Member",
+		LeagueNodes: []LeagueNode{{Number: 1, Name: "NewCoordName"}, {Number: 2, Name: "Member"}, {Number: 3, Name: "NewMember"}}}}
+	lc.StampOutbox()
+	order := lc.Outbox[0]
+	if order.FromNode != 1 {
+		t.Fatalf("StampOutbox did not stamp FromNode: %+v", order)
+	}
+
+	// The member's own roster is stale: it still has the Coordinator's OLD name.
+	m := NewWorldSeed(Config{BoardID: "Member"}, 1)
+	m.CoordPub = coordPub
+	m.LeagueNodes = []LeagueNode{{Number: 1, Name: "OldCoordName"}, {Number: 2, Name: "Member"}}
+
+	m.ApplyPacket(order)
+
+	found := false
+	for _, n := range m.LeagueNodes {
+		if n.Name == "NewMember" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("coordinator orders were refused after a rename, even though the node number still matches; news:\n%s", newsText(m))
+	}
+}

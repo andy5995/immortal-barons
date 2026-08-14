@@ -135,6 +135,7 @@ func addressBroadcasts(w *game.World, packets []game.Packet) []game.Packet {
 		for _, b := range boards {
 			copied := p
 			copied.ToBoard = b
+			copied.ToNode = w.NodeNumber(b)
 			out = append(out, copied)
 		}
 	}
@@ -184,7 +185,7 @@ func ReadInbound(w *game.World, dir string) (int, error) {
 		if w.Config.LeagueNumber != 0 && p.League != 0 && p.League != w.Config.LeagueNumber {
 			continue // another league's game, sharing this directory
 		}
-		if p.ToBoard != "" && p.ToBoard != w.Config.BoardID {
+		if !w.AddressedToMe(p) {
 			if !w.Routed() {
 				continue // a mesh fans every packet out; this is a copy for someone else
 			}

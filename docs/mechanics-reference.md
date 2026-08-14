@@ -2319,3 +2319,18 @@ write time. `ApplyPacket` discards a packet whole when its Epoch is older than
 this board's current one, before anything in it is applied. A packet with no
 Epoch at all — one written before this existed — is trusted rather than
 rejected.
+
+## Inter-BBS board identity (#105)
+
+BRE keys a board on the roster's node number (`BRNODES.DAT`), not its name;
+IB's packets originally carried only `FromBoard`/`ToBoard` name strings. A name
+can collide between two sysops, and a board that renames itself becomes a
+stranger to a league still holding its old name.
+
+Packets now also carry `FromNode`/`ToNode`, the roster numbers of the two
+ends, stamped from the sender's own roster. Wherever identity actually matters
+— `VerifyBoardOrigin`'s key lookup, the Coordinator check (`fromCoordinator`,
+node #1), and whether an inbound packet is addressed here
+(`World.AddressedToMe`) — the node number is checked first and the board name
+is the fallback, for a packet or a roster that predates node identity. The
+name stays the display label everywhere else (`RemoteBoard`, the planet list).
