@@ -38,42 +38,61 @@ func TestRecipientsExcludesPlayerAndDead(t *testing.T) {
 	}
 }
 
-func TestRecipientIndex(t *testing.T) {
-	cases := []struct {
-		name string
-		r    rune
-		n    int
-		want int
-	}{
-		{"A selects first", 'A', 3, 0},
-		{"lowercase a selects first", 'a', 3, 0},
-		{"B selects second", 'B', 3, 1},
-		{"out of range n", 'C', 2, -1},
-		{"below A", '0', 3, -1},
-		{"beyond 25 cap", rune('A' + 25), 30, -1},
+// A picker letter is the empire's SLOT letter, so a dead realm or the caller's
+// own leaves a GAP instead of renumbering the rows below it — BRE indexes its
+// empire array with the letter itself (BRE.OVR 0x1b575). The letters must also
+// agree with the ones a message records in "Message To  :".
+func TestPickIndexUsesSlotLetters(t *testing.T) {
+	w := newWorld()
+	w.With(func() { w.AddAIEmpires(3) })
+	var gap *game.Empire
+	w.With(func() {
+		for _, e := range w.Empires { // the first realm that is neither dead nor the caller
+			if e != w.Player() {
+				gap = e
+				break
+			}
+		}
+		gap.Alive = false
+	})
+	rows, _ := pickRows(w, pickOpts{})
+	if len(rows) == 0 {
+		t.Fatal("no selectable realms")
 	}
-	for _, c := range cases {
-		t.Run(c.name, func(t *testing.T) {
-			if got := recipientIndex(c.r, c.n); got != c.want {
-				t.Errorf("recipientIndex(%q, %d) = %d, want %d", c.r, c.n, got, c.want)
+	for _, r := range rows {
+		if r.e == gap {
+			t.Fatalf("a dead realm is still selectable as (%c)", r.letter)
+		}
+		if r.e == w.Player() {
+			t.Fatalf("the caller is selectable as (%c)", r.letter)
+		}
+		if got := pickIndex(rows, r.letter); got < 0 || rows[got].e != r.e {
+			t.Errorf("pickIndex(%q) did not find its own row", r.letter)
+		}
+		w.With(func() {
+			if want := w.EmpireLetter(r.e); want != string(r.letter) {
+				t.Errorf("row letter = %q, want the empire's slot letter %q", r.letter, want)
 			}
 		})
+	}
+	if pickIndex(rows, '0') != -1 {
+		t.Error("a non-letter key selected a row")
 	}
 }
 
 func TestPickRecipientSelectsByLetter(t *testing.T) {
 	w := newWorld()
-	rs := recipients(w)
-	if len(rs) == 0 {
+	rows, _ := pickRows(w, pickOpts{})
+	if len(rows) == 0 {
 		t.Skip("no recipients seeded")
 	}
-	f := &fakeSession{keys: []rune{'A'}}
+	f := &fakeSession{keys: []rune{rows[0].letter}}
 	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
 	if target != targetOne {
-		t.Fatalf("pickRecipient('A') target = %v, want targetOne", target)
+		t.Fatalf("pickRecipient(%q) target = %v, want targetOne", rows[0].letter, target)
 	}
-	if got != rs[0] {
-		t.Errorf("pickRecipient('A') = %v, want %v", got, rs[0])
+	if got != rows[0].e {
+		t.Errorf("pickRecipient(%q) = %v, want %v", rows[0].letter, got, rows[0].e)
 	}
 }
 
@@ -178,7 +197,8 @@ func TestSendMessageToAllAllies(t *testing.T) {
 	ally, other := rs[0], rs[1]
 	treatyWith(w, ally)
 	body := "Muster at the river."
-	f := &fakeSession{keys: []rune("*" + body + "\r/s")}
+	// '*' marks the allies, RETURN closes the list, then the message.
+	f := &fakeSession{keys: []rune("*\r" + body + "\r/s")}
 	sendMessage(f, w)
 	if len(ally.Mail) != 1 {
 		t.Errorf("ally got %d messages, want 1", len(ally.Mail))
@@ -187,5 +207,133 @@ func TestSendMessageToAllAllies(t *testing.T) {
 	}
 	if len(other.Mail) != 0 {
 		t.Errorf("a realm with no treaty got %d messages, want 0", len(other.Mail))
+	}
+}
+
+// BRE's Send Message picker is a MULTI-select list: letters toggle, RETURN
+// closes it. Two letters must therefore reach two inboxes from one composition,
+// and every copy must carry the same "Message To  :" letters, in letter order.
+func TestSendMessageToSeveralRealms(t *testing.T) {
+	w := newWorld()
+	w.With(func() { w.AddAIEmpires(2) })
+	rows, _ := pickRows(w, pickOpts{})
+	if len(rows) < 3 {
+		t.Fatalf("need 3 selectable realms, got %d", len(rows))
+	}
+	first, second, untouched := rows[0], rows[2], rows[1]
+	body := "Meet at dawn."
+	keys := string(second.letter) + string(first.letter) + "\r" + body + "\r/s"
+	f := &fakeSession{keys: []rune(keys)}
+	sendMessage(f, w)
+
+	if !strings.Contains(f.out.String(), "lines for your message") {
+		t.Fatalf("never reached the editor:\n%s", f.out.String())
+	}
+	want := string(first.letter) + string(second.letter)
+	for _, r := range []pickRow{first, second} {
+		if len(r.e.Mail) != 1 {
+			t.Fatalf("%s got %d messages, want 1", r.name, len(r.e.Mail))
+		}
+		if !strings.Contains(r.e.Mail[0].Body, body) {
+			t.Errorf("%s message = %q, want it to carry %q", r.name, r.e.Mail[0].Body, body)
+		}
+		if r.e.Mail[0].To != want {
+			t.Errorf("%s message addressed to %q, want %q", r.name, r.e.Mail[0].To, want)
+		}
+	}
+	if len(untouched.e.Mail) != 0 {
+		t.Errorf("%s got %d messages, want 0", untouched.name, len(untouched.e.Mail))
+	}
+}
+
+// Z addresses everyone and does NOT close the prompt — BRE toggles each letter
+// A..Y in turn and still waits for RETURN (BRE.OVR 0x1b65e, its 0x1427 branch).
+func TestSendMessageZAllNeedsReturn(t *testing.T) {
+	w := newWorld()
+	w.With(func() { w.AddAIEmpires(2) })
+	rows, _ := pickRows(w, pickOpts{})
+	if len(rows) < 3 {
+		t.Fatalf("need 3 selectable realms, got %d", len(rows))
+	}
+	body := "Everyone hears this."
+	f := &fakeSession{keys: []rune("Z\r" + body + "\r/s")}
+	sendMessage(f, w)
+
+	if !strings.Contains(f.out.String(), "lines for your message") {
+		t.Fatalf("Z then RETURN never reached the editor:\n%s", f.out.String())
+	}
+	var want strings.Builder
+	for _, r := range rows {
+		want.WriteRune(r.letter)
+	}
+	for _, r := range rows {
+		if len(r.e.Mail) != 1 {
+			t.Fatalf("%s got %d messages, want 1", r.name, len(r.e.Mail))
+		}
+		if r.e.Mail[0].To != want.String() {
+			t.Errorf("%s message addressed to %q, want %q", r.name, r.e.Mail[0].To, want.String())
+		}
+	}
+}
+
+// Pressing a letter twice takes it back off the list, so Z followed by one
+// letter addresses everybody except that realm.
+func TestSendMessageZThenDeselect(t *testing.T) {
+	w := newWorld()
+	w.With(func() { w.AddAIEmpires(2) })
+	rows, _ := pickRows(w, pickOpts{})
+	if len(rows) < 3 {
+		t.Fatalf("need 3 selectable realms, got %d", len(rows))
+	}
+	dropped := rows[1]
+	f := &fakeSession{keys: []rune("Z" + string(dropped.letter) + "\rnote\r/s")}
+	sendMessage(f, w)
+
+	if !strings.Contains(f.out.String(), "lines for your message") {
+		t.Fatalf("never reached the editor:\n%s", f.out.String())
+	}
+	if len(dropped.e.Mail) != 0 {
+		t.Errorf("%s was deselected but got %d messages", dropped.name, len(dropped.e.Mail))
+	}
+	for _, r := range rows {
+		if r.e == dropped.e {
+			continue
+		}
+		if len(r.e.Mail) != 1 {
+			t.Errorf("%s got %d messages, want 1", r.name, len(r.e.Mail))
+		}
+	}
+}
+
+// RETURN with an empty list is BRE's cancel: no editor, no mail.
+func TestSendMessageEmptySelectionCancels(t *testing.T) {
+	w := newWorld()
+	rows, _ := pickRows(w, pickOpts{})
+	if len(rows) == 0 {
+		t.Skip("no recipients seeded")
+	}
+	f := &fakeSession{keys: []rune("\r")}
+	sendMessage(f, w)
+	if strings.Contains(f.out.String(), "lines for your message") {
+		t.Errorf("an empty selection opened the editor:\n%s", f.out.String())
+	}
+	for _, r := range rows {
+		if len(r.e.Mail) != 0 {
+			t.Errorf("%s got mail from a cancelled send", r.name)
+		}
+	}
+}
+
+// The prompt names the whole addressable range whatever the realm count: BRE
+// prints "(A-Y,Z=All,?=List)" in a two-realm game too (docs/dev/bre-screens.md).
+func TestPickPromptAlwaysSpansAToY(t *testing.T) {
+	w := newWorld()
+	if len(recipients(w)) == 0 {
+		t.Skip("no recipients seeded")
+	}
+	f := &fakeSession{keys: []rune("\r")}
+	pickRecipients(f, w, pickOpts{prompt: "Send to:", allowAll: true})
+	if got := sgr.ReplaceAllString(f.out.String(), ""); !strings.Contains(got, "(A-Y,Z=All,?=List) Send to:") {
+		t.Errorf("prompt = %q, want BRE's (A-Y,Z=All,?=List) Send to:", got)
 	}
 }

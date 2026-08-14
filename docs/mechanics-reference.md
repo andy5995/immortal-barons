@@ -1681,6 +1681,34 @@ Box geometry, measured from a live capture: a 76-column top rule carrying the
 date and time, and a short 41-column rule under the From/To headers (it does not
 span the box). Colors are in `docs/dev/bre-screens.md`.
 
+**Sending: the recipient picker addresses a LIST, not one realm.** BRE's
+`(A-Y,Z=All,?=List) Send to:` prompt toggles: each letter adds or removes that
+realm, `Z` toggles the whole `A`..`Y` range at once, `?` prints the roster and
+re-draws the prompt, and **RETURN closes the list** (empty = cancel). Anything
+else is ignored silently, the caller's own letter and dead slots included. One
+composition then goes to every selected realm, and every copy carries the same
+`Message To  :` letters in letter order — which is what the boxed capture's
+`Message To  : ABCE` is. Verified against the selection routine at `BRE.OVR`
+0x1b65e and its per-letter toggle at 0x1b575; layout and colours are in
+`docs/dev/bre-screens.md`. Two consequences worth stating outright:
+
+- **`Z` does not send.** It only marks everyone; the message is not composed
+  until RETURN. IB used to treat `Z` as a one-key "all" that jumped straight to
+  the editor.
+- **A picker letter is the realm's world SLOT, not its row number**, so a dead
+  realm or your own leaves a gap in the lettering. That is the same letter
+  `Message To  :` records, and the same one the `-*Relations*-` roster shows.
+
+Editor: 20 lines under a 68-column ruler, `/S` save, `/A` abort, `/C` clear.
+
+**Not yet built (verified, from the binary).** BRE's *local* reader answers `R`
+with a three-way destination prompt — public reply, author only, or select
+destinations — keyed `P`/`A`/`S` (`BRE.OVR` unit 0x1d75d: the tests sit at
++0xe02, +0xeb7 and +0xf13). `P` addresses every living realm that was on the
+original message's recipient list except the reader; `S` opens the same
+multi-select picker as Send Message. IB replies to the author alone, and asks its
+two-way `Public Reply?` only for interplanetary mail.
+
 ## Menu fidelity vs BRE
 
 IB's menus match BRE's layout, item order, and hotkeys where practical (#17 menu
@@ -1702,10 +1730,14 @@ purpose:
   Enter wipes the allocation; IB suggests the unit's **current** % instead, so Enter
   leaves it unchanged. Both cap the running total at 100% via a shrinking max (the
   remainder becomes gold). The order and per-unit prompt otherwise match BRE.
-- **Send Message can address all allies.** BRE's picker takes one realm or `Z`
-  for all of them; IB adds `*`, which writes to every realm the sender holds a
-  standing treaty with, of any type (Enemy is a relation, not a treaty, so an
-  enemy is never included). The key is offered only while they hold one.
+- **Send Message can address all allies.** On top of BRE's letters and `Z`, IB
+  adds `*`, which toggles every realm the sender holds a standing treaty with, of
+  any type (Enemy is a relation, not a treaty, so an enemy is never included).
+  The key is offered only while they hold one.
+- **The Diplomacy picker is still single-select.** BRE runs the *same*
+  multi-select routine there, so its Declaration Of War and treaty proposals can
+  name several realms at once; IB takes one realm, or `Z`/`*` for a whole group.
+  The outcome differs only in that IB cannot propose to an arbitrary subset.
 - **Diplomacy is on the opening menu as well as System.** BRE lists it under
   System alone.
 - **Buy Regions closes itself when the gold runs out.** A purchase that leaves

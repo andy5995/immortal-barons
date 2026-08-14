@@ -343,6 +343,29 @@ before writing "BRE does not do X" into a commit, a doc, or the spec, grep for
 X's own words, and say "not found in the sending menu; not searched further" if
 that is all you did.
 
+**A prompt's TEXT is not its behaviour — read the caller.** `find-string` on a
+prompt lands you in the routine that *prints* it, and that routine usually does
+nothing else. The input loop, the key table and the semantics are one level up,
+in `callers[]`. `(A-Y,Z=All,?=List) Send to:` had been cloned as a single
+keypress for a year on the strength of how it reads; its caller
+(`BRE.OVR` 0x1b65e) is a toggling multi-select closed by RETURN, and `Z` marks
+every letter rather than sending. Always `lookup` the printer, then `lookup` its
+caller, before describing what a prompt does.
+
+**In a capture, count the characters echoed after a prompt.** One echoed key
+means a single-key prompt; a run of them (`Send to: EFHIJKMNOP`) means
+multi-select, and a run with embedded `\b`/space/`\b` means the keys *toggle*.
+This is visible in a plain `cat -v` of the capture and it settles the question
+before any disassembly — but only if the capture is read as bytes rather than
+skimmed after ANSI stripping, which turns the erase sequences into
+innocuous-looking spaces.
+
+**A letter in a picker is usually an ARRAY INDEX, not a row number.** BRE
+multiplies the ASCII letter straight into its empire-record stride, so the
+letters carry gaps for dead realms and for the caller — never renumber a list to
+close them, and check that every screen naming a realm by letter (roster,
+relations, `Message To  :`) is using the same basis.
+
 **The variant-string trap (a number in a string may be the WRONG variant's
 number).** A literal value baked into a string is only authoritative for *that
 call site*, and BRE often has several near-identical strings for variants of one
