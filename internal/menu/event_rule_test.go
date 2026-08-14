@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
@@ -56,5 +57,36 @@ func TestShowTurnEventsNumbersAndStampsEachEntry(t *testing.T) {
 	}
 	if len(w.Player().Events) != 0 {
 		t.Errorf("recap should consume the events, %d left", len(w.Player().Events))
+	}
+}
+
+// The recap body colors the realm name and the treaty type bright-cyan and
+// leaves the connecting words plain, matching BRE's live capture (#94,
+// docs/dev/bre-screens.md "Since your last play" section). newWorld's AI
+// empire is named "Gale Horde" (game.NewWorldSeed(cfg, 1)), so it's a real,
+// known realm the highlighter should recognize.
+func TestShowTurnEventsColorsRealmAndTreatyType(t *testing.T) {
+	f := &fakeSession{keys: []rune("\r")}
+	w := newWorld()
+	w.Player().Events = []game.Event{
+		{When: time.Now(), Text: "Gale Horde accepted your Full Defense Alliance proposal."},
+	}
+
+	showTurnEvents(f, w)
+
+	out := f.out.String()
+	wantRealm := ansi.FgBrightCyan + "Gale Horde" + ansi.Reset
+	if !strings.Contains(out, wantRealm) {
+		t.Errorf("realm name not colored bright-cyan, want substring %q in:\n%s", wantRealm, out)
+	}
+	wantTreaty := ansi.FgBrightCyan + "Full Defense Alliance" + ansi.Reset
+	if !strings.Contains(out, wantTreaty) {
+		t.Errorf("treaty type not colored bright-cyan, want substring %q in:\n%s", wantTreaty, out)
+	}
+	// "accepted your" and "proposal." are connecting words BRE leaves plain —
+	// they must not themselves carry a color escape right before them.
+	stripped := sgr.ReplaceAllString(out, "")
+	if !strings.Contains(stripped, "Gale Horde accepted your Full Defense Alliance proposal.") {
+		t.Errorf("stripped recap text mismatch:\n%s", stripped)
 	}
 }

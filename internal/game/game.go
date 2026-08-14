@@ -773,6 +773,12 @@ func planetTotals(w *World) PlanetTotals {
 	return t
 }
 
+// PlanetTotals computes today's totals live, over the empires that exist
+// right now. rollNews only freezes a BulletinToday.Totals snapshot at daily
+// maintenance, so a board still on its first game day (or any realm created
+// since the last maintenance) would otherwise report an empty planet (#109).
+func (w *World) PlanetTotals() PlanetTotals { return planetTotals(w) }
+
 // AI baron names are built from a modifier x noun matrix rather than a fixed
 // list, so a game can field far more distinct barons and the lineup varies
 // game to game. The two single-word pools combine as "<modifier> <noun>"

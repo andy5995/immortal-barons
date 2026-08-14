@@ -2,6 +2,8 @@ package menu
 
 import (
 	"fmt"
+	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"unicode"
@@ -78,6 +80,28 @@ func hiNumsIn(s, color string) string { return hiNumsReset(s, color, ansi.Reset)
 // hiNums highlights figures in bright-yellow — BRE's default figure color for
 // battle/raid/economy reports.
 func hiNums(s string) string { return hiNumsIn(s, ansi.FgBrightYellow) }
+
+// hiTokens paints whole-word occurrences of any of words in color on an
+// otherwise-plain line, then back to ansi.Reset — the same shape as hiNums,
+// but for known literal words instead of digit runs. Longest word first, so a
+// short token that is a substring of a longer one (an empire named "Trade"
+// against "Free Trade Agreement") can't steal the longer token's match; \b
+// keeps a short token from painting itself inside an unrelated word.
+func hiTokens(s string, words []string, color string) string {
+	if len(words) == 0 {
+		return s
+	}
+	sorted := append([]string(nil), words...)
+	sort.Slice(sorted, func(i, j int) bool { return len(sorted[i]) > len(sorted[j]) })
+	quoted := make([]string, len(sorted))
+	for i, w := range sorted {
+		quoted[i] = regexp.QuoteMeta(w)
+	}
+	re := regexp.MustCompile(`\b(?:` + strings.Join(quoted, "|") + `)\b`)
+	return re.ReplaceAllStringFunc(s, func(m string) string {
+		return color + m + ansi.Reset
+	})
+}
 
 // targetRow snapshots the identity plus displayed fields of one living rival,
 // taken under the world lock so the picker list can be rendered and prompted

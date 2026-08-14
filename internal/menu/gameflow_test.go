@@ -387,6 +387,7 @@ func TestShowBulletinTodayVsYesterday(t *testing.T) {
 	w.NewsToday = []string{"today-line"}
 	w.BulletinYesterday = game.DailyBulletin{Totals: game.PlanetTotals{Population: 222}}
 	w.NewsYesterday = []string{"yesterday-line"}
+	live := w.PlanetTotals() // today's Totals are computed live, not the stored 111 (#109)
 
 	fToday := &fakeSession{keys: []rune(" ")}
 	showBulletinToday(fToday, w)
@@ -394,8 +395,8 @@ func TestShowBulletinTodayVsYesterday(t *testing.T) {
 	if !strings.Contains(todayOut, "today-line") || strings.Contains(todayOut, "yesterday-line") {
 		t.Errorf("showBulletinToday should show only today's news, got:\n%s", todayOut)
 	}
-	if !strings.Contains(todayOut, "111") {
-		t.Error("showBulletinToday should render today's totals")
+	if !strings.Contains(todayOut, formatGold(live.Population, "")) {
+		t.Error("showBulletinToday should render today's LIVE totals")
 	}
 
 	fYesterday := &fakeSession{keys: []rune(" ")}
@@ -406,6 +407,30 @@ func TestShowBulletinTodayVsYesterday(t *testing.T) {
 	}
 	if !strings.Contains(yesterdayOut, "222") {
 		t.Error("showBulletinYesterday should render yesterday's totals")
+	}
+}
+
+// Regression test for #109: rollNews only freezes a BulletinToday.Totals
+// snapshot at daily maintenance, so a board still on its first game day (or
+// any realm created since the last maintenance) had a zero-valued snapshot
+// while the scoreboard beside it already showed living, populated realms.
+// Today's News must reflect the CURRENT totals, not that stale snapshot.
+func TestShowBulletinTodayNotStaleOnFreshBoard(t *testing.T) {
+	w := newWorld()
+	// A brand-new board: no maintenance has ever rolled a snapshot, so
+	// BulletinToday is still its zero value, as game.NewWorldSeed leaves it.
+	w.BulletinToday = game.DailyBulletin{}
+	live := w.PlanetTotals()
+	if live.Population == 0 {
+		t.Fatal("test setup: expected the seeded world to already have living, populated empires")
+	}
+
+	f := &fakeSession{keys: []rune(" ")}
+	showBulletinToday(f, w)
+	out := f.out.String()
+
+	if !strings.Contains(out, formatGold(live.Population, "")) {
+		t.Errorf("expected Today's News to show the live population %d, got:\n%s", live.Population, out)
 	}
 }
 

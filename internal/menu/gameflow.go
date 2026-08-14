@@ -113,6 +113,12 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 			bulletin, news = w.BulletinYesterday, w.NewsYesterday
 		} else {
 			bulletin, news = w.BulletinToday, w.NewsToday
+			// Totals are recomputed live rather than trusted from the snapshot:
+			// rollNews only takes one at daily maintenance, so on a board's first
+			// day (or for any realm created since the last maintenance) the
+			// snapshot is still zero-valued while living empires already exist
+			// (#109). Change stays the frozen day-over-day delta rollNews took.
+			bulletin.Totals = w.PlanetTotals()
 		}
 		// Only name the board in a league, where several planets file news into
 		// one feed. On a stand-alone board the prefix is noise — and the default
@@ -210,6 +216,7 @@ func withPlayer(w *ctx, fn func(p *game.Empire)) bool {
 // and the empire is re-resolved inside the lock so a reload can't rebind it.
 func showTurnEvents(s session.Session, w *ctx) {
 	var events []game.Event
+	var realmNames []string
 	withPlayer(w, func(p *game.Empire) {
 		events = p.Events
 		p.Events = nil
@@ -217,13 +224,22 @@ func showTurnEvents(s session.Session, w *ctx) {
 		// event appended right after this clear still shows (takeSessionNews's
 		// shrink-reset alone couldn't tell it from part of the cleared backlog).
 		w.seenEvents, w.seenEventsSet = 0, true
+		for _, e := range w.World.Empires {
+			if e.Name != "" {
+				realmNames = append(realmNames, e.Name)
+			}
+		}
 	})
 	if len(events) == 0 {
 		return
 	}
+	// Realm names and treaty types paint bright-cyan, BRE's color for both in
+	// this recap (docs/dev/bre-screens.md, "Since your last play" capture).
+	recapTokens := append(realmNames, game.TreatyTypes...)
 	fmt.Fprintf(s, "\n%s%s%s\n\n", ansi.FgWhite, tr(s, "Since your last play, this has happened:"), ansi.Reset)
 	for i, ev := range events {
-		fmt.Fprintf(s, "%s\n%s\n\n", eventRule(i+1, ev.When), hiNums(wrapReport(ev.Text)))
+		body := hiTokens(wrapReport(ev.Text), recapTokens, ansi.FgBrightCyan)
+		fmt.Fprintf(s, "%s\n%s\n\n", eventRule(i+1, ev.When), hiNums(body))
 	}
 	pause(s)
 }
