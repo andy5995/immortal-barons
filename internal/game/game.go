@@ -179,12 +179,18 @@ type Empire struct {
 	// LastActive is the unix time of this baron's most recent menu action, and
 	// feeds only the online indicator on the roster screens. Zeroed on a clean
 	// session end; see presence.go.
-	LastActive       int64 `json:"lastActive,omitempty"`
-	Events           []Event
-	Mail             []Message
-	PirateHits       []PirateHit // raids suffered since last play; shown in the income report
-	ImmuneFrom       []string    // empires whose covert ops against us auto-fail (we bribed their agents)
-	ShieldedUntilDay int         // GameDay through which ALL incoming covert ops auto-fail (Expose Enemy Ops)
+	LastActive int64 `json:"lastActive,omitempty"`
+	Events     []Event
+	Mail       []Message
+	PirateHits []PirateHit // raids suffered since last play; shown in the income report
+	// RaidersThisTurn is the pirate-faction slots (PirateHit.Slot) that raided
+	// since last play. Set alongside PirateHits at the same recap that drains
+	// it, but left standing afterward so the Attack Pirates menu can flag the
+	// raider for the rest of the turn; the next recap overwrites it, empty if
+	// no new raid landed.
+	RaidersThisTurn  []int
+	ImmuneFrom       []string // empires whose covert ops against us auto-fail (we bribed their agents)
+	ShieldedUntilDay int      // GameDay through which ALL incoming covert ops auto-fail (Expose Enemy Ops)
 
 	// CoordinatorVote is the owner handle this baron votes for as the BBS
 	// Coordinator (the elected player who gets the Coordinator menu). Changeable

@@ -359,6 +359,41 @@ var pirateColors = []string{
 	ansi.FgBrightCyan,    // Ammonians    (11 light cyan)
 }
 
+// pirateRaiderMark hugs the name of whichever faction raided the player since
+// their last play (Empire.RaidersThisTurn) — IB's own addition, not BRE's;
+// see the online-baron mark it borrows its treatment from (actions_info.go).
+// Translatable like scoreOnlineMark, though an arrow is unlikely to need it.
+const pirateRaiderMark = "->"
+
+// raiderMark renders the mark, or a blank of the same width — reserving the
+// column so an unmarked row's name still starts where a marked one's does.
+// The shaft is decoration, like the online mark's parens (dark gray,
+// FgBrightBlack); the head is what carries the meaning, so it takes the same
+// brighter gray (FgWhite) the online mark's letter does — measured 9.04:1 on
+// VGA/CP437 and 11.54:1 on xterm against black, versus dark gray's 2.82:1 /
+// 5.32:1, so the part that must read alone gets the color that clears 4.5:1.
+func raiderMark(s session.Session, raided bool) string {
+	mark := []rune(tr(s, pirateRaiderMark))
+	if !raided {
+		return strings.Repeat(" ", len(mark))
+	}
+	if len(mark) == 0 {
+		return ""
+	}
+	return ansi.FgBrightBlack + string(mark[0]) + ansi.FgWhite + string(mark[1:]) + ansi.Reset
+}
+
+// raidedSlot reports whether slot is in raiders — the factions that hit the
+// player since their last play (Empire.RaidersThisTurn).
+func raidedSlot(raiders []int, slot int) bool {
+	for _, r := range raiders {
+		if r == slot {
+			return true
+		}
+	}
+	return false
+}
+
 func attackPirates(s session.Session, w *ctx) Result {
 	if blockedByProtection(s, w) {
 		return Stay
@@ -367,9 +402,13 @@ func attackPirates(s session.Session, w *ctx) Result {
 	// are hidden, so raiding blind (not knowing which band is fat or lean) is
 	// part of the game.
 	var names []string
+	var raiders []int
 	w.With(func() {
 		for _, p := range w.Pirates {
 			names = append(names, p.Name)
+		}
+		if p := w.Player(); p != nil {
+			raiders = p.RaidersThisTurn
 		}
 	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Attack Pirates"), ansi.Reset)
@@ -378,7 +417,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 		if i < len(pirateColors) {
 			color = pirateColors[i]
 		}
-		fmt.Fprintf(s, "  %d) %s%s%s\n", i+1, color, name, ansi.Reset)
+		fmt.Fprintf(s, "  %d) %s%s%s%s\n", i+1, raiderMark(s, raidedSlot(raiders, i)), color, name, ansi.Reset)
 	}
 	fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
 	f := ChoiceQuit(s, len(names))

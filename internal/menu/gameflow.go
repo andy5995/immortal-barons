@@ -293,6 +293,7 @@ func incomeReport(s session.Session, w *ctx) {
 		b = w.IncomeThisTurn(p)
 		raids = p.PirateHits
 		p.PirateHits = nil
+		p.RaidersThisTurn = raiderSlots(raids)
 		madeTroopers, madeJets, madeTurrets = p.MadeTroopers, p.MadeJets, p.MadeTurrets
 		madeBombers, madeTanks, madeCarriers = p.MadeBombers, p.MadeTanks, p.MadeCarriers
 	}) {
@@ -374,6 +375,26 @@ func pirateColor(slot int) string {
 		return pirateColors[slot]
 	}
 	return ansi.FgWhite
+}
+
+// raiderSlots is the distinct set of faction slots that hit in raids, in the
+// order first seen — feeds Empire.RaidersThisTurn (nil when raids is empty,
+// which is what leaves an old turn's mark cleared).
+func raiderSlots(raids []game.PirateHit) []int {
+	var slots []int
+	for _, h := range raids {
+		seen := false
+		for _, s := range slots {
+			if s == h.Slot {
+				seen = true
+				break
+			}
+		}
+		if !seen {
+			slots = append(slots, h.Slot)
+		}
+	}
+	return slots
 }
 
 // pirateHitLine reports one raid the way BRE does: the faction in its own
