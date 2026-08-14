@@ -4,29 +4,24 @@ import (
 	"fmt"
 )
 
-// Strike/SDI gold costs (ChemCost, BioCost, AnnihilatorCost, SDIStep, and the
-// nuclear pricing constants) live in balance.go; the nuclear price itself is
-// computed per target, by NukeCostForLand below. SDIMax is a level cap, not a
-// cost, so it stays here.
-// SDIMax caps SDI at 50%: BRE's SDI destroys "up to 50%" of incoming missiles
-// (breins.txt), so the level tops out there.
-const SDIMax = 50
+// Strike/SDI gold costs (ChemCost, BioCost, AnnihilatorCost and the nuclear
+// pricing constants) live in balance.go, as do the SDI figures; the nuclear
+// price itself is computed per target, by NukeCostForLand below.
 
 // The SDI program is a pot of gold rather than a level bought outright: gold
 // goes in a turn at a time against an allowance, the pot carries an upkeep every
-// turn, and the strength is read off the total. The allowance and the upkeep are
-// the original's (see balance.go); how the total converts to a percentage is
-// NOT — the captured game's region count moved under it too much to read a curve
-// off seventeen points, so IB keeps its own SDIStep until the original's rule is
-// disassembled.
+// turn, and the strength is read off the total and the land it has to cover.
+// Every figure here is the original's — see the SDI block in balance.go.
 
 // SDIMaintenance is the upkeep e owes on its program this turn.
 func (w *World) SDIMaintenance(e *Empire) int64 { return pctOf(e.SDIFunding, SDIMaintPct) }
 
 // SDIFundingPerRegion is the program's spending spread over the land it covers,
-// which the original prints on the same screen. It printed 0 there in every
-// capture, at every funding level — unexplained, and most likely a defect in the
-// original, so IB shows the figure the label describes.
+// which the original prints on the same screen. Its own line read 0 at every
+// captured funding level because it divides the funding it stores — whole
+// thousands — by the region count and then prints a literal ",000", so anything
+// under a thousand gold per region shows as zero. IB prints the gold figure the
+// label describes instead; a deliberate divergence, not a fix to a defect.
 func (w *World) SDIFundingPerRegion(e *Empire) int64 {
 	if e.Land <= 0 {
 		return 0
@@ -84,10 +79,38 @@ func (w *World) PaySDI(e *Empire, gold int64) {
 	e.syncSDI()
 }
 
-// syncSDI recomputes the strength from the funding total. Every place that
-// changes SDIFunding must call it.
+// syncSDI recomputes the strength from the funding total and the land it has to
+// cover. Every place that changes SDIFunding — or the region count — must call
+// it, which is why syncLand does too.
 func (e *Empire) syncSDI() {
-	e.SDI = min(SDIMax, int(e.SDIFunding/SDIStep))
+	e.SDI = SDIStrength(e.SDIFunding, e.Land)
+}
+
+// SDIStrength is the shield percentage a program of `funding` gold buys a realm
+// holding `land` regions (see the SDI block in balance.go for the provenance).
+// The square root is taken over integers: trunc(sqrt(x)) is the largest n with
+// n*n <= x, so flooring the division first cannot change the answer, and this
+// stays exact on the 32-bit door builds where a float would not.
+func SDIStrength(funding int64, land int) int {
+	if funding <= 0 {
+		return 0
+	}
+	per := funding / (SDIStrengthLandDivisor * (int64(land) + 1))
+	return min(SDIMax, int(isqrt(per)))
+}
+
+// isqrt is the integer square root of a non-negative value, by Newton's method.
+func isqrt(n int64) int64 {
+	if n < 2 {
+		return max(0, n)
+	}
+	x := n
+	y := (x + 1) / 2
+	for y < x {
+		x = y
+		y = (x + n/x) / 2
+	}
+	return x
 }
 
 // EnsureSDIFunding backfills the funding pool on a save written before the
@@ -95,7 +118,10 @@ func (e *Empire) syncSDI() {
 // zero pool and wipe an SDI the player had already paid for.
 func (e *Empire) EnsureSDIFunding() {
 	if e.SDIFunding == 0 && e.SDI > 0 {
-		e.SDIFunding = int64(e.SDI) * SDIStep
+		// Invert the strength curve: the funding that buys this percentage over
+		// the land the realm holds now.
+		lvl := int64(e.SDI)
+		e.SDIFunding = lvl * lvl * SDIStrengthLandDivisor * (int64(e.Land) + 1)
 	}
 	e.syncSDI() // funding is the authoritative figure once it exists
 }
@@ -207,16 +233,18 @@ func (w *World) Decontaminate(e *Empire, gold int64) int {
 	return n
 }
 
-// ChemicalStrike kills people and troopers and damages some land.
+// ChemicalStrike kills people and troopers and damages some land. Like the
+// nuclear strike it is not intercepted: the original's local missile routines
+// read neither the target's SDI nor its turrets or tanks.
 func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 	if a.Gold < ChemCost {
 		return "", ErrCantAfford
 	}
 	a.Gold -= ChemCost
 
-	people := w.jitter(d.People*15/100) * (100 - d.SDI) / 100
-	troops := w.jitter(d.Troopers*20/100) * (100 - d.SDI) / 100
-	regions := d.Land / 20 * (100 - d.SDI) / 100
+	people := w.jitter(d.People * 15 / 100)
+	troops := w.jitter(d.Troopers * 20 / 100)
+	regions := d.Land / 20
 
 	people, troops, regions = clamp(d.People, people), clamp(d.Troopers, troops), clamp(d.Land, regions)
 	d.People -= people
@@ -239,15 +267,16 @@ func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 	return report, nil
 }
 
-// BiologicalStrike kills people and troopers but leaves land untouched.
+// BiologicalStrike kills people and troopers but leaves land untouched. It is
+// not intercepted either — see ChemicalStrike.
 func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 	if a.Gold < BioCost {
 		return "", ErrCantAfford
 	}
 	a.Gold -= BioCost
 
-	people := w.jitter(d.People*15/100) * (100 - d.SDI) / 100
-	troops := w.jitter(d.Troopers*20/100) * (100 - d.SDI) / 100
+	people := w.jitter(d.People * 15 / 100)
+	troops := w.jitter(d.Troopers * 20 / 100)
 
 	people, troops = clamp(d.People, people), clamp(d.Troopers, troops)
 	d.People -= people

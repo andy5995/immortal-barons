@@ -279,6 +279,16 @@ func (f AttackForce) offense() int {
 	return f.Troopers + f.Jets*2 + f.Tanks*4 + f.Bombers*GroupAttackBomberOffense
 }
 
+// offenseAgainstSDI values the detachment as a defender's shield leaves it: the
+// jets and the bombers are blunted, in proportion to the percentage, and nothing
+// else in the force is touched. Basis points, so the two ceilings land exactly
+// where the original's reals do.
+func (f AttackForce) offenseAgainstSDI(sdi int) int {
+	jets := f.Jets * 2 * (10_000 - SDIJetReductionPct*sdi) / 10_000
+	bombers := f.Bombers * GroupAttackBomberOffense * (10_000 - SDIBomberReductionPct*sdi) / 10_000
+	return f.Troopers + jets + f.Tanks*4 + bombers
+}
+
 // Contribution records one baron's committed detachment, so the strike's
 // strength and the returning survivors split per baron.
 type Contribution struct {
@@ -917,6 +927,31 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	return result
 }
 
+// offenseAgainstSDI is the strike's offense once the defender's shield has taken
+// its share of the jets and bombers. Offense arrives already scaled by the
+// strike's kind, so the shield is applied as the ratio between the blunted and
+// the whole force rather than recomputed from scratch.
+//
+// A GROUP attack passes through untouched, which is the original's behaviour and
+// not an oversight: it feeds the planet's land-weighted average shield through
+// an expression that divides by 100 a second time (BRE.OVR ovr_03f4a0 +0xf18),
+// and since no average can reach 100 the truncated result is always zero. Only a
+// named baron's own shield ever defends anything.
+func (atk RemoteAttack) offenseAgainstSDI(d *Empire) int {
+	if atk.Group || d.SDI <= 0 || len(atk.Contributors) == 0 {
+		return atk.Offense
+	}
+	whole, blunted := 0, 0
+	for _, c := range atk.Contributors {
+		whole += c.offense()
+		blunted += c.offenseAgainstSDI(d.SDI)
+	}
+	if whole <= 0 {
+		return atk.Offense
+	}
+	return int(int64(atk.Offense) * int64(blunted) / int64(whole))
+}
+
 // resolveRemoteAttack resolves a remote strike against its target empire (or,
 // for a whole-planet attack, this board's strongest baron).
 func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
@@ -948,8 +983,9 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		target.addEvent(fmt.Sprintf("An interplanetary strike from %s was stopped by your New Realm Protection.", atk.FromBoard))
 		return res
 	}
+	offense := atk.offenseAgainstSDI(target)
 	def := target.Defense()
-	if atk.Offense <= def {
+	if offense <= def {
 		target.addEvent(fmt.Sprintf("You repelled an interplanetary strike from %s.", atk.FromBoard))
 		return res
 	}
@@ -957,7 +993,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// this kind of strike can carry off (capped). The margin is widened to int64
 	// first: a league-sized strike can pass 21 million offense, and multiplying
 	// that by 100 wraps a 32-bit int on the door builds this project supports.
-	frac := int64(atk.Offense-def) * 100 / int64(max(atk.Offense, 1))
+	frac := int64(offense-def) * 100 / int64(max(offense, 1))
 	land := int(int64(target.Land) * frac / 100 / 4 * int64(kind.capturePct()) / 100 * int64(returnsPct) / 100)
 	if land > target.Land {
 		land = target.Land

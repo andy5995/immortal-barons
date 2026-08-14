@@ -810,7 +810,6 @@ const (
 	WasteDecontamPriceDiv = 2  // region price divided by this, before technology
 	ChemCost              = 6_000_000
 	BioCost               = 6_000_000
-	SDIStep               = 1_500_000 // gold of total funding per +1% SDI
 	// The SDI program's two running figures, CAPTURE-VERIFIED: seventeen
 	// consecutive SDI Program screens from a live league game (2026-08-08, see
 	// docs/dev/bre-screens.md) fit both exactly, across funding from 0 to just
@@ -823,6 +822,38 @@ const (
 	SDISpendPct  = 20      // per-turn funding allowance, as a percent of total funding
 	SDIMinSpend  = 250_000 // floor under that allowance, so a new program can start
 	SDIIncrement = 1_000   // funding is accepted only in whole thousands
+	// How funding converts to strength, BINARY-VERIFIED (BRE.EXE resident
+	// 056d:1139, the routine every reader of the percentage calls):
+	//
+	//	strength% = trunc(sqrt(funding / (SDIStrengthLandDivisor * (regions + 1))))
+	//
+	// clamped to 0..SDIMax. The original stores the program in whole thousands
+	// and computes `thousands * 1000 / (regions+1) / 10` before the square root,
+	// which is the same figure. The curve reproduces all sixteen captured screens
+	// exactly at that game's 8,321 regions, so land is a divisor of the shield,
+	// not just of its cost: doubling your realm halves the funding-per-region and
+	// costs you ~29% of the percentage.
+	SDIStrengthLandDivisor = 10
+	SDIMax                 = 100 // the original's own clamp on the percentage
+	// What the shield actually does, BINARY-VERIFIED. The percentage is read in
+	// exactly four places: the two screens that print it, an arriving
+	// interplanetary attack (BRE.OVR ovr_03f4a0 +0xed6/+0x10aa), and an arriving
+	// S3-Sabre bombing op (ovr_0450a9 +0x481). Nothing local consults it —
+	// neither a neighbour's attack nor a nuclear, chemical or biological missile
+	// — so these three are its whole reach, and they are the three the original's
+	// own instructions name.
+	//
+	// Against an arriving strike the reduction is linear in the percentage, and
+	// the published "up to 30% / 20%" figures are what it reaches at SDI 100:
+	// jets fight at `1 - SDI*0.3/100` and bombers at `1 - SDI*0.2/100`.
+	SDIJetReductionPct    = 30
+	SDIBomberReductionPct = 20
+	// The missile ceiling works differently: the S3-Sabre is INTERCEPTED on a
+	// roll — `Random(100) <= SDI * 0.5` — so a full program stops about half the
+	// missiles aimed at it rather than halving each one's damage. The comparison
+	// is inclusive in the original, so a realm with no program still intercepts
+	// on a zero roll (1%); that is faithful, not a rounding artifact.
+	SDIMissileInterceptPct = 50
 	// TerrorUnitLossDenom: each successful terror hit removes 1/N of one random
 	// unit type. BRE's disassembled hit applier uses a 6/7 ratio (removes ~1/7),
 	// so N = 7.

@@ -141,6 +141,44 @@ The loop that keeps paying off:
    operations both change results by a unit — the two real→int helpers differ
    only in that, and picking the wrong one is easy.
 
+### Real48 calls: which register triple is which operand
+
+A binary real op takes `dx:bx:ax` and `cx:si:di`, and **`RDiv`/`RSub` compute
+`dx:bx:ax OP cx:si:di`** — the triple `dx:bx:ax` is the left operand. Turbo
+Pascal evaluates the *right* operand first, so the pattern is: right operand →
+`push dx / push bx / push ax`, left operand computed into `dx:bx:ax`, then
+`pop cx / pop si / pop di` restores the right one. A constant right operand skips
+the push and is loaded straight into `cx:si:di` (`mov cx,0x8a / xor si,si / mov
+di,0x7a00`). Chains fall out correctly: `a / b / c` divides, then divides the
+result by the next constant.
+
+The register-to-byte mapping for those loads is `ax`=bytes 0-1, `bx`=2-3,
+`dx`=4-5, so `cx=0x008a, si=0, di=0x7a00` is `mem:8a000000007a`. Decode it,
+never eyeball it — `scripts/bre-real48.py decode mem:...`. **Getting a round
+number out (1000, 100, 0.3, 0.2) is the check that the mapping is right**; a
+garbage value means the bytes are in the wrong order, not that the constant is
+strange.
+
+Getting the divide backwards inverts a whole formula and the mistake survives
+plausibility checks, so confirm the direction against a *labelled* screen figure
+or a captured number before building on it.
+
+### A stored figure may not be in the units the screen prints
+
+BRE stores the SDI pot in **whole thousands** and the screen prints the stored
+value followed by a literal `,000` string. So `Total Funding: 7,078,000` is a
+record field holding `7078`, and a formula reading that field is a thousand times
+smaller than the displayed gold. The tell was a second line reading `Funding /
+Region: 0,000 Gold` at every funding level, which had been written up here as an
+unexplained defect in the original — it was the same `,000` suffix on a division
+that had genuinely truncated to zero.
+
+**When a formula comes out orders of magnitude wrong, suspect the field's units
+before suspecting the reading.** Dump the string constants the display routine
+pushes (they sit in the unit's code segment at the `cs`-relative offsets the
+`mov di,imm16 / push cs / push di` pairs name) and look for a suffix that is
+doing arithmetic.
+
 Record layout and helper addresses live in `docs/dev/bre-save-format.md`; extend
 that file rather than re-deriving.
 

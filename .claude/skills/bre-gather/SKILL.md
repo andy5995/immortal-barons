@@ -442,6 +442,21 @@ by changed that turn.** Purchases land between the report and the Regions
 display, so a total can print next to a STALE count. Twice in one session a
 changed denominator was mistaken for a changed mechanic.
 
+### Past sessions are a capture archive — grep them before asking for a new run
+
+Every screen ever scraped in this project sits in the session transcripts at
+`~/.claude/projects/-home-andy-src-andy5995-immortal-barons/*.jsonl`. They are
+JSON-escaped (`\\u001b`, `\\r\\n`) but a small Python pass unescapes and strips
+ANSI, and they hold the *surrounding* screens that a summarised table in
+`docs/dev/` dropped. That is what settled the SDI curve: the write-up recorded
+funding and strength but not the realm's region count, and the count was sitting
+in a menu two screens away in the transcript.
+
+**A price can stand in for a figure the capture never printed.** Reverse an
+already-verified formula: Terrorist Ops is `total regions x 64`, so a menu
+showing `532,544` pins the realm at 8,321 regions without a Regions display. The
+region-maintenance and nuclear-price formulas work the same way.
+
 ### First ask whether the capture EXERCISED the feature at all
 
 A capture that mentions a feature thousands of times may never have used it

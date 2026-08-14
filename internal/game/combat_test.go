@@ -21,17 +21,19 @@ func TestBombingRunDestroysGroundedJets(t *testing.T) {
 	}
 }
 
-func TestBombingRunTurretsDownBombersAndSDIBlunts(t *testing.T) {
+// Turrets down bombers; the defender's SDI does not touch a raid from a
+// neighbour, however well funded it is.
+func TestBombingRunTurretsDownBombersAndSDIIsIrrelevant(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := &Empire{Bombers: 10}
-	d := &Empire{Jets: 1000, Turrets: 50, SDI: 50} // 50/25 = 2 bombers lost, SDI halves
+	d := &Empire{Jets: 1000, Turrets: 50, SDI: SDIMax} // 50/25 = 2 bombers lost
 	kills, lost := w.bombingRun(a, d, a.Bombers)
 	if lost != 2 {
 		t.Errorf("50 turrets should down 2 bombers, got %d", lost)
 	}
-	// 8 survivors * 3 kills = 24, halved by 50% SDI = 12
-	if kills != 12 {
-		t.Errorf("expected 12 kills after SDI, got %d", kills)
+	// 8 survivors * 3 kills = 24, and the shield takes none of them.
+	if kills != 24 {
+		t.Errorf("expected 24 kills, got %d", kills)
 	}
 	if a.Bombers != 8 {
 		t.Errorf("attacker should have 8 bombers left, got %d", a.Bombers)

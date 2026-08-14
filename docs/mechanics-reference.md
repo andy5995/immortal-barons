@@ -16,7 +16,7 @@ settings from a real league, so they are defaults, not fixed rules.
 | Unit | Offense | Defense | Notes |
 |------|---------|---------|-------|
 | Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy R5-Slappenheimer likelier to backfire. |
-| Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). SDI cuts jet strength 25–30%. |
+| Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). An enemy SDI cuts jet strength, but only on an interplanetary strike — see "SDI Defense". |
 | Turret | **0** | 2 | Defense only — the defensive **counterpart to jets**: it shoots down attacking jets (and blows up tanks / kills troops). Also helps intercept nuclear missiles. Cannot be destroyed by terrorist ops. |
 | Tank | **3–5** | **3–5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (3 at 0%, 4 at 50%, 5 at 100%) and with morale. Helps defend vs. chemical missiles. The guide's flat "4" is the HQ-50 value — see HeadQuarters below. |
 | Bomber | 0 | 0 | Carries bombs / special-ops; destroys enemy *grounded* jets when sent in an attack. |
@@ -557,9 +557,13 @@ The rest is **IB's reconstruction**, following the original's prompts rather tha
 its code: two days in flight, 10% of each realm's regions on arrival scaled by how
 much of the weapon survived, and interception by **jets only** (the original is
 explicit that nothing else can reach it) at one percent knocked off per 250 jets,
-spent whether they connect or not. SDI reduces the damage.
+spent whether they connect or not. The SDI does not touch it: the original's SDI
+percentage is read in four places and this is not one of them (see "SDI Defense"),
+which matches its instructions saying jets are the only answer. IB scaled the
+damage by the defender's SDI until 2026-08-14; that was IB's own and is gone
+(#111).
 
-**That reconstruction is known to be wrong in two ways** — it needs a live game,
+**That reconstruction is still wrong in one known way** — it needs a live game,
 or the original's code, before it can be called done:
 
 - **The weapon should not detonate once and vanish.** The original's own
@@ -569,10 +573,6 @@ or the original's code, before it can be called done:
   the whole time it sits there. IB has no post-arrival phase at all, so the
   weapon costs a planet a tenth of its land instead of up to a third, and the
   cooperative defence the original is built around never happens. (#112)
-- **SDI should not blunt it.** The original says jets are "the only way to
-  destroy this thing", and the doomsday weapon is not among the three things SDI
-  is documented to work on. IB subtracts the defender's SDI anyway, which
-  contradicts the interception note in the line above. (#111)
 
 The target planet is told about it — while it is under construction and again in
 flight, with the arrival time in hours — which is what makes interception
@@ -583,8 +583,9 @@ possible (#63). BRE does the same, and its own strings carry the wording:
 **SDI Defense** — a funded anti-missile/anti-jet shield. The original names
 three separate ceilings: it destroys **up to 50%** of incoming missiles, and
 reduces attacking **jets by up to 30%** and **bombers by up to 20%**
-(`game/breins.txt`). See "The SDI program" below for how it is funded, and
-"What the shield actually does is not verified" for how much of that IB has.
+(`game/breins.txt`). All three are BINARY-VERIFIED, along with what the shield
+does NOT reach — see "The SDI program" below for the funding, the strength curve,
+and the reach.
 
 Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
 
@@ -755,7 +756,11 @@ every item below):
   User Select handling, but it changes nothing (every launch is the same random
   gamble). The `None` handling mode disables the weapon (gated in the menu);
   `User Select`/`Random`/`Constant` all enable it and differ only in the (inert)
-  dial. The target's SDI (`d.SDI`%) can intercept, and only about 3 launches in
+  dial. The target's SDI intercepts on `Random(100) <= SDI/2` — BINARY-VERIFIED
+  from the arriving-strike routine (`BRE.OVR ovr_0450a9 +0x481`), which is where
+  breins.txt's "up to 50% of incoming missiles" comes from and why a full shield
+  stops half of them rather than halving one. The comparison is inclusive, so an
+  unshielded realm still turns one shot in a hundred aside. Only about 3 launches in
   10 (`SlappenheimerEffectHits`/`SlappenheimerEffectRange`) land a payload — the
   rest fizzle. A landed hit removes a random 5–30 %
   (`SlappenheimerBaseDamagePct` + `rng.Intn(SlappenheimerDamageSpread)`) of one
@@ -1696,8 +1701,8 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   ratio) of one randomly chosen unit type. New Realm Protection blocks it.
 - **Spy** — send an agent to a remote baron; intel lands in the planet-wide Spy
   Database. Reached from the Spy Database screen.
-- **SDI** — puts gold into the program, capped at `SDIMax` (50%, per BRE's "up
-  to 50%" missile interception). See "The SDI program" below.
+- **SDI** — puts gold into the program; the strength it buys is capped at
+  `SDIMax` (100%, the original's own clamp). See "The SDI program" below.
 
 ### The SDI program
 
@@ -1715,46 +1720,57 @@ million gold (`docs/dev/bre-screens.md`):
   refilled every turn. Gold goes in only in whole thousands, which the screen
   says outright.
 
-Two things are **not** established:
+**Strength is BINARY-VERIFIED** (`BRE.EXE` resident `056d:1139`, the routine every
+reader of the percentage calls):
 
-- **How funding converts to strength.** The captured game's region count moved
-  under the figures too much to read a curve off seventeen points, and the
-  strategy guides say the percentage scales with region count, which the screen's
-  own "Funding / Region" line hints at. IB keeps its own `SDIStep` until the
-  original's rule is disassembled, so its strength curve is NOT a fidelity claim.
+```
+strength% = trunc(sqrt(funding / (10 x (totalRegions + 1))))     clamped 0..100
+```
+
+The original stores the pot in **whole thousands** and computes
+`thousands * 1000 / (regions+1) / 10` before the square root, which is the same
+figure. It reproduces all sixteen captured screens exactly at that game's **8,321
+regions** — the Terrorist Ops price on the surrounding menu is `regions x 64`,
+which pins the count — so land is a divisor of the shield and not just of its
+cost. Two consequences worth stating: taking land thins your own shield, and each
+further percent costs more than the last (the curve is quadratic in the
+percentage).
+
+That also explains the screen's `Funding / Region: 0,000 Gold` line, previously
+recorded here as an unexplained defect. It divides the stored thousands by the
+region count and prints a literal `,000`, so any realm funding under 1,000 gold
+per region reads as zero. The label is honest; the granularity is coarse. IB
+prints the gold figure the label describes — a deliberate divergence.
+
+One thing is still **not** established:
+
 - **What underpaying the upkeep does.** The captured player always paid in full.
   IB scales the program back to what was funded; without some consequence the
   upkeep would be optional and an unmaintained shield would defend as well as a
   maintained one.
 
-The original printed `Funding / Region: 0,000 Gold` at every funding level,
-including seven million. That is unexplained and most likely a defect in it, so
-IB shows the figure the label describes.
+#### What the shield reaches — BINARY-VERIFIED
 
-The original's own instructions confirm what the screen's per-region line hints
-at: "The more territory you control, the larger your program will need to be as
-well." So the strength curve is a function of funding AND land, which is why a
-funding-only table cannot give it.
+The percentage is read in exactly four places, which is the whole of the
+mechanic: the empire status screen, the SDI Program screen, an arriving
+interplanetary attack (`BRE.OVR ovr_03f4a0 +0xed6` and `+0x10aa`), and an
+arriving S3-Sabre bombing op (`ovr_0450a9 +0x481`).
 
-#### What the shield actually does is not verified
-
-The funding side above came off a live capture and is exact. **The combat side
-did not.** It arrived with the feature, carries no provenance, and does not
-match the original's documented figures — treat every number in this paragraph
-as IB's own until someone reads the original's code:
-
-- IB scales missile damage by the defender's SDI percentage. The original
-  describes *destroying* up to half of incoming missiles, which is interception,
-  not a discount — and one strike is one missile, where the two models disagree
-  most. (#113)
-- IB applies the SDI percentage to jet effectiveness and has no bomber term. The
-  original caps jets at 30% and bombers at 20%, separately. (#113)
-- IB already contains two different models: an R5-Slappenheimer is intercepted
-  on a roll against the SDI percentage, while nuclear, chemical and biological
-  damage is scaled by it. Nothing justifies the split. (#113)
-- IB reduces Clingy Annihilator damage by the defender's SDI. It should not: the
-  original says jets are "the only way to destroy this thing", and the doomsday
-  weapon is not among the three things SDI is documented to work on. (#111)
+- **Jets** on an arriving strike fight at `1 - SDI x 0.3/100`, **bombers** at
+  `1 - SDI x 0.2/100` (truncated). Linear in the percentage; the published "up to
+  30% / 20%" are what they reach at SDI 100.
+- **Missiles** are *intercepted*, not discounted: `Random(100) <= SDI x 0.5`
+  stops the S3-Sabre outright. Hence "up to 50%".
+- **A GROUP attack faces no shield at all.** The whole-planet path averages every
+  living realm's SDI by land and then divides by 100 a second time
+  (`ovr_03f4a0 +0xf18`); no average can reach 100, so the truncated result is
+  always zero. Only a strike aimed at a named baron meets a shield. IB follows
+  this rather than correcting it — it is what the original does, and the
+  alternative reading would be a guess.
+- **Nothing local is touched.** Not a neighbour's attack, not a nuclear, chemical
+  or biological missile, and not the Clingy Annihilator (#111). IB applied
+  `(100 - SDI)` in four such places until 2026-08-14; all four were IB's own
+  invention and are gone.
 
 **Picking a planet is one prompt everywhere.** BRE asks
 `Enter Planet Name or Number (? for list)` on every screen that needs a planet —
@@ -2114,7 +2130,6 @@ Now matching this reference (as of v0.0.4):
 - Turrets (defense-only) and carriers (jets can only attack if carried)
 - Bomber airfield strikes: a regular attack sends the attacker's bombers to
   destroy the defender's grounded jets first, resisted by turrets (anti-air)
-  and SDI
 - Interactive maintenance stage at turn start: pay armed-forces upkeep and
   region maintenance ("how much will you give?"), with underpayment causing
   desertion / revolts, plus an optional popular-support boost. Auto-Pay
@@ -2123,8 +2138,10 @@ Now matching this reference (as of v0.0.4):
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and the money cap
 - Nuclear / chemical / biological strikes and pirate raids
-- Clingy Annihilator, with the original's fund-build-launch-intercept lifecycle,
-  and SDI defense (a flat percentage damage-reducer)
+- Clingy Annihilator, with the original's fund-build-launch-intercept lifecycle
+- SDI defense: a funded shield whose strength is its gold spread over the land it
+  covers, blunting incoming interplanetary jets and bombers and intercepting
+  incoming missiles
 - Covert agents with spying and sabotage (success scales with agent count)
 - Player mail — a BRE-style per-message reader (Reply / Delete / Ignore /
   Quit), where Ignore keeps a message for next time (it can be ignored

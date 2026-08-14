@@ -1475,10 +1475,16 @@ The funding column is truncated to whole thousands — adding a 518,400 allowanc
 to 2,592,000 gives 3,110,400 but the next screen reads 3,110,000 — which matches
 the screen's own note about funding in increments of 1000.
 
-**Strength is NOT determined by this table.** The player's region count grew
-throughout the capture, and the strategy guides say the percentage scales with
-region count, so the funding column alone cannot separate the two. Reading the
-curve wants a disassembly, not a fit.
+**Strength is a function of funding AND land**, so the funding column alone
+cannot give it. The curve came out of the binary instead
+(`trunc(sqrt(funding / (10 x (regions+1))))`, see `docs/mechanics-reference.md`),
+and every row above reproduces exactly at **8,321 regions** — the count this
+capture's realm held, read off the Terrorist Ops price (`regions x 64` =
+532,544) on the menu the SDI screen opens from.
+
+The `Funding / Region: 0,000 Gold` line is not a defect: the program is stored in
+whole thousands and the screen appends a literal `,000`, so a realm funding under
+1,000 gold per region reads as zero.
 
 The upkeep is billed in the maintenance sequence between the region maintenance
 and the crown tax:
