@@ -1089,13 +1089,25 @@ const (
 // Trade-deal sending (BRE-verified live, 2026-07-21): sending a trade deal
 // consumes one carrier to transport the goods and costs TradeDealGoldPerDay per
 // day for a chosen span of TradeDealMinDays..TradeDealMaxDays days; the offered
-// goods are escrowed and arrive on the recipient's next turn. (BRE adds a small
-// deal-size component on top of the 100,000/day base that IB does not model.)
+// goods are escrowed and arrive on the recipient's next turn. (BRE adds a
+// cargo-weighted component on top of the 100,000/day base that IB does not
+// model — BRE.OVR 0x0513e7 sums the nine goods against fixed weights, divides by
+// 5, and adds the base at 0x05154e.)
 const (
 	TradeDealCarriers   = 1       // carriers consumed to send one deal
-	TradeDealGoldPerDay = 100_000 // gold cost per day of transit
+	TradeDealGoldPerDay = 100_000 // binary: the flat part of the per-day transit cost
 	TradeDealMinDays    = 2       // shortest a deal may be sent for
 	TradeDealMaxDays    = 5       // longest a deal may be sent for
+
+	// ProtectiveTradeCostDivisor is what a Protective Trade agreement takes off
+	// the transit cost — the manual's "making trade deals cheaper to send and
+	// maintain". BINARY-VERIFIED (BRE.OVR 0x0268bc, create_trade_offer): the
+	// recipient's relation is compared against 2 (Protective Trade) and, when it
+	// matches, the PER-DAY cost is divided by three before the span is chosen and
+	// before days x cost is deducted. There is no separate upkeep charge in the
+	// binary — the one up-front payment is the whole cost, so "maintain" is
+	// covered by the same discount.
+	ProtectiveTradeCostDivisor = 3
 )
 
 // The Clingy Annihilator, IB's rename of BRE's Gooie Kablooie. It is not a purchase

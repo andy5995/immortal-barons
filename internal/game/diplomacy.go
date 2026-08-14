@@ -15,7 +15,8 @@ import (
 //   - Technology Agreement shares a partner's tech (techAgreementCeiling,
 //     advanceTech).
 //   - Protective Trade guards the two realms' trade from covert bombing
-//     (BombTradeRoutes, BombTradingMarket).
+//     (BombTradeRoutes, BombTradingMarket) and cuts the cost of sending a trade
+//     deal between them (TradeDealGoldPerDayBetween).
 var TreatyTypes = []string{
 	"Full Defense Alliance",
 	"Tariff Trade Agreement",
@@ -30,6 +31,9 @@ const (
 	fullDefenseAlliance  = "Full Defense Alliance"
 	intelligenceAlliance = "Intelligence Alliance"
 	terroristPrevention  = "Terrorist Prevention"
+	protectiveTrade      = "Protective Trade"
+	tariffTradeAgreement = "Tariff Trade Agreement"
+	freeTradeAgreement   = "Free Trade Agreement"
 )
 
 // RelationEnemy is the hostile state a pair falls into when one side declares

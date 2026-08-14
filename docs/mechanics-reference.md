@@ -2015,8 +2015,13 @@ and each carries a gameplay effect (#11 wired the last two):
 - **Protective Trade** — guards the two realms' trade (BRE: "preventing bombing
   of trade deals"): a partner cannot bomb the other's trade routes or trading
   market (`BombTradeRoutes` / `BombTradingMarket` refuse the op, no agent lost).
-  BRE also makes trade deals "cheaper to send and maintain" — deferred until IB's
-  trade deals carry costs (#17 Phase 2).
+  It also makes trade deals **cheaper to send**: the per-day transit rate is
+  divided by `ProtectiveTradeCostDivisor` (3) before the span is chosen, so a
+  guarded deal costs 33,333 a day instead of 100,000
+  (`TradeDealGoldPerDayBetween`). BINARY-VERIFIED — BRE.OVR 0x0268bc compares the
+  recipient's relation against 2 (Protective Trade) and divides the per-day cost
+  by three; the manual's "and maintain" has no separate charge behind it, because
+  the one up-front `days x rate` payment is the whole cost.
 
 Declaration of War breaks treaties without causing internal unrest. The two
 newly-wired treaties' magnitudes are IB tunables — BRE's manual gives the intent,

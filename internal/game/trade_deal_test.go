@@ -24,7 +24,7 @@ func TestSendTradeDealChargesAndAcceptTransfersBaskets(t *testing.T) {
 	if from.Carriers != 0 {
 		t.Errorf("send should consume the transport carrier: %d, want 0", from.Carriers)
 	}
-	if from.Gold != int64(300_000-fee) {
+	if from.Gold != 300_000-fee {
 		t.Errorf("send should charge the fee: Gold = %d, want %d", from.Gold, 300_000-fee)
 	}
 	if len(to.TradeDeals) != 1 {
@@ -37,7 +37,7 @@ func TestSendTradeDealChargesAndAcceptTransfersBaskets(t *testing.T) {
 	if to.Tanks != 100 || to.Gold != 95_000 {
 		t.Errorf("accept should deliver 100 tanks and take 5000 gold: Tanks=%d Gold=%d", to.Tanks, to.Gold)
 	}
-	if from.Gold != int64(300_000-fee+5_000) {
+	if from.Gold != 300_000-fee+5_000 {
 		t.Errorf("accept should pay the demanded gold to the sender: %d", from.Gold)
 	}
 }
@@ -141,5 +141,35 @@ func TestAcceptTradeDealClampsGoldToMoneyCap(t *testing.T) {
 	}
 	if to.Gold != w.MoneyCap() {
 		t.Errorf("delivered gold should clamp to the money cap: %d, want %d", to.Gold, w.MoneyCap())
+	}
+}
+
+// A Protective Trade agreement puts guards on the route and makes the deal
+// cheaper to send: BRE divides the PER-DAY rate by three, so a two-day deal
+// costs 2 x 33,333 rather than 2 x 100,000. Golden literals — these are the
+// binary's figures, not a playtest knob (see ProtectiveTradeCostDivisor).
+func TestProtectiveTradeMakesDealsCheaper(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	from := w.AddHuman("f", "Fromland")
+	to := w.AddHuman("t", "Toland")
+	from.Carriers, from.Gold = 2, 1_000_000
+
+	if got := w.TradeDealCostBetween(from, to, 2); got != 200_000 {
+		t.Fatalf("undiscounted 2-day cost = %d, want 200000", got)
+	}
+	w.setRelation(from.Name, to.Name, protectiveTrade)
+	if got := w.TradeDealGoldPerDayBetween(from, to); got != 33_333 {
+		t.Errorf("guarded per-day rate = %d, want 33333", got)
+	}
+	if got := w.TradeDealCostBetween(from, to, 2); got != 66_666 {
+		t.Errorf("guarded 2-day cost = %d, want 66666", got)
+	}
+
+	before := from.Gold
+	if err := w.SendTradeDeal(from, to, TradeBasket{}, TradeBasket{Food: 1}, 2); err != nil {
+		t.Fatalf("send: %v", err)
+	}
+	if before-from.Gold != 66_666 {
+		t.Errorf("send charged %d, want the guarded 66666", before-from.Gold)
 	}
 }

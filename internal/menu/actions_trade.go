@@ -154,9 +154,16 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 	if !AskYesNo(s, "Send this trade deal?", true) {
 		return Stay
 	}
-	// BRE: a deal is sent for 2-5 days at a per-day gold fee and consumes a carrier.
+	// BRE: a deal is sent for 2-5 days at a per-day gold fee and consumes a
+	// carrier. A standing Protective Trade agreement cuts the per-day rate.
+	perDay := int64(game.TradeDealGoldPerDay)
+	w.With(func() {
+		if p, recip := w.Player(), findRealm(w, toName); p != nil && recip != nil {
+			perDay = w.World.TradeDealGoldPerDayBetween(p, recip)
+		}
+	})
 	fmt.Fprintf(s, "\n%s"+tr(s, "Sending costs %s gold per day; it needs one carrier.")+"%s\n",
-		ansi.Dim, comma(game.TradeDealGoldPerDay), ansi.Reset)
+		ansi.Dim, comma(perDay), ansi.Reset)
 	days := promptSuggested(s, "How many days to send it for?", game.TradeDealMinDays, game.TradeDealMaxDays)
 	if days < game.TradeDealMinDays {
 		days = game.TradeDealMinDays
@@ -175,7 +182,7 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Trade deal sent to %s for %d days (%s gold).", toName, days, comma(game.TradeDealCost(days)))
+		ok(s, "Trade deal sent to %s for %d days (%s gold).", toName, days, comma(int64(days)*perDay))
 	}
 	return Stay
 }
