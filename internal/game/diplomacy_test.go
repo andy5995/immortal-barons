@@ -264,18 +264,37 @@ func TestEnsureTreatiesMigratesLegacyAlliances(t *testing.T) {
 	}
 }
 
+// Trade income pays on the SMALLER of the two populations at a fixed per-head
+// rate, and New Realm Protection cuts that rate. Golden literals from the binary
+// — 11 a head for Free Trade, 6 for a Tariff, less 5/5 and 3/2 respectively for
+// a protected self / partner.
 func TestTradeTreatyAddsIncome(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
-	a.People = 4000
+	a.People, b.People = 4000, 3000
+	a.Protection, b.Protection = 0, 0
 	if got := w.tradeIncome(a); got != 0 {
 		t.Fatalf("no treaties -> no trade income, got %d", got)
 	}
-	w.ProposeTreaty(a, b, "Free Trade Agreement")
-	w.AcceptTreaty(b, a.Name, "Free Trade Agreement")
-	if got := w.tradeIncome(a); got != 4000/20 {
-		t.Errorf("free trade should add People/20 = %d, got %d", 4000/20, got)
+
+	w.setRelation(a.Name, b.Name, freeTradeAgreement)
+	if got := w.tradeIncome(a); got != 33_000 {
+		t.Errorf("free trade on the smaller population: got %d, want 3000 x 11 = 33000", got)
+	}
+	b.Protection = 5
+	if got := w.tradeIncome(a); got != 18_000 {
+		t.Errorf("a protected partner cuts the rate to 6: got %d, want 18000", got)
+	}
+
+	b.Protection = 0
+	w.setRelation(a.Name, b.Name, tariffTradeAgreement)
+	if got := w.tradeIncome(a); got != 18_000 {
+		t.Errorf("tariff trade: got %d, want 3000 x 6 = 18000", got)
+	}
+	a.Protection = 5
+	if got := w.tradeIncome(a); got != 9_000 {
+		t.Errorf("protection of your own cuts a tariff to 3: got %d, want 9000", got)
 	}
 }
 

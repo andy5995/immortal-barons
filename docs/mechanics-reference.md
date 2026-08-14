@@ -2008,8 +2008,22 @@ and each carries a gameplay effect (#11 wired the last two):
   nothing more — `resolveRemoteAttack` does not consult `allyDefenseBoost`, and
   `TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes` fails if it
   ever starts to.
-- **Tariff Trade Agreement** / **Free Trade Agreement** — per-turn trade income
-  scaled by population; Free earns more than Tariff (`tradeIncome`).
+- **Tariff Trade Agreement** / **Free Trade Agreement** — per-turn trade income.
+  BINARY-VERIFIED (BRE.OVR 0x03416b Tariff, 0x0341f0 Free Trade, both in
+  `process_economic_production`): each partner pays
+  `min(myPopulation, partnerPopulation) x rate`, with the rate assembled inline
+  from both realms' New Realm Protection flags —
+  `6 - 3*protectedSelf - 2*protectedPartner` for a Tariff,
+  `11 - 5*protectedSelf - 5*protectedPartner` for Free Trade. Paying on the
+  SMALLER population is what stops a pact with a giant from being free money, and
+  the protection cuts stop a sheltered newcomer farming one.
+  `TariffTradeGoldPerHead` / `FreeTradeGoldPerHead` and their cuts in
+  `balance.go`, applied by `tradeIncome`. The rates are **gold per head of IB's
+  own `People` count** — BRE counts population in millions and IB counts people,
+  and IB applies BRE's population-side figures to its own unit unchanged, as it
+  already does for the carrying-capacity weights. (IB previously paid
+  `People/40` and `People/20` off the holder's OWN population, roughly a
+  twelfth of the original and rounding to nothing at starting scale.)
 - **Intelligence Alliance** / **Terrorist Prevention** — lend half an ally's
   agents to your covert offense / defense (`covert.go`).
 - **Technology Agreement** — a tech-sharing pact (BRE: "gain some of the

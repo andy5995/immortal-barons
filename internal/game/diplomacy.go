@@ -171,12 +171,37 @@ func (w *World) allyAgents(e *Empire, ttype string) int {
 	return sum
 }
 
-// tradeIncome is the extra per-turn gold from trade treaties, scaled by
-// population: a Free Trade Agreement earns more than a Tariff Trade Agreement.
+// tradeIncome is the extra per-turn gold from trade treaties. Each partner pays
+// on the SMALLER of the two populations, so a pact with a tiny realm earns
+// little and neither side can farm a giant; a Free Trade Agreement is worth
+// nearly twice a Tariff. See TariffTradeGoldPerHead for the binary evidence and
+// — importantly — which population unit the rates are in.
 func (w *World) tradeIncome(e *Empire) int {
-	tariff := len(w.alliesOf(e, "Tariff Trade Agreement"))
-	free := len(w.alliesOf(e, "Free Trade Agreement"))
-	return tariff*e.People/40 + free*e.People/20
+	sum := int64(0)
+	for _, other := range w.alliesOf(e, tariffTradeAgreement) {
+		sum += tradePactIncome(e, other, TariffTradeGoldPerHead, TariffTradeProtectedSelfCut, TariffTradeProtectedPartnerCut)
+	}
+	for _, other := range w.alliesOf(e, freeTradeAgreement) {
+		sum += tradePactIncome(e, other, FreeTradeGoldPerHead, FreeTradeProtectedSelfCut, FreeTradeProtectedPartnerCut)
+	}
+	return int(sum)
+}
+
+// tradePactIncome is one trade partner's contribution: the smaller of the two
+// populations at the pact's per-head rate, with New Realm Protection on either
+// side cutting that rate.
+func tradePactIncome(e, other *Empire, perHead, selfCut, partnerCut int) int64 {
+	rate := perHead
+	if e.Protection > 0 {
+		rate -= selfCut
+	}
+	if other.Protection > 0 {
+		rate -= partnerCut
+	}
+	if rate < 0 {
+		rate = 0
+	}
+	return int64(min(e.People, other.People)) * int64(rate)
 }
 
 // A Technology Agreement lets a partner's research help your own (#11). BRE adds

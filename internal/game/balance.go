@@ -329,6 +329,34 @@ const (
 	DeclareWarKeepDenominator = 4
 )
 
+// Trade-treaty income, per turn, per partner. BINARY-VERIFIED inside
+// process_economic_production: the Tariff branch at BRE.OVR 0x03416b and the
+// Free Trade branch at 0x0341f0 each take
+//
+//	min(myPopulation, partnerPopulation) x rate
+//
+// and add it to the turn's gold. The rate is assembled inline from the two
+// realms' New Realm Protection flags — 6 - 3*protected(self) - 2*protected(partner)
+// for a Tariff, 11 - 5*protected(self) - 5*protected(partner) for Free Trade —
+// so a sheltered newcomer cannot open a trade pact and farm it, and the pact is
+// worth less to you while YOU are the sheltered one.
+//
+// UNITS: gold per head of IB's OWN People count. BRE stores population as a
+// count of millions (record +0x62) and IB counts people; this project's settled
+// choice is to apply BRE's population-side figures to IB's unit unchanged, the
+// same way the carrying-capacity weights above do. Read as "per IB person", not
+// "per million" — an unlabelled per-population constant is exactly how a factor
+// of twenty gets lost.
+const (
+	TariffTradeGoldPerHead = 6  // binary
+	FreeTradeGoldPerHead   = 11 // binary
+
+	TariffTradeProtectedSelfCut    = 3 // binary
+	TariffTradeProtectedPartnerCut = 2 // binary
+	FreeTradeProtectedSelfCut      = 5 // binary
+	FreeTradeProtectedPartnerCut   = 5 // binary
+)
+
 // Tax coefficient (reconstructed / tunable). BRE stores population/tax income
 // as an inline "6 − f(tax)" × Population shape that was only partially
 // recovered. Calibrated to BRE's first-turn income report: a new realm
