@@ -1,6 +1,25 @@
 package menu
 
-import "testing"
+import (
+	"strings"
+	"testing"
+)
+
+// breRuler is BRE's own message-editor ruler, read out of the overlay's string
+// table and seen on screen in a live session (docs/dev/bre-screens.md). It is
+// written out in full rather than built from msgLineWidth so that a change to
+// the width has to come with new evidence, and so the ruler can never quietly
+// stop matching the column the editor wraps at.
+const breRuler = "[---+----|----+----|----+----|----+----|----+----|----+----|----+----]"
+
+func TestMessageRulerMatchesBRE(t *testing.T) {
+	if got := msgRuler(msgLineWidth); got != breRuler {
+		t.Errorf("ruler =\n%q\nwant\n%q", got, breRuler)
+	}
+	if n := len(breRuler) - 2; n != 68 {
+		t.Errorf("ruler spans %d columns, want 68", n)
+	}
+}
 
 // The message editor advertises /S=save /A=abort /C=clear in its header, so a
 // line that is exactly one of those commands — either case — must act on it
@@ -43,5 +62,123 @@ func TestComposeMessageTextEndingInSlashIsNotACommand(t *testing.T) {
 	}
 	if msg != "hello/s" {
 		t.Fatalf("msg = %q, want %q", msg, "hello/s")
+	}
+}
+
+// The wrap cases below assert the composed message's real line breaks, and each
+// first checks the ruler reached the screen — when a scripted key sequence runs
+// dry the session ends cleanly, so without that marker a flow change upstream
+// would leave these green while never entering the editor.
+//
+// The expected splits are BRE's, observed live on 2026-08-14: a line takes 68
+// characters and the 69th wraps.
+func TestComposeMessageWrapsAtASpace(t *testing.T) {
+	// "kkkkk" ends at column 65 and "lllll" starts at 67, so the wrap fires on
+	// the third 'l' and carries the whole word down.
+	typed := "aaaaa bbbbb ccccc ddddd eeeee fffff ggggg hhhhh iiiii jjjjj kkkkk lllll"
+	f := &fakeSession{keys: []rune(typed + "\r/S")}
+	text, send := composeMessage(f)
+	if !send {
+		t.Fatal("editor did not save")
+	}
+	if !strings.Contains(f.out.String(), breRuler) {
+		t.Fatal("never reached the editor: the ruler was not drawn")
+	}
+	want := "aaaaa bbbbb ccccc ddddd eeeee fffff ggggg hhhhh iiiii jjjjj kkkkk\nlllll"
+	if text != want {
+		t.Errorf("text = %q, want %q", text, want)
+	}
+	if first := strings.SplitN(text, "\n", 2)[0]; len(first) != 65 {
+		t.Errorf("first line is %d columns, want 65 (the break drops the space)", len(first))
+	}
+	// The carried word and the space before it were echoed on the line being
+	// left, so three characters must be erased from it before the newline.
+	if !strings.Contains(f.out.String(), strings.Repeat("\b \b", 3)) {
+		t.Error("the carried word was not erased from the line it came from")
+	}
+}
+
+func TestComposeMessageSplitsAnOverlongWord(t *testing.T) {
+	// A word with no space in reach of the break search has nowhere to break, so
+	// it is split at the margin: 68 characters stay, the rest starts a new line.
+	typed := strings.Repeat("0123456789", 7) + "012345" // 76 characters
+	f := &fakeSession{keys: []rune(typed + "\r/S")}
+	text, send := composeMessage(f)
+	if !send {
+		t.Fatal("editor did not save")
+	}
+	if !strings.Contains(f.out.String(), breRuler) {
+		t.Fatal("never reached the editor: the ruler was not drawn")
+	}
+	want := strings.Repeat("0123456789", 6) + "01234567" + "\n" + "89012345"
+	if text != want {
+		t.Errorf("text = %q, want %q", text, want)
+	}
+	if first := strings.SplitN(text, "\n", 2)[0]; len(first) != 68 {
+		t.Errorf("first line is %d columns, want 68", len(first))
+	}
+	// Nothing is carried, so nothing may be erased. BRE erases one cell here
+	// anyway and its screen ends up a character short of what it saves; that is
+	// a display fault, not behaviour to copy.
+	if strings.Contains(f.out.String(), "\b \b") {
+		t.Error("a margin split erased characters that were not carried")
+	}
+}
+
+func TestComposeMessageDoesNotWrapPastTheLastLine(t *testing.T) {
+	// Nineteen empty lines put the cursor on line 20, where there is nowhere to
+	// wrap to. The line must stop taking keys at the margin rather than open a
+	// twenty-first. (BRE opens one, then drops it when it saves.)
+	typed := strings.Repeat("\r", msgMaxLines-1) + strings.Repeat("0123456789", 7) + "012345\r"
+	f := &fakeSession{keys: []rune(typed)}
+	text, send := composeMessage(f)
+	if !send {
+		t.Fatal("editor did not save when the lines ran out")
+	}
+	if !strings.Contains(f.out.String(), breRuler) {
+		t.Fatal("never reached the editor: the ruler was not drawn")
+	}
+	got := strings.Split(text, "\n")
+	if len(got) != 20 {
+		t.Fatalf("message has %d lines, want 20", len(got))
+	}
+	if want := strings.Repeat("0123456789", 6) + "01234567"; got[19] != want {
+		t.Errorf("last line = %q, want %q", got[19], want)
+	}
+	if strings.Contains(f.out.String(), "21>") {
+		t.Error("a 21st line prompt was drawn")
+	}
+}
+
+func TestComposeMessageLeavesQuotedLinesAlone(t *testing.T) {
+	// A reply's quoted lines are placed in the editor, not typed into it, so an
+	// over-long one is echoed as it stands — the wrap only ever fires on a key.
+	quoted := "> " + strings.Repeat("x", 90)
+	f := &fakeSession{keys: []rune("/S")}
+	text, send := composeMessageFrom(f, []string{quoted})
+	if !send {
+		t.Fatal("editor did not save")
+	}
+	if !strings.Contains(f.out.String(), breRuler) {
+		t.Fatal("never reached the editor: the ruler was not drawn")
+	}
+	if text != quoted {
+		t.Errorf("text = %q, want the quoted line unchanged (%q)", text, quoted)
+	}
+}
+
+func TestComposeMessageBackspaceReopensThePreviousLine(t *testing.T) {
+	// Backspace at column 1 takes the line above back out of the message and
+	// puts the cursor at its end, which is how an unwanted wrap is undone.
+	f := &fakeSession{keys: []rune("aaa\rbbb\b\b\b\bX\r/S")}
+	text, send := composeMessage(f)
+	if !send {
+		t.Fatal("editor did not save")
+	}
+	if !strings.Contains(f.out.String(), breRuler) {
+		t.Fatal("never reached the editor: the ruler was not drawn")
+	}
+	if text != "aaaX" {
+		t.Errorf("text = %q, want %q", text, "aaaX")
 	}
 }

@@ -1457,6 +1457,70 @@ before printing the outcome, and prints an abort in red (`0;40;31`).
 IB divergences here, both cosmetic and deliberate: IB shows no block cursor while
 typing (BRE draws `█` then backspaces over it per character), and it prints the
 `/`-command outcome in place rather than erasing the prompt first.
+## Message editor (captured live 2026-08-14, standalone board)
+
+Reached from the main menu's `(7) Send Messages` once a recipient is picked, and
+from a reply in either message reader. All five entry points call one routine
+(`compose_message`, BRE.OVR 0x0492ba), so the editor behaves the same
+everywhere; only the line allowance differs, and the 3-line banner in the string
+table belongs to the trade-deal note, not to this screen.
+
+```
+    You have 20 lines for your message.  /S=save /A=abort /C=clear
+    [---+----|----+----|----+----|----+----|----+----|----+----|----+----]
+ 1> aaaaa bbbbb ccccc ddddd eeeee fffff ggggg hhhhh iiiii jjjjj kkkkk
+ 2> lllll mmmmm
+```
+
+Measurements: the ruler spans **68** columns between its brackets. Counting the
+`[` itself as column 1, a `+` marks every fifth column and a `|` every tenth.
+Banner and ruler are indented four columns, which puts the `[` directly over the
+first text column of a `NN> ` prompt — so the ruler's own last `-` sits one
+column past where the line stops taking text.
+
+Colors: banner white `37`; ruler plain cyan `36`; the line-number prompt bright
+green `92` with the typed text bright white `97`. A line re-opened by backspacing
+off the start of the one below it is prompted in bright **red** `91`.
+
+### Wrapping at the margin
+
+A line takes 68 characters. The 69th printable key wraps rather than extending
+the line or being refused (`compose_message` compares the next column against
+`0x45`). The wrap:
+
+- Scans back from column 68 for a space, giving up below column 56 — a 13-column
+  window. A space found at column *k* breaks there: columns *k*+1..68 are erased
+  from the screen with `\b \b`, along with the space at *k*, and re-echoed after
+  the next line's prompt. The key that triggered the wrap lands on the new line
+  after them.
+- Splits at the margin when no space is in reach, carrying nothing. A word
+  longer than 13 columns therefore gets cut mid-word, not carried whole.
+- Keeps the space at *k* in the stored line even though it erased it from the
+  screen, so a wrapped line is saved with a trailing space.
+- Erases one screen cell in the margin-split case although nothing was carried,
+  so the line renders one character shorter than it saves. Confirmed against
+  `data/msgs.dat` and by backspacing into the line, which redrew all 68.
+- Opens a **21st** line when it fires on line 20, accepts the carried word plus
+  the triggering key there, then refuses every further key — and drops that line
+  when saving, losing the word.
+
+Backspace at column 1 takes the line above back out of the message and re-opens
+it with the cursor at its end. BRE does not move the cursor up a row; it draws
+the line again below, under the red prompt noted above.
+
+Quoted lines in a reply are placed in the buffer and echoed as they stand. Only
+a keypress can wrap, so they are never re-flowed however long they are.
+
+**IB's deliberate divergences**, all in `internal/menu/actions_message.go`:
+
+- On line 20 IB stops taking keys at the margin instead of opening a 21st line.
+  BRE's 21st line is discarded on save, so the text the player watched himself
+  type is lost either way; stopping at the margin keeps the 68 columns.
+- IB erases nothing on a margin split, so the screen matches what is saved.
+- IB trims the space it broke at rather than storing it.
+- IB draws the banner and ruler bright cyan. That predates this capture and is
+  recorded here rather than changed, since the colour is not what the wrap fix
+  was about.
 
 ## Planetary diplomacy (captured live 2026-08-08, league game)
 
