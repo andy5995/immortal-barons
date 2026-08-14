@@ -1,4 +1,7 @@
 (in-progress:)
+  * A realm removed from the game takes its treaties, its Enemy standings and
+    the proposals it sent with it, so a later realm of the same name starts
+    with no relations
   * A nuclear strike ruins land rather than destroying it: the target keeps
     every region and its upkeep but earns nothing from the ruined share
   * Waste is a region type of its own, listed on the region tables; it is

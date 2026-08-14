@@ -64,6 +64,16 @@ empire record (les di,[0x28d8])
                  turn and it reads 0 in the save. The maintenance routine loads
                  gold from it into a local, so it is a per-turn working field.)
   +0x72  int32  gold earned this turn  (see below)
+  +0x5d  int32  the slot's player id, and the FREE-SLOT MARKER. The record
+                initializer (056d:0d21) writes -1 here; the daily purge skips
+                any slot whose value is not > 0, so this — not the name's
+                ShortString length byte — is what says "empty". The deletion
+                routine passes it as the key to the message, trade-offer and
+                report cleanups, which is what identifies it as the player id
+                (a BBS user number: inferred from that use, not proven).
+  +0x62  int32  population. Seeded 100 by the initializer, and the field the
+                chemical and biological strikes subtract from before printing
+                a millions-of-civilians line.
   +0x8e  int32  military morale
   +0x92  int32  popular support
   +0x96  int32  region block starts (Coastal first, Buy-Regions order); the
@@ -76,6 +86,13 @@ empire record (les di,[0x28d8])
   +0x129 .. +0x12e   six bytes: Set-Industries allocation percentages, in
                      menu order (Troopers, Jets, Turrets, Bombers, Tanks,
                      Carriers)
+  +0x130 .. +0x161   the diplomatic relation with each of the 25 slots, one
+                     int16 per slot (enum: -1 Enemy, 0 None, 1..7 the pacts,
+                     8 Declaration Of War). Indexed by the raw ASCII letter, so
+                     the code's displacement carries a folded `base - 2*'A'` and
+                     a hit only means "relation" when a `shl ax,1` precedes it.
+                     Each realm holds its OWN row, so a pair's relation is stored
+                     twice and both copies have to be maintained together.
   +0x281 int32  lifetime turns played. Drives the HeadQuarters price ratchet and,
                 against config +0x38, whether the realm is still protected.
   +0x285 byte   turns remaining today. Reset to config +0x36 at rollover; zero is
@@ -96,6 +113,10 @@ empire record (les di,[0x28d8])
                      reads them on five of its sixteen faces — so escrowed
                      military is NOT hidden from pirates.
   +0x26f int32  agents held (the market's escrowed agents are at +0x229)
+  +0x28a real48 the day the realm was last played, as a date serial. The daily
+                purge truncates it, adds the configured DeletionDays (a word at
+                DS:0x6f99, default 7) and deletes the slot when the sum falls
+                before today (a Real48 at DS:0x8606).
   +0x331 int32  land still available to BUY — the Daily Land Creation allowance.
                 PER-EMPIRE, not a planet-wide pool: 0x12D30 bounds a region
                 purchase against it and 0x12EF9 subtracts the number bought
@@ -168,6 +189,29 @@ line — population tax, ore, tourism, solar, industrial, hydro. Nothing else in
 the binary writes it, so bank interest, food sales and plunder do not enter it.
 This is the base for the crown tax (issue #52).
 
+## Deleting an empire record
+
+Every deletion in the game funnels through one routine, `BRE.OVR 0x0079c1`. It
+has exactly two callers — the sysop's Delete Empire in `manage_players`, and the
+daily-maintenance purge at `BRE.OVR 0x007ed2` — which is why a crushed or
+abdicated realm is still there for the rest of the game day and gone the next.
+The purge loops the 25 slots, skips any whose `+0x5d` is not > 0, and marks a
+slot for deletion when it has no regions (`total_regions` < 1), no population
+(`+0x62` < 1), has gone unplayed past DeletionDays, or was never played and the
+game has been running more than three days. The slot currently in play is exempt.
+
+The routine itself clears the player's messages, trade offers and reports by
+`+0x5d`; calls `BRE.OVR 0x050d74`, which loops the slots and zeroes the relation
+at `+0x130` in BOTH directions (the deleted realm's row toward each rival and
+each rival's row toward it); and finishes with `056d:0d21`, which `FillChar`s the
+whole 1069-byte record to zero and seeds the new-realm defaults — `+0x5d` = -1,
+`+0x62` = 100 population, `+0x76` = 100 troopers, `+0x8e`/`+0x92` = 100 morale
+and support. The attack resolver never deletes anything: a realm crushed at
+`BRE.OVR 0xef90` just hands over its land and surviving units.
+
+`0x050d74`'s other caller is `confirm_end_game`, which wipes the whole relation
+table at the end of a season.
+
 Runtime helpers worth recognising when reading this code:
 
 ```
@@ -180,6 +224,7 @@ Runtime helpers worth recognising when reading this code:
 056d:1a07   technology factor: 1 + (cap-1)*(1 - exp(-level[sel]/(regions+1)))
 0fd0:193e   Ln          0fd0:19e7   Exp          0fd0:1774   square
 056d:0ec6   sum of the nine region counts (total regions)
+056d:0d21   blank an empire record and seed the new-realm defaults
 0fd0:1792   real -> int, TRUNCATES
 0fd0:179a   real -> int, ROUNDS      <- the two are easy to confuse; which one a
                                         routine uses changes results by one unit

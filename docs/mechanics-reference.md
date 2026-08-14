@@ -1634,6 +1634,34 @@ day**: on a later day's login they are prompted to name a new realm (it need not
 be the old name) and start fresh under the same handle. Voluntary abdication
 works the same way.
 
+**BRE deletes the record, and it does it at daily maintenance — never in the
+attack.** Read from a disassembly of the original: the attack resolver
+(`BRE.OVR 0xef90`) that crushes a realm only moves its land and surviving
+military to the winner and files the news; it leaves the loser's record in place,
+holding zero regions. The record is collected by the daily-maintenance sweep
+(`BRE.OVR 0x007ed2`), which walks every slot and deletes it when **any** of these
+holds: it has no regions left; it has no population left; nobody has played it
+for the configured idle limit (`DeletionDays`, default 7, per `docs/bre.doc`); or
+it was created and never played and the game is more than three days old. The
+slot in play is exempt. Two things follow. A crushed realm stays visible for the
+rest of the game day, which is why the loser's neighbours can still see what
+happened — IB's one-day husk (`removeDeadHusks`) is the same window. And
+abdication has to reach the player "the next day" because it also goes through
+this sweep: the deletion routine has exactly two callers, that sweep and the
+sysop's Delete Empire.
+
+**Deleting a realm clears its diplomacy, both ways.** BRE's deletion routine
+(`BRE.OVR 0x0079c1`) discards the player's messages, trade offers and reports,
+then calls a helper (`BRE.OVR 0x050d74`) that walks every other slot and zeroes
+the relation **in both directions** — the dead realm's row toward each rival and
+each rival's row toward it — before blanking the record and marking the slot free
+(the per-record player id is set to -1; that field, not the realm name, is what
+BRE tests for an empty slot). IB does the same in `forgetRelations`, called from
+`dropEmpires` for every realm any removal path drops: `w.Treaties` rows and
+pending `TreatyOffers` are keyed by realm NAME, and a freed name can be claimed
+by the next caller to onboard, so a leftover row would hand a reborn realm its
+predecessor's alliances and Enemy standing.
+
 ## Interplanetary operations (IB implementation)
 
 InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
