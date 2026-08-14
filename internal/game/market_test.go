@@ -15,7 +15,7 @@ func TestMarketEscrowConserves(t *testing.T) {
 	if e.Troopers != 60 {
 		t.Errorf("owned after listing 40: got %d, want 60", e.Troopers)
 	}
-	if got := w.MarketForSale("alice", "Trooper"); got != 40 {
+	if got := w.MarketForSale("Alethia", "Trooper"); got != 40 {
 		t.Errorf("for sale: got %d, want 40", got)
 	}
 	if got := w.MarketTotalForSale("Trooper"); got != 40 {
@@ -26,8 +26,8 @@ func TestMarketEscrowConserves(t *testing.T) {
 	if err := w.SetMarketListing(e, "Trooper", 10, 500); err != nil {
 		t.Fatalf("relist: %v", err)
 	}
-	if e.Troopers != 90 || w.MarketForSale("alice", "Trooper") != 10 {
-		t.Errorf("after relist to 10: owned=%d listed=%d, want 90 and 10", e.Troopers, w.MarketForSale("alice", "Trooper"))
+	if e.Troopers != 90 || w.MarketForSale("Alethia", "Trooper") != 10 {
+		t.Errorf("after relist to 10: owned=%d listed=%d, want 90 and 10", e.Troopers, w.MarketForSale("Alethia", "Trooper"))
 	}
 
 	// Delist (0) returns everything and removes the listing.
@@ -37,7 +37,7 @@ func TestMarketEscrowConserves(t *testing.T) {
 	if e.Troopers != 100 {
 		t.Errorf("owned after delist: got %d, want 100", e.Troopers)
 	}
-	if w.marketListing("alice", "Trooper") != nil {
+	if w.marketListing("Alethia", "Trooper") != nil {
 		t.Error("empty listing should be removed")
 	}
 }
@@ -71,7 +71,7 @@ func TestMarketListedFoodSpoilsLikeGranary(t *testing.T) {
 	w.processEconomy(a)
 	w.processEconomy(b)
 	totalA := a.Food
-	totalB := b.Food + w.MarketForSale("bob", "Food")
+	totalB := b.Food + w.MarketForSale("Bobland", "Food")
 	if totalA != totalB {
 		t.Errorf("listed food spoiled differently: granary-only total=%d, half-listed total=%d", totalA, totalB)
 	}
@@ -85,8 +85,8 @@ func TestMarketListingClamps(t *testing.T) {
 	if err := w.SetMarketListing(e, "Jet", 999, 100); err != nil {
 		t.Fatalf("list: %v", err)
 	}
-	if w.MarketForSale("alice", "Jet") != 5 || e.Jets != 0 {
-		t.Errorf("clamp: listed=%d owned=%d, want 5 and 0", w.MarketForSale("alice", "Jet"), e.Jets)
+	if w.MarketForSale("Alethia", "Jet") != 5 || e.Jets != 0 {
+		t.Errorf("clamp: listed=%d owned=%d, want 5 and 0", w.MarketForSale("Alethia", "Jet"), e.Jets)
 	}
 }
 
@@ -104,14 +104,14 @@ func TestMarketBuyAndSettle(t *testing.T) {
 	}
 	sellerGoldBefore := seller.Gold
 
-	if err := w.BuyFromMarket(buyer, "alice", "Tank", 4); err != nil {
+	if err := w.BuyFromMarket(buyer, "Alethia", "Tank", 4); err != nil {
 		t.Fatalf("buy: %v", err)
 	}
 	if buyer.Tanks != 4 || buyer.Gold != 100000-4*1000 {
 		t.Errorf("buyer: tanks=%d gold=%d", buyer.Tanks, buyer.Gold)
 	}
-	if w.MarketForSale("alice", "Tank") != 6 {
-		t.Errorf("listing after buy: %d, want 6", w.MarketForSale("alice", "Tank"))
+	if w.MarketForSale("Alethia", "Tank") != 6 {
+		t.Errorf("listing after buy: %d, want 6", w.MarketForSale("Alethia", "Tank"))
 	}
 	// Seller not paid until day-end settlement.
 	if seller.Gold != sellerGoldBefore {
@@ -138,20 +138,20 @@ func TestMarketBuyGuards(t *testing.T) {
 	if err := w.SetMarketListing(a, "Carrier", 10, 1000); err != nil {
 		t.Fatalf("list: %v", err)
 	}
-	if err := w.BuyFromMarket(a, "alice", "Carrier", 1); err != ErrOwnListing {
+	if err := w.BuyFromMarket(a, "Alethia", "Carrier", 1); err != ErrOwnListing {
 		t.Errorf("self-buy: want ErrOwnListing, got %v", err)
 	}
 	// Can't afford: bob has too little gold.
 	b.Gold = 500
-	if err := w.BuyFromMarket(b, "alice", "Carrier", 1); err != ErrCantAfford {
+	if err := w.BuyFromMarket(b, "Alethia", "Carrier", 1); err != ErrCantAfford {
 		t.Errorf("afford: want ErrCantAfford, got %v", err)
 	}
 	// Over-buy clamps to what's for sale.
 	b.Gold = 100000
-	if err := w.BuyFromMarket(b, "alice", "Carrier", 999); err != nil {
+	if err := w.BuyFromMarket(b, "Alethia", "Carrier", 999); err != nil {
 		t.Fatalf("buy: %v", err)
 	}
-	if b.Carriers != 10 || w.marketListing("alice", "Carrier") != nil {
-		t.Errorf("over-buy: bought=%d, listing still present=%v", b.Carriers, w.marketListing("alice", "Carrier") != nil)
+	if b.Carriers != 10 || w.marketListing("Alethia", "Carrier") != nil {
+		t.Errorf("over-buy: bought=%d, listing still present=%v", b.Carriers, w.marketListing("Alethia", "Carrier") != nil)
 	}
 }

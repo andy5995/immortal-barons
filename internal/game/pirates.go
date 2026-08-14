@@ -283,7 +283,7 @@ func (w *World) pirateRaidVictim(slot int, v *Empire) {
 	// is not traded, so it has no market face.
 	var src *int
 	if draw.FromMarket {
-		if l := w.marketListing(v.Owner, draw.Spoil.marketGood()); l != nil {
+		if l := w.marketListing(v.Name, draw.Spoil.marketGood()); l != nil {
 			src = &l.Qty
 		}
 	} else {

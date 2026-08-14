@@ -35,7 +35,7 @@ func stockAll(w *World, v *Empire, n int) {
 	v.Gold = int64(n)
 	w.Market = nil
 	for _, g := range []string{"Trooper", "Jet", "Turret", "Tank", "Agent"} {
-		w.Market = append(w.Market, MarketListing{Owner: v.Owner, Good: g, Qty: n, Price: 1})
+		w.Market = append(w.Market, MarketListing{Realm: v.Name, Good: g, Qty: n, Price: 1})
 	}
 }
 
@@ -60,7 +60,7 @@ func TestPirateRaidTakesFromTheMarketListing(t *testing.T) {
 	for i := 0; i < 300; i++ {
 		v.Troopers = 0 // everything is escrowed, so only a market face can take any
 		v.Jets, v.Turrets, v.Tanks, v.Agents, v.Gold = 0, 0, 0, 0, 0
-		w.Market = []MarketListing{{Owner: v.Owner, Good: "Trooper", Qty: 33_000, Price: 1}}
+		w.Market = []MarketListing{{Realm: v.Name, Good: "Trooper", Qty: 33_000, Price: 1}}
 		v.PirateHits = nil
 
 		w.pirateRaidVictim(0, v)

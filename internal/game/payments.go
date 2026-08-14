@@ -67,12 +67,12 @@ func (w *World) ForcesDue(e *Empire) int64 {
 // maintenance doesn't work. Same per-unit rates and Technology scaling as
 // ForcesUpkeep; food and agents have no upkeep.
 func (w *World) listedForcesUpkeep(e *Empire) int64 {
-	tenths := w.MarketForSale(e.Owner, "Trooper")*MaintTrooperTenths +
-		w.MarketForSale(e.Owner, "Jet")*MaintJetTenths +
-		w.MarketForSale(e.Owner, "Turret")*MaintTurretTenths +
-		w.MarketForSale(e.Owner, "Bomber")*MaintBomberTenths +
-		w.MarketForSale(e.Owner, "Tank")*MaintTankTenths +
-		w.MarketForSale(e.Owner, "Carrier")*MaintCarrierTenths
+	tenths := w.MarketForSale(e.Name, "Trooper")*MaintTrooperTenths +
+		w.MarketForSale(e.Name, "Jet")*MaintJetTenths +
+		w.MarketForSale(e.Name, "Turret")*MaintTurretTenths +
+		w.MarketForSale(e.Name, "Bomber")*MaintBomberTenths +
+		w.MarketForSale(e.Name, "Tank")*MaintTankTenths +
+		w.MarketForSale(e.Name, "Carrier")*MaintCarrierTenths
 	return techLower(int64(tenths/MaintTenthsPerGold), e.TechMaintFactor())
 }
 func (w *World) RegionsDue(e *Empire) int64 {
@@ -115,12 +115,12 @@ func (e *Empire) ForcesFoodUpkeep() int {
 func (w *World) ForcesFoodDue(e *Empire) int {
 	held := forcesFoodWeighted(e.Troopers, e.Jets, e.Turrets, e.Bombers, e.Tanks, e.Carriers)
 	listed := forcesFoodWeighted(
-		w.MarketForSale(e.Owner, "Trooper"),
-		w.MarketForSale(e.Owner, "Jet"),
-		w.MarketForSale(e.Owner, "Turret"),
-		w.MarketForSale(e.Owner, "Bomber"),
-		w.MarketForSale(e.Owner, "Tank"),
-		w.MarketForSale(e.Owner, "Carrier"),
+		w.MarketForSale(e.Name, "Trooper"),
+		w.MarketForSale(e.Name, "Jet"),
+		w.MarketForSale(e.Name, "Turret"),
+		w.MarketForSale(e.Name, "Bomber"),
+		w.MarketForSale(e.Name, "Tank"),
+		w.MarketForSale(e.Name, "Carrier"),
 	)
 	return int((held + listed) / ForcesFoodWeightScale)
 }
@@ -337,7 +337,7 @@ func (e *Empire) moraleBoostDeficit() int {
 // Bombers and carriers carry no weight in the original.
 func (w *World) moraleBoostUnits(e *Empire) int64 {
 	held := func(good string, n int) int64 {
-		return int64(n + w.MarketForSale(e.Owner, good))
+		return int64(n + w.MarketForSale(e.Name, good))
 	}
 	return held("Trooper", e.Troopers)*MoraleBoostTrooper +
 		held("Jet", e.Jets)*MoraleBoostJet +

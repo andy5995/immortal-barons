@@ -99,7 +99,7 @@ func (w *World) resolveCivilWar(e *Empire) {
 	for _, good := range []string{"Trooper", "Jet", "Turret", "Bomber", "Tank", "Carrier"} {
 		f := marketField(e, good)
 		*f = *f / CivilWarPerCent * keep
-		if l := w.marketListing(e.Owner, good); l != nil {
+		if l := w.marketListing(e.Name, good); l != nil {
 			l.Qty = l.Qty / CivilWarPerCent * keep
 		}
 	}
@@ -137,7 +137,7 @@ func (w *World) moraleDesertion(e *Empire) {
 		d := *f / MoraleDesertPerCent * pct
 		*f -= d
 		e.LastMoraleDesertion += d
-		if l := w.marketListing(e.Owner, good); l != nil {
+		if l := w.marketListing(e.Name, good); l != nil {
 			d = l.Qty / MoraleDesertPerCent * pct
 			l.Qty -= d
 			e.LastMoraleDesertion += d

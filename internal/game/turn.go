@@ -463,7 +463,7 @@ func (w *World) aiShopMarket(e *Empire) {
 			continue
 		}
 		want := shop * (100 - AIMarketBuyDiscountPct) / 100
-		for _, l := range w.MarketSellers(good, e.Owner) {
+		for _, l := range w.MarketSellers(good, e.Name) {
 			if l.Price > want || l.Price <= 0 {
 				continue
 			}
@@ -471,7 +471,7 @@ func (w *World) aiShopMarket(e *Empire) {
 			if n <= 0 {
 				continue
 			}
-			if w.BuyFromMarket(e, l.Owner, good, n) == nil {
+			if w.BuyFromMarket(e, l.Realm, good, n) == nil {
 				budget -= goldCost(n, l.Price)
 			}
 		}
@@ -499,7 +499,7 @@ func (w *World) aiListSurplus(e *Empire) {
 		// turn, so adding to it each time grows the escrow without bound (a sim ran
 		// one baron to 600k jets listed). One offer at a time, replaced only once
 		// the last has cleared.
-		if w.MarketForSale(e.Owner, good) > 0 {
+		if w.MarketForSale(e.Name, good) > 0 {
 			return
 		}
 		if qty := surplus * AIMarketListPct / 100; qty > 0 {
@@ -884,7 +884,7 @@ func (w *World) processEconomy(e *Empire) {
 	// (#17); the same sum is what BRE's decay block tests against FoodSpoilFloor,
 	// below which nothing rots at all. Spoilage comes out of the granary first,
 	// then the listing.
-	listedFood := w.MarketForSale(e.Owner, "Food")
+	listedFood := w.MarketForSale(e.Name, "Food")
 	if total := e.Food + listedFood; total > FoodSpoilFloor {
 		spoiled := techLower(total*FoodSpoilPct/100, e.TechDecayFactor())
 		e.LastSpoiled = spoiled
@@ -893,7 +893,7 @@ func (w *World) processEconomy(e *Empire) {
 			fromGranary = e.Food
 		}
 		e.Food -= fromGranary
-		w.spoilListedFood(e.Owner, spoiled-fromGranary)
+		w.spoilListedFood(e.Name, spoiled-fromGranary)
 	} else {
 		e.LastSpoiled = 0
 	}

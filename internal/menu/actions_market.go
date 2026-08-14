@@ -96,9 +96,9 @@ func printMarketTable(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "%s(%s%c%s)%s %s%-11s%s%s%19d%s%s%12d%s%s%14d%s%s%17d%s\n",
 			ansi.FgYellow, ansi.FgBrightYellow, marketGoodKeys[i], ansi.FgYellow, ansi.Reset,
 			ansi.FgWhite, marketDisplayName(s, good), ansi.Reset,
-			ansi.FgBrightWhite, w.MarketPrice(p.Owner, good), ansi.Reset,
+			ansi.FgBrightWhite, w.MarketPrice(p.Name, good), ansi.Reset,
 			ansi.FgBrightCyan, owned, ansi.Reset,
-			ansi.FgBrightYellow, w.MarketForSale(p.Owner, good), ansi.Reset,
+			ansi.FgBrightYellow, w.MarketForSale(p.Name, good), ansi.Reset,
 			ansi.FgBrightYellow, w.MarketTotalForSale(good), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), marketRule(), ansi.Reset)
@@ -130,11 +130,11 @@ func sellerRule() string { return insetRule(sellerRuleWidth, sellerRuleDouble) }
 // SetMarketListing.
 func marketChangeSetup(s session.Session, w *ctx, good string) {
 	p := w.Player()
-	max := marketFieldValue(p, good) + w.MarketForSale(p.Owner, good)
-	qty := promptSuggested(s, fmt.Sprintf(tr(s, "New amount of %s for sale"), tr(s, good)), w.MarketForSale(p.Owner, good), max)
+	max := marketFieldValue(p, good) + w.MarketForSale(p.Name, good)
+	qty := promptSuggested(s, fmt.Sprintf(tr(s, "New amount of %s for sale"), tr(s, good)), w.MarketForSale(p.Name, good), max)
 	// A per-unit price is held in count width, so it is bounded by what one
 	// transaction may move rather than by what a treasury may hold.
-	price := promptSuggested(s, fmt.Sprintf(tr(s, "Set %s price"), tr(s, good)), w.MarketPrice(p.Owner, good), game.MaxCountField)
+	price := promptSuggested(s, fmt.Sprintf(tr(s, "Set %s price"), tr(s, good)), w.MarketPrice(p.Name, good), game.MaxCountField)
 	err := w.mutatePlayer(func(pp *game.Empire) error {
 		return w.World.SetMarketListing(pp, good, qty, price)
 	})
@@ -147,7 +147,7 @@ func marketChangeSetup(s session.Session, w *ctx, good string) {
 // sellers, then a quantity, then transfer (BuyFromMarket credits the seller).
 func marketBuy(s session.Session, w *ctx, good string) {
 	p := w.Player()
-	sellers := w.MarketSellers(good, p.Owner)
+	sellers := w.MarketSellers(good, p.Name)
 	if len(sellers) == 0 {
 		fail(s, fmt.Errorf("Nobody is selling %s right now.", tr(s, good)))
 		return
@@ -156,13 +156,9 @@ func marketBuy(s session.Session, w *ctx, good string) {
 		tr(s, "Id"), tr(s, "Empire Name"), tr(s, "For Sale"), tr(s, "Price"), ansi.Reset)
 	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), sellerRule(), ansi.Reset)
 	for i, l := range sellers {
-		name := l.Owner
-		if e := w.FindByOwner(l.Owner); e != nil {
-			name = e.Name
-		}
 		fmt.Fprintf(s, "%s[%s%c%s]%s %s%-16s%s %s%10d %10d%s\n",
 			ansi.FgYellow, ansi.FgBrightWhite, byte('A'+i), ansi.FgYellow, ansi.Reset,
-			ansi.FgWhite, name, ansi.Reset, ansi.FgBrightYellow, l.Qty, l.Price, ansi.Reset)
+			ansi.FgWhite, l.Realm, ansi.Reset, ansi.FgBrightYellow, l.Qty, l.Price, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), sellerRule(), ansi.Reset)
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Choose a Target (0 to cancel)?"), ansi.Reset)
@@ -188,9 +184,12 @@ func marketBuy(s session.Session, w *ctx, good string) {
 	if n <= 0 {
 		return
 	}
-	owner := target.Owner
+	// The realm name, not the *MarketListing: mutatePlayer reloads the world under
+	// the lock, so every pointer taken from the browse list above is stale by the
+	// time the purchase runs.
+	seller := target.Realm
 	buyErr := w.mutatePlayer(func(pp *game.Empire) error {
-		return w.World.BuyFromMarket(pp, owner, good, n)
+		return w.World.BuyFromMarket(pp, seller, good, n)
 	})
 	if buyErr != nil {
 		fail(s, buyErr)
