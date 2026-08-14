@@ -93,17 +93,65 @@ func (w *World) RegionsDue(e *Empire) int64 {
 	return pctOf(e.RegionUpkeep(), w.Config.MaintCosts.Percent())
 }
 
-// FoodUpkeep is the food the population and army eat per turn. The population's
-// share is scaled (BRE bills "People Need ~150 food", not one-per-person); the
-// army's share is TROOPERS ONLY, ~1 food per ArmyFoodDivisor of them.
-//
-// Only troopers eat, measured live: a realm with 7,212 troopers was billed 36
-// food, and adding 1,000 jets and 533 tanks left it at 36 — unchanged. IB used
-// to weigh jets and tanks double here ("crews plus fuel/rations"), which on that
-// army would have billed 51. breins.txt agrees in prose: troopers carry "the
-// added need for food, as compared to other units".
+// PeopleFoodUpkeep is the food the population eats per turn — the first of BRE's
+// two food obligations ("Your People Need N units of food"). BRE charges 1.5 per
+// unit of population and counts population in millions, so the conversion to
+// IB's counter runs through PopBREUnitScale.
+func (e *Empire) PeopleFoodUpkeep() int {
+	return peopleFood(e.People)
+}
+
+func peopleFood(people int) int {
+	return int(int64(people) * FoodPerBREPopUnitTenths / (10 * PopBREUnitScale))
+}
+
+// forcesFoodWeighted is the armed forces' food bill in ten-thousandths, before
+// the single truncation BRE applies to the whole sum. Every military unit type
+// is charged; the counts are weighted, not divided one type at a time, so the
+// fractions add up before they are dropped.
+func forcesFoodWeighted(troopers, jets, turrets, bombers, tanks, carriers int) int64 {
+	return int64(troopers)*ForcesFoodTrooperWeight +
+		int64(jets+turrets+bombers+tanks+carriers)*ForcesFoodUnitWeight
+}
+
+// ForcesFoodUpkeep is the food the armed forces eat per turn — BRE's second,
+// separately truncated obligation ("Your Armed Forces Require N units of food").
+// This is the baseline for the units the empire holds; World.ForcesFoodDue adds
+// the ones escrowed on the Trading Market, which BRE charges too.
+func (e *Empire) ForcesFoodUpkeep() int {
+	return int(forcesFoodWeighted(e.Troopers, e.Jets, e.Turrets, e.Bombers, e.Tanks, e.Carriers) / ForcesFoodWeightScale)
+}
+
+// ForcesFoodDue is the armed forces' food including the units this empire has
+// listed on the Trading Market. BRE reads each type from both its home field and
+// its market escrow into the same sum, so parking an army on the market no more
+// dodges its rations than it dodges its maintenance (see listedForcesUpkeep).
+func (w *World) ForcesFoodDue(e *Empire) int {
+	held := forcesFoodWeighted(e.Troopers, e.Jets, e.Turrets, e.Bombers, e.Tanks, e.Carriers)
+	listed := forcesFoodWeighted(
+		w.MarketForSale(e.Owner, "Trooper"),
+		w.MarketForSale(e.Owner, "Jet"),
+		w.MarketForSale(e.Owner, "Turret"),
+		w.MarketForSale(e.Owner, "Bomber"),
+		w.MarketForSale(e.Owner, "Tank"),
+		w.MarketForSale(e.Owner, "Carrier"),
+	)
+	return int((held + listed) / ForcesFoodWeightScale)
+}
+
+// FoodUpkeep is this turn's whole food bill for the units the empire holds. The
+// two obligations are truncated separately and then added — that is what BRE
+// does, and a single accumulator reads one food high whenever both terms have a
+// fractional part.
 func (e *Empire) FoodUpkeep() int {
-	return e.People*PeopleFoodPerThousand/1000 + e.Troopers/ArmyFoodDivisor
+	return e.PeopleFoodUpkeep() + e.ForcesFoodUpkeep()
+}
+
+// FoodDue is FoodUpkeep with the Trading Market escrow counted, and is the
+// figure actually consumed and displayed (same relationship ForcesDue has to
+// ForcesUpkeep).
+func (w *World) FoodDue(e *Empire) int {
+	return e.PeopleFoodUpkeep() + w.ForcesFoodDue(e)
 }
 
 // FoodUpkeepAtCapacity projects FoodUpkeep to the empire's population carrying
@@ -117,7 +165,7 @@ func (e *Empire) FoodUpkeepAtCapacity() int {
 	if cap := e.popCapacity(); cap > people {
 		people = cap
 	}
-	return people*PeopleFoodPerThousand/1000 + e.Troopers/ArmyFoodDivisor
+	return peopleFood(people) + e.ForcesFoodUpkeep()
 }
 
 // clampGive limits a payment to what the empire can actually afford and

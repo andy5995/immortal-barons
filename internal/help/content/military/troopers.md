@@ -14,10 +14,10 @@ They are cheap to buy and cheap to keep. About seven troopers cost as much as
 one tank, but a tank is worth several troopers in a fight. Troopers are the
 better value early in the game, and tanks become stronger later.
 
-Troopers are the only unit that eats. Jets, tanks, turrets, bombers and
-carriers cost you nothing to feed, so food pressure comes from your people and
-your troopers alone. A large trooper army needs a strong food supply; a large
-armored one does not.
+Every military unit eats, but a trooper eats fifty times as much as any other:
+one unit of food feeds 200 troopers, or 10,000 of anything else. So a large
+trooper army needs a strong food supply, and a large armored one barely
+registers.
 
 A large trooper army also discourages enemy R5-Slappenheimer strikes. The more
 troopers you hold, the more likely that missile is to backfire onto the empire

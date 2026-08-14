@@ -1381,52 +1381,58 @@ league ran tax 85%, interest 75%).
   **sell or spend this turn's growth the same turn**. (Earlier IB deferred the
   growth to the end-of-turn economy step, where it arrived after the food market
   and was always subject to spoilage — corrected 2026-07-20 after driving BRE.)
-- **Food consumption:** each turn the population eats
-  `People × PeopleFoodPerThousand (75) / 1000` and the army eats
-  `Troopers / ArmyFoodDivisor (200)` — about **1 food per 200 troopers**.
-  Live-verified twice: 42,259 troopers → 211, and a realm billed 36 food for
-  7,212 troopers. `breins.txt` gives troopers "the added need for food, as
-  compared to other units", which is comparative, not exclusive: **troopers are
-  not the only unit that eats** (see the turret/tank rate below). A large
-  standing army is still nearly food-free, as in BRE — food pressure comes from
-  population, not the army. (Both constants in `balance.go`.
-  Fixed 2026-07-23: the army was previously billed 1 food/trooper, ~200× too heavy.)
+- **Food consumption is TWO obligations, not one (#91).** BRE bills the people
+  and the armed forces from two separate routines, prompts for them one after
+  the other, and truncates each on its own:
 
-  **The two terms are truncated separately, then summed** — the total is
-  `trunc(population food) + trunc(army food)`, not one accumulator truncated
-  once. Four turns of a combined `N units of Food consumed` line discriminate
-  the models (25,865M + 49,840 turrets billed 38,801, where a single
-  accumulator gives 38,802); the same holds at 219,032 and 278,857 turrets.
-  Summing the two terms before truncating reads one unit high whenever both
-  have a fractional part.
+  ```
+  people = trunc(populationInMillions × 1.5)
+  forces = trunc((troopers × 0.5 + everyOtherMilitaryUnit × 0.01) × 0.01)
+  ```
 
-  The **people** rate is BRE's, not a reconstruction, once the population scales
-  are lined up. BRE charges exactly `1.5` food per million people — nine samples
-  across five captures, from 100M to 34,600M, all exact under truncation
-  (4,081M → 6,121, i.e. `trunc(6121.5)`). IB's population counter runs 20× BRE's
-  displayed millions (a fresh realm is 2,000 to BRE's 100M), and `75/1000` is
-  `1.5/20`, so the two charge the same food for the same realm. An earlier note
-  here claimed IB's rate was lighter; it is identical.
+  Both are read straight out of the binary — `BRE.OVR 0x37418` (people) and
+  `0x37459` (armed forces), the two need routines in the food overlay unit,
+  called back to back by the allocation routine at `0x37fdf` that prints
+  `Your People Need N units of food` and then `Your Armed Forces Require N units
+  of food`. The prompts default to as much of the granary as the obligation
+  asks for, and if either goes unmet BRE warns that the decision *may lead to
+  DISASTEROUS results* and offers to reconsider, which restarts both prompts.
 
-  **Turrets and tanks each eat 1 food per 10,000 units, and IB does not charge
-  them.** The divisor is **10,000 exactly**, not a fit. Ten army-food prompts
-  from a turret-only empire (99,382 up to 816,657 turrets) bracket it to
-  9,966.5 … 10,082.2, and a tank-only empire drove it shut: with production
-  frozen and the count sold to an exact figure, **30,000 tanks billed 3 and
-  29,999 billed 2**, which allows only 9,999.67 … 10,000. The same pair proves
-  **truncation, not rounding** (2.9999 → 2). Fifteen further tank readings from
-  10,194 to 56,197 are all consistent.
+  **The people** eat 1.5 per million, exactly. Nine live samples from 100M to
+  34,600M are all exact under truncation (4,081M → 6,121, i.e.
+  `trunc(6121.5)`). IB counts people directly, `PopBREUnitScale` (20) to BRE's
+  million, so the conversion runs through that constant —
+  `FoodPerBREPopUnitTenths` in `balance.go`.
 
-  Tanks and turrets therefore carry the same weight, so the rate is a property
-  of the army, not of the unit type. An earlier note here recorded tanks and
-  jets as eating **nothing**; that test added 1,000 jets and 533 tanks, both of
-  which truncate to zero at this rate, so it had no power to detect them.
-  **Jets, bombers and carriers remain untested — not known-free.** Covert agents
-  are bounded below 1 food per 300 agents (a 50-agent purchase moved nothing),
-  which rules out the trooper rate but not the turret/tank one.
+  **Every military unit type eats**, which BRE's own changelog states outright:
+  *"All military units now require food to survive"* (`docs/whatsnew.doc`,
+  0.97). The armed-forces routine sums **twelve** terms as one real and
+  truncates once — six unit types, each counted both where it is held
+  (record `+0x76 … +0x8a`) and where it sits escrowed on the Trading Market
+  (`+0x211 … +0x231`), so listing an army for sale no more dodges its rations
+  than it dodges its maintenance. Food (`+0x221`) and agents (`+0x229`) are
+  **not** among the twelve, so neither eats — which settles the covert-agent
+  question that live play could only bound.
 
-  The charge stays 0.02% of a realm's food bill, which is why IB's omission has
-  never shown up in play.
+  Troopers carry weight `0.5` and everything else `0.01`, and the whole sum is
+  then multiplied by `0.01`: **1 food per 200 troopers, 1 per 10,000 of
+  everything else**. Both rates are corroborated in play — 42,259 troopers →
+  211 and 7,212 → 36 for the trooper rate; **30,000 tanks bill 3 and 29,999 bill
+  2** for the other, which allows only 9,999.67 … 10,000 and proves truncation
+  over rounding. `breins.txt` gives troopers "the added need for food, as
+  compared to other units", which is comparative and matches the 50× weight.
+
+  **The two obligations are truncated separately, then summed.** Four turns of a
+  combined `N units of Food consumed` line discriminate the models (25,865M +
+  49,840 turrets billed 38,801, where one accumulator gives 38,802); the same
+  holds at 219,032 and 278,857 turrets. Summing before truncating reads one unit
+  high whenever both terms have a fractional part.
+
+  Food pressure still comes from population, not the army: the non-trooper
+  charge is ~0.02% of a realm's bill, which is why IB's earlier troopers-only
+  formula survived so long. The measurement that appeared to clear jets and
+  tanks added 1,000 jets and 533 tanks — 0.15 food between them, so it had no
+  power to detect either.
 - **Food spoilage:** **5% of the food remaining after growth and consumption**
   spoils each turn — `floor(0.05 × food)` — with **no floor** below which nothing
   spoils, reduced by Technology regions. **Re-verified by driving the original

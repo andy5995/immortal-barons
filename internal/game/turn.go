@@ -261,7 +261,7 @@ func (w *World) aiPlay(today string) {
 // troopers. This keeps AI realms from starving themselves to death.
 func (w *World) aiManageEconomy(e *Empire) {
 	produced := w.FoodGrown(e)
-	upkeep := e.FoodUpkeep()
+	upkeep := w.FoodDue(e)
 
 	// 1. Keep a food buffer, spending at most half the treasury on it so expansion
 	//    gold survives. AIFoodBufferTurns is sized to ride out a day of consumption
@@ -500,7 +500,7 @@ func (w *World) aiListSurplus(e *Empire) {
 		}
 	}
 	list("Jet", e.Jets-e.Carriers*JetsPerCarrier, w.JetPrice(e))
-	list("Food", e.Food-e.FoodUpkeep()*AIFoodBufferTurns, w.FoodBuyPrice())
+	list("Food", e.Food-w.FoodDue(e)*AIFoodBufferTurns, w.FoodBuyPrice())
 }
 
 // shopPrice is what e would pay the shop for one unit of a market good, or 0 for
@@ -578,7 +578,7 @@ func (w *World) aiDecontaminate(e *Empire) {
 // land it could have converted. Only fires when food production genuinely falls
 // short AND it cannot pay for the farmland outright.
 func (w *World) aiRebalanceRegions(e *Empire) {
-	if w.FoodGrown(e) >= e.FoodUpkeep() {
+	if w.FoodGrown(e) >= w.FoodDue(e) {
 		return
 	}
 	if e.Gold >= int64(w.LandPrice(e)) || e.LandAvailable <= 0 {
@@ -862,7 +862,7 @@ func (w *World) processEconomy(e *Empire) {
 	// Food growth was already credited at turn start (GrowFood); here we only
 	// consume and then spoil. (Was `Food += FoodGrown - consumed`, which grew the
 	// food at turn end where it couldn't be sold and always spoiled.)
-	e.LastFoodConsumed = e.FoodUpkeep()
+	e.LastFoodConsumed = w.FoodDue(e)
 	e.Food -= e.LastFoodConsumed
 	if e.Food < 0 {
 		// Underfeeding hits popular support and drives people away, worse the
