@@ -2427,8 +2427,9 @@ Market`. Any empire can list goods for other empires to buy:
   (`BombMarketLossPct`) of a target's listed goods and pending proceeds.
 
 Negotiated empire-to-empire trade deals carrying goods with demands (BRE's other
-trading half) are not built yet; `Send Trade Deal` still sends gold only.
-Interplanetary trades and carrier-moved goods remain future work.
+trading half) are built: `SendTradeDeal` takes a full basket each way, escrows
+what is offered, consumes a transport carrier and charges the per-day transit
+fee (#17). Interplanetary trades and carrier-moved goods remain future work.
 
 ## News files (what BRE broadcasts)
 
