@@ -392,14 +392,14 @@ func composeMessage(s session.Session) (string, bool) { return composeMessageFro
 // — they are ordinary lines from there on, numbered, counted against the limit,
 // and cleared by /C along with everything else.
 func composeMessageFrom(s session.Session, initial []string) (string, bool) {
-	// IB draws the banner and ruler bright cyan. BRE draws the banner white and
-	// the ruler plain cyan — a 2026-08-14 capture disagrees with the earlier
-	// screenshot this was taken from; see docs/dev/bre-screens.md, which records
-	// both and leaves the difference standing rather than changing colours
-	// inside a wrapping fix. The line-number prompts below do match BRE's green.
+	// Banner white, ruler plain cyan — read off a live capture (2026-08-14),
+	// which corrected an earlier note here claiming both were bright cyan
+	// "verified from a screenshot". Both clear 4.5:1 on black: the white 9.0:1
+	// on the VGA palette, the cyan 7.3:1. The line-number prompts below are
+	// BRE's green.
 	fmt.Fprintf(s, "\n    %s"+tr(s, "You have %d lines for your message.  /S=save /A=abort /C=clear")+"%s\n",
-		ansi.FgBrightCyan, msgMaxLines, ansi.Reset)
-	fmt.Fprintf(s, "    %s%s%s\n", ansi.FgBrightCyan, msgRuler(msgLineWidth), ansi.Reset)
+		ansi.FgWhite, msgMaxLines, ansi.Reset)
+	fmt.Fprintf(s, "    %s%s%s\n", ansi.FgCyan, msgRuler(msgLineWidth), ansi.Reset)
 
 	lines := make([]string, 0, len(initial))
 	for _, q := range initial {
