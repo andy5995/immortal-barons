@@ -1,13 +1,147 @@
 (in-progress:)
-  * Each computer-run realm now holds its own Trading Market listings and sale
-    gold; they shared one position per good, so a baron's listing destroyed the
-    goods another had escrowed and all their sale gold was paid to one of them
-  * A realm removed from the game loses its Trading Market listings and any sale
-    gold it had not been paid, so the next realm to take its name no longer
-    inherits them
+  * A regular attack is fought out round by round: the side that breaks off
+    loses the share of its forces it will accept, and the winner loses only what
+    the strength ratio cost it, so a rout is cheap and an even fight is not
+  * Attack Rewards and Attack Damage follow the original's own tables — High
+    takes a quarter of the defender's regions and costs a third of the force,
+    and None still costs a little
+  * A battle report leads with what the fight cost both sides and closes with
+    the result
+  * Population follows the original's model: the kind of land a realm owns —
+    Urban far outweighing every other type — scaled by popular support and
+    divided by the tax rate. Acreage alone no longer houses anyone
+  * People move a share of the way toward that number each turn, leaving faster
+    the harder a realm taxes and faster again above a 50% rate
+  * Computer-run realms keep buying land instead of stopping for good once their
+    upkeep catches up with their income; land and army now draw on one surplus
+  * Each computer-run realm holds its own Trading Market listings and sale gold.
+    They shared one position per good, so a baron's listing destroyed goods
+    another had escrowed and one of them collected everyone's sale gold
+  * A realm removed from the game takes its listings, unpaid sale gold, treaties,
+    Enemy standings and sent proposals with it, so the next realm of that name
+    starts clean
+  * Food is two obligations: the people and the armed forces are billed apart
+    and asked about apart, as in the original
+  * Every military unit eats — one food per 200 troopers and per 10,000 of every
+    other type, including units listed for sale
+  * A granary of a thousand units or less spoils nothing
+  * River fishing follows the original's yield: a base of 110 plus a draw,
+    raised by technology; rivers take a quarter of their output as food and pay
+    the rest as gold
+  * Military morale is bought back the way popular support is: the request is
+    priced off the army's size, and paying part of it buys part of the points
+  * Military morale rises only by that boost — it no longer drifts back on its own
+  * Troopers, jets and tanks desert at a rate drawn from a band chosen by morale,
+    and stop deserting at 40; turrets, bombers and carriers never desert
+  * Underpaying the armed forces costs military morale and underpaying land
+    upkeep costs popular support, at the original's rates, and both land at
+    rollover rather than mid-turn
+  * A food shortfall bills the people's need against popular support and the
+    army's against military morale, and drives nobody out of the realm
+  * Added civil war: a realm that feeds its people under two thirds of their
+    need, or pays under 90% of its land upkeep, loses half its popular support
+    and a share of its land and of every kind of unit it owns
+  * Auto-Pay Maintenance stays silent only while popular support and military
+    morale both read 100
+  * Declaring war costs a quarter of both popular support and military morale;
+    attacking a partner outright breaks the pact and costs nothing, as in the
+    original
+  * Stir Revolts and Demoralize Forces scale their target's stat instead of
+    docking a flat number of points; an AI's covert op cannot push either below 5
+  * An unpopular realm reaches the planet news even in a turn without a riot
+  * A nuclear strike ruins land rather than destroying it: the target keeps every
+    region and its upkeep but earns nothing from the ruined share
+  * A chemical strike ruins land into waste, gasses a fifth of the target's
+    people and knocks down its military morale and popular support
+  * A biological strike kills a share of the target's people and troopers and
+    halves its military morale, leaving the land alone
+  * All three warheads are priced by the target — the nuclear by its land, the
+    chemical by its people and land, the biological by its troopers, people and
+    land — quoted once the target is chosen, and can be declined
+  * A warhead the gold in hand cannot cover is paid out of the bank
+  * All three raise the attacker's score, and none can wipe out a realm
+  * Waste is a region type of its own, listed on the region tables; it is
+    decontaminated during maintenance and its owner shares the recovered land
+    out across region types
+  * SDI strength is its funding spread over the realm's land, so taking regions
+    thins the shield that covers them
+  * SDI answers only strikes from another planet: it blunts an arriving realm's
+    jets and bombers and intercepts incoming missiles, leaving a neighbour's
+    missiles and bombing runs and the Clingy Annihilator alone
+  * A group attack is not blunted by its target's SDI, as in the original
+  * Send Message addresses a list of realms: a letter marks or unmarks one, "Z"
+    marks them all, and Enter closes the list and opens the editor
+  * Diplomacy takes the same list: a treaty is offered to, and war declared on,
+    every marked realm at once, and "?" there lists relations rather than scores
+  * Message target letters are the realm's own, so a fallen realm or the sender
+    leaves a gap; they match the letters a message records as its recipients
+  * A message-editor line wraps at the ruler's 68th column, carrying the word in
+    progress down, and backspace at the start of a line re-opens the one above
+  * A message is removed from the inbox once it is replied to, like Delete
+  * A reply asks which lines of the message to quote, and opens with them
+  * Empire Status is one unboxed block in the original's layout instead of two
+    boxed pages, listing only the fields the realm has something in
+  * Empire Status shows the cumulative score the scores board ranks on, where it
+    used to show net worth under that label
+  * Today's News counts the planet live, so a new board's first day no longer
+    reads as empty
+  * "Since your last play" recap entries color the realm name and treaty type
+    bright cyan
+  * See Scores, the attack target list and the View Treaties roster mark a baron
+    who is on the board with "(O)" beside their name
+  * A pirate raid takes about a thirtieth of one kind of holding, named on its
+    own line at the end of the income report, and reports its outcome as the
+    original does: one of five random headlines, the loot, and what it cost
+  * Pirate bands start with no army and no land and can field only what they have
+    stolen, so an untouched band grows and a drained one is harmless
+  * Beating a band recovers a third of its gold, regions, agents and troopers and
+    a quarter of its jets, turrets and tanks, and costs the attacker casualties
+  * Pirates raid larger realms more often, a turn can carry more than one raid,
+    and military listed on the Trading Market is not hidden from them
+  * Attack Pirates marks a faction that raided you since your last play with "->"
+    beside its name
+  * Diplomacy is on the opening menu as well as the System menu, and Game Setup
+    is on the System menu as well as the opening menu
+  * Combat reports, pirate raid results, planet news and "since your last play"
+    events wrap between words; the terminal was splitting figures in half
+  * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
+  * config-during-reset: a new Money Cap setting sets how much gold a realm may
+    hold, on hand and again in the bank — two billion (the original's own limit)
+    up to 999 billion
+  * A bank at the Money Cap pays its interest into gold in hand instead of
+    losing it; destroyed gold is reported in the event log
+  * One investment still locks away at most two billion; deposits and
+    withdrawals have no size limit
+  * A withdrawal takes only as much gold as will fit in hand, leaving the rest in
+    the bank
+  * Figures of a billion or more are shown as "1.0000B" rather than in full
+  * Amounts may be typed with a "b" suffix, as they already could with "k"/"m"
+  * config-during-reset: added the Local Attacks (enabled), Local Attack Scoring
+    (disabled) and Dupe Checking (enabled) league settings, editable in both
+    Configuration Editors, shown on Game Setup and broadcast to the league
+  * With Local Attacks disabled, barons on one board cannot attack each other and
+    the Attack menu keeps only the pirate and alliance entries
+  * With Local Attack Scoring disabled, a battle between barons on one board
+    moves neither side's score
+  * With Dupe Checking enabled, a caller found playing on another board in the
+    league is locked out until one of the realms goes. Scores packets carry a
+    hash of the handle for this, never the handle itself
+  * The Bombing Ops, Missile Ops and Clingy Annihilator settings take their
+    operations off the Attack, Covert and InterPlanetary menus when disabled,
+    hotkeys included
+  * Added Waste, Population, and Morale and Support help topics
+
+  Inter-BBS (league play only):
+  * Individual interplanetary strikes choose an attack type — Normal Attack,
+    Quick Strike, or Extended Battle — trading strength against the land taken
+    and the losses both sides accept. A Quick Strike fights at 120% strength,
+    the figure the original's code applies rather than the 110% its help
+    advertises
+  * An individual strike takes twice the land a group attack of the same weight
+    would, costs one gold per unit, and asks for confirmation
   * A group attack's departure is set in hours, from 12 to 120, and the force
     leaves at that hour rather than on a day boundary
-  * A baron who sends an interplanetary strike now gets a private report when it
+  * A baron who sends an interplanetary strike gets a private report when it
     returns: the attack type, the target realm and planet, whether it won, was
     beaten, found no such realm or found it protected, what was lost and what
     came home by unit type, and what it destroyed
@@ -17,181 +151,24 @@
   * An interplanetary strike costs the defender units, not only regions
   * A returning report for a strike whose forces have already been given up as
     lost is discarded instead of raising a second army
-  * The sysop's Attack Damage setting now reaches interplanetary strikes: None
-    makes them almost bloodless, Low halves the losses and High doubles them
-  * A Quick Strike fights at 120% strength, the figure the original's own code
-    applies rather than the 110% its help advertises
-  * Computer-run realms no longer stop buying land permanently once upkeep
-    catches up with income; land purchases and army funding now draw from the
-    same gold surplus
-  * A regular attack is fought out round by round: the side that breaks off
-    loses the share of its forces it will accept, and the winner loses only
-    what the strength ratio cost it, so a rout is cheap and an even fight is not
-  * Attack Rewards and Attack Damage follow the original's own tables — High
-    takes a quarter of the defender's regions and costs a third of the force,
-    and None still costs a little
-  * A battle report leads with what the fight cost both sides and closes with
-    the result
-  * Today's News now counts the planet live; a new board's first day no
-    longer shows as empty
-  * "Since your last play" recap entries color the realm name and treaty type
-    bright cyan
-  * A message is removed from the inbox once it is replied to, like Delete
-  * Send Message addresses a list of realms: a letter marks or unmarks one, "Z"
-    marks them all, and Enter closes the list and opens the editor
-  * Diplomacy takes the same list: a treaty is offered to, and war declared on,
-    every marked realm at once, and "?" there lists relations rather than scores
-  * Message target letters are the realm's own, so a fallen realm or the sender
-    leaves a gap; they match the letters a message records as its recipients
-  * The message editor's column ruler is 68 columns wide, as the original's is
-  * Food is two obligations: the people and the armed forces are billed apart
-    and asked about apart, as in the original
-  * Every military unit eats, not troopers alone — one food per 200 troopers
-    and per 10,000 of every other type, including units listed for sale
-  * A granary of a thousand units or less no longer spoils
-  * River fishing follows the original's yield: a base of 110 plus a draw, and
-    technology raises it; rivers take a quarter of their output as food rather
-    than 30%, and pay the rest as gold
-  * Attack Pirates marks a faction that raided you since your last play with
-    "->" beside its name
-  * config-during-reset: added the Local Attacks (enabled), Local Attack
-    Scoring (disabled) and Dupe Checking (enabled) league settings, editable in
-    both Configuration Editors, shown on Game Setup and broadcast to the league
-  * With Local Attacks disabled, barons on one board can no longer attack each
-    other and the Attack menu keeps only the pirate and alliance entries
-  * With Local Attack Scoring disabled, a battle between barons on one board
-    moves neither side's score
-  * With Dupe Checking enabled, a caller found playing on another board in the
-    league is locked out until one of the realms goes. Scores packets carry a
-    hash of the handle for this, never the handle itself
-  * The Bombing Ops, Missile Ops and Clingy Annihilator settings take their
-    operations off the Attack, Covert and InterPlanetary menus when disabled,
-    hotkeys included
+  * The sysop's Attack Damage setting reaches interplanetary strikes: None makes
+    them almost bloodless, Low halves the losses and High doubles them
   * The Attack Costs setting scales what an interplanetary strike charges, and
     the price is capped at 200,000,000 gold
   * A terrorist operation costs 64 gold per region the launcher owns, scaled by
     the Terrorism Costs setting, quoted before it is sent
-  * Military morale is bought back the way popular support is: the request is
-    priced off the army's size, and paying part of it buys part of the points
-  * Military morale no longer recovers on its own; only the boost raises it
-  * Troopers, jets and tanks desert at a rate drawn from a band chosen by
-    morale, and stop deserting entirely at 40. Turrets, bombers and carriers
-    never desert
-  * A food shortfall bills the people's need and the army's need separately —
-    the first against popular support, the second against military morale — and
-    no longer drives anyone out of the realm
-  * Added civil war: a realm that feeds its people under two thirds of their
-    need, or pays under 90% of its land upkeep, loses half its popular support
-    and a share of its land and of every kind of unit it owns
-  * Underpaying the armed forces costs military morale alone, land upkeep
-    popular support alone, at the original's rates
-  * Maintenance shortfalls no longer land mid-turn; they surface at rollover
-  * Auto-Pay Maintenance stays silent only while popular support and military
-    morale both read 100
-  * Breaking a treaty by attacking a partner costs a quarter of both popular
-    support and military morale
-  * Chemical and biological strikes lower the target's morale and support
-  * Stir Revolts and Demoralize Forces scale their target's stat instead of
-    docking a flat number of points; an AI's covert op cannot push either below 5
-  * An unpopular realm reaches the planet news even in a turn without a riot
-  * Added a Morale and Support help topic
-  * A realm removed from the game takes its treaties, its Enemy standings and
-    the proposals it sent with it, so a later realm of the same name starts
-    with no relations
-  * A message-editor line wraps at the ruler's 68th column, carrying the word
-    in progress down to the next line, and backspace at the start of a line
-    re-opens the one above it
-  * A nuclear strike ruins land rather than destroying it: the target keeps
-    every region and its upkeep but earns nothing from the ruined share
-  * Waste is a region type of its own, listed on the region tables; it is
-    decontaminated during maintenance and its owner shares the recovered land
-    out across region types
-  * Nuclear missiles are priced by the size of the target, quoted after the
-    target is chosen, and can be declined
-  * A chemical strike ruins land into waste instead of destroying it, gasses a
-    fifth of the target's people, and knocks down its military morale and
-    popular support; it no longer kills troopers
-  * A biological strike kills a share of the target's people and troopers and
-    halves its military morale, and leaves the land alone
-  * Chemical and biological missiles are priced by the target as well: the
-    chemical one by its people and land, the biological one by its troopers,
-    people and land
-  * SDI no longer reduces nuclear, chemical or biological damage from a realm
-    on the same planet
-  * A chemical or biological strike can no longer wipe out a realm
-  * Nuclear, chemical and biological strikes raise the attacker's score
-  * A warhead the gold in hand cannot cover is paid for out of the bank rather
-    than refused
-  * SDI no longer reduces nuclear damage from a realm on the same planet
-  * SDI strength is its funding spread over the realm's land, so taking regions
-    thins the shield that covers them
-  * SDI answers only strikes from another planet: it blunts an arriving realm's
-    jets and bombers and intercepts incoming missiles, and no longer touches
-    chemical or biological strikes, a neighbour's bombing run, or the Clingy
-    Annihilator
-  * A group attack is not blunted by its target's SDI, as in the original
-  * A nuclear strike raises the attacker's score
-  * Inter-BBS packets carry the sending board's signature, and a board whose
-    key is in the league roster can no longer be impersonated
+  * Inter-BBS packets carry the sending board's signature, so a board whose key
+    is in the league roster cannot be impersonated, and the roster's node number
+    for each end, preferred over the board name for authentication, addressing
+    and identifying the League Coordinator
   * Added "-gen-board-key" to create this board's packet-signing key
-  * See Scores, the attack target list and the View Treaties roster mark a
-    baron who is on the board with "(O)" beside their name
-  * Population follows the original's model: the kind of land a realm owns —
-    Urban far outweighing every other type — scaled by popular support and
-    divided by the tax rate. Acreage alone no longer houses anyone
-  * People move a share of the way toward that number each turn, leaving faster
-    the harder a realm taxes and faster again above a 50% rate
-  * Added Waste and Population help topics
-  * A pirate raid takes about a thirtieth of one kind of holding, named on its
-    own line at the end of the income report
-  * Pirate bands start with no army and no land and can field only what they
-    have stolen, so an untouched band grows and a drained one is harmless
-  * Beating a band recovers a third of its gold, regions, agents and troopers
-    and a quarter of its jets, turrets and tanks
-  * A winning raid costs the attacker casualties, and reports them
-  * Pirates raid larger realms more often, and a turn can carry more than one
-    raid
-  * Military listed on the Trading Market is no longer hidden from pirates
-  * Diplomacy is on the opening menu as well as the System menu
-  * Game Setup is on the System menu as well as the opening menu
-  * Send Message can address every realm the sender holds a treaty with
-  * A reply asks which lines of the message to quote, and opens with them
-  * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
-  * Combat reports, pirate raid results, planet news and "since your last play"
-    events wrap between words; the terminal was splitting figures in half
-  * Proposing a treaty picks the realm the way Send Message does: a letter, "?"
-    for the list, and "Z" to offer it to every realm at once
-  * A pirate raid reports its outcome as the original does: one of five random
-    headlines, the loot taken, and what the raid cost
-  * config-during-reset: a new Money Cap setting sets how much gold a realm may
-    hold, on hand and again in the bank — two billion (the original's own limit)
-    up to 999 billion
-  * A bank at the Money Cap pays its interest into gold in hand instead of
-    losing it; destroyed gold is reported in the event log
-  * One investment still locks away at most two billion; deposits and
-    withdrawals have no size limit
-  * A withdrawal takes only as much gold as will fit in hand, leaving the rest
-    in the bank
-  * Empire Status is one unboxed block in the original's layout instead of two
-    boxed pages, listing only the fields the realm has something in
-  * Empire Status shows the cumulative score the scores board ranks on, where it
-    used to show net worth under that label
-  * Figures of a billion or more are shown as "1.0000B" rather than in full
-  * Amounts may be typed with a "b" suffix, as they already could with "k"/"m"
-
-  Inter-BBS (league play only):
-  * Individual interplanetary strikes choose an attack type — Normal Attack,
-    Quick Strike, or Extended Battle — trading strength against the land taken
-    and the losses both sides accept
-  * An individual strike takes twice the land a group attack of the same weight
-    would
-  * Individual strikes cost one gold per unit and ask for confirmation
-  * Added an Attack Types help topic
+  * A reset advances this board's own generation marker, so a packet left over
+    from the cleared game is discarded instead of applied to the new one
   * This board's own settings — name, league number, packet directories — moved
     out of config.json into "bbs.cfg", editable without the settings editor; an
     existing board migrates on its next save with nothing for the sysop to do
-  * "-ibbs-reset -import-bbs-cfg" takes a board's name, incoming-files
-    directory and league number from an original Barren Realms Elite BBS.CFG
+  * "-ibbs-reset -import-bbs-cfg" takes a board's name, incoming-files directory
+    and league number from an original Barren Realms Elite BBS.CFG
   * A league can be arranged as a tree instead of every board linking to every
     other one: the Coordinator writes the routing into the node list, and a
     member board then links only to its uplink (#106)
@@ -212,14 +189,15 @@
   * The Planetary Treaties chart matches the original's layout and colors
   * Implemented the SDI Program: its funding allowance, its upkeep, its screen
     and the strength its funding buys all match the original
-  * Clingy Annihilator Ops answers to 9 on the InterPlanetary Operations menu, and
-    the interplanetary Special Operations menu is numbered, both as in the
+  * Clingy Annihilator Ops answers to 9 on the InterPlanetary Operations menu,
+    and the interplanetary Special Operations menu is numbered, both as in the
     original
   * The InterPlanetary Operations and Special Operations menus show the gold on
     hand
   * Implemented IP mail
   * Travel Times shows the measured round trip to each planet, in hours or days
   * Every screen asks for a planet by name or number, with "?" for the list
+  * Added an Attack Types help topic
   * Sysops: "-ibbs-reset" starts a new game as a league board and a plain
     "-reset" a stand-alone one, which is no longer asked the league settings;
     adding "-board-id" sets a member board up in one command, without the
@@ -227,11 +205,6 @@
   * The Configuration Editor sets the inter-BBS inbound and outbound
     directories, which now sit inside the data directory; a reset creates them
     and warns about packets left from the cleared game
-  * A reset advances this board's own generation marker, so a packet left over
-    from the cleared game is discarded instead of applied to the new one
-  * Inter-BBS packets carry the roster's node number for each end, preferred
-    over the board name for authentication, addressing and identifying the
-    League Coordinator
 
 2026-08-05 (v0.0.4)
   * The web server has been removed (an SSH server may replace it)
