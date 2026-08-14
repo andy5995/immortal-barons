@@ -488,23 +488,29 @@ Id  Empire Name                          Territory     Score    Net Worth
 ─────══════════─────────────────────────────────────────────────────────
 ```
 
-**IB adds an online mark in that same flag column (#123).** BRE has no online
-indicator; IB writes `O` in the fourth column for a baron who acted within
-`OnlineWindowSecs`, taking the slot BRE uses for its participation `+`. Chosen
-to follow the original's idiom rather than to add a headed column: the flag
-costs no width and the table's geometry is unchanged. Your own realm is never
-marked. Every local roster carries it: the attack target picker and the
-recipient picker share `scoreTableRow`/`idCell`, and the Coordinator's Player
-List puts it in its indent. The inter-BBS scores screen does NOT — those figures
-arrive in packets that may be hours old, so there is nothing to report.
+**IB adds an online mark (#123).** BRE has no online indicator; IB writes `(O)`
+for a baron who acted within `OnlineWindowSecs`, hugging the LEFT of the empire
+name inside the name field. Your own realm is never marked. Every local roster
+carries it: the attack target picker and the recipient picker share
+`scoreTableRow`/`nameCell`, and the Coordinator's Player List puts it in its
+indent. The inter-BBS scores screen does NOT — those figures arrive in packets
+that may be hours old, so there is nothing to report.
 
-The cell is drawn `93` + `7` — bright-yellow foreground plus reverse video, so
-it reads as a lit key against the dim table. Reverse rather than a `103` bright
-BACKGROUND because that code is an aixterm extension and the classic CP437
-clients a door meets treat the high-intensity background bit as blink. Black on
-bright yellow measures 19.7:1 (VGA palette) and 19.6:1 (xterm); plain `43m`
-yellow would be 4.0:1 on VGA and fail. The `O` carries the meaning by itself on
-a monochrome or ANSI-less session, so the colour is enhancement only.
+An unmarked row reserves the mark's width, so the names stay in one column
+either way; `markWidth` measures the translated letter rather than assuming one
+character, since the `O` goes through `tr`.
+
+The parentheses are `90` dark gray and the letter `37` gray. Measured on black:
+the letter is **9.0:1** on the VGA palette and 16.7:1 on xterm's, comfortably
+over 4.5:1. The parentheses are **2.8:1** on VGA (5.3:1 on xterm), under the 3:1
+non-text minimum — they are deliberately dim framing, and the letter inside them
+carries the meaning on its own, including on a monochrome or ANSI-less session.
+Brightening them to `37` as well would make the mark compete with the empire
+name it sits against, which is the thing a reader is scanning for.
+
+An earlier revision drew the mark as a reverse-video `93`+`7` cell in the ID
+column, in the slot BRE uses for its participation `+`. Changing it moved the
+mark next to the name it describes; `3c4a789` is the commit.
 
 ### Turn income, status block, maintenance
 
@@ -1283,13 +1289,11 @@ make a dense line scan faster:
   the three figures read as separate fields rather than as prose. It costs the
   same width as the semicolon (one glyph per gap), which bracketing the values
   would not — `[…]` reaches 78 columns with a 9-digit net worth and wraps at 10.
-- **Online mark (#123).** Relations shows the same inverse-video `O` as See
-  Scores, in the FIRST of the two spaces BRE leaves after `[X]` — `[A]O Gale
-  Horde`. The second
-  space still separates it from the name, so the 40-column name field and the
-  relation at column 45 are untouched. A headed column of its own would have
-  moved both, and this is one of the closest-matched screens; the cost is that
-  the mark carries no heading here.
+- **Online mark (#123).** Relations shows the same `(O)` as See Scores, hugging
+  the left of the realm name in the two spaces BRE leaves after `[X]`, so the
+  40-column name field and the relation at column 45 are untouched. A headed
+  column of its own would have moved both, and this is one of the
+  closest-matched screens; the cost is that the mark carries no heading here.
 
 Everything else on the two screens is the original's.
 
