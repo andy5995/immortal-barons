@@ -115,3 +115,56 @@ func TestRunPlanetaryExportsScores(t *testing.T) {
 		t.Error(`no outbound packet scored the "Player" empire`)
 	}
 }
+
+// TestStalePacketLeftInInboundAfterResetIsDiscarded is #104's end-to-end
+// shape: a packet a peer wrote sits unread in the inbound directory, the
+// sysop runs -reset, and only THEN does -planetary get around to it. The
+// leftover must not be applied to the fresh world.
+func TestStalePacketLeftInInboundAfterResetIsDiscarded(t *testing.T) {
+	in, out := t.TempDir(), t.TempDir()
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "boardA"
+	w := game.NewWorldSeed(cfg, 1)
+
+	// A neighbour writes a packet for this board's CURRENT game and it lands in
+	// the inbound directory, unread.
+	sender := game.NewWorldSeed(game.Config{BoardID: "Neighbour"}, 1)
+	sender.Outbox = []game.Packet{{FromBoard: "Neighbour", ToBoard: "boardA",
+		Scores: []game.RemoteScore{{Empire: "Junk", NetWorth: 999}}}}
+	sender.StampOutbox()
+	if _, err := WriteOutbox(sender, in); err != nil {
+		t.Fatalf("seeding the inbound directory: %v", err)
+	}
+
+	w.Reset() // the sysop resets before -planetary ever reads the leftover
+
+	if _, err := RunPlanetary(w, in, out); err != nil {
+		t.Fatalf("RunPlanetary: %v", err)
+	}
+	if len(w.RemoteBoards) != 0 {
+		t.Errorf("a packet written before the reset was applied: %+v", w.RemoteBoards)
+	}
+}
+
+// TestPreEpochPacketFileIsHandled pins the wire back-compat for #104: a
+// packet file written before Epoch existed has no such key at all, and must
+// decode and apply cleanly — never crash, never be treated as stale.
+func TestPreEpochPacketFileIsHandled(t *testing.T) {
+	in, out := t.TempDir(), t.TempDir()
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "boardA"
+	w := game.NewWorldSeed(cfg, 1)
+	w.Reset() // now at Epoch 2 — the old-format packet still has to go through
+
+	raw := `{"FromBoard":"Neighbour","ToBoard":"boardA","Scores":[{"Empire":"Old","NetWorth":10}]}`
+	if err := os.WriteFile(filepath.Join(in, "Neighbour-to-boardA-2026-01-01-1-0.brp"), []byte(raw), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := RunPlanetary(w, in, out); err != nil {
+		t.Fatalf("RunPlanetary: %v", err)
+	}
+	if len(w.RemoteBoards) != 1 {
+		t.Errorf("a pre-Epoch packet was refused instead of trusted: %+v", w.RemoteBoards)
+	}
+}

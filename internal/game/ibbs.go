@@ -55,6 +55,21 @@ type Packet struct {
 	// Hops counts the boards that have forwarded this packet. Outside the
 	// signed payload, because every hub changes it.
 	Hops int
+	// Epoch is the sending board's own generation counter (World.Epoch) at the
+	// moment this packet was written. A receiver that has since reset — its own
+	// Epoch has advanced past this — recognises the packet as belonging to a
+	// game it has already wiped and discards it (#104). 0 means the sender
+	// predates the field, and is trusted rather than rejected.
+	Epoch int
+	// FromNode and ToNode are the roster's node numbers for the packet's two
+	// ends, preferred over FromBoard/ToBoard wherever identity actually
+	// matters (authentication, addressing, the Coordinator check) because a
+	// number cannot collide the way two boards sharing a name can, and survives
+	// either end renaming (#105). 0 means unaddressed (ToNode) or unknown
+	// (FromNode — no roster loaded yet, or a packet that predates the field);
+	// FromBoard/ToBoard are always what's checked in that case.
+	FromNode int
+	ToNode   int
 }
 
 // HasPayload reports whether p carries anything worth sending. The transport
@@ -819,6 +834,17 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		w.postNews(fmt.Sprintf("A packet claiming to be from %s did not match that board's key and was refused.", p.FromBoard))
 		return Packet{}
 	}
+	// A packet stamped with an Epoch older than this board's current one was
+	// written for a game this board has since wiped — most often its own
+	// unprocessed leftovers surviving a -reset. Applying it would grant units,
+	// take regions, or deliver mail against empires that no longer exist, so it
+	// is discarded whole rather than applied to the fresh world (#104). Checked
+	// before SeenPacket for the same reason as the origin check above: a stale
+	// packet should not get to poison the replay counter either.
+	if p.Epoch > 0 && p.Epoch < w.Epoch {
+		w.postNews(fmt.Sprintf("A packet from %s predates this world's current game and was discarded.", p.FromBoard))
+		return Packet{}
+	}
 	// Applying the same packet twice would pay out a strike's results, a
 	// broadcast or a reset all over again, so a packet already seen here is
 	// dropped whole (#53).
@@ -1157,11 +1183,18 @@ func (w *World) ArriveAnnihilator() {
 	w.DetonateAnnihilator(intact)
 }
 
-// fromCoordinator reports whether p claims to come from the Coordinator's board,
-// and that this board is not the Coordinator hearing its own echo. It is only
-// half the check — the signature is the half that cannot be faked.
+// fromCoordinator reports whether p claims to come from the Coordinator's
+// board (node #1, #105), and that this board is not the Coordinator hearing
+// its own echo. It is only half the check — the signature is the half that
+// cannot be faked.
 func (w *World) fromCoordinator(p Packet) bool {
-	return p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID() && !w.IsLeagueCoordinator()
+	if w.IsLeagueCoordinator() {
+		return false
+	}
+	if p.FromNode != 0 {
+		return p.FromNode == 1
+	}
+	return p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID()
 }
 
 // applyLeagueReset carries out the Coordinator's order to start a new season.

@@ -69,6 +69,24 @@ func (w *World) NodeName(number int) string {
 	return ""
 }
 
+// AddressedToMe reports whether p is meant for this board: a broadcast, or
+// naming this board specifically. The roster's node number is checked first
+// when the packet carries one and this board's own number is known (#105) —
+// it cannot collide the way two boards sharing a name could, and survives
+// either end renaming — falling back to the board name for a packet, or a
+// roster, that predates node identity.
+func (w *World) AddressedToMe(p Packet) bool {
+	if p.ToBoard == "" && p.ToNode == 0 {
+		return true
+	}
+	if p.ToNode != 0 {
+		if mine := w.NodeNumber(w.Config.BoardID); mine != 0 {
+			return p.ToNode == mine
+		}
+	}
+	return p.ToBoard == w.Config.BoardID
+}
+
 // hostOf maps each node number to the node that forwards for it.
 func (w *World) hostOf() map[int]int {
 	host := map[int]int{}
