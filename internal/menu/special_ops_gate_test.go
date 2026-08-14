@@ -95,3 +95,39 @@ func TestBombEnemyTargetsHiddenWhenNothingIsLeftInIt(t *testing.T) {
 		t.Error("Bomb Enemy Targets should return once bombing ops are back on")
 	}
 }
+
+// With Local Attacks off, BRE's Attack Menu collapses to the pirate and
+// alliance entries — captured live (docs/dev/bre-screens.md, "Attack Menu
+// (InterBBS, local attacks OFF)").
+func TestLocalAttacksOffCollapsesTheAttackMenu(t *testing.T) {
+	w := newWorld()
+	w.Config.IBBS = true
+	w.Config.LocalAttacks = false
+	w.Player().Protection = 0
+	attack := BuildMenus().Attack
+
+	f := &fakeSession{keys: []rune("0\r ")}
+	if err := Run(f, w, attack); err != nil {
+		t.Fatalf("Run: %v", err)
+	}
+	out := f.out.String()
+	for _, gone := range []string{"Regular Attack", "Nuclear Attack", "Chemical Attack", "Biological Attack"} {
+		if strings.Contains(out, gone) {
+			t.Errorf("%q survived Local Attacks = Disabled:\n%s", gone, out)
+		}
+	}
+	for _, kept := range []string{"Attack Pirates", "Alliance Strength"} {
+		if !strings.Contains(out, kept) {
+			t.Errorf("%q should still be on the menu:\n%s", kept, out)
+		}
+	}
+	if attack.byKey('R', w) != nil {
+		t.Error("the Regular Attack hotkey still works with local attacks off")
+	}
+
+	// A stand-alone board keeps every entry whatever the switch says.
+	w.Config.IBBS = false
+	if attack.byKey('R', w) == nil {
+		t.Error("a stand-alone board should always allow a Regular Attack")
+	}
+}

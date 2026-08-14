@@ -75,12 +75,21 @@ Component types:
 
 ```json
 RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940,
-                "Protected": true }
+                "Protected": true, "OwnerHash": "3f6a1c09b2d84e57" }
                 // Protected = still under New Realm Protection, so the boards
                 // that read this leave it off their target lists. Absent in a
                 // packet written before the field existed, which reads as
                 // unprotected. Advisory: the target board still refuses an
                 // arriving strike on its own authority.
+                //
+                // OwnerHash feeds duplicate-user checking: the first 16 hex
+                // characters of the SHA-256 of the caller's normalized BBS
+                // handle. A HASH, not the handle — a scores packet lands on
+                // every board in the league and is kept there, and no sysop
+                // needs another board's user list to answer "is this the same
+                // person". Present only while the sending board has Dupe
+                // Checking on; absent otherwise and in older packets, and a
+                // board that sends none releases the locks it had asserted.
 
 RemoteAttack  { "ID": 1, "FromBoard": "AlphaBBS", "TargetEmpire": "Victim",
                 "Offense": 150000, "Contributors": [ Contribution ] }

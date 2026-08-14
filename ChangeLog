@@ -1,4 +1,14 @@
 (in-progress:)
+  * config-during-reset: added the Local Attacks (enabled), Local Attack
+    Scoring (disabled) and Dupe Checking (enabled) league settings, editable in
+    both Configuration Editors, shown on Game Setup and broadcast to the league
+  * With Local Attacks disabled, barons on one board can no longer attack each
+    other and the Attack menu keeps only the pirate and alliance entries
+  * With Local Attack Scoring disabled, a battle between barons on one board
+    moves neither side's score
+  * With Dupe Checking enabled, a caller found playing on another board in the
+    league is locked out until one of the realms goes. Scores packets carry a
+    hash of the handle for this, never the handle itself
   * The Bombing Ops, Missile Ops and Clingy Annihilator settings take their
     operations off the Attack, Covert and InterPlanetary menus when disabled,
     hotkeys included

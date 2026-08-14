@@ -37,6 +37,16 @@ func noBombingOps(w *ctx) bool  { return !w.Config.BombingOps }
 func noMissileOps(w *ctx) bool  { return !w.Config.MissileOps }
 func noAnnihilator(w *ctx) bool { return !w.Config.ClingyAnnihilator }
 
+// noLocalAttacks hides the ways of striking a baron on this board. With Local
+// Attacks disabled BRE's Attack Menu collapses to the pirate and alliance
+// entries, captured live in docs/dev/bre-screens.md ("Attack Menu (InterBBS,
+// local attacks OFF)") — Regular, Nuclear, Chemical and Biological all go.
+func noLocalAttacks(w *ctx) bool { return !w.LocalAttacksAllowed() }
+
+// noLocalMissiles combines the two: a warhead aimed at a neighbour needs both
+// missiles and local fighting to be allowed.
+func noLocalMissiles(w *ctx) bool { return noMissileOps(w) || noLocalAttacks(w) }
+
 // noSpecialOps hides a menu whose whole contents are bombing and missile items,
 // so the player is not sent into an empty box.
 func noSpecialOps(w *ctx) bool { return noBombingOps(w) && noMissileOps(w) }
@@ -173,10 +183,10 @@ func BuildMenus() *Menus {
 	}
 
 	attack.Items = []Item{
-		{Key: 'R', Label: "Regular Attack", Do: regularAttack},
-		{Key: 'N', Label: "Nuclear Attack", Do: nuclearAttack, Hidden: noMissileOps},
-		{Key: 'C', Label: "Chemical Attack", Do: chemicalAttack, Hidden: noMissileOps},
-		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack, Hidden: noMissileOps},
+		{Key: 'R', Label: "Regular Attack", Do: regularAttack, Hidden: noLocalAttacks},
+		{Key: 'N', Label: "Nuclear Attack", Do: nuclearAttack, Hidden: noLocalMissiles},
+		{Key: 'C', Label: "Chemical Attack", Do: chemicalAttack, Hidden: noLocalMissiles},
+		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack, Hidden: noLocalMissiles},
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates,
 			// Hidden while under new-realm protection — a protected realm can't raid.
 			Hidden: func(w *ctx) bool { return w.Player().Protection > 0 }},

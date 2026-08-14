@@ -606,6 +606,37 @@ inter-BBS settings about attacks sent to another board, and no capture of either
 one disabled exists, so which menus the original strips is unverified — but a
 switch the player is told about on Game Setup has to do something.
 
+### Local Attacks, Local Attack Scoring, Dupe Checking
+
+Three more inter-BBS-only settings, all from BRE's Configuration Editor page two
+and documented in `game/reset.hlp`. Each is off-league inert: IB checks
+`Config.IBBS` first, because BRE scopes all three to interplanetary games.
+
+- **Local Attacks** (default **Enabled**; the original's help "highly
+  recommends" leaving it on, "forcing BBS's to use teamwork to remove
+  troublemakers"). Disabled, barons on one board may not attack each other. The
+  Attack Menu then collapses to the pirate and alliance entries — **captured
+  live**, `docs/dev/bre-screens.md` "Attack Menu (InterBBS, local attacks OFF)" —
+  so Regular, Nuclear, Chemical and Biological all go, hotkeys with them. IB
+  binds its AI barons by the same switch.
+- **Local Attack Scoring** (default **Disabled**, which is how BRE ships it and
+  what its help recommends: "so that users cannot attack each other just to
+  build up score"). Disabled, a local battle moves neither side's score;
+  `whatsnew.doc` records the change as "score is no longer given for winning
+  local attacks". Whether BRE also suppresses the LOSER's penalty is unverified;
+  IB suppresses both, so the pair cannot be used to grind a rival down.
+- **Dupe Checking** (default **Enabled**). BRE looks "for users on your system
+  that may be playing on other BBSes and temporarily lock them out of the game
+  (until they delete one of their players)". IB does the same from the scores
+  packet, and **deliberately diverges on how**: BRE compares handles, IB compares
+  a 64-bit hash of the normalized handle (`RemoteScore.OwnerHash`), so a packet
+  that lands on every sysop's board carries nobody's handle. A locked baron is
+  refused at login with the board that reported them; the lock lifts when that
+  board stops listing them, or when the Coordinator turns the switch off —
+  `World.DupeLocked` reads the switch at the gate rather than clearing state.
+
+All three ride the `LeagueConfig` broadcast, since a league has to agree on them.
+
 **A terrorist op costs `total regions × 64` gold — BINARY-VERIFIED.** The
 InterPlanetary Operations menu prices the op in its own cost column, and the
 price scales with the launcher's **region count**, which is why it drifts upward

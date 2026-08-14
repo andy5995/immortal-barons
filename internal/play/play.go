@@ -140,6 +140,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	var e *game.Empire
 	var localReborn string // a husk maintenance didn't sweep yet; swept here as a fallback
 	var deadToday string   // realm destroyed today; no play until a later day
+	var dupeLocked string  // the league's duplicate-user check shut this caller out
 	w.With(func() {
 		e = w.FindByOwner(id.Handle)
 		if e != nil && !e.Alive {
@@ -155,12 +156,19 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 				deadToday = e.Name
 			}
 		}
+		if e != nil && w.DupeLocked(e) {
+			dupeLocked = w.DupeLockMessage(e)
+		}
 		if e == nil {
 			joinOpen = w.Config.JoinOpen(w.Today)
 			boardFull = w.BoardFull()
 			joinDate = w.Config.JoinDate
 		}
 	})
+	if dupeLocked != "" {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, dupeLocked, ansi.Reset)
+		return "dupe", save()
+	}
 	if deadToday != "" {
 		fmt.Fprintf(s, "\n%sYour realm %s was destroyed. Return on a later day to build a new realm.%s\n",
 			ansi.FgYellow, deadToday, ansi.Reset)

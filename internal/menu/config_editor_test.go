@@ -65,8 +65,8 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 	// The identifiers ran 1..38 before the pages existed and must still, so no
 	// sysop's habit or note breaks. Later fields are appended above that. 22 was
 	// the Inter-BBS toggle, replaced by the -ibbs-reset command.
-	const fields = 40
-	for n := 1; n <= 41; n++ {
+	const fields = 43
+	for n := 1; n <= 44; n++ {
 		if n == 22 {
 			continue
 		}
@@ -173,6 +173,7 @@ func TestGameSetupHidesLeagueRulesOffLeague(t *testing.T) {
 	for _, label := range []string{
 		"Group attacks per day", "Terrorist ops per day", "Bombing ops per day",
 		"Terrorism costs", "Lost forces return after", "Clingy Annihilator", "This planet",
+		"Local attacks", "Local attack scoring", "Dupe checking",
 	} {
 		if strings.Contains(off, label) {
 			t.Errorf("Game Setup shows %q on a stand-alone board", label)

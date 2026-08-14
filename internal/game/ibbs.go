@@ -131,6 +131,9 @@ type LeagueConfig struct {
 	BombingOps            bool
 	MissileOps            bool
 	ClingyAnnihilator     bool
+	LocalAttacks          bool
+	LocalAttackScoring    bool
+	DupeChecking          bool
 	MaxPlayers            int
 	BuyMilitary           BuyMode
 	MaintCosts            Level
@@ -169,6 +172,9 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		BombingOps:            c.BombingOps,
 		MissileOps:            c.MissileOps,
 		ClingyAnnihilator:     c.ClingyAnnihilator,
+		LocalAttacks:          c.LocalAttacks,
+		LocalAttackScoring:    c.LocalAttackScoring,
+		DupeChecking:          c.DupeChecking,
 		MaxPlayers:            c.MaxPlayers,
 		BuyMilitary:           c.BuyMilitary,
 		MaintCosts:            c.MaintCosts,
@@ -206,6 +212,9 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.BombingOps = lc.BombingOps
 	c.MissileOps = lc.MissileOps
 	c.ClingyAnnihilator = lc.ClingyAnnihilator
+	c.LocalAttacks = lc.LocalAttacks
+	c.LocalAttackScoring = lc.LocalAttackScoring
+	c.DupeChecking = lc.DupeChecking
 	c.MaxPlayers = lc.MaxPlayers
 	c.BuyMilitary = lc.BuyMilitary
 	c.MaintCosts = lc.MaintCosts
@@ -665,10 +674,14 @@ func (w *World) ExportScores() {
 	var scores []RemoteScore
 	for _, e := range w.Empires {
 		if e.Alive && e.Owner != "" {
-			scores = append(scores, RemoteScore{
+			s := RemoteScore{
 				Empire: e.Name, NetWorth: w.NetWorth(e), Land: e.Land, Score: e.Score,
 				Protected: e.Protection > 0,
-			})
+			}
+			if w.Config.DupeChecking {
+				s.OwnerHash = dupeHash(e.Owner)
+			}
+			scores = append(scores, s)
 		}
 	}
 	if len(scores) == 0 {
@@ -853,6 +866,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	}
 	if len(p.Scores) > 0 {
 		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores})
+		w.applyDupeCheck(p.FromBoard, p.Scores)
 	}
 	// Outcomes of our own strikes, returning from the target board.
 	for _, res := range p.Results {

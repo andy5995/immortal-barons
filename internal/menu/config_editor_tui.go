@@ -99,33 +99,36 @@ const (
 	helpMoneyCap     = "The most gold a realm may hold, in billions — the same limit again " +
 		"for the bank. The original stops at 2 billion and discards anything above it. " +
 		"Raise it for a long league where the economy outgrows that."
-	helpPlanetaryTax      = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold goes to the Queen's purse, which she refunds a share of to each baron at the start of their playing day."
-	helpFoodUnlimited     = "When on, the food market never runs short — its daily supply is unlimited."
-	helpBuyMilitary       = "Whether players may buy military units: freely (Yes), not at all (No), or a limited amount each day (Limited)."
-	helpMaintCosts        = "Upkeep cost for regions and forces: High, Medium, Low, or None."
-	helpTradeCosts        = "Cost of trade deals: High, Medium, Low, or None."
-	helpRegionCosts       = "Price of buying regions: High, Medium, Low, or None."
-	helpAttackDamage      = "How much a conventional attack destroys on both sides: High, Medium, or Low."
-	helpAttackRewards     = "How much land and goods the winner of an attack gains: High, Medium, or Low."
-	helpSlappenheimer     = "How R5-Slappenheimer missiles behave when fired."
-	helpMaxAttacks        = "The most conventional attacks a player may launch in one day. 0 means no limit."
-	helpMaxGroupAttacks   = "The most group (interplanetary) attacks a player may lead or join in one day. 0 means no limit."
-	helpMaxTerrorOps      = "The most terrorist operations a player may launch in one day. 0 means no limit."
-	helpMaxBombingOps     = "The most bombing operations a player may launch in one day. 0 means no limit."
-	helpLostForcesDays    = "How long forces sent to another board wait for a result before they are given back. Packets go missing; this stops an army being lost for good. 0 means they never come back."
-	helpAttackCosts       = "How much gold an attack costs to launch."
-	helpTerrorCosts       = "How much gold a terrorist operation costs to launch."
-	helpBombingOps        = "Whether Bomb Enemy Targets is offered at all."
-	helpMissileOps        = "Whether nuclear, chemical and biological strikes are offered at all."
-	helpClingyAnnihilator = "Whether the Clingy Annihilator doomsday weapon may be built."
-	helpMaxRegions        = "The most regions a single player may own."
-	helpMaxPlayers        = "The most human empires allowed on this board. 0 means no limit."
-	helpBoardID           = "The name this board uses in inter-BBS packets."
-	helpLeagueNumber      = "The League Coordinator's number for this league, 1-999. It keeps two leagues apart when they share one inbound directory."
-	helpInboundDir        = "Where packets from the other boards arrive. Relative to the data directory unless you give a full path."
-	helpOutboundDir       = "Where the game writes packets for the other boards. Relative to the data directory unless you give a full path."
-	helpIdleTimeout       = "End a session after this many seconds with no keypress, freeing the shared world lock. 0 never times out."
-	helpIdleWarnings      = "How many idle warnings a session receives before it is disconnected."
+	helpPlanetaryTax       = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold goes to the Queen's purse, which she refunds a share of to each baron at the start of their playing day."
+	helpFoodUnlimited      = "When on, the food market never runs short — its daily supply is unlimited."
+	helpBuyMilitary        = "Whether players may buy military units: freely (Yes), not at all (No), or a limited amount each day (Limited)."
+	helpMaintCosts         = "Upkeep cost for regions and forces: High, Medium, Low, or None."
+	helpTradeCosts         = "Cost of trade deals: High, Medium, Low, or None."
+	helpRegionCosts        = "Price of buying regions: High, Medium, Low, or None."
+	helpAttackDamage       = "How much a conventional attack destroys on both sides: High, Medium, or Low."
+	helpAttackRewards      = "How much land and goods the winner of an attack gains: High, Medium, or Low."
+	helpSlappenheimer      = "How R5-Slappenheimer missiles behave when fired."
+	helpMaxAttacks         = "The most conventional attacks a player may launch in one day. 0 means no limit."
+	helpMaxGroupAttacks    = "The most group (interplanetary) attacks a player may lead or join in one day. 0 means no limit."
+	helpMaxTerrorOps       = "The most terrorist operations a player may launch in one day. 0 means no limit."
+	helpMaxBombingOps      = "The most bombing operations a player may launch in one day. 0 means no limit."
+	helpLostForcesDays     = "How long forces sent to another board wait for a result before they are given back. Packets go missing; this stops an army being lost for good. 0 means they never come back."
+	helpAttackCosts        = "How much gold an attack costs to launch."
+	helpTerrorCosts        = "How much gold a terrorist operation costs to launch."
+	helpBombingOps         = "Whether Bomb Enemy Targets is offered at all."
+	helpLocalAttacks       = "Whether barons on this board may attack each other in a league game."
+	helpLocalAttackScoring = "Whether winning an attack on a baron here moves either side's score."
+	helpDupeChecking       = "Whether a baron found playing on another board in the league is locked out here."
+	helpMissileOps         = "Whether nuclear, chemical and biological strikes are offered at all."
+	helpClingyAnnihilator  = "Whether the Clingy Annihilator doomsday weapon may be built."
+	helpMaxRegions         = "The most regions a single player may own."
+	helpMaxPlayers         = "The most human empires allowed on this board. 0 means no limit."
+	helpBoardID            = "The name this board uses in inter-BBS packets."
+	helpLeagueNumber       = "The League Coordinator's number for this league, 1-999. It keeps two leagues apart when they share one inbound directory."
+	helpInboundDir         = "Where packets from the other boards arrive. Relative to the data directory unless you give a full path."
+	helpOutboundDir        = "Where the game writes packets for the other boards. Relative to the data directory unless you give a full path."
+	helpIdleTimeout        = "End a session after this many seconds with no keypress, freeing the shared world lock. 0 never times out."
+	helpIdleWarnings       = "How many idle warnings a session receives before it is disconnected."
 )
 
 // configTUI holds the tview app and the widget read-back closures. Each field's
@@ -233,6 +236,8 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addBool(mil, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
 	if ibbs {
 		t.addBool(mil, "Clingy Annihilator", helpClingyAnnihilator, c.ClingyAnnihilator, func(c *game.Config, b bool) { c.ClingyAnnihilator = b })
+		t.addBool(mil, "Local Attacks", helpLocalAttacks, c.LocalAttacks, func(c *game.Config, b bool) { c.LocalAttacks = b })
+		t.addBool(mil, "Local Attack Scoring", helpLocalAttackScoring, c.LocalAttackScoring, func(c *game.Config, b bool) { c.LocalAttackScoring = b })
 	}
 
 	caps := tview.NewForm()
@@ -253,6 +258,7 @@ func newConfigTUI(w *game.World) *configTUI {
 				c.OutboundDir = v
 			}
 		})
+		t.addBool(caps, "Dupe Checking", helpDupeChecking, c.DupeChecking, func(c *game.Config, b bool) { c.DupeChecking = b })
 	}
 	t.addInt(caps, "Idle timeout (sec, 0=never)", helpIdleTimeout, c.IdleTimeoutSecs, 0, 86400, func(c *game.Config, n int) { c.IdleTimeoutSecs = n })
 	t.addInt(caps, "Idle warnings before boot", helpIdleWarnings, c.MaxIdleWarnings, 1, 100, func(c *game.Config, n int) { c.MaxIdleWarnings = n })
