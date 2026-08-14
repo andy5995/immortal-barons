@@ -67,13 +67,30 @@ func (w *World) ForcesDue(e *Empire) int64 {
 // maintenance doesn't work. Same per-unit rates and Technology scaling as
 // ForcesUpkeep; food and agents have no upkeep.
 func (w *World) listedForcesUpkeep(e *Empire) int64 {
-	tenths := w.MarketForSale(e.Name, "Trooper")*MaintTrooperTenths +
-		w.MarketForSale(e.Name, "Jet")*MaintJetTenths +
-		w.MarketForSale(e.Name, "Turret")*MaintTurretTenths +
-		w.MarketForSale(e.Name, "Bomber")*MaintBomberTenths +
-		w.MarketForSale(e.Name, "Tank")*MaintTankTenths +
-		w.MarketForSale(e.Name, "Carrier")*MaintCarrierTenths
+	l := w.listedUnits(e)
+	tenths := l.Troopers*MaintTrooperTenths + l.Jets*MaintJetTenths +
+		l.Turrets*MaintTurretTenths + l.Bombers*MaintBomberTenths +
+		l.Tanks*MaintTankTenths + l.Carriers*MaintCarrierTenths
 	return techLower(int64(tenths/MaintTenthsPerGold), e.TechMaintFactor())
+}
+
+// unitCounts is one full set of military counts. Both the gold bill and the
+// food bill charge a realm's escrowed units, so they read them through this
+// rather than each spelling out the six market names.
+type unitCounts struct {
+	Troopers, Jets, Turrets, Bombers, Tanks, Carriers int
+}
+
+// listedUnits is the military this empire has escrowed on the Trading Market.
+func (w *World) listedUnits(e *Empire) unitCounts {
+	return unitCounts{
+		Troopers: w.MarketForSale(e.Name, "Trooper"),
+		Jets:     w.MarketForSale(e.Name, "Jet"),
+		Turrets:  w.MarketForSale(e.Name, "Turret"),
+		Bombers:  w.MarketForSale(e.Name, "Bomber"),
+		Tanks:    w.MarketForSale(e.Name, "Tank"),
+		Carriers: w.MarketForSale(e.Name, "Carrier"),
+	}
 }
 func (w *World) RegionsDue(e *Empire) int64 {
 	return pctOf(e.RegionUpkeep(), w.Config.MaintCosts.Percent())
@@ -114,14 +131,8 @@ func (e *Empire) ForcesFoodUpkeep() int {
 // dodges its rations than it dodges its maintenance (see listedForcesUpkeep).
 func (w *World) ForcesFoodDue(e *Empire) int {
 	held := forcesFoodWeighted(e.Troopers, e.Jets, e.Turrets, e.Bombers, e.Tanks, e.Carriers)
-	listed := forcesFoodWeighted(
-		w.MarketForSale(e.Name, "Trooper"),
-		w.MarketForSale(e.Name, "Jet"),
-		w.MarketForSale(e.Name, "Turret"),
-		w.MarketForSale(e.Name, "Bomber"),
-		w.MarketForSale(e.Name, "Tank"),
-		w.MarketForSale(e.Name, "Carrier"),
-	)
+	l := w.listedUnits(e)
+	listed := forcesFoodWeighted(l.Troopers, l.Jets, l.Turrets, l.Bombers, l.Tanks, l.Carriers)
 	return int((held + listed) / ForcesFoodWeightScale)
 }
 
