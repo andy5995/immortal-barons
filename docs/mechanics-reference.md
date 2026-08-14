@@ -1836,14 +1836,11 @@ purpose:
   Enter wipes the allocation; IB suggests the unit's **current** % instead, so Enter
   leaves it unchanged. Both cap the running total at 100% via a shrinking max (the
   remainder becomes gold). The order and per-unit prompt otherwise match BRE.
-- **Send Message can address all allies.** On top of BRE's letters and `Z`, IB
+- **The picker can address all allies.** On top of BRE's letters and `Z`, IB
   adds `*`, which toggles every realm the sender holds a standing treaty with, of
   any type (Enemy is a relation, not a treaty, so an enemy is never included).
-  The key is offered only while they hold one.
-- **The Diplomacy picker is still single-select.** BRE runs the *same*
-  multi-select routine there, so its Declaration Of War and treaty proposals can
-  name several realms at once; IB takes one realm, or `Z`/`*` for a whole group.
-  The outcome differs only in that IB cannot propose to an arbitrary subset.
+  The key is offered only while they hold one, and it marks the allies on the
+  same list — RETURN still closes it, so letters can be added or removed after.
 - **Diplomacy is on the opening menu as well as System.** BRE lists it under
   System alone.
 - **Buy Regions closes itself when the gold runs out.** A purchase that leaves
@@ -2176,6 +2173,23 @@ implemented:
   `TreatyBreachSupportPenalty` popular support (`World.breachTreaty`, called from
   `Attack`). The original does not publish the size of that penalty, so the
   figure is IB's own.
+
+**Every Diplomacy action that addresses a realm takes a LIST.** The Diplomacy
+menu calls the same toggling picker Send Message uses — the selection routine at
+`BRE.OVR` 0x1b65e, reached from two sites inside its diplomacy menu (0x1c800
++0x08e7 and +0x0a79) — so one action proposes a pact to, or declares war on, as
+many realms as are marked. Letters toggle, `Z` marks the whole `A`..`Y` range,
+`?` lists, RETURN closes and an empty list cancels; the full behaviour is under
+"Sending: the recipient picker addresses a LIST" above. One thing differs here,
+and BRE passes it to the routine as a flag: `?` lists the `-*Relations*-` table
+rather than the score table. IB's rules on top of that:
+
+- **Marking exactly one realm is the negotiation proper** — it proposes the pact,
+  accepts that realm's matching offer, or breaks the pact already held.
+- **Marking several sends one proposal each**, skipping any realm that already
+  holds that pact, and asks the covering message once for the whole batch.
+- **A Declaration Of War takes one confirmation for the list** and reports each
+  realm it ended a relation with.
 
 **Known simplification:** the original says a treaty "is not officially broken
 until the other realm is notified", implying the old pact still binds until the

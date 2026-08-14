@@ -87,11 +87,7 @@ func TestPickRecipientSelectsByLetter(t *testing.T) {
 		t.Skip("no recipients seeded")
 	}
 	f := &fakeSession{keys: []rune{rows[0].letter}}
-	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
-	if target != targetOne {
-		t.Fatalf("pickRecipient(%q) target = %v, want targetOne", rows[0].letter, target)
-	}
-	if got != rows[0].e {
+	if got := pickRecipient(f, w, pickOpts{prompt: "Trade with:"}); got != rows[0].e {
 		t.Errorf("pickRecipient(%q) = %v, want %v", rows[0].letter, got, rows[0].e)
 	}
 }
@@ -109,7 +105,7 @@ func TestPickRecipientShowsScoreNotLand(t *testing.T) {
 		rs[0].Score = 7777
 	})
 	f := &fakeSession{keys: []rune("?0")} // '?' prints the roster, then cancel
-	pickRecipient(f, w, pickOpts{prompt: "Send to:"})
+	pickRecipient(f, w, pickOpts{prompt: "Trade with:"})
 	out := f.out.String()
 	// Comma-grouped: IB groups the figures BRE prints bare (a recorded
 	// divergence, docs/dev/bre-screens.md).
@@ -118,27 +114,35 @@ func TestPickRecipientShowsScoreNotLand(t *testing.T) {
 	}
 }
 
-func TestPickRecipientAll(t *testing.T) {
+// Z marks every realm; RETURN then closes the list with all of them on it.
+func TestPickRecipientsAll(t *testing.T) {
 	w := newWorld()
-	if len(recipients(w)) == 0 {
+	rows, _ := pickRows(w, pickOpts{})
+	if len(rows) == 0 {
 		t.Skip("no recipients seeded")
 	}
-	f := &fakeSession{keys: []rune{'Z'}}
-	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
-	if target != targetAll || got != nil {
-		t.Errorf("pickRecipient('Z') = (%v, %v), want (nil, targetAll)", got, target)
+	f := &fakeSession{keys: []rune("Z\r")}
+	got := pickRecipients(f, w, pickOpts{prompt: "Send to:", allowAll: true})
+	if len(got) != len(rows) {
+		t.Fatalf("pickRecipients(\"Z\\r\") = %d realms, want %d", len(got), len(rows))
+	}
+	for i, r := range rows {
+		if got[i] != r.e {
+			t.Errorf("realm %d = %v, want %v", i, got[i], r.e)
+		}
 	}
 }
 
+// The single-target picker takes one keypress, and a key that names no realm
+// cancels it.
 func TestPickRecipientCancel(t *testing.T) {
 	w := newWorld()
 	if len(recipients(w)) == 0 {
 		t.Skip("no recipients seeded")
 	}
 	f := &fakeSession{keys: []rune{'0'}}
-	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
-	if target != targetNone || got != nil {
-		t.Errorf("pickRecipient('0') = (%v, %v), want (nil, targetNone)", got, target)
+	if got := pickRecipient(f, w, pickOpts{prompt: "Trade with:"}); got != nil {
+		t.Errorf("pickRecipient('0') = %v, want nil", got)
 	}
 }
 
@@ -150,17 +154,23 @@ func treatyWith(w *ctx, e *game.Empire) {
 	w.World.AcceptTreaty(p, e.Name, "Free Trade Agreement")
 }
 
-func TestPickRecipientAllAllies(t *testing.T) {
+// '*' marks the treaty partners and nobody else — IB's own key, composing with
+// the multi-select rather than short-circuiting it: the list still closes on
+// RETURN, so a letter can be added to or taken off the allies afterwards.
+func TestPickRecipientsAllAllies(t *testing.T) {
 	w := newWorld()
-	rs := recipients(w)
-	if len(rs) == 0 {
-		t.Skip("no recipients seeded")
+	w.With(func() { w.AddAIEmpires(2) })
+	rows, _ := pickRows(w, pickOpts{})
+	if len(rows) < 3 {
+		t.Fatalf("need 3 selectable realms, got %d", len(rows))
 	}
-	treatyWith(w, rs[0])
-	f := &fakeSession{keys: []rune{'*'}}
-	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
-	if target != targetAllies || got != nil {
-		t.Errorf("pickRecipient('*') = (%v, %v), want (nil, targetAllies)", got, target)
+	ally, extra := rows[0], rows[2]
+	treatyWith(w, ally.e)
+	f := &fakeSession{keys: []rune("*" + string(extra.letter) + "\r")}
+	got := pickRecipients(f, w, pickOpts{prompt: "Send to:", allowAll: true})
+	if len(got) != 2 || got[0] != ally.e || got[1] != extra.e {
+		t.Fatalf("pickRecipients(\"*%c\\r\") = %v, want the ally %s plus %s",
+			extra.letter, got, ally.name, extra.name)
 	}
 	// Strip the SGR runs: BRE colours each piece of this prompt separately, so
 	// the escape sequences sit between the '*' and its label.
@@ -169,17 +179,16 @@ func TestPickRecipientAllAllies(t *testing.T) {
 	}
 }
 
-// With no treaty there is nobody to reach that way, so the target is not
-// offered and the key is not live.
-func TestPickRecipientAllAlliesHiddenWithoutTreaty(t *testing.T) {
+// With no treaty there is nobody to reach that way, so the key is not offered
+// and marks nothing.
+func TestPickRecipientsAllAlliesHiddenWithoutTreaty(t *testing.T) {
 	w := newWorld()
 	if len(recipients(w)) == 0 {
 		t.Skip("no recipients seeded")
 	}
-	f := &fakeSession{keys: []rune{'*'}}
-	got, target := pickRecipient(f, w, pickOpts{prompt: "Send to:", allowAll: true})
-	if target != targetNone || got != nil {
-		t.Errorf("pickRecipient('*') without a treaty = (%v, %v), want (nil, targetNone)", got, target)
+	f := &fakeSession{keys: []rune("*\r")}
+	if got := pickRecipients(f, w, pickOpts{prompt: "Send to:", allowAll: true}); len(got) != 0 {
+		t.Errorf("pickRecipients('*') without a treaty = %v, want nothing marked", got)
 	}
 	if strings.Contains(f.out.String(), "All Allies") {
 		t.Errorf("prompt should not offer All Allies without a treaty:\n%s", f.out.String())

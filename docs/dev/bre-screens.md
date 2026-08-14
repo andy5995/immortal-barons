@@ -1230,7 +1230,26 @@ Id  Empire Name                          Territory     Score    Net Worth
 (A-Y,Z=All,?=List) Send to:
 ```
 The `+` marks a realm in the list; figures are ungrouped. This is the same table
-the Regular Attack picker lists, so one routine serves both. Recipient sees at next login:
+the Regular Attack picker lists, so one routine serves both.
+
+**The prompt is the MULTI-select one** (see "Send Message: the recipient picker
+is MULTI-select" below for how it behaves), and the Diplomacy menu is its other
+caller: the selection routine at `BRE.OVR` 0x1b65e is reached from exactly three
+sites, one on the message path and two inside `run_diplomacy_menu` (0x1c800
++0x08e7 and +0x0a79) — a treaty proposal and the Declaration Of War. So both
+address several realms in one action, and the capture above sits at a prompt that
+is waiting for RETURN, not for one letter. The prompt text is the same for both
+callers: its printer (0x1b0a3) has the selection routine as its only caller, so
+there is no per-item wording.
+
+**Unresolved:** Diplomacy passes 0 for the roster flag, which lists
+`-*Relations*-` rather than the score table — yet the capture above is filed
+under a treaty proposal and shows the score table. One of the two is mislabelled
+and it has not been re-captured; the capture's own note only says it was taken
+"at a `Send to:` prompt", which the message path also has. IB follows the flag
+and lists Relations at a Diplomacy prompt.
+
+Recipient sees at next login:
 `<Name> proposes a Full Defense Alliance.` / `Regions: N; Net Worth: N; Score: N;
 Accept? (Y/n)`. (9) View Treaties -> `-*Relations*-` table: each empire letter +
 name + Relations ("None" / "Full Defense Alliance").
@@ -1419,6 +1438,13 @@ the two-realm capture in the Full Defense Alliance section shows the same
 
 After a message is saved BRE asks `Do you wish to send another message? (y/N)`
 and loops straight back to the `Send to:` prompt.
+
+**IB uses this picker at both of BRE's call sites**: Send Message, and every
+Diplomacy action that names a realm — each treaty type and Declaration Of War
+(see the Diplomacy section above). The roster flag is the `relations` field of
+`pickOpts`. IB adds `*=All Allies`, which marks the realms it holds a treaty with
+and leaves the list open, so letters can still be added or taken off before
+RETURN.
 
 ### The message editor
 
