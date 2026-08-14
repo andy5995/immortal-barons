@@ -625,10 +625,15 @@ type World struct {
 	LastTravelPing string
 
 	// Market holds every empire's listings on the general Trading Market (#17);
-	// listed goods are escrowed out of the owner's inventory. MarketProceeds
+	// listed goods are escrowed out of the seller's inventory. MarketProceeds
 	// accrues each seller's unpaid sale gold, deposited at daily maintenance.
-	Market         []MarketListing
-	MarketProceeds map[string]int64
+	// Both are keyed by realm NAME — see MarketListing.Realm for why the owner
+	// handle could not do the job. MarketProceedsByOwner is the handle-keyed map a
+	// save written before that carried; the key is the old one so such a save
+	// still loads, and EnsureMarket drains it.
+	Market                []MarketListing
+	MarketProceeds        map[string]int64 `json:"MarketProceedsByRealm"`
+	MarketProceedsByOwner map[string]int64 `json:"MarketProceeds,omitempty"`
 
 	// Inter-BBS (interplanetary) play — see ibbs.go. GroupAttacks assemble
 	// locally until they depart; Outbox holds packets queued for other boards;
@@ -778,6 +783,7 @@ func (w *World) initFreshGame() {
 	w.Pirates = nil
 	w.Market = nil
 	w.MarketProceeds = nil
+	w.MarketProceedsByOwner = nil
 	w.GroupAttacks = nil
 	w.NextAttackID = 0
 	w.Outbox = nil
@@ -1059,10 +1065,9 @@ func (w *World) With(fn func()) {
 // invisible in the meantime — alliesOf and TreatyPartners skip the non-living —
 // so the leak only surfaces when the name comes back.
 //
-// The trading market is keyed by OWNER HANDLE, which is worse: the handle is the
-// caller's, so it needs no name reuse at all. Whatever the dead realm had
-// escrowed on the market, and whatever sale gold it had not been paid, would
-// come across the rebirth to the fresh realm the same caller onboards.
+// The trading market is keyed by realm name too, and leaks the same way: the
+// goods a dead realm had escrowed there, and the sale gold it had not been paid,
+// would go to whoever claims the name next.
 //
 // BRE deletes an empire the same way, and more completely: its delete path
 // (BRE.OVR 0x0079c1) clears the slot's messages, trade offers and reports by the
@@ -1081,7 +1086,7 @@ func (w *World) dropEmpires(gone func(*Empire) bool) {
 	w.Empires = kept
 	for _, e := range forget {
 		w.forgetRelations(e.Name)
-		w.forgetMarketPosition(e.Owner)
+		w.forgetMarketPosition(e.Name)
 	}
 }
 
@@ -1161,8 +1166,18 @@ func (w *World) removeIdleEmpires(today string) {
 	})
 }
 
+// FindByOwner returns the realm belonging to a caller's BBS handle, or nil.
+//
+// An empty handle matches NOBODY, though every computer baron stores one: the
+// empty handle is the AI marker, not an identity, so a lookup on it used to
+// return an arbitrary baron and hand the caller its realm. Callers that pass a
+// handle straight from outside — a dropfile alias, an inter-BBS packet, a
+// market key — get nil instead of a stranger's empire.
 func (w *World) FindByOwner(handle string) *Empire {
 	h := strings.ToLower(strings.TrimSpace(handle))
+	if h == "" {
+		return nil
+	}
 	for _, e := range w.Empires {
 		if e.Owner == h {
 			return e

@@ -256,9 +256,13 @@ func TestSaveLoadRoundTripAllFields(t *testing.T) {
 	e.SDIFunding = 10_000_000
 	e.SDI = game.SDIStrength(e.SDIFunding, e.Land)
 
-	// Legacy fields the EnsureTreaties migration deliberately nils on load —
-	// zero after a round trip is their correct state, not a loss.
-	migrated := map[string]bool{"World.Alliances": true, "Empire.AllianceOffers": true}
+	// Legacy fields the EnsureTreaties and EnsureMarket migrations deliberately
+	// nil on load — zero after a round trip is their correct state, not a loss.
+	migrated := map[string]bool{
+		"World.Alliances":             true,
+		"World.MarketProceedsByOwner": true,
+		"Empire.AllianceOffers":       true,
+	}
 
 	if err := Save(w, cfg); err != nil {
 		t.Fatal(err)
@@ -329,9 +333,10 @@ func TestLoadFrozenV002Fixture(t *testing.T) {
 // committed bytes, not one this test wrote — so a JSON key rename breaks it
 // even though save and load share the tag and every same-marshaller round trip
 // stays green. It pins the load-bearing legacy aliases: the "Bulletin" key
-// (NewsToday's tag exists solely for old saves) and Events as bare strings
-// (pre-timestamp saves). Editing the fixture to make this pass means breaking
-// every real pre-existing world.json — don't.
+// (NewsToday's tag exists solely for old saves), Events as bare strings
+// (pre-timestamp saves), and the owner-handle market keys
+// TestOwnerKeyedMarketMigratesToRealmNames reads. Editing the fixture to make
+// this pass means breaking every real pre-existing world.json — don't.
 func TestLoadFrozenV003Fixture(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	fixture, err := os.ReadFile("testdata/world-v0.0.3.json")
@@ -373,5 +378,60 @@ func TestLoadFrozenV003Fixture(t *testing.T) {
 	// value, which a packet reads as "no epoch info" (see game.ApplyPacket).
 	if got.Epoch != 1 {
 		t.Errorf("Epoch in a save from before #104 must migrate to 1, got %d", got.Epoch)
+	}
+}
+
+// TestOwnerKeyedMarketMigratesToRealmNames loads the same frozen fixture for its
+// market, which is written the way every save before the realm-name key wrote
+// one: listings and proceeds under the seller's owner handle, including the
+// empty handle the whole computer-baron pool shared. EnsureMarket has to move
+// each one onto the realm it belongs to, or a sysop's world comes back with the
+// escrowed goods and the unpaid gold gone.
+func TestOwnerKeyedMarketMigratesToRealmNames(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	fixture, err := os.ReadFile("testdata/world-v0.0.3.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(cfg.DataDir, "world.json"), fixture, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	got, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// A handle that still names a realm carries its position over whole.
+	if n, p := got.MarketForSale("Khan's Realm", "Tank"), got.MarketPrice("Khan's Realm", "Tank"); n != 25 || p != 900 {
+		t.Errorf("the human seller's listing came back as %d at %d, want 25 at 900", n, p)
+	}
+	if got.MarketProceeds["Khan's Realm"] != 12000 {
+		t.Errorf("the human seller's unpaid gold came back as %d, want 12000", got.MarketProceeds["Khan's Realm"])
+	}
+	// The empty handle names no one baron, so its row goes to the first living
+	// one — where the old game already sent it, since that is the realm the
+	// handle lookup resolved to and the one that could delist the goods.
+	if n := got.MarketForSale("Cinder Wardens", "Trooper"); n != 400 {
+		t.Errorf("the shared computer-baron listing came back as %d, want 400 under the first baron", n)
+	}
+	if got.MarketProceeds["Cinder Wardens"] != 5000 {
+		t.Errorf("the shared computer-baron gold came back as %d, want 5000", got.MarketProceeds["Cinder Wardens"])
+	}
+	// A handle with no realm left is forfeit, as the live game already treats it.
+	if n := got.MarketTotalForSale("Jet"); n != 0 {
+		t.Errorf("%d jets of a departed seller are still on the market", n)
+	}
+	if len(got.MarketProceeds) != 2 {
+		t.Errorf("proceeds after migration: %v, want only the two live sellers", got.MarketProceeds)
+	}
+	// The legacy map is drained, so a re-save cannot migrate the same gold twice.
+	if got.MarketProceedsByOwner != nil {
+		t.Errorf("the handle-keyed proceeds map survived the migration: %v", got.MarketProceedsByOwner)
+	}
+	for _, l := range got.Market {
+		if l.LegacyOwner != "" {
+			t.Errorf("a migrated listing still carries its handle: %+v", l)
+		}
 	}
 }

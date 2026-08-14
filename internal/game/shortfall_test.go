@@ -116,7 +116,7 @@ func TestCivilWarDestroysAShareOfEverything(t *testing.T) {
 			t.Errorf("%s = %d, want %d", c.name, c.got, want)
 		}
 	}
-	if got := w.MarketForSale(e.Owner, "Tank"); got != 350 {
+	if got := w.MarketForSale(e.Name, "Tank"); got != 350 {
 		t.Errorf("escrowed tanks = %d, want 350 — a listing is no shelter", got)
 	}
 	if e.CivilWarSeverity != 0 {

@@ -486,7 +486,7 @@ func TestAIBuysBelowShopPrice(t *testing.T) {
 	if bot.Troopers <= before {
 		t.Errorf("the AI should buy troopers listed at half the shop price (had %d, now %d)", before, bot.Troopers)
 	}
-	if w.MarketForSale("seller", "Trooper") == 1000 {
+	if w.MarketForSale(seller.Name, "Trooper") == 1000 {
 		t.Error("the seller's listing should have been drawn down")
 	}
 }

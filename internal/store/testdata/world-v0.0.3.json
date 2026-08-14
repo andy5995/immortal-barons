@@ -20,10 +20,52 @@
       "Support": 0,
       "Morale": 100,
       "Events": ["A dragon attacked your regions."]
+    },
+    {
+      "Name": "Cinder Wardens",
+      "Owner": "",
+      "Alive": true,
+      "Gold": 5000,
+      "Food": 500,
+      "Land": 15,
+      "Regions": {
+        "Coastal": 10,
+        "Agricultural": 5
+      },
+      "People": 1500,
+      "Tax": 15,
+      "Support": 0,
+      "Morale": 100
+    },
+    {
+      "Name": "Salt Marauders",
+      "Owner": "",
+      "Alive": true,
+      "Gold": 5000,
+      "Food": 500,
+      "Land": 15,
+      "Regions": {
+        "Coastal": 10,
+        "Agricultural": 5
+      },
+      "People": 1500,
+      "Tax": 15,
+      "Support": 0,
+      "Morale": 100
     }
   ],
   "GameDay": 7,
   "LastMaintDate": "2026-07-28",
   "Bulletin": ["A bulletin line from an old save"],
-  "InvestRate": 12
+  "InvestRate": 12,
+  "Market": [
+    { "Owner": "khan", "Good": "Tank", "Qty": 25, "Price": 900 },
+    { "Owner": "", "Good": "Trooper", "Qty": 400, "Price": 30 },
+    { "Owner": "abdicated", "Good": "Jet", "Qty": 9, "Price": 700 }
+  ],
+  "MarketProceeds": {
+    "khan": 12000,
+    "": 5000,
+    "abdicated": 700
+  }
 }

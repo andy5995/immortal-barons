@@ -152,7 +152,7 @@ func TestProtectiveTradeGuardsTradeCovert(t *testing.T) {
 	if _, err := w.BombTradingMarket(a, d); err != nil {
 		t.Fatalf("BombTradingMarket: %v", err)
 	}
-	if got := w.MarketForSale("d", "Tank"); got != 5 {
+	if got := w.MarketForSale(d.Name, "Tank"); got != 5 {
 		t.Errorf("d's market listing should be untouched, got %d", got)
 	}
 }

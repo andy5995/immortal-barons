@@ -437,6 +437,12 @@ func ioModeName(m door.IOMode) string {
 // runLocal plays Immortal Barons locally in the caller's terminal against the
 // shared persistent world, for someone testing or playing outside a BBS.
 func runLocal(cfg game.Config, name, today string, cs charset, noANSI bool) {
+	// -name "" would build a realm with no owner handle, which is the marker for a
+	// computer baron — the same fallback the door path applies to a dropfile with
+	// no alias.
+	if strings.TrimSpace(name) == "" {
+		name = defaultName()
+	}
 	c := session.NewConsole()
 	defer c.Close()
 

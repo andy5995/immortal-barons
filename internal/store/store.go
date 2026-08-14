@@ -65,6 +65,7 @@ func repair(w *game.World, cfg game.Config) {
 	w.EnsureInvestRate()
 	w.EnsurePirates()
 	w.EnsureTreaties()
+	w.EnsureMarket()
 	w.EnsureNews()
 	w.EnsureEpoch()
 	w.Config = cfg
