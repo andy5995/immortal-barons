@@ -15,6 +15,6 @@ of its output goes to fishing instead. What it gives you in return is
 steadiness: river gold barely swings from turn to turn, while the others can
 have a poor turn.
 
-The food is a bonus, not a food supply. One river grows about an eighth of what
+The food is a bonus, not a food supply. One river grows about a tenth of what
 one agricultural region grows. Buy rivers for the gold and the steadiness; buy
 agricultural regions when you need to feed people.

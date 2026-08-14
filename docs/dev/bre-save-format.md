@@ -59,11 +59,21 @@ and `base + 0x96` (150) here, and 150 − 32 = 118.
 
 ```
 empire record (les di,[0x28d8])
+  +0x62  int32  population, counted in MILLIONS (the food routine at BRE.OVR
+                0x37418 multiplies it by 1.5 for "Your People Need N")
   +0x6a  int32  bank balance
                 (+0x66 is NOT gold on hand: the turn routine zeroes it every
                  turn and it reads 0 in the save. The maintenance routine loads
                  gold from it into a local, so it is a per-turn working field.)
+  +0x6e  int32  food in store. The production routine adds each turn's yield
+                here; the allocation routine draws feeding out of it.
   +0x72  int32  gold earned this turn  (see below)
+  +0x76 .. +0x8a  six int32 unit counts, in the order the food routine reads
+                them: Trooper +0x76, Bomber +0x7a, Jet +0x7e, Turret +0x82,
+                Tank +0x86, Carrier +0x8a. Trooper is measured (see the market
+                escrow below); the rest are paired with their escrow slots by
+                the armed-forces food routine, which reads each type's two
+                fields back to back.
   +0x8e  int32  military morale
   +0x92  int32  popular support
   +0x96  int32  region block starts (Coastal first, Buy-Regions order); the
@@ -87,6 +97,15 @@ empire record (les di,[0x28d8])
                 (0x688e). It lives in the record, not on the stack, so an
                 abandoned turn resumes where it stopped; the same job as IB's
                 TurnProgress.
+  +0x2b9 .. +0x2bb   three penalty bytes, zeroed at turn start (BRE.EXE 0x62c4)
+                     and spent during the end-of-turn step:
+                       +0x2b9  subtracted from military morale (BRE.OVR 0xc1a1)
+                       +0x2ba  subtracted from popular support (0xcf41)
+                       +0x2bb  civil-war severity, in percent (0xc59a): halves
+                               popular support and destroys that percentage of
+                               every military unit type. The food-allocation
+                               routine writes all three; an anti-crack check
+                               writes 50 into the third.
   +0x211 .. +0x231   the Trading Market "For Sale" escrow, one int32 per slot in
                      the market screen's own order: Trooper, Jet, Turret,
                      Bomber, Food, (unused key 6), Agent, Tank, Carrier.

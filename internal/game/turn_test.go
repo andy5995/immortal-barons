@@ -77,15 +77,17 @@ func TestRiversPayGoldAndFoodEveryTurn(t *testing.T) {
 	e := w.AddHuman("t", "T")
 	e.Regions = RegionMix{River: 24}
 	e.syncLand()
-	wantFood := 24 * RiverFishFood * RiverFishShare / 100
+	// A river's haul is 110 + [0, 20) in BRE; IB pays RiverFishShare of it.
+	lo := 24 * 110 * RiverFishShare / 100
+	hi := 24 * 129 * RiverFishShare / 100
 	for d := 0; d < 40; d++ {
 		w.GameDay = d
 		b := w.IncomeThisTurn(e)
 		if b.Rivers <= 0 {
 			t.Fatalf("day %d: rivers should always pay hydropower gold, got %d", d, b.Rivers)
 		}
-		if b.RiverFood != wantFood {
-			t.Fatalf("day %d: river food want %d, got %d", d, wantFood, b.RiverFood)
+		if b.RiverFood < lo || b.RiverFood > hi {
+			t.Fatalf("day %d: river food %d outside [%d, %d]", d, b.RiverFood, lo, hi)
 		}
 	}
 }
@@ -103,7 +105,7 @@ func TestRiverYieldSplitByShare(t *testing.T) {
 	if lo, hi := RiverBase/2*(100-RiverFishShare)/100, (RiverBase+RiverRate)*(100-RiverFishShare)/100; gold < lo || gold > hi {
 		t.Errorf("river gold %d outside the share-scaled yield band [%d, %d]", gold, lo, hi)
 	}
-	if got, want := w.riverFood(e), RiverFishFood*RiverFishShare/100; got != want {
+	if got, want := w.riverFood(e), (110+w.regionDraw(e, 7, RiverFishRate))*RiverFishShare/100; got != want {
 		t.Errorf("river food want %d, got %d", want, got)
 	}
 }
@@ -383,22 +385,24 @@ func TestDailyMaintenanceHandlesMalformedDate(t *testing.T) {
 	}
 }
 
-// BRE-verified (2026-07-16): 5% of the ENTIRE food stock spoils each turn, with
-// NO floor below which nothing spoils.
-func TestFoodSpoils5PctNoFloor(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	e := w.AddHuman("me", "Mine")
-	e.People, e.Troopers, e.Jets, e.Tanks = 0, 0, 0, 0 // no consumption
-	e.Regions, e.Land = RegionMix{}, 0                 // no food grown
-	e.Food = 200                                       // below the old 1000 "floor" — BRE spoils it anyway
-
-	w.PlayTurn(e, "2026-07-03")
-
-	if e.LastSpoiled != 200*FoodSpoilPct/100 { // 5% of 200 = 10, no floor
-		t.Errorf("food should spoil %d%% with no floor: want %d, got %d", FoodSpoilPct, 200*FoodSpoilPct/100, e.LastSpoiled)
+// 5% of the ENTIRE food stock spoils each turn, but only once the stock passes
+// 1,000 — BRE's decay block skips itself below that, which is why a fresh
+// realm's starting granary never rots.
+func TestFoodSpoils5PctAboveFloor(t *testing.T) {
+	spoiled := func(stock int) (int, int) {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		e := w.AddHuman("me", "Mine")
+		e.People, e.Troopers, e.Jets, e.Tanks = 0, 0, 0, 0 // no consumption
+		e.Regions, e.Land = RegionMix{}, 0                 // no food grown
+		e.Food = stock
+		w.PlayTurn(e, "2026-07-03")
+		return e.LastSpoiled, e.Food
 	}
-	if e.Food != 200-200*FoodSpoilPct/100 {
-		t.Errorf("food after spoilage: want %d, got %d", 200-200*FoodSpoilPct/100, e.Food)
+	if lost, left := spoiled(1000); lost != 0 || left != 1000 {
+		t.Errorf("a 1,000 granary should not spoil: lost %d, left %d", lost, left)
+	}
+	if lost, left := spoiled(2000); lost != 100 || left != 1900 { // 5% of 2,000
+		t.Errorf("a 2,000 granary should lose 100: lost %d, left %d", lost, left)
 	}
 }
 

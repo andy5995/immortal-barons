@@ -584,6 +584,39 @@ func TestFeedStageAutoFeedOpensMarketWhenShort(t *testing.T) {
 	}
 }
 
+// The people and the armed forces are two separate obligations, and BRE prompts
+// for each one in turn. Feeding the people in full but the army not at all must
+// still raise the disastrous-results reconsider.
+func TestFeedStageAsksForPeopleAndForcesSeparately(t *testing.T) {
+	w := newWorld()
+	w.AutoFeed = true
+	p := w.Player()
+	p.People = 100000 // eats 7,500
+	p.Turrets = 500000
+	p.Food = 7500 // covers the people exactly, nothing for the army
+	if got := p.PeopleFoodUpkeep(); got != 7500 {
+		t.Fatalf("test setup: people should eat 7,500, got %d", got)
+	}
+	if got := w.ForcesFoodDue(p); got != 50 {
+		t.Fatalf("test setup: 500,000 turrets should eat 50, got %d", got)
+	}
+	// quit market, take each prompt's default, decline the reconsider
+	f := &fakeSession{keys: []rune("0\r\rn")}
+	if err := feedStage(f, w, BuildMenus().Food); err != nil {
+		t.Fatalf("feedStage: %v", err)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "people need ") {
+		t.Errorf("expected the people's obligation; got:\n%s", out)
+	}
+	if !strings.Contains(out, "armed forces require ") {
+		t.Errorf("expected the armed forces' obligation as its own prompt; got:\n%s", out)
+	}
+	if !strings.Contains(out, "disastrous") {
+		t.Errorf("an unfed army must still raise the reconsider; got:\n%s", out)
+	}
+}
+
 func TestFeedStageNoNoticeWhenFed(t *testing.T) {
 	w := newWorld()
 	w.AutoFeed = true

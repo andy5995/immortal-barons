@@ -569,11 +569,17 @@ const (
 	// unless the sysop's Food Unlimited toggle is on.
 	FoodMarketDailySupply = 1_000_000
 	// FoodSpoilPct: each turn this % of the ENTIRE stored food stock spoils —
-	// floor(0.05 × food) — with NO floor below which nothing spoils. BRE-verified
-	// by driving the original (2026-07-16): spoilage matched floor(5% × food) to
-	// the unit across food stocks from 1.4k to 13.9k. Technology decreases it (via
-	// TechFactor). Was an unverified "4% of food above 1000" guess.
+	// floor(0.05 × food). BRE-verified by driving the original (2026-07-16):
+	// spoilage matched floor(5% × food) to the unit across food stocks from 1.4k
+	// to 13.9k. Technology decreases it (via TechFactor).
 	FoodSpoilPct = 5
+	// FoodSpoilFloor: a granary at or below this spoils nothing at all. BINARY-
+	// VERIFIED — the decay block in BRE's end-of-turn routine (BRE.OVR 0xd8ef)
+	// sums the stored and market-listed food and skips the whole step unless the
+	// total exceeds 1,000, which is why a fresh realm's starting granary never
+	// rots. IB previously spoiled every stock down to the last unit; the earlier
+	// captures that "showed no floor" never ran the granary this low.
+	FoodSpoilFloor = 1000
 	// Food-shortfall penalties (IB reconstruction — BRE publishes no rate;
 	// calibrated to a live BRE point: ~73% short dropped support ~50 points in one
 	// turn). Scaled by how much of the turn's food need went unmet (0–100%): the
@@ -667,43 +673,55 @@ const (
 
 const (
 	// Agricultural food follows the same Base + [0, Rate) draw the gold regions
-	// use — one roll per turn, multiplied by the region count. BRE-verified: over
-	// six captures and nine different region counts (2 … 194) every printed total
-	// divided exactly by its count, and the per-region figure landed on exactly
-	// 300, 301, 302, 303 or 304 — all five values, so the width is 5 and the floor
-	// is 300. IB previously paid a flat 300, i.e. always the floor of the band.
+	// use — one roll per turn, multiplied by the region count. BINARY-VERIFIED:
+	// BRE.OVR 0x33b64 returns 300 raised by the food technology factor, and its
+	// caller in the production routine adds Random(5) before multiplying by the
+	// Agricultural count. The technology factor lands on the BASE only, which is
+	// what six captures showed as per-region figures of exactly 300 … 304.
 	FoodAgriBase = 300
 	FoodAgriRate = 5
 	// Rivers produce BOTH gold and food every turn — a DELIBERATE DIVERGENCE.
-	// In BRE a river does hydropower OR fishing each turn, never both, and it
-	// fished on 21 of 73 captured turns (~29%). IB pays the same expected value
-	// with none of the swing: RiverFishShare of a river's output is taken as
-	// food, the rest as hydropower gold. A player committed to rivers otherwise
-	// watches millions of gold appear and vanish turn to turn with no way to plan
-	// around it, and an un-plannable food source is close to useless.
+	// In BRE a river does hydropower OR fishing each turn, never both: the
+	// production routine rolls Random(4) and fishes only on a zero. IB pays the
+	// same expected value with none of the swing: RiverFishShare of a river's
+	// output is taken as food, the rest as hydropower gold. A player committed to
+	// rivers otherwise watches millions of gold appear and vanish turn to turn
+	// with no way to plan around it, and an un-plannable food source is close to
+	// useless.
 	//
-	// One constant drives both halves so they cannot drift apart when tuned.
-	RiverFishShare = 30  // % of a river's output taken as food; the rest is gold
-	RiverFishFood  = 124 // food per River region at a full (100%) fishing turn
-	// PeopleFoodPerThousand is the food the population eats per 1000 people per
-	// turn. BRE's maintenance shows "Your People Need ~150 units of food"; at IB's
-	// ~2000-person start that lands on ~150 (2000×75/1000), so a fresh realm's 1000
-	// food comfortably covers it. Was an unscaled 1:1 with People, which starved a
-	// BRE-faithful 1000-food start. Tunable.
-	PeopleFoodPerThousand = 75
-	// ArmyFoodDivisor: TROOPERS eat ~1 food per this many. Live-verified twice:
-	// 42,259 troopers → 211 food (42,259/200), and a second realm billed 36 for
-	// 7,212 troopers. breins.txt agrees in prose: troopers have "the added need
-	// for food, as compared to other units" — comparative, not exclusive.
+	// One constant drives both halves so they cannot drift apart when tuned, so
+	// the share IS the original's fishing chance — 1 in 4.
+	RiverFishShare = 25 // binary: % of turns a BRE river fishes; IB takes it as a share
+	// The fishing haul itself is the same shape as the Agricultural one, from
+	// BRE.OVR 0x33ba6 and the same caller: 110 raised by the food technology
+	// factor, plus Random(20). IB paid a flat 124, mid-band and untouched by
+	// technology.
+	RiverFishFood = 110 // binary: food per River region on a fishing turn, before the draw
+	RiverFishRate = 20  // binary: width of the draw added to it
+	// Food is TWO obligations, each truncated on its own: BRE bills the people
+	// and the armed forces from separate routines and prompts for them one after
+	// the other. Summing the terms before truncating reads one food high whenever
+	// both have a fraction. BINARY-VERIFIED from the food overlay unit's two
+	// need routines, BRE.OVR 0x37418 (people) and 0x37459 (armed forces).
 	//
-	// Troopers are NOT the only unit that eats. BRE also charges turrets and tanks
-	// at 1 food per 10,000 each, BINARY-VERIFIED as one accumulator truncated once
-	// (BRE.OVR cs:0x41) and pinned in play: 30,000 tanks bill 3 and 29,999 bill 2.
-	// IB does not charge them — the amount is ~0.02% of a realm's food bill. Jets,
-	// bombers and carriers are untested, not known-free; an earlier test that
-	// "cleared" jets and tanks used counts that truncate to zero at this rate.
-	// See docs/mechanics-reference.md and issue #91.
-	ArmyFoodDivisor = 200
+	// FoodPerBREPopUnitTenths: the people eat 1.5 food per unit of population,
+	// where BRE's unit is one million — PopBREUnitScale of IB's people. Held in
+	// tenths so the conversion to IB's counter stays integer.
+	FoodPerBREPopUnitTenths = 15
+	// The armed-forces routine sums TWELVE terms as one real and truncates once:
+	// six unit types, each counted where it is held AND where it sits escrowed on
+	// the Trading Market. Troopers carry weight 0.5, every other type 0.01, and
+	// the whole sum is then multiplied by 0.01 — so a trooper eats 1 food per 200
+	// and everything else 1 per 10,000. Food and agents are not among the twelve,
+	// so neither eats. The weights below are that product, in ten-thousandths.
+	//
+	// So the whole army eats: BRE's own changelog says "All military units now
+	// require food to survive" (docs/whatsnew.doc, 0.97). IB charged troopers
+	// only, on a measurement that added 1,000 jets and 533 tanks — both of which
+	// truncate to zero at 1 per 10,000, so it could not have detected them (#91).
+	ForcesFoodWeightScale   = 10_000
+	ForcesFoodTrooperWeight = 50 // 1 food per 200 troopers
+	ForcesFoodUnitWeight    = 1  // 1 food per 10,000 jets/turrets/bombers/tanks/carriers
 
 	// --- Popular support: tax drift, riots, and the pay-to-boost prompt ---
 	// BINARY-VERIFIED against BRE.OVR's end-of-turn routine (0xCE97) and the

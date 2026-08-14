@@ -980,9 +980,9 @@ level, which the original does not.
 
 **Urban and Technology produce no direct gold** (BRE-verified): Urban is
 population housing, Technology is an efficiency multiplier (see the Technology
-region above). Food output: `Agricultural × 300` grown, then raised by the
-Technology factor (#20); rivers add a share of their yield as food every turn,
-see the Rivers section. These income numbers, the caps (2B money / 1.599B
+region above). Food output is covered under the food
+section: an Agricultural draw raised by the Technology factor (#20), plus a
+share of every river's yield. These income numbers, the caps (2B money / 1.599B
 interest) and the pirate caps table are BRE-scale, and the net-worth weights are
 binary-verified; **the tax per-capita coefficient and the yield band are IB's own
 reconstructions** anchored to this scale. All tunables live in `internal/game/balance.go`.
@@ -1408,34 +1408,44 @@ league ran tax 85%, interest 75%).
   **vary daily** within `buy ∈ [FoodBuyPriceMin, 3×FoodBuyPriceMin]` with
   `sell = buy/3` — BRE's own [20,60]/[7,20] band (IB runs BRE-native economy
   scale; `FoodBuyPriceMin = 20` in `balance.go`).
-- **Food production:** `Agricultural × FoodPerAgri (300)` per turn, calibrated to
-  live BRE (97 Agri → 29,197; 16 Agri → 4,864, both no River).
+- **Food production:** `Agricultural × (300 + Random(5))` per turn, calibrated to
+  live BRE (97 Agri → 29,197; 16 Agri → 4,864, both no River) and read from the
+  binary (below).
 - **Rivers — IB pays gold *and* food every turn (DELIBERATE DIVERGENCE, #29).**
   In BRE each turn an empire's rivers do EITHER hydropower (gold) OR fishing,
-  never both — strictly exclusive across 63/63 captured turns. **IB pays both
-  every turn instead**, splitting a river's yield by `RiverFishShare` (30%): 70%
-  of the hydropower gold plus 30% of a full fishing haul, every turn.
+  never both — strictly exclusive across 63/63 captured turns, and the
+  production routine says why: it rolls `Random(4)` and fishes only on a zero.
+  **IB pays both every turn instead**, splitting a river's yield by
+  `RiverFishShare`: 75% of the hydropower gold plus 25% of a fishing haul, every
+  turn.
 
   The split is **expectation-preserving** — it is BRE's average, not a buff or a
   nerf — so no rebalancing follows from it. What it removes is the variance. At
   24 rivers the swing is ~121,000 gold present or absent; a player who commits to
   rivers at scale faces millions of gold appearing and vanishing with no way to
-  plan around it, and a food source that shows up 30% of the time is close to
-  useless for covering consumption. One constant drives both halves so they
-  cannot drift apart when tuned.
+  plan around it, and a food source that shows up a quarter of the time is close
+  to useless for covering consumption. One constant drives both halves so they
+  cannot drift apart when tuned, which is why the share IS the fishing chance.
 
   **Live measurements (63 turns across five captures):** rivers fished on **19 of
-  63 turns, 30%** — the source of `RiverFishShare`. Hydropower gold is a clean
-  `5,000 + Random(100)` per region (every one of 44 captured figures divided
-  exactly by the river count, 5,002–5,099). Fishing yield per river is
-  `110 + [0, ~20)` — Base 110 is firm (the Civilian advisor quotes it as the
-  minimum) but the Rate is not pinned. **IB uses a flat `RiverFishFood = 124`**,
-  which sits inside that range, so the remaining defect is the flatness rather
-  than the magnitude.
+  63 turns, 30%**, which was the original source of `RiverFishShare` — a
+  reasonable read of 19/63 but wide enough to hold the true 25%, and the binary
+  settles it. Hydropower gold is a clean `5,000 + Random(100)` per region (every
+  one of 44 captured figures divided exactly by the river count, 5,002–5,099).
 
-  This does **not** make rivers a food region: 30% of 124 is ~37 food per region
-  per turn against an Agricultural region's 300, about an eighth. It is a steady
-  garnish, not a substitute for farmland.
+  This does **not** make rivers a food region: a quarter of ~120 is ~30 food per
+  region per turn against an Agricultural region's 300, about a tenth. It is a
+  steady garnish, not a substitute for farmland.
+- **Both food yields are binary-verified, and technology raises the base only.**
+  `BRE.OVR 0x33b64` returns `300 × technologyFactor(2.0, slot 0)` — the **food**
+  factor — and `0x33ba6` returns `110 × ` the same factor. Their shared caller in
+  the production routine then adds the per-turn draw (`Random(5)` for
+  Agricultural, `Random(20)` for a fishing river) and multiplies by the region
+  count. So the draw is *not* scaled by technology, and the Agricultural
+  per-region figures of exactly 300 … 304 seen across six captures are the
+  untech'd band. IB paid a flat `RiverFishFood = 124` with no draw and no
+  technology; both are now `RiverFishFood (110) + Random(RiverFishRate (20))`
+  raised on the base, matching the Agricultural shape.
 
   **Superseded (was recorded here as a caveat on 2026-07-23):** an earlier reading
   of "0 fishing across ~240 river-turns" was a counting error, not a finding — the
@@ -1448,13 +1458,13 @@ league ran tax 85%, interest 75%).
   controlled test — the same empire driven through a food deficit and then a
   surplus — fished on 4 of 9 short turns versus 3 of 11 surplus turns (Fisher
   exact, p = 0.64). See issue #67.
-- **Agricultural output is a draw, not a flat rate (BRE-verified).** Per region
-  per turn it is `FoodAgriBase (300) + Random(FoodAgriRate (5))` — one roll per
-  turn shared by every Agricultural region, exactly like the gold regions. Across
-  six captures and nine region counts (2 … 194) every printed total divided
-  exactly by its region count, and the per-region figure landed on 300, 301, 302,
-  303 and 304 — all five, so the width is 5 and the floor is 300. (IB paid a flat
-  300 until 2026-07-30, i.e. always the bottom of the band.)
+- **Agricultural output is a draw, not a flat rate.** Per region per turn it is
+  `FoodAgriBase (300) + Random(FoodAgriRate (5))` — one roll per turn shared by
+  every Agricultural region, exactly like the gold regions. Across six captures
+  and nine region counts (2 … 194) every printed total divided exactly by its
+  region count, and the per-region figure landed on 300, 301, 302, 303 and 304 —
+  all five, so the width is 5 and the floor is 300; the binary read below says
+  the same. (IB paid a flat 300 until 2026-07-30, i.e. always the bottom.)
 - **Food growth is a *turn-start* credit (matches BRE).** This turn's food yield
   (Agricultural draw + river fishing) is added to the granary at the **start**
   of the turn — alongside military production and gold income, exactly what the
@@ -1462,76 +1472,111 @@ league ran tax 85%, interest 75%).
   **sell or spend this turn's growth the same turn**. (Earlier IB deferred the
   growth to the end-of-turn economy step, where it arrived after the food market
   and was always subject to spoilage — corrected 2026-07-20 after driving BRE.)
-- **Food consumption:** each turn the population eats
-  `People × PeopleFoodPerThousand (75) / 1000` and the army eats
-  `Troopers / ArmyFoodDivisor (200)` — about **1 food per 200 troopers**.
-  Live-verified twice: 42,259 troopers → 211, and a realm billed 36 food for
-  7,212 troopers. `breins.txt` gives troopers "the added need for food, as
-  compared to other units", which is comparative, not exclusive: **troopers are
-  not the only unit that eats** (see the turret/tank rate below). A large
-  standing army is still nearly food-free, as in BRE — food pressure comes from
-  population, not the army. (Both constants in `balance.go`.
-  Fixed 2026-07-23: the army was previously billed 1 food/trooper, ~200× too heavy.)
+- **Food consumption is TWO obligations, not one (#91).** BRE bills the people
+  and the armed forces from two separate routines, prompts for them one after
+  the other, and truncates each on its own:
 
-  **The two terms are truncated separately, then summed** — the total is
-  `trunc(population food) + trunc(army food)`, not one accumulator truncated
-  once. Four turns of a combined `N units of Food consumed` line discriminate
-  the models (25,865M + 49,840 turrets billed 38,801, where a single
-  accumulator gives 38,802); the same holds at 219,032 and 278,857 turrets.
-  Summing the two terms before truncating reads one unit high whenever both
-  have a fractional part.
+  ```
+  people = trunc(populationInMillions × 1.5)
+  forces = trunc((troopers × 0.5 + everyOtherMilitaryUnit × 0.01) × 0.01)
+  ```
 
-  The **people** rate is BRE's, not a reconstruction, once the population scales
-  are lined up. BRE charges exactly `1.5` food per million people — nine samples
-  across five captures, from 100M to 34,600M, all exact under truncation
-  (4,081M → 6,121, i.e. `trunc(6121.5)`). IB's population counter runs 20× BRE's
-  displayed millions (a fresh realm is 2,000 to BRE's 100M), and `75/1000` is
-  `1.5/20`, so the two charge the same food for the same realm. An earlier note
-  here claimed IB's rate was lighter; it is identical.
+  Both are read straight out of the binary — `BRE.OVR 0x37418` (people) and
+  `0x37459` (armed forces), the two need routines in the food overlay unit,
+  called back to back by the allocation routine at `0x37fdf` that prints
+  `Your People Need N units of food` and then `Your Armed Forces Require N units
+  of food`. The prompts default to as much of the granary as the obligation
+  asks for, and if either goes unmet BRE warns that the decision *may lead to
+  DISASTEROUS results* and offers to reconsider, which restarts both prompts.
 
-  **Turrets and tanks each eat 1 food per 10,000 units, and IB does not charge
-  them.** The divisor is **10,000 exactly**, not a fit. Ten army-food prompts
-  from a turret-only empire (99,382 up to 816,657 turrets) bracket it to
-  9,966.5 … 10,082.2, and a tank-only empire drove it shut: with production
-  frozen and the count sold to an exact figure, **30,000 tanks billed 3 and
-  29,999 billed 2**, which allows only 9,999.67 … 10,000. The same pair proves
-  **truncation, not rounding** (2.9999 → 2). Fifteen further tank readings from
-  10,194 to 56,197 are all consistent.
+  **The people** eat 1.5 per million, exactly. Nine live samples from 100M to
+  34,600M are all exact under truncation (4,081M → 6,121, i.e.
+  `trunc(6121.5)`). IB counts people directly, `PopBREUnitScale` (20) to BRE's
+  million, so the conversion runs through that constant —
+  `FoodPerBREPopUnitTenths` in `balance.go`.
 
-  Tanks and turrets therefore carry the same weight, so the rate is a property
-  of the army, not of the unit type. An earlier note here recorded tanks and
-  jets as eating **nothing**; that test added 1,000 jets and 533 tanks, both of
-  which truncate to zero at this rate, so it had no power to detect them.
-  **Jets, bombers and carriers remain untested — not known-free.** Covert agents
-  are bounded below 1 food per 300 agents (a 50-agent purchase moved nothing),
-  which rules out the trooper rate but not the turret/tank one.
+  **Every military unit type eats**, which BRE's own changelog states outright:
+  *"All military units now require food to survive"* (`docs/whatsnew.doc`,
+  0.97). The armed-forces routine sums **twelve** terms as one real and
+  truncates once — six unit types, each counted both where it is held
+  (record `+0x76 … +0x8a`) and where it sits escrowed on the Trading Market
+  (`+0x211 … +0x231`), so listing an army for sale no more dodges its rations
+  than it dodges its maintenance. Food (`+0x221`) and agents (`+0x229`) are
+  **not** among the twelve, so neither eats — which settles the covert-agent
+  question that live play could only bound.
 
-  The charge stays 0.02% of a realm's food bill, which is why IB's omission has
-  never shown up in play.
+  Troopers carry weight `0.5` and everything else `0.01`, and the whole sum is
+  then multiplied by `0.01`: **1 food per 200 troopers, 1 per 10,000 of
+  everything else**. Both rates are corroborated in play — 42,259 troopers →
+  211 and 7,212 → 36 for the trooper rate; **30,000 tanks bill 3 and 29,999 bill
+  2** for the other, which allows only 9,999.67 … 10,000 and proves truncation
+  over rounding. `breins.txt` gives troopers "the added need for food, as
+  compared to other units", which is comparative and matches the 50× weight.
+
+  **The two obligations are truncated separately, then summed.** Four turns of a
+  combined `N units of Food consumed` line discriminate the models (25,865M +
+  49,840 turrets billed 38,801, where one accumulator gives 38,802); the same
+  holds at 219,032 and 278,857 turrets. Summing before truncating reads one unit
+  high whenever both terms have a fractional part.
+
+  Food pressure still comes from population, not the army: the non-trooper
+  charge is ~0.02% of a realm's bill, which is why IB's earlier troopers-only
+  formula survived so long. The measurement that appeared to clear jets and
+  tanks added 1,000 jets and 533 tanks — 0.15 food between them, so it had no
+  power to detect either.
 - **Food spoilage:** **5% of the food remaining after growth and consumption**
-  spoils each turn — `floor(0.05 × food)` — with **no floor** below which nothing
-  spoils, reduced by Technology regions. **Re-verified by driving the original
+  spoils each turn — `floor(0.05 × food)` — reduced by Technology regions, and
+  **only once the stock passes 1,000**. **Verified by driving the original
   (2026-07-20):** spoilage matched `floor(5% × food-after-grow-and-consume)` to
-  the unit at three stocks (1,452→72, 2,668→133, 0→0). **Re-verified again at
-  scale (2026-07-30)** over every capture: 62 of 63 turns matched to the unit,
-  once food sold or bought at the market between the stock line and the spoilage
-  line is counted. Truncation, not rounding (29,759 → 1,487, from 1,487.95). Because growth is credited
-  at turn start (above), selling the surplus down to next-turn consumption drains
-  the granary to ~0 after feeding, yielding **zero spoilage** — BRE's "sell excess
-  → no decay" behavior. (`FoodSpoilPct` in `balance.go`. An earlier 2026-07-11
-  disassembly read hypothesized a ~1,000-unit floor + decay of the excess; the
-  live driving disproved it — a floor would give 22/83, not 72/133.)
+  the unit at three stocks (1,452→72, 2,668→133, 0→0), and **again at scale
+  (2026-07-30)** over every capture: 62 of 63 turns matched to the unit, once
+  food sold or bought at the market between the stock line and the spoilage line
+  is counted. Truncation, not rounding (29,759 → 1,487, from 1,487.95).
+
+  The 1,000 floor is **binary-verified** — BRE's decay block (`BRE.OVR 0xd8ef`)
+  sums the stored and market-listed food and jumps past the whole step unless
+  the total exceeds 1,000, which is why a fresh realm's starting granary never
+  rots. A 2026-07-11 read had hypothesised the floor **and** that only the
+  excess decays; the live driving disproved the second half (excess-only gives
+  22/83, not 72/133) and the first half was discarded with it. Below the floor
+  nothing rots; above it, the whole stock is charged. IB spoiled every stock
+  down to the last unit until this was corrected.
+
+  Because growth is credited at turn start (above), selling the surplus down to
+  next-turn consumption drains the granary after feeding, yielding **zero
+  spoilage** — BRE's "sell excess → no decay" behavior. (`FoodSpoilPct` and
+  `FoodSpoilFloor` in `balance.go`.)
 - **Feeding & food shortfall:** each turn the realm consumes food; a **feed stage**
   (BRE's Payment→Food-Market slot) warns when short, and with **Auto-Feed** on the
-  Food Market opens automatically so the player can buy food. Going underfed hurts:
-  **popular support and military morale drop and people emigrate, scaled to how
-  much of the turn's food need went unmet** (`FoodShortfallSupportDrop` = 70
-  support points, `FoodShortfallMoraleDrop` = 80 morale points — hungry troops
-  demoralize faster than the public — and `FoodShortfallEmigrationPct` = 10% of
-  population, all at 100% unfed). IB's own reconstruction (BRE publishes no rate),
-  calibrated to a live BRE point: ~73% short dropped support ~50 points in one
-  turn. breins.txt confirms the direction: *"Without food, morale and public
-  support will [decline]."*
+  Food Market opens automatically so the player can buy food, then asks the two
+  obligations in turn. Going underfed hurts: **popular support and military morale
+  drop and people emigrate, scaled to how much of the turn's food need went unmet**
+  (`FoodShortfallSupportDrop` = 70 support points, `FoodShortfallMoraleDrop` = 80
+  morale points — hungry troops demoralize faster than the public — and
+  `FoodShortfallEmigrationPct` = 10% of population, all at 100% unfed). IB's own
+  reconstruction, calibrated to a live BRE point: ~73% short dropped support ~50
+  points in one turn. breins.txt confirms the direction: *"Without food, morale
+  and public support will [decline]."*
+
+  **BRE's own penalties are now read, and IB's differ — deliberately, for now.**
+  The allocation routine files three byte-sized penalties on the empire record,
+  all applied and cleared during the end-of-turn step. With `r` the fraction of
+  an obligation that was actually given (BRE computes it as `(given+1)/(need+1)`):
+
+  | shortfall | penalty | applied at |
+  | --- | --- | --- |
+  | armed forces | military morale `-= trunc((1−r) × 40)` | `BRE.OVR 0xc1a1`, clamped to 0…100 |
+  | people | popular support `-= trunc((1−r) × 40)` | `BRE.OVR 0xcf41`, clamped to 0…100 |
+  | people, and only when `r < 0.65` | **civil war** of severity `round((1−r) × 30)` percent | `BRE.OVR 0xc59a` |
+
+  A civil war **halves popular support and destroys that percentage of every
+  military unit type**, and it is the same routine an anti-crack punishment
+  fires at severity 50. So BRE's starvation has no emigration at all: the people
+  do not leave, the army collapses. IB's model (support/morale drops plus
+  emigration, no civil war) is a heavier hit at mild shortfalls and a far lighter
+  one at severe ones. **Civil-war collapse is still unbuilt**, so swapping in
+  BRE's rates without it would leave starvation weaker than either game intends;
+  the two belong in one change.
 - **Land market:** you may buy at most **500 regions per turn**, and the
   per-region price rises as you own more (about 1,100 coins/region when you hold
   only 2). Land is also **finite**: see Daily Land Creation below.

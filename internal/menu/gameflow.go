@@ -692,45 +692,64 @@ func decontaminateStage(s session.Session, w *ctx) {
 // player manages food from the menu themselves. Fixes the old silent starvation:
 // Auto-Feed was a dead no-op and nothing ever flagged a food shortfall.
 func feedStage(s session.Session, w *ctx, food *Menu) error {
-	need, have, autoFeed := 0, 0, false
+	people, forces, have, autoFeed := 0, 0, 0, false
 	if !withPlayer(w, func(p *game.Empire) {
-		need, have, autoFeed = p.FoodUpkeep(), p.Food, w.AutoFeed
+		people, forces, have, autoFeed = p.PeopleFoodUpkeep(), w.ForcesFoodDue(p), p.Food, w.AutoFeed
 	}) {
 		return nil // realm gone; the caller's next withPlayer aborts the turn
 	}
-	if have >= need {
+	if have >= people+forces {
 		return nil // fed — no notice
 	}
 	if !autoFeed {
 		// Auto-Feed off: just warn (no pause) — the player manages food from the menu.
-		fmt.Fprintf(s, "\n%s"+tr(s, "Your people need %s units of food and you have only %s.")+"%s\n",
-			ansi.FgYellow, comma(need), comma(have), ansi.Reset)
+		fmt.Fprintf(s, "\n%s"+tr(s, "Your people need %s units of food and your armed forces %s; you have only %s.")+"%s\n",
+			ansi.FgYellow, comma(people), comma(forces), comma(have), ansi.Reset)
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed, tr(s, "Visit the Food Market to feed them, or they will starve."), ansi.Reset)
 		return nil
 	}
 	// Auto-Feed on and short: bring up the Food Market so the player can buy food,
-	// then ask how much to give (BRE's "How much will you give?"). Giving LESS than
-	// required triggers the disastrous-results reconsider, which loops back to the
-	// market — exactly like IB's maintenance-underpayment guard; giving the full
-	// amount proceeds silently. (IB consumes food automatically, so the given amount
-	// gates the reconsider; buying enough food is the real fix.)
+	// then ask how much to give (BRE's "How much will you give?"). BRE asks TWICE —
+	// the people and the armed forces are separate obligations, each with its own
+	// prompt — and raises the disastrous-results reconsider once at the end if
+	// either was underfed, looping back to the market. (IB consumes food
+	// automatically, so the given amounts gate the reconsider; buying enough food
+	// is the real fix.)
 	for {
 		if err := Run(s, w, food); err != nil {
 			return err
 		}
-		if !withPlayer(w, func(p *game.Empire) { need, have = p.FoodUpkeep(), p.Food }) {
+		if !withPlayer(w, func(p *game.Empire) {
+			people, forces, have = p.PeopleFoodUpkeep(), w.ForcesFoodDue(p), p.Food
+		}) {
 			return nil
 		}
-		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "Your people need %s units of food."), comma(need))))
-		give := promptSuggested(s, "How much will you give?", min(have, need), min(have, need))
-		if give >= need {
-			return nil // fed the full amount — proceed
+		short := askFoodGift(s, tr(s, "Your people need %s units of food."), people, &have)
+		short = askFoodGift(s, tr(s, "Your armed forces require %s units of food."), forces, &have) || short
+		if !short {
+			return nil // both obligations met — proceed
 		}
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
 		if !AskYesNo(s, "Would you like to reconsider?", true) {
 			return nil // proceed despite underfeeding
 		}
 	}
+}
+
+// askFoodGift runs one of BRE's two food prompts: it states the obligation,
+// offers as much of the remaining stock as the obligation asks for, and draws
+// what the player gives out of that stock so the second prompt sees what the
+// first spent. Reports whether the obligation went unmet. A zero obligation is
+// skipped, as in BRE, where the prompt only appears when something is owed.
+func askFoodGift(s session.Session, label string, need int, stock *int) bool {
+	if need <= 0 {
+		return false
+	}
+	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(label, comma(need))))
+	offer := min(*stock, need)
+	give := min(promptSuggested(s, "How much will you give?", offer, offer), *stock)
+	*stock -= max(give, 0)
+	return give < need
 }
 
 // showQueenRefund hands the realm its share of the Queen's purse, once per game

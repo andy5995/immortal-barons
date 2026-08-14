@@ -7,8 +7,10 @@ in_game: true
 
 # Food Market and Spoilage
 
-Your people and army eat food every turn. Agricultural regions grow food, and
-you can buy more at the Food Market.
+Your people and your armed forces eat food every turn. They are billed
+separately, and you are asked about each in turn, so it is possible to feed one
+and not the other. Agricultural regions grow food, and you can buy more at the
+Food Market.
 
 The market sells food to you for more than it pays to buy it back. So it is not
 a place to store extra food for profit.
@@ -18,8 +20,9 @@ that day, and it stays the same until the next day. Buy on a cheap day if you
 can.
 
 Each turn your people eat first, and then part of whatever food is still in
-store spoils. There is no safe amount. Even a small store loses some, and a
-large one loses more.
+store spoils. A small store is safe: nothing rots until you are holding more
+than a thousand units. Above that the whole store loses a share, so the more
+you hoard the more you lose.
 
 This turn's harvest arrives at the start of the turn, so you can sell it the
 same turn. Selling your surplus down each turn, instead of hoarding it, is how

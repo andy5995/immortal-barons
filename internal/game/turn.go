@@ -261,7 +261,7 @@ func (w *World) aiPlay(today string) {
 // troopers. This keeps AI realms from starving themselves to death.
 func (w *World) aiManageEconomy(e *Empire) {
 	produced := w.FoodGrown(e)
-	upkeep := e.FoodUpkeep()
+	upkeep := w.FoodDue(e)
 
 	// 1. Keep a food buffer, spending at most half the treasury on it so expansion
 	//    gold survives. AIFoodBufferTurns is sized to ride out a day of consumption
@@ -507,7 +507,7 @@ func (w *World) aiListSurplus(e *Empire) {
 		}
 	}
 	list("Jet", e.Jets-e.Carriers*JetsPerCarrier, w.JetPrice(e))
-	list("Food", e.Food-e.FoodUpkeep()*AIFoodBufferTurns, w.FoodBuyPrice())
+	list("Food", e.Food-w.FoodDue(e)*AIFoodBufferTurns, w.FoodBuyPrice())
 }
 
 // shopPrice is what e would pay the shop for one unit of a market good, or 0 for
@@ -585,7 +585,7 @@ func (w *World) aiDecontaminate(e *Empire) {
 // land it could have converted. Only fires when food production genuinely falls
 // short AND it cannot pay for the farmland outright.
 func (w *World) aiRebalanceRegions(e *Empire) {
-	if w.FoodGrown(e) >= e.FoodUpkeep() {
+	if w.FoodGrown(e) >= w.FoodDue(e) {
 		return
 	}
 	if e.Gold >= int64(w.LandPrice(e)) || e.LandAvailable <= 0 {
@@ -803,9 +803,11 @@ func (w *World) IncomeThisTurn(e *Empire) IncomeBreakdown {
 // riverFood is the food e's rivers fish this turn. Unlike BRE, where a river
 // runs hydropower OR fishes and the empire finds out which only when the income
 // report prints, IB's rivers always do both — RiverFishShare of the yield as
-// food, the rest as gold (see riverGold).
+// food, the rest as gold (see riverGold). The haul itself has BRE's shape: a
+// tech-raised base plus one draw per turn.
 func (w *World) riverFood(e *Empire) int {
-	return e.Regions.River * RiverFishFood * RiverFishShare / 100
+	perRegion := techRaise(RiverFishFood, e.TechFoodFactor()) + w.regionDraw(e, 7, RiverFishRate)
+	return e.Regions.River * perRegion * RiverFishShare / 100
 }
 
 // FoodGrown is the empire's total food production this turn: its tech-boosted
@@ -869,7 +871,7 @@ func (w *World) processEconomy(e *Empire) {
 	// Food growth was already credited at turn start (GrowFood); here we only
 	// consume and then spoil. (Was `Food += FoodGrown - consumed`, which grew the
 	// food at turn end where it couldn't be sold and always spoiled.)
-	e.LastFoodConsumed = e.FoodUpkeep()
+	e.LastFoodConsumed = w.FoodDue(e)
 	e.Food -= e.LastFoodConsumed
 	if e.Food < 0 {
 		// Underfeeding hits popular support and drives people away, worse the
@@ -901,13 +903,14 @@ func (w *World) processEconomy(e *Empire) {
 	}
 
 	// Food spoilage (BRE-verified by driving the original, 2026-07-16): FoodSpoilPct
-	// (5%) of the ENTIRE stored food spoils each turn — floor(0.05 × food) — with NO
-	// floor below which nothing spoils. Technology decreases it (via tf). Food
-	// escrowed on the Trading Market counts toward the total, so listing food doesn't
-	// dodge spoilage — only attacks (#17). Spoilage comes out of the granary first,
+	// (5%) of the ENTIRE stored food spoils each turn — floor(0.05 × food).
+	// Technology decreases it (via tf). Food escrowed on the Trading Market counts
+	// toward the total, so listing food doesn't dodge spoilage — only attacks
+	// (#17); the same sum is what BRE's decay block tests against FoodSpoilFloor,
+	// below which nothing rots at all. Spoilage comes out of the granary first,
 	// then the listing.
 	listedFood := w.MarketForSale(e.Owner, "Food")
-	if total := e.Food + listedFood; total > 0 {
+	if total := e.Food + listedFood; total > FoodSpoilFloor {
 		spoiled := techLower(total*FoodSpoilPct/100, e.TechDecayFactor())
 		e.LastSpoiled = spoiled
 		fromGranary := spoiled

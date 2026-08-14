@@ -100,7 +100,7 @@ func gatherAdvisorData(w *ctx) advisorData {
 	w.With(func() {
 		d.p = *w.Player()
 		d.foodGrown = w.FoodGrown(&d.p)
-		d.foodEaten = d.p.FoodUpkeep()
+		d.foodEaten = w.FoodDue(&d.p)
 		d.foodAtCap = d.p.FoodUpkeepAtCapacity()
 		d.income = w.IncomeThisTurn(&d.p).Gold()
 		for _, e := range w.Empires {
