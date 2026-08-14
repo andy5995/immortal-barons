@@ -378,11 +378,10 @@ All four constants live in `balance.go`; Score never drops below 0.
 ## Attack types
 
 - **Regular attack** — direct assault; the winner takes some of the
-  loser's regions. `attack.hlp` documents the Normal attack as "both sides fight
-  to 15% losses"; a **live BRE test (2026-07-21, two samples)** showed losses are
-  actually **asymmetric — the LOSER bleeds ~20%, the WINNER ~8%** (scaled by the
-  Attack Damage config). IB now uses `RegularAttackLoserLossPct` (20) /
-  `RegularAttackWinnerLossPct` (8), deciding the winner first.
+  loser's regions. Losses are asymmetric, and the asymmetry is an outcome of the
+  strength ratio rather than a pair of rates: see "The regular attack's
+  casualties and capture" under the combat section, which supersedes the earlier
+  reconstruction from two live samples.
   - **Quick Strike / Extended Battle** (`attack.hlp`): these belong to the
     **IBBS individual attack**, not to local combat and not to group attacks. A
     live local Regular Attack offers no variant menu, and `breins.txt` gives a
@@ -390,9 +389,11 @@ All four constants live in `balance.go`; Score never drops below 0.
     unit** settles it: the three-item menu is drawn inside `Indiv. Attack Force`.
     See "Individual attack variants" below.
 
-  Region **capture** follows `max(RegularAttackCaptureFloor, RegularAttackCapturePct%
-  × loser regions × density factor)`, scaled by Attack Rewards. The **density
-  factor** is IB-original (no BRE-verified formula): the attacker's
+  Region **capture** follows `min(loser regions, max(RegularAttackCaptureFloor,
+  the Attack Rewards share × loser regions × density factor))`. The **density
+  factor** is IB-original, and the binary now proves it is an addition rather
+  than a reconstruction — BRE reads the defender's region count and the level
+  constant and nothing else. It is the attacker's
   net-worth-per-region over the defender's, clamped to `[CaptureDensityMin,
   CaptureDensityMax]` = 50–200% (`CaptureDensityBase` 100% at equal density). A
   defender whose net worth is spread thin over its land (cheap, lightly-held
