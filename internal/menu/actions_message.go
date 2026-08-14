@@ -195,8 +195,58 @@ func pickRecipient(s session.Session, w *ctx, opts pickOpts) (*game.Empire, send
 	}
 }
 
-// msgMaxLines is how many lines a single message may hold (BRE: 20).
-const msgMaxLines = 20
+// Message-editor geometry, read off BRE's own editor (captured live 2026-08-14
+// and cross-read in BRE.OVR's compose_message; docs/dev/bre-screens.md).
+const (
+	// msgMaxLines is how many lines a single message may hold.
+	msgMaxLines = 20
+	// msgLineWidth is the width of an editor line in columns. A printable key
+	// arriving on a line that already holds this many characters wraps instead
+	// of extending it. The ruler is drawn to the same width, from the same
+	// constant, so the mark the player types up to and the column that wraps
+	// cannot drift apart.
+	msgLineWidth = 68
+	// msgWrapMinBreakCol is the earliest column a wrap may break at. BRE scans
+	// back from msgLineWidth looking for a space and gives up here, so a word
+	// filling more than the last msgLineWidth-msgWrapMinBreakCol+1 columns has
+	// no reachable space and is split at the margin rather than carried whole.
+	msgWrapMinBreakCol = 56
+)
+
+// msgRuler draws the editor's column ruler for a width-column line, as BRE
+// draws it: counting the opening bracket as column 1, a '|' marks every tenth
+// column and a '+' every fifth.
+func msgRuler(width int) string {
+	var b strings.Builder
+	b.WriteByte('[')
+	for c := 1; c <= width; c++ {
+		switch n := c + 1; {
+		case n%10 == 0:
+			b.WriteByte('|')
+		case n%5 == 0:
+			b.WriteByte('+')
+		default:
+			b.WriteByte('-')
+		}
+	}
+	b.WriteByte(']')
+	return b.String()
+}
+
+// wrapMessageLine splits a full editor line, returning the text that stays and
+// the word carried down to the next line. The break is the last space at or
+// after msgWrapMinBreakCol; that space is dropped, since the line ends there
+// now. With no space in reach — a single word longer than the search window —
+// the whole line stays and nothing is carried, so the word is split at the
+// margin. Both behaviours are BRE's.
+func wrapMessageLine(b []rune) (head, carry []rune) {
+	for c := len(b); c >= msgWrapMinBreakCol; c-- {
+		if b[c-1] == ' ' {
+			return b[:c-1], b[c:]
+		}
+	}
+	return b, nil
+}
 
 // composeMessage runs the editor with nothing in it.
 func composeMessage(s session.Session) (string, bool) { return composeMessageFrom(s, nil) }
@@ -210,12 +260,14 @@ func composeMessage(s session.Session) (string, bool) { return composeMessageFro
 // — they are ordinary lines from there on, numbered, counted against the limit,
 // and cleared by /C along with everything else.
 func composeMessageFrom(s session.Session, initial []string) (string, bool) {
-	// The banner and ruler are uniformly bright cyan in BRE (verified from a
-	// live message-editor screenshot); the line-number prompts below are green.
+	// IB draws the banner and ruler bright cyan. BRE draws the banner white and
+	// the ruler plain cyan — a 2026-08-14 capture disagrees with the earlier
+	// screenshot this was taken from; see docs/dev/bre-screens.md, which records
+	// both and leaves the difference standing rather than changing colours
+	// inside a wrapping fix. The line-number prompts below do match BRE's green.
 	fmt.Fprintf(s, "\n    %s"+tr(s, "You have %d lines for your message.  /S=save /A=abort /C=clear")+"%s\n",
 		ansi.FgBrightCyan, msgMaxLines, ansi.Reset)
-	ruler := "[" + "---+----|" + strings.Repeat("----+----|", 6) + "]"
-	fmt.Fprintf(s, "    %s%s%s\n", ansi.FgBrightCyan, ruler, ansi.Reset)
+	fmt.Fprintf(s, "    %s%s%s\n", ansi.FgBrightCyan, msgRuler(msgLineWidth), ansi.Reset)
 
 	lines := make([]string, 0, len(initial))
 	for _, q := range initial {
@@ -227,6 +279,21 @@ func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 		// what was carried over is told from what is being written.
 		fmt.Fprintf(s, "%s%2d>%s %s\n", ansi.FgBrightBlue, len(lines), ansi.Reset, q)
 	}
+	// reopenPrev implements BRE's backspace at column 1: the line above is taken
+	// back out of the message and re-opened with the cursor at its end — the way
+	// to undo a wrap you did not want. BRE redraws that line under a fresh prompt
+	// below rather than moving the cursor up a row, and colours the prompt bright
+	// red where a new line is green, so a line being revisited reads as one.
+	reopenPrev := func() []rune {
+		if len(lines) == 0 {
+			return nil
+		}
+		b := []rune(lines[len(lines)-1])
+		lines = lines[:len(lines)-1]
+		fmt.Fprintf(s, "\n%s%2d>%s %s", ansi.FgBrightRed, len(lines)+1, ansi.Reset, string(b))
+		return b
+	}
+
 	for len(lines) < msgMaxLines {
 		fmt.Fprintf(s, "%s%2d>%s ", ansi.FgBrightGreen, len(lines)+1, ansi.Reset)
 
@@ -266,9 +333,17 @@ func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 			continue
 		}
 
-		// Ordinary line: echo the first key, then read the rest until Enter.
-		b := []rune{first}
-		fmt.Fprintf(s, "%c", first)
+		// Ordinary line: echo the first key, then read the rest until Enter. A
+		// control key is not text — backspace here is already at column 1, so it
+		// reaches the line above instead of starting this one with a stray byte.
+		var b []rune
+		switch {
+		case first >= 32:
+			b = append(b, first)
+			fmt.Fprintf(s, "%c", first)
+		case first == 127 || first == 8:
+			b = reopenPrev()
+		}
 		for {
 			r, err := readKey(s)
 			if err != nil {
@@ -282,10 +357,32 @@ func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 				if len(b) > 0 {
 					b = b[:len(b)-1]
 					fmt.Fprint(s, "\b \b")
+					continue
 				}
+				b = reopenPrev()
 				continue
 			}
 			if r >= 32 {
+				if len(b) >= msgLineWidth {
+					// The last line has nowhere to wrap to, so it stops taking
+					// keys at the margin. BRE instead carries the word onto a
+					// 21st line, accepts nothing more, and drops that line when
+					// it saves (observed live) — text the player watched
+					// himself type, silently lost.
+					if len(lines)+1 >= msgMaxLines {
+						continue
+					}
+					head, carry := wrapMessageLine(b)
+					// The carried word — and the space before it — were already
+					// echoed on the line being left, so erase them there before
+					// the newline. A margin split carries nothing and erases
+					// nothing.
+					fmt.Fprint(s, strings.Repeat("\b \b", len(b)-len(head)))
+					fmt.Fprint(s, "\n")
+					lines = append(lines, string(head))
+					fmt.Fprintf(s, "%s%2d>%s %s", ansi.FgBrightGreen, len(lines)+1, ansi.Reset, string(carry))
+					b = carry
+				}
 				b = append(b, r)
 				fmt.Fprintf(s, "%c", r)
 			}
