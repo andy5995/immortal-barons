@@ -169,6 +169,15 @@ const (
 	AIReserveTurns   = 3
 	AIGoldReserveMin = 50_000
 
+	// AILandBudgetPct is the share of the surplus above that reserve the AI puts
+	// into land, leaving the rest for the army. Both spenders draw on the SAME
+	// surplus: military spending used to take its cut of all gold including the
+	// reserve, which meant a grown realm could never save past the reserve and
+	// so stopped buying land for good. Giving expansion the entire surplus
+	// instead ran realms straight into the daily land allowance and left wars
+	// unwinnable, so the two split it.
+	AILandBudgetPct = 40
+
 	// Trading Market (#69). The AI used to ignore the market completely, so a
 	// human's listings never sold and the AI never took the cheaper of two
 	// prices. It now shops there first: it buys a good listed below what the

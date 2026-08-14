@@ -344,7 +344,7 @@ func (w *World) aiExpandLand(e *Empire) {
 	if e.Gold <= reserve {
 		return
 	}
-	budget := e.Gold - reserve
+	budget := pctOf(e.Gold-reserve, AILandBudgetPct)
 	if e.aiSkill() == AISkillDull {
 		budget = budget * AIDullLandBuyPct / 100 // dull barons hold back and grow slower
 	}
@@ -386,7 +386,14 @@ func (w *World) aiStartHQ(e *Empire) {
 // compounded into six-figure stockpiles on a large realm with nothing to spend
 // them on (#57).
 func (w *World) aiBuildForces(e *Empire) {
-	budget := pctOf(e.Gold, AIMilitaryBudgetPct)
+	// Spend out of the SURPLUS above the working reserve — the same pot land
+	// buying draws on. Taking a share of ALL gold pinned a grown realm's
+	// treasury at about one turn's income and stopped it expanding for good:
+	// aiExpandLand waits for gold to clear three days of upkeep, and half of
+	// everything saved toward that went on soldiers before it ever got there.
+	// Two of four AI realms froze this way within thirty days.
+	spendable := max(int64(0), e.Gold-w.aiReserve(e))
+	budget := pctOf(spendable, AIMilitaryBudgetPct)
 	buy := func(share, price int, count *int) {
 		if price <= 0 {
 			return
@@ -400,7 +407,7 @@ func (w *World) aiBuildForces(e *Empire) {
 	// Under threat the realm stops building the army it wants and buys the one it
 	// needs: a bigger slice of gold, spent turret-heavy.
 	if w.aiUnderThreat(e) {
-		budget = pctOf(e.Gold, AIThreatBudgetPct)
+		budget = pctOf(spendable, AIThreatBudgetPct)
 		mix = aiForceMix{AIForceTrooperPctPanic, AIForceTurretPctPanic, AIForceTankPctPanic, AIForceJetPctPanic, AIForceAgentPctPanic}
 	}
 	w.aiSellIdleCarriers(e)
