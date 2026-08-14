@@ -49,20 +49,15 @@ func recipients(w *ctx) []*game.Empire {
 	return r
 }
 
-// sendTarget is what a pickRecipient keypress resolved to.
-type sendTarget int
-
-const (
-	targetNone   sendTarget = iota // cancelled
-	targetOne                      // the empire pickRecipient returned
-	targetAll                      // every living realm
-	targetAllies                   // every realm the sender holds a treaty with
-)
-
 // pickOpts configures the recipient picker for one call site.
 type pickOpts struct {
 	prompt   string // the trailing prompt text, e.g. "Send to:"
 	allowAll bool   // offer Z=All (and *=All Allies when the sender holds a treaty)
+	// relations makes '?' list the "-*Relations*-" table instead of the See
+	// Scores one. BRE's selection routine takes the same choice as a flag: Send
+	// Message passes 1 and gets the score table, the Diplomacy menu passes 0
+	// and gets Relations (docs/dev/bre-screens.md).
+	relations bool
 }
 
 // Recipient-picker geometry, matching BRE's captured list (docs/dev/bre-screens.md,
@@ -90,6 +85,7 @@ type pickRow struct {
 	name            string
 	online          bool
 	land, score, nw int
+	held            []string // pacts held with the caller; gathered for the Relations roster
 }
 
 // pickRows collects the realms a picker may address, plus how many treaty
@@ -101,10 +97,14 @@ func pickRows(w *ctx, opts pickOpts) (rows []pickRow, allies int) {
 			if i >= pickLetters || !e.Alive || e == p {
 				continue
 			}
-			rows = append(rows, pickRow{
+			row := pickRow{
 				e: e, letter: rune('A' + i), name: e.Name, online: e.Online(),
 				land: e.Land, score: e.Score, nw: w.NetWorth(e),
-			})
+			}
+			if opts.relations {
+				row.held = w.TreatiesBetween(p, e)
+			}
+			rows = append(rows, row)
 		}
 		if opts.allowAll { // the only callers that can offer the all-allies target
 			allies = len(w.TreatyPartners(p))
@@ -124,11 +124,23 @@ func pickIndex(rows []pickRow, r rune) int {
 	return -1
 }
 
-// writePickRoster prints the "?=List" roster.
+// writePickRoster prints the "?=List" roster — the See Scores table, or the
+// "-*Relations*-" one when the caller asked for it (opts.relations).
 //
 // IB comma-groups the figures BRE prints bare, a recorded divergence
 // (docs/dev/bre-screens.md).
-func writePickRoster(s session.Session, rows []pickRow) {
+func writePickRoster(s session.Session, rows []pickRow, opts pickOpts) {
+	if opts.relations {
+		rel := make([]relationsRow, 0, len(rows))
+		for _, r := range rows {
+			rel = append(rel, relationsRow{
+				id: string(r.letter), name: r.name,
+				relations: relationsText(s, r.held), online: r.online,
+			})
+		}
+		writeRelationsTable(s, rel)
+		return
+	}
 	rule := ansi.FgMagenta + insetRule(pickRuleWidth, pickRuleDouble) + ansi.Reset
 	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n",
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.FgBrightMagenta, ansi.Reset)
@@ -179,55 +191,50 @@ func writePickPrompt(s session.Session, allies int, opts pickOpts) {
 	fmt.Fprint(s, b.String())
 }
 
-// pickRecipient is the single-target form of the picker, used where one realm
-// is chosen — Send Trade Deal and proposing a treaty. It reads a SINGLE
-// keypress: a letter selects that realm, '?' prints the roster, and anything
-// else cancels. With opts.allowAll, 'Z' means every realm and '*' every realm
-// the sender holds a treaty with.
+// pickRecipient is the single-target form of the picker, for an action that can
+// only address one realm — Send Trade Deal. It reads a SINGLE keypress: a letter
+// selects that realm, '?' prints the roster, and anything else cancels, so it
+// takes no opts.allowAll (Z=All and *=All Allies address a list, which is what
+// pickRecipients is for).
 //
 // The roster prints ON DEMAND, as BRE prints it — the prompt comes first and
-// '?' lists. The all-allies target is IB's own; BRE has no such key.
-func pickRecipient(s session.Session, w *ctx, opts pickOpts) (*game.Empire, sendTarget) {
-	rows, allies := pickRows(w, opts)
+// '?' lists.
+func pickRecipient(s session.Session, w *ctx, opts pickOpts) *game.Empire {
+	rows, _ := pickRows(w, opts)
 	if len(rows) == 0 {
 		ok(s, "There is no one to reach.")
-		return nil, targetNone
+		return nil
 	}
 	for {
-		writePickPrompt(s, allies, opts)
+		writePickPrompt(s, 0, opts)
 		r, err := readKey(s)
 		if err != nil {
 			fmt.Fprint(s, ansi.Reset)
-			return nil, targetNone
+			return nil
 		}
 		echo := func(text string) { fmt.Fprintf(s, "%s%s\n", text, ansi.Reset) }
 		if r == '?' {
 			echo(tr(s, "List"))
-			writePickRoster(s, rows)
+			writePickRoster(s, rows, opts)
 			continue
-		}
-		if opts.allowAll && (r == 'z' || r == 'Z') {
-			echo(tr(s, "All"))
-			return nil, targetAll
-		}
-		if allies > 0 && r == '*' {
-			echo(tr(s, "All Allies"))
-			return nil, targetAllies
 		}
 		idx := pickIndex(rows, r)
 		if idx < 0 {
 			echo("")
-			return nil, targetNone
+			return nil
 		}
 		echo(rows[idx].name)
-		return rows[idx].e, targetOne
+		return rows[idx].e
 	}
 }
 
 // pickRecipients is BRE's "(A-Y,Z=All,?=List) Send to:" picker as the original
-// actually runs it: a MULTI-select list, not one keypress. Read from the
-// selection routine at BRE.OVR 0x1b65e and the per-letter toggle it calls at
-// 0x1b575:
+// actually runs it: a MULTI-select list, not one keypress. It serves Send
+// Message and the Diplomacy menu alike — BRE's selection routine at
+// BRE.OVR 0x1b65e has exactly three callers, the message path and two sites in
+// its diplomacy menu (0x1c800+0x08e7 and +0x0a79), which is why a treaty
+// proposal and a Declaration Of War both take a list. Read from that routine and
+// the per-letter toggle it calls at 0x1b575:
 //
 //   - a letter TOGGLES that realm. Selecting echoes the letter in bright cyan;
 //     pressing it again erases it again.
@@ -294,7 +301,7 @@ func pickRecipients(s session.Session, w *ctx, opts pickOpts) []*game.Empire {
 			return out
 		case r == '?':
 			fmt.Fprintf(s, "%s%s\n", tr(s, "List"), ansi.Reset)
-			writePickRoster(s, rows)
+			writePickRoster(s, rows, opts)
 			writePickPrompt(s, allies, opts)
 			echoed = echoed[:0]
 		case opts.allowAll && (r == 'z' || r == 'Z'):

@@ -28,13 +28,18 @@ keys: Enter chooses the marked row, typing a few letters jumps to a title, and
 Backspace or `Q` goes back. If your terminal cannot show colour and cursor
 control, those lists are numbered instead — type the number and press Enter.
 
-## Choosing who a message goes to
+## Choosing who an action goes to
 
 Send Message asks `(A-Y,Z=All,?=List) Send to:` and takes a whole list, not one
 name. Press a realm's letter to add it and press the same letter again to take
 it off. `Z` marks everyone at once, `?` shows the roster, and `*` marks your
 treaty partners. **Press Enter when the list is right** — that is what opens the
 editor. Enter with nothing marked leaves without sending.
+
+Every Diplomacy option that names a realm takes the same list: offer a treaty to
+several realms at once, or declare war on several. There `?` shows your
+relations rather than the scores. Mark one realm only and you get the full
+negotiation with it — you can accept its offer or break the pact you hold.
 
 The letters belong to the realms, not to the rows, so a letter may be missing
 from the list: it is either yours or a realm that has fallen. The letters of

@@ -142,10 +142,17 @@ var treatyDescriptions = map[string]string{
 	"Technology Agreement":   "Shares technology — the partner with less advanced tech is pulled up toward the more advanced one.",
 }
 
+// diplomacyPickOpts configures the realm picker for every Diplomacy action that
+// addresses a realm. The Diplomacy menu calls BRE's selection routine the same
+// way each time — a multi-select list whose '?' lists Relations rather than the
+// scores (docs/dev/bre-screens.md).
+var diplomacyPickOpts = pickOpts{prompt: "Send to:", allowAll: true, relations: true}
+
 // negotiateTreaty returns a Diplomacy menu action for one BRE treaty type
-// (#68): pick a target empire, then propose it, accept a matching offer from
-// them, or break it if already held. Treaty types are now direct menu items
-// instead of hiding behind a single "Modify Diplomacy" item.
+// (#68): mark the realms to address, then propose the pact to each. Marking a
+// single realm negotiates with it instead — proposing, accepting a matching
+// offer from them, or breaking the pact already held. Treaty types are direct
+// menu items rather than hiding behind a single "Modify Diplomacy" item.
 func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 	return func(s session.Session, w *ctx) Result {
 		// Show what this pact does before choosing a partner, as BRE does — its
@@ -155,29 +162,32 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 				ansi.FgBrightYellow, tr(s, ttype), ansi.Reset,
 				ansi.Dim, wrapIndented(tr(s, desc), "  "), ansi.Reset)
 		}
-		to, target := pickRecipient(s, w, pickOpts{prompt: "Send to:", allowAll: true})
-		switch target {
-		case targetNone:
-			return Stay
-		case targetOne:
-			negotiateWithType(s, w, to.Name, ttype)
+		picked := pickRecipients(s, w, diplomacyPickOpts)
+		if len(picked) == 0 {
 			return Stay
 		}
-		// Z=All: BRE sends one proposal to every realm at once. Each is the
-		// ordinary single proposal, so the existing rules hold — a new offer
-		// replaces a pending one, and a realm already holding this pact is left
-		// alone rather than asked to break it. '*' is IB's own and narrows the
-		// same send to the sender's treaty partners.
+		var chosen []string
+		w.With(func() {
+			for _, e := range picked {
+				chosen = append(chosen, e.Name)
+			}
+		})
+		if len(chosen) == 1 {
+			// One realm is the negotiation proper: propose it, accept a matching
+			// offer, or break the pact already held.
+			negotiateWithType(s, w, chosen[0], ttype)
+			return Stay
+		}
+		// Several realms take one proposal each — the ordinary single proposal, so
+		// the existing rules hold: a new offer replaces a pending one, and a realm
+		// already holding this pact is left alone rather than asked to break it.
 		var names []string
 		w.With(func() {
 			p := w.Player()
-			pool := recipients(w)
-			if target == targetAllies {
-				pool = w.TreatyPartners(p)
-			}
-			for _, e := range pool {
-				if !w.World.HasTreaty(p, e, ttype) {
-					names = append(names, e.Name)
+			for _, name := range chosen {
+				e := findRealm(w, name)
+				if e != nil && !w.World.HasTreaty(p, e, ttype) {
+					names = append(names, name)
 				}
 			}
 		})
@@ -305,62 +315,51 @@ func proposeTreatyTo(w *ctx, ename, ttype, message string) error {
 	return err
 }
 
-// declareWar is BRE's Declaration Of War: pick a target and, on confirmation,
-// break every treaty currently held with them in one action. Per
+// declareWar is BRE's Declaration Of War: mark the realms to declare on — the
+// same multi-select list every Diplomacy action uses — and, on confirmation,
+// break every treaty currently held with each in one action. Per
 // docs/mechanics-reference.md this is meant to skip the internal unrest a
 // normal treaty break causes — but IB does not yet model unrest on treaty
 // breaks at all, so there is no behavioral difference from breaking each
 // treaty individually today; this is a placeholder for when that lands.
 func declareWar(s session.Session, w *ctx) Result {
-	p := w.Player()
+	picked := pickRecipients(s, w, diplomacyPickOpts)
+	if len(picked) == 0 {
+		return Stay
+	}
 	var names []string
 	w.With(func() {
-		for _, e := range w.Empires {
-			if !e.Alive || e == p {
-				continue
-			}
+		for _, e := range picked {
 			names = append(names, e.Name)
 		}
 	})
-	if len(names) == 0 {
-		ok(s, "There is no one to declare war on.")
-		return Stay
-	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Choose an empire:"), ansi.Reset)
-	for i, n := range names {
-		fmt.Fprintf(s, "  %d) %s\n", i+1, n)
-	}
-	i := promptInt(s, "Declare war on which empire (0 to cancel)?")
-	if i < 1 || i > len(names) {
-		return Stay
-	}
-	targetName := names[i-1]
 	if !AskYesNo(s, "Declare war? This breaks all treaties with them.", false) {
 		return Stay
 	}
-	var broke []string
-	var err error
-	w.With(func() {
-		p := w.Player()
-		target := findRealm(w, targetName)
-		if p == nil || target == nil {
-			err = errTargetGone
-			return
+	for _, name := range names {
+		var broke []string
+		var err error
+		w.With(func() {
+			p := w.Player()
+			target := findRealm(w, name)
+			if p == nil || target == nil {
+				err = errTargetGone
+				return
+			}
+			// One relation per pair (#88), so this ends whatever stood and leaves the
+			// two realms hostile. DeclareWar is the route that costs no popular
+			// support — breaking a pact by attacking instead does (breachTreaty).
+			broke = w.World.TreatiesBetween(p, target)
+			w.World.DeclareWar(p, target)
+		})
+		switch {
+		case err != nil:
+			fail(s, err)
+		case len(broke) == 0:
+			ok(s, "You declared war on %s.", name)
+		default:
+			ok(s, "You declared war on %s. Agreement ended: %s", name, strings.Join(broke, ", "))
 		}
-		// One relation per pair (#88), so this ends whatever stood and leaves the
-		// two realms hostile. DeclareWar is the route that costs no popular
-		// support — breaking a pact by attacking instead does (breachTreaty).
-		broke = w.World.TreatiesBetween(p, target)
-		w.World.DeclareWar(p, target)
-	})
-	if err != nil {
-		fail(s, err)
-		return Stay
-	}
-	if len(broke) == 0 {
-		ok(s, "You declared war on %s.", targetName)
-	} else {
-		ok(s, "You declared war on %s. Agreement ended: %s", targetName, strings.Join(broke, ", "))
 	}
 	return Stay
 }
@@ -427,11 +426,7 @@ const (
 // pact plus a pending type would overflow 80 columns.
 func viewDiplomacy(s session.Session, w *ctx) Result {
 	p := w.Player()
-	type row struct {
-		id, name, treaties string
-		online             bool
-	}
-	var rows []row
+	var rows []relationsRow
 	var pending []game.PendingProposal
 	w.With(func() {
 		pending = w.ProposalsFrom(p)
@@ -439,18 +434,48 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 			if e == p || !e.Alive {
 				continue
 			}
-			held := w.TreatiesBetween(p, e)
-			named := make([]string, len(held))
-			for i, t := range held {
-				named[i] = tr(s, t)
-			}
-			relations := tr(s, "None")
-			if len(named) > 0 {
-				relations = strings.Join(named, ", ")
-			}
-			rows = append(rows, row{w.EmpireLetter(e), e.Name, relations, e.Online()})
+			rows = append(rows, relationsRow{
+				id: w.EmpireLetter(e), name: e.Name,
+				relations: relationsText(s, w.TreatiesBetween(p, e)), online: e.Online(),
+			})
 		}
 	})
+	writeRelationsTable(s, rows)
+	if len(pending) > 0 {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "Awaiting a reply:"), ansi.Reset)
+		for _, o := range pending {
+			fmt.Fprintf(s, "  %s%s%s — %s%s%s\n", ansi.FgBrightCyan, o.To, ansi.FgWhite,
+				ansi.FgBrightYellow, tr(s, o.Type), ansi.Reset)
+		}
+	}
+	pause(s)
+	return Stay
+}
+
+// relationsRow is one line of the Relations table: a realm's letter, its name,
+// and what stands between it and the player.
+type relationsRow struct {
+	id, name, relations string
+	online              bool
+}
+
+// relationsText renders the Relations column for the pacts held, BRE's "None"
+// when there are none.
+func relationsText(s session.Session, held []string) string {
+	if len(held) == 0 {
+		return tr(s, "None")
+	}
+	named := make([]string, len(held))
+	for i, t := range held {
+		named[i] = tr(s, t)
+	}
+	return strings.Join(named, ", ")
+}
+
+// writeRelationsTable draws the "-*Relations*-" table itself. View Treaties and
+// the Diplomacy picker's "?" list share it, as they share one routine in the
+// original.
+func writeRelationsTable(s session.Session, rows []relationsRow) {
 	rule := ansi.FgBlue + insetRule(relationsRuleWidth, relationsRuleDouble) + ansi.Reset
 	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n", ansi.FgBlue, ansi.FgBrightWhite, tr(s, "Relations"), ansi.FgBlue, ansi.Reset)
 	fmt.Fprintf(s, "%s%-5s%-*s%s%s\n", ansi.FgBrightWhite,
@@ -467,16 +492,7 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 		fmt.Fprintf(s, "%s[%s%s%s]%s  %s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
 			ansi.Reset,
 			nameCell(s, r.name, ansi.FgBrightCyan, r.online, relationsNameWidth),
-			ansi.FgBrightBlue, r.treaties, ansi.Reset)
+			ansi.FgBrightBlue, r.relations, ansi.Reset)
 	}
 	fmt.Fprintln(s, rule)
-	if len(pending) > 0 {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "Awaiting a reply:"), ansi.Reset)
-		for _, o := range pending {
-			fmt.Fprintf(s, "  %s%s%s — %s%s%s\n", ansi.FgBrightCyan, o.To, ansi.FgWhite,
-				ansi.FgBrightYellow, tr(s, o.Type), ansi.Reset)
-		}
-	}
-	pause(s)
-	return Stay
 }

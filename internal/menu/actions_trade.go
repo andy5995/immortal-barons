@@ -137,7 +137,7 @@ func buildTradeBasket(s session.Session, w *ctx, title string, limitToOwned bool
 // back), confirm, and send. The recipient sees it on their turn (reviewTradeDeals)
 // and accepts or declines. The offered goods are escrowed until then.
 func sendTradeDeal(s session.Session, w *ctx) Result {
-	to, _ := pickRecipient(s, w, pickOpts{prompt: "Trade with:"})
+	to := pickRecipient(s, w, pickOpts{prompt: "Trade with:"})
 	if to == nil {
 		return Stay
 	}

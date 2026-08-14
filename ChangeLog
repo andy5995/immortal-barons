@@ -17,6 +17,8 @@
   * A message is removed from the inbox once it is replied to, like Delete
   * Send Message addresses a list of realms: a letter marks or unmarks one, "Z"
     marks them all, and Enter closes the list and opens the editor
+  * Diplomacy takes the same list: a treaty is offered to, and war declared on,
+    every marked realm at once, and "?" there lists relations rather than scores
   * Message target letters are the realm's own, so a fallen realm or the sender
     leaves a gap; they match the letters a message records as its recipients
   * The message editor's column ruler is 68 columns wide, as the original's is
