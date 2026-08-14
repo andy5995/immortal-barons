@@ -1033,29 +1033,44 @@ func (w *World) With(fn func()) {
 	fn()
 }
 
+// dropEmpires removes every empire `gone` selects and forgets the diplomacy each
+// removed realm was party to. EVERY removal path goes through here, because
+// w.Treaties rows and pending TreatyOffers are keyed by realm NAME: a name freed
+// by one removal can be claimed by the next caller to onboard, and the new realm
+// would then hold its predecessor's alliances and Enemy standing. The rows stay
+// invisible in the meantime — alliesOf and TreatyPartners skip the non-living —
+// so the leak only surfaces when the name comes back.
+//
+// BRE deletes an empire the same way: its delete path (BRE.OVR 0x0079c1) clears
+// the pair's relation in BOTH directions for every other realm (0x050d74) before
+// zeroing the record.
+func (w *World) dropEmpires(gone func(*Empire) bool) {
+	kept := w.Empires[:0]
+	var forget []string
+	for _, e := range w.Empires {
+		if gone(e) {
+			forget = append(forget, e.Name)
+			continue
+		}
+		kept = append(kept, e)
+	}
+	w.Empires = kept
+	for _, name := range forget {
+		w.forgetRelations(name)
+	}
+}
+
 // RemoveEmpire deletes e from the world (Abdicate). The empire is gone
 // entirely; the caller gets a fresh realm on their next visit.
 func (w *World) RemoveEmpire(e *Empire) {
-	for i, x := range w.Empires {
-		if x == e {
-			w.Empires = append(w.Empires[:i], w.Empires[i+1:]...)
-			break
-		}
-	}
+	w.dropEmpires(func(x *Empire) bool { return x == e })
 }
 
 // removeDeadHusks deletes eliminated empires whose death is in the past
 // (GameDay > DiedDay), keeping husks that died today so the owner cannot
 // re-onboard on the same day. AI barons are removed too; they never rebuild.
 func (w *World) removeDeadHusks() {
-	kept := w.Empires[:0]
-	for _, e := range w.Empires {
-		if !e.Alive && w.GameDay > e.DiedDay {
-			continue
-		}
-		kept = append(kept, e)
-	}
-	w.Empires = kept
+	w.dropEmpires(func(e *Empire) bool { return !e.Alive && w.GameDay > e.DiedDay })
 }
 
 // removeUnplayedEmpires erases a human realm whose owner created it and then
@@ -1081,14 +1096,9 @@ func (w *World) removeUnplayedEmpires() {
 	if w.Config.IdleDaysRemove <= 0 {
 		return
 	}
-	kept := w.Empires[:0]
-	for _, e := range w.Empires {
-		if e.Owner != "" && e.LastPlayed == "" && w.GameDay > e.CreatedDay {
-			continue
-		}
-		kept = append(kept, e)
-	}
-	w.Empires = kept
+	w.dropEmpires(func(e *Empire) bool {
+		return e.Owner != "" && e.LastPlayed == "" && w.GameDay > e.CreatedDay
+	})
 }
 
 // removeIdleEmpires removes a human realm nobody has played for
@@ -1117,15 +1127,13 @@ func (w *World) removeIdleEmpires(today string) {
 		return // unparseable clock: remove nobody rather than guess
 	}
 	limit := cutoff.AddDate(0, 0, -days).Format("2006-01-02")
-	kept := w.Empires[:0]
-	for _, e := range w.Empires {
+	w.dropEmpires(func(e *Empire) bool {
 		if e.Owner != "" && e.LastPlayed != "" && e.LastPlayed < limit {
 			w.postNews(fmt.Sprintf("%s has been abandoned by its ruler and fades from the map.", e.Name))
-			continue
+			return true
 		}
-		kept = append(kept, e)
-	}
-	w.Empires = kept
+		return false
+	})
 }
 
 func (w *World) FindByOwner(handle string) *Empire {

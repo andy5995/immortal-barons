@@ -128,6 +128,32 @@ func (w *World) setRelation(aName, bName, ttype string) {
 	}
 }
 
+// forgetRelations erases every trace of a realm from the diplomacy tables: the
+// Treaty rows naming it, and the proposals it sent that are still sitting
+// unanswered on other realms. Offers made TO it are held on its own record and
+// go with it. Called by dropEmpires for every removed realm — see the reasoning
+// there for why a leftover row is not merely untidy.
+func (w *World) forgetRelations(name string) {
+	kept := w.Treaties[:0]
+	for _, t := range w.Treaties {
+		if t.A == name || t.B == name {
+			continue
+		}
+		kept = append(kept, t)
+	}
+	w.Treaties = kept
+	for _, e := range w.Empires {
+		keptOffers := e.TreatyOffers[:0]
+		for _, o := range e.TreatyOffers {
+			if o.From == name {
+				continue
+			}
+			keptOffers = append(keptOffers, o)
+		}
+		e.TreatyOffers = keptOffers
+	}
+}
+
 // AreAllied reports a standing Full Defense Alliance — the pact that blocks
 // attacks between the two empires (used by Targets).
 func (w *World) AreAllied(a, b *Empire) bool {
