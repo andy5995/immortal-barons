@@ -2,18 +2,21 @@ package game
 
 import "testing"
 
-// The figures below are golden literals quoted from BRE's own in-game help,
-// game/attack.hlp, not mirrors of the balance.go constants — a retune has to
-// fail here and produce new evidence (CLAUDE.md's fidelity contract).
+// The figures below are golden literals, not mirrors of the balance.go
+// constants — a retune has to fail here and produce new evidence (CLAUDE.md's
+// fidelity contract). Capture and loss are quoted from BRE's own in-game help,
+// game/attack.hlp. The STRENGTH multipliers are quoted from the resolver
+// instead (BRE.OVR 0x4055a-0x405a8), because the two sources disagree about the
+// quick strike: the help advertises 110% and the code loads Real48 1.2.
 
-// TestAttackKindRatesMatchBREHelp pins each variant's three published figures.
-func TestAttackKindRatesMatchBREHelp(t *testing.T) {
+// TestAttackKindRatesMatchBRE pins each variant's three published figures.
+func TestAttackKindRatesMatchBRE(t *testing.T) {
 	for _, c := range []struct {
 		kind                    AttackKind
 		name                    string
 		strength, capture, loss int
 	}{
-		{QuickStrike, "Quick Strike", 110, 50, 8},
+		{QuickStrike, "Quick Strike", 120, 50, 8},
 		{NormalAttack, "Normal Attack", 100, 100, 15},
 		{ExtendedBattle, "Extended Battle", 85, 125, 20},
 	} {
@@ -54,7 +57,7 @@ func TestQuickStrikeSendsAtGreaterStrength(t *testing.T) {
 	for _, c := range []struct {
 		kind AttackKind
 		want int
-	}{{QuickStrike, 1100}, {NormalAttack, 1000}, {ExtendedBattle, 850}} {
+	}{{QuickStrike, 1200}, {NormalAttack, 1000}, {ExtendedBattle, 850}} {
 		w := NewWorldSeed(DefaultConfig(), 1)
 		e := w.AddHuman("alice", "Alethia")
 		e.Troopers = 5000

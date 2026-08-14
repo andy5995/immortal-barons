@@ -705,6 +705,22 @@ func decontaminateStage(s session.Session, w *ctx) {
 	}
 }
 
+// spoilsStage hands over land captured on another planet. The strike resolved
+// on the target's board while its owner was not in a session, so the regions
+// have been parked with no type since (game.Empire.PendingRegions); this is the
+// first point in the turn there is anybody to ask, and it sits right after the
+// recap that told them the strike had come home (#107).
+func spoilsStage(s session.Session, w *ctx) {
+	var pending int
+	if !withPlayer(w, func(p *game.Empire) { pending = p.PendingRegions }) {
+		return
+	}
+	if pending <= 0 {
+		return
+	}
+	allocateSpoils(s, w, pending)
+}
+
 // feedStage is BRE's Food Market slot in the turn (Payment -> Food Market ->
 // Covert). When the realm's stored food can't cover this turn's consumption it
 // warns the player; with Auto-Feed on it also brings the Food Market up
@@ -820,6 +836,7 @@ func runTurn(s session.Session, w *ctx) Result {
 	}
 
 	showTurnEvents(s, w)
+	spoilsStage(s, w)        // land an interplanetary strike brought home still needs its types
 	reviewTreatyOffers(s, w) // BRE surfaces pending treaty offers here, with proposer stats + accept/decline
 	reviewTradeDeals(s, w)   // and pending trade-deal barters (accept/decline)
 

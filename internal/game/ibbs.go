@@ -3,6 +3,7 @@ package game
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 // Inter-BBS (interplanetary) play. Transport is Option A: the game reads and
@@ -301,14 +302,45 @@ type Contribution struct {
 	AttackForce
 }
 
-// GroupAttack is a strike being assembled on this board. Until DepartDay,
-// other barons here may join it.
+// GroupAttack is a strike being assembled on this board. Until it leaves, other
+// barons here may join it.
 type GroupAttack struct {
 	ID           int
 	TargetBoard  string
 	TargetEmpire string // "" = the whole planet (its strongest baron)
-	DepartDay    int
+	// DepartAt is the instant the force leaves. BRE asks for a delay in HOURS
+	// (12-120) and stores the answer as a wall-clock departure, which is what
+	// lets a strike be timed to land before an opponent's next turn; a day
+	// number cannot express that (#124).
+	DepartAt time.Time
+	// DepartDay is the pre-hours field, kept so a world saved before the change
+	// still knows when its pending attacks leave. Only read when DepartAt is
+	// zero; never written for a new attack.
+	DepartDay    int `json:",omitempty"`
 	Contributors []Contribution
+}
+
+// Due reports whether this attack's force has left by now. A pre-hours attack
+// has no DepartAt, so it falls back to the game day it was filed against.
+func (g GroupAttack) Due(now time.Time, gameDay int) bool {
+	if g.DepartAt.IsZero() {
+		return gameDay >= g.DepartDay
+	}
+	return !now.Before(g.DepartAt)
+}
+
+// DepartureAfter is the instant a group attack filed now leaves, given a delay
+// in hours. It clamps to BRE's own window rather than trusting the caller: a
+// packet-driven or scripted launch must not slip past the bounds the prompt
+// enforces.
+func DepartureAfter(now time.Time, hours int) time.Time {
+	if hours < GroupAttackHoursMin {
+		hours = GroupAttackHoursMin
+	}
+	if hours > GroupAttackHoursMax {
+		hours = GroupAttackHoursMax
+	}
+	return now.Add(time.Duration(hours) * time.Hour)
 }
 
 // Offense is the strike's offensive strength: every contributor's detachment
@@ -480,6 +512,39 @@ type AttackResult struct {
 	// was pressed — "Quick Strike", "Normal Attack", "Extended Battle" or
 	// "Group Attack", which is what BRE heads each returning report with.
 	Kind string
+	// Outcome says WHY, which Won alone cannot: BRE's returning report prints
+	// SUCCESS, FAILURE, NOT FOUND or PROTECTED, and a baron whose force never
+	// found its target is owed a different sentence from one that was beaten.
+	// Empty in a packet written before this existed, which reads as Won deciding
+	// between success and failure — the behaviour that packet was written under.
+	Outcome AttackOutcome `json:",omitempty"`
+	// Enemy is what the strike destroyed on the defender, by unit type. BRE's
+	// returning report itemises it beside the attacker's own casualties; without
+	// it the origin board can only say whether the strike won.
+	Enemy UnitLoss `json:",omitempty"`
+}
+
+// AttackOutcome is a returning strike's verdict, matching the four BRE prints
+// on its result header.
+type AttackOutcome string
+
+const (
+	OutcomeWon       AttackOutcome = "success"
+	OutcomeRepelled  AttackOutcome = "failure"
+	OutcomeNotFound  AttackOutcome = "notfound"  // no such realm on the target board
+	OutcomeProtected AttackOutcome = "protected" // shielded by New Realm Protection
+)
+
+// outcome reads a result's verdict, falling back to Won for a packet written
+// before Outcome existed.
+func (r AttackResult) outcome() AttackOutcome {
+	if r.Outcome != "" {
+		return r.Outcome
+	}
+	if r.Won {
+		return OutcomeWon
+	}
+	return OutcomeRepelled
 }
 
 // RemoteTerror is a terror strike sent to an empire on another board: BRE's
@@ -505,6 +570,13 @@ type InFlightStrike struct {
 	Contributors []Contribution // an attack's detachments, by owner
 	Owner        string         // a terror op's sender
 	Agents       int            // a terror op's committed agents
+	// Group marks a strike assembled by CreateGroupAttack, and Whole a strike
+	// aimed at the planet rather than a named baron. Both are needed to word the
+	// returning report and its news line: BRE keeps separate copy for an
+	// individual strike, a group strike on one realm, and a group strike on a
+	// whole planet, and the target board's answer carries none of that.
+	Group bool `json:",omitempty"`
+	Whole bool `json:",omitempty"`
 }
 
 // commitForce deducts the detachment f from e's army; ErrCantAfford if e lacks
@@ -521,9 +593,9 @@ func (e *Empire) commitForce(f AttackForce) error {
 }
 
 // CreateGroupAttack starts a new group strike led by e, aimed at targetEmpire
-// on targetBoard, leaving on departDay. e commits the detachment f (deducted
-// from its army); ErrCantAfford if it lacks the units.
-func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, departDay int, f AttackForce) (*GroupAttack, error) {
+// on targetBoard, leaving after hours hours (BRE's 12-120 window). e commits the
+// detachment f (deducted from its army); ErrCantAfford if it lacks the units.
+func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, hours int, f AttackForce) (*GroupAttack, error) {
 	if !w.CanGroupAttack(e) {
 		return nil, ErrGroupAttacksExhausted
 	}
@@ -536,7 +608,7 @@ func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, d
 		ID:           w.NextAttackID,
 		TargetBoard:  targetBoard,
 		TargetEmpire: targetEmpire,
-		DepartDay:    departDay,
+		DepartAt:     DepartureAfter(time.Now(), hours),
 		Contributors: []Contribution{{Owner: e.Owner, AttackForce: f}},
 	})
 	return &w.GroupAttacks[len(w.GroupAttacks)-1], nil
@@ -598,7 +670,7 @@ func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 		if ga.ID != id {
 			continue
 		}
-		if w.GameDay >= ga.DepartDay {
+		if ga.Due(time.Now(), w.GameDay) {
 			return ErrDeparted
 		}
 		if !w.CanGroupAttack(e) {
@@ -614,13 +686,19 @@ func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 	return ErrNoAttack
 }
 
-// LaunchDueGroupAttacks turns every group attack whose DepartDay has arrived
+// LaunchDueGroupAttacks turns every group attack whose departure has arrived
 // into an outbound RemoteAttack and removes it from the pending list. Run
-// during the PLANETARY maintenance step.
-func (w *World) LaunchDueGroupAttacks() {
+// during the PLANETARY maintenance step, which is why the window is worth
+// having in hours: the step runs several times a day, so a 12-hour delay really
+// does leave before a day-long one.
+func (w *World) LaunchDueGroupAttacks() { w.LaunchDueGroupAttacksAt(time.Now()) }
+
+// LaunchDueGroupAttacksAt is LaunchDueGroupAttacks against a given instant, so a
+// test can watch a strike sit and then leave without waiting for the clock.
+func (w *World) LaunchDueGroupAttacksAt(now time.Time) {
 	var remaining []GroupAttack
 	for _, ga := range w.GroupAttacks {
-		if w.GameDay < ga.DepartDay {
+		if !ga.Due(now, w.GameDay) {
 			remaining = append(remaining, ga)
 			continue
 		}
@@ -639,6 +717,8 @@ func (w *World) LaunchDueGroupAttacks() {
 			TargetEmpire: ga.TargetEmpire,
 			LaunchedDay:  w.GameDay,
 			Contributors: ga.Contributors,
+			Group:        true,
+			Whole:        ga.TargetEmpire == "",
 		})
 	}
 	w.GroupAttacks = remaining
@@ -881,28 +961,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	}
 	// Outcomes of our own strikes, returning from the target board.
 	for _, res := range p.Results {
-		w.clearInFlight(res.ID) // answered, so it can no longer time out
-		switch {
-		case res.Kind == "terror" && res.Won:
-			w.postNews(fmt.Sprintf("Our terror op on %s (%s) destroyed %d troopers!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
-		case res.Kind == "terror":
-			w.postNews(fmt.Sprintf("Our terror op on %s (%s) was foiled.", res.TargetEmpire, res.TargetBoard))
-		case res.Won:
-			w.postNews(fmt.Sprintf("Our %s on %s (%s) took %d regions!", res.Kind, res.TargetEmpire, res.TargetBoard, res.LandTaken))
-		default:
-			w.postNews(fmt.Sprintf("Our %s on %s (%s) was repelled.", res.Kind, res.TargetEmpire, res.TargetBoard))
-		}
-		// Return each contributor's surviving forces to their army.
-		for _, sv := range res.Survivors {
-			e := w.FindByOwner(sv.Owner)
-			if e == nil {
-				continue
-			}
-			e.Troopers += sv.Troopers
-			e.Jets += sv.Jets
-			e.Tanks += sv.Tanks
-			e.Bombers += sv.Bombers
-		}
+		w.applyAttackResult(res)
 	}
 	if p.Annihilator != nil && p.FromBoard != "" {
 		w.applyAnnihilatorStatus(p.Annihilator)
@@ -945,6 +1004,14 @@ func (w *World) ApplyPacket(p Packet) Packet {
 
 // resolveRemoteAttack resolves a remote strike against its target empire (or,
 // for a whole-planet attack, this board's strongest baron).
+//
+// Both armies press until they have spent the attack type's share of what they
+// brought and then break off — BRE states that for the interplanetary variants
+// outright ("both sides will only fight until they suffer 8% losses",
+// game/attack.hlp), which is why this does not run the local Regular Attack's
+// round-by-round attrition. That resolver exists to make the WINNER's casualties
+// an outcome rather than a rate; here the rate is the published mechanic. The
+// sysop's Attack Damage rescales it (Level.InterplanetaryLossPct).
 func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	target := w.remoteTarget(atk.TargetEmpire)
 	res := AttackResult{ID: atk.ID, TargetBoard: w.Config.BoardID, TargetEmpire: atk.TargetEmpire}
@@ -960,10 +1027,12 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		res.Kind = kind.String()
 		returnsPct = IndividualAttackReturnsPct
 	}
-	// Survivors return to their contributors whatever the outcome — both armies
-	// press until they have taken the kind's share of losses, then retreat.
-	res.Survivors = survivorsOf(atk.Contributors, kind.lossPct())
+	lossPct := w.Config.AttackDamage.InterplanetaryLossPct(kind.lossPct())
+	// Survivors return to their contributors whatever the outcome — the force
+	// bleeds on the way in, not only when it wins.
+	res.Survivors = survivorsOf(atk.Contributors, lossPct)
 	if target == nil {
+		res.Outcome = OutcomeNotFound
 		return res
 	}
 	res.TargetEmpire = target.Name
@@ -971,12 +1040,21 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// terror op (resolveRemoteTerror). Protection counts down in transit, so this
 	// arrival-time check — not the sender's view days earlier — is authoritative.
 	if target.Protection > 0 {
+		res.Outcome = OutcomeProtected
 		target.addEvent(fmt.Sprintf("An interplanetary strike from %s was stopped by your New Realm Protection.", atk.FromBoard))
 		return res
 	}
+	// Measure the defence BEFORE the battle costs it — the fight is decided by
+	// what was standing when the force arrived, not by what is left afterwards.
 	def := target.Defense()
+	// The defender spends the same share of its own forces holding the line, win
+	// or lose. loseForces is the local battle's own helper, so a turret lost to an
+	// invader is accounted exactly as one lost at home.
+	res.Enemy = loseForces(target, float64(lossPct)/100)
 	if atk.Offense <= def {
-		target.addEvent(fmt.Sprintf("You repelled an interplanetary strike from %s.", atk.FromBoard))
+		res.Outcome = OutcomeRepelled
+		target.addEvent(fmt.Sprintf("You repelled an interplanetary strike from %s. You lost %d of your forces.",
+			atk.FromBoard, res.Enemy.Total()))
 		return res
 	}
 	// Overwhelmed: take a bite of land proportional to the margin, scaled by what
@@ -992,9 +1070,11 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		target.Regions.remove(land)
 		target.syncLand()
 	}
-	target.addEvent(fmt.Sprintf("An interplanetary strike from %s took %d regions!", atk.FromBoard, land))
+	target.addEvent(fmt.Sprintf("An interplanetary strike from %s took %d regions and %d of your forces!",
+		atk.FromBoard, land, res.Enemy.Total()))
 	res.LandTaken = land
 	res.Won = true
+	res.Outcome = OutcomeWon
 	return res
 }
 
@@ -1034,15 +1114,17 @@ func (w *World) remoteTarget(name string) *Empire {
 	return best
 }
 
-// clearInFlight drops the strike with this ID from the waiting list, because its
-// result has come home.
-func (w *World) clearInFlight(id int) {
+// takeInFlight removes the strike with this ID from the waiting list and returns
+// it, because its result has come home. ok is false when nothing was waiting —
+// see applyAttackResult for why that is not the same as "harmless".
+func (w *World) takeInFlight(id int) (InFlightStrike, bool) {
 	for i, f := range w.InFlight {
 		if f.ID == id {
 			w.InFlight = append(w.InFlight[:i], w.InFlight[i+1:]...)
-			return
+			return f, true
 		}
 	}
+	return InFlightStrike{}, false
 }
 
 // ReturnLostForces gives back the forces of any strike still unanswered after

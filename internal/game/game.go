@@ -192,6 +192,14 @@ type Empire struct {
 	ImmuneFrom       []string // empires whose covert ops against us auto-fail (we bribed their agents)
 	ShieldedUntilDay int      // GameDay through which ALL incoming covert ops auto-fail (Expose Enemy Ops)
 
+	// PendingRegions is land captured on ANOTHER planet and waiting for its owner
+	// to say what to hold it as. A Regular Attack asks at the moment of victory,
+	// but an interplanetary strike resolves days later on a board its owner is not
+	// logged in to, so the land is parked here and the picker runs at the start of
+	// their next turn (#107). It is real land the realm owns; it just has no type
+	// yet, which is why it is counted nowhere until it is allocated.
+	PendingRegions int `json:"pendingRegions,omitempty"`
+
 	// CoordinatorVote is the owner handle this baron votes for as the BBS
 	// Coordinator (the elected player who gets the Coordinator menu). Changeable
 	// any time from the System menu.

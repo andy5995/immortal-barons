@@ -6,7 +6,14 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
+
+// afterDeparture is a moment past a group attack filed with the shortest
+// permitted delay, so a test can watch it leave without waiting twelve hours.
+func afterDeparture() time.Time {
+	return time.Now().Add((GroupAttackHoursMin + 1) * time.Hour)
+}
 
 func TestImportBoardAppendsNewBoard(t *testing.T) {
 	w := NewWorld(DefaultConfig())
@@ -75,7 +82,7 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0 // defenseless
 
 	leader.Troopers, ally.Troopers = 1_000_000, 1_000_000 // troops to commit
-	ga, err := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, AttackForce{Troopers: 100_000})
+	ga, err := wA.CreateGroupAttack(leader, "boardB", "Victim", GroupAttackHoursMin, AttackForce{Troopers: 100_000})
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -83,8 +90,7 @@ func TestGroupAttackRoundTrip(t *testing.T) {
 		t.Fatalf("join: %v", err)
 	}
 
-	wA.GameDay++ // reach departure day
-	wA.LaunchDueGroupAttacks()
+	wA.LaunchDueGroupAttacksAt(afterDeparture()) // the delay has run out
 	if len(wA.Outbox) != 1 || len(wA.Outbox[0].Attacks) != 1 {
 		t.Fatalf("expected one outbound attack, got %+v", wA.Outbox)
 	}
@@ -202,7 +208,8 @@ func TestJoinDepartedAttackFails(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("e", "E")
 	e.Troopers = 10_000
-	ga, _ := w.CreateGroupAttack(e, "boardB", "", w.GameDay, AttackForce{Troopers: 1000}) // departs today
+	ga, _ := w.CreateGroupAttack(e, "boardB", "", GroupAttackHoursMin, AttackForce{Troopers: 1000})
+	w.GroupAttacks[0].DepartAt = time.Now().Add(-time.Hour) // its force has left
 	if err := w.JoinGroupAttack(e, ga.ID, AttackForce{Troopers: 500}); err != ErrDeparted {
 		t.Errorf("joining a departed attack should fail with ErrDeparted, got %v", err)
 	}
@@ -227,7 +234,7 @@ func TestGroupAttackReturnsSurvivors(t *testing.T) {
 	target.syncLand()
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0 // defenseless
 
-	_, err := wA.CreateGroupAttack(leader, "boardB", "Victim", wA.GameDay+1, AttackForce{Troopers: 100_000, Tanks: 1000})
+	_, err := wA.CreateGroupAttack(leader, "boardB", "Victim", GroupAttackHoursMin, AttackForce{Troopers: 100_000, Tanks: 1000})
 	if err != nil {
 		t.Fatalf("create: %v", err)
 	}
@@ -235,8 +242,7 @@ func TestGroupAttackReturnsSurvivors(t *testing.T) {
 		t.Fatalf("committed units should be deducted, have %d troopers %d tanks", leader.Troopers, leader.Tanks)
 	}
 
-	wA.GameDay++
-	wA.LaunchDueGroupAttacks()
+	wA.LaunchDueGroupAttacksAt(afterDeparture())
 	result := wB.ApplyPacket(wA.Outbox[0]) // B resolves, returns survivors to A
 	wA.ApplyPacket(result)                 // A restores survivors
 
@@ -389,13 +395,13 @@ func TestLostForcesComeHome(t *testing.T) {
 	e.Troopers, e.Tanks, e.Agents = 1000, 40, 20
 
 	f := AttackForce{Troopers: 600, Tanks: 25}
-	if _, err := w.CreateGroupAttack(e, "faraway", "Rome", w.GameDay, f); err != nil {
+	if _, err := w.CreateGroupAttack(e, "faraway", "Rome", GroupAttackHoursMin, f); err != nil {
 		t.Fatalf("CreateGroupAttack: %v", err)
 	}
 	if err := w.SendTerror(e, "faraway", "Rome", 5); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
-	w.LaunchDueGroupAttacks()
+	w.LaunchDueGroupAttacksAt(afterDeparture())
 	if e.Troopers != 400 || e.Tanks != 15 || e.Agents != 15 {
 		t.Fatalf("after launching: troopers=%d tanks=%d agents=%d, want 400/15/15", e.Troopers, e.Tanks, e.Agents)
 	}
@@ -435,10 +441,10 @@ func TestAnsweredStrikeDoesNotAlsoTimeOut(t *testing.T) {
 	e := w.AddHuman("alice", "Alethia")
 	e.Troopers = 500
 
-	if _, err := w.CreateGroupAttack(e, "faraway", "Rome", w.GameDay, AttackForce{Troopers: 300}); err != nil {
+	if _, err := w.CreateGroupAttack(e, "faraway", "Rome", GroupAttackHoursMin, AttackForce{Troopers: 300}); err != nil {
 		t.Fatalf("CreateGroupAttack: %v", err)
 	}
-	w.LaunchDueGroupAttacks()
+	w.LaunchDueGroupAttacksAt(afterDeparture())
 	id := w.InFlight[0].ID
 
 	w.ApplyPacket(Packet{

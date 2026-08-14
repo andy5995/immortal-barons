@@ -975,10 +975,17 @@ const (
 //
 // Capture percentages are relative to a normal attack's take, which is how
 // attack.hlp states them ("50% of what you would in a normal attack").
+//
+// The STRENGTH multipliers are the one place the help and the code disagree, and
+// the code wins. BRE's own invasion resolver (BRE.OVR 0x4055a-0x405a8, unit
+// ovr_03f4a0 +0x10ef..+0x1184) switches on the arriving attack's type byte and
+// scales the incoming force by a Real48 constant: Quick loads 1.2, Extended
+// loads 0.85, Normal is left alone. attack.hlp advertises the quick strike at
+// "110%" — the binary applies 120%.
 const (
 	// A quick strike buys surprise: it hits harder but takes far less land, and
 	// the disorganised battle breaks off early.
-	QuickStrikeStrengthPct = 110
+	QuickStrikeStrengthPct = 120 // binary: Real48 1.2 (attack.hlp says 110%)
 	QuickStrikeCapturePct  = 50
 	QuickStrikeLossPct     = 8
 
@@ -989,9 +996,18 @@ const (
 
 	// An extended battle grinds: fatigue costs strength, but it takes the most
 	// land and both armies absorb the heaviest losses before retreating.
-	ExtendedBattleStrengthPct = 85
+	ExtendedBattleStrengthPct = 85 // binary: Real48 0.85
 	ExtendedBattleCapturePct  = 125
 	ExtendedBattleLossPct     = 20
+
+	// GroupAttackHoursMin/Max bound the delay before a group attack leaves.
+	// BINARY-VERIFIED: BRE.OVR 0x2c38a/0x2c391 (unit ovr_02b783 +0x0c07/+0x0c0e)
+	// push 12 and 120 as the prompt's bounds and +0x0c4b/+0x0c4f re-check the
+	// answer against both. The delay is HOURS, not days — +0x0c88 divides it by
+	// 24 and +0x0c99 adds the quotient to the clock, so what BRE stores is an
+	// instant the force leaves at, not a day number (#124).
+	GroupAttackHoursMin = 12
+	GroupAttackHoursMax = 120
 
 	// IndividualAttackGoldPerUnit is what launching an individual interplanetary
 	// strike costs, per unit sent. Captured live (2026-08-11): committing 100

@@ -1663,16 +1663,16 @@ Attack Aborted
 types, including ones held at zero, every default 0. There is no attack-type
 menu here: a group attack has no type choice.
 
-**Two divergences IB has not yet closed**, recorded so they are not mistaken for
-settled behaviour:
+**The departure delay is in HOURS**, `Wait how many Hours (12-120)?`, with a
+12-hour floor and a 120-hour ceiling — and it is asked BEFORE the force prompts,
+not after. IB matches this (#124): it asks the same question in the same place
+and stores the answer as a departure instant, because the binary does
+(`hours/24` added to the clock — see docs/mechanics-reference.md).
 
-- **Whole-planet vs one baron** is a single keypress, `Do you wish to target
-  (O)ne Dominion or (A)ll?`, echoing "Entire Planet". IB instead offers "(the
-  whole planet)" as the first row of a numbered baron list.
-- **The departure delay is in HOURS**, `Wait how many Hours (12-120)?`, with a
-  12-hour floor and a 120-hour ceiling. IB asks "Leave in how many days?" and
-  stores whole days (`GameDay+days`), so it can express neither the floor nor
-  anything between days.
+**One divergence IB has not closed**, recorded so it is not mistaken for settled
+behaviour: **whole-planet vs one baron** is a single keypress, `Do you wish to
+target (O)ne Dominion or (A)ll?`, echoing "Entire Planet". IB instead offers
+"(the whole planet)" as the first row of a numbered baron list.
 
 An empty force prints `Attack Aborted` (capital A on both words), where the
 attack-type menu's quit path prints `Attack aborted.` with a period.

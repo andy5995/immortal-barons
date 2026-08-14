@@ -213,7 +213,19 @@ func regionCapReached(w *ctx, p *game.Empire) bool {
 // composition from the proportional mix the loser bled).
 func allocateCaptured(s session.Session, w *ctx, n int) {
 	allocateRegions(s, w, n, 0,
-		fmt.Sprintf(tr(s, "You captured %d regions — choose which types to hold them as."), n))
+		fmt.Sprintf(tr(s, "You captured %d regions — choose which types to hold them as."), n), nil)
+}
+
+// allocateSpoils is the same picker for land taken on ANOTHER planet. The strike
+// resolved days ago on a board this baron was not logged in to, so the land has
+// been parked on Empire.PendingRegions ever since; this is the first moment
+// there is anybody to ask (#107). The pending count is cleared inside the same
+// transaction that grants the land, so a session that drops mid-picker cannot
+// hand it over twice.
+func allocateSpoils(s session.Session, w *ctx, n int) {
+	allocateRegions(s, w, n, 0,
+		fmt.Sprintf(tr(s, "Your forces brought home %d regions — choose which types to hold them as."), n),
+		func(fp *game.Empire) { fp.PendingRegions -= min(n, fp.PendingRegions) })
 }
 
 // allocateDecontaminated re-types land just cleaned of waste. The original pools
@@ -224,7 +236,7 @@ func allocateCaptured(s session.Session, w *ctx, n int) {
 // back out of Coastal and are shared out again.
 func allocateDecontaminated(s session.Session, w *ctx, n int) {
 	allocateRegions(s, w, n, n,
-		fmt.Sprintf(tr(s, "%d regions are clean again — choose which types to hold them as."), n))
+		fmt.Sprintf(tr(s, "%d regions are clean again — choose which types to hold them as."), n), nil)
 }
 
 // allocateRegions reuses the Buy Regions table and picker as an allocate-N loop
@@ -236,7 +248,11 @@ func allocateDecontaminated(s session.Session, w *ctx, n int) {
 // back before they are shared out, so the total does not double. It is 0 for
 // land that has not been placed yet (a fresh conquest) and n for land restored
 // before the player was asked (decontamination).
-func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string) {
+//
+// also runs inside the granting transaction, for a caller that has to retire
+// bookkeeping in the same save — the parked interplanetary spoils, which must
+// not survive the picker that hands them over.
+func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string, also func(*game.Empire)) {
 	if n <= 0 {
 		return
 	}
@@ -267,6 +283,9 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string)
 		fp.Regions.Coastal -= min(reclaim, fp.Regions.Coastal)
 		for i, cnt := range alloc {
 			w.World.GrantRegions(fp, regionField(fp, i), cnt)
+		}
+		if also != nil {
+			also(fp)
 		}
 		return nil
 	}); err != nil {
