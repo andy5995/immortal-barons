@@ -1536,6 +1536,14 @@ carriers never desert** — the routine loads three unit types and stops.
 morale except the boost the baron pays for. IB used to drift it back 4 points a
 turn; that is removed.
 
+**No auto-pay for the boost, deliberately (#39).** The prompt appears every turn
+support sits under 100 and there is no preference to pay it automatically. That
+is not a missing convenience: BRE's silent Auto-Pay Maintenance branch is gated
+on popular support and military morale BOTH reading exactly 100, so a realm that
+has slipped is routed through the manual sequence precisely so the boost is put
+in front of the player. A toggle that paid it unattended would remove the
+decision the original built the gate to force.
+
 **The support boost — binary-verified (BRE.OVR 0x2F4C4 and 0x2F740):**
 
 ```
