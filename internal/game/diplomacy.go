@@ -184,6 +184,15 @@ func (w *World) tradeIncome(e *Empire) int {
 // holds less Technology — so a pact with a strong partner helps, but does not
 // substitute for holding tech yourself. Applied in advanceTech.
 
+// A Full Defense Alliance is LOCAL ONLY. BRE's manual says so of the treaty
+// itself — "effective only in Local Games" — and the binary matches: the
+// relation row belongs to one planet's empire records and never rides an
+// inter-BBS packet. So the three helpers below feed the local battle
+// (combat.go's Attack) and the Alliance Strength screen, and nothing in the
+// interplanetary path may call them: resolveRemoteAttack meets an arriving
+// strike with the target's own Defense() alone. Pinned by
+// TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes.
+
 // AllyContribution is the detachment a Full Defense Alliance partner sends to aid
 // an ally under attack — BRE-verified as 30% of the ally's troopers, tanks, and
 // agents (turrets/jets/bombers/carriers stay home). Mirrors BRE's Alliance

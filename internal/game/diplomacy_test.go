@@ -411,3 +411,35 @@ func TestTreatyPartnersCountsEveryTreatyType(t *testing.T) {
 		}
 	}
 }
+
+// A Full Defense Alliance is a LOCAL pact. BRE's manual says so outright of the
+// treaty ("effective only in Local Games"), and the binary agrees: the relation
+// row is read for the current player's own planet and never travels in a packet.
+// So an interplanetary strike meets the target's own defense and nothing else,
+// and the ally bleeds nothing for a battle it was not in.
+func TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	victim := w.AddHuman("bob", "Rome")
+	ally := w.AddHuman("carol", "Carthage")
+	victim.Protection, ally.Protection = 0, 0
+	victim.Troopers, victim.Turrets, victim.Tanks = 100, 10, 5
+	ally.Troopers, ally.Tanks = 1_000_000, 100_000
+	w.setRelation(victim.Name, ally.Name, fullDefenseAlliance)
+	if len(w.AllyDefenders(victim)) != 1 {
+		t.Fatal("the alliance must stand, or this proves nothing")
+	}
+
+	// One point over the victim's OWN defense. If the ally's detachment were
+	// counted the strike would be repelled instead.
+	res := w.resolveRemoteAttack(RemoteAttack{
+		ID: 1, FromBoard: "far", TargetEmpire: "Rome", Kind: NormalAttack,
+		Offense:      victim.Defense() + 1,
+		Contributors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 1000}}},
+	})
+	if !res.Won {
+		t.Error("a Full Defense Alliance reinforced an interplanetary defense; BRE keeps it to local games")
+	}
+	if ally.Troopers != 1_000_000 || ally.Tanks != 100_000 {
+		t.Errorf("the ally bled for a battle it is not in: %d troopers / %d tanks", ally.Troopers, ally.Tanks)
+	}
+}

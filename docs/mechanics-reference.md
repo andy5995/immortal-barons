@@ -2002,6 +2002,12 @@ and each carries a gameplay effect (#11 wired the last two):
   rate (`bleedAllies`). The Alliance Strength screen (`allianceStrength`) shows
   each ally's sent troopers/tanks/agents. See the `bre-binary-verified-math`
   memory.
+  **The "only in Local Games" note is a rule, not a caveat, and IB honours it**:
+  the relation lives in one planet's empire records and never rides a packet, so
+  an arriving interplanetary strike meets the target's own `Defense()` and
+  nothing more — `resolveRemoteAttack` does not consult `allyDefenseBoost`, and
+  `TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes` fails if it
+  ever starts to.
 - **Tariff Trade Agreement** / **Free Trade Agreement** — per-turn trade income
   scaled by population; Free earns more than Tariff (`tradeIncome`).
 - **Intelligence Alliance** / **Terrorist Prevention** — lend half an ally's
