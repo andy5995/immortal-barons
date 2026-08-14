@@ -149,9 +149,9 @@ type Config struct {
 	MaxTerrorOps          int               // most terrorist ops a player may launch per day; 0 = unlimited
 	MaxBombingOps         int               // most bombing ops a player may launch per day; 0 = unlimited
 	LostForcesDays        int               // days before a strike with no result packet gives its forces back (#96); 0 = never
-	BombingOps            bool              // Bomb Enemy Targets is offered
-	MissileOps            bool              // nuclear/chemical/biological strikes are offered
-	ClingyAnnihilator     bool              // the doomsday weapon may be built
+	BombingOps            bool              // the four bombing ops are offered (Bomb Enemy Targets, Special Operations)
+	MissileOps            bool              // nuclear/chemical/biological strikes are offered (Attack, Bomb Enemy Targets, Special Operations)
+	ClingyAnnihilator     bool              // the doomsday weapon is offered
 	MaxPlayers            int               // most human empires per board (0 = unlimited)
 	BuyMilitary           BuyMode           // Yes / No / Limited
 	MaintCosts            Level             // maintenance costs (regions + forces)

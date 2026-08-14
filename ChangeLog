@@ -1,4 +1,7 @@
 (in-progress:)
+  * The Bombing Ops, Missile Ops and Clingy Annihilator settings take their
+    operations off the Attack, Covert and InterPlanetary menus when disabled,
+    hotkeys included
   * The Attack Costs setting scales what an interplanetary strike charges, and
     the price is capped at 200,000,000 gold
   * A terrorist operation costs 64 gold per region the launcher owns, scaled by

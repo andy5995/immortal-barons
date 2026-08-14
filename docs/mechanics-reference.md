@@ -588,6 +588,24 @@ reduces attacking **jets by up to 30%** and **bombers by up to 20%**
 
 Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
 
+**The three special-attack switches remove their operations from the menus.**
+`game/reset.hlp` describes Bombing Operations, Missile Operations and Gooie
+Kablooies (IB's Clingy Annihilator) as classes of special attack a sysop may
+disable outright, so IB hides rather than refuses — `byKey` skips a hidden item,
+so the hotkey goes with the label:
+
+| Setting | What it hides |
+| --- | --- |
+| `BombingOps` | Bomb Food Market, Bomb Trading Market, Bomb Trade Routes, Undermine Investments — on Bomb Enemy Targets and on Special Operations |
+| `MissileOps` | Nuclear / Chemical / Biological Attack on the Attack menu, and Nuclear Assault / Chemical Bombing / R5-Slappenheimer on both submenus |
+| `ClingyAnnihilator` | Clingy Annihilator Ops on the InterPlanetary menu |
+
+With both of the first two off, the Bomb Enemy Targets entry itself goes, since
+its box would be empty. **IB's reading, not a capture:** BRE words both as
+inter-BBS settings about attacks sent to another board, and no capture of either
+one disabled exists, so which menus the original strips is unverified — but a
+switch the player is told about on Game Setup has to do something.
+
 **A terrorist op costs `total regions × 64` gold — BINARY-VERIFIED.** The
 InterPlanetary Operations menu prices the op in its own cost column, and the
 price scales with the launcher's **region count**, which is why it drifts upward
