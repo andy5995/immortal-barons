@@ -1,4 +1,5 @@
 (in-progress:)
+  * config-during-reset: a new Pirates setting (enabled) turns the bands off
   * config-during-reset: a new Money Cap setting sets how much gold a realm may
     hold, on hand and again in the bank — two billion (the original's own limit)
     up to 999 billion
@@ -138,11 +139,6 @@
   * The league Coordinator now also sets the money cap, unlimited food and
     idle-realm removal for every board; each was left to the local sysop, so two
     planets in one season could play by different rules
-  * config-during-reset: a new Pirates setting (enabled) turns the nine bands
-    off — nobody is raided and Attack Pirates leaves the menu. The original has
-    no such switch. It is broadcast to the league, so a season cannot have some
-    planets robbed and others not, but it is not an inter-BBS option and a
-    stand-alone board is asked it too
   * config-during-reset: added the Local Attacks (enabled), Local Attack Scoring
     (disabled) and Dupe Checking (enabled) league settings, editable in both
     Configuration Editors, shown on Game Setup and broadcast to the league
