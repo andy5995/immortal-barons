@@ -615,3 +615,40 @@ func TestPriceWalkRevertsToMid(t *testing.T) {
 		}
 	}
 }
+
+// Region Cost Change is a BIG-REALM SURCHARGE on the per-region climb, not a
+// scale on the price: below 300 regions the knob does nothing at all, and at or
+// above it the level's value is ADDED to the climb. Golden literals — IB used to
+// multiply the whole price by a percentage, which taxed small realms the
+// original never touches (#56).
+func TestRegionCostChangeIsABigRealmSurcharge(t *testing.T) {
+	price := func(l Level, owned int) int {
+		cfg := DefaultConfig()
+		cfg.RegionCosts = l
+		w := NewWorldSeed(cfg, 1)
+		return w.regionCost(owned)
+	}
+	// Under the threshold every level agrees, because the knob has not engaged.
+	const small = RegionCostSurchargeAt - 1
+	base := PriceLand + small*LandPerRegion
+	for _, l := range []Level{None, Low, Medium, High} {
+		if got := price(l, small); got != base {
+			t.Errorf("%v at %d regions = %d, want %d — the knob must be inert below the threshold",
+				l, small, got, base)
+		}
+	}
+	// At the threshold the level's value is added to the CLIMB, so it multiplies
+	// up by the region count.
+	const big = RegionCostSurchargeAt
+	for _, c := range []struct {
+		level Level
+		climb int
+	}{
+		{None, 33}, {Low, 33 + 15}, {Medium, 33 + 35}, {High, 33 + 55},
+	} {
+		want := PriceLand + big*c.climb
+		if got := price(c.level, big); got != want {
+			t.Errorf("%v at %d regions = %d, want %d (climb %d)", c.level, big, got, want, c.climb)
+		}
+	}
+}

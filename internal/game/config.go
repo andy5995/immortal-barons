@@ -119,6 +119,23 @@ func (l Level) CostPercent() int {
 	}
 }
 
+// RegionCostSurcharge is what the Region Cost Change level ADDS to the
+// per-region price climb once a realm is big enough to trigger it — see
+// World.regionCost, which carries the binary evidence. Unlike every other cost
+// knob this one selects a value rather than scaling one.
+func (l Level) RegionCostSurcharge() int {
+	switch l {
+	case None:
+		return RegionCostSurchargeNone
+	case Low:
+		return RegionCostSurchargeLow
+	case High:
+		return RegionCostSurchargeHigh
+	default:
+		return RegionCostSurchargeMedium
+	}
+}
+
 // MaintCostScaled applies the Maintenance Costs level to an upkeep figure, in
 // the original's own arithmetic.
 //

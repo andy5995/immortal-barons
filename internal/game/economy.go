@@ -94,12 +94,34 @@ func (e *Empire) spend(n, unit int) error {
 }
 
 // regionCost is the gold cost of the next region when the empire already owns
-// `owned` regions: BRE's rising price ≈ Prices.Land + owned×LandPerRegion
-// (≈ 917 + owned×33, live-sampled), scaled by the league's Region Costs knob
-// (Medium = 100% = unchanged). LandPrice, MaxAffordableRegions, and BuyRegions
-// all build on it.
+// `owned` regions: Prices.Land + owned × the per-region climb. LandPrice,
+// MaxAffordableRegions and BuyRegions all build on it.
+//
+// The climb is where the sysop's Region Cost Change setting lands, and it does
+// NOT scale the price. BINARY-VERIFIED at BRE.OVR 0x3019C, which selects a value
+// from config byte +0x185 (None 0, Low 15, Medium 35, High 55), multiplies it by
+// a FLAG — one when the realm owns RegionCostSurchargeAt regions or more, zero
+// below — and adds LandPerRegion:
+//
+//	climb = LandPerRegion + (owned >= 300 ? levelValue : 0)
+//
+// So the knob is a big-realm surcharge, inert until a realm passes 300 regions
+// and then steep: at Medium the climb goes 33 -> 68, at High 33 -> 88. It also
+// explains why live sampling put the climb at a flat 33 — every realm sampled
+// was under the threshold, so the knob had not engaged.
+//
+// IB used to multiply the WHOLE price by a percentage of the level instead,
+// which is the wrong shape and hits small realms the original never touches.
 func (w *World) regionCost(owned int) int {
-	return (w.Prices.Land + owned*LandPerRegion) * w.Config.RegionCosts.Percent() / 100
+	return w.Prices.Land + owned*w.regionClimb(owned)
+}
+
+// regionClimb is the per-region price step at the given size — see regionCost.
+func (w *World) regionClimb(owned int) int {
+	if owned < RegionCostSurchargeAt {
+		return LandPerRegion
+	}
+	return LandPerRegion + w.Config.RegionCosts.RegionCostSurcharge()
 }
 
 // regionBuyLimit is the most regions e may still buy this turn, from the

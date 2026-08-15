@@ -416,6 +416,16 @@ const (
 	// World.LandPrice. PriceLand is the base; LandPerRegion the per-owned climb.
 	PriceLand     = 917
 	LandPerRegion = 33
+	// The Region Cost Change knob is a BIG-REALM SURCHARGE on the per-region
+	// climb, not a scale on the price. BINARY-VERIFIED (BRE.OVR 0x3019C): the
+	// level selects one of the values below, a flag turns it on only at
+	// RegionCostSurchargeAt regions or more, and the result is ADDED to
+	// LandPerRegion. Below the threshold the knob does nothing at all.
+	RegionCostSurchargeAt     = 300 // binary: cmp against 0x12C
+	RegionCostSurchargeNone   = 0
+	RegionCostSurchargeLow    = 15
+	RegionCostSurchargeMedium = 35
+	RegionCostSurchargeHigh   = 55
 	// SellAgentPrice: agents sell at a flat 100 in BRE, not buy/3 like other units.
 	// Binary-verified — the Sell menu's agent column is the literal 100 pushed at
 	// BRE.OVR 0x16AEB, and every sell capture shows it.

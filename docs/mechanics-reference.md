@@ -872,20 +872,34 @@ matched the generic ladder until the routine was read; `Level.TradeCostScaled`
 now applies the original's arithmetic, and the test pins the figures as golden
 literals.
 
-### Region Cost Change — LOCATED, not yet settled
+### Region Cost Change — BINARY-VERIFIED, and a big-realm surcharge
 
-Config byte **+0x185**, read at `BRE.OVR 0x3019C` and `0x30249` in the
-region-price unit. It does NOT scale anything: it SELECTS a value — **None 0,
-Low 15, Medium 35, High 55** — written straight into a local.
+It does not scale the price. Config byte **+0x185**, read at `BRE.OVR 0x3019C`,
+selects a value and the routine then does:
 
-What that value feeds is not yet proven, so nothing is changed on the strength
-of it. The suggestive part is that IB's land price is `PriceLand + Land ×
-LandPerRegion` with `LandPerRegion = 33` **live-sampled** from play, and 33 is
-exactly what fitting a slope to noisy samples of a true 35 would give. If the
-selected value is that per-region climb, then IB has both the Medium figure
-slightly wrong AND the wrong shape — it multiplies the whole price by a percent
-where the original swaps the slope. Worth finishing: trace what `[bp-0x6]` at
-`0x3019C` is used for.
+```
+flag  = (regions >= 300) ? 1 : 0        -- cmp against 0x12C
+climb = 33 + flag x value               -- mul [bp-0x6], add 0x21
+```
+
+| Level | Value added | Climb below 300 regions | Climb at 300+ |
+| --- | --- | --- | --- |
+| None | 0 | 33 | 33 |
+| Low | 15 | 33 | 48 |
+| Medium | 35 | 33 | 68 |
+| High | 55 | 33 | 88 |
+
+So the knob is **inert until a realm passes 300 regions**, then steep — and it
+moves the per-region CLIMB, which the region count then multiplies, so the effect
+on the price of the next region grows with the realm.
+
+This also settles where IB's `LandPerRegion = 33` came from: it is the binary's
+own `add ax,0x21`, not an approximation. Live sampling read a flat 33 because
+every realm sampled was under the threshold, so the knob had never engaged — and
+33 was right all along, for the realms that were measured.
+
+IB used to multiply the whole price by a percentage of the level, which is the
+wrong shape and taxes small realms the original leaves alone.
 
 **Which knob reaches what (#56).** The original has five cost knobs — Maintenance
 Costs, Region Cost Change, Trade Deal Costs, Attack Costs, Terrorism Costs — and

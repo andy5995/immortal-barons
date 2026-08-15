@@ -1,4 +1,7 @@
 (in-progress:)
+  * Region Cost Change is a surcharge on big realms, as in the original: it
+    does nothing under 300 regions and then adds to the per-region climb, where
+    it used to scale the price of every region for everyone (#56)
   * Maintenance Costs scales upkeep at the original's own rates — a quarter at
     Low and four times at High, where it was half and double (#56)
   * The Trade Deal Costs setting scales what sending a trade deal charges — at
