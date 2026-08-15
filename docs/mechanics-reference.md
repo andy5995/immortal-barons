@@ -3047,6 +3047,12 @@ Market`. Any empire can list goods for other empires to buy:
   granting income *and* market access would crown itself and the other six would
   stop being signed. This also gates the AI barons, which shop and list every
   turn (#69) — they now need a pact like anyone else.
+- **A trade deal needs a relation (BRE-verified).** `create_trade_offer` loads
+  the pair's relation and runs `cmp word [es:di+0xae],1` / `jnl`, so it proceeds
+  only at **>= 1**. BRE's enum is -1 Enemy, 0 None, 1..7 the seven pacts, so the
+  test is "any pact at all" — None and Enemy are refused with its
+  "no relations" message. IB checks the same (`HasPact`, `SendTradeDeal`); it
+  previously checked nothing.
 - **Escrowed goods are safe from attacks, but NOT from pirates.** The community
   guide's "park military to evade pirates" is wrong about pirates, and IB now
   follows the original: five of the sixteen faces of the raid's category ladder

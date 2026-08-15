@@ -152,6 +152,9 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	if to.Protection > 0 {
 		return ErrTheyProtected
 	}
+	if !w.HasPact(from, to) {
+		return ErrNoRelations
+	}
 	if send.IsEmpty() && demand.IsEmpty() {
 		return fmt.Errorf("A trade deal must offer or request something.")
 	}

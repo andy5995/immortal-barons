@@ -15,6 +15,8 @@ var (
 	// See MarketAccessTreaties: buying from a listing needs one of the four
 	// non-trade pacts. IB's own rule, not BRE's.
 	ErrNoMarketPact = errors.New("You need a pact with that realm to buy from its listing.")
+	// BRE refuses a trade deal between realms with no relation at all.
+	ErrNoRelations = errors.New("You need a pact with that realm to send it a trade deal.")
 )
 
 // MarketGoods are the goods tradeable on the general Trading Market: military

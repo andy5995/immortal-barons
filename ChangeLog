@@ -12,6 +12,7 @@
     everyone, so a seller now chooses who may take the goods and who can see
     them, and computer barons are held to the same rule. A league board leaves
     the market open, where the planet is one team
+  * Sending a trade deal needs a treaty with the other realm, as in the original
   * -gen-board-key prints the key alone on its line. It used to print the board
     name in front of it, and a roster entry pasted whole left that board's
     packets unchecked instead of reporting an error

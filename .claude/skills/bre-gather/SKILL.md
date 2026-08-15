@@ -294,6 +294,16 @@ but returns the cataloged functions and blocks that reference each match. Use
 raw `strings` only to inspect declaration order or text that has no indexed
 code reference.
 
+**Know where the prose actually is: BRE ships only TWO `.hlp` files** —
+`game/attack.hlp` and `game/reset.hlp`. There is no per-screen help, so do not
+hunt for a `market.hlp`; the bulk of the prose is `docs/bre.doc` and
+`game/breins.txt`, with `docs/whatsnew.doc` carrying the version-by-version
+changes. **`reset.hlp` is the sleeper**: it documents every *config setting*,
+and settings are where BRE states mechanics outright. "Turns Of Protection" is
+defined there as the turns a new empire "is unable to attack, trade, and be
+attacked" — one grep, and it settled a question that had been about to be
+argued from code, with `whatsnew.doc` corroborating on the trade half.
+
 **`find-string` with an EMPTY query and a `--function` filter dumps every string
 one routine touches** — which reconstructs a screen's whole structure in one
 command, without disassembling anything:
@@ -408,6 +418,16 @@ before writing "BRE does not do X" into a commit, a doc, or the spec, grep for
 X's own words, and say "not found in the sending menu; not searched further" if
 that is all you did.
 
+**A negative is only strong enough to build a DIVERGENCE on when three
+independent places agree.** Deciding IB should require a treaty to buy on the
+Trading Market rested on BRE having no such rule, so the claim had to hold up:
+the manual and `breins.txt` both describe "a general market at any price you
+choose" with no mention of who may buy; `run_trading_market` references no
+relation string; and the one relation refusal in the binary belongs to a
+different routine (`create_trade_offer`). Prose, the routine's own strings, and
+the whereabouts of the nearest contradicting string — when all three line up,
+write the negative down and name them. One of the three alone is a hunch.
+
 **A prompt's TEXT is not its behaviour — read the caller.** `find-string` on a
 prompt lands you in the routine that *prints* it, and that routine usually does
 nothing else. The input loop, the key table and the semantics are one level up,
@@ -416,6 +436,35 @@ keypress for a year on the strength of how it reads; its caller
 (`BRE.OVR` 0x1b65e) is a toggling multi-select closed by RETURN, and `Z` marks
 every letter rather than sending. Always `lookup` the printer, then `lookup` its
 caller, before describing what a prompt does.
+
+**A refusal string's OWNER is not its condition — disassemble the compare.**
+`find-string` tells you which routine can print a refusal. It does not tell you
+what triggers it, and a routine usually holds several refusals whose branches
+sit next to each other. Real case (2026-08-15): "You do not have relations with
+that realm." belongs to `create_trade_offer`, which is enough to say trade deals
+involve relations — but the branch immediately below it calls `056d:19b5`, the
+**protection** predicate, so reading the neighbourhood would have attributed the
+wrong rule. Disassembling the guard itself gave both the rule and its threshold:
+
+```
+17E5  cmp word [es:di+0xae],0x1   ; the pair's relation
+17EB  jnl 0x1817                  ; >= 1 proceeds
+17ED  <the "no relations" refusal block>
+```
+
+read against BRE's relation enum (-1 Enemy, 0 None, 1..7 the seven pacts, 8
+War), that is "any pact at all" rather than a specific one — a distinction the
+string alone cannot carry, and exactly the kind of constant the spec should
+record with its instructions.
+
+**The chain is `find-string` -> `lookup` -> `disasm`, and the compare sits
+BEFORE the refusal block.** Aim `--around` a few dozen bytes earlier than the
+block `find-string` reports, or the window opens after the test you want and
+shows only the message being built. Two practical notes on the tools, both of
+which cost invocations here: `lookup` takes **no** `--directory` (unlike
+`find-string`, `disasm` and `verify`) and returns a JSON **list**, not an
+object; and `--around` accepts an OVR offset, so convert from the block address
+`find-string` prints rather than guessing a unit-relative one.
 
 **In a capture, count the characters echoed after a prompt.** One echoed key
 means a single-key prompt; a run of them (`Send to: EFHIJKMNOP`) means

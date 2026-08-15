@@ -112,8 +112,11 @@ func TestSendTradeDealSuccess(t *testing.T) {
 	p := w.Player()
 	p.Gold, p.Carriers = 300_000, 1
 	to := recipients(w)[0]
-	// Neither side may be under New Realm Protection to trade.
+	// Neither side may be under New Realm Protection to trade, and a trade deal
+	// needs a pact between them.
 	p.Protection, to.Protection = 0, 0
+	w.World.ProposeTreaty(p, to, "Full Defense Alliance")
+	w.World.AcceptTreaty(to, p.Name, "Full Defense Alliance")
 	toGold := to.Gold
 	// Pick (A), offer 100 gold (6), done (0), no request (0), confirm (y), 2 days (Enter).
 	f := &fakeSession{keys: []rune("A6100\r00y\r")}

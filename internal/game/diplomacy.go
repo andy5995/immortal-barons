@@ -61,6 +61,15 @@ var MarketAccessTreaties = []string{
 	technologyAgreement,
 }
 
+// HasPact reports whether a and b hold one of the seven treaties — neither None
+// nor Enemy. BRE gates sending a trade deal on exactly this: create_trade_offer
+// compares the pair's relation against 1 (`cmp word [es:di+0xae],1; jnl`), and
+// its enum runs -1 Enemy, 0 None, 1..7 for the pacts.
+func (w *World) HasPact(a, b *Empire) bool {
+	rel := w.Relation(a, b)
+	return rel != "" && rel != RelationEnemy
+}
+
 // CanBuyOnMarketFrom reports whether buyer may take seller's Trading Market
 // listings — see MarketAccessTreaties for why this is narrower than HasPact.
 func (w *World) CanBuyOnMarketFrom(buyer, seller *Empire) bool {
