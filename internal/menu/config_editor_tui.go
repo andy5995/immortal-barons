@@ -121,6 +121,7 @@ const (
 	helpDupeChecking       = "Whether a baron found playing on another board in the league is locked out here."
 	helpMissileOps         = "Whether nuclear, chemical and biological strikes are offered at all."
 	helpPirates            = "Whether there are pirates at all. Off, nobody is raided and Attack Pirates is gone."
+	helpIPTrading          = "Whether barons may bid on an ALLIED planet's Trading Market. IB's own feature; the original has no such thing."
 	helpClingyAnnihilator  = "Whether the Clingy Annihilator doomsday weapon may be built."
 	helpMaxRegions         = "The most regions a single player may own."
 	helpMaxPlayers         = "The most human empires allowed on this board. 0 means no limit."
@@ -240,6 +241,7 @@ func newConfigTUI(w *game.World) *configTUI {
 		t.addBool(mil, "Clingy Annihilator", helpClingyAnnihilator, c.ClingyAnnihilator, func(c *game.Config, b bool) { c.ClingyAnnihilator = b })
 		t.addBool(mil, "Local Attacks", helpLocalAttacks, c.LocalAttacks, func(c *game.Config, b bool) { c.LocalAttacks = b })
 		t.addBool(mil, "Local Attack Scoring", helpLocalAttackScoring, c.LocalAttackScoring, func(c *game.Config, b bool) { c.LocalAttackScoring = b })
+		t.addBool(mil, "Allow IP Allies to Trade at Market", helpIPTrading, c.IPTrading, func(c *game.Config, b bool) { c.IPTrading = b })
 	}
 
 	caps := tview.NewForm()

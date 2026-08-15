@@ -560,6 +560,10 @@ type RemoteBoard struct {
 	BoardID string
 	Date    string
 	Scores  []RemoteScore
+	// Market is that planet's Trading Market as of this snapshot, for barons here
+	// to bid on. It is stale by a packet round trip by definition, which is why a
+	// bid is an offer the far board may refuse rather than a purchase.
+	Market []RemoteListing `json:",omitempty"`
 }
 
 // PlanetTotals is a snapshot of planet-wide aggregates over living empires.

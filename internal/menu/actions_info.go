@@ -528,6 +528,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 		row("Local attacks", onOffStr(c.LocalAttacks))
 		row("Local attack scoring", onOffStr(c.LocalAttackScoring))
 		row("Dupe checking", onOffStr(c.DupeChecking))
+		row("Allied market trading", onOffStr(c.IPTrading))
 	}
 	pause(s)
 	return Stay

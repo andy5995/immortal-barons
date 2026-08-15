@@ -42,6 +42,15 @@ type Packet struct {
 	Annihilator  *AnnihilatorStatus // a doomsday weapon aimed at ToBoard (#63)
 	TimeChecks   []TimeCheck        // round-trip probes, out and echoed back (Travel Times)
 	IPMessages   []IPMessage        // interplanetary mail for ToBoard's barons
+	// Interplanetary trading (IB's own). All three are omitempty ON PURPOSE: the
+	// origin signature is taken over the marshalled packet, so a board too old to
+	// know these fields would drop them on unmarshal and then fail to verify a
+	// packet that carried them. Omitting them when empty keeps every packet that
+	// does NOT trade byte-identical across versions, which is every packet an old
+	// board can act on anyway.
+	TradeBids  []IPTradeBid    `json:",omitempty"` // buy orders landing on ToBoard's market
+	TradeFills []IPTradeFill   `json:",omitempty"` // their answers coming home
+	Market     []RemoteListing `json:",omitempty"` // FromBoard's market, riding its scores
 	// Seq numbers this board's outbound packets so the far side can spot one it
 	// has already applied, and Signature authenticates the parts only the
 	// Coordinator may author (#53).
@@ -82,6 +91,7 @@ func (p Packet) HasPayload() bool {
 	return len(p.Scores) > 0 || len(p.Attacks) > 0 || len(p.Terrors) > 0 ||
 		len(p.Results) > 0 || len(p.Recon) > 0 || len(p.ReconReports) > 0 ||
 		len(p.TimeChecks) > 0 || len(p.IPMessages) > 0 ||
+		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 ||
 		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Annihilator != nil || p.Reset != nil
 }
 
@@ -155,6 +165,7 @@ type LeagueConfig struct {
 	LocalAttacks          bool
 	LocalAttackScoring    bool
 	DupeChecking          bool
+	IPTrading             bool
 	Pirates               bool
 	MaxPlayers            int
 	BuyMilitary           BuyMode
@@ -202,6 +213,7 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		LocalAttacks:          c.LocalAttacks,
 		LocalAttackScoring:    c.LocalAttackScoring,
 		DupeChecking:          c.DupeChecking,
+		IPTrading:             c.IPTrading,
 		Pirates:               c.Pirates,
 		MaxPlayers:            c.MaxPlayers,
 		BuyMilitary:           c.BuyMilitary,
@@ -249,6 +261,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.LocalAttacks = lc.LocalAttacks
 	c.LocalAttackScoring = lc.LocalAttackScoring
 	c.DupeChecking = lc.DupeChecking
+	c.IPTrading = lc.IPTrading
 	c.Pirates = lc.Pirates
 	c.MaxPlayers = lc.MaxPlayers
 	c.BuyMilitary = lc.BuyMilitary
@@ -617,6 +630,13 @@ type InFlightStrike struct {
 	// whole planet, and the target board's answer carries none of that.
 	Group bool `json:",omitempty"`
 	Whole bool `json:",omitempty"`
+	// An interplanetary trade bid's escrow (Kind "trade"): the gold held while
+	// the bid is away, and what it was bidding for, so the lost-packet timer can
+	// hand the money back and word the notice.
+	Gold  int64  `json:",omitempty"`
+	Good  string `json:",omitempty"`
+	Qty   int    `json:",omitempty"`
+	Price int    `json:",omitempty"`
 }
 
 // commitForce deducts the detachment f from e's army; ErrCantAfford if e lacks
@@ -818,7 +838,10 @@ func (w *World) ExportScores() {
 	if len(scores) == 0 {
 		return
 	}
-	w.Outbox = append(w.Outbox, Packet{FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores})
+	w.Outbox = append(w.Outbox, Packet{
+		FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores,
+		Market: w.ExportMarket(), // so allied planets can bid on it (#47)
+	})
 }
 
 // SameRoster reports whether two league rosters hold the same boards in the
@@ -872,6 +895,12 @@ func (w *World) outboxFor(board string) *Packet {
 func (w *World) enqueue(toBoard string, atk RemoteAttack) {
 	p := w.outboxFor(toBoard)
 	p.Attacks = append(p.Attacks, atk)
+}
+
+// enqueueTradeBid queues a buy order for another planet's market.
+func (w *World) enqueueTradeBid(toBoard string, b IPTradeBid) {
+	p := w.outboxFor(toBoard)
+	p.TradeBids = append(p.TradeBids, b)
 }
 
 // SendTerror queues a terror op against targetEmpire on targetBoard, committing
@@ -1011,7 +1040,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		w.postNews(fmt.Sprintf("A packet from %s claimed to carry League Coordinator orders and was refused.", p.FromBoard))
 	}
 	if len(p.Scores) > 0 {
-		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores})
+		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores, Market: p.Market})
 		w.applyDupeCheck(p.FromBoard, p.Scores)
 	}
 	// Outcomes of our own strikes, returning from the target board.
@@ -1030,7 +1059,16 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	for _, m := range p.IPMessages {
 		w.deliverIPMessage(m)
 	}
+	// Answers to our own bids: goods or gold, straight to the baron who bid (#47).
+	for _, f := range p.TradeFills {
+		w.applyTradeFill(f)
+	}
 	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
+	// Bids landing HERE are filled or refused against this board's market now,
+	// and the answer rides the reply home.
+	for _, b := range p.TradeBids {
+		result.TradeFills = append(result.TradeFills, w.resolveRemoteTradeBid(b))
+	}
 	// A probe naming us goes straight back; one of ours coming home is measured.
 	result.TimeChecks = w.applyTimeChecks(p.TimeChecks)
 	// Scouting asked of us: answer with what is true here and now.
@@ -1238,6 +1276,14 @@ func (w *World) ReturnLostForces() int {
 			continue
 		}
 		recovered++
+		if f.Kind == "trade" {
+			if e := w.FindByOwner(f.Owner); e != nil {
+				w.creditGold(e, f.Gold, "a bid that never came home")
+				e.addEvent(fmt.Sprintf("No word came back from %s. Your bid for %d %s was abandoned and the gold returned.",
+					f.TargetBoard, f.Qty, f.Good))
+			}
+			continue
+		}
 		if f.Kind == "terror" {
 			if e := w.FindByOwner(f.Owner); e != nil {
 				e.Agents += f.Agents

@@ -1,4 +1,6 @@
 (in-progress:)
+  * config-during-reset: a new Allow IP Allies to Trade at Market setting
+    (enabled) opens interplanetary trading
   * Region Cost Change is a surcharge on big realms, as in the original: it
     does nothing under 300 regions and then adds to the per-region climb, where
     it used to scale the price of every region for everyone (#56)
@@ -140,6 +142,16 @@
   * Added Waste, Population, and Morale and Support help topics
 
   Inter-BBS (league play only):
+  * Added Trading to the InterPlanetary Operations menu: a baron may bid on the
+    Trading Market of any planet the Coordinator has marked Allied
+  * A planet's market travels with its scores, so an ally sees what is offered
+  * A bid holds the gold when it is sent. The far planet fills it only if the
+    listing is still there at the same price, pays its seller, and sends the
+    goods back; otherwise the gold comes home, with the reason
+  * A listing that shrank fills as far as it goes and refunds the rest
+  * A bid whose answer never arrives is given up on and refunded, on the same
+    timer that brings lost forces home
+  * Bids Out lists what a baron has bid for and how much gold is held
   * Individual interplanetary strikes choose an attack type — Normal Attack,
     Quick Strike, or Extended Battle — trading strength against the land taken
     and the losses both sides accept. A Quick Strike fights at 120% strength,

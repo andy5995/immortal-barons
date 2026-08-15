@@ -234,6 +234,8 @@ func configPages(ibbs bool) []cfgPage {
 			}},
 		// 45 is past the original's own field numbers, which end at 44: pirates are
 		// IB's switch, so it takes the next free number rather than one of BRE's.
+		toggle(46, "Allow IP Allies to Trade at Market", func(c *game.Config) bool { return c.IPTrading },
+			func(c *game.Config, v bool) { c.IPTrading = v }),
 		toggle(45, "Pirates", func(c *game.Config) bool { return c.Pirates },
 			func(c *game.Config, v bool) { c.Pirates = v }),
 	}
@@ -407,6 +409,7 @@ var ibbsOnlyFields = map[int]bool{
 	38: true, // Clingy Annihilator
 	42: true, // Local Attacks
 	43: true, // Local Attack Scoring
+	46: true, // Allow IP Allies to Trade at Market — meaningless off a league
 	44: true, // Dupe Checking
 }
 

@@ -37,6 +37,11 @@ func noBombingOps(w *ctx) bool  { return !w.Config.BombingOps }
 func noMissileOps(w *ctx) bool  { return !w.Config.MissileOps }
 func noAnnihilator(w *ctx) bool { return !w.Config.ClingyAnnihilator }
 
+// noIPTrading hides Trading when the league has turned it off. It is IB's own
+// feature, so a league that wants the original's shape says so and the menu
+// entry goes with it, hotkey included.
+func noIPTrading(w *ctx) bool { return !w.Config.IPTrading }
+
 // noLocalAttacks hides the ways of striking a baron on this board. With Local
 // Attacks disabled BRE's Attack Menu collapses to the pirate and alliance
 // entries, captured live in docs/dev/bre-screens.md ("Attack Menu (InterBBS,
@@ -77,6 +82,7 @@ func BuildMenus() *Menus {
 	// BRE draws IP Messages as a narrow single-column box (25 columns, from a
 	// live capture) rather than at the full menu width.
 	ipMessages := &Menu{Title: "IP Messages", Color: ansi.FgBrightCyan, ExitOnEnter: true, Width: 25}
+	ipTrading := &Menu{Title: "Trading", Color: ansi.FgBrightYellow, ExitOnEnter: true, Header: tradingHeader}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
 	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}
 	messages := &Menu{Title: "Messages", Color: ansi.FgBrightCyan}
@@ -182,6 +188,14 @@ func BuildMenus() *Menus {
 			formatGold(p.Gold, lang), formatGold(p.Bank, lang))
 	}
 
+	ipTrading.Items = []Item{
+		{Key: 'M', Label: "Markets", Do: ipMarkets},
+		{Key: 'B', Label: "Bids Out", Do: ipPendingBids},
+		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
+		{Key: '0', Label: "Quit", Do: back},
+	}
+	ipTrading.DefaultOnEnter = quitOnEnter(ipTrading)
+
 	attack.Items = []Item{
 		{Key: 'R', Label: "Regular Attack", Do: regularAttack, Hidden: noLocalAttacks},
 		{Key: 'N', Label: "Nuclear Attack", Do: nuclearAttack, Hidden: noLocalMissiles},
@@ -224,6 +238,7 @@ func BuildMenus() *Menus {
 		{Key: '8', Label: "Special Operations", Do: gotoMenu(ipSpecial)},
 		{Key: '9', Label: "Clingy Annihilator Ops", Do: clingyAnnihilator, Hidden: noAnnihilator},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
+		{Key: 'B', Label: "Trading", Do: gotoMenu(ipTrading), Hidden: noIPTrading},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
 		{Key: 'S', Label: "Spy Database", Do: spyDatabase},
 		{Key: 'T', Label: "Travel Times", Do: travelTimes},

@@ -197,7 +197,15 @@ func (w *World) BuyFromMarket(buyer *Empire, seller, good string, n int) error {
 // escrowed food spoils along with the food in hand (see processEconomy), so listing
 // food doesn't dodge spoilage. Returns the amount removed.
 func (w *World) spoilListedFood(realm string, n int) int {
-	l := w.marketListing(realm, "Food")
+	return w.takeFromMarket(realm, "Food", n)
+}
+
+// takeFromMarket removes up to n units of good from realm's listing, dropping
+// the listing when it empties, and reports how many it actually took. The goods
+// are simply gone as far as the market is concerned — where they end up is the
+// caller's business: spoilage destroys them, an interplanetary bid ships them.
+func (w *World) takeFromMarket(realm, good string, n int) int {
+	l := w.marketListing(realm, good)
 	if l == nil || n <= 0 {
 		return 0
 	}
@@ -206,9 +214,17 @@ func (w *World) spoilListedFood(realm string, n int) int {
 	}
 	l.Qty -= n
 	if l.Qty == 0 {
-		w.removeListing(realm, "Food")
+		w.removeListing(realm, good)
 	}
 	return n
+}
+
+// giveGood adds n units of a market good to e's inventory. Unknown goods are
+// ignored rather than silently landing somewhere wrong.
+func (w *World) giveGood(e *Empire, good string, n int) {
+	if f := marketField(e, good); f != nil && n > 0 {
+		*f += n
+	}
 }
 
 // bombMarketPosition destroys pct% of d's listed goods (per listing) and pct% of

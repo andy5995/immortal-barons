@@ -61,6 +61,9 @@ definition.
   "Annihilator": AnnihilatorStatus,          // a doomsday weapon aimed at ToBoard (#63)
   "TimeChecks": [ TimeCheck ],      // round-trip probes, out and echoed back
   "IPMessages": [ IPMessage ],      // interplanetary mail for ToBoard's barons
+  "TradeBids":  [ IPTradeBid ],     // buy orders landing on ToBoard's market (#47)
+  "TradeFills": [ IPTradeFill ],    // their answers coming home (#47)
+  "Market":  [ RemoteListing ],     // FromBoard's market, riding its scores (#47)
   "LeagueConfig": LeagueConfig,     // coordinator's ruleset (signed)
   "LeagueNodes": [ LeagueNode ],    // coordinator's roster (signed, #64)
   "Reset": LeagueReset,             // coordinator's new-season order (signed, #65)
@@ -78,9 +81,44 @@ definition.
 }
 ```
 
+### Interplanetary trading (#47) — a version change worth reading
+
+The three trading fields are **new in v0.0.5** and are the first change to this
+format since boards began signing packets, so the compatibility rule matters.
+
+**They are `omitempty`, and that is load-bearing.** The origin signature is taken
+over the marshalled packet (`boardSigningBytes`), so a board too old to know a
+field drops it on unmarshal and then computes a different signature. If these
+fields were always emitted, EVERY packet would fail verification on an older
+board. Omitting them when empty keeps every packet that carries no trading byte
+identical across versions — which is every packet an old board could act on
+anyway. `TestTradingFieldsAreOmittedWhenEmpty` holds that line.
+
+What does break, unavoidably: a packet that actually carries trading will not
+verify on a board older than v0.0.5. That is the honest cost of the feature, and
+it degrades sensibly — the old board rejects the packet rather than
+misinterpreting it, and its barons simply never see the Trading menu.
+
 Component types:
 
 ```json
+IPTradeBid    { "ID": 12, "FromBoard": "AlphaBBS", "FromOwner": "khan",
+                "FromEmpire": "Ironhold", "Seller": "Redlands", "Good": "Tank",
+                "Qty": 40, "Price": 500 }
+                // A BID, not a purchase. The buyer's gold left their hands when
+                // this was queued; the receiving board fills it only if Seller
+                // still offers Good at exactly Price, and refuses otherwise.
+IPTradeFill   { "ID": 12, "Filled": true, "Good": "Tank", "Qty": 40,
+                "Gold": 0, "Reason": "" }
+                // The answer. Gold is the refund for whatever did not fill (the
+                // whole bid when Filled is false, the remainder on a partial
+                // fill). Reason is the seller-side wording, so the buyer is told
+                // why rather than just handed their money back.
+RemoteListing { "Realm": "Redlands", "Good": "Tank", "Qty": 100, "Price": 500 }
+                // One row of the sender's market. A SNAPSHOT: by the time a bid
+                // against it lands, a packet round trip has passed and the
+                // listing may be gone, smaller or repriced. That staleness is
+                // the whole reason bids exist.
 RemoteScore   { "Empire": "Asgard", "NetWorth": 1281, "Land": 100, "Score": 940,
                 "Protected": true, "OwnerHash": "3f6a1c09b2d84e57" }
                 // Protected = still under New Realm Protection, so the boards

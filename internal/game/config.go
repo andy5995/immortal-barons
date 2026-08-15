@@ -283,6 +283,12 @@ type Config struct {
 	LocalAttackScoring bool // ... and winning one moves score
 	DupeChecking       bool // a baron playing on another board in the league is locked out here
 
+	// IPTrading lets a baron bid on an ALLIED planet's Trading Market (#47). IB's
+	// own, and inter-BBS by nature — off a league there is no other planet — so
+	// it is a starred setting only -ibbs-reset asks, and it rides the league
+	// ruleset like every other rule.
+	IPTrading bool
+
 	// Pirates is IB's own switch, not one of BRE's: the original always has its
 	// nine factions. A raid never crosses a planet, but the setting is still part of
 	// the league ruleset the Coordinator broadcasts — a league where some planets
@@ -422,6 +428,7 @@ func DefaultConfig() Config {
 		MaxTerrorOps:          25,
 		MaxBombingOps:         4,
 		LostForcesDays:        3,
+		IPTrading:             true, // IB's own feature; a league that wants it off says so
 		Pirates:               true, // the original has no switch; on is what it does
 		BombingOps:            true,
 		MissileOps:            true,
