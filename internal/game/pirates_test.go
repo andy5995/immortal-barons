@@ -479,3 +479,38 @@ func TestRaidLossReport(t *testing.T) {
 		t.Errorf("a lost raid should report its cost on its own line: %q", report)
 	}
 }
+
+// With pirates off there are no bands at all: none are seeded on a fresh game,
+// none are seeded on load, and nobody is raided.
+func TestPiratesDisabledMeansNoBandsAndNoRaids(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.Pirates = false
+	w := NewWorldSeed(cfg, 1)
+	if len(w.Pirates) != 0 {
+		t.Fatalf("a fresh game seeded %d bands with pirates off", len(w.Pirates))
+	}
+	w.EnsurePirates()
+	if len(w.Pirates) != 0 {
+		t.Errorf("loading re-seeded %d bands with pirates off", len(w.Pirates))
+	}
+
+	// A realm the bands would certainly rob if they existed: no protection, and
+	// enough troopers that every raid roll finds something to take.
+	e := w.AddHuman("h", "Realm")
+	e.Protection, e.Troopers, e.Land = 0, 1_000_000, 500
+	e.syncLand()
+	for i := 0; i < 500; i++ {
+		w.maybePirateRaid(e)
+	}
+	if len(e.PirateHits) != 0 {
+		t.Errorf("pirates raided %d times with the setting off", len(e.PirateHits))
+	}
+
+	// Turning them back on restores the bands rather than leaving the game
+	// permanently pirate-free.
+	w.Config.Pirates = true
+	w.EnsurePirates()
+	if len(w.Pirates) != len(PirateFactions) {
+		t.Errorf("turning pirates back on seeded %d bands, want %d", len(w.Pirates), len(PirateFactions))
+	}
+}

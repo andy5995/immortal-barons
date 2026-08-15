@@ -126,9 +126,12 @@ func (w *World) seedPirates() {
 // battleLoss is a percentage casualty, rounded as BRE rounds it.
 func battleLoss(have, pct int) int { return have * pct / 100 }
 
-// EnsurePirates seeds the factions after loading a save that predates them.
+// EnsurePirates seeds the factions after loading a save that predates them, and
+// again if the sysop turns pirates back on. Turning them OFF leaves the bands'
+// records alone rather than emptying them, so a band keeps whatever it had
+// stolen and the switch is reversible.
 func (w *World) EnsurePirates() {
-	if len(w.Pirates) == 0 {
+	if w.Config.Pirates && len(w.Pirates) == 0 {
 		w.seedPirates()
 	}
 }
@@ -177,7 +180,7 @@ func pirateRaidChance(e *Empire) int {
 // flattened: roll, maybe raid, then a 1-in-10 roll to go round again with a
 // freshly picked faction.
 func (w *World) maybePirateRaid(e *Empire) {
-	if !e.Alive || e.Protection > 0 || len(w.Pirates) == 0 {
+	if !w.Config.Pirates || !e.Alive || e.Protection > 0 || len(w.Pirates) == 0 {
 		return
 	}
 	for {

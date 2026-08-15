@@ -105,12 +105,12 @@ func TestInterestNoInt32Overflow(t *testing.T) {
 	// A raised cap, so the earned figure is the one under test rather than the
 	// stock 2-billion ceiling clamping it on the way past.
 	w := NewWorldSeed(raisedCapConfig(), 1)
-	w.Config.InterestRate = 5000 // add ~100% of min(Bank,InterestCap) this turn
+	w.Config.InterestRate = 5000 // add ~50% of the balance this turn
 	e := w.AddHuman("h", "Realm")
-	e.Bank = InterestCap
+	e.Bank = 1_599_999_999
 	e.Food = 1_000_000 // avoid starvation noise; irrelevant to the bank math
 	w.processEconomy(e)
-	// Golden figure for InterestCap at rate 5000 over the default 10 turns/day:
+	// Golden figure for that balance at rate 5000 over the default 10 turns/day:
 	// 1,599,999,999 + 1,599,999,999×5000/(1000×10).
 	const want int64 = 2_399_999_998
 	if e.Bank != want {

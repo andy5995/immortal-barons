@@ -215,6 +215,11 @@ type Config struct {
 	LocalAttackScoring bool // ... and winning one moves score
 	DupeChecking       bool // a baron playing on another board in the league is locked out here
 
+	// Pirates is IB's own switch, not one of BRE's: the original always has its
+	// nine bands. It stays on the board rather than in the league ruleset,
+	// because a raid touches only the realm it robs and never crosses a planet.
+	Pirates bool // the pirate bands exist, raid, and can be raided
+
 	BombingOps            bool              // the four bombing ops are offered (Bomb Enemy Targets, Special Operations)
 	MissileOps            bool              // nuclear/chemical/biological strikes are offered (Attack, Bomb Enemy Targets, Special Operations)
 	ClingyAnnihilator     bool              // the doomsday weapon is offered
@@ -341,6 +346,7 @@ func DefaultConfig() Config {
 		MaxTerrorOps:          25,
 		MaxBombingOps:         4,
 		LostForcesDays:        3,
+		Pirates:               true, // the original has no switch; on is what it does
 		BombingOps:            true,
 		MissileOps:            true,
 		ClingyAnnihilator:     true,

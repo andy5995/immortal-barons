@@ -120,6 +120,7 @@ const (
 	helpLocalAttackScoring = "Whether winning an attack on a baron here moves either side's score."
 	helpDupeChecking       = "Whether a baron found playing on another board in the league is locked out here."
 	helpMissileOps         = "Whether nuclear, chemical and biological strikes are offered at all."
+	helpPirates            = "Whether the pirate bands exist. Off, nobody is raided and Attack Pirates is gone."
 	helpClingyAnnihilator  = "Whether the Clingy Annihilator doomsday weapon may be built."
 	helpMaxRegions         = "The most regions a single player may own."
 	helpMaxPlayers         = "The most human empires allowed on this board. 0 means no limit."
@@ -201,6 +202,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addDate(timing, "Game Start Date (YYYY-MM-DD)", helpStartDate, c.GameStartDate, func(c *game.Config, v string) { c.GameStartDate = v })
 	t.addDate(timing, "Join Cutoff Date (YYYY-MM-DD)", helpJoinDate, c.JoinDate, func(c *game.Config, v string) { c.JoinDate = v })
 	t.addInt(timing, "AI empires", helpAICount, c.AICount, 0, 5, func(c *game.Config, n int) { c.AICount = n })
+	t.addBool(timing, "Pirates", helpPirates, c.Pirates, func(c *game.Config, b bool) { c.Pirates = b })
 
 	econ := tview.NewForm()
 	t.addInt(econ, "Initial Market Land", helpInitialLand, c.InitialMarketLand, 0, game.MaxInitialMarketLand, func(c *game.Config, n int) { c.InitialMarketLand = n })

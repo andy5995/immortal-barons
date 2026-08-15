@@ -817,7 +817,8 @@ func (w *World) initFreshGame() {
 	w.AutoPayMaint = true
 	w.AutoFeed = true
 	w.seedAIEmpires()
-	w.seedPirates()
+	w.Pirates = nil
+	w.EnsurePirates() // a no-op when the sysop has turned pirates off
 }
 
 // EnsureEpoch repairs Epoch after loading a save that predates the inter-BBS
