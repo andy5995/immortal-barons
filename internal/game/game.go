@@ -640,12 +640,11 @@ type World struct {
 	// listed goods are escrowed out of the seller's inventory. MarketProceeds
 	// accrues each seller's unpaid sale gold, deposited at daily maintenance.
 	// Both are keyed by realm NAME — see MarketListing.Realm for why the owner
-	// handle could not do the job. MarketProceedsByOwner is the handle-keyed map a
-	// save written before that carried; the key is the old one so such a save
-	// still loads, and EnsureMarket drains it.
-	Market                []MarketListing
-	MarketProceeds        map[string]int64 `json:"MarketProceedsByRealm"`
-	MarketProceedsByOwner map[string]int64 `json:"MarketProceeds,omitempty"`
+	// handle could not do the job. A save from before that key change carried
+	// both under different names; nothing migrates them, since no released
+	// version's market had been traded on.
+	Market         []MarketListing
+	MarketProceeds map[string]int64 `json:"MarketProceedsByRealm"`
 
 	// Inter-BBS (interplanetary) play — see ibbs.go. GroupAttacks assemble
 	// locally until they depart; Outbox holds packets queued for other boards;
@@ -795,7 +794,6 @@ func (w *World) initFreshGame() {
 	w.Pirates = nil
 	w.Market = nil
 	w.MarketProceeds = nil
-	w.MarketProceedsByOwner = nil
 	w.GroupAttacks = nil
 	w.NextAttackID = 0
 	w.Outbox = nil

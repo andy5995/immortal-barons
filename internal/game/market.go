@@ -55,10 +55,6 @@ type MarketListing struct {
 	Good  string
 	Qty   int
 	Price int // gold per unit, seller-set
-	// LegacyOwner is the owner handle a save written before the name key carried
-	// here. EnsureMarket drains it into Realm and clears it; it exists only so
-	// such a save keeps its listings.
-	LegacyOwner string `json:"Owner,omitempty"`
 }
 
 // marketListing returns the pointer to realm's listing of good (so callers can
@@ -264,59 +260,21 @@ func (w *World) forgetMarketPosition(realm string) {
 	delete(w.MarketProceeds, realm)
 }
 
-// EnsureMarket migrates a save whose market was keyed by the seller's OWNER
-// HANDLE onto the realm-name key (see MarketListing.Realm). A row from such a
-// save arrives with Realm empty — a name never is — and its handle in
-// LegacyOwner, which is the only thing that tells the two shapes apart.
-//
-// Where a legacy key resolves to a realm, its listings and unpaid proceeds move
-// there intact. Where it does not, they are forfeit, which is what the live game
-// already did with them: forgetMarketPosition wipes a departed realm's position
-// and settleMarketProceeds pays nobody for it.
+// EnsureMarket drops any listing that names no realm. Nothing migrates a market
+// written before the realm-name key — no released version's market had been
+// traded on, so there is nothing to carry over — but such a row would still LOAD,
+// with Realm empty where its old Owner key used to be. That is worse than losing
+// it: MarketTotalForSale counts every row whatever it is keyed on, so the goods
+// would sit on the shelf, be purchasable from a seller who does not exist, and
+// pay their gold into a realm nobody can be.
 func (w *World) EnsureMarket() {
 	kept := w.Market[:0]
 	for _, l := range w.Market {
-		if l.Realm == "" {
-			l.Realm = w.legacyMarketRealm(l.LegacyOwner)
+		if l.Realm != "" {
+			kept = append(kept, l)
 		}
-		l.LegacyOwner = ""
-		if l.Realm == "" {
-			continue
-		}
-		kept = append(kept, l)
 	}
 	w.Market = kept
-	for owner, gross := range w.MarketProceedsByOwner {
-		realm := w.legacyMarketRealm(owner)
-		if realm == "" {
-			continue
-		}
-		if w.MarketProceeds == nil {
-			w.MarketProceeds = map[string]int64{}
-		}
-		w.MarketProceeds[realm] += gross
-	}
-	w.MarketProceedsByOwner = nil
-}
-
-// legacyMarketRealm names the realm a pre-name-keyed market row belongs to, or
-// "" if it belongs to nobody left.
-func (w *World) legacyMarketRealm(owner string) string {
-	if e := w.FindByOwner(owner); e != nil {
-		return e.Name
-	}
-	// The empty handle was every computer baron's, so a row under it is the one
-	// position the whole pool shared and no baron can be shown to own it. It goes
-	// to the first living baron — the realm the pre-fix game already handed it to,
-	// since that is what FindByOwner("") resolved to when the proceeds settled and
-	// what could delist the goods. Handing it over keeps the units and the gold in
-	// play; destroying them would take a real baron's stock with the ambiguity.
-	if owner == "" {
-		if ai := w.AIEmpires(); len(ai) > 0 {
-			return ai[0].Name
-		}
-	}
-	return ""
 }
 
 // settleMarketProceeds deposits each seller's accrued market proceeds (minus the
