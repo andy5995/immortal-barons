@@ -41,9 +41,11 @@
 - Gold above the limit is still lost, but the game now tells you when it happens,
   and a full bank pays its interest into your gold in hand rather than losing it.
 - A reset option turns the pirates off. BRE always has them.
-- Some game values — such as attack rewards, unit prices, and economy rates —
-  may not match BRE exactly. The game aims to get as close as it can, using
-  BRE's own numbers where they are known. A few mechanics are still being built.
+- Some game values — such as attack rewards and several economy rates — may not
+  match BRE exactly. The ones read out of BRE's own program do match: region
+  income, unit prices, industrial output, and the crown tax. The rest are being
+  tuned as more of the original is worked out, and a few mechanics are still
+  being built.
 
 ## Is winsock supported?
 

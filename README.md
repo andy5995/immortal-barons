@@ -8,8 +8,9 @@ highest net worth when the turns run out, or to conquer everyone else.
 The game is written in Go. It is an independent remake, inspired by the
 1990s BBS door game *Barren Realms Elite*. See [Heritage](#heritage) below.
 
-> **Early release.** The game is playable but not finished. Game values are
-> still being balanced, and live inter-BBS (IBBS) play is not ready yet.
+> **Early release.** The game is playable and inter-BBS (IBBS) league play
+> works, but it is not finished: some game values are still being balanced, and
+> a league has so far only been run between boards belonging to one operator.
 
 ## Status
 
@@ -17,11 +18,16 @@ Immortal Barons is a persistent, multi-user BBS door game: each caller has a
 lasting empire in one shared world; you play your turns, and other barons (and
 any AI) act on their own turns. The game runs locally or as a native BBS door.
 
-The core game is already playable — economy, military and war, covert
-operations, diplomacy, and messaging all work, but the game is not yet balanced.
-Many values do not match BRE's yet, so parts of the game are far too easy or too
-hard. Larger features, such as leagues and live inter-BBS play, are still to
-come.
+The core game is playable — economy, military and war, covert operations,
+diplomacy, and messaging all work. Leagues and inter-BBS play are built as well:
+boards trade packets, and barons attack, message, and buy from an ally's market
+across planets. That has been run between two boards on one machine; a league
+spread across boards run by different sysops has not been tried yet.
+
+Balance is the unfinished part. The values read from the original's own program
+— region income, unit costs, industrial output, the crown tax — now match it,
+but the rest are still being tuned, so parts of the game may be too easy or too
+hard.
 
 Learn more, follow progress, or get involved:
 
