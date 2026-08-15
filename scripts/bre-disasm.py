@@ -3758,23 +3758,51 @@ def context_boundaries(context: dict) -> tuple[dict[int, str], list[tuple[int, i
     return labels, data
 
 
+def code_regions(size: int, data: list[tuple[int, int, str]]) -> list[tuple[int, int]]:
+    """The parts of a context that are NOT catalogued data, in order."""
+    regions = []
+    cursor = 0
+    for start, end, _name in sorted(data):
+        start, end = max(0, start), min(size, end)
+        if start > cursor:
+            regions.append((cursor, start))
+        cursor = max(cursor, end)
+    if cursor < size:
+        regions.append((cursor, size))
+    return regions
+
+
 def ndisasm_context(context: dict) -> list[tuple[int, str]]:
     labels, data = context_boundaries(context)
-    with tempfile.NamedTemporaryFile(prefix="bre-disasm-", suffix=".bin") as stream:
-        stream.write(context["code"])
-        stream.flush()
-        command = [shutil.which("ndisasm") or "ndisasm", "-b", "16", "-a"]
-        for start in labels:
-            command += ["-s", str(start)]
-        for start, end, _name in data:
-            command += ["-k", f"{start},{end - start}"]
-        command.append(stream.name)
-        result = subprocess.run(command, check=True, text=True, capture_output=True)
+    code = context["code"]
+    # The catalogued data chunks are cut out HERE rather than handed to ndisasm
+    # as -k ranges. ndisasm 3.02's -k skips its range and then stops
+    # disassembling altogether instead of resuming after it — verified with a
+    # four-byte skip, which prints one "skipping" line and nothing else — so a
+    # unit that opens with a string block (they routinely do) disassembled to a
+    # single line, and asking for a procedure past that point produced no output
+    # at all while still exiting 0.
+    #
+    # Each code region is disassembled on its own with -o set to its true start,
+    # so offsets stay honest and no region can be thrown out of step by the data
+    # in front of it.
+    binary = shutil.which("ndisasm") or "ndisasm"
     lines = []
-    for line in result.stdout.splitlines():
-        match = NDISASM_LINE.match(line)
-        if match:
-            lines.append((int(match.group(1), 16), line))
+    for start, end in code_regions(len(code), data):
+        with tempfile.NamedTemporaryFile(prefix="bre-disasm-", suffix=".bin") as stream:
+            stream.write(code[start:end])
+            stream.flush()
+            command = [binary, "-b", "16", "-a", "-o", str(start)]
+            for label in labels:
+                if start <= label < end:
+                    command += ["-s", str(label)]
+            command.append(stream.name)
+            result = subprocess.run(command, check=True, text=True, capture_output=True)
+        for line in result.stdout.splitlines():
+            match = NDISASM_LINE.match(line)
+            if match:
+                lines.append((int(match.group(1), 16), line))
+    lines.sort(key=lambda item: item[0])
     return lines
 
 
