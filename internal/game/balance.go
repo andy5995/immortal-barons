@@ -1538,6 +1538,11 @@ const (
 	// the attack pair's divide-by-five.
 	TradeCostLowDivisor   = 6
 	TradeCostHighMultiple = 3
+	// The Maintenance Costs ladder, applied by Level.MaintCostScaled.
+	// BINARY-VERIFIED (BRE.OVR 0x2E836 and 0x2E948): a quarter at Low, four
+	// times at High — a sixteenfold spread, where IB applied half and double.
+	MaintCostLowDivisor   = 4
+	MaintCostHighMultiple = 4
 	TradeDealMinDays      = 2 // shortest a deal may be sent for
 	TradeDealMaxDays      = 5 // longest a deal may be sent for
 

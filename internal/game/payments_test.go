@@ -177,3 +177,41 @@ func TestClampGiveLimitsToGold(t *testing.T) {
 		t.Errorf("LastGoldPaid should equal what was affordable (50), got %d", e.LastGoldPaid)
 	}
 }
+
+// The Maintenance Costs ladder is the original's own, not the generic preset
+// one: a QUARTER at Low and FOUR TIMES at High, so the same army costs sixteen
+// times as much to keep between the two ends. Golden literals — IB applied half
+// and double until the routine was read (#56).
+func TestMaintenanceCostsFollowTheOriginalsLadder(t *testing.T) {
+	due := func(l Level) (int64, int64) {
+		cfg := DefaultConfig()
+		cfg.MaintCosts = l
+		w := NewWorldSeed(cfg, 1)
+		e := w.AddHuman("h", "Realm")
+		e.Troopers, e.Jets, e.Tanks = 10_000, 1_000, 500
+		e.Regions.Urban, e.Regions.Agricultural = 100, 100
+		e.syncLand()
+		return w.ForcesDue(e), w.RegionsDue(e)
+	}
+	mf, mr := due(Medium)
+	if mf <= 0 || mr <= 0 {
+		t.Fatalf("the Medium baseline is empty (forces %d, regions %d)", mf, mr)
+	}
+	for _, c := range []struct {
+		level       Level
+		wf, wr      int64
+		whatItMeans string
+	}{
+		{None, 0, 0, "free"},
+		{Low, mf / 4, mr / 4, "a quarter"},
+		{High, mf * 4, mr * 4, "four times"},
+	} {
+		gf, gr := due(c.level)
+		if gf != c.wf {
+			t.Errorf("%v forces upkeep = %d, want %s of Medium (%d)", c.level, gf, c.whatItMeans, c.wf)
+		}
+		if gr != c.wr {
+			t.Errorf("%v region upkeep = %d, want %s of Medium (%d)", c.level, gr, c.whatItMeans, c.wr)
+		}
+	}
+}

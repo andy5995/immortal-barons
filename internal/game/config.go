@@ -119,6 +119,31 @@ func (l Level) CostPercent() int {
 	}
 }
 
+// MaintCostScaled applies the Maintenance Costs level to an upkeep figure, in
+// the original's own arithmetic.
+//
+// BINARY-VERIFIED at BRE.OVR 0x2E836, inside calculate_military_maintenance, and
+// again at 0x2E948 inside calculate_region_maintenance — the same two charges IB
+// scales. Both switch on config byte +0x180 (Medium 0 / None 1 / Low 2 / High 3)
+// and leave the figure alone, zero it, divide it by Real48 4.0, or multiply it
+// by 4.0.
+//
+// So Low is a QUARTER and High is FOUR TIMES, not the half and double of the
+// generic preset ladder IB used to apply here. The spread is much wider than it
+// looked: from Low to High the same army costs sixteen times as much to keep.
+func (l Level) MaintCostScaled(n int64) int64 {
+	switch l {
+	case None:
+		return 0
+	case Low:
+		return n / MaintCostLowDivisor
+	case High:
+		return n * MaintCostHighMultiple
+	default:
+		return n
+	}
+}
+
 // TradeCostScaled applies the Trade Deal Costs level to a transit rate, in the
 // original's own arithmetic.
 //

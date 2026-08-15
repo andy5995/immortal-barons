@@ -54,11 +54,11 @@ func (w *World) agriFood(e *Empire) int {
 }
 
 // ForcesDue and RegionsDue apply the league's Maintenance Costs knob to the
-// base upkeep (Medium = 100% = unchanged; None = 0 = free upkeep). These are
-// the amounts actually charged and displayed; the Empire methods above give
-// the unscaled baseline.
+// base upkeep, on the original's own ladder — a quarter at Low, four times at
+// High (Level.MaintCostScaled). These are the amounts actually charged and
+// displayed; the Empire methods above give the unscaled baseline.
 func (w *World) ForcesDue(e *Empire) int64 {
-	return pctOf(e.ForcesUpkeep()+w.listedForcesUpkeep(e), w.Config.MaintCosts.Percent())
+	return w.Config.MaintCosts.MaintCostScaled(e.ForcesUpkeep() + w.listedForcesUpkeep(e))
 }
 
 // listedForcesUpkeep is the maintenance owed on this empire's military units that
@@ -93,7 +93,7 @@ func (w *World) listedUnits(e *Empire) unitCounts {
 	}
 }
 func (w *World) RegionsDue(e *Empire) int64 {
-	return pctOf(e.RegionUpkeep(), w.Config.MaintCosts.Percent())
+	return w.Config.MaintCosts.MaintCostScaled(e.RegionUpkeep())
 }
 
 // PeopleFoodUpkeep is the food the population eats per turn — the first of BRE's

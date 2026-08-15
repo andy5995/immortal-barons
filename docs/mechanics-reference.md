@@ -830,6 +830,25 @@ through `Level.CostPercent()`. `Level.Percent()` stays for Maintenance / Region 
 Attack Damage / Attack Rewards; Trade Deal Costs has a third ladder of its own,
 below.
 
+### Maintenance Costs — BINARY-VERIFIED, and wider than it looked
+
+| Level | Effect on upkeep |
+| --- | --- |
+| None | 0 |
+| Low | ÷ 4 |
+| Medium | unchanged |
+| High | × 4 |
+
+Read at `BRE.OVR 0x2E836` inside `calculate_military_maintenance`, and again at
+`0x2E948` inside `calculate_region_maintenance` — the same two charges IB scales.
+Both switch on config byte **+0x180** and divide by Real48 `4.0` or multiply by
+it.
+
+**Low is a quarter and High is four times**, so between the two ends the same
+army costs SIXTEEN times as much to keep. IB applied the generic ladder's half
+and double until this was read, which understated the knob badly at both ends.
+`Level.MaintCostScaled` now carries it.
+
 ### Trade Deal Costs — BINARY-VERIFIED, and a ladder of its own
 
 | Level | Effect on the per-day transit rate |
@@ -852,6 +871,21 @@ the generic presets halve. Three knobs, three ladders. IB assumed this one
 matched the generic ladder until the routine was read; `Level.TradeCostScaled`
 now applies the original's arithmetic, and the test pins the figures as golden
 literals.
+
+### Region Cost Change — LOCATED, not yet settled
+
+Config byte **+0x185**, read at `BRE.OVR 0x3019C` and `0x30249` in the
+region-price unit. It does NOT scale anything: it SELECTS a value — **None 0,
+Low 15, Medium 35, High 55** — written straight into a local.
+
+What that value feeds is not yet proven, so nothing is changed on the strength
+of it. The suggestive part is that IB's land price is `PriceLand + Land ×
+LandPerRegion` with `LandPerRegion = 33` **live-sampled** from play, and 33 is
+exactly what fitting a slope to noisy samples of a true 35 would give. If the
+selected value is that per-region climb, then IB has both the Medium figure
+slightly wrong AND the wrong shape — it multiplies the whole price by a percent
+where the original swaps the slope. Worth finishing: trace what `[bp-0x6]` at
+`0x3019C` is used for.
 
 **Which knob reaches what (#56).** The original has five cost knobs — Maintenance
 Costs, Region Cost Change, Trade Deal Costs, Attack Costs, Terrorism Costs — and

@@ -1,4 +1,6 @@
 (in-progress:)
+  * Maintenance Costs scales upkeep at the original's own rates — a quarter at
+    Low and four times at High, where it was half and double (#56)
   * The Trade Deal Costs setting scales what sending a trade deal charges — at
     the original's own rates, a sixth at Low and triple at High; it was stored,
     shown and broadcast while changing nothing (#56)
