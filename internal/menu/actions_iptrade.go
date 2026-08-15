@@ -58,19 +58,29 @@ func browseRemoteMarket(s session.Session, w *ctx, board string) {
 		return rows[i].Good < rows[j].Good
 	})
 
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, fmt.Sprintf(tr(s, "%s Trading Market"), board), ansi.Reset)
+	// This is the local Trading Market seen from another planet, so it is drawn
+	// as that screen is drawn — same title weight, same headings ("Empire Name"
+	// and "Name" are what the local market and its seller list call these two
+	// columns), same inset rule in the dim market accent, same colors per column.
+	// A player should recognise it as the market, not meet a second convention.
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightWhite, fmt.Sprintf(tr(s, "%s Trading Market"), board), ansi.Reset)
 	if asOf != "" {
 		// The date is not decoration: it is how stale the prices are, and staleness
 		// is what makes a bid fail.
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgWhite, fmt.Sprintf(tr(s, "As we last heard, %s."), asOf), ansi.Reset)
 	}
-	fmt.Fprintf(s, "%s  %-3s %-20s %-10s %10s %10s%s\n", ansi.FgWhite,
-		tr(s, "#"), tr(s, "Realm"), tr(s, "Good"), tr(s, "Amount"), tr(s, "Price"), ansi.Reset)
+	fmt.Fprintf(s, "%s%-5s%-20s%-12s%12s %10s%s\n", ansi.FgBrightWhite,
+		tr(s, "Key"), tr(s, "Empire Name"), tr(s, "Name"), tr(s, "For Sale"), tr(s, "Price"), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), remoteMarketRule(), ansi.Reset)
 	for i, r := range rows {
-		fmt.Fprintf(s, "  %s%-3d%s %-20s %-10s %s%10s %10s%s\n",
-			ansi.FgBrightCyan, i+1, ansi.Reset, r.Realm, tr(s, r.Good),
-			ansi.FgBrightWhite, comma(r.Qty), comma(r.Price), ansi.Reset)
+		// The number is padded rather than bare: a market with ten or more
+		// listings would otherwise step every column right at "(10)".
+		fmt.Fprintf(s, "%s(%s%2d%s)%s %s%-20s%-12s%s%s%12s %10s%s\n",
+			ansi.FgYellow, ansi.FgBrightYellow, i+1, ansi.FgYellow, ansi.Reset,
+			ansi.FgWhite, r.Realm, tr(s, r.Good), ansi.Reset,
+			ansi.FgBrightYellow, comma(r.Qty), comma(r.Price), ansi.Reset)
 	}
+	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), remoteMarketRule(), ansi.Reset)
 
 	pick := promptSuggested(s, tr(s, "Bid on which listing?"), 0, len(rows))
 	if pick <= 0 {
@@ -108,6 +118,16 @@ func browseRemoteMarket(s session.Session, w *ctx, board string) {
 	}
 	ok(s, "Your bid is away. If %s no longer offers it at that price, your gold comes back.", r.Realm)
 }
+
+// An allied planet's market carries a realm column the local one does not, so it
+// is wider than the seller list and narrower than the full market — sized to its
+// own content, as every box here is.
+const (
+	remoteMarketRuleWidth  = 60
+	remoteMarketRuleDouble = 12
+)
+
+func remoteMarketRule() string { return insetRule(remoteMarketRuleWidth, remoteMarketRuleDouble) }
 
 // ipPendingBids lists the bids this baron has out, so the held gold is never a
 // mystery. It reads the same in-flight list the lost-packet timer sweeps.
