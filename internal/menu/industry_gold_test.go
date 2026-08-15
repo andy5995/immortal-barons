@@ -99,3 +99,25 @@ func TestSpecializeDeclineIsReported(t *testing.T) {
 		t.Errorf("declining should say so:\n%s", out)
 	}
 }
+
+// The Paused bar has to close its own line. A menu opens with its title rule and
+// no newline of its own, so a bar left un-terminated ran straight into it:
+// "─»>Paused<«──────────[System]──────────" on one row.
+func TestPausedBarDoesNotRunIntoTheNextScreen(t *testing.T) {
+	w := newWorld()
+	w.With(func() { w.Player().Regions.Industrial = 10 })
+	// Specialize in Tanks (5), dismiss the Paused bar, then draw a menu.
+	f := &fakeSession{keys: []rune("5y \r")}
+	specializeIndustry(f, w)
+	draw(f, w, BuildMenus().System)
+
+	out := f.out.String()
+	if !strings.Contains(out, "Paused") {
+		t.Fatalf("the pause never happened, so the test proves nothing:\n%s", out)
+	}
+	for _, line := range strings.Split(stripANSI(out), "\n") {
+		if strings.Contains(line, "Paused") && strings.Contains(line, "[System]") {
+			t.Errorf("the Paused bar and the menu rule share a line:\n%q", line)
+		}
+	}
+}

@@ -399,6 +399,7 @@ func pauseTight(s session.Session) {
 	fmt.Fprintf(s, "%s%s%s", ansi.FgBrightCyan, i18n.T(sessionLang(s), "─»>Paused<«─"), ansi.Reset)
 	readKey(s)
 	drainInput(s)
+	endPausedLine(s)
 }
 
 func pause(s session.Session) {
@@ -407,7 +408,15 @@ func pause(s session.Session) {
 	fmt.Fprintf(s, "\n%s%s%s", ansi.FgBrightCyan, i18n.T(sessionLang(s), "─»>Paused<«─"), ansi.Reset)
 	readKey(s)
 	drainInput(s) // drop a trailing Enter sent in one burst with the dismissing key
+	endPausedLine(s)
 }
+
+// endPausedLine closes the line the Paused bar sits on, once the key that
+// dismisses it has arrived. Without it the cursor is left at the end of the bar
+// and whatever draws next continues that line — a menu opens with its title rule
+// and no newline of its own, so the two ran together as
+// "─»>Paused<«──────[System]──────".
+func endPausedLine(s session.Session) { fmt.Fprint(s, "\n") }
 
 // statLine prints one BRE-style result line — a highlighted, comma-formatted
 // number followed by text — and skips the line entirely when n is zero (BRE
