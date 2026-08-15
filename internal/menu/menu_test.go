@@ -819,3 +819,41 @@ func TestTitleBarPadsToRuleWidth(t *testing.T) {
 		t.Errorf("title bar width = %d runes, want %d (rule display width); the byte-vs-rune bug gives ~180", got, want)
 	}
 }
+
+// A realm's selection letter is its own position in the list, not a count of
+// the pickable realms above it. Allying with the realms at the top used to
+// re-letter everyone below them, so the key that attacked one realm yesterday
+// attacked a different one today (reported from a live game, 2026-08-15).
+func TestTargetLettersDoNotShiftWhenRealmsBecomeUnpickable(t *testing.T) {
+	rows := []targetRow{
+		{name: "Shadow Vultures", attackable: false}, // allied
+		{name: "Rust Vultures", attackable: false},   // allied
+		{name: "Obsidian Sovereigns", attackable: true},
+		{name: "Blood Host", attackable: true},
+	}
+	f := &fakeSession{keys: []rune("C")}
+	name, chosen := pickAttackTarget(f, rows, "Choose a target")
+	if !chosen || name != "Obsidian Sovereigns" {
+		t.Errorf("pressing C chose %q (chosen=%v), want the third realm", name, chosen)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "(C)") || !strings.Contains(out, "(D)") {
+		t.Errorf("the two pickable realms should be lettered C and D by position:\n%s", out)
+	}
+	if strings.Contains(out, "(A)") || strings.Contains(out, "(B)") {
+		t.Errorf("A and B belong to the shielded realms and must not be reused:\n%s", out)
+	}
+}
+
+// A letter belonging to a shielded realm is a gap, not a near miss: it must not
+// select the next pickable realm along.
+func TestAShieldedRealmsLetterSelectsNothing(t *testing.T) {
+	rows := []targetRow{
+		{name: "Shadow Vultures", attackable: false},
+		{name: "Obsidian Sovereigns", attackable: true},
+	}
+	f := &fakeSession{keys: []rune("A")}
+	if name, chosen := pickAttackTarget(f, rows, "Choose a target"); chosen {
+		t.Errorf("pressing a shielded realm's letter chose %q; it should abort", name)
+	}
+}

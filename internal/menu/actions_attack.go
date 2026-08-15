@@ -264,24 +264,32 @@ func warnTrimmedForce(s session.Session, trimmed bool) {
 
 // pickAttackTarget renders the living rivals in IB's familiar scores-table
 // layout (Id / Empire Name / Territory / Score / Net Worth, lettered ids) and
-// reads the player's single-key choice. Only attackable realms get a selection
-// letter; shielded ones (New Realm Protection or an alliance) are listed with a
-// blank id so they can be seen but not picked — their diplomacy status shows in
-// the diplomacy menus. Returns the chosen realm name, or chosen=false if the
-// player aborts (RETURN / any non-letter) or nothing is attackable.
+// reads the player's single-key choice. Shielded realms (New Realm Protection or
+// an alliance) are listed with a blank id so they can be seen but not picked —
+// their diplomacy status shows in the diplomacy menus. Returns the chosen realm
+// name, or chosen=false if the player aborts (RETURN / any non-letter) or
+// nothing is attackable.
+//
+// A REALM'S LETTER IS ITS OWN, taken from its position in the whole list rather
+// than from a running count of the pickable ones. A shielded realm therefore
+// consumes its letter and leaves a gap, exactly as a fallen realm or the sender
+// does in the message picker. The alternative — numbering only what can be
+// picked — silently re-letters everyone the moment an alliance is formed or a
+// realm comes out of protection, so the key that attacked one realm yesterday
+// attacks a different one today.
 func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name string, chosen bool) {
 	scoreTableHead(s)
-	var names []string
-	for _, r := range rows {
+	byLetter := make(map[int]string, len(rows))
+	for i, r := range rows {
 		id := "" // no selection letter for a realm that can't be attacked
 		if r.attackable {
-			id = scoreID(len(names))
-			names = append(names, r.name)
+			id = scoreID(i)
+			byLetter[i] = r.name
 		}
 		scoreTableRow(s, id, r.name, ansi.FgBrightWhite, r.online, r.land, r.score, r.netWorth)
 	}
 	scoreTableRule(s)
-	if len(names) == 0 {
+	if len(byLetter) == 0 {
 		ok(s, "None of these realms can be attacked — they are protected or allied with you.")
 		return "", false
 	}
@@ -290,13 +298,15 @@ func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name 
 	if err != nil {
 		return "", false
 	}
-	i := int(unicode.ToUpper(r) - 'A')
-	if i < 0 || i >= len(names) {
+	// A letter with no realm behind it — a gap, or past the end — aborts rather
+	// than selecting a neighbour.
+	name, found := byLetter[int(unicode.ToUpper(r)-'A')]
+	if !found {
 		fmt.Fprint(s, "\n")
 		return "", false
 	}
 	fmt.Fprintf(s, "%c\n", unicode.ToUpper(r))
-	return names[i], true
+	return name, true
 }
 
 // costOf prices a gold-fee op against the target it is aimed at. The three

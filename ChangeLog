@@ -1,4 +1,7 @@
 (in-progress:)
+  * A realm's letter on the attack and covert target lists is its own place in
+    the list. Allying with the realms above it used to re-letter everything
+    below, so the key that struck one realm struck a different one next time
   * The InterPlanetary Special Operations menu works: Bomb Food Market, Bomb
     Trading Market, Bomb Trade Routes, Undermine Investments, Nuclear Assault,
     Chemical Bombing and R5-Slappenheimer are aimed at a baron on another

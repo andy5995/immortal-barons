@@ -386,6 +386,12 @@ func TestRegularAttackAdvancesTurn(t *testing.T) {
 	w.Player().Protection = 0
 	v := w.AddHuman("victim", "Victimville")
 	v.Protection = 0
+	// Every rival must be attackable, or the seeded computer realm holds (A) as
+	// a gap and the scripted key below selects nothing: a target's letter is its
+	// place in the whole list, not a count of the pickable ones.
+	for _, e := range w.Empires {
+		e.Protection = 0
+	}
 
 	f := &fakeSession{keys: []rune("A\r\r\r\r ")} // target A, full-force defaults, then a key to clear the report pause
 	if r := regularAttack(f, w); r != Back {
