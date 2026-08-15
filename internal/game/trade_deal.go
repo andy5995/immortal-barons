@@ -114,13 +114,24 @@ func TradeDealCost(days int) int64 {
 }
 
 // TradeDealGoldPerDayBetween is the per-day transit cost `from` pays to send a
-// deal to `to`. A standing Protective Trade agreement puts guards on the route
-// and cuts the rate to a third (ProtectiveTradeCostDivisor).
+// deal to `to`. The sysop's Trade Deal Costs setting scales the rate, and a
+// standing Protective Trade agreement then puts guards on the route and cuts
+// what is left to a third (ProtectiveTradeCostDivisor).
+//
+// The setting is one of the original's own five cost knobs ("Trade Deal Costs",
+// alongside Maintenance Costs, Region Cost Change, Attack Costs and Terrorism
+// Costs) and IB has always stored and broadcast it — it just reached nothing,
+// which is what #56 is about. It takes the same None/Low/Medium/High ladder as
+// the other two upkeep-style knobs; the two ATTACK knobs have their own wider
+// spread (Level.CostPercent), and nothing suggests trade belongs with those.
+// The discount divides the SCALED rate, so at Trade Deal Costs = None a
+// Protective Trade pact discounts nothing, there being nothing to discount.
 func (w *World) TradeDealGoldPerDayBetween(from, to *Empire) int64 {
+	rate := int64(TradeDealGoldPerDay) * int64(w.Config.TradeCosts.Percent()) / 100
 	if w.HasTreaty(from, to, protectiveTrade) {
-		return TradeDealGoldPerDay / ProtectiveTradeCostDivisor
+		return rate / ProtectiveTradeCostDivisor
 	}
-	return TradeDealGoldPerDay
+	return rate
 }
 
 // TradeDealCostBetween is what `from` actually pays to send `to` a deal over the

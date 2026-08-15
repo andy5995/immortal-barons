@@ -829,6 +829,22 @@ The figures live in `balance.go` as `CostLevel*Pct` and reach the two knobs
 through `Level.CostPercent()`. `Level.Percent()` stays for Maintenance / Trade /
 Region / Attack Damage / Attack Rewards.
 
+**Which knob reaches what (#56).** The original has five cost knobs — Maintenance
+Costs, Region Cost Change, Trade Deal Costs, Attack Costs, Terrorism Costs — and
+all five now scale something in IB. Trade Deal Costs was the last one wired: it
+was stored, shown on Game Setup and broadcast to the league while reaching no
+gameplay at all, so a sysop could set it to None or High and nothing moved. It
+scales the per-day transit rate a trade deal is charged, on the `Level.Percent()`
+ladder the other two upkeep-style knobs use, and a Protective Trade pact then
+discounts what the setting leaves.
+
+The **Covert Operations fees** (`Cost*`) are a different case and #56 should not
+be read as covering them. There is no covert cost knob among the five, and none
+of those fees is a literal in either binary in 32-bit or Real48 form, so the
+figures IB sampled cannot be treated as one point on a ladder. Scaling them is
+**unevidenced**, not merely unbuilt; sampling a second BRE setup live would
+settle it.
+
 "Days before 'lost' forces returned" (`Config.LostForcesDays`, default 3) is an
 **inter-BBS** setting, not a local-combat one. A strike sent to another board is
 away for the whole packet round trip, and packets go missing; the setting gives a

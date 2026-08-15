@@ -424,9 +424,16 @@ const (
 
 // Covert Operations gold costs, charged per op on top of the agent risk
 // (live-sampled from BRE's Covert Operations menu at the DEFAULT/medium game
-// setup, 2026-07-21 — other BRE setups scale these; tune here as needed). Bomb
-// Enemy Targets is one 100k menu entry in BRE; IB splits it into a submenu and
-// charges each variant CostBombEnemyTargets.
+// setup, 2026-07-21). Bomb Enemy Targets is one 100k menu entry in BRE; IB
+// splits it into a submenu and charges each variant CostBombEnemyTargets.
+//
+// These are NOT known to move with any of the sysop's cost settings, and #56
+// should not assume they do. The original's five cost knobs are Maintenance
+// Costs, Region Cost Change, Trade Deal Costs, Attack Costs and Terrorism Costs
+// — there is no covert one — and none of these fees is a literal in either
+// binary, in 32-bit or Real48 form, so nothing here can be read off as a
+// medium-setup sample of a ladder. Sampling a second setup live would settle it;
+// until then, treat scaling them as unevidenced rather than pending.
 // The covert roll, BINARY-VERIFIED from BRE.OVR 0x4BA48 (the roll) and 0x4CAB7
 // (the agent pools). docs/mechanics-reference.md carries the full routine and the
 // evidence, including the defect IB now reproduces for Send Spy.

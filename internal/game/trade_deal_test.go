@@ -173,3 +173,51 @@ func TestProtectiveTradeMakesDealsCheaper(t *testing.T) {
 		t.Errorf("send charged %d, want the guarded 66666", before-from.Gold)
 	}
 }
+
+// The sysop's Trade Deal Costs setting has to reach the price. It is one of the
+// original's five cost knobs and IB stored and broadcast it while it changed
+// nothing at all (#56).
+func TestTradeDealCostFollowsTheCostSetting(t *testing.T) {
+	rate := func(l Level) int64 {
+		cfg := DefaultConfig()
+		cfg.TradeCosts = l
+		w := NewWorldSeed(cfg, 1)
+		a, b := w.AddHuman("a", "Alpha"), w.AddHuman("b", "Bravo")
+		return w.TradeDealGoldPerDayBetween(a, b)
+	}
+	med := rate(Medium)
+	if med != TradeDealGoldPerDay {
+		t.Fatalf("Medium should be the unscaled rate: got %d, want %d", med, TradeDealGoldPerDay)
+	}
+	if got := rate(Low); got != med/2 {
+		t.Errorf("Low = %d, want half of Medium (%d)", got, med/2)
+	}
+	if got := rate(High); got != med*2 {
+		t.Errorf("High = %d, want twice Medium (%d)", got, med*2)
+	}
+	if got := rate(None); got != 0 {
+		t.Errorf("None = %d, want a free deal", got)
+	}
+}
+
+// A Protective Trade pact discounts what the setting leaves, not the raw rate —
+// so at None there is nothing to discount and the deal is still free.
+func TestProtectiveTradeDiscountsTheScaledRate(t *testing.T) {
+	for _, c := range []struct {
+		level Level
+		want  int64
+	}{
+		{Medium, TradeDealGoldPerDay / ProtectiveTradeCostDivisor},
+		{High, TradeDealGoldPerDay * 2 / ProtectiveTradeCostDivisor},
+		{None, 0},
+	} {
+		cfg := DefaultConfig()
+		cfg.TradeCosts = c.level
+		w := NewWorldSeed(cfg, 1)
+		a, b := w.AddHuman("a", "Alpha"), w.AddHuman("b", "Bravo")
+		w.setRelation(a.Name, b.Name, protectiveTrade)
+		if got := w.TradeDealGoldPerDayBetween(a, b); got != c.want {
+			t.Errorf("%v with Protective Trade: got %d, want %d", c.level, got, c.want)
+		}
+	}
+}
