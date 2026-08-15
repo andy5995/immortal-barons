@@ -1690,19 +1690,26 @@ relies on it.
   flattening. IB carried it as `InterestCap` until v0.0.4 and no longer does —
   the whole balance earns, and the money cap is the bank's only ceiling. Do not
   put it back without evidence that is not a guide.
-- **Absolute money cap: 2,000,000,000 in BRE.** You cannot hold more than 2
-  billion coins at once (in the bank or on hand) — a separate, higher ceiling
-  than the interest cap.
+- **An absolute money cap of 2,000,000,000 is CLAIMED** — no more than 2 billion
+  coins at once, in the bank or on hand. It is UNVERIFIED on the same footing as
+  the interest cap: not a literal in either binary, in 32-bit or Real48 form.
+  The likeliest reading is that the original has no designed ceiling and the
+  money field is a Turbo Pascal `LongInt`, which stops at 2,147,483,647 — a guide
+  author rounding that gives exactly the figure handed down. Reading the field's
+  type out of the record layout, or driving a live game past 2.1 billion, would
+  settle it. IB keeps 2 billion as the *default* of a sysop knob rather than a
+  rule, so being wrong about it costs a default and not a mechanic.
 
   **IB makes it a sysop knob, defaulting to BRE's figure.**
   `Config.MoneyCapBillions` (Configuration Editor: "Money Cap (billions)") is
   the cap in whole billions, read through `World.MoneyCap()`. It defaults to
-  `MoneyCapMinBillions` = 2, which reproduces BRE, and may be raised to
+  `MoneyCapMinBillions` = 2, the claimed BRE figure, and may be raised to
   `MoneyCapMaxBillions` = 999. Gold credited above whatever it is set to is
   still discarded — the knob moves the ceiling, it does not remove it.
 
-  BRE's own 2 billion is the largest a 32-bit signed integer holds, so it reads
-  as a machine limit rather than a design choice. IB's money fields are `int64`,
+  Two billion is NOT the largest a 32-bit signed integer holds (that is
+  2,147,483,647), so the figure cannot be explained as the machine limit it is
+  usually presented as — see the bullet above. IB's money fields are `int64`,
   so the ceiling is now a game rule and behaves the same on a 32-bit door as on
   a 64-bit one. The knob is in whole billions so the editor's field fits an
   `int` on a 32-bit build, and 999 is the widest figure the abbreviated display

@@ -31,13 +31,11 @@
   about your own offers, so it does not show you anything about other players.
 - Send Message can write to all your allies at once — every realm on your board
   that you hold a treaty with, of any kind.
-- Your sysop sets how much gold you can hold. BRE always stops at two billion;
+- Your sysop sets how much gold you can hold. BRE stops at about two billion;
   here that is only the starting value, and it can go as high as 999 billion.
 - Gold above the limit is still lost, but the game now tells you when it happens,
   and a full bank pays its interest into your gold in hand rather than losing it.
-- Your sysop can turn the pirates off. BRE always has its nine bands; here a
-  sysop who wants a game without raids can set Pirates to Off, and then nobody is
-  robbed and Attack Pirates is gone from the menu. It is on to begin with.
+- A reset option turns the pirates off. BRE always has them.
 - Some game values — such as attack rewards, unit prices, and economy rates —
   may not match BRE exactly. The game aims to get as close as it can, using
   BRE's own numbers where they are known. A few mechanics are still being built.
@@ -99,5 +97,3 @@ normally use a moving highlight are numbered in that mode, so they stay usable.
 - If your empire is attacked while you are at the menus, a notice appears the
   next time you press a key. Orders you already typed are adjusted to what you
   still hold, and the game tells you when that happens.
-- The web version also serves several players at once (as its own separate
-  game, not as a BBS door).
