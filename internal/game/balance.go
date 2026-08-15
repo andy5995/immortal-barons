@@ -108,10 +108,14 @@ const (
 	StartMountain     = 5
 	StartCoastal      = 3
 	StartTroopers     = 100
-	StartFood         = 1000
-	StartGold         = 10000
-	StartPeople       = 2000
-	StartTax          = 15
+	// StartRegions is the land a new realm opens with, and the only thing besides
+	// its troopers that its net worth is made of — which is what ScorePerTurn is
+	// derived from.
+	StartRegions = StartAgricultural + StartDesert + StartMountain + StartCoastal
+	StartFood    = 1000
+	StartGold    = 10000
+	StartPeople  = 2000
+	StartTax     = 15
 )
 
 // --- AI economic behaviour (reconstructed / tunable) ---
@@ -1120,12 +1124,31 @@ const (
 	// unit type. BRE's disassembled hit applier uses a 6/7 ratio (removes ~1/7),
 	// so N = 7.
 	TerrorUnitLossDenom = 7
-	// ScorePerTurn is the flat Score a played turn earns. BRE's observed award
-	// for a standard start was 213 (= round of the standard-start net worth
-	// 212.5), constant within a day; day-over-day growth was never shown to
-	// change it, so IB awards a flat constant to every empire per turn rather
-	// than tracking net worth. Combat and covert score (combat.go) are on top.
-	ScorePerTurn = 213
+	// ScorePerTurn is the Score a played turn earns: the net worth of a BRAND-NEW
+	// realm, rounded — 213 for the standard start, which is every award ever
+	// observed in the original.
+	//
+	// Derived rather than written down, because 213 is not a figure the original
+	// stores. Neither 213 as a 32-bit integer nor 213.0 as a Turbo Pascal Real48
+	// appears anywhere in BRE.EXE or BRE.OVR, so the award is computed; and the
+	// empire's Score field (a Real48 at record +0x28A) is written from exactly
+	// two sites in the whole program, both in BRE.EXE, neither of them a per-turn
+	// overlay stage. What the original computes it FROM is not recovered.
+	//
+	// Two readings survive every measurement — a size-independent constant, and
+	// the realm's net worth captured at creation — because every empire the
+	// original can create has the same start, so both give 213. They part company
+	// only if the starting setup changes, which is a thing balance.go can do and
+	// BRE cannot. Spelling the award as the starting net worth keeps the two in
+	// step: retune the start and the award follows, instead of a magic 213 that
+	// quietly stops meaning what it meant.
+	//
+	// Award live-verified as flat per turn, NOT tracking current net worth: one
+	// realm played 16 turns across two days at exactly +213 each while its net
+	// worth grew 212 -> 8,512 (see the bre-score-formula notes). The +500 rounds
+	// the thousandths half-up, as the original's display does (212.5 -> 213).
+	// Combat and covert score (combat.go) are on top.
+	ScorePerTurn = (StartRegions*NetWorthLand + StartTroopers*NetWorthTrooper + 500) / 1000
 	// Riots and food spoilage do NOT affect Score — Score is the cumulative earned
 	// metric, and BRE leaves it untouched by economy events (Andy's call, reversing
 	// IB's earlier per-event dings).

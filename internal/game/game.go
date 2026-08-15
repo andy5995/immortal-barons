@@ -166,10 +166,10 @@ type Empire struct {
 	TurnProgress TurnProgress
 	Protection   int
 	// Score is BRE's cumulative score (shown on the scores board, distinct from
-	// Net Worth): += a flat ScorePerTurn once per turn played, minus small
-	// IB-only penalties for riots/food spoilage, plus combat/covert score.
-	// Seeded 0. Matches BRE live data (a standard realm scored a flat +213/turn,
-	// 8 turns = 1704).
+	// Net Worth): += ScorePerTurn once per turn played, plus combat/covert score.
+	// Seeded 0, and nothing in the economy takes it away — riots and spoilage do
+	// not touch it. Matches BRE live data (a standard realm scored a flat
+	// +213/turn, 8 turns = 1704).
 	Score int
 	// TechSlots holds the empire's research, one counter per slot. Only the six
 	// slots named in balance.go do anything; the rest are dilution, exactly as in

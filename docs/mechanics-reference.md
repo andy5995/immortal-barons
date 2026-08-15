@@ -365,14 +365,27 @@ realm (NW 212.5) scored a flat **+213 every turn**; 8 turns = **1704** (matching
 another 8-turn realm exactly). BRE's exact per-win attack bonus and the
 day-rollover behaviour are not recoverable from the binary (overlay-blocked).
 
-IB implements: `Empire.Score` (seeded 0) `+= ScorePerTurn` (a flat **213**) each
-turn played. All measured BRE empires were standard starts (net worth 212, award
-213), so whether the award tracks net worth or is a size-independent constant was
-never distinguishable — IB awards a **flat constant**, so Score measures turns
-played, not realm size. **IB additions (not in BRE):** a riot and food spoilage
-each subtract `ScorePerTurn/10` from Score (tunable in `balance.go`; Score never
-goes below 0). BRE's exact attack-scoring bonus is unrecoverable from the binary,
-so IB uses its own combat-score model (below).
+**What the binary says, and what it does not.** The award is **computed, not
+stored**: neither 213 as a 32-bit integer nor 213.0 as a Turbo Pascal Real48
+appears anywhere in `BRE.EXE` or `BRE.OVR`. The Score field itself is a **Real48
+at empire record +0x28A** (an earlier note called it +0x28E, which is only its
+last word), and it is written from **exactly two sites in the whole program**,
+both in `BRE.EXE` — neither of them a per-turn overlay stage. What the original
+computes the award *from* is still not recovered.
+
+Two readings survive every measurement: a size-independent constant, and the
+realm's net worth captured at creation. They cannot be told apart from play,
+because every empire BRE can create has the same start and so the same 213.
+
+**IB implements** `Empire.Score` (seeded 0) `+= ScorePerTurn` each turn played,
+with `ScorePerTurn` **derived from the starting setup** — `(StartRegions ×
+NetWorthLand + StartTroopers × NetWorthTrooper + 500) / 1000`, which is 213 —
+rather than written down as a literal. That reproduces BRE exactly for every
+empire BRE can create, and keeps the award in step with the start if `balance.go`
+retunes it, which is the one case where the two readings diverge. Nothing in the
+economy takes Score away: riots and food spoilage do **not** touch it. BRE's
+exact attack-scoring bonus is unrecoverable from the binary, so IB uses its own
+combat-score model (below).
 
 **Combat score (IB's own).** A battle's Score award scales with the forces used
 up in it (units both sides lose = `battle`):

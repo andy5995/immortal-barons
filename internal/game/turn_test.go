@@ -521,3 +521,28 @@ func TestAIStartsHQ(t *testing.T) {
 		t.Error("AI with tanks and ample gold should start a HeadQuarters, HQ still 0")
 	}
 }
+
+// The per-turn Score award is 213 for the standard start — the figure every
+// measured empire in the original earned, every turn, whatever its size. Held as
+// a golden literal, not as ScorePerTurn: the award is DERIVED from the starting
+// setup now, so retuning a Start* constant moves it, and that should have to
+// produce new evidence rather than silently redefining the score.
+func TestScorePerTurnIsTheStandardStartsNetWorth(t *testing.T) {
+	if ScorePerTurn != 213 {
+		t.Errorf("ScorePerTurn = %d, want the original's observed 213", ScorePerTurn)
+	}
+	// ...and it is that figure because it IS the new realm's net worth, rounded:
+	// 15 regions at 12.5 plus 100 troopers at 0.25 is 212.5.
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("fresh", "Newland")
+	thou := StartRegions*NetWorthLand + StartTroopers*NetWorthTrooper
+	if thou != 212_500 {
+		t.Fatalf("a new realm's net worth is %d thousandths, want 212,500", thou)
+	}
+	if got := w.NetWorth(e); got != 212 { // NetWorth truncates; the award rounds
+		t.Errorf("NetWorth(new realm) = %d, want 212", got)
+	}
+	if e.Score != 0 {
+		t.Errorf("a realm that has played nothing scores %d, want 0", e.Score)
+	}
+}
