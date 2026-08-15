@@ -125,3 +125,43 @@ func TestRemovingOneAIBaronLeavesTheOthersMarketPosition(t *testing.T) {
 		t.Errorf("B's unpaid sale gold is %d after A was removed, want 700", got)
 	}
 }
+
+// With the shop closed to military, the Trading Market is the planet's only
+// source of units — so an AI must not stock it. While the shop is open, listing
+// under its price arms nobody, and the surplus jets still go up.
+func TestAIListsNoMilitaryWhenTheShopIsClosed(t *testing.T) {
+	stock := func(mode BuyMode) int {
+		cfg := DefaultConfig()
+		cfg.BuyMilitary = mode
+		w := NewWorldSeed(cfg, 1)
+		w.AddAIEmpires(1)
+		e := w.AIEmpires()[0]
+		e.Jets, e.Carriers = 50_000, 0 // every jet is beyond carrier lift
+		e.Food = 10_000_000            // and a granary well past the buffer
+		w.aiListSurplus(e)
+		return w.MarketForSale(e.Name, "Jet")
+	}
+	if n := stock(BuyYes); n <= 0 {
+		t.Errorf("with the shop open the surplus jets should be listed, got %d", n)
+	}
+	for _, mode := range []BuyMode{BuyNo, BuyLimited} {
+		if n := stock(mode); n != 0 {
+			t.Errorf("Buy Military %v: %d jets listed, want none", mode, n)
+		}
+	}
+}
+
+// Food is not a weapon, so the same setting must not stop the AI selling it —
+// the shortage the market exists to relieve is the one that starves realms.
+func TestAIStillListsFoodWhenTheShopIsClosed(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.BuyMilitary = BuyNo
+	w := NewWorldSeed(cfg, 1)
+	w.AddAIEmpires(1)
+	e := w.AIEmpires()[0]
+	e.Food = 10_000_000
+	w.aiListSurplus(e)
+	if n := w.MarketForSale(e.Name, "Food"); n <= 0 {
+		t.Errorf("surplus food should still be listed, got %d", n)
+	}
+}
