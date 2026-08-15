@@ -1,6 +1,10 @@
 package game
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/andy5995/immortal-barons/internal/numfmt"
+)
 
 // Interplanetary Special Operations (#49) — the InterPlanetary Ops menu's
 // Special Operations submenu, where every op is aimed at a baron on another
@@ -62,9 +66,27 @@ func SpecialOpLabel(op SpecialOp) string {
 // switch governs; the other four answer to Bombing Ops. Same split as the local
 // menu, so one switch cannot disable an op on one menu and leave it on the
 // other.
+//
+// It is also the line between the two kinds of target below, which is not a
+// coincidence: the original's menu handler branches the same way. Keys '1'-'4'
+// all jump to ONE shared handler differing only by an index into a price table,
+// while '5', '6' and '7' each have their own branch (BRE.OVR 0x029ea9, the
+// dispatch at 0x105a-0x124c).
 func isMissileOp(op SpecialOp) bool {
 	return op == OpNuclear || op == OpChemical || op == OpSlappenheimer
 }
+
+// TargetsPlanet reports whether op is aimed at the PLANET rather than at a named
+// baron on it.
+//
+// The four bombing ops are: what they wreck belongs to the whole planet, not to
+// one realm. The Food Market is the planet's, the Trading Market is the planet's
+// (every realm lists on the one board), and the bank the investments sit in is
+// the planet's. Aiming them at a single baron — which is what IB did at first,
+// by copying the LOCAL Bomb Enemy Targets menu — misreads the local menu as the
+// model for this one. The three missiles are the other way round: they ruin land
+// and kill people, so they must name the realm that owns them.
+func (op SpecialOp) TargetsPlanet() bool { return !isMissileOp(op) }
 
 // RemoteSpecialOp is one op in flight to another planet. FromEmpire travels
 // because the target's event log names who struck it, and the target board has
@@ -126,6 +148,9 @@ func (w *World) SendSpecialOp(e *Empire, targetBoard, targetEmpire string, op Sp
 	if e.Gold < cost {
 		return ErrCantAfford
 	}
+	if op.TargetsPlanet() {
+		targetEmpire = "" // nothing on the far side should look for a realm
+	}
 	e.Gold -= cost
 	e.BombingOpsToday++
 	w.NextAttackID++
@@ -163,25 +188,39 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 		TargetEmpire: op.TargetEmpire,
 		Kind:         string(op.Op),
 	}
+	label := SpecialOpLabel(op.Op)
+	from := fmt.Sprintf("%s of %s", op.FromEmpire, op.FromBoard)
+
+	// A planet op wrecks what the whole planet shares, so there is no realm to
+	// look up and New Realm Protection does not enter into it — a new realm is
+	// shielded from being singled out, not from the planet's market burning
+	// down around it.
+	if op.Op.TargetsPlanet() {
+		report, hit := w.applyPlanetOp(op.Op, from)
+		res.Report = report
+		res.Won = hit
+		if hit {
+			res.Outcome = OutcomeWon
+			w.postNews(fmt.Sprintf("%s struck this planet: %s.", from, label))
+		} else {
+			res.Outcome = OutcomeRepelled
+		}
+		return res
+	}
+
 	target := w.remoteTarget(op.TargetEmpire)
 	if target == nil {
 		res.Outcome = OutcomeNotFound
 		return res
 	}
 	res.TargetEmpire = target.Name
-	label := SpecialOpLabel(op.Op)
 	if target.Protection > 0 {
 		res.Outcome = OutcomeProtected
-		target.addEvent(fmt.Sprintf("A %s from %s of %s broke on your New Realm Protection.",
-			label, op.FromEmpire, op.FromBoard))
+		target.addEvent(fmt.Sprintf("A %s from %s broke on your New Realm Protection.", label, from))
 		w.postNews(fmt.Sprintf("%s's New Realm Protection turned aside a %s from %s.",
 			target.Name, label, op.FromBoard))
 		return res
 	}
-
-	// The attacker's name, as the target's own event log should read it: BRE
-	// names the realm, and cross-planet the planet matters as much as the realm.
-	from := fmt.Sprintf("%s of %s", op.FromEmpire, op.FromBoard)
 	report, score, hit, backfired := w.applySpecialOp(op.Op, target, from)
 	res.Report = report
 	res.Score = score
@@ -194,6 +233,81 @@ func (w *World) resolveRemoteSpecialOp(op RemoteSpecialOp) AttackResult {
 	}
 	w.postNews(fmt.Sprintf("%s struck %s from %s.", from, target.Name, w.Config.BoardID))
 	return res
+}
+
+// applyPlanetOp runs one of the four bombing ops against the whole planet.
+//
+// Each is the planet-wide reading of the local op's effect: the food market's
+// own supply rather than one realm's stores, every listing on the Trading Market
+// rather than one realm's position, every realm's trade agreements, every
+// realm's investments. The per-realm helpers are still the ones doing the work,
+// so the local menu and this one stay in step.
+func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, hit bool) {
+	living := func() []*Empire {
+		var out []*Empire
+		for _, e := range w.Empires {
+			if e.Alive {
+				out = append(out, e)
+			}
+		}
+		return out
+	}
+	tell := func(text string) {
+		for _, e := range living() {
+			e.addEvent(text)
+		}
+	}
+
+	switch op {
+	case OpBombFood:
+		lost := w.FoodMarketSupply / 2
+		if lost <= 0 {
+			return "The food market on that planet was already bare.", false
+		}
+		w.FoodMarketSupply -= lost
+		tell(fmt.Sprintf("Bombers from %s hit the planet's food market — %s units of supply destroyed.",
+			from, numfmt.Comma(int64(lost))))
+		return fmt.Sprintf("You destroyed %d units of the planet's food supply.", lost), true
+
+	case OpBombMarket:
+		goods, proceeds := 0, int64(0)
+		for _, e := range living() {
+			g, p := w.bombMarketPosition(e, BombMarketLossPct)
+			goods, proceeds = goods+g, proceeds+p
+		}
+		if goods == 0 && proceeds == 0 {
+			return "Nothing was listed on that planet's trading market.", false
+		}
+		tell(fmt.Sprintf("Bombers from %s wrecked the planet's trading market — %s listed goods and %s gold in proceeds destroyed.",
+			from, numfmt.Comma(int64(goods)), numfmt.Comma(proceeds)))
+		return fmt.Sprintf("You wrecked the planet's trading market: %d goods and %d gold in proceeds.", goods, proceeds), true
+
+	case OpBombRoutes:
+		cut := 0
+		for _, e := range living() {
+			if _, _, ok := w.bombRoutesEffect(e); ok {
+				cut++
+			}
+		}
+		if cut == 0 {
+			return "No trade agreements stood on that planet to sever.", false
+		}
+		tell(fmt.Sprintf("Bombers from %s severed trade routes across the planet — %d agreements broken.", from, cut))
+		return fmt.Sprintf("You severed %d trade agreements on that planet.", cut), true
+
+	case OpUndermine:
+		var lost int64
+		for _, e := range living() {
+			lost += undermineEffect(e)
+		}
+		if lost == 0 {
+			return "Nothing was invested on that planet to undermine.", false
+		}
+		tell(fmt.Sprintf("Agents from %s undermined the planet's bank — %s gold in principal lost.",
+			from, numfmt.Comma(lost)))
+		return fmt.Sprintf("You undermined the planet's investments: %d gold lost.", lost), true
+	}
+	return "Nothing came of the operation.", false
 }
 
 // applySpecialOp runs one op's effect against d and reports what it did, what

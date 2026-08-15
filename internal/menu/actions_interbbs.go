@@ -595,12 +595,12 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// ipSpecialStub is a recorded-but-inert interplanetary Special Operations item:
-// the cross-planet bombing/WMD variants aren't built yet, so the menu matches
-// BRE while the mechanic stays a stub.
 // ipSpecialOp drives every item on the interplanetary Special Operations menu
-// (#49): pick a planet and a baron, quote the price, confirm, and send. The
-// strike itself happens on the target's board when the packet lands, so the
+// (#49): choose a target, quote the price, confirm, and send. What "a target"
+// means depends on the op — a planet for the four bombing ops, a named baron for
+// the three missiles — which is why the choice branches below.
+//
+// The strike itself happens on the target's board when the packet lands, so the
 // screen promises a report rather than printing an outcome — the same shape as
 // Terrorist Ops above, and for the same reason.
 func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
@@ -615,11 +615,33 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 			return Stay
 		}
 		label := game.SpecialOpLabel(op)
-		board, baron, _, found := pickRemoteTarget(s, w,
-			fmt.Sprintf(tr(s, "%s against which planet?"), label),
-			fmt.Sprintf(tr(s, "%s against which baron?"), label), hostile)
-		if !found {
-			return Stay
+		var board, baron string
+		if op.TargetsPlanet() {
+			// The four bombing ops wreck what the whole planet shares — its food
+			// market, its trading market, its bank — so there is no baron to
+			// name and asking for one would be asking a question with no answer.
+			var boards []string
+			w.With(func() {
+				for _, b := range w.World.RemoteBoards {
+					boards = append(boards, b.BoardID)
+				}
+			})
+			if len(boards) == 0 {
+				ok(s, "No other planets are known yet.")
+				return Stay
+			}
+			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightYellow, fmt.Sprintf(tr(s, "%s against which planet?"), label), ansi.Reset)
+			if board = pickPlanetNamed(s, w, boards); board == "" {
+				return Stay
+			}
+		} else {
+			var found bool
+			board, baron, _, found = pickRemoteTarget(s, w,
+				fmt.Sprintf(tr(s, "%s against which planet?"), label),
+				fmt.Sprintf(tr(s, "%s against which baron?"), label), hostile)
+			if !found {
+				return Stay
+			}
 		}
 		cost := w.World.SpecialOpGoldCost(w.Player(), op)
 		okNoPause(s, "This operation will cost %s gold.", comma(cost))
@@ -631,6 +653,10 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 		})
 		if err != nil {
 			fail(s, err)
+			return Stay
+		}
+		if baron == "" {
+			ok(s, "Your %s is away against %s. Word will come back with the next packet.", label, board)
 			return Stay
 		}
 		ok(s, "Your %s is away against %s of %s. Word will come back with the next packet.", label, baron, board)

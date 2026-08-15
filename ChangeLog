@@ -2,11 +2,11 @@
   * A realm's letter on the attack and covert target lists is its own place in
     the list. Allying with the realms above it used to re-letter everything
     below, so the key that struck one realm struck a different one next time
-  * The InterPlanetary Special Operations menu works: Bomb Food Market, Bomb
-    Trading Market, Bomb Trade Routes, Undermine Investments, Nuclear Assault,
-    Chemical Bombing and R5-Slappenheimer are aimed at a baron on another
-    planet, resolve on that planet's own board, and report back. Seven of the
-    menu's eight items did nothing before
+  * The InterPlanetary Special Operations menu works, where seven of its eight
+    items did nothing before. Bomb Food Market, Bomb Trading Market, Bomb Trade
+    Routes and Undermine Investments are aimed at another planet and wreck what
+    it shares; Nuclear Assault, Chemical Bombing and R5-Slappenheimer name a
+    baron there. All of them resolve on that planet's own board and report back
   * The Coordinator menu matches the original: Modify Diplomacy, Global Recon
     Request, View Diplomacy and Player List, keyed 1 to 4
   * Global Recon Request asks every other planet for a report on every realm it

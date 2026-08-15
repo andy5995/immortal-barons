@@ -27,10 +27,11 @@ func specialOpWorlds(t *testing.T) (from, to *World, attacker, target *Empire) {
 // realm, and the answer files a report with the baron who sent it.
 func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 	from, to, attacker, target := specialOpWorlds(t)
-	target.Food = 4000
+	to.FoodMarketSupply = 4000
+	_ = target
 
 	goldBefore := attacker.Gold
-	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpBombFood); err != nil {
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", "", OpBombFood); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
 	cost := from.SpecialOpGoldCost(attacker, OpBombFood)
@@ -50,8 +51,8 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 	}
 	answer := to.ApplyPacket(from.Outbox[0])
 
-	if target.Food != 2000 {
-		t.Errorf("target food %d, want half of 4000", target.Food)
+	if to.FoodMarketSupply != 2000 {
+		t.Errorf("the planet's food market holds %d, want half of 4000", to.FoodMarketSupply)
 	}
 	if len(answer.Results) != 1 {
 		t.Fatalf("target board sent no answer: %+v", answer.Results)
@@ -79,15 +80,18 @@ func TestSpecialOpCrossesAndReportsBack(t *testing.T) {
 // be the strongest thing in the game.
 func TestSpecialOpBreaksOnNewRealmProtection(t *testing.T) {
 	from, to, attacker, target := specialOpWorlds(t)
-	target.Food = 4000
+	target.Land, target.People = 500, 100_000
 	target.Protection = 5
 
-	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpBombFood); err != nil {
+	// A MISSILE is the case protection covers: it is aimed at one realm. The
+	// bombing ops are aimed at the planet, where a new realm's shield has
+	// nothing to refuse.
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpNuclear); err != nil {
 		t.Fatalf("SendSpecialOp: %v", err)
 	}
 	answer := to.ApplyPacket(from.Outbox[0])
-	if target.Food != 4000 {
-		t.Errorf("a protected realm lost food: %d", target.Food)
+	if target.Land != 500 {
+		t.Errorf("a protected realm lost land: %d", target.Land)
 	}
 	if got := answer.Results[0].outcome(); got != OutcomeProtected {
 		t.Errorf("outcome %q, want %q", got, OutcomeProtected)
@@ -193,5 +197,42 @@ func TestGlobalReconRequestAsksEveryBoardAboutEveryone(t *testing.T) {
 	answer := to.ApplyPacket(from.Outbox[0])
 	if len(answer.ReconReports) != 2 {
 		t.Fatalf("got %d reports, want one per living realm on the far board", len(answer.ReconReports))
+	}
+}
+
+// The four bombing ops are aimed at the PLANET, so they carry no realm and are
+// not refused by one realm's New Realm Protection. Getting this backwards is
+// how they were first built (from the local menu's model), which cost a
+// released-then-corrected ChangeLog line.
+func TestBombingOpsTargetThePlanetNotABaron(t *testing.T) {
+	for _, op := range []SpecialOp{OpBombFood, OpBombMarket, OpBombRoutes, OpUndermine} {
+		if !op.TargetsPlanet() {
+			t.Errorf("%s should be aimed at the planet", op)
+		}
+	}
+	for _, op := range []SpecialOp{OpNuclear, OpChemical, OpSlappenheimer} {
+		if op.TargetsPlanet() {
+			t.Errorf("%s ruins one realm's land and must name it", op)
+		}
+	}
+
+	// A named baron is discarded rather than travelling, so nothing on the far
+	// side can go looking for a realm.
+	from, to, attacker, target := specialOpWorlds(t)
+	to.FoodMarketSupply = 1000
+	target.Protection = 99 // would refuse a realm-aimed op
+	if err := from.SendSpecialOp(attacker, "Bravo BBS", target.Name, OpBombFood); err != nil {
+		t.Fatalf("SendSpecialOp: %v", err)
+	}
+	if got := from.Outbox[0].SpecialOps[0].TargetEmpire; got != "" {
+		t.Errorf("the packet names %q; a planet op carries no realm", got)
+	}
+	answer := to.ApplyPacket(from.Outbox[0])
+	if to.FoodMarketSupply != 500 {
+		t.Errorf("the planet's food market holds %d, want 500 — protection must not shield the planet",
+			to.FoodMarketSupply)
+	}
+	if got := answer.Results[0].outcome(); got != OutcomeWon {
+		t.Errorf("outcome %q, want %q", got, OutcomeWon)
 	}
 }

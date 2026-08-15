@@ -2504,6 +2504,16 @@ The menu is numbered 1-8 with no Help item (live capture):
 The four prices are the original's own, off the menu's price column
 (`docs/dev/bre-screens.md`), and are fidelity constants in `balance.go`.
 
+**Items 1-4 are aimed at the PLANET, items 5-7 at a named baron.** What the four
+bombing ops wreck belongs to the whole planet — its food market, its trading
+market, the trade agreements standing on it, the investments in its bank — so
+they carry no realm, and one realm's New Realm Protection has nothing to refuse.
+The three missiles ruin land and kill people, so they must name the realm that
+owns them, and protection stops them as it stops any strike. The original's menu
+handler splits the same way: keys `1`-`4` all branch to ONE shared handler
+differing only by an index into a price table, while `5`, `6` and `7` each have
+their own (`BRE.OVR` 0x029ea9, dispatch at 0x105a-0x124c).
+
 **The effects are the local ops' effects**, called through the same helpers, so
 a retune lands on both menus: food halved, a share of the market position and
 its pending proceeds destroyed, the first trade agreement severed, a quarter off
@@ -3105,8 +3115,6 @@ Still missing against the reference:
 - A league season that ends on a schedule. A Planetary Master is crowned each
   day and the Coordinator can start a new season with `-league-reset`, but
   nothing times one.
-- Negotiated empire-to-empire trade deals carrying goods with demands (see the
-  trading section above; `Send Trade Deal` sends gold only)
 - BRE's finer interplanetary news subtypes
 
 A few Diplomacy and Covert menu items are recorded but inert, pending fuller
