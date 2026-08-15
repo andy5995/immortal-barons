@@ -374,3 +374,34 @@ func TestLostDefenceDamagesHQ(t *testing.T) {
 		t.Errorf("HeadQuarters = %d after 40 defeats, want 0", d.HQ)
 	}
 }
+
+// The damage is gated on the attacker WINNING (BRE.OVR 0xFF82 tests the
+// resolver's win flag before subtracting), so a repelled attack must leave the
+// defender's HeadQuarters untouched. Several seeds, because the resolver can
+// upset any single fight.
+func TestRepelledAttackLeavesHQAlone(t *testing.T) {
+	repelled := 0
+	for seed := int64(1); seed <= 8; seed++ {
+		w := NewWorldSeed(DefaultConfig(), seed)
+		a := w.AddHuman("me", "Mine")
+		d := w.AddHuman("you", "Yours")
+		for _, e := range []*Empire{a, d} {
+			e.Protection, e.Morale = 0, 100
+		}
+		a.Troopers = 10
+		d.Troopers, d.Turrets, d.Land = 5_000_000, 500_000, 100
+		d.HQ = 100
+
+		report, _ := w.Attack(a, d, AttackForce{Troopers: 10}, true)
+		if !strings.Contains(report, "Defeat!") {
+			continue // an upset; the win path is the other test's business
+		}
+		repelled++
+		if d.HQ != 100 {
+			t.Errorf("seed %d: a repelled attack cost the HeadQuarters %d points, want 0", seed, 100-d.HQ)
+		}
+	}
+	if repelled == 0 {
+		t.Fatal("no attack was repelled; the test never reached the branch it covers")
+	}
+}
