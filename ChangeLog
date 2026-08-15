@@ -1,4 +1,4 @@
-(in-progress:)
+2026-08-15 (v0.0.5)
   * "?" at a planet prompt shows the list on the keypress; it no longer waits
     for Enter as well
   * The door attaches to the caller's socket when a Unix BBS gives it no live
