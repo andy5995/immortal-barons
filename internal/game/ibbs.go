@@ -133,11 +133,14 @@ type LeagueConfig struct {
 	TurnsPerDay           int
 	ProtectionTurns       int
 	GameLength            int
+	IdleDaysRemove        int
 	InitialMarketLand     int
 	LandPerDay            int
+	MoneyCapBillions      int
 	InterestRate          int
 	StdInvestRate         int
 	SteadyInvest          bool
+	FoodUnlimited         bool
 	MaxTaxRate            int
 	PlanetaryTaxRate      int
 	MaxRegions            int
@@ -152,6 +155,7 @@ type LeagueConfig struct {
 	LocalAttacks          bool
 	LocalAttackScoring    bool
 	DupeChecking          bool
+	Pirates               bool
 	MaxPlayers            int
 	BuyMilitary           BuyMode
 	MaintCosts            Level
@@ -164,9 +168,11 @@ type LeagueConfig struct {
 	SlappenheimerHandling SlappenheimerMode
 }
 
-// leagueRuleset extracts the league-wide rules (the fields marked * in the
-// Configuration Editor) from this board's config, for the coordinator to
-// broadcast.
+// leagueRuleset extracts the league-wide rules from this board's config, for the
+// coordinator to broadcast. It is a WIDER set than the fields the Configuration
+// Editor stars: the star means "an inter-BBS option", which a rule like the tax
+// cap or the pirates is not, though both still have to be the same on every
+// board for the game to be fair.
 func (c Config) leagueRuleset() *LeagueConfig {
 	return &LeagueConfig{
 		GameStartDate:         c.GameStartDate,
@@ -174,11 +180,14 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		TurnsPerDay:           c.TurnsPerDay,
 		ProtectionTurns:       c.ProtectionTurns,
 		GameLength:            c.GameLength,
+		IdleDaysRemove:        c.IdleDaysRemove,
 		InitialMarketLand:     c.InitialMarketLand,
 		LandPerDay:            c.LandPerDay,
+		MoneyCapBillions:      c.MoneyCapBillions,
 		InterestRate:          c.InterestRate,
 		StdInvestRate:         c.StdInvestRate,
 		SteadyInvest:          c.SteadyInvest,
+		FoodUnlimited:         c.FoodUnlimited,
 		MaxTaxRate:            c.MaxTaxRate,
 		PlanetaryTaxRate:      c.PlanetaryTaxRate,
 		MaxRegions:            c.MaxRegions,
@@ -193,6 +202,7 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		LocalAttacks:          c.LocalAttacks,
 		LocalAttackScoring:    c.LocalAttackScoring,
 		DupeChecking:          c.DupeChecking,
+		Pirates:               c.Pirates,
 		MaxPlayers:            c.MaxPlayers,
 		BuyMilitary:           c.BuyMilitary,
 		MaintCosts:            c.MaintCosts,
@@ -207,18 +217,24 @@ func (c Config) leagueRuleset() *LeagueConfig {
 }
 
 // applyLeagueRuleset copies broadcast league rules into this board's config,
-// leaving per-board fields (BoardID, dirs, AICount, IBBS) untouched.
+// leaving per-board fields untouched. What counts as which is decided by one
+// rule: anything that changes how the local game plays has to be the same on
+// every planet, or the season is not a fair one. Only identity, file paths and
+// session policy stay local — see perBoardConfigFields, which pins the list.
 func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.GameStartDate = lc.GameStartDate
 	c.JoinDate = lc.JoinDate
 	c.TurnsPerDay = lc.TurnsPerDay
 	c.ProtectionTurns = lc.ProtectionTurns
 	c.GameLength = lc.GameLength
+	c.IdleDaysRemove = lc.IdleDaysRemove
 	c.InitialMarketLand = lc.InitialMarketLand
 	c.LandPerDay = lc.LandPerDay
+	c.MoneyCapBillions = lc.MoneyCapBillions
 	c.InterestRate = lc.InterestRate
 	c.StdInvestRate = lc.StdInvestRate
 	c.SteadyInvest = lc.SteadyInvest
+	c.FoodUnlimited = lc.FoodUnlimited
 	c.MaxTaxRate = lc.MaxTaxRate
 	c.PlanetaryTaxRate = lc.PlanetaryTaxRate
 	c.MaxRegions = lc.MaxRegions
@@ -233,6 +249,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.LocalAttacks = lc.LocalAttacks
 	c.LocalAttackScoring = lc.LocalAttackScoring
 	c.DupeChecking = lc.DupeChecking
+	c.Pirates = lc.Pirates
 	c.MaxPlayers = lc.MaxPlayers
 	c.BuyMilitary = lc.BuyMilitary
 	c.MaintCosts = lc.MaintCosts
