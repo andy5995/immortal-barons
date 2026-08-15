@@ -305,13 +305,13 @@ func BuildMenus() *Menus {
 	// Numbered 1-8 with no Help item, as the live capture draws it — unlike the
 	// local Bomb Enemy Targets submenu above, which is lettered.
 	ipSpecial.Items = []Item{
-		{Key: '1', Label: "Bomb Food Market", Do: ipSpecialStub, Hidden: noBombingOps},
-		{Key: '2', Label: "Bomb Trading Market", Do: ipSpecialStub, Hidden: noBombingOps},
-		{Key: '3', Label: "Bomb Trade Routes", Do: ipSpecialStub, Hidden: noBombingOps},
-		{Key: '4', Label: "Undermine Investments", Do: ipSpecialStub, Hidden: noBombingOps},
-		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialStub, Hidden: noMissileOps},
-		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialStub, Hidden: noMissileOps},
-		{Key: '7', Label: "R5-Slappenheimer", Do: ipSpecialStub, Hidden: noMissileOps},
+		{Key: '1', Label: "Bomb Food Market", Do: ipSpecialOp(game.OpBombFood), Hidden: noBombingOps},
+		{Key: '2', Label: "Bomb Trading Market", Do: ipSpecialOp(game.OpBombMarket), Hidden: noBombingOps},
+		{Key: '3', Label: "Bomb Trade Routes", Do: ipSpecialOp(game.OpBombRoutes), Hidden: noBombingOps},
+		{Key: '4', Label: "Undermine Investments", Do: ipSpecialOp(game.OpUndermine), Hidden: noBombingOps},
+		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialOp(game.OpNuclear), Hidden: noMissileOps},
+		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialOp(game.OpChemical), Hidden: noMissileOps},
+		{Key: '7', Label: "R5-Slappenheimer", Do: ipSpecialOp(game.OpSlappenheimer), Hidden: noMissileOps},
 		{Key: '8', Label: "Send SpyGuy", Do: sendSpyGuy},
 		{Key: '0', Label: "Quit", Do: back},
 	}
@@ -381,9 +381,17 @@ func BuildMenus() *Menus {
 
 	// The Coordinator Menu belongs to the elected BBS Coordinator (see the
 	// System menu gate below); it holds the planet-coordination functions.
+	// BRE's own Coordinator Ops menu, from its handler (run_interbbs_operations_menu,
+	// BRE.OVR 0x015e3a): four items keyed '1'-'4' in this order, dispatched by
+	// cmp al,'1'..'4'. See docs/dev/bre-screens.md — an earlier reading of this
+	// menu as eight lettered hotkeys was wrong. Dismantle Gooie is the one item
+	// not built yet (#114); Player List is IB's own, keyed past the original's
+	// four rather than displacing one of them.
 	coord.Items = []Item{
-		{Key: 'D', Label: "Modify Diplomacy", Do: diplomacyModification},
-		{Key: 'P', Label: "Player List", Do: playerList},
+		{Key: '1', Label: "Modify Diplomacy", Do: diplomacyModification},
+		{Key: '2', Label: "Global Recon Request", Do: globalReconRequest},
+		{Key: '3', Label: "View Diplomacy", Do: planetaryTreaties},
+		{Key: '4', Label: "Player List", Do: playerList},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	coord.DefaultOnEnter = quitOnEnter(coord)

@@ -598,9 +598,44 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 // ipSpecialStub is a recorded-but-inert interplanetary Special Operations item:
 // the cross-planet bombing/WMD variants aren't built yet, so the menu matches
 // BRE while the mechanic stays a stub.
-func ipSpecialStub(s session.Session, w *ctx) Result {
-	ok(s, "That interplanetary operation is not yet available.")
-	return Stay
+// ipSpecialOp drives every item on the interplanetary Special Operations menu
+// (#49): pick a planet and a baron, quote the price, confirm, and send. The
+// strike itself happens on the target's board when the packet lands, so the
+// screen promises a report rather than printing an outcome — the same shape as
+// Terrorist Ops above, and for the same reason.
+func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
+	return func(s session.Session, w *ctx) Result {
+		if blockedByProtection(s, w) {
+			return Stay
+		}
+		// Checked before a planet is picked so a baron who cannot deliver a
+		// payload is not walked through choosing a target first.
+		if w.Player().Bombers < game.BombingBombersRequired {
+			fail(s, game.ErrNeedBombers)
+			return Stay
+		}
+		label := game.SpecialOpLabel(op)
+		board, baron, _, found := pickRemoteTarget(s, w,
+			fmt.Sprintf(tr(s, "%s against which planet?"), label),
+			fmt.Sprintf(tr(s, "%s against which baron?"), label), hostile)
+		if !found {
+			return Stay
+		}
+		cost := w.World.SpecialOpGoldCost(w.Player(), op)
+		okNoPause(s, "This operation will cost %s gold.", comma(cost))
+		if !askYesNoHere(s, "Send this Operation?", true) {
+			return Stay
+		}
+		err := w.mutatePlayer(func(p *game.Empire) error {
+			return w.World.SendSpecialOp(p, board, baron, op)
+		})
+		if err != nil {
+			fail(s, err)
+			return Stay
+		}
+		ok(s, "Your %s is away against %s of %s. Word will come back with the next packet.", label, baron, board)
+		return Stay
+	}
 }
 
 // spyDatabase is the read-only Spy Database viewer (sending is Special
@@ -833,4 +868,27 @@ func splitFirstRune(word string) (first, rest string) {
 		return string(r), word[i+utf8.RuneLen(r):]
 	}
 	return "", ""
+}
+
+// globalReconRequest is Coordinator Ops item 3: one scouting sweep of the whole
+// league, answered with a report on every realm every other board holds. The
+// answers land in the planet-wide Spy Database, so the sweep is the Coordinator
+// spending their agent on everyone's behalf.
+func globalReconRequest(s session.Session, w *ctx) Result {
+	var boards int
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		n, e := w.World.GlobalReconRequest(p)
+		boards = n
+		return e
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	if boards == 0 {
+		ok(s, "No other planets are known yet, so there is nobody to scout.")
+		return Stay
+	}
+	ok(s, "Recon requests created to all %d planets. The reports will reach the Spy Database.", boards)
+	return Stay
 }

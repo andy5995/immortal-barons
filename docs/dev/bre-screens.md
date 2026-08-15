@@ -1623,25 +1623,35 @@ color as above.
 ### Diplomacy Modification (BBS Coordinator only)
 
 Not reachable in the capture — the caller was not the elected Coordinator — so
-this is read from the binary rather than observed. `BRE.EXE` 0x14e5b defines a
-`Coordinator Ops` menu with eight hotkeys (`DEFRIOKL`), reached from the System
+this is read from the binary rather than observed. It is reached from the System
 Menu's `Coordinator Menu` item (`BRE.OVR` 0x13920).
 
-Four of its item labels sit together at `BRE.OVR` 0x15dc0, immediately before
-the BBS Coordinator strings:
+The menu has **four items, keyed `1`-`4`**, and its handler settles both the
+labels and the mapping. `run_interbbs_operations_menu` (`BRE.OVR` 0x015e3a, unit
+`ovr_015dbf`) draws each row with `mov al,0x31`..`0x34` against the four label
+offsets 0x00 / 0x11 / 0x22 / 0x37, which are the four strings stored together at
+`BRE.OVR` 0x15dbf, then dispatches on `cmp al,'1'`..`'4'`:
 
-```
-Dismantle Gooie
-Modify Diplomacy
-Global Recon Request
-View Diplomacy
-```
+| Key | Item | Opens |
+|---|---|---|
+| 1 | Dismantle Gooie | confirms `Are you positive?` first |
+| 2 | Modify Diplomacy | the `Diplomacy Modification` screen below |
+| 3 | Global Recon Request | posts `Recon Requests Created to All BBSs` |
+| 4 | View Diplomacy | the `Planetary Treaties` chart |
+
+A fifth key, read from a variable rather than a literal, quits; anything else
+redraws the menu.
 
 So the menu **item** is `Modify Diplomacy`; `Diplomacy Modification` is the title
-of the screen it opens. The other four items are unknown, and the eight hotkeys
-are not the labels' initials, so which key opens what is **not** established.
-IB uses `D` for Modify Diplomacy, which is probably the original's key for
-`Dismantle Gooie` (#45) — expect to move it when that lands.
+of the screen it opens.
+
+**Correction.** This section previously recorded "eight hotkeys (`DEFRIOKL`)"
+from `BRE.EXE` 0x14e50 and called the mapping unestablished. That string is not
+this menu's key set: it sits in a run of `GAME\BREINS.TXT` help-topic names
+(`Spending Menu`, `System Menu`, `Coordinator Ops`, `Sell Menu`, `Covert
+Operations`, `Preferences`), and the handler above proves the keys are `1`-`4`.
+The note that IB's `D` was "probably the original's key for Dismantle Gooie" was
+wrong for the same reason.
 
 `BRE.OVR` 0x23530 carries the screen: the title `Diplomacy Modification`, the
 prompt `Change status to War, None, Peace, or Ally?` (keys `WNPAU` at 0x23594,

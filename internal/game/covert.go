@@ -261,8 +261,7 @@ func (w *World) BombFood(a, d *Empire) (string, error) {
 		return "", err
 	}
 	if w.covertSuccess(a, d) {
-		lost := d.Food / 2
-		d.Food -= lost
+		lost := bombFoodEffect(d)
 		d.addEvent(fmt.Sprintf("Saboteurs torched your food stores — %d units lost.", lost))
 		return fmt.Sprintf("You destroyed %d units of %s's food.", lost, d.Name), nil
 	}
@@ -324,15 +323,12 @@ func (w *World) BombTradeRoutes(a, d *Empire) (string, error) {
 		return "", err
 	}
 	if w.covertSuccess(a, d) {
-		for _, ttype := range tradeTreatyTypes {
-			if allies := w.alliesOf(d, ttype); len(allies) > 0 {
-				partner := allies[0]
-				w.BreakTreaty(d, partner, ttype)
-				d.addEvent(fmt.Sprintf("Saboteurs severed your %s with %s.", ttype, partner.Name))
-				return fmt.Sprintf("You severed %s's %s with %s.", d.Name, ttype, partner.Name), nil
-			}
+		ttype, partner, cut := w.bombRoutesEffect(d)
+		if !cut {
+			return fmt.Sprintf("%s has no trade routes to sever.", d.Name), nil
 		}
-		return fmt.Sprintf("%s has no trade routes to sever.", d.Name), nil
+		d.addEvent(fmt.Sprintf("Saboteurs severed your %s with %s.", ttype, partner))
+		return fmt.Sprintf("You severed %s's %s with %s.", d.Name, ttype, partner), nil
 	}
 	a.Agents--
 	d.addEvent("Your security foiled an enemy attempt to sever your trade routes.")
@@ -347,15 +343,9 @@ func (w *World) UndermineInvestments(a, d *Empire) (string, error) {
 		return "", err
 	}
 	if w.covertSuccess(a, d) {
-		if len(d.Investments) == 0 {
+		lost := undermineEffect(d)
+		if lost == 0 {
 			return fmt.Sprintf("%s has no investments to undermine.", d.Name), nil
-		}
-		var lost int64
-		for i := range d.Investments {
-			cut := d.Investments[i].Amount / 4
-			d.Investments[i].Amount -= cut
-			d.Investments[i].Return -= cut
-			lost += cut
 		}
 		d.addEvent(fmt.Sprintf("Saboteurs undermined your investments — %d gold in principal lost.", lost))
 		return fmt.Sprintf("You undermined %s's investments: %d gold lost.", d.Name, lost), nil
@@ -485,7 +475,7 @@ func (w *World) SlappenheimerStrike(a, d *Empire) (string, error) {
 	}
 	// The more Troopers the target garrisons, the likelier the missile turns
 	// back on the attacker.
-	if w.rng.Intn(100) < d.Troopers/SlappenheimerBackfireScale {
+	if w.slappenheimerBackfires(d) {
 		if hit := w.slappenheimerDamage(a); hit != "" {
 			return "The R5-Slappenheimer backfired! You lost " + hit + ".", nil
 		}
@@ -497,4 +487,77 @@ func (w *World) SlappenheimerStrike(a, d *Empire) (string, error) {
 	}
 	d.addEvent("An R5-Slappenheimer struck your empire — lost " + hit + ".")
 	return fmt.Sprintf("Your R5-Slappenheimer hit %s: %s destroyed.", d.Name, hit), nil
+}
+
+// slappenheimerBackfires reports whether the missile turns back on whoever
+// fired it: the more Troopers the target garrisons, the likelier it does.
+func (w *World) slappenheimerBackfires(d *Empire) bool {
+	return w.rng.Intn(100) < d.Troopers/SlappenheimerBackfireScale
+}
+
+// slappenheimerEffect is the target-side half of the missile, for a strike that
+// arrived from another planet (#49). It runs the same shield, fizzle and
+// backfire rolls the local strike runs, in the same order.
+//
+// A backfire cannot be applied here — the realm it would hurt is on the board
+// that fired — so it is reported instead, and the launching board takes the
+// damage when the answer gets home. That is the one thing the two versions do
+// differently, and the delay is the packet's, not a rule of its own.
+func (w *World) slappenheimerEffect(d *Empire, from string) (report string, hit, backfired bool) {
+	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
+		return fmt.Sprintf("%s's SDI intercepted your R5-Slappenheimer.", d.Name), false, false
+	}
+	if w.rng.Intn(SlappenheimerEffectRange) >= SlappenheimerEffectHits {
+		return "The R5-Slappenheimer fizzled and did no damage.", false, false
+	}
+	if w.slappenheimerBackfires(d) {
+		return "The R5-Slappenheimer backfired on the way out!", false, true
+	}
+	lost := w.slappenheimerDamage(d)
+	if lost == "" {
+		return fmt.Sprintf("Your R5-Slappenheimer reached %s but did negligible damage.", d.Name), false, false
+	}
+	d.addEvent(fmt.Sprintf("An R5-Slappenheimer from %s struck your empire — lost %s.", from, lost))
+	return fmt.Sprintf("Your R5-Slappenheimer hit %s: %s destroyed.", d.Name, lost), true, false
+}
+
+// The effects the local Bomb Enemy Targets ops and their interplanetary
+// counterparts share (#49). Each one is the part of an op that touches the
+// TARGET only — no attacker, no success roll, no fee — which is exactly the
+// part a board can run for a strike that arrived in a packet. Keeping them here
+// rather than duplicating the arithmetic is what stops the two menus drifting
+// apart when a number is tuned.
+
+// bombFoodEffect burns half of d's food reserve and reports what was lost.
+func bombFoodEffect(d *Empire) int {
+	lost := d.Food / 2
+	d.Food -= lost
+	return lost
+}
+
+// bombRoutesEffect severs the first trade agreement d holds, and reports which
+// and with whom. cut is false when d has no trade agreement at all.
+func (w *World) bombRoutesEffect(d *Empire) (ttype, partner string, cut bool) {
+	for _, t := range tradeTreatyTypes {
+		if allies := w.alliesOf(d, t); len(allies) > 0 {
+			other := allies[0]
+			w.BreakTreaty(d, other, t)
+			return string(t), other.Name, true
+		}
+	}
+	return "", "", false
+}
+
+// undermineEffect trims a quarter off the principal and matching return of each
+// of d's pending investments, and reports the principal lost. Zero means d had
+// nothing invested.
+func undermineEffect(d *Empire) int64 {
+	var lost int64
+	for i := range d.Investments {
+		cut := d.Investments[i].Amount / UndermineInvestmentDivisor
+		d.Investments[i].Amount -= cut
+		d.Investments[i].Return -= cut
+		lost += cut
+	}
+	return lost
 }

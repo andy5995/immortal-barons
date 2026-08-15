@@ -1657,3 +1657,27 @@ var MoraleDesertBands = [MoraleDesertBandTop / MoraleDesertBandWidth]struct{ Bas
 	{10, 3, 8},  // morale 20-29
 	{5, 2, 5},   // morale 30-39
 }
+
+// Interplanetary Special Operations prices (#49).
+//
+// The four bombing ops carry the figures the original prints in that menu's own
+// price column, read off a live capture (docs/dev/bre-screens.md). They are
+// fidelity constants, not playtest knobs.
+//
+// The three missiles print NO price there. The local versions price off the
+// TARGET's size, which a board cannot know about a realm on another planet, so
+// IB prices them off the launcher's own land the way terror ops already are.
+// That per-region rate IS a playtest knob — it is IB's, with nothing in the
+// original to match it against.
+const (
+	IPBombFoodCost   int64 = 10_000_000
+	IPBombMarketCost int64 = 25_000_000
+	IPBombRoutesCost int64 = 25_000_000
+	IPUndermineCost  int64 = 75_000_000
+
+	IPMissileGoldPerRegion int64 = 20_000
+)
+
+// UndermineInvestmentDivisor is the share of each investment's principal an
+// Undermine Investments op destroys: a quarter.
+const UndermineInvestmentDivisor = 4

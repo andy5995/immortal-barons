@@ -1,3 +1,14 @@
+(in-progress:)
+  * The InterPlanetary Special Operations menu works: Bomb Food Market, Bomb
+    Trading Market, Bomb Trade Routes, Undermine Investments, Nuclear Assault,
+    Chemical Bombing and R5-Slappenheimer are aimed at a baron on another
+    planet, resolve on that planet's own board, and report back. Seven of the
+    menu's eight items did nothing before
+  * The Coordinator menu matches the original: Modify Diplomacy, Global Recon
+    Request, View Diplomacy and Player List, keyed 1 to 4
+  * Global Recon Request asks every other planet for a report on every realm it
+    holds, and the answers land in the Spy Database
+
 2026-08-15 (v0.0.5)
   * "?" at a planet prompt shows the list on the keypress; it no longer waits
     for Enter as well

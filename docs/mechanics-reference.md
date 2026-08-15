@@ -800,8 +800,8 @@ assume it is flat.
 
 IB charges it: `World.TerrorOpGoldCost` is `Land × TerrorOpGoldPerRegion (64)`
 scaled by `TerrorCosts`, quoted before the confirm and taken in `SendTerror`.
-BRE also prices four Special Operations entries on their own menu (figures in
-`docs/dev/bre-screens.md`), which is a separate gap.
+The four Special Operations entries the original prices on their own menu are
+implemented at those figures — see "Interplanetary Special Operations" below.
 
 ### The two cost levels (Attack Costs, Terrorism Costs) — BINARY-VERIFIED
 
@@ -2475,8 +2475,56 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   ratio) of one randomly chosen unit type. New Realm Protection blocks it.
 - **Spy** — send an agent to a remote baron; intel lands in the planet-wide Spy
   Database. Reached from the Spy Database screen.
+- **Special Operations** — the cross-planet bombing and missile set; see below.
 - **SDI** — puts gold into the program; the strength it buys is capped at
   `SDIMax` (100%, the original's own clamp). See "The SDI program" below.
+
+### Interplanetary Special Operations
+
+The Special Operations submenu (InterPlanetary Ops → 8) runs the local Bomb
+Enemy Targets set against a baron on another planet, plus Send SpyGuy. The
+original resolves them by **writing a packet** rather than touching the target:
+its handler (`run_bombing_operations_menu`, `BRE.OVR` 0x029ea9) calls
+`write_special_operation_packet`, so the strike lands when the packet does. IB
+does the same, on the machinery that already carries terror ops.
+
+The menu is numbered 1-8 with no Help item (live capture):
+
+| # | Operation | Price |
+|---|---|---|
+| 1 | Bomb Food Market | 10,000,000 |
+| 2 | Bomb Trading Market | 25,000,000 |
+| 3 | Bomb Trade Routes | 25,000,000 |
+| 4 | Undermine Investments | 75,000,000 |
+| 5 | Nuclear Assault | quoted |
+| 6 | Chemical Bombing | quoted |
+| 7 | R5-Slappenheimer | quoted |
+| 8 | Send SpyGuy | quotes its own, after the target is named |
+
+The four prices are the original's own, off the menu's price column
+(`docs/dev/bre-screens.md`), and are fidelity constants in `balance.go`.
+
+**The effects are the local ops' effects**, called through the same helpers, so
+a retune lands on both menus: food halved, a share of the market position and
+its pending proceeds destroyed, the first trade agreement severed, a quarter off
+each investment's principal and matching return, and the three missiles' own
+damage. Every op needs the 500 Bombers the original requires of anything on this
+menu, answers to the sysop's Bombing Ops / Missile Ops switches, counts against
+the daily bombing allowance, and is stopped by New Realm Protection.
+
+**Three IB decisions**, none of them established from the original:
+
+- **The three missiles are priced off the LAUNCHER's land**
+  (`IPMissileGoldPerRegion`), scaled by Terrorism Costs. The local versions
+  price off the target's size, which is exactly what a board cannot know about a
+  realm on another planet, and the original's menu shows no price for them. This
+  one is a playtest knob.
+- **A backfiring R5-Slappenheimer is reported home and applied there.** The roll
+  happens where the target lives, but the realm it hurts is on the board that
+  fired, so the damage lands when the answer arrives.
+- **A lost packet returns nothing**, because a Special Operation commits no
+  forces and no agents — only gold, already spent on launching it. The sender is
+  told the strike was never heard of again rather than left waiting.
 
 ### The SDI program
 

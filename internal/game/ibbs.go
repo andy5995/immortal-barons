@@ -23,17 +23,28 @@ var (
 	ErrTerrorOpsExhausted    = errors.New("You have already launched all of your terrorist operations for today.")
 	ErrAttacksExhausted      = errors.New("You have already launched all of your attacks for today.")
 	ErrNoTarget              = errors.New("An individual attack must name a baron to strike.")
+	// The interplanetary Special Operations menu's refusals (#49). Bombing Ops
+	// and Missile Ops are the sysop's two switches over that menu, and the
+	// bomber floor is the original's delivery requirement.
+	ErrBombingOpsExhausted = errors.New("You have already launched all of your bombing operations for today.")
+	ErrBombingOpsDisabled  = errors.New("Bombing operations are not part of this game.")
+	ErrMissileOpsDisabled  = errors.New("Missile operations are not part of this game.")
+	ErrNeedBombers         = fmt.Errorf("You need at least %d Bombers to deliver a payload.", BombingBombersRequired)
 )
 
 // Packet carries inter-BBS actions from one board to another (or, with an empty
 // ToBoard, broadcast to the whole league).
 type Packet struct {
-	FromBoard    string
-	ToBoard      string
-	Date         string
-	Scores       []RemoteScore      // score share (feeds RemoteBoards / IP scores)
-	Attacks      []RemoteAttack     // strikes landing on ToBoard
-	Terrors      []RemoteTerror     // terror ops landing on ToBoard
+	FromBoard string
+	ToBoard   string
+	Date      string
+	Scores    []RemoteScore  // score share (feeds RemoteBoards / IP scores)
+	Attacks   []RemoteAttack // strikes landing on ToBoard
+	Terrors   []RemoteTerror // terror ops landing on ToBoard
+	// SpecialOps are the InterPlanetary Special Operations menu's strikes (#49),
+	// carried apart from Terrors: a different menu, a different per-day
+	// allowance, and no committed agents.
+	SpecialOps   []RemoteSpecialOp  `json:",omitempty"`
 	Results      []AttackResult     // outcomes returning to the origin
 	LeagueConfig *LeagueConfig      // LC-authored league settings (nil if absent)
 	LeagueNodes  []LeagueNode       // LC-authored league roster (nil if absent, #64)
@@ -97,6 +108,7 @@ type Packet struct {
 // or only an echoed probe still goes out.
 func (p Packet) HasPayload() bool {
 	return len(p.Scores) > 0 || len(p.Attacks) > 0 || len(p.Terrors) > 0 ||
+		len(p.SpecialOps) > 0 ||
 		len(p.Results) > 0 || len(p.Recon) > 0 || len(p.ReconReports) > 0 ||
 		len(p.TimeChecks) > 0 || len(p.IPMessages) > 0 ||
 		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 || p.Notice != "" ||
@@ -589,6 +601,15 @@ type AttackResult struct {
 	// returning report itemises it beside the attacker's own casualties; without
 	// it the origin board can only say whether the strike won.
 	Enemy UnitLoss `json:",omitempty"`
+	// Report is the sentence the target board wrote for what a Special Operation
+	// did (#49), and Score what the strike earned its sender. Both are settled
+	// where the target lives, so neither can be worked out back home.
+	Report string `json:",omitempty"`
+	Score  int    `json:",omitempty"`
+	// Backfired says an R5-Slappenheimer turned on the realm that fired it. The
+	// damage cannot be applied where it was rolled — that realm is on the board
+	// that sent the missile — so it is applied when this answer gets home.
+	Backfired bool `json:",omitempty"`
 }
 
 // AttackOutcome is a returning strike's verdict, matching the four BRE prints
@@ -651,6 +672,9 @@ type InFlightStrike struct {
 	Good  string `json:",omitempty"`
 	Qty   int    `json:",omitempty"`
 	Price int    `json:",omitempty"`
+	// Op is which Special Operation is away (Kind "special"), so a lost-packet
+	// notice can name it.
+	Op SpecialOp `json:",omitempty"`
 }
 
 // commitForce deducts the detachment f from e's army; ErrCantAfford if e lacks
@@ -1126,6 +1150,26 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	result.TimeChecks = w.applyTimeChecks(p.TimeChecks)
 	// Scouting asked of us: answer with what is true here and now.
 	for _, req := range p.Recon {
+		// An empty TargetEmpire is a GLOBAL request — the Coordinator's sweep of
+		// the whole league (#48) — and is answered with every living realm here
+		// rather than one. A request naming a realm is answered with that one.
+		if req.TargetEmpire == "" {
+			for _, e := range w.Empires {
+				if !e.Alive || e.Owner == "" {
+					continue
+				}
+				result.ReconReports = append(result.ReconReports, SpyReport{
+					Board:   w.Config.BoardID,
+					Empire:  e.Name,
+					Date:    w.LastMaintDate,
+					Land:    e.Land,
+					Offense: e.Offense(),
+					Defense: e.Defense(),
+					Gold:    e.Gold,
+				})
+			}
+			continue
+		}
 		if e := w.remoteTarget(req.TargetEmpire); e != nil {
 			result.ReconReports = append(result.ReconReports, SpyReport{
 				Board:   w.Config.BoardID,
@@ -1144,6 +1188,9 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	}
 	for _, t := range p.Terrors {
 		result.Results = append(result.Results, w.resolveRemoteTerror(t))
+	}
+	for _, op := range p.SpecialOps {
+		result.Results = append(result.Results, w.resolveRemoteSpecialOp(op))
 	}
 	return result
 }
@@ -1344,6 +1391,17 @@ func (w *World) ReturnLostForces() int {
 			}
 			continue
 		}
+		// A Special Operation commits no forces and no agents — only the gold,
+		// which was spent on launching it. There is nothing to hand back, so the
+		// baron is told the strike was never heard of again rather than left
+		// waiting on a report that is not coming.
+		if f.Kind == "special" {
+			if e := w.FindByOwner(f.Owner); e != nil {
+				e.addEvent(fmt.Sprintf("No word came back from %s. Your %s against %s is presumed lost.",
+					f.TargetBoard, SpecialOpLabel(f.Op), f.TargetEmpire))
+			}
+			continue
+		}
 		for _, c := range f.Contributors {
 			e := w.FindByOwner(c.Owner)
 			if e == nil {
@@ -1379,6 +1437,45 @@ func (w *World) SendRecon(e *Empire, targetBoard, targetEmpire string) error {
 	p := w.outboxFor(targetBoard)
 	p.Recon = append(p.Recon, req)
 	return nil
+}
+
+// GlobalReconRequest is the Coordinator Ops menu's own scouting sweep (#48):
+// one request to every other board in the league, each answered with a report on
+// every realm that board holds. The original posts `Recon Requests Created to
+// All BBSs` and says no more, so what it charges is not established — IB spends
+// ONE agent for the sweep rather than one per board, because the alternative
+// prices the Coordinator out of the item as the league grows.
+//
+// It returns how many boards were asked, so the screen can say so.
+func (w *World) GlobalReconRequest(e *Empire) (int, error) {
+	if e.Agents < 1 {
+		return 0, ErrNoAgents
+	}
+	var boards []string
+	seen := map[string]bool{w.Config.BoardID: true}
+	for _, n := range w.LeagueNodes {
+		if !seen[n.Name] {
+			seen[n.Name] = true
+			boards = append(boards, n.Name)
+		}
+	}
+	for _, b := range w.RemoteBoards {
+		if !seen[b.BoardID] {
+			seen[b.BoardID] = true
+			boards = append(boards, b.BoardID)
+		}
+	}
+	if len(boards) == 0 {
+		return 0, nil
+	}
+	e.Agents--
+	for _, b := range boards {
+		w.NextAttackID++
+		req := ReconRequest{ID: w.NextAttackID, FromBoard: w.Config.BoardID, FromOwner: e.Owner}
+		pkt := w.outboxFor(b)
+		pkt.Recon = append(pkt.Recon, req)
+	}
+	return len(boards), nil
 }
 
 // ExportAnnihilatorStatus tells the targeted planet about this one's weapon, whether

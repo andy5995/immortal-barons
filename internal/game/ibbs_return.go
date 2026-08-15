@@ -38,6 +38,10 @@ func (w *World) applyAttackResult(res AttackResult) {
 		w.applyTerrorResult(sent, res)
 		return
 	}
+	if sent.Kind == "special" {
+		w.applySpecialOpResult(sent, res)
+		return
+	}
 	// Return each contributor's surviving forces to their army, and tell them
 	// what the strike cost and did.
 	for _, c := range sent.Contributors {
@@ -227,4 +231,45 @@ func strikeSender(w *World, sent InFlightStrike) string {
 		return "Our forces"
 	}
 	return owner
+}
+
+// applySpecialOpResult files the answer to an interplanetary Special Operation
+// with the baron who sent it: what it did, what it earned, and — for an
+// R5-Slappenheimer that turned on its owner — the damage that could only be
+// rolled where the target lives but has to land here.
+func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
+	e := w.FindByOwner(sent.Owner)
+	if e == nil {
+		return
+	}
+	label := SpecialOpLabel(sent.Op)
+	if res.Backfired {
+		lost := w.slappenheimerDamage(e)
+		if lost == "" {
+			e.addEvent(fmt.Sprintf("Your %s against %s of %s backfired, but the damage was negligible.",
+				label, res.TargetEmpire, sent.TargetBoard))
+			return
+		}
+		e.addEvent(fmt.Sprintf("Your %s against %s of %s backfired! You lost %s.",
+			label, res.TargetEmpire, sent.TargetBoard, lost))
+		w.postNews(fmt.Sprintf("%s's %s turned on its own realm.", e.Name, label))
+		return
+	}
+	switch res.outcome() {
+	case OutcomeNotFound:
+		e.addEvent(fmt.Sprintf("Your %s found no realm named %s on %s.", label, sent.TargetEmpire, sent.TargetBoard))
+		return
+	case OutcomeProtected:
+		e.addEvent(fmt.Sprintf("Your %s against %s of %s broke on their New Realm Protection.",
+			label, res.TargetEmpire, sent.TargetBoard))
+		return
+	}
+	if res.Score > 0 {
+		addScore(e, res.Score)
+	}
+	report := res.Report
+	if report == "" {
+		report = fmt.Sprintf("Your %s against %s of %s is over.", label, res.TargetEmpire, sent.TargetBoard)
+	}
+	e.addEvent(fmt.Sprintf("%s (%s of %s): %s", label, res.TargetEmpire, sent.TargetBoard, report))
 }

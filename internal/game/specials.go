@@ -217,10 +217,7 @@ func (w *World) NuclearStrike(a, d *Empire) (string, error) {
 		return "", err
 	}
 
-	// 7% ± a two-draw jitter, so the band is 5-9% and the extremes are rarer
-	// than the middle.
-	pct := NukeWastePct + w.rng.Intn(NukeWasteJitter) - w.rng.Intn(NukeWasteJitter)
-	regions := ruinToWaste(d, pct)
+	regions := w.nuclearEffect(d)
 
 	// The award is a flat draw, not a share of the damage: a strike on a small
 	// realm that ruined nothing still scores.
@@ -307,17 +304,7 @@ func (w *World) ChemicalStrike(a, d *Empire) (string, error) {
 		return "", err
 	}
 
-	// 3% ± a two-draw jitter, so 1-5% — a third of the nuclear band.
-	pct := ChemWastePct + w.rng.Intn(ChemWasteJitter) - w.rng.Intn(ChemWasteJitter)
-	regions := ruinToWaste(d, pct)
-
-	// The population kill has no roll behind it at all: it is a flat share.
-	// int64 through the multiply — a big urban realm's head count times a
-	// percentage passes 2^31 on the 32-bit door builds.
-	people := int(int64(d.People) * ChemPopKillPct / 100)
-	d.People -= people
-	d.Morale = roundDiv(d.Morale*ChemMoraleKeepNum, ChemMoraleKeepDen)
-	d.Support = roundDiv(d.Support*StrikeSupportKeepNum, StrikeSupportKeepDen)
+	regions, people := w.chemicalEffect(d)
 
 	addScore(a, w.rng.Intn(ChemScoreAward))
 
@@ -356,4 +343,33 @@ func (w *World) BiologicalStrike(a, d *Empire) (string, error) {
 
 	w.postStrikeNews(a, d, "biological")
 	return fmt.Sprintf("Biological strike! The plague killed %d troopers of %s.\nIt also carried off %d civilians, and half the realm's morale with them.", troops, d.Name, people), nil
+}
+
+// nuclearEffect and chemicalEffect are the target-side halves of the two
+// missile strikes, shared with their interplanetary counterparts (#49) so a
+// retune lands on both menus. They take no attacker: the fee, the score award
+// and the news line all belong to the side that fired, which cross-planet is a
+// different board entirely.
+
+// nuclearEffect ruins a share of d's land into waste and reports the regions.
+// 7% ± a two-draw jitter, so the band is 5-9% and the extremes are rarer than
+// the middle.
+func (w *World) nuclearEffect(d *Empire) int {
+	pct := NukeWastePct + w.rng.Intn(NukeWasteJitter) - w.rng.Intn(NukeWasteJitter)
+	return ruinToWaste(d, pct)
+}
+
+// chemicalEffect ruins land, gasses a share of the people, and breaks morale
+// and support. 3% ± a two-draw jitter, so 1-5% — a third of the nuclear band.
+func (w *World) chemicalEffect(d *Empire) (regions, people int) {
+	pct := ChemWastePct + w.rng.Intn(ChemWasteJitter) - w.rng.Intn(ChemWasteJitter)
+	regions = ruinToWaste(d, pct)
+	// The population kill has no roll behind it at all: it is a flat share.
+	// int64 through the multiply — a big urban realm's head count times a
+	// percentage passes 2^31 on the 32-bit door builds.
+	people = int(int64(d.People) * ChemPopKillPct / 100)
+	d.People -= people
+	d.Morale = roundDiv(d.Morale*ChemMoraleKeepNum, ChemMoraleKeepDen)
+	d.Support = roundDiv(d.Support*StrikeSupportKeepNum, StrikeSupportKeepDen)
+	return regions, people
 }
