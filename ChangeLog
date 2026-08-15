@@ -1,4 +1,10 @@
 (in-progress:)
+  * The door attaches to the caller's socket whenever the BBS gives it no live
+    standard input, on every platform rather than only on Windows. A native
+    Synchronet door on Linux is handed the socket and a standard input connected
+    to nothing, so the caller was dropped the moment the door started
+  * The door log records which I/O path was actually taken, not only what the
+    drop file asked for
   * config-during-reset: a new Allow IP Allies to Trade at Market setting
     (enabled) opens interplanetary trading
   * Region Cost Change is a surcharge on big realms, as in the original: it
