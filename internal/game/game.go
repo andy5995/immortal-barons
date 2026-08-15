@@ -513,11 +513,23 @@ const (
 	// bank prints "There is now a 2 day minimum on investments." and the prompt
 	// reads "How many days would you like to invest for? (2; 10)". So min 2, max
 	// 10, and BRE's own suggested value is the minimum (2), not 0.
-	MinInvestDays     = 2
-	MaxInvestDays     = 10
-	DefaultInvestRate = 5 // % per day
-	MinInvestRate     = 1
-	MaxInvestRate     = 25
+	MinInvestDays = 2
+	MaxInvestDays = 10
+
+	// The daily investment rate is held in TENTHS of a percent, which is the
+	// resolution BRE works in: its Standard Investment Rate knob states the
+	// return over ten days (35 → 3.5%/day), the Investments screen prints two
+	// decimals ("5.00%"), View Bank Rates prints one ("5.0%"), and the bank
+	// nudges the floating rate by half a point. A whole-percent rate can express
+	// none of that, and its band ran to 25%/day — two and a half times BRE's
+	// ceiling, which a ten-day term compounds into a ninefold return.
+	//
+	// The floating rate is bounded by the same range BRE allows the knob,
+	// (35; 100): a live game whose knob sat at the default 35 was observed at
+	// 5.0%/day, so the rate drifts well above its setting but not without limit.
+	DefaultInvestRate = 35  // 3.5%/day, matching Config.StdInvestRate's default
+	MinInvestRate     = 35  // 3.5%/day
+	MaxInvestRate     = 100 // 10.0%/day
 )
 
 // RemoteScore is one empire's score as reported by another board's
@@ -569,7 +581,7 @@ type World struct {
 	Prices     Prices
 	Config     Config `json:"-"` // authoritative copy is config.json; Load sets this
 	GameDay    int
-	InvestRate int // percent per day, floats each daily maintenance
+	InvestRate int // tenths of a percent per day, floats each daily maintenance
 	// FoodMarketSupply is the shared planet-wide pool of food available to buy
 	// today; buying depletes it, selling replenishes it, and it resets to
 	// FoodMarketDailySupply each day's maintenance (issue #19).
@@ -819,11 +831,19 @@ func (w *World) EnsureEpoch() {
 }
 
 // EnsureInvestRate repairs InvestRate after loading a save that predates
-// investments (InvestRate zero).
+// investments (InvestRate zero), and converts one written while the rate was a
+// whole percent. The two units cannot be confused: the old band was 1..25 and
+// the new one starts at 35, so anything below the floor is a percent figure
+// that wants scaling by ten.
 func (w *World) EnsureInvestRate() {
 	if w.InvestRate == 0 {
 		w.InvestRate = DefaultInvestRate
+		return
 	}
+	if w.InvestRate < MinInvestRate {
+		w.InvestRate *= 10
+	}
+	w.InvestRate = min(max(w.InvestRate, MinInvestRate), MaxInvestRate)
 }
 
 // EnsureNews migrates a save that predates the Today/Yesterday news split.

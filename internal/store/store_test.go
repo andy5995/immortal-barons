@@ -42,7 +42,7 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	e.Investments = []game.Investment{{Amount: 1000, Return: 1150, MaturesDay: 5}}
 	w.GameDay = 7
 	w.LastMaintDate = "2026-07-03"
-	w.InvestRate = 12
+	w.InvestRate = 42
 
 	if err := Save(w, cfg); err != nil {
 		t.Fatal(err)
@@ -54,8 +54,8 @@ func TestSaveLoadRoundTrip(t *testing.T) {
 	if got.GameDay != 7 || got.LastMaintDate != "2026-07-03" {
 		t.Errorf("world scalars not preserved: day=%d date=%q", got.GameDay, got.LastMaintDate)
 	}
-	if got.InvestRate != 12 {
-		t.Errorf("InvestRate=%d, want 12", got.InvestRate)
+	if got.InvestRate != 42 {
+		t.Errorf("InvestRate=%d, want 42", got.InvestRate)
 	}
 	ge := got.FindByOwner("khan")
 	if ge == nil || ge.Gold != 4242 || len(ge.Events) != 1 {
@@ -351,8 +351,10 @@ func TestLoadFrozenV003Fixture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.GameDay != 7 || got.InvestRate != 12 {
-		t.Errorf("world scalars: day=%d rate=%d, want 7 and 12", got.GameDay, got.InvestRate)
+	// The fixture's rate, 12, is in the whole percents that release used; loading
+	// converts it to tenths and holds it at the band's 10.0%/day ceiling.
+	if got.GameDay != 7 || got.InvestRate != 100 {
+		t.Errorf("world scalars: day=%d rate=%d, want 7 and 100", got.GameDay, got.InvestRate)
 	}
 	if len(got.NewsToday) != 1 || got.NewsToday[0] != "A bulletin line from an old save" {
 		t.Errorf(`the legacy "Bulletin" key must load into NewsToday, got %v`, got.NewsToday)

@@ -1671,12 +1671,22 @@ league ran tax 85%, interest 75%).
 
 ### Concrete economy numbers (from strategy guides)
 
+**Treat every figure in this section as unverified.** The public player guides
+are not tied to a version, so a number in one may describe a build other than the
+0.988 this clone is matched against. They are useful for finding what a mechanic
+*is*; the figure itself needs the binary or a live game behind it before anything
+relies on it.
+
 - **Bank interest: about 1% per turn** on gold held in the bank *while you
   are playing* (investments tie money up until your next login and are
-  less useful for this). The clone's Interest Rate knob is anchored so its
-  default (50) yields ~1%/turn, matching this.
+  less useful for this). This is *not* what IB does: its Interest Rate knob is
+  read the way BRE's own config help describes it — the return over ten days, so
+  the default 50 is 5.0%/day, credited across the day's turns — which comes out
+  well under 1% on a turn.
 - **Interest cap: 1,599,999,999.** Gold above this does not earn interest.
-  At the cap, interest is roughly 25–35 million per turn.
+  At the cap, interest is roughly 25–35 million per turn. IB carries the ceiling
+  (`InterestCap`) but has no evidence for it: neither that figure nor a round 1.6
+  billion is a 32-bit constant anywhere in `BRE.EXE` or `BRE.OVR`.
 - **Absolute money cap: 2,000,000,000 in BRE.** You cannot hold more than 2
   billion coins at once (in the bank or on hand) — a separate, higher ceiling
   than the interest cap.
@@ -2004,6 +2014,20 @@ Investments / Loans**, and **View Bank Rates**.
   - Random events: the Queen occasionally raises/lowers investment rates by
     ~1% (inflation flavor).
   - The sysop configures a **Standard** and a **Steady** investment rate.
+
+  **IB holds the rate in tenths of a percent per day** (`World.InvestRate`),
+  which is the unit BRE works in throughout: the Standard Investment Rate knob
+  states the return over ten days, so its default 35 is 3.5%/day; the
+  Investments screen quotes two decimals ("5.00%") and View Bank Rates one
+  ("5.0%"); and the half-point nudge above cannot be expressed in whole
+  percents. The floating rate is bounded by the same range BRE allows the knob,
+  **3.5% to 10.0% per day** (`MinInvestRate`/`MaxInvestRate`) — a live game whose
+  knob sat at the default was observed at 5.0%/day, so the rate drifts well above
+  its setting but not without limit. IB held it as a whole percent until
+  v0.0.4, in a 1–25%/day band whose ceiling compounded a ten-day term into a
+  ninefold return; a save from before the change is converted on load
+  (`EnsureInvestRate` — the old band tops out below the new floor, so the two
+  units cannot be confused) and clamped into the band.
 - **Loans**: you borrow gold at a stated loan interest rate ("The loan rate
   will be N% interest overall"); loans appear in the list with a due date.
 - **Undermine Investments** is a covert op that damages a rival's pending

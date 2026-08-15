@@ -111,9 +111,9 @@ func (w *World) postStarvationNews(e *Empire) {
 func (w *World) postInvestRateNews(before int) {
 	switch {
 	case w.InvestRate > before:
-		w.postNews(fmt.Sprintf("The planetary investment rate rose to %d%%.", w.InvestRate))
+		w.postNews(fmt.Sprintf("The planetary investment rate rose to %s%%.", PctTenths(w.InvestRate)))
 	case w.InvestRate < before:
-		w.postNews(fmt.Sprintf("The planetary investment rate fell to %d%%.", w.InvestRate))
+		w.postNews(fmt.Sprintf("The planetary investment rate fell to %s%%.", PctTenths(w.InvestRate)))
 	}
 }
 

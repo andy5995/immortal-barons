@@ -9,7 +9,7 @@ func TestInvestLocksAndSchedules(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("tester", "Testland")
 	e.Gold = 5000
-	w.InvestRate = 5
+	w.InvestRate = 50 // 5.0%/day, in tenths
 	w.GameDay = 10
 
 	ret, err := w.Invest(e, 1000, 3)
@@ -126,13 +126,39 @@ func TestPendingInvested(t *testing.T) {
 }
 
 func TestInvestRateMigration(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	w.InvestRate = 0 // simulate a save written before InvestRate existed
+	// The rate is held in tenths of a percent per day. A save from before
+	// investments existed reads zero; one written while the rate was a whole
+	// percent reads somewhere in the old 1..25 band, which is below the new
+	// floor and so is recognisable as the older unit.
+	for _, c := range []struct{ stored, want int }{
+		{0, DefaultInvestRate},
+		{5, 50},            // 5%/day, in band once scaled
+		{1, MinInvestRate}, // 1%/day is below BRE's floor
+		{12, MaxInvestRate},
+		{25, MaxInvestRate}, // the old ceiling was 2.5x BRE's
+		{50, 50},            // already tenths: left alone
+	} {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		w.InvestRate = c.stored
 
-	w.EnsureInvestRate()
+		w.EnsureInvestRate()
 
-	if w.InvestRate != DefaultInvestRate {
-		t.Errorf("InvestRate after migration: want %d, got %d", DefaultInvestRate, w.InvestRate)
+		if w.InvestRate != c.want {
+			t.Errorf("stored %d: want %d, got %d", c.stored, c.want, w.InvestRate)
+		}
+	}
+}
+
+// The rate BRE quotes is what an investment actually pays: a term at the
+// default 3.5%/day compounds to a figure the whole-percent rate could not
+// express at all, and the old 25%/day ceiling turned a ten-day term into a
+// ninefold return.
+func TestInvestReturnUsesTenthsOfAPercent(t *testing.T) {
+	if got := ExpectedReturn(1000, DefaultInvestRate, 2); got != 1071 { // 1000·1.035²
+		t.Errorf("1000 for 2 days at 3.5%%/day: want 1071, got %d", got)
+	}
+	if got := ExpectedReturn(1000, MaxInvestRate, 10); got != 2593 { // 1000·1.10¹⁰
+		t.Errorf("the ceiling should pay 2593 over ten days, got %d", got)
 	}
 }
 

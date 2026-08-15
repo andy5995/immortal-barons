@@ -8,8 +8,8 @@ import (
 )
 
 // Invest locks `amount` gold for `days` days (clamped to [MinInvestDays,
-// MaxInvestDays]) and records a maturing return at the current InvestRate (simple
-// interest). Returns the expected return, or an error if the amount is unaffordable.
+// MaxInvestDays]) and records a maturing return at the current InvestRate.
+// Returns the expected return, or an error if the amount is unaffordable.
 //
 // One investment is capped at MaxInvestment however much gold is on hand; the
 // menu offers no more than that, and this is the rule a direct caller meets.
@@ -35,17 +35,23 @@ func (w *World) Invest(e *Empire, amount int64, days int) (int64, error) {
 }
 
 // ExpectedReturn is the total payout (principal + interest) for investing
-// `amount` for `days` days at `rate` percent per day, COMPOUNDED daily — matching
-// BRE (live-verified: 1000 for 2 days at 5%/day returns 1102 = 1000·1.05²). BRE
-// computes this in floating point ("TP reals") and truncates once at the end, so
-// IB does the same (int-iterative truncation would drift low over a long term).
+// `amount` for `days` days at `rate` TENTHS of a percent per day, COMPOUNDED
+// daily — matching BRE (live-verified: 1000 for 2 days at 5%/day returns
+// 1102 = 1000·1.05²). BRE computes this in floating point ("TP reals") and
+// truncates once at the end, so IB does the same (int-iterative truncation would
+// drift low over a long term).
 func ExpectedReturn(amount int64, rate, days int) int64 {
-	v := float64(amount) * math.Pow(1+float64(rate)/100, float64(days))
+	v := float64(amount) * math.Pow(1+float64(rate)/1000, float64(days))
 	if v > float64(MoneyCapMax) {
 		return MoneyCapMax
 	}
 	return int64(v)
 }
+
+// PctTenths renders a tenths-of-a-percent figure for display: 84 -> "8.4",
+// 1594 -> "159.4". The bank's rates — savings, investing and loan — are all held
+// in tenths, so they all print through this.
+func PctTenths(t int) string { return fmt.Sprintf("%d.%d", t/10, t%10) }
 
 // PendingInvested is the total principal an empire has locked in investments.
 func (w *World) PendingInvested(e *Empire) int64 {
@@ -75,23 +81,23 @@ func (w *World) matureInvestments(e *Empire) int64 {
 	return paid
 }
 
-// investRateHeavyThreshold is a v1 tunable: total gold invested across all
-// empires above this pushes the rate down (heavy demand for the bank's
-// gold); below it, the rate drifts up.
-const investRateHeavyThreshold = 5_000_000
+// Investment-rate drift (v1 tunables, in the same tenths-of-a-percent unit as
+// InvestRate). Total gold invested across all empires above the threshold pushes
+// the rate down (heavy demand for the bank's gold); below it, the rate drifts
+// up. The nudge is BRE's stated half point; the small random drift on top is the
+// clone's stand-in for the original's occasional inflation events.
+const (
+	investRateHeavyThreshold = 5_000_000
+	investRateNudgeTenths    = 5
+	investRateDriftTenths    = 2
+)
 
-// steadyInvestRate is the fixed daily rate the league's Standard Investment
-// Rate knob implies (BRE states that value over 10 days), clamped to the
-// engine's [MinInvestRate, MaxInvestRate] band.
+// steadyInvestRate is the fixed daily rate the league's Standard Investment Rate
+// knob sets, clamped to the engine's [MinInvestRate, MaxInvestRate] band. The
+// knob is already in tenths of a percent per day — BRE words it as the return
+// over ten days, which is the same figure.
 func (w *World) steadyInvestRate() int {
-	r := w.Config.StdInvestRate / 10
-	if r < MinInvestRate {
-		return MinInvestRate
-	}
-	if r > MaxInvestRate {
-		return MaxInvestRate
-	}
-	return r
+	return min(max(w.Config.StdInvestRate, MinInvestRate), MaxInvestRate)
 }
 
 // adjustInvestRate nudges the floating rate: heavy total investing across all
@@ -113,17 +119,12 @@ func (w *World) adjustInvestRate() {
 		}
 	}
 	if total > investRateHeavyThreshold {
-		w.InvestRate--
+		w.InvestRate -= investRateNudgeTenths
 	} else {
-		w.InvestRate++
+		w.InvestRate += investRateNudgeTenths
 	}
-	w.InvestRate += w.rng.Intn(3) - 1 // -1..+1 random drift (inflation flavor)
-	if w.InvestRate < MinInvestRate {
-		w.InvestRate = MinInvestRate
-	}
-	if w.InvestRate > MaxInvestRate {
-		w.InvestRate = MaxInvestRate
-	}
+	w.InvestRate += w.rng.Intn(2*investRateDriftTenths+1) - investRateDriftTenths
+	w.InvestRate = min(max(w.InvestRate, MinInvestRate), MaxInvestRate)
 	w.postInvestRateNews(before)
 }
 

@@ -57,7 +57,7 @@ func cashRelief(s session.Session, w *ctx) Result {
 		days = game.LoanMinDays
 	}
 	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "The loan rate will be %s%% per day, totalling %s%% interest overall."),
-		tenthsPct(game.LoanRateTenths(days)), tenthsPct(game.LoanOverallTenths(days)))))
+		game.PctTenths(game.LoanRateTenths(days)), game.PctTenths(game.LoanOverallTenths(days)))))
 	ceiling := w.LoanCeiling(p)
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "We will provide up to %s gold."), comma(ceiling))))
 	amount := promptSuggested(s, "How many would you like to borrow?", 0, ceiling)
@@ -79,14 +79,16 @@ func cashRelief(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// tenthsPct renders a tenths-of-a-percent value as "N.N" (84 -> "8.4").
-func tenthsPct(t int) string { return fmt.Sprintf("%d.%d", t/10, t%10) }
+// pctHundredths renders a tenths-of-a-percent rate to two decimals (50 ->
+// "5.00"). BRE's Investments screen quotes the rate that way where View Bank
+// Rates quotes one decimal, so this screen alone needs the wider form.
+func pctHundredths(t int) string { return fmt.Sprintf("%.2f", float64(t)/10) }
 
 // investFunds prompts for a term (days) and amount, shows the expected return,
 // and locks the gold via w.Invest.
 func investFunds(s session.Session, w *ctx) Result {
 	p := w.Player()
-	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "The current interest returns on investments are %d%%."), w.InvestRate)))
+	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "The current interest returns on investments are %s%%."), pctHundredths(w.InvestRate))))
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "There is a %d-day minimum on investments."), game.MinInvestDays)))
 	days := promptSuggested(s, "How many days would you like to invest for?", game.MinInvestDays, game.MaxInvestDays)
 	if days < game.MinInvestDays {
@@ -179,8 +181,8 @@ func listInvestments(s session.Session, w *ctx) Result {
 // Interest Rate knob read as a daily percent (config/10, e.g. 50 → 5.0%);
 // investing is the current floating rate.
 func bankRates(s session.Session, w *ctx) Result {
-	fmt.Fprintf(s, "\n  %-25s%s%s%%%s\n", tr(s, "Savings Interest Rate:"), ansi.FgBrightYellow, tenthsPct(w.Config.InterestRate), ansi.Reset)
-	fmt.Fprintf(s, "  %-25s%s%s%%%s\n", tr(s, "Investing Interest Rate:"), ansi.FgBrightYellow, tenthsPct(w.InvestRate*10), ansi.Reset)
+	fmt.Fprintf(s, "\n  %-25s%s%s%%%s\n", tr(s, "Savings Interest Rate:"), ansi.FgBrightYellow, game.PctTenths(w.Config.InterestRate), ansi.Reset)
+	fmt.Fprintf(s, "  %-25s%s%s%%%s\n", tr(s, "Investing Interest Rate:"), ansi.FgBrightYellow, game.PctTenths(w.InvestRate), ansi.Reset)
 	pause(s)
 	return Stay
 }

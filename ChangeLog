@@ -114,6 +114,9 @@
     losing it; destroyed gold is reported in the event log
   * One investment still locks away at most two billion; deposits and
     withdrawals have no size limit
+  * The investment rate is quoted and carried to a tenth of a percent, as the
+    original does, and stays between 3.5% and 10% a day; it was whole percents
+    in a band reaching 25% a day, which paid ninefold on a ten-day term
   * A withdrawal takes only as much gold as will fit in hand, leaving the rest in
     the bank
   * Figures of a billion or more are shown as "1.0000B" rather than in full
