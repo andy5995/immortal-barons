@@ -28,6 +28,8 @@ Learn more, follow progress, or get involved:
 - [Website](https://andy5995.github.io/immortal-barons/)
 - [Issue tracker](https://github.com/andy5995/immortal-barons/issues)
 - [Discussions](https://github.com/andy5995/immortal-barons/discussions)
+- [Allied Markets](https://andy5995.github.io/immortal-barons/guide/interbbs/allied-markets/)
+  — in a league game, buying from another planet's Trading Market
 
 We strongly recommend reading the [FAQ](docs/faq.md) first.
 
