@@ -745,6 +745,20 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
 
 All three ride the `LeagueConfig` broadcast, since a league has to agree on them.
 
+**Which settings the Coordinator broadcasts follows one rule: anything that
+changes how the local game plays has to be the same on every planet, or the
+season is not a fair one.** Only a board's identity, its file paths, and its
+session policy (the idle-caller timeout and its warning count) stay local; so
+does the AI count, which a league board never uses. Note this is a WIDER set
+than the fields the Configuration Editor stars — the star means "an inter-BBS
+option", which a rule like the tax cap or the pirate bands is not, though both
+still have to match across the league. `TestEveryGameRuleIsBroadcast` holds the
+line: a field added to `Config` must be either in `LeagueConfig` or in
+`perBoardConfigFields` with the reason it is not a rule. It found three on the
+wrong side when it was written — idle-realm removal, the money cap, and
+unlimited food, each of which would have let two planets play a different
+game.
+
 **A terrorist op costs `total regions × 64` gold — BINARY-VERIFIED.** The
 InterPlanetary Operations menu prices the op in its own cost column, and the
 price scales with the launcher's **region count**, which is why it drifts upward

@@ -999,3 +999,53 @@ func TestCoordinatorRenameStillRecognizedByNode(t *testing.T) {
 		t.Errorf("coordinator orders were refused after a rename, even though the node number still matches; news:\n%s", newsText(m))
 	}
 }
+
+// perBoardConfigFields are the Config fields a league does NOT broadcast. The
+// rule they are the exception to: anything that changes how the local game plays
+// must be the same on every planet, or the season is not a fair one. So a field
+// earns a place here only by being identity, a file path, or session policy —
+// never by being a rule.
+var perBoardConfigFields = map[string]string{
+	"DataDir":         "where this board keeps its files",
+	"BoardID":         "this board's name in the league",
+	"InboundDir":      "packet path, this machine's business",
+	"OutboundDir":     "packet path, this machine's business",
+	"OutboundDirs":    "per-neighbour packet paths on this machine",
+	"LeagueNumber":    "which league this board belongs to",
+	"IBBS":            "whether this board plays in a league at all",
+	"IdleTimeoutSecs": "when to boot a silent caller and free the world lock",
+	"MaxIdleWarnings": "how many warnings before that boot",
+	"AICount":         "a league board never gets AI barons, so the value is inert there",
+}
+
+// TestEveryGameRuleIsBroadcast holds the line the rule above draws. A new Config
+// field is either in LeagueConfig or listed as per-board with a reason; adding
+// one and forgetting both fails here rather than shipping a league whose planets
+// quietly play different games. Three rules were found on the wrong side this
+// way — idle removal, the money cap and unlimited food.
+func TestEveryGameRuleIsBroadcast(t *testing.T) {
+	broadcast := map[string]bool{}
+	lc := reflect.TypeOf(LeagueConfig{})
+	for i := 0; i < lc.NumField(); i++ {
+		broadcast[lc.Field(i).Name] = true
+	}
+	cfg := reflect.TypeOf(Config{})
+	for i := 0; i < cfg.NumField(); i++ {
+		name := cfg.Field(i).Name
+		_, local := perBoardConfigFields[name]
+		if !broadcast[name] && !local {
+			t.Errorf("Config.%s is neither broadcast to the league nor listed as per-board: "+
+				"add it to LeagueConfig (and leagueRuleset/applyLeagueRuleset), or to "+
+				"perBoardConfigFields with the reason it is not a game rule", name)
+		}
+		if broadcast[name] && local {
+			t.Errorf("Config.%s is both broadcast and listed as per-board", name)
+		}
+	}
+	// The list must not outlive the fields it describes.
+	for name := range perBoardConfigFields {
+		if _, ok := cfg.FieldByName(name); !ok {
+			t.Errorf("perBoardConfigFields names %s, which Config no longer has", name)
+		}
+	}
+}
