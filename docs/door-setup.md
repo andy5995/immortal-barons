@@ -225,9 +225,22 @@ Set these on the **Caps & Node** page:
   Setup. The Coordinator sets it and it reaches every board with the rest of the
   ruleset, so you can leave it blank. Nothing routes by it; the League Number
   still does all the matching.
-- **Inbound Dir** — the directory where packets from other boards arrive.
+- **Inbound Dir** — the directory where packets from other boards arrive. This
+  is usually your mailer's inbound directory, where it puts every file it
+  receives.
 - **Outbound Dir** — the directory where the game writes packets for other
-  boards.
+  boards. Pick the directory whose **whole contents your mailer sends** to that
+  link. Mailers often call this a *file box*.
+
+  **It is usually not your mailer's main outbound directory.** That one holds
+  the mailer's own queue: it sends the files a control file names, and it never
+  looks for anything else. A game packet left there is not named anywhere, so it
+  stays where it is and nothing reports an error. Your mailer's own
+  documentation will say which directory it sends whole.
+
+  To check it: run `-planetary`, look for a `.brp` file in the directory, then
+  poll the other board. If the file goes, the directory is right. If it stays,
+  it is a queue and you need the other one.
 
 Board ID, League Number and the two directories are written to **`bbs.cfg`** in
 your data directory, a plain text file you can edit instead of opening the
