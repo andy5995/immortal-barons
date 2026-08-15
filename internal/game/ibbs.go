@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"time"
+
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // Inter-BBS (interplanetary) play. Transport is Option A: the game reads and
@@ -432,6 +434,12 @@ type RemoteAttack struct {
 	// distinguishes "a group attack" from "an individual quick strike", which
 	// share Kind's zero value.
 	Group bool
+	// FromEmpire is the realm that sent an INDIVIDUAL strike, so the defending
+	// planet's news can name it (#108). A group attack leaves it empty: it is the
+	// whole planet's doing, and naming one of several contributors would be a
+	// lie. Empty in a packet written before this existed, which reads as "we know
+	// only the planet" — what those boards could say anyway.
+	FromEmpire string `json:",omitempty"`
 }
 
 // LeagueNode is one board in the inter-BBS league, as listed in the
@@ -665,6 +673,7 @@ func (w *World) CreateIndividualAttack(e *Empire, targetBoard, targetEmpire stri
 		Offense:      f.offense() * kind.strengthPct() / 100,
 		Contributors: contributors,
 		Kind:         kind,
+		FromEmpire:   e.Name,
 	})
 	w.InFlight = append(w.InFlight, InFlightStrike{
 		ID:           id,
@@ -892,6 +901,7 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	res.TargetEmpire = target.Name
 	if target.Protection > 0 {
 		target.addEvent(fmt.Sprintf("Terrorists from %s were stopped by your New Realm Protection.", t.FromBoard))
+		w.postNews(fmt.Sprintf("Terrorists from %s broke on %s's New Realm Protection.", t.FromBoard, target.Name))
 		return res
 	}
 	// BRE terror: each committed agent is an independent hit that removes a
@@ -907,9 +917,12 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	}
 	if destroyed == 0 {
 		target.addEvent(fmt.Sprintf("Terrorists from %s struck but destroyed nothing.", t.FromBoard))
+		w.postNews(fmt.Sprintf("Terrorists from %s reached %s and achieved nothing.", t.FromBoard, target.Name))
 		return res
 	}
 	target.addEvent(fmt.Sprintf("Terrorists from %s destroyed %d of your forces!", t.FromBoard, destroyed))
+	w.postNews(fmt.Sprintf("Terrorists from %s destroyed %s of %s's forces!",
+		t.FromBoard, numfmt.Comma(int64(destroyed)), target.Name))
 	res.LandTaken = destroyed
 	res.Won = true
 	return res
@@ -1092,6 +1105,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	if target.Protection > 0 {
 		res.Outcome = OutcomeProtected
 		target.addEvent(fmt.Sprintf("An interplanetary strike from %s was stopped by your New Realm Protection.", atk.FromBoard))
+		w.postNews(fmt.Sprintf("A strike by %s broke on %s's New Realm Protection.", raider(atk), target.Name))
 		return res
 	}
 	// Measure the defence BEFORE the battle costs it — the fight is decided by
@@ -1107,6 +1121,11 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		res.Outcome = OutcomeRepelled
 		target.addEvent(fmt.Sprintf("You repelled an interplanetary strike from %s. You lost %d of your forces.",
 			atk.FromBoard, res.Enemy.Total()))
+		// The whole planet hears it: an interplanetary exchange is planet against
+		// planet, and until this the defending board printed nothing at all while
+		// its scores moved (#108).
+		w.postNews(fmt.Sprintf("%s repelled a strike by %s, losing %s of its forces.",
+			target.Name, raider(atk), numfmt.Comma(int64(res.Enemy.Total()))))
 		return res
 	}
 	// Overwhelmed: take a bite of land proportional to the margin, scaled by what
@@ -1124,6 +1143,8 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	}
 	target.addEvent(fmt.Sprintf("An interplanetary strike from %s took %d regions and %d of your forces!",
 		atk.FromBoard, land, res.Enemy.Total()))
+	w.postNews(fmt.Sprintf("%s overran %s, carrying off %s regions and %s of its forces!",
+		raider(atk), target.Name, numfmt.Comma(int64(land)), numfmt.Comma(int64(res.Enemy.Total()))))
 	res.LandTaken = land
 	res.Won = true
 	res.Outcome = OutcomeWon
@@ -1369,4 +1390,16 @@ func (w *World) DeclareLeagueReset(onDate, announcement string) error {
 	}
 	w.postNews(fmt.Sprintf("Season %d begins. Every realm starts again.", w.Season))
 	return nil
+}
+
+// raider names the far realm behind an incoming strike, for the defending
+// planet's news: "Ironhold of Alpha" when the packet says which realm sent it,
+// and the bare planet name otherwise (#108). A group attack is deliberately
+// anonymous — it is the whole planet's doing — and so is a packet from a board
+// old enough not to carry the field.
+func raider(atk RemoteAttack) string {
+	if atk.FromEmpire == "" {
+		return atk.FromBoard
+	}
+	return atk.FromEmpire + " of " + atk.FromBoard
 }

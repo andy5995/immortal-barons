@@ -63,7 +63,7 @@ func (w *World) applyAttackResult(res AttackResult) {
 			}
 		}
 	}
-	w.postNews(returnNews(sent, res))
+	w.postNews(w.returnNews(sent, res))
 }
 
 // applyTerrorResult is the returning half of a Terrorist Op: the agents are
@@ -194,16 +194,37 @@ func forceLine(f AttackForce) string {
 // each with a win and a loss form), because who to congratulate differs: a solo
 // baron is named, a group strike is the planet's doing, and a whole-planet raid
 // names no enemy realm at all. Each line is a whole translatable sentence.
-func returnNews(sent InFlightStrike, res AttackResult) string {
+func (w *World) returnNews(sent InFlightStrike, res AttackResult) string {
 	realm := strikeTarget(sent, res)
 	if !sent.Group {
+		// Name the baron who sent it. The planet's own news used to report the
+		// strike anonymously, so nobody reading it knew which of their realms had
+		// gone abroad (#108); a group attack stays the planet's doing.
+		sender := strikeSender(w, sent)
 		if res.Won {
-			return fmt.Sprintf("Our forces have returned in triumph from %s, carrying off %d regions!", realm, res.LandTaken)
+			return fmt.Sprintf("%s has returned in triumph from %s, carrying off %d regions!", sender, realm, res.LandTaken)
 		}
-		return fmt.Sprintf("Our forces have returned with news of failure from %s.", realm)
+		return fmt.Sprintf("%s has returned from %s with news of failure.", sender, realm)
 	}
 	if res.Won {
 		return fmt.Sprintf("Our planet's forces have returned in triumph from %s and captured %d regions!", realm, res.LandTaken)
 	}
 	return fmt.Sprintf("Our planet's forces have returned in disarray from a loss against %s.", realm)
+}
+
+// strikeSender is the realm behind an individual strike, for our own planet's
+// news. A strike has one contributor; a realm that has since fallen leaves only
+// the handle, so the line still names somebody rather than reading as nobody.
+func strikeSender(w *World, sent InFlightStrike) string {
+	owner := sent.Owner
+	if owner == "" && len(sent.Contributors) > 0 {
+		owner = sent.Contributors[0].Owner
+	}
+	if e := w.FindByOwner(owner); e != nil {
+		return e.Name
+	}
+	if owner == "" {
+		return "Our forces"
+	}
+	return owner
 }

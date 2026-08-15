@@ -1899,7 +1899,7 @@ relies on it.
   points in one turn. breins.txt confirms the direction: *"Without food, morale
   and public support will [decline]."*
 
-  **BRE's own penalties are now read, and IB's differ — deliberately, for now.**
+  **BRE's own penalties are now read, and IB implements them.**
   The allocation routine files three byte-sized penalties on the empire record,
   all applied and cleared during the end-of-turn step. With `r` the fraction of
   an obligation that was actually given (BRE computes it as `(given+1)/(need+1)`):
@@ -1913,11 +1913,13 @@ relies on it.
   A civil war **halves popular support and destroys that percentage of every
   military unit type**, and it is the same routine an anti-crack punishment
   fires at severity 50. So BRE's starvation has no emigration at all: the people
-  do not leave, the army collapses. IB's model (support/morale drops plus
-  emigration, no civil war) is a heavier hit at mild shortfalls and a far lighter
-  one at severe ones. **Civil-war collapse is still unbuilt**, so swapping in
-  BRE's rates without it would leave starvation weaker than either game intends;
-  the two belong in one change.
+  do not leave, the army collapses.
+
+  **IB matches this** (`internal/game/morale.go`, `resolveCivilWar`): the two
+  shortfalls are billed apart at BRE's rates, a famine under two thirds of the
+  people's need triggers the civil war, and starvation no longer drives anyone
+  out of the realm. The rates and the collapse landed together, which was the
+  point — either alone leaves starvation weaker than both games intend.
   Food Market opens automatically so the player can buy food. Going underfed hurts:
   **BINARY-VERIFIED (`BRE.OVR 0x38104` / `0x381E5` / `0x382E9`).** BRE bills the
   people's need and the army's need **separately** and scores each on the usual
@@ -2852,10 +2854,21 @@ flavor variants and placeholders `%F` (from/attacker), `%T` (target), `%N`
 The clone broadcasts most of these to its planetary bulletin (original wording,
 not BRE's verbatim lines): regular-attack wins/losses/conquests (NORMALWIN /
 NORMALLOSS / TOTALWIN), nuclear/chemical/biological strikes (NUKE / CHEM / BIO),
-pirate-raid outcomes (PIRATEWIN / PIRATELOSS), and tax riots (RIOTS). IP strike
-results post to the bulletin too. Not yet generated: CIVILWAR (the clone has no
-civil-war collapse mechanic) and BRE's finer-grained interplanetary news
-categories (individual vs. group vs. whole-BBS, attack vs. return).
+pirate-raid outcomes (PIRATEWIN / PIRATELOSS), tax riots (RIOTS), and civil-war
+collapse (CIVILWAR — `postCivilWarNews`).
+
+An interplanetary strike is reported on **both** planets (#108): the defending
+board posts what the raid took and cost, or that it was repelled, and the
+attacker's board posts its return. An INDIVIDUAL strike is named on both sides —
+the packet carries `RemoteAttack.FromEmpire`, so the defending planet reads
+"Ironhold of Alpha" and not merely "Alpha" — while a GROUP attack is anonymous
+on both, since it is the planet's doing and naming one of several contributors
+would be a lie. A packet from a board too old to carry the field falls back to
+the planet name, which is all those boards could ever say.
+
+Not yet generated: BRE's finer-grained interplanetary news categories
+(individual vs. group vs. whole-BBS, attack vs. return) as separate `ipnews.dat`
+subtypes.
 
 **Keep news prose translatable.** News lines go through the PO catalogs, so each
 line must be a *whole sentence* chosen by event category, with only clearly
@@ -2918,7 +2931,6 @@ Still missing against the reference:
   nothing times one.
 - Negotiated empire-to-empire trade deals carrying goods with demands (see the
   trading section above; `Send Trade Deal` sends gold only)
-- Civil-war collapse
 - BRE's finer interplanetary news subtypes
 
 A few Diplomacy and Covert menu items are recorded but inert, pending fuller
