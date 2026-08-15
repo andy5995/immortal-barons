@@ -117,6 +117,9 @@
   * The investment rate is quoted and carried to a tenth of a percent, as the
     original does, and stays between 3.5% and 10% a day; it was whole percents
     in a band reaching 25% a day, which paid ninefold on a ten-day term
+  * Both Configuration Editors hold Interest Rate to 50-200 and Standard
+    Investment Rate to 35-100, the original's own ranges; they accepted 0,
+    which is a bank that pays nothing
   * The whole bank balance earns interest; savings above 1.6 billion used to
     earn none, on a figure that came from a player guide and is in neither of
     the original's binaries

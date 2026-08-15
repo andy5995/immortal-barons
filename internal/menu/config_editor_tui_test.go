@@ -24,8 +24,10 @@ func distinctConfig() game.Config {
 	c.AICount = 5
 	c.InitialMarketLand = 6
 	c.LandPerDay = 7
-	c.InterestRate = 8
-	c.StdInvestRate = 9
+	// The two bank rates carry BRE's own floors, so a round-trip fixture has to
+	// use in-range values: 8 and 9 would clamp and read back as the floors.
+	c.InterestRate = 80
+	c.StdInvestRate = 90
 	c.SteadyInvest = true
 	c.MaxTaxRate = 11
 	c.FoodUnlimited = true
