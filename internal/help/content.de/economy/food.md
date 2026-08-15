@@ -7,9 +7,10 @@ title: 'Nahrungsmarkt und Verderb'
 
 # Nahrungsmarkt und Verderb
 
-Ihr Volk und Ihre Armee verbrauchen jede Runde
-Nahrung. Landwirtschaftsgebiete bauen Nahrung an, und weitere können Sie auf
-dem Markt kaufen.
+Your people and your armed forces eat food every turn. They are billed
+separately, and you are asked about each in turn, so it is possible to feed
+one and not the other. Agricultural regions grow food, and you can buy more
+at the Food Market.
 
 Der Markt verkauft Ihnen Nahrung teurer, als er beim Rückkauf zahlt. Er ist
 also kein Ort, um überschüssige Nahrung zu lagern.
@@ -18,9 +19,12 @@ The price changes a little each day. It is the same for everyone on the
 planet that day, and it stays the same until the next day. Buy on a cheap
 day if you can.
 
-Each turn your people eat first, then your army, and then part of whatever
-food is still in store spoils. There is no safe amount. Even a small store
-loses some, and a large one loses more.
+Each turn your people eat first, and then part of whatever food is still in
+store spoils. A small store is safe: nothing rots until you are holding more
+than a thousand units. Above that the whole store loses a share, so the more
+you hoard the more you lose.  Each turn your people eat first, then your
+army, and then part of whatever food is still in store spoils. There is no
+safe amount. Even a small store loses some, and a large one loses more.
 
 Going short is billed twice, because the two needs are counted
 apart. Whatever your people go without costs Popular Support, and whatever

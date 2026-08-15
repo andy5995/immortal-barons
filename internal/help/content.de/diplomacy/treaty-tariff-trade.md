@@ -8,5 +8,7 @@ title: Zoll-Handelsabkommen
 # Zoll-Handelsabkommen
 
 A Tariff Trade Agreement is trade between two realms, with a tax on goods
-that cross the border. Both sides earn extra income based on population. It
-is good if you have many people.
+that cross the border. Both sides earn extra income each turn, counted on
+whichever of the two realms has FEWER people — so a pact with a small realm
+earns little, and the best partner is one as populous as you. A realm still
+under new-realm protection earns a reduced rate.

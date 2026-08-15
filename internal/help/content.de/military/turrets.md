@@ -12,8 +12,8 @@ have a defense of 2 and an offense of 0, which is about twice as strong on
 defense as a trooper.
 
 Turrets shoot down attacking jets, destroy attacking tanks, and kill
-attacking troops. They do not stop a neighbour's nuclear missile — nothing
-does.
+attacking troops. They do not stop a neighbour's missiles — nothing does,
+nuclear, chemical or biological alike.
 
 Covert operations cannot destroy your turrets, so they form a stable core
 for your defense.

@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-14 10:32-0500\n"
+"POT-Creation-Date: 2026-08-15 08:58-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -83,11 +83,46 @@ msgstr ""
 #. type: Title ##
 #: internal/help/content/controls/interface.md:31
 #, no-wrap
-msgid "Who else is on"
+msgid "Choosing who an action goes to"
 msgstr ""
 
 #. type: Plain text
 #: internal/help/content/controls/interface.md:38
+msgid ""
+"Send Message asks `(A-Y,Z=All,?=List) Send to:` and takes a whole list, not "
+"one name. Press a realm's letter to add it and press the same letter again "
+"to take it off. `Z` marks everyone at once, `?` shows the roster, and `*` "
+"marks your treaty partners. **Press Enter when the list is right** — that is "
+"what opens the editor. Enter with nothing marked leaves without sending."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:43
+msgid ""
+"Every Diplomacy option that names a realm takes the same list: offer a "
+"treaty to several realms at once, or declare war on several. There `?` shows "
+"your relations rather than the scores. Mark one realm only and you get the "
+"full negotiation with it — you can accept its offer or break the pact you "
+"hold."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:47
+msgid ""
+"The letters belong to the realms, not to the rows, so a letter may be "
+"missing from the list: it is either yours or a realm that has fallen. The "
+"letters of everyone a message went to appear at the top of it when it is "
+"read."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/controls/interface.md:48
+#, no-wrap
+msgid "Who else is on"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:55
 msgid ""
 "An `O` beside a realm's letter — on See Scores, the attack and message "
 "target lists, and the View Treaties roster — means that baron is on the "
@@ -97,7 +132,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:39
+#: internal/help/content/controls/interface.md:56
 msgid "Press `?` at a menu to open this help."
 msgstr "Нажмите `?` в любом меню, чтобы открыть эту справку."
 
@@ -525,17 +560,26 @@ msgstr ""
 "когда другая сторона его принимает. Вот их виды."
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:18
+#: internal/help/content/diplomacy/treaties.md:19
 msgid ""
 "Two related actions also live on the Diplomacy menu. A Declaration of War "
-"ends an agreement without causing trouble at home; the treaty is not truly "
-"broken until the other realm is told. View Treaties shows your current "
-"relations with the other rulers in the game, and below that, the offers you "
-"have sent that nobody has answered yet."
+"ends an agreement at once, and it is costly: your people riot at being ruled "
+"by a faithless baron, and you lose a quarter of both your support and your "
+"army's morale. It costs nothing if you had no agreement to break. Attacking "
+"a partner without declaring war ends the agreement just as surely and costs "
+"you nothing at home, though the ruler you betrayed will have their own "
+"answer to that."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:21
+#: internal/help/content/diplomacy/treaties.md:22
+msgid ""
+"View Treaties shows your current relations with the other rulers in the "
+"game, and below that, the offers you have sent that nobody has answered yet."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:25
 msgid ""
 "Once you hold a treaty, Send Message offers to write to all your allies at "
 "once.  It reaches every ruler you have an agreement with, whatever kind it "
@@ -543,7 +587,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:24
+#: internal/help/content/diplomacy/treaties.md:28
 msgid ""
 "An offer waits until the other ruler plays a turn. It does not run out. If "
 "you send a second, different offer to the same ruler, it takes the place of "
@@ -558,7 +602,7 @@ msgid "Free Trade Agreement"
 msgstr "Соглашение о свободной торговле"
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-free-trade.md:12
+#: internal/help/content/diplomacy/treaty-free-trade.md:13
 #, fuzzy
 #| msgid ""
 #| "People and goods move freely, with no border tax. You earn a lot from "
@@ -566,8 +610,9 @@ msgstr "Соглашение о свободной торговле"
 #| "low support, so watch it."
 msgid ""
 "A Free Trade Agreement lets people and goods move freely, with no border "
-"tax. You earn a lot from income taxes. But people mixing across borders can "
-"spread low morale and low support, so watch it."
+"tax. You earn a lot from income taxes — nearly twice what a Tariff Trade "
+"Agreement pays, on the same count of the smaller realm's people. But people "
+"mixing across borders can spread low morale and low support, so watch it."
 msgstr ""
 "Люди и товары движутся свободно, без пошлин. Вы много зарабатываете на "
 "налогах. Но смешение народов может ухудшить настроение в других государствах."
@@ -621,15 +666,15 @@ msgid "Protective Trade"
 msgstr "Защищённая торговля"
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-protective-trade.md:11
+#: internal/help/content/diplomacy/treaty-protective-trade.md:12
 #, fuzzy
 #| msgid ""
 #| "Guards along the trade routes. This stops enemies from bombing your trade "
 #| "deals, and makes trade deals cheaper to send and to keep."
 msgid ""
 "Protective Trade places guards along the trade routes. It stops enemies from "
-"bombing your trade deals, and it makes trade deals cheaper to send and to "
-"keep."
+"bombing your trade deals, and it cuts the cost of sending one to a partner "
+"to a third of the usual daily rate."
 msgstr ""
 "Охрана вдоль торговых путей. Это мешает врагам бомбить ваши сделки и делает "
 "торговлю безопаснее."
@@ -642,7 +687,7 @@ msgid "Tariff Trade Agreement"
 msgstr "Тарифное торговое соглашение"
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-tariff-trade.md:12
+#: internal/help/content/diplomacy/treaty-tariff-trade.md:14
 #, fuzzy
 #| msgid ""
 #| "Trade between two realms, with a tax on goods that cross the border. Both "
@@ -650,8 +695,10 @@ msgstr "Тарифное торговое соглашение"
 #| "many people."
 msgid ""
 "A Tariff Trade Agreement is trade between two realms, with a tax on goods "
-"that cross the border. Both sides earn extra income based on population. It "
-"is good if you have many people."
+"that cross the border. Both sides earn extra income each turn, counted on "
+"whichever of the two realms has FEWER people — so a pact with a small realm "
+"earns little, and the best partner is one as populous as you. A realm still "
+"under new-realm protection earns a reduced rate."
 msgstr ""
 "Торговля между двумя государствами с пошлиной на товары, пересекающие "
 "границу. Обе стороны получают дополнительный доход в зависимости от объёма "
@@ -665,17 +712,27 @@ msgid "Technology Agreement"
 msgstr "Технологическое соглашение"
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-technology-agreement.md:11
+#: internal/help/content/diplomacy/treaty-technology-agreement.md:12
 #, fuzzy
 #| msgid ""
 #| "The two realms share science. Each side gains some of the other's "
 #| "technology."
 msgid ""
-"A Technology Agreement shares science between the two realms. Each side "
-"gains some of the other's technology."
+"A Technology Agreement shares science between the two realms. Each side's "
+"research runs faster while the pact holds."
 msgstr ""
 "Оба государства делятся наукой. Каждая сторона получает часть технологий "
 "другой."
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaty-technology-agreement.md:17
+msgid ""
+"The help it gives you is bounded by whichever of you holds fewer Technology "
+"regions, so it speeds up work you are already doing rather than standing in "
+"for it. A realm with no Technology of its own gains nothing from the pact, "
+"however advanced its partner is — buy the regions first, then find an ally "
+"who has done the same."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-terrorist-prevention.md:1
@@ -816,16 +873,22 @@ msgid "Food Market and Spoilage"
 msgstr "Рынок еды и порча"
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:12
+#: internal/help/content/economy/food.md:14
+#, fuzzy
+#| msgid ""
+#| "Your people and army eat food every turn. Agricultural regions grow food, "
+#| "and you can buy more at the Food Market."
 msgid ""
-"Your people and army eat food every turn. Agricultural regions grow food, "
-"and you can buy more at the Food Market."
+"Your people and your armed forces eat food every turn. They are billed "
+"separately, and you are asked about each in turn, so it is possible to feed "
+"one and not the other. Agricultural regions grow food, and you can buy more "
+"at the Food Market."
 msgstr ""
 "Ваш народ и армия каждый ход едят еду. Сельские регионы выращивают её, а ещё "
 "можно докупить на рынке."
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:15
+#: internal/help/content/economy/food.md:17
 msgid ""
 "The market sells food to you for more than it pays to buy it back. So it is "
 "not a place to store extra food for profit."
@@ -834,7 +897,7 @@ msgstr ""
 "излишки там невыгодно."
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:19
+#: internal/help/content/economy/food.md:21
 msgid ""
 "The price changes a little each day. It is the same for everyone on the "
 "planet that day, and it stays the same until the next day. Buy on a cheap "
@@ -842,15 +905,18 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:23
+#: internal/help/content/economy/food.md:29
 msgid ""
-"Each turn your people eat first, then your army, and then part of whatever "
-"food is still in store spoils. There is no safe amount. Even a small store "
-"loses some, and a large one loses more."
+"Each turn your people eat first, and then part of whatever food is still in "
+"store spoils. A small store is safe: nothing rots until you are holding more "
+"than a thousand units. Above that the whole store loses a share, so the more "
+"you hoard the more you lose.  Each turn your people eat first, then your "
+"army, and then part of whatever food is still in store spoils. There is no "
+"safe amount. Even a small store loses some, and a large one loses more."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:30
+#: internal/help/content/economy/food.md:36
 msgid ""
 "Going short is billed twice, because the two needs are counted apart. "
 "Whatever your people go without costs Popular Support, and whatever your "
@@ -861,7 +927,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/food.md:35
+#: internal/help/content/economy/food.md:41
 msgid ""
 "This turn's harvest arrives at the start of the turn, so you can sell it the "
 "same turn. Selling your surplus down each turn, instead of hoarding it, is "
@@ -946,7 +1012,7 @@ msgid "What lowers them"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:47
+#: internal/help/content/economy/morale-and-support.md:48
 msgid ""
 "Underpaying your armed forces costs Morale. Underpaying your land upkeep, "
 "the Queen's tax, or your people's food costs Support. Underfeeding the army "
@@ -954,39 +1020,40 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:47
+#: internal/help/content/economy/morale-and-support.md:48
 msgid "A riot from high taxes costs Support."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:47
+#: internal/help/content/economy/morale-and-support.md:48
 msgid ""
-"Breaking a treaty by attacking a partner, instead of declaring war first, "
-"costs you a quarter of each."
+"Declaring war on a ruler you hold an agreement with costs you a quarter of "
+"each. Attacking that ruler without declaring war first ends the agreement "
+"too, but costs you nothing."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:47
+#: internal/help/content/economy/morale-and-support.md:48
 msgid ""
 "A chemical or biological strike on your realm hurts both. The plague is far "
 "worse for your army than the gas is."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/economy/morale-and-support.md:47
+#: internal/help/content/economy/morale-and-support.md:48
 msgid ""
 "Enemy agents can lower either one directly. See Stir Revolts and Demoralize "
 "Forces."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/morale-and-support.md:48
+#: internal/help/content/economy/morale-and-support.md:49
 #, no-wrap
 msgid "Paying them back"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:54
+#: internal/help/content/economy/morale-and-support.md:55
 msgid ""
 "At the maintenance stage the crown asks for gold to buy back up to fifteen "
 "points of each. Support is priced by the size of your population, Morale by "
@@ -996,7 +1063,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/morale-and-support.md:58
+#: internal/help/content/economy/morale-and-support.md:59
 msgid ""
 "What you pay buys points in proportion, so paying half the request buys "
 "about half the points. You may pay up to half again as much as is asked, and "
@@ -1193,6 +1260,126 @@ msgstr ""
 "подарок, без условий."
 
 #. type: Title #
+#: internal/help/content/interbbs/allied-markets.md:1
+#: internal/help/content/interbbs/allied-markets.md:8
+#, no-wrap
+msgid "Allied Markets"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/allied-markets.md:12
+msgid ""
+"In a league game you can buy from another planet's Trading Market. Open "
+"Trading from the InterPlanetary Operations menu, then Markets, and choose a "
+"planet."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/allied-markets.md:15
+msgid ""
+"Only planets your Coordinator has marked Allied are listed. Barren Realms "
+"Elite had no way to trade between planets at all, so this is new."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/allied-markets.md:16
+#, no-wrap
+msgid "Your order is a bid, not a purchase"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/allied-markets.md:22
+msgid ""
+"What you see is that planet's market **as it was when we last heard from "
+"it**.  The screen tells you the date. News travels between planets in "
+"packets, and a packet takes as long as it takes, so by the time your order "
+"arrives the goods may have been sold, the amount may have shrunk, or the "
+"price may have changed."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/allied-markets.md:24
+msgid "So your order is a bid. When you send it:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/allied-markets.md:31
+msgid ""
+"Your gold is **held straight away**. It leaves your treasury but is not "
+"spent yet, and it is not counted as gold you have."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/allied-markets.md:31
+msgid ""
+"When the bid arrives, the other planet sells to you **only if the goods are "
+"still there at the same price, and you are still allies**."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/allied-markets.md:31
+msgid "If it sells, the goods come back to you on the next packet."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/allied-markets.md:31
+msgid "If it does not, your gold comes back instead, and you are told why."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/allied-markets.md:35
+msgid ""
+"If the seller still has some but not all of what you asked for, you get what "
+"there was and the rest of your gold returns. You are never charged for goods "
+"that did not arrive."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/allied-markets.md:36
+#, no-wrap
+msgid "Waiting, and getting your gold back"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/allied-markets.md:41
+#, no-wrap
+msgid ""
+"**Bids Out** on the Trading menu lists every bid you have waiting and how much\n"
+"gold is held against them. That gold is invisible everywhere else, so this is\n"
+"where to look when your treasury seems short.\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/allied-markets.md:46
+msgid ""
+"Nothing is lost if a packet goes missing. A bid that never gets an answer is "
+"given up on after the same number of days your sysop set for lost attack "
+"forces, and your gold is returned. If the answer turns up later than that, "
+"it is ignored rather than paid twice."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/allied-markets.md:47
+#, no-wrap
+msgid "Two things worth knowing"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/allied-markets.md:52
+msgid ""
+"Each planet keeps its own list of who it is allied with. A planet can "
+"therefore stop selling to you before you have heard about it, and your bid "
+"will come back refused. That is not a fault."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/allied-markets.md:54
+msgid ""
+"Your sysop can turn this feature off for the whole league, in which case "
+"Trading does not appear on the InterPlanetary Operations menu."
+msgstr ""
+
+#. type: Title #
 #: internal/help/content/interbbs/attack-types.md:1
 #: internal/help/content/interbbs/attack-types.md:8
 #, fuzzy, no-wrap
@@ -1227,7 +1414,7 @@ msgstr ""
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/attack-types.md:27
 msgid ""
-"**Quick Strike** — surprise lets you fight at 110% of your normal strength, "
+"**Quick Strike** — surprise lets you fight at 120% of your normal strength, "
 "but the battle is short and disorganised: both sides retreat at 8% losses, "
 "and you carry off only half the land a Normal Attack would."
 msgstr ""
@@ -1252,12 +1439,57 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/attack-types.md:38
+#: internal/help/content/interbbs/attack-types.md:39
 msgid ""
 "Remember that your strength is measured on arrival, not on departure. "
 "Against a distant planet the defender has days to build turrets before your "
-"force lands, so the 10% a Quick Strike adds is worth less than it looks "
-"against a target you cannot reach quickly."
+"force lands, so the extra weight a Quick Strike carries is worth less than "
+"it looks against a target you cannot reach quickly."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/attack-types.md:40
+#, no-wrap
+msgid "While the force is away, and when it comes back"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/attack-types.md:46
+msgid ""
+"A group attack does not leave the moment you file it. You set the wait in "
+"hours, between 12 and 120, and it sits on the launch pad until then — other "
+"barons can join it in the meantime, and the delay is how you time it to land "
+"before the target takes their next turn."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/attack-types.md:52
+msgid ""
+"Once a force leaves, it is out of your hands and out of your army until the "
+"other planet's board resolves it and the answer travels back. When it does, "
+"you get a private report: what you sent, what came home, what it destroyed, "
+"and whether it found the target at all. A force that found no such realm, or "
+"found it still under New Realm Protection, is told so rather than counted as "
+"a defeat."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/attack-types.md:57
+msgid ""
+"Land you capture abroad has no type until you give it one, so it waits for "
+"you and the region picker comes up at the start of your next turn — the same "
+"question a Regular Attack asks at home. On a group attack the regions are "
+"shared between the barons who paid for them, in proportion to what each "
+"committed."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/attack-types.md:60
+msgid ""
+"If the answer never arrives — a board goes quiet, a packet is lost — your "
+"forces come home by themselves after the number of days your sysop has set, "
+"and a report that turns up after that is thrown away rather than paid out "
+"twice."
 msgstr ""
 
 #. type: Title #
@@ -1770,14 +2002,15 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/jets.md:23
+#: internal/help/content/military/jets.md:24
 msgid ""
-"An enemy SDI shield lowers your jets' attacking strength, so jets are weaker "
-"against a well-shielded target."
+"An enemy SDI shield lowers your jets' attacking strength, but only when you "
+"are striking a named baron on another planet — a shield does nothing against "
+"jets attacking on its own planet."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/jets.md:25
+#: internal/help/content/military/jets.md:26
 msgid ""
 "Jets are also weak on the ground. In a normal attack the enemy's bombers "
 "destroy your grounded jets, and enemy turrets shoot down the jets that do "
@@ -1815,11 +2048,6 @@ msgstr ""
 
 #. type: Plain text
 #: internal/help/content/military/tanks.md:20
-msgid "Tanks also help defend your empire against chemical missile attacks."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/tanks.md:22
 msgid ""
 "Grow your economy first, and then turn your gold into tanks for a force that "
 "wins both attacks and defenses."
@@ -1851,10 +2079,10 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/military/troopers.md:21
 msgid ""
-"Troopers are the only unit that eats. Jets, tanks, turrets, bombers and "
-"carriers cost you nothing to feed, so food pressure comes from your people "
-"and your troopers alone. A large trooper army needs a strong food supply; a "
-"large armored one does not."
+"Every military unit eats, but a trooper eats fifty times as much as any "
+"other: one unit of food feeds 200 troopers, or 10,000 of anything else. So a "
+"large trooper army needs a strong food supply, and a large armored one "
+"barely registers."
 msgstr ""
 
 #. type: Plain text
@@ -1888,29 +2116,29 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:16
+#: internal/help/content/military/turrets.md:17
 msgid ""
 "Turrets shoot down attacking jets, destroy attacking tanks, and kill "
-"attacking troops. They do not stop a neighbour's nuclear missile — nothing "
-"does."
+"attacking troops. They do not stop a neighbour's missiles — nothing does, "
+"nuclear, chemical or biological alike."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:19
+#: internal/help/content/military/turrets.md:20
 msgid ""
 "Covert operations cannot destroy your turrets, so they form a stable core "
 "for your defense."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:22
+#: internal/help/content/military/turrets.md:23
 msgid ""
 "Some strategy guides call this unit a \"Missile Base.\" It is the same "
 "defensive unit."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/turrets.md:24
+#: internal/help/content/military/turrets.md:25
 msgid ""
 "Build turrets to defend your regions, and pair them with troopers and tanks "
 "so you can both defend and attack."
@@ -2114,7 +2342,7 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/regions/region-river.md:20
 msgid ""
-"The food is a bonus, not a food supply. One river grows about an eighth of "
+"The food is a bonus, not a food supply. One river grows about a tenth of "
 "what one agricultural region grows. Buy rivers for the gold and the "
 "steadiness; buy agricultural regions when you need to feed people."
 msgstr ""
@@ -2334,13 +2562,28 @@ msgid "Biological Attack"
 msgstr "Биологическая атака"
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-biological.md:10
-#, fuzzy
-#| msgid "Harms the enemy's people and troopers, but not their land."
+#: internal/help/content/warfare/attack-biological.md:13
 msgid ""
-"A Biological Attack harms the enemy's people and troopers, but not their "
-"land."
-msgstr "Наносит вред людям и пехоте врага, но не его земле."
+"A Biological Attack releases a plague. It kills about a tenth of the enemy's "
+"people and a sixth of their troopers, and it halves their military morale. "
+"It does not touch their land at all — no regions are ruined and none change "
+"hands."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-biological.md:16
+msgid ""
+"The missile is priced off all three of the things it hurts: the target's "
+"troopers, their people, and their regions. Nothing intercepts it."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-biological.md:19
+msgid ""
+"Strategy: this is the anti-army weapon of the three. Halved morale weakens "
+"every tank and trooper the target owns, so a plague the turn before you "
+"march is worth more than the casualties alone suggest."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/warfare/attack-chemical.md:1
@@ -2350,17 +2593,38 @@ msgid "Chemical Attack"
 msgstr "Химическая атака"
 
 #. type: Plain text
-#: internal/help/content/warfare/attack-chemical.md:11
-#, fuzzy
-#| msgid ""
-#| "Kills many of the enemy's people and troopers, but harms fewer regions. "
-#| "Enemy tanks help defend against it."
+#: internal/help/content/warfare/attack-chemical.md:14
 msgid ""
-"A Chemical Attack kills many of the enemy's people and troopers, but harms "
-"fewer regions. Enemy tanks help defend against it."
+"A Chemical Attack does what a Nuclear Attack does to land, on a smaller "
+"scale, and then gasses the realm underneath it. It ruins about a third as "
+"many regions into waste, kills a fifth of the enemy's people outright, and "
+"knocks down both their military morale and their popular support. It leaves "
+"their troopers alone."
 msgstr ""
-"Убивает много людей и пехоты врага, но вредит меньшему числу регионов. Танки "
-"врага помогают защищаться от неё."
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-chemical.md:18
+msgid ""
+"The morale and support damage is the part that lasts. Casualties come back "
+"as the population grows; a realm knocked down to two-thirds support earns "
+"less and fights worse until it has climbed back."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-chemical.md:22
+msgid ""
+"The arms broker prices the missile off the target's population as well as "
+"its land, so gassing a crowded realm is expensive. Nothing intercepts it — "
+"not SDI, not turrets, not tanks."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/attack-chemical.md:25
+msgid ""
+"Strategy: this is the weapon to use on a rich, crowded rival you cannot beat "
+"in the field. A Nuclear Attack hurts their land harder, but only a chemical "
+"strike touches the people paying for their army."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/warfare/attack-nuclear.md:1
@@ -2383,7 +2647,7 @@ msgstr ""
 msgid ""
 "You are quoted a price once you name a target, and you can walk away from "
 "it. The price is set by the size of the realm you are aiming at — a large "
-"neighbour needs a large warhead — up to a ceiling, so the very biggest "
+"neighbour needs a large missile — up to a ceiling, so the very biggest "
 "realms are proportionally cheap to hit."
 msgstr ""
 
@@ -2540,10 +2804,11 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:27
+#: internal/help/content/warfare/clingy-annihilator.md:28
 msgid ""
 "Whatever survives the flight strikes every realm on that planet and takes a "
-"share of their regions. SDI reduces the damage."
+"share of their regions. An SDI program is no help against it — jets are the "
+"only thing that can reach the weapon."
 msgstr ""
 
 #. type: Title #
@@ -2558,7 +2823,7 @@ msgstr "Пираты"
 msgid ""
 "Nine pirate factions live in the world. A faction owns nothing at the start "
 "of a game. Everything it has, it stole, and what it can put in the field is "
-"only what it holds. So the bands are all weak on day one, and the ones "
+"only what it holds. So the factions are all weak on day one, and the ones "
 "nobody fights are the dangerous ones later."
 msgstr ""
 
@@ -2571,11 +2836,11 @@ msgstr ""
 #| "bombers, carriers, or your regions. A single raid takes at most 24,999 of "
 #| "any one thing."
 msgid ""
-"Pirates raid players at random. A raid is not a battle — a band that owns "
+"Pirates raid players at random. A raid is not a battle — a faction that owns "
 "nothing can still rob you. Each raid carries off **one** kind of thing: your "
 "troopers, jets, turrets, tanks, agents, or gold, about a thirtieth of it. "
 "They never take bombers, carriers, or your regions. The raid also gives the "
-"band new regions, so a pirate that just robbed someone holds more land."
+"faction new regions, so a pirate that just robbed someone holds more land."
 msgstr "Пираты"
 
 #. type: Plain text
@@ -2583,9 +2848,9 @@ msgstr "Пираты"
 msgid ""
 "You can attack a faction to take goods back. A win returns a third of its "
 "gold, regions, agents and troopers, and a quarter of its jets, turrets and "
-"tanks. One raid often recovers what a band took from you; two or three will "
-"if it is fat.  Attacking costs you casualties whether you win or lose, so do "
-"not raid a band that holds nothing."
+"tanks. One raid often recovers what a faction took from you; two or three "
+"will if it is fat.  Attacking costs you casualties whether you win or lose, "
+"so do not raid a faction that holds nothing."
 msgstr ""
 
 #. type: Plain text
@@ -2599,8 +2864,8 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/warfare/pirates.md:32
 msgid ""
-"Tip: a band you keep beaten stays harmless, because its army is only what it "
-"has managed to steal. Big realms are raided more often than small ones."
+"Tip: a faction you keep beaten stays harmless, because its army is only what "
+"it has managed to steal. Big realms are raided more often than small ones."
 msgstr ""
 
 #. type: Title #
@@ -2611,28 +2876,64 @@ msgid "SDI Program"
 msgstr "Программа СОИ"
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:13
-#, fuzzy
-#| msgid ""
-#| "A shield you fund. When it is complete, it destroys about half of the "
-#| "missiles fired at you and cuts attacking jets' strength by about a "
-#| "quarter. Technology regions lower its upkeep."
+#: internal/help/content/warfare/sdi.md:20
 msgid ""
 "The SDI Program is a shield you fund. When it is complete, it destroys about "
-"half of the missiles fired at you and cuts attacking jets' strength by about "
-"a quarter. Technology regions lower its upkeep."
+"half of the missiles fired at you from other planets and cuts attacking "
+"jets' strength by about a quarter. It does nothing against a neighbour on "
+"your own planet, whose nuclear, chemical and biological missiles always "
+"land. Technology regions lower its upkeep.  The SDI Program is a shield you "
+"fund. It answers three things, and only these three: missiles fired at you "
+"from another planet, and the jets and bombers of a strike arriving from one. "
+"It does nothing against a neighbour on your own planet — not their army, and "
+"not their nuclear, chemical or biological missiles.  Technology regions "
+"lower its upkeep."
 msgstr ""
-"Щит, который вы финансируете. По завершении он уничтожает около половины "
-"выпущенных по вам ракет и ослабляет вражеские истребители и бомбардировщики."
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:25
+msgid ""
+"At full strength it turns aside about half the missiles aimed at you, takes "
+"30% off an arriving realm's jets and 20% off its bombers. At half strength "
+"it does half of each. Only a strike aimed at you by name meets your shield; "
+"one aimed at the planet as a whole goes through it."
+msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:14
+#: internal/help/content/warfare/sdi.md:26
+#, no-wrap
+msgid "How strong it is"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:29
+msgid "Strength is the funding spread over your land, not the funding alone:"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:31
+#, no-wrap
+msgid "    strength% = the square root of (funding / (10 x (regions + 1)))\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/sdi.md:37
+msgid ""
+"capped at 100%. Two things follow. Every region you take thins your own "
+"shield, so the same pot that shields a small realm well is nearly useless "
+"over a large one. And each further percent costs more than the last: over "
+"8,000 regions the first 1% wants about 80,000 gold in the pot, while going "
+"from 9% to 10% wants another 1.5 million."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/sdi.md:38
 #, no-wrap
 msgid "Funding it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:19
+#: internal/help/content/warfare/sdi.md:43
 msgid ""
 "The program is a pot of gold, not something you buy once. Each turn you may "
 "add up to a set amount: a fifth of what is already in the pot, and never "
@@ -2640,39 +2941,71 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:22
+#: internal/help/content/warfare/sdi.md:46
 msgid ""
 "That amount is your allowance for the whole turn. Leaving the screen and "
 "coming back does not give you a second one."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:25
+#: internal/help/content/warfare/sdi.md:49
 msgid ""
 "So a shield takes many turns to build, however rich you are. You cannot buy "
 "one the turn you need it, so start early if you expect missiles."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/sdi.md:26
+#: internal/help/content/warfare/sdi.md:50
 #, no-wrap
 msgid "Paying for it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:30
+#: internal/help/content/warfare/sdi.md:54
 msgid ""
 "Every turn the program asks for **4% of its total funding** as upkeep, in "
 "the maintenance prompts, after your regions and before the Queen's tax."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/sdi.md:33
+#: internal/help/content/warfare/sdi.md:57
 msgid ""
 "Pay it in full. If you pay short, the program shrinks to what you did pay "
 "for, and the shield weakens with it. A large pot is a large bill every turn, "
 "so grow it at a pace your income can carry."
 msgstr ""
+
+#, fuzzy
+#~| msgid "Harms the enemy's people and troopers, but not their land."
+#~ msgid ""
+#~ "A Biological Attack harms the enemy's people and troopers, but not their "
+#~ "land."
+#~ msgstr "Наносит вред людям и пехоте врага, но не его земле."
+
+#, fuzzy
+#~| msgid ""
+#~| "Kills many of the enemy's people and troopers, but harms fewer regions. "
+#~| "Enemy tanks help defend against it."
+#~ msgid ""
+#~ "A Chemical Attack kills many of the enemy's people and troopers, but "
+#~ "harms fewer regions. Enemy tanks help defend against it."
+#~ msgstr ""
+#~ "Убивает много людей и пехоты врага, но вредит меньшему числу регионов. "
+#~ "Танки врага помогают защищаться от неё."
+
+#, fuzzy
+#~| msgid ""
+#~| "A shield you fund. When it is complete, it destroys about half of the "
+#~| "missiles fired at you and cuts attacking jets' strength by about a "
+#~| "quarter. Technology regions lower its upkeep."
+#~ msgid ""
+#~ "The SDI Program is a shield you fund. When it is complete, it destroys "
+#~ "about half of the missiles fired at you and cuts attacking jets' strength "
+#~ "by about a quarter. Technology regions lower its upkeep."
+#~ msgstr ""
+#~ "Щит, который вы финансируете. По завершении он уничтожает около половины "
+#~ "выпущенных по вам ракет и ослабляет вражеские истребители и "
+#~ "бомбардировщики."
 
 #, fuzzy
 #~| msgid ""

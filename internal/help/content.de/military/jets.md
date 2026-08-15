@@ -18,8 +18,9 @@ Jets cannot reach a battle on their own. You need carriers to carry them,
 and one carrier moves up to 100 jets. Without enough carriers, your jets
 cannot join the attack.
 
-An enemy SDI shield lowers your jets' attacking strength, so jets are weaker
-against a well-shielded target.
+An enemy SDI shield lowers your jets' attacking strength, but only when you
+are striking a named baron on another planet — a shield does nothing against
+jets attacking on its own planet.
 
 Jets are also weak on the ground. In a normal attack the enemy's bombers
 destroy your grounded jets, and enemy turrets shoot down the jets that do

@@ -159,6 +159,7 @@
   * A bid whose answer never arrives is given up on and refunded, on the same
     timer that brings lost forces home
   * Bids Out lists what a baron has bid for and how much gold is held
+  * Added an Allied Markets help topic
   * Individual interplanetary strikes choose an attack type — Normal Attack,
     Quick Strike, or Extended Battle — trading strength against the land taken
     and the losses both sides accept. A Quick Strike fights at 120% strength,
