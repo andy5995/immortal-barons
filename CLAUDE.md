@@ -53,12 +53,13 @@ a help topic goes through `gen-help-translations.sh` (which rewrites
 `gen-ui-pot.py` pair — and running one does not regenerate the other.
 
 **Do not regenerate translations as a matter of course.** Run these passes only
-when preparing a release, when a new translation is added, or when the parity
-test forces it (below). Reworded English with a stale translation still renders:
-the PO catalogs fall back per string, so the reader sees English for what has
-moved on, which is the intended behaviour and not a defect to chase. Running the
-passes on every text edit instead churns the `.po` files and the `content.de/`
-and `content.ru/` trees on unrelated commits.
+when preparing a release (the whole sequence is in `docs/dev/releasing.md`),
+when a new translation is added, or when the parity test forces it (below).
+Reworded English with a stale translation still renders: the PO catalogs fall
+back per string, so the reader sees English for what has moved on, which is the
+intended behaviour and not a defect to chase. Running the passes on every text
+edit instead churns the `.po` files and the `content.de/` and `content.ru/`
+trees on unrelated commits.
 
 The one case that cannot wait: **adding, renaming, or removing a help topic
 requires `gen-help-translations.sh` in the same change.**
@@ -229,6 +230,10 @@ mis-set this way before the disassembly corrected them.
 **Mechanics live in that spec, not in this guide.** Don't describe how a
 mechanic works, or restate any of its numbers, here — this file just points to
 the spec, which is the single source (the same rule as balance.go for constants).
+
+`docs/dev/releasing.md` is the release checklist — the translation passes, the
+ChangeLog stamp, what to verify, and the **version bump after publishing**,
+which was missed on v0.0.5.
 
 `docs/dev/` holds deeper reference material: `bre-screens.md` (BRE's literal
 on-screen output, layout, and ANSI colors, captured live — the source of truth
