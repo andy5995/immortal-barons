@@ -34,7 +34,44 @@ const (
 	protectiveTrade      = "Protective Trade"
 	tariffTradeAgreement = "Tariff Trade Agreement"
 	freeTradeAgreement   = "Free Trade Agreement"
+	technologyAgreement  = "Technology Agreement"
 )
+
+// MarketAccessTreaties are the pacts that open a partner's Trading Market
+// listings to you in a SINGLE-BOARD game. A league board does not gate the
+// market at all (BuyFromMarket): there the planet is one team.
+//
+// DELIBERATE DIVERGENCE from BRE, whose market is open to every realm — its
+// manual calls it "a general market at any price you choose", and
+// run_trading_market carries no relation check. That leaves a seller unable to
+// aim a cheap listing at a teammate, because anyone can take it first, so in
+// practice the local market goes unused. Requiring a pact to BUY makes a
+// listing a thing you can offer to specific realms; listing itself stays open.
+//
+// The three trade pacts are excluded on purpose. Tariff and Free Trade already
+// pay a per-turn income and Protective Trade shields trade and cheapens trade
+// deals, so those carry their own commercial benefit; giving the other four
+// market access instead leaves every pact worth signing and keeps the choice
+// between them real. Only one pact can stand between a pair (setRelation), so a
+// treaty that granted both income and market access would crown itself.
+var MarketAccessTreaties = []string{
+	fullDefenseAlliance,
+	terroristPrevention,
+	intelligenceAlliance,
+	technologyAgreement,
+}
+
+// CanBuyOnMarketFrom reports whether buyer may take seller's Trading Market
+// listings — see MarketAccessTreaties for why this is narrower than HasPact.
+func (w *World) CanBuyOnMarketFrom(buyer, seller *Empire) bool {
+	rel := w.Relation(buyer, seller)
+	for _, t := range MarketAccessTreaties {
+		if rel == t {
+			return true
+		}
+	}
+	return false
+}
 
 // RelationEnemy is the hostile state a pair falls into when one side declares
 // war or breaks a pact by attacking. It is stored as a Treaty row like any other

@@ -10,3 +10,6 @@ in_game: true
 A Full Defense Alliance is the strongest alliance. You commit a large part of
 your forces to defend an ally in need. It works only in local (single-board)
 games.
+
+It also lets you buy from that realm on the Trading Market. See the Trading
+topic for how that works.

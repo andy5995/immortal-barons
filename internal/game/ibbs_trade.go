@@ -146,10 +146,12 @@ func (w *World) resolveRemoteTradeBid(b IPTradeBid) IPTradeFill {
 		w.MarketProceeds = map[string]int64{}
 	}
 	w.MarketProceeds[b.Seller] += paid
+	// The seller is told privately and the planet is not: a market sale is
+	// business between two realms, and putting every one on the news both fills
+	// the paper on a trading planet and tells every rival what a realm is
+	// stocking up on.
 	seller.addEvent(fmt.Sprintf("%s of %s bought %s %s from your market for %s gold.",
 		b.FromEmpire, b.FromBoard, numfmt.Comma(int64(qty)), b.Good, numfmt.Comma(paid)))
-	w.postNews(fmt.Sprintf("%s of %s bought %s %s from %s.",
-		b.FromEmpire, b.FromBoard, numfmt.Comma(int64(qty)), b.Good, b.Seller))
 	fill.Filled = true
 	fill.Good, fill.Qty = b.Good, qty
 	fill.Gold = TradeBidCost(b.Qty-qty, b.Price) // the unfilled remainder

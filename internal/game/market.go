@@ -12,6 +12,9 @@ var (
 	// between realms checks this.
 	ErrInProtection  = errors.New("You cannot trade while under new realm protection.")
 	ErrTheyProtected = errors.New("That realm is under new realm protection.")
+	// See MarketAccessTreaties: buying from a listing needs one of the four
+	// non-trade pacts. IB's own rule, not BRE's.
+	ErrNoMarketPact = errors.New("You need a pact with that realm to buy from its listing.")
 )
 
 // MarketGoods are the goods tradeable on the general Trading Market: military
@@ -90,24 +93,42 @@ func (w *World) MarketPrice(realm, good string) int {
 	return 0
 }
 
-// MarketTotalForSale is the planet-wide pool of good on the market (all empires).
-func (w *World) MarketTotalForSale(good string) int {
+// visibleOnMarketTo reports whether viewer may see seller's listings at all. In
+// a single-board game a realm sees only what it could actually buy: a listing it
+// has no pact for is not a missed opportunity, it is noise, and showing the
+// quantities would leak what a rival holds. A league board shows the whole
+// market, the same place BuyFromMarket stops gating.
+func (w *World) visibleOnMarketTo(viewer *Empire, seller string) bool {
+	if w.Config.IBBS || seller == viewer.Name {
+		return true
+	}
+	s := w.FindByName(seller)
+	return s != nil && w.CanBuyOnMarketFrom(viewer, s)
+}
+
+// MarketTotalForSale is the pool of good on the market as viewer sees it: the
+// whole planet's, including their own listing, minus the realms a single-board
+// game hides from them. It sits beside "your own For Sale" on the market screen,
+// so it must keep counting the viewer's goods.
+func (w *World) MarketTotalForSale(good string, viewer *Empire) int {
 	total := 0
 	for i := range w.Market {
-		if w.Market[i].Good == good {
-			total += w.Market[i].Qty
+		l := &w.Market[i]
+		if l.Good == good && w.visibleOnMarketTo(viewer, l.Realm) {
+			total += l.Qty
 		}
 	}
 	return total
 }
 
-// MarketSellers returns the live listings for good (Qty > 0), excluding the
-// buyer's own realm, in stable order — the "Choose a Target" browse list.
-func (w *World) MarketSellers(good, exclude string) []*MarketListing {
+// MarketSellers returns the live listings for good (Qty > 0) that viewer may
+// see, excluding their own realm, in stable order — the "Choose a Target"
+// browse list.
+func (w *World) MarketSellers(good string, viewer *Empire) []*MarketListing {
 	var out []*MarketListing
 	for i := range w.Market {
 		l := &w.Market[i]
-		if l.Good == good && l.Qty > 0 && l.Realm != exclude {
+		if l.Good == good && l.Qty > 0 && l.Realm != viewer.Name && w.visibleOnMarketTo(viewer, l.Realm) {
 			out = append(out, l)
 		}
 	}
@@ -181,6 +202,16 @@ func (w *World) BuyFromMarket(buyer *Empire, seller, good string, n int) error {
 	l := w.marketListing(seller, good)
 	if l == nil || l.Qty <= 0 {
 		return ErrNoListing
+	}
+	// Single-board games only. In a league the whole planet is one team, so an
+	// open listing already reaches only teammates and the gate would buy nothing
+	// while getting in the way of the trading a league runs on. The interplanetary
+	// market is a separate path (resolveRemoteTradeBid) with its own alliance
+	// check, and never comes through here.
+	if !w.Config.IBBS {
+		if s := w.FindByName(seller); s == nil || !w.CanBuyOnMarketFrom(buyer, s) {
+			return ErrNoMarketPact
+		}
 	}
 	if n <= 0 {
 		return nil

@@ -1,6 +1,17 @@
 (in-progress:)
+  * A market sale is no longer posted to the planet news. The seller is still
+    told who bought what and for how much
+  * The Diplomacy Modification screen no longer says planetary diplomacy is
+    enforced by nothing: barons may only trade at a planet marked Allied
   * A realm under new realm protection can no longer trade. The Trading Market,
     trade deals and interplanetary bids all refuse it, as attacks already did
+  * In a single-board game the Trading Market shows only the goods you could
+    buy, which means a Terrorist Prevention, Intelligence Alliance, Technology
+    Agreement or Full Defense Alliance treaty with the seller. A realm you have
+    no treaty with does not appear on the market at all. Listing stays open to
+    everyone, so a seller now chooses who may take the goods and who can see
+    them, and computer barons are held to the same rule. A league board leaves
+    the market open, where the planet is one team
   * -gen-board-key prints the key alone on its line. It used to print the board
     name in front of it, and a roster entry pasted whole left that board's
     packets unchecked instead of reporting an error

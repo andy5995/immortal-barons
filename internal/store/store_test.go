@@ -408,8 +408,17 @@ func TestPreNameKeyedMarketRowsAreDropped(t *testing.T) {
 			t.Errorf("a listing with no realm survived the load: %+v", l)
 		}
 	}
+	// Counted straight off the table rather than through MarketTotalForSale,
+	// which reports what one realm may see: this is about what survived the
+	// load, not about who can look at it.
 	for _, good := range []string{"Tank", "Trooper", "Jet"} {
-		if n := got.MarketTotalForSale(good); n != 0 {
+		n := 0
+		for _, l := range got.Market {
+			if l.Good == good {
+				n += l.Qty
+			}
+		}
+		if n != 0 {
 			t.Errorf("%d %s of the old handle-keyed market are still on the shelf", n, good)
 		}
 	}

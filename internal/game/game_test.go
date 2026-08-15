@@ -23,6 +23,19 @@ func pastProtection(w *World) *World {
 	return w
 }
 
+// pactAll puts ttype between every pair of realms in w. Sending a trade deal
+// needs any pact (BRE), and buying from a listing needs one of
+// MarketAccessTreaties (IB's own rule), so a fixture that trades has to
+// establish one. Full Defense Alliance satisfies both.
+func pactAll(w *World, ttype string) *World {
+	for i, a := range w.Empires {
+		for _, b := range w.Empires[i+1:] {
+			w.setRelation(a.Name, b.Name, ttype)
+		}
+	}
+	return w
+}
+
 func TestNewWorldSeedsAIOnly(t *testing.T) {
 	w := testWorld()
 	if len(w.Empires) != 2 {

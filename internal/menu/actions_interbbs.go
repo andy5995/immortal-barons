@@ -801,9 +801,11 @@ func diplomacyModification(s session.Session, w *ctx) Result {
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Diplomacy Modification"), ansi.Reset)
 	for _, line := range []string{
-		"NOTE: Planetary Diplomacy is not official. It lets you tell your own",
-		"      barons where this planet stands with the others. None of it is",
-		"      enforced, and none of it is reported to the other planets.",
+		"NOTE: Planetary Diplomacy is your own record. It tells your barons",
+		"      where this planet stands with the others, and it is not sent",
+		"      to them, so each planet keeps its own view.",
+		"      One thing does turn on it: your barons may only trade at a",
+		"      planet's market while you have it marked Allied.",
 	} {
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgWhite, tr(s, line), ansi.Reset)
 	}
