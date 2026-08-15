@@ -252,11 +252,17 @@ const (
 	// editor used to allow 100000, letting a sysop configure a board whose realms
 	// could not all be named — the picker silently truncated its roster at 25.
 	MaxPlayersPerBoard  = 25
-	MaxPlanetaryTaxRate = 20  // Planetary (crown) Tax Rate ceiling, whole percent (default 5)
-	MaxLostForcesDays   = 30  // "Days before lost forces returned" ceiling (default 3; 0 = never return)
-	MaxPlayerTaxRate    = 50  // ceiling for MaxTaxRate (IB's own cap; BRE has none, its prompt is [0-100])
-	MaxBankInterest     = 200 // Bank Interest Rate ceiling (default 50; 200 = 20%/day)
-	MaxStdInvestRate    = 100 // Standard Investment Rate ceiling (default 35; 100 = 10%/day)
+	MaxPlanetaryTaxRate = 20 // Planetary (crown) Tax Rate ceiling, whole percent (default 5)
+	MaxLostForcesDays   = 30 // "Days before lost forces returned" ceiling (default 3; 0 = never return)
+	MaxPlayerTaxRate    = 50 // ceiling for MaxTaxRate (IB's own cap; BRE has none, its prompt is [0-100])
+	// The two bank rates are stated over ten days, so the value is tenths of a
+	// percent per day. Both ranges are BRE's own, read off its config-help
+	// screens: "(50; 200)" and "(35; 100)". The floors matter — a league set to
+	// zero has a bank that pays nothing, which the original never offers.
+	MinBankInterest  = 50  // Bank Interest Rate floor (5.0%/day)
+	MaxBankInterest  = 200 // ... and ceiling (20%/day); default 50
+	MinStdInvestRate = 35  // Standard Investment Rate floor (3.5%/day)
+	MaxStdInvestRate = 100 // ... and ceiling (10%/day); default 35
 )
 
 // MaxLeagueNumber is the League Number ceiling. Not from a Configuration Help

@@ -169,11 +169,17 @@ type cfgPage struct {
 // (issue #100).
 func configPages(ibbs bool) []cfgPage {
 	// Shorthands: most fields either prompt for a number or cycle a choice.
-	num := func(n int, label string, prompt string, get func(*game.Config) int, set func(*game.Config, int), maxV int) cfgField {
+	// num prompts for a value in [minV, maxV]. The prompt itself carries the
+	// current value and the ceiling; a field with a floor above zero names its
+	// range in the prompt text, since the "(current; max)" hint cannot show one.
+	// The tview editor holds the same bounds through addInt.
+	num := func(n int, label string, prompt string, get func(*game.Config) int, set func(*game.Config, int), minV, maxV int) cfgField {
 		return cfgField{
 			n: n, label: label,
 			value: func(c *game.Config) string { return fmt.Sprintf("%d", get(c)) },
-			edit:  func(s session.Session, c *game.Config) { set(c, promptSuggested(s, prompt, get(c), maxV)) },
+			edit: func(s session.Session, c *game.Config) {
+				set(c, max(minV, promptSuggested(s, prompt, get(c), maxV)))
+			},
 		}
 	}
 	toggle := func(n int, label string, get func(*game.Config) bool, set func(*game.Config, bool)) cfgField {
@@ -199,7 +205,7 @@ func configPages(ibbs bool) []cfgPage {
 			}},
 		num(2, "Turns of Protection", "Turns of Protection",
 			func(c *game.Config) int { return c.ProtectionTurns },
-			func(c *game.Config, v int) { c.ProtectionTurns = v }, game.MaxProtectionTurns),
+			func(c *game.Config, v int) { c.ProtectionTurns = v }, 0, game.MaxProtectionTurns),
 		{n: 3, label: "Game length (days)",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = endless)", c.GameLength) },
 			edit: func(s session.Session, c *game.Config) {
@@ -235,22 +241,22 @@ func configPages(ibbs bool) []cfgPage {
 	econ := []cfgField{
 		num(4, "Initial Market Land", "Initial Market Land",
 			func(c *game.Config) int { return c.InitialMarketLand },
-			func(c *game.Config, v int) { c.InitialMarketLand = v }, game.MaxInitialMarketLand),
+			func(c *game.Config, v int) { c.InitialMarketLand = v }, 0, game.MaxInitialMarketLand),
 		num(5, "Land Created / Day", "Land Created / Day",
 			func(c *game.Config) int { return c.LandPerDay },
-			func(c *game.Config, v int) { c.LandPerDay = v }, game.MaxLandPerDay),
-		num(6, "Interest Rate", "Interest Rate",
+			func(c *game.Config, v int) { c.LandPerDay = v }, 0, game.MaxLandPerDay),
+		num(6, "Interest Rate", "Interest Rate (50-200)",
 			func(c *game.Config) int { return c.InterestRate },
-			func(c *game.Config, v int) { c.InterestRate = v }, game.MaxBankInterest),
-		num(7, "Standard Investment Rate", "Standard Investment Rate",
+			func(c *game.Config, v int) { c.InterestRate = v }, game.MinBankInterest, game.MaxBankInterest),
+		num(7, "Standard Investment Rate", "Standard Investment Rate (35-100)",
 			func(c *game.Config) int { return c.StdInvestRate },
-			func(c *game.Config, v int) { c.StdInvestRate = v }, game.MaxStdInvestRate),
+			func(c *game.Config, v int) { c.StdInvestRate = v }, game.MinStdInvestRate, game.MaxStdInvestRate),
 		{n: 8, label: "Steady Investment Rate",
 			value: func(c *game.Config) string { return enabledStr(c.SteadyInvest) },
 			edit:  func(_ session.Session, c *game.Config) { c.SteadyInvest = !c.SteadyInvest }},
 		num(9, "Max Tax Rate", "Max Tax Rate",
 			func(c *game.Config) int { return c.MaxTaxRate },
-			func(c *game.Config, v int) { c.MaxTaxRate = v }, game.MaxPlayerTaxRate),
+			func(c *game.Config, v int) { c.MaxTaxRate = v }, 0, game.MaxPlayerTaxRate),
 		{n: 28, label: "Planetary Tax Rate",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d%%", c.PlanetaryTaxRate) },
 			edit: func(s session.Session, c *game.Config) {
@@ -324,10 +330,10 @@ func configPages(ibbs bool) []cfgPage {
 	caps := []cfgField{
 		num(10, "Max Purchasable Regions", "Max Purchasable Regions",
 			func(c *game.Config) int { return c.MaxRegions },
-			func(c *game.Config, v int) { c.MaxRegions = v }, game.MaxPurchasableRegions),
+			func(c *game.Config, v int) { c.MaxRegions = v }, 0, game.MaxPurchasableRegions),
 		num(11, "Max Players Per BBS", "Max Players Per BBS (1-25; 0 = unlimited)",
 			func(c *game.Config) int { return c.MaxPlayers },
-			func(c *game.Config, v int) { c.MaxPlayers = v }, game.MaxPlayersPerBoard),
+			func(c *game.Config, v int) { c.MaxPlayers = v }, 0, game.MaxPlayersPerBoard),
 		{n: 23, label: "Board ID",
 			value: func(c *game.Config) string { return c.BoardID },
 			edit: func(s session.Session, c *game.Config) {

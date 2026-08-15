@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 func TestConfigEditorEditsAndSaves(t *testing.T) {
@@ -182,5 +184,35 @@ func TestGameSetupHidesLeagueRulesOffLeague(t *testing.T) {
 		if !strings.Contains(on, label) {
 			t.Errorf("Game Setup omits %q on a league board", label)
 		}
+	}
+}
+
+// Both editors hold the two bank rates to BRE's own ranges — "(50; 200)" and
+// "(35; 100)" on its config-help screens. They used to accept 0, which is a bank
+// that pays nothing, and the two editors have to agree or a sysop's setting
+// depends on which one they opened.
+func TestBothEditorsHoldTheBankRatesToBRERanges(t *testing.T) {
+	dir := t.TempDir()
+	w := newWorld()
+	w.Config.DataDir = dir
+
+	// Field 6 (Interest Rate) then 7 (Standard Investment Rate), each set to 1,
+	// then save and exit.
+	f := &fakeSession{keys: []rune("6\r1\r7\r1\rs\r ")}
+	ConfigEditor(f, w.World)
+
+	if w.Config.InterestRate != game.MinBankInterest {
+		t.Errorf("Interest Rate = %d, want the %d floor", w.Config.InterestRate, game.MinBankInterest)
+	}
+	if w.Config.StdInvestRate != game.MinStdInvestRate {
+		t.Errorf("Standard Investment Rate = %d, want the %d floor", w.Config.StdInvestRate, game.MinStdInvestRate)
+	}
+
+	// The tview editor clamps the same way, so the two cannot drift apart.
+	if got := clampInt(1, game.MinBankInterest, game.MaxBankInterest); got != game.MinBankInterest {
+		t.Errorf("tview clamp gave %d, want %d", got, game.MinBankInterest)
+	}
+	if got := clampInt(1, game.MinStdInvestRate, game.MaxStdInvestRate); got != game.MinStdInvestRate {
+		t.Errorf("tview clamp gave %d, want %d", got, game.MinStdInvestRate)
 	}
 }
