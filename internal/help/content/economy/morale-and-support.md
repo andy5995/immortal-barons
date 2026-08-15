@@ -38,8 +38,9 @@ you are back to answering the maintenance prompts by hand every turn.
   Queen's tax, or your people's food costs Support. Underfeeding the army costs
   Morale.
 - A riot from high taxes costs Support.
-- Breaking a treaty by attacking a partner, instead of declaring war first,
-  costs you a quarter of each.
+- Declaring war on a ruler you hold an agreement with costs you a quarter of
+  each. Attacking that ruler without declaring war first ends the agreement too,
+  but costs you nothing.
 - A chemical or biological strike on your realm hurts both. The plague is far
   worse for your army than the gas is.
 - Enemy agents can lower either one directly. See Stir Revolts and Demoralize
