@@ -2661,13 +2661,15 @@ rather than the score table. IB's rules on top of that:
   holds that pact, and asks the covering message once for the whole batch.
 - **A Declaration Of War takes one confirmation for the list** and reports each
   realm it ended a relation with.
-- **Declaring war costs nothing at home** and leaves the pair at **Enemy**
-  (`World.DeclareWar`), mailing the other realm.
-- **Breaking a pact any other way does cost you.** Attacking a realm you hold an
-  agreement with breaches it: the pair drops to Enemy and the breaker loses a
-  QUARTER of both popular support and military morale (`World.breachTreaty`,
-  called from `Attack`). BINARY-VERIFIED at `BRE.OVR 0x1A881`: each stat is
-  integer-divided by 4 and multiplied by 3, so 90 support becomes 66, not 67.
+- **Declaring war costs a QUARTER of both popular support and military morale**
+  and leaves the pair at **Enemy** (`World.DeclareWar`), mailing the other realm.
+  BINARY-VERIFIED at `BRE.OVR 0x1A881`: each stat is integer-divided by 4 and
+  multiplied by 3, so 90 support becomes 66, not 67.
+- **Breaking a pact by attacking costs nothing.** The pair still drops to Enemy
+  (`World.breachTreaty`, called from `Attack`), but the breaker pays no price at
+  home — no attack path in the original ever reads the relationship. The crown
+  charges for the public act and leaves the private one to the other players.
+  This paragraph had the asymmetry backwards until 2026-08-15, as IB itself did.
   IB previously docked a flat 10 support and left morale untouched.
 
 **Known simplification:** the original says a treaty "is not officially broken
