@@ -289,7 +289,7 @@ for d in (off, off - 3949):
 
 Morale and support (2026-08-14) came out as 62 `BRE.OVR` sites and 4 in
 `BRE.EXE`, and the arbitrary form was 30 of them — the chemical and biological
-warheads, both covert ops, the Free Trade contagion, and the AI's floor of 5.
+missiles, both covert ops, the Free Trade contagion, and the AI's floor of 5.
 Scanning only the positive form would have found the economy and missed every
 weapon. Widening the modrm set to all `mod=10` registers found nothing new
 (ten hits, all `mov cx,imm`/`mov di,imm` false positives), so the `[di+disp16]`

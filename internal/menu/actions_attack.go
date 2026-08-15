@@ -111,7 +111,7 @@ func hiTokens(s string, words []string, color string) string {
 // a realm the player can see in the list but cannot hit (shielded by New Realm
 // Protection or an alliance) — it is shown without a selection letter.
 //
-// people and troopers are NOT displayed: they are carried so a warhead can be
+// people and troopers are NOT displayed: they are carried so a missile can be
 // priced off the target without a second trip under the lock (the chemical and
 // biological missiles read both, see game.ChemCostForTarget).
 type targetRow struct {
@@ -300,7 +300,7 @@ func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name 
 }
 
 // costOf prices a gold-fee op against the target it is aimed at. The three
-// warheads read different fields of it — the nuclear missile only the land, the
+// missiles read different fields of it — the nuclear one only the land, the
 // chemical one the people too, the biological one the troopers as well — so
 // they are all handed the whole snapshotted row.
 type costOf func(t targetRow) int64
@@ -314,7 +314,7 @@ type costOf func(t targetRow) int64
 // price is nil for an op with no fee. The original quotes the figure only once
 // a target is named — the three missile screens all reach the same arms-dealer
 // routine, which prints it and asks for a yes before anything is deducted — so
-// a warhead priced off the target has somewhere to read that target from.
+// a missile priced off the target has somewhere to read that target from.
 func localAttack(s session.Session, w *ctx, label string, price costOf, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
 	if blockedByProtection(s, w) {
 		return Stay
@@ -335,9 +335,9 @@ func localAttack(s session.Session, w *ctx, label string, price costOf, endsTurn
 				target = r
 			}
 		}
-		fmt.Fprintf(s, "\n%s"+tr(s, "%s — an arms broker wants %s gold for the warhead.")+"%s\n",
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s — an arms broker wants %s gold for the missile.")+"%s\n",
 			ansi.FgBrightCyan, label, comma(price(target)), ansi.Reset)
-		// Default NO: a warhead can cost tens of millions, and Enter is the
+		// Default NO: a missile can cost tens of millions, and Enter is the
 		// default-accept key everywhere else in the turn.
 		if !AskYesNo(s, "Buy it?", false) {
 			return Stay
@@ -365,7 +365,7 @@ func localAttack(s session.Session, w *ctx, label string, price costOf, endsTurn
 	return Stay
 }
 
-// The three warhead prices, each reading only the target fields its own routine
+// The three missile prices, each reading only the target fields its own routine
 // reads in the original.
 func nukePrice(t targetRow) int64 { return game.NukeCostForLand(t.land) }
 func chemPrice(t targetRow) int64 { return game.ChemCostForTarget(t.people, t.land) }

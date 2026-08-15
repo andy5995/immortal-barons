@@ -126,13 +126,13 @@ func (e *Empire) EnsureSDIFunding() {
 	e.syncSDI() // funding is the authoritative figure once it exists
 }
 
-// The arms dealer prices every warhead off the TARGET, so the three functions
+// The arms dealer prices every missile off the TARGET, so the three functions
 // below take the target's figures rather than an *Empire: the attack screen can
 // then quote a price straight from its snapshotted target list, without
 // re-resolving the rival under the world lock.
 
 // NukeCostForLand is what a nuclear missile aimed at a realm of `land` regions
-// costs — a bigger realm needs a bigger warhead, up to the shared cap.
+// costs — a bigger realm needs a bigger missile, up to the shared cap.
 func NukeCostForLand(land int) int64 {
 	return min(int64(land)*NukeCostPerRegion, StrikeCostCap)
 }
@@ -170,7 +170,7 @@ func (w *World) BioCost(d *Empire) int64 {
 	return BioCostForTarget(d.Troopers, d.People, d.Land)
 }
 
-// payArmsDealer settles a warhead's price against gold in hand and then against
+// payArmsDealer settles a missile's price against gold in hand and then against
 // the bank. Drawing on the bank is the original's rule, not a convenience: the
 // affordability test it runs before confirming the sale compares the price
 // against gold PLUS bank, and the deduction that follows takes whatever gold in

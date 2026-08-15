@@ -14,7 +14,7 @@ until they are cleaned up.
 
 You are quoted a price once you name a target, and you can walk away from
 it. The price is set by the size of the realm you are aiming at — a large
-neighbour needs a large warhead — up to a ceiling, so the very biggest
+neighbour needs a large missile — up to a ceiling, so the very biggest
 realms are proportionally cheap to hit.
 
 About 7% of the target's land is ruined per strike, varying a couple of

@@ -477,7 +477,7 @@ All four constants live in `balance.go`; Score never drops below 0.
   for the target first, then quotes. **That routine settles the bill against
   gold in hand PLUS the bank**: it compares the price against the sum, then takes
   whatever gold on hand cannot cover straight out of the bank. IB used to refuse
-  a sale a banked fortune could have paid for; all three warheads now draw the
+  a sale a banked fortune could have paid for; all three missiles now draw the
   same way.
 
   The attacker also gains **`Random(900)` Score**. Empire field +0x286 is the

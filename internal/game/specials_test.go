@@ -23,7 +23,7 @@ func TestNuclearStrike(t *testing.T) {
 	a.Gold = 10_000_000
 	// A realm needs real size for the strike to bite: the damage is a percentage
 	// of the target's regions, truncated, so a 15-region starter realm can shrug
-	// off a warhead entirely (as it does in the original).
+	// off a missile entirely (as it does in the original).
 	d.Regions = defaultRegionMix(500)
 	d.syncLand()
 	beforeLand := d.Land
@@ -122,7 +122,7 @@ func TestChemicalStrike(t *testing.T) {
 	}
 }
 
-// The warhead is priced off the target's people AND its land, and the two terms
+// The missile is priced off the target's people AND its land, and the two terms
 // are golden literals read out of the original.
 func TestChemCostReadsPeopleAndLand(t *testing.T) {
 	// 200 BRE population units (20 IB people to each) and 500 regions.
@@ -174,7 +174,7 @@ func TestBiologicalStrike(t *testing.T) {
 	}
 }
 
-// The biological warhead is priced off all three of the figures it hurts.
+// The biological missile is priced off all three of the figures it hurts.
 func TestBioCostReadsTroopersPeopleAndLand(t *testing.T) {
 	got := BioCostForTarget(1_000, 200*PopBREUnitScale, 500)
 	if want := int64(1000*23 + 200*434 + 500*1237); got != want {
@@ -185,7 +185,7 @@ func TestBioCostReadsTroopersPeopleAndLand(t *testing.T) {
 	}
 }
 
-// No warhead can finish a realm off: the chemical and biological strikes take
+// No missile can finish a realm off: the chemical and biological strikes take
 // percentages, and the nuclear one leaves every region on the target's books.
 func TestStrikesCannotEliminateARealm(t *testing.T) {
 	for seed := int64(1); seed <= 20; seed++ {
@@ -223,7 +223,7 @@ func TestStrikesCannotEliminateARealm(t *testing.T) {
 
 // The arms dealer takes what gold in hand cannot cover out of the bank rather
 // than refusing the sale.
-func TestWarheadDrawsOnTheBank(t *testing.T) {
+func TestMissileDrawsOnTheBank(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	cost := w.NukeCost(d)
 	a.Gold, a.Bank = cost-1_000, 5_000
@@ -240,7 +240,7 @@ func TestWarheadDrawsOnTheBank(t *testing.T) {
 }
 
 // Gold plus bank still has to cover it.
-func TestWarheadRefusedWhenGoldAndBankFallShort(t *testing.T) {
+func TestMissileRefusedWhenGoldAndBankFallShort(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Gold, a.Bank = 1, 1
 
@@ -367,7 +367,7 @@ func TestDecontaminateWithoutWaste(t *testing.T) {
 	}
 }
 
-// The warhead is priced off the target, and the price stops climbing at the cap.
+// The missile is priced off the target, and the price stops climbing at the cap.
 func TestNukeCostScalesWithTarget(t *testing.T) {
 	if got, want := NukeCostForLand(1000), int64(1000*3543); got != want {
 		t.Errorf("price for 1000 regions = %d, want %d", got, want)

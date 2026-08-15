@@ -62,11 +62,12 @@
     people and knocks down its military morale and popular support
   * A biological strike kills a share of the target's people and troopers and
     halves its military morale, leaving the land alone
-  * All three warheads are priced by the target — the nuclear by its land, the
-    chemical by its people and land, the biological by its troopers, people and
-    land — quoted once the target is chosen, and can be declined
-  * A warhead the gold in hand cannot cover is paid out of the bank
-  * All three raise the attacker's score, and none can wipe out a realm
+  * Each missile is priced by its target — the nuclear by its land, the chemical
+    by its people and land, the biological by its troopers, people and land —
+    quoted once the target is chosen, and can be declined; one the gold in hand
+    cannot cover is paid out of the bank
+  * A nuclear, chemical or biological strike raises the attacker's score, and
+    none of them can wipe out a realm
   * Waste is a region type of its own, listed on the region tables; it is
     decontaminated during maintenance and its owner shares the recovered land
     out across region types

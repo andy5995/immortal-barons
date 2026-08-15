@@ -921,13 +921,13 @@ const (
 	// Covert operations and weapons scale the victim's stat rather than docking a
 	// flat number of points, so a broken realm cannot be broken much further.
 	// BINARY-VERIFIED: the covert resolver at BRE.OVR 0x4AC91 (Demoralize Forces)
-	// and 0x4AE61 (Stir Revolts); the chemical warhead at 0x110AE / 0x11109 and
+	// and 0x4AE61 (Stir Revolts); the chemical missile at 0x110AE / 0x11109 and
 	// the biological one at 0x115FE / 0x11645. IB docked a flat 15 points for both
 	// covert ops and left both stats untouched on a WMD strike.
 	DemoralizeKeepNum, DemoralizeKeepDen   = 6, 7   // morale x 6/7
 	StirRevoltsKeepNum, StirRevoltsKeepDen = 11, 13 // support x 11/13
 	// The two WMD strikes cut both stats too; their constants live with the rest
-	// of each warhead's figures further down (ChemMoraleKeepNum, BioMoraleDivisor,
+	// of each missile's figures further down (ChemMoraleKeepNum, BioMoraleDivisor,
 	// StrikeSupportKeepNum).
 
 	// --- Industry (live-verified; one capacity pool per region, split between
@@ -991,7 +991,7 @@ const (
 	NukeCostPerRegion = 3_543
 	NukeWastePct      = 7 // centre of the band
 	NukeWasteJitter   = 3 // each of the two Random(3) draws
-	// StrikeCostCap is the arms dealer's ceiling on a warhead, shared by all
+	// StrikeCostCap is the arms dealer's ceiling on a missile, shared by all
 	// three missiles. BINARY-VERIFIED: each routine hands the same literal
 	// 50,000,000 to the resident min helper before it quotes a price (BRE.OVR
 	// +0x22ae nuclear, +0x266c chemical, +0x2b6e biological), so this is one
