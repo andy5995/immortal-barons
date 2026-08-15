@@ -466,6 +466,16 @@ which cost invocations here: `lookup` takes **no** `--directory` (unlike
 object; and `--around` accepts an OVR offset, so convert from the block address
 `find-string` prints rather than guessing a unit-relative one.
 
+**A disassembler that prints nothing has not told you the region is empty.**
+`disasm` once produced no output and exited **0**, which reads as "no code
+there" and is the most expensive kind of wrong answer. The cause was ndisasm
+3.02's `-k` skip flag, which stops disassembly outright rather than skipping a
+span; the fix was to compute the code regions and run one ndisasm per region
+with `-o <start>` (`code_regions`, fixed in the script). Do not reintroduce
+`-k`. More generally, when a disassembly step returns empty, verify against a
+second window that you know has code before concluding anything about the
+bytes.
+
 **In a capture, count the characters echoed after a prompt.** One echoed key
 means a single-key prompt; a run of them (`Send to: EFHIJKMNOP`) means
 multi-select, and a run with embedded `\b`/space/`\b` means the keys *toggle*.
