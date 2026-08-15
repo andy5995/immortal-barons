@@ -10,8 +10,10 @@
   * Population follows the original's model: the kind of land a realm owns —
     Urban far outweighing every other type — scaled by popular support and
     divided by the tax rate. Acreage alone no longer houses anyone
-  * People move a share of the way toward that number each turn, leaving faster
-    the harder a realm taxes and faster again above a 50% rate
+  * Each turn a realm closes part of the gap between the people it has and the
+    people its land can hold; they leave faster than they arrive, and faster
+    still the harder it taxes. Above a 50% rate the turn's movement is docked a
+    further quarter, whichever way it was going
   * Computer-run realms keep buying land instead of stopping for good once their
     upkeep catches up with their income; land and army now draw on one surplus
   * Each computer-run realm holds its own Trading Market listings and sale gold.
