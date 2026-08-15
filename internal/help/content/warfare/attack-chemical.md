@@ -16,7 +16,7 @@ The morale and support damage is the part that lasts. Casualties come back as
 the population grows; a realm knocked down to two-thirds support earns less and
 fights worse until it has climbed back.
 
-The arms broker prices the warhead off the target's population as well as its
+The arms broker prices the missile off the target's population as well as its
 land, so gassing a crowded realm is expensive. Nothing intercepts it — not SDI,
 not turrets, not tanks.
 

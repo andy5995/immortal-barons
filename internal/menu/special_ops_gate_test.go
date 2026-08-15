@@ -49,7 +49,7 @@ func TestSpecialOpSwitchesHideTheirOperations(t *testing.T) {
 }
 
 // The Bomb Enemy Targets submenu splits between the two switches: the four
-// bombing entries answer to Bombing Ops, the three warheads to Missile Ops.
+// bombing entries answer to Bombing Ops, the three missiles to Missile Ops.
 func TestBombEnemyTargetsSplitsBetweenTheTwoSwitches(t *testing.T) {
 	open := func(set func(w *ctx)) string {
 		w := newWorld()
@@ -69,7 +69,7 @@ func TestBombEnemyTargetsSplitsBetweenTheTwoSwitches(t *testing.T) {
 		t.Errorf("Bomb Food Market survived Bombing Ops = Disabled:\n%s", out)
 	}
 	if !strings.Contains(out, "Nuclear Assault") {
-		t.Errorf("Bombing Ops = Disabled should leave the warheads alone:\n%s", out)
+		t.Errorf("Bombing Ops = Disabled should leave the missiles alone:\n%s", out)
 	}
 
 	out = open(func(w *ctx) { w.Config.BombingOps, w.Config.MissileOps = true, false })

@@ -43,7 +43,7 @@ func noAnnihilator(w *ctx) bool { return !w.Config.ClingyAnnihilator }
 // local attacks OFF)") — Regular, Nuclear, Chemical and Biological all go.
 func noLocalAttacks(w *ctx) bool { return !w.LocalAttacksAllowed() }
 
-// noLocalMissiles combines the two: a warhead aimed at a neighbour needs both
+// noLocalMissiles combines the two: a missile aimed at a neighbour needs both
 // missiles and local fighting to be allowed.
 func noLocalMissiles(w *ctx) bool { return noMissileOps(w) || noLocalAttacks(w) }
 

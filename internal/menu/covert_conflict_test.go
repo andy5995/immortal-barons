@@ -30,7 +30,7 @@ func TestNuclearStrikeShapeShiftConflict(t *testing.T) {
 	})
 
 	fb := &hookSession{
-		fakeSession: fakeSession{keys: []rune("Ay")}, // pick A, then buy the warhead
+		fakeSession: fakeSession{keys: []rune("Ay")}, // pick A, then buy the missile
 		marker:      "Choose a target",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("victim")) })

@@ -63,7 +63,7 @@ empire record (les di,[0x28d8])
                 routine at BRE.OVR 0x37418 multiplies it by 1.5 for "Your People
                 Need N", and the chemical and biological strikes print "<N>
                 million civilians were killed!" beside it after taking a
-                percentage of it. Both warheads also multiply it into their
+                percentage of it. Both missiles also multiply it into their
                 price, so every per-head price in this binary is per million.
   +0x5d  int32  slot-in-use serial. -1 in every unoccupied slot; a positive,
                 game-lifetime-increasing number in an occupied one (921 / 932 /
