@@ -157,6 +157,15 @@ func (w *World) StampOutbox() {
 	for i := range w.Outbox {
 		w.Outbox[i].League = w.Config.LeagueNumber
 		w.Outbox[i].Epoch = w.Epoch
+		// EVERY packet says what this board runs, not just the ones whose
+		// builders remembered to. A board's version is a property of the board,
+		// and the receiving end tests it on everything that arrives: a mail or
+		// recon packet that omitted it read as "states no version", which fails
+		// a Coordinator's requirement and got the board bounced while it was
+		// running the required version all along. Forwarded packets are left
+		// alone — Transit is not stamped here — so a relayed packet keeps the
+		// version of the board that wrote it.
+		w.Outbox[i].Version = Version
 		w.Outbox[i].FromNode = w.NodeNumber(w.Config.BoardID)
 		if w.Outbox[i].ToBoard != "" {
 			w.Outbox[i].ToNode = w.NodeNumber(w.Outbox[i].ToBoard)

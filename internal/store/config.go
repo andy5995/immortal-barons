@@ -28,6 +28,13 @@ func LoadConfig(dataDir string) (game.Config, error) {
 		return cfg, err
 	}
 	cfg.DataDir = dataDir
+	// The required version has its own file for the same reason bbs.cfg does: it
+	// is a thing a sysop edits and greps. A Coordinator's broadcast rewrites
+	// config.json, and SaveConfig then rewrites this file to match, so the two
+	// agree; where only the file has been edited by hand, the file wins.
+	if v := ReadVersionFile(dataDir); v != "" {
+		cfg.MinBoardVersion = v
+	}
 	// The per-board settings moved from config.json to bbs.cfg. A board set up
 	// before that still has them in config.json and nowhere else, so they are
 	// read back here; bbs.cfg then overwrites whatever it names. A sysop who
@@ -83,6 +90,11 @@ func SaveConfig(cfg game.Config) error {
 		return err
 	}
 	if err := SaveBoardConfig(cfg); err != nil {
+		return err
+	}
+	// The required version is kept in its own readable file too, so a Coordinator's
+	// broadcast leaves something a sysop can find without opening the game.
+	if err := syncVersionFile(cfg); err != nil {
 		return err
 	}
 	data, err := json.MarshalIndent(cfg, "", "  ")

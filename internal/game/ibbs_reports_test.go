@@ -128,3 +128,32 @@ func TestVersionAtLeast(t *testing.T) {
 		}
 	}
 }
+
+// Every originating packet must state this board's version, not just the score
+// export: the receiving board tests the version on everything that arrives, so a
+// packet type that omitted it was refused by any league with a requirement set,
+// however current the sending board actually was.
+func TestEveryOutboundPacketStatesItsVersion(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.Config.IBBS = true
+	w.Config.BoardID = "Alpha BBS"
+	// A league that requires exactly what this board runs: every packet it sends
+	// must clear its own bar.
+	w.Config.MinBoardVersion = Version
+	// One packet from each shape that leaves a board: a plain reply, a mail
+	// carrier, and a broadcast with no addressee.
+	w.Outbox = append(w.Outbox,
+		Packet{FromBoard: w.Config.BoardID, ToBoard: "Bravo BBS"},
+		Packet{FromBoard: w.Config.BoardID, ToBoard: "Bravo BBS", IPMessages: []IPMessage{{Body: "hi"}}},
+		Packet{FromBoard: w.Config.BoardID},
+	)
+	w.StampOutbox()
+	for i, p := range w.Outbox {
+		if p.Version != Version {
+			t.Errorf("packet %d states version %q, want %q", i, p.Version, Version)
+		}
+		if !w.BoardMeetsMinVersion(p.Version) {
+			t.Errorf("packet %d would be refused by a league requiring the current version", i)
+		}
+	}
+}

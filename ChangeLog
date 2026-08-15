@@ -159,6 +159,8 @@
   * config-during-reset: the League Coordinator may require a game version of
     every board. A board below it has its packets refused and is marked on the
     BBSINFO report; only that board is refused, not the whole league
+  * The required version is kept in "ibversion.cfg" beside the roster, on every
+    board, so a sysop can read and set it without opening the game
   * Added Trading to the InterPlanetary Operations menu: a baron may bid on the
     Trading Market of any planet the Coordinator has marked Allied
   * A planet's market travels with its scores, so an ally sees what is offered

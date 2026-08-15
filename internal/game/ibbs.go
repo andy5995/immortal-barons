@@ -51,6 +51,9 @@ type Packet struct {
 	TradeBids  []IPTradeBid    `json:",omitempty"` // buy orders landing on ToBoard's market
 	TradeFills []IPTradeFill   `json:",omitempty"` // their answers coming home
 	Market     []RemoteListing `json:",omitempty"` // FromBoard's market, riding its scores
+	// Notice is a plain-text bounce: this board refused a packet and is telling
+	// the sender why. It carries NO payload, deliberately — see bounceVersion.
+	Notice string `json:",omitempty"`
 	// Version is the game version the sender is running, for the BBSINFO report.
 	// omitempty on the same grounds as the fields above: the origin signature is
 	// taken over the marshalled packet, so a board that does not know this field
@@ -96,7 +99,7 @@ func (p Packet) HasPayload() bool {
 	return len(p.Scores) > 0 || len(p.Attacks) > 0 || len(p.Terrors) > 0 ||
 		len(p.Results) > 0 || len(p.Recon) > 0 || len(p.ReconReports) > 0 ||
 		len(p.TimeChecks) > 0 || len(p.IPMessages) > 0 ||
-		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 ||
+		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 || p.Notice != "" ||
 		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Annihilator != nil || p.Reset != nil
 }
 
@@ -848,8 +851,7 @@ func (w *World) ExportScores() {
 	}
 	w.Outbox = append(w.Outbox, Packet{
 		FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores,
-		Market:  w.ExportMarket(), // so allied planets can bid on it (#47)
-		Version: Version,          // for the other boards' BBSINFO report
+		Market: w.ExportMarket(), // so allied planets can bid on it (#47)
 	})
 }
 
@@ -1034,14 +1036,13 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// whole league hostage to one stale board is too destructive to copy on a
 	// maybe. Recorded in docs/mechanics-reference.md as unverified.
 	if p.FromBoard != "" && p.FromBoard != w.Config.BoardID && !w.BoardMeetsMinVersion(p.Version) {
-		ver := p.Version
-		if ver == "" {
-			ver = "an unstated version"
-		} else {
-			ver = "v" + ver
-		}
-		w.postNews(fmt.Sprintf("A packet from %s was refused: it runs %s, and this league requires v%s.",
-			p.FromBoard, ver, w.Config.MinBoardVersion))
+		return w.bounceVersion(p)
+	}
+	// A bounce carries no payload, so there is nothing to apply and nothing to
+	// answer. Delivering the notice and stopping is what keeps two boards that
+	// both refuse each other from bouncing the same packet back and forth.
+	if p.Notice != "" {
+		w.postNews(fmt.Sprintf("%s refused our packet: %s", p.FromBoard, p.Notice))
 		return Packet{}
 	}
 	// Past every guard, so this records packets actually ACCEPTED — a forged or
@@ -1112,7 +1113,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	for _, f := range p.TradeFills {
 		w.applyTradeFill(f)
 	}
-	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate, Version: Version}
+	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
 	// Bids landing HERE are filled or refused against this board's market now,
 	// and the answer rides the reply home.
 	for _, b := range p.TradeBids {
@@ -1502,6 +1503,33 @@ func (w *World) DeclareLeagueReset(onDate, announcement string) error {
 	}
 	w.postNews(fmt.Sprintf("Season %d begins. Every realm starts again.", w.Season))
 	return nil
+}
+
+// bounceVersion refuses a packet from a board below the league's required
+// version and tells the sender so, rather than dropping it in silence — a board
+// whose packets vanish has no way to learn that it is the one at fault.
+//
+// The reply carries a NOTICE and nothing else. It is tempting to return the
+// packet itself, which is how "send it back" is usually described, but that
+// packet holds attacks, bids and mail aimed at THIS board: handing it back would
+// have the origin apply its own strikes against its own realms. What the sender
+// needs is the reason, and the reason is one line.
+//
+// The sender's own in-flight forces and escrowed gold are not stranded by this:
+// nothing was applied here, so its lost-packet timer returns them on schedule
+// (ReturnLostForces).
+func (w *World) bounceVersion(p Packet) Packet {
+	ver := "an unstated version"
+	if p.Version != "" {
+		ver = "v" + p.Version
+	}
+	w.postNews(fmt.Sprintf("A packet from %s was refused: it runs %s, and this league requires v%s.",
+		p.FromBoard, ver, w.Config.MinBoardVersion))
+	return Packet{
+		FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate,
+		Notice: fmt.Sprintf("this league requires v%s and your board runs %s; upgrade and the packet will be accepted",
+			w.Config.MinBoardVersion, ver),
+	}
 }
 
 // raider names the far realm behind an incoming strike, for the defending
