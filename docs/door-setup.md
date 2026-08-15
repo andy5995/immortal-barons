@@ -231,12 +231,18 @@ Set these on the **Caps & Node** page:
   999. Leave it at 0 if they have not given you one. It matters when one board
   plays in two leagues that share an inbound directory: each game ignores the
   other's packets, and marks its own files `L042-`.
+- **League Name** — what the league calls itself, shown to players on Game
+  Setup. The Coordinator sets it and it reaches every board with the rest of the
+  ruleset, so you can leave it blank. Nothing routes by it; the League Number
+  still does all the matching.
 - **Inbound Dir** — the directory where packets from other boards arrive.
 - **Outbound Dir** — the directory where the game writes packets for other
   boards.
 
-These four are written to **`bbs.cfg`** in your data directory, a plain text
-file you can edit instead of opening the editor. See below.
+Board ID, League Number and the two directories are written to **`bbs.cfg`** in
+your data directory, a plain text file you can edit instead of opening the
+editor. See below. The League Name is not among them — it belongs to the league
+rather than to your board, so it travels in the Coordinator's broadcast.
 
 The two directories are relative to your data directory, so the defaults
 `inbound` and `outbound` need no editing on most boards. Give a full path

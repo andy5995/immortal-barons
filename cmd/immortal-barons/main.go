@@ -763,7 +763,7 @@ func runLeagueRoutes(cfg game.Config) error {
 			filepath.Join(cfg.DataDir, store.NodeListFile), cfg.Outbound())
 		return nil
 	}
-	fmt.Printf("This board: %s (node %d), league %s\n", cfg.BoardID, w.NodeNumber(cfg.BoardID), leagueLabel(cfg.LeagueNumber))
+	fmt.Printf("This board: %s (node %d), league %s\n", cfg.BoardID, w.NodeNumber(cfg.BoardID), leagueLabel(cfg.LeagueName, cfg.LeagueNumber))
 	if !w.Routed() {
 		fmt.Println("The roster carries no HOST routing, so this board links to every other one.")
 	}
@@ -782,11 +782,17 @@ func runLeagueRoutes(cfg game.Config) error {
 	return nil
 }
 
-func leagueLabel(n int) string {
-	if n <= 0 {
-		return "(number not set)"
+// leagueLabel names the league for a sysop: the number is what routes, so it is
+// always shown, and the Coordinator's name for the league joins it when set.
+func leagueLabel(name string, n int) string {
+	num := "(number not set)"
+	if n > 0 {
+		num = fmt.Sprintf("#%d", n)
 	}
-	return fmt.Sprintf("#%d", n)
+	if name == "" {
+		return num
+	}
+	return fmt.Sprintf("%s %s", name, num)
 }
 
 // runLeagueConfig broadcasts this board's league rules (turns, protection,

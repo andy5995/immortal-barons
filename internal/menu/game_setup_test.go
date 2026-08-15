@@ -50,6 +50,21 @@ func TestGameSetupNamesTheLeague(t *testing.T) {
 			t.Errorf("Game Setup missing %q with IBBS on:\n%s", want, out)
 		}
 	}
+	// An unnamed league gets no row at all rather than a blank one.
+	if strings.Contains(out, "League ") {
+		t.Errorf("Game Setup shows a League row for a league with no name:\n%s", out)
+	}
+
+	// Named, it is the first thing the league group says.
+	fn := &fakeSession{keys: []rune("  ")}
+	wn := newWorld()
+	wn.Config.IBBS = true
+	wn.Config.BoardID = "eye of the storm"
+	wn.Config.LeagueName = "Southern Cross"
+	gameSetup(fn, wn)
+	if !strings.Contains(fn.out.String(), "Southern Cross") {
+		t.Errorf("Game Setup omits the league name:\n%s", fn.out.String())
+	}
 
 	// With it off, the league group is absent entirely.
 	f2 := &fakeSession{keys: []rune("  ")}

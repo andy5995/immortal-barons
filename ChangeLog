@@ -161,6 +161,8 @@
     BBSINFO report; only that board is refused, not the whole league
   * The required version is kept in "ibversion.cfg" beside the roster, on every
     board, so a sysop can read and set it without opening the game
+  * config-during-reset: a league may have a name, set by its Coordinator and
+    shown to players on Game Setup. The League Number still does the routing
   * Added Trading to the InterPlanetary Operations menu: a baron may bid on the
     Trading Market of any planet the Coordinator has marked Allied
   * A planet's market travels with its scores, so an ally sees what is offered

@@ -253,6 +253,14 @@ type Config struct {
 	IdleTimeoutSecs int // boot a session after this many seconds with no keypress (0 = never), freeing the world lock
 	MaxIdleWarnings int // idle warnings a session may collect before a hard boot
 
+	// LeagueName is what the league calls itself — IB's own, with no counterpart
+	// in the original. It is decoration and nothing routes by it: LeagueNumber
+	// still does all the matching, so two leagues may share a name as harmlessly
+	// as the original says they may share a number. The Coordinator sets it and
+	// it rides the ruleset broadcast, so every board shows the same name rather
+	// than whatever its own sysop typed.
+	LeagueName string
+
 	// League ruleset (BRE Configuration Editor fields).
 	GameStartDate        string // ISO date the game begins; before it, maintenance doesn't advance ("" = already started)
 	JoinDate             string // ISO date after which no new player may join ("" = no cutoff)

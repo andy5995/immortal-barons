@@ -67,10 +67,10 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 	// The identifiers ran 1..38 before the pages existed and must still, so no
 	// sysop's habit or note breaks. Later fields are appended above that. 22 was
 	// the Inter-BBS toggle, replaced by the -ibbs-reset command. 45 (Pirates), 46
-	// (allied market trading) and 47 (required version) are IB's own, numbered
-	// past the last of the original's own fields.
-	const fields = 46
-	for n := 1; n <= 47; n++ {
+	// (allied market trading), 47 (required version) and 48 (league name) are
+	// IB's own, numbered past the last of the original's own fields.
+	const fields = 47
+	for n := 1; n <= 48; n++ {
 		if n == 22 {
 			continue
 		}

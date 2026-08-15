@@ -127,6 +127,7 @@ const (
 	helpMaxPlayers         = "The most human empires allowed on this board. 0 means no limit."
 	helpBoardID            = "The name this board uses in inter-BBS packets."
 	helpLeagueNumber       = "The League Coordinator's number for this league, 1-999. It keeps two leagues apart when they share one inbound directory."
+	helpLeagueName         = "What this league calls itself. Shown to players on Game Setup and nothing routes by it — the League Number still does the matching. The Coordinator sets it and it reaches every board."
 	helpMinVersion         = "The game version every board in the league must run (blank for no requirement). A board below it has its packets refused."
 	helpInboundDir         = "Where packets from the other boards arrive. Relative to the data directory unless you give a full path."
 	helpOutboundDir        = "Where the game writes packets for the other boards. Relative to the data directory unless you give a full path."
@@ -250,6 +251,9 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addInt(caps, "Max Players Per BBS (0=unlimited)", helpMaxPlayers, c.MaxPlayers, 0, 100000, func(c *game.Config, n int) { c.MaxPlayers = n })
 	if ibbs {
 		t.addText(caps, 16, "Board ID", helpBoardID, c.BoardID, func(c *game.Config, v string) { c.BoardID = v })
+		t.addText(caps, 48, "League Name", helpLeagueName, c.LeagueName, func(c *game.Config, v string) {
+			c.LeagueName = strings.TrimSpace(v)
+		})
 		t.addText(caps, 47, "Required Version", helpMinVersion, c.MinBoardVersion, func(c *game.Config, v string) {
 			c.MinBoardVersion = strings.TrimPrefix(strings.TrimSpace(v), "v")
 		})

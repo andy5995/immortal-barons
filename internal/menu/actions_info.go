@@ -507,6 +507,12 @@ func gameSetup(s session.Session, w *ctx) Result {
 			declaration = w.LeagueDiplomacy
 		})
 		group("The league")
+		// The name its Coordinator gave the league, when there is one. Nothing
+		// routes by it, so a league that never set one simply has no row rather
+		// than a blank.
+		if c.LeagueName != "" {
+			row("League", c.LeagueName)
+		}
 		row("This planet", c.BoardID)
 		row("Planets in the league", countOr(boards, "Roster not loaded"))
 		// The rules above are not this sysop's to set once a board joins a league:

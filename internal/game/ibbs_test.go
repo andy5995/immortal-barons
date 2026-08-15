@@ -1049,3 +1049,17 @@ func TestEveryGameRuleIsBroadcast(t *testing.T) {
 		}
 	}
 }
+
+// The league's name is the Coordinator's to set, and it must reach the member
+// boards: a name only the Coordinator's own board shows is worse than none,
+// because each sysop then sees a different one on the same league's Game Setup.
+func TestLeagueNameTravelsWithTheRuleset(t *testing.T) {
+	co := DefaultConfig()
+	co.LeagueName = "Southern Cross"
+	member := DefaultConfig()
+	member.LeagueName = "whatever this sysop typed"
+	member.applyLeagueRuleset(co.leagueRuleset())
+	if member.LeagueName != "Southern Cross" {
+		t.Errorf("member board calls the league %q, want %q", member.LeagueName, "Southern Cross")
+	}
+}
