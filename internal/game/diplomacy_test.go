@@ -118,6 +118,7 @@ func TestProtectiveTradeGuardsTradeCovert(t *testing.T) {
 	a := w.AddHuman("a", "Alpha")
 	d := w.AddHuman("d", "Delta")
 	partner := w.AddHuman("p", "Partner")
+	pastProtection(w)
 	a.Agents = 10
 	d.Tanks = 10
 	// d has a trade treaty (a target for Bomb Trade Routes) and a market listing.

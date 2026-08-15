@@ -11,6 +11,7 @@ func TestRebornRealmHoldsNoMarketPositionOfItsPredecessor(t *testing.T) {
 	w.LastMaintDate = "2026-07-02"
 	doomed := w.AddHuman("owner", "Doomed")
 	buyer := w.AddHuman("buyer", "Buyer")
+	pastProtection(w)
 	for _, e := range []*Empire{doomed, buyer} {
 		// Played today, so the never-played and idle sweeps leave them alone and the
 		// husk is the only realm this maintenance collects.
@@ -51,6 +52,7 @@ func TestRebornRealmHoldsNoMarketPositionOfItsPredecessor(t *testing.T) {
 
 	// The freed name is claimed by the next caller to onboard.
 	reborn := w.AddHuman("newcomer", "Doomed")
+	pastProtection(w)
 	troopers, gold := reborn.Troopers, reborn.Gold
 	if err := w.SetMarketListing(reborn, "Trooper", 0, 0); err != nil {
 		t.Fatalf("delist: %v", err)
@@ -70,6 +72,7 @@ func TestAbdicationDropsItsMarketPosition(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	quitter := w.AddHuman("q", "Quitter")
 	buyer := w.AddHuman("b", "Buyer")
+	pastProtection(w)
 	quitter.Tanks = 10
 	buyer.Gold = 100_000
 	if err := w.SetMarketListing(quitter, "Tank", 10, 1_000); err != nil {
@@ -91,6 +94,7 @@ func TestAbdicationDropsItsMarketPosition(t *testing.T) {
 		t.Errorf("%d escrowed tanks outlived the realm that listed them", n)
 	}
 	reborn := w.AddHuman("second", "Quitter")
+	pastProtection(w)
 	tanks, gold := reborn.Tanks, reborn.Gold
 	if err := w.SetMarketListing(reborn, "Tank", 0, 0); err != nil {
 		t.Fatalf("delist: %v", err)

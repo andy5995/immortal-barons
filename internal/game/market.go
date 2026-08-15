@@ -6,6 +6,12 @@ var (
 	ErrBadGood    = errors.New("That is not traded on the market.")
 	ErrOwnListing = errors.New("You cannot buy from your own listing.")
 	ErrNoListing  = errors.New("That empire has none of those for sale.")
+	// New Realm Protection stops a realm trading, not only fighting: BRE's own
+	// reset help defines the setting as the turns for which a new empire "is
+	// unable to attack, trade, and be attacked". Every path that moves goods
+	// between realms checks this.
+	ErrInProtection  = errors.New("You cannot trade while under new realm protection.")
+	ErrTheyProtected = errors.New("That realm is under new realm protection.")
 )
 
 // MarketGoods are the goods tradeable on the general Trading Market: military
@@ -114,6 +120,9 @@ func (w *World) MarketSellers(good, exclude string) []*MarketListing {
 // clamped to what e can back (current inventory + already-listed). A newQty of 0
 // removes the listing and returns the goods to inventory.
 func (w *World) SetMarketListing(e *Empire, good string, newQty, price int) error {
+	if e.Protection > 0 {
+		return ErrInProtection
+	}
 	f := marketField(e, good)
 	if f == nil {
 		return ErrBadGood
@@ -159,6 +168,9 @@ func (w *World) removeListing(realm, good string) {
 // listing and to what the buyer can afford. Buying your own listing is refused
 // (as in BRE).
 func (w *World) BuyFromMarket(buyer *Empire, seller, good string, n int) error {
+	if buyer.Protection > 0 {
+		return ErrInProtection
+	}
 	bf := marketField(buyer, good)
 	if bf == nil {
 		return ErrBadGood

@@ -10,6 +10,7 @@ import "testing"
 func TestAIBaronsKeepSeparateMarketPositions(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.AddAIEmpires(2)
+	pastProtection(w)
 	ai := w.AIEmpires()
 	if len(ai) < 2 {
 		t.Fatalf("need two computer barons, got %d — nothing below is tested", len(ai))
@@ -49,6 +50,7 @@ func TestAIBaronsKeepSeparateMarketPositions(t *testing.T) {
 func TestAIBaronsAreSettledTheirOwnMarketProceeds(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.AddAIEmpires(2)
+	pastProtection(w)
 	ai := w.AIEmpires()
 	if len(ai) < 2 {
 		t.Fatalf("need two computer barons, got %d — nothing below is tested", len(ai))
@@ -56,6 +58,7 @@ func TestAIBaronsAreSettledTheirOwnMarketProceeds(t *testing.T) {
 	a, b := ai[0], ai[1]
 	a.Tanks, b.Carriers = 500, 700
 	buyer := w.AddHuman("buyer", "Buyer")
+	pastProtection(w)
 	buyer.Gold = 10_000_000
 
 	if err := w.SetMarketListing(a, "Tank", 100, 50); err != nil {
@@ -95,6 +98,7 @@ func TestAIBaronsAreSettledTheirOwnMarketProceeds(t *testing.T) {
 func TestRemovingOneAIBaronLeavesTheOthersMarketPosition(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.AddAIEmpires(2)
+	pastProtection(w)
 	ai := w.AIEmpires()
 	if len(ai) < 2 {
 		t.Fatalf("need two computer barons, got %d — nothing below is tested", len(ai))
@@ -102,6 +106,7 @@ func TestRemovingOneAIBaronLeavesTheOthersMarketPosition(t *testing.T) {
 	a, b := ai[0], ai[1]
 	a.Tanks, b.Carriers = 500, 700
 	buyer := w.AddHuman("buyer", "Buyer")
+	pastProtection(w)
 	buyer.Gold = 10_000_000
 	if err := w.SetMarketListing(a, "Tank", 100, 50); err != nil {
 		t.Fatalf("A lists: %v", err)
@@ -135,6 +140,7 @@ func TestAIListsNoMilitaryWhenTheShopIsClosed(t *testing.T) {
 		cfg.BuyMilitary = mode
 		w := NewWorldSeed(cfg, 1)
 		w.AddAIEmpires(1)
+		pastProtection(w)
 		e := w.AIEmpires()[0]
 		e.Jets, e.Carriers = 50_000, 0 // every jet is beyond carrier lift
 		e.Food = 10_000_000            // and food well past the buffer
@@ -158,6 +164,7 @@ func TestAIStillListsFoodWhenTheShopIsClosed(t *testing.T) {
 	cfg.BuyMilitary = BuyNo
 	w := NewWorldSeed(cfg, 1)
 	w.AddAIEmpires(1)
+	pastProtection(w)
 	e := w.AIEmpires()[0]
 	e.Food = 10_000_000
 	w.aiListSurplus(e)

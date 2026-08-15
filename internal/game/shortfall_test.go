@@ -82,6 +82,7 @@ func TestStarvationSplitsSupportAndMorale(t *testing.T) {
 func TestCivilWarDestroysAShareOfEverything(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("me", "Mine")
+	pastProtection(w)
 	e.Regions = RegionMix{Coastal: 100, Agricultural: 100}
 	e.syncLand()
 	e.Support = 80

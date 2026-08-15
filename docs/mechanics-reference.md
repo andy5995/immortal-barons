@@ -3001,7 +3001,15 @@ Market`. Any empire can list goods for other empires to buy:
   This was a by-product of the commission test and it **confirms IB's existing
   formula** (`Bank x InterestRate / (1000 x TurnsPerDay)`, `processEconomy`),
   which until now rested on the config help text alone.
-- **Protection-gated:** a realm under new-realm protection cannot use the market.
+- **Protection-gated:** a realm under new-realm protection cannot trade at all.
+  BRE's own reset help defines the setting as the turns for which a new empire
+  "is unable to attack, trade, and be attacked", and its changelog adds that
+  trade deals cannot be received under protection. IB refuses every path that
+  moves goods between realms: listing on or buying from the Trading Market
+  (`SetMarketListing`, `BuyFromMarket`), trade deals in both directions
+  (`SendTradeDeal` checks the sender and the target), and interplanetary bids
+  (`SendTradeBid`). Implemented 2026-08-15; this entry had stated the rule while
+  only attacks were actually gated.
 - **Escrowed goods are safe from attacks, but NOT from pirates.** The community
   guide's "park military to evade pirates" is wrong about pirates, and IB now
   follows the original: five of the sixteen faces of the raid's category ladder

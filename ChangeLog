@@ -1,4 +1,6 @@
 (in-progress:)
+  * A realm under new realm protection can no longer trade. The Trading Market,
+    trade deals and interplanetary bids all refuse it, as attacks already did
   * -gen-board-key prints the key alone on its line. It used to print the board
     name in front of it, and a roster entry pasted whole left that board's
     packets unchecked instead of reporting an error

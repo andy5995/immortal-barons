@@ -7,6 +7,7 @@ import "testing"
 func TestMarketEscrowConserves(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("alice", "Alethia")
+	pastProtection(w)
 	e.Troopers = 100
 
 	if err := w.SetMarketListing(e, "Trooper", 40, 500); err != nil {
@@ -47,6 +48,7 @@ func TestMarketEscrowConserves(t *testing.T) {
 func TestMarketListedGoodsStillCostMaintenance(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("alice", "Alethia")
+	pastProtection(w)
 	e.Troopers = 100
 	before := w.ForcesDue(e)
 	if err := w.SetMarketListing(e, "Trooper", 40, 500); err != nil {
@@ -64,6 +66,7 @@ func TestMarketListedFoodSpoilsLikeFoodInHand(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("alice", "Alethia")
 	b := w.AddHuman("bob", "Bobland")
+	pastProtection(w)
 	a.Food, b.Food = 5000, 5000
 	if err := w.SetMarketListing(b, "Food", 2000, 10); err != nil {
 		t.Fatalf("list: %v", err)
@@ -81,6 +84,7 @@ func TestMarketListedFoodSpoilsLikeFoodInHand(t *testing.T) {
 func TestMarketListingClamps(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("alice", "Alethia")
+	pastProtection(w)
 	e.Jets = 5
 	if err := w.SetMarketListing(e, "Jet", 999, 100); err != nil {
 		t.Fatalf("list: %v", err)
@@ -96,6 +100,7 @@ func TestMarketBuyAndSettle(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	seller := w.AddHuman("alice", "Alethia")
 	buyer := w.AddHuman("bob", "Bobland")
+	pastProtection(w)
 	seller.Tanks = 20
 	buyer.Gold = 100000
 	buyer.Tanks = 0
@@ -134,6 +139,7 @@ func TestMarketBuyGuards(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("alice", "Alethia")
 	b := w.AddHuman("bob", "Bobland")
+	pastProtection(w)
 	a.Carriers = 10
 	if err := w.SetMarketListing(a, "Carrier", 10, 1000); err != nil {
 		t.Fatalf("list: %v", err)

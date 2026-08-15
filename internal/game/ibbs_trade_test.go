@@ -14,12 +14,14 @@ func twoTradingBoards(t *testing.T, qty, price int) (buyerW *World, buyer *Empir
 	buyerW = NewWorldSeed(bc, 1)
 	buyer = buyerW.AddHuman("buyer", "Ironhold")
 	buyer.Gold = 10_000_000
+	buyer.Protection = 0 // a realm still under New Realm Protection cannot trade
 	buyerW.SetPlanetRelationWith("Bravo", PlanetAllied)
 
 	sc := DefaultConfig()
 	sc.IBBS, sc.BoardID = true, "Bravo"
 	sellerW = NewWorldSeed(sc, 2)
 	seller = sellerW.AddHuman("seller", "Redlands")
+	seller.Protection = 0
 	seller.Tanks = qty
 	if err := sellerW.SetMarketListing(seller, "Tank", qty, price); err != nil {
 		t.Fatalf("list: %v", err)

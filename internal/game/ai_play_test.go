@@ -470,7 +470,7 @@ func TestAIBuysBelowShopPrice(t *testing.T) {
 	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 	seller := w.AddHuman("seller", "Sellville")
-	seller.Troopers = 5000
+	seller.Protection, seller.Troopers = 0, 5000
 	ai := w.AddAIEmpires(1)
 	_ = ai
 	bot := w.Empires[len(w.Empires)-1]

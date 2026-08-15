@@ -74,6 +74,9 @@ func TradeBidCost(qty, price int) int64 { return int64(qty) * int64(price) }
 // The bid is only offered to a planet the Coordinator has marked Allied — this
 // is a favour between allies, not an open exchange.
 func (w *World) SendTradeBid(e *Empire, targetBoard, seller, good string, qty, price int) (int, error) {
+	if e.Protection > 0 {
+		return 0, ErrInProtection
+	}
 	if !w.Config.IPTrading {
 		return 0, ErrIPTradingOff
 	}

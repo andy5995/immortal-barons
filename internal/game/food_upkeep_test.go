@@ -76,6 +76,7 @@ func TestForcesFoodSmallAirWingIsInvisible(t *testing.T) {
 func TestForcesFoodCountsMarketEscrow(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	e := w.AddHuman("feeder", "Feedoria")
+	pastProtection(w)
 	e.Troopers, e.Tanks = 20000, 20000
 	if got := e.ForcesFoodUpkeep(); got != 102 {
 		t.Fatalf("held army should eat 102 food, got %d", got)

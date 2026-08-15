@@ -9,6 +9,7 @@ func TestSendTradeDealChargesAndAcceptTransfersBaskets(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
 	from.Tanks, from.Carriers, from.Gold = 500, 1, 300_000
 	to.Gold, to.Tanks = 100_000, 0
 
@@ -47,6 +48,7 @@ func TestSendTradeDealNeedsCarrier(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
 	from.Tanks, from.Carriers, from.Gold = 500, 0, 1_000_000
 
 	if err := w.SendTradeDeal(from, to, TradeBasket{Tanks: 100}, TradeBasket{}, 2); err != ErrTradeNeedsCarrier {
@@ -62,6 +64,7 @@ func TestSendTradeDealNeedsFee(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
 	from.Tanks, from.Carriers, from.Gold = 500, 1, 100 // can't cover a 200,000 fee
 
 	if err := w.SendTradeDeal(from, to, TradeBasket{Tanks: 100}, TradeBasket{}, 2); err != ErrCantAfford {
@@ -78,6 +81,7 @@ func TestDeclineTradeDealReturnsEscrow(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
 	from.Tanks, from.Carriers, from.Gold = 500, 1, 300_000
 	toGoldBefore := to.Gold
 
@@ -104,6 +108,7 @@ func TestAcceptTradeDealFailsWhenRecipientCantPay(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
 	from.Tanks, from.Carriers, from.Gold = 500, 1, 300_000
 	to.Gold = 100 // can't cover a 5,000 demand
 
@@ -121,6 +126,7 @@ func TestSendTradeDealRejectsEmpty(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
 	from.Carriers, from.Gold = 1, 1_000_000
 	if err := w.SendTradeDeal(from, to, TradeBasket{}, TradeBasket{}, 2); err == nil {
 		t.Error("an empty trade deal should be rejected")
@@ -132,6 +138,7 @@ func TestAcceptTradeDealClampsGoldToMoneyCap(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
 	from.Carriers, from.Gold = 1, w.MoneyCap()
 	to.Gold = w.MoneyCap() - 50
 
@@ -152,6 +159,7 @@ func TestProtectiveTradeMakesDealsCheaper(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
 	from.Carriers, from.Gold = 2, 1_000_000
 
 	if got := w.TradeDealCostBetween(from, to, 2); got != 200_000 {

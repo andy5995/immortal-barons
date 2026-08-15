@@ -146,6 +146,12 @@ func (w *World) TradeDealCostBetween(from, to *Empire, days int) int64 {
 // turn). Fails if both baskets are empty, `from` lacks the offered goods, lacks a
 // transport carrier, or can't afford the fee.
 func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days int) error {
+	if from.Protection > 0 {
+		return ErrInProtection
+	}
+	if to.Protection > 0 {
+		return ErrTheyProtected
+	}
 	if send.IsEmpty() && demand.IsEmpty() {
 		return fmt.Errorf("A trade deal must offer or request something.")
 	}

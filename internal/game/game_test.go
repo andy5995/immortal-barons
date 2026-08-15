@@ -11,6 +11,18 @@ func testWorld() *World {
 	return NewWorldSeed(cfg, 1)
 }
 
+// pastProtection clears New Realm Protection on every realm in w. Every trade
+// path refuses a protected realm — BRE defines the setting as the turns for
+// which a new empire "is unable to attack, trade, and be attacked" — so a
+// fixture that exercises trading has to start past it, the same way the combat
+// fixtures already zero it before attacking.
+func pastProtection(w *World) *World {
+	for _, e := range w.Empires {
+		e.Protection = 0
+	}
+	return w
+}
+
 func TestNewWorldSeedsAIOnly(t *testing.T) {
 	w := testWorld()
 	if len(w.Empires) != 2 {
