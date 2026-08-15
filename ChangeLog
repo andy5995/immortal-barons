@@ -3,6 +3,7 @@
   * config-during-reset: a new Money Cap setting sets how much gold a realm may
     hold, on hand and again in the bank — two billion (the original's own limit)
     up to 999 billion
+  * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
   * A regular attack is fought out round by round: the side that breaks off
     loses the share of its forces it will accept, and the winner loses only what
     the strength ratio cost it, so a rout is cheap and an even fight is not
@@ -75,12 +76,6 @@
   * Waste is a region type of its own, listed on the region tables; it is
     decontaminated during maintenance and its owner shares the recovered land
     out across region types
-  * SDI strength is its funding spread over the realm's land, so taking regions
-    thins the shield that covers them
-  * SDI answers only strikes from another planet: it blunts an arriving realm's
-    jets and bombers and intercepts incoming missiles, leaving a neighbour's
-    missiles and bombing runs and the Clingy Annihilator alone
-  * A group attack is not blunted by its target's SDI, as in the original
   * Send Message addresses a list of realms: a letter marks or unmarks one, "Z"
     marks them all, and Enter closes the list and opens the editor
   * Diplomacy takes the same list: a treaty is offered to, and war declared on,
@@ -118,7 +113,6 @@
     is on the System menu as well as the opening menu
   * Combat reports, pirate raid results, planet news and "since your last play"
     events wrap between words; the terminal was splitting figures in half
-  * "-reset" honours "-no-ansi", "-ascii" and "-cp437"
   * A bank at the Money Cap pays its interest into gold in hand instead of
     losing it; destroyed gold is reported in the event log
   * One investment still locks away at most two billion; deposits and
@@ -136,19 +130,6 @@
     the bank
   * Figures of a billion or more are shown as "1.0000B" rather than in full
   * Amounts may be typed with a "b" suffix, as they already could with "k"/"m"
-  * The league Coordinator now also sets the money cap, unlimited food and
-    idle-realm removal for every board; each was left to the local sysop, so two
-    planets in one season could play by different rules
-  * config-during-reset: added the Local Attacks (enabled), Local Attack Scoring
-    (disabled) and Dupe Checking (enabled) league settings, editable in both
-    Configuration Editors, shown on Game Setup and broadcast to the league
-  * With Local Attacks disabled, barons on one board cannot attack each other and
-    the Attack menu keeps only the pirate and alliance entries
-  * With Local Attack Scoring disabled, a battle between barons on one board
-    moves neither side's score
-  * With Dupe Checking enabled, a caller found playing on another board in the
-    league is locked out until one of the realms goes. Scores packets carry a
-    hash of the handle for this, never the handle itself
   * The Bombing Ops, Missile Ops and Clingy Annihilator settings take their
     operations off the Attack, Covert and InterPlanetary menus when disabled,
     hotkeys included
@@ -219,6 +200,12 @@
   * The Planetary Treaties chart matches the original's layout and colors
   * Implemented the SDI Program: its funding allowance, its upkeep, its screen
     and the strength its funding buys all match the original
+  * SDI strength is its funding spread over the realm's land, so taking regions
+    thins the shield that covers them
+  * SDI answers only strikes from another planet: it blunts an arriving realm's
+    jets and bombers and intercepts incoming missiles, leaving a neighbour's
+    missiles and bombing runs and the Clingy Annihilator alone
+  * A group attack is not blunted by its target's SDI, as in the original
   * Clingy Annihilator Ops answers to 9 on the InterPlanetary Operations menu,
     and the interplanetary Special Operations menu is numbered, both as in the
     original
@@ -232,6 +219,19 @@
     "-reset" a stand-alone one, which is no longer asked the league settings;
     adding "-board-id" sets a member board up in one command, without the
     settings editor
+  * The league Coordinator now also sets the money cap, unlimited food and
+    idle-realm removal for every board; each was left to the local sysop, so two
+    planets in one season could play by different rules
+  * config-during-reset: added the Local Attacks (enabled), Local Attack Scoring
+    (disabled) and Dupe Checking (enabled) league settings, editable in both
+    Configuration Editors, shown on Game Setup and broadcast to the league
+  * With Local Attacks disabled, barons on one board cannot attack each other and
+    the Attack menu keeps only the pirate and alliance entries
+  * With Local Attack Scoring disabled, a battle between barons on one board
+    moves neither side's score
+  * With Dupe Checking enabled, a caller found playing on another board in the
+    league is locked out until one of the realms goes. Scores packets carry a
+    hash of the handle for this, never the handle itself
   * The Configuration Editor sets the inter-BBS inbound and outbound
     directories, which now sit inside the data directory; a reset creates them
     and warns about packets left from the cleared game
