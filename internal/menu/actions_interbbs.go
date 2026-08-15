@@ -67,6 +67,31 @@ func interbbsScores(s session.Session, w *ctx) Result {
 // another planet (chosen from imported scores). Barons commit troopers (BRE's
 // model — real forces, not gold); the pooled troopers become the strike's
 // offense on departure.
+// askOneOrAll asks BRE's whole-planet question and takes one key for it. The
+// capture (docs/dev/bre-screens.md, "Create Group Attack") shows the "A" answer
+// echoing "Entire Planet"; the "O" wording is IB's, since no capture has it. The
+// prompt offers no default, so it waits for one of the two letters — a player
+// who arrives here by mistake leaves BRE's own way, by sending no forces.
+// Reports false, false when the session ends under it.
+func askOneOrAll(s session.Session) (all, answered bool) {
+	fmt.Fprintf(s, "\n%s ", tr(s, "Do you wish to target (O)ne Dominion or (A)ll?"))
+	for {
+		r, err := readKey(s)
+		if err != nil {
+			return false, false
+		}
+		drainInput(s) // drop a trailing Enter typed with the single-key answer
+		switch r {
+		case 'a', 'A':
+			fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, tr(s, "Entire Planet"), ansi.Reset)
+			return true, true
+		case 'o', 'O':
+			fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, tr(s, "One Dominion"), ansi.Reset)
+			return false, true
+		}
+	}
+}
+
 func createGroupAttack(s session.Session, w *ctx) Result {
 	if blockedByProtection(s, w) {
 		return Stay
@@ -91,21 +116,23 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 			rb = &w.RemoteBoards[i]
 		}
 	}
-	names, hidden := attackableBarons(rb.Scores, hostile)
-	noteProtectedHidden(s, hidden)
-	// The whole-planet choice stays even when every realm we know of is
-	// protected: it names no target, and the far board picks its strongest realm
-	// when the strike lands, by which time protection may have lapsed or a realm
-	// we have never heard of may be the strongest there.
-	choices := append([]string{tr(s, "(the whole planet)")}, names...)
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
-	pick := pickFromList(s, "Baron", choices)
-	if pick == "" {
+	// Whole planet or one baron is asked BEFORE the roster, and answered with one
+	// key, as BRE does (#125). Taking it first is the point: a planet-wide strike
+	// names no target, so it never fetches or draws the baron list at all.
+	all, answered := askOneOrAll(s)
+	if !answered {
 		return Stay
 	}
-	target := pick
-	if pick == choices[0] {
-		target = "" // whole planet
+	pick := tr(s, "the whole planet")
+	var target string
+	if !all {
+		names, hidden := attackableBarons(rb.Scores, hostile)
+		noteProtectedHidden(s, hidden)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
+		if pick = pickFromList(s, "Baron", names); pick == "" {
+			return Stay
+		}
+		target = pick
 	}
 	// BRE asks for the wait in HOURS, floor 12 and ceiling 120, before the force
 	// prompts (docs/dev/bre-screens.md, "Create Group Attack"). The window is what

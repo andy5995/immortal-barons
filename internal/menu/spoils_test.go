@@ -87,9 +87,9 @@ func TestCreateGroupAttackAsksHours(t *testing.T) {
 		p.Protection = 0
 		p.Troopers = 10_000
 	})
-	// planet 1, baron 2 (Redlands, past "the whole planet"), 3 hours, 500 troopers,
-	// then zero for the other three types.
-	f := &fakeSession{keys: []rune("1\r2\r3\r500\r\r\r\r")}
+	// planet 1, "O" for one baron, baron 1 (Redlands), 3 hours, 500 troopers, then
+	// zero for the other three types.
+	f := &fakeSession{keys: []rune("1\ro1\r3\r500\r\r\r\r")}
 	createGroupAttack(f, w)
 
 	out := f.out.String()
@@ -109,5 +109,46 @@ func TestCreateGroupAttackAsksHours(t *testing.T) {
 	}
 	if wait < float64(game.GroupAttackHoursMin)-1 {
 		t.Errorf("a 3-hour delay was honoured (%.1fh); the floor is %d", wait, game.GroupAttackHoursMin)
+	}
+}
+
+// Whole planet or one baron is one keypress, asked before the roster: answering
+// "A" must never draw the baron list (#125).
+func TestGroupAttackWholePlanetSkipsTheBaronList(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.World.Config.BoardID = "Alpha"
+		w.World.ImportBoard(game.RemoteBoard{
+			BoardID: "Mars",
+			Scores:  []game.RemoteScore{{Empire: "Redlands"}},
+		})
+		p := w.Player()
+		p.Protection = 0
+		p.Troopers = 10_000
+	})
+	// planet 1, "A" for the whole planet, 12 hours, 500 troopers, then zeroes.
+	f := &fakeSession{keys: []rune("1\ra12\r500\r\r\r\r")}
+	createGroupAttack(f, w)
+
+	out := f.out.String()
+	if !strings.Contains(out, "Entire Planet") {
+		t.Fatalf(`"A" should echo "Entire Planet"; output was: %q`, out)
+	}
+	if strings.Contains(out, "Redlands") || strings.Contains(out, "Target which baron?") {
+		t.Error("a whole-planet strike drew the baron roster it never needed")
+	}
+	var target string
+	var count int
+	w.With(func() {
+		count = len(w.World.GroupAttacks)
+		if count == 1 {
+			target = w.World.GroupAttacks[0].TargetEmpire
+		}
+	})
+	if count != 1 {
+		t.Fatalf("group attacks = %d, want 1", count)
+	}
+	if target != "" {
+		t.Errorf("TargetEmpire = %q, want it empty for the whole planet", target)
 	}
 }
