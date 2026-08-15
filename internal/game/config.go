@@ -216,8 +216,10 @@ type Config struct {
 	DupeChecking       bool // a baron playing on another board in the league is locked out here
 
 	// Pirates is IB's own switch, not one of BRE's: the original always has its
-	// nine bands. It stays on the board rather than in the league ruleset,
-	// because a raid touches only the realm it robs and never crosses a planet.
+	// nine bands. A raid never crosses a planet, but the setting is still part of
+	// the league ruleset the Coordinator broadcasts — a league where some planets
+	// are robbed and others are not is not a fair one. It is NOT an inter-BBS
+	// option, so it carries no star and a stand-alone board is asked it too.
 	Pirates bool // the pirate bands exist, raid, and can be raided
 
 	BombingOps            bool              // the four bombing ops are offered (Bomb Enemy Targets, Special Operations)

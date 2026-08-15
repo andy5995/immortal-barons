@@ -152,6 +152,7 @@ type LeagueConfig struct {
 	LocalAttacks          bool
 	LocalAttackScoring    bool
 	DupeChecking          bool
+	Pirates               bool
 	MaxPlayers            int
 	BuyMilitary           BuyMode
 	MaintCosts            Level
@@ -164,9 +165,11 @@ type LeagueConfig struct {
 	SlappenheimerHandling SlappenheimerMode
 }
 
-// leagueRuleset extracts the league-wide rules (the fields marked * in the
-// Configuration Editor) from this board's config, for the coordinator to
-// broadcast.
+// leagueRuleset extracts the league-wide rules from this board's config, for the
+// coordinator to broadcast. It is a WIDER set than the fields the Configuration
+// Editor stars: the star means "an inter-BBS option", which a rule like the tax
+// cap or the pirates is not, though both still have to be the same on every
+// board for the game to be fair.
 func (c Config) leagueRuleset() *LeagueConfig {
 	return &LeagueConfig{
 		GameStartDate:         c.GameStartDate,
@@ -193,6 +196,7 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		LocalAttacks:          c.LocalAttacks,
 		LocalAttackScoring:    c.LocalAttackScoring,
 		DupeChecking:          c.DupeChecking,
+		Pirates:               c.Pirates,
 		MaxPlayers:            c.MaxPlayers,
 		BuyMilitary:           c.BuyMilitary,
 		MaintCosts:            c.MaintCosts,
@@ -233,6 +237,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.LocalAttacks = lc.LocalAttacks
 	c.LocalAttackScoring = lc.LocalAttackScoring
 	c.DupeChecking = lc.DupeChecking
+	c.Pirates = lc.Pirates
 	c.MaxPlayers = lc.MaxPlayers
 	c.BuyMilitary = lc.BuyMilitary
 	c.MaintCosts = lc.MaintCosts

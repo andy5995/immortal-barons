@@ -129,7 +129,9 @@
   * Amounts may be typed with a "b" suffix, as they already could with "k"/"m"
   * config-during-reset: a new Pirates setting (enabled) turns the nine bands
     off — nobody is raided and Attack Pirates leaves the menu. The original has
-    no such switch; this one stays on the board rather than in the league rules
+    no such switch. It is broadcast to the league, so a season cannot have some
+    planets robbed and others not, but it is not an inter-BBS option and a
+    stand-alone board is asked it too
   * config-during-reset: added the Local Attacks (enabled), Local Attack Scoring
     (disabled) and Dupe Checking (enabled) league settings, editable in both
     Configuration Editors, shown on Game Setup and broadcast to the league
