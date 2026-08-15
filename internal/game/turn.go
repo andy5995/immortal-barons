@@ -495,6 +495,14 @@ func (w *World) aiListSurplus(e *Empire) {
 		if surplus <= 0 || shop <= 0 {
 			return
 		}
+		// While the shop sells the unit freely, listing it under the shop price
+		// arms nobody — it only offers a discount on something a rival could
+		// already buy. Where the sysop has closed the shop, the market is the
+		// planet's only military supply, and an AI stocking it would be handing
+		// every enemy the units the setting was meant to withhold.
+		if good != "Food" && w.Config.BuyMilitary != BuyYes {
+			return
+		}
 		// Do NOT stack onto an existing listing: the surplus is recomputed every
 		// turn, so adding to it each time grows the escrow without bound (a sim ran
 		// one baron to 600k jets listed). One offer at a time, replaced only once

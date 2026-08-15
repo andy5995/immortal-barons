@@ -16,9 +16,14 @@
     further quarter, whichever way it was going
   * Computer-run realms keep buying land instead of stopping for good once their
     upkeep catches up with their income; land and army now draw on one surplus
-  * Each computer-run realm holds its own Trading Market listings and sale gold.
-    They shared one position per good, so a baron's listing destroyed goods
-    another had escrowed and one of them collected everyone's sale gold
+  * A computer-run realm lists no military on the Trading Market where the sysop
+    has set Buy Military to anything but Yes: with the shop closed the market is
+    the planet's only supply, and stocking it would hand every enemy the units
+    the setting withholds
+  * Computer-run realms no longer share one Trading Market identity. Every one
+    of them traded under the same empty handle, so the whole pool had a single
+    listing per good: each new listing wiped out the goods the last had
+    escrowed, and one baron was paid for all of their sales
   * A realm removed from the game takes its listings, unpaid sale gold, treaties,
     Enemy standings and sent proposals with it, so the next realm of that name
     starts clean
