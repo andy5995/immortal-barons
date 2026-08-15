@@ -300,6 +300,13 @@ Menu: `35` magenta rule + `95` bright-magenta `[` + `97` `Advisors` + `95` `]` +
 Each advisor prints prose (no inner border); key numbers are highlighted. The
 `─»>Paused<«─` bar is `36` cyan with `96` bright-cyan `Paused`.
 
+**Deliberate divergence — IB gives all four advisors a named greeting, in `96`
+bright-cyan.** The original names only the MILITARY one: `", your military
+advisor."` is the single greeting string in `BRE.OVR`, and the capture shows no
+opening line for the other three and no colour for advisor prose. IB coins a
+name and a line of character for each of the four, which Andy approved on
+2026-08-15. Do not "correct" this back.
+
 ### (1) Civilian — food outlook
 
 Numbers `97` bright-white; a deficit figure in `93` bright-yellow (warning).

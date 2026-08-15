@@ -143,6 +143,10 @@ type advisorLine struct {
 	Text string
 	Hi   string // figure highlight color for this line
 	Emph string // color for {braced} key terms ("" = none)
+	// Note marks the Technology advisor's closing remark, which BRE sets apart
+	// from the report above it: a blank line, a bright-cyan "NOTE:" and a cyan
+	// body indented to hang under the label (docs/dev/bre-screens.md).
+	Note bool
 }
 
 // hiTerms replaces each {braced} run in s with emph-colored text, returning to
@@ -201,8 +205,9 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		emph = ansi.FgBrightWhite
 	}
 	var out []advisorLine
-	add := func(text string) { out = append(out, advisorLine{text, fig, emph}) }
-	warn := func(text string) { out = append(out, advisorLine{text, ansi.FgBrightYellow, emph}) }
+	add := func(text string) { out = append(out, advisorLine{Text: text, Hi: fig, Emph: emph}) }
+	warn := func(text string) { out = append(out, advisorLine{Text: text, Hi: ansi.FgBrightYellow, Emph: emph}) }
+	note := func(text string) { out = append(out, advisorLine{Text: text, Hi: fig, Note: true}) }
 	switch dom {
 	case advisorCivilian:
 		add(fmt.Sprintf(tr(s, "Our people number %s, and their support stands at %d%%."), count(p.People), p.Support))
@@ -310,9 +315,10 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 			add(fmt.Sprintf(tr(s, "{Food decay} is at %d%% of standard levels."), decay))
 			if p.Regions.Technology == 0 {
 				add(tr(s, "We hold no Technology regions, so our research has halted — but what we have already learned is not lost."))
-			} else {
-				add(tr(s, "Technology is relative to the size of the empire: a larger realm needs more of it to keep the same efficiency."))
 			}
+			// BRE closes this advisor with a set-apart NOTE saying the same
+			// thing, so it is the last line whether or not research has halted.
+			note(tr(s, "Technology levels are relative to the number of regions in the empire. A larger realm needs more advanced technology to hold the same efficiency as a smaller one."))
 		}
 	}
 	return out
@@ -338,6 +344,19 @@ func renderAdvisor(s session.Session, w *ctx, d advisorDomain) {
 		// indent (wrap the plain text, then color), so a long sentence breaks at
 		// spaces instead of mid-word at col 80. A figure returns to the off-white
 		// base after its highlight, not the terminal default.
+		if line.Note {
+			// BRE's own shape: a blank line, "NOTE:" in bright cyan, and the body
+			// in cyan hanging under the label at six columns.
+			fmt.Fprint(s, "\n")
+			for i, wl := range strings.Split(help.Wrap(line.Text, 66), "\n") {
+				if i == 0 {
+					fmt.Fprintf(s, "%sNOTE:%s %s%s%s\n", ansi.FgBrightCyan, ansi.Reset, ansi.FgCyan, wl, ansi.Reset)
+					continue
+				}
+				fmt.Fprintf(s, "      %s%s%s\n", ansi.FgCyan, wl, ansi.Reset)
+			}
+			continue
+		}
 		for _, wl := range strings.Split(help.Wrap(line.Text, 76), "\n") {
 			fmt.Fprintf(s, "  %s%s%s\n", base, hiNumsReset(hiTerms(wl, line.Emph, base), line.Hi, base), ansi.Reset)
 		}
@@ -394,7 +413,7 @@ func about(s session.Session, w *ctx) Result {
 	// Body prose is off-white so the name/version headline above stays the only
 	// bright thing on the panel, per docs/dev/bre-screens.md. Wrap to the rule's
 	// width less the 2-space indent.
-	for _, wl := range strings.Split(help.Wrap(tr(s, "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and later maintained by John Dailey. No original BRE code, text, or art is used."), len([]rune(rule))-2), "\n") {
+	for _, wl := range strings.Split(help.Wrap(tr(s, "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and later maintained by John Dailey."), len([]rune(rule))-2), "\n") {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgWhite, wl, ansi.Reset)
 	}
 	fmt.Fprint(s, "\n")
