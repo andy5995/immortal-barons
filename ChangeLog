@@ -146,8 +146,9 @@
     Trading Market of any planet the Coordinator has marked Allied
   * A planet's market travels with its scores, so an ally sees what is offered
   * A bid holds the gold when it is sent. The far planet fills it only if the
-    listing is still there at the same price, pays its seller, and sends the
-    goods back; otherwise the gold comes home, with the reason
+    listing is still there at the same price and the alliance still stands when
+    the bid lands, pays its seller, and sends the goods back; otherwise the gold
+    comes home, with the reason
   * A listing that shrank fills as far as it goes and refunds the rest
   * A bid whose answer never arrives is given up on and refunded, on the same
     timer that brings lost forces home

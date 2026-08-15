@@ -210,3 +210,56 @@ func TestInterplanetaryBidRefusedWhenTheLeagueTurnsItOff(t *testing.T) {
 		t.Error("a refused bid was recorded in flight")
 	}
 }
+
+// The standing is judged when the bid LANDS, not when it was sent. An alliance
+// broken while the packet was in transit closes the market, and the gold goes
+// home untouched — the same arrival-time rule an incoming strike's protection
+// check follows.
+func TestInterplanetaryBidRefusedWhenTheAllianceEndsInTransit(t *testing.T) {
+	bw, buyer, sw, _ := twoTradingBoards(t, 100, 500)
+	goldBefore := buyer.Gold
+	if _, err := bw.SendTradeBid(buyer, "Bravo", "Redlands", "Tank", 40, 500); err != nil {
+		t.Fatalf("SendTradeBid: %v", err)
+	}
+	// Bravo falls out with Alpha while the bid is on its way.
+	sw.SetPlanetRelationWith("Alpha", PlanetEnemy)
+
+	reply := sw.ApplyPacket(bw.Outbox[len(bw.Outbox)-1])
+	if left := sw.MarketForSale("Redlands", "Tank"); left != 100 {
+		t.Errorf("the listing lost %d tanks to a bid that should have been refused", 100-left)
+	}
+	if sw.MarketProceeds["Redlands"] != 0 {
+		t.Error("the seller was paid by a planet it is no longer allied with")
+	}
+	bw.ApplyPacket(reply)
+	if buyer.Tanks != 0 {
+		t.Errorf("the buyer received %d tanks from a closed market", buyer.Tanks)
+	}
+	if buyer.Gold != goldBefore {
+		t.Errorf("gold = %d, want the full %d back", buyer.Gold, goldBefore)
+	}
+	var ev []string
+	for _, e := range buyer.Events {
+		ev = append(ev, e.Text)
+	}
+	if joined := strings.Join(ev, "\n"); !strings.Contains(joined, "alliance") {
+		t.Errorf("the buyer should be told the alliance ended, got:\n%s", joined)
+	}
+}
+
+// The far board's own switch is judged at arrival too: a league that turns
+// trading off between the bid and its landing refuses it and refunds.
+func TestInterplanetaryBidRefusedWhenTheFarBoardStopsTrading(t *testing.T) {
+	bw, buyer, sw, _ := twoTradingBoards(t, 100, 500)
+	goldBefore := buyer.Gold
+	if _, err := bw.SendTradeBid(buyer, "Bravo", "Redlands", "Tank", 40, 500); err != nil {
+		t.Fatalf("SendTradeBid: %v", err)
+	}
+	sw.Config.IPTrading = false
+
+	bw.ApplyPacket(sw.ApplyPacket(bw.Outbox[len(bw.Outbox)-1]))
+	if buyer.Tanks != 0 || buyer.Gold != goldBefore {
+		t.Errorf("tanks = %d, gold = %d; want nothing bought and %d refunded",
+			buyer.Tanks, buyer.Gold, goldBefore)
+	}
+}

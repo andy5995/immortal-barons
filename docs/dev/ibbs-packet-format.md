@@ -108,6 +108,10 @@ IPTradeBid    { "ID": 12, "FromBoard": "AlphaBBS", "FromOwner": "khan",
                 // A BID, not a purchase. The buyer's gold left their hands when
                 // this was queued; the receiving board fills it only if Seller
                 // still offers Good at exactly Price, and refuses otherwise.
+                // The ALLIANCE is judged on arrival too, not as the buyer saw it
+                // — one broken while the packet was in transit closes the market
+                // and the gold goes home, the same arrival-time rule an incoming
+                // strike's New Realm Protection check follows.
 IPTradeFill   { "ID": 12, "Filled": true, "Good": "Tank", "Qty": 40,
                 "Gold": 0, "Reason": "" }
                 // The answer. Gold is the refund for whatever did not fill (the

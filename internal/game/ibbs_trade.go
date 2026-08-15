@@ -115,6 +115,15 @@ func (w *World) resolveRemoteTradeBid(b IPTradeBid) IPTradeFill {
 	seller := w.FindByName(b.Seller)
 	have := w.MarketForSale(b.Seller, b.Good)
 	switch {
+	// The standing is judged HERE and NOW, not as the buyer saw it when they
+	// bid. An alliance broken while the bid was in transit closes this market to
+	// them, the same way New Realm Protection is checked on an arriving strike
+	// rather than at launch — a packet crossing takes days, and what a board owes
+	// a stranger is decided by where things stand when the order lands.
+	case !w.Config.IPTrading:
+		fill.Reason = fmt.Sprintf("%s no longer trades with other planets.", w.Config.BoardID)
+	case w.PlanetRelationWith(b.FromBoard) != PlanetAllied:
+		fill.Reason = fmt.Sprintf("Our alliance with %s has ended; the market is closed to you.", b.FromBoard)
 	case seller == nil || !seller.Alive:
 		fill.Reason = fmt.Sprintf("%s is no longer on our planet.", b.Seller)
 	case have <= 0:
