@@ -634,6 +634,14 @@ type World struct {
 	RemoteBoards  []RemoteBoard
 	Pirates       []PirateFaction
 
+	// LastPacketFrom records the game day a packet from each board was PROCESSED
+	// here, and BoardVersion the game version that board last said it was
+	// running. Neither is gameplay: they are what the sysop reports need
+	// (LastPacketReport, BBSInfoReport) to answer "who has gone quiet" and "who
+	// is too old to read our packets", and nothing else reads them.
+	LastPacketFrom map[string]string `json:",omitempty"`
+	BoardVersion   map[string]string `json:",omitempty"`
+
 	// TravelTimes is the average packet round trip to each other board, in days,
 	// and LastTravelPing the game day the probes for it last went out — see
 	// ibbs_travel.go.

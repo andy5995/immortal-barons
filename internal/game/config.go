@@ -283,6 +283,12 @@ type Config struct {
 	LocalAttackScoring bool // ... and winning one moves score
 	DupeChecking       bool // a baron playing on another board in the league is locked out here
 
+	// MinBoardVersion is the game version the League Coordinator requires of every
+	// board, as "0.0.5" ("" = no requirement). A board below it has its packets
+	// refused, which is the only way a Coordinator can insist on a version once
+	// the packet format has moved on. See World.BoardMeetsMinVersion.
+	MinBoardVersion string
+
 	// IPTrading lets a baron bid on an ALLIED planet's Trading Market (#47). IB's
 	// own, and inter-BBS by nature — off a league there is no other planet — so
 	// it is a starred setting only -ibbs-reset asks, and it rides the league
@@ -428,6 +434,7 @@ func DefaultConfig() Config {
 		MaxTerrorOps:          25,
 		MaxBombingOps:         4,
 		LostForcesDays:        3,
+		MinBoardVersion:       "",   // no requirement until a Coordinator sets one
 		IPTrading:             true, // IB's own feature; a league that wants it off says so
 		Pirates:               true, // the original has no switch; on is what it does
 		BombingOps:            true,

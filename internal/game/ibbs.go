@@ -51,6 +51,11 @@ type Packet struct {
 	TradeBids  []IPTradeBid    `json:",omitempty"` // buy orders landing on ToBoard's market
 	TradeFills []IPTradeFill   `json:",omitempty"` // their answers coming home
 	Market     []RemoteListing `json:",omitempty"` // FromBoard's market, riding its scores
+	// Version is the game version the sender is running, for the BBSINFO report.
+	// omitempty on the same grounds as the fields above: the origin signature is
+	// taken over the marshalled packet, so a board that does not know this field
+	// must still see byte-identical bytes for every packet that omits it.
+	Version string `json:",omitempty"`
 	// Seq numbers this board's outbound packets so the far side can spot one it
 	// has already applied, and Signature authenticates the parts only the
 	// Coordinator may author (#53).
@@ -165,6 +170,7 @@ type LeagueConfig struct {
 	LocalAttacks          bool
 	LocalAttackScoring    bool
 	DupeChecking          bool
+	MinBoardVersion       string
 	IPTrading             bool
 	Pirates               bool
 	MaxPlayers            int
@@ -213,6 +219,7 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		LocalAttacks:          c.LocalAttacks,
 		LocalAttackScoring:    c.LocalAttackScoring,
 		DupeChecking:          c.DupeChecking,
+		MinBoardVersion:       c.MinBoardVersion,
 		IPTrading:             c.IPTrading,
 		Pirates:               c.Pirates,
 		MaxPlayers:            c.MaxPlayers,
@@ -261,6 +268,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.LocalAttacks = lc.LocalAttacks
 	c.LocalAttackScoring = lc.LocalAttackScoring
 	c.DupeChecking = lc.DupeChecking
+	c.MinBoardVersion = lc.MinBoardVersion
 	c.IPTrading = lc.IPTrading
 	c.Pirates = lc.Pirates
 	c.MaxPlayers = lc.MaxPlayers
@@ -840,7 +848,8 @@ func (w *World) ExportScores() {
 	}
 	w.Outbox = append(w.Outbox, Packet{
 		FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores,
-		Market: w.ExportMarket(), // so allied planets can bid on it (#47)
+		Market:  w.ExportMarket(), // so allied planets can bid on it (#47)
+		Version: Version,          // for the other boards' BBSINFO report
 	})
 }
 
@@ -1014,6 +1023,46 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	if w.SeenPacket(p) {
 		return Packet{}
 	}
+	// The Coordinator may require a version of the whole league. A board below it
+	// has its packets refused here — the only lever a Coordinator has once the
+	// packet format has moved on, since an old board cannot even verify the
+	// signature on a packet carrying fields it does not know.
+	//
+	// IB refuses only the OFFENDING board. The original is said to stop the
+	// Coordinator processing outbound traffic at all until the laggard upgrades;
+	// that is a recollection, not something read out of the binary, and holding a
+	// whole league hostage to one stale board is too destructive to copy on a
+	// maybe. Recorded in docs/mechanics-reference.md as unverified.
+	if p.FromBoard != "" && p.FromBoard != w.Config.BoardID && !w.BoardMeetsMinVersion(p.Version) {
+		ver := p.Version
+		if ver == "" {
+			ver = "an unstated version"
+		} else {
+			ver = "v" + ver
+		}
+		w.postNews(fmt.Sprintf("A packet from %s was refused: it runs %s, and this league requires v%s.",
+			p.FromBoard, ver, w.Config.MinBoardVersion))
+		return Packet{}
+	}
+	// Past every guard, so this records packets actually ACCEPTED — a forged or
+	// replayed one must not make a silent board look like it is still talking,
+	// which is the whole question LastPacketReport answers.
+	if p.FromBoard != "" && p.FromBoard != w.Config.BoardID {
+		if w.LastPacketFrom == nil {
+			w.LastPacketFrom = map[string]string{}
+		}
+		// A wall-clock stamp, not the game date: the original's own BBSINFO.LST
+		// shows MM/DD/YYYY HH:MM:SS, and the question ("has this board gone
+		// quiet?") is about real elapsed time, which a game date cannot answer on
+		// a league whose clock has stalled.
+		w.LastPacketFrom[p.FromBoard] = time.Now().Format(RecordedTimeFormat)
+		if p.Version != "" {
+			if w.BoardVersion == nil {
+				w.BoardVersion = map[string]string{}
+			}
+			w.BoardVersion[p.FromBoard] = p.Version
+		}
+	}
 	// Anything that dictates to this board has to be signed by the Coordinator.
 	// Positional trust — believing whoever names themselves node 1 — is what this
 	// replaces, because the board name in a packet is just a string a file can
@@ -1063,7 +1112,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	for _, f := range p.TradeFills {
 		w.applyTradeFill(f)
 	}
-	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate}
+	result := Packet{FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate, Version: Version}
 	// Bids landing HERE are filled or refused against this board's market now,
 	// and the answer rides the reply home.
 	for _, b := range p.TradeBids {

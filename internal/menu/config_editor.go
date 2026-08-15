@@ -348,6 +348,17 @@ func configPages(ibbs bool) []cfgPage {
 			edit: func(s session.Session, c *game.Config) {
 				c.LeagueNumber = promptSuggested(s, "League Number (1-999, 0 = unset)", c.LeagueNumber, game.MaxLeagueNumber)
 			}},
+		{n: 47, label: "Required Version",
+			value: func(c *game.Config) string {
+				if c.MinBoardVersion == "" {
+					return "any"
+				}
+				return "v" + c.MinBoardVersion
+			},
+			edit: func(s session.Session, c *game.Config) {
+				v := strings.TrimSpace(prompt(s, "Version every board must run (blank for no requirement, e.g. 0.0.5):"))
+				c.MinBoardVersion = strings.TrimPrefix(v, "v")
+			}},
 		{n: 39, label: "Inbound Dir",
 			value: func(c *game.Config) string { return c.InboundDir },
 			edit: func(s session.Session, c *game.Config) {
@@ -410,6 +421,7 @@ var ibbsOnlyFields = map[int]bool{
 	42: true, // Local Attacks
 	43: true, // Local Attack Scoring
 	46: true, // Allow IP Allies to Trade at Market — meaningless off a league
+	47: true, // Required Version — a league rule, and only the LC's to set
 	44: true, // Dupe Checking
 }
 

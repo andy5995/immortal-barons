@@ -150,6 +150,15 @@
   * Added Waste, Population, and Morale and Support help topics
 
   Inter-BBS (league play only):
+  * Added the original's three sysop reports: "-lastpacket" writes when a packet
+    from each board was last processed, "-bbsinfo" every board with the version
+    it runs and when it was last heard from, and "-playerlist" every realm on
+    every board (League Coordinator only)
+  * Packets carry the sending board's game version, so a Coordinator can see
+    which boards are too old to read the newer ones
+  * config-during-reset: the League Coordinator may require a game version of
+    every board. A board below it has its packets refused and is marked on the
+    BBSINFO report; only that board is refused, not the whole league
   * Added Trading to the InterPlanetary Operations menu: a baron may bid on the
     Trading Market of any planet the Coordinator has marked Allied
   * A planet's market travels with its scores, so an ally sees what is offered

@@ -82,6 +82,9 @@ func main() {
 	genBoardKey := flag.Bool("gen-board-key", false, i18n.T(lang, "create this board's packet-signing key, print the public half to send to the League Coordinator, then exit"))
 	leagueReset := flag.String("league-reset", "", i18n.T(lang, "start a new season across the whole league on DATE (node #1 only), then exit"))
 	leagueRoutes := flag.Bool("league-routes", false, i18n.T(lang, "print which board each planet's packets are handed to, and the directory they are written in, then exit"))
+	lastPacket := flag.Bool("lastpacket", false, i18n.T(lang, "write LASTPACKET.LST — when a packet from each other board was last processed here, then exit"))
+	bbsInfo := flag.Bool("bbsinfo", false, i18n.T(lang, "write BBSINFO.LST — every board, when it was last heard from, and the version it runs, then exit"))
+	playerList := flag.Bool("playerlist", false, i18n.T(lang, "write PLAYERLIST.LST — every realm on every board (League Coordinator only), then exit"))
 	reset := flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"))
 	boardID := flag.String("board-id", "", i18n.T(lang, "this board's name in the league, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator"))
 	inboundDir := flag.String("inbound", "", i18n.T(lang, "directory where packets from the other boards arrive, for -ibbs-reset (default \"inbound\", under the data directory)"))
@@ -121,6 +124,7 @@ func main() {
 	// stray word alongside one is a mistake — flag it instead of silently ignoring
 	// it. (Unknown -flags are already rejected by the flag package.)
 	explicitMode := *maint || *planetary || *leagueConfig || *leagueRoutes || *reset || *resetFromConfig || *ibbsReset ||
+		*lastPacket || *bbsInfo || *playerList ||
 		*addAI > 0 || *dump || *spectate > 0 || *local || *export != "" || *imp != "" || *setDrop
 	if flag.NArg() > 0 && explicitMode {
 		fmt.Fprintf(os.Stderr, "immortal-barons: unknown argument %q\n\n", flag.Arg(0))
@@ -189,6 +193,20 @@ func main() {
 	if *leagueRoutes {
 		if err := runLeagueRoutes(cfg); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -league-routes:", err)
+			os.Exit(1)
+		}
+		return
+	}
+	// The original's three sysop reports (docs/bre.doc, "Command-Line Options").
+	for _, r := range []struct {
+		on   bool
+		flag string
+	}{{*lastPacket, "lastpacket"}, {*bbsInfo, "bbsinfo"}, {*playerList, "playerlist"}} {
+		if !r.on {
+			continue
+		}
+		if err := runLeagueReport(cfg, r.flag); err != nil {
+			fmt.Fprintf(os.Stderr, "immortal-barons -%s: %v\n", r.flag, err)
 			os.Exit(1)
 		}
 		return
@@ -696,6 +714,38 @@ func runLeagueReset(cfg game.Config, date string) error {
 // runLeagueRoutes reports where this board sends each planet's packets — BRE's
 // "BRE TEST", whose whole job is letting a sysop see the routing the roster
 // gives them before they wonder why nothing arrives.
+// runLeagueReport writes one of the original's sysop report files into the data
+// directory and says where it went. They are pure reads over what inbound
+// packets already told this board, so none of them touches the world.
+func runLeagueReport(cfg game.Config, which string) error {
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	var name, body string
+	switch which {
+	case "lastpacket":
+		name, body = "LASTPACKET.LST", w.LastPacketReport()
+	case "bbsinfo":
+		name, body = "BBSINFO.LST", w.BBSInfoReport()
+	case "playerlist":
+		// The original restricts this one to the League Coordinator: it is the
+		// whole league's player roll, not this board's business to publish.
+		if !w.IsLeagueCoordinator() {
+			return errors.New("only the League Coordinator (node 1) may write the league player list")
+		}
+		name, body = "PLAYERLIST.LST", w.PlayerListReport()
+	default:
+		return fmt.Errorf("unknown report %q", which)
+	}
+	path := filepath.Join(cfg.DataDir, name)
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("Wrote %s\n", path)
+	return nil
+}
+
 func runLeagueRoutes(cfg game.Config) error {
 	w, err := store.Load(cfg)
 	if err != nil {

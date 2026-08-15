@@ -64,6 +64,7 @@ definition.
   "TradeBids":  [ IPTradeBid ],     // buy orders landing on ToBoard's market (#47)
   "TradeFills": [ IPTradeFill ],    // their answers coming home (#47)
   "Market":  [ RemoteListing ],     // FromBoard's market, riding its scores (#47)
+  "Version": "0.0.5",               // the sender's game version, for BBSINFO
   "LeagueConfig": LeagueConfig,     // coordinator's ruleset (signed)
   "LeagueNodes": [ LeagueNode ],    // coordinator's roster (signed, #64)
   "Reset": LeagueReset,             // coordinator's new-season order (signed, #65)
@@ -98,6 +99,26 @@ What does break, unavoidably: a packet that actually carries trading will not
 verify on a board older than v0.0.5. That is the honest cost of the feature, and
 it degrades sensibly — the old board rejects the packet rather than
 misinterpreting it, and its barons simply never see the Trading menu.
+
+### The Coordinator's version requirement
+
+`LeagueConfig.MinBoardVersion` lets the Coordinator require a game version of
+every board ("" = no requirement). A packet from a board below it is refused
+whole, with a news line naming the board and the version it runs; `BBSINFO.LST`
+marks the same board `(below vX.Y.Z)` so a Coordinator can see who is holding
+the league up without waiting for a bounce.
+
+A board that states NO version fails a set requirement. That is deliberate: it
+predates boards saying so at all, which puts it below any version worth
+requiring, and a board that cannot state its version cannot prove it meets the
+bar.
+
+**UNVERIFIED — how the original behaves.** It is *said* to stop the Coordinator
+processing outbound traffic at all until the laggard upgrades. That comes from
+recollection, not from the binary or the docs, and holding a whole league
+hostage to one stale board is destructive enough that IB does not copy it on a
+maybe: IB refuses only the offending board. Worth settling if anyone can read
+the original's inter-BBS path.
 
 Component types:
 
