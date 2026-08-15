@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 // TestAttackPiratesMarksRaider checks that a faction which raided the player
@@ -47,5 +48,44 @@ func TestAttackPiratesMarksRaider(t *testing.T) {
 	out2 := f2.out.String()
 	if strings.Contains(out2, marked) {
 		t.Errorf("mark should clear once RaidersThisTurn no longer names the faction; output:\n%s", out2)
+	}
+}
+
+// A turn can carry more than one raid, and the raids can come from different
+// factions — so the mark has to appear beside EVERY faction that hit, not just
+// the first. raiderSlots collects the distinct set of slots; this pins that the
+// screen honours all of them.
+func TestAttackPiratesMarksEveryRaider(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Protection = 0
+	// Two different factions hit, and one of them twice — the repeat must not
+	// produce a second entry or a doubled mark.
+	p.RaidersThisTurn = raiderSlots([]game.PirateHit{{Slot: 2}, {Slot: 6}, {Slot: 2}})
+	if len(p.RaidersThisTurn) != 2 {
+		t.Fatalf("raiderSlots gave %v, want the two distinct slots", p.RaidersThisTurn)
+	}
+
+	f := &fakeSession{keys: []rune("0\r")}
+	attackPirates(f, w)
+	out := stripANSI(f.out.String())
+
+	marked := map[string]bool{}
+	for _, line := range strings.Split(out, "\n") {
+		if strings.Contains(line, pirateRaiderMark) {
+			for _, name := range game.PirateFactions {
+				if strings.Contains(line, name) {
+					marked[name] = true
+				}
+			}
+		}
+	}
+	for _, slot := range []int{2, 6} {
+		if name := game.PirateFactions[slot]; !marked[name] {
+			t.Errorf("%s raided but carries no mark; output:\n%s", name, out)
+		}
+	}
+	if n := len(marked); n != 2 {
+		t.Errorf("marked %d factions (%v), want exactly the two that raided", n, marked)
 	}
 }
