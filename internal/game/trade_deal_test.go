@@ -189,11 +189,14 @@ func TestTradeDealCostFollowsTheCostSetting(t *testing.T) {
 	if med != TradeDealGoldPerDay {
 		t.Fatalf("Medium should be the unscaled rate: got %d, want %d", med, TradeDealGoldPerDay)
 	}
-	if got := rate(Low); got != med/2 {
-		t.Errorf("Low = %d, want half of Medium (%d)", got, med/2)
+	// Golden literals, not the constants: this ladder is the original's own and
+	// differs from BOTH the others — Low divides by six where the attack knobs
+	// divide by five, and the generic presets halve.
+	if got := rate(Low); got != 16_666 {
+		t.Errorf("Low = %d, want 100,000/6 = 16,666", got)
 	}
-	if got := rate(High); got != med*2 {
-		t.Errorf("High = %d, want twice Medium (%d)", got, med*2)
+	if got := rate(High); got != 300_000 {
+		t.Errorf("High = %d, want 100,000x3 = 300,000", got)
 	}
 	if got := rate(None); got != 0 {
 		t.Errorf("None = %d, want a free deal", got)
@@ -208,7 +211,7 @@ func TestProtectiveTradeDiscountsTheScaledRate(t *testing.T) {
 		want  int64
 	}{
 		{Medium, TradeDealGoldPerDay / ProtectiveTradeCostDivisor},
-		{High, TradeDealGoldPerDay * 2 / ProtectiveTradeCostDivisor},
+		{High, TradeDealGoldPerDay * TradeCostHighMultiple / ProtectiveTradeCostDivisor},
 		{None, 0},
 	} {
 		cfg := DefaultConfig()

@@ -1,6 +1,7 @@
 (in-progress:)
-  * The Trade Deal Costs setting scales what sending a trade deal charges; it
-    was stored, shown and broadcast while changing nothing (#56)
+  * The Trade Deal Costs setting scales what sending a trade deal charges — at
+    the original's own rates, a sixth at Low and triple at High; it was stored,
+    shown and broadcast while changing nothing (#56)
   * The "Paused" bar no longer runs into the screen drawn after it
   * config-during-reset: a new Money Cap setting sets how much gold a realm may
     hold, on hand and again in the bank — two billion (the original's own limit)

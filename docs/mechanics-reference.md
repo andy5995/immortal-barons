@@ -826,17 +826,40 @@ to its level; the direction also matches `game/reset.hlp`, which says a High
 Attack Costs setting "will make attacking more difficult".
 
 The figures live in `balance.go` as `CostLevel*Pct` and reach the two knobs
-through `Level.CostPercent()`. `Level.Percent()` stays for Maintenance / Trade /
-Region / Attack Damage / Attack Rewards.
+through `Level.CostPercent()`. `Level.Percent()` stays for Maintenance / Region /
+Attack Damage / Attack Rewards; Trade Deal Costs has a third ladder of its own,
+below.
+
+### Trade Deal Costs — BINARY-VERIFIED, and a ladder of its own
+
+| Level | Effect on the per-day transit rate |
+| --- | --- |
+| None | 0 |
+| Low | ÷ 6 |
+| Medium | unchanged |
+| High | × 3 |
+
+Read at `BRE.OVR 0x5158F`, inside the trade-deal cost routine: it switches on
+config byte **+0x186** (BRE's own encoding, Medium 0 / None 1 / Low 2 / High 3)
+and either leaves the figure alone, zeroes it, divides by Real48 `6.0`, or
+multiplies by `3.0`. The two runtime calls it uses are the same pair the
+attack-cost site at `0x2BBC2` uses with `5.0` and `3.0`, which is what pins
+divide against multiply — that site was verified independently, so this reading
+rests on a case already checked rather than on a fresh guess.
+
+**Note the Low arm divides by SIX**, where the attack pair divides by five and
+the generic presets halve. Three knobs, three ladders. IB assumed this one
+matched the generic ladder until the routine was read; `Level.TradeCostScaled`
+now applies the original's arithmetic, and the test pins the figures as golden
+literals.
 
 **Which knob reaches what (#56).** The original has five cost knobs — Maintenance
 Costs, Region Cost Change, Trade Deal Costs, Attack Costs, Terrorism Costs — and
 all five now scale something in IB. Trade Deal Costs was the last one wired: it
 was stored, shown on Game Setup and broadcast to the league while reaching no
 gameplay at all, so a sysop could set it to None or High and nothing moved. It
-scales the per-day transit rate a trade deal is charged, on the `Level.Percent()`
-ladder the other two upkeep-style knobs use, and a Protective Trade pact then
-discounts what the setting leaves.
+scales the per-day transit rate a trade deal is charged, and a Protective Trade
+pact then discounts what the setting leaves.
 
 The **Covert Operations fees** (`Cost*`) are a different case and #56 should not
 be read as covering them. There is no covert cost knob among the five, and none

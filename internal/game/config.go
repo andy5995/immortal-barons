@@ -119,6 +119,32 @@ func (l Level) CostPercent() int {
 	}
 }
 
+// TradeCostScaled applies the Trade Deal Costs level to a transit rate, in the
+// original's own arithmetic.
+//
+// BINARY-VERIFIED at BRE.OVR 0x5158F, inside the trade-deal cost routine: it
+// switches on config byte +0x186 (BRE's encoding, Medium 0 / None 1 / Low 2 /
+// High 3) and either leaves the figure alone, zeroes it, divides it by Real48
+// 6.0, or multiplies it by 3.0. Read the same way as the attack pair at
+// 0x2BBC2, which uses the identical shape with 5.0 and 3.0 — same two runtime
+// calls, so divide and multiply are pinned by a case already verified.
+//
+// This is a THIRD ladder. It is neither the generic 0/50/100/200 nor the attack
+// pair's 0/20/100/300: the Low arm divides by SIX. Assuming it matched one of
+// the others is exactly the mistake this replaces.
+func (l Level) TradeCostScaled(n int64) int64 {
+	switch l {
+	case None:
+		return 0
+	case Low:
+		return n / TradeCostLowDivisor
+	case High:
+		return n * TradeCostHighMultiple
+	default:
+		return n
+	}
+}
+
 // BuyMode controls military purchasing (BRE "Buy Military": Yes/No/Limited).
 type BuyMode int
 

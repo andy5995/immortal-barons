@@ -1532,8 +1532,14 @@ const (
 const (
 	TradeDealCarriers   = 1       // carriers consumed to send one deal
 	TradeDealGoldPerDay = 100_000 // binary: the flat part of the per-day transit cost
-	TradeDealMinDays    = 2       // shortest a deal may be sent for
-	TradeDealMaxDays    = 5       // longest a deal may be sent for
+	// The sysop's Trade Deal Costs ladder, applied by Level.TradeCostScaled.
+	// BINARY-VERIFIED (BRE.OVR 0x5158F): Low divides by six and High multiplies
+	// by three, which is its own spread — not the generic preset ladder and not
+	// the attack pair's divide-by-five.
+	TradeCostLowDivisor   = 6
+	TradeCostHighMultiple = 3
+	TradeDealMinDays      = 2 // shortest a deal may be sent for
+	TradeDealMaxDays      = 5 // longest a deal may be sent for
 
 	// ProtectiveTradeCostDivisor is what a Protective Trade agreement takes off
 	// the transit cost — the manual's "making trade deals cheaper to send and
