@@ -58,9 +58,9 @@ func TestMarketListedGoodsStillCostMaintenance(t *testing.T) {
 }
 
 // listing food does not protect it from spoilage: two identical empires, one
-// holding all its food in the granary and one with half listed, end a turn with
+// holding all its food in hand and one with half listed, end a turn with
 // the same total food.
-func TestMarketListedFoodSpoilsLikeGranary(t *testing.T) {
+func TestMarketListedFoodSpoilsLikeFoodInHand(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("alice", "Alethia")
 	b := w.AddHuman("bob", "Bobland")
@@ -73,7 +73,7 @@ func TestMarketListedFoodSpoilsLikeGranary(t *testing.T) {
 	totalA := a.Food
 	totalB := b.Food + w.MarketForSale("Bobland", "Food")
 	if totalA != totalB {
-		t.Errorf("listed food spoiled differently: granary-only total=%d, half-listed total=%d", totalA, totalB)
+		t.Errorf("listed food spoiled differently: all-in-hand total=%d, half-listed total=%d", totalA, totalB)
 	}
 }
 

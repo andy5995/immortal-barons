@@ -387,7 +387,7 @@ func TestDailyMaintenanceHandlesMalformedDate(t *testing.T) {
 
 // 5% of the ENTIRE food stock spoils each turn, but only once the stock passes
 // 1,000 — BRE's decay block skips itself below that, which is why a fresh
-// realm's starting granary never rots.
+// realm's starting food never rots.
 func TestFoodSpoils5PctAboveFloor(t *testing.T) {
 	spoiled := func(stock int) (int, int) {
 		w := NewWorldSeed(DefaultConfig(), 1)
@@ -399,10 +399,10 @@ func TestFoodSpoils5PctAboveFloor(t *testing.T) {
 		return e.LastSpoiled, e.Food
 	}
 	if lost, left := spoiled(1000); lost != 0 || left != 1000 {
-		t.Errorf("a 1,000 granary should not spoil: lost %d, left %d", lost, left)
+		t.Errorf("a 1,000 stock should not spoil: lost %d, left %d", lost, left)
 	}
 	if lost, left := spoiled(2000); lost != 100 || left != 1900 { // 5% of 2,000
-		t.Errorf("a 2,000 granary should lose 100: lost %d, left %d", lost, left)
+		t.Errorf("a 2,000 stock should lose 100: lost %d, left %d", lost, left)
 	}
 }
 

@@ -92,7 +92,7 @@ func (w *World) postRiotNews(e *Empire) {
 func (w *World) postCivilWarNews(e *Empire) {
 	lines := []string{
 		fmt.Sprintf("Civil war breaks out in %s as the hungry turn on the crown.", e.Name),
-		fmt.Sprintf("The realm of %s tears itself apart over empty granaries.", e.Name),
+		fmt.Sprintf("The realm of %s tears itself apart over empty food stores.", e.Name),
 	}
 	w.postNews(lines[w.rng.Intn(len(lines))])
 }
