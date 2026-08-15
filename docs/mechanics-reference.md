@@ -901,13 +901,24 @@ every realm sampled was under the threshold, so the knob had never engaged — a
 IB used to multiply the whole price by a percentage of the level, which is the
 wrong shape and taxes small realms the original leaves alone.
 
-**Which knob reaches what (#56).** The original has five cost knobs — Maintenance
-Costs, Region Cost Change, Trade Deal Costs, Attack Costs, Terrorism Costs — and
-all five now scale something in IB. Trade Deal Costs was the last one wired: it
-was stored, shown on Game Setup and broadcast to the league while reaching no
-gameplay at all, so a sysop could set it to None or High and nothing moved. It
-scales the per-day transit rate a trade deal is charged, and a Protective Trade
-pact then discounts what the setting leaves.
+### All five cost knobs, side by side (#56)
+
+Every one is now read from the binary, and **no two share a ladder** — which is
+the point worth carrying away, because IB had assumed a shared one and was wrong
+about three of them.
+
+| Knob | Config byte | None | Low | Medium | High | Shape |
+| --- | --- | --- | --- | --- | --- | --- |
+| Maintenance Costs | +0x180 | 0 | ÷4 | ×1 | ×4 | scales upkeep |
+| Region Cost Change | +0x185 | +0 | +15 | +35 | +55 | adds to the climb, only at 300+ regions |
+| Trade Deal Costs | +0x186 | 0 | ÷6 | ×1 | ×3 | scales the transit rate |
+| Attack Costs | +0x182 | 0 | ÷5 | ×1 | ×3 | scales an interplanetary strike |
+| Terrorism Costs | +0x184 | 0 | ÷5 | ×1 | ×3 | scales a terrorist op |
+
+Trade Deal Costs was the one reaching nothing at all: stored, shown on Game Setup
+and broadcast to the league while no gameplay read it, so a sysop could set it to
+None or High and no number moved. A Protective Trade pact discounts what that
+setting leaves, not the raw rate.
 
 The **Covert Operations fees** (`Cost*`) are a different case and #56 should not
 be read as covering them. There is no covert cost knob among the five, and none
