@@ -11,14 +11,13 @@ plain-text `BRNODES.DAT` layout (under the clone's own filename `ibnodes.dat`).
 ## Transport model (Option A, file-drop)
 
 The game only reads and writes packet files in two directories, set per board in
-the Configuration Editor and stored in `config.json`:
+the Configuration Editor and stored in `bbs.cfg` (not `config.json` — see "Board
+config" below):
 
 - `InboundDir` — packets from other boards arrive here.
 - `OutboundDir` — the game writes packets for other boards here.
 - `OutboundDirs` — per-neighbour override of `OutboundDir`, keyed by roster node
   number (`Config.OutboundLink`). Only a board that HOSTs others needs any.
-
-They are stored in `bbs.cfg`, not `config.json` — see below.
 
 Both are resolved against `DataDir` unless absolute (`Config.Inbound()` /
 `Config.Outbound()`) — a door is launched from whatever working directory the
@@ -41,11 +40,9 @@ Where the file is written is the routing decision (`World.NextHop`); the name
 records who it is ultimately for, which is what makes a directory of packets
 readable to a sysop chasing one.
 
-The JSON is `game.Packet`:
-
-Every field is optional; one packet carries whatever the run had to send. The
-authority is `game.Packet` — this is a reader's map of it, not a second
-definition.
+The JSON is `game.Packet`. Every field is optional; one packet carries whatever
+the run had to send. `game.Packet` itself is the authority — this is a reader's
+map of it, not a second definition.
 
 ```json
 {
@@ -70,6 +67,12 @@ definition.
   "Reset": LeagueReset,             // coordinator's new-season order (signed, #65)
   "Seq": 7,                         // per-sender sequence, for replay detection (#53)
   "Signature": "base64",            // ed25519 over the coordinator-authored parts
+  "BoardSig": "base64",             // ed25519 by the SENDING board over the whole packet, so
+                                     // FromBoard is proven rather than claimed (#118).
+                                     // boardSigningBytes zeroes exactly two fields first:
+                                     // BoardSig itself and Hops, which every hub increments.
+                                     // Signature IS covered, so a coordinator order cannot be
+                                     // lifted out of one packet and grafted into another.
   "League": 42,                     // league number; a board in two leagues ignores the other's
   "Hops": 0,                        // boards that have forwarded this; capped by MaxPacketHops
   "Epoch": 3,                       // sender's World.Epoch, so a packet a reset has outlived is
@@ -82,7 +85,7 @@ definition.
 }
 ```
 
-### Interplanetary trading (#47) — a version change worth reading
+### Interplanetary trading (#47): the compatibility rule
 
 The three trading fields are **new in v0.0.5** and are the first change to this
 format since boards began signing packets, so the compatibility rule matters.
@@ -200,25 +203,33 @@ preference `VerifyBoardOrigin` and the Coordinator check give `FromNode` over
 `World.Epoch` is discarded before anything else runs: it was written for a
 game this board has since wiped by resetting (#104).
 
-Processing (`World.ApplyPacket`): a packet addressed to this board (or a
-broadcast) is applied — scores import into `RemoteBoards`; attacks and terror
-ops resolve and produce results returned to the origin; incoming results give
-each contributor their survivors, a private report and their share of the
-captured land, and post a line to the planetary bulletin — unless nothing is
-waiting on that result's ID, in which case the whole result is discarded rather
-than paid out (the lost-forces timer has already returned the army, or this is a
-duplicate); recon requests are answered from live figures; IP
-messages are delivered to the mailboxes they name; and a time-check naming this
-board is echoed back untouched, while one of our own coming home is folded into
-`World.TravelTimes`. In a routed league (`World.Routed` — the roster carries HOST
-lines, or this board has route rules) a packet addressed to a different board is
-taken from the inbound directory and queued on `World.Transit`, to be written out
-again on the link for its next hop (#106). In an unrouted league it is left
-alone: the transport there copies every packet to every board, so it is one the
-addressee already has. It is forwarded byte for byte apart from `Hops`:
-its `Seq` and `Signature` belong to the board that wrote it, so a hub that
-re-stamped one would be vouching for another board's orders. A packet carrying a
-different league's number is left alone.
+Processing (`World.ApplyPacket`). A packet addressed to this board, or a
+broadcast, is applied payload by payload:
+
+- **Scores** import into `RemoteBoards`.
+- **Attacks and terror ops** resolve, producing results returned to the origin.
+- **Incoming results** give each contributor their survivors, a private report
+  and their share of the captured land, and post a line to the planetary
+  bulletin. If nothing is waiting on that result's ID the whole result is
+  discarded rather than paid out — the lost-forces timer has already returned
+  the army, or this is a duplicate.
+- **Recon requests** are answered from live figures.
+- **IP messages** are delivered to the mailboxes they name.
+- **Time checks** naming this board are echoed back untouched; one of this
+  board's own coming home is folded into `World.TravelTimes`.
+
+A packet addressed to a *different* board depends on the league's shape:
+
+- **Routed** (`World.Routed` — the roster carries HOST lines, or this board has
+  route rules): the packet is taken from the inbound directory and queued on
+  `World.Transit`, to be written out again on the link for its next hop (#106).
+  It is forwarded byte for byte apart from `Hops`, because its `Seq` and
+  `Signature` belong to the board that wrote it — a hub that re-stamped one
+  would be vouching for another board's orders.
+- **Unrouted:** the packet is left alone. The transport there copies every
+  packet to every board, so the addressee already has it.
+
+A packet carrying a different league's number is left alone.
 
 A reply packet is written whenever it carries anything at all
 (`Packet.HasPayload`) — an answer that is only an echoed probe, or only recon
@@ -227,7 +238,8 @@ reports, still has to go out.
 ## Node list: `ibnodes.dat`
 
 Plain text, one board per six-line block, blank line between blocks (BRE's
-`BRNODES.DAT` layout). Loaded at startup into `World.LeagueNodes`.
+`BRNODES.DAT` layout), plus an optional seventh line IB adds. Loaded at startup
+into `World.LeagueNodes`.
 
 ```
 1              node number (1 = League Coordinator), optionally "1 HOST 2 4"
@@ -236,14 +248,24 @@ Avalon         board / planet name
 Orlando        city
 FL             state / province
 USA            country
+4e1b…8d3       OPTIONAL: that board's packet-signing public key (#118)
 ```
+
+The seventh line is read by index, so a roster written without it parses
+unchanged and one written with it is ignored by an older board. `BoardPublicKey`
+hex-decodes the **whole trimmed line** and requires 32 bytes, so anything else
+on it — the board name the `-gen-board-key` output prints in front of the key,
+say — makes the entry decode to no key at all. That reads as "this board has no
+key published", which applies its packets unchecked rather than raising an
+error, so a malformed key line silently disables the check it was meant to turn
+on.
 
 The first line may carry BRE's HOST routing: the node's own number, `HOST`, then
 the numbers it forwards for. The roster is the league's routing table, and it is
 signed and broadcast by the Coordinator (#64), so every board gets the tree
 without any sysop editing anything.
 
-Nothing below applies until a roster carries a HOST line or a board has an
+Routing applies only once a roster carries a HOST line or a board has an
 `ibroute.cfg`. Until then a league is a mesh and the transport fans packets out,
 which is what every existing board does.
 

@@ -327,7 +327,12 @@ etc.); a league Coordinator broadcasts the whole ruleset over inter-BBS.
 
 **Inter-BBS ("Option A")**: file-drop `.brp` JSON packets in Inbound/Outbound
 dirs; the sysop's transport moves them; `-planetary` processes inbound, launches
-group attacks, and exports scores/news. IP Messages (planet-addressed mail, with
+group attacks, and exports scores/news. Two ed25519 key pairs guard it: the
+Coordinator's (`coord.key`, recorded once by hand) authorises league orders, and
+each board's own (`board.key`, published on an optional seventh roster line)
+proves which board a packet came from. A roster entry with no key is applied
+unchecked — where every league starts — so "cannot check" and "failed the check"
+are deliberately different outcomes (`docs/mechanics-reference.md`). IP Messages (planet-addressed mail, with
 an IB-only reply path) and Travel Times (measured round trips, kept by a probe
 that rides the packets) ride the same transport. An individual strike picks its
 type — Normal Attack / Quick Strike / Extended Battle, BRE-verified from

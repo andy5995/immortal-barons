@@ -161,8 +161,19 @@ These options are for games that link several BBSes together (a "league"). See
 - **`-league-reset DATE`** — Start a new season across the whole league on DATE,
   then exit. Only the coordinator uses this. It resets this board and sends a
   signed order for the other boards to reset on their next `-planetary` run.
+- **`-lastpacket`** — Write `LASTPACKET.LST`, then exit: when a packet from each
+  other board was last processed here. Use it to find a board that has gone
+  quiet.
+- **`-bbsinfo`** — Write `BBSINFO.LST`, then exit: every board, when it was last
+  heard from, and the game version it runs. A board below a version the
+  coordinator requires is marked.
+- **`-playerlist`** — Write `PLAYERLIST.LST`, then exit: every realm on every
+  board. Only the league coordinator (node #1) may write this one.
 - **`-export FILE`** — Write this board's score packet to FILE, then exit.
 - **`-import FILE`** — Read a score packet from FILE, then exit.
+
+The three `.LST` reports are written into the data directory, and are built from
+what packets have already told this board — none of them changes the game.
 
 ### Info
 

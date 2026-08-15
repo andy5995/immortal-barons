@@ -17,25 +17,24 @@ Run `immortal-barons -help` to see all the command-line options. The
 
 ## First-time setup
 
-You must create the game once before anyone can play. Run `-reset` to open the
-Configuration Editor (starting from built-in defaults), choose your settings, and
-seed the world. Until this is done, the game reports "no game found" and refuses
-to start, so a caller never lands in an empty, unplayable world.
+You must create the game once before anyone can play. Until you do, the game
+reports "no game found" and refuses to start, so a caller never lands in an
+empty, unplayable world.
 
 ```
 immortal-barons -reset -data /path/to/data
 ```
 
-To create the game without the editor — using the current `config.json` as-is —
-use `-reset-from-config` instead.
+This opens the **Configuration Editor**, starting from the built-in defaults: a
+menu of every game setting (turns per day, protection turns, land and market
+settings, interest and investment rates, tax and region limits, costs and attack
+settings, number of AI barons, game length, and more). Change what you like,
+then press `S` to save `config.json` and seed the world, or `Q` to cancel.
 
-This opens the **Configuration Editor**: a menu of every game setting (turns per
-day, protection turns, land and market settings, interest and investment rates,
-tax and region limits, costs and attack settings, number of AI barons, game
-length, and more). Change what you like, then press `S` to save `config.json`
-and start a fresh game, or `Q` to cancel. On a brand-new install there is
-nothing to clear, so this just writes your config and seeds the starting world.
-See "Starting a fresh game" below — it is the same command.
+To skip the editor and use the current `config.json` as it stands, run
+`-reset-from-config` instead.
+
+These same two commands restart the game later on — see "Starting a fresh game".
 
 ## Registering the door
 
@@ -76,25 +75,23 @@ into each node's own temporary directory and gives you `%P` for that directory
 /path/to/immortal-barons -dropfile %Pdoor32.sys -data /path/to/game-data
 ```
 
-Two things to note. Mystic writes the file name in lower case (`door32.sys`),
-which matters on Linux because file names there are case-sensitive. And the
-game's data directory should be a separate directory from the BBS's own files.
+Mystic writes the file name in lower case (`door32.sys`), which matters on Linux
+because file names there are case-sensitive. Keep the game's data directory
+separate from the BBS's own files.
 
-Before the first caller connects, seed the game:
+Before the first caller connects, seed the game as in "First-time setup" above,
+pointing it at this board's data directory:
 
 ```
 /path/to/immortal-barons -reset -data /path/to/game-data
 ```
 
-This opens the settings editor (see "First-time setup" above); when you save
-with `S`, it creates the data directory if it does not exist and writes
-`config.json` and the starting world into it.
+Saving with `S` creates the data directory if it does not exist.
 
 ### How the game talks to the caller
 
 The game connects to the caller in one of two ways, chosen automatically on
-every platform. You do not choose it, and there is nothing to configure in the
-game.
+every platform. There is nothing to configure.
 
 - If your BBS hands the door a **live standard input** — a terminal — the game
   reads and writes the caller through it. Mystic does this, and so does
@@ -104,10 +101,10 @@ game.
   the connection arrives as a numbered handle (line 2 of `DOOR32.SYS`) and
   standard input is connected to nothing.
 
-A live standard input wins because a BBS that went to the trouble of handing one
-over means it to be used. Note the drop file alone cannot decide this: Mystic
-names a socket **and** gives a terminal, so a door that simply believed the drop
-file would abandon a connection that works.
+A live standard input wins: a BBS that hands one over means it to be used. The
+drop file alone cannot decide this, because Mystic names a socket **and** gives
+a terminal, so a door that simply believed the drop file would abandon a
+connection that works.
 
 **If a caller is dropped the instant the door starts**, check
 `data/ib-door.log`. The `session i/o backend=` line says which path was taken.
@@ -118,9 +115,8 @@ those two log lines.
 Serial (FOSSIL) doors are not supported. Configure your BBS for a socket or
 stdio door.
 
-Note: a sysop has run the Windows socket path with a live caller and reports
-that it works. If you run the game as a Windows door, please still report how it
-goes.
+A sysop has run the Windows socket path with a live caller and reports that it
+works. If you run the game as a Windows door, please still report how it goes.
 
 ### Character set
 
@@ -143,50 +139,32 @@ Maintenance moves the game forward one day. It lets the AI barons take their
 turns, runs pirate raids, and refreshes each player's turns.
 
 **You usually do not need to schedule this.** Maintenance runs on its own the
-first time a player logs in on a new day. A board that is not played every day
-needs no nightly event; days with no play are skipped, and the game picks up
-where it left off. If you would rather the game keep moving on quiet days, run
-it from a nightly event.
-
-Run it by hand only if you want the game to move forward while no one is playing:
+first time a player logs in on a new day. Days with no play are skipped, and the
+game picks up where it left off.
 
 ```
 immortal-barons -maint -data /path/to/data
 ```
 
-This is useful for a league board, where the AI barons, pirates, and inter-BBS
-packets should keep to a set schedule even on days when no local player logs in.
-For a solo or local game, you can skip it.
+Run that from a nightly event if you want the game to keep moving on quiet days.
+It matters most on a league board, where the AI barons, pirates and inter-BBS
+packets should keep to a schedule even when no local player logs in.
 
 ## Starting a fresh game (reset)
 
-There are two ways to start the game over. Both clear all empires (players
-re-create their realm the next time they log in) and re-seed the AI barons on a
-fresh day one. Neither picks a winner. Each one saves the old world to
-`world.json.bak` in the data directory first, so you can restore it if you reset
-by mistake.
+The two commands that create the game also restart it:
 
-**Reset and choose the settings:**
+- **`-reset`** opens the Configuration Editor from the built-in defaults, so it
+  resets `config.json` to those defaults as well. `Q` cancels and leaves the
+  game untouched. Because it writes a clean default config, this is also how you
+  produce a `config.json` to copy and reuse.
+- **`-reset-from-config`** keeps the `config.json` you already have, opens no
+  editor, and only clears the world.
 
-```
-immortal-barons -reset -data /path/to/data
-```
-
-This opens the **Configuration Editor** starting from the built-in defaults, so
-it also resets `config.json` to those defaults. Adjust any settings, then press `S`
-to save and start the fresh game, or `Q` to cancel (which leaves the game
-untouched). Because it writes a clean default `config.json`, you can also use
-this to produce a config file to copy and reuse.
-
-**Reset and keep your current settings:**
-
-```
-immortal-barons -reset-from-config -data /path/to/data
-```
-
-This starts the fresh game using the `config.json` you already have. It does not
-open the editor and does not change your settings. Use it when you are happy with
-the current settings and only want to clear the world.
+Both clear all empires (players re-create their realm the next time they log in)
+and re-seed the AI barons on a fresh day one. Neither picks a winner. Each saves
+the old world to `world.json.bak` in the data directory first, so you can
+restore it if you reset by mistake.
 
 ### The config file is portable
 
@@ -215,6 +193,15 @@ adds none.
 ## Inter-BBS (league) play
 
 A league is a group of boards whose players compete against each other.
+
+Two different roles are called "coordinator", and the rest of this guide keeps
+them apart:
+
+- **League Coordinator** — the sysop of board number 1. This person keeps the
+  node list, hands it out to the other boards, and sets the league's rules.
+- **BBS Coordinator** — a *player* your board elects. Players vote in the
+  System menu, and the player with the most votes gets the Coordinator menu.
+  Votes can change at any time.
 
 Set the board up with `-ibbs-reset` instead of `-reset`:
 
@@ -311,7 +298,7 @@ A common setup:
 In a small league every board links to every other one, and your transport
 copies each packet to all of them. That is the default, and nothing below
 changes it until your Coordinator says otherwise. A large league routes instead
-— see the next section but one.
+— see "Routing" below.
 
 Run it as often as you like. More often means shorter travel times between
 planets. The in-game "Travel Times" screen shows players how recently packets
@@ -346,6 +333,56 @@ All six lines must have something on them. A blank line is what separates one
 board from the next, so a board written with an empty field is read as a broken
 entry and skipped. Only the first three matter to the game; put anything you
 like in the last three.
+
+A board may also carry a **seventh line**: its packet-signing key, described
+under "Signing packets" below. The line is optional, and a roster written
+without it is read exactly as before, so keys can be added to a league that is
+already running, one board at a time.
+
+```
+2
+Pier 7
+106/477
+Houston
+TX
+USA
+4e1b9c07a3f25d81c6b40e9fa27d3358e1c0b7429dd6a85f3b1e64c0927af8d3
+```
+
+## Signing packets
+
+A packet names the board it came from, but that name is only text in a file.
+Signing lets the other boards check it.
+
+Each board creates its own key once:
+
+```
+immortal-barons -gen-board-key -data /path/to/data
+```
+
+This writes the private half to `board.key` in your data directory and prints
+the public half, with your board's name in front of it so the Coordinator knows
+whose it is. Keep `board.key` secret: anyone holding it can send packets as your
+board.
+
+Send that printed line to your League Coordinator. They put **the key on its
+own** as the seventh line of your roster entry — not the whole printed line, and
+not the board name with it — then broadcast the roster to everyone. A seventh
+line that holds anything but the 64-character key is treated as no key at all,
+which leaves that board unchecked rather than reporting an error.
+
+Once the roster carries a key for a board, every packet claiming to come from it
+is checked, and one that does not match is refused with a news line naming the
+board. Until then, packets from that board are applied unchecked. That is where
+every league starts, and it is why adding keys is worth doing.
+
+Do not create a second key on a board that already has one. Every packet it
+sends will fail on the other boards until the Coordinator publishes the
+replacement.
+
+This key answers "which board sent this packet". The Coordinator's key, under
+"Joining a league" below, answers a different question: "is this really a league
+order". A league uses both.
 
 ## Routing: one link instead of nineteen
 
@@ -440,19 +477,35 @@ immortal-barons -league-config -data /path/to/data
 ```
 
 This writes a settings packet to your outbound directory. Each member board
-adopts the settings on its next `-planetary` run. Member boards accept these
-settings only from the Coordinator's board (node 1), so no one else can change
-the league rules. Only the Coordinator's board may send this packet.
+adopts the settings on its next `-planetary` run. A member accepts them only
+when the packet comes from node 1 *and* carries the Coordinator's signature, so
+no other board can change the league rules.
 
-## The Coordinator
+### Starting a new season
 
-There are two different "coordinator" ideas, and they are not the same thing:
+The Coordinator can restart the whole league on a chosen date:
 
-- **League Coordinator** — the sysop of board number 1. This person keeps the
-  node list and hands it out to the other boards.
-- **BBS Coordinator** — a *player* your board elects. Players vote in the
-  System menu, and the player with the most votes gets the Coordinator menu.
-  Votes can change at any time.
+```
+immortal-barons -league-reset 2026-09-01 -data /path/to/data
+```
+
+The date is `YYYY-MM-DD`. This resets the Coordinator's own board straight away
+and sends a signed order that each member carries out on its next `-planetary`
+run. Every board keeps what identifies it in the league — its roster, its keys
+and its packet history — and starts a fresh world, so nobody re-does the setup.
+
+Nothing schedules this. Run it when you decide the season is over.
+
+### League reports
+
+Three commands write a report into the data directory. None of them changes the
+game; each is built from what packets have already told this board.
+
+| Command | Writes | Shows |
+|---|---|---|
+| `-lastpacket` | `LASTPACKET.LST` | when a packet from each board was last processed here — how you spot a board that has gone quiet |
+| `-bbsinfo` | `BBSINFO.LST` | every board, when it was last heard from, and the version it runs |
+| `-playerlist` | `PLAYERLIST.LST` | every realm on every board (Coordinator only) |
 
 ## Joining a league (member boards)
 
@@ -463,7 +516,7 @@ create the game.
 **Tell the League Coordinator what you want your board called** — that is your
 choice, not theirs. They add it to the roster and give it a node number.
 
-**Then you need four things back from them:**
+**Then you need five things back from them:**
 
 | What | Why |
 |---|---|
@@ -473,8 +526,8 @@ choice, not theirs. They add it to the roster and give it a node number.
 | The league number, if they use one | A number from 1 to 999. It only matters if your board plays in two leagues that share an inbound directory, but ask anyway — a packet stamped with the wrong one is ignored. |
 | The mailer details for your uplink | Their address, host and port, and the session password. This is your BBS's business, not the game's. |
 
-**All four arrive by hand — email, a message on their board, a download.** None
-of it can come over the league's own link, because none of the link exists yet:
+**All five arrive by hand — email, a message on their board, a download.** None
+of it can come over the league's own link, because that link does not exist yet:
 the mailer details are what build it, and the key is what proves a packet came
 from the Coordinator, so a key that arrived in a packet would prove nothing. It
 is a public key, so there is no harm in it travelling in the clear; it lets your
@@ -525,9 +578,20 @@ The key is a one-time exchange, unless the league changes Coordinator.
     It leaves behind the three lines the game has no use for — your name, your
     node address, and your mailer — and does **not** read your netmail directory
     as the outbound directory. BRE puts `.MSG` files there; the game writes
-    packets, which is a different thing in the same neighbourhood.
+    packets, which are not the same thing.
 
-4. **Run the inter-BBS step once:**
+4. **Create your board's own signing key**, and send the line it prints to the
+    Coordinator:
+
+    ```
+    immortal-barons -gen-board-key -data /path/to/data
+    ```
+
+    They add it to your roster entry, so the other boards can tell your packets
+    from ones that only claim to be yours. See "Signing packets" above. You can
+    join a league without this and add it later.
+
+5. **Run the inter-BBS step once:**
 
     ```
     immortal-barons -planetary -data /path/to/data
@@ -538,11 +602,12 @@ The key is a one-time exchange, unless the league changes Coordinator.
     not be alarmed at the first `Game Setup` screen, and do not let players on
     before it.
 
-5. **Put `-planetary` on a schedule**, and let your callers in.
+6. **Put `-planetary` on a schedule**, and let your callers in.
 
 Step 3 does not need the Coordinator's rules to have arrived, so 2 and 3 can
-happen in either order — but the key must be recorded before step 4, or the
-settings packet is refused as unsigned.
+happen in either order — the keys are kept in their own files and a reset does
+not disturb them. The Coordinator's key must be recorded before step 5, though,
+or the settings packet is refused as unsigned.
 
 ## Example: a two-board league, step by step
 
@@ -727,6 +792,11 @@ immortal-barons -coord-key THE_KEY_IT_PRINTED -data /path/to/member/data
 
 Without the key the member board refuses the Coordinator's orders, and the
 league rules never arrive.
+
+This example stops there, which is enough to play. To have each board sign its
+own packets as well, run `-gen-board-key` on both and add the 64-character key
+it prints — the key alone, without the board name — as a seventh line in that
+board's roster entry. See "Signing packets" above.
 
 ### Step 8 — the first exchange
 
