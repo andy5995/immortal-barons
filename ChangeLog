@@ -1,10 +1,10 @@
 (in-progress:)
   * "?" at a planet prompt shows the list on the keypress; it no longer waits
     for Enter as well
-  * The door attaches to the caller's socket whenever the BBS gives it no live
-    standard input, on every platform rather than only on Windows. A native
-    Synchronet door on Linux is handed the socket and a standard input connected
-    to nothing, so the caller was dropped the moment the door started
+  * The door attaches to the caller's socket when a Unix BBS gives it no live
+    standard input. A native Synchronet door on Linux is handed the socket and a
+    standard input connected to nothing, so the caller was dropped the moment the
+    door started. Windows keeps its own rule, a drop file naming a socket
   * The door log records which I/O path was actually taken, not only what the
     drop file asked for
   * config-during-reset: a new Allow IP Allies to Trade at Market setting

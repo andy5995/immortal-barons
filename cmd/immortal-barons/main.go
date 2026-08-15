@@ -570,19 +570,18 @@ func printVersion() {
 	fmt.Printf("go: %s\n", runtime.Version())
 }
 
-// openSession attaches to the caller per the dropfile's I/O mode and platform.
-//
-// On Unix, Synchronet and Mystic run native doors with the caller's connection
-// wired to our stdin/stdout (Synchronet's EX_STDIO mode pipes the socket to us
-// and handles telnet itself), so stdio is correct even though the dropfile
-// reports a socket with a handle — that handle is the BBS's own socket, not
-// something the door attaches to. Only on Windows does the door attach to the
-// inherited winsock handle directly. The returned func releases the connection.
+// useSocket is the one place that decides between the socket and stdio, so the
+// logged backend cannot drift from the one actually opened. See openSession for
+// why the terminal test is Unix-only.
+func useSocket(caller *door.Caller) bool {
+	return caller.IO == door.IOSocket && (runtime.GOOS == "windows" || !session.StdinIsTerminal())
+}
+
 // backendName is the I/O path openSession takes for this caller — the thing a
 // sysop actually needs in the log, as against what the drop file claimed.
 func backendName(caller *door.Caller) string {
 	switch {
-	case caller.IO == door.IOSocket && !session.StdinIsTerminal():
+	case useSocket(caller):
 		return "socket"
 	case caller.IO == door.IOSerial:
 		return "unsupported-serial"
@@ -591,6 +590,8 @@ func backendName(caller *door.Caller) string {
 	}
 }
 
+// openSession attaches to the caller by the path useSocket picks, and returns a
+// func that releases the connection.
 func openSession(caller *door.Caller) (session.Session, func(), error) {
 	// Which of the two I/O paths to take is NOT decided by the platform, and not
 	// by the drop file alone. Two live Linux boards settle it:
@@ -605,14 +606,19 @@ func openSession(caller *door.Caller) (session.Session, func(), error) {
 	// inherited descriptor and a stdin attached to nothing — so its first read
 	// hit EOF and the caller was dropped the moment the door started.
 	//
-	// So: a live stdin wins, because a BBS that went to the trouble of handing us
-	// one means it to be used. Only when there is no terminal AND the drop file
-	// names a socket do we take the socket. That keeps every board that works
-	// today on the path it already works on.
+	// So: on Unix a live stdin wins, because a BBS that went to the trouble of
+	// handing us one means it to be used. Only when there is no terminal AND the
+	// drop file names a socket do we take the socket.
 	//
-	// This used to attach only on Windows, which fixed nobody on Unix and is why
-	// the Synchronet case went unnoticed.
-	if caller.IO == door.IOSocket && !session.StdinIsTerminal() {
+	// That test is Unix-only, and deliberately so. A native Windows door is a
+	// child of the BBS and inherits ITS console, so standard input is a terminal
+	// there whether or not it carries the caller — the test cannot tell a handed-
+	// over connection from the server's own console, and answering "terminal"
+	// sends the door to a console the caller cannot see. Windows therefore keeps
+	// the older rule it has always used: a drop file naming a socket means the
+	// socket. Widening the Unix heuristic to Windows hung the door for a caller
+	// (reported against the win32 snapshot).
+	if useSocket(caller) {
 		sock, err := session.NewSocket(caller.Socket)
 		if err != nil {
 			return nil, nil, fmt.Errorf("the drop file names socket %d and standard input is not a terminal, "+
