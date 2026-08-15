@@ -259,11 +259,11 @@ USA            country
 The seventh line is read by index, so a roster written without it parses
 unchanged and one written with it is ignored by an older board. `BoardPublicKey`
 hex-decodes the **whole trimmed line** and requires 32 bytes, so anything else
-on it — the board name the `-gen-board-key` output prints in front of the key,
-say — makes the entry decode to no key at all. That reads as "this board has no
-key published", which applies its packets unchecked rather than raising an
-error, so a malformed key line silently disables the check it was meant to turn
-on.
+on it — a board name, a label — makes the entry decode to no key at all. That
+reads as "this board has no key published", which applies its packets unchecked
+rather than raising an error, so a malformed key line silently disables the
+check it was meant to turn on. `-gen-board-key` prints the key alone for this
+reason.
 
 The first line may carry BRE's HOST routing: the node's own number, `HOST`, then
 the numbers it forwards for. The roster is the league's routing table, and it is

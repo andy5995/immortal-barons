@@ -238,12 +238,20 @@ func main() {
 			}
 			os.Exit(1)
 		}
-		fmt.Println("Board signing key created. Send this line to your League Coordinator:")
+		// The key is printed alone, with the board named in the prose around it
+		// rather than on the same line. It goes on the roster's seventh line by
+		// itself, and a line carrying anything else fails to decode — which
+		// leaves that board unchecked instead of reporting an error, so the
+		// output must not invite pasting a board name along with it.
+		fmt.Printf("Board signing key created for %s.\n", cfg.BoardID)
 		fmt.Println()
-		fmt.Println("   ", cfg.BoardID, pub)
+		fmt.Println("Send your League Coordinator this key:")
 		fmt.Println()
-		fmt.Println("They add it to the league roster, which is signed and broadcast, so every")
-		fmt.Println("board can check that a packet naming yours really came from it.")
+		fmt.Println("   ", pub)
+		fmt.Println()
+		fmt.Println("They add it to this board's entry in the league roster, as a seventh line")
+		fmt.Println("with the key on it and nothing else. The roster is signed and broadcast, so")
+		fmt.Println("every board can then check that a packet naming yours really came from it.")
 		fmt.Println("Keep", filepath.Join(cfg.DataDir, store.BoardKeyFile), "secret; anyone holding it can send packets as this board.")
 		return
 	}

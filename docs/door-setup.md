@@ -364,15 +364,14 @@ immortal-barons -gen-board-key -data /path/to/data
 ```
 
 This writes the private half to `board.key` in your data directory and prints
-the public half, with your board's name in front of it so the Coordinator knows
-whose it is. Keep `board.key` secret: anyone holding it can send packets as your
-board.
+the public half on a line of its own. Keep `board.key` secret: anyone holding it
+can send packets as your board.
 
-Send that printed line to your League Coordinator. They put **the key on its
-own** as the seventh line of your roster entry — not the whole printed line, and
-not the board name with it — then broadcast the roster to everyone. A seventh
-line that holds anything but the 64-character key is treated as no key at all,
-which leaves that board unchecked rather than reporting an error.
+Send that key to your League Coordinator. They add it as the seventh line of
+your board's roster entry, with the key on it and nothing else, then broadcast
+the roster to everyone. A seventh line holding anything but the 64-character key
+is treated as no key at all, which leaves that board unchecked rather than
+reporting an error.
 
 Once the roster carries a key for a board, every packet claiming to come from it
 is checked, and one that does not match is refused with a news line naming the
@@ -798,8 +797,8 @@ league rules never arrive.
 
 This example stops there, which is enough to play. To have each board sign its
 own packets as well, run `-gen-board-key` on both and add the 64-character key
-it prints — the key alone, without the board name — as a seventh line in that
-board's roster entry. See "Signing packets" above.
+it prints as a seventh line in that board's roster entry. See "Signing packets"
+above.
 
 ### Step 8 — the first exchange
 

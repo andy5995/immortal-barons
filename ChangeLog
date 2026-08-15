@@ -1,4 +1,7 @@
 (in-progress:)
+  * -gen-board-key prints the key alone on its line. It used to print the board
+    name in front of it, and a roster entry pasted whole left that board's
+    packets unchecked instead of reporting an error
   * A realm's letter on the attack and covert target lists is its own place in
     the list. Allying with the realms above it used to re-letter everything
     below, so the key that struck one realm struck a different one next time
