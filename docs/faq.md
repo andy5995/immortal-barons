@@ -36,6 +36,11 @@
 - Gold above the limit is still lost, but the game now tells you when it happens,
   and a full bank pays its interest into your gold in hand rather than losing it.
 - A reset option turns the pirates off. BRE always has them.
+- In a league game you can buy from an allied planet's Trading Market. BRE has
+  no way to trade between planets at all. Your order is a bid: the gold is held
+  when you send it, and when it arrives the other planet only sells to you if
+  the goods are still there at the same price and you are still allies. If not,
+  your gold comes back.
 - Some game values — such as attack rewards, unit prices, and economy rates —
   may not match BRE exactly. The game aims to get as close as it can, using
   BRE's own numbers where they are known. A few mechanics are still being built.
