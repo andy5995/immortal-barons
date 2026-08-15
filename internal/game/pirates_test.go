@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-// A band starts with nothing. Its army is stolen goods, so a fresh game's
+// A faction starts with nothing. Its army is stolen goods, so a fresh game's
 // factions cannot defend themselves until they have robbed somebody.
 func TestSeedPiratesStartEmpty(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
@@ -225,13 +225,13 @@ func TestRaidFactionWinStillCostsTheAttacker(t *testing.T) {
 }
 
 // A win against a faction that holds no land captures no regions, so the caller
-// shows no picker (#21 — BRE: raiding a landless band yields gold/military only).
+// shows no picker (#21 — BRE: raiding a landless faction yields gold/military only).
 func TestRaidFactionLandlessCapturesNoRegions(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("me", "Mine")
 	a.Troopers = 1_000_000
 	p := &w.Pirates[0]
-	p.Land = 0 // landless band
+	p.Land = 0 // landless faction
 	p.Gold = 50_000
 
 	beforeLand := a.Land
@@ -387,7 +387,7 @@ func TestPirateTakeCappedAtMax(t *testing.T) {
 		}
 		got := v.PirateHits[0].Amount
 		if got < PirateRaidCapBase || got >= PirateRaidCapBase+PirateRaidCapJitter {
-			t.Fatalf("take %d outside the cap band [%d,%d)", got, PirateRaidCapBase, PirateRaidCapBase+PirateRaidCapJitter)
+			t.Fatalf("take %d outside the cap faction [%d,%d)", got, PirateRaidCapBase, PirateRaidCapBase+PirateRaidCapJitter)
 		}
 	}
 }
@@ -480,21 +480,21 @@ func TestRaidLossReport(t *testing.T) {
 	}
 }
 
-// With pirates off there are no bands at all: none are seeded on a fresh game,
+// With pirates off there are no factions at all: none are seeded on a fresh game,
 // none are seeded on load, and nobody is raided.
 func TestPiratesDisabledMeansNoBandsAndNoRaids(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.Pirates = false
 	w := NewWorldSeed(cfg, 1)
 	if len(w.Pirates) != 0 {
-		t.Fatalf("a fresh game seeded %d bands with pirates off", len(w.Pirates))
+		t.Fatalf("a fresh game seeded %d factions with pirates off", len(w.Pirates))
 	}
 	w.EnsurePirates()
 	if len(w.Pirates) != 0 {
-		t.Errorf("loading re-seeded %d bands with pirates off", len(w.Pirates))
+		t.Errorf("loading re-seeded %d factions with pirates off", len(w.Pirates))
 	}
 
-	// A realm the bands would certainly rob if they existed: no protection, and
+	// A realm the factions would certainly rob if they existed: no protection, and
 	// enough troopers that every raid roll finds something to take.
 	e := w.AddHuman("h", "Realm")
 	e.Protection, e.Troopers, e.Land = 0, 1_000_000, 500
@@ -506,11 +506,11 @@ func TestPiratesDisabledMeansNoBandsAndNoRaids(t *testing.T) {
 		t.Errorf("pirates raided %d times with the setting off", len(e.PirateHits))
 	}
 
-	// Turning them back on restores the bands rather than leaving the game
+	// Turning them back on restores the factions rather than leaving the game
 	// permanently pirate-free.
 	w.Config.Pirates = true
 	w.EnsurePirates()
 	if len(w.Pirates) != len(PirateFactions) {
-		t.Errorf("turning pirates back on seeded %d bands, want %d", len(w.Pirates), len(PirateFactions))
+		t.Errorf("turning pirates back on seeded %d factions, want %d", len(w.Pirates), len(PirateFactions))
 	}
 }

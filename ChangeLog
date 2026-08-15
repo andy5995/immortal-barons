@@ -1,5 +1,6 @@
 (in-progress:)
-  * config-during-reset: a new Pirates setting (enabled) turns the bands off
+  * config-during-reset: a new Pirates setting (enabled) takes the pirates out
+    of the game
   * config-during-reset: a new Money Cap setting sets how much gold a realm may
     hold, on hand and again in the bank — two billion (the original's own limit)
     up to 999 billion
@@ -90,8 +91,6 @@
     boxed pages, listing only the fields the realm has something in
   * Empire Status shows the cumulative score the scores board ranks on, where it
     used to show net worth under that label
-  * Spending the last turn of the day says so, instead of returning to the
-    opening menu without a word
   * Today's News counts the planet live, so a new board's first day no longer
     reads as empty
   * "Since your last play" recap entries color the realm name and treaty type
@@ -101,10 +100,11 @@
   * A pirate raid takes about a thirtieth of one kind of holding, named on its
     own line at the end of the income report, and reports its outcome as the
     original does: one of five random headlines, the loot, and what it cost
-  * Pirate bands start with no army and no land and can field only what they have
-    stolen, so an untouched band grows and a drained one is harmless
-  * Beating a band recovers a third of its gold, regions, agents and troopers and
-    a quarter of its jets, turrets and tanks, and costs the attacker casualties
+  * Pirates start with no army and no land and can field only what they have
+    stolen, so a group left alone grows and a drained one is harmless
+  * Beating pirates recovers a third of their gold, regions, agents and troopers
+    and a quarter of their jets, turrets and tanks, and costs the attacker
+    casualties
   * Pirates raid larger realms more often, a turn can carry more than one raid,
     and military listed on the Trading Market is not hidden from them
   * Attack Pirates marks a faction that raided you since your last play with "->"

@@ -383,9 +383,9 @@ func incomeReport(s session.Session, w *ctx) {
 // pirateSpoilNames label each spoil in BRE's own words, in PirateSpoil order.
 var pirateSpoilNames = [...]string{"Troopers", "Jets", "Turrets", "Tanks", "Gold", "Agents"}
 
-// pirateColor returns a band's color by its slot — pirateColors, the palette
+// pirateColor returns a faction's color by its slot — pirateColors, the palette
 // the Attack Pirates menu paints. Keyed on the slot rather than the name so a
-// world whose bands carry other names still colors them.
+// world whose factions carry other names still colors them.
 func pirateColor(slot int) string {
 	if slot >= 0 && slot < len(pirateColors) {
 		return pirateColors[slot]

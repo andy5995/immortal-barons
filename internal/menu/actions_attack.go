@@ -441,7 +441,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	// BRE lists only the colored faction names — a faction's strength and hoard
-	// are hidden, so raiding blind (not knowing which band is fat or lean) is
+	// are hidden, so raiding blind (not knowing which of them is fat or lean) is
 	// part of the game.
 	var names []string
 	var raiders []int

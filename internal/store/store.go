@@ -54,7 +54,7 @@ func Load(cfg game.Config) (*game.World, error) {
 // this list.
 func repair(w *game.World, cfg game.Config) {
 	// The config goes on first: the world's own repairs read the sysop's
-	// settings (EnsurePirates seeds the bands only when pirates are enabled).
+	// settings (EnsurePirates seeds the factions only when pirates are enabled).
 	w.Config = cfg
 	for _, e := range w.Empires {
 		// SDI first: it reads the saved percentage to rebuild a pre-pool save's
