@@ -972,7 +972,10 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 		if backedUp {
 			fmt.Println("The previous world was backed up to world.json.bak.")
 		}
-		fmt.Println("The league rules arrive from the Coordinator on the next -planetary run.")
+		// Naming the board skips the editor, which is the member path; but the
+		// Coordinator's board can be set up this way too, and at reset time
+		// there is often no roster yet to tell which this is.
+		fmt.Println("If this board is a league member, the rules arrive from the Coordinator on the next -planetary run.")
 		noteDropfileUnset(cfg.DataDir)
 		preparePacketDirs(w.Config)
 		return nil
