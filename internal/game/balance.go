@@ -1453,12 +1453,10 @@ const (
 // hard-coded 2 billion because plain int is 32 bits on a 32-bit build, and every
 // gold credit past it was silently discarded.
 //
-// The 2 billion itself is UNVERIFIED — a player-guide figure, and not a literal
-// in either binary in 32-bit or Real48 form. The likeliest reading is that the
-// original has no designed ceiling at all and the money field is a Turbo Pascal
-// LongInt, which stops at 2,147,483,647; a guide author rounding that gives
-// exactly the number handed down here. Settling it means reading the field's
-// type out of the record layout, or driving a live game past 2.1 billion.
+// The 2 billion is CONFIRMED BY PLAY of the original — it holds gold in hand,
+// savings, and what may be invested in a day, all three at that figure. It is
+// not a literal in either binary in 32-bit or Real48 form, which fits: a cap
+// tested against a Turbo Pascal constant needs no constant of its own.
 const (
 	// What a realm may HOLD, on hand or in the bank, is the sysop's call:
 	// Config.MoneyCapBillions, read through World.MoneyCap. The default is the
