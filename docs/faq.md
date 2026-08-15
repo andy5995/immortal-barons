@@ -35,6 +35,9 @@
   here that is only the starting value, and it can go as high as 999 billion.
 - Gold above the limit is still lost, but the game now tells you when it happens,
   and a full bank pays its interest into your gold in hand rather than losing it.
+- Your sysop can turn the pirates off. BRE always has its nine bands; here a
+  sysop who wants a game without raids can set Pirates to Off, and then nobody is
+  robbed and Attack Pirates is gone from the menu. It is on to begin with.
 - Some game values — such as attack rewards, unit prices, and economy rates —
   may not match BRE exactly. The game aims to get as close as it can, using
   BRE's own numbers where they are known. A few mechanics are still being built.

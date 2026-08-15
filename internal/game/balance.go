@@ -1453,16 +1453,6 @@ const (
 // hard-coded 2 billion because plain int is 32 bits on a 32-bit build, and every
 // gold credit past it was silently discarded.
 const (
-	// Bank balance above this earns no more interest, so the last stretch of a
-	// maxed-out bank is idle.
-	//
-	// UNVERIFIED. The figure came from a public player guide, which may describe
-	// a build other than the 0.988 this clone is matched against, and it is not
-	// in the binary: neither 1,599,999,999 nor a round 1.6 billion appears as a
-	// 32-bit constant anywhere in BRE.EXE or BRE.OVR. Treat it as a placeholder
-	// until the ceiling is read out of the code or measured in a live game.
-	InterestCap int64 = 1_599_999_999
-
 	// What a realm may HOLD, on hand or in the bank, is the sysop's call:
 	// Config.MoneyCapBillions, read through World.MoneyCap. The default is BRE's
 	// own 2 billion; a league that wants a longer game raises it. These are the

@@ -355,8 +355,8 @@ func TestInterestOnAFullBankOverflowsIntoGold(t *testing.T) {
 	if e.Bank != w.MoneyCap() {
 		t.Errorf("bank = %d, want it still exactly at the %d cap", e.Bank, w.MoneyCap())
 	}
-	// Interest is charged on the capped slice: InterestCap × 50 / (1000 × 10).
-	want := InterestCap * 50 / (1000 * int64(cfg.TurnsPerDay))
+	// The whole balance earns: MoneyCap × 50 / (1000 × 10).
+	want := w.MoneyCap() * 50 / (1000 * int64(cfg.TurnsPerDay))
 	if e.Gold != want {
 		t.Errorf("treasury received %d, want the %d of interest the full bank earned", e.Gold, want)
 	}

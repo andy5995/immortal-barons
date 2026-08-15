@@ -188,8 +188,9 @@ func BuildMenus() *Menus {
 		{Key: 'C', Label: "Chemical Attack", Do: chemicalAttack, Hidden: noLocalMissiles},
 		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack, Hidden: noLocalMissiles},
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates,
-			// Hidden while under new-realm protection — a protected realm can't raid.
-			Hidden: func(w *ctx) bool { return w.Player().Protection > 0 }},
+			// Hidden while under new-realm protection — a protected realm can't
+			// raid — and on a board whose sysop has turned the bands off.
+			Hidden: func(w *ctx) bool { return !w.Config.Pirates || w.Player().Protection > 0 }},
 		{Key: 'A', Label: "Alliance Strength", Do: allianceStrength},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
 		{Key: '0', Label: "Quit", Do: back},

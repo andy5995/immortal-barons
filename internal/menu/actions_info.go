@@ -488,6 +488,8 @@ func gameSetup(s session.Session, w *ctx) Result {
 	if !c.BombingOps {
 		row("Bombing ops", tr(s, "Disabled"))
 	}
+	row("Pirates", onOffStr(c.Pirates))
+
 	group("This board")
 	row("Players per board", countOr(c.MaxPlayers, "Unlimited"))
 	row("Inter-BBS play", onOffStr(c.IBBS))

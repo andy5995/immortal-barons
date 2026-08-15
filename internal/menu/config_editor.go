@@ -226,6 +226,10 @@ func configPages(ibbs bool) []cfgPage {
 				}
 				c.AICount = promptSuggested(s, "AI empires", c.AICount, 5)
 			}},
+		// 45 is past the original's own field numbers, which end at 44: pirates are
+		// IB's switch, so it takes the next free number rather than one of BRE's.
+		toggle(45, "Pirates", func(c *game.Config) bool { return c.Pirates },
+			func(c *game.Config, v bool) { c.Pirates = v }),
 	}
 
 	econ := []cfgField{

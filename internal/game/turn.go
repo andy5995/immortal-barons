@@ -847,13 +847,17 @@ func (w *World) processEconomy(e *Empire) {
 	// of each turn", so per turn it is the daily rate spread across the day's turns:
 	// interest = Bank × (InterestRate/10)/100 / TurnsPerDay = Bank × InterestRate /
 	// (1000 × TurnsPerDay). int64 throughout and clamp before storing: on a 32-bit
-	// build the min(Bank,InterestCap)*InterestRate product overflows int32 before
-	// the divide. Storage stays int.
+	// build the Bank*InterestRate product overflows int32 before the divide.
+	// Storage stays int.
+	//
+	// The whole balance earns. IB used to stop paying interest above 1.6 billion,
+	// a figure that came from a player guide and turned out to be in neither
+	// binary; the money cap is the only ceiling the bank has.
 	tpd := int64(w.Config.TurnsPerDay)
 	if tpd < 1 {
 		tpd = 1
 	}
-	e.Bank += min(e.Bank, InterestCap) * int64(w.Config.InterestRate) / (1000 * tpd)
+	e.Bank += e.Bank * int64(w.Config.InterestRate) / (1000 * tpd)
 	// A bank sitting at the cap pays its interest into the treasury rather than
 	// having it destroyed: the cap limits what one purse holds, and a full purse
 	// is no reason to burn the earnings. Gold has the same cap, so a baron whose

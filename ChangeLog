@@ -117,10 +117,16 @@
   * The investment rate is quoted and carried to a tenth of a percent, as the
     original does, and stays between 3.5% and 10% a day; it was whole percents
     in a band reaching 25% a day, which paid ninefold on a ten-day term
+  * The whole bank balance earns interest; savings above 1.6 billion used to
+    earn none, on a figure that came from a player guide and is in neither of
+    the original's binaries
   * A withdrawal takes only as much gold as will fit in hand, leaving the rest in
     the bank
   * Figures of a billion or more are shown as "1.0000B" rather than in full
   * Amounts may be typed with a "b" suffix, as they already could with "k"/"m"
+  * config-during-reset: a new Pirates setting (enabled) turns the nine bands
+    off — nobody is raided and Attack Pirates leaves the menu. The original has
+    no such switch; this one stays on the board rather than in the league rules
   * config-during-reset: added the Local Attacks (enabled), Local Attack Scoring
     (disabled) and Dupe Checking (enabled) league settings, editable in both
     Configuration Editors, shown on Game Setup and broadcast to the league

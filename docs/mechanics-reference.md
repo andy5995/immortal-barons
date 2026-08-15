@@ -1683,10 +1683,13 @@ relies on it.
   read the way BRE's own config help describes it — the return over ten days, so
   the default 50 is 5.0%/day, credited across the day's turns — which comes out
   well under 1% on a turn.
-- **Interest cap: 1,599,999,999.** Gold above this does not earn interest.
-  At the cap, interest is roughly 25–35 million per turn. IB carries the ceiling
-  (`InterestCap`) but has no evidence for it: neither that figure nor a round 1.6
-  billion is a 32-bit constant anywhere in `BRE.EXE` or `BRE.OVR`.
+- **An interest cap of 1,599,999,999 is CLAIMED and REJECTED** — gold above it
+  earning no interest, and roughly 25–35 million per turn at the ceiling. Nothing
+  supports the figure: neither it nor a round 1.6 billion is a 32-bit constant
+  anywhere in `BRE.EXE` or `BRE.OVR`, and no capture shows the interest
+  flattening. IB carried it as `InterestCap` until v0.0.4 and no longer does —
+  the whole balance earns, and the money cap is the bank's only ceiling. Do not
+  put it back without evidence that is not a guide.
 - **Absolute money cap: 2,000,000,000 in BRE.** You cannot hold more than 2
   billion coins at once (in the bank or on hand) — a separate, higher ceiling
   than the interest cap.
