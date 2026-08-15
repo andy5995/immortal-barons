@@ -148,6 +148,9 @@
     and the losses both sides accept. A Quick Strike fights at 120% strength,
     the figure the original's code applies rather than the 110% its help
     advertises
+  * A group attack asks whether to target one baron or the whole planet with a
+    single key, before the roster is drawn, as the original does; the whole
+    planet was a row in the numbered baron list
   * An individual strike takes twice the land a group attack of the same weight
     would, costs one gold per unit, and asks for confirmation
   * A group attack's departure is set in hours, from 12 to 120, and the force

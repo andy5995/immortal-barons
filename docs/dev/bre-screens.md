@@ -1823,10 +1823,12 @@ not after. IB matches this (#124): it asks the same question in the same place
 and stores the answer as a departure instant, because the binary does
 (`hours/24` added to the clock — see docs/mechanics-reference.md).
 
-**One divergence IB has not closed**, recorded so it is not mistaken for settled
-behaviour: **whole-planet vs one baron** is a single keypress, `Do you wish to
-target (O)ne Dominion or (A)ll?`, echoing "Entire Planet". IB instead offers
-"(the whole planet)" as the first row of a numbered baron list.
+**Whole-planet vs one baron is a single keypress**, `Do you wish to target
+(O)ne Dominion or (A)ll?`, echoing "Entire Planet", and it is asked BEFORE the
+roster — so a planet-wide strike never draws the baron list. IB matches this
+(#125); it used to offer "(the whole planet)" as the first row of a numbered
+list. The capture shows only the "A" echo, so IB's "One Dominion" for the other
+key is a guess at wording, not a captured string.
 
 An empty force prints `Attack Aborted` (capital A on both words), where the
 attack-type menu's quit path prints `Attack aborted.` with a period.
