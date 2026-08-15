@@ -266,7 +266,7 @@ func (w *World) aiManageEconomy(e *Empire) {
 	// 1. Keep a food buffer, spending at most half the treasury on it so expansion
 	//    gold survives. AIFoodBufferTurns is sized to ride out a day of consumption
 	//    plus the 5% per-turn spoilage; too small a buffer let the correct BRE
-	//    spoilage drain the granary mid-day and starve the realm's people.
+	//    spoilage drain the food mid-day and starve the realm's people.
 	if target := upkeep * AIFoodBufferTurns; e.Food < target {
 		if price := w.FoodBuyPrice(); price > 0 {
 			buy := target - e.Food
@@ -489,7 +489,7 @@ func (w *World) aiShopMarket(e *Empire) {
 //
 // Food only qualifies when production has outrun consumption, which the food
 // buffer in aiManageEconomy usually prevents — it is handled anyway so a
-// farming-heavy realm does not sit on a granary that only spoils.
+// farming-heavy realm does not sit on food that only spoils.
 func (w *World) aiListSurplus(e *Empire) {
 	list := func(good string, surplus, shop int) {
 		if surplus <= 0 || shop <= 0 {
@@ -894,18 +894,18 @@ func (w *World) processEconomy(e *Empire) {
 	// Technology decreases it (via tf). Food escrowed on the Trading Market counts
 	// toward the total, so listing food doesn't dodge spoilage — only attacks
 	// (#17); the same sum is what BRE's decay block tests against FoodSpoilFloor,
-	// below which nothing rots at all. Spoilage comes out of the granary first,
+	// below which nothing rots at all. Spoilage comes out of the food in hand first,
 	// then the listing.
 	listedFood := w.MarketForSale(e.Name, "Food")
 	if total := e.Food + listedFood; total > FoodSpoilFloor {
 		spoiled := techLower(total*FoodSpoilPct/100, e.TechDecayFactor())
 		e.LastSpoiled = spoiled
-		fromGranary := spoiled
-		if fromGranary > e.Food {
-			fromGranary = e.Food
+		fromStock := spoiled
+		if fromStock > e.Food {
+			fromStock = e.Food
 		}
-		e.Food -= fromGranary
-		w.spoilListedFood(e.Name, spoiled-fromGranary)
+		e.Food -= fromStock
+		w.spoilListedFood(e.Name, spoiled-fromStock)
 	} else {
 		e.LastSpoiled = 0
 	}

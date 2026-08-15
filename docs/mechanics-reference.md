@@ -1822,7 +1822,7 @@ relies on it.
   all five, so the width is 5 and the floor is 300; the binary read below says
   the same. (IB paid a flat 300 until 2026-07-30, i.e. always the bottom.)
 - **Food growth is a *turn-start* credit (matches BRE).** This turn's food yield
-  (Agricultural draw + river fishing) is added to the granary at the **start**
+  (Agricultural draw + river fishing) is added to the realm's food at the **start**
   of the turn — alongside military production and gold income, exactly what the
   start-of-turn income report announces (`World.GrowFood`). So the player can
   **sell or spend this turn's growth the same turn**. (Earlier IB deferred the
@@ -1841,7 +1841,7 @@ relies on it.
   `0x37459` (armed forces), the two need routines in the food overlay unit,
   called back to back by the allocation routine at `0x37fdf` that prints
   `Your People Need N units of food` and then `Your Armed Forces Require N units
-  of food`. The prompts default to as much of the granary as the obligation
+  of food`. The prompts default to as much of the stored food as the obligation
   asks for, and if either goes unmet BRE warns that the decision *may lead to
   DISASTEROUS results* and offers to reconsider, which restarts both prompts.
 
@@ -1891,7 +1891,7 @@ relies on it.
 
   The 1,000 floor is **binary-verified** — BRE's decay block (`BRE.OVR 0xd8ef`)
   sums the stored and market-listed food and jumps past the whole step unless
-  the total exceeds 1,000, which is why a fresh realm's starting granary never
+  the total exceeds 1,000, which is why a fresh realm's starting food never
   rots. A 2026-07-11 read had hypothesised the floor **and** that only the
   excess decays; the live driving disproved the second half (excess-only gives
   22/83, not 72/133) and the first half was discarded with it. Below the floor
@@ -1899,7 +1899,7 @@ relies on it.
   down to the last unit until this was corrected.
 
   Because growth is credited at turn start (above), selling the surplus down to
-  next-turn consumption drains the granary after feeding, yielding **zero
+  next-turn consumption drains the food after feeding, yielding **zero
   spoilage** — BRE's "sell excess → no decay" behavior. (`FoodSpoilPct` and
   `FoodSpoilFloor` in `balance.go`.)
 - **Feeding & food shortfall:** each turn the realm consumes food; a **feed stage**

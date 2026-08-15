@@ -618,12 +618,12 @@ const (
 	// spoilage matched floor(5% × food) to the unit across food stocks from 1.4k
 	// to 13.9k. Technology decreases it (via TechFactor).
 	FoodSpoilPct = 5
-	// FoodSpoilFloor: a granary at or below this spoils nothing at all. BINARY-
+	// FoodSpoilFloor: a food stock at or below this spoils nothing at all. BINARY-
 	// VERIFIED — the decay block in BRE's end-of-turn routine (BRE.OVR 0xd8ef)
 	// sums the stored and market-listed food and skips the whole step unless the
-	// total exceeds 1,000, which is why a fresh realm's starting granary never
+	// total exceeds 1,000, which is why a fresh realm's starting food never
 	// rots. IB previously spoiled every stock down to the last unit; the earlier
-	// captures that "showed no floor" never ran the granary this low.
+	// captures that "showed no floor" never ran the stock this low.
 	FoodSpoilFloor = 1000
 	// Food-shortfall penalties. BINARY-VERIFIED against BRE's food-allocation
 	// routine (BRE.OVR 0x38104-0x381E5 for the people, 0x382E9-0x3832C for the

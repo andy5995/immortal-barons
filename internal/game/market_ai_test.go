@@ -137,7 +137,7 @@ func TestAIListsNoMilitaryWhenTheShopIsClosed(t *testing.T) {
 		w.AddAIEmpires(1)
 		e := w.AIEmpires()[0]
 		e.Jets, e.Carriers = 50_000, 0 // every jet is beyond carrier lift
-		e.Food = 10_000_000            // and a granary well past the buffer
+		e.Food = 10_000_000            // and food well past the buffer
 		w.aiListSurplus(e)
 		return w.MarketForSale(e.Name, "Jet")
 	}

@@ -119,7 +119,7 @@ func gatherAdvisorData(w *ctx) advisorData {
 func advisorGreeting(s session.Session, d advisorDomain) string {
 	switch d {
 	case advisorCivilian:
-		return tr(s, "Odris, your civilian advisor, Sire. I keep an ear to the people and an eye on the granary.")
+		return tr(s, "Odris, your civilian advisor, Sire. I keep an ear to the people and an eye on the food supply.")
 	case advisorEconomic:
 		return tr(s, "Vell, your treasurer, Sire. I count the coin twice — once for hope, once for the truth.")
 	case advisorMilitary:

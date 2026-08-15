@@ -39,7 +39,7 @@ func TestProcessEconomyConsumesAndSpoilsButDoesNotGrow(t *testing.T) {
 }
 
 // The point of the timing fix: selling this turn's surplus down to consumption
-// (what the sell default suggests) drains the granary to zero after feeding, so
+// (what the sell default suggests) drains the food to zero after feeding, so
 // nothing spoils — matching BRE's "sell excess -> no decay". Simulated at the
 // game layer: grow at turn start, sell everything above consumption, then the
 // end-of-turn economy consumes it to 0 with 0 spoilage.

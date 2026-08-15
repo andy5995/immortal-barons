@@ -194,7 +194,7 @@ func (w *World) BuyFromMarket(buyer *Empire, seller, good string, n int) error {
 }
 
 // spoilListedFood removes up to n units of food from realm's market listing —
-// escrowed food spoils along with granary food (see processEconomy), so listing
+// escrowed food spoils along with the food in hand (see processEconomy), so listing
 // food doesn't dodge spoilage. Returns the amount removed.
 func (w *World) spoilListedFood(realm string, n int) int {
 	l := w.marketListing(realm, "Food")
