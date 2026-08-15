@@ -289,3 +289,74 @@ func TestPreHoursGroupAttackStillDeparts(t *testing.T) {
 		t.Fatalf("a legacy attack never left on its day")
 	}
 }
+
+// An interplanetary exchange is the whole planet's business, so BOTH planets
+// hear about it: the defending board used to post nothing at all while its
+// scores moved, and the attacker's own line named nobody (#108).
+func TestBothPlanetsReportAnInterplanetaryStrike(t *testing.T) {
+	def := NewWorldSeed(DefaultConfig(), 1)
+	def.Config.BoardID = "Bravo"
+	victim := def.AddHuman("vic", "Redlands")
+	victim.Protection = 0
+	victim.Troopers, victim.Turrets = 100, 100
+	victim.Regions.Urban = 200
+	victim.syncLand()
+
+	// A force that plainly beats that defence, sent by a named realm.
+	atk := RemoteAttack{
+		ID: 7, FromBoard: "Alpha", FromEmpire: "Ironhold", TargetEmpire: "Redlands",
+		Offense:      10_000_000,
+		Contributors: []Contribution{{Owner: "iron", AttackForce: AttackForce{Troopers: 500_000}}},
+		Kind:         NormalAttack,
+	}
+	res := def.resolveRemoteAttack(atk)
+	if !res.Won {
+		t.Fatalf("the strike should have won; outcome %q", res.Outcome)
+	}
+	news := strings.Join(def.NewsToday, "\n")
+	if !strings.Contains(news, "Ironhold of Alpha") {
+		t.Errorf("the defending planet's news should name the raider, got:\n%s", news)
+	}
+	if !strings.Contains(news, "Redlands") {
+		t.Errorf("the defending planet's news should name who was hit, got:\n%s", news)
+	}
+
+	// ...and the attacker's own planet names the realm that went abroad.
+	org := NewWorldSeed(DefaultConfig(), 1)
+	org.Config.BoardID = "Alpha"
+	sender := org.AddHuman("iron", "Ironhold")
+	sender.Protection = 0
+	org.InFlight = append(org.InFlight, InFlightStrike{
+		ID: 7, Kind: "attack", TargetBoard: "Bravo", TargetEmpire: "Redlands",
+		Contributors: []Contribution{{Owner: "iron"}},
+	})
+	org.applyAttackResult(res)
+	if home := strings.Join(org.NewsToday, "\n"); !strings.Contains(home, "Ironhold") {
+		t.Errorf("our own planet's news should name the realm that struck, got:\n%s", home)
+	}
+}
+
+// A group attack stays anonymous on both sides: it is the planet's doing, and
+// naming one of several contributors would be a lie.
+func TestAGroupAttackNamesNoBaron(t *testing.T) {
+	def := NewWorldSeed(DefaultConfig(), 1)
+	def.Config.BoardID = "Bravo"
+	victim := def.AddHuman("vic", "Redlands")
+	victim.Protection = 0
+	victim.Troopers = 100
+	victim.Regions.Urban = 200
+	victim.syncLand()
+
+	def.resolveRemoteAttack(RemoteAttack{
+		ID: 8, FromBoard: "Alpha", TargetEmpire: "Redlands", Group: true,
+		Offense:      10_000_000,
+		Contributors: []Contribution{{Owner: "a"}, {Owner: "b"}},
+	})
+	news := strings.Join(def.NewsToday, "\n")
+	if !strings.Contains(news, "Alpha") {
+		t.Errorf("the planet should still be named, got:\n%s", news)
+	}
+	if strings.Contains(news, " of Alpha") {
+		t.Errorf("a group attack must not name a baron, got:\n%s", news)
+	}
+}

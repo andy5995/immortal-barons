@@ -148,6 +148,10 @@
     and the losses both sides accept. A Quick Strike fights at 120% strength,
     the figure the original's code applies rather than the 110% its help
     advertises
+  * Both planets now report an interplanetary strike: the defending planet
+    reads what it took and cost, or that it was repelled, where it read nothing
+    at all; and an individual strike names the realm that sent it on both
+    boards, where it was anonymous. A group attack stays the planet's doing
   * A group attack asks whether to target one baron or the whole planet with a
     single key, before the roster is drawn, as the original does; the whole
     planet was a row in the numbered baron list
