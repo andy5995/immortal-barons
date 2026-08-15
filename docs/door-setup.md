@@ -217,7 +217,10 @@ Set these on the **Caps & Node** page:
 - **League Number** — the number your Coordinator picked for this league, 1 to
   999. Leave it at 0 if they have not given you one. It matters when one board
   plays in two leagues that share an inbound directory: each game ignores the
-  other's packets, and marks its own files `L042-`.
+  other's packets, and marks its own files `L042-`. **Both leagues need a
+  non-zero number** for that to work. A packet is only ignored when the two
+  numbers are set and differ, so a league still on 0 reads the other league's
+  packets and has its own read in turn.
 - **League Name** — what the league calls itself, shown to players on Game
   Setup. The Coordinator sets it and it reaches every board with the rest of the
   ruleset, so you can leave it blank. Nothing routes by it; the League Number

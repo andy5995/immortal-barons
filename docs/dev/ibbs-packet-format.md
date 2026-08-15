@@ -73,7 +73,12 @@ map of it, not a second definition.
                                      // BoardSig itself and Hops, which every hub increments.
                                      // Signature IS covered, so a coordinator order cannot be
                                      // lifted out of one packet and grafted into another.
-  "League": 42,                     // league number; a board in two leagues ignores the other's
+  "League": 42,                     // league number; a board in two leagues ignores the other's.
+                                     // ReadInbound skips a packet only when the reader's own number
+                                     // and the packet's are BOTH non-zero and differ, so 0 on either
+                                     // side (an unnumbered league, or a packet predating the field)
+                                     // is accepted. Two leagues sharing an inbound directory
+                                     // therefore both need a number.
   "Hops": 0,                        // boards that have forwarded this; capped by MaxPacketHops
   "Epoch": 3,                       // sender's World.Epoch, so a packet a reset has outlived is
                                      // recognised as stale rather than applied (#104). 0 = sender
