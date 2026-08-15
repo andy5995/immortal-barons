@@ -41,8 +41,15 @@ func GuardEnd(err *error) {
 // ReadLine reads a line of input terminated by Enter, echoing keystrokes
 // (the console runs in no-echo mode). Backspace/DEL erase the last rune.
 // It returns whatever was typed so far if the stream ends.
-func ReadLine(s Session) (string, error) {
-	var b []rune
+func ReadLine(s Session) (string, error) { return ReadLineFrom(s, nil) }
+
+// ReadLineFrom is ReadLine with `typed` already in the buffer. It exists for a
+// prompt that must PEEK at the first keystroke — one offering a single-key
+// shortcut such as "?" for a list — and then hand the key back when it turns out
+// to be the start of an ordinary answer. The caller has already echoed those
+// runes, so they are not echoed again.
+func ReadLineFrom(s Session, typed []rune) (string, error) {
+	b := append([]rune(nil), typed...)
 	for {
 		r, err := s.ReadKey()
 		if err != nil {

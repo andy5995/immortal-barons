@@ -87,19 +87,41 @@ func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.Leag
 			ansi.FgWhite, tr(s, "Enter Planet Name or Number"),
 			ansi.FgBrightBlack, ansi.FgBrightWhite, ansi.FgWhite, tr(s, "for list"),
 			ansi.FgBrightBlack, ansi.FgWhite, ansi.FgBrightYellow)
-		line, err := session.ReadLine(s)
+		// Peek the first key so "?" acts at once. It is a shortcut, not an
+		// answer — asking to SEE the list and then pressing Enter to prove it is
+		// a keystroke that buys nothing, and BRE's own single-key screens set the
+		// expectation that "?" just shows you the list.
+		r, err := readKey(s)
+		if err != nil {
+			fmt.Fprint(s, ansi.Reset)
+			return nil
+		}
+		if r == '?' {
+			fmt.Fprintf(s, "?%s\n", ansi.Reset)
+			showPlanetList(s, planets)
+			continue
+		}
+		// Anything else is the start of a typed answer: echo it and read the rest
+		// of the line with it already entered.
+		var typed []rune
+		if r >= 32 {
+			fmt.Fprintf(s, "%c", r)
+			typed = []rune{r}
+		}
+		line := ""
+		if r != '\r' && r != '\n' {
+			line, err = session.ReadLineFrom(s, typed)
+		} else {
+			fmt.Fprint(s, "\n")
+		}
 		fmt.Fprint(s, ansi.Reset)
 		if err != nil {
 			return nil
 		}
 		line = strings.TrimSpace(line)
-		switch {
-		case line == "":
+		if line == "" {
 			fmt.Fprintf(s, "%s%s%s\n", ansi.FgCyan, tr(s, "None"), ansi.Reset)
 			return nil
-		case line == "?":
-			showPlanetList(s, planets)
-			continue
 		}
 		if p := matchPlanet(planets, line); p != nil {
 			showRelation(s, w, p.Name)

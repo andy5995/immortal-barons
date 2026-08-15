@@ -26,7 +26,7 @@ func ipWorld() *ctx {
 // banner AND by the queued packet, so a flow change upstream cannot leave this
 // passing on a script that ran dry.
 func TestIPMessageSinglePlanetReachesEditorAndQueues(t *testing.T) {
-	f := &fakeSession{keys: []rune("?\r4\rTerms.\r/s")}
+	f := &fakeSession{keys: []rune("?4\rTerms.\r/s")}
 	w := ipWorld()
 	ipMessageSingle(f, w)
 	out := f.out.String()
@@ -119,7 +119,7 @@ func TestRemoteTargetUsesBREPlanetPrompt(t *testing.T) {
 	// "?" lists the planets, "4" names The Eclipse by its ROSTER number (it is
 	// third in the roster and the only reachable board, so a positional picker
 	// would have wanted "1"), then the baron, 10 agents, and Y to the price.
-	f := &fakeSession{keys: []rune("?\r4\r1\r10\ry ")}
+	f := &fakeSession{keys: []rune("?4\r1\r10\ry ")}
 	terroristOps(f, w)
 	out := f.out.String()
 	for _, want := range []string{"Enter Planet Name or Number", "List of Planets", "Terrorize which baron?"} {
@@ -132,5 +132,44 @@ func TestRemoteTargetUsesBREPlanetPrompt(t *testing.T) {
 	}
 	if got := w.Outbox[0].ToBoard; got != "The Eclipse" {
 		t.Errorf("queued against %q, want The Eclipse", got)
+	}
+}
+
+// "?" at the planet prompt shows the list on the KEYPRESS. It is a shortcut,
+// not an answer, so requiring Enter to confirm a request to look at something
+// costs a keystroke and buys nothing. A typed planet number still reads as a
+// line, first character included.
+func TestPlanetPromptListsOnTheQuestionMarkAlone(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.World.Config.IBBS = true
+		w.World.LeagueNodes = []game.LeagueNode{
+			{Number: 1, Name: "Nova Hub"}, {Number: 2, Name: "The Eclipse"},
+		}
+	})
+	// No Enter after "?": the list appears, then "2" and Enter pick a planet.
+	f := &fakeSession{keys: []rune("?2\r")}
+	got := pickPlanetNamed(f, w, []string{"Nova Hub", "The Eclipse"})
+
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "List of Planets") {
+		t.Errorf("? alone did not show the list:\n%s", out)
+	}
+	if got != "The Eclipse" {
+		t.Errorf("picked %q after the list, want The Eclipse — the typed number must still read as a line", got)
+	}
+}
+
+// A multi-character answer typed straight in still works: the peeked first key
+// is handed back to the line reader rather than swallowed.
+func TestPlanetPromptKeepsTheFirstTypedCharacter(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.World.Config.IBBS = true
+		w.World.LeagueNodes = []game.LeagueNode{{Number: 1, Name: "Nova Hub"}}
+	})
+	f := &fakeSession{keys: []rune("Nova Hub\r")}
+	if got := pickPlanetNamed(f, w, []string{"Nova Hub"}); got != "Nova Hub" {
+		t.Errorf("picked %q, want Nova Hub — the first letter must not be eaten", got)
 	}
 }

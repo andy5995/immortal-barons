@@ -1,4 +1,6 @@
 (in-progress:)
+  * "?" at a planet prompt shows the list on the keypress; it no longer waits
+    for Enter as well
   * The door attaches to the caller's socket whenever the BBS gives it no live
     standard input, on every platform rather than only on Windows. A native
     Synchronet door on Linux is handed the socket and a standard input connected
