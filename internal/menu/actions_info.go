@@ -413,7 +413,7 @@ func about(s session.Session, w *ctx) Result {
 	// Body prose is off-white so the name/version headline above stays the only
 	// bright thing on the panel, per docs/dev/bre-screens.md. Wrap to the rule's
 	// width less the 2-space indent.
-	for _, wl := range strings.Split(help.Wrap(tr(s, "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and later maintained by John Dailey."), len([]rune(rule))-2), "\n") {
+	for _, wl := range strings.Split(help.Wrap(tr(s, "An independent tribute to Barren Realms Elite (BRE), created by Mehul Patel and now owned by John Dailey Software. It is maintained by Andy Alt, with contributions and advice from the BBS and Barren Realms Elite community. This project is not affiliated with, nor endorsed by, the current or past owner(s) of Barren Realms Elite."), len([]rune(rule))-2), "\n") {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgWhite, wl, ansi.Reset)
 	}
 	fmt.Fprint(s, "\n")

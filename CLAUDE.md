@@ -12,8 +12,14 @@ comments, docs, commit messages, ChangeLog). The line is public vs. private:
 
 - **Fine to name** — an actual project contributor; or a person credited for a
   **public document, project, or repository they have published** that we cite
-  or build on (proper attribution of public work). The original authors in the
-  Heritage section (Mehul Patel, John Dailey) are named for creating BRE.
+  or build on (proper attribution of public work). The Heritage section names
+  Mehul Patel, who created BRE, and John Dailey Software, which has owned it
+  since 1998 — creating and owning are different roles, so do not credit either
+  with the other's. Say **owned**, not maintained: no new BRE release is known
+  of. Do NOT write the original off as abandoned either — the copyright is
+  asserted for the current year, the games are still sold as registrations, and
+  the site was posting news within days of this being written (checked
+  2026-08-15).
 - **Do NOT name** — usernames/handles from **private or community channels**
   (forum/Discord/Slack handles, private tips, relayed disassembly notes). Credit
   the *source* generically instead: "a disassembly of the original binary",
