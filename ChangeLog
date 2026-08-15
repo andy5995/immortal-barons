@@ -1,7 +1,4 @@
 (in-progress:)
-  * The Score a turn earns is the net worth a realm starts with, rounded, rather
-    than a written-down 213; the two are the same figure for a standard start,
-    but the award now follows the starting setup if it is retuned
   * config-during-reset: a new Money Cap setting sets how much gold a realm may
     hold, on hand and again in the bank — two billion (the original's own limit)
     up to 999 billion
@@ -31,14 +28,10 @@
     has set Buy Military to anything but Yes: with the shop closed the market is
     the planet's only supply, and stocking it would hand every enemy the units
     the setting withholds
-  * A realm removed from the game takes its listings, unpaid sale gold, treaties,
-    Enemy standings and sent proposals with it, so the next realm of that name
-    starts clean
   * Food is two obligations: the people and the armed forces are billed apart
     and asked about apart, as in the original
   * Every military unit eats — one food per 200 troopers and per 10,000 of every
     other type, including units listed for sale
-  * Food at or below a thousand units does not spoil
   * River fishing follows the original's yield: a base of 110 plus a draw,
     raised by technology; rivers take a quarter of their output as food and pay
     the rest as gold
@@ -92,6 +85,9 @@
     boxed pages, listing only the fields the realm has something in
   * Empire Status shows the cumulative score the scores board ranks on, where it
     used to show net worth under that label
+  * The Score a turn earns is the net worth a realm starts with, rounded, rather
+    than a written-down 213; the same figure for a standard start, but it now
+    follows the starting setup if that is retuned
   * Today's News counts the planet live, so a new board's first day no longer
     reads as empty
   * "Since your last play" recap entries color the realm name and treaty type
