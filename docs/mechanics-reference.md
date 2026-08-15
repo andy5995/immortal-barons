@@ -559,7 +559,7 @@ All four constants live in `balance.go`; Score never drops below 0.
   leave every region on the target's books as waste, and a percentage of a
   population never reaches zero. IB used to declare a realm "utterly conquered"
   on a chemical or biological strike; that was IB's own and is gone.
-- **Attack pirates** — the nine pirate factions are living bands, not a
+- **Attack pirates** — the nine pirate factions are living raiders, not a
   fixed difficulty ladder: their strength is random (any faction can be the
   strongest). Their **names are IB-original** (BRE's coined names are its own
   creative work). Pirates raid players at random: IB rolls a **20%** chance per
@@ -600,13 +600,13 @@ All four constants live in `balance.go`; Score never drops below 0.
   the treasury at the moment shown. The likely reading is that the raid resolves
   early in the turn, before the turn's income is credited, so it takes 1/33 of
   whatever was left in hand — but that is inference, not read from the binary.
-  **A band's army is nothing but stolen goods.** BRE keeps no strength stat for
+  **A faction's army is nothing but stolen goods.** BRE keeps no strength stat for
   a faction: its defense is computed live from its loot as
   **`tanks + turrets/2 + troopers/3`** (`BRE.OVR` `0x3671b`), and the only
   writes to a faction's record anywhere in the overlay are the raid-steal path
   and the raid-resolution path — nothing seeds one. A new game therefore opens
-  with nine empty bands. That is not a contradiction: **a raid on a player is
-  not a battle**, so an empty band robs you exactly as well as a fat one and
+  with nine empty factions. That is not a contradiction: **a raid on a player is
+  not a battle**, so an empty faction robs you exactly as well as a fat one and
   arms itself from the proceeds. Faction strength is consulted only when *you*
   attack *them*.
 
@@ -623,15 +623,15 @@ All four constants live in `balance.go`; Score never drops below 0.
   while troopers, jets and tanks fall faster because they also pay battle
   losses — those three are the types the faction commits to the fight, so they
   are docked twice and turrets are not. So
-  one raid recovers a third of what a band holds, two recover 5/9, three 70% —
+  one raid recovers a third of what a faction holds, two recover 5/9, three 70% —
   which is why one attack sometimes suffices and two or three usually do.
   **A winning raid that seizes pirate-held land opens the same region-type
-  picker a Regular Attack uses (#21)**, while a raid on a landless band yields
+  picker a Regular Attack uses (#21)**, while a raid on a landless faction yields
   only gold and military.
 
   Hard caps on what a faction can hold, read from the clamp sites themselves
   (`BRE.OVR` `0x3629c` and `0x36a59`, each a min against a literal, applied at
-  the end of every raid and again after a player beats the band): troopers
+  the end of every raid and again after a player beats the faction): troopers
   **300,000**, jets **400,000**, turrets **400,000**, tanks **200,000**, agents
   **200,000**, regions **300**, gold **600,000,000**. A raid also grants the
   faction `Random(25)` regions. This supersedes the earlier reading of the
@@ -751,7 +751,7 @@ season is not a fair one.** Only a board's identity, its file paths, and its
 session policy (the idle-caller timeout and its warning count) stay local; so
 does the AI count, which a league board never uses. Note this is a WIDER set
 than the fields the Configuration Editor stars — the star means "an inter-BBS
-option", which a rule like the tax cap or the pirate bands is not, though both
+option", which a rule like the tax cap or the pirate factions is not, though both
 still have to match across the league. `TestEveryGameRuleIsBroadcast` holds the
 line: a field added to `Config` must be either in `LeagueConfig` or in
 `perBoardConfigFields` with the reason it is not a rule. It found three on the

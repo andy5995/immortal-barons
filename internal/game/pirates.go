@@ -18,7 +18,7 @@ var PirateFactions = []string{
 	"Trilobarians", "Raptorians", "Gorgonoids", "Ammonians",
 }
 
-// PirateFaction is a living pirate band. It raids empires — carrying off one
+// PirateFaction is a living pirate faction. It raids empires — carrying off one
 // kind of holding at a time and being granted new regions by the game (it does
 // not steal the victim's regions) — and grows the longer it is ignored, since
 // nothing shrinks it but a player attacking it. Pirates never take bombers or
@@ -27,7 +27,7 @@ type PirateFaction struct {
 	Name string
 	Land int // regions it holds (game-granted on raids; capturable)
 	Gold int64
-	// The loot IS the army. BRE keeps no strength stat for a band — see Defense.
+	// The loot IS the army. BRE keeps no strength stat for a faction — see Defense.
 	LootTroopers int
 	LootJets     int
 	LootTurrets  int
@@ -40,12 +40,12 @@ type PirateFaction struct {
 
 // Defense is what a faction fields when a player raids it, computed live from
 // the loot it is sitting on: BINARY-VERIFIED as tanks + turrets/2 + troopers/3
-// (BRE.OVR 0x3671b). A band has no strength of its own — it fights with what it
+// (BRE.OVR 0x3671b). A faction has no strength of its own — it fights with what it
 // stole, so draining its hoard is what actually weakens it, and a faction that
 // has robbed nobody cannot defend itself at all.
 //
 // Note this does NOT gate raiding: a raid on a player is not a battle (the
-// steal path never reads these fields), so day-one empty bands rob players and
+// steal path never reads these fields), so day-one empty factions rob players and
 // arm themselves from the proceeds.
 func (p *PirateFaction) Defense() int {
 	return p.LootTanks + p.LootTurrets/2 + p.LootTroopers/3
@@ -97,7 +97,7 @@ const (
 	PirateRaidLandMax     = 25     // binary: Random(25) regions granted to a faction per raid
 
 	// Hard caps on faction holdings, clamped at the end of every raid and again
-	// after a player beats the band. No bombers/carriers — a faction never
+	// after a player beats the faction. No bombers/carriers — a faction never
 	// holds either. BINARY-VERIFIED from the clamp sites themselves (BRE.OVR
 	// 0x3629c onward and 0x36a59 onward, each a min against a literal), which
 	// supersedes the earlier reading of the BRE.EXE table at 0x14ede: that
@@ -112,10 +112,10 @@ const (
 )
 
 // seedPirates creates the nine factions EMPTY. Nothing in the original seeds a
-// band with an army or with land: the only writes to its record anywhere in the
+// faction with an army or with land: the only writes to its record anywhere in the
 // overlay are the raid-steal path and the raid-resolution path, so a faction
 // holds exactly what it has taken from players. A new game therefore opens with
-// nine bands that can rob you from day one and cannot yet defend themselves.
+// nine factions that can rob you from day one and cannot yet defend themselves.
 func (w *World) seedPirates() {
 	w.Pirates = make([]PirateFaction, len(PirateFactions))
 	for i, name := range PirateFactions {
@@ -127,8 +127,8 @@ func (w *World) seedPirates() {
 func battleLoss(have, pct int) int { return have * pct / 100 }
 
 // EnsurePirates seeds the factions after loading a save that predates them, and
-// again if the sysop turns pirates back on. Turning them OFF leaves the bands'
-// records alone rather than emptying them, so a band keeps whatever it had
+// again if the sysop turns pirates back on. Turning them OFF leaves the factions'
+// records alone rather than emptying them, so a faction keeps whatever it had
 // stolen and the switch is reversible.
 func (w *World) EnsurePirates() {
 	if w.Config.Pirates && len(w.Pirates) == 0 {
@@ -263,7 +263,7 @@ func (s PirateSpoil) marketGood() string {
 // front-end owns the wording and the faction's color, so the engine stores the
 // parts rather than a sentence.
 //
-// Slot is the band's index in World.Pirates. The colour BRE paints a faction
+// Slot is the faction's index in World.Pirates. The colour BRE paints a faction
 // belongs to its SLOT, not its name (PIRATECOLOR is indexed by faction number),
 // so the front-end must not look the colour up by name — a world seeded under
 // different faction names would find no match and fall back to plain body text.
@@ -419,14 +419,14 @@ func raidLosses(troopers, jets, tanks int) string {
 //
 // BOTH sides take casualties whichever way it goes, then a win hands back a
 // third of the faction's gold, regions, agents and troopers and a quarter of
-// its jets, turrets and tanks — so draining a fat band takes several hits.
+// its jets, turrets and tanks — so draining a fat faction takes several hits.
 // The report names the loot; capturedLand is the number of regions won (0 on a
 // loss or against a landless faction), which the caller lets the player allocate
 // by type through the same picker a Regular Attack uses (#21). Reclaimed gold and
 // military land in the attacker at once; only the land is deferred.
 func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (report string, capturedLand int) {
 	if faction < 0 || faction >= len(w.Pirates) {
-		return "There is no such pirate faction.", 0
+		return "There are no pirates by that name.", 0
 	}
 	p := &w.Pirates[faction]
 	startForces := p.Defense() // battle scale for Score, before any reclaim shrinks it
