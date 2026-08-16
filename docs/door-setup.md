@@ -354,19 +354,22 @@ The gain is that the game knows nothing about mail, which means:
 - **The wrapper is optional**: boards using another transport keep `.msg` files
   and mailer-specific settings entirely out of the path.
 
-What you give up is that BRE arranged delivery for you. Here you point your own
-transport at the outbound directory — a file box entry if you already run a
-mailer, or a `cron` line if you do not.
+What changes is that arranging delivery is now yours. Point a transport at the
+outbound directory: a file box entry if you already run a mailer, a timed event
+if you do not. Or run `barons-ftn`, which gives you the original's handoff back.
 
 The rest of the mapping:
 
 | Barren Realms Elite | Immortal Barons |
 |---|---|
 | `BBS.CFG`, seven lines by position | `bbs.cfg`, one keyword per line |
+| Line 1, sysop name | nothing — the wrapper is from `Immortal Barons` |
 | Line 2, BBS name | `BoardID` |
+| Line 3, node address | `ibnodes.dat`, where the helper reads it |
 | Line 4, incoming files | `Inbound` |
+| Line 5, netmail directory | `ftn.cfg`'s `NetmailDir` |
 | Line 6, league number | `LeagueNumber` |
-| Lines 1, 3, 5, 7 | optional `barons-ftn` plus `ftn.cfg` |
+| Line 7, mailer | `ftn.cfg`'s `Binkley`, and only two ways rather than seven |
 | `\OUTBOUND`, fixed | `Outbound`, and you choose the path |
 | `ROUTE.CFG` | the roster's `HOST` entries, plus `Link` lines |
 | `BRNODES.DAT` | `ibnodes.dat` |
@@ -543,6 +546,22 @@ immortal-barons -planetary -data /path/to/data
 barons-ftn -data /path/to/data
 ```
 
+**Writing the netmail is not sending it.** `barons-ftn` leaves a `.msg` in the
+netmail directory and stops. What carries it is whatever already carries your
+netmail. On Synchronet that is two more steps: SBBSecho packs the message and
+its attachment into the outbound, then the mailer sends it on its next outbound
+session. An incoming poll from the other board sends nothing.
+
+```
+sbbsecho                          # pack the .msg and its attachment
+jsexec -c ctrl exec/binkit.js     # poll out; an inbound session sends nothing
+```
+
+Both usually run from your BBS's timed events already, so there is often
+nothing to add. Knowing the shape helps when nothing arrives. A `.msg` left in
+the netmail directory means the game did its part, and the mail system has not
+run. That is a different problem from a `.msg` that never appeared.
+
 Create `ftn.cfg` in that data directory:
 
 ```
@@ -552,6 +571,12 @@ Binkley    No
 
 - **NetmailDir** is the directory where your BBS or mailer watches for Type-2
   `.msg` netmail. A relative path is read relative to the game data directory.
+  Not every BBS has one. Mystic keeps its own message bases and watches no such
+  directory, so the helper has nothing to hand a packet to; use a file box or
+  another transport there. On Synchronet, read the path from `scfg` → Networks
+  → FidoNet EchoMail and NetMail → **NetMail Directory**. Check **Allow File
+  Attachments** on that screen too. With it off, the wrapper is written and then
+  ignored.
 - **Binkley** is `Yes` when the mailer uses Binkley-style file attaches,
   including BinkIT, the Binkley-style mailer shipped with Synchronet, and `No`
   for a non-Binkley mailer. Synchronet can be used with several mailers, so the
@@ -976,8 +1001,9 @@ game never moves a file between boards, and your mailer knows nothing about the
 game, so both have to run. The order matters: polling before the game has
 written its outbox sends the packets from the run before.
 
-Run it from cron, or from your BBS's own event scheduler. How often is up to
-you. Every exchange is a round trip, and the Travel Times screen in the game
+Run it from your BBS's own event scheduler if it has one. If it has none, use
+whatever schedules jobs on your system: `cron` or a systemd timer on Unix, Task
+Scheduler on Windows. How often is up to you. Every exchange is a round trip, and the Travel Times screen in the game
 reports how long your players actually wait. A league whose boards poll each hour
 plays very differently from one that polls at 3am.
 
