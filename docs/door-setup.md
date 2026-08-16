@@ -12,6 +12,13 @@ software on any platform Go supports.
 The game keeps all its files in one data directory (default `./data`). Point
 the `-data` option at it.
 
+**Keep that directory on a local disk, and run every node from the same
+computer.** Several nodes can play at once, because the game locks the world
+file for the moment of each change and the nodes take turns. That lock works
+inside one computer only. If the directory sits on a network share, or nodes
+run on two computers, two of them can save over each other. Nothing reports an
+error — a turn simply goes missing.
+
 Run `immortal-barons -help` to see all the command-line options. The
 [Command Reference](command-reference.md) explains every option in one place.
 

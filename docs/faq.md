@@ -109,6 +109,10 @@ normally use a moving highlight are numbered in that mode, so they stay usable.
 - Each action reads and writes the shared game file under a brief lock, so
   nodes wait for each other only for the instant of a change, not for a whole
   session.
+- **All the nodes must run on the same computer, and the data directory must be
+  on a local disk.** The lock works inside one computer only. On a network
+  share, or with nodes running on two computers, two of them can save over each
+  other. You would see no error; a turn would just be gone.
 - If your empire is attacked while you are at the menus, a notice appears the
   next time you press a key. Orders you already typed are adjusted to what you
   still hold, and the game tells you when that happens.
