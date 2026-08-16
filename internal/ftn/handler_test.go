@@ -192,7 +192,14 @@ func TestRunPreflightsEverySubjectBeforeMovingPackets(t *testing.T) {
 
 func newTestSetup(t *testing.T) string {
 	t.Helper()
-	data, err := os.MkdirTemp("", "i")
+	tempRoot := os.TempDir()
+	if filepath.VolumeName(tempRoot) == "" {
+		// Darwin's system temp directory alone exceeds the 71-byte Subject
+		// limit. Use the short conventional Unix path; Windows needs its
+		// volume-qualified temp directory.
+		tempRoot = "/tmp"
+	}
+	data, err := os.MkdirTemp(tempRoot, "i")
 	if err != nil {
 		t.Fatal(err)
 	}
