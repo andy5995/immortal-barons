@@ -552,7 +552,6 @@ func gameSetup(s session.Session, w *ctx) Result {
 		row("Clingy Annihilator", onOffStr(c.ClingyAnnihilator))
 		row("Local attacks", onOffStr(c.LocalAttacks))
 		row("Local attack scoring", onOffStr(c.LocalAttackScoring))
-		row("Dupe checking", onOffStr(c.DupeChecking))
 		row("Allied market trading", onOffStr(c.IPTrading))
 	}
 	pause(s)
