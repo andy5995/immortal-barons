@@ -327,6 +327,52 @@ Run it as often as you like. More often means shorter travel times between
 planets. The in-game "Travel Times" screen shows players how recently packets
 have arrived, so they know how fast operations move.
 
+### If you are coming from Barren Realms Elite
+
+BRE hands each packet to your mailer. It writes the packet to its own
+`\OUTBOUND` directory, then drops a `.msg` wrapper in your netmail directory so
+the mailer knows to attach the file and send it. Four of `BBS.CFG`'s seven lines
+serve that wrapper: the sysop name and node address that go inside it, the
+netmail directory it is written to, and which mailer's flavour to use.
+
+Immortal Barons stops one step earlier. It writes the packet and leaves it
+there, so there is no wrapper, no netmail directory and no mailer setting, and
+`bbs.cfg` has no line for any of the four. Watch for `.brp` files in your
+outbound directory; that is the equivalent of seeing the `.msg` appear.
+
+The gain is that the game knows nothing about mail, which means:
+
+- **A league needs no mailer at all.** Two boards on one machine sharing a
+  directory is a working league, and so is a pair of boards syncing a folder
+  between them.
+- **Any transport works**, including ones written long after BRE was. You are
+  not held to the four mailers BRE knows about, and there is no once-a-day limit
+  for choosing the wrong one.
+- **The wrapper's failure modes are gone**: no `.msg` dialect to get wrong, and
+  nothing of ours in the netmail directory to collide with another door's files.
+
+What you give up is that BRE arranged delivery for you. Here you point your own
+transport at the outbound directory — a file box entry if you already run a
+mailer, or a `cron` line if you do not.
+
+The rest of the mapping:
+
+| Barren Realms Elite | Immortal Barons |
+|---|---|
+| `BBS.CFG`, seven lines by position | `bbs.cfg`, one keyword per line |
+| Line 2, BBS name | `BoardID` |
+| Line 4, incoming files | `Inbound` |
+| Line 6, league number | `LeagueNumber` |
+| Lines 1, 3, 5, 7 | no equivalent — all wrapper settings |
+| `\OUTBOUND`, fixed | `Outbound`, and you choose the path |
+| `ROUTE.CFG` | the roster's `HOST` entries, plus `Link` lines |
+| `BRNODES.DAT` | `ibnodes.dat` |
+| `BRE PLANETARY` | `immortal-barons -planetary` |
+
+The keywords are there because a file read by position gives no warning when a
+line is missing: every value below the gap moves up one and is read as the wrong
+setting.
+
 ## The node list: `ibnodes.dat`
 
 The node list names every board in the league. It uses the same simple layout
