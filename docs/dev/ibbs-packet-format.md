@@ -29,11 +29,14 @@ a shared mount). `RunPlanetary` (`immortal-barons -planetary`, also folded into
 group attacks, exports this board's scores, and writes the outbox.
 
 `barons-ftn` is the optional FTN adapter. It remains outside the game process:
-it reads the existing board, roster, and route files, atomically claims each
-outbound `.brp` into that directory's `fido/` child, then creates an FTS-0001
-Type-2 file-attach `.msg`. An unaddressed mesh broadcast is fanned out to one
-distinct attachment and message per other roster node; an addressed packet is
-sent to its routed next hop. Its only settings are in `ftn.cfg`.
+it takes the ordinary local game lock, reads the existing board, roster, and
+route files, renames each outbound `.brp` into that directory's `fido/` child,
+then creates an FTS-0001 Type-2 file-attach `.msg` with exclusive creation. An
+unaddressed mesh broadcast is fanned out with real copies to one distinct
+attachment and message per other roster node; an addressed packet is sent to
+its routed next hop. No hard-link support is required. Its only settings are in
+`ftn.cfg`. `StampOutbox` and `WriteOutbox` run under the same lock, so the
+adapter cannot observe a packet between signing and the end of its file write.
 
 ## Packet files (`*.brp`)
 

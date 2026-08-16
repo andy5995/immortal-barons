@@ -3,6 +3,7 @@ package ftn
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"slices"
@@ -22,8 +23,7 @@ type Queued struct {
 
 // Result describes one outbound scan.
 type Result struct {
-	Queued         []Queued
-	LostClaimRaces int
+	Queued []Queued
 }
 
 // Run scans every configured outbound directory. A packet is first moved into
@@ -34,6 +34,14 @@ func Run(dataDir string) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
+	lock, err := store.Lock(board, true)
+	if err != nil {
+		return Result{}, err
+	}
+	defer lock.Release()
+	// The game holds this same lock through StampOutbox and WriteOutbox. By the
+	// time the scan begins, every visible packet is a complete JSON file and has
+	// its BoardSig when this board has signing configured.
 	transport, err := LoadConfig(dataDir)
 	if err != nil {
 		return Result{}, err
@@ -119,7 +127,6 @@ func scanDirectory(dir string, transport Config, origin Address, world *game.Wor
 			return fmt.Errorf("claim %s: %w", source, err)
 		}
 		if !won {
-			result.LostClaimRaces++
 			continue
 		}
 		queued, err := queueClaimed(claimed, transport, origin, world, nodes)
@@ -134,19 +141,18 @@ func scanDirectory(dir string, transport Config, origin Address, world *game.Wor
 	return nil
 }
 
-// claimPacket uses link+unlink as an atomic, no-replace move. The fido target
-// is beneath the source directory and therefore on the same filesystem. If two
-// copies of the handler race, only one can create the destination link.
+// claimPacket runs while Run holds the board's cross-platform file lock, so two
+// handlers cannot both pass the target check. Rename is the ownership claim:
+// only the process that moves the source goes on to create netmail.
 func claimPacket(source, destination string) (bool, error) {
-	if err := os.Link(source, destination); err != nil {
-		if os.IsExist(err) || os.IsNotExist(err) {
-			return false, nil
-		}
+	if _, err := os.Lstat(destination); err == nil {
+		return false, nil
+	} else if !os.IsNotExist(err) {
 		return false, err
 	}
-	if err := os.Remove(source); err != nil && !os.IsNotExist(err) {
-		if rollbackErr := os.Remove(destination); rollbackErr != nil {
-			return false, fmt.Errorf("remove source: %v (remove claim: %v)", err, rollbackErr)
+	if err := os.Rename(source, destination); err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
 		}
 		return false, err
 	}
@@ -154,13 +160,12 @@ func claimPacket(source, destination string) (bool, error) {
 }
 
 func restorePacket(claimed, source string) error {
-	if err := os.Link(claimed, source); err != nil {
+	if _, err := os.Lstat(source); err == nil {
+		return fmt.Errorf("source path already exists")
+	} else if !os.IsNotExist(err) {
 		return err
 	}
-	if err := os.Remove(claimed); err != nil {
-		return err
-	}
-	return nil
+	return os.Rename(claimed, source)
 }
 
 func queueClaimed(path string, transport Config, origin Address, world *game.World, nodes []game.LeagueNode) ([]Queued, error) {
@@ -214,7 +219,7 @@ func queueBroadcast(path string, transport Config, origin Address, world *game.W
 	paths := []string{path}
 	for _, node := range recipients[1:] {
 		copyPath := broadcastCopyPath(path, node.Number)
-		if err := os.Link(path, copyPath); err != nil {
+		if err := copyFileExclusive(path, copyPath); err != nil {
 			removeFiles(paths[1:])
 			return nil, fmt.Errorf("copy broadcast for node %d: %w", node.Number, err)
 		}
@@ -233,6 +238,30 @@ func queueBroadcast(path string, transport Config, origin Address, world *game.W
 		queued = append(queued, item)
 	}
 	return queued, nil
+}
+
+func copyFileExclusive(source, destination string) (err error) {
+	in, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	out, err := os.OpenFile(destination, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err != nil {
+		return err
+	}
+	ok := false
+	defer func() {
+		if closeErr := out.Close(); err == nil && closeErr != nil {
+			err = closeErr
+		}
+		if !ok || err != nil {
+			os.Remove(destination)
+		}
+	}()
+	_, err = io.Copy(out, in)
+	ok = err == nil
+	return err
 }
 
 func broadcastCopyPath(path string, node int) string {

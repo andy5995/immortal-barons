@@ -585,10 +585,15 @@ subject. The pathname must fit the Type-2 subject field (71 bytes, or 70 with
 the Binkley `^`); choose a short outbound path if necessary. The FTN software
 removes the claimed file after sending it.
 
-The move is the concurrency claim. If two door nodes launch the helper at the
-same time, only one can create the destination file; only that process creates
-the `.msg` or broadcast set. A malformed packet or a message-creation failure
-is moved back to the outbound directory for a later run.
+The helper takes the same cross-platform local file lock as the game before it
+scans, so two door nodes cannot move the same source together or race a game
+write. The game holds that lock while it signs and writes the outbox, so a
+packet visible to the helper is complete and, when board signing is configured,
+already signed. The move is the ownership claim; only the process that moves a
+packet creates its `.msg` or broadcast set. A malformed packet or a
+message-creation failure is moved back to the outbound directory for a later
+run. This uses ordinary rename, exclusive file creation, and real copies—hard-
+link support is not required.
 
 ## League-wide rules (Coordinator only)
 

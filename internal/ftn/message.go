@@ -42,38 +42,26 @@ func createFileAttach(netmailDir, attached string, origin, destination Address, 
 	data = append(data, header[:]...)
 	data = append(data, body...)
 	data = append(data, 0)
-	// Publish only a complete message: the mailer cannot see the temporary name,
-	// and linking it to N.msg is both atomic and no-replace across competing
-	// handler processes.
-	tmp, err := os.CreateTemp(netmailDir, ".barons-ftn-*.tmp")
-	if err != nil {
-		return "", err
-	}
-	tmpPath := tmp.Name()
-	defer os.Remove(tmpPath)
-	if err := tmp.Chmod(0o644); err != nil {
-		tmp.Close()
-		return "", err
-	}
-	if _, err := tmp.Write(data); err != nil {
-		tmp.Close()
-		return "", err
-	}
-	if err := tmp.Close(); err != nil {
-		return "", err
-	}
-
 	first, err := firstUnusedMessageNumber(netmailDir)
 	if err != nil {
 		return "", err
 	}
 	for number := first; ; number++ {
 		path := filepath.Join(netmailDir, strconv.FormatUint(uint64(number), 10)+".msg")
-		err := os.Link(tmpPath, path)
+		f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 		if os.IsExist(err) {
 			continue // another handler won this message number
 		}
 		if err != nil {
+			return "", err
+		}
+		if _, err := f.Write(data); err != nil {
+			f.Close()
+			os.Remove(path)
+			return "", err
+		}
+		if err := f.Close(); err != nil {
+			os.Remove(path)
 			return "", err
 		}
 		return path, nil
