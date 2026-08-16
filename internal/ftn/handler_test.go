@@ -13,6 +13,11 @@ import (
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
+const (
+	testOutboundDir = "o"
+	testNetmailDir  = "n"
+)
+
 func TestRunMovesAndRoutesPacket(t *testing.T) {
 	data := newTestSetup(t)
 	packet := game.Packet{FromBoard: "Bravo BBS", ToBoard: "Old Name", FromNode: 2, ToNode: 3}
@@ -32,7 +37,7 @@ func TestRunMovesAndRoutesPacket(t *testing.T) {
 	if queued.NextHop != "Alpha BBS" || queued.Address.String() != "1:229/100" {
 		t.Errorf("next hop = %q %s, want Alpha BBS 1:229/100", queued.NextHop, queued.Address)
 	}
-	if filepath.Dir(queued.PacketPath) != filepath.Join(data, "outbound", "fido") {
+	if filepath.Dir(queued.PacketPath) != filepath.Join(data, testOutboundDir, "fido") {
 		t.Errorf("packet moved to %q", queued.PacketPath)
 	}
 	message, err := os.ReadFile(queued.Message)
@@ -79,7 +84,7 @@ func TestConcurrentRunsQueuePacketOnce(t *testing.T) {
 	if queued != 1 {
 		t.Fatalf("concurrent runs queued %d messages, want 1", queued)
 	}
-	messages, err := filepath.Glob(filepath.Join(data, "netmail", "*.msg"))
+	messages, err := filepath.Glob(filepath.Join(data, testNetmailDir, "*.msg"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -131,7 +136,7 @@ func TestBroadcastGetsOneAttachmentPerOtherBoard(t *testing.T) {
 
 func TestBadPacketIsRestoredToOutbound(t *testing.T) {
 	data := newTestSetup(t)
-	source := filepath.Join(data, "outbound", "bad.brp")
+	source := filepath.Join(data, testOutboundDir, "bad.brp")
 	if err := os.WriteFile(source, []byte("not json"), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -145,7 +150,7 @@ func TestBadPacketIsRestoredToOutbound(t *testing.T) {
 
 func TestRunPreflightsEverySubjectBeforeMovingPackets(t *testing.T) {
 	data := newTestSetup(t)
-	outbound := filepath.Join(data, "outbound")
+	outbound := filepath.Join(data, testOutboundDir)
 	good := filepath.Join(outbound, "a.brp")
 	body, err := json.Marshal(game.Packet{FromNode: 2})
 	if err != nil {
@@ -178,7 +183,7 @@ func TestRunPreflightsEverySubjectBeforeMovingPackets(t *testing.T) {
 			t.Errorf("preflight moved %s: %v", path, err)
 		}
 	}
-	if messages, err := filepath.Glob(filepath.Join(data, "netmail", "*.msg")); err != nil {
+	if messages, err := filepath.Glob(filepath.Join(data, testNetmailDir, "*.msg")); err != nil {
 		t.Fatal(err)
 	} else if len(messages) != 0 {
 		t.Errorf("preflight created messages: %v", messages)
@@ -187,20 +192,20 @@ func TestRunPreflightsEverySubjectBeforeMovingPackets(t *testing.T) {
 
 func newTestSetup(t *testing.T) string {
 	t.Helper()
-	data, err := os.MkdirTemp("/tmp", "ib-ftn-")
+	data, err := os.MkdirTemp("", "i")
 	if err != nil {
 		t.Fatal(err)
 	}
 	t.Cleanup(func() { os.RemoveAll(data) })
-	for _, dir := range []string{"outbound", "netmail"} {
+	for _, dir := range []string{testOutboundDir, testNetmailDir} {
 		if err := os.Mkdir(filepath.Join(data, dir), 0o755); err != nil {
 			t.Fatal(err)
 		}
 	}
 	files := map[string]string{
 		"config.json":         "{}\n",
-		store.BoardConfigFile: "BoardID Bravo BBS\nOutbound outbound\n",
-		ConfigFile:            "NetmailDir netmail\n",
+		store.BoardConfigFile: "BoardID Bravo BBS\nOutbound " + testOutboundDir + "\n",
+		ConfigFile:            "NetmailDir " + testNetmailDir + "\n",
 		store.RouteFile:       "ROUTE * 1\n",
 		store.NodeListFile: "1\nAlpha BBS\n1:229/100\nDetroit\nMI\nUSA\n\n" +
 			"2\nBravo BBS\n1:229/200\nLansing\nMI\nUSA\n\n" +
@@ -220,7 +225,7 @@ func writePacket(t *testing.T, data string, packet game.Packet) string {
 	if err != nil {
 		t.Fatal(err)
 	}
-	path := filepath.Join(data, "outbound", "packet.brp")
+	path := filepath.Join(data, testOutboundDir, "packet.brp")
 	if err := os.WriteFile(path, body, 0o644); err != nil {
 		t.Fatal(err)
 	}
