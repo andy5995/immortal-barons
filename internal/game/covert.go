@@ -70,6 +70,33 @@ func (w *World) spySuccess(a, d *Empire) bool {
 	return w.rng.Intn(total) < offense
 }
 
+// covertFoiled files the target's event for a covert operation that was caught,
+// naming the realm that sent the agent. attempt names the operation as the
+// target's own security would describe it ("a bribery attempt").
+//
+// BINARY-VERIFIED: BRE tells a target who came after it only when an agent is
+// caught; an operation that succeeds stays anonymous. Three independent paths
+// in the original agree, so the split is the rule rather than one screen's
+// wording:
+//
+//   - the local Send Spy / Spy on Relations report (BRE.OVR 0x016d67) files an
+//     event on the target naming the caller's realm on the caught branch, and
+//     files nothing at all when the spy gets away;
+//   - a received interplanetary agent packet (BRE.OVR 0x04a96b) counts the
+//     agents that failed and, only when that count is non-zero, files a line
+//     naming the sending realm and its planet — the per-operation lines the
+//     target sees for the agents that DID get through carry no source at all;
+//   - a received interplanetary bombing run (BRE.OVR 0x04a09a) fails two rolls
+//     in three and, on failure, files the one line in its template that names
+//     the source; the four success lines name nobody.
+//
+// The shield and bribed-agent guards in covertSuccess route to this same branch,
+// so Expose Enemy Ops and Bribery buy the defender the attacker's name — which
+// is what makes them worth their fee.
+func covertFoiled(a, d *Empire, attempt string) {
+	d.addEvent(fmt.Sprintf("Your security foiled %s — the agent was in %s's pay.", attempt, a.Name))
+}
+
 // ErrCovertCapReached is returned when an EFFECT covert op is attempted after
 // one already ran this turn (BRE: "Limit one try per turn!"). Info ops (Send
 // Spy, Spy on Relations) are exempt.
@@ -108,13 +135,13 @@ func (w *World) SendSpy(a, d *Empire) (string, error) {
 			d.Name, d.Land, d.Troopers, d.Turrets, d.Tanks, d.Offense(), d.Defense(), d.Gold, d.Agents), nil
 	}
 	a.Agents--
-	d.addEvent("Your counter-intelligence caught an enemy spy.")
+	covertFoiled(a, d, "a spying attempt")
 	return "Your spy was caught and did not return.", nil
 }
 
 // SupportDissensions agitates d's own troopers into fleeing — eliminating
-// ~10% of them on success; on failure the agent is lost. Covert ops are
-// secret, so the victim event does not name the attacker.
+// ~10% of them on success; on failure the agent is lost. A successful op is
+// anonymous; a caught agent gives the attacker away (see covertFoiled).
 func (w *World) SupportDissensions(a, d *Empire) (string, error) {
 	if err := w.covertCost(a, CostSupportDissensions, true); err != nil {
 		return "", err
@@ -126,7 +153,7 @@ func (w *World) SupportDissensions(a, d *Empire) (string, error) {
 		return fmt.Sprintf("Your agents sowed dissension in %s: %d troopers eliminated.", d.Name, lost), nil
 	}
 	a.Agents--
-	d.addEvent("Your security foiled an enemy sabotage attempt.")
+	covertFoiled(a, d, "a sabotage attempt")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -144,7 +171,7 @@ func (w *World) DemoralizeForces(a, d *Empire) (string, error) {
 		return fmt.Sprintf("You demoralized %s's forces, lowering their morale.", d.Name), nil
 	}
 	a.Agents--
-	d.addEvent("Your security foiled an enemy attempt to demoralize your forces.")
+	covertFoiled(a, d, "an attempt to demoralize your forces")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -166,7 +193,7 @@ func (w *World) SetUp(a, d *Empire) (string, error) {
 		return fmt.Sprintf("%s holds no alliance for us to unravel.", d.Name), nil
 	}
 	a.Agents--
-	d.addEvent("Your security foiled an enemy attempt to set us up.")
+	covertFoiled(a, d, "an attempt to set you up")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -212,7 +239,7 @@ func (w *World) SpyOnRelations(a, d *Empire) (string, error) {
 		return fmt.Sprintf("Treaties of %s:\n%s", d.Name, strings.Join(lines, "\n")), nil
 	}
 	a.Agents--
-	d.addEvent("Your counter-intelligence caught a spy probing your relations.")
+	covertFoiled(a, d, "an attempt to spy on your relations")
 	return "Your spy was caught and did not return.", nil
 }
 
@@ -233,7 +260,7 @@ func (w *World) Bribery(a, d *Empire) (string, error) {
 		return fmt.Sprintf("You bribed an agent in %s. Their covert ops against you will now fail.", d.Name), nil
 	}
 	a.Agents--
-	d.addEvent("Your security foiled a bribery attempt.")
+	covertFoiled(a, d, "a bribery attempt")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -250,7 +277,7 @@ func (w *World) StirRevolts(a, d *Empire) (string, error) {
 		return fmt.Sprintf("You stirred revolts in %s, lowering its popular support.", d.Name), nil
 	}
 	a.Agents--
-	d.addEvent("Your security foiled an enemy agitation attempt.")
+	covertFoiled(a, d, "an agitation attempt")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -266,7 +293,7 @@ func (w *World) BombFood(a, d *Empire) (string, error) {
 		return fmt.Sprintf("You destroyed %d units of %s's food.", lost, d.Name), nil
 	}
 	a.Agents--
-	d.addEvent("Your security foiled an enemy raid on your food stores.")
+	covertFoiled(a, d, "a raid on your food stores")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -302,7 +329,7 @@ func (w *World) BombTradingMarket(a, d *Empire) (string, error) {
 		return fmt.Sprintf("You wrecked %s's trading market: %d listed goods and %d gold destroyed.", d.Name, goods, proceeds), nil
 	}
 	a.Agents--
-	d.addEvent("Your security foiled an enemy strike on your trading market.")
+	covertFoiled(a, d, "a strike on your trading market")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -331,7 +358,7 @@ func (w *World) BombTradeRoutes(a, d *Empire) (string, error) {
 		return fmt.Sprintf("You severed %s's %s with %s.", d.Name, ttype, partner), nil
 	}
 	a.Agents--
-	d.addEvent("Your security foiled an enemy attempt to sever your trade routes.")
+	covertFoiled(a, d, "an attempt to sever your trade routes")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -351,7 +378,7 @@ func (w *World) UndermineInvestments(a, d *Empire) (string, error) {
 		return fmt.Sprintf("You undermined %s's investments: %d gold lost.", d.Name, lost), nil
 	}
 	a.Agents--
-	d.addEvent("Your security foiled an enemy attempt to undermine your investments.")
+	covertFoiled(a, d, "an attempt to undermine your investments")
 	return "The operation failed and your agent was lost.", nil
 }
 
@@ -459,7 +486,7 @@ func (w *World) SlappenheimerStrike(a, d *Empire) (string, error) {
 	}
 	if !w.covertSuccess(a, d) {
 		a.Agents--
-		d.addEvent("Your security foiled an enemy R5-Slappenheimer strike.")
+		covertFoiled(a, d, "an R5-Slappenheimer strike")
 		return "The operation failed and your agent was lost.", nil
 	}
 	// BINARY-VERIFIED interception: the original rolls Random(100) against HALF
@@ -485,6 +512,11 @@ func (w *World) SlappenheimerStrike(a, d *Empire) (string, error) {
 	if hit == "" {
 		return fmt.Sprintf("Your R5-Slappenheimer reached %s but did negligible damage.", d.Name), nil
 	}
+	// A missile that lands is anonymous here but not on the interplanetary path
+	// (slappenheimerEffect). That is not an oversight: the original names the
+	// sender on a sabre that arrives from another planet and the local covert
+	// path it uses for a same-planet strike is not readable, so only the half
+	// with evidence attributes the hit.
 	d.addEvent("An R5-Slappenheimer struck your empire — lost " + hit + ".")
 	return fmt.Sprintf("Your R5-Slappenheimer hit %s: %s destroyed.", d.Name, hit), nil
 }
@@ -503,6 +535,12 @@ func (w *World) slappenheimerBackfires(d *Empire) bool {
 // that fired — so it is reported instead, and the launching board takes the
 // damage when the answer gets home. That is the one thing the two versions do
 // differently, and the delay is the packet's, not a rule of its own.
+//
+// This is the one covert event in this file that names the source on SUCCESS,
+// and it is deliberate: BRE treats a sabre that lands from another planet as a
+// missile impact rather than an agent op and reports it with the firing realm
+// and its planet, the same as an incoming nuclear or chemical strike. Agent ops
+// stay anonymous unless the agent is caught (see covertFoiled).
 func (w *World) slappenheimerEffect(d *Empire, from string) (report string, hit, backfired bool) {
 	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
 		return fmt.Sprintf("%s's SDI intercepted your R5-Slappenheimer.", d.Name), false, false

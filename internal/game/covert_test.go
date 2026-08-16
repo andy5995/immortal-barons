@@ -424,3 +424,70 @@ func TestSlappenheimerCanStrikeGold(t *testing.T) {
 	}
 	t.Errorf("300 landed-or-fizzled launches never touched gold (still %d)", d.Gold)
 }
+
+// BINARY-VERIFIED: a caught agent gives the attacker away; an operation that
+// succeeds does not (BRE.OVR 0x016d67 for the local spy report, 0x04a96b and
+// 0x04a09a for the two interplanetary paths). The whole family has to carry it,
+// so this walks every covert op rather than the one that was changed first — a
+// sibling left on the old wording would still pass a single-op test.
+func TestFoiledCovertOpsNameTheAttacker(t *testing.T) {
+	ops := []struct {
+		name string
+		run  func(*World, *Empire, *Empire) (string, error)
+	}{
+		{"SendSpy", (*World).SendSpy},
+		{"SupportDissensions", (*World).SupportDissensions},
+		{"DemoralizeForces", (*World).DemoralizeForces},
+		{"SetUp", (*World).SetUp},
+		{"SpyOnRelations", (*World).SpyOnRelations},
+		{"Bribery", (*World).Bribery},
+		{"StirRevolts", (*World).StirRevolts},
+		{"BombFood", (*World).BombFood},
+		{"BombTradingMarket", (*World).BombTradingMarket},
+		{"BombTradeRoutes", (*World).BombTradeRoutes},
+		{"UndermineInvestments", (*World).UndermineInvestments},
+		{"SlappenheimerStrike", (*World).SlappenheimerStrike},
+	}
+	for _, op := range ops {
+		w, a, d := newAttackerAndTarget(t)
+		a.Gold, a.Agents = 1_000_000_000, 100
+		// Expose Enemy Ops turns every roll in both covertSuccess and
+		// spySuccess, so the foiled branch is reached without depending on the
+		// seed.
+		d.ShieldedUntilDay = w.GameDay + 1
+		before := len(d.Events)
+
+		if _, err := op.run(w, a, d); err != nil {
+			t.Fatalf("%s: %v", op.name, err)
+		}
+		if len(d.Events) != before+1 {
+			t.Fatalf("%s: filed %d victim events, want 1", op.name, len(d.Events)-before)
+		}
+		if text := d.Events[before].Text; !strings.Contains(text, a.Name) {
+			t.Errorf("%s: foiled event does not name the attacker %q: %q", op.name, a.Name, text)
+		}
+	}
+}
+
+// The other half of the same rule: an operation that lands leaves the target
+// guessing. Naming the attacker there would make Expose Enemy Ops and Bribery
+// pointless, since the name is the only thing they buy.
+func TestSuccessfulCovertOpsStayAnonymous(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Gold, a.Agents = 1_000_000_000, 1_000
+	d.Agents, d.Troopers = 0, 10_000
+	before := len(d.Events)
+
+	if _, err := w.SupportDissensions(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if d.Troopers == 10_000 {
+		t.Fatal("the op did not land, so this proves nothing about a success")
+	}
+	if len(d.Events) != before+1 {
+		t.Fatalf("filed %d victim events, want 1", len(d.Events)-before)
+	}
+	if text := d.Events[before].Text; strings.Contains(text, a.Name) {
+		t.Errorf("a successful covert op named the attacker: %q", text)
+	}
+}

@@ -21,9 +21,11 @@ You may run only one covert operation that affects an enemy per turn. After you
 run one, the others are blocked until your next turn. Send Spy and Spy on
 Relations only gather information, so they do not count against this limit.
 
-When an operation fails, your agent is caught and lost, and the target may be
-warned. The operations are secret, so the report the victim sees does not name
-you.
+When an operation fails, your agent is caught and lost, and the target is warned
+— and a caught agent talks, so the target is told your realm's name. An
+operation that succeeds is reported to the target with no name attached. The
+only way anyone learns who is running operations against them is by catching an
+agent.
 
 Each operation has its own topic. The bombing operations also need Bombers to
 deliver their payloads.

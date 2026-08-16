@@ -1,4 +1,6 @@
 (in-progress:)
+  * A foiled covert operation now names the realm that sent the agent, as the
+    original does; an operation that succeeds still names nobody
   * A market sale is no longer posted to the planet news. The seller is still
     told who bought what and for how much
   * The Diplomacy Modification screen no longer says planetary diplomacy is

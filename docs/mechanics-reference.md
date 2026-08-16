@@ -1034,6 +1034,58 @@ confirmed from BRE (BRE.OVR string table plus a live capture, #73):
   (`ExposeOpsShieldDays`). Cost `CostExposeEnemyOps` (600,000).
 - **(V) Visit Bank**.
 
+**Who the target is told about (BINARY-VERIFIED).** The target learns which
+realm came after it only when an agent is **caught**. An operation that succeeds
+is reported to the target with no attribution at all. Three independent paths in
+the original agree, which is why this is treated as the rule and not one screen's
+wording:
+
+- the local **Send Spy** / **Spy on Relations** report (`BRE.OVR 0x016d67`)
+  files an event on the target naming the caller's realm on the caught branch,
+  and files *nothing* on the target when the spy gets away;
+- a received **interplanetary agent packet** (`BRE.OVR 0x04a96b`) resolves each
+  agent in turn, counts the successes, and files a source-naming line — realm
+  plus the sending planet in parentheses, count = agents caught — only when that
+  count is short of the number sent. The per-operation lines the target sees for
+  the agents that *did* get through carry no source;
+- a received **interplanetary bombing run** (`BRE.OVR 0x04a09a`) fails two rolls
+  in three, and on failure files the one line in its template that names the
+  source; the four success lines name nobody.
+
+IB follows this in `internal/game/covert.go`: every foiled op goes through
+`covertFoiled`, which names the attacking realm, and every success event stays
+anonymous. The shield and bribed-agent guards in `covertSuccess` route to the
+same branch, so **Expose Enemy Ops and Bribery buy the defender the attacker's
+name** — the only thing they buy.
+
+Two paths deliberately sit outside the rule, both because the original puts them
+there:
+
+- an **R5-Slappenheimer that arrives from another planet** names the firing
+  realm and its planet on impact. BRE reports an incoming sabre as a missile
+  strike, alongside nuclear and chemical, rather than as an agent operation. The
+  *local* R5-Slappenheimer stays anonymous on a hit — BRE resolves a same-planet
+  strike through a report template (`GAME\COVERT.DAT`) that is not shipped with
+  0.988 and cannot be read, so only the half with evidence attributes the hit.
+- IB's **interplanetary bombing ops** (`applySpecialOp` in `ibbs_special.go`)
+  name the sending realm and board on success, where BRE names nobody. This is a
+  standing IB divergence, not an oversight: everything else that crosses in a
+  packet — attacks, nuclear and chemical strikes — is board-attributed, and the
+  packet is signed anyway.
+
+**BRE's local effect ops cannot be read.** Stir Revolts, Set Up, Support
+Dissensions, Demoralize Forces, Bribery and the Bomb Enemy Targets items are
+dispatched by the menu ("Covert Agent Sent out") and resolved later out of daily
+maintenance (`BRE.OVR 0x04be9f`), which files a report line to **both** sides
+from `GAME\COVERT.DAT` — categories `COVERT_TARGET_HIT`, `COVERT_TARGET_FAIL`,
+`COVERT_SENDER_HIT`, `COVERT_SENDER_FAIL`, `BOMB_TARGET_HIT`, `BOMB_SENDER_HIT`,
+`COVERT_MISC`. Its formatter (`0x04bc05`) substitutes the sending realm's name,
+the target's, a third realm's, and an amount, so the sender's name *is* available
+to the target-side lines. The file itself ships with neither the 0.988 tree nor
+the `BREDATA.EXE` payload, so the wording — and therefore whether those lines use
+it — is unknown. IB applies the caught-agent rule above to these ops on the
+strength of the three paths that can be read, the local spy among them.
+
 **One effect op per turn (#54).** BRE caps *effect* covert ops at one per turn
 ("Limit one try per turn!"): the first effect op works, and any second effect op
 of *any* type is refused that turn — verified live (Stir Revolts, then Set Up,
