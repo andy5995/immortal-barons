@@ -740,7 +740,7 @@ type hiTerm struct{ text, color string }
 
 // hiNewsItem colors one planetary-news line the way BRE does: known names
 // (empires, pirate factions, the Planetary Master title) in their accent color
-// and digit runs in bright-yellow, over a white body. Single left-to-right pass
+// and digit runs in bright-white, over a white body. Single left-to-right pass
 // matching the LONGEST term at each position, so "Iron Dominion" is not split by
 // a shorter "Iron"; ANSI codes it inserts never contain a term, so there is no
 // re-match. Replaces the numbers-only hiNums for news text.
@@ -768,7 +768,7 @@ func hiNewsItem(line string, terms []hiTerm) string {
 			for j < len(runes) && (isDigit(runes[j]) || (runes[j] == ',' && j+1 < len(runes) && isDigit(runes[j+1]))) {
 				j++
 			}
-			b.WriteString(ansi.FgBrightYellow + string(runes[i:j]) + ansi.FgWhite)
+			b.WriteString(ansi.FgBrightWhite + string(runes[i:j]) + ansi.FgWhite)
 			i = j
 			continue
 		}
@@ -781,23 +781,23 @@ func hiNewsItem(line string, terms []hiTerm) string {
 
 func isDigit(r rune) bool { return r >= '0' && r <= '9' }
 
-// newsHighlightTerms is the set of names to color in planetary-news lines: the
-// caller's own empire (bright-yellow) and other empires (bright-white), the
-// pirate factions (bright-cyan), and the Planetary Master title (bright-white).
+// newsHighlightTerms is the set of names to color in planetary-news lines:
+// every empire in bright-yellow, the pirate factions in bright-red, and the
+// Planetary Master title in bright-white. Read off the live captures in `cap/`,
+// where three different realms in one news screen all render `1;33` — BRE gives
+// the reader's own realm no distinct color here, unlike the recap (bright-cyan)
+// or the status screens. Factions are the one deliberate divergence: BRE uses plain
+// `31`, which is 2.71:1 on black and under the legibility floor, so IB brightens
+// to `1;31` within the same hue (docs/dev/bre-screens.md records it).
 func newsHighlightTerms(w *ctx) []hiTerm {
 	var terms []hiTerm
 	w.With(func() {
-		self := w.Player()
 		for _, e := range w.Empires {
-			c := ansi.FgBrightWhite
-			if self != nil && e.Name == self.Name {
-				c = ansi.FgBrightYellow
-			}
-			terms = append(terms, hiTerm{e.Name, c})
+			terms = append(terms, hiTerm{e.Name, ansi.FgBrightYellow})
 		}
 	})
 	for _, f := range game.PirateFactions {
-		terms = append(terms, hiTerm{f, ansi.FgBrightCyan})
+		terms = append(terms, hiTerm{f, ansi.FgBrightRed})
 	}
 	terms = append(terms, hiTerm{"Planetary Master", ansi.FgBrightWhite})
 	return terms

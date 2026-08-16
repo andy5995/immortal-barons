@@ -469,12 +469,31 @@ bright-cyan value; **negative** change = `96` bright-cyan for the whole thing
 
 Below the box, the news items. Each item starts with `31` red `──` + `91`
 bright-red `─` arrow, then `37` white body; wrapped continuation lines indent 5
-spaces. **A blank line separates every item.** In-line highlights: your own
-empire `93` bright-yellow, other empires `97` bright-white or `93`, planet names
-`96` bright-cyan, numbers `93` bright-yellow, timestamps `97` bright-white, the
-`The Queen Royale` actor `91` bright-red. Today's News and Yesterday's News use
-this same layout. (IB is free to reword the prose — clean-room — this records
-BRE's wording and coloring only.)
+spaces. **A blank line separates every item.** In-line highlights, read off a
+live capture in `cap/` (2026-08-13) and confirmed against a second session two
+weeks earlier:
+
+| element | code |
+|---|---|
+| every empire — the reader's own included | `1;33` bright-yellow |
+| pirate factions (Humans, Barbarians, Spacians, …) | `31` red, returning to `37` |
+| numbers | `1;37` bright-white |
+| `Planetary Master` title | `1;37` bright-white |
+| `The Queen Royale` actor | `1;31` bright-red |
+
+**BRE gives your own realm no distinct color in the news** — three different
+realms in a single captured screen all render `1;33`. A realm name has no one
+color in BRE: the same name renders `1;36` on the recap and in message headers,
+`1;33` here and at the target-picker echo, and `37` in plain lists. Take the
+color from the screen, never from a sibling screen.
+
+**Deliberate divergence: IB paints pirate factions `1;31` bright-red, not BRE's
+`31`.** Plain red on black measures 2.71:1, below the 4.5:1 floor for text, and
+the faction name is the payload of a raid item. Brightening keeps BRE's hue and
+reaches ~5.2:1. Everything else on this screen matches.
+
+Today's News and Yesterday's News use this same layout. (IB is free to reword
+the prose — clean-room — this records BRE's wording and coloring only.)
 
 ### See Scores (local planet)
 

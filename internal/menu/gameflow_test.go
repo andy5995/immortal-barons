@@ -531,21 +531,39 @@ func TestShowBulletinMastheadAndBox(t *testing.T) {
 	}
 }
 
+// Golden literals from the live capture in cap/kd3-01.cap, not from named
+// constants: these are the fidelity contract, so a retune must fail here and
+// produce new evidence. The other-realm case is the one that matters — BRE
+// paints every realm `1;33`, giving the reader's own no distinct color, and a
+// test covering only the player's own realm passed for months while other
+// realms rendered in an invisible bright-white.
 func TestNewsItemHighlights(t *testing.T) {
 	w := newWorld()
 	self := w.Player().Name
+	var other string
+	for _, e := range w.Empires {
+		if e.Name != self {
+			other = e.Name
+			break
+		}
+	}
+	if other == "" {
+		t.Fatal("need a second empire to prove own and other share a color")
+	}
 	w.NewsToday = []string{
-		self + " routed the " + game.PirateFactions[0] + " and took 1,375 regions; now Planetary Master!",
+		self + " routed the " + game.PirateFactions[0] + " and took 1,375 regions from " +
+			other + "; now Planetary Master!",
 	}
 	f := &fakeSession{keys: []rune(" ")}
 	showBulletinToday(f, w)
 	out := f.out.String()
 
 	for what, want := range map[string]string{
-		"own empire bright-yellow": ansi.FgBrightYellow + self,
-		"faction bright-cyan":      ansi.FgBrightCyan + game.PirateFactions[0],
-		"title bright-white":       ansi.FgBrightWhite + "Planetary Master",
-		"number bright-yellow":     ansi.FgBrightYellow + "1,375",
+		"own empire bright-yellow":   "\x1b[93m" + self,
+		"other empire bright-yellow": "\x1b[93m" + other,
+		"faction bright-red":         "\x1b[91m" + game.PirateFactions[0],
+		"title bright-white":         "\x1b[97m" + "Planetary Master",
+		"number bright-white":        "\x1b[97m" + "1,375",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("%s: expected %q in output:\n%s", what, want, out)
