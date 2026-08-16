@@ -437,6 +437,35 @@ keypress for a year on the strength of how it reads; its caller
 every letter rather than sending. Always `lookup` the printer, then `lookup` its
 caller, before describing what a prompt does.
 
+**An unnamed routine can be identified by the company its CALLERS keep.** The
+catalog leaves many routines unclassified, and the instinct is to disassemble
+one until its purpose emerges. Reading its `callers[]` is usually faster and
+gives a stronger answer, because a routine's job is defined by who needs it.
+Real case (2026-08-16): proving BRE tells a Full Defense Alliance partner that
+its troops died defending someone else turned on whether `04ef:002f` wrote to
+the screen or to a stored recap. The routine itself was nameless. Its caller
+list — WMD launches, `report_spy_result`, `break_diplomatic_treaty`,
+`process_diplomatic_proposal`, `process_trade_offer`,
+`resolve_received_covert_operation`, `write_economic_policy_news` — has one
+thing in common: every one of them happens while the recipient is NOT logged
+in. That makes it the asynchronous "since your last play" filer, and settles the
+question without decoding a single instruction of its body.
+
+The general form: list the callers, then ask what they share that the
+alternatives would not. Screen-printers are called from menu handlers; recap
+filers are called from resolvers that run in someone else's turn; disk writers
+are called from the maintenance and packet paths.
+
+**Which ARGUMENT slot receives the record proves it reached the right realm.**
+Having identified a filer, the remaining question is who it filed against, and
+the answer is the recipient argument at each call site. In the same case the
+defender's notice passed `[bp-0x3]` and the ally's, 100 bytes later, passed
+`[bp-0x1]` — the loop letter. Two call sites into one filer with different
+recipient slots is what separates "the attacker was told about the ally" from
+"the ally was told", which is the whole finding. Quote the slot when recording a
+result like this; without it the claim is an inference about plausible
+behaviour, not a reading.
+
 **A refusal string's OWNER is not its condition — disassemble the compare.**
 `find-string` tells you which routine can print a refusal. It does not tell you
 what triggers it, and a routine usually holds several refusals whose branches
