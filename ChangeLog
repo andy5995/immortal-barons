@@ -4,7 +4,10 @@
     file-attach .msg netmail, with routing from ibnodes.dat and ibroute.cfg;
     broadcasts get one attachment and message per other board. Packet names are
     compact, and the helper rejects a run before moving anything if an absolute
-    attachment pathname will not fit in the Type-2 subject
+    attachment pathname will not fit in the Type-2 subject. Complete packets,
+    including their signature when configured, are atomically published before
+    the helper can discover them, so it does not hold the game lock while
+    creating netmail
   * A foiled covert operation now names the realm that sent the agent, as the
     original does; an operation that succeeds still names nobody
   * A market sale is no longer posted to the planet news. The seller is still

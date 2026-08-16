@@ -29,14 +29,16 @@ a shared mount). `RunPlanetary` (`immortal-barons -planetary`, also folded into
 group attacks, exports this board's scores, and writes the outbox.
 
 `barons-ftn` is the optional FTN adapter. It remains outside the game process:
-it takes the ordinary local game lock, reads the existing board, roster, and
-route files, renames each outbound `.brp` into that directory's `fido/` child,
-then creates an FTS-0001 Type-2 file-attach `.msg` with exclusive creation. An
-unaddressed mesh broadcast is fanned out with real copies to one distinct
-attachment and message per other roster node; an addressed packet is sent to
-its routed next hop. No hard-link support is required. Its only settings are in
-`ftn.cfg`. `StampOutbox` and `WriteOutbox` run under the same lock, so the
-adapter cannot observe a packet between signing and the end of its file write.
+it reads the existing board, roster, and route files, renames each outbound
+`.brp` into that directory's `fido/` child, then creates an FTS-0001 Type-2
+file-attach `.msg` with exclusive creation. An unaddressed mesh broadcast is
+fanned out with real copies to one distinct attachment and message per other
+roster node; an addressed packet is sent to its routed next hop. No hard-link
+support is required. Its only settings are in `ftn.cfg`. `WriteOutbox` writes
+complete JSON, including the board signature when configured, under a
+non-`.brp` temporary name and atomically publishes it by renaming it, so the
+adapter needs no game lock. Concurrent adapter processes serialize through
+their own `barons-ftn.lock`, which the game never takes.
 
 ## Packet files (`*.brp`)
 
@@ -47,9 +49,15 @@ subject. The sequence has a fixed width so a directory scan sees each sender's
 packets in order. For example, `L042-2-000000000001z-3.brp` is league 42,
 origin node 2, sequence 71, final destination node 3. A zero destination is a
 broadcast. The `L<nnn>` prefix is present when the league number is set. A
-legacy packet without a stable origin node and sequence gets a deterministic
-128-bit content digest instead. A transport that fans out must copy a broadcast
-to every other board's inbound.
+modern packet at league 0 gets a short digest of its origin board before those
+three numbers, preventing equal node numbers in two leagues sharing a directory
+from colliding. A legacy packet without a stable origin node and sequence gets
+a deterministic 128-bit content digest instead. A transport that fans out must
+copy a broadcast to every other board's inbound.
+
+The short name leaves room for FTN `.msg` transports, whose Subject must carry
+the attachment pathname in at most 71 bytes. That byte budget is an FTN Type-2
+constraint, not a restriction on the packet format or on other transports.
 
 The destination number is the packet's FINAL destination, not the board the
 file is handed to. Where the file is written is the routing decision

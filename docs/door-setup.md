@@ -589,15 +589,24 @@ attachment pathname the whole run would create, including broadcast suffixes,
 and exits with the offending path and byte limit if one will not fit. The FTN
 software removes the claimed file after sending it.
 
-The helper takes the same cross-platform local file lock as the game before it
-scans, so two door nodes cannot move the same source together or race a game
-write. The game holds that lock while it signs and writes the outbox, so a
-packet visible to the helper is complete and, when board signing is configured,
-already signed. The move is the ownership claim; only the process that moves a
-packet creates its `.msg` or broadcast set. A malformed packet or a
-message-creation failure is moved back to the outbound directory for a later
-run. This uses ordinary rename, exclusive file creation, and real copies—hard-
-link support is not required.
+This pathname budget applies only when `barons-ftn` carries files through
+Type-2 `.msg` netmail. A shared directory, sync tool, `scp`, or another
+transport that does not put the pathname in an FTN Subject has no such limit.
+For `.msg` transport, budget the whole absolute pathname, not only the
+configured directory. For example, `/sbbs/ibout/fido/` is 17 bytes. With node
+numbers from 1 to 999, reserve up to 45 more for the longest packet name plus a
+broadcast suffix, and one more for Binkley's `^`: 63 bytes total, leaving 8 of
+the 71-byte field.
+
+The game writes and closes each complete, optionally signed packet under a
+non-`.brp` temporary name, then atomically renames it to its final `.brp` name.
+The helper therefore needs no game lock and never scans a partial packet.
+Concurrent helpers serialize through their own `barons-ftn.lock`, which the
+game never takes; only the helper that moves a source into `fido` creates its
+`.msg` or broadcast set. A malformed packet remains in the outbound directory;
+a message-creation failure is moved back there for a later run. This uses
+ordinary rename, exclusive file creation, and real copies—hard-link support is
+not required.
 
 ## League-wide rules (Coordinator only)
 

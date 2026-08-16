@@ -34,14 +34,13 @@ func Run(dataDir string) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	lock, err := store.Lock(board, true)
+	// This lock serializes only copies of barons-ftn. It never blocks the game;
+	// WriteOutbox publishes complete packets atomically under their .brp names.
+	adapterLock, err := store.LockPath(filepath.Join(board.DataDir, "barons-ftn.lock"), true)
 	if err != nil {
 		return Result{}, err
 	}
-	defer lock.Release()
-	// The game holds this same lock through StampOutbox and WriteOutbox. By the
-	// time the scan begins, every visible packet is a complete JSON file and has
-	// its BoardSig when this board has signing configured.
+	defer adapterLock.Release()
 	transport, err := LoadConfig(dataDir)
 	if err != nil {
 		return Result{}, err
@@ -65,85 +64,121 @@ func Run(dataDir string) (Result, error) {
 	}
 
 	dirs := outboundDirectories(board)
-	if err := preflightDirectories(dirs, transport, world, nodes); err != nil {
+	candidates, err := preflightDirectories(dirs, transport, world, nodes)
+	if err != nil {
 		return Result{}, err
 	}
 	var result Result
-	for _, dir := range dirs {
-		if err := scanDirectory(dir, transport, origin, world, nodes, &result); err != nil {
+	for _, candidate := range candidates {
+		if err := os.MkdirAll(filepath.Dir(candidate.claimed), 0o755); err != nil {
 			return result, err
 		}
+		won, err := claimPacket(candidate.source, candidate.claimed)
+		if err != nil {
+			return result, fmt.Errorf("claim %s: %w", candidate.source, err)
+		}
+		if !won {
+			continue
+		}
+		queued, err := queueClaimed(candidate.claimed, candidate.packet, transport, origin, world, nodes)
+		if err != nil {
+			if restoreErr := restorePacket(candidate.claimed, candidate.source); restoreErr != nil {
+				return result, fmt.Errorf("queue %s: %v (packet remains at %s: rollback failed: %v)",
+					filepath.Base(candidate.source), err, candidate.claimed, restoreErr)
+			}
+			return result, fmt.Errorf("queue %s: %w", filepath.Base(candidate.source), err)
+		}
+		result.Queued = append(result.Queued, queued...)
 	}
 	return result, nil
 }
 
+type packetCandidate struct {
+	source  string
+	claimed string
+	packet  game.Packet
+}
+
 // preflightDirectories checks every pathname that this run could put in an
 // FTN subject before it moves even the first packet. This makes an overlong
-// outbound path a configuration error instead of a partial handoff.
-func preflightDirectories(dirs []string, transport Config, world *game.World, nodes []game.LeagueNode) error {
+// outbound path a configuration error instead of a partial handoff. It returns
+// the exact snapshot it checked, so a packet atomically published while the
+// helper is running waits for the next run rather than bypassing preflight.
+func preflightDirectories(dirs []string, transport Config, world *game.World, nodes []game.LeagueNode) ([]packetCandidate, error) {
+	var candidates []packetCandidate
 	for _, dir := range dirs {
 		entries, err := os.ReadDir(dir)
 		if os.IsNotExist(err) {
 			continue
 		}
 		if err != nil {
-			return err
+			return nil, err
 		}
 		for _, entry := range entries {
 			if entry.IsDir() || filepath.Ext(entry.Name()) != store.PacketExt {
 				continue
 			}
 			info, err := entry.Info()
+			if os.IsNotExist(err) {
+				continue // another helper claimed it after ReadDir
+			}
 			if err != nil {
-				return err
+				return nil, err
 			}
 			if !info.Mode().IsRegular() {
 				continue
 			}
 			source := filepath.Join(dir, entry.Name())
 			claimed := filepath.Join(dir, "fido", entry.Name())
-			if err := preflightPacket(source, claimed, transport, world, nodes); err != nil {
-				return fmt.Errorf("preflight %s: %w", source, err)
+			packet, found, err := preflightPacket(source, claimed, transport, world, nodes)
+			if err != nil {
+				return nil, fmt.Errorf("preflight %s: %w", source, err)
+			}
+			if found {
+				candidates = append(candidates, packetCandidate{source: source, claimed: claimed, packet: packet})
 			}
 		}
 	}
-	return nil
+	return candidates, nil
 }
 
-func preflightPacket(source, claimed string, transport Config, world *game.World, nodes []game.LeagueNode) error {
-	attached, err := filepath.Abs(claimed)
-	if err != nil {
-		return err
-	}
-	if _, err := fileAttachSubject(attached, transport.Binkley); err != nil {
-		return err
-	}
+func preflightPacket(source, claimed string, transport Config, world *game.World, nodes []game.LeagueNode) (game.Packet, bool, error) {
 	data, err := os.ReadFile(source)
+	if os.IsNotExist(err) {
+		return game.Packet{}, false, nil // another helper claimed it
+	}
 	if err != nil {
-		return err
+		return game.Packet{}, false, err
 	}
 	var packet game.Packet
 	if err := json.Unmarshal(data, &packet); err != nil {
-		return err
+		return game.Packet{}, false, err
+	}
+	attached, err := filepath.Abs(claimed)
+	if err != nil {
+		return game.Packet{}, false, err
+	}
+	if _, err := fileAttachSubject(attached, transport.Binkley); err != nil {
+		return game.Packet{}, false, err
 	}
 	destinationNumber := packet.ToNode
 	if destinationNumber == 0 && packet.ToBoard != "" {
 		destinationNumber = world.NodeNumber(packet.ToBoard)
 	}
 	if destinationNumber != 0 {
-		return nil
+		return packet, true, nil
 	}
 	recipients := broadcastRecipients(world, nodes)
 	if len(recipients) == 0 {
-		return fmt.Errorf("broadcast has no other board in %s", store.NodeListFile)
+		return game.Packet{}, false, fmt.Errorf("broadcast has no other board in %s", store.NodeListFile)
 	}
 	for _, node := range recipients[1:] {
 		copyPath := broadcastCopyPath(attached, node.Number)
 		if _, err := fileAttachSubject(copyPath, transport.Binkley); err != nil {
-			return fmt.Errorf("broadcast attachment for node %d: %w", node.Number, err)
+			return game.Packet{}, false, fmt.Errorf("broadcast attachment for node %d: %w", node.Number, err)
 		}
 	}
-	return nil
+	return packet, true, nil
 }
 
 func outboundDirectories(cfg game.Config) []string {
@@ -170,53 +205,9 @@ func outboundDirectories(cfg game.Config) []string {
 	return dirs
 }
 
-func scanDirectory(dir string, transport Config, origin Address, world *game.World, nodes []game.LeagueNode, result *Result) error {
-	entries, err := os.ReadDir(dir)
-	if os.IsNotExist(err) {
-		return nil
-	}
-	if err != nil {
-		return err
-	}
-	fidoDir := filepath.Join(dir, "fido")
-	for _, entry := range entries {
-		if entry.IsDir() || filepath.Ext(entry.Name()) != store.PacketExt {
-			continue
-		}
-		info, err := entry.Info()
-		if err != nil {
-			return err
-		}
-		if !info.Mode().IsRegular() {
-			continue
-		}
-		if err := os.MkdirAll(fidoDir, 0o755); err != nil {
-			return err
-		}
-		source := filepath.Join(dir, entry.Name())
-		claimed := filepath.Join(fidoDir, entry.Name())
-		won, err := claimPacket(source, claimed)
-		if err != nil {
-			return fmt.Errorf("claim %s: %w", source, err)
-		}
-		if !won {
-			continue
-		}
-		queued, err := queueClaimed(claimed, transport, origin, world, nodes)
-		if err != nil {
-			if restoreErr := restorePacket(claimed, source); restoreErr != nil {
-				return fmt.Errorf("queue %s: %v (packet remains at %s: rollback failed: %v)", entry.Name(), err, claimed, restoreErr)
-			}
-			return fmt.Errorf("queue %s: %w", entry.Name(), err)
-		}
-		result.Queued = append(result.Queued, queued...)
-	}
-	return nil
-}
-
-// claimPacket runs while Run holds the board's cross-platform file lock, so two
-// handlers cannot both pass the target check. Rename is the ownership claim:
-// only the process that moves the source goes on to create netmail.
+// claimPacket uses the source rename as the ownership claim. Run's adapter-only
+// lock gives same-path rename one portable winner; an existing destination is
+// never overwritten.
 func claimPacket(source, destination string) (bool, error) {
 	if _, err := os.Lstat(destination); err == nil {
 		return false, nil
@@ -241,15 +232,7 @@ func restorePacket(claimed, source string) error {
 	return os.Rename(claimed, source)
 }
 
-func queueClaimed(path string, transport Config, origin Address, world *game.World, nodes []game.LeagueNode) ([]Queued, error) {
-	data, err := os.ReadFile(path)
-	if err != nil {
-		return nil, err
-	}
-	var packet game.Packet
-	if err := json.Unmarshal(data, &packet); err != nil {
-		return nil, err
-	}
+func queueClaimed(path string, packet game.Packet, transport Config, origin Address, world *game.World, nodes []game.LeagueNode) ([]Queued, error) {
 	destinationNumber := packet.ToNode
 	if destinationNumber == 0 && packet.ToBoard != "" {
 		destinationNumber = world.NodeNumber(packet.ToBoard)

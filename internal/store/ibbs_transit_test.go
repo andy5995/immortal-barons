@@ -260,6 +260,80 @@ func TestPacketFilenameUsesCompactStableIdentity(t *testing.T) {
 	}
 }
 
+func TestLeagueZeroPacketNamesDistinguishOriginBoards(t *testing.T) {
+	first := game.Packet{FromBoard: "Alpha BBS", FromNode: 1, ToNode: 2, Seq: 3}
+	second := game.Packet{FromBoard: "Other Alpha", FromNode: 1, ToNode: 2, Seq: 3}
+	firstName := packetFilename(first, []byte("first"))
+	secondName := packetFilename(second, []byte("second"))
+	if firstName == secondName {
+		t.Fatalf("league-0 packet names collide: %q", firstName)
+	}
+	for _, name := range []string{firstName, secondName} {
+		if len(name) > 38 {
+			t.Errorf("league-0 packet filename is %d bytes: %q", len(name), name)
+		}
+	}
+}
+
+func TestLeagueZeroBoardsSharingOutboundDoNotOverwrite(t *testing.T) {
+	out := t.TempDir()
+	for _, board := range []string{"Alpha BBS", "Other Alpha"} {
+		cfg := game.DefaultConfig()
+		cfg.BoardID = board
+		w := game.NewWorldSeed(cfg, 1)
+		w.LeagueNodes = []game.LeagueNode{{Number: 1, Name: board}, {Number: 2, Name: "Target"}}
+		w.Outbox = []game.Packet{{FromBoard: board, ToBoard: "Target", Date: "2026-08-16"}}
+		w.StampOutbox()
+		if _, err := WriteOutbox(w, out); err != nil {
+			t.Fatalf("WriteOutbox %s: %v", board, err)
+		}
+	}
+	if files := packetFiles(t, out); len(files) != 2 {
+		t.Fatalf("shared league-0 outbound holds %d packets, want 2: %v", len(files), files)
+	}
+}
+
+func TestWritePacketAtomicLeavesOnlyCompleteFinalName(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "packet.brp")
+	want := []byte("complete signed packet")
+	if err := writePacketAtomic(path, want); err != nil {
+		t.Fatal(err)
+	}
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != string(want) {
+		t.Errorf("packet = %q, want %q", got, want)
+	}
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Name() != "packet.brp" {
+		t.Errorf("published directory contains %v, want only packet.brp", entries)
+	}
+}
+
+func TestWritePacketAtomicDoesNotOverwriteCollision(t *testing.T) {
+	dir := t.TempDir()
+	path := filepath.Join(dir, "packet.brp")
+	if err := os.WriteFile(path, []byte("existing packet"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := writePacketAtomic(path, []byte("different packet")); err == nil {
+		t.Fatal("writePacketAtomic overwrote a filename collision")
+	}
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != "existing packet" {
+		t.Errorf("collision changed packet to %q", got)
+	}
+}
+
 func writePacket(t *testing.T, dir, name string, p game.Packet) {
 	t.Helper()
 	data, err := json.MarshalIndent(p, "", "  ")
