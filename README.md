@@ -90,10 +90,12 @@ Arch, Alpine, and FreeBSD; `golang` on Debian, Ubuntu, and Fedora). A distro's
 package can be older than 1.26, though — if it is, use the official tarball.
 
 ```
-go build ./cmd/immortal-barons
+go build ./cmd/immortal-barons ./cmd/barons-ftn
 ```
 
-This produces the `immortal-barons` binary; see "Running" above to start it.
+This produces the `immortal-barons` game and the optional `barons-ftn` inter-BBS
+transport helper. See "Running" above to start the game; the Door Setup guide
+explains the helper.
 
 ## Character set
 

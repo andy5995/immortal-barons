@@ -1,7 +1,8 @@
 # Command Reference
 
 This page lists every command-line option for Immortal Barons in one place. It
-covers the game program (`immortal-barons`).
+covers the game program (`immortal-barons`) and the optional FTN transport
+helper (`barons-ftn`).
 
 Run `immortal-barons -help` to see the same options in your terminal. This page
 and the `-help` output use the same groups.
@@ -196,3 +197,27 @@ what packets have already told this board — none of them changes the game.
 - **`-version`** — Print the version, then exit.
 - **`-help`** — Print the grouped list of options, then exit.
 
+## The FTN helper: `barons-ftn`
+
+`barons-ftn` hands packets already written by the game to an FTN mailer. Run it
+after `immortal-barons -planetary`, after the door exits, or both:
+
+```
+barons-ftn -data /path/to/data
+```
+
+It reads `bbs.cfg`, `ibnodes.dat`, `ibroute.cfg`, and the FTN-only `ftn.cfg`.
+It scans the default `Outbound` directory and every `Link` directory, moves
+each `.brp` packet into that directory's `fido` subdirectory, and creates a
+Type-2 file-attach `.msg` in the configured netmail directory. An unaddressed
+broadcast gets a separate attachment and message for every other board. If two
+copies run together, only the one that successfully moves a packet creates its
+messages.
+
+- **`-data DIR`** — Folder holding the game data and `ftn.cfg`; default
+  `./data`.
+- **`-version`** — Print the helper and game version, then exit.
+- **`-help`** — Print the options, then exit.
+
+See the FTN handoff section of [Door Setup](door-setup.md#optional-ftn-handoff)
+for `ftn.cfg`, routing, and mailer details.

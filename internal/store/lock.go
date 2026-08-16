@@ -37,10 +37,17 @@ type FileLock struct{ f *os.File }
 // turn that is gone. That is why this is a comment and not a runtime check —
 // there is nothing here that could detect it.
 func Lock(cfg game.Config, block bool) (*FileLock, error) {
-	if err := os.MkdirAll(cfg.DataDir, 0o755); err != nil {
+	return LockPath(filepath.Join(cfg.DataDir, "game.lock"), block)
+}
+
+// LockPath takes an exclusive lock through the named local lock file. It uses
+// the same platform-specific primitives and has the same local-filesystem scope
+// as Lock, but lets a subsystem serialize itself without blocking the game.
+func LockPath(path string, block bool) (*FileLock, error) {
+	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, err
 	}
-	f, err := os.OpenFile(filepath.Join(cfg.DataDir, "game.lock"), os.O_CREATE|os.O_RDWR, 0o644)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_RDWR, 0o644)
 	if err != nil {
 		return nil, err
 	}

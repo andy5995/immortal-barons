@@ -1,14 +1,21 @@
 package store
 
 import (
+	"bytes"
+	"crypto/sha256"
+	"encoding/base32"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
+
+// math.MaxUint64 is "3w5e11264sgsf" in base 36: exactly 13 digits.
+const maxUint64Base36Digits = 13
 
 // PacketExt is the file extension for inter-BBS packet files. Exported because
 // an inbound directory is usually shared with the BBS's own mail, so anything
@@ -67,10 +74,10 @@ type PlanetaryRun struct {
 	RosterUpdated bool // the Coordinator's roster replaced this board's copy
 }
 
-// WriteOutbox writes each queued packet to a JSON file and clears the world's
-// Outbox and Transit queues. How the files then reach other boards (a sync tool,
-// FidoNet, scp, a shared mount) is the operator's concern — this is the Option A
-// transport from the design spec.
+// WriteOutbox atomically publishes each queued packet as a JSON file and clears
+// the world's Outbox and Transit queues. How the files then reach other boards
+// (a sync tool, FidoNet, scp, a shared mount) is the operator's concern — this
+// is the Option A transport from the design spec.
 //
 // A packet goes to the link for its NEXT hop, not for its final destination:
 // with HOST routing in the roster, everything a leaf board sends lands in the
@@ -81,14 +88,10 @@ func WriteOutbox(w *game.World, dir string) (int, error) {
 	if len(packets) == 0 {
 		return 0, nil
 	}
-	for i, p := range packets {
+	for _, p := range packets {
 		data, err := json.MarshalIndent(p, "", "  ")
 		if err != nil {
 			return 0, err
-		}
-		to := p.ToBoard
-		if to == "" {
-			to = "all"
 		}
 		target := dir
 		// A broadcast that got this far has no roster to address it from, so
@@ -102,14 +105,84 @@ func WriteOutbox(w *game.World, dir string) (int, error) {
 		if err := os.MkdirAll(target, 0o755); err != nil {
 			return 0, err
 		}
-		name := fmt.Sprintf("%s%s-to-%s-%s-%d-%d%s",
-			leaguePrefix(p.League), sanitize(w.Config.BoardID), sanitize(to), sanitize(p.Date), p.Seq, i, PacketExt)
-		if err := os.WriteFile(filepath.Join(target, name), data, 0o644); err != nil {
+		name := packetFilename(p, data)
+		if err := writePacketAtomic(filepath.Join(target, name), data); err != nil {
 			return 0, err
 		}
 	}
 	w.Outbox, w.Transit = nil, nil
 	return len(packets), nil
+}
+
+// packetFilename keeps the transport name short enough to leave room for an
+// absolute directory in an FTN Type-2 subject. Modern packets are identified
+// exactly by origin node, final destination node, and the origin's monotonic
+// sequence number. Older packets without that identity use a stable 128-bit
+// content digest instead.
+func packetFilename(p game.Packet, data []byte) string {
+	var identity string
+	if p.FromNode > 0 && p.Seq > 0 {
+		sequence := strconv.FormatUint(p.Seq, 36)
+		if padding := maxUint64Base36Digits - len(sequence); padding > 0 {
+			sequence = strings.Repeat("0", padding) + sequence
+		}
+		identity = strconv.FormatInt(int64(p.FromNode), 36) + "-" + sequence + "-" +
+			strconv.FormatInt(int64(p.ToNode), 36)
+		if p.League <= 0 {
+			// With no league prefix, the same node numbers in two leagues sharing
+			// a directory need a short discriminator. Matching board names still
+			// denote the same origin, as they did in the old descriptive names.
+			identity = shortDigest([]byte(p.FromBoard), 10) + "-" + identity
+		}
+	} else {
+		identity = shortDigest(data, 16)
+	}
+	return leaguePrefix(p.League) + identity + PacketExt
+}
+
+func shortDigest(data []byte, size int) string {
+	digest := sha256.Sum256(data)
+	return base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(digest[:size])
+}
+
+// writePacketAtomic keeps an incomplete packet under a non-.brp temporary
+// name. Consumers only discover the final name after the signed JSON has been
+// completely written and closed.
+func writePacketAtomic(path string, data []byte) error {
+	tmp, err := os.CreateTemp(filepath.Dir(path), "."+filepath.Base(path)+"-*.tmp")
+	if err != nil {
+		return err
+	}
+	tmpPath := tmp.Name()
+	defer os.Remove(tmpPath)
+	if err := tmp.Chmod(0o644); err != nil {
+		tmp.Close()
+		return err
+	}
+	if _, err := tmp.Write(data); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	if existing, readErr := os.ReadFile(path); readErr == nil {
+		if bytes.Equal(existing, data) {
+			return nil // an earlier attempt already published this packet
+		}
+		return fmt.Errorf("packet filename collision at %s", path)
+	} else if !os.IsNotExist(readErr) {
+		return readErr
+	}
+	if err := os.Rename(tmpPath, path); err == nil {
+		return nil
+	} else if existing, readErr := os.ReadFile(path); readErr == nil && bytes.Equal(existing, data) {
+		// Windows will not rename over an existing target. An identical target
+		// means this packet was already published by an earlier attempt.
+		return nil
+	} else {
+		return err
+	}
 }
 
 // addressBroadcasts turns each broadcast into one packet per planet on the
@@ -207,10 +280,4 @@ func ReadInbound(w *game.World, dir string) (int, error) {
 		applied++
 	}
 	return applied, nil
-}
-
-// sanitize keeps packet filenames safe (no path separators or spaces).
-func sanitize(s string) string {
-	r := strings.NewReplacer("/", "_", "\\", "_", " ", "_", ":", "_")
-	return r.Replace(s)
 }

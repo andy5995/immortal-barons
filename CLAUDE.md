@@ -76,6 +76,9 @@ stream). Front-ends attach different streams; the engine is unchanged.
 
 - `cmd/immortal-barons` — the door + local terminal front-end (stdio + dropfile;
   `-local`, `-maint`, `-planetary`, `-league-config`, `-reset`, …)
+- `cmd/barons-ftn` + `internal/ftn` — optional FTN transport: claims outbound
+  `.brp` packets, moves them under `outbound/fido`, and creates Type-2
+  file-attach `.msg` netmail using the league roster and route file
 - `internal/session` — the `Session` byte-stream abstraction + console/stdio/
   socket implementations, shared `ReadLine`, and the Ctrl-key macro expander
 - `internal/ansi` — ANSI escape helpers (one rendering path for all front-ends)

@@ -28,17 +28,40 @@ a shared mount). `RunPlanetary` (`immortal-barons -planetary`, also folded into
 `-maint` when `IBBS` is on) reads and applies inbound packets, launches due
 group attacks, exports this board's scores, and writes the outbox.
 
+`barons-ftn` is the optional FTN adapter. It remains outside the game process:
+it reads the existing board, roster, and route files, renames each outbound
+`.brp` into that directory's `fido/` child, then creates an FTS-0001 Type-2
+file-attach `.msg` with exclusive creation. An unaddressed mesh broadcast is
+fanned out with real copies to one distinct attachment and message per other
+roster node; an addressed packet is sent to its routed next hop. No hard-link
+support is required. Its only settings are in `ftn.cfg`. `WriteOutbox` writes
+complete JSON, including the board signature when configured, under a
+non-`.brp` temporary name and atomically publishes it by renaming it, so the
+adapter needs no game lock. Concurrent adapter processes serialize through
+their own `barons-ftn.lock`, which the game never takes.
+
 ## Packet files (`*.brp`)
 
-Each packet is one JSON file. Filename:
-`[L<nnn>-]<from>-to-<to>-<date>-<seq>-<n>.brp`, where `<to>` is `all` for a
-broadcast and the `L<nnn>` prefix is the league number when one is set. A
-transport that fans out must copy a broadcast to every other board's inbound.
+Each packet is one JSON file. Modern packet filenames are
+`[L<nnn>-]<from-node>-<sequence>-<to-node>.brp`; the three identity numbers use
+base 36 to keep the name short enough for an absolute pathname in an FTN Type-2
+subject. The sequence has a fixed width so a directory scan sees each sender's
+packets in order. For example, `L042-2-000000000001z-3.brp` is league 42,
+origin node 2, sequence 71, final destination node 3. A zero destination is a
+broadcast. The `L<nnn>` prefix is present when the league number is set. A
+modern packet at league 0 gets a short digest of its origin board before those
+three numbers, preventing equal node numbers in two leagues sharing a directory
+from colliding. A legacy packet without a stable origin node and sequence gets
+a deterministic 128-bit content digest instead. A transport that fans out must
+copy a broadcast to every other board's inbound.
 
-`<to>` is the packet's FINAL destination, not the board the file is handed to.
-Where the file is written is the routing decision (`World.NextHop`); the name
-records who it is ultimately for, which is what makes a directory of packets
-readable to a sysop chasing one.
+The short name leaves room for FTN `.msg` transports, whose Subject must carry
+the attachment pathname in at most 71 bytes. That byte budget is an FTN Type-2
+constraint, not a restriction on the packet format or on other transports.
+
+The destination number is the packet's FINAL destination, not the board the
+file is handed to. Where the file is written is the routing decision
+(`World.NextHop`).
 
 The JSON is `game.Packet`. Every field is optional; one packet carries whatever
 the run had to send. `game.Packet` itself is the authority — this is a reader's
@@ -304,15 +327,18 @@ Link 3        /home/bbs/filebox/node3
 Not BRE's positional seven lines (sysop, planet, address, inbound, netmail dir,
 league, mailer). Positional cannot express `Link` at all, and a blank field
 shifts every field after it — which is what most of BRE's own InterBBS
-troubleshooting section is about. IB stores no FTN address or mailer name
-because it addresses nothing and writes no netmail.
+troubleshooting section is about. The game stores no mailer name or netmail
+directory here. FTN addresses are already roster data in `ibnodes.dat`; the
+optional `barons-ftn` adapter keeps its netmail directory and Binkley-mode
+switch in the separate `ftn.cfg`.
 
 `store.ParseBoardConfig` reads BRE's own positional format, wired to
 `-ibbs-reset -import-bbs-cfg PATH` for a sysop converting a league they already
 run. It takes the planet name, the incoming-files directory and the league
-number. The sysop name, FTN address and mailer have no counterpart here, and the
-netmail directory is deliberately not read as `OutboundDir` — BRE puts `.MSG`
-files there, while IB's outbound holds the packets themselves.
+number. The sysop name, FTN address, netmail directory, and mailer are not
+imported: the roster and optional `ftn.cfg` own those values, and BRE's netmail
+directory must not become `OutboundDir` — BRE puts `.MSG` files there, while
+IB's outbound holds the packets themselves.
 
 The path is explicit rather than a scan of the data directory: `BBS.CFG` and
 `bbs.cfg` are the same filename on macOS and Windows, so a scan would find the

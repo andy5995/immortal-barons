@@ -1,4 +1,6 @@
 (in-progress:)
+  * Added barons-ftn, an optional helper that hands outbound packets to an FTN
+    mailer as Type-2 file-attach netmail
   * A foiled covert operation now names the realm that sent the agent, as the
     original does; an operation that succeeds still names nobody
   * A market sale is no longer posted to the planet news. The seller is still
