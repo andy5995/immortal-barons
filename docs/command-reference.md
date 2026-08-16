@@ -90,8 +90,8 @@ then exit.
 
 ### Testing and balance
 
-These are development tools. A board never needs them, and both advance or
-expose game state.
+These are development tools. A board never needs them, and they advance, expose
+or override game state.
 
 - **`-dump`** — Print the game world as JSON, then exit. The output is the world
   *after* the game loads it (old saves are migrated and missing fields filled
@@ -115,6 +115,22 @@ expose game state.
     running it by mistake: it asks before starting, and the default answer is
     no; and it refuses outright on a game that has any human realm, since
     advancing someone else's realm is not something a warning can undo.
+
+- **`-dupe-check on`** / **`-dupe-check off`** — Force Dupe Checking on or off
+  **for this run only**. Dupe Checking is the league rule that locks a baron out
+  here when they are found playing on another board in the league.
+
+    **It changes no setting.** `config.json` is not written, and neither is
+    anything else, so the run cannot leave the league rule altered behind it —
+    the next command sees the saved setting again. This is what makes it a
+    testing switch rather than a way to configure the game; to change the rule
+    for real, use the Configuration Editor.
+
+    It is a modifier, not a mode: it rides whatever else you asked for, so
+    `immortal-barons -local -dupe-check off` plays a local turn with the rule
+    lifted. `off` lets a baron the league had shut out reach the game; `on`
+    applies the rule even on a board whose saved setting has it off. Either way
+    the record of who was locked survives untouched.
 
 ### Inter-BBS
 

@@ -95,6 +95,7 @@ func main() {
 	addAI := flag.Int("add-ai", 0, i18n.T(lang, "add N computer barons to the running game, then exit"))
 	spectate := flag.Int("spectate", 0, i18n.T(lang, "play the game forward N days of computer-baron turns, printing a per-day summary and final standings, then exit (a balance probe). ADVANCES AND SAVES the game, so it asks first and refuses on a game that has human realms"))
 	dump := flag.Bool("dump", false, i18n.T(lang, "print the normalized game world as JSON, then exit (after load-time migration; for scripts and balance checks)"))
+	dupeCheck := flag.String("dupe-check", "", i18n.T(lang, "force Dupe Checking `on|off` for this run only, for testing a league lockout. Nothing is saved: the sysop's setting is left as it is"))
 	utf8 := flag.Bool("utf8", false, i18n.T(lang, "force UTF-8 output (needed for non-English languages; -local detects this from your locale)"))
 	cp437 := flag.Bool("cp437", false, i18n.T(lang, "force CP437 output (the door default; overrides the -local locale detection)"))
 	asciiOut := flag.Bool("ascii", false, i18n.T(lang, "force plain 7-bit ASCII output, for a terminal that is neither CP437 nor UTF-8 (box rules and accents degrade to ASCII look-alikes)"))
@@ -136,6 +137,25 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "config:", err)
 		os.Exit(1)
+	}
+	// A modifier, not a mode: it rides whatever else was asked for (-local, the
+	// door, -planetary), like -no-ansi. It is applied to the in-memory config
+	// only — Config.DupeCheckOverride never reaches config.json.
+	if *dupeCheck != "" {
+		on, ok := parseOnOff(*dupeCheck)
+		if !ok {
+			fmt.Fprintf(os.Stderr, "immortal-barons: -dupe-check takes on or off, not %q\n", *dupeCheck)
+			os.Exit(2)
+		}
+		cfg.DupeCheckOverride = &on
+		word := "off"
+		if on {
+			word = "on"
+		}
+		// stderr, not stdout: under a BBS this reaches the sysop's log rather
+		// than the caller's screen, where it would land in the middle of the
+		// game's own output.
+		fmt.Fprintf(os.Stderr, "immortal-barons: Dupe Checking forced %s for this run only; the saved setting is unchanged.\n", word)
 	}
 	today := time.Now().Format("2006-01-02")
 	// IB_GAME_DATE overrides the game's "today" for testing (e.g.
@@ -830,6 +850,19 @@ func runLeagueConfig(cfg game.Config) error {
 	fmt.Printf("Broadcast league config (turns/day=%d, protection=%d, length=%d) to %s\n",
 		cfg.TurnsPerDay, cfg.ProtectionTurns, cfg.GameLength, cfg.Outbound())
 	return store.Save(w, cfg)
+}
+
+// parseOnOff reads the value of -dupe-check. Only on and off are accepted, in
+// either letter case — the words the Configuration Editor and the game settings
+// screen already show for this switch.
+func parseOnOff(v string) (on, ok bool) {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "on":
+		return true, true
+	case "off":
+		return false, true
+	}
+	return false, false
 }
 
 // leagueSetup is the per-board half of a league reset (-ibbs-reset): the

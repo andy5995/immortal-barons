@@ -55,6 +55,32 @@ func TestDupeCheckingOffReleasesLockedBarons(t *testing.T) {
 	}
 }
 
+// The -dupe-check testing switch covers BOTH sites that ask whether checking is
+// on: the login gate above, and what this board's outgoing packets carry. Off,
+// the scores go out with no owner hash, so no other board can lock anyone on
+// this run's account either — a half-applied override would leave the tester
+// shut out on the far side of the league.
+func TestDupeCheckOverrideReachesTheOutgoingPacket(t *testing.T) {
+	w, e := dupeWorld(t)
+	w.LastMaintDate = "2026-08-16"
+
+	w.ExportScores()
+	if len(w.Outbox) != 1 || len(w.Outbox[0].Scores) != 1 {
+		t.Fatalf("expected one score in one packet, got %#v", w.Outbox)
+	}
+	if w.Outbox[0].Scores[0].OwnerHash != dupeHash(e.Owner) {
+		t.Fatal("the packet should carry the owner hash while Dupe Checking is on")
+	}
+
+	off := false
+	w.Config.DupeCheckOverride = &off
+	w.Outbox = nil
+	w.ExportScores()
+	if got := w.Outbox[0].Scores[0].OwnerHash; got != "" {
+		t.Errorf("OwnerHash = %q, want the override to keep it out of the packet", got)
+	}
+}
+
 // Only the board that reported a duplicate can release it, or a quiet board
 // would clear a lock another board is still asserting.
 func TestDupeLockSurvivesAnotherBoardsPacket(t *testing.T) {

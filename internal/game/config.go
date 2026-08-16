@@ -291,6 +291,15 @@ type Config struct {
 	LocalAttackScoring bool // ... and winning one moves score
 	DupeChecking       bool // a baron playing on another board in the league is locked out here
 
+	// DupeCheckOverride forces duplicate-user checking on or off for THIS RUN
+	// only (the -dupe-check testing switch); nil leaves DupeChecking in charge.
+	// `json:"-"` is what keeps it off disk: it rides the in-memory Config that
+	// every load hands the world, but the four places that write a Config back
+	// out — both Configuration Editors, an applied league broadcast, and -reset —
+	// marshal it away, so a test run cannot leave the league rule changed behind
+	// it. Read it through World.dupeCheckingOn, never directly.
+	DupeCheckOverride *bool `json:"-"`
+
 	// MinBoardVersion is the game version the League Coordinator requires of every
 	// board, as "0.0.5" ("" = no requirement). A board below it has its packets
 	// refused, which is the only way a Coordinator can insist on a version once

@@ -24,8 +24,8 @@ var usageGroups = []struct {
 	{"Sysop / game admin", []string{"set-dropfile", "reset", "reset-from-config", "add-ai", "maint"}},
 	{"Inter-BBS", []string{"ibbs-reset", "board-id", "inbound", "outbound", "import-bbs-cfg", "planetary", "league-routes", "league-config", "export", "import"}},
 	// Development tools, kept out of the sysop section: a board never needs
-	// these, and both of them advance or expose game state.
-	{"Testing and balance", []string{"dump", "spectate"}},
+	// these, and they advance, expose or override game state.
+	{"Testing and balance", []string{"dump", "spectate", "dupe-check"}},
 	{"Info", []string{"version"}},
 }
 

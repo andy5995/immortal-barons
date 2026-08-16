@@ -867,7 +867,7 @@ func (w *World) ExportScores() {
 				Empire: e.Name, NetWorth: w.NetWorth(e), Land: e.Land, Score: e.Score,
 				Protected: e.Protection > 0,
 			}
-			if w.Config.DupeChecking {
+			if w.dupeCheckingOn() {
 				s.OwnerHash = dupeHash(e.Owner)
 			}
 			scores = append(scores, s)

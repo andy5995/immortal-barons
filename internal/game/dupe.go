@@ -33,11 +33,26 @@ func dupeHash(handle string) string {
 	return hex.EncodeToString(sum[:])[:DupeHashLen]
 }
 
+// dupeCheckingOn reports whether this run enforces duplicate-user checking: the
+// sysop's saved setting, unless the -dupe-check testing switch overrides it for
+// the process. Every site that ASKS goes through here, so a reader added later
+// cannot quietly ignore the switch.
+//
+// What the league is TOLD the rule is stays Config.DupeChecking — see
+// ExportLeagueConfig, which broadcasts the saved setting. A testing switch on
+// one board must not rewrite the rule for the league.
+func (w *World) dupeCheckingOn() bool {
+	if w.Config.DupeCheckOverride != nil {
+		return *w.Config.DupeCheckOverride
+	}
+	return w.Config.DupeChecking
+}
+
 // DupeLocked reports whether e is shut out for playing elsewhere in the league.
 // The switch is read here rather than when the lock is set, so a Coordinator who
 // turns Dupe Checking off releases every locked baron at once.
 func (w *World) DupeLocked(e *Empire) bool {
-	return w.Config.IBBS && w.Config.DupeChecking && e.DupeLockedBy != ""
+	return w.Config.IBBS && w.dupeCheckingOn() && e.DupeLockedBy != ""
 }
 
 // DupeLockMessage explains the lock to the caller it shut out.

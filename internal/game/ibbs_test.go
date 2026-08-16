@@ -1016,6 +1016,10 @@ var perBoardConfigFields = map[string]string{
 	"IdleTimeoutSecs": "when to boot a silent caller and free the world lock",
 	"MaxIdleWarnings": "how many warnings before that boot",
 	"AICount":         "a league board never gets AI barons, so the value is inert there",
+	// Not a rule and not a setting: the -dupe-check switch, in force for one
+	// run and never saved. Broadcasting it would push one tester's override
+	// onto every board in the league.
+	"DupeCheckOverride": "the -dupe-check testing switch, this run only",
 }
 
 // TestEveryGameRuleIsBroadcast holds the line the rule above draws. A new Config

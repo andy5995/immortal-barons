@@ -46,6 +46,14 @@ func TestSaveConfig_LoadConfig_RoundTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("LoadConfig: %v", err)
 	}
+	// One field must NOT survive, and this is where that is proved: the
+	// -dupe-check testing switch is kept off disk by `json:"-"`, so a run using
+	// it cannot leave the league's Dupe Checking rule changed behind it. Every
+	// other field is still held to the round trip below.
+	if got.DupeCheckOverride != nil {
+		t.Error("DupeCheckOverride reached config.json; a -dupe-check run would change the saved rule")
+	}
+	cfg.DupeCheckOverride = nil
 	if !reflect.DeepEqual(got, cfg) {
 		t.Errorf("round trip = %+v, want %+v", got, cfg)
 	}
