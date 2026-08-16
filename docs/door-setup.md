@@ -335,10 +335,13 @@ the mailer knows to attach the file and send it. Four of `BBS.CFG`'s seven lines
 serve that wrapper: the sysop name and node address that go inside it, the
 netmail directory it is written to, and which mailer's flavour to use.
 
-Immortal Barons stops one step earlier. It writes the packet and leaves it
-there, so there is no wrapper, no netmail directory and no mailer setting, and
-`bbs.cfg` has no line for any of the four. Watch for `.brp` files in your
-outbound directory; that is the equivalent of seeing the `.msg` appear.
+Immortal Barons normally stops one step earlier. It writes the packet and
+leaves it there, so the game itself has no wrapper, netmail directory, or mailer
+setting, and `bbs.cfg` has no line for any of the four. Watch for `.brp` files
+in your outbound directory; that is the equivalent of seeing the `.msg` appear.
+
+If your transport wants the original-style handoff, the separate `barons-ftn`
+helper creates it. See [Optional FTN handoff](#optional-ftn-handoff) below.
 
 The gain is that the game knows nothing about mail, which means:
 
@@ -348,8 +351,8 @@ The gain is that the game knows nothing about mail, which means:
 - **Any transport works**, including ones written long after BRE was. You are
   not held to the four mailers BRE knows about, and there is no once-a-day limit
   for choosing the wrong one.
-- **The wrapper's failure modes are gone**: no `.msg` dialect to get wrong, and
-  nothing of ours in the netmail directory to collide with another door's files.
+- **The wrapper is optional**: boards using another transport keep `.msg` files
+  and mailer-specific settings entirely out of the path.
 
 What you give up is that BRE arranged delivery for you. Here you point your own
 transport at the outbound directory — a file box entry if you already run a
@@ -363,7 +366,7 @@ The rest of the mapping:
 | Line 2, BBS name | `BoardID` |
 | Line 4, incoming files | `Inbound` |
 | Line 6, league number | `LeagueNumber` |
-| Lines 1, 3, 5, 7 | no equivalent — all wrapper settings |
+| Lines 1, 3, 5, 7 | optional `barons-ftn` plus `ftn.cfg` |
 | `\OUTBOUND`, fixed | `Outbound`, and you choose the path |
 | `ROUTE.CFG` | the roster's `HOST` entries, plus `Link` lines |
 | `BRNODES.DAT` | `ibnodes.dat` |
@@ -382,14 +385,14 @@ separates boards:
 ```
 1
 Avalon
-363/277
+1:363/277
 Orlando
 FL
 USA
 
 2
 Pier 7
-106/477
+1:106/477
 Houston
 TX
 USA
@@ -528,6 +531,64 @@ ROUTE 5 5
 The file overrides what the roster says. Later lines win over earlier ones, so
 write the general rule first. A league whose Coordinator keeps the routing in the
 roster needs no such file on any board.
+
+## Optional FTN handoff
+
+`barons-ftn` turns the transport-neutral `.brp` files into ordinary FTN
+file-attach netmail. The game does not run it automatically. A typical event or
+door-exit chain is:
+
+```
+immortal-barons -planetary -data /path/to/data
+barons-ftn -data /path/to/data
+```
+
+Create `ftn.cfg` in that data directory:
+
+```
+NetmailDir /sbbs/fido/netmail
+Binkley    No
+```
+
+- **NetmailDir** is the directory where your BBS or mailer watches for Type-2
+  `.msg` netmail. A relative path is read relative to the game data directory.
+- **Binkley** is `Yes` when the mailer uses Binkley-style file attaches,
+  including BinkIT, the Binkley-style mailer shipped with Synchronet, and `No`
+  for a non-Binkley mailer. Synchronet can be used with several mailers, so the
+  BBS package itself does not decide this switch. Omitting the setting is the
+  same as `No`.
+  Binkley-style handling gets a `^` before the attached path in the subject;
+  non-Binkley handling gets a `FLAGS KFS` control line. Both get the private,
+  local, file-attach, and kill-sent header attributes.
+
+The helper gets this board's address and every destination address from
+`ibnodes.dat`. Use complete `zone:net/node` addresses there; a point may add
+`.point`. The helper prefers the packet's stable destination node number, uses
+the board name for packets from older versions, and applies `ibroute.cfg` and
+the roster's `HOST` tree to choose the next hop. For the common arrangement
+where every member sends through node 1:
+
+```
+; ibroute.cfg
+ROUTE * 1
+```
+
+With a route configured, `-planetary` already writes one signed, addressed
+packet per board. In an unrouted mesh it writes one unaddressed broadcast
+instead; `barons-ftn` gives every other board its own attachment pathname and
+`.msg`. It sends those copies directly to each board. Turning the already-signed
+broadcast into routed, addressed packets here would change its signed bytes.
+
+For each configured `Outbound` or `Link` directory, the helper moves a claimed
+packet into its `fido` child and puts that absolute pathname in the `.msg`
+subject. The pathname must fit the Type-2 subject field (71 bytes, or 70 with
+the Binkley `^`); choose a short outbound path if necessary. The FTN software
+removes the claimed file after sending it.
+
+The move is the concurrency claim. If two door nodes launch the helper at the
+same time, only one can create the destination file; only that process creates
+the `.msg` or broadcast set. A malformed packet or a message-creation failure
+is moved back to the outbound directory for a later run.
 
 ## League-wide rules (Coordinator only)
 

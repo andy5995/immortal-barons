@@ -28,6 +28,13 @@ a shared mount). `RunPlanetary` (`immortal-barons -planetary`, also folded into
 `-maint` when `IBBS` is on) reads and applies inbound packets, launches due
 group attacks, exports this board's scores, and writes the outbox.
 
+`barons-ftn` is the optional FTN adapter. It remains outside the game process:
+it reads the existing board, roster, and route files, atomically claims each
+outbound `.brp` into that directory's `fido/` child, then creates an FTS-0001
+Type-2 file-attach `.msg`. An unaddressed mesh broadcast is fanned out to one
+distinct attachment and message per other roster node; an addressed packet is
+sent to its routed next hop. Its only settings are in `ftn.cfg`.
+
 ## Packet files (`*.brp`)
 
 Each packet is one JSON file. Filename:
@@ -304,15 +311,18 @@ Link 3        /home/bbs/filebox/node3
 Not BRE's positional seven lines (sysop, planet, address, inbound, netmail dir,
 league, mailer). Positional cannot express `Link` at all, and a blank field
 shifts every field after it — which is what most of BRE's own InterBBS
-troubleshooting section is about. IB stores no FTN address or mailer name
-because it addresses nothing and writes no netmail.
+troubleshooting section is about. The game stores no mailer name or netmail
+directory here. FTN addresses are already roster data in `ibnodes.dat`; the
+optional `barons-ftn` adapter keeps its netmail directory and Binkley-mode
+switch in the separate `ftn.cfg`.
 
 `store.ParseBoardConfig` reads BRE's own positional format, wired to
 `-ibbs-reset -import-bbs-cfg PATH` for a sysop converting a league they already
 run. It takes the planet name, the incoming-files directory and the league
-number. The sysop name, FTN address and mailer have no counterpart here, and the
-netmail directory is deliberately not read as `OutboundDir` — BRE puts `.MSG`
-files there, while IB's outbound holds the packets themselves.
+number. The sysop name, FTN address, netmail directory, and mailer are not
+imported: the roster and optional `ftn.cfg` own those values, and BRE's netmail
+directory must not become `OutboundDir` — BRE puts `.MSG` files there, while
+IB's outbound holds the packets themselves.
 
 The path is explicit rather than a scan of the data directory: `BBS.CFG` and
 `bbs.cfg` are the same filename on macOS and Windows, so a scan would find the

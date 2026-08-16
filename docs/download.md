@@ -21,8 +21,8 @@ Builds are provided for these systems:
 | Linux | x86-64 and ARM64 |
 | macOS | Intel and Apple Silicon |
 
-The game is one program. There is nothing to install: unpack the archive and
-run the file inside it.
+There is nothing to install: unpack the archive and run `immortal-barons`. It
+also contains `barons-ftn`, an optional helper for leagues carried over FTN.
 
 ## Notes before you run it
 

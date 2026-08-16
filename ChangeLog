@@ -1,4 +1,8 @@
 (in-progress:)
+  * Added barons-ftn, an optional FTN transport helper. It atomically moves
+    outbound .brp packets into an outbound/fido directory and creates Type-2
+    file-attach .msg netmail, with routing from ibnodes.dat and ibroute.cfg;
+    broadcasts get one attachment and message per other board
   * A foiled covert operation now names the realm that sent the agent, as the
     original does; an operation that succeeds still names nobody
   * A market sale is no longer posted to the planet news. The seller is still
