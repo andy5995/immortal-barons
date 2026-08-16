@@ -14,6 +14,91 @@ the time goes. Read this section before building anything.
 | Scripted two-board league | "does this inter-BBS feature move a packet" | a minute |
 | Live Mystic boards | "does a real sysop's setup work end to end" | tens of minutes, and Andy's machine |
 
+**Pick the board software by what the transport needs.** The Mystic pair cannot
+test an FTN netmail path at all: Mystic keeps its own message bases and has no
+`*.msg` netmail directory anywhere, so the Binkley/FrontDoor file-attach
+convention has nothing to read it. Synchronet does, through SBBSecho — which is
+why a third local board was built. Check for the directory the transport
+actually watches before concluding a handoff is broken.
+
+Building Synchronet from `~/src/sbbs`, three things worth knowing:
+
+- **Build from a clone.** The install makefile builds in `REPODIR`, so pointing
+  it at the reference checkout scatters `gcc.linux.x64.*` output through the tree
+  used for grepping Synchronet source. `~/src/sbbs-testbbs` is that clone;
+  `~/c-sbbs` is the install.
+- **Unset `MAKEFLAGS` first.** It is exported as `-j12` in this environment, and
+  cryptlib's 3rdp extraction is not parallel-safe: the same archive gets unzipped
+  several times at once, directories vanish mid-unpack, and the build dies with
+  `cryptlib.h: No such file or directory` — which reads like a missing dependency
+  and is not one. `install-sbbs.mk` clears `MAKEFLAGS` for its sub-makes but
+  cannot clear its own. `env -u CC -u CXX -u MAKEFLAGS make …` builds cleanly.
+- **`SBBSCTRL` must be set** or every binary looks in `/sbbs/ctrl`:
+  `export SBBSCTRL=$HOME/c-sbbs/ctrl`. The install symlinks `exec/*` back into
+  the clone, so the clone must not be cleaned away.
+
+Configuring it, and the three things that stop it working:
+
+- **Nothing may bind below 1024** after a `NOCAP=1` build. Move the terminal
+  ports (`sbbs.ini`: Telnet, SSH, RLogin), turn off the Mail/FTP/Web servers,
+  and disable every `services.ini` entry with a privileged port — NNTP 119,
+  Finger 79, Gopher 70, MSP 18, ActiveUser 11. NNTP retrying port 119 five times
+  is what delays the whole Services startup. `[Services]` itself must stay
+  enabled: BinkIT lives there.
+- **`scfg` and `echocfg` render fine under tmux with `-iA -k`** (ANSI mode, no
+  mouse) and can be driven with `send-keys` + `capture-pane`, exactly like the
+  BRE harness. Without `-iA` the banner draws and nothing else. To confirm which
+  row the cursor is on before typing into it, `capture-pane -pe | cat -v` and
+  look for the `^[[47m` background — guessing the row count is how the wrong
+  field gets set. `INS` adds a list entry; ESC backs out and offers to save.
+- **The system's FTN address is not in any file until `scfg` writes it.** It
+  lands in `msgs.ini` as `[FidoNet] addr_list=`. Linked nodes are `echocfg`, and
+  land in `sbbsecho.ini` as `[node:ADDR@domain]` with `BinkpHost`, `BinkpPort`
+  and `BinkpPoll`.
+- **Mystic offers plain-text binkp auth; Synchronet demands CRAM-MD5 by
+  default.** The symptom is `Authorization failed` on the Mystic side and
+  `CRAM-MD5 required (and not provided)` on the Synchronet side. Setting
+  `BinkpAllowPlainAuth = true` on that node fixes it, and is acceptable only
+  because this link is loopback on a test rig — do not carry the setting into
+  advice for a real board.
+
+Poll by NODE ADDRESS, not by domain: `./mis poll 1:1/2` works, `./mis poll
+iblocal` reports "Polled 0 systems" and looks like a connection failure when
+nothing was ever attempted.
+
+**A private FTN domain needs its own zone, or BinkIT ignores the host you
+configured.** Outbound, BinkIT maps zone to domain through the `[domain:*]`
+sections, so with the stock `[domain:fidonet] Zones = 1,…` an address like
+`1:1/1@iblocal` resolves as `…@fidonet`, misses the `[node:1:1/1@iblocal]`
+section entirely, and falls back to `f1.n1.z1.binkp.net` — a DNS failure that
+looks nothing like a config problem. Inbound still works throughout, because
+that matches on address, which is what makes it confusing. On a rig that never
+touches real FidoNet, take zone 1 off `fidonet` and give it to the private
+domain. Retagging the node instead makes it authenticate as the wrong domain and
+the far side answers `Bad address or password`.
+
+## The FTN handoff chain, end to end
+
+Verified 2026-08-16, Synchronet to Mystic. Each step has its own failure mode, so
+check them in order rather than guessing where a packet stalled:
+
+    immortal-barons -planetary   # writes .brp into Outbound
+    barons-ftn                   # claims it into Outbound/fido, writes N.msg
+    exec/sbbsecho                # packs the .msg into the BSO .flo, deletes it
+    exec/jsexec -c ctrl exec/binkit.js   # OUTBOUND session, actually sends
+
+**BinkIT does not push its queue to a caller.** An inbound session authenticates,
+transfers nothing, and looks like success on both sides. Only an outbound poll
+sends what the BSO holds — which is why the last step is a `jsexec` run and not
+"wait for the other board to poll".
+
+**Keep the outbound path short.** The Type-2 subject holds 70 bytes in Binkley
+mode for the WHOLE absolute attachment path, `fido/` child and filename
+included. `<data dir>/outbound` is already too deep on a normal Unix layout; a
+short path near the BBS root is not fussiness, it is the only thing that fits.
+The preflight refuses the run and moves nothing, so this is loud rather than
+subtle.
+
 **Default to the first.** `NewWorldSeed(DefaultConfig(), seed)` in a throwaway
 `internal/game/zz_*_test.go` gives a complete world for nothing, and `rmw` the
 file afterwards. The recurring failure is not reaching for it: fidelity work
@@ -21,10 +106,28 @@ file afterwards. The recurring failure is not reaching for it: fidelity work
 feels fixed and external, and simulation stops feeling available. "I haven't
 verified this" is a trigger to build a sandbox, not a disclaimer to ship.
 
-**Never run an experiment against Andy's live data directories.** His worlds
-exist to reproduce what HE saw. A synthetic world answers balance and behaviour
-questions, and cannot corrupt anything. Reproducing a specific report is the
-only reason to touch a live dir, and then read it, do not mutate it.
+**The two Mystic boards are a test rig, not a public BBS.** Nobody else dials
+them; they exist to exercise inter-BBS play, and experimenting on them is what
+they are for. Do not treat them as production and do not stall to ask before
+playing a turn or running a step there.
+
+What they are is a *working* rig that took real effort to reach — two boards,
+binkp both ways, keys, roster, two separate leagues — so the care they need is
+about not silently breaking the parts that already work, rather than about the
+data being precious:
+
+- **Check what a step does to the transport before running it.** The `Outbound`
+  directory on each board IS the binkp file box, so anything that moves packets
+  somewhere else (into a `fido/` subdirectory, say) stops delivery with no
+  error. The league looks alive and quietly carries nothing.
+- **Say what you changed**, so a later session does not spend an hour on a
+  symptom that was a leftover from a test.
+- **A question about game behaviour still belongs in a throwaway world**, not
+  here — not because the boards are precious, but because a fresh world is
+  faster, isolated, and repeatable.
+
+Andy's own BRE install under `~/.dosemu` is the same kind of thing: for testing,
+nothing precious, no need to ask before resetting it.
 
 ## Changing game state without the menus
 
