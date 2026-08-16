@@ -98,6 +98,23 @@ func TestCreateFileAttachClaimsMessageNumber(t *testing.T) {
 	}
 }
 
+func TestFileAttachSubjectLimits(t *testing.T) {
+	if _, err := fileAttachSubject(strings.Repeat("x", 71), false); err != nil {
+		t.Fatalf("71-byte non-Binkley subject: %v", err)
+	}
+	if _, err := fileAttachSubject(strings.Repeat("x", 72), false); err == nil {
+		t.Fatal("accepted 72-byte non-Binkley attachment path")
+	}
+	if got, err := fileAttachSubject(strings.Repeat("x", 70), true); err != nil {
+		t.Fatalf("70-byte Binkley subject: %v", err)
+	} else if len(got) != 71 || got[0] != '^' {
+		t.Fatalf("Binkley subject = %q", got)
+	}
+	if _, err := fileAttachSubject(strings.Repeat("x", 71), true); err == nil {
+		t.Fatal("accepted 71-byte Binkley attachment path")
+	}
+}
+
 func cString(b []byte) string {
 	if i := bytes.IndexByte(b, 0); i >= 0 {
 		b = b[:i]

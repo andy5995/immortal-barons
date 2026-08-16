@@ -582,8 +582,12 @@ broadcast into routed, addressed packets here would change its signed bytes.
 For each configured `Outbound` or `Link` directory, the helper moves a claimed
 packet into its `fido` child and puts that absolute pathname in the `.msg`
 subject. The pathname must fit the Type-2 subject field (71 bytes, or 70 with
-the Binkley `^`); choose a short outbound path if necessary. The FTN software
-removes the claimed file after sending it.
+the Binkley `^`); choose a short outbound path if necessary. Packet filenames
+are compact (`L042-2-000000000001z-3.brp` is league 42, origin node 2, sequence
+71, destination node 3). Before moving any packet, the helper checks every
+attachment pathname the whole run would create, including broadcast suffixes,
+and exits with the offending path and byte limit if one will not fit. The FTN
+software removes the claimed file after sending it.
 
 The helper takes the same cross-platform local file lock as the game before it
 scans, so two door nodes cannot move the same source together or race a game

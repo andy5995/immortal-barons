@@ -40,15 +40,20 @@ adapter cannot observe a packet between signing and the end of its file write.
 
 ## Packet files (`*.brp`)
 
-Each packet is one JSON file. Filename:
-`[L<nnn>-]<from>-to-<to>-<date>-<seq>-<n>.brp`, where `<to>` is `all` for a
-broadcast and the `L<nnn>` prefix is the league number when one is set. A
-transport that fans out must copy a broadcast to every other board's inbound.
+Each packet is one JSON file. Modern packet filenames are
+`[L<nnn>-]<from-node>-<sequence>-<to-node>.brp`; the three identity numbers use
+base 36 to keep the name short enough for an absolute pathname in an FTN Type-2
+subject. The sequence has a fixed width so a directory scan sees each sender's
+packets in order. For example, `L042-2-000000000001z-3.brp` is league 42,
+origin node 2, sequence 71, final destination node 3. A zero destination is a
+broadcast. The `L<nnn>` prefix is present when the league number is set. A
+legacy packet without a stable origin node and sequence gets a deterministic
+128-bit content digest instead. A transport that fans out must copy a broadcast
+to every other board's inbound.
 
-`<to>` is the packet's FINAL destination, not the board the file is handed to.
-Where the file is written is the routing decision (`World.NextHop`); the name
-records who it is ultimately for, which is what makes a directory of packets
-readable to a sysop chasing one.
+The destination number is the packet's FINAL destination, not the board the
+file is handed to. Where the file is written is the routing decision
+(`World.NextHop`).
 
 The JSON is `game.Packet`. Every field is optional; one packet carries whatever
 the run had to send. `game.Packet` itself is the authority — this is a reader's

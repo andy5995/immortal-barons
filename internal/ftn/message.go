@@ -13,8 +13,9 @@ import (
 )
 
 const (
-	type2HeaderSize = 190
-	programName     = "Immortal Barons"
+	type2HeaderSize  = 190
+	type2SubjectSize = 72
+	programName      = "Immortal Barons"
 
 	attributePrivate    = 0x0001
 	attributeFileAttach = 0x0010
@@ -27,12 +28,9 @@ const (
 // pathname in the subject, file-attach/local/private/kill-sent attributes, and
 // TOPT, FMPT, INTL, MSGID, PID and FLAGS KFS control lines as applicable.
 func createFileAttach(netmailDir, attached string, origin, destination Address, binkley bool) (string, error) {
-	subject := attached
-	if binkley {
-		subject = "^" + subject
-	}
-	if strings.IndexByte(subject, 0) >= 0 || len(subject) > 71 {
-		return "", fmt.Errorf("attachment subject is %d bytes; an FTN .msg subject holds at most 71", len(subject))
+	subject, err := fileAttachSubject(attached, binkley)
+	if err != nil {
+		return "", err
 	}
 	now := time.Now()
 	id := messageID(now)
@@ -66,6 +64,28 @@ func createFileAttach(netmailDir, attached string, origin, destination Address, 
 		}
 		return path, nil
 	}
+}
+
+// fileAttachSubject validates the pathname before anything is handed to the
+// mailer. The Type-2 field is 72 bytes including its terminating NUL; Binkley
+// consumes one more byte for its ^ convention.
+func fileAttachSubject(attached string, binkley bool) (string, error) {
+	limit := type2SubjectSize - 1
+	prefix := ""
+	mode := ""
+	if binkley {
+		limit--
+		prefix = "^"
+		mode = " in Binkley mode"
+	}
+	if strings.IndexByte(attached, 0) >= 0 {
+		return "", fmt.Errorf("attachment path contains a NUL byte")
+	}
+	if len(attached) > limit {
+		return "", fmt.Errorf("attachment path %q is %d bytes; FTN Type-2 permits at most %d%s",
+			attached, len(attached), limit, mode)
+	}
+	return prefix + attached, nil
 }
 
 func type2Header(attached string, origin, destination Address, now time.Time) [type2HeaderSize]byte {

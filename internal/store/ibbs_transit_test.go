@@ -122,13 +122,10 @@ func TestAMeshBoardWritesOneBroadcast(t *testing.T) {
 	if len(files) != 1 {
 		t.Fatalf("wrote %d files, want 1: %v", len(files), files)
 	}
-	if !strings.Contains(files[0], "-to-all-") {
-		t.Errorf("the broadcast was addressed to a board: %q", files[0])
-	}
 	var got game.Packet
 	readPacket(t, filepath.Join(out, files[0]), &got)
-	if got.ToBoard != "" {
-		t.Errorf("ToBoard = %q, want empty (a broadcast)", got.ToBoard)
+	if got.ToBoard != "" || got.ToNode != 0 {
+		t.Errorf("destination = %q/node %d, want an unaddressed broadcast", got.ToBoard, got.ToNode)
 	}
 }
 
@@ -243,6 +240,23 @@ func TestPacketFilenameCarriesTheLeagueNumber(t *testing.T) {
 	files := packetFiles(t, out)
 	if len(files) != 1 || !strings.HasPrefix(files[0], "L042-") {
 		t.Errorf("packet filenames = %v, want one prefixed L042-", files)
+	}
+}
+
+func TestPacketFilenameUsesCompactStableIdentity(t *testing.T) {
+	p := game.Packet{League: 42, FromNode: 2, ToNode: 3, Seq: 71}
+	if got := packetFilename(p, []byte("ignored for a modern packet")); got != "L042-2-000000000001z-3.brp" {
+		t.Errorf("packet filename = %q, want L042-2-000000000001z-3.brp", got)
+	}
+
+	legacy := game.Packet{League: 42, FromBoard: strings.Repeat("A very long board name ", 20)}
+	first := packetFilename(legacy, []byte("stable packet bytes"))
+	second := packetFilename(legacy, []byte("stable packet bytes"))
+	if first != second {
+		t.Errorf("legacy packet filename changed: %q != %q", first, second)
+	}
+	if len(first) > 35 {
+		t.Errorf("legacy packet filename is %d bytes: %q", len(first), first)
 	}
 }
 

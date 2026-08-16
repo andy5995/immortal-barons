@@ -1,10 +1,13 @@
 package store
 
 import (
+	"crypto/sha256"
+	"encoding/base32"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -81,14 +84,10 @@ func WriteOutbox(w *game.World, dir string) (int, error) {
 	if len(packets) == 0 {
 		return 0, nil
 	}
-	for i, p := range packets {
+	for _, p := range packets {
 		data, err := json.MarshalIndent(p, "", "  ")
 		if err != nil {
 			return 0, err
-		}
-		to := p.ToBoard
-		if to == "" {
-			to = "all"
 		}
 		target := dir
 		// A broadcast that got this far has no roster to address it from, so
@@ -102,14 +101,32 @@ func WriteOutbox(w *game.World, dir string) (int, error) {
 		if err := os.MkdirAll(target, 0o755); err != nil {
 			return 0, err
 		}
-		name := fmt.Sprintf("%s%s-to-%s-%s-%d-%d%s",
-			leaguePrefix(p.League), sanitize(w.Config.BoardID), sanitize(to), sanitize(p.Date), p.Seq, i, PacketExt)
+		name := packetFilename(p, data)
 		if err := os.WriteFile(filepath.Join(target, name), data, 0o644); err != nil {
 			return 0, err
 		}
 	}
 	w.Outbox, w.Transit = nil, nil
 	return len(packets), nil
+}
+
+// packetFilename keeps the transport name short enough to leave room for an
+// absolute directory in an FTN Type-2 subject. Modern packets are identified
+// exactly by origin node, final destination node, and the origin's monotonic
+// sequence number. Older packets without that identity use a stable 128-bit
+// content digest instead.
+func packetFilename(p game.Packet, data []byte) string {
+	var identity string
+	if p.FromNode > 0 && p.Seq > 0 {
+		sequence := strconv.FormatUint(p.Seq, 36)
+		sequence = strings.Repeat("0", 13-len(sequence)) + sequence
+		identity = strconv.FormatInt(int64(p.FromNode), 36) + "-" + sequence + "-" +
+			strconv.FormatInt(int64(p.ToNode), 36)
+	} else {
+		digest := sha256.Sum256(data)
+		identity = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString(digest[:16])
+	}
+	return leaguePrefix(p.League) + identity + PacketExt
 }
 
 // addressBroadcasts turns each broadcast into one packet per planet on the
@@ -207,10 +224,4 @@ func ReadInbound(w *game.World, dir string) (int, error) {
 		applied++
 	}
 	return applied, nil
-}
-
-// sanitize keeps packet filenames safe (no path separators or spaces).
-func sanitize(s string) string {
-	r := strings.NewReplacer("/", "_", "\\", "_", " ", "_", ":", "_")
-	return r.Replace(s)
 }

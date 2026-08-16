@@ -64,13 +64,86 @@ func Run(dataDir string) (Result, error) {
 		return Result{}, fmt.Errorf("this board %q: %w", board.BoardID, err)
 	}
 
+	dirs := outboundDirectories(board)
+	if err := preflightDirectories(dirs, transport, world, nodes); err != nil {
+		return Result{}, err
+	}
 	var result Result
-	for _, dir := range outboundDirectories(board) {
+	for _, dir := range dirs {
 		if err := scanDirectory(dir, transport, origin, world, nodes, &result); err != nil {
 			return result, err
 		}
 	}
 	return result, nil
+}
+
+// preflightDirectories checks every pathname that this run could put in an
+// FTN subject before it moves even the first packet. This makes an overlong
+// outbound path a configuration error instead of a partial handoff.
+func preflightDirectories(dirs []string, transport Config, world *game.World, nodes []game.LeagueNode) error {
+	for _, dir := range dirs {
+		entries, err := os.ReadDir(dir)
+		if os.IsNotExist(err) {
+			continue
+		}
+		if err != nil {
+			return err
+		}
+		for _, entry := range entries {
+			if entry.IsDir() || filepath.Ext(entry.Name()) != store.PacketExt {
+				continue
+			}
+			info, err := entry.Info()
+			if err != nil {
+				return err
+			}
+			if !info.Mode().IsRegular() {
+				continue
+			}
+			source := filepath.Join(dir, entry.Name())
+			claimed := filepath.Join(dir, "fido", entry.Name())
+			if err := preflightPacket(source, claimed, transport, world, nodes); err != nil {
+				return fmt.Errorf("preflight %s: %w", source, err)
+			}
+		}
+	}
+	return nil
+}
+
+func preflightPacket(source, claimed string, transport Config, world *game.World, nodes []game.LeagueNode) error {
+	attached, err := filepath.Abs(claimed)
+	if err != nil {
+		return err
+	}
+	if _, err := fileAttachSubject(attached, transport.Binkley); err != nil {
+		return err
+	}
+	data, err := os.ReadFile(source)
+	if err != nil {
+		return err
+	}
+	var packet game.Packet
+	if err := json.Unmarshal(data, &packet); err != nil {
+		return err
+	}
+	destinationNumber := packet.ToNode
+	if destinationNumber == 0 && packet.ToBoard != "" {
+		destinationNumber = world.NodeNumber(packet.ToBoard)
+	}
+	if destinationNumber != 0 {
+		return nil
+	}
+	recipients := broadcastRecipients(world, nodes)
+	if len(recipients) == 0 {
+		return fmt.Errorf("broadcast has no other board in %s", store.NodeListFile)
+	}
+	for _, node := range recipients[1:] {
+		copyPath := broadcastCopyPath(attached, node.Number)
+		if _, err := fileAttachSubject(copyPath, transport.Binkley); err != nil {
+			return fmt.Errorf("broadcast attachment for node %d: %w", node.Number, err)
+		}
+	}
+	return nil
 }
 
 func outboundDirectories(cfg game.Config) []string {
@@ -205,13 +278,7 @@ func queueClaimed(path string, transport Config, origin Address, world *game.Wor
 // that message is sent. Broadcasts go directly to their recipients: assigning
 // ToNode here to route them would change the already-signed packet bytes.
 func queueBroadcast(path string, transport Config, origin Address, world *game.World, nodes []game.LeagueNode) ([]Queued, error) {
-	mine := world.NodeNumber(world.Config.BoardID)
-	var recipients []game.LeagueNode
-	for _, node := range nodes {
-		if node.Number != mine {
-			recipients = append(recipients, node)
-		}
-	}
+	recipients := broadcastRecipients(world, nodes)
 	if len(recipients) == 0 {
 		return nil, fmt.Errorf("broadcast has no other board in %s", store.NodeListFile)
 	}
@@ -240,6 +307,17 @@ func queueBroadcast(path string, transport Config, origin Address, world *game.W
 	return queued, nil
 }
 
+func broadcastRecipients(world *game.World, nodes []game.LeagueNode) []game.LeagueNode {
+	mine := world.NodeNumber(world.Config.BoardID)
+	var recipients []game.LeagueNode
+	for _, node := range nodes {
+		if node.Number != mine {
+			recipients = append(recipients, node)
+		}
+	}
+	return recipients
+}
+
 func copyFileExclusive(source, destination string) (err error) {
 	in, err := os.Open(source)
 	if err != nil {
@@ -266,7 +344,7 @@ func copyFileExclusive(source, destination string) (err error) {
 
 func broadcastCopyPath(path string, node int) string {
 	ext := filepath.Ext(path)
-	return strings.TrimSuffix(path, ext) + fmt.Sprintf("-node-%d", node) + ext
+	return strings.TrimSuffix(path, ext) + fmt.Sprintf("-n%d", node) + ext
 }
 
 func queueForNode(path string, transport Config, origin Address, node game.LeagueNode) (Queued, error) {

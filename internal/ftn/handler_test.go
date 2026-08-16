@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 	"testing"
 
@@ -139,6 +140,48 @@ func TestBadPacketIsRestoredToOutbound(t *testing.T) {
 	}
 	if _, err := os.Stat(source); err != nil {
 		t.Fatalf("malformed packet was not restored: %v", err)
+	}
+}
+
+func TestRunPreflightsEverySubjectBeforeMovingPackets(t *testing.T) {
+	data := newTestSetup(t)
+	outbound := filepath.Join(data, "outbound")
+	good := filepath.Join(outbound, "a.brp")
+	body, err := json.Marshal(game.Packet{FromNode: 2})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(good, body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Make the base attachment fit exactly. The -n3 copy needed by the second
+	// broadcast recipient then exceeds the Type-2 subject field.
+	fidoDir := filepath.Join(outbound, "fido")
+	stemBytes := type2SubjectSize - 1 - len(fidoDir) - 1 - len(store.PacketExt)
+	if stemBytes < 1 {
+		t.Fatalf("test path %q is already too long", fidoDir)
+	}
+	longSource := filepath.Join(outbound, strings.Repeat("z", stemBytes)+store.PacketExt)
+	if err := os.WriteFile(longSource, body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if _, err := Run(data); err == nil {
+		t.Fatal("Run accepted an overlong broadcast attachment")
+	} else if !strings.Contains(err.Error(), "broadcast attachment for node 3") ||
+		!strings.Contains(err.Error(), "permits at most 71") {
+		t.Fatalf("Run error did not identify the subject limit: %v", err)
+	}
+	for _, path := range []string{good, longSource} {
+		if _, err := os.Stat(path); err != nil {
+			t.Errorf("preflight moved %s: %v", path, err)
+		}
+	}
+	if messages, err := filepath.Glob(filepath.Join(data, "netmail", "*.msg")); err != nil {
+		t.Fatal(err)
+	} else if len(messages) != 0 {
+		t.Errorf("preflight created messages: %v", messages)
 	}
 }
 
