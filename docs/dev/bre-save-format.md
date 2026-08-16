@@ -118,6 +118,13 @@ empire record (les di,[0x28d8])
                      6 Technology Agreement, 7 Full Defense Alliance); 8 and 9
                      are menu items (Declaration Of War, View Treaties) that
                      share the same name table and are never stored here.
+                     VERIFIED: `break_diplomatic_treaty` writes `xor ax,ax` to
+                     both parties' rows (`BRE.OVR 0x1a8f0`, `0x1a912`), so a
+                     Declaration Of War leaves 0 behind rather than 8, and a
+                     sweep of every write site at both relation displacements
+                     found no site that stores 8 at all. This matters to any
+                     code testing the row against a range: BRE's own battle
+                     report loop admits `> 5`, which reaches 6 and 7 only.
 
                      BRE indexes it by the RAW ASCII letter, so every access
                      reads `[es:di + 2*letter + 0xae]` and the displacement
@@ -132,12 +139,13 @@ empire record (les di,[0x28d8])
                      a Full Defense Alliance cannot reach across planets: no
                      interplanetary code path can read a relation row at all.
   +0x130 .. +0x161   the diplomatic relation with each of the 25 slots, one
-                     int16 per slot (enum: -1 Enemy, 0 None, 1..7 the pacts,
-                     8 Declaration Of War). Indexed by the raw ASCII letter, so
-                     the code's displacement carries a folded `base - 2*'A'` and
-                     a hit only means "relation" when a `shl ax,1` precedes it.
-                     Each realm holds its OWN row, so a pair's relation is stored
-                     twice and both copies have to be maintained together.
+                     int16 per slot. For the enum see the fuller entry above —
+                     8 is NOT among the stored values. Indexed by the raw ASCII
+                     letter, so the code's displacement carries a folded
+                     `base - 2*'A'` and a hit only means "relation" when a
+                     `shl ax,1` precedes it. Each realm holds its OWN row, so a
+                     pair's relation is stored twice and both copies have to be
+                     maintained together.
   +0x281 int32  lifetime turns played. Drives the HeadQuarters price ratchet and,
                 against config +0x38, whether the realm is still protected.
   +0x285 byte   turns remaining today. Reset to config +0x36 at rollover; zero is
