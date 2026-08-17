@@ -219,11 +219,68 @@ The `.msg` numbering restarts from 1 each run. SBBSecho deletes the message once
 it is packed (kill-sent), so seeing `1.msg` again is the previous one having been
 carried, not the same one stuck.
 
-**Keep the outbound path short.** The Type-2 subject holds 70 bytes in Binkley
-mode for the WHOLE absolute attachment path, `fido/` child and filename included.
-`<data dir>/outbound` is already too deep on a normal Unix layout; a short path
-near the BBS root is not fussiness, it is the only thing that fits. The preflight
-refuses the run and moves nothing, so this is loud rather than subtle.
+**Keep the outbound path short — with room to grow.** The Type-2 subject holds 70
+bytes in Binkley mode for the WHOLE absolute attachment path, `fido/` child and
+filename included. `<data dir>/outbound` is already too deep on a normal Unix
+layout; a short path near the BBS root is not fussiness, it is the only thing
+that fits. The preflight refuses the run and moves nothing, so this is loud
+rather than subtle.
+
+A path that fits today can stop fitting later with nothing changed: the packet
+name carries the board's outbound SEQUENCE NUMBER, so it grows a byte each time
+that number gains a digit. A rig proven working at sequence 99 failed at 100 and
+stayed failed, because every packet after it hit the same preflight. Leave
+several bytes of headroom rather than trimming to exactly 70, and read a fresh
+"attachment path is 71 bytes" as this rather than as a config change someone
+made.
+
+## Scheduling the exchange
+
+Nothing in the game moves a file between boards and no mailer knows about the
+game, so a league only advances when something runs both halves on a schedule. A
+timer per board, every 15 minutes, is enough for a test rig.
+
+**EVERY board needs its own timer, including the one that gets polled.** This is
+the same "BinkIT does not push its queue to a caller" fact seen from the
+scheduling side, and it is easy to get wrong because the league does not look
+dead: packets keep arriving at the polling board, its journal keeps reporting
+`Applied N packets`, and only the far side's outbound quietly grows without
+bound. Confirm both directions by looking at BOTH boards' inbound, never one.
+
+**A board's timer must be retired with the board.** A timer left enabled for a
+retired board keeps running `-planetary` on its data and keeps polling, so a
+dead board goes on writing packets into a live one — which reads as ordinary
+league traffic in the journal. Check the enabled timers against the boards that
+actually exist whenever the rig changes shape.
+
+The unit is a `oneshot` service with a templated instance per board, so one
+script and one timer file cover the whole rig. Give the timer `Persistent=true`
+(a workstation is not up at every scheduled time) and a `RandomizedDelaySec`, so
+two boards polling each other do not open binkp sessions at the same instant.
+
+Shape of the per-board script, which has to branch because the two board
+softwares agree on nothing:
+
+    for each game data dir on this board:
+        immortal-barons -planetary -data <dir>
+        barons-ftn -data <dir>            # only where the dir has an ftn.cfg
+    then ONE mailer run for the whole board:
+        Mystic:      cd $MYSTIC && ./mis poll <peer node address>
+        Synchronet:  cd $SBBS && ./exec/sbbsecho && ./exec/jsexec -c ctrl exec/binkit.js
+
+One mailer run per board rather than per game: several leagues share the link,
+and running it last means a packet written this cycle leaves this cycle.
+
+- **The data directory is not in the same place on both.** Mystic's is under the
+  BBS `data/`; a Synchronet door's lives under `xtrn/<door>/data`. Do not derive
+  it from the BBS root with one rule.
+- **`SBBSCTRL` must be set inside the script.** systemd runs no profile, so
+  `sbbsecho` and `jsexec` otherwise look in `/sbbs/ctrl` and do nothing useful.
+- **Skip a missing data directory instead of failing.** Adding or retiring a
+  league then needs no edit, and a half-set-up board does not spam the journal.
+- `binkit.js` printing `We got an M_EOB, but there are still N files pending
+  M_GOT` is normal on a rig like this — check the BSO outbound is empty and the
+  file landed on the far side rather than reading it as a failure.
 
 ## Working on someone's rig without breaking it
 
