@@ -52,7 +52,7 @@ func interbbsScores(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
 	for i, r := range rows {
 		fmt.Fprintf(s, "%s%-4s%s %s%-26s%s %s%10d%s %s%11d%s %s%11d%s\n",
-			ansi.FgBrightMagenta, scoreID(i), ansi.Reset,
+			ansi.FgBrightMagenta, remoteScoreID(i), ansi.Reset,
 			ansi.FgBrightWhite, r.name, ansi.Reset,
 			ansi.FgBrightMagenta, r.land, ansi.Reset,
 			ansi.FgBrightWhite, r.score, ansi.Reset,
@@ -61,6 +61,20 @@ func interbbsScores(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
 	pause(s)
 	return Stay
+}
+
+// remoteScoreID numbers the inter-BBS board POSITIONALLY, unlike every local
+// roster. Slots are per-planet, and nothing in a score packet carries the
+// sender's: two realms on different planets legitimately hold the same letter
+// there, so this list can only count its own rows. Nothing selects by it — the
+// group-attack picker asks for the realm separately — so it is a label, not a
+// key. It runs (A)..(Z) and then (27)+, since the list pools every planet in the
+// league and is not bounded by one planet's slots.
+func remoteScoreID(i int) string {
+	if i < 26 {
+		return fmt.Sprintf("(%c)", 'A'+i)
+	}
+	return fmt.Sprintf("(%d)", i+1)
 }
 
 // createGroupAttack assembles an interplanetary strike against an empire on

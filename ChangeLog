@@ -1,4 +1,18 @@
 (in-progress:)
+  * A realm now holds one of the planet's 25 seats for its whole life, and its
+    letter is that seat. The letter no longer moves when another realm joins or
+    falls, and the Id column on See Scores shows it, so those rows are no longer
+    in letter order
+  * A planet holds 25 realms and no more. A caller arriving when every seat is
+    taken is told so and given no realm. A realm past the 25th used to be
+    created in silence, able to act on everyone while appearing in nobody's
+    target list
+  * Computer barons take seats from the 25, so a board running them seats fewer
+    callers. Max Players Per BBS set to 0 now means "as many as the seats left"
+    rather than "unlimited"
+  * A seat freed when a realm is swept from the map is given to the next realm
+    founded, which inherits none of its predecessor's pacts, mail or market
+    stock
   * A realm under New Realm Protection is refused the covert operations that
     have an effect, and the interplanetary Send SpyGuy, at no cost in gold,
     agents or turn slots; Send Spy and Spy on Relations stay open to it
@@ -71,9 +85,9 @@
   * -gen-board-key prints the key alone on its line. It used to print the board
     name in front of it, and a roster entry pasted whole left that board's
     packets unchecked instead of reporting an error
-  * A realm's letter on the attack and covert target lists is its own place in
-    the list. Allying with the realms above it used to re-letter everything
-    below, so the key that struck one realm struck a different one next time
+  * A realm's letter on the attack and covert target lists is its own seat.
+    Allying with the realms above it used to re-letter everything below, so the
+    key that struck one realm struck a different one next time
   * The InterPlanetary Special Operations menu works, where seven of its eight
     items did nothing before. Bomb Food Market, Bomb Trading Market, Bomb Trade
     Routes and Undermine Investments are aimed at another planet and wreck what

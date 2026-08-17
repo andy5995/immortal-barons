@@ -69,6 +69,11 @@ func repair(w *game.World, cfg game.Config) {
 	w.EnsurePirates()
 	w.EnsureTreaties()
 	w.EnsureMarket()
+	// After the treaty and market migrations, not before: an over-full save
+	// loses its surplus realms here, and dropping one has to forget the pacts
+	// and market rows it left — which EnsureTreaties has only just moved out of
+	// their legacy fields.
+	w.EnsureSlots()
 	w.EnsureNews()
 	w.EnsureEpoch()
 	loadLeagueNodes(w, cfg)

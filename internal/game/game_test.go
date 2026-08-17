@@ -108,21 +108,50 @@ func TestAddAIEmpires(t *testing.T) {
 	}
 }
 
-func TestAddAIEmpiresExhaustsPool(t *testing.T) {
+// The name pool (576 combinations) is far larger than the planet, so what stops
+// AddAIEmpires is the slot count, not the names. Barons share the roster the
+// pickers letter, so a board cannot be given more of them than can be addressed.
+func TestAddAIEmpiresStopsAtPlanetSlots(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 0
+	w := NewWorldSeed(cfg, 1)
+
+	if got := w.AddAIEmpires(100); got != 25 {
+		t.Fatalf("requesting 100 barons added %d, want 25 (the planet's slots)", got)
+	}
+	if len(w.Empires) != 25 {
+		t.Fatalf("want 25 empires, got %d", len(w.Empires))
+	}
+	if got := w.AddAIEmpires(1); got != 0 {
+		t.Errorf("a full planet should add 0, got %d", got)
+	}
+	if !w.PlanetFull() {
+		t.Error("PlanetFull() = false with every slot held")
+	}
+}
+
+// The name pool itself still has an exact end, tested where it can be reached:
+// through newAIName, which AddAIEmpires can no longer drain now that the planet
+// runs out of slots first.
+func TestNewAINameExhaustsPool(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AICount = 0
 	w := NewWorldSeed(cfg, 1)
 
 	pool := len(aiNameModifiers) * len(aiNameNouns) // every modifier x noun combination
-	if got := w.AddAIEmpires(pool + 10); got != pool {
-		t.Fatalf("requesting more than the pool added %d, want %d", got, pool)
+	used := map[string]bool{}
+	for i := 0; i < pool; i++ {
+		name, ok := w.newAIName(used)
+		if !ok {
+			t.Fatalf("pool ran dry after %d names, want %d", i, pool)
+		}
+		if used[strings.ToLower(name)] {
+			t.Fatalf("newAIName repeated %q", name)
+		}
+		used[strings.ToLower(name)] = true
 	}
-	if len(w.Empires) != pool {
-		t.Fatalf("want %d empires (whole pool), got %d", pool, len(w.Empires))
-	}
-	// No names left; a further request adds nothing.
-	if got := w.AddAIEmpires(1); got != 0 {
-		t.Errorf("exhausted pool should add 0, got %d", got)
+	if _, ok := w.newAIName(used); ok {
+		t.Error("an exhausted pool still offered a name")
 	}
 }
 

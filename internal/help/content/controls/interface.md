@@ -42,8 +42,15 @@ relations rather than the scores. Mark one realm only and you get the full
 negotiation with it — you can accept its offer or break the pact you hold.
 
 The letters belong to the realms, not to the rows, so a letter may be missing
-from the list: it is either yours or a realm that has fallen. The letters of
-everyone a message went to appear at the top of it when it is read.
+from the list: it is either yours or a realm that has fallen. A realm keeps its
+letter for as long as it stands, whoever else joins or falls, and it is the same
+letter on every screen — the `Id` column on See Scores is that letter too, which
+is why those rows are not in letter order. The letters of everyone a message
+went to appear at the top of it when it is read.
+
+A letter is freed when the realm holding it is swept from the map, and a later
+baron may be given it. So a letter names whoever holds it today, not whoever
+held it when an old message was written.
 
 ## Who else is on
 

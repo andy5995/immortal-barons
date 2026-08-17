@@ -53,14 +53,7 @@ func (w *World) SendMail(from, to *Empire, m Message) {
 	to.Mail = append(to.Mail, m)
 }
 
-// EmpireLetter is the display letter (A, B, …) for e, from its slot in the
-// world's empire list — the way BRE addresses mail recipients. Returns "?" for
-// an empire not in the world.
-func (w *World) EmpireLetter(e *Empire) string {
-	for i, x := range w.Empires {
-		if x == e {
-			return string(rune('A' + i))
-		}
-	}
-	return "?"
-}
+// A message's "To" records the recipient's slot letter — see EmpireLetter in
+// slots.go. It is the label the recipient carried when the mail was sent, not a
+// live reference: a realm that falls and has its slot re-occupied leaves old
+// mail naming a letter someone else now answers to.

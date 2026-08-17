@@ -51,7 +51,9 @@ func TestRegularAttackShapeShiftConflict(t *testing.T) {
 	})
 
 	fb := &hookSession{
-		fakeSession: fakeSession{keys: []rune("A")},
+		// B, not A: the attacker holds slot A, and a picker letter is the
+		// target's own slot rather than its row number.
+		fakeSession: fakeSession{keys: []rune("B")},
 		marker:      "Attack which realm",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.RemoveEmpire(w.FindByOwner("victim")) })

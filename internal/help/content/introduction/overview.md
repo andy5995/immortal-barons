@@ -12,6 +12,12 @@ strongest empire. You do this through your economy, your military, and your
 dealings with the other barons. The other players want the same thing, so you
 face steady competition.
 
+A planet has room for 25 baronies, each holding one of its 25 seats. Your seat
+is yours for as long as your realm stands, and its letter is how everyone else
+names you. When every seat is taken, a new caller is turned away until a realm
+falls; a sysop may also seat fewer than 25 players, and any computer-run barons
+take seats of their own.
+
 Many bulletin board systems can link their games together. When they do, each
 board is one planet, and your planet competes against the others. Then the goal
 is not just the strongest barony, but the strongest planet. Your side has to

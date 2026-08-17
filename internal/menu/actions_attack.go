@@ -116,6 +116,7 @@ func hiTokens(s string, words []string, color string) string {
 // biological missiles read both, see game.ChemCostForTarget).
 type targetRow struct {
 	name                  string
+	letter                string // the realm's permanent slot letter; its selection key
 	land, score, netWorth int
 	people, troopers      int
 	attackable, online    bool
@@ -139,7 +140,8 @@ func snapshotTargets(w *ctx) []targetRow {
 			}
 			attackable := e.Protection == 0 && !w.AreAllied(p, e)
 			rows = append(rows, targetRow{
-				name: e.Name, land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
+				name: e.Name, letter: e.Letter(),
+				land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
 				people: e.People, troopers: e.Troopers,
 				attackable: attackable, online: e.Online(),
 			})
@@ -270,21 +272,20 @@ func warnTrimmedForce(s session.Session, trimmed bool) {
 // name, or chosen=false if the player aborts (RETURN / any non-letter) or
 // nothing is attackable.
 //
-// A REALM'S LETTER IS ITS OWN, taken from its position in the whole list rather
-// than from a running count of the pickable ones. A shielded realm therefore
-// consumes its letter and leaves a gap, exactly as a fallen realm or the sender
-// does in the message picker. The alternative — numbering only what can be
-// picked — silently re-letters everyone the moment an alliance is formed or a
-// realm comes out of protection, so the key that attacked one realm yesterday
-// attacks a different one today.
+// A REALM'S LETTER IS ITS OWN — its permanent slot letter, not a count of the
+// rows above it. A shielded realm therefore keeps its letter and leaves a gap,
+// exactly as a fallen realm or the sender does in the message picker. Numbering
+// the rows instead re-letters everyone the moment an alliance is formed, a realm
+// comes out of protection, or a neighbour dies, so the key that attacked one
+// realm yesterday attacks a different one today.
 func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name string, chosen bool) {
 	scoreTableHead(s)
-	byLetter := make(map[int]string, len(rows))
-	for i, r := range rows {
+	byLetter := make(map[string]string, len(rows))
+	for _, r := range rows {
 		id := "" // no selection letter for a realm that can't be attacked
 		if r.attackable {
-			id = scoreID(i)
-			byLetter[i] = r.name
+			id = scoreID(r.letter)
+			byLetter[r.letter] = r.name
 		}
 		scoreTableRow(s, id, r.name, ansi.FgBrightWhite, r.online, r.land, r.score, r.netWorth)
 	}
@@ -300,7 +301,7 @@ func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name 
 	}
 	// A letter with no realm behind it — a gap, or past the end — aborts rather
 	// than selecting a neighbour.
-	name, found := byLetter[int(unicode.ToUpper(r)-'A')]
+	name, found := byLetter[string(unicode.ToUpper(r))]
 	if !found {
 		fmt.Fprint(s, "\n")
 		return "", false

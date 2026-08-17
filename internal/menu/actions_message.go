@@ -69,13 +69,14 @@ const (
 	pickNameWidth  = 26
 )
 
-// pickLetters is how many realms the picker can address. BRE indexes its empire
-// array with the letter itself and reserves Z for "All", so A..Y is the whole
-// addressable range and a realm past the 25th slot cannot be reached at all.
-const pickLetters = 25
+// pickLetters is how many realms the picker can address: one per slot on the
+// planet, since BRE indexes its empire array with the letter itself and reserves
+// Z for "All". The picker cannot fall short of the game because no more realms
+// than this can exist (game.PlanetSlots bounds creation).
+const pickLetters = game.PlanetSlots
 
 // pickRow is one selectable realm. The letter is the empire's SLOT letter
-// (World.EmpireLetter), not its position in the list: BRE uses the letter as an
+// (Empire.Letter), not its position in the list: BRE uses the letter as an
 // index straight into its empire array, so a dead realm or the caller's own
 // leaves a gap rather than renumbering everyone below it. That is also the
 // letter a message records in "Message To  :".
@@ -93,12 +94,12 @@ type pickRow struct {
 func pickRows(w *ctx, opts pickOpts) (rows []pickRow, allies int) {
 	w.With(func() {
 		p := w.Player()
-		for i, e := range w.Empires {
-			if i >= pickLetters || !e.Alive || e == p {
+		for _, e := range w.Empires {
+			if !e.Alive || e == p || e.Slot < 1 || e.Slot > pickLetters {
 				continue
 			}
 			row := pickRow{
-				e: e, letter: rune('A' + i), name: e.Name, online: e.Online(),
+				e: e, letter: rune('A' + e.Slot - 1), name: e.Name, online: e.Online(),
 				land: e.Land, score: e.Score, nw: w.NetWorth(e),
 			}
 			if opts.relations {

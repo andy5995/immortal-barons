@@ -322,7 +322,7 @@ type Config struct {
 	BombingOps            bool              // the four bombing ops are offered (Bomb Enemy Targets, Special Operations)
 	MissileOps            bool              // nuclear/chemical/biological strikes are offered (Attack, Bomb Enemy Targets, Special Operations)
 	ClingyAnnihilator     bool              // the doomsday weapon is offered
-	MaxPlayers            int               // most human empires per board (0 = unlimited)
+	MaxPlayers            int               // most human empires per board (0 = as many as the planet has slots for)
 	BuyMilitary           BuyMode           // Yes / No / Limited
 	MaintCosts            Level             // maintenance costs (regions + forces)
 	TradeCosts            Level             // trade-deal costs
@@ -347,10 +347,13 @@ const (
 	// addressed by a LETTER on every screen that lists one — See Scores, the
 	// attack picker, the recipient picker, Relations — and **Z is reserved for
 	// "All"** in the pickers ("(A-Y,Z=All,?=List) Send to:"). So realms may take
-	// A..Y only, which is 25 and is why the default has always been 25. The
-	// editor used to allow 100000, letting a sysop configure a board whose realms
-	// could not all be named — the picker silently truncated its roster at 25.
-	MaxPlayersPerBoard  = 25
+	// A..Y only, which is PlanetSlots and is why the default has always been 25.
+	//
+	// This is a cap on CALLERS. The hard bound is the planet's slots, which the
+	// computer barons share (see PlanetSlots and World.BoardFull) — so a board
+	// running barons seats fewer callers than this number says, and setting it to
+	// 0 means "up to the slots left", not "unlimited".
+	MaxPlayersPerBoard  = PlanetSlots
 	MaxPlanetaryTaxRate = 20 // Planetary (crown) Tax Rate ceiling, whole percent (default 5)
 	MaxLostForcesDays   = 30 // "Days before lost forces returned" ceiling (default 3; 0 = never return)
 	MaxPlayerTaxRate    = 50 // ceiling for MaxTaxRate (IB's own cap; BRE has none, its prompt is [0-100])

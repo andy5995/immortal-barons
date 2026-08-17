@@ -107,7 +107,10 @@ func snapshotBribedTargets(w *ctx) []targetRow {
 		}
 		for _, e := range w.BribedRealms(p) {
 			rows = append(rows, targetRow{
-				name: e.Name, land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
+				// The letter is the realm's permanent slot, as everywhere else — this
+				// picker is newer than the slot work and was still lettering by row.
+				name: e.Name, letter: e.Letter(),
+				land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
 				people: e.People, troopers: e.Troopers,
 				attackable: true, online: e.Online(),
 			})

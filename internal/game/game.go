@@ -64,6 +64,20 @@ func VersionString() string {
 type Empire struct {
 	Name  string
 	Owner string // normalized BBS handle; "" for AI
+	// Slot is the realm's permanent place in the planet's fixed roster, 1..25,
+	// and the public identity every screen addresses it by: the Id column and
+	// every picker letter is 'A' + Slot - 1, so slot 1 is A and slot 25 is Y.
+	// It is assigned once at creation and never moves, so a realm keeps its
+	// letter for its whole life however many neighbours die or join.
+	//
+	// BRE stores its empires in a 25-entry array and uses the letter as the
+	// index straight into it — the diplomatic relation row is 25 words, "one
+	// per empire letter A..Y" (docs/dev/bre-save-format.md), and its rosters
+	// print gaps where a slot is empty rather than closing them up.
+	//
+	// 0 marks a realm saved before slots existed, or one a legacy over-full
+	// world left no room for; EnsureSlots settles both on load.
+	Slot int
 	// DupeLockedBy names the league board that last reported this owner playing
 	// there too, or "" when no duplicate is known. See dupe.go; only consulted
 	// while Config.DupeChecking is on, so turning the switch off releases
@@ -943,9 +957,15 @@ func (w *World) newAIName(used map[string]bool) (string, bool) {
 }
 
 // addAIEmpire appends one AI empire (Owner "") with the standard AI starting
-// setup and returns it. Shared by seedAIEmpires and AddAIEmpires.
+// setup and returns it, or nil when the planet has no free slot. Shared by
+// seedAIEmpires and AddAIEmpires.
 func (w *World) addAIEmpire(name string) *Empire {
+	slot := w.freeSlot()
+	if slot == 0 {
+		return nil
+	}
 	e := newEmpire(name, "", w.Config, w.GameDay)
+	e.Slot = slot
 	e.Jets = 5
 	e.Turrets = 40
 	// Spread personalities evenly across the AI pool (#36) so a game gets a mix
@@ -970,7 +990,11 @@ func (w *World) seedAIEmpires() {
 // AddAIEmpires injects up to n new AI barons into the live world, generating
 // matrix names not already used by any existing empire (dead or alive,
 // case-insensitive). It returns the count actually added, which is less than n
-// only if every name combination is already taken.
+// when the planet runs out of slots or every name combination is taken.
+//
+// Barons and callers share the planet's PlanetSlots realms, and barons are
+// seeded at reset, so they take their slots first and Max Players Per BBS
+// bounds the callers within what is left.
 //
 // A league board gets none, ever, and adds none later: an inter-BBS game is
 // played between the boards' human realms, and a computer baron would take a
@@ -991,7 +1015,9 @@ func (w *World) AddAIEmpires(n int) int {
 		if !ok {
 			break
 		}
-		w.addAIEmpire(name)
+		if w.addAIEmpire(name) == nil {
+			break // the planet is full
+		}
 		used[strings.ToLower(name)] = true
 		added++
 	}
@@ -1051,15 +1077,33 @@ func (w *World) HumanCount() int {
 	return n
 }
 
-// BoardFull reports whether the Max Players Per BBS cap is reached (0 =
-// unlimited), so no new caller may enroll.
+// BoardFull reports whether no new caller may enroll — either the planet has no
+// free slot at all, or the sysop's Max Players Per BBS cap is reached.
+//
+// The slot check is the one that cannot be configured away. Max Players Per BBS
+// counts HUMANS only, so it never saw the computer barons sharing the same
+// roster, and 0 ("no cap of my own") left nothing bounding the set the pickers
+// letter — either way a board could hold more realms than 25 and the surplus was
+// addressable by nobody (#144). 0 now means "up to the planet's slots", which is
+// the most it could ever have meant.
 func (w *World) BoardFull() bool {
+	if w.PlanetFull() {
+		return true
+	}
 	return w.Config.MaxPlayers > 0 && w.HumanCount() >= w.Config.MaxPlayers
 }
 
-// AddHuman creates and registers a human empire keyed by handle.
+// AddHuman creates and registers a human empire keyed by handle, in the lowest
+// free slot. It returns nil when the planet is full; callers check BoardFull
+// under the same lock that does the insert, so this is the backstop rather than
+// the refusal a player sees.
 func (w *World) AddHuman(handle, realm string) *Empire {
+	slot := w.freeSlot()
+	if slot == 0 {
+		return nil
+	}
 	e := newEmpire(realm, strings.ToLower(strings.TrimSpace(handle)), w.Config, w.GameDay)
+	e.Slot = slot
 	w.Empires = append(w.Empires, e)
 	return e
 }
@@ -1118,6 +1162,14 @@ func (w *World) With(fn func()) {
 // The trading market is keyed by realm name too, and leaks the same way: the
 // goods a dead realm had escrowed there, and the sale gold it had not been paid,
 // would go to whoever claims the name next.
+//
+// The departing realm's SLOT is freed here too, and the next realm founded may
+// take it — nothing waits for a reset. That is safe only because everything a
+// realm leaves behind keys on its NAME, never on its slot: treaties, pending
+// offers and market escrow are forgotten below, and mail and events name realms
+// in prose. The one trace of a slot that outlives its holder is the letter a
+// sent message recorded in its "To" field, which is a label written at send
+// time and not a reference anything follows.
 //
 // BRE deletes an empire the same way, and more completely: its delete path
 // (BRE.OVR 0x0079c1) clears the slot's messages, trade offers and reports by the

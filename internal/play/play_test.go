@@ -101,6 +101,51 @@ func TestOnboardsThenPersists(t *testing.T) {
 	}
 }
 
+// A planet holds 25 realms, and the 26th caller is told so instead of being
+// handed a realm nobody could ever address (#144). The refusal has to reach the
+// player — before slots the surplus realm was created in silence.
+func TestFullPlanetRefusesTheTwentySixthCaller(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	w, err := store.Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := 0; i < 25; i++ {
+		if e := w.AddHuman(string(rune('a'+i)), "Realm"+string(rune('A'+i))); e == nil {
+			t.Fatalf("realm %d of 25 was refused a slot", i+1)
+		}
+	}
+	if err := store.Save(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+
+	f := &fakeSession{keys: []rune(" \rSurplusia\r0")}
+	reason, err := Run(f, Identity{Handle: "Surplus"}, cfg, "2026-07-03")
+	if err != nil {
+		t.Fatal(err)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "All 25 realms of this planet are held") {
+		t.Errorf("the caller was not told the planet is full, got: %q", out)
+	}
+	if strings.Contains(out, "Name your Realm") {
+		t.Error("a refused caller should not reach the realm-name prompt")
+	}
+	if reason != "closed" {
+		t.Errorf("session reason = %q, want %q", reason, "closed")
+	}
+	after, err := store.Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(after.Empires) != 25 {
+		t.Errorf("planet holds %d realms after the refused call, want 25", len(after.Empires))
+	}
+	if after.FindByOwner("surplus") != nil {
+		t.Error("the refused caller was given a realm anyway")
+	}
+}
+
 func TestReturningPlayerResumes(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	f1 := &fakeSession{keys: []rune(" \rKhanate\r0")}

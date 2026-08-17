@@ -7,6 +7,41 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
+// #144: the picker used to stop at the first 25 entries of the Empires slice
+// while nothing stopped the slice from growing, so a realm past that point could
+// act on everyone and be acted on by nobody. With the roster bounded at the
+// planet's slots, the picker cannot fall short of the game: on a FULL planet,
+// every living realm appears in every other living realm's picker, under the
+// letter that realm answers to everywhere else.
+func TestEveryLivingRealmIsAddressableByEveryOther(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.AICount = 0
+	w := game.NewWorldSeed(cfg, 1)
+	for i := 0; i < 25; i++ { // fill the planet
+		if e := w.AddHuman(string(rune('a'+i)), "Realm"+string(rune('A'+i))); e == nil {
+			t.Fatalf("realm %d of 25 was refused a slot", i+1)
+		}
+	}
+
+	for i := 0; i < 25; i++ {
+		c := &ctx{World: w, handle: string(rune('a' + i)), Term: Term{UTF8: true}}
+		c.Today = "2026-07-03"
+		rows, _ := pickRows(c, pickOpts{})
+		if len(rows) != 24 {
+			t.Fatalf("%s sees %d of the other 24 realms", c.Player().Name, len(rows))
+		}
+		for _, r := range rows {
+			if r.e == c.Player() {
+				t.Errorf("%s can address itself", c.Player().Name)
+			}
+			if got := r.e.Letter(); got != string(r.letter) {
+				t.Errorf("%s sees %s as (%c), but its letter is %q",
+					c.Player().Name, r.e.Name, r.letter, got)
+			}
+		}
+	}
+}
+
 func TestRecipientsExcludesPlayerAndDead(t *testing.T) {
 	w := newWorld()
 	// newWorld seeds one AI empire plus the human player.

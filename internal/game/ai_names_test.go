@@ -6,16 +6,17 @@ import (
 )
 
 // AI baron names come from a modifier x noun matrix, so a game can field many
-// more than the old fixed list of 15 and each name is distinct. Seeding 30 AIs
-// (twice the old cap) must yield 30 unique two-word names.
+// more than the old fixed list of 15 and each name is distinct. Asking for more
+// barons than the planet holds fills every one of its 25 slots with a distinct
+// two-word name.
 func TestAIBaronNamesFromMatrix(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AICount = 30
 	w := NewWorldSeed(cfg, 1)
 
 	ais := w.AIEmpires()
-	if len(ais) != 30 {
-		t.Fatalf("want 30 AI barons from the name matrix, got %d (old fixed list capped at 15)", len(ais))
+	if len(ais) != 25 {
+		t.Fatalf("want 25 AI barons (the planet's slots), got %d (old fixed list capped at 15)", len(ais))
 	}
 	seen := map[string]bool{}
 	for _, e := range ais {

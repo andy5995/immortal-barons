@@ -2501,6 +2501,60 @@ empire name is invalid…". The player is then asked "Would you like
 Instructions?" (`BREINS.TXT`). Our clone reproduces the naming prompt and
 its validation rule.
 
+## Realm slots: the planet holds 25, and a letter is a realm's name
+
+**A planet holds exactly 25 realms, and each holds one permanent slot.** BRE
+keeps its empires in a fixed 25-entry array and uses the letter that indexes it
+as the realm's public identity: slot 1 is `A` and slot 25 is `Y`, with `Z`
+reserved for "All" in the pickers. Three independent readings agree — the save
+record's diplomatic relation row is 25 int16s, "one per empire letter A..Y"
+(`docs/dev/bre-save-format.md`); each record carries an in-use marker (`+0x5d`,
+-1 when free) rather than the array being packed; and its own config help says
+"the normal maximum is 25" (`game/reset.hlp`). The rosters print the gaps: a
+captured See Scores board runs `(A)`, `(B)`, `(E)`, and a captured Relations
+table `[A]` then `[F]` (`docs/dev/bre-screens.md`).
+
+IB matches all of it.
+
+- **The slot is assigned once and never moves.** `Empire.Slot` is 1..25, and
+  every screen that shows an `Id` or takes a selection letter — See Scores, the
+  attack picker, the recipient picker, `-*Relations*-`, the letters a message
+  records in `Message To  :` — reads `'A' + Slot - 1`. A realm keeps its letter
+  however many neighbours die, are pruned, or join, and the See Scores board
+  letters by slot rather than by rank, so its rows are not in letter order.
+- **Creation is bounded by the slots, not by a separate count.** The lowest free
+  slot is taken under the same world lock that checks for one, so two BBS nodes
+  onboarding at once cannot both claim it. A caller arriving at a full planet is
+  refused with a message and no realm is made. Before this (#144) nothing
+  bounded the roster: the pickers stopped at 25 entries while the world kept
+  growing, so a realm past the 25th could act on everyone and be acted on by
+  nobody, in silence.
+- **Callers and computer barons share the 25.** They live in one roster and one
+  set of pickers, so barons take slots that callers then cannot have. Barons are
+  seeded at reset, so they take theirs first.
+- **Max Players Per BBS is a cap on CALLERS within that.** A sysop may seat fewer
+  than the planet allows; 0 means "as many as the slots left", not "unlimited" —
+  it never bounded the roster the pickers letter, which is half of what made #144
+  possible on a default board.
+- **A freed slot is reusable at once, and its next holder inherits nothing.**
+  Every removal path goes through one function, which forgets the departing
+  realm's treaties, pending offers and market escrow. All of that keys on the
+  realm's NAME, never on its slot, so nothing follows the slot to its next
+  occupant. The one trace that outlives a realm is the letter an already-sent
+  message recorded in its `To` field: a label written at send time, not a
+  reference anything follows.
+- **Slots are per-planet and never leave it.** Nothing in an inter-BBS packet
+  carries one. An interplanetary message names its target realm, and the letter
+  is stamped locally when the message is delivered; the inter-BBS scores board
+  numbers its rows positionally, since two realms on different planets
+  legitimately hold the same letter.
+- **A world saved before slots existed gets them on load**, in the saved order —
+  which is the order the letters used to come from, so a live board's players
+  keep the letters they know. The pass is idempotent, so a reload never
+  renumbers anyone twice. A world that had grown past 25 keeps its callers ahead
+  of its barons and drops whatever is left over, which was addressable by nobody
+  in any case.
+
 ## Turn structure
 
 Turns per day: 10 (config; BRE's own default is 8). New players get protection

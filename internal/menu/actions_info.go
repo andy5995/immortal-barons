@@ -854,6 +854,7 @@ func printScores(s session.Session, w *ctx) {
 	// consistent moment, even if another session mutates the world mid-render.
 	type row struct {
 		name                    string
+		letter                  string
 		alive, isPlayer, online bool
 		land, score, nw         int
 	}
@@ -875,7 +876,7 @@ func printScores(s session.Session, w *ctx) {
 			// read as the most reliable entry on a screen where it carries no
 			// information at all.
 			self := e == w.Player()
-			rows = append(rows, row{e.Name, e.Alive, self, !self && e.Online(), e.Land, e.Score, nw})
+			rows = append(rows, row{e.Name, e.Letter(), e.Alive, self, !self && e.Online(), e.Land, e.Score, nw})
 		}
 		lastMaster = w.LastMaster
 	})
@@ -887,7 +888,7 @@ func printScores(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "\n%s-*%s%s%s%s*-%s\n\n",
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
 	scoreTableHead(s)
-	for i, r := range rows {
+	for _, r := range rows {
 		name := r.name
 		if !r.alive {
 			name += " " + tr(s, "(dead)")
@@ -896,7 +897,7 @@ func printScores(s session.Session, w *ctx) {
 		if r.isPlayer {
 			nameColor = ansi.FgBrightYellow // highlight the caller's own realm
 		}
-		scoreTableRow(s, scoreID(i), name, nameColor, r.online, r.land, r.score, r.nw)
+		scoreTableRow(s, scoreID(r.letter), name, nameColor, r.online, r.land, r.score, r.nw)
 	}
 	scoreTableRule(s)
 	if lastMaster != "" {
@@ -913,11 +914,9 @@ const (
 	scoreRuleWidth  = 75
 	scoreRuleDouble = 15
 	// scoreIDCellWidth is the id column. Three columns is the whole id: a realm
-	// is addressed by a letter, and Max Players Per BBS is capped at 26 for that
-	// reason (game.MaxPlayersPerBoard), so `(A)`..`(Z)` is every id there is. The
-	// attack picker leaves it EMPTY for a realm that cannot be attacked, which
-	// this still holds in place. A board configured "unlimited" can hand out
-	// `(27)`, which widens its own row and moves nothing else.
+	// is addressed by its slot letter and a planet holds game.PlanetSlots realms,
+	// so `(A)`..`(Y)` is every id there is. The attack picker leaves it EMPTY for
+	// a realm that cannot be attacked, which this still holds in place.
 	scoreIDCellWidth = 3
 	// scoreNameWidth is the name column. It carries the online suffix too, so
 	// the figures beside it do not move when a baron comes or goes.
@@ -1007,11 +1006,9 @@ func scoreTableRow(s session.Session, id, name, nameColor string, online bool, l
 		ansi.FgWhite, nw, ansi.Reset)
 }
 
-// scoreID is the lettered id for a scores row — (A), (B), … (Z), then (27)+ for
-// the rare game with more than 26 realms.
-func scoreID(i int) string {
-	if i < 26 {
-		return fmt.Sprintf("(%c)", 'A'+i)
-	}
-	return fmt.Sprintf("(%d)", i+1)
-}
+// scoreID is the parenthesised id for a scores row: the realm's own slot letter
+// (game.Empire.Letter), never its position in the sorted table. BRE prints the
+// same — its captured See Scores board runs (A), (B), (E), skipping the letters
+// of the realms that have fallen (docs/dev/bre-screens.md) — and it is what
+// makes the key that mailed a realm yesterday reach the same realm today.
+func scoreID(letter string) string { return "(" + letter + ")" }

@@ -820,16 +820,16 @@ func TestTitleBarPadsToRuleWidth(t *testing.T) {
 	}
 }
 
-// A realm's selection letter is its own position in the list, not a count of
+// A realm's selection letter is its own permanent slot letter, not a count of
 // the pickable realms above it. Allying with the realms at the top used to
 // re-letter everyone below them, so the key that attacked one realm yesterday
 // attacked a different one today (reported from a live game, 2026-08-15).
 func TestTargetLettersDoNotShiftWhenRealmsBecomeUnpickable(t *testing.T) {
 	rows := []targetRow{
-		{name: "Shadow Vultures", attackable: false}, // allied
-		{name: "Rust Vultures", attackable: false},   // allied
-		{name: "Obsidian Sovereigns", attackable: true},
-		{name: "Blood Host", attackable: true},
+		{name: "Shadow Vultures", letter: "A", attackable: false}, // allied
+		{name: "Rust Vultures", letter: "B", attackable: false},   // allied
+		{name: "Obsidian Sovereigns", letter: "C", attackable: true},
+		{name: "Blood Host", letter: "D", attackable: true},
 	}
 	f := &fakeSession{keys: []rune("C")}
 	name, chosen := pickAttackTarget(f, rows, "Choose a target")
@@ -838,7 +838,7 @@ func TestTargetLettersDoNotShiftWhenRealmsBecomeUnpickable(t *testing.T) {
 	}
 	out := f.out.String()
 	if !strings.Contains(out, "(C)") || !strings.Contains(out, "(D)") {
-		t.Errorf("the two pickable realms should be lettered C and D by position:\n%s", out)
+		t.Errorf("the two pickable realms should keep their own slot letters C and D:\n%s", out)
 	}
 	if strings.Contains(out, "(A)") || strings.Contains(out, "(B)") {
 		t.Errorf("A and B belong to the shielded realms and must not be reused:\n%s", out)
@@ -849,8 +849,8 @@ func TestTargetLettersDoNotShiftWhenRealmsBecomeUnpickable(t *testing.T) {
 // select the next pickable realm along.
 func TestAShieldedRealmsLetterSelectsNothing(t *testing.T) {
 	rows := []targetRow{
-		{name: "Shadow Vultures", attackable: false},
-		{name: "Obsidian Sovereigns", attackable: true},
+		{name: "Shadow Vultures", letter: "A", attackable: false},
+		{name: "Obsidian Sovereigns", letter: "B", attackable: true},
 	}
 	f := &fakeSession{keys: []rune("A")}
 	if name, chosen := pickAttackTarget(f, rows, "Choose a target"); chosen {

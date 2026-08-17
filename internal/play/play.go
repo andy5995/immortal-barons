@@ -135,7 +135,8 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 	menu.Splash(s)
 	maintNotice(s, maint)
 
-	var joinOpen, boardFull bool
+	var joinOpen bool
+	var refusal string
 	var joinDate string
 	var e *game.Empire
 	var localReborn string // a husk maintenance didn't sweep yet; swept here as a fallback
@@ -161,7 +162,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 		}
 		if e == nil {
 			joinOpen = w.Config.JoinOpen(w.Today)
-			boardFull = w.BoardFull()
+			refusal = joinRefusal(w)
 			joinDate = w.Config.JoinDate
 		}
 	})
@@ -189,8 +190,8 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			fmt.Fprintf(s, "\n%sThe game is closed to new barons (join cutoff %s has passed).%s\n", ansi.FgYellow, joinDate, ansi.Reset)
 			return "closed", save()
 		}
-		if boardFull {
-			fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
+		if refusal != "" {
+			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, refusal, ansi.Reset)
 			return "closed", save()
 		}
 		// First run: a brand-new player picks their UI language once, before
@@ -219,14 +220,16 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 			if quit {
 				return "quit", save()
 			}
-			var full, taken bool
+			var full string
+			var taken bool
 			w.With(func() {
 				if existing := w.FindByOwner(id.Handle); existing != nil {
 					e = existing
 					return
 				}
-				if w.BoardFull() {
-					full = true
+				// The slot is claimed inside the same lock that checked for one,
+				// so two nodes onboarding at once cannot both take it.
+				if full = joinRefusal(w); full != "" {
 					return
 				}
 				if w.RealmNameTaken(realm) {
@@ -236,8 +239,8 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 				e = w.AddHuman(id.Handle, realm)
 				e.Language = lang
 			})
-			if full {
-				fmt.Fprintf(s, "\n%sThis realm is full — no new barons may enroll.%s\n", ansi.FgYellow, ansi.Reset)
+			if full != "" {
+				fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, full, ansi.Reset)
 				return "closed", save()
 			}
 			if taken {
@@ -346,6 +349,23 @@ func (o onboardLang) SetInputLine(line string) {
 // DrainInput forwards the single-key trailing-terminator drain (menu.AskYesNo
 // drains after the onboarding Quit?/Confirm? answers) to the inner session.
 func (o onboardLang) DrainInput() { session.Drain(o.Session) }
+
+// joinRefusal is the sentence shown to a caller who may not found a realm, or
+// "" when they may. Call it under the world lock.
+//
+// The two refusals are different facts and read differently. A planet with no
+// free slot has hit the game's own ceiling and will reopen when a realm falls;
+// the Max Players Per BBS cap is the sysop's choice and may never move. BRE
+// tells a caller much the same in one message; this is IB's own wording.
+func joinRefusal(w *game.World) string {
+	if w.PlanetFull() {
+		return fmt.Sprintf("All %d realms of this planet are held. Call back when one has fallen.", game.PlanetSlots)
+	}
+	if w.BoardFull() {
+		return "This realm is full — no new barons may enroll."
+	}
+	return ""
+}
 
 // onboard prompts for a realm name, re-prompting on an invalid or taken one.
 // Pressing Enter with nothing typed offers a way out — "Quit? (n,Y)" — so a

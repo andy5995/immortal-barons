@@ -411,6 +411,22 @@ func TestLoadFrozenV003Fixture(t *testing.T) {
 	if got.Epoch != 1 {
 		t.Errorf("Epoch in a save from before #104 must migrate to 1, got %d", got.Epoch)
 	}
+	// The fixture predates permanent slots (#144). Every realm must come back
+	// with a distinct one in 1..25, in the saved order — that order is the one
+	// its players' letters were drawn from, so it is the one that keeps them.
+	seen := map[int]bool{}
+	for i, e := range got.Empires {
+		if e.Slot != i+1 {
+			t.Errorf("realm %q backfilled to slot %d, want %d (its place in the old save)", e.Name, e.Slot, i+1)
+		}
+		if seen[e.Slot] {
+			t.Errorf("slot %d is held by two realms", e.Slot)
+		}
+		seen[e.Slot] = true
+	}
+	if got := e.Letter(); got != "A" {
+		t.Errorf("the old save's first realm is lettered %q, want A", got)
+	}
 }
 
 // The frozen v0.0.3 fixture's market is keyed the way every save before the

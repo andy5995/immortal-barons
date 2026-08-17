@@ -156,8 +156,9 @@ func TestRegularAttackReportsTrimmedForce(t *testing.T) {
 	})
 
 	fb := &hookSession{
-		// Target (A), send 10000 troopers, defaults for the rest.
-		fakeSession: fakeSession{keys: []rune("A10000\r\r\r\r")},
+		// Target (B) — Victimville's slot, the attacker holding A — send 10000
+		// troopers, defaults for the rest.
+		fakeSession: fakeSession{keys: []rune("B10000\r\r\r\r")},
 		marker:      "Send how many Troopers?",
 		hook: func() {
 			commitOnFile(t, cfg, func(w *game.World) { w.FindByOwner("bob").Troopers = 100 })
