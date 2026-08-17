@@ -152,11 +152,12 @@ treaty raises the defending term — which, because that term is really the
 attacker's own agent count, *lowers the holder's own spy success*. Signing a
 counter-espionage pact makes you worse at espionage.
 
-**Immortal Barons** reproduces this for Send Spy, defect included, as a
-deliberate choice. The covert operations that cause an effect keep a correct
-attacker-against-defender roll, because the original does not resolve them
-through this routine at all — copying the bug there would invent one the original
-does not have.
+**Immortal Barons** reproduces this, defect included, as a deliberate choice. It
+was written here that only Send Spy went through the defective routine and that
+the effect operations kept a correct attacker-against-defender roll; walking the
+resolver's call sites showed otherwise. Every local operation reaches this one
+roll — the effect ones by way of the queue daily maintenance drains — so none of
+them is defended against by agents.
 
 ## Mistaken for a defect
 

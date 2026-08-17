@@ -117,6 +117,11 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 				e.TurnProgress = TurnProgress{} // abandon any turn left uncommitted at rollover (#10)
 			}
 		}
+		// Every covert agent sent out yesterday lands now, before anyone plays —
+		// BRE's run_daily_maintenance drains the queue the same way. Ahead
+		// of aiPlay so an AI's own operations wait a day exactly as a player's
+		// do, rather than resolving inside the run that queued them.
+		w.resolveCovertQueue()
 		w.aiPlay(w.LastMaintDate)
 		// Pirate raids are per-turn now (maybePirateRaid in PlayTurn), not a daily
 		// sweep — so they land randomly across turns (~1-in-5) instead of clustering

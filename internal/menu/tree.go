@@ -52,10 +52,6 @@ func noLocalAttacks(w *ctx) bool { return !w.LocalAttacksAllowed() }
 // missiles and local fighting to be allowed.
 func noLocalMissiles(w *ctx) bool { return noMissileOps(w) || noLocalAttacks(w) }
 
-// noSpecialOps hides a menu whose whole contents are bombing and missile items,
-// so the player is not sent into an empty box.
-func noSpecialOps(w *ctx) bool { return noBombingOps(w) && noMissileOps(w) }
-
 // quitOnEnter makes Enter activate a menu's own '0' Quit item, so the prompt
 // shows and selects "Quit" uniformly across submenus (#62). The Spending
 // menu is the one exception: its Enter-to-exit stays gated behind the
@@ -82,7 +78,6 @@ func BuildMenus() *Menus {
 	// figures BRE prints bare — a recorded divergence. So 34 follows BRE's rule,
 	// sizing the box to its own content, where 32 would clip every priced row.
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightGreen, ExitOnEnter: true, Status: covertStatus, Width: 34}
-	bombTargets := &Menu{Title: "Bomb Enemy Targets", Color: ansi.FgBrightGreen, ExitOnEnter: true}
 	ipSpecial := &Menu{Title: "Special Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
 	// BRE draws IP Messages as a narrow single-column box (25 columns, from a
 	// live capture) rather than at the full menu width.
@@ -277,7 +272,7 @@ func BuildMenus() *Menus {
 		{Key: '4', Label: "Support Dissensions", Price: costOf(game.CostSupportDissensions), Do: supportDissensions},
 		{Key: '5', Label: "Demoralize Forces", Price: costOf(game.CostDemoralizeForces), Do: demoralizeForces},
 		{Key: '6', Label: "Spy on Relations", Price: costOf(game.CostSpyOnRelations), Do: spyRelations},
-		{Key: '7', Label: "Bomb Enemy Targets", Price: costOf(game.CostBombEnemyTargets), Do: gotoMenu(bombTargets), Hidden: noSpecialOps},
+		{Key: '7', Label: "Bomb Enemy Targets", Price: costOf(game.CostBombEnemyTargets), Do: bombEnemyTargets, Hidden: noBombingOps},
 		{Key: '8', Label: "Bribery", Price: costOf(game.CostBribery), Do: briberyOp},
 		{Key: '9', Label: "Expose Enemy Ops", Price: costOf(game.CostExposeEnemyOps), Do: exposeEnemyOps},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
@@ -286,29 +281,16 @@ func BuildMenus() *Menus {
 	}
 	covert.DefaultOnEnter = quitOnEnter(covert)
 
-	bombTargets.Items = []Item{
-		{Key: 'F', Label: "Bomb Food Market", Do: bombFoodMarket, Hidden: noBombingOps},
-		{Key: 'T', Label: "Bomb Trading Market", Do: bombTradingMarket, Hidden: noBombingOps},
-		{Key: 'R', Label: "Bomb Trade Routes", Do: bombTradeRoutes, Hidden: noBombingOps},
-		{Key: 'U', Label: "Undermine Investments", Do: undermineInvestments, Hidden: noBombingOps},
-		{Key: 'N', Label: "Nuclear Assault", Do: nuclearAssault, Hidden: noMissileOps},
-		{Key: 'C', Label: "Chemical Bombing", Do: chemicalBombing, Hidden: noMissileOps},
-		{Key: 'S', Label: "R5-Slappenheimer", Do: slappenheimerStrike, Hidden: noMissileOps},
-		{Key: '0', Label: "Quit", Do: back},
-	}
-	bombTargets.DefaultOnEnter = quitOnEnter(bombTargets)
-
 	// Interplanetary Special Operations: BRE's cross-planet covert menu — every
-	// op targets an empire on another planet. Disassembly (BRE.OVR string table
-	// @170012) shows the local Bomb Enemy Targets set and this IP menu draw from
-	// ONE 8-item table; the local menu shows the first 7, the IP menu shows all 8
-	// (it adds Send SpyGuy). Labels/order are binary-verified; the Send SpyGuy
-	// hotkey ('G' here) wasn't recoverable from the overlay dispatch. Only Send
-	// SpyGuy is wired; the bombing/WMD variants are recorded-but-inert until
-	// interplanetary covert strikes are built. ('?'/'0' are IB's menu convention;
-	// BRE exits via ESC/Q with no listed items.)
-	// Numbered 1-8 with no Help item, as the live capture draws it — unlike the
-	// local Bomb Enemy Targets submenu above, which is lettered.
+	// op targets an empire on another planet. The 8-item table at BRE.OVR 170011
+	// is read by `run_bombing_operations_menu` (0x029EA9) alone, whose only caller
+	// is the InterBBS menu, so the table belongs to THIS menu and to no other.
+	// Labels/order are binary-verified; the Send SpyGuy hotkey ('G' here) wasn't
+	// recoverable from the overlay dispatch. Only Send SpyGuy is wired; the
+	// bombing/WMD variants are recorded-but-inert until interplanetary covert
+	// strikes are built. ('?'/'0' are IB's menu convention; BRE exits via ESC/Q
+	// with no listed items.) Numbered 1-8 with no Help item, as the live capture
+	// draws it.
 	ipSpecial.Items = []Item{
 		{Key: '1', Label: "Bomb Food Market", Do: ipSpecialOp(game.OpBombFood), Hidden: noBombingOps},
 		{Key: '2', Label: "Bomb Trading Market", Do: ipSpecialOp(game.OpBombMarket), Hidden: noBombingOps},

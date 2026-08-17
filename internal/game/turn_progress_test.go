@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/json"
+	"reflect"
 	"testing"
 )
 
@@ -11,7 +12,10 @@ import (
 // resume, so guard the serialization here.
 func TestTurnProgressPersistsJSON(t *testing.T) {
 	e := &Empire{}
-	e.TurnProgress = TurnProgress{IncomeCollected: true, MaintPaid: true, AttackDone: true}
+	e.TurnProgress = TurnProgress{
+		IncomeCollected: true, MaintPaid: true, AttackDone: true,
+		CovertOpsUsed: map[CovertOp]bool{OpBribery: true},
+	}
 
 	data, err := json.Marshal(e)
 	if err != nil {
@@ -21,7 +25,7 @@ func TestTurnProgressPersistsJSON(t *testing.T) {
 	if err := json.Unmarshal(data, &back); err != nil {
 		t.Fatalf("unmarshal: %v", err)
 	}
-	if back.TurnProgress != e.TurnProgress {
+	if !reflect.DeepEqual(back.TurnProgress, e.TurnProgress) {
 		t.Errorf("TurnProgress did not survive JSON round-trip: got %+v, want %+v", back.TurnProgress, e.TurnProgress)
 	}
 }
@@ -35,7 +39,7 @@ func TestPlayTurnClearsTurnProgress(t *testing.T) {
 
 	w.PlayTurn(e, "2026-07-03")
 
-	if e.TurnProgress != (TurnProgress{}) {
+	if !reflect.DeepEqual(e.TurnProgress, TurnProgress{}) {
 		t.Errorf("PlayTurn should clear TurnProgress, got %+v", e.TurnProgress)
 	}
 }
@@ -54,7 +58,7 @@ func TestDailyMaintenanceClearsTurnProgress(t *testing.T) {
 
 	w.DailyMaintenance("2026-07-04")
 
-	if e.TurnProgress != (TurnProgress{}) {
+	if !reflect.DeepEqual(e.TurnProgress, TurnProgress{}) {
 		t.Errorf("new day should clear TurnProgress, got %+v", e.TurnProgress)
 	}
 }

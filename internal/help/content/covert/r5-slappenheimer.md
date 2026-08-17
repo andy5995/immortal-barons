@@ -7,7 +7,8 @@ in_game: true
 
 # R5-Slappenheimer
 
-The R5-Slappenheimer is an unreliable weapon of mass destruction. Before you
+The R5-Slappenheimer is an unreliable weapon of mass destruction, fired from the
+InterPlanetary menu's Special Operations at a baron on another planet. Before you
 fire, you set a dial from 0 to 10, but the dial is for show and changes nothing,
 so pick any number you like. The missile is a gamble every time. Most launches
 do nothing: it misses, it malfunctions, or the enemy's SDI shoots it down. When

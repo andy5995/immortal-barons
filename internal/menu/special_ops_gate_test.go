@@ -3,6 +3,8 @@ package menu
 import (
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 // The sysop's three special-attack switches take their operations off the
@@ -48,51 +50,39 @@ func TestSpecialOpSwitchesHideTheirOperations(t *testing.T) {
 	}
 }
 
-// The Bomb Enemy Targets submenu splits between the two switches: the four
-// bombing entries answer to Bombing Ops, the three missiles to Missile Ops.
-func TestBombEnemyTargetsSplitsBetweenTheTwoSwitches(t *testing.T) {
-	open := func(set func(w *ctx)) string {
-		w := newWorld()
-		set(w)
-		// 7 opens Bomb Enemy Targets from the Covert menu, then quit both boxes.
-		f := &fakeSession{keys: []rune("7\r0\r0\r ")}
-		if err := Run(f, w, BuildMenus().Covert); err != nil {
-			t.Fatalf("Run: %v", err)
-		}
-		return f.out.String()
-	}
+// Bomb Enemy Targets is one terror-bombing op, so it answers to Bombing Ops
+// alone; the missiles it used to sit beside are the Attack menu's and the
+// interplanetary menu's.
+func TestBombEnemyTargetsAnswersToBombingOps(t *testing.T) {
+	w := newWorld()
+	covert := BuildMenus().Covert
 
-	// Both-on is TestBombEnemyTargetsSubmenuShowsItems; each case below asserts a
-	// surviving item too, so it also proves the submenu really opened.
-	out := open(func(w *ctx) { w.Config.BombingOps, w.Config.MissileOps = false, true })
-	if strings.Contains(out, "Bomb Food Market") {
-		t.Errorf("Bomb Food Market survived Bombing Ops = Disabled:\n%s", out)
+	w.Config.BombingOps, w.Config.MissileOps = false, true
+	if covert.byKey('7', w) != nil {
+		t.Error("Bomb Enemy Targets still opens with Bombing Ops = Disabled")
 	}
-	if !strings.Contains(out, "Nuclear Assault") {
-		t.Errorf("Bombing Ops = Disabled should leave the missiles alone:\n%s", out)
-	}
-
-	out = open(func(w *ctx) { w.Config.BombingOps, w.Config.MissileOps = true, false })
-	if strings.Contains(out, "Nuclear Assault") {
-		t.Errorf("Nuclear Assault survived Missile Ops = Disabled:\n%s", out)
-	}
-	if !strings.Contains(out, "Bomb Food Market") {
-		t.Errorf("Missile Ops = Disabled should leave the bombing runs alone:\n%s", out)
+	w.Config.BombingOps, w.Config.MissileOps = true, false
+	if covert.byKey('7', w) == nil {
+		t.Error("Bomb Enemy Targets should stand on Bombing Ops alone, not on Missile Ops")
 	}
 }
 
-// With both switches off the Bomb Enemy Targets submenu would hold nothing, so
-// the entry that opens it goes too.
-func TestBombEnemyTargetsHiddenWhenNothingIsLeftInIt(t *testing.T) {
+// The R5-Slappenheimer's handling mode gates the only menu that fires one. It
+// moved with the missile when the local Bomb Enemy Targets submenu collapsed to
+// BRE's single terror-bombing op, and a mode the editor stores but nothing reads
+// is the failure this guards.
+func TestSlappenheimerHandlingGatesTheInterplanetaryOp(t *testing.T) {
 	w := newWorld()
-	w.Config.BombingOps, w.Config.MissileOps = false, false
-	covert := BuildMenus().Covert
-	if covert.byKey('7', w) != nil {
-		t.Error("Bomb Enemy Targets still opens with every operation in it disabled")
+	w.Player().Protection = 0
+	w.Player().Bombers = game.BombingBombersRequired
+	w.Config.SlappenheimerHandling = game.SlappenheimerNone
+
+	f := &fakeSession{}
+	if got := ipSpecialOp(game.OpSlappenheimer)(f, w); got != Stay {
+		t.Fatalf("ipSpecialOp returned %v, want Stay", got)
 	}
-	w.Config.BombingOps = true
-	if covert.byKey('7', w) == nil {
-		t.Error("Bomb Enemy Targets should return once bombing ops are back on")
+	if !strings.Contains(f.out.String(), "disabled") {
+		t.Errorf("R5-Slappenheimer Handling = None did not stop the op; output:\n%s", f.out.String())
 	}
 }
 

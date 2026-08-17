@@ -7,8 +7,8 @@ import (
 )
 
 // A spy that gets through reports on the target and costs nothing. No agent
-// count guarantees this any more — BRE's roll ignores both sides' agents (see
-// spySuccess) — so the test spies until one lands.
+// count guarantees this — BRE's roll ignores both sides' agents (see
+// covertRoll) — so the test spies until one lands.
 func TestSendSpySuccess(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents = 50
@@ -31,34 +31,110 @@ func TestSendSpySuccess(t *testing.T) {
 	t.Fatal("50 spies in a row were all caught; the roll is not landing near 55%")
 }
 
-// TestSpyRollIgnoresTheTarget pins the defect IB reproduces from BRE: the Send
-// Spy roll draws both of its terms from the attacker, so neither realm's agent
-// count moves the odds and every spy is a coin flip on top of a flat one-in-ten
-// free pass. Several seeds, since one seed is one trajectory.
-func TestSpyRollIgnoresTheTarget(t *testing.T) {
-	const trials = 2000
-	rate := func(seed int64, attackerAgents, targetAgents int) float64 {
+// covertTries bounds the retry loops in this file. EVERY local covert op is now
+// resolved by BRE's own roll, which neither realm's agent count moves
+// (covertRoll), so a test that needs one branch has to ask repeatedly rather
+// than stack agents. The worst case is Bribery at 32.5%: 60 tries miss them all
+// about once in 10^10 runs.
+const covertTries = 60
+
+// covertTestAgents is what runCovertUntil restocks the attacker to between
+// attempts. Every effect op now spends an agent when it is QUEUED and hands it
+// back only if it lands, so a loop of sixty tries would otherwise run the
+// attacker dry and start returning ErrNoAgents.
+const covertTestAgents = 10_000
+
+// runCovert runs one operation the way a day of play does, and returns what the
+// attacker is told. An EFFECT op only queues at the menu, so its report is the
+// line the drain files on the attacker's recap; the two INFO ops resolve at the
+// menu, so theirs is the value returned there. Which of the two happened is read
+// off the queue rather than from a list of op names, so an op that changes side
+// is followed rather than silently mis-read.
+func runCovert(t *testing.T, w *World, a *Empire, run func() (string, error)) string {
+	t.Helper()
+	report, err := run()
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(w.CovertQueue) == 0 {
+		return report
+	}
+	before := len(a.Events)
+	w.resolveCovertQueue()
+	if len(a.Events) != before+1 {
+		t.Fatalf("a queued operation should file one line on the attacker's recap, got %d", len(a.Events)-before)
+	}
+	return a.Events[len(a.Events)-1].Text
+}
+
+// runCovertUntil repeats run until want accepts its report and returns that
+// report, clearing the attacker's per-turn slots and restocking its purse and
+// agents between attempts so only the roll varies.
+func runCovertUntil(t *testing.T, w *World, a *Empire, run func() (string, error), want func(report string) bool) string {
+	t.Helper()
+	for i := 0; i < covertTries; i++ {
+		a.TurnProgress = TurnProgress{}
+		a.Gold = 1_000_000_000
+		a.Agents = covertTestAgents
+		if report := runCovert(t, w, a, run); want(report) {
+			return report
+		}
+	}
+	t.Fatalf("%d attempts never reached the branch under test", covertTries)
+	return ""
+}
+
+// caught reports whether a covert report is one of the two the attacker gets
+// when the agent is taken: the effect ops say the operation failed, the two info
+// ops say the spy was caught.
+func caught(report string) bool {
+	return strings.Contains(report, "failed") || strings.Contains(report, "caught")
+}
+
+// TestCovertRollIgnoresTheTargetAndScalesWithDifficulty pins the two things
+// BRE's one covert roll does that read as bugs. Both terms of the comparison are
+// drawn from the ATTACKER, so neither realm's agents move the odds; and each op
+// divides the attacker's own term by its own difficulty figure. The three rates
+// are golden literals off BRE's formula — 0.1 + 0.9/(1+k) for k of 1, 2 and 3 —
+// not the constants, so a retune has to bring new evidence with it. Several
+// seeds, since one seed is one trajectory.
+func TestCovertRollIgnoresTheTargetAndScalesWithDifficulty(t *testing.T) {
+	const trials = 4000
+	rate := func(seed int64, op CovertOp, attackerAgents, targetAgents int) float64 {
 		w := NewWorldSeed(DefaultConfig(), seed)
 		a := w.AddHuman("alice", "Alethia")
 		d := w.AddHuman("bob", "Bobland")
 		a.Agents, d.Agents = attackerAgents, targetAgents
 		won := 0
 		for i := 0; i < trials; i++ {
-			if w.spySuccess(a, d) {
+			if w.covertRoll(a, d, op) {
 				won++
 			}
 		}
 		return float64(won) / trials
 	}
+	cases := []struct {
+		op   CovertOp
+		want float64
+	}{
+		{OpSendSpy, 0.550},          // divisor 1
+		{OpDemoralizeForces, 0.400}, // divisor 2
+		{OpBribery, 0.325},          // divisor 3
+	}
 	for _, seed := range []int64{1, 7, 99, 2026} {
-		naked := rate(seed, 1, 1_000_000)
-		swamped := rate(seed, 1_000_000, 1)
-		for _, tc := range []struct {
-			name string
-			got  float64
-		}{{"one agent against a million", naked}, {"a million against one", swamped}} {
-			if tc.got < 0.50 || tc.got > 0.60 {
-				t.Errorf("seed %d, %s: success rate %.3f, want near 0.55", seed, tc.name, tc.got)
+		for _, tc := range cases {
+			for _, stock := range []struct {
+				name             string
+				attacker, target int
+			}{
+				{"a million against one", 1_000_000, 1},
+				{"a million against a million", 1_000_000, 1_000_000},
+			} {
+				got := rate(seed, tc.op, stock.attacker, stock.target)
+				if got < tc.want-0.05 || got > tc.want+0.05 {
+					t.Errorf("seed %d, %s, %s: success rate %.3f, want %.3f",
+						seed, tc.op, stock.name, got, tc.want)
+				}
 			}
 		}
 	}
@@ -79,6 +155,33 @@ func TestCovertOpChargesGold(t *testing.T) {
 	}
 }
 
+// Spy on Relations charges the price its menu shows, which BRE does not: the
+// original's report_spy_result serves both info ops and subtracts the slot-'1'
+// fee — Send Spy's 5,000 — whichever one called it (BRE.OVR 0x016E73), while its
+// menu advertises 100,000. IB charges the advertised figure DELIBERATELY; this
+// test locks that divergence so it is not "corrected" to 5,000 by a later
+// reading of the binary. It passes against the code as it stands, by design.
+func TestSpyOnRelationsChargesTheFeeItAdvertises(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents = 50, 0
+
+	a.Gold = 99_999 // one gold under the advertised fee
+	if _, err := w.SpyOnRelations(a, d); !errors.Is(err, ErrCantAfford) {
+		t.Fatalf("expected ErrCantAfford below the advertised 100,000, got %v", err)
+	}
+	if a.Gold != 99_999 {
+		t.Errorf("a refused op must charge nothing: gold %d, want 99999", a.Gold)
+	}
+
+	a.Gold = 100_000
+	if _, err := w.SpyOnRelations(a, d); err != nil {
+		t.Fatal(err)
+	}
+	if a.Gold != 0 {
+		t.Errorf("Spy on Relations should take the 100,000 it advertises: gold %d, want 0", a.Gold)
+	}
+}
+
 func TestCovertOpTooPoor(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents = 50
@@ -92,29 +195,40 @@ func TestCovertOpTooPoor(t *testing.T) {
 	}
 }
 
-// BRE caps EFFECT covert ops at one per turn ("Limit one try per turn!"): the
-// first works, any second effect op (of any type) is blocked, but the info ops
-// (Send Spy, Spy on Relations) stay exempt. The cap clears next turn.
-func TestCovertEffectOpCappedOncePerTurn(t *testing.T) {
+// BRE's "Limit one try per turn!" is keyed PER OPERATION (the per-digit byte at
+// record +0xFD), so a turn holds one try of each effect op rather than one op
+// overall. The info ops (Send Spy, Spy on Relations) are exempt entirely. The
+// slots clear next turn.
+func TestCovertEffectOpCappedOncePerTurnPerOperation(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	a.Agents, d.Agents = 50, 0 // d has no agents, so ops reliably succeed
-	a.Gold = 10_000_000
+	a.Agents, d.Agents = 50, 0
+	a.Gold = 100_000_000
 
 	if _, err := w.StirRevolts(a, d); err != nil {
-		t.Fatalf("first effect op should work: %v", err)
+		t.Fatalf("first try of an effect op should work: %v", err)
 	}
-	if _, err := w.SetUp(a, d); !errors.Is(err, ErrCovertCapReached) {
-		t.Fatalf("a second effect op (any type) should be capped, got %v", err)
+	if _, err := w.StirRevolts(a, d); !errors.Is(err, ErrCovertCapReached) {
+		t.Fatalf("a SECOND Stir Revolts should be capped, got %v", err)
+	}
+	// A different operation holds its own slot and is unaffected by the one above.
+	if _, err := w.SetUp(a, d); err != nil {
+		t.Errorf("a different effect op holds its own slot: %v", err)
+	}
+	if _, err := w.DemoralizeForces(a, d); err != nil {
+		t.Errorf("a different effect op holds its own slot: %v", err)
 	}
 	if _, err := w.SendSpy(a, d); err != nil {
 		t.Errorf("Send Spy is an info op, exempt from the cap: %v", err)
+	}
+	if _, err := w.SendSpy(a, d); err != nil {
+		t.Errorf("an info op is exempt however often it is run: %v", err)
 	}
 	if _, err := w.SpyOnRelations(a, d); err != nil {
 		t.Errorf("Spy on Relations is an info op, exempt from the cap: %v", err)
 	}
 	a.TurnProgress = TurnProgress{} // next turn
 	if _, err := w.StirRevolts(a, d); err != nil {
-		t.Errorf("the cap should reset next turn: %v", err)
+		t.Errorf("the slots should reset next turn: %v", err)
 	}
 }
 
@@ -133,17 +247,22 @@ func TestSupportDissensionsSuccess(t *testing.T) {
 	a.Agents = 50
 	d.Agents = 0
 	d.Troopers = 1000
-	beforeEvents := len(d.Events)
+	beforeEvents := 0
 
-	report, err := w.SupportDissensions(a, d)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
+	// A foiled attempt files a victim event of its own, so the count is taken
+	// afresh for the attempt that lands.
+	report := runCovertUntil(t, w, a, func() (string, error) {
+		beforeEvents = len(d.Events)
+		return w.SupportDissensions(a, d)
+	}, func(r string) bool { return !caught(r) })
 	if report == "" {
 		t.Error("expected a non-empty attacker report")
 	}
-	if d.Troopers != 900 {
-		t.Errorf("expected 900 troopers remaining, got %d", d.Troopers)
+	// Golden band from the LOCAL resolver (BRE.OVR 0x04C178): the share that
+	// flees is Random(10)+10-Random(10) percent, so 1-19% of 1,000 goes and
+	// 810-990 remain. The flat tenth asserted here before was IB's own.
+	if d.Troopers < 810 || d.Troopers > 990 {
+		t.Errorf("expected 810-990 troopers remaining, got %d", d.Troopers)
 	}
 	if len(d.Events) != beforeEvents+1 {
 		t.Fatalf("expected one victim event, got %d new", len(d.Events)-beforeEvents)
@@ -187,54 +306,55 @@ func TestSendSpyFailure(t *testing.T) {
 	t.Fatal("50 spies in a row all got through; the roll is not landing near 55%")
 }
 
-// The effect ops still weigh attacker against defender (covertSuccess), so one
-// agent against a million fails on any seed and the branch stays deterministic.
+// A caught agent is lost and the victim is alerted. No fixture can force the
+// branch — the roll ignores both realms' agents — so the op runs until one is
+// foiled, and the assertions are made against that attempt.
 func TestSupportDissensionsFailure(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	a.Agents = 1
+	a.Agents = 50
 	d.Agents = 1000000
 	d.Troopers = 1000
-	beforeEvents := len(d.Events)
 
-	report, err := w.SupportDissensions(a, d)
-	if err != nil {
-		t.Fatalf("unexpected error: %v", err)
-	}
-	if report == "" {
-		t.Error("expected a non-empty attacker report")
-	}
+	agentsBefore, eventsBefore := 0, 0
+	runCovertUntil(t, w, a, func() (string, error) {
+		// An attempt that LANDS takes troopers, so the victim is restocked
+		// before each one and the assertions below read the foiled attempt.
+		d.Troopers = 1000
+		agentsBefore, eventsBefore = a.Agents, len(d.Events)
+		return w.SupportDissensions(a, d)
+	}, caught)
+
 	if d.Troopers != 1000 {
 		t.Errorf("expected troopers unchanged at 1000, got %d", d.Troopers)
 	}
-	if a.Agents != 0 {
-		t.Errorf("expected attacker to lose the caught agent, got %d agents", a.Agents)
+	if a.Agents != agentsBefore-1 {
+		t.Errorf("expected attacker to lose the caught agent, got %d agents, want %d", a.Agents, agentsBefore-1)
 	}
-	if len(d.Events) != beforeEvents+1 {
-		t.Fatalf("expected one victim event, got %d new", len(d.Events)-beforeEvents)
+	if len(d.Events) != eventsBefore+1 {
+		t.Fatalf("expected one victim event, got %d new", len(d.Events)-eventsBefore)
 	}
 }
 
+// bombFoodEffect is now reached only from the interplanetary Special Operation;
+// BRE's LOCAL Bomb Enemy Targets is one op with its own six-slot table.
 func TestBombFoodDestroysReserve(t *testing.T) {
-	w, a, d := newAttackerAndTarget(t)
-	a.Agents, d.Agents, d.Food = 50, 0, 1000
-	if _, err := w.BombFood(a, d); err != nil {
-		t.Fatal(err)
-	}
-	if d.Food != 500 {
-		t.Errorf("expected 500 food after a 50%% strike, got %d", d.Food)
+	_, _, d := newAttackerAndTarget(t)
+	d.Food = 1000
+	if lost := bombFoodEffect(d); lost != 500 || d.Food != 500 {
+		t.Errorf("expected 500 lost and 500 left after a 50%% strike, got lost=%d left=%d", lost, d.Food)
 	}
 }
 
 func TestStirRevoltsLowersSupport(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Support = 50, 0, 100
-	if _, err := w.StirRevolts(a, d); err != nil {
-		t.Fatal(err)
-	}
-	// Golden literal from BRE.OVR 0x4AE61: support is SCALED by 11/13, not
-	// docked a flat number of points.
-	if d.Support != 84 {
-		t.Errorf("expected support 84, got %d", d.Support)
+	runCovertUntil(t, w, a, func() (string, error) { return w.StirRevolts(a, d) },
+		func(r string) bool { return !caught(r) })
+	// Golden band from the LOCAL resolver (BRE.OVR 0x04C00C): support loses
+	// Random(4)+5 POINTS, so 92-95 of 100. The x11/13 scaling asserted here
+	// before came from the inter-BBS packet resolver, a different op table.
+	if d.Support < 92 || d.Support > 95 {
+		t.Errorf("expected support 92-95, got %d", d.Support)
 	}
 }
 
@@ -249,11 +369,96 @@ func TestCovertOpNeedsAnAgent(t *testing.T) {
 func TestDemoralizeForcesLowersMorale(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Morale = 50, 0, 100
-	if _, err := w.DemoralizeForces(a, d); err != nil {
-		t.Fatal(err)
+	runCovertUntil(t, w, a, func() (string, error) { return w.DemoralizeForces(a, d) },
+		func(r string) bool { return !caught(r) })
+	// Golden band from the LOCAL resolver (BRE.OVR 0x04C2BD): morale loses
+	// Random(5)+5 POINTS, so 91-95 of 100. The x6/7 scaling asserted here before
+	// came from the inter-BBS packet resolver, a different op table.
+	if d.Morale < 91 || d.Morale > 95 {
+		t.Errorf("expected morale 91-95, got %d", d.Morale)
 	}
-	if d.Morale != 85 {
-		t.Errorf("expected morale 85, got %d", d.Morale)
+}
+
+// Both stats stop at CovertStatFloor however often they are ground at
+// (BRE.OVR 0x04C02F for support, 0x04C2E0 for morale). Golden literal 5.
+func TestCovertOpsFloorMoraleAndSupport(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	a.Agents, d.Agents = 50, 0
+	d.Morale, d.Support = 6, 6
+	// Twice the passes the deterministic version needed: only about half of them
+	// land now, and both stats have to be ground all the way down.
+	for i := 0; i < 60; i++ {
+		// A foiled attempt costs an agent, and about half of these are foiled.
+		a.Gold, a.Agents = 10_000_000, 50
+		a.TurnProgress = TurnProgress{}
+		if _, err := w.DemoralizeForces(a, d); err != nil {
+			t.Fatal(err)
+		}
+		a.TurnProgress = TurnProgress{}
+		if _, err := w.StirRevolts(a, d); err != nil {
+			t.Fatal(err)
+		}
+		w.resolveCovertQueue() // both agents land at the day's maintenance
+	}
+	if d.Morale != 5 || d.Support != 5 {
+		t.Errorf("expected both stats held at 5, got morale %d support %d", d.Morale, d.Support)
+	}
+}
+
+// BRE's local Bomb Enemy Targets picks ONE of six holdings at random and takes a
+// slice of it. The six bands are golden literals from the resolver's own dispatch
+// (BRE.OVR 0x04C39E, 0x04C427, 0x04C4B0, 0x04C539, 0x04C5C2, 0x04C64B), and over
+// many strikes every one of the six has to be reached — a table wired to the
+// wrong field would leave a holding untouched forever.
+func TestBombEnemyTargetsHitsEverySlotInBand(t *testing.T) {
+	bands := map[string][2]int{
+		"People": {5, 14}, "Troopers": {5, 9}, "Agents": {5, 9},
+		"Tanks": {5, 7}, "Jets": {5, 7}, "Food": {20, 89},
+	}
+	seen := map[string]bool{}
+	for seed := int64(1); seed <= 3; seed++ {
+		w := NewWorldSeed(DefaultConfig(), seed)
+		a := w.AddHuman("a", "Alpha")
+		d := w.AddHuman("d", "Delta")
+		pastProtection(w)
+		for i := 0; i < 200; i++ {
+			a.Gold, a.Agents = 10_000_000, 10_000_000
+			a.TurnProgress = TurnProgress{}
+			d.Agents, d.People, d.Troopers = 100_000, 100_000, 100_000
+			d.Tanks, d.Jets, d.Food = 100_000, 100_000, 100_000
+			before := map[string]int{
+				"People": d.People, "Troopers": d.Troopers, "Agents": d.Agents,
+				"Tanks": d.Tanks, "Jets": d.Jets, "Food": d.Food,
+			}
+			if _, err := w.BombEnemyTargets(a, d); err != nil {
+				t.Fatal(err)
+			}
+			w.resolveCovertQueue() // the agent only bombs at maintenance
+			after := map[string]int{
+				"People": d.People, "Troopers": d.Troopers, "Agents": d.Agents,
+				"Tanks": d.Tanks, "Jets": d.Jets, "Food": d.Food,
+			}
+			hits := 0
+			for name, was := range before {
+				if after[name] == was {
+					continue
+				}
+				hits++
+				seen[name] = true
+				lost, band := was-after[name], bands[name]
+				if pct := lost * 100 / was; pct < band[0] || pct > band[1] {
+					t.Fatalf("seed %d: %s lost %d%% of %d, want %d-%d%%", seed, name, pct, was, band[0], band[1])
+				}
+			}
+			if hits > 1 {
+				t.Fatalf("seed %d: one strike damaged %d holdings, want at most 1", seed, hits)
+			}
+		}
+	}
+	for name := range bands {
+		if !seen[name] {
+			t.Errorf("600 strikes never picked %s — is the six-slot table wired to it?", name)
+		}
 	}
 }
 
@@ -268,10 +473,9 @@ func TestSetUpVoidsAlliance(t *testing.T) {
 	w.ProposeTreaty(d, partner, "Full Defense Alliance")
 	w.AcceptTreaty(partner, d.Name, "Full Defense Alliance")
 
-	report, err := w.SetUp(a, d)
-	if err != nil {
-		t.Fatal(err)
-	}
+	// Set Up rolls once against each court, so it lands about 30% of the time.
+	report := runCovertUntil(t, w, a, func() (string, error) { return w.SetUp(a, d) },
+		func(r string) bool { return !caught(r) })
 	if !strings.Contains(report, partner.Name) {
 		t.Errorf("expected report to name the tricked ally %q, got %q", partner.Name, report)
 	}
@@ -280,65 +484,263 @@ func TestSetUpVoidsAlliance(t *testing.T) {
 	}
 }
 
-func TestExposeEnemyOpsShieldsAgainstCovertOps(t *testing.T) {
+// Expose Enemy Ops shields against ONE realm — the one your bribed agent sits
+// inside — and blocks nine of its attempts in ten rather than all of them
+// (BRE.OVR 0x01701B writes the expiry per pair; 0x04BA48 reads it and lets one
+// attempt in ten through). Both golden literals here are BRE's, not IB's: the
+// exposed realm lands about 1 op in 20 (a tenth of the 55% an easy op would
+// otherwise make), and an unexposed one is untouched at 55%.
+func TestExposeEnemyOpsShieldsAgainstOneRealmOnly(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
-	a.Gold = 10_000_000 // afford covert op fees
-	a.Agents = 1
-	d := w.AddHuman("d", "Delta") // unused target, required by the action signature
+	a.Gold, a.Agents = 100_000_000, 1_000_000
+	exposed := w.AddHuman("d", "Delta")
+	other := w.AddHuman("o", "Omega")
+	exposed.Agents, other.Agents = 1_000_000, 1_000_000
 
-	if _, err := w.ExposeEnemyOps(a, d); err != nil {
+	// The shield needs a bribed agent already inside the realm it shields
+	// against; without one there is nothing to aim it at.
+	if _, err := w.ExposeEnemyOps(a, exposed); !errors.Is(err, ErrNoBribedAgent) {
+		t.Fatalf("expected ErrNoBribedAgent with no agent inside %s, got %v", exposed.Name, err)
+	}
+	a.Bribed = append(a.Bribed, exposed.Name)
+
+	goldBefore, agentsBefore := a.Gold, a.Agents
+	if _, err := w.ExposeEnemyOps(a, exposed); err != nil {
 		t.Fatal(err)
 	}
-
-	attacker := w.AddHuman("e", "Enemyland")
-	attacker.Agents = 1_000_000
-	attacker.Gold = 10_000_000
-	before := a.Troopers
-	if _, err := w.SupportDissensions(attacker, a); err != nil {
-		t.Fatal(err)
+	// It spends no agent and takes no per-turn slot: BRE's menu dispatches it
+	// before it reaches either.
+	if a.Agents != agentsBefore {
+		t.Errorf("Expose Enemy Ops should spend no agent, %d -> %d", agentsBefore, a.Agents)
 	}
-	if a.Troopers != before {
-		t.Errorf("Expose Enemy Ops should shield a from incoming covert ops, troopers %d -> %d", before, a.Troopers)
+	if a.Gold != goldBefore-CostExposeEnemyOps {
+		t.Errorf("gold %d, want %d", a.Gold, goldBefore-CostExposeEnemyOps)
+	}
+	if len(a.TurnProgress.CovertOpsUsed) != 0 {
+		t.Errorf("Expose Enemy Ops should take no per-turn slot, got %v", a.TurnProgress.CovertOpsUsed)
+	}
+
+	const trials = 4000
+	rate := func(from *Empire) float64 {
+		won := 0
+		for i := 0; i < trials; i++ {
+			if w.covertRoll(from, a, OpSupportDissensions) {
+				won++
+			}
+		}
+		return float64(won) / trials
+	}
+	if got := rate(exposed); got < 0.02 || got > 0.09 {
+		t.Errorf("the exposed realm landed %.3f of its ops, want near 0.055", got)
+	}
+	if got := rate(other); got < 0.50 || got > 0.60 {
+		t.Errorf("an unexposed realm landed %.3f of its ops, want near 0.55 — the shield is not per realm", got)
 	}
 }
 
-func TestBombTradingMarketDrainsGold(t *testing.T) {
-	w, a, d := newAttackerAndTarget(t)
-	a.Agents, d.Agents, d.Gold = 50, 0, 1000
-	if _, err := w.BombTradingMarket(a, d); err != nil {
-		t.Fatal(err)
-	}
-	if d.Gold != 750 {
-		t.Errorf("expected 750 gold after a 25%% strike, got %d", d.Gold)
-	}
-}
-
-func TestBombTradeRoutesSeversTreaty(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	a := w.AddHuman("a", "Alpha")
-	a.Gold = 10_000_000 // afford covert op fees
+// bombRoutesFixture builds an attacker, a victim, the victim's trade partner and
+// a realm the victim holds Protective Trade with, on the given seed. The
+// attacker's covert roll is made certain (all the agents against none) so what
+// varies is the strike's own dice, not whether the agent got in.
+func bombRoutesFixture(t *testing.T, seed int64) (w *World, a, d, partner, guarded *Empire) {
+	t.Helper()
+	w = NewWorldSeed(DefaultConfig(), seed)
+	a = w.AddHuman("a", "Alpha")
+	a.Gold = 10_000_000
 	a.Agents = 1_000_000
-	d := w.AddHuman("d", "Delta")
+	d = w.AddHuman("d", "Delta")
 	d.Agents = 0
-	partner := w.AddHuman("p", "PartnerLand")
-	w.ProposeTreaty(d, partner, "Free Trade Agreement")
-	w.AcceptTreaty(partner, d.Name, "Free Trade Agreement")
+	partner = w.AddHuman("p", "PartnerLand")
+	partner.Agents = 0
+	guarded = w.AddHuman("g", "GuardedLand")
+	guarded.Agents = 0
+	pastProtection(w)
+	return w, a, d, partner, guarded
+}
 
-	if _, err := w.BombTradeRoutes(a, d); err != nil {
-		t.Fatal(err)
+// pact puts ttype between two realms through the offer/accept path.
+func pact(t *testing.T, w *World, from, to *Empire, ttype string) {
+	t.Helper()
+	w.ProposeTreaty(from, to, ttype)
+	if !w.AcceptTreaty(to, from.Name, ttype) {
+		t.Fatalf("AcceptTreaty %s between %s and %s failed", ttype, from.Name, to.Name)
 	}
-	if w.HasTreaty(d, partner, "Free Trade Agreement") {
-		t.Error("expected the Free Trade Agreement to be severed")
+}
+
+// bombDealQty is the round quantity every good in a test deal carries, so the
+// 5-9% a bombed deal keeps is the golden 50-90.
+const bombDealQty = 1000
+
+// bombRoutesTrials is how many strikes a test throws at a standing deal. Each
+// has a 1-in-9 chance of reaching it (a 1-in-3 landing roll and a 1-in-3 per-deal
+// roll), so 200 leaves a miss at about 4e-11 — the tests below assert what
+// happens when a strike lands, not that any single one does.
+const bombRoutesTrials = 200
+
+// pendingDeal records a deal from `from` on `to` directly. SendTradeDeal's pact,
+// carrier and escrow requirements would put a second relation between the
+// parties, which is the one thing these tests are measuring.
+func pendingDeal(from, to *Empire) {
+	to.TradeDeals = append(to.TradeDeals, TradeDeal{
+		From:   from.Name,
+		Send:   TradeBasket{Troopers: bombDealQty, Food: bombDealQty, Gold: bombDealQty},
+		Demand: TradeBasket{Tanks: bombDealQty},
+	})
+}
+
+// dealUntouched reports whether a deal pendingDeal recorded still carries
+// everything it was given.
+func dealUntouched(deal TradeDeal) bool {
+	return deal.Send == (TradeBasket{Troopers: bombDealQty, Food: bombDealQty, Gold: bombDealQty}) &&
+		deal.Demand == (TradeBasket{Tanks: bombDealQty})
+}
+
+// bombRoutes runs one Bomb Trade Routes strike against d through the helper the
+// interplanetary op calls, skipping the fee and the one-effect-op-per-turn cap so
+// a test can repeat it.
+func bombRoutes(w *World, d *Empire) {
+	if w.bombRoutesLands() {
+		w.bombRoutesEffect(d)
+	}
+}
+
+// The Protective Trade guard belongs to the DEAL being bombed, not to the
+// attacker: a deal whose own two parties hold the pact survives a strike from an
+// unrelated third realm, while an unguarded deal standing beside it on the same
+// realm is wrecked (BRE.OVR 0x051077). Both halves are properties rather than one
+// trajectory, so several seeds.
+func TestBombTradeRoutesSparesTheDealsOwnProtectivePartners(t *testing.T) {
+	for seed := int64(1); seed <= 5; seed++ {
+		w, _, d, partner, guarded := bombRoutesFixture(t, seed)
+		pact(t, w, d, guarded, "Protective Trade")
+		pendingDeal(guarded, d) // index 0: its own two parties hold the pact
+		pendingDeal(partner, d) // index 1: its parties hold nothing
+
+		wrecked := false
+		for i := 0; i < bombRoutesTrials; i++ {
+			bombRoutes(w, d)
+			if !dealUntouched(d.TradeDeals[0]) {
+				t.Fatalf("seed %d: a deal between Protective Trade partners was bombed", seed)
+			}
+			if !dealUntouched(d.TradeDeals[1]) {
+				wrecked = true
+			}
+		}
+		if !wrecked {
+			t.Errorf("seed %d: %d strikes never touched the unguarded deal", seed, bombRoutesTrials)
+		}
+	}
+}
+
+// The attacker's own relations are never read. A realm holding Protective Trade
+// with the VICTIM still wrecks a deal whose own two parties hold nothing, and the
+// strike is neither refused nor refunded. Standing treaties are no longer touched
+// at all — the op damages deals in transit, not the agreements behind them.
+func TestBombTradeRoutesIgnoresTheAttackersOwnPact(t *testing.T) {
+	for seed := int64(1); seed <= 5; seed++ {
+		w, a, d, partner, _ := bombRoutesFixture(t, seed)
+		pact(t, w, d, partner, "Free Trade Agreement")
+		pact(t, w, a, d, "Protective Trade")
+		pendingDeal(partner, d)
+
+		wrecked := false
+		for i := 0; i < bombRoutesTrials; i++ {
+			bombRoutes(w, d)
+			if !dealUntouched(d.TradeDeals[0]) {
+				wrecked = true
+			}
+		}
+		if !wrecked {
+			t.Errorf("seed %d: the attacker's own pact shielded a deal it is not a party to", seed)
+		}
+		if !w.HasTreaty(d, partner, "Free Trade Agreement") {
+			t.Errorf("seed %d: the op should damage deals, not sever standing agreements", seed)
+		}
+	}
+}
+
+// A bombed deal keeps 5-9% of every good and loses the rest (BRE.OVR 0x051077,
+// trunc(qty x (random(5)+5) / 100)). The band is asserted as the golden 50-90 out
+// of 1,000 rather than through the constants, so a retune fails here.
+func TestBombTradeRoutesLeavesFiveToNinePercent(t *testing.T) {
+	for seed := int64(1); seed <= 5; seed++ {
+		w, _, d, partner, _ := bombRoutesFixture(t, seed)
+		landed := 0
+		for i := 0; i < bombRoutesTrials; i++ {
+			d.TradeDeals = nil
+			pendingDeal(partner, d)
+			bombRoutes(w, d)
+			deal := d.TradeDeals[0]
+			if dealUntouched(deal) {
+				continue
+			}
+			landed++
+			for name, got := range map[string]int{
+				"Troopers": deal.Send.Troopers,
+				"Food":     deal.Send.Food,
+				"Gold":     deal.Send.Gold,
+				"Tanks":    deal.Demand.Tanks,
+			} {
+				if got < 50 || got > 90 {
+					t.Fatalf("seed %d: %s: expected 50-90 of %d left after a strike, got %d", seed, name, bombDealQty, got)
+				}
+			}
+		}
+		if landed == 0 {
+			t.Errorf("seed %d: %d strikes landed on nothing", seed, bombRoutesTrials)
+		}
+	}
+}
+
+// Two strikes in three come to nothing before a single deal is looked at
+// (BRE.OVR 0x04a09a), on top of the one-in-three each deal has of escaping. With
+// one deal standing that is 1 strike in 9 landing, against the 1 in 3 it would be
+// with no void roll. A rate is a property of the dice, not of a seed, so it is
+// measured over many trials on several seeds.
+func TestBombTradeRoutesVoidsTwoStrikesInThree(t *testing.T) {
+	const trials = 900
+	for seed := int64(1); seed <= 3; seed++ {
+		w, _, d, partner, _ := bombRoutesFixture(t, seed)
+		landed := 0
+		for i := 0; i < trials; i++ {
+			d.TradeDeals = nil
+			pendingDeal(partner, d)
+			bombRoutes(w, d)
+			if !dealUntouched(d.TradeDeals[0]) {
+				landed++
+			}
+		}
+		// 1 in 9 of 900 is 100, with a standard deviation of 9.4; 1 in 3 is 300.
+		if landed < 60 || landed > 145 {
+			t.Errorf("seed %d: %d of %d strikes landed, expected about 100 (1 in 9)", seed, landed, trials)
+		}
+	}
+}
+
+// BRE's market bombing reads no relation at all, so Protective Trade between
+// attacker and victim does not shield a listing. The 25% loss is asserted as the
+// exact computed figure, which stays deterministic across seeds.
+func TestBombTradingMarketIsNotGatedByAnyRelation(t *testing.T) {
+	for seed := int64(1); seed <= 5; seed++ {
+		w, a, d, _, _ := bombRoutesFixture(t, seed)
+		pact(t, w, a, d, "Protective Trade")
+		d.Tanks = 20
+		if err := w.SetMarketListing(d, "Tank", 20, 1000); err != nil {
+			t.Fatalf("seed %d: list: %v", seed, err)
+		}
+		w.bombMarketPosition(d, BombMarketLossPct)
+		if got := w.MarketForSale(d.Name, "Tank"); got != 15 {
+			t.Errorf("seed %d: expected 15 tanks left after a 25%% strike, got %d", seed, got)
+		}
 	}
 }
 
 func TestUndermineInvestmentsReducesPrincipal(t *testing.T) {
-	w, a, d := newAttackerAndTarget(t)
-	a.Agents, d.Agents = 50, 0
+	_, _, d := newAttackerAndTarget(t)
 	d.Investments = []Investment{{Amount: 1000, Return: 1100, MaturesDay: 5}}
-	if _, err := w.UndermineInvestments(a, d); err != nil {
-		t.Fatal(err)
+	if lost := undermineEffect(d); lost != 250 {
+		t.Errorf("expected 250 principal destroyed, got %d", lost)
 	}
 	if d.Investments[0].Amount != 750 {
 		t.Errorf("expected 750 principal remaining, got %d", d.Investments[0].Amount)
@@ -347,16 +749,15 @@ func TestUndermineInvestmentsReducesPrincipal(t *testing.T) {
 
 func TestSlappenheimerStrikeDamagesTarget(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	// Give the attacker overwhelming agents so covertSuccess always passes, no
-	// Troopers on the target so it can never backfire, and a stock of every
-	// strikeable resource. Only ~3 in 10 launches land, so fire many.
+	// slappenheimerEffect is the target-side half and rolls no covert attempt, so
+	// no agents are needed here. No Troopers on the target so it can never
+	// backfire, and a stock of every strikeable resource. Only ~3 in 10 launches
+	// land, so fire many.
 	a.Agents, d.Agents, d.Troopers, d.SDI = 50, 0, 0, 0
 	d.Jets, d.Turrets, d.Tanks, d.Bombers, d.Carriers, d.Gold, d.Food = 1000, 1000, 1000, 1000, 1000, 1000, 1000
 	before := int64(d.Jets+d.Turrets+d.Tanks+d.Bombers+d.Carriers+d.Agents+d.Food) + d.Gold
 	for i := 0; i < 100; i++ {
-		if _, err := w.SlappenheimerStrike(a, d); err != nil {
-			t.Fatal(err)
-		}
+		w.slappenheimerEffect(d, a.Name)
 	}
 	after := int64(d.Jets+d.Turrets+d.Tanks+d.Bombers+d.Carriers+d.Agents+d.Food) + d.Gold
 	if after >= before {
@@ -375,34 +776,52 @@ func TestSpyOnRelationsRevealsTreaties(t *testing.T) {
 	w.ProposeTreaty(d, c, "Tariff Trade Agreement")
 	w.AcceptTreaty(c, d.Name, "Tariff Trade Agreement")
 
-	report, err := w.SpyOnRelations(a, d)
-	if err != nil {
-		t.Fatal(err)
-	}
+	report := runCovertUntil(t, w, a, func() (string, error) { return w.SpyOnRelations(a, d) },
+		func(r string) bool { return !caught(r) })
 	if !strings.Contains(report, "Tariff Trade Agreement") || !strings.Contains(report, "Gamma") {
 		t.Errorf("report should reveal Delta's treaty with Gamma, got: %s", report)
 	}
 }
 
-func TestBriberyGrantsImmunity(t *testing.T) {
+// A bribed agent is the BRIBER's advantage, not the victim's: it doubles the
+// briber's own side of the roll against that realm and does nothing at all to
+// the ops that realm sends back. IB read the same flag as a shield until the
+// binary was checked (BRE.OVR 0x04BA48 at +0x165 reads it from the ATTACKER's
+// record). The two rates are golden literals off BRE's formula: 0.1 + 0.9x2/3
+// with the agent in place, 0.1 + 0.9/2 without.
+func TestBriberyDoublesTheBribersOwnOdds(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
-	a.Gold = 10_000_000 // afford covert op fees
-	a.Agents = 1_000_000
+	a.Gold, a.Agents = 100_000_000, 1_000_000
 	d := w.AddHuman("d", "Delta")
-	d.Agents = 4
-	if _, err := w.Bribery(a, d); err != nil {
-		t.Fatal(err)
+	d.Agents, d.Gold = 1_000_000, 100_000_000
+
+	runCovertUntil(t, w, a, func() (string, error) { return w.Bribery(a, d) },
+		func(r string) bool { return !caught(r) })
+	if !a.hasBribed(d.Name) {
+		t.Fatal("a successful Bribery should record the bribed realm")
 	}
-	// d now cannot land covert ops on a, even with overwhelming agents.
-	d.Agents = 1_000_000
-	d.Gold = 10_000_000
-	before := a.Troopers
-	if _, err := w.SupportDissensions(d, a); err != nil {
-		t.Fatal(err)
+	// BRE refuses a second bribe inside the same realm at the menu, before it
+	// charges anything.
+	if _, err := w.Bribery(a, d); err == nil {
+		t.Error("a second bribe inside the same realm should be refused")
 	}
-	if a.Troopers != before {
-		t.Errorf("d's ops should fail from a's bribery immunity, troopers %d -> %d", before, a.Troopers)
+
+	const trials = 4000
+	rate := func(from, to *Empire) float64 {
+		won := 0
+		for i := 0; i < trials; i++ {
+			if w.covertRoll(from, to, OpSupportDissensions) {
+				won++
+			}
+		}
+		return float64(won) / trials
+	}
+	if got := rate(a, d); got < 0.65 || got > 0.75 {
+		t.Errorf("the briber landed %.3f of its ops on the bribed realm, want near 0.70", got)
+	}
+	if got := rate(d, a); got < 0.50 || got > 0.60 {
+		t.Errorf("the bribed realm landed %.3f of its ops back, want near 0.55 — a bribe is not a shield", got)
 	}
 }
 
@@ -415,9 +834,7 @@ func TestSlappenheimerCanStrikeGold(t *testing.T) {
 	d.Gold = 1_000_000
 	before := d.Gold
 	for i := 0; i < 300; i++ {
-		if _, err := w.SlappenheimerStrike(a, d); err != nil {
-			t.Fatal(err)
-		}
+		w.slappenheimerEffect(d, a.Name)
 		if d.Gold < before {
 			return // it reached gold at least once
 		}
@@ -442,24 +859,24 @@ func TestFoiledCovertOpsNameTheAttacker(t *testing.T) {
 		{"SpyOnRelations", (*World).SpyOnRelations},
 		{"Bribery", (*World).Bribery},
 		{"StirRevolts", (*World).StirRevolts},
-		{"BombFood", (*World).BombFood},
-		{"BombTradingMarket", (*World).BombTradingMarket},
-		{"BombTradeRoutes", (*World).BombTradeRoutes},
-		{"UndermineInvestments", (*World).UndermineInvestments},
-		{"SlappenheimerStrike", (*World).SlappenheimerStrike},
+		{"BombEnemyTargets", (*World).BombEnemyTargets},
 	}
 	for _, op := range ops {
 		w, a, d := newAttackerAndTarget(t)
-		a.Gold, a.Agents = 1_000_000_000, 100
-		// Expose Enemy Ops turns every roll in both covertSuccess and
-		// spySuccess, so the foiled branch is reached without depending on the
-		// seed.
-		d.ShieldedUntilDay = w.GameDay + 1
-		before := len(d.Events)
+		a.Gold, a.Agents = 1_000_000_000, 10_000
+		// Exposing the attacker turns nine rolls in ten, so the foiled branch
+		// comes up quickly; nothing can force it outright.
+		d.ExposedFrom = map[string]int{a.Name: w.GameDay + ExposeOpsShieldDays}
+		before := 0
 
-		if _, err := op.run(w, a, d); err != nil {
-			t.Fatalf("%s: %v", op.name, err)
-		}
+		runCovertUntil(t, w, a, func() (string, error) {
+			// A Bribery that lands would refuse the next attempt outright, and
+			// would double a's odds from then on.
+			a.Bribed = nil
+			before = len(d.Events)
+			return op.run(w, a, d)
+		}, caught)
+
 		if len(d.Events) != before+1 {
 			t.Fatalf("%s: filed %d victim events, want 1", op.name, len(d.Events)-before)
 		}
@@ -475,12 +892,14 @@ func TestFoiledCovertOpsNameTheAttacker(t *testing.T) {
 func TestSuccessfulCovertOpsStayAnonymous(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Gold, a.Agents = 1_000_000_000, 1_000
-	d.Agents, d.Troopers = 0, 10_000
-	before := len(d.Events)
+	d.Agents = 0
+	before := 0
 
-	if _, err := w.SupportDissensions(a, d); err != nil {
-		t.Fatal(err)
-	}
+	runCovertUntil(t, w, a, func() (string, error) {
+		d.Troopers, before = 10_000, len(d.Events)
+		return w.SupportDissensions(a, d)
+	}, func(r string) bool { return !caught(r) })
+
 	if d.Troopers == 10_000 {
 		t.Fatal("the op did not land, so this proves nothing about a success")
 	}

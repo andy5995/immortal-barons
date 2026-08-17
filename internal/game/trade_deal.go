@@ -50,9 +50,20 @@ func goodPtrs(e *Empire) [8]*int {
 	return [8]*int{&e.Troopers, &e.Jets, &e.Turrets, &e.Bombers, &e.Food, &e.Agents, &e.Tanks, &e.Carriers}
 }
 
+// basketPtrs returns pointers to a basket's amounts in the same fixed order as
+// goodPtrs, so a caller can rewrite them uniformly. Gold is left out for the
+// same reason it is left out there.
+func basketPtrs(b *TradeBasket) [8]*int {
+	return [8]*int{&b.Troopers, &b.Jets, &b.Turrets, &b.Bombers, &b.Food, &b.Agents, &b.Tanks, &b.Carriers}
+}
+
 // basketVals returns a basket's amounts in the same fixed order as goodPtrs.
 func basketVals(b TradeBasket) [8]int {
-	return [8]int{b.Troopers, b.Jets, b.Turrets, b.Bombers, b.Food, b.Agents, b.Tanks, b.Carriers}
+	var vals [8]int
+	for i, p := range basketPtrs(&b) {
+		vals[i] = *p
+	}
+	return vals
 }
 
 // empireHasBasket reports whether e owns at least everything in b.

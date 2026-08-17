@@ -329,6 +329,14 @@ func localAttack(s session.Session, w *ctx, label string, price costOf, endsTurn
 	if blockedByProtection(s, w) {
 		return Stay
 	}
+	return pickAndStrike(s, w, label, price, endsTurn, strike)
+}
+
+// pickAndStrike is localAttack without the New Realm Protection gate: the
+// target list, the arms-broker quote, and the strike itself. The covert menu
+// calls it directly for the two operations the original lets a sheltered realm
+// still run (see covertInfoOp).
+func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTurn bool, strike func(a, d *game.Empire) (string, error)) Result {
 	rows := snapshotTargets(w)
 	if len(rows) == 0 {
 		ok(s, "There are no rival empires left to attack.")

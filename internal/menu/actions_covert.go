@@ -7,85 +7,127 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
+// blockedByCovertProtection reports whether the player's own New Realm
+// Protection bars them from an operation that acts on another realm, printing
+// the refusal when it does. The reason is the reverse of the one an attack
+// prints: there the shield is the TARGET's, here it is the caller's own, and
+// the two must not read alike.
+//
+// The original tests this at the menu, immediately before the affordability
+// gate (`BRE.OVR 0x017716`, refusal string loaded at `0x01772E`), so a refused
+// operation costs no gold, no agent and no per-turn slot. IB keeps that
+// placement.
+func blockedByCovertProtection(s session.Session, w *ctx) bool {
+	if w.Player().Protection > 0 {
+		ok(s, "Your New Realm Protection shelters you, and while it lasts your agents may not move against another realm.")
+		return true
+	}
+	return false
+}
+
+// covertOp runs a covert operation that has an effect on its target, refusing
+// it while the caller is sheltered.
+func covertOp(s session.Session, w *ctx, label string, strike func(a, d *game.Empire) (string, error)) Result {
+	if blockedByCovertProtection(s, w) {
+		return Stay
+	}
+	return pickAndStrike(s, w, label, nil, false, strike)
+}
+
+// covertInfoOp runs one of the two operations that only gather information.
+// The original's protection test is jumped over for exactly these two — the
+// menu digits 1 and 6 — so a sheltered realm can still look before it can
+// touch.
+func covertInfoOp(s session.Session, w *ctx, label string, strike func(a, d *game.Empire) (string, error)) Result {
+	return pickAndStrike(s, w, label, nil, false, strike)
+}
+
 func sendSpy(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Send Spy", nil, false, func(a, d *game.Empire) (string, error) { return w.SendSpy(a, d) })
+	return covertInfoOp(s, w, "Send Spy", func(a, d *game.Empire) (string, error) { return w.SendSpy(a, d) })
 }
 
 func supportDissensions(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Support Dissensions", nil, false, func(a, d *game.Empire) (string, error) { return w.SupportDissensions(a, d) })
+	return covertOp(s, w, "Support Dissensions", func(a, d *game.Empire) (string, error) { return w.SupportDissensions(a, d) })
 }
 
 func demoralizeForces(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Demoralize Forces", nil, false, func(a, d *game.Empire) (string, error) { return w.DemoralizeForces(a, d) })
+	return covertOp(s, w, "Demoralize Forces", func(a, d *game.Empire) (string, error) { return w.DemoralizeForces(a, d) })
 }
 
 func setUp(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Set Up", nil, false, func(a, d *game.Empire) (string, error) { return w.SetUp(a, d) })
+	return covertOp(s, w, "Set Up", func(a, d *game.Empire) (string, error) { return w.SetUp(a, d) })
 }
 
+// exposeEnemyOps aims the shield at ONE realm, chosen from the realms the
+// player already holds a bribed agent inside — BRE lists no others, because the
+// bribed agent is what does the exposing. It does not go through localAttack:
+// that lists every living rival and withholds a selection letter from realms
+// under New Realm Protection or in an alliance, neither of which has anything to
+// do with an agent already on the payroll.
 func exposeEnemyOps(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Expose Enemy Ops", nil, false, func(a, d *game.Empire) (string, error) { return w.ExposeEnemyOps(a, d) })
+	if blockedByCovertProtection(s, w) {
+		return Stay
+	}
+	rows := snapshotBribedTargets(w)
+	if len(rows) == 0 {
+		fail(s, game.ErrNoBribedAgents)
+		return Stay
+	}
+	name, chosen := pickAttackTarget(s, rows, tr(s, "Whose operations should your agent expose (letter, RETURN to abort)"))
+	if !chosen {
+		return Stay
+	}
+	var report string
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		d := w.FindByName(name)
+		if d == nil || !d.Alive {
+			return errTargetGone
+		}
+		var e error
+		report, e = w.ExposeEnemyOps(p, d)
+		return e
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s\n", hiNums(wrapReport(report)))
+	pause(s)
+	return Stay
+}
+
+// snapshotBribedTargets is the Expose Enemy Ops list: the living realms the
+// player holds a bribed agent inside, every one of them selectable.
+func snapshotBribedTargets(w *ctx) []targetRow {
+	var rows []targetRow
+	w.With(func() {
+		p := w.Player()
+		if p == nil {
+			return
+		}
+		for _, e := range w.BribedRealms(p) {
+			rows = append(rows, targetRow{
+				name: e.Name, land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
+				people: e.People, troopers: e.Troopers,
+				attackable: true, online: e.Online(),
+			})
+		}
+	})
+	return rows
 }
 
 func stirRevolts(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Stir Revolts", nil, false, func(a, d *game.Empire) (string, error) { return w.StirRevolts(a, d) })
+	return covertOp(s, w, "Stir Revolts", func(a, d *game.Empire) (string, error) { return w.StirRevolts(a, d) })
 }
 
-// bombingAttack wraps localAttack with BRE's Bomb Enemy Targets 500-Bomber
-// payload requirement (BRE.OVR: "All missiles and bombs require 500 Bombers
-// to deliver their payloads").
-func bombingAttack(s session.Session, w *ctx, label string, price costOf, strike func(a, d *game.Empire) (string, error)) Result {
-	if w.Player().Bombers < game.BombingBombersRequired {
-		fail(s, fmt.Errorf("you need at least %d Bombers to deliver a payload", game.BombingBombersRequired))
-		return Stay
-	}
-	return localAttack(s, w, label, price, false, strike)
-}
-
-func bombFoodMarket(s session.Session, w *ctx) Result {
-	return bombingAttack(s, w, "Bomb Food Market", nil, func(a, d *game.Empire) (string, error) { return w.BombFood(a, d) })
-}
-
-func bombTradingMarket(s session.Session, w *ctx) Result {
-	return bombingAttack(s, w, "Bomb Trading Market", nil, func(a, d *game.Empire) (string, error) { return w.BombTradingMarket(a, d) })
-}
-
-func bombTradeRoutes(s session.Session, w *ctx) Result {
-	return bombingAttack(s, w, "Bomb Trade Routes", nil, func(a, d *game.Empire) (string, error) { return w.BombTradeRoutes(a, d) })
-}
-
-func undermineInvestments(s session.Session, w *ctx) Result {
-	return bombingAttack(s, w, "Undermine Investments", nil, func(a, d *game.Empire) (string, error) { return w.UndermineInvestments(a, d) })
-}
-
-func nuclearAssault(s session.Session, w *ctx) Result {
-	return bombingAttack(s, w, "Nuclear Assault", nukePrice, func(a, d *game.Empire) (string, error) { return w.NuclearStrike(a, d) })
-}
-
-func chemicalBombing(s session.Session, w *ctx) Result {
-	return bombingAttack(s, w, "Chemical Bombing", chemPrice, func(a, d *game.Empire) (string, error) { return w.ChemicalStrike(a, d) })
-}
-
-func slappenheimerStrike(s session.Session, w *ctx) Result {
-	var mode game.SlappenheimerMode
-	w.With(func() { mode = w.Config.SlappenheimerHandling })
-	if mode == game.SlappenheimerNone {
-		ok(s, "The R5-Slappenheimer is disabled.")
-		return Stay
-	}
-	// Under User Select handling the player dials the missile in (0-10). The
-	// dial is BRE's bluff — it changes nothing about the outcome — but we still
-	// prompt for it to keep the original's feel.
-	if mode == game.SlappenheimerUserSelect {
-		promptInt(s, "Set the R5-Slappenheimer dial (0-10)")
-	}
-	return bombingAttack(s, w, "R5-Slappenheimer", nil, func(a, d *game.Empire) (string, error) { return w.SlappenheimerStrike(a, d) })
+func bombEnemyTargets(s session.Session, w *ctx) Result {
+	return covertOp(s, w, "Bomb Enemy Targets", func(a, d *game.Empire) (string, error) { return w.BombEnemyTargets(a, d) })
 }
 
 func spyRelations(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Spy on Relations", nil, false, func(a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) })
+	return covertInfoOp(s, w, "Spy on Relations", func(a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) })
 }
 
 func briberyOp(s session.Session, w *ctx) Result {
-	return localAttack(s, w, "Bribery", nil, false, func(a, d *game.Empire) (string, error) { return w.Bribery(a, d) })
+	return covertOp(s, w, "Bribery", func(a, d *game.Empire) (string, error) { return w.Bribery(a, d) })
 }

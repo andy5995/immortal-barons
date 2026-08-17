@@ -1,4 +1,43 @@
 (in-progress:)
+  * A realm under New Realm Protection is refused the covert operations that
+    have an effect, and the interplanetary Send SpyGuy, at no cost in gold,
+    agents or turn slots; Send Spy and Spy on Relations stay open to it
+  * The six local covert effect operations are queued when chosen and resolved
+    at daily maintenance, as in the original; the fee, the agent and the
+    per-turn slot are taken at the menu and the result lands on the sender's
+    next report. Send Spy, Spy on Relations and Expose Enemy Ops still answer
+    at once
+  * Every local covert operation is resolved by the original's own roll. Neither
+    realm's agent count changes the odds; each operation carries its own
+    difficulty, so the simpler ones land 55 percent of the time, Demoralize
+    Forces and Bomb Enemy Targets 40, and Bribery 32.5
+  * A covert operation may be run once per turn each, rather than one operation
+    of any type per turn. Send Spy, Spy on Relations and Expose Enemy Ops have
+    no limit
+  * A bribed agent doubles the briber's own odds against that realm. It used to
+    make that realm's operations against the briber fail
+  * Expose Enemy Ops shields against one realm — one the caller already holds a
+    bribed agent inside, chosen from a list of those — for a day, and turns away
+    nine of that realm's operations in ten. It used to block every realm's
+    operations outright. It costs no agent and takes no per-turn slot
+  * Bomb Enemy Targets is one covert operation, as in the original, instead of a
+    submenu of seven lettered variants. A successful strike destroys part of one
+    of the target's holdings, picked at random from its people, troopers,
+    agents, tanks, jets and food store, and needs no Bombers. The seven variants
+    remain on the InterPlanetary Special Operations menu, where the original
+    keeps them
+  * Stir Revolts and Demoralize Forces subtract points from popular support and
+    military morale rather than scaling them, and hold both at 5. The scaling
+    figures came from the resolver for operations arriving in a packet, which
+    uses a different operation table
+  * Support Dissensions sends 1 to 19 percent of the target's troopers fleeing,
+    averaging a tenth, in place of a flat tenth
+  * Set Up voids every treaty between the two realms, not only a Full Defense
+    Alliance, and the attempt is rolled against each of them
+  * Bribery is refused before any gold is charged when a bribed agent is already
+    inside that realm
+  * The R5-Slappenheimer Handling setting gates the InterPlanetary
+    R5-Slappenheimer, which is the only menu that now fires one
   * A pending trade deal and treaty offer are now answered before the "since
     your last play" entries rather than after them, and the trade deal comes
     first, matching the original
@@ -44,6 +83,11 @@
     Request, View Diplomacy and Player List, keyed 1 to 4
   * Global Recon Request asks every other planet for a report on every realm it
     holds, and the answers land in the Spy Database
+  * Bomb Trade Routes wrecks the goods riding in the target's pending trade
+    deals rather than severing a standing treaty: most strikes come to nothing,
+    some deals slip through, and a deal the bombers reach keeps 5-9% of every
+    good. A deal is spared when its own two parties hold Protective Trade,
+    whoever fired, so the pact no longer refuses the strike or shields a market
   * The End of Turn Statistics screen is bracketed by the original's blue inset
     rule, above and below, where it had none
   * The Empire Status block is bracketed by the original's blue inset rule,

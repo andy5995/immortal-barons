@@ -7,5 +7,6 @@ in_game: true
 
 # Undermine Investments
 
-Undermine Investments damages the target's pending bank investments, trimming
-about a quarter off the money they were due to get back.
+Undermine Investments is an InterPlanetary operation, on the Special Operations
+menu. It damages the pending bank investments of every realm on another planet,
+trimming about a quarter off the money they were due to get back.

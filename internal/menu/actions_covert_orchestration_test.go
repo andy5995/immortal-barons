@@ -7,11 +7,11 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// The covert handlers all funnel through localAttack / bombingAttack, passing
-// the actual operation as a strike callback. Testing those two shared helpers
-// with a recording stub covers the target-selection, protection, cost, and
-// bomber-gate branches for the whole covert file without depending on any one
-// operation's RNG. A couple of real delegators then confirm the wiring.
+// The covert handlers all funnel through localAttack, passing the actual
+// operation as a strike callback. Testing that shared helper with a recording
+// stub covers the target-selection, protection and cost branches for the whole
+// covert file without depending on any one operation's RNG. A couple of real
+// delegators then confirm the wiring.
 
 // recordingStrike returns a strike callback that notes whether it ran and with
 // which empires, standing in for a real covert operation.
@@ -148,67 +148,6 @@ func TestSpecialAttackPricesOffTarget(t *testing.T) {
 	}
 }
 
-// --- bombingAttack (the 500-Bomber gate) --------------------------------
-
-func TestBombingAttackRequiresBombers(t *testing.T) {
-	w, _ := covertWorld()
-	w.Player().Bombers = game.BombingBombersRequired - 1
-	called := false
-	var a, d *game.Empire
-	f := &fakeSession{keys: []rune("1\r")}
-
-	bombingAttack(f, w, "Bomb Food Market", nil, recordingStrike(&called, &a, &d))
-
-	if called {
-		t.Error("strike ran without enough Bombers")
-	}
-	if !strings.Contains(f.out.String(), "Bombers") {
-		t.Errorf("expected the Bombers requirement notice; got:\n%s", f.out.String())
-	}
-}
-
-func TestBombingAttackProceedsWithBombers(t *testing.T) {
-	w, _ := covertWorld()
-	w.Player().Bombers = game.BombingBombersRequired
-	called := false
-	var a, d *game.Empire
-	f := &fakeSession{keys: []rune("A")} // target A
-
-	bombingAttack(f, w, "Bomb Food Market", nil, recordingStrike(&called, &a, &d))
-
-	if !called {
-		t.Error("strike did not run with enough Bombers")
-	}
-}
-
-// --- slappenheimerStrike (mode branches) --------------------------------
-
-func TestSlappenheimerDisabled(t *testing.T) {
-	w, _ := covertWorld()
-	w.Config.SlappenheimerHandling = game.SlappenheimerNone
-	f := &fakeSession{}
-
-	slappenheimerStrike(f, w)
-
-	if !strings.Contains(f.out.String(), "disabled") {
-		t.Errorf("expected the disabled notice; got:\n%s", f.out.String())
-	}
-}
-
-func TestSlappenheimerUserSelectPromptsDial(t *testing.T) {
-	w, _ := covertWorld()
-	w.Config.SlappenheimerHandling = game.SlappenheimerUserSelect
-	w.Player().Bombers = game.BombingBombersRequired
-	w.Player().Agents = 100
-	f := &fakeSession{keys: []rune("5\r1\r")} // dial 5, then attack target 1
-
-	slappenheimerStrike(f, w)
-
-	if !strings.Contains(f.out.String(), "dial") {
-		t.Errorf("expected the R5-Slappenheimer dial prompt; got:\n%s", f.out.String())
-	}
-}
-
 // --- real delegators (wiring check) -------------------------------------
 
 // The wiring claim needs the op's own report on screen, not just "some
@@ -228,17 +167,16 @@ func TestSendSpyDelegates(t *testing.T) {
 	}
 }
 
-func TestBombFoodMarketDelegates(t *testing.T) {
+func TestBombEnemyTargetsDelegates(t *testing.T) {
 	w, _ := covertWorld()
 	w.Player().Agents = 100
 	w.Player().Gold = 10_000_000 // the op has a gold cost; broke = "cannot afford", op never runs
-	w.Player().Bombers = game.BombingBombersRequired
 	f := &fakeSession{keys: []rune("a")}
 
-	if got := bombFoodMarket(f, w); got != Stay {
-		t.Errorf("bombFoodMarket returned %v, want Stay", got)
+	if got := bombEnemyTargets(f, w); got != Stay {
+		t.Errorf("bombEnemyTargets returned %v, want Stay", got)
 	}
-	if out := f.out.String(); !strings.Contains(out, "food") {
-		t.Errorf("bombFoodMarket should report the food strike outcome, got:\n%s", out)
+	if out := f.out.String(); !strings.Contains(out, "Gale Horde") {
+		t.Errorf("bombEnemyTargets should report the strike outcome, got:\n%s", out)
 	}
 }

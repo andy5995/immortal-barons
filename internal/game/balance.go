@@ -306,7 +306,9 @@ const (
 	// gold it can spare, so covert never starves food or maintenance.
 	AICovertOpPct = 25
 	// A realm shields itself when it is worth attacking: covert defense is worth
-	// buying once a realm leads, since it is then everyone's target.
+	// buying once a realm leads, since it is then everyone's target. The shield
+	// needs a bribed agent inside the realm it guards against, so at this chance
+	// the AI either buys that bribe or spends the shield it already has.
 	AIExposeOpsPct = 10
 )
 
@@ -434,21 +436,45 @@ const (
 
 // The covert roll, BINARY-VERIFIED from BRE.OVR 0x4BA48 (the roll) and 0x4CAB7
 // (the agent pools). docs/mechanics-reference.md carries the full routine and the
-// evidence, including the defect IB now reproduces for Send Spy.
+// evidence, including the defect IB reproduces: both sides of the comparison are
+// drawn from the ATTACKER, so the defender's agents never enter it.
 const (
 	// CovertAutoSuccessOdds: one roll in this many succeeds before agents are
 	// weighed at all.
 	CovertAutoSuccessOdds = 10
-	// CovertBribeSlipOdds: an attacker whose agent has been bribed still slips
-	// through one time in this many instead of failing outright.
-	CovertBribeSlipOdds = 10
-	// SpyDifficulty divides the attacker's pool. BRE passes 1 for Send Spy, which
-	// is the only op reached through this roll; a harder op would pass more.
-	SpyDifficulty = 1
+	// ExposeOpsSlipOdds: an operation against a realm that has exposed you still
+	// slips through one time in this many instead of failing outright.
+	ExposeOpsSlipOdds = 10
+	// ExposeOpsShieldDays is how long an Expose Enemy Ops shield lasts. BRE
+	// writes `now + 1.0` into a Real48 slot (BRE.OVR 0x1701B, and the string
+	// "Bribed Agent will expose enemy operations for 24 Hours"); IB tracks whole
+	// days, so one day is the same span.
+	ExposeOpsShieldDays = 1
+	// CovertBribeOffenseMultiplier: an attacker holding a bribed agent inside the
+	// target doubles its own side of the roll (BRE.OVR 0x4BA48, at +0x165 — the
+	// flag is read from the ATTACKER's record, indexed by the target).
+	CovertBribeOffenseMultiplier = 2
 	// An ally's agents count for less on the attacking side than the defending
 	// one. The two shares live in the same BRE function and are not equal.
 	CovertAllyOffensePct = 40
 	CovertAllyDefensePct = 50
+)
+
+// Each covert operation divides the attacker's own pool by its own difficulty
+// figure, so a harder op lands less often against the same agents. BINARY-VERIFIED
+// from the local resolver (BRE.OVR 0x04BE9F), which passes the divisor to the
+// roll at its seven call sites; Send Spy and Spy on Relations come through
+// report_spy_result (BRE.OVR 0x016D67) instead and pass 1. With no treaties in
+// play, a divisor of 1 lands 55% of the time, 2 lands 40%, and 3 lands 32.5%.
+const (
+	CovertDifficultySendSpy            = 1
+	CovertDifficultyStirRevolts        = 1
+	CovertDifficultySetUp              = 1
+	CovertDifficultySupportDissensions = 1
+	CovertDifficultySpyOnRelations     = 1
+	CovertDifficultyDemoralizeForces   = 2
+	CovertDifficultyBombEnemyTargets   = 2
+	CovertDifficultyBribery            = 3
 )
 
 // Covert Operations gold costs, charged per op on top of the agent risk.
@@ -461,8 +487,8 @@ const (
 // Terrorist Costs all set to High drew the identical nine figures, and a Send
 // Spy moved gold by exactly 5,000.
 //
-// Bomb Enemy Targets is one 100k menu entry in BRE; IB splits it into a
-// submenu and charges each variant CostBombEnemyTargets.
+// Bomb Enemy Targets is one 100k menu entry in BRE, and IB now charges that
+// once for the single op rather than per variant of a submenu it no longer has.
 const (
 	CostSendSpy            = 5_000
 	CostStirRevolts        = 25_000
@@ -473,6 +499,31 @@ const (
 	CostBombEnemyTargets   = 100_000
 	CostBribery            = 200_000
 	CostExposeEnemyOps     = 600_000
+)
+
+// Support Dissensions. BINARY-VERIFIED from the local resolver (BRE.OVR
+// 0x04C178): the share of the victim's Troopers that flees is
+// Random(10) + 10 - Random(10) percent, so 1-19 with a mean of 10, truncated.
+const (
+	DissensionsPctBase   = 10
+	DissensionsPctSpread = 10
+)
+
+// Bomb Enemy Targets, the LOCAL covert op. BINARY-VERIFIED from the local
+// resolver (BRE.OVR 0x04C37D onward): a successful strike rolls Random(6)+1 to
+// pick ONE of six holdings and destroys Trunc(holding * percent / 100) of it,
+// where each holding has its own percentage band. The player chooses nothing —
+// the eight-item bombing table BRE also ships is read only by the
+// interplanetary Special Operations menu.
+const (
+	BombTargetPickCount = 6
+
+	BombTargetPeoplePctBase, BombTargetPeoplePctSpread   = 5, 10  // 5-14%  (BRE.OVR 0x04C39E)
+	BombTargetTrooperPctBase, BombTargetTrooperPctSpread = 5, 5   // 5-9%   (0x04C427)
+	BombTargetAgentPctBase, BombTargetAgentPctSpread     = 5, 5   // 5-9%   (0x04C4B0)
+	BombTargetTankPctBase, BombTargetTankPctSpread       = 5, 3   // 5-7%   (0x04C539)
+	BombTargetJetPctBase, BombTargetJetPctSpread         = 5, 3   // 5-7%   (0x04C5C2)
+	BombTargetFoodPctBase, BombTargetFoodPctSpread       = 20, 70 // 20-89% (0x04C64B)
 )
 
 // Per-turn price WALK (#30), BINARY-VERIFIED from BRE.OVR 0x12633. Each empire
@@ -507,6 +558,19 @@ const (
 // BombMarketLossPct is the share (percent) of a target's listed goods and pending
 // market proceeds destroyed by a successful Bomb Trading Market covert op (#17).
 const BombMarketLossPct = 25
+
+// Bomb Trade Routes. BINARY-VERIFIED: BRE.OVR 0x051077, the routine
+// `resolve_received_bombing` (0x04a09a) runs for a received op type 3. Three
+// rolls decide the damage — a `random(3)` at the top of the caller that voids
+// the whole strike two times in three, a `random(3)` per deal that lets one deal
+// in three escape, and `trunc(qty x (random(5)+5) / 100)` on each of the deal's
+// goods quantities, which leaves 5-9% and destroys the rest.
+const (
+	BombRoutesLandOdds      = 3 // 1-in-this the strike lands at all
+	BombRoutesDealHitOdds   = 3 // 1-in-this a given deal is hit; the rest escape
+	BombRoutesKeptPctMin    = 5 // a hit deal keeps this percent of each good...
+	BombRoutesKeptPctSpread = 5 // ...plus random(this), so 5-9% survives
+)
 
 // MarketCommissionPct is the cut (percent) the general Trading Market takes from
 // a seller's proceeds at day-end settlement (#17). It is ZERO, and that is now
@@ -934,19 +998,19 @@ const (
 	LowSupportNewsCeil = 35
 	LowSupportNewsOdds = 20
 
-	// An AI covert operation never pushes its victim below AICovertStatFloor
-	// popular support or military morale. BINARY-VERIFIED (BRE.OVR 0x4C02F for
-	// support, 0x4C2E0 for morale); a human's covert op has no such floor.
-	AICovertStatFloor = 5
+	// No covert operation pushes its victim below CovertStatFloor popular support
+	// or military morale. BINARY-VERIFIED (BRE.OVR 0x4C02F for support, 0x4C2E0
+	// for morale) — both floors sit in the resolver that runs every queued covert
+	// op, so the floor is not the computer's alone.
+	CovertStatFloor = 5
 
-	// Covert operations and weapons scale the victim's stat rather than docking a
-	// flat number of points, so a broken realm cannot be broken much further.
-	// BINARY-VERIFIED: the covert resolver at BRE.OVR 0x4AC91 (Demoralize Forces)
-	// and 0x4AE61 (Stir Revolts); the chemical missile at 0x110AE / 0x11109 and
-	// the biological one at 0x115FE / 0x11645. IB docked a flat 15 points for both
-	// covert ops and left both stats untouched on a WMD strike.
-	DemoralizeKeepNum, DemoralizeKeepDen   = 6, 7   // morale x 6/7
-	StirRevoltsKeepNum, StirRevoltsKeepDen = 11, 13 // support x 11/13
+	// Stir Revolts and Demoralize Forces dock POINTS off the victim's stat, then
+	// hold it at CovertStatFloor. BINARY-VERIFIED from the local resolver
+	// (BRE.OVR 0x04C00C support, 0x04C2BD morale): support loses Random(4)+5,
+	// morale Random(5)+5. The scaling forms IB used before (x6/7, x11/13) belong
+	// to the inter-BBS packet resolver, which is a different op enumeration.
+	StirRevoltsLossBase, StirRevoltsLossSpread = 5, 4 // support -= 5..8
+	DemoralizeLossBase, DemoralizeLossSpread   = 5, 5 // morale -= 5..9
 	// The two WMD strikes cut both stats too; their constants live with the rest
 	// of each missile's figures further down (ChemMoraleKeepNum, BioMoraleDivisor,
 	// StrikeSupportKeepNum).

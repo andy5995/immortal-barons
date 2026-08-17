@@ -153,21 +153,33 @@ func TestAIAggressorBuysAgents(t *testing.T) {
 	}
 }
 
-func TestAIAggressorDemoralizesBeforeWar(t *testing.T) {
+// An attack no longer carries a covert strike in front of it. BRE queues every
+// effect covert operation and resolves it at daily maintenance, so an agent sent
+// this turn cannot soften the realm being invaded this turn — and an AI that
+// still sent one would be spending a fee and an agent for nothing. The pre-war
+// demoralize the AI used to run here belongs to aiCovertOps, a day earlier.
+func TestAIAttackSendsNoAgentAhead(t *testing.T) {
 	w, agg, vic := warWorld(t)
 	agg.Troopers, agg.Tanks = 5000, 500 // clearly favored
-	agg.Agents = 50                     // enough agents that the covert op reliably lands
-	agg.Gold = 1_000_000                // afford the demoralize fee
+	agg.Agents = 50
+	agg.Gold = 1_000_000
 	vic.Morale = 100
-	beforeLand := vic.Land
+	beforeLand, beforeAgents, beforeGold := vic.Land, agg.Agents, agg.Gold
 
 	w.aiWageWar(agg)
 
 	if vic.Land >= beforeLand {
 		t.Fatalf("precondition: the attack should still have happened, land %d->%d", beforeLand, vic.Land)
 	}
-	if vic.Morale >= 100 {
-		t.Errorf("aggressor should have demoralized the target before attacking, morale still %d", vic.Morale)
+	if len(w.CovertQueue) != 0 {
+		t.Errorf("the war path queued %d covert operations, want 0", len(w.CovertQueue))
+	}
+	if agg.Agents != beforeAgents || agg.Gold != beforeGold {
+		t.Errorf("the war path spent covert resources: agents %d->%d, gold %d->%d",
+			beforeAgents, agg.Agents, beforeGold, agg.Gold)
+	}
+	if vic.Morale != 100 {
+		t.Errorf("the target's morale moved before the battle: %d", vic.Morale)
 	}
 }
 

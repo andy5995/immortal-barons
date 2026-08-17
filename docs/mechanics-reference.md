@@ -717,12 +717,11 @@ so the hotkey goes with the label:
 
 | Setting | What it hides |
 | --- | --- |
-| `BombingOps` | Bomb Food Market, Bomb Trading Market, Bomb Trade Routes, Undermine Investments — on Bomb Enemy Targets and on Special Operations |
-| `MissileOps` | Nuclear / Chemical / Biological Attack on the Attack menu, and Nuclear Assault / Chemical Bombing / R5-Slappenheimer on both submenus |
+| `BombingOps` | Bomb Enemy Targets on the Covert menu, and Bomb Food Market / Bomb Trading Market / Bomb Trade Routes / Undermine Investments on Special Operations |
+| `MissileOps` | Nuclear / Chemical / Biological Attack on the Attack menu, and Nuclear Assault / Chemical Bombing / R5-Slappenheimer on Special Operations |
 | `ClingyAnnihilator` | Clingy Annihilator Ops on the InterPlanetary menu |
 
-With both of the first two off, the Bomb Enemy Targets entry itself goes, since
-its box would be empty. **IB's reading, not a capture:** BRE words both as
+**IB's reading, not a capture:** BRE words both as
 inter-BBS settings about attacks sent to another board, and no capture of either
 one disabled exists, so which menus the original strips is unverified — but a
 switch the player is told about on Game Setup has to do something.
@@ -938,9 +937,12 @@ and posts news. 0 turns the recovery off.
 
 ## Covert operations
 
-Success depends on how many agents you have compared to the target: more
-agents relative to the enemy means a higher success rate. Keeping many
-agents on hand also *defends* you against incoming terrorist ops.
+Neither realm's agent count changes an operation's odds. That is not IB's
+choice — it is what the original's one covert roll computes, and the routine
+below is where it comes from. An agent is what an operation SPENDS (one per try,
+lost when the try fails); what moves the odds is the operation's own difficulty,
+a bribed agent inside the target, an Expose Enemy Ops shield, and the two agent-
+lending treaties.
 
 **What the binary actually does — Send Spy (`BRE.OVR 0x4BA48`, reached through
 overlay stub `0x4DC:0x3E`).** Read 2026-08-01. `a` is the attacker (the current
@@ -967,21 +969,37 @@ player, the global empire letter at `DS:0x28DC`); `d` is the chosen target;
         if total > 1e9 then total := 1e9
         result := trunc(total)
 
-**IB reproduces this for Send Spy** (`spySuccess` in `internal/game/covert.go`),
-defect included, on Andy's call. The effect ops keep `covertSuccess` — its
-attacker-against-defender roll — because BRE does not resolve them through this
-routine at all, so extending the defect to them would invent a bug the original
-does not have. Both paths now share `covertStrength` and so pick up the verified
-40/50 ally shares. What differs between the two:
+**IB resolves EVERY local covert operation through this routine** (`covertRoll`
+in `internal/game/covert.go`), defect included, on Andy's call. It is BRE's only
+local covert roll: the menu queues each effect op as a type-7 record
+(`BRE.OVR 0x04CA06`) and the resolver at `0x04BE9F` drains the queue and calls
+this routine once per op — twice for Set Up, once against each court. Send Spy
+and Spy on Relations skip the queue and reach it through `report_spy_result`
+(`BRE.OVR 0x016D67`). There is no second roll anywhere for the local menu, which
+is what retired IB's own attacker-against-defender `covertSuccess`. Verified
+2026-08-16 by walking all seven resolver call sites and both info-op sites.
 
-- **The defender's agents never enter the roll.** Both `covertStrength` calls
-  pass `a`; the bytes are identical (`8A 46 10`) at `0x4BAE7` and `0x4BB03`, only
-  the mode byte changes. With no alliances `A = agents div kind` and
-  `B = agents`, the agent count cancels, and Send Spy is a flat
-  `0.1 + 0.9 x 1/(1+1)` = **55%** whatever either side holds. The same function
-  is called correctly elsewhere (`0x4AA5E` passes a different empire with mode 1),
-  so the Send Spy site looks like a copy-paste bug in the original rather than a
-  design.
+What that means in play:
+
+- **The defender's agents never enter the roll.** This is the startling one, and
+  it is deliberate in IB because it is what the original does — a future reader
+  will take it for a bug, so: both `covertStrength` calls pass `a`; the bytes are
+  identical (`8A 46 10`) at `0x4BAE7` and `0x4BB03`, only the mode byte changes.
+  With no alliances `A = agents div kind` and `B = agents`, the agent count
+  cancels, and an easy op is a flat `0.1 + 0.9 x 1/(1+1)` = **55%** whatever
+  either side holds. The same function is called correctly elsewhere (`0x4AA5E`
+  passes a different empire with mode 1), so the site looks like a copy-paste bug
+  in the original rather than a design.
+
+  **Consequence: agents defend against nothing on the local menu.** Stockpiling
+  them buys staying power against the one-per-failure loss and the attacking side
+  of the roll once an Intelligence Alliance is in play, and nothing else. The
+  only defences that exist are Expose Enemy Ops and a Terrorist Prevention treaty
+  — and the latter, per the entry below, works backwards.
+- **The divisor is integer division, so a thin realm is worse off than the
+  cancellation suggests.** At 1 agent, `A = 1 div 2 = 0` and a Demoralize Forces
+  can only land on the flat one-in-ten. The cancellation to a fixed rate holds
+  only once the count is large against the divisor.
 - **The two alliance weights are not equal**: 0.5 on the defending side, 0.4 on
   the attacking one. IB lent half in both directions until this was read. Which
   treaty number is which is inferred from the documented effect (an Intelligence
@@ -989,15 +1007,78 @@ does not have. Both paths now share `covertStrength` and so pick up the verified
   read from a name table.
 - **A Terrorist-Prevention treaty raises `B`**, which lowers the holder's *own*
   spy success — a direct consequence of the defect above.
-- **One roll in ten succeeds before any of this**, and a bribed attacker still
-  slips through one time in ten instead of failing outright. A fourth branch
+- **One roll in ten succeeds before any of this** is weighed. A fourth branch
   (`r = 10`) is dead code: `Random(10)` returns 0..9.
+- **The first guard is the Expose Enemy Ops shield, not a bribe.** IB read the
+  bribed-agent flag here until 2026-08-16; the Real48 slot the routine compares
+  against the clock is the shield's expiry, and the bribe flag is read further
+  down as a doubling of `A`. See the two entries below.
 
-Two more things read here, **not** reflected in IB: an effect op **spends an
-agent up front** (`BRE.OVR 0x17957` decrements agents before resolving) where IB
-charges it only on failure, and it records itself in a per-op byte at record
-`+0xFD + op`, which is how "Limit one try per turn!" is enforced. How the effect
-ops resolve is still unread.
+**The per-op difficulty divisor** (`kind`) is 1 for Send Spy, Spy on Relations,
+Stir Revolts, Set Up and Support Dissensions; 2 for Demoralize Forces and Bomb
+Enemy Targets; 3 for Bribery. Read from the seven resolver call sites at
+`BRE.OVR 0x04BFD4`, `0x04C0A2`, `0x04C0CA`, `0x04C16E`, `0x04C277`, `0x04C353`
+and `0x04C6F5`, plus `report_spy_result` at `0x016D8A`. With no treaties in play
+that gives 55% / 40% / 32.5%. IB's `CovertDifficulty*` constants carry them.
+
+**An effect op spends an agent up front** (`BRE.OVR 0x17957` decrements agents as
+the record is queued) and hands one back on success (`0x04C69D` and its five
+siblings), so the net cost is one agent per failure. IB does both now, and the
+distinction is visible rather than cosmetic: between sending an agent and hearing
+back, a realm really is one agent short.
+
+**"Limit one try per turn!" is per OPERATION.** The menu indexes a per-digit byte
+at record `+0xFD + digit` — read at `BRE.OVR 0x017AE0`, set at `0x017C4F` — so a
+turn holds one try of each item, not one item overall. Digits 1 and 6 (the info
+ops) skip the check and never set the byte; digit 9 (Expose Enemy Ops) is
+dispatched before either. IB matches this with `TurnProgress.CovertOpsUsed`,
+keyed by operation.
+
+**Bribery is an OFFENSIVE holding.** The flag lives in the ATTACKER's record
+indexed by the target (`BRE.OVR 0x04BA48` at `+0x15D`, set by the resolver at
+`0x04CD67`), and a set flag doubles `A` — the attacker's own numerator. It buys
+the bribed realm nothing. IB read the same flag backwards, as a shield making
+that realm's ops against you fail, until it was checked; it now doubles the
+briber's odds (`CovertBribeOffenseMultiplier`). The menu still refuses a second
+bribe inside a realm you already hold one in, before charging (`0x01790A`).
+
+**Expose Enemy Ops shields against ONE realm** — one of the realms you already
+hold a bribed agent inside, chosen from a list of exactly those
+(`bribe_enemy_agents`, `BRE.OVR 0x01701B`, which walks the per-letter bribe array
+and lists every entry that is set). It writes `now + 1.0` days into a per-pair
+Real48 slot, charges the fee, spends no agent and takes no per-turn slot, and
+blocks 9 attempts in 10 from that realm — the tenth lands normally. IB matches
+all of that; `Empire.ExposedFrom` holds the per-realm expiry.
+
+> **Not reproduced — an off-by-one in the original.** `bribe_enemy_agents` reads
+> the player's chosen letter into `[bp-2]` (the read is at `BRE.OVR 0x0171C7`,
+> and `[bp-2]` is what the routine echoes back and tests for RETURN), then writes
+> the expiry into the slot indexed by `[bp-1]` (`BRE.OVR 0x0172D4`) — the listing
+> loop's counter, which the loop leaves at `'Y'`, the 25th and last realm slot.
+> The Pascal source almost certainly said `c` where it meant `ch`. So BRE's
+> shield does not land on the realm the player picked: it lands on slot 25, which
+> is a real realm on a full board and an empty record on every other, where the
+> 600,000 buys nothing.
+>
+> Re-examined 2026-08-17, weighing three ways to render it. **Reproducing the
+> index** is out: a realm's letter in BRE is its permanent index into a fixed
+> 25-entry array, while `World.Empires` is unbounded and IB's letters are
+> assigned per screen by list position, so `Empires[24]` usually exists and the
+> misfire would hit an arbitrary innocent realm instead of missing harmlessly.
+> **Reproducing the outcome** — take the 600,000 and do nothing — matches what a
+> player on a half-full board experiences, but it is wrong on a full one, and it
+> would strand the rest of the routine: the per-pair expiry, the nine-in-ten
+> block and the bribed-realms-only picker are all binary-verified, all read by
+> `covertRoll`, and nothing else in IB writes that expiry, so the verified half
+> of the mechanic would become dead code behind a dead menu item. **IB therefore
+> keeps the intended behaviour** — the shield lands on the realm you picked —
+> which diverges on one instruction's index and reproduces everything else the
+> routine does. The artifact is recorded here instead of built.
+>
+> One thing behind this is unverified: `bribe_enemy_agents` is the only writer of
+> the expiry array found, but the binary was not swept exhaustively for others.
+> If another writer exists, the shield is a live mechanic in BRE and the case for
+> the intended behaviour is stronger still.
 
 **Each op charges a gold fee up front** (on top of the agent risk), shown as
 a cost column on the menu. The fees below are live-sampled from BRE's default
@@ -1010,28 +1091,33 @@ The menu's item order, labels, numeric hotkeys (1-9), and per-op costs are
 confirmed from BRE (BRE.OVR string table plus a live capture, #73):
 
 - **(1) Send Spy** — read the enemy's full status. Cost `CostSendSpy` (5,000).
-- **(2) Stir Revolts** — propaganda that lowers popular support, SCALING it by
-  11/13 rather than docking points (`BRE.OVR 0x4AE61`).
-  Cost `CostStirRevolts` (25,000).
-- **(3) Set Up** — trick d and one of its Full Defense Alliance partners into
-  believing the other declared war, voiding the alliance between them
-  (useful against a defense pact protecting a target). Cost `CostSetUp`
-  (50,000).
-- **(4) Support Dissensions** — agitate d's own troopers into fleeing (~10%
-  trooper loss). Cost `CostSupportDissensions` (80,000).
-- **(5) Demoralize Forces** — lower enemy military morale, scaling it by 6/7
-  (`BRE.OVR 0x4AC91`); they fight worse and, if low enough, units desert.
+- **(2) Stir Revolts** — propaganda that lowers popular support by
+  `Random(4)+5` POINTS, floored at 5. Cost `CostStirRevolts` (25,000).
+- **(3) Set Up** — trick d and a second realm into believing the other declared
+  war, voiding every treaty between them (useful against a defense pact
+  protecting a target). BRE rolls the covert attempt against EACH of the two.
+  Cost `CostSetUp` (50,000).
+- **(4) Support Dissensions** — agitate d's own troopers into fleeing;
+  `Random(10)+10-Random(10)` percent of them go, so 1-19% around a mean of a
+  tenth. Cost `CostSupportDissensions` (80,000).
+- **(5) Demoralize Forces** — lower enemy military morale by `Random(5)+5`
+  POINTS, floored at 5; they fight worse and, if low enough, units desert.
   Cost `CostDemoralizeForces` (80,000).
 - **(6) Spy on Relations** — reveal the enemy's treaties. Cost
-  `CostSpyOnRelations` (100,000).
-- **(7) Bomb Enemy Targets** — a submenu (see below). Cost
-  `CostBombEnemyTargets` (100,000) per variant.
-- **(8) Bribery** — bribe an enemy agent inside d, so d's future covert ops
-  against you auto-fail. Cost `CostBribery` (200,000).
+  `CostSpyOnRelations` (100,000), which IB charges and BRE only advertises — see
+  the deliberate divergence below.
+- **(7) Bomb Enemy Targets** — ONE flat terror-bombing op, not a submenu (see
+  below). Cost `CostBombEnemyTargets` (100,000).
+- **(8) Bribery** — buy an agent inside d over to your side, doubling your own
+  odds on every later op against d. BRE refuses at the menu, before charging
+  anything, when a bribed agent is already in place. Cost `CostBribery`
+  (200,000).
 - **(9) Expose Enemy Ops** — per BRE.OVR ("Bribed Agent will expose enemy
-  operations for 24 Hours"), a temporary shield against *all* incoming
-  covert ops. IB models the 24 hours as one game-day
-  (`ExposeOpsShieldDays`). Cost `CostExposeEnemyOps` (600,000).
+  operations for 24 Hours"), a one-day shield against ONE realm you already
+  hold a bribed agent inside, blocking 9 of its attempts in 10. Spends no agent
+  and takes no per-turn slot, so it can be run repeatedly. IB models the 24
+  hours as one game-day (`ExposeOpsShieldDays`). Cost `CostExposeEnemyOps`
+  (600,000).
 - **(V) Visit Bank**.
 
 **Who the target is told about (BINARY-VERIFIED).** The target learns which
@@ -1054,9 +1140,9 @@ wording:
 
 IB follows this in `internal/game/covert.go`: every foiled op goes through
 `covertFoiled`, which names the attacking realm, and every success event stays
-anonymous. The shield and bribed-agent guards in `covertSuccess` route to the
-same branch, so **Expose Enemy Ops and Bribery buy the defender the attacker's
-name** — the only thing they buy.
+anonymous. The Expose Enemy Ops guard in `covertRoll` routes to the same branch,
+so **an exposed realm hands you its name nine times in ten** — which is most of
+what the shield buys.
 
 Two paths deliberately sit outside the rule, both because the original puts them
 there:
@@ -1073,10 +1159,151 @@ there:
   packet — attacks, nuclear and chemical strikes — is board-attributed, and the
   packet is signed anyway.
 
-**BRE's local effect ops cannot be read.** Stir Revolts, Set Up, Support
-Dissensions, Demoralize Forces, Bribery and the Bomb Enemy Targets items are
-dispatched by the menu ("Covert Agent Sent out") and resolved later out of daily
-maintenance (`BRE.OVR 0x04be9f`), which files a report line to **both** sides
+### The local resolver, read 2026-08-16
+
+The six EFFECT ops are queued by the menu ("Covert Agent Sent out") and resolved
+out of daily maintenance by **`BRE.OVR 0x04be9f`** — catalogued
+`run_ai_covert_operations`, which is a **misnomer**: it walks the queued 19-byte
+covert records of every player and is the only resolver the local menu reaches.
+It dispatches on the MENU DIGIT, with cases for 2, 3, 4, 5, 7 and 8 only. Digits
+1, 6 and 9 are absent because they resolve inside the menu itself
+(`run_covert_operations_menu`, `0x017469`): '9' branches at `0xAA3` without
+queuing, and '1' and '6' resolve immediately through `report_spy_result` at
+`0xB4A` and are exempt from the once-per-turn flag.
+
+**IB queues the six effect ops the same way** (`World.CovertQueue`,
+`internal/game/covert_queue.go`), read 2026-08-16 and built the same day. The
+menu path takes the fee, the agent and the once-per-turn slot and files a record;
+`DailyMaintenance` drains the queue — before `aiPlay`, so an AI's operations wait
+a day exactly as a player's do — and files each result on the ATTACKER's event
+recap, which is where an asynchronous player reads it. Where the evidence sits:
+
+- **The record.** `commit_agent` (`BRE.OVR 0x01793C`) sets the per-digit byte at
+  `+0xFD + digit`, decrements agents at `+0x26F`, then passes a 19-byte buffer to
+  the queue writer at `0x04CA06`, which copies `0x13` bytes and appends it as a
+  **type 7** record. Its fields, filled at `0x0175A6-0x0175D3`: `+0x00` the
+  attacker's 32-bit player ID (record `+0x5D`), `+0x04` the target's, `+0x0C` the
+  attacker's realm letter, `+0x0D` the target's, `+0x0F` the menu digit as a
+  32-bit. Digit '3' calls a picker first and stores the second court beside the
+  target. IB's `QueuedCovertOp` mirrors this, carrying names in place of the two
+  IDs and the two letters.
+- **It is persisted.** The list helpers (`0490:0025` append, `0490:002A` delete)
+  share an overlay unit with `open_and_validate_game_data`, and BRE's maintenance
+  is a separate program run (`BRE PLANETARY`), so the record must outlive the
+  door session that made it. IB persists `CovertQueue` in `world.json`.
+- **The player sees no result at the menu**, only "Covert Agent Sent out". The
+  resolver files report lines to BOTH sides from `GAME\COVERT.DAT` — the
+  `COVERT_SENDER_HIT` / `COVERT_SENDER_FAIL` categories are the attacker's half.
+  That file is not shipped with 0.988, so **the wording is unknown** and IB
+  writes its own.
+- **A realm that dies in between is not struck.** The resolver re-reads the
+  target's stored ID out of the empire record indexed by `+0x0D` and compares it
+  with `+0x04`; a mismatch jumps clear of the whole resolution
+  (`0x04BF3D-0x04BF6A`, branching to `0x04BF5C` and out). Nothing is refunded. IB
+  has no fixed 25-letter roster to re-check against, so it checks the realm is
+  still alive, refunds nothing, and files a line telling the attacker why —
+  otherwise the fee would vanish unexplained.
+- **BRE's own manual corroborates the split**, singling Send Spy out with "This
+  operation takes place immediately" and telling the other operations no such
+  thing.
+
+**Consequence for play, and it is a large one:** a covert operation cannot soften
+a realm you attack in the same turn. IB resolved every operation on the spot
+until this landed, which made covert a tactical move; in the original it is a
+strategic one, planned a day ahead. The AI's pre-battle demoralize (`aiWageWar`)
+was removed with the same change — it could no longer affect the battle it was
+paid for, and `aiCovertOps` already makes that judgement a day earlier.
+
+**A whole family of spec figures was sourced from the WRONG resolver.** The
+inter-BBS packet path, `resolve_received_covert_operation` (`BRE.OVR 0x04a68e`),
+uses a **different op enumeration**, so an address inside it says nothing about
+what a local menu digit does. Everything corrected below came from that mistake.
+
+| Menu digit / op | Local resolver site | What it actually does | What this spec claimed | Corrected |
+|---|---|---|---|---|
+| 2 Stir Revolts | `0x04C00C` | `support -= Random(4)+5`, then floor 5 | `support × 11/13` from `0x4AE61` | yes — `0x4AE61` is inside the inter-BBS resolver |
+| 3 Set Up | `0x04C084` | rolls the attempt against BOTH named realms, then zeroes the relation slot in each direction | one roll, and only a Full Defense Alliance broken | yes |
+| 4 Support Dissensions | `0x04C178` | `troopers -= Trunc(troopers × (Random(10)+10−Random(10)) / 100)` | "~10% trooper loss" | yes — a flat tenth was IB's own |
+| 5 Demoralize Forces | `0x04C2BD` | `morale -= Random(5)+5`, then floor 5 | `morale × 6/7` from `0x4AC91` | yes — `0x4AC91` is inside the inter-BBS resolver |
+| 7 Bomb Enemy Targets | `0x04C37D` | `Random(6)+1` picks one of six holdings; it loses `Trunc(held × pct / 100)` (table below) | a seven-item lettered submenu of player-chosen variants | yes |
+| 8 Bribery | `0x04C6D1` | sets the bribed-agent flag for the target on the ATTACKER's record, where the roll reads it as a doubling of the ATTACKER's numerator | a shield making the bribed realm's ops against you fail | yes — the flag is offensive, not defensive |
+
+Two figures the same reading corrected on the way past:
+
+- **The floor of 5 on morale and support is not the computer's.** `0x4C02F` and
+  `0x4C2E0` sit in this resolver, which runs every player's queued op, so every
+  successful Stir Revolts and Demoralize Forces stops at 5. IB applied it only
+  after an AI op (`aiCovertFloor`), which has been removed in favour of the
+  universal `CovertStatFloor`.
+- **A successful op hands the attacker an agent back** (`agents += 1` on the
+  attacker's record in every case). Since the menu spends one agent when the op
+  is queued, that is the same net result as IB's "lose the agent only on
+  failure" and needs no change.
+
+**The Bomb Enemy Targets table** (`0x04C37D` rolls `Random(6)+1`; each slot then
+takes `base + Random(spread)` percent of the named holding):
+
+| Pick | Holding (record field) | Percent | Site |
+|---:|---|---|---|
+| 1 | population (`+0x62`) | `Random(10)+5` → 5-14% | `0x04C39E` |
+| 2 | troopers (`+0x76`) | `Random(5)+5` → 5-9% | `0x04C427` |
+| 3 | agents (`+0x26F`) | `Random(5)+5` → 5-9% | `0x04C4B0` |
+| 4 | tanks (`+0x86`) | `Random(3)+5` → 5-7% | `0x04C539` |
+| 5 | jets (`+0x7E`) | `Random(3)+5` → 5-7% | `0x04C5C2` |
+| 6 | food in store (`+0x6E`) | `Random(70)+20` → 20-89% | `0x04C64B` |
+
+Picks 1-5 truncate; the food slot calls the rounding helper instead
+(`0x04C6C6`). Nothing else is touched, and the player chooses neither the target
+holding nor the percentage.
+
+**The per-op cost is a runtime table, not a constant in the file.** The menu
+reads a 32-bit fee at `DS:0x57A + keycode×4` — `DS:0x63E` for '1' through
+`DS:0x65E` for '9' — which is why neither binary contains 5,000 or 600,000
+anywhere. So **BRE's local bombing fee cannot be read out of the binary**: IB's
+100,000 stays, being the default-setup figure sampled live on 2026-07-21.
+
+Two smaller things read on 2026-08-16, both settled on 2026-08-17 from a second
+reading of the menu:
+
+- **DELIBERATE DIVERGENCE — Spy on Relations charges what its menu says.**
+  BRE's item 6 advertises 100,000 (`cap/covert-menu-20260817.cap`,
+  `cap/kd3-01.cap`) and takes 5,000: `report_spy_result` serves both info ops and
+  subtracts `DS:0x63E`, the slot-'1' Send Spy fee, whichever one called it
+  (`BRE.OVR 0x016E73`, the tail of the routine). The menu's own affordability
+  gate still measures the advertised 100,000, so what the original does is hold
+  you to a price it never charges. **IB charges the advertised 100,000 on
+  purpose** (`CostSpyOnRelations`), which makes the op twenty times dearer than
+  in the original and shifts covert economics accordingly — Andy's call, made
+  knowing that. Do not "correct" this back to 5,000;
+  `TestSpyOnRelationsChargesTheFeeItAdvertises` locks it.
+- **Expose Enemy Ops IS affordability-checked, in the menu.** The earlier note
+  here read the fee subtraction inside `bribe_enemy_agents` (`BRE.OVR 0x0175D9`),
+  which does no checking, and concluded gold could go negative. It cannot: the
+  menu compares the pressed key's fee against the caller's gold before it
+  dispatches anything — `BRE.OVR 0x01775C`, printing "Sorry!  You cannot afford
+  that!" — and digit 9 is dispatched after that gate, at `0x0177BD`. IB's refusal
+  (`ErrCantAfford`) already matched; nothing changed.
+
+**A realm under New Realm Protection cannot run the effect ops or Expose Enemy
+Ops** — the menu tests the CALLER's own shield right before the fee gate, and
+refuses (`BRE.OVR 0x017716`, refusal string loaded at `0x01772E`). The predicate
+is `056d:19b5`, the same lifetime-turns-against-Turns-Of-Protection test the
+lottery cap uses. Digits 1 and 6, the info ops, jump past it (`0x01770B` and
+`0x017714`), so a sheltered realm may still spy.
+
+**IB matches this.** `covertOp` refuses the seven effect ops — including Expose
+Enemy Ops, which does not share the target picker — while `covertInfoOp` lets
+Send Spy and Spy on Relations through. The gate sits ahead of the fee, so a
+refused operation costs no gold, no agent and no per-turn slot, and it carries
+its own wording: the attack menus refuse because the TARGET is shielded, this
+refuses because the caller is.
+
+An earlier reading of this section claimed IB gated nothing here. That was
+wrong — the six ops routed through `localAttack` were gated all along, with the
+attack wording. The real divergences were that the two info ops were gated too,
+and that Expose Enemy Ops and the interplanetary Send SpyGuy were not.
+
+The resolver also files a report line to **both** sides
 from `GAME\COVERT.DAT` — categories `COVERT_TARGET_HIT`, `COVERT_TARGET_FAIL`,
 `COVERT_SENDER_HIT`, `COVERT_SENDER_FAIL`, `BOMB_TARGET_HIT`, `BOMB_SENDER_HIT`,
 `COVERT_MISC`. Its formatter (`0x04bc05`) substitutes the sending realm's name,
@@ -1086,54 +1313,82 @@ the `BREDATA.EXE` payload, so the wording — and therefore whether those lines 
 it — is unknown. IB applies the caught-agent rule above to these ops on the
 strength of the three paths that can be read, the local spy among them.
 
-**One effect op per turn (#54).** BRE caps *effect* covert ops at one per turn
-("Limit one try per turn!"): the first effect op works, and any second effect op
-of *any* type is refused that turn — verified live (Stir Revolts, then Set Up,
-was refused). The two *info* ops — **Send Spy** and **Spy on Relations** — are
-exempt and unlimited. IB enforces this: `covertCost(..., capped)` sets
-`TurnProgress.CovertOpUsed` on the first effect op and returns
-`ErrCovertCapReached` for the rest until the flag clears at turn start; the info
-ops pass `capped=false`.
+**One try of EACH effect op per turn (#54).** "Limit one try per turn!" is keyed
+per OPERATION, not per turn overall. The menu computes `digit - '0'`, indexes the
+per-digit byte array at record `+0xFD`, and refuses only when THAT digit's byte
+is already set (`BRE.OVR 0x017AE0`, set at `0x017C4F`). So a turn holds one Stir
+Revolts, one Set Up, one Support Dissensions, and so on. The two *info* ops —
+**Send Spy** and **Spy on Relations** — skip the check outright (`0x017AC9`
+tests for digits '1' and '6') and never set a byte, and **Expose Enemy Ops** is
+dispatched at `0x017AA3` before the check is reached. IB matches this:
+`covertCost(..., capped)` records the operation in `TurnProgress.CovertOpsUsed`
+and returns `ErrCovertCapReached` only for a repeat of that same operation; the
+info ops pass `capped=false` and Expose Enemy Ops does not go through
+`covertCost` at all.
 
-**Bomb Enemy Targets** submenu (BRE.OVR: "All missiles and bombs require
-500 Bombers to deliver their payloads" — `BombingBombersRequired` gates
-every item below):
+> An earlier note here recorded the opposite from live play — Stir Revolts
+> followed by Set Up, refused. That could not be reconciled with the code on a
+> re-read (2026-08-16), and the code is unambiguous, so the live note is treated
+> as a misattributed refusal (a spent agent or an unaffordable fee would give the
+> same "nothing happened") rather than evidence. Re-testing it live would settle
+> what that session actually hit.
 
-- **Bomb Food Market** — destroy an empire's food reserve (can trigger a
-  death spiral).
-- **Bomb Trading Market** — raid a quarter of the target's gold.
-- **Bomb Trade Routes** — sever one of the target's standing trade
-  treaties.
-- **Undermine Investments** — trim a quarter off the principal of the
-  target's pending bank investments.
-- **Nuclear Assault** / **Chemical Bombing** — reuses the WAR menu's
-  `NuclearStrike`/`ChemicalStrike`.
-- **R5-Slappenheimer** (the clone's rename of BRE's *S3-Sabre*, avoiding the
-  original's coined name) — a variable-return missile. A disassembly of BRE's
-  `SABREHIT` showed only 3 of the 11 dial settings (1, 2, 3) did anything and
-  the manual never said which number did what, so from the player's seat the
-  result was random; the target's SDI could intercept it and a heavily
-  garrisoned target could turn it back on the attacker. IB keeps that feel but
-  makes it honest: the **dial is a bluff** — the player still sets it 0–10 under
-  User Select handling, but it changes nothing (every launch is the same random
-  gamble). The `None` handling mode disables the weapon (gated in the menu);
-  `User Select`/`Random`/`Constant` all enable it and differ only in the (inert)
-  dial. The target's SDI intercepts on `Random(100) <= SDI/2` — BINARY-VERIFIED
-  from the arriving-strike routine (`BRE.OVR ovr_0450a9 +0x481`), which is where
-  breins.txt's "up to 50% of incoming missiles" comes from and why a full shield
-  stops half of them rather than halving one. The comparison is inclusive, so an
-  unshielded realm still turns one shot in a hundred aside. Only about 3 launches in
-  10 (`SlappenheimerEffectHits`/`SlappenheimerEffectRange`) land a payload — the
-  rest fizzle. A landed hit removes a random 5–30 %
-  (`SlappenheimerBaseDamagePct` + `rng.Intn(SlappenheimerDamageSpread)`) of one
-  asset, and ~1-in-`SlappenheimerMultiHitOdds` strafes several at once (BRE's
-  "extremely devastating" outcome). Backfire is a continuous probability scaled
-  by the target's Troopers (`d.Troopers / SlappenheimerBackfireScale`), applying
-  the same damage to the attacker. BRE hid which field each effect hit, so IB
-  picks its own spread (Troopers, Jets, Turrets, Tanks, Bombers, Carriers,
-  Agents, Gold, Food, and Land — Land removed through the RegionMix so its Total
-  stays equal to `Land`). The agent is lost only when the covert approach itself
-  is foiled — not on an interception, a fizzle, or a backfire.
+**Bomb Enemy Targets is ONE op, and the bombing submenu is interplanetary.** The
+eight-item bombing table at `BRE.OVR 170011` is read by
+`run_bombing_operations_menu` (`0x029EA9`) alone, and that procedure's only
+caller is `run_interbbs_menu` — so Bomb Food Market, Bomb Trading Market, Bomb
+Trade Routes, Undermine Investments, Nuclear Assault, Chemical Bombing, S3-Sabre
+and Send SpyGuy belong to the InterPlanetary **Special Operations** menu and to
+no other. The 500-Bomber requirement is that menu's too: the gate and the 500
+Bombers each launch consumes are both inside it (`+0x1015`, `+0x1146`), and the
+local Covert menu tests no bomber count anywhere. BRE's own manual agrees on the
+local op — "your intelligence agency will randomly bomb targets".
+
+IB offered a seven-item lettered submenu here (`B/M/R/U/N/C/S`) and charged
+100,000 per variant. That was IB's own construction, built by reading the shared
+string table as if the local menu took its first seven entries, and it has been
+replaced by BRE's single op with the six-slot table above. The interplanetary
+Special Operations menu is unchanged and keeps all eight items.
+
+The **R5-Slappenheimer** (the clone's rename of BRE's *S3-Sabre*, avoiding the
+original's coined name) is therefore an interplanetary weapon only, and the
+sysop's `R5-Slappenheimer Handling` setting now gates it there. A disassembly of
+BRE's `SABREHIT` showed only 3 of the 11 dial settings (1, 2, 3) did anything and
+the manual never said which number did what, so from the player's seat the result
+was random; the target's SDI could intercept it and a heavily garrisoned target
+could turn it back on the attacker. IB keeps that feel but makes it honest: the
+**dial is a bluff** — the player still sets it 0-10 under User Select handling,
+but it changes nothing. The `None` handling mode disables the weapon (gated in
+the menu); `User Select`/`Random`/`Constant` all enable it and differ only in the
+(inert) dial. The target's SDI intercepts on `Random(100) <= SDI/2` —
+BINARY-VERIFIED from the arriving-strike routine (`BRE.OVR ovr_0450a9 +0x481`),
+which is where breins.txt's "up to 50% of incoming missiles" comes from and why a
+full shield stops half of them rather than halving one. The comparison is
+inclusive, so an unshielded realm still turns one shot in a hundred aside. Only
+about 3 launches in 10 (`SlappenheimerEffectHits`/`SlappenheimerEffectRange`)
+land a payload — the rest fizzle. A landed hit removes a random 5-30 %
+(`SlappenheimerBaseDamagePct` + `rng.Intn(SlappenheimerDamageSpread)`) of one
+asset, and ~1-in-`SlappenheimerMultiHitOdds` strafes several at once (BRE's
+"extremely devastating" outcome). Backfire is a continuous probability scaled by
+the target's Troopers (`d.Troopers / SlappenheimerBackfireScale`). BRE hid which
+field each effect hit, so IB picks its own spread (Troopers, Jets, Turrets,
+Tanks, Bombers, Carriers, Agents, Gold, Food, and Land — Land removed through the
+RegionMix so its Total stays equal to `Land`).
+
+The other interplanetary Special Operations, unchanged by this:
+
+- **Bomb Food Market** — destroy a planet's food-market supply.
+- **Bomb Trading Market** — destroy a share of what is listed on a planet's
+  trading market, and the pending proceeds with it.
+- **Bomb Trade Routes** — wreck the goods riding in the planet's pending trade
+  deals: two strikes in three come to nothing, each deal has one chance in three
+  of being hit, and a deal that is hit keeps 5-9% of every good in it. A deal
+  whose own two parties hold Protective Trade is spared (see that pact under
+  Diplomacy for the BRE rule and its addresses).
+- **Undermine Investments** — trim a quarter off the principal of a planet's
+  pending bank investments.
+- **Nuclear Assault** / **Chemical Bombing** — the WAR menu's strikes, aimed
+  across planets.
 
 **Alliances:** a Terrorist Prevention treaty adds **half** (50%) of an ally's
 agents to your covert defense; an Intelligence Alliance adds **two-fifths**
@@ -1678,13 +1933,17 @@ access list** for the two fields: 62 sites in `BRE.OVR` and 4 in `BRE.EXE`.
 | Breaking a treaty by attacking | both `× 3/4` (integer) | `BRE.OVR 0x1A881` |
 | Chemical strike on you | morale `× 3/4` rounded, support `× 2/3` rounded | `BRE.OVR 0x110AE`, `0x11109` |
 | Biological strike on you | morale halved, support `× 2/3` rounded | `BRE.OVR 0x115FE`, `0x11645` |
-| Demoralize Forces against you | morale `× 6/7` | `BRE.OVR 0x4AC91` |
-| Stir Revolts against you | support `× 11/13` | `BRE.OVR 0x4AE61` |
+| Demoralize Forces against you (local) | morale `− (Random(5)+5)`, floor 5 | `BRE.OVR 0x4C2BD` |
+| Stir Revolts against you (local) | support `− (Random(4)+5)`, floor 5 | `BRE.OVR 0x4C00C` |
+| Demoralize Forces arriving in a packet | morale `× 6/7` | `BRE.OVR 0x4AC91` |
+| Stir Revolts arriving in a packet | support `× 11/13` | `BRE.OVR 0x4AE61` |
 | A Free Trade Agreement partner in worse shape | drags you toward them (NOT built in IB) | `BRE.OVR 0x99BF` |
 
-Both are clamped to `[0, 100]` where they are applied. An **AI's** covert op
-additionally floors its victim at **5** of either stat (`BRE.OVR 0x4C02F`,
-`0x4C2E0`); a human's op has no such mercy.
+Both are clamped to `[0, 100]` where they are applied. **Every** covert op — not
+only an AI's — floors its victim at **5** of either stat (`BRE.OVR 0x4C02F`,
+`0x4C2E0`, both inside the resolver that runs every player's queued op). The two
+packet-path rows are recorded for completeness: IB has no received-covert-op path
+yet, so nothing reads those two ratios today.
 
 **What they do**
 
@@ -2524,14 +2783,24 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   under New Realm Protection, and the attack and terror target lists leave those
   realms out — matching the local attack list, which hides them too. The target
   board still refuses an arriving strike itself, since the flag can go stale
-  while the strike is in transit. Spying is not blocked by protection, so the
-  spy target list shows every realm.
+  while the strike is in transit. A protected realm is still a legal SPY target,
+  so the spy target list shows every realm.
+- **The caller's own shield gates this menu too.** The InterPlanetary menu tests
+  it on the same predicate the covert menu uses, at `BRE.OVR 0x020F88`, for
+  digits 2, 3, 4, 6, 8 and 9 — Terrorist Ops, Send Trade Deal, Create Group
+  Attack, Indiv. Attack Force, Special Operations and Gooie Kablooie. Digits 1,
+  5 and 7 (View IPScores, Join Group Attack, Send Message) jump past it. IB gates
+  the same items except Join Group Attack, which it still refuses; whether the
+  original really lets a sheltered realm join someone else's group attack, or
+  refuses it further in, is untested here.
 - **Terrorist Ops** — a force-destroying strike (not intel). Commit agents; the
   op is queued and resolves on the target board's next packet run. Each agent is
   one hit that removes ~1/`TerrorUnitLossDenom` (7, from BRE's disassembled 6/7
   ratio) of one randomly chosen unit type. New Realm Protection blocks it.
 - **Spy** — send an agent to a remote baron; intel lands in the planet-wide Spy
-  Database. Reached from the Spy Database screen.
+  Database. Sent from Special Operations → Send SpyGuy; the Spy Database screen
+  is the read-only viewer. Being on that gated submenu, it is refused while the
+  caller is under New Realm Protection, unlike the local Send Spy.
 - **Special Operations** — the cross-planet bombing and missile set; see below.
 - **SDI** — puts gold into the program; the strength it buys is capped at
   `SDIMax` (100%, the original's own clamp). See "The SDI program" below.
@@ -2563,7 +2832,7 @@ The four prices are the original's own, off the menu's price column
 
 **Items 1-4 are aimed at the PLANET, items 5-7 at a named baron.** What the four
 bombing ops wreck belongs to the whole planet — its food market, its trading
-market, the trade agreements standing on it, the investments in its bank — so
+market, the trade deals in transit across it, the investments in its bank — so
 they carry no realm, and one realm's New Realm Protection has nothing to refuse.
 The three missiles ruin land and kill people, so they must name the realm that
 owns them, and protection stops them as it stops any strike. The original's menu
@@ -2573,9 +2842,9 @@ their own (`BRE.OVR` 0x029ea9, dispatch at 0x105a-0x124c).
 
 **The effects are the local ops' effects**, called through the same helpers, so
 a retune lands on both menus: food halved, a share of the market position and
-its pending proceeds destroyed, the first trade agreement severed, a quarter off
-each investment's principal and matching return, and the three missiles' own
-damage. Every op needs the 500 Bombers the original requires of anything on this
+its pending proceeds destroyed, the goods stripped out of the trade deals a
+strike reaches, a quarter off each investment's principal and matching return,
+and the three missiles' own damage. Every op needs the 500 Bombers the original requires of anything on this
 menu, answers to the sysop's Bombing Ops / Missile Ops switches, counts against
 the daily bombing allowance, and is stopped by New Realm Protection.
 
@@ -3045,10 +3314,58 @@ and each carries a gameplay effect (#11 wired the last two):
   research term bounded by whichever side holds fewer Technology regions, so it
   accelerates a realm that is already researching and does nothing for one
   holding none (`advanceTech`; full derivation under Technology above).
-- **Protective Trade** — guards the two realms' trade (BRE: "preventing bombing
-  of trade deals"): a partner cannot bomb the other's trade routes or trading
-  market (`BombTradeRoutes` / `BombTradingMarket` refuse the op, no agent lost).
-  It also makes trade deals **cheaper to send**: the per-day transit rate is
+- **Protective Trade** — guards a trade deal from bombing (BRE: "preventing
+  bombing of trade deals"), and the guard belongs to the DEAL, not to the
+  attacker. BINARY-VERIFIED (BRE.OVR 0x051077, the routine that
+  `resolve_received_bombing` at 0x04a09a calls for a received op type 3, Bomb
+  Trade Routes): a deal is skipped when the deal's own sender and recipient hold
+  Protective Trade with each other — whoever fired the strike. The deal record's
+  fields +8 and +9 are the sender and recipient letters (confirmed against
+  `create_trade_offer`, BRE.OVR 0x024961+0x1e97), and relations are mutual, so
+  reading one row settles both. The attacker's own relations are never read.
+
+  Three further facts about that routine. The check runs at RESOLUTION on the
+  receiving board, after the attacker has paid and the packet has flown, so
+  nothing is refused, nothing is refunded, and no per-deal message exists. A
+  separate `random(3)` per deal lets one deal in three escape whatever the
+  relation. And another `random(3)` at the top of `resolve_received_bombing`
+  voids the whole strike two times in three. A deal that is not spared loses
+  `trunc(qty x (random(5)+5) / 100)` — 91-95% — of each of its nine goods
+  quantities.
+
+  **IB follows all of it** (`bombRoutesLands`, `bombRoutesEffect`,
+  `bombDealBasket`; the three rolls are `BombRoutesLandOdds`,
+  `BombRoutesDealHitOdds` and `BombRoutesKeptPctMin`/`Spread` in `balance.go`).
+  A strike wrecks the goods in pending `TradeDeal`s rather than severing any
+  standing agreement, and the guard reads the deal's own two parties, so holding
+  Protective Trade with the realm you are bombing buys you nothing and a deal
+  between a guarded pair survives whoever fires. Since only one relation can
+  stand between a pair (#88), the pact that guards a deal is also the pact that
+  makes it cheap to send. IB used to REFUSE the op outright — no fee, no agent
+  spent — when the ATTACKER held Protective Trade with the target; that was IB's
+  own invention and has been removed.
+
+  **Bomb Trading Market reads no relation at all.** Op type 2 loops every living
+  realm and scales each one's market quantities; nothing in that branch compares
+  a relation, so Protective Trade shields no market. IB's market guard has been
+  removed to match.
+
+  **Bomb Trade Routes is interplanetary-only in BRE, and now in IB.** Its menu
+  (`run_bombing_operations_menu`, BRE.OVR 0x029ea9) is reached only from
+  `run_interbbs_menu`. BRE's LOCAL Covert Operations item 7 is a different op
+  that rolls `random(6)+1` and damages one of six quantities, comparing no
+  relation — which is what IB's local item 7 now is. Only the interplanetary
+  menu offers the trade-route strike.
+
+  **What deals a strike reaches is IB's own call.** BRE's op is planet-wide, so
+  it never had to say which deals a strike aimed at ONE realm covers. IB takes
+  every deal that realm is a party to, on either side of it — a realm's trade
+  routes run both ways, and counting only the deals sent TO it would let a realm
+  dodge the op by never accepting one. The interplanetary planet-wide variant
+  keeps BRE's scope: every deal on the planet, with one landing roll for the
+  whole strike rather than one per realm.
+
+  Protective Trade also makes trade deals **cheaper to send**: the per-day transit rate is
   divided by `ProtectiveTradeCostDivisor` (3) before the span is chosen, so a
   guarded deal costs 33,333 a day instead of 100,000
   (`TradeDealGoldPerDayBetween`). BINARY-VERIFIED — BRE.OVR 0x0268bc compares the
@@ -3146,7 +3463,7 @@ Market`. Any empire can list goods for other empires to buy:
   its own listing, which is what keeps the "Total For Sale" column beside "your
   own For Sale" honest.
   The three trade pacts are excluded on purpose: Tariff and Free Trade already
-  pay a per-turn income and Protective Trade shields trade and cheapens trade
+  pay a per-turn income and Protective Trade shields trade deals and cheapens trade
   deals, and only one pact can stand between a pair (`setRelation`), so a pact
   granting income *and* market access would crown itself and the other six would
   stop being signed. This also gates the AI barons, which shop and list every

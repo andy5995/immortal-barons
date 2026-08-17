@@ -587,6 +587,13 @@ func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt strin
 // another planet. BRE puts sending on Special Operations and keeps the Spy
 // Database as the read-only viewer.
 func sendSpyGuy(s session.Session, w *ctx) Result {
+	// The original gates the whole Special Operations node on the caller's own
+	// protection — the InterPlanetary menu tests it when '8' is pressed, with no
+	// exemption for any item inside (`BRE.OVR 0x020F88`). IB gates the items
+	// instead, and this one had been missed.
+	if blockedByCovertProtection(s, w) {
+		return Stay
+	}
 	if w.Player().Agents < 1 {
 		fail(s, game.ErrNoAgents)
 		return Stay
@@ -613,6 +620,23 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 		if w.Player().Bombers < game.BombingBombersRequired {
 			fail(s, game.ErrNeedBombers)
 			return Stay
+		}
+		// The R5-Slappenheimer's handling mode is the sysop's, and this is the
+		// only menu that fires one: BRE's S3-Sabre is an interplanetary Special
+		// Operation, so the local Covert menu never had it.
+		if op == game.OpSlappenheimer {
+			var mode game.SlappenheimerMode
+			w.With(func() { mode = w.Config.SlappenheimerHandling })
+			if mode == game.SlappenheimerNone {
+				ok(s, "The R5-Slappenheimer is disabled.")
+				return Stay
+			}
+			// Under User Select handling the player dials the missile in (0-10).
+			// The dial is BRE's bluff — it changes nothing about the outcome —
+			// but we still prompt for it to keep the original's feel.
+			if mode == game.SlappenheimerUserSelect {
+				promptInt(s, "Set the R5-Slappenheimer dial (0-10)")
+			}
 		}
 		label := game.SpecialOpLabel(op)
 		var board, baron string

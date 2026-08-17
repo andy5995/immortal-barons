@@ -33,6 +33,37 @@ func TestNewGameSeedsAI(t *testing.T) {
 	}
 }
 
+// A covert agent in the field outlives the door session that sent it. The whole
+// point of queuing an operation for daily maintenance is that the sender hangs
+// up in between, so a queue held only in memory would lose the fee, the agent
+// and the operation together.
+func TestCovertQueueSurvivesTheSession(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	w := game.NewWorldSeed(cfg, 1)
+	a := w.AddHuman("khan", "Khan's Realm")
+	d := w.AddHuman("rival", "Rivalia")
+	a.Gold, a.Agents = 1_000_000_000, 10
+	if _, err := w.Bribery(a, d); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := Save(w, cfg); err != nil {
+		t.Fatal(err)
+	}
+	got, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(got.CovertQueue) != 1 {
+		t.Fatalf("the queue holds %d records after a reload, want 1", len(got.CovertQueue))
+	}
+	rec := got.CovertQueue[0]
+	if rec.Attacker != "Khan's Realm" || rec.Target != "Rivalia" || rec.Op != game.OpBribery {
+		t.Errorf("queued record came back as %+v", rec)
+	}
+}
+
 func TestSaveLoadRoundTrip(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	w := game.NewWorldSeed(cfg, 1)

@@ -135,13 +135,12 @@ func (w *World) aiWageWar(e *Empire) {
 		return
 	}
 	if e.Offense() > effectiveDefense(target)*margin/100 {
-		// Soften the target with a covert strike first: demoralized forces defend
-		// worse, so the aggressor's agents pave the way for the attack (#36). The
-		// op now carries a gold fee, so only attempt it when the AI can pay.
-		if e.Agents > 0 && e.Gold >= CostDemoralizeForces {
-			w.DemoralizeForces(e, target)
-			aiCovertFloor(target)
-		}
+		// No pre-battle covert strike here any more: an agent sent now lands at
+		// the NEXT daily maintenance, so it can no longer soften the target of
+		// the attack being launched in this turn. aiCovertOps already demoralizes
+		// the realm this AI could follow up against, which is the same judgement
+		// a day earlier — where the original puts it.
+		//
 		// autoCapture is false so the AI ALLOCATES what it takes, the way a human
 		// does at the capture prompt (#58), instead of inheriting whatever mix the
 		// loser happened to hold. Captured land goes into whichever type this realm
@@ -253,7 +252,8 @@ func (w *World) aiProposeTreaty(e *Empire) {
 //   - a balanced realm agitates whoever is ahead of it on net worth, which is
 //     the cheapest way to slow a leader it cannot yet fight
 //   - a diplomat plays defense only, shielding itself when it is the realm worth
-//     attacking
+//     attacking — which means buying a bribed agent inside a rival first, since
+//     that agent is what Expose Enemy Ops turns
 //
 // Everything is gated on affordability against the AI's working reserve, so
 // covert spending never eats the food and maintenance budget. Chance-gated and
@@ -269,11 +269,24 @@ func (w *World) aiCovertOps(e *Empire) {
 	// attacking, and never runs an offensive op — the same personality line that
 	// stops it starting wars.
 	if e.aiProfile() == AIProfileDiplomat {
-		if w.aiIsLeader(e) && spare >= CostExposeEnemyOps && e.ShieldedUntilDay <= w.GameDay &&
-			w.regionDraw(e, 94, 100) < AIExposeOpsPct {
-			// ExposeEnemyOps shields the CALLER and ignores its target argument
-			// entirely, so there is no rival to name here.
-			w.ExposeEnemyOps(e, e)
+		if !w.aiIsLeader(e) || w.regionDraw(e, 94, 100) >= AIExposeOpsPct {
+			return
+		}
+		// The shield is per realm and needs a bribed agent already inside the
+		// realm it shields against, so a diplomat holding none buys the bribe
+		// first and shields on a later turn.
+		shieldable := w.BribedRealms(e)
+		if len(shieldable) == 0 {
+			if target := w.aiCovertTarget(e); target != nil && spare >= CostBribery {
+				w.Bribery(e, target)
+			}
+			return
+		}
+		if spare >= CostExposeEnemyOps {
+			d := shieldable[0]
+			if until, ok := e.ExposedFrom[d.Name]; !ok || until < w.GameDay {
+				w.ExposeEnemyOps(e, d)
+			}
 		}
 		return
 	}
@@ -287,21 +300,11 @@ func (w *World) aiCovertOps(e *Empire) {
 	// could actually follow up against.
 	if spare >= CostDemoralizeForces && e.Offense() > effectiveDefense(target) {
 		w.DemoralizeForces(e, target)
-		aiCovertFloor(target)
 		return
 	}
 	if spare >= CostStirRevolts {
 		w.StirRevolts(e, target)
-		aiCovertFloor(target)
 	}
-}
-
-// aiCovertFloor keeps an AI's covert operation from grinding a victim below
-// AICovertStatFloor. BRE applies it only to the computer's ops (BRE.OVR 0x4C02F
-// and 0x4C2E0); a human agent has no such mercy.
-func aiCovertFloor(d *Empire) {
-	d.Support = max(d.Support, AICovertStatFloor)
-	d.Morale = max(d.Morale, AICovertStatFloor)
 }
 
 // aiCovertTarget picks who an AI works against: the realm it would attack if it

@@ -164,6 +164,7 @@ func TestAIAggressorRunsCovertOps(t *testing.T) {
 		w.GameDay = day
 		before := victim.Support
 		w.aiCovertOps(a)
+		w.resolveCovertQueue() // the AI queues like a player; the effect lands at maintenance
 		if victim.Support != before || len(victim.Events) > 0 {
 			fired = true
 		}

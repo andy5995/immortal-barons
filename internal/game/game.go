@@ -194,9 +194,18 @@ type Empire struct {
 	// it, but left standing afterward so the Attack Pirates menu can flag the
 	// raider for the rest of the turn; the next recap overwrites it, empty if
 	// no new raid landed.
-	RaidersThisTurn  []int
-	ImmuneFrom       []string // empires whose covert ops against us auto-fail (we bribed their agents)
-	ShieldedUntilDay int      // GameDay through which ALL incoming covert ops auto-fail (Expose Enemy Ops)
+	RaidersThisTurn []int
+	// Bribed lists the realms this empire holds a bribed agent inside. It is an
+	// OFFENSIVE holding: it doubles this empire's own side of a covert roll
+	// against that realm, and it is the list Expose Enemy Ops chooses from. The
+	// JSON key is the one it carried when IB read the flag the other way round,
+	// as a shield against the bribed realm's ops; the stored content is the same
+	// list of realms either way, so old saves load unchanged.
+	Bribed []string `json:"ImmuneFrom"`
+	// ExposedFrom maps a rival realm's name to the GameDay through which Expose
+	// Enemy Ops turns its operations against this empire away. The shield is per
+	// realm, never blanket, and it is bought against one realm at a time.
+	ExposedFrom map[string]int `json:"exposedFrom,omitempty"`
 
 	// PendingRegions is land captured on ANOTHER planet and waiting for its owner
 	// to say what to hold it as. A Regular Attack asks at the moment of victory,
@@ -286,12 +295,17 @@ type Empire struct {
 // re-applying a resource effect; the rest prevent re-showing a menu the player
 // already exited. All are cleared at turn-commit (PlayTurn) and daily rollover.
 type TurnProgress struct {
-	IncomeCollected    bool  // turn-start Manufacture + CollectIncome + regions-cap reset done
-	MaintPaid          bool  // paymentStage done (set with the forces/regions charge)
-	SDIFunded          int64 // gold put into the SDI program this turn, against its allowance
-	Fed                bool  // feedStage done
-	CovertDone         bool
-	CovertOpUsed       bool // an EFFECT covert op ran this turn (BRE's one-per-turn cap; info ops exempt)
+	IncomeCollected bool  // turn-start Manufacture + CollectIncome + regions-cap reset done
+	MaintPaid       bool  // paymentStage done (set with the forces/regions charge)
+	SDIFunded       int64 // gold put into the SDI program this turn, against its allowance
+	Fed             bool  // feedStage done
+	CovertDone      bool
+	// CovertOpsUsed holds the EFFECT covert operations already run this turn.
+	// BRE's "Limit one try per turn!" is keyed per OPERATION, so each item on the
+	// menu carries its own slot; info ops (Send Spy, Spy on Relations) never take
+	// one. A map rather than a bool is what makes TurnProgress uncomparable, so
+	// the whole-struct checks around it use reflect.DeepEqual.
+	CovertOpsUsed      map[CovertOp]bool `json:"covertOpsUsed,omitempty"`
 	SpendingDone       bool
 	AttackDone         bool
 	TradingDone        bool
@@ -626,6 +640,11 @@ type World struct {
 	// without parsing the news prose.
 	BattlesTotal   int `json:"-"`
 	ConquestsTotal int `json:"-"`
+
+	// CovertQueue holds the local covert operations that have been paid for and
+	// are waiting on daily maintenance to resolve — BRE's type-7 records. Added
+	// after v0.0.5, so a world saved before it loads with an empty queue.
+	CovertQueue []QueuedCovertOp `json:",omitempty"`
 
 	Alliances     []string // legacy (pre-typed-treaties); migrated by EnsureTreaties
 	Treaties      []Treaty

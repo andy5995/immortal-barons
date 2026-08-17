@@ -301,8 +301,9 @@ types and both sides' casualties are reported by unit type), nuclear/chemical/
 biological strikes, pirate raids (now rolled per turn, not once a day; the nine
 factions carry IB-original names, not BRE's), covert operations (spy, stir revolts, set up,
 support dissensions,
-demoralize forces, bribery, expose enemy ops, and a Bomb Enemy Targets
-submenu — incl. R5-Slappenheimer, the clone's rename of BRE's S3-Sabre),
+demoralize forces, bribery, expose enemy ops, and a single Bomb Enemy Targets
+terror-bombing op; the eight-item bombing table, R5-Slappenheimer among it, is
+the InterPlanetary Special Operations menu's alone),
 diplomacy treaties, trading, region types + food market, SDI, Clingy Annihilator
 (BRE's Gooie Kablooie), player mail + a BRE-style multi-line message editor +
 planetary bulletin, banking (deposit/withdraw/loan/invest), Set Industries +

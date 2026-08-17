@@ -1643,19 +1643,26 @@ The status line under it is assembled from `'You have '` + gold + `' gold and '`
 + agents + `' agents.'`, and `'Limit one try per turn!'` sits just below in the
 same unit — the one-effect-op-per-turn cap.
 
-The **Bomb Enemy Targets** set and the interplanetary Special Operations menu
-share ONE table at `BRE.OVR 0x2981b`, in this order, with a zero-length entry
-between Nuclear Assault and Chemical Bombing that a naive ShortString walk will
-mistake for the end of the table:
+The interplanetary **Special Operations** menu has its own table at
+`BRE.OVR 0x2981b`, in this order, with a zero-length entry between Nuclear
+Assault and Chemical Bombing that a naive ShortString walk will mistake for the
+end of the table:
 
 ```
 Bomb Food Market · Bomb Trading Market · Bomb Trade Routes · Undermine
 Investments · Nuclear Assault · <len 0> · Chemical Bombing · S3-Sabre · Send SpyGuy
 ```
 
-The local menu takes the first seven, the interplanetary one all eight. The
-500-bomber gate string follows immediately, which is where
-`BombingBombersRequired` comes from.
+**All eight belong to the interplanetary menu, and none to the local one.** The
+table is read by `run_bombing_operations_menu` (`BRE.OVR 0x029EA9`) alone, whose
+only caller is `run_interbbs_menu`. The 500-bomber gate string follows
+immediately, and the gate itself (`+0x1015`) and the 500 Bombers each launch
+consumes (`+0x1146`, `+0x1233`, `+0x1689`) are all inside that same procedure —
+the local Covert menu tests no bomber count anywhere. The local **Bomb Enemy
+Targets** is ONE flat op that rolls `Random(6)+1` over six holdings in the
+resolver; see `docs/mechanics-reference.md`. IB read this table as "the local
+menu takes the first seven" and built a lettered submenu on it, which was wrong
+and has been removed.
 
 **From the draw routine** (`run_covert_operations_menu`, `BRE.OVR 0x17469`),
 read directly rather than inferred:

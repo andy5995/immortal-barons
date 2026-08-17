@@ -136,7 +136,7 @@ var treatyDescriptions = map[string]string{
 	"Full Defense Alliance":  "Neither realm may attack the other. If either is attacked, the ally sends 30% of its troopers and tanks to reinforce the defense.",
 	"Tariff Trade Agreement": "Opens a taxed trade route. Both realms earn a modest income each turn, scaled to population.",
 	"Free Trade Agreement":   "Opens an open trade route. Both realms earn a larger income each turn — about double a tariff — scaled to population.",
-	"Protective Trade":       "Shields both realms' trade routes and markets from covert sabotage.",
+	"Protective Trade":       "Guards the trade route between the two realms: deals in transit between you survive covert bombing, whoever fires. Markets are not covered.",
 	"Terrorist Prevention":   "Pools covert agents for defense, making both realms harder to spy on and sabotage.",
 	"Intelligence Alliance":  "Shares intelligence — partner agents strengthen your covert operations, both attacking and defending.",
 	"Technology Agreement":   "Shares technology — the partner with less advanced tech is pulled up toward the more advanced one.",

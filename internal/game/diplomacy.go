@@ -14,9 +14,9 @@ import (
 //     offense/defense (covert.go).
 //   - Technology Agreement shares a partner's tech (techAgreementCeiling,
 //     advanceTech).
-//   - Protective Trade guards the two realms' trade from covert bombing
-//     (BombTradeRoutes, BombTradingMarket) and cuts the cost of sending a trade
-//     deal between them (TradeDealGoldPerDayBetween).
+//   - Protective Trade spares the two realms' trade deals when trade routes are
+//     bombed (bombRoutesEffect) and cuts the cost of sending a deal between them
+//     (TradeDealGoldPerDayBetween). It shields no market.
 var TreatyTypes = []string{
 	"Full Defense Alliance",
 	"Tariff Trade Agreement",

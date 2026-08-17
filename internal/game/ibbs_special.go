@@ -83,9 +83,10 @@ func isMissileOp(op SpecialOp) bool {
 // one realm. The Food Market is the planet's, the Trading Market is the planet's
 // (every realm lists on the one board), and the bank the investments sit in is
 // the planet's. Aiming them at a single baron — which is what IB did at first,
-// by copying the LOCAL Bomb Enemy Targets menu — misreads the local menu as the
-// model for this one. The three missiles are the other way round: they ruin land
-// and kill people, so they must name the realm that owns them.
+// by copying the lettered submenu it wrongly gave the LOCAL Covert menu —
+// misreads one menu as the model for the other. The three missiles are the other
+// way round: they ruin land and kill people, so they must name the realm that
+// owns them.
 func (op SpecialOp) TargetsPlanet() bool { return !isMissileOp(op) }
 
 // RemoteSpecialOp is one op in flight to another planet. FromEmpire travels
@@ -283,17 +284,17 @@ func (w *World) applyPlanetOp(op SpecialOp, from string) (report string, hit boo
 		return fmt.Sprintf("You wrecked the planet's trading market: %d goods and %d gold in proceeds.", goods, proceeds), true
 
 	case OpBombRoutes:
-		cut := 0
-		for _, e := range living() {
-			if _, _, ok := w.bombRoutesEffect(e); ok {
-				cut++
-			}
+		// nil takes every deal on the planet, and the strike's one landing roll
+		// covers the whole planet rather than being rolled per realm.
+		hit := 0
+		if w.bombRoutesLands() {
+			hit = w.bombRoutesEffect(nil)
 		}
-		if cut == 0 {
-			return "No trade agreements stood on that planet to sever.", false
+		if hit == 0 {
+			return "Nothing worth hitting was moving on that planet's trade routes.", false
 		}
-		tell(fmt.Sprintf("Bombers from %s severed trade routes across the planet — %d agreements broken.", from, cut))
-		return fmt.Sprintf("You severed %d trade agreements on that planet.", cut), true
+		tell(fmt.Sprintf("Bombers from %s hit trade routes across the planet — the goods in %d deals in transit were all but destroyed.", from, hit))
+		return fmt.Sprintf("You wrecked the goods in %d trade deals on that planet.", hit), true
 
 	case OpUndermine:
 		var lost int64
@@ -332,13 +333,16 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string) (report str
 		return fmt.Sprintf("You wrecked %s's trading market: %d goods and %d gold in proceeds.", d.Name, goods, proceeds), 0, true, false
 
 	case OpBombRoutes:
-		ttype, partner, cut := w.bombRoutesEffect(d)
-		if !cut {
-			d.addEvent(fmt.Sprintf("Bombers from %s struck at trade routes you do not have.", from))
-			return fmt.Sprintf("%s has no trade agreement to sever.", d.Name), 0, false, false
+		hit := 0
+		if w.bombRoutesLands() {
+			hit = w.bombRoutesEffect(d)
 		}
-		d.addEvent(fmt.Sprintf("Bombers from %s severed your %s with %s.", from, ttype, partner))
-		return fmt.Sprintf("You severed %s's %s with %s.", d.Name, ttype, partner), 0, true, false
+		if hit == 0 {
+			d.addEvent(fmt.Sprintf("Bombers from %s struck at your trade routes and found nothing.", from))
+			return fmt.Sprintf("%s had no trade deals in transit worth hitting.", d.Name), 0, false, false
+		}
+		d.addEvent(fmt.Sprintf("Bombers from %s hit your trade routes — the goods in %d deals in transit were all but destroyed.", from, hit))
+		return fmt.Sprintf("You wrecked the goods in %d of %s's trade deals in transit.", hit, d.Name), 0, true, false
 
 	case OpUndermine:
 		lost := undermineEffect(d)
