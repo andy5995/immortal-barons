@@ -2537,6 +2537,11 @@ IB matches all of it.
   it never bounded the roster the pickers letter, which is half of what made #144
   possible on a default board.
 - **A freed slot is reusable at once, and its next holder inherits nothing.**
+  BRE does the same — delete the realm holding C and the next realm founded is
+  lettered C — so this matches rather than merely being IB's own call. Observed in
+  play; the original's purge loop is in the disassembly but its re-seeding side
+  was never found there, which is why this was recorded as undetermined until it
+  was simply asked about.
   Every removal path goes through one function, which forgets the departing
   realm's treaties, pending offers and market escrow. All of that keys on the
   realm's NAME, never on its slot, so nothing follows the slot to its next
