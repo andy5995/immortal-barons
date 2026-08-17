@@ -293,18 +293,33 @@ func tradePactIncome(e, other *Empire, perHead, selfCut, partnerCut int) int64 {
 // strike with the target's own Defense() alone. Pinned by
 // TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes.
 
-// AllyContribution is the detachment a Full Defense Alliance partner sends to aid
-// an ally under attack — BRE-verified as 30% of the ally's troopers, tanks, and
-// agents (turrets/jets/bombers/carriers stay home). Mirrors BRE's Alliance
-// Strength screen.
+// AllyContribution is one row of BRE's Alliance Strength screen: what a partner
+// sends to aid a realm under attack. The screen has three figure columns and
+// TWO treaties feed them, one each:
+//
+//   - a Full Defense Alliance sends AllyDefenseContribPct% of its troopers and
+//     tanks (turrets/jets/bombers/carriers stay home) — it sends NO agents;
+//   - a Terrorist Prevention pact sends CovertAllyDefensePct% of its agents,
+//     and no troops.
+//
+// BINARY-VERIFIED (BRE.OVR 0x01177a, send_defensive_aid): the routine sets two
+// independent shares from the pair's relation — 0x32 (50) against relation 4,
+// Terrorist Prevention, applied to agents; 0x1e (30) against relation 7, Full
+// Defense Alliance, applied to troopers and tanks. The attack resolver's aid
+// loop likewise reads troopers and tanks only, and the attacker's in-battle line
+// names only those two.
+//
+// IB used to credit an alliance partner 30% of its AGENTS as well, which lent
+// help the original never lends. A pair holds one relation at a time
+// (setRelation), so a partner appears on exactly one of the two lists and the
+// rows cannot double-count.
 type AllyContribution struct {
 	Name                    string
 	Troopers, Tanks, Agents int
 }
 
-// AllyDefenders returns what each of e's Full Defense Alliance partners will send
-// to reinforce e in defense: AllyDefenseContribPct% of their troopers, tanks, and
-// agents. Empty if e holds no such alliance.
+// AllyDefenders returns what each of e's defensive partners will send to
+// reinforce it, one row per partner. Empty if e holds neither pact.
 func (w *World) AllyDefenders(e *Empire) []AllyContribution {
 	var out []AllyContribution
 	for _, ally := range w.alliesOf(e, fullDefenseAlliance) {
@@ -312,7 +327,12 @@ func (w *World) AllyDefenders(e *Empire) []AllyContribution {
 			Name:     ally.Name,
 			Troopers: ally.Troopers * AllyDefenseContribPct / 100,
 			Tanks:    ally.Tanks * AllyDefenseContribPct / 100,
-			Agents:   ally.Agents * AllyDefenseContribPct / 100,
+		})
+	}
+	for _, ally := range w.alliesOf(e, terroristPrevention) {
+		out = append(out, AllyContribution{
+			Name:   ally.Name,
+			Agents: ally.Agents * CovertAllyDefensePct / 100,
 		})
 	}
 	return out
@@ -337,12 +357,70 @@ func (w *World) allyDefenseBoost(d *Empire) int {
 // bleedAllies applies the given casualty fraction to each Full Defense Alliance
 // partner's committed detachment (its sent 30% of troopers + tanks) after a
 // battle in which d was defended — the reinforcements bleed at the same rate as
-// the defender.
-func (w *World) bleedAllies(d *Empire, frac float64) {
-	for _, ally := range w.alliesOf(d, fullDefenseAlliance) {
-		ally.Troopers -= shareOf(ally.Troopers*AllyDefenseContribPct/100, frac)
-		ally.Tanks -= shareOf(ally.Tanks*AllyDefenseContribPct/100, frac)
+// the defender — and tells each partner what it lost and where.
+//
+// The notice is not optional bookkeeping. Without it a player's troopers and
+// tanks vanish in a battle they were never told about: the loss has no visible
+// cause, and nothing else on any screen would ever explain it. BRE files it in
+// the SAME loop iteration as the deduction (BRE.OVR 0x00ef90, the aid loop in
+// resolve_regular_attack, which passes the ally's own record to the asynchronous
+// recap filer), so the two belong together here as well.
+//
+// The wording is IB's own. Only the FACT that a notice is filed, who receives
+// one, and that it is filed unconditionally are taken from the original; its
+// sentence is not reproduced.
+//
+// Colour needs nothing here: showTurnEvents paints realm names bright-cyan and
+// highlights figures, both from a live capture, so naming both realms and both
+// counts styles this line like every other recap entry.
+//
+// WHO IS TOLD is wider than who helps, and that is BRE's own shape rather than
+// a choice. Its loop guard is `cmp word [es:di-0xebf],0x5 / jg` (BRE.OVR
+// 0x10545) — every relation ABOVE 5 — while the detachment share is written
+// only at `cmp ax,0x7 / jnz` (0xf541), equality with Full Defense Alliance. A
+// Technology Agreement partner therefore receives a battle notice reading zero
+// and zero, having contributed nothing and lost nothing. Relation 8 looks like
+// it should qualify too, but is never stored: break_diplomatic_treaty writes
+// `xor ax,ax` to both relation rows (0x1a8f0, 0x1a912), so a Declaration Of War
+// leaves 0 behind and the value exists only as a display string.
+//
+// NOTHING SUPPRESSES A ZERO LINE. The 236 instructions between the guard and
+// the deduction contain no branch of any kind, and the recap filer itself
+// (04ef:002f) is 25 instructions with no conditional jump — no zero-total test,
+// no dedup. A partner that sent nothing is told so.
+//
+// The zero lines are faithful, not a defect: if play shows them to be noise,
+// suppressing them is a deliberate divergence to be recorded as one, not a bug
+// fix to be quietly applied.
+func (w *World) bleedAllies(a, d *Empire, frac float64) {
+	for _, ally := range w.battleNotified(d) {
+		var troopers, tanks int
+		if w.HasTreaty(d, ally, fullDefenseAlliance) {
+			troopers = shareOf(ally.Troopers*AllyDefenseContribPct/100, frac)
+			tanks = shareOf(ally.Tanks*AllyDefenseContribPct/100, frac)
+			ally.Troopers -= troopers
+			ally.Tanks -= tanks
+		}
+		ally.addEvent(fmt.Sprintf("%s attacked %s: you lost %d troopers and %d tanks in the defence.",
+			a.Name, d.Name, troopers, tanks))
 	}
+}
+
+// battleNotified returns every living realm BRE tells about a battle fought
+// against d — the relations its report loop admits, which is its enum above 5:
+// Technology Agreement and Full Defense Alliance. Only the second sends anyone.
+func (w *World) battleNotified(d *Empire) []*Empire {
+	var out []*Empire
+	for _, other := range w.Empires {
+		if other == d || !other.Alive {
+			continue
+		}
+		switch w.Relation(d, other) {
+		case technologyAgreement, fullDefenseAlliance:
+			out = append(out, other)
+		}
+	}
+	return out
 }
 
 // ProposeTreaty records a pending offer of ttype from `from` to `to` with no

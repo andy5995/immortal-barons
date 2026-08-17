@@ -376,10 +376,12 @@ func names(es []*Empire) []string {
 	return r
 }
 
-// A Full Defense Alliance partner sends exactly AllyDefenseContribPct% (30%,
-// BRE-verified) of its troopers, tanks, and agents to aid the defender, and that
-// detachment bleeds at the defender's casualty rate.
-func TestAllyDefenders30Pct(t *testing.T) {
+// A Full Defense Alliance partner sends 30% of its troopers and tanks and NO
+// agents; the agents column belongs to Terrorist Prevention at 50%. Golden
+// literals, not expressions over the constants: these are the BRE-verified
+// figures (BRE.OVR 0x01177a), so a retune has to fail here and produce new
+// evidence rather than follow along quietly.
+func TestAllyDefendersSplitByTreaty(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
@@ -391,18 +393,137 @@ func TestAllyDefenders30Pct(t *testing.T) {
 	if len(d) != 1 || d[0].Name != "Beta" {
 		t.Fatalf("want Beta as the sole defender, got %v", d)
 	}
-	if d[0].Troopers != 300 || d[0].Tanks != 150 || d[0].Agents != 30 {
-		t.Errorf("want 30%% sent (300/150/30), got %d/%d/%d", d[0].Troopers, d[0].Tanks, d[0].Agents)
+	if d[0].Troopers != 300 || d[0].Tanks != 150 {
+		t.Errorf("want 300 troopers / 150 tanks sent, got %d / %d", d[0].Troopers, d[0].Tanks)
+	}
+	if d[0].Agents != 0 {
+		t.Errorf("a Full Defense Alliance lends no agents, got %d", d[0].Agents)
 	}
 	if w.allyDefenseBoost(a) <= 0 {
 		t.Error("ally defense boost should be positive with a tank-holding ally")
 	}
 
-	// The committed 30% (300 troopers / 150 tanks) bleeds at, say, a 20% rate:
+	// The same partner under Terrorist Prevention instead: 50% of its agents and
+	// no troops. Forming a relation replaces the old one (#88).
+	c := w.AddHuman("c", "Gamma")
+	c.Troopers, c.Tanks, c.Agents = 1000, 500, 100
+	w.ProposeTreaty(a, c, terroristPrevention)
+	w.AcceptTreaty(c, a.Name, terroristPrevention)
+	rows := w.AllyDefenders(a)
+	var gamma *AllyContribution
+	for i := range rows {
+		if rows[i].Name == "Gamma" {
+			gamma = &rows[i]
+		}
+	}
+	if gamma == nil {
+		t.Fatalf("want Gamma on the Alliance Strength rows, got %v", rows)
+	}
+	if gamma.Agents != 50 || gamma.Troopers != 0 || gamma.Tanks != 0 {
+		t.Errorf("want 50 agents and no troops from Terrorist Prevention, got %d agents %d troopers %d tanks",
+			gamma.Agents, gamma.Troopers, gamma.Tanks)
+	}
+}
+
+// The committed detachment bleeds at the defender's casualty rate, and the
+// partner is TOLD what it lost. Before this the units simply vanished from a
+// battle the player was never notified of (#136).
+func TestBleedAlliesTellsThePartner(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	raider := w.AddHuman("r", "Raider")
+	b.Troopers, b.Tanks = 1000, 500
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+	b.Events = nil
+
+	// The committed 30% (300 troopers / 150 tanks) bleeds at a 20% rate:
 	// 60 troopers and 30 tanks lost from Beta.
-	w.bleedAllies(a, 0.20)
+	w.bleedAllies(raider, a, 0.20)
 	if b.Troopers != 940 || b.Tanks != 470 {
-		t.Errorf("bleedAllies(0.20): want Beta 940 troopers / 470 tanks, got %d / %d", b.Troopers, b.Tanks)
+		t.Errorf("want Beta 940 troopers / 470 tanks, got %d / %d", b.Troopers, b.Tanks)
+	}
+	if len(b.Events) != 1 {
+		t.Fatalf("want one event filed on the ally, got %d: %v", len(b.Events), b.Events)
+	}
+	got := b.Events[0].Text
+	for _, want := range []string{"60 troopers", "30 tanks", "Alpha", "Raider"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("ally's event %q omits %q", got, want)
+		}
+	}
+}
+
+// A partner with nothing to send is not sent a line of zeroes.
+// A partner that sent nothing is still told, with a line reading zero and zero.
+// BRE has no suppression anywhere on that path: no branch between the loop
+// guard and the deduction, and no zero test inside the recap filer. Skipping
+// the line would be a deliberate divergence, so this pins the faithful
+// behaviour against a future "fix".
+func TestBleedAlliesTellsAPartnerThatLostNothing(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+	raider := w.AddHuman("r", "Raider")
+	b.Troopers, b.Tanks = 0, 0
+	w.ProposeTreaty(a, b, fullDefenseAlliance)
+	w.AcceptTreaty(b, a.Name, fullDefenseAlliance)
+	b.Events = nil
+
+	w.bleedAllies(raider, a, 0.20)
+	if len(b.Events) != 1 {
+		t.Fatalf("want one event even with nothing lost, got %d: %v", len(b.Events), b.Events)
+	}
+	got := b.Events[0].Text
+	for _, want := range []string{"0 troopers", "0 tanks", "Alpha", "Raider"} {
+		if !strings.Contains(got, want) {
+			t.Errorf("event %q omits %q", got, want)
+		}
+	}
+}
+
+// BRE's report loop admits every relation ABOVE 5, while only 7 sets a
+// detachment share — so a Technology Agreement partner is told about a battle
+// it took no part in, and loses nothing to it. Golden behaviour read from the
+// guard at BRE.OVR 0x10545 against the share at 0xf541.
+func TestTechnologyAgreementPartnerIsToldAboutTheBattle(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	tech := w.AddHuman("t", "Techie")
+	raider := w.AddHuman("r", "Raider")
+	tech.Troopers, tech.Tanks = 1000, 500
+	w.ProposeTreaty(a, tech, technologyAgreement)
+	w.AcceptTreaty(tech, a.Name, technologyAgreement)
+	tech.Events = nil
+
+	w.bleedAllies(raider, a, 0.20)
+	if len(tech.Events) != 1 {
+		t.Fatalf("a Technology Agreement partner is told, got %d events: %v", len(tech.Events), tech.Events)
+	}
+	if got := tech.Events[0].Text; !strings.Contains(got, "0 troopers") || !strings.Contains(got, "0 tanks") {
+		t.Errorf("it sends nothing, so it loses nothing: %q", got)
+	}
+	if tech.Troopers != 1000 || tech.Tanks != 500 {
+		t.Errorf("no units may be taken from a tech partner, got %d/%d", tech.Troopers, tech.Tanks)
+	}
+}
+
+// A realm with no relation, and one at war, are told nothing. Declaration Of War
+// stores 0 rather than 8 (break_diplomatic_treaty writes xor ax,ax to both
+// rows), so "at war" is the same as "no relation" to this loop.
+func TestUnalliedRealmsAreNotToldAboutTheBattle(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	none := w.AddHuman("n", "Neutral")
+	foe := w.AddHuman("f", "Foe")
+	raider := w.AddHuman("r", "Raider")
+	w.setRelation(a.Name, foe.Name, RelationEnemy)
+	none.Events, foe.Events = nil, nil
+
+	w.bleedAllies(raider, a, 0.20)
+	if len(none.Events) != 0 || len(foe.Events) != 0 {
+		t.Errorf("only relations above 5 are told, got neutral=%v foe=%v", none.Events, foe.Events)
 	}
 }
 

@@ -3,6 +3,13 @@
     agreement stands, instead of offering to break it
   * Added barons-ftn, an optional helper that hands outbound packets to an FTN
     mailer as Type-2 file-attach netmail
+  * A Full Defense Alliance partner is told what it lost defending an ally, who
+    it was defending, and who attacked. Those losses used to happen silently. A
+    Technology Agreement partner is told about the battle too, as in the
+    original, though it sends nothing and loses nothing
+  * A Full Defense Alliance no longer lends agents. The Alliance Strength
+    screen's agents column comes from a Terrorist Prevention pact, as in the
+    original
   * A foiled covert operation now names the realm that sent the agent, as the
     original does; an operation that succeeds still names nobody
   * A market sale is no longer posted to the planet news. The seller is still

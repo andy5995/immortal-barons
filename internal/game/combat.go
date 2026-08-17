@@ -197,7 +197,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	aloss := loseCommitted(a, f, aLoss)
 	aloss.Bombers = bomberLoss // bombers fall to anti-air in the bombing run, not the ground clash
 	dloss := loseForces(d, dLoss)
-	w.bleedAllies(d, dLoss) // the allies' committed 30% bleeds at the defender's rate
+	w.bleedAllies(a, d, dLoss) // the allies' committed 30% bleeds at the defender's rate, and each is told
 
 	// A beaten defender's HeadQuarters is knocked back, and can be flattened by
 	// repeated defeats. BINARY-VERIFIED (BRE.OVR 0xFFA2: Random(3)+5 subtracted

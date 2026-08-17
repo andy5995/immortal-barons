@@ -1135,9 +1135,14 @@ every item below):
   stays equal to `Land`). The agent is lost only when the covert approach itself
   is foiled — not on an interception, a fizzle, or a backfire.
 
-**Alliances:** a Terrorist-Prevention treaty adds half an ally's agents to
-your defense; an Intelligence alliance adds half their agents to your
-offense.
+**Alliances:** a Terrorist Prevention treaty adds **half** (50%) of an ally's
+agents to your covert defense; an Intelligence Alliance adds **two-fifths**
+(40%) of theirs to your covert offense. The two shares are not equal.
+BINARY-VERIFIED: both are Real48 literals thirty bytes apart in one routine,
+`covert_resolution` (`BRE.OVR 0x04cab7`) — relation 4 with the defense flag
+multiplies by `0.5` (`800000000000`), relation 5 with the offense flag by `0.4`
+(`7fcdcccccc4c`). BRE caps the accumulated total at 1e9; IB does not, which is
+unreachable at any real agent count.
 
 ## Economy and regions
 
@@ -2958,8 +2963,8 @@ Seven treaty types are proposed / accepted / broken through the Diplomacy menu,
 and each carries a gameplay effect (#11 wired the last two):
 
 - **Full Defense Alliance** — blocks attacks between the two realms; when either
-  is attacked, its ally **sends 30% of its mobile forces** — troopers, tanks, and
-  agents only (*not* jets/turrets/bombers/carriers) — to reinforce the defender in
+  is attacked, its ally **sends 30% of its troopers and tanks** (*not*
+  jets/turrets/bombers/carriers, and **not agents**) to reinforce the defender in
   that battle (`AreAllied`, `AllianceStrength`). **Verified live against BRE
   (2026-07):** an ally holding 10,903 tanks / 97 troopers contributed exactly
   3,271 tanks / 29 troopers = 30.0% (Attack Menu → Alliance Strength screen), and
@@ -2973,9 +2978,41 @@ and each carries a gameplay effect (#11 wired the last two):
   `Defense()` weighs them — tanks 3–5 troopers by HQ, morale- and tech-scaled; turrets
   stay home, agents are covert); the attacker's battle report notes the
   reinforcements, and the committed detachment bleeds at the defender's casualty
-  rate (`bleedAllies`). The Alliance Strength screen (`allianceStrength`) shows
-  each ally's sent troopers/tanks/agents. See the `bre-binary-verified-math`
-  memory.
+  rate (`bleedAllies`), which also **tells each partner what it lost and in whose
+  defence** — BRE files that line in the same loop iteration as the deduction
+  (`BRE.OVR 0x00ef90`, the aid loop in `resolve_regular_attack`), and without it
+  a player's units disappear from a battle they were never told about.
+  See the `bre-binary-verified-math` memory.
+
+  **Who is told is wider than who helps, and the line is filed unconditionally.**
+  BINARY-VERIFIED. The report loop's guard is `cmp word [es:di-0xebf],0x5 / jg`
+  (`BRE.OVR 0x10545`) — every relation ABOVE 5 — while the detachment share is
+  written only at `cmp ax,0x7 / jnz` (`0xf541`), equality with Full Defense
+  Alliance. So a **Technology Agreement** partner receives a battle notice
+  reading zero and zero, having sent nothing and lost nothing. The 236
+  instructions between guard and deduction contain no branch of any kind, and the
+  recap filer itself (`04ef:002f`) is 25 instructions with no conditional jump —
+  there is no zero-total test and no dedup, so a partner that sent nothing is
+  told so. IB matches both behaviours (`battleNotified`).
+
+  **A Declaration Of War does NOT qualify, though relation 8 would pass the
+  guard.** The value is never stored: `break_diplomatic_treaty` writes
+  `xor ax,ax` to both relation rows (`0x1a8f0`, `0x1a912`), leaving 0 behind, so
+  8 exists only as a display string. This settles the contradiction in
+  `docs/dev/bre-save-format.md`, whose `+0x130` entry appears twice — once
+  correctly saying 8 and 9 are menu items never stored, once wrongly listing 8 as
+  a stored enum value.
+
+  **The Alliance Strength screen has three figure columns and TWO treaties feed
+  them.** BINARY-VERIFIED at `BRE.OVR 0x01177a` (`send_defensive_aid`), which
+  sets two independent shares from the pair's relation: `0x32` (50) against
+  relation 4, **Terrorist Prevention**, applied to **agents**; `0x1e` (30)
+  against relation 7, **Full Defense Alliance**, applied to **troopers and
+  tanks**. The attack resolver's aid loop reads troopers and tanks only, and the
+  attacker's in-battle line names only those two. A pair holds one relation at a
+  time, so a partner appears on exactly one of the two lists. IB credited an
+  alliance partner 30% of its agents as well until 2026-08-16, lending help the
+  original never lends; `AllyDefenders` now splits the rows by treaty.
   **The "only in Local Games" note is a rule, not a caveat, and IB honours it**:
   the relation lives in one planet's empire records and never rides a packet, so
   an arriving interplanetary strike meets the target's own `Defense()` and
@@ -2998,8 +3035,11 @@ and each carries a gameplay effect (#11 wired the last two):
   already does for the carrying-capacity weights. (IB previously paid
   `People/40` and `People/20` off the holder's OWN population, roughly a
   twelfth of the original and rounding to nothing at starting scale.)
-- **Intelligence Alliance** / **Terrorist Prevention** — lend half an ally's
-  agents to your covert offense / defense (`covert.go`).
+- **Intelligence Alliance** / **Terrorist Prevention** — lend an ally's agents to
+  your covert offense / defense, at **40%** and **50%** respectively — the shares
+  differ (`covert.go`, `CovertAllyOffensePct` / `CovertAllyDefensePct`).
+  BINARY-VERIFIED in `covert_resolution` (`BRE.OVR 0x04cab7`); see the Covert
+  Operations section for the two constants.
 - **Technology Agreement** — a tech-sharing pact (BRE: "gain some of the
   technological advances of its partner"). Each partner adds an unmultiplied
   research term bounded by whichever side holds fewer Technology regions, so it

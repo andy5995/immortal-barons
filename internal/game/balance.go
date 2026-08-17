@@ -1178,7 +1178,14 @@ const (
 	// AllyDefenseContribPct is the share of a Full Defense Alliance partner's
 	// MOBILE forces (troopers + tanks — not turrets/jets/bombers/carriers) that it
 	// sends to reinforce an ally under attack. BRE-verified live (2026-07): an ally
-	// sent exactly 30% of its troopers, tanks, and agents to the defender's aid.
+	// sent exactly 30% of its troopers and tanks to the defender's aid.
+	//
+	// NOT agents. The Alliance Strength screen shows an agents column, but that
+	// column belongs to a Terrorist Prevention pact at CovertAllyDefensePct — a
+	// separate share set by the same routine (BRE.OVR 0x01177a, send_defensive_aid,
+	// which writes 0x1e against relation 7 and 0x32 against relation 4). An
+	// alliance lends no agents at all.
+	//
 	// See docs/mechanics-reference.md "Diplomacy" and the bre-binary-verified-math
 	// memory. The sent detachment adds to the defender's battle power and takes the
 	// same casualty rate as the defender.
