@@ -24,6 +24,8 @@ type Queued struct {
 // Result describes one outbound scan.
 type Result struct {
 	Queued []Queued
+	// Warnings report a configuration that works now but is close to failing.
+	Warnings []string
 }
 
 // Run scans every configured outbound directory. A packet is first moved into
@@ -64,11 +66,16 @@ func Run(dataDir string) (Result, error) {
 	}
 
 	dirs := outboundDirectories(board)
-	candidates, err := preflightDirectories(dirs, transport, world, nodes)
+	candidates, margin, err := preflightDirectories(dirs, transport, world, nodes)
 	if err != nil {
 		return Result{}, err
 	}
 	var result Result
+	if len(candidates) > 0 && margin < subjectMarginBytes {
+		result.Warnings = append(result.Warnings, fmt.Sprintf(
+			"attachment subjects have %d byte(s) to spare in the FTN Type-2 field; %s",
+			margin, subjectAdvice(transport.SubjectMode)))
+	}
 	for _, candidate := range candidates {
 		if err := os.MkdirAll(filepath.Dir(candidate.claimed), 0o755); err != nil {
 			return result, err
@@ -104,15 +111,18 @@ type packetCandidate struct {
 // outbound path a configuration error instead of a partial handoff. It returns
 // the exact snapshot it checked, so a packet atomically published while the
 // helper is running waits for the next run rather than bypassing preflight.
-func preflightDirectories(dirs []string, transport Config, world *game.World, nodes []game.LeagueNode) ([]packetCandidate, error) {
+// The second return is the smallest number of unused subject bytes any of the
+// checked pathnames left.
+func preflightDirectories(dirs []string, transport Config, world *game.World, nodes []game.LeagueNode) ([]packetCandidate, int, error) {
 	var candidates []packetCandidate
+	margin := type2SubjectSize
 	for _, dir := range dirs {
 		entries, err := os.ReadDir(dir)
 		if os.IsNotExist(err) {
 			continue
 		}
 		if err != nil {
-			return nil, err
+			return nil, 0, err
 		}
 		for _, entry := range entries {
 			if entry.IsDir() || filepath.Ext(entry.Name()) != store.PacketExt {
@@ -123,62 +133,66 @@ func preflightDirectories(dirs []string, transport Config, world *game.World, no
 				continue // another helper claimed it after ReadDir
 			}
 			if err != nil {
-				return nil, err
+				return nil, 0, err
 			}
 			if !info.Mode().IsRegular() {
 				continue
 			}
 			source := filepath.Join(dir, entry.Name())
-			claimed := filepath.Join(dir, "fido", entry.Name())
-			packet, found, err := preflightPacket(source, claimed, transport, world, nodes)
+			claimed := transport.attachPath(dir, entry.Name())
+			packet, found, spare, err := preflightPacket(source, claimed, transport, world, nodes)
 			if err != nil {
-				return nil, fmt.Errorf("preflight %s: %w", source, err)
+				return nil, 0, fmt.Errorf("preflight %s: %w", source, err)
 			}
 			if found {
 				candidates = append(candidates, packetCandidate{source: source, claimed: claimed, packet: packet})
+				margin = min(margin, spare)
 			}
 		}
 	}
-	return candidates, nil
+	return candidates, margin, nil
 }
 
-func preflightPacket(source, claimed string, transport Config, world *game.World, nodes []game.LeagueNode) (game.Packet, bool, error) {
+func preflightPacket(source, claimed string, transport Config, world *game.World, nodes []game.LeagueNode) (game.Packet, bool, int, error) {
 	data, err := os.ReadFile(source)
 	if os.IsNotExist(err) {
-		return game.Packet{}, false, nil // another helper claimed it
+		return game.Packet{}, false, 0, nil // another helper claimed it
 	}
 	if err != nil {
-		return game.Packet{}, false, err
+		return game.Packet{}, false, 0, err
 	}
 	var packet game.Packet
 	if err := json.Unmarshal(data, &packet); err != nil {
-		return game.Packet{}, false, err
+		return game.Packet{}, false, 0, err
 	}
 	attached, err := filepath.Abs(claimed)
 	if err != nil {
-		return game.Packet{}, false, err
+		return game.Packet{}, false, 0, err
 	}
-	if _, err := fileAttachSubject(attached, transport.Binkley); err != nil {
-		return game.Packet{}, false, err
+	_, spare, err := fileAttachSubject(transport, attached)
+	if err != nil {
+		return game.Packet{}, false, 0, err
 	}
 	destinationNumber := packet.ToNode
 	if destinationNumber == 0 && packet.ToBoard != "" {
 		destinationNumber = world.NodeNumber(packet.ToBoard)
 	}
 	if destinationNumber != 0 {
-		return packet, true, nil
+		return packet, true, spare, nil
 	}
 	recipients := broadcastRecipients(world, nodes)
 	if len(recipients) == 0 {
-		return game.Packet{}, false, fmt.Errorf("broadcast has no other board in %s", store.NodeListFile)
+		return game.Packet{}, false, 0, fmt.Errorf("broadcast has no other board in %s", store.NodeListFile)
 	}
 	for _, node := range recipients[1:] {
 		copyPath := broadcastCopyPath(attached, node.Number)
-		if _, err := fileAttachSubject(copyPath, transport.Binkley); err != nil {
-			return game.Packet{}, false, fmt.Errorf("broadcast attachment for node %d: %w", node.Number, err)
+		_, copySpare, err := fileAttachSubject(transport, copyPath)
+		if err != nil {
+			return game.Packet{}, false, 0, fmt.Errorf("broadcast attachment for node %d: %w", node.Number, err)
 		}
+		spare = min(spare, copySpare)
 	}
-	return packet, true, nil
+	return packet, true, spare, nil
 }
 
 func outboundDirectories(cfg game.Config) []string {
@@ -339,7 +353,7 @@ func queueForNode(path string, transport Config, origin Address, node game.Leagu
 	if err != nil {
 		return Queued{}, err
 	}
-	message, err := createFileAttach(transport.NetmailDir, attached, origin, address, transport.Binkley)
+	message, err := createFileAttach(transport, attached, origin, address)
 	if err != nil {
 		return Queued{}, err
 	}

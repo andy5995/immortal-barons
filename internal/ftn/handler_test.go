@@ -190,7 +190,132 @@ func TestRunPreflightsEverySubjectBeforeMovingPackets(t *testing.T) {
 	}
 }
 
-func newTestSetup(t *testing.T) string {
+func TestAttachDirAndBasenameSubject(t *testing.T) {
+	data := newTestSetup(t, "AttachDir hold\nSubjectPath Basename\n")
+	writePacket(t, data, game.Packet{FromBoard: "Bravo BBS", ToBoard: "Old Name", FromNode: 2, ToNode: 3})
+
+	result, err := Run(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Queued) != 1 {
+		t.Fatalf("queued = %d, want 1", len(result.Queued))
+	}
+	queued := result.Queued[0]
+	if want := filepath.Join(data, "hold"); filepath.Dir(queued.PacketPath) != want {
+		t.Errorf("packet moved to %q, want a file in %q", queued.PacketPath, want)
+	}
+	if _, err := os.Stat(queued.PacketPath); err != nil {
+		t.Errorf("attachment is not where the subject says: %v", err)
+	}
+	message, err := os.ReadFile(queued.Message)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := cString(message[72:144]); got != "packet.brp" {
+		t.Errorf("attachment subject = %q, want the basename alone", got)
+	}
+	if len(result.Warnings) != 0 {
+		t.Errorf("basename subjects warned about their margin: %v", result.Warnings)
+	}
+}
+
+func TestSubjectPrefixIsWrittenNotResolved(t *testing.T) {
+	data := newTestSetup(t, "AttachDir hold\nSubjectPath ib/out\n")
+	writePacket(t, data, game.Packet{FromBoard: "Bravo BBS", FromNode: 2, ToNode: 3})
+
+	result, err := Run(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	message, err := os.ReadFile(result.Queued[0].Message)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := cString(message[72:144]); got != "ib/out/packet.brp" {
+		t.Errorf("attachment subject = %q, want the operator's prefix and the basename", got)
+	}
+}
+
+// The incident from #141: an absolute subject that fitted at outbound sequence
+// 99 broke at 100, with nothing reconfigured. The queued name is the one that
+// took the live board down.
+func TestBasenameSubjectSurvivesTheSequenceDigit(t *testing.T) {
+	const (
+		attachDir = "AttachDir " + "ibout-a-conventional-enough-directory\n"
+		binkley   = "Binkley Yes\n"
+		name      = "L100-Bravo_BBS-to-all-2026-08-16-100-0.brp"
+	)
+	packet := game.Packet{FromBoard: "Bravo BBS", FromNode: 2, ToNode: 3}
+	body, err := json.Marshal(packet)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	absolute := newTestSetup(t, attachDir+binkley)
+	source := filepath.Join(absolute, testOutboundDir, name)
+	if err := os.WriteFile(source, body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := Run(absolute); err == nil {
+		t.Fatal("the absolute spelling fitted; this test no longer reproduces the incident")
+	} else if !strings.Contains(err.Error(), "SubjectPath") {
+		t.Errorf("error does not name the setting that fixes it: %v", err)
+	}
+	if _, err := os.Stat(source); err != nil {
+		t.Errorf("preflight moved the packet before refusing: %v", err)
+	}
+
+	short := newTestSetup(t, attachDir+binkley+"SubjectPath Basename\n")
+	if err := os.WriteFile(filepath.Join(short, testOutboundDir, name), body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	result, err := Run(short)
+	if err != nil {
+		t.Fatalf("the same packet still fails under basename subjects: %v", err)
+	}
+	if len(result.Queued) != 1 {
+		t.Fatalf("queued = %d, want 1", len(result.Queued))
+	}
+	message, err := os.ReadFile(result.Queued[0].Message)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := cString(message[72:144]); got != "^"+name {
+		t.Errorf("attachment subject = %q, want the Binkley-prefixed basename", got)
+	}
+}
+
+func TestThinSubjectMarginIsReported(t *testing.T) {
+	data := newTestSetup(t)
+	const spare = 3
+	fido := filepath.Join(data, testOutboundDir, fidoSubdir)
+	stem := type2SubjectSize - 1 - spare - len(fido) - 1 - len(store.PacketExt)
+	if stem < 1 {
+		t.Fatalf("test path %q is already too long", fido)
+	}
+	body, err := json.Marshal(game.Packet{FromBoard: "Bravo BBS", FromNode: 2, ToNode: 3})
+	if err != nil {
+		t.Fatal(err)
+	}
+	name := strings.Repeat("z", stem) + store.PacketExt
+	if err := os.WriteFile(filepath.Join(data, testOutboundDir, name), body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := Run(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Queued) != 1 {
+		t.Fatalf("queued = %d, want 1", len(result.Queued))
+	}
+	if len(result.Warnings) != 1 || !strings.Contains(result.Warnings[0], "3 byte") {
+		t.Fatalf("warnings = %v, want one naming the 3 bytes left", result.Warnings)
+	}
+}
+
+func newTestSetup(t *testing.T, extraFTN ...string) string {
 	t.Helper()
 	tempRoot := os.TempDir()
 	if filepath.VolumeName(tempRoot) == "" {
@@ -212,7 +337,7 @@ func newTestSetup(t *testing.T) string {
 	files := map[string]string{
 		"config.json":         "{}\n",
 		store.BoardConfigFile: "BoardID Bravo BBS\nOutbound " + testOutboundDir + "\n",
-		ConfigFile:            "NetmailDir " + testNetmailDir + "\n",
+		ConfigFile:            "NetmailDir " + testNetmailDir + "\n" + strings.Join(extraFTN, ""),
 		store.RouteFile:       "ROUTE * 1\n",
 		store.NodeListFile: "1\nAlpha BBS\n1:229/100\nDetroit\nMI\nUSA\n\n" +
 			"2\nBravo BBS\n1:229/200\nLansing\nMI\nUSA\n\n" +

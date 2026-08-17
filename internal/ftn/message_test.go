@@ -62,8 +62,8 @@ func TestCreateFileAttachClaimsMessageNumber(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(dir, "1.msg"), []byte("occupied"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	path, err := createFileAttach(dir, "/bbs/out/fido/test.brp",
-		Address{Zone: 1, Net: 229, Node: 100}, Address{Zone: 1, Net: 229, Node: 200}, false)
+	path, err := createFileAttach(Config{NetmailDir: dir}, "/bbs/out/fido/test.brp",
+		Address{Zone: 1, Net: 229, Node: 100}, Address{Zone: 1, Net: 229, Node: 200})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -81,8 +81,8 @@ func TestCreateFileAttachClaimsMessageNumber(t *testing.T) {
 		t.Fatal("message has no KFS flag")
 	}
 
-	binkleyPath, err := createFileAttach(dir, "/bbs/out/fido/next.brp",
-		Address{Zone: 1, Net: 229, Node: 100}, Address{Zone: 1, Net: 229, Node: 200}, true)
+	binkleyPath, err := createFileAttach(Config{NetmailDir: dir, Binkley: true}, "/bbs/out/fido/next.brp",
+		Address{Zone: 1, Net: 229, Node: 100}, Address{Zone: 1, Net: 229, Node: 200})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -99,19 +99,83 @@ func TestCreateFileAttachClaimsMessageNumber(t *testing.T) {
 }
 
 func TestFileAttachSubjectLimits(t *testing.T) {
-	if _, err := fileAttachSubject(strings.Repeat("x", 71), false); err != nil {
+	plain, binkley := Config{}, Config{Binkley: true}
+	if _, spare, err := fileAttachSubject(plain, strings.Repeat("x", 71)); err != nil {
 		t.Fatalf("71-byte non-Binkley subject: %v", err)
+	} else if spare != 0 {
+		t.Errorf("spare = %d, want 0", spare)
 	}
-	if _, err := fileAttachSubject(strings.Repeat("x", 72), false); err == nil {
+	if _, _, err := fileAttachSubject(plain, strings.Repeat("x", 72)); err == nil {
 		t.Fatal("accepted 72-byte non-Binkley attachment path")
 	}
-	if got, err := fileAttachSubject(strings.Repeat("x", 70), true); err != nil {
+	if got, spare, err := fileAttachSubject(binkley, strings.Repeat("x", 70)); err != nil {
 		t.Fatalf("70-byte Binkley subject: %v", err)
-	} else if len(got) != 71 || got[0] != '^' {
-		t.Fatalf("Binkley subject = %q", got)
+	} else if len(got) != 71 || got[0] != '^' || spare != 0 {
+		t.Fatalf("Binkley subject = %q, spare = %d", got, spare)
 	}
-	if _, err := fileAttachSubject(strings.Repeat("x", 71), true); err == nil {
+	if _, _, err := fileAttachSubject(binkley, strings.Repeat("x", 71)); err == nil {
 		t.Fatal("accepted 71-byte Binkley attachment path")
+	}
+}
+
+func TestSubjectSpellingModes(t *testing.T) {
+	const attached = "/sbbs/xtrn/ib/data/outbound/fido/L100-2-000000000064z-3.brp"
+	cases := []struct {
+		name string
+		cfg  Config
+		want string
+	}{
+		{"default is the unchanged absolute path", Config{}, attached},
+		{"explicit absolute", Config{SubjectMode: SubjectAbsolute}, attached},
+		{"basename", Config{SubjectMode: SubjectBasename}, "L100-2-000000000064z-3.brp"},
+		{"prefix gains a separator", Config{SubjectMode: SubjectPrefixed, SubjectPrefix: "ibout"},
+			"ibout/L100-2-000000000064z-3.brp"},
+		{"prefix keeps its own separator", Config{SubjectMode: SubjectPrefixed, SubjectPrefix: "ibout/"},
+			"ibout/L100-2-000000000064z-3.brp"},
+		{"backslash prefix stays a mailer path", Config{SubjectMode: SubjectPrefixed, SubjectPrefix: `C:\sbbs\ibout`},
+			`C:\sbbs\ibout\L100-2-000000000064z-3.brp`},
+	}
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			got, _, err := fileAttachSubject(c.cfg, attached)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got != c.want {
+				t.Errorf("subject = %q, want %q", got, c.want)
+			}
+		})
+	}
+}
+
+// The absolute path below is 70 bytes at sequence 99 and 71 at 100, which is
+// one over the Binkley limit: the failure that took a live board down.
+// Basename-only spends nothing on directories, so the extra digit stops
+// mattering.
+func TestSequenceDigitBreaksAbsoluteButNotBasename(t *testing.T) {
+	const dir = "/home/andy/c-sbbs/ibout/fido/"
+	at99 := dir + strings.Repeat("p", 70-len(dir))
+	at100 := at99 + "0"
+
+	binkley := Config{Binkley: true}
+	if _, _, err := fileAttachSubject(binkley, at99); err != nil {
+		t.Fatalf("sequence 99 already failed: %v", err)
+	}
+	_, _, err := fileAttachSubject(binkley, at100)
+	if err == nil {
+		t.Fatal("the extra sequence digit was accepted; this test no longer covers the incident")
+	}
+	if !strings.Contains(err.Error(), "SubjectPath") || !strings.Contains(err.Error(), "AttachDir") {
+		t.Errorf("error does not name the settings that fix it: %v", err)
+	}
+
+	short := Config{Binkley: true, SubjectMode: SubjectBasename}
+	for _, path := range []string{at99, at100} {
+		if _, spare, err := fileAttachSubject(short, path); err != nil {
+			t.Errorf("basename subject for %s: %v", path, err)
+		} else if spare < subjectMarginBytes {
+			t.Errorf("basename subject for %s left only %d bytes", path, spare)
+		}
 	}
 }
 

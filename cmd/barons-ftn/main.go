@@ -30,6 +30,9 @@ func main() {
 		fmt.Fprintln(os.Stderr, "barons-ftn:", err)
 		os.Exit(1)
 	}
+	for _, warning := range result.Warnings {
+		fmt.Fprintln(os.Stderr, "barons-ftn: warning:", warning)
+	}
 	for _, queued := range result.Queued {
 		fmt.Printf("Queued %s for %s (%s) as %s\n",
 			queued.PacketPath, queued.NextHop, queued.Address, queued.Message)

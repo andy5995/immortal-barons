@@ -17,6 +17,12 @@ const (
 	type2SubjectSize = 72
 	programName      = "Immortal Barons"
 
+	// subjectMarginBytes is how little headroom is worth reporting. A packet
+	// name carries the outbound sequence number, so a path that fits today
+	// grows a byte at 100 and again at 1000; a board with a byte to spare has
+	// an outage scheduled rather than a working configuration.
+	subjectMarginBytes = 8
+
 	attributePrivate    = 0x0001
 	attributeFileAttach = 0x0010
 	attributeKillSent   = 0x0080
@@ -27,11 +33,12 @@ const (
 // lines follow the OpenDoors implementation used by The Clans: a full attached
 // pathname in the subject, file-attach/local/private/kill-sent attributes, and
 // TOPT, FMPT, INTL, MSGID, PID and FLAGS KFS control lines as applicable.
-func createFileAttach(netmailDir, attached string, origin, destination Address, binkley bool) (string, error) {
-	subject, err := fileAttachSubject(attached, binkley)
+func createFileAttach(transport Config, attached string, origin, destination Address) (string, error) {
+	subject, _, err := fileAttachSubject(transport, attached)
 	if err != nil {
 		return "", err
 	}
+	netmailDir, binkley := transport.NetmailDir, transport.Binkley
 	now := time.Now()
 	id := messageID(now)
 	header := type2Header(subject, origin, destination, now)
@@ -66,26 +73,42 @@ func createFileAttach(netmailDir, attached string, origin, destination Address, 
 	}
 }
 
-// fileAttachSubject validates the pathname before anything is handed to the
-// mailer. The Type-2 field is 72 bytes including its terminating NUL; Binkley
-// consumes one more byte for its ^ convention.
-func fileAttachSubject(attached string, binkley bool) (string, error) {
+// fileAttachSubject spells the claimed file the way the configured mailer
+// resolves it, and validates that before anything is handed over. The Type-2
+// field is 72 bytes including its terminating NUL; Binkley consumes one more
+// byte for its ^ convention. It also returns the bytes left unused, so a run
+// can report a margin thin enough to fail on the next sequence digit.
+func fileAttachSubject(transport Config, attached string) (string, int, error) {
 	limit := type2SubjectSize - 1
 	prefix := ""
 	mode := ""
-	if binkley {
+	if transport.Binkley {
 		limit--
 		prefix = "^"
 		mode = " in Binkley mode"
 	}
-	if strings.IndexByte(attached, 0) >= 0 {
-		return "", fmt.Errorf("attachment path contains a NUL byte")
+	spelled := transport.subjectPath(attached)
+	if strings.IndexByte(spelled, 0) >= 0 {
+		return "", 0, fmt.Errorf("attachment path contains a NUL byte")
 	}
-	if len(attached) > limit {
-		return "", fmt.Errorf("attachment path %q is %d bytes; FTN Type-2 permits at most %d%s",
-			attached, len(attached), limit, mode)
+	if len(spelled) > limit {
+		return "", 0, fmt.Errorf("attachment subject %q is %d bytes; FTN Type-2 permits at most %d%s. %s",
+			spelled, len(spelled), limit, mode, subjectAdvice(transport.SubjectMode))
 	}
-	return prefix + attached, nil
+	return prefix + spelled, limit - len(spelled), nil
+}
+
+func subjectAdvice(mode SubjectMode) string {
+	switch mode {
+	case SubjectBasename:
+		return "The filename alone does not fit, so no SubjectPath setting can shorten it"
+	case SubjectPrefixed:
+		return `Shorten the SubjectPath prefix in ftn.cfg, or set "SubjectPath Basename" to write the filename alone, ` +
+			"with AttachDir naming the directory the mailer searches"
+	}
+	return `Set SubjectPath in ftn.cfg: "Basename" writes the filename alone, with AttachDir naming the directory ` +
+		`the mailer searches; a prefix such as "SubjectPath fido" is resolved against the mailer's working directory. ` +
+		"An absolute path also loses a byte each time the outbound sequence number gains a digit"
 }
 
 func type2Header(attached string, origin, destination Address, now time.Time) [type2HeaderSize]byte {

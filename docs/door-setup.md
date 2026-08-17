@@ -585,6 +585,9 @@ Binkley    No
   Binkley-style handling gets a `^` before the attached path in the subject;
   non-Binkley handling gets a `FLAGS KFS` control line. Both get the private,
   local, file-attach, and kill-sent header attributes.
+- **AttachDir** and **SubjectPath** are optional and control the attachment
+  pathname. They are described under [Attachment pathnames](#attachment-pathnames)
+  below. Omitting both keeps the behaviour of every earlier release.
 
 The helper gets this board's address and every destination address from
 `ibnodes.dat`. Use complete `zone:net/node` addresses there; a point may add
@@ -604,31 +607,68 @@ instead; `barons-ftn` gives every other board its own attachment pathname and
 `.msg`. It sends those copies directly to each board. Turning the already-signed
 broadcast into routed, addressed packets here would change its signed bytes.
 
-For each configured `Outbound` or `Link` directory, the helper moves a claimed
-packet into its `fido` child and puts that absolute pathname in the `.msg`
-subject. The pathname must fit the Type-2 subject field (71 bytes, or 70 with
-the Binkley `^`); choose a short outbound path if necessary. Packet filenames
-are compact (`L042-2-000000000001z-3.brp` is league 42, origin node 2, sequence
-71, destination node 3). Before moving any packet, the helper checks every
-attachment pathname the whole run would create, including broadcast suffixes,
-and exits with the offending path and byte limit if one will not fit. The FTN
-software removes the claimed file after sending it.
+### Attachment pathnames
 
-This pathname budget applies only when `barons-ftn` carries files through
-Type-2 `.msg` netmail. A shared directory, sync tool, `scp`, or another
-transport that does not put the pathname in an FTN Subject has no such limit.
-For `.msg` transport, budget the whole absolute pathname, not only the
-configured directory. For example, `/sbbs/ibout/fido/` is 17 bytes. With node
-numbers from 1 to 999, reserve up to 45 more for the longest packet name plus a
-broadcast suffix, and one more for Binkley's `^`: 63 bytes total, leaving 8 of
-the 71-byte field.
+Two separate things decide the attachment: where the file is written, and how
+that file is spelled in the `.msg` subject. They are configured separately
+because the spelling is resolved by the mailer, and only the operator knows the
+mailer's working directory and attachment search path.
+
+By default the helper moves a claimed packet into the `fido` child of the
+`Outbound` or `Link` directory it came from, and puts that absolute pathname in
+the subject. Both defaults are what every release before these settings existed
+did, and an `ftn.cfg` with neither key behaves exactly that way.
+
+```
+AttachDir   /sbbs/fido/attach
+SubjectPath Basename
+```
+
+- **AttachDir** puts every claimed packet in one directory instead of the
+  per-outbound `fido` child, whatever outbound or link it came from. A relative
+  path is read relative to the game data directory. Keep it on the same
+  filesystem as the outbound directories: the helper claims a packet by
+  renaming it there.
+- **SubjectPath** chooses the spelling:
+    - `Absolute`, or the key omitted, writes the full pathname. Safe with any
+      mailer, and the most expensive in subject bytes.
+    - `Basename` writes the filename alone, for a mailer configured to search
+      an attachment directory. Point that search at `AttachDir`.
+    - Anything else is a prefix. It is written in front of the filename exactly
+      as configured, and the mailer resolves it against its own working
+      directory — the helper never resolves it and never checks that it exists.
+      A prefix written with backslashes (`C:\sbbs\ibout`) keeps them, for a
+      mailer on a different kind of system.
+
+Whatever the spelling, it must name a file the mailer can find, because the
+mailer deletes the attachment after sending it.
+
+The subject holds 71 bytes, or 70 with the Binkley `^`, for the whole spelling.
+Before moving any packet, the helper checks every subject the whole run would
+create, including broadcast suffixes, and exits without moving anything if one
+will not fit. The error names the setting to change. When fewer than 8 bytes
+are left, it warns on standard error while still queueing the mail.
+
+**An absolute path's budget shrinks as the league runs.** Packet names carry the
+outbound sequence number, so the same directory loses a byte at sequence 100 and
+another at 1000. A board that has been exchanging for weeks can stop with nothing
+reconfigured. `Basename` spends nothing on directories, which is why it is the
+recommended setting for any board whose layout is not very short; a prefix is the
+middle ground when the mailer has no attachment search path. `Absolute` is worth
+keeping only with a short path and real headroom — `/sbbs/ibout/fido/` is 17
+bytes, and up to 45 more for the longest packet name plus a broadcast suffix and
+Binkley's `^` leaves 8 of the 71.
+
+This budget applies only when `barons-ftn` carries files through Type-2 `.msg`
+netmail. A shared directory, sync tool, `scp`, or another transport that does
+not put the pathname in an FTN subject has no such limit.
 
 The game writes and closes each complete, optionally signed packet under a
 non-`.brp` temporary name, then atomically renames it to its final `.brp` name.
 The helper therefore needs no game lock and never scans a partial packet.
 Concurrent helpers serialize through their own `barons-ftn.lock`, which the
-game never takes; only the helper that moves a source into `fido` creates its
-`.msg` or broadcast set. A malformed packet remains in the outbound directory;
+game never takes; only the helper that moves a source into the attachment
+directory creates its `.msg` or broadcast set. A malformed packet remains in the outbound directory;
 a message-creation failure is moved back there for a later run. This uses
 ordinary rename, exclusive file creation, and real copies—hard-link support is
 not required.
