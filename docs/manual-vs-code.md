@@ -77,6 +77,26 @@ front, and no recurring trade cost exists anywhere in the program.
 **Immortal Barons** implements the discount and does not invent an upkeep to
 discount.
 
+### A High terrorism setting makes terrorism rarer, not commoner
+
+The sysop help for the Terrorist Costs option (`game/reset.hlp`) says the choice
+sets what an interplanetary terrorist operation charges, and that "a High
+setting will make terrorism more popular".
+
+It does the opposite. The pricing routine (`BRE.OVR` `0x02aca8`) reads the
+option's byte and, for High, multiplies the price by three; for Low it divides by
+five, and for None it zeroes the charge. The byte's encoding is Medium 0, None 1,
+Low 2, High 3, which the settings screen's own name lookup confirms. Tripling the
+price of an operation makes it rarer.
+
+The sentence reads as though someone described the setting from the sysop's point
+of view — a high setting turns terrorism up — while the code turns the *cost* up.
+Nothing else in the entry is wrong, which is what makes the line easy to take at
+face value.
+
+**Immortal Barons** follows the code: None free, Low a fifth, Medium the base
+price, High triple.
+
 ## Where the changelog describes a version you do not have
 
 Worth separating from the two above. A changelog can be a perfectly truthful
