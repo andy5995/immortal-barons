@@ -15,6 +15,15 @@ League Coordinator's minimum-version gate.
    scripts/gen-help-translations.sh
    ```
 
+   **Never clear a `#, fuzzy` flag without reading the translation.** `msgmerge`
+   fills a new entry from whichever old one has the most similar *English*, so a
+   fuzzy `msgstr` is a guess about spelling, not about meaning. `de.po` currently
+   renders `Specialization` as "Regionen" and `Relations` as "Regionen" — both
+   inherited from `Regions` on string similarity alone, and `ru.po` has the same
+   pair. Nobody sees them: `internal/i18n` skips fuzzy entries by design, so the
+   reader gets English until a human validates one. Un-fuzzying in bulk is what
+   would ship them.
+
 2. **Stamp the ChangeLog.** Replace the `(in-progress:)` heading with
    `YYYY-MM-DD (vX.Y.Z)`, matching the existing entries.
 
