@@ -253,7 +253,15 @@ which was missed on v0.0.5.
 `docs/dev/` holds deeper reference material: `bre-screens.md` (BRE's literal
 on-screen output, layout, and ANSI colors, captured live — the source of truth
 for UI fidelity), `bre-save-format.md` (its binary `game.dat` layout, mapped by
-differential diffing), and `ibbs-packet-format.md`.
+differential diffing), `ibbs-packet-format.md`, and `ftn-standards.md`.
+
+`ftn-standards.md` describes the FTN formats themselves — the stored-message
+header, the attribute bits, the kludge lines — and which FTSC document defines
+each. Put FTN facts there and IB's use of them in `ibbs-packet-format.md`. No
+FTSC document is vendored: their licences forbid distribution inside a work
+that may be sold, which this project's licence permits, and they carry their
+authors' contact details. Facts are free to restate, so the file says them in
+its own words and links the originals. Nothing in FidoNet is an RFC.
 
 ## Status (v0.0.5 released 2026-08-15; v0.0.6 in development)
 

@@ -56,8 +56,11 @@ a deterministic 128-bit content digest instead. A transport that fans out must
 copy a broadcast to every other board's inbound.
 
 The short name leaves room for FTN `.msg` transports, whose Subject must carry
-the attachment pathname in at most 71 bytes. That byte budget is an FTN Type-2
-constraint, not a restriction on the packet format or on other transports.
+the attachment pathname in at most 71 bytes. That byte budget is an FTN
+constraint, not a restriction on the packet format or on other transports; it
+comes from the stored-message header described in
+[`ftn-standards.md`](ftn-standards.md), which is where the FTN formats and the
+standards defining them are written down.
 
 The destination number is the packet's FINAL destination, not the board the
 file is handed to. Where the file is written is the routing decision
