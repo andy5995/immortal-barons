@@ -285,8 +285,8 @@ func BuildMenus() *Menus {
 	// op targets an empire on another planet. The 8-item table at BRE.OVR 170011
 	// is read by `run_bombing_operations_menu` (0x029EA9) alone, whose only caller
 	// is the InterBBS menu, so the table belongs to THIS menu and to no other.
-	// Labels/order are binary-verified; the Send SpyGuy hotkey ('G' here) wasn't
-	// recoverable from the overlay dispatch. Only Send SpyGuy is wired; the
+	// Labels/order are binary-verified; the Send SpyGuy hotkey wasn't recoverable
+	// from the overlay dispatch, so IB numbers it 8 with the rest. Only Send SpyGuy is wired; the
 	// bombing/WMD variants are recorded-but-inert until interplanetary covert
 	// strikes are built. ('?'/'0' are IB's menu convention; BRE exits via ESC/Q
 	// with no listed items.) Numbered 1-8 with no Help item, as the live capture
