@@ -1,4 +1,6 @@
 (in-progress:)
+  * Choosing the treaty a realm already holds with you now reports that the
+    agreement stands, instead of offering to break it
   * Added barons-ftn, an optional helper that hands outbound packets to an FTN
     mailer as Type-2 file-attach netmail
   * A foiled covert operation now names the realm that sent the agent, as the

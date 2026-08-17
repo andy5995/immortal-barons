@@ -2886,7 +2886,19 @@ and BRE passes it to the routine as a flag: `?` lists the `-*Relations*-` table
 rather than the score table. IB's rules on top of that:
 
 - **Marking exactly one realm is the negotiation proper** — it proposes the pact,
-  accepts that realm's matching offer, or breaks the pact already held.
+  or accepts that realm's matching offer.
+- **Selecting the pact a realm ALREADY holds with you changes nothing
+  (DELIBERATE DIVERGENCE).** IB reports that the agreement stands and returns to
+  the Diplomacy menu. BRE files the proposal again regardless: its treaty items
+  (1–7) read no relation before sending — verified in `BRE.OVR` at 0x1C800, where
+  the send loop at +0x0995 goes straight to `"<pact> proposed to <realm>"` with no
+  test of the relation row, while the Declaration Of War loop at +0x0ADA is the
+  only one that reads it. IB used to offer to BREAK the standing pact here, which
+  is neither BRE's behaviour nor safe — it put the one destructive diplomatic act
+  behind the same key as the constructive one. BRE's break-with-penalty prompt
+  ("Are you sure you wish break your agreement?", `BRE.OVR` 0x1A838) belongs to
+  the shared target picker used by attacks, covert ops and trading, not to
+  diplomacy.
 - **Marking several sends one proposal each**, skipping any realm that already
   holds that pact, and asks the covering message once for the whole batch.
 - **A Declaration Of War takes one confirmation for the list** and reports each

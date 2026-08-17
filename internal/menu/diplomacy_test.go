@@ -280,3 +280,70 @@ func TestDiplomacyPickerListsRelations(t *testing.T) {
 		t.Errorf("an empty list proposed something to %s: %v", rows[0].name, rows[0].e.TreatyOffers)
 	}
 }
+
+// Selecting the treaty type a realm ALREADY holds with you says the pact stands
+// and returns to the Diplomacy menu. It used to offer to break it, which put the
+// one destructive diplomatic act behind the same key as the constructive one.
+func TestNegotiateTreatyAlreadyHeldChangesNothing(t *testing.T) {
+	w := newWorld()
+	rows, _ := pickRows(w, pickOpts{})
+	if len(rows) == 0 {
+		t.Skip("no recipients seeded")
+	}
+	p, target := w.Player(), rows[0].e
+	treatyWith(w, target) // a standing Free Trade Agreement
+
+	action := negotiateTreaty("Free Trade Agreement")
+	f := &fakeSession{keys: []rune(string(rows[0].letter) + "\r")} // mark the realm, close the list
+	if res := action(f, w); res != Stay {
+		t.Fatalf("negotiateTreaty action = %v, want Stay", res)
+	}
+	out := sgr.ReplaceAllString(f.out.String(), "")
+	if !strings.Contains(out, "Send to:") {
+		t.Fatalf("never reached the Send to: picker:\n%s", out)
+	}
+	if !strings.Contains(out, "holding strong") {
+		t.Fatalf("want the pact-still-stands message:\n%s", out)
+	}
+	if strings.Contains(out, "Break this treaty") {
+		t.Fatalf("selecting a held pact must not offer to break it:\n%s", out)
+	}
+	if got := w.World.Relation(p, target); got != "Free Trade Agreement" {
+		t.Errorf("the standing pact should be untouched, got %q", got)
+	}
+	if len(target.TreatyOffers) != 0 {
+		t.Errorf("nothing should have been proposed to %s, got %v", rows[0].name, target.TreatyOffers)
+	}
+}
+
+// The regression guard for the case above: a DIFFERENT pact offered to a realm
+// you already have relations with is a real proposal and still goes out. A pair
+// holds one relation (#88), so the standing pact gives way only on acceptance.
+func TestNegotiateTreatyProposesDifferentTypeToPartner(t *testing.T) {
+	w := newWorld()
+	rows, _ := pickRows(w, pickOpts{})
+	if len(rows) == 0 {
+		t.Skip("no recipients seeded")
+	}
+	p, target := w.Player(), rows[0].e
+	treatyWith(w, target) // a standing Free Trade Agreement
+
+	action := negotiateTreaty("Tariff Trade Agreement")
+	f := &fakeSession{keys: []rune(string(rows[0].letter) + "\rn")} // mark, close the list, decline the note
+	if res := action(f, w); res != Stay {
+		t.Fatalf("negotiateTreaty action = %v, want Stay", res)
+	}
+	out := sgr.ReplaceAllString(f.out.String(), "")
+	if !strings.Contains(out, "Send to:") {
+		t.Fatalf("never reached the Send to: picker:\n%s", out)
+	}
+	if strings.Contains(out, "holding strong") {
+		t.Fatalf("a different pact is a real proposal, not a standing one:\n%s", out)
+	}
+	if !offeredType(target, p.Name, "Tariff Trade Agreement") {
+		t.Errorf("want a pending Tariff Trade Agreement offer on %s, got %v", rows[0].name, target.TreatyOffers)
+	}
+	if got := w.World.Relation(p, target); got != "Free Trade Agreement" {
+		t.Errorf("an unaccepted proposal must not change the standing relation, got %q", got)
+	}
+}

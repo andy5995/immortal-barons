@@ -150,8 +150,8 @@ var diplomacyPickOpts = pickOpts{prompt: "Send to:", allowAll: true, relations: 
 
 // negotiateTreaty returns a Diplomacy menu action for one BRE treaty type
 // (#68): mark the realms to address, then propose the pact to each. Marking a
-// single realm negotiates with it instead — proposing, accepting a matching
-// offer from them, or breaking the pact already held. Treaty types are direct
+// single realm negotiates with it instead — proposing, or accepting a matching
+// offer from them. Treaty types are direct
 // menu items rather than hiding behind a single "Modify Diplomacy" item.
 func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 	return func(s session.Session, w *ctx) Result {
@@ -173,14 +173,14 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 			}
 		})
 		if len(chosen) == 1 {
-			// One realm is the negotiation proper: propose it, accept a matching
-			// offer, or break the pact already held.
+			// One realm is the negotiation proper: propose it, or accept a
+			// matching offer.
 			negotiateWithType(s, w, chosen[0], ttype)
 			return Stay
 		}
 		// Several realms take one proposal each — the ordinary single proposal, so
 		// the existing rules hold: a new offer replaces a pending one, and a realm
-		// already holding this pact is left alone rather than asked to break it.
+		// already holding this pact is left alone.
 		var names []string
 		w.With(func() {
 			p := w.Player()
@@ -209,8 +209,8 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 
 // negotiateWithType performs the one action that applies to ttype between the
 // player and the empire named ename: propose it if neither side has it, accept
-// it if ename has already offered it, or break it (with confirmation) if the
-// player already holds it. Both empires are re-resolved by name inside every
+// it if ename has already offered it, or — when the pact already stands — say
+// so and leave it alone. Both empires are re-resolved by name inside every
 // mutating transaction, so a concurrent node that eliminates ename (or the
 // player) between the prompt and the write aborts cleanly instead of mutating a
 // stale/rebound pointer. AcceptTreaty is idempotent — a second accept of an
@@ -239,25 +239,12 @@ func negotiateWithType(s session.Session, w *ctx, ename, ttype string) {
 	}
 	switch {
 	case held:
-		fmt.Fprintf(s, "\n%s"+tr(s, "You hold a %s with %s.")+"%s\n", ansi.FgBrightCyan, ttype, ename, ansi.Reset)
-		if !AskYesNo(s, "Break this treaty?", false) {
-			return
-		}
-		var err error
-		w.With(func() {
-			p := w.Player()
-			e := findRealm(w, ename)
-			if p == nil || e == nil {
-				err = errTargetGone
-				return
-			}
-			w.World.BreakTreaty(p, e, ttype)
-		})
-		if err != nil {
-			fail(s, err)
-			return
-		}
-		ok(s, "You broke the %s with %s.", ttype, ename)
+		// Selecting the pact you already hold is a no-op. It used to offer to
+		// break it, which put the one destructive diplomatic act behind the same
+		// key as the constructive one; BRE's Diplomacy menu never breaks from a
+		// treaty item either, and Declaration Of War is where a standing
+		// agreement is ended.
+		ok(s, "Your %s with %s stands, and is holding strong.", ttype, ename)
 	case offered:
 		fmt.Fprintf(s, "\n%s"+tr(s, "%s offers you a %s.")+"%s\n", ansi.FgBrightCyan, ename, ttype, ansi.Reset)
 		if !AskYesNo(s, "Accept this treaty?", false) {
