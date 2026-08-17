@@ -353,6 +353,25 @@ whether you should open it at all:
 **Record captured screens in `docs/dev/bre-screens.md`, not in this skill** — that
 doc is the durable catalog of BRE's exact output, wording, layout and ANSI color.
 
+**KEEP THE RAW CAPTURE. Write the `script` log straight into `cap/`, and never
+into a scratch directory you intend to delete.** `cap/` is gitignored — as
+verbatim BRE output it must not be committed — but it persists, and every claim
+in `bre-screens.md` has to stay re-readable by whoever doubts it later. A
+finding whose evidence is gone is a finding nobody can check, which is the exact
+condition the doc's corrections exist to remove.
+
+This has already gone wrong once. On 2026-08-16 a re-capture pass drove BRE in a
+throwaway `bre-cap` directory, corrected a dozen screens, and removed the
+directory when it finished; the `script` logs had gone to temp and vanished with
+it. The doc now carries claims stamped "re-captured" that nothing on disk
+supports, and two follow-up fixes stalled because the evidence for them could
+not be re-read. Copying the game elsewhere to protect the sysop's save was
+right; putting the capture there too was not.
+
+So: game state may live in a scratch copy, **captures may not**. Name the file
+for the session (`cap/<topic>-YYYYMMDD.cap`), and cite that filename in
+`bre-screens.md` beside what it proves.
+
 ## What the strings give you — and what they DON'T
 
 BRE is Turbo Pascal. Menu items are **length-prefixed ShortStrings stored
@@ -597,6 +616,29 @@ What must be in front of you BEFORE you open it:
   `list` / `lookup` / `find-string` / `map` / `disasm`), which needs no transient
   runtime segment. Base-solving by plausibility score dead-ends silently.
 - **A candidate reading is not a finding until it reproduces captured figures.**
+
+## Deciding a screen is NOT in the captures — the two ways that goes wrong
+
+Concluding "no capture covers this" is a claim, and a wrong one sends people off
+to re-drive BRE for something already on disk. Both failures below happened on
+2026-08-17, on the same screen, within an hour.
+
+- **Search for a menu ITEM plus its value, not for the status line.** The Covert
+  Operations menu was declared missing because the grep was keyed on its footer,
+  `You have N gold and N agents.`, and the pattern did not match the real
+  spacing. A screen's most greppable feature is a distinctive label next to a
+  number — `'Stir Revolts'` with `25,000` — not its prose furniture.
+- **BRE's help-topic INDEX lists every menu item, so it looks exactly like the
+  menu.** The follow-up search found the nine covert operation names, read the
+  screen they sat on, saw a plain list of all of them, and concluded the hits
+  were only the topic index. They were — at that offset. The real menu was
+  elsewhere in the same file. **A hit inside the topic index does not rule out a
+  hit on the menu; keep walking the matches.** The index has no prices and no
+  `(n)` keys; the menu has both.
+
+**Before reporting a screen as uncaptured, say which files you searched and with
+what pattern.** And check the file's mtime: a capture Andy took minutes ago is
+new data, and an earlier "not present" was true when it was made.
 
 ## Parsing a `.cap` capture — three traps that produced wrong findings
 
