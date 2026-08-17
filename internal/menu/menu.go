@@ -573,13 +573,19 @@ func dim(color string) string {
 // rule line, e.g. "──────[Goldie Luck's Bank]──────". Per BRE (live capture) the
 // dashes are the normal accent, the brackets the bright accent, and the title
 // itself bright white.
+// A title wider than its own box simply overhangs it, with no fill either side:
+// BRE draws Specialization's 16-column [Specialization] over a 14-column box
+// that way, brackets and title colored exactly as when the fill is present
+// (cap/../bbskd3.cap). So the fill runs collapse to zero rather than the line
+// falling back to a bare, uncolored label.
 func titleRule(color, title string, width int) string {
 	label := "[" + title + "]"
-	if len([]rune(label)) >= width {
-		return color + label + ansi.Reset
+	fill := width - len([]rune(label))
+	if fill < 0 {
+		fill = 0
 	}
-	left := (width - len([]rune(label))) / 2
-	right := width - left - len([]rune(label))
+	left := fill / 2
+	right := fill - left
 	return dim(color) + strings.Repeat("─", left) +
 		color + "[" + ansi.FgBrightWhite + title + color + "]" +
 		dim(color) + strings.Repeat("─", right) + ansi.Reset

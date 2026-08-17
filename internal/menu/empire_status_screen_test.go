@@ -34,6 +34,7 @@ func TestEmpireStatusMatchesTheCapturedFieldOrder(t *testing.T) {
 	p.Protection = 100
 
 	want := []string{
+		"─────══════════════───────────────────────────────────────────────────",
 		"-*Testland*-",
 		"Turns: 10",
 		"Score: 4,473",
@@ -52,6 +53,7 @@ func TestEmpireStatusMatchesTheCapturedFieldOrder(t *testing.T) {
 		"          [3 Industrial] [2 Urban] [1 Mountain] [7 Technology]",
 		"          [9 Waste]",
 		"You have 100 turns of protection left.",
+		"─────══════════════───────────────────────────────────────────────────",
 	}
 	got := statusLines(w)
 	if len(got) != len(want) {
@@ -81,6 +83,31 @@ func TestEmpireStatusUsesTheCapturedColours(t *testing.T) {
 		if !strings.Contains(out, want) {
 			t.Errorf("block is missing %q:\n%q", want, out)
 		}
+	}
+}
+
+// The rule that brackets the block, as a golden literal off the capture: `34`
+// blue, 70 columns, 5 single + 14 double + 51 single, drawn immediately above
+// the title and immediately below the reign line. Written out in full rather
+// than rebuilt from statusRuleWidth, so a retune has to bring new evidence.
+func TestEmpireStatusIsBracketedByTheCapturedRule(t *testing.T) {
+	w := newWorld()
+	w.Player().Name = "Testland"
+	out := empireStatusBlock(&fakeSession{}, w)
+
+	const rule = "\x1b[34m─────══════════════───────────────────────────────────────────────────\x1b[0m"
+	if n := strings.Count(out, rule); n != 2 {
+		t.Fatalf("want the 70-column blue inset rule twice, got %d:\n%q", n, out)
+	}
+	if !strings.Contains(out, rule+"\n\x1b[96m-*") {
+		t.Error("the rule should sit immediately above the -*realm*- title")
+	}
+	if !strings.HasSuffix(out, rule+"\n") {
+		t.Error("the rule should close the block, immediately after the reign line")
+	}
+	// A rule above and below is not a box: nothing runs down the sides.
+	if strings.ContainsAny(out, "│┌┐└┘") {
+		t.Errorf("the status block draws no box:\n%q", out)
 	}
 }
 

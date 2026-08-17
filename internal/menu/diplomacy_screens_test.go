@@ -158,3 +158,30 @@ func TestRelationsShowsOutgoingProposals(t *testing.T) {
 		t.Error("an answered proposal should stop being listed")
 	}
 }
+
+// TestCapturedRulesMatchBRE pins the two rules the 2026-08-16 capture audit
+// corrected. Golden literals, not measurements against the constants: the
+// renderers build from those same constants, so measuring against them would
+// pass whatever the constant drifts to (docs/dev/bre-screens.md).
+func TestCapturedRulesMatchBRE(t *testing.T) {
+	// The scores table: 75 columns, 5 ─ / 15 ═ / 55 ─. It was a plain 72 here,
+	// which is BRE's heading width rather than its rule, and left the recipient
+	// picker drawing the same table under a different rule.
+	w := newWorld()
+	f := &fakeSession{}
+	printScores(f, w)
+	got := findLine(plainLines(f.out.String()), "═")
+	want := "─────═══════════════───────────────────────────────────────────────────────"
+	if got != want {
+		t.Errorf("scores rule:\n got %q\nwant %q", got, want)
+	}
+
+	// The region table: 25 columns, 5 ─ / 5 ═ / 15 ─. It was 28.
+	f2 := &fakeSession{}
+	printRegionTable(f2, w.Player())
+	got = findLine(plainLines(f2.out.String()), "═")
+	want = "─────═════───────────────"
+	if got != want {
+		t.Errorf("region rule:\n got %q\nwant %q", got, want)
+	}
+}

@@ -76,7 +76,12 @@ func BuildMenus() *Menus {
 	// same, so the box fits it exactly (docs/dev/bre-screens.md).
 	attack := &Menu{Title: "Attack", Color: ansi.FgBrightMagenta, ExitOnEnter: true, Width: 23}
 	interplanetary := &Menu{Title: "InterPlanetary Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
-	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightGreen, ExitOnEnter: true, Status: covertStatus}
+	// Width: BRE's box is 32 columns (re-captured live 2026-08-17,
+	// cap/covert-menu-20260817.cap), sized to its widest row. IB's same row runs
+	// 34: the engine indents every menu item two columns, and IB comma-groups
+	// figures BRE prints bare — a recorded divergence. So 34 follows BRE's rule,
+	// sizing the box to its own content, where 32 would clip every priced row.
+	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightGreen, ExitOnEnter: true, Status: covertStatus, Width: 34}
 	bombTargets := &Menu{Title: "Bomb Enemy Targets", Color: ansi.FgBrightGreen, ExitOnEnter: true}
 	ipSpecial := &Menu{Title: "Special Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
 	// BRE draws IP Messages as a narrow single-column box (25 columns, from a

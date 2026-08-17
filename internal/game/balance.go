@@ -432,18 +432,6 @@ const (
 	SellAgentPrice = 100
 )
 
-// Covert Operations gold costs, charged per op on top of the agent risk
-// (live-sampled from BRE's Covert Operations menu at the DEFAULT/medium game
-// setup, 2026-07-21). Bomb Enemy Targets is one 100k menu entry in BRE; IB
-// splits it into a submenu and charges each variant CostBombEnemyTargets.
-//
-// These are NOT known to move with any of the sysop's cost settings, and #56
-// should not assume they do. The original's five cost knobs are Maintenance
-// Costs, Region Cost Change, Trade Deal Costs, Attack Costs and Terrorism Costs
-// — there is no covert one — and none of these fees is a literal in either
-// binary, in 32-bit or Real48 form, so nothing here can be read off as a
-// medium-setup sample of a ladder. Sampling a second setup live would settle it;
-// until then, treat scaling them as unevidenced rather than pending.
 // The covert roll, BINARY-VERIFIED from BRE.OVR 0x4BA48 (the roll) and 0x4CAB7
 // (the agent pools). docs/mechanics-reference.md carries the full routine and the
 // evidence, including the defect IB now reproduces for Send Spy.
@@ -463,6 +451,18 @@ const (
 	CovertAllyDefensePct = 50
 )
 
+// Covert Operations gold costs, charged per op on top of the agent risk.
+// BINARY-VERIFIED (#143): the nine dwords BRE's covert menu reads from
+// DS:0x63E are initialized data in BRE.EXE at file offset 0x14EDE, not a table
+// built at run time. Nothing in either binary writes them, the charge is a bare
+// 32-bit sub/sbb with no multiply, and the covert overlay unit never loads the
+// config record — so the sysop's cost presets do NOT scale them. Confirmed
+// live the same day: a game with Maintenance, Trade Deal, Region, Attack and
+// Terrorist Costs all set to High drew the identical nine figures, and a Send
+// Spy moved gold by exactly 5,000.
+//
+// Bomb Enemy Targets is one 100k menu entry in BRE; IB splits it into a
+// submenu and charges each variant CostBombEnemyTargets.
 const (
 	CostSendSpy            = 5_000
 	CostStirRevolts        = 25_000

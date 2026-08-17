@@ -29,6 +29,19 @@ const (
 	statusRegionsPerLine  = 4
 )
 
+// The block is bracketed by a blue inset rule — 70 columns, 5 single, 14
+// double, 51 single — sitting immediately above the `-*realm*-` line and
+// immediately below the reign line (cap/eots-ibbs-01.cap). A rule above and
+// below is not a box: nothing runs down the sides and nothing is filled.
+const (
+	statusRuleWidth  = 70
+	statusRuleDouble = 14
+)
+
+func statusRule() string {
+	return ansi.FgBlue + insetRule(statusRuleWidth, statusRuleDouble) + ansi.Reset
+}
+
 // statusItem is one bracketed `[figure Label]` cell. width is its visible width,
 // which the colour escapes in text make uncountable.
 type statusItem struct {
@@ -72,7 +85,8 @@ func empireStatusBlock(s session.Session, w *ctx) string {
 		fmt.Fprintf(&b, "%s%s%s\n", ansi.FgWhite, fmt.Sprintf(format, a...), ansi.Reset)
 	}
 
-	fmt.Fprintf(&b, "\n%s-*%s%s%s*-%s\n",
+	fmt.Fprintf(&b, "\n%s\n", statusRule())
+	fmt.Fprintf(&b, "%s-*%s%s%s*-%s\n",
 		ansi.FgBrightCyan, ansi.FgBrightWhite, p.Name, ansi.FgBrightCyan, ansi.Reset)
 
 	row("%s: %s", tr(s, "Turns"), hiFigure(count(p.TurnsLeft)))
@@ -149,6 +163,7 @@ func empireStatusBlock(s session.Session, w *ctx) string {
 	}
 
 	row("%s", reignLine(s, &p))
+	fmt.Fprintf(&b, "%s\n", statusRule())
 	return b.String()
 }
 

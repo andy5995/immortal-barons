@@ -255,10 +255,21 @@ The landmines:
   `Name your Realm:` → name + Enter → confirm `(Y/n)` → `y` →
   `Would you like Instructions? (y/N)` → `n` → ANSI splash (takes ~5s) →
   pause → main menu. An EMPTY realm name makes BRE exit immediately.
-- **Playing creates real state.** The run enrolls an empire under the
-  DOORFILE.SR caller name in the sysop's actual game data — tell Andy so he can
-  re-`reset`, and never run this against data he cares about. Don't run while
-  his own dosemu session is up (single-instance conflicts).
+- **Playing creates real state — so do not play in `bre-dos` at all.** Copy a
+  snapshot to a NEW directory under `~/.dosemu/drive_c/games/` (e.g. `bre-cap`)
+  and `CD` there instead. BRE reads its data relative to the current directory,
+  and `bbs.cfg` only names outbound paths, so a copied board runs standalone
+  with no edits. Andy's own install is then untouched by construction and there
+  is nothing to restore afterwards — which beats snapshot-and-restore, because a
+  restore you forget is a restore that did not happen. Say which directory you
+  made so he can delete it.
+- **`~/.dosemu/drive_c/dat-bak/` holds ready-made scenarios.** `saved4` is three
+  built realms with a Full Defense Alliance already signed — the fastest way to
+  a post-battle report, an Alliance Strength ally row, a `-*Relations*-` roster
+  with a real treaty in it, and an incoming treaty-offer prompt. Read its
+  `README.md` for the realm letters and the DOS date it needs before deciding to
+  grind a game up from a reset.
+- Don't run while Andy's own dosemu session is up (single-instance conflicts).
 - **`SRDOOR local` prompts `Name:` and it must be TYPED — never just Enter.**
   An empty answer writes an EMPTY caller name; BRE then treats you as a brand-new
   caller, asks "Name your Realm:", and exits on the empty answer, silently
@@ -366,12 +377,28 @@ Two ways round it, one of which does NOT work:
   `Error: Status File has been tampered with! Game will not run.` on the next
   launch. Restore from a backup copy and use the game instead. Those offsets are
   still worth having for READING a game's settings without driving the UI.
-- **The Configuration Editor would not accept edits in a headless pane.**
-  `BRE RESET` opens it, arrow keys move the highlight and PG-DN pages, but on a
-  numeric field none of typing digits, Left/Right, `+`/`-`, `e`/`E`, Backspace,
-  Space or Tab changed the value; Enter shows that field's help. Unresolved —
-  if you find the edit key, record it here. Until then, assume the editor is
-  read-only under `dosemu -t` and plan to burn protection with the driver.
+- **The Configuration Editor DOES accept edits in a headless pane** (settled
+  2026-08-16; this note used to say it was read-only, which cost sessions of
+  grinding around it). Enter on a field opens a full-screen page whose top is
+  that field's help and whose bottom is `New Setting:`. From there:
+  - a **preset** field (Maintenance Costs, Attack Damage, Sabre Handling, Buy
+    Military) commits on **one key** — `H` sets High and returns to the list, no
+    Enter;
+  - a **numeric** field takes digits then Enter;
+  - arrow keys move the highlight, PG-DN / PG-UP page, and the highlighted field
+    is drawn bright-white on both label and value so you can see where you are;
+  - `tmux send-keys -H 1b 1b` leaves the editor — a single `1b` was swallowed.
+
+  The trap that produced the old note: the edit prompt is at the BOTTOM of the
+  page while the help text fills the top, so a `head`-style capture shows a
+  modal-looking wall of prose and no prompt. Always
+  `tmux capture-pane -p | tail -5`.
+
+  So **`BRE RESET` is the cheap A/B for "does the sysop's cost knob scale this
+  price?"** — reset a scratch board with every cost preset at High, enrol a
+  realm, and read the price off the screen that quotes it. That settled two
+  questions in one run: local covert fees do not move, and Terrorist Ops does
+  (`regions x 64 x 3` at High).
 
 So: **budget three game days per empire before any trade/attack experiment**,
 and start the grind early rather than discovering the gate mid-run.

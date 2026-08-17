@@ -70,6 +70,32 @@ func TestEndOfTurnStatsWritesNonEmpty(t *testing.T) {
 	}
 }
 
+// The screen is bracketed by BRE's 75-column blue inset rule — 5 single, 15
+// double, 55 single — one under the heading and one closing the block. Golden
+// literal off the capture rather than a rebuild from eotsRuleWidth, so a retune
+// has to bring new evidence.
+func TestEndOfTurnStatsIsBracketedByTheCapturedRule(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	w := newWorld()
+	w.Player().LastSpoiled = 57 // a body line, so the two rules cannot be adjacent
+	endOfTurnStats(f, w)
+	out := f.out.String()
+
+	const rule = "\x1b[34m─────═══════════════───────────────────────────────────────────────────────\x1b[0m"
+	if n := strings.Count(out, rule); n != 2 {
+		t.Fatalf("want the 75-column blue inset rule twice, got %d:\n%q", n, out)
+	}
+	if !strings.Contains(out, "End of Turn Statistics:\x1b[0m\n"+rule) {
+		t.Error("the rule should sit immediately under the heading")
+	}
+	if !strings.HasSuffix(out, rule+"\n") {
+		t.Error("the rule should close the block")
+	}
+	if !strings.Contains(out, "57") {
+		t.Fatalf("the food-spoilage line never rendered, so the block was empty:\n%q", out)
+	}
+}
+
 // TestIncomeReportShowsIndustryProduction checks #71: production (and its
 // report lines) moved from end-of-turn to turn start, alongside income.
 func TestIncomeReportShowsIndustryProduction(t *testing.T) {
@@ -417,24 +443,30 @@ func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
 
 	for _, want := range []string{
 		"wildside — Daily Bulletin",
-		"Total Population", "1,865,289", "-5,838",
-		"Total Regions", "53,266", "+0",
-		"Total Net Worth", "34,833k", "+1,373k",
+		// The sign carries its own colour, so it and its figure are asserted apart.
+		"Total Population", "1,865,289", "5,838",
+		"Total Regions", "53,266",
+		"Total Net Worth", "34,833k", "1,373k",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected output to contain %q, got:\n%s", want, out)
 		}
 	}
-	// Population change is negative -> red; net worth change is positive -> green;
-	// regions change is zero -> neutral white.
-	if !strings.Contains(out, ansi.FgRed+"-5,838") {
-		t.Error("expected the negative population change to be red")
+	// BRE's colouring, as golden escape literals off bre-01-color.cap: the figure
+	// is `96` bright cyan whichever way the day went, and only a rise paints its
+	// `+` in `92` bright green. Direction is carried by the sign, so a reader who
+	// sees no colour at all still gets it.
+	if !strings.Contains(out, "\x1b[96m-\x1b[96m5,838") {
+		t.Error("a falling figure and its minus sign should both be bright cyan")
 	}
-	if !strings.Contains(out, ansi.FgGreen+"+1,373k") {
-		t.Error("expected the positive net-worth change to be green")
+	if !strings.Contains(out, "\x1b[92m+\x1b[96m1,373k") {
+		t.Error("a rising figure should carry a bright-green plus over a bright-cyan figure")
 	}
-	if !strings.Contains(out, ansi.FgWhite+"+0") {
-		t.Error("expected the zero regions change to be neutral white")
+	if !strings.Contains(out, "\x1b[96m+\x1b[96m0") {
+		t.Error("an unchanged figure should not be painted as a rise")
+	}
+	if strings.Contains(out, ansi.FgRed) {
+		t.Errorf("nothing in the bulletin is red — direction is not colour-coded:\n%q", out)
 	}
 }
 
@@ -520,9 +552,25 @@ func TestShowBulletinMastheadAndBox(t *testing.T) {
 			t.Errorf("expected news screen to contain %q, got:\n%s", want, out)
 		}
 	}
-	// The Daily Bulletin is now drawn as a box, not a solid bar.
-	if !strings.Contains(out, "╔") || !strings.Contains(out, "║") || !strings.Contains(out, "╚") {
-		t.Errorf("expected a boxed Daily Bulletin (╔ ║ ╚), got:\n%s", out)
+	// Golden literals, not the constants: BRE draws the Daily Bulletin in the
+	// SINGLE-line CP437 set at 66 columns and leads the masthead banner with `═`,
+	// not `»`. Both were wrong until the 2026-08-16 capture audit, so these must
+	// fail loudly if anyone "tidies" them back (docs/dev/bre-screens.md).
+	if strings.ContainsAny(out, "╔║╚╗╝") {
+		t.Errorf("Daily Bulletin must use the single-line box, not ╔ ║ ╚, got:\n%s", out)
+	}
+	if !strings.Contains(out, "┌") || !strings.Contains(out, "│") || !strings.Contains(out, "└") {
+		t.Errorf("expected a single-line boxed Daily Bulletin (┌ │ └), got:\n%s", out)
+	}
+	if !strings.Contains(out, "└"+strings.Repeat("─", 64)+"┘") {
+		t.Errorf("expected the bulletin box to close at 64 inner columns, got:\n%s", out)
+	}
+	wantBanner := "\x1b[31m──\x1b[91m═\x1b[97m" + newsBannerName + "\x1b[91m═\x1b[31m──"
+	if !strings.Contains(out, wantBanner) {
+		t.Errorf("expected the masthead banner %q, got:\n%s", wantBanner, out)
+	}
+	if strings.Contains(out, "»"+newsBannerName) || strings.Contains(out, newsBannerName+"«") {
+		t.Errorf("masthead banner must not use guillemets, got:\n%s", out)
 	}
 	// Each news item is led by the red arrow and the items are blank-line
 	// separated, so the arrow appears once per item.

@@ -631,11 +631,16 @@ const (
 	// wraps it — a column wider than the arrow itself.
 	newsItemIndent = "     "
 	newsBoxIndent  = "    "
-	newsBoxInner   = 54 // printable columns between the box's ║ borders
+	// newsBoxInner is the printable width between the box's │ borders. BRE draws
+	// the Daily Bulletin in SINGLE-line CP437 at 66 columns overall, indented 4
+	// (docs/dev/bre-screens.md) — this was a 54-wide double-line box until
+	// 2026-08-16, following a code block in that file that no capture produces.
+	newsBoxInner = 64
 )
 
 // renderDailyBulletin draws the boxed blue Daily Bulletin: planet-wide totals
-// with day-over-day change, colored green/red/neutral for +/-/0. title is the
+// with day-over-day change, the change bright cyan behind a bright-green "+" on
+// a rising day and a plain bright-cyan "-" on a falling one. title is the
 // board name in a league, or "" for a stand-alone board, which shows just
 // "Daily Bulletin".
 func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) {
@@ -646,24 +651,26 @@ func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) 
 	boxTop(s, head)
 
 	row := func(label string, total, change int, fmtNum func(int) string) {
-		clr := ansi.FgWhite
-		switch {
-		case change > 0:
-			clr = ansi.FgGreen
-		case change < 0:
-			clr = ansi.FgRed
-		}
 		sign := "+"
 		abs := change
 		if change < 0 {
 			sign = "-"
 			abs = -change
 		}
+		// BRE colors the change bright cyan whichever way it moved and paints only
+		// a rising day's "+" bright green, so direction is carried by the sign, not
+		// by color (docs/dev/bre-screens.md). IB drew a fall in dim red until
+		// then — 2.7:1 on the VGA palette, under the 4.5:1 text minimum.
+		signClr := ansi.FgBrightCyan
+		if change > 0 {
+			signClr = ansi.FgBrightGreen
+		}
 		lab := fmt.Sprintf("%-18s", tr(s, label)+":")
 		val := fmt.Sprintf("%-16s", fmtNum(total))
-		chg := sign + fmtNum(abs)
-		inner := "  " + ansi.FgWhite + lab + ansi.FgCyan + val + ansi.FgWhite + tr(s, "Change") + ": " + clr + chg + ansi.Reset
-		vis := 2 + len([]rune(lab)) + len([]rune(val)) + len([]rune(tr(s, "Change")+": ")) + len([]rune(chg))
+		num := fmtNum(abs)
+		inner := "  " + ansi.FgWhite + lab + ansi.FgCyan + val + ansi.FgWhite + tr(s, "Change") + ": " +
+			signClr + sign + ansi.FgBrightCyan + num + ansi.Reset
+		vis := 2 + len([]rune(lab)) + len([]rune(val)) + len([]rune(tr(s, "Change")+": ")) + 1 + len([]rune(num))
 		boxRow(s, inner, vis)
 	}
 
@@ -674,9 +681,10 @@ func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) 
 	boxBottom(s)
 }
 
-// boxTop draws the box's top border with head embedded (bright-white) in the ═
-// line; boxRow draws one ║…║ content line padded to newsBoxInner (innerVis is
-// the printable width of inner, excluding ANSI); boxBottom closes it.
+// boxTop draws the box's top border with head embedded (bright-white) in the ─
+// line; boxRow draws one │…│ content line padded to newsBoxInner (innerVis is
+// the printable width of inner, excluding ANSI); boxBottom closes it. BRE uses
+// the single-line CP437 set here, not the double one (docs/dev/bre-screens.md).
 func boxTop(s session.Session, head string) {
 	tw := len([]rune(head))
 	if tw > newsBoxInner {
@@ -684,11 +692,11 @@ func boxTop(s session.Session, head string) {
 	}
 	left := (newsBoxInner - tw) / 2
 	right := newsBoxInner - tw - left
-	fmt.Fprintf(s, "\n%s%s╔%s%s%s%s%s╗%s\n",
+	fmt.Fprintf(s, "\n%s%s┌%s%s%s%s%s┐%s\n",
 		newsBoxIndent, ansi.FgBlue,
-		strings.Repeat("═", left),
+		strings.Repeat("─", left),
 		ansi.FgBrightWhite, head, ansi.FgBlue,
-		strings.Repeat("═", right), ansi.Reset)
+		strings.Repeat("─", right), ansi.Reset)
 }
 
 func boxRow(s session.Session, inner string, innerVis int) {
@@ -696,15 +704,15 @@ func boxRow(s session.Session, inner string, innerVis int) {
 	if pad < 0 {
 		pad = 0
 	}
-	fmt.Fprintf(s, "%s%s║%s%s%s%s║%s\n",
+	fmt.Fprintf(s, "%s%s│%s%s%s%s│%s\n",
 		newsBoxIndent, ansi.FgBlue, ansi.Reset,
 		inner, strings.Repeat(" ", pad),
 		ansi.FgBlue, ansi.Reset)
 }
 
 func boxBottom(s session.Session) {
-	fmt.Fprintf(s, "%s%s╚%s╝%s\n",
-		newsBoxIndent, ansi.FgBlue, strings.Repeat("═", newsBoxInner), ansi.Reset)
+	fmt.Fprintf(s, "%s%s└%s┘%s\n",
+		newsBoxIndent, ansi.FgBlue, strings.Repeat("─", newsBoxInner), ansi.Reset)
 }
 
 // renderNewsMasthead prints the news screen's header: the program/version
@@ -725,7 +733,11 @@ func renderNewsMasthead(s session.Session, date string) {
 	}
 	fmt.Fprintf(s, "%s\n", ansi.Reset)
 
-	banner := ansi.FgRed + "──" + ansi.FgBrightRed + "»" + ansi.FgBrightWhite + tr(s, newsBannerName) + ansi.FgBrightRed + "«" + ansi.FgRed + "──" + ansi.Reset
+	// The inner glyph is `═` (CP437 0xCD), not a guillemet: BRE draws this banner,
+	// the Planetary Post one and the Planetary Treaties one all as ──═title═──
+	// (docs/dev/bre-screens.md). The `─»>Paused<«─` bar is a different decoration
+	// and does use guillemets.
+	banner := ansi.FgRed + "──" + ansi.FgBrightRed + "═" + ansi.FgBrightWhite + tr(s, newsBannerName) + ansi.FgBrightRed + "═" + ansi.FgRed + "──" + ansi.Reset
 	bannerVis := 2 + 1 + len([]rune(tr(s, newsBannerName))) + 1 + 2
 	indent := (len([]rune(rule)) - bannerVis) / 2
 	if indent < 0 {
@@ -893,7 +905,13 @@ func printScores(s session.Session, w *ctx) {
 }
 
 const (
-	scoreRuleWidth = 72
+	// scoreRuleWidth/Double are BRE's rule under the scores heading: 75 columns
+	// with a 15-column `═` accent inset (docs/dev/bre-screens.md). It was a plain
+	// 72 here, which is BRE's *heading* width rather than its rule, and left the
+	// recipient picker in actions_message.go drawing the same table under a
+	// different rule. One BRE screen gets one rule.
+	scoreRuleWidth  = 75
+	scoreRuleDouble = 15
 	// scoreIDCellWidth is the id column. Three columns is the whole id: a realm
 	// is addressed by a letter, and Max Players Per BBS is capped at 26 for that
 	// reason (game.MaxPlayersPerBoard), so `(A)`..`(Z)` is every id there is. The
@@ -968,7 +986,7 @@ func idCell(id string, idColor string) string {
 // here once. They previously carried a copy each of the same format strings,
 // which is how a change to one silently leaves the others behind.
 func scoreTableRule(s session.Session) {
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, strings.Repeat("─", scoreRuleWidth), ansi.Reset)
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, insetRule(scoreRuleWidth, scoreRuleDouble), ansi.Reset)
 }
 
 func scoreTableHead(s session.Session) {

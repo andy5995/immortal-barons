@@ -82,3 +82,38 @@ func TestReviewTreatyOffersShowsAttachedMessage(t *testing.T) {
 		t.Errorf("the attached message should be shown to the recipient, got:\n%s", f.out.String())
 	}
 }
+
+// BRE answers a pending offer BEFORE printing the numbered recap entries, and
+// takes the trade barter before the treaty. Read out of run_player_turn
+// (BRE.EXE 0x36E1): header, then process_trade_offer at 0x3855, then
+// process_diplomatic_proposal at 0x385A, then write_data_report at 0x385F for
+// the entries. IB ran the entries first and the treaty before the trade, so the
+// player answered a proposal underneath news that was meant to follow it.
+//
+// The captures cannot settle this on their own: no BRE screen anywhere shows an
+// offer and numbered entries in one recap, which is why this is pinned against
+// the call order instead.
+func TestPendingOfferIsAnsweredBeforeTheRecapEntries(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	other := recipients(w)[0]
+	w.World.ProposeTreaty(other, p, "Full Defense Alliance")
+	p.Events = []game.Event{{Text: "Pirates raided your treasury!"}}
+
+	f := &fakeSession{keys: []rune("n\r \r")}
+	openTurnRecap(f, w)
+	out := f.out.String()
+
+	offer := strings.Index(out, "proposes")
+	entry := strings.Index(out, "Pirates raided your treasury!")
+	if offer < 0 {
+		t.Fatalf("never reached the offer prompt, got:\n%s", out)
+	}
+	if entry < 0 {
+		t.Fatalf("never reached the recap entry, got:\n%s", out)
+	}
+	if offer > entry {
+		t.Errorf("offer at %d rendered AFTER the recap entry at %d; BRE prompts it first:\n%s",
+			offer, entry, out)
+	}
+}

@@ -210,6 +210,24 @@ func withPlayer(w *ctx, fn func(p *game.Empire)) bool {
 	return alive
 }
 
+// openTurnRecap runs the "since your last play" opening in BRE's order, read out
+// of run_player_turn (BRE.EXE 0x36E1): it prints the header, then calls
+// process_trade_offer (0x3855), then process_diplomatic_proposal (0x385A), then
+// write_data_report (0x385F) for the numbered entries, then read_local_messages
+// (0x3869). So a pending offer is answered BEFORE the recap entries it sits
+// above, and the trade barter comes before the treaty. IB ran both the other way
+// round until this was read.
+//
+// It is one function rather than four calls in playTurn so the order is
+// testable: no capture can settle it, because no BRE screen anywhere shows an
+// offer and numbered entries in the same recap.
+func openTurnRecap(s session.Session, w *ctx) {
+	reviewTradeDeals(s, w)   // pending trade-deal barters (accept/decline)
+	reviewTreatyOffers(s, w) // pending treaty offers, with proposer stats
+	showTurnEvents(s, w)
+	spoilsStage(s, w) // a landed interplanetary strike still needs its region types
+}
+
 // showTurnEvents prints and clears the active empire's accumulated events, if
 // any. The read and clear happen together under w's lock so a concurrent
 // maintenance tick or another session's action can't append between the two,
@@ -468,6 +486,7 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	}
 	p := &snap
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "End of Turn Statistics:"), ansi.Reset)
+	fmt.Fprintf(s, "%s\n", eotsRule())
 	fmt.Fprintf(s, "  %s\n", tr(s, peopleMood(p.Support)))
 	if p.LastPopGrowth > 0 {
 		fmt.Fprintf(s, "  "+tr(s, "Your dominion gained %s%s%s people.")+"\n", ansi.FgBrightCyan, comma(p.LastPopGrowth), ansi.Reset)
@@ -482,6 +501,19 @@ func endOfTurnStats(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, hiNums(fmt.Sprintf(tr(s, "Civil war! Famine cost you %d%% of your realm and its forces."), p.LastCivilWar)), ansi.Reset)
 	}
 	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
+	fmt.Fprintf(s, "%s\n", eotsRule())
+}
+
+// End of Turn Statistics geometry, measured off a live BRE capture
+// (cap/eots-ibbs-01.cap): the heading sits over a 75-column blue inset rule —
+// 5 single, 15 double, 55 single — and the same rule closes the block.
+const (
+	eotsRuleWidth  = 75
+	eotsRuleDouble = 15
+)
+
+func eotsRule() string {
+	return ansi.FgBlue + insetRule(eotsRuleWidth, eotsRuleDouble) + ansi.Reset
 }
 
 // paymentStage runs BRE's start-of-turn maintenance prompts. With Auto-Pay
@@ -843,10 +875,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		return Stay
 	}
 
-	showTurnEvents(s, w)
-	spoilsStage(s, w)        // land an interplanetary strike brought home still needs its types
-	reviewTreatyOffers(s, w) // BRE surfaces pending treaty offers here, with proposer stats + accept/decline
-	reviewTradeDeals(s, w)   // and pending trade-deal barters (accept/decline)
+	openTurnRecap(s, w)
 
 	firstTurn := true
 	for {

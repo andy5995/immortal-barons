@@ -121,3 +121,34 @@ func TestPausedBarDoesNotRunIntoTheNextScreen(t *testing.T) {
 		}
 	}
 }
+
+// The Specialization box is 14 columns, closed by a 14-column rule under a bare
+// 16-column [Specialization] title that overhangs it — the one box in BRE whose
+// title is wider than its content (docs/dev/bre-screens.md). Golden literals off
+// the capture: 14 dashes and an unfilled title line, not a rebuild from
+// specializationRuleWidth.
+func TestSpecializationBoxIsFourteenColumnsWithAnOverhangingTitle(t *testing.T) {
+	w := newWorld()
+	f := &fakeSession{keys: []rune("0\r \r")} // Quit the list, then the ok() pause
+	specializeIndustry(f, w)
+	out := f.out.String()
+
+	// Reached the screen, and Quit took effect — a script that ran dry would end
+	// the session cleanly and leave this green having drawn nothing.
+	if !strings.Contains(stripANSI(out), "1) Troopers") {
+		t.Fatalf("script never reached the Specialization list:\n%s", stripANSI(out))
+	}
+	if got := w.Player().Specialized; got != "" {
+		t.Errorf("Specialized = %q, want Quit to leave it unset", got)
+	}
+	// No fill either side of the title, and the brackets and title keep the
+	// colours a filled title line uses: dim accent, bright brackets, bright white.
+	const title = "\x1b[31m\x1b[91m[\x1b[97mSpecialization\x1b[91m]\x1b[31m\x1b[0m"
+	if !strings.Contains(out, title) {
+		t.Errorf("the title line should overhang the box unfilled, got:\n%q", out)
+	}
+	const rule = "\x1b[31m──────────────\x1b[0m"
+	if !strings.Contains(out, rule) {
+		t.Errorf("expected the 14-column dim-red closing rule, got:\n%q", out)
+	}
+}

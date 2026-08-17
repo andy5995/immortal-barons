@@ -281,6 +281,26 @@ read the code for the number you will actually type into `balance.go`. When the
 two disagree, the code wins and the disagreement goes in the constant's comment
 — otherwise the next reader "fixes" the constant back to the doc's value.
 
+**A price question is usually answered by the screen that quotes the price.**
+BRE prints its own costs — the Covert Operations menu carries a price column for
+all nine ops, the InterPlanetary menu prices Terrorist Ops, Special Operations
+prices four of its eight. Issue #143 had stood open on the theory that the covert
+fees were a runtime table nothing could read; the whole ladder was on the menu,
+and one operation confirmed the charge against gold in hand. **Open the screen
+before you open a disassembler.** Then use the disassembly to answer the question
+the screen cannot — here, whether the number is a constant or a scaled one.
+
+**"Not a literal in the binary" means you searched BOTH binaries, in the right
+encoding.** The same covert fees had been written up as a runtime table on the
+strength of a byte search that found nothing — the search had covered `BRE.OVR`
+only. The nine dwords are initialized data in `BRE.EXE` at `0x14EDE`, and
+`BRE.EXE` is where BRE keeps its initialized DGROUP (the goods table at
+`0x157b7` is the other case this bit). A `DS:` displacement is an offset into
+that data, so before concluding a value is assembled at run time, solve for the
+DGROUP base and look. Confirm the base against a known landmark, not
+plausibility: the ShortString `"Covert Operations"` sits right after the fee
+table at `DS:0x662`, and the menu's own `mov di,0x662` pins it.
+
 Three cheap sweeps to run at the start of any mechanic hunt:
 
 ```

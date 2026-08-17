@@ -1,4 +1,7 @@
 (in-progress:)
+  * A pending trade deal and treaty offer are now answered before the "since
+    your last play" entries rather than after them, and the trade deal comes
+    first, matching the original
   * Choosing the treaty a realm already holds with you now reports that the
     agreement stands, instead of offering to break it
   * Added barons-ftn, an optional helper that hands outbound packets to an FTN
@@ -41,6 +44,15 @@
     Request, View Diplomacy and Player List, keyed 1 to 4
   * Global Recon Request asks every other planet for a report on every realm it
     holds, and the answers land in the Spy Database
+  * The End of Turn Statistics screen is bracketed by the original's blue inset
+    rule, above and below, where it had none
+  * The Empire Status block is bracketed by the original's blue inset rule,
+    above the realm name and below the reign line, where it had none
+  * The Specialization box is 14 columns wide, as in the original, with its
+    title overhanging it
+  * A Daily Bulletin change is drawn as in the original: bright cyan whichever
+    way the day went, with only a rise carrying a green plus. The falling rows
+    were red, which was hard to read against black
 
 2026-08-15 (v0.0.5)
   * "?" at a planet prompt shows the list on the keypress; it no longer waits

@@ -11,6 +11,81 @@ Captured live 2026-07 by driving BRE v0.988 under dosemu2 and scraping the pane
 with `tmux capture-pane -ep` (the `-e` flag keeps ANSI escapes — this is the
 proven way to read BRE's colors headlessly; see the `bre-gather` skill).
 
+## Audit status — and the UNVERIFIED marker
+
+**Every claim in this file is either backed by a capture or marked
+`**UNVERIFIED**`.** That literal string is the one marker; `grep -n UNVERIFIED
+docs/dev/bre-screens.md` lists every gap in the file. A marked claim is a
+recorded guess or a reading taken from somewhere other than a live screen — do
+not build a colour or layout decision on one without re-capturing first. An
+unmarked claim was read off a capture, and the entry says which.
+
+**Captures are not in git** (`cap/` is excluded and `*.cap` is gitignored as
+verbatim proprietary output), so a future audit needs them re-taken, and nothing
+verbatim beyond what is already recorded here should be pasted in.
+
+**One exception to the rule above, and it is a defect in this file rather than a
+kind of claim.** The entries stamped **re-captured 2026-08-16** were read off a
+live session whose raw log was NOT kept: that pass drove BRE in a throwaway
+directory and deleted it when it finished, taking the `script` output with it.
+Copying the game aside to protect the sysop's save was right; putting the
+capture there too was not. Nothing here contradicts those readings and they are
+probably correct — but they cannot be re-checked against anything on disk, which
+is the standard every other unmarked claim meets. Treat them as sound but
+unauditable until someone re-drives those screens and keeps the log in `cap/`,
+per the rule now in the `bre-gather` skill.
+
+Nothing is parked on this any more. The last item that was — the **incoming
+treaty-offer prompt's position relative to the numbered recap entries** — was
+settled from the DISASSEMBLY instead, because no capture can settle it: a survey
+of all 249 recaps across six captures found no screen showing an offer and
+numbered entries together. `run_player_turn` (`BRE.EXE 0x36E1`) prints the
+header, then calls `process_trade_offer` (`0x3855`), `process_diplomatic_proposal`
+(`0x385A`), `write_data_report` (`0x385F`) for the entries, and
+`read_local_messages` (`0x3869`). So both offers precede the entries, and the
+trade barter precedes the treaty. IB had both the other way round.
+
+The **Covert Operations box width** was parked here too and is now settled: it
+was re-captured on 2026-08-17 with the log kept as `cap/covert-menu-20260817.cap`
+(32 columns; see that section).
+
+### 2026-08-16, pass one — the file against the captures on disk
+
+Every claim was checked against four colour captures plus one large monochrome
+public-board session. Roughly seventeen screens were misdescribed and corrected;
+each correction below says so and names the capture. That pass also found about
+a third of the file resting on no capture at all, which is what pass two went
+after.
+
+### 2026-08-16, pass two — driving BRE for the screens with no evidence
+
+A fresh session under dosemu2 (`script`-wrapped, so SGR colour survives) against
+a three-realm local game, then a `BRE RESET` for the editor. These went from
+recorded-but-unverified to capture-backed:
+
+| Screen | Outcome |
+|---|---|
+| Status bar | CORRECTED — three fields, and their pre-login values |
+| Regular Attack force entry | confirmed |
+| Regular Attack post-battle report (WIN) + region picker | confirmed |
+| Covert Operations menu | CORRECTED — accent is green, and the fees are on screen |
+| SDI Program colours | confirmed, plus the post-funding echo |
+| Configuration Editor | confirmed, plus the highlight colour and the edit screen |
+| Message editor | confirmed |
+| Game Setup | CORRECTED — it is bracketed by a rule this file omitted |
+| Travel Times | CORRECTED — the unmeasured case |
+| Alliance Strength with a real ally row | confirmed |
+| `-*Relations*-` | CORRECTED — the caller's own realm is not listed |
+| Incoming treaty-offer prompt | CORRECTED — it comes *before* the recap entries |
+
+**Still not reached, and still marked in place:** the Attack Type menu was not
+re-reached this run (it needs a live two-board league with recon data), but it
+is *not* unverified — it was captured end-to-end on 2026-08-11 and its entry
+carries those colours. What genuinely remains unverified is listed at each
+screen; the biggest are the interplanetary screens that need a second board
+running, and the Diplomacy roster-flag contradiction recorded under Full Defense
+Alliance.
+
 ## How to read the color notes
 
 Colors are given as ANSI SGR codes (what BRE actually emits):
@@ -32,8 +107,23 @@ mix the single horizontal `─` (U+2500) and double `═` (U+2550) — e.g. a sh
 
 ## Status bar (bottom line, every screen)
 
-`44`(blue bg)` BOB ` then `94` bright-blue `│` separators, fields in `37` white:
-`│ A │ Asgard │`, ending with `F2=Extra Information`.
+Captured 2026-08-16. The whole line carries a `44` blue background. It opens
+with the **BBS caller's handle** in `37` white, padded to 20 columns, then three
+`94` bright-blue `│` separators with `37` white fields between them — the
+empire **letter**, the **realm name**, and last the `■` (CP437 `0xFE`) marker
+immediately followed by `F2=Extra Information`:
+
+```
+ BORON               │ A │ Boron │ ■F2=Extra Information
+```
+
+**Before the caller is matched to an empire** — during the splash and the
+new-realm flow — the second and third fields read `UNKNOWN` and `Who knows!`.
+That is BRE's own placeholder text, so the bar is drawn before the login is
+resolved rather than being suppressed.
+
+This section said the bar opened with the *realm* name and showed two fields; it
+is the BBS handle, and there are three.
 
 ---
 
@@ -86,9 +176,11 @@ Choose a Target [A-Y,?=List RETURN to Abort]
 
 ### Force selection
 
-`You have ` white, counts in `96` bright-cyan. Each prompt: label white, then
-`94` blue `(` + `96` bright-cyan (suggested/default) + `94` `; ` + `36` cyan
-(max) + `94` `)`, input echoed `97` bright-white.
+Re-captured 2026-08-16, unchanged. `You have ` white, counts in `96`
+bright-cyan. Each prompt: label white, then `94` blue `(` + `96` bright-cyan
+(suggested/default) + `94` `; ` + `36` cyan (max) + `94` `)`, input echoed `97`
+bright-white. The default **is** the maximum here, so Enter commits everything —
+unlike the interplanetary force prompts, whose defaults are all 0.
 
 ```
 You have 4359 Troopers, 5000 usable Jets, 26,374 Tanks, and 0 Bombers
@@ -100,9 +192,17 @@ Send how many Troopers? (4359; 4359)
 
 ### Post-battle result (WIN)
 
-Note BRE breaks down **both sides' losses by unit type**, and uses the same
-"Exhausted from battle" header even on a win. The captured count is `96`
-bright-cyan; all other unit numbers are `97` bright-white; labels `37` white.
+Re-captured live 2026-08-16 (a winning attack that took 79 regions), and the
+description below held on every point. BRE breaks down **both sides' losses by
+unit type**, and uses the same "Exhausted from battle" header even on a win. The
+captured count is `96` bright-cyan; all other unit numbers are `97`
+bright-white; labels `37` white.
+
+**The line before it is an animation.** `And the battle begins` is followed by a
+run of about forty dots drawn alternately `31` red and `34` blue, which reads as
+a twinkling progress bar on a real terminal. The dot count varies. IB does not
+reproduce it, which is fine — but this is where the pause lives, so a
+reimplementation that prints the report instantly loses the beat.
 
 ```
 Your forces have returned..Exhausted from battle...
@@ -126,21 +226,24 @@ immediately after this. A win capturing 0 regions shows no picker.
 
 The **same** picker BRE shows after a winning Regular Attack that took land and
 after a winning pirate raid that took land. Header `Key Name            Owned`
-in `97` bright-white. Rule: `95` bright-magenta, `─────═════...` (short double
-accent in a single line). Each row: `35` magenta `(` + `97` bright-white
+in `97` bright-white. Rule: `95` bright-magenta, **25 columns** — 5 `─`, 5 `═`,
+15 `─` (measured in `cap/kd3-01.cap` and `cap/eots-ibbs-01.cap`; the same rule
+the Regions buy screen draws, since one routine serves both). Each row: `35`
+magenta `(` + `97` bright-white
 key-letter + `35` `)` + `93` bright-yellow region name + `97` bright-white Owned
 count. `(*) Advisors` uses the same coloring. **Owned counts are the values
 BEFORE this allocation** — BRE applies the picked amounts at the end.
 
 Picker prompt (distinct from the buy/sell "Your choice?"): `34` blue `[` + `96`
 bright-cyan (count) + `37` ` Regions left` + `34` `]` + `37` ` Your choice? `.
-After a type is chosen: `How many <Type> regions? ` white + `94` blue `(` + `96`
+After a type is chosen: `How many ` white + the type name `96` bright-cyan +
+` regions? ` white + `94` blue `(` + `96`
 `0` + `94` `; ` + `36` cyan (count) + `94` `)`. The picker loops, decrementing
 the count, and auto-exits when it reaches 0.
 
 ```
 Key Name            Owned
-─────═════──────────────────
+─────═════───────────────
 (C) Coastal           131
 (R) River               0
 (A) Agricultural       12
@@ -150,7 +253,7 @@ Key Name            Owned
 (M) Mountain          139
 (T) Technology         58
 (*) Advisors
-─────═════──────────────────
+─────═════───────────────
 [15 Regions left] Your choice?
 How many Coastal regions? (0; 15)
 ```
@@ -235,7 +338,7 @@ columns: `34` blue `(` + `94` bright-blue key + `34` `) ` + `37` white label.
 (F) Food Market        (T) Trading            (*) Coordinator Menu
 (G) Game Setup         (V) Visit Bank         (0) Quit
 (I) InterBBS Scores    (W) Write Macros
-──────────────────────────────────────────────────────────────────────
+─────────────────────────────────────────────────────────────────────
 Choice> Quit
 ```
 
@@ -332,7 +435,8 @@ The global average is approximately 1941 Gold per Region.
 
 ### (3) Military — named advisor + conditional advice + force tally
 
-The advisor is **named** ("Hi, I'm Joe, your military advisor."). Advice lines
+The advisor is **named** ("Hi, I'm Joe, your military advisor."), and the name
+itself is `97` bright-white against the `37` white greeting. Advice lines
 are conditional on empire state (missing HQ, carrier shortage, etc.); unit types
 named in advice are `93` bright-yellow. Force counts `97` bright-white.
 
@@ -397,42 +501,80 @@ catalogs had already dropped their "Menü"/"Меню" element for Diplomacy befo
 this change.
 
 **Box widths vary per screen** — BRE sizes each box to its content rather than
-to one house width. Measured across the captures in this file: 23 (Attack Menu),
-28 (Diplomacy), 38 (InterBBS Scores), 44 (Spending), 46 (Industrial Production),
-47 (opening), 61 (Crazy Gold Bank), 62 (InterPlanetary Ops), 64 (Food
-Unlimited), 69/75 (System Menu). IB's `rule` constant is 62; a screen that draws
+to one house width. Re-measured 2026-08-16 across every capture on disk
+(`cap/`, plus the two older colour captures), counting the title line and the
+closing rule of each box: 14/16 (Specialization), 17 (Attack Pirates), 16
+(Advisors), 20 (Trading), 23 (Attack Menu, Terrorist Ops), 26 (Coordinator
+Ops), 28 (Diplomacy), 36 (Preferences), 37 (Special Operations), 38 (InterBBS
+Scores), 44 (Spending, Sell), 46 (Industrial Production), 52 (opening), 60
+(Crazy Gold Bank), 58/62/64/68 (InterPlanetary Ops), 64 (Food Unlimited), 69/75
+(System Menu).
+
+**The closing rule is exactly the box width.** True of 18 of the 19 box titles
+found across the five captures; Specialization is the one exception, and only
+because its title is wider than its content (below). Several code blocks in this
+file used to draw the closing rule one column wider than its own title line —
+those were the blocks being wrong, not BRE being inconsistent.
+
+IB's `rule` constant is 62; a screen that draws
 its own box should take its width from its own capture instead. IB sets `Width`
 per menu where a capture gives one: Attack 23 (its content measures 23 too, so
-the fit is exact), Spending 44, Industrial Production and Specialization 46.
+the fit is exact), Spending 44, Industrial Production 46, Specialization 14.
 **System is 59, not BRE's 69/75** — BRE lays that menu out in three columns and
 its box tracks whichever items are showing, IB uses two, so IB follows the
-principle (size to content) rather than the number. Specialization
-is not captured — IB draws it at 46, matching Industrial Production beside it,
-which is a reasoned guess rather than a verified figure.
+principle (size to content) rather than the number.
+
+**Specialization IS captured** (this file said it was not until 2026-08-16).
+BRE draws its title line as a bare `[Specialization]` with **no fill at all** —
+16 columns, because the title is wider than the menu — and closes it with a
+**14**-column rule, the width of its widest item (`(1) Troopers  `). So the box
+is content-sized like every other, and the title simply overhangs it. **IB now
+draws it at 14**, having drawn it at 46 until 2026-08-16 to sit beside Industrial
+Production. `titleRule` collapses its fill runs to zero rather than falling back
+to a bare label, so an overhanging title keeps the bright brackets and
+bright-white text a filled one has — which is what the capture shows. IB's item
+labels are still laid out its own way (`  1) Troopers`, unpadded, where BRE pads
+each to the full 14), and the width grows past 14 when a translated label needs
+it, since sizing to content is what produces 14 in the first place.
+
+**InterPlanetary Operations is the one box whose width moves** — 58, 62, 64 and
+68 all appear, because the Terrorist Ops price column grows with the figure it
+carries. Take 62 from the block below only as one sample.
 
 | Menu | Accent |
 |------|--------|
 | Opening menu (`Barren Realms Elite`) | `35` magenta |
 | See Scores / Regions buy / Attack Menu / Advisors | `35` magenta |
-| Diplomacy Menu | `36` cyan |
-| Crazy Gold Bank / Food Unlimited | `36` cyan |
-| Spending Menu / Industrial Production / Trading / Specialization | `31` red |
+| Diplomacy Menu / Sell Menu | `32` green |
+| Crazy Gold Bank / Food Unlimited / Preferences | `36` cyan |
+| Spending Menu / Industrial Production / Trading / Specialization / Special Operations / Terrorist Ops | `31` red |
 | System Menu | `34` blue |
 | InterPlanetary Operations | `33` yellow |
 | InterBBS Scores / Attack Pirates | `90` bright-black (gray) |
-| Sell Menu | `32` green |
+
+The whole table was re-read from the captures on 2026-08-16 by matching the SGR
+run in front of each `[Title]`. Every menu is consistent across all five
+captures. **Diplomacy is GREEN, not cyan** — this file said cyan until then, and
+all four captures that contain the menu draw its rule `32` and its brackets
+`1;32`. (IB's code was already green; only the doc was wrong.)
+
+The two gray menus put the accent on the rule and the parentheses only: their
+title brackets are plain white `37` and their hotkeys `1;37` bright-white, where
+every other menu brightens its own accent for both.
 
 Data-value convention (status, income, bank, food, end-of-turn): the **numbers**
 are `96` bright-cyan, the surrounding label text `37` white. Maintenance-paid /
 food-consumed lines and the Spending-Menu Price/#Owned columns use `97`
-bright-white numbers instead.
+bright-white numbers instead — and so does a **menu's own status footer**
+(`You have N gold and N turns.`, `…and N units of food.`), on every menu that
+carries one.
 
 ### Opening menu (top-level)
 
 Shown after login and after each news screen. Magenta accent; two columns.
 
 ```
-─────────────[Barren Realms Elite]─────────────
+───────────────[Barren Realms Elite]────────────────
 (1) Play Game             (8) Game Bulletins
 (2) See Status            (9) InterPlanetary Ops
 (3) See Scores            (A) Game Instructions
@@ -440,16 +582,28 @@ Shown after login and after each news screen. Magenta accent; two columns.
 (5) See Yesterday's News  (P) Preferences
 (6) Read Messages         (0) Quit
 (7) Send Messages
-────────────────────────────────────────────────
+────────────────────────────────────────────────────
 Choice> Play Game
 ```
+
+**52 columns**, not the 47/48 this block used to draw: 15 `─`, `[Barren Realms
+Elite]`, 16 `─`, closing rule 52. That is exactly its content — two 26-column
+item cells (`(1) ` plus a 22-column label field).
 
 ### Daily News File / Daily Bulletin
 
 Header line: `93` bright-yellow `Barren Realms Elite ` + `97` `v0.988` + `37`
-`: News File` with the date right-aligned. Then a blank line, then a **centered**
-banner: `31` red `──` + `91` bright-red `»` + `97` bright-white
-`The Queen's Quadrant` + `91` `«` + `31` `──`, then a full-width `33` yellow rule.
+`: News File` with the date right-aligned. Then a blank line, then the banner,
+indented 24 columns — centred over the 75-column rule below it, not over the
+80-column screen: `31` red `──` + `91` bright-red `═` + `97` bright-white
+`The Queen's Quadrant` + `91` `═` + `31` `──`, then a full-width `33` yellow rule.
+
+**The banner's inner glyphs are `═` (CP437 `0xCD`), not `»`/`«`.** This file
+recorded them as guillemets until 2026-08-16; the bytes around the title in
+`bre-01-color.cap` read `c4 c4 … cd … cd … c4 c4`. The same idiom draws the
+`──═Planetary Post═──` and `──═Planetary Treaties═──` banners, which this file
+already had right — three screens, one decoration. (The `─»>Paused<«─` bar is a
+different decoration and really is `0xAF`/`0xAE`.)
 
 The Daily Bulletin box has a `34` blue border with `97` bright-white
 `Daily Bulletin` in the top edge. Three rows; label `37` white, value `36` cyan,
@@ -457,14 +611,27 @@ The Daily Bulletin box has a `34` blue border with `97` bright-white
 bright-cyan value; **negative** change = `96` bright-cyan for the whole thing
 (minus sign included — direction is not color-coded).
 
+**IB matched this on 2026-08-16**, having drawn a rise in `32` green and a fall
+in `31` red. The old colouring was also a contrast defect: `31` red on black
+measures **2.7:1** on the VGA palette (#AA0000, relative luminance 0.0853,
+`(0.0853 + 0.05) / 0.05`), under the 4.5:1 text minimum. `96` bright cyan is
+17.1:1 and `92` bright green 15.8:1, both far clear of it. Nothing is lost by
+dropping the red/green pairing, because the `+`/`-` sign already carries
+direction on its own — including in a monochrome or ANSI-less session.
+
+**The box is drawn in SINGLE-line CP437, `┌ ─ ┐ │ └ ┘`, and is 66 columns wide**
+— not the double `╔ ═ ╗ ║ ╚ ╝` at 68 this block used to show. Indented 4; top
+edge is `┌` + 25 `─` + `Daily Bulletin` + 25 `─` + `┐`, bottom `└` + 64 `─` +
+`┘`. Measured identically in `bre-01-color.cap` and the public-board capture.
+
 ```
-                        ──»The Queen's Quadrant«──
+                        ──═The Queen's Quadrant═──
 ───────────────────────────────────────────────────────────────────────────
-    ╔══════════════════════════Daily Bulletin══════════════════════════╗
-    ║  Total Population: 185,861             Change: +19243              ║
-    ║  Total Regions:    25,283              Change: +1167               ║
-    ║  Total Net Worth:  2720k               Change: +616k               ║
-    ╚═══════════════════════════════════════════════════════════════════╝
+    ┌─────────────────────────Daily Bulletin─────────────────────────┐
+    │  Total Population: 185,861             Change: +19243          │
+    │  Total Regions:    25,283              Change: +1167           │
+    │  Total Net Worth:  2720k               Change: +616k           │
+    └────────────────────────────────────────────────────────────────┘
 ```
 
 Below the box, the news items. Each item starts with `31` red `──` + `91`
@@ -500,19 +667,34 @@ the prose — clean-room — this records BRE's wording and coloring only.)
 Title `-*` `91` red + `97` bright-white `Barren Realms Elite` + `*-` red. Column
 header row `97` bright-white. The border mixes single `─` and a `══` double-line
 accent over the name column. Each row: `35`(`(`)` + `97` key + `35`)` + a flag
-column (`+` = participating this reset, space = not) + `37` white name + `95`
+column + `37` white name + `95`
 bright-magenta Territory + `97` bright-white Score + `37` white Net Worth.
+
+**UNVERIFIED — what the `+` flag means.** This file has called it
+"participating this reset", and elsewhere just "marks it in the list". Neither
+survives the 2026-08-16 capture: across one session the flag moved on and off
+individual realms with no reset in sight — a three-realm game showed all three
+flagged, then `A +`, `B —`, `C +` after `A` played and attacked `B`, then
+`A +`, `B +`, `C —` after `B` played. It is per-viewer or per-day state of some
+kind and nobody has pinned which. Do not build anything on the current wording;
+IB's own `+` is its own choice either way.
 
 ```
 -*Barren Realms Elite*-
 
 Id  Empire Name                          Territory     Score    Net Worth
-─────══════════─────────────────────────────────────────────────────────
+─────═══════════════───────────────────────────────────────────────────────
 (A)+Empire One                               6936    536115     1344439
 (B)+Empire Two                               5749    442683      692769
 (E) Your Empire                              1140      4260       24814
-─────══════════─────────────────────────────────────────────────────────
+─────═══════════════───────────────────────────────────────────────────────
 ```
+
+The rule is **75 columns — 5 `─`, 15 `═`, 55 `─`** in `35` magenta, the same
+figure the attack picker and the recipient picker draw, since one routine serves
+all three. This block showed 72 (with a 10-column `═` accent) until 2026-08-16;
+no capture produces that. Note the *heading* row is 72, three columns short of
+its own rule — that mismatch is BRE's.
 
 **IB adds an online mark (#123).** BRE has no online indicator; IB writes `(O)`
 for a baron who acted within `OnlineWindowSecs`, hugging the LEFT of the empire
@@ -541,8 +723,14 @@ mark next to the name it describes; `3c4a789` is the commit.
 ### Turn income, status block, maintenance
 
 At turn start BRE prints the income lines (numbers `96` bright-cyan), then the
-status block bordered by `34` blue rules (single/double mix), then the
-maintenance-paid lines (`97` bright-white numbers).
+status block bordered by `34` blue rules, then the maintenance-paid lines (`97`
+bright-white numbers).
+
+**Two different rule widths are in play here, both `34` blue inset rules.** The
+income lines open under a **75**-column one (5 `─`, 15 `═`, 55 `─`); the status
+block is bracketed by a **70**-column one (5 `─`, 14 `═`, 51 `─`) above and
+below. Nothing closes the maintenance lines — the pause follows them directly.
+The rules are omitted from the block below only to keep the field list readable.
 
 ```
 227,717 gold was earned in taxes.
@@ -571,8 +759,20 @@ The status title `-*name*-` uses `96` bright-cyan `-*`/`*-` with `97` bright-whi
 name; every field value is `96` bright-cyan, labels `37` white.
 
 **There is no box.** The block is a plain run of lines at column 0 — no border,
-no rule, no fill. IB drew it as two boxed pages of its own invention until
+no side rails, no fill. IB drew it as two boxed pages of its own invention until
 v0.0.4; both are gone and IB now renders the block above.
+
+This paragraph said "no rule" until 2026-08-16, which the captures contradict:
+the 70-column blue inset rule described above sits immediately before `-*name*-`
+and immediately after the protection line. A rule above and below is not a box,
+and both statements have to be made separately. **IB draws both rules** as of
+2026-08-16; it drew neither before.
+
+IB's income lines open under an `Income Report` title bar of its own rather than
+the 75-column rule BRE uses. An undocumented divergence until 2026-08-16 —
+recorded here rather than corrected, because the report is itemized differently
+from BRE's (right-aligned amounts, a subtotal rule, a total line) and the heading
+is what names that table.
 
 **The capture is of a realm that holds little, and the block is shorter than the
 field set.** The status routine (`BRE.OVR` `show_empire_status`, 0x193b2) is a
@@ -658,15 +858,18 @@ Cyan accent, two columns. Followed by the gold-in-hand / in-bank line (both
 figures `97` bright-white).
 
 ```
-──────────────────────[Crazy Gold Bank]──────────────────────
+─────────────────────[Crazy Gold Bank]──────────────────────
 (C) Cash Relief / Loans       (L) List Investments / Loans
 (D) Deposit Funds             (V) View Bank Rates
 (W) Withdraw Funds            (0) Quit
 (I) Investments
-──────────────────────────────────────────────────────────────
+────────────────────────────────────────────────────────────
 You have 4,582,875 gold in hand and 7,255,312 gold in the bank.
 Choice> Quit
 ```
+
+**60 columns** (21 `─`, `[Crazy Gold Bank]`, 22 `─`), closing rule 60 — this
+block drew 61/62 until 2026-08-16.
 
 Deposit / Withdraw prompt form: `Withdraw how many gold? (0; 7,255,312)` — the
 parenthetical is `(minimum; maximum)`.
@@ -715,7 +918,7 @@ Note: Region prices are constantly changing.  Therefore, the region price
 You can afford 274 regions.
 
 Key Name            Owned
-─────────────────────────
+─────═════───────────────
 (C) Coastal          1088
 (R) River              24
 (A) Agricultural       14
@@ -725,9 +928,13 @@ Key Name            Owned
 (M) Mountain            5
 (T) Technology          0
 (*) Advisors
-─────────────────────────
+─────═════───────────────
 Your choice?
 ```
+
+Same 25-column rule and the same colors as the captured-region picker above —
+one routine draws both. `There are N Regions available` and `You can afford N`
+carry their figures in `96` bright-cyan against `37` white body.
 
 Picking a region type prints its one-paragraph blurb, then
 `Buy how many <Type> regions? (0; <max>)`.
@@ -760,8 +967,9 @@ when gold runs out.
 
 ### Diplomacy Menu
 
-Cyan accent, single column. (Reached pre-turn in this build, and from the System
-Menu.)
+**Green accent** (`32` rule and parens, `1;32` brackets and hotkeys), single
+column. (Reached pre-turn in this build, and from the System Menu.) This section
+said cyan until 2026-08-16; see the accent table above for the evidence.
 
 ```
 ──────[Diplomacy Menu]──────
@@ -799,11 +1007,19 @@ Change Production? (y/N) No
 ### InterPlanetary Operations
 
 Yellow accent, two columns. `Terrorist Ops` shows a cost figure next to the
-label — **the launcher's region count × 64**, so it climbs as the realm buys
-land. The `72,960` below is 1,140 regions; a second capture
-(`cap/eots-ibbs-01.cap`) gives 541,824 / 542,144 / 542,336 / 542,976 against
-8,466 / 8,471 / 8,474 / 8,484 regions, every one exact. The derivation and the
+label — **the launcher's region count × 64 at the default Terrorist Costs
+setting**, so it climbs as the realm buys land. The `72,960` below is 1,140
+regions; a second capture (`cap/eots-ibbs-01.cap`) gives 541,824 / 542,144 /
+542,336 / 542,976 against 8,466 / 8,471 / 8,474 / 8,484 regions, every one
+exact; a third on 2026-08-16 gives 47,232 against 738. The derivation and the
 one term still unpinned are in `docs/mechanics-reference.md`.
+
+**The 64 is the Medium figure — the sysop's `Terrorist Costs` knob scales it.**
+Set to **High**, a 15-region realm was quoted **2,880**, which is
+`15 × 64 × 3`. So the multiplier is a preset factor and 64 is its Medium value;
+`×3` for High is one sample and the Low / None factors were not measured, so
+**UNVERIFIED** beyond that. This is the opposite of the local covert fees, which
+the same experiment proved do not move at all (see Covert Operations).
 
 Colors, from `cap/eots-ibbs-01.cap`: the rule is `33` yellow with the brackets
 `1;33` bright yellow and the title `1;37` bright white; each item is a `33`
@@ -829,8 +1045,23 @@ Gates seen: `Sorry....You are under New Realm Protection!` (Terrorist / Special
 Ops while protected), `There are not any attack parties at this time.` (Join
 Group Attack).
 
-**Travel Times** (T): `Average Turn Around Times to All BBSes`, one
-`planet    N.NN hours` row per board.
+**Travel Times** (T). Captured 2026-08-16: a `37` white heading
+`Average Turn Around Times to All BBSes`, then the **78**-column inset rule
+(5 `─`, 15 `═`, 58 `─`) in `90` gray above and below the rows. Each row is the
+planet name in `37` white in a 30-column field, then the figure.
+
+```
+Average Turn Around Times to All BBSes
+─────═══════════════───────────────────────────────────────────────────────
+Test Planet Two               No Data
+─────═══════════════───────────────────────────────────────────────────────
+```
+
+**A board with no measured round trip reads `No Data`, in `31` red** — not a
+zero and not a blank. The `planet    N.NN hours` form this file recorded is the
+measured case only; both belong in the same column. (`31` red on black measures
+2.7:1 on the VGA palette, under the 4.5:1 minimum — IB should not copy the
+colour for its own "no data" state, and the word carries the meaning without it.)
 
 **SDI Program** (A):
 ```
@@ -844,10 +1075,17 @@ Note: You should only fund the SDI in increments of 1000 Gold.
 Add how much gold for funding? (0; 0)
 ```
 
-Colors: labels white `37`, every figure bright-yellow `1;33`, the Note line gray
-`1;30`. After funding it prints `N Gold added.` then `Current SDI Strength: N%`
-again. See the SDI section at the end of this file for the seventeen captured
-funding levels and what they establish.
+Colors, re-captured 2026-08-16 and confirmed: labels white `37`, every figure
+bright-yellow `1;33`, the Note line gray `1;30`. After funding it prints
+`N Gold added.` then `Current SDI Strength: N%` again — and **those two lines
+put their figures in `97` bright-white**, not the bright-yellow the report lines
+above use. See the SDI section at the end of this file for the seventeen
+captured funding levels and what they establish.
+
+The same run funded an empty program with 250,000 gold at 738 regions and got
+**5%**, which is `trunc(sqrt(250000 / (10 × 739)))` exactly — an independent
+check of the curve on a realm three orders of magnitude smaller than the one it
+was derived from.
 
 The menu's own keys, from the capture: Gooie Kablooie Ops is **9**, not a
 letter, and Terrorist Ops carries a gold cost in the menu's price column
@@ -903,13 +1141,22 @@ add a `Planet` column.
 ```
 Barren Realms Elite: Top Planets by Score
 
-                          »Planetary Post«
+                          ──═Planetary Post═──
 
       Name                               Score
-────────────────────────────────────────────────────
+────────────────────────────────────────────────────────────────────────
 (  1) Planet A                         1321561
 (  2) Planet B                         1254755
 ```
+
+Colors and geometry, from `bre-01-color.cap`: the title line is `97`
+bright-white `Barren Realms Elite` + `90` gray `: ` + `91` bright-red metric
+name. The banner is the same `──═…═──` decoration as the news masthead — `31`
+red `──`, `91` bright-red `═`, `97` bright-white title — indented 26. The
+heading row is `97` bright-white and the rule under it is **72** columns of
+plain `─` in `90` gray (this block drew 52 until 2026-08-16, and the banner as
+`»…«`). Each row: `31` red `(` + `91` bright-red right-aligned number + `31`
+`) ` + `37` white name + `97` bright-white value.
 
 ### Attack Menu (InterBBS, local attacks OFF)
 
@@ -948,19 +1195,27 @@ file, which lists Regular/Nuclear/Chemical/Biological). Magenta accent.
 
 ### End of Turn Statistics
 
-Blue border rules. Opens with a support-flavor line, then population change and
-food spoilage (numbers `96` bright-cyan), then `Do you wish to continue? (Y/n)`.
+Heading `97` bright-white, then `34` blue **inset** rules — 75 columns, 5 `─`,
+15 `═`, 55 `─`, the same rule that opens the income lines. Opens with a
+support-flavor line, then population change and food spoilage (numbers `96`
+bright-cyan), then `Do you wish to continue? (Y/n)`.
 
 ```
 End of Turn Statistics
-───────────────────────────────────────────────────────────────────────────
+─────═══════════════───────────────────────────────────────────────────────
 Your people have great faith in you as an excellent ruler!
 
 Your dominion gained 380 million people.
 57 units of food spoiled.
-───────────────────────────────────────────────────────────────────────────
+─────═══════════════───────────────────────────────────────────────────────
 Do you wish to continue? (Y/n) Yes
 ```
+
+This block drew both rules as plain 75-column runs until 2026-08-16; the `═`
+accent is in `bre-01-color.cap` and `cap/eots-ibbs-01.cap` alike. **IB draws
+both rules** as of 2026-08-16; it drew a bare heading and no rules before. Its
+heading keeps IB's own bright-cyan `End of Turn Statistics:` where BRE writes it
+bright-white without the colon, and its body lines are indented two columns.
 
 ### Food Unlimited (Food Market)
 
@@ -973,7 +1228,7 @@ We are buying for 9 and selling for 26.
 
 ────────────────────────[Food Unlimited]────────────────────────
 (B) Buy Food    (S) Sell Food   (V) Visit Bank  (0) Quit
-─────────────────────────────────────────────────────────────────
+────────────────────────────────────────────────────────────────
 You have 3,229,328 gold and 5321 units of food.
 ```
 
@@ -1046,11 +1301,16 @@ Blue accent, three columns. In InterBBS mode it carries two extra rows —
 (F) Food Market          (T) Trading              (4) Spy Database
 (G) Game Setup           (V) Visit Bank           (0) Quit
 (I) InterBBS Scores
-────────────────────────────────────────────────────────────────────────────
+───────────────────────────────────────────────────────────────────────────
 ```
 
 - **Set Tax Rate** (R): `New Tax Rate [0-100, Current Tax Rate = 20]?`
-- **Game Setup** (G): the read-only ruleset dump —
+- **Game Setup** (G): the read-only ruleset dump. **Re-captured 2026-08-16, and
+  it is bracketed above and below by a 78-column inset rule (5 `─`, 15 `═`,
+  58 `─`) in `90` gray**, which this block omitted entirely. Labels are `37`
+  white and values `97` bright-white — except the board count in the InterBBS
+  sentence and the three `Gooie Kablooies` / `Bombing Ops` / `Missile Ops`
+  toggles on the last line, which are `93` bright-yellow.
 
 ```
 Game Started:        7/8/2026
@@ -1094,18 +1354,35 @@ member** (its `bbs.cfg` FTN address matching an entry in `BRNODES.DAT`). A
 standalone install never asks it, which makes it the quickest confirmation that
 an InterBBS test board is configured correctly.
 
-Two pages, moved through with **PG-DN / PG-UP**; `[ESC]` saves and quits. Fields
-are **colour-coded by type, and every value is the BRIGHT form of its label's
+Two pages, moved through with **PG-DN / PG-UP**; `[ESC]` saves and quits.
+**Re-captured with colour 2026-08-16** — the colour-by-type table below had been
+presented as fact with no capture behind it, and it holds. Fields are
+**colour-coded by type, and every value is the BRIGHT form of its label's
 colour** — labels `3x`, values `9x`:
 
 | field type | label | value | seen on |
 |---|---|---|---|
-| dates | `32` green | `92`/`97` bright | Game Start Date, Game Join Date |
+| dates | `32` green | `92` bright-green | Game Start Date, Game Join Date |
 | numbers | `36` cyan | `96` bright-cyan | Turns Per Day, Turns of Protection, rates, caps |
-| presets | `35` magenta | `95` bright-magenta | Maintenance/Trade Deal/Region Costs, Attack Damage |
+| presets | `35` magenta | `95` bright-magenta | Buy Military, Maintenance/Trade Deal/Region Costs, Attack Damage, Sabre Handling |
+
+Three additions the earlier entry did not have:
+
+- **The highlighted field is `97` bright-white on BOTH label and value**, which
+  is how the cursor is shown — the type colour is replaced, not brightened. The
+  `92`/`97` alternative the old table gave for a date value was this highlight
+  being read as a date colour.
+- **`Buy Military` is a preset field**, not a number, and takes the magenta pair
+  even though its values are `Yes`/`No`.
+- The footer's `*` and the three bracketed key names (`PG-DN`, `PG-UP`, `ESC`)
+  are `93` bright-yellow inside `37` white brackets.
 
 The `: ` separator and the trailing pad are `37` white. A `*` prefix marks an
-InterBBS-only setting; the footer states it.
+InterBBS-only setting; the footer states it. The title rule is **72 columns** —
+5 `─`, 2 `═`, the 40-column title, 6 `═`, 19 `─` — and it is drawn in mixed
+colours: the outer `─` runs `90` gray, the inner `─` and `═` `37` white, with
+the title itself split across `91` bright-red and `31` red and `97` runs. That
+last is not a scheme worth copying; record it and move on.
 
 ```
 ─────══Barren Realms Elite Configuration Editor══════───────────────────
@@ -1150,6 +1427,36 @@ Sabre Handling                : User Select/Original Setting
 * = InterBBS Setting Only   [PG-UP] For More Options   [ESC] to Save & Quit
 ```
 
+### Editing a field — the help screen IS the edit screen
+
+Enter on a field replaces the list with a full-screen page (captured 2026-08-16):
+
+```
+                    ──═Configuration Help Information═──
+─────═══════════════──────────────────────────────────────────────────────────
+  ──═GamePlay: Maintenance Costs═──
+  The GamePlay options may be set to the following values: High, Medium
+  Low, or None.  [H,M,L,N]  ...
+─────═══════════════──────────────────────────────────────────────────────────
+
+Possible Settings: High
+                   Medium
+                   Low
+                   None
+New Setting:
+```
+
+The outer banner is the `──═…═──` decoration in `34` blue / `94` bright-blue
+around a `97` bright-white title; the field's own banner repeats it in `32`
+green / `92` bright-green. Both rules are the **78**-column inset (5 `─`,
+15 `═`, 58 `─`) in `90` gray. Body text `37` white with the setting's key words
+`92` bright-green.
+
+**A preset field commits on ONE key** — `H` sets High and returns to the list
+with no Enter. A numeric field takes digits and Enter. The old note calling the
+editor read-only under `dosemu -t` is wrong and has been removed: every field
+edited cleanly this run.
+
 ## Trading (System Menu → T) and the Trading Market
 
 The Trading submenu's accent is **red**: `31` red parens and rule, `91`
@@ -1184,6 +1491,13 @@ Key Name               Your Prices       Owned      For Sale   Total For Sale
 Your Choice?
 ```
 
+**The market table does NOT take the Trading menu's accent** (`cap/eots-ibbs-01.cap`):
+its 78-column inset rule is `91` bright-red, the row parentheses are `33` yellow
+around a `93` bright-yellow key, the good's name is `37` white, and the four
+figure columns each carry their own color — Your Prices `97` bright-white, Owned
+`96` bright-cyan, For Sale and Total For Sale `93` bright-yellow. The heading row
+is plain `37`.
+
 Picking a good gives `[C] Change your setup, or [B] Buy from Market:`, then
 `Enter new amount of <Good> for sale:(MAX=n)` and `Set new <Good> price: (0)`.
 Listing moves the goods out of `Owned` into `For Sale` immediately.
@@ -1217,10 +1531,106 @@ The column geometry above is pinned by `TestMarketTableMatchesTheCapturedGeometr
 as golden literals (edges 33/45/59/76, and the 5/15/58 inset rule), so a change
 to the format must produce new evidence rather than quietly following the code.
 
-## Covert Operations (System Menu → C) — colors NOT captured
+## Covert Operations (System Menu → C)
 
-**The menu's text is binary-verified; its colors and decorations are not.** The
-item labels and their order come from the overlay's string table, where Turbo
+**Captured live 2026-08-16, and RE-captured 2026-08-17 with the log kept —
+`cap/covert-menu-20260817.cap`.** This section said "colors NOT captured" before
+that. The second pass exists because the first one's log was not retained; every
+figure below now has a file behind it.
+
+The menu's accent is **green**, and it prices every operation on the menu
+itself. Colours, byte for byte: border `32` green, brackets `92` bright-green,
+title `97` bright-white, item parens `32`, item keys `92`, labels and prices
+`37` white. IB chose bright-green for this menu before any capture existed, and
+the capture bears that out.
+
+**The box is 32 columns** — `6 + [Covert Operations] + 7`, closing rule 32,
+obeying the rule that a closing rule equals the box width.
+
+**IB draws 34, and that is the faithful answer rather than a divergence.** BRE
+sizes the box to its widest row; IB's same row is two columns wider, because the
+menu engine indents every item two columns and IB comma-groups figures BRE
+prints bare (both long-standing). Forcing 32 clips every priced row, which is a
+worse likeness than a box two columns wider. IB drew 62 until this was captured.
+
+IB additionally prints a `Key Item Price` header row that BRE has no equivalent
+for — **UNVERIFIED** whether BRE omits it everywhere or only here.
+
+**`cap/kd3-01.cap` holds this screen too**, from a real board with 11,652 agents,
+and independently gives the same 32-column box and the same nine prices. It was
+missed on two earlier passes: a search keyed on the status line's wording did not
+match the real spacing, and the follow-up found only the help-topic index, which
+lists all nine operation names and reads like the menu. **Grep an operation name
+plus a price, not the status line, and do not stop at the topic index.**
+
+**The same capture shows what BRE says when an operation is ORDERED**, which no
+other screen records:
+
+```
+Demoralize Forces
+Choose a Target [A-Y,?=List RETURN to Abort] Endor
+Covert Agent Sent out
+──────[Covert Operations]───────
+```
+
+The menu redraws immediately and no outcome is shown, because an effect operation
+is queued and resolved at daily maintenance rather than on the spot. That is the
+observed counterpart to the queue mechanism read out of the binary.
+
+**The menu is hidden until the realm holds covert agents.** Observed directly: at
+0 agents the System Menu has no `(C)` item and its right column starts at
+`(1) Set Industries`; buying 20 agents makes `(C) Covert Operations` appear.
+
+**The advertised price for Spy on Relations is a lie.** The menu says 100,000;
+`report_spy_result` subtracts the Send Spy fee of 5,000 for both info ops. The
+screen above is what BRE shows, not what it charges.
+
+```
+──────[Covert Operations]───────
+(1) Send Spy               5000
+(2) Stir Revolts         25,000
+(3) Set Up               50,000
+(4) Support Dissensions  80,000
+(5) Demoralize Forces    80,000
+(6) Spy on Relations    100,000
+(7) Bomb Enemy Targets  100,000
+(8) Bribery             200,000
+(9) Expose Enemy Ops    600,000
+(V) Visit Bank
+(?) Help
+(0) Quit
+────────────────────────────────
+You have 4,732,202 gold and 100 agents.
+Choice> Quit
+```
+
+Colours: the rule and the parentheses `32` green, the title brackets and the
+hotkeys `92` bright-green, the title `97` bright-white, and both the item label
+**and its price** `37` white. The footer follows the menu-footer convention —
+body `37` white, the two figures `97` bright-white. **32 columns** (6 `─` +
+`[Covert Operations]` + 7 `─`), closing rule 32.
+
+IB drew this menu bright-green before the capture existed, so its choice turns
+out to match. The price column is IB's to add or not; BRE shows it.
+
+**`Limit one try per turn!` did not appear** on either capture of this screen,
+though the string sits beside the footer's in the same overlay unit. Not
+explained — record it as a string that exists rather than as a line the menu
+draws.
+
+**The fees are flat constants, not scaled by the sysop's cost levels.** Two
+independent lines agree. Live: a game with Maintenance / Trade Deal / Region /
+Attack / Terrorist Costs all set to **High** draws the identical nine figures as
+one with them at Medium/None, and a Send Spy moved gold by exactly 5,000. Static:
+the nine dwords the menu reads from `DS:0x63E` are **initialized DGROUP data in
+`BRE.EXE` at file offset `0x14EDE`**, not a runtime table — nothing anywhere in
+either binary writes them, the charge is a bare 32-bit `sub`/`sbb` with no
+multiply, and the covert overlay unit never loads the config record at all. See
+GitHub issue #143.
+
+### What the strings and the disassembly give
+
+The item labels and their order come from the overlay's string table, where Turbo
 Pascal stores them consecutively in declaration order, which is render order
 (`BRE.OVR 0x1731a` onward):
 
@@ -1252,12 +1662,12 @@ read directly rather than inferred:
 
 - **The hotkeys are binary-verified.** Each item block opens `mov al,<char>` with
   `0x31`–`0x39` then `0x56` — `1`-`9` then `V`, in the same order as the strings.
-- **The per-op costs are a runtime table, not constants in the file.** Each item
-  pushes a different consecutive dword from `DS:0x63e`, stepping 4 bytes per item
-  (`[0x63e]`, `[0x642]`, …). That is why searching either binary for 5,000 or
-  600,000 finds nothing, and it confirms the note in `balance.go` that other BRE
-  setups scale these — IB's figures are the default setup sampled live, which is
-  the most that can be pinned without reproducing BRE's setup arithmetic.
+- **The per-op costs sit in a DS table, indexed by keycode.** Each item pushes a
+  different consecutive dword from `DS:0x63e`, stepping 4 bytes per item
+  (`[0x63e]`, `[0x642]`, …). This was read as a *runtime* table until 2026-08-16,
+  on the strength of a byte search finding nothing — but the search had been run
+  over the overlay. The dwords are initialized data in `BRE.EXE` (above), which
+  is why they never change.
 - **The entry gate is a signed 32-bit `agents > 0`** on the *held* agent count
   (`+0x26f`), tested high word then low. Agents escrowed on the Trading Market
   live at `+0x229` and are a separate field, so listing agents for sale can close
@@ -1265,16 +1675,15 @@ read directly rather than inferred:
   per-turn covert step carries an extra gate on the byte at `DS:0x6d52`, which is
   the preference; the System-menu item does not, matching what the captures show.
 
-**The colors are still unverified, and the disassembly does not settle them.**
-Neither binary contains a single literal ANSI escape, so BRE holds color as a
-Turbo Pascal attribute and builds the escape at write time; the draw routine
-passes only key, label and cost, and neither it nor `enter_covert_operations_menu`
-sets an attribute. The color therefore comes from the shared output helpers
-(`0dc9:0608` formats the line, `0735:0000` writes it), which every screen uses —
-so identifying it means tracing those and finding what sets the attribute
-per-screen, not reading this routine. IB draws the menu bright-green, which
-remains a choice rather than a finding. A `script`-wrapped live capture is still
-the cheap way to close it (see the `bre-gather` skill).
+**Why the disassembly could not have settled the colours** — worth keeping,
+because the same reasoning applies to every screen whose colours are still
+missing. Neither binary contains a single literal ANSI escape, so BRE holds
+colour as a Turbo Pascal attribute and builds the escape at write time; the draw
+routine passes only key, label and cost, and neither it nor
+`enter_covert_operations_menu` sets an attribute. The colour comes from the
+shared output helpers (`0dc9:0608` formats the line, `0735:0000` writes it),
+which every screen uses. **A `script`-wrapped live capture is the only cheap way
+to get a screen's colours**, which is how this one was finally closed.
 
 Corroboration worth keeping: a 2012 public-board capture renders the Help "List
 of Topics" divider as CP437 `ÄÄÄÄÄÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÄÄÄ…` — 5 `─` then 15 `═` — the
@@ -1326,7 +1735,7 @@ is waiting for RETURN, not for one letter. The prompt text is the same for both
 callers: its printer (0x1b0a3) has the selection routine as its only caller, so
 there is no per-item wording.
 
-**Unresolved:** Diplomacy passes 0 for the roster flag, which lists
+**UNVERIFIED — Diplomacy's roster flag.** Diplomacy passes 0 for the roster flag, which lists
 `-*Relations*-` rather than the score table — yet the capture above is filed
 under a treaty proposal and shows the score table. One of the two is mislabelled
 and it has not been re-captured; the capture's own note only says it was taken
@@ -1349,8 +1758,10 @@ Total Forces                29      3271      NONE
 
 ### Measurements and colors for those three (captured live 2026-08-01, league game)
 
-**Incoming proposal**, in the "since your last play" block — after the numbered
-recap entries and before the mail. It carries NO rule and NO timestamp: unlike a
+**Incoming proposal**, in the "since your last play" block — **immediately after
+the `Since your last play, this has happened:` header and BEFORE the numbered
+recap entries**, not after them. Re-captured 2026-08-16 and every colour below
+held; only the position was wrong. It carries NO rule and NO timestamp: unlike a
 recap entry it is a prompt, not a log line. Two lines, unindented, the second
 running straight into the prompt; the figures are NOT comma-grouped:
 ```
@@ -1362,12 +1773,18 @@ white (`0;40;37`), the three figures bright yellow (`1;33`). The y/n hint is
 BRE's usual cyan parens (`36`) around bright-cyan letters, and the answer echoes
 as the whole word (`Yes`/`No`) in bright white (`1;37`).
 
-**View Treaties -> `-*Relations*-`.** Lists EVERY living realm, "None" included —
-the roster doubles as the empire-letter key. Title `-*`/`*-` blue (`0;40;34`)
-around a bright-white word; heading bright white; a **75-column** inset rule
-(5 `─`, 15 `═`, 55 `─`) in blue above and below the rows. A row is `[X]  ` then
-the name in a **40-column** field: brackets blue, letter bright white, name
-bright cyan (`1;36`), relation bright blue (`1;34`).
+BRE writes `proposes a <Treaty>` with no article agreement, so an
+`Intelligence Alliance` reads `proposes a Intelligence Alliance`. Recorded for
+accuracy; IB fixes the article, which is a divergence not worth reversing.
+
+**View Treaties -> `-*Relations*-`.** Re-captured 2026-08-16. Lists every living
+realm **except the caller's own**, "None" included — the roster doubles as the
+empire-letter key, minus your own letter. (This file said it listed every living
+realm; a three-realm capture from realm `A` lists only `[B]` and `[C]`.) Title
+`-*`/`*-` blue (`0;40;34`) around a bright-white word; heading bright white; a
+**75-column** inset rule (5 `─`, 15 `═`, 55 `─`) in blue above and below the
+rows. A row is `[X]  ` then the name in a **40-column** field: brackets blue,
+letter bright white, name bright cyan (`1;36`), relation bright blue (`1;34`).
 ```
 Id   Empire Name                             Relations
 ─────═══════════════───────────────────────────────────────────────────────
@@ -1375,11 +1792,22 @@ Id   Empire Name                             Relations
 [F]  Opium                                   Full Defense Alliance
 ```
 
-**Alliance Strength.** White headings, a **51-column** inset rule (5 `─`, 10 `═`,
-36 `─`) in red above the rows and above the total, ally names bright white,
-figures bright yellow and ungrouped, a zero shown as `NONE`. Data columns are
-name 21, then 9 / 10 / 10; BRE's *heading* row is one column wider on Troopers
-(10), so the headings sit one column right of the figures.
+**Alliance Strength.** Re-captured 2026-08-16 with a real ally row — until then
+only the empty `Total Forces … NONE` case was on disk — and every figure below
+held. White headings, a **51-column** inset rule (5 `─`, 10 `═`, 36 `─`) in red
+above the rows and above the total, ally names bright white, figures bright
+yellow and ungrouped, a zero shown as `NONE`. Data columns are name 21, then
+9 / 10 / 10; BRE's *heading* row is one column wider on Troopers (10), so the
+headings sit one column right of the figures.
+
+```
+Your allies will send the following to aid you in defense:
+Name                   Troopers     Tanks    Agents
+─────══════════────────────────────────────────────
+Carbon                      29      3271      NONE
+─────══════════────────────────────────────────────
+Total Forces                29      3271      NONE
+```
 
 **IB deviates on readability (deliberate, Andy's call).** Two changes, both to
 make a dense line scan faster:
@@ -1430,12 +1858,17 @@ line.
 ```
 Since your last play, this has happened:
 
-─────(1)────────────────────────────────────────07/31/2026  07:43:11────────
+─────(1)────────────────────────────────07/31/2026  07:43:11────────
 Opium accepted your Full Defense Alliance proposal.
 
-─────(2)────────────────────────────────────────07/31/2026  09:07:07────────
+─────(2)────────────────────────────────07/31/2026  09:07:07────────
 DTF accepted your Full Defense Alliance proposal.
 ```
+
+Measured: 5 `─`, `(N)`, **40** `─`, the 20-column stamp, 8 `─` — **76 columns**,
+with the stamp starting at column 48. This block showed 48 fill columns, which
+would run the line to 84 and wrap; 13 rules across two captures all measure 76.
+(IB's `eventRuleWidth`/`eventStampColumn` were already 76/48 and are correct.)
 
 Colors:
 
@@ -1443,8 +1876,13 @@ Colors:
 - The rule, both sides of the counter and the date/time inside it — bright-black
   `1;30` (dim gray). The `(` `)` around the counter are yellow `0;40;33`; the
   counter digit itself is bright-yellow `1;33`.
-- Body: realm name and treaty type bright-cyan `1;36`; the connecting words
-  plain white `0;40;37`.
+- Body: on a **treaty** entry the realm name and treaty type are bright-cyan
+  `1;36`; the connecting words plain white `0;40;37`.
+- **The body colors are per entry TYPE, not per kind of thing.** A trade entry
+  in `cap/eots-ibbs-01.cap` renders the buying realm `1;33` bright-yellow, the
+  good `1;31` bright-red and the quantity `1;37` — the same realm name that a
+  treaty entry two rules above draws `1;36`. Do not generalise one entry's
+  palette to the rest of the recap.
 
 Treaty replies read `<Realm> accepted your <Treaty> proposal.` and
 `<Realm> rejected your <Treaty> proposal.` — **rejected**, not "declined".
@@ -1562,9 +2000,11 @@ Banner and ruler are indented four columns, which puts the `[` directly over the
 first text column of a `NN> ` prompt — so the ruler's own last `-` sits one
 column past where the line stops taking text.
 
-Colors: banner white `37`; ruler plain cyan `36`; the line-number prompt bright
-green `92` with the typed text bright white `97`. A line re-opened by backspacing
-off the start of the one below it is prompted in bright **red** `91`.
+Colors, re-captured 2026-08-16 and confirmed: banner white `37`; ruler plain
+cyan `36`; the line-number prompt bright green `92` with the typed text bright
+white `97`. A line re-opened by backspacing off the start of the one below it is
+prompted in bright **red** `91`. The `/`-command prompt draws its `[A,S,C]` keys
+`96` bright-cyan inside `37` white brackets, and `ABORTED!` lands in `31` red.
 
 ### Wrapping at the margin
 
@@ -1632,7 +2072,7 @@ bright-white `1;37` title; the rules gray `1;30`; the row parentheses gray
 `1;30` around a bright-white number; the planet name bright-white `1;37`. The
 status carries its own color — **None** white `37`, **Peace** bright-green
 `1;32`, **Allied** bright-blue `1;34`. **Enemy** never appeared in the capture,
-so IB's bright-red for it is an inference, not an observation.
+so IB's bright-red for it is an inference, not an observation — **UNVERIFIED**.
 
 ### The relations line
 
@@ -1649,7 +2089,7 @@ color as above.
 ### Diplomacy Modification (BBS Coordinator only)
 
 Not reachable in the capture — the caller was not the elected Coordinator — so
-this is read from the binary rather than observed. It is reached from the System
+this is read from the binary rather than observed, so its layout and colours are **UNVERIFIED**. It is reached from the System
 Menu's `Coordinator Menu` item (`BRE.OVR` 0x13920).
 
 The menu has **four items, keyed `1`-`4`**, and its handler settles both the
@@ -1784,8 +2224,18 @@ Id   Empire Name                          Territory   Score   Networth
                                                 [BRE v0.988]   8/15/2026
 ```
 
+**The interplanetary picker's prompt is colored differently from the local
+one**, though the wording is nearly the same (`cap/eots-ibbs-01.cap`): here the
+brackets are `34` blue and every key inside them `97` bright-white, where the
+local `Choose a Target [A-Y,?=List RETURN to Abort]` uses `31` red brackets and
+`93` bright-yellow keys. Another case of the color belonging to the screen
+rather than to the kind of thing.
+
 **Attack Type menu.** A 21-column box, sized to its own content as BRE always
-does. Note the `(?) Help` item and that **Enter takes Quit**, not the first item:
+does. Note the `(?) Help` item and that **Enter takes Quit**, not the first item.
+(Not re-reached on 2026-08-16 — the menu needs a live two-board league with recon
+data, and a single-board attempt stops at `Sorry, we don't have any information
+on that planet yet.` The colours below are from the 2026-08-11 capture and stand.)
 
 ```
 ────[Attack Type]────
@@ -1819,7 +2269,7 @@ Send this Attack? (Y/n) Yes
 ```
 
 100 troopers cost 100 gold, so the rate is 1 gold per unit — **verified for
-troopers only**; whether the other three types cost the same is not known.
+troopers only**; whether the other three types cost the same is **UNVERIFIED**.
 
 **Result, in the sender's news after the round trip:**
 
@@ -1864,7 +2314,7 @@ and stores the answer as a departure instant, because the binary does
 roster — so a planet-wide strike never draws the baron list. IB matches this
 (#125); it used to offer "(the whole planet)" as the first row of a numbered
 list. The capture shows only the "A" echo, so IB's "One Dominion" for the other
-key is a guess at wording, not a captured string.
+key is a guess at wording, not a captured string — **UNVERIFIED**.
 
 An empty force prints `Attack Aborted` (capital A on both words), where the
 attack-type menu's quit path prints `Attack aborted.` with a period.

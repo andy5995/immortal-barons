@@ -317,8 +317,9 @@ the opening menu; Quit on submenus). A **Play** turn opens with the
 "since your last play" event log — shown when you start your turn, not before
 the opening menu; Diplomacy and Change Production are no longer pre-turn stops
 (they moved to the System menu, #70). Each recap entry sits under its own
-numbered, timestamped rule, as BRE draws it, and any pending treaty offer is
-prompted right after the recap with the proposer's stats inline. Mail then
+numbered, timestamped rule, as BRE draws it. A pending trade barter and then a
+pending treaty offer are answered BEFORE those entries, with the proposer's
+stats inline — the order in BRE's own `run_player_turn`. Mail then
 follows unasked — BRE has no "read them now?" gate — one message per box, and
 Enter is inert at the `[R]/[D]/[I]/[Q]` prompt so a held key cannot skip an
 unread message. **v0.0.4 diplomacy additions:** the proposer is told whether an

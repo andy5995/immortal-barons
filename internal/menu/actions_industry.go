@@ -19,20 +19,25 @@ var prodTypeNames = []string{"Troopers", "Jets", "Turrets", "Bombers", "Tanks", 
 // per-year production figure. Gold sits past the end of ProjectedProduction.
 const prodUnitCount = 6
 
-// industryRuleWidth is the width of the box these two screens draw. BRE sizes
+// industryRuleWidth is the width of the Industrial Production box. BRE sizes
 // every menu box to its own content rather than to one house width — its
 // captures run from 23 to 76 columns — and Industrial Production is 46
-// (docs/dev/bre-screens.md). Specialization is not among the captures; it takes
-// the same width because it sits in the same red-accent family and lists the
-// same six units. UNVERIFIED for Specialization specifically.
+// (docs/dev/bre-screens.md).
 const industryRuleWidth = 46
+
+// specializationRuleWidth is the Specialization box, 14 columns, closed by a
+// 14-column rule under a bare 16-column [Specialization] title that overhangs
+// it (docs/dev/bre-screens.md). It is the one box whose title is wider than its
+// content. The width grows to the widest item when a translation needs it,
+// since sizing to content is what produces 14 in the first place.
+const specializationRuleWidth = 14
 
 // industryAccent is the bright accent for both screens; the rules are drawn in
 // its dim form, as the menu engine does. BRE's accent for Spending / Industrial
 // Production / Trading / Specialization is red (docs/dev/bre-screens.md).
 var industryAccent = ansi.FgBrightRed
 
-// industryRule is the box's closing rule, at this screen's width.
+// industryRule is the Industrial Production box's closing rule.
 func industryRule() string {
 	return closingRule(industryAccent, industryRuleWidth)
 }
@@ -128,18 +133,28 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "This choice is permanent and cannot be undone."), ansi.Reset)
-	// The original draws this as a red-accent menu, so it matches the rest of the
-	// game rather than reading as a bare list (docs/dev/bre-screens.md).
-	fmt.Fprintf(s, "%s\n", titleRule(industryAccent, tr(s, "Specialization"), industryRuleWidth))
 	// Units only. Gold is a row on Set Industries but not a unit, and there is
 	// nothing for a specialization's efficiency modifier to apply to.
+	items := make([]string, 0, prodUnitCount+1)
 	for i, name := range prodTypeNames[:prodUnitCount] {
-		fmt.Fprintf(s, "  %d) %s\n", i+1, tr(s, name))
+		items = append(items, fmt.Sprintf("  %d) %s", i+1, tr(s, name)))
 	}
-	fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
+	items = append(items, fmt.Sprintf("  0) %s", tr(s, "Quit")))
+	width := specializationRuleWidth
+	for _, it := range items {
+		if n := utf8.RuneCountInString(it); n > width {
+			width = n
+		}
+	}
+	// The original draws this as a red-accent menu, so it matches the rest of the
+	// game rather than reading as a bare list (docs/dev/bre-screens.md).
+	fmt.Fprintf(s, "%s\n", titleRule(industryAccent, tr(s, "Specialization"), width))
+	for _, it := range items {
+		fmt.Fprintf(s, "%s\n", it)
+	}
 	// The original closes every menu box with a rule, whether or not a status
 	// line follows it (see the menu engine's draw).
-	fmt.Fprintf(s, "%s\n", industryRule())
+	fmt.Fprintf(s, "%s\n", closingRule(industryAccent, width))
 	t := ChoiceQuit(s, prodUnitCount)
 	if t < 1 {
 		ok(s, "Your industry was left unspecialized.")
