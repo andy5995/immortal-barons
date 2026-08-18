@@ -853,10 +853,10 @@ func printScores(s session.Session, w *ctx) {
 	// Snapshot every empire's rank inputs together so the board reflects one
 	// consistent moment, even if another session mutates the world mid-render.
 	type row struct {
-		name                    string
-		letter                  string
-		alive, isPlayer, online bool
-		land, score, nw         int
+		name                                 string
+		letter                               string
+		alive, isPlayer, online, playedToday bool
+		land, score, nw                      int
 	}
 	var rows []row
 	var lastMaster string
@@ -870,13 +870,12 @@ func printScores(s session.Session, w *ctx) {
 			// Net Worth is the asset value (land + military). Score is BRE's
 			// cumulative metric (Empire.Score): the day-start net worth awarded per
 			// turn played, minus small riot/spoilage dings — separate from wealth.
-			// Never mark your own realm: you know you are here, and the row is
-			// already singled out by its bright-yellow name. Marking it would
-			// also be the one row whose stamp is guaranteed fresh, so it would
-			// read as the most reliable entry on a screen where it carries no
-			// information at all.
+			// Never mark your own realm: (O) is redundant — you know you
+			// are here, and the row is already singled out by its
+			// bright-yellow name. The '+' played-today marker is also
+			// suppressed: your own status is obvious from context.
 			self := e == w.Player()
-			rows = append(rows, row{e.Name, e.Letter(), e.Alive, self, !self && e.Online(), e.Land, e.Score, nw})
+			rows = append(rows, row{e.Name, e.Letter(), e.Alive, self, !self && e.Online(), !self && e.LastPlayed == w.Today, e.Land, e.Score, nw})
 		}
 		lastMaster = w.LastMaster
 	})
@@ -897,7 +896,7 @@ func printScores(s session.Session, w *ctx) {
 		if r.isPlayer {
 			nameColor = ansi.FgBrightYellow // highlight the caller's own realm
 		}
-		scoreTableRow(s, scoreID(r.letter), name, nameColor, r.online, r.land, r.score, r.nw)
+		scoreTableRow(s, scoreID(r.letter), name, nameColor, r.online, r.playedToday, r.land, r.score, r.nw)
 	}
 	scoreTableRule(s)
 	if lastMaster != "" {
@@ -997,9 +996,14 @@ func scoreTableHead(s session.Session) {
 	scoreTableRule(s)
 }
 
-func scoreTableRow(s session.Session, id, name, nameColor string, online bool, land, score, nw int) {
-	fmt.Fprintf(s, "%s%s %s%10d%s %s%11d%s %s%11d%s\n",
+func scoreTableRow(s session.Session, id, name, nameColor string, online, playedToday bool, land, score, nw int) {
+	sep := ""
+	if playedToday && !online {
+		sep = ansi.FgBrightBlack + "+" + ansi.Reset
+	}
+	fmt.Fprintf(s, "%s%s%s %s%10d%s %s%11d%s %s%11d%s\n",
 		idCell(id, ansi.FgBrightMagenta),
+		sep,
 		nameCell(s, name, nameColor, online, scoreNameWidth),
 		ansi.FgBrightMagenta, land, ansi.Reset,
 		ansi.FgBrightWhite, score, ansi.Reset,

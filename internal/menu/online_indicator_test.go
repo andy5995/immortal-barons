@@ -203,7 +203,7 @@ func TestIDCellKeepsTheNameColumn(t *testing.T) {
 	} {
 		t.Run(tc.whatItIs, func(t *testing.T) {
 			f := &fakeSession{}
-			scoreTableRow(f, tc.id, "Realm", ansi.FgBrightWhite, true, 1, 2, 3)
+			scoreTableRow(f, tc.id, "Realm", ansi.FgBrightWhite, true, false, 1, 2, 3)
 			row := plainLines(f.out.String())[0]
 			assertOnlineSuffix(t, row, "Realm", true)
 			if got := strings.Index(row, "Realm"); got != tc.nameCol {
@@ -262,7 +262,7 @@ func TestLongNameCannotMoveTheColumns(t *testing.T) {
 	} {
 		for _, online := range []bool{true, false} {
 			f := &fakeSession{}
-			scoreTableRow(f, "(A)", name, ansi.FgBrightWhite, online, 15, 0, 231)
+			scoreTableRow(f, "(A)", name, ansi.FgBrightWhite, online, false, 15, 0, 231)
 			row := plainLines(f.out.String())[0]
 			if online && !strings.Contains(row, "(O)") {
 				t.Errorf("clip dropped the marker for %q: %q", name, row)

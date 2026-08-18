@@ -85,6 +85,7 @@ type pickRow struct {
 	letter          rune
 	name            string
 	online          bool
+	playedToday     bool
 	land, score, nw int
 	held            []string // pacts held with the caller; gathered for the Relations roster
 }
@@ -100,7 +101,8 @@ func pickRows(w *ctx, opts pickOpts) (rows []pickRow, allies int) {
 			}
 			row := pickRow{
 				e: e, letter: rune('A' + e.Slot - 1), name: e.Name, online: e.Online(),
-				land: e.Land, score: e.Score, nw: w.NetWorth(e),
+				playedToday: e.LastPlayed == w.Today,
+				land:        e.Land, score: e.Score, nw: w.NetWorth(e),
 			}
 			if opts.relations {
 				row.held = w.TreatiesBetween(p, e)
@@ -151,8 +153,13 @@ func writePickRoster(s session.Session, rows []pickRow, opts pickOpts) {
 	for _, r := range rows {
 		// idCell also squares the roster with its own heading: the rows used
 		// to put the name one column left of where "Empire Name" starts.
-		fmt.Fprintf(s, "%s%s %s%10s%s %s%11s%s %s%11s%s\n",
+		sep := ""
+		if r.playedToday && !r.online {
+			sep = ansi.FgBrightBlack + "+" + ansi.Reset
+		}
+		fmt.Fprintf(s, "%s%s%s %s%10s%s %s%11s%s %s%11s%s\n",
 			idCell(fmt.Sprintf("(%c)", r.letter), ansi.FgBrightMagenta),
+			sep,
 			nameCell(s, r.name, ansi.FgBrightWhite, r.online, pickNameWidth),
 			ansi.FgBrightMagenta, comma(r.land), ansi.Reset,
 			ansi.FgBrightWhite, comma(r.score), ansi.Reset,
