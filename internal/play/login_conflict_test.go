@@ -22,9 +22,11 @@ func TestConcurrentOnboardSameRealmName(t *testing.T) {
 	var wg sync.WaitGroup
 	onboard := func(handle string) {
 		defer wg.Done()
-		// splash dismiss, realm name "Contested", quit; a returning-name
-		// collision re-prompts and (keys exhausted) falls back to the handle.
-		f := &fakeSession{keys: []rune(" \rContested\r0")}
+		// Splash dismiss, realm name "Contested", confirm. The caller who loses
+		// the race is told the name was taken and re-prompted, and names their
+		// realm after their own handle instead — a read error at this prompt ends
+		// the session with no realm at all, so the fallback has to be typed.
+		f := &fakeSession{keys: []rune(" \rContested\ry" + handle + "land\ry0")}
 		if _, err := Run(f, Identity{Handle: handle}, cfg, "2026-07-10"); err != nil {
 			t.Errorf("%s: %v", handle, err)
 		}

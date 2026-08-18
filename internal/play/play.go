@@ -319,7 +319,10 @@ func selectLanguage(s session.Session) string {
 	fmt.Fprintf(s, "\n%sChoice (Enter for English):%s ", ansi.FgBrightWhite, ansi.Reset)
 	line, err := session.ReadLine(s)
 	if err != nil {
-		return ""
+		// Same as the realm-name prompt below: a boot or hang-up here ends the
+		// session instead of falling through to onboarding, which would only be
+		// booted again at its own first read.
+		session.End(err)
 	}
 	n, err := strconv.Atoi(strings.TrimSpace(line))
 	if err != nil || n < 1 || n > len(opts) {
@@ -388,12 +391,15 @@ func onboard(s session.Session, w *game.World, handle, lang string) (name string
 		fmt.Fprintf(s, "\n%s%s, %s%s ", ansi.FgBrightWhite, handle, i18n.T(lang, "Name your Realm:"), ansi.Reset)
 		line, err := session.ReadLine(s)
 		if err != nil {
-			// Stream ended mid-prompt: fall back to the handle as the realm name.
-			// ReadLine echoes the newline when Enter is pressed, but not on this
-			// path, so close the line here or whatever renders next lands on top of
-			// the prompt.
+			// The read ended the session — an idle/time boot, or the caller hung
+			// up. Unwind it (Run's recover saves and closes cleanly) rather than
+			// carrying on: this used to fall back to the caller's BBS handle as the
+			// realm name, which founded a realm nobody had named and then ran on
+			// into the opening menu after the boot notice had already been printed.
+			// ReadLine echoes the newline on Enter but not here, so close the line
+			// first or the notice lands on top of the prompt.
 			fmt.Fprint(s, "\n")
-			return handle, false
+			session.End(err)
 		}
 		name = strings.TrimSpace(line)
 		if name == "" {

@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
@@ -215,5 +216,34 @@ func TestEventsPersistUntilPlayed(t *testing.T) {
 	w2, _ := store.Load(cfg)
 	if len(w2.FindByOwner("khan").Events) != 1 {
 		t.Error("events must persist through a login without Play, not be consumed")
+	}
+}
+
+// An idle boot at the realm-name prompt ends the session and creates NO realm.
+// It used to name the realm after the caller's BBS handle and carry on into the
+// opening menu, so a caller who never answered the prompt was given a realm
+// they had not named, moments after being told they were disconnected.
+func TestIdleBootAtRealmNamePromptCreatesNoRealm(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	// The deadline decorator returns ErrSessionEnded once it boots; the reader
+	// stands in for it, running dry at the realm-name prompt.
+	f := &errAfterSession{
+		keys: []rune(" \r"), // splash dismiss, Enter for English
+		err:  session.ErrSessionEnded,
+	}
+	reason, err := Run(f, Identity{Handle: "Bobby"}, cfg, "2026-07-03")
+	w, _ := store.Load(cfg)
+	if e := w.FindByOwner("bobby"); e != nil {
+		t.Fatalf("a realm was created (%q) for a caller who never named one", e.Name)
+	}
+	if err != nil {
+		t.Fatalf("the session should end cleanly: %v", err)
+	}
+	// The opening menu must never be reached — that was the visible symptom.
+	if strings.Contains(f.out.String(), "[Entry]") {
+		t.Errorf("the session ran on into the opening menu after the boot:\n%s", f.out.String())
+	}
+	if reason == "" {
+		t.Error("the door log needs a reason for the session ending")
 	}
 }

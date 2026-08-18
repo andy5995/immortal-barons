@@ -1,4 +1,5 @@
 (in-progress:)
+  * An idle timeout while naming a realm now ends the session, creating none
   * A realm may be renamed once, from the Preferences menu, after protection ends
   * CP437 characters typed at a prompt now arrive as typed (issue #151)
   * -planetary now reports skipped packets by reason (wrong league, mesh copy,
