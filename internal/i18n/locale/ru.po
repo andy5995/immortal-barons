@@ -128,6 +128,10 @@ msgstr "%s золота требуется на содержание ваших 
 msgid "%s have captured %s %s"
 msgstr ""
 
+#: internal/menu/actions_info.go:100
+msgid "%s is now known as %s."
+msgstr "%s теперь известно как %s."
+
 #: internal/menu/actions_diplomacy.go:262
 msgid "%s offers you a %s."
 msgstr ""
@@ -224,6 +228,14 @@ msgstr ""
 msgid "A league board has no computer barons."
 msgstr ""
 
+#: internal/menu/actions_info.go:85
+msgid "A realm may be renamed once and never again."
+msgstr "Королевство можно переименовать лишь один раз."
+
+#: internal/game/rename.go:24
+msgid "A realm name needs at least three visible characters."
+msgstr "Имя королевства должно содержать не менее трёх видимых символов."
+
 #: internal/menu/config_editor.go:233
 #, fuzzy
 msgid "AI empires"
@@ -303,6 +315,10 @@ msgstr ""
 #: internal/game/ibbs.go:25
 msgid "An individual attack must name a baron to strike."
 msgstr ""
+
+#: internal/game/rename.go:27
+msgid "Another realm already answers to that name."
+msgstr "Другое королевство уже носит это имя."
 
 #: internal/menu/actions_iptrade.go:70
 msgid "As we last heard, %s."
@@ -476,6 +492,10 @@ msgstr ""
 msgid "Change Production?"
 msgstr "Изменить производство?"
 
+#: internal/menu/tree.go:395
+msgid "Change Realm Name"
+msgstr "Переименовать королевство"
+
 #: internal/menu/actions_interbbs.go:796
 msgid "Change status to"
 msgstr ""
@@ -532,9 +552,9 @@ msgstr ""
 msgid "Complete"
 msgstr "Готово"
 
-#: internal/play/play.go:390
+#: internal/menu/input.go:195
 msgid "Confirm?"
-msgstr ""
+msgstr "Подтвердить?"
 
 #: internal/menu/gameflow.go:985
 msgid "Continue to your next turn?"
@@ -914,9 +934,11 @@ msgstr "Планетарный бюллетень:"
 msgid "InterPlanetary Ops"
 msgstr ""
 
-#: internal/play/play.go:384
-msgid "Invalid: at least 3 letters/numbers, not matching another realm."
-msgstr "Неверно: не менее 3 букв или цифр, не совпадает с другим королевством."
+#: internal/play/play.go:414
+msgid "Invalid: at least 3 visible characters, not matching another realm."
+msgstr ""
+"Неверно: не менее 3 видимых символов, не совпадает с другим "
+"королевством."
 
 #: internal/menu/actions_bank.go:185
 msgid "Investing Interest Rate:"
@@ -1213,6 +1235,12 @@ msgstr ""
 msgid ""
 "Our Technology regions are new. Their benefits will build up as we hold them."
 msgstr ""
+
+#: internal/menu/actions_info.go:105
+msgid "Other planets will see the new name once this board's next scores go out."
+msgstr ""
+"Другие планеты увидят новое имя после следующей отправки результатов "
+"этой доски."
 
 #: internal/menu/actions_ipmessages.go:199
 msgid "Our current relations with"
@@ -2205,6 +2233,12 @@ msgstr ""
 msgid "You joined group attack #%d."
 msgstr ""
 
+#: internal/game/rename.go:22
+msgid "You may not rename your realm while it is under New Realm Protection."
+msgstr ""
+"Нельзя переименовать королевство, пока оно под защитой нового "
+"королевства."
+
 #: internal/game/ibbs_trade.go:27
 msgid "You may only trade with a planet your Coordinator has marked Allied."
 msgstr ""
@@ -2366,13 +2400,19 @@ msgstr ""
 msgid "Your realm has %d turns of new-realm protection left."
 msgstr "У вас осталось %s%s ходов защиты."
 
+#: internal/game/rename.go:19
+msgid "Your realm has already been renamed once. The name it carries now is permanent."
+msgstr ""
+"Ваше королевство уже переименовано один раз. Нынешнее имя останется "
+"навсегда."
+
 #: internal/menu/gameflow.go:833
 msgid "Your realm is no longer active."
 msgstr ""
 
-#: internal/play/play.go:389
+#: internal/menu/input.go:194
 msgid "Your realm will be named %s."
-msgstr ""
+msgstr "Ваше королевство будет называться %s."
 
 #: internal/menu/actions_interbbs.go:674
 msgid "Your terrorists depart for %s on %s."
@@ -2805,3 +2845,4 @@ msgstr "─»>Пауза<«─"
 
 #~ msgid "Debt"
 #~ msgstr "Долг"
+

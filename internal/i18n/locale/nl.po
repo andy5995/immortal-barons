@@ -125,6 +125,10 @@ msgstr ""
 msgid "%s have captured %s %s"
 msgstr ""
 
+#: internal/menu/actions_info.go:100
+msgid "%s is now known as %s."
+msgstr "%s heet nu %s."
+
 #: internal/menu/actions_diplomacy.go:262
 msgid "%s offers you a %s."
 msgstr ""
@@ -217,6 +221,14 @@ msgstr ""
 msgid "A league board has no computer barons."
 msgstr ""
 
+#: internal/menu/actions_info.go:85
+msgid "A realm may be renamed once and never again."
+msgstr "Een rijk kan maar een keer hernoemd worden, nooit meer."
+
+#: internal/game/rename.go:24
+msgid "A realm name needs at least three visible characters."
+msgstr "Een naam voor een rijk heeft minstens drie zichtbare tekens nodig."
+
 #: internal/menu/config_editor.go:233
 msgid "AI empires"
 msgstr ""
@@ -293,6 +305,10 @@ msgstr ""
 #: internal/game/ibbs.go:25
 msgid "An individual attack must name a baron to strike."
 msgstr ""
+
+#: internal/game/rename.go:27
+msgid "Another realm already answers to that name."
+msgstr "Een ander rijk luistert al naar die naam."
 
 #: internal/menu/actions_iptrade.go:70
 msgid "As we last heard, %s."
@@ -463,6 +479,10 @@ msgstr ""
 #, fuzzy
 msgid "Change Production?"
 msgstr "Bescherming beëindigen"
+
+#: internal/menu/tree.go:395
+msgid "Change Realm Name"
+msgstr "Rijk hernoemen"
 
 #: internal/menu/actions_interbbs.go:796
 msgid "Change status to"
@@ -891,9 +911,11 @@ msgstr "Interplanetaire operaties"
 msgid "InterPlanetary Ops"
 msgstr "Interplanetaire operaties"
 
-#: internal/play/play.go:384
-msgid "Invalid: at least 3 letters/numbers, not matching another realm."
-msgstr "Ongeldig: minstens 3 letters/cijfers, niet gelijk aan een ander rijk."
+#: internal/play/play.go:414
+msgid "Invalid: at least 3 visible characters, not matching another realm."
+msgstr ""
+"Ongeldig: minstens 3 zichtbare tekens, niet gelijk aan een ander "
+"rijk."
 
 #: internal/menu/actions_bank.go:185
 msgid "Investing Interest Rate:"
@@ -1185,6 +1207,12 @@ msgstr ""
 msgid ""
 "Our Technology regions are new. Their benefits will build up as we hold them."
 msgstr ""
+
+#: internal/menu/actions_info.go:105
+msgid "Other planets will see the new name once this board's next scores go out."
+msgstr ""
+"Andere planeten zien de nieuwe naam zodra de volgende scores van dit "
+"board vertrekken."
 
 #: internal/menu/actions_ipmessages.go:199
 msgid "Our current relations with"
@@ -2144,6 +2172,12 @@ msgstr ""
 msgid "You joined group attack #%d."
 msgstr ""
 
+#: internal/game/rename.go:22
+msgid "You may not rename your realm while it is under New Realm Protection."
+msgstr ""
+"Je kunt je rijk niet hernoemen zolang het onder bescherming van een "
+"nieuw rijk staat."
+
 #: internal/game/ibbs_trade.go:27
 msgid "You may only trade with a planet your Coordinator has marked Allied."
 msgstr ""
@@ -2297,6 +2331,11 @@ msgstr ""
 #: internal/menu/actions_info.go:55
 msgid "Your realm has %d turns of new-realm protection left."
 msgstr ""
+
+#: internal/game/rename.go:19
+msgid "Your realm has already been renamed once. The name it carries now is permanent."
+msgstr ""
+"Je rijk is al een keer hernoemd. De naam die het nu draagt, blijft."
 
 #: internal/menu/gameflow.go:833
 msgid "Your realm is no longer active."
@@ -2622,3 +2661,4 @@ msgstr ""
 
 #~ msgid "Configuration Editor"
 #~ msgstr "Configuratie-editor"
+
