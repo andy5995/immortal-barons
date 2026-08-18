@@ -488,16 +488,25 @@ func TestPlanetaryTreatiesMatchesBRE(t *testing.T) {
 	}
 }
 
-// TestIPScoresMatchesBRE checks View IPScores renders BRE's cross-planet board:
-// the Id/Empire Name/Territory/Score/Net Worth header and lettered (A) id.
+// TestIPScoresMatchesBRE checks IP Scores opens BRE's submenu of eight ranking
+// views, and that selecting one renders the correct table layout.
 func TestIPScoresMatchesBRE(t *testing.T) {
-	f := &fakeSession{keys: []rune(" ")}
+	// '1' selects Top Planets by Score, space dismisses pause, '0' quits submenu
+	f := &fakeSession{keys: []rune("1 0")}
 	w := newWorld()
 	w.RemoteBoards = []game.RemoteBoard{{BoardID: "ZZap BBS", Date: "2026-07-02",
 		Scores: []game.RemoteScore{{Empire: "Iron Dominion", Land: 120, NetWorth: 50000, Score: 61000}}}}
 	interbbsScores(f, w)
 	out := f.out.String()
-	for _, want := range []string{"InterBBS Scores", "Id", "Empire Name", "Territory", "Score", "Net Worth", "(A)", "Iron Dominion"} {
+	for _, want := range []string{
+		"InterBBS Scores",
+		"Top Planets by Score", "Top Planets by Net Worth",
+		"Top Planets by Land", "Top Planets by Net Worth Density",
+		"Top Players by Score", "Top Players by Net Worth",
+		"Top Players by Land", "Top Players by Net Worth Density",
+		"Barren Realms Elite", "Planetary Post",
+		"ZZap BBS", "61000",
+	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("interbbsScores missing %q:\n%s", want, out)
 		}
