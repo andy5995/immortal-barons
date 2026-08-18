@@ -670,14 +670,22 @@ accent over the name column. Each row: `35`(`(`)` + `97` key + `35`)` + a flag
 column + `37` white name + `95`
 bright-magenta Territory + `97` bright-white Score + `37` white Net Worth.
 
-**UNVERIFIED — what the `+` flag means.** This file has called it
+**The `+` flag is BRE's own, meaning unverified.** This file has called it
 "participating this reset", and elsewhere just "marks it in the list". Neither
 survives the 2026-08-16 capture: across one session the flag moved on and off
 individual realms with no reset in sight — a three-realm game showed all three
 flagged, then `A +`, `B —`, `C +` after `A` played and attacked `B`, then
 `A +`, `B +`, `C —` after `B` played. It is per-viewer or per-day state of some
-kind and nobody has pinned which. Do not build anything on the current wording;
-IB's own `+` is its own choice either way.
+kind and nobody has pinned which. Do not build anything on the current wording.
+
+IB uses it for its own "played today" marker: a realm that played today but is
+not online now gets `+` in the same column. The `(O)` online mark takes priority
+when both apply.
+
+**IB diverges from BRE by suppressing the `+` for your own realm.** BRE's
+capture shows the flag on the caller's own row too (`(E)+Your Empire`); IB
+omits it there — your own status is obvious from context, and the row is
+already singled out by its bright-yellow name.
 
 ```
 -*Barren Realms Elite*-

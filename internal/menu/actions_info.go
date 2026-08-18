@@ -593,7 +593,7 @@ const playerListNameWidth = 25
 func playerList(s session.Session, w *ctx) Result {
 	type row struct {
 		name, owner string
-		online      bool
+		presence    string
 		land, nw    int
 	}
 	var rows []row
@@ -602,7 +602,8 @@ func playerList(s session.Session, w *ctx) Result {
 			if !e.Alive {
 				continue
 			}
-			rows = append(rows, row{e.Name, e.Owner, e != w.Player() && e.Online(), e.Land, w.NetWorth(e)})
+			self := e == w.Player()
+			rows = append(rows, row{e.Name, e.Owner, presenceOf(e, self, w.Today), e.Land, w.NetWorth(e)})
 		}
 	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightBlue, tr(s, "Player List"), ansi.Reset)
@@ -614,7 +615,7 @@ func playerList(s session.Session, w *ctx) Result {
 		}
 		// The suffix rides in the name column, so the roster that names who owns
 		// each realm also says who is on without moving the columns beside it.
-		fmt.Fprintf(s, "  %s %-14s %-8d %d\n", nameCell(s, r.name, "", r.online, playerListNameWidth), owner, r.land, r.nw)
+		fmt.Fprintf(s, "  %s %-14s %-8d %d\n", nameCell(s, r.name, "", r.presence, playerListNameWidth), owner, r.land, r.nw)
 	}
 	pause(s)
 	return Stay
@@ -853,10 +854,11 @@ func printScores(s session.Session, w *ctx) {
 	// Snapshot every empire's rank inputs together so the board reflects one
 	// consistent moment, even if another session mutates the world mid-render.
 	type row struct {
-		name                                 string
-		letter                               string
-		alive, isPlayer, online, playedToday bool
-		land, score, nw                      int
+		name            string
+		letter          string
+		alive, isPlayer bool
+		presence        string
+		land, score, nw int
 	}
 	var rows []row
 	var lastMaster string
@@ -875,15 +877,13 @@ func printScores(s session.Session, w *ctx) {
 			// bright-yellow name. The '+' played-today marker is also
 			// suppressed: your own status is obvious from context.
 			self := e == w.Player()
-			rows = append(rows, row{e.Name, e.Letter(), e.Alive, self, !self && e.Online(), !self && e.LastPlayed == w.Today, e.Land, e.Score, nw})
+			rows = append(rows, row{e.Name, e.Letter(), e.Alive, self, presenceOf(e, self, w.Today), e.Land, e.Score, nw})
 		}
 		lastMaster = w.LastMaster
 	})
-	sort.Slice(rows, func(i, j int) bool { return rows[i].score > rows[j].score })
-
 	// BRE-style scores screen (matches a live BRE scores screen): a game-name
-	// banner, lettered (A)/(B) ids, Id / Empire Name / Territory / Score /
-	// Net Worth columns, magenta header/footer rules. IB-branded.
+	// banner, lettered (A)/(B) ids in slot order, Id / Empire Name / Territory /
+	// Score / Net Worth columns, magenta header/footer rules. IB-branded.
 	fmt.Fprintf(s, "\n%s-*%s%s%s%s*-%s\n\n",
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
 	scoreTableHead(s)
@@ -896,7 +896,7 @@ func printScores(s session.Session, w *ctx) {
 		if r.isPlayer {
 			nameColor = ansi.FgBrightYellow // highlight the caller's own realm
 		}
-		scoreTableRow(s, scoreID(r.letter), name, nameColor, r.online, r.playedToday, r.land, r.score, r.nw)
+		scoreTableRow(s, scoreID(r.letter), name, nameColor, r.presence, r.land, r.score, r.nw)
 	}
 	scoreTableRule(s)
 	if lastMaster != "" {
@@ -917,11 +917,36 @@ const (
 	// so `(A)`..`(Y)` is every id there is. The attack picker leaves it EMPTY for
 	// a realm that cannot be attacked, which this still holds in place.
 	scoreIDCellWidth = 3
-	// scoreNameWidth is the name column. It carries the online suffix too, so
+	// scoreNameWidth is the name column. It carries the presence suffix too, so
 	// the figures beside it do not move when a baron comes or goes.
 	scoreNameWidth  = 26
 	scoreOnlineMark = "O"
 )
+
+// presence captures a realm's activity state for display in score tables and
+// rosters. It is computed once when a row is gathered, not re-evaluated at
+// render time.
+const (
+	presenceOnline = "online"
+	presencePlayed = "played"
+	presenceNone   = ""
+)
+
+// presenceOf returns the display presence for an empire relative to the caller.
+// Self is always suppressed — a deliberate divergence from BRE, which shows the
+// `+` on the caller's own row too (docs/dev/bre-screens.md).
+func presenceOf(e *game.Empire, self bool, today string) string {
+	if self {
+		return presenceNone
+	}
+	if e.Online() {
+		return presenceOnline
+	}
+	if e.LastPlayed == today {
+		return presencePlayed
+	}
+	return presenceNone
+}
 
 // onlineMark renders the indicator, or a blank of the same width. Both the
 // score tables and the Relations roster call it, so the two cannot drift into
@@ -937,7 +962,10 @@ const (
 // for a monochrome or ANSI-less session.
 // onlineMark marks a baron who is on the board: "(O)" set immediately to the
 // LEFT of their name, or a blank of the same width so the name column holds in
-// both states.
+// both states. A realm that merely played today but is not online now gets
+// BRE's own "+" instead (docs/dev/bre-screens.md), right-justified in the same
+// cell so it too hugs the name directly — matching the captured `(A)+Asgard`,
+// not a `+` stranded against the id column with a gap before the name.
 //
 // The LETTER takes the lighter gray and the parens the darker one, not the other
 // way round. Measured against a black background, gray (37) is 9.04:1 on the
@@ -949,34 +977,45 @@ const (
 // of the letter — so headings and blanks can be sized from one place.
 func markWidth(s session.Session) int { return len([]rune(tr(s, scoreOnlineMark))) + 2 }
 
-func onlineMark(s session.Session, online bool) string {
-	if !online {
-		return strings.Repeat(" ", markWidth(s))
+func onlineMark(s session.Session, presence string) string {
+	width := markWidth(s)
+	switch presence {
+	case presenceOnline:
+		return ansi.FgMagenta + "(" + ansi.FgBrightWhite + tr(s, scoreOnlineMark) +
+			ansi.FgMagenta + ")" + ansi.Reset
+	case presencePlayed:
+		return strings.Repeat(" ", width-1) + ansi.FgMagenta + "+" + ansi.Reset
+	default:
+		return strings.Repeat(" ", width)
 	}
-	return ansi.FgBrightBlack + "(" + ansi.FgWhite + tr(s, scoreOnlineMark) +
-		ansi.FgBrightBlack + ")" + ansi.Reset
 }
 
-// nameCell renders the online mark hugging a realm's name on the left, then
-// pads the pair to width. It measures the PLAIN text: the mark carries escapes
-// that a width verb counts as characters, which is what would otherwise ragged
-// the column beside it.
+// nameCell renders the presence mark hugging a realm's name on the
+// left, then pads the pair to width. It measures the PLAIN text: the mark
+// carries escapes that a width verb counts as characters, which is what would
+// otherwise ragged the column beside it.
 //
 // It also CLIPS a name too long for the cell. Nothing caps a realm's name at
 // onboarding — only a three-character minimum is enforced — so a long one used
 // to push the figures beside it out of true. The mark survives the clip: it is
 // the part carrying information the row cannot show twice.
-func nameCell(s session.Session, name, nameColor string, online bool, width int) string {
+func nameCell(s session.Session, name, nameColor string, presence string, width int) string {
 	mark := markWidth(s)
 	if room := width - mark; len([]rune(name)) > room {
 		name = string([]rune(name)[:max(room, 0)])
 	}
-	return onlineMark(s, online) + nameColor + name + ansi.Reset +
+	return onlineMark(s, presence) + nameColor + name + ansi.Reset +
 		strings.Repeat(" ", max(width-mark-len([]rune(name)), 0))
 }
 
-func idCell(id string, idColor string) string {
-	return idColor + id + ansi.Reset + strings.Repeat(" ", max(scoreIDCellWidth-len(id), 0))
+func idCell(id string) string {
+	// BRE: magenta parens, bright-white letter — e.g. 35( 1;37A 35)
+	inner := strings.Trim(id, "()")
+	if inner == "" {
+		return strings.Repeat(" ", scoreIDCellWidth)
+	}
+	return ansi.FgMagenta + "(" + ansi.FgBrightWhite + inner + ansi.FgMagenta + ")" + ansi.Reset +
+		strings.Repeat(" ", max(scoreIDCellWidth-len(id), 0))
 }
 
 // The scores table is drawn on three screens — the Scores display, the attack
@@ -996,15 +1035,10 @@ func scoreTableHead(s session.Session) {
 	scoreTableRule(s)
 }
 
-func scoreTableRow(s session.Session, id, name, nameColor string, online, playedToday bool, land, score, nw int) {
-	sep := ""
-	if playedToday && !online {
-		sep = ansi.FgBrightBlack + "+" + ansi.Reset
-	}
-	fmt.Fprintf(s, "%s%s%s %s%10d%s %s%11d%s %s%11d%s\n",
-		idCell(id, ansi.FgBrightMagenta),
-		sep,
-		nameCell(s, name, nameColor, online, scoreNameWidth),
+func scoreTableRow(s session.Session, id, name, nameColor string, presence string, land, score, nw int) {
+	fmt.Fprintf(s, "%s%s %s%10d%s %s%11d%s %s%11d%s\n",
+		idCell(id),
+		nameCell(s, name, nameColor, presence, scoreNameWidth),
 		ansi.FgBrightMagenta, land, ansi.Reset,
 		ansi.FgBrightWhite, score, ansi.Reset,
 		ansi.FgWhite, nw, ansi.Reset)

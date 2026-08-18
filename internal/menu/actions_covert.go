@@ -112,7 +112,7 @@ func snapshotBribedTargets(w *ctx) []targetRow {
 				name: e.Name, letter: e.Letter(),
 				land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
 				people: e.People, troopers: e.Troopers,
-				attackable: true, online: e.Online(), playedToday: e.LastPlayed == w.Today,
+				attackable: true, presence: presenceOf(e, false, w.Today),
 			})
 		}
 	})

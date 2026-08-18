@@ -84,8 +84,7 @@ type pickRow struct {
 	e               *game.Empire
 	letter          rune
 	name            string
-	online          bool
-	playedToday     bool
+	presence        string
 	land, score, nw int
 	held            []string // pacts held with the caller; gathered for the Relations roster
 }
@@ -100,9 +99,9 @@ func pickRows(w *ctx, opts pickOpts) (rows []pickRow, allies int) {
 				continue
 			}
 			row := pickRow{
-				e: e, letter: rune('A' + e.Slot - 1), name: e.Name, online: e.Online(),
-				playedToday: e.LastPlayed == w.Today,
-				land:        e.Land, score: e.Score, nw: w.NetWorth(e),
+				e: e, letter: rune('A' + e.Slot - 1), name: e.Name,
+				presence: presenceOf(e, false, w.Today),
+				land:     e.Land, score: e.Score, nw: w.NetWorth(e),
 			}
 			if opts.relations {
 				row.held = w.TreatiesBetween(p, e)
@@ -138,7 +137,7 @@ func writePickRoster(s session.Session, rows []pickRow, opts pickOpts) {
 		for _, r := range rows {
 			rel = append(rel, relationsRow{
 				id: string(r.letter), name: r.name,
-				relations: relationsText(s, r.held), online: r.online,
+				relations: relationsText(s, r.held), presence: r.presence,
 			})
 		}
 		writeRelationsTable(s, rel)
@@ -153,14 +152,9 @@ func writePickRoster(s session.Session, rows []pickRow, opts pickOpts) {
 	for _, r := range rows {
 		// idCell also squares the roster with its own heading: the rows used
 		// to put the name one column left of where "Empire Name" starts.
-		sep := ""
-		if r.playedToday && !r.online {
-			sep = ansi.FgBrightBlack + "+" + ansi.Reset
-		}
-		fmt.Fprintf(s, "%s%s%s %s%10s%s %s%11s%s %s%11s%s\n",
-			idCell(fmt.Sprintf("(%c)", r.letter), ansi.FgBrightMagenta),
-			sep,
-			nameCell(s, r.name, ansi.FgBrightWhite, r.online, pickNameWidth),
+		fmt.Fprintf(s, "%s%s %s%10s%s %s%11s%s %s%11s%s\n",
+			idCell(fmt.Sprintf("(%c)", r.letter)),
+			nameCell(s, r.name, ansi.FgBrightWhite, r.presence, pickNameWidth),
 			ansi.FgBrightMagenta, comma(r.land), ansi.Reset,
 			ansi.FgBrightWhite, comma(r.score), ansi.Reset,
 			ansi.FgWhite, comma(r.nw), ansi.Reset)

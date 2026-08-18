@@ -421,7 +421,7 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 			}
 			rows = append(rows, relationsRow{
 				id: w.EmpireLetter(e), name: e.Name,
-				relations: relationsText(s, w.TreatiesBetween(p, e)), online: e.Online(),
+				relations: relationsText(s, w.TreatiesBetween(p, e)), presence: presenceOf(e, false, w.Today),
 			})
 		}
 	})
@@ -441,7 +441,7 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 // and what stands between it and the player.
 type relationsRow struct {
 	id, name, relations string
-	online              bool
+	presence            string
 }
 
 // relationsText renders the Relations column for the pacts held, BRE's "None"
@@ -476,7 +476,7 @@ func writeRelationsTable(s session.Session, rows []relationsRow) {
 		// meets it labelled.
 		fmt.Fprintf(s, "%s[%s%s%s]%s  %s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
 			ansi.Reset,
-			nameCell(s, r.name, ansi.FgBrightCyan, r.online, relationsNameWidth),
+			nameCell(s, r.name, ansi.FgBrightCyan, r.presence, relationsNameWidth),
 			ansi.FgBrightBlue, r.relations, ansi.Reset)
 	}
 	fmt.Fprintln(s, rule)

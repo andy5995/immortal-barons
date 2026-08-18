@@ -115,11 +115,12 @@ func hiTokens(s string, words []string, color string) string {
 // priced off the target without a second trip under the lock (the chemical and
 // biological missiles read both, see game.ChemCostForTarget).
 type targetRow struct {
-	name                            string
-	letter                          string // the realm's permanent slot letter; its selection key
-	land, score, netWorth           int
-	people, troopers                int
-	attackable, online, playedToday bool
+	name                  string
+	letter                string // the realm's permanent slot letter; its selection key
+	land, score, netWorth int
+	people, troopers      int
+	attackable            bool
+	presence              string
 }
 
 // snapshotTargets copies every LIVING rival (not just the attackable ones) under
@@ -143,7 +144,7 @@ func snapshotTargets(w *ctx) []targetRow {
 				name: e.Name, letter: e.Letter(),
 				land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
 				people: e.People, troopers: e.Troopers,
-				attackable: attackable, online: e.Online(), playedToday: e.LastPlayed == w.Today,
+				attackable: attackable, presence: presenceOf(e, false, w.Today),
 			})
 		}
 	})
@@ -287,7 +288,7 @@ func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name 
 			id = scoreID(r.letter)
 			byLetter[r.letter] = r.name
 		}
-		scoreTableRow(s, id, r.name, ansi.FgBrightWhite, r.online, r.playedToday, r.land, r.score, r.netWorth)
+		scoreTableRow(s, id, r.name, ansi.FgBrightWhite, r.presence, r.land, r.score, r.netWorth)
 	}
 	scoreTableRule(s)
 	if len(byLetter) == 0 {

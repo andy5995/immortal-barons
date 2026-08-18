@@ -203,7 +203,7 @@ func TestIDCellKeepsTheNameColumn(t *testing.T) {
 	} {
 		t.Run(tc.whatItIs, func(t *testing.T) {
 			f := &fakeSession{}
-			scoreTableRow(f, tc.id, "Realm", ansi.FgBrightWhite, true, false, 1, 2, 3)
+			scoreTableRow(f, tc.id, "Realm", ansi.FgBrightWhite, presenceOnline, 1, 2, 3)
 			row := plainLines(f.out.String())[0]
 			assertOnlineSuffix(t, row, "Realm", true)
 			if got := strings.Index(row, "Realm"); got != tc.nameCol {
@@ -260,18 +260,18 @@ func TestLongNameCannotMoveTheColumns(t *testing.T) {
 		"Eighteen Chars Xyz",
 		"A Realm Name Of Truly Excessive Length Indeed",
 	} {
-		for _, online := range []bool{true, false} {
+		for _, presence := range []string{presenceOnline, presenceNone} {
 			f := &fakeSession{}
-			scoreTableRow(f, "(A)", name, ansi.FgBrightWhite, online, false, 15, 0, 231)
+			scoreTableRow(f, "(A)", name, ansi.FgBrightWhite, presence, 15, 0, 231)
 			row := plainLines(f.out.String())[0]
-			if online && !strings.Contains(row, "(O)") {
+			if presence == presenceOnline && !strings.Contains(row, "(O)") {
 				t.Errorf("clip dropped the marker for %q: %q", name, row)
 			}
 			tail := row[len(row)-34:]
 			if want == "" {
 				want = tail
 			} else if tail != want {
-				t.Errorf("figures moved for %q (online=%v):\n got %q\nwant %q", name, online, tail, want)
+				t.Errorf("figures moved for %q (presence=%q):\n got %q\nwant %q", name, presence, tail, want)
 			}
 		}
 	}
