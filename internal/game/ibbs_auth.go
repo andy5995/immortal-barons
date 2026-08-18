@@ -109,6 +109,21 @@ func (w *World) NextSeq() uint64 {
 	return w.OutSeq
 }
 
+// IsPacketSeen reports whether a packet has already been applied here, without
+// recording it. Use this for a read-only check — for example, counting skipped
+// packets in ReadInbound — where the caller will call SeenPacket or ApplyPacket
+// afterwards and needs the side effects to fire exactly once.
+func (w *World) IsPacketSeen(p Packet) bool {
+	key := packetKey(p)
+	if w.SeenPackets != nil && w.SeenPackets[key] {
+		return true
+	}
+	if p.Seq > 0 && p.FromBoard != "" && w.HighSeq != nil && p.Seq <= w.HighSeq[p.FromBoard] {
+		return true
+	}
+	return false
+}
+
 // SeenPacket reports whether a packet has already been applied here, and records
 // it if not. A packet with no sequence number is fingerprinted by its contents
 // instead, so an older board that sends none is still protected.

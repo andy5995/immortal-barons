@@ -1,4 +1,6 @@
 (in-progress:)
+  * -planetary now reports skipped packets by reason (wrong league, mesh copy,
+    already seen) instead of silently discarding them (issue #139)
   * New -full, -scores, and -detailed flags for sysop batch files, matching BRE's
     command-line arguments (issue #148)
   * Extra blank lines removed from maintenance payment prompts; each "How much

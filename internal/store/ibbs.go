@@ -29,11 +29,14 @@ const PacketExt = ".brp"
 func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (PlanetaryRun, error) {
 	var run PlanetaryRun
 	before := w.LeagueNodes
-	applied, err := ReadInbound(w, inboundDir, verbose)
+	inResult, err := ReadInbound(w, inboundDir, verbose)
 	if err != nil {
 		return run, err
 	}
-	run.Applied = applied
+	run.Applied = inResult.Applied
+	run.OtherLeague = inResult.OtherLeague
+	run.MeshCopy = inResult.MeshCopy
+	run.AlreadySeen = inResult.AlreadySeen
 	// A member board that just adopted the Coordinator's roster has to persist
 	// it: the roster is read from ibnodes.dat at startup, not from the world
 	// file (#64).
@@ -72,6 +75,9 @@ type PlanetaryRun struct {
 	Forwarded     int  // packets that arrived for another board and were passed on
 	Sent          int  // packet files written, forwarded ones included
 	RosterUpdated bool // the Coordinator's roster replaced this board's copy
+	OtherLeague   int  // packets skipped: wrong league number
+	MeshCopy      int  // packets skipped: not addressed here, mesh mode
+	AlreadySeen   int  // packets skipped: duplicate/replay
 }
 
 // WriteOutbox atomically publishes each queued packet as a JSON file and clears
@@ -232,6 +238,17 @@ func leaguePrefix(league int) string {
 	return fmt.Sprintf("L%03d-", league)
 }
 
+// InboundResult is what ReadInbound did: how many packets were applied and how
+// many were skipped, broken down by reason. The per-reason breakdown matters
+// more than the total — "already seen" and "another league" send the sysop to
+// completely different places.
+type InboundResult struct {
+	Applied     int
+	OtherLeague int
+	MeshCopy    int
+	AlreadySeen int
+}
+
 // ReadInbound reads every packet file in dir addressed to this board (or
 // broadcast), applies it, queues any result packet to the world's Outbox, and
 // removes the consumed files. In a routed league a packet for another board is
@@ -239,16 +256,15 @@ func leaguePrefix(league int) string {
 // collecting it (#106); in a mesh it is left alone, being a copy of one the
 // addressee got directly. A packet stamped with a different league's number is
 // left alone too: it belongs to the other game sharing this directory.
-// Returns the number of packets applied.
-func ReadInbound(w *game.World, dir string, verbose bool) (int, error) {
+func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error) {
+	var result InboundResult
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return 0, nil
+			return result, nil
 		}
-		return 0, err
+		return result, err
 	}
-	applied := 0
 	for _, e := range entries {
 		if e.IsDir() || filepath.Ext(e.Name()) != PacketExt {
 			continue
@@ -256,17 +272,25 @@ func ReadInbound(w *game.World, dir string, verbose bool) (int, error) {
 		path := filepath.Join(dir, e.Name())
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return applied, err
+			return result, err
 		}
 		var p game.Packet
 		if err := json.Unmarshal(data, &p); err != nil {
-			return applied, fmt.Errorf("packet %s: %w", e.Name(), err)
+			return result, fmt.Errorf("packet %s: %w", e.Name(), err)
 		}
 		if w.Config.LeagueNumber != 0 && p.League != 0 && p.League != w.Config.LeagueNumber {
+			result.OtherLeague++
+			if verbose {
+				fmt.Printf("  Skipped packet from %s (wrong league)\n", p.FromBoard)
+			}
 			continue // another league's game, sharing this directory
 		}
 		if !w.AddressedToMe(p) {
 			if !w.Routed() {
+				result.MeshCopy++
+				if verbose {
+					fmt.Printf("  Skipped packet from %s (not addressed here)\n", p.FromBoard)
+				}
 				continue // a mesh fans every packet out; this is a copy for someone else
 			}
 			// In transit. The file goes either way, so a packet that has run out
@@ -277,21 +301,29 @@ func ReadInbound(w *game.World, dir string, verbose bool) (int, error) {
 					p.FromBoard, p.ToBoard, p.PacketType(), p.Date)
 			}
 			if err := os.Remove(path); err != nil {
-				return applied, err
+				return result, err
 			}
 			continue
 		}
 		if verbose {
 			fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
 		}
-		result := w.ApplyPacket(p)
-		if result.HasPayload() {
-			w.Outbox = append(w.Outbox, result)
+		if w.IsPacketSeen(p) {
+			result.AlreadySeen++
+			if verbose {
+				fmt.Printf("  Skipped packet from %s (already seen)\n", p.FromBoard)
+			}
+			os.Remove(path) // clean up; SeenPacket already recorded it
+			continue
 		}
+		applyResult := w.ApplyPacket(p)
+		if applyResult.HasPayload() {
+			w.Outbox = append(w.Outbox, applyResult)
+		}
+		result.Applied++
 		if err := os.Remove(path); err != nil {
-			return applied, err
+			return result, err
 		}
-		applied++
 	}
-	return applied, nil
+	return result, nil
 }

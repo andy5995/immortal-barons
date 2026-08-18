@@ -1197,13 +1197,24 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 // for a command whose whole job is moving mail: a sysop cannot tell a run that
 // had nothing to do from one that read the wrong directory.
 func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
-	switch run.Applied {
-	case 0:
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen
+	switch {
+	case run.Applied == 0 && skipped == 0:
 		fmt.Printf("No packets waiting in %s\n", cfg.Inbound())
-	case 1:
+	case run.Applied == 1 && skipped == 0:
 		fmt.Printf("Applied 1 packet from %s\n", cfg.Inbound())
-	default:
+	case run.Applied > 1 && skipped == 0:
 		fmt.Printf("Applied %d packets from %s\n", run.Applied, cfg.Inbound())
+	case run.Applied == 0 && skipped > 0:
+		fmt.Printf("No packets applied from %s (%s)\n", cfg.Inbound(),
+			skipSummary(run))
+	default:
+		pkt := "packet"
+		if run.Applied != 1 {
+			pkt = "packets"
+		}
+		fmt.Printf("Applied %d %s from %s (%s)\n", run.Applied, pkt,
+			cfg.Inbound(), skipSummary(run))
 	}
 	if run.Forwarded == 1 {
 		fmt.Println("Passed 1 packet on towards the board it is addressed to.")
@@ -1227,6 +1238,31 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 	default:
 		fmt.Printf("Wrote %d packets%s\n", run.Sent, where)
 	}
+}
+
+// skipSummary returns a human-readable breakdown of why packets were skipped,
+// e.g. "skipped 3: 2 already seen, 1 for another league". Each reason is shown
+// only when its count is above zero.
+func skipSummary(run store.PlanetaryRun) string {
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen
+	if skipped == 0 {
+		return ""
+	}
+	var parts []string
+	if run.AlreadySeen > 0 {
+		parts = append(parts, fmt.Sprintf("%d already seen", run.AlreadySeen))
+	}
+	if run.OtherLeague > 0 {
+		parts = append(parts, fmt.Sprintf("%d for another league", run.OtherLeague))
+	}
+	if run.MeshCopy > 0 {
+		parts = append(parts, fmt.Sprintf("%d mesh copy", run.MeshCopy))
+	}
+	pkt := "skipped"
+	if skipped == 1 {
+		pkt = "skipped 1:"
+	}
+	return fmt.Sprintf("%s %d: %s", pkt, skipped, strings.Join(parts, ", "))
 }
 
 // runFull chains the three steps a sysop's batch file runs: inbound, play,

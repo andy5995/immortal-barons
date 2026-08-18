@@ -35,12 +35,12 @@ func TestAHubForwardsAPacketItIsNotAddressedTo(t *testing.T) {
 		Scores:    []game.RemoteScore{{Empire: "Apples", Land: 500}},
 	})
 
-	applied, err := ReadInbound(hub, inbound, false)
+	result, err := ReadInbound(hub, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
-	if applied != 0 {
-		t.Errorf("a packet in transit is not applied here, got applied=%d", applied)
+	if result.Applied != 0 {
+		t.Errorf("a packet in transit is not applied here, got applied=%d", result.Applied)
 	}
 	if left := packetFiles(t, inbound); len(left) != 0 {
 		t.Errorf("transit packet left in the inbound directory: %v", left)
@@ -211,16 +211,59 @@ func TestAPacketFromAnotherLeagueIsLeftAlone(t *testing.T) {
 		Scores: []game.RemoteScore{{Empire: "Oranges", Land: 500}},
 	})
 
-	applied, err := ReadInbound(w, inbound, false)
+	result, err := ReadInbound(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
-	if applied != 1 {
-		t.Errorf("applied %d packets, want 1", applied)
+	if result.Applied != 1 {
+		t.Errorf("applied %d packets, want 1", result.Applied)
+	}
+	if result.OtherLeague != 1 {
+		t.Errorf("other league skips = %d, want 1", result.OtherLeague)
 	}
 	left := packetFiles(t, inbound)
 	if len(left) != 1 || !strings.HasPrefix(left[0], "theirs") {
 		t.Errorf("the other league's packet should still be there, directory holds %v", left)
+	}
+}
+
+// A packet already recorded in SeenPackets is not applied again, even if the
+// file is still in the inbound directory.
+func TestAnAlreadySeenPacketIsSkipped(t *testing.T) {
+	inbound := t.TempDir()
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "Alpha BBS"
+	w := game.NewWorldSeed(cfg, 1)
+
+	p := game.Packet{
+		FromBoard: "Bravo BBS", ToBoard: "Alpha BBS",
+		Scores: []game.RemoteScore{{Empire: "Apples", Land: 500}},
+	}
+	writePacket(t, inbound, "first", p)
+
+	// Apply it once — this records it in SeenPackets and removes the file.
+	result, err := ReadInbound(w, inbound, false)
+	if err != nil {
+		t.Fatalf("ReadInbound (first): %v", err)
+	}
+	if result.Applied != 1 {
+		t.Fatalf("first apply: applied=%d, want 1", result.Applied)
+	}
+
+	// Write the same packet again. SeenPacket should recognise it.
+	writePacket(t, inbound, "second", p)
+	result, err = ReadInbound(w, inbound, false)
+	if err != nil {
+		t.Fatalf("ReadInbound (second): %v", err)
+	}
+	if result.Applied != 0 {
+		t.Errorf("second apply: applied=%d, want 0", result.Applied)
+	}
+	if result.AlreadySeen != 1 {
+		t.Errorf("second apply: already seen=%d, want 1", result.AlreadySeen)
+	}
+	if len(packetFiles(t, inbound)) != 0 {
+		t.Error("the already-seen packet should have been removed")
 	}
 }
 

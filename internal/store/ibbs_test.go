@@ -39,9 +39,9 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	}
 
 	// Board B reads the exchange, applies the attack, and queues its result.
-	n, err := ReadInbound(wB, exchange, false)
-	if err != nil || n != 1 {
-		t.Fatalf("ReadInbound B: n=%d err=%v", n, err)
+	result, err := ReadInbound(wB, exchange, false)
+	if err != nil || result.Applied != 1 {
+		t.Fatalf("ReadInbound B: applied=%d err=%v", result.Applied, err)
 	}
 	if target.Land >= 100 {
 		t.Errorf("target should have lost land, has %d", target.Land)
