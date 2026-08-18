@@ -38,7 +38,7 @@ func TestAttackGoldCostCapped(t *testing.T) {
 }
 
 func TestTerrorOpGoldCostByLevel(t *testing.T) {
-	// 5,000 regions at 64 gold each is 320,000 at Medium.
+	// 5,000 regions at (0+63)=64 gold each is 320,000 at Medium.
 	for _, tc := range []struct {
 		level Level
 		want  int64
@@ -59,6 +59,32 @@ func TestTerrorOpGoldCostByLevel(t *testing.T) {
 	}
 }
 
+// BINARY-VERIFIED: the per-region cost rises with each op launched that day.
+// capped = clamp(opsToday, 1, 100); cost = (capped + 63) * regions * configMult.
+func TestTerrorOpGoldCostByCounter(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.TerrorCosts = Medium
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("alice", "Alethia")
+	e.Land = 1000
+
+	for _, tc := range []struct {
+		opsToday int
+		want     int64
+	}{
+		{0, 64_000},    // clamp to 1 → (1+63) * 1000
+		{1, 64_000},    // same: (1+63) * 1000
+		{2, 65_000},    // (2+63) * 1000
+		{100, 163_000}, // cap: (100+63) * 1000
+		{200, 163_000}, // clamped at 100
+	} {
+		e.TerrorOpsToday = tc.opsToday
+		if got := w.TerrorOpGoldCost(e); got != tc.want {
+			t.Errorf("opsToday=%d: cost = %d, want %d", tc.opsToday, got, tc.want)
+		}
+	}
+}
+
 // The price is charged, and an op the launcher cannot pay for is refused with
 // nothing spent — no agents committed, no packet queued.
 func TestSendTerrorChargesTheOp(t *testing.T) {
@@ -70,7 +96,7 @@ func TestSendTerrorChargesTheOp(t *testing.T) {
 	e.Land, e.Agents, e.Gold = 1000, 10, 100_000
 
 	want := int64(1000 * 64) // Medium
-	if err := w.SendTerror(e, "faraway", "Rome", 4); err != nil {
+	if err := w.SendTerror(e, "faraway", "Rome", 4, TerrorOpSpy); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
 	if e.Gold != 100_000-want {
@@ -78,7 +104,7 @@ func TestSendTerrorChargesTheOp(t *testing.T) {
 	}
 
 	e.Gold = want - 1
-	if err := w.SendTerror(e, "faraway", "Rome", 4); err != ErrCantAfford {
+	if err := w.SendTerror(e, "faraway", "Rome", 4, TerrorOpSpy); err != ErrCantAfford {
 		t.Fatalf("a broke launcher: err = %v, want ErrCantAfford", err)
 	}
 	if e.Agents != 6 {

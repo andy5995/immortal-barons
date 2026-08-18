@@ -17,6 +17,7 @@ type Menus struct {
 	Bank           *Menu
 	Attack         *Menu
 	InterPlanetary *Menu
+	TerrorOps      *Menu
 	Covert         *Menu
 	Trading        *Menu
 	Diplomacy      *Menu
@@ -79,6 +80,12 @@ func BuildMenus() *Menus {
 	// sizing the box to its own content, where 32 would clip every priced row.
 	covert := &Menu{Title: "Covert Operations", Color: ansi.FgBrightGreen, ExitOnEnter: true, Status: covertStatus, Width: 34}
 	ipSpecial := &Menu{Title: "Special Operations", Color: ansi.FgBrightYellow, ExitOnEnter: true, Columns: 2}
+	// BRE's Terrorist Ops submenu (IP Operations item '2') shows 9 named
+	// operations; all share the same mechanical effect (each agent destroys
+	// 1/7 of a random unit type) but BRE carries the op type in the packet
+	// so the result report can name it. Order, labels and hotkeys match the
+	// binary-verified string table.
+	terrorOps := &Menu{Title: "Terrorist Ops", Color: ansi.FgBrightYellow, ExitOnEnter: true}
 	// BRE draws IP Messages as a narrow single-column box (25 columns, from a
 	// live capture) rather than at the full menu width.
 	ipMessages := &Menu{Title: "IP Messages", Color: ansi.FgBrightCyan, ExitOnEnter: true, Width: 25}
@@ -227,7 +234,7 @@ func BuildMenus() *Menus {
 	// individual-attack mechanic behind it yet — see indivAttackForce's doc.
 	interplanetary.Items = []Item{
 		{Key: '1', Label: "View IPScores", Do: interbbsScores},
-		{Key: '2', Label: "Terrorist Ops", Do: terroristOps},
+		{Key: '2', Label: "Terrorist Ops", Do: gotoMenu(terrorOps)},
 		{Key: '3', Label: "Send Trade Deal", Do: sendTradeDeal},
 		{Key: '4', Label: "Create Group Attack", Do: createGroupAttack},
 		{Key: '5', Label: "Join Group Attack", Do: joinGroupAttack},
@@ -304,6 +311,25 @@ func BuildMenus() *Menus {
 	}
 	ipSpecial.Status = goldStatus
 	ipSpecial.DefaultOnEnter = quitOnEnter(ipSpecial)
+
+	// Terrorist Ops submenu: BRE's 9-item sub-menu under IP Operations item '2'.
+	// All sub-ops share the same mechanical effect (each agent destroys 1/7 of
+	// one random unit type) and the same gold cost; the labels are cosmetic flavor.
+	// Order, labels and hotkeys match the binary-verified string table. Numbered
+	// 1-9 with no Help item, as BRE draws it.
+	terrorOps.Items = []Item{
+		{Key: '1', Label: "Send Spy", Do: terrorOp(game.TerrorOpSpy)},
+		{Key: '2', Label: "Bomb Intelligence", Do: terrorOp(game.TerrorOpBombIntel)},
+		{Key: '3', Label: "Demoralize", Do: terrorOp(game.TerrorOpDemoralize)},
+		{Key: '4', Label: "Cause Dissensions", Do: terrorOp(game.TerrorOpDissensions)},
+		{Key: '5', Label: "Bomb AirBases", Do: terrorOp(game.TerrorOpBombAirBases)},
+		{Key: '6', Label: "Stir Emigrations", Do: terrorOp(game.TerrorOpEmigrations)},
+		{Key: '7', Label: "Spread Propaganda", Do: terrorOp(game.TerrorOpPropaganda)},
+		{Key: '8', Label: "Bomb Food Stores", Do: terrorOp(game.TerrorOpBombFood)},
+		{Key: '9', Label: "Sabotage HQ", Do: terrorOp(game.TerrorOpSabotageHQ)},
+		{Key: '0', Label: "Quit", Do: back},
+	}
+	terrorOps.DefaultOnEnter = quitOnEnter(terrorOps)
 
 	trading.Items = []Item{
 		{Key: '1', Label: "Send Trade Deal", Do: sendTradeDeal},
@@ -489,6 +515,7 @@ func BuildMenus() *Menus {
 		Bank:           bank,
 		Attack:         attack,
 		InterPlanetary: interplanetary,
+		TerrorOps:      terrorOps,
 		Covert:         covert,
 		Trading:        trading,
 		Diplomacy:      diplomacy,

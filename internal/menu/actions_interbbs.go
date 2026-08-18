@@ -985,10 +985,20 @@ func sendRemoteSpy(s session.Session, w *ctx) {
 	ok(s, "Your agents are on their way to %s on %s. Their report will reach the Spy Database when word comes back.", baron, board)
 }
 
-// terroristOps sends agents to destroy an enemy baron's forces on another
-// planet — BRE's Terrorist Ops. The strike is queued and resolves on the target
-// board's next packet run; New Realm Protection blocks it.
-func terroristOps(s session.Session, w *ctx) Result {
+// terrorOp returns a handler that sends agents to perform a specific terror
+// sub-operation on an enemy baron on another planet. All nine sub-ops share the
+// same mechanical effect (each agent destroys 1/7 of a random unit type) but BRE
+// carries the op type in the packet so the result report can name it.
+func terrorOp(op game.TerrorOpType) Action {
+	return func(s session.Session, w *ctx) Result {
+		return doTerrorOp(s, w, op)
+	}
+}
+
+// doTerrorOp is the shared implementation behind the Terrorist Ops submenu.
+// The strike is queued and resolves on the target board's next packet run; New
+// Realm Protection blocks it.
+func doTerrorOp(s session.Session, w *ctx, op game.TerrorOpType) Result {
 	if blockedByProtection(s, w) {
 		return Stay
 	}
@@ -1011,13 +1021,13 @@ func terroristOps(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		return w.World.SendTerror(p, board, baron, agents)
+		return w.World.SendTerror(p, board, baron, agents, op)
 	})
 	if err != nil {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "Your terrorists depart for %s on %s.", baron, board)
+	ok(s, "Your %s agents depart for %s on %s.", op, baron, board)
 	return Stay
 }
 

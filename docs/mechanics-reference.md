@@ -771,10 +771,12 @@ wrong side when it was written — idle-realm removal, the money cap, and
 unlimited food, each of which would have let two planets play a different
 game.
 
-**A terrorist op costs `total regions × 64` gold — BINARY-VERIFIED.** The
-InterPlanetary Operations menu prices the op in its own cost column, and the
-price scales with the launcher's **region count**, which is why it drifts upward
-as a realm buys land. Read from the binary and then confirmed against a capture:
+**A terrorist op costs `(opsToday + 63) × total regions` gold — BINARY-VERIFIED.**
+The InterPlanetary Operations menu prices the op in its own cost column, and the
+price scales with the launcher's **region count** and **daily op count**, rising
+as a realm buys land or launches more ops. At opsToday ≤ 1 the per-region cost
+is 64 (confirmed against four captures); each additional op adds 1 per region,
+up to 163 at the cap of 100. Terrorism Costs scales the result:
 
 | Regions | × 64 | Price on the menu |
 | --- | --- | --- |
@@ -783,24 +785,30 @@ as a realm buys land. Read from the binary and then confirmed against a capture:
 | 8,474 | 542,336 | 542,336 |
 | 8,484 | 542,976 | 542,976 |
 
-Four readings, four exact matches, from one session as the realm's land grew.
+Four readings, four exact matches, from one session as the realm's land grew
+(opsToday = 0 throughout, so the per-region cost held at 64).
 The chain: `launch_terrorist_operation` (`BRE.OVR 0x2afbf`) passes empire field
 `+0x276` to the pricing routine at `0x2aca8`, which clamps it with `max_i32(…,1)`
 then `min_i32(…,100)`, calls `total_regions` (`056d:0ec6`), and combines them
 through Real48. The result is compared against gold before the op is allowed.
 
-**What is not yet pinned** is the clamped `+0x276` term. That field is a per-day
-counter — written at `0x864f`, incremented at `0x2b603` after a launch, read by
-both the menu and the launcher, and separately tested against the configured cap
-at `[0x1040]`. All four readings above were taken with it at its floor, so they
-only prove the ×64-per-region term; whether the price also rises with each op
-already launched that day needs a capture with the counter above zero. Do not
-assume it is flat.
+The `+0x276` term is the per-day counter — written at `0x864f`, incremented at
+`0x2b603` after a launch, read by both the menu and the launcher, and separately
+tested against the configured cap at `[0x1040]`. The pricing routine (`ovr_02aca8_entry_0000`)
+clamps it with `max_i32(…,1)` then `min_i32(…,100)`, adds 63, and multiplies
+by `total_regions`:
 
-IB charges it: `World.TerrorOpGoldCost` is `Land × TerrorOpGoldPerRegion (64)`
-scaled by `TerrorCosts`, quoted before the confirm and taken in `SendTerror`.
-The four Special Operations entries the original prices on their own menu are
-implemented at those figures — see "Interplanetary Special Operations" below.
+	capped   := clamp(terrorOpsToday, 1, 100)
+	base     := (capped + 63) × totalRegions
+	goldCost := base × configMult
+
+For opsToday ≤ 1 the per-region cost is 64 (matching the four captures above);
+each subsequent op raises it by 1, up to 163 at the cap of 100. BINARY-VERIFIED.
+
+IB charges it: `World.TerrorOpGoldCost` applies the same formula, quoted before
+the confirm and taken in `SendTerror`. The four Special Operations entries
+price themselves on their own menu — see "Interplanetary Special Operations"
+below.
 
 ### The two cost levels (Attack Costs, Terrorism Costs) — BINARY-VERIFIED
 
@@ -2947,7 +2955,7 @@ strength% = trunc(sqrt(funding / (10 x (totalRegions + 1))))     clamped 0..100
 The original stores the pot in **whole thousands** and computes
 `thousands * 1000 / (regions+1) / 10` before the square root, which is the same
 figure. It reproduces all sixteen captured screens exactly at that game's **8,321
-regions** — the Terrorist Ops price on the surrounding menu is `regions x 64`,
+regions** — the Terrorist Ops price on the surrounding menu is `regions × 64` (base per-region cost at opsToday=0),
 which pins the count — so land is a divisor of the shield and not just of its
 cost. Two consequences worth stating: taking land thins your own shield, and each
 further percent costs more than the last (the curve is quadratic in the

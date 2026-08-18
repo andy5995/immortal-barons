@@ -131,7 +131,7 @@ func TestTerrorOpDestroysForces(t *testing.T) {
 	target.Tanks, target.Bombers, target.Carriers = 700, 700, 700
 	totalBefore := target.Troopers + target.Jets + target.Turrets + target.Tanks + target.Bombers + target.Carriers
 
-	if err := wA.SendTerror(attacker, "boardB", "Victim", 4); err != nil {
+	if err := wA.SendTerror(attacker, "boardB", "Victim", 4, TerrorOpSpy); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
 	if attacker.Agents != 6 {
@@ -166,7 +166,7 @@ func TestTerrorOpBlockedByProtection(t *testing.T) {
 	target.Protection = 3
 	target.Troopers = 5000
 
-	if err := wA.SendTerror(attacker, "boardB", "Victim", 4); err != nil {
+	if err := wA.SendTerror(attacker, "boardB", "Victim", 4, TerrorOpBombIntel); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
 	result := wB.ApplyPacket(wA.Outbox[0])
@@ -398,7 +398,7 @@ func TestLostForcesComeHome(t *testing.T) {
 	if _, err := w.CreateGroupAttack(e, "faraway", "Rome", GroupAttackHoursMin, f); err != nil {
 		t.Fatalf("CreateGroupAttack: %v", err)
 	}
-	if err := w.SendTerror(e, "faraway", "Rome", 5); err != nil {
+	if err := w.SendTerror(e, "faraway", "Rome", 5, TerrorOpDemoralize); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
 	w.LaunchDueGroupAttacksAt(afterDeparture())

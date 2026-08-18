@@ -19,15 +19,28 @@ func (w *World) AttackGoldCost(f AttackForce) int64 {
 }
 
 // TerrorOpGoldCost is what a terrorist op costs e to launch: BRE prices it off
-// the launcher's own realm, at TerrorOpGoldPerRegion per region, scaled by the
-// league's Terrorism Costs level. The price therefore climbs as a realm buys
-// land, which is what stops a large empire spamming ops for free.
+// the launcher's own realm, scaled by the league's Terrorism Costs level.
+// The price climbs as a realm buys land (stopping large empires from spamming
+// ops for free) and as more ops are launched that day.
 //
-// No ceiling: BRE clamps the attack price at AttackCostCap, and nothing in the
-// terrorist pricing routine does the same. Unverified rather than proven
-// absent — the routine was read, but only as far as the level table and the
-// per-region term.
+// BINARY-VERIFIED formula (ovr_02aca8_entry_0000, BRE.OVR):
+//
+//	capped := clamp(terrorOpsToday, 1, 100)
+//	cost   := (capped + 63) * totalRegions * configMult
+//
+// For opsToday ≤ 1 the per-region cost is TerrorOpGoldPerRegion (64); each
+// subsequent op raises it by 1, up to 163 at the cap of 100.
+//
+// No ceiling: BRE clamps the attack price at AttackCostCap, and nothing in
+// the terrorist pricing routine does the same.
 func (w *World) TerrorOpGoldCost(e *Empire) int64 {
-	cost := int64(e.Land) * TerrorOpGoldPerRegion
+	ops := int64(e.TerrorOpsToday)
+	switch {
+	case ops < 1:
+		ops = 1
+	case ops > 100:
+		ops = 100
+	}
+	cost := (ops + 63) * int64(e.Land)
 	return cost * int64(w.Config.TerrorCosts.CostPercent()) / 100
 }

@@ -672,13 +672,58 @@ func (r AttackResult) outcome() AttackOutcome {
 	return OutcomeRepelled
 }
 
+// TerrorOpType identifies which sub-operation was launched from the Terrorist
+// Ops submenu. All nine types have the same mechanical effect (each agent
+// destroys 1/TerrorUnitLossDenom of one random unit type), but BRE carries the
+// type in the packet so the result report can name it.
+type TerrorOpType int
+
+const (
+	TerrorOpSpy TerrorOpType = iota + 1
+	TerrorOpBombIntel
+	TerrorOpDemoralize
+	TerrorOpDissensions
+	TerrorOpBombAirBases
+	TerrorOpEmigrations
+	TerrorOpPropaganda
+	TerrorOpBombFood
+	TerrorOpSabotageHQ
+)
+
+// TerrorOpName returns the BRE label for a terror sub-op.
+func (t TerrorOpType) String() string {
+	switch t {
+	case TerrorOpSpy:
+		return "Send Spy"
+	case TerrorOpBombIntel:
+		return "Bomb Intelligence"
+	case TerrorOpDemoralize:
+		return "Demoralize"
+	case TerrorOpDissensions:
+		return "Cause Dissensions"
+	case TerrorOpBombAirBases:
+		return "Bomb AirBases"
+	case TerrorOpEmigrations:
+		return "Stir Emigrations"
+	case TerrorOpPropaganda:
+		return "Spread Propaganda"
+	case TerrorOpBombFood:
+		return "Bomb Food Stores"
+	case TerrorOpSabotageHQ:
+		return "Sabotage HQ"
+	default:
+		return "Terrorist Ops"
+	}
+}
+
 // RemoteTerror is a terror strike sent to an empire on another board: BRE's
 // Terrorist Ops destroy the target's forces rather than capturing land.
 type RemoteTerror struct {
 	ID           int
 	FromBoard    string
 	TargetEmpire string
-	Agents       int // agents committed; scales the forces destroyed
+	Agents       int          // agents committed; scales the forces destroyed
+	Op           TerrorOpType `json:",omitempty"` // sub-op type (cosmetic; all resolve identically)
 }
 
 // InFlightStrike is a strike that has left this board and has not been answered.
@@ -979,8 +1024,10 @@ func (w *World) enqueueTradeBid(toBoard string, b IPTradeBid) {
 }
 
 // SendTerror queues a terror op against targetEmpire on targetBoard, committing
-// agents (deducted now). It resolves on the target board's next packet run.
-func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents int) error {
+// agents (deducted now). op is the sub-operation type from the Terrorist Ops
+// submenu; it is cosmetic (all resolve identically) but BRE carries it in the
+// packet. It resolves on the target board's next packet run.
+func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents int, op TerrorOpType) error {
 	if !w.CanTerrorOp(e) {
 		return ErrTerrorOpsExhausted
 	}
@@ -995,7 +1042,7 @@ func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents i
 	e.Agents -= agents
 	e.TerrorOpsToday++
 	w.NextAttackID++
-	t := RemoteTerror{ID: w.NextAttackID, FromBoard: w.Config.BoardID, TargetEmpire: targetEmpire, Agents: agents}
+	t := RemoteTerror{ID: w.NextAttackID, FromBoard: w.Config.BoardID, TargetEmpire: targetEmpire, Agents: agents, Op: op}
 	w.InFlight = append(w.InFlight, InFlightStrike{
 		ID:           t.ID,
 		Kind:         "terror",

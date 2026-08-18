@@ -1406,10 +1406,15 @@ const (
 	// the computed price and substituted for it when the price is larger).
 	AttackCostCap int64 = 200_000_000
 
-	// TerrorOpGoldPerRegion prices a terrorist op off the launcher's own realm:
-	// BINARY-VERIFIED at 64 gold per region and confirmed against four captured
-	// menu prices (docs/mechanics-reference.md, "A terrorist op costs total
-	// regions x 64 gold"). TerrorCosts scales it.
+	// TerrorOpGoldPerRegion is the minimum per-region cost of a terrorist op
+	// (64 gold), confirmed against four captured menu prices. The full
+	// BINARY-VERIFIED formula (docs/mechanics-reference.md) is:
+	//
+	//	capped := clamp(terrorOpsToday, 1, 100)
+	//	cost   := (capped + TerrorOpGoldPerRegion - 1) * totalRegions * configMult
+	//
+	// For opsToday ≤ 1 this yields TerrorOpGoldPerRegion per region; each
+	// additional op that day raises it by 1, up to 163 at the cap.
 	TerrorOpGoldPerRegion int64 = 64
 )
 

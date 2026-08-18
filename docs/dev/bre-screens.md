@@ -2183,7 +2183,7 @@ the screen's own note about funding in increments of 1000.
 cannot give it. The curve came out of the binary instead
 (`trunc(sqrt(funding / (10 x (regions+1))))`, see `docs/mechanics-reference.md`),
 and every row above reproduces exactly at **8,321 regions** — the count this
-capture's realm held, read off the Terrorist Ops price (`regions x 64` =
+capture's realm held, read off the Terrorist Ops price (`regions × 64` (base at opsToday=0) =
 532,544) on the menu the SDI screen opens from.
 
 The `Funding / Region: 0,000 Gold` line is not a defect: the program is stored in
