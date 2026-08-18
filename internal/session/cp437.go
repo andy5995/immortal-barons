@@ -16,7 +16,8 @@ import (
 // CP437 session only renders catalogs that map cleanly), and cp437Fallback
 // rewrites common typographic characters to ASCII, so the encoder's
 // last-resort substitution byte (0x1a) should be effectively unreachable.
-// ReadKey passes through to the inner session; only output is transcoded.
+// Input is transcoded too: ReadKey decodes one raw byte as CP437 (see
+// KeyByteReader), so a character typed on the terminal round-trips.
 type cp437Writer struct {
 	Session           // inner session; promotes ReadKey (Write is overridden below)
 	enc     io.Writer // transform.Writer that encodes UTF-8 -> CP437 into inner
@@ -43,6 +44,23 @@ func NewCP437Writer(inner Session) Session {
 		Session: inner,
 		enc:     transform.NewWriter(inner, encoding.ReplaceUnsupported(charmap.CodePage437.NewEncoder())),
 	}
+}
+
+// ReadKey returns the next keypress decoded as CP437, so a high byte the
+// terminal sends for a block or line-drawing character becomes that character
+// rather than U+FFFD. CP437's low half is plain ASCII, so control keys — Enter,
+// backspace, ESC and the Ctrl-letter macro triggers — are unaffected. An inner
+// session with no raw-byte read (a test fake, a decorator) keeps the UTF-8 path.
+func (c *cp437Writer) ReadKey() (rune, error) {
+	br, ok := c.Session.(KeyByteReader)
+	if !ok {
+		return c.Session.ReadKey()
+	}
+	b, err := br.ReadKeyByte()
+	if err != nil {
+		return 0, err
+	}
+	return charmap.CodePage437.DecodeByte(b), nil
 }
 
 // DrainInput forwards to the inner session (see InputDrainer); the embedded

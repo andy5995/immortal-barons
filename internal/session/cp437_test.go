@@ -141,3 +141,54 @@ func TestLocaleIsUTF8(t *testing.T) {
 		}
 	}
 }
+
+// fakeByteInner is a Session whose input arrives as raw bytes, like the real
+// stdio/socket/console readers (see KeyByteReader).
+type fakeByteInner struct {
+	out   bytes.Buffer
+	bytes []byte
+	pos   int
+}
+
+func (f *fakeByteInner) Write(p []byte) (int, error) { return f.out.Write(p) }
+func (f *fakeByteInner) ReadKeyByte() (byte, error) {
+	if f.pos >= len(f.bytes) {
+		return 0, io.EOF
+	}
+	b := f.bytes[f.pos]
+	f.pos++
+	return b, nil
+}
+func (f *fakeByteInner) ReadKey() (rune, error) {
+	b, err := f.ReadKeyByte()
+	return rune(b), err
+}
+
+func TestCP437WriterReadKeyDecodesInput(t *testing.T) {
+	// The bytes SyncTERM sends for A, ╘ (Alt+212), █ and Enter. Decoded as
+	// UTF-8 the high bytes would each be U+FFFD (issue #151).
+	inner := &fakeByteInner{bytes: []byte{'A', 0xD4, 0xDB, '\r'}}
+	w := NewCP437Writer(inner)
+	for _, want := range []rune{'A', '╘', '█', '\r'} {
+		if got, err := w.ReadKey(); got != want || err != nil {
+			t.Errorf("ReadKey = %q, %v; want %q, nil", got, err, want)
+		}
+	}
+}
+
+// A CP437 character typed at a prompt must come back on the wire as the same
+// byte it arrived as — decode on input, encode on echo.
+func TestCP437ReadLineRoundTrip(t *testing.T) {
+	inner := &fakeByteInner{bytes: []byte{'x', 0xD4, 0xB0, '\r'}}
+	w := NewCP437Writer(inner)
+	line, err := ReadLine(w)
+	if err != nil {
+		t.Fatalf("ReadLine: %v", err)
+	}
+	if want := "x╘░"; line != want {
+		t.Errorf("ReadLine = %q, want %q", line, want)
+	}
+	if got, want := inner.out.Bytes(), []byte{'x', 0xD4, 0xB0, '\n'}; !bytes.Equal(got, want) {
+		t.Errorf("echo = % X, want % X", got, want)
+	}
+}

@@ -26,6 +26,15 @@ type Session interface {
 // sessions with no input buffer (web, test fakes) simply do not implement it.
 type InputDrainer interface{ DrainInput() }
 
+// KeyByteReader is the optional capability to read one RAW input byte, before
+// any character-set decoding. The base readers decode input as UTF-8 (bufio's
+// ReadRune), which is wrong for a CP437 terminal: SyncTERM sends the CP437 byte
+// for a block or line-drawing character the caller typed, and as UTF-8 that is
+// an invalid lead byte, so it arrives as U+FFFD and echoes back as CP437 0x1A,
+// a right arrow (issue #151). NewCP437Writer uses this to decode input in the
+// same charset it writes.
+type KeyByteReader interface{ ReadKeyByte() (byte, error) }
+
 // Drain invokes s's DrainInput if it has one, so callers and forwarding
 // wrappers need no type assertion of their own.
 func Drain(s Session) {

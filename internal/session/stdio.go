@@ -45,6 +45,9 @@ func (s *Stdio) ReadKey() (rune, error) {
 	return r, err
 }
 
+// ReadKeyByte returns the next raw byte, undecoded (see KeyByteReader).
+func (s *Stdio) ReadKeyByte() (byte, error) { return s.r.ReadByte() }
+
 // DrainInput drops a line terminator left buffered after a single-key answer
 // (see InputDrainer).
 func (s *Stdio) DrainInput() { drainTerminators(s.r) }

@@ -1,4 +1,5 @@
 (in-progress:)
+  * CP437 characters typed at a prompt now arrive as typed (issue #151)
   * -planetary now reports skipped packets by reason (wrong league, mesh copy,
     already seen) instead of silently discarding them (issue #139)
   * New -full, -scores, and -detailed flags for sysop batch files, matching BRE's

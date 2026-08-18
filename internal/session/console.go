@@ -56,6 +56,9 @@ func (c *Console) ReadKey() (rune, error) {
 	return r, err
 }
 
+// ReadKeyByte returns the next raw byte, undecoded (see KeyByteReader).
+func (c *Console) ReadKeyByte() (byte, error) { return c.r.ReadByte() }
+
 // DrainInput drops a line terminator left buffered after a single-key answer
 // (see InputDrainer).
 func (c *Console) DrainInput() { drainTerminators(c.r) }
