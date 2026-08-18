@@ -1,4 +1,5 @@
 (in-progress:)
+  * Onboarding messages wrap to the screen instead of splitting words at column 80
   * A realm name may now be made entirely of CP437 glyphs (issue #151)
   * An idle timeout while naming a realm now ends the session, creating none
   * A realm may be renamed once, from the Preferences menu, after protection ends

@@ -428,11 +428,15 @@ func statLine[T numfmt.Number](s session.Session, n T, text string) {
 	fmt.Fprintf(s, "  %s%s%s %s\n", ansi.FgBrightCyan, comma(n), ansi.Reset, i18n.T(sessionLang(s), text))
 }
 
-// wrapIndented breaks text at word boundaries to the screen width, indenting
+// WrapIndented breaks text at word boundaries to the screen width, indenting
 // every line by indent. Without it a message longer than the terminal is broken
 // by the terminal itself, mid-word and flush against the left margin — and a
-// translated string is often half again as long as the English it came from.
-func wrapIndented(text, indent string) string { return wrapHanging(text, indent, indent) }
+// translated string is often half again as long as the English it came from
+// (a German line ran off the margin and split "Reich" as "Re"/"ich").
+//
+// Exported for internal/play, whose onboarding prompts run before the menu
+// engine exists and print straight to the session.
+func WrapIndented(text, indent string) string { return wrapHanging(text, indent, indent) }
 
 // wrapReport word-wraps a multi-line report, keeping the line breaks it already
 // has. help.Wrap collapses all whitespace, newlines included, so passing a whole
@@ -453,7 +457,7 @@ func wrapReport(text string) string {
 	return strings.Join(lines, "\n")
 }
 
-// wrapHanging is wrapIndented with a different lead on the first line, so a
+// wrapHanging is WrapIndented with a different lead on the first line, so a
 // marker can sit outside the text and the continuation still lines up under it.
 func wrapHanging(text, first, cont string) string {
 	lines := strings.Split(help.Wrap(text, ansi.ScreenCols-len(cont)-1), "\n")
@@ -478,7 +482,7 @@ func ok(s session.Session, format string, a ...any) {
 // that a following screen or prompt makes the pause redundant.
 func okNoPause(s session.Session, format string, a ...any) {
 	msg := fmt.Sprintf(i18n.T(sessionLang(s), format), a...)
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightWhite, wrapIndented(msg, "  "), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightWhite, WrapIndented(msg, "  "), ansi.Reset)
 }
 
 func fail(s session.Session, err error) {

@@ -203,6 +203,15 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   included — inside it. Before calling a hand-drawn screen done, render it and
   an engine-drawn menu side by side and compare; a checklist of fixes is not
   the same as looking at the output.
+- **Player-visible prose is wrapped at render time, never left to the terminal.**
+  Print it through `ok`/`okNoPause`/`fail` or `menu.WrapIndented` (exported for
+  `internal/play`, whose onboarding runs before the menu engine); a bare
+  `Fprintf` of a sentence is the defect. A terminal breaks an over-long line
+  mid-word at column 80, and **a translated string is longer than the English it
+  came from** — the German invalid-name message ran 84 columns and split "Reich"
+  into "Re" and "ich". Checking that the English fits is what makes this recur:
+  check the longest catalog rendering, or just wrap unconditionally.
+  `TestOnboardingOutputFitsTheScreen` holds the onboarding path to 80 columns.
 - **Menu prompts are consistent.** A numbered selection list ends with a
   `0) Quit` line and the standard `> Quit` prompt (use `ChoiceQuit`, which
   prints the bare `>` and echoes the translated `Quit` as the Enter default),

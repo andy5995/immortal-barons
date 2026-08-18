@@ -166,12 +166,13 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 		}
 	})
 	if dupeLocked != "" {
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, dupeLocked, ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(dupeLocked, ""), ansi.Reset)
 		return "dupe", save()
 	}
 	if deadToday != "" {
-		fmt.Fprintf(s, "\n%sYour realm %s was destroyed. Return on a later day to build a new realm.%s\n",
-			ansi.FgYellow, deadToday, ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow,
+			menu.WrapIndented(fmt.Sprintf("Your realm %s was destroyed. Return on a later day to build a new realm.", deadToday), ""),
+			ansi.Reset)
 		return "dead", save()
 	}
 	// rebornFrom (captured by the caller before login maintenance swept the husk)
@@ -181,16 +182,19 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 		if reborn == "" {
 			reborn = localReborn
 		}
-		fmt.Fprintf(s, "\n%sYour former realm %s was destroyed; you begin anew.%s\n",
-			ansi.FgYellow, reborn, ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow,
+			menu.WrapIndented(fmt.Sprintf("Your former realm %s was destroyed; you begin anew.", reborn), ""),
+			ansi.Reset)
 	}
 	if e == nil {
 		if !joinOpen {
-			fmt.Fprintf(s, "\n%sThe game is closed to new barons (join cutoff %s has passed).%s\n", ansi.FgYellow, joinDate, ansi.Reset)
+			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow,
+				menu.WrapIndented(fmt.Sprintf("The game is closed to new barons (join cutoff %s has passed).", joinDate), ""),
+				ansi.Reset)
 			return "closed", save()
 		}
 		if refusal != "" {
-			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, refusal, ansi.Reset)
+			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(refusal, ""), ansi.Reset)
 			return "closed", save()
 		}
 		// First run: a brand-new player picks their UI language once, before
@@ -239,11 +243,12 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 				e.Language = lang
 			})
 			if full != "" {
-				fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, full, ansi.Reset)
+				fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, menu.WrapIndented(full, ""), ansi.Reset)
 				return "closed", save()
 			}
 			if taken {
-				fmt.Fprintf(s, "%s  That realm name was just taken — please choose another.%s\n", ansi.FgRed, ansi.Reset)
+				fmt.Fprintf(s, "%s%s%s\n", ansi.FgRed,
+					menu.WrapIndented("That realm name was just taken — please choose another.", "  "), ansi.Reset)
 			}
 		}
 	}
@@ -411,12 +416,15 @@ func onboard(s session.Session, w *game.World, handle, lang string) (name string
 			continue
 		}
 		if !game.ValidRealmName(name) || taken[strings.ToLower(name)] {
-			fmt.Fprintf(s, "%s  %s%s\n", ansi.FgBrightRed, i18n.T(lang, "Invalid: at least 3 visible characters, not matching another realm."), ansi.Reset)
+			fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed,
+				menu.WrapIndented(i18n.T(lang, "Invalid: at least 3 visible characters, not matching another realm."), "  "),
+				ansi.Reset)
 			continue
 		}
 		// Confirm the name before committing to it — a typo is easy to make and the
 		// realm name is permanent. Declining re-prompts for a different one.
-		fmt.Fprintf(s, "\n%s"+i18n.T(lang, "Your realm will be named %s.")+"%s\n", ansi.FgBrightCyan, name, ansi.Reset)
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan,
+			menu.WrapIndented(fmt.Sprintf(i18n.T(lang, "Your realm will be named %s."), name), ""), ansi.Reset)
 		if !menu.AskYesNo(s, "Confirm?", true) {
 			continue
 		}

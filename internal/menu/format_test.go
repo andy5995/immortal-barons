@@ -119,7 +119,7 @@ func TestTrimTrailingBlank(t *testing.T) {
 // terminal edge lands, and every line carries the indent.
 func TestWrapIndented(t *testing.T) {
 	long := "Your forces changed while you prepared the attack — only units still under your command were sent."
-	got := wrapIndented(long, "  ")
+	got := WrapIndented(long, "  ")
 	for _, line := range strings.Split(got, "\n") {
 		if !strings.HasPrefix(line, "  ") {
 			t.Errorf("line lost its indent: %q", line)

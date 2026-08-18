@@ -7,7 +7,13 @@ import (
 	"strings"
 	"testing"
 
+	"regexp"
+	"strconv"
+	"unicode/utf8"
+
+	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
 )
@@ -247,3 +253,40 @@ func TestIdleBootAtRealmNamePromptCreatesNoRealm(t *testing.T) {
 		t.Error("the door log needs a reason for the session ending")
 	}
 }
+
+// Every line the onboarding path prints must fit the 80-column terminal. A
+// translated string runs longer than the English it came from — the German
+// invalid-name message is 84 columns, and unwrapped the terminal split "Reich"
+// into "Re" and "ich" at the margin.
+func TestOnboardingOutputFitsTheScreen(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	// Splash dismiss, German at the language picker, then a name too short to
+	// pass, so the invalid-name message is printed before naming the realm.
+	lang := 0
+	for i, l := range i18n.Languages {
+		if l.Code == "de" {
+			lang = i + 2 // English is option 1
+		}
+	}
+	if lang == 0 {
+		t.Skip("no German catalog")
+	}
+	f := &fakeSession{keys: []rune(" " + strconv.Itoa(lang) + "\rx\rDrachenfels\ry0")}
+	if _, err := Run(f, Identity{Handle: "Johnny"}, cfg, "2026-07-03"); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "Ungültig") {
+		t.Fatalf("the German invalid-name message was never shown:\n%s", out)
+	}
+	for _, line := range strings.Split(stripANSI(out), "\n") {
+		line = strings.TrimRight(line, "\r")
+		if n := utf8.RuneCountInString(line); n > ansi.ScreenCols {
+			t.Errorf("line of %d columns (max %d): %q", n, ansi.ScreenCols, line)
+		}
+	}
+}
+
+var ansiEsc = regexp.MustCompile(`\x1b\[[0-9;?]*[a-zA-Z]`)
+
+func stripANSI(s string) string { return ansiEsc.ReplaceAllString(s, "") }

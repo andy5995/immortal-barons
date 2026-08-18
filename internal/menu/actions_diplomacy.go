@@ -160,7 +160,7 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 		if desc := treatyDescriptions[ttype]; desc != "" {
 			fmt.Fprintf(s, "\n%s%s%s\n%s%s%s\n",
 				ansi.FgBrightYellow, tr(s, ttype), ansi.Reset,
-				ansi.Dim, wrapIndented(tr(s, desc), "  "), ansi.Reset)
+				ansi.Dim, WrapIndented(tr(s, desc), "  "), ansi.Reset)
 		}
 		picked := pickRecipients(s, w, diplomacyPickOpts)
 		if len(picked) == 0 {
