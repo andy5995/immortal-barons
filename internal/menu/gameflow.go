@@ -616,16 +616,16 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 			return
 		}
 
-		fmt.Fprintf(s, "\n%s"+tr(s, "Your armed forces require %s gold.")+"%s\n",
+		fmt.Fprintf(s, "\n%s"+tr(s, "Your armed forces require %s gold.")+"%s",
 			ansi.FgWhite, ansi.FgBrightCyan+comma(forces)+ansi.FgWhite, ansi.Reset)
 		forcesGold = promptSuggested(s, "How much will you give?", min(forces, gold), min(forces, gold))
 
-		fmt.Fprintf(s, "\n%s"+tr(s, "%s gold is required to maintain your regions.")+"%s\n",
+		fmt.Fprintf(s, "\n%s"+tr(s, "%s gold is required to maintain your regions.")+"%s",
 			ansi.FgWhite, ansi.FgBrightCyan+comma(regions)+ansi.FgWhite, ansi.Reset)
 		regionsGold = promptSuggested(s, "How much will you give?", min(regions, gold-forcesGold), min(regions, gold-forcesGold))
 
 		if sdi > 0 {
-			fmt.Fprintf(s, "\n%s"+tr(s, "Your SDI Program requires %s gold.")+"%s\n",
+			fmt.Fprintf(s, "\n%s"+tr(s, "Your SDI Program requires %s gold.")+"%s",
 				ansi.FgWhite, ansi.FgBrightCyan+comma(sdi)+ansi.FgWhite, ansi.Reset)
 			afford := min(sdi, gold-forcesGold-regionsGold)
 			sdiGold = promptSuggested(s, "How much will you give?", afford, afford)
@@ -634,7 +634,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		// The crown tax comes last, and unlike the two above its prompt maximum is
 		// everything still in hand rather than the amount required — BRE lets a
 		// baron hand the Queen more than she asked for.
-		fmt.Fprintf(s, "\n%s"+tr(s, "The Queen Royale requires %s gold for Taxes.")+"%s\n",
+		fmt.Fprintf(s, "\n%s"+tr(s, "The Queen Royale requires %s gold for Taxes.")+"%s",
 			ansi.FgWhite, ansi.FgBrightCyan+comma(crown)+ansi.FgWhite, ansi.Reset)
 		left := gold - forcesGold - regionsGold - sdiGold
 		crownGold = promptSuggested(s, "How much will you give?", min(crown, left), left)
@@ -679,7 +679,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		if !withPlayer(w, func(p *game.Empire) { cost, maxGive = p.SupportBoostCost(), min(p.SupportBoostMax(), p.Gold) }) {
 			return
 		}
-		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to boost popular support."), cost)))
+		fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to boost popular support."), cost)))
 		supportGold := promptSuggested(s, "How much will you give?", min(cost, maxGive), maxGive)
 		var pts int
 		if !withPlayer(w, func(p *game.Empire) {
@@ -700,7 +700,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		}) {
 			return
 		}
-		fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to improve military morale."), cost)))
+		fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to improve military morale."), cost)))
 		moraleGold := promptSuggested(s, "How much will you give?", min(cost, maxGive), maxGive)
 		var pts int
 		if !withPlayer(w, func(p *game.Empire) { pts = w.World.BoostMorale(p, moraleGold) }) {
@@ -729,7 +729,7 @@ func decontaminateStage(s session.Session, w *ctx) {
 	if waste <= 0 || allowance <= 0 || gold <= 0 {
 		return
 	}
-	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(
+	fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(
 		tr(s, "%s gold will decontaminate %s of your %s waste regions."),
 		comma(cost), comma(int64(allowance)), comma(int64(waste)))))
 	give := promptSuggested(s, "How much will you give?", min(cost, gold), min(cost, gold))
@@ -822,7 +822,7 @@ func askFoodGift(s session.Session, label string, need int, stock *int) bool {
 	if need <= 0 {
 		return false
 	}
-	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(label, comma(need))))
+	fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(label, comma(need))))
 	offer := min(*stock, need)
 	give := min(promptSuggested(s, "How much will you give?", offer, offer), *stock)
 	*stock -= max(give, 0)
