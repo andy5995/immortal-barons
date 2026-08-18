@@ -157,6 +157,19 @@ These options are for games that link several BBSes together (a "league"). See
   editor just as `-board-id` does.
 - **`-planetary`** — Run the inter-BBS step, then exit: read incoming packets,
   run the group attacks, and write outgoing packets.
+- **`-full`** — Run the full cycle, then exit: read inbound packets, play a
+  turn, and write outbound packets. This is the same as running `-planetary`,
+  then the door (or `-local`), then `-planetary` again, but in one step. It
+  requires either `-local` (with `-name` to identify the player) or a BBS drop
+  file in the working directory. Use `-detailed` alongside it to see each
+  packet as it is read and written.
+- **`-scores`** — Write this board's score packet to the outbound directory,
+  then exit. The file is named after the board (for example
+  `outboard/MyBBS.brp`). Use `-export FILE` to write to a specific path
+  instead.
+- **`-detailed`** — Show each packet as it is read and written. This is a
+  modifier, not a mode: it takes effect when used with `-full` or `-planetary`.
+  Without one of those, it is ignored.
 - **`-league-config`** — Send this board's league settings to the whole league,
   then exit. Only the league coordinator (node #1) uses this.
 - **`-league-routes`** — Print which board each planet's packets are handed to,

@@ -35,7 +35,7 @@ func TestAHubForwardsAPacketItIsNotAddressedTo(t *testing.T) {
 		Scores:    []game.RemoteScore{{Empire: "Apples", Land: 500}},
 	})
 
-	applied, err := ReadInbound(hub, inbound)
+	applied, err := ReadInbound(hub, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
@@ -47,7 +47,7 @@ func TestAHubForwardsAPacketItIsNotAddressedTo(t *testing.T) {
 	}
 
 	hub.StampOutbox()
-	if _, err := WriteOutbox(hub, onward); err != nil {
+	if _, err := WriteOutbox(hub, onward, false); err != nil {
 		t.Fatalf("WriteOutbox: %v", err)
 	}
 	files := packetFiles(t, onward)
@@ -86,7 +86,7 @@ func TestAMeshBoardDoesNotForwardAPacketForSomeoneElse(t *testing.T) {
 	}
 	writePacket(t, inbound, "alpha-to-charlie", game.Packet{FromBoard: "Alpha BBS", ToBoard: "Charlie BBS"})
 
-	if _, err := ReadInbound(w, inbound); err != nil {
+	if _, err := ReadInbound(w, inbound, false); err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
 	if len(w.Transit) != 0 {
@@ -114,7 +114,7 @@ func TestAMeshBoardWritesOneBroadcast(t *testing.T) {
 	w.Outbox = []game.Packet{{FromBoard: "Alpha BBS", Date: "2026-08-09",
 		Scores: []game.RemoteScore{{Empire: "Apples", Land: 500}}}}
 	w.StampOutbox()
-	if _, err := WriteOutbox(w, out); err != nil {
+	if _, err := WriteOutbox(w, out, false); err != nil {
 		t.Fatalf("WriteOutbox: %v", err)
 	}
 
@@ -145,7 +145,7 @@ func TestARoutedBoardAddressesABroadcastPerPlanet(t *testing.T) {
 	w.Outbox = []game.Packet{{FromBoard: "Alpha BBS", Date: "2026-08-09",
 		Scores: []game.RemoteScore{{Empire: "Apples", Land: 500}}}}
 	w.StampOutbox()
-	if _, err := WriteOutbox(w, out); err != nil {
+	if _, err := WriteOutbox(w, out, false); err != nil {
 		t.Fatalf("WriteOutbox: %v", err)
 	}
 
@@ -182,7 +182,7 @@ func TestPacketsGoToTheLinkForTheirNextHop(t *testing.T) {
 		{FromBoard: "Bravo BBS", ToBoard: "Delta BBS", Date: "2026-08-09"},
 	}
 	hub.StampOutbox()
-	if _, err := WriteOutbox(hub, base); err != nil {
+	if _, err := WriteOutbox(hub, base, false); err != nil {
 		t.Fatalf("WriteOutbox: %v", err)
 	}
 
@@ -211,7 +211,7 @@ func TestAPacketFromAnotherLeagueIsLeftAlone(t *testing.T) {
 		Scores: []game.RemoteScore{{Empire: "Oranges", Land: 500}},
 	})
 
-	applied, err := ReadInbound(w, inbound)
+	applied, err := ReadInbound(w, inbound, false)
 	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
@@ -234,7 +234,7 @@ func TestPacketFilenameCarriesTheLeagueNumber(t *testing.T) {
 	w := game.NewWorldSeed(cfg, 1)
 	w.Outbox = []game.Packet{{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", Date: "2026-08-09"}}
 	w.StampOutbox()
-	if _, err := WriteOutbox(w, out); err != nil {
+	if _, err := WriteOutbox(w, out, false); err != nil {
 		t.Fatalf("WriteOutbox: %v", err)
 	}
 	files := packetFiles(t, out)
@@ -284,7 +284,7 @@ func TestLeagueZeroBoardsSharingOutboundDoNotOverwrite(t *testing.T) {
 		w.LeagueNodes = []game.LeagueNode{{Number: 1, Name: board}, {Number: 2, Name: "Target"}}
 		w.Outbox = []game.Packet{{FromBoard: board, ToBoard: "Target", Date: "2026-08-16"}}
 		w.StampOutbox()
-		if _, err := WriteOutbox(w, out); err != nil {
+		if _, err := WriteOutbox(w, out, false); err != nil {
 			t.Fatalf("WriteOutbox %s: %v", board, err)
 		}
 	}

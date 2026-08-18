@@ -34,19 +34,19 @@ func TestPacketFileRoundTrip(t *testing.T) {
 		t.Fatalf("create: %v", cErr)
 	}
 	wA.LaunchDueGroupAttacksAt(time.Now().Add((game.GroupAttackHoursMin + 1) * time.Hour))
-	if _, err := WriteOutbox(wA, exchange); err != nil {
+	if _, err := WriteOutbox(wA, exchange, false); err != nil {
 		t.Fatalf("WriteOutbox A: %v", err)
 	}
 
 	// Board B reads the exchange, applies the attack, and queues its result.
-	n, err := ReadInbound(wB, exchange)
+	n, err := ReadInbound(wB, exchange, false)
 	if err != nil || n != 1 {
 		t.Fatalf("ReadInbound B: n=%d err=%v", n, err)
 	}
 	if target.Land >= 100 {
 		t.Errorf("target should have lost land, has %d", target.Land)
 	}
-	if _, err := WriteOutbox(wB, exchange); err != nil {
+	if _, err := WriteOutbox(wB, exchange, false); err != nil {
 		t.Fatalf("WriteOutbox B: %v", err)
 	}
 
@@ -58,7 +58,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	// Board A reads the result back; its bulletin records the outcome, and the
 	// survivors come home. Content, not just presence: a result packet that
 	// lost its outcome fields would still land "a bulletin line".
-	if _, err := ReadInbound(wA, exchange); err != nil {
+	if _, err := ReadInbound(wA, exchange, false); err != nil {
 		t.Fatalf("ReadInbound A: %v", err)
 	}
 	if len(wA.NewsToday) == 0 {
@@ -82,7 +82,7 @@ func TestRunPlanetaryExportsScores(t *testing.T) {
 	w := game.NewWorldSeed(cfg, 1)
 	w.AddHuman("p", "Player")
 
-	if _, err := RunPlanetary(w, in, out); err != nil {
+	if _, err := RunPlanetary(w, in, out, false); err != nil {
 		t.Fatalf("RunPlanetary: %v", err)
 	}
 	// A broadcast score packet should have been written to the outbound dir —

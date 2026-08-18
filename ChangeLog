@@ -1,4 +1,6 @@
 (in-progress:)
+  * New -full, -scores, and -detailed flags for sysop batch files, matching BRE's
+    command-line arguments (issue #148)
   * Extra blank lines removed from maintenance payment prompts; each "How much
     will you give?" now sits on the same line as its requirement, matching BRE
   * A realm now holds one of the planet's 25 seats for its whole life, and its

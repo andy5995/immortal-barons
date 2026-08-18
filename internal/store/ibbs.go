@@ -26,10 +26,10 @@ const PacketExt = ".brp"
 // reads and applies inbound packets, launches any group attacks whose day has
 // come, exports this board's scores to the league, and writes the outbox. Run
 // it on a schedule (or on the door's -maint pass) — can run several times a day.
-func RunPlanetary(w *game.World, inboundDir, outboundDir string) (PlanetaryRun, error) {
+func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (PlanetaryRun, error) {
 	var run PlanetaryRun
 	before := w.LeagueNodes
-	applied, err := ReadInbound(w, inboundDir)
+	applied, err := ReadInbound(w, inboundDir, verbose)
 	if err != nil {
 		return run, err
 	}
@@ -59,7 +59,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string) (PlanetaryRun, 
 	w.ExportAnnihilatorStatus()
 	w.StampOutbox()
 	run.Forwarded = len(w.Transit)
-	sent, err := WriteOutbox(w, outboundDir)
+	sent, err := WriteOutbox(w, outboundDir, verbose)
 	run.Sent = sent
 	return run, err
 }
@@ -83,7 +83,7 @@ type PlanetaryRun struct {
 // with HOST routing in the roster, everything a leaf board sends lands in the
 // one directory its uplink collects from (#106). dir is that directory; a board
 // that hosts others configures a separate one per neighbour.
-func WriteOutbox(w *game.World, dir string) (int, error) {
+func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 	packets := addressBroadcasts(w, append(append([]game.Packet(nil), w.Outbox...), w.Transit...))
 	if len(packets) == 0 {
 		return 0, nil
@@ -108,6 +108,13 @@ func WriteOutbox(w *game.World, dir string) (int, error) {
 		name := packetFilename(p, data)
 		if err := writePacketAtomic(filepath.Join(target, name), data); err != nil {
 			return 0, err
+		}
+		if verbose {
+			board := p.ToBoard
+			if board == "" {
+				board = "(broadcast)"
+			}
+			fmt.Printf("  Wrote packet to %s (%s, dated %s)\n", board, p.PacketType(), p.Date)
 		}
 	}
 	w.Outbox, w.Transit = nil, nil
@@ -233,7 +240,7 @@ func leaguePrefix(league int) string {
 // addressee got directly. A packet stamped with a different league's number is
 // left alone too: it belongs to the other game sharing this directory.
 // Returns the number of packets applied.
-func ReadInbound(w *game.World, dir string) (int, error) {
+func ReadInbound(w *game.World, dir string, verbose bool) (int, error) {
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -265,10 +272,17 @@ func ReadInbound(w *game.World, dir string) (int, error) {
 			// In transit. The file goes either way, so a packet that has run out
 			// of hops is not re-read on every later run.
 			w.ForwardPacket(p)
+			if verbose {
+				fmt.Printf("  Forwarded packet from %s to %s (%s, dated %s)\n",
+					p.FromBoard, p.ToBoard, p.PacketType(), p.Date)
+			}
 			if err := os.Remove(path); err != nil {
 				return applied, err
 			}
 			continue
+		}
+		if verbose {
+			fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
 		}
 		result := w.ApplyPacket(p)
 		if result.HasPayload() {

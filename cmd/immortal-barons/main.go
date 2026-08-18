@@ -76,6 +76,9 @@ func main() {
 	export := flag.String("export", "", i18n.T(lang, "write this board's score packet to FILE, then exit"))
 	imp := flag.String("import", "", i18n.T(lang, "read a score packet from FILE, then exit"))
 	planetary := flag.Bool("planetary", false, i18n.T(lang, "run the inter-BBS step: read incoming packets, run group attacks, write outgoing packets, then exit"))
+	full := flag.Bool("full", false, i18n.T(lang, "run the full cycle: read inbound packets, play a turn, write outbound packets, then exit"))
+	scores := flag.Bool("scores", false, i18n.T(lang, "write this board's score packet to the outbound directory, then exit"))
+	detailed := flag.Bool("detailed", false, i18n.T(lang, "show each packet as it is read and written (use with -full or -planetary)"))
 	leagueConfig := flag.Bool("league-config", false, i18n.T(lang, "send this board's league settings to the whole league (node #1 only), then exit"))
 	genCoordKey := flag.Bool("gen-coord-key", false, i18n.T(lang, "create this league's Coordinator key, print the public half to give the other boards, then exit (node #1 only)"))
 	coordPub := flag.String("coord-key", "", i18n.T(lang, "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"))
@@ -124,7 +127,7 @@ func main() {
 	// when -dropfile isn't given). Every explicit-mode flag consumes none, so a
 	// stray word alongside one is a mistake — flag it instead of silently ignoring
 	// it. (Unknown -flags are already rejected by the flag package.)
-	explicitMode := *maint || *planetary || *leagueConfig || *leagueRoutes || *reset || *resetFromConfig || *ibbsReset ||
+	explicitMode := *maint || *planetary || *full || *scores || *leagueConfig || *leagueRoutes || *reset || *resetFromConfig || *ibbsReset ||
 		*lastPacket || *bbsInfo || *playerList ||
 		*addAI > 0 || *dump || *spectate > 0 || *local || *export != "" || *imp != "" || *setDrop
 	if flag.NArg() > 0 && explicitMode {
@@ -196,8 +199,21 @@ func main() {
 	}
 
 	if *planetary {
-		if err := runPlanetary(cfg); err != nil {
+		if err := runPlanetary(cfg, *detailed); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -planetary:", err)
+			os.Exit(1)
+		}
+		return
+	}
+
+	if *full {
+		exitOn("-full", runFull(cfg, *name, today, localCS, *noANSI, *detailed))
+		return
+	}
+
+	if *scores {
+		if err := runScores(cfg, today); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -scores:", err)
 			os.Exit(1)
 		}
 		return
@@ -713,7 +729,7 @@ func runMaint(cfg game.Config, today string) error {
 		fmt.Println("Maintenance has already been run today.")
 	}
 	if cfg.IBBS {
-		run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound())
+		run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), false)
 		if err != nil {
 			return err
 		}
@@ -733,7 +749,7 @@ func runLeagueReset(cfg game.Config, date string) error {
 	if err := w.DeclareLeagueReset(date, ""); err != nil {
 		return err
 	}
-	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound())
+	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), false)
 	if err != nil {
 		return err
 	}
@@ -844,7 +860,7 @@ func runLeagueConfig(cfg game.Config) error {
 	// RunPlanetary; this one writes the outbox directly, and an unsigned ruleset
 	// is refused by every board that receives it.
 	w.StampOutbox()
-	if _, err := store.WriteOutbox(w, cfg.Outbound()); err != nil {
+	if _, err := store.WriteOutbox(w, cfg.Outbound(), false); err != nil {
 		return err
 	}
 	fmt.Printf("Broadcast league config (turns/day=%d, protection=%d, length=%d) to %s\n",
@@ -1159,7 +1175,7 @@ func runAddAI(cfg game.Config, n int) error {
 // runPlanetary runs the inter-BBS maintenance step on its own (BRE's
 // "BRE PLANETARY"): apply inbound packets, launch due group attacks, export
 // scores, and write the outbox. Can run several times a day.
-func runPlanetary(cfg game.Config) error {
+func runPlanetary(cfg game.Config, verbose bool) error {
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err
@@ -1169,7 +1185,7 @@ func runPlanetary(cfg game.Config) error {
 	if err != nil {
 		return err
 	}
-	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound())
+	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose)
 	if err != nil {
 		return err
 	}
@@ -1211,6 +1227,155 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 	default:
 		fmt.Printf("Wrote %d packets%s\n", run.Sent, where)
 	}
+}
+
+// runFull chains the three steps a sysop's batch file runs: inbound, play,
+// outbound (BRE's "BRE FULL"). It requires either -local with a name or a BBS
+// drop file to identify the caller for the play step.
+func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bool) error {
+	// Step 1: read inbound packets.
+	lock, err := store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	w, err := store.Load(cfg)
+	if err != nil {
+		lock.Release()
+		return err
+	}
+	run, err := store.RunPlanetary(w, cfg.Inbound(), cfg.Outbound(), verbose)
+	if err != nil {
+		lock.Release()
+		return err
+	}
+	if err := store.Save(w, cfg); err != nil {
+		lock.Release()
+		return err
+	}
+	lock.Release()
+	reportPlanetary(cfg, run)
+
+	// Step 2: play a turn. Detect whether we have -local with a name or a drop
+	// file to identify the caller.
+	if strings.TrimSpace(name) != "" {
+		// -local path: play locally.
+		c := session.NewConsole()
+		defer c.Close()
+		if noANSI {
+			c.SetPlain()
+		}
+		s := encodeFor(session.Session(c), cs)
+		if _, err := play.Run(s, play.Identity{Handle: name}, cfg, today); err != nil {
+			return err
+		}
+		fmt.Fprint(s, "\nUntil next turn, Baron.\n")
+	} else {
+		// Door path: try to find a drop file.
+		doorCfg, derr := store.LoadDoorConfig(cfg.DataDir)
+		if derr != nil {
+			return fmt.Errorf("could not read door config: %w", derr)
+		}
+		if doorCfg.DropfileFormat == "" {
+			return fmt.Errorf("requires -local or a BBS drop file (run -set-dropfile first)")
+		}
+		path := findDropfile(doorCfg.DropfileFormat)
+		if path == "" {
+			return fmt.Errorf("requires -local or a BBS drop file (no %s found in the working directory)", doorCfg.DropfileFormat)
+		}
+		caller, cerr := door.ParseDropfileAs(path, doorCfg.DropfileFormat)
+		if cerr != nil {
+			return fmt.Errorf("drop file: %w", cerr)
+		}
+		s, closeSession, serr := openSession(caller)
+		if serr != nil {
+			return serr
+		}
+		defer closeSession()
+		s = encodeFor(s, wantCharset(false, false, false, false))
+		if !caller.ANSI || noANSI {
+			s = session.NewPlain(s)
+		}
+		handle := caller.Handle
+		if handle == "" {
+			handle = fmt.Sprintf("node%d", caller.Node)
+		}
+		id := play.Identity{Handle: handle, TimeLeft: time.Duration(caller.SecondsLeft) * time.Second}
+		if _, err := play.Run(s, id, cfg, today); err != nil {
+			return err
+		}
+	}
+
+	// Step 3: write outbound packets.
+	lock, err = store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	defer lock.Release()
+	w, err = store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	w.StampOutbox()
+	sent, err := store.WriteOutbox(w, cfg.Outbound(), verbose)
+	if err != nil {
+		return err
+	}
+	if err := store.Save(w, cfg); err != nil {
+		return err
+	}
+	switch sent {
+	case 0:
+		fmt.Println("Nothing to send.")
+	case 1:
+		fmt.Println("Wrote 1 outbound packet.")
+	default:
+		fmt.Printf("Wrote %d outbound packets.\n", sent)
+	}
+	return nil
+}
+
+// runScores writes this board's score packet to the outbound directory (BRE's
+// "BRE SCORES"), then exits. The destination is always the default outbound
+// directory; use -export to write to a specific path.
+func runScores(cfg game.Config, today string) error {
+	lock, err := store.Lock(cfg, true)
+	if err != nil {
+		return err
+	}
+	defer lock.Release()
+	w, err := store.Load(cfg)
+	if err != nil {
+		return err
+	}
+	packet := ibbs.Packet{BoardID: cfg.BoardID, Date: today}
+	for _, e := range w.Empires {
+		if !e.Alive {
+			continue
+		}
+		packet.Scores = append(packet.Scores, ibbs.Score{
+			Empire:   e.Name,
+			NetWorth: w.NetWorth(e),
+			Land:     e.Land,
+		})
+	}
+	outDir := cfg.Outbound()
+	if err := os.MkdirAll(outDir, 0o755); err != nil {
+		return err
+	}
+	data, err := json.MarshalIndent(packet, "", "  ")
+	if err != nil {
+		return err
+	}
+	name := cfg.BoardID
+	if name == "" {
+		name = "scores"
+	}
+	path := filepath.Join(outDir, name+store.PacketExt)
+	if err := os.WriteFile(path, data, 0o644); err != nil {
+		return err
+	}
+	fmt.Printf("Wrote score packet (%d scores) to %s\n", len(packet.Scores), path)
+	return nil
 }
 
 // runExport writes this board's alive-empire scores to path as an inter-BBS

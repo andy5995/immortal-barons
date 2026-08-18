@@ -97,6 +97,49 @@ type Packet struct {
 	ToNode   int
 }
 
+// PacketType returns a short human-readable label for the packet's primary
+// content, for verbose logging (-detailed).
+func (p Packet) PacketType() string {
+	switch {
+	case p.LeagueConfig != nil:
+		return "league config"
+	case len(p.LeagueNodes) > 0:
+		return "roster"
+	case p.Reset != nil:
+		return "reset"
+	case len(p.Attacks) > 0 && len(p.Results) > 0:
+		return "attacks, results"
+	case len(p.Attacks) > 0:
+		return "attacks"
+	case len(p.Terrors) > 0:
+		return "terror ops"
+	case len(p.SpecialOps) > 0:
+		return "special ops"
+	case len(p.Results) > 0:
+		return "results"
+	case len(p.Scores) > 0:
+		return "scores"
+	case len(p.Recon) > 0:
+		return "recon"
+	case len(p.ReconReports) > 0:
+		return "recon reports"
+	case p.Annihilator != nil:
+		return "annihilator"
+	case len(p.TimeChecks) > 0:
+		return "time checks"
+	case len(p.IPMessages) > 0:
+		return "ip messages"
+	case len(p.TradeBids) > 0 || len(p.TradeFills) > 0:
+		return "trade"
+	case len(p.Market) > 0:
+		return "market"
+	case p.Notice != "":
+		return "notice"
+	default:
+		return "empty"
+	}
+}
+
 // HasPayload reports whether p carries anything worth sending. The transport
 // asks before queueing a reply packet, so an answer that is only recon reports
 // or only an echoed probe still goes out.
