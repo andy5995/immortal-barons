@@ -2506,8 +2506,12 @@ new-player intro text (`NEWPLAY.TXT`), then the naming step titled "Name
 Your Empire" with the prompt `Name your Realm:`. A name must have at least
 3 letters/numbers and must not match another player; otherwise: "Your
 empire name is invalid…". The player is then asked "Would you like
-Instructions?" (`BREINS.TXT`). Our clone reproduces the naming prompt and
-its validation rule.
+Instructions?" (`BREINS.TXT`). Our clone reproduces the naming prompt, and
+**deliberately loosens the rule**: it asks for three VISIBLE characters
+rather than three letters or numbers, so a name drawn entirely from CP437's
+block and line-drawing glyphs is accepted (#151). Control characters are
+refused outright — an escape in a realm name would move the cursor on every
+screen that lists it.
 
 ## Realm slots: the planet holds 25, and a letter is a realm's name
 

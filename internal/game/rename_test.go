@@ -100,8 +100,8 @@ func TestRenameEmpireRefusals(t *testing.T) {
 		t.Errorf("protected rename = %v, want ErrRenameProtected", err)
 	}
 	old.Protection = 0
-	if err := w.RenameEmpire(old, "-=[]=-"); !errors.Is(err, ErrRealmNameInvalid) {
-		t.Errorf("nameless decoration = %v, want ErrRealmNameInvalid", err)
+	if err := w.RenameEmpire(old, " x "); !errors.Is(err, ErrRealmNameInvalid) {
+		t.Errorf("a one-character name = %v, want ErrRealmNameInvalid", err)
 	}
 	if err := w.RenameEmpire(old, "rival"); !errors.Is(err, ErrRealmNameTaken) {
 		t.Errorf("taken name = %v, want ErrRealmNameTaken", err)
@@ -141,9 +141,17 @@ func TestValidRealmName(t *testing.T) {
 		{"Vega", true},
 		{"-=[ Vega ]=-", true},
 		{"a1b", true},
+		// A name drawn from CP437's block and line-drawing glyphs is the point of
+		// #151, and carries no letters at all.
+		{"╫╫╓", true},
+		{"▓▒░", true},
 		{"ab", false},
-		{"-=[]=-", false},
+		{"╫╓", false},
 		{"  ", false},
+		{"", false},
+		// An escape in a realm name would move the cursor on every screen that
+		// lists it.
+		{"Vega\x1b[31m", false},
 	} {
 		if got := ValidRealmName(c.name); got != c.want {
 			t.Errorf("ValidRealmName(%q) = %v, want %v", c.name, got, c.want)

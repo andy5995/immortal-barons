@@ -411,7 +411,7 @@ func onboard(s session.Session, w *game.World, handle, lang string) (name string
 			continue
 		}
 		if !game.ValidRealmName(name) || taken[strings.ToLower(name)] {
-			fmt.Fprintf(s, "%s  %s%s\n", ansi.FgBrightRed, i18n.T(lang, "Invalid: at least 3 letters/numbers, not matching another realm."), ansi.Reset)
+			fmt.Fprintf(s, "%s  %s%s\n", ansi.FgBrightRed, i18n.T(lang, "Invalid: at least 3 visible characters, not matching another realm."), ansi.Reset)
 			continue
 		}
 		// Confirm the name before committing to it — a typo is easy to make and the

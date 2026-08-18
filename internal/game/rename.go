@@ -7,10 +7,12 @@ import (
 	"unicode"
 )
 
-// RealmNameMinAlnum is how many letters or digits a realm name must carry.
-// Decoration around them is free, so "-=[ Vega ]=-" passes and "-=[]=-" does
-// not. Enforced at onboarding and on a rename alike.
-const RealmNameMinAlnum = 3
+// RealmNameMinChars is how many visible characters a realm name must carry.
+// They need not be letters: a name drawn entirely from CP437's block and
+// line-drawing glyphs is exactly what an ANSI-era player wants (#151), so the
+// rule bars only the empty and the blank. Enforced at onboarding and on a
+// rename alike.
+const RealmNameMinChars = 3
 
 var (
 	// ErrRenameUsed is returned when the realm has already been renamed once.
@@ -18,23 +20,29 @@ var (
 	// ErrRenameProtected is returned while the realm is still under new-realm
 	// protection: a realm that cannot be attacked cannot slip its name either.
 	ErrRenameProtected = errors.New("You may not rename your realm while it is under New Realm Protection.")
-	// ErrRealmNameInvalid is returned for a name with too few letters or digits.
-	ErrRealmNameInvalid = errors.New("A realm name needs at least three letters or numbers.")
+	// ErrRealmNameInvalid is returned for a name with too few visible characters.
+	ErrRealmNameInvalid = errors.New("A realm name needs at least three visible characters.")
 	// ErrRealmNameTaken is returned when another realm holds the name — including
 	// a name a renamed realm used to carry, since packets still address it.
 	ErrRealmNameTaken = errors.New("Another realm already answers to that name.")
 )
 
 // ValidRealmName reports whether name is usable as a realm name: at least
-// RealmNameMinAlnum letters or digits, once surrounding space is trimmed.
+// RealmNameMinChars visible characters once surrounding space is trimmed, and
+// no control characters anywhere. A control character is refused outright
+// rather than merely uncounted — an escape in a realm name is printed on every
+// screen that lists it, and would move the cursor or recolour the row.
 func ValidRealmName(name string) bool {
 	n := 0
 	for _, r := range strings.TrimSpace(name) {
-		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+		switch {
+		case !unicode.IsPrint(r) && !unicode.IsSpace(r):
+			return false
+		case !unicode.IsSpace(r):
 			n++
 		}
 	}
-	return n >= RealmNameMinAlnum
+	return n >= RealmNameMinChars
 }
 
 // RenameEmpire changes e's realm name, once in a realm's life, and rewrites
