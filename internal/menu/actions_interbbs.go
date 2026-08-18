@@ -56,6 +56,17 @@ func interbbsScores(s session.Session, w *ctx) Result {
 				})
 			}
 		}
+		for _, e := range w.Empires {
+			if e.Alive && e.Owner != "" {
+				rows = append(rows, ipScoreRow{
+					name:   e.Name,
+					planet: w.Config.BoardID,
+					score:  e.Score,
+					nw:     w.NetWorth(e),
+					land:   e.Land,
+				})
+			}
+		}
 	})
 	if len(rows) == 0 {
 		ok(s, "No inter-BBS scores have been imported yet.")

@@ -489,10 +489,13 @@ func TestPlanetaryTreatiesMatchesBRE(t *testing.T) {
 }
 
 // TestIPScoresMatchesBRE checks IP Scores opens BRE's submenu of eight ranking
-// views, and that selecting one renders the correct table layout.
+// views, and that selecting one renders the correct table layout. The local
+// board's empires must appear alongside remote ones in both planet and player
+// views.
 func TestIPScoresMatchesBRE(t *testing.T) {
-	// '1' selects Top Planets by Score, space dismisses pause, '0' quits submenu
-	f := &fakeSession{keys: []rune("1 0")}
+	// '1' selects Top Planets by Score, space dismisses pause,
+	// '5' selects Top Players by Score, space dismisses pause, '0' quits
+	f := &fakeSession{keys: []rune("1 5 0")}
 	w := newWorld()
 	w.RemoteBoards = []game.RemoteBoard{{BoardID: "ZZap BBS", Date: "2026-07-02",
 		Scores: []game.RemoteScore{{Empire: "Iron Dominion", Land: 120, NetWorth: 50000, Score: 61000}}}}
@@ -506,6 +509,7 @@ func TestIPScoresMatchesBRE(t *testing.T) {
 		"Top Players by Land", "Top Players by Net Worth Density",
 		"Barren Realms Elite", "Planetary Post",
 		"ZZap BBS", "61000",
+		"Testland", // local empire must appear in player view
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("interbbsScores missing %q:\n%s", want, out)
