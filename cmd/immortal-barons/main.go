@@ -1076,40 +1076,46 @@ func preparePacketDirs(cfg game.Config) {
 	if !cfg.InterBBSEnabled() {
 		return
 	}
-	var stale []string
 	for _, dir := range []string{cfg.Inbound(), cfg.Outbound()} {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			fmt.Printf("Could not create the packet directory %s: %v\n", dir, err)
 			continue
 		}
-		// Count only game packets: an inbound directory is usually the BBS's own
-		// FTN inbound, which holds mail bundles and subdirectories that are none
-		// of the game's business.
-		n := 0
+		// Count and move game packets: an inbound directory is usually the BBS's
+		// own FTN inbound, which holds mail bundles and subdirectories that are
+		// none of the game's business.
+		var brps []string
 		entries, err := os.ReadDir(dir)
 		if err != nil {
 			continue
 		}
 		for _, e := range entries {
 			if !e.IsDir() && filepath.Ext(e.Name()) == store.PacketExt {
-				n++
+				brps = append(brps, e.Name())
 			}
 		}
-		if n > 0 {
-			stale = append(stale, fmt.Sprintf("%s (%d)", dir, n))
+		if len(brps) == 0 {
+			continue
+		}
+		archive := filepath.Join(dir, fmt.Sprintf("reset-%s", time.Now().Format("2006-01-02")))
+		if err := os.MkdirAll(archive, 0o755); err != nil {
+			fmt.Printf("Could not create the archive directory %s: %v\n", archive, err)
+			continue
+		}
+		moved := 0
+		for _, name := range brps {
+			src := filepath.Join(dir, name)
+			dst := filepath.Join(archive, name)
+			if err := os.Rename(src, dst); err != nil {
+				fmt.Printf("Could not move %s: %v\n", src, err)
+				continue
+			}
+			moved++
+		}
+		if moved > 0 {
+			fmt.Printf("Moved %d leftover packet(s) from %s to %s\n", moved, dir, archive)
 		}
 	}
-	if len(stale) == 0 {
-		return
-	}
-	fmt.Println("\n!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-	fmt.Println("!! WARNING: packets are still sitting in your inter-BBS directories:")
-	for _, s := range stale {
-		fmt.Printf("!!   %s\n", s)
-	}
-	fmt.Println("!! They belong to the game you just cleared. The next -planetary run")
-	fmt.Println("!! will apply them to the new one. Delete them before it does.")
-	fmt.Println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 }
 
 // noteDropfileUnset reminds the sysop after a reset that the door still needs a

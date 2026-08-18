@@ -916,52 +916,6 @@ func TestUnchangedLeagueBroadcastIsQuiet(t *testing.T) {
 	}
 }
 
-// TestStalePacketAfterResetIsDiscarded is the literal scenario in #104: a
-// packet already sitting in the inbound directory when this board resets was
-// written for the game just wiped, so applying it would grant units, take
-// regions, or deliver mail against empires that no longer exist.
-func TestStalePacketAfterResetIsDiscarded(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	stale := Packet{FromBoard: "Neighbour", Epoch: w.Epoch, Scores: []RemoteScore{{Empire: "Junk", NetWorth: 999}}}
-
-	w.Reset() // the sysop's -reset: any packet already on disk now predates this game
-
-	w.ApplyPacket(stale)
-	if len(w.RemoteBoards) != 0 {
-		t.Fatalf("a packet written before the reset was applied: %+v", w.RemoteBoards)
-	}
-	if !strings.Contains(newsText(w), "predates this world's current game") {
-		t.Errorf("the discard was not reported to the planet:\n%s", newsText(w))
-	}
-
-	// A packet stamped with the CURRENT epoch is unaffected.
-	fresh := Packet{FromBoard: "Neighbour", Epoch: w.Epoch, Scores: []RemoteScore{{Empire: "Fresh", NetWorth: 1}}}
-	w.ApplyPacket(fresh)
-	if len(w.RemoteBoards) != 1 {
-		t.Errorf("a packet stamped with the current epoch was rejected: %+v", w.RemoteBoards)
-	}
-
-	// A packet with no epoch info at all — from a sender that predates #104 —
-	// is trusted rather than rejected, the migration path for an old build.
-	legacy := Packet{FromBoard: "OldPeer", Scores: []RemoteScore{{Empire: "Legacy", NetWorth: 1}}}
-	w.ApplyPacket(legacy)
-	if len(w.RemoteBoards) != 2 {
-		t.Errorf("a packet with no epoch info was rejected: %+v", w.RemoteBoards)
-	}
-}
-
-// TestResetForNewSeasonAlsoAdvancesEpoch pins that a league-wide reset gives
-// the same protection a solo -reset does (#104): ResetForNewSeason bumps
-// Epoch too, not only Season.
-func TestResetForNewSeasonAlsoAdvancesEpoch(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	before := w.Epoch
-	w.ResetForNewSeason("2026-09-01")
-	if w.Epoch != before+1 {
-		t.Errorf("Epoch after ResetForNewSeason = %d, want %d", w.Epoch, before+1)
-	}
-}
-
 // TestCoordinatorRenameStillRecognizedByNode is #105's core claim: the
 // roster's node number is the identity, so a Coordinator that has renamed
 // itself is still obeyed by a member whose own roster copy has not caught up

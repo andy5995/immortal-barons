@@ -156,7 +156,6 @@ func packetKey(p Packet) string {
 func (w *World) StampOutbox() {
 	for i := range w.Outbox {
 		w.Outbox[i].League = w.Config.LeagueNumber
-		w.Outbox[i].Epoch = w.Epoch
 		// EVERY packet says what this board runs, not just the ones whose
 		// builders remembered to. A board's version is a property of the board,
 		// and the receiving end tests it on everything that arrives: a mail or

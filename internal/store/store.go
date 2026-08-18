@@ -75,7 +75,6 @@ func repair(w *game.World, cfg game.Config) {
 	// their legacy fields.
 	w.EnsureSlots()
 	w.EnsureNews()
-	w.EnsureEpoch()
 	loadLeagueNodes(w, cfg)
 	loadRoutes(w, cfg)
 	loadLeagueKeys(w, cfg)

@@ -405,12 +405,6 @@ func TestLoadFrozenV003Fixture(t *testing.T) {
 	if e.Support != 100 {
 		t.Errorf("Support=0 in an old save must migrate to 100, got %d", e.Support)
 	}
-	// The fixture predates the inter-BBS Epoch marker (#104): EnsureEpoch must
-	// give an old save its first generation rather than leaving it at the zero
-	// value, which a packet reads as "no epoch info" (see game.ApplyPacket).
-	if got.Epoch != 1 {
-		t.Errorf("Epoch in a save from before #104 must migrate to 1, got %d", got.Epoch)
-	}
 	// The fixture predates permanent slots (#144). Every realm must come back
 	// with a distinct one in 1..25, in the saved order — that order is the one
 	// its players' letters were drawn from, so it is the one that keeps them.
