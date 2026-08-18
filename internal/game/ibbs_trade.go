@@ -115,8 +115,14 @@ func (w *World) SendTradeBid(e *Empire, targetBoard, seller, good string, qty, p
 // has shrunk fills partially, one that has repriced or gone fills not at all.
 func (w *World) resolveRemoteTradeBid(b IPTradeBid) IPTradeFill {
 	fill := IPTradeFill{ID: b.ID}
-	seller := w.FindByName(b.Seller)
-	have := w.MarketForSale(b.Seller, b.Good)
+	// Through the former name too: a seller who renamed while the bid crossed
+	// still holds the listing it was placed against, under its new key.
+	seller := w.FindByNameOrFormer(b.Seller)
+	realm := b.Seller
+	if seller != nil {
+		realm = seller.Name
+	}
+	have := w.MarketForSale(realm, b.Good)
 	switch {
 	// The standing is judged HERE and NOW, not as the buyer saw it when they
 	// bid. An alliance broken while the bid was in transit closes this market to
@@ -131,7 +137,7 @@ func (w *World) resolveRemoteTradeBid(b IPTradeBid) IPTradeFill {
 		fill.Reason = fmt.Sprintf("%s is no longer on our planet.", b.Seller)
 	case have <= 0:
 		fill.Reason = fmt.Sprintf("%s no longer offers %s.", b.Seller, b.Good)
-	case w.MarketPrice(b.Seller, b.Good) != b.Price:
+	case w.MarketPrice(realm, b.Good) != b.Price:
 		fill.Reason = fmt.Sprintf("%s has repriced its %s since you were quoted.", b.Seller, b.Good)
 	}
 	if fill.Reason != "" {
@@ -140,12 +146,12 @@ func (w *World) resolveRemoteTradeBid(b IPTradeBid) IPTradeFill {
 	}
 	// A shrunken listing sells what it still has; the rest of the gold goes back.
 	qty := min(b.Qty, have)
-	w.takeFromMarket(b.Seller, b.Good, qty)
+	w.takeFromMarket(realm, b.Good, qty)
 	paid := TradeBidCost(qty, b.Price)
 	if w.MarketProceeds == nil {
 		w.MarketProceeds = map[string]int64{}
 	}
-	w.MarketProceeds[b.Seller] += paid
+	w.MarketProceeds[realm] += paid
 	// The seller is told privately and the planet is not: a market sale is
 	// business between two realms, and putting every one on the news both fills
 	// the paper on a trading planet and tells every rival what a realm is

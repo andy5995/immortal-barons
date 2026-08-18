@@ -238,12 +238,31 @@ type Item struct {
 	Do      Action            // nil => heading/separator, not selectable
 	Hidden  func(*ctx) bool   // nil => always shown
 	Color   string            // overrides the menu color for this item's key+label; e.g. to tint an entry the color of the submenu it opens
+	// Dimmed greys an item that is listed but cannot be used yet: its key is
+	// drawn in the menu's dim accent instead of the bright one. The label keeps
+	// its normal white, because a menu's dim accent is not guaranteed legible
+	// (dim blue on black is not). The grey is a hint and nothing more — choosing
+	// such an item says plainly why it is refused, so a caller who cannot see
+	// the difference loses nothing.
+	Dimmed func(*ctx) bool
 
 	// Price and Owned drive the BRE-style Price / # Owned columns on the
 	// Spending and Sell menus. When any item in a menu sets either, the menu
 	// draws the column header and every item's values (blank where nil).
 	Price func(*ctx) int
 	Owned func(*ctx) int
+}
+
+// keyColor is the accent this item's key is drawn in: its own Color override, a
+// dimmed item's normal-intensity accent, or the menu's own color.
+func (it *Item) keyColor(g *ctx, menuColor string) string {
+	if it.Color != "" {
+		return it.Color
+	}
+	if it.Dimmed != nil && it.Dimmed(g) {
+		return dim(menuColor)
+	}
+	return menuColor
 }
 
 func (it *Item) hidden(g *ctx) bool {
@@ -684,9 +703,9 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					}
 					continue
 				}
-				kcol, lcol := col, ansi.FgWhite
+				kcol, lcol := it.keyColor(g, col), ansi.FgWhite
 				if it.Color != "" {
-					kcol, lcol = it.Color, it.Color
+					lcol = it.Color
 				}
 				fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%s%s\n",
 					dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, it.displayLabel(g, lang), ansi.Reset)
@@ -723,9 +742,9 @@ func drawItemsColumns(b *strings.Builder, g *ctx, m *Menu, col, lang string, nco
 	}
 	cell := func(it *Item) (string, int) {
 		label := it.displayLabel(g, lang)
-		kcol, lcol := col, ansi.FgWhite
+		kcol, lcol := it.keyColor(g, col), ansi.FgWhite
 		if it.Color != "" {
-			kcol, lcol = it.Color, it.Color
+			lcol = it.Color
 		}
 		s := fmt.Sprintf("  %s(%s%c%s)%s %s%s%s", dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, label, ansi.Reset)
 		return s, 6 + utf8.RuneCountInString(label) // "  (K) " is 6 visible cols

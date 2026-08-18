@@ -62,8 +62,14 @@ func VersionString() string {
 }
 
 type Empire struct {
-	Name  string
-	Owner string // normalized BBS handle; "" for AI
+	Name string
+	// FormerName is the name this realm carried before its one permitted rename
+	// (see RenameEmpire), and "" for a realm that has never been renamed — which
+	// is also what makes the rename once-only. It stays readable for the realm's
+	// whole life because packets already in the air are addressed to it; see
+	// FindByNameOrFormer.
+	FormerName string `json:",omitempty"`
+	Owner      string // normalized BBS handle; "" for AI
 	// Slot is the realm's permanent place in the planet's fixed roster, 1..25,
 	// and the public identity every screen addresses it by: the Id column and
 	// every picker letter is 'A' + Slot - 1, so slot 1 is A and slot 25 is Y.
@@ -1094,7 +1100,9 @@ func (w *World) AddHuman(handle, realm string) *Empire {
 func (w *World) RealmNameTaken(name string) bool {
 	n := strings.ToLower(strings.TrimSpace(name))
 	for _, e := range w.Empires {
-		if strings.ToLower(e.Name) == n {
+		// A renamed realm holds its old name too: inbound packets still address it
+		// (see RenameEmpire), so nobody else may take delivery of that name.
+		if strings.ToLower(e.Name) == n || (e.FormerName != "" && strings.ToLower(e.FormerName) == n) {
 			return true
 		}
 	}

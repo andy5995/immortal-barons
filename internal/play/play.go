@@ -10,7 +10,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -378,6 +377,11 @@ func onboard(s session.Session, w *game.World, handle, lang string) (name string
 		taken = make(map[string]bool, len(w.Empires))
 		for _, e := range w.Empires {
 			taken[strings.ToLower(e.Name)] = true
+			// A renamed realm holds its old name too — packets in the air still
+			// address it (game.RenameEmpire).
+			if e.FormerName != "" {
+				taken[strings.ToLower(e.FormerName)] = true
+			}
 		}
 	})
 	for {
@@ -400,7 +404,7 @@ func onboard(s session.Session, w *game.World, handle, lang string) (name string
 			}
 			continue
 		}
-		if alnum(name) < 3 || taken[strings.ToLower(name)] {
+		if !game.ValidRealmName(name) || taken[strings.ToLower(name)] {
 			fmt.Fprintf(s, "%s  %s%s\n", ansi.FgBrightRed, i18n.T(lang, "Invalid: at least 3 letters/numbers, not matching another realm."), ansi.Reset)
 			continue
 		}
@@ -412,14 +416,4 @@ func onboard(s session.Session, w *game.World, handle, lang string) (name string
 		}
 		return name, false
 	}
-}
-
-func alnum(s string) int {
-	n := 0
-	for _, r := range s {
-		if unicode.IsLetter(r) || unicode.IsDigit(r) {
-			n++
-		}
-	}
-	return n
 }

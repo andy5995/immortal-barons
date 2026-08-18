@@ -18,6 +18,11 @@ names you. When every seat is taken, a new caller is turned away until a realm
 falls; a sysop may also seat fewer than 25 players, and any computer-run barons
 take seats of their own.
 
+You name your realm when you first call, and you may change that name once —
+from the Preferences menu, after your New Realm Protection has ended. Only
+once: the option disappears afterwards, and the whole planet is told of the
+change.
+
 Many bulletin board systems can link their games together. When they do, each
 board is one planet, and your planet competes against the others. Then the goal
 is not just the strongest barony, but the strongest planet. Your side has to

@@ -1399,10 +1399,10 @@ func survivorsOf(cs []Contribution, lossPct int) []Contribution {
 // (for a whole-planet strike) this board's strongest living human empire.
 func (w *World) remoteTarget(name string) *Empire {
 	if name != "" {
-		for _, e := range w.Empires {
-			if e.Alive && e.Name == name {
-				return e
-			}
+		// Through the former name too, so a strike, message or op sent before the
+		// realm renamed still finds it (see RenameEmpire).
+		if e := w.FindByNameOrFormer(name); e != nil && e.Alive {
+			return e
 		}
 		return nil
 	}

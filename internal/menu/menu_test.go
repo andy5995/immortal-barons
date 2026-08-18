@@ -871,3 +871,46 @@ func TestAShieldedRealmsLetterSelectsNothing(t *testing.T) {
 		t.Errorf("pressing a shielded realm's letter chose %q; it should abort", name)
 	}
 }
+
+// The rename item sits on Preferences, is spent once, and must actually reach
+// the rename screen — hence the marker assertion as well as the state check.
+func TestChangeRealmNameFromPreferences(t *testing.T) {
+	f := &fakeSession{keys: []rune("PNNewland\ry \r0\r0\r")}
+	w := newWorld()
+	p := w.Player()
+	p.Protection = 0
+	if err := Run(f, w, BuildMenus().System); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Change Realm Name") {
+		t.Fatalf("the Preferences menu should list the rename item:\n%s", out)
+	}
+	if p.Name != "Newland" || p.FormerName != "Testland" {
+		t.Fatalf("realm = %q (was %q); want Newland (was Testland)", p.Name, p.FormerName)
+	}
+	if !strings.Contains(strings.Join(w.NewsToday, "\n"), "Testland is henceforth known as Newland.") {
+		t.Errorf("the planet should be told: %v", w.NewsToday)
+	}
+}
+
+// Under New Realm Protection the item is listed but refuses, saying why.
+func TestChangeRealmNameLockedWhileProtected(t *testing.T) {
+	f := &fakeSession{keys: []rune("PN \r0\r0\r")}
+	w := newWorld()
+	p := w.Player()
+	p.Protection = 5
+	if err := Run(f, w, BuildMenus().System); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Change Realm Name") {
+		t.Errorf("a protected realm should still see the item listed:\n%s", out)
+	}
+	if !strings.Contains(out, "New Realm Protection") {
+		t.Errorf("choosing it should say why it is refused:\n%s", out)
+	}
+	if p.Name != "Testland" || p.FormerName != "" {
+		t.Errorf("realm = %q (was %q); want Testland unrenamed", p.Name, p.FormerName)
+	}
+}

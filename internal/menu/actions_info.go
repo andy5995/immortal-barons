@@ -70,6 +70,44 @@ func endProtection(s session.Session, w *ctx) Result {
 	return Stay
 }
 
+// changeRealmName renames the realm, once in its life (IB's own — BRE has no
+// rename). It is refused while the realm is under New Realm Protection: a realm
+// nobody can touch should not also be able to shed the name its rivals know it
+// by. The item stays on the menu, drawn dim, until the rename is spent, so a
+// player who reads about it under protection can find it again afterwards.
+func changeRealmName(s session.Session, w *ctx) Result {
+	p := w.Player()
+	if p.Protection > 0 {
+		fail(s, game.ErrRenameProtected)
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightYellow,
+		tr(s, "A realm may be renamed once and never again. Every other baron is told."), ansi.Reset)
+	name := strings.TrimSpace(prompt(s, "New realm name (Enter to cancel)"))
+	if name == "" {
+		return Stay
+	}
+	if !AskYesNo(s, fmt.Sprintf(tr(s, "Rename %s to %s?"), p.Name, name), false) {
+		return Stay
+	}
+	old := p.Name
+	// The rename and every reference it rewrites land in ONE transaction, so no
+	// other node reads a world where half the treaties still name the old realm.
+	if err := w.mutatePlayer(func(p *game.Empire) error { return w.RenameEmpire(p, name) }); err != nil {
+		fail(s, err)
+		return Stay
+	}
+	okNoPause(s, "%s is now known as %s.", old, name)
+	// Other planets learn the new name with this board's next score export, the
+	// same round trip every cross-board fact takes; anything already in the air
+	// still reaches the realm under its old name.
+	if !ibbsHidden(w) {
+		okNoPause(s, "Other planets will see the new name once this board's next scores go out.")
+	}
+	pause(s)
+	return Stay
+}
+
 // advisorDomain is one of BRE's four advisors. The values match the submenu's
 // 1..4 numbering (Civilian, Economic, Military, Technology).
 type advisorDomain int

@@ -388,6 +388,13 @@ func BuildMenus() *Menus {
 			// endonym is displayable — a stored "Русский" would only mojibake.
 			return i18n.T(playerLang(w), "Language") + ": " + languageName(playerLang(w))
 		}, Do: pickLanguage},
+		// IB's own, and once spent it is gone for good — the way Specialize
+		// Industry goes from the System menu. A realm still under New Realm
+		// Protection sees it greyed rather than missing, so it can be found again
+		// when protection ends; choosing it then says why it is refused.
+		{Key: 'N', Label: "Change Realm Name", Do: changeRealmName,
+			Hidden: func(w *ctx) bool { return w.Player().FormerName != "" },
+			Dimmed: func(w *ctx) bool { return w.Player().Protection > 0 }},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	prefs.DefaultOnEnter = quitOnEnter(prefs)

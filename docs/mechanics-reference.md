@@ -2568,6 +2568,39 @@ IB matches all of it.
   of its barons and drops whatever is left over, which was addressable by nobody
   in any case.
 
+### Renaming a realm (IB's own; BRE has none)
+
+A realm may be renamed **once**, from the Preferences menu, and never again.
+The item is listed from the start but refuses while the realm is under New
+Realm Protection — a realm nobody may touch should not also be able to shed the
+name its rivals know it by — and disappears from the menu once the rename is
+spent. `Empire.FormerName` holds the previous name and is what makes it
+once-only. The planet is told in the news.
+
+The realm name is an identity key as well as a label, so `World.RenameEmpire`
+rewrites every reference in the same transaction: treaties (re-sorted, since
+the pair is held in canonical order), the covert queue, market listings and
+market proceeds, treaty offers, barter offers, local mail senders, bribed-agent
+lists, `ExposedFrom`, and the Planetary Master fields. Prose already written —
+events and past news — is left alone: it records what was said at the time.
+
+What cannot be rewritten is what has already left the board, and two things
+cover it:
+
+- **Committed interplanetary forces find their way home regardless.**
+  `InFlightStrike` and `GroupAttack` record their contributors by OWNER HANDLE,
+  not by realm name.
+- **A packet addressed to the old name still lands.** `remoteTarget` and the
+  inbound trade path resolve through `FindByNameOrFormer`, so an attack,
+  message, recon request, special op or market bid sent before the rename
+  reaches the realm. The old name is also held against re-use for as long as
+  the realm lives (`RealmNameTaken`), so no second realm can take delivery of
+  it.
+
+Other planets see the new name from this board's next score export
+(`ImportBoard` replaces a board's snapshot wholesale, so no ghost row is left),
+which is the same packet round trip every other cross-board fact takes.
+
 ## Turn structure
 
 Turns per day: 10 (config; BRE's own default is 8). New players get protection
