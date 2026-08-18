@@ -374,11 +374,12 @@ func joinRefusal(w *game.World) string {
 	return ""
 }
 
-// onboard prompts for a realm name, re-prompting on an invalid or taken one.
-// Pressing Enter with nothing typed offers a way out — "Quit? (n,Y)" — so a
-// player who reached the name prompt by mistake can leave instead of being
-// forced to invent a realm. quit is true when they chose to leave without
-// creating one; the caller then ends the session.
+// onboard names a brand-new player's realm, and reports quit when they chose to
+// leave without creating one (the caller then ends the session). The screen
+// itself is menu.AskRealmName, shared with the rename in Preferences, so both
+// ask, reject and confirm in the same words. Enter on an empty line offers the
+// way out — "Quit? (n,Y)" — so a player who reached the prompt by mistake is not
+// forced to invent a realm.
 func onboard(s session.Session, w *game.World, handle, lang string) (name string, quit bool) {
 	var taken map[string]bool
 	w.With(func() {
@@ -392,42 +393,7 @@ func onboard(s session.Session, w *game.World, handle, lang string) (name string
 			}
 		}
 	})
-	for {
-		fmt.Fprintf(s, "\n%s%s, %s%s ", ansi.FgBrightWhite, handle, i18n.T(lang, "Name your Realm:"), ansi.Reset)
-		line, err := session.ReadLine(s)
-		if err != nil {
-			// The read ended the session — an idle/time boot, or the caller hung
-			// up. Unwind it (Run's recover saves and closes cleanly) rather than
-			// carrying on: this used to fall back to the caller's BBS handle as the
-			// realm name, which founded a realm nobody had named and then ran on
-			// into the opening menu after the boot notice had already been printed.
-			// ReadLine echoes the newline on Enter but not here, so close the line
-			// first or the notice lands on top of the prompt.
-			fmt.Fprint(s, "\n")
-			session.End(err)
-		}
-		name = strings.TrimSpace(line)
-		if name == "" {
-			// Empty entry offers a way out. AskYesNo reads a single key (the game's
-			// y/n convention); Yes is the default, so Enter quits and "n" re-prompts.
-			if menu.AskYesNo(s, "Quit?", true) {
-				return "", true
-			}
-			continue
-		}
-		if !game.ValidRealmName(name) || taken[strings.ToLower(name)] {
-			fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed,
-				menu.WrapIndented(i18n.T(lang, "Invalid: at least 3 visible characters, not matching another realm."), "  "),
-				ansi.Reset)
-			continue
-		}
-		// Confirm the name before committing to it — a typo is easy to make and the
-		// realm name is permanent. Declining re-prompts for a different one.
-		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan,
-			menu.WrapIndented(fmt.Sprintf(i18n.T(lang, "Your realm will be named %s."), name), ""), ansi.Reset)
-		if !menu.AskYesNo(s, "Confirm?", true) {
-			continue
-		}
-		return name, false
-	}
+	return menu.AskRealmName(s, lang, handle+", ",
+		func(n string) bool { return taken[strings.ToLower(n)] },
+		func() bool { return menu.AskYesNo(s, "Quit?", true) })
 }

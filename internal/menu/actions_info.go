@@ -82,12 +82,18 @@ func changeRealmName(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightYellow,
-		tr(s, "A realm may be renamed once and never again. Every other baron is told."), ansi.Reset)
-	name := strings.TrimSpace(prompt(s, "New realm name (Enter to cancel)"))
-	if name == "" {
-		return Stay
-	}
-	if !AskYesNo(s, fmt.Sprintf(tr(s, "Rename %s to %s?"), p.Name, name), false) {
+		WrapIndented(tr(s, "A realm may be renamed once and never again."), ""), ansi.Reset)
+	// The same naming screen the realm was christened on (AskRealmName), so the
+	// prompt, the rejection and the confirmation read alike. An empty line here
+	// cancels rather than offering to quit — this is a menu, not onboarding.
+	name, cancelled := AskRealmName(s, playerLang(w), "",
+		func(n string) bool {
+			var taken bool
+			w.With(func() { taken = w.RealmNameTaken(n) })
+			return taken
+		},
+		func() bool { return true })
+	if cancelled {
 		return Stay
 	}
 	old := p.Name

@@ -9,6 +9,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
+	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/help"
 	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/numfmt"
@@ -148,6 +149,54 @@ func prompt(s session.Session, msg string) string {
 		session.End(err) // idle boot / disconnect: unwind (a bare io.EOF falls through)
 	}
 	return line
+}
+
+// AskRealmName runs the realm-naming screen — the one place a realm is named,
+// at onboarding and again on a rename (System > Preferences), so both ask,
+// reject, and confirm in the same words. It re-asks until the name is valid and
+// free and the player has confirmed it, and returns gaveUp when they backed out.
+//
+// lead prints before the prompt: the caller's handle at onboarding ("Bobby, "),
+// nothing on a rename. taken reports whether a name is already spoken for —
+// the caller supplies it because the two callers read different state (a
+// snapshot taken under the world lock at onboarding, the live roster on a
+// rename). giveUp is what an empty line means: onboarding asks "Quit?" there
+// and ends the session, a rename simply cancels.
+func AskRealmName(s session.Session, lang, lead string, taken func(string) bool, giveUp func() bool) (name string, gaveUp bool) {
+	for {
+		fmt.Fprintf(s, "\n%s%s%s%s ", ansi.FgBrightWhite, lead, i18n.T(lang, "Name your Realm:"), ansi.Reset)
+		line, err := session.ReadLine(s)
+		if err != nil {
+			// The read ended the session — an idle/time boot, or the caller hung up.
+			// Unwind it rather than carrying on with whatever was typed so far.
+			// ReadLine echoes the newline on Enter but not here, so close the line
+			// first or the boot notice lands on top of the prompt.
+			fmt.Fprint(s, "\n")
+			session.End(err)
+		}
+		name = strings.TrimSpace(line)
+		if name == "" {
+			if giveUp() {
+				return "", true
+			}
+			continue
+		}
+		if !game.ValidRealmName(name) || taken(name) {
+			fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed,
+				WrapIndented(i18n.T(lang, "Invalid: at least 3 visible characters, not matching another realm."), "  "),
+				ansi.Reset)
+			continue
+		}
+		// Confirm before committing: a typo is easy to make, and the name is
+		// permanent — a realm is named once and renamed at most once. Declining
+		// re-prompts for a different one.
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan,
+			WrapIndented(fmt.Sprintf(i18n.T(lang, "Your realm will be named %s."), name), ""), ansi.Reset)
+		if !AskYesNo(s, "Confirm?", true) {
+			continue
+		}
+		return name, false
+	}
 }
 
 // parseAmount interprets a numeric input with BRE-style shortcuts:
