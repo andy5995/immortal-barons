@@ -16,25 +16,44 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-// interbbsScores displays scores imported from other boards via inter-BBS
-// packets (see internal/ibbs). v1 covers only score/news sharing.
+type ipRankKind int
+
+const (
+	ipRankPlanetScore ipRankKind = iota + 1
+	ipRankPlanetNW
+	ipRankPlanetLand
+	ipRankPlanetDensity
+	ipRankPlayerScore
+	ipRankPlayerNW
+	ipRankPlayerLand
+	ipRankPlayerDensity
+)
+
+type ipScoreRow struct {
+	name            string
+	planet          string // empty for planet views
+	score, nw, land int
+}
+
+// interbbsScores opens BRE's IP Scores submenu: eight ranking views (four
+// planet-level, four player-level) each showing a ranked table. Captured from
+// BRE (docs/dev/bre-screens.md, "InterBBS Scores").
 func interbbsScores(s session.Session, w *ctx) Result {
-	// BRE's View IPScores is one cross-planet board (header
-	// "Id Empire Name Territory Score Net Worth", lettered ids, "No Scores"
-	// when empty), not a per-board split. Reuse the local scores layout.
-	type row struct {
-		name            string
-		land, score, nw int
-	}
-	var rows []row
+	var rows []ipScoreRow
 	w.With(func() {
 		for _, b := range w.RemoteBoards {
 			for _, sc := range b.Scores {
 				score := sc.Score
 				if score == 0 {
-					score = sc.NetWorth // pre-Score packets carried only net worth
+					score = sc.NetWorth
 				}
-				rows = append(rows, row{sc.Empire, sc.Land, score, sc.NetWorth})
+				rows = append(rows, ipScoreRow{
+					name:   sc.Empire,
+					planet: b.BoardID,
+					score:  score,
+					nw:     sc.NetWorth,
+					land:   sc.Land,
+				})
 			}
 		}
 	})
@@ -42,39 +61,256 @@ func interbbsScores(s session.Session, w *ctx) Result {
 		ok(s, "No inter-BBS scores have been imported yet.")
 		return Stay
 	}
-	sort.Slice(rows, func(i, j int) bool { return rows[i].score > rows[j].score })
-	rule := strings.Repeat("─", 72)
-	fmt.Fprintf(s, "\n%s-*%s%s%s%s*-%s\n\n",
-		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "InterBBS Scores"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
-	fmt.Fprintf(s, "%s%-4s %-26s %10s %11s %11s%s\n",
-		ansi.FgBrightWhite, tr(s, "Id"), tr(s, "Empire Name"),
-		tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
-	for i, r := range rows {
-		fmt.Fprintf(s, "%s%-4s%s %s%-26s%s %s%10d%s %s%11d%s %s%11d%s\n",
-			ansi.FgBrightMagenta, remoteScoreID(i), ansi.Reset,
-			ansi.FgBrightWhite, r.name, ansi.Reset,
-			ansi.FgBrightMagenta, r.land, ansi.Reset,
-			ansi.FgBrightWhite, r.score, ansi.Reset,
-			ansi.FgWhite, r.nw, ansi.Reset)
+	boxW := 42
+	boxPad := (boxW - len("InterBBS Scores")) / 2
+	for {
+		fmt.Fprintf(s, "\n%s%s%s\n",
+			ansi.FgBrightBlack, strings.Repeat("─", boxW), ansi.Reset)
+		fmt.Fprintf(s, "%s%s%s%s%s\n",
+			ansi.FgBrightBlack, strings.Repeat(" ", boxPad),
+			tr(s, "InterBBS Scores"), ansi.Reset,
+			strings.Repeat(" ", boxW-boxPad-len("InterBBS Scores")))
+		for i, item := range []struct {
+			key   byte
+			label string
+		}{
+			{'1', "Top Planets by Score"},
+			{'2', "Top Planets by Net Worth"},
+			{'3', "Top Planets by Land"},
+			{'4', "Top Planets by Net Worth Density"},
+			{'5', "Top Players by Score"},
+			{'6', "Top Players by Net Worth"},
+			{'7', "Top Players by Land"},
+			{'8', "Top Players by Net Worth Density"},
+		} {
+			fmt.Fprintf(s, "%s(%s%d%s) %s%s%s\n",
+				ansi.FgBrightBlack, ansi.FgBrightWhite, i+1,
+				ansi.FgBrightBlack, ansi.FgWhite, tr(s, item.label), ansi.Reset)
+		}
+		fmt.Fprintf(s, "%s(%s%c%s) %s%s%s\n",
+			ansi.FgBrightBlack, ansi.FgBrightWhite, '0',
+			ansi.FgBrightBlack, ansi.FgWhite, tr(s, "Quit"), ansi.Reset)
+		fmt.Fprintf(s, "%s%s%s\n",
+			ansi.FgBrightBlack, strings.Repeat("─", boxW), ansi.Reset)
+
+		fmt.Fprintf(s, "\n%s>%s ", ansi.FgBrightWhite, ansi.Reset)
+		r, err := readKey(s)
+		if err != nil {
+			return Stay
+		}
+		drainInput(s)
+		if r == '\r' || r == '\n' || r == '0' {
+			fmt.Fprintln(s, tr(s, "Quit"))
+			return Stay
+		}
+		n := int(r - '0')
+		if r < '1' || r > '8' {
+			fmt.Fprintln(s)
+			continue
+		}
+		fmt.Fprintf(s, "%d\n", n)
+		ipScoreRank(s, w, rows, ipRankKind(n))
 	}
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, rule, ansi.Reset)
-	pause(s)
-	return Stay
 }
 
-// remoteScoreID numbers the inter-BBS board POSITIONALLY, unlike every local
-// roster. Slots are per-planet, and nothing in a score packet carries the
-// sender's: two realms on different planets legitimately hold the same letter
-// there, so this list can only count its own rows. Nothing selects by it — the
-// group-attack picker asks for the realm separately — so it is a label, not a
-// key. It runs (A)..(Z) and then (27)+, since the list pools every planet in the
-// league and is not bounded by one planet's slots.
-func remoteScoreID(i int) string {
-	if i < 26 {
-		return fmt.Sprintf("(%c)", 'A'+i)
+// ipScoreViewName returns the BRE label for each ranking view.
+func ipScoreViewName(s session.Session, kind ipRankKind) string {
+	switch kind {
+	case ipRankPlanetScore:
+		return tr(s, "Top Planets by Score")
+	case ipRankPlanetNW:
+		return tr(s, "Top Planets by Net Worth")
+	case ipRankPlanetLand:
+		return tr(s, "Top Planets by Land")
+	case ipRankPlanetDensity:
+		return tr(s, "Top Planets by Net Worth Density")
+	case ipRankPlayerScore:
+		return tr(s, "Top Players by Score")
+	case ipRankPlayerNW:
+		return tr(s, "Top Players by Net Worth")
+	case ipRankPlayerLand:
+		return tr(s, "Top Players by Land")
+	case ipRankPlayerDensity:
+		return tr(s, "Top Players by Net Worth Density")
 	}
-	return fmt.Sprintf("(%d)", i+1)
+	return ""
+}
+
+type planetAgg struct {
+	name            string
+	score, nw, land int
+}
+
+// ipScoreRank sorts and renders one BRE ranking view. Planet views aggregate
+// scores per board; player views show individual empires with a Planet column.
+// Captured from BRE (docs/dev/bre-screens.md, "InterBBS Scores").
+func ipScoreRank(s session.Session, w *ctx, rows []ipScoreRow, kind ipRankKind) {
+	metric := tr(s, "Score")
+	switch kind {
+	case ipRankPlanetScore, ipRankPlayerScore:
+		sort.Slice(rows, func(i, j int) bool {
+			if rows[i].score != rows[j].score {
+				return rows[i].score > rows[j].score
+			}
+			return rows[i].name < rows[j].name
+		})
+	case ipRankPlanetNW, ipRankPlayerNW:
+		metric = tr(s, "Net Worth")
+		sort.Slice(rows, func(i, j int) bool {
+			if rows[i].nw != rows[j].nw {
+				return rows[i].nw > rows[j].nw
+			}
+			return rows[i].name < rows[j].name
+		})
+	case ipRankPlanetLand, ipRankPlayerLand:
+		metric = tr(s, "Land")
+		sort.Slice(rows, func(i, j int) bool {
+			if rows[i].land != rows[j].land {
+				return rows[i].land > rows[j].land
+			}
+			return rows[i].name < rows[j].name
+		})
+	case ipRankPlanetDensity, ipRankPlayerDensity:
+		metric = tr(s, "Net Worth / Region")
+		sort.Slice(rows, func(i, j int) bool {
+			di, dj := 0, 0
+			if rows[i].land > 0 {
+				di = rows[i].nw / rows[i].land
+			}
+			if rows[j].land > 0 {
+				dj = rows[j].nw / rows[j].land
+			}
+			if di != dj {
+				return di > dj
+			}
+			return rows[i].name < rows[j].name
+		})
+	}
+	isPlanet := kind <= ipRankPlanetDensity
+	var viewRows []struct {
+		name, planet string
+		val          int
+	}
+	if isPlanet {
+		agg := map[string]*planetAgg{}
+		for _, r := range rows {
+			a, ok := agg[r.planet]
+			if !ok {
+				a = &planetAgg{name: r.planet}
+				agg[r.planet] = a
+			}
+			a.score += r.score
+			a.nw += r.nw
+			a.land += r.land
+		}
+		var list []planetAgg
+		for _, a := range agg {
+			list = append(list, *a)
+		}
+		// Re-sort the aggregated list using the same comparator.
+		switch kind {
+		case ipRankPlanetScore:
+			sort.Slice(list, func(i, j int) bool {
+				if list[i].score != list[j].score {
+					return list[i].score > list[j].score
+				}
+				return list[i].name < list[j].name
+			})
+		case ipRankPlanetNW:
+			sort.Slice(list, func(i, j int) bool {
+				if list[i].nw != list[j].nw {
+					return list[i].nw > list[j].nw
+				}
+				return list[i].name < list[j].name
+			})
+		case ipRankPlanetLand:
+			sort.Slice(list, func(i, j int) bool {
+				if list[i].land != list[j].land {
+					return list[i].land > list[j].land
+				}
+				return list[i].name < list[j].name
+			})
+		case ipRankPlanetDensity:
+			sort.Slice(list, func(i, j int) bool {
+				di, dj := 0, 0
+				if list[i].land > 0 {
+					di = list[i].nw / list[i].land
+				}
+				if list[j].land > 0 {
+					dj = list[j].nw / list[j].land
+				}
+				if di != dj {
+					return di > dj
+				}
+				return list[i].name < list[j].name
+			})
+		}
+		for _, a := range list {
+			val := metricValue(kind, a.score, a.nw, a.land)
+			viewRows = append(viewRows, struct {
+				name, planet string
+				val          int
+			}{a.name, "", val})
+		}
+	} else {
+		for _, r := range rows {
+			val := metricValue(kind, r.score, r.nw, r.land)
+			viewRows = append(viewRows, struct {
+				name, planet string
+				val          int
+			}{r.name, r.planet, val})
+		}
+	}
+	viewName := ipScoreViewName(s, kind)
+	rule := strings.Repeat("─", 72)
+	// Title: "Barren Realms Elite: <view name>" (bright-white + gray ": " + bright-red name).
+	fmt.Fprintf(s, "\n%s%s%s: %s%s%s\n", ansi.FgBrightWhite, tr(s, "Barren Realms Elite"),
+		ansi.FgBrightBlack, ansi.FgBrightRed, viewName, ansi.Reset)
+	// Planetary Post banner: ──═Planetary Post═── (red ──, bright-red ═, bright-white title).
+	fmt.Fprintf(s, "%s                          %s──%s═%s%s%s═%s──%s\n",
+		ansi.FgRed, ansi.FgRed, ansi.FgBrightRed,
+		ansi.FgBrightWhite, tr(s, "Planetary Post"), ansi.FgBrightRed,
+		ansi.FgRed, ansi.Reset)
+	fmt.Fprintf(s, "\n")
+	// Column header.
+	if isPlanet {
+		fmt.Fprintf(s, "%s      %-34s %12s%s\n", ansi.FgBrightWhite, tr(s, "Name"), metric, ansi.Reset)
+	} else {
+		fmt.Fprintf(s, "%s      %-26s %-20s %12s%s\n", ansi.FgBrightWhite, tr(s, "Name"), tr(s, "Planet"), metric, ansi.Reset)
+	}
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightBlack, rule, ansi.Reset)
+	for i, r := range viewRows {
+		if isPlanet {
+			fmt.Fprintf(s, "%s(%s%3d%s) %s%-34s%s %s%12d%s\n",
+				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
+				ansi.FgWhite, r.name, ansi.Reset,
+				ansi.FgBrightWhite, r.val, ansi.Reset)
+		} else {
+			fmt.Fprintf(s, "%s(%s%3d%s) %s%-26s%s %s%-20s%s %s%12d%s\n",
+				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
+				ansi.FgWhite, r.name, ansi.Reset,
+				ansi.FgWhite, r.planet, ansi.Reset,
+				ansi.FgBrightWhite, r.val, ansi.Reset)
+		}
+	}
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightBlack, rule, ansi.Reset)
+	pause(s)
+}
+
+func metricValue(kind ipRankKind, score, nw, land int) int {
+	switch kind {
+	case ipRankPlanetScore, ipRankPlayerScore:
+		return score
+	case ipRankPlanetNW, ipRankPlayerNW:
+		return nw
+	case ipRankPlanetLand, ipRankPlayerLand:
+		return land
+	case ipRankPlanetDensity, ipRankPlayerDensity:
+		if land > 0 {
+			return nw / land
+		}
+	}
+	return 0
 }
 
 // createGroupAttack assembles an interplanetary strike against an empire on
