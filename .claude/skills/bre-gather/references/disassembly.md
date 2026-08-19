@@ -219,6 +219,40 @@ inspection. Cross-check against a current-empire site in the same routine, which
 reaches the same fields through `les di,[0x28d8]` with plain positive offsets
 (`+0x1f` name, `+0x286` Score); if the two disagree, the anchor is wrong.
 
+### A whole mechanic falls out of scanning for the RECORD BYTE it hangs on
+
+When a feature keeps one counter or flag, every part of it has to touch that
+byte — so a regex over the raw overlay for accesses at its displacement
+enumerates the entire mechanic in one command: where it is set, where it is
+spent, and every gate that reads it. The SpyGuy took seven sites and nothing
+else:
+
+```
+python3 - <<'EOF'
+import re
+d=open('BRE.OVR','rb').read()
+for name,p in {
+ 'store':  rb'\x26\x88[\x45\x4d\x55\x5d\x65\x6d\x7d]\x6f',
+ 'load':   rb'\x26\x8a[\x45\x4d\x55\x5d\x65\x6d\x7d]\x6f',
+ 'cmp':    rb'\x26\x80\x7d\x6f',
+ 'incdec': rb'\x26\xfe[\x45\x4d]\x6f',
+}.items():
+    for m in re.finditer(p,d): print(name, hex(m.start()))
+EOF
+```
+
+`map --ovr-offset` then turns each hit into `unit+offset`, and the procedure
+list turns that into a name. Here: one store (the packet receiver), one
+inc/dec (the daily expiry inside `run_daily_maintenance`), and four compares —
+`fund_gooie_kablooie` twice, `dismantle_gooie_kablooie`, `create_group_attack`
+— which IS the feature's specification, gates included. Scanning for the
+mechanic's *strings* would have found the menu and none of the gates.
+
+Two cautions. The displacement is only meaningful with its base: `+0x6f` here
+is an array inside the record at `[0x28b4]`, indexed by board number with no
+stride, so the same byte pattern at another base means nothing. And a mechanic
+whose state lives in a word, not a byte, needs the 16-bit forms as well.
+
 ### A menu's key-to-label map: read the DRAW calls, not the string order
 
 Declaration order equals menu order often enough to be a trap. Read the handler

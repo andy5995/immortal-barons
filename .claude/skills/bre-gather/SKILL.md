@@ -357,6 +357,12 @@ each way, on both the arrival and the return side) plus a total-conquest one.
 `grep -a '^\^' "$BRE/game/"*.dat` lists every category in the game in one go.
 Cheaper than any other source and no disassembly can give it to you as fast.
 
+**A missing category is real evidence, but only half of it.** No `.dat` carries
+a spy category, which is most of the case for "the SpyGuy makes no news" — the
+other half is that BRE also builds news lines in code, through
+`append_news_record`, without a template. So pair the template census with the
+caller list of the news writer before concluding a mechanic is silent.
+
 ## Running BRE headless (tmux + dosemu2 harness)
 
 BRE can be driven scriptably and its screens scraped as plain text

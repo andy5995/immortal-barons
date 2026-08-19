@@ -352,6 +352,23 @@ nowhere else, so `LoadConfig` reads them back from the raw JSON before applying
 `bbs.cfg` over the top; the next `SaveConfig` writes `bbs.cfg` and drops them
 from `config.json`. A sysop who opens neither file sees nothing happen.
 
+## How BRE tells another board something: `NEWS_DATA`
+
+The original has one channel for "put this line in that planet's news", and it
+is a packet type of its own. `append_news_record` (BRE.OVR 0x048a79) builds a
+258-byte record — our board number, the destination board number, and a
+255-byte line — looks up the `NEWS_DATA` type code and writes it out. Seven
+routines use it: `create_group_attack`, `fund_gooie_kablooie`,
+`launch_gooie_kablooie`, `dismantle_gooie_kablooie`, `estimate_attack_arrival`,
+`show_gooie_arrival_time` and `report_suspected_cheating`. So every SpyGuy
+report, and the warning that a weapon is on its way, reaches the far planet as
+**planet news**, not as mail and not as a private notice.
+
+IB carries the same thing as `Packet.News []string`, posted to `NewsToday` on
+arrival. The watcher himself rides as `Packet.SpyGuys []SpyGuyDispatch`
+(`{FromBoard, Days}`), which is BRE's three-byte `SPY_GUY` record — from board,
+to board, days — in IB's own shape.
+
 ## Code map
 
 - `internal/game/ibbs.go` — packet types, group attacks, resolution, scores.
