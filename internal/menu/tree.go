@@ -402,16 +402,21 @@ func BuildMenus() *Menus {
 	// The Coordinator Menu belongs to the elected BBS Coordinator (see the
 	// System menu gate below); it holds the planet-coordination functions.
 	// BRE's own Coordinator Ops menu, from its handler (run_interbbs_operations_menu,
-	// BRE.OVR 0x015e3a): four items keyed '1'-'4' in this order, dispatched by
-	// cmp al,'1'..'4'. See docs/dev/bre-screens.md — an earlier reading of this
-	// menu as eight lettered hotkeys was wrong. Dismantle Gooie is the one item
-	// not built yet (#114); Player List is IB's own, keyed past the original's
-	// four rather than displacing one of them.
+	// BRE.OVR 0x015e3a): four items keyed '1'-'4', dispatched by cmp al,'1'..'4',
+	// drawn from the label offsets 0x00/0x11/0x22/0x37 in that order — Dismantle
+	// Gooie, Modify Diplomacy, Global Recon Request, View Diplomacy. See
+	// docs/dev/bre-screens.md, which has carried that table since the eight-
+	// lettered-hotkey reading was corrected.
+	//
+	// KEY 1 IS DELIBERATELY EMPTY: Dismantle Gooie is not built (#114), and
+	// closing the gap would put every remaining item on the original's key for
+	// its neighbour — which is what IB shipped until 2026-08-18. Player List is
+	// IB's own, keyed past the original's four rather than displacing one.
 	coord.Items = []Item{
-		{Key: '1', Label: "Modify Diplomacy", Do: diplomacyModification},
-		{Key: '2', Label: "Global Recon Request", Do: globalReconRequest},
-		{Key: '3', Label: "View Diplomacy", Do: planetaryTreaties},
-		{Key: '4', Label: "Player List", Do: playerList},
+		{Key: '2', Label: "Modify Diplomacy", Do: diplomacyModification},
+		{Key: '3', Label: "Global Recon Request", Do: globalReconRequest},
+		{Key: '4', Label: "View Diplomacy", Do: planetaryTreaties},
+		{Key: '5', Label: "Player List", Do: playerList},
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	coord.DefaultOnEnter = quitOnEnter(coord)

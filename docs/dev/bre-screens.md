@@ -2130,6 +2130,12 @@ offsets 0x00 / 0x11 / 0x22 / 0x37, which are the four strings stored together at
 A fifth key, read from a variable rather than a literal, quits; anything else
 redraws the menu.
 
+**IB's keys match this table as of 2026-08-18 and did not before**: it numbered
+the three items it has built `1`-`3`, so each sat on the original's key for its
+neighbour, and its own Player List sat on `4`, View Diplomacy's key. Key `1` is
+now deliberately empty until Dismantle Gooie is built (#114), and Player List
+has moved to `5`, past the original's four.
+
 So the menu **item** is `Modify Diplomacy`; `Diplomacy Modification` is the title
 of the screen it opens.
 
@@ -2142,7 +2148,10 @@ The note that IB's `D` was "probably the original's key for Dismantle Gooie" was
 wrong for the same reason.
 
 `BRE.OVR` 0x23530 carries the screen: the title `Diplomacy Modification`, the
-prompt `Change status to War, None, Peace, or Ally?` (keys `WNPAU` at 0x23594,
+prompt `Change status to War, None, Peace, or Ally?` (keys `WNPA` at 0x23594 —
+this file read that string as `WNPAU` until 2026-08-18, but the length byte
+ahead of it is `0x04` and the `U` is the `0x55 push bp` of the routine that
+follows, the length-prefix trap; there is no fifth key, and IB's four match,
 with the tails `ar, ` / `one, ` / `eace, or ` / `lly? ` stored separately, so
 each key character is printed highlighted ahead of the rest of its word), and
 at 0x23425 the note that governs the whole mechanic:

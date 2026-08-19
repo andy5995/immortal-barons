@@ -2,6 +2,9 @@
   * The ballot for BBS Coordinator lists every realm again. Realms under
     new-realm protection were left off it, so early in a game a voter was the
     only candidate on their own ballot (issue #149)
+  * Coordinator menu items moved onto the original's keys: Modify Diplomacy 2,
+    Global Recon Request 3, View Diplomacy 4, Player List 5. Key 1 is held for
+    Dismantle Gooie (issue #114)
   * An empty granary no longer stops a realm's population from growing. A realm
     that fed its people in full at the maintenance prompts lost that turn's
     growth for having spent its food doing so
