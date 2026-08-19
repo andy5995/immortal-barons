@@ -34,6 +34,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/play"
 	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
+	"github.com/andy5995/immortal-barons/internal/textwrap"
 )
 
 // errCancelled reports that the sysop backed out of an interactive step. The
@@ -84,6 +85,7 @@ func main() {
 	coordPub := flag.String("coord-key", "", i18n.T(lang, "record the league Coordinator's public key (the value -gen-coord-key printed), then exit"))
 	genBoardKey := flag.Bool("gen-board-key", false, i18n.T(lang, "create this board's packet-signing key, print the public half to send to the League Coordinator, then exit"))
 	leagueReset := flag.String("league-reset", "", i18n.T(lang, "start a new season across the whole league on DATE (node #1 only), then exit"))
+	leagueCheck := flag.Bool("league-check", false, i18n.T(lang, "check this board's league setup — roster, board name, packet directories, keys — and report everything wrong at once, then exit"))
 	leagueRoutes := flag.Bool("league-routes", false, i18n.T(lang, "print which board each planet's packets are handed to, and the directory they are written in, then exit"))
 	lastPacket := flag.Bool("lastpacket", false, i18n.T(lang, "write LASTPACKET.LST — when a packet from each other board was last processed here, then exit"))
 	bbsInfo := flag.Bool("bbsinfo", false, i18n.T(lang, "write BBSINFO.LST — every board, when it was last heard from, and the version it runs, then exit"))
@@ -128,7 +130,7 @@ func main() {
 	// when -dropfile isn't given). Every explicit-mode flag consumes none, so a
 	// stray word alongside one is a mistake — flag it instead of silently ignoring
 	// it. (Unknown -flags are already rejected by the flag package.)
-	explicitMode := *maint || *planetary || *full || *scores || *leagueConfig || *leagueRoutes || *reset || *resetFromConfig || *ibbsReset ||
+	explicitMode := *maint || *planetary || *full || *scores || *leagueConfig || *leagueRoutes || *leagueCheck || *reset || *resetFromConfig || *ibbsReset ||
 		*lastPacket || *bbsInfo || *playerList || *players ||
 		*addAI > 0 || *dump || *spectate > 0 || *local || *export != "" || *imp != "" || *setDrop
 	if flag.NArg() > 0 && explicitMode {
@@ -223,6 +225,12 @@ func main() {
 	if *leagueConfig {
 		if err := runLeagueConfig(cfg); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -league-config:", err)
+			os.Exit(1)
+		}
+		return
+	}
+	if *leagueCheck {
+		if !runLeagueCheck(cfg) {
 			os.Exit(1)
 		}
 		return
@@ -804,6 +812,25 @@ func runLeagueReport(cfg game.Config, which string) error {
 	return nil
 }
 
+// runLeagueCheck prints every league setup item at once and reports whether
+// all of them are usable. A sysop joining a league gets a handful of settings
+// exactly right or a transport run fails three steps from the cause (#154).
+func runLeagueCheck(cfg game.Config) bool {
+	allOK := true
+	for _, c := range store.Checkup(cfg) {
+		mark := "ok  "
+		if !c.OK {
+			mark, allOK = "FAIL", false
+		}
+		prefix := fmt.Sprintf("%s  %-20s", mark, c.Name)
+		fmt.Println(prefix + textwrap.Wrap(c.Detail, textwrap.Console, strings.Repeat(" ", len(prefix))))
+	}
+	if !allOK {
+		fmt.Println("\nFix the FAIL lines above; see the Door Setup guide for what each one wants.")
+	}
+	return allOK
+}
+
 func runLeagueRoutes(cfg game.Config) error {
 	w, err := store.Load(cfg)
 	if err != nil {
@@ -1026,6 +1053,12 @@ func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset,
 	// ask that is its own to answer, so it is not opened.
 	if league != nil && league.BoardID != "" {
 		w.Config.BoardID = league.BoardID
+		// Checked before anything is written: the name is compared byte for
+		// byte at transport time, and catching it here costs a retyped command
+		// rather than a reset that looked like it worked (#154).
+		if err := store.CheckBoardInRoster(cfg.DataDir, w.Config.BoardID); err != nil {
+			return err
+		}
 		if err := store.SaveConfig(w.Config); err != nil {
 			return err
 		}

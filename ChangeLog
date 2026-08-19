@@ -1,4 +1,8 @@
 (in-progress:)
+  * New -league-check command line option: it reports the roster, the board
+    name, the packet directories and the keys in one pass (issue #154)
+  * Joining a league with a board name that is not in the roster is refused at
+    setup, naming the closest entry (issue #154)
   * barons-ftn's thin-margin warning wraps to the console width, and drops
     advice that no longer applies (issue #156)
   * A bid on an allied planet's listing priced at 0 gold is accepted. It was

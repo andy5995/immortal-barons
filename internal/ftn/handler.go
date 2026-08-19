@@ -58,6 +58,9 @@ func Run(dataDir string) (Result, error) {
 	world := &game.World{Config: board, LeagueNodes: nodes, Routes: routes}
 	originNode := nodeByNumber(nodes, world.NodeNumber(board.BoardID))
 	if originNode == nil {
+		if err := store.CheckBoardInRoster(board.DataDir, board.BoardID); err != nil {
+			return Result{}, err
+		}
 		return Result{}, fmt.Errorf("this board %q is not in %s", board.BoardID, store.NodeListFile)
 	}
 	origin, err := ParseAddress(originNode.Address)

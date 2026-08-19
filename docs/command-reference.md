@@ -179,6 +179,11 @@ These options are for games that link several BBSes together (a "league"). See
   Without one of those, it is ignored.
 - **`-league-config`** — Send this board's league settings to the whole league,
   then exit. Only the league coordinator (node #1) uses this.
+- **`-league-check`** — Check this board's league setup — the roster, the board
+  name, the packet directories and the keys — and report everything that is
+  wrong at once, then exit. Run it after joining a league, and whenever a
+  transport run complains. It exits non-zero when anything failed, so an event
+  can run it.
 - **`-league-routes`** — Print which board each planet's packets are handed to,
   and the directory they are written in, then exit. Use it to check a roster the
   coordinator has just sent.
