@@ -7,9 +7,11 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ftn"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/textwrap"
 )
 
 func main() {
@@ -31,7 +33,9 @@ func main() {
 		os.Exit(1)
 	}
 	for _, warning := range result.Warnings {
-		fmt.Fprintln(os.Stderr, "barons-ftn: warning:", warning)
+		const prefix = "barons-ftn: warning: "
+		fmt.Fprint(os.Stderr, prefix,
+			textwrap.Wrap(warning, textwrap.Console, strings.Repeat(" ", len(prefix))), "\n")
 	}
 	for _, queued := range result.Queued {
 		fmt.Printf("Queued %s for %s (%s) as %s\n",

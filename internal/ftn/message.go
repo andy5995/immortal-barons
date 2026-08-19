@@ -17,10 +17,10 @@ const (
 	type2SubjectSize = 72
 	programName      = "Immortal Barons"
 
-	// subjectMarginBytes is how little headroom is worth reporting. A packet
-	// name carries the outbound sequence number, so a path that fits today
-	// grows a byte at 100 and again at 1000; a board with a byte to spare has
-	// an outage scheduled rather than a working configuration.
+	// subjectMarginBytes is how little headroom is worth reporting. The packet
+	// name is fixed-width for a given pair of nodes, so a path that fits today
+	// does not grow on its own; what consumes a thin margin is a board joining
+	// the league on a longer node number, or a change to the directory.
 	subjectMarginBytes = 8
 
 	attributePrivate    = 0x0001
@@ -107,8 +107,7 @@ func subjectAdvice(mode SubjectMode) string {
 			"with AttachDir naming the directory the mailer searches"
 	}
 	return `Set SubjectPath in ftn.cfg: "Basename" writes the filename alone, with AttachDir naming the directory ` +
-		`the mailer searches; a prefix such as "SubjectPath fido" is resolved against the mailer's working directory. ` +
-		"An absolute path also loses a byte each time the outbound sequence number gains a digit"
+		`the mailer searches; a prefix such as "SubjectPath fido" is resolved against the mailer's working directory`
 }
 
 func type2Header(attached string, origin, destination Address, now time.Time) [type2HeaderSize]byte {

@@ -1,4 +1,6 @@
 (in-progress:)
+  * barons-ftn's thin-margin warning wraps to the console width, and drops
+    advice that no longer applies (issue #156)
   * A bid on an allied planet's listing priced at 0 gold is accepted. It was
     refused with a message about the quantity
   * New -players command line option, the original's VIEW: lists the players

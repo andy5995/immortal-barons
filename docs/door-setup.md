@@ -672,15 +672,14 @@ create, including broadcast suffixes, and exits without moving anything if one
 will not fit. The error names the setting to change. When fewer than 8 bytes
 are left, it warns on standard error while still queueing the mail.
 
-**An absolute path's budget shrinks as the league runs.** Packet names carry the
-outbound sequence number, so the same directory loses a byte at sequence 100 and
-another at 1000. A board that has been exchanging for weeks can stop with nothing
-reconfigured. `Basename` spends nothing on directories, which is why it is the
-recommended setting for any board whose layout is not very short; a prefix is the
-middle ground when the mailer has no attachment search path. `Absolute` is worth
-keeping only with a short path and real headroom — `/sbbs/ibout/fido/` is 17
-bytes, and up to 45 more for the longest packet name plus a broadcast suffix and
-Binkley's `^` leaves 8 of the 71.
+**Which spelling to choose depends on your mailer.** `Absolute` spends the whole
+directory out of the 71 bytes: `/sbbs/ibout/fido/` is 17, and the longest packet
+name plus a broadcast suffix and Binkley's `^` can take 45 more, leaving 8.
+`Basename` spends nothing on directories, but it needs a mailer that searches an
+attachment directory. **Synchronet is not one** — SBBSecho reads the directory
+out of the subject and reports the file as not found when it is missing — so a
+Synchronet board keeps `Absolute` and a short data directory. A prefix is the
+middle ground where the mailer resolves it against its own working directory.
 
 This budget applies only when `barons-ftn` carries files through Type-2 `.msg`
 netmail. A shared directory, sync tool, `scp`, or another transport that does
