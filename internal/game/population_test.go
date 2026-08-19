@@ -50,6 +50,29 @@ func TestPopulationMovesTowardCapacity(t *testing.T) {
 	}
 }
 
+// An empty granary does not stop migration. BRE's end-of-turn routine
+// (BRE.OVR 0xD219-0xD3CC) reads the region counts, population, support and tax
+// and never touches the food field at +0x221 — a food shortfall costs support,
+// morale and, at 50% severity, a civil war, and nothing else. IB gated growth
+// on Food > 0 from its own pre-binary logistic model (6ace5fd) and kept the
+// gate through the rewrite, so a realm that had fed its people in full at the
+// maintenance prompts, spending the granary down to zero, silently lost its
+// whole turn's growth.
+func TestAnEmptyGranaryDoesNotStopGrowth(t *testing.T) {
+	for seed := int64(1); seed <= 8; seed++ {
+		cfg := DefaultConfig()
+		cfg.AICount = 0
+		w := NewWorldSeed(cfg, seed)
+		e := w.AddHuman("tester", "Testland")
+		e.Food = 0
+		w.PlayTurn(e, "2026-08-14")
+		if e.LastPopGrowth <= 0 {
+			t.Errorf("seed %d: a realm under capacity with no food migrated by %d; food does not gate growth",
+				seed, e.LastPopGrowth)
+		}
+	}
+}
+
 // Waste houses nobody. BRE's capacity routine (BRE.OVR 0xD08A) loads eight
 // region counts and never reads the ninth, Waste at +0xb6 — so ruined land
 // contributes nothing to carrying capacity. Asserted as a golden literal rather

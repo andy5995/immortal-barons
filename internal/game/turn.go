@@ -943,9 +943,6 @@ func (w *World) processEconomy(e *Empire) {
 	if ceiling := e.People / PopGrowthCeilingDivisor; growth > ceiling {
 		growth = ceiling // no realm more than half again as big in one turn
 	}
-	if growth > 0 && e.Food <= 0 {
-		growth = 0 // starving realms don't grow; starvation attrition is separate
-	}
 	if e.People+growth < 0 {
 		growth = -e.People
 	}

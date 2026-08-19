@@ -1835,6 +1835,15 @@ if move > People/2:  move = People/2                   -- 50%/turn ceiling
 People += move  (floored at 0)
 ```
 
+**Food does not gate migration.** The routine reads the region counts, the
+population, support and tax, and never touches the food field at `+0x221`; a
+shortfall costs support, morale and, past the threshold, a civil war, and
+nothing more. IB suppressed a turn's growth whenever the granary was empty — a
+leftover of its own pre-binary logistic model (`6ace5fd`) that outlived the
+rewrite — so a realm that fed its people in full at the maintenance prompts,
+spending its food down to zero, lost the growth it had paid for. Removed
+2026-08-18.
+
 Because the movement is a share of the **gap** rather than of the population, a
 realm far below capacity fills quickly and one near it barely stirs. The
 `People/2` ceiling is BRE's characteristic explosive growth. Above a 50% tax

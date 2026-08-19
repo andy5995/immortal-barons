@@ -1,4 +1,7 @@
 (in-progress:)
+  * An empty granary no longer stops a realm's population from growing. A realm
+    that fed its people in full at the maintenance prompts lost that turn's
+    growth for having spent its food doing so
   * Onboarding messages wrap to the screen instead of splitting words at column 80
   * A realm name may now be made entirely of CP437 glyphs (issue #151)
   * An idle timeout while naming a realm now ends the session, creating none
