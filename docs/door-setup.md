@@ -95,6 +95,42 @@ pointing it at this board's data directory:
 
 Saving with `S` creates the data directory if it does not exist.
 
+### Example: Synchronet
+
+Add an external program in `scfg` → External Programs → Online Programs, and
+set its **Start-up Directory** to the game's own directory.
+
+**Synchronet keeps only the first 100 characters of a command line, and says
+nothing when it cuts one.** A path to the binary and a `-data` path can exceed
+it on their own. The cut lands mid-way through `-data`. The door then
+complains about the drop file, because the half path names no directory.
+Measured on Synchronet 3.21d: a 110-character line came back 100.
+
+The cheapest way under the limit is to spend nothing on `-data`. Synchronet
+changes to the **Start-up Directory** before it runs the door. The game looks
+for `data` beside it. So a start-up directory of `/sbbs/xtrn/imb/` leaves the
+argument off altogether:
+
+```
+/path/to/immortal-barons -dropfile %Ndoor32.sys
+```
+
+That relies on the start-up directory staying set — clear it and the game
+looks for its data somewhere else and reports no game found.
+
+When the binary's path alone is long enough to overflow the line, put it in a
+launcher script instead:
+
+```
+#!/bin/sh
+exec /a/very/long/path/to/immortal-barons \
+  -dropfile "$1" \
+  -data /sbbs/xtrn/imb/data
+```
+
+Then the configured line is the script and the drop file, and nothing else.
+Windows takes the same shape with a `.bat` file and `%1`.
+
 ### How the game talks to the caller
 
 The game connects to the caller in one of two ways, chosen automatically on
