@@ -3151,8 +3151,16 @@ see below.
 **Allied Planets** writes to every planet the board's own diplomacy chart calls
 Allied (see Planetary diplomacy, below) — the one thing that chart drives rather
 than describes. A message to a planet reaches every living realm there,
-computer barons included, which is the same reach the local "send to all" has;
-a coordinator message with no Coordinator elected posts a news line instead.
+computer barons included, which is the same reach the local "send to all" has.
+
+**Arriving mail posts no news, on either planet.** BRE's inbound handler
+(`process_interbbs_message_packet`) writes `DATA\MSG.BRF` and touches no news
+file, and no news or report template carries a message category. IB filed a
+planet news line for each arrival — naming the sender of a planet-wide message,
+and reporting one addressed to the Coordinator or to a realm that had since
+died — which put private mail in front of the whole planet. Removed 2026-08-18
+(#146). A message to a Coordinator on a planet that has elected none, or to a
+realm that has died, is now simply not delivered.
 
 **Replying is BRE's own.** It ships a SECOND message reader for interplanetary
 mail (`DATA\MSG.BRF`, strings at `BRE.OVR` 0x1F94C), separate from the local one

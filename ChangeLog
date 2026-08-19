@@ -1,4 +1,7 @@
 (in-progress:)
+  * Messages arriving from another planet no longer appear in the planet news.
+    They are delivered to the mailboxes they are addressed to and nowhere else
+    (issue #146)
   * The BBS Coordinator can stand down the planet's Clingy Annihilator before it
     flies, from the Coordinator menu, whoever built it (issue #45). The baron
     who started it keeps their own dismantle for now (issue #114)

@@ -143,3 +143,23 @@ func TestIPMessageToOwnPlanetIsDeliveredLocally(t *testing.T) {
 		}
 	}
 }
+
+// A message arriving from another planet is mail, and mail only: it reaches the
+// mailboxes and posts nothing to the planet news (#146). BRE's own inbound
+// handler writes DATA\\MSG.BRF and touches no news file.
+func TestArrivingIPMessagesStayOutOfTheNews(t *testing.T) {
+	holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	here := ipWorld("Nova Hub")
+	there := ipWorld("The Eclipse")
+
+	here.SendIPMessage(here.Empires[0], []string{"The Eclipse"}, false, "Stand down.")
+	before := len(there.NewsToday)
+	there.ApplyPacket(here.Outbox[0])
+
+	if len(there.Empires[0].Mail) != 1 {
+		t.Fatalf("the message should still be delivered, got %d", len(there.Empires[0].Mail))
+	}
+	if got := there.NewsToday[before:]; len(got) != 0 {
+		t.Errorf("an arriving message reached the news: %q", got)
+	}
+}

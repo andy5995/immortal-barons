@@ -1,7 +1,5 @@
 package game
 
-import "fmt"
-
 // Interplanetary messages (BRE's "IP Messages"). A message is normally
 // addressed to a PLANET: the original offers one planet, several picked
 // planets, every planet, allied planets, or a planet's Coordinator, and the text
@@ -54,9 +52,14 @@ func (w *World) sendIP(from *Empire, boards []string, m IPMessage) {
 	}
 }
 
-// deliverIPMessage puts an arriving message in the mailboxes it is addressed to.
+// deliverIPMessage puts an arriving message in the mailboxes it is addressed to,
+// and says nothing anywhere else. IB used to post a planet news line for each
+// arrival — naming the sender for a planet-wide message, and reporting one sent
+// to the Coordinator or to a realm that had died — which put private mail in
+// front of the whole planet and filled the feed with traffic notices (#146).
+// The original posts nothing: process_interbbs_message_packet writes
+// DATA\MSG.BRF and touches no news file.
 func (w *World) deliverIPMessage(m IPMessage) {
-	from := fmt.Sprintf("%s of %s", m.FromEmpire, m.FromBoard)
 	when := m.When
 	if when == "" {
 		when = timeNow().Format(StampFormat)
@@ -65,7 +68,6 @@ func (w *World) deliverIPMessage(m IPMessage) {
 	if m.ToEmpire != "" {
 		to := w.remoteTarget(m.ToEmpire)
 		if to == nil {
-			w.postNews(fmt.Sprintf("%s wrote to %s, who is no longer with us.", from, m.ToEmpire))
 			return
 		}
 		msg.To = w.EmpireLetter(to)
@@ -75,17 +77,14 @@ func (w *World) deliverIPMessage(m IPMessage) {
 	if m.ToCoordinator {
 		co := w.BBSCoordinator()
 		if co == nil {
-			w.postNews(fmt.Sprintf("A message from %s arrived for our Planet Coordinator, but we have elected none.", from))
 			return
 		}
 		msg.To = w.EmpireLetter(co)
 		co.Mail = append(co.Mail, msg)
-		w.postNews(fmt.Sprintf("%s sent word to our Planet Coordinator.", from))
 		return
 	}
 	// Every living realm, computer barons included — the same reach the local
-	// "send to all" has. The news line goes up either way, so a planet whose
-	// humans have all fallen still shows that someone out there wrote to it.
+	// "send to all" has.
 	for _, e := range w.Empires {
 		if !e.Alive {
 			continue
@@ -94,7 +93,6 @@ func (w *World) deliverIPMessage(m IPMessage) {
 		one.To = w.EmpireLetter(e)
 		e.Mail = append(e.Mail, one)
 	}
-	w.postNews(fmt.Sprintf("%s addressed our whole planet.", from))
 }
 
 // ReplyIPMessage answers an interplanetary message. A public reply goes to the
