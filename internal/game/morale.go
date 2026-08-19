@@ -96,10 +96,10 @@ func (w *World) resolveCivilWar(e *Empire) {
 		e.syncLand()
 	}
 	keep := CivilWarPerCent - sev
-	for _, good := range []string{"Trooper", "Jet", "Turret", "Bomber", "Tank", "Carrier"} {
-		f := marketField(e, good)
+	for _, g := range MilitaryGoods {
+		f := g.Count(e)
 		*f = *f / CivilWarPerCent * keep
-		if l := w.marketListing(e.Name, good); l != nil {
+		if l := w.marketListing(e.Name, g.Singular); l != nil {
 			l.Qty = l.Qty / CivilWarPerCent * keep
 		}
 	}
@@ -119,6 +119,11 @@ func (w *World) moraleDesertRate(e *Empire) int {
 	return b.Base + w.rng.Intn(b.Up) - down
 }
 
+// moraleDeserters are the three units that desert, in the order the original's
+// routine touches them. Turrets, bombers and carriers never desert: it touches
+// three unit types and stops.
+var moraleDeserters = []*Good{Trooper, Jet, Tank}
+
 // moraleDesertion runs one turn of low-morale desertion. Troopers, jets and
 // tanks each desert at the drawn rate, independently, one face of
 // MoraleDesertTypeOdds sparing each. Turrets, bombers and carriers never desert:
@@ -129,15 +134,15 @@ func (w *World) moraleDesertion(e *Empire) {
 	if pct <= 0 {
 		return
 	}
-	for _, good := range []string{"Trooper", "Jet", "Tank"} {
+	for _, g := range moraleDeserters {
 		if w.rng.Intn(MoraleDesertTypeOdds) == 0 {
 			continue
 		}
-		f := marketField(e, good)
+		f := g.Count(e)
 		d := *f / MoraleDesertPerCent * pct
 		*f -= d
 		e.LastMoraleDesertion += d
-		if l := w.marketListing(e.Name, good); l != nil {
+		if l := w.marketListing(e.Name, g.Singular); l != nil {
 			d = l.Qty / MoraleDesertPerCent * pct
 			l.Qty -= d
 			e.LastMoraleDesertion += d

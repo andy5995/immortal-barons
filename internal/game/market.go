@@ -19,35 +19,6 @@ var (
 	ErrNoRelations = errors.New("You need a pact with that realm to send it a trade deal.")
 )
 
-// MarketGoods are the goods tradeable on the general Trading Market: military
-// units plus food and agents (BRE-verified live, 2026-07-15). Regions and
-// HeadQuarters are not tradeable. The order matches BRE's Trading Market screen.
-var MarketGoods = []string{"Trooper", "Jet", "Turret", "Bomber", "Food", "Agent", "Tank", "Carrier"}
-
-// marketField returns a pointer to e's inventory count for a market good, or nil
-// if the good is not tradeable.
-func marketField(e *Empire, good string) *int {
-	switch good {
-	case "Trooper":
-		return &e.Troopers
-	case "Jet":
-		return &e.Jets
-	case "Turret":
-		return &e.Turrets
-	case "Bomber":
-		return &e.Bombers
-	case "Food":
-		return &e.Food
-	case "Agent":
-		return &e.Agents
-	case "Tank":
-		return &e.Tanks
-	case "Carrier":
-		return &e.Carriers
-	}
-	return nil
-}
-
 // MarketListing is one empire's offer of one good on the general market. The
 // listed Qty is escrowed — it has already left the seller's inventory (see
 // SetMarketListing), so it is held here until bought or delisted.

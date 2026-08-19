@@ -74,23 +74,19 @@ func (w *World) listedForcesUpkeep(e *Empire) int64 {
 	return techLower(int64(tenths/MaintTenthsPerGold), e.TechMaintFactor())
 }
 
-// unitCounts is one full set of military counts. Both the gold bill and the
-// food bill charge a realm's escrowed units, so they read them through this
-// rather than each spelling out the six market names.
-type unitCounts struct {
-	Troopers, Jets, Turrets, Bombers, Tanks, Carriers int
-}
-
 // listedUnits is the military this empire has escrowed on the Trading Market.
-func (w *World) listedUnits(e *Empire) unitCounts {
-	return unitCounts{
-		Troopers: w.MarketForSale(e.Name, "Trooper"),
-		Jets:     w.MarketForSale(e.Name, "Jet"),
-		Turrets:  w.MarketForSale(e.Name, "Turret"),
-		Bombers:  w.MarketForSale(e.Name, "Bomber"),
-		Tanks:    w.MarketForSale(e.Name, "Tank"),
-		Carriers: w.MarketForSale(e.Name, "Carrier"),
+// Both the gold bill and the food bill charge escrowed units, so they read them
+// through this rather than each spelling out the six market names.
+//
+// It hands the counts back in an otherwise empty Empire, so the canonical
+// table's own accessors can fill it (#134) and a caller reads e.Troopers on
+// both sides of the sum. Nothing else on the value is set or meaningful.
+func (w *World) listedUnits(e *Empire) Empire {
+	var listed Empire
+	for _, g := range MilitaryGoods {
+		*g.Count(&listed) = w.MarketForSale(e.Name, g.Singular)
 	}
+	return listed
 }
 func (w *World) RegionsDue(e *Empire) int64 {
 	return w.Config.MaintCosts.MaintCostScaled(e.RegionUpkeep())

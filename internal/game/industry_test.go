@@ -2,6 +2,18 @@ package game
 
 import "testing"
 
+// projected reads one good's figure out of a ProjectedProduction result by the
+// good itself, not by a raw index: an index would follow a reordering of
+// MilitaryGoods silently and assert about the wrong unit (#134).
+func projected(proj []int, g *Good) int {
+	for i, x := range MilitaryGoods {
+		if x == g {
+			return proj[i]
+		}
+	}
+	return -1
+}
+
 func TestManufactureSplitsByPercent(t *testing.T) {
 	cfg := DefaultConfig()
 	w := NewWorldSeed(cfg, 1)
@@ -19,8 +31,8 @@ func TestManufactureSplitsByPercent(t *testing.T) {
 	// a second hand-rolled formula here truncated where production rounds, and
 	// disagreed by one unit whenever a percentage left a fraction.
 	want := w.ProjectedProduction(e)
-	wantTroopers, wantJets, wantTurrets := want[0], want[1], want[2]
-	wantTanks, wantCarriers := want[4], want[5]
+	wantTroopers, wantJets, wantTurrets := projected(want, Trooper), projected(want, Jet), projected(want, Turret)
+	wantTanks, wantCarriers := projected(want, Tank), projected(want, Carrier)
 
 	if e.MadeTroopers != wantTroopers {
 		t.Errorf("MadeTroopers = %d, want %d", e.MadeTroopers, wantTroopers)
@@ -102,11 +114,11 @@ func TestSpecializedBonusAndPenalty(t *testing.T) {
 	plain.Specialized = ""
 	base := w.ProjectedProduction(&plain)
 
-	if e.MadeTroopers >= base[0] {
-		t.Errorf("MadeTroopers (penalized) = %d, want fewer than the unspecialized %d", e.MadeTroopers, base[0])
+	if e.MadeTroopers >= projected(base, Trooper) {
+		t.Errorf("MadeTroopers (penalized) = %d, want fewer than the unspecialized %d", e.MadeTroopers, projected(base, Trooper))
 	}
-	if e.MadeTanks <= base[4] {
-		t.Errorf("MadeTanks (bonused) = %d, want more than the unspecialized %d", e.MadeTanks, base[4])
+	if e.MadeTanks <= projected(base, Tank) {
+		t.Errorf("MadeTanks (bonused) = %d, want more than the unspecialized %d", e.MadeTanks, projected(base, Tank))
 	}
 }
 
@@ -151,7 +163,7 @@ func TestDefaultProdLiftsItsJets(t *testing.T) {
 	e.Land = e.Regions.Total()
 
 	made := w.ProjectedProduction(e)
-	jets, carriers := made[1], made[5]
+	jets, carriers := projected(made, Jet), projected(made, Carrier)
 	if carriers == 0 || jets/carriers != JetsPerCarrier {
 		t.Errorf("default production made %d jets and %d carriers; want %d jets per carrier",
 			jets, carriers, JetsPerCarrier)

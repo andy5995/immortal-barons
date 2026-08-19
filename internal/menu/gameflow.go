@@ -398,9 +398,6 @@ func incomeReport(s session.Session, w *ctx) {
 	pause(s)
 }
 
-// pirateSpoilNames label each spoil in BRE's own words, in PirateSpoil order.
-var pirateSpoilNames = [...]string{"Troopers", "Jets", "Turrets", "Tanks", "Gold", "Agents"}
-
 // pirateColor returns a faction's color by its slot — pirateColors, the palette
 // the Attack Pirates menu paints. Keyed on the slot rather than the name so a
 // world whose factions carry other names still colors them.
@@ -436,10 +433,7 @@ func raiderSlots(raids []game.PirateHit) []int {
 // writes "has captured" for every faction; IB uses "have", since the names are
 // plural.
 func pirateHitLine(s session.Session, h game.PirateHit) {
-	unit := pirateSpoilNames[0]
-	if int(h.Spoil) < len(pirateSpoilNames) {
-		unit = pirateSpoilNames[h.Spoil]
-	}
+	unit := h.Spoil.Label()
 	faction := pirateColor(h.Slot) + h.Faction + ansi.Reset
 	amount := ansi.FgBrightCyan + comma(h.Amount) + ansi.Reset
 	fmt.Fprintf(s, "  %s\n", fmt.Sprintf(tr(s, "%s have captured %s %s"), faction, amount, tr(s, unit)))

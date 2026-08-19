@@ -10,14 +10,15 @@ import (
 // Gold is the last row and starts at nothing, so an existing empire produces
 // exactly what it did before the row existed.
 func TestGoldIsTheLastIndustryRowAndStartsAtZero(t *testing.T) {
-	if got := prodTypeNames[len(prodTypeNames)-1]; got != "Gold" {
+	rows := prodRows()
+	if got := rows[len(rows)-1].name; got != "Gold" {
 		t.Errorf("last row = %q, want Gold", got)
 	}
 	if game.DefaultProdGoldPct != 0 {
 		t.Errorf("default gold share = %d%%, want 0", game.DefaultProdGoldPct)
 	}
 	var e game.Empire
-	if p := prodField(&e, len(prodTypeNames)-1); p != &e.ProdGold {
+	if p := rows[len(rows)-1].field(&e); p != &e.ProdGold {
 		t.Error("the Gold row is not wired to Empire.ProdGold")
 	}
 }

@@ -23,7 +23,7 @@ func TestProjectedProductionMatchesBRE(t *testing.T) {
 		mix := RegionMix{Industrial: c.industrial, Mountain: c.mountain}
 		mix.Desert = c.total - mix.Total() // padding to reach the captured total
 		e := &Empire{Regions: mix, Specialized: "Turrets", ProdTurrets: 100}
-		if got := (&World{}).ProjectedProduction(e)[2]; got != c.want {
+		if got := projected((&World{}).ProjectedProduction(e), Turret); got != c.want {
 			t.Errorf("industrial=%d mountain=%d total=%d: got %d turrets, want %d",
 				c.industrial, c.mountain, c.total, got, c.want)
 		}

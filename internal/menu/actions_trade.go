@@ -11,25 +11,35 @@ import (
 )
 
 // tradeGoods is the nine tradeable goods, keyed 1-9 as on BRE's trade-deal
-// screen (Regions and HQ are not tradeable). field points into a basket; owned
-// reads the amount an empire holds.
-var tradeGoods = []struct {
+// screen (Regions and HQ are not tradeable). Each row is a key and the
+// canonical table's row for the good (#134); gold has no table row, since it is
+// not a holding anyone counts by the unit, so it carries its own accessors.
+type tradeGood struct {
 	key   byte
 	name  string
 	field func(*game.TradeBasket) *int
 	owned func(*game.Empire) int
-}{
-	{'1', "Troopers", func(b *game.TradeBasket) *int { return &b.Troopers }, func(e *game.Empire) int { return e.Troopers }},
-	{'2', "Jets", func(b *game.TradeBasket) *int { return &b.Jets }, func(e *game.Empire) int { return e.Jets }},
-	{'3', "Turrets", func(b *game.TradeBasket) *int { return &b.Turrets }, func(e *game.Empire) int { return e.Turrets }},
-	{'4', "Bombers", func(b *game.TradeBasket) *int { return &b.Bombers }, func(e *game.Empire) int { return e.Bombers }},
-	{'5', "Food", func(b *game.TradeBasket) *int { return &b.Food }, func(e *game.Empire) int { return e.Food }},
+}
+
+func tradeRow(key byte, g *game.Good) tradeGood {
+	return tradeGood{key: key, name: g.Plural, field: g.Basket,
+		owned: func(e *game.Empire) int { return *g.Count(e) }}
+}
+
+var tradeGoods = []tradeGood{
+	tradeRow('1', game.Trooper),
+	tradeRow('2', game.Jet),
+	tradeRow('3', game.Turret),
+	tradeRow('4', game.Bomber),
+	tradeRow('5', game.Food),
 	// A trade deal moves at most MaxCountField gold, so the basket holds the
 	// amount in count width even though a treasury does not.
-	{'6', "Gold", func(b *game.TradeBasket) *int { return &b.Gold }, func(e *game.Empire) int { return int(min(e.Gold, game.MaxCountField)) }},
-	{'7', "Agents", func(b *game.TradeBasket) *int { return &b.Agents }, func(e *game.Empire) int { return e.Agents }},
-	{'8', "Tanks", func(b *game.TradeBasket) *int { return &b.Tanks }, func(e *game.Empire) int { return e.Tanks }},
-	{'9', "Carriers", func(b *game.TradeBasket) *int { return &b.Carriers }, func(e *game.Empire) int { return e.Carriers }},
+	{key: '6', name: "Gold",
+		field: func(b *game.TradeBasket) *int { return &b.Gold },
+		owned: func(e *game.Empire) int { return int(min(e.Gold, game.MaxCountField)) }},
+	tradeRow('7', game.Agent),
+	tradeRow('8', game.Tank),
+	tradeRow('9', game.Carrier),
 }
 
 // basketSummary renders a basket as "100 Tanks, 5,000 Gold", or "nothing".
@@ -101,12 +111,7 @@ func buildTradeBasket(s session.Session, w *ctx, title string, limitToOwned bool
 			fmt.Fprint(s, "\n")
 			return b
 		}
-		var g *struct {
-			key   byte
-			name  string
-			field func(*game.TradeBasket) *int
-			owned func(*game.Empire) int
-		}
+		var g *tradeGood
 		for i := range tradeGoods {
 			if tradeGoods[i].key == byte(unicode.ToUpper(r)) {
 				g = &tradeGoods[i]

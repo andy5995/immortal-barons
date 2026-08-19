@@ -463,7 +463,8 @@ func (w *World) aiShopMarket(e *Empire) {
 		return
 	}
 	budget := (e.Gold - reserve) * AIMarketBuyBudgetPct / 100
-	for _, good := range MarketGoods {
+	for _, g := range MarketGoods {
+		good := g.Singular
 		shop := w.shopPrice(e, good)
 		if shop <= 0 {
 			continue
@@ -527,25 +528,11 @@ func (w *World) aiListSurplus(e *Empire) {
 // shopPrice is what e would pay the shop for one unit of a market good, or 0 for
 // goods the shop does not sell at a per-unit price.
 func (w *World) shopPrice(e *Empire, good string) int {
-	switch good {
-	case "Trooper":
-		return w.TrooperPrice(e)
-	case "Jet":
-		return w.JetPrice(e)
-	case "Turret":
-		return w.TurretPrice(e)
-	case "Bomber":
-		return w.BomberPrice(e)
-	case "Tank":
-		return w.TankPrice(e)
-	case "Carrier":
-		return w.CarrierPrice(e)
-	case "Agent":
-		return w.AgentPrice(e)
-	case "Food":
-		return w.FoodBuyPrice()
+	g := GoodByName(good)
+	if g == nil || g.Price == nil {
+		return 0
 	}
-	return 0
+	return g.Price(w, e)
 }
 
 // aiManageDebt borrows to cover a maintenance shortfall and repays out of a
@@ -1037,7 +1024,7 @@ func industryMountainBoost(r RegionMix) (num, den int) {
 // ~24%, rounding the mountain boost to whole percent loses up to 0.3%, and
 // truncating instead of rounding is off by one unit whenever the fraction
 // exceeds a half (which is what the 1086-industrial live sample caught).
-func (w *World) ProjectedProduction(e *Empire) [6]int {
+func (w *World) ProjectedProduction(e *Empire) []int {
 	boostNum, boostDen := industryMountainBoost(e.Regions)
 	made := func(name string, pct, cost int) int {
 		spec := 100
@@ -1052,14 +1039,11 @@ func (w *World) ProjectedProduction(e *Empire) [6]int {
 		d := int64(cost) * 100 * 100 * int64(boostDen) * TechFactorUnit
 		return int((n + d/2) / d)
 	}
-	return [6]int{
-		made("Troopers", e.ProdTroopers, CostTrooper),
-		made("Jets", e.ProdJets, CostJet),
-		made("Turrets", e.ProdTurrets, CostTurret),
-		made("Bombers", e.ProdBombers, CostBomber),
-		made("Tanks", e.ProdTanks, CostTank),
-		made("Carriers", e.ProdCarriers, CostCarrier),
+	out := make([]int, len(MilitaryGoods))
+	for i, g := range MilitaryGoods {
+		out[i] = made(g.Plural, *g.Prod(e), g.Cost)
 	}
+	return out
 }
 
 // Manufacture converts e's Industrial regions into production points and spends
@@ -1069,15 +1053,9 @@ func (w *World) ProjectedProduction(e *Empire) [6]int {
 // (#71). Industrial GOLD is not credited here — it flows through IncomeThisTurn
 // (see industrialGold).
 func (w *World) Manufacture(e *Empire) {
-
-	p := w.ProjectedProduction(e)
-	e.MadeTroopers, e.MadeJets, e.MadeTurrets = p[0], p[1], p[2]
-	e.MadeBombers, e.MadeTanks, e.MadeCarriers = p[3], p[4], p[5]
-
-	e.Troopers += e.MadeTroopers
-	e.Jets += e.MadeJets
-	e.Turrets += e.MadeTurrets
-	e.Bombers += e.MadeBombers
-	e.Tanks += e.MadeTanks
-	e.Carriers += e.MadeCarriers
+	proj := w.ProjectedProduction(e)
+	for i, g := range MilitaryGoods {
+		*g.Made(e) = proj[i]
+		*g.Count(e) += proj[i]
+	}
 }

@@ -53,7 +53,7 @@ func tradingMarket(s session.Session, w *ctx) Result {
 			continue
 		}
 		fmt.Fprintf(s, "%c\n", r)
-		good := game.MarketGoods[gi]
+		good := game.MarketGoods[gi].Singular
 		fmt.Fprintf(s, "%s[C]%s %s %s[B]%s %s ",
 			ansi.FgBrightCyan, ansi.Reset, tr(s, "Change your setup, or"),
 			ansi.FgBrightCyan, ansi.Reset, tr(s, "Buy from Market:"))
@@ -88,11 +88,9 @@ func printMarketTable(s session.Session, w *ctx) {
 		tr(s, "Key"), tr(s, "Name"), tr(s, "Your Prices"), tr(s, "Owned"),
 		tr(s, "For Sale"), tr(s, "Total For Sale"), ansi.Reset)
 	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), marketRule(), ansi.Reset)
-	for i, good := range game.MarketGoods {
-		owned := 0
-		if f := marketFieldValue(p, good); f >= 0 {
-			owned = f
-		}
+	for i, g := range game.MarketGoods {
+		good := g.Singular
+		owned := game.GoodCount(p, good)
 		fmt.Fprintf(s, "%s(%s%c%s)%s %s%-11s%s%s%19d%s%s%12d%s%s%14d%s%s%17d%s\n",
 			ansi.FgYellow, ansi.FgBrightYellow, marketGoodKeys[i], ansi.FgYellow, ansi.Reset,
 			ansi.FgWhite, marketDisplayName(s, good), ansi.Reset,
@@ -130,7 +128,7 @@ func sellerRule() string { return insetRule(sellerRuleWidth, sellerRuleDouble) }
 // SetMarketListing.
 func marketChangeSetup(s session.Session, w *ctx, good string) {
 	p := w.Player()
-	max := marketFieldValue(p, good) + w.MarketForSale(p.Name, good)
+	max := game.GoodCount(p, good) + w.MarketForSale(p.Name, good)
 	qty := promptSuggested(s, fmt.Sprintf(tr(s, "New amount of %s for sale"), tr(s, good)), w.MarketForSale(p.Name, good), max)
 	// A per-unit price is held in count width, so it is bounded by what one
 	// transaction may move rather than by what a treasury may hold.
@@ -210,28 +208,4 @@ func marketDisplayName(s session.Session, good string) string {
 		return "*" + tr(s, good)
 	}
 	return tr(s, good)
-}
-
-// marketFieldValue returns p's inventory count for a market good, or -1 if the
-// good is not tradeable (matches game.marketField, exposed for the menu).
-func marketFieldValue(p *game.Empire, good string) int {
-	switch good {
-	case "Trooper":
-		return p.Troopers
-	case "Jet":
-		return p.Jets
-	case "Turret":
-		return p.Turrets
-	case "Bomber":
-		return p.Bombers
-	case "Food":
-		return p.Food
-	case "Agent":
-		return p.Agents
-	case "Tank":
-		return p.Tanks
-	case "Carrier":
-		return p.Carriers
-	}
-	return -1
 }

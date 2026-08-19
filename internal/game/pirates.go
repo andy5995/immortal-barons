@@ -241,20 +241,39 @@ var pirateSpoilWeights = [16]pirateDraw{
 	{Spoil: SpoilAgents, FromMarket: true},
 }
 
+// Good is the table row a spoil takes from, and nil for gold — which is not a
+// holding anyone trades. Both the raid's own bookkeeping and the front-end's
+// wording go through here, so the enum and the names cannot fall out of step.
+func (s PirateSpoil) Good() *Good {
+	switch s {
+	case SpoilTroopers:
+		return Trooper
+	case SpoilJets:
+		return Jet
+	case SpoilTurrets:
+		return Turret
+	case SpoilTanks:
+		return Tank
+	case SpoilAgents:
+		return Agent
+	}
+	return nil
+}
+
+// Label is what a raid notice calls the spoil, in English for the front-end to
+// translate.
+func (s PirateSpoil) Label() string {
+	if g := s.Good(); g != nil {
+		return g.Plural
+	}
+	return "Gold"
+}
+
 // marketGood is the Trading Market good a spoil is listed under, or "" for gold
 // (which is not traded).
 func (s PirateSpoil) marketGood() string {
-	switch s {
-	case SpoilTroopers:
-		return "Trooper"
-	case SpoilJets:
-		return "Jet"
-	case SpoilTurrets:
-		return "Turret"
-	case SpoilTanks:
-		return "Tank"
-	case SpoilAgents:
-		return "Agent"
+	if g := s.Good(); g != nil {
+		return g.Singular
 	}
 	return ""
 }
@@ -289,19 +308,8 @@ func (w *World) pirateRaidVictim(slot int, v *Empire) {
 		if l := w.marketListing(v.Name, draw.Spoil.marketGood()); l != nil {
 			src = &l.Qty
 		}
-	} else {
-		switch draw.Spoil {
-		case SpoilTroopers:
-			src = &v.Troopers
-		case SpoilJets:
-			src = &v.Jets
-		case SpoilTurrets:
-			src = &v.Turrets
-		case SpoilTanks:
-			src = &v.Tanks
-		case SpoilAgents:
-			src = &v.Agents
-		}
+	} else if g := draw.Spoil.Good(); g != nil {
+		src = g.Count(v)
 	}
 
 	var took int64

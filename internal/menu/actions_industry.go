@@ -9,15 +9,30 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-// prodTypeNames and prodField describe the rows of the Set Industries screen in
-// the order the player sees them: the 6 unit types Industrial regions can build,
-// then Gold. Gold is last and starts at 0 — capacity left unallocated pays gold
-// anyway, so the row is for reserving it deliberately.
-var prodTypeNames = []string{"Troopers", "Jets", "Turrets", "Bombers", "Tanks", "Carriers", "Gold"}
+// prodRow is one row of the Set Industries screen: a label and the percentage
+// field it sets. The rows are the units Industrial regions build, in
+// game.MilitaryGoods order — the same order ProjectedProduction returns, so row
+// i's projection is projection i — then Gold. Gold is last and starts at 0:
+// capacity left unallocated pays gold anyway, so the row is for reserving it
+// deliberately.
+type prodRow struct {
+	name  string
+	field func(*game.Empire) *int
+}
+
+// prodRows builds the screen's rows from the canonical unit table (#134), so a
+// row can never come to label a different field than it sets.
+func prodRows() []prodRow {
+	rows := make([]prodRow, 0, prodUnitCount+1)
+	for _, g := range game.MilitaryGoods {
+		rows = append(rows, prodRow{g.Plural, g.Prod})
+	}
+	return append(rows, prodRow{"Gold", func(e *game.Empire) *int { return &e.ProdGold }})
+}
 
 // prodUnitCount is how many of those rows are units, and so how many have a
 // per-year production figure. Gold sits past the end of ProjectedProduction.
-const prodUnitCount = 6
+var prodUnitCount = len(game.MilitaryGoods)
 
 // industryRuleWidth is the width of the Industrial Production box. BRE sizes
 // every menu box to its own content rather than to one house width — its
@@ -42,14 +57,6 @@ func industryRule() string {
 	return closingRule(industryAccent, industryRuleWidth)
 }
 
-func prodField(p *game.Empire, idx int) *int {
-	fields := []*int{
-		&p.ProdTroopers, &p.ProdJets, &p.ProdTurrets, &p.ProdBombers, &p.ProdTanks, &p.ProdCarriers,
-		&p.ProdGold,
-	}
-	return fields[idx]
-}
-
 // setIndustries lets the player set the percentage of Industrial production
 // points spent on each unit type. Percentages need not sum to 100; capacity not
 // allocated to units is paid out as gold (BRE's trade-off — see industrialGold).
@@ -58,13 +65,15 @@ func setIndustries(s session.Session, w *ctx) Result {
 	proj := w.ProjectedProduction(p)
 	fmt.Fprintf(s, "\n%s\n", titleRule(industryAccent, tr(s, "Industrial Production"), industryRuleWidth))
 	allocated := 0
-	for i, name := range prodTypeNames {
-		allocated += *prodField(p, i)
+	rows := prodRows()
+	for i, row := range rows {
+		pct := *row.field(p)
+		allocated += pct
 		// Columns match BRE's capture: the colon at 16, the figure's paren at 29.
-		fmt.Fprintf(s, "%-16s: %s%3d%%%s", tr(s, name), ansi.FgBrightYellow, *prodField(p, i), ansi.Reset)
+		fmt.Fprintf(s, "%-16s: %s%3d%%%s", tr(s, row.name), ansi.FgBrightYellow, pct, ansi.Reset)
 		// Units come from the projection; the Gold row asks the same function
 		// that will pay it, so the figure shown is the one credited.
-		per := w.ProjectedIndustrialGold(p, *prodField(p, i))
+		per := w.ProjectedIndustrialGold(p, pct)
 		if i < prodUnitCount {
 			per = proj[i]
 		}
@@ -72,7 +81,7 @@ func setIndustries(s session.Session, w *ctx) Result {
 		// The original tags the specialized row at the end of the line, where it
 		// wrote "Specialized"; three spaced asterisks say the same thing without
 		// a word to translate or to run past the margin.
-		if p.Specialized == name {
+		if p.Specialized == row.name {
 			fmt.Fprintf(s, "  %s* * *%s", ansi.FgBrightYellow, ansi.Reset)
 		}
 		fmt.Fprint(s, "\n")
@@ -90,28 +99,28 @@ func setIndustries(s session.Session, w *ctx) Result {
 	// Unlike BRE, the suggested value is the CURRENT % (clamped to what's left),
 	// so pressing Enter keeps a unit unchanged instead of zeroing it (a deliberate
 	// UX improvement — see the Set Industries note in docs/mechanics-reference.md).
-	ns := make([]int, len(prodTypeNames))
+	ns := make([]int, len(rows))
 	remaining := 100
 	// Pad every unit label to the widest (rune-based, so translations line up too)
 	// and right-align the numbers, so the input column lines up down the list.
 	labelW := 0
-	for _, name := range prodTypeNames {
-		if wdt := utf8.RuneCountInString(tr(s, name)); wdt > labelW {
+	for _, row := range rows {
+		if wdt := utf8.RuneCountInString(tr(s, row.name)); wdt > labelW {
 			labelW = wdt
 		}
 	}
 	fmt.Fprint(s, "\n") // one blank line after "Change Production? y", then the units follow consecutively
-	for i, name := range prodTypeNames {
-		cur := *prodField(p, i)
+	for i, row := range rows {
+		cur := *row.field(p)
 		if cur > remaining {
 			cur = remaining
 		}
-		ns[i] = promptProduction(s, tr(s, name), labelW, cur, remaining)
+		ns[i] = promptProduction(s, tr(s, row.name), labelW, cur, remaining)
 		remaining -= ns[i]
 	}
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		for i, n := range ns {
-			*prodField(p, i) = n
+			*rows[i].field(p) = n
 		}
 		return nil
 	})
@@ -136,8 +145,8 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 	// Units only. Gold is a row on Set Industries but not a unit, and there is
 	// nothing for a specialization's efficiency modifier to apply to.
 	items := make([]string, 0, prodUnitCount+1)
-	for i, name := range prodTypeNames[:prodUnitCount] {
-		items = append(items, fmt.Sprintf("  %d) %s", i+1, tr(s, name)))
+	for i, g := range game.MilitaryGoods {
+		items = append(items, fmt.Sprintf("  %d) %s", i+1, tr(s, g.Plural)))
 	}
 	items = append(items, fmt.Sprintf("  0) %s", tr(s, "Quit")))
 	width := specializationRuleWidth
@@ -168,7 +177,7 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 			already = true
 			return nil
 		}
-		p.Specialized = prodTypeNames[t-1]
+		p.Specialized = game.MilitaryGoods[t-1].Plural
 		return nil
 	})
 	if err != nil {
@@ -179,6 +188,6 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 		ok(s, "Your industry is already specialized.")
 		return Stay
 	}
-	ok(s, "Your industry is now permanently specialized in %s.", prodTypeNames[t-1])
+	ok(s, "Your industry is now permanently specialized in %s.", game.MilitaryGoods[t-1].Plural)
 	return Stay
 }

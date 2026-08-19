@@ -502,22 +502,25 @@ type bombTarget struct {
 	roundsUp bool
 }
 
+// bombGood is a target that is one of the canonical goods (#134), so its name
+// and its accessor come from the table rather than being spelled out again.
+func bombGood(g *Good, base, spread int, roundsUp bool) bombTarget {
+	return bombTarget{g.Plural, base, spread,
+		func(e *Empire) int { return *g.Count(e) },
+		func(e *Empire, v int) { *g.Count(e) = v }, roundsUp}
+}
+
 // bombTargets is BRE's six-slot table, in its roll order: Random(6)+1 indexes
 // straight into it. The player picks nothing.
 func bombTargets() []bombTarget {
 	return []bombTarget{
 		{"People", BombTargetPeoplePctBase, BombTargetPeoplePctSpread,
 			func(e *Empire) int { return e.People }, func(e *Empire, v int) { e.People = v }, false},
-		{"Troopers", BombTargetTrooperPctBase, BombTargetTrooperPctSpread,
-			func(e *Empire) int { return e.Troopers }, func(e *Empire, v int) { e.Troopers = v }, false},
-		{"Agents", BombTargetAgentPctBase, BombTargetAgentPctSpread,
-			func(e *Empire) int { return e.Agents }, func(e *Empire, v int) { e.Agents = v }, false},
-		{"Tanks", BombTargetTankPctBase, BombTargetTankPctSpread,
-			func(e *Empire) int { return e.Tanks }, func(e *Empire, v int) { e.Tanks = v }, false},
-		{"Jets", BombTargetJetPctBase, BombTargetJetPctSpread,
-			func(e *Empire) int { return e.Jets }, func(e *Empire, v int) { e.Jets = v }, false},
-		{"Food", BombTargetFoodPctBase, BombTargetFoodPctSpread,
-			func(e *Empire) int { return e.Food }, func(e *Empire, v int) { e.Food = v }, true},
+		bombGood(Trooper, BombTargetTrooperPctBase, BombTargetTrooperPctSpread, false),
+		bombGood(Agent, BombTargetAgentPctBase, BombTargetAgentPctSpread, false),
+		bombGood(Tank, BombTargetTankPctBase, BombTargetTankPctSpread, false),
+		bombGood(Jet, BombTargetJetPctBase, BombTargetJetPctSpread, false),
+		bombGood(Food, BombTargetFoodPctBase, BombTargetFoodPctSpread, true),
 	}
 }
 
@@ -582,17 +585,16 @@ type slappenheimerResource struct {
 	val  *int
 }
 
+// slappenheimerResources are the plain-count assets the missile can hit, taken
+// from the canonical table (#134) rather than listed again here. Land and gold
+// are handled apart by slappenheimerDamage — one goes through the RegionMix and
+// the other is money-width.
 func slappenheimerResources(e *Empire) []slappenheimerResource {
-	return []slappenheimerResource{
-		{"Troopers", &e.Troopers},
-		{"Jets", &e.Jets},
-		{"Turrets", &e.Turrets},
-		{"Tanks", &e.Tanks},
-		{"Bombers", &e.Bombers},
-		{"Carriers", &e.Carriers},
-		{"Agents", &e.Agents},
-		{"Food", &e.Food},
+	res := make([]slappenheimerResource, 0, len(AllGoods))
+	for _, g := range AllGoods {
+		res = append(res, slappenheimerResource{g.Plural, g.Count(e)})
 	}
+	return res
 }
 
 // slappenheimerDamage applies a landed R5-Slappenheimer hit to e and returns a

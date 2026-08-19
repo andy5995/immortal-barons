@@ -1354,8 +1354,9 @@ func (w *World) NetWorth(e *Empire) int {
 	// int64 intermediate: e.Land*12500 (and the unit terms) overflow int32 on a
 	// 32-bit build for a large realm. Weights are BRE-exact and unchanged; only
 	// the arithmetic is widened. Storage/return stay int.
-	thou := int64(e.Land)*NetWorthLand +
-		int64(e.Troopers)*NetWorthTrooper + int64(e.Jets)*NetWorthJet + int64(e.Turrets)*NetWorthTurret + int64(e.Bombers)*NetWorthBomber +
-		int64(e.Agents)*NetWorthAgent + int64(e.Tanks)*NetWorthTank + int64(e.Carriers)*NetWorthCarrier
+	thou := int64(e.Land) * NetWorthLand
+	for _, g := range AllGoods {
+		thou += int64(*g.Count(e)) * g.NetWorth
+	}
 	return int(thou / 1000)
 }

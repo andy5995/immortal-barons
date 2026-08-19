@@ -134,18 +134,17 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   figures, penalties — all of it. When you add a mechanic, put its numbers in
   the data file (with a one-line provenance comment) and reference them by
   name. Only structural literals (`0`, `1`, `100` for percent math) stay inline.
-- **There is no canonical unit table — reuse an existing list, don't add another
-  (#134).** The unit set is enumerated independently in a dozen places
-  (`MarketGoods`, `prodTypeNames`, `pirateSpoilNames`, `slappenheimerResources`,
-  the trade and Buy Military tables, …), in several orders and two naming forms:
-  singular `"Trooper"` in the market code, plural `"Troopers"` everywhere else.
-  Two pairs are coupled by position — `prodTypeNames[i]` with `prodField(p, i)`,
-  and `pirateSpoilNames` with the `PirateSpoil` enum in another package — so
-  reordering one half silently mislabels the other, and `industry_test.go`
-  asserts through raw indices (`want[4]` is tanks). The names are identity keys
-  as well as labels: `Empire.Specialized` is persisted and compared with `==`,
-  and `marketField` switches on the singular form, so they stay English and
-  translation happens at render time through `tr()`.
+- **The unit set has ONE table: `internal/game/units.go` (#134).** A screen that
+  needs the goods declares a slice of those rows — `[]*game.Good{Trooper, Jet,
+  …}` in its own order — and reads names and fields through the row (`Plural`,
+  `Count`, `Prod`, `Made`, `Basket`, `Price`). Never restate the set as string
+  literals, and never pair two lists by index: that is what this replaced, and
+  it had `prodTypeNames[i]` labelling `prodField(p, i)` with nothing checking
+  them. Both naming forms are on the row because both are identity keys:
+  `Empire.Specialized` persists the plural and `==`-compares it, a market
+  listing persists the singular. They stay English; `tr()` translates at render
+  time. Buy Military and Sell (`menu/tree.go`) are still hand-written menu
+  items — their per-unit actions are not in the table.
 - Tests use a scripted fake `Session` (see `internal/menu/menu_test.go`) and
   a fixed RNG seed via `game.NewSeed` for determinism.
 - **A scripted key sequence must assert it REACHED the screen it tests.** When

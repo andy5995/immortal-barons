@@ -42,25 +42,32 @@ type TradeBasket struct {
 // IsEmpty reports whether the basket holds nothing.
 func (b TradeBasket) IsEmpty() bool { return b == TradeBasket{} }
 
-// goodPtrs returns pointers to an empire's fields for each basket good, in a
-// fixed order, so add/subtract/ownership can loop uniformly.
+// goodPtrs returns pointers to an empire's fields for each basket good, and
+// basketPtrs to a basket's own amounts. Both walk MarketGoods, so index i is
+// the same good in each without either restating the set (#134).
 // Gold is not among them: it is the one basket good held in money width, so the
 // three routines below handle it beside the loop rather than inside it.
-func goodPtrs(e *Empire) [8]*int {
-	return [8]*int{&e.Troopers, &e.Jets, &e.Turrets, &e.Bombers, &e.Food, &e.Agents, &e.Tanks, &e.Carriers}
+func goodPtrs(e *Empire) []*int {
+	ptrs := make([]*int, len(MarketGoods))
+	for i, g := range MarketGoods {
+		ptrs[i] = g.Count(e)
+	}
+	return ptrs
 }
 
-// basketPtrs returns pointers to a basket's amounts in the same fixed order as
-// goodPtrs, so a caller can rewrite them uniformly. Gold is left out for the
-// same reason it is left out there.
-func basketPtrs(b *TradeBasket) [8]*int {
-	return [8]*int{&b.Troopers, &b.Jets, &b.Turrets, &b.Bombers, &b.Food, &b.Agents, &b.Tanks, &b.Carriers}
+func basketPtrs(b *TradeBasket) []*int {
+	ptrs := make([]*int, len(MarketGoods))
+	for i, g := range MarketGoods {
+		ptrs[i] = g.Basket(b)
+	}
+	return ptrs
 }
 
-// basketVals returns a basket's amounts in the same fixed order as goodPtrs.
-func basketVals(b TradeBasket) [8]int {
-	var vals [8]int
-	for i, p := range basketPtrs(&b) {
+// basketVals returns a basket's amounts in the same order as goodPtrs.
+func basketVals(b TradeBasket) []int {
+	ptrs := basketPtrs(&b)
+	vals := make([]int, len(ptrs))
+	for i, p := range ptrs {
 		vals[i] = *p
 	}
 	return vals

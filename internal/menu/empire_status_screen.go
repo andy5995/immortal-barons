@@ -115,17 +115,13 @@ func empireStatusBlock(s session.Session, w *ctx) string {
 	// and their continuations line up, which is what the original's fixed
 	// ten-column prefixes do in English.
 	milLabel, indent := statusRowPrefix(s, "Military")
-	military := []struct {
-		label string
-		n     int
-	}{
-		{"Troopers", p.Troopers}, {"Jets", p.Jets}, {"Turrets", p.Turrets},
-		{"Tanks", p.Tanks}, {"Bombers", p.Bombers}, {"Carriers", p.Carriers},
-	}
+	// The status screen's own order, which is not the Set Industries one —
+	// hence a slice of the canonical rows rather than a re-use of MilitaryGoods.
+	military := []*game.Good{game.Trooper, game.Jet, game.Turret, game.Tank, game.Bomber, game.Carrier}
 	var cells []statusItem
-	for _, u := range military {
-		if u.n > 0 {
-			cells = append(cells, statusCell(count(u.n), tr(s, u.label)))
+	for _, g := range military {
+		if n := *g.Count(&p); n > 0 {
+			cells = append(cells, statusCell(count(n), tr(s, g.Plural)))
 		}
 	}
 	if len(cells) == 0 {
