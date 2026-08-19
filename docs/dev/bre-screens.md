@@ -2136,6 +2136,26 @@ neighbour, and its own Player List sat on `4`, View Diplomacy's key. Key `1` is
 now deliberately empty until Dismantle Gooie is built (#114), and Player List
 has moved to `5`, past the original's four.
 
+**The Coordinator gets no player list in the original.** The two coordinator
+roles are different offices: the **BBS Coordinator** whose menu this is was
+elected by the planet's own barons and is an ordinary player, while the
+**League Coordinator** operates the coordinating board. Neither implies the
+other, and neither implies a sysop — a board's operator may be playing or may
+not be, so "the sysop knows the handles anyway" is no argument for handing them
+to whoever wins an election.
+
+BRE's player list belongs to the second: `PLAYERLIST`, a command-line switch its
+manual documents as "for League Coordinators only", writing `PLAYERS.LST` from
+`DATA\DUPE.BR`, the duplicate-user file. That file is the only place a caller's
+BBS account name is printed anywhere near the game. No screen shows one. The
+empire record holds the BBS name at +0x00 and the realm name at +0x1f (both
+`String[30]`, proven against a live `game.dat` where a caller `WRAPTEST` holds a
+realm `Wraptest`), and See Scores, the coordinator vote and the interplanetary
+Player Information screen all print +0x1f — as does the recon packet, whose
+`PlanetInfo.Names` `build_recon_record` fills from the same field, so a realm's
+owner never crosses to another planet either. IB's Player List carried an Owner
+column of BBS handles until 2026-08-18; it now names realms only.
+
 So the menu **item** is `Modify Diplomacy`; `Diplomacy Modification` is the title
 of the screen it opens.
 

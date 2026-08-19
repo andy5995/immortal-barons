@@ -634,11 +634,21 @@ func foodMarketStr(s session.Session, c game.Config) string {
 // names down to seven characters to make room.
 const playerListNameWidth = 25
 
+// It names realms, never the callers behind them. BRE prints a player's BBS
+// account name in exactly one place — PLAYERS.LST, written by the PLAYERLIST
+// command line, which its manual restricts to the League Coordinator. That is
+// a BOARD's operator, running a DOS command, and need not be playing at all;
+// the BBS Coordinator this menu belongs to is an elected PLAYER with no
+// standing on anyone's system. No screen in the game shows one: the empire record
+// carries the BBS name at +0x00 and the realm name at +0x1f, and See Scores,
+// the coordinator vote and the interplanetary Player Information screen all
+// print +0x1f, as does the recon packet's own name array. This screen listed
+// an Owner column of handles until 2026-08-18.
 func playerList(s session.Session, w *ctx) Result {
 	type row struct {
-		name, owner string
-		presence    string
-		land, nw    int
+		name     string
+		presence string
+		land, nw int
 	}
 	var rows []row
 	w.With(func() {
@@ -647,19 +657,15 @@ func playerList(s session.Session, w *ctx) Result {
 				continue
 			}
 			self := e == w.Player()
-			rows = append(rows, row{e.Name, e.Owner, presenceOf(e, self, w.Today), e.Land, w.NetWorth(e)})
+			rows = append(rows, row{e.Name, presenceOf(e, self, w.Today), e.Land, w.NetWorth(e)})
 		}
 	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightBlue, tr(s, "Player List"), ansi.Reset)
-	fmt.Fprintf(s, "  %-*s %-14s %-8s %s\n", playerListNameWidth, tr(s, "Empire"), tr(s, "Owner"), tr(s, "Land"), tr(s, "Net Worth"))
+	fmt.Fprintf(s, "  %-*s %-8s %s\n", playerListNameWidth, tr(s, "Empire"), tr(s, "Land"), tr(s, "Net Worth"))
 	for _, r := range rows {
-		owner := r.owner
-		if owner == "" {
-			owner = tr(s, "(AI)")
-		}
-		// The suffix rides in the name column, so the roster that names who owns
-		// each realm also says who is on without moving the columns beside it.
-		fmt.Fprintf(s, "  %s %-14s %-8d %d\n", nameCell(s, r.name, "", r.presence, playerListNameWidth), owner, r.land, r.nw)
+		// The suffix rides in the name column, so the roster says who is on
+		// without moving the columns beside it.
+		fmt.Fprintf(s, "  %s %-8d %d\n", nameCell(s, r.name, "", r.presence, playerListNameWidth), r.land, r.nw)
 	}
 	pause(s)
 	return Stay

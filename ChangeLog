@@ -1,4 +1,7 @@
 (in-progress:)
+  * The Coordinator's Player List no longer shows the BBS account name behind
+    each realm. The original prints one only in a file a sysop creates, never
+    on a screen
   * The ballot for BBS Coordinator lists every realm again. Realms under
     new-realm protection were left off it, so early in a game a voter was the
     only candidate on their own ballot (issue #149)

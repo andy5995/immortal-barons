@@ -52,3 +52,18 @@ func ballotChoice(w *ctx, want *game.Empire) string {
 	return string(rune('0' + n))
 }
 
+// The Player List names realms, not the callers behind them — BRE prints a BBS
+// account name only in the sysop's PLAYERS.LST, never on a screen.
+func TestPlayerListDoesNotShowBBSHandles(t *testing.T) {
+	w := leagueCtx(t)
+	w.AddHuman("bravo", "Bravo")
+
+	f := drive(t, w, " ", playerList)
+	out := f.out.String()
+	if !strings.Contains(out, "Bravo") {
+		t.Fatalf("the roster should list the realm, got %q", out)
+	}
+	if strings.Contains(out, "bravo") || strings.Contains(out, "tester") {
+		t.Errorf("the roster names a caller's BBS handle: %q", out)
+	}
+}
