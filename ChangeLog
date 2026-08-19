@@ -1,4 +1,5 @@
 (in-progress:)
+  * The ChangeLog ships in the release and snapshot archives
   * Send SpyGuy now works as the original's does: a watcher posted on a planet
     for a number of days, paid for in gold by the day rather than with an agent,
     who reports group attacks and Clingy Annihilators aimed at your planet into
