@@ -3194,10 +3194,31 @@ planets.)" So:
 One thing reads it rather than displaying it: **Allied Planets** on the IP
 Messages menu addresses the planets it calls Allied.
 
-IB implements all of this. Two things are not established from the original: the
+### Electing the BBS Coordinator — BINARY-VERIFIED
+
+The Coordinator is elected by the planet's own barons, from the System Menu's
+**Coordinator Vote** (`5`), and the vote may be changed at any time.
+
+- **A baron still under new-realm protection cannot vote.** BRE draws the menu
+  item only after the protection predicate clears the caller
+  (`show_game_settings`, the guard at `BRE.OVR` unit `ovr_013753` +0x082f).
+- **Every realm holding a slot is a candidate — protected realms included, and
+  yourself.** The ballot is the shared realm picker
+  (`choose_target_empire`, `BRE.OVR` 0x01aa99), which builds its key set from
+  one test, the slot's player id > 0. Its two extra filters — the target's net
+  worth must be positive, and the target must not be protected — ride an
+  argument the vote passes as 0, and the exclude-yourself branch rides another
+  it passes as 1. **IB excluded protected realms until 2026-08-18**, which in a
+  young game left a voter with only their own realm on the ballot (#149).
+- The office goes to the living realm with the most votes; IB breaks a tie by
+  net worth, which the original does not state.
+
+IB implements all of this. One thing is not established from the original: the
 color it prints **Enemy** in (the capture only ever showed the other three, so
-IB infers bright red), and which hotkey on BRE's eight-item Coordinator Ops menu
-opens the screen (IB uses `D`). A new season clears the chart, since the
+IB infers bright red). The hotkey is settled — BRE's Coordinator Ops menu has
+**four** items keyed `1`-`4` and this screen is `2` (see the table in
+`docs/dev/bre-screens.md`); the "eight-item menu, IB uses `D`" this file used to
+record came from the same misread string that section corrects. A new season clears the chart, since the
 Coordinator who filed it is cleared with every other empire.
 
 ### Quoting a reply

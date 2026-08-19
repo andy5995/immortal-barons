@@ -1040,9 +1040,19 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 	var coordinatorName string
 	w.With(func() {
 		for _, e := range w.Empires {
-			// Realms still under new-realm protection are not eligible candidates
-			// (BRE). Voting for yourself is allowed once your own protection ends.
-			if !e.Alive || e.Owner == "" || e.Protection > 0 {
+			// Every realm holding a slot is a candidate, protected ones included,
+			// and so are you (#149). BRE builds the picker's key set in
+			// choose_target_empire (BRE.OVR 0x01aa99) from one test — the slot's
+			// player id > 0 — and its two extra filters are both switched OFF for
+			// this call: the net-worth and protection checks ride an argument the
+			// vote passes as 0, and the exclude-yourself branch rides another it
+			// passes as 1. IB filtered out protected realms, which in a young game
+			// is every realm but the voter's own.
+			//
+			// The voter's OWN protection is a separate gate, and BRE does have it:
+			// show_game_settings draws the Coordinator Vote item only when the
+			// protection predicate says the caller is clear (see tree.go).
+			if !e.Alive || e.Owner == "" {
 				continue
 			}
 			owners = append(owners, e.Owner)
