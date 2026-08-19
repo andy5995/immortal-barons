@@ -715,6 +715,10 @@ type World struct {
 	// #63).
 	Annihilator *Annihilator
 	Incoming    *Annihilator
+	// SpyGuys counts, per foreign planet, the game days a watcher of theirs has
+	// left here. It is the WATCHED board that holds this — the planet paying for
+	// the man keeps no record of him at all, which is BRE's arrangement.
+	SpyGuys map[string]int `json:",omitempty"`
 
 	// League packet authentication (#53). CoordKey is the ed25519 private key,
 	// held only by the Coordinator's board; CoordPub is the matching public key,

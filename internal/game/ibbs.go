@@ -53,6 +53,13 @@ type Packet struct {
 	Annihilator  *AnnihilatorStatus // a doomsday weapon aimed at ToBoard (#63)
 	TimeChecks   []TimeCheck        // round-trip probes, out and echoed back (Travel Times)
 	IPMessages   []IPMessage        // interplanetary mail for ToBoard's barons
+	// SpyGuys are watchers posted TO ToBoard, and News the lines they send home:
+	// a SpyGuy's report is planet news on the planet that paid for him, which is
+	// what BRE's NEWS_DATA record makes it. Both omitempty for the reason the
+	// trading fields below give — an older board must still verify a packet that
+	// carries neither.
+	SpyGuys []SpyGuyDispatch `json:",omitempty"`
+	News    []string         `json:",omitempty"`
 	// Interplanetary trading (IB's own). All three are omitempty ON PURPOSE: the
 	// origin signature is taken over the marshalled packet, so a board too old to
 	// know these fields would drop them on unmarshal and then fail to verify a
@@ -129,6 +136,10 @@ func (p Packet) PacketType() string {
 		return "time checks"
 	case len(p.IPMessages) > 0:
 		return "ip messages"
+	case len(p.SpyGuys) > 0:
+		return "spyguys"
+	case len(p.News) > 0:
+		return "news"
 	case len(p.TradeBids) > 0 || len(p.TradeFills) > 0:
 		return "trade"
 	case len(p.Market) > 0:
@@ -148,6 +159,7 @@ func (p Packet) HasPayload() bool {
 		len(p.SpecialOps) > 0 ||
 		len(p.Results) > 0 || len(p.Recon) > 0 || len(p.ReconReports) > 0 ||
 		len(p.TimeChecks) > 0 || len(p.IPMessages) > 0 ||
+		len(p.SpyGuys) > 0 || len(p.News) > 0 ||
 		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 || p.Notice != "" ||
 		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Annihilator != nil || p.Reset != nil
 }
@@ -791,7 +803,11 @@ func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, h
 		DepartAt:     DepartureAfter(time.Now(), hours),
 		Contributors: []Contribution{{Owner: e.Owner, AttackForce: f}},
 	})
-	return &w.GroupAttacks[len(w.GroupAttacks)-1], nil
+	g := &w.GroupAttacks[len(w.GroupAttacks)-1]
+	// A watcher from the target planet sees the force assembling and sends the
+	// hours home — the whole reason his planet paid for him.
+	w.reportToSpy(targetBoard, groupAttackSpyLine(w.Config.BoardID, *g))
+	return g, nil
 }
 
 // CreateIndividualAttack sends one baron's detachment against one named remote
@@ -1221,6 +1237,16 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	}
 	// A probe naming us goes straight back; one of ours coming home is measured.
 	result.TimeChecks = w.applyTimeChecks(p.TimeChecks)
+	// A watcher posted here settles in and answers at once with whatever this
+	// planet already has aimed at his; his own reports go out later, as the
+	// strikes are prepared. News coming the other way IS his report — it is
+	// planet news here, which is what the original's NEWS_DATA record makes it.
+	for _, d := range p.SpyGuys {
+		w.receiveSpyGuy(d)
+	}
+	for _, line := range p.News {
+		w.postNews(line)
+	}
 	// Scouting asked of us: answer with what is true here and now.
 	for _, req := range p.Recon {
 		// An empty TargetEmpire is a GLOBAL request — the Coordinator's sweep of
@@ -1231,36 +1257,28 @@ func (w *World) ApplyPacket(p Packet) Packet {
 				if !e.Alive || e.Owner == "" {
 					continue
 				}
-				result.ReconReports = append(result.ReconReports, SpyReport{
-					Board:   w.Config.BoardID,
-					Empire:  e.Name,
-					Date:    w.LastMaintDate,
-					Land:    e.Land,
-					Offense: e.Offense(),
-					Defense: e.Defense(),
-					Gold:    e.Gold,
-				})
+				result.ReconReports = append(result.ReconReports, w.spyReport(e))
 			}
 			continue
 		}
 		if e := w.remoteTarget(req.TargetEmpire); e != nil {
-			result.ReconReports = append(result.ReconReports, SpyReport{
-				Board:   w.Config.BoardID,
-				Empire:  e.Name,
-				Date:    w.LastMaintDate,
-				Land:    e.Land,
-				Offense: e.Offense(),
-				Defense: e.Defense(),
-				Gold:    e.Gold,
-			})
+			result.ReconReports = append(result.ReconReports, w.spyReport(e))
 			e.addEvent("Foreign agents were seen taking an interest in your realm.")
 		}
 	}
 	for _, atk := range p.Attacks {
 		result.Results = append(result.Results, w.resolveRemoteAttack(atk))
 	}
+	// A covert operation landing here reports the state it found its target in,
+	// and that is what fills the sender's Spy Database — the original's own
+	// arrangement, where resolve_received_covert_operation calls write_spy_report
+	// and the answer reaches the sender as "Information added to Global Spy Data
+	// Bank". Intelligence is a by-product of acting, not an errand of its own.
 	for _, t := range p.Terrors {
 		result.Results = append(result.Results, w.resolveRemoteTerror(t))
+		if e := w.remoteTarget(t.TargetEmpire); e != nil {
+			result.ReconReports = append(result.ReconReports, w.spyReport(e))
+		}
 	}
 	for _, op := range p.SpecialOps {
 		result.Results = append(result.Results, w.resolveRemoteSpecialOp(op))
@@ -1494,22 +1512,19 @@ func (w *World) ReturnLostForces() int {
 	return recovered
 }
 
-// SendRecon queues a scouting request at targetEmpire on targetBoard, spending
-// one of e's agents. The answer arrives with a later packet and lands in the
-// planet-wide Spy Database (#61).
-func (w *World) SendRecon(e *Empire, targetBoard, targetEmpire string) error {
-	if e.Agents < 1 {
-		return ErrNoAgents
+// spyReport is what this board tells another about one of its realms: the
+// figures as they stand right now, which is what separates a spy's word from
+// the shared score table.
+func (w *World) spyReport(e *Empire) SpyReport {
+	return SpyReport{
+		Board:   w.Config.BoardID,
+		Empire:  e.Name,
+		Date:    w.LastMaintDate,
+		Land:    e.Land,
+		Offense: e.Offense(),
+		Defense: e.Defense(),
+		Gold:    e.Gold,
 	}
-	if targetEmpire == "" {
-		return ErrNoTarget
-	}
-	e.Agents--
-	w.NextAttackID++
-	req := ReconRequest{ID: w.NextAttackID, FromBoard: w.Config.BoardID, FromOwner: e.Owner, TargetEmpire: targetEmpire}
-	p := w.outboxFor(targetBoard)
-	p.Recon = append(p.Recon, req)
-	return nil
 }
 
 // GlobalReconRequest is the Coordinator Ops menu's own scouting sweep (#48):
@@ -1558,6 +1573,16 @@ func (w *World) ExportAnnihilatorStatus() {
 		return
 	}
 	d := w.Annihilator
+	// A weapon still on the ground is the builders' own business. The target
+	// learns of it only through a SpyGuy posted here — BRE's "destined for our
+	// planet is under construction at ..." belongs to show_gooie_arrival_time,
+	// whose only caller is the SPY_GUY receiver, and the funding and dismantle
+	// reports are gated on the target's spy counter as well. IB broadcast the
+	// whole build for free until 2026-08-18, which left the watcher with nothing
+	// to report that his planet did not already know.
+	if !d.Launched {
+		return
+	}
 	w.enqueueAnnihilator(d.TargetBoard, &AnnihilatorStatus{
 		FromBoard:  w.Config.BoardID,
 		Funded:     d.Funded,

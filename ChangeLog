@@ -1,4 +1,16 @@
 (in-progress:)
+  * Send SpyGuy now works as the original's does: a watcher posted on a planet
+    for a number of days, paid for in gold by the day rather than with an agent,
+    who reports group attacks and Clingy Annihilators aimed at your planet into
+    your planet news. He cannot be caught, and the planet he watches is never
+    told he is there
+  * A Clingy Annihilator under construction is no longer announced to the planet
+    it is aimed at. That planet learns of it from a SpyGuy, or when the weapon
+    launches
+  * The Spy Database is filled by interplanetary covert operations reporting on
+    the realms they strike, as in the original, rather than by a scouting errand
+    of its own
+  * New help topic: Send SpyGuy
   * Messages arriving from another planet no longer appear in the planet news.
     They are delivered to the mailboxes they are addressed to and nowhere else
     (issue #146)

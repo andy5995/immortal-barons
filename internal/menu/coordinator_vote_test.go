@@ -109,3 +109,28 @@ func TestOnlyTheCoordinatorDismantlesTheAnnihilator(t *testing.T) {
 		t.Error("a baron who does not hold the office dismantled the weapon")
 	}
 }
+
+// Send SpyGuy quotes the price per day, asks how long, and charges gold — no
+// agent is spent, and the target is a PLANET rather than a baron. The whole
+// shape is BRE's (see internal/game/spyguy.go).
+func TestSendSpyGuyChargesGoldForDays(t *testing.T) {
+	w := leagueCtx(t)
+	w.Player().Protection = 0
+	w.Player().Gold = 1_000_000_000
+	agents, gold := w.Player().Agents, w.Player().Gold
+	perDay := w.SpyGuyCostPerDay()
+
+	// Pick the first planet by number, then take the default stay.
+	f := drive(t, w, "1\r\r ", sendSpyGuy)
+	out := f.out.String()
+	if !strings.Contains(out, "gold per day") {
+		t.Fatalf("the price per day was never quoted:\n%s", out)
+	}
+	if w.Player().Agents != agents {
+		t.Errorf("a SpyGuy cost %d agents; he is not a covert agent", agents-w.Player().Agents)
+	}
+	want := perDay * int64(game.SpyGuyDefaultDays)
+	if spent := gold - w.Player().Gold; spent != want {
+		t.Errorf("charged %d gold, want %d for the %d-day default", spent, want, game.SpyGuyDefaultDays)
+	}
+}

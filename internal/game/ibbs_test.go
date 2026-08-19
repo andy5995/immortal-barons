@@ -551,47 +551,42 @@ func TestIndividualInterplanetaryAttack(t *testing.T) {
 	}
 }
 
-// Cross-board scouting is a real round trip: the request travels out, the target
-// board answers with figures read on its own side, and the answer lands in the
-// asking board's Spy Database (#61).
-func TestReconRoundTrip(t *testing.T) {
+// Intelligence on another planet's realms is a by-product of acting against
+// them: a covert operation landing there answers with the target's figures as
+// they stand, and that answer fills the sender's Spy Database. BRE does the
+// same — resolve_received_covert_operation calls write_spy_report, and the
+// sender files it under "Information added to Global Spy Data Bank". IB had an
+// errand of its own for this, a per-baron Send Recon that spent an agent and
+// scouted without touching anyone; that was IB's invention and is gone.
+func TestACovertOpBringsBackIntelligence(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.IBBS = true
 	cfg.BoardID = "Wildside"
 	asker := NewWorldSeed(cfg, 1)
 	scout := asker.AddHuman("alice", "Alethia")
-	scout.Agents = 3
+	scout.Agents, scout.Gold, scout.Protection = 5, 10_000_000, 0
 
-	if err := asker.SendRecon(scout, "faraway", "Rome"); err != nil {
-		t.Fatalf("SendRecon: %v", err)
-	}
-	if scout.Agents != 2 {
-		t.Errorf("recon cost %d agents, want 1", 3-scout.Agents)
-	}
-	if len(asker.Outbox) != 1 || len(asker.Outbox[0].Recon) != 1 {
-		t.Fatalf("no recon request was queued: %+v", asker.Outbox)
+	if err := asker.SendTerror(scout, "faraway", "Rome", 2, TerrorOpSpy); err != nil {
+		t.Fatalf("SendTerror: %v", err)
 	}
 
-	// The far board answers from its own state, not from anything the asker sent.
+	// The far board resolves it against its own state and answers from there.
 	farCfg := DefaultConfig()
 	farCfg.IBBS = true
 	farCfg.BoardID = "faraway"
 	far := NewWorldSeed(farCfg, 1)
 	rome := far.AddHuman("bob", "Rome")
+	rome.Protection = 0
 	rome.Land, rome.Gold, rome.Troopers = 4321, 99000, 5000
 	reply := far.ApplyPacket(asker.Outbox[0])
 	if len(reply.ReconReports) != 1 {
-		t.Fatalf("target board sent %d reports, want 1", len(reply.ReconReports))
+		t.Fatalf("the far board sent %d reports, want 1", len(reply.ReconReports))
 	}
 	if got := reply.ReconReports[0]; got.Land != 4321 || got.Gold != 99000 || got.Offense == 0 {
 		t.Errorf("report does not carry the target's real figures: %+v", got)
 	}
-	// The scouted baron notices.
-	if len(rome.Events) == 0 {
-		t.Error("the scouted realm was told nothing about foreign agents")
-	}
 
-	// And the answer files itself on the asking board.
+	// And the answer files itself on the sending board.
 	asker.ApplyPacket(reply)
 	if len(asker.SpyDatabase) != 1 || asker.SpyDatabase[0].Land != 4321 {
 		t.Errorf("Spy Database did not receive the report: %+v", asker.SpyDatabase)

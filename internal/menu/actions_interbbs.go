@@ -844,9 +844,12 @@ func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt strin
 	return board, baron, sc, true
 }
 
-// sendSpyGuy is the Special Operations "Send SpyGuy" item: infiltrate a baron on
-// another planet. BRE puts sending on Special Operations and keeps the Spy
-// Database as the read-only viewer.
+// sendSpyGuy is the Special Operations "Send SpyGuy" item: post a watcher on
+// another PLANET for a paid number of days. He is not a covert agent — no agent
+// is spent, he cannot be caught, and he brings back no intelligence. What he
+// does is send word home the moment his hosts aim a group attack or a Clingy
+// Annihilator at his own planet, and that word arrives as planet news there.
+// The model is BRE's, read out of the binary; see internal/game/spyguy.go.
 func sendSpyGuy(s session.Session, w *ctx) Result {
 	// The original gates the whole Special Operations node on the caller's own
 	// protection — the InterPlanetary menu tests it when '8' is pressed, with no
@@ -855,11 +858,46 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 	if blockedByCovertProtection(s, w) {
 		return Stay
 	}
-	if w.Player().Agents < 1 {
-		fail(s, game.ErrNoAgents)
+	var planets []string
+	var perDay int64
+	var maxDays int
+	w.With(func() {
+		planets = w.KnownBoards()
+		perDay = w.SpyGuyCostPerDay()
+		maxDays = w.SpyGuyDaysAffordable(w.Player())
+	})
+	if len(planets) == 0 {
+		ok(s, "No other planets are known yet.")
 		return Stay
 	}
-	sendRemoteSpy(s, w)
+	// The price is quoted before the target is picked, as BRE quotes it: it is
+	// the same on every planet, being drawn from the sender's own size.
+	fmt.Fprintf(s, "\n%s"+tr(s, "A SpyGuy costs %s%s%s gold per day.")+"%s\n",
+		ansi.FgWhite, ansi.FgBrightCyan, comma(perDay), ansi.FgWhite, ansi.Reset)
+	if maxDays < 1 {
+		fail(s, game.ErrCantAfford)
+		return Stay
+	}
+	board := pickPlanetNamed(s, w, planets)
+	if board == "" {
+		return Stay
+	}
+	suggested := game.SpyGuyDefaultDays
+	if suggested > maxDays {
+		suggested = maxDays
+	}
+	days := promptSuggested(s, "How many days would you like him to remain?", suggested, maxDays)
+	if days < 1 {
+		return Stay
+	}
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		return w.World.SendSpyGuy(p, board, days)
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	ok(s, "Your SpyGuy leaves for %s, and will watch it for %d days.", board, days)
 	return Stay
 }
 
@@ -963,26 +1001,6 @@ func spyDatabase(s session.Session, w *ctx) Result {
 	}
 	pause(s)
 	return Stay
-}
-
-// sendRemoteSpy scouts a baron on another planet. The request travels in the
-// outbound packet and the answer comes back with real figures read on the target
-// board, which is the point of the exchange — a shared score table already gives
-// everyone land and net worth (#61). It costs an agent, and the report lands in
-// the planet-wide Spy Database where every baron here can read it.
-func sendRemoteSpy(s session.Session, w *ctx) {
-	board, baron, _, found := pickRemoteTarget(s, w, "Spy on which planet?", "Spy on which baron?", observing)
-	if !found {
-		return
-	}
-	err := w.mutatePlayer(func(p *game.Empire) error {
-		return w.World.SendRecon(p, board, baron)
-	})
-	if err != nil {
-		fail(s, err)
-		return
-	}
-	ok(s, "Your agents are on their way to %s on %s. Their report will reach the Spy Database when word comes back.", baron, board)
 }
 
 // terrorOp returns a handler that sends agents to perform a specific terror

@@ -28,3 +28,7 @@ is.
 An offer waits until the other ruler plays a turn. It does not run out. If
 you send a second, different offer to the same ruler, it takes the place of
 the first one, because two realms can hold only one agreement at a time.
+
+Choosing the treaty you already hold with a ruler sends nothing. The game
+tells you the agreement still stands and returns you to the
+menu. Declaration of War is the way to end one.

@@ -702,11 +702,16 @@ or the original's code, before it can be called done:
   weapon costs a planet a tenth of its land instead of up to a third, and the
   cooperative defence the original is built around never happens. (#112)
 
-The target planet is told about it — while it is under construction and again in
-flight, with the arrival time in hours — which is what makes interception
-possible (#63). BRE does the same, and its own strings carry the wording:
-"Gooie Kablooie destined for our planet is under construction at ...",
-"Gooie Kablooie arrives from ... in N Hours."
+The target planet is told when the weapon **launches**, with the arrival time in
+hours, which is what makes interception possible (#63). **It is not told while
+the weapon is being built** — that is what a SpyGuy is for. Both of BRE's
+construction strings, "Gooie Kablooie destined for our planet is under
+construction at ..." and "Gooie Kablooie arrives from ... in N Hours.", belong
+to `show_gooie_arrival_time`, whose only caller is the SPY_GUY packet receiver,
+and its funding and dismantle reports are gated on the target's spy counter as
+well. IB broadcast the whole build to its target for free until 2026-08-18,
+which left a watcher with nothing to report that his planet did not already
+know.
 
 **SDI Defense** — a funded anti-missile/anti-jet shield. The original names
 three separate ceilings: it destroys **up to 50%** of incoming missiles, and
@@ -2918,10 +2923,39 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   op is queued and resolves on the target board's next packet run. Each agent is
   one hit that removes ~1/`TerrorUnitLossDenom` (7, from BRE's disassembled 6/7
   ratio) of one randomly chosen unit type. New Realm Protection blocks it.
-- **Spy** — send an agent to a remote baron; intel lands in the planet-wide Spy
-  Database. Sent from Special Operations → Send SpyGuy; the Spy Database screen
-  is the read-only viewer. Being on that gated submenu, it is refused while the
-  caller is under New Realm Protection, unlike the local Send Spy.
+- **Send SpyGuy — BINARY-VERIFIED, and not a covert agent at all.** He is a
+  watcher posted on a PLANET, bought with gold rather than an agent, and he
+  gathers no intelligence. Read out of `run_bombing_operations_menu`
+  (BRE.OVR 0x029ea9), `ovr_044225_entry_0000` and `run_daily_maintenance`:
+
+  - **Price**: the SENDER's own total regions × `SpyGuyGoldPerRegion` (300),
+    **per day** — "A SpyGuy will cost N gold per day." — charged for the whole
+    stay at once. The same shape as Terrorist Ops, which is total regions × 64.
+  - **Stay**: the caller is asked "How many days would you like him to remain?",
+    defaulting to 3, bounded by `SpyGuyMaxDays` (15) and by what the gold
+    covers. The 15 is corroborated by `whatsnew.doc` — "Extended SpyGuy to
+    function for up to 15 days (previously, max was 10)".
+  - **The watched board holds the counter**, one byte per foreign board, and
+    keeps the LONGER of a stay already running and a newly paid one. Daily
+    maintenance decrements every counter ("Processing SpyGuys"); at zero he is
+    gone. **Nobody is told, on either side** — there is no discovery and no
+    execution. ("found and executed" belongs to `investigate_traitors`, and
+    "was found spying on you" to the LOCAL Send Spy.)
+  - **What he reports**: a group attack assembled against his planet (or a realm
+    on it), with the hours until it leaves, and a Gooie under construction,
+    funded, or dismantled. `breins.txt`: "he(she) will report information on all
+    incoming group attacks and Gooie Kablooies allowing realms to prepare for
+    the incoming onslaughts." On arrival he is caught up on both at once
+    (`show_gooie_arrival_time`, `estimate_attack_arrival`).
+  - **Reports are PLANET NEWS on the paying planet**, not mail: every report
+    goes out through `append_news_record`, which writes a `NEWS_DATA` packet.
+
+  IB implements all of it. **What IB had before was its own invention** — a
+  per-baron Send Recon that spent an agent, warned the target, and filed figures
+  in the Spy Database. That errand is gone; the Spy Database is now filled the
+  way the original fills it, by covert operations reporting the state they found
+  their target in (`resolve_received_covert_operation` → `write_spy_report` →
+  "Information added to Global Spy Data Bank").
 - **Special Operations** — the cross-planet bombing and missile set; see below.
 - **SDI** — puts gold into the program; the strength it buys is capped at
   `SDIMax` (100%, the original's own clamp). See "The SDI program" below.

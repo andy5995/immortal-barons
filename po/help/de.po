@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-15 08:58-0500\n"
+"POT-Creation-Date: 2026-08-18 20:10-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -107,22 +107,33 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:47
+#: internal/help/content/controls/interface.md:50
 msgid ""
 "The letters belong to the realms, not to the rows, so a letter may be "
-"missing from the list: it is either yours or a realm that has fallen. The "
-"letters of everyone a message went to appear at the top of it when it is "
+"missing from the list: it is either yours or a realm that has fallen. A "
+"realm keeps its letter for as long as it stands, whoever else joins or "
+"falls, and it is the same letter on every screen — the `Id` column on See "
+"Scores is that letter too, which is why those rows are not in letter order. "
+"The letters of everyone a message went to appear at the top of it when it is "
 "read."
 msgstr ""
 
+#. type: Plain text
+#: internal/help/content/controls/interface.md:54
+msgid ""
+"A letter is freed when the realm holding it is swept from the map, and a "
+"later baron may be given it. So a letter names whoever holds it today, not "
+"whoever held it when an old message was written."
+msgstr ""
+
 #. type: Title ##
-#: internal/help/content/controls/interface.md:48
+#: internal/help/content/controls/interface.md:55
 #, no-wrap
 msgid "Who else is on"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:55
+#: internal/help/content/controls/interface.md:62
 msgid ""
 "An `O` beside a realm's letter — on See Scores, the attack and message "
 "target lists, and the View Treaties roster — means that baron is on the "
@@ -132,7 +143,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:56
+#: internal/help/content/controls/interface.md:63
 msgid "Press `?` at a menu to open this help."
 msgstr "Drücken Sie `?` in einem Menü, um diese Hilfe zu öffnen."
 
@@ -254,11 +265,22 @@ msgid "Bomb Enemy Targets"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-enemy-targets.md:11
+#: internal/help/content/covert/bomb-enemy-targets.md:15
 msgid ""
-"Bomb Enemy Targets is a submenu of bombing operations. Every operation here "
-"needs at least 500 Bombers to deliver its payload. Each one has its own "
-"topic."
+"Bomb Enemy Targets sends your agents to plant bombs across an enemy realm. "
+"You choose the realm and nothing else: if the operation lands, your agency "
+"picks one of the enemy's holdings at random and destroys part of it. It may "
+"hit their people, their troopers, their own agents, their tanks, their jets, "
+"or their food store."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/bomb-enemy-targets.md:19
+msgid ""
+"Food is the prize. A strike that reaches the granaries burns a large share "
+"of it, far more than the few percent the other five lose, so a realm already "
+"short of food can be pushed into starvation by a single lucky raid. You "
+"cannot aim for it, though, so the operation is a gamble rather than a plan."
 msgstr ""
 
 #. type: Title #
@@ -269,10 +291,11 @@ msgid "Bomb Food Market"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-food-market.md:11
+#: internal/help/content/covert/bomb-food-market.md:12
 msgid ""
-"Bomb Food Market destroys much of the target's food reserve. A large loss "
-"can start a food shortage that harms their people and army."
+"Bomb Food Market is an InterPlanetary operation, on the Special Operations "
+"menu. It destroys much of another planet's food market supply. A large loss "
+"can start a food shortage across that whole planet."
 msgstr ""
 
 #. type: Title #
@@ -283,10 +306,21 @@ msgid "Bomb Trade Routes"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trade-routes.md:11
+#: internal/help/content/covert/bomb-trade-routes.md:14
 msgid ""
-"Bomb Trade Routes severs one of the target's standing trade treaties, "
-"cutting off the income that deal provided."
+"Bomb Trade Routes is an InterPlanetary operation, on the Special Operations "
+"menu. It hits the trade deals in transit across another planet. Most strikes "
+"come to nothing and some deals slip through, but a deal the bombers reach "
+"arrives all but empty — only a few percent of every good in it is left. "
+"Standing treaties are not touched."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/bomb-trade-routes.md:17
+msgid ""
+"A deal is spared when the two realms trading it hold Protective Trade with "
+"each other. Your own agreements with the target count for nothing here, so a "
+"partner can bomb you as easily as an enemy can."
 msgstr ""
 
 #. type: Title #
@@ -297,10 +331,11 @@ msgid "Bomb Trading Market"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bomb-trading-market.md:11
+#: internal/help/content/covert/bomb-trading-market.md:12
 msgid ""
-"Bomb Trading Market raids the target's gold through their own trading "
-"market, taking some of their reserves."
+"Bomb Trading Market is an InterPlanetary operation, on the Special "
+"Operations menu. It destroys a share of everything listed on another "
+"planet's trading market, and the gold sellers there were waiting on."
 msgstr ""
 
 #. type: Title #
@@ -311,18 +346,35 @@ msgid "Bribery"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/bribery.md:12
+#: internal/help/content/covert/bribery.md:13
 #, fuzzy
 #| msgid ""
 #| "Bribery — buy off an agent inside the enemy, so that their covert "
 #| "operations against you fail from then on."
 msgid ""
 "Bribery pays one of the enemy's own agents to work for you. From then on, "
-"that enemy's covert operations against you almost always fail. Their spies "
-"still get through now and then, but nothing else does."
+"every covert operation YOU run against that realm is twice as likely to "
+"land. It does nothing to the operations they run against you."
 msgstr ""
 "Bestechung — einen Agenten im Inneren des Feindes kaufen, sodass dessen "
 "verdeckte Operationen gegen Sie von da an scheitern."
+
+#. type: Plain text
+#: internal/help/content/covert/bribery.md:19
+msgid ""
+"The agent stays on your payroll for the rest of the game, and you can only "
+"hold one inside a realm — the menu refuses a second attempt, at no cost. It "
+"is also what Expose Enemy Ops needs before it can shield you from that "
+"realm. Since the bribe itself is only carried out at daily maintenance, the "
+"earliest you can expose that realm is the day after you pay for the bribe."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/bribery.md:21
+msgid ""
+"Bribery is the hardest operation on the menu to land, so expect to pay for "
+"several attempts."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/covert/demoralize-forces.md:1
@@ -332,10 +384,17 @@ msgid "Demoralize Forces"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/demoralize-forces.md:11
+#: internal/help/content/covert/demoralize-forces.md:12
 msgid ""
 "Demoralize Forces lowers the target's military morale. Low morale weakens "
 "their army in battle and can cause desertion."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/demoralize-forces.md:14
+msgid ""
+"Your agent only reaches them at daily maintenance, so send one the day "
+"before the battle you want it to affect, not the turn of it."
 msgstr ""
 
 #. type: Title #
@@ -346,11 +405,29 @@ msgid "Expose Enemy Ops"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/expose-enemy-ops.md:12
+#: internal/help/content/covert/expose-enemy-ops.md:13
 msgid ""
-"Expose Enemy Ops is a defensive operation. It shields your empire from all "
-"incoming covert operations for a short time. Use it when you expect an enemy "
-"to strike."
+"Expose Enemy Ops turns a bribed agent against the service that employs it. "
+"For the next day, nine in ten of that realm's covert operations against you "
+"are caught before they do anything."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/expose-enemy-ops.md:18
+msgid ""
+"It works against ONE realm — the realm the agent is inside — so the menu "
+"lists only the realms you have already bribed. Bribery comes first; without "
+"an agent on your payroll there is nothing to expose. A tenth of that realm's "
+"attempts still get through."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/expose-enemy-ops.md:21
+msgid ""
+"It costs no agent and takes no once-per-turn slot, so you may run it as "
+"often as you can pay for it. Anything the shield turns aside counts as a "
+"caught agent, so on top of blocking the damage you are told which realm sent "
+"it."
 msgstr ""
 
 #. type: Title #
@@ -361,27 +438,25 @@ msgid "Covert Operations"
 msgstr "Verdeckte Operationen"
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:15
-#, fuzzy
-#| msgid ""
-#| "Covert operations are secret missions run by your agents. Success depends "
-#| "on how many agents you have compared to the target. More agents means a "
-#| "better chance.  Keeping many agents also defends you against enemy covert "
-#| "operations."
+#: internal/help/content/covert/overview.md:12
 msgid ""
-"Covert operations are secret missions run by your agents. Your chance of "
-"success depends on how many agents you have compared to the target. More "
-"agents give you a better chance. Keeping many agents also protects you, "
-"because it lowers the chance that enemy operations against you succeed. Send "
-"Spy works differently — see its own topic."
+"Covert operations are secret missions run by your agents. You need at least "
+"one agent to run any of them, and a failed one costs you that agent."
 msgstr ""
-"Verdeckte Operationen sind geheime Missionen Ihrer Agenten. Der Erfolg hängt "
-"davon ab, wie viele Agenten Sie im Vergleich zum Ziel haben. Mehr Agenten "
-"bedeuten bessere Chancen. Viele Agenten verteidigen Sie auch gegen "
-"feindliche verdeckte Operationen."
 
 #. type: Plain text
 #: internal/help/content/covert/overview.md:19
+msgid ""
+"What agents do NOT do is change your odds. The chance an operation lands is "
+"set by the operation itself: the simpler ones land just over half the time, "
+"the harder ones less often. Your agents make no difference to it, and "
+"neither do the target's. Two things do change it: a bribed agent inside the "
+"target doubles your chance against that realm, and a realm that has exposed "
+"your agent turns nine of your attempts in ten away."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:23
 msgid ""
 "Each operation also costs gold. The menu shows the price next to each one, "
 "and the footer shows how much gold and how many agents you have. You pay the "
@@ -390,31 +465,63 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:23
+#: internal/help/content/covert/overview.md:29
 msgid ""
-"You may run only one covert operation that affects an enemy per turn. After "
-"you run one, the others are blocked until your next turn. Send Spy and Spy "
-"on Relations only gather information, so they do not count against this "
-"limit."
+"While your realm is under New Realm Protection, your agents may not move "
+"against another realm: every operation that has an effect on its target is "
+"refused, and the refusal costs nothing — no gold, no agent, no turn. Send "
+"Spy and Spy on Relations only gather information, so those two stay open to "
+"you for as long as the shield lasts."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:27
+#: internal/help/content/covert/overview.md:37
 msgid ""
-"When an operation fails, your agent is caught and lost, and the target may "
-"be warned. The operations are secret, so the report the victim sees does not "
-"name you."
+"Most operations do not happen on the spot. When you choose one, your agent "
+"sets out: the fee and the agent go at once, and the operation itself is "
+"carried out during the next daily maintenance. The result waits for you on "
+"your next turn's report — whether the agent got through, and what it did. So "
+"an operation cannot soften a realm you are about to attack in the same turn; "
+"plan it a day ahead.  Send Spy and Spy on Relations are the exceptions, "
+"along with Expose Enemy Ops: those three answer you immediately."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:30
+#: internal/help/content/covert/overview.md:40
 msgid ""
-"Each operation has its own topic. The bombing operations also need Bombers "
-"to deliver their payloads."
+"If the realm you aimed at is gone by the time your agent arrives, the "
+"operation is abandoned and the fee is not returned."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/overview.md:32
+#: internal/help/content/covert/overview.md:45
+msgid ""
+"You may run each covert operation once per turn. Running Stir Revolts blocks "
+"a second Stir Revolts until your next turn, but leaves every other operation "
+"open.  Send Spy and Spy on Relations only gather information, so they have "
+"no limit at all, and Expose Enemy Ops has none either."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:51
+msgid ""
+"When an operation fails, your agent is caught and lost, and the target is "
+"warned — and a caught agent talks, so the target is told your realm's name. "
+"An operation that succeeds is reported to the target with no name attached. "
+"The only way anyone learns who is running operations against them is by "
+"catching an agent."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:55
+msgid ""
+"Each operation has its own topic. Some of the topics in this section cover "
+"InterPlanetary Special Operations instead, which are aimed at another planet "
+"and need Bombers to deliver their payloads; each says so."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/overview.md:57
 msgid ""
 "The Covert Operations menu appears during your turn, after the Attack menu. "
 "If you do not see it, turn on \"Visit Covert Menu\" in the Preferences menu."
@@ -428,18 +535,19 @@ msgid "R5-Slappenheimer"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/r5-slappenheimer.md:18
+#: internal/help/content/covert/r5-slappenheimer.md:19
 msgid ""
-"The R5-Slappenheimer is an unreliable weapon of mass destruction. Before you "
-"fire, you set a dial from 0 to 10, but the dial is for show and changes "
-"nothing, so pick any number you like. The missile is a gamble every time. "
-"Most launches do nothing: it misses, it malfunctions, or the enemy's SDI "
-"shoots it down. When one does get through, it destroys part of one of the "
-"enemy's assets — troops, jets, tanks, turrets, bombers, carriers, agents, "
-"gold, food, or regions — and sometimes it wrecks several of these at once, "
-"which can be devastating. It can also backfire: if the enemy keeps a very "
-"large trooper army, the missile may turn back and strike your own empire "
-"instead."
+"The R5-Slappenheimer is an unreliable weapon of mass destruction, fired from "
+"the InterPlanetary menu's Special Operations at a baron on another planet. "
+"Before you fire, you set a dial from 0 to 10, but the dial is for show and "
+"changes nothing, so pick any number you like. The missile is a gamble every "
+"time. Most launches do nothing: it misses, it malfunctions, or the enemy's "
+"SDI shoots it down. When one does get through, it destroys part of one of "
+"the enemy's assets — troops, jets, tanks, turrets, bombers, carriers, "
+"agents, gold, food, or regions — and sometimes it wrecks several of these at "
+"once, which can be devastating. It can also backfire: if the enemy keeps a "
+"very large trooper army, the missile may turn back and strike your own "
+"empire instead."
 msgstr ""
 
 #. type: Title #
@@ -460,9 +568,16 @@ msgstr ""
 #. type: Plain text
 #: internal/help/content/covert/send-spy.md:16
 msgid ""
-"Send Spy is the one operation where agents do not change your chance. "
-"Neither your agents nor the enemy's count here. Just over half of all spies "
-"get through, whoever you send them against."
+"Just over half of all spies get through, whoever you send them against — see "
+"the Covert Operations overview for what does and does not move the odds."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/covert/send-spy.md:18
+msgid ""
+"Send Spy answers on the spot. It is one of the few operations that does not "
+"wait for daily maintenance, which is what makes it useful right before an "
+"attack."
 msgstr ""
 
 #. type: Title #
@@ -538,10 +653,12 @@ msgid "Undermine Investments"
 msgstr "Investitionen"
 
 #. type: Plain text
-#: internal/help/content/covert/undermine-investments.md:11
+#: internal/help/content/covert/undermine-investments.md:12
 msgid ""
-"Undermine Investments damages the target's pending bank investments, "
-"trimming about a quarter off the money they were due to get back."
+"Undermine Investments is an InterPlanetary operation, on the Special "
+"Operations menu. It damages the pending bank investments of every realm on "
+"another planet, trimming about a quarter off the money they were due to get "
+"back."
 msgstr ""
 
 #. type: Title #
@@ -592,11 +709,19 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaties.md:28
+#: internal/help/content/diplomacy/treaties.md:29
 msgid ""
 "An offer waits until the other ruler plays a turn. It does not run out. If "
 "you send a second, different offer to the same ruler, it takes the place of "
 "the first one, because two realms can hold only one agreement at a time."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaties.md:32
+msgid ""
+"Choosing the treaty you already hold with a ruler sends nothing. The game "
+"tells you the agreement still stands and returns you to the menu. "
+"Declaration of War is the way to end one."
 msgstr ""
 
 #. type: Title #
@@ -623,36 +748,56 @@ msgstr ""
 "an Einkommensteuern. Aber die Vermischung der Völker kann die Stimmung in "
 "anderen Reichen trüben."
 
-#. type: Title #
+#. type: Bullet: '- '
 #: internal/help/content/diplomacy/treaty-full-defense.md:1
 #: internal/help/content/diplomacy/treaty-full-defense.md:8
+#: internal/help/content/economy/trading.md:24
 #, no-wrap
 msgid "Full Defense Alliance"
 msgstr "Volles Verteidigungsbündnis"
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-full-defense.md:12
+#: internal/help/content/diplomacy/treaty-full-defense.md:13
 #, fuzzy
 #| msgid ""
 #| "The strongest alliance. You commit a large part of your forces to defend "
 #| "an ally in need. This works only in local (single-board) games."
 msgid ""
 "A Full Defense Alliance is the strongest alliance. You commit a large part "
-"of your forces to defend an ally in need. It works only in local (single-"
-"board)  games."
+"of your troopers and tanks to defend an ally in need. It works only in local "
+"(single-board) games."
 msgstr ""
 "Das stärkste Bündnis. Sie verpflichten einen großen Teil Ihrer Streitkräfte "
 "zur Verteidigung eines Verbündeten in Not. Dies gilt in beide Richtungen."
 
-#. type: Title #
+#. type: Plain text
+#: internal/help/content/diplomacy/treaty-full-defense.md:17
+msgid ""
+"Those forces can die in a battle you were not part of. When that happens you "
+"are told what you lost, who you were defending, and who attacked them, so "
+"watch your report after an ally has been raided."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaty-full-defense.md:19
+#: internal/help/content/diplomacy/treaty-intelligence-alliance.md:14
+#: internal/help/content/diplomacy/treaty-technology-agreement.md:20
+#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:14
+msgid ""
+"It also lets you buy from that realm on the Trading Market. See the Trading "
+"topic for how that works."
+msgstr ""
+
+#. type: Bullet: '- '
 #: internal/help/content/diplomacy/treaty-intelligence-alliance.md:1
 #: internal/help/content/diplomacy/treaty-intelligence-alliance.md:8
+#: internal/help/content/economy/trading.md:24
 #, no-wrap
 msgid "Intelligence Alliance"
 msgstr "Geheimdienstbündnis"
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-intelligence-alliance.md:11
+#: internal/help/content/diplomacy/treaty-intelligence-alliance.md:12
 #, fuzzy
 #| msgid ""
 #| "The two realms give each other covert help in operations, both at home "
@@ -672,18 +817,28 @@ msgid "Protective Trade"
 msgstr "Geschützter Handel"
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-protective-trade.md:12
+#: internal/help/content/diplomacy/treaty-protective-trade.md:15
 #, fuzzy
 #| msgid ""
 #| "Guards along the trade routes. This stops enemies from bombing your trade "
 #| "deals, and makes trade deals cheaper to send and to keep."
 msgid ""
-"Protective Trade places guards along the trade routes. It stops enemies from "
-"bombing your trade deals, and it cuts the cost of sending one to a partner "
-"to a third of the usual daily rate."
+"Protective Trade places guards along the trade routes between two realms. "
+"Deals in transit between the two of you survive enemy bombing, whoever fires "
+"the strike: the guard is on the route itself, so it holds against every "
+"attacker, not only against your partner. It also cuts the cost of sending a "
+"trade deal to that partner to a third of the usual daily rate."
 msgstr ""
 "Wachen entlang der Handelswege. Das hindert Feinde daran, Ihre "
 "Handelsgeschäfte zu bombardieren, und macht Handelsgeschäfte sicherer."
+
+#. type: Plain text
+#: internal/help/content/diplomacy/treaty-protective-trade.md:18
+msgid ""
+"The guard covers deals with that partner only. Anything you have in transit "
+"to another realm can still be bombed, and so can goods you have listed on "
+"the trading market."
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/diplomacy/treaty-tariff-trade.md:1
@@ -709,9 +864,10 @@ msgstr ""
 "Handel zwischen zwei Reichen, mit einer Abgabe auf Waren, die die Grenze "
 "überqueren. Beide Seiten verdienen zusätzlich, je nach Größe des Handels."
 
-#. type: Title #
+#. type: Bullet: '- '
 #: internal/help/content/diplomacy/treaty-technology-agreement.md:1
 #: internal/help/content/diplomacy/treaty-technology-agreement.md:8
+#: internal/help/content/economy/trading.md:24
 #, no-wrap
 msgid "Technology Agreement"
 msgstr "Technologieabkommen"
@@ -730,7 +886,7 @@ msgstr ""
 "der Technologie der anderen."
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-technology-agreement.md:17
+#: internal/help/content/diplomacy/treaty-technology-agreement.md:18
 msgid ""
 "The help it gives you is bounded by whichever of you holds fewer Technology "
 "regions, so it speeds up work you are already doing rather than standing in "
@@ -739,15 +895,16 @@ msgid ""
 "who has done the same."
 msgstr ""
 
-#. type: Title #
+#. type: Bullet: '- '
 #: internal/help/content/diplomacy/treaty-terrorist-prevention.md:1
 #: internal/help/content/diplomacy/treaty-terrorist-prevention.md:8
+#: internal/help/content/economy/trading.md:24
 #, no-wrap
 msgid "Terrorist Prevention"
 msgstr "Terrorabwehr"
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:11
+#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:12
 #, fuzzy
 #| msgid ""
 #| "The two realms' intelligence agencies help each other find and stop "
@@ -1259,12 +1416,130 @@ msgstr "Handel"
 #. type: Plain text
 #: internal/help/content/economy/trading.md:12
 msgid ""
-"From the Trading menu you can send gold directly to another empire as a "
-"trade deal, with no strings attached. Use it to help an ally, or to move "
-"gold to a friend on your board."
+"There are two ways to move goods between realms: the Trading Market, and a "
+"trade deal. Both need a treaty with the other realm."
 msgstr ""
-"Über das Handelsmenü können Sie einem anderen Imperium Gold direkt als "
-"Handelsgeschenk senden, ohne Bedingungen."
+
+#. type: Title ##
+#: internal/help/content/economy/trading.md:13
+#, fuzzy, no-wrap
+#| msgid "The Coordinator"
+msgid "The Trading Market"
+msgstr "Der Koordinator"
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:16
+msgid "You can put any of your goods on the market and set your own price."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:19
+#, no-wrap
+msgid ""
+"**In a single-board game, to buy from a realm you need one of these treaties\n"
+"with it:**\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:28
+msgid ""
+"You see only the goods you could buy. A realm you have no treaty with does "
+"not appear on the market at all, and its goods are not counted in the "
+"totals. Your own listing is always shown to you."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:31
+msgid ""
+"Listing is open to everyone. Only buying is limited. So you choose who can "
+"take your goods, and who can even see them, by choosing who you sign a "
+"treaty with."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:34
+msgid ""
+"In a league game the market is open to every realm on your planet, because "
+"there your planet is your team."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:38
+msgid ""
+"Goods you list leave your hands at once. They are held for the buyer, and "
+"you are paid when someone buys them. You still pay upkeep on them while they "
+"wait, and pirates can raid them, so do not list more than you mean to sell."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/trading.md:39
+#, no-wrap
+msgid "Trade deals"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:44
+msgid ""
+"A trade deal is an offer to one realm. You put goods and gold in it, and you "
+"may ask for goods and gold in return. The other realm reads the offer and "
+"accepts or refuses it."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:47
+msgid ""
+"A trade deal costs a fee, and it needs a spare carrier to move the goods. A "
+"Protective Trade treaty with that realm makes the fee cheaper."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/trading.md:48
+#, no-wrap
+msgid "Getting the most from trade"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:51
+msgid "Trade matters most when several realms work together. A few ideas:"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:56
+#, no-wrap
+msgid ""
+"**Specialise, then supply your partners.** Your industry can favour one unit\n"
+"type, which makes that unit cheaper for you than for anyone else. If you build\n"
+"tanks and a partner builds turrets, each of you can sell to the other below the\n"
+"price they would pay to build it themselves. Both realms come out ahead.\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:60
+#, no-wrap
+msgid ""
+"**Price for the realm you want to help.** Because only your treaty partners can\n"
+"buy, a low price is a gift to them and not to a stranger. Some realms list goods\n"
+"very cheaply, or even for nothing, to arm a partner who is under attack.\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:65
+#, no-wrap
+msgid ""
+"**Watch what your treaty is worth.** You can hold only one treaty with a realm\n"
+"at a time. A Tariff or Free Trade Agreement pays you gold every turn. The four\n"
+"treaties above open that realm's market to you instead. Which is worth more\n"
+"depends on how much you plan to buy from them.\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:68
+#, no-wrap
+msgid ""
+"**Trade is bigger between planets.** In a league, whole planets specialise, and\n"
+"an ally's market is often the cheapest place to buy. See the Interplanetary\n"
+"Trading topic.\n"
+msgstr ""
 
 #. type: Title #
 #: internal/help/content/interbbs/allied-markets.md:1
@@ -1617,14 +1892,14 @@ msgstr ""
 #: internal/help/content/interbbs/planetary-diplomacy.md:23
 msgid ""
 "The list is a note from your Coordinator to the barons on your own board. It "
-"tells you what your board thinks of a planet. It does nothing else:"
+"tells you what your board thinks of a planet. Mostly it only describes:"
 msgstr ""
 
 #. type: Bullet: '- '
 #: internal/help/content/interbbs/planetary-diplomacy.md:28
 msgid ""
-"It stops nothing. A planet marked Enemy can still trade with you, and you "
-"can still attack a planet marked Allied."
+"It does not stop an attack. You can still attack a planet marked Allied, and "
+"a planet marked Enemy can still attack you."
 msgstr ""
 
 #. type: Bullet: '- '
@@ -1635,20 +1910,42 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/planetary-diplomacy.md:31
+#: internal/help/content/interbbs/planetary-diplomacy.md:30
+msgid "Two things do use it:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/planetary-diplomacy.md:37
 msgid ""
-"One thing does use it. When you write to **Allied Planets** from the IP "
-"Messages menu, your message goes to every planet the list marks Allied."
+"**Trading.** You may only buy at another planet's market while your board "
+"marks that planet **Allied**. Both boards must agree: yours has to call "
+"theirs Allied for your bid to go, and theirs has to call yours Allied to "
+"fill it. If an alliance ends while your bid is travelling, your gold comes "
+"back."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/planetary-diplomacy.md:37
+msgid ""
+"**Messages.** Writing to **Allied Planets** from the IP Messages menu sends "
+"to every planet the list marks Allied."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/planetary-diplomacy.md:39
+msgid ""
+"So ask your Coordinator to mark a planet Allied before you plan to trade "
+"there."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/planetary-diplomacy.md:32
+#: internal/help/content/interbbs/planetary-diplomacy.md:40
 #, no-wrap
 msgid "Using it"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/planetary-diplomacy.md:38
+#: internal/help/content/interbbs/planetary-diplomacy.md:46
 msgid ""
 "Read the list before you commit forces. Your Coordinator marks a planet "
 "Enemy after seeing something you may not have seen — a raid on a neighbour, "
@@ -1657,10 +1954,133 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/planetary-diplomacy.md:40
+#: internal/help/content/interbbs/planetary-diplomacy.md:48
 msgid ""
 "If you disagree with a mark, say so. The Coordinator is elected, and the "
 "list follows whoever holds the post."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/interbbs/spyguy.md:1
+#: internal/help/content/interbbs/spyguy.md:8
+#, no-wrap
+msgid "Send SpyGuy"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:14
+msgid ""
+"A SpyGuy is a watcher you post on another planet. He is not one of your "
+"agents: sending him spends no agent, he cannot be caught, and he brings back "
+"no figures for the Spy Database. What he does is send word home the moment "
+"his hosts turn something on your planet."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:16
+msgid "Send him from InterPlanetary Operations, under Special Operations."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/spyguy.md:17
+#, fuzzy, no-wrap
+#| msgid "What you need"
+msgid "What he costs"
+msgstr "Was Sie brauchen"
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:23
+msgid ""
+"Gold, by the day, and the whole stay is paid up front. The daily rate is "
+"drawn from the size of **your own** planet — every region every realm here "
+"holds — so a crowded planet pays more for the same man. The rate is quoted "
+"before you pick a target, since it is the same wherever you send him."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:26
+msgid ""
+"You choose how long he stays, up to fifteen days or as many days as your "
+"gold covers, whichever runs out first."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/spyguy.md:27
+#, fuzzy, no-wrap
+#| msgid "What you need"
+msgid "What he reports"
+msgstr "Was Sie brauchen"
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:31
+msgid ""
+"Two things, and both arrive as **planetary news** where everyone here can "
+"read them:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/spyguy.md:36
+msgid ""
+"a **group attack** being assembled against this planet, or against one realm "
+"on it, with the hours left before it leaves"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/spyguy.md:36
+msgid ""
+"a **Clingy Annihilator** being built for us — when the work starts, when the "
+"funding is complete, and if it is stood down again"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:39
+msgid ""
+"He also reports whatever is already under way the day he arrives, so a man "
+"sent late is not wasted."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/spyguy.md:40
+#, no-wrap
+msgid "Why it matters"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:46
+msgid ""
+"A weapon still on the ground is the builders' own business: nobody tells you "
+"it exists. You learn of it when it launches — and by then it is two days out "
+"with only your jets between it and your regions. A SpyGuy on the right "
+"planet buys you the days you need to raise them."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:50
+msgid ""
+"The planet you are watching is told nothing. There is no discovery, no "
+"trial, and no execution; when the days you paid for run out, your man simply "
+"comes home."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/spyguy.md:51
+#, no-wrap
+msgid "Strategy"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:56
+msgid ""
+"Post him where the threat is, not where the grudge is. The planet that just "
+"lost a battle to you is the one assembling the answer, and the rate is the "
+"same whether you watch a rival or a neighbour you trust."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/spyguy.md:58
+msgid ""
+"A short stay renewed is worth more than one long stay bought early: the days "
+"run whether anything happens or not."
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title
@@ -1685,7 +2105,26 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:19
+#: internal/help/content/introduction/overview.md:20
+msgid ""
+"A planet has room for 25 baronies, each holding one of its 25 seats. Your "
+"seat is yours for as long as your realm stands, and its letter is how "
+"everyone else names you. When every seat is taken, a new caller is turned "
+"away until a realm falls; a sysop may also seat fewer than 25 players, and "
+"any computer-run barons take seats of their own."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/introduction/overview.md:25
+msgid ""
+"You name your realm when you first call, and you may change that name once — "
+"from the Preferences menu, after your New Realm Protection has ended. Only "
+"once: the option disappears afterwards, and the whole planet is told of the "
+"change."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/introduction/overview.md:30
 msgid ""
 "Many bulletin board systems can link their games together. When they do, "
 "each board is one planet, and your planet competes against the others. Then "
@@ -1694,13 +2133,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/introduction/overview.md:20
+#: internal/help/content/introduction/overview.md:31
 #, no-wrap
 msgid "Turns"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:25
+#: internal/help/content/introduction/overview.md:36
 #, fuzzy
 #| msgid ""
 #| "You get a set number of turns each day. When you use them all, come back "
@@ -1714,92 +2153,92 @@ msgstr ""
 "haben, kommen Sie am nächsten Tag für weitere zurück."
 
 #. type: Title ##
-#: internal/help/content/introduction/overview.md:26
+#: internal/help/content/introduction/overview.md:37
 #, no-wrap
 msgid "What happens in a turn"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:29
+#: internal/help/content/introduction/overview.md:40
 msgid "A turn moves through these steps in order:"
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid ""
 "**News and mail.** You see what happened since your last turn, and read any "
 "new messages from other players."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid ""
 "**Production and income.** Your industry builds military units, and your "
 "income for the turn arrives."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid "**Reports.** You see an income report and your full Empire Status."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid ""
 "**Upkeep.** You pay to maintain your military and your land, and you feed "
 "your people and your army. Short food or gold causes trouble, so watch these."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid ""
 "**Covert Operations.** Spying and sabotage. This step appears only if you "
 "keep it turned on and hold at least one covert agent."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid "**Spending.** You buy land, military, and other things."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid "**Attacks.** You may attack another barony (once per turn)."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid ""
 "**Trading.** Trade goods with other baronies, if you keep this step turned "
 "on."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid ""
 "**InterPlanetary Operations.** Actions against other planets, in linked "
 "games."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid "**Messages.** You may send a message to another player."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/introduction/overview.md:45
+#: internal/help/content/introduction/overview.md:56
 msgid ""
 "**End of turn.** Your economy and population settle, and the turn closes."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/introduction/overview.md:46
+#: internal/help/content/introduction/overview.md:57
 #, no-wrap
 msgid "The System menu"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:52
+#: internal/help/content/introduction/overview.md:63
 msgid ""
 "Some choices are not forced on you every turn. From the **System menu** you "
 "can set your tax rate, change what your industry builds, open diplomacy, "
@@ -1808,7 +2247,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:56
+#: internal/help/content/introduction/overview.md:67
 msgid ""
 "In this game, **diplomacy** and **changing production** live on the System "
 "menu.  They are not automatic stops in each turn, so visit them yourself "
@@ -1816,14 +2255,14 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/introduction/overview.md:57
+#: internal/help/content/introduction/overview.md:68
 #, fuzzy, no-wrap
 #| msgid "Registering the door"
 msgid "Reading the rest"
 msgstr "Den Door registrieren"
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:62
+#: internal/help/content/introduction/overview.md:73
 msgid ""
 "The sections that follow explain each part of the game in turn: the "
 "controls, your military, your economy, warfare, covert operations, "
@@ -1846,24 +2285,22 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/agents.md:15
+#: internal/help/content/military/agents.md:19
 msgid ""
-"Your chance of success at a covert operation depends on how many agents you "
-"have compared to the target. More agents give you a better chance."
+"Agents are what you spend, not what you win with. Each operation needs one, "
+"and a failed operation costs you it. On their own, your agents do not change "
+"your chance of success, and neither do the target's — the Covert Operations "
+"topic covers what does. Where the count tells is alongside an Intelligence "
+"Alliance or a Terrorist Prevention treaty, which lend an ally's agents to "
+"one side of the reckoning."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/military/agents.md:18
+#: internal/help/content/military/agents.md:22
 msgid ""
-"Keeping many agents also protects you. It lowers the chance that enemy "
-"covert operations against you succeed."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/military/agents.md:20
-msgid ""
-"Agents do not fight in normal battles. Build a network of them if you plan "
-"to fight a secret war. See the Covert Operations topic for what they can do."
+"What a stock of agents buys you is staying power: a run of failures does not "
+"leave you unable to act. Agents do not fight in normal battles. See the "
+"Covert Operations topic for what they can do."
 msgstr ""
 
 #. type: Title #
@@ -2987,6 +3424,32 @@ msgid ""
 msgstr ""
 
 #, fuzzy
+#~| msgid ""
+#~| "Covert operations are secret missions run by your agents. Success "
+#~| "depends on how many agents you have compared to the target. More agents "
+#~| "means a better chance.  Keeping many agents also defends you against "
+#~| "enemy covert operations."
+#~ msgid ""
+#~ "Covert operations are secret missions run by your agents. Your chance of "
+#~ "success depends on how many agents you have compared to the target. More "
+#~ "agents give you a better chance. Keeping many agents also protects you, "
+#~ "because it lowers the chance that enemy operations against you succeed. "
+#~ "Send Spy works differently — see its own topic."
+#~ msgstr ""
+#~ "Verdeckte Operationen sind geheime Missionen Ihrer Agenten. Der Erfolg "
+#~ "hängt davon ab, wie viele Agenten Sie im Vergleich zum Ziel haben. Mehr "
+#~ "Agenten bedeuten bessere Chancen. Viele Agenten verteidigen Sie auch "
+#~ "gegen feindliche verdeckte Operationen."
+
+#~ msgid ""
+#~ "From the Trading menu you can send gold directly to another empire as a "
+#~ "trade deal, with no strings attached. Use it to help an ally, or to move "
+#~ "gold to a friend on your board."
+#~ msgstr ""
+#~ "Über das Handelsmenü können Sie einem anderen Imperium Gold direkt als "
+#~ "Handelsgeschenk senden, ohne Bedingungen."
+
+#, fuzzy
 #~| msgid "Harms the enemy's people and troopers, but not their land."
 #~ msgid ""
 #~ "A Biological Attack harms the enemy's people and troopers, but not their "
@@ -3501,10 +3964,6 @@ msgstr ""
 #~ "Die sechs Zeilen sind: Knotennummer, Board-(Planeten-)Name, "
 #~ "Netzwerkadresse, Stadt, Bundesland oder Provinz und Land. Board Nummer 1 "
 #~ "ist der Liga-Koordinator."
-
-#, no-wrap
-#~ msgid "The Coordinator"
-#~ msgstr "Der Koordinator"
 
 #~ msgid ""
 #~ "There are two different \"coordinator\" ideas, and they are not the same "

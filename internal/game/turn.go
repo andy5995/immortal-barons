@@ -158,6 +158,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 				w.matureLoans(e)
 			}
 		}
+		w.expireSpyGuys() // a watcher's stay is a day shorter, silently (SpyGuy)
 		w.adjustInvestRate()
 		w.postMasterNews()
 		w.postProclamationNews()

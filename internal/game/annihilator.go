@@ -118,6 +118,7 @@ func (w *World) StartAnnihilator(e *Empire, board string) error {
 		Intact:      100,
 	}
 	w.postNews(fmt.Sprintf("Construction of a Clingy Annihilator aimed at %s has begun.", board))
+	w.reportToSpy(board, annihilatorSpyLine(w.Config.BoardID, w.Annihilator))
 	return nil
 }
 
@@ -149,6 +150,7 @@ func (w *World) FundAnnihilator(e *Empire, millions int) (int, error) {
 		d.Funded = true
 		d.FundedDay = w.GameDay
 		w.postNews("The Clingy Annihilator is complete and awaiting launch.")
+		w.reportToSpy(d.TargetBoard, annihilatorSpyLine(w.Config.BoardID, d))
 	}
 	return millions, nil
 }
@@ -217,6 +219,7 @@ func (w *World) scrapAnnihilator() error {
 	w.Annihilator = nil
 	w.ExportAnnihilatorGone(board) // let the target stop watching for it (#63)
 	w.postNews("The Clingy Annihilator has been dismantled.")
+	w.reportToSpy(board, fmt.Sprintf("Our agent on %s reports their Clingy Annihilator has been dismantled.", w.Config.BoardID))
 	return nil
 }
 

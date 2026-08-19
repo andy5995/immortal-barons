@@ -1073,6 +1073,18 @@ const (
 	// band centred on 7. Nothing in that routine reads the target's SDI or
 	// turrets, so a local nuclear strike is not intercepted; SDI's "up to 50% of
 	// incoming missiles" (breins.txt) is the interplanetary path.
+	// SpyGuy — the interplanetary watcher on the InterPlanetary Special
+	// Operations menu. BINARY-VERIFIED (BRE.OVR run_bombing_operations_menu
+	// +0x16cb..+0x194f): the sending planet sums total_regions over every realm
+	// it holds and multiplies by 300 for a PER-DAY price ("A SpyGuy will cost N
+	// gold per day."), then offers a stay of up to SpyGuyMaxDays or as many days
+	// as the caller's gold buys, whichever is smaller, defaulting to
+	// SpyGuyDefaultDays. The 15-day ceiling is corroborated by whatsnew.doc:
+	// "Extended SpyGuy to function for up to 15 days (previously, max was 10)".
+	SpyGuyGoldPerRegion = 300
+	SpyGuyMaxDays       = 15
+	SpyGuyDefaultDays   = 3
+
 	NukeCostPerRegion = 3_543
 	NukeWastePct      = 7 // centre of the band
 	NukeWasteJitter   = 3 // each of the two Random(3) draws

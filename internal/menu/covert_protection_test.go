@@ -147,8 +147,8 @@ func TestSendSpyGuyRefusedUnderProtection(t *testing.T) {
 	if !strings.Contains(out, "New Realm Protection shelters you") {
 		t.Fatalf("Send SpyGuy never refused on the caller's own protection, got:\n%s", out)
 	}
-	// Without the gate the op walks straight into its planet picker.
-	if strings.Contains(out, "Spy on which planet?") {
+	// Without the gate the op walks straight into its price quote and picker.
+	if strings.Contains(out, "gold per day") {
 		t.Errorf("Send SpyGuy reached its target picker while sheltered:\n%s", out)
 	}
 	if p.Agents != agentsBefore {
