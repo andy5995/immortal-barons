@@ -82,6 +82,13 @@ func parseNodeNumber(line string) (int, []int, error) {
 	if err != nil {
 		return 0, nil, err
 	}
+	// Node numbers are 1-based. A 0 here would be looked up by every board
+	// whose own name is absent from the roster, since NodeNumber answers 0 for
+	// a name it cannot find — handing that board a stranger's roster entry as
+	// its own origin, silently.
+	if n < 1 {
+		return 0, nil, strconv.ErrRange
+	}
 	var hosts []int
 	for i := 1; i < len(fields); i++ {
 		if strings.EqualFold(fields[i], "HOST") {

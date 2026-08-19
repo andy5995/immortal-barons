@@ -120,3 +120,25 @@ func TestNodeListKeyLineIsOptional(t *testing.T) {
 		t.Errorf("the key line disturbed the other fields: %+v", back)
 	}
 }
+
+// NodeNumber answers 0 for a name it cannot find, so a roster entry numbered 0
+// would be handed to any board whose own name is absent, as its own origin.
+func TestNodeListRejectsNodeNumberZero(t *testing.T) {
+	path := filepath.Join(t.TempDir(), NodeListFile)
+	body := "0\nGhost BBS\n1:1/0\nLocal\nXX\nUSA\n\n2\nBravo BBS\n1:1/2\nLocal\nXX\nUSA\n"
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	nodes, err := ParseNodeList(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, n := range nodes {
+		if n.Number < 1 {
+			t.Errorf("node %q parsed with number %d", n.Name, n.Number)
+		}
+	}
+	if len(nodes) != 1 || nodes[0].Name != "Bravo BBS" {
+		t.Errorf("want only the valid entry, got %+v", nodes)
+	}
+}
