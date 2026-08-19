@@ -2923,7 +2923,10 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   op is queued and resolves on the target board's next packet run. Each agent is
   one hit that removes ~1/`TerrorUnitLossDenom` (7, from BRE's disassembled 6/7
   ratio) of one randomly chosen unit type. New Realm Protection blocks it.
-- **Send SpyGuy — BINARY-VERIFIED, and not a covert agent at all.** He is a
+- **Send SpyGuy — BINARY-VERIFIED, and not a covert agent at all.** IB keeps the
+  original's name here, deliberately (Andy, 2026-08-18), where it renamed Gooie
+  Kablooie and S3-Sabre: players coming from the original look for this one by
+  name. Do not "correct" it under the distinctive-names rule. He is a
   watcher posted on a PLANET, bought with gold rather than an agent, and he
   gathers no intelligence. Read out of `run_bombing_operations_menu`
   (BRE.OVR 0x029ea9), `ovr_044225_entry_0000` and `run_daily_maintenance`:
