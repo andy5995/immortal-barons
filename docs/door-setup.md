@@ -1110,3 +1110,109 @@ step itself when inter-BBS play is on. Maintenance also runs on its own at the
 first login of a new day, so a board with callers already reads and writes
 packets once a day with nothing scheduled. What the timer adds is doing it more
 often than daily, and the poll — which the game cannot do for you at all.
+
+## Synchronet: the league link
+
+The steps under "Joining a league (member boards)" are the game's side. This
+section is Synchronet's side — where each setting lives, and what carries the
+packets. Do it in the order below. It assumes SBBSecho and BinkIT are already
+running your other mail.
+
+Paths below are the Linux defaults. On Windows they are `C:\SBBS\...`, the two
+programs are `immortal-barons.exe` and `barons-ftn.exe`, and the script in the
+last step is a `.bat` file.
+
+### Your league address
+
+In `scfg` → Networks → FidoNet EchoMail and NetMail:
+
+- **System Addresses** — add the address the Coordinator assigned you. Leave
+  your existing addresses alone.
+- **NetMail Directory** — note the path. It goes in `ftn.cfg` below.
+- **Allow File Attachments** — `Yes`. With it off the netmail is written and
+  then ignored.
+
+### A domain for the league
+
+In `echocfg` → **Domains**, add one:
+
+```
+Name    xleague
+Zones   777
+```
+
+The other three fields can stay empty. The domain keeps the league's zone from
+being read as part of a network you already carry, and gives it its own
+outbound tree if you set **Outbound Root**. Any name will do; use the same one
+everywhere below.
+
+### The Coordinator as a linked node
+
+In `echocfg` → **Linked Nodes**, add the Coordinator's address with the domain
+on it — `777:777/1@xleague`. Set **Session Password** to the one they gave
+you. **Host** and **Port** are one level down, under **BinkP Settings...**,
+along with **Poll** — which only calls when you have nothing waiting to send,
+since pending files call out on their own.
+
+Prove the link before you configure the game:
+
+```
+jsexec -c /sbbs/ctrl /sbbs/exec/binkit.js -l 777:777/1@xleague
+```
+
+Check the host it dials and that authentication succeeds.
+
+Once the game side is set up too, `immortal-barons -league-check` should come
+back with no FAIL lines.
+
+### Point `barons-ftn` at the netmail directory
+
+In the game's data directory, `ftn.cfg`:
+
+```
+NetmailDir /sbbs/fido/netmail
+Binkley    Yes
+```
+
+`Binkley Yes` is what BinkIT expects. Leave `SubjectPath` alone: SBBSecho
+takes the attachment's directory from the netmail subject, so the full
+pathname has to be there. That pathname gets 70 bytes — see [Attachment
+pathnames](#attachment-pathnames) — which is another reason to keep the game's
+data directory short.
+
+### The four steps, in order
+
+```
+immortal-barons -planetary -data /sbbs/xtrn/imb/data
+barons-ftn -data /sbbs/xtrn/imb/data
+sbbsecho
+jsexec -c /sbbs/ctrl /sbbs/exec/binkit.js
+```
+
+The game reads and writes `.brp` files. `barons-ftn` wraps each one in a
+`.msg`. SBBSecho packs it into the BSO/FLO outbound. BinkIT sends it. Wherever
+a file stops is the step that did not run.
+
+`sbbsecho` takes its ctrl directory from `SBBSCTRL`, not from an `.ini` path on
+the command line, so set that variable in the script if your board is not at
+`/sbbs`. Judge a run by whether the outbound emptied, not by BinkIT's last
+line: a session that transferred everything can still end on a complaint about
+files pending acknowledgement.
+
+Put those four lines in a shell script and give it a lock, so the door's
+clean-up and the timed event cannot run it at once:
+
+```
+#!/bin/sh
+exec 9>/sbbs/xtrn/imb/data/planetary.lock
+flock -n 9 || exit 0
+...the four commands...
+```
+
+Then set it as the door's **Clean-up Command Line** in `scfg` → External
+Programs → Online Programs, and add a timed event that runs it every 15
+minutes or so. It carries your other networks' mail too, since SBBSecho and
+BinkIT are system-wide.
+
+On Windows there is no `flock`; run the batch file from the timed event alone
+and leave the clean-up command line empty.
