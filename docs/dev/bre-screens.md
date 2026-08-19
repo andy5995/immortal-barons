@@ -1219,6 +1219,13 @@ Your dominion gained 380 million people.
 Do you wish to continue? (Y/n) Yes
 ```
 
+A turn with no migration still prints the population line, as `Your dominion
+gained 0 million people.` (twice in `cap/kd3-01.cap`, both on riot turns).
+`process_end_of_turn` (BRE.OVR 0x00ce97) references only two strings for it,
+`Your dominion gained ` and `Your dominion lost `, so zero has no wording of its
+own. **IB printed nothing at all on a zero turn** until 2026-08-18 — most often
+hit by a realm with an empty granary, whose growth is forced to zero.
+
 This block drew both rules as plain 75-column runs until 2026-08-16; the `═`
 accent is in `bre-01-color.cap` and `cap/eots-ibbs-01.cap` alike. **IB draws
 both rules** as of 2026-08-16; it drew a bare heading and no rules before. Its

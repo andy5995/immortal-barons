@@ -488,9 +488,13 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "End of Turn Statistics:"), ansi.Reset)
 	fmt.Fprintf(s, "%s\n", eotsRule())
 	fmt.Fprintf(s, "  %s\n", tr(s, peopleMood(p.Support)))
-	if p.LastPopGrowth > 0 {
+	// A flat turn prints "gained 0" rather than nothing: BRE does (cap/kd3-01.cap,
+	// twice, both on riot turns), and IB used to skip the line entirely, so a
+	// realm whose growth was suppressed — most often by an empty granary — was
+	// told nothing at all.
+	if p.LastPopGrowth >= 0 {
 		fmt.Fprintf(s, "  "+tr(s, "Your dominion gained %s%s%s people.")+"\n", ansi.FgBrightCyan, comma(p.LastPopGrowth), ansi.Reset)
-	} else if p.LastPopGrowth < 0 {
+	} else {
 		fmt.Fprintf(s, "  "+tr(s, "Your dominion lost %s%s%s people.")+"\n", ansi.FgBrightRed, comma(-p.LastPopGrowth), ansi.Reset)
 	}
 	statLine(s, p.LastSpoiled, "units of food spoiled.")

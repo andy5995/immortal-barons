@@ -70,6 +70,21 @@ func TestEndOfTurnStatsWritesNonEmpty(t *testing.T) {
 	}
 }
 
+// A turn with no migration still reports the figure: BRE prints "gained 0"
+// (cap/kd3-01.cap, twice), and there is no third string in the binary —
+// process_end_of_turn references only "Your dominion gained "/"lost ". IB used
+// to print nothing at all, which left a starving realm (growth is forced to
+// zero with an empty granary) with no line to read.
+func TestEndOfTurnStatsReportsZeroPopulationGrowth(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	w := newWorld()
+	w.Player().LastPopGrowth = 0
+	endOfTurnStats(f, w)
+	if !strings.Contains(f.out.String(), "gained \x1b[96m0\x1b[0m people.") {
+		t.Errorf("want the gained-0 line, got %q", f.out.String())
+	}
+}
+
 // The screen is bracketed by BRE's 75-column blue inset rule — 5 single, 15
 // double, 55 single — one under the heading and one closing the block. Golden
 // literal off the capture rather than a rebuild from eotsRuleWidth, so a retune
