@@ -317,19 +317,53 @@ func readTurnMail(s session.Session, w *ctx, announceEmpty bool) {
 	mailReader(s, w)
 }
 
+// manufacturedUnits lists what the Industrial Zones built this turn, one unit
+// type per line under a heading, and nothing at all on a turn that built
+// nothing. A type that produced none is left out, as every other line of this
+// report is.
+//
+// This is a DELIBERATE DIVERGENCE from the original, which ends every one of
+// those lines with "were manufactured by Industrial Zones." — five words
+// repeated six times for the sake of six figures. Recorded in
+// docs/dev/bre-screens.md and docs/mechanics-reference.md; do not "fix" it back
+// to match a capture.
+func manufacturedUnits(s session.Session, made []int) {
+	width := 0
+	for _, n := range made {
+		if w := len(comma(n)); n > 0 && w > width {
+			width = w
+		}
+	}
+	if width == 0 {
+		return
+	}
+	fmt.Fprintf(s, "\n  %s\n", tr(s, "Your Industrial Zones built:"))
+	for i, g := range game.MilitaryGoods {
+		if made[i] == 0 {
+			continue
+		}
+		name := g.Plural
+		if made[i] == 1 {
+			name = g.Singular
+		}
+		fmt.Fprintf(s, "    %s%*s%s  %s\n", ansi.FgBrightCyan, width, comma(made[i]), ansi.Reset, tr(s, name))
+	}
+}
+
 // incomeReport itemizes p's per-turn income by source. It shows exactly the
 // values CollectIncome credits: both derive from World.IncomeThisTurn.
 func incomeReport(s session.Session, w *ctx) {
 	var b game.IncomeBreakdown
 	var raids []game.PirateHit
-	var madeTroopers, madeJets, madeTurrets, madeBombers, madeTanks, madeCarriers int
+	made := make([]int, len(game.MilitaryGoods))
 	if !withPlayer(w, func(p *game.Empire) {
 		b = w.IncomeThisTurn(p)
 		raids = p.PirateHits
 		p.PirateHits = nil
 		p.RaidersThisTurn = raiderSlots(raids)
-		madeTroopers, madeJets, madeTurrets = p.MadeTroopers, p.MadeJets, p.MadeTurrets
-		madeBombers, madeTanks, madeCarriers = p.MadeBombers, p.MadeTanks, p.MadeCarriers
+		for i, g := range game.MilitaryGoods {
+			made[i] = *g.Made(p)
+		}
 	}) {
 		return
 	}
@@ -380,12 +414,7 @@ func incomeReport(s session.Session, w *ctx) {
 	if b.RiverFood > 0 {
 		amt(ansi.FgBrightCyan, b.RiverFood, "Food units were fished from the rivers.")
 	}
-	statLine(s, madeTroopers, "Troopers were trained by Industrial Zones.")
-	statLine(s, madeJets, "Jets were manufactured by Industrial Zones.")
-	statLine(s, madeTurrets, "Turrets were manufactured by Industrial Zones.")
-	statLine(s, madeBombers, "Bombers were manufactured by Industrial Zones.")
-	statLine(s, madeTanks, "Tanks were manufactured by Industrial Zones.")
-	statLine(s, madeCarriers, "Carriers were manufactured by Industrial Zones.")
+	manufacturedUnits(s, made)
 	if len(raids) > 0 {
 		// A blank line before the raid notices. BRE runs them straight on from
 		// the production lines; separating them is IB's own readability choice
@@ -843,7 +872,7 @@ func showQueenRefund(s session.Session, w *ctx) {
 	if paid <= 0 {
 		return
 	}
-	fmt.Fprintf(s, "\n%s"+tr(s, "The Queen Royale opens her coffers and refunds you %s gold in taxes!")+"%s\n",
+	fmt.Fprintf(s, "\n%s"+tr(s, "The Queen Royale opens her coffers and refunds you %s gold!")+"%s\n",
 		ansi.FgWhite, ansi.FgBrightYellow+comma(paid)+ansi.FgWhite, ansi.Reset)
 	pause(s)
 }

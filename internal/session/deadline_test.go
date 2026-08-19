@@ -65,16 +65,18 @@ func TestDeadlineStrikesBootEarly(t *testing.T) {
 	f := newFakeConn()
 	d := NewDeadline(f, 100*time.Millisecond, 3, time.Time{})
 	d.warnings = 3 // simulate three prior idle strikes
-	start := time.Now()
 	_, err := d.ReadKey()
-	elapsed := time.Since(start)
 	if !errors.Is(err, ErrSessionEnded) || d.Reason() != "idle" {
 		t.Fatalf("got (%v, reason=%q), want (ErrSessionEnded, idle)", err, d.Reason())
 	}
-	// With strikes maxed it boots at the warning point (idle-warnLead), not the
-	// full idle deadline.
-	if elapsed >= 90*time.Millisecond {
-		t.Errorf("strike boot took %v, expected earlier than the full idle timeout", elapsed)
+	// With strikes maxed it boots AT the warning point instead of warning and
+	// waiting out the rest of the idle timeout — so the tell is that no warning
+	// was printed. Asserting the elapsed time instead is what made this flaky:
+	// the boot is due at idle/2 and a loaded CI VM took 98.5ms of a 100ms
+	// budget to get there (FreeBSD, 2026-08-19), which says nothing about the
+	// code under test.
+	if strings.Contains(f.out.String(), "You will be disconnected") {
+		t.Errorf("a maxed-out striker should be booted without another warning:\n%s", f.out.String())
 	}
 }
 

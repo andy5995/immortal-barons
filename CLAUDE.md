@@ -367,7 +367,9 @@ advisor pages, and the diplomacy screens (incoming treaty offer, View Treaties'
 `-*Relations*-` roster, Alliance Strength) match BRE's captured layout and ANSI
 colors — figures are highlighted (bright-white or yellow) against dimmer body
 text, per `docs/dev/bre-screens.md`. **Deliberate divergences** are recorded
-there, each beside the screen it belongs to, and must not be "corrected" back —
+there, each beside the screen it belongs to, with the ones most likely to read
+as bugs also listed under "Screen output that deliberately diverges" in
+`docs/mechanics-reference.md`. They must not be "corrected" back —
 IB comma-groups figures BRE prints bare, and the offer's stats line separates
 fields with `│` where BRE uses `; `, among others. IB also lists the treaty
 offers you have SENT, which BRE shows nowhere (#92).

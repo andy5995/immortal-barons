@@ -128,7 +128,8 @@ func TestIncomeReportShowsIndustryProduction(t *testing.T) {
 	out := f.out.String()
 	for _, want := range []string{
 		"gold was earned from Industrial Zones", // industrial gold, now itemized in the breakdown
-		"Troopers were trained by Industrial Zones",
+		"Your Industrial Zones built",
+		"Troopers",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected incomeReport to contain %q, got:\n%s", want, out)
@@ -150,7 +151,7 @@ func TestEndOfTurnStatsNoLongerShowsIndustryProduction(t *testing.T) {
 	out := f.out.String()
 	for _, unwanted := range []string{
 		"gold was produced by your Industry",
-		"Troopers were trained by Industrial Zones",
+		"Your Industrial Zones built",
 	} {
 		if strings.Contains(out, unwanted) {
 			t.Errorf("expected endOfTurnStats to NOT contain %q, got:\n%s", unwanted, out)
@@ -897,5 +898,42 @@ func TestRunTurnSaysWhenTheLastTurnIsSpent(t *testing.T) {
 	}
 	if !strings.Contains(out, "used all of your turns today") {
 		t.Error("spending the last turn should say so rather than returning silently")
+	}
+}
+
+// Six unit types used to print six near-identical sentences. They are a list
+// under one heading now, and a count of one takes the singular name.
+func TestManufacturedUnitsAreListedOnce(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	w := newWorld()
+	p := w.Player()
+	p.Regions.Industrial = 200
+	w.World.Manufacture(p)
+	if p.MadeCarriers != 0 {
+		p.MadeCarriers = 1 // pin the singular case rather than hoping the split lands on it
+	}
+
+	incomeReport(f, w)
+	out := stripANSI(f.out.String())
+	built := 0
+	for _, line := range strings.Split(out, "\n") {
+		if strings.Contains(line, "Industrial Zones built") {
+			built++
+		}
+		if strings.Contains(line, " 0  ") {
+			t.Errorf("a unit type that built none should be left out: %q", line)
+		}
+		if n := len([]rune(line)); n > 80 {
+			t.Errorf("line runs to %d columns: %q", n, line)
+		}
+	}
+	if built != 1 {
+		t.Errorf("manufacturing opened %d lines, want 1:\n%s", built, out)
+	}
+	if !strings.Contains(out, "1  Carrier\n") {
+		t.Errorf("a count of one should take the singular name:\n%s", out)
+	}
+	if strings.Contains(out, "1 Carriers") {
+		t.Errorf("plural on a count of one:\n%s", out)
 	}
 }

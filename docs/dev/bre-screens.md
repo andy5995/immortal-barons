@@ -569,6 +569,32 @@ bright-white numbers instead — and so does a **menu's own status footer**
 (`You have N gold and N turns.`, `…and N units of food.`), on every menu that
 carries one.
 
+### Daily maintenance (login, before the opening menu)
+
+Captured live in `cap/treaty-order-20260817.cap`. The header carries a `93`
+bright-yellow `■` marker and `37` white text; each task is its own line
+indented 5 columns, printed as it is carried out and scrolled up a line at a
+time; the closing line is `97` bright-white. The tasks BRE names in order:
+checking for dead empires, the news bulletin, covert operations, investment and
+loan information, packing trade deals / covert operations / treaties, awarding
+the Planetary Master, depositing trading market money, duplicate scanning
+files, inbound and outbound doomsday attacks, old recons, transfer times,
+duplicate users, SpyGuys, packing data packets.
+
+```
+■  Running Daily Maintenance
+     Checking for Dead Empires
+     Updating Daily News Bulletin
+     Processing Covert Operations
+     ...
+     Daily Maintainence Complete
+```
+
+**Deliberate divergence:** IB names its own tasks, in its own words, and lists
+only the ones that had something to do — its maintenance is not BRE's, and half
+those lines belong to file formats IB does not have. The shape (marker, header,
+indented task lines, bright closing line) is the same.
+
 ### Opening menu (top-level)
 
 Shown after login and after each news screen. Magenta accent; two columns.
@@ -739,6 +765,11 @@ income lines open under a **75**-column one (5 `─`, 15 `═`, 55 `─`); the s
 block is bracketed by a **70**-column one (5 `─`, 14 `═`, 51 `─`) above and
 below. Nothing closes the maintenance lines — the pause follows them directly.
 The rules are omitted from the block below only to keep the field list readable.
+
+**Deliberate divergence:** BRE ends each manufacturing line with "were
+manufactured by Industrial Zones." IB says that once, as a heading, and lists
+the units under it — one per line, figure first, and no line for a type that
+built none.
 
 ```
 227,717 gold was earned in taxes.

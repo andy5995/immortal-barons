@@ -3821,6 +3821,24 @@ Still missing against the reference:
 A few Diplomacy and Covert menu items are recorded but inert, pending fuller
 subsystems. Each is flagged where it is described above.
 
+### Screen output that deliberately diverges
+
+`docs/dev/bre-screens.md` is the catalog, each note beside the screen it belongs
+to. These two are recent enough to be worth naming here as well, since both
+replace something the original does line for line and both will look like bugs
+to anyone checking IB against a capture:
+
+- **Manufacturing is a list, not six sentences.** BRE ends each line with "were
+  manufactured by Industrial Zones."; IB says that once as a heading and lists
+  the units under it, one per line, with no line for a type that built none.
+- **Daily maintenance names IB's own tasks.** The shape is BRE's — a marked
+  header, an indented line per task as it is carried out, a bright closing
+  line — but the tasks are IB's, in IB's words, and only the ones with something
+  to do are printed. Half of BRE's list belongs to file formats IB does not
+  have.
+
+Neither is an oversight to correct back.
+
 ### Deliberately not implemented
 
 - **Lottery.** BRE offers a ticket at the start of a turn

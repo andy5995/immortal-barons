@@ -72,13 +72,20 @@ func maintNotice(s session.Session, r game.MaintReport) {
 		// Nothing ran — the game hasn't started yet; the opening menu shows the
 		// start date, so no notice is needed here.
 	case r.Days > 0:
-		fmt.Fprintf(s, "\n%sRunning daily maintenance...%s\n", ansi.FgBrightCyan, ansi.Reset)
-		day := "day"
-		if r.Days > 1 {
-			day = "days"
+		// The original's shape: a marked header, then one indented line per
+		// stage as it is carried out, closed by a bright completion line
+		// (docs/dev/bre-screens.md, captured live). The steps come from the run
+		// itself, so a stage with nothing to do prints no line.
+		//
+		// The STEP NAMES are a deliberate divergence: they are IB's own tasks in
+		// IB's own words, since half of BRE's list belongs to file formats IB
+		// does not have. Recorded in bre-screens.md and mechanics-reference.md
+		// beside the shape they keep.
+		fmt.Fprintf(s, "\n%s\u25a0  %s%s%s\n", ansi.FgBrightYellow, ansi.FgWhite, "Running daily maintenance", ansi.Reset)
+		for _, step := range r.Steps {
+			fmt.Fprintf(s, "%s%s%s\n", ansi.FgWhite, menu.WrapIndented(step, "     "), ansi.Reset)
 		}
-		fmt.Fprintf(s, "  Advanced %d %s. Rival barons played their turns, markets settled,\n", r.Days, day)
-		fmt.Fprint(s, "  investments matured, and every realm's turns were refreshed.\n")
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, menu.WrapIndented("Daily maintenance complete", "     "), ansi.Reset)
 	default:
 		fmt.Fprintf(s, "\n%sMaintenance has already been run today.%s\n", ansi.FgWhite, ansi.Reset)
 	}

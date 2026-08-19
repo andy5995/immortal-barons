@@ -62,7 +62,16 @@ func (w *World) PlayTurn(e *Empire, today string) {
 type MaintReport struct {
 	Days       int
 	NotStarted bool
+	// Steps names each stage the run actually performed, in the order it ran
+	// them, for the front-end to print one per line — the way the original
+	// reports its own daily maintenance. A stage that had nothing to do adds no
+	// line, so the list is a record of what happened rather than a fixed menu.
+	// English, as every engine-authored string is; the front-end translates.
+	Steps []string
 }
+
+// step records a stage of daily maintenance for the caller's report.
+func (r *MaintReport) step(name string) { r.Steps = append(r.Steps, name) }
 
 // DailyMaintenance advances the world by AT MOST ONE game day per real day,
 // however long the game has sat idle. A realm nobody has touched for four days
@@ -101,9 +110,12 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		w.removeDeadHusks()
 		return MaintReport{}
 	}
+	rep := MaintReport{Days: 1}
 	{
+		rep.step("Paying out trading market sales")
 		w.settleMarketProceeds()                   // "Depositing trading market money" — pay sellers at day-end (#17)
 		w.FoodMarketSupply = FoodMarketDailySupply // refill the food market for the new day (#19)
+		rep.step("Restocking the food market")
 		for _, e := range w.Empires {
 			if e.Alive {
 				e.LandAvailable += w.Config.LandPerDay // Daily Land Creation
@@ -117,11 +129,18 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 				e.TurnProgress = TurnProgress{} // abandon any turn left uncommitted at rollover (#10)
 			}
 		}
+		rep.step("Granting new land and refreshing turns")
 		// Every covert agent sent out yesterday lands now, before anyone plays —
 		// BRE's run_daily_maintenance drains the queue the same way. Ahead
 		// of aiPlay so an AI's own operations wait a day exactly as a player's
 		// do, rather than resolving inside the run that queued them.
+		if len(w.CovertQueue) > 0 {
+			rep.step("Resolving covert operations")
+		}
 		w.resolveCovertQueue()
+		if len(w.Empires) > w.HumanCount() {
+			rep.step("Playing the computer barons' turns")
+		}
 		w.aiPlay(w.LastMaintDate)
 		// Pirate raids are per-turn now (maybePirateRaid in PlayTurn), not a daily
 		// sweep — so they land randomly across turns (~1-in-5) instead of clustering
@@ -142,6 +161,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 				e.DiedDay = w.GameDay
 			}
 		}
+		rep.step("Checking for fallen realms")
 		w.GameDay++
 		// Sweep out husks whose death is now in the past so dead barons (AI
 		// included) don't linger on the scoreboard or in the world. A realm
@@ -150,20 +170,28 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		w.removeDeadHusks()
 		// A caller who created a realm and never played a turn is erased; they may
 		// start fresh whenever they next log in.
+		before := len(w.Empires)
 		w.removeUnplayedEmpires()
 		w.removeIdleEmpires(today) // abandoned realms fade out (#83)
+		if len(w.Empires) < before {
+			rep.step("Clearing away abandoned realms")
+		}
 		for _, e := range w.Empires {
 			if e.Alive {
 				w.matureInvestments(e)
 				w.matureLoans(e)
 			}
 		}
+		rep.step("Settling investments and loans")
 		w.expireSpyGuys() // a watcher's stay is a day shorter, silently (SpyGuy)
 		w.adjustInvestRate()
+		rep.step("Setting the bank's rate")
 		w.postMasterNews()
 		w.postProclamationNews()
 		w.rollNews()
+		rep.step("Writing the daily news bulletin")
 		if w.Config.GameLength > 0 && w.GameDay >= w.Config.GameLength {
+			rep.step("Crowning the Planetary Master")
 			w.endGame()
 		}
 		w.LastMaintRun = today
@@ -177,7 +205,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 	// an already-current world), so past-day dead realms don't linger. A realm
 	// that died today (DiedDay == GameDay) is kept by removeDeadHusks.
 	w.removeDeadHusks()
-	return MaintReport{Days: 1}
+	return rep
 }
 
 // rollNews snapshots the day's planet totals into BulletinToday (rolling the
