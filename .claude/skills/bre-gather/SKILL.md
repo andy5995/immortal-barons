@@ -314,6 +314,15 @@ but returns the cataloged functions and blocks that reference each match. Use
 raw `strings` only to inspect declaration order or text that has no indexed
 code reference.
 
+**"Who is allowed to do this?" is usually answered by `bre.doc`'s command-line
+section.** It lists every switch with a one-line restriction, and those lines
+settle permissions questions no screen can: `PLAYERLIST` is "for League
+Coordinators only", `UPDATE` is "Only can be done by BBS #1", `EDITOR` is
+League-Coordinator-only in an InterBBS game. That is where it was established
+that BRE hands a player list to the coordinating BOARD's operator and never to
+the elected in-game Coordinator, which is a different office held by an ordinary
+player. Grep that section before reasoning from which menu a thing appears on.
+
 **Know where the prose actually is: BRE ships only TWO `.hlp` files** —
 `game/attack.hlp` and `game/reset.hlp`. There is no per-screen help, so do not
 hunt for a `market.hlp`; the bulk of the prose is `docs/bre.doc` and
@@ -427,7 +436,13 @@ order.
 
 **The length-prefix trap:** the byte immediately *before* each string is its
 **length**, not a color or a hotkey. Example: `0d "View IPScores"` — `0x0d`=13 =
-`len("View IPScores")`. A run of 16-bit little-endian values before a menu
+`len("View IPScores")`. It bites in the other direction too, by making a string
+look LONGER than it is: `docs/dev/bre-screens.md` recorded the Diplomacy
+Modification key set as `WNPAU` for months, but the length byte ahead of it is
+`0x04` and the `U` is the `0x55 push bp` of the next routine. **A key set, a
+version, or any short string quoted in our own docs is worth re-checking against
+its length byte the first time you rely on it** — the trailing junk is real code
+and reads as a plausible extra key. A run of 16-bit little-endian values before a menu
 cluster is usually a Pascal case/jump table, not data you want.
 
 **Never claim BRE LACKS a feature from the screen you happened to look at.**

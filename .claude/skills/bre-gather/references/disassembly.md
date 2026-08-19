@@ -219,6 +219,23 @@ inspection. Cross-check against a current-empire site in the same routine, which
 reaches the same fields through `les di,[0x28d8]` with plain positive offsets
 (`+0x1f` name, `+0x286` Score); if the two disagree, the anchor is wrong.
 
+### A menu's key-to-label map: read the DRAW calls, not the string order
+
+Declaration order equals menu order often enough to be a trap. Read the handler
+instead: each row is `mov al,'<key>'` followed by the label's *unit-relative*
+offset loaded into `di` and pushed with `cs`, then one call to the shared item
+printer. Converting those offsets against the unit's string pool gives the
+mapping outright, and the dispatch below (`cmp al,'1'` …) confirms it.
+
+The Coordinator Ops menu is the worked example: keys `0x31`-`0x34` against
+offsets 0x00 / 0x11 / 0x22 / 0x37 in `ovr_015dbf`, which are Dismantle Gooie,
+Modify Diplomacy, Global Recon Request, View Diplomacy. Note the pool offsets
+point at the **length byte**, so 0x00 is the first string and the run of
+`0x0f "Dismantle Gooie"` `0x00` `0x10 "Modify Diplomacy"` puts a ZERO-LENGTH
+string at 0x10 — which is the printer's second argument on every row, the
+annotation column BRE leaves blank here. Do not read that constant argument as
+a fifth label; `xxd` the pool before interpreting any of them.
+
 ### Finding an UNKNOWN record field: scan the opcode, not the string
 
 When you don't yet know a mechanic's field offset, don't hunt for its message

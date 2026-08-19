@@ -59,6 +59,21 @@ and `base + 0x96` (150) here, and 150 − 32 = 118.
 
 ```
 empire record (les di,[0x28d8])
+  +0x00  String[30]  the CALLER'S BBS ACCOUNT NAME — the person, not the realm.
+                A live save has "SELBY" here against a realm named "duh", and a
+                second record "WRAPTEST" against "Wraptest", the BBS's own
+                upper-cased login beside the name its owner typed. Nothing on
+                any screen prints it; the dupe file DATA\DUPE.BR carries it
+                across boards for duplicate-user checking, and the League
+                Coordinator's PLAYERLIST command line dumps that file to
+                PLAYERS.LST. Its length byte doubles as the slot-occupied test
+                the pickers use (`cmp byte [es:di-0xf6d],0`).
+  +0x1f  String[30]  the REALM name, and the one every player-visible screen
+                uses: See Scores, the coordinator vote's roster, the
+                interplanetary Player Information screen, and the recon packet's
+                own `PlanetInfo.Names`, which `build_recon_record` fills from
+                here. So a realm's owner never crosses to another planet.
+  +0x3e  String[30]  a third name slot, empty in every record examined.
   +0x62  int32  population, in MILLIONS. Two independent reads agree: the food
                 routine at BRE.OVR 0x37418 multiplies it by 1.5 for "Your People
                 Need N", and the chemical and biological strikes print "<N>
