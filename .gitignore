@@ -1,5 +1,8 @@
-# Built binaries (one per front-end in cmd/)
+# Built binaries (one per command in cmd/, all three left in the repo root by
+# a bare `go build ./...`)
 /immortal-barons
+/barons-ftn
+/barons-docs
 
 # Go test and profiling output
 *.test
