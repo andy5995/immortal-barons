@@ -67,3 +67,45 @@ func TestPlayerListDoesNotShowBBSHandles(t *testing.T) {
 		t.Errorf("the roster names a caller's BBS handle: %q", out)
 	}
 }
+
+// Dismantle is the Coordinator's lever, not the builder's — BRE's Dismantle
+// Gooie, item 1 of the Coordinator Ops menu (#45). The weapon here belongs to
+// another baron, which is the whole point: peace is made and the strike aimed
+// at the new ally is called off over its builder's head.
+func TestCoordinatorDismantlesAnotherBaronsAnnihilator(t *testing.T) {
+	w := leagueCtx(t)
+	w.Config.ClingyAnnihilator = true
+	w.RemoteBoards = []game.RemoteBoard{{BoardID: "Nova Hub"}}
+	builder := w.AddHuman("bravo", "Bravo")
+	if err := w.StartAnnihilator(builder, "Nova Hub"); err != nil {
+		t.Fatalf("start: %v", err)
+	}
+
+	f := drive(t, w, "y", dismantleAnnihilator)
+	if out := f.out.String(); !strings.Contains(out, "Nova Hub") {
+		t.Errorf("the screen should name the target, got %q", out)
+	}
+	if w.Annihilator != nil {
+		t.Error("the weapon should have been dismantled")
+	}
+}
+
+// An ordinary baron gets the refusal, whoever built it.
+func TestOnlyTheCoordinatorDismantlesTheAnnihilator(t *testing.T) {
+	w := leagueCtx(t)
+	w.Config.ClingyAnnihilator = true
+	w.RemoteBoards = []game.RemoteBoard{{BoardID: "Nova Hub"}}
+	if err := w.StartAnnihilator(w.Player(), "Nova Hub"); err != nil {
+		t.Fatalf("start: %v", err)
+	}
+	other := w.AddHuman("bravo", "Bravo")
+	w.VoteCoordinator(w.Player(), other.Owner) // hand the office to Bravo
+
+	f := drive(t, w, "y", dismantleAnnihilator)
+	if out := f.out.String(); !strings.Contains(out, "Coordinator") {
+		t.Errorf("want the coordinator-only refusal, got %q", out)
+	}
+	if w.Annihilator == nil {
+		t.Error("a baron who does not hold the office dismantled the weapon")
+	}
+}

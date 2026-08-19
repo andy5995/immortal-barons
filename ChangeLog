@@ -1,4 +1,7 @@
 (in-progress:)
+  * The BBS Coordinator can stand down the planet's Clingy Annihilator before it
+    flies, from the Coordinator menu, whoever built it (issue #45). The baron
+    who started it keeps their own dismantle for now (issue #114)
   * The Coordinator's Player List no longer shows the BBS account name behind
     each realm. The original prints one only in a file a sysop creates, never
     on a screen

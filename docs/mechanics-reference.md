@@ -657,8 +657,16 @@ All four constants live in `balance.go`; Score never drops below 0.
 ultimate weapon, aimed at an entire enemy planet rather than one empire, and one
 per planet at a time. IB implements the original's lifecycle (#16): begin
 construction against a named planet → any baron funds it a million gold at a time
-→ complete → awaiting launch → in flight → arrival. Its creator may dismantle it
-instead, and the gold is not refunded.
+→ complete → awaiting launch → in flight → arrival. It can be dismantled before
+it flies and the gold is not refunded.
+
+**Who may call it off is the elected BBS Coordinator**, from item 1 of the
+Coordinator menu — the original's *Dismantle Gooie*. Standing a strike down is a
+diplomatic lever rather than a change of mind: the planet makes peace and calls
+off the weapon still aimed at its new ally, over the builder's head (#45, built
+2026-08-18). Two divergences remain, both **#114**: IB still lets the baron who
+started it dismantle it from the weapon's own desk, and still asks them whether
+to launch, where the original launches by itself once the funding completes.
 
 The **funding cost is binary-verified** from BRE.OVR's overlay unit at 0x27441
 (the routine at 0x277A0-0x27950), in millions of gold:

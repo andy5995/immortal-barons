@@ -408,11 +408,12 @@ func BuildMenus() *Menus {
 	// docs/dev/bre-screens.md, which has carried that table since the eight-
 	// lettered-hotkey reading was corrected.
 	//
-	// KEY 1 IS DELIBERATELY EMPTY: Dismantle Gooie is not built (#114), and
-	// closing the gap would put every remaining item on the original's key for
-	// its neighbour — which is what IB shipped until 2026-08-18. Player List is
-	// IB's own, keyed past the original's four rather than displacing one.
+	// Player List is IB's own, keyed past the original's four rather than
+	// displacing one. IB numbered its three built items 1-3 until 2026-08-18,
+	// which put every one of them on the original's key for its neighbour.
 	coord.Items = []Item{
+		{Key: '1', Label: "Dismantle Clingy Annihilator", Do: dismantleAnnihilator,
+			Hidden: noAnnihilator},
 		{Key: '2', Label: "Modify Diplomacy", Do: diplomacyModification},
 		{Key: '3', Label: "Global Recon Request", Do: globalReconRequest},
 		{Key: '4', Label: "View Diplomacy", Do: planetaryTreaties},

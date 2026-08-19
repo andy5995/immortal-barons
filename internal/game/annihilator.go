@@ -37,6 +37,7 @@ var (
 	ErrAnnihilatorFlying   = errors.New("The Clingy Annihilator has already launched.")
 	ErrAnnihilatorDisabled = errors.New("Clingy Annihilator operations are switched off in this game.")
 	ErrNotYours            = errors.New("Only the baron who started it may do that.")
+	ErrNotPlanetCO         = errors.New("Only the elected BBS Coordinator may do that.")
 )
 
 // annihilatorCost prices a Clingy Annihilator aimed at targetLand, from a planet holding
@@ -188,6 +189,29 @@ func (w *World) DismantleAnnihilator(e *Empire) error {
 	}
 	if w.Annihilator.Creator != "" && w.Annihilator.Creator != e.Owner {
 		return ErrNotYours
+	}
+	return w.scrapAnnihilator()
+}
+
+// DismantleAnnihilatorByCoordinator stands the weapon down on the elected BBS
+// Coordinator's order instead of its builder's. In BRE this is Dismantle Gooie,
+// the first item of the Coordinator Ops menu, and it is a diplomatic lever
+// rather than a change of mind: a planet that has just made peace calls off the
+// weapon still aimed at its new ally, so the office holds the switch (#45).
+func (w *World) DismantleAnnihilatorByCoordinator(e *Empire) error {
+	if w.BBSCoordinator() != e {
+		return ErrNotPlanetCO
+	}
+	return w.scrapAnnihilator()
+}
+
+// scrapAnnihilator is the dismantling itself, without asking who ordered it.
+func (w *World) scrapAnnihilator() error {
+	if w.Annihilator == nil {
+		return ErrNoAnnihilator
+	}
+	if w.Annihilator.Launched {
+		return ErrAnnihilatorFlying
 	}
 	board := w.Annihilator.TargetBoard
 	w.Annihilator = nil

@@ -2131,10 +2131,10 @@ A fifth key, read from a variable rather than a literal, quits; anything else
 redraws the menu.
 
 **IB's keys match this table as of 2026-08-18 and did not before**: it numbered
-the three items it has built `1`-`3`, so each sat on the original's key for its
-neighbour, and its own Player List sat on `4`, View Diplomacy's key. Key `1` is
-now deliberately empty until Dismantle Gooie is built (#114), and Player List
-has moved to `5`, past the original's four.
+the three items it had built `1`-`3`, so each sat on the original's key for its
+neighbour, and its own Player List sat on `4`, View Diplomacy's key. Key `1` now
+holds IB's Dismantle Clingy Annihilator (#45 — IB renames the weapon), and
+Player List has moved to `5`, past the original's four.
 
 **The Coordinator gets no player list in the original.** The two coordinator
 roles are different offices: the **BBS Coordinator** whose menu this is was

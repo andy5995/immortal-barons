@@ -1093,6 +1093,56 @@ func voteCoordinator(s session.Session, w *ctx) Result {
 	return Stay
 }
 
+// dismantleAnnihilator is BRE's Dismantle Gooie, item 1 of the Coordinator Ops
+// menu: the elected Coordinator calls off the planet's doomsday weapon before
+// it flies (#45). The builder keeps a dismantle of their own on the weapon's
+// own desk for now; #114 covers taking that away, along with launching the
+// weapon by hand.
+func dismantleAnnihilator(s session.Session, w *ctx) Result {
+	var isCoordinator, enabled bool
+	var d *game.Annihilator
+	w.With(func() {
+		isCoordinator = w.BBSCoordinator() == w.Player()
+		enabled = w.Config.ClingyAnnihilator
+		if w.Annihilator != nil {
+			c := *w.Annihilator
+			d = &c
+		}
+	})
+	if !isCoordinator {
+		ok(s, "Only the BBS Coordinator may stand the weapon down.")
+		return Stay
+	}
+	if !enabled {
+		ok(s, "Clingy Annihilator operations are switched off in this game.")
+		return Stay
+	}
+	if d == nil {
+		ok(s, "This planet is not building a Clingy Annihilator.")
+		return Stay
+	}
+	if d.Launched {
+		ok(s, "The Clingy Annihilator has already launched. Nothing can call it back.")
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s"+tr(s, "The Clingy Annihilator is aimed at %s.")+"%s\n", ansi.FgWhite, d.TargetBoard, ansi.Reset)
+	okNoPause(s, "Dismantling it refunds nothing — the gold is spent.")
+	if !AskYesNo(s, "Stand it down?", false) {
+		return Stay
+	}
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		// Re-checked inside the transaction: a vote on another node can unseat
+		// the caller between the gate above and here.
+		return w.World.DismantleAnnihilatorByCoordinator(p)
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	ok(s, "The Clingy Annihilator has been dismantled.")
+	return Stay
+}
+
 // diplomacyModification is the BBS Coordinator's Diplomacy Modification screen:
 // pick a planet, file where this one stands with it. What that does and does
 // not mean is BRE's own note, reproduced below — the chart tells this planet's
