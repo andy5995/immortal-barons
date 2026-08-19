@@ -1,4 +1,6 @@
 (in-progress:)
+  * A bid on an allied planet's listing priced at 0 gold is accepted. It was
+    refused with a message about the quantity
   * New -players command line option, the original's VIEW: lists the players
     and changes a player's name, renames a realm, or deletes one (issue #161)
   * The ChangeLog ships in the release and snapshot archives

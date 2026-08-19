@@ -28,6 +28,7 @@ var (
 	ErrNoSuchListing  = errors.New("That good is no longer offered there.")
 	ErrOwnPlanet      = errors.New("That is your own planet's market.")
 	ErrBadTradeAmount = errors.New("Enter how many units to bid for.")
+	ErrBadTradePrice  = errors.New("That listing's price is not valid.")
 )
 
 // RemoteListing is one row of another planet's market as this board last heard
@@ -86,8 +87,14 @@ func (w *World) SendTradeBid(e *Empire, targetBoard, seller, good string, qty, p
 	if w.PlanetRelationWith(targetBoard) != PlanetAllied {
 		return 0, ErrNotAllied
 	}
-	if qty <= 0 || price <= 0 {
+	if qty <= 0 {
 		return 0, ErrBadTradeAmount
+	}
+	// A price of 0 is a real listing — a giveaway between allies — and the local
+	// market has always allowed one. Only a negative price is rejected, and that
+	// can only arrive from a malformed snapshot packet, never from a seller here.
+	if price < 0 {
+		return 0, ErrBadTradePrice
 	}
 	cost := TradeBidCost(qty, price)
 	if e.Gold < cost {

@@ -265,3 +265,27 @@ func TestInterplanetaryBidRefusedWhenTheFarBoardStopsTrading(t *testing.T) {
 			buyer.Tanks, buyer.Gold, goldBefore)
 	}
 }
+
+// A listing priced at 0 is a giveaway between allies, which the local market has
+// always allowed. The bid path used to refuse it, and told the buyer to "enter
+// how many units to bid for" — a quantity complaint about a price.
+func TestInterplanetaryBidOnAFreeListing(t *testing.T) {
+	bw, buyer, sw, seller := twoTradingBoards(t, 50, 0)
+	sw.ExportScores()
+	bw.ApplyPacket(sw.Outbox[0])
+
+	goldBefore := buyer.Gold
+	if _, err := bw.SendTradeBid(buyer, "Bravo", "Redlands", "Tank", 50, 0); err != nil {
+		t.Fatalf("SendTradeBid: %v", err)
+	}
+	if buyer.Gold != goldBefore {
+		t.Errorf("a free bid escrowed %d gold", goldBefore-buyer.Gold)
+	}
+	bw.ApplyPacket(sw.ApplyPacket(bw.Outbox[len(bw.Outbox)-1]))
+	if buyer.Tanks != 50 {
+		t.Errorf("the buyer received %d tanks, want the 50 given away", buyer.Tanks)
+	}
+	if got := sw.MarketProceeds[seller.Name]; got != 0 {
+		t.Errorf("the seller is owed %d for a giveaway", got)
+	}
+}
