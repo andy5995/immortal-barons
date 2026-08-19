@@ -88,6 +88,7 @@ func main() {
 	lastPacket := flag.Bool("lastpacket", false, i18n.T(lang, "write LASTPACKET.LST — when a packet from each other board was last processed here, then exit"))
 	bbsInfo := flag.Bool("bbsinfo", false, i18n.T(lang, "write BBSINFO.LST — every board, when it was last heard from, and the version it runs, then exit"))
 	playerList := flag.Bool("playerlist", false, i18n.T(lang, "write PLAYERLIST.LST — every realm on every board (League Coordinator only), then exit"))
+	players := flag.Bool("players", false, i18n.T(lang, "list the players and change a caller's name, rename their realm, or remove it, then exit"))
 	reset := flag.Bool("reset", false, i18n.T(lang, "start a new game: change the settings, then clear all empires and rebuild the world (the old world is saved first)"))
 	boardID := flag.String("board-id", "", i18n.T(lang, "this board's name in the league, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator"))
 	inboundDir := flag.String("inbound", "", i18n.T(lang, "directory where packets from the other boards arrive, for -ibbs-reset (default \"inbound\", under the data directory)"))
@@ -128,7 +129,7 @@ func main() {
 	// stray word alongside one is a mistake — flag it instead of silently ignoring
 	// it. (Unknown -flags are already rejected by the flag package.)
 	explicitMode := *maint || *planetary || *full || *scores || *leagueConfig || *leagueRoutes || *reset || *resetFromConfig || *ibbsReset ||
-		*lastPacket || *bbsInfo || *playerList ||
+		*lastPacket || *bbsInfo || *playerList || *players ||
 		*addAI > 0 || *dump || *spectate > 0 || *local || *export != "" || *imp != "" || *setDrop
 	if flag.NArg() > 0 && explicitMode {
 		fmt.Fprintf(os.Stderr, "immortal-barons: unknown argument %q\n\n", flag.Arg(0))
@@ -243,6 +244,13 @@ func main() {
 		}
 		if err := runLeagueReport(cfg, r.flag); err != nil {
 			fmt.Fprintf(os.Stderr, "immortal-barons -%s: %v\n", r.flag, err)
+			os.Exit(1)
+		}
+		return
+	}
+	if *players {
+		if err := runPlayers(cfg, os.Stdin, os.Stdout); err != nil {
+			fmt.Fprintln(os.Stderr, "immortal-barons -players:", err)
 			os.Exit(1)
 		}
 		return

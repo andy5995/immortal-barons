@@ -64,26 +64,57 @@ func ValidRealmName(name string) bool {
 // lands. The old name is also held against re-use (RealmNameTaken) for as long
 // as the realm lives, so no second realm can take delivery of it.
 func (w *World) RenameEmpire(e *Empire, newName string) error {
-	name := strings.TrimSpace(newName)
 	switch {
 	case e.FormerName != "":
 		return ErrRenameUsed
 	case e.Protection > 0:
 		return ErrRenameProtected
+	}
+	old, err := w.setRealmName(e, newName)
+	if err != nil {
+		return err
+	}
+	// FormerName is both halves of the deal: the name packets still answer to,
+	// and the marker that spends the one rename. A sysop rename records its old
+	// name in PriorNames instead, so it does not spend a player's allowance.
+	e.FormerName = old
+	return nil
+}
+
+// SysopRenameEmpire renames e on the sysop's authority (#161). It is the same
+// rewrite RenameEmpire performs, without the two conditions that are the
+// player's alone: the once-in-a-realm's-life limit and the New Realm Protection
+// bar. Nor does it spend the player's rename — a name changed for them is not a
+// name they chose, so the old one goes to PriorNames rather than FormerName.
+func (w *World) SysopRenameEmpire(e *Empire, newName string) error {
+	old, err := w.setRealmName(e, newName)
+	if err != nil {
+		return err
+	}
+	e.PriorNames = append(e.PriorNames, old)
+	return nil
+}
+
+// setRealmName validates newName, moves the realm onto it, repoints every
+// stored reference, and tells the planet. It returns the name the realm was
+// carrying, for the caller to record as an alias — which of the two alias
+// fields it lands in is what separates a player's rename from a sysop's.
+func (w *World) setRealmName(e *Empire, newName string) (string, error) {
+	name := strings.TrimSpace(newName)
+	switch {
 	case !ValidRealmName(name):
-		return ErrRealmNameInvalid
+		return "", ErrRealmNameInvalid
 	case w.RealmNameTaken(name):
-		return ErrRealmNameTaken
+		return "", ErrRealmNameTaken
 	}
 	old := e.Name
-	e.FormerName = old
 	e.Name = name
 	w.rewriteRealmName(old, name)
 	// BRE has no rename, so the wording is IB's own: the planet is told, because
 	// every other baron's treaty list, market screen and target list just changed
 	// under them.
 	w.postNews(fmt.Sprintf("%s is henceforth known as %s.", old, name))
-	return nil
+	return old, nil
 }
 
 // rewriteRealmName repoints every stored reference to realm `old` at `name`.
@@ -155,8 +186,10 @@ func (w *World) FindByNameOrFormer(name string) *Empire {
 		return nil
 	}
 	for _, e := range w.Empires {
-		if e.FormerName == name {
-			return e
+		for _, old := range e.PriorRealmNames() {
+			if old == name {
+				return e
+			}
 		}
 	}
 	return nil

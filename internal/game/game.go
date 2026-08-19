@@ -69,7 +69,13 @@ type Empire struct {
 	// whole life because packets already in the air are addressed to it; see
 	// FindByNameOrFormer.
 	FormerName string `json:",omitempty"`
-	Owner      string // normalized BBS handle; "" for AI
+	// PriorNames holds the names a SYSOP rename moved this realm off (#161).
+	// They serve the same delivery job FormerName does — packets in the air are
+	// addressed to them, and nobody else may claim them — but they are kept
+	// apart because FormerName also spends the player's one rename, and a name
+	// changed for a player must not cost them theirs.
+	PriorNames []string `json:",omitempty"`
+	Owner      string   // normalized BBS handle; "" for AI
 	// Slot is the realm's permanent place in the planet's fixed roster, 1..25,
 	// and the public identity every screen addresses it by: the Id column and
 	// every picker letter is 'A' + Slot - 1, so slot 1 is A and slot 25 is Y.
@@ -1106,11 +1112,28 @@ func (w *World) RealmNameTaken(name string) bool {
 	for _, e := range w.Empires {
 		// A renamed realm holds its old name too: inbound packets still address it
 		// (see RenameEmpire), so nobody else may take delivery of that name.
-		if strings.ToLower(e.Name) == n || (e.FormerName != "" && strings.ToLower(e.FormerName) == n) {
+		if strings.ToLower(e.Name) == n {
 			return true
+		}
+		for _, old := range e.PriorRealmNames() {
+			if strings.ToLower(old) == n {
+				return true
+			}
 		}
 	}
 	return false
+}
+
+// PriorRealmNames returns every name this realm used to answer to and still
+// takes delivery on — the one a player's rename moved it off (FormerName) and
+// any a sysop's did (PriorNames). Callers that resolve a name written before a
+// rename, or that hold a name against re-use, walk this rather than either
+// field, so neither kind of rename can be missed.
+func (e *Empire) PriorRealmNames() []string {
+	if e.FormerName == "" {
+		return e.PriorNames
+	}
+	return append([]string{e.FormerName}, e.PriorNames...)
 }
 
 // Lock/Unlock guard the shared World when a single process runs concurrent

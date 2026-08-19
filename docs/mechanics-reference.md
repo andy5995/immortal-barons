@@ -2627,6 +2627,48 @@ Other planets see the new name from this board's next score export
 (`ImportBoard` replaces a board's snapshot wholesale, so no ghost row is left),
 which is the same packet round trip every other cross-board fact takes.
 
+### Sysop edits to a player (`-players`, BRE's `VIEW`)
+
+The original's `VIEW` command lists the players and, for one of them, changes
+the caller's user name, changes the empire's name, or deletes the empire behind
+a confirmation. IB's `-players` does the same three (#161). It is a command-line
+mode, as BRE's is: sysop work, and two of the three are things no player may do
+to themselves. Each edit is one locked transaction — lock, re-read, apply,
+save — and the prompts run outside the lock, so it is safe to run on a live
+board without holding a caller's turn up.
+
+**The interface follows `manage_players` (`BRE.OVR` 0x405a).** BRE browses one
+realm per screen: the up and down arrows step through the roster, a letter A-Y
+jumps to that realm, ESC leaves, and RETURN opens an action prompt reading
+`Delete Empire, Player Name, Empire Name, or Quit?` on the keys D, P, E and Q.
+A delete asks `Are you sure?` and takes only Y; a rejected name draws
+`Invalid Empire Name.`; an empty roster is said in words rather than drawn as
+an empty table.
+
+IB keeps the realm LETTER as what a realm is picked by, the four keys, and
+their order. Two deliberate divergences: the arrow-key browse is not
+reproduced, since this mode reads a pipe as readily as a terminal and prints
+the roster as a table; and BRE's `E` for Empire Name is `R`, because a realm is
+what IB calls the thing on every other screen.
+
+- **Change the realm name** — `World.SysopRenameEmpire`, the same rewrite the
+  player's rename performs, without the once-only limit or the protection bar.
+  The old name goes to `Empire.PriorNames` rather than `FormerName`, so a name
+  changed FOR a player does not spend the rename that is theirs to make. Both
+  fields take delivery of packets addressed to an old name and both are held
+  against re-use; `PriorRealmNames` is what every lookup walks.
+- **Change the caller name** — `World.RenameOwner` re-keys the realm to a
+  different BBS handle and repoints everything stored under the old one: group
+  attack contributors, strikes and bids away on another planet, the Clingy
+  Annihilator's builder, and every realm's Coordinator vote. The incoming
+  weapon's builder is NOT touched — that handle belongs to another board.
+  Nothing needs holding for a packet in the air, unlike a realm rename: every
+  interplanetary answer is matched to the local record it belongs to by id, and
+  the handle is read off that record rather than off the packet.
+- **Delete the realm** — `World.RemoveEmpire`, the path Abdicate takes, which
+  already forgets the realm's treaties and market position. The caller may
+  build fresh at their next login.
+
 ## Turn structure
 
 Turns per day: 10 (config; BRE's own default is 8). New players get protection

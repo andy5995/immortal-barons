@@ -386,10 +386,10 @@ func onboard(s session.Session, w *game.World, handle, lang string) (name string
 		taken = make(map[string]bool, len(w.Empires))
 		for _, e := range w.Empires {
 			taken[strings.ToLower(e.Name)] = true
-			// A renamed realm holds its old name too — packets in the air still
-			// address it (game.RenameEmpire).
-			if e.FormerName != "" {
-				taken[strings.ToLower(e.FormerName)] = true
+			// A renamed realm holds its old names too — packets in the air still
+			// address them (game.RenameEmpire).
+			for _, old := range e.PriorRealmNames() {
+				taken[strings.ToLower(old)] = true
 			}
 		}
 	})

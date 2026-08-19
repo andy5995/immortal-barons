@@ -1,4 +1,6 @@
 (in-progress:)
+  * New -players command line option, the original's VIEW: lists the players
+    and changes a player's name, renames a realm, or deletes one (issue #161)
   * The ChangeLog ships in the release and snapshot archives
   * Send SpyGuy now works as the original's does: a watcher posted on a planet
     for a number of days, paid for in gold by the day rather than with an agent,

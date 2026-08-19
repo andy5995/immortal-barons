@@ -94,6 +94,18 @@ normally use a moving highlight are numbered in that mode, so they stay usable.
 - A board in a league game has no AI barons, and none can be added. League play
   is between the boards' own players.
 
+## A player changed their name on my BBS. How do I move their realm?
+
+- Run `immortal-barons -players`, pick the realm by its Id letter, and press
+  **P** for the player name. The game finds a realm by the player's BBS account
+  name. Until you change it, the game does not know the player at their next
+  login, and offers them a new realm.
+- The same command renames a realm (**R**) and deletes one (**D**). Deleting
+  asks first and cannot be undone; the player may build a fresh realm at their
+  next login.
+- You can run it while the board is up. Each edit takes the same lock a
+  caller's turn takes.
+
 ## What happens when my empire is destroyed?
 
 - If your realm is wiped out — its people or land reach zero, from an attack or a

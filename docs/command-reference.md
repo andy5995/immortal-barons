@@ -86,6 +86,13 @@ then exit.
   without opening the editor. It clears all empires and rebuilds the world. The
   old world is saved first.
 - **`-add-ai N`** — Add N computer barons to the running game, then exit.
+- **`-players`** — List the players and edit one of them, then exit. This is the
+  original's `VIEW` command. Pick a realm by its Id letter, then choose
+  **D**elete realm, **P**layer name, **R**ealm name, or **Q**uit. Deleting asks
+  you to confirm and cannot be undone. Change the player name when someone has
+  renamed their account on the board: the game finds a realm by that name, so
+  otherwise the game does not know them at their next login. Each edit takes the
+  same lock a caller's turn takes, so it is safe to run while the board is up.
 - **`-maint`** — Run the daily maintenance step, then exit. Run this once a day
   (for example, from a nightly scheduled task).
 

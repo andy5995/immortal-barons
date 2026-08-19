@@ -197,6 +197,29 @@ This adds N new AI barons and exits. It leaves existing players and AI alone.
 via `-reset`.) A board in a league game has no AI barons, and this command
 adds none.
 
+## Editing a player
+
+```
+immortal-barons -players -data /path/to/data
+```
+
+This is the original's `VIEW` command. It lists every realm a caller owns. Pick
+one by its Id letter — the same letter the game uses for it everywhere else —
+then choose **D**elete realm, **P**layer name, **R**ealm name, or **Q**uit.
+
+The player name is the one that matters most. The game finds a realm by the
+player's BBS account name. If a player renames their account on your board, the
+game no longer knows them at their next login and offers them a new realm. Their
+old realm sits unplayed until the game removes it for being idle. Set the player
+name here to the new one and the realm stays theirs.
+
+Deleting asks you to confirm and cannot be undone. The caller may build a fresh
+realm the next time they log in.
+
+You can run this while the board is up. Each edit takes the same lock a caller's
+turn takes, and only for as long as the edit. The questions are asked outside
+the lock, so nobody is kept waiting while you decide.
+
 ## Inter-BBS (league) play
 
 A league is a group of boards whose players compete against each other.
