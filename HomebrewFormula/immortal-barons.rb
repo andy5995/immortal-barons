@@ -11,8 +11,8 @@ class ImmortalBarons < Formula
   # This is the vendored-source tarball the release workflow publishes, not the
   # auto-generated tag archive: the repo does not commit vendor/, so only this
   # asset lets the build skip a module download.
-  url "https://github.com/andy5995/immortal-barons/releases/download/v0.0.4/immortal-barons-v0.0.4-vendored-source.tar.gz"
-  sha256 "b88352fe2a3629a6e183d1bf2b6bb09cd09634e0ef8663b6ce414746cc69feaa"
+  url "https://github.com/andy5995/immortal-barons/releases/download/v0.0.5/immortal-barons-v0.0.5-vendored-source.tar.gz"
+  sha256 "89b4441720d9f512ce00e19e527e31ee74919fd498811e7c64f19a1e53774dd6"
   license "MIT"
   head "https://github.com/andy5995/immortal-barons.git", branch: "trunk"
 
@@ -20,14 +20,14 @@ class ImmortalBarons < Formula
 
   def install
     system "go", "build", *std_go_args, "./cmd/immortal-barons"
-    # This is the doc set scripts/build-archives.sh shipped at v0.0.4, the
-    # release this formula pins -- not the current list on trunk, which drifts
-    # as docs are added and removed. Check it against
-    # "git show <tag>:scripts/build-archives.sh" whenever the pin moves.
+    # Every path here must exist in the v0.0.5 tarball this formula pins, NOT
+    # in the current tree -- trunk drifts as docs are added, and naming a file
+    # no release has shipped fails the install with ENOENT. The vendored
+    # tarball carries the whole docs/ tree, so check a pin bump against
+    # "tar tzf <tarball> | grep docs/", not against build-archives.sh.
     doc.install "LICENSE", "README.md", "docs/faq.md", "docs/playing.md",
                 "docs/command-reference.md", "docs/door-setup.md",
-                "docs/inter-bbs.md", "docs/charset.md", "docs/download.md",
-                "docs/translating.md"
+                "docs/charset.md", "docs/download.md", "docs/translating.md"
   end
 
   def caveats

@@ -66,3 +66,27 @@ Watch it: a release with no assets is a release nobody can use.
 7. **Delete any renamed or removed asset** left behind on the snapshot
    prerelease by hand. `replacesArtifacts` only replaces an asset of the same
    name, so a rename leaves the old file sitting beside the new one.
+
+8. **Bump the Homebrew formula** in `HomebrewFormula/immortal-barons.rb` — the
+   `url`, the `sha256`, and the doc list:
+
+   ```
+   gh release download vX.Y.Z -p '*-vendored-source.tar.gz'
+   sha256sum immortal-barons-vX.Y.Z-vendored-source.tar.gz
+   tar tzf immortal-barons-vX.Y.Z-vendored-source.tar.gz | grep 'docs/.*\.md$'
+   ```
+
+   The formula installs from that tarball, so every path in `doc.install` has
+   to exist inside it — the third command is the check. The vendored tarball
+   carries the whole `docs/` tree, which is a wider set than the platform
+   archives get from `scripts/build-archives.sh`.
+
+   **A doc added on trunk does not go in the formula.** It is not in any
+   released tarball yet, so the Homebrew CI job fails the install with
+   `Errno::ENOENT` — which is how this step came to be written. The list
+   changes only when the pin moves. `scripts/build-archives.sh` is the
+   opposite: it runs from the tree at release time, so a new doc goes in it
+   straight away.
+
+   Missed at v0.0.5, which left the formula installing v0.0.4 until it was
+   noticed.
