@@ -309,7 +309,7 @@ business, not the game's.
 ## Board config: `bbs.cfg`
 
 The per-board settings — `BoardID`, `LeagueNumber`, `InboundDir`, `OutboundDir`,
-`OutboundDirs` — live here rather than in `config.json`, and are marked
+`OutboundDirs`, and `Lottery` — live here rather than in `config.json`, and are marked
 `json:"-"` on `game.Config` so they cannot land in both. `config.json` is
 rewritten by a Coordinator's ruleset broadcast, which is no place for settings
 that describe one board's own machine.
@@ -323,7 +323,14 @@ LeagueNumber  900
 Inbound       /home/bbs/ftn/in
 Outbound      /home/bbs/filebox/uplink
 Link 3        /home/bbs/filebox/node3
+Lottery       yes
 ```
+
+`Lottery` is the only rule in the file, and the exception
+`TestEveryGameRuleIsBroadcast` names: BRE keeps the same switch in the
+per-install `RESOURCE.DAT`, so it is each sysop's, not the league's. It takes
+yes/no, on/off or true/false, and an unreadable value leaves the default (on)
+alone.
 
 Not BRE's positional seven lines (sysop, planet, address, inbound, netmail dir,
 league, mailer). Positional cannot express `Link` at all, and a blank field

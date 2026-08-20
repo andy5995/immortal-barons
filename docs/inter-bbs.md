@@ -201,16 +201,23 @@ BoardID       Avalon
 LeagueNumber  900
 Inbound       /home/bbs/ftn/in
 Outbound      /home/bbs/filebox/uplink
+Lottery       yes
 ```
 
 Lines starting with `#` or `;` are comments, and `-ibbs-reset` prints a commented
 copy for you to save. Keywords are matched whatever their capitalisation.
 
+`Lottery` is the odd one out: it is a rule rather than an address, and it is
+here because the original keeps the same switch in each installation's own file.
+Set it to `no` and this board never offers the Queen's lottery. Boards in one
+league may answer it differently, so a league that wants everyone on the same
+footing has to agree it between themselves.
+
 These settings sit apart from `config.json` because `config.json` holds the
 league's rules, and those are overwritten when the Coordinator's settings packet
 arrives. The game reads `bbs.cfg` and never writes it, so nothing — not the
 Coordinator, not a reset — changes what you put there. The settings editor shows
-these four but will not change them, and says so.
+the four above but will not change them, and says so.
 
 A board that forwards packets for its neighbours adds a line per neighbour —
 see "Routing" below.

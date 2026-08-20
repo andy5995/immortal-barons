@@ -221,7 +221,10 @@ saved `config.json` into the data directory, then run `-reset-from-config`.
 
 It holds the rules only. Anything naming this particular board — its name in a
 league, its packet directories — is in `bbs.cfg`, so a config copied to another
-machine does not drag the old board's directories along with it.
+machine does not drag the old board's directories along with it. That file also
+carries the one rule the league does not set for you: `Lottery yes` or
+`Lottery no` decides whether this board offers the Queen's lottery, and it
+defaults to yes.
 
 ## Adding AI barons to a running game
 

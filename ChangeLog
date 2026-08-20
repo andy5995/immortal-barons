@@ -1,4 +1,9 @@
 (in-progress:)
+  * The Queen's lottery is offered once a game day, right after her tax refund:
+    a six-letter ticket for 5,000 gold, paying 2,500 to 10,000,000 by how many
+    of the six drawn letters it covers
+  * New bbs.cfg setting "Lottery": no turns the lottery off for this board. The
+    original keeps the same switch per installation, so a league may differ
   * bbs.cfg is read even when config.json is absent, where its settings used to
     be ignored entirely on a board that had not saved a config yet
   * A routed league's broadcasts are signed after they are addressed, where

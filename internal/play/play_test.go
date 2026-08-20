@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -79,6 +81,14 @@ func cfgIn(dir string) game.Config {
 	// and any assertion counting onboarded realms fails intermittently. Reaping
 	// itself is covered in internal/game (idle_test.go); nothing here is about it.
 	c.IdleDaysRemove = 0
+	// The lottery offer is a prompt at the head of the first turn of a day, and
+	// every scripted turn in this package would have to spend a key on it. Off
+	// through bbs.cfg rather than the Config field, so a session run in a child
+	// process reads it back the same way; the field itself is json:"-".
+	c.Lottery = false
+	if err := os.MkdirAll(dir, 0o755); err == nil {
+		os.WriteFile(filepath.Join(dir, store.BoardConfigFile), []byte("Lottery no\n"), 0o644)
+	}
 	// Load now errors on a missing world, so stand one up first — as a real
 	// deployment does with -reset before the first caller plays.
 	if err := store.Save(store.NewGame(c), c); err != nil {

@@ -34,7 +34,20 @@ const (
 	keyInbound  = "Inbound"
 	keyOutbound = "Outbound"
 	keyLink     = "Link"
+	keyLottery  = "Lottery"
 )
+
+// boolWord maps the words a sysop is likely to write to what ParseBool takes.
+// The original's own configuration file spells its booleans "yes" and "no".
+func boolWord(v string) string {
+	switch strings.ToLower(strings.TrimSpace(v)) {
+	case "yes", "on":
+		return "true"
+	case "no", "off":
+		return "false"
+	}
+	return v
+}
 
 func boardConfigPath(dataDir string) string { return filepath.Join(dataDir, BoardConfigFile) }
 
@@ -74,6 +87,10 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 			cfg.InboundDir = value
 		case strings.EqualFold(key, keyOutbound):
 			cfg.OutboundDir = value
+		case strings.EqualFold(key, keyLottery):
+			if b, err := strconv.ParseBool(boolWord(value)); err == nil {
+				cfg.Lottery = b
+			}
 		case strings.EqualFold(key, keyLink):
 			node, dir, ok := strings.Cut(value, " ")
 			n, err := strconv.Atoi(strings.TrimSpace(node))
@@ -116,6 +133,11 @@ func BoardConfigText(cfg game.Config) string {
 	fmt.Fprintf(&b, "%s %s\n", keyInbound, cfg.InboundDir)
 	fmt.Fprintf(&b, "%s %s\n\n", keyOutbound, cfg.OutboundDir)
 
+	b.WriteString("# Whether this board offers the Queen's lottery: a six-letter ticket,\n")
+	b.WriteString("# once a day, for 5,000 gold. Yes or no; the league does not decide it\n")
+	b.WriteString("# for you.\n")
+	fmt.Fprintf(&b, "%s %s\n\n", keyLottery, yesNo(cfg.Lottery))
+
 	b.WriteString("# A board that forwards for its neighbours has one link per neighbour:\n")
 	b.WriteString("# \"Link <node number> <directory>\". A board with nobody to forward for\n")
 	b.WriteString("# needs none of these — anything with no line of its own goes to\n")
@@ -124,6 +146,13 @@ func BoardConfigText(cfg game.Config) string {
 		fmt.Fprintf(&b, "%s %d %s\n", keyLink, n, cfg.OutboundDirs[n])
 	}
 	return b.String()
+}
+
+func yesNo(b bool) string {
+	if b {
+		return "yes"
+	}
+	return "no"
 }
 
 // migrateBoardConfig creates bbs.cfg from settings that a board set up before

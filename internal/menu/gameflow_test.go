@@ -937,3 +937,64 @@ func TestManufacturedUnitsAreListedOnce(t *testing.T) {
 		t.Errorf("plural on a count of one:\n%s", out)
 	}
 }
+
+// The lottery offer reaches the screen with the day's first turn, right after
+// the Queen's refund, and settles there: the price leaves gold in hand, the
+// letters typed are the ticket, and the day's offer is spent whatever the
+// answer. Scripted with six letters of its own so a flow change upstream that
+// swallowed a key shows up as a missing draw rather than a quiet pass.
+func TestLotteryOfferComesWithTheDaysFirstTurn(t *testing.T) {
+	w := newWorld()
+	w.World.Config.Lottery = true
+	w.AutoPayMaint = true
+	w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+	p := w.Player()
+	p.Protection = 0
+	p.Gold = 50_000
+	p.Bank = 0
+	w.RefundPool = 0 // the refund would otherwise print between the two prompts
+
+	// Accept the ticket, type ABCDEF, then dismiss the turn's screens and quit.
+	f := &fakeSession{keys: []rune("yABCDEF   0000n0")}
+	runTurn(f, w)
+	out := f.out.String()
+
+	if !strings.Contains(out, "Drawn:") {
+		t.Fatalf("the draw never reached the screen:\n%s", out)
+	}
+	if !strings.Contains(stripANSI(out), "letters: ABCDEF") {
+		t.Errorf("the typed ticket was not echoed:\n%s", out)
+	}
+	if !p.LotteryTaken {
+		t.Error("the day's offer should be spent once it has been made")
+	}
+	// 50,000 less the 5,000 ticket, plus whatever the turn earned — the ticket
+	// price is the only thing that can have taken gold before the income report.
+	if p.Gold >= 50_000 && p.Bank == 0 {
+		t.Errorf("gold = %d: the ticket price was never charged", p.Gold)
+	}
+}
+
+// A realm that cannot cover the price is not offered a ticket at all, and gets
+// no second offer later the same day.
+func TestNoLotteryOfferWithoutThePrice(t *testing.T) {
+	w := newWorld()
+	w.World.Config.Lottery = true
+	w.AutoPayMaint = true
+	w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+	p := w.Player()
+	p.Protection = 0
+	p.Gold = game.LotteryTicketPrice - 1
+	w.RefundPool = 0
+
+	f := &fakeSession{keys: []rune("   0000n0")}
+	runTurn(f, w)
+	out := f.out.String()
+
+	if strings.Contains(out, "Drawn:") {
+		t.Errorf("a realm with %d gold was sold a ticket:\n%s", game.LotteryTicketPrice-1, out)
+	}
+	if !p.LotteryTaken {
+		t.Error("the day's offer is spent even when it could not be made")
+	}
+}

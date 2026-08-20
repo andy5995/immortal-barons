@@ -200,3 +200,30 @@ func TestBoardConfigIsReadWithNoConfigJSON(t *testing.T) {
 		t.Errorf("bbs.cfg went unread: BoardID %q, league %d", cfg.BoardID, cfg.LeagueNumber)
 	}
 }
+
+// The lottery switch is the one bbs.cfg setting spelled as a word, so take the
+// spellings a sysop is likely to write, and leave the default alone for one
+// that means nothing.
+func TestLotterySwitchSpellings(t *testing.T) {
+	for _, c := range []struct {
+		value string
+		want  bool
+	}{
+		{"no", false}, {"No", false}, {"off", false}, {"false", false},
+		{"yes", true}, {"YES", true}, {"on", true}, {"true", true},
+		{"maybe", true}, // unparseable: the default stands
+	} {
+		dir := t.TempDir()
+		if err := os.WriteFile(filepath.Join(dir, BoardConfigFile),
+			[]byte("Lottery "+c.value+"\n"), 0o644); err != nil {
+			t.Fatalf("WriteFile: %v", err)
+		}
+		cfg, err := LoadConfig(dir)
+		if err != nil {
+			t.Fatalf("LoadConfig: %v", err)
+		}
+		if cfg.Lottery != c.want {
+			t.Errorf("Lottery %q gave %v, want %v", c.value, cfg.Lottery, c.want)
+		}
+	}
+}

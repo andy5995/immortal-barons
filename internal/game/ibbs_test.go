@@ -969,6 +969,12 @@ var perBoardConfigFields = map[string]string{
 	// run and never saved. Broadcasting it would push one tester's override
 	// onto every board in the league.
 	"DupeCheckOverride": "the -dupe-check testing switch, this run only",
+	// The one entry here that IS a rule, and it sits here on the original's
+	// authority: BRE keeps its lottery switch in the per-install RESOURCE.DAT,
+	// not the game data, so two boards in one league may differ. Noted rather
+	// than hidden — a league whose boards disagree about the lottery is a league
+	// where one planet has a faucet the other does not.
+	"Lottery": "each sysop's call in the original, per-install and never broadcast",
 }
 
 // TestEveryGameRuleIsBroadcast holds the line the rule above draws. A new Config

@@ -96,6 +96,41 @@ const (
 	QueenRefundCap      = 1_000_000   // ceiling while the realm is still protected
 )
 
+// --- The Queen's lottery ---
+//
+// A ticket is offered once a game day, in the same first-play event block as
+// the tax refund above and immediately after it. The player picks six letters,
+// six are drawn, and the prize is paid by how many of the six drawn letters the
+// ticket covers.
+//
+// BINARY-VERIFIED (BRE.OVR 0x018610, run_lottery, called from BRE.EXE 0x038a2):
+// the ticket price, the alphabet, the six-letter ticket, and every prize below
+// are literals in that routine. The 6-letter prize is 0x00989680 = 10,000,000 —
+// a hundred million is a figure that circulates among players and is not in the
+// binary.
+//
+// The price is charged the moment the offer is accepted and is never named on
+// screen, which is BRE's behaviour and not an oversight here. The offer is
+// withheld entirely from a realm that cannot pay it.
+const (
+	LotteryTicketPrice = 5_000 // charged on "yes", never displayed
+	LotteryLetters     = 6     // letters on a ticket, and letters drawn
+	LotteryAlphabet    = 26    // 'A'..'Z', uppercase only
+)
+
+// LotteryPrizes is the payout by number of matched letters, indexed 0..6.
+// Binary-verified alongside the constants above; all seven are golden figures,
+// not playtest knobs.
+var LotteryPrizes = [LotteryLetters + 1]int64{
+	0,
+	2_500,
+	10_000,
+	500_000,
+	1_000_000,
+	4_000_000,
+	10_000_000,
+}
+
 // --- New-realm starting setup ---
 //
 // A fresh realm's regions and units. The region mix, trooper count, and food

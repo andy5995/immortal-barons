@@ -250,6 +250,12 @@ type Config struct {
 	OutboundDirs map[int]string `json:"-"` // per-neighbour override of OutboundDir, keyed by roster node number (#106)
 	LeagueNumber int            `json:"-"` // the Coordinator's league number, 1-999; tells two leagues apart in one inbound directory
 
+	// Lottery is whether this board offers the Queen's lottery, default on. It
+	// lives in bbs.cfg with the settings above for the reason the original keeps
+	// its own switch in the per-install RESOURCE.DAT rather than the game data:
+	// it is each sysop's call, and a league's boards may differ.
+	Lottery bool `json:"-"`
+
 	IdleTimeoutSecs int // boot a session after this many seconds with no keypress (0 = never), freeing the world lock
 	MaxIdleWarnings int // idle warnings a session may collect before a hard boot
 
@@ -429,6 +435,7 @@ func DefaultConfig() Config {
 		AICount:         0,
 		DataDir:         "./data",
 		BoardID:         "local",
+		Lottery:         true,
 		InboundDir:      "inbound",
 		OutboundDir:     "outbound",
 		IdleTimeoutSecs: 300,

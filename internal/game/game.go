@@ -184,6 +184,11 @@ type Empire struct {
 	// equivalent counter to test — TurnProgress is a set of named flags, not
 	// BRE's 0-20 stage number — so it records the day's draw directly.
 	RefundTaken bool
+	// LotteryTaken records that this realm has already been offered the Queen's
+	// lottery today, and is cleared with RefundTaken. Set when the offer is made,
+	// not when it is accepted: BRE runs the two as one first-play-of-the-day
+	// block, so declining a ticket does not bring a second offer that day.
+	LotteryTaken bool
 	// TurnProgress records which stages of the current turn have already completed,
 	// so a turn REPLAYED after an idle-boot skips what was done — no double income
 	// or double charge, and no re-showing a menu the player already exited (GH #10).

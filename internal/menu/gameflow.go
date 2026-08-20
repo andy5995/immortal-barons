@@ -877,6 +877,102 @@ func showQueenRefund(s session.Session, w *ctx) {
 	pause(s)
 }
 
+// showLottery offers the Queen's lottery, once a game day, immediately after
+// her tax refund — the original settles the two as one first-play block.
+//
+// Three details are the original's and look like bugs if you do not know them.
+// The 5,000-gold price is charged the moment the offer is accepted and is never
+// shown; a realm that cannot pay is not offered a ticket at all; and either way
+// the day's offer is spent, so there is no second chance after a refusal or
+// after spending down. The price is documented in the Taxes help topic.
+func showLottery(s session.Session, w *ctx) {
+	offered := false
+	withPlayer(w, func(p *game.Empire) {
+		offered = w.World.LotteryOffered(p)
+		// Spent for the day either way. The original runs this as part of one
+		// first-play block, so a realm too poor to be offered a ticket does not
+		// get another chance after selling something.
+		p.LotteryTaken = true
+	})
+	if !offered {
+		return
+	}
+	if !AskYesNo(s, "Care to try your luck on the Queen's lottery?", true) {
+		return
+	}
+	bought := false
+	withPlayer(w, func(p *game.Empire) { bought = w.World.BuyLotteryTicket(p) })
+	if !bought {
+		return
+	}
+
+	ticket := readLotteryTicket(s, w)
+	var draw []byte
+	var hit []bool
+	var matches int
+	var prize int64
+	withPlayer(w, func(p *game.Empire) {
+		draw, hit, matches = w.World.DrawLottery(ticket)
+		prize = w.World.PayLotteryPrize(p, matches)
+	})
+
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgWhite, tr(s, "Drawn:"), ansi.Reset)
+	for i, c := range draw {
+		// A matched letter is bright yellow and an unmatched one bright red, but
+		// the count below says the same thing in words: colour alone must not be
+		// what tells a win from a miss. Bright red rather than the original's
+		// dark red, which sits at 2:1 against black.
+		color := ansi.FgBrightRed
+		if hit[i] {
+			color = ansi.FgBrightYellow
+		}
+		fmt.Fprintf(s, "%s%c%s", color, c, ansi.Reset)
+	}
+	fmt.Fprint(s, "\n")
+	if prize <= 0 {
+		ok(s, "No matches. The Queen thanks you for your contribution.")
+		return
+	}
+	ok(s, "%d matched! You win %s gold, paid straight into your bank.", matches, comma(prize))
+}
+
+// readLotteryTicket reads the six letters of a ticket, one keypress each,
+// accepting only A-Z. Enter takes a random letter for that slot, so a player who
+// does not care can hold it down and still hold a playable ticket — the
+// original's behaviour, and the reason its prompt takes no Enter to finish.
+func readLotteryTicket(s session.Session, w *ctx) []byte {
+	// The random fallbacks are drawn in one go, under the world lock, rather than
+	// one at a time while the player types: the draw needs the lock and nothing
+	// about it depends on which slot it lands in.
+	fallback := make([]byte, game.LotteryLetters)
+	withPlayer(w, func(*game.Empire) {
+		for i := range fallback {
+			fallback[i] = w.World.RandomLotteryLetter()
+		}
+	})
+
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgWhite, tr(s, "Pick your six letters:"), ansi.Reset)
+	ticket := make([]byte, 0, game.LotteryLetters)
+	for len(ticket) < game.LotteryLetters {
+		r, err := readKey(s)
+		var c byte
+		switch {
+		case err != nil, r == '\r', r == '\n':
+			c = fallback[len(ticket)]
+		case r >= 'a' && r <= 'z':
+			c = byte(r) - 'a' + 'A'
+		case r >= 'A' && r <= 'Z':
+			c = byte(r)
+		default:
+			continue
+		}
+		ticket = append(ticket, c)
+		fmt.Fprintf(s, "%s%c%s", ansi.FgBrightCyan, c, ansi.Reset)
+	}
+	fmt.Fprint(s, "\n")
+	return ticket
+}
+
 // runTurn is the "Play Game" action. It shows the event log, then walks the
 // per-turn pipeline (industry production, income report, status,
 // spending/attack/covert/trading/message stages, then end-of-turn) for as
@@ -920,6 +1016,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		readTurnMail(s, w, firstTurn)
 		if firstTurn {
 			showQueenRefund(s, w)
+			showLottery(s, w)
 		}
 		firstTurn = false
 

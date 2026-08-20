@@ -2400,3 +2400,40 @@ key is a guess at wording, not a captured string — **UNVERIFIED**.
 
 An empty force prints `Attack Aborted` (capital A on both words), where the
 attack-type menu's quit path prints `Attack aborted.` with a period.
+
+## The lottery (first play of a game day)
+
+Captured with colour in `cap/kd3-01.cap`, declined in `cap/eots-ibbs-01.cap`,
+and played several times in `cap/20240527-134Pho_Lazarus_Public.cap` (that one
+holds no escape sequences). It follows the Queen Royale's tax refund and is the
+second half of the same first-play block.
+
+The offer is BRE's ordinary y/n prompt, cyan `(Y/n)` with a bright-white echo of
+the full word `Yes` or `No`. Then, on separate lines, a prompt for the ticket
+and one for the draw — from `cap/kd3-01.cap`, with the escapes shown:
+
+```
+Choose your 6 letters: ESC[1;36m AGNTYI
+Winning Letters: ESC[0;40;31m D ESC[31m K ESC[31m M ESC[31m M ESC[1;33m I ESC[0;40;31m U
+```
+
+| Element | Colour |
+|---|---|
+| ticket letters, as they are typed | `1;36` bright cyan |
+| a drawn letter that matched | `1;33` yellow |
+| a drawn letter that did not | `0;40;31` dark red |
+
+That one capture proves the whole scoring rule on its own: the ticket is
+`AGNTYI`, the draw `DKMMIU`, and the single yellow letter is the `I` — which
+sits at position 5 in the draw and position 6 on the ticket, so matching cannot
+be positional.
+
+The six ticket letters are **six separate keypresses with no Enter to finish**,
+each accepted only if it is A–Z; the count of echoed characters after the prompt
+is what shows this. Enter fills the slot with a random letter, so the echo never
+stalls on a player who just wants it over with.
+
+**IB deviates on two points.** An unmatched letter is drawn in bright red, not
+dark red, which sits at about 2:1 against black; and the result line states the
+match count in words, so nothing depends on telling two colours apart. Both are
+deliberate — see `docs/mechanics-reference.md`.

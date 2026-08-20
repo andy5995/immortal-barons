@@ -238,8 +238,8 @@ flow runs in this order:
    tests — the turn-stage counter (`+0x2b8`) is zero and `turnsRemaining ≥
    turnsPerDay`. That is **no turn part-way through and none taken today**: the
    player's first play of a game day. It is not a random event. The routine
-   called immediately after it is the **lottery**, which confirms the
-   first-play-of-the-day event block the lottery entry below predicts.
+   called immediately after it is the **lottery**, the other half of the same
+   first-play-of-the-day event block (its own entry follows).
 
    **The cap is a newcomer guard.** It applies only when a per-empire predicate
    holds; that predicate (`056d:19b5`) compares the realm's lifetime turn counter
@@ -264,6 +264,51 @@ flow runs in this order:
    tests, since it has no turn-stage counter to test — `TurnProgress` is a set of
    named flags, not a 0–20 counter. The two agree on every path traced through
    the original.
+
+   ### The Queen's lottery
+
+   The other half of the same first-play block, settled immediately after the
+   refund and from the same routine's caller (`BRE.OVR 0x018610`, called from
+   `BRE.EXE 0x038a2`). **Fully binary-verified.**
+
+   A ticket costs **5,000 gold**, taken the moment the offer is accepted and
+   **never shown on screen**. The offer is skipped entirely for a realm holding
+   less than the price, and the block runs once a game day, so refusing it — or
+   being too poor for it — means no second offer until tomorrow.
+
+   The player types **six letters**, A–Z only, one keypress each with no Enter to
+   finish; **Enter takes a random letter** for that position, so a held key still
+   produces a playable ticket. Six letters are then drawn, each uniform over the
+   26, and scored by **set intersection with multiplicity**: a drawn letter
+   matches any not-yet-used letter on the ticket wherever it sits and consumes
+   it, so one `A` on the ticket scores at most one drawn `A`. Position is
+   irrelevant — the original's scan blanks the ticket slot it matched.
+
+   | Matches | Prize |
+   |---:|---:|
+   | 1 | 2,500 |
+   | 2 | 10,000 |
+   | 3 | 500,000 |
+   | 4 | 1,000,000 |
+   | 5 | 4,000,000 |
+   | 6 | 10,000,000 |
+
+   One match is still a 2,500-gold loss. The six-letter prize is `0x00989680` =
+   ten million; the hundred million that circulates among players is not in the
+   binary. Winnings go to the **bank**, not to gold in hand.
+
+   Whether the lottery runs at all is the **BBS sysop's** choice, not the League
+   Coordinator's: the switch is the `LOTTERY` boolean in the per-install
+   `RESOURCE.DAT`, default on, so two boards in one league may differ.
+
+   **IB implements this**, constants in `balance.go`, the switch as `Lottery` in
+   `bbs.cfg` — IB's own per-board file, which no broadcast rewrites. Two
+   divergences. Where the prize would carry the bank past the money cap BRE pays
+   **nothing at all**; IB banks what fits and pays the rest into gold in hand
+   through `creditGold`, which reports what the ceiling ate rather than deleting
+   a win it has just announced. And IB draws an unmatched letter in bright red
+   rather than the original's dark red, which sits at 2:1 against black, and
+   states the match count in words so colour is not what tells a win from a miss.
 
 4. Conditional: SDI maintenance (with SDI), waste-region decontamination (with
    waste regions), then the popular-support and military-morale boosts (shown
@@ -1309,7 +1354,7 @@ reading of the menu:
 Ops** — the menu tests the CALLER's own shield right before the fee gate, and
 refuses (`BRE.OVR 0x017716`, refusal string loaded at `0x01772E`). The predicate
 is `056d:19b5`, the same lifetime-turns-against-Turns-Of-Protection test the
-lottery cap uses. Digits 1 and 6, the info ops, jump past it (`0x01770B` and
+Queen's refund cap uses. Digits 1 and 6, the info ops, jump past it (`0x01770B` and
 `0x017714`), so a sheltered realm may still spy.
 
 **IB matches this.** `covertOp` refuses the seven effect ops — including Expose
@@ -3804,26 +3849,6 @@ to anyone checking IB against a capture:
   have.
 
 Neither is an oversight to correct back.
-
-### Deliberately not implemented
-
-- **Lottery.** BRE offers a ticket at the start of a turn
-  (`Would you like to buy a lottery ticket? (Y/n)`), takes six letters, draws six,
-  and pays winnings into the bank — one observed draw picked `ABCDEF` against
-  `OZDQEF` and paid 500,000. No ticket cost was shown or charged. The match rule
-  is unresolved: that draw scores 2 by position (E, F) or 3 by set intersection
-  (D, E, F), and both fit the payout. **Not planned** — it is a pure
-  random-gold faucet with no decision content. Revisit only if players ask for it,
-  in which case the match rule needs pinning down first with a shuffled-letter
-  ticket.
-
-  The ticket is offered **once per day per empire**, not on every entry into the
-  game — re-entering the same day brings no second offer. It shares that gating
-  with the Queen Royale tax refund (#93), and the disassembly settles it: the
-  recap calls the refund and the lottery back to back, both behind the same
-  `turnsRemaining ≥ turnsPerDay` test (`BRE.EXE 0x61dd`). So the two are one
-  **first-play-of-the-day event block**. The refund is built (see its entry
-  above); a lottery would hang off the same hook rather than be a random event.
 
 ## Sources
 
