@@ -100,39 +100,43 @@ Saving with `S` creates the data directory if it does not exist.
 
 ### Example: Synchronet
 
+The release archive carries an `install-xtrn.ini`, so Synchronet can set the
+door up for you. Unpack the archive under Synchronet's `xtrn` directory and
+point the installer at it:
+
+```
+jsexec install-xtrn /sbbs/xtrn/imb
+```
+
+It adds the door itself and offers a nightly maintenance event, which you can
+decline. The start-up directory is taken from where the file sits, so nothing
+in the command line depends on a path you have to type. Two things it cannot
+do for you: run `-set-dropfile` and create the game with `-reset`, as in
+"First-time setup" above. The door refuses to start until both are done.
+
+The rest of this section is the same setup entered by hand.
+
 Add an external program in `scfg` → External Programs → Online Programs, and
 set its **Start-up Directory** to the game's own directory.
 
-**Synchronet keeps only the first 100 characters of a command line, and says
-nothing when it cuts one.** A path to the binary and a `-data` path can exceed
-it on their own. The cut lands mid-way through `-data`. The door then
-complains about the drop file, because the half path names no directory.
-Measured on Synchronet 3.21d: a 110-character line came back 100.
-
-The cheapest way under the limit is to spend nothing on `-data`. Synchronet
-changes to the **Start-up Directory** before it runs the door. The game looks
-for `data` beside it. So a start-up directory of `/sbbs/xtrn/imb/` leaves the
-argument off altogether:
+Synchronet changes to the **Start-up Directory** before it runs the door, and
+the game looks for `data` beside its own binary, so neither path needs to be
+spelled out:
 
 ```
-/path/to/immortal-barons -dropfile %Ndoor32.sys
+immortal-barons%. -dropfile %f
 ```
 
-That relies on the start-up directory staying set — clear it and the game
-looks for its data somewhere else and reports no game found.
+Keeping the line short this way also stays clear of Synchronet's command-line
+limit, which is 100 characters and is applied silently. That relies on the
+start-up directory staying set — clear it and the game looks for its data
+somewhere else and reports no game found.
 
-When the binary's path alone is long enough to overflow the line, put it in a
-launcher script instead:
-
-```
-#!/bin/sh
-exec /a/very/long/path/to/immortal-barons \
-  -dropfile "$1" \
-  -data /sbbs/xtrn/imb/data
-```
-
-Then the configured line is the script and the drop file, and nothing else.
-Windows takes the same shape with a `.bat` file and `%1`.
+`%f` is the drop file Synchronet has just written for this caller: the full
+path, in whichever directory and letter case it used. Nothing in the line
+depends on the drop file type or on how you answered **Lowercase Filename**,
+which matters on Linux, where file names are case-sensitive. `%.` appends the
+platform's executable extension, so the same line works on Windows.
 
 ### How the game talks to the caller
 
