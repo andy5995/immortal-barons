@@ -73,6 +73,29 @@ func TestAllocateCapturedSplitsByType(t *testing.T) {
 	}
 }
 
+// The captured-region picker carries the Buy Regions screen's Advisors entry,
+// because BRE draws both screens from one routine (docs/dev/bre-screens.md).
+// It went missing here while the two screens shared only their table.
+func TestAllocateCapturedOffersAdvisors(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	beforeLand := p.Land
+	f := &fakeSession{keys: []rune("*0\rR10\r")} // Advisors, leave it, then place all 10
+	allocateCaptured(f, w, 10)
+
+	out := plainLines(f.out.String())
+	if findLine(out, "(*) Advisors") == "" {
+		t.Error("the picker does not list the Advisors entry")
+	}
+	// Reaching an advisor screen proves '*' was acted on rather than ignored.
+	if findLine(out, "Advisors]") == "" {
+		t.Errorf("'*' did not open the advisors screen; got:\n%s", f.out.String())
+	}
+	if p = w.Player(); p.Land != beforeLand+10 {
+		t.Errorf("Land = %d, want %d — the picker did not resume after the advisors", p.Land, beforeLand+10)
+	}
+}
+
 // Quitting the allocator early (0) must not lose captured land: the unassigned
 // remainder defaults to Coastal so Land still rises by the full captured count.
 func TestAllocateCapturedRemainderToCoastal(t *testing.T) {

@@ -51,7 +51,12 @@ func regionRule(s session.Session) {
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightMagenta, insetRule(regionRuleWidth, regionRuleDouble), ansi.Reset)
 }
 
-func printRegionTable(s session.Session, p *game.Empire) {
+// printRegionTable renders the table; advisors adds BRE's "(*) Advisors" entry
+// and the closing rule beneath it. Both the Buy Regions screen and the
+// captured-region picker carry them (docs/dev/bre-screens.md, measured from
+// cap/kd3-01.cap) — one routine draws both screens in the original. The drop
+// screen is left without them: no capture of it exists to say either way.
+func printRegionTable(s session.Session, p *game.Empire, advisors bool) {
 	fmt.Fprintf(s, "%s%-5s%-15s%s%s\n", ansi.FgBrightWhite, tr(s, "Key"), tr(s, "Name"), tr(s, "Owned"), ansi.Reset)
 	regionRule(s)
 	for i, name := range regionTypeNames {
@@ -71,6 +76,10 @@ func printRegionTable(s session.Session, p *game.Empire) {
 			len("(X)"), "", ansi.FgBrightRed, tr(s, "Waste"), ansi.Reset,
 			ansi.FgBrightRed, p.Regions.Waste, ansi.Reset)
 	}
+	if advisors {
+		fmt.Fprintf(s, " %s(%s*%s)%s %s%s%s\n", ansi.FgMagenta, ansi.FgBrightWhite, ansi.FgMagenta, ansi.Reset, ansi.FgBrightYellow, tr(s, "Advisors"), ansi.Reset)
+		regionRule(s)
+	}
 }
 
 // promptRegionType reads a single-letter region choice (case-insensitive),
@@ -78,6 +87,12 @@ func printRegionTable(s session.Session, p *game.Empire) {
 // label (the captured-region picker uses BRE's "[N Regions left] Your choice?",
 // distinct from the plain "Your choice?" of the sell/buy screens).
 func promptRegionType(s session.Session, prompt string) int {
+	return promptRegionChoice(s, prompt, false)
+}
+
+// promptRegionChoice is the picker's key loop. extras adds the '*' Advisors key
+// and the '?' redisplay key, for the screens that offer them.
+func promptRegionChoice(s session.Session, prompt string, extras bool) int {
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, prompt, ansi.Reset)
 	for {
 		r, err := readKey(s)
@@ -91,6 +106,14 @@ func promptRegionType(s session.Session, prompt string) int {
 		if r == '0' {
 			fmt.Fprint(s, "0\n")
 			return -1
+		}
+		if extras && r == '?' {
+			fmt.Fprint(s, "?\n")
+			return redisplayChoice
+		}
+		if extras && r == '*' {
+			fmt.Fprint(s, "*\n")
+			return advisorsChoice
 		}
 		u := byte(unicode.ToUpper(r))
 		for i, k := range regionTypeKeys {
@@ -110,42 +133,12 @@ const (
 	redisplayChoice = -3
 )
 
-// promptBuyRegionType is promptRegionType plus a '*' key for Advisors (BRE's
-// Buy Regions screen lists "(*) Advisors" at the bottom of the region list) and
-// a '?' key to redisplay the region list (the list is only drawn on entry, then
-// on demand, so repeat purchases don't rescroll it).
+// promptBuyRegionType is the picker with the Buy Regions screen's extra keys:
+// '*' for Advisors (BRE lists "(*) Advisors" at the bottom of the region list)
+// and '?' to redisplay the list, which is drawn on entry and then on demand so
+// repeat purchases do not rescroll it.
 func promptBuyRegionType(s session.Session) int {
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Your choice?"), ansi.Reset)
-	for {
-		r, err := readKey(s)
-		if err != nil {
-			return -1
-		}
-		if r == '\r' || r == '\n' { // Enter leaves, like '0'
-			fmt.Fprint(s, "\n")
-			return -1
-		}
-		if r == '0' {
-			fmt.Fprint(s, "0\n")
-			return -1
-		}
-		if r == '?' {
-			fmt.Fprint(s, "?\n")
-			return redisplayChoice
-		}
-		if r == '*' {
-			fmt.Fprint(s, "*\n")
-			return advisorsChoice
-		}
-		u := byte(unicode.ToUpper(r))
-		for i, k := range regionTypeKeys {
-			if k == u {
-				fmt.Fprintf(s, "%c\n", u) // echo the single keypress; no Enter needed
-				return i
-			}
-		}
-		// invalid key — ignore and wait for a valid region letter, '*', or 0
-	}
+	return promptRegionChoice(s, tr(s, "Your choice?"), true)
 }
 
 // buyLand is the Buy Regions action. It loops the region-type picker so a
@@ -158,9 +151,7 @@ func buyLand(s session.Session, w *ctx) Result {
 		fmt.Fprintf(s, "\n%s"+tr(s, "Buy Regions — %d gold each.")+"%s\n", ansi.FgBrightCyan, w.LandPrice(p), ansi.Reset)
 		fmt.Fprintf(s, "%s\n", tr(s, "Note: Region prices rise as you expand, so the price shown is only\n      the cost of the first region you buy."))
 		fmt.Fprintf(s, tr(s, "You can afford %s%d%s regions.")+"\n\n", ansi.FgBrightCyan, w.MaxAffordableRegions(p), ansi.Reset)
-		printRegionTable(s, p)
-		fmt.Fprintf(s, " %s(%s*%s)%s %s%s%s\n", ansi.FgMagenta, ansi.FgBrightWhite, ansi.FgMagenta, ansi.Reset, ansi.FgBrightYellow, tr(s, "Advisors"), ansi.Reset)
-		regionRule(s)
+		printRegionTable(s, p, true)
 	}
 	showMenu()
 	for {
@@ -266,15 +257,29 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 	if n <= 0 {
 		return
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, headline, ansi.Reset)
-	printRegionTable(s, w.Player())
+	showTable := func() {
+		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, headline, ansi.Reset)
+		printRegionTable(s, w.Player(), true)
+	}
+	showTable()
 
 	alloc := make([]int, len(regionTypeNames))
 	remaining := n
 	for remaining > 0 {
 		// BRE's captured-region prompt: "[N Regions left] Your choice?" then
 		// "How many <Type> regions? (0; N)" — distinct from the buy/sell screens.
-		t := promptRegionType(s, fmt.Sprintf(tr(s, "[%d Regions left] Your choice?"), remaining))
+		// The Advisors and redisplay keys are the buy screen's, and BRE offers
+		// them here too: one routine draws both region screens.
+		t := promptRegionChoice(s, fmt.Sprintf(tr(s, "[%d Regions left] Your choice?"), remaining), true)
+		if t == advisorsChoice {
+			advisorsMenu(s, w)
+			showTable()
+			continue
+		}
+		if t == redisplayChoice {
+			showTable()
+			continue
+		}
 		if t < 0 { // 0/Enter: assign the rest as Coastal and finish
 			break
 		}
@@ -308,7 +313,7 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 func sellLand(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "NOTE: You cannot sell Regions, only drop them..."), ansi.Reset)
-	printRegionTable(s, p)
+	printRegionTable(s, p, false)
 	t := promptRegionType(s, tr(s, "Your choice?"))
 	if t < 0 {
 		return Stay

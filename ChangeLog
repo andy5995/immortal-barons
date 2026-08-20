@@ -1,4 +1,7 @@
 (in-progress:)
+  * The captured-region picker lists the Advisors entry and takes * to visit
+    them, as the Buy Regions screen does — the original draws both screens from
+    one routine
   * bbs.cfg is read and never written by the game: -ibbs-reset prints it for the
     sysop to save, where a rules reset used to return the board's name, league
     number and packet directories to their defaults (issue #152)

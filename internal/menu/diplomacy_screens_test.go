@@ -178,7 +178,7 @@ func TestCapturedRulesMatchBRE(t *testing.T) {
 
 	// The region table: 25 columns, 5 ─ / 5 ═ / 15 ─. It was 28.
 	f2 := &fakeSession{}
-	printRegionTable(f2, w.Player())
+	printRegionTable(f2, w.Player(), true)
 	got = findLine(plainLines(f2.out.String()), "═")
 	want = "─────═════───────────────"
 	if got != want {
