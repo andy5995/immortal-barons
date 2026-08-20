@@ -324,7 +324,8 @@ the elected in-game Coordinator, which is a different office held by an ordinary
 player. Grep that section before reasoning from which menu a thing appears on.
 
 **A setting missing from `bre.doc` may still exist: read RESOURCE.DAT's keyword
-table out of the binary.** The manual documents only some of the per-install
+table out of the binary.** The full sweep is already done and written up in
+`docs/dev/bre-resource-dat.md` — read that before repeating it. The manual documents only some of the per-install
 settings, and the undocumented ones are where a whole mechanic can hide. The
 loader stores its keywords as consecutive ShortStrings, so finding one finds them
 all — `LOTTERY` sits between `LEADER` and `EXTERNALSCORESANSI` at `BRE.OVR`

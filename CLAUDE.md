@@ -261,7 +261,9 @@ which was missed on v0.0.5.
 `docs/dev/` holds deeper reference material: `bre-screens.md` (BRE's literal
 on-screen output, layout, and ANSI colors, captured live — the source of truth
 for UI fidelity), `bre-save-format.md` (its binary `game.dat` layout, mapped by
-differential diffing), `ibbs-packet-format.md`, and `ftn-standards.md`.
+differential diffing), `bre-resource-dat.md` (every setting BRE's per-install
+config file reads, including the 21 its own manual never mentions),
+`ibbs-packet-format.md`, and `ftn-standards.md`.
 
 `ftn-standards.md` describes the FTN formats themselves — the stored-message
 header, the attribute bits, the kludge lines — and which FTSC document defines
