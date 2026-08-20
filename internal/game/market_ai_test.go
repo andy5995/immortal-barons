@@ -11,7 +11,6 @@ func TestAIBaronsKeepSeparateMarketPositions(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.AddAIEmpires(2)
 	pastProtection(w)
-	pactAll(w, fullDefenseAlliance)
 	ai := w.AIEmpires()
 	if len(ai) < 2 {
 		t.Fatalf("need two computer barons, got %d — nothing below is tested", len(ai))
@@ -40,7 +39,7 @@ func TestAIBaronsKeepSeparateMarketPositions(t *testing.T) {
 	}
 	// The planet-wide pool is the conservation check: 750 tanks existed, 350 of
 	// them are escrowed on the market and the other 400 are still in stock.
-	if got := w.MarketTotalForSale("Tank", a); got != 350 {
+	if got := w.MarketTotalForSale("Tank"); got != 350 {
 		t.Errorf("%d tanks on the market, want 350 (100 + 250) — the rest were destroyed", got)
 	}
 }
@@ -52,7 +51,6 @@ func TestAIBaronsAreSettledTheirOwnMarketProceeds(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.AddAIEmpires(2)
 	pastProtection(w)
-	pactAll(w, fullDefenseAlliance)
 	ai := w.AIEmpires()
 	if len(ai) < 2 {
 		t.Fatalf("need two computer barons, got %d — nothing below is tested", len(ai))
@@ -61,7 +59,6 @@ func TestAIBaronsAreSettledTheirOwnMarketProceeds(t *testing.T) {
 	a.Tanks, b.Carriers = 500, 700
 	buyer := w.AddHuman("buyer", "Buyer")
 	pastProtection(w)
-	pactAll(w, fullDefenseAlliance)
 	buyer.Gold = 10_000_000
 
 	if err := w.SetMarketListing(a, "Tank", 100, 50); err != nil {
@@ -102,7 +99,6 @@ func TestRemovingOneAIBaronLeavesTheOthersMarketPosition(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	w.AddAIEmpires(2)
 	pastProtection(w)
-	pactAll(w, fullDefenseAlliance)
 	ai := w.AIEmpires()
 	if len(ai) < 2 {
 		t.Fatalf("need two computer barons, got %d — nothing below is tested", len(ai))
@@ -111,7 +107,6 @@ func TestRemovingOneAIBaronLeavesTheOthersMarketPosition(t *testing.T) {
 	a.Tanks, b.Carriers = 500, 700
 	buyer := w.AddHuman("buyer", "Buyer")
 	pastProtection(w)
-	pactAll(w, fullDefenseAlliance)
 	buyer.Gold = 10_000_000
 	if err := w.SetMarketListing(a, "Tank", 100, 50); err != nil {
 		t.Fatalf("A lists: %v", err)
@@ -125,7 +120,7 @@ func TestRemovingOneAIBaronLeavesTheOthersMarketPosition(t *testing.T) {
 
 	w.RemoveEmpire(a)
 
-	if got := w.MarketTotalForSale("Tank", a); got != 0 {
+	if got := w.MarketTotalForSale("Tank"); got != 0 {
 		t.Errorf("%d tanks of the removed baron are still on the market", got)
 	}
 	if got := w.MarketForSale(b.Name, "Carrier"); got != 190 {
@@ -146,7 +141,6 @@ func TestAIListsNoMilitaryWhenTheShopIsClosed(t *testing.T) {
 		w := NewWorldSeed(cfg, 1)
 		w.AddAIEmpires(1)
 		pastProtection(w)
-		pactAll(w, fullDefenseAlliance)
 		e := w.AIEmpires()[0]
 		e.Jets, e.Carriers = 50_000, 0 // every jet is beyond carrier lift
 		e.Food = 10_000_000            // and food well past the buffer
@@ -171,7 +165,6 @@ func TestAIStillListsFoodWhenTheShopIsClosed(t *testing.T) {
 	w := NewWorldSeed(cfg, 1)
 	w.AddAIEmpires(1)
 	pastProtection(w)
-	pactAll(w, fullDefenseAlliance)
 	e := w.AIEmpires()[0]
 	e.Food = 10_000_000
 	w.aiListSurplus(e)

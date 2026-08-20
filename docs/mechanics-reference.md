@@ -3669,40 +3669,6 @@ Market`. Any empire can list goods for other empires to buy:
   (`SendTradeDeal` checks the sender and the target), and interplanetary bids
   (`SendTradeBid`). Implemented 2026-08-15; this entry had stated the rule while
   only attacks were actually gated.
-- **Buying needs a pact in a SINGLE-BOARD game — DELIBERATE DIVERGENCE.** BRE's
-  market is open to every realm: `run_trading_market` carries no relation check,
-  and the manual calls it "a general market at any price you choose". That
-  leaves a seller unable to aim a cheap listing at a partner, because anyone can
-  take it first, so the local market goes largely unused. **A league board does
-  not gate the market at all** (`BuyFromMarket` checks `!Config.IBBS`): there
-  the whole planet is one team, so an open listing already reaches only
-  teammates, and gating it would obstruct the trading league play runs on. The
-  interplanetary market is a separate path (`resolveRemoteTradeBid`) with its
-  own planet-alliance check and never passes through `BuyFromMarket`.
-  In a single-board game IB requires the buyer to hold one of four pacts
-  with the seller — Terrorist Prevention, Intelligence Alliance, Technology
-  Agreement, Full Defense Alliance (`MarketAccessTreaties`). **Listing stays
-  open to everyone**; only buying is gated, which is what lets a seller choose
-  who may take the goods.
-  **A listing you cannot buy is not shown to you at all.** `MarketSellers` and
-  `MarketTotalForSale` take the viewing realm and filter through
-  `visibleOnMarketTo`, so an ungated realm is absent from the browse list and
-  its quantity is left out of the totals — otherwise the screen would advertise
-  goods that cannot be had and leak what a rival is holding. A realm always sees
-  its own listing, which is what keeps the "Total For Sale" column beside "your
-  own For Sale" honest.
-  The three trade pacts are excluded on purpose: Tariff and Free Trade already
-  pay a per-turn income and Protective Trade shields trade deals and cheapens trade
-  deals, and only one pact can stand between a pair (`setRelation`), so a pact
-  granting income *and* market access would crown itself and the other six would
-  stop being signed. This also gates the AI barons, which shop and list every
-  turn (#69) — they now need a pact like anyone else.
-- **A trade deal needs a relation (BRE-verified).** `create_trade_offer` loads
-  the pair's relation and runs `cmp word [es:di+0xae],1` / `jnl`, so it proceeds
-  only at **>= 1**. BRE's enum is -1 Enemy, 0 None, 1..7 the seven pacts, so the
-  test is "any pact at all" — None and Enemy are refused with its
-  "no relations" message. IB checks the same (`HasPact`, `SendTradeDeal`); it
-  previously checked nothing.
 - **Escrowed goods are safe from attacks, but NOT from pirates.** The community
   guide's "park military to evade pirates" is wrong about pirates, and IB now
   follows the original: five of the sixteen faces of the raid's category ladder

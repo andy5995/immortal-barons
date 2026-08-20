@@ -14,6 +14,3 @@ your troopers and tanks to defend an ally in need. It works only in local
 Those forces can die in a battle you were not part of. When that happens you
 are told what you lost, who you were defending, and who attacked them, so watch
 your report after an ally has been raided.
-
-It also lets you buy from that realm on the Trading Market. See the Trading
-topic for how that works.

@@ -498,7 +498,7 @@ func (w *World) aiShopMarket(e *Empire) {
 			continue
 		}
 		want := shop * (100 - AIMarketBuyDiscountPct) / 100
-		for _, l := range w.MarketSellers(good, e) {
+		for _, l := range w.MarketSellers(good, e.Name) {
 			if l.Price > want || l.Price <= 0 {
 				continue
 			}

@@ -11,14 +11,6 @@
   when you send it, and when it arrives the other planet only sells to you if
   the goods are still there at the same price and you are still allies. If not,
   your gold comes back.
-- In a single-board game you only see the Trading Market goods you could buy: a
-  realm you have no treaty with does not appear there at all. Listing stays open
-  to everyone, so you choose who may take your goods, and who can even see them,
-  and a low price meant for a friend is not taken by a stranger. In BRE anyone can buy from anyone, which is why the local market is
-  little used. A Terrorist Prevention, Intelligence Alliance, Technology
-  Agreement or Full Defense Alliance treaty opens that realm's market to you;
-  the three trade agreements pay you gold every turn instead. In a league game
-  the market is open, because there your whole planet is your team.
 - It also plays in a local terminal, without a BBS, so you can try it on your
   own computer.
 - It does not run under DOS. It is a modern native program that runs as a door

@@ -476,7 +476,6 @@ func TestAIBuysBelowShopPrice(t *testing.T) {
 	_ = ai
 	bot := w.Empires[len(w.Empires)-1]
 	bot.Protection, bot.Gold = 0, 10_000_000
-	w.setRelation(seller.Name, bot.Name, fullDefenseAlliance) // buying needs a pact
 	before := bot.Troopers
 
 	cheap := w.TrooperPrice(bot) / 2 // well under the discount threshold
@@ -490,34 +489,6 @@ func TestAIBuysBelowShopPrice(t *testing.T) {
 	}
 	if w.MarketForSale(seller.Name, "Trooper") == 1000 {
 		t.Error("the seller's listing should have been drawn down")
-	}
-}
-
-// The pact requirement is what keeps computer barons out of a market they have
-// no relationship with — the same rule a human buyer meets. Without it the AI
-// would quietly clear every cheap listing on the planet.
-func TestAIDoesNotBuyWithoutAPact(t *testing.T) {
-	cfg := DefaultConfig()
-	cfg.AICount = 0
-	w := NewWorldSeed(cfg, 1)
-	seller := w.AddHuman("seller", "Sellville")
-	seller.Protection, seller.Troopers = 0, 5000
-	w.AddAIEmpires(1)
-	bot := w.Empires[len(w.Empires)-1]
-	bot.Protection, bot.Gold = 0, 10_000_000
-	before := bot.Troopers
-
-	cheap := w.TrooperPrice(bot) / 2
-	if err := w.SetMarketListing(seller, "Trooper", 1000, cheap); err != nil {
-		t.Fatalf("list: %v", err)
-	}
-	w.aiShopMarket(bot)
-
-	if bot.Troopers != before {
-		t.Errorf("the AI bought %d troopers with no pact with the seller", bot.Troopers-before)
-	}
-	if n := w.MarketForSale(seller.Name, "Trooper"); n != 1000 {
-		t.Errorf("the listing was drawn down to %d with no pact in place", n)
 	}
 }
 

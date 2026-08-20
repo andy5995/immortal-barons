@@ -97,7 +97,7 @@ func printMarketTable(s session.Session, w *ctx) {
 			ansi.FgBrightWhite, w.MarketPrice(p.Name, good), ansi.Reset,
 			ansi.FgBrightCyan, owned, ansi.Reset,
 			ansi.FgBrightYellow, w.MarketForSale(p.Name, good), ansi.Reset,
-			ansi.FgBrightYellow, w.MarketTotalForSale(good, p), ansi.Reset)
+			ansi.FgBrightYellow, w.MarketTotalForSale(good), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), marketRule(), ansi.Reset)
 }
@@ -145,7 +145,7 @@ func marketChangeSetup(s session.Session, w *ctx, good string) {
 // sellers, then a quantity, then transfer (BuyFromMarket credits the seller).
 func marketBuy(s session.Session, w *ctx, good string) {
 	p := w.Player()
-	sellers := w.MarketSellers(good, p)
+	sellers := w.MarketSellers(good, p.Name)
 	if len(sellers) == 0 {
 		fail(s, fmt.Errorf("Nobody is selling %s right now.", tr(s, good)))
 		return
