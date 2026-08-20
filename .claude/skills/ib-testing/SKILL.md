@@ -5,20 +5,52 @@ description: Use when testing Immortal Barons behaviour — verifying a mechanic
 
 # Testing Immortal Barons
 
+**`-data` defaults to `./data`, and the repo root holds a real `data/world.json`.**
+So `immortal-barons -local` run from the checkout plays a live world, not a
+scratch one. Pass `-data` explicitly at every invocation, pointed somewhere
+under `/tmp`.
+
+**There is no seed control from the command line.** `store.Load` builds worlds
+through `game.NewWorld` (time-seeded) and the RNG is unexported and never
+serialized, so two `-reset-from-config` runs differ. Anything that must be
+reproducible is a Go harness with `NewWorldSeed`, optionally unmarshalling a
+saved `world.json` on top — do not burn time hunting for a `-seed` flag.
+
 Three surfaces answer different questions, and picking the wrong one is where the
 time goes.
 
 | Surface | Answers | Costs |
 |---|---|---|
-| Throwaway Go harness | "is this number right", "what does this code do to a world" | milliseconds |
+| `internal/game` harness | "is this number right", "what does the engine do to a world" | milliseconds |
+| `internal/menu` scripted session | "what does a PLAYER get" — every gate, prompt and refusal | milliseconds |
 | Scripted two-board league | "does this inter-BBS feature move a packet" | a minute |
 | Live BBS boards | "does a real sysop's setup work end to end" | tens of minutes, and a configured rig |
 
-**Default to the first.** `NewWorldSeed(DefaultConfig(), seed)` in a throwaway
-`internal/game/zz_*_test.go` gives a complete world for nothing; delete the file
-afterwards. The recurring failure is not reaching for it: fidelity work (reading
-the binary, parsing captures) puts you in a mode where the data source feels
-fixed and external, and simulation stops feeling available. "I haven't verified
+**Pick between the first two by where the rule lives, and the engine enforces
+very little.** New-realm protection is the worked example: `World.Attack` has no
+protection check at all and will happily fight a protected defender. The gate is
+`game.Targets` plus `menu.blockedByProtection`
+(`internal/menu/actions_attack.go:175`). A `game` harness therefore answers
+"can a protected realm be attacked?" with a confident **yes**, which is wrong for
+every question a player or sysop is actually asking. Ask "would a player ever
+reach this?" — if yes, script the menu.
+
+**Two facts the engine harness needs, both of which cost an hour when missed:**
+
+- **`DefaultConfig().AICount` is 0** (`internal/game/config.go:429`), so
+  `NewWorldSeed(DefaultConfig(), seed)` builds a world with **no empires**. Set
+  `cfg.AICount` before the call, or add empires after.
+- **`PlayTurn` does not collect income.** `CollectIncome`, `Manufacture` and
+  `GrowFood` are separate turn-start calls the caller makes
+  (`internal/game/turn.go`, `internal/menu/gameflow.go:57-59`). A naive
+  `PlayTurn` loop leaves gold unchanged every day and reads as a broken
+  economy. Drive days with `DailyMaintenance` instead.
+
+Delete the throwaway file afterwards.
+
+The recurring failure is not reaching for a harness at all: fidelity work
+(reading the binary, parsing captures) puts you in a mode where the data source
+feels fixed and external, and simulation stops feeling available. "I haven't verified
 this" is a trigger to build a sandbox, not a disclaimer to ship.
 
 **A question about game behaviour belongs in a throwaway world even when a live
@@ -35,9 +67,29 @@ touches money, to catch the 32-bit overflows the 64-bit build hides.
 
 ## Changing game state without the menus
 
-`config.json` in the data directory is the single source of truth —
-`store.repair` overwrites `World.Config` from it on every load, so editing the
-world's copy achieves nothing.
+`config.json` holds the game rules, and `store.repair` overwrites
+`World.Config` from it on every load (`internal/store/store.go:55-58`), so
+editing the world's copy achieves nothing.
+
+**It is not the only file, and it does not win.** Per-board settings —
+`BoardID`, `LeagueNumber`, `Inbound`, `Outbound`, `Link` — live in `bbs.cfg`,
+and `LoadBoardConfig` runs *after* the JSON (`internal/store/config.go:70`), so
+bbs.cfg overrides it. Editing `LeagueNumber` in `config.json` on a rig that has
+a `bbs.cfg` silently does nothing. Dropfile settings are in `door.json` and
+`MinBoardVersion` has its own file.
+
+The flags that exist for testing, none of which need the editor:
+
+| flag | does |
+|---|---|
+| `-dump` | print the normalized world as JSON after load-time migration — the inspection tool for "reproduce what I saw" |
+| `-spectate N` | play N days of computer-baron turns and print standings, the built-in balance probe. **Advances and saves**, so never point it at a rig you care about |
+| `-add-ai N` | add N computer barons to a running game (refused under IBBS) |
+| `-reset-from-config` | rebuild the world from the current `config.json`, no editor |
+| `-league-check` | report roster, board name, packet directories and keys at once — run this before blaming a league test |
+| `-league-routes` | print which board each planet's packets are handed to |
+| `-full`, `-detailed` | one full inbound/turn/outbound cycle, and per-packet tracing |
+| `-dupe-check on\|off` | force the league lockout for one run; never written to `config.json` |
 
 Prefer a CLI flag over the Configuration Editor when one exists. The editor is
 driven by keystrokes, which means **the change leaves no searchable trace**: a
@@ -85,12 +137,38 @@ Two traps, both of which fail silently:
   is on, so create a human realm on each side first, or a packet arrives with
   nobody to receive it.
 
+**The language picker is still there**, and it is the third trap. A first run
+needs a prelude before any game key:
+
+    ' 1\r<RealmName>\ry\r'
+
+— space to clear the splash pause, `1\r` to pick English, the realm name, then
+`y\r` to confirm it. Omit it and the realm gets named from your first keystroke
+and every key after that lands one screen early.
+
 **A scripted key sequence must assert it REACHED the screen it tests.** When the
 script runs dry the session ends *cleanly*, so any flow change upstream — a new
 prompt, a re-mapped hotkey — leaves the test green while it never reaches the
-code it covers. Two tests rotted this way, one for weeks, after a first-run
-language picker ate a key and shifted every key after it. Assert a marker unique
-to the target screen plus a state effect (`TurnsPlayed` rose, the treaty formed).
+code it covers. Two tests rotted this way, one for weeks, after that same
+language picker ate a key. Assert a marker unique to the target screen plus a
+state effect (`TurnsPlayed` rose, the treaty formed).
+
+## A menu-level test, in full
+
+The form the `internal/menu` tests use — this is what to copy when the answer
+lives behind a gate rather than in the engine:
+
+```go
+menus := BuildMenus()
+f, w, err := run(t, "g  0", menus.Game)   // helper in menu_test.go
+// then assert on f.out.String() and on w
+```
+
+`run` builds the fake session and world and calls `Run(f, w, root)` for you.
+The roots are **fields on `BuildMenus()`** — `.Game`, `.Attack`, `.System` —
+not paths walked from `Game`, which is why grepping the menu tree for them
+finds nothing. Hotkey dispatch is case-folded, so a lowercase letter is the
+honest key to script.
 
 ## Gates that block a test before it starts
 
@@ -98,11 +176,24 @@ Check these first when a mechanic appears not to work:
 
 - **New realm protection** gates trading and the market on both sides. End it
   from the System menu rather than playing turns to burn it off.
-- **Most interplanetary ops need a turn played this entry.** The menu redraws
-  with no message when it has not been.
-- **Every league needs a non-zero `LeagueNumber`.** `ReadInbound` skips a packet
-  only when reader and packet numbers are both set and differ, so a league left
-  at 0 reads another league's packets and has its own read in turn.
+- **An interplanetary or WMD item that is simply absent is a config switch**,
+  not a bug: `BombingOps`, `MissileOps`, `IPTrading`, `ClingyAnnihilator` and
+  `InterBBSEnabled` hide their items with no message
+  (`internal/menu/tree.go:37-44,544`).
+- **BRE gates most InterPlanetary options behind a turn played this entry, and
+  IB does not — that is a known fidelity gap, not a settled difference.**
+  BRE's `enforce_interbbs_turn_requirement` (`BRE.OVR 0x020a12`) prints "You
+  must play at least one turn per entry in the game to access this option." and
+  is called from **four** sites in `run_interbbs_menu` (`0x020caf`). Banking
+  and IP messages are reachable at the entry menu without a turn. IB has no
+  such check anywhere in `internal/game` or `internal/menu`. So when a test
+  reaches an IP op without playing a turn, **that is the bug, not the
+  baseline** — do not write the permissive behaviour into an expectation.
+  Issue #162.
+- **A `LeagueNumber` of 0 is fine on its own** — `-league-check` reports it as
+  ok. It matters only when two leagues share an inbound directory:
+  `ReadInbound` skips a packet just when reader and packet numbers are both set
+  and differ, so two leagues both left at 0 read each other's packets.
 
 ---
 
@@ -121,9 +212,11 @@ slowest surface and the only one that answers "does a sysop's setup work".
 
 ## Choosing board software by what the transport needs
 
-**Mystic cannot test an FTN netmail path at all.** It keeps its own message bases
-and has no `*.msg` netmail directory anywhere, so the Binkley/FrontDoor
-file-attach convention has nothing to read it. Synchronet can, through SBBSecho.
+**Mystic is reported not to test an FTN netmail path at all** — keeping its own
+message bases with no `*.msg` netmail directory for the file-attach convention
+to write into, where Synchronet has one through SBBSecho. Unverified against
+Mystic's own source or docs; confirm before concluding a handoff is impossible
+rather than misconfigured.
 Check for the directory the transport actually watches before concluding a
 handoff is broken.
 
@@ -201,14 +294,17 @@ Each step has its own failure mode, so check them in order rather than guessing
 where a packet stalled:
 
     immortal-barons -planetary          # writes .brp into Outbound
-    barons-ftn                          # claims it into Outbound/fido, writes N.msg
+    barons-ftn                          # claims it (Outbound/fido, or AttachDir), writes N.msg
     $SBBS/exec/sbbsecho                 # packs the .msg into the BSO .flo, deletes it
     $SBBS/exec/jsexec -c ctrl exec/binkit.js   # OUTBOUND session, actually sends
 
-**BinkIT does not push its queue to a caller.** An inbound session
-authenticates, transfers nothing, and looks like success on both sides. Only an
-outbound poll sends what the BSO holds — which is why the last step is a `jsexec`
-run rather than "wait for the other board to poll".
+**Run the whole chain; do not wait to be polled.** binkp is bidirectional and
+an inbound session *does* hand over what the BSO holds
+(`~/src/sbbs/exec/binkit.js:1008`), so the reason is not that BinkIT withholds
+the queue. It is that the first three steps have to run before there is
+anything in the BSO to collect: until `barons-ftn` and `sbbsecho` have run, a
+poll from the other board finds an empty outbound and both logs look healthy.
+See the `ftn` skill's Myths table.
 
 **The chain is safe to run with callers online.** `barons-ftn` takes its own
 `barons-ftn.lock` rather than the game lock, so it never blocks a node mid-turn.
@@ -219,20 +315,26 @@ The `.msg` numbering restarts from 1 each run. SBBSecho deletes the message once
 it is packed (kill-sent), so seeing `1.msg` again is the previous one having been
 carried, not the same one stuck.
 
-**Keep the outbound path short — with room to grow.** The Type-2 subject holds 70
-bytes in Binkley mode for the WHOLE absolute attachment path, `fido/` child and
-filename included. `<data dir>/outbound` is already too deep on a normal Unix
-layout; a short path near the BBS root is not fussiness, it is the only thing
-that fits. The preflight refuses the run and moves nothing, so this is loud
-rather than subtle.
+**On Synchronet, keep the outbound path short.** The Type-2 subject holds 71
+bytes for the whole attachment path, 70 with Binkley's `^`. `ftn.cfg` can spend
+fewer — `SubjectPath Basename` writes the filename alone, a prefix is resolved
+against the mailer's working directory (`internal/ftn/config.go:104-118`) — but
+**SBBSecho does not search for a bare name**, so a Synchronet board keeps
+`Absolute` and needs a short data directory (`docs/inter-bbs.md`). `AttachDir`
+moves the file itself off the `fido/` child. The preflight refuses the run and
+moves nothing, so this is loud rather than subtle.
 
-A path that fits today can stop fitting later with nothing changed: the packet
-name carries the board's outbound SEQUENCE NUMBER, so it grows a byte each time
-that number gains a digit. A rig proven working at sequence 99 failed at 100 and
-stayed failed, because every packet after it hit the same preflight. Leave
-several bytes of headroom rather than trimming to exactly 70, and read a fresh
-"attachment path is 71 bytes" as this rather than as a config change someone
-made.
+**The packet name does not grow** — `packetFilename` zero-pads the sequence to a
+fixed width (`internal/store/ibbs.go`), so a path that fits keeps fitting. Issue
+#156 removed the opposite claim from the code and the docs; this file had it
+too. What does consume a thin margin is a longer directory or a board joining on
+a longer node number.
+
+`barons-ftn` warns below 8 bytes spare (`internal/ftn/message.go:24`,
+`handler.go:75-78`). Treat that warning as real headroom advice, and read a hard
+failure — `attachment subject %q is %d bytes; FTN Type-2 permits at most …`
+(`message.go:95-96`), which names the `SubjectPath` fix — as a path or config
+change, not as drift.
 
 ## Scheduling the exchange
 
