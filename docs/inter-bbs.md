@@ -466,13 +466,19 @@ barons-ftn -data /path/to/data
 netmail directory and stops. What carries it is whatever already carries your
 netmail. On [Synchronet](https://www.synchro.net/) that is two more steps:
 SBBSecho packs the message and its attachment into the outbound, then the
-mailer sends it on its next outbound session. An incoming poll from the other
-board sends nothing.
+mailer carries it.
 
 ```
 sbbsecho                          # pack the .msg and its attachment
-jsexec -c ctrl exec/binkit.js     # poll out; an inbound poll sends nothing
+jsexec -c ctrl exec/binkit.js     # scan the outbound and send
 ```
+
+Your board still needs its own schedule, but not because a poll cannot collect:
+BinkIT hands over whatever is queued for an authenticated caller, so the other
+board's poll does carry your packets away. What it cannot do is run the two
+steps above. Until they have run there is nothing in the outbound to collect,
+and both boards' mailer logs look perfectly healthy while the league moves one
+way.
 
 Both usually run from your BBS's timed events already, so there is often
 nothing to add. Knowing the shape helps when nothing arrives. A `.msg` left in

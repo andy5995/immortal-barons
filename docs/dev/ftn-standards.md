@@ -98,9 +98,11 @@ Bit flags. The ones that bear on file attaches:
 | 0x0080 | KillSent |
 | 0x0100 | Local |
 
-A file attach is signalled two ways depending on the mailer's convention, and
-they are alternatives rather than both: a Binkley-style `^` prefix on the
-subject path, or a `^AFLAGS KFS` control line.
+**The attach itself is `0x0010`.** `^` and `^AFLAGS KFS` signal something
+else — *delete the file once it has been sent* — and they are alternatives
+rather than both: a Binkley-style `^` prefix on the subject path, or the
+control line. Do not read either as the attach, and do not confuse them with
+`0x0080` KillSent, which deletes the message rather than the file.
 
 ### Zone and point fields
 
