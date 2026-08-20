@@ -274,3 +274,52 @@ func TestForgeryCannotPoisonTheReplayCounter(t *testing.T) {
 		t.Fatal("a forged packet locked out every genuine packet from that board")
 	}
 }
+
+// TestBroadcastCopiesVerifyInARoutedLeague is the regression for the bug that a
+// third board exposed: the broadcast fan-out used to happen after signing, so
+// every addressed copy carried a signature over the unaddressed broadcast it
+// was made from, and every board that checked keys refused all of it. Only
+// broadcasts were affected, which is why individual attacks and mail kept
+// working and the league looked alive.
+//
+// The league here ROUTES — node 1 hosts 2 and 3 — because an unrouted league
+// does no fan-out and cannot show the fault.
+func TestBroadcastCopiesVerifyInARoutedLeague(t *testing.T) {
+	hubPub, hubSec, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	roster := []LeagueNode{
+		{Number: 1, Name: "Alpha BBS", Hosts: []int{2, 3}, PublicKey: hex.EncodeToString(hubPub)},
+		{Number: 2, Name: "Bravo BBS"},
+		{Number: 3, Name: "Delta BBS"},
+	}
+
+	hub := NewWorldSeed(Config{BoardID: "Alpha BBS"}, 1)
+	hub.BoardKey = hubSec
+	hub.LeagueNodes = roster
+	hub.RemoteBoards = []RemoteBoard{{BoardID: "Bravo BBS"}, {BoardID: "Delta BBS"}}
+	hub.Outbox = []Packet{{
+		FromBoard: "Alpha BBS",
+		Scores:    []RemoteScore{{Empire: "Apples", NetWorth: 4242}},
+	}} // no ToBoard: a broadcast
+	hub.StampOutbox()
+
+	if len(hub.Outbox) != 2 {
+		t.Fatalf("broadcast produced %d copies, want one per member board", len(hub.Outbox))
+	}
+	member := NewWorldSeed(Config{BoardID: "Bravo BBS"}, 1)
+	member.LeagueNodes = roster
+	for _, p := range hub.Outbox {
+		if p.ToBoard == "" {
+			t.Errorf("copy left unaddressed: %+v", p)
+		}
+		ok, checked := member.VerifyBoardOrigin(p)
+		if !checked {
+			t.Fatalf("roster names a key for %s but the check was skipped", p.FromBoard)
+		}
+		if !ok {
+			t.Errorf("copy for %s failed its origin check; it was signed before the destination was filled in", p.ToBoard)
+		}
+	}
+}

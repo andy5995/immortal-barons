@@ -1,6 +1,9 @@
 package store
 
 import (
+	"crypto/ed25519"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -9,6 +12,18 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
+
+// generateBoardKey gives w a signing key and returns the hex public half, for
+// the roster entry that lets another board check what w sends.
+func generateBoardKey(t *testing.T, w *game.World) string {
+	t.Helper()
+	pub, sec, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	w.BoardKey = sec
+	return hex.EncodeToString(pub)
+}
 
 // A three-board league where Alpha and Charlie only talk through Bravo. Alpha's
 // packet for Charlie has to survive the hop: before #106 it was skipped and left
@@ -412,4 +427,54 @@ func packetFiles(t *testing.T, dir string) []string {
 		}
 	}
 	return names
+}
+
+// TestBroadcastFilesVerifyOnArrivalInARoutedLeague walks the whole path a
+// broadcast takes — enqueue, StampOutbox, WriteOutbox, read the file back, check
+// the origin — because the fault it guards against lived in the seam between the
+// two layers. Signing happened in game, the fan-out in store, and each was
+// correct on its own: the copies went to the right boards and every packet was
+// signed, but the signature covered the packet as it looked BEFORE the
+// destination was filled in, so all of it was refused on arrival.
+func TestBroadcastFilesVerifyOnArrivalInARoutedLeague(t *testing.T) {
+	roster := []game.LeagueNode{
+		{Number: 1, Name: "Alpha BBS", Hosts: []int{2, 3}},
+		{Number: 2, Name: "Bravo BBS"},
+		{Number: 3, Name: "Delta BBS"},
+	}
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "Alpha BBS"
+	hub := game.NewWorldSeed(cfg, 1)
+	hub.LeagueNodes = roster
+	hub.RemoteBoards = []game.RemoteBoard{{BoardID: "Bravo BBS"}, {BoardID: "Delta BBS"}}
+	pub := generateBoardKey(t, hub)
+	roster[0].PublicKey = pub
+
+	hub.Outbox = []game.Packet{{FromBoard: "Alpha BBS", Scores: []game.RemoteScore{{Empire: "Apples", Land: 500}}}}
+	hub.StampOutbox()
+
+	outbound := t.TempDir()
+	sent, err := WriteOutbox(hub, outbound, false)
+	if err != nil {
+		t.Fatalf("WriteOutbox: %v", err)
+	}
+	if sent != 2 {
+		t.Fatalf("wrote %d files for a broadcast, want one per member board", sent)
+	}
+
+	memberCfg := game.DefaultConfig()
+	memberCfg.BoardID = "Bravo BBS"
+	member := game.NewWorldSeed(memberCfg, 1)
+	member.LeagueNodes = roster
+	for _, f := range packetFiles(t, outbound) {
+		var p game.Packet
+		readPacket(t, filepath.Join(outbound, f), &p)
+		ok, checked := member.VerifyBoardOrigin(p)
+		if !checked {
+			t.Fatalf("%s: the roster names Alpha's key but the check was skipped", f)
+		}
+		if !ok {
+			t.Errorf("%s: addressed to %s, refused on arrival", f, p.ToBoard)
+		}
+	}
 }

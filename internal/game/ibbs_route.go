@@ -179,3 +179,34 @@ func (w *World) ForwardPacket(p Packet) {
 	p.Hops++
 	w.Transit = append(w.Transit, p)
 }
+
+// addressBroadcasts turns each broadcast into one packet per planet on the
+// roster. A broadcast is one file that the transport is expected to copy to
+// every board — which only works where every board links to every other one.
+// Once a league routes, only the game knows the shape of it, so the roster is
+// where the copies have to be made; each one then follows the ordinary path to
+// its board. An unrouted league sends the single broadcast as before.
+//
+// Each copy is a separate packet from here on: StampOutbox gives it its own
+// sequence number and its own origin signature, covering the destination it
+// actually names.
+func (w *World) addressBroadcasts(packets []Packet) []Packet {
+	boards := w.KnownBoards()
+	if !w.Routed() || len(boards) == 0 {
+		return packets
+	}
+	out := make([]Packet, 0, len(packets))
+	for _, p := range packets {
+		if p.ToBoard != "" {
+			out = append(out, p)
+			continue
+		}
+		for _, b := range boards {
+			copied := p
+			copied.ToBoard = b
+			copied.ToNode = w.NodeNumber(b)
+			out = append(out, copied)
+		}
+	}
+	return out
+}

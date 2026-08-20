@@ -898,8 +898,14 @@ func runLeagueConfig(cfg game.Config) error {
 	if _, err := store.WriteOutbox(w, cfg.Outbound(), false); err != nil {
 		return err
 	}
+	// A routed league writes one copy per member, each to its own link, so
+	// naming the default directory would name where most of them did not go.
+	where := cfg.Outbound()
+	if len(cfg.OutboundDirs) > 0 {
+		where = "every board in the league"
+	}
 	fmt.Printf("Broadcast league config (turns/day=%d, protection=%d, length=%d) to %s\n",
-		cfg.TurnsPerDay, cfg.ProtectionTurns, cfg.GameLength, cfg.Outbound())
+		cfg.TurnsPerDay, cfg.ProtectionTurns, cfg.GameLength, where)
 	return store.Save(w, cfg)
 }
 
@@ -1257,7 +1263,7 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 // for a command whose whole job is moving mail: a sysop cannot tell a run that
 // had nothing to do from one that read the wrong directory.
 func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
-	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused
 	switch {
 	case run.Applied == 0 && skipped == 0:
 		fmt.Printf("No packets waiting in %s\n", cfg.Inbound())
@@ -1304,11 +1310,16 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 // e.g. "skipped 3: 2 already seen, 1 for another league". Each reason is shown
 // only when its count is above zero.
 func skipSummary(run store.PlanetaryRun) string {
-	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused
 	if skipped == 0 {
 		return ""
 	}
 	var parts []string
+	// First: a refusal is the one reason here that means something is wrong,
+	// rather than a packet this board had no business with.
+	if run.Refused > 0 {
+		parts = append(parts, fmt.Sprintf("%d refused, not matching the sender's key", run.Refused))
+	}
 	if run.AlreadySeen > 0 {
 		parts = append(parts, fmt.Sprintf("%d already seen", run.AlreadySeen))
 	}

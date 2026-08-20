@@ -168,7 +168,15 @@ func packetKey(p Packet) string {
 // StampOutbox numbers every queued packet and signs the ones carrying
 // Coordinator orders, just before they are written out. Doing it here rather
 // than at each enqueue means nothing can be queued unnumbered (#53).
+//
+// The broadcast fan-out happens FIRST, so each addressed copy is signed with
+// the destination it will carry. It used to happen further down, in
+// store.WriteOutbox, which left every copy signed as the unaddressed broadcast
+// it was made from and refused by every board that checked it. The fan-out
+// belongs with the signing for that reason: separate them again and the
+// signature stops covering what is sent.
 func (w *World) StampOutbox() {
+	w.Outbox = w.addressBroadcasts(w.Outbox)
 	for i := range w.Outbox {
 		w.Outbox[i].League = w.Config.LeagueNumber
 		// EVERY packet says what this board runs, not just the ones whose
@@ -281,6 +289,16 @@ func (w *World) BoardPublicKey(board string, node int) (ed25519.PublicKey, bool)
 		return ed25519.PublicKey(raw), true
 	}
 	return nil, false
+}
+
+// OriginRefused reports whether p fails the origin check ApplyPacket enforces,
+// so a caller can say what happened to it. ApplyPacket answers with an empty
+// packet whether it refused one, dropped a replay, or simply had no reply to
+// send, and a refusal counted as an application is how a league whose every
+// broadcast was being rejected went on reporting "Applied N packets".
+func (w *World) OriginRefused(p Packet) bool {
+	ok, checked := w.VerifyBoardOrigin(p)
+	return checked && !ok
 }
 
 // VerifyBoardOrigin checks a packet against the sending board's roster key.

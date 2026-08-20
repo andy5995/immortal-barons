@@ -1,4 +1,8 @@
 (in-progress:)
+  * A routed league's broadcasts are signed after they are addressed, where
+    every copy used to be refused by the boards that check keys
+  * A packet refused for not matching the sender's key is reported as refused,
+    where it was counted and announced as applied
   * The captured-region picker lists the Advisors entry and takes * to visit
     them, as the Buy Regions screen does — the original draws both screens from
     one routine

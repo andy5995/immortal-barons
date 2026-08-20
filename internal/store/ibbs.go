@@ -37,6 +37,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	run.OtherLeague = inResult.OtherLeague
 	run.MeshCopy = inResult.MeshCopy
 	run.AlreadySeen = inResult.AlreadySeen
+	run.Refused = inResult.Refused
 	// A member board that just adopted the Coordinator's roster has to persist
 	// it: the roster is read from ibnodes.dat at startup, not from the world
 	// file (#64).
@@ -78,6 +79,7 @@ type PlanetaryRun struct {
 	OtherLeague   int  // packets skipped: wrong league number
 	MeshCopy      int  // packets skipped: not addressed here, mesh mode
 	AlreadySeen   int  // packets skipped: duplicate/replay
+	Refused       int  // packets refused: the sender's signature did not match the roster
 }
 
 // WriteOutbox atomically publishes each queued packet as a JSON file and clears
@@ -90,7 +92,7 @@ type PlanetaryRun struct {
 // one directory its uplink collects from (#106). dir is that directory; a board
 // that hosts others configures a separate one per neighbour.
 func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
-	packets := addressBroadcasts(w, append(append([]game.Packet(nil), w.Outbox...), w.Transit...))
+	packets := append(append([]game.Packet(nil), w.Outbox...), w.Transit...)
 	if len(packets) == 0 {
 		return 0, nil
 	}
@@ -198,36 +200,6 @@ func writePacketAtomic(path string, data []byte) error {
 	}
 }
 
-// addressBroadcasts turns each broadcast into one packet per planet on the
-// roster. A broadcast is one file that the transport is expected to copy to
-// every board — which only works where every board links to every other one.
-// Once a league routes, only the game knows the shape of it, so the roster is
-// where the copies have to be made; each one then follows the ordinary path to
-// its board. An unrouted league sends the single broadcast as before.
-//
-// The Coordinator's signature covers the payload and the sender, not the
-// destination, so an addressed copy verifies exactly as the broadcast did.
-func addressBroadcasts(w *game.World, packets []game.Packet) []game.Packet {
-	boards := w.KnownBoards()
-	if !w.Routed() || len(boards) == 0 {
-		return packets
-	}
-	out := make([]game.Packet, 0, len(packets))
-	for _, p := range packets {
-		if p.ToBoard != "" {
-			out = append(out, p)
-			continue
-		}
-		for _, b := range boards {
-			copied := p
-			copied.ToBoard = b
-			copied.ToNode = w.NodeNumber(b)
-			out = append(out, copied)
-		}
-	}
-	return out
-}
-
 // leaguePrefix marks a packet's filename with the league it belongs to, so a
 // sysop looking at an inbound directory shared by two leagues can see which is
 // which. League 0 means the number was never set, and the prefix is left off.
@@ -247,6 +219,7 @@ type InboundResult struct {
 	OtherLeague int
 	MeshCopy    int
 	AlreadySeen int
+	Refused     int
 }
 
 // ReadInbound reads every packet file in dir addressed to this board (or
@@ -305,9 +278,6 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			}
 			continue
 		}
-		if verbose {
-			fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
-		}
 		if w.IsPacketSeen(p) {
 			result.AlreadySeen++
 			if verbose {
@@ -316,11 +286,26 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			os.Remove(path) // clean up; SeenPacket already recorded it
 			continue
 		}
+		// Asked BEFORE ApplyPacket, which posts the refusal to the planet's
+		// news and then returns the same empty packet it returns for a
+		// replay or for anything with no reply to send.
+		refused := w.OriginRefused(p)
 		applyResult := w.ApplyPacket(p)
 		if applyResult.HasPayload() {
 			w.Outbox = append(w.Outbox, applyResult)
 		}
-		result.Applied++
+		if refused {
+			result.Refused++
+			if verbose {
+				fmt.Printf("  Refused packet from %s (%s): it does not match that board's key\n",
+					p.FromBoard, p.PacketType())
+			}
+		} else {
+			result.Applied++
+			if verbose {
+				fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
+			}
+		}
 		if err := os.Remove(path); err != nil {
 			return result, err
 		}
