@@ -1,8 +1,6 @@
 # Inter-BBS Packet & Node-List Formats (developer reference)
 
-This is the on-disk contract for Immortal Barons' inter-BBS ("interplanetary")
-play. It is a developer reference, not a player/sysop doc — the door setup guide
-is `docs/door-setup.md`.
+The sysop's side of inter-BBS ("interplanetary") play is `docs/inter-bbs.md`.
 
 The clone is an independent reimplementation and does **not** use BRE's binary
 packet format. It defines its own JSON packets. The node list reuses BRE's

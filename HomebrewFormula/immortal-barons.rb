@@ -26,7 +26,8 @@ class ImmortalBarons < Formula
     # "git show <tag>:scripts/build-archives.sh" whenever the pin moves.
     doc.install "LICENSE", "README.md", "docs/faq.md", "docs/playing.md",
                 "docs/command-reference.md", "docs/door-setup.md",
-                "docs/charset.md", "docs/download.md", "docs/translating.md"
+                "docs/inter-bbs.md", "docs/charset.md", "docs/download.md",
+                "docs/translating.md"
   end
 
   def caveats

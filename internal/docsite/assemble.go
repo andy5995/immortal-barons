@@ -346,6 +346,7 @@ func Assemble(repoRoot, outDir, feedURL string) error {
 			{homeSource(repoRoot, lang.code), filepath.Join(langDir, "index.md"), "index.md"},
 			{guideIntroSource(repoRoot, lang.code), filepath.Join(langDir, "guide", "index.md"), "guide/index.md"},
 			{doorSetupSource(repoRoot, lang.code), filepath.Join(langDir, "door-setup", "index.md"), "door-setup/index.md"},
+			{interBBSSource(repoRoot, lang.code), filepath.Join(langDir, "inter-bbs", "index.md"), "inter-bbs/index.md"},
 			{charsetSource(repoRoot, lang.code), filepath.Join(langDir, "charset", "index.md"), "charset/index.md"},
 			{cmdRefSource(repoRoot, lang.code), filepath.Join(langDir, "command-reference", "index.md"), "command-reference/index.md"},
 			{downloadSource(repoRoot, lang.code), filepath.Join(langDir, "download", "index.md"), "download/index.md"},
@@ -523,6 +524,10 @@ func guideIntroSource(repoRoot, lang string) string {
 func doorSetupSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "docs", "door-setup.md"), lang)
 }
+func interBBSSource(repoRoot, lang string) string {
+	return langFile(filepath.Join(repoRoot, "docs", "inter-bbs.md"), lang)
+}
+
 func charsetSource(repoRoot, lang string) string {
 	return langFile(filepath.Join(repoRoot, "docs", "charset.md"), lang)
 }

@@ -101,6 +101,7 @@ func buildNav(repoRoot string, enTopics []topic) ([]navNode, error) {
 	nav = append(nav, navNode{title: "Manual vs. Code", path: "manual-vs-code/index.md"})
 
 	nav = append(nav, navNode{title: "Door Setup", path: "door-setup/index.md"})
+	nav = append(nav, navNode{title: "Inter-BBS Leagues", path: "inter-bbs/index.md"})
 	nav = append(nav, navNode{title: "Character Set", path: "charset/index.md"})
 	nav = append(nav, navNode{title: "Translating", path: "translating/index.md"})
 	// The full headline list the sidebar block links to.

@@ -109,9 +109,10 @@ supports. Callers share one persistent world, each empire saved between calls
 and keyed by its BBS handle, and several nodes can play at the same time.
 
 The [Door Setup guide](https://andy5995.github.io/immortal-barons/door-setup/)
-covers the details: registering the door, the dropfile, daily maintenance
-(`immortal-barons -maint`), the node list, inter-BBS play, and starting a fresh
-game (`immortal-barons -reset`).
+covers registering the door, the dropfile, daily maintenance
+(`immortal-barons -maint`) and starting a fresh game (`immortal-barons -reset`).
+[Inter-BBS Leagues](https://andy5995.github.io/immortal-barons/inter-bbs/)
+covers linking your board to others.
 
 ## How to play
 

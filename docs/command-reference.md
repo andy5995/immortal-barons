@@ -143,7 +143,7 @@ or override game state.
 ### Inter-BBS
 
 These options are for games that link several BBSes together (a "league"). See
-[Door Setup](door-setup.md) for how inter-BBS play works.
+[Inter-BBS Leagues](inter-bbs.md) for how league play works.
 
 - **`-ibbs-reset`** — Start a new game as a board in a league. The same as
   `-reset`, except the settings editor also asks the league settings (board
@@ -244,5 +244,6 @@ messages.
 - **`-version`** — Print the helper and game version, then exit.
 - **`-help`** — Print the options, then exit.
 
-See the FTN handoff section of [Door Setup](door-setup.md#optional-ftn-handoff)
-for `ftn.cfg`, routing, and mailer details.
+See the FTN handoff section of
+[Inter-BBS Leagues](inter-bbs.md#optional-ftn-handoff) for `ftn.cfg`, routing,
+and mailer details.

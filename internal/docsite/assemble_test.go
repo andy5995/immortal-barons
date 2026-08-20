@@ -13,7 +13,8 @@ func writeFixture(t *testing.T, root string) {
 	files := map[string]string{
 		"README.md":                                   "# Immortal Barons\n\nOverview. See [door setup](docs/door-setup.md).\n",
 		"docs/playing.md":                             "# Playing\n\nHow to play.\n",
-		"docs/door-setup.md":                          "# Door Setup\n\nSetup.\n",
+		"docs/door-setup.md":                          "# Door Setup\n\nSetup. See [leagues](docs/inter-bbs.md).\n",
+		"docs/inter-bbs.md":                           "# Inter-BBS Leagues\n\nLeague play.\n",
 		"docs/command-reference.md":                   "# Command Reference\n\nAll options.\n",
 		"docs/download.md":                            "# Download\n\nReleases and snapshots.\n",
 		"docs/faq.md":                                 "# FAQ\n\nQuestions.\n",
@@ -56,6 +57,7 @@ func TestAssembleLayout(t *testing.T) {
 		"site-src/en/guide/economy/regions.md",    // help topic
 		"site-src/en/guide/controls/interface.md", // help topic
 		"site-src/en/door-setup/index.md",         // door setup (was sysop guide)
+		"site-src/en/inter-bbs/index.md",          // inter-BBS leagues, split out of door setup
 		"site-src/en/command-reference/index.md",  // command reference (#34)
 		"site-src/en/download/index.md",           // download page
 		"site-src/en/faq/index.md",                // faq
@@ -72,7 +74,7 @@ func TestAssembleLayout(t *testing.T) {
 
 	// German has no translated README/playing/sysop, so those files must be
 	// absent (the i18n plugin falls back to English at build time).
-	for _, rel := range []string{"site-src/de/index.md", "site-src/de/door-setup/index.md", "site-src/de/command-reference/index.md", "site-src/de/faq/index.md", "site-src/de/translating/index.md", "site-src/de/developers/packets.md"} {
+	for _, rel := range []string{"site-src/de/index.md", "site-src/de/door-setup/index.md", "site-src/de/inter-bbs/index.md", "site-src/de/command-reference/index.md", "site-src/de/faq/index.md", "site-src/de/translating/index.md", "site-src/de/developers/packets.md"} {
 		if _, err := os.Stat(filepath.Join(out, rel)); err == nil {
 			t.Errorf("did not expect %s (should fall back to English)", rel)
 		}
