@@ -1,4 +1,6 @@
 (in-progress:)
+  * bbs.cfg is read even when config.json is absent, where its settings used to
+    be ignored entirely on a board that had not saved a config yet
   * A routed league's broadcasts are signed after they are addressed, where
     every copy used to be refused by the boards that check keys
   * A packet refused for not matching the sender's key is reported as refused,

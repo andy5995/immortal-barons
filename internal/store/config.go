@@ -19,7 +19,11 @@ func LoadConfig(dataDir string) (game.Config, error) {
 	cfg.DataDir = dataDir
 	data, err := os.ReadFile(configPath(dataDir))
 	if os.IsNotExist(err) {
-		return cfg, nil
+		// No config.json yet. bbs.cfg still has to be read: it is hand-written and
+		// may well be in place first, and returning here left a board with its
+		// name, league number and packet paths all silently at their defaults.
+		err := LoadBoardConfig(dataDir, &cfg)
+		return cfg, err
 	}
 	if err != nil {
 		return cfg, err

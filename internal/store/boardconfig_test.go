@@ -180,3 +180,23 @@ func TestSavingConfigLeavesBoardConfigAlone(t *testing.T) {
 		t.Errorf("%s was rewritten:\n%s", BoardConfigFile, got)
 	}
 }
+
+// bbs.cfg is hand-written and may be in place before the game has ever written
+// a config.json — a sysop preparing a board, or a data directory restored from
+// a backup that only kept the files they edit. LoadConfig used to return the
+// moment config.json was missing, so every setting in bbs.cfg went unread and
+// the board came up as "local" on node 0.
+func TestBoardConfigIsReadWithNoConfigJSON(t *testing.T) {
+	dir := t.TempDir()
+	body := "BoardID Avalon\nLeagueNumber 900\n"
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(body), 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+	cfg, err := LoadConfig(dir)
+	if err != nil {
+		t.Fatalf("LoadConfig: %v", err)
+	}
+	if cfg.BoardID != "Avalon" || cfg.LeagueNumber != 900 {
+		t.Errorf("bbs.cfg went unread: BoardID %q, league %d", cfg.BoardID, cfg.LeagueNumber)
+	}
+}
