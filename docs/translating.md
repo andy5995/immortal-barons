@@ -116,7 +116,10 @@ on disk.
 2. Create the **interface** catalog from the template:
 
    ```
-   msginit -i po/ui/immortal-barons.pot -l <code> -o internal/i18n/locale/<code>.po --no-translator
+   msginit -i po/ui/immortal-barons.pot \
+     -l <code> \
+     -o internal/i18n/locale/<code>.po \
+     --no-translator
    ```
 
    (Run from `po/ui/` you can omit `-i` — msginit finds the template on its own.)
