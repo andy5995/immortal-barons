@@ -2437,3 +2437,33 @@ stalls on a player who just wants it over with.
 dark red, which sits at about 2:1 against black; and the result line states the
 match count in words, so nothing depends on telling two colours apart. Both are
 deliberate — see `docs/mechanics-reference.md`.
+
+## The Coordinator notice (top of every InterBBS turn)
+
+Printed the moment Play Game is chosen, before the "Since your last play"
+header, and only in an InterBBS game. One of two lines, chosen by comparing the
+elected Coordinator's id against the caller's own (`run_door_session`,
+`BRE.EXE 013a:0cf7`).
+
+To the Coordinator (`cap/treaty-order-20260817.cap`, and colour-stripped in
+`cap/20240527-134Pho_Lazarus_Public.cap`) — the office is the bright segment,
+BRE's colour `0x0f`, and the line returns to `0x07` after it:
+
+```
+You are currently the ESC[0fm BBS Coordinator ESC[07m
+```
+
+To everyone else (`cap/eots-ibbs-01.cap`), the voted realm is the bright
+segment, and a second line follows in the body colour:
+
+```
+Your current vote for BBS coordinator is: ESC[1;37m Dynoland ESC[0;40;37m
+You may change your vote in the system menu
+```
+
+Note the casing: the office is capitalised on the first line and not on the
+second.
+
+IB prints its own wording in the same place and the same shape, adds a third
+case for a baron who has not voted yet, and withholds the second line from a
+realm still under protection — see `docs/mechanics-reference.md`.

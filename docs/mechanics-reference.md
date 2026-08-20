@@ -3353,6 +3353,24 @@ The Coordinator is elected by the planet's own barons, from the System Menu's
 - The office goes to the living realm with the most votes; IB breaks a tie by
   net worth, which the original does not state.
 
+**Every turn opens by telling you where you stand.** The moment Play Game is
+chosen, before the "since your last play" recap and only in an InterBBS game,
+BRE prints one of two lines (`run_door_session`, `BRE.EXE 013a:0cf7`, behind the
+InterBBS flag at `0x6a9a`; it compares the elected Coordinator's id against the
+caller's own):
+
+- to the Coordinator, that they hold the office;
+- to everyone else, the realm their vote is currently for, and that the vote can
+  be changed from the System menu.
+
+The office and the realm name are the bright segment of the line, the rest the
+body colour. **IB implements this** with two divergences. BRE has no case for a
+baron who has not voted, its field always holding something; IB's is empty until
+the first vote, so it says so. And IB withholds the "System menu" line from a
+realm still under protection, which has no Coordinator Vote item to be sent to —
+BRE prints that line to them anyway, pointing at an item its own menu builder
+has just left out.
+
 IB implements all of this. One thing is not established from the original: the
 color it prints **Enemy** in (the capture only ever showed the other three, so
 IB infers bright red). The hotkey is settled — BRE's Coordinator Ops menu has

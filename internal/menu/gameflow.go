@@ -877,6 +877,64 @@ func showQueenRefund(s session.Session, w *ctx) {
 	pause(s)
 }
 
+// showCoordinatorNotice tells an inter-BBS caller where they stand on the BBS
+// Coordinator: that they hold the office, or who their vote is for. BRE prints
+// one of the two the moment Play Game is chosen, ahead of the "since your last
+// play" recap, and only in an InterBBS game (`run_door_session`, BRE.EXE
+// 013a:0cf7, behind its InterBBS flag). Without it a baron who never opens the
+// vote screen never learns either fact.
+//
+// Two divergences. BRE has no case for a baron who has not voted, because its
+// field always holds something; IB's is empty until the first vote, so it says
+// so. And the closing line about the System menu is held back from a realm
+// still under new-realm protection, for which that menu item is hidden — BRE
+// prints the line to them anyway, pointing at an item its own menu builder has
+// just left out.
+func showCoordinatorNotice(s session.Session, w *ctx) {
+	if !w.Config.IBBS {
+		return
+	}
+	var isCoordinator, protected bool
+	var voteName string
+	withPlayer(w, func(p *game.Empire) {
+		protected = p.Protection > 0
+		if co := w.World.BBSCoordinator(); co != nil && co == p {
+			isCoordinator = true
+			return
+		}
+		if v := w.World.FindByOwner(p.CoordinatorVote); v != nil {
+			voteName = v.Name
+		}
+	})
+
+	// Wrapped before colouring, so a translation longer than the English does
+	// not break past column 80 — then the one name the line is about is
+	// brightened, as BRE brightens it. A name the wrap has split across two
+	// lines simply stays unhighlighted.
+	say := func(msg, highlight string) {
+		msg = WrapIndented(msg, "")
+		if highlight != "" {
+			msg = strings.Replace(msg, highlight, ansi.FgBrightWhite+highlight+ansi.FgWhite, 1)
+		}
+		fmt.Fprintf(s, "%s%s%s\n", ansi.FgWhite, msg, ansi.Reset)
+	}
+
+	fmt.Fprint(s, "\n")
+	if isCoordinator {
+		office := tr(s, "BBS Coordinator")
+		say(fmt.Sprintf(tr(s, "You hold the office of %s."), office), office)
+		return
+	}
+	if voteName == "" {
+		say(tr(s, "You have not voted for a BBS Coordinator yet."), "")
+	} else {
+		say(fmt.Sprintf(tr(s, "Your vote for BBS Coordinator is %s."), voteName), voteName)
+	}
+	if !protected {
+		say(tr(s, "You can change it from the System menu."), "")
+	}
+}
+
 // showLottery offers the Queen's lottery, once a game day, immediately after
 // her tax refund — the original settles the two as one first-play block.
 //
@@ -998,6 +1056,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		return Stay
 	}
 
+	showCoordinatorNotice(s, w)
 	openTurnRecap(s, w)
 
 	firstTurn := true

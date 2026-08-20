@@ -998,3 +998,93 @@ func TestNoLotteryOfferWithoutThePrice(t *testing.T) {
 		t.Error("the day's offer is spent even when it could not be made")
 	}
 }
+
+// The BBS Coordinator notice opens an inter-BBS turn, before the recap, and
+// says one of three things: that you hold the office, who your vote is for, or
+// that you have not voted. Each case asserts the line reached the screen and
+// that the turn went on past it.
+func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
+	perTurn := "   0000n0" // the turn's pauses, then quit each stage and the menu
+
+	t.Run("holds the office", func(t *testing.T) {
+		w := leagueCtx(t)
+		w.AutoPayMaint = true
+		w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+		f := &fakeSession{keys: []rune(perTurn)}
+		runTurn(f, w)
+		out := stripANSI(f.out.String())
+		if !strings.Contains(out, "You hold the office of BBS Coordinator.") {
+			t.Errorf("the office notice never reached the screen:\n%s", out)
+		}
+		if w.Player().TurnsLeft != w.Config.TurnsPerDay-1 {
+			t.Errorf("the turn did not run past the notice: %d turns left", w.Player().TurnsLeft)
+		}
+	})
+
+	t.Run("voted for someone else", func(t *testing.T) {
+		w := leagueCtx(t)
+		w.AutoPayMaint = true
+		w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+		w.Player().Protection = 0 // a protected realm is not told where to vote
+		// An AI baron holds no BBS handle, so the vote needs a second human.
+		other := w.AddHuman("rival", "Rivalia")
+		w.VoteCoordinator(w.Player(), other.Owner)
+		if w.Player().CoordinatorVote != other.Owner {
+			t.Fatalf("the vote did not register: %q", w.Player().CoordinatorVote)
+		}
+		f := &fakeSession{keys: []rune(perTurn)}
+		runTurn(f, w)
+		out := stripANSI(f.out.String())
+		if !strings.Contains(out, "Your vote for BBS Coordinator is "+other.Name+".") {
+			t.Errorf("the vote notice never reached the screen:\n%s", out)
+		}
+		if !strings.Contains(out, "System menu") {
+			t.Errorf("an unprotected voter should be told where to change it:\n%s", out)
+		}
+	})
+
+	t.Run("protected realm is not sent to a hidden menu item", func(t *testing.T) {
+		w := leagueCtx(t)
+		w.AutoPayMaint = true
+		w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+		other := w.AddHuman("rival", "Rivalia")
+		w.VoteCoordinator(w.Player(), other.Owner)
+		w.Player().Protection = 5
+		f := &fakeSession{keys: []rune(perTurn)}
+		runTurn(f, w)
+		out := stripANSI(f.out.String())
+		if !strings.Contains(out, "Your vote for BBS Coordinator is Rivalia.") {
+			t.Fatalf("the vote notice never reached the screen:\n%s", out)
+		}
+		if strings.Contains(out, "System menu") {
+			t.Errorf("a protected realm has no Coordinator Vote item to be sent to:\n%s", out)
+		}
+	})
+
+	t.Run("has not voted", func(t *testing.T) {
+		w := leagueCtx(t)
+		w.AutoPayMaint = true
+		w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+		for _, e := range w.Empires {
+			e.CoordinatorVote = ""
+		}
+		f := &fakeSession{keys: []rune(perTurn)}
+		runTurn(f, w)
+		out := stripANSI(f.out.String())
+		if !strings.Contains(out, "You have not voted for a BBS Coordinator yet.") {
+			t.Errorf("the no-vote notice never reached the screen:\n%s", out)
+		}
+	})
+}
+
+// Outside a league there is no Coordinator and no notice.
+func TestNoCoordinatorNoticeOffLeague(t *testing.T) {
+	w := newWorld()
+	w.AutoPayMaint = true
+	w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+	f := &fakeSession{keys: []rune("   0000n0")}
+	runTurn(f, w)
+	if out := stripANSI(f.out.String()); strings.Contains(out, "BBS Coordinator") {
+		t.Errorf("a standalone board should say nothing about a Coordinator:\n%s", out)
+	}
+}
