@@ -125,12 +125,12 @@ const (
 	helpClingyAnnihilator  = "Whether the Clingy Annihilator doomsday weapon may be built."
 	helpMaxRegions         = "The most regions a single player may own."
 	helpMaxPlayers         = "The most human empires allowed on this board. 0 means no limit."
-	helpBoardID            = "The name this board uses in inter-BBS packets."
-	helpLeagueNumber       = "The League Coordinator's number for this league, 1-999. It keeps two leagues apart when they share one inbound directory."
+	helpBoardID            = "The name this board uses in inter-BBS packets. Set in bbs.cfg, which the game reads but never writes; shown here so you can see what it is running on."
+	helpLeagueNumber       = "The League Coordinator's number for this league, 1-999. It keeps two leagues apart when they share one inbound directory. Set in bbs.cfg."
 	helpLeagueName         = "What this league calls itself. Shown to players on Game Setup and nothing routes by it — the League Number still does the matching. The Coordinator sets it and it reaches every board."
 	helpMinVersion         = "The game version every board in the league must run (blank for no requirement). A board below it has its packets refused."
-	helpInboundDir         = "Where packets from the other boards arrive. Relative to the data directory unless you give a full path."
-	helpOutboundDir        = "Where the game writes packets for the other boards. Relative to the data directory unless you give a full path."
+	helpInboundDir         = "Where packets from the other boards arrive. Relative to the data directory unless you give a full path. Set in bbs.cfg."
+	helpOutboundDir        = "Where the game writes packets for the other boards. Relative to the data directory unless you give a full path. Set in bbs.cfg."
 	helpIdleTimeout        = "End a session after this many seconds with no keypress, freeing the shared world lock. 0 never times out."
 	helpIdleWarnings       = "How many idle warnings a session receives before it is disconnected."
 )
@@ -250,26 +250,16 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addInt(caps, "Max Purchasable Regions", helpMaxRegions, c.MaxRegions, 0, game.MaxPurchasableRegions, func(c *game.Config, n int) { c.MaxRegions = n })
 	t.addInt(caps, "Max Players Per BBS (0=unlimited)", helpMaxPlayers, c.MaxPlayers, 0, 100000, func(c *game.Config, n int) { c.MaxPlayers = n })
 	if ibbs {
-		t.addText(caps, 16, "Board ID", helpBoardID, c.BoardID, func(c *game.Config, v string) { c.BoardID = v })
+		t.addStatic(caps, 16, "Board ID", helpBoardID, c.BoardID)
 		t.addText(caps, 48, "League Name", helpLeagueName, c.LeagueName, func(c *game.Config, v string) {
 			c.LeagueName = strings.TrimSpace(v)
 		})
 		t.addText(caps, 47, "Required Version", helpMinVersion, c.MinBoardVersion, func(c *game.Config, v string) {
 			c.MinBoardVersion = strings.TrimPrefix(strings.TrimSpace(v), "v")
 		})
-		t.addInt(caps, "League Number (0=unset)", helpLeagueNumber, c.LeagueNumber, 0, game.MaxLeagueNumber, func(c *game.Config, n int) { c.LeagueNumber = n })
-		// A cleared path field keeps the current one: the inter-BBS step has nowhere
-		// to read or write with an empty directory.
-		t.addText(caps, 40, "Inbound Dir", helpInboundDir, c.InboundDir, func(c *game.Config, v string) {
-			if v != "" {
-				c.InboundDir = v
-			}
-		})
-		t.addText(caps, 40, "Outbound Dir", helpOutboundDir, c.OutboundDir, func(c *game.Config, v string) {
-			if v != "" {
-				c.OutboundDir = v
-			}
-		})
+		t.addStatic(caps, 16, "League Number", helpLeagueNumber, strconv.Itoa(c.LeagueNumber))
+		t.addStatic(caps, 40, "Inbound Dir", helpInboundDir, c.InboundDir)
+		t.addStatic(caps, 40, "Outbound Dir", helpOutboundDir, c.OutboundDir)
 		t.addBool(caps, "Dupe Checking", helpDupeChecking, c.DupeChecking, func(c *game.Config, b bool) { c.DupeChecking = b })
 	}
 	t.addInt(caps, "Idle timeout (sec, 0=never)", helpIdleTimeout, c.IdleTimeoutSecs, 0, 86400, func(c *game.Config, n int) { c.IdleTimeoutSecs = n })
@@ -547,6 +537,17 @@ func (t *configTUI) addText(form *tview.Form, width int, label, help, val string
 
 // addDate adds an ISO-date field; an empty value clears it, a malformed one is
 // ignored (keeps the opening value), matching the line editor's promptDate.
+// addStatic shows a setting this editor does not own. The four that name this
+// board live in bbs.cfg, which the game reads and never writes (#152), so the
+// field is disabled rather than absent: the sysop still sees what the board is
+// running on, and the help pane says where to change it.
+func (t *configTUI) addStatic(form *tview.Form, width int, label, help, val string) {
+	f := tview.NewInputField().SetLabel(mark(label) + label).SetText(val).SetFieldWidth(width)
+	f.SetFocusFunc(func() { t.showHelp(help) })
+	f.SetDisabled(true)
+	form.AddFormItem(zebra(form, f))
+}
+
 func (t *configTUI) addDate(form *tview.Form, label, help, val string, set func(*game.Config, string)) {
 	f := tview.NewInputField().SetLabel(mark(label) + label).SetText(val).SetFieldWidth(14)
 	f.SetFocusFunc(func() { t.showHelp(help) })

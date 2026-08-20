@@ -54,6 +54,11 @@ func TestSaveConfig_LoadConfig_RoundTrip(t *testing.T) {
 		t.Error("DupeCheckOverride reached config.json; a -dupe-check run would change the saved rule")
 	}
 	cfg.DupeCheckOverride = nil
+	// Nor do the settings that name this board: they belong to bbs.cfg, which
+	// SaveConfig must leave alone (#152). Their round trip is
+	// TestBoardConfigRoundTrip's.
+	cfg.BoardID, cfg.InboundDir, cfg.OutboundDir = got.BoardID, got.InboundDir, got.OutboundDir
+	cfg.LeagueNumber, cfg.OutboundDirs = got.LeagueNumber, got.OutboundDirs
 	if !reflect.DeepEqual(got, cfg) {
 		t.Errorf("round trip = %+v, want %+v", got, cfg)
 	}

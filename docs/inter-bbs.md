@@ -59,10 +59,12 @@ Set these on the **Caps & Node** page:
   poll the other board. If the file goes, the directory is right. If it stays,
   it is a queue and you need the other one.
 
-Board ID, League Number and the two directories are written to **`bbs.cfg`** in
-your data directory, a plain text file you can edit instead of opening the
-editor. See below. The League Name is not among them — it belongs to the league
-rather than to your board, so it travels in the Coordinator's broadcast.
+Board ID, League Number and the two directories are read from **`bbs.cfg`** in
+your data directory, a plain text file you write yourself. The game never writes
+it, so nothing you do in the game — a reset included — can undo an edit you made
+there. See below. The League Name is not among them: it belongs to the league
+rather than to your board, so it travels in the Coordinator's broadcast, and the
+settings editor is where you set it.
 
 The two directories are relative to your data directory, so the defaults
 `inbound` and `outbound` need no editing on most boards. Give a full path
@@ -136,8 +138,9 @@ The key is a one-time exchange, unless the league changes Coordinator.
     may be left out, in which case the game uses `inbound` and `outbound` inside
     its data directory and you move the files yourself.
 
-    This writes `bbs.cfg`. If your Coordinator gave you a league number, add it
-    there — the command has no flag for it:
+    The command does not write `bbs.cfg` — it ends by printing the file for you
+    to save, filled in from the flags you gave. Add your Coordinator's league
+    number to it if you have one; the command has no flag for it:
 
     ```
     LeagueNumber 900
@@ -145,7 +148,7 @@ The key is a one-time exchange, unless the league changes Coordinator.
 
     **Converting a board that already plays BRE?** Point the command at your old
     `BBS.CFG` instead and it takes the board name, incoming-files directory and
-    league number from it, printing what it read:
+    league number from it, printing what it read and the `bbs.cfg` to save:
 
     ```
     immortal-barons -ibbs-reset \
@@ -200,12 +203,14 @@ Inbound       /home/bbs/ftn/in
 Outbound      /home/bbs/filebox/uplink
 ```
 
-Lines starting with `#` or `;` are comments, and the game writes a commented copy
-for you. Keywords are matched whatever their capitalisation.
+Lines starting with `#` or `;` are comments, and `-ibbs-reset` prints a commented
+copy for you to save. Keywords are matched whatever their capitalisation.
 
 These settings sit apart from `config.json` because `config.json` holds the
 league's rules, and those are overwritten when the Coordinator's settings packet
-arrives. Nothing outside your board ever changes `bbs.cfg`.
+arrives. The game reads `bbs.cfg` and never writes it, so nothing — not the
+Coordinator, not a reset — changes what you put there. The settings editor shows
+these four but will not change them, and says so.
 
 A board that forwards packets for its neighbours adds a line per neighbour —
 see "Routing" below.

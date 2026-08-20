@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -21,10 +23,7 @@ func TestIBBSResetWithBoardIDSkipsTheEditor(t *testing.T) {
 	}
 	in, out := filepath.Join(dir, "ftn-in"), filepath.Join(dir, "filebox")
 
-	league := &leagueSetup{BoardID: "BravoBBS", Inbound: in, Outbound: out}
-	if err := runReset(cfg, false, league, charsetUTF8, true); err != nil {
-		t.Fatalf("runReset: %v", err)
-	}
+	out2 := captureReset(t, cfg, &leagueSetup{BoardID: "BravoBBS", Inbound: in, Outbound: out})
 
 	got, err := store.LoadConfig(dir)
 	if err != nil {
@@ -33,12 +32,11 @@ func TestIBBSResetWithBoardIDSkipsTheEditor(t *testing.T) {
 	if !got.IBBS {
 		t.Error("a league reset should leave inter-BBS play on")
 	}
-	if got.BoardID != "BravoBBS" {
-		t.Errorf("BoardID = %q, want BravoBBS", got.BoardID)
-	}
-	if got.Inbound() != in || got.Outbound() != out {
-		t.Errorf("packet dirs = %q / %q, want %q / %q", got.Inbound(), got.Outbound(), in, out)
-	}
+	// The settings that name the board are handed back as bbs.cfg lines: the
+	// game reads that file and never writes it (#152).
+	wantsLine(t, out2, "BoardID BravoBBS")
+	wantsLine(t, out2, "Inbound "+in)
+	wantsLine(t, out2, "Outbound "+out)
 	// The reset creates them, so the first -planetary run has somewhere to read.
 	for _, d := range []string{in, out} {
 		if fi, err := os.Stat(d); err != nil || !fi.IsDir() {
@@ -61,8 +59,10 @@ func TestLeagueConfigBroadcastIsSigned(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	league := &leagueSetup{BoardID: "Alpha BBS", Outbound: out}
-	if err := runReset(cfg, false, league, charsetUTF8, true); err != nil {
+	captureReset(t, cfg, &leagueSetup{BoardID: "Alpha BBS", Outbound: out})
+	// The sysop's half of the setup: the reset prints these, they type them.
+	if err := os.WriteFile(filepath.Join(dir, store.BoardConfigFile),
+		[]byte("BoardID Alpha BBS\nOutbound "+out+"\n"), 0o644); err != nil {
 		t.Fatal(err)
 	}
 	cfg, err = store.LoadConfig(dir)
@@ -119,27 +119,15 @@ func TestIBBSResetImportsABREBoardConfig(t *testing.T) {
 
 	// No -board-id: the imported name is what skips the editor, which a test
 	// has no terminal for.
-	if err := runReset(cfg, false, &leagueSetup{ImportPath: path}, charsetUTF8, true); err != nil {
-		t.Fatalf("runReset: %v", err)
-	}
+	out := captureReset(t, cfg, &leagueSetup{ImportPath: path})
 
-	got, err := store.LoadConfig(dir)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if got.BoardID != "Avalon" {
-		t.Errorf("BoardID = %q, want Avalon", got.BoardID)
-	}
-	if got.LeagueNumber != 900 {
-		t.Errorf("LeagueNumber = %d, want 900", got.LeagueNumber)
-	}
-	if got.Inbound() != filepath.Join(dir, "fd-files") {
-		t.Errorf("Inbound = %q, want the file's incoming-files directory", got.Inbound())
-	}
+	wantsLine(t, out, "BoardID Avalon")
+	wantsLine(t, out, "LeagueNumber 900")
+	wantsLine(t, out, "Inbound "+filepath.Join(dir, "fd-files"))
 	// BRE's netmail directory holds .MSG files; IB's outbound holds the packets
 	// themselves. Reading one as the other would point the board at a directory
 	// its mailer treats as something else entirely.
-	if got.Outbound() == filepath.Join(dir, "fd-netmail") {
+	if strings.Contains(out, filepath.Join(dir, "fd-netmail")) {
 		t.Error("the netmail directory was read as the outbound directory")
 	}
 }
@@ -157,18 +145,77 @@ func TestBoardIDFlagBeatsTheImportedName(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	league := &leagueSetup{BoardID: "New Name", ImportPath: path}
-	if err := runReset(cfg, false, league, charsetUTF8, true); err != nil {
-		t.Fatalf("runReset: %v", err)
-	}
-	got, err := store.LoadConfig(dir)
+	out := captureReset(t, cfg, &leagueSetup{BoardID: "New Name", ImportPath: path})
+
+	wantsLine(t, out, "BoardID New Name")
+	wantsLine(t, out, "LeagueNumber 900")
+}
+
+// captureReset runs a reset with stdout redirected, because the per-board
+// settings are now printed for the sysop to paste into bbs.cfg rather than
+// written (#152) — the printout is the only place they land.
+func captureReset(t *testing.T, cfg game.Config, league *leagueSetup) string {
+	t.Helper()
+	r, w, err := os.Pipe()
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got.BoardID != "New Name" {
-		t.Errorf("BoardID = %q, want the flag to win", got.BoardID)
+	saved := os.Stdout
+	os.Stdout = w
+	runErr := runReset(cfg, false, league, charsetUTF8, true)
+	os.Stdout = saved
+	w.Close()
+	out, err := io.ReadAll(r)
+	r.Close()
+	if err != nil {
+		t.Fatal(err)
 	}
-	if got.LeagueNumber != 900 {
-		t.Errorf("LeagueNumber = %d, want the imported 900", got.LeagueNumber)
+	if runErr != nil {
+		t.Fatalf("runReset: %v (output: %s)", runErr, out)
+	}
+	return string(out)
+}
+
+// wantsLine fails unless the printed bbs.cfg carries this exact setting line.
+func wantsLine(t *testing.T, out, line string) {
+	t.Helper()
+	for _, l := range strings.Split(out, "\n") {
+		if strings.TrimRight(l, "\r") == line {
+			return
+		}
+	}
+	t.Errorf("the printed %s has no %q line:\n%s", store.BoardConfigFile, line, out)
+}
+
+// The reset that started #152: a board with its identity already set had all
+// four settings returned to defaults. Nothing about a rules reset may touch
+// that file.
+func TestIBBSResetLeavesAnExistingBoardConfigAlone(t *testing.T) {
+	dir := t.TempDir()
+	own := "BoardID Alpha BBS\nLeagueNumber 900\nInbound ftn/in\nOutbound ftn/out\n"
+	path := filepath.Join(dir, store.BoardConfigFile)
+	if err := os.WriteFile(path, []byte(own), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := store.LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	captureReset(t, cfg, &leagueSetup{BoardID: "Alpha BBS"})
+
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != own {
+		t.Errorf("%s was rewritten by the reset:\n%s", store.BoardConfigFile, got)
+	}
+	after, err := store.LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if after.LeagueNumber != 900 || after.InboundDir != "ftn/in" {
+		t.Errorf("the board lost its own settings: %+v", after)
 	}
 }

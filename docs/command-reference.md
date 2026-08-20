@@ -154,14 +154,16 @@ These options are for games that link several BBSes together (a "league"). See
   is set up in one command. Use this when the League Coordinator sets the rules:
   they arrive in the Coordinator's next broadcast and replace whatever this board
   starts with. `-inbound` and `-outbound` default to `inbound` and `outbound`
-  inside the data directory. All three are written to `bbs.cfg`, a plain text
-  file you can edit afterwards instead of opening the editor.
+  inside the data directory. The game does not write `bbs.cfg`: the reset ends by
+  printing that file, filled in from these flags, for you to save yourself. It is
+  plain text and yours alone — nothing in the game ever rewrites it.
 - **`-import-bbs-cfg PATH`** — Take this board's name, incoming-files directory
   and league number from an original Barren Realms Elite `BBS.CFG`, for
   `-ibbs-reset`. Use it when converting a league you already run, so you do not
   retype what that file already says. It prints what it read. `-board-id` and
   `-inbound` override it, and naming the board in the file skips the settings
-  editor just as `-board-id` does.
+  editor just as `-board-id` does. It prints the `bbs.cfg` to save, the same as
+  the flags do.
 - **`-planetary`** — Run the inter-BBS step, then exit: read incoming packets,
   run the group attacks, and write outgoing packets.
 - **`-full`** — Run the full cycle, then exit: read inbound packets, play a

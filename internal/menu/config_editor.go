@@ -157,6 +157,17 @@ type cfgField struct {
 	edit  func(session.Session, *game.Config)
 }
 
+// boardOwned is a field this editor shows but does not change: the settings
+// that name this board live in bbs.cfg, which the game reads and never writes
+// (#152). Keeping them on the screen keeps BRE's field numbering intact and
+// tells the sysop where they are; an editable field would be a lie, because the
+// editor saves config.json and these no longer go there.
+func boardOwned(n int, label string, value func(*game.Config) string) cfgField {
+	return cfgField{n: n, label: label, value: value, edit: func(s session.Session, c *game.Config) {
+		ok(s, "%s is set in %s, which the game reads but never writes. Edit that file instead.", label, store.BoardConfigFile)
+	}}
+}
+
 // cfgPage is one screenful of fields.
 type cfgPage struct {
 	title  string
@@ -336,18 +347,10 @@ func configPages(ibbs bool) []cfgPage {
 		num(11, "Max Players Per BBS", "Max Players Per BBS (1-25; 0 = unlimited)",
 			func(c *game.Config) int { return c.MaxPlayers },
 			func(c *game.Config, v int) { c.MaxPlayers = v }, 0, game.MaxPlayersPerBoard),
-		{n: 23, label: "Board ID",
-			value: func(c *game.Config) string { return c.BoardID },
-			edit: func(s session.Session, c *game.Config) {
-				if v := strings.TrimSpace(prompt(s, "Board ID:")); v != "" {
-					c.BoardID = v
-				}
-			}},
-		{n: 41, label: "League Number",
-			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unset)", c.LeagueNumber) },
-			edit: func(s session.Session, c *game.Config) {
-				c.LeagueNumber = promptSuggested(s, "League Number (1-999, 0 = unset)", c.LeagueNumber, game.MaxLeagueNumber)
-			}},
+		boardOwned(23, "Board ID", func(c *game.Config) string { return c.BoardID }),
+		boardOwned(41, "League Number", func(c *game.Config) string {
+			return fmt.Sprintf("%d (0 = unset)", c.LeagueNumber)
+		}),
 		{n: 48, label: "League Name",
 			value: func(c *game.Config) string {
 				if c.LeagueName == "" {
@@ -369,20 +372,8 @@ func configPages(ibbs bool) []cfgPage {
 				v := strings.TrimSpace(prompt(s, "Version every board must run (blank for no requirement, e.g. 0.0.5):"))
 				c.MinBoardVersion = strings.TrimPrefix(v, "v")
 			}},
-		{n: 39, label: "Inbound Dir",
-			value: func(c *game.Config) string { return c.InboundDir },
-			edit: func(s session.Session, c *game.Config) {
-				if v := strings.TrimSpace(prompt(s, "Inbound Dir (relative to the data directory):")); v != "" {
-					c.InboundDir = v
-				}
-			}},
-		{n: 40, label: "Outbound Dir",
-			value: func(c *game.Config) string { return c.OutboundDir },
-			edit: func(s session.Session, c *game.Config) {
-				if v := strings.TrimSpace(prompt(s, "Outbound Dir (relative to the data directory):")); v != "" {
-					c.OutboundDir = v
-				}
-			}},
+		boardOwned(39, "Inbound Dir", func(c *game.Config) string { return c.InboundDir }),
+		boardOwned(40, "Outbound Dir", func(c *game.Config) string { return c.OutboundDir }),
 		toggle(44, "Dupe Checking", func(c *game.Config) bool { return c.DupeChecking },
 			func(c *game.Config, v bool) { c.DupeChecking = v }),
 		{n: 24, label: "Idle timeout (sec)",

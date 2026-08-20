@@ -118,27 +118,24 @@ func TestConfigEditorPreviousPageWraps(t *testing.T) {
 
 // The packet directories are set in the editor, not by hand in config.json, so
 // both must be reachable and a cleared answer must keep the current one.
-func TestConfigEditorSetsPacketDirs(t *testing.T) {
+func TestConfigEditorLeavesTheBoardsOwnSettingsToBBSCfg(t *testing.T) {
 	w := newWorld()
 	w.Config.DataDir = t.TempDir()
-	w.Config.IBBS = true // the packet directories are only asked of a league board
-	w.Config.InboundDir = "./data/inbound"
-	w.Config.OutboundDir = "./data/outbound"
+	w.Config.IBBS = true // the packet directories are only shown to a league board
+	w.Config.InboundDir = "ftn/in"
+	w.Config.BoardID = "Alpha BBS"
 
-	f := &fakeSession{keys: []rune("39\r/srv/in\r40\r/srv/out\rs\r ")}
+	// 39 is Inbound Dir. It answers with where the setting lives instead of a
+	// prompt: this editor saves config.json, and the four settings that name the
+	// board are read from bbs.cfg, which the game never writes (#152).
+	f := &fakeSession{keys: []rune("39\r q\r ")}
 	ConfigEditor(f, w.World)
 
-	if w.Config.InboundDir != "/srv/in" {
-		t.Errorf("InboundDir = %q, want /srv/in", w.Config.InboundDir)
+	if w.Config.InboundDir != "ftn/in" || w.Config.BoardID != "Alpha BBS" {
+		t.Errorf("the editor changed a bbs.cfg setting: %q / %q", w.Config.InboundDir, w.Config.BoardID)
 	}
-	if w.Config.OutboundDir != "/srv/out" {
-		t.Errorf("OutboundDir = %q, want /srv/out", w.Config.OutboundDir)
-	}
-
-	f = &fakeSession{keys: []rune("39\r\rs\r ")}
-	ConfigEditor(f, w.World)
-	if w.Config.InboundDir != "/srv/in" {
-		t.Errorf("an empty answer changed InboundDir to %q", w.Config.InboundDir)
+	if !strings.Contains(f.out.String(), "bbs.cfg") {
+		t.Error("the editor did not say where the setting is edited")
 	}
 }
 

@@ -61,7 +61,7 @@ func TestMissingBoardConfigChangesNothing(t *testing.T) {
 	}
 }
 
-// What the game writes, the game must read back — including the per-neighbour
+// What the game offers the sysop to paste, the game must read back — including the per-neighbour
 // links, which BRE's positional format could not carry at all.
 func TestBoardConfigRoundTrip(t *testing.T) {
 	dir := t.TempDir()
@@ -73,8 +73,8 @@ func TestBoardConfigRoundTrip(t *testing.T) {
 	cfg.OutboundDir = "ftn/out"
 	cfg.OutboundDirs = map[int]string{5: "box/five", 3: "box/three"}
 
-	if err := SaveBoardConfig(cfg); err != nil {
-		t.Fatalf("SaveBoardConfig: %v", err)
+	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(BoardConfigText(cfg)), 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
 	}
 	got := game.DefaultConfig()
 	if err := LoadBoardConfig(dir, &got); err != nil {
@@ -152,5 +152,31 @@ func TestBoardConfigBeatsALeftoverConfigJSONValue(t *testing.T) {
 	}
 	if cfg.BoardID != "Edited Name" {
 		t.Errorf("BoardID = %q, want the hand-edited name", cfg.BoardID)
+	}
+}
+
+// The reset that started #152 wrote bbs.cfg from a defaults-seeded config and
+// returned a working board to "local" and node 0. Nothing the game saves may
+// touch that file once it exists.
+func TestSavingConfigLeavesBoardConfigAlone(t *testing.T) {
+	dir := t.TempDir()
+	own := "BoardID Alpha BBS\nLeagueNumber 900\nInbound ftn/in\nOutbound ftn/out\n"
+	path := filepath.Join(dir, BoardConfigFile)
+	if err := os.WriteFile(path, []byte(own), 0o644); err != nil {
+		t.Fatalf("WriteFile: %v", err)
+	}
+
+	cfg := game.DefaultConfig() // as a reset seeds it: BoardID "local", league 0
+	cfg.DataDir = dir
+	if err := SaveConfig(cfg); err != nil {
+		t.Fatalf("SaveConfig: %v", err)
+	}
+
+	got, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("ReadFile: %v", err)
+	}
+	if string(got) != own {
+		t.Errorf("%s was rewritten:\n%s", BoardConfigFile, got)
 	}
 }

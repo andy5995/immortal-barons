@@ -89,13 +89,13 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 	return sc.Err()
 }
 
-// SaveBoardConfig writes the per-board settings to <dataDir>/bbs.cfg. The
-// comments are written every time: this is the file a sysop opens in an editor,
-// and the game is the only thing that knows what belongs in it.
-func SaveBoardConfig(cfg game.Config) error {
-	if err := os.MkdirAll(cfg.DataDir, 0o755); err != nil {
-		return err
-	}
+// BoardConfigText renders bbs.cfg as the game would like to see it, comments
+// and all. It is printed for the sysop to paste rather than written: this file
+// is the board's own identity, a sysop edits it by hand more than anything else
+// in the game, and a rules reset that rewrote it put four correct settings back
+// to defaults (#152). The one exception is the migration below, which only ever
+// creates the file when it is missing.
+func BoardConfigText(cfg game.Config) string {
 	var b strings.Builder
 	b.WriteString("# This board's own settings. The game's rules are in config.json,\n")
 	b.WriteString("# which the League Coordinator's broadcast may rewrite; nothing here\n")
@@ -123,10 +123,20 @@ func SaveBoardConfig(cfg game.Config) error {
 	for _, n := range slices.Sorted(maps.Keys(cfg.OutboundDirs)) {
 		fmt.Fprintf(&b, "%s %d %s\n", keyLink, n, cfg.OutboundDirs[n])
 	}
+	return b.String()
+}
 
-	tmp := boardConfigPath(cfg.DataDir) + ".tmp"
-	if err := os.WriteFile(tmp, []byte(b.String()), 0o644); err != nil {
-		return err
+// migrateBoardConfig creates bbs.cfg from settings that a board set up before
+// the split still holds in config.json, and nowhere else. Without it the first
+// save after the upgrade would erase them: they no longer marshal into
+// config.json, so the board would quietly fall back to "local" and node 0.
+//
+// It writes only when the file is absent, so it can never overwrite a working
+// board's own file — the whole point of #152. A failure is not the caller's
+// problem: loading a game must not fail because a directory is read-only.
+func migrateBoardConfig(dataDir string, cfg game.Config) {
+	if _, err := os.Stat(boardConfigPath(dataDir)); err == nil || !os.IsNotExist(err) {
+		return
 	}
-	return os.Rename(tmp, boardConfigPath(cfg.DataDir))
+	os.WriteFile(boardConfigPath(dataDir), []byte(BoardConfigText(cfg)), 0o644)
 }

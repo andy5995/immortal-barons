@@ -1,4 +1,9 @@
 (in-progress:)
+  * bbs.cfg is read and never written by the game: -ibbs-reset prints it for the
+    sysop to save, where a rules reset used to return the board's name, league
+    number and packet directories to their defaults (issue #152)
+  * The settings editor shows those four settings but no longer changes them,
+    naming bbs.cfg as where they are edited
   * New -league-check command line option: it reports the roster, the board
     name, the packet directories and the keys in one pass (issue #154)
   * Joining a league with a board name that is not in the roster is refused at

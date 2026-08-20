@@ -45,11 +45,14 @@ func LoadConfig(dataDir string) (game.Config, error) {
 		OutboundDir  *string
 		LeagueNumber *int
 	}
+	legacyBoard := false
 	if json.Unmarshal(data, &moved) == nil {
 		setIf(&cfg.BoardID, moved.BoardID)
 		setIf(&cfg.InboundDir, moved.InboundDir)
 		setIf(&cfg.OutboundDir, moved.OutboundDir)
 		setIf(&cfg.LeagueNumber, moved.LeagueNumber)
+		legacyBoard = moved.BoardID != nil || moved.InboundDir != nil ||
+			moved.OutboundDir != nil || moved.LeagueNumber != nil
 	}
 	// The packet directories used to be read relative to the working directory
 	// and defaulted to "./data/inbound". They now hang off the data directory, so
@@ -71,6 +74,12 @@ func LoadConfig(dataDir string) (game.Config, error) {
 	if err := LoadBoardConfig(dataDir, &cfg); err != nil {
 		return cfg, err
 	}
+	// Give those legacy settings a bbs.cfg of their own before the next save
+	// drops them: they no longer marshal into config.json. This is the only
+	// place the game writes that file, and only when it does not exist.
+	if legacyBoard {
+		migrateBoardConfig(dataDir, cfg)
+	}
 	return cfg, nil
 }
 
@@ -80,16 +89,12 @@ func setIf[T any](dst *T, src *T) {
 	}
 }
 
-// SaveConfig writes cfg to <dataDir>/config.json atomically, and the per-board
-// settings alongside it in bbs.cfg. Both are written together because a caller
-// holds one Config and has no way to know which half it changed — and because
-// writing bbs.cfg is what completes the migration for a board set up before the
-// two files were split.
+// SaveConfig writes cfg to <dataDir>/config.json atomically. It leaves bbs.cfg
+// alone: that file is the board's own identity, and a caller holding one Config
+// cannot tell which half of it changed, so a rules reset used to return a
+// working board's name and directories to defaults (#152).
 func SaveConfig(cfg game.Config) error {
 	if err := os.MkdirAll(cfg.DataDir, 0o755); err != nil {
-		return err
-	}
-	if err := SaveBoardConfig(cfg); err != nil {
 		return err
 	}
 	// The required version is kept in its own readable file too, so a Coordinator's
