@@ -96,7 +96,10 @@ func (w *World) resolveCovertOp(a, d *Empire, rec QueuedCovertOp) string {
 	case OpBribery:
 		return w.resolveBribery(a, d)
 	}
-	return ""
+	// An op this build does not know — a queue record written by a version that
+	// spelled it differently. The agent is still gone, so the fee is still spent,
+	// and a blank line on the recap would leave that unexplained.
+	return fmt.Sprintf("Your agent's orders against %s could not be carried out.", d.Name)
 }
 
 // covertReturned hands the attacker its agent back, which is what every

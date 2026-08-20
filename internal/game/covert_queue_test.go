@@ -168,3 +168,21 @@ func TestInfoOpsAndExposeAreNotQueued(t *testing.T) {
 		t.Errorf("an immediate operation was queued: %+v", w.CovertQueue)
 	}
 }
+
+// A queued record naming an op this build does not handle still owes its sender
+// a report: the agent and the fee are gone either way, and an empty string would
+// be filed as a blank line on the recap.
+func TestUnknownQueuedOpStillReports(t *testing.T) {
+	w, a, d := newAttackerAndTarget(t)
+	before := len(a.Events)
+	w.CovertQueue = []QueuedCovertOp{{Attacker: a.Name, Target: d.Name, Op: CovertOp("Steal Sheep")}}
+
+	w.resolveCovertQueue()
+
+	if len(a.Events) != before+1 {
+		t.Fatalf("events = %d, want one report filed", len(a.Events)-before)
+	}
+	if got := a.Events[len(a.Events)-1]; got.Text == "" {
+		t.Error("the sender was filed a blank recap line")
+	}
+}
