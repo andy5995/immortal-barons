@@ -323,6 +323,28 @@ that BRE hands a player list to the coordinating BOARD's operator and never to
 the elected in-game Coordinator, which is a different office held by an ordinary
 player. Grep that section before reasoning from which menu a thing appears on.
 
+**A setting missing from `bre.doc` may still exist: read RESOURCE.DAT's keyword
+table out of the binary.** The manual documents only some of the per-install
+settings, and the undocumented ones are where a whole mechanic can hide. The
+loader stores its keywords as consecutive ShortStrings, so finding one finds them
+all — `LOTTERY` sits between `LEADER` and `EXTERNALSCORESANSI` at `BRE.OVR`
+`0x56919`, and it is the switch that decides whether the lottery runs at all.
+Working backwards is just as cheap: a global tested by a mechanic
+(`cmp byte [0x76c0],0x0` at the head of `run_lottery`) has exactly one other
+reader and one writer, and the writer is the settings loader loading that
+keyword's label right before it. **This also answers "who sets it"** — a
+RESOURCE.DAT keyword is the local sysop's, per installation, never the League
+Coordinator's or the game data's.
+
+**Per-character colour in a capture is DATA, not decoration.** `cat -v` a `.cap`
+and read where the escape sequences fall between characters: BRE colours each
+letter of a lottery draw as it prints it, so one captured line
+(`ESC[0;40;31m D ESC[31m K … ESC[1;33m I …` against the ticket `AGNTYI`) proves
+the scoring rule — the yellow letter is at a different position in the draw than
+on the ticket, so matching cannot be positional. A whole disassembly session was
+about to be spent on that question. Look for the colour capture before deciding a
+rule needs code: ANSI-stripped skimming throws exactly this away.
+
 **Know where the prose actually is: BRE ships only TWO `.hlp` files** —
 `game/attack.hlp` and `game/reset.hlp`. There is no per-screen help, so do not
 hunt for a `market.hlp`; the bulk of the prose is `docs/bre.doc` and
