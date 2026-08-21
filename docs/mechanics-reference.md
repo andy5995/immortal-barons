@@ -3342,6 +3342,7 @@ The Coordinator is elected by the planet's own barons, from the System Menu's
 - **A baron still under new-realm protection cannot vote.** BRE draws the menu
   item only after the protection predicate clears the caller
   (`show_game_settings`, the guard at `BRE.OVR` unit `ovr_013753` +0x082f).
+  IB matches this.
 - **Every realm holding a slot is a candidate — protected realms included, and
   yourself.** The ballot is the shared realm picker
   (`choose_target_empire`, `BRE.OVR` 0x01aa99), which builds its key set from
@@ -3364,12 +3365,16 @@ caller's own):
   be changed from the System menu.
 
 The office and the realm name are the bright segment of the line, the rest the
-body colour. **IB implements this** with two divergences. BRE has no case for a
-baron who has not voted, its field always holding something; IB's is empty until
-the first vote, so it says so. And IB withholds the "System menu" line from a
-realm still under protection, which has no Coordinator Vote item to be sent to —
-BRE prints that line to them anyway, pointing at an item its own menu builder
-has just left out.
+body colour. A baron who has not voted is named **"No one"**: the formatter
+(`format_no_recipient`, `BRE.OVR 0x0176f`) falls back to that literal when the
+stored vote is not a realm letter A-Y, and takes the same path when the realm it
+names has zero net worth — so a choice that has since died reads the same as
+never having chosen. The line is one sentence in every case.
+
+The notice does not test protection, so a realm still under protection is told
+where to change a vote it cannot yet cast — the menu builder having just left
+that item out (above). **IB copies both halves**, contradiction included: the
+line is printed to everyone, and the item appears when protection ends.
 
 IB implements all of this. One thing is not established from the original: the
 color it prints **Enemy** in (the capture only ever showed the other three, so

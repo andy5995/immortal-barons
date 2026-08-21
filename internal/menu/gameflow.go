@@ -884,25 +884,23 @@ func showQueenRefund(s session.Session, w *ctx) {
 // 013a:0cf7, behind its InterBBS flag). Without it a baron who never opens the
 // vote screen never learns either fact.
 //
-// Two divergences. BRE has no case for a baron who has not voted, because its
-// field always holds something; IB's is empty until the first vote, so it says
-// so. And the closing line about the System menu is held back from a realm
-// still under new-realm protection, for which that menu item is hidden — BRE
-// prints the line to them anyway, pointing at an item its own menu builder has
-// just left out.
+// A baron who has not voted is named "no one", as the original does: its
+// formatter (`format_no_recipient`, BRE.OVR 0x0176f) falls back to that literal
+// when the stored vote is not a realm letter, or names a realm whose net worth
+// has gone to zero. So a dead or departed choice reads the same as never having
+// chosen, and the line is always the same one sentence.
 func showCoordinatorNotice(s session.Session, w *ctx) {
 	if !w.Config.IBBS {
 		return
 	}
-	var isCoordinator, protected bool
+	var isCoordinator bool
 	var voteName string
 	withPlayer(w, func(p *game.Empire) {
-		protected = p.Protection > 0
 		if co := w.World.BBSCoordinator(); co != nil && co == p {
 			isCoordinator = true
 			return
 		}
-		if v := w.World.FindByOwner(p.CoordinatorVote); v != nil {
+		if v := w.World.FindByOwner(p.CoordinatorVote); v != nil && v.Alive {
 			voteName = v.Name
 		}
 	})
@@ -926,13 +924,10 @@ func showCoordinatorNotice(s session.Session, w *ctx) {
 		return
 	}
 	if voteName == "" {
-		say(tr(s, "You have not voted for a BBS Coordinator yet."), "")
-	} else {
-		say(fmt.Sprintf(tr(s, "Your vote for BBS Coordinator is %s."), voteName), voteName)
+		voteName = tr(s, "no one")
 	}
-	if !protected {
-		say(tr(s, "You can change it from the System menu."), "")
-	}
+	say(fmt.Sprintf(tr(s, "Your vote for BBS Coordinator is %s."), voteName), voteName)
+	say(tr(s, "You can change it from the System menu."), "")
 }
 
 // showLottery offers the Queen's lottery, once a game day, immediately after

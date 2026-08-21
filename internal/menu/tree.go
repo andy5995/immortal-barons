@@ -476,9 +476,14 @@ func BuildMenus() *Menus {
 		{Key: '4', Label: "Spy Database", Do: spyDatabase, Hidden: ibbsHidden},
 		{Key: '?', Label: "Help", Do: helpBrowse},
 		// BRE: Coordinator Vote is '5', shown only in IBBS games and only once the
-		// voter's new-realm protection ends (a protected realm can't vote and isn't
-		// a candidate). The Coordinator Menu is '*' and appears only for the empire
+		// voter's new-realm protection ends — the guard at show_game_settings
+		// +0x082f. The Coordinator Menu is '*' and appears only for the empire
 		// currently elected Coordinator (most votes).
+		//
+		// The original contradicts itself here and IB copies both halves: the
+		// turn-opening notice tells a protected realm to change its vote in this
+		// menu, which is the one menu the same routine has just left the item out
+		// of. Out of protection the item is there and the vote can change freely.
 		{Key: '5', Label: "Coordinator Vote", Do: voteCoordinator,
 			Hidden: func(w *ctx) bool { return ibbsHidden(w) || w.Player().Protection > 0 }},
 		{Key: '*', Label: "Coordinator Menu", Do: gotoMenu(coord),

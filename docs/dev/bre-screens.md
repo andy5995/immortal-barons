@@ -2464,6 +2464,7 @@ You may change your vote in the system menu
 Note the casing: the office is capitalised on the first line and not on the
 second.
 
-IB prints its own wording in the same place and the same shape, adds a third
-case for a baron who has not voted yet, and withholds the second line from a
-realm still under protection — see `docs/mechanics-reference.md`.
+A baron who has not voted has `No one` in the name slot, from
+`format_no_recipient` (`BRE.OVR 0x0176f`), so the line never changes shape. IB
+prints its own wording in the same place, the same shape and the same three
+cases.

@@ -1025,7 +1025,6 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 		w := leagueCtx(t)
 		w.AutoPayMaint = true
 		w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
-		w.Player().Protection = 0 // a protected realm is not told where to vote
 		// An AI baron holds no BBS handle, so the vote needs a second human.
 		other := w.AddHuman("rival", "Rivalia")
 		w.VoteCoordinator(w.Player(), other.Owner)
@@ -1043,7 +1042,7 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 		}
 	})
 
-	t.Run("protected realm is not sent to a hidden menu item", func(t *testing.T) {
+	t.Run("a protected realm gets the same line", func(t *testing.T) {
 		w := leagueCtx(t)
 		w.AutoPayMaint = true
 		w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
@@ -1056,8 +1055,8 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 		if !strings.Contains(out, "Your vote for BBS Coordinator is Rivalia.") {
 			t.Fatalf("the vote notice never reached the screen:\n%s", out)
 		}
-		if strings.Contains(out, "System menu") {
-			t.Errorf("a protected realm has no Coordinator Vote item to be sent to:\n%s", out)
+		if !strings.Contains(out, "System menu") {
+			t.Errorf("protection does not change what the notice says:\n%s", out)
 		}
 	})
 
@@ -1071,7 +1070,9 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 		f := &fakeSession{keys: []rune(perTurn)}
 		runTurn(f, w)
 		out := stripANSI(f.out.String())
-		if !strings.Contains(out, "You have not voted for a BBS Coordinator yet.") {
+		// As the original does: the vote line always names somebody, and "no one"
+		// is who it names when nobody has been chosen.
+		if !strings.Contains(out, "Your vote for BBS Coordinator is no one.") {
 			t.Errorf("the no-vote notice never reached the screen:\n%s", out)
 		}
 	})

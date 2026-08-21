@@ -37,8 +37,9 @@ menu, under Coordinator Vote. Any living realm can be voted for, yourself
 included, and you may change your mind whenever you like — the office goes to
 whoever holds the most votes at the time.
 
-You cannot vote while your realm is still under new-realm protection. Once it
-ends, the item appears.
+You cannot vote while your realm is still under new-realm protection, and the
+item is not on the menu until that ends — though the notice below will already
+be naming your vote.
 
 Every turn opens by telling you whether you hold the office or who your vote is
 currently for, so you never have to go looking.

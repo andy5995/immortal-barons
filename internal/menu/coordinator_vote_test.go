@@ -134,3 +134,35 @@ func TestSendSpyGuyChargesGoldForDays(t *testing.T) {
 		t.Errorf("charged %d gold, want %d for the %d-day default", spent, want, game.SpyGuyDefaultDays)
 	}
 }
+
+// The Coordinator Vote item is withheld until new-realm protection ends, as the
+// original withholds it (show_game_settings +0x082f), and never appears off a
+// league at all.
+func TestCoordinatorVoteIsHiddenUnderProtection(t *testing.T) {
+	menus := BuildMenus()
+	var item *Item
+	for i := range menus.System.Items {
+		if it := &menus.System.Items[i]; it.Label == "Coordinator Vote" {
+			item = it
+			break
+		}
+	}
+	if item == nil || item.Hidden == nil {
+		t.Fatal("the System menu has no Coordinator Vote item with a visibility rule")
+	}
+
+	w := newWorld()
+	w.Config.IBBS = true
+	w.Player().Protection = 10
+	if !item.Hidden(w) {
+		t.Error("a protected realm cannot vote, so the item should not be drawn")
+	}
+	w.Player().Protection = 0
+	if item.Hidden(w) {
+		t.Error("the item should appear once protection ends")
+	}
+	w.Config.IBBS = false
+	if !item.Hidden(w) {
+		t.Error("a standalone board has no Coordinator to vote for")
+	}
+}
