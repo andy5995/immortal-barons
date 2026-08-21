@@ -201,7 +201,7 @@ func (w *World) SupportDissensions(a, d *Empire) (string, error) {
 		return "", err
 	}
 	w.queueCovertOp(a, d, OpSupportDissensions, "")
-	return covertSent(OpSupportDissensions, d), nil
+	return covertSent(d), nil
 }
 
 // resolveSupportDissensions is the queued operation arriving. A successful op is
@@ -229,7 +229,7 @@ func (w *World) DemoralizeForces(a, d *Empire) (string, error) {
 		return "", err
 	}
 	w.queueCovertOp(a, d, OpDemoralizeForces, "")
-	return covertSent(OpDemoralizeForces, d), nil
+	return covertSent(d), nil
 }
 
 // resolveDemoralizeForces is the queued operation arriving. The local resolver
@@ -262,7 +262,7 @@ func (w *World) SetUp(a, d *Empire) (string, error) {
 		partner = p.Name
 	}
 	w.queueCovertOp(a, d, OpSetUp, partner)
-	return covertSent(OpSetUp, d), nil
+	return covertSent(d), nil
 }
 
 // resolveSetUp is the queued operation arriving. The agent has to reach both
@@ -441,7 +441,7 @@ func (w *World) Bribery(a, d *Empire) (string, error) {
 		return "", err
 	}
 	w.queueCovertOp(a, d, OpBribery, "")
-	return covertSent(OpBribery, d), nil
+	return covertSent(d), nil
 }
 
 // resolveBribery is the queued operation arriving. Because the bribe only lands
@@ -467,7 +467,7 @@ func (w *World) StirRevolts(a, d *Empire) (string, error) {
 		return "", err
 	}
 	w.queueCovertOp(a, d, OpStirRevolts, "")
-	return covertSent(OpStirRevolts, d), nil
+	return covertSent(d), nil
 }
 
 // resolveStirRevolts is the queued operation arriving. Support is docked in
@@ -533,7 +533,7 @@ func (w *World) BombEnemyTargets(a, d *Empire) (string, error) {
 		return "", err
 	}
 	w.queueCovertOp(a, d, OpBombEnemyTargets, "")
-	return covertSent(OpBombEnemyTargets, d), nil
+	return covertSent(d), nil
 }
 
 // resolveBombEnemyTargets is the queued operation arriving.
