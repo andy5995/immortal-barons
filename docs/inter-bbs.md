@@ -671,7 +671,7 @@ The two boards in the example:
 | Install | `~/a-mystic` | `~/b-mystic` |
 | Board ID (planet) | `AlphaBBS` | `BravoBBS` |
 | Node number | 1 (League Coordinator) | 2 |
-| Network address | `1:1/1` | `1:1/2` |
+| Network address | `99:1/1` | `99:1/2` |
 | binkp port | 24554 | 24555 |
 
 ### Step 1 — choose the names and addresses
@@ -685,6 +685,12 @@ Node 1 is the League Coordinator. The network addresses belong to your mailer,
 not to the game — the game never opens a connection, so it never uses them. Two
 boards on one machine need different binkp ports; 24554 is the standard one.
 
+**Pick a zone your BBS does not already carry.** Zone 99 is used here. Zones 1
+to 6 are FidoNet's, and most mailers ship a domain that claims them, so a
+private league placed in zone 1 either collides with a real feed or has to be
+given zone 1 by taking it away from FidoNet — which breaks the feed of anyone
+who later adds one.
+
 ### Step 2 — give each board its own network address
 
 In Mystic: `mystic -cfg`, then **Networking → Echomail Addresses**. Add an
@@ -692,7 +698,7 @@ address on each board:
 
 | | first board | second board |
 |---|---|---|
-| Zone / Net / Node / Point | 1 / 1 / 1 / 0 | 1 / 1 / 2 / 0 |
+| Zone / Net / Node / Point | 99 / 1 / 1 / 0 | 99 / 1 / 2 / 0 |
 | Domain | `iblocal` | `iblocal` |
 | Primary | Yes | Yes |
 
@@ -708,7 +714,7 @@ it connects to:
 
 | Field | on the first board | on the second board |
 |---|---|---|
-| Address | `1:1/2` | `1:1/1` |
+| Address | `99:1/2` | `99:1/1` |
 | Domain | `iblocal` | `iblocal` |
 | Session type | BinkP | BinkP |
 | binkp hostname | `127.0.0.1:24555` | `127.0.0.1:24554` |
@@ -730,8 +736,8 @@ Set **Use Filebox** to Yes and let Mystic generate the default path. A filebox
 is a directory whose contents your BBS hands to that node at the next session,
 and it is how the game's packets travel. Mystic names it after the network and
 the node's address, so the first board gets
-`~/a-mystic/filebox/iblocal_z1n1n2` — its outbox for the second board — and the
-second board gets `~/b-mystic/filebox/iblocal_z1n1n1`. Note both paths: a later
+`~/a-mystic/filebox/iblocal_z99n1n2` — its outbox for the second board — and the
+second board gets `~/b-mystic/filebox/iblocal_z99n1n1`. Note both paths: a later
 step points the game's outbound directory at them.
 
 A larger league does not mean more of these. Boards route through the League
@@ -758,13 +764,13 @@ binkp server bound its port and did not report the address as already in use.
 From the first board, poll the second:
 
 ```
-./mis poll 1:1/2
+./mis poll 99:1/2
 ```
 
 Then the other way round, from the second board:
 
 ```
-./mis poll 1:1/1
+./mis poll 99:1/1
 ```
 
 **Test both directions.** They use different settings, so one working says
@@ -802,7 +808,7 @@ The member board takes no editor at all — its rules arrive from the Coordinato
 ```
 immortal-barons -ibbs-reset -board-id "Bravo BBS" \
   -inbound ~/b-mystic/echomail/in \
-  -outbound ~/b-mystic/filebox/iblocal_z1n1n1 \
+  -outbound ~/b-mystic/filebox/iblocal_z99n1n1 \
   -data /path/to/member/data
 ```
 
@@ -816,14 +822,14 @@ must match the Board IDs exactly:
 ```
 1
 Alpha BBS
-1:1/1
+99:1/1
 Local
 XX
 USA
 
 2
 Bravo BBS
-1:1/2
+99:1/2
 Local
 XX
 USA
@@ -853,7 +859,7 @@ them:
 ```
 immortal-barons -league-config -data /path/to/coordinator/data
 cd ~/a-mystic
-./mis poll 1:1/2
+./mis poll 99:1/2
 immortal-barons -planetary -data /path/to/member/data
 ```
 
@@ -871,7 +877,7 @@ a timer, doing the two steps in order:
 ```
 immortal-barons -planetary -data /path/to/data
 cd /path/to/bbs
-./mis poll 1:1/2
+./mis poll 99:1/2
 ```
 
 The game step reads and writes packet files; the mail step carries them. The

@@ -99,21 +99,21 @@ write_roster() {  # the Coordinator's roster, identical on every board
   cat > "$1" <<'NODES'
 1
 AlphaBBS
-1:1/1
+99:1/1
 Orlando
 FL
 USA
 
 2 HOST 1 3
 BravoBBS
-1:1/2
+99:1/2
 Houston
 TX
 USA
 
 3
 CharlieBBS
-1:1/3
+99:1/3
 Hull
 MA
 USA

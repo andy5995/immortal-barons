@@ -269,7 +269,7 @@ file-box path, the Synchronet side the FTN path, over one binkp link.
 
 ## Linking two boards over binkp
 
-- **Poll by NODE ADDRESS, not by domain.** `mis poll 1:1/2` works; `mis poll
+- **Poll by NODE ADDRESS, not by domain.** `mis poll 99:1/2` works; `mis poll
   <domain>` reports "Polled 0 systems" and looks like a connection failure when
   nothing was ever attempted.
 - **Mystic offers plain-text binkp auth; Synchronet demands CRAM-MD5 by
@@ -283,10 +283,17 @@ file-box path, the Synchronet side the FTN path, over one binkp link.
   `1:1/1@mynet` resolves as `…@fidonet`, misses the `[node:1:1/1@mynet]` section
   entirely, and falls back to `f1.n1.z1.binkp.net` — a DNS failure that looks
   nothing like a config problem. Inbound keeps working throughout, because that
-  matches on address, which is what makes it confusing. On a rig that never
-  touches real FidoNet, take zone 1 off `fidonet` and give it to the private
-  domain. Retagging the node instead makes it authenticate as the wrong domain
-  and the far side answers `Bad address or password`.
+  matches on address, which is what makes it confusing. Retagging the node
+  instead makes it authenticate as the wrong domain and the far side answers
+  `Bad address or password`.
+- **Give the private net a zone nobody else claims, rather than taking zone 1
+  off `fidonet`.** Both make BinkIT resolve the domain correctly, and the rig
+  here ran on the second one until 2026-08-21. It is the worse of the two: the
+  moment that board carries a real FidoNet feed its zone 1 is gone, and a
+  `DNSSuffix` left empty resolves to the literal `example.com`, which
+  Synchronet substitutes as the default (`exec/load/fido_syscfg.js`). Stock
+  `sbbsecho.ini` claims 1–6, 8–11, 18, 21, 24 and a long tail of higher
+  numbers; 99 is free and is what the rig and `docs/inter-bbs.md` now use.
 
 ## The FTN handoff chain, end to end
 
