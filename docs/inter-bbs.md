@@ -386,9 +386,25 @@ A common setup:
    shared mount — whatever you use).
 4. The next `-planetary` run on that board reads and applies those files.
 
-In a small league every board links to every other one, and your transport
-copies each packet to all of them. That is the default until your Coordinator
-says otherwise. A large league routes instead — see "Routing" above.
+In a small league every board links to every other one, and that is the default
+until your Coordinator says otherwise. A large league routes instead — see
+"Routing" above.
+
+A league with no routing asks two things of your transport, and a broadcast —
+scores, the roster, a ruleset change, a season reset — needs both:
+
+- **Something that copies one packet to every board.** A shared directory or
+  mount does this by being shared. A mailer queue does not: a binkp file box and
+  an FTN file attach are both per-node, so one packet left in the queue reaches
+  one board. `barons-ftn` is the piece that fans it out — see "Optional FTN
+  handoff" below.
+- **A link to every board those copies name.** A copy addressed to a board your
+  mailer has no session with stays in the queue and is retried until you notice.
+
+If your boards all dial one hub, that is a star, and the roster should say so
+with `HOST` lines. A star described as a mesh sends every broadcast to the hub's
+one neighbour, and the Coordinator is the last to find out, because its own
+view stays complete.
 
 Run it as often as you like. More often means shorter travel times between
 planets. The in-game "Travel Times" screen shows players how recently packets
