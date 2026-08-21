@@ -625,6 +625,34 @@ func (m *Menu) hasColumns(g *ctx) bool {
 	return false
 }
 
+// labelWidth is the visible width of the Item column in a Price/# Owned menu:
+// BRE's 18, widened to fit the longest label on the menu. A label that runs
+// past the column pushes its own price one place right of every other row's
+// (Covert Operations' "Support Dissensions"), and a translation is longer than
+// the English it came from, so the width cannot be a constant.
+func (m *Menu) labelWidth(g *ctx, lang string) int {
+	w := 18
+	for i := range m.Items {
+		it := &m.Items[i]
+		if it.hidden(g) || it.Do == nil {
+			continue
+		}
+		if n := utf8.RuneCountInString(it.displayLabel(g, lang)); n > w {
+			w = n
+		}
+	}
+	return w
+}
+
+// padLabel pads s to w visible columns. fmt's %-*s counts bytes, which
+// under-pads any label carrying a non-ASCII rune.
+func padLabel(s string, w int) string {
+	if n := utf8.RuneCountInString(s); n < w {
+		return s + strings.Repeat(" ", w-n)
+	}
+	return s
+}
+
 // hasOwnedColumn reports whether any visible item carries an Owned count, so a
 // price-only menu (BRE's Covert Operations) omits the "# Owned" column entirely
 // rather than trailing an empty one.
@@ -663,12 +691,16 @@ func draw(s session.Session, g *ctx, m *Menu) {
 		fmt.Fprintf(&b, "%s\n", titleRule(col, i18n.T(lang, m.Title), m.ruleWidth()))
 		cols := m.hasColumns(g)
 		ownedCol := cols && m.hasOwnedColumn(g)
+		lw := 0
+		if cols {
+			lw = m.labelWidth(g, lang)
+		}
 		if cols && ownedCol {
-			fmt.Fprintf(&b, "%s  Key %-18s %8s %9s%s\n",
-				ansi.FgWhite, i18n.T(lang, "Item"), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
+			fmt.Fprintf(&b, "%s  Key %s %8s %9s%s\n",
+				ansi.FgWhite, padLabel(i18n.T(lang, "Item"), lw), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
 		} else if cols {
-			fmt.Fprintf(&b, "%s  Key %-18s %8s%s\n",
-				ansi.FgWhite, i18n.T(lang, "Item"), i18n.T(lang, "Price"), ansi.Reset)
+			fmt.Fprintf(&b, "%s  Key %s %8s%s\n",
+				ansi.FgWhite, padLabel(i18n.T(lang, "Item"), lw), i18n.T(lang, "Price"), ansi.Reset)
 		}
 		if m.Columns >= 2 && !cols {
 			drawItemsColumns(&b, g, m, col, lang, m.Columns)
@@ -693,12 +725,12 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					// BRE (live capture): normal-accent parens with a bright-accent key,
 					// white label, bright-white Price, white Owned.
 					if ownedCol {
-						fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%-18s%s %s%8s%s %s%9s%s\n",
-							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset,
+						fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%s%s %s%8s%s %s%9s%s\n",
+							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
 							ansi.FgBrightWhite, price, ansi.Reset, ansi.FgWhite, owned, ansi.Reset)
 					} else {
-						fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%-18s%s %s%8s%s\n",
-							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, it.displayLabel(g, lang), ansi.Reset,
+						fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%s%s %s%8s%s\n",
+							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
 							ansi.FgBrightWhite, price, ansi.Reset)
 					}
 					continue

@@ -1,8 +1,10 @@
 package menu
 
 import (
+	"regexp"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
@@ -222,5 +224,32 @@ func TestExposeEnemyOpsListsOnlyBribedRealms(t *testing.T) {
 	}
 	if p.Agents != 50 {
 		t.Errorf("Expose Enemy Ops should spend no agent, got %d agents", p.Agents)
+	}
+}
+
+// "Support Dissensions" is 19 characters and the Item column was a fixed 18, so
+// that one row's price sat a place right of every other row's. Every listed
+// price must end in the same column.
+func TestCovertMenuPricesAlign(t *testing.T) {
+	menus := BuildMenus()
+	f, _, err := run(t, "0", menus.Covert)
+	if err != nil {
+		t.Fatalf("got %v", err)
+	}
+	esc := regexp.MustCompile("\x1b\\[[0-9;]*m")
+	end := -1
+	for _, line := range strings.Split(esc.ReplaceAllString(f.out.String(), ""), "\n") {
+		if !strings.HasSuffix(line, "000") {
+			continue
+		}
+		n := utf8.RuneCountInString(line)
+		if end < 0 {
+			end = n
+		} else if n != end {
+			t.Errorf("price column ragged: %q ends at %d, want %d", line, n, end)
+		}
+	}
+	if end < 0 {
+		t.Fatalf("no price rows found; output:\n%s", f.out.String())
 	}
 }

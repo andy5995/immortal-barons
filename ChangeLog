@@ -1,4 +1,5 @@
 (in-progress:)
+  * A menu's price column lines up when an item name overruns the column
   * An inter-BBS turn opens with the BBS Coordinator's name, or the realm the
     current vote is for
   * The Queen's lottery is offered once a game day, after her tax refund: a
