@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-18 20:10-0500\n"
+"POT-Creation-Date: 2026-08-21 10:46-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -748,10 +748,9 @@ msgstr ""
 "an Einkommensteuern. Aber die Vermischung der Völker kann die Stimmung in "
 "anderen Reichen trüben."
 
-#. type: Bullet: '- '
+#. type: Title #
 #: internal/help/content/diplomacy/treaty-full-defense.md:1
 #: internal/help/content/diplomacy/treaty-full-defense.md:8
-#: internal/help/content/economy/trading.md:24
 #, no-wrap
 msgid "Full Defense Alliance"
 msgstr "Volles Verteidigungsbündnis"
@@ -771,33 +770,22 @@ msgstr ""
 "zur Verteidigung eines Verbündeten in Not. Dies gilt in beide Richtungen."
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-full-defense.md:17
+#: internal/help/content/diplomacy/treaty-full-defense.md:16
 msgid ""
 "Those forces can die in a battle you were not part of. When that happens you "
 "are told what you lost, who you were defending, and who attacked them, so "
 "watch your report after an ally has been raided."
 msgstr ""
 
-#. type: Plain text
-#: internal/help/content/diplomacy/treaty-full-defense.md:19
-#: internal/help/content/diplomacy/treaty-intelligence-alliance.md:14
-#: internal/help/content/diplomacy/treaty-technology-agreement.md:20
-#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:14
-msgid ""
-"It also lets you buy from that realm on the Trading Market. See the Trading "
-"topic for how that works."
-msgstr ""
-
-#. type: Bullet: '- '
+#. type: Title #
 #: internal/help/content/diplomacy/treaty-intelligence-alliance.md:1
 #: internal/help/content/diplomacy/treaty-intelligence-alliance.md:8
-#: internal/help/content/economy/trading.md:24
 #, no-wrap
 msgid "Intelligence Alliance"
 msgstr "Geheimdienstbündnis"
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-intelligence-alliance.md:12
+#: internal/help/content/diplomacy/treaty-intelligence-alliance.md:11
 #, fuzzy
 #| msgid ""
 #| "The two realms give each other covert help in operations, both at home "
@@ -864,10 +852,9 @@ msgstr ""
 "Handel zwischen zwei Reichen, mit einer Abgabe auf Waren, die die Grenze "
 "überqueren. Beide Seiten verdienen zusätzlich, je nach Größe des Handels."
 
-#. type: Bullet: '- '
+#. type: Title #
 #: internal/help/content/diplomacy/treaty-technology-agreement.md:1
 #: internal/help/content/diplomacy/treaty-technology-agreement.md:8
-#: internal/help/content/economy/trading.md:24
 #, no-wrap
 msgid "Technology Agreement"
 msgstr "Technologieabkommen"
@@ -886,7 +873,7 @@ msgstr ""
 "der Technologie der anderen."
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-technology-agreement.md:18
+#: internal/help/content/diplomacy/treaty-technology-agreement.md:17
 msgid ""
 "The help it gives you is bounded by whichever of you holds fewer Technology "
 "regions, so it speeds up work you are already doing rather than standing in "
@@ -895,16 +882,15 @@ msgid ""
 "who has done the same."
 msgstr ""
 
-#. type: Bullet: '- '
+#. type: Title #
 #: internal/help/content/diplomacy/treaty-terrorist-prevention.md:1
 #: internal/help/content/diplomacy/treaty-terrorist-prevention.md:8
-#: internal/help/content/economy/trading.md:24
 #, no-wrap
 msgid "Terrorist Prevention"
 msgstr "Terrorabwehr"
 
 #. type: Plain text
-#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:12
+#: internal/help/content/diplomacy/treaty-terrorist-prevention.md:11
 #, fuzzy
 #| msgid ""
 #| "The two realms' intelligence agencies help each other find and stop "
@@ -1400,10 +1386,74 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/taxes.md:36
+#: internal/help/content/economy/taxes.md:37
 msgid ""
 "All barons draw on the same purse, and each refund empties it a little. The "
 "first to play on a given day takes the largest share, so play early."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/taxes.md:38
+#, no-wrap
+msgid "The lottery"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:44
+msgid ""
+"Once a day, as she hands back your refund, the Queen offers a lottery "
+"ticket.  It costs 5,000 gold, taken as soon as you say yes — she does not "
+"mention the price, and a baron with less than that in hand is not offered a "
+"ticket at all.  Either way the day's offer is spent: there is no asking "
+"again later."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:49
+msgid ""
+"Pick six letters, one keypress each, and press Enter for any you would "
+"rather leave to chance. Six letters are then drawn. What counts is how many "
+"of the drawn letters your ticket covers, not where they sit, and each letter "
+"on your ticket can only be spent once."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/taxes.md:56
+msgid "1 letter: 2,500 gold"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/taxes.md:56
+msgid "2 letters: 10,000"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/taxes.md:56
+msgid "3 letters: 500,000"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/taxes.md:56
+msgid "4 letters: 1,000,000"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/taxes.md:56
+msgid "5 letters: 4,000,000"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/economy/taxes.md:56
+msgid "6 letters: 10,000,000"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/taxes.md:60
+msgid ""
+"Winnings go into your bank. One match still leaves you 2,500 down on the "
+"ticket, and most tickets match nothing — the Queen did not build her purse "
+"by losing. Your sysop can switch the lottery off, so a board that never "
+"offers you one is not broken."
 msgstr ""
 
 #. type: Title #
@@ -1417,7 +1467,7 @@ msgstr "Handel"
 #: internal/help/content/economy/trading.md:12
 msgid ""
 "There are two ways to move goods between realms: the Trading Market, and a "
-"trade deal. Both need a treaty with the other realm."
+"trade deal."
 msgstr ""
 
 #. type: Title ##
@@ -1428,43 +1478,15 @@ msgid "The Trading Market"
 msgstr "Der Koordinator"
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:16
-msgid "You can put any of your goods on the market and set your own price."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/trading.md:19
-#, no-wrap
+#: internal/help/content/economy/trading.md:18
 msgid ""
-"**In a single-board game, to buy from a realm you need one of these treaties\n"
-"with it:**\n"
+"You can put any of your goods on the market and set your own price. The "
+"market is open: any realm on your planet can see what is listed and buy it, "
+"and you can buy from any of them."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:28
-msgid ""
-"You see only the goods you could buy. A realm you have no treaty with does "
-"not appear on the market at all, and its goods are not counted in the "
-"totals. Your own listing is always shown to you."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/trading.md:31
-msgid ""
-"Listing is open to everyone. Only buying is limited. So you choose who can "
-"take your goods, and who can even see them, by choosing who you sign a "
-"treaty with."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/trading.md:34
-msgid ""
-"In a league game the market is open to every realm on your planet, because "
-"there your planet is your team."
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/trading.md:38
+#: internal/help/content/economy/trading.md:22
 msgid ""
 "Goods you list leave your hands at once. They are held for the buyer, and "
 "you are paid when someone buys them. You still pay upkeep on them while they "
@@ -1472,39 +1494,39 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:39
+#: internal/help/content/economy/trading.md:23
 #, no-wrap
 msgid "Trade deals"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:44
+#: internal/help/content/economy/trading.md:28
 msgid ""
 "A trade deal is an offer to one realm. You put goods and gold in it, and you "
 "may ask for goods and gold in return. The other realm reads the offer and "
-"accepts or refuses it."
+"accepts or refuses it. You need a treaty with that realm to send one."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:47
+#: internal/help/content/economy/trading.md:31
 msgid ""
 "A trade deal costs a fee, and it needs a spare carrier to move the goods. A "
 "Protective Trade treaty with that realm makes the fee cheaper."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:48
+#: internal/help/content/economy/trading.md:32
 #, no-wrap
 msgid "Getting the most from trade"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:51
+#: internal/help/content/economy/trading.md:35
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:56
+#: internal/help/content/economy/trading.md:40
 #, no-wrap
 msgid ""
 "**Specialise, then supply your partners.** Your industry can favour one unit\n"
@@ -1514,26 +1536,16 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:60
+#: internal/help/content/economy/trading.md:44
 #, no-wrap
 msgid ""
-"**Price for the realm you want to help.** Because only your treaty partners can\n"
-"buy, a low price is a gift to them and not to a stranger. Some realms list goods\n"
-"very cheaply, or even for nothing, to arm a partner who is under attack.\n"
+"**A cheap listing is taken by whoever gets there first.** Anyone can buy it, so\n"
+"a price meant as a gift to an ally may end up arming a rival. To be sure the\n"
+"goods reach the realm you mean them for, send a trade deal instead.\n"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:65
-#, no-wrap
-msgid ""
-"**Watch what your treaty is worth.** You can hold only one treaty with a realm\n"
-"at a time. A Tariff or Free Trade Agreement pays you gold every turn. The four\n"
-"treaties above open that realm's market to you instead. Which is worth more\n"
-"depends on how much you plan to buy from them.\n"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/economy/trading.md:68
+#: internal/help/content/economy/trading.md:47
 #, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialise, and\n"
@@ -1840,8 +1852,40 @@ msgid ""
 "are committing forces you will not hear about until the weekend."
 msgstr ""
 
+#. type: Title ##
+#: internal/help/content/interbbs/leagues.md:31
+#, no-wrap
+msgid "Your BBS Coordinator"
+msgstr ""
+
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:33
+#: internal/help/content/interbbs/leagues.md:39
+msgid ""
+"The barons on your own board elect one of their number Coordinator, and the "
+"Coordinator speaks for the board: they set where it stands with each other "
+"planet, and they alone can call off a doomsday weapon. Vote from the System "
+"menu, under Coordinator Vote. Any living realm can be voted for, yourself "
+"included, and you may change your mind whenever you like — the office goes "
+"to whoever holds the most votes at the time."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/leagues.md:43
+msgid ""
+"You cannot vote while your realm is still under new-realm protection, and "
+"the item is not on the menu until that ends — though the notice below will "
+"already be naming your vote."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/leagues.md:46
+msgid ""
+"Every turn opens by telling you whether you hold the office or who your vote "
+"is currently for, so you never have to go looking."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/leagues.md:49
 msgid ""
 "A league game has a set length. When it ends, the world resets and a new "
 "game begins."
@@ -1850,7 +1894,7 @@ msgstr ""
 "zurückgesetzt und ein neues Spiel beginnt."
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:34
+#: internal/help/content/interbbs/leagues.md:50
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
 "play."

@@ -7,8 +7,8 @@ their string-literal arguments:
 
   - tr(s, "...")                      direct-print helper
   - plural(s, n, "one", "many")       both wordings of a counted figure
-  - ok(s, "..." / fail via errors     feedback
-  - prompt / promptInt / promptSuggested / askYesNo / askYesNoDefaultNo
+  - ok / okNoPause(s, "..." / fail via errors     feedback
+  - prompt / promptInt / promptSuggested(Tight) / AskYesNo / askYesNoHere
   - i18n.T(lang, "...")               explicit lookups (menu draw)
   - menu item Label:/Title: literals  menu chrome
   - errors.New("...") in internal/game  (surfaced to the player via fail())
@@ -32,10 +32,13 @@ CALL_PATTERNS = [
     re.compile(r'\btr\(s,\s*' + STR),
     re.compile(r'\bi18n\.T\([^,]+,\s*' + STR),
     re.compile(r'\bok\(s,\s*' + STR),
+    re.compile(r'\bokNoPause\(s,\s*' + STR),
     re.compile(r'\bprompt\(s,\s*' + STR),
     re.compile(r'\bpromptInt\(s,\s*' + STR),
     re.compile(r'\bpromptSuggested\(s,\s*' + STR),
+    re.compile(r'\bpromptSuggestedTight\(s,\s*' + STR),
     re.compile(r'\bAskYesNo\(s,\s*' + STR),
+    re.compile(r'\baskYesNoHere\(s,\s*' + STR),
     re.compile(r'\bstatLine\(s,\s*[^,]+,\s*' + STR),
     re.compile(r'\b(?:Label|Title):\s*' + STR),
     re.compile(r'\bonOff\(' + STR),  # Preferences toggle labels (dynamic LabelFn)

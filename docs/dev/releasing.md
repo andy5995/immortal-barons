@@ -7,13 +7,36 @@ League Coordinator's minimum-version gate.
 
 ## Before tagging
 
-1. **Regenerate the translations.** They are deliberately NOT regenerated on
+1. **Curate the ChangeLog.** The in-progress block accumulates in commit
+   order, which is neither the reader's order nor a finished list. Three passes,
+   in order:
+
+   - **Reorder** so the most important, most user-facing changes come first and
+     sysop, command-line and packaging entries come last.
+   - **Fold** entries that describe one change, and delete any entry that fixes
+     something added in the same cycle — nobody upgrading ever saw the bug.
+   - **Shorten** to the one-line rule: no entry wraps, no second person, no
+     explanation of how a feature plays, no clause saying what BRE does. If a
+     change will not fit on one line, ask before writing a longer one.
+
+   Expect this to be substantial: the v0.0.6 pass cut 71 wrapped entries to 69
+   single lines.
+
+2. **Regenerate the translations.** They are deliberately NOT regenerated on
    ordinary commits, so a release is where they catch up:
 
    ```
    python3 scripts/gen-ui-pot.py && scripts/merge-ui-po.sh
    scripts/gen-help-translations.sh
    ```
+
+   **Check what the UI extractor is not seeing.** `gen-ui-pot.py` scans for a
+   fixed list of call forms, so a print helper added since the last release
+   drops out of the catalogs silently — its strings translate at runtime and no
+   translator has ever been shown them. At v0.0.6 that was `okNoPause`,
+   `askYesNoHere` and `promptSuggestedTight`, 28 strings between them. To find
+   the next one, list the helpers that pass a literal through `i18n.T` and
+   compare them against `CALL_PATTERNS`.
 
    **Never clear a `#, fuzzy` flag without reading the translation.** `msgmerge`
    fills a new entry from whichever old one has the most similar *English*, so a
@@ -24,13 +47,13 @@ League Coordinator's minimum-version gate.
    reader gets English until a human validates one. Un-fuzzying in bulk is what
    would ship them.
 
-2. **Stamp the ChangeLog.** Replace the `(in-progress:)` heading with
+3. **Stamp the ChangeLog.** Replace the `(in-progress:)` heading with
    `YYYY-MM-DD (vX.Y.Z)`, matching the existing entries.
 
-3. **Update the status line** in `CLAUDE.md` — which version is released and
+4. **Update the status line** in `CLAUDE.md` — which version is released and
    which is in development.
 
-4. **Verify.** All of these, not a subset:
+5. **Verify.** All of these, not a subset:
 
    ```
    gofmt -l .            # silence
@@ -40,7 +63,7 @@ League Coordinator's minimum-version gate.
    go test ./internal/play/ -race
    ```
 
-5. **Commit** as `release: vX.Y.Z`.
+6. **Commit** as `release: vX.Y.Z`.
 
 ## Tagging
 
@@ -53,7 +76,7 @@ Watch it: a release with no assets is a release nobody can use.
 
 ## After publishing
 
-6. **Bump `Version` in `internal/game/game.go`** to the next patch. This is the
+7. **Bump `Version` in `internal/game/game.go`** to the next patch. This is the
    step that gets forgotten, because the release feels finished once the assets
    are up.
 
@@ -63,11 +86,11 @@ Watch it: a release with no assets is a release nobody can use.
    version stamped on every inter-BBS packet, where a Coordinator's minimum
    version is tested against it.
 
-7. **Delete any renamed or removed asset** left behind on the snapshot
+8. **Delete any renamed or removed asset** left behind on the snapshot
    prerelease by hand. `replacesArtifacts` only replaces an asset of the same
    name, so a rename leaves the old file sitting beside the new one.
 
-8. **Bump the Homebrew formula** in `HomebrewFormula/immortal-barons.rb` — the
+9. **Bump the Homebrew formula** in `HomebrewFormula/immortal-barons.rb` — the
    `url`, the `sha256`, and the doc list:
 
    ```

@@ -1,186 +1,74 @@
-(in-progress:)
+2026-08-21 (v0.0.6)
+  * Local covert effect operations resolve at daily maintenance
+  * Covert success runs 55% to 32.5% by operation and ignores agent counts
+  * Each covert operation may be run once per turn, rather than one in total
+  * Bomb Enemy Targets is a single covert operation, not a submenu of seven
+  * Expose Enemy Ops shields against one bribed realm for a day
+  * A bribed agent doubles the briber's covert odds against that realm
+  * Stir Revolts and Demoralize Forces subtract points, floored at 5
+  * Support Dissensions routs 1-19% of the target's troopers
+  * Set Up is rolled against, and voids, every treaty between the two realms
+  * Bribery is refused before charging when a bribed agent is already inside
+  * New Realm Protection refuses covert effect operations and Send SpyGuy
+  * A foiled covert operation names the realm that sent the agent
+  * Send SpyGuy posts a paid watcher on a planet for a set number of days
+  * New help topic: Send SpyGuy
+  * A Clingy Annihilator under construction is not announced to its target
+  * The Spy Database is filled by interplanetary covert operations
+  * The InterPlanetary Special Operations menu's other seven items now work
+  * Bomb Trade Routes wrecks the goods in the target's pending trade deals
+  * The R5-Slappenheimer Handling setting gates the InterPlanetary R5 strike
+  * Global Recon Request reports every realm on every other planet
+  * Messages from another planet no longer appear in the planet news (#146)
+  * A planet holds 25 realms; a caller arriving with every seat taken gets none
+  * A realm keeps one of the 25 seats for its life, and its letter is that seat
+  * The Id column on See Scores shows a realm's seat letter
+  * Computer barons take seats; Max Players Per BBS 0 means the seats left
+  * A seat freed by an eliminated realm is reused, inheriting nothing
+  * Added the Queen's lottery, a 5,000-gold ticket, offered once a game day
+  * New bbs.cfg setting "Lottery": "no" turns the lottery off for this board
+  * Sending a trade deal requires a treaty with the other realm
+  * New Realm Protection refuses trading, trade deals and interplanetary bids
+  * Planetary diplomacy gates interplanetary trading: only Allied planets trade
+  * A bid on an allied planet's listing priced at 0 gold is accepted
+  * A market sale is no longer posted to the planet news
+  * A Full Defense Alliance partner is told what it lost defending an ally
+  * A Technology Agreement partner is told about a battle it was not in
+  * A Full Defense Alliance no longer lends agents
+  * Choosing a treaty already held reports that the agreement stands
+  * A pending trade deal, then a treaty offer, is answered before the recap
+  * The BBS Coordinator can stand down the planet's Clingy Annihilator (#45)
+  * The Coordinator's Player List no longer shows BBS account names
+  * The ballot for BBS Coordinator lists realms under protection again (#149)
+  * Coordinator menu keys: Dismantle 1, Diplomacy 2, Recon 3, View 4, List 5
+  * An empty granary no longer stops a realm's population from growing
+  * End of Turn Statistics reports a turn with no population movement
+  * Maintenance payment prompts lost their extra blank lines
+  * A realm name may be made of CP437 glyphs, which arrive as typed (#151)
+  * An idle timeout while naming a realm ends the session, creating no realm
+  * A realm may be renamed once, from Preferences, after protection ends
+  * Onboarding messages wrap to the screen instead of splitting words
+  * Show advisor option at region picker after pirate attack
   * A menu's price column lines up when an item name overruns the column
-  * An inter-BBS turn opens with the BBS Coordinator's name, or the realm the
-    current vote is for
-  * The Queen's lottery is offered once a game day, after her tax refund: a
-    six-letter ticket costing 5,000 gold, paying 2,500 to 10,000,000 by letters
-    matched
-  * New bbs.cfg setting "Lottery": no turns the lottery off for this board
-  * bbs.cfg is read even when config.json is absent, where its settings used to
-    be ignored entirely on a board that had not saved a config yet
-  * A routed league's broadcasts are signed after they are addressed, where
-    every copy used to be refused by the boards that check keys
-  * A packet refused for not matching the sender's key is reported as refused,
-    where it was counted and announced as applied
-  * The captured-region picker lists the Advisors entry and takes * to visit
-    them, as the Buy Regions screen does — the original draws both screens from
-    one routine
-  * bbs.cfg is read and never written by the game: -ibbs-reset prints it for the
-    sysop to save, where a rules reset used to return the board's name, league
-    number and packet directories to their defaults (issue #152)
-  * The settings editor shows those four settings but no longer changes them,
-    naming bbs.cfg as where they are edited
-  * New -league-check command line option: it reports the roster, the board
-    name, the packet directories and the keys in one pass (issue #154)
-  * Joining a league with a board name that is not in the roster is refused at
-    setup, naming the closest entry (issue #154)
-  * barons-ftn's thin-margin warning wraps to the console width, and drops
-    advice that no longer applies (issue #156)
-  * A bid on an allied planet's listing priced at 0 gold is accepted. It was
-    refused with a message about the quantity
-  * New -players command line option, the original's VIEW: lists the players
-    and changes a player's name, renames a realm, or deletes one (issue #161)
+  * End of Turn Statistics is bracketed by a blue inset rule
+  * The Empire Status block is bracketed by a blue inset rule
+  * The Specialization box is 14 columns wide, its title overhanging it
+  * A falling Daily Bulletin figure is bright cyan in place of red
+  * New -players option: list players, rename a realm or player, delete (#161)
+  * New -league-check option: reports the roster, directories and keys (#154)
+  * New -full, -scores and -detailed flags for sysop batch files (#148)
+  * Joining a league under a name not in the roster is refused (#154)
+  * -planetary reports skipped packets by reason (#139)
+  * bbs.cfg is read and never written; -ibbs-reset prints it (#152)
+  * The settings editor shows the four bbs.cfg settings without changing them
+  * bbs.cfg is read even when config.json is absent
+  * -gen-board-key prints the key alone on its line
+  * A routed league's broadcasts are signed after they are addressed
+  * A packet refused for not matching the sender's key is reported as refused
+  * An inter-BBS turn opens with the BBS Coordinator's name
+  * Added barons-ftn, which hands outbound packets to an FTN mailer as netmail
   * The ChangeLog ships in the release and snapshot archives
   * The archives carry an optional install-xtrn.ini for Synchronet
-  * Send SpyGuy now works as the original's does: a watcher posted on a planet
-    for a number of days, paid for in gold by the day rather than with an agent,
-    who reports group attacks and Clingy Annihilators aimed at your planet into
-    your planet news. He cannot be caught, and the planet he watches is never
-    told he is there
-  * A Clingy Annihilator under construction is no longer announced to the planet
-    it is aimed at. That planet learns of it from a SpyGuy, or when the weapon
-    launches
-  * The Spy Database is filled by interplanetary covert operations reporting on
-    the realms they strike, as in the original, rather than by a scouting errand
-    of its own
-  * New help topic: Send SpyGuy
-  * Messages arriving from another planet no longer appear in the planet news.
-    They are delivered to the mailboxes they are addressed to and nowhere else
-    (issue #146)
-  * The BBS Coordinator can stand down the planet's Clingy Annihilator before it
-    flies, from the Coordinator menu, whoever built it (issue #45). The baron
-    who started it keeps their own dismantle for now (issue #114)
-  * The Coordinator's Player List no longer shows the BBS account name behind
-    each realm. The original prints one only in a file a sysop creates, never
-    on a screen
-  * The ballot for BBS Coordinator lists every realm again. Realms under
-    new-realm protection were left off it, so early in a game a voter was the
-    only candidate on their own ballot (issue #149)
-  * Coordinator menu items moved onto the original's keys: Modify Diplomacy 2,
-    Global Recon Request 3, View Diplomacy 4, Player List 5. Key 1 is held for
-    Dismantle Gooie (issue #114)
-  * An empty granary no longer stops a realm's population from growing. A realm
-    that fed its people in full at the maintenance prompts lost that turn's
-    growth for having spent its food doing so
-  * End of Turn Statistics now reports a turn with no population movement as
-    "gained 0", matching the original; the line was omitted entirely, so a realm
-    out of food was told nothing
-  * Onboarding messages wrap to the screen instead of splitting words at column 80
-  * A realm name may now be made entirely of CP437 glyphs (issue #151)
-  * An idle timeout while naming a realm now ends the session, creating none
-  * A realm may be renamed once, from the Preferences menu, after protection ends
-  * CP437 characters typed at a prompt now arrive as typed (issue #151)
-  * -planetary now reports skipped packets by reason (wrong league, mesh copy,
-    already seen) instead of silently discarding them (issue #139)
-  * New -full, -scores, and -detailed flags for sysop batch files, matching BRE's
-    command-line arguments (issue #148)
-  * Extra blank lines removed from maintenance payment prompts; each "How much
-    will you give?" now sits on the same line as its requirement, matching BRE
-  * A realm now holds one of the planet's 25 seats for its whole life, and its
-    letter is that seat. The letter no longer moves when another realm joins or
-    falls, and the Id column on See Scores shows it, so those rows are no longer
-    in letter order
-  * A planet holds 25 realms and no more. A caller arriving when every seat is
-    taken is told so and given no realm. A realm past the 25th used to be
-    created in silence, able to act on everyone while appearing in nobody's
-    target list
-  * Computer barons take seats from the 25, so a board running them seats fewer
-    callers. Max Players Per BBS set to 0 now means "as many as the seats left"
-    rather than "unlimited"
-  * A seat freed when a realm is swept from the map is given to the next realm
-    founded, which inherits none of its predecessor's pacts, mail or market
-    stock
-  * A realm under New Realm Protection is refused the covert operations that
-    have an effect, and the interplanetary Send SpyGuy, at no cost in gold,
-    agents or turn slots; Send Spy and Spy on Relations stay open to it
-  * The six local covert effect operations are queued when chosen and resolved
-    at daily maintenance, as in the original; the fee, the agent and the
-    per-turn slot are taken at the menu and the result lands on the sender's
-    next report. Send Spy, Spy on Relations and Expose Enemy Ops still answer
-    at once
-  * Every local covert operation is resolved by the original's own roll. Neither
-    realm's agent count changes the odds; each operation carries its own
-    difficulty, so the simpler ones land 55 percent of the time, Demoralize
-    Forces and Bomb Enemy Targets 40, and Bribery 32.5
-  * A covert operation may be run once per turn each, rather than one operation
-    of any type per turn. Send Spy, Spy on Relations and Expose Enemy Ops have
-    no limit
-  * A bribed agent doubles the briber's own odds against that realm. It used to
-    make that realm's operations against the briber fail
-  * Expose Enemy Ops shields against one realm — one the caller already holds a
-    bribed agent inside, chosen from a list of those — for a day, and turns away
-    nine of that realm's operations in ten. It used to block every realm's
-    operations outright. It costs no agent and takes no per-turn slot
-  * Bomb Enemy Targets is one covert operation, as in the original, instead of a
-    submenu of seven lettered variants. A successful strike destroys part of one
-    of the target's holdings, picked at random from its people, troopers,
-    agents, tanks, jets and food store, and needs no Bombers. The seven variants
-    remain on the InterPlanetary Special Operations menu, where the original
-    keeps them
-  * Stir Revolts and Demoralize Forces subtract points from popular support and
-    military morale rather than scaling them, and hold both at 5. The scaling
-    figures came from the resolver for operations arriving in a packet, which
-    uses a different operation table
-  * Support Dissensions sends 1 to 19 percent of the target's troopers fleeing,
-    averaging a tenth, in place of a flat tenth
-  * Set Up voids every treaty between the two realms, not only a Full Defense
-    Alliance, and the attempt is rolled against each of them
-  * Bribery is refused before any gold is charged when a bribed agent is already
-    inside that realm
-  * The R5-Slappenheimer Handling setting gates the InterPlanetary
-    R5-Slappenheimer, which is the only menu that now fires one
-  * A pending trade deal and treaty offer are now answered before the "since
-    your last play" entries rather than after them, and the trade deal comes
-    first, matching the original
-  * Choosing the treaty a realm already holds with you now reports that the
-    agreement stands, instead of offering to break it
-  * Added barons-ftn, an optional helper that hands outbound packets to an FTN
-    mailer as Type-2 file-attach netmail
-  * A Full Defense Alliance partner is told what it lost defending an ally, who
-    it was defending, and who attacked. Those losses used to happen silently. A
-    Technology Agreement partner is told about the battle too, as in the
-    original, though it sends nothing and loses nothing
-  * A Full Defense Alliance no longer lends agents. The Alliance Strength
-    screen's agents column comes from a Terrorist Prevention pact, as in the
-    original
-  * A foiled covert operation now names the realm that sent the agent, as the
-    original does; an operation that succeeds still names nobody
-  * A market sale is no longer posted to the planet news. The seller is still
-    told who bought what and for how much
-  * The Diplomacy Modification screen no longer says planetary diplomacy is
-    enforced by nothing: barons may only trade at a planet marked Allied
-  * A realm under new realm protection can no longer trade. The Trading Market,
-    trade deals and interplanetary bids all refuse it, as attacks already did
-  * Sending a trade deal needs a treaty with the other realm, as in the original
-  * -gen-board-key prints the key alone on its line. It used to print the board
-    name in front of it, and a roster entry pasted whole left that board's
-    packets unchecked instead of reporting an error
-  * A realm's letter on the attack and covert target lists is its own seat.
-    Allying with the realms above it used to re-letter everything below, so the
-    key that struck one realm struck a different one next time
-  * The InterPlanetary Special Operations menu works, where seven of its eight
-    items did nothing before. Bomb Food Market, Bomb Trading Market, Bomb Trade
-    Routes and Undermine Investments are aimed at another planet and wreck what
-    it shares; Nuclear Assault, Chemical Bombing and R5-Slappenheimer name a
-    baron there. All of them resolve on that planet's own board and report back
-  * The Coordinator menu matches the original: Modify Diplomacy, Global Recon
-    Request, View Diplomacy and Player List, keyed 1 to 4
-  * Global Recon Request asks every other planet for a report on every realm it
-    holds, and the answers land in the Spy Database
-  * Bomb Trade Routes wrecks the goods riding in the target's pending trade
-    deals rather than severing a standing treaty: most strikes come to nothing,
-    some deals slip through, and a deal the bombers reach keeps 5-9% of every
-    good. A deal is spared when its own two parties hold Protective Trade,
-    whoever fired, so the pact no longer refuses the strike or shields a market
-  * The End of Turn Statistics screen is bracketed by the original's blue inset
-    rule, above and below, where it had none
-  * The Empire Status block is bracketed by the original's blue inset rule,
-    above the realm name and below the reign line, where it had none
-  * The Specialization box is 14 columns wide, as in the original, with its
-    title overhanging it
-  * A Daily Bulletin change is drawn as in the original: bright cyan whichever
-    way the day went, with only a rise carrying a green plus. The falling rows
-    were red, which was hard to read against black
 
 2026-08-15 (v0.0.5)
   * "?" at a planet prompt shows the list on the keypress; it no longer waits
