@@ -16,7 +16,7 @@ import (
 // Version is the single source of truth for the game's version string,
 // displayed in the status bar and reported by the front-ends. The
 // in-development version; bumped after each release.
-const Version = "0.0.6"
+const Version = "0.0.7"
 
 // Revision is the short VCS revision (7 hex chars, git's default short hash) the
 // binary was built from, with a "-dirty" suffix when the working tree had
