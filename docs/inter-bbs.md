@@ -361,23 +361,6 @@ Anything with no `Link` line of its own goes to **Outbound**, which is what a
 board's link to its own uplink should be. A board that hosts nobody needs none
 of this.
 
-### Overriding the Coordinator's routing
-
-A board that wants to send some traffic its own way can put an `ibroute.cfg`
-file in its data directory. Each line is `ROUTE`, the board to send to, and the
-board to send it through; `*` stands for every board, and sending a board
-through itself restores a direct link. Lines starting with `;` are comments.
-
-```
-; everything through board 8, except board 5, which we reach directly
-ROUTE * 8
-ROUTE 5 5
-```
-
-The file overrides what the roster says. Later lines win over earlier ones, so
-write the general rule first. A league whose Coordinator keeps the routing in the
-roster needs no such file on any board.
-
 ## How packets move (you choose the schedule)
 
 The game never moves files between boards. It only reads and writes packet
@@ -527,16 +510,15 @@ Binkley    No
 The helper gets this board's address and every destination address from
 `ibnodes.dat`. Use complete `zone:net/node` addresses there; a point may add
 `.point`. The helper prefers the packet's stable destination node number, uses
-the board name for packets from older versions, and applies `ibroute.cfg` and
-the roster's `HOST` tree to choose the next hop. For the common arrangement
-where every member sends through node 1:
+the board name for packets from older versions, and follows the roster's `HOST`
+tree to choose the next hop. For the common arrangement where every member sends
+through node 1, node 1 hosts every other board:
 
 ```
-; ibroute.cfg
-ROUTE * 1
+1 HOST 2 3 4 5
 ```
 
-With a route configured, `-planetary` already writes one signed, addressed
+With HOST routing in the roster, `-planetary` already writes one signed, addressed
 packet per board. In an unrouted mesh it writes one unaddressed broadcast
 instead; `barons-ftn` gives every other board its own attachment pathname and
 `.msg`. It sends those copies directly to each board. Turning the already-signed

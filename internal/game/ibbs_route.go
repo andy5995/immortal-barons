@@ -8,18 +8,6 @@ import "fmt"
 // however many boards the league has — which is what makes a twenty-board
 // league something a hobbyist sysop can join (#106). Until a Coordinator writes
 // a HOST line the league is a mesh, and none of this is in play; see Routed.
-//
-// A board may override the roster's answer with its own route file (BRE's
-// ROUTE.CFG): "any information in this file will override anything else assumed
-// by the BRNODES.DAT file".
-
-// RouteRule is one line of the board's route file: send anything bound for Dest
-// to Via instead. Dest 0 is BRE's "*", meaning every board. Setting Via equal to
-// Dest restores a direct link, which is how BRE cancels an earlier "*" rule.
-type RouteRule struct {
-	Dest int // node number, or 0 for "*"
-	Via  int // node number to hand the packet to
-}
 
 // MaxPacketHops bounds how many boards a packet may be forwarded through before
 // it is discarded. A routing tree that is mis-typed into a cycle would otherwise
@@ -28,7 +16,7 @@ type RouteRule struct {
 const MaxPacketHops = 25
 
 // Routed reports whether this league is arranged as a tree — whether the roster
-// carries HOST lines, or this board has routing rules of its own.
+// carries HOST lines.
 //
 // It is the switch for every behaviour on this page, because the alternative is
 // not "no routing" but a different transport. An unrouted league is a mesh whose
@@ -37,9 +25,6 @@ const MaxPacketHops = 25
 // send it back into the same fan-out, and expanding a broadcast into one file
 // per board would have the transport deliver each of them everywhere.
 func (w *World) Routed() bool {
-	if len(w.Routes) > 0 {
-		return true
-	}
 	for _, n := range w.LeagueNodes {
 		if len(n.Hosts) > 0 {
 			return true
@@ -117,12 +102,9 @@ func (w *World) NextHop(dest string) string {
 	return dest
 }
 
-// routedHop answers NextHop in roster numbers: the route file first, then the
-// HOST tree, then a direct link.
+// routedHop answers NextHop in roster numbers: the HOST tree, then a direct
+// link.
 func (w *World) routedHop(me, to int) int {
-	if via, ok := w.routeOverride(to); ok {
-		return via
-	}
 	host := w.hostOf()
 
 	// Walk from the destination towards the root. If this board is on that
@@ -144,20 +126,6 @@ func (w *World) routedHop(me, to int) int {
 		return up
 	}
 	return to
-}
-
-// routeOverride applies the board's route file. Rules are read in order and the
-// last one to match wins, so a specific rule written after a "*" rule overrides
-// it — BRE's own example is "ROUTE 5 5 after a Route * # command will restore
-// BBS #5 to Direct".
-func (w *World) routeOverride(to int) (int, bool) {
-	via, found := 0, false
-	for _, r := range w.Routes {
-		if r.Dest == 0 || r.Dest == to {
-			via, found = r.Via, true
-		}
-	}
-	return via, found
 }
 
 // ForwardPacket queues a packet that arrived here but is addressed elsewhere.

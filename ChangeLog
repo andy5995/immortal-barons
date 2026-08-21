@@ -1,3 +1,6 @@
+(in-progress:)
+  * A board no longer overrides league routing with an "ibroute.cfg" file
+
 2026-08-21 (v0.0.6)
   * Local covert effect operations resolve at daily maintenance
   * Covert success runs 55% to 32.5% by operation and ignores agent counts

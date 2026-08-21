@@ -233,7 +233,7 @@ after `immortal-barons -planetary`, after the door exits, or both:
 barons-ftn -data /path/to/data
 ```
 
-It reads `bbs.cfg`, `ibnodes.dat`, `ibroute.cfg`, and the FTN-only `ftn.cfg`.
+It reads `bbs.cfg`, `ibnodes.dat`, and the FTN-only `ftn.cfg`.
 It scans the default `Outbound` directory and every `Link` directory, moves
 each `.brp` packet into that directory's `fido` subdirectory, and creates a
 Type-2 file-attach `.msg` in the configured netmail directory. An unaddressed

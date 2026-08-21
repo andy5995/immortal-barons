@@ -91,31 +91,6 @@ func TestNextHopWithNoRosterIsDirect(t *testing.T) {
 	}
 }
 
-func TestRouteFileOverridesTheHostTree(t *testing.T) {
-	w := routingWorld(3) // a leaf whose uplink is 2
-	w.Routes = []RouteRule{{Dest: 5, Via: 8}}
-	if got := w.NextHop(planetName(5)); got != planetName(8) {
-		t.Errorf("NextHop = %q, want %q", got, planetName(8))
-	}
-	// Anything the file does not name still follows the tree.
-	if got := w.NextHop(planetName(7)); got != planetName(2) {
-		t.Errorf("unrouted NextHop = %q, want %q", got, planetName(2))
-	}
-}
-
-// BRE's own example: "Using ROUTE 5 5 after a Route * # command will restore
-// BBS #5 to Direct".
-func TestRouteStarThenSpecificRestoresDirect(t *testing.T) {
-	w := routingWorld(3)
-	w.Routes = []RouteRule{{Dest: 0, Via: 8}, {Dest: 5, Via: 5}}
-	if got := w.NextHop(planetName(7)); got != planetName(8) {
-		t.Errorf("* rule: NextHop = %q, want %q", got, planetName(8))
-	}
-	if got := w.NextHop(planetName(5)); got != planetName(5) {
-		t.Errorf("restored direct: NextHop = %q, want %q", got, planetName(5))
-	}
-}
-
 // A roster typed into a cycle must not hang the game working out a next hop.
 func TestNextHopSurvivesACircularRoster(t *testing.T) {
 	w := &World{}

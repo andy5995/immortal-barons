@@ -751,7 +751,6 @@ type World struct {
 	Season          int
 	LeagueDiplomacy string       // coordinator's league-wide declaration, made with a season reset
 	LeagueNodes     []LeagueNode `json:"-"` // league roster, loaded from ibnodes.dat at startup
-	Routes          []RouteRule  `json:"-"` // this board's routing overrides, loaded from ibroute.cfg at startup
 	// Transit holds packets that arrived here addressed to another board and are
 	// waiting to be handed on. Kept apart from the Outbox because they must go
 	// out exactly as they came in — see ForwardPacket. Saved with the world, as
