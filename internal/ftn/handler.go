@@ -51,11 +51,7 @@ func Run(dataDir string) (Result, error) {
 	if err != nil {
 		return Result{}, err
 	}
-	routes, err := store.ParseRouteFile(filepath.Join(dataDir, store.RouteFile))
-	if err != nil && !os.IsNotExist(err) {
-		return Result{}, err
-	}
-	world := &game.World{Config: board, LeagueNodes: nodes, Routes: routes}
+	world := &game.World{Config: board, LeagueNodes: nodes}
 	originNode := nodeByNumber(nodes, world.NodeNumber(board.BoardID))
 	if originNode == nil {
 		if err := store.CheckBoardInRoster(board.DataDir, board.BoardID); err != nil {

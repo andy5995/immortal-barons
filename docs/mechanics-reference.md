@@ -3930,17 +3930,20 @@ routing of their own at all, "in which case you may skip this step". A board may
 override the answer with its own `ROUTE.CFG`, whose rules the manual says
 "override anything else assumed by the BRNODES.DAT file".
 
-IB reads the same HOST lines out of `ibnodes.dat` and the same rules out of
-`ibroute.cfg` (`ROUTE <dest|*> <via>`, last match wins). What this buys is the
+IB reads the same HOST lines out of `ibnodes.dat`. What this buys is the
 reason BRE did it: a leaf board configures one link, to its uplink, whatever the
 size of the league, and a board joining costs one sysop an edit instead of all of
 them. `-league-routes` prints the resulting table, as BRE's `BRE TEST` does.
 
 Divergences, all forced by the transport rather than chosen:
 
-- **BRE's ROUTE.CFG also sets a FidoNet mailer's send priority** (`CRASH`,
-  `HOLD`, `NORMAL`). IB reads and ignores those: a packet is a file in a
-  directory, and what the transport does with it is configured in the transport.
+- **IB does not read `ROUTE.CFG`.** It did until v0.0.7. Three of that file's
+  four keywords (`CRASH`, `HOLD`, `NORMAL`) set a FidoNet mailer's send
+  priority, which with a file drop is configured in the transport rather than
+  the game; the fourth left a board able to contradict the Coordinator's roster
+  silently, in a file no other board can see. BRE's own sample says a league
+  whose Coordinator keeps routing in the roster needs no such file, so the
+  roster is IB's single routing table.
 - **A broadcast is addressed per planet before it is written**, one file each,
   because only the game knows the tree and the transport cannot fan out along
   it. An unrouted league still writes the single broadcast, and its transport

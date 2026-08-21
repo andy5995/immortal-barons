@@ -27,7 +27,7 @@ a shared mount). `RunPlanetary` (`immortal-barons -planetary`, also folded into
 group attacks, exports this board's scores, and writes the outbox.
 
 `barons-ftn` is the optional FTN adapter. It remains outside the game process:
-it reads the existing board, roster, and route files, renames each outbound
+it reads the existing board and roster files, renames each outbound
 `.brp` into that directory's `fido/` child, then creates an FTS-0001 Type-2
 file-attach `.msg` with exclusive creation. An unaddressed mesh broadcast is
 fanned out with real copies to one distinct attachment and message per other
@@ -294,17 +294,16 @@ the numbers it forwards for. The roster is the league's routing table, and it is
 signed and broadcast by the Coordinator (#64), so every board gets the tree
 without any sysop editing anything.
 
-Routing applies only once a roster carries a HOST line or a board has an
-`ibroute.cfg`. Until then a league is a mesh and the transport fans packets out,
-which is what every existing board does.
+Routing applies only once a roster carries a HOST line. Until then a league is a
+mesh and the transport fans packets out, which is what every existing board
+does.
 
-## Routing overrides: `ibroute.cfg`
-
-Optional, in the data directory (`store.ParseRouteFile`, BRE's `ROUTE.CFG`).
-`ROUTE <dest|*> <via>`, `;` comments, last matching rule wins. Overrides the HOST
-tree. BRE's `CRASH` / `HOLD` / `NORMAL` lines set a FidoNet mailer's send
-priority and are read and ignored — with a file drop that is the transport's
-business, not the game's.
+BRE also let a board override the roster with its own `ROUTE.CFG`. IB read that
+file until v0.0.7 and no longer does: BRE's own sample says a league whose
+Coordinator keeps routing in the roster needs no such file, and three of the
+file's four keywords (`CRASH`, `HOLD`, `NORMAL`) set a FidoNet mailer's send
+priority, which is the transport's business rather than the game's. One routing
+table, held by the Coordinator, is what remains.
 
 ## Board config: `bbs.cfg`
 
@@ -380,7 +379,6 @@ to board, days — in IB's own shape.
 - `internal/store/ibbs.go` — `WriteOutbox`, `ReadInbound`, `RunPlanetary`.
 - `internal/game/ibbs_route.go` — `NextHop`, `ForwardPacket`, the HOST tree.
 - `internal/store/league.go` — `ParseNodeList`, `ParseBoardConfig`.
-- `internal/store/route.go` — `ParseRouteFile`.
 - `scripts/ibbs-smoke.sh` — end-to-end 3-board exchange with the real binary.
 
 ## Verified against real BRE (2026-07-22)

@@ -18,8 +18,22 @@ const (
 	testNetmailDir  = "n"
 )
 
+// hostRoster puts HOST routing in the test roster: Alpha (node 1) forwards for
+// Bravo and Charlie, so a packet Bravo sends to Charlie goes up to Alpha first.
+// Without it the roster is a mesh and every board links directly.
+func hostRoster(t *testing.T, data string) {
+	t.Helper()
+	roster := "1 HOST 2 3\nAlpha BBS\n1:229/100\nDetroit\nMI\nUSA\n\n" +
+		"2\nBravo BBS\n1:229/200\nLansing\nMI\nUSA\n\n" +
+		"3\nCharlie BBS\n1:229/300\nFlint\nMI\nUSA\n"
+	if err := os.WriteFile(filepath.Join(data, store.NodeListFile), []byte(roster), 0o644); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestRunMovesAndRoutesPacket(t *testing.T) {
 	data := newTestSetup(t)
+	hostRoster(t, data) // Alpha hosts the other two, so Bravo's traffic goes up
 	packet := game.Packet{FromBoard: "Bravo BBS", ToBoard: "Old Name", FromNode: 2, ToNode: 3}
 	source := writePacket(t, data, packet)
 
@@ -95,9 +109,6 @@ func TestConcurrentRunsQueuePacketOnce(t *testing.T) {
 
 func TestBroadcastGetsOneAttachmentPerOtherBoard(t *testing.T) {
 	data := newTestSetup(t)
-	if err := os.Remove(filepath.Join(data, store.RouteFile)); err != nil {
-		t.Fatal(err)
-	}
 	writePacket(t, data, game.Packet{FromBoard: "Bravo BBS", FromNode: 2})
 
 	result, err := Run(data)
@@ -338,7 +349,6 @@ func newTestSetup(t *testing.T, extraFTN ...string) string {
 		"config.json":         "{}\n",
 		store.BoardConfigFile: "BoardID Bravo BBS\nOutbound " + testOutboundDir + "\n",
 		ConfigFile:            "NetmailDir " + testNetmailDir + "\n" + strings.Join(extraFTN, ""),
-		store.RouteFile:       "ROUTE * 1\n",
 		store.NodeListFile: "1\nAlpha BBS\n1:229/100\nDetroit\nMI\nUSA\n\n" +
 			"2\nBravo BBS\n1:229/200\nLansing\nMI\nUSA\n\n" +
 			"3\nCharlie BBS\n1:229/300\nFlint\nMI\nUSA\n",
