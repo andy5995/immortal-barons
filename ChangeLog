@@ -1,5 +1,6 @@
 (in-progress:)
   * A board no longer overrides league routing with an "ibroute.cfg" file
+  * A treaty proposal no longer mails a notice the offer screen already gives
 
 2026-08-21 (v0.0.6)
   * Local covert effect operations resolve at daily maintenance

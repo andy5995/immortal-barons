@@ -3472,18 +3472,16 @@ rather than the score table. IB's rules on top of that:
   diplomacy.
 - **Marking several sends one proposal each**, skipping any realm that already
   holds that pact, and asks the covering message once for the whole batch.
-- **A Declaration Of War takes one confirmation for the list** and reports each
-  realm it ended a relation with.
-- **Declaring war costs a QUARTER of both popular support and military morale**
-  and leaves the pair at **Enemy** (`World.DeclareWar`), mailing the other realm.
-  BINARY-VERIFIED at `BRE.OVR 0x1A881`: each stat is integer-divided by 4 and
-  multiplied by 3, so 90 support becomes 66, not 67.
-- **Breaking a pact by attacking costs nothing.** The pair still drops to Enemy
-  (`World.breachTreaty`, called from `Attack`), but the breaker pays no price at
-  home — no attack path in the original ever reads the relationship. The crown
-  charges for the public act and leaves the private one to the other players.
-  This paragraph had the asymmetry backwards until 2026-08-15, as IB itself did.
-  IB previously docked a flat 10 support and left morale untouched.
+- **The covering message is optional, rides on the offer, and is mailed
+  nowhere.** Attaching one is a separate step in the diplomacy menu
+  (`prompt_diplomatic_message_attachment`, `BRE.OVR` 0x1C5BC), and the target
+  reads it inside the offer itself: the proposal line is followed by a
+  `Message attached:` block (`attach_message_to_diplomatic_proposal`, 0x1CCD9)
+  before the Regions/Net Worth/Score line. Captured live in `cap/kd3-01.cap`,
+  where the next proposal on the same screen carries no message and goes
+  straight to its figures. A proposal puts nothing in the mailbox at all. IB
+  mailed a generated "proposes a pact" line on every proposal, so the target was
+  told twice what the offer prompt had just asked them.
 
 **Known simplification:** the original says a treaty "is not officially broken
 until the other realm is notified", implying the old pact still binds until the

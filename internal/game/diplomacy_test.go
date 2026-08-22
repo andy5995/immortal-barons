@@ -111,7 +111,9 @@ func TestTechAgreementPartnerContributionSize(t *testing.T) {
 	}
 }
 
-func TestProposeTreatyAddsOfferAndMails(t *testing.T) {
+// A bare proposal mails nothing: the target is told by the offer prompt at the
+// start of their turn, and the original announces it nowhere else.
+func TestProposeTreatyAddsOfferAndMailsNothing(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("a", "Alpha")
 	b := w.AddHuman("b", "Beta")
@@ -121,12 +123,28 @@ func TestProposeTreatyAddsOfferAndMails(t *testing.T) {
 	if len(b.TreatyOffers) != 1 || b.TreatyOffers[0].From != a.Name || b.TreatyOffers[0].Type != fullDefenseAlliance {
 		t.Fatalf("want offer from %q, got %v", a.Name, b.TreatyOffers)
 	}
-	if len(b.Mail) != 1 {
-		t.Fatalf("want 1 mail, got %d", len(b.Mail))
+	if len(b.Mail) != 0 {
+		t.Fatalf("a proposal with no covering message should mail nothing, got %d: %v", len(b.Mail), b.Mail)
 	}
 	w.ProposeTreaty(a, b, fullDefenseAlliance) // duplicate = no-op
-	if len(b.TreatyOffers) != 1 || len(b.Mail) != 1 {
-		t.Fatal("duplicate proposal should not add another offer or mail")
+	if len(b.TreatyOffers) != 1 {
+		t.Fatal("duplicate proposal should not add another offer")
+	}
+}
+
+// A covering message is not mailed either: it rides on the offer.
+func TestProposeTreatyWithMessageMailsNothing(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	a := w.AddHuman("a", "Alpha")
+	b := w.AddHuman("b", "Beta")
+
+	w.ProposeTreatyWithMessage(a, b, fullDefenseAlliance, "Peace and profit.")
+
+	if len(b.Mail) != 0 {
+		t.Fatalf("a proposal should mail nothing, got %d: %v", len(b.Mail), b.Mail)
+	}
+	if len(b.TreatyOffers) != 1 || b.TreatyOffers[0].Message != "Peace and profit." {
+		t.Errorf("the covering message should ride on the offer, got %v", b.TreatyOffers)
 	}
 }
 

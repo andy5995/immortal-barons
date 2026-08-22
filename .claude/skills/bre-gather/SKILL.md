@@ -492,6 +492,31 @@ interplanetary one. It even has a prompt the local reader does not:
   R/D/I/Q, then a two-way **`Public Reply?`** — the answer goes to the whole
   planet or to the author alone — plus `Quote Message?` with first/last line.
 
+**Any claim about what a SCREEN shows or omits is checked against `cap/` FIRST.**
+A rendered capture is source 1 and the authority on screen content; a string
+table and a disassembly are not. The check costs one command:
+
+```
+LC_ALL=C grep -ao "<a distinctive line from that screen>" cap/*.cap | sort | uniq -c
+LC_ALL=C tr '\r' '\n' < cap/<file>.cap | grep -a -B4 -A12 "<that line>" | sed 's/\x1b\[[0-9;]*m//g'
+```
+
+Real miss (2026-08-21): the treaty-proposal screen was reported as having no
+covering-message field, and IB's inline display was removed to match. One grep
+for `proposes a` in `cap/` shows a boxed `Message attached:` block sitting
+between the proposal line and the figures — and the very next proposal in the
+same capture, which carries no message, going straight to its figures. The
+capture proved both the feature and its conditionality in one screen.
+
+**`find-string --function X` lists ONE routine's strings, and a screen is drawn
+by several.** Absence there is not absence from the screen. In the same miss,
+`"Message attached:"` belongs to `attach_message_to_diplomatic_proposal`
+(`BRE.OVR` 0x1CCD9) while the offer screen's own strings live in
+`process_diplomatic_proposal` (0x1CF73) — adjacent, obviously named, and
+invisible to a `--function` query scoped to the second. Before concluding a
+field is absent, search the string GLOBALLY for the feature's own words, and
+read the `callees[]` of the routine you looked at.
+
 Two lessons, both cheap to apply. **BRE duplicates whole subsystems rather than
 parameterising them**, so the local and interplanetary versions of a feature sit
 in different overlay units with near-identical strings; finding one tells you

@@ -417,10 +417,13 @@ func (w *World) ProposeTreatyWithMessage(from, to *Empire, ttype, message string
 		}
 	}
 	to.TreatyOffers = append(kept, TreatyOffer{From: from.Name, Type: ttype, Message: message})
-	w.SendMail(from, to, Message{
-		To:   w.EmpireLetter(to),
-		Body: fmt.Sprintf("Proposes a %s (respond in the Diplomacy menu).", ttype),
-	})
+	// A proposal mails nothing. The covering message rides on the offer and is
+	// shown with it; the mailbox is for messages the player sent through Send
+	// Message. Captured from a live game (cap/kd3-01.cap): one proposal carries
+	// an inline "Message attached:" block, the next has none, and the mail read
+	// moments later is an unrelated conversation. IB used to mail a generated
+	// "proposes a pact" line on every proposal, which told the target what the
+	// offer prompt had just asked them.
 }
 
 // PendingProposal is one treaty offer YOU sent that has not been answered yet.

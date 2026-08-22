@@ -69,7 +69,10 @@ func TestReviewTreatyOffersSilentWhenNone(t *testing.T) {
 	}
 }
 
-// An offer's attached message is shown to the recipient in the inline review.
+// An offer's covering message is shown with the offer, not mailed. Captured
+// live (cap/kd3-01.cap): the proposal line is followed by a "Message attached:"
+// block, and the next proposal, which carries none, goes straight to its
+// figures.
 func TestReviewTreatyOffersShowsAttachedMessage(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
