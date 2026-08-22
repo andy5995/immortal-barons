@@ -428,60 +428,56 @@ func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 		return b
 	}
 
+	// slashCommand answers the "/-Command?" prompt with the letter typed, upper-
+	// cased. It is reached from anywhere the cursor sits at column 1 — a fresh
+	// line, or a line backspaced empty again, which is the same place to the
+	// player. BRE tests the COLUMN, not whether a key has been typed yet
+	// (compose_message, BRE.OVR: `cmp word [bp-0x4],0x1` at 0x3A4 falls through
+	// to the `cmp byte [bp-0xb],0x2f` slash test at 0x3AD, and jumps to the
+	// ordinary-text path otherwise). IB peeked only the first key of a line, so
+	// backspacing to the start and typing /A left a literal "/a" in the message.
+	slashCommand := func() (rune, error) {
+		fmt.Fprintf(s, tr(s, "/-Command?")+"  [%sA%s,%sS%s,%sC%s] ",
+			ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset)
+		r, err := readKey(s)
+		if err != nil {
+			return 0, err
+		}
+		return unicode.ToUpper(r), nil
+	}
+
 	for len(lines) < msgMaxLines {
 		fmt.Fprintf(s, "%s%2d>%s ", ansi.FgBrightGreen, len(lines)+1, ansi.Reset)
 
-		// A '/' as the FIRST key of a line opens the command sub-menu right away
-		// — BRE reads key-by-key and reacts on the bare '/', so we peek the first
-		// key instead of reading a whole line. '/' anywhere else stays literal
-		// text (e.g. "line s /s"), so only the leading key is special.
-		first, err := readKey(s)
-		if err != nil {
-			return "", false
-		}
-		if first == '/' {
-			fmt.Fprintf(s, tr(s, "/-Command?")+"  [%sA%s,%sS%s,%sC%s] ",
-				ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset, ansi.FgBrightCyan, ansi.Reset)
-			r, err := readKey(s)
-			if err != nil {
-				return "", false
-			}
-			switch unicode.ToUpper(r) {
-			case 'A':
-				fmt.Fprintf(s, "%s\n", tr(s, "Abort"))
-				return "", false
-			case 'S':
-				fmt.Fprintf(s, "%s\n", tr(s, "Save"))
-				return trimTrailingBlank(lines), true
-			case 'C':
-				fmt.Fprintf(s, "%s\n", tr(s, "Clear"))
-				lines = nil
-			default:
-				fmt.Fprint(s, "\n")
-			}
-			continue
-		}
-		if first == '\r' || first == '\n' {
-			fmt.Fprint(s, "\n")
-			lines = append(lines, "")
-			continue
-		}
-
-		// Ordinary line: echo the first key, then read the rest until Enter. A
-		// control key is not text — backspace here is already at column 1, so it
-		// reaches the line above instead of starting this one with a stray byte.
 		var b []rune
-		switch {
-		case first >= 32:
-			b = append(b, first)
-			fmt.Fprintf(s, "%c", first)
-		case first == 127 || first == 8:
-			b = reopenPrev()
-		}
+		// restart abandons the line without recording it, after a command that
+		// left the editor open (Clear, or an unrecognized letter).
+		restart := false
 		for {
 			r, err := readKey(s)
 			if err != nil {
 				return "", false
+			}
+			if r == '/' && len(b) == 0 {
+				c, err := slashCommand()
+				if err != nil {
+					return "", false
+				}
+				switch c {
+				case 'A':
+					fmt.Fprintf(s, "%s\n", tr(s, "Abort"))
+					return "", false
+				case 'S':
+					fmt.Fprintf(s, "%s\n", tr(s, "Save"))
+					return trimTrailingBlank(lines), true
+				case 'C':
+					fmt.Fprintf(s, "%s\n", tr(s, "Clear"))
+					lines = nil
+				default:
+					fmt.Fprint(s, "\n")
+				}
+				restart = true
+				break
 			}
 			if r == '\r' || r == '\n' {
 				fmt.Fprint(s, "\n")
@@ -520,6 +516,9 @@ func composeMessageFrom(s session.Session, initial []string) (string, bool) {
 				b = append(b, r)
 				fmt.Fprintf(s, "%c", r)
 			}
+		}
+		if restart {
+			continue
 		}
 		lines = append(lines, string(b))
 	}

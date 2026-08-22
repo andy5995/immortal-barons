@@ -182,3 +182,49 @@ func TestComposeMessageBackspaceReopensThePreviousLine(t *testing.T) {
 		t.Errorf("text = %q, want %q", text, "aaaX")
 	}
 }
+
+// Backspacing a line empty puts the cursor back at column 1, where '/' is the
+// command key again. BRE tests the column (compose_message 0x3A4), not whether
+// the line has been typed into; IB peeked only a line's first key, so "/A" after
+// a backspace landed in the message as text.
+func TestComposeMessageSlashWorksAfterBackspacingToColumnOne(t *testing.T) {
+	for _, c := range []struct {
+		name     string
+		keys     string
+		wantSend bool
+		wantText string
+	}{
+		{"abort", "keep\rab\b\b/A", false, ""},
+		{"save", "keep\rab\b\b/S", true, "keep"},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			f := &fakeSession{keys: []rune(c.keys)}
+			text, send := composeMessage(f)
+			if !strings.Contains(f.out.String(), breRuler) {
+				t.Fatal("never reached the editor: the ruler was not drawn")
+			}
+			if send != c.wantSend {
+				t.Fatalf("send = %v, want %v (text %q)", send, c.wantSend, text)
+			}
+			if send && text != c.wantText {
+				t.Errorf("text = %q, want %q", text, c.wantText)
+			}
+			if strings.Contains(text, "/") {
+				t.Errorf("the command key was taken as text: %q", text)
+			}
+		})
+	}
+}
+
+// A backspace PAST column 1 still reopens the line above, and the reopened line
+// is not at column 1, so a '/' typed there is ordinary text.
+func TestComposeMessageSlashOnAReopenedLineIsText(t *testing.T) {
+	f := &fakeSession{keys: []rune("hi\r\b/s\r/S")}
+	text, send := composeMessage(f)
+	if !send {
+		t.Fatal("editor did not save")
+	}
+	if text != "hi/s" {
+		t.Errorf("text = %q, want %q", text, "hi/s")
+	}
+}
