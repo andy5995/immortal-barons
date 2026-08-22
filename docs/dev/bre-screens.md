@@ -45,6 +45,14 @@ header, then calls `process_trade_offer` (`0x3855`), `process_diplomatic_proposa
 `read_local_messages` (`0x3869`). So both offers precede the entries, and the
 trade barter precedes the treaty. IB had both the other way round.
 
+The same routine says **which of those stops a player out of turns still gets**:
+the two offer calls sit behind a turns-remaining test (`0x3842`), while the
+entries and the mailbox are called on either path (`0x385F`), and "Sorry, you
+have used all of your turns today." is only reached afterwards (`0x38D7` ->
+`0x3F8D`). So entering with no turns left shows the recap and the mail and asks
+nothing about pending offers. Neither stop has a per-day gate: a pending barter
+is put again on every entry that has a turn to play, which is what #175 asks.
+
 The **Covert Operations box width** was parked here too and is now settled: it
 was re-captured on 2026-08-17 with the log kept as `cap/covert-menu-20260817.cap`
 (32 columns; see that section).

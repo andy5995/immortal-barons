@@ -1089,3 +1089,35 @@ func TestNoCoordinatorNoticeOffLeague(t *testing.T) {
 		t.Errorf("a standalone board should say nothing about a Coordinator:\n%s", out)
 	}
 }
+
+// A player who has used every turn still gets their recap and their mailbox on
+// entering, and is not asked about pending offers. BRE gates process_trade_offer
+// and process_diplomatic_proposal on turns remaining (BRE.EXE 0x3842) but runs
+// write_data_report and read_local_messages either way (0x385F), reaching
+// "Sorry, you have used all of your turns today." only after them (0x3F8D).
+func TestOutOfTurnsStillShowsRecapAndMail(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.TurnsLeft = 0
+	rival := recipients(w)[0]
+	p.TradeDeals = []game.TradeDeal{{From: rival.Name}}
+	p.Mail = []game.Message{{From: "Postmaster", To: "A", When: "07/24/2026  09:00:00", Body: "hi"}}
+	p.Events = []game.Event{{Text: "A dragon attacked your regions."}}
+
+	// Recap pause, quit the mail reader, then the score-table pause.
+	f := &fakeSession{keys: []rune(" q ")}
+	runTurn(f, w)
+	out := f.out.String()
+
+	for _, marker := range []string{"dragon", "Postmaster", "used all of your turns"} {
+		if !strings.Contains(out, marker) {
+			t.Errorf("out of turns should still show %q, got:\n%s", marker, out)
+		}
+	}
+	if strings.Contains(out, "offers you a trade deal") {
+		t.Errorf("out of turns should not put the offer prompt, got:\n%s", out)
+	}
+	if len(w.Player().TradeDeals) != 1 {
+		t.Errorf("the deal should stay pending for a turn they can play, got %d", len(w.Player().TradeDeals))
+	}
+}

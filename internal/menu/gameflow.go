@@ -1046,6 +1046,13 @@ func runTurn(s session.Session, w *ctx) Result {
 		return abort()
 	}
 	if turnsLeft <= 0 {
+		// Out of turns still gets the recap and the mailbox, and skips the offer
+		// prompts. BRE gates process_trade_offer and process_diplomatic_proposal
+		// on turns remaining (BRE.EXE 0x3842) but runs write_data_report and
+		// read_local_messages either way (0x385F), reaching "Sorry, you have used
+		// all of your turns today." only afterwards (0x38D7 -> 0x3F8D).
+		showTurnEvents(s, w)
+		readTurnMail(s, w, true)
 		ok(s, "Sorry, you have used all of your turns today.")
 		seeScores(s, w)
 		return Stay
