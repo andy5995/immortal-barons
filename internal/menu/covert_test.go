@@ -75,10 +75,10 @@ func TestCovertMenuShowsBREItems(t *testing.T) {
 	}
 }
 
-// Bomb Enemy Targets is ONE flat covert op in BRE, not a submenu: the eight-item
-// bombing table is read by the interplanetary Special Operations menu alone
-// (BRE.OVR 0x029EA9, whose only caller is the InterBBS menu). Pressing 7 must
-// therefore reach the target picker, never a box of lettered variants.
+// Bomb Enemy Targets is ONE flat covert op in BRE, not a submenu: its resolver
+// rolls Random(6) and dispatches on the die through six branches of its own
+// (run_ai_covert_operations 0x04C3B4), reading no menu table at all. Pressing 7
+// must therefore reach the target picker, never a box of lettered variants.
 func TestBombEnemyTargetsIsNotASubmenu(t *testing.T) {
 	menus := BuildMenus()
 	f, _, err := run(t, "7\r0", menus.Covert)

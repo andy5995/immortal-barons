@@ -1399,8 +1399,16 @@ info ops pass `capped=false` and Expose Enemy Ops does not go through
 > same "nothing happened") rather than evidence. Re-testing it live would settle
 > what that session actually hit.
 
-**Bomb Enemy Targets is ONE op, and the bombing submenu is interplanetary.** The
-eight-item bombing table at `BRE.OVR 170011` is read by
+**Bomb Enemy Targets is ONE op, and the bombing submenu is interplanetary.**
+Settled from the LOCAL resolver, which is the direct evidence (#159): the
+digit-7 case in `run_ai_covert_operations` rolls `Random(6)` at `0x04C3B4` and
+dispatches on the result through six branches, each taking a band off one field
+— the table above. Six sub-targets chosen by the die, no menu, and no reading of
+the eight-item string table anywhere on the path. The ownership argument below
+points the same way and is kept because it settles who the eight items belong
+TO, but it is not what settles the local op.
+
+The eight-item bombing table at `BRE.OVR 170011` is read by
 `run_bombing_operations_menu` (`0x029EA9`) alone, and that procedure's only
 caller is `run_interbbs_menu` — so Bomb Food Market, Bomb Trading Market, Bomb
 Trade Routes, Undermine Investments, Nuclear Assault, Chemical Bombing, S3-Sabre
@@ -3056,8 +3064,7 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   damaging entries are in this order.
 
   **Not modelled:** the original rolls each agent against the covert odds and
-  only a winner lands; IB lands every committed agent. IB also reports a batch
-  the way the original does — one line carrying the count rather than one line
+  only a winner lands; IB lands every committed agent. IB also reports a batch the way the original does — one line carrying the count rather than one line
   per agent, which is what `ipreport.dat`'s `MULTI_`/`SINGLE_` template pair is
   for ("... %N times!"). Until this landed, IB ignored the operation and
   destroyed random units whichever of the nine was sent; a packet from a board
