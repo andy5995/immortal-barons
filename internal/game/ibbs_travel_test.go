@@ -109,3 +109,53 @@ func TestEchoOnlyPacketHasPayload(t *testing.T) {
 		t.Error("an empty packet reports a payload")
 	}
 }
+
+// TestTravelProbesOverlapWhenTheRoundTripIsSlow answers the question #169 could
+// not measure on a live rig without waiting real days: what the figure does when
+// a round trip outlasts the once-a-day probe interval.
+//
+// Nothing suppresses the next day's probe while an earlier one is still out, so
+// several are in flight at once. Each is measured against its OWN send time when
+// it comes home and folds into the average independently — none is lost, and
+// none is credited with another's elapsed time. A slow transport therefore shows
+// up as a large average rather than as a stalled screen.
+func TestTravelProbesOverlapWhenTheRoundTripIsSlow(t *testing.T) {
+	advance := holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	here := travelWorld("Nova Hub")
+	here.LeagueNodes = []LeagueNode{{Number: 2, Name: "The Eclipse"}}
+	there := travelWorld("The Eclipse")
+
+	// Three days of probing with nothing coming back yet. The game day is what
+	// gates a probe, so each day's maintenance date releases one.
+	var inFlight []Packet
+	for _, day := range []string{"2026-08-06", "2026-08-07", "2026-08-08"} {
+		here.LastMaintDate = day
+		here.PingTravelTimes()
+		if len(here.Outbox) != 1 {
+			t.Fatalf("day %s queued %d packets, want 1", day, len(here.Outbox))
+		}
+		inFlight = append(inFlight, here.Outbox[0])
+		here.Outbox = nil // the transport carried it
+		advance(24 * time.Hour)
+	}
+	if len(inFlight) != 3 {
+		t.Fatalf("%d probes went out over three days, want 3", len(inFlight))
+	}
+
+	// They all arrive at the far board on the fourth day, half a day after the
+	// last one was sent, and every echo comes straight home.
+	advance(-12 * time.Hour)
+	for i, p := range inFlight {
+		echo := there.ApplyPacket(p)
+		if len(echo.TimeChecks) != 1 {
+			t.Fatalf("probe %d was not echoed: %+v", i, echo.TimeChecks)
+		}
+		here.ApplyPacket(echo)
+	}
+
+	// Elapsed is 2.5, 1.5 and 0.5 days, each folded as avg = (avg + 2*new)/3:
+	// (0+5)/3 = 5/3, then (5/3+3)/3 = 14/9, then (14/9+1)/3 = 23/27.
+	if got, want := here.TravelTimes["The Eclipse"], 23.0/27.0; math.Abs(got-want) > 1e-9 {
+		t.Errorf("average after three overlapping round trips = %v days, want %v", got, want)
+	}
+}

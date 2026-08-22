@@ -356,6 +356,18 @@ dead: packets keep arriving at the polling board, its journal keeps reporting
 `Applied N packets`, and only the far side's outbound quietly grows without
 bound. Confirm both directions by looking at BOTH boards' inbound, never one.
 
+**`-planetary` does not run daily maintenance, and some mechanics are keyed to
+the GAME day rather than the wall clock.** Travel-time probes are the case that
+bites: `PingTravelTimes` fires once per `LastMaintDate`, maintenance advances
+that at most one day per REAL day (`internal/game/turn.go`), and nothing in an
+exchange script runs `-maint`. A rig with no callers therefore exchanges packets
+every fifteen minutes for days while queueing no probes at all — the boards here
+had gone 7 and 12 days between pings with all three timers healthy. Before
+concluding an inter-BBS mechanic is broken, check `LastMaintDate` against
+today's date; if it is behind, run `-maint` on each board and try again. One
+`-maint` buys one game day, so a board days behind needs one run per day to
+catch up and cannot be fast-forwarded in a single pass.
+
 **A board's timer must be retired with the board.** A timer left enabled for a
 retired board keeps running `-planetary` on its data and keeps polling, so a
 dead board goes on writing packets into a live one — which reads as ordinary
