@@ -450,6 +450,34 @@ and subtracts it here, looping until the pool is empty.
 through `+0xb6+2` and does **not** include this pool, so unallocated land is not
 territory until it is placed.
 
+### The trade-offer record and the routines around it
+
+The offers a realm has not answered live in ONE list shared by trade deals and
+diplomatic proposals — the head pointer is a resident global, each node carries a
+record type (1 = trade deal, 2 = treaty proposal) and a pointer to its payload.
+A trade-deal payload is 151 bytes with a CRC over the first 0x93 of them stored
+at `+0x93`, which `process_trade_offer` recomputes before trusting the record and
+which is what its "data tampered with" line reports.
+
+Fields read while settling this session's questions:
+
+- **`+0x5a` — when the deal lapses** (Real48). `create_trade_offer` adds the
+  chosen day count to the clock global at `0x8606` and stores the sum; the
+  turn-start sweep compares the two and deletes anything older.
+- **`+0x8` / `+0x9` — the two realms**, sender and target as slot bytes: `+0x8`
+  is who the outcome is reported to, `+0x9` indexes the target's record for the
+  identity check that follows.
+- **`+0x4` / `+0x6` — the target's identity**, matched against the record `+0x9`
+  points at and then against the player taking the turn, so a slot reused by a
+  new realm does not inherit the offer.
+
+Four routines in the trade unit were named from this pass:
+`calculate_trade_offer_cost` (the weighted sum of the nine goods that gives the
+per-day figure), `empire_trade_good_pointer` (slot + good index -> the count to
+adjust, used by both the escrow loop and every accept-branch transfer),
+`store_trade_offer_record`, and `pack_trade_offer_packets` (the daily-maintenance
+step that exports deals to other boards).
+
 ### A catalog name corrected
 
 `allocate_unassigned_regions` (`BRE.OVR 0x030ebb`) was catalogued as

@@ -1518,6 +1518,26 @@
       "confidence": "high",
       "evidence": ["repository_docs: trade offers are constructed and later processed as persistent records", "instruction_behavior: clears exactly one 0x97-byte trade-offer record", "call_graph: shared by create_trade_offer and process_trade_offer"]
     },
+    "0x050e1a": {
+      "name": "pack_trade_offer_packets",
+      "confidence": "medium",
+      "evidence": ["call_graph: sole caller is the daily-maintenance step announcing that trade deals are being packed", "instruction_behavior: walks the shared offer list, selects the trade-deal record type, checksums each record and passes it to the packet writer"]
+    },
+    "0x050f23": {
+      "name": "store_trade_offer_record",
+      "confidence": "medium",
+      "evidence": ["call_graph: called by create_trade_offer with the record it has just filled, after the sender is charged", "instruction_behavior: takes one record pointer and returns nothing"]
+    },
+    "0x051133": {
+      "name": "empire_trade_good_pointer",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: takes an empire slot and a 1..9 good index and returns a pointer whose target is read, adjusted and written straight back", "call_graph: used by create_trade_offer's escrow loop over the nine goods and by every transfer in process_trade_offer's accept branch"]
+    },
+    "0x0513e7": {
+      "name": "calculate_trade_offer_cost",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: sums the nine goods against fixed weights and returns the per-day figure the chosen span multiplies", "call_graph: called by create_trade_offer immediately before the Protective Trade divisor and the days prompt"]
+    },
     "0x051738": {
       "name": "format_planetary_relation",
       "confidence": "high",
