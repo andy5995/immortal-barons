@@ -3776,6 +3776,16 @@ trading half) are built: `SendTradeDeal` takes a full basket each way, escrows
 what is offered, consumes a transport carrier and charges the per-day transit
 fee (#17). Interplanetary trades and carrier-moved goods remain future work.
 
+**Neither the offer nor an answer is mail.** BRE carries
+" accepted your trade deal." and " rejected your trade deal." side by side in
+`process_trade_offer` (`BRE.OVR` 0x24D6B), each written to the other realm's
+record, so the answer is waiting on the proposer's recap whenever they next
+play — the same shape as a treaty answer (`notifyProposer`). IB filed only the
+acceptance, and as mail: a decline returned the escrow silently, leaving the
+proposer to notice their own stock coming back. The offer itself puts nothing
+in the mailbox either; the recipient meets it at turn start, as with a treaty
+proposal.
+
 ## News files (what BRE broadcasts)
 
 BRE keeps two planet-wide news feeds, populated from template files with random

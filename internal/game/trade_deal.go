@@ -190,10 +190,10 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	from.Carriers -= TradeDealCarriers // the transport carrier is consumed
 	from.Gold -= cost                  // pay the per-day transit fee
 	to.TradeDeals = append(to.TradeDeals, TradeDeal{From: from.Name, Send: send, Demand: demand})
-	w.SendMail(from, to, Message{
-		To:   w.EmpireLetter(to),
-		Body: "Sent you a trade deal (respond in the Trading menu).",
-	})
+	// The offer mails nothing: the recipient meets it at turn start, where the
+	// baskets and the accept prompt are. Same reason a treaty proposal stopped
+	// mailing (a1b309f) — a generated line telling them what the screen is
+	// already asking.
 	return nil
 }
 
@@ -236,11 +236,17 @@ func (w *World) AcceptTradeDeal(to *Empire, fromName string) error {
 	subBasket(to, d.Demand)     // recipient pays the demand
 	w.addBasket(from, d.Demand) // sender receives the demand
 	to.removeDeal(i)
-	w.SendMail(to, from, Message{
-		To:   w.EmpireLetter(from),
-		Body: "Accepted your trade deal.",
-	})
+	notifyTrader(from, to, "accepted")
 	return nil
+}
+
+// notifyTrader files the sender's answer on the proposer's recap: BRE holds both
+// " accepted your trade deal." and " rejected your trade deal."
+// (process_trade_offer, BRE.OVR 0x24D6B), each written to the other realm's
+// record rather than mailed, so the answer reaches them whenever they next play.
+// Same shape as notifyProposer for treaties.
+func notifyTrader(from, to *Empire, verb string) {
+	from.addEvent(fmt.Sprintf("%s %s your trade deal.", to.Name, verb))
 }
 
 // DeclineTradeDeal drops a pending deal and returns the escrowed Send goods to
@@ -253,6 +259,7 @@ func (w *World) DeclineTradeDeal(to *Empire, fromName string) bool {
 	d := to.TradeDeals[i]
 	if from := w.FindByName(fromName); from != nil {
 		w.addBasket(from, d.Send) // return the escrow
+		notifyTrader(from, to, "rejected")
 	}
 	to.removeDeal(i)
 	return true

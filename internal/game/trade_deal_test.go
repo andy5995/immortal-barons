@@ -240,3 +240,44 @@ func TestProtectiveTradeDiscountsTheScaledRate(t *testing.T) {
 		}
 	}
 }
+
+// Both answers reach the proposer on their recap, and neither the offer nor an
+// answer goes to the mailbox.
+func TestTradeDealAnswersAreFiledOnTheProposersRecap(t *testing.T) {
+	for _, tc := range []struct {
+		name   string
+		answer func(w *World, to *Empire)
+		want   string
+	}{
+		{"accept", func(w *World, to *Empire) { w.AcceptTradeDeal(to, "Fromland") }, "Toland accepted your trade deal."},
+		{"decline", func(w *World, to *Empire) { w.DeclineTradeDeal(to, "Fromland") }, "Toland rejected your trade deal."},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			w := NewWorldSeed(DefaultConfig(), 1)
+			from := w.AddHuman("f", "Fromland")
+			to := w.AddHuman("t", "Toland")
+			pastProtection(w)
+			pactAll(w, fullDefenseAlliance)
+			from.Tanks, from.Carriers, from.Gold = 500, 1, 300_000
+			to.Gold = 100_000
+
+			if err := w.SendTradeDeal(from, to, TradeBasket{Tanks: 100}, TradeBasket{Gold: 5_000}, TradeDealMinDays); err != nil {
+				t.Fatalf("send: %v", err)
+			}
+			if len(to.Mail) != 0 {
+				t.Errorf("the offer should mail nothing; got %d message(s)", len(to.Mail))
+			}
+			before := len(from.Events)
+			tc.answer(w, to)
+			if len(from.Mail) != 0 {
+				t.Errorf("the answer should mail nothing; got %d message(s)", len(from.Mail))
+			}
+			if len(from.Events) != before+1 {
+				t.Fatalf("proposer should get one recap entry, got %d", len(from.Events)-before)
+			}
+			if got := from.Events[before].Text; got != tc.want {
+				t.Errorf("recap entry = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
