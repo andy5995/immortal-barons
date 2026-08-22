@@ -455,3 +455,32 @@ func TestPreNameKeyedMarketRowsAreDropped(t *testing.T) {
 		}
 	}
 }
+
+// A save that predates per-realm preferences carries them on the world,
+// or — like the frozen v0.0.3 fixture — does not carry them at all. Either way
+// every realm in it must come out of the load with a usable set, because a zero
+// Prefs would silently turn Auto-Pay and Auto-Feed off for players who never
+// asked for that.
+func TestPreferencesMigrateOntoEveryRealm(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	fixture, err := os.ReadFile("testdata/world-v0.0.3.json")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(cfg.DataDir, "world.json"), fixture, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	w, err := Load(cfg)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(w.Empires) == 0 {
+		t.Fatal("fixture has no empires to migrate")
+	}
+	for _, e := range w.Empires {
+		if got, want := e.Prefs, game.DefaultPrefs(); got != want {
+			t.Errorf("%s: prefs = %+v, want the defaults %+v", e.Name, got, want)
+		}
+	}
+}

@@ -158,11 +158,11 @@ func TestPaymentStageVanishedEmpireConflict(t *testing.T) {
 	addDecoy(t, cfg, decoyGold, 0)
 
 	_ = b.Player() // gather node B's realm (caches the pointer)
-	// Another node removes alice and turns Auto-Pay on for the whole world, so the
+	// Another node removes alice and turns Auto-Pay on for the DECOY, so the
 	// stale-pointer path would silently auto-pay the decoy's maintenance.
 	commitOnFile(t, cfg, func(w *game.World) {
 		w.RemoveEmpire(w.FindByOwner("alice"))
-		w.AutoPayMaint = true
+		w.FindByOwner("decoy").Prefs.AutoPayMaint = true
 	})
 
 	fb := &fakeSession{}

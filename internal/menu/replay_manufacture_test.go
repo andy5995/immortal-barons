@@ -20,8 +20,8 @@ func TestReplayDoesNotDoubleManufactureOrAdvanceTurn(t *testing.T) {
 	p.Support, p.Morale = 100, 100 // no support/morale boost prompts
 	p.Agents = 0                   // skip the covert stage
 	p.TurnsLeft = 5
-	w.AutoPayMaint = true
-	w.AutoFeed = true
+	w.Player().Prefs.AutoPayMaint = true
+	w.Player().Prefs.AutoFeed = true
 
 	turnsBefore := p.TurnsLeft
 

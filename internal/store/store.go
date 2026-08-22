@@ -65,6 +65,7 @@ func repair(w *game.World, cfg game.Config) {
 		e.EnsureProduction()
 	}
 	w.EnsureInvestRate()
+	w.EnsurePrefs() // older saves keep the preferences on the world
 	w.EnsurePirates()
 	w.EnsureTreaties()
 	w.EnsureMarket()

@@ -2639,6 +2639,30 @@ IB matches all of it.
   of its barons and drops whatever is left over, which was addressable by nobody
   in any case.
 
+### Preferences belong to the player, not to the board
+
+The seven Preferences toggles — the three Visit-menu skips, Enter-exits-BUY,
+end-of-turn deposit, Auto-Pay Maintenance and Auto-Feed — are one player's own
+settings, held on `Empire.Prefs`.
+
+BRE keeps them the same way, and the disassembly says so outright rather than
+the manual: the Auto-Pay flag is read as `cmp byte [es:di+0x339],0` with `es:di`
+on the empire record (see "Auto-Pay Maintenance bypasses itself" above), so the
+preference is a field inside the player, at record offset `+0x339`.
+
+IB held all seven on the `World` until this was corrected, which made them the
+board's: every caller on a BBS shared one set, and each player's choices
+overwrote the last player's. The world-level fields survive as migration input
+only — `World.EnsurePrefs`, run from `store.repair` on every load, copies them
+onto any realm that has not got its own yet, so a board that upgrades mid-season
+keeps the settings it was playing with.
+
+Defaults for a new realm are IB's, not BRE's: BRE opens with the three Visit
+menus and the two buy/deposit toggles on and the two automations off, so an
+untouched realm walks through every optional menu and answers the same
+maintenance and food prompts by hand each turn. IB starts with the walk-through
+menus off and the automations on.
+
 ### Renaming a realm (IB's own; BRE has none)
 
 A realm may be renamed **once**, from the Preferences menu, and never again.

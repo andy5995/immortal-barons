@@ -261,11 +261,11 @@ func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 	menus := BuildMenus()
 	f := &fakeSession{keys: []rune("P7")} // P = Preferences, 7 = Auto-Feed Empire
 	w := newWorld()
-	w.AutoFeed = false // default is on, so toggle it off first and expect it back on
+	w.Player().Prefs.AutoFeed = false // default is on, so toggle it off first and expect it back on
 	if err := Run(f, w, menus.System); err != io.EOF {
 		t.Fatalf("expected EOF after script, got %v", err)
 	}
-	if !w.AutoFeed {
+	if !w.Player().Prefs.AutoFeed {
 		t.Error("Auto-feed should be ON after toggling")
 	}
 }
@@ -274,14 +274,14 @@ func TestPreferenceToggleViaSystemMenu(t *testing.T) {
 // bracketed [ON]/[OFF] (verified against a live BRE Preferences capture).
 func TestPreferenceLabelUsesBareYesNo(t *testing.T) {
 	w := newWorld()
-	label := onOff("Auto-Feed Empire", func(g *ctx) *bool { return &g.AutoFeed })
+	label := onOff("Auto-Feed Empire", func(g *ctx) *bool { return &g.prefs().AutoFeed })
 
-	w.AutoFeed = true
+	w.Player().Prefs.AutoFeed = true
 	on := label(w)
 	if !strings.Contains(on, "Yes") || strings.ContainsAny(on, "[]") || strings.Contains(on, "ON") {
 		t.Errorf("enabled pref should read bare 'Yes', got %q", on)
 	}
-	w.AutoFeed = false
+	w.Player().Prefs.AutoFeed = false
 	off := label(w)
 	if !strings.Contains(off, "No") || strings.ContainsAny(off, "[]") {
 		t.Errorf("disabled pref should read bare 'No', got %q", off)
@@ -605,7 +605,7 @@ func TestPromptSuggestedExpandsKAndM(t *testing.T) {
 
 func TestEnterExitsWhenPrefOn(t *testing.T) {
 	w := newWorld()
-	w.EnterExitsBuy = true
+	w.Player().Prefs.EnterExitsBuy = true
 	m := &Menu{ExitOnEnter: true, Items: []Item{
 		{Key: '1', Label: "Buy", Do: func(session.Session, *ctx) Result { return Stay }},
 		{Key: '0', Label: "Quit", Do: back},
@@ -622,7 +622,7 @@ func TestEnterExitsWhenPrefOn(t *testing.T) {
 
 func TestEnterIgnoredWhenPrefOff(t *testing.T) {
 	w := newWorld()
-	w.EnterExitsBuy = false
+	w.Player().Prefs.EnterExitsBuy = false
 	m := &Menu{ExitOnEnter: true, Items: []Item{{Key: '0', Label: "Quit", Do: back}}}
 	f := &fakeSession{keys: []rune{'\r'}}
 	if it, _ := m.readChoice(f, w); it != nil {
@@ -736,7 +736,7 @@ func TestEnterExitsSpendingRespectsPreference(t *testing.T) {
 	menus := BuildMenus()
 
 	w := newWorld()
-	w.EnterExitsBuy = true
+	w.Player().Prefs.EnterExitsBuy = true
 	if it, err := menus.Spending.readChoice(&fakeSession{keys: []rune{'\r'}}, w); err != nil {
 		t.Fatal(err)
 	} else if it == nil || it.Key != '0' {
@@ -744,7 +744,7 @@ func TestEnterExitsSpendingRespectsPreference(t *testing.T) {
 	}
 
 	w2 := newWorld()
-	w2.EnterExitsBuy = false
+	w2.Player().Prefs.EnterExitsBuy = false
 	// With the pref off, Enter is not the default, so it's ignored (not treated as
 	// Quit) and the next real key is what selects: feed Enter then '0'.
 	if it, err := menus.Spending.readChoice(&fakeSession{keys: []rune{'\r', '0'}}, w2); err != nil {

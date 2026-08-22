@@ -44,6 +44,8 @@ type ctx struct {
 	// takeSessionNews.
 	seenEvents    int
 	seenEventsSet bool
+	// noRealmPrefs backs ctx.prefs() when there is no active realm; see there.
+	noRealmPrefs *game.Prefs
 	Term
 }
 
@@ -65,6 +67,20 @@ type Term struct {
 	// needs a plain alternative. Negative so the zero value is the capable,
 	// ordinary case.
 	Plain bool
+}
+
+// prefs is the active player's own settings. A session with no realm — one that
+// abdicated and is on its way out — still draws menus, so it falls back to a
+// scratch copy of the defaults rather than dereferencing a nil empire.
+func (c *ctx) prefs() *game.Prefs {
+	if p := c.Player(); p != nil {
+		return &p.Prefs
+	}
+	if c.noRealmPrefs == nil {
+		d := game.DefaultPrefs()
+		c.noRealmPrefs = &d
+	}
+	return c.noRealmPrefs
 }
 
 // Player is the active empire for this session (nil before onboarding / after
@@ -349,7 +365,7 @@ func (m *Menu) readChoice(s session.Session, g *ctx) (*Item, error) {
 	g.With(func() {
 		if m.DefaultOnEnter != nil {
 			def = m.DefaultOnEnter(g)
-		} else if g.EnterExitsBuy && m.ExitOnEnter {
+		} else if g.prefs().EnterExitsBuy && m.ExitOnEnter {
 			def = m.byKey('0', g)
 		}
 		if def != nil {

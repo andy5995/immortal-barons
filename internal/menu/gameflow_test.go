@@ -197,7 +197,7 @@ func TestIncomeReportSurfacesAndClearsPirateRaids(t *testing.T) {
 func TestPaymentStageAutoPays(t *testing.T) {
 	f := &fakeSession{}
 	w := newWorld()
-	w.AutoPayMaint = true
+	w.Player().Prefs.AutoPayMaint = true
 	p := w.Player()
 	p.Gold = 100000
 	before := p.Gold
@@ -222,7 +222,7 @@ func TestPaymentStageAutoPays(t *testing.T) {
 func TestPaymentStageBypassesAutoPayOnLowSupport(t *testing.T) {
 	f := &fakeSession{keys: []rune("n\r\r\r\r")} // decline bank, accept forces/regions/crown tax, accept the support-boost prompt
 	w := newWorld()
-	w.AutoPayMaint = true
+	w.Player().Prefs.AutoPayMaint = true
 	p := w.Player()
 	p.Gold = 1_000_000
 	p.Support = 50
@@ -243,7 +243,7 @@ func TestPaymentStageBypassesAutoPayOnLowSupport(t *testing.T) {
 func TestPaymentStageBypassesAutoPayOnLowMorale(t *testing.T) {
 	f := &fakeSession{keys: []rune("n\r\r\r\r")} // decline bank, accept forces/regions/crown tax, accept the morale-boost prompt
 	w := newWorld()
-	w.AutoPayMaint = true
+	w.Player().Prefs.AutoPayMaint = true
 	p := w.Player()
 	p.Gold = 1_000_000
 	p.Morale = 50
@@ -266,7 +266,7 @@ func TestPaymentStageBypassesAutoPayOnLowMorale(t *testing.T) {
 func TestPaymentStageBypassesAutoPayOnWaste(t *testing.T) {
 	f := &fakeSession{keys: []rune("n\r\r\r\r")} // decline bank, accept forces/regions/crown tax, accept the decontamination offer
 	w := newWorld()
-	w.AutoPayMaint = true
+	w.Player().Prefs.AutoPayMaint = true
 	p := w.Player()
 	p.Gold = 1_000_000
 	p.Regions.Waste = 50
@@ -285,7 +285,7 @@ func TestPaymentStageBypassesAutoPayOnWaste(t *testing.T) {
 func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
 	f := &fakeSession{keys: []rune("n\r\r\r")} // decline bank, accept suggested (full) for forces, regions, crown tax
 	w := newWorld()
-	w.AutoPayMaint = false
+	w.Player().Prefs.AutoPayMaint = false
 	p := w.Player()
 	p.Gold = 100000
 	p.Support = 100 // skips the optional support-boost prompt
@@ -306,7 +306,7 @@ func TestPaymentStageManualFullPayNoDesertion(t *testing.T) {
 func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 	f := &fakeSession{keys: []rune("n0\r0\r0\r")} // decline bank, give 0 to forces, regions and crown tax
 	w := newWorld()
-	w.AutoPayMaint = false
+	w.Player().Prefs.AutoPayMaint = false
 	p := w.Player()
 	p.Gold = 100000
 	p.Support = 100
@@ -332,7 +332,7 @@ func TestRunTurnConsumesATurn(t *testing.T) {
 	keys := "    00n"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
-	w.AutoPayMaint = true // pay maintenance silently; this test is about the turn loop
+	w.Player().Prefs.AutoPayMaint = true // pay maintenance silently; this test is about the turn loop
 	left := w.Player().TurnsLeft
 	runTurn(f, w)
 	if w.Player().TurnsLeft != left-1 {
@@ -353,8 +353,8 @@ func TestRunTurnCovertGatedBeforeSpending(t *testing.T) {
 	// With an agent, Covert Operations appears before the Spending Menu.
 	f := &fakeSession{keys: []rune("0\r   0000nn")}
 	w := newWorld()
-	w.AutoPayMaint = true
-	w.VisitCovert, w.VisitTrading, w.VisitMessage = true, true, true // this test walks every optional menu
+	w.Player().Prefs.AutoPayMaint = true
+	w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = true, true, true // this test walks every optional menu
 	w.Player().Agents = 1
 	runTurn(f, w)
 	out := f.out.String()
@@ -369,8 +369,8 @@ func TestRunTurnCovertGatedBeforeSpending(t *testing.T) {
 	// With no agent, the Covert stage is skipped (one fewer menu to quit).
 	f2 := &fakeSession{keys: []rune("0\r   000nn")}
 	w2 := newWorld()
-	w2.AutoPayMaint = true
-	w2.VisitCovert, w2.VisitTrading, w2.VisitMessage = true, true, true
+	w2.Player().Prefs.AutoPayMaint = true
+	w2.Player().Prefs.VisitCovert, w2.Player().Prefs.VisitTrading, w2.Player().Prefs.VisitMessage = true, true, true
 	w2.Player().Agents = 0
 	runTurn(f2, w2)
 	out2 := f2.out.String()
@@ -392,9 +392,9 @@ func TestRunTurnHasNoPreTurnDiplomacyOrProduction(t *testing.T) {
 	keys := " 0\r   0000nn" // leading pause for the non-empty event log
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
-	w.AutoPayMaint = true
-	w.VisitCovert, w.VisitTrading, w.VisitMessage = true, true, true // this test walks every optional menu
-	w.Player().Agents = 1                                            // hold an agent so the Covert stage runs (it now gates on that)
+	w.Player().Prefs.AutoPayMaint = true
+	w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = true, true, true // this test walks every optional menu
+	w.Player().Agents = 1                                                                                         // hold an agent so the Covert stage runs (it now gates on that)
 	w.Player().Events = []game.Event{{Text: "A dragon attacked your regions."}}
 
 	runTurn(f, w)
@@ -429,9 +429,9 @@ func TestRunTurnPlaysTwoTurnsWithoutDiplomacy(t *testing.T) {
 	keys := " " + perTurn + "y" + perTurn + "n"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
-	w.AutoPayMaint = true
-	w.VisitCovert, w.VisitTrading, w.VisitMessage = true, true, true // this test walks every optional menu
-	w.Player().Agents = 1                                            // hold an agent so the Covert stage runs (it now gates on that)
+	w.Player().Prefs.AutoPayMaint = true
+	w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = true, true, true // this test walks every optional menu
+	w.Player().Agents = 1                                                                                         // hold an agent so the Covert stage runs (it now gates on that)
 	left := w.Player().TurnsLeft
 
 	runTurn(f, w)
@@ -649,7 +649,7 @@ func TestShowBulletinEmptyNewsShowsNoBulletinsNote(t *testing.T) {
 // player can buy food before their people starve (the old bug: nothing did).
 func TestFeedStageAutoFeedOpensMarketWhenShort(t *testing.T) {
 	w := newWorld()
-	w.AutoFeed = true
+	w.Player().Prefs.AutoFeed = true
 	p := w.Player()
 	p.Food = 0
 	p.People = 100000                       // ensures FoodUpkeep > 0
@@ -671,7 +671,7 @@ func TestFeedStageAutoFeedOpensMarketWhenShort(t *testing.T) {
 // still raise the disastrous-results reconsider.
 func TestFeedStageAsksForPeopleAndForcesSeparately(t *testing.T) {
 	w := newWorld()
-	w.AutoFeed = true
+	w.Player().Prefs.AutoFeed = true
 	p := w.Player()
 	p.People = 100000 // eats 7,500
 	p.Turrets = 500000
@@ -701,7 +701,7 @@ func TestFeedStageAsksForPeopleAndForcesSeparately(t *testing.T) {
 
 func TestFeedStageNoNoticeWhenFed(t *testing.T) {
 	w := newWorld()
-	w.AutoFeed = true
+	w.Player().Prefs.AutoFeed = true
 	w.Player().Food = 10_000_000 // far more than needed
 	f := &fakeSession{}
 	if err := feedStage(f, w, BuildMenus().Food); err != nil {
@@ -714,7 +714,7 @@ func TestFeedStageNoNoticeWhenFed(t *testing.T) {
 
 func TestFeedStageWarnsButNoMarketWhenAutoFeedOff(t *testing.T) {
 	w := newWorld()
-	w.AutoFeed = false
+	w.Player().Prefs.AutoFeed = false
 	p := w.Player()
 	p.Food = 0
 	p.People = 100000
@@ -758,7 +758,7 @@ func TestBulletinNamesTheBoardOnlyInALeague(t *testing.T) {
 // never sees offers or mail again.
 func TestRunTurnSurfacesOffersDealsAndMail(t *testing.T) {
 	w := newWorld()
-	w.AutoPayMaint = true
+	w.Player().Prefs.AutoPayMaint = true
 	rival := recipients(w)[0]
 	w.World.ProposeTreaty(rival, w.Player(), "Free Trade Agreement")
 	w.Player().TradeDeals = []game.TradeDeal{{From: rival.Name}}
@@ -793,8 +793,8 @@ func TestQueenRefundPaidOncePerDay(t *testing.T) {
 	keys := perTurn + "y" + perTurn + "n"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
-	w.AutoPayMaint = true
-	w.VisitCovert, w.VisitTrading, w.VisitMessage = true, true, true
+	w.Player().Prefs.AutoPayMaint = true
+	w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = true, true, true
 	w.Player().Agents = 1
 	w.Player().Protection = 0
 	w.RefundPool = 500_000
@@ -946,8 +946,8 @@ func TestManufacturedUnitsAreListedOnce(t *testing.T) {
 func TestLotteryOfferComesWithTheDaysFirstTurn(t *testing.T) {
 	w := newWorld()
 	w.World.Config.Lottery = true
-	w.AutoPayMaint = true
-	w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+	w.Player().Prefs.AutoPayMaint = true
+	w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = false, false, false
 	p := w.Player()
 	p.Protection = 0
 	p.Gold = 50_000
@@ -980,8 +980,8 @@ func TestLotteryOfferComesWithTheDaysFirstTurn(t *testing.T) {
 func TestNoLotteryOfferWithoutThePrice(t *testing.T) {
 	w := newWorld()
 	w.World.Config.Lottery = true
-	w.AutoPayMaint = true
-	w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+	w.Player().Prefs.AutoPayMaint = true
+	w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = false, false, false
 	p := w.Player()
 	p.Protection = 0
 	p.Gold = game.LotteryTicketPrice - 1
@@ -1008,8 +1008,8 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 
 	t.Run("holds the office", func(t *testing.T) {
 		w := leagueCtx(t)
-		w.AutoPayMaint = true
-		w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+		w.Player().Prefs.AutoPayMaint = true
+		w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = false, false, false
 		f := &fakeSession{keys: []rune(perTurn)}
 		runTurn(f, w)
 		out := stripANSI(f.out.String())
@@ -1023,8 +1023,8 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 
 	t.Run("voted for someone else", func(t *testing.T) {
 		w := leagueCtx(t)
-		w.AutoPayMaint = true
-		w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+		w.Player().Prefs.AutoPayMaint = true
+		w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = false, false, false
 		// An AI baron holds no BBS handle, so the vote needs a second human.
 		other := w.AddHuman("rival", "Rivalia")
 		w.VoteCoordinator(w.Player(), other.Owner)
@@ -1044,8 +1044,8 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 
 	t.Run("a protected realm gets the same line", func(t *testing.T) {
 		w := leagueCtx(t)
-		w.AutoPayMaint = true
-		w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+		w.Player().Prefs.AutoPayMaint = true
+		w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = false, false, false
 		other := w.AddHuman("rival", "Rivalia")
 		w.VoteCoordinator(w.Player(), other.Owner)
 		w.Player().Protection = 5
@@ -1062,8 +1062,8 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 
 	t.Run("has not voted", func(t *testing.T) {
 		w := leagueCtx(t)
-		w.AutoPayMaint = true
-		w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+		w.Player().Prefs.AutoPayMaint = true
+		w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = false, false, false
 		for _, e := range w.Empires {
 			e.CoordinatorVote = ""
 		}
@@ -1081,8 +1081,8 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 // Outside a league there is no Coordinator and no notice.
 func TestNoCoordinatorNoticeOffLeague(t *testing.T) {
 	w := newWorld()
-	w.AutoPayMaint = true
-	w.VisitCovert, w.VisitTrading, w.VisitMessage = false, false, false
+	w.Player().Prefs.AutoPayMaint = true
+	w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = false, false, false
 	f := &fakeSession{keys: []rune("   0000n0")}
 	runTurn(f, w)
 	if out := stripANSI(f.out.String()); strings.Contains(out, "BBS Coordinator") {

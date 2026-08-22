@@ -63,6 +63,9 @@ func VersionString() string {
 
 type Empire struct {
 	Name string
+	// Prefs are this player's own menu settings; see prefs.go. Held per realm
+	// rather than per board.
+	Prefs Prefs
 	// FormerName is the name this realm carried before its one permitted rename
 	// (see RenameEmpire), and "" for a realm that has never been renamed — which
 	// is also what makes the rename once-only. It stays readable for the realm's
@@ -762,8 +765,9 @@ type World struct {
 	// binding nothing and never sent anywhere. See ibbs_diplomacy.go.
 	PlanetDiplomacy map[string]PlanetRelation
 
-	// Player preferences (kept on the world for now; per-empire is a later
-	// refinement). Referenced by the Preferences menu.
+	// Player preferences, kept here only so an older save can be
+	// migrated: EnsurePrefs copies them onto each realm, and nothing reads them
+	// afterwards. New code wants Empire.Prefs.
 	EnterExitsBuy  bool
 	DepositEndTurn bool
 	AutoPayMaint   bool
@@ -855,19 +859,13 @@ func (w *World) initFreshGame() {
 	w.SpyDatabase = nil
 	w.LeagueDiplomacy = ""
 	w.PlanetDiplomacy = nil
-	// Preferences, in the order the Preferences menu lists them. These are IB's
-	// defaults, not BRE's: BRE opens with the three Visit menus and the two buy/
-	// deposit toggles on and the two automations off, so an untouched realm walks
-	// through every optional menu and answers the same maintenance and food
-	// prompts by hand each turn. IB starts with the walk-through menus off and
-	// the automations on, leaving the prompts to players who turn them back on.
-	w.VisitCovert = false
-	w.VisitTrading = false
-	w.VisitMessage = false
-	w.EnterExitsBuy = false
-	w.DepositEndTurn = true
-	w.AutoPayMaint = true
-	w.AutoFeed = true
+	// The world's own copies are migration input for older saves (see
+	// prefs.go). A fresh world has no realm to migrate, so they simply hold the
+	// same defaults every new realm is founded on.
+	d := DefaultPrefs()
+	w.VisitCovert, w.VisitTrading, w.VisitMessage = d.VisitCovert, d.VisitTrading, d.VisitMessage
+	w.EnterExitsBuy, w.DepositEndTurn = d.EnterExitsBuy, d.DepositEndTurn
+	w.AutoPayMaint, w.AutoFeed = d.AutoPayMaint, d.AutoFeed
 	w.seedAIEmpires()
 	w.Pirates = nil
 	w.EnsurePirates() // a no-op when the sysop has turned pirates off
@@ -1062,6 +1060,7 @@ func newEmpire(name, owner string, cfg Config, day int) *Empire {
 		ProdBombers: DefaultProdBombersPct, ProdTanks: DefaultProdTanksPct, ProdCarriers: DefaultProdCarriersPct,
 		ProdGold:        DefaultProdGoldPct,
 		ProdInitialized: true, // so a player's later all-zero setting isn't overwritten
+		Prefs:           DefaultPrefs(),
 	}
 }
 

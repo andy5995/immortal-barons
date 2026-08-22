@@ -579,7 +579,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		sdi = w.SDIMaintenance(p)
 		crown = w.World.CrownTax(p)
 		gold = p.Gold
-		autoPay = w.AutoPayMaint
+		autoPay = p.Prefs.AutoPayMaint
 		support = p.Support
 		morale = p.Morale
 		waste = p.Regions.Waste
@@ -798,7 +798,7 @@ func spoilsStage(s session.Session, w *ctx) {
 func feedStage(s session.Session, w *ctx, food *Menu) error {
 	people, forces, have, autoFeed := 0, 0, 0, false
 	if !withPlayer(w, func(p *game.Empire) {
-		people, forces, have, autoFeed = p.PeopleFoodUpkeep(), w.ForcesFoodDue(p), p.Food, w.AutoFeed
+		people, forces, have, autoFeed = p.PeopleFoodUpkeep(), w.ForcesFoodDue(p), p.Food, p.Prefs.AutoFeed
 	}) {
 		return nil // realm gone; the caller's next withPlayer aborts the turn
 	}
@@ -1110,7 +1110,7 @@ func runTurn(s session.Session, w *ctx) Result {
 		// BRE's turn order (Payment/Food Market -> Covert -> Spending). Shown only
 		// when the player keeps the step on (Preferences) AND holds at least one
 		// covert agent to act with — a fresh realm starts with none.
-		if w.VisitCovert {
+		if w.prefs().VisitCovert {
 			var agents int
 			if !withPlayer(w, func(p *game.Empire) { agents = p.Agents }) {
 				return abort()
@@ -1137,7 +1137,7 @@ func runTurn(s session.Session, w *ctx) Result {
 			func() error { return Run(s, w, menus.Attack) }); err != nil {
 			return Stay
 		}
-		if w.VisitTrading {
+		if w.prefs().VisitTrading {
 			if err := runStageOnce(w,
 				func(tp game.TurnProgress) bool { return tp.TradingDone },
 				func(tp *game.TurnProgress) { tp.TradingDone = true },
@@ -1154,7 +1154,7 @@ func runTurn(s session.Session, w *ctx) Result {
 				return Stay
 			}
 		}
-		if w.VisitMessage {
+		if w.prefs().VisitMessage {
 			_ = runStageOnce(w,
 				func(tp game.TurnProgress) bool { return tp.MessageDone },
 				func(tp *game.TurnProgress) { tp.MessageDone = true },
@@ -1168,7 +1168,7 @@ func runTurn(s session.Session, w *ctx) Result {
 
 		if !withPlayer(w, func(p *game.Empire) {
 			w.World.PlayTurn(p, w.Today)
-			if w.DepositEndTurn && p.Gold > 0 {
+			if p.Prefs.DepositEndTurn && p.Gold > 0 {
 				w.World.Deposit(p, p.Gold)
 			}
 		}) {

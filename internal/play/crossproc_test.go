@@ -51,10 +51,8 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 	dir := t.TempDir()
 	cfg := cfgIn(dir)
 	seed := game.NewWorld(cfg)
-	seed.AutoPayMaint = true
-	seed.VisitCovert = false
-	seed.VisitTrading = false
-	seed.VisitMessage = false
+	// Auto-Pay on and the three Visit menus off is what a new realm is founded
+	// with (game.DefaultPrefs), so the script below needs no preference setup.
 	// A non-empty purse makes the Queen's refund fire on the first turn, so its
 	// pause is always in the script below rather than depending on how much tax
 	// the computer barons happen to have paid.

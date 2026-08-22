@@ -77,7 +77,7 @@ func TestPaymentStageNotRechargedOnReplay(t *testing.T) {
 	p := w.Player()
 	p.Gold = 5_000_000
 	p.Troopers, p.Land = 700, 100
-	w.AutoPayMaint = true
+	w.Player().Prefs.AutoPayMaint = true
 
 	paymentStage(&fakeSession{}, w, BuildMenus().Bank)
 	if !p.TurnProgress.MaintPaid {
