@@ -26,8 +26,15 @@ A trade deal is an offer to one realm. You put goods and gold in it, and you
 may ask for goods and gold in return. The other realm reads the offer and
 accepts or refuses it. You need a treaty with that realm to send one.
 
-A trade deal costs a fee, and it needs a spare carrier to move the goods. A
-Protective Trade treaty with that realm makes the fee cheaper.
+A trade deal costs a fee for each day you send it for, and it needs a spare
+carrier to move the goods. A Protective Trade treaty with that realm makes
+the fee cheaper.
+
+The days you pay for are how long the offer stands. What you put in the deal
+leaves your realm the moment you send it, and it comes back only if the
+offer is accepted: a refusal, a deal nobody answers before its days run out,
+and a realm that falls before it replies all cost you the goods. Send to
+someone who is playing, and give them enough days to get to it.
 
 ## Getting the most from trade
 

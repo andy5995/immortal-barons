@@ -3030,10 +3030,39 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   the same items except Join Group Attack, which it still refuses; whether the
   original really lets a sheltered realm join someone else's group attack, or
   refuses it further in, is untested here.
-- **Terrorist Ops** — a force-destroying strike (not intel). Commit agents; the
-  op is queued and resolves on the target board's next packet run. Each agent is
-  one hit that removes ~1/`TerrorUnitLossDenom` (7, from BRE's disassembled 6/7
-  ratio) of one randomly chosen unit type. New Realm Protection blocks it.
+- **Terrorist Ops — the nine operations differ, BINARY-VERIFIED (#166).** Commit
+  agents; the op is queued and resolves on the target board's next packet run,
+  where `resolve_received_covert_operation` (`BRE.OVR` 0x04a96b) dispatches on the
+  operation byte the packet carried. New Realm Protection blocks the lot. What
+  each one does to the target, per agent that lands:
+
+  | # | Operation | Field | Effect | Branch |
+  |---|-----------|-------|--------|--------|
+  | 1 | Send Spy | — | takes intelligence, costs the target nothing | 0x3F0 |
+  | 2 | Bomb Intelligence Agencies | agents `+0x26F` | −(2 + `Random(3)`)% | 0x56A |
+  | 3 | Demoralize Forces | morale `+0x8E` | × 6/7 | 0x5E9 |
+  | 4 | Cause Dissensions | troopers `+0x76` | −(2 + `Random(3)`)% | 0x63C |
+  | 5 | Bomb Air Bases | jets `+0x7E` | −(3 + `Random(5)`)% | 0x6BB |
+  | 6 | Stir Emigrations | population `+0x62` | −(4 + `Random(7)`)% | 0x73A |
+  | 7 | Spread Propaganda | support `+0x92` | × 11/13 | 0x7B9 |
+  | 8 | Bomb Food Storages | food `+0x6E` | −`Random(30)`% | 0x80C |
+  | 9 | Sabotage HQ | HeadQuarters `+0x26B` | −15 points, flat | 0x87C |
+
+  Turbo Pascal's `Random(n)` returns 0..n-1, so Bomb Intelligence takes 2, 3 or
+  4 percent and Bomb Food Storages can take nothing at all. The percentage bands
+  are `Random(n)/100 + base` computed in Real48 and multiplied by the field; the
+  two ratio operations and the flat HQ hit have no roll in them. The operation
+  names come from the report templates in `game/ipreport.dat`, whose eight
+  damaging entries are in this order.
+
+  **Not modelled:** the original rolls each agent against the covert odds and
+  only a winner lands; IB lands every committed agent. IB also reports a batch
+  the way the original does — one line carrying the count rather than one line
+  per agent, which is what `ipreport.dat`'s `MULTI_`/`SINGLE_` template pair is
+  for ("... %N times!"). Until this landed, IB ignored the operation and
+  destroyed random units whichever of the nine was sent; a packet from a board
+  that predates the dispatch still gets that blanket effect
+  (`TerrorUnitLossDenom`), since it names no operation.
 - **Send SpyGuy — BINARY-VERIFIED, and not a covert agent at all.** IB keeps the
   original's name here, deliberately (Andy, 2026-08-18), where it renamed Gooie
   Kablooie and S3-Sabre: players coming from the original look for this one by

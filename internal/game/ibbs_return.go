@@ -74,16 +74,26 @@ func (w *World) applyAttackResult(res AttackResult) {
 // spent either way, so only the report and the news line come home.
 func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult) {
 	if e := w.FindByOwner(sent.Owner); e != nil {
-		if res.Won {
+		switch {
+		case res.Report != "":
+			// The target board settled what the operation did and wrote the line;
+			// only it knows what was there to damage (#166).
+			e.addEvent(fmt.Sprintf("Your terrorists reached %s of %s. %s",
+				res.TargetEmpire, res.TargetBoard, res.Report))
+		case res.Won:
 			e.addEvent(fmt.Sprintf("Your terrorists struck %s of %s and destroyed %d of its forces.",
 				res.TargetEmpire, res.TargetBoard, res.LandTaken))
-		} else {
+		default:
 			e.addEvent(fmt.Sprintf("Your terrorists reached %s of %s and achieved nothing.",
 				res.TargetEmpire, res.TargetBoard))
 		}
 	}
-	if res.Won {
+	if res.Won && res.LandTaken > 0 {
 		w.postNews(fmt.Sprintf("Our terror op on %s (%s) destroyed %d troopers!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
+		return
+	}
+	if res.Won {
+		w.postNews(fmt.Sprintf("Our terror op on %s (%s) got through.", res.TargetEmpire, res.TargetBoard))
 		return
 	}
 	w.postNews(fmt.Sprintf("Our terror op on %s (%s) was foiled.", res.TargetEmpire, res.TargetBoard))

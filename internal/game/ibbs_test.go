@@ -131,7 +131,7 @@ func TestTerrorOpDestroysForces(t *testing.T) {
 	target.Tanks, target.Bombers, target.Carriers = 700, 700, 700
 	totalBefore := target.Troopers + target.Jets + target.Turrets + target.Tanks + target.Bombers + target.Carriers
 
-	if err := wA.SendTerror(attacker, "boardB", "Victim", 4, TerrorOpSpy); err != nil {
+	if err := wA.SendTerror(attacker, "boardB", "Victim", 4, TerrorOpDissensions); err != nil {
 		t.Fatalf("SendTerror: %v", err)
 	}
 	if attacker.Agents != 6 {
@@ -143,8 +143,8 @@ func TestTerrorOpDestroysForces(t *testing.T) {
 
 	result := wB.ApplyPacket(wA.Outbox[0])
 	res := result.Results[0]
-	if !res.Won || res.Kind != "terror" || res.LandTaken <= 0 {
-		t.Errorf("expected a won terror result with forces destroyed, got %+v", res)
+	if !res.Won || res.Kind != "terror" || res.Report == "" {
+		t.Errorf("expected a won terror result carrying its own report, got %+v", res)
 	}
 	totalAfter := target.Troopers + target.Jets + target.Turrets + target.Tanks + target.Bombers + target.Carriers
 	if totalAfter >= totalBefore {
@@ -1020,5 +1020,75 @@ func TestLeagueNameTravelsWithTheRuleset(t *testing.T) {
 	member.applyLeagueRuleset(co.leagueRuleset())
 	if member.LeagueName != "Southern Cross" {
 		t.Errorf("member board calls the league %q, want %q", member.LeagueName, "Southern Cross")
+	}
+}
+
+// Each of the nine interplanetary terrorist operations does its own thing to
+// its own field (#166), which the received-op resolver dispatches on
+// (BRE.OVR 0x04a96b). Before this they all destroyed random units.
+func TestEachTerrorOpHitsItsOwnField(t *testing.T) {
+	stock := func(e *Empire) {
+		e.Protection = 0
+		e.Agents, e.Troopers, e.Jets, e.People, e.Food = 500, 5_000, 700, 900, 400_000
+		e.Morale, e.Support, e.HQ = 100, 100, 90
+	}
+	cases := []struct {
+		op    TerrorOpType
+		field func(*Empire) int
+	}{
+		{TerrorOpBombIntel, func(e *Empire) int { return e.Agents }},
+		{TerrorOpDemoralize, func(e *Empire) int { return e.Morale }},
+		{TerrorOpDissensions, func(e *Empire) int { return e.Troopers }},
+		{TerrorOpBombAirBases, func(e *Empire) int { return e.Jets }},
+		{TerrorOpEmigrations, func(e *Empire) int { return e.People }},
+		{TerrorOpPropaganda, func(e *Empire) int { return e.Support }},
+		{TerrorOpBombFood, func(e *Empire) int { return e.Food }},
+		{TerrorOpSabotageHQ, func(e *Empire) int { return e.HQ }},
+	}
+	for _, c := range cases {
+		t.Run(c.op.String(), func(t *testing.T) {
+			cfg := DefaultConfig()
+			cfg.BoardID = "boardB"
+			w := NewWorldSeed(cfg, 3)
+			target := w.AddHuman("victim", "Victim")
+			stock(target)
+			before := c.field(target)
+
+			w.resolveRemoteTerror(RemoteTerror{ID: 1, FromBoard: "boardA", TargetEmpire: "Victim", Agents: 3, Op: c.op})
+
+			if got := c.field(target); got >= before {
+				t.Errorf("%s should have cost the target: %d -> %d", c.op, before, got)
+			}
+			// Nothing else moves: each operation owns one field.
+			for _, other := range cases {
+				if other.op == c.op {
+					continue
+				}
+				fresh := &Empire{}
+				stock(fresh)
+				if other.field(target) != other.field(fresh) {
+					t.Errorf("%s also changed what %s aims at", c.op, other.op)
+				}
+			}
+		})
+	}
+}
+
+// Send Spy takes nothing from the target: it brings intelligence home instead.
+func TestTerrorSpyTakesNothing(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.BoardID = "boardB"
+	w := NewWorldSeed(cfg, 3)
+	target := w.AddHuman("victim", "Victim")
+	target.Protection = 0
+	target.Troopers, target.Agents, target.Morale = 5_000, 500, 100
+
+	res := w.resolveRemoteTerror(RemoteTerror{ID: 1, FromBoard: "boardA", TargetEmpire: "Victim", Agents: 2, Op: TerrorOpSpy})
+
+	if target.Troopers != 5_000 || target.Agents != 500 || target.Morale != 100 {
+		t.Errorf("a spy should cost the target nothing, got %+v", target)
+	}
+	if !res.Won || res.Report == "" {
+		t.Errorf("the spy should come home with something to say, got %+v", res)
 	}
 }

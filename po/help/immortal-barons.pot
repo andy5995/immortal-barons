@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-08-21 10:46-0500\n"
+"POT-Creation-Date: 2026-08-22 16:10-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1508,27 +1508,39 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:31
+#: internal/help/content/economy/trading.md:32
 #, markdown-text
 msgid ""
-"A trade deal costs a fee, and it needs a spare carrier to move the goods. A "
-"Protective Trade treaty with that realm makes the fee cheaper."
+"A trade deal costs a fee for each day you send it for, and it needs a spare "
+"carrier to move the goods. A Protective Trade treaty with that realm makes "
+"the fee cheaper."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:38
+#, markdown-text
+msgid ""
+"The days you pay for are how long the offer stands. What you put in the deal "
+"leaves your realm the moment you send it, and it comes back only if the "
+"offer is accepted: a refusal, a deal nobody answers before its days run out, "
+"and a realm that falls before it replies all cost you the goods. Send to "
+"someone who is playing, and give them enough days to get to it."
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:32
+#: internal/help/content/economy/trading.md:39
 #, markdown-text, no-wrap
 msgid "Getting the most from trade"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:35
+#: internal/help/content/economy/trading.md:42
 #, markdown-text
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:40
+#: internal/help/content/economy/trading.md:47
 #, markdown-text, no-wrap
 msgid ""
 "**Specialise, then supply your partners.** Your industry can favour one "
@@ -1541,7 +1553,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:44
+#: internal/help/content/economy/trading.md:51
 #, markdown-text, no-wrap
 msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, "
@@ -1552,7 +1564,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:47
+#: internal/help/content/economy/trading.md:54
 #, markdown-text, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialise, "
@@ -2182,6 +2194,128 @@ msgstr ""
 msgid ""
 "A short stay renewed is worth more than one long stay bought early: the days "
 "run whether anything happens or not."
+msgstr ""
+
+#. type: Title #
+#: internal/help/content/interbbs/terrorist-ops.md:1
+#: internal/help/content/interbbs/terrorist-ops.md:8
+#, markdown-text, no-wrap
+msgid "Terrorist Ops"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/terrorist-ops.md:14
+#, markdown-text
+msgid ""
+"Terrorist Ops send agents against a realm on another planet. You choose the "
+"operation, then how many agents to commit. The agents are spent when you "
+"send them, whatever they achieve, and the strike resolves on the target's "
+"planet once the packet reaches it — so the word comes back a day or more "
+"later."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/terrorist-ops.md:17
+#, markdown-text
+msgid ""
+"Every operation is answered by New Realm Protection: a sheltered realm takes "
+"nothing at all."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/terrorist-ops.md:18
+#, markdown-text, no-wrap
+msgid "What each operation does"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/terrorist-ops.md:22
+#, markdown-text
+msgid ""
+"The nine are not interchangeable. Each aims at one thing, and each agent "
+"that gets through takes its own bite:"
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:34
+#, markdown-text
+msgid "**Send Spy** — brings intelligence home and costs the target nothing."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:34
+#, markdown-text
+msgid ""
+"**Bomb Intelligence Agencies** — kills a few percent of their agents, which "
+"is what they defend and attack with."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:34
+#, markdown-text
+msgid "**Demoralize Forces** — takes a seventh off military morale."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:34
+#, markdown-text
+msgid "**Cause Dissensions** — a few percent of their troopers desert."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:34
+#, markdown-text
+msgid "**Bomb Air Bases** — burns a slice of their jets on the ground."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:34
+#, markdown-text
+msgid "**Stir Emigrations** — drives people out of the realm."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:34
+#, markdown-text
+msgid "**Spread Propaganda** — costs them popular support."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:34
+#, markdown-text
+msgid ""
+"**Bomb Food Storages** — the widest swing of the nine: it can take almost a "
+"third of what is in store, or almost nothing."
+msgstr ""
+
+#. type: Bullet: '- '
+#: internal/help/content/interbbs/terrorist-ops.md:34
+#, markdown-text
+msgid "**Sabotage HQ** — sets back their HeadQuarters by a fixed amount."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/interbbs/terrorist-ops.md:35
+#, markdown-text, no-wrap
+msgid "Picking one"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/terrorist-ops.md:41
+#, markdown-text
+msgid ""
+"Match the operation to what you plan next. Softening a realm before an "
+"interplanetary attack argues for the ones that thin what fights back — "
+"troopers, jets, morale. Grinding down a realm you cannot reach yet argues "
+"for the ones that cost it growth: food, people, support."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/terrorist-ops.md:43
+#, markdown-text
+msgid ""
+"Committing more agents does more damage; it does not raise the odds for a "
+"single strike, because each agent lands on its own."
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title

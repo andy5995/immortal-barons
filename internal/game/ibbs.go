@@ -734,8 +734,11 @@ type RemoteTerror struct {
 	ID           int
 	FromBoard    string
 	TargetEmpire string
-	Agents       int          // agents committed; scales the forces destroyed
-	Op           TerrorOpType `json:",omitempty"` // sub-op type (cosmetic; all resolve identically)
+	Agents       int // agents committed; scales the forces destroyed
+	// Op is which of the nine operations was launched; the target board resolves
+	// each one differently (#166). Absent on a packet written before that, which
+	// falls back to the blanket unit damage every op used to do.
+	Op TerrorOpType `json:",omitempty"`
 }
 
 // InFlightStrike is a strike that has left this board and has not been answered.
@@ -1041,8 +1044,8 @@ func (w *World) enqueueTradeBid(toBoard string, b IPTradeBid) {
 
 // SendTerror queues a terror op against targetEmpire on targetBoard, committing
 // agents (deducted now). op is the sub-operation type from the Terrorist Ops
-// submenu; it is cosmetic (all resolve identically) but BRE carries it in the
-// packet. It resolves on the target board's next packet run.
+// submenu, and it decides what lands: the target board dispatches on it as the
+// original does. It resolves on the target board's next packet run.
 func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents int, op TerrorOpType) error {
 	if !w.CanTerrorOp(e) {
 		return ErrTerrorOpsExhausted
@@ -1088,9 +1091,39 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 		w.postNews(fmt.Sprintf("Terrorists from %s broke on %s's New Realm Protection.", t.FromBoard, target.Name))
 		return res
 	}
-	// BRE terror: each committed agent is an independent hit that removes a
-	// fraction (~1/TerrorUnitLossDenom, from BRE's disassembled 6/7 ratio) of one
-	// randomly chosen unit type.
+	if t.Op == 0 {
+		return w.resolveLegacyTerror(t, target, res)
+	}
+	// Each committed agent lands once, and what it does depends on the operation
+	// the packet names (#166). BRE dispatches the same way, on the operation byte
+	// it carried across (resolve_received_covert_operation, BRE.OVR 0x04a96b);
+	// IB used to ignore it and destroy random units whichever of the nine was
+	// sent, so eight menu items were priced and named for nothing.
+	//
+	// NOT modelled: the original rolls each agent against the covert odds and
+	// only a winning agent lands. IB lands them all, as it always has here.
+	hit := 0
+	for i := 0; i < t.Agents; i++ {
+		if w.applyTerrorOp(t.Op, target) {
+			hit++
+		}
+	}
+	res.Report = terrorOpReport(t.Op, hit)
+	if hit == 0 {
+		target.addEvent(fmt.Sprintf("Terrorists from %s struck at %s and achieved nothing.", t.FromBoard, terrorOpTargetName(t.Op)))
+		w.postNews(fmt.Sprintf("Terrorists from %s reached %s and achieved nothing.", t.FromBoard, target.Name))
+		return res
+	}
+	target.addEvent(fmt.Sprintf("Terrorists from %s %s %s", t.FromBoard, terrorOpDamage(t.Op), timesSuffix(hit)))
+	w.postNews(fmt.Sprintf("Terrorists from %s struck %s's %s.", t.FromBoard, target.Name, terrorOpTargetName(t.Op)))
+	res.Won = true
+	return res
+}
+
+// resolveLegacyTerror is the blanket effect every terror op had before the nine
+// were separated: a fraction of one randomly chosen unit type per agent. It is
+// reached only by a packet from a board too old to name its operation.
+func (w *World) resolveLegacyTerror(t RemoteTerror, target *Empire, res AttackResult) AttackResult {
 	fields := []*int{&target.Troopers, &target.Jets, &target.Turrets, &target.Tanks, &target.Bombers, &target.Carriers}
 	destroyed := 0
 	for i := 0; i < t.Agents; i++ {
@@ -1110,6 +1143,127 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	res.LandTaken = destroyed
 	res.Won = true
 	return res
+}
+
+// applyTerrorOp lands one agent's operation on target and reports whether it
+// changed anything. Send Spy costs the target nothing, so it always "lands":
+// what it takes is intelligence, carried home in the result's report.
+func (w *World) applyTerrorOp(op TerrorOpType, target *Empire) bool {
+	if band, ok := TerrorOpLosses[op]; ok {
+		field := terrorOpField(op, target)
+		loss := *field * (band.Base + w.rng.Intn(band.Spread)) / 100
+		*field -= loss
+		return loss > 0
+	}
+	switch op {
+	case TerrorOpSpy:
+		return true
+	case TerrorOpDemoralize:
+		before := target.Morale
+		target.Morale = target.Morale * TerrorMoraleKeepNumerator / TerrorMoraleKeepDenominator
+		return target.Morale < before
+	case TerrorOpPropaganda:
+		before := target.Support
+		target.Support = target.Support * TerrorSupportKeepNumerator / TerrorSupportKeepDenominator
+		return target.Support < before
+	case TerrorOpSabotageHQ:
+		if target.HQ <= 0 {
+			return false
+		}
+		target.HQ -= TerrorHQSabotagePoints
+		if target.HQ < 0 {
+			target.HQ = 0
+		}
+		return true
+	}
+	return false
+}
+
+// terrorOpField is the count each percentage-based operation eats into.
+func terrorOpField(op TerrorOpType, e *Empire) *int {
+	switch op {
+	case TerrorOpBombIntel:
+		return &e.Agents
+	case TerrorOpDissensions:
+		return &e.Troopers
+	case TerrorOpBombAirBases:
+		return &e.Jets
+	case TerrorOpEmigrations:
+		return &e.People
+	case TerrorOpBombFood:
+		return &e.Food
+	}
+	return new(int) // unreachable for anything in TerrorOpLosses
+}
+
+// terrorOpTargetName, terrorOpDamage and timesSuffix write the two sentences an
+// operation produces: what the target reads, and the line the result carries
+// home. BRE reports a batch the same way — `ipreport.dat` holds a MULTI_ and a
+// SINGLE_ template for each of the eight damaging operations, the multi form
+// counting the successes ("... %N times!") rather than repeating the line.
+func terrorOpTargetName(op TerrorOpType) string {
+	switch op {
+	case TerrorOpSpy:
+		return "secrets"
+	case TerrorOpBombIntel:
+		return "intelligence agencies"
+	case TerrorOpDemoralize:
+		return "forces"
+	case TerrorOpDissensions:
+		return "ranks"
+	case TerrorOpBombAirBases:
+		return "air bases"
+	case TerrorOpEmigrations:
+		return "people"
+	case TerrorOpPropaganda:
+		return "streets"
+	case TerrorOpBombFood:
+		return "food stores"
+	case TerrorOpSabotageHQ:
+		return "headquarters"
+	}
+	return "realm"
+}
+
+func terrorOpDamage(op TerrorOpType) string {
+	switch op {
+	case TerrorOpSpy:
+		return "went through your files"
+	case TerrorOpBombIntel:
+		return "bombed your intelligence agencies"
+	case TerrorOpDemoralize:
+		return "demoralized your forces"
+	case TerrorOpDissensions:
+		return "stirred dissent in your ranks"
+	case TerrorOpBombAirBases:
+		return "bombed your air bases"
+	case TerrorOpEmigrations:
+		return "drove your people into exile"
+	case TerrorOpPropaganda:
+		return "spread false rumors through your realm"
+	case TerrorOpBombFood:
+		return "bombed your food stores"
+	case TerrorOpSabotageHQ:
+		return "sabotaged your headquarters"
+	}
+	return "struck your realm"
+}
+
+// terrorOpReport is what the launching realm reads when the strike comes home.
+func terrorOpReport(op TerrorOpType, hit int) string {
+	if hit == 0 {
+		return fmt.Sprintf("Your agents reached their target and achieved nothing (%s).", op)
+	}
+	return fmt.Sprintf("%s: your agents got through %s", op, timesSuffix(hit))
+}
+
+// timesSuffix closes a report line with how many agents landed, counting rather
+// than repeating the sentence.
+func timesSuffix(n int) string {
+	if n == 1 {
+		return "once."
+	}
+	return fmt.Sprintf("%d times.", n)
 }
 
 // ApplyPacket applies an inbound packet to this board and returns a result

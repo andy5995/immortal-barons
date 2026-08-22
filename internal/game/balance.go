@@ -1248,10 +1248,23 @@ const (
 	// is inclusive in the original, so a realm with no program still intercepts
 	// on a zero roll (1%); that is faithful, not a rounding artifact.
 	SDIMissileInterceptPct = 50
-	// TerrorUnitLossDenom: each successful terror hit removes 1/N of one random
-	// unit type. BRE's disassembled hit applier uses a 6/7 ratio (removes ~1/7),
-	// so N = 7.
+	// TerrorUnitLossDenom is what a terror op takes when the packet does not say
+	// WHICH operation it was — a strike written by a board old enough to predate
+	// the per-op dispatch. It removes 1/N of one random unit type per agent, the
+	// blanket effect every op used to get. See TerrorOpLosses for the real ones.
 	TerrorUnitLossDenom = 7
+	// The two morale/support operations scale the stat rather than taking a
+	// percentage band off it. BINARY-VERIFIED (resolve_received_covert_operation,
+	// BRE.OVR 0x04a96b): Demoralize Forces multiplies military morale by 6/7 at
+	// 0x5E9, and Spread Propaganda multiplies popular support by 11/13 at 0x7B9,
+	// each per landed agent.
+	TerrorMoraleKeepNumerator    = 6
+	TerrorMoraleKeepDenominator  = 7
+	TerrorSupportKeepNumerator   = 11
+	TerrorSupportKeepDenominator = 13
+	// Sabotage HQ takes a flat fifteen points off the target's HeadQuarters
+	// progress per landed agent — the one operation with no roll in it (0x87C).
+	TerrorHQSabotagePoints = 15
 	// ScorePerTurn is the Score a played turn earns: the net worth of a BRAND-NEW
 	// realm, rounded — 213 for the standard start, which is every award ever
 	// observed in the original.
@@ -1812,3 +1825,32 @@ const (
 // UndermineInvestmentDivisor is the share of each investment's principal an
 // Undermine Investments op destroys: a quarter.
 const UndermineInvestmentDivisor = 4
+
+// TerrorPctLoss is the band one landed terror agent takes off the field its
+// operation aims at: Base + Random(Spread) percent, truncated.
+type TerrorPctLoss struct {
+	Base   int
+	Spread int
+}
+
+// TerrorOpLosses is what each percentage-based interplanetary terrorist
+// operation destroys. BINARY-VERIFIED from the received-op resolver
+// (`resolve_received_covert_operation`, BRE.OVR 0x04a96b), which dispatches on
+// the operation byte the packet carries and, for these five, computes
+// `Random(n)/100 + base` as a Real48 and multiplies the target's field by it:
+//
+//	Bomb Intelligence  agents    (+0x26F)  0x56A  Random(3)/100 + 0.02
+//	Cause Dissensions  troopers  (+0x76)   0x63C  Random(3)/100 + 0.02
+//	Bomb Air Bases     jets      (+0x7E)   0x6BB  Random(5)/100 + 0.03
+//	Stir Emigrations   population(+0x62)   0x73A  Random(7)/100 + 0.04
+//	Bomb Food Storages food      (+0x6E)   0x80C  Random(30)/100
+//
+// Turbo Pascal's Random(n) returns 0..n-1, so Bomb Intelligence takes 2, 3 or 4
+// percent and Bomb Food Storages takes anything from nothing to 29 percent.
+var TerrorOpLosses = map[TerrorOpType]TerrorPctLoss{
+	TerrorOpBombIntel:    {Base: 2, Spread: 3},
+	TerrorOpDissensions:  {Base: 2, Spread: 3},
+	TerrorOpBombAirBases: {Base: 3, Spread: 5},
+	TerrorOpEmigrations:  {Base: 4, Spread: 7},
+	TerrorOpBombFood:     {Base: 0, Spread: 30},
+}
