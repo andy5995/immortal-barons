@@ -3,6 +3,7 @@ package game
 import (
 	"errors"
 	"fmt"
+	"math"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/numfmt"
@@ -739,6 +740,13 @@ type RemoteTerror struct {
 	// each one differently (#166). Absent on a packet written before that, which
 	// falls back to the blanket unit damage every op used to do.
 	Op TerrorOpType `json:",omitempty"`
+	// Strength is the sender's covert pool, measured at home and carried across
+	// because the target board cannot see it. BRE does exactly this: the launcher
+	// calls the covert-pool routine for its own realm and writes the figure into
+	// the 18-byte record the packet carries (launch_terrorist_operation, BRE.OVR
+	// 0x02B201, storing at record +0x0D). Absent on an older packet, which then
+	// rolls against a pool of nothing and lands every agent, as it used to.
+	Strength int `json:",omitempty"`
 }
 
 // InFlightStrike is a strike that has left this board and has not been answered.
@@ -755,6 +763,10 @@ type InFlightStrike struct {
 	Contributors []Contribution // an attack's detachments, by owner
 	Owner        string         // a terror op's sender
 	Agents       int            // a terror op's committed agents
+	// TerrorOp is which terrorist operation went out, so the returning report can
+	// name it even when the far board answers with none (#165). SpecialOp's own
+	// Op field below is a different menu's.
+	TerrorOp TerrorOpType `json:",omitempty"`
 	// Group marks a strike assembled by CreateGroupAttack, and Whole a strike
 	// aimed at the planet rather than a named baron. Both are needed to word the
 	// returning report and its news line: BRE keeps separate copy for an
@@ -1061,7 +1073,14 @@ func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents i
 	e.Agents -= agents
 	e.TerrorOpsToday++
 	w.NextAttackID++
-	t := RemoteTerror{ID: w.NextAttackID, FromBoard: w.Config.BoardID, TargetEmpire: targetEmpire, Agents: agents, Op: op}
+	t := RemoteTerror{
+		ID:           w.NextAttackID,
+		FromBoard:    w.Config.BoardID,
+		TargetEmpire: targetEmpire,
+		Agents:       agents,
+		Op:           op,
+		Strength:     w.covertStrength(e, true),
+	}
 	w.InFlight = append(w.InFlight, InFlightStrike{
 		ID:           t.ID,
 		Kind:         "terror",
@@ -1070,6 +1089,7 @@ func (w *World) SendTerror(e *Empire, targetBoard, targetEmpire string, agents i
 		LaunchedDay:  w.GameDay,
 		Owner:        e.Owner,
 		Agents:       agents,
+		TerrorOp:     op,
 	})
 	p := w.outboxFor(targetBoard)
 	p.Terrors = append(p.Terrors, t)
@@ -1083,17 +1103,22 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	res := AttackResult{ID: t.ID, TargetBoard: w.Config.BoardID, TargetEmpire: t.TargetEmpire, Kind: "terror"}
 	target := w.remoteTarget(t.TargetEmpire)
 	if target == nil {
+		// Nobody of that name here: the sender is owed that answer rather than the
+		// same "achieved nothing" a repelled op gets (#165).
+		res.Outcome = OutcomeNotFound
 		return res
 	}
 	res.TargetEmpire = target.Name
 	if target.Protection > 0 {
 		target.addEvent(fmt.Sprintf("Terrorists from %s were stopped by your New Realm Protection.", t.FromBoard))
 		w.postNews(fmt.Sprintf("Terrorists from %s broke on %s's New Realm Protection.", t.FromBoard, target.Name))
+		res.Outcome = OutcomeProtected
 		return res
 	}
 	if t.Op == 0 {
 		return w.resolveLegacyTerror(t, target, res)
 	}
+	defense := w.covertStrength(target, false)
 	// Each committed agent lands once, and what it does depends on the operation
 	// the packet names (#166). BRE dispatches the same way, on the operation byte
 	// it carried across (resolve_received_covert_operation, BRE.OVR 0x04a96b);
@@ -1104,12 +1129,18 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	// only a winning agent lands. IB lands them all, as it always has here.
 	hit := 0
 	for i := 0; i < t.Agents; i++ {
+		// A packet with no strength recorded is from a board that predates the
+		// roll; its agents all land, which is what it was written expecting.
+		if t.Strength > 0 && !w.terrorAgentLands(t.Strength, defense) {
+			continue
+		}
 		if w.applyTerrorOp(t.Op, target) {
 			hit++
 		}
 	}
 	res.Report = terrorOpReport(t.Op, hit)
 	if hit == 0 {
+		res.Outcome = OutcomeRepelled
 		target.addEvent(fmt.Sprintf("Terrorists from %s struck at %s and achieved nothing.", t.FromBoard, terrorOpTargetName(t.Op)))
 		w.postNews(fmt.Sprintf("Terrorists from %s reached %s and achieved nothing.", t.FromBoard, target.Name))
 		return res
@@ -1117,7 +1148,45 @@ func (w *World) resolveRemoteTerror(t RemoteTerror) AttackResult {
 	target.addEvent(fmt.Sprintf("Terrorists from %s %s %s", t.FromBoard, terrorOpDamage(t.Op), timesSuffix(hit)))
 	w.postNews(fmt.Sprintf("Terrorists from %s struck %s's %s.", t.FromBoard, target.Name, terrorOpTargetName(t.Op)))
 	res.Won = true
+	res.Outcome = OutcomeWon
 	return res
+}
+
+// terrorAgentLands is whether one committed agent gets through, weighing the
+// sender's covert pool (carried in the packet) against the target's. It is
+// calculate_combat_odds (BRE.OVR 0x04a7a9), which the received-op resolver calls
+// once per agent before letting it act; see the constants for the shape.
+func (w *World) terrorAgentLands(attack, defense int) bool {
+	if attack < 0 {
+		attack = 0
+	}
+	if defense < 0 {
+		defense = 0
+	}
+	if w.rng.Intn(TerrorAutoLandOdds) == 0 {
+		return true
+	}
+	if w.rng.Intn(TerrorAutoFoilOdds) == 0 {
+		return false
+	}
+	a := roundedRoot(attack)
+	d := roundedRoot(defense)
+	weighted := func() int { return a + d*TerrorDefenseWeightNum/TerrorDefenseWeightDenom }
+	for weighted() > TerrorOddsCeiling {
+		a /= 2
+		d /= 2
+	}
+	total := weighted()
+	if total <= 0 {
+		return false
+	}
+	return w.rng.Intn(total) < a
+}
+
+// roundedRoot is the square root the odds routine takes of each side, rounded
+// as the original rounds it.
+func roundedRoot(n int) int {
+	return int(math.Round(math.Sqrt(float64(n))))
 }
 
 // resolveLegacyTerror is the blanket effect every terror op had before the nine

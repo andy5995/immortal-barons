@@ -39,5 +39,16 @@ interplanetary attack argues for the ones that thin what fights back — trooper
 jets, morale. Grinding down a realm you cannot reach yet argues for the ones
 that cost it growth: food, people, support.
 
-Committing more agents does more damage; it does not raise the odds for a
-single strike, because each agent lands on its own.
+## Getting through
+
+Each agent is rolled for on its own, weighing your agents against theirs. The
+weighing takes the square root of each side and gives the defender the better of
+it, so agents help but with sharply falling returns: four times as many buys you
+twice the edge, and two evenly matched realms see about two agents in five get
+through. There is a small chance either way that has nothing to do with either
+side.
+
+Committing more agents therefore does more damage on average, but it never makes
+one agent likelier to land. A Terrorist Prevention pact adds its partners'
+agents to the defence, which is what makes a well-allied realm expensive to
+work on.

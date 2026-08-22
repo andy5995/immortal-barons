@@ -1262,6 +1262,20 @@ const (
 	TerrorMoraleKeepDenominator  = 7
 	TerrorSupportKeepNumerator   = 11
 	TerrorSupportKeepDenominator = 13
+	// Whether one agent gets through is BRE's own two-coin-then-odds roll,
+	// BINARY-VERIFIED in calculate_combat_odds (BRE.OVR 0x04a7a9): one roll in
+	// TerrorAutoLandOdds lands whatever the pools say, then one in
+	// TerrorAutoFoilOdds fails the same way, and only then are the two covert
+	// pools weighed. The weighing takes the ROOT of each side and gives the
+	// defender half again its own — success on `Random(a + d*3/2) < a`, where
+	// `a` and `d` are the rounded roots — so a realm needs four times the agents
+	// to double its edge. Both sides are halved until the total fits
+	// TerrorOddsCeiling, which is the original guarding its 16-bit Random.
+	TerrorAutoLandOdds       = 100
+	TerrorAutoFoilOdds       = 20
+	TerrorDefenseWeightNum   = 3
+	TerrorDefenseWeightDenom = 2
+	TerrorOddsCeiling        = 30_000
 	// Sabotage HQ takes a flat fifteen points off the target's HeadQuarters
 	// progress per landed agent — the one operation with no roll in it (0x87C).
 	TerrorHQSabotagePoints = 15

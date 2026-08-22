@@ -1054,7 +1054,10 @@ func TestEachTerrorOpHitsItsOwnField(t *testing.T) {
 			stock(target)
 			before := c.field(target)
 
-			w.resolveRemoteTerror(RemoteTerror{ID: 1, FromBoard: "boardA", TargetEmpire: "Victim", Agents: 3, Op: c.op})
+			w.resolveRemoteTerror(RemoteTerror{
+				ID: 1, FromBoard: "boardA", TargetEmpire: "Victim",
+				Agents: 3, Op: c.op, Strength: 1_000_000,
+			})
 
 			if got := c.field(target); got >= before {
 				t.Errorf("%s should have cost the target: %d -> %d", c.op, before, got)
@@ -1083,12 +1086,67 @@ func TestTerrorSpyTakesNothing(t *testing.T) {
 	target.Protection = 0
 	target.Troopers, target.Agents, target.Morale = 5_000, 500, 100
 
-	res := w.resolveRemoteTerror(RemoteTerror{ID: 1, FromBoard: "boardA", TargetEmpire: "Victim", Agents: 2, Op: TerrorOpSpy})
+	res := w.resolveRemoteTerror(RemoteTerror{
+		ID: 1, FromBoard: "boardA", TargetEmpire: "Victim",
+		Agents: 2, Op: TerrorOpSpy, Strength: 1_000_000,
+	})
 
 	if target.Troopers != 5_000 || target.Agents != 500 || target.Morale != 100 {
 		t.Errorf("a spy should cost the target nothing, got %+v", target)
 	}
 	if !res.Won || res.Report == "" {
 		t.Errorf("the spy should come home with something to say, got %+v", res)
+	}
+}
+
+// The odds are BRE's: the root of each side, the defender given half again, and
+// the two flat coins on top (calculate_combat_odds, BRE.OVR 0x04a7a9). A far
+// stronger sender lands most agents; a far weaker one lands few.
+func TestTerrorAgentOddsFavourTheStrongerCovertPool(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 7)
+	count := func(attack, defense int) int {
+		landed := 0
+		for i := 0; i < 1000; i++ {
+			if w.terrorAgentLands(attack, defense) {
+				landed++
+			}
+		}
+		return landed
+	}
+	strong := count(10_000, 100)
+	weak := count(100, 10_000)
+	if strong < 800 {
+		t.Errorf("a hundredfold pool should land most agents, got %d/1000", strong)
+	}
+	if weak > 200 {
+		t.Errorf("a hundredth of the pool should land few agents, got %d/1000", weak)
+	}
+	// Even sides: the defender's extra half puts it under a coin flip.
+	if even := count(1_000, 1_000); even < 300 || even > 500 {
+		t.Errorf("evenly matched pools should land ~40%%, got %d/1000", even)
+	}
+}
+
+// A terror op that finds no such realm, or one under protection, comes home
+// saying so and naming the operation (#165) — not as the "achieved nothing" a
+// repelled one gets.
+func TestTerrorReturnReportSaysWhyNothingHappened(t *testing.T) {
+	sent := InFlightStrike{Kind: "terror", TargetBoard: "boardB", TargetEmpire: "Victim", TerrorOp: TerrorOpBombAirBases}
+	cases := []struct {
+		outcome AttackOutcome
+		want    string
+	}{
+		{OutcomeNotFound, "no realm called"},
+		{OutcomeProtected, "New Realm Protection"},
+		{OutcomeRepelled, "turned away"},
+	}
+	for _, c := range cases {
+		got := terrorReturnReport(sent, AttackResult{TargetBoard: "boardB", TargetEmpire: "Victim", Outcome: c.outcome})
+		if !strings.Contains(got, c.want) {
+			t.Errorf("%s report = %q, want it to mention %q", c.outcome, got, c.want)
+		}
+		if !strings.Contains(got, TerrorOpBombAirBases.String()) {
+			t.Errorf("%s report should name the operation: %q", c.outcome, got)
+		}
 	}
 }

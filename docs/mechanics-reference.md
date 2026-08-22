@@ -3063,8 +3063,24 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   names come from the report templates in `game/ipreport.dat`, whose eight
   damaging entries are in this order.
 
-  **Not modelled:** the original rolls each agent against the covert odds and
-  only a winner lands; IB lands every committed agent. IB also reports a batch the way the original does — one line carrying the count rather than one line
+  **Each agent is rolled for — BINARY-VERIFIED.** `calculate_combat_odds`
+  (`BRE.OVR` 0x04a7a9) is called once per committed agent, and only a winner
+  reaches the branch above. It takes one roll in a hundred as an automatic
+  success, then one in twenty as an automatic failure, then weighs the two
+  covert pools: it takes the ROUNDED SQUARE ROOT of each, gives the defender
+  half again its own, and succeeds on `Random(a + d*3/2) < a`. Roots mean
+  quadrupling your agents only doubles your edge, and evenly matched realms land
+  about two agents in five. Both figures are halved together until the total
+  fits 30,000, which guards the original's 16-bit `Random`.
+
+  The attacker's pool cannot be measured on the defending board, so it TRAVELS:
+  the launcher calls the covert-pool routine for itself and writes the figure
+  into the record the packet carries (`launch_terrorist_operation` 0x02B201, at
+  record `+0x0D`), which is what 0x04a7a9 weighs against the local pool. IB does
+  the same through `RemoteTerror.Strength`; a packet without it lands every
+  agent, as every packet did before this.
+
+  IB also reports a batch the way the original does — one line carrying the count rather than one line
   per agent, which is what `ipreport.dat`'s `MULTI_`/`SINGLE_` template pair is
   for ("... %N times!"). Until this landed, IB ignored the operation and
   destroyed random units whichever of the nine was sent; a packet from a board

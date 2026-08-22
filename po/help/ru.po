@@ -6,7 +6,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: andy 5995\n"
-"POT-Creation-Date: 2026-08-22 16:10-0500\n"
+"POT-Creation-Date: 2026-08-22 16:19-0500\n"
 "PO-Revision-Date: 2026-07-04 09:56-0500\n"
 "Last-Translator: Automatically generated\n"
 "Language-Team: none\n"
@@ -2235,11 +2235,30 @@ msgid ""
 "for the ones that cost it growth: food, people, support."
 msgstr ""
 
+#. type: Title ##
+#: internal/help/content/interbbs/terrorist-ops.md:42
+#, no-wrap
+msgid "Getting through"
+msgstr ""
+
 #. type: Plain text
-#: internal/help/content/interbbs/terrorist-ops.md:43
+#: internal/help/content/interbbs/terrorist-ops.md:50
 msgid ""
-"Committing more agents does more damage; it does not raise the odds for a "
-"single strike, because each agent lands on its own."
+"Each agent is rolled for on its own, weighing your agents against theirs. "
+"The weighing takes the square root of each side and gives the defender the "
+"better of it, so agents help but with sharply falling returns: four times as "
+"many buys you twice the edge, and two evenly matched realms see about two "
+"agents in five get through. There is a small chance either way that has "
+"nothing to do with either side."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/interbbs/terrorist-ops.md:54
+msgid ""
+"Committing more agents therefore does more damage on average, but it never "
+"makes one agent likelier to land. A Terrorist Prevention pact adds its "
+"partners' agents to the defence, which is what makes a well-allied realm "
+"expensive to work on."
 msgstr ""
 
 #. type: Yaml Front Matter Hash Value: title

@@ -74,29 +74,43 @@ func (w *World) applyAttackResult(res AttackResult) {
 // spent either way, so only the report and the news line come home.
 func (w *World) applyTerrorResult(sent InFlightStrike, res AttackResult) {
 	if e := w.FindByOwner(sent.Owner); e != nil {
-		switch {
-		case res.Report != "":
-			// The target board settled what the operation did and wrote the line;
-			// only it knows what was there to damage (#166).
-			e.addEvent(fmt.Sprintf("Your terrorists reached %s of %s. %s",
-				res.TargetEmpire, res.TargetBoard, res.Report))
-		case res.Won:
-			e.addEvent(fmt.Sprintf("Your terrorists struck %s of %s and destroyed %d of its forces.",
-				res.TargetEmpire, res.TargetBoard, res.LandTaken))
-		default:
-			e.addEvent(fmt.Sprintf("Your terrorists reached %s of %s and achieved nothing.",
-				res.TargetEmpire, res.TargetBoard))
-		}
+		e.addEvent(terrorReturnReport(sent, res))
 	}
-	if res.Won && res.LandTaken > 0 {
+	switch {
+	case res.Won && res.LandTaken > 0:
 		w.postNews(fmt.Sprintf("Our terror op on %s (%s) destroyed %d troopers!", res.TargetEmpire, res.TargetBoard, res.LandTaken))
-		return
+	case res.Won:
+		w.postNews(fmt.Sprintf("Our terror op on %s (%s) got through.", res.TargetEmpire, res.TargetBoard))
+	default:
+		w.postNews(fmt.Sprintf("Our terror op on %s (%s) was foiled.", res.TargetEmpire, res.TargetBoard))
+	}
+}
+
+// terrorReturnReport is what the sender reads when a terrorist op comes home.
+// It names the operation and says WHY nothing happened, where the three silent
+// outcomes — repelled, sheltered, no such realm — used to arrive as one
+// sentence the sender could not tell apart (#165). The Special Ops path already
+// worked this way; this is the terror path catching up.
+func terrorReturnReport(sent InFlightStrike, res AttackResult) string {
+	op := sent.TerrorOp.String()
+	switch res.outcome() {
+	case OutcomeNotFound:
+		return fmt.Sprintf("Your agents reached %s and found no realm called %s; the %s was abandoned.",
+			res.TargetBoard, res.TargetEmpire, op)
+	case OutcomeProtected:
+		return fmt.Sprintf("Your %s against %s of %s broke on their New Realm Protection.",
+			op, res.TargetEmpire, res.TargetBoard)
+	}
+	if res.Report != "" {
+		// The target board settled what the operation did and wrote the line; only
+		// it knows what was there to damage (#166).
+		return fmt.Sprintf("Your agents reached %s of %s. %s", res.TargetEmpire, res.TargetBoard, res.Report)
 	}
 	if res.Won {
-		w.postNews(fmt.Sprintf("Our terror op on %s (%s) got through.", res.TargetEmpire, res.TargetBoard))
-		return
+		return fmt.Sprintf("Your %s against %s of %s destroyed %d of its forces.",
+			op, res.TargetEmpire, res.TargetBoard, res.LandTaken)
 	}
-	w.postNews(fmt.Sprintf("Our terror op on %s (%s) was foiled.", res.TargetEmpire, res.TargetBoard))
+	return fmt.Sprintf("Your %s against %s of %s was turned away.", op, res.TargetEmpire, res.TargetBoard)
 }
 
 // survivorFor picks one owner's returning detachment out of the result. An owner
