@@ -167,8 +167,9 @@ func TestBroadcastCopyPathUsesDenseBase36Index(t *testing.T) {
 		{35, "packetz.brp"},
 		{36, "packet10.brp"},
 	} {
-		if got := broadcastCopyPath(path, tc.index); got != filepath.Join("out", tc.name) {
-			t.Errorf("broadcastCopyPath(%d) = %q, want %q", tc.index, got, tc.name)
+		want := filepath.Join("out", tc.name)
+		if got := broadcastCopyPath(path, tc.index); got != want {
+			t.Errorf("broadcastCopyPath(%d) = %q, want %q", tc.index, got, want)
 		}
 	}
 }
