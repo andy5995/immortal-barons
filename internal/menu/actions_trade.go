@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 	"strings"
+	"time"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -159,22 +160,36 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 	if !AskYesNo(s, "Send this trade deal?", true) {
 		return Stay
 	}
-	// BRE: a deal is sent for 2-5 days at a per-day gold fee and consumes a
-	// carrier. A standing Protective Trade agreement cuts the per-day rate.
+	// BRE: a deal is sent for a span of days at a per-day gold fee and consumes a
+	// carrier. A standing Protective Trade agreement cuts the per-day rate. The
+	// span is how long the offer stands before it lapses, so the ceiling here is
+	// what the sender can pay for — the original has no other limit.
 	perDay := int64(game.TradeDealGoldPerDay)
+	var purse int64
 	w.With(func() {
 		if p, recip := w.Player(), findRealm(w, toName); p != nil && recip != nil {
 			perDay = w.World.TradeDealGoldPerDayBetween(p, recip)
+			purse = p.Gold
 		}
 	})
+	// What is left after the gold being offered is what can pay for the span.
+	maxDays := game.TradeDealMinDays
+	if left := purse - int64(send.Gold); perDay > 0 && left > 0 {
+		if affordable := int(left / perDay); affordable > maxDays {
+			maxDays = affordable
+		}
+	}
 	fmt.Fprintf(s, "\n%s"+tr(s, "Sending costs %s gold per day; it needs one carrier.")+"%s\n",
 		ansi.Dim, comma(perDay), ansi.Reset)
-	days := promptSuggested(s, "How many days to send it for?", game.TradeDealMinDays, game.TradeDealMaxDays)
+	fmt.Fprintf(s, "%s"+tr(s, "The deal stands until the span runs out; unanswered, the goods are lost.")+"%s\n",
+		ansi.Dim, ansi.Reset)
+	suggested := game.TradeDealDefaultDays
+	if suggested > maxDays {
+		suggested = maxDays
+	}
+	days := promptSuggested(s, "How many days to send it for?", suggested, maxDays)
 	if days < game.TradeDealMinDays {
 		days = game.TradeDealMinDays
-	}
-	if days > game.TradeDealMaxDays {
-		days = game.TradeDealMaxDays
 	}
 
 	err := w.mutatePlayer(func(p *game.Empire) error {
@@ -198,6 +213,10 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 func reviewTradeDeals(s session.Session, w *ctx) {
 	var deals []game.TradeDeal
 	withPlayer(w, func(p *game.Empire) {
+		// Deals lapse here rather than in daily maintenance, which is where the
+		// original sweeps them too: whoever takes the next turn clears the stale
+		// ones (see World.ExpireTradeDeals).
+		w.World.ExpireTradeDeals(time.Now())
 		deals = append([]game.TradeDeal(nil), p.TradeDeals...)
 	})
 	for _, d := range deals {

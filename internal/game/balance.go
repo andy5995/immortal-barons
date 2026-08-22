@@ -1676,8 +1676,16 @@ const (
 	// times at High — a sixteenfold spread, where IB applied half and double.
 	MaintCostLowDivisor   = 4
 	MaintCostHighMultiple = 4
-	TradeDealMinDays      = 2 // shortest a deal may be sent for
-	TradeDealMaxDays      = 5 // longest a deal may be sent for
+	// The span a deal is sent for is also its LIFETIME: BRE stores now + days as
+	// the deal's expiry and drops it unanswered past that (create_trade_offer
+	// 0x2256 adds the day count to the clock global; process_trade_offer 0x24E5
+	// compares the stored stamp against it). BINARY-VERIFIED: the prompt refuses
+	// anything under two days (0x21B2) and offers ten as its default (0x1F7D).
+	// There is no upper bound in the original — what the sender can pay for is
+	// the only limit — so IB has none either, where it used to cap the span at
+	// five days.
+	TradeDealMinDays     = 2  // shortest a deal may be sent for
+	TradeDealDefaultDays = 10 // what the prompt offers
 
 	// ProtectiveTradeCostDivisor is what a Protective Trade agreement takes off
 	// the transit cost — the manual's "making trade deals cheaper to send and

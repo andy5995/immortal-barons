@@ -1206,6 +1206,7 @@ func (w *World) dropEmpires(gone func(*Empire) bool) {
 	for _, e := range forget {
 		w.forgetRelations(e.Name)
 		w.forgetMarketPosition(e.Name)
+		w.forfeitPendingDeals(e)
 	}
 }
 

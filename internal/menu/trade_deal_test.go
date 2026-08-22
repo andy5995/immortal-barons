@@ -75,3 +75,39 @@ func TestBasketSummary(t *testing.T) {
 		t.Errorf("empty basket should summarize as %q", "nothing")
 	}
 }
+
+// An ignored deal stays pending and is put to the player again the next time
+// they enter the game, however often that is in a day (#175). Nothing expires it
+// and nothing marks it seen, which is BRE's behaviour: run_player_turn calls
+// process_trade_offer on every entry that has a turn to play (BRE.EXE 0x3855),
+// with no per-day gate anywhere on the path.
+func TestIgnoredTradeDealComesBackOnTheNextEntry(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	other := recipients(w)[0]
+	goldBefore, otherGoldBefore := p.Gold, other.Gold
+	p.TradeDeals = []game.TradeDeal{{
+		From:   other.Name,
+		Send:   game.TradeBasket{Tanks: 100},
+		Demand: game.TradeBasket{Gold: 5_000},
+	}}
+
+	f := &fakeSession{keys: []rune("i")}
+	reviewTradeDeals(f, w)
+	if !strings.Contains(f.out.String(), "offers you a trade deal") {
+		t.Fatalf("first entry should present the deal, got:\n%s", f.out.String())
+	}
+	if len(w.Player().TradeDeals) != 1 {
+		t.Fatalf("ignore should leave the deal pending, got %d", len(w.Player().TradeDeals))
+	}
+	if p.Gold != goldBefore || other.Gold != otherGoldBefore {
+		t.Errorf("ignore should move nothing: player %d->%d, sender %d->%d",
+			goldBefore, p.Gold, otherGoldBefore, other.Gold)
+	}
+
+	f2 := &fakeSession{keys: []rune("i")}
+	reviewTradeDeals(f2, w)
+	if !strings.Contains(f2.out.String(), "offers you a trade deal") {
+		t.Errorf("the next entry should present it again, got:\n%s", f2.out.String())
+	}
+}

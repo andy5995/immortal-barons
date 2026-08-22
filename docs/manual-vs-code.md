@@ -71,8 +71,10 @@ The manual says the pact makes trade deals cheaper to send *and to maintain*.
 The send discount is real: `create_trade_offer` (`BRE.OVR` `0x0268bc`) compares
 the recipient's relation against the Protective Trade value and divides the
 per-day transit cost by three, before the span is chosen. The other half
-describes nothing — the cost routine is called from two sites, charged once up
-front, and no recurring trade cost exists anywhere in the program.
+describes nothing recurring — the cost routine is called from two sites, charged
+once up front, and nothing bills a standing deal again. The nearest thing to
+"maintain" is that the span being paid for is the deal's lifetime, so a longer
+offer costs more; but it is one payment at the counter, not upkeep.
 
 **Immortal Barons** implements the discount and does not invent an upkeep to
 discount.

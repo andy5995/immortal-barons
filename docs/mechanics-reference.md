@@ -3533,8 +3533,12 @@ prints it as an "Awaiting a reply" block under the Relations table; no new state
 is stored, so the two views cannot drift. Safe because your own outgoing offers
 are information you already hold — nothing about another realm is revealed.
 
-Two rules go with it. A proposal **does not expire**: it stands until the target
-accepts, rejects, or is eliminated. And a **new proposal to the same realm
+Two rules go with it. A proposal **does not expire** — BINARY-VERIFIED, and the
+answer to #95: it stands until the target accepts, rejects, or is eliminated.
+`process_diplomatic_proposal` (`BRE.OVR` 0x1CF73) walks the same record list a
+trade deal uses and selects proposals by type, then goes straight to the
+identity checks; the timestamp compare that lapses a trade deal has no
+counterpart there, and the proposal record carries no day count to compare. And a **new proposal to the same realm
 replaces the pending one**, for the same reason a pair holds one relation at a
 time (#88) — only one can ever be agreed, so leaving both live would let a realm
 accept a pact the proposer had already thought better of. Re-sending the
@@ -3785,6 +3789,34 @@ acceptance, and as mail: a decline returned the escrow silently, leaving the
 proposer to notice their own stock coming back. The offer itself puts nothing
 in the mailbox either; the recipient meets it at turn start, as with a treaty
 proposal.
+
+**A deal lasts exactly the span it was sent for, and only an acceptance ever
+moves the goods — BINARY-VERIFIED.** The days prompt is not a pricing dial: BRE
+adds the day count to the clock and stores the result on the offer record
+(`create_trade_offer` 0x2256), and the turn-start sweep compares that stamp
+against the clock, deleting the record and telling the sender its trade fleet
+got no response (`process_trade_offer` 0x24E5). The prompt refuses fewer than
+two days (0x21B2), offers ten as its default (0x1F7D), and has no ceiling —
+what the sender can pay for is the only limit, where IB used to cap the span at
+five days.
+
+Nothing gives the escrow back. The rejection branch files the notice and zeroes
+the 151-byte record (0xDC4) with no goods moving, the lapse branch does the same
+(0x511), and the branch for a target that can no longer be found does the same
+again (0x562) — every routine that moves goods sits inside the accept branch.
+So sending a deal is a bet: the goods leave when it is sent, and they come back
+only if the offer is taken. That settles #174 — the escrow is forfeit when the
+recipient dies, and the sender is told, which is what IB now does on all three
+paths. IB previously returned the goods on a decline.
+
+**A pending deal is put again on every entry, and out of turns is asked
+nothing.** `run_player_turn` calls `process_trade_offer` behind a
+turns-remaining test (`BRE.EXE` 0x3842) with no per-day gate of any kind, so
+ignoring a deal only defers it to the next entry that has a turn to play — the
+second question in #175. The recap entries and the mailbox are on the other side
+of that test (0x385F) and are shown either way, before "Sorry, you have used all
+of your turns today." (0x3F8D); IB returned at that message and showed neither.
+Both of #175's questions are now answered above.
 
 ## News files (what BRE broadcasts)
 

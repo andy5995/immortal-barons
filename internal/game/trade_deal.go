@@ -3,6 +3,7 @@ package game
 import (
 	"errors"
 	"fmt"
+	"time"
 )
 
 // ErrTradeSenderGone is returned when a trade deal's proposer no longer exists
@@ -111,15 +112,18 @@ type TradeDeal struct {
 	From   string
 	Send   TradeBasket // goods the sender gives the recipient
 	Demand TradeBasket // goods the sender wants back from the recipient
+	// Expires is when the deal lapses unanswered — the span it was sent for,
+	// counted from the moment it was sent. A deal saved before deals expired
+	// carries the zero time and stands forever, as it did when it was written.
+	Expires time.Time `json:",omitempty"`
 }
 
-// clampTradeDealDays holds a requested span to the allowed 2-5 days.
+// clampTradeDealDays holds a requested span to the two-day minimum. There is no
+// maximum: BRE checks only the floor, and the per-day cost is what bounds a long
+// deal (see TradeDealMinDays).
 func clampTradeDealDays(days int) int {
 	if days < TradeDealMinDays {
 		return TradeDealMinDays
-	}
-	if days > TradeDealMaxDays {
-		return TradeDealMaxDays
 	}
 	return days
 }
@@ -189,7 +193,12 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	subBasket(from, send)              // escrow the offered goods
 	from.Carriers -= TradeDealCarriers // the transport carrier is consumed
 	from.Gold -= cost                  // pay the per-day transit fee
-	to.TradeDeals = append(to.TradeDeals, TradeDeal{From: from.Name, Send: send, Demand: demand})
+	to.TradeDeals = append(to.TradeDeals, TradeDeal{
+		From:    from.Name,
+		Send:    send,
+		Demand:  demand,
+		Expires: time.Now().AddDate(0, 0, clampTradeDealDays(days)),
+	})
 	// The offer mails nothing: the recipient meets it at turn start, where the
 	// baskets and the accept prompt are. Same reason a treaty proposal stopped
 	// mailing (a1b309f) — a generated line telling them what the screen is
@@ -249,18 +258,56 @@ func notifyTrader(from, to *Empire, verb string) {
 	from.addEvent(fmt.Sprintf("%s %s your trade deal.", to.Name, verb))
 }
 
-// DeclineTradeDeal drops a pending deal and returns the escrowed Send goods to
-// the (re-resolved) sender. Returns false if there was no such deal.
+// DeclineTradeDeal drops a pending deal. The escrow is NOT returned: acceptance
+// is the only outcome in the original that moves the offered goods anywhere.
+// process_trade_offer answers a rejection by filing the notice and zeroing the
+// 0x97-byte record (`clear_trade_offer_record` at 0xDC4), and the whole of its
+// goods-moving code sits in the accept branch — nothing credits the sender back.
+// Sending is therefore a real bet on the answer, and IB used to return the goods.
 func (w *World) DeclineTradeDeal(to *Empire, fromName string) bool {
 	i := findDeal(to, fromName)
 	if i < 0 {
 		return false
 	}
-	d := to.TradeDeals[i]
 	if from := w.FindByName(fromName); from != nil {
-		w.addBasket(from, d.Send) // return the escrow
 		notifyTrader(from, to, "rejected")
 	}
 	to.removeDeal(i)
 	return true
+}
+
+// ExpireTradeDeals drops every pending deal whose span has run out and tells the
+// realm that sent it. The escrow goes with it — see DeclineTradeDeal.
+//
+// BRE sweeps lazily, inside the turn-start routine that puts pending deals to a
+// player (process_trade_offer 0x24E5): whoever plays next is who clears the
+// stale ones, so a deal outlives its span until someone takes a turn. IB does
+// the same rather than expiring them in daily maintenance.
+func (w *World) ExpireTradeDeals(now time.Time) {
+	for _, e := range w.Empires {
+		kept := e.TradeDeals[:0]
+		for _, d := range e.TradeDeals {
+			if !d.Expires.IsZero() && now.After(d.Expires) {
+				if from := w.FindByName(d.From); from != nil {
+					from.addEvent(fmt.Sprintf("%s never answered your trade deal, and the goods you sent it with are lost.", e.Name))
+				}
+				continue
+			}
+			kept = append(kept, d)
+		}
+		e.TradeDeals = kept
+	}
+}
+
+// forfeitPendingDeals tells each realm holding a deal on e that its trade fleet
+// found nobody there. Called when e leaves the world — eliminated, abdicated or
+// reaped as idle — where the goods would otherwise vanish with no word at all
+// (#174). They are forfeit, as they are on a rejection and on an expiry.
+func (w *World) forfeitPendingDeals(e *Empire) {
+	for _, d := range e.TradeDeals {
+		if from := w.FindByName(d.From); from != nil && from != e {
+			from.addEvent(fmt.Sprintf("Your trade fleet could not find %s, and the goods you sent it with are lost.", e.Name))
+		}
+	}
+	e.TradeDeals = nil
 }

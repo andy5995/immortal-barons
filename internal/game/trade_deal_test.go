@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"testing"
+	"time"
+)
 
 // Sending escrows the offered goods, consumes a transport carrier, and charges
 // the per-day fee. Accepting delivers the offered goods to the recipient and
@@ -78,9 +81,9 @@ func TestSendTradeDealNeedsFee(t *testing.T) {
 	}
 }
 
-// Declining returns the escrowed offered goods to the sender (but not the spent
-// carrier or fee) and drops the deal.
-func TestDeclineTradeDealReturnsEscrow(t *testing.T) {
+// Declining drops the deal and keeps nobody's goods moving: the escrow is gone,
+// as it is in the original, where only an acceptance ever moves it.
+func TestDeclineTradeDealForfeitsEscrow(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	from := w.AddHuman("f", "Fromland")
 	to := w.AddHuman("t", "Toland")
@@ -93,11 +96,14 @@ func TestDeclineTradeDealReturnsEscrow(t *testing.T) {
 	if !w.DeclineTradeDeal(to, "Fromland") {
 		t.Fatal("decline should find and drop the deal")
 	}
-	if from.Tanks != 500 {
-		t.Errorf("decline should return escrowed tanks: %d, want 500", from.Tanks)
+	if from.Tanks != 400 {
+		t.Errorf("decline forfeits the escrow, as the original does: %d, want 400", from.Tanks)
 	}
 	if from.Carriers != 0 {
 		t.Errorf("the spent carrier is not returned on decline: %d, want 0", from.Carriers)
+	}
+	if len(from.Events) != 1 {
+		t.Errorf("the sender should be told once, got %v", from.Events)
 	}
 	if to.Gold != toGoldBefore {
 		t.Errorf("decline should not move the recipient's gold: %d, want %d", to.Gold, toGoldBefore)
@@ -279,5 +285,80 @@ func TestTradeDealAnswersAreFiledOnTheProposersRecap(t *testing.T) {
 				t.Errorf("recap entry = %q, want %q", got, tc.want)
 			}
 		})
+	}
+}
+
+// A deal outlives the span it was sent for by nobody's action: it lapses the
+// next time a turn sweeps the list, the sender is told, and the goods are gone
+// (#175). BRE stores now + days on the record and compares it against the clock
+// at turn start (process_trade_offer 0x24E5).
+func TestTradeDealExpiresAfterItsSpan(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	from := w.AddHuman("f", "Fromland")
+	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
+	pactAll(w, fullDefenseAlliance)
+	from.Tanks, from.Carriers, from.Gold = 500, 1, 300_000
+
+	if err := w.SendTradeDeal(from, to, TradeBasket{Tanks: 100}, TradeBasket{}, TradeDealMinDays); err != nil {
+		t.Fatalf("send: %v", err)
+	}
+	sent := to.TradeDeals[0]
+	if sent.Expires.IsZero() {
+		t.Fatal("a sent deal should carry the day it lapses")
+	}
+
+	w.ExpireTradeDeals(sent.Expires.Add(-time.Hour))
+	if len(to.TradeDeals) != 1 {
+		t.Fatal("a deal inside its span must not be swept")
+	}
+
+	before := len(from.Events)
+	w.ExpireTradeDeals(sent.Expires.Add(time.Hour))
+	if len(to.TradeDeals) != 0 {
+		t.Error("a deal past its span should be swept")
+	}
+	if from.Tanks != 400 {
+		t.Errorf("the escrow is forfeit on a lapse: %d tanks, want 400", from.Tanks)
+	}
+	if len(from.Events) != before+1 {
+		t.Fatalf("the sender should be told once, got %v", from.Events[before:])
+	}
+}
+
+// A deal saved before deals carried an expiry stands, rather than lapsing the
+// moment it is next looked at.
+func TestTradeDealWithNoExpiryNeverLapses(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	from := w.AddHuman("f", "Fromland")
+	to := w.AddHuman("t", "Toland")
+	to.TradeDeals = []TradeDeal{{From: from.Name, Send: TradeBasket{Tanks: 1}}}
+
+	w.ExpireTradeDeals(time.Now().AddDate(1, 0, 0))
+	if len(to.TradeDeals) != 1 {
+		t.Error("a deal with no recorded expiry should stand")
+	}
+}
+
+// A realm leaving the world takes its pending deals with it, and every realm
+// waiting on one is told rather than watching goods never come back (#174).
+func TestRemovingARealmTellsWhoeverSentItADeal(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	from := w.AddHuman("f", "Fromland")
+	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
+	pactAll(w, fullDefenseAlliance)
+	from.Tanks, from.Carriers, from.Gold = 500, 1, 300_000
+	if err := w.SendTradeDeal(from, to, TradeBasket{Tanks: 100}, TradeBasket{}, TradeDealMinDays); err != nil {
+		t.Fatalf("send: %v", err)
+	}
+
+	before := len(from.Events)
+	w.RemoveEmpire(to)
+	if len(from.Events) != before+1 {
+		t.Fatalf("the sender should be told the fleet found nobody, got %v", from.Events[before:])
+	}
+	if from.Tanks != 400 {
+		t.Errorf("the escrow goes with the realm: %d tanks, want 400", from.Tanks)
 	}
 }
