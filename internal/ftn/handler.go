@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -183,8 +184,8 @@ func preflightPacket(source, claimed string, transport Config, world *game.World
 	if len(recipients) == 0 {
 		return game.Packet{}, false, 0, fmt.Errorf("broadcast has no other board in %s", store.NodeListFile)
 	}
-	for _, node := range recipients[1:] {
-		copyPath := broadcastCopyPath(attached, node.Number)
+	for copyIndex, node := range recipients[1:] {
+		copyPath := broadcastCopyPath(attached, copyIndex)
 		_, copySpare, err := fileAttachSubject(transport, copyPath)
 		if err != nil {
 			return game.Packet{}, false, 0, fmt.Errorf("broadcast attachment for node %d: %w", node.Number, err)
@@ -280,8 +281,8 @@ func queueBroadcast(path string, transport Config, origin Address, world *game.W
 	}
 
 	paths := []string{path}
-	for _, node := range recipients[1:] {
-		copyPath := broadcastCopyPath(path, node.Number)
+	for copyIndex, node := range recipients[1:] {
+		copyPath := broadcastCopyPath(path, copyIndex)
 		if err := copyFileExclusive(path, copyPath); err != nil {
 			removeFiles(paths[1:])
 			return nil, fmt.Errorf("copy broadcast for node %d: %w", node.Number, err)
@@ -338,9 +339,12 @@ func copyFileExclusive(source, destination string) (err error) {
 	return err
 }
 
-func broadcastCopyPath(path string, node int) string {
+// broadcastCopyPath gives each extra recipient a distinct attachment without
+// letting sparse roster node numbers consume the Type-2 Subject field. The
+// first recipient keeps path itself; copyIndex zero names the second.
+func broadcastCopyPath(path string, copyIndex int) string {
 	ext := filepath.Ext(path)
-	return strings.TrimSuffix(path, ext) + fmt.Sprintf("-n%d", node) + ext
+	return strings.TrimSuffix(path, ext) + strconv.FormatInt(int64(copyIndex), 36) + ext
 }
 
 func queueForNode(path string, transport Config, origin Address, node game.LeagueNode) (Queued, error) {
