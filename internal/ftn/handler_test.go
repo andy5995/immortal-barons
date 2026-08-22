@@ -109,6 +109,14 @@ func TestConcurrentRunsQueuePacketOnce(t *testing.T) {
 
 func TestBroadcastGetsOneAttachmentPerOtherBoard(t *testing.T) {
 	data := newTestSetup(t)
+	// Sparse roster numbers must not make the attachment name longer. The
+	// transport copy is identified by its dense recipient position instead.
+	roster := "1\nAlpha BBS\n1:229/100\nDetroit\nMI\nUSA\n\n" +
+		"2\nBravo BBS\n1:229/200\nLansing\nMI\nUSA\n\n" +
+		"999\nCharlie BBS\n1:229/300\nFlint\nMI\nUSA\n"
+	if err := os.WriteFile(filepath.Join(data, store.NodeListFile), []byte(roster), 0o644); err != nil {
+		t.Fatal(err)
+	}
 	writePacket(t, data, game.Packet{FromBoard: "Bravo BBS", FromNode: 2})
 
 	result, err := Run(data)
@@ -122,9 +130,10 @@ func TestBroadcastGetsOneAttachmentPerOtherBoard(t *testing.T) {
 		name    string
 		address string
 		node    uint16
+		packet  string
 	}{
-		{"Alpha BBS", "1:229/100", 100},
-		{"Charlie BBS", "1:229/300", 300},
+		{"Alpha BBS", "1:229/100", 100, "packet.brp"},
+		{"Charlie BBS", "1:229/300", 300, "packet0.brp"},
 	}
 	seenPaths := map[string]bool{}
 	for i, queued := range result.Queued {
@@ -135,12 +144,31 @@ func TestBroadcastGetsOneAttachmentPerOtherBoard(t *testing.T) {
 			t.Errorf("two broadcast messages share attachment %s", queued.PacketPath)
 		}
 		seenPaths[queued.PacketPath] = true
+		if got := filepath.Base(queued.PacketPath); got != want[i].packet {
+			t.Errorf("message %d attachment = %q, want %q", i, got, want[i].packet)
+		}
 		message, err := os.ReadFile(queued.Message)
 		if err != nil {
 			t.Fatal(err)
 		}
 		if got := binary.LittleEndian.Uint16(message[166:168]); got != want[i].node {
 			t.Errorf("message %d destination node = %d, want %d", i, got, want[i].node)
+		}
+	}
+}
+
+func TestBroadcastCopyPathUsesDenseBase36Index(t *testing.T) {
+	path := filepath.Join("out", "packet.brp")
+	for _, tc := range []struct {
+		index int
+		name  string
+	}{
+		{0, "packet0.brp"},
+		{35, "packetz.brp"},
+		{36, "packet10.brp"},
+	} {
+		if got := broadcastCopyPath(path, tc.index); got != filepath.Join("out", tc.name) {
+			t.Errorf("broadcastCopyPath(%d) = %q, want %q", tc.index, got, tc.name)
 		}
 	}
 }
@@ -171,8 +199,8 @@ func TestRunPreflightsEverySubjectBeforeMovingPackets(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// Make the base attachment fit exactly. The -n3 copy needed by the second
-	// broadcast recipient then exceeds the Type-2 subject field.
+	// Make the base attachment fit exactly. The one-character copy index needed
+	// by the second broadcast recipient then exceeds the Type-2 subject field.
 	fidoDir := filepath.Join(outbound, "fido")
 	stemBytes := type2SubjectSize - 1 - len(fidoDir) - 1 - len(store.PacketExt)
 	if stemBytes < 1 {

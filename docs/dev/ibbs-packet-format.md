@@ -51,7 +51,12 @@ modern packet at league 0 gets a short digest of its origin board before those
 three numbers, preventing equal node numbers in two leagues sharing a directory
 from colliding. A legacy packet without a stable origin node and sequence gets
 a deterministic 128-bit content digest instead. A transport that fans out must
-copy a broadcast to every other board's inbound.
+copy a broadcast to every other board's inbound. `barons-ftn` leaves the first
+broadcast attachment's name unchanged and appends a zero-based, base-36 copy
+index directly to the stem for each additional recipient (`packet0.brp`,
+`packet1.brp`, ...). The dense index is transport-only: sparse roster node
+numbers do not lengthen the attachment name, and packet identity remains in the
+JSON rather than the copy suffix.
 
 The short name leaves room for FTN `.msg` transports, whose Subject must carry
 the attachment pathname in at most 71 bytes. That byte budget is an FTN
