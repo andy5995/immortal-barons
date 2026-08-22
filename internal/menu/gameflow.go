@@ -255,11 +255,64 @@ func showTurnEvents(s session.Session, w *ctx) {
 	// this recap (docs/dev/bre-screens.md, "Since your last play" capture).
 	recapTokens := append(realmNames, game.TreatyTypes...)
 	fmt.Fprintf(s, "\n%s%s%s\n\n", ansi.FgWhite, tr(s, "Since your last play, this has happened:"), ansi.Reset)
-	for i, ev := range events {
-		body := hiTokens(wrapReport(ev.Text), recapTokens, ansi.FgBrightCyan)
+	rows := recapHeaderRows
+	for i, ev := range countRepeats(events) {
+		text := ev.Text
+		if ev.Count > 1 {
+			text = fmt.Sprintf("%s %s", text, fmt.Sprintf(tr(s, "(%d times)"), ev.Count))
+		}
+		body := hiTokens(wrapReport(text), recapTokens, ansi.FgBrightCyan)
+		// Rule, the body's own lines, and the blank line after it.
+		entryRows := 2 + strings.Count(body, "\n")
+		if rows+entryRows > recapPageRows {
+			pauseTight(s)
+			rows = 0
+		}
+		rows += entryRows
 		fmt.Fprintf(s, "%s\n%s\n\n", eventRule(i+1, ev.When), hiNums(body))
 	}
 	pause(s)
+}
+
+// recapPageRows is how much of the recap goes by before it waits for a key, and
+// recapHeaderRows is what its own heading has already spent. An 80x24 screen
+// with the Paused bar on the last row is what these leave room for; the recap is
+// the one screen a player can arrive at with a whole day of entries queued, and
+// a terminal without scrollback loses everything above the fold.
+const (
+	recapPageRows   = 22
+	recapHeaderRows = 2
+)
+
+// countedEvent is one recap line and how many times its exact text was filed
+// since the last play. Repeats are counted rather than listed, which is what the
+// original does with a batch of interplanetary terror operations: `ipreport.dat`
+// carries a MULTI_ and a SINGLE_ template per outcome and the multi form counts
+// the occurrences ("... %N times!"). BRE only does this for that one report —
+// its local covert resolver writes a line per operation — so counting the local
+// ones too is IB's own, recorded in docs/mechanics-reference.md.
+type countedEvent struct {
+	game.Event
+	Count int
+}
+
+// countRepeats folds events sharing the same text into one entry apiece, in the
+// order each text first appeared, keeping that first entry's timestamp. Repeats
+// need not be adjacent: five covert operations resolving in one maintenance pass
+// interleave their successes and failures, and the player wants two lines, not
+// five.
+func countRepeats(events []game.Event) []countedEvent {
+	var out []countedEvent
+	at := make(map[string]int, len(events))
+	for _, ev := range events {
+		if i, seen := at[ev.Text]; seen {
+			out[i].Count++
+			continue
+		}
+		at[ev.Text] = len(out)
+		out = append(out, countedEvent{Event: ev, Count: 1})
+	}
+	return out
 }
 
 // Recap-rule geometry, measured off a live BRE capture: the rule runs 76 columns

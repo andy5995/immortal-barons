@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 
@@ -1119,5 +1120,55 @@ func TestOutOfTurnsStillShowsRecapAndMail(t *testing.T) {
 	}
 	if len(w.Player().TradeDeals) != 1 {
 		t.Errorf("the deal should stay pending for a turn they can play, got %d", len(w.Player().TradeDeals))
+	}
+}
+
+// A day's worth of recap entries waits for a key rather than scrolling off an
+// 80x24 screen (there is no scrollback on a terminal reading a door).
+func TestTurnRecapPausesBeforeItRunsOffTheScreen(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	for i := range 12 {
+		p.Events = append(p.Events, game.Event{Text: fmt.Sprintf("Raiders took %d gold.", (i+1)*11)})
+	}
+
+	f := &fakeSession{keys: []rune("   ")}
+	showTurnEvents(f, w)
+
+	out := stripANSI(f.out.String())
+	if got := strings.Count(out, "Paused"); got < 2 {
+		t.Errorf("12 entries should pause mid-recap as well as at the end, got %d pause(s):\n%s", got, out)
+	}
+	if !strings.Contains(out, "Raiders took 132 gold.") {
+		t.Error("the last entry should still be drawn after the pause")
+	}
+}
+
+// Entries repeating the same text are counted, not listed one by one — a day of
+// covert operations resolving together otherwise fills the screen with the same
+// sentence.
+func TestTurnRecapCountsRepeatedEntries(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Events = []game.Event{
+		{Text: "You demoralized Redmark's forces."},
+		{Text: "You demoralized Redmark's forces."},
+		{Text: "The operation failed and your agent was lost."},
+		{Text: "You demoralized Redmark's forces."},
+		{Text: "The operation failed and your agent was lost."},
+	}
+
+	f := &fakeSession{keys: []rune(" ")}
+	showTurnEvents(f, w)
+
+	out := stripANSI(f.out.String())
+	if got := strings.Count(out, "You demoralized"); got != 1 {
+		t.Errorf("the repeated line should be drawn once, got %d:\n%s", got, out)
+	}
+	if !strings.Contains(out, "(3 times)") || !strings.Contains(out, "(2 times)") {
+		t.Errorf("both repeats should carry their count:\n%s", out)
+	}
+	if strings.Contains(out, "(1 times)") {
+		t.Error("a one-off entry should carry no count")
 	}
 }
