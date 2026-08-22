@@ -844,7 +844,46 @@ func runLeagueRoutes(cfg game.Config) error {
 	}
 	fmt.Printf("This board: %s (node %d), league %s\n", cfg.BoardID, w.NodeNumber(cfg.BoardID), leagueLabel(cfg.LeagueName, cfg.LeagueNumber))
 	if !w.Routed() {
-		fmt.Println("The roster carries no HOST routing, so this board links to every other one.")
+		broadcastDir := cfg.Outbound()
+		others := 0
+		var elsewhere []string
+		for _, p := range planets {
+			if p.Name == cfg.BoardID {
+				continue
+			}
+			others++
+			// A Link line is the sysop saying this neighbour's files go in a
+			// directory of its own, which is what a per-node queue needs. An
+			// unaddressed broadcast is never written to one of those.
+			if dir, ok := cfg.OutboundLink(w.NodeNumber(p.Name)); ok && dir != broadcastDir {
+				elsewhere = append(elsewhere, p.Name)
+			}
+		}
+		boards := fmt.Sprintf("the other %d boards", others)
+		if others == 1 {
+			boards = "the one other board"
+		}
+		// A league without HOST lines is a legitimate setup, so this is a
+		// description and not a FAIL: only the sysop knows whether the
+		// transport copies one file to everybody. Saying it here is what a
+		// three-board rig needed four exchange cycles to notice (#168).
+		fmt.Println(textwrap.Wrap(fmt.Sprintf("The roster carries no HOST routing, so this board links to every other one. "+
+			"A broadcast is written unaddressed to %s, and your transport has to copy that one file to %s. "+
+			"A per-node queue, such as a binkp file box or an FTN file attach, delivers it to one board unless a "+
+			"connector in front of it fans the file out. See \"How packets move\" in the Inter-BBS guide.",
+			broadcastDir, boards), textwrap.Console, ""))
+		if len(elsewhere) > 0 {
+			body := fmt.Sprintf("%s are handed packets in directories of their own, and a broadcast is written "+
+				"to none of them. Nothing this board writes carries one to them unless something copies it out of %s.",
+				strings.Join(elsewhere, ", "), broadcastDir)
+			if len(elsewhere) == 1 {
+				body = fmt.Sprintf("%s is handed packets in a directory of its own, and a broadcast is not written "+
+					"there. Nothing this board writes carries one to it unless something copies it out of %s.",
+					elsewhere[0], broadcastDir)
+			}
+			const prefix = "warning: "
+			fmt.Print(prefix, textwrap.Wrap(body, textwrap.Console-len(prefix), strings.Repeat(" ", len(prefix))), "\n")
+		}
 	}
 	fmt.Printf("\n%-24s %-24s %s\n", "PLANET", "HANDED TO", "WRITTEN IN")
 	for _, p := range planets {
