@@ -16,14 +16,28 @@ import (
 // this project's other scripts), but re-running it would discard hand edits, so
 // it is a starting point rather than a build step.
 //
-// The art is a half-block pixel canvas: every cell is U+2580, its foreground
+// The art is a half-block pixel canvas: an art cell is U+2580, its foreground
 // painting the cell's top pixel and its background the bottom one. That makes
 // pixels square, which is what lets the planets read as spheres — a circle
 // drawn with whole character cells comes out twice as tall as it is wide. The
 // wordmark is a 5x7 bitmap on the same canvas, so it costs four rows where a
-// FIGlet block font costs six. Every object is lit from the upper left.
-// Modern terminals and xterm.js render the 256-color ramps; a 16-color client
-// degrades gracefully.
+// FIGlet block font costs six, and it is bevelled rather than filled flat: it
+// is the piece's signature element and gets the only bright color in it.
+// Every object is lit from the upper left.
+//
+// The background cells are the exception to U+2580 — stars and the nebula
+// drift are punctuation glyphs ('.', U+00B7, U+00B0) in near-black colors,
+// because they need far less ink per cell than the lightest shade block can
+// give. Modern terminals and xterm.js render the 256-color ramps; a 16-color
+// client degrades gracefully.
+//
+// Both the shading and the limbs are ORDERED-DITHERED at pixel resolution.
+// The 256-color cube carries six levels per channel, which is not enough to
+// render a sphere without visible banding, and a partly covered edge pixel has
+// no dark saturated color to fade into — so each pixel is scattered between
+// the two palette entries that straddle its true color, and coverage is
+// applied as the same kind of alpha. The generator carries the reasoning and
+// the two approaches that were tried first and did not work.
 //
 // The art fills all 80 columns, which is only safe because Splash turns AUTOWRAP
 // OFF around it (ansi.WrapOff). Painting column 80 otherwise wraps the cursor by
