@@ -1187,6 +1187,14 @@ Enter Planet Name or Number (? for list): Starship Junkyard
 
 ### InterBBS Scores (IP Ops → View IPScores)
 
+**IB substitutes its own name in the title, deliberately.** The original heads
+this screen with its product name (`Barren Realms Elite: Top Planets by Score`),
+so cloning the layout faithfully means putting OURS there — a title is branding,
+not a mechanic, and the licence line is that IB may replicate the original's
+shape but never present itself as the original. IB printed the original's name
+here until 2026-08-23, which is the one place in the whole game it ever did.
+Colours and geometry are unchanged.
+
 Gray accent. A menu of eight ranking views + Quit; each opens a `»Planetary
 Post«` table.
 

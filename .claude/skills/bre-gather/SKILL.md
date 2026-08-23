@@ -909,7 +909,20 @@ strictly limited. The idea/expression line:
   "Clingy Annihilator".
 
 **Trademark / branding:** do not present the project as "Barren Realms Elite" or
-use its name/logo as our branding. IB is an independent tribute, "not affiliated
+use its name/logo as our branding.
+
+**The trap is SCREEN TITLES.** A captured screen is copied for its layout and
+colours, and the original's product name sits right there in the header looking
+like part of the design. It is not — it is the branding, and it is the one
+element of a captured screen that must be substituted rather than reproduced. IB
+shipped `Barren Realms Elite: Top Planets by Score` as its own InterBBS Scores
+title for months for exactly this reason. When cloning a screen, ask what in it
+is the original's NAME and replace that; keep everything else.
+
+Naming the original in *prose* is fine and often required — the About screen's
+attribution and disclaimer, the README's Heritage section, a doc explaining a
+divergence. The line is identity, not mention: describing IB as a clone OF the
+original is fine, heading IB's own screen WITH the original's name is not. IB is an independent tribute, "not affiliated
 with, or endorsed by" the original authors (README "Heritage").
 
 **Never ship BRE's files:** do not distribute, commit, or bundle `BRE.EXE` /

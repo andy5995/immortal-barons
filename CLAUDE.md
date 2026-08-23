@@ -7,6 +7,15 @@ copy verbatim display text/art from the original into this repo, and never
 put John Dailey's (or any third party's) private contact info into any
 artifact here.
 
+**Never put the original's NAME on IB's own screens.** Cloning a captured screen
+copies its layout and colours; the product name in its header is branding, not
+design, and must be replaced with IB's. The InterBBS Scores view shipped as
+"Barren Realms Elite: Top Planets by Score" for months because the title came
+along with the layout (fixed 2026-08-23; `TestScreensDoNotWearTheOriginalsName`
+guards it). Naming the original in prose is fine and sometimes required — the
+About screen's attribution and disclaimer, the README's Heritage, a doc
+explaining a divergence. The line is identity, not mention.
+
 Be careful with other people's names and handles in repo artifacts (code,
 comments, docs, commit messages, ChangeLog). The line is public vs. private:
 

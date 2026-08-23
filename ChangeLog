@@ -27,6 +27,7 @@
   * A nuclear, chemical or biological strike scores a flat award
   * A won pirate raid scores 100 to 399; a lost one costs nothing
   * Missile Ops and Bombing Ops govern Special Operations alone, not local menus
+  * The InterBBS Scores screen is headed Immortal Barons, not the original's name
 
 2026-08-21 (v0.0.6)
   * Local covert effect operations resolve at daily maintenance

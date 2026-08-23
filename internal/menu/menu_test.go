@@ -511,7 +511,7 @@ func TestIPScoresMatchesBRE(t *testing.T) {
 		"Top Planets by Land", "Top Planets by Net Worth Density",
 		"Top Players by Score", "Top Players by Net Worth",
 		"Top Players by Land", "Top Players by Net Worth Density",
-		"Barren Realms Elite", "Planetary Post",
+		"Immortal Barons", "Planetary Post",
 		"ZZap BBS", "61000",
 		"Testland", // local empire must appear in player view
 	} {
@@ -916,5 +916,36 @@ func TestChangeRealmNameLockedWhileProtected(t *testing.T) {
 	}
 	if p.Name != "Testland" || p.FormerName != "" {
 		t.Errorf("realm = %q (was %q); want Testland unrenamed", p.Name, p.FormerName)
+	}
+}
+
+// The game must never put the original's product name on its own screens. It did
+// once — the InterBBS Scores view was headed "Barren Realms Elite: Top Planets by
+// Score", because the screen was cloned from a capture and the title went with
+// the layout. Matching the original's shape is the project; wearing its name is
+// not, and a title is branding rather than a mechanic.
+//
+// The About screen is the deliberate exception: naming the original is how the
+// tribute is credited and how the disclaimer disowns any affiliation.
+func TestScreensDoNotWearTheOriginalsName(t *testing.T) {
+	w := newWorld()
+	w.Config.IBBS = true
+	w.Config.BoardID = "Testland"
+	w.ImportBoard(game.RemoteBoard{BoardID: "ZZap BBS",
+		Scores: []game.RemoteScore{{Empire: "Iron Dominion", Land: 120, NetWorth: 50000, Score: 61000}}})
+
+	for _, tc := range []struct {
+		name string
+		draw func(session.Session, *ctx) Result
+	}{
+		{"InterBBS Scores", interbbsScores},
+		{"Travel Times", travelTimes},
+		{"Game Setup", gameSetup},
+	} {
+		f := &fakeSession{keys: []rune("        ")}
+		tc.draw(f, w)
+		if out := stripANSI(f.out.String()); strings.Contains(out, "Barren Realms") {
+			t.Errorf("%s names the original on screen:\n%s", tc.name, out)
+		}
 	}
 }

@@ -10,8 +10,8 @@ in_game: true
 In a league game you can buy from another planet's Trading Market. Open Trading
 from the InterPlanetary Operations menu, then Markets, and choose a planet.
 
-Only planets your Coordinator has marked Allied are listed. Barren Realms Elite
-had no way to trade between planets at all, so this is new.
+Only planets your Coordinator has marked Allied are listed. Buying across
+planets is an Immortal Barons feature, and a league may switch it off.
 
 ## Your order is a bid, not a purchase
 

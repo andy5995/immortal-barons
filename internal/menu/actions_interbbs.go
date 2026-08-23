@@ -274,8 +274,14 @@ func ipScoreRank(s session.Session, w *ctx, rows []ipScoreRow, kind ipRankKind) 
 	}
 	viewName := ipScoreViewName(s, kind)
 	rule := strings.Repeat("─", 72)
-	// Title: "Barren Realms Elite: <view name>" (bright-white + gray ": " + bright-red name).
-	fmt.Fprintf(s, "\n%s%s%s: %s%s%s\n", ansi.FgBrightWhite, tr(s, "Barren Realms Elite"),
+	// Title: "<game name>: <view name>" (bright-white + gray ": " + bright-red name).
+	//
+	// DELIBERATE DIVERGENCE, and one that must never be "corrected" back: the
+	// original heads this screen with its OWN product name, so copying the layout
+	// faithfully means substituting ours. A title is branding, not a mechanic —
+	// see the licence note in the bre-gather skill. IB printed the original's name
+	// here until 2026-08-23.
+	fmt.Fprintf(s, "\n%s%s%s: %s%s%s\n", ansi.FgBrightWhite, tr(s, "Immortal Barons"),
 		ansi.FgBrightBlack, ansi.FgBrightRed, viewName, ansi.Reset)
 	// Planetary Post banner: ──═Planetary Post═── (red ──, bright-red ═, bright-white title).
 	fmt.Fprintf(s, "%s                          %s──%s═%s%s%s═%s──%s\n",
