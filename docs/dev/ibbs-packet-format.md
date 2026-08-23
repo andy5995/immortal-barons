@@ -58,6 +58,13 @@ index directly to the stem for each additional recipient (`packet0.brp`,
 numbers do not lengthen the attachment name, and packet identity remains in the
 JSON rather than the copy suffix.
 
+**The extension is matched without regard to case** (#179). FTN transport hands
+files over in upper case routinely — 8.3-era software and several mailers do it,
+and a league carried over FidoNet can meet one at any hop — so a `.BRP` delivered
+into an inbound directory is read like any other packet. An exact match against
+the lowercase name left the file sitting there unread, and unreported: not
+applied, not refused, not counted as skipped.
+
 The short name leaves room for FTN `.msg` transports, whose Subject must carry
 the attachment pathname in at most 71 bytes. That byte budget is an FTN
 constraint, not a restriction on the packet format or on other transports; it

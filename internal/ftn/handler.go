@@ -125,7 +125,7 @@ func preflightDirectories(dirs []string, transport Config, world *game.World, no
 			return nil, 0, err
 		}
 		for _, entry := range entries {
-			if entry.IsDir() || filepath.Ext(entry.Name()) != store.PacketExt {
+			if entry.IsDir() || !store.IsPacketFile(entry.Name()) {
 				continue
 			}
 			info, err := entry.Info()

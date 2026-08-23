@@ -22,6 +22,18 @@ const maxUint64Base36Digits = 13
 // inspecting it has to tell a game packet from a mail bundle.
 const PacketExt = ".brp"
 
+// IsPacketFile reports whether a directory entry's name is an inter-BBS packet.
+// The extension is matched WITHOUT regard to case (#179): FTN transport hands
+// files over in upper case routinely — 8.3-era software and several mailers do
+// it, and a league carried over FidoNet can meet one at any hop. An exact match
+// against the lowercase name left a ".BRP" sitting in the inbound directory
+// unread and unreported, so the only symptom a sysop got was packets that never
+// arrived. Every scan of a packet directory goes through here, so the two ends
+// cannot drift apart on what counts as a packet.
+func IsPacketFile(name string) bool {
+	return strings.EqualFold(filepath.Ext(name), PacketExt)
+}
+
 // RunPlanetary is the inter-BBS maintenance step (BRE's "BRE PLANETARY"): it
 // reads and applies inbound packets, launches any group attacks whose day has
 // come, exports this board's scores to the league, and writes the outbox. Run
@@ -248,7 +260,7 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 		return result, err
 	}
 	for _, e := range entries {
-		if e.IsDir() || filepath.Ext(e.Name()) != PacketExt {
+		if e.IsDir() || !IsPacketFile(e.Name()) {
 			continue
 		}
 		path := filepath.Join(dir, e.Name())

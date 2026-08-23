@@ -1216,7 +1216,7 @@ func preparePacketDirs(cfg game.Config) {
 			continue
 		}
 		for _, e := range entries {
-			if !e.IsDir() && filepath.Ext(e.Name()) == store.PacketExt {
+			if !e.IsDir() && store.IsPacketFile(e.Name()) {
 				brps = append(brps, e.Name())
 			}
 		}
