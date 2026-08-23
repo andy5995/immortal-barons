@@ -1082,17 +1082,18 @@ func TestEveryGameRuleIsBroadcast(t *testing.T) {
 	}
 }
 
-// The league's name is the Coordinator's to set, and it must reach the member
-// boards: a name only the Coordinator's own board shows is worse than none,
-// because each sysop then sees a different one on the same league's Game Setup.
-func TestLeagueNameTravelsWithTheRuleset(t *testing.T) {
+// A Coordinator-set string reaches the member boards. Tested on the required
+// version, which is the kind that matters: a floor only the Coordinator's own
+// board honours is worse than none, because each sysop then enforces a
+// different one on the same league.
+func TestCoordinatorStringsTravelWithTheRuleset(t *testing.T) {
 	co := DefaultConfig()
-	co.LeagueName = "Southern Cross"
+	co.MinBoardVersion = "0.0.7"
 	member := DefaultConfig()
-	member.LeagueName = "whatever this sysop typed"
+	member.MinBoardVersion = "whatever this sysop typed"
 	member.applyLeagueRuleset(co.leagueRuleset())
-	if member.LeagueName != "Southern Cross" {
-		t.Errorf("member board calls the league %q, want %q", member.LeagueName, "Southern Cross")
+	if member.MinBoardVersion != "0.0.7" {
+		t.Errorf("member board requires %q, want %q", member.MinBoardVersion, "0.0.7")
 	}
 }
 

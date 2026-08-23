@@ -45,25 +45,15 @@ func TestGameSetupNamesTheLeague(t *testing.T) {
 	gameSetup(f, w)
 	out := f.out.String()
 
-	for _, want := range []string{"The league", "eye of the storm", "Coordinator"} {
+	for _, want := range []string{"The league", "eye of the storm", "Coordinator", "League number"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("Game Setup missing %q with IBBS on:\n%s", want, out)
 		}
 	}
-	// An unnamed league gets no row at all rather than a blank one.
-	if strings.Contains(out, "League ") {
-		t.Errorf("Game Setup shows a League row for a league with no name:\n%s", out)
-	}
-
-	// Named, it is the first thing the league group says.
-	fn := &fakeSession{keys: []rune("  ")}
-	wn := newWorld()
-	wn.Config.IBBS = true
-	wn.Config.BoardID = "eye of the storm"
-	wn.Config.LeagueName = "Southern Cross"
-	gameSetup(fn, wn)
-	if !strings.Contains(fn.out.String(), "Southern Cross") {
-		t.Errorf("Game Setup omits the league name:\n%s", fn.out.String())
+	// The NUMBER is always there — it is what keeps two leagues apart, so a sysop
+	// diagnosing one should not have to open bbs.cfg to read it.
+	if !strings.Contains(out, "League number") {
+		t.Errorf("Game Setup omits the league number:\n%s", out)
 	}
 
 	// With it off, the league group is absent entirely.
@@ -98,6 +88,36 @@ func TestGameSetupShowsTheMoneyCap(t *testing.T) {
 		}
 		if !strings.Contains(out, c.want) {
 			t.Errorf("cap %dB: screen should show %q", c.billions, c.want)
+		}
+	}
+}
+
+// Game Setup must fit an 80x25 terminal, and a LEAGUE board is the worst case —
+// it carries the league group and the whole interplanetary ruleset on top of
+// everything a stand-alone board shows. This regressed once: one setting per
+// line ran the second panel to 37 lines, so its first dozen rows scrolled off
+// unread. The pairing in gameSetup is what holds it, and only a line count
+// catches it going again.
+func TestGameSetupPanelsFitTheScreen(t *testing.T) {
+	f := &fakeSession{keys: []rune("  ")}
+	w := newWorld()
+	w.Config.IBBS = true
+	w.Config.BoardID = "Wildside"
+	w.Config.LeagueNumber = 618
+	w.LeagueNodes = []game.LeagueNode{{Number: 1, Name: "Wildside"}, {Number: 2, Name: "Faraway"}}
+	gameSetup(f, w)
+
+	// A panel gets 24 of the 25 rows; the pause prompt takes the last.
+	const maxRows, maxCols = 24, 80
+	for i, panel := range strings.Split(stripANSI(f.out.String()), ">Paused<") {
+		lines := strings.Split(strings.Trim(panel, "\n"), "\n")
+		if len(lines) > maxRows {
+			t.Errorf("panel %d is %d lines, over the %d a screen holds:\n%s", i+1, len(lines), maxRows, panel)
+		}
+		for _, ln := range lines {
+			if n := len([]rune(strings.TrimRight(ln, " "))); n > maxCols {
+				t.Errorf("panel %d has a %d-column line: %q", i+1, n, ln)
+			}
 		}
 	}
 }

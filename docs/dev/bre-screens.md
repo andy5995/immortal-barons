@@ -2499,3 +2499,74 @@ A baron who has not voted has `No one` in the name slot, from
 `format_no_recipient` (`BRE.OVR 0x0176f`), so the line never changes shape. IB
 prints its own wording in the same place, the same shape and the same three
 cases.
+
+## Game Setup (captured live 2026-08-23, `cap/shsbbs.cap`)
+
+### The panel (System Menu → G)
+
+The panel is **78 columns** and pairs settings two to a line, the second block
+starting at column 38. Labels carry their own colon and are padded to 21, so a
+value always begins at column 22 of its block. It is one panel, not two — the
+whole ruleset fits a screen because of the pairing:
+
+```
+──────═══════════════─────────────────────────────────────────────────────────
+Game Started:        6/27/2025
+Turns per day:       8
+Protection Turns:    20
+Daily Land Creation: 1000
+Planetary Tax Rate:  6.9%
+Maximum Players:     25
+Bank Interest Rate:  5.0%
+Investment Rate:     5.2%
+Maintenance Costs:   Medium          Region Cost Change:  Medium
+Trade Deal Costs:    Medium          Attack Damage:       Medium
+Attack Rewards:      Medium
+Military purchasing: Enabled
+This game is setup for Local mode only.
+──────═══════════════─────────────────────────────────────────────────────────
+```
+
+On a **league** board the mode line changes and the interplanetary rules follow
+it, still inside the same single panel — 21 content lines, no pause
+(`cap/20240527-134Pho_Lazarus_Public.cap`, a 13-board league):
+
+```
+Military purchasing: Enabled
+This game is setup in InterBBS mode with 13 boards in the game.
+Attack Costs:        Medium          Terrorism Costs:       Medium
+Maximum Individual Attacks Per Day: 2
+Maximum Group Attacks Per Day:      2
+Maximum Terrorist Ops Per Day:      10
+Maximum Bombing Operations Per Day: 15
+Days before "lost" forces returned: 2
+Gooie Kablooies: Enabled     Bombing Ops: Enabled     Missile Ops: Enabled
+```
+
+Note the three label widths in use: 21 for the paired rows, 36 for the
+"Maximum ... Per Day" block, and a three-up line for the switches whose labels
+carry their own leading spaces (`'Gooie Kablooies: '`, `'     Bombing Ops: '`,
+`'     Missile Ops: '`).
+
+**BRE names no league anywhere on this screen — neither a number nor a name.**
+The board count is the whole of it (`show_game_settings`, BRE.OVR 0x13c44:
+`'This game is setup in '`, `'InterBBS'`, `' mode with '`, `' boards in the
+game.'`). IB shows a **league group first**, carrying the league's number, this planet,
+the roster size and the board holding the League Coordinator — an addition, not
+a fidelity fix. Those are what identify a league: the number is what keeps two
+sharing one inbound directory apart, and the Coordinator's board is who set the
+rules below.
+IB has no league NAME at all. It carried one until 2026-08-23 — its own
+invention, with no counterpart in the original — and dropped it: hardly any
+league ever set one, and a row that came and went left the group a different
+shape on every board a player visited.
+
+IB also diverges by grouping under captioned dividers and by paging in two.
+BRE fits one panel because its ruleset is 21 lines; IB's has grown well past
+that, and pairing settings two to a line is what holds the result to two pages.
+
+**This capture settles the crown tax.** `Planetary Tax Rate: 6.9%` beside a
+first turn earning 53,740 gold and charged 3,708 — `trunc(53740 x 0.069)` — so
+the rate is a sysop's setting and the formula in
+`docs/mechanics-reference.md` is unchanged.
+

@@ -67,10 +67,12 @@ func TestConfigPagesCoverEveryFieldAndFit(t *testing.T) {
 	// The identifiers ran 1..38 before the pages existed and must still, so no
 	// sysop's habit or note breaks. Later fields are appended above that. 22 was
 	// the Inter-BBS toggle, replaced by the -ibbs-reset command. 45 (Pirates), 46
-	// (allied market trading), 47 (required version) and 48 (league name) are
-	// IB's own, numbered past the last of the original's own fields.
-	const fields = 47
-	for n := 1; n <= 48; n++ {
+	// (allied market trading) and 47 (required version) are IB's own, numbered
+	// past the last of the original's own fields. 48 was a league name, removed
+	// once nothing displayed it; its number is retired rather than reused, so an
+	// old note naming 48 cannot land on a different setting.
+	const fields = 46
+	for n := 1; n <= 47; n++ {
 		if n == 22 {
 			continue
 		}
@@ -173,7 +175,8 @@ func TestGameSetupHidesLeagueRulesOffLeague(t *testing.T) {
 
 	for _, label := range []string{
 		"Group attacks per day", "Terrorist ops per day", "Bombing ops per day",
-		"Terrorism costs", "Lost forces return after", "Clingy Annihilator", "This planet",
+		"Terrorism costs", "Lost forces return", "Clingy Annihilator", "This planet",
+		"League number", "League Coordinator",
 		"Local attacks", "Local attack scoring",
 	} {
 		if strings.Contains(off, label) {

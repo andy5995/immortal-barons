@@ -38,10 +38,6 @@ Set these on the **Caps & Node** page:
   non-zero number** for that to work. A packet is only ignored when the two
   numbers are set and differ, so a league still on 0 reads the other league's
   packets and has its own read in turn.
-- **League Name** — what the league calls itself, shown to players on Game
-  Setup. The Coordinator sets it and it reaches every board with the rest of the
-  ruleset, so you can leave it blank. Nothing routes by it; the League Number
-  still does all the matching.
 - **Inbound Dir** — the directory where packets from other boards arrive. This
   is usually your mailer's inbound directory, where it puts every file it
   receives.
@@ -62,9 +58,11 @@ Set these on the **Caps & Node** page:
 Board ID, League Number and the two directories are read from **`bbs.cfg`** in
 your data directory, a plain text file you write yourself. The game never writes
 it, so nothing you do in the game — a reset included — can undo an edit you made
-there. See below. The League Name is not among them: it belongs to the league
-rather than to your board, so it travels in the Coordinator's broadcast, and the
-settings editor is where you set it.
+there. See below.
+
+A league has no name of its own: the number identifies it, and the board that
+coordinates it is the other half of the answer. Both are on Game Setup, so a
+player can see which league they are in and who set its rules.
 
 The two directories are relative to your data directory, so the defaults
 `inbound` and `outbound` need no editing on most boards. Give a full path

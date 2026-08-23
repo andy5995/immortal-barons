@@ -16,6 +16,9 @@
   * Only the elected Coordinator can dismantle a Clingy Annihilator
   * A landed Clingy Annihilator besieges the planet for five days
   * Jets attack a landed Clingy Annihilator, capped at 75% of it per wave
+  * Game Setup leads with the league, adding its number and its Coordinator
+  * The League Name setting is removed; a league is identified by its number
+  * Game Setup pairs settings two to a line, so a league board's fits two pages
 
 2026-08-21 (v0.0.6)
   * Local covert effect operations resolve at daily maintenance

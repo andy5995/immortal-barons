@@ -3,6 +3,7 @@ package menu
 import (
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -469,16 +470,51 @@ func about(s session.Session, w *ctx) Result {
 }
 
 // gameSetup shows the current game rules (read-only; the sysop edits them with
-// the -reset Configuration Editor). Two screens with a pause between them: the
-// full ruleset does not fit an 80x25 terminal, and a player reading it wants
-// the turn/economy rules and the war/trade rules apart anyway.
+// the -reset Configuration Editor). Two screens with a pause between them.
+//
+// Settings are paired two to a line, as BRE's own setup screen does
+// ("Maintenance Costs:   Medium          Region Cost Change:  Medium", 78
+// columns wide — cap/shsbbs.cap). Pairing is what keeps a ruleset IB has grown
+// well past the original's inside two pages: one per line ran to 37 lines on the
+// second page of a league game, so its first dozen rows scrolled off an 80x25
+// terminal unread. A pair whose labels or values are too wide for the half
+// column falls back to two full-width lines by itself, which is what makes the
+// layout safe for a translated catalog — German runs longer than the English it
+// came from and nothing here needs to know that.
 func gameSetup(s session.Session, w *ctx) Result {
 	c := w.Config
+	// BRE's own setup screen is 78 columns; the 62-column `rule` is the menu
+	// engine's box and would leave these dividers short of the rows they head.
+	const setupRule = 78
+	const labelW = 22
+	const halfValueW = 14
+
+	pad := func(text string, width int) string {
+		if n := len([]rune(text)); n < width {
+			return text + strings.Repeat(" ", width-n)
+		}
+		return text
+	}
 	// Label in body white, figure in bright white — the highlight convention from
 	// docs/dev/bre-screens.md, so the numbers a player is scanning for stand out.
+	cell := func(label, value string, valueW int) string {
+		return ansi.FgWhite + pad(label, labelW) + ansi.Reset + " " +
+			ansi.FgBrightWhite + pad(value, valueW) + ansi.Reset
+	}
 	row := func(label, value string) {
-		fmt.Fprintf(s, "  %s%-24s%s %s%s%s\n",
-			ansi.FgWhite, tr(s, label), ansi.Reset, ansi.FgBrightWhite, value, ansi.Reset)
+		fmt.Fprintf(s, "  %s\n", cell(tr(s, label), value, 0))
+	}
+	// pair puts two settings on one line, or gives up and prints both full width
+	// when either would be truncated.
+	pair := func(l1, v1, l2, v2 string) {
+		t1, t2 := tr(s, l1), tr(s, l2)
+		if len([]rune(t1)) > labelW || len([]rune(t2)) > labelW ||
+			len([]rune(v1)) > halfValueW || len([]rune(v2)) > halfValueW {
+			row(l1, v1)
+			row(l2, v2)
+			return
+		}
+		fmt.Fprintf(s, "  %s  %s\n", cell(t1, v1, halfValueW), cell(t2, v2, 0))
 	}
 	// countOr renders a limit, naming what its zero means rather than printing a
 	// bare 0 the player has to interpret.
@@ -500,7 +536,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 	// stay the brightest thing on the panel.
 	group := func(caption string) {
 		text := tr(s, caption)
-		fill := len([]rune(rule)) - len([]rune(text)) - 6
+		fill := setupRule - len([]rune(text)) - 6
 		if fill < 0 {
 			fill = 0
 		}
@@ -511,95 +547,120 @@ func gameSetup(s session.Session, w *ctx) Result {
 			dim(ansi.FgBrightCyan), text, strings.Repeat("─", fill), ansi.Reset)
 	}
 
+	// The league comes first, because on a league board it is the frame for
+	// everything under it: none of these rules are the local sysop's, and a
+	// player who reads the ruleset without knowing whose it is asks the wrong
+	// person to change it.
+	if c.IBBS {
+		var boards int
+		var declaration, coordBoard string
+		w.With(func() {
+			boards = len(w.LeagueNodes)
+			declaration = w.LeagueDiplomacy
+			coordBoard = w.CoordinatorBoardID()
+		})
+		group("The league")
+		// The league is identified by its NUMBER and the board that coordinates
+		// it, and by nothing else — a league has no name of its own, because
+		// hardly any league ever set one. The number is what keeps two leagues
+		// sharing an inbound directory apart, so a sysop diagnosing one reads it
+		// here rather than in bbs.cfg.
+		leagueNo := tr(s, "Not set")
+		if c.LeagueNumber > 0 {
+			leagueNo = strconv.Itoa(c.LeagueNumber)
+		}
+		pair("League number", leagueNo, "Planets in the league", countOr(boards, "Roster not loaded"))
+		// Which board holds the office, because the rules below are not this
+		// sysop's to set once a board joins a league: the Coordinator broadcasts
+		// the whole ruleset (see LeagueConfig), so a player asking their own sysop
+		// to change one is asking the wrong person. "League Coordinator" is BRE's
+		// own name for this office and IB's everywhere else — not to be confused
+		// with the elected BBS Coordinator, which is a different job. A board with
+		// no roster to look the name up in says so instead.
+		coordinator := tr(s, "Not known — no roster yet")
+		if coordBoard != "" {
+			coordinator = coordBoard
+		}
+		row("League Coordinator", coordinator)
+		// Last, so the group narrows from the whole league to the board the
+		// player is standing on.
+		row("This planet", c.BoardID)
+		if declaration != "" {
+			row("League declaration", declaration)
+		}
+	}
+
 	group("The day and the game")
-	row("Turns per day", comma(c.TurnsPerDay))
-	row("New realm protection", fmt.Sprintf(tr(s, "%s turns"), comma(c.ProtectionTurns)))
-	row("Game length", daysOr(c.GameLength, "Endless"))
-	row("Removed if unplayed", daysOr(c.IdleDaysRemove, "Never"))
+	pair("Turns per day", comma(c.TurnsPerDay),
+		"New realm protection", fmt.Sprintf(tr(s, "%s turns"), comma(c.ProtectionTurns)))
+	pair("Game length", daysOr(c.GameLength, "Endless"),
+		"Removed if unplayed", daysOr(c.IdleDaysRemove, "Never"))
 	group("Land")
-	row("Maximum regions", countOr(c.MaxRegions, "Unlimited"))
-	row("Land at game start", comma(c.InitialMarketLand))
-	row("New land per realm/day", comma(c.LandPerDay))
-	row("Region costs", tr(s, c.RegionCosts.String()))
+	pair("Maximum regions", countOr(c.MaxRegions, "Unlimited"),
+		"Land at game start", comma(c.InitialMarketLand))
+	pair("New land per realm/day", comma(c.LandPerDay),
+		"Region costs", tr(s, c.RegionCosts.String()))
 	group("Money")
-	row("Maximum tax rate", fmt.Sprintf("%d%%", c.MaxTaxRate))
-	row("Crown tax on income", fmt.Sprintf("%d%%", c.PlanetaryTaxRate))
+	pair("Maximum tax rate", fmt.Sprintf("%d%%", c.MaxTaxRate),
+		"Crown tax on income", fmt.Sprintf("%d%%", c.PlanetaryTaxRate))
+	pair("Bank interest", fmt.Sprintf(tr(s, "%d%% over 10 days"), c.InterestRate),
+		"Investment rate", investRateStr(s, c))
+	row("Food market", foodMarketStr(s, c))
 	// Worth a line of its own: gold earned past this is destroyed, and a player
 	// who does not know the figure only finds out by losing some.
 	// Whole billions, not the 4-decimal display form: the cap is SET in billions,
 	// so the fraction is always zeros.
 	row("Most gold you can hold", fmt.Sprintf(tr(s, "%sB in hand, and again in the bank"),
 		comma(w.MoneyCapBillions())))
-	row("Bank interest", fmt.Sprintf(tr(s, "%d%% over 10 days"), c.InterestRate))
-	row("Investment rate", investRateStr(s, c))
-	row("Food market", foodMarketStr(s, c))
 	pause(s)
 
 	group("Forces and trade")
-	row("Buy military", tr(s, c.BuyMilitary.String()))
-	row("Maintenance costs", tr(s, c.MaintCosts.String()))
-	row("Trade costs", tr(s, c.TradeCosts.String()))
+	pair("Buy military", tr(s, c.BuyMilitary.String()),
+		"Maintenance costs", tr(s, c.MaintCosts.String()))
+	pair("Trade costs", tr(s, c.TradeCosts.String()),
+		"Pirates", onOffStr(c.Pirates))
 	group("Attacking")
-	row("Attack damage", tr(s, c.AttackDamage.String()))
-	row("Attack rewards", tr(s, c.AttackRewards.String()))
-	row("Attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"))
-	row("Attack costs", tr(s, c.AttackCosts.String()))
+	pair("Attack damage", tr(s, c.AttackDamage.String()),
+		"Attack rewards", tr(s, c.AttackRewards.String()))
+	pair("Attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"),
+		"Attack costs", tr(s, c.AttackCosts.String()))
 	row("R5-Slappenheimer", tr(s, c.SlappenheimerHandling.String()))
-	if !c.MissileOps {
-		row("Missile ops", tr(s, "Disabled"))
+	if !c.MissileOps || !c.BombingOps {
+		pair("Missile ops", onOffStr(c.MissileOps), "Bombing ops", onOffStr(c.BombingOps))
 	}
-	if !c.BombingOps {
-		row("Bombing ops", tr(s, "Disabled"))
-	}
-	row("Pirates", onOffStr(c.Pirates))
 
 	group("This board")
-	row("Players per board", countOr(c.MaxPlayers, "Unlimited"))
-	row("Inter-BBS play", onOffStr(c.IBBS))
-	if c.GameStartDate != "" {
-		row("Game starts", c.GameStartDate)
+	pair("Players per board", countOr(c.MaxPlayers, "Unlimited"),
+		"Inter-BBS play", onOffStr(c.IBBS))
+	if c.GameStartDate != "" || c.JoinDate != "" {
+		pair("Game starts", orDash(c.GameStartDate), "Joining closes", orDash(c.JoinDate))
 	}
-	if c.JoinDate != "" {
-		row("Joining closes", c.JoinDate)
-	}
+
 	if c.IBBS {
-		var boards int
-		var declaration string
-		w.With(func() {
-			boards = len(w.LeagueNodes)
-			declaration = w.LeagueDiplomacy
-		})
-		group("The league")
-		// The name its Coordinator gave the league, when there is one. Nothing
-		// routes by it, so a league that never set one simply has no row rather
-		// than a blank.
-		if c.LeagueName != "" {
-			row("League", c.LeagueName)
-		}
-		row("This planet", c.BoardID)
-		row("Planets in the league", countOr(boards, "Roster not loaded"))
-		// The rules above are not this sysop's to set once a board joins a league:
-		// the Coordinator broadcasts the whole ruleset (see LeagueConfig), so a
-		// player asking their own sysop to change one is asking the wrong person.
-		row("Rules come from", tr(s, "The league Coordinator"))
-		if declaration != "" {
-			row("League declaration", declaration)
-		}
 		// The interplanetary rules only mean anything once this board is in a
 		// league, so they stay hidden on a stand-alone board.
 		group("Interplanetary")
-		row("Group attacks per day", countOr(c.MaxGroupAttacks, "Unlimited"))
-		row("Terrorist ops per day", countOr(c.MaxTerrorOps, "Unlimited"))
-		row("Bombing ops per day", countOr(c.MaxBombingOps, "Unlimited"))
-		row("Terrorism costs", tr(s, c.TerrorCosts.String()))
-		row("Lost forces return after", lostForcesStr(s, c))
-		row("Clingy Annihilator", onOffStr(c.ClingyAnnihilator))
+		pair("Group attacks per day", countOr(c.MaxGroupAttacks, "Unlimited"),
+			"Terrorist ops per day", countOr(c.MaxTerrorOps, "Unlimited"))
+		pair("Bombing ops per day", countOr(c.MaxBombingOps, "Unlimited"),
+			"Terrorism costs", tr(s, c.TerrorCosts.String()))
+		pair("Lost forces return", lostForcesStr(s, c),
+			"Clingy Annihilator", onOffStr(c.ClingyAnnihilator))
+		pair("Allied market trading", onOffStr(c.IPTrading),
+			"Local attack scoring", onOffStr(c.LocalAttackScoring))
 		row("Local attacks", onOffStr(c.LocalAttacks))
-		row("Local attack scoring", onOffStr(c.LocalAttackScoring))
-		row("Allied market trading", onOffStr(c.IPTrading))
 	}
 	pause(s)
 	return Stay
+}
+
+// orDash renders an unset date as a dash, so a pair keeps its shape when only
+// one of the two dates is configured.
+func orDash(v string) string {
+	if v == "" {
+		return "—"
+	}
+	return v
 }
 
 // lostForcesStr says how long a strike waits for a result before its forces are

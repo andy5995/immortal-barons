@@ -847,7 +847,7 @@ func runLeagueRoutes(cfg game.Config) error {
 			filepath.Join(cfg.DataDir, store.NodeListFile), cfg.Outbound())
 		return nil
 	}
-	fmt.Printf("This board: %s (node %d), league %s\n", cfg.BoardID, w.NodeNumber(cfg.BoardID), leagueLabel(cfg.LeagueName, cfg.LeagueNumber))
+	fmt.Printf("This board: %s (node %d), league %s\n", cfg.BoardID, w.NodeNumber(cfg.BoardID), leagueLabel(cfg.LeagueNumber))
 	if !w.Routed() {
 		broadcastDir := cfg.Outbound()
 		others := 0
@@ -905,17 +905,14 @@ func runLeagueRoutes(cfg game.Config) error {
 	return nil
 }
 
-// leagueLabel names the league for a sysop: the number is what routes, so it is
-// always shown, and the Coordinator's name for the league joins it when set.
-func leagueLabel(name string, n int) string {
-	num := "(number not set)"
-	if n > 0 {
-		num = fmt.Sprintf("#%d", n)
+// leagueLabel names the league for a sysop. The number is the whole of it: it
+// is what routes, and it is what tells two leagues sharing an inbound directory
+// apart.
+func leagueLabel(n int) string {
+	if n <= 0 {
+		return "(number not set)"
 	}
-	if name == "" {
-		return num
-	}
-	return fmt.Sprintf("%s %s", name, num)
+	return fmt.Sprintf("#%d", n)
 }
 
 // runLeagueConfig broadcasts this board's league rules (turns, protection,

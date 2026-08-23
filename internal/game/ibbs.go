@@ -243,7 +243,6 @@ type LeagueConfig struct {
 	LocalAttackScoring    bool
 	DupeChecking          bool
 	MinBoardVersion       string
-	LeagueName            string
 	IPTrading             bool
 	Pirates               bool
 	MaxPlayers            int
@@ -293,7 +292,6 @@ func (c Config) leagueRuleset() *LeagueConfig {
 		LocalAttackScoring:    c.LocalAttackScoring,
 		DupeChecking:          c.DupeChecking,
 		MinBoardVersion:       c.MinBoardVersion,
-		LeagueName:            c.LeagueName,
 		IPTrading:             c.IPTrading,
 		Pirates:               c.Pirates,
 		MaxPlayers:            c.MaxPlayers,
@@ -343,7 +341,6 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.LocalAttackScoring = lc.LocalAttackScoring
 	c.DupeChecking = lc.DupeChecking
 	c.MinBoardVersion = lc.MinBoardVersion
-	c.LeagueName = lc.LeagueName
 	c.IPTrading = lc.IPTrading
 	c.Pirates = lc.Pirates
 	c.MaxPlayers = lc.MaxPlayers

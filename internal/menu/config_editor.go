@@ -351,16 +351,6 @@ func configPages(ibbs bool) []cfgPage {
 		boardOwned(41, "League Number", func(c *game.Config) string {
 			return fmt.Sprintf("%d (0 = unset)", c.LeagueNumber)
 		}),
-		{n: 48, label: "League Name",
-			value: func(c *game.Config) string {
-				if c.LeagueName == "" {
-					return "(unnamed)"
-				}
-				return c.LeagueName
-			},
-			edit: func(s session.Session, c *game.Config) {
-				c.LeagueName = strings.TrimSpace(prompt(s, "What this league calls itself (blank for none):"))
-			}},
 		{n: 47, label: "Required Version",
 			value: func(c *game.Config) string {
 				if c.MinBoardVersion == "" {
@@ -423,7 +413,6 @@ var ibbsOnlyFields = map[int]bool{
 	43: true, // Local Attack Scoring
 	46: true, // Allow IP Allies to Trade at Market — meaningless off a league
 	47: true, // Required Version — a league rule, and only the LC's to set
-	48: true, // League Name — a stand-alone board is in no league to name
 	44: true, // Dupe Checking
 }
 
