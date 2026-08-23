@@ -219,8 +219,10 @@ func TestConstructionIsSecretButFlightIsNot(t *testing.T) {
 	if _, err := theirs.FundAnnihilator(builder, theirs.Annihilator.CostMillion); err != nil {
 		t.Fatalf("FundAnnihilator: %v", err)
 	}
-	if err := theirs.LaunchAnnihilator(builder); err != nil {
-		t.Fatalf("LaunchAnnihilator: %v", err)
+	theirs.GameDay += AnnihilatorBuildDays
+	theirs.LaunchDueAnnihilator()
+	if !theirs.Annihilator.Launched {
+		t.Fatal("a fully funded weapon did not launch itself")
 	}
 	theirs.ExportAnnihilatorStatus()
 	var told bool

@@ -545,6 +545,23 @@ keypress for a year on the strength of how it reads; its caller
 every letter rather than sending. Always `lookup` the printer, then `lookup` its
 caller, before describing what a prompt does.
 
+**A catalog NAME can be wrong about a routine's direction — the callers settle
+it.** `launch_gooie_kablooie` sounds like the attacker firing the weapon. Its
+strings are `Sorry!  Only Jets can attack Gooie Kablooies`, `Send how many Jets?`
+and `Days Until Self-Destruct`: it is the DEFENDER's jet attack, and its single
+caller is `run_player_turn`, which also proves the prompt is offered every turn
+rather than hidden behind a menu item. Dump the strings and read `callers[]`
+before trusting a name; the catalog's names are evidence, not gospel.
+
+**A Real48 immediate arrives in registers, and `bre-real48.py decode` reads it.**
+Turbo Pascal passes a 6-byte real as `cx`/`si`/`di` (or a run of `mov word
+[bp-N]`), packed low byte first: `cx` low = exponent, `cx` high = mantissa byte
+1, `si` = bytes 2-3, `di` = bytes 4-5. So `mov cx,0x8a / xor si,si / mov
+di,0x3b80` is `mem:8a000000803b`, which decodes to 750. That one command turns a
+wall of `call 0xfd0:0x17xx` into arithmetic, once the resident helpers are named
+(`bre-disasm.py list | grep real_` gives add/subtract/multiply/divide/compare and
+the int conversions). Operand order is `ax:bx:dx` OP `cx:si:di`.
+
 **An unnamed routine can be identified by the company its CALLERS keep.** The
 catalog leaves many routines unclassified, and the instinct is to disassemble
 one until its purpose emerges. Reading its `callers[]` is usually faster and

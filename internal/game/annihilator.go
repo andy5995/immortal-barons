@@ -23,20 +23,26 @@ type Annihilator struct {
 	// funded yet".
 	Funded      bool
 	FundedDay   int
+	LaunchDay   int // funding day + AnnihilatorBuildDays; it goes by itself (#114)
 	Launched    bool
 	LaunchedDay int
 	ArrivesDay  int
-	Intact      int // percent of the weapon still flying; jets whittle this down
+	Intact      int // percent of the weapon still standing; jets whittle this down
+	// DaysLeft is the siege countdown once it has landed on the target planet:
+	// AnnihilatorSiegeDays on arrival, one less after every day's damage, gone at
+	// zero. Zero also means "not landed", which is why the flying weapon and the
+	// besieging one are never the same record — the target keeps its own.
+	DaysLeft int
 }
 
 var (
 	ErrAnnihilatorExists   = errors.New("This planet is already building a Clingy Annihilator.")
 	ErrNoAnnihilator       = errors.New("This planet has no Clingy Annihilator.")
 	ErrAnnihilatorFunded   = errors.New("The Clingy Annihilator is already paid for.")
-	ErrAnnihilatorUnfunded = errors.New("The Clingy Annihilator is not paid for yet.")
 	ErrAnnihilatorFlying   = errors.New("The Clingy Annihilator has already launched.")
+	ErrAnnihilatorAloft    = errors.New("The Clingy Annihilator has not landed yet. Nothing can reach it up there.")
+	ErrNoJets              = errors.New("Only jets can attack a Clingy Annihilator, and you have none.")
 	ErrAnnihilatorDisabled = errors.New("Clingy Annihilator operations are switched off in this game.")
-	ErrNotYours            = errors.New("Only the baron who started it may do that.")
 	ErrNotPlanetCO         = errors.New("Only the elected BBS Coordinator may do that.")
 )
 
@@ -149,50 +155,27 @@ func (w *World) FundAnnihilator(e *Empire, millions int) (int, error) {
 	if d.PaidMillion >= d.CostMillion {
 		d.Funded = true
 		d.FundedDay = w.GameDay
-		w.postNews("The Clingy Annihilator is complete and awaiting launch.")
+		d.LaunchDay = w.GameDay + AnnihilatorBuildDays
+		w.postNews(fmt.Sprintf("The Clingy Annihilator is complete. It launches at %s in %d hours.",
+			d.TargetBoard, AnnihilatorBuildDays*24))
 		w.reportToSpy(d.TargetBoard, annihilatorSpyLine(w.Config.BoardID, d))
 	}
 	return millions, nil
 }
 
-// LaunchAnnihilator sends the finished weapon on its way. Only the baron who started
-// it may launch it, and it is in the air — and visible to its target — for
-// AnnihilatorFlightDays.
-func (w *World) LaunchAnnihilator(e *Empire) error {
-	if w.Annihilator == nil {
-		return ErrNoAnnihilator
-	}
+// LaunchDueAnnihilator sends the finished weapon on its way by itself, once
+// construction has run its AnnihilatorBuildDays. No baron decides this: the
+// original has no launch prompt anywhere, and funding reaching its target is the
+// whole trigger (#114). Run once a day from maintenance.
+func (w *World) LaunchDueAnnihilator() {
 	d := w.Annihilator
-	if !d.Funded {
-		return ErrAnnihilatorUnfunded
-	}
-	if d.Launched {
-		return ErrAnnihilatorFlying
-	}
-	if d.Creator != "" && d.Creator != e.Owner {
-		return ErrNotYours
+	if d == nil || !d.Funded || d.Launched || w.GameDay < d.LaunchDay {
+		return
 	}
 	d.Launched = true
 	d.LaunchedDay = w.GameDay
 	d.ArrivesDay = w.GameDay + AnnihilatorFlightDays
 	w.postNews(fmt.Sprintf("The Clingy Annihilator has launched at %s.", d.TargetBoard))
-	return nil
-}
-
-// DismantleAnnihilator scraps the planet's weapon before it flies, refunding nothing
-// — the money is spent. Only its creator may do it, and only while it is still
-// on the ground.
-func (w *World) DismantleAnnihilator(e *Empire) error {
-	if w.Annihilator == nil {
-		return ErrNoAnnihilator
-	}
-	if w.Annihilator.Launched {
-		return ErrAnnihilatorFlying
-	}
-	if w.Annihilator.Creator != "" && w.Annihilator.Creator != e.Owner {
-		return ErrNotYours
-	}
-	return w.scrapAnnihilator()
 }
 
 // DismantleAnnihilatorByCoordinator stands the weapon down on the elected BBS
@@ -223,68 +206,130 @@ func (w *World) scrapAnnihilator() error {
 	return nil
 }
 
-// InterceptAnnihilator sends jets at an incoming weapon. Nothing but jets can reach
-// it, and the jets are spent whether or not they knock anything off. Returns the
-// percentage destroyed by this sortie.
-func (w *World) InterceptAnnihilator(e *Empire, jets int) (int, error) {
+// AnnihilatorJetsNeeded is how many jets it takes to destroy an arrived weapon
+// outright. It scales with the whole planet's land, which is what makes killing
+// one need the cooperation the original's instructions describe: one baron's air
+// force is never enough on a developed planet.
+func (w *World) AnnihilatorJetsNeeded() int64 {
+	land := int64(w.planetLand())
+	need := land * (land/AnnihilatorJetsLandDivisor + AnnihilatorJetsLandBase)
+	if need > AnnihilatorJetsRequiredCap {
+		need = AnnihilatorJetsRequiredCap
+	}
+	if need < 1 {
+		need = 1
+	}
+	return need
+}
+
+// InterceptAnnihilator sends jets at the weapon squatting on this planet.
+// Nothing but jets can reach it, and they are spent whether or not they knock
+// anything off. Returns the percentage destroyed by this sortie and the jets
+// lost doing it.
+func (w *World) InterceptAnnihilator(e *Empire, jets int) (int, int, error) {
 	if w.Incoming == nil {
-		return 0, ErrNoAnnihilator
+		return 0, 0, ErrNoAnnihilator
+	}
+	if w.Incoming.DaysLeft <= 0 {
+		return 0, 0, ErrAnnihilatorAloft
+	}
+	if e.Jets < 1 {
+		return 0, 0, ErrNoJets
 	}
 	if jets < 1 {
-		return 0, nil
+		return 0, 0, nil
 	}
-	if e.Jets < jets {
+	if jets > e.Jets {
 		jets = e.Jets
 	}
-	e.Jets -= jets
-	knocked := jets / AnnihilatorJetsPerPercent
+	knocked := int(int64(jets) * 100 / w.AnnihilatorJetsNeeded())
+	if knocked > AnnihilatorMaxSortiePct {
+		knocked = AnnihilatorMaxSortiePct
+	}
 	if knocked > w.Incoming.Intact {
 		knocked = w.Incoming.Intact
 	}
+	// 33% of the wing does not come home, give or take five points either way.
+	lossPct := AnnihilatorJetLossPct + w.rng.Intn(AnnihilatorJetLossSpread) - w.rng.Intn(AnnihilatorJetLossSpread)
+	lost := jets * lossPct / 100
+	if lost > e.Jets {
+		lost = e.Jets
+	}
+	e.Jets -= lost
+
 	w.Incoming.Intact -= knocked
 	if w.Incoming.Intact <= 0 {
 		w.Incoming = nil
-		w.postNews("The incoming Clingy Annihilator was destroyed in flight!")
-		return knocked, nil
+		w.postNews(fmt.Sprintf("%s destroyed the Clingy Annihilator!", e.Name))
+		return knocked, lost, nil
 	}
-	w.postNews(fmt.Sprintf("%d%% of the incoming Clingy Annihilator was destroyed.", knocked))
-	return knocked, nil
+	w.postNews(fmt.Sprintf("%s knocked %d%% off the Clingy Annihilator; it is still at %d%% strength.",
+		e.Name, knocked, w.Incoming.Intact))
+	return knocked, lost, nil
 }
 
-// DetonateAnnihilator applies an arrived weapon to this planet: every living
-// realm loses AnnihilatorDamagePct of its land, scaled by how much of the weapon
-// survived the flight. The SDI does not blunt it — jets are the only thing that
-// can reach the weapon, and the original's own resolution never reads the shield
-// (#111).
-func (w *World) DetonateAnnihilator(intact int) string {
-	if intact <= 0 {
-		return ""
+// RetireSpentAnnihilator frees the builder's planet to start another once its
+// weapon has reached its target. Without this the planet keeps announcing a
+// weapon that has already landed, and the target would keep landing it again.
+func (w *World) RetireSpentAnnihilator() {
+	d := w.Annihilator
+	if d == nil || !d.Launched || w.GameDay <= d.ArrivesDay {
+		return
 	}
-	w.postNews("A Clingy Annihilator detonates across the planet!")
-	hit := 0
-	for _, d := range w.Empires {
-		if !d.Alive {
+	w.Annihilator = nil
+}
+
+// TickAnnihilator is one day of the siege: the weapon takes its share of every
+// living realm's regions, its countdown drops by a day, and at zero it
+// self-destructs. AnnihilatorFirstDayPct goes the day it lands and
+// AnnihilatorLaterDayPct on each of the days after — a fixed share of what the
+// realm still holds, so the bite shrinks as the planet does. Neither the SDI nor
+// the weapon's own battered strength changes the figure (#111); a realm under
+// new-realm protection is passed over.
+func (w *World) TickAnnihilator() {
+	d := w.Incoming
+	if d == nil || d.DaysLeft <= 0 {
+		return
+	}
+	pct := AnnihilatorLaterDayPct
+	first := d.DaysLeft == AnnihilatorSiegeDays
+	if first {
+		pct = AnnihilatorFirstDayPct
+		w.postNews(fmt.Sprintf("A Clingy Annihilator from %s has landed on our planet!", d.Creator))
+	}
+	total := 0
+	for _, e := range w.Empires {
+		if !e.Alive || e.Protection > 0 {
 			continue
 		}
-		pct := AnnihilatorDamagePct * intact / 100
-		lost := d.Land * pct / 100
-		if lost < 1 && pct > 0 {
-			lost = 1
-		}
-		if lost <= 0 {
+		lost := e.Land * pct / 100
+		if lost < 1 {
 			continue
 		}
-		if lost > d.Land {
-			lost = d.Land
+		if lost > e.Land {
+			lost = e.Land
 		}
-		d.Regions.remove(lost)
-		d.syncLand()
-		if d.Land <= 0 || d.People <= 0 {
-			d.Alive = false
-			d.DiedDay = w.GameDay
+		e.Regions.remove(lost)
+		e.syncLand()
+		if e.Land <= 0 || e.People <= 0 {
+			e.Alive = false
+			e.DiedDay = w.GameDay
 		}
-		d.addEvent(fmt.Sprintf("A Clingy Annihilator struck the planet — you lost %d regions.", lost))
-		hit++
+		total += lost
+		if first {
+			e.addEvent(fmt.Sprintf("A Clingy Annihilator landed on the planet — you lost %d regions.", lost))
+		} else {
+			e.addEvent(fmt.Sprintf("The Clingy Annihilator destroyed %d more regions.", lost))
+		}
 	}
-	return fmt.Sprintf("The Clingy Annihilator struck %d realms.", hit)
+	if first {
+		w.postNews(fmt.Sprintf("The Clingy Annihilator destroyed %d regions!", total))
+	} else {
+		w.postNews(fmt.Sprintf("The Clingy Annihilator continues its attack and destroyed %d more regions!", total))
+	}
+	d.DaysLeft--
+	if d.DaysLeft <= 0 {
+		w.Incoming = nil
+		w.postNews("The Clingy Annihilator has burned itself out.")
+	}
 }

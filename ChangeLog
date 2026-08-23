@@ -12,6 +12,10 @@
   * A treaty proposal no longer mails a notice the offer screen already gives
   * FTN broadcast copies are named by a short index, not the recipient node
   * Each realm keeps its own Preferences, where a board once shared one set
+  * A Clingy Annihilator launches itself three days after its funding completes
+  * Only the elected Coordinator can dismantle a Clingy Annihilator
+  * A landed Clingy Annihilator besieges the planet for five days
+  * Jets attack a landed Clingy Annihilator, capped at 75% of it per wave
 
 2026-08-21 (v0.0.6)
   * Local covert effect operations resolve at daily maintenance

@@ -1746,9 +1746,8 @@ const (
 // much bigger than you the planet you are aiming at is: attacking upward is
 // affordable, and a giant planet flattening a small one pays the most.
 //
-// Everything below the cost is IB's own reconstruction — the build, decay and
-// interception numbers were not read from the binary. They follow what the
-// original's help describes and are ordinary playtest knobs.
+// The siege and interception figures below are BINARY-VERIFIED too, from the
+// daily resolver at BRE.OVR 0x47c52 and the jet-attack routine at 0x2827b.
 const (
 	AnnihilatorCostPerLand       = 44743   // per region of the target planet, in millionths of a million
 	AnnihilatorCostPerLandDenom  = 1000000 // ... so the rate is 0.0044743
@@ -1760,17 +1759,45 @@ const (
 	AnnihilatorSurchargeHugePct  = 200     // more than four times our size
 	AnnihilatorMillion           = 1_000_000
 
-	// Flight and decay (reconstructed). The weapon is visible to its target for
-	// the whole flight, which is what makes shooting it down possible.
+	// Construction runs for AnnihilatorBuildDays after the last gold is in, and
+	// then the weapon launches itself: the funding routine sets its launch date
+	// to now + 3.0 days (BRE.OVR 0x27e47-0x27ac9, a Real48 3.0) and announces the
+	// remaining hours. Nothing asks a baron whether to launch (#114).
+	AnnihilatorBuildDays = 3
+	// The weapon is visible to its target for the whole flight, which is what
+	// makes the warning worth having. BRE's flight is the league's real packet
+	// transit; IB fixes it, which is a divergence of convenience.
 	AnnihilatorFlightDays = 2
-	// On arrival it destroys AnnihilatorDamagePct of each realm's land, and a strike
-	// that is only partly intact does proportionally less.
-	AnnihilatorDamagePct = 10
 
-	// Interception (reconstructed). Only jets can reach it — the original is
-	// explicit that nothing else can — and each sortie of AnnihilatorJetsPerPercent
-	// jets knocks one percent off it. The jets are spent either way.
-	AnnihilatorJetsPerPercent = 250
+	// The weapon is a siege, not an explosion (#112). It sits on the planet for
+	// AnnihilatorSiegeDays, taking AnnihilatorFirstDayPct of every realm's
+	// regions the day it lands and AnnihilatorLaterDayPct every day after, then
+	// self-destructs. The resolver divides each realm's region total by 10 and
+	// then by 20 (BRE.OVR 0x4783a, 0x47b0c); it reads neither the weapon's
+	// remaining strength nor the defender's SDI, so a battered weapon bites just
+	// as deep as a fresh one (#111). A realm under new-realm protection is
+	// skipped outright (is_under_protection, 056d:19b5).
+	AnnihilatorSiegeDays   = 5
+	AnnihilatorFirstDayPct = 10
+	AnnihilatorLaterDayPct = 5
+
+	// Interception. Only jets can reach it — the original is explicit that
+	// nothing else can — and the number needed scales with the whole planet's
+	// land, which is what makes killing one a planet-wide effort:
+	//
+	//	required = min(2e9, land x (land/750 + 15))
+	//	knocked  = min(75, jets x 100 / required)
+	//
+	// (BRE.OVR 0x28897-0x28961). The 75% ceiling means no single sortie can
+	// finish the weapon, however many jets it carries. The jets sent are spent
+	// either way, at 33% give or take five points: the routine adds one
+	// Random(5) and subtracts another (0x2879d-0x287d3).
+	AnnihilatorJetsLandDivisor = 750
+	AnnihilatorJetsLandBase    = 15
+	AnnihilatorJetsRequiredCap = 2_000_000_000
+	AnnihilatorMaxSortiePct    = 75
+	AnnihilatorJetLossPct      = 33
+	AnnihilatorJetLossSpread   = 5
 )
 
 // Travel Times — how the average packet round trip to another board is kept.

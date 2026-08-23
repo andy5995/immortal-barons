@@ -175,7 +175,8 @@ func groupAttackSpyLine(from string, g GroupAttack) string {
 // annihilatorSpyLine reports the state of the weapon being built for us.
 func annihilatorSpyLine(from string, d *Annihilator) string {
 	if d.Funded {
-		return fmt.Sprintf("Our agent on %s reports their Clingy Annihilator is funded and ready to fly.", from)
+		return fmt.Sprintf("Our agent on %s reports their Clingy Annihilator is funded and launches in %d hours.",
+			from, AnnihilatorBuildDays*24)
 	}
 	return fmt.Sprintf("Our agent on %s reports work has begun on a Clingy Annihilator aimed at us.", from)
 }

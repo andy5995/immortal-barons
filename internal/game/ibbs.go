@@ -1871,6 +1871,12 @@ func (w *World) applyAnnihilatorStatus(st *AnnihilatorStatus) {
 		return
 	}
 	first := w.Incoming == nil
+	// A status for a weapon that has already been and gone — the builder's board
+	// announcing it once more before it retires the record — must not raise a
+	// second siege.
+	if first && st.Launched && st.ArrivesDay < w.GameDay {
+		return
+	}
 	if first {
 		w.Incoming = &Annihilator{Creator: st.FromBoard, Intact: 100}
 	}
@@ -1896,15 +1902,18 @@ func (w *World) applyAnnihilatorStatus(st *AnnihilatorStatus) {
 	}
 }
 
-// ArriveAnnihilator detonates an incoming weapon whose flight is over. Run from the
-// planetary step, so the jets get every day of the flight to shoot at it.
+// ArriveAnnihilator lands an incoming weapon whose flight is over. It does not
+// go off: it settles on the planet and begins its siege, and the damage is the
+// daily tick's (#112). Called from the planetary step, so the warning has had
+// every day of the flight to reach the barons.
 func (w *World) ArriveAnnihilator() {
-	if w.Incoming == nil || !w.Incoming.Launched || w.GameDay < w.Incoming.ArrivesDay {
+	if w.Incoming == nil || !w.Incoming.Launched || w.Incoming.DaysLeft > 0 {
 		return
 	}
-	intact := w.Incoming.Intact
-	w.Incoming = nil
-	w.DetonateAnnihilator(intact)
+	if w.GameDay < w.Incoming.ArrivesDay {
+		return
+	}
+	w.Incoming.DaysLeft = AnnihilatorSiegeDays
 }
 
 // fromCoordinator reports whether p claims to come from the Coordinator's

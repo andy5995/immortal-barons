@@ -616,8 +616,10 @@ func TestClingyAnnihilatorLifecycle(t *testing.T) {
 		t.Fatalf("weapon costs %d million", cost)
 	}
 	// It cannot fly on a promise.
-	if err := w.LaunchAnnihilator(founder); err != ErrAnnihilatorUnfunded {
-		t.Errorf("an unfunded weapon launched: %v", err)
+	w.GameDay += AnnihilatorBuildDays
+	w.LaunchDueAnnihilator()
+	if w.Annihilator.Launched {
+		t.Error("an unfunded weapon launched")
 	}
 
 	// Two barons fund it between them — that is the point of the thing.
@@ -639,30 +641,53 @@ func TestClingyAnnihilatorLifecycle(t *testing.T) {
 		t.Errorf("took %d million, want exactly %d", w.Annihilator.PaidMillion, cost)
 	}
 
-	// Only its creator may launch it.
-	if err := w.LaunchAnnihilator(backer); err != ErrNotYours {
-		t.Errorf("a baron launched someone else's weapon: %v", err)
+	// Nobody launches it. Construction runs for AnnihilatorBuildDays and then it
+	// goes by itself (#114).
+	if w.Annihilator.LaunchDay != w.GameDay+AnnihilatorBuildDays {
+		t.Errorf("launch day %d, want %d", w.Annihilator.LaunchDay, w.GameDay+AnnihilatorBuildDays)
 	}
-	if err := w.LaunchAnnihilator(founder); err != nil {
-		t.Fatalf("LaunchAnnihilator: %v", err)
+	w.LaunchDueAnnihilator()
+	if w.Annihilator.Launched {
+		t.Error("the weapon launched before construction finished")
+	}
+	w.GameDay += AnnihilatorBuildDays
+	w.LaunchDueAnnihilator()
+	if !w.Annihilator.Launched {
+		t.Fatal("a finished weapon did not launch itself")
 	}
 	if w.Annihilator.ArrivesDay != w.GameDay+AnnihilatorFlightDays {
 		t.Errorf("arrives day %d, want %d", w.Annihilator.ArrivesDay, w.GameDay+AnnihilatorFlightDays)
 	}
-	if err := w.DismantleAnnihilator(founder); err != ErrAnnihilatorFlying {
-		t.Errorf("a weapon in flight was dismantled: %v", err)
+	// Not even the Coordinator can call back a weapon already in the air.
+	if err := w.DismantleAnnihilatorByCoordinator(founder); err == nil {
+		t.Error("a weapon in flight was dismantled")
+	}
+
+	// Once it has landed on the target, the planet is free to build another.
+	w.RetireSpentAnnihilator()
+	if w.Annihilator == nil {
+		t.Error("the weapon was retired before it arrived")
+	}
+	w.GameDay = w.Annihilator.ArrivesDay + 1
+	w.RetireSpentAnnihilator()
+	if w.Annihilator != nil {
+		t.Errorf("a spent weapon still occupies the planet: %+v", w.Annihilator)
 	}
 }
 
-// The target planet is told the weapon exists while it is still being built, and
-// again when it launches, and its jets can shoot it down in flight (#63, #16).
+// The target planet is told the weapon exists while it is still being built and
+// again when it launches; nothing can touch it until it lands, and then jets and
+// only jets can kill it (#63, #16, #112).
 func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.IBBS = true
 	cfg.BoardID = "faraway"
 	target := NewWorldSeed(cfg, 1)
 	defender := target.AddHuman("bob", "Rome")
-	defender.Land, defender.Jets = 9000, 30_000
+	defender.Regions = RegionMix{Agricultural: 9000}
+	defender.syncLand()
+	defender.Protection = 0
+	defender.Jets = 400_000
 
 	// Under construction: a warning, and nothing to shoot at yet.
 	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{FromBoard: "Wildside"}})
@@ -673,70 +698,118 @@ func TestAnnihilatorIsVisibleAndCanBeShotDown(t *testing.T) {
 		t.Error("a weapon still under construction is marked as flying")
 	}
 
-	// Launched: now it is in the air.
+	// Launched: in the air, and out of reach until it lands.
 	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{
 		FromBoard: "Wildside", Funded: true, Launched: true, ArrivesDay: target.GameDay + 2, Intact: 100,
 	}})
 	if !target.Incoming.Launched {
 		t.Fatal("target does not know the weapon has launched")
 	}
+	if _, _, err := target.InterceptAnnihilator(defender, 1000); err != ErrAnnihilatorAloft {
+		t.Errorf("jets reached a weapon still in flight: %v", err)
+	}
 
-	// Jets, and only jets, whittle it down.
-	knocked, err := target.InterceptAnnihilator(defender, 5000)
+	// It lands. Now the jets have something to fight.
+	target.GameDay += 2
+	target.ArriveAnnihilator()
+	if target.Incoming.DaysLeft != AnnihilatorSiegeDays {
+		t.Fatalf("siege countdown is %d, want %d", target.Incoming.DaysLeft, AnnihilatorSiegeDays)
+	}
+	needed := target.AnnihilatorJetsNeeded()
+	if want := int64(9000 * (9000/AnnihilatorJetsLandDivisor + AnnihilatorJetsLandBase)); needed != want {
+		t.Errorf("%d jets needed, want %d", needed, want)
+	}
+
+	// No single sortie can finish it, however many jets it carries.
+	knocked, lost, err := target.InterceptAnnihilator(defender, 400_000)
 	if err != nil {
 		t.Fatalf("InterceptAnnihilator: %v", err)
 	}
-	if knocked != 5000/AnnihilatorJetsPerPercent {
-		t.Errorf("5,000 jets knocked %d%% off, want %d%%", knocked, 5000/AnnihilatorJetsPerPercent)
+	if knocked != AnnihilatorMaxSortiePct {
+		t.Errorf("one sortie knocked %d%% off, want the %d%% ceiling", knocked, AnnihilatorMaxSortiePct)
 	}
-	if defender.Jets != 25_000 {
-		t.Errorf("jets not spent: %d, want 25,000", defender.Jets)
+	if target.Incoming == nil {
+		t.Fatal("one sortie destroyed the weapon; the ceiling must forbid that")
 	}
-	if target.Incoming.Intact != 100-knocked {
-		t.Errorf("weapon is %d%% intact, want %d%%", target.Incoming.Intact, 100-knocked)
+	if lost < 1 || lost >= 400_000 {
+		t.Errorf("%d of 400,000 jets lost, want about a third", lost)
+	}
+	if defender.Jets != 400_000-lost {
+		t.Errorf("jets not spent: %d, want %d", defender.Jets, 400_000-lost)
 	}
 
-	// Enough jets destroy it outright, and then nothing arrives.
-	defender.Jets = 100_000
-	if _, err := target.InterceptAnnihilator(defender, 100_000); err != nil {
+	// A second wave finishes it, and then the siege is over.
+	defender.Jets = 400_000
+	if _, _, err := target.InterceptAnnihilator(defender, 400_000); err != nil {
 		t.Fatalf("InterceptAnnihilator: %v", err)
 	}
 	if target.Incoming != nil {
-		t.Fatalf("weapon survived a full interception: %+v", target.Incoming)
+		t.Fatalf("weapon survived a second full wave: %+v", target.Incoming)
 	}
 	before := defender.Land
-	target.GameDay += 5
-	target.ArriveAnnihilator()
+	target.TickAnnihilator()
 	if defender.Land != before {
-		t.Errorf("a destroyed weapon still detonated: land %d, was %d", defender.Land, before)
+		t.Errorf("a destroyed weapon still bit: land %d, was %d", defender.Land, before)
+	}
+
+	// The builder announcing it once more must not raise a second siege.
+	target.ApplyPacket(Packet{FromBoard: "Wildside", Annihilator: &AnnihilatorStatus{
+		FromBoard: "Wildside", Funded: true, Launched: true, ArrivesDay: target.GameDay - 1, Intact: 100,
+	}})
+	if target.Incoming != nil {
+		t.Errorf("a spent weapon came back: %+v", target.Incoming)
 	}
 }
 
-// A weapon that gets through takes the same share of every realm's land. The
-// SDI is no defence against it: only jets can reach the thing (#111).
-func TestAnnihilatorDetonationHitsThePlanet(t *testing.T) {
+// The weapon is a siege: a tenth of every realm's regions the day it lands and a
+// twentieth on each of the four days after, then it burns out. The SDI is no
+// defence — only jets can reach it (#111, #112) — and a realm still under
+// new-realm protection is passed over.
+func TestAnnihilatorBesiegesThePlanetForFiveDays(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.IBBS = true
 	w := NewWorldSeed(cfg, 1)
 	plain := w.AddHuman("bob", "Rome")
 	shielded := w.AddHuman("carol", "Carthage")
-	for _, e := range []*Empire{plain, shielded} {
+	newcomer := w.AddHuman("dave", "Dacia")
+	for _, e := range []*Empire{plain, shielded, newcomer} {
 		e.Regions = RegionMix{Agricultural: 10_000}
 		e.syncLand()
+		e.Protection = 0
 	}
 	shielded.SDI = SDIMax
+	newcomer.Protection = 5
 
 	w.Incoming = &Annihilator{Creator: "Wildside", Launched: true, ArrivesDay: w.GameDay, Intact: 100}
 	w.ArriveAnnihilator()
 
-	if plain.Land != 9000 {
-		t.Errorf("unshielded realm has %d land, want 9,000 (10%% lost)", plain.Land)
+	// Day one: a tenth, shield or no shield.
+	w.TickAnnihilator()
+	for _, e := range []*Empire{plain, shielded} {
+		if e.Land != 9000 {
+			t.Errorf("%s has %d land after the first day, want 9,000", e.Name, e.Land)
+		}
 	}
-	if shielded.Land != 9000 {
-		t.Errorf("shielded realm has %d land, want 9,000 — the SDI must not blunt it", shielded.Land)
+	if newcomer.Land != 10_000 {
+		t.Errorf("a protected realm lost land: %d, want 10,000", newcomer.Land)
+	}
+
+	// Four more days at a twentieth of what is left, then it burns out.
+	want := 9000
+	for day := 2; day <= AnnihilatorSiegeDays; day++ {
+		w.TickAnnihilator()
+		want -= want * AnnihilatorLaterDayPct / 100
+		if plain.Land != want {
+			t.Errorf("day %d: %d land, want %d", day, plain.Land, want)
+		}
 	}
 	if w.Incoming != nil {
-		t.Error("the weapon was not consumed on arrival")
+		t.Fatalf("the weapon outlasted its %d days: %+v", AnnihilatorSiegeDays, w.Incoming)
+	}
+	// A battered weapon bites just as deep as a fresh one, so five days of it
+	// costs a realm better than a quarter of its land.
+	if plain.Land > 7400 {
+		t.Errorf("five days of siege left %d land, want under 7,400", plain.Land)
 	}
 }
 

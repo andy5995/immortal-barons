@@ -1113,6 +1113,7 @@ func runTurn(s session.Session, w *ctx) Result {
 
 	showCoordinatorNotice(s, w)
 	openTurnRecap(s, w)
+	annihilatorDefense(s, w)
 
 	firstTurn := true
 	for {

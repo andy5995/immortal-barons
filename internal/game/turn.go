@@ -163,6 +163,14 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 			}
 		}
 		rep.step("Checking for fallen realms")
+		// The planet's own weapon goes off to war by itself once construction has
+		// run (#114), and any weapon squatting here takes its daily bite (#112).
+		if w.Annihilator != nil || w.Incoming != nil {
+			rep.step("Resolving Clingy Annihilator operations")
+		}
+		w.LaunchDueAnnihilator()
+		w.TickAnnihilator()
+		w.RetireSpentAnnihilator()
 		w.GameDay++
 		// Sweep out husks whose death is now in the past so dead barons (AI
 		// included) don't linger on the scoreboard or in the world. A realm

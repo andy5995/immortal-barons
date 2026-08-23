@@ -702,16 +702,22 @@ All four constants live in `balance.go`; Score never drops below 0.
 ultimate weapon, aimed at an entire enemy planet rather than one empire, and one
 per planet at a time. IB implements the original's lifecycle (#16): begin
 construction against a named planet → any baron funds it a million gold at a time
-→ complete → awaiting launch → in flight → arrival. It can be dismantled before
-it flies and the gold is not refunded.
+→ complete → three days' construction → it launches itself → in flight → arrival
+→ a five-day siege. It can be dismantled before it flies and the gold is not
+refunded.
 
 **Who may call it off is the elected BBS Coordinator**, from item 1 of the
 Coordinator menu — the original's *Dismantle Gooie*. Standing a strike down is a
 diplomatic lever rather than a change of mind: the planet makes peace and calls
 off the weapon still aimed at its new ally, over the builder's head (#45, built
-2026-08-18). Two divergences remain, both **#114**: IB still lets the baron who
-started it dismantle it from the weapon's own desk, and still asks them whether
-to launch, where the original launches by itself once the funding completes.
+2026-08-18). Nobody else may stand it down, and nobody launches it: **funding
+reaching its target is the whole trigger** (#114, built 2026-08-23). The funding
+routine stamps a launch date of `now + 3.0 days` (BRE.OVR 0x27a47, a Real48
+3.0) and reports the hours left — "Gooie Kablooie Complete. / Launch to <planet>
+in N hours. / Gooie is awaiting launch." No launch prompt exists anywhere in the
+overlay, and *Dismantle Gooie* sits on the Coordinator Ops menu
+(`run_interbbs_operations_menu`) beside Modify Diplomacy and Global Recon
+Request, not on the weapon's own desk.
 
 The **funding cost is binary-verified** from BRE.OVR's overlay unit at 0x27441
 (the routine at 0x277A0-0x27950), in millions of gold:
@@ -726,26 +732,43 @@ The **funding cost is binary-verified** from BRE.OVR's overlay unit at 0x27441
 so the weapon is priced against how much bigger the target planet is than yours.
 The constants are `Clingy Annihilator*` in `balance.go`.
 
-The rest is **IB's reconstruction**, following the original's prompts rather than
-its code: two days in flight, 10% of each realm's regions on arrival scaled by how
-much of the weapon survived, and interception by **jets only** (the original is
-explicit that nothing else can reach it) at one percent knocked off per 250 jets,
-spent whether they connect or not. The SDI does not touch it: the original's SDI
-percentage is read in four routines and this is not one of them (see "SDI
-Defense"), which matches its instructions saying jets are the only answer. IB scaled the
-damage by the defender's SDI until 2026-08-14; that was IB's own and is gone
-(#111).
+**The siege is binary-verified** from the daily resolver (`resolve_gooie_attack`,
+BRE.OVR 0x47c52), called once a day from `run_daily_maintenance`. The weapon
+lands with a strength of 100 and a five-day counter, and each day:
 
-**That reconstruction is still wrong in one known way** — it needs a live game,
-or the original's code, before it can be called done:
+    day 5 (arrival):  every realm loses regions / 10   { 10% }
+    days 4..1:        every realm loses regions / 20   { 5%  }
+    counter--, and at zero the weapon is gone
 
-- **The weapon should not detonate once and vanish.** The original's own
-  instructions describe a siege: 10% of the planet's regions instantly on
-  arrival, "every day of it's existance after the first day, another 5% ... up
-  to a max of 5 days at which time it will self-destruct", with jets battling it
-  the whole time it sits there. IB has no post-arrival phase at all, so the
-  weapon costs a planet a tenth of its land instead of up to a third, and the
-  cooperative defence the original is built around never happens. (#112)
+The share is taken from what the realm *still holds*, so five days cost it
+`1 - 0.9 x 0.95^4` = about 26.7% of its land rather than a flat 30%. Three things
+the resolver does **not** read: the weapon's own remaining strength, the
+defender's SDI (#111), and anything else at all — strength is hit points, not a
+damage multiplier, so a weapon battered to 1% bites as deep as a fresh one. It
+**does** call `is_under_protection` (056d:19b5) per realm and skip anyone still
+under new-realm protection.
+
+**Killing it is a planet-wide effort, and jets are the only thing that can do
+it.** BRE asks every baron at the top of their turn — `run_player_turn` calls the
+jet-attack routine (BRE.OVR 0x2827b) directly, so it is not hidden behind a menu
+— and refuses a baron with no jets outright: "Only Jets can attack Gooie
+Kablooies due to their dynamic structure". The math, from 0x28897-0x28961 and
+0x2879d-0x287d3:
+
+    required = min(2,000,000,000, planetLand x (planetLand / 750 + 15))
+    knocked  = min(75, jets x 100 / required)          { percent, truncated }
+    jetsLost = jets x (33 + Random(5) - Random(5)) / 100
+
+`planetLand` is every living realm's regions on the *defending* planet, so a big
+planet has to raise more jets to save itself. The **75% ceiling per sortie** is
+what makes it cooperative: no single air force, however large, can finish the
+weapon in one wave. The jets are spent whether they connect or not.
+
+**IB's own divergences here.** The flight is a fixed two days
+(`AnnihilatorFlightDays`) where BRE's is the league's real packet transit; and IB
+tracks one incoming weapon at a time, so the original's numbered picker
+(" #  From / Strength / Days Until Self-Destruct") is a single row with no
+"Enter Gooie Number" prompt.
 
 The target planet is told when the weapon **launches**, with the arrival time in
 hours, which is what makes interception possible (#63). **It is not told while
@@ -3269,9 +3292,6 @@ as IB's own until someone reads the original's code:
   routines were all read and none of the three consults it, so the damage
   discount IB used to apply is gone (#103). Whether SDI should touch the
   R5-Slappenheimer either is still unread. (#113)
-- IB reduces Clingy Annihilator damage by the defender's SDI. It should not: the
-  original says jets are "the only way to destroy this thing", and the doomsday
-  weapon is not among the three things SDI is documented to work on. (#111)
 - **Jets** on an arriving strike fight at `1 - SDI x 0.3/100`, **bombers** at
   `1 - SDI x 0.2/100` (truncated). Linear in the percentage; the published "up to
   30% / 20%" are what they reach at SDI 100.

@@ -603,11 +603,14 @@ func clingyAnnihilator(s session.Session, w *ctx) Result {
 	case d.Launched:
 		ok(s, "The Clingy Annihilator is on its way. Nothing more can be done with it.")
 	case d.Funded:
-		if AskYesNo(s, "Launch it now?", false) {
-			runAnnihilator(s, w, func(p *game.Empire) error { return w.World.LaunchAnnihilator(p) }, "Launched.")
-		} else if AskYesNo(s, "Dismantle it?", false) {
-			runAnnihilator(s, w, func(p *game.Empire) error { return w.World.DismantleAnnihilator(p) }, "Dismantled.")
+		// Nobody presses a button here: the weapon launches itself once
+		// construction has run, and only the Coordinator can stand it down (#114).
+		var hours int
+		w.With(func() { hours = (d.LaunchDay - w.GameDay) * 24 })
+		if hours < 0 {
+			hours = 0
 		}
+		ok(s, "The Clingy Annihilator is complete. It launches at %s in %d hours.", d.TargetBoard, hours)
 	default:
 		millions := promptSuggested(s, "How many million gold do you wish to put in?", 0, d.CostMillion-d.PaidMillion)
 		if millions > 0 {
@@ -675,4 +678,67 @@ func runAnnihilator(s session.Session, w *ctx, act func(*game.Empire) error, don
 		return
 	}
 	ok(s, done)
+}
+
+// annihilatorDefense is the planet's answer to a Clingy Annihilator squatting on
+// it: throw jets at the thing until it dies. The original asks every baron this
+// at the top of their turn rather than hiding it behind a menu item
+// (run_player_turn calls the routine directly), because the weapon needs the
+// whole planet's air forces and a baron who never opens the InterPlanetary menu
+// would never see it (#112).
+//
+// IB tracks one incoming weapon at a time, so the original's numbered picker is
+// a single row here and there is no "Enter Gooie Number" prompt.
+func annihilatorDefense(s session.Session, w *ctx) {
+	var d *game.Annihilator
+	var jets, needed int
+	w.With(func() {
+		if w.Incoming == nil || w.Incoming.DaysLeft <= 0 {
+			return
+		}
+		c := *w.Incoming
+		d = &c
+		needed = int(w.AnnihilatorJetsNeeded())
+	})
+	if d == nil {
+		return
+	}
+	withPlayer(w, func(p *game.Empire) { jets = p.Jets })
+
+	fmt.Fprintf(s, "\n%s%-24s %-14s %s%s\n", ansi.FgWhite,
+		tr(s, "From"), tr(s, "Strength"), tr(s, "Days Until Self-Destruct"), ansi.Reset)
+	fmt.Fprintf(s, "%s%-24s %-14s %d%s\n", ansi.FgBrightWhite,
+		d.Creator, fmt.Sprintf("%d%%", d.Intact), d.DaysLeft, ansi.Reset)
+	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(
+		tr(s, "It would take %s jets to destroy it outright."), comma(needed))))
+
+	if !AskYesNo(s, "Do you wish to attack the Clingy Annihilator?", false) {
+		return
+	}
+	if jets < 1 {
+		ok(s, "Only jets can attack a Clingy Annihilator, and you have none.")
+		return
+	}
+	send := promptSuggested(s, "Send how many jets?", 0, jets)
+	if send < 1 {
+		return
+	}
+	var knocked, lost int
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		var e error
+		knocked, lost, e = w.World.InterceptAnnihilator(p, send)
+		return e
+	})
+	if err != nil {
+		fail(s, err)
+		return
+	}
+	var gone bool
+	w.With(func() { gone = w.Incoming == nil })
+	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "%s jets were destroyed in the attack!"), comma(lost))))
+	if gone {
+		ok(s, "The Clingy Annihilator was DESTROYED!")
+		return
+	}
+	ok(s, "%d%% of the Clingy Annihilator destroyed!", knocked)
 }

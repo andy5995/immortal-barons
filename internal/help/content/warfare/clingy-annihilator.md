@@ -15,14 +15,26 @@ planet. After that, any baron here can put money in, a million gold at a time.
 The price depends on the size of the target planet: aiming at a planet much
 larger than yours costs more.
 
-When the money is all in, the weapon is ready. Only the baron who started the
-work can launch it. They can scrap it instead, but the gold is spent either way.
+When the last of the money is in, the weapon builds for three more days and then
+launches itself. Nobody decides that. The only person who can call it off is your
+elected Coordinator, and only before it leaves the ground. The gold is spent
+either way.
 
-The target planet can see the weapon coming. They are told while the work is
-going on, and told again at launch, with the hours left before it lands. Only
-jets can reach it. Every wave takes a piece out of the weapon, and enough
-waves destroy it in the air.
+## Being on the receiving end
 
-Whatever survives the flight strikes every realm on that planet and takes a
-share of their regions. An SDI program is no help against it — jets are the only
-thing that can reach the weapon.
+A weapon aimed at your planet does not go off and disappear. It arrives, sits on
+your planet, and eats it. The day it lands it takes a tenth of every realm's
+regions. Every day after that it takes another twentieth, until five days are up
+and it burns itself out. Left alone it will cost you better than a quarter of
+your land.
+
+Only jets can reach it. Your realm is asked at the start of your turn whether you
+want to attack it, and the screen tells you how many jets it would take to
+destroy the thing outright — a figure that grows with the size of your planet.
+About a third of the jets you send do not come home.
+
+No single wave can finish it, however many jets you send. That is the point: the
+weapon is built to need the whole planet's air forces, and a planet that cannot
+organise loses the land.
+
+An SDI program is no help against it, and neither is anything else you own.
