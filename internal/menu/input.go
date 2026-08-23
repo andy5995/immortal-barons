@@ -267,6 +267,25 @@ func promptSuggestedTight[T numfmt.Number](s session.Session, msg string, sugges
 	return editAmount(s, prefix, suggested, max)
 }
 
+// promptSuggestedOpen is promptSuggested with the ceiling left OFF the screen,
+// for a prompt whose bound is a sentinel rather than a fact about the game. The
+// value is still clamped to [0, max].
+//
+// The trade deal's Request side is the case: BRE bounds "Demand how many <item>?"
+// at 0xFFFFFFFF (create_trade_offer, BRE.OVR 0x26a4b — against the player's own
+// holdings on the Send side at 0x2679d) and prints no hint at all, because there
+// is no honest number to print. What the other realm holds is not yours to see.
+// IB printed the sentinel itself, "(0; 1.0737B)", which reads like information
+// and is not.
+func promptSuggestedOpen[T numfmt.Number](s session.Session, msg string, suggested, max T) T {
+	prefix := fmt.Sprintf("\n%s%s %s(%s%s%s)%s:%s ",
+		ansi.FgWhite, i18n.T(sessionLang(s), msg),
+		ansi.FgBrightBlue, ansi.FgBrightCyan, comma(suggested), ansi.FgBrightBlue,
+		ansi.FgWhite, ansi.Reset)
+	fmt.Fprint(s, prefix)
+	return editAmount(s, prefix, suggested, max)
+}
+
 // promptProduction is the Set Industries per-unit prompt (no leading blank line,
 // so the units sit on consecutive lines). `label` is padded to labelW runes and
 // the (suggested; max) numbers are right-aligned to 3 digits, so the input column

@@ -57,6 +57,11 @@ func basketSummary(s session.Session, b game.TradeBasket) string {
 	return strings.Join(parts, ", ")
 }
 
+// TradeRequestMax bounds what one basket line may ask for. BRE uses 0xFFFFFFFF
+// as "no ceiling" on the Request side; IB keeps a real one so the figure stays
+// inside an int on a 32-bit door build.
+const TradeRequestMax = 1 << 30
+
 // buildTradeBasket lets the player assemble a basket of goods: pick a good (1-9),
 // enter a quantity, repeat, and 0/Enter when done. When limitToOwned, quantities
 // are capped at what the player currently holds (the Offer side); the Request
@@ -123,11 +128,16 @@ func buildTradeBasket(s session.Session, w *ctx, title string, limitToOwned bool
 			continue
 		}
 		fmt.Fprintf(s, "%c\n", r)
-		maxAmt := 1 << 30
+		// The Offer side is bounded by what you hold, and says so — the Owned
+		// column beside it is the same figure. The Request side has no honest
+		// ceiling to quote, so it quotes none (see promptSuggestedOpen).
+		var n int
+		label := fmt.Sprintf(tr(s, "How many %s?"), tr(s, g.name))
 		if limitToOwned {
-			maxAmt = g.owned(p)
+			n = promptSuggested(s, label, *g.field(&b), g.owned(p))
+		} else {
+			n = promptSuggestedOpen(s, label, *g.field(&b), TradeRequestMax)
 		}
-		n := promptSuggested(s, fmt.Sprintf(tr(s, "How many %s?"), tr(s, g.name)), *g.field(&b), maxAmt)
 		if n < 0 {
 			n = 0
 		}

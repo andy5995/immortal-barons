@@ -2500,7 +2500,7 @@ A baron who has not voted has `No one` in the name slot, from
 prints its own wording in the same place, the same shape and the same three
 cases.
 
-## Game Setup (captured live 2026-08-23, `cap/shsbbs.cap`)
+## Game Setup and Send Trade Deal (captured live 2026-08-23, `cap/shsbbs.cap`)
 
 ### The panel (System Menu → G)
 
@@ -2570,3 +2570,42 @@ first turn earning 53,740 gold and charged 3,708 — `trunc(53740 x 0.069)` — 
 the rate is a sysop's setting and the formula in
 `docs/mechanics-reference.md` is unchanged.
 
+### Send Trade Deal — the Request side shows no counts at all
+
+**Read from the binary, not from a capture.** `cap/shsbbs.cap` switches from BRE
+to Immortal Barons partway through (the A-Net game server's own door menu, `[0]
+Immortal Barons`), and the trade-deal screens in it are IB's own — a trap worth
+naming, because the two games look alike enough that IB's output was briefly
+written up here as the original's.
+
+BRE draws both baskets from ONE routine, `compose_trade_demand` (BRE.OVR
+0x25ab4), with a Send/Demand flag at `[bp+0x6]`. Three things branch on it, so
+the Demand table is a genuinely different screen and not the same one with a
+blank column:
+
+- the header tail `'       # Owned'` prints only on the Send side (0x25d47);
+- the divider is **48** characters with it and **34** without (0x25d85);
+- the row format differs, and only the Send row looks the owned figure up
+  (`0504:003e`, 0x25db6).
+
+Its strings: `'Stuff to '` + `'Send'`/`'Demand'` for the title, `'Key  Item
+              '`, `'  # to '`, `'       # Owned'`, and
+`'Trade Deal requires N Carriers.'` with a separate `'WARNING:'` +
+`' You do not have enough carriers.'`.
+
+The quantity prompts are `'Send how many '` / `'Demand how many '` + the item +
+`'? '` — **bare, with no `(suggested; max)` hint on either side**. BRE's bounded
+input helper (`056d:01bf` -> `0851:0bd9`) is a raw key-by-key editor that prints
+no bounds of its own; the `(N; M)` hints elsewhere in BRE are printed by their
+callers. And the bounds themselves say the same thing the columns do
+(`create_trade_offer`, BRE.OVR 0x2624c):
+
+    Send prompt   bounded by the player's own count of that item   (0x2679d)
+    Demand prompt bounded by 0xFFFFFFFF — a sentinel, not a figure  (0x26a4b)
+
+**IB matches the important half and diverges on the rest.** No Owned column on
+the Request side, and no ceiling quoted in its prompt — IB used to print the
+sentinel as `(0; 1.0737B)`, which reads like information about the other realm
+and is not. IB keeps its `(suggested)` hint on both sides where BRE has none,
+and keeps a real 2^30 ceiling internally so the figure stays inside an `int` on
+a 32-bit door build.
