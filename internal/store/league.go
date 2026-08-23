@@ -11,7 +11,17 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// ParseNodeList reads a BRNODES-style league node list. Each node is a block of
+// ParseNodeList reads a roster and drops any block it cannot use. Callers that
+// have to TELL the sysop what was dropped — the setup checkup — want
+// ParseNodeListReport instead: a board missing from the roster is unreachable
+// and its packets are refused, which is not a thing to learn from a board count
+// that is one lower than expected.
+func ParseNodeList(path string) ([]game.LeagueNode, error) {
+	nodes, _, err := ParseNodeListReport(path)
+	return nodes, err
+}
+
+// ParseNodeListReport reads a BRNODES-style league node list. Each node is a block of
 // six lines — number, name, FidoNet address, city, state, country — separated
 // by one or more blank lines (matching docs/brnodes.sam in the original), with
 // an OPTIONAL seventh line carrying that board's packet-signing public key
@@ -26,18 +36,21 @@ import (
 // missing (no city, say) loses that board here. That is deliberate — the loss
 // happens on the Coordinator's own board, where they notice, rather than
 // silently on everyone else's.
-func ParseNodeList(path string) ([]game.LeagueNode, error) {
+func ParseNodeListReport(path string) (nodes []game.LeagueNode, problems []string, err error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer f.Close()
 
-	var nodes []game.LeagueNode
 	var block []string
 	flush := func() {
 		if len(block) >= 6 {
 			n, hosts, err := parseNodeNumber(block[0])
+			if err != nil {
+				problems = append(problems, fmt.Sprintf("%q (%s) was skipped: a node number must be 1 to %d",
+					strings.TrimSpace(block[1]), strings.TrimSpace(block[0]), game.MaxNodeNumber))
+			}
 			if err == nil {
 				var key string
 				if len(block) >= 7 {
@@ -68,7 +81,7 @@ func ParseNodeList(path string) ([]game.LeagueNode, error) {
 		block = append(block, line)
 	}
 	flush()
-	return nodes, sc.Err()
+	return nodes, problems, sc.Err()
 }
 
 // parseNodeNumber reads a roster block's first line: a node number, optionally
@@ -86,7 +99,10 @@ func parseNodeNumber(line string) (int, []int, error) {
 	// whose own name is absent from the roster, since NodeNumber answers 0 for
 	// a name it cannot find — handing that board a stranger's roster entry as
 	// its own origin, silently.
-	if n < 1 {
+	if n < 1 || n > game.MaxNodeNumber {
+		// The ceiling is the packet filename's, not a matter of taste: the
+		// number goes into every name this board writes in base 36, and the name
+		// has to fit an FTN Type-2 subject beside its directory path (#180).
 		return 0, nil, strconv.ErrRange
 	}
 	var hosts []int

@@ -119,7 +119,7 @@ func Checkup(cfg game.Config) []Check {
 	add("Inter-BBS play", true, "on")
 
 	rosterPath := filepath.Join(cfg.DataDir, NodeListFile)
-	nodes, err := ParseNodeList(rosterPath)
+	nodes, problems, err := ParseNodeListReport(rosterPath)
 	switch {
 	case err != nil:
 		add("League roster", false, fmt.Sprintf("%s: %v", rosterPath, err))
@@ -127,6 +127,12 @@ func Checkup(cfg game.Config) []Check {
 		add("League roster", false, rosterPath+" lists no boards")
 	default:
 		add("League roster", true, fmt.Sprintf("%d board(s) in %s", len(nodes), rosterPath))
+	}
+	// A skipped block is a board this league cannot reach and whose packets are
+	// refused, so it is reported on its own line rather than left to be inferred
+	// from a board count (#180).
+	if len(problems) > 0 {
+		add("Roster entries", false, fmt.Sprintf("%s in %s", strings.Join(problems, "; "), rosterPath))
 	}
 	switch {
 	case cfg.BoardID == "":

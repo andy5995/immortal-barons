@@ -1002,6 +1002,22 @@ func (w *World) ExportScores() {
 	})
 }
 
+// usableNodes drops roster entries this board cannot use: a node number outside
+// 1 to MaxNodeNumber. The roster file's parser refuses the same numbers, so a
+// roster adopted from a packet and one read off disk describe the same league
+// (#180). Dropping the entry rather than the whole roster keeps one bad line
+// from cutting a board off from every other board in the league.
+func usableNodes(nodes []LeagueNode) []LeagueNode {
+	out := make([]LeagueNode, 0, len(nodes))
+	for _, n := range nodes {
+		if n.Number < 1 || n.Number > MaxNodeNumber {
+			continue
+		}
+		out = append(out, n)
+	}
+	return out
+}
+
 // SameRoster reports whether two league rosters hold the same boards in the
 // same order. Lives here beside LeagueNode so both the packet reader and the
 // store's node-list writer ask one question one way.
@@ -1424,10 +1440,16 @@ func (w *World) ApplyPacket(p Packet) Packet {
 			w.postNews("The League Coordinator updated the league settings.")
 		}
 	}
-	// The roster travels the same way and under the same guard (#64).
-	if len(p.LeagueNodes) > 0 && orders && !SameRoster(w.LeagueNodes, p.LeagueNodes) {
-		w.LeagueNodes = append([]LeagueNode(nil), p.LeagueNodes...)
-		w.postNews("The League Coordinator updated the league roster.")
+	// The roster travels the same way and under the same guard (#64). It arrives
+	// as a struct rather than through the roster PARSER, so the node-number
+	// range is applied here as well (#180) — otherwise a number the file format
+	// rejects could still reach this board over the wire and last until the next
+	// restart, when re-reading the written file would silently drop it.
+	if len(p.LeagueNodes) > 0 && orders {
+		if nodes := usableNodes(p.LeagueNodes); !SameRoster(w.LeagueNodes, nodes) {
+			w.LeagueNodes = nodes
+			w.postNews("The League Coordinator updated the league roster.")
+		}
 	}
 	if p.Reset != nil && orders {
 		w.applyLeagueReset(p.Reset)

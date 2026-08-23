@@ -43,7 +43,9 @@ their own `barons-ftn.lock`, which the game never takes.
 Each packet is one JSON file. Modern packet filenames are
 `[L<nnn>-]<from-node>-<sequence>-<to-node>.brp`; the three identity numbers use
 base 36 to keep the name short enough for an absolute pathname in an FTN Type-2
-subject. The sequence has a fixed width so a directory scan sees each sender's
+subject. That budget is why a roster node number is capped at 999 (#180): every
+extra digit lengthens every filename the board sends, and boards have been
+measured running with three bytes of subject to spare. The sequence has a fixed width so a directory scan sees each sender's
 packets in order. For example, `L042-2-000000000001z-3.brp` is league 42,
 origin node 2, sequence 71, final destination node 3. A zero destination is a
 broadcast. The `L<nnn>` prefix is present when the league number is set. A
@@ -283,7 +285,7 @@ Plain text, one board per six-line block, blank line between blocks (BRE's
 into `World.LeagueNodes`.
 
 ```
-1              node number (1 = League Coordinator), optionally "1 HOST 2 4"
+1              node number, 1 to 999 (1 = League Coordinator), optionally "1 HOST 2 4"
 Avalon         board / planet name
 363/277        network address
 Orlando        city

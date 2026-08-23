@@ -379,6 +379,15 @@ const (
 // 0 means the number was never set.
 const MaxLeagueNumber = 999
 
+// MaxNodeNumber is the roster node-number ceiling, the same 1-999 range as the
+// league number above (#180). Not a matter of taste: a node number is rendered
+// in base 36 into every packet filename its board produces, and that name has
+// to fit inside an FTN Type-2 subject alongside the absolute path of the
+// directory holding it. Boards already run with a few bytes of margin there, so
+// a four- or five-digit node number would lengthen every name a board sends and
+// make the width of a packet name something nobody can reason about.
+const MaxNodeNumber = 999
+
 // InterBBSEnabled reports whether inter-BBS / interplanetary features (group
 // attacks, IP scores, travel times, terrorist ops, planetary Gooie/SDI) should
 // be offered. In BRE these live on a separate "InterPlanetary Operations" menu

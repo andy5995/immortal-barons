@@ -3,6 +3,7 @@ package store
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -140,5 +141,50 @@ func TestNodeListRejectsNodeNumberZero(t *testing.T) {
 	}
 	if len(nodes) != 1 || nodes[0].Name != "Bravo BBS" {
 		t.Errorf("want only the valid entry, got %+v", nodes)
+	}
+}
+
+// TestNodeListRejectsNodeNumberAboveTheCeiling is #180: a node number is
+// rendered in base 36 into every packet filename its board writes, and that name
+// has to fit an FTN Type-2 subject beside a directory path, so the roster holds
+// the same 1-999 range as the league number.
+func TestNodeListRejectsNodeNumberAboveTheCeiling(t *testing.T) {
+	path := filepath.Join(t.TempDir(), NodeListFile)
+	body := "1000\nOversized BBS\n1:1/0\nLocal\nXX\nUSA\n\n" +
+		"999\nCeiling BBS\n1:1/1\nLocal\nXX\nUSA\n\n" +
+		"2\nBravo BBS\n1:1/2\nLocal\nXX\nUSA\n"
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	nodes, problems, err := ParseNodeListReport(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// 999 is inside the range and must survive: a ceiling that excludes its own
+	// top value would quietly narrow the documented range.
+	if len(nodes) != 2 || nodes[0].Number != 999 || nodes[1].Number != 2 {
+		t.Fatalf("roster parsed as %+v", nodes)
+	}
+	// The dropped board is named, because a board missing from the roster is
+	// unreachable and its packets are refused.
+	if len(problems) != 1 || !strings.Contains(problems[0], "Oversized BBS") {
+		t.Fatalf("problems reported: %v", problems)
+	}
+	if !strings.Contains(problems[0], "1 to 999") {
+		t.Errorf("the problem does not state the range: %q", problems[0])
+	}
+}
+
+// A roster with nothing wrong reports nothing, so the checkup line only appears
+// when there is something to fix.
+func TestCleanNodeListReportsNoProblems(t *testing.T) {
+	path := filepath.Join(t.TempDir(), NodeListFile)
+	body := "1\nAlpha BBS\n1:1/1\nLocal\nXX\nUSA\n\n2\nBravo BBS\n1:1/2\nLocal\nXX\nUSA\n"
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	nodes, problems, err := ParseNodeListReport(path)
+	if err != nil || len(nodes) != 2 || len(problems) != 0 {
+		t.Fatalf("nodes=%+v problems=%v err=%v", nodes, problems, err)
 	}
 }

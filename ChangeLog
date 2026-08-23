@@ -1,5 +1,7 @@
 (in-progress:)
   * Inbound packets are matched whatever the case of their .brp extension
+  * A roster node number must be 1 to 999
+  * -league-check names a roster entry it had to skip
   * The 32-bit Windows build runs on Windows 7, 8, and Server 2008 R2 through
     2012 R2
   * Game Bulletins reads .txt and .ans files from a bull folder in the data dir
