@@ -461,8 +461,10 @@ func TestNuclearStrikeScoresTheAttacker(t *testing.T) {
 		if _, err := w.NuclearStrike(a, d); err != nil {
 			t.Fatalf("seed %d: unexpected error: %v", seed, err)
 		}
-		if a.Score < 0 || a.Score > 899 {
-			t.Errorf("seed %d: scored %d, want 0-899", seed, a.Score)
+		// A FLAT 900, on every seed — the routine loads the figure as an
+		// immediate with no Random call. Golden literal, not the constant.
+		if a.Score != 900 {
+			t.Errorf("seed %d: scored %d, want a flat 900", seed, a.Score)
 		}
 	}
 }

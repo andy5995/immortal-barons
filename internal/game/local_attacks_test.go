@@ -51,8 +51,9 @@ func TestLocalAttackScoringOffMovesNoScore(t *testing.T) {
 	if on.Score <= 5_000 {
 		t.Fatalf("with scoring on the winner should gain, got %d", on.Score)
 	}
-	if onDef.Score >= 5_000 {
-		t.Fatalf("with scoring on the loser should lose score, got %d", onDef.Score)
+	// The loser is not docked — BRE never writes a second realm's Score.
+	if onDef.Score != 5_000 {
+		t.Fatalf("the loser's score should be untouched, got %d", onDef.Score)
 	}
 
 	off, offDef, captured := fight(false)

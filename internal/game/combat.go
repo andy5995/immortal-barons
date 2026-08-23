@@ -210,11 +210,6 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		}
 	}
 
-	// Score (IB's own): the award scales with the forces used up in the battle.
-	// The winner gains; the loser loses a bit less; a successful defense is worth
-	// more than a successful attack.
-	battle := aloss.Total() + dloss.Total()
-
 	// Casualty lines list each side's losses by unit type (BRE shows the same
 	// breakdown). The field order mirrors what each side fields: the attacker
 	// commits troopers/jets/tanks/bombers, the defender holds troopers/turrets/
@@ -262,12 +257,21 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 			captured -= lost.Waste
 		}
 
-		gain := battle / CombatScoreDivisor
-		if !w.localAttacksScore() {
-			gain = 0 // no score from local fighting, and the report stays silent about it
+		// Score is per REGION taken, and a total conquest pays better than an
+		// ordinary win — BRE's two award sites in resolve_regular_attack, told
+		// apart by the report each one follows. Nothing is awarded for losing and
+		// nothing is taken from the loser: the original writes only the acting
+		// player's Score field, ever.
+		crushed := d.Land <= 0 || d.People <= 0
+		gain := 0
+		if w.localAttacksScore() {
+			per := CombatScoreWinPerRegion
+			if crushed {
+				per = CombatScoreCrushPerRegion
+			}
+			gain = taken * per
 		}
 		addScore(a, gain)
-		addScore(d, -gain*CombatLoserPenaltyPct/100)
 
 		fmt.Fprint(&b, returningForces)
 		fmt.Fprintf(&b, "Your casualties: %s.\n\n", attackerCas(aloss))
@@ -279,7 +283,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		// Total conquest only when the capture actually reduces the defender to
 		// nothing — the final blow after grinding them down. You take their last
 		// regions and seize the remains of their military (BRE's BRCRUSH.DSP).
-		if d.Land <= 0 || d.People <= 0 {
+		if crushed {
 			absorbMilitary(a, d)
 			d.Alive = false
 			d.DiedDay = w.GameDay
@@ -288,24 +292,15 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		d.addEvent(fmt.Sprintf("%s attacked you: you lost %d regions and %d units.", a.Name, taken, dloss.Total()))
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
-		gain := battle / CombatScoreDivisor * DefenseWinBonusPct / 100
-		if !w.localAttacksScore() {
-			gain = 0
-		}
-		addScore(d, gain)
-		addScore(a, -gain*CombatLoserPenaltyPct/100)
+		// A repelled attack scores nothing for either side. The original's only two
+		// Score writes are on the winning-ATTACK paths, and neither touches a
+		// second realm's record — a successful defence is its own reward.
 
 		fmt.Fprint(&b, returningForces)
 		fmt.Fprintf(&b, "Your casualties: %s.\n\n", attackerCas(aloss))
 		fmt.Fprintf(&b, "The enemy lost: %s.\n\n", defenderCas(dloss))
 		fmt.Fprint(&b, "Defeat! Your forces took the field and could not hold it.\n")
-		// Local Attack Scoring can be off, in which case nobody's score moved and
-		// the victim must not be told otherwise.
-		repelled := fmt.Sprintf("%s attacked you but was repelled. You lost %d units.", a.Name, dloss.Total())
-		if gain > 0 {
-			repelled = fmt.Sprintf("%s attacked you but was repelled. You lost %d units; your score rose by %d.", a.Name, dloss.Total(), gain)
-		}
-		d.addEvent(repelled)
+		d.addEvent(fmt.Sprintf("%s attacked you but was repelled. You lost %d units.", a.Name, dloss.Total()))
 		w.postCombatNews(a, d, false, false)
 	}
 	return b.String(), captured

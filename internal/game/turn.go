@@ -14,8 +14,8 @@ import (
 // (manufacture) is a turn-start step, run alongside CollectIncome by the
 // caller, not here.
 func (w *World) PlayTurn(e *Empire, today string) {
-	// BRE score: each turn played awards a flat amount. processEconomy may then
-	// subtract small riot/spoilage penalties.
+	// A played turn awards a flat 213 (binary-verified; see ScorePerTurn). Nothing
+	// in the economy touches Score — no riot or spoilage ding.
 	e.Score += ScorePerTurn
 	e.TurnsPlayed++      // lifetime count; the HeadQuarters price rises with it
 	w.maybePirateRaid(e) // ~1-in-5-turns pirate raid; notice surfaces next turn's income (#21)

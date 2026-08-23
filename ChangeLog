@@ -22,6 +22,10 @@
   * A trade deal's request side no longer quotes a ceiling for what it asks
   * A loan's ceiling falls as its repayment term lengthens
   * Net worth counts toward a loan ceiling only up to ten million
+  * A won attack scores 82 per region captured, and 192 for a total conquest
+  * Repelling an attack no longer moves either realm's score
+  * A nuclear, chemical or biological strike scores a flat award
+  * A won pirate raid scores 100 to 399; a lost one costs nothing
 
 2026-08-21 (v0.0.6)
   * Local covert effect operations resolve at daily maintenance

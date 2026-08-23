@@ -402,49 +402,56 @@ the crown tax rate (`PlanetaryTaxRate`).
 ## Score (distinct from Net Worth)
 
 The scores board shows **Score** and **Net Worth** as separate columns. Net
-Worth is the wealth snapshot above. **Score is a cumulative, earned metric**,
-verified from live BRE play: it starts at **0** and grows by the empire's
-**net worth measured at the start of the day**, awarded **once per turn played**
-— flat within a day, regardless of mid-day growth. Measured: a standard new
-realm (NW 212.5) scored a flat **+213 every turn**; 8 turns = **1704** (matching
-another 8-turn realm exactly). BRE's exact per-win attack bonus and the
-day-rollover behaviour are not recoverable from the binary (overlay-blocked).
+Worth is the wealth snapshot above; **Score is cumulative and earned**, starting
+at 0 and rising only when the realm does something. It is a **32-bit integer at
+empire record +0x286** — the field `show_scores` prints; Territory and Net Worth
+beside it are computed by helpers rather than stored.
 
-**What the binary says, and what it does not.** The award is **computed, not
-stored**: neither 213 as a 32-bit integer nor 213.0 as a Turbo Pascal Real48
-appears anywhere in `BRE.EXE` or `BRE.OVR`. The Score field itself is a **Real48
-at empire record +0x28A** (an earlier note called it +0x28E, which is only its
-last word), and it is written from **exactly two sites in the whole program**,
-both in `BRE.EXE` — neither of them a per-turn overlay stage. What the original
-computes the award *from* is still not recovered.
+**Every award, read out of the binary 2026-08-23:**
 
-Two readings survive every measurement: a size-independent constant, and the
-realm's net worth captured at creation. They cannot be told apart from play,
-because every empire BRE can create has the same start and so the same 213.
+| action | award | routine |
+|---|---|---|
+| a turn played | **flat 213** | `run_player_turn`, BRE.EXE 0x03a4f |
+| won attack | **82 x regions captured** | `resolve_regular_attack`, BRE.OVR 0x010405 |
+| total conquest | **192 x regions captured** | same routine, 0x0102b0 |
+| nuclear strike | **flat 900** | `launch_nuclear_attack` |
+| chemical strike | **flat 700** | `launch_chemical_attack` |
+| biological strike | **flat 400** | `launch_biological_attack` |
+| won pirate raid | **Random(300) + 100** | `launch_pirate_raid` |
 
-**IB implements** `Empire.Score` (seeded 0) `+= ScorePerTurn` each turn played,
-with `ScorePerTurn` **derived from the starting setup** — `(StartRegions ×
-NetWorthLand + StartTroopers × NetWorthTrooper + 500) / 1000`, which is 213 —
-rather than written down as a literal. That reproduces BRE exactly for every
-empire BRE can create, and keeps the award in step with the start if `balance.go`
-retunes it, which is the one case where the two readings diverge. Nothing in the
-economy takes Score away: riots and food spoilage do **not** touch it. BRE's
-exact attack-scoring bonus is unrecoverable from the binary, so IB uses its own
-combat-score model (below).
+The per-turn award is a plain `push 0x00D5` — size-independent and hardcoded,
+which closes a question that stood open for months: it is a constant, not the
+realm's net worth at creation. The two attack sites are told apart by the report
+each one follows — the higher rate sits under "You have crushed the enemy
+completely!", the lower under "You won the battle!" — and both are gated the same
+way: an interplanetary attack always scores, a local one only when the league's
+Local Attack Scoring byte is set.
 
-**Combat score (IB's own).** A battle's Score award scales with the forces used
-up in it (units both sides lose = `battle`):
+**Nothing subtracts Score, and no realm ever changes another's.** Across both
+binaries every write to +0x286 is one of the seven above, and each writes the
+acting player's own record. So a repelled attack pays the defender nothing and
+costs the attacker nothing, a failed pirate raid is free, and riots and spoilage
+leave Score alone. IB's earlier model — an award scaled by casualties, a
+defender's bonus, a loser's penalty, a raid penalty — was invented throughout and
+is gone.
 
-- Attacker wins: attacker `+= battle / CombatScoreDivisor`; the defender loses
-  `CombatLoserPenaltyPct%` of that (a bit less than the winner gained).
-- Defender repels the attack: the defender gains `DefenseWinBonusPct%` of an
-  attacker's award (a successful defense is worth more); the losing attacker
-  loses `CombatLoserPenaltyPct%` of that.
-- Raids on a **pirate faction** move Score only a little — win or lose,
-  `faction strength / PirateScoreDivisor` (scaled by the fight's real size, not
-  the army you bring, so it can't be farmed; far below an empire battle).
+**Two earlier notes here were wrong**, and both read like proofs, which is why
+they are named rather than quietly deleted:
 
-All four constants live in `balance.go`; Score never drops below 0.
+- *"213 appears nowhere in either binary, so the award is computed."* The search
+  was for a 32-bit 213; the instruction carries a **16-bit** immediate.
+- *"Score is a Real48 at +0x28A, written from two sites, neither per-turn."*
+  Wrong FIELD. +0x28A is the last-played timestamp `run_door_session` stamps from
+  the clock global — the same global the Gooie launch countdown reads. Its two
+  writers are session bookkeeping.
+
+The sweep that missed the real field looked for the offset baked into an
+instruction's modrm. Six of the seven award sites reach it with a separate
+`add di,0x286` instead, so none of them matched. See the `bre-gather` skill.
+
+**IB implements all seven** (`ScorePerTurn`, `CombatScoreWinPerRegion`,
+`CombatScoreCrushPerRegion`, `NukeScoreAward`, `ChemScoreAward`, `BioScoreAward`,
+`PirateScoreBase`/`PirateScoreRoll`), with Score floored at 0.
 
 ## Attack types
 

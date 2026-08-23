@@ -195,52 +195,59 @@ func TestAttackDeferredCapture(t *testing.T) {
 	}
 }
 
-func TestAttackScoreAttackerWins(t *testing.T) {
+// A won attack pays per REGION captured, and nothing else in a battle moves
+// Score: the loser is not docked, and a repelled attack pays the defender
+// nothing. BRE writes only the acting player's Score field, ever
+// (resolve_regular_attack, BRE.OVR 0x0102b0 / 0x010405).
+func TestAttackScoreIsPerRegionCaptured(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := &Empire{Name: "A", Troopers: 100000, Morale: 100, Alive: true}
 	d := &Empire{Name: "D", Turrets: 1000, Morale: 100, Land: 100,
 		Regions: RegionMix{Mountain: 100}, Gold: 1000, People: 1000, Alive: true, Score: 1_000_000}
 
-	w.Attack(a, d, FullForce(a), true)
-
-	// The award is the combined casualties over CombatScoreDivisor. Casualties
-	// come out of the battle rather than a fixed rate, so read what the fight
-	// actually cost instead of predicting it.
-	battle := (100000 - a.Troopers) + (1000 - d.Turrets)
-	gain := battle / CombatScoreDivisor
-	if a.Score != gain {
-		t.Errorf("attacker Score = %d, want %d", a.Score, gain)
+	_, captured := w.Attack(a, d, FullForce(a), true)
+	if captured <= 0 {
+		t.Fatalf("the attack captured %d regions; the test proves nothing", captured)
 	}
-	wantD := 1_000_000 - gain*CombatLoserPenaltyPct/100
-	if d.Score != wantD {
-		t.Errorf("defender Score = %d, want %d (loses less than the winner gains)", d.Score, wantD)
+	// 82 as a golden literal, not the constant — a retune must fail this.
+	if want := captured * 82; a.Score != want {
+		t.Errorf("attacker Score = %d, want %d (%d regions x 82)", a.Score, want, captured)
 	}
-	if gain-(1_000_000-d.Score) <= 0 {
-		t.Errorf("loser penalty should be smaller than the winner's gain")
+	if d.Score != 1_000_000 {
+		t.Errorf("defender Score = %d, want it untouched at 1,000,000", d.Score)
 	}
 }
 
-func TestAttackScoreDefenderWinsWorthMore(t *testing.T) {
+// Wiping a realm out pays better per region than merely beating it.
+func TestTotalConquestScoresHigherPerRegion(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
-	// Big enough forces that the score arithmetic does not vanish into integer
-	// truncation, but still a defence the attacker cannot break.
+	a := &Empire{Name: "A", Troopers: 100000, Morale: 100, Alive: true}
+	// Small enough that one win takes everything it has.
+	d := &Empire{Name: "D", Morale: 100, Land: 3, Regions: RegionMix{Mountain: 3},
+		People: 1000, Alive: true}
+
+	_, captured := w.Attack(a, d, FullForce(a), true)
+	if d.Alive {
+		t.Fatalf("the defender survived with %d land; the test proves nothing", d.Land)
+	}
+	if want := captured * 192; a.Score != want {
+		t.Errorf("conquering Score = %d, want %d (%d regions x 192)", a.Score, want, captured)
+	}
+}
+
+// A repelled attack leaves both scores where they were.
+func TestRepelledAttackMovesNoScore(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
 	a := &Empire{Name: "A", Troopers: 200_000, Morale: 100, Alive: true, Score: 1_000_000}
-	d := &Empire{Name: "D", Turrets: 800_000, Morale: 100, Land: 100, People: 1000, Alive: true}
+	d := &Empire{Name: "D", Turrets: 800_000, Morale: 100, Land: 100, People: 1000, Alive: true, Score: 500}
 
 	w.Attack(a, d, FullForce(a), true)
 
-	battle := (200_000 - a.Troopers) + (800_000 - d.Turrets)
-	gain := battle / CombatScoreDivisor * DefenseWinBonusPct / 100
-	if d.Score != gain {
-		t.Errorf("defending winner Score = %d, want %d", d.Score, gain)
+	if a.Score != 1_000_000 {
+		t.Errorf("repelled attacker Score = %d, want it untouched", a.Score)
 	}
-	wantA := 1_000_000 - gain*CombatLoserPenaltyPct/100
-	if a.Score != wantA {
-		t.Errorf("repelled attacker Score = %d, want %d", a.Score, wantA)
-	}
-	// A defensive win awards more than the same-size attack would (150% vs 100%).
-	if gain <= battle/CombatScoreDivisor {
-		t.Errorf("defensive win (%d) should out-award an equivalent attack win (%d)", gain, battle/CombatScoreDivisor)
+	if d.Score != 500 {
+		t.Errorf("successful defender Score = %d, want it untouched — BRE pays nothing for defending", d.Score)
 	}
 }
 

@@ -1129,14 +1129,14 @@ const (
 	// +0x22ae nuclear, +0x266c chemical, +0x2b6e biological), so this is one
 	// fact rather than three.
 	StrikeCostCap = 50_000_000
-	// A successful strike also pays the attacker Random(NukeScoreAward) Score.
-	// BINARY-VERIFIED from the same routine, which adds it to empire field
-	// +0x286 — the field the scores table prints in its Score column and every
-	// aggressive action credits. The sibling awards, for #103: chemical
-	// Random(700), biological Random(400), a pirate raid Random(300) + 100, a
-	// spy Random(30). The two regular-attack awards multiply a battle figure by
-	// 192 and 82 and are gated behind a league config byte, so they need their
-	// own pass.
+	// A successful strike also pays the attacker a FLAT NukeScoreAward of Score —
+	// re-read 2026-08-23 and corrected: the routine loads the figure as an
+	// immediate and adds it, with no Random call anywhere near it. The earlier
+	// note here said Random(900) and IB rolled one, which halved the award on
+	// average. The pirate raid IS rolled (Random(300) + 100) — that is where the
+	// shape came from. It adds to empire field +0x286, the field the scores table
+	// prints in its Score column and every aggressive action credits. Siblings:
+	// chemical 700, biological 400 (both flat).
 	NukeScoreAward = 900
 	// Waste decontamination, BINARY-VERIFIED (BRE.OVR ovr_02e6b2 +0x458 and
 	// +0x4b1). A turn may clean min(max(waste/5, 10), waste) regions — 20% of
@@ -1279,40 +1279,44 @@ const (
 	// Sabotage HQ takes a flat fifteen points off the target's HeadQuarters
 	// progress per landed agent — the one operation with no roll in it (0x87C).
 	TerrorHQSabotagePoints = 15
-	// ScorePerTurn is the Score a played turn earns: the net worth of a BRAND-NEW
-	// realm, rounded — 213 for the standard start, which is every award ever
-	// observed in the original.
+	// ScorePerTurn is the Score a played turn earns. BINARY-VERIFIED as a flat
+	// literal: `run_player_turn` (BRE.EXE 0x03a4f) does
 	//
-	// Derived rather than written down, because 213 is not a figure the original
-	// stores. Neither 213 as a 32-bit integer nor 213.0 as a Turbo Pascal Real48
-	// appears anywhere in BRE.EXE or BRE.OVR, so the award is computed; and the
-	// empire's Score field (a Real48 at record +0x28A) is written from exactly
-	// two sites in the whole program, both in BRE.EXE, neither of them a per-turn
-	// overlay stage. What the original computes it FROM is not recovered.
+	//	add di,0x286        { &Score }
+	//	push 0x00D5         { 213 }
+	//	call add_i32_indirect
 	//
-	// Two readings survive every measurement — a size-independent constant, and
-	// the realm's net worth captured at creation — because every empire the
-	// original can create has the same start, so both give 213. They part company
-	// only if the starting setup changes, which is a thing balance.go can do and
-	// BRE cannot. Spelling the award as the starting net worth keeps the two in
-	// step: retune the start and the award follows, instead of a magic 213 that
-	// quietly stops meaning what it meant.
+	// so the award is size-independent and hardcoded, and the long-open question
+	// of what the original computed it FROM is answered: nothing, it is a
+	// constant. IB derived it from the starting net worth until 2026-08-23, which
+	// gave the same 213 but would have drifted the moment the starting setup was
+	// retuned.
 	//
-	// Award live-verified as flat per turn, NOT tracking current net worth: one
-	// realm played 16 turns across two days at exactly +213 each while its net
-	// worth grew 212 -> 8,512 (see the bre-score-formula notes). The +500 rounds
-	// the thousandths half-up, as the original's display does (212.5 -> 213).
-	// Combat and covert score (combat.go) are on top.
-	ScorePerTurn = (StartRegions*NetWorthLand + StartTroopers*NetWorthTrooper + 500) / 1000
+	// Two earlier notes here were wrong and are worth naming, because both look
+	// like proofs. "213 appears nowhere in either binary" came from searching for
+	// a 32-bit 213; the instruction carries a 16-bit immediate. And "Score is a
+	// Real48 at record +0x28A, written from two sites, neither per-turn" was the
+	// wrong FIELD — +0x28A is the last-played timestamp `run_door_session` stamps
+	// from the clock global. Score is a 32-bit integer at +0x286, the field
+	// show_scores prints.
+	ScorePerTurn = 213
 	// Riots and food spoilage do NOT affect Score — Score is the cumulative earned
 	// metric, and BRE leaves it untouched by economy events (Andy's call, reversing
 	// IB's earlier per-event dings).
-	// Combat score (IB's own): a battle's Score award scales with the forces used
-	// (units both sides lose). The winner gains, the loser loses a bit less, and a
-	// successful DEFENSE is worth more than a successful attack.
-	CombatScoreDivisor    = 2   // Score award = (units lost by both sides) / this
-	CombatLoserPenaltyPct = 80  // the loser loses this % of the winner's gain
-	DefenseWinBonusPct    = 150 // a defender's win awards this % of an attacker's win
+	// Combat score, BINARY-VERIFIED (`resolve_regular_attack`, BRE.OVR 0x0102b0
+	// and 0x010405): a won attack pays PER REGION TAKEN, and the two award sites
+	// are told apart by the report each one follows — the higher rate sits under
+	// "You have crushed the enemy completely!", the lower under "You won the
+	// battle!".
+	//
+	// Nothing else moves Score in a battle. A repelled attack pays the defender
+	// nothing and costs the attacker nothing: across both binaries the ONLY
+	// writes to the Score field are on these paths and the WMD/pirate/per-turn
+	// ones, and not one of them writes a realm other than the acting player's.
+	// IB's earlier model — an award scaled by casualties, a defender's bonus and
+	// a loser's penalty — was invented, and is gone.
+	CombatScoreWinPerRegion   = 82  // ordinary win, per region captured
+	CombatScoreCrushPerRegion = 192 // total conquest, per region captured
 	// AllyDefenseContribPct is the share of a Full Defense Alliance partner's
 	// MOBILE forces (troopers + tanks — not turrets/jets/bombers/carriers) that it
 	// sends to reinforce an ally under attack. BRE-verified live (2026-07): an ally
@@ -1328,9 +1332,12 @@ const (
 	// memory. The sent detachment adds to the defender's battle power and takes the
 	// same casualty rate as the defender.
 	AllyDefenseContribPct = 30
-	// PirateScoreDivisor keeps raids on pirate factions worth only a little Score
-	// (win or lose) — far less than a battle against another empire.
-	PirateScoreDivisor = 50
+	// A won pirate raid pays Random(PirateScoreRoll) + PirateScoreBase Score.
+	// BINARY-VERIFIED (`launch_pirate_raid`, BRE.OVR 0x037004): the one Score site
+	// in the routine, so a failed raid costs nothing. This is the only rolled
+	// award in the game — the WMD ones are flat.
+	PirateScoreBase = 100
+	PirateScoreRoll = 300
 	// GroupAttackBomberOffense values a committed bomber's offense in a group
 	// attack (tunable; BRE's exact figure not recovered — set to a tank's).
 	GroupAttackBomberOffense = 4

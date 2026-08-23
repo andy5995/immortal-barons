@@ -437,7 +437,6 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		return "There are no pirates by that name.", 0
 	}
 	p := &w.Pirates[faction]
-	startForces := p.Defense() // battle scale for Score, before any reclaim shrinks it
 
 	troopers = clampInt(troopers, 0, a.Troopers)
 	jets = clampInt(jets, 0, a.Jets)
@@ -492,7 +491,7 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		// region-type picker so the player chooses the composition (#21). Reclaimed
 		// gold/military above land immediately; only the regions wait.
 		capturedLand = gotLand
-		addScore(a, startForces/PirateScoreDivisor)
+		addScore(a, PirateScoreBase+w.rng.Intn(PirateScoreRoll))
 		w.postPirateNews(a, p.Name, true)
 		// BRE's wording, verbatim from BRE.OVR ("Your efforts against ",
 		// " have brought you success!", "You took ", "You lost "). Three short
@@ -506,7 +505,8 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 		return raidWin(headline, raidLoot(gotG, gotLand, gotT, gotJ, gotU, gotK, gotA), tLost, jLost, kLost), capturedLand
 	}
 
-	addScore(a, -startForces/PirateScoreDivisor)
+	// A failed raid costs no Score: launch_pirate_raid has ONE Score site and it
+	// is the award. The penalty here was IB's own.
 	w.postPirateNews(a, p.Name, false)
 	return fmt.Sprintf("%s\nYou lost %s.",
 		fmt.Sprintf(raidFailLines[w.rng.Intn(len(raidFailLines))], p.Name),

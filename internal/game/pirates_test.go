@@ -303,25 +303,30 @@ func TestPirateRaidFrequencyScalesWithRealmSize(t *testing.T) {
 	}
 }
 
-func TestRaidFactionScoreIsSmall(t *testing.T) {
+// A won raid pays Random(300) + 100 — the one rolled Score award in the game —
+// and it does not scale with the faction or the army. A LOST raid costs nothing:
+// launch_pirate_raid has a single Score site and it is the award
+// (BRE.OVR 0x037004).
+func TestRaidFactionScoreIsRolledAndLossFree(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	a := w.AddHuman("me", "Mine")
 	a.Troopers = 1_000_000 // overwhelming, deterministic win
 	w.Pirates[0].LootTanks = 100
 
 	w.RaidFaction(a, 0, 1_000_000, 0, 0)
-	if want := 100 / PirateScoreDivisor; a.Score != want {
-		t.Errorf("pirate-win Score = %d, want %d (scaled by faction strength, not army size)", a.Score, want)
+	// Golden bounds, not the constants: 100 <= award <= 399.
+	if a.Score < 100 || a.Score > 399 {
+		t.Errorf("pirate-win Score = %d, want 100..399", a.Score)
 	}
 
-	// A loss shaves the same small amount, and never below zero.
+	// A loss leaves Score alone.
 	b := w.AddHuman("you", "Yours")
 	b.Troopers = 10
 	b.Score = 1000
 	w.Pirates[1].LootTanks = 1000
 	w.RaidFaction(b, 1, 10, 0, 0)
-	if want := 1000 - 1000/PirateScoreDivisor; b.Score != want {
-		t.Errorf("pirate-loss Score = %d, want %d", b.Score, want)
+	if b.Score != 1000 {
+		t.Errorf("pirate-loss Score = %d, want it untouched at 1000", b.Score)
 	}
 }
 
