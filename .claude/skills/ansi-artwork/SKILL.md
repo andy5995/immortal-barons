@@ -73,6 +73,46 @@ what turns "3 solid stripes" into "a smooth gradient." A hue's family
 (dark → bright → white) blended this way yields 6–7 perceived shades from 3
 palette colors — see `references/depth-and-3d.md`.
 
+### Extending the ramp past `░` with punctuation glyphs
+
+`░` is a big step from empty — 25% of the cell in one jump — so a fill that
+needs to sit *just* off the background has nowhere to go. Punctuation and the
+small-symbol glyphs fill that gap: they are the same dither idea at much lower
+ink coverage, and they extend the ramp at **both** ends, because what matters is
+coverage, not the glyph's identity.
+
+```
+(space)   ·  ∙  °  '  ,  .        ■           ░       ▒    ▓    █
+  0%      ~1–4% ink               ~20–25%     25%     50%   75%  100%
+          (0xFA 0xF9 0xF8)        (0xFE)
+```
+
+- **Darker than `░`:** bright/dim fg on a dark bg. A field of `. ∙ °` in dim
+  blue on black is a tone a few percent above black — starfields, haze, the
+  faint edge of a nebula. `\x1b[1;30m.` (bright-black dot on black) is the
+  darkest mark that is still visible at all.
+- **Lighter than `░`:** invert it — dark fg on a light bg. A `.` in dim gray on
+  `BgWhite` is ~97% light, one step *below* the near-white that `░` in bright
+  fg on white already gives you. `■` on white is the mid-step between the two.
+
+They also make a usable nebula or haze layer, but **the field has to set
+DENSITY, not placement**: thresholding a smooth trig field directly puts every
+mark on the same crest, and on a canvas only ~22 rows deep the drifts come out
+as dotted stripes marching across the frame. Let the smooth field give a
+probability and let a per-cell hash decide each mark.
+
+Live example: the login art in `cap/kd3-01.cap` (an outside BBS, technique only
+— do not copy the art). Its counts are `.`×1711, `,`×2413, `∙`×318, `°`×171,
+`■`×155 alongside `░`×1269 / `▒`×868 / `▓`×712, all of the sparse ones on a
+black background in dim blue/cyan for the star haze, and `■` appearing on
+`BgWhite` at the light end.
+
+Two cautions. The coverage figures are eyeballed off an 8x16 VGA cell, so treat
+them as ordering, not measurements — and the ordering itself shifts with the
+font, since a dot glyph's size is not standardised the way a block's is. And
+these are 7-bit-safe only for `. , '` — `∙ ° ■` are CP437 high bytes and carry
+the usual encoding rule.
+
 ## The half-block trick (double your resolution)
 
 This is the single most important technique. A cell has one fg and one bg
@@ -88,6 +128,12 @@ Concrete: to stack a bright-blue pixel above a dark-blue pixel in one cell, set
 `fg = bright blue`, `bg = blue`, glyph = `▀`. Rows of these give smooth vertical
 transitions. (Quarter blocks `▘▝▖▗▚▞▙▟▛▜` split a cell 2×2, but only two colors
 still apply per cell.)
+
+**The trade is vertical resolution for horizontal.** `▀`/`▄` buy the vertical
+axis and leave the horizontal one at one pixel per column; `▌`/`▐` do the
+reverse. A canvas built on `▀` therefore renders horizontal edges smoothly and
+near-vertical ones as a staircase, and the fix is to switch axis for those
+cells alone — see the antialiasing section.
 
 ## The encoding rule (the #1 gotcha)
 
@@ -110,6 +156,110 @@ interchangeable at the byte level.**
 
 `references/glyphs.md` has the full CP437-hex ↔ Unicode ↔ glyph table for every
 block, shade, and box-drawing character.
+
+## Antialiasing and banding in 256 colors
+
+Two faults show up together on any shaded curve — a stepped limb and visible
+bands across the body — and both come from the same place: the xterm-256 cube
+is six levels per channel, and it holds no dark saturated colors at all (its
+darkest step above zero is 95). What follows was worked out on this repo's
+splash and each rejected approach was built and looked at, not reasoned about.
+
+**Dither at PIXEL resolution, not cell resolution.** Scatter each pixel between
+the two palette entries that straddle its true color, using a 4x4 Bayer
+threshold on `(x, y)`. This trades a little spatial noise for many more
+apparent tones, and because it works per half-block pixel the cell keeps both
+of its vertical pixels.
+
+```python
+BAYER = [[0,8,2,10],[12,4,14,6],[3,11,1,9],[15,7,13,5]]
+c1, c2 = two_nearest(rgb)          # RANK the palette; see the trap below
+t = position_of(rgb, between=(c1, c2))          # 0..1
+px = c2 if (BAYER[y & 3][x & 3] + 0.5) / 16 < t else c1
+```
+
+**Spend a cell on `▌`/`▐` where an edge runs near-vertical.** The half-block
+canvas subdivides a cell vertically and not at all horizontally, so the left
+and right limbs of any curve staircase while the top and bottom ones come out
+clean — the missing axis, not a missing colour. `▌` (U+258C) and `▐` (U+2590)
+supply it: one cell puts the edge on the half-column. Sample coverage as two
+halves (`sx < 2` vs `sx >= 2` on the sub-grid) and use one when the cell is
+part-covered, the two halves disagree strongly, and the cell's two pixels agree
+with each other — that last test is what confines it to near-vertical edges,
+where the lost vertical subdivision is worth nothing anyway. It fires on very
+few cells (nine, on this repo's splash) and is plainly visible on the limbs.
+
+This is old scene practice: 1993 pieces routinely terminate a horizontal run of
+shade cells with `▌` or `▐` to move a boundary half a column. Reading the raw
+bytes of a piece you admire is the fastest way to find devices like this — the
+glyph histogram alone tells you what the artist was working with.
+
+**Threshold the edge; do not scatter it.** Coverage can be pushed through the
+same Bayer matrix as an alpha — paint an edge pixel in that fraction of the
+cells asking for it — and it is the obvious move once the dither is written.
+Measured against a plain `coverage >= 0.5`, it looked identical along a
+diagonal and left stray lit pixels adrift off the limb, which read as noise.
+With `▌`/`▐` doing the near-vertical work, a crisp edge is better than a
+scattered one at small sizes. Dither the *colours*, threshold the *shape*.
+
+Four traps, all of which produce a *worse* picture than the staircase you
+started with:
+
+- **Do not fold coverage into brightness.** `b * coverage` indexed into a ramp
+  pushes the edge pixel further down that ramp, where it lands on another
+  fully-saturated entry — more steps, not fewer.
+- **Do not composite toward the background and match the result.** Nearest-RGB
+  reaches for the grey run (232–255) constantly, because a dim teal really is
+  closer to a dark grey than to anything in the cube. Every disc picks up a
+  grey rind. Fix: match a saturated target against indices 16–231 only.
+- **Find the second color by RANKING the palette, not by extrapolating.**
+  Stepping past the nearest entry and matching again leaves the local
+  neighbourhood and returns an unrelated hue — it sprayed bright green pixels
+  across an orange planet.
+- **Only dither between close pairs.** Past roughly 90 in RGB distance the two
+  stop reading as an intermediate tone and read as a checkerboard. This bites
+  first on a shadow side, where a ramp's floor sits next to black.
+
+**Interpolate the ramp too.** Sampling a seven-entry ramp at a discrete index
+quantises a sphere into seven bands. Interpolate between neighbouring entries
+in RGB at a continuous brightness, then dither the result; the two together are
+what remove the terracing.
+
+**The per-cell alternative, and when it loses.** A shade glyph (`░▒▓`, or the
+punctuation glyphs below them) in the surface color on black also antialiases
+an edge and keeps the hue exact — the classic 16-color answer, and the only one
+available at that depth. But it costs the cell its second half-block pixel, and
+at small sizes the lost vertical resolution shows up as dotted patches along
+the limb that read as dirt rather than as a soft edge. With 256 colors, prefer
+the pixel-resolution dither.
+
+**Judge this at real cell size.** Dither texture magnified 2x looks like a
+checkerboard and at true size reads as a blend, so a zoomed preview will talk
+you into "fixing" something that is already right.
+
+## File size: group cells by colour, not by position
+
+Colour changes dominate an ANSI file. On this repo's dithered splash, 11,049 of
+12,914 bytes are escape sequences against 1,865 printable cells — roughly six
+bytes of SGR per cell, because dithering makes neighbouring cells differ
+constantly and a naive left-to-right emitter re-states the colour for each one.
+
+Scene files solve this with **multi-pass overpainting**: paint a row in one
+colour pair, skip over everything else with `ESC[<n>C` (cursor forward), then
+`ESC[A` back up to the same display row and paint the cells of the next colour.
+A row is built in layers, so one SGR run covers every cell of that colour in
+the row rather than one run per colour change. A 1993-era 82-row piece examined
+here spends 144 `ESC[A` and 249 `ESC[C` to hold itself to 1,542 SGR sequences
+over ~6,500 cells — about one colour change per four cells.
+
+Worth knowing, rarely worth building: a multi-pass emitter is markedly more
+complex, and `ESC[A` interacts with the column-80 wrap rules above. Reach for it
+when the file has to be small (a slow link, an embedded asset), not by default.
+
+Cheaper wins first, in order: stop re-emitting `ESC[0m` before every coloured
+glyph when the background is already the default (968 bytes, 7.5%, on the file
+measured above); emit `ESC[<n>C` instead of a run of spaces once the run is
+longer than the escape; and only then consider passes.
 
 ## Full-width art: the column-80 autowrap trap (the #2 gotcha)
 
@@ -203,6 +353,19 @@ consistent density ramp, assume a monospace grid, and test at the target width.
 
 ## Building a piece: workflow
 
+0. **Write the brief down before you draw a cell.** Four lines, in your notes,
+   not in the file: **subject** (what this is a piece *of*, and for whom —
+   a door game's title, a CLI's startup banner, a menu header); **palette** (the
+   4–6 of the 16 you will actually use, named, plus which one is the accent that
+   appears least); **glyph vocabulary** (which subset of the ramp — e.g.
+   half-blocks and shades only, or sparse punctuation only, or plain 7-bit); and
+   **signature** (the one element the viewer will remember). Then read it back
+   and ask whether you would have written the same four lines for *any* piece in
+   this genre. If yes, change the one that is most generic and say what you
+   changed. Restricting the palette is not a limitation to work around — a piece
+   using 5 of the 16 colors deliberately reads as designed, one using all 16
+   reads as a test pattern.
+
 1. **Decide the size and the light direction first.** Pick a canvas width
    (≤ 80) and, for any shaded/3D element, a single light-source direction
    (e.g. upper-right). *Every* shaded object must agree on that direction —
@@ -224,6 +387,20 @@ consistent density ramp, assume a monospace grid, and test at the target width.
    out.png`. Then actually open the PNG — legibility faults (see the wordmark
    section) are invisible in the source and obvious in the image.
    See `references/formats-and-tools.md`.
+
+### Spend your boldness in one place
+
+One signature element carries the piece; everything around it stays quiet. A
+splash with a lit planet *and* a chrome wordmark *and* a starfield *and* a
+filled title bar has no focal point — each element competes with the others for
+the same 16 colors and the eye lands nowhere. Pick the one thing that gets the
+brightest color, the widest area, and the most shading work, then render the
+rest flat and dim. When a piece feels busy, the fix is almost always to remove
+one whole element rather than to shade the existing ones better.
+
+This is the composition rule behind the depth guidance in
+`references/depth-and-3d.md`: scene depth needs a foreground that is worth
+looking at and a background that knows it is a background.
 
 ## 3D and dimensional shading
 
@@ -256,6 +433,12 @@ Three rules learned the hard way on the Immortal Barons splash:
   darker of the two.** A land ramp that is brighter at equal brightness reads as
   a lit patch of ocean — a shading artifact, not a continent. Basalt against
   lava, olive against teal, tundra against deep blue.
+- **When a body is cut off by the frame, work out which part of its ramp is
+  actually on screen.** A planet whose centre sits off-canvas may show only its
+  LIT quadrant, in which case it never touches the bottom of its ramps and
+  darkening their floors — the obvious move — changes nothing at all. What
+  governs how dark that mass reads is the ramp's TOP. Terrain frequency is
+  likewise near-useless there: the visible sliver is too small for it to matter.
 - **Vary `sealevel` per world** so they are not obviously the same function
   reskinned: a scorched world mostly crust, an ocean world mostly water.
 - **Polar caps** are nearly free and sell the sphere instantly: swap in a third
@@ -329,6 +512,16 @@ Draw the letters as a **5x7 bitmap on the same half-block canvas** instead: 7
 pixel rows is 4 character rows, against 6 for ANSI Shadow, and 6 columns per
 character, so an 8-letter word costs 47 columns instead of 68 — about 30% off
 both axes with the solid-block feel intact.
+
+**Bevel a bitmap wordmark vertically only, and mind the one-pixel bars.** Every
+stroke in a 5x7 font is one pixel wide, so a left/right bevel has nowhere to go;
+the vertical one does the work — a pixel with nothing above it is a lit top
+surface, one with nothing below it is the shaded underside, the rest walk the
+body gradient. A stem then renders as a bright cap, a graded shaft and a dark
+foot: an extrusion rather than a filled outline. But a ONE-pixel horizontal bar
+(the I and T crossbars) has nothing above *or* below it, and must take the body
+color — highlighting it on "nothing above" alone turns every crossbar pale and
+the wordmark reads as stripes instead of metal.
 
 **The drop shadow is what breaks legibility at this size.** A diagonal (+1,+1)
 shadow crosses the one-column letter gap and welds each letter to the next:
@@ -453,6 +646,34 @@ For a program that prints art (a BBS door, a CLI tool), embed the art as a
   choices before you commit them to code.
 
 ## Originality and copyright
+
+### The generic look — the other way to fail at originality
+
+Copying is one failure; producing the piece anyone would have produced is the
+other. Text-mode work has its own set of defaults that appear regardless of
+subject, and reaching for one is a choice not to make a choice:
+
+- A bright-cyan `ANSI Shadow` FIGlet wordmark, optionally with a magenta or
+  blue gradient across the rows.
+- A double-line box (`╔═╗`) in cyan on black around everything.
+- The sci-fi splash: starfield of dots, one shaded sphere, a wordmark under it.
+- `░▒▓` used purely as a decorative fade at the left and right margins, shading
+  nothing.
+- Every one of the 16 colors present, because they were available.
+
+All five are legitimate when the brief calls for them — a BBS door *should*
+look like a BBS door, and matching an existing house style outranks novelty.
+The rule is narrower: on the axes the brief leaves open, do not spend the
+freedom on these. (This list is my own characterisation of what generic
+text-mode output looks like, not a measured survey; treat it as a prompt to
+check yourself, not as evidence.)
+
+The way out is step 0's brief: the subject's own world supplies the vocabulary.
+A game about empires and land has maps, borders, banners and crowns available to
+it; a disk utility has platters, sectors and gauges. Draw from that instead of
+from the genre.
+
+### Do not copy other people's art
 
 Reproduce *techniques*, never someone else's *art*. Do not copy a company's or
 another artist's logo/splash/ANSI piece byte-for-byte into a project. Scene art
