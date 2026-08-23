@@ -3830,7 +3830,37 @@ Market`. Any empire can list goods for other empires to buy:
 Negotiated empire-to-empire trade deals carrying goods with demands (BRE's other
 trading half) are built: `SendTradeDeal` takes a full basket each way, escrows
 what is offered, consumes a transport carrier and charges the per-day transit
-fee (#17). Interplanetary trades and carrier-moved goods remain future work.
+fee (#17). Interplanetary trading is built too, as its own type (`IPTradeBid`,
+a buy order that travels to another planet and is filled there); carrier-moved
+goods remain future work.
+
+**A deal cannot reach anyone earlier in their day than it left yours —
+BINARY-VERIFIED.** `create_trade_offer` stamps the offer record with the
+SENDER's turns-remaining-today at the moment of sending (`BRE.OVR` 0x260CD,
+unit offset 0x238B, into record byte `+0x60`) and prints the same figure back
+to them as the turn it will arrive on (0x2451, rendered as
+`TurnsPerDay - turnsRemaining + 1`). `process_trade_offer` then compares that
+stamp against the RECIPIENT's own turns-remaining (0x24D6B, unit offset 0x05B1)
+and, when the recipient still has more turns left than the sender did, leaves
+the record pending — it is neither shown nor deleted, only re-stamped with its
+integrity word. Because both halves read the same counter, a deal sent on the
+sender's third turn of the day is waiting from the recipient's third turn
+onward, that day and every later day it survives to. A byte of `0xFF` is a
+sentinel for no gate at all; which path writes it is NOT established.
+
+IB mirrors this with `TradeDeal.ArrivesOnTurn`, holding the sender's turn of
+the day counted from 1 — the figure BRE prints — so that turns-per-day cancels
+out of the comparison and an unstamped deal from an older save keeps arriving
+at once. The sender is told the arrival turn in IB's own wording.
+
+Andy's suggestion that the stagger exists to keep a recipient under the
+2-billion gold cap is NOT what the code does: the branch reads only
+turns-remaining and turns-per-day, no gold figure appears in it, and a
+recipient reaching their sixth turn meets everything sent on turns one to six
+at once — `cap/eots-ibbs-01.cap` shows two deals accepted back to back. Lower
+cap exposure is a side effect. (The claim circulates because that capture also
+carries a *player's* mail message asserting it; that is folklore, not BRE
+output.)
 
 **Neither the offer nor an answer is mail.** BRE carries
 " accepted your trade deal." and " rejected your trade deal." side by side in
@@ -3863,8 +3893,9 @@ paths. IB previously returned the goods on a decline.
 
 **A pending deal is put again on every entry, and out of turns is asked
 nothing.** `run_player_turn` calls `process_trade_offer` behind a
-turns-remaining test (`BRE.EXE` 0x3842) with no per-day gate of any kind, so
-ignoring a deal only defers it to the next entry that has a turn to play — the
+turns-remaining test (`BRE.EXE` 0x3842) and gates the CALL on nothing further —
+the per-deal arrival test above lives inside the routine, not at this call site
+— so ignoring a deal only defers it to the next entry that has a turn to play — the
 second question in #175. The recap entries and the mailbox are on the other side
 of that test (0x385F) and are shown either way, before "Sorry, you have used all
 of your turns today." (0x3F8D); IB returned at that message and showed neither.

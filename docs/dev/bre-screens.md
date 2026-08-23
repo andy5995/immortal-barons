@@ -1092,6 +1092,29 @@ Gates seen: `Sorry....You are under New Realm Protection!` (Terrorist / Special
 Ops while protected), `There are not any attack parties at this time.` (Join
 Group Attack).
 
+**Send Trade Deal** (3). Captured in `cap/kd3-01.cap`. After the goods are
+chosen it states the transport requirement, the per-day cost and the two-day
+floor, prompts for a span, and then — the part IB had no equivalent of — tells
+the sender which turn of the recipient's day it lands on:
+
+```
+Trade Deal requires 20 Carriers.
+Send Trade Deal? (Y/n) Yes
+
+This trade deal will cost 120,000 gold per day to send.
+Trade deals must be sent for a minimum of 2 days.
+
+How many days would you like to send this deal for? (2; 10) 2
+
+Trade Deal sent to <realm>
+It will arrive at earliest on Turn #<n> of that empire today.
+```
+
+The turn number is `0e` bright-yellow against `07` grey body text. The figure
+is the sender's own turn of the day; the mechanic behind it is in
+`docs/mechanics-reference.md`. **Deliberate divergence:** IB says the same thing
+in its own words rather than reproducing BRE's sentence.
+
 **Travel Times** (T). Captured 2026-08-16: a `37` white heading
 `Average Turn Around Times to All BBSes`, then the **78**-column inset rule
 (5 `─`, 15 `═`, 58 `─`) in `90` gray above and below the rows. Each row is the

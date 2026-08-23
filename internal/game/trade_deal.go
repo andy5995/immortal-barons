@@ -116,6 +116,34 @@ type TradeDeal struct {
 	// counted from the moment it was sent. A deal saved before deals expired
 	// carries the zero time and stands forever, as it did when it was written.
 	Expires time.Time `json:",omitempty"`
+	// ArrivesOnTurn is the sender's own turn of the day, counted from 1, at the
+	// moment the deal was sent; the recipient does not meet it until they reach
+	// that turn of their own day. So a deal sent on your third turn is waiting
+	// from their third turn onward — a trade fleet cannot reach someone earlier
+	// in their day than it left yours.
+	//
+	// Zero means no gate, and it has to: a deal saved before this was recorded
+	// has no such key, and it must go on arriving at once rather than being
+	// held forever behind a turn it was never stamped with.
+	ArrivesOnTurn int `json:",omitempty"`
+}
+
+// TurnOfDay is the turn an empire is currently on, counted from 1. It is what
+// BRE prints when a deal is sent, and both halves of the arrival gate are
+// expressed in it so the comparison does not depend on turns-per-day: the
+// setting cancels out of both sides.
+func (w *World) TurnOfDay(e *Empire) int {
+	if n := w.Config.TurnsPerDay - e.TurnsLeft + 1; n > 1 {
+		return n
+	}
+	return 1
+}
+
+// TradeDealArrived reports whether a pending deal has reached `to` yet. A deal
+// that has not is left pending — never expired early, never delivered — exactly
+// as BRE leaves it (`process_trade_offer`, BRE.OVR 0x24D6B unit offset 0x05B1).
+func (w *World) TradeDealArrived(d TradeDeal, to *Empire) bool {
+	return d.ArrivesOnTurn == 0 || w.TurnOfDay(to) >= d.ArrivesOnTurn
 }
 
 // clampTradeDealDays holds a requested span to the two-day minimum. There is no
@@ -164,9 +192,10 @@ func (w *World) TradeDealCostBetween(from, to *Empire, days int) int64 {
 
 // SendTradeDeal sends a trade deal from `from` to `to` over `days` days: it
 // consumes one carrier to transport it, charges the per-day gold fee, escrows the
-// Send goods, and records a pending deal on `to` (arrives on the recipient's next
-// turn). Fails if both baskets are empty, `from` lacks the offered goods, lacks a
-// transport carrier, or can't afford the fee.
+// Send goods, and records a pending deal on `to`, stamped with the turn of the
+// day it left (see TradeDeal.ArrivesOnTurn). Fails if both baskets are empty,
+// `from` lacks the offered goods, lacks a transport carrier, or can't afford the
+// fee.
 func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days int) error {
 	if from.Protection > 0 {
 		return ErrInProtection
@@ -194,10 +223,11 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	from.Carriers -= TradeDealCarriers // the transport carrier is consumed
 	from.Gold -= cost                  // pay the per-day transit fee
 	to.TradeDeals = append(to.TradeDeals, TradeDeal{
-		From:    from.Name,
-		Send:    send,
-		Demand:  demand,
-		Expires: time.Now().AddDate(0, 0, clampTradeDealDays(days)),
+		From:          from.Name,
+		Send:          send,
+		Demand:        demand,
+		Expires:       time.Now().AddDate(0, 0, clampTradeDealDays(days)),
+		ArrivesOnTurn: w.TurnOfDay(from),
 	})
 	// The offer mails nothing: the recipient meets it at turn start, where the
 	// baskets and the accept prompt are. Same reason a treaty proposal stopped

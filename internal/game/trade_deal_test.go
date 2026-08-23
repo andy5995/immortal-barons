@@ -1,6 +1,7 @@
 package game
 
 import (
+	"encoding/json"
 	"testing"
 	"time"
 )
@@ -360,5 +361,65 @@ func TestRemovingARealmTellsWhoeverSentItADeal(t *testing.T) {
 	}
 	if from.Tanks != 400 {
 		t.Errorf("the escrow goes with the realm: %d tanks, want 400", from.Tanks)
+	}
+}
+
+// A deal is stamped with the sender's own turn of the day and does not reach the
+// recipient until they get that far into theirs — BRE compares the two directly
+// (`process_trade_offer`, BRE.OVR 0x24D6B unit offset 0x05B1).
+func TestTradeDealArrivesNoEarlierInTheDayThanItWasSent(t *testing.T) {
+	cfg := DefaultConfig()
+	w := NewWorldSeed(cfg, 1)
+	from := w.AddHuman("f", "Fromland")
+	to := w.AddHuman("t", "Toland")
+	pastProtection(w)
+	pactAll(w, fullDefenseAlliance)
+	from.Tanks, from.Carriers, from.Gold = 500, 1, 300_000
+
+	from.TurnsLeft = cfg.TurnsPerDay - 2 // the sender is on turn 3 of their day
+	if err := w.SendTradeDeal(from, to, TradeBasket{Tanks: 100}, TradeBasket{}, TradeDealMinDays); err != nil {
+		t.Fatalf("send: %v", err)
+	}
+	d := to.TradeDeals[0]
+	if d.ArrivesOnTurn != 3 {
+		t.Fatalf("deal should be stamped with the sender's turn: %d, want 3", d.ArrivesOnTurn)
+	}
+
+	for _, tc := range []struct {
+		turnsLeft int
+		want      bool
+	}{
+		{cfg.TurnsPerDay, false},     // their turn 1
+		{cfg.TurnsPerDay - 1, false}, // their turn 2
+		{cfg.TurnsPerDay - 2, true},  // their turn 3 — it has landed
+		{cfg.TurnsPerDay - 5, true},  // and every turn after
+	} {
+		to.TurnsLeft = tc.turnsLeft
+		if got := w.TradeDealArrived(d, to); got != tc.want {
+			t.Errorf("on turn %d of their day, arrived = %v, want %v",
+				w.TurnOfDay(to), got, tc.want)
+		}
+	}
+}
+
+// A deal saved before arrival turns were recorded carries no stamp, and must go
+// on landing at once rather than waiting for a turn it was never given. The
+// fixture is written out by hand precisely because marshalling a TradeDeal here
+// would produce the key the old save does not have.
+func TestTradeDealSavedWithoutAnArrivalTurnLandsAtOnce(t *testing.T) {
+	const saved = `{"From":"Fromland","Send":{"Tanks":100},"Demand":{}}`
+	var d TradeDeal
+	if err := json.Unmarshal([]byte(saved), &d); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+	if d.ArrivesOnTurn != 0 {
+		t.Fatalf("a save with no arrival key should decode to 0, got %d", d.ArrivesOnTurn)
+	}
+	cfg := DefaultConfig()
+	w := NewWorldSeed(cfg, 1)
+	to := w.AddHuman("t", "Toland")
+	to.TurnsLeft = cfg.TurnsPerDay // their very first turn of the day
+	if !w.TradeDealArrived(d, to) {
+		t.Error("an unstamped deal should arrive immediately, not be held")
 	}
 }

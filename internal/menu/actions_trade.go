@@ -192,17 +192,24 @@ func sendTradeDeal(s session.Session, w *ctx) Result {
 		days = game.TradeDealMinDays
 	}
 
+	// Read inside the mutation, so the turn reported to the sender is the very
+	// one stamped on the deal even if sending ever comes to cost a turn.
+	var arrives int
 	err := w.mutatePlayer(func(p *game.Empire) error {
 		recip := findRealm(w, toName)
 		if recip == nil || recip == p {
 			return errTargetGone
 		}
+		arrives = w.World.TurnOfDay(p)
 		return w.World.SendTradeDeal(p, recip, send, demand, days)
 	})
 	if err != nil {
 		fail(s, err)
 	} else {
-		ok(s, "Trade deal sent to %s for %d days (%s gold).", toName, days, comma(int64(days)*perDay))
+		okNoPause(s, "Trade deal sent to %s for %d days (%s gold).", toName, days, comma(int64(days)*perDay))
+		// The sender is told when it lands, as BRE tells them: a trade fleet
+		// cannot reach the other realm earlier in their day than it left ours.
+		ok(s, "It reaches them no sooner than turn %d of their day.", arrives)
 	}
 	return Stay
 }
@@ -217,7 +224,15 @@ func reviewTradeDeals(s session.Session, w *ctx) {
 		// original sweeps them too: whoever takes the next turn clears the stale
 		// ones (see World.ExpireTradeDeals).
 		w.World.ExpireTradeDeals(time.Now())
-		deals = append([]game.TradeDeal(nil), p.TradeDeals...)
+		// A deal still in transit is skipped, not removed: it will be waiting
+		// on the turn it was sent for, today and on any later day it survives
+		// to (see TradeDeal.ArrivesOnTurn). ExpireTradeDeals stays the only
+		// thing that ever takes one off the list.
+		for _, d := range p.TradeDeals {
+			if w.World.TradeDealArrived(d, p) {
+				deals = append(deals, d)
+			}
+		}
 	})
 	for _, d := range deals {
 		fmt.Fprintf(s, "\n%s"+tr(s, "%s offers you a trade deal.")+"%s\n", ansi.FgBrightCyan, d.From, ansi.Reset)

@@ -270,6 +270,25 @@ line — population tax, ore, tourism, solar, industrial, hydro. Nothing else in
 the binary writes it, so bank interest, food sales and plunder do not enter it.
 This is the base for the crown tax (issue #52).
 
+## Trade offer record (one field mapped)
+
+A pending trade offer is a 0x97-byte record with its own integrity word at
+`+0x93`/`+0x95`, checksummed over the whole 0x97 bytes by the same routine the
+empire records use. Only one field of it has been read so far:
+
+```
+  +0x60  byte   the SENDER's turns-remaining-today at the moment of sending.
+                Written by create_trade_offer (BRE.OVR 0x260CD, unit offset
+                0x238B); read by process_trade_offer (0x24D6B, unit offset
+                0x05B1), which compares it against the RECIPIENT's own +0x285
+                and leaves the offer pending while the recipient has more turns
+                left than the sender did. 0xFF is a sentinel meaning no gate —
+                which path writes it is NOT established.
+```
+
+The rest of the record is unmapped. See `docs/mechanics-reference.md` for what
+the field means in play.
+
 ## Deleting an empire record
 
 Every deletion in the game funnels through one routine, `BRE.OVR 0x0079c1`. It
