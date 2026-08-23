@@ -1100,6 +1100,16 @@ ops) skip the check and never set the byte; digit 9 (Expose Enemy Ops) is
 dispatched before either. IB matches this with `TurnProgress.CovertOpsUsed`,
 keyed by operation.
 
+**The covert menu closes when the last agent is spent.** Its wrapper
+(`enter_covert_operations_menu`, `BRE.OVR 0x0179db`) re-reads the 32-bit agent
+count at record `+0x26f` at the head of every pass and returns when it reaches
+zero, so the operation that spends a realm's last agent ends the menu and the
+turn moves on. Otherwise the menu loops until the choice byte is `'0'` — an
+operation never advances the turn by itself, and the same wrapper serves both
+the turn's covert step and the System menu's entry to it. IB tested the count
+only on the way in, and went on drawing a menu that could do nothing but refuse;
+it now matches, through `Menu.ExitWhen`.
+
 **Bribery is an OFFENSIVE holding.** The flag lives in the ATTACKER's record
 indexed by the target (`BRE.OVR 0x04BA48` at `+0x15D`, set by the resolver at
 `0x04CD67`), and a set flag doubles `A` — the attacker's own numerator. It buys

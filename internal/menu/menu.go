@@ -308,7 +308,13 @@ type Menu struct {
 	// the same way the ExitOnEnter default is, and Enter selects it. nil
 	// return means no default this time. Takes priority over ExitOnEnter.
 	DefaultOnEnter func(*ctx) *Item
-	Status         func(*ctx) string // optional status bar under the menu
+	// ExitWhen closes the menu before it is drawn again, for a menu whose whole
+	// point has gone away while the player sat in it. BRE re-tests such a
+	// condition on every pass of a menu's own loop, so an action that consumes
+	// the last of something ends the menu on the spot rather than leaving the
+	// player to press 0 past a screen that can only refuse them.
+	ExitWhen func(*ctx) bool
+	Status   func(*ctx) string // optional status bar under the menu
 	// Header is an optional line drawn ABOVE the title rule. BRE puts the game's
 	// start date there, over the opening menu, rather than in a footer.
 	Header func(*ctx) string
@@ -434,6 +440,13 @@ func Run(s session.Session, g *ctx, root *Menu) error {
 	stack := []*Menu{root}
 	for len(stack) > 0 {
 		cur := stack[len(stack)-1]
+		// Tested before every draw, as BRE tests its own loop guards, so the
+		// menu closes on the action that emptied it rather than one keypress
+		// later.
+		if cur.ExitWhen != nil && cur.ExitWhen(g) {
+			stack = stack[:len(stack)-1]
+			continue
+		}
 		draw(s, g, cur)
 
 		item, err := cur.readChoice(s, g)

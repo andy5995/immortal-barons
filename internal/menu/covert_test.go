@@ -40,6 +40,18 @@ func queuedOp(t *testing.T, w *ctx) game.QueuedCovertOp {
 	return w.CovertQueue[0]
 }
 
+// runCovert opens the Covert Operations menu on a realm that actually holds
+// agents. BRE closes that menu as soon as the last agent is gone (Menu.ExitWhen,
+// from the loop guard at BRE.OVR 0x0179db), so a scripted covert run has to
+// stock the realm or it never sees the menu at all.
+func runCovert(t *testing.T, keys string, m *Menu) (*fakeSession, *ctx, error) {
+	t.Helper()
+	f := &fakeSession{keys: []rune(keys)}
+	w := newWorld()
+	w.Player().Agents = 5
+	return f, w, Run(f, w, m)
+}
+
 // TestCovertMenuShowsBREItems checks the Covert Operations menu's layout
 // (#73): BRE.OVR's order/labels (Send Spy, Stir Revolts, Set Up, Support
 // Dissensions, Demoralize Forces, Spy on Relations, Bomb Enemy Targets,
@@ -47,7 +59,7 @@ func queuedOp(t *testing.T, w *ctx) game.QueuedCovertOp {
 // it replaced are gone.
 func TestCovertMenuShowsBREItems(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "0", menus.Covert) // Quit immediately
+	f, _, err := runCovert(t, "0", menus.Covert) // Quit immediately
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -81,7 +93,7 @@ func TestCovertMenuShowsBREItems(t *testing.T) {
 // must therefore reach the target picker, never a box of lettered variants.
 func TestBombEnemyTargetsIsNotASubmenu(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "7\r0", menus.Covert)
+	f, _, err := runCovert(t, "7\r0", menus.Covert)
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -232,7 +244,7 @@ func TestExposeEnemyOpsListsOnlyBribedRealms(t *testing.T) {
 // price must end in the same column.
 func TestCovertMenuPricesAlign(t *testing.T) {
 	menus := BuildMenus()
-	f, _, err := run(t, "0", menus.Covert)
+	f, _, err := runCovert(t, "0", menus.Covert)
 	if err != nil {
 		t.Fatalf("got %v", err)
 	}
@@ -251,5 +263,58 @@ func TestCovertMenuPricesAlign(t *testing.T) {
 	}
 	if end < 0 {
 		t.Fatalf("no price rows found; output:\n%s", f.out.String())
+	}
+}
+
+// TestCovertMenuClosesWhenTheLastAgentIsSpent: BRE re-reads the agent count at
+// the head of the covert menu's own loop (enter_covert_operations_menu, BRE.OVR
+// 0x0179db) and returns when it reaches zero, so the operation that spends the
+// last agent ends the menu and the turn moves on. IB checked the count only on
+// the way in, and went on drawing a menu that could do nothing but refuse.
+func TestCovertMenuClosesWhenTheLastAgentIsSpent(t *testing.T) {
+	menus := BuildMenus()
+	// Two DIFFERENT operations: repeating one would be refused by BRE's
+	// once-per-turn cap, and the test would pass without the menu ever closing.
+	f := &fakeSession{keys: []rune("4A 5A ")} // Support Dissensions, then Demoralize Forces
+	w, _ := covertWorld()
+	p := w.Player()
+	p.Agents, p.Gold = 1, 1_000_000_000
+	if err := Run(f, w, menus.Covert); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	out := stripANSI(f.out.String())
+	// It reached the operation: the agent went out and was spent.
+	if !strings.Contains(out, "has set out for") {
+		t.Fatalf("the first operation never ran:\n%s", out)
+	}
+	if p.Agents != 0 {
+		t.Fatalf("the operation should have spent the agent, %d left", p.Agents)
+	}
+	// And the menu closed rather than being drawn a second time: the second
+	// keypress never reached an item, so only one operation was queued.
+	// Counted on the title rule, not on an item label: the chosen item's label
+	// is echoed after the prompt as well, so a label appears twice in one draw.
+	if drawn := strings.Count(out, "[Covert Operations]"); drawn != 1 {
+		t.Errorf("the covert menu was drawn again after the last agent went (%d listings):\n%s", drawn, out)
+	}
+	if len(w.CovertQueue) != 1 {
+		t.Errorf("queued %d operations, want 1", len(w.CovertQueue))
+	}
+}
+
+// A realm with agents still gets the menu back after an operation — BRE returns
+// to the covert menu after each one and leaves only on "0", so the exit above
+// must not fire on any successful operation.
+func TestCovertMenuStaysOpenWhileAgentsRemain(t *testing.T) {
+	menus := BuildMenus()
+	f := &fakeSession{keys: []rune("4A 5A 0")}
+	w, _ := covertWorld()
+	p := w.Player()
+	p.Agents, p.Gold = 5, 1_000_000_000
+	if err := Run(f, w, menus.Covert); err != nil {
+		t.Fatalf("run: %v", err)
+	}
+	if len(w.CovertQueue) != 2 {
+		t.Errorf("queued %d operations, want 2 — the menu did not come back", len(w.CovertQueue))
 	}
 }

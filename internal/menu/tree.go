@@ -287,6 +287,17 @@ func BuildMenus() *Menus {
 		{Key: '0', Label: "Quit", Do: back},
 	}
 	covert.DefaultOnEnter = quitOnEnter(covert)
+	// BRE re-reads the agent count at the head of the covert menu's own loop
+	// (enter_covert_operations_menu, BRE.OVR 0x0179db, testing the 32-bit count
+	// at record +0x26f) and returns when it hits zero — so the operation that
+	// spends the last agent closes the menu and the turn moves on. IB tested it
+	// only on the way in, and went on drawing a menu that could do nothing but
+	// refuse. The same wrapper serves BRE's System-menu entry, so this applies
+	// there too.
+	covert.ExitWhen = func(w *ctx) bool {
+		p := w.Player()
+		return p == nil || p.Agents < 1
+	}
 
 	// Interplanetary Special Operations: BRE's cross-planet covert menu — every
 	// op targets an empire on another planet. The 8-item table at BRE.OVR 170011
