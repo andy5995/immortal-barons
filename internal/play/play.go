@@ -45,6 +45,7 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	// the fresh start (the husk is gone by the time Session binds the empire).
 	var rebornFrom string
 	var maint game.MaintReport
+	var bulletinErr error
 	w.With(func() {
 		w.Today = today
 		var deadName string
@@ -55,7 +56,14 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 		if deadName != "" && w.FindByOwner(id.Handle) == nil {
 			rebornFrom = deadName
 		}
+		// A bulletin the sysop copied in since the last login is news, and the
+		// login transaction is the one pass every board makes — a stand-alone
+		// board never runs the planetary step where the league's are reconciled.
+		_, bulletinErr = store.SyncBulletins(w)
 	})
+	if bulletinErr != nil {
+		return "", bulletinErr
+	}
 
 	// Each action already persisted via its Transact; the session-end save is a
 	// no-op here (saving w's in-memory state would overwrite concurrent nodes).

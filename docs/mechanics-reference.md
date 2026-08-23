@@ -3949,6 +3949,58 @@ is one self-contained sentence per variant with the substitutions at the edges.
 Prefer more flavor *variants* (separate whole sentences) over grammatically
 clever single lines.
 
+## Game Bulletins
+
+Bulletins are the sysop's noticeboard, reached from **(8) Game Bulletins** on
+the opening menu. BRE keeps them all in one `game/bulletin.lst`, each section
+opened by `^NAME` and closed by `^END`. **IB uses one file per bulletin
+instead** — a deliberate divergence, because a league's bulletins have to travel
+between boards as files anyway, and ANSI artwork does not survive being pasted
+into a list file.
+
+They live under the data directory:
+
+    data/bull/league   the League Coordinator's, shown as "Galactic"
+    data/bull/local    this board's own
+
+A bulletin is a `.txt` or an `.ans` file, at most 64 KB, and its **title is the
+first line of the file** with any ANSI escapes removed; a first line carrying no
+letters or digits (a row of block art, an empty line) leaves the file name to
+name it. `.ans` files are decoded from CP437, so artwork authored in PabloDraw
+or Moebius renders on a CP437 door and on a UTF-8 terminal alike. Files are
+listed in file-name order, which is what a `10-`/`20-` prefix is for.
+
+The menu numbers the galactic bulletins from 1 and carries straight on into the
+local ones, so a player picks by number without minding which list a bulletin
+came from. A group with nothing in it draws no heading.
+
+**A bulletin added or edited is planet news**, naming the bulletin, so nobody
+has to open the menu to find out whether anything moved. A withdrawn one is not
+news. The first pass on a board upgrading from a version without bulletins is
+silent — the files already sitting there are the baseline, not a day's worth of
+news.
+
+### League distribution
+
+`bull/league` belongs to the League Coordinator. The Coordinator's board reads
+it off disk on every planetary run and broadcasts the **complete set**, signed
+with the Coordinator key like the ruleset and the roster; every other board
+writes what arrives into its own `bull/league`, creating the directory if it
+has none, and removes anything the league no longer carries. A board that joins
+late or misses a packet is brought level by the next broadcast rather than
+needing a replay, and an empty set is how the last bulletin is withdrawn from
+the league.
+
+A member board's own edits to `bull/league` are neither news nor kept: the next
+broadcast puts the directory back. A file deleted there by hand is restored the
+same way. A board in no league has no Coordinator filling the directory, so
+whatever its sysop puts there is treated as its own and does file news.
+
+An incoming bulletin's file name is checked before it is used to build a path —
+no separators, no leading dot, `.txt` or `.ans` only — and an oversized file is
+refused at both ends. An unsigned set, or one from a board that is not node #1,
+is refused like a forged ruleset.
+
 ## How Immortal Barons differs right now
 
 Now matching this reference (as of v0.0.4):

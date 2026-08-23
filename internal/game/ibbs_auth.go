@@ -45,6 +45,7 @@ type signedPayload struct {
 	LeagueConfig *LeagueConfig
 	LeagueNodes  []LeagueNode
 	Reset        *LeagueReset
+	Bulletins    *BulletinSet
 }
 
 // signingBytes renders the signed part of p in a stable form. encoding/json
@@ -57,13 +58,14 @@ func signingBytes(p Packet) ([]byte, error) {
 		LeagueConfig: p.LeagueConfig,
 		LeagueNodes:  p.LeagueNodes,
 		Reset:        p.Reset,
+		Bulletins:    p.Bulletins,
 	})
 }
 
 // carriesCoordinatorOrders reports whether a packet contains anything only the
 // Coordinator may send. Those parts are the ones that need a signature.
 func carriesCoordinatorOrders(p Packet) bool {
-	return p.LeagueConfig != nil || len(p.LeagueNodes) > 0 || p.Reset != nil
+	return p.LeagueConfig != nil || len(p.LeagueNodes) > 0 || p.Reset != nil || p.Bulletins != nil
 }
 
 // SignAsCoordinator signs a packet's coordinator-authored parts. A no-op for a

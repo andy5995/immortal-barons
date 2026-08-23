@@ -40,6 +40,10 @@
   here that is only the starting value, and it can go as high as 999 billion.
 - Gold above the limit is still lost, but the game now tells you when it happens,
   and a full bank pays its interest into your gold in hand rather than losing it.
+- Each bulletin is its own file in a `bull` folder, so a sysop can put up ANSI
+  artwork. BRE keeps every bulletin in one `bulletin.lst` text file. In a league
+  the Coordinator's bulletins are sent to every board and shown to all players
+  under a "Galactic" heading.
 - A reset option turns the pirates off. BRE always has them.
 - Some game values — such as attack rewards and several economy rates — may not
   match BRE exactly. The ones read out of BRE's own program do match: region

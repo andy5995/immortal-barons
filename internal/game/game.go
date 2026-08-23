@@ -729,6 +729,18 @@ type World struct {
 	// #63).
 	Annihilator *Annihilator
 	Incoming    *Annihilator
+	// BulletinDigest fingerprints every bulletin this board holds, keyed
+	// "<scope>/<name>", so an edited file can be told from an untouched one
+	// without keeping a second copy of it. BulletinsKnown marks the scopes
+	// already recorded once, so the files a board had before this existed are
+	// the baseline rather than a day's worth of news. See bulletin.go.
+	BulletinDigest map[string]string `json:",omitempty"`
+	BulletinsKnown map[string]bool   `json:",omitempty"`
+	// PendingBulletins is a league set that has just arrived and still has to
+	// reach the disk. Not persisted: internal/store drains it in the same run
+	// that applied the packet.
+	PendingBulletins *BulletinSet `json:"-"`
+
 	// SpyGuys counts, per foreign planet, the game days a watcher of theirs has
 	// left here. It is the WATCHED board that holds this — the planet paying for
 	// the man keeps no record of him at all, which is BRE's arrangement.
@@ -821,7 +833,11 @@ func (w *World) ResetForNewSeason(startDate string) {
 	nodes, key, pub := w.LeagueNodes, w.CoordKey, w.CoordPub
 	season, outSeq, high, seen := w.Season, w.OutSeq, w.HighSeq, w.SeenPackets
 	outbox, transit := w.Outbox, w.Transit
+	// The bulletins on disk survive a season, so their fingerprints have to as
+	// well: forgetting them would file every one of them as newly posted.
+	digest, known := w.BulletinDigest, w.BulletinsKnown
 	w.initFreshGame()
+	w.BulletinDigest, w.BulletinsKnown = digest, known
 	w.LeagueNodes, w.CoordKey, w.CoordPub = nodes, key, pub
 	w.Season, w.OutSeq, w.HighSeq, w.SeenPackets = season, outSeq, high, seen
 	w.Outbox, w.Transit = outbox, transit // mail for the other boards must still go out
@@ -859,6 +875,11 @@ func (w *World) initFreshGame() {
 	w.SpyDatabase = nil
 	w.LeagueDiplomacy = ""
 	w.PlanetDiplomacy = nil
+	// A fresh world has no bulletins, so both scopes start KNOWN and empty: the
+	// silent baseline in RecordBulletins exists for a save made before bulletins
+	// did, not for a board whose first bulletin is genuine news.
+	w.BulletinDigest = nil
+	w.BulletinsKnown = map[string]bool{"league": true, "local": true}
 	// The world's own copies are migration input for older saves (see
 	// prefs.go). A fresh world has no realm to migrate, so they simply hold the
 	// same defaults every new realm is founded on.

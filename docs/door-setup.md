@@ -200,6 +200,35 @@ Run that from a nightly event if you want the game to keep moving on quiet days.
 It matters most on a league board, where the AI barons, pirates and inter-BBS
 packets should keep to a schedule even when no local player logs in.
 
+## Bulletins
+
+Players read your bulletins from **(8) Game Bulletins** on the opening menu.
+Each bulletin is one file, in a folder under the data directory:
+
+```
+data/bull/local     your own
+data/bull/league    the League Coordinator's, if this board is in a league
+```
+
+Create the folders if they are not there yet. A bulletin is a `.txt` file or an
+ANSI `.ans` file, up to 64 KB.
+
+The **first line of the file is the title** the menu shows, so put the title on
+line one and the text below it. Files are listed in file-name order. Name them
+`10-news.txt`, `20-rules.txt` and so on to set the order yourself.
+
+The menu shows the league's bulletins first, under the heading "Galactic", then
+your own. It reads the folders each time a player opens it, so a file you copy
+in is there for the next player.
+
+When you add or change a bulletin, the game puts a line in the day's news with
+its title.
+
+In a league, `data/bull/league` belongs to the League Coordinator. The game
+fills that folder for you on each `-planetary` run, and replaces whatever is in
+it, so put your own bulletins in `data/bull/local`. See
+[League bulletins](inter-bbs.md#league-bulletins).
+
 ## Starting a fresh game (reset)
 
 The two commands that create the game also restart it:

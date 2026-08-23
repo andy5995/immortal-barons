@@ -750,6 +750,11 @@ func runMaint(cfg game.Config, today string) error {
 			return err
 		}
 		reportPlanetary(cfg, run)
+	} else if _, err := store.SyncBulletins(w); err != nil {
+		// A league board reconciles its bulletins inside the planetary step
+		// above; a stand-alone one has no such step, so this is where a bulletin
+		// the sysop added reaches the news.
+		return err
 	}
 	return store.Save(w, cfg)
 }
@@ -1328,6 +1333,11 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 	}
 	if run.RosterUpdated {
 		fmt.Println("The League Coordinator's roster replaced this board's copy.")
+	}
+	if run.Bulletins == 1 {
+		fmt.Println("Broadcast 1 league bulletin to the league.")
+	} else if run.Bulletins > 1 {
+		fmt.Printf("Broadcast %d league bulletins to the league.\n", run.Bulletins)
 	}
 	// Where the files went is only one directory when this board has no
 	// per-neighbour links; naming it otherwise would be wrong for most of them.

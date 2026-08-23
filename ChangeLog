@@ -1,4 +1,7 @@
 (in-progress:)
+  * Game Bulletins reads .txt and .ans files from a bull folder in the data dir
+  * The League Coordinator's bulletins are distributed to every board
+  * A bulletin that is added or changed is named in the day's news
   * A board no longer overrides league routing with an "ibroute.cfg" file
   * A player out of turns still gets their recap and mail on entering
   * A treaty proposal no longer mails a notice the offer screen already gives

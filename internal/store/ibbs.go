@@ -52,6 +52,13 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	if err := SaveConfig(w.Config); err != nil {
 		return run, err
 	}
+	// The bulletin directories are reconciled after the inbound packets, so a
+	// set that arrived this run reaches the disk in the same pass.
+	leagueBulletins, err := SyncBulletins(w)
+	if err != nil {
+		return run, err
+	}
+	run.Bulletins = len(leagueBulletins)
 	// After the inbound packets, so a result that arrived this run is never
 	// overtaken by the recovery timer.
 	w.ReturnLostForces()
@@ -59,6 +66,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	w.ArriveAnnihilator() // a weapon whose flight is over lands before anything else moves
 	w.ExportScores()
 	w.ExportNodeList()
+	w.ExportBulletins(leagueBulletins)
 	w.PingTravelTimes()
 	w.ExportAnnihilatorStatus()
 	w.StampOutbox()
@@ -80,6 +88,7 @@ type PlanetaryRun struct {
 	MeshCopy      int  // packets skipped: not addressed here, mesh mode
 	AlreadySeen   int  // packets skipped: duplicate/replay
 	Refused       int  // packets refused: the sender's signature did not match the roster
+	Bulletins     int  // league bulletins broadcast (Coordinator's board only)
 }
 
 // WriteOutbox atomically publishes each queued packet as a JSON file and clears

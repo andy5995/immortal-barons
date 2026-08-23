@@ -87,7 +87,12 @@ type Packet struct {
 	// FromBoard is proven rather than claimed (#118). Verified against the
 	// public key the signed roster carries for that board.
 	BoardSig []byte
-	Reset    *LeagueReset // Coordinator's order to start a new season (#65)
+	// Bulletins is the Coordinator's complete league bulletin set (see
+	// bulletin.go). A pointer with omitempty for the reason the trading fields
+	// give: a board too old to know the field must still see byte-identical
+	// bytes for every packet that does not carry one.
+	Bulletins *BulletinSet `json:",omitempty"`
+	Reset     *LeagueReset // Coordinator's order to start a new season (#65)
 	// League is the Coordinator's league number, so a board playing in two
 	// leagues that share one inbound directory can tell the traffic apart.
 	League int
@@ -115,6 +120,8 @@ func (p Packet) PacketType() string {
 		return "roster"
 	case p.Reset != nil:
 		return "reset"
+	case p.Bulletins != nil:
+		return "bulletins"
 	case len(p.Attacks) > 0 && len(p.Results) > 0:
 		return "attacks, results"
 	case len(p.Attacks) > 0:
@@ -1424,6 +1431,12 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	}
 	if p.Reset != nil && orders {
 		w.applyLeagueReset(p.Reset)
+	}
+	// The league's bulletins travel with the ruleset and the roster, under the
+	// same guard: the Coordinator sends the whole set every run, and this board
+	// files news only for what actually changed here (see bulletin.go).
+	if p.Bulletins != nil && orders {
+		w.applyBulletins(*p.Bulletins)
 	}
 	if carriesCoordinatorOrders(p) && !orders {
 		w.postNews(fmt.Sprintf("A packet from %s claimed to carry League Coordinator orders and was refused.", p.FromBoard))

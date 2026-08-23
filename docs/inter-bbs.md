@@ -625,6 +625,24 @@ adopts the settings on its next `-planetary` run. A member accepts them only
 when the packet comes from node 1 *and* carries the Coordinator's signature, so
 no other board can change the league rules.
 
+### League bulletins
+
+Bulletins the whole league reads are yours to write. Put them in
+`data/bull/league` on your own board, one file per bulletin, `.txt` or `.ans`
+and up to 64 KB each. The first line of each file is the title players see.
+
+Every `-planetary` run sends the whole folder to every board, signed with your
+Coordinator key. The other sysops do nothing: on their own next `-planetary`
+run the game saves the files into their `data/bull/league`, makes that folder
+if they have none, and deletes any bulletin you have taken out. A board that
+joins the league late gets them all on its next run.
+
+Members cannot write league bulletins. A file a member's sysop puts in that
+folder is removed by your next broadcast, so their own bulletins belong in
+`data/bull/local`.
+
+A new or changed bulletin appears in each board's news, with its title.
+
 ### Starting a new season
 
 The Coordinator can restart the whole league on a chosen date:
