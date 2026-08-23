@@ -20,6 +20,11 @@ jobs:
         with:
           go-version-file: go.mod
 
+      # windows/386 needs a Windows 7-capable Go (see the script and #181); the
+      # other targets use the setup-go toolchain above.
+      - name: Fetch the Windows 7 Go toolchain
+        run: scripts/fetch-win7-go.sh >> "$GITHUB_ENV"
+
       # Same build script as the rolling snapshot; here the tag drives both the
       # archive filename and the wrapped dir version (each tag is distinct, so
       # no clobber). GITHUB_REF_NAME is the pushed tag, e.g. "v0.0.1".

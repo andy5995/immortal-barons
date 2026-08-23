@@ -24,6 +24,11 @@ jobs:
         with:
           go-version-file: go.mod
 
+      # windows/386 needs a Windows 7-capable Go (see the script and #181); the
+      # other targets use the setup-go toolchain above.
+      - name: Fetch the Windows 7 Go toolchain
+        run: scripts/fetch-win7-go.sh >> "$GITHUB_ENV"
+
       # Shared with release.yml (scripts/build-archives.sh) so the two can't
       # drift. The archive filename stays stable ("snapshot") so the release
       # assets clobber in place each push; the inner dir carries the short sha

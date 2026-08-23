@@ -63,7 +63,16 @@ League Coordinator's minimum-version gate.
    go test ./internal/play/ -race
    ```
 
-6. **Commit** as `release: vX.Y.Z`.
+6. **Check the Windows 7 toolchain pin.** `scripts/fetch-win7-go.sh` pins a
+   [go-legacy-win7](https://github.com/thongtech/go-legacy-win7) release, which
+   builds the `windows/386` asset because a stock-Go binary cannot start on
+   Windows 7 at all (#181). Compare the pin against that project's releases: if
+   it has followed upstream to a newer patch level, bump `VERSION` and `SHA256`
+   together, taking the hash from the release page rather than from the
+   download. Left alone the release still builds, on the older Go — which is the
+   failure worth catching here, since nothing else reports it.
+
+7. **Commit** as `release: vX.Y.Z`.
 
 ## Tagging
 
@@ -76,7 +85,7 @@ Watch it: a release with no assets is a release nobody can use.
 
 ## After publishing
 
-7. **Bump `Version` in `internal/game/game.go`** to the next patch. This is the
+8. **Bump `Version` in `internal/game/game.go`** to the next patch. This is the
    step that gets forgotten, because the release feels finished once the assets
    are up.
 
@@ -86,11 +95,11 @@ Watch it: a release with no assets is a release nobody can use.
    version stamped on every inter-BBS packet, where a Coordinator's minimum
    version is tested against it.
 
-8. **Delete any renamed or removed asset** left behind on the snapshot
+9. **Delete any renamed or removed asset** left behind on the snapshot
    prerelease by hand. `replacesArtifacts` only replaces an asset of the same
    name, so a rename leaves the old file sitting beside the new one.
 
-9. **Bump the Homebrew formula** in `HomebrewFormula/immortal-barons.rb` — the
+10. **Bump the Homebrew formula** in `HomebrewFormula/immortal-barons.rb` — the
    `url`, the `sha256`, and the doc list:
 
    ```

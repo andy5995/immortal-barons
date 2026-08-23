@@ -17,7 +17,7 @@ Builds are provided for these systems:
 
 | System | Notes |
 | --- | --- |
-| Windows | 32-bit and 64-bit |
+| Windows | 32-bit and 64-bit. The 32-bit build also runs on Windows 7 |
 | Linux | x86-64 and ARM64 |
 | macOS | Intel and Apple Silicon |
 
@@ -30,6 +30,10 @@ also contains `barons-ftn`, an optional helper for leagues carried over FTN.
   SmartScreen may say the file is not recognised. This is expected.
 - **macOS may block the file** the first time, for the same reason. Open it
   from the Finder with a right-click, then choose Open.
+- **On Windows 7, use the 32-bit build.** The 64-bit one needs Windows 10 or
+  later, because that is where the Go compiler's own support now starts. The
+  32-bit build is made with a Go fork that keeps Windows 7, 8, 8.1 and Server
+  2008 R2 through 2012 R2 working.
 
 ## Install with Homebrew
 

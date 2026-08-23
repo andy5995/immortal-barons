@@ -18,6 +18,17 @@ set -eu
 label="$1"
 ver="$2"
 
+# windows/386 is built by a Windows 7-capable toolchain, because a stock-Go
+# binary cannot start on Windows 7 at all (#181) and old Windows is most of what
+# a 32-bit build is for — anyone on Windows 10 or later takes the amd64 asset.
+# scripts/fetch-win7-go.sh downloads and verifies it and sets WIN386_GO; CI runs
+# that before this script. Unset, the 386 archive is still built, with stock Go
+# and the warning below, so a local test build needs no 65 MB download.
+if [ -z "${WIN386_GO:-}" ]; then
+	echo "!!! WIN386_GO is not set: the windows/386 build will NOT run on Windows 7." >&2
+	echo "!!! Run: WIN386_GO=\$(scripts/fetch-win7-go.sh --path) \$0 $*" >&2
+fi
+
 mkdir -p dist
 for target in windows/386 windows/amd64 linux/amd64 linux/arm64 darwin/amd64 darwin/arm64; do
 	os="${target%/*}"
@@ -26,11 +37,15 @@ for target in windows/386 windows/amd64 linux/amd64 linux/arm64 darwin/amd64 dar
 	[ "$os" = windows ] && ext=".exe"
 	name="immortal-barons-${label}-${os}-${arch}"
 	dir="immortal-barons-${ver}-${os}-${arch}"
-	echo "==> building $name ($dir)"
+	gocmd="go"
+	if [ "$target" = windows/386 ] && [ -n "${WIN386_GO:-}" ]; then
+		gocmd="$WIN386_GO"
+	fi
+	echo "==> building $name ($dir) with $($gocmd version)"
 	mkdir -p "$dir"
-	GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags "-s -w" \
+	GOOS="$os" GOARCH="$arch" "$gocmd" build -trimpath -ldflags "-s -w" \
 		-o "$dir/immortal-barons${ext}" ./cmd/immortal-barons
-	GOOS="$os" GOARCH="$arch" go build -trimpath -ldflags "-s -w" \
+	GOOS="$os" GOARCH="$arch" "$gocmd" build -trimpath -ldflags "-s -w" \
 		-o "$dir/barons-ftn${ext}" ./cmd/barons-ftn
 	cp LICENSE README.md ChangeLog install-xtrn.ini "$dir/"
 	mkdir -p "$dir/docs"
