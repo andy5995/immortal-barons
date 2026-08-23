@@ -2005,3 +2005,22 @@ func raider(atk RemoteAttack) string {
 	}
 	return atk.FromEmpire + " of " + atk.FromBoard
 }
+
+// FitColumn cuts text to width runes so an over-long name cannot push a table's
+// later columns off the row. A `%-*s` verb pads but never trims, so without this
+// one long board name shifts every column after it and wraps the line.
+//
+// Presentational only — the stored name is untouched. Packets are routed by
+// board NAME when they carry no node number, so a shortened name could match the
+// wrong board; the only cap applied to the stored value is MaxNodeNameLen, which
+// sits far above any real one.
+func FitColumn(text string, width int) string {
+	r := []rune(text)
+	if len(r) <= width {
+		return text
+	}
+	if width <= 1 {
+		return string(r[:max(0, width)])
+	}
+	return string(r[:width-1]) + "…"
+}

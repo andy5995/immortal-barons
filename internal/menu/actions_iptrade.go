@@ -63,7 +63,7 @@ func browseRemoteMarket(s session.Session, w *ctx, board string) {
 	// and "Name" are what the local market and its seller list call these two
 	// columns), same inset rule in the dim market accent, same colors per column.
 	// A player should recognise it as the market, not meet a second convention.
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightWhite, fmt.Sprintf(tr(s, "%s Trading Market"), board), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightWhite, fmt.Sprintf(tr(s, "%s Trading Market"), game.FitColumn(board, 60)), ansi.Reset)
 	if asOf != "" {
 		// The date is not decoration: it is how stale the prices are, and staleness
 		// is what makes a bid fail.

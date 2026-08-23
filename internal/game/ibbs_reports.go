@@ -83,7 +83,7 @@ func (w *World) LastPacketReport() string {
 		if n, ok := w.HighSeq[name]; ok {
 			seq = fmt.Sprintf("%d", n)
 		}
-		fmt.Fprintf(&b, "%-28s %-12s %s\n", name, when, seq)
+		fmt.Fprintf(&b, "%-28s %-12s %s\n", FitColumn(name, 27), when, seq)
 	}
 	return b.String()
 }
@@ -154,7 +154,7 @@ func (w *World) PlayerListReport() string {
 	rows := 0
 	for _, e := range w.Empires {
 		if e.Alive && e.Owner != "" {
-			fmt.Fprintf(&b, "%-28s %-20s %10d %10d\n", local, e.Name, w.NetWorth(e), e.Score)
+			fmt.Fprintf(&b, "%-28s %-20s %10d %10d\n", FitColumn(local, 27), FitColumn(e.Name, 19), w.NetWorth(e), e.Score)
 			rows++
 		}
 	}
@@ -162,7 +162,7 @@ func (w *World) PlayerListReport() string {
 	sort.Slice(boards, func(i, j int) bool { return boards[i].BoardID < boards[j].BoardID })
 	for _, rb := range boards {
 		for _, s := range rb.Scores {
-			fmt.Fprintf(&b, "%-28s %-20s %10d %10d\n", rb.BoardID, s.Empire, s.NetWorth, s.Score)
+			fmt.Fprintf(&b, "%-28s %-20s %10d %10d\n", FitColumn(rb.BoardID, 27), FitColumn(s.Empire, 19), s.NetWorth, s.Score)
 			rows++
 		}
 	}

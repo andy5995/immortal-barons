@@ -380,6 +380,23 @@ const MaxLeagueNumber = 999
 // make the width of a packet name something nobody can reason about.
 const MaxNodeNumber = 999
 
+// MaxNodeNameLen bounds a roster board name, in bytes, so a malformed or hostile
+// ibnodes.dat cannot carry an unbounded string into the world and out again on
+// every packet.
+//
+// It is deliberately far above any real board name, and that is the whole design
+// — because truncating a name is not free. Routing falls back to comparing board
+// NAMES when a packet carries no node number (`AddressedToMe`), so two boards
+// whose names differ only past the cut would become the same board for delivery.
+// A cap near the display columns (27-30) could plausibly collide; one a board
+// running an older release does not apply would make the two disagree about what
+// a board is called. At 512 neither is reachable by a real roster, so the cap
+// bounds the input without ever changing a name anyone actually uses.
+//
+// Fitting a long name to a column is a RENDERING problem, solved where it cannot
+// affect identity — see the planet list and Travel Times.
+const MaxNodeNameLen = 512
+
 // InterBBSEnabled reports whether inter-BBS / interplanetary features (group
 // attacks, IP scores, travel times, terrorist ops, planetary Gooie/SDI) should
 // be offered. In BRE these live on a separate "InterPlanetary Operations" menu

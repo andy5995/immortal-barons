@@ -68,7 +68,7 @@ func showPlanetList(s session.Session, planets []game.LeagueNode) {
 	for _, p := range planets {
 		fmt.Fprintf(s, "%s%2d %s%-*s%s%s%s\n",
 			ansi.FgBrightRed, p.Number,
-			ansi.FgBrightWhite, planetNameWidth, p.Name,
+			ansi.FgBrightWhite, planetNameWidth, game.FitColumn(p.Name, planetNameWidth-1),
 			ansi.FgWhite, nodeLocation(p), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", rule)

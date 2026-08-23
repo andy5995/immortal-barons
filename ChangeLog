@@ -28,6 +28,8 @@
   * A won pirate raid scores 100 to 399; a lost one costs nothing
   * Missile Ops and Bombing Ops govern Special Operations alone, not local menus
   * The InterBBS Scores screen is headed Immortal Barons, not the original's name
+  * A roster board name is capped at 512 bytes, and -league-check reports a cut
+  * A long board name is shown cut to fit wherever a screen has room for it
 
 2026-08-21 (v0.0.6)
   * Local covert effect operations resolve at daily maintenance

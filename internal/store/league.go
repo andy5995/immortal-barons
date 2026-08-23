@@ -56,10 +56,16 @@ func ParseNodeListReport(path string) (nodes []game.LeagueNode, problems []strin
 				if len(block) >= 7 {
 					key = strings.TrimSpace(block[6])
 				}
+				name := strings.TrimSpace(block[1])
+				if len(name) > game.MaxNodeNameLen {
+					problems = append(problems, fmt.Sprintf("node %d's name is %d bytes and was cut to %d",
+						n, len(name), game.MaxNodeNameLen))
+					name = name[:game.MaxNodeNameLen]
+				}
 				nodes = append(nodes, game.LeagueNode{
 					Number:    n,
 					Hosts:     hosts,
-					Name:      strings.TrimSpace(block[1]),
+					Name:      name,
 					Address:   strings.TrimSpace(block[2]),
 					City:      strings.TrimSpace(block[3]),
 					State:     strings.TrimSpace(block[4]),

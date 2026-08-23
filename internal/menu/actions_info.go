@@ -581,10 +581,10 @@ func gameSetup(s session.Session, w *ctx) Result {
 		if coordBoard != "" {
 			coordinator = coordBoard
 		}
-		row("League Coordinator", coordinator)
+		row("League Coordinator", game.FitColumn(coordinator, 50))
 		// Last, so the group narrows from the whole league to the board the
 		// player is standing on.
-		row("This planet", c.BoardID)
+		row("This planet", game.FitColumn(c.BoardID, 50))
 		if declaration != "" {
 			row("League declaration", declaration)
 		}
@@ -758,7 +758,9 @@ const (
 func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) {
 	head := tr(s, "Daily Bulletin")
 	if title != "" {
-		head = title + " — " + head
+		// The board name is the sysop's, and a long one would blow the box out of
+		// the screen — the masthead is drawn to a fixed rule.
+		head = game.FitColumn(title, 30) + " — " + head
 	}
 	boxTop(s, head)
 

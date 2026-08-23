@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/game"
 )
 
 func TestParseNodeList(t *testing.T) {
@@ -186,5 +188,39 @@ func TestCleanNodeListReportsNoProblems(t *testing.T) {
 	nodes, problems, err := ParseNodeListReport(path)
 	if err != nil || len(nodes) != 2 || len(problems) != 0 {
 		t.Fatalf("nodes=%+v problems=%v err=%v", nodes, problems, err)
+	}
+}
+
+// A roster name is bounded so a malformed file cannot carry an unbounded string
+// into the world and out on every packet — but the cap sits far above any real
+// board name on purpose. Routing compares board NAMES when a packet carries no
+// node number, so a cut that a real roster could reach would let two boards
+// answer to each other's mail.
+func TestRosterNameIsCappedFarAboveAnyRealName(t *testing.T) {
+	dir := t.TempDir()
+	long := strings.Repeat("A", game.MaxNodeNameLen+50)
+	path := filepath.Join(dir, "ibnodes.dat")
+	body := "1\n" + long + "\n1:1/1\nCity\nST\nUSA\n\n2\nShort BBS\n1:1/2\nCity\nST\nUSA\n"
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	nodes, problems, err := ParseNodeListReport(path)
+	if err != nil {
+		t.Fatalf("ParseNodeListReport: %v", err)
+	}
+	if len(nodes) != 2 {
+		t.Fatalf("got %d nodes, want 2", len(nodes))
+	}
+	if got := len(nodes[0].Name); got != game.MaxNodeNameLen {
+		t.Errorf("name kept %d bytes, want it cut to %d", got, game.MaxNodeNameLen)
+	}
+	// The Coordinator has to be told, or the roster silently means something else
+	// on their board than the file says.
+	if len(problems) == 0 {
+		t.Error("the cut was not reported; -league-check would say nothing")
+	}
+	// An ordinary name is untouched — the cap must never reach a real roster.
+	if nodes[1].Name != "Short BBS" {
+		t.Errorf("ordinary name became %q", nodes[1].Name)
 	}
 }

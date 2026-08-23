@@ -300,13 +300,13 @@ func ipScoreRank(s session.Session, w *ctx, rows []ipScoreRow, kind ipRankKind) 
 		if isPlanet {
 			fmt.Fprintf(s, "%s(%s%3d%s) %s%-34s%s %s%12d%s\n",
 				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
-				ansi.FgWhite, r.name, ansi.Reset,
+				ansi.FgWhite, game.FitColumn(r.name, 33), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset)
 		} else {
 			fmt.Fprintf(s, "%s(%s%3d%s) %s%-26s%s %s%-20s%s %s%12d%s\n",
 				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
-				ansi.FgWhite, r.name, ansi.Reset,
-				ansi.FgWhite, r.planet, ansi.Reset,
+				ansi.FgWhite, game.FitColumn(r.name, 25), ansi.Reset,
+				ansi.FgWhite, game.FitColumn(r.planet, 19), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset)
 		}
 	}
@@ -716,7 +716,7 @@ func travelTimes(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "%s\n", rule)
 	for _, p := range planets {
 		label, col := turnaroundLabel(s, p.days)
-		fmt.Fprintf(s, "%s%-*s%s%s%s\n", ansi.FgWhite, travelNameWidth, p.name, col, label, ansi.Reset)
+		fmt.Fprintf(s, "%s%-*s%s%s%s\n", ansi.FgWhite, travelNameWidth, game.FitColumn(p.name, travelNameWidth-1), col, label, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", rule)
 	pause(s)

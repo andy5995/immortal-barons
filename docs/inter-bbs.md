@@ -226,6 +226,19 @@ The node list names every board in the league. It uses the same simple layout
 as the original BRE `BRNODES.DAT`. Each board is six lines, and a blank line
 separates boards:
 
+A board name has no length limit worth worrying about: the parser caps it at 512
+bytes and says so in `-league-check` if it ever cuts one, which is a guard
+against a malformed file rather than a rule for you. The cap is deliberately far
+above any real name — packets are routed by board NAME when they carry no node
+number, so a cut a real roster could reach would let two boards answer to each
+other's mail. Fitting a long name to a screen column is done when the column is
+drawn, where it cannot affect delivery.
+
+Keep names under about 27 characters if you want them to sit whole everywhere.
+A longer one is shown cut with an ellipsis on each screen that has a column for
+it — the planet list, Travel Times, InterBBS Scores, Game Setup, the Daily
+Bulletin masthead, an allied market's title, and the score and peer reports.
+
 ```
 1
 Avalon
