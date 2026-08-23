@@ -814,6 +814,15 @@ inter-BBS settings about attacks sent to another board, and no capture of either
 one disabled exists, so which menus the original strips is unverified — but a
 switch the player is told about on Game Setup has to do something.
 
+*Attempted 2026-08-23 and left open, with the route written down so the next
+attempt does not start over.* `show_game_settings` is the wrong end: it builds
+each Enabled/Disabled word into a buffer well before the label, so the config
+byte never appears beside the text. The route is the other way round — find each
+setting's offset in the config record from `run_configuration_editor`, then sweep
+both binaries for `cmp byte [es:di+<offset>]` **and** the `add reg,<offset>`
+idiom, and read the containing routine of every tester. Each tester names a menu,
+which is the whole answer. Budget an hour, not ten minutes.
+
 ### Local Attacks, Local Attack Scoring, Dupe Checking
 
 Three more inter-BBS-only settings, all from BRE's Configuration Editor page two
@@ -831,8 +840,16 @@ and documented in `game/reset.hlp`. Each is off-league inert: IB checks
   what its help recommends: "so that users cannot attack each other just to
   build up score"). Disabled, a local battle moves neither side's score;
   `whatsnew.doc` records the change as "score is no longer given for winning
-  local attacks". Whether BRE also suppresses the LOSER's penalty is unverified;
-  IB suppresses both, so the pair cannot be used to grind a rival down.
+  local attacks".
+
+  **The "loser's penalty" question is closed, and the answer is that there was
+  never one to suppress** (read 2026-08-23). `resolve_regular_attack` writes
+  Score at two sites, both on winning-attack paths and both crediting the acting
+  player's own record; no routine in either binary writes a second realm's Score.
+  So the toggle governs exactly one thing — whether a won local attack pays its
+  attacker — and the gate is the same at both sites: `[0x6a9a]` decides whether
+  the league byte at `cfg+0x3d8` is consulted, so an interplanetary attack always
+  scores. See "Score (distinct from Net Worth)".
 - **Dupe Checking** (default **Enabled**). BRE looks "for users on your system
   that may be playing on other BBSes and temporarily lock them out of the game
   (until they delete one of their players)". IB does the same from the scores
@@ -1181,10 +1198,13 @@ all of that; `Empire.ExposedFrom` holds the per-realm expiry.
 > which diverges on one instruction's index and reproduces everything else the
 > routine does. The artifact is recorded here instead of built.
 >
-> One thing behind this is unverified: `bribe_enemy_agents` is the only writer of
-> the expiry array found, but the binary was not swept exhaustively for others.
-> If another writer exists, the shield is a live mechanic in BRE and the case for
-> the intended behaviour is stronger still.
+> The sole-writer claim has since been swept properly (2026-08-23). The expiry
+> array is one Real48 per realm, indexed `letter x 6` — a distinctive
+> `shl ax,1 / mov si,ax / shl ax,1 / add ax,si` — and that idiom occurs **three
+> times in both binaries together**: this routine, `save_interbbs_times` (the
+> travel-times array) and `send_spy` (the spy expiries). Only this one carries
+> the expiry array's `-0xb` displacement. So `bribe_enemy_agents` is the only
+> writer, unless another reaches the field by some other index idiom.
 
 **Each op charges a gold fee up front** (on top of the agent risk), shown as
 a cost column on the menu. The fees below are live-sampled from BRE's default
@@ -2511,16 +2531,8 @@ relies on it.
 - **Feeding & food shortfall:** each turn the realm consumes food; a **feed stage**
   (BRE's Payment→Food-Market slot) warns when short, and with **Auto-Feed** on the
   Food Market opens automatically so the player can buy food, then asks the two
-  obligations in turn. Going underfed hurts: **popular support and military morale
-  drop and people emigrate, scaled to how much of the turn's food need went unmet**
-  (`FoodShortfallSupportDrop` = 70 support points, `FoodShortfallMoraleDrop` = 80
-  morale points — hungry troops demoralize faster than the public — and
-  `FoodShortfallEmigrationPct` = 10% of population, all at 100% unfed). IB's own
-  reconstruction, calibrated to a live BRE point: ~73% short dropped support ~50
-  points in one turn. breins.txt confirms the direction: *"Without food, morale
-  and public support will [decline]."*
-
-  **BRE's own penalties are now read, and IB implements them.**
+  obligations in turn. Going underfed hurts, and **BRE's own penalties are read,
+  and IB implements them.**
   The allocation routine files three byte-sized penalties on the empire record,
   all applied and cleared during the end-of-turn step. With `r` the fraction of
   an obligation that was actually given (BRE computes it as `(given+1)/(need+1)`):
