@@ -17,6 +17,7 @@ type Menus struct {
 	Bank           *Menu
 	Attack         *Menu
 	InterPlanetary *Menu
+	IPSpecial      *Menu // the interplanetary "Special Operations" submenu
 	TerrorOps      *Menu
 	Covert         *Menu
 	Trading        *Menu
@@ -28,12 +29,18 @@ type Menus struct {
 }
 
 // noBombingOps, noMissileOps and noAnnihilator are the sysop's three special-
-// attack switches as menu gates. BRE's Configuration Editor turns each class of
-// special attack off outright (game/reset.hlp: "One of the special forms of
-// attacks in BRE is to send bombs / Nuclear, Chemical, and other special
-// missiles / a Gooie Kablooie... you may wish to disable this feature"), so a
-// disabled class leaves the menu rather than refusing at the prompt. byKey skips
-// a hidden item, so the hotkey stops working too.
+// attack switches as menu gates. A disabled class leaves the menu rather than
+// refusing at the prompt; byKey skips a hidden item, so the hotkey goes too.
+//
+// BINARY-VERIFIED reach (2026-08-23). Each byte has exactly TWO testers in the
+// whole product — the Configuration Editor that sets it, and one menu that reads
+// it: Gooie Kablooies (cfg+0x18a) in run_interbbs_menu, Bombing Ops (cfg+0x18b)
+// and Missile Ops (cfg+0x18c) both in run_bombing_operations_menu, which is
+// Special Operations. **Nothing local is gated by any of them** — these are
+// inter-BBS switches about what may be sent to another board, exactly as
+// game/reset.hlp words them. IB used to hide the local Attack menu's WMDs behind
+// Missile Ops and Bomb Enemy Targets behind Bombing Ops; neither is BRE's, and
+// both are gone.
 func noBombingOps(w *ctx) bool  { return !w.Config.BombingOps }
 func noMissileOps(w *ctx) bool  { return !w.Config.MissileOps }
 func noAnnihilator(w *ctx) bool { return !w.Config.ClingyAnnihilator }
@@ -48,10 +55,6 @@ func noIPTrading(w *ctx) bool { return !w.Config.IPTrading }
 // entries, captured live in docs/dev/bre-screens.md ("Attack Menu (InterBBS,
 // local attacks OFF)") — Regular, Nuclear, Chemical and Biological all go.
 func noLocalAttacks(w *ctx) bool { return !w.LocalAttacksAllowed() }
-
-// noLocalMissiles combines the two: a missile aimed at a neighbour needs both
-// missiles and local fighting to be allowed.
-func noLocalMissiles(w *ctx) bool { return noMissileOps(w) || noLocalAttacks(w) }
 
 // quitOnEnter makes Enter activate a menu's own '0' Quit item, so the prompt
 // shows and selects "Quit" uniformly across submenus (#62). The Spending
@@ -205,9 +208,9 @@ func BuildMenus() *Menus {
 
 	attack.Items = []Item{
 		{Key: 'R', Label: "Regular Attack", Do: regularAttack, Hidden: noLocalAttacks},
-		{Key: 'N', Label: "Nuclear Attack", Do: nuclearAttack, Hidden: noLocalMissiles},
-		{Key: 'C', Label: "Chemical Attack", Do: chemicalAttack, Hidden: noLocalMissiles},
-		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack, Hidden: noLocalMissiles},
+		{Key: 'N', Label: "Nuclear Attack", Do: nuclearAttack, Hidden: noLocalAttacks},
+		{Key: 'C', Label: "Chemical Attack", Do: chemicalAttack, Hidden: noLocalAttacks},
+		{Key: 'B', Label: "Biological Attack", Do: biologicalAttack, Hidden: noLocalAttacks},
 		{Key: 'P', Label: "Attack Pirates", Do: attackPirates,
 			// Hidden while under new-realm protection — a protected realm can't
 			// raid — and on a board whose sysop has turned the pirates off.
@@ -279,7 +282,7 @@ func BuildMenus() *Menus {
 		{Key: '4', Label: "Support Dissensions", Price: costOf(game.CostSupportDissensions), Do: supportDissensions},
 		{Key: '5', Label: "Demoralize Forces", Price: costOf(game.CostDemoralizeForces), Do: demoralizeForces},
 		{Key: '6', Label: "Spy on Relations", Price: costOf(game.CostSpyOnRelations), Do: spyRelations},
-		{Key: '7', Label: "Bomb Enemy Targets", Price: costOf(game.CostBombEnemyTargets), Do: bombEnemyTargets, Hidden: noBombingOps},
+		{Key: '7', Label: "Bomb Enemy Targets", Price: costOf(game.CostBombEnemyTargets), Do: bombEnemyTargets},
 		{Key: '8', Label: "Bribery", Price: costOf(game.CostBribery), Do: briberyOp},
 		{Key: '9', Label: "Expose Enemy Ops", Price: costOf(game.CostExposeEnemyOps), Do: exposeEnemyOps},
 		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
@@ -544,6 +547,7 @@ func BuildMenus() *Menus {
 		Bank:           bank,
 		Attack:         attack,
 		InterPlanetary: interplanetary,
+		IPSpecial:      ipSpecial,
 		TerrorOps:      terrorOps,
 		Covert:         covert,
 		Trading:        trading,

@@ -8,8 +8,11 @@ import (
 )
 
 // The sysop's three special-attack switches take their operations off the
-// menus. Each was stored, edited and reported but gated nothing, so a league
-// that turned missiles off still played with them.
+// menus — and off the RIGHT menus. BINARY-VERIFIED reach: each byte has exactly
+// two testers in BRE, the editor that sets it and one menu that reads it, and
+// none of them is a local menu. Missile Ops governs Special Operations, not the
+// Attack menu's own WMDs; Bombing Ops governs Special Operations, not Bomb
+// Enemy Targets on the Covert menu.
 func TestSpecialOpSwitchesHideTheirOperations(t *testing.T) {
 	cases := []struct {
 		name   string
@@ -19,10 +22,14 @@ func TestSpecialOpSwitchesHideTheirOperations(t *testing.T) {
 		label  string
 		hidden bool
 	}{
-		{"missiles off hides Nuclear Attack", func(w *ctx) { w.Config.MissileOps = false },
-			func(m *Menus) *Menu { return m.Attack }, 'N', "Nuclear Attack", true},
-		{"missiles on keeps Nuclear Attack", func(w *ctx) { w.Config.MissileOps = true },
+		{"missiles off hides Nuclear Assault", func(w *ctx) { w.Config.MissileOps = false },
+			func(m *Menus) *Menu { return m.IPSpecial }, '5', "Nuclear Assault", true},
+		{"missiles on keeps Nuclear Assault", func(w *ctx) { w.Config.MissileOps = true },
+			func(m *Menus) *Menu { return m.IPSpecial }, '5', "Nuclear Assault", false},
+		{"missiles off leaves the LOCAL Nuclear Attack alone", func(w *ctx) { w.Config.MissileOps = false },
 			func(m *Menus) *Menu { return m.Attack }, 'N', "Nuclear Attack", false},
+		{"bombing off hides Bomb Food Market", func(w *ctx) { w.Config.BombingOps = false },
+			func(m *Menus) *Menu { return m.IPSpecial }, '1', "Bomb Food Market", true},
 		{"annihilator off hides its entry", func(w *ctx) { w.Config.ClingyAnnihilator = false },
 			func(m *Menus) *Menu { return m.InterPlanetary }, '9', "Clingy Annihilator Ops", true},
 		{"annihilator on keeps its entry", func(w *ctx) { w.Config.ClingyAnnihilator = true },
@@ -50,20 +57,17 @@ func TestSpecialOpSwitchesHideTheirOperations(t *testing.T) {
 	}
 }
 
-// Bomb Enemy Targets is one terror-bombing op, so it answers to Bombing Ops
-// alone; the missiles it used to sit beside are the Attack menu's and the
-// interplanetary menu's.
-func TestBombEnemyTargetsAnswersToBombingOps(t *testing.T) {
+// Bomb Enemy Targets stands on neither switch. BRE tests the Bombing Ops byte in
+// one place, run_bombing_operations_menu (Special Operations), and the local
+// Covert menu is not it — the switch is about what may be sent to another board.
+func TestBombEnemyTargetsIsNotGatedByBombingOps(t *testing.T) {
 	w := newWorld()
 	covert := BuildMenus().Covert
-
-	w.Config.BombingOps, w.Config.MissileOps = false, true
-	if covert.byKey('7', w) != nil {
-		t.Error("Bomb Enemy Targets still opens with Bombing Ops = Disabled")
-	}
-	w.Config.BombingOps, w.Config.MissileOps = true, false
-	if covert.byKey('7', w) == nil {
-		t.Error("Bomb Enemy Targets should stand on Bombing Ops alone, not on Missile Ops")
+	for _, on := range []bool{true, false} {
+		w.Config.BombingOps, w.Config.MissileOps = on, !on
+		if covert.byKey('7', w) == nil {
+			t.Errorf("Bomb Enemy Targets vanished with Bombing Ops = %v", on)
+		}
 	}
 }
 

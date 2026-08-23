@@ -803,25 +803,25 @@ Kablooies (IB's Clingy Annihilator) as classes of special attack a sysop may
 disable outright, so IB hides rather than refuses — `byKey` skips a hidden item,
 so the hotkey goes with the label:
 
-| Setting | What it hides |
-| --- | --- |
-| `BombingOps` | Bomb Enemy Targets on the Covert menu, and Bomb Food Market / Bomb Trading Market / Bomb Trade Routes / Undermine Investments on Special Operations |
-| `MissileOps` | Nuclear / Chemical / Biological Attack on the Attack menu, and Nuclear Assault / Chemical Bombing / R5-Slappenheimer on Special Operations |
-| `ClingyAnnihilator` | Clingy Annihilator Ops on the InterPlanetary menu |
+| Setting | Config byte | What it hides |
+| --- | --- | --- |
+| `ClingyAnnihilator` | `cfg+0x18a` | Clingy Annihilator Ops on the InterPlanetary menu |
+| `BombingOps` | `cfg+0x18b` | Bomb Food Market / Bomb Trading Market / Bomb Trade Routes / Undermine Investments on Special Operations |
+| `MissileOps` | `cfg+0x18c` | Nuclear Assault / Chemical Bombing / R5-Slappenheimer on Special Operations |
 
-**IB's reading, not a capture:** BRE words both as
-inter-BBS settings about attacks sent to another board, and no capture of either
-one disabled exists, so which menus the original strips is unverified — but a
-switch the player is told about on Game Setup has to do something.
+**BINARY-VERIFIED reach** (2026-08-23), and narrower than IB had it. Sweeping
+both binaries for every `cmp byte [es:di+<offset>]` against those three bytes
+returns **two testers each**: the Configuration Editor that sets it, and exactly
+one menu that reads it — `run_interbbs_menu` for the Annihilator (drawing its
+`(9)` item), and `run_bombing_operations_menu`, which is Special Operations, for
+the other two.
 
-*Attempted 2026-08-23 and left open, with the route written down so the next
-attempt does not start over.* `show_game_settings` is the wrong end: it builds
-each Enabled/Disabled word into a buffer well before the label, so the config
-byte never appears beside the text. The route is the other way round — find each
-setting's offset in the config record from `run_configuration_editor`, then sweep
-both binaries for `cmp byte [es:di+<offset>]` **and** the `add reg,<offset>`
-idiom, and read the containing routine of every tester. Each tester names a menu,
-which is the whole answer. Budget an hour, not ten minutes.
+**Nothing local is gated by any of them**, which matches how `game/reset.hlp`
+words all three: settings about attacks *sent to another board*. IB used to hide
+the Attack menu's own Nuclear/Chemical/Biological behind Missile Ops and Bomb
+Enemy Targets behind Bombing Ops; neither is BRE's and both are gone. The local
+WMDs answer to **Local Attacks** alone, which is the switch a live capture shows
+collapsing that menu.
 
 ### Local Attacks, Local Attack Scoring, Dupe Checking
 
@@ -2316,6 +2316,12 @@ are not tied to a version, so a number in one may describe a build other than th
 0.988 this clone is matched against. They are useful for finding what a mechanic
 *is*; the figure itself needs the binary or a live game behind it before anything
 relies on it.
+
+*Audited 2026-08-23: every claim below is resolved — rejected outright,
+contrasted against what IB actually does, or kept as a stated choice with its
+reason. None of them feeds a constant on the guides' authority alone.* The
+section is a record of what was claimed and how it was settled, so the word
+"unverified" here describes its subject rather than marking work to do.
 
 - **Bank interest: about 1% per turn** on gold held in the bank *while you
   are playing* (investments tie money up until your next login and are
