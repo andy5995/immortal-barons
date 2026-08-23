@@ -102,6 +102,29 @@ normally use a moving highlight are numbered in that mode, so they stay usable.
 - You can run it while the board is up. Each edit takes the same lock a
   caller's turn takes.
 
+## What may a realm be called?
+
+Up to **30 characters**, of which at least **three must be letters or digits**.
+That is the original's own ceiling — it holds the realm name as a `String[30]`.
+
+Decoration is welcome and does not count toward the three: a name may be framed
+in CP437 block and box glyphs, or any other printable character, and they are
+kept exactly as typed. What the rule stops is a name made of *nothing but*
+decoration — one that reads as a row of blocks in every list it appears in, so
+nobody can tell which realm it is. It also travels: in a league your name is
+shown on other boards, and the same bytes that draw a neat box in CP437 come out
+as mojibake on a board running UTF-8.
+
+(You rarely type another realm's name — the attack, message and diplomacy
+screens all pick by Id letter. The rule is about reading, not typing.)
+
+Control characters are refused outright: an escape sequence in a realm name
+would move the cursor or recolour the row on every screen that lists it.
+
+Letters of any alphabet count, so a Cyrillic or German name qualifies on its own
+letters. The limit is counted in characters rather than bytes, so a name in one
+alphabet is not shorter than the same name in another.
+
 ## What happens when my empire is destroyed?
 
 - If your realm is wiped out — its people or land reach zero, from an attack or a

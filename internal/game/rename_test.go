@@ -137,24 +137,34 @@ func TestValidRealmName(t *testing.T) {
 	for _, c := range []struct {
 		name string
 		want bool
+		why  string
 	}{
-		{"Vega", true},
-		{"-=[ Vega ]=-", true},
-		{"a1b", true},
-		// A name drawn from CP437's block and line-drawing glyphs is the point of
-		// #151, and carries no letters at all.
-		{"╫╫╓", true},
-		{"▓▒░", true},
-		{"ab", false},
-		{"╫╓", false},
-		{"  ", false},
-		{"", false},
+		{"Vega", true, "ordinary"},
+		{"-=[ Vega ]=-", true, "decoration around a real name"},
+		{"a1b", true, "letters and digits both count"},
+		{"Ярость", true, "letters of any alphabet count"},
+		{"Grüße", true, "so do accented ones"},
+		// CP437 block and line glyphs stay WELCOME — they just do not count
+		// toward the minimum, so a name may be framed in them but not made of
+		// them. A name of pure glyphs is unreadable in a list and mojibake on a
+		// league board running a different code page.
+		{"╫═[ Vega ]═╫", true, "framed in CP437, still three letters"},
+		{"▓▒░ A1b ░▒▓", true, "same, with digits"},
+		{"╫╫╓", false, "no letters or digits at all"},
+		{"▓▒░", false, "same"},
+		{"ab", false, "two alphanumerics"},
+		{"a b", false, "still two"},
+		{"  ", false, "blank"},
+		{"", false, "empty"},
+		// BRE holds the realm name as a String[30] at record +0x1f.
+		{strings.Repeat("a", RealmNameMaxChars), true, "exactly the ceiling"},
+		{strings.Repeat("a", RealmNameMaxChars+1), false, "one past it"},
 		// An escape in a realm name would move the cursor on every screen that
 		// lists it.
-		{"Vega\x1b[31m", false},
+		{"Vega\x1b[31m", false, "control character"},
 	} {
 		if got := ValidRealmName(c.name); got != c.want {
-			t.Errorf("ValidRealmName(%q) = %v, want %v", c.name, got, c.want)
+			t.Errorf("ValidRealmName(%q) = %v, want %v (%s)", c.name, got, c.want, c.why)
 		}
 	}
 }

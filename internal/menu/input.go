@@ -182,9 +182,17 @@ func AskRealmName(s session.Session, lang, lead string, taken func(string) bool,
 			continue
 		}
 		if !game.ValidRealmName(name) || taken(name) {
-			fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed,
-				WrapIndented(i18n.T(lang, "Invalid: at least 3 visible characters, not matching another realm."), "  "),
-				ansi.Reset)
+			// Say WHICH rule was missed. The three are easy to confuse, and a
+			// player framing a name in CP437 glyphs would otherwise be told
+			// nothing about why a name they can see on screen is refused.
+			why := i18n.T(lang, "Invalid: a realm name needs at least 3 letters or digits. Decoration around them is fine and does not count.")
+			switch {
+			case len([]rune(name)) > game.RealmNameMaxChars:
+				why = fmt.Sprintf(i18n.T(lang, "Too long: a realm name may be at most %d characters."), game.RealmNameMaxChars)
+			case taken(name):
+				why = i18n.T(lang, "Taken: another realm already answers to that name.")
+			}
+			fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed, WrapIndented(why, "  "), ansi.Reset)
 			continue
 		}
 		// Confirm before committing: a typo is easy to make, and the name is

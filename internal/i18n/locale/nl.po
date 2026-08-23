@@ -1023,10 +1023,6 @@ msgstr "Interplanetaire operaties"
 msgid "InterPlanetary Ops"
 msgstr "Interplanetaire operaties"
 
-#: internal/menu/input.go:186
-msgid "Invalid: at least 3 visible characters, not matching another realm."
-msgstr "Ongeldig: minstens 3 zichtbare tekens, niet gelijk aan een ander rijk."
-
 #: internal/menu/actions_bank.go:185
 msgid "Investing Interest Rate:"
 msgstr ""

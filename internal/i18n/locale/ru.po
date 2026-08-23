@@ -1044,10 +1044,21 @@ msgstr "Планетарный бюллетень:"
 msgid "InterPlanetary Ops"
 msgstr ""
 
-#: internal/menu/input.go:186
-msgid "Invalid: at least 3 visible characters, not matching another realm."
+#: internal/menu/input.go
+msgid "Invalid: a realm name needs at least 3 letters or digits. Decoration around them is fine and does not count."
 msgstr ""
-"Неверно: не менее 3 видимых символов, не совпадает с другим королевством."
+"Недопустимо: в названии державы нужно минимум 3 буквы или цифры. "
+"Украшения вокруг них допустимы и не считаются."
+
+#: internal/menu/input.go
+msgid "Too long: a realm name may be at most %d characters."
+msgstr ""
+"Слишком длинно: название державы — не более %d символов."
+
+#: internal/menu/input.go
+msgid "Taken: another realm already answers to that name."
+msgstr ""
+"Занято: другая держава уже носит это имя."
 
 #: internal/menu/actions_bank.go:185
 msgid "Investing Interest Rate:"

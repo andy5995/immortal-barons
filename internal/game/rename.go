@@ -14,35 +14,67 @@ import (
 // rename alike.
 const RealmNameMinChars = 3
 
+// RealmNameMaxChars is the ceiling, in runes. BRE's empire record holds the
+// realm name as a `String[30]` at +0x1f (docs/dev/bre-save-format.md), so 30 is
+// the original's own limit rather than a number picked to fit a column — though
+// it fits every column IB draws too.
+//
+// Runes, not bytes: the original counts CP437 bytes, but IB in UTF-8 mode would
+// then give a Cyrillic or German realm half the name an English one gets, and
+// what the limit is really protecting is screen width.
+const RealmNameMaxChars = 30
+
 var (
 	// ErrRenameUsed is returned when the realm has already been renamed once.
 	ErrRenameUsed = errors.New("Your realm has already been renamed once. The name it carries now is permanent.")
 	// ErrRenameProtected is returned while the realm is still under new-realm
 	// protection: a realm that cannot be attacked cannot slip its name either.
 	ErrRenameProtected = errors.New("You may not rename your realm while it is under New Realm Protection.")
-	// ErrRealmNameInvalid is returned for a name with too few visible characters.
-	ErrRealmNameInvalid = errors.New("A realm name needs at least three visible characters.")
+	// ErrRealmNameInvalid is returned for a name with too few alphanumerics.
+	ErrRealmNameInvalid = errors.New("A realm name needs at least three letters or digits.")
+	// ErrRealmNameTooLong is returned for a name past RealmNameMaxChars.
+	ErrRealmNameTooLong = errors.New("A realm name may be at most 30 characters.")
 	// ErrRealmNameTaken is returned when another realm holds the name — including
 	// a name a renamed realm used to carry, since packets still address it.
 	ErrRealmNameTaken = errors.New("Another realm already answers to that name.")
 )
 
-// ValidRealmName reports whether name is usable as a realm name: at least
-// RealmNameMinChars visible characters once surrounding space is trimmed, and
-// no control characters anywhere. A control character is refused outright
-// rather than merely uncounted — an escape in a realm name is printed on every
-// screen that lists it, and would move the cursor or recolour the row.
+// ValidRealmName reports whether name is usable as a realm name.
+//
+// The rule is **at least RealmNameMinChars alphanumeric characters**, no more
+// than RealmNameMaxChars in all, and no control characters anywhere.
+//
+// Decoration is welcome and does not count. A player may frame a name in CP437
+// block and box glyphs, or any other printable character, and those are kept —
+// they simply do not satisfy the minimum.
+//
+// What the rule stops is a realm whose name is nothing BUT decoration, and the
+// reason is legibility rather than input: a realm is almost always CHOSEN by its
+// Id letter (pickAttackTarget, pickRecipient and the diplomacy pickers all read
+// a single key), so the case for the rule is not that such a name is untypeable.
+// It is that a name of pure glyphs is unreadable in a list, tells nobody which
+// realm they are looking at, and does not survive the trip: the same bytes are
+// box-drawing in CP437 and mojibake in UTF-8, and a league carries names between
+// boards that need not agree on a code page.
+//
+// Letters of any alphabet count, so a Cyrillic or German name qualifies on its
+// own letters.
+//
+// A control character is refused outright rather than merely uncounted — an
+// escape in a realm name is printed on every screen that lists it, and would
+// move the cursor or recolour the row.
 func ValidRealmName(name string) bool {
-	n := 0
+	alnum, total := 0, 0
 	for _, r := range strings.TrimSpace(name) {
-		switch {
-		case !unicode.IsPrint(r) && !unicode.IsSpace(r):
+		if !unicode.IsPrint(r) && !unicode.IsSpace(r) {
 			return false
-		case !unicode.IsSpace(r):
-			n++
+		}
+		total++
+		if unicode.IsLetter(r) || unicode.IsDigit(r) {
+			alnum++
 		}
 	}
-	return n >= RealmNameMinChars
+	return alnum >= RealmNameMinChars && total <= RealmNameMaxChars
 }
 
 // RenameEmpire changes e's realm name, once in a realm's life, and rewrites
@@ -102,6 +134,8 @@ func (w *World) SysopRenameEmpire(e *Empire, newName string) error {
 func (w *World) setRealmName(e *Empire, newName string) (string, error) {
 	name := strings.TrimSpace(newName)
 	switch {
+	case len([]rune(strings.TrimSpace(name))) > RealmNameMaxChars:
+		return "", ErrRealmNameTooLong
 	case !ValidRealmName(name):
 		return "", ErrRealmNameInvalid
 	case w.RealmNameTaken(name):

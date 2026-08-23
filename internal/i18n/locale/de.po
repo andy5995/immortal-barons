@@ -1045,11 +1045,21 @@ msgstr "Planetenaushang:"
 msgid "InterPlanetary Ops"
 msgstr ""
 
-#: internal/menu/input.go:186
-msgid "Invalid: at least 3 visible characters, not matching another realm."
+#: internal/menu/input.go
+msgid "Invalid: a realm name needs at least 3 letters or digits. Decoration around them is fine and does not count."
 msgstr ""
-"Ungültig: mindestens 3 sichtbare Zeichen, nicht identisch mit einem anderen "
-"Reich."
+"Ungültig: Ein Reichsname braucht mindestens 3 Buchstaben oder Ziffern. "
+"Verzierungen darum herum sind erlaubt und zählen nicht mit."
+
+#: internal/menu/input.go
+msgid "Too long: a realm name may be at most %d characters."
+msgstr ""
+"Zu lang: Ein Reichsname darf höchstens %d Zeichen haben."
+
+#: internal/menu/input.go
+msgid "Taken: another realm already answers to that name."
+msgstr ""
+"Vergeben: Ein anderes Reich trägt diesen Namen bereits."
 
 #: internal/menu/actions_bank.go:185
 msgid "Investing Interest Rate:"
