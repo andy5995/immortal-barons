@@ -620,6 +620,23 @@ which cost invocations here: `lookup` takes **no** `--directory` (unlike
 object; and `--around` accepts an OVR offset, so convert from the block address
 `find-string` prints rather than guessing a unit-relative one.
 
+**An empty BYTE-PATTERN scan is not evidence of absence either — the compiler
+has more than one way to reach a field.** Proving BRE never decays a Technology
+research counter meant showing nothing writes to the array. A scan for the
+disp16 baked into the modrm (`26 8B 85 51 F1` and friends) found the one read
+and nothing else, which reads exactly like "no writer exists". It was wrong: the
+writer reaches the caller's own record with a separate `add di,0xbe` and then a
+plain `[es:di]`, so no displacement appears in the access at all. Two idioms,
+two patterns, and only the pair is a proof.
+
+The general rule: before concluding a field is never touched, work out how the
+SAME field is addressed from each of its bases — the caller's own record
+(`[0x28d8]`, small positive offsets) and another realm's (`[0x28b0] +
+letter*0x42d`, large negative displacements) are different code shapes for one
+field. Then say which idioms you searched. A bulk `rep stos` over a whole record
+matches neither, so a clear-on-create is invisible to any such sweep and has to
+be reasoned about separately.
+
 **A disassembler that prints nothing has not told you the region is empty.**
 `disasm` once produced no output and exited **0**, which reads as "no code
 there" and is the most expensive kind of wrong answer. The cause was ndisasm

@@ -2609,3 +2609,46 @@ sentinel as `(0; 1.0737B)`, which reads like information about the other realm
 and is not. IB keeps its `(suggested)` hint on both sides where BRE has none,
 and keeps a real 2^30 ceiling internally so the figure stays inside an `int` on
 a 32-bit door build.
+
+## Travel Times (InterPlanetary Ops → T) — captured live, `cap/eots-ibbs-01.cap`
+
+**The board you are calling is not in the list, and only it is missing.** The
+same session's planet roster a few hundred lines earlier (line 20389) shows four
+planets and *does* include the caller, which is what rules out the alternative
+reading of a three-board league:
+
+```
+## Planet Name                Location
+ 1 Nova Hub                   Brisbane, QL, AUS
+ 2 Starship Junkyard          Brisbane, QL, AUS
+ 3 Eye of the Storm           New Plymouth, TN, NZ      <- the board being called
+ 4 The Eclipse                Sydney, NS, AUS
+```
+
+The screen itself (line 20613) lists the other three:
+
+```
+Average Turn Around Times to All BBSes
+──────═══════════════──────────────────────────────────────────────────────
+Nova Hub                      0.80 hours
+Starship Junkyard             0.80 hours
+The Eclipse                   1.00 hours
+──────═══════════════──────────────────────────────────────────────────────
+```
+
+Geometry, measured off the capture: a **75**-column rule with a **15**-column
+double run starting at column 6, and the planet name in **30** columns before
+its figure. Hours print to two decimals over a value quantized to a tenth
+(`0.80`, `1.00`) — the format and the quantization are different widths, which
+is easy to get backwards.
+
+`show_interbbs_turnaround_times` (`BRE.OVR 0x23d76`) holds exactly four strings:
+`'Average Turn Around Times to All BBSes'`, `'No Data'`, `' hours'`, `' days'`.
+`No Data` matters to the finding: BRE **does** print a row for a board it has
+never measured, so leaving the caller out is a deliberate omission rather than a
+row suppressed for want of a measurement.
+
+IB matches all of it — `KnownBoards()` drops `Config.BoardID` and nothing else,
+and the constants are `travelRuleWidth`/`travelRuleDouble`/`travelNameWidth`.
+Its sub-hour tiers (seconds, minutes) are IB's own; BRE never needed them,
+because no 1990s FidoNet link answered in under a minute.

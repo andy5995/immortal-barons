@@ -1638,6 +1638,16 @@ each point:  slot[random 0..14] += 1
 So research is **quadratic in Technology regions and only inverse-linear in
 realm size** — it rewards a large tech block in a small realm.
 
+Re-read 2026-08-23 in `process_economic_production`, which is what puts it ahead
+of the income phase. The gate is a 32-bit Technology-region count at record
+`+0xb2`, and `^0.75` is spelled `exp(ln(x) x 3 / 4)` — the three Real48 literals
+decode to 1.0, 3.0 and 4.0. The ally term takes `min` through `0c03:12e1`,
+requires the ally's relation word to be **6** (Technology Agreement) and their
+own Technology regions to be above zero, and divides by the CALLER's total
+regions rather than the ally's. Its `add` carries no x4, which is the whole of
+the difference between the two terms. Distribution is
+`random_bounded_i32(15)` per point into `record + idx*4 + 0xbe`.
+
 **Effect of a level**, per slot:
 
 ```
@@ -1658,8 +1668,38 @@ factor = 1 + (cap − 1) × (1 − exp( −level / (totalRegions + 1) ))
 Food decay has by far the largest ceiling, which is why it moves first and
 furthest — at low levels Technology is effectively a spoilage technology.
 
-**There is no decay.** The binary has exactly one write site and it only
-increments. Selling Technology regions makes research stop; the level itself
+**The lowered effects are the same factor, divided — not a second formula.**
+Worth stating because it has been doubted. `technology_factor` (`056d:1a07` ->
+`056d:1a42`) is one routine taking the realm, the slot and the cap as a Real48
+argument, and every effect calls it; the growth and decay sites differ only in
+what they do with the answer. Re-read 2026-08-23:
+`calculate_agricultural_food_yield` passes slot 0 / cap 2.0 and multiplies,
+`calculate_military_maintenance` and `calculate_region_maintenance` pass slot 3
+/ cap 1.4 and divide, `calculate_sdi_maintenance` passes slot 1 / cap 2.0 and
+divides, and `process_end_of_turn` passes slot 4 / cap 5.0 for food decay.
+`level / (totalRegions + 1)` is negated before `exp` and clamped at -50.
+
+Every cap and slot in the table above has now been read from its own call site,
+not carried forward from this document: gold 1.5 at three sites in
+`process_economic_production`, population tax 1.5 at a fourth (slot 2), unit
+production 1.35 (`ovr_034f48`), military strength 1.4 at slot 5 in
+`resolve_regular_attack` and `configure_attack_forces`, and waste
+decontamination on slot 0 / cap 2.0 — the same pair food production uses, which
+is why IB reads it through `TechFoodFactor`.
+
+The two do trace different CURVES — `1/f` is not the mirror of `f` — which is
+probably how the belief in a separate decay formula arises. But the curve is a
+consequence of the inversion, not evidence of a second formula, and reading the
+call sites settles it either way.
+
+**There is no decay.** The 15 research counters live at record offset `0xbe`,
+four bytes each, and a sweep of BOTH binaries for every idiom that reaches them
+— the `-0xeaf` displacement other realms are read through, and the `add reg,0xbe`
+the compiler emits for the caller's own record — finds exactly **two** sites in
+the whole product: the read in `technology_factor`, and the `+1` above. Nothing
+decrements and nothing zeroes them. (A bulk clear of the whole empire record on
+a new game would not match such a sweep, and is not decay either.) Selling
+Technology regions only trips the gate, so research stops; the level itself
 **freezes permanently**. Confirmed live: a realm that dropped to zero Technology
 regions held identical advisor percentages across four further turns.
 
@@ -2180,12 +2220,28 @@ IB's earlier placeholder charged a flat 100 gold a point up to 20 points a turn.
   from the full list, which is exactly the failure mode
   `.claude/skills/bre-gather/references/disassembly.md` warns about.
 - **Random population swings ARE real, though** — separate from the above.
-  BRE's sysop-editable random events (`events.dat` `^GAINPEOPLE` / `^LOSEPEOPLE`:
-  "people flee to your empire", "aliens drop off N million", "killed in bungee
-  accidents", …) make population appear "from nowhere" and vanish "into
-  oblivion" — never a transfer to/from another realm. The clone implements
-  these as random per-empire events (`internal/game/events_random.go`,
-  `eventPeople`).
+  BRE's sysop-editable random events (`events.dat`, `^GAINPEOPLE` / `^LOSEPEOPLE`)
+  make population appear "from nowhere" and vanish "into oblivion" — never a
+  transfer to/from another realm. The clone implements these as random
+  per-empire events (`internal/game/events_random.go`, `eventPeople`).
+
+  **The file's full shape** (read 2026-08-23): 14 `^` category headers — LOSE
+  and GAIN for each of **seven** resources, `TROOPERS JETS TURRETS TANKS AGENTS
+  FOOD PEOPLE` — over 71 one-line events. There are no gold events and no land
+  events. Its header states the contract for a sysop: add or remove lines
+  freely, every line needs a `%%` where the number is substituted, and an event
+  must be one line.
+
+  **IB's `eventResource` set is those same seven, with the same gain/lose
+  split**, so the structure matches; only the wording is IB's own, and
+  deliberately — the 71 lines are the original's expression, not its mechanics,
+  so they may not be copied (see the licence note in the `bre-gather` skill).
+  One of them is where "galactic coordinator" appears in BRE: a joke event about
+  a galactic official killing population, NOT a name for the League Coordinator,
+  which is the office that owns a league's ruleset.
+
+  **Not built:** IB has no sysop-editable events file. A sysop who wants their
+  own events has nowhere to put them.
 
 The clone implements all of the above (`internal/game/turn.go`): the trigger and
 chance, the `People div 15` loss, the `tax div 3` support hit, the per-turn tax
