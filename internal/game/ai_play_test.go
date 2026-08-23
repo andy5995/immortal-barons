@@ -534,8 +534,9 @@ func TestAIBorrowsToCoverShortfall(t *testing.T) {
 		t.Errorf("the loan should have credited gold, got %d", bot.Gold)
 	}
 	// It borrows what the ceiling allowed, which may not cover the whole bill:
-	// LoanCeiling is 8 x net worth, and a region's net worth (12.5) is tiny beside
-	// its 913 upkeep, so a land-heavy realm cannot borrow its way out entirely.
+	// LoanCeiling is 10 x net worth discounted by the term's compound factor, and
+	// a region's net worth (12.5) is tiny beside its 913 upkeep, so a land-heavy
+	// realm cannot borrow its way out entirely.
 	// Partial cover still buys down the desertion/revolt penalty. (The ceiling
 	// reads 0 afterwards because the loan it just took is now outstanding.)
 	if got, want := bot.Loans[0].Principal, bot.Gold; got != want {

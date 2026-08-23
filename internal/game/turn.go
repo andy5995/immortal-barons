@@ -581,7 +581,7 @@ func (w *World) aiManageDebt(e *Empire) {
 	due := w.ForcesDue(e) + w.RegionsDue(e)
 	if short := due - e.Gold; short > 0 {
 		want := short * AILoanHeadroomPct / 100
-		if ceiling := w.LoanCeiling(e); want > ceiling {
+		if ceiling := w.LoanCeiling(e, AILoanDays); want > ceiling {
 			want = ceiling
 		}
 		if want > 0 {

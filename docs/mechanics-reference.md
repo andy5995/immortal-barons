@@ -130,8 +130,8 @@ Bombers and carriers are integer multiplies (3 and 1); the rest are Turbo Pascal
 (`056d:0EC6`) the Territory column uses. Three further details:
 
 - **There is no debt subtraction.** IB subtracted `Debt/100` until 2026-08-01 and
-  no longer does. This slightly raises the loan ceiling, which is a multiple of
-  net worth.
+  no longer does. This slightly raises the loan ceiling, which is built from net
+  worth (below the ten-million cap it stops counting at).
 - **Units away from home still count.** Each unit term adds a second count from a
   parallel array at record `+0x211` (troopers, jets, turrets, bombers, …, agents,
   tanks, carriers, 4 bytes apart) before applying the weight, so a realm with a
@@ -2625,10 +2625,33 @@ Investments / Loans**, and **View Bank Rates**.
   up to it and **owe the compounded total on the due date** ("You owe N gold in D
   Days."). Loan math is **live-BRE-verified**: daily rate = `8.0 + 0.2·days` %
   (`LoanBaseRateTenths`/`LoanRatePerDayTenths`; 2d→8.4, 5d→9.0, 10d→10.0),
-  compounded daily (1000@2d=1175, 616@5d=947, 500@10d=1296). The **ceiling
-  formula is IB-reconstructed** (`LoanCeilingMultiple` × net worth less
-  outstanding — BRE's exact formula is unverified, the gathered points were
-  confounded by growing debt). At the due date `matureLoans` deducts the amount
+  compounded daily (1000@2d=1175, 616@5d=947, 500@10d=1296).
+
+  **The ceiling is binary-verified** (`run_bank`, BRE.OVR 0x38648-0x38973; read
+  2026-08-23). It is a *discount*, not a multiple, which is why the earlier
+  sampling "would not fit" — nobody had varied the term:
+
+      base    = 10 x min(netWorth, 10,000,000)          { net_worth, 056d:0f43 }
+      base   -= each of the realm's ten outstanding loan slots
+      base    = min(base, 2,000,000,000 - outstanding)
+      ceiling = trunc( base / (1 + dailyRate)^days )
+
+  So the bank sizes what the realm will **owe at maturity** rather than what it
+  takes now, and a ten-day term offers well under half what a one-day term does.
+  Net worth stops counting at ten million, so the richest realm in the game
+  borrows against the same headroom as a merely rich one. IB implements all of
+  it, clamping against the sysop's money cap where BRE has a flat 2,000,000,000
+  — the same figure by default.
+
+  **One part still diverges.** BRE's daily rate is
+  `max(investRate, savingsRate) + 30` tenths, plus `2 x days`, reading two config
+  words through `max_i32`; IB has a constant `LoanBaseRateTenths = 80`, which is
+  that expression on a board sitting at 5.0%. A board whose sysop moved either
+  rate would see a different loan rate than IB gives. Not built yet: the two
+  games hold these rates in different units, so it needs care rather than a
+  constant swap.
+
+  At the due date `matureLoans` deducts the amount
   owed from gold then bank; an unpaid loan **defaults** — the shortfall rolls into
   open-ended **Debt** grown by `LoanDefaultPenaltyPct` (25%) and support drops.
   Defaulted **Debt** still grows `DebtGrowthPct`/turn and is repaid from the same

@@ -242,6 +242,20 @@ exceptional validation tool, not a prerequisite for following overlays.
    **declaration order** (which equals menu order). See the extraction cookbook.
 4. **`game/*.hlp`, `docs/`, `breins.txt`** — prose, help text, tutorial wording.
 
+**"IB's own" and "reconstructed" in our own notes are DATED, not decided.** Two
+very different things wear the same label: a deliberate divergence (IB
+comma-groups figures BRE prints bare) and a gap nobody could close at the time
+(the Clingy Annihilator's whole siege was marked "not read from the binary" and
+then read in twenty minutes once the static catalog existed). The tooling has
+improved faster than the notes were revisited, so a "reconstructed" marker older
+than the disassembly catalog is a TODO rather than a decision.
+
+So when a task touches a figure our own docs call reconstructed or unverified,
+**re-read it before building on it**, and when you write such a marker, say
+which kind it is and why — "IB chooses this because …" for a decision, "not read
+yet; <routine> is where it lives" for a gap. A marker that does not say which
+costs its next reader the whole investigation again.
+
 **Grep the shipped help and docs FIRST, before driving the emulator or
 disassembling.** They are last in *authority* but first in *cost*, and BRE
 documents far more of its own mechanics than "prose" suggests — with numbers.

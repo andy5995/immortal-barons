@@ -58,7 +58,7 @@ func cashRelief(s session.Session, w *ctx) Result {
 	}
 	fmt.Fprintf(s, "\n%s\n", hiNums(fmt.Sprintf(tr(s, "The loan rate will be %s%% per day, totalling %s%% interest overall."),
 		game.PctTenths(game.LoanRateTenths(days)), game.PctTenths(game.LoanOverallTenths(days)))))
-	ceiling := w.LoanCeiling(p)
+	ceiling := w.LoanCeiling(p, days)
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "We will provide up to %s gold."), comma(ceiling))))
 	amount := promptSuggested(s, "How many would you like to borrow?", 0, ceiling)
 	if amount <= 0 {

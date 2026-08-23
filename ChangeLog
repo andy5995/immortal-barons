@@ -20,6 +20,8 @@
   * The League Name setting is removed; a league is identified by its number
   * Game Setup pairs settings two to a line, so a league board's fits two pages
   * A trade deal's request side no longer quotes a ceiling for what it asks
+  * A loan's ceiling falls as its repayment term lengthens
+  * Net worth counts toward a loan ceiling only up to ten million
 
 2026-08-21 (v0.0.6)
   * Local covert effect operations resolve at daily maintenance

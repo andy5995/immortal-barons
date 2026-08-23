@@ -48,7 +48,7 @@ func TestTakeLoanAndDefault(t *testing.T) {
 	}
 
 	// Can't borrow past the ceiling.
-	if _, err := w.TakeLoan(e, w.LoanCeiling(e)+1, 2); err != ErrCantAfford {
+	if _, err := w.TakeLoan(e, w.LoanCeiling(e, 2)+1, 2); err != ErrCantAfford {
 		t.Errorf("over-ceiling loan: want ErrCantAfford, got %v", err)
 	}
 
@@ -66,5 +66,51 @@ func TestTakeLoanAndDefault(t *testing.T) {
 	}
 	if e.Support >= beforeSupport {
 		t.Errorf("support should drop on default: was %d, now %d", beforeSupport, e.Support)
+	}
+}
+
+// The ceiling is a DISCOUNT, not a multiple: BRE sizes what the realm will owe
+// at maturity, so a longer term offers less (run_bank, BRE.OVR 0x38648). And net
+// worth stops counting at 10,000,000, so the richest realm in the game borrows
+// against the same headroom as a merely rich one. Both were invisible to the
+// live sampling this replaced, which never varied the term.
+func TestLoanCeilingDiscountsByTermAndCapsNetWorth(t *testing.T) {
+	cfg := DefaultConfig()
+	w := NewWorldSeed(cfg, 1)
+	e := w.AddHuman("alice", "Alethia")
+
+	// Rich enough to sit above the net-worth cap several times over.
+	e.Troopers = 100_000_000
+	if nw := int64(w.NetWorth(e)); nw <= LoanCeilingNetWorthCap {
+		t.Fatalf("net worth %d does not exceed the cap; the test proves nothing", nw)
+	}
+
+	// Capped: 10 x 10,000,000, then discounted by the term's compound factor.
+	// Golden figures, not the constants — a retune must fail this and produce new
+	// evidence, which is the point of a fidelity contract.
+	for _, tc := range []struct{ days int }{{1}, {2}, {10}} {
+		want := int64(100_000_000 / loanFactor(tc.days))
+		if got := w.LoanCeiling(e, tc.days); got != want {
+			t.Errorf("%d-day ceiling %d, want %d", tc.days, got, want)
+		}
+	}
+	// A one-day term offers strictly more than a ten-day one.
+	if short, long := w.LoanCeiling(e, 1), w.LoanCeiling(e, 10); short <= long {
+		t.Errorf("1-day ceiling %d should beat the 10-day %d", short, long)
+	}
+	// 10 days at 10.0%/day compounds to about 2.59x, so the ceiling is well under
+	// half the uncapped headroom.
+	if got := w.LoanCeiling(e, 10); got > 40_000_000 {
+		t.Errorf("10-day ceiling %d, want well under 40,000,000", got)
+	}
+
+	// What is already owed comes off before the discount.
+	e.Debt = 60_000_000
+	if got, want := w.LoanCeiling(e, 1), int64(40_000_000/loanFactor(1)); got != want {
+		t.Errorf("ceiling with debt %d, want %d", got, want)
+	}
+	e.Debt = 200_000_000
+	if got := w.LoanCeiling(e, 1); got != 0 {
+		t.Errorf("a realm owing more than its headroom may borrow %d, want 0", got)
 	}
 }

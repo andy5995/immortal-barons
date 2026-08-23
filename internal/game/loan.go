@@ -55,11 +55,27 @@ func (e *Empire) LoansOwed() int64 {
 	return total
 }
 
-// LoanCeiling is the most gold e may borrow right now — BRE's "We will provide up
-// to N gold." IB reconstruction: a multiple of net worth, less everything already
-// owed (active loans + defaulted debt). BRE's exact formula is unverified.
-func (w *World) LoanCeiling(e *Empire) int64 {
-	return max(0, int64(w.NetWorth(e))*LoanCeilingMultiple-e.LoansOwed()-e.Debt)
+// LoanCeiling is the most gold e may borrow over a `days` term — BRE's "We will
+// provide up to N gold." The term is an argument because the bank sizes what you
+// will OWE at maturity, not what you take now: the headroom is divided by the
+// same compound factor the debt will grow by, so asking for ten days offers less
+// than asking for one. See balance.go for the binary provenance.
+func (w *World) LoanCeiling(e *Empire, days int) int64 {
+	nw := int64(w.NetWorth(e))
+	if nw > LoanCeilingNetWorthCap {
+		nw = LoanCeilingNetWorthCap
+	}
+	base := nw*LoanCeilingMultiple - e.LoansOwed() - e.Debt
+	// BRE clamps against a flat 2,000,000,000 less the realm's outstanding
+	// balance. IB clamps against the sysop's money cap instead, which is the same
+	// figure by default and stays right when they raise it.
+	if cap := w.MoneyCap(); base > cap {
+		base = cap
+	}
+	if base <= 0 {
+		return 0
+	}
+	return int64(float64(base) / loanFactor(days))
 }
 
 // TakeLoan borrows `amount` for `days` days (clamped to [LoanMinDays,
@@ -76,7 +92,7 @@ func (w *World) TakeLoan(e *Empire, amount int64, days int) (Loan, error) {
 	if amount <= 0 {
 		return Loan{}, nil
 	}
-	if amount > w.LoanCeiling(e) {
+	if amount > w.LoanCeiling(e, days) {
 		return Loan{}, ErrCantAfford
 	}
 	l := Loan{Principal: amount, Owed: LoanTotalOwed(amount, days), DueDay: w.GameDay + days}
