@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"io"
 	"sort"
 	"strconv"
 	"strings"
@@ -14,18 +15,25 @@ import (
 )
 
 // abdicate ends the player's empire (BRE.DOC: "delete your empire from the game
-// so you may start over the next day"). It is irreversible, so the player must
-// retype their realm name to confirm. The realm is marked dead (not removed) so
-// the same next-day rule as a battlefield death applies: the husk lingers until
-// a LATER day, and only then does a login rebuild a fresh realm. Daily
-// maintenance sweeps the husk once GameDay passes DiedDay.
+// so you may start over the next day").
+//
+// ONE yes/no confirmation, defaulting to No — BRE's `confirm_end_game` asks
+// "Are you POSITIVE you wish to erase your empire?" and takes the answer, with
+// "Glad you changed your mind!" on a refusal. IB made the player retype their
+// realm name instead, which is not the original's and was justified by the same
+// mistaken idea that realm names get typed anywhere: they do not, every picker
+// in the game selects by Id letter.
+//
+// The realm is marked dead (not removed) so the same next-day rule as a
+// battlefield death applies: the husk lingers until a LATER day, and only then
+// does a login rebuild a fresh realm. Daily maintenance sweeps the husk once
+// GameDay passes DiedDay.
 func abdicate(s session.Session, w *ctx) Result {
 	p := w.Player()
 	fmt.Fprintf(s, "\n%s"+tr(s, "Abdicating deletes %s permanently. This cannot be undone.")+"%s\n",
 		ansi.FgBrightRed, p.Name, ansi.Reset)
-	typed := prompt(s, fmt.Sprintf(tr(s, "Type your realm name (%s) to confirm, or anything else to cancel"), p.Name))
-	if strings.TrimSpace(typed) != p.Name {
-		fmt.Fprintf(s, "\n%s\n", tr(s, "Abdication cancelled."))
+	if !AskYesNo(s, "Are you POSITIVE you wish to erase your empire?", false) {
+		okNoPause(s, "Glad you changed your mind!")
 		pause(s)
 		return Stay
 	}
@@ -39,8 +47,16 @@ func abdicate(s session.Session, w *ctx) Result {
 			p.DiedDay = w.GameDay
 		}
 	})
+	// The session ENDS here, as the original's does — it signs off and hangs up
+	// rather than returning the player to a menu their realm no longer belongs
+	// to. session.End unwinds to GameLoop even from a nested Run, the same route
+	// endCollapsed takes for an elimination.
+	//
+	// The wording is IB's own: the original's two sign-off lines are its display
+	// text, which this project reconstructs rather than copies.
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgYellow, tr(s, "Your empire is no more. Return on a later day to build a new realm."), ansi.Reset)
 	pause(s)
+	session.End(io.EOF)
 	return Quit
 }
 

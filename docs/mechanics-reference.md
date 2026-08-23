@@ -2999,6 +2999,18 @@ day**: on a later day's login they are prompted to name a new realm (it need not
 be the old name) and start fresh under the same handle. Voluntary abdication
 works the same way.
 
+**Abdication asks ONE question** (`confirm_end_game`, called from the System
+menu): "Are you POSITIVE you wish to erase your empire?" — yes signs off and
+**ends the session**, no answers "Glad you changed your mind!" IB matches both,
+ending through `session.End` the way an elimination does, though its sign-off is
+IB's own wording rather than the original's two lines. IB adopted the shape in
+2026-08-23; it had asked the player
+to retype their realm name, which is not the original's and rested on the
+mistaken idea that realm names are typed somewhere. They are not — every picker
+in the game (attack target, message recipient, diplomacy) selects by Id letter,
+which is also why the realm-name rule is about a name being READ rather than
+typed.
+
 **BRE deletes the record, and it does it at daily maintenance — never in the
 attack.** Read from a disassembly of the original: the attack resolver
 (`BRE.OVR 0xef90`) that crushes a realm only moves its land and surviving

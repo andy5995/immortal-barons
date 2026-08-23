@@ -2,6 +2,7 @@
   * A realm name needs three letters or digits; decoration does not count
   * A realm name may be at most 30 characters, the original's own limit
   * A refused realm name says which rule it missed
+  * Abdicating asks one yes/no question, then ends the session
   * Inbound packets are matched whatever the case of their .brp extension
   * A roster node number must be 1 to 999
   * -league-check names a roster entry it had to skip
