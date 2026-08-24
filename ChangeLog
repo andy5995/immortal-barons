@@ -6,6 +6,9 @@
   * Inbound packets are matched whatever the case of their .brp extension
   * A roster node number must be 1 to 999
   * -league-check names a roster entry it had to skip
+  * -league-check reports a league key that is present but unreadable
+  * A refused Coordinator packet says which check it failed
+  * Planetary Bulletin lines are wrapped to the screen
   * The 32-bit Windows build runs on Windows 7, 8, and Server 2008 R2 through
     2012 R2
   * Game Bulletins reads .txt and .ans files from a bull folder in the data dir

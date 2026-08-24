@@ -899,7 +899,14 @@ Watch the packet as it goes: it appears in the filebox, then in the other
 board's inbound, then disappears as the game reads it. The member board's news
 should then say **"The League Coordinator updated the league settings."** If it
 says a packet "claimed to carry League Coordinator orders and was refused"
-instead, the key in step 7 did not take.
+instead, the rest of that line names the check that failed — six different
+situations refuse a packet, and three of them are on the sending board rather
+than this one. Run `-league-check` on both boards before changing anything.
+
+One fault it cannot see: a key that is well-formed but simply the wrong one.
+If both boards pass the check and orders are still refused, compare the two
+`coord.pub` files character for character. A public key is safe to send in the
+clear.
 
 ### Step 9 — put it on a schedule
 
