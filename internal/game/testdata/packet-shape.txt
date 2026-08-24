@@ -1,0 +1,204 @@
+Packet:
+  FromBoard
+  ToBoard
+  Date
+  Scores
+  Attacks
+  Terrors
+  SpecialOps `json:",omitempty"`
+  Results
+  LeagueConfig
+  LeagueNodes
+  Recon
+  ReconReports
+  Annihilator
+  TimeChecks
+  IPMessages
+  SpyGuys `json:",omitempty"`
+  News `json:",omitempty"`
+  TradeBids `json:",omitempty"`
+  TradeFills `json:",omitempty"`
+  Market `json:",omitempty"`
+  Notice `json:",omitempty"`
+  Version `json:",omitempty"`
+  Seq
+  Signature
+  BoardSig
+  Bulletins `json:",omitempty"`
+  Reset
+  League
+  Hops
+  Protocol `json:",omitempty"`
+  FromNode
+  ToNode
+RemoteScore:
+  Empire
+  NetWorth
+  Land
+  Score
+  Protected `json:",omitempty"`
+  OwnerHash `json:",omitempty"`
+RemoteAttack:
+  ID
+  FromBoard
+  TargetEmpire
+  Offense
+  Contributors
+  Kind
+  Group
+  FromEmpire `json:",omitempty"`
+Contribution:
+  Owner
+  AttackForce
+AttackForce:
+  Troopers
+  Jets
+  Tanks
+  Bombers
+RemoteTerror:
+  ID
+  FromBoard
+  TargetEmpire
+  Agents
+  Op `json:",omitempty"`
+  Strength `json:",omitempty"`
+RemoteSpecialOp:
+  ID
+  FromBoard
+  FromEmpire
+  TargetEmpire
+  Op
+AttackResult:
+  ID
+  TargetBoard
+  TargetEmpire
+  LandTaken
+  Won
+  Survivors
+  Kind
+  Outcome `json:",omitempty"`
+  Enemy `json:",omitempty"`
+  Report `json:",omitempty"`
+  Score `json:",omitempty"`
+  Backfired `json:",omitempty"`
+UnitLoss:
+  Troopers
+  Jets
+  Turrets
+  Tanks
+  Bombers
+LeagueConfig:
+  GameStartDate
+  JoinDate
+  TurnsPerDay
+  ProtectionTurns
+  GameLength
+  IdleDaysRemove
+  InitialMarketLand
+  LandPerDay
+  MoneyCapBillions
+  InterestRate
+  StdInvestRate
+  SteadyInvest
+  FoodUnlimited
+  MaxTaxRate
+  PlanetaryTaxRate
+  MaxRegions
+  MaxIndividualAttacks
+  MaxGroupAttacks
+  MaxTerrorOps
+  MaxBombingOps
+  LostForcesDays
+  BombingOps
+  MissileOps
+  ClingyAnnihilator
+  LocalAttacks
+  LocalAttackScoring
+  DupeChecking
+  MinBoardVersion
+  IPTrading
+  Pirates
+  MaxPlayers
+  BuyMilitary
+  MaintCosts
+  TradeCosts
+  RegionCosts
+  AttackCosts
+  TerrorCosts
+  AttackDamage
+  AttackRewards
+  SlappenheimerHandling
+LeagueNode:
+  Number
+  Name
+  Address
+  City
+  State
+  Country
+  PublicKey
+  Hosts
+ReconRequest:
+  ID
+  FromBoard
+  FromOwner
+  TargetEmpire
+SpyReport:
+  Board
+  Empire
+  Date
+  Land
+  Offense
+  Defense
+  Gold
+AnnihilatorStatus:
+  FromBoard
+  Funded
+  Launched
+  ArrivesDay
+  Intact
+  Dismantled
+TimeCheck:
+  From
+  To
+  Sent
+IPMessage:
+  FromBoard
+  FromEmpire
+  ToCoordinator
+  ToEmpire
+  When
+  Body
+SpyGuyDispatch:
+  FromBoard
+  Days
+IPTradeBid:
+  ID
+  FromBoard
+  FromOwner
+  FromEmpire
+  Seller
+  Good
+  Qty
+  Price
+IPTradeFill:
+  ID
+  Filled
+  Good
+  Qty
+  Gold
+  Reason `json:",omitempty"`
+RemoteListing:
+  Realm
+  Good
+  Qty
+  Price
+BulletinSet:
+  Files
+BulletinFile:
+  Name
+  Title
+  Data
+LeagueReset:
+  Season
+  OnDate
+  Announced

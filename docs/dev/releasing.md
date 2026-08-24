@@ -95,11 +95,32 @@ Watch it: a release with no assets is a release nobody can use.
    version stamped on every inter-BBS packet, where a Coordinator's minimum
    version is tested against it.
 
-9. **Delete any renamed or removed asset** left behind on the snapshot
+9. **Decide whether `game.Protocol` needs bumping**, and settle it now rather
+   than when the next format change is half-written.
+
+   Bump it only when the packet format actually moved. It is deliberately not
+   the release version: a release that changes menus or balance leaves it alone,
+   so boards on either side of that release go on exchanging packets. Bumping it
+   every release turns it back into the version and forces the whole league to
+   upgrade in lockstep for changes that never touched the wire.
+
+   `TestPacketWireShapeIsFrozen` is what makes this a decision instead of an
+   oversight — it fails the build when a field is added, renamed or reordered,
+   and its comment says which of the three answers applies.
+
+   **For v0.0.8 specifically:** remove the `p == 0` case from
+   `game.SpeaksOurProtocol`. It exists so v0.0.7 accepts packets written before
+   the protocol field existed, which is what let the mechanism ship without
+   stranding a live league. Once every board is on v0.0.7 or later it is a
+   permanent hole, since a build old enough to omit the field is exactly what
+   this holds. It has to land on a release boundary: the day it ships, packets
+   from anything older start being held.
+
+10. **Delete any renamed or removed asset** left behind on the snapshot
    prerelease by hand. `replacesArtifacts` only replaces an asset of the same
    name, so a rename leaves the old file sitting beside the new one.
 
-10. **Bump the Homebrew formula** in `HomebrewFormula/immortal-barons.rb` — the
+11. **Bump the Homebrew formula** in `HomebrewFormula/immortal-barons.rb` — the
    `url`, the `sha256`, and the doc list:
 
    ```

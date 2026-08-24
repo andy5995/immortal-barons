@@ -27,6 +27,13 @@ const Version = "0.0.7"
 // exactly this format, so it counts as protocol 1 rather than as a mismatch.
 // That is what makes introducing this a soft change instead of a cutover that
 // strands every board in the league on the release meant to fix them.
+//
+// REMOVE THAT CONCESSION BEFORE v0.0.8. Once every board in a league is on
+// v0.0.7 or later, accepting an absent protocol is a permanent hole: a build
+// old enough to predate the field is exactly the kind this mechanism exists to
+// hold, and it walks straight through. Deleting the `p == 0` case is the whole
+// change, and it must be a release boundary because it starts holding packets
+// from anything older on the day it ships.
 const Protocol = 1
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can
