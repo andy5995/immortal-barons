@@ -146,6 +146,25 @@ verify on a board older than v0.0.5. That is the honest cost of the feature, and
 it degrades sensibly — the old board rejects the packet rather than
 misinterpreting it, and its barons simply never see the Trading menu.
 
+### The Coordinator payload: accepted shapes
+
+The Coordinator's `Signature` covers a payload of its own, not the whole packet:
+`FromBoard`, `Seq`, `LeagueConfig`, `LeagueNodes`, `Reset`, `Bulletins`, in that
+order. `omitempty` cannot do for it what it does for the packet — the payload is
+assembled from named fields, so adding one changes the bytes of every packet, and
+a field left nil marshals as `null` rather than vanishing. Adding `Bulletins` did
+exactly that: a Coordinator on the older build signed five fields while every
+board built since verified six, and each refused the other's league orders
+silently.
+
+A receiver therefore verifies against every payload shape a released build signed,
+newest first — today the six fields above, then the five without `Bulletins`. A
+shorter shape is accepted only when the packet leaves every field beyond it empty:
+a signature taken before `Bulletins` existed cannot have covered a bulletin set,
+so accepting one for a packet that carries bulletins would apply content nothing
+signed. Adding a field to the payload means appending its old length to
+`payloadShapes` in `internal/game/ibbs_auth.go`.
+
 ### The Coordinator's version requirement
 
 `LeagueConfig.MinBoardVersion` lets the Coordinator require a game version of

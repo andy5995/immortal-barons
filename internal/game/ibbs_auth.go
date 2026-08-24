@@ -1,6 +1,7 @@
 package game
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"crypto/sha256"
 	"encoding/binary"
@@ -35,31 +36,99 @@ var (
 	ErrBadSignature   = errors.New("packet signature does not verify")
 )
 
-// signedPayload is the part of a packet that the Coordinator's signature covers:
-// the fields that dictate to other boards. Scores and strikes are self-reported
-// and deliberately left out — signing them would imply a guarantee nothing can
-// give.
-type signedPayload struct {
-	FromBoard    string
-	Seq          uint64
-	LeagueConfig *LeagueConfig
-	LeagueNodes  []LeagueNode
-	Reset        *LeagueReset
-	Bulletins    *BulletinSet
+// signedField is one field of the Coordinator payload: the JSON name it is
+// written under, its value, and whether this packet actually uses it. The list
+// is APPEND-ONLY and its order is the signed byte order — reordering, renaming
+// or removing an entry invalidates every signature every board in the league
+// has already been taught to accept.
+type signedField struct {
+	name  string
+	value any
+	inUse bool
 }
 
-// signingBytes renders the signed part of p in a stable form. encoding/json
-// writes struct fields in declaration order, so the same packet always produces
-// the same bytes.
-func signingBytes(p Packet) ([]byte, error) {
-	return json.Marshal(signedPayload{
-		FromBoard:    p.FromBoard,
-		Seq:          p.Seq,
-		LeagueConfig: p.LeagueConfig,
-		LeagueNodes:  p.LeagueNodes,
-		Reset:        p.Reset,
-		Bulletins:    p.Bulletins,
-	})
+// signedFields is the part of a packet the Coordinator's signature covers: the
+// fields that dictate to other boards. Scores and strikes are self-reported and
+// deliberately left out — signing them would imply a guarantee nothing can give.
+func signedFields(p Packet) []signedField {
+	return []signedField{
+		{"FromBoard", p.FromBoard, p.FromBoard != ""},
+		{"Seq", p.Seq, p.Seq != 0},
+		{"LeagueConfig", p.LeagueConfig, p.LeagueConfig != nil},
+		{"LeagueNodes", p.LeagueNodes, len(p.LeagueNodes) > 0},
+		{"Reset", p.Reset, p.Reset != nil},
+		{"Bulletins", p.Bulletins, p.Bulletins != nil},
+	}
+}
+
+// Payload shapes, and why more than one is accepted.
+//
+// The signature is taken over the marshalled payload, so ADDING a field changes
+// the bytes of every packet — including ones that leave the new field empty,
+// which marshal it as null. A Coordinator running the older build then signs a
+// five-field payload while every newer board verifies a six-field one, and each
+// board silently refuses every league order the other sends. That is exactly
+// what happened when Bulletins was added (1da5698): a real six-board league sat
+// broken for weeks, looking for all the world like a wrong key.
+//
+// So verification accepts a signature taken over any shape a released build
+// signed, newest first. Adding a field to signedFields means appending its old
+// length here — one line — and boards on either side of the change go on
+// verifying each other. Signing always uses the newest shape.
+const (
+	// shapeCurrent is the whole of signedFields.
+	shapeCurrent = 6
+	// shapePreBulletins is what builds before 1da5698 signed: the same fields
+	// without Bulletins.
+	shapePreBulletins = 5
+)
+
+var payloadShapes = []int{shapeCurrent, shapePreBulletins}
+
+// shapeCovers reports whether a signature of the given shape could legitimately
+// have covered p. This is the whole security argument for the fallback: an older
+// shape stops short of the newer fields, so accepting one for a packet that USES
+// a newer field would apply content no signature ever covered — a bulletin set
+// anyone could have appended to a validly signed roster packet. A shorter shape
+// is therefore accepted only for a packet that leaves every field beyond it
+// empty, where the two renderings differ in nothing but the null.
+func shapeCovers(p Packet, shape int) bool {
+	fields := signedFields(p)
+	if shape > len(fields) {
+		return false
+	}
+	for _, f := range fields[shape:] {
+		if f.inUse {
+			return false
+		}
+	}
+	return true
+}
+
+// signingBytes renders the first shape fields of the signed payload. It builds
+// the object by hand so the shape is data rather than a struct per version; the
+// bytes are what encoding/json writes for a struct of those fields in that
+// order, which is what the deployed signatures were taken over.
+func signingBytes(p Packet, shape int) ([]byte, error) {
+	fields := signedFields(p)
+	if shape > len(fields) {
+		return nil, fmt.Errorf("unknown payload shape %d", shape)
+	}
+	var b bytes.Buffer
+	b.WriteByte('{')
+	for i, f := range fields[:shape] {
+		if i > 0 {
+			b.WriteByte(',')
+		}
+		fmt.Fprintf(&b, "%q:", f.name)
+		v, err := json.Marshal(f.value)
+		if err != nil {
+			return nil, err
+		}
+		b.Write(v)
+	}
+	b.WriteByte('}')
+	return b.Bytes(), nil
 }
 
 // carriesCoordinatorOrders reports whether a packet contains anything only the
@@ -77,7 +146,7 @@ func (w *World) SignAsCoordinator(p *Packet) error {
 	if len(w.CoordKey) != ed25519.PrivateKeySize {
 		return ErrNoCoordKey
 	}
-	msg, err := signingBytes(*p)
+	msg, err := signingBytes(*p, payloadShapes[0])
 	if err != nil {
 		return err
 	}
@@ -96,11 +165,19 @@ func (w *World) VerifyCoordinatorOrders(p Packet) bool {
 	if len(w.CoordPub) != ed25519.PublicKeySize || len(p.Signature) == 0 {
 		return false
 	}
-	msg, err := signingBytes(p)
-	if err != nil {
-		return false
+	for _, shape := range payloadShapes {
+		if !shapeCovers(p, shape) {
+			continue
+		}
+		msg, err := signingBytes(p, shape)
+		if err != nil {
+			return false
+		}
+		if ed25519.Verify(ed25519.PublicKey(w.CoordPub), msg, p.Signature) {
+			return true
+		}
 	}
-	return ed25519.Verify(ed25519.PublicKey(w.CoordPub), msg, p.Signature)
+	return false
 }
 
 // CoordRefusalReason says WHY an order-bearing packet was turned away, in the

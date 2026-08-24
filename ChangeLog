@@ -1,4 +1,5 @@
 (in-progress:)
+  * Coordinator orders verify against older signed-payload shapes as well
   * A realm name needs three letters or digits; decoration does not count
   * A realm name may be at most 30 characters, the original's own limit
   * A refused realm name says which rule it missed
