@@ -87,7 +87,7 @@ func TestTheLoserPaysTheRetreatShare(t *testing.T) {
 		{"five to one", 50000, 10000},
 		{"overwhelming", 5_000_000, 10000},
 	} {
-		won, aLost, dLost := w.battleAttrition(ratio.ap, ratio.dp, 20)
+		won, aLost, dLost := w.battleAttrition(float64(ratio.ap), float64(ratio.dp), 20)
 		if !won {
 			t.Errorf("%s: the stronger side should win", ratio.name)
 		}
@@ -110,7 +110,7 @@ func TestALopsidedWinIsCheaperThanAnEvenOne(t *testing.T) {
 		total := 0.0
 		for seed := int64(1); seed <= 20; seed++ {
 			w := NewWorldSeed(DefaultConfig(), seed)
-			_, aLost, _ := w.battleAttrition(ap, dp, 20)
+			_, aLost, _ := w.battleAttrition(float64(ap), float64(dp), 20)
 			total += aLost
 		}
 		return total / 20
@@ -287,15 +287,22 @@ func TestAttackUsesOnlyCommittedForce(t *testing.T) {
 		t.Errorf("full offense = %d, want 200", got)
 	}
 
-	// Commit only 50. No side loses more than the retreat share of what it
-	// committed — 20% at the default Attack Damage — so at most 10 of the 50 go,
-	// and the 150 held back are safe.
+	// Commit only 50. Losses come out of the commitment and nothing else, so the
+	// 150 held back are safe whatever the battle costs.
+	//
+	// The retreat share is NOT a cap. It is where the loop stops, and the losing
+	// side always overshoots it by its last round — so a little over 20% of the
+	// 50 is correct and exactly 20% would be the bug this suite exists to catch.
 	w.Attack(a, d, AttackForce{Troopers: 50}, true)
-	if a.Troopers < 200-50*20/100 {
-		t.Errorf("held-back troopers were hit: 200 -> %d", a.Troopers)
+	lost := 200 - a.Troopers
+	if lost > 50 {
+		t.Errorf("lost %d from a 50-trooper commitment; the held-back 150 were hit", lost)
 	}
 	if a.Troopers < 150 {
 		t.Errorf("the 150 held-back troopers should be safe, got %d", a.Troopers)
+	}
+	if lost < 50*20/100 {
+		t.Errorf("committed losses = %d, below the 20%% retreat share the loser must reach", lost)
 	}
 }
 
@@ -410,5 +417,47 @@ func TestRepelledAttackLeavesHQAlone(t *testing.T) {
 	}
 	if repelled == 0 {
 		t.Fatal("no attack was repelled; the test never reached the branch it covers")
+	}
+}
+
+// TestCapturedJetsVersusTurrets reproduces a live BRE v0.988 game, captured
+// 2026-08-24: a realm with 3 jets and nothing else attacked one holding 112
+// turrets, 15 regions and no other units, at full morale and Attack Damage
+// Medium. The original printed:
+//
+//	You lost 0 Troopers, 0 Jets, 0 Tanks, and 0 Bombers.
+//	You destroyed 0 Troopers, 2 Turrets, 0 Tanks, and 0 Jets.
+//	You lost the battle!
+//
+// Both figures are golden literals and each pins something different. Zero jets
+// lost only comes out if the strengths stay fractional — a truncated 6.6 costs a
+// jet. Two turrets only comes out if the defence carries NO per-region bonus:
+// with one the figure is odd for every possible number of rounds.
+//
+// It also settles what turrets do. 112 of them shot down none of 3 jets, so they
+// are not the "counterpart to jets" the strategy guides call them; the defence is
+// one undifferentiated pool and nothing on the ground singles out an aircraft.
+func TestCapturedJetsVersusTurrets(t *testing.T) {
+	const (
+		jets    = 3
+		turrets = 112
+	)
+	ap := float64(jets) * 2 * float64(moraleFactor(100)) / 100    // jet offence 2
+	dp := float64(turrets) * 2 * float64(moraleFactor(100)) / 100 // turret defence 2
+	if ap != 6.6 || dp != 246.4 {
+		t.Fatalf("strengths are %v and %v, want 6.6 and 246.4 — the capture's inputs moved", ap, dp)
+	}
+	// One exchange is all this battle can last: the attacker is under its own
+	// retreat threshold the first time it is hit.
+	a := ap*BattleRoundSurvival - BattleRoundFlatLoss
+	if a > ap*0.80 {
+		t.Fatalf("attacker survived its first hit (%v > %v); the capture ended in one exchange", a, ap*0.80)
+	}
+	if got := shareOf(jets, lossFraction(ap, a)); got != 0 {
+		t.Errorf("jets lost = %d, want 0 (the original reported none)", got)
+	}
+	d := dp*BattleRoundSurvival - BattleRoundFlatLoss
+	if got := shareOf(turrets, lossFraction(dp, d)); got != 2 {
+		t.Errorf("turrets destroyed = %d, want 2 (the original reported two)", got)
 	}
 }

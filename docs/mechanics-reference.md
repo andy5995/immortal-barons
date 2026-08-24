@@ -3193,6 +3193,26 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   2026-08-24, so the knob moved local attacks and nothing else.
   `Level.InterplanetaryCapturePct`.
 
+  **The flat per-round loss is in the ORIGINAL's units, and IB's are double.**
+  Each hit is `strength x 0.99 - 1`, and that `- 1` is an absolute subtraction in
+  a scale where a trooper is 0.5, a jet 1, a turret 1 and a tank 2. IB values
+  everything at twice that, so the same term is **2** here. The survival factor
+  is a ratio and cancels under rescaling; a flat subtraction does not, and the
+  error is invisible in a large battle while deciding a small one.
+
+  Verified against a live v0.988 game captured 2026-08-24: 3 jets at full morale
+  against 112 turrets, 15 regions, no other units, Attack Damage Medium. The
+  original reported **0 jets lost and 2 turrets destroyed**. Both figures fall
+  out exactly, and each pins a separate thing — zero jets only if the strengths
+  stay fractional rather than being truncated to integers first, and two turrets
+  only with the flat term at the right scale and **no per-region defence bonus**
+  (IB carried one of 2 per region; with it the figure is odd for every possible
+  round count). `TestCapturedJetsVersusTurrets`.
+
+  That capture also disposes of the guide's claim that turrets are the
+  "counterpart to jets" which shoot them down: 112 turrets destroyed none of 3
+  jets, and the defence is one undifferentiated pool.
+
   **The shield reaches the air battle, not the offence.** The resolver calls the
   SDI-strength routine (`0x56d:0x1139`) at `+0x10aa` and hands the resulting
   percentage as the second argument to BOTH the offence builder and the

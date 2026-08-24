@@ -38,9 +38,15 @@ const (
 	CaptureDensityMin  = 50  // percent (0.5x): densest targets
 	CaptureDensityMax  = 200 // percent (2.0x): softest targets
 
-	// LandDefenseBonus is the defensive strength each region adds on top of the
-	// defender's units (terrain the attacker must take). Used in the battle math
-	// and by the AI when judging whether a target is winnable (#36).
+	// LandDefenseBonus is how much a region adds when the AI sizes up a rival --
+	// cheap, lightly-held land looks softer. IB's own, and a playtest knob.
+	//
+	// It is deliberately NOT in the battle math any more. It was until
+	// 2026-08-24, and two independent lines say the original has no per-region
+	// defence: its defence builder sums troopers, turrets and tanks and never
+	// reads a region count, and a live capture discriminates -- 112 turrets
+	// losing exactly 2 to a 3-jet attack matches a land-free defence, where any
+	// per-region bonus makes that figure odd for every possible round count.
 	LandDefenseBonus = 2
 )
 
@@ -187,8 +193,8 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	// There is no jitter on the inputs: the variance lives inside the battle,
 	// where BRE puts it, and rolling the strengths beforehand as well would
 	// double-count it.
-	ap := f.groundOffense(a) * moraleFactor(a.Morale) / 100
-	dp := d.Defense()*moraleFactor(d.Morale)/100 + d.Land*LandDefenseBonus + w.allyDefenseBoost(d)
+	ap := float64(f.groundOffense(a)) * float64(moraleFactor(a.Morale)) / 100
+	dp := float64(d.Defense())*float64(moraleFactor(d.Morale))/100 + float64(w.allyDefenseBoost(d))
 
 	// Fight it out. Both sides grind each other down until one has lost the share
 	// of its force it is willing to lose, so the loser always pays the full
@@ -337,9 +343,13 @@ func absorbMilitary(a, d *Empire) {
 // weaker army still lands blows. Termination is not in doubt: the two hit
 // probabilities sum to 1, so at least one side is hit with probability 0.77 or
 // better every round, and about 30 hits carry a side to the deepest threshold.
-func (w *World) battleAttrition(ap, dp, retreatPct int) (attackerWins bool, aLost, dLost float64) {
+// The strengths arrive as float64 because the original keeps them in Real48 the
+// whole way. Truncating them to integers first is not a rounding detail: a live
+// capture had 3 jets at full morale attack 112 turrets, and BRE reported ZERO
+// jets lost where a truncated 6.6 -> 6 loses one (see TestCapturedJetsVersusTurrets).
+func (w *World) battleAttrition(ap, dp float64, retreatPct int) (attackerWins bool, aLost, dLost float64) {
 	survive := float64(100-retreatPct) / 100
-	a0, d0 := float64(ap), float64(dp)
+	a0, d0 := ap, dp
 	a, d := a0, d0
 	aFloor, dFloor := a0*survive, d0*survive
 	for a > aFloor && d > dFloor {

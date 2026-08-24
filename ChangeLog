@@ -4,6 +4,8 @@
   * Bombers add no strength to an interplanetary strike; they fight the jets
   * An arriving strike is defended with its own tank and morale values
   * The Attack Rewards setting now reaches interplanetary strikes
+  * Battle strengths keep their fractions instead of truncating to whole units
+  * A region no longer adds defensive strength in battle
   * Tank strength no longer overflows on the 32-bit door builds
   * A packet stating no protocol number is held rather than applied; only
     builds from before the v0.0.7 release omit it

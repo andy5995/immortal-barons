@@ -1489,8 +1489,18 @@ const (
 // evenly matched one pays nearly the full retreat share.
 const (
 	BattleRoundSurvival = 0.99 // binary: Real48 0.99, both sides
-	BattleRoundFlatLoss = 1    // binary: the "- 1" after the multiply
-	BattleUpsetPct      = 5    // binary: Real48 0.05, the consolation roll
+	// The binary subtracts a flat 1 after the multiply — but in ITS units, where
+	// a trooper is worth 0.5 and a turret 1. IB values everything at twice that,
+	// so the same flat term is 2 here.
+	//
+	// This is NOT a scaling detail that cancels. The survival factor is a ratio
+	// and does cancel; a flat subtraction does not, and halving the scale doubles
+	// how much of a side each hit removes. Getting it wrong is invisible in a
+	// large battle and decides a small one: a captured 3-jets-against-112-turrets
+	// fight cost the defender 2 turrets, which a flat 1 at IB's scale renders as
+	// 1 (TestCapturedJetsVersusTurrets).
+	BattleRoundFlatLoss = 2
+	BattleUpsetPct      = 5 // binary: Real48 0.05, the consolation roll
 )
 
 // The interplanetary battle runs the same attrition, with two differences read
