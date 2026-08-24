@@ -487,9 +487,10 @@ The keywords are there because a file read by position gives no warning when a
 line is missing: every value below the gap moves up one and is read as the wrong
 setting.
 
-## When packets do not arrive
+## Troubleshooting
 
-Look in two places, in this order: the game's own log, then your mailer's.
+When packets stop arriving, look in two places, in this order: the game's own
+log, then your mailer's.
 
 ### The game's log
 
