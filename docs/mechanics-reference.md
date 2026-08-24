@@ -11,13 +11,45 @@ settings from a real league, so they are defaults, not fixed rules.
 
 ## Military units
 
+**What a turret actually does (exhaustive, 2026-08-24).** Every reference to the
+turret field in the overlay was enumerated — 46 sites, all of them mapped — by
+scanning both addressing idioms (a realm's own record at `+0x82`, another
+realm's at `-0xeeb`). The result:
+
+| What | Where | Turrets are... |
+| --- | --- | --- |
+| A neighbour's regular attack | `resolve_regular_attack` | **defence** — one term in the pool |
+| An arriving interplanetary invasion | `resolve_received_invasion` | **defence** — one term in the pool |
+| Civil unrest | `resolve_civil_unrest` | destroyed (read, then written back) |
+| An S3-Sabre missile | `resolve_received_sabre_strike` | destroyed (read, then written back) |
+| A covert operation | `resolve_received_covert_operation` | read |
+| Total defeat | `resolve_regular_attack__transfer_defeated_military` | handed to the winner |
+| Food, maintenance, status, advisor, budget, trading | six routines | bookkeeping and display |
+
+So a turret defends against **an attack, as a whole** — never against a
+particular attacking unit. In both resolvers it is one addend in
+`troopers + turrets + tanks x <factor>`, and nothing in either reads what the
+attacker brought in order to decide what a turret does.
+
+Two consequences, both contradicting the guide-sourced table below:
+
+- **Turrets do not shoot down jets.** No defence term reads the attacker's jets,
+  and a live capture settles it from the other side: 112 turrets destroyed none
+  of 3 attacking jets.
+- **Turrets do not intercept nuclear, chemical or biological missiles.** No WMD
+  routine appears in the 46 sites at all. This matches the existing finding that
+  no WMD routine reads tanks, turrets or SDI either.
+
+One limit worth stating: the scan sees the two displacement idioms, not the
+`add di,<n>` then bare `[es:di]` form, which no scan of this shape can rule out.
+
 ### Combat values (exact, from the Wennagel guide)
 
 | Unit | Offense | Defense | Notes |
 |------|---------|---------|-------|
 | Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy R5-Slappenheimer likelier to backfire. |
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). An enemy SDI cuts jet strength, but only on an interplanetary strike — see "SDI Defense". |
-| Turret | **0** | 2 | Defense only. Also helps intercept nuclear missiles. Cannot be destroyed by terrorist ops. (**The guide calls it the counterpart to jets that "shoots down attacking jets". The binary does not: neither resolver puts jets on the DEFENDING side at all, and no defence term reads the attacker's jets. What turrets actually counter is bombers — see the Bomber row.**) |
+| Turret | **0** | 2 | Defense only. Cannot be destroyed by terrorist ops. **What it defends against is exactly two things — see "What a turret actually does" below.** |
 | Tank | **3–5** | **3–5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (3 at 0%, 4 at 50%, 5 at 100%) and with morale. The guide's flat "4" is the HQ-50 value — see HeadQuarters below. (`whatsnew.doc` claims tanks help defend against chemical missiles; the shipped v0.988 routine never reads the tank count — see the chemical attack below.) |
 | Bomber | 0 | 0 | Carries bombs / special-ops; destroys enemy *grounded* jets when sent in an attack. |
 | Carrier | 0 | 0 | Support: moves jets to battle and goods for trade. |

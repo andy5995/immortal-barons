@@ -10,6 +10,15 @@ import (
 // defender shoots down one bomber per TurretsPerBomberDown turrets. The
 // defender's SDI does NOT come into it — the original reads the shield only
 // against an attack arriving from another planet, never against a neighbour.
+//
+// BOTH numbers below are IB's own. An exhaustive sweep of every turret
+// reference in the overlay (46 sites, 2026-08-24, docs/mechanics-reference.md
+// "What a turret actually does") found turrets in exactly two combat roles, a
+// neighbour's attack and an arriving invasion, and in both they are one addend
+// in an undifferentiated defence pool. No routine has them shooting anything
+// down. The sweep cannot see an `add di,<n>` then bare `[es:di]` access, so this
+// is strong evidence rather than proof — but it is the only support these two
+// constants have, and neither should be treated as fidelity.
 const (
 	BomberJetKills       = 3
 	TurretsPerBomberDown = 25
