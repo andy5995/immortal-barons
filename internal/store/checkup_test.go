@@ -1,6 +1,7 @@
 package store
 
 import (
+	"crypto/ed25519"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -175,5 +176,68 @@ func TestDirUsableRejectsAnUnwritableDirectory(t *testing.T) {
 	}
 	if !dirUsable(dir, false) {
 		t.Error("a readable directory was reported unreadable")
+	}
+}
+
+// checkNamed returns one check by name, so a test can assert on it without
+// depending on where it sits in the report.
+func checkNamed(t *testing.T, cfg game.Config, name string) Check {
+	t.Helper()
+	for _, c := range Checkup(cfg) {
+		if c.Name == name {
+			return c
+		}
+	}
+	t.Fatalf("no %q check in the report", name)
+	return Check{}
+}
+
+// A key file that is present but does not decode is the same to the game as no
+// key at all — loadLeagueKeys reads it as nil and every league order is refused.
+// Reporting "ok" for it answers the sysop's actual question wrongly and sends
+// them hunting elsewhere, which is what happened on a live league.
+func TestCheckupRejectsAKeyFileThatDoesNotDecode(t *testing.T) {
+	for _, tc := range []struct {
+		name, file, contents, want string
+	}{
+		{"Coordinator key", CoordPubFile, "not hex at all", "does not read as a key"},
+		{"Coordinator key", CoordPubFile, "abcd", "does not read as a key"}, // valid hex, too short
+		{"Board signing key", BoardKeyFile, "zz", "does not read as a key"},
+	} {
+		t.Run(tc.file+"/"+tc.contents, func(t *testing.T) {
+			dir := rosterDir(t)
+			cfg := game.DefaultConfig()
+			cfg.DataDir = dir
+			cfg.IBBS = true
+			cfg.BoardID = "Bravo BBS"
+			cfg.InboundDir, cfg.OutboundDir = dir, dir
+			if err := os.WriteFile(filepath.Join(dir, tc.file), []byte(tc.contents+"\n"), 0o600); err != nil {
+				t.Fatal(err)
+			}
+			got := checkNamed(t, cfg, tc.name)
+			if got.OK {
+				t.Fatalf("%s reported ok for an undecodable file: %q", tc.name, got.Detail)
+			}
+			if !strings.Contains(got.Detail, tc.want) {
+				t.Errorf("detail %q does not say the file is unreadable", got.Detail)
+			}
+		})
+	}
+}
+
+// The good path must still pass, or the check above would be satisfied by a
+// report that fails on everything.
+func TestCheckupAcceptsAKeyThatDecodes(t *testing.T) {
+	dir := rosterDir(t)
+	cfg := game.DefaultConfig()
+	cfg.DataDir = dir
+	cfg.IBBS = true
+	cfg.BoardID = "Bravo BBS"
+	cfg.InboundDir, cfg.OutboundDir = dir, dir
+	if err := InstallCoordPub(dir, strings.Repeat("ab", ed25519.PublicKeySize)); err != nil {
+		t.Fatal(err)
+	}
+	if got := checkNamed(t, cfg, "Coordinator key"); !got.OK {
+		t.Errorf("a well-formed coord.pub was rejected: %q", got.Detail)
 	}
 }

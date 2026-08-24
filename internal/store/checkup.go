@@ -1,6 +1,7 @@
 package store
 
 import (
+	"crypto/ed25519"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -158,21 +159,38 @@ func Checkup(cfg game.Config) []Check {
 	add("Inbound directory", dirUsable(cfg.Inbound(), false), cfg.Inbound())
 	add("Outbound directory", dirUsable(cfg.Outbound(), true), cfg.Outbound())
 
+	// Test the keys the way loadLeagueKeys does — decode them and check the
+	// length — rather than that a file is present. A coord.pub that does not
+	// decode to a full key loads as no key at all and every league order is
+	// refused, so a file-exists check answers "ok" to the one question the sysop
+	// is asking and sends them looking somewhere else.
 	coordPub := filepath.Join(cfg.DataDir, CoordPubFile)
 	coordKey := filepath.Join(cfg.DataDir, CoordKeyFile)
 	switch {
 	case fileExists(coordKey):
-		add("Coordinator key", true, "this board is the League Coordinator ("+CoordKeyFile+")")
+		if readHexKey(coordKey, ed25519.PrivateKeySize) == nil {
+			add("Coordinator key", false, CoordKeyFile+" is there but does not read as a key, so this board cannot sign league orders and sends them unsigned")
+		} else {
+			add("Coordinator key", true, "this board is the League Coordinator ("+CoordKeyFile+")")
+		}
 	case fileExists(coordPub):
-		add("Coordinator key", true, "recorded in "+CoordPubFile)
+		if readHexKey(coordPub, ed25519.PublicKeySize) == nil {
+			add("Coordinator key", false, CoordPubFile+" is there but does not read as a key, so league orders will be refused. Run -coord-key again with the key the Coordinator gave you")
+		} else {
+			add("Coordinator key", true, "recorded in "+CoordPubFile)
+		}
 	default:
 		add("Coordinator key", false, "not recorded — league orders will be refused. Run -coord-key with the key the Coordinator gave you")
 	}
 
-	if fileExists(filepath.Join(cfg.DataDir, BoardKeyFile)) {
-		add("Board signing key", true, BoardKeyFile)
-	} else {
+	boardKey := filepath.Join(cfg.DataDir, BoardKeyFile)
+	switch {
+	case !fileExists(boardKey):
 		add("Board signing key", true, "none — optional; -gen-board-key creates one")
+	case readHexKey(boardKey, ed25519.PrivateKeySize) == nil:
+		add("Board signing key", false, BoardKeyFile+" is there but does not read as a key, so this board's packets go out unsigned")
+	default:
+		add("Board signing key", true, BoardKeyFile)
 	}
 
 	return checks
