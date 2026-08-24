@@ -117,14 +117,6 @@ Watch it: a release with no assets is a release nobody can use.
    this — it gates on the game version, which does move for a formula change.
    Set it when a release changes gameplay a league would notice.
 
-   **For v0.0.8 specifically:** remove the `p == 0` case from
-   `game.SpeaksOurProtocol`. It exists so v0.0.7 accepts packets written before
-   the protocol field existed, which is what let the mechanism ship without
-   stranding a live league. Once every board is on v0.0.7 or later it is a
-   permanent hole, since a build old enough to omit the field is exactly what
-   this holds. It has to land on a release boundary: the day it ships, packets
-   from anything older start being held.
-
 10. **Delete any renamed or removed asset** left behind on the snapshot
    prerelease by hand. `replacesArtifacts` only replaces an asset of the same
    name, so a rename leaves the old file sitting beside the new one.

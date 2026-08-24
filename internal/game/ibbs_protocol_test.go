@@ -49,12 +49,13 @@ func TestOriginSignatureIgnoresProtocol(t *testing.T) {
 	}
 }
 
-// A board that states no protocol predates the field and speaks exactly this
-// format. Treating that as a mismatch would strand every board in the league on
-// the release that introduces the mechanism.
-func TestAnAbsentProtocolIsNotAMismatch(t *testing.T) {
-	if !SpeaksOurProtocol(0) {
-		t.Error("a packet with no stated protocol should be readable")
+// v0.0.7 accepted a packet stating no protocol, so introducing the field was a
+// soft change. v0.0.8 does not: a build old enough to omit it is exactly the
+// kind this mechanism exists to hold, and letting it through left a permanent
+// hole in the check.
+func TestAnAbsentProtocolIsAMismatch(t *testing.T) {
+	if SpeaksOurProtocol(0) {
+		t.Error("a packet stating no protocol predates the field and must be held")
 	}
 	if !SpeaksOurProtocol(Protocol) {
 		t.Error("this build should read its own protocol")

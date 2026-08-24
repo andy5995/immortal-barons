@@ -2,6 +2,7 @@ package store
 
 import (
 	"encoding/json"
+	"io"
 	"os"
 	"path/filepath"
 
@@ -20,6 +21,44 @@ const HeldDir = "held"
 // heldPath is the data directory's held-packet folder.
 func heldPath(dataDir string) string { return filepath.Join(dataDir, HeldDir) }
 
+// moveFile moves a file, falling back to copy-and-delete when the two paths are
+// on different filesystems. os.Rename alone is not enough here: an inbound
+// directory is usually the MAILER's, which is routinely a different mount from
+// the game's data directory, and rename across one fails with EXDEV. That would
+// fail the whole planetary run rather than hold one packet.
+func moveFile(src, dst string) error {
+	if err := os.Rename(src, dst); err == nil {
+		return nil
+	}
+	in, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer in.Close()
+	// Written under a temporary name and renamed into place, so a run
+	// interrupted mid-copy cannot leave a half-packet that later reads as a
+	// corrupt one. The rename is within one directory, so it cannot hit EXDEV.
+	tmp := dst + ".part"
+	out, err := os.Create(tmp)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(out, in); err != nil {
+		out.Close()
+		os.Remove(tmp)
+		return err
+	}
+	if err := out.Close(); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	if err := os.Rename(tmp, dst); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	return os.Remove(src)
+}
+
 // holdPacket moves an inbound packet file aside to wait for a build that can
 // read it. A failure to move it is reported to the caller: silently leaving the
 // file in the inbound directory would have it re-read, re-held and re-announced
@@ -29,7 +68,7 @@ func holdPacket(dataDir, path string) error {
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}
-	return os.Rename(path, filepath.Join(dir, filepath.Base(path)))
+	return moveFile(path, filepath.Join(dir, filepath.Base(path)))
 }
 
 // releaseHeld moves every held packet this build can now read back into the
@@ -66,7 +105,7 @@ func releaseHeld(dataDir, inboundDir string) (int, error) {
 		if !game.SpeaksOurProtocol(p.Protocol) {
 			continue
 		}
-		if err := os.Rename(path, filepath.Join(inboundDir, e.Name())); err != nil {
+		if err := moveFile(path, filepath.Join(inboundDir, e.Name())); err != nil {
 			continue
 		}
 		moved++

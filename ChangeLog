@@ -1,4 +1,6 @@
 (in-progress:)
+  * A packet stating no protocol number is held rather than applied; only
+    builds from before the v0.0.7 release omit it
 
 2026-08-23 (v0.0.7)
   * A Clingy Annihilator launches itself three days after its funding completes

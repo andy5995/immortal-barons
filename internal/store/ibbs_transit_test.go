@@ -394,6 +394,12 @@ func TestWritePacketAtomicDoesNotOverwriteCollision(t *testing.T) {
 
 func writePacket(t *testing.T, dir, name string, p game.Packet) {
 	t.Helper()
+	// Stamp the protocol as StampOutbox does for every real packet. A fixture
+	// that omits it is not simulating anything a board actually sends, and would
+	// be held rather than applied.
+	if p.Protocol == 0 {
+		p.Protocol = game.Protocol
+	}
 	data, err := json.MarshalIndent(p, "", "  ")
 	if err != nil {
 		t.Fatalf("Marshal: %v", err)

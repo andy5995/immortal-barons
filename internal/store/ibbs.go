@@ -136,6 +136,17 @@ type PlanetaryRun struct {
 // that hosts others configures a separate one per neighbour.
 func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 	packets := append(append([]game.Packet(nil), w.Outbox...), w.Transit...)
+	// Backstop the protocol stamp. StampOutbox sets it on everything this board
+	// authored, and every production path calls it — but this is the last point
+	// before bytes reach disk, and a packet that goes out stating no protocol is
+	// held by every board that receives it, for a reason nobody can see from the
+	// packet. Transit packets keep the stamp of the board that wrote them: a
+	// forwarded packet is relayed byte for byte and is not ours to re-label.
+	for i := range packets[:len(w.Outbox)] {
+		if packets[i].Protocol == 0 {
+			packets[i].Protocol = game.Protocol
+		}
+	}
 	if len(packets) == 0 {
 		return 0, nil
 	}
@@ -303,15 +314,6 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			}
 			continue // another league's game, sharing this directory
 		}
-		// Held, not applied: this build cannot read the format. See HeldDir.
-		if !game.SpeaksOurProtocol(p.Protocol) {
-			result.Held++
-			w.NoteProtocolHold(p.FromBoard, p.Protocol)
-			if err := holdPacket(w.Config.DataDir, path); err != nil {
-				return result, err
-			}
-			continue
-		}
 		if !w.AddressedToMe(p) {
 			if !w.Routed() {
 				result.MeshCopy++
@@ -328,6 +330,18 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 					p.FromBoard, p.ToBoard, p.PacketType(), p.Date)
 			}
 			if err := os.Remove(path); err != nil {
+				return result, err
+			}
+			continue
+		}
+		// Held, not applied: this build cannot read the format. See HeldDir.
+		// Checked only for a packet addressed HERE — a hub passes on bytes it
+		// never interprets, and holding one in transit would stall delivery to a
+		// board that reads it perfectly well.
+		if !game.SpeaksOurProtocol(p.Protocol) {
+			result.Held++
+			w.NoteProtocolHold(p.FromBoard, p.Protocol)
+			if err := holdPacket(w.Config.DataDir, path); err != nil {
 				return result, err
 			}
 			continue

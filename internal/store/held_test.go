@@ -67,13 +67,14 @@ func TestAPacketForAnotherProtocolIsHeldAndLaterReleased(t *testing.T) {
 	}
 }
 
-// The v0.0.7 case: every packet already in flight was written before the field
-// existed. Holding those would strand the league on the release meant to fix it.
-func TestAPacketWithNoProtocolIsNotHeld(t *testing.T) {
+// A packet stating no protocol comes from a build older than v0.0.7 and is held
+// like any other format this one cannot read. v0.0.7 accepted them so that
+// introducing the field did not strand a league; v0.0.8 closes that.
+func TestAPacketWithNoProtocolIsHeld(t *testing.T) {
 	data, inbound := t.TempDir(), t.TempDir()
 	writeHeldTestPacket(t, inbound, "legacy"+PacketExt, game.Packet{FromBoard: "Alpha BBS"})
-	if !game.SpeaksOurProtocol(0) {
-		t.Fatal("a packet with no protocol must be readable, or existing traffic stops dead")
+	if game.SpeaksOurProtocol(0) {
+		t.Fatal("a packet stating no protocol must not be readable")
 	}
 	if moved, _ := releaseHeld(data, inbound); moved != 0 {
 		t.Errorf("releaseHeld touched %d files with no held directory", moved)

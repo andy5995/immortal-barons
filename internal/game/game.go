@@ -30,22 +30,23 @@ const Version = "0.0.8"
 // receives it. Config.MinBoardVersion gates on the game version and is what
 // covers that; the two are not alternatives.
 //
-// A board that states no protocol (the field is absent) predates it and speaks
-// exactly this format, so it counts as protocol 1 rather than as a mismatch.
-// That is what makes introducing this a soft change instead of a cutover that
-// strands every board in the league on the release meant to fix them.
+// v0.0.7 additionally accepted a packet that stated NO protocol, so that
+// introducing the field was a soft change rather than a cutover that stranded
+// every board on the release meant to fix them. That concession is gone as of
+// v0.0.8: a build old enough to omit the field is exactly the kind this exists
+// to hold, and letting it through left the mechanism with a permanent hole.
 //
-// REMOVE THAT CONCESSION BEFORE v0.0.8. Once every board in a league is on
-// v0.0.7 or later, accepting an absent protocol is a permanent hole: a build
-// old enough to predate the field is exactly the kind this mechanism exists to
-// hold, and it walks straight through. Deleting the `p == 0` case is the whole
-// change, and it must be a release boundary because it starts holding packets
-// from anything older on the day it ships.
+// "Old enough" is about the BUILD, not the version it reports. Version stayed
+// "0.0.7" for that whole development cycle while the field landed late in it,
+// so a snapshot taken during it calls itself v0.0.7 and still states no
+// protocol. A board on the v0.0.7 RELEASE stamps this number and is unaffected;
+// a board on a snapshot from before the field is held, whatever it calls
+// itself. One more reason a league board should run a release.
 const Protocol = 1
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can
-// apply. See Protocol for why an absent value is not a mismatch.
-func SpeaksOurProtocol(p int) bool { return p == 0 || p == Protocol }
+// apply. A packet that states no protocol is NOT one of them — see Protocol.
+func SpeaksOurProtocol(p int) bool { return p == Protocol }
 
 // Revision is the short VCS revision (7 hex chars, git's default short hash) the
 // binary was built from, with a "-dirty" suffix when the working tree had
