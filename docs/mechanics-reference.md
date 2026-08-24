@@ -2336,12 +2336,17 @@ section is a record of what was claimed and how it was settled, so the word
   flattening. IB carried it as `InterestCap` until v0.0.4 and no longer does —
   the whole balance earns, and the money cap is the bank's only ceiling. Do not
   put it back without evidence that is not a guide.
-- **Absolute money cap: 2,000,000,000 — CONFIRMED BY PLAY of the original.** It
-  binds three things there: gold in hand, gold in savings, and what may be
+- **Absolute money cap: 2,000,000,000 — CONFIRMED BY PLAY, and BINARY-VERIFIED.**
+  It binds three things there: gold in hand, gold in savings, and what may be
   invested in a day. Unlike the interest cap it survives the check that killed
-  that one, and the absence of a literal in either binary (32-bit or Real48) is
-  consistent rather than damning — a bound tested against a Turbo Pascal constant
-  needs no constant of its own.
+  that one, and the literal is in `BRE.OVR` — four sites in `run_bank`
+  (0x0389d6), the investment ceiling among them, each loading `0x77359400` as
+  `mov ax,0x9400` / `mov dx,0x7735`.
+
+  This entry said for months that no literal existed in either binary. That was
+  a false negative from searching for the contiguous dword: Turbo Pascal loads a
+  longint as two 16-bit immediates, so the bytes run `B8 00 94 BA 35 77` and the
+  second opcode splits the halves. Search the halves, not the value.
 
   IB implements the first two as a **sysop knob** defaulting to that figure, and
   the third differently: it caps **one investment** at 2 billion but does not add
@@ -2643,6 +2648,32 @@ Investments / Loans**, and **View Bank Rates**.
   "Returns expected to be approximately N gold. Accept? (Y/n)"; on accept it
   reports "Investment will be returned on MM/DD/YYYY." The list view shows
   columns: Date / Investments / Loans Due.
+
+  **BRE does not store investments individually at all.** The empire record
+  holds a fixed TEN-SLOT array at `+0x2f5` — ten 32-bit values at stride 4,
+  summed by `run_bank` (`BRE.OVR` 0x0389d6) under a literal bound (`cmp word
+  [bp-0xe],0xa`) to get the total invested. Ten slots against a maximum ten-day
+  term means **a slot is a maturity day, and it holds one accumulated figure**:
+  investing again against a day you already hold adds to that day's figure
+  rather than creating a second record. Since a day is several turns, this is
+  reachable within a single day — invest on one turn and again on a later turn
+  of the same day at the same term, and the two are indistinguishable
+  afterwards. It also explains the shape of the money cap above: BRE bounds
+  *what may be invested in a day*, which is the same unit its storage uses.
+
+  Only `+0x2f5`/`+0x2f7` (one dword's halves) appear across the bank code, so
+  there is no parallel array — whether the stored figure is the principal or the
+  computed payout is NOT established here, only that there is one per day.
+
+  **IB diverges — deliberately, and it stays.** `Empire.Investments` is an
+  unbounded slice of individual `Investment` records, each with its own amount,
+  return and maturity day, so IB keeps them separate where BRE merges them by
+  date, and the count has no ceiling. This is the same divergence as the money
+  cap above (IB caps one investment, not the day's total) seen from the storage
+  side. The slice is self-draining rather than unbounded in practice:
+  `matureInvestments` (`internal/game/bank.go`) rebuilds it without the matured
+  entries each turn, so its size is bounded by how many investments a realm
+  makes inside a ten-day window.
 - **Cash Relief / Loans** (#40) — term-based borrowing (`internal/game/loan.go`).
   You choose a **repayment term** of **1–10 days** (`LoanMinDays`/`LoanMaxDays`),
   the bank shows the **rate** ("The loan rate will be X% per day, totalling Y%

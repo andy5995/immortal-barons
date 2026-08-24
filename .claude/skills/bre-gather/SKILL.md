@@ -651,6 +651,23 @@ field. Then say which idioms you searched. A bulk `rep stos` over a whole record
 matches neither, so a clear-on-create is invisible to any such sweep and has to
 be reasoned about separately.
 
+**A 32-bit constant is loaded as two 16-bit immediates, so its bytes are NOT
+contiguous — a scan for the dword cannot find it.** Turbo Pascal loads a longint
+into `dx:ax` as a `mov ax,imm16` / `mov dx,imm16` pair, and the second
+instruction's opcode byte sits *between* the two halves. 2,000,000,000 in
+`run_bank` is `B8 00 94  BA 35 77` (`mov ax,0x9400` / `mov dx,0x7735` =
+0x77359400), so the obvious search for `00 94 35 77` matches nothing while the
+value is right there at four sites. `docs/mechanics-reference.md` recorded "the
+absence of a literal in either binary is consistent rather than damning" on the
+strength of exactly that search; the literal exists.
+
+Search for the **halves** instead — `grep -abo` for `\xb8\x00\x94` and
+`\xba\x35\x77`, or compute the pair for any constant with
+`python3 -c "v=2000000000; print(hex(v&0xffff), hex(v>>16))"` — and only then
+say a value is assembled at run time. The same applies in reverse when reading a
+listing: a bare `mov ax,0x9400` means nothing until you read the next
+instruction.
+
 **A disassembler that prints nothing has not told you the region is empty.**
 `disasm` once produced no output and exited **0**, which reads as "no code
 there" and is the most expensive kind of wrong answer. The cause was ndisasm
