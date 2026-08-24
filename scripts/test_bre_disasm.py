@@ -288,11 +288,11 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(
             catalog["summary"]["semantic_coverage"],
             {
-                "procedures": {"identified": 404, "unclassified": 588},
+                "procedures": {"identified": 407, "unclassified": 585},
                 "blocks": {
-                    "contextual": 6907,
-                    "identified": 445,
-                    "unclassified": 4064,
+                    "contextual": 6950,
+                    "identified": 448,
+                    "unclassified": 4018,
                 },
                 "data_chunks": {
                     "identified": 282,
@@ -328,7 +328,7 @@ class ParseTests(unittest.TestCase):
         self.assertEqual(
             bre.validate_catalog(catalog),
             {
-                "unique_names": 12672,
+                "unique_names": 12675,
                 "overlay_blocks": 8495,
                 "overlay_data_chunks": 319,
                 "resident_blocks": 2921,
