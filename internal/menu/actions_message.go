@@ -26,7 +26,10 @@ func readMessages(s session.Session, w *ctx) Result {
 	if len(news) > 0 {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
 		for _, b := range news {
-			fmt.Fprintf(s, "  %s\n", b)
+			// Wrapped, not left to the terminal: a news line already runs past 80
+			// columns with an ordinary board name in it, and a translated one is
+			// longer still.
+			fmt.Fprintf(s, "%s\n", WrapIndented(b, "  "))
 		}
 	}
 	if !hadMail && len(news) == 0 {
