@@ -109,7 +109,7 @@ func TestSignedPayloadBytesMatchTheStructFormTheyReplaced(t *testing.T) {
 
 // A Coordinator on a build older than the bulletins field signs a five-field
 // payload. A board built since must still obey its orders — this is the break
-// that stopped a live six-board league for weeks.
+// that stopped a live six-board league's orders the day the field landed.
 func TestOrdersSignedBeforeBulletinsExistedAreStillObeyed(t *testing.T) {
 	priv, pub := testCoordKeys(t)
 	p := Packet{FromBoard: "AlphaBBS", Seq: 1, LeagueConfig: &LeagueConfig{GameLength: 42, TurnsPerDay: 15}}

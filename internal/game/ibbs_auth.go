@@ -68,8 +68,8 @@ func signedFields(p Packet) []signedField {
 // which marshal it as null. A Coordinator running the older build then signs a
 // five-field payload while every newer board verifies a six-field one, and each
 // board silently refuses every league order the other sends. That is exactly
-// what happened when Bulletins was added (1da5698): a real six-board league sat
-// broken for weeks, looking for all the world like a wrong key.
+// what happened when Bulletins was added (1da5698): a real six-board league's
+// orders stopped that same day, looking for all the world like a wrong key.
 //
 // So verification accepts a signature taken over any shape a released build
 // signed, newest first. Adding a field to signedFields means appending its old
