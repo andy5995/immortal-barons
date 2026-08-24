@@ -11,6 +11,16 @@ Stable versions are on the
 are built automatically from the latest source. They change often and may be
 less stable than a tagged release.
 
+**Do not run a snapshot on a board in an inter-BBS league.** A snapshot is
+rebuilt on every push and the previous one is not kept, so two boards that
+download hours apart end up on different builds — and the earlier build cannot
+be fetched again, so they cannot be brought back into step even deliberately.
+When a change lands that alters what boards send each other, boards on either
+side of it stop understanding one another. A league on snapshots hit exactly
+that in August 2026: every order the Coordinator sent was refused for a day,
+and nothing was misconfigured. Use a tagged release, and have the whole league
+move between releases together.
+
 ## Which file do I need?
 
 Builds are provided for these systems:

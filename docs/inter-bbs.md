@@ -86,6 +86,14 @@ A member board's sysop does not set the league rules — the Coordinator does, a
 they arrive over the wire. What a member has to do is get on the wire, then
 create the game.
 
+**Run a tagged release, not a snapshot, and move between releases when the rest
+of the league does.** A snapshot is rebuilt on every push and the old one is not
+kept, so boards that download hours apart cannot be brought onto the same build
+even deliberately. That is a league-breaking problem rather than an
+inconvenience: a change to what boards send each other leaves the two sides
+unable to verify one another, with nothing misconfigured to find. See
+[Download](download.md).
+
 **Tell the League Coordinator what you want your board called** — that is your
 choice, not theirs. They add it to the roster and give it a node number.
 
