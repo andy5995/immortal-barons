@@ -999,6 +999,30 @@ State the source and confidence in the reply, e.g. "from BRE.OVR string table
 findings in the relevant memory (`bre-binary-verified-math`,
 `check-bre-strings-when-unsure`).
 
+**Name every routine you identify, in the same pass.** If you worked out what an
+`ovr_*`/`exe_*` address-derived routine does, write it into
+`scripts/bre-semantic-names.json` before you finish — name, `confidence`, and an
+`evidence` list. Reading against a frozen name set is how the next run gets
+confused, and it is the failure the catalog's author warned about (#126).
+
+Three things this gets wrong if rushed:
+
+- **Let the CALLERS pick the name's shape.** A routine reached from one parent
+  takes a `parent__child` name; one shared by several does NOT — it gets a plain
+  descriptive name. `calculate_attack_force_offense` was nearly filed under the
+  invasion resolver until its caller list showed `create_individual_attack` and
+  `resolve_returning_attack` use it too.
+- **Match the file's own formatting.** Its `evidence` arrays sit on ONE line. A
+  `json.dump(..., indent=2)` rewrite turns three added entries into a 1,800-line
+  diff. Insert the text; do not round-trip the file.
+- **The generated catalog is derived, and hand-patching it does not work.**
+  `docs/dev/bre-v0988-disassembly.json` carries names, call-graph edge labels,
+  coverage counts AND a validation record; patching the first three leaves the
+  fourth stale and `check-catalog` says so. Only
+  `bre-disasm.py analyze --directory "$BRE" -o docs/dev/bre-v0988-disassembly.json`
+  rebuilds it, and that needs Capstone installed. Update the authored name map,
+  run `check-catalog`, and say the derived catalog still needs regenerating.
+
 **Keep this skill current.** When you discover something new about *how to gather
 from BRE* — a driving/scraping technique, a harness landmine and its fix, a
 menu-input quirk, a build-up/strategy method for staging a scenario, a source
