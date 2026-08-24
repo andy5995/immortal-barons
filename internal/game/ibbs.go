@@ -422,20 +422,34 @@ func (f AttackForce) Empty() bool { return f.units() == 0 }
 // units counts the whole detachment, whatever the type.
 func (f AttackForce) units() int { return f.Troopers + f.Jets + f.Tanks + f.Bombers }
 
-// offense values the detachment by the combat table (trooper 1, jet 2, tank 4,
-// bomber GroupAttackBomberOffense).
+// offense values the detachment by the combat table (trooper 1, jet 2, tank 4).
+//
+// BOMBERS ADD NOTHING. BRE's interplanetary offence builder (ovr_03f4a0 +0x0000)
+// reads the force record's troopers, jets and tanks (+0x4, +0x8, +0xc) and never
+// its bombers (+0x10), because bombers fight the air battle against the
+// defender's jets instead (remoteBattleAttrition). IB used to value one at a
+// tank's 4, a placeholder from before this was read. Note the LOCAL resolver is
+// different and does consult bombers — the two are separate subsystems.
 func (f AttackForce) offense() int {
-	return f.Troopers + f.Jets*2 + f.Tanks*4 + f.Bombers*GroupAttackBomberOffense
+	return f.Troopers + f.Jets*2 + f.Tanks*4
 }
 
 // offenseAgainstSDI values the detachment as a defender's shield leaves it: the
-// jets and the bombers are blunted, in proportion to the percentage, and nothing
-// else in the force is touched. Basis points, so the two ceilings land exactly
-// where the original's reals do.
+// jets are blunted in proportion to the percentage and nothing else in the force
+// is touched. Basis points, so the ceiling lands exactly where the original's
+// reals do. The shield's effect on the BOMBERS is not here — they carry no
+// offence at all, so it lands on the air battle instead (bombersAgainstSDI).
 func (f AttackForce) offenseAgainstSDI(sdi int) int {
 	jets := f.Jets * 2 * (10_000 - SDIJetReductionPct*sdi) / 10_000
-	bombers := f.Bombers * GroupAttackBomberOffense * (10_000 - SDIBomberReductionPct*sdi) / 10_000
-	return f.Troopers + jets + f.Tanks*4 + bombers
+	return f.Troopers + jets + f.Tanks*4
+}
+
+// bombersAgainstSDI is the bomber count that reaches the airfields, which is the
+// only thing the air battle is decided by. BRE hands the SDI percentage to the
+// bomber-count routine (ovr_03f4a0 +0x015a) exactly as it hands it to the
+// offence builder, and that routine returns trunc((1 - SDI*0.2/100) * bombers).
+func (f AttackForce) bombersAgainstSDI(sdi int) int {
+	return f.Bombers * (10_000 - SDIBomberReductionPct*sdi) / 10_000
 }
 
 // Contribution records one baron's committed detachment, so the strike's
@@ -1648,11 +1662,14 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// The shield takes its share of the arriving jets and bombers first.
 	offense := atk.offenseAgainstSDI(target)
 	def := target.Defense()
-	// The defender spends the same share of its own forces holding the line, win
-	// or lose. loseForces is the local battle's own helper, so a turret lost to an
-	// invader is accounted exactly as one lost at home.
-	res.Enemy = loseForces(target, float64(lossPct)/100)
-	if offense <= def {
+	// Fight it out. What each side loses is the OUTCOME of the attrition, not
+	// lossPct: that only says where the loop stops. Handing the defender lossPct
+	// outright made a strike's damage independent of its size, so a token force
+	// cost a large realm the full share every time (#199).
+	won, atkLost, defLost, jetLost := w.remoteBattleAttrition(offense, def, target.Jets, atk.bombers(target), lossPct)
+	res.Survivors = survivorsOfFrac(atk.Contributors, atkLost)
+	res.Enemy = loseForcesSplit(target, defLost, jetLost)
+	if !won {
 		res.Outcome = OutcomeRepelled
 		target.addEvent(fmt.Sprintf("You repelled an interplanetary strike from %s. You lost %d of your forces.",
 			atk.FromBoard, res.Enemy.Total()))
@@ -1686,8 +1703,46 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	return res
 }
 
+// survivorsOfFrac returns each contributor's detachment reduced by the fraction
+// the battle actually cost the attacker, for a strike that was fought. A force
+// far stronger than the defence is barely touched; an evenly matched one pays
+// close to the full retreat share.
+func survivorsOfFrac(cs []Contribution, lost float64) []Contribution {
+	keep := 1 - lost
+	if keep < 0 {
+		keep = 0
+	}
+	out := make([]Contribution, 0, len(cs))
+	for _, c := range cs {
+		out = append(out, Contribution{Owner: c.Owner, AttackForce: AttackForce{
+			Troopers: shareOf(c.Troopers, keep),
+			Jets:     shareOf(c.Jets, keep),
+			Tanks:    shareOf(c.Tanks, keep),
+			Bombers:  shareOf(c.Bombers, keep),
+		}})
+	}
+	return out
+}
+
+// bombers is the whole arriving force's bomber count once the defender's shield
+// has taken its share — the only thing that decides the air battle against the
+// defender's jets. A group attack faces no shield at all, for the reason
+// offenseAgainstSDI gives.
+func (a RemoteAttack) bombers(d *Empire) int {
+	sdi := d.SDI
+	if a.Group || sdi < 0 {
+		sdi = 0
+	}
+	n := 0
+	for _, c := range a.Contributors {
+		n += c.bombersAgainstSDI(sdi)
+	}
+	return n
+}
+
 // survivorsOf returns each contributor's detachment reduced by lossPct — the
-// forces that come home after the strike.
+// forces that come home after the strike. Used where no battle was fought (the
+// target had vanished, or was under New Realm Protection).
 func survivorsOf(cs []Contribution, lossPct int) []Contribution {
 	keep := 100 - lossPct
 	out := make([]Contribution, 0, len(cs))

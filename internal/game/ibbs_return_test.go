@@ -63,9 +63,11 @@ func TestIndividualStrikeRoundTrip(t *testing.T) {
 
 	wA.Outbox = nil
 	wA.ApplyPacket(result)
-	// A normal attack retreats at 15% losses, so 85% of each type comes home.
-	if attacker.Troopers != 500_000+425_000 || attacker.Tanks != 5000+4250 {
-		t.Errorf("survivors home: %d troopers, %d tanks; want 925000 and 9250",
+	// The strike overwhelmed the defence, so it was barely touched and nearly the
+	// whole detachment comes home. What it paid is the battle's outcome, not the
+	// type's threshold (#199).
+	if attacker.Troopers < 500_000+499_000 || attacker.Tanks < 5000+4990 {
+		t.Errorf("survivors home: %d troopers, %d tanks; an overwhelming strike should return nearly all of 500000/5000",
 			attacker.Troopers, attacker.Tanks)
 	}
 	if len(wA.InFlight) != 0 {
@@ -211,19 +213,25 @@ func TestAttackDamageRescalesInterplanetaryLosses(t *testing.T) {
 			t.Errorf("%s: loss = %d%%, want %d%%", c.level, got, c.want)
 		}
 	}
-	// And it reaches the survivors that actually come home.
+	// And it reaches a real battle. The threshold is only visible on the side that
+	// breaks off, so the strike below is built to lose: at High it grinds down to
+	// 30% and stops, where Medium would have stopped at 15% (830..850 survivors).
 	cfg := DefaultConfig()
 	cfg.BoardID = "boardB"
 	cfg.AttackDamage = High
 	w := NewWorldSeed(cfg, 1)
 	victim := w.AddHuman("victim", "Victim")
 	victim.Protection = 0
+	victim.Troopers, victim.Turrets, victim.Tanks = 500_000, 200_000, 50_000
 	res := w.resolveRemoteAttack(RemoteAttack{
-		ID: 1, FromBoard: "far", TargetEmpire: "Victim", Kind: NormalAttack, Offense: 50_000_000,
+		ID: 1, FromBoard: "far", TargetEmpire: "Victim", Kind: NormalAttack, Offense: 1000,
 		Contributors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 1000}}},
 	})
-	if res.Survivors[0].Troopers != 700 {
-		t.Errorf("survivors at Attack Damage High = %d, want 700 (30%% losses)", res.Survivors[0].Troopers)
+	if res.Won {
+		t.Fatal("the token force was meant to lose, or the threshold below proves nothing")
+	}
+	if s := res.Survivors[0].Troopers; s < 680 || s > 700 {
+		t.Errorf("survivors at Attack Damage High = %d, want 680..700 (the 30%% threshold)", s)
 	}
 }
 

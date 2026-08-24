@@ -1338,9 +1338,6 @@ const (
 	// award in the game — the WMD ones are flat.
 	PirateScoreBase = 100
 	PirateScoreRoll = 300
-	// GroupAttackBomberOffense values a committed bomber's offense in a group
-	// attack (tunable; BRE's exact figure not recovered — set to a tank's).
-	GroupAttackBomberOffense = 4
 	// GroupAttackLossPct is the share of a committed force lost in the strike;
 	// the rest returns. 15% matches attack.hlp's normal-attack losses.
 	GroupAttackLossPct = 15
@@ -1458,6 +1455,27 @@ const (
 	BattleRoundSurvival = 0.99 // binary: Real48 0.99, both sides
 	BattleRoundFlatLoss = 1    // binary: the "- 1" after the multiply
 	BattleUpsetPct      = 5    // binary: Real48 0.05, the consolation roll
+)
+
+// The interplanetary battle runs the same attrition, with two differences read
+// from its own resolver (BRE.OVR 0x03f4a0 +0x0647, reached from
+// resolve_received_invasion at 0x040012).
+//
+// It has NO upset roll: each side is hit on its opponent's share of the two
+// strengths and on nothing else (the hits at +0x0718 and +0x0802 follow a single
+// compare each, where the local resolver tests twice).
+//
+// And it fights a SECOND battle in the same loop, in the air. The defender's
+// jets are ground down on their own roll (+0x0744) against the attacking force's
+// bombers weighted by RemoteJetBomberWeight, and the fraction that survives is
+// applied to jets ALONE — the caller multiplies the ground fraction into
+// troopers, turrets and tanks (+0x76, +0x82, +0x86) and the air fraction into
+// jets (+0x7e). So a strike carrying no bombers costs the defender no jets
+// however hard it presses, and bombers cost the defender nothing but jets.
+const (
+	// binary: Real48 5.0, multiplying the bomber count in the air roll's
+	// denominator (BRE.OVR +0x074f).
+	RemoteJetBomberWeight = 5
 )
 
 // --- Attack Costs / Terrorist Costs levels (BINARY-VERIFIED) ---

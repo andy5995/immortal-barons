@@ -598,11 +598,12 @@ func TestFullDefenseAllianceDoesNotDefendAgainstInterplanetaryStrikes(t *testing
 		t.Fatal("the alliance must stand, or this proves nothing")
 	}
 
-	// One point over the victim's OWN defense. If the ally's detachment were
-	// counted the strike would be repelled instead.
+	// Far above the victim's OWN defense and far below the ally's. A knife-edge
+	// margin would not do since the battle is fought out round by round: only a
+	// gap this wide makes the outcome name which defence was counted.
 	res := w.resolveRemoteAttack(RemoteAttack{
 		ID: 1, FromBoard: "far", TargetEmpire: "Rome", Kind: NormalAttack,
-		Offense:      victim.Defense() + 1,
+		Offense:      victim.Defense() * 20,
 		Contributors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 1000}}},
 	})
 	if !res.Won {

@@ -355,6 +355,46 @@ func (w *World) battleAttrition(ap, dp, retreatPct int) (attackerWins bool, aLos
 	return a > aFloor, lossFraction(a0, a), lossFraction(d0, d)
 }
 
+// remoteBattleAttrition fights an ARRIVING interplanetary strike. It is
+// battleAttrition's sibling, not a caller of it, because BRE gives the two
+// resolvers different loops (see RemoteJetBomberWeight): there is no upset roll
+// here, and the defender's jets fight their own battle against the attacker's
+// bombers alongside the ground one.
+//
+// BINARY-VERIFIED against BRE.OVR 0x03f4a0 +0x0647: the exit tests at +0x068d
+// and +0x06b7, the three rolls at +0x06e1, +0x0744 and +0x07cb with their hits
+// at +0x0718, +0x079f and +0x0802, the clamps at +0x082e/+0x0853/+0x0878, the
+// fractions written out at +0x08e7 and +0x094a, and the outcome at +0x08c0.
+//
+// The fractions are OUTCOMES of the fight. retreatPct is only where the loop
+// stops, which is what keeps a token force from hurting anybody: a strike far
+// weaker than the defence reaches its own threshold almost at once, so the
+// defender's fraction comes out near zero. Handing the defender retreatPct
+// outright instead is what let a 1,100-unit strike destroy 7,696 units (#199).
+func (w *World) remoteBattleAttrition(ap, dp, jets, bombers, retreatPct int) (attackerWins bool, aLost, dLost, jetLost float64) {
+	survive := float64(100-retreatPct) / 100
+	a0, d0, j0 := float64(ap), float64(dp), float64(jets)
+	a, d, j := a0, d0, j0
+	air := float64(bombers) * RemoteJetBomberWeight
+	aFloor, dFloor := a0*survive, d0*survive
+	for a > aFloor && d > dFloor {
+		total := a + d
+		if w.rng.Float64()*total < a {
+			d = max(0, d*BattleRoundSurvival-BattleRoundFlatLoss)
+		}
+		// The air battle is decided by the bombers alone and never feeds back
+		// into the ground one; with no bombers sent, air is 0 and no jet dies.
+		if air > 0 && w.rng.Float64()*(air+j) < air {
+			j = max(0, j*BattleRoundSurvival-BattleRoundFlatLoss)
+		}
+		total = a + d // the second exchange sees the first one's damage
+		if w.rng.Float64()*total < d {
+			a = max(0, a*BattleRoundSurvival-BattleRoundFlatLoss)
+		}
+	}
+	return a > aFloor, lossFraction(a0, a), lossFraction(d0, d), lossFraction(j0, j)
+}
+
 // lossFraction is how much of a starting strength was ground away, counting a
 // side that was driven to nothing as a total loss.
 func lossFraction(start, left float64) float64 {
@@ -382,6 +422,23 @@ func (u UnitLoss) Total() int {
 // winner of a lopsided battle walks away having lost well under one percent —
 // rounding that to zero or one would erase the difference between a cheap win
 // and an expensive one.
+// loseForcesSplit is loseForces for an interplanetary battle, where the ground
+// fight and the air fight produce different fractions (see
+// remoteBattleAttrition). Jets take the air fraction and nothing else does.
+func loseForcesSplit(e *Empire, ground, air float64) UnitLoss {
+	l := UnitLoss{
+		Troopers: shareOf(e.Troopers, ground),
+		Jets:     shareOf(e.Jets, air),
+		Turrets:  shareOf(e.Turrets, ground),
+		Tanks:    shareOf(e.Tanks, ground),
+	}
+	e.Troopers -= l.Troopers
+	e.Jets -= l.Jets
+	e.Turrets -= l.Turrets
+	e.Tanks -= l.Tanks
+	return l
+}
+
 func loseForces(e *Empire, frac float64) UnitLoss {
 	l := UnitLoss{
 		Troopers: shareOf(e.Troopers, frac),

@@ -1,4 +1,7 @@
 (in-progress:)
+  * Interplanetary strike losses follow the battle, not a flat share
+  * Only an attacking force's bombers destroy the defender's jets
+  * Bombers add no strength to an interplanetary strike; they fight the jets
   * A packet stating no protocol number is held rather than applied; only
     builds from before the v0.0.7 release omit it
 

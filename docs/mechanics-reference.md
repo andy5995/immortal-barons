@@ -3096,7 +3096,7 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 - **Group Attack** — commit real forces, not gold. Each baron sends troopers,
   jets, tanks and bombers (deducted from their army); the pooled detachments are
   the strike's offense, valued by the combat table (trooper 1, jet 2, tank 4,
-  bomber `GroupAttackBomberOffense`). Survivors return to each contributor,
+  bombers not at all — see the air battle below). Survivors return to each contributor,
   reduced by `GroupAttackLossPct` — including when the strike is refused, so
   attacking a realm that turns out to be protected still costs a slice of the
   force. A group attack gets **no type choice** (confirmed by a live capture —
@@ -3141,6 +3141,60 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   different with it than the local table: **None** flattens survival to 0.99
   (1% losses whatever the type), **Low** halves the type's loss, **Medium**
   leaves it, **High** doubles it. `Level.InterplanetaryLossPct`.
+
+  **The retreat share is where the battle STOPS, not what either side pays.**
+  This is the single most-misread figure in the whole mechanic, and IB read it
+  wrong until 2026-08-24 (#199): "both sides will only fight until they suffer
+  8% losses" in `attack.hlp` describes a loop's exit condition. BRE fights the
+  strike out round by round in `ovr_03f4a0 +0x0647`, reached from
+  `resolve_received_invasion` (`BRE.OVR 0x040012`):
+
+  ```
+  A0 = attacker offence (troopers, jets, tanks + morale) x the strength column
+  B0 = defender defence (troopers, turrets, tanks; tanks x HQ%/100 + 1.5)
+  C0 = defender's jets
+  L  = attacker's bombers, summed over all 25 contributor slots
+  f  = the retreat share above, as a survival fraction (0.92 / 0.85 / 0.80)
+
+  repeat until  A <= f*A0  or  B <= f*B0 :
+      with P = A/(A+B)        B <- max(0, 0.99*B - 1)
+      with P = 5L/(5L + C)    C <- max(0, 0.99*C - 1)
+      with P = B/(A+B)        A <- max(0, 0.99*A - 1)
+
+  attacker lost = 1 - A/A0        defender lost = 1 - B/B0
+  jets lost     = 1 - C/C0        attacker won <=> A > f*A0
+  ```
+
+  Evidence: exit tests at `+0x068d` / `+0x06b7`; rolls at `+0x06e1`, `+0x0744`,
+  `+0x07cb` with hits at `+0x0718`, `+0x079f`, `+0x0802`; clamps at `+0x082e`,
+  `+0x0853`, `+0x0878`; fractions written at `+0x08e7` / `+0x094a`; outcome at
+  `+0x08c0`. Unlike the LOCAL resolver there is no upset roll — each side is hit
+  on its opponent's share and on nothing else.
+
+  So the loser pays the retreat share and the winner pays only what the strength
+  ratio cost it. A force far weaker than the defence reaches its own threshold
+  after a round or two, which is what stops a token strike from hurting anybody.
+  Handing the defender the share outright instead let 100 troopers and 1,000
+  tanks destroy 7,696 units of a 97,000-unit realm, as much as a full invasion.
+
+  **Jets fight their own battle, and only bombers are in it.** The defender's
+  loss fraction is applied to troopers (`+0x76`), turrets (`+0x82`) and tanks
+  (`+0x86`); the air fraction is applied to jets (`+0x7e`) alone. Bombers are
+  absent from the offence builder, which is what gives them this job instead. A
+  strike carrying no bombers costs the defender no jets however hard it presses,
+  and nothing on the ground shields the airfield — turrets and tanks are in the
+  ground strength and never enter the air roll.
+
+  **The shield reaches the air battle, not the offence.** The resolver calls the
+  SDI-strength routine (`0x56d:0x1139`) at `+0x10aa` and hands the resulting
+  percentage as the second argument to BOTH the offence builder and the
+  bomber-count routine. The offence builder uses it to blunt the jets; the
+  bomber routine returns `trunc((1 - SDI x 0.2/100) x bombers)`, which is exactly
+  the published "up to 20%" figure. So `SDIBomberReductionPct` applies to `L`
+  rather than to any offence term.
+
+  Not read from the binary: the weight constants inside the offence and defence
+  builders. IB uses its own binary-verified unit values instead.
 
   The strength multiplier is applied to the offense that leaves the sending
   board; the capture and casualty rates are applied by the **target** board on

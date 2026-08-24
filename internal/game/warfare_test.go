@@ -140,18 +140,28 @@ func TestSDIStrengthThinsOverMoreLand(t *testing.T) {
 	}
 }
 
-// An arriving individual strike loses 30% of its jets' contribution and 20% of
-// its bombers' to a full shield, and keeps everything else.
+// An arriving individual strike loses 30% of its jets' contribution to a full
+// shield, and 20% of the bombers that reach the airfields. The two land in
+// different places: bombers carry no offence at all, so the shield's effect on
+// them shows up in the air battle's bomber count instead.
 func TestSDIBluntsArrivingJetsAndBombers(t *testing.T) {
 	f := AttackForce{Troopers: 1_000, Jets: 1_000, Tanks: 1_000, Bombers: 1_000}
 	whole := f.offense()
+	if want := 1_000 + 1_000*2 + 1_000*4; whole != want {
+		t.Fatalf("offense = %d, want %d: bombers must not add strength", whole, want)
+	}
 	jetLoss := 1_000 * 2 * 30 / 100
-	bomberLoss := 1_000 * GroupAttackBomberOffense * 20 / 100
-	if got, want := f.offenseAgainstSDI(SDIMax), whole-jetLoss-bomberLoss; got != want {
+	if got, want := f.offenseAgainstSDI(SDIMax), whole-jetLoss; got != want {
 		t.Errorf("offense against a full shield = %d, want %d", got, want)
 	}
 	if got := f.offenseAgainstSDI(0); got != whole {
 		t.Errorf("no shield changed the offense: %d, want %d", got, whole)
+	}
+	if got, want := f.bombersAgainstSDI(SDIMax), 1_000-1_000*20/100; got != want {
+		t.Errorf("bombers reaching the airfields through a full shield = %d, want %d", got, want)
+	}
+	if got := f.bombersAgainstSDI(0); got != 1_000 {
+		t.Errorf("no shield changed the bomber count: %d, want 1000", got)
 	}
 }
 

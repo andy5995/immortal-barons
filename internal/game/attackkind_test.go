@@ -103,10 +103,13 @@ func TestAttackKindCasualtiesAndCapture(t *testing.T) {
 		}
 		got[kind] = outcome{res.Survivors[0].Troopers, res.LandTaken}
 	}
-	// Survivors follow the published loss rates exactly: 8%, 15%, 20% of 1000.
-	for kind, want := range map[AttackKind]int{QuickStrike: 920, NormalAttack: 850, ExtendedBattle: 800} {
-		if got[kind].survivors != want {
-			t.Errorf("%s survivors = %d, want %d", kind, got[kind].survivors, want)
+	// A force this far above the defence is almost never the side that gets hit,
+	// so it walks away nearly whole WHATEVER its type: the published 8/15/20 is
+	// where the loop stops, not what the winner pays (#199). The kinds differ
+	// here only in what they carry off, asserted below.
+	for kind, o := range got {
+		if o.survivors < 995 {
+			t.Errorf("%s survivors = %d, want at least 995 of 1000 for an overwhelming strike", kind, o.survivors)
 		}
 	}
 	// Land follows the capture rates relative to a normal attack: half, and a
@@ -130,16 +133,25 @@ func TestGroupAttackFightsAsNormal(t *testing.T) {
 	w := NewWorldSeed(DefaultConfig(), 1)
 	victim := w.AddHuman("bob", "Rome")
 	victim.Protection = 0
+	// The share is only visible on the side that BREAKS OFF, so send a force that
+	// loses: it grinds down to its own threshold and stops there.
+	victim.Troopers, victim.Turrets, victim.Tanks = 500_000, 200_000, 50_000
 	res := w.resolveRemoteAttack(RemoteAttack{
 		ID: 1, FromBoard: "far", TargetEmpire: "Rome", Group: true,
-		Offense:      50_000_000,
+		Offense:      1000,
 		Contributors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 1000}}},
 	})
 	if res.Kind != "Group Attack" {
 		t.Errorf("result named %q, want %q", res.Kind, "Group Attack")
 	}
-	if res.Survivors[0].Troopers != 850 {
-		t.Errorf("survivors = %d, want 850 (the normal attack's 15%% losses)", res.Survivors[0].Troopers)
+	if res.Won {
+		t.Fatal("the token force was meant to lose, or the share below proves nothing")
+	}
+	// 15% is the normal attack's threshold, and a losing side stops just past it.
+	// Quick Strike (8%) would leave 920+ and Extended Battle (20%) 800 or fewer,
+	// so this band names the normal attack and nothing else.
+	if s := res.Survivors[0].Troopers; s < 830 || s > 850 {
+		t.Errorf("survivors = %d, want 830..850 (the normal attack's 15%% threshold)", s)
 	}
 }
 
@@ -167,5 +179,68 @@ func TestIndividualAttackDoublesReturns(t *testing.T) {
 	}
 	if i != g*2 {
 		t.Errorf("individual attack took %d regions, want %d (twice the group attack's %d)", i, g*2, g)
+	}
+}
+
+// TestTokenStrikeCostsTheDefenderAlmostNothing is the guard for #199: a strike
+// far weaker than the defence must cost the defender almost nothing, because it
+// reaches its OWN retreat threshold after a round or two and breaks off. The
+// figures are the ones a live league reported — 100 troopers and 1,000 tanks,
+// 1,100 gold, against a realm holding ~97,000 units — where the defender lost
+// 7,696 units, 8% of everything, exactly as it would have to a full-scale
+// invasion.
+//
+// The bound is deliberately loose (4%, against the 8% the bug produced): which
+// side is hit each round is a die roll, so a figure that only holds on this
+// seed would prove nothing about the mechanic.
+func TestTokenStrikeCostsTheDefenderAlmostNothing(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	victim := w.AddHuman("bob", "Rome")
+	victim.Protection = 0
+	victim.Troopers, victim.Turrets, victim.Tanks, victim.Jets = 37_029, 27_250, 11_456, 21_164
+	before := victim.Troopers + victim.Turrets + victim.Tanks + victim.Jets
+
+	force := AttackForce{Troopers: 100, Tanks: 1000}
+	res := w.resolveRemoteAttack(RemoteAttack{
+		ID: 1, FromBoard: "far", TargetEmpire: "Rome", Kind: QuickStrike,
+		Offense:      force.offense(),
+		Contributors: []Contribution{{Owner: "alice", AttackForce: force}},
+	})
+	if res.Won {
+		t.Fatal("a 1,100-unit force overran a realm holding 97,000; the defence is not being fought")
+	}
+	if lost := res.Enemy.Total(); lost > before/25 {
+		t.Errorf("the defender lost %d of %d units to a token strike; the flat rate this replaced took 8%% (%d)",
+			lost, before, before*8/100)
+	}
+	// No bombers were sent, so no jet can die: the air battle is decided by the
+	// attacker's bombers alone and by nothing on the ground.
+	if victim.Jets != 21_164 {
+		t.Errorf("jets fell to %d with no bomber in the strike; they take the air battle's share, not the ground one", victim.Jets)
+	}
+}
+
+// The other half of the air battle: bombers, and only bombers, cost the defender
+// jets — and they cost it nothing else. Ground and air are resolved as two
+// separate fights in one loop, so the two fractions differ.
+func TestBombersCostTheDefenderJetsAndNothingElse(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 7)
+	victim := w.AddHuman("bob", "Rome")
+	victim.Protection = 0
+	victim.Troopers, victim.Turrets, victim.Tanks, victim.Jets = 40_000, 30_000, 12_000, 20_000
+
+	force := AttackForce{Troopers: 50_000, Tanks: 20_000, Bombers: 5_000}
+	res := w.resolveRemoteAttack(RemoteAttack{
+		ID: 1, FromBoard: "far", TargetEmpire: "Rome", Kind: NormalAttack,
+		Offense:      force.offense(),
+		Contributors: []Contribution{{Owner: "alice", AttackForce: force}},
+	})
+	if res.Enemy.Jets == 0 {
+		t.Error("a strike carrying 5,000 bombers cost the defender no jets")
+	}
+	// Bombers add no ground strength, so they cannot be what took the regions or
+	// the ground units: those follow the troopers and tanks.
+	if res.Enemy.Troopers == 0 || res.Enemy.Tanks == 0 {
+		t.Error("the ground battle cost the defender nothing")
 	}
 }

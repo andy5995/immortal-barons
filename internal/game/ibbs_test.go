@@ -246,9 +246,11 @@ func TestGroupAttackReturnsSurvivors(t *testing.T) {
 	result := wB.ApplyPacket(wA.Outbox[0]) // B resolves, returns survivors to A
 	wA.ApplyPacket(result)                 // A restores survivors
 
-	// 15% lost, 85% return: 85,000 troopers and 850 tanks.
-	if leader.Troopers != 85_000 || leader.Tanks != 850 {
-		t.Errorf("survivors returned wrong: have %d troopers, %d tanks (want 85000, 850)", leader.Troopers, leader.Tanks)
+	// The target is defenceless, so there is no battle to bleed in and the whole
+	// detachment comes home. A flat retreat share used to take 15% from a force
+	// nobody fired on (#199).
+	if leader.Troopers != 100_000 || leader.Tanks != 1000 {
+		t.Errorf("survivors returned wrong: have %d troopers, %d tanks (want 100000, 1000 -- nothing opposed them)", leader.Troopers, leader.Tanks)
 	}
 }
 
