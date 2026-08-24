@@ -99,6 +99,22 @@ type Packet struct {
 	// Hops counts the boards that have forwarded this packet. Outside the
 	// signed payload, because every hub changes it.
 	Hops int
+	// Protocol is the packet format this board speaks, and the ONLY thing a
+	// board must match to exchange packets. It moves when the wire format moves,
+	// not when the game version does, so a board can take a menu fix or a
+	// balance change without the league having to move in lockstep.
+	//
+	// omitempty AND excluded from the origin signature (boardSigningBytes), both
+	// deliberately: a board that predates the field omits it, and one that has it
+	// signs as though it did not, so the two verify each other's packets. Without
+	// that, introducing this field would break every board pair across the
+	// change — the exact fault it exists to prevent.
+	//
+	// It is deliberately NOT signed. Tampering with it can only make the far side
+	// hold a packet it would otherwise apply, which is a denial of service a
+	// dropped file achieves anyway; signing it would buy nothing and cost the
+	// cross-version compatibility above.
+	Protocol int `json:",omitempty"`
 	// FromNode and ToNode are the roster's node numbers for the packet's two
 	// ends, preferred over FromBoard/ToBoard wherever identity actually
 	// matters (authentication, addressing, the Coordinator check) because a

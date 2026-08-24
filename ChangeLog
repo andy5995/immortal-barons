@@ -13,6 +13,7 @@
   * Transport faults are reported to the sysop and logged, not put in the news
   * A planet the league roster cannot place is no longer offered as a target
   * A packet is never addressed to a board the league roster cannot place
+  * Packets speaking a protocol this build cannot read are held, not refused
   * The 32-bit Windows build runs on Windows 7, 8, and Server 2008 R2 through
     2012 R2
   * Game Bulletins reads .txt and .ans files from a bull folder in the data dir

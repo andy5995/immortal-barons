@@ -23,6 +23,22 @@ func (w *World) noteSysop(format string, a ...any) {
 	w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(format, a...))
 }
 
+// NoteProtocolHold records that a board's packets are being set aside because
+// this build cannot read their format, once per board per run rather than once
+// per packet — a mismatch affects every packet that board sends, and repeating
+// it per file buries the one line that matters.
+func (w *World) NoteProtocolHold(board string, protocol int) {
+	if w.heldNoted == nil {
+		w.heldNoted = map[string]bool{}
+	}
+	if w.heldNoted[board] {
+		return
+	}
+	w.heldNoted[board] = true
+	w.noteSysop("Packets from %s are being held: they speak protocol %d and this board speaks %d. They will be applied when both boards run the same release.",
+		board, protocol, Protocol)
+}
+
 // postCombatNews broadcasts the outcome of a regular attack to the planet.
 func (w *World) postCombatNews(a, d *Empire, won, conquered bool) {
 	// Every conventional battle funnels through here, so this is the honest place

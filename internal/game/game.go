@@ -18,6 +18,21 @@ import (
 // in-development version; bumped after each release.
 const Version = "0.0.7"
 
+// Protocol is the packet format this build speaks. It moves ONLY when the wire
+// format changes, which is what lets a board take a menu fix or a balance change
+// without the whole league moving with it — the game version cannot say that,
+// because it moves for everything.
+//
+// A board that states no protocol (the field is absent) predates it and speaks
+// exactly this format, so it counts as protocol 1 rather than as a mismatch.
+// That is what makes introducing this a soft change instead of a cutover that
+// strands every board in the league on the release meant to fix them.
+const Protocol = 1
+
+// SpeaksOurProtocol reports whether a packet's format is one this build can
+// apply. See Protocol for why an absent value is not a mismatch.
+func SpeaksOurProtocol(p int) bool { return p == 0 || p == Protocol }
+
 // Revision is the short VCS revision (7 hex chars, git's default short hash) the
 // binary was built from, with a "-dirty" suffix when the working tree had
 // uncommitted changes, or "" when the build carries no VCS info (e.g. `go build`
@@ -692,7 +707,10 @@ type World struct {
 	// for them — no player can act on one, and the news cap is 20 lines, so a
 	// fault that repeats every exchange silently deletes the day's real events.
 	SysopNotices []string `json:"-"`
-	Pirates      []PirateFaction
+	// heldNoted dedupes the protocol-hold notice to one per board per run. Not
+	// persisted: a new run should say so again.
+	heldNoted map[string]bool
+	Pirates   []PirateFaction
 
 	// LastPacketFrom records the game day a packet from each board was PROCESSED
 	// here, and BoardVersion the game version that board last said it was

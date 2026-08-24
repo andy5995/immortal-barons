@@ -42,6 +42,13 @@ func IsPacketFile(name string) bool {
 func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (PlanetaryRun, error) {
 	var run PlanetaryRun
 	before := w.LeagueNodes
+	// Before anything else: a packet held for a protocol this build could not
+	// read may be readable now, and it has been waiting since it arrived.
+	released, err := releaseHeld(w.Config.DataDir, inboundDir)
+	if err != nil {
+		return run, err
+	}
+	run.Released = released
 	inResult, err := ReadInbound(w, inboundDir, verbose)
 	if err != nil {
 		return run, err
@@ -51,6 +58,7 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	run.MeshCopy = inResult.MeshCopy
 	run.AlreadySeen = inResult.AlreadySeen
 	run.Refused = inResult.Refused
+	run.Held = inResult.Held
 	// A member board that just adopted the Coordinator's roster has to persist
 	// it: the roster is read from ibnodes.dat at startup, not from the world
 	// file (#64).
@@ -107,6 +115,8 @@ type PlanetaryRun struct {
 	MeshCopy      int  // packets skipped: not addressed here, mesh mode
 	AlreadySeen   int  // packets skipped: duplicate/replay
 	Refused       int  // packets refused: the sender's signature did not match the roster
+	Held          int  // packets set aside: they speak a protocol this build cannot read
+	Released      int  // held packets this build can now read, returned to inbound
 	Bulletins     int  // league bulletins broadcast (Coordinator's board only)
 	// Notices are transport faults for the sysop -- an undeliverable packet,
 	// orders that failed their check. They are reported here rather than in the
@@ -253,6 +263,8 @@ type InboundResult struct {
 	MeshCopy    int
 	AlreadySeen int
 	Refused     int
+	// Held counts packets set aside for a protocol this build cannot read.
+	Held int
 }
 
 // ReadInbound reads every packet file in dir addressed to this board (or
@@ -290,6 +302,15 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 				fmt.Printf("  Skipped packet from %s (wrong league)\n", p.FromBoard)
 			}
 			continue // another league's game, sharing this directory
+		}
+		// Held, not applied: this build cannot read the format. See HeldDir.
+		if !game.SpeaksOurProtocol(p.Protocol) {
+			result.Held++
+			w.NoteProtocolHold(p.FromBoard, p.Protocol)
+			if err := holdPacket(w.Config.DataDir, path); err != nil {
+				return result, err
+			}
+			continue
 		}
 		if !w.AddressedToMe(p) {
 			if !w.Routed() {

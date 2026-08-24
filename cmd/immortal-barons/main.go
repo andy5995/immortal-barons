@@ -1304,7 +1304,7 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 // for a command whose whole job is moving mail: a sysop cannot tell a run that
 // had nothing to do from one that read the wrong directory.
 func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
-	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held
 	switch {
 	case run.Applied == 0 && skipped == 0:
 		fmt.Printf("No packets waiting in %s\n", cfg.Inbound())
@@ -1327,6 +1327,13 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 		fmt.Println("Passed 1 packet on towards the board it is addressed to.")
 	} else if run.Forwarded > 1 {
 		fmt.Printf("Passed %d packets on towards the boards they are addressed to.\n", run.Forwarded)
+	}
+	if run.Released > 0 {
+		fmt.Printf("Released %d held packet(s): this board can now read their format.\n", run.Released)
+	}
+	if run.Held > 0 {
+		fmt.Printf("Held %d packet(s) for a protocol this build cannot read; they are in %s and will be applied after the builds match.\n",
+			run.Held, filepath.Join(cfg.DataDir, store.HeldDir))
 	}
 	if run.RosterUpdated {
 		fmt.Println("The League Coordinator's roster replaced this board's copy.")
@@ -1362,7 +1369,7 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 // e.g. "skipped 3: 2 already seen, 1 for another league". Each reason is shown
 // only when its count is above zero.
 func skipSummary(run store.PlanetaryRun) string {
-	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held
 	if skipped == 0 {
 		return ""
 	}
@@ -1371,6 +1378,11 @@ func skipSummary(run store.PlanetaryRun) string {
 	// rather than a packet this board had no business with.
 	if run.Refused > 0 {
 		parts = append(parts, fmt.Sprintf("%d refused, not matching the sender's key", run.Refused))
+	}
+	// Held ranks next: nothing is lost, but the league is out of step and
+	// somebody has to act before those packets move.
+	if run.Held > 0 {
+		parts = append(parts, fmt.Sprintf("%d held for a newer protocol", run.Held))
 	}
 	if run.AlreadySeen > 0 {
 		parts = append(parts, fmt.Sprintf("%d already seen", run.AlreadySeen))

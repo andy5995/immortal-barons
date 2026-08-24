@@ -295,6 +295,7 @@ func (w *World) StampOutbox() {
 		// alone — Transit is not stamped here — so a relayed packet keeps the
 		// version of the board that wrote it.
 		w.Outbox[i].Version = Version
+		w.Outbox[i].Protocol = Protocol
 		w.Outbox[i].FromNode = w.NodeNumber(w.Config.BoardID)
 		if w.Outbox[i].ToBoard != "" {
 			w.Outbox[i].ToNode = w.NodeNumber(w.Outbox[i].ToBoard)
@@ -344,13 +345,20 @@ func (w *World) StampOutbox() {
 // honesty, and it is not delivery.
 
 // boardSigningBytes renders a packet for its origin signature: everything it
-// carries, with the two fields that legitimately change in transit zeroed.
-// BoardSig is the signature itself, and Hops is incremented by each forwarding
-// hub. The Coordinator's own Signature IS covered, so it cannot be lifted from
-// one packet onto another.
+// carries, with the fields that must not be signed zeroed. BoardSig is the
+// signature itself, Hops is incremented by each forwarding hub, and Protocol is
+// excluded so that adding it did not invalidate every signature written before
+// it existed (see Packet.Protocol). The Coordinator's own Signature IS covered,
+// so it cannot be lifted from one packet onto another.
+//
+// This marshals the whole struct, so it holds only while every field added from
+// here on is either omitempty or zeroed here. That is a convention enforced by
+// nothing but this comment; TestOriginSignatureIgnoresProtocol is the part a
+// build can check.
 func boardSigningBytes(p Packet) ([]byte, error) {
 	p.BoardSig = nil
 	p.Hops = 0
+	p.Protocol = 0
 	return json.Marshal(p)
 }
 
