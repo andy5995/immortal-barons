@@ -128,6 +128,30 @@ map of it, not a second definition.
 }
 ```
 
+### Identity lives in the file, and BRE's lived in the name
+
+The original derives a packet's origin from its **filename**. Its inbound
+scanner (`BRE.OVR 0x03bd64`) is a wildcard directory walk, not a loop over the
+roster: `FindFirst` on the mask, `while DosError = 0` (`0x1b68`) with `FindNext`
+at the bottom, and inside it copies five characters starting at position 2 of
+the name (`0x1b7d`), converts them to a number, bounds-checks that against the
+node count at `[0x1264]`, indexes the node table by `node x 0x3e`, and deletes
+the file when that entry is empty. The routine has a message for removing data
+from an unknown node, which a roster loop could never reach and a name-keyed
+scan reaches routinely.
+
+IB reads origin and destination from the JSON instead (`FromNode`/`ToNode`
+above), so a renamed packet still applies correctly and the name is free to be a
+transport convenience. This is a deliberate divergence and the stronger design;
+it is also what makes an 8.3 transport alias possible at all (#178).
+
+**The original picks no ingestion ORDER.** `FindFirst`/`FindNext` return DOS
+FAT directory-entry order — the slot each file happened to be written into, with
+freed slots reused after deletions. Not alphabetical, not by node, not arrival
+order. So IB's current sorted order is not fidelity: `os.ReadDir` sorts where DOS
+did not, and whatever order #178 settles on diverges from nothing the original
+decided. Note that the fixed-width sequence above is justified by scan order; if #178 removes that dependence, the fixed width keeps its other job (a short, collision-free name) and loses that one.
+
 ### Interplanetary trading (#47): the compatibility rule
 
 The three trading fields are **new in v0.0.5** and are the first change to this
