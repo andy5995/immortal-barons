@@ -1458,7 +1458,8 @@ func (w *World) ApplyPacket(p Packet) Packet {
 		w.applyBulletins(*p.Bulletins)
 	}
 	if carriesCoordinatorOrders(p) && !orders {
-		w.postNews(fmt.Sprintf("A packet from %s claimed to carry League Coordinator orders and was refused.", p.FromBoard))
+		w.postNews(fmt.Sprintf("A packet from %s claimed to carry League Coordinator orders and was refused: %s.",
+			p.FromBoard, w.CoordRefusalReason(p)))
 	}
 	if len(p.Scores) > 0 {
 		w.ImportBoard(RemoteBoard{BoardID: p.FromBoard, Date: p.Date, Scores: p.Scores, Market: p.Market})

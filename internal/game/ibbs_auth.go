@@ -103,6 +103,34 @@ func (w *World) VerifyCoordinatorOrders(p Packet) bool {
 	return ed25519.Verify(ed25519.PublicKey(w.CoordPub), msg, p.Signature)
 }
 
+// CoordRefusalReason says WHY an order-bearing packet was turned away, in the
+// receiving sysop's terms. Six different situations refuse a packet and they
+// need six different fixes — three of them on the sending board, not here — so
+// a bare "was refused" sends the wrong person looking. It reports the first
+// gate that failed, in the order the caller applies them, and is meaningful
+// only for a packet that actually failed one.
+//
+// It keeps the "cannot check" and "failed the check" cases apart, as the rest
+// of the league auth does: no key recorded is a setup step nobody has done, a
+// signature that does not verify is a mismatch between two boards.
+func (w *World) CoordRefusalReason(p Packet) string {
+	switch {
+	case w.IsLeagueCoordinator():
+		return "this board is the League Coordinator and takes orders from no one"
+	case p.FromNode != 0 && p.FromNode != 1:
+		return fmt.Sprintf("it came from node %d, and only node 1 may issue orders", p.FromNode)
+	case p.FromNode == 0 && w.CoordinatorBoardID() == "":
+		return "this board's roster names no node 1, so it has no Coordinator to trust"
+	case p.FromNode == 0 && p.FromBoard != w.CoordinatorBoardID():
+		return fmt.Sprintf("this board's Coordinator is %s", w.CoordinatorBoardID())
+	case len(w.CoordPub) != ed25519.PublicKeySize:
+		return "no Coordinator key is recorded here; the sysop should run -league-check"
+	case len(p.Signature) == 0:
+		return "the sending board did not sign it"
+	}
+	return "the signature did not match the Coordinator key recorded here"
+}
+
 // NextSeq is this board's next outbound packet number. Sequence numbers only
 // ever go up, which is what lets the far side spot a packet it has already
 // applied.
