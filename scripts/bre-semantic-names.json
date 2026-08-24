@@ -712,6 +712,21 @@
       "confidence": "high",
       "evidence": ["binary_strings: incoming invasion, battle result, unit losses, and captured-region topics", "call_graph: called from incoming-packet processing and mutates both sides of an Inter-BBS attack"]
     },
+    "0x03f4a0": {
+      "name": "calculate_attack_force_offense",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: sums each of the 25 force slots as troopers*0.5 + jets*(1 - SDI*0.3/100) + tanks*2, times the slot's stored Real48 factor; the fourth force field is never read", "call_graph: shared by create_individual_attack, resolve_received_invasion and resolve_returning_attack, each passing the SDI percentage as its second argument"]
+    },
+    "0x03f5fa": {
+      "name": "calculate_attack_force_bombers_after_sdi",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: sums the fourth force field across the 25 slots and returns trunc((1 - SDI*0.2/100) * total)", "repository_docs: matches the documented up-to-20% shield reduction against bombers"]
+    },
+    "0x03fae7": {
+      "name": "resolve_invasion_battle",
+      "confidence": "high",
+      "evidence": ["instruction_behavior: attrition loop leaving when either side reaches its retreat factor times its initial strength; three per-round rolls each applying value*0.99 - 1; writes both sides' loss fractions through its var parameters", "call_graph: sole caller is resolve_received_invasion, which applies the returned fractions to the defender's units"]
+    },
     "0x03f92a": {
       "name": "validate_outbound_attack_file",
       "confidence": "high",
