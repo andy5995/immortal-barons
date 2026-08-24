@@ -1092,28 +1092,13 @@ Gates seen: `Sorry....You are under New Realm Protection!` (Terrorist / Special
 Ops while protected), `There are not any attack parties at this time.` (Join
 Group Attack).
 
-**Send Trade Deal** (3). Captured in `cap/kd3-01.cap`. After the goods are
-chosen it states the transport requirement, the per-day cost and the two-day
-floor, prompts for a span, and then — the part IB had no equivalent of — tells
-the sender which turn of the recipient's day it lands on:
-
-```
-Trade Deal requires 20 Carriers.
-Send Trade Deal? (Y/n) Yes
-
-This trade deal will cost 120,000 gold per day to send.
-Trade deals must be sent for a minimum of 2 days.
-
-How many days would you like to send this deal for? (2; 10) 2
-
-Trade Deal sent to <realm>
-It will arrive at earliest on Turn #<n> of that empire today.
-```
-
-The turn number is `0e` bright-yellow against `07` grey body text. The figure
-is the sender's own turn of the day; the mechanic behind it is in
-`docs/mechanics-reference.md`. **Deliberate divergence:** IB says the same thing
-in its own words rather than reproducing BRE's sentence.
+**Send Trade Deal** (3). **Not captured.** A different routine from the local
+deal — `send_trade_offer` (BRE.OVR 0x24212), whose only caller is the InterBBS
+menu. It charges a flat fee to send rather than a rate per day and has no day
+span, so none of the local flow applies to it. How it picks its target planet and
+realm is unread: its own strings carry no picker prompt, so the picker is a
+callee nobody has followed. The block that used to sit here was the LOCAL deal
+and has moved to the Trading section (#195).
 
 **Travel Times** (T). Captured 2026-08-16: a `37` white heading
 `Average Turn Around Times to All BBSes`, then the **78**-column inset rule
@@ -1235,6 +1220,30 @@ heading row is `97` bright-white and the rule under it is **72** columns of
 plain `─` in `90` gray (this block drew 52 until 2026-08-16, and the banner as
 `»…«`). Each row: `31` red `(` + `91` bright-red right-aligned number + `31`
 `) ` + `37` white name + `97` bright-white value.
+
+**The player tables put `Planet` LAST, after the metric** — captured in
+`cap/20240527-134Pho_Lazarus_Public.cap` and
+`cap/121125-666H4H_Camembert_Public.cap`. All four player views share one
+geometry: `Name` at column 6, the metric **right-aligned to column 46** (the
+same column the planet table's metric ends on, so the two shapes agree), then
+`Planet` beginning at column 51, for a 57-column heading under the same
+72-column rule.
+
+```
+      Name                                Land     Planet
+      Name                               Score     Planet
+      Name                           Net Worth     Planet
+      Name                  Net Worth / Region     Planet
+```
+
+**IB has these reversed** — `Planet` second at column 33 and the metric last, a
+66-column heading (#196). Not established: the `Planet` column's width and
+whether it truncates. Neither capture has a data row under that heading, so only
+the geometry above is proven.
+
+**The rule is WIDER than the table on purpose.** 72 columns of `─` over a
+46-column planet table and a 57-column player table. It is not misalignment and
+must not be "corrected".
 
 ### Attack Menu (InterBBS, local attacks OFF)
 
@@ -1556,6 +1565,37 @@ bright-red key letter, `37` white label.
 ────────────────────
 Choice> Quit
 ```
+
+### Send Trade Deal — the local flow (captured in `cap/kd3-01.cap`)
+
+This is `create_trade_offer` (BRE.OVR 0x260cd), the LOCAL deal, reached from
+this menu. **It was filed under the InterPlanetary Operations menu's (3) for
+months** — the two items are different routines, and that misattribution is what
+wired IB's interplanetary item to the local mechanic (#195). Every string below
+is this routine's: the per-day rate, the minimum span and the arrival-turn
+sentence have no counterpart in the interplanetary one.
+
+After the goods are chosen it states the transport requirement, the per-day
+cost and the two-day floor, prompts for a span, and then — the part IB had no
+equivalent of — tells the sender which turn of the recipient's day it lands on:
+
+```
+Trade Deal requires 20 Carriers.
+Send Trade Deal? (Y/n) Yes
+
+This trade deal will cost 120,000 gold per day to send.
+Trade deals must be sent for a minimum of 2 days.
+
+How many days would you like to send this deal for? (2; 10) 2
+
+Trade Deal sent to <realm>
+It will arrive at earliest on Turn #<n> of that empire today.
+```
+
+The turn number is `0e` bright-yellow against `07` grey body text. The figure
+is the sender's own turn of the day; the mechanic behind it is in
+`docs/mechanics-reference.md`. **Deliberate divergence:** IB says the same thing
+in its own words rather than reproducing BRE's sentence.
 
 The market itself lists the eight tradeable goods — note keys 1-5 and 7-9, with
 **no key 6** (regions are not tradeable):
