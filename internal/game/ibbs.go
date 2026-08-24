@@ -1685,7 +1685,13 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// first: a league-sized strike can pass 21 million offense, and multiplying
 	// that by 100 wraps a 32-bit int on the door builds this project supports.
 	frac := int64(offense-def) * 100 / int64(max(offense, 1))
-	land := int(int64(target.Land) * frac / 100 / 4 * int64(kind.capturePct()) / 100 * int64(returnsPct) / 100)
+	// The sysop's Attack Rewards setting reaches an interplanetary strike too,
+	// on its own ladder (Level.InterplanetaryCapturePct). It is applied relative
+	// to Medium so the default is unchanged: None takes nothing, Low half, High
+	// half again as much.
+	rewards := int64(w.Config.AttackRewards.InterplanetaryCapturePct())
+	land := int(int64(target.Land) * frac / 100 / 4 * int64(kind.capturePct()) / 100 * int64(returnsPct) / 100 *
+		rewards / int64(AttackCaptureMediumPct))
 	if land > target.Land {
 		land = target.Land
 	}

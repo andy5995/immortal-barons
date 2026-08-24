@@ -330,3 +330,48 @@ func TestInvasionUsesItsOwnDefenceArithmetic(t *testing.T) {
 		t.Errorf("invasion defence = %d, want %d", got, want)
 	}
 }
+
+// The sysop's Attack Rewards setting reaches an interplanetary strike, on its
+// own ladder. Golden literals from resolve_received_invasion's switch, not from
+// the local table: only the top rung differs, and that is the whole point.
+func TestAttackRewardsReachInterplanetaryStrikes(t *testing.T) {
+	for _, c := range []struct {
+		level         Level
+		local, remote int
+	}{
+		{None, AttackCaptureNonePct, 0},
+		{Low, AttackCaptureLowPct, 5},
+		{Medium, AttackCaptureMediumPct, 10},
+		{High, 25, 15}, // the divergence: 25 at home, 15 on an invasion
+	} {
+		if got := c.level.AttackCapturePct(); got != c.local {
+			t.Errorf("%s: local capture = %d%%, want %d%%", c.level, got, c.local)
+		}
+		if got := c.level.InterplanetaryCapturePct(); got != c.remote {
+			t.Errorf("%s: interplanetary capture = %d%%, want %d%%", c.level, got, c.remote)
+		}
+	}
+
+	// And it moves the land a strike actually takes. None must take nothing.
+	land := func(level Level) int {
+		cfg := DefaultConfig()
+		cfg.AttackRewards = level
+		w := NewWorldSeed(cfg, 3)
+		victim := w.AddHuman("bob", "Rome")
+		victim.Protection = 0
+		victim.Regions = RegionMix{Desert: 40_000}
+		victim.syncLand()
+		return w.resolveRemoteAttack(RemoteAttack{
+			ID: 1, FromBoard: "far", TargetEmpire: "Rome", Kind: NormalAttack,
+			Offense:      50_000_000,
+			Contributors: []Contribution{{Owner: "alice", AttackForce: AttackForce{Troopers: 1000}}},
+		}).LandTaken
+	}
+	med, high, low, none := land(Medium), land(High), land(Low), land(None)
+	if none != 0 {
+		t.Errorf("Attack Rewards None still carried off %d regions", none)
+	}
+	if !(low < med && med < high) {
+		t.Errorf("land taken does not follow the ladder: none=%d low=%d medium=%d high=%d", none, low, med, high)
+	}
+}

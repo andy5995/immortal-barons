@@ -17,7 +17,7 @@ settings from a real league, so they are defaults, not fixed rules.
 |------|---------|---------|-------|
 | Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy R5-Slappenheimer likelier to backfire. |
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). An enemy SDI cuts jet strength, but only on an interplanetary strike — see "SDI Defense". |
-| Turret | **0** | 2 | Defense only — the defensive **counterpart to jets**: it shoots down attacking jets (and blows up tanks / kills troops). Also helps intercept nuclear missiles. Cannot be destroyed by terrorist ops. |
+| Turret | **0** | 2 | Defense only. Also helps intercept nuclear missiles. Cannot be destroyed by terrorist ops. (**The guide calls it the counterpart to jets that "shoots down attacking jets". The binary does not: neither resolver puts jets on the DEFENDING side at all, and no defence term reads the attacker's jets. What turrets actually counter is bombers — see the Bomber row.**) |
 | Tank | **3–5** | **3–5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (3 at 0%, 4 at 50%, 5 at 100%) and with morale. The guide's flat "4" is the HQ-50 value — see HeadQuarters below. (`whatsnew.doc` claims tanks help defend against chemical missiles; the shipped v0.988 routine never reads the tank count — see the chemical attack below.) |
 | Bomber | 0 | 0 | Carries bombs / special-ops; destroys enemy *grounded* jets when sent in an attack. |
 | Carrier | 0 | 0 | Support: moves jets to battle and goods for trade. |
@@ -3184,6 +3184,14 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   strike carrying no bombers costs the defender no jets however hard it presses,
   and nothing on the ground shields the airfield — turrets and tanks are in the
   ground strength and never enter the air roll.
+
+  **Attack Rewards has its own ladder too.** The resolver switches on the config
+  byte `+0x183` (`+0x12a4`) exactly as it switches on the Attack Damage byte, and
+  loads a Real48 per level. Against BRE's byte encoding (Medium 0, None 1, Low 2,
+  High 3) those are **10, 0, 5 and 15** — the local ladder's High is **25**. IB
+  applied no Attack Rewards setting to an interplanetary strike at all until
+  2026-08-24, so the knob moved local attacks and nothing else.
+  `Level.InterplanetaryCapturePct`.
 
   **The shield reaches the air battle, not the offence.** The resolver calls the
   SDI-strength routine (`0x56d:0x1139`) at `+0x10aa` and hands the resulting

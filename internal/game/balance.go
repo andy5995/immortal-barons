@@ -1463,6 +1463,11 @@ const (
 	AttackCaptureMediumPct = 10
 	AttackCaptureHighPct   = 25
 
+	// The INTERPLANETARY resolver keeps its own ladder and only the top rung
+	// differs: 0 / 5 / 10 / 15 against the local 0 / 5 / 10 / 25. Binary, from
+	// resolve_received_invasion +0x12a4 (Real48 15 at the High branch).
+	InterplanetaryCaptureHighPct = 15
+
 	// Share of its own force a side will lose before it breaks off, by Attack
 	// Damage. Same switch shape at BRE.OVR 0xF84F on the byte at +0x181, except
 	// the constants are what SURVIVES — 0.99, 0.90, 0.80, 0.70 — so the losses
