@@ -3193,8 +3193,41 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   the published "up to 20%" figure. So `SDIBomberReductionPct` applies to `L`
   rather than to any offence term.
 
-  Not read from the binary: the weight constants inside the offence and defence
-  builders. IB uses its own binary-verified unit values instead.
+  **The builders' own weights, read 2026-08-24.** Both differ from the LOCAL
+  resolver's, which is why applying one set to both battles was wrong.
+
+  Offence, per contributor slot (`ovr_03f4a0 +0x0000`):
+
+  ```
+  (troopers x 0.5  +  jets x (1 - SDI x 0.3/100)  +  tanks x 2) x factor(+0x1c)
+  ```
+
+  Doubled into trooper units that is **trooper 1, jet 2, tank 4** — the table IB
+  already uses, so its offence values were right. Bombers are absent, as above.
+  The per-contributor `+0x1c` factor travels in the packet; what writes it has
+  not been found, so IB applies no equivalent.
+
+  Defence (`resolve_received_invasion +0x0f9d`):
+
+  ```
+  round( (troopers x 0.5 + turrets + tanks x (HQ/100 + 1.5)) x (morale/175 + 0.5) )
+  ```
+
+  Two things there are NOT the local resolver's:
+
+  | | Local (`resolve_regular_attack`) | Invasion |
+  | --- | --- | --- |
+  | Tank value, in troopers | `(350 + HQ)/100` (`+0x0adb`: HQ/200 + 1.75) | `(300 + 2*HQ)/100` (`+0x0f9d`: HQ/100 + 1.5) |
+  | Morale factor | `50 + 0.6 x morale` (`+0x0b72`) | `50 + morale/1.75` (`+0x1040`) |
+
+  The tank factors cross at HQ 50: a realm with no HeadQuarters defends an
+  invasion **worse** than a neighbour's attack, and a finished one better. The
+  morale slope is gentler, so full morale holds at 107% against an invasion and
+  110% at home. `remoteTankStrength`, `remoteMoraleFactor`, `remoteDefense`.
+
+  This is where the `TankStrengthPctBase` comment's rejected reading — "300
+  rising to 500" — came from. It was never a misread; it belongs to the other
+  resolver.
 
   The strength multiplier is applied to the offense that leaves the sending
   board; the capture and casualty rates are applied by the **target** board on

@@ -17,6 +17,14 @@ const (
 	// the slope from the floor (100-floor = 50) and capped effectiveness at 100.
 	MoraleCombatFloor = 50 // binary: effectiveness % at zero morale
 	MoraleCombatSlope = 60 // binary
+
+	// The invasion resolver has its OWN slope: it divides morale by Real48 175
+	// and adds 0.5 (BRE.OVR resolve_received_invasion +0x1040), where the local
+	// resolver multiplies by 0.6 and adds 50 (+0x0b72). Same floor, gentler
+	// slope, so a defender at full morale holds at 107% against an invasion and
+	// 110% against a neighbour. Binary-verified; see remoteMoraleFactor.
+	RemoteMoraleSlopeNum = 100
+	RemoteMoraleSlopeDen = 175
 )
 
 // ForcesUpkeep is the gold the armed forces require this turn. Technology

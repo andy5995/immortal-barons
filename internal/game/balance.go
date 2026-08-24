@@ -1,5 +1,7 @@
 package game
 
+import "math"
+
 // balance.go — the game's tunable economy balance data, in one place.
 //
 // This is a "config that isn't changed at runtime": compiled-in, type-safe
@@ -650,9 +652,38 @@ const (
 	TankStrengthPctPerHQ = 1   // binary: HQ/200 doubled to trooper units
 )
 
+// An ARRIVING interplanetary strike is valued by a different builder, with its
+// own two constants. Both are BINARY-VERIFIED, and the pair of routines is why
+// this looks like a contradiction of the block above:
+//
+//	local          (resolve_regular_attack, BRE.OVR +0x0adb)  HQ/200 + 1.75
+//	interplanetary (resolve_received_invasion,        +0x0f9d) HQ/100 + 1.5
+//
+// Doubled into trooper units those are (350 + HQ)/100 and (300 + 2*HQ)/100. They
+// cross at HQ 50 and diverge either side of it, so a realm with no HeadQuarters
+// defends an invasion WORSE than a neighbour's attack, and a finished one better.
+//
+// This is the reading the block above records as rejected — "300 rising to 500".
+// It was not a misread, it was the other resolver's constant, and IB applied the
+// local pair to both battles until 2026-08-24.
+const (
+	RemoteTankStrengthPctBase  = 300 // binary: Real48 1.5, doubled
+	RemoteTankStrengthPctPerHQ = 2   // binary: HQ/100, doubled
+)
+
+// remoteTankStrength values n tanks in troopers for an arriving interplanetary
+// strike, given HQ completion percent.
+// Widened before the multiply: a realm can hold tens of millions of tanks, and
+// `n * 500` passes 2^31 on the 32-bit door builds this project supports.
+func remoteTankStrength(n, hq int) int {
+	wide := int64(n) * int64(RemoteTankStrengthPctBase+RemoteTankStrengthPctPerHQ*hq) / 100
+	return int(min(wide, math.MaxInt32))
+}
+
 // tankStrength values n tanks in troopers, given HQ completion percent.
 func tankStrength(n, hq int) int {
-	return n * (TankStrengthPctBase + TankStrengthPctPerHQ*hq) / 100
+	wide := int64(n) * int64(TankStrengthPctBase+TankStrengthPctPerHQ*hq) / 100
+	return int(min(wide, math.MaxInt32))
 }
 
 // HQBuildStart is the completion percent a newly bought HeadQuarters begins at,

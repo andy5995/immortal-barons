@@ -288,3 +288,45 @@ func TestSDIAllowanceIsPerTurnNotPerVisit(t *testing.T) {
 		t.Errorf("funding after a second turn = %d, want %d", a.SDIFunding, 2*SDIMinSpend)
 	}
 }
+
+// A realm defends an INVASION with different arithmetic than a neighbour's
+// attack. Golden literals from the two builders, not the constants: BRE keeps a
+// separate tank factor and a separate morale slope for an arriving strike, and
+// IB used the local pair for both until 2026-08-24.
+func TestInvasionUsesItsOwnDefenceArithmetic(t *testing.T) {
+	// Tanks: local (350+HQ)/100, invasion (300+2*HQ)/100. They cross at HQ 50.
+	for _, c := range []struct{ hq, local, remote int }{
+		{0, 350, 300},
+		{50, 400, 400},
+		{100, 450, 500},
+	} {
+		if got := tankStrength(100, c.hq); got != c.local {
+			t.Errorf("HQ %d%%: local tank strength = %d, want %d", c.hq, got, c.local)
+		}
+		if got := remoteTankStrength(100, c.hq); got != c.remote {
+			t.Errorf("HQ %d%%: invasion tank strength = %d, want %d", c.hq, got, c.remote)
+		}
+	}
+	// Morale: local 50+0.6m, invasion 50+m/1.75. Same floor, gentler slope.
+	for _, c := range []struct{ morale, local, remote int }{
+		{0, 50, 50},
+		{100, 110, 107},
+	} {
+		if got := moraleFactor(c.morale); got != c.local {
+			t.Errorf("morale %d: local factor = %d%%, want %d%%", c.morale, got, c.local)
+		}
+		if got := remoteMoraleFactor(c.morale); got != c.remote {
+			t.Errorf("morale %d: invasion factor = %d%%, want %d%%", c.morale, got, c.remote)
+		}
+	}
+	// And the two reach the field differently: Defense() leaves morale to its
+	// caller, remoteDefense() folds it in.
+	e := &Empire{Troopers: 1_000, Turrets: 1_000, Tanks: 1_000, HQ: 0, Morale: 100}
+	e.EnsureMorale()
+	if got, want := e.Defense(), 1_000+2_000+tankStrength(1_000, 0); got != want {
+		t.Errorf("local defence = %d, want %d", got, want)
+	}
+	if got, want := e.remoteDefense(), (1_000+2_000+remoteTankStrength(1_000, 0))*107/100; got != want {
+		t.Errorf("invasion defence = %d, want %d", got, want)
+	}
+}

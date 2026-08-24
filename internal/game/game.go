@@ -423,6 +423,25 @@ func moraleFactor(morale int) int {
 	return MoraleCombatFloor + MoraleCombatSlope*morale/100
 }
 
+// remoteMoraleFactor is the same idea for an ARRIVING interplanetary strike, and
+// the slope is not the same. BINARY-VERIFIED: the local builder multiplies morale
+// by Real48 0.6 and adds 50 (BRE.OVR +0x0b72), the invasion builder divides it by
+// Real48 175 and adds 0.5 (+0x1040). So a defender at full morale holds at 110%
+// against a neighbour and 107% against an invasion.
+func remoteMoraleFactor(morale int) int {
+	return MoraleCombatFloor + RemoteMoraleSlopeNum*morale/RemoteMoraleSlopeDen
+}
+
+// remoteDefense is what a realm brings to an ARRIVING interplanetary strike:
+// the same units as Defense(), valued by the invasion resolver's own tank
+// constant, and then scaled by morale — which Defense() does not do because its
+// callers apply moraleFactor themselves.
+func (e *Empire) remoteDefense() int {
+	sum := e.Troopers + e.Turrets*2 + remoteTankStrength(e.Tanks, e.HQ)
+	wide := int64(techRaise(sum, e.TechMilitaryFactor())) * int64(remoteMoraleFactor(e.Morale)) / 100
+	return int(min(wide, math.MaxInt32))
+}
+
 // EnsureProduction repairs the production percentages after loading a save that
 // predates industrial production (all Prod* fields zero). It runs on every load,
 // so it must NOT touch an empire that has already been initialized — otherwise a

@@ -1661,7 +1661,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// what was standing when the force arrived, not by what is left afterwards.
 	// The shield takes its share of the arriving jets and bombers first.
 	offense := atk.offenseAgainstSDI(target)
-	def := target.Defense()
+	def := target.remoteDefense()
 	// Fight it out. What each side loses is the OUTCOME of the attrition, not
 	// lossPct: that only says where the loop stops. Handing the defender lossPct
 	// outright made a strike's damage independent of its size, so a token force
