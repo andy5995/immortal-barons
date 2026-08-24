@@ -313,9 +313,10 @@ is treated as no key at all, which leaves that board unchecked rather than
 reporting an error.
 
 Once the roster carries a key for a board, every packet claiming to come from it
-is checked, and one that does not match is refused with a news line naming the
-board. Until then, packets from that board are applied unchecked. That is where
-every league starts, and it is why adding keys is worth doing.
+is checked, and one that does not match is refused, with a line in your
+`planetary.log` naming the board. Until then, packets from that board are
+applied unchecked. That is where every league starts, and it is why adding keys
+is worth doing.
 
 Do not create a second key on a board that already has one. Every packet it
 sends will fail on the other boards until the Coordinator publishes the
@@ -485,6 +486,65 @@ The rest of the mapping:
 The keywords are there because a file read by position gives no warning when a
 line is missing: every value below the gap moves up one and is read as the wrong
 setting.
+
+## When packets do not arrive
+
+Look in two places, in this order: the game's own log, then your mailer's.
+
+### The game's log
+
+Every `-planetary` run prints its transport faults when it finishes, and writes
+the same lines to `planetary.log` in your data directory, each one stamped with
+the date and time. Most sysops run the step from a scheduler, which throws
+printed output away, so the file is usually the only copy you have. It keeps the
+last 500 lines.
+
+These are the faults it records:
+
+- **A packet was destroyed.** Either no board of that name is on your roster, or
+  it was passed from board to board 25 times and never reached anyone. The
+  second one means a `HOST` line points back the way the packet came, so the
+  route is a circle.
+- **Nothing can be sent to a board.** Same cause, found before anything is
+  written: that board is not on the roster, so this board has no route to it.
+  Anything addressed there is discarded here.
+- **A packet was refused.** The line says why. A packet that did not match the
+  sending board's key, a board running an older release than the league
+  requires, or Coordinator orders that failed one of the six checks — those are
+  the three, and the wording names which one.
+- **Another board refused ours**, quoting that board's own reason.
+- **Packets from a board are being held.** See below.
+
+### Held packets
+
+A packet whose format this build cannot read is moved to the `held` folder in
+your data directory instead of being refused. Refusing would destroy a roster
+update, mail, or a returning strike that will be perfectly good once both boards
+run the same release.
+
+Every planetary run looks in that folder again and applies whatever it can now
+read, so a board that upgrades catches up on its backlog with nobody doing
+anything. Leave the files alone.
+
+### Nothing in the log, and still nothing arriving
+
+Then the packet never reached your inbound directory, and the fault is in the
+half you own. Three things to check:
+
+Your **Inbound Dir** setting has to name the directory your mailer really writes
+to. If it names a different one, the game reads an empty directory and reports
+nothing, because an empty inbound is also what a quiet day looks like.
+
+Your mailer has to be running and linked. "Step 5 — prove the link" below polls
+each board from the other and reads the result properly; a session that connects
+and transfers nothing is the answer you want.
+
+If you hand packets to FidoNet, writing the netmail is not sending it. See
+"Writing the netmail is not sending it" under "Optional FTN handoff" — a `.msg`
+still sitting in your netmail directory means the game did its part.
+
+The in-game **Travel Times** screen is where players see this first. A planet
+whose round trip stops moving is the same fault, seen from the other end.
 
 ## Optional FTN handoff
 
@@ -905,11 +965,12 @@ immortal-barons -planetary -data /path/to/member/data
 
 Watch the packet as it goes: it appears in the filebox, then in the other
 board's inbound, then disappears as the game reads it. The member board's news
-should then say **"The League Coordinator updated the league settings."** If it
-says a packet "claimed to carry League Coordinator orders and was refused"
-instead, the rest of that line names the check that failed — six different
-situations refuse a packet, and three of them are on the sending board rather
-than this one. Run `-league-check` on both boards before changing anything.
+should then say **"The League Coordinator updated the league settings."** If
+instead the member board's `planetary.log` says a packet "claimed to carry
+League Coordinator orders and was refused", the rest of that line names the
+check that failed — six different situations refuse a packet, and three of them
+are on the sending board rather than this one. Run `-league-check` on both
+boards before changing anything.
 
 One fault it cannot see: a key that is well-formed but simply the wrong one.
 If both boards pass the check and orders are still refused, compare the two
