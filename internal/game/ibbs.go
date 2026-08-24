@@ -1049,6 +1049,23 @@ func sameNode(a, b LeagueNode) bool {
 // the next call — appending to the Outbox can move the packets — so fill it in
 // before asking for another.
 func (w *World) outboxFor(board string) *Packet {
+	// The backstop for every way a destination can be named. A board the roster
+	// cannot place is unroutable by construction (see Routable): the packet would
+	// be handed from board to board unchanged until the hop cap destroyed it. It
+	// is refused here rather than at each call site so that a call site added
+	// later cannot put one on the wire. The caller still gets somewhere to write,
+	// and what it writes is thrown away.
+	if !w.Routable(board) {
+		if !w.unroutableNoted[board] {
+			if w.unroutableNoted == nil {
+				w.unroutableNoted = map[string]bool{}
+			}
+			w.unroutableNoted[board] = true
+			w.noteSysop("Nothing can be sent to %s: no board of that name is on the league roster, so no route to it exists. Anything addressed there is being discarded here rather than circling the league.", board)
+		}
+		w.unroutableSink = Packet{FromBoard: w.Config.BoardID, ToBoard: board, Date: w.LastMaintDate}
+		return &w.unroutableSink
+	}
 	for i := range w.Outbox {
 		if w.Outbox[i].ToBoard == board {
 			return &w.Outbox[i]

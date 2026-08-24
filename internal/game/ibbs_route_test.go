@@ -238,3 +238,52 @@ func TestAnUnrosteredBoardStillAddressesEveryone(t *testing.T) {
 		t.Error("a board that is not on the roster itself must still address its peers")
 	}
 }
+
+// The backstop under every call site that addresses a board by name: a
+// destination the roster cannot place never reaches the Outbox at all, and the
+// fault is reported to the sysop rather than to the planet, which can do
+// nothing about a routing problem.
+func TestTheOutboxRefusesAnUnroutableDestination(t *testing.T) {
+	w := &World{}
+	w.Config.BoardID = "The X-Bit BBS"
+	w.LeagueNodes = []LeagueNode{
+		{Number: 1, Name: "The X-Bit BBS", Hosts: []int{2}},
+		{Number: 2, Name: "Nite Eyes BBS"},
+	}
+
+	w.enqueue("local", RemoteAttack{})
+	w.enqueue("local", RemoteAttack{})
+	w.enqueue("Nite Eyes BBS", RemoteAttack{})
+
+	if len(w.Outbox) != 1 || w.Outbox[0].ToBoard != "Nite Eyes BBS" {
+		t.Fatalf("Outbox = %+v, want one packet, for Nite Eyes BBS", w.Outbox)
+	}
+	if len(w.Outbox[0].Attacks) != 1 {
+		t.Errorf("the routable board lost its payload: %+v", w.Outbox[0])
+	}
+	if len(w.NewsToday) != 0 {
+		t.Errorf("a transport fault reached the planet's news: %q", w.NewsToday)
+	}
+	if len(w.SysopNotices) != 1 {
+		t.Fatalf("recorded %d sysop notices, want 1 — one per board, not one per payload", len(w.SysopNotices))
+	}
+	for _, want := range []string{"local", "roster"} {
+		if !strings.Contains(w.SysopNotices[0], want) {
+			t.Errorf("the notice should mention %q, got %q", want, w.SysopNotices[0])
+		}
+	}
+}
+
+// A board with no roster entry of its own routes nothing, so the backstop must
+// not stop it queueing anything (the mirror of Routable's own exemption).
+func TestTheOutboxBackstopSparesAnUnrosteredBoard(t *testing.T) {
+	w := &World{}
+	w.Config.BoardID = "Lonely BBS"
+	w.RemoteBoards = []RemoteBoard{{BoardID: "Nite Eyes BBS"}}
+
+	w.enqueue("Nite Eyes BBS", RemoteAttack{})
+
+	if len(w.Outbox) != 1 || len(w.SysopNotices) != 0 {
+		t.Errorf("Outbox = %+v, notices = %q; the backstop stranded an unrostered board", w.Outbox, w.SysopNotices)
+	}
+}

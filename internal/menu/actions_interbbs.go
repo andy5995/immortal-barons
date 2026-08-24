@@ -373,7 +373,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 		boards[i] = b.BoardID
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
-	board := pickPlanetNamed(s, w, boards)
+	board := pickAddressee(s, w, boards)
 	if board == "" {
 		return Stay
 	}
@@ -661,7 +661,7 @@ func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 		return "", ""
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
-	board = pickPlanetNamed(s, w, boards)
+	board = pickAddressee(s, w, boards)
 	if board == "" {
 		return "", ""
 	}
@@ -817,7 +817,7 @@ func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt strin
 		boards[i] = b.BoardID
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, planetPrompt), ansi.Reset)
-	board = pickPlanetNamed(s, w, boards)
+	board = pickAddressee(s, w, boards)
 	if board == "" {
 		return "", "", sc, false
 	}
@@ -884,7 +884,7 @@ func sendSpyGuy(s session.Session, w *ctx) Result {
 		fail(s, game.ErrCantAfford)
 		return Stay
 	}
-	board := pickPlanetNamed(s, w, planets)
+	board := pickAddressee(s, w, planets)
 	if board == "" {
 		return Stay
 	}
@@ -960,7 +960,7 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 				return Stay
 			}
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightYellow, fmt.Sprintf(tr(s, "%s against which planet?"), label), ansi.Reset)
-			if board = pickPlanetNamed(s, w, boards); board == "" {
+			if board = pickAddressee(s, w, boards); board == "" {
 				return Stay
 			}
 		} else {
@@ -1194,6 +1194,8 @@ func diplomacyModification(s session.Session, w *ctx) Result {
 		ok(s, "No other planets are known yet.")
 		return Stay
 	}
+	// pickPlanetNamed, not pickAddressee: this chart is kept here and sent
+	// nowhere, so a planet the roster cannot place yet can still be marked.
 	board := pickPlanetNamed(s, w, planets)
 	if board == "" {
 		return Stay

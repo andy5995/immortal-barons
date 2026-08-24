@@ -797,6 +797,13 @@ type World struct {
 
 	Today string `json:"-"` // ISO date for this session
 
+	// unroutableSink absorbs a payload addressed to a board the roster cannot
+	// place, and unroutableNoted keeps the sysop notice to one per board per run
+	// rather than one per payload. Both are unexported, so neither is saved.
+	// See outboxFor.
+	unroutableSink  Packet
+	unroutableNoted map[string]bool
+
 	mu  sync.Mutex // guards concurrent access when a server shares one World
 	rng *rand.Rand
 	// nameRng is a SEPARATE stream for cosmetic AI-name generation, so choosing

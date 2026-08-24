@@ -26,7 +26,7 @@ func ipMarkets(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Allied Markets"), ansi.Reset)
-	board := pickPlanetNamed(s, w, boards)
+	board := pickAddressee(s, w, boards)
 	if board == "" {
 		return Stay
 	}

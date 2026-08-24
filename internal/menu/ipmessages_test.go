@@ -173,3 +173,78 @@ func TestPlanetPromptKeepsTheFirstTypedCharacter(t *testing.T) {
 		t.Errorf("picked %q, want Nova Hub — the first letter must not be eaten", got)
 	}
 }
+
+// unroutableWorld is ipWorld having also heard, over a packet, from a board
+// that never introduced itself to the Coordinator — the live fault, where a
+// board ran with its BoardID unset and every league member recorded "local"
+// forever. Its node number is invented by LeaguePlanets, so routing cannot
+// place it.
+func unroutableWorld() *ctx {
+	w := ipWorld()
+	w.RemoteBoards = []game.RemoteBoard{{BoardID: "local"}}
+	return w
+}
+
+// The picker must not offer a board a packet cannot reach: choosing one costs
+// the player the action and destroys the packet several boards away. The script
+// names it and is refused, then names a real planet, so the prompt is proved to
+// have been reached and still working.
+func TestThePickerDoesNotOfferAnUnroutablePlanet(t *testing.T) {
+	f := &fakeSession{keys: []rune("?local\r4\rTerms.\r/s")}
+	w := unroutableWorld()
+	ipMessageSingle(f, w)
+	out := f.out.String()
+	if !strings.Contains(out, "List of Planets") {
+		t.Fatalf("never reached the planet list:\n%s", out)
+	}
+	table := out[strings.Index(out, "List of Planets"):]
+	if i := strings.Index(table, "Enter Planet Name"); i >= 0 {
+		table = table[:i]
+	}
+	if strings.Contains(table, "local") {
+		t.Errorf("the picker listed a planet the roster cannot place:\n%s", table)
+	}
+	// Three prompts: the one "?" answered, the one that took "local", and the one
+	// it had to ask again because that name was refused.
+	if n := strings.Count(out, "Enter Planet Name"); n != 3 {
+		t.Errorf("the prompt ran %d times, want 3 — naming the unroutable planet was not refused:\n%s", n, out)
+	}
+	if !strings.Contains(out, "lines for your message") {
+		t.Fatalf("the prompt never recovered to take a real planet:\n%s", out)
+	}
+	if len(w.Outbox) != 1 || w.Outbox[0].ToBoard != "The Eclipse" {
+		t.Fatalf("queued %+v, want one packet for The Eclipse", w.Outbox)
+	}
+}
+
+// All Planets never goes through the picker, so the send itself has to filter.
+func TestAllPlanetsSkipsAnUnroutablePlanet(t *testing.T) {
+	f := &fakeSession{keys: []rune("Hello league.\r/s")}
+	w := unroutableWorld()
+	ipMessageAll(f, w)
+	if !strings.Contains(f.out.String(), "lines for your message") {
+		t.Fatalf("All Planets did not reach the editor:\n%s", f.out.String())
+	}
+	var to []string
+	for _, p := range w.Outbox {
+		to = append(to, p.ToBoard)
+	}
+	if len(to) != 2 {
+		t.Fatalf("queued for %v, want only the two planets on the roster", to)
+	}
+}
+
+// Unroutable is not invisible: a board heard from before the Coordinator's
+// roster catches up is a normal, temporary state, and it becomes routable on
+// its own once the roster lands. It stays on the screens that only SHOW the
+// league.
+func TestAnUnroutablePlanetIsStillShownWhereTheScreenOnlyInforms(t *testing.T) {
+	w := unroutableWorld()
+	out := drive(t, w, "\r", planetaryTreaties).out.String()
+	if !strings.Contains(out, "Planetary Treaties") {
+		t.Fatalf("never reached the chart:\n%s", out)
+	}
+	if !strings.Contains(out, "local") {
+		t.Errorf("the treaty chart hid a planet it has merely heard from:\n%s", out)
+	}
+}

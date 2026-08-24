@@ -46,6 +46,50 @@ func planetsNamed(w *ctx, want []string) []game.LeagueNode {
 	return list
 }
 
+// addressablePlanets is knownPlanets for a screen that will SEND to whatever
+// the player names. A board this one has only heard from over a packet is
+// listed with an invented node number that routing cannot place, so a packet
+// addressed to it is passed from board to board until the hop cap destroys it
+// (game.Routable). It stays on the screens that merely SHOW the league — the
+// planet list, the treaty chart, travel times — because a board heard from
+// before the Coordinator's roster catches up is normal and becomes routable on
+// its own. It just cannot be picked as a destination.
+func addressablePlanets(w *ctx) []game.LeagueNode {
+	var list []game.LeagueNode
+	w.With(func() {
+		for _, p := range w.LeaguePlanets() {
+			if w.Routable(p.Name) {
+				list = append(list, p)
+			}
+		}
+	})
+	return list
+}
+
+// addressable keeps the boards a packet from here can actually reach.
+func addressable(w *ctx, boards []string) []string {
+	var out []string
+	w.With(func() {
+		for _, b := range boards {
+			if w.Routable(b) {
+				out = append(out, b)
+			}
+		}
+	})
+	return out
+}
+
+// pickAddressee is pickPlanetNamed for a screen that will send a packet to the
+// planet chosen, so an unroutable one is never offered.
+func pickAddressee(s session.Session, w *ctx, want []string) string {
+	reach := addressable(w, want)
+	if len(reach) == 0 {
+		ok(s, "None of those planets is on the league roster, so nothing can be sent to them yet.")
+		return ""
+	}
+	return pickPlanetNamed(s, w, reach)
+}
+
 // nodeLocation joins a roster entry's city/state/country the way BRE's planet
 // list prints it, skipping the parts a sysop left blank.
 func nodeLocation(n game.LeagueNode) string {
@@ -215,7 +259,7 @@ func ipMessageCoordinator(s session.Session, w *ctx) Result {
 // ipMessageToOnePlanet is Single Planet and Planet Coordinator, which differ
 // only in how narrowly the far side delivers what arrives.
 func ipMessageToOnePlanet(s session.Session, w *ctx, toCoordinator bool) Result {
-	planets := knownPlanets(w)
+	planets := addressablePlanets(w)
 	if len(planets) == 0 {
 		ok(s, "No other planets are known yet.")
 		return Stay
@@ -228,7 +272,7 @@ func ipMessageToOnePlanet(s session.Session, w *ctx, toCoordinator bool) Result 
 }
 
 func ipMessageSelect(s session.Session, w *ctx) Result {
-	planets := knownPlanets(w)
+	planets := addressablePlanets(w)
 	if len(planets) == 0 {
 		ok(s, "No other planets are known yet.")
 		return Stay
@@ -282,6 +326,14 @@ func ipMessageAllied(s session.Session, w *ctx) Result {
 // they travel on the sysop's next inter-BBS run, which is why the reply comes
 // back in hours or days rather than in the same turn.
 func composeIPMessage(s session.Session, w *ctx, boards []string, toCoordinator bool) Result {
+	// The whole-league and allied modes never went through the picker, and a
+	// board can stop being routable between the pick and the send, so the list is
+	// filtered once more here — before the sender types anything.
+	boards = addressable(w, boards)
+	if len(boards) == 0 {
+		ok(s, "None of those planets is on the league roster, so nothing can be sent to them yet.")
+		return Stay
+	}
 	text, send := composeMessage(s)
 	if !send || strings.TrimSpace(text) == "" {
 		return Stay
