@@ -1,0 +1,12 @@
+# Text files are LF in the working tree on every platform, not just on the ones
+# that use LF natively. A test that compares a checked-in fixture byte for byte
+# otherwise passes everywhere and fails on Windows alone, where git hands the
+# file back with CRLF — which is exactly how the frozen packet shape broke CI on
+# the v0.0.7 release commit, on one job out of seven.
+* text=auto eol=lf
+
+# ANSI art is not text to be normalised. Its CRLF is what returns a terminal to
+# column 0 between rows; rewritten to LF the splash renders as a staircase. The
+# file is embedded verbatim (//go:embed) and written to the caller as those
+# exact bytes, and it carries CP437 high bytes that are not text either.
+*.ans -text

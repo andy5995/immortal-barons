@@ -79,10 +79,10 @@ func TestPacketWireShapeIsFrozen(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// Strip CR: git checks this file out with CRLF on Windows, and comparing it
-	// to a string built with \n then fails there and nowhere else. Normalising
-	// here rather than in .gitattributes keeps the test right whatever a
-	// contributor's checkout settings are.
+	// Strip CR even though .gitattributes now pins this file to LF: a checkout
+	// made before that landed, or a source tarball unpacked on Windows, still
+	// hands it back with CRLF. The failure is a diff between two strings that
+	// look identical, on one platform, so it is worth not being able to happen.
 	want := strings.ReplaceAll(string(raw), "\r\n", "\n")
 	got := packetShape()
 	if got == want {
