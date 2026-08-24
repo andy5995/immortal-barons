@@ -23,6 +23,13 @@ const Version = "0.0.7"
 // without the whole league moving with it — the game version cannot say that,
 // because it moves for everything.
 //
+// It says nothing about whether two boards agree on the RULES. A retuned
+// formula leaves the wire identical, so this number stays put while the two
+// compute different outcomes — and an interplanetary attack is resolved on the
+// target board, so the same attack resolves differently depending on which end
+// receives it. Config.MinBoardVersion gates on the game version and is what
+// covers that; the two are not alternatives.
+//
 // A board that states no protocol (the field is absent) predates it and speaks
 // exactly this format, so it counts as protocol 1 rather than as a mismatch.
 // That is what makes introducing this a soft change instead of a cutover that

@@ -108,6 +108,15 @@ Watch it: a release with no assets is a release nobody can use.
    oversight — it fails the build when a field is added, renamed or reordered,
    and its comment says which of the three answers applies.
 
+   **A protocol bump is not the tool for a balance change.** Retuning a formula
+   leaves the wire byte-identical, so the protocol number stays put and boards
+   go on exchanging packets while computing different outcomes. That is worse
+   than a format break, not better: an interplanetary attack is resolved on the
+   TARGET board, so the same attack gives different results depending on which
+   end resolves it, and nothing announces it. `MinBoardVersion` is what covers
+   this — it gates on the game version, which does move for a formula change.
+   Set it when a release changes gameplay a league would notice.
+
    **For v0.0.8 specifically:** remove the `p == 0` case from
    `game.SpeaksOurProtocol`. It exists so v0.0.7 accepts packets written before
    the protocol field existed, which is what let the mechanism ship without

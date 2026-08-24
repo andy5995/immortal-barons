@@ -1,47 +1,47 @@
-(in-progress:)
-  * Coordinator orders verify against older signed-payload shapes as well
-  * A realm name needs three letters or digits; decoration does not count
-  * A realm name may be at most 30 characters, the original's own limit
-  * A refused realm name says which rule it missed
-  * Abdicating asks one yes/no question, then ends the session
-  * Inbound packets are matched whatever the case of their .brp extension
-  * A roster node number must be 1 to 999
-  * -league-check names a roster entry it had to skip
-  * -league-check reports a league key that is present but unreadable
-  * A refused Coordinator packet says which check it failed
-  * Planetary Bulletin lines are wrapped to the screen
-  * Transport faults are reported to the sysop and logged, not put in the news
-  * A planet the league roster cannot place is no longer offered as a target
-  * A packet is never addressed to a board the league roster cannot place
-  * Packets speaking a protocol this build cannot read are held, not refused
-  * The 32-bit Windows build runs on Windows 7, 8, and Server 2008 R2 through
-    2012 R2
-  * Game Bulletins reads .txt and .ans files from a bull folder in the data dir
-  * The League Coordinator's bulletins are distributed to every board
-  * A bulletin that is added or changed is named in the day's news
-  * A board no longer overrides league routing with an "ibroute.cfg" file
-  * A player out of turns still gets their recap and mail on entering
-  * A treaty proposal no longer mails a notice the offer screen already gives
-  * FTN broadcast copies are named by a short index, not the recipient node
-  * Each realm keeps its own Preferences, where a board once shared one set
+2026-08-23 (v0.0.7)
   * A Clingy Annihilator launches itself three days after its funding completes
-  * Only the elected Coordinator can dismantle a Clingy Annihilator
   * A landed Clingy Annihilator besieges the planet for five days
   * Jets attack a landed Clingy Annihilator, capped at 75% of it per wave
-  * Game Setup leads with the league, adding its number and its Coordinator
-  * The League Name setting is removed; a league is identified by its number
-  * Game Setup pairs settings two to a line, so a league board's fits two pages
-  * A trade deal's request side no longer quotes a ceiling for what it asks
-  * A loan's ceiling falls as its repayment term lengthens
-  * Net worth counts toward a loan ceiling only up to ten million
+  * Only the elected Coordinator can dismantle a Clingy Annihilator
   * A won attack scores 82 per region captured, and 192 for a total conquest
   * Repelling an attack no longer moves either realm's score
   * A nuclear, chemical or biological strike scores a flat award
   * A won pirate raid scores 100 to 399; a lost one costs nothing
-  * Missile Ops and Bombing Ops govern Special Operations alone, not local menus
-  * The InterBBS Scores screen is headed Immortal Barons, not the original's name
+  * Each realm keeps its own Preferences, where a board once shared one set
+  * A realm name needs three letters or digits; decoration does not count
+  * A realm name may be at most 30 characters, the original's own limit
+  * A refused realm name says which rule it missed
+  * Abdicating asks one yes/no question, then ends the session
+  * A player out of turns still gets their recap and mail on entering
+  * Coordinator orders verify against older signed-payload shapes as well
+  * Packets speaking a protocol this build cannot read are held, not refused
+  * A refused Coordinator packet says which check it failed
+  * Transport faults are reported to the sysop and logged, not put in the news
+  * A planet the league roster cannot place is no longer offered as a target,
+    and no packet is addressed to one
+  * Inbound packets are matched whatever the case of their .brp extension
+  * A board no longer overrides league routing with an "ibroute.cfg" file
+  * FTN broadcast copies are named by a short index, not the recipient node
+  * A roster node number must be 1 to 999
   * A roster board name is capped at 512 bytes, and -league-check reports a cut
   * A long board name is shown cut to fit wherever a screen has room for it
+  * -league-check names a roster entry it had to skip
+  * -league-check reports a league key that is present but unreadable
+  * The League Coordinator's bulletins are distributed to every board
+  * Game Bulletins reads .txt and .ans files from a bull folder in the data dir
+  * A bulletin that is added or changed is named in the day's news
+  * Game Setup leads with the league, adding its number and its Coordinator
+  * The League Name setting is removed; a league is identified by its number
+  * Game Setup pairs settings two to a line, so a league board's fits two pages
+  * Missile Ops and Bombing Ops govern Special Operations alone, not local menus
+  * A loan's ceiling falls as its repayment term lengthens
+  * Net worth counts toward a loan ceiling only up to ten million
+  * A trade deal's request side no longer quotes a ceiling for what it asks
+  * A treaty proposal no longer mails a notice the offer screen already gives
+  * Planetary Bulletin lines are wrapped to the screen
+  * The InterBBS Scores screen is headed Immortal Barons, not the original's name
+  * The 32-bit Windows build runs on Windows 7, 8, and Server 2008 R2 through
+    2012 R2
 
 2026-08-21 (v0.0.6)
   * Local covert effect operations resolve at daily maintenance

@@ -68,6 +68,14 @@ In this game, **diplomacy** and **changing production** live on the System
 menu.  They are not automatic stops in each turn, so visit them yourself
 when you want to change your plans.
 
+## Game Bulletins
+
+Your sysop can put up notices for players to read. Choose **Game Bulletins**
+from the opening menu to see the list, then pick one by its number. In a
+linked game the league's own notices are listed first, under "Galactic", and
+every planet in the league sees the same ones. When a notice is put up or
+changed, it is named in the day's news.
+
 ## Reading the rest
 
 The sections that follow explain each part of the game in turn: the

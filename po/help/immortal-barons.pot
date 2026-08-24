@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-08-22 16:19-0500\n"
+"POT-Creation-Date: 2026-08-23 21:49-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -1594,8 +1594,8 @@ msgstr ""
 #: internal/help/content/interbbs/allied-markets.md:15
 #, markdown-text
 msgid ""
-"Only planets your Coordinator has marked Allied are listed. Barren Realms "
-"Elite had no way to trade between planets at all, so this is new."
+"Only planets your Coordinator has marked Allied are listed. Buying across "
+"planets is an Immortal Barons feature, and a league may switch it off."
 msgstr ""
 
 #. type: Title ##
@@ -2525,11 +2525,28 @@ msgstr ""
 #. type: Title ##
 #: internal/help/content/introduction/overview.md:68
 #, markdown-text, no-wrap
+msgid "Game Bulletins"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/introduction/overview.md:75
+#, markdown-text
+msgid ""
+"Your sysop can put up notices for players to read. Choose **Game Bulletins** "
+"from the opening menu to see the list, then pick one by its number. In a "
+"linked game the league's own notices are listed first, under \"Galactic\", "
+"and every planet in the league sees the same ones. When a notice is put up "
+"or changed, it is named in the day's news."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/introduction/overview.md:76
+#, markdown-text, no-wrap
 msgid "Reading the rest"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/introduction/overview.md:73
+#: internal/help/content/introduction/overview.md:81
 #, markdown-text
 msgid ""
 "The sections that follow explain each part of the game in turn: the "
@@ -3495,31 +3512,55 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:20
+#: internal/help/content/warfare/clingy-annihilator.md:22
 #, markdown-text
 msgid ""
-"When the money is all in, the weapon is ready. Only the baron who started "
-"the work can launch it. They can scrap it instead, but the gold is spent "
-"either way."
+"When the last of the money is in, the weapon builds for three more days and "
+"then launches itself. Nobody decides that. The only person who can call it "
+"off is your elected Coordinator, and only before it leaves the ground. The "
+"gold is spent either way."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/warfare/clingy-annihilator.md:23
+#, markdown-text, no-wrap
+msgid "Being on the receiving end"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:25
+#: internal/help/content/warfare/clingy-annihilator.md:30
 #, markdown-text
 msgid ""
-"The target planet can see the weapon coming. They are told while the work is "
-"going on, and told again at launch, with the hours left before it "
-"lands. Only jets can reach it. Every wave takes a piece out of the weapon, "
-"and enough waves destroy it in the air."
+"A weapon aimed at your planet does not go off and disappear. It arrives, "
+"sits on your planet, and eats it. The day it lands it takes a tenth of every "
+"realm's regions. Every day after that it takes another twentieth, until five "
+"days are up and it burns itself out. Left alone it will cost you better than "
+"a quarter of your land."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:28
+#: internal/help/content/warfare/clingy-annihilator.md:35
 #, markdown-text
 msgid ""
-"Whatever survives the flight strikes every realm on that planet and takes a "
-"share of their regions. An SDI program is no help against it — jets are the "
-"only thing that can reach the weapon."
+"Only jets can reach it. Your realm is asked at the start of your turn "
+"whether you want to attack it, and the screen tells you how many jets it "
+"would take to destroy the thing outright — a figure that grows with the size "
+"of your planet.  About a third of the jets you send do not come home."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/clingy-annihilator.md:39
+#, markdown-text
+msgid ""
+"No single wave can finish it, however many jets you send. That is the point: "
+"the weapon is built to need the whole planet's air forces, and a planet that "
+"cannot organise loses the land."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/warfare/clingy-annihilator.md:40
+#, markdown-text
+msgid "An SDI program is no help against it, and neither is anything else you own."
 msgstr ""
 
 #. type: Title #
