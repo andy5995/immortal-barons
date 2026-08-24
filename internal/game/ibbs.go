@@ -1375,7 +1375,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// a working league on upgrade rather than securing it. That transition state
 	// is the remaining gap, and it closes as rosters gain keys.
 	if ok, checked := w.VerifyBoardOrigin(p); checked && !ok {
-		w.postNews(fmt.Sprintf("A packet claiming to be from %s did not match that board's key and was refused.", p.FromBoard))
+		w.noteSysop("A packet claiming to be from %s did not match that board's key and was refused.", p.FromBoard)
 		return Packet{}
 	}
 	// Applying the same packet twice would pay out a strike's results, a
@@ -1401,7 +1401,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	// answer. Delivering the notice and stopping is what keeps two boards that
 	// both refuse each other from bouncing the same packet back and forth.
 	if p.Notice != "" {
-		w.postNews(fmt.Sprintf("%s refused our packet: %s", p.FromBoard, p.Notice))
+		w.noteSysop("%s refused our packet: %s", p.FromBoard, p.Notice)
 		return Packet{}
 	}
 	// Past every guard, so this records packets actually ACCEPTED — a forged or
@@ -1986,8 +1986,8 @@ func (w *World) bounceVersion(p Packet) Packet {
 	if p.Version != "" {
 		ver = "v" + p.Version
 	}
-	w.postNews(fmt.Sprintf("A packet from %s was refused: it runs %s, and this league requires v%s.",
-		p.FromBoard, ver, w.Config.MinBoardVersion))
+	w.noteSysop("A packet from %s was refused: it runs %s, and this league requires v%s.",
+		p.FromBoard, ver, w.Config.MinBoardVersion)
 	return Packet{
 		FromBoard: w.Config.BoardID, ToBoard: p.FromBoard, Date: w.LastMaintDate,
 		Notice: fmt.Sprintf("this league requires v%s and your board runs %s; upgrade and the packet will be accepted",

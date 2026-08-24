@@ -94,8 +94,13 @@ func TestMinimumVersionGatesPackets(t *testing.T) {
 	if len(w.RemoteBoards) != 0 {
 		t.Error("a packet from a board below the minimum was applied")
 	}
-	if news := strings.Join(w.NewsToday, "\n"); !strings.Contains(news, "requires v0.0.5") {
-		t.Errorf("the refusal should say why:\n%s", news)
+	// The sysop is told why, not the players -- upgrading a board is not
+	// something a baron can act on.
+	if note := strings.Join(w.SysopNotices, "\n"); !strings.Contains(note, "requires v0.0.5") {
+		t.Errorf("the refusal should say why:\n%s", note)
+	}
+	if strings.Contains(strings.Join(w.NewsToday, "\n"), "requires v0.0.5") {
+		t.Error("a transport fault reached the planet's news")
 	}
 	// A board that states no version cannot prove it meets the bar.
 	w.ApplyPacket(Packet{FromBoard: "Bravo BBS", Seq: 2, Scores: []RemoteScore{{Empire: "Redlands"}}})
