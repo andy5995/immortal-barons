@@ -49,6 +49,11 @@ func (w *World) PingTravelTimes() {
 	w.LastTravelPing = today
 	sent := timeNow().Format(time.RFC3339)
 	for _, board := range w.KnownBoards() {
+		// A board the roster cannot place gets no probe: the packet would only
+		// circle the league and be destroyed, once a day, forever.
+		if !w.Routable(board) {
+			continue
+		}
 		p := w.outboxFor(board)
 		p.TimeChecks = append(p.TimeChecks, TimeCheck{From: w.Config.BoardID, To: board, Sent: sent})
 	}

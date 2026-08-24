@@ -92,8 +92,10 @@ func TestCoordRefusalReasonNamesTheGateThatFailed(t *testing.T) {
 	})
 }
 
-// The reason has to reach the bulletin, not just exist.
-func TestRefusalNewsCarriesTheReason(t *testing.T) {
+// The reason has to reach the sysop, not just exist -- and it must NOT reach
+// the planet's news, where no player can act on it and the 20-line cap would
+// let it delete the day's real events.
+func TestRefusalNoticeCarriesTheReason(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.BoardID = "BravoBBS"
 	w := NewWorldSeed(cfg, 1)
@@ -101,15 +103,20 @@ func TestRefusalNewsCarriesTheReason(t *testing.T) {
 	w.ApplyPacket(Packet{FromBoard: "AlphaBBS", FromNode: 1, LeagueNodes: w.LeagueNodes})
 
 	var line string
-	for _, n := range w.NewsToday {
+	for _, n := range w.SysopNotices {
 		if strings.Contains(n, "was refused") {
 			line = n
 		}
 	}
 	if line == "" {
-		t.Fatal("no refusal filed in the bulletin")
+		t.Fatal("no refusal recorded for the sysop")
 	}
 	if !strings.Contains(line, "no Coordinator key is recorded") {
-		t.Errorf("bulletin line %q does not say why it was refused", line)
+		t.Errorf("the notice %q does not say why it was refused", line)
+	}
+	for _, n := range w.NewsToday {
+		if strings.Contains(n, "was refused") {
+			t.Errorf("a transport fault reached the planet's news: %q", n)
+		}
 	}
 }

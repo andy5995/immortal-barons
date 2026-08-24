@@ -1331,6 +1331,12 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 	if run.RosterUpdated {
 		fmt.Println("The League Coordinator's roster replaced this board's copy.")
 	}
+	for _, n := range run.Notices {
+		fmt.Println(textwrap.Wrap("  "+n, textwrap.Console, "  "))
+	}
+	if len(run.Notices) > 0 {
+		fmt.Printf("  (also recorded in %s)\n", filepath.Join(cfg.DataDir, store.PlanetaryLogFile))
+	}
 	if run.Bulletins == 1 {
 		fmt.Println("Broadcast 1 league bulletin to the league.")
 	} else if run.Bulletins > 1 {

@@ -685,7 +685,14 @@ type World struct {
 	LastMaster    string // crowned at league end (endGame); shown as "Last Planetary Master"
 	CurrentMaster string // daily net-worth leader, tracked by postMasterNews
 	RemoteBoards  []RemoteBoard
-	Pirates       []PirateFaction
+	// SysopNotices are transport faults for the person running the game, not
+	// for its players: a packet that could not be delivered, orders that failed
+	// their check. They are NOT persisted (json:"-") and are drained by the
+	// planetary step into its run report, because a bulletin is the wrong place
+	// for them — no player can act on one, and the news cap is 20 lines, so a
+	// fault that repeats every exchange silently deletes the day's real events.
+	SysopNotices []string `json:"-"`
+	Pirates      []PirateFaction
 
 	// LastPacketFrom records the game day a packet from each board was PROCESSED
 	// here, and BoardVersion the game version that board last said it was

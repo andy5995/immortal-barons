@@ -121,6 +121,10 @@ func TestForwardPacketStopsAtTheHopLimit(t *testing.T) {
 // Destroying the packet is only half the job. A hop count that ate the traffic
 // in silence would leave a mis-routed league with no symptom but disappearing
 // mail, which is the failure the count exists to make survivable.
+//
+// It is reported to the SYSOP, not to the planet: a player can do nothing about
+// a routing cycle, and the news cap is 20 lines, so a fault that repeats every
+// exchange would delete the day's real events instead.
 func TestADestroyedPacketIsReported(t *testing.T) {
 	w := &World{}
 	w.ForwardPacket(Packet{FromBoard: "Alpha BBS", ToBoard: "Charlie BBS", Hops: MaxPacketHops})
@@ -128,13 +132,16 @@ func TestADestroyedPacketIsReported(t *testing.T) {
 	if len(w.Transit) != 0 {
 		t.Errorf("queued %d packets, want 0", len(w.Transit))
 	}
-	if len(w.NewsToday) != 1 {
-		t.Fatalf("posted %d news lines, want 1", len(w.NewsToday))
+	if len(w.NewsToday) != 0 {
+		t.Errorf("a transport fault reached the planet's news: %q", w.NewsToday)
 	}
-	news := w.NewsToday[0]
+	if len(w.SysopNotices) != 1 {
+		t.Fatalf("recorded %d sysop notices, want 1", len(w.SysopNotices))
+	}
+	note := w.SysopNotices[0]
 	for _, want := range []string{"Alpha BBS", "Charlie BBS"} {
-		if !strings.Contains(news, want) {
-			t.Errorf("news should name %q, got %q", want, news)
+		if !strings.Contains(note, want) {
+			t.Errorf("the notice should name %q, got %q", want, note)
 		}
 	}
 }
@@ -159,5 +166,75 @@ func TestForwardPacketDoesNotRestampTheOriginal(t *testing.T) {
 	}
 	if got.Hops != 1 {
 		t.Errorf("Hops = %d, want 1", got.Hops)
+	}
+}
+
+// The live fault this guard exists for: a board that once introduced itself
+// under the default BoardID ("local") is recorded in RemoteBoards, and
+// LeaguePlanets hands it an invented node number so it can be listed and
+// picked. NodeNumber never learns that number, so anything addressed to it is
+// unroutable by construction -- and the travel probe addressed one every day,
+// which circled the league and was destroyed, once a day, on every board.
+func TestTheTravelProbeSkipsABoardTheRosterCannotPlace(t *testing.T) {
+	w := &World{}
+	w.Config.BoardID = "The X-Bit BBS"
+	w.LeagueNodes = []LeagueNode{
+		{Number: 1, Name: "The X-Bit BBS", Hosts: []int{2}},
+		{Number: 2, Name: "Nite Eyes BBS"},
+	}
+	w.RemoteBoards = []RemoteBoard{{BoardID: "local"}}
+	w.LastMaintDate = "2026-08-23"
+
+	// It is still a planet as far as the screens are concerned -- the guard must
+	// stop it being ADDRESSED, not make it vanish.
+	var listed bool
+	for _, p := range w.LeaguePlanets() {
+		if p.Name == "local" {
+			listed = true
+		}
+	}
+	if !listed {
+		t.Fatal("LeaguePlanets should still list a board heard from off-roster")
+	}
+
+	w.PingTravelTimes()
+	for _, p := range w.Outbox {
+		if p.ToBoard == "local" {
+			t.Error("the travel probe addressed a board the roster cannot place")
+		}
+	}
+	if len(w.Outbox) == 0 {
+		t.Error("no probe was sent at all; the guard is too broad")
+	}
+}
+
+// An undeliverable packet dies on arrival rather than after 25 hops, and the
+// notice says which name is missing instead of describing a circle.
+func TestAnUnroutablePacketIsDroppedAtOnce(t *testing.T) {
+	w := &World{}
+	w.Config.BoardID = "The X-Bit BBS"
+	w.LeagueNodes = []LeagueNode{{Number: 1, Name: "The X-Bit BBS", Hosts: []int{2}}, {Number: 2, Name: "Nite Eyes BBS"}}
+
+	w.ForwardPacket(Packet{FromBoard: "Nite Eyes BBS", ToBoard: "local"})
+
+	if len(w.Transit) != 0 {
+		t.Errorf("queued %d packets, want 0", len(w.Transit))
+	}
+	if len(w.SysopNotices) != 1 {
+		t.Fatalf("recorded %d notices, want 1", len(w.SysopNotices))
+	}
+	if !strings.Contains(w.SysopNotices[0], "roster") {
+		t.Errorf("the notice should name the roster as the problem, got %q", w.SysopNotices[0])
+	}
+}
+
+// A board with no roster entry of its own routes nothing and leans on the
+// transport, so nothing there is unroutable -- the guard must not strand it.
+func TestAnUnrosteredBoardStillAddressesEveryone(t *testing.T) {
+	w := &World{}
+	w.Config.BoardID = "Lonely BBS"
+	w.RemoteBoards = []RemoteBoard{{BoardID: "Nite Eyes BBS"}}
+	if !w.Routable("Nite Eyes BBS") {
+		t.Error("a board that is not on the roster itself must still address its peers")
 	}
 }

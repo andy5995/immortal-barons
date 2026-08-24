@@ -17,6 +17,12 @@ func (w *World) postNews(line string) {
 	}
 }
 
+// noteSysop records a transport fault for whoever runs the game. See
+// World.SysopNotices for why these do not go to the planet's news.
+func (w *World) noteSysop(format string, a ...any) {
+	w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(format, a...))
+}
+
 // postCombatNews broadcasts the outcome of a regular attack to the planet.
 func (w *World) postCombatNews(a, d *Empire, won, conquered bool) {
 	// Every conventional battle funnels through here, so this is the honest place

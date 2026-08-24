@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 )
@@ -83,6 +84,12 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	w.ExportAnnihilatorStatus()
 	w.StampOutbox()
 	run.Forwarded = len(w.Transit)
+	// Drained, not copied: they belong to this run, and leaving them on the
+	// world would repeat them in the next one.
+	run.Notices, w.SysopNotices = w.SysopNotices, nil
+	// Also to disk: the run report goes to stdout, which a scheduled run throws
+	// away, and a scheduler is how the setup guide says to drive this step.
+	AppendPlanetaryLog(w.Config.DataDir, run.Notices, time.Now())
 	sent, err := WriteOutbox(w, outboundDir, verbose)
 	run.Sent = sent
 	return run, err
@@ -101,6 +108,11 @@ type PlanetaryRun struct {
 	AlreadySeen   int  // packets skipped: duplicate/replay
 	Refused       int  // packets refused: the sender's signature did not match the roster
 	Bulletins     int  // league bulletins broadcast (Coordinator's board only)
+	// Notices are transport faults for the sysop -- an undeliverable packet,
+	// orders that failed their check. They are reported here rather than in the
+	// planet's news: no player can act on one, and the news cap would let a
+	// repeating fault delete the day's real events.
+	Notices []string
 }
 
 // WriteOutbox atomically publishes each queued packet as a JSON file and clears

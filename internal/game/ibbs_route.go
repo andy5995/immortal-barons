@@ -1,7 +1,5 @@
 package game
 
-import "fmt"
-
 // Packet routing. Where the Coordinator has arranged the league as a tree, the
 // HOST lines in the roster (BRE's BRNODES.DAT) say which neighbour each board
 // hands a packet to. A leaf board then configures one link, to its uplink,
@@ -42,6 +40,26 @@ func (w *World) NodeNumber(name string) int {
 		}
 	}
 	return 0
+}
+
+// Routable reports whether a packet addressed to dest can actually be
+// delivered from here.
+//
+// LeaguePlanets lists boards this one has merely HEARD of — learned from a
+// packet and never on the roster — giving each an invented number so it can be
+// shown and picked. NodeNumber does not know those numbers, so NextHop cannot
+// place such a board and hands the packet on unchanged; the next board does the
+// same, and it circles the league until the hop cap destroys it. That cost a
+// live league a destroyed packet a day, because the travel probe addressed one
+// to a board that had once introduced itself under a default name.
+//
+// A board with no roster entry of its own routes nothing and relies on the
+// transport to copy its packets, so everything stays routable there.
+func (w *World) Routable(dest string) bool {
+	if w.NodeNumber(w.Config.BoardID) == 0 {
+		return true
+	}
+	return dest == "" || dest == w.Config.BoardID || w.NodeNumber(dest) != 0
 }
 
 // NodeName is the planet name for a roster number, or "" if unlisted.
@@ -139,9 +157,18 @@ func (w *World) routedHop(me, to int) int {
 // the traffic would leave nobody anything to go on. BRE reported the same thing
 // as "Illegal Route Found from BBS #".
 func (w *World) ForwardPacket(p Packet) {
+	// An unroutable destination is hopeless on the first hop, not the
+	// twenty-fifth: no board on the way can place it either. Saying which board
+	// is missing from the roster beats reporting a circle, which describes what
+	// the packet did rather than why.
+	if !w.Routable(p.ToBoard) {
+		w.noteSysop("A packet from %s for %s was destroyed: no board of that name is on the league roster.",
+			p.FromBoard, p.ToBoard)
+		return
+	}
 	if p.Hops >= MaxPacketHops {
-		w.postNews(fmt.Sprintf("A packet from %s bound for %s has been passed between boards %d times and was destroyed. The league's routing sends it in a circle.",
-			p.FromBoard, p.ToBoard, p.Hops))
+		w.noteSysop("A packet from %s bound for %s has been passed between boards %d times and was destroyed. The league's routing sends it in a circle.",
+			p.FromBoard, p.ToBoard, p.Hops)
 		return
 	}
 	p.Hops++
@@ -170,6 +197,11 @@ func (w *World) addressBroadcasts(packets []Packet) []Packet {
 			continue
 		}
 		for _, b := range boards {
+			// Skip a board the roster cannot place: addressing it would put one
+			// undeliverable copy of every broadcast on the wire.
+			if !w.Routable(b) {
+				continue
+			}
 			copied := p
 			copied.ToBoard = b
 			copied.ToNode = w.NodeNumber(b)
