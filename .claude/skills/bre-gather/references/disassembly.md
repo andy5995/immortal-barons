@@ -659,3 +659,38 @@ The check costs one line: dump ~12 bytes BEFORE each hit as well as after, and
 sort the sites by whether an index was added. Here that split eight matches into
 three int32 region-count comparisons and five relation tests, and only the second
 group compared against the treaty enum's small values.
+
+## A `push`/`pop` between the operands INVERTS a comparison — read the pop, not the order you expect
+
+`real_compare` takes its operands in `ax:bx:dx` and `cx:si:di`, and Turbo Pascal
+routinely computes one side, pushes it, computes the other, and pops the FIRST
+into `cx:si:di`. So the value that was computed first ends up as the SECOND
+operand, and a conditional that looks like "if the roll is below the threshold"
+is really the reverse.
+
+This produced a wrong finding in the middle of an otherwise-correct read
+(2026-08-24, the interplanetary air battle). Two rolls in the same loop were
+written differently:
+
+```
+; ground roll -- no push between: ax:bx:dx really is rnd*(A+B)
+    mul                       ; ax:bx:dx = rnd*(A+B)
+    mov cx,[bp+0x2c] ...      ; cx:si:di = A
+    call real_compare         ; compare(rnd*(A+B), A)
+
+; air roll -- pushed, recomputed, popped: the operands are SWAPPED
+    mul                       ; ax:bx:dx = rnd*(L*5 + C)
+    push dx / push bx / push ax
+    ...recompute L*5 into ax:bx:dx...
+    pop cx / pop si / pop di  ; cx:si:di = rnd*(L*5 + C)
+    call real_compare         ; compare(L*5, rnd*(...)) -- NOT the other way
+```
+
+Read naively, the second says the defender's jets are hit in proportion to their
+OWN number, which is nonsense (no bombers sent would mean every jet dies). Read
+correctly it is opponent-proportional like every other roll in the loop.
+
+**The tell is that the reading is absurd**, and the check is one line: find the
+`pop` and see which register triple it fills. More generally — when a decoded
+rule comes out backwards, suspect the operand order before suspecting the game.
+A mechanic that makes no sense is nearly always a misread, not a quirk.
