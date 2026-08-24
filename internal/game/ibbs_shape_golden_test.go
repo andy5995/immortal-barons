@@ -75,17 +75,22 @@ func packetShape() string {
 const PacketShapeFile = "testdata/packet-shape.txt"
 
 func TestPacketWireShapeIsFrozen(t *testing.T) {
-	want, err := os.ReadFile(PacketShapeFile)
+	raw, err := os.ReadFile(PacketShapeFile)
 	if err != nil {
 		t.Fatal(err)
 	}
+	// Strip CR: git checks this file out with CRLF on Windows, and comparing it
+	// to a string built with \n then fails there and nowhere else. Normalising
+	// here rather than in .gitattributes keeps the test right whatever a
+	// contributor's checkout settings are.
+	want := strings.ReplaceAll(string(raw), "\r\n", "\n")
 	got := packetShape()
-	if got == string(want) {
+	if got == want {
 		return
 	}
 	t.Errorf("the packet's wire shape moved, which can invalidate every signature in the league.\n"+
 		"Read the comment on PacketShapeFile before regenerating it.\n\n%s",
-		firstDifference(got, string(want)))
+		firstDifference(got, want))
 }
 
 // firstDifference names the line that moved, so the failure points at the change
