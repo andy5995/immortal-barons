@@ -172,10 +172,6 @@ These options are for games that link several BBSes together (a "league"). See
   requires either `-local` (with `-name` to identify the player) or a BBS drop
   file in the working directory. Use `-detailed` alongside it to see each
   packet as it is read and written.
-- **`-scores`** — Write this board's score packet to the outbound directory,
-  then exit. The file is named after the board (for example
-  `outboard/MyBBS.brp`). Use `-export FILE` to write to a specific path
-  instead.
 - **`-detailed`** — Show each packet as it is read and written. This is a
   modifier, not a mode: it takes effect when used with `-full` or `-planetary`.
   Without one of those, it is ignored.
@@ -213,8 +209,6 @@ These options are for games that link several BBSes together (a "league"). See
   coordinator requires is marked.
 - **`-playerlist`** — Write `PLAYERLIST.LST`, then exit: every realm on every
   board. Only the league coordinator (node #1) may write this one.
-- **`-export FILE`** — Write this board's score packet to FILE, then exit.
-- **`-import FILE`** — Read a score packet from FILE, then exit.
 
 The three `.LST` reports are written into the data directory, and are built from
 what packets have already told this board — none of them changes the game.

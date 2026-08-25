@@ -29,7 +29,6 @@ import (
 	"github.com/andy5995/immortal-barons/internal/door"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/i18n"
-	"github.com/andy5995/immortal-barons/internal/ibbs"
 	"github.com/andy5995/immortal-barons/internal/menu"
 	"github.com/andy5995/immortal-barons/internal/play"
 	"github.com/andy5995/immortal-barons/internal/session"
@@ -74,11 +73,8 @@ func main() {
 	setDrop := flag.Bool("set-dropfile", false, i18n.T(lang, "choose which drop file format your BBS writes, save it, then exit"))
 	dataDir := flag.String("data", "./data", i18n.T(lang, "folder that holds the game data"))
 	maint := flag.Bool("maint", false, i18n.T(lang, "run the daily maintenance, then exit"))
-	export := flag.String("export", "", i18n.T(lang, "write this board's score packet to FILE, then exit"))
-	imp := flag.String("import", "", i18n.T(lang, "read a score packet from FILE, then exit"))
 	planetary := flag.Bool("planetary", false, i18n.T(lang, "run the inter-BBS step: read incoming packets, run group attacks, write outgoing packets, then exit"))
 	full := flag.Bool("full", false, i18n.T(lang, "run the full cycle: read inbound packets, play a turn, write outbound packets, then exit"))
-	scores := flag.Bool("scores", false, i18n.T(lang, "write this board's score packet to the outbound directory, then exit"))
 	detailed := flag.Bool("detailed", false, i18n.T(lang, "show each packet as it is read and written (use with -full or -planetary)"))
 	leagueConfig := flag.Bool("league-config", false, i18n.T(lang, "send this board's league settings to the whole league (node #1 only), then exit"))
 	genCoordKey := flag.Bool("gen-coord-key", false, i18n.T(lang, "create this league's Coordinator key, print the public half to give the other boards, then exit (node #1 only)"))
@@ -130,9 +126,9 @@ func main() {
 	// when -dropfile isn't given). Every explicit-mode flag consumes none, so a
 	// stray word alongside one is a mistake — flag it instead of silently ignoring
 	// it. (Unknown -flags are already rejected by the flag package.)
-	explicitMode := *maint || *planetary || *full || *scores || *leagueConfig || *leagueRoutes || *leagueCheck || *reset || *resetFromConfig || *ibbsReset ||
+	explicitMode := *maint || *planetary || *full || *leagueConfig || *leagueRoutes || *leagueCheck || *reset || *resetFromConfig || *ibbsReset ||
 		*lastPacket || *bbsInfo || *playerList || *players ||
-		*addAI > 0 || *dump || *spectate > 0 || *local || *export != "" || *imp != "" || *setDrop
+		*addAI > 0 || *dump || *spectate > 0 || *local || *setDrop
 	if flag.NArg() > 0 && explicitMode {
 		fmt.Fprintf(os.Stderr, "immortal-barons: unknown argument %q\n\n", flag.Arg(0))
 		flag.Usage() // show -help, the common convention for a bad invocation
@@ -177,22 +173,6 @@ func main() {
 		today = d
 	}
 
-	if *export != "" {
-		if err := runExport(cfg, *export, today); err != nil {
-			fmt.Fprintln(os.Stderr, "immortal-barons -export:", err)
-			os.Exit(1)
-		}
-		return
-	}
-
-	if *imp != "" {
-		if err := runImport(cfg, *imp); err != nil {
-			fmt.Fprintln(os.Stderr, "immortal-barons -import:", err)
-			os.Exit(1)
-		}
-		return
-	}
-
 	if *maint {
 		if err := runMaint(cfg, today); err != nil {
 			fmt.Fprintln(os.Stderr, "immortal-barons -maint:", err)
@@ -211,14 +191,6 @@ func main() {
 
 	if *full {
 		exitOn("-full", runFull(cfg, *name, today, localCS, *noANSI, *detailed))
-		return
-	}
-
-	if *scores {
-		if err := runScores(cfg, today); err != nil {
-			fmt.Fprintln(os.Stderr, "immortal-barons -scores:", err)
-			os.Exit(1)
-		}
 		return
 	}
 
@@ -1502,112 +1474,6 @@ func runFull(cfg game.Config, name, today string, cs charset, noANSI, verbose bo
 	default:
 		fmt.Printf("Wrote %d outbound packets.\n", sent)
 	}
-	return nil
-}
-
-// runScores writes this board's score packet to the outbound directory (BRE's
-// "BRE SCORES"), then exits. The destination is always the default outbound
-// directory; use -export to write to a specific path.
-func runScores(cfg game.Config, today string) error {
-	lock, err := store.Lock(cfg, true)
-	if err != nil {
-		return err
-	}
-	defer lock.Release()
-	w, err := store.Load(cfg)
-	if err != nil {
-		return err
-	}
-	packet := ibbs.Packet{BoardID: cfg.BoardID, Date: today}
-	for _, e := range w.Empires {
-		if !e.Alive {
-			continue
-		}
-		packet.Scores = append(packet.Scores, ibbs.Score{
-			Empire:   e.Name,
-			NetWorth: w.NetWorth(e),
-			Land:     e.Land,
-		})
-	}
-	outDir := cfg.Outbound()
-	if err := os.MkdirAll(outDir, 0o755); err != nil {
-		return err
-	}
-	data, err := json.MarshalIndent(packet, "", "  ")
-	if err != nil {
-		return err
-	}
-	name := cfg.BoardID
-	if name == "" {
-		name = "scores"
-	}
-	path := filepath.Join(outDir, name+store.PacketExt)
-	if err := os.WriteFile(path, data, 0o644); err != nil {
-		return err
-	}
-	fmt.Printf("Wrote score packet (%d scores) to %s\n", len(packet.Scores), path)
-	return nil
-}
-
-// runExport writes this board's alive-empire scores to path as an inter-BBS
-// packet, for a sysop's mailer to carry to another board.
-func runExport(cfg game.Config, path, today string) error {
-	lock, err := store.Lock(cfg, true)
-	if err != nil {
-		return err
-	}
-	defer lock.Release()
-	w, err := store.Load(cfg)
-	if err != nil {
-		return err
-	}
-	packet := ibbs.Packet{BoardID: cfg.BoardID, Date: today}
-	for _, e := range w.Empires {
-		if !e.Alive {
-			continue
-		}
-		packet.Scores = append(packet.Scores, ibbs.Score{
-			Empire:   e.Name,
-			NetWorth: w.NetWorth(e),
-			Land:     e.Land,
-		})
-	}
-	if err := ibbs.Write(path, packet); err != nil {
-		return err
-	}
-	fmt.Printf("Exported %d scores to %s\n", len(packet.Scores), path)
-	return nil
-}
-
-// runImport reads an inter-BBS packet from path and records it as a
-// RemoteBoard in this board's world.
-func runImport(cfg game.Config, path string) error {
-	packet, err := ibbs.Read(path)
-	if err != nil {
-		return err
-	}
-	lock, err := store.Lock(cfg, true)
-	if err != nil {
-		return err
-	}
-	defer lock.Release()
-	w, err := store.Load(cfg)
-	if err != nil {
-		return err
-	}
-	board := game.RemoteBoard{BoardID: packet.BoardID, Date: packet.Date}
-	for _, sc := range packet.Scores {
-		board.Scores = append(board.Scores, game.RemoteScore{
-			Empire:   sc.Empire,
-			NetWorth: sc.NetWorth,
-			Land:     sc.Land,
-		})
-	}
-	w.ImportBoard(board)
-	if err := store.Save(w, cfg); err != nil {
-		return err
-	}
-	fmt.Printf("Imported board %s (%d scores)\n", board.BoardID, len(board.Scores))
 	return nil
 }
 

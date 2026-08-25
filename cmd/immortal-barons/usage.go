@@ -22,7 +22,7 @@ var usageGroups = []struct {
 	{"Play", []string{"local", "name", "dropfile", "data"}},
 	{"Terminal (output)", []string{"utf8", "cp437", "ascii", "no-ansi"}},
 	{"Sysop / game admin", []string{"set-dropfile", "reset", "reset-from-config", "add-ai", "maint", "players"}},
-	{"Inter-BBS", []string{"ibbs-reset", "board-id", "inbound", "outbound", "import-bbs-cfg", "planetary", "full", "scores", "detailed", "league-routes", "league-config", "export", "import"}},
+	{"Inter-BBS", []string{"ibbs-reset", "board-id", "inbound", "outbound", "import-bbs-cfg", "planetary", "full", "detailed", "league-routes", "league-config"}},
 	// Development tools, kept out of the sysop section: a board never needs
 	// these, and they advance, expose or override game state.
 	{"Testing and balance", []string{"dump", "spectate", "dupe-check"}},

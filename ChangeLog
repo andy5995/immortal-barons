@@ -1,4 +1,5 @@
 (in-progress:)
+  * The -scores, -export and -import flags are gone; -planetary carries scores
   * Interplanetary strike losses follow the battle, not a flat share
   * Only an attacking force's bombers destroy the defender's jets
   * Bombers add no strength to an interplanetary strike; they fight the jets
