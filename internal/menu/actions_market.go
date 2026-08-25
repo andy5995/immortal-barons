@@ -2,7 +2,6 @@ package menu
 
 import (
 	"fmt"
-	"math"
 	"unicode"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -173,8 +172,11 @@ func marketBuy(s session.Session, w *ctx, good string) {
 	target := sellers[idx]
 	price := target.Price
 	max := target.Qty
+	// Only when there is a price to afford: a listing may be given away at 0
+	// (SetMarketListing clamps a negative price to it), and UnitsAffordable
+	// answers 0 for a zero price, which would cap a free listing at nothing.
 	if price > 0 {
-		if afford := int(min(p.Gold/int64(price), math.MaxInt32)); afford < max {
+		if afford := game.UnitsAffordable(p.Gold, price); afford < max {
 			max = afford
 		}
 	}

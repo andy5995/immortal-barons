@@ -313,7 +313,7 @@ func (w *World) aiManageEconomy(e *Empire) {
 	if target := upkeep * AIFoodBufferTurns; e.Food < target {
 		if price := w.FoodBuyPrice(); price > 0 {
 			buy := target - e.Food
-			if afford := unitsAffordable(e.Gold/2, price); buy > afford {
+			if afford := UnitsAffordable(e.Gold/2, price); buy > afford {
 				buy = afford
 			}
 			if buy > 0 {
@@ -332,7 +332,7 @@ func (w *World) aiManageEconomy(e *Empire) {
 	//    turn while this closes the gap.
 	if produced < upkeep && e.Gold > int64(w.Prices.Land) {
 		n := (upkeep-produced)/FoodAgriBase + 1 // conservative: the floor of the yield band
-		if afford := unitsAffordable(e.Gold, w.Prices.Land); n > afford {
+		if afford := UnitsAffordable(e.Gold, w.Prices.Land); n > afford {
 			n = afford
 		}
 		if n > AIAgriBuyMax {
@@ -441,7 +441,7 @@ func (w *World) aiBuildForces(e *Empire) {
 		if price <= 0 {
 			return
 		}
-		if n := unitsAffordable(pctOf(budget, share), price); n > 0 {
+		if n := UnitsAffordable(pctOf(budget, share), price); n > 0 {
 			*count += n
 			e.Gold -= goldCost(n, price)
 		}
@@ -478,7 +478,7 @@ func (w *World) aiBuyCarriers(e *Empire) {
 	if short <= 0 {
 		return
 	}
-	if afford := unitsAffordable(e.Gold, price); short > afford {
+	if afford := UnitsAffordable(e.Gold, price); short > afford {
 		short = afford
 	}
 	if short > 0 {
@@ -511,7 +511,7 @@ func (w *World) aiShopMarket(e *Empire) {
 			if l.Price > want || l.Price <= 0 {
 				continue
 			}
-			n := min(l.Qty, unitsAffordable(budget, l.Price))
+			n := min(l.Qty, UnitsAffordable(budget, l.Price))
 			if n <= 0 {
 				continue
 			}

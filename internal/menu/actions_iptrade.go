@@ -90,8 +90,12 @@ func browseRemoteMarket(s session.Session, w *ctx, board string) {
 	var gold int64
 	w.With(func() { gold = w.Player().Gold })
 	most := r.Qty
-	if afford := int(gold / int64(max(r.Price, 1))); afford < most {
-		most = afford
+	// See marketBuy: a zero-priced listing is a giveaway, not something nobody
+	// can afford.
+	if r.Price > 0 {
+		if afford := game.UnitsAffordable(gold, r.Price); afford < most {
+			most = afford
+		}
 	}
 	if most <= 0 {
 		ok(s, "You cannot afford one unit at that price.")

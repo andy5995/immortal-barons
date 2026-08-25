@@ -140,3 +140,44 @@ func equalInts(a, b []int) bool {
 	}
 	return true
 }
+
+// A listing may be given away: SetMarketListing clamps a negative price to 0,
+// so 0 is a legitimate price and the goods must still be buyable up to what is
+// on offer.
+//
+// This exists because routing the buy screens through game.UnitsAffordable
+// briefly broke it. That helper answers 0 for a zero price — correct for "how
+// many can I afford", wrong as a cap on a free listing — and the guard the old
+// hand-rolled expression carried was lost in the unification. The test drives
+// marketBuy itself rather than recomputing its cap, so it fails on the real
+// screen rather than on a copy of its arithmetic.
+func TestAFreeListingIsStillBuyable(t *testing.T) {
+	w := newWorld()
+	var seller string
+	w.With(func() {
+		s := w.World.Empires[0]
+		seller = s.Name
+		s.Protection = 0
+		s.Troopers = 500
+		if err := w.World.SetMarketListing(s, "Trooper", 100, 0); err != nil {
+			t.Fatalf("SetMarketListing: %v", err)
+		}
+		b := w.World.FindByOwner(w.handle)
+		b.Protection = 0
+		b.Troopers = 0
+	})
+
+	before := 0
+	w.With(func() { before = w.World.FindByOwner(w.handle).Troopers })
+
+	// 'a' picks the first (only) seller, then 100 units.
+	f := &fakeSession{keys: []rune("a100\r")}
+	marketBuy(f, w, "Trooper")
+
+	after := 0
+	w.With(func() { after = w.World.FindByOwner(w.handle).Troopers })
+	if got := after - before; got != 100 {
+		t.Errorf("bought %d troopers from a free listing, want 100\nseller=%s\n%s",
+			got, seller, f.out.String())
+	}
+}

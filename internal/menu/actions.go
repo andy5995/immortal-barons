@@ -3,7 +3,6 @@ package menu
 import (
 	"errors"
 	"fmt"
-	"math"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -41,10 +40,7 @@ func buyUnit(label string, military bool, unit func(*ctx) int, apply func(*game.
 			return Stay
 		}
 		price := unit(w)
-		max := 0
-		if price > 0 {
-			max = int(min(p.Gold/int64(price), math.MaxInt32))
-		}
+		max := game.UnitsAffordable(p.Gold, price)
 		n := promptSuggested(s, fmt.Sprintf("%s — %d gold each. How many?", label, price), 0, max)
 		if n <= 0 {
 			return Stay

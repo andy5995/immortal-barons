@@ -528,10 +528,16 @@ func pctOf[T number](v T, p int) T { return T(int64(v) * int64(p) / 100) }
 // wrapped the bill negative and handed the goods over for free.
 func goldCost(n, unit int) int64 { return int64(n) * int64(unit) }
 
-// unitsAffordable is how many units at `price` gold each `gold` buys. The divide
+// UnitsAffordable is how many units at `price` gold each `gold` buys. The divide
 // happens in money width; the count comes back in count width, clamped so a vast
 // treasury against a cheap unit cannot wrap int on a 32-bit door.
-func unitsAffordable(gold int64, price int) int {
+//
+// Exported because every buy screen needs it. Four of them had hand-rolled the
+// expression instead, and they had already drifted: one omitted the price guard
+// and one the MaxInt32 clamp, so with the money cap raised past 2 billion (the
+// sysop knob reaches 999) a rich realm bidding on a cheap remote listing wrapped
+// int on a 32-bit door and was told it could not afford one unit.
+func UnitsAffordable(gold int64, price int) int {
 	if price <= 0 {
 		return 0
 	}
