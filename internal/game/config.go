@@ -3,9 +3,11 @@ package game
 import "path/filepath"
 
 // Level is a cost/damage/reward preset, as BRE's Configuration Editor uses
-// ([H,M,L,N]). Medium is the baseline. Percent() gives the multiplier applied
-// to the underlying value. None (0×) is valid only for the cost knobs; the
-// damage/reward knobs use only High/Medium/Low.
+// ([H,M,L,N]). Medium is the baseline, and each knob applies its own spread
+// through its own method — MaintCostScaled, RegionCostSurcharge,
+// AttackCapturePct, AttackRetreatPct, CostPercent, TradeCostScaled. None (0×)
+// is valid only for the cost knobs; the damage/reward knobs use only
+// High/Medium/Low.
 type Level int
 
 const (
@@ -28,26 +30,11 @@ func (l Level) String() string {
 	}
 }
 
-// Percent is the multiplier this level applies, in percent: None 0, Low 50,
-// Medium 100, High 200.
-func (l Level) Percent() int {
-	switch l {
-	case None:
-		return 0
-	case Low:
-		return 50
-	case High:
-		return 200
-	default:
-		return 100
-	}
-}
-
 // AttackCapturePct is the share of a beaten defender's regions the winner
 // takes at this Attack Rewards level, and AttackRetreatPct the share of its own
 // force a side will lose before it breaks off at this Attack Damage level.
-// Both are read out of the binary and neither is Percent() applied to a
-// baseline — see the tables in balance.go for why that matters.
+// Both are read out of the binary rather than one ladder applied to a baseline
+// — see the tables in balance_combat.go for why that matters.
 func (l Level) AttackCapturePct() int {
 	switch l {
 	case None:
@@ -127,9 +114,9 @@ func (l Level) AttackRetreatPct() int {
 
 // CostPercent is the multiplier the two ATTACK/TERRORISM cost levels apply, in
 // percent. BRE gives those two their own spread — None 0, Low 20, Medium 100,
-// High 300 — rather than the Percent() ladder above; see the balance.go block
-// for the binary evidence. Use this for AttackCosts and TerrorCosts, Percent()
-// for the rest.
+// High 300 — rather than the even 0/50/100/200 ladder these knobs once shared;
+// see the balance_combat.go block for the binary evidence. Use this for
+// AttackCosts and TerrorCosts; every other knob has its own method.
 func (l Level) CostPercent() int {
 	switch l {
 	case None:

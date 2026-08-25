@@ -33,7 +33,6 @@ import (
 var (
 	ErrNotCoordinator = errors.New("this board is not the League Coordinator")
 	ErrNoCoordKey     = errors.New("no coordinator key is loaded")
-	ErrBadSignature   = errors.New("packet signature does not verify")
 )
 
 // signedField is one field of the Coordinator payload: the JSON name it is

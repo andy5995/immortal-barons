@@ -1233,7 +1233,6 @@ const (
 	StrikeSupportKeepNum = 2
 	StrikeSupportKeepDen = 3
 
-	SDIStep = 1_500_000 // gold of total funding per +1% SDI
 	// The SDI program's two running figures, CAPTURE-VERIFIED: seventeen
 	// consecutive SDI Program screens from a live league game (2026-08-08, see
 	// docs/dev/bre-screens.md) fit both exactly, across funding from 0 to just
@@ -1532,9 +1531,9 @@ const (
 // --- Attack Costs / Terrorist Costs levels (BINARY-VERIFIED) ---
 //
 // The sysop's two cost Levels scale what an interplanetary strike and a
-// terrorist op charge. They do NOT use the generic Level.Percent() ladder
-// (0/50/100/200): BRE keeps its own spread for these two, and High TRIPLES the
-// price while Low cuts it to a fifth.
+// terrorist op charge. They do NOT use the even 0/50/100/200 ladder the other
+// Level knobs were once all read through: BRE keeps its own spread for these
+// two, and High TRIPLES the price while Low cuts it to a fifth.
 //
 // Read from BRE.OVR two independent ways, agreeing exactly. The attack site
 // (0x2bbc2, config byte 0x182) branches on the level and then divides the price

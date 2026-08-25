@@ -2,7 +2,8 @@ package game
 
 import "testing"
 
-// The two cost Levels use BRE's own spread, NOT Level.Percent()'s 0/50/100/200.
+// The two cost Levels use BRE's own spread, NOT the even 0/50/100/200 ladder
+// these knobs once shared.
 // Golden literals, per the fidelity rule: mirroring the constants would follow a
 // retune silently, and these figures came out of the binary.
 func TestAttackGoldCostByLevel(t *testing.T) {

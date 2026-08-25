@@ -148,16 +148,6 @@ func GoodByName(name string) *Good {
 	return nil
 }
 
-// MarketGoodNames is the Trading Market's goods as the singular names a
-// listing stores, in screen order.
-func MarketGoodNames() []string {
-	names := make([]string, len(MarketGoods))
-	for i, g := range MarketGoods {
-		names[i] = g.Singular
-	}
-	return names
-}
-
 // marketField returns a pointer to e's inventory count for a market good, or
 // nil if the good is not tradeable.
 func marketField(e *Empire, good string) *int {

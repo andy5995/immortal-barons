@@ -377,8 +377,6 @@ type TurnProgress struct {
 	MessageDone        bool
 }
 
-func (e *Empire) Army() int { return e.Troopers + e.Jets + e.Turrets + e.Tanks }
-
 // syncLand resyncs the authoritative Land total from Regions. Every place
 // that changes an empire's regions must call this afterward. The SDI follows,
 // because the shield's strength is its funding spread over the land it covers:

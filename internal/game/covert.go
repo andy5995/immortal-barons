@@ -22,7 +22,6 @@ const (
 	OpSpyOnRelations     CovertOp = "Spy on Relations"
 	OpBombEnemyTargets   CovertOp = "Bomb Enemy Targets"
 	OpBribery            CovertOp = "Bribery"
-	OpExposeEnemyOps     CovertOp = "Expose Enemy Ops"
 )
 
 // difficulty is the divisor this op applies to the attacker's own agent pool.

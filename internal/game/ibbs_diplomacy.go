@@ -27,12 +27,6 @@ const (
 	PlanetAllied PlanetRelation = "Allied"
 )
 
-// PlanetRelations lists the settable values in the order the editing prompt
-// offers them.
-func PlanetRelations() []PlanetRelation {
-	return []PlanetRelation{PlanetEnemy, PlanetNone, PlanetPeace, PlanetAllied}
-}
-
 // PlanetRelationWith reports the recorded standing with board. A planet nobody
 // has filed anything about reads None, which is what an empty chart shows.
 func (w *World) PlanetRelationWith(board string) PlanetRelation {

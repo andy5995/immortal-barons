@@ -1009,9 +1009,11 @@ to its level; the direction also matches `game/reset.hlp`, which says a High
 Attack Costs setting "will make attacking more difficult".
 
 The figures live in `balance.go` as `CostLevel*Pct` and reach the two knobs
-through `Level.CostPercent()`. `Level.Percent()` stays for Maintenance / Region /
-Attack Damage / Attack Rewards; Trade Deal Costs has a third ladder of its own,
-below.
+through `Level.CostPercent()`. Maintenance, Region, Attack Damage and Attack
+Rewards each have a ladder of their own — `Level.MaintCostScaled`,
+`RegionCostSurcharge`, `AttackRetreatPct` and `AttackCapturePct` — and Trade
+Deal Costs a third, below. The generic `Level.Percent()` those four once shared
+is gone: every knob now names the figures it uses.
 
 ### Maintenance Costs — BINARY-VERIFIED, and wider than it looked
 

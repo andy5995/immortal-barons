@@ -25,7 +25,6 @@ import (
 var (
 	ErrIPTradingOff   = errors.New("Trading with other planets is turned off in this league.")
 	ErrNotAllied      = errors.New("You may only trade with a planet your Coordinator has marked Allied.")
-	ErrNoSuchListing  = errors.New("That good is no longer offered there.")
 	ErrOwnPlanet      = errors.New("That is your own planet's market.")
 	ErrBadTradeAmount = errors.New("Enter how many units to bid for.")
 	ErrBadTradePrice  = errors.New("That listing's price is not valid.")

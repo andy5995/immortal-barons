@@ -295,18 +295,3 @@ func htmlText(s string) string {
 
 // htmlAttr escapes a validated URL for an HTML attribute (same brace rule).
 func htmlAttr(s string) string { return htmlText(s) }
-
-// mdEscape neutralises the Markdown punctuation a feed title could carry into
-// the generated page.
-func mdEscape(s string) string {
-	r := strings.NewReplacer(
-		`\`, `\\`,
-		"`", "\\`",
-		"*", `\*`,
-		"_", `\_`,
-		"[", `\[`,
-		"]", `\]`,
-		"<", `\<`,
-	)
-	return r.Replace(strings.TrimSpace(s))
-}
