@@ -584,16 +584,12 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "%s\n", eotsRule())
 }
 
-// End of Turn Statistics geometry, measured off a live BRE capture
-// (cap/eots-ibbs-01.cap): the heading sits over a 75-column blue inset rule —
-// 5 single, 15 double, 55 single — and the same rule closes the block.
-const (
-	eotsRuleWidth  = 75
-	eotsRuleDouble = 15
-)
-
+// eotsRule is the End of Turn Statistics divider, measured off a live BRE
+// capture (cap/eots-ibbs-01.cap): the heading sits over a blue inset rule and
+// the same rule closes the block. It is the shared roster rule — 75 columns,
+// 15 of them double — in blue.
 func eotsRule() string {
-	return ansi.FgBlue + insetRule(eotsRuleWidth, eotsRuleDouble) + ansi.Reset
+	return rosterRule(ansi.FgBlue)
 }
 
 // paymentStage runs BRE's start-of-turn maintenance prompts. With Auto-Pay

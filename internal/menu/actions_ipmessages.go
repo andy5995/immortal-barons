@@ -19,11 +19,7 @@ import (
 // Planet-list geometry, measured off a live BRE capture: a 75-column inset rule
 // around the table, a 3-column number field ("## "), and the planet name in 27
 // columns before the location.
-const (
-	planetRuleWidth  = 75
-	planetRuleDouble = 15
-	planetNameWidth  = 27
-)
+const planetNameWidth = 27
 
 // knownPlanets is World.LeaguePlanets under the world lock. Callers must not
 // already hold it.
@@ -105,7 +101,7 @@ func nodeLocation(n game.LeagueNode) string {
 // showPlanetList draws BRE's "List of Planets" table: a red-ruled board of
 // number, planet name and location.
 func showPlanetList(s session.Session, planets []game.LeagueNode) {
-	rule := ansi.FgRed + insetRule(planetRuleWidth, planetRuleDouble) + ansi.Reset
+	rule := rosterRule(ansi.FgRed)
 	fmt.Fprintf(s, "%s\n", tr(s, "List of Planets"))
 	fmt.Fprintf(s, "%s\n", rule)
 	fmt.Fprintf(s, "%s%-3s%-*s%s%s\n", ansi.FgWhite, tr(s, "##"), planetNameWidth, tr(s, "Planet Name"), tr(s, "Location"), ansi.Reset)

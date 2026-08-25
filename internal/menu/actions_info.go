@@ -1029,13 +1029,6 @@ func printScores(s session.Session, w *ctx) {
 }
 
 const (
-	// scoreRuleWidth/Double are BRE's rule under the scores heading: 75 columns
-	// with a 15-column `═` accent inset (docs/dev/bre-screens.md). It was a plain
-	// 72 here, which is BRE's *heading* width rather than its rule, and left the
-	// recipient picker in actions_message.go drawing the same table under a
-	// different rule. One BRE screen gets one rule.
-	scoreRuleWidth  = 75
-	scoreRuleDouble = 15
 	// scoreIDCellWidth is the id column. Three columns is the whole id: a realm
 	// is addressed by its slot letter and a planet holds game.PlanetSlots realms,
 	// so `(A)`..`(Y)` is every id there is. The attack picker leaves it EMPTY for
@@ -1147,7 +1140,7 @@ func idCell(id string) string {
 // here once. They previously carried a copy each of the same format strings,
 // which is how a change to one silently leaves the others behind.
 func scoreTableRule(s session.Session) {
-	fmt.Fprintf(s, "%s%s%s\n", ansi.FgMagenta, insetRule(scoreRuleWidth, scoreRuleDouble), ansi.Reset)
+	fmt.Fprintf(s, "%s\n", rosterRule(ansi.FgMagenta))
 }
 
 func scoreTableHead(s session.Session) {

@@ -390,11 +390,7 @@ func pickFromList(s session.Session, msg string, list []string) string {
 
 // Relations-screen geometry, measured off a live BRE capture: a 75-column inset
 // rule, and a row of "[X]  " then the realm name in a 40-column field.
-const (
-	relationsRuleWidth  = 75
-	relationsRuleDouble = 15
-	relationsNameWidth  = 40
-)
+const relationsNameWidth = 40
 
 // viewDiplomacy is BRE's View Treaties — its "-*Relations*-" screen. It lists
 // EVERY living realm with the pact held, "None" included, not just the ones under
@@ -461,7 +457,7 @@ func relationsText(s session.Session, held []string) string {
 // the Diplomacy picker's "?" list share it, as they share one routine in the
 // original.
 func writeRelationsTable(s session.Session, rows []relationsRow) {
-	rule := ansi.FgBlue + insetRule(relationsRuleWidth, relationsRuleDouble) + ansi.Reset
+	rule := rosterRule(ansi.FgBlue)
 	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n", ansi.FgBlue, ansi.FgBrightWhite, tr(s, "Relations"), ansi.FgBlue, ansi.Reset)
 	fmt.Fprintf(s, "%s%-5s%-*s%s%s\n", ansi.FgBrightWhite,
 		tr(s, "Id"), relationsNameWidth, tr(s, "Empire Name"), tr(s, "Relations"), ansi.Reset)

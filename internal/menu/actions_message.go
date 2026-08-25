@@ -66,11 +66,7 @@ type pickOpts struct {
 // Recipient-picker geometry, matching BRE's captured list (docs/dev/bre-screens.md,
 // the "?=List" roster): a 75-column inset rule over Id / Empire Name / Territory /
 // Score / Net Worth.
-const (
-	pickRuleWidth  = 75
-	pickRuleDouble = 15
-	pickNameWidth  = 26
-)
+const pickNameWidth = 26
 
 // pickLetters is how many realms the picker can address: one per slot on the
 // planet, since BRE indexes its empire array with the letter itself and reserves
@@ -146,7 +142,7 @@ func writePickRoster(s session.Session, rows []pickRow, opts pickOpts) {
 		writeRelationsTable(s, rel)
 		return
 	}
-	rule := ansi.FgMagenta + insetRule(pickRuleWidth, pickRuleDouble) + ansi.Reset
+	rule := rosterRule(ansi.FgMagenta)
 	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n",
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.FgBrightMagenta, ansi.Reset)
 	fmt.Fprintf(s, "%s%-*s%-*s %10s %11s %11s%s\n%s\n", ansi.FgBrightWhite,

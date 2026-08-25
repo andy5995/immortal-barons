@@ -682,11 +682,7 @@ func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 // Travel Times geometry, measured off a live BRE capture: a 75-column inset
 // rule above and below the list, and each planet's name in a 30-column field
 // with the turnaround right after it.
-const (
-	travelRuleWidth  = 75
-	travelRuleDouble = 15
-	travelNameWidth  = 30
-)
+const travelNameWidth = 30
 
 // travelTimes is BRE's "Average Turn Around Times to All BBSes": every other
 // planet in the league with the average round trip a packet makes to it and
@@ -711,7 +707,7 @@ func travelTimes(s session.Session, w *ctx) Result {
 		ok(s, "No other planets are known yet.")
 		return Stay
 	}
-	rule := ansi.FgBrightBlack + insetRule(travelRuleWidth, travelRuleDouble) + ansi.Reset
+	rule := rosterRule(ansi.FgBrightBlack)
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "Average Turn Around Times to All BBSes"), ansi.Reset)
 	fmt.Fprintf(s, "%s\n", rule)
 	for _, p := range planets {
