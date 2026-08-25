@@ -432,7 +432,10 @@ to board, days — in IB's own shape.
 
 ## Code map
 
-- `internal/game/ibbs.go` — packet types, group attacks, resolution, scores.
+- `internal/game/ibbs.go` — the packet itself: what it carries, how it is
+  addressed, how an arriving one is applied. The mechanics that ride in it sit
+  beside it as `ibbs_attack.go`, `ibbs_terror.go`, `ibbs_league.go`,
+  `ibbs_spy.go`, `ibbs_annihilator.go` and the rest of the `ibbs_*.go` family.
 - `internal/store/ibbs.go` — `WriteOutbox`, `ReadInbound`, `RunPlanetary`.
 - `internal/game/ibbs_route.go` — `NextHop`, `ForwardPacket`, the HOST tree.
 - `internal/store/league.go` — `ParseNodeList`, `ParseBoardConfig`.
