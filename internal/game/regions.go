@@ -25,13 +25,16 @@ func (r RegionMix) Total() int {
 		r.Agricultural + r.Urban + r.Industrial + r.Technology + r.Waste
 }
 
-// fields returns pointers to each count in a stable order, for generic
-// proportional add/remove. Waste is included: the original spreads a loss over
-// every type it holds, waste among them, so a realm already carrying waste
-// absorbs part of the next strike with land that was ruined already.
+// fields returns pointers to each count in mixOrder, for generic proportional
+// add/remove. Waste is included: the original spreads a loss over every type it
+// holds, waste among them, so a realm already carrying waste absorbs part of
+// the next strike with land that was ruined already.
 func (r *RegionMix) fields() []*int {
-	return []*int{&r.Coastal, &r.Mountain, &r.Desert, &r.River,
-		&r.Agricultural, &r.Urban, &r.Industrial, &r.Technology, &r.Waste}
+	f := make([]*int, len(mixOrder))
+	for i, reg := range mixOrder {
+		f[i] = reg.Count(r)
+	}
+	return f
 }
 
 // foodProduced is the per-turn food GROWN by Agricultural regions, given this
@@ -125,3 +128,49 @@ func defaultRegionMix(land int) RegionMix {
 	m.Coastal = land - (m.Mountain + m.Desert + m.River + m.Agricultural + m.Urban) // remainder -> Coastal
 	return m
 }
+
+// Region is one type of land a realm holds: its English name, BRE's selection
+// letter, and the accessor for a mix's count of it.
+//
+// This is the RegionMix analogue of Good in units.go, and exists for the same
+// reason (#134). internal/menu carried three lists — names, selection keys and
+// field pointers — coupled to each other by index, while RegionMix itself
+// declared the set a fourth time in a different order. Nothing checked that any
+// of them still agreed. Each type is declared once here now, and a screen that
+// wants its own order declares a slice of these rows rather than restating the
+// names, so a mismatch is a compile error instead of a wrong label.
+//
+// Name is an identity key as well as a display label, so it stays ENGLISH;
+// tr() translates at render time.
+type Region struct {
+	Name string
+	// Key is the letter the player presses to choose it. Waste has none — it
+	// cannot be bought, sold or allocated, only decontaminated.
+	Key   byte
+	Count func(m *RegionMix) *int
+}
+
+// The rows. Referred to by variable everywhere, so a screen's order cannot
+// drift out of step with the field it labels.
+var (
+	Coastal      = &Region{Name: "Coastal", Key: 'C', Count: func(m *RegionMix) *int { return &m.Coastal }}
+	Mountain     = &Region{Name: "Mountain", Key: 'M', Count: func(m *RegionMix) *int { return &m.Mountain }}
+	Desert       = &Region{Name: "Desert", Key: 'D', Count: func(m *RegionMix) *int { return &m.Desert }}
+	River        = &Region{Name: "River", Key: 'R', Count: func(m *RegionMix) *int { return &m.River }}
+	Agricultural = &Region{Name: "Agricultural", Key: 'A', Count: func(m *RegionMix) *int { return &m.Agricultural }}
+	Urban        = &Region{Name: "Urban", Key: 'U', Count: func(m *RegionMix) *int { return &m.Urban }}
+	Industrial   = &Region{Name: "Industrial", Key: 'I', Count: func(m *RegionMix) *int { return &m.Industrial }}
+	Technology   = &Region{Name: "Technology", Key: 'T', Count: func(m *RegionMix) *int { return &m.Technology }}
+	Waste        = &Region{Name: "Waste", Count: func(m *RegionMix) *int { return &m.Waste }}
+)
+
+// mixOrder is the order RegionMix declares its fields in, and the order a
+// proportional add or remove walks them. It is NOT arbitrary: remove() breaks a
+// remainder tie in favour of the field it meets first, so reordering this
+// changes which region loses a unit when two are the same size.
+var mixOrder = []*Region{Coastal, Mountain, Desert, River, Agricultural, Urban, Industrial, Technology, Waste}
+
+// BuyableRegions is the eight types a player may buy, in BRE's Buy Regions
+// screen order (verified live, #17 menu audit). Waste is absent because nothing
+// can buy it.
+var BuyableRegions = []*Region{Coastal, River, Agricultural, Desert, Industrial, Urban, Mountain, Technology}

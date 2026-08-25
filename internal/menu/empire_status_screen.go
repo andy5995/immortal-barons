@@ -139,15 +139,15 @@ func empireStatusBlock(s session.Session, w *ctx) string {
 		row("%s: %s%%", tr(s, "SDI Strength"), hiFigure(count(p.SDI)))
 	}
 
-	// Regions in the order the rest of the game uses (regionTypeNames, the Buy
-	// Regions order), with Waste last as the region table lists it. The original
-	// re-sorts this one row — its status block leads with Rivers and buries
-	// Coastal seventh — while its record, its Buy Regions screen and every other
-	// display keep the order used here.
+	// Regions in the order the rest of the game uses (game.BuyableRegions, the
+	// Buy Regions order), with Waste last as the region table lists it. The
+	// original re-sorts this one row — its status block leads with Rivers and
+	// buries Coastal seventh — while its record, its Buy Regions screen and every
+	// other display keep the order used here.
 	var regions []statusItem
-	for i, name := range regionTypeNames {
-		if n := *regionField(&p, i); n > 0 {
-			regions = append(regions, statusCell(count(n), tr(s, name)))
+	for _, reg := range game.BuyableRegions {
+		if n := *reg.Count(&p.Regions); n > 0 {
+			regions = append(regions, statusCell(count(n), tr(s, reg.Name)))
 		}
 	}
 	if p.Regions.Waste > 0 {

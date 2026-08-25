@@ -341,6 +341,10 @@ func (w *World) aiIsLeader(e *Empire) bool {
 // aiRegionMix is one personality's target share of land per region type. The
 // five shares sum to 100; Agricultural is deliberately not among them because
 // the food logic buys it on demand.
+//
+// The literals below name their fields. Supplying five same-typed percentages
+// by position is one transposition away from an AI that silently builds the
+// wrong empire, with nothing to fail.
 type aiRegionMix struct{ coastal, desert, mountain, industrial, river int }
 
 // aiRegionShares returns the land mix an AI of the given profile builds toward.
@@ -349,11 +353,23 @@ type aiRegionMix struct{ coastal, desert, mountain, industrial, river int }
 func aiRegionShares(profile string) aiRegionMix {
 	switch profile {
 	case AIProfileAggressor:
-		return aiRegionMix{AIRegionCoastalPctWar, AIRegionDesertPctWar, AIRegionMountainPctWar, AIRegionIndustrialPctWar, AIRegionRiverPctWar}
+		return aiRegionMix{
+			coastal: AIRegionCoastalPctWar, desert: AIRegionDesertPctWar,
+			mountain: AIRegionMountainPctWar, industrial: AIRegionIndustrialPctWar,
+			river: AIRegionRiverPctWar,
+		}
 	case AIProfileBalanced:
-		return aiRegionMix{AIRegionCoastalPctMixed, AIRegionDesertPctMixed, AIRegionMountainPctMixed, AIRegionIndustrialPctMixed, AIRegionRiverPctMixed}
+		return aiRegionMix{
+			coastal: AIRegionCoastalPctMixed, desert: AIRegionDesertPctMixed,
+			mountain: AIRegionMountainPctMixed, industrial: AIRegionIndustrialPctMixed,
+			river: AIRegionRiverPctMixed,
+		}
 	default:
-		return aiRegionMix{AIRegionCoastalPct, AIRegionDesertPct, AIRegionMountainPct, AIRegionIndustrialPct, AIRegionRiverPct}
+		return aiRegionMix{
+			coastal: AIRegionCoastalPct, desert: AIRegionDesertPct,
+			mountain: AIRegionMountainPct, industrial: AIRegionIndustrialPct,
+			river: AIRegionRiverPct,
+		}
 	}
 }
 

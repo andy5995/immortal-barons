@@ -1,6 +1,9 @@
 package game
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestRegionMixTotalIncomeFood(t *testing.T) {
 	r := RegionMix{Coastal: 2, Mountain: 3, Desert: 1, River: 1, Agricultural: 4, Urban: 5, Industrial: 1, Technology: 1}
@@ -156,5 +159,80 @@ func TestProcessEconomyReflectsRegionMix(t *testing.T) {
 	}
 	if ag.Food <= coastal.Food {
 		t.Errorf("all-Agricultural empire should produce more food than all-Coastal: ag=%d coastal=%d", ag.Food, coastal.Food)
+	}
+}
+
+// TestRegionTableMatchesTheMix proves each Region row's Count accessor reaches
+// the RegionMix field its Name claims, and that mixOrder covers the struct
+// exactly once. Written with reflection on purpose: a hand-written switch over
+// the eight names would be one more copy of the set, which is what the table
+// exists to remove.
+func TestRegionTableMatchesTheMix(t *testing.T) {
+	rt := reflect.TypeOf(RegionMix{})
+	if len(mixOrder) != rt.NumField() {
+		t.Fatalf("mixOrder has %d rows, RegionMix has %d fields", len(mixOrder), rt.NumField())
+	}
+
+	seen := map[string]bool{}
+	for i, reg := range mixOrder {
+		if seen[reg.Name] {
+			t.Errorf("mixOrder lists %q twice", reg.Name)
+		}
+		seen[reg.Name] = true
+
+		if _, ok := rt.FieldByName(reg.Name); !ok {
+			t.Errorf("no RegionMix field named %q", reg.Name)
+			continue
+		}
+		// Write a value only this row should carry, then read every field back
+		// and insist exactly the named one holds it.
+		var m RegionMix
+		want := 1000 + i
+		*reg.Count(&m) = want
+		rv := reflect.ValueOf(m)
+		for f := 0; f < rt.NumField(); f++ {
+			got := int(rv.Field(f).Int())
+			name := rt.Field(f).Name
+			switch {
+			case name == reg.Name && got != want:
+				t.Errorf("%s.Count did not write RegionMix.%s: it holds %d, want %d", reg.Name, name, got, want)
+			case name != reg.Name && got != 0:
+				t.Errorf("%s.Count also wrote %s (%d)", reg.Name, name, got)
+			}
+		}
+	}
+	for f := 0; f < rt.NumField(); f++ {
+		if !seen[rt.Field(f).Name] {
+			t.Errorf("RegionMix.%s is in no mixOrder row", rt.Field(f).Name)
+		}
+	}
+}
+
+// TestBuyableRegionsAreTheMixMinusWaste guards the one relationship between the
+// two orders: a screen may order the rows how it likes, but it may not invent or
+// lose one. Waste is the sole exclusion — nothing can buy it.
+func TestBuyableRegionsAreTheMixMinusWaste(t *testing.T) {
+	inMix := map[*Region]bool{}
+	for _, reg := range mixOrder {
+		inMix[reg] = true
+	}
+	keys := map[byte]string{}
+	for _, reg := range BuyableRegions {
+		if !inMix[reg] {
+			t.Errorf("BuyableRegions lists %q, which mixOrder does not", reg.Name)
+		}
+		if reg == Waste {
+			t.Error("Waste is buyable, but nothing may buy it")
+		}
+		if reg.Key == 0 {
+			t.Errorf("%q has no selection key", reg.Name)
+		}
+		if prev, dup := keys[reg.Key]; dup {
+			t.Errorf("%q and %q share the key %q", prev, reg.Name, reg.Key)
+		}
+		keys[reg.Key] = reg.Name
+	}
+	if len(BuyableRegions) != len(mixOrder)-1 {
+		t.Errorf("BuyableRegions has %d rows, want %d (mixOrder minus Waste)", len(BuyableRegions), len(mixOrder)-1)
 	}
 }

@@ -9,29 +9,6 @@ import (
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
-// regionTypeNames lists the 8 region types in BRE's Buy Regions screen order
-// (Coastal, River, Agricultural, Desert, Industrial, Urban, Mountain, Technology
-// — verified live, #17 menu audit). regionTypeKeys and regionField track this
-// same order; the index is display/selection-only and never persisted.
-var regionTypeNames = []string{
-	"Coastal", "River", "Agricultural", "Desert",
-	"Industrial", "Urban", "Mountain", "Technology",
-}
-
-// regionTypeKeys are the single-letter selection keys (BRE style), in the same
-// order as regionTypeNames.
-var regionTypeKeys = []byte{'C', 'R', 'A', 'D', 'I', 'U', 'M', 'T'}
-
-// regionField returns a pointer to the idx'th (0-based) field of p.Regions,
-// in the same order as regionTypeNames.
-func regionField(p *game.Empire, idx int) *int {
-	fields := []*int{
-		&p.Regions.Coastal, &p.Regions.River, &p.Regions.Agricultural, &p.Regions.Desert,
-		&p.Regions.Industrial, &p.Regions.Urban, &p.Regions.Mountain, &p.Regions.Technology,
-	}
-	return fields[idx]
-}
-
 // printRegionTable renders the BRE-style region picker: a Key / Name / Owned
 // table, colored (magenta keys, yellow names) so buy and drop share one look.
 // regionRuleWidth/Double are BRE's region-table separator: a single
@@ -59,13 +36,13 @@ func regionRule(s session.Session) {
 func printRegionTable(s session.Session, p *game.Empire, advisors bool) {
 	fmt.Fprintf(s, "%s%-5s%-15s%s%s\n", ansi.FgBrightWhite, tr(s, "Key"), tr(s, "Name"), tr(s, "Owned"), ansi.Reset)
 	regionRule(s)
-	for i, name := range regionTypeNames {
+	for _, reg := range game.BuyableRegions {
 		// BRE's region table (docs/dev/bre-screens.md): magenta parens, a
 		// bright-white key letter, a bright-yellow name, a bright-white Owned count.
 		fmt.Fprintf(s, " %s(%s%c%s)%s %s%-14s%s %s%5d%s\n",
-			ansi.FgMagenta, ansi.FgBrightWhite, regionTypeKeys[i], ansi.FgMagenta, ansi.Reset,
-			ansi.FgBrightYellow, name, ansi.Reset,
-			ansi.FgBrightWhite, *regionField(p, i), ansi.Reset)
+			ansi.FgMagenta, ansi.FgBrightWhite, reg.Key, ansi.FgMagenta, ansi.Reset,
+			ansi.FgBrightYellow, reg.Name, ansi.Reset,
+			ansi.FgBrightWhite, *reg.Count(&p.Regions), ansi.Reset)
 	}
 	// Waste has no key: it cannot be bought or sold, only decontaminated during
 	// maintenance. It is listed anyway so a baron can see what a strike left
@@ -116,8 +93,8 @@ func promptRegionChoice(s session.Session, prompt string, extras bool) int {
 			return advisorsChoice
 		}
 		u := byte(unicode.ToUpper(r))
-		for i, k := range regionTypeKeys {
-			if k == u {
+		for i, reg := range game.BuyableRegions {
+			if reg.Key == u {
 				fmt.Fprintf(s, "%c\n", u) // echo the single keypress; no Enter needed
 				return i
 			}
@@ -164,7 +141,7 @@ func buyLand(s session.Session, w *ctx) Result {
 		case t < 0:
 			return Stay
 		default:
-			n := promptSuggested(s, fmt.Sprintf("Buy how many %s regions?", regionTypeNames[t]), 0, w.MaxAffordableRegions(p))
+			n := promptSuggested(s, fmt.Sprintf("Buy how many %s regions?", game.BuyableRegions[t].Name), 0, w.MaxAffordableRegions(p))
 			if n <= 0 {
 				continue
 			}
@@ -173,7 +150,7 @@ func buyLand(s session.Session, w *ctx) Result {
 			// per-turn region cap against fresh state, and the region field pointer
 			// must index the reloaded empire, not the stale gather.
 			err := w.mutatePlayer(func(fp *game.Empire) error {
-				e := w.World.BuyRegions(fp, regionField(fp, t), n)
+				e := w.World.BuyRegions(fp, game.BuyableRegions[t].Count(&fp.Regions), n)
 				gold = fp.Gold
 				return e
 			})
@@ -183,7 +160,7 @@ func buyLand(s session.Session, w *ctx) Result {
 				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgRed, tr(s, err.Error()), ansi.Reset)
 			} else {
 				fmt.Fprintf(s, "\n  %s%s%s\n", ansi.FgGreen,
-					fmt.Sprintf(tr(s, "%d %s regions purchased. Gold: %d"), n, regionTypeNames[t], gold), ansi.Reset)
+					fmt.Sprintf(tr(s, "%d %s regions purchased. Gold: %d"), n, game.BuyableRegions[t].Name, gold), ansi.Reset)
 			}
 			// A concurrent node may have hit this empire while the player was
 			// buying (region losses change the rising land price); surface it
@@ -263,7 +240,7 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 	}
 	showTable()
 
-	alloc := make([]int, len(regionTypeNames))
+	alloc := make([]int, len(game.BuyableRegions))
 	remaining := n
 	for remaining > 0 {
 		// BRE's captured-region prompt: "[N Regions left] Your choice?" then
@@ -283,21 +260,21 @@ func allocateRegions(s session.Session, w *ctx, n, reclaim int, headline string,
 		if t < 0 { // 0/Enter: assign the rest as Coastal and finish
 			break
 		}
-		got := promptSuggested(s, fmt.Sprintf("How many %s regions?", regionTypeNames[t]), remaining, remaining)
+		got := promptSuggested(s, fmt.Sprintf("How many %s regions?", game.BuyableRegions[t].Name), remaining, remaining)
 		if got <= 0 {
 			continue
 		}
 		alloc[t] += got
 		remaining -= got
 	}
-	alloc[0] += remaining // regionTypeNames[0] == Coastal: soak up any unassigned remainder
+	alloc[0] += remaining // BuyableRegions[0] is Coastal: soak up any unassigned remainder
 
 	if err := w.mutatePlayer(func(fp *game.Empire) error {
 		// Reclaim and re-grant inside ONE transaction: a save between the two would
 		// leave the land missing if the session dropped in the gap.
 		fp.Regions.Coastal -= min(reclaim, fp.Regions.Coastal)
 		for i, cnt := range alloc {
-			w.World.GrantRegions(fp, regionField(fp, i), cnt)
+			w.World.GrantRegions(fp, game.BuyableRegions[i].Count(&fp.Regions), cnt)
 		}
 		if also != nil {
 			also(fp)
@@ -318,21 +295,21 @@ func sellLand(s session.Session, w *ctx) Result {
 	if t < 0 {
 		return Stay
 	}
-	field := regionField(p, t)
-	n := promptSuggested(s, fmt.Sprintf("Drop how many %s regions?", regionTypeNames[t]), 0, *field)
+	field := game.BuyableRegions[t].Count(&p.Regions)
+	n := promptSuggested(s, fmt.Sprintf("Drop how many %s regions?", game.BuyableRegions[t].Name), 0, *field)
 	if n <= 0 {
 		return Stay
 	}
 	var land int
 	err := w.mutatePlayer(func(fp *game.Empire) error {
-		e := w.World.DropRegions(fp, regionField(fp, t), n)
+		e := w.World.DropRegions(fp, game.BuyableRegions[t].Count(&fp.Regions), n)
 		land = fp.Land
 		return e
 	})
 	if err != nil {
 		fail(s, err)
 	} else {
-		okNoPause(s, "%d %s regions dropped. You now hold %d land.", n, regionTypeNames[t], land)
+		okNoPause(s, "%d %s regions dropped. You now hold %d land.", n, game.BuyableRegions[t].Name, land)
 	}
 	return Stay
 }
