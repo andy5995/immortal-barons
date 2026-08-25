@@ -625,7 +625,15 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 
 	var forces, regions, sdi, crown, gold int64
 	var autoPay bool
-	var support, morale, waste int
+	var support, morale int
+	// due is game's own total, not these four added up here: a charge added to
+	// MaintenanceDue would otherwise be paid by Auto-Pay and left out of the
+	// figure shown. The four parts are still gathered for the itemised path.
+	var due int64
+	// The gate is read inside the same gather, so it sees the state the four
+	// charges below were figured from rather than whatever a concurrent node
+	// leaves behind. The rule itself is game.AutoPayApplies.
+	var autoPaySilent bool
 	if !withPlayer(w, func(p *game.Empire) {
 		forces = w.ForcesDue(p)
 		regions = w.RegionsDue(p)
@@ -633,28 +641,11 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		crown = w.World.CrownTax(p)
 		gold = p.Gold
 		autoPay = p.Prefs.AutoPayMaint
-		support = p.Support
-		morale = p.Morale
-		waste = p.Regions.Waste
+		due = w.World.MaintenanceDue(p)
+		autoPaySilent = w.World.AutoPayApplies(p)
 	}) {
 		return
 	}
-	due := forces + regions + sdi + crown
-
-	// BRE's silent one-line Auto-Pay total is gated on more than the
-	// preference and affordability: it also requires popular support and
-	// military morale to both be at their 100 cap and the realm to hold no
-	// Waste regions. If any of those fail, BRE bypasses Auto-Pay for this
-	// turn only — the preference itself is untouched — and falls through to
-	// the manual, itemised sequence below (which is also where the optional
-	// support/morale boosts and the waste-decontamination offer live).
-	// BRE.OVR `allocate_turn_budget` (0x02eebb), called from BRE.EXE
-	// `run_player_turn`: the gate at flat 0x3b12-0x3b6d compares gold to the
-	// total due, then checks empire-record fields +0x92 (support, ==100),
-	// +0x8e (morale, ==100), +0xb6 (Waste count, ==0) and +0x339 (the
-	// Auto-Pay flag itself) before taking the silent branch at 0x3b72; any
-	// failure falls to 0x3c16, which calls allocate_turn_budget instead.
-	autoPaySilent := autoPay && gold >= due && support >= 100 && morale >= 100 && waste <= 0
 
 	if autoPaySilent {
 		if !withPlayer(w, func(p *game.Empire) {

@@ -100,6 +100,37 @@ func (w *World) RegionsDue(e *Empire) int64 {
 	return w.Config.MaintCosts.MaintCostScaled(e.RegionUpkeep())
 }
 
+// MaintenanceDue is the whole maintenance bill for one turn: the armed forces,
+// the regions, the SDI programme and the Queen's crown tax. The pay-by-hand
+// path charges the four separately, prompt by prompt; Auto-Pay settles this one
+// figure in a line.
+func (w *World) MaintenanceDue(e *Empire) int64 {
+	return w.ForcesDue(e) + w.RegionsDue(e) + w.SDIMaintenance(e) + w.CrownTax(e)
+}
+
+// AutoPayApplies reports whether this turn's maintenance may be settled by the
+// silent one-line Auto-Pay rather than the itemised sequence.
+//
+// The gate is more than the preference and affordability: it also requires
+// popular support and military morale to both be at their 100 cap and the realm
+// to hold no Waste regions. If any of those fail, BRE bypasses Auto-Pay for this
+// turn only — the preference itself is untouched — and falls through to the
+// manual path, which is also where the optional support/morale boosts and the
+// waste-decontamination offer live.
+//
+// BRE.OVR `allocate_turn_budget` (0x02eebb), called from BRE.EXE
+// `run_player_turn`: the gate at flat 0x3b12-0x3b6d compares gold to the total
+// due, then checks empire-record fields +0x92 (support, ==100), +0x8e (morale,
+// ==100), +0xb6 (Waste count, ==0) and +0x339 (the Auto-Pay flag itself) before
+// taking the silent branch at 0x3b72; any failure falls to 0x3c16, which calls
+// allocate_turn_budget instead.
+func (w *World) AutoPayApplies(e *Empire) bool {
+	return e.Prefs.AutoPayMaint &&
+		e.Gold >= w.MaintenanceDue(e) &&
+		e.Support >= 100 && e.Morale >= 100 &&
+		e.Regions.Waste <= 0
+}
+
 // PeopleFoodUpkeep is the food the population eats per turn — the first of BRE's
 // two food obligations ("Your People Need N units of food"). BRE charges 1.5 per
 // unit of population and counts population in millions, so the conversion to
