@@ -442,15 +442,16 @@ func (u UnitLoss) Total() int {
 	return u.Troopers + u.Jets + u.Turrets + u.Tanks + u.Bombers
 }
 
-// loseForces removes the given fraction of an empire's combat units and returns
-// the per-type breakdown lost (the defender fights with everything, so all four
-// types bleed). The share is a fraction rather than whole percent because the
-// winner of a lopsided battle walks away having lost well under one percent —
-// rounding that to zero or one would erase the difference between a cheap win
-// and an expensive one.
-// loseForcesSplit is loseForces for an interplanetary battle, where the ground
-// fight and the air fight produce different fractions (see
-// remoteBattleAttrition). Jets take the air fraction and nothing else does.
+// loseForcesSplit removes a fraction of an empire's combat units and returns the
+// per-type breakdown lost (the defender fights with everything, so all four
+// types bleed). Jets take the air fraction; troopers, turrets and tanks take the
+// ground one. An interplanetary battle sets the two apart — see
+// remoteBattleAttrition.
+//
+// The shares are fractions rather than whole percent because the winner of a
+// lopsided battle walks away having lost well under one percent, and rounding
+// that to zero or one would erase the difference between a cheap win and an
+// expensive one.
 func loseForcesSplit(e *Empire, ground, air float64) UnitLoss {
 	l := UnitLoss{
 		Troopers: shareOf(e.Troopers, ground),
@@ -465,18 +466,10 @@ func loseForcesSplit(e *Empire, ground, air float64) UnitLoss {
 	return l
 }
 
+// loseForces is loseForcesSplit for a battle fought on one planet, where the
+// ground and the air bleed at the same rate.
 func loseForces(e *Empire, frac float64) UnitLoss {
-	l := UnitLoss{
-		Troopers: shareOf(e.Troopers, frac),
-		Jets:     shareOf(e.Jets, frac),
-		Turrets:  shareOf(e.Turrets, frac),
-		Tanks:    shareOf(e.Tanks, frac),
-	}
-	e.Troopers -= l.Troopers
-	e.Jets -= l.Jets
-	e.Turrets -= l.Turrets
-	e.Tanks -= l.Tanks
-	return l
+	return loseForcesSplit(e, frac, frac)
 }
 
 // AttackForce (defined in ibbs.go for group attacks — Troopers/Jets/Tanks/Bombers)
@@ -500,10 +493,10 @@ func FullForce(e *Empire) AttackForce {
 func (f AttackForce) clampTo(e *Empire) AttackForce {
 	usableJets := min(e.Jets, e.Carriers*JetsPerCarrier)
 	return AttackForce{
-		Troopers: clampInt(f.Troopers, 0, e.Troopers),
-		Jets:     clampInt(f.Jets, 0, usableJets),
-		Tanks:    clampInt(f.Tanks, 0, e.Tanks),
-		Bombers:  clampInt(f.Bombers, 0, e.Bombers),
+		Troopers: min(max(f.Troopers, 0), e.Troopers),
+		Jets:     min(max(f.Jets, 0), usableJets),
+		Tanks:    min(max(f.Tanks, 0), e.Tanks),
+		Bombers:  min(max(f.Bombers, 0), e.Bombers),
 	}
 }
 
@@ -534,17 +527,7 @@ func loseCommitted(e *Empire, f AttackForce, frac float64) UnitLoss {
 
 // shareOf is frac of n, rounded down and never more than n.
 func shareOf(n int, frac float64) int {
-	return clampInt(int(float64(n)*frac), 0, n)
-}
-
-func clampInt(n, lo, hi int) int {
-	if n < lo {
-		return lo
-	}
-	if n > hi {
-		return hi
-	}
-	return n
+	return min(max(int(float64(n)*frac), 0), n)
 }
 
 // addScore adjusts an empire's Score, never letting it fall below zero.

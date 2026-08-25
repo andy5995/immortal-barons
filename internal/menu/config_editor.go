@@ -12,57 +12,36 @@ import (
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
-// cycleCost steps a cost knob through High -> Medium -> Low -> None (BRE
-// "[H,M,L,N]").
-func cycleCost(l game.Level) game.Level {
-	switch l {
-	case game.High:
-		return game.Medium
-	case game.Medium:
-		return game.Low
-	case game.Low:
-		return game.None
-	default:
-		return game.High
+// nextIn steps v to the value after it in order, wrapping at the end. A value
+// order does not list — a config written by another version, or a zero value —
+// lands on the first, which is what each knob's default arm did when these were
+// four separate switches.
+func nextIn[T comparable](v T, order []T) T {
+	for i, o := range order {
+		if o == v {
+			return order[(i+1)%len(order)]
+		}
 	}
+	return order[0]
 }
 
-// cycleHML steps a damage/reward knob through High -> Medium -> Low (no None).
-func cycleHML(l game.Level) game.Level {
-	switch l {
-	case game.High:
-		return game.Medium
-	case game.Medium:
-		return game.Low
-	default:
-		return game.High
+// The orders the sysop's keypress walks, one per knob. BRE prompts the cost
+// knobs "[H,M,L,N]"; the damage and reward knobs have no None.
+var (
+	costOrder          = []game.Level{game.High, game.Medium, game.Low, game.None}
+	hmlOrder           = []game.Level{game.High, game.Medium, game.Low}
+	buyOrder           = []game.BuyMode{game.BuyYes, game.BuyNo, game.BuyLimited}
+	slappenheimerOrder = []game.SlappenheimerMode{
+		game.SlappenheimerUserSelect, game.SlappenheimerNone,
+		game.SlappenheimerRandom, game.SlappenheimerConstant,
 	}
-}
+)
 
-// cycleBuy steps Buy Military through Yes -> No -> Limited.
-func cycleBuy(b game.BuyMode) game.BuyMode {
-	switch b {
-	case game.BuyYes:
-		return game.BuyNo
-	case game.BuyNo:
-		return game.BuyLimited
-	default:
-		return game.BuyYes
-	}
-}
-
-// cycleSlappenheimer steps Slappenheimer Handling through its four settings.
+func cycleCost(l game.Level) game.Level    { return nextIn(l, costOrder) }
+func cycleHML(l game.Level) game.Level     { return nextIn(l, hmlOrder) }
+func cycleBuy(b game.BuyMode) game.BuyMode { return nextIn(b, buyOrder) }
 func cycleSlappenheimer(m game.SlappenheimerMode) game.SlappenheimerMode {
-	switch m {
-	case game.SlappenheimerUserSelect:
-		return game.SlappenheimerNone
-	case game.SlappenheimerNone:
-		return game.SlappenheimerRandom
-	case game.SlappenheimerRandom:
-		return game.SlappenheimerConstant
-	default:
-		return game.SlappenheimerUserSelect
-	}
+	return nextIn(m, slappenheimerOrder)
 }
 
 // ConfigEditor runs the Configuration Editor standalone (used by the door's

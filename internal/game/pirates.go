@@ -438,9 +438,9 @@ func (w *World) RaidFaction(a *Empire, faction, troopers, jets, tanks int) (repo
 	}
 	p := &w.Pirates[faction]
 
-	troopers = clampInt(troopers, 0, a.Troopers)
-	jets = clampInt(jets, 0, a.Jets)
-	tanks = clampInt(tanks, 0, a.Tanks)
+	troopers = min(max(troopers, 0), a.Troopers)
+	jets = min(max(jets, 0), a.Jets)
+	tanks = min(max(tanks, 0), a.Tanks)
 
 	offense := troopers/2 + jets + tanks*2
 	defense := p.Defense()

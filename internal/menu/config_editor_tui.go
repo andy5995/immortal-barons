@@ -458,6 +458,12 @@ func (t *configTUI) dismissModal() {
 }
 
 // addInt adds a digits-only field that clamps to [lo, hi] on read-back.
+// clampRange holds a typed number inside a knob's [lo, hi]. Named rather than
+// written out at both sites so the test can assert the clamp the editor really
+// applies: asserting the expression instead reduces to lo != lo, which cannot
+// fail and was covering nothing.
+func clampRange(n, lo, hi int) int { return min(max(n, lo), hi) }
+
 func (t *configTUI) addInt(form *tview.Form, label, help string, val, lo, hi int, set func(*game.Config, int)) {
 	base := mark(label) + label
 	f := tview.NewInputField().
@@ -470,7 +476,7 @@ func (t *configTUI) addInt(form *tview.Form, label, help string, val, lo, hi int
 	// visibly snaps to the bound (belt-and-suspenders with the Save-time clamp).
 	f.SetDoneFunc(func(tcell.Key) {
 		n, _ := strconv.Atoi(strings.TrimSpace(f.GetText()))
-		f.SetText(strconv.Itoa(clampInt(n, lo, hi)))
+		f.SetText(strconv.Itoa(clampRange(n, lo, hi)))
 	})
 	form.AddFormItem(zebra(form, f))
 	openText := strconv.Itoa(val)
@@ -479,7 +485,7 @@ func (t *configTUI) addInt(form *tview.Form, label, help string, val, lo, hi int
 	t.aligns = append(t.aligns, rangeField{form: form, field: f, base: base, rng: fmt.Sprintf("[%d-%d]", lo, hi)})
 	t.binders = append(t.binders, func(c *game.Config) {
 		n, _ := strconv.Atoi(strings.TrimSpace(f.GetText()))
-		set(c, clampInt(n, lo, hi))
+		set(c, clampRange(n, lo, hi))
 	})
 }
 
@@ -738,16 +744,6 @@ func stripeBg(form *tview.Form) tcell.Color {
 // zebra wraps an input field with the striped background for its row.
 func zebra(form *tview.Form, f tview.FormItem) *styledField {
 	return &styledField{FormItem: f, fg: tcell.ColorWhite, bg: stripeBg(form)}
-}
-
-func clampInt(n, lo, hi int) int {
-	if n < lo {
-		return lo
-	}
-	if n > hi {
-		return hi
-	}
-	return n
 }
 
 func validISODate(s string) bool {

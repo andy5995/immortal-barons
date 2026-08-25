@@ -209,11 +209,66 @@ func TestBothEditorsHoldTheBankRatesToBRERanges(t *testing.T) {
 		t.Errorf("Standard Investment Rate = %d, want the %d floor", w.Config.StdInvestRate, game.MinStdInvestRate)
 	}
 
-	// The tview editor clamps the same way, so the two cannot drift apart.
-	if got := clampInt(1, game.MinBankInterest, game.MaxBankInterest); got != game.MinBankInterest {
-		t.Errorf("tview clamp gave %d, want %d", got, game.MinBankInterest)
+	// The tview editor clamps through clampRange, which is what its own field
+	// handler and save binder both call — so the two editors cannot drift apart.
+	if got := clampRange(1, game.MinBankInterest, game.MaxBankInterest); got != game.MinBankInterest {
+		t.Errorf("tview clamp gave %d, want the %d floor", got, game.MinBankInterest)
 	}
-	if got := clampInt(1, game.MinStdInvestRate, game.MaxStdInvestRate); got != game.MinStdInvestRate {
-		t.Errorf("tview clamp gave %d, want %d", got, game.MinStdInvestRate)
+	if got := clampRange(1, game.MinStdInvestRate, game.MaxStdInvestRate); got != game.MinStdInvestRate {
+		t.Errorf("tview clamp gave %d, want the %d floor", got, game.MinStdInvestRate)
 	}
+	if got := clampRange(9999, game.MinBankInterest, game.MaxBankInterest); got != game.MaxBankInterest {
+		t.Errorf("tview clamp gave %d, want the %d ceiling", got, game.MaxBankInterest)
+	}
+}
+
+// TestKnobsCycleThroughEveryValue pins the order each sysop knob walks, and
+// that every value is reachable and the walk returns to where it started. The
+// four cyclers were four separate switches whose default arm carried the wrap;
+// nextIn has to reproduce each one exactly, including where an unset value
+// lands.
+func TestKnobsCycleThroughEveryValue(t *testing.T) {
+	t.Run("cost", func(t *testing.T) {
+		want := []game.Level{game.Medium, game.Low, game.None, game.High}
+		got := game.High
+		for i, w := range want {
+			if got = cycleCost(got); got != w {
+				t.Fatalf("step %d: got %v, want %v", i+1, got, w)
+			}
+		}
+	})
+	t.Run("damage and reward skip None", func(t *testing.T) {
+		want := []game.Level{game.Medium, game.Low, game.High}
+		got := game.High
+		for i, w := range want {
+			if got = cycleHML(got); got != w {
+				t.Fatalf("step %d: got %v, want %v", i+1, got, w)
+			}
+		}
+		// None is not on this ladder, so it steps onto the first value.
+		if got := cycleHML(game.None); got != game.High {
+			t.Errorf("None stepped to %v, want High", got)
+		}
+	})
+	t.Run("buy military", func(t *testing.T) {
+		want := []game.BuyMode{game.BuyNo, game.BuyLimited, game.BuyYes}
+		got := game.BuyYes
+		for i, w := range want {
+			if got = cycleBuy(got); got != w {
+				t.Fatalf("step %d: got %v, want %v", i+1, got, w)
+			}
+		}
+	})
+	t.Run("slappenheimer", func(t *testing.T) {
+		want := []game.SlappenheimerMode{
+			game.SlappenheimerNone, game.SlappenheimerRandom,
+			game.SlappenheimerConstant, game.SlappenheimerUserSelect,
+		}
+		got := game.SlappenheimerUserSelect
+		for i, w := range want {
+			if got = cycleSlappenheimer(got); got != w {
+				t.Fatalf("step %d: got %v, want %v", i+1, got, w)
+			}
+		}
+	})
 }
