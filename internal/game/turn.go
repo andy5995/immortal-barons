@@ -2,6 +2,7 @@ package game
 
 import (
 	"encoding/binary"
+	"errors"
 	"hash/fnv"
 	"io"
 	"math"
@@ -730,6 +731,19 @@ func (b IncomeBreakdown) CrownTaxBase() int {
 // or units. BRE stores its rate in tenths of a percent (its default is 50,
 // shown as 5.0%); IB stores whole percent instead, so a sysop and the config
 // editor deal in one unit rather than two. Same arithmetic, one fewer trap.
+// ErrAlreadySpecialized is returned when a realm's industry is already
+// committed. The choice is permanent, so a second attempt keeps the first.
+var ErrAlreadySpecialized = errors.New("Your industry is already specialized.")
+
+// Specialize commits e's industry to one military good, permanently.
+func (w *World) Specialize(e *Empire, g *Good) error {
+	if e.Specialized != "" {
+		return ErrAlreadySpecialized
+	}
+	e.Specialized = g.Plural
+	return nil
+}
+
 func (w *World) CrownTax(e *Empire) int64 {
 	return pctOf(int64(w.IncomeThisTurn(e).CrownTaxBase()), w.Config.PlanetaryTaxRate)
 }

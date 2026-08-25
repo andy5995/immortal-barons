@@ -249,7 +249,8 @@ func setTaxRate(s session.Session, w *ctx) Result {
 	rate := promptSuggested(s, "New tax rate?", p.Tax, maxRate)
 	w.With(func() {
 		if p := w.Player(); p != nil {
-			p.Tax = rate
+			w.World.SetTax(p, rate)
+			rate = p.Tax
 		}
 	})
 	ok(s, "Tax rate set to %d%%.", rate)

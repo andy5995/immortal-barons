@@ -245,6 +245,19 @@ func (w *World) BuyFoodMarket(e *Empire, n int) error {
 	return nil
 }
 
+// SetTax sets e's tax rate, held inside the range a player may choose:
+// 0 to Config.MaxTaxRate. The rate reaches population income every turn, so the
+// bound belongs with the rule rather than with whichever prompt collected the
+// number — the human path had been relying on its prompt to clamp.
+//
+// NOTE a divergence this did not invent: aiSetTax reads MaxTaxRate == 0 as "no
+// cap set" and leaves the AI's rate alone, while a player at that setting is
+// held to 0%. A sysop may choose 0 in the editor, so the two paths genuinely
+// disagree there.
+func (w *World) SetTax(e *Empire, n int) {
+	e.Tax = min(max(n, 0), w.Config.MaxTaxRate)
+}
+
 // SellFood sells n units of food at today's FoodSellPrice, clamped to what e
 // owns. In limited mode the sold food goes back into the planet-wide pool.
 func (w *World) SellFood(e *Empire, n int) error {

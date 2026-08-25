@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"errors"
 	"fmt"
 	"unicode/utf8"
 
@@ -169,25 +170,18 @@ func specializeIndustry(s session.Session, w *ctx) Result {
 		ok(s, "Your industry was left unspecialized.")
 		return Stay
 	}
-	var already bool
+	// Inside the transaction, so a visit that specialized between the prompt and
+	// here keeps its choice rather than being overwritten.
 	err := w.mutatePlayer(func(p *game.Empire) error {
-		// Re-check against fresh state: specialization is permanent, so if another
-		// visit set it between the prompt and here, keep the existing choice.
-		if p.Specialized != "" {
-			already = true
-			return nil
-		}
-		p.Specialized = game.MilitaryGoods[t-1].Plural
-		return nil
+		return w.World.Specialize(p, game.MilitaryGoods[t-1])
 	})
-	if err != nil {
-		fail(s, err)
-		return Stay
-	}
-	if already {
+	switch {
+	case errors.Is(err, game.ErrAlreadySpecialized):
 		ok(s, "Your industry is already specialized.")
-		return Stay
+	case err != nil:
+		fail(s, err)
+	default:
+		ok(s, "Your industry is now permanently specialized in %s.", game.MilitaryGoods[t-1].Plural)
 	}
-	ok(s, "Your industry is now permanently specialized in %s.", game.MilitaryGoods[t-1].Plural)
 	return Stay
 }

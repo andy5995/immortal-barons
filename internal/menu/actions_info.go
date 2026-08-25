@@ -73,13 +73,9 @@ func endProtection(s session.Session, w *ctx) Result {
 	if !AskYesNo(s, "You will be out of protection at the end of this turn. Are you sure?", false) {
 		return Stay
 	}
-	// Drop to a single turn, not 0: the realm stays protected for the rest of
-	// this turn (still can't attack or be attacked), and the turn-end tick in
-	// PlayTurn clears it — so ending protection can't double as a free same-turn
-	// attack.
 	w.With(func() {
-		if fp := w.Player(); fp != nil && fp.Protection > 1 {
-			fp.Protection = 1
+		if fp := w.Player(); fp != nil {
+			w.World.WaiveProtection(fp)
 		}
 	})
 	ok(s, "Your new-realm protection will end when this turn does.")

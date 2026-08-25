@@ -1315,6 +1315,18 @@ func (w *World) Kill(e *Empire) {
 	e.DiedDay = w.GameDay
 }
 
+// WaiveProtection ends e's new-realm protection at the end of the current turn.
+//
+// It drops to a single turn rather than 0 on purpose: the realm stays protected
+// for the rest of this turn — still unable to attack or be attacked — and the
+// turn-end tick in PlayTurn clears it. Setting 0 here would let ending
+// protection double as a free same-turn attack.
+func (w *World) WaiveProtection(e *Empire) {
+	if e.Protection > 1 {
+		e.Protection = 1
+	}
+}
+
 // RemoveEmpire deletes e from the world (Abdicate). The empire is gone
 // entirely; the caller gets a fresh realm on their next visit.
 func (w *World) RemoveEmpire(e *Empire) {
