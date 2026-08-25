@@ -3217,6 +3217,25 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   and nothing on the ground shields the airfield — turrets and tanks are in the
   ground strength and never enter the air roll.
 
+  **The land a strike carries off is a FLAT SHARE, not a share of the margin.**
+  `resolve_received_invasion` at `+0x1862` calls `total_regions` on the target,
+  multiplies by the capture percentage it has built, divides by 100, truncates,
+  and takes `max_i32` against a floor of **10** — where the local resolver's
+  floor is 15. Nothing in it looks at how lopsided the battle was, so a squeaker
+  and a rout carry off the same share. That is what makes an interplanetary
+  campaign a grind rather than one decisive blow.
+
+  The percentage is built in three steps, all binary (`+0x130b`-`+0x1391`):
+  the Attack Rewards rung, **doubled** when a baron sent the strike alone
+  (`x2`, the documented "twice as many returns if you send the attack
+  yourself"), then scaled by the type — Quick **halves** it, Normal leaves it,
+  Extended multiplies by **5/4**. So the 50% and 125% capture figures that came
+  from `attack.hlp` are now confirmed in code, and an individual Normal strike
+  at Medium takes 20% of the defender's regions.
+
+  IB took a share of the MARGIN and quartered it until 2026-08-24. That was its
+  own and had no support.
+
   **Attack Rewards has its own ladder too.** The resolver switches on the config
   byte `+0x183` (`+0x12a4`) exactly as it switches on the Attack Damage byte, and
   loads a Real48 per level. Against BRE's byte encoding (Medium 0, None 1, Low 2,

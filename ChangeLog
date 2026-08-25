@@ -4,6 +4,7 @@
   * Bombers add no strength to an interplanetary strike; they fight the jets
   * An arriving strike is defended with its own tank and morale values
   * The Attack Rewards setting now reaches interplanetary strikes
+  * An interplanetary strike takes a flat share of the defender's regions
   * Battle strengths keep their fractions instead of truncating to whole units
   * A region no longer adds defensive strength in battle
   * The battle report is shown in each player's own language

@@ -1468,6 +1468,11 @@ const (
 	// resolve_received_invasion +0x12a4 (Real48 15 at the High branch).
 	InterplanetaryCaptureHighPct = 15
 
+	// And its own floor, which is NOT the local resolver's 15. Binary:
+	// resolve_received_invasion +0x18a8 pushes 10 into max_i32 against the
+	// computed share.
+	InterplanetaryCaptureFloor = 10
+
 	// Share of its own force a side will lose before it breaks off, by Attack
 	// Damage. Same switch shape at BRE.OVR 0xF84F on the byte at +0x181, except
 	// the constants are what SURVIVES — 0.99, 0.90, 0.80, 0.70 — so the losses

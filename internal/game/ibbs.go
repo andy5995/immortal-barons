@@ -1684,14 +1684,25 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// this kind of strike can carry off (capped). The margin is widened to int64
 	// first: a league-sized strike can pass 21 million offense, and multiplying
 	// that by 100 wraps a 32-bit int on the door builds this project supports.
-	frac := int64(offense-def) * 100 / int64(max(offense, 1))
-	// The sysop's Attack Rewards setting reaches an interplanetary strike too,
-	// on its own ladder (Level.InterplanetaryCapturePct). It is applied relative
-	// to Medium so the default is unchanged: None takes nothing, Low half, High
-	// half again as much.
-	rewards := int64(w.Config.AttackRewards.InterplanetaryCapturePct())
-	land := int(int64(target.Land) * frac / 100 / 4 * int64(kind.capturePct()) / 100 * int64(returnsPct) / 100 *
-		rewards / int64(AttackCaptureMediumPct))
+	// A FLAT SHARE of what the defender holds, not a share of the margin. BRE
+	// (resolve_received_invasion +0x1862) calls total_regions on the target,
+	// multiplies by the capture percentage it built, divides by 100, truncates,
+	// and takes max_i32 against a floor of 10.
+	//
+	// The percentage is the Attack Rewards ladder, doubled for a strike a baron
+	// sent alone, then scaled by the type: Quick halves it, Extended multiplies
+	// by 5/4 (+0x1338 onwards). None of it looks at how lopsided the battle was
+	// — a squeaker and a rout carry off the same share, which is what makes an
+	// interplanetary campaign a grind rather than one decisive blow.
+	//
+	// IB used to take a share of the MARGIN and quarter it, which is its own and
+	// had no support.
+	pct := float64(w.Config.AttackRewards.InterplanetaryCapturePct()) *
+		float64(returnsPct) / 100 * float64(kind.capturePct()) / 100
+	land := int(float64(target.Land) * pct / 100)
+	if land < InterplanetaryCaptureFloor {
+		land = InterplanetaryCaptureFloor
+	}
 	if land > target.Land {
 		land = target.Land
 	}

@@ -368,10 +368,18 @@ func TestAttackRewardsReachInterplanetaryStrikes(t *testing.T) {
 		}).LandTaken
 	}
 	med, high, low, none := land(Medium), land(High), land(Low), land(None)
-	if none != 0 {
-		t.Errorf("Attack Rewards None still carried off %d regions", none)
+	// None zeroes the SHARE, but the floor still applies — max_i32 against 10 —
+	// so a winning strike always carries off at least that. The local resolver
+	// behaves the same way with its own floor of 15.
+	if none != InterplanetaryCaptureFloor {
+		t.Errorf("Attack Rewards None took %d regions, want the floor of %d", none, InterplanetaryCaptureFloor)
 	}
 	if !(low < med && med < high) {
 		t.Errorf("land taken does not follow the ladder: none=%d low=%d medium=%d high=%d", none, low, med, high)
+	}
+	// A flat share of what the defender holds: an individual Normal strike at
+	// Medium is the 10% ladder rung doubled for going alone.
+	if want := 40_000 * 20 / 100; med != want {
+		t.Errorf("an individual Normal strike at Medium took %d of 40,000 regions, want %d", med, want)
 	}
 }
