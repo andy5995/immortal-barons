@@ -815,11 +815,14 @@ and immediately after the protection line. A rule above and below is not a box,
 and both statements have to be made separately. **IB draws both rules** as of
 2026-08-16; it drew neither before.
 
-IB's income lines open under an `Income Report` title bar of its own rather than
-the 75-column rule BRE uses. An undocumented divergence until 2026-08-16 —
-recorded here rather than corrected, because the report is itemized differently
-from BRE's (right-aligned amounts, a subtotal rule, a total line) and the heading
-is what names that table.
+**Deliberate divergence:** IB itemizes the income differently from BRE —
+right-aligned amounts in one column, a subtotal rule, and a total line BRE does
+not print. The lines and their wording are BRE's.
+
+IB drew a blue-backed `Income Report` bar of its own above them until
+2026-08-25, where BRE has the 75-column rule and no heading at all. Corrected:
+the rule is what opens the block now. That bar was the only filled-background
+heading in the game, so the style went with it.
 
 **The capture is of a realm that holds little, and the block is shorter than the
 field set.** The status routine (`BRE.OVR` `show_empire_status`, 0x193b2) is a

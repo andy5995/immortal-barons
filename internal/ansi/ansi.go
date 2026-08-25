@@ -42,8 +42,6 @@ const (
 	FgBrightMagenta = esc + "95m"
 	FgBrightCyan    = esc + "96m"
 	FgBrightWhite   = esc + "97m"
-
-	BgBlue = esc + "44m"
 )
 
 // The screen a BBS caller is assumed to have. DOS text mode is 80x25 and that

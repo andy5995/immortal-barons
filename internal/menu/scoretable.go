@@ -180,7 +180,7 @@ func idCell(id string) string {
 // here once. They previously carried a copy each of the same format strings,
 // which is how a change to one silently leaves the others behind.
 func scoreTableRule(s session.Session) {
-	fmt.Fprintf(s, "%s\n", rosterRule(ansi.FgMagenta))
+	fmt.Fprintf(s, "%s\n", rule75(ansi.FgMagenta))
 }
 
 func scoreTableHead(s session.Session) {

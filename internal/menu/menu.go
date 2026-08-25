@@ -581,25 +581,25 @@ func insetRule(width, double int) string {
 		strings.Repeat("─", width-5-double)
 }
 
-// rosterRule is BRE's full-width table divider — 75 columns with a 15-column `═`
-// accent inset (docs/dev/bre-screens.md) — in the accent colour of the screen
-// drawing it. Six screens draw the same table under it: the scores board, the
-// -*Relations*- roster, the recipient picker, the planet list, Travel Times and
-// the end-of-turn stats. Each had declared the pair itself, and they had already
-// drifted once — the scores rule was a plain 72, which is BRE's *heading* width,
-// leaving the recipient picker drawing the same table under a different rule.
-// One BRE screen gets one rule.
+// rule75 is BRE's 75-column inset rule — 5 `─`, 15 `═`, 55 `─`
+// (docs/dev/bre-screens.md) — in the accent colour of the screen drawing it.
 //
-// This is NOT a house width to reach for. BRE sizes every other box to its own
+// BRE serves every screen that wants it from one routine, and so does this: the
+// scores board, the -*Relations*- roster, the recipient picker, the planet list,
+// Travel Times, the turn's income lines and the End of Turn Statistics. Each had
+// declared the pair itself, and they had already drifted once — the scores rule
+// was a plain 72, BRE's heading width rather than its rule.
+//
+// It is NOT a house width to reach for. BRE sizes every other box to its own
 // content — its captures run 23 to 76 columns — so a new screen takes its width
 // from its own capture, not from here.
-func rosterRule(accent string) string {
-	return accent + insetRule(rosterRuleWidth, rosterRuleDouble) + ansi.Reset
+func rule75(accent string) string {
+	return accent + insetRule(rule75Width, rule75Double) + ansi.Reset
 }
 
 const (
-	rosterRuleWidth  = 75
-	rosterRuleDouble = 15
+	rule75Width  = 75
+	rule75Double = 15
 )
 
 // InsetRule is that divider at the menu rule's width. BRE uses it broadly —

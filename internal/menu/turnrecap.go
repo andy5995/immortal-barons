@@ -308,7 +308,11 @@ func incomeReport(s session.Session, w *ctx) {
 		width = w
 	}
 
-	titleBar(s, tr(s, "Income Report"))
+	// BRE opens the income lines under its 75-column blue rule and gives them no
+	// heading at all (docs/dev/bre-screens.md, "Turn income, status block,
+	// maintenance"). IB drew a blue-backed "Income Report" bar of its own here
+	// until 2026-08-25.
+	fmt.Fprintf(s, "\n%s\n", rule75(ansi.FgBlue))
 	amt := func(color string, n int, text string) {
 		fmt.Fprintf(s, "  %s%*s%s  %s\n", color, width, comma(n), ansi.Reset, i18n.T(sessionLang(s), text))
 	}
@@ -422,7 +426,7 @@ func endOfTurnStats(s session.Session, w *ctx) {
 	}
 	p := &snap
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "End of Turn Statistics:"), ansi.Reset)
-	fmt.Fprintf(s, "%s\n", eotsRule())
+	fmt.Fprintf(s, "%s\n", rule75(ansi.FgBlue))
 	fmt.Fprintf(s, "  %s\n", tr(s, peopleMood(p.Support)))
 	// A flat turn prints "gained 0" rather than nothing: BRE does (cap/kd3-01.cap,
 	// twice, both on riot turns), and IB used to skip the line entirely, so a
@@ -441,13 +445,5 @@ func endOfTurnStats(s session.Session, w *ctx) {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBrightRed, hiNums(fmt.Sprintf(tr(s, "Civil war! Famine cost you %d%% of your realm and its forces."), p.LastCivilWar)), ansi.Reset)
 	}
 	statLine(s, p.LastMoraleDesertion, "troops deserted due to low morale.")
-	fmt.Fprintf(s, "%s\n", eotsRule())
-}
-
-// eotsRule is the End of Turn Statistics divider, measured off a live BRE
-// capture (cap/eots-ibbs-01.cap): the heading sits over a blue inset rule and
-// the same rule closes the block. It is the shared roster rule — 75 columns,
-// 15 of them double — in blue.
-func eotsRule() string {
-	return rosterRule(ansi.FgBlue)
+	fmt.Fprintf(s, "%s\n", rule75(ansi.FgBlue))
 }

@@ -457,7 +457,7 @@ func relationsText(s session.Session, held []string) string {
 // the Diplomacy picker's "?" list share it, as they share one routine in the
 // original.
 func writeRelationsTable(s session.Session, rows []relationsRow) {
-	rule := rosterRule(ansi.FgBlue)
+	rule := rule75(ansi.FgBlue)
 	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n", ansi.FgBlue, ansi.FgBrightWhite, tr(s, "Relations"), ansi.FgBlue, ansi.Reset)
 	fmt.Fprintf(s, "%s%-5s%-*s%s%s\n", ansi.FgBrightWhite,
 		tr(s, "Id"), relationsNameWidth, tr(s, "Empire Name"), tr(s, "Relations"), ansi.Reset)

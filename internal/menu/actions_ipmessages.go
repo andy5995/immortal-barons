@@ -101,7 +101,7 @@ func nodeLocation(n game.LeagueNode) string {
 // showPlanetList draws BRE's "List of Planets" table: a red-ruled board of
 // number, planet name and location.
 func showPlanetList(s session.Session, planets []game.LeagueNode) {
-	rule := rosterRule(ansi.FgRed)
+	rule := rule75(ansi.FgRed)
 	fmt.Fprintf(s, "%s\n", tr(s, "List of Planets"))
 	fmt.Fprintf(s, "%s\n", rule)
 	fmt.Fprintf(s, "%s%-3s%-*s%s%s\n", ansi.FgWhite, tr(s, "##"), planetNameWidth, tr(s, "Planet Name"), tr(s, "Location"), ansi.Reset)

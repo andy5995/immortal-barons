@@ -219,18 +219,6 @@ func writeMacros(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// titleBar prints a full-width white-on-blue panel header spanning the rule.
-func titleBar(s session.Session, text string) {
-	bar := " " + text + " "
-	// Pad to the rule's DISPLAY width, not its byte length: `rule` is 62 box-drawing
-	// runes at 3 UTF-8 bytes each, so len(rule) is 180 and would stretch the blue
-	// bar across ~2.25 lines (#8). len([]rune(...)) counts columns, like titleRule.
-	if pad := len([]rune(rule)) - len([]rune(bar)); pad > 0 {
-		bar += strings.Repeat(" ", pad)
-	}
-	fmt.Fprintf(s, "\n%s%s%s%s\n", ansi.BgBlue, ansi.FgBrightWhite, bar, ansi.Reset)
-}
-
 // centered prints text centered on the rule's display width in the given color.
 func centered(s session.Session, color, text string) {
 	pad := (len([]rune(rule)) - len([]rune(text))) / 2

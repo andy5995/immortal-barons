@@ -822,21 +822,6 @@ func TestPromptClampAndConfirm(t *testing.T) {
 	}
 }
 
-// TestTitleBarPadsToRuleWidth guards #8: the blue title bar must be padded to the
-// rule's DISPLAY width (rune count), not its byte length — the box-drawing rune is
-// 3 bytes, so the byte-count bug stretched the bar to ~180 cols and wrapped.
-func TestTitleBarPadsToRuleWidth(t *testing.T) {
-	f := &fakeSession{}
-	titleBar(f, "About")
-	out := f.out.String()
-	for _, esc := range []string{ansi.BgBlue, ansi.FgBrightWhite, ansi.Reset, "\n"} {
-		out = strings.ReplaceAll(out, esc, "")
-	}
-	if got, want := len([]rune(out)), len([]rune(rule)); got != want {
-		t.Errorf("title bar width = %d runes, want %d (rule display width); the byte-vs-rune bug gives ~180", got, want)
-	}
-}
-
 // A realm's selection letter is its own permanent slot letter, not a count of
 // the pickable realms above it. Allying with the realms at the top used to
 // re-letter everyone below them, so the key that attacked one realm yesterday

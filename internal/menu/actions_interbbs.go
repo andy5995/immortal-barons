@@ -41,7 +41,7 @@ func travelTimes(s session.Session, w *ctx) Result {
 		ok(s, "No other planets are known yet.")
 		return Stay
 	}
-	rule := rosterRule(ansi.FgBrightBlack)
+	rule := rule75(ansi.FgBrightBlack)
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "Average Turn Around Times to All BBSes"), ansi.Reset)
 	fmt.Fprintf(s, "%s\n", rule)
 	for _, p := range planets {

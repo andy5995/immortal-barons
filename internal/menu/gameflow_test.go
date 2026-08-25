@@ -54,8 +54,31 @@ func TestIncomeReportWritesNonEmpty(t *testing.T) {
 	if f.out.Len() == 0 {
 		t.Error("expected incomeReport to write output")
 	}
-	if !strings.Contains(f.out.String(), "Income Report") {
-		t.Error("expected income report heading")
+	if !strings.Contains(f.out.String(), "gold was earned in taxes.") {
+		t.Error("expected the income report's first line")
+	}
+}
+
+// BRE opens the income lines under its 75-column blue inset rule and gives them
+// no heading (docs/dev/bre-screens.md). IB drew a blue-backed "Income Report"
+// bar of its own instead until 2026-08-25 — the only place in the game that
+// used a filled background for a heading. Golden literal off the capture, so a
+// retune has to bring new evidence.
+func TestIncomeReportOpensUnderTheCapturedRule(t *testing.T) {
+	f := &fakeSession{keys: []rune(" ")}
+	w := newWorld()
+	incomeReport(f, w)
+	out := f.out.String()
+
+	const rule = "\x1b[34m─────═══════════════───────────────────────────────────────────────────────\x1b[0m"
+	if !strings.HasPrefix(out, "\n"+rule+"\n") {
+		t.Errorf("the income lines should open under the 75-column blue rule, got %q", out)
+	}
+	if strings.Contains(out, "Income Report") {
+		t.Error("BRE gives the income lines no heading")
+	}
+	if strings.Contains(out, "\x1b[44m") {
+		t.Error("no screen fills a heading background; that style is gone")
 	}
 }
 
@@ -88,7 +111,7 @@ func TestEndOfTurnStatsReportsZeroPopulationGrowth(t *testing.T) {
 
 // The screen is bracketed by BRE's 75-column blue inset rule — 5 single, 15
 // double, 55 single — one under the heading and one closing the block. Golden
-// literal off the capture rather than a rebuild from eotsRuleWidth, so a retune
+// literal off the capture rather than a rebuild from rule75Width, so a retune
 // has to bring new evidence.
 func TestEndOfTurnStatsIsBracketedByTheCapturedRule(t *testing.T) {
 	f := &fakeSession{keys: []rune(" ")}
@@ -402,12 +425,12 @@ func TestRunTurnHasNoPreTurnDiplomacyOrProduction(t *testing.T) {
 	out := f.out.String()
 
 	eventsAt := strings.Index(out, "Since your last play, this has happened:")
-	incomeAt := strings.Index(out, "Income Report")
+	incomeAt := strings.Index(out, "gold was earned in taxes.")
 	if eventsAt == -1 || incomeAt == -1 {
-		t.Fatalf("expected the event log and Income Report, got:\n%s", out)
+		t.Fatalf("expected the event log and the income report, got:\n%s", out)
 	}
 	if eventsAt > incomeAt {
-		t.Errorf("event log should precede the Income Report, got offsets %d, %d", eventsAt, incomeAt)
+		t.Errorf("event log should precede the income report, got offsets %d, %d", eventsAt, incomeAt)
 	}
 	if strings.Contains(out, ansi.FgBrightWhite+"Diplomacy") {
 		t.Errorf("Diplomacy should not appear in the Play flow (System menu only):\n%s", out)
@@ -444,8 +467,8 @@ func TestRunTurnPlaysTwoTurnsWithoutDiplomacy(t *testing.T) {
 	if strings.Contains(out, ansi.FgBrightWhite+"Diplomacy") {
 		t.Errorf("Diplomacy should not appear in the Play flow:\n%s", out)
 	}
-	if n := strings.Count(out, "Income Report"); n != 2 {
-		t.Errorf("expected Income Report once per turn (2), got %d\n%s", n, out)
+	if n := strings.Count(out, "gold was earned in taxes."); n != 2 {
+		t.Errorf("expected the income report once per turn (2), got %d\n%s", n, out)
 	}
 }
 

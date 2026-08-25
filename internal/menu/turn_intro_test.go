@@ -15,14 +15,14 @@ func TestTurnIntroSkipsIncomeButShowsStatusOnReplay(t *testing.T) {
 
 	first := &fakeSession{keys: []rune("   ")} // keys to satisfy the intro pauses
 	showTurnIntro(first, w, false)
-	if !strings.Contains(first.out.String(), "Income Report") {
+	if !strings.Contains(first.out.String(), "gold was earned in taxes.") {
 		t.Error("first pass of a turn should show the income report")
 	}
 
 	replay := &fakeSession{}
 	showTurnIntro(replay, w, true)
 	out := replay.out.String()
-	if strings.Contains(out, "Income Report") {
+	if strings.Contains(out, "gold was earned in taxes.") {
 		t.Errorf("a replay should skip the income report, got:\n%s", out)
 	}
 	// "Popular Support:" is the status block's own line and appears nowhere else
