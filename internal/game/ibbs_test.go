@@ -1226,3 +1226,54 @@ func TestTerrorReturnReportSaysWhyNothingHappened(t *testing.T) {
 		}
 	}
 }
+
+// A group attack aimed at the PLANET fights every living realm at once, not the
+// strongest one. BRE marks that target with the letter Z and, on seeing it,
+// loops A..Y summing each realm's defence and pooling their jets before a single
+// battle (resolve_received_invasion +0x0d3d). IB sent the whole strike against
+// the biggest baron and left everyone else untouched.
+func TestPlanetWideStrikeFightsEveryRealm(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.BoardID = "here"
+	w := NewWorldSeed(cfg, 5)
+	big := w.AddHuman("a", "Big")
+	small := w.AddHuman("b", "Small")
+	shielded := w.AddHuman("c", "Shielded")
+	for _, e := range []*Empire{big, small, shielded} {
+		e.Protection = 0
+		e.Troopers, e.Turrets, e.Tanks, e.Jets = 20_000, 20_000, 5_000, 4_000
+		e.Regions = RegionMix{Desert: 4_000}
+		e.syncLand()
+	}
+	big.Troopers *= 4 // make one clearly the strongest
+	shielded.Protection = 5
+
+	// Every realm in the pool must be measured, so the defence a planet-wide
+	// strike meets is strictly greater than the strongest realm's alone.
+	if got, want := len(w.planetDefenders()), 2; got != want {
+		t.Fatalf("planetDefenders = %d, want %d (the protected realm is out)", got, want)
+	}
+	force := AttackForce{Troopers: 400_000, Tanks: 100_000, Bombers: 2_000}
+	res := w.resolveRemoteAttack(RemoteAttack{
+		ID: 1, FromBoard: "far", TargetEmpire: "", Group: true,
+		Offense:      force.offense(),
+		Contributors: []Contribution{{Owner: "x", AttackForce: force}},
+	})
+	if !res.Won {
+		t.Fatalf("the strike did not land: %q", res.Outcome)
+	}
+	// Both unprotected realms bled and lost ground; the protected one did not.
+	if small.Land == 4_000 {
+		t.Error("the smaller realm was untouched; the strike hit only the strongest")
+	}
+	if big.Land == 4_000 {
+		t.Error("the strongest realm was untouched")
+	}
+	if shielded.Land != 4_000 || shielded.Turrets != 20_000 {
+		t.Errorf("a realm under New Realm Protection was drawn into the battle: %d land, %d turrets",
+			shielded.Land, shielded.Turrets)
+	}
+	if res.LandTaken != (4_000-big.Land)+(4_000-small.Land) {
+		t.Errorf("LandTaken %d does not match what the realms actually lost", res.LandTaken)
+	}
+}

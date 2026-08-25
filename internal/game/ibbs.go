@@ -1647,11 +1647,29 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		res.Outcome = OutcomeNotFound
 		return res
 	}
+	// Who stands. A strike that names no baron is aimed at the PLANET and fights
+	// every living realm at once; the strongest of them only names the report.
+	planetWide := atk.TargetEmpire == ""
+	defenders := []*Empire{target}
+	if planetWide {
+		defenders = w.planetDefenders()
+		target = nil
+		for _, e := range defenders {
+			if target == nil || w.NetWorth(e) > w.NetWorth(target) {
+				target = e
+			}
+		}
+		if target == nil {
+			res.Outcome = OutcomeNotFound
+			return res
+		}
+	}
 	res.TargetEmpire = target.Name
 	// A target still under New Realm Protection is shielded, same as an incoming
 	// terror op (resolveRemoteTerror). Protection counts down in transit, so this
 	// arrival-time check — not the sender's view days earlier — is authoritative.
-	if target.Protection > 0 {
+	// planetDefenders has already left protected realms out of the pool.
+	if !planetWide && target.Protection > 0 {
 		res.Outcome = OutcomeProtected
 		target.addEvent(fmt.Sprintf("An interplanetary strike from %s was stopped by your New Realm Protection.", atk.FromBoard))
 		w.postNews(fmt.Sprintf("A strike by %s broke on %s's New Realm Protection.", raider(atk), target.Name))
@@ -1661,14 +1679,25 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// what was standing when the force arrived, not by what is left afterwards.
 	// The shield takes its share of the arriving jets and bombers first.
 	offense := atk.offenseAgainstSDI(target)
-	def := target.remoteDefense()
+	def, pooledJets := 0, 0
+	for _, e := range defenders {
+		def += e.remoteDefense()
+		pooledJets += e.Jets
+	}
 	// Fight it out. What each side loses is the OUTCOME of the attrition, not
 	// lossPct: that only says where the loop stops. Handing the defender lossPct
 	// outright made a strike's damage independent of its size, so a token force
 	// cost a large realm the full share every time (#199).
-	won, atkLost, defLost, jetLost := w.remoteBattleAttrition(offense, def, target.Jets, atk.bombers(target), lossPct)
+	won, atkLost, defLost, jetLost := w.remoteBattleAttrition(offense, def, pooledJets, atk.bombers(target), lossPct)
 	res.Survivors = survivorsOfFrac(atk.Contributors, atkLost)
-	res.Enemy = loseForcesSplit(target, defLost, jetLost)
+	// One battle, then the same two fractions applied to everyone who stood in it.
+	for _, e := range defenders {
+		l := loseForcesSplit(e, defLost, jetLost)
+		res.Enemy.Troopers += l.Troopers
+		res.Enemy.Jets += l.Jets
+		res.Enemy.Turrets += l.Turrets
+		res.Enemy.Tanks += l.Tanks
+	}
 	if !won {
 		res.Outcome = OutcomeRepelled
 		target.addEvent(fmt.Sprintf("You repelled an interplanetary strike from %s. You lost %d of your forces.",
@@ -1699,21 +1728,33 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// had no support.
 	pct := float64(w.Config.AttackRewards.InterplanetaryCapturePct()) *
 		float64(returnsPct) / 100 * float64(kind.capturePct()) / 100
-	land := int(float64(target.Land) * pct / 100)
-	if land < InterplanetaryCaptureFloor {
-		land = InterplanetaryCaptureFloor
+	// The share is charged against each realm that stood, because the capture
+	// reads total_regions on the realm it is taking from (+0x1862) and a
+	// planet-wide strike ran that inside the same per-realm loop.
+	land := 0
+	for _, e := range defenders {
+		take := int(float64(e.Land) * pct / 100)
+		if take < InterplanetaryCaptureFloor {
+			take = InterplanetaryCaptureFloor
+		}
+		if take > e.Land {
+			take = e.Land
+		}
+		if take > 0 {
+			e.Regions.remove(take)
+			e.syncLand()
+		}
+		land += take
+		e.addEvent(fmt.Sprintf("An interplanetary strike from %s took %d regions and %d of your forces!",
+			atk.FromBoard, take, res.Enemy.Total()))
 	}
-	if land > target.Land {
-		land = target.Land
+	if planetWide {
+		w.postNews(fmt.Sprintf("%s struck the whole planet, carrying off %s regions and %s of its forces!",
+			raider(atk), numfmt.Comma(int64(land)), numfmt.Comma(int64(res.Enemy.Total()))))
+	} else {
+		w.postNews(fmt.Sprintf("%s overran %s, carrying off %s regions and %s of its forces!",
+			raider(atk), target.Name, numfmt.Comma(int64(land)), numfmt.Comma(int64(res.Enemy.Total()))))
 	}
-	if land > 0 {
-		target.Regions.remove(land)
-		target.syncLand()
-	}
-	target.addEvent(fmt.Sprintf("An interplanetary strike from %s took %d regions and %d of your forces!",
-		atk.FromBoard, land, res.Enemy.Total()))
-	w.postNews(fmt.Sprintf("%s overran %s, carrying off %s regions and %s of its forces!",
-		raider(atk), target.Name, numfmt.Comma(int64(land)), numfmt.Comma(int64(res.Enemy.Total()))))
 	res.LandTaken = land
 	res.Won = true
 	res.Outcome = OutcomeWon
@@ -1792,6 +1833,30 @@ func (w *World) remoteTarget(name string) *Empire {
 		}
 	}
 	return best
+}
+
+// planetDefenders is everyone who stands when a strike is aimed at the PLANET
+// rather than at a named baron.
+//
+// BRE marks that target with the letter Z — "Z=All" in its own picker — and on
+// seeing it loops A..Y, summing each realm's defence and pooling their jets
+// before ONE battle (resolve_received_invasion +0x0d3d, the loop at +0x0d47).
+// Each realm is measured exactly as a lone defender would be, technology factor
+// and all; the planet is simply the sum. IB used to send the whole strike
+// against the single strongest baron, which made a planet-wide attack far
+// cheaper than the original's and left everyone else untouched.
+//
+// Realms under New Realm Protection are left out of the pool: the loop skips a
+// realm on a per-letter flag whose meaning is not read, and protection is what
+// excludes a realm from every other arriving strike.
+func (w *World) planetDefenders() []*Empire {
+	var out []*Empire
+	for _, e := range w.Empires {
+		if e.Alive && e.Owner != "" && e.Protection <= 0 {
+			out = append(out, e)
+		}
+	}
+	return out
 }
 
 // takeInFlight removes the strike with this ID from the waiting list and returns

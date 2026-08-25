@@ -28,6 +28,7 @@ code, not from `attack.hlp` or a strategy guide.
 | Type multipliers | n/a | verified (1.2 / 1.0 / 0.85, capture 1/2, 1, 5/4) | fights as Normal |
 | Air battle (jets vs bombers) | not applicable | verified | verified |
 | SDI | verified: does not apply | verified (jets 30%, bombers 20%) | verified: none |
+| Whole-planet target | n/a | n/a | verified (`Z` = all, summed pool) |
 | Reproduces a live capture | **yes, exactly** | not yet captured | not yet captured |
 
 Still open, and each is IB's own or unread rather than known-correct:
@@ -41,12 +42,10 @@ Still open, and each is IB's own or unread rather than known-correct:
 - **A per-contributor Real48 factor** rides each force slot (`+0x1c`) and is
   multiplied into the offence. What writes it has not been found, so IB applies
   no equivalent.
-- **The whole-planet group attack.** `resolve_received_invasion` holds a second
-  strength block that the catalog names `__calculate_attacker_strength`, but it
-  reads defender-shaped fields and cannot be that — the attacker's strength
-  provably comes from `calculate_attack_force_offense` on the force record. It is
-  most likely the planet-wide path, which IB resolves against a single realm
-  instead. This is the largest unexplored piece of any attack path.
+- **The catalog name `resolve_received_invasion__calculate_attacker_strength`
+  is wrong.** That block reads defender-shaped fields, and the attacker's
+  strength provably comes from `calculate_attack_force_offense` on the force
+  record. It is the whole-planet defence loop, now understood (below).
 
 **What a turret actually does (exhaustive, 2026-08-24).** Every reference to the
 turret field in the overlay was enumerated — 46 sites, all of them mapped — by
@@ -3272,6 +3271,23 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 
   IB took a share of the MARGIN and quartered it until 2026-08-24. That was its
   own and had no support.
+
+  **A strike aimed at the PLANET fights every realm at once.** The target is
+  carried as a letter, and `Z` means all — the same "Z=All" convention BRE's own
+  multi-select picker uses. On seeing it (`+0x0d3d`) the resolver loops `A`..`Y`
+  (`+0x0d47`), skipping a realm on a per-letter flag, and for each one computes
+  the ordinary defence expression — including that realm's technology military
+  factor, slot 5 capped at 1.4 (`056d:1a42`) — summing them into the defence and
+  pooling their jets into the air battle. Then ONE battle is fought against the
+  total, and the capture runs per realm, reading `total_regions` on whichever it
+  is taking from.
+
+  Anything other than `Z` takes the single-realm path at `+0x0f60`.
+
+  IB sent a planet-wide group attack against the single strongest baron and left
+  every other realm untouched, which made it far cheaper than the original's.
+  Protected realms are left out of the pool — the skip flag's meaning is not
+  read, but protection excludes a realm from every other arriving strike.
 
   **Attack Rewards has its own ladder too.** The resolver switches on the config
   byte `+0x183` (`+0x12a4`) exactly as it switches on the Attack Damage byte, and
