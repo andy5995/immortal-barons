@@ -85,6 +85,14 @@ msgstr ""
 msgid "%d regions revolted for lack of upkeep."
 msgstr ""
 
+#: internal/game/combat.go:240
+msgid "%d troopers, %d jets, %d tanks, %d bombers"
+msgstr ""
+
+#: internal/game/combat.go:243
+msgid "%d troopers, %d turrets, %d tanks, %d jets"
+msgstr ""
+
 #: internal/menu/gameflow.go:746
 msgid "%d units deserted for lack of pay."
 msgstr ""
@@ -119,6 +127,18 @@ msgstr ""
 
 #: internal/menu/actions_interbbs.go:962
 msgid "%s against which planet?"
+msgstr ""
+
+#: internal/game/combat.go:325
+msgid "%s attacked you but was repelled. You lost %d units."
+msgstr ""
+
+#: internal/game/combat.go:314
+msgid "%s attacked you: you lost %d regions and %d units."
+msgstr ""
+
+#: internal/game/combat.go:182
+msgid "%s attacks %s!"
 msgstr ""
 
 #: internal/menu/actions_info.go:547
@@ -183,6 +203,10 @@ msgstr ""
 
 #: internal/menu/actions_attack.go:358
 msgid "%s — an arms broker wants %s gold for the missile."
+msgstr ""
+
+#: internal/game/combat.go:193
+msgid "%s's allies send %d troopers and %d tanks to aid the defense."
 msgstr ""
 
 #: internal/menu/actions_info.go:629
@@ -671,6 +695,10 @@ msgstr ""
 
 #: internal/menu/actions_diplomacy.go:321
 msgid "Declare war? Breaking an agreement costs a quarter of your support and morale."
+msgstr ""
+
+#: internal/game/combat.go:324
+msgid "Defeat! Your forces were beaten off the field."
 msgstr ""
 
 #: internal/menu/mailreader.go:174
@@ -1905,6 +1933,10 @@ msgstr ""
 msgid "The empire that sent this deal is gone."
 msgstr ""
 
+#: internal/game/combat.go:300
+msgid "The enemy lost: %s."
+msgstr ""
+
 #: internal/game/economy.go:17
 msgid "The food market is out of food for today."
 msgstr ""
@@ -2113,6 +2145,10 @@ msgstr ""
 msgid "Version every board must run (blank for no requirement, e.g. 0.0.5):"
 msgstr ""
 
+#: internal/game/combat.go:301
+msgid "Victory! You captured %d regions."
+msgstr ""
+
 #: internal/menu/tree.go:189
 msgid "View Bank Rates"
 msgstr ""
@@ -2303,6 +2339,10 @@ msgstr ""
 
 #: internal/menu/actions_attack.go:216
 msgid "You committed no forces; the attack is called off."
+msgstr ""
+
+#: internal/game/combat.go:312
+msgid "You crushed %s completely and seized the remains of its military!"
 msgstr ""
 
 #: internal/menu/actions_diplomacy.go:344
@@ -2529,6 +2569,18 @@ msgstr ""
 msgid "Your bid is away. If %s no longer offers it at that price, your gold comes back."
 msgstr ""
 
+#: internal/game/combat.go:200
+msgid "Your bombers hit the airfields: %d enemy jets destroyed, %d bombers lost to anti-air."
+msgstr ""
+
+#: internal/game/combat.go:202
+msgid "Your bombers hit the airfields: %d enemy jets destroyed."
+msgstr ""
+
+#: internal/game/combat.go:299
+msgid "Your casualties: %s."
+msgstr ""
+
 #: internal/menu/actions_regions.go:141
 msgid "Your choice?"
 msgstr ""
@@ -2615,6 +2667,10 @@ msgstr ""
 
 #: internal/menu/input.go:202
 msgid "Your realm will be named %s."
+msgstr ""
+
+#: internal/game/combat.go:303
+msgid "Your score rose by %d."
 msgstr ""
 
 #: internal/menu/gameflow.go:982

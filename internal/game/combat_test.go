@@ -3,6 +3,8 @@ package game
 import (
 	"strings"
 	"testing"
+
+	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
 func TestBombingRunDestroysGroundedJets(t *testing.T) {
@@ -459,5 +461,43 @@ func TestCapturedJetsVersusTurrets(t *testing.T) {
 	d := dp*BattleRoundSurvival - BattleRoundFlatLoss
 	if got := shareOf(turrets, lossFraction(dp, d)); got != 2 {
 		t.Errorf("turrets destroyed = %d, want 2 (the original reported two)", got)
+	}
+}
+
+// The battle report is written by the engine, which cannot reach internal/menu,
+// so it translates through i18n keyed on the empire's own Language. Two things
+// can go wrong and neither shows up in an English run:
+//
+// A missing translation must fall back to the English msgid, never to an empty
+// line. And a catalog whose msgstr has different format verbs than its msgid
+// makes Sprintf emit "%!d(MISSING)" into what a player reads — which is why this
+// walks every language that ships a catalog rather than just the seeded two.
+func TestCombatReportTranslatesInEveryLanguage(t *testing.T) {
+	langs := append([]string{""}, i18n.Codes()...)
+	for _, lang := range langs {
+		w := NewWorldSeed(DefaultConfig(), 4)
+		a := w.AddHuman("a", "Alpha")
+		d := w.AddHuman("d", "Delta")
+		a.Protection, d.Protection = 0, 0
+		a.Language, d.Language = lang, lang
+		a.Troopers, a.Bombers, a.Morale = 5_000, 10, 100
+		d.Troopers, d.Turrets, d.Jets, d.Morale = 10, 10, 50, 100
+
+		report, _ := w.Attack(a, d, AttackForce{Troopers: 5_000, Bombers: 10}, true)
+		if strings.TrimSpace(report) == "" {
+			t.Errorf("language %q produced an empty battle report", lang)
+		}
+		if strings.Contains(report, "%!") {
+			t.Errorf("language %q: format verbs in a catalog string do not match its msgid: %q", lang, report)
+		}
+		// The defender reads its own copy off the recap, in its own language.
+		if len(d.Events) == 0 {
+			t.Errorf("language %q: the defender was told nothing", lang)
+		}
+		for _, e := range d.Events {
+			if strings.Contains(e.Text, "%!") {
+				t.Errorf("language %q: bad format verbs in a filed event: %q", lang, e.Text)
+			}
+		}
 	}
 }

@@ -45,6 +45,15 @@ CALL_PATTERNS = [
 ]
 ERR_PATTERN = re.compile(r'errors\.New\(' + STR + r'\)')
 
+# internal/game writes some player-visible text itself (battle reports, the
+# events it files on the other player's recap). It cannot import internal/menu,
+# so it translates through a local tr() closure or i18n.T keyed on the empire's
+# own Language — neither of which the menu-side patterns above match.
+GAME_PATTERNS = [
+    re.compile(r'\btr\(' + STR),
+    re.compile(r'\bi18n\.T\([^,]+,\s*' + STR),
+]
+
 # plural(s, n, "one", "many") carries BOTH wordings, and the count argument may
 # itself contain commas (math.Max(1, ...)), so match the last two literals in
 # the call rather than counting arguments.
@@ -79,6 +88,9 @@ def extract():
         for n, line in enumerate(open(path, encoding="utf-8"), 1):
             for m in ERR_PATTERN.finditer(line):
                 add(m.group(1), f"{rel}:{n}")
+            for pat in GAME_PATTERNS:
+                for m in pat.finditer(line):
+                    add(m.group(1), f"{rel}:{n}")
     return seen
 
 def main():

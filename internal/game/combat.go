@@ -3,6 +3,8 @@ package game
 import (
 	"fmt"
 	"strings"
+
+	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
 // Bombing-run tuning: each bomber that survives the defender's anti-air
@@ -64,7 +66,7 @@ const (
 // the same opening whether the attack won or lost — so a player reads what the
 // fight cost before learning how it went. The wording is IB's own; only the
 // order and the per-unit breakdown are the original's (docs/dev/bre-screens.md).
-const returningForces = "Your forces have returned from the field, exhausted.\n"
+const returningForces = "Your forces have returned from the field, exhausted."
 
 // bombingRun sends a's bombers against d's airfields before the ground
 // clash. It destroys grounded jets (which don't defend anyway, so this
@@ -172,7 +174,12 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	// alliance reinforcement below sees the broken relation.
 	w.breachTreaty(a, d)
 	var b strings.Builder
-	fmt.Fprintf(&b, "%s attacks %s!\n\n", a.Name, d.Name)
+	// The report is written in the ATTACKER's language: it is what that player
+	// reads at the end of their own turn. The defender's copy is filed as an
+	// event further down and translated into THEIR language instead, because the
+	// two players need not share one.
+	tr := func(msgid string) string { return i18n.T(a.Language, msgid) }
+	fmt.Fprintf(&b, tr("%s attacks %s!")+"\n\n", a.Name, d.Name)
 
 	// Full Defense Alliance: each of the defender's partners sends 30% of its
 	// troopers and tanks to reinforce the defense (BRE-verified). Reported to the
@@ -183,17 +190,17 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		allyTanks += ally.Tanks * AllyDefenseContribPct / 100
 	}
 	if allyTroopers+allyTanks > 0 {
-		fmt.Fprintf(&b, "%s's allies send %d troopers and %d tanks to aid the defense.\n\n", d.Name, allyTroopers, allyTanks)
+		fmt.Fprintf(&b, tr("%s's allies send %d troopers and %d tanks to aid the defense.")+"\n\n", d.Name, allyTroopers, allyTanks)
 	}
 
 	bomberLoss := 0 // folded into the attacker's casualty breakdown below
 	if kills, lost := w.bombingRun(a, d, f.Bombers); kills > 0 || lost > 0 {
 		bomberLoss = lost
-		fmt.Fprintf(&b, "Your bombers hit the airfields: %d enemy jets destroyed", kills)
 		if lost > 0 {
-			fmt.Fprintf(&b, ", %d bombers lost to anti-air", lost)
+			fmt.Fprintf(&b, tr("Your bombers hit the airfields: %d enemy jets destroyed, %d bombers lost to anti-air.")+"\n\n", kills, lost)
+		} else {
+			fmt.Fprintf(&b, tr("Your bombers hit the airfields: %d enemy jets destroyed.")+"\n\n", kills)
 		}
-		fmt.Fprint(&b, ".\n\n")
 	}
 
 	// Military morale scales each side's unit effectiveness (the land defense
@@ -230,10 +237,10 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	// commits troopers/jets/tanks/bombers, the defender holds troopers/turrets/
 	// tanks/jets.
 	attackerCas := func(u UnitLoss) string {
-		return fmt.Sprintf("%d troopers, %d jets, %d tanks, %d bombers", u.Troopers, u.Jets, u.Tanks, u.Bombers)
+		return fmt.Sprintf(tr("%d troopers, %d jets, %d tanks, %d bombers"), u.Troopers, u.Jets, u.Tanks, u.Bombers)
 	}
 	defenderCas := func(u UnitLoss) string {
-		return fmt.Sprintf("%d troopers, %d turrets, %d tanks, %d jets", u.Troopers, u.Turrets, u.Tanks, u.Jets)
+		return fmt.Sprintf(tr("%d troopers, %d turrets, %d tanks, %d jets"), u.Troopers, u.Turrets, u.Tanks, u.Jets)
 	}
 
 	if attackerWins {
@@ -288,12 +295,12 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		}
 		addScore(a, gain)
 
-		fmt.Fprint(&b, returningForces)
-		fmt.Fprintf(&b, "Your casualties: %s.\n\n", attackerCas(aloss))
-		fmt.Fprintf(&b, "The enemy lost: %s.\n\n", defenderCas(dloss))
-		fmt.Fprintf(&b, "Victory! You captured %d regions.\n", taken)
+		fmt.Fprint(&b, tr(returningForces)+"\n")
+		fmt.Fprintf(&b, tr("Your casualties: %s.")+"\n\n", attackerCas(aloss))
+		fmt.Fprintf(&b, tr("The enemy lost: %s.")+"\n\n", defenderCas(dloss))
+		fmt.Fprintf(&b, tr("Victory! You captured %d regions.")+"\n", taken)
 		if gain > 0 {
-			fmt.Fprintf(&b, "Your score rose by %d.\n", gain)
+			fmt.Fprintf(&b, tr("Your score rose by %d.")+"\n", gain)
 		}
 		// Total conquest only when the capture actually reduces the defender to
 		// nothing — the final blow after grinding them down. You take their last
@@ -302,20 +309,20 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 			absorbMilitary(a, d)
 			d.Alive = false
 			d.DiedDay = w.GameDay
-			fmt.Fprintf(&b, "\nYou crushed %s completely and seized the remains of its military!\n", d.Name)
+			fmt.Fprintf(&b, "\n"+tr("You crushed %s completely and seized the remains of its military!")+"\n", d.Name)
 		}
-		d.addEvent(fmt.Sprintf("%s attacked you: you lost %d regions and %d units.", a.Name, taken, dloss.Total()))
+		d.addEvent(fmt.Sprintf(i18n.T(d.Language, "%s attacked you: you lost %d regions and %d units."), a.Name, taken, dloss.Total()))
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
 		// A repelled attack scores nothing for either side. The original's only two
 		// Score writes are on the winning-ATTACK paths, and neither touches a
 		// second realm's record — a successful defence is its own reward.
 
-		fmt.Fprint(&b, returningForces)
-		fmt.Fprintf(&b, "Your casualties: %s.\n\n", attackerCas(aloss))
-		fmt.Fprintf(&b, "The enemy lost: %s.\n\n", defenderCas(dloss))
-		fmt.Fprint(&b, "Defeat! Your forces were beaten off the field.\n")
-		d.addEvent(fmt.Sprintf("%s attacked you but was repelled. You lost %d units.", a.Name, dloss.Total()))
+		fmt.Fprint(&b, tr(returningForces)+"\n")
+		fmt.Fprintf(&b, tr("Your casualties: %s.")+"\n\n", attackerCas(aloss))
+		fmt.Fprintf(&b, tr("The enemy lost: %s.")+"\n\n", defenderCas(dloss))
+		fmt.Fprint(&b, tr("Defeat! Your forces were beaten off the field.")+"\n")
+		d.addEvent(fmt.Sprintf(i18n.T(d.Language, "%s attacked you but was repelled. You lost %d units."), a.Name, dloss.Total()))
 		w.postCombatNews(a, d, false, false)
 	}
 	return b.String(), captured
