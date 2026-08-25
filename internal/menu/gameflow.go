@@ -485,7 +485,7 @@ func incomeReport(s session.Session, w *ctx) {
 // world whose factions carry other names still colors them.
 func pirateColor(slot int) string {
 	if slot >= 0 && slot < len(pirateColors) {
-		return pirateColors[slot]
+		return pirateColors[slot].Color
 	}
 	return ansi.FgWhite
 }

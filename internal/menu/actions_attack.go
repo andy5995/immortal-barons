@@ -407,18 +407,27 @@ func biologicalAttack(s session.Session, w *ctx) Result {
 
 // pirateColors are the per-faction name colors, in game.PirateFactions order.
 // The palette is BRE's, verified from BRE.EXE's color table (the 9 bytes right
-// after the faction-name array): 0a 0e 0c 04 05 0d 09 03 0b. The names are IB's
-// own; the comments track which slot each color paints.
-var pirateColors = []string{
-	ansi.FgBrightGreen,   // Humans       (10 light green)
-	ansi.FgBrightYellow,  // Barbarians   (14 yellow)
-	ansi.FgBrightRed,     // Nightjackals (12 light red)
-	ansi.FgRed,           // Sharks       (4 red)
-	ansi.FgMagenta,       // Dunkleoids   (5 magenta)
-	ansi.FgBrightMagenta, // Trilobarians (13 light magenta)
-	ansi.FgBrightBlue,    // Raptorians   (9 light blue)
-	ansi.FgCyan,          // Gorgonoids   (3 cyan)
-	ansi.FgBrightCyan,    // Ammonians    (11 light cyan)
+// after the faction-name array): 0a 0e 0c 04 05 0d 09 03 0b.
+//
+// The lookup is by SLOT, not by name, so a saved world whose factions carry
+// other names still gets coloured (see pirateColor). That leaves this list
+// paired with a list in another package by position alone, so each row carries
+// the faction it paints and TestPirateColorsMatchTheFactions checks the pairing
+// — a reordering of game.PirateFactions would otherwise repaint every faction
+// silently.
+var pirateColors = []struct {
+	Faction string
+	Color   string
+}{
+	{"Humans", ansi.FgBrightGreen},         // 10 light green
+	{"Barbarians", ansi.FgBrightYellow},    // 14 yellow
+	{"Nightjackals", ansi.FgBrightRed},     // 12 light red
+	{"Sharks", ansi.FgRed},                 // 4 red
+	{"Dunkleoids", ansi.FgMagenta},         // 5 magenta
+	{"Trilobarians", ansi.FgBrightMagenta}, // 13 light magenta
+	{"Raptorians", ansi.FgBrightBlue},      // 9 light blue
+	{"Gorgonoids", ansi.FgCyan},            // 3 cyan
+	{"Ammonians", ansi.FgBrightCyan},       // 11 light cyan
 }
 
 // pirateRaiderMark hugs the name of whichever faction raided the player since
@@ -477,7 +486,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 	for i, name := range names {
 		color := ""
 		if i < len(pirateColors) {
-			color = pirateColors[i]
+			color = pirateColors[i].Color
 		}
 		fmt.Fprintf(s, "  %d) %s%s%s%s\n", i+1, raiderMark(s, raidedSlot(raiders, i)), color, name, ansi.Reset)
 	}
