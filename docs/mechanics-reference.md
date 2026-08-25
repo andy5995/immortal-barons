@@ -11,6 +11,43 @@ settings from a real league, so they are defaults, not fixed rules.
 
 ## Military units
 
+**Attack fidelity status (2026-08-24).** What has been read out of the binary
+and what has not, for the three attack paths. "Verified" means read from the
+code, not from `attack.hlp` or a strategy guide.
+
+| Piece | Local regular | Interplanetary individual | Group |
+| --- | --- | --- | --- |
+| Offence weights | verified | verified (flat tank 2, no bombers) | as individual |
+| Defence weights | verified | verified (own tank factor) | as individual |
+| Morale factor | verified (`0.6m+50`) | verified (`m/1.75+50`) | as individual |
+| Attrition loop | verified (with upset roll) | verified (no upset roll) | as individual |
+| Per-round flat loss | verified, and scale-corrected | same constant | same |
+| Retreat share ladder | verified | verified, own rescaling | fights as Normal |
+| Capture shape and floor | verified (floor 15) | verified (floor 10) | as individual |
+| Attack Rewards ladder | verified (High 25) | verified (High 15) | as individual |
+| Type multipliers | n/a | verified (1.2 / 1.0 / 0.85, capture 1/2, 1, 5/4) | fights as Normal |
+| Air battle (jets vs bombers) | not applicable | verified | verified |
+| SDI | verified: does not apply | verified (jets 30%, bombers 20%) | verified: none |
+| Reproduces a live capture | **yes, exactly** | not yet captured | not yet captured |
+
+Still open, and each is IB's own or unread rather than known-correct:
+
+- **The total-conquest condition** is not decoded. IB triggers it when the
+  capture reduces the defender to no land or no people, which is a guess.
+- **The bombing run's two constants** (3 jets per bomber, one bomber down per 25
+  turrets) have no support: no bombing routine reads turrets at all.
+- **The capture-density modifier** is IB's own and deliberate, and is the only
+  thing separating IB's local capture from the original's.
+- **A per-contributor Real48 factor** rides each force slot (`+0x1c`) and is
+  multiplied into the offence. What writes it has not been found, so IB applies
+  no equivalent.
+- **The whole-planet group attack.** `resolve_received_invasion` holds a second
+  strength block that the catalog names `__calculate_attacker_strength`, but it
+  reads defender-shaped fields and cannot be that — the attacker's strength
+  provably comes from `calculate_attack_force_offense` on the force record. It is
+  most likely the planet-wide path, which IB resolves against a single realm
+  instead. This is the largest unexplored piece of any attack path.
+
 **What a turret actually does (exhaustive, 2026-08-24).** Every reference to the
 turret field in the overlay was enumerated — 46 sites, all of them mapped — by
 scanning both addressing idioms (a realm's own record at `+0x82`, another
