@@ -7,6 +7,7 @@ import (
 	"encoding/base32"
 	"encoding/json"
 	"fmt"
+	"io"
 	"math/big"
 	"os"
 	"path/filepath"
@@ -294,33 +295,46 @@ type stagedPacket struct {
 	packet game.Packet
 }
 
-// originKey identifies a packet's sender for grouping, preferring the
-// roster's node number the same way fromCoordinator does (#105): a number
-// cannot collide the way two boards sharing a name can, and survives either
-// end renaming. Packets from the same origin land in the same group whether
-// they carry a node number or not, because ONE origin's own packets must
-// never be split across two groups and reordered against each other.
+// originKey identifies a packet's sender for grouping. It keys on FromBoard
+// first, matching IsPacketSeen/SeenPacket's replay tracking (HighSeq is keyed
+// by FromBoard alone) — NOT preferring FromNode the way fromCoordinator does,
+// because the two keys disagreeing is exactly what would split one origin's
+// packets across two groups. A board's own packets do not all carry the same
+// FromNode within one batch: an older or backlogged packet can predate the
+// board's roster entry (FromNode 0) while a newer one from the same board
+// carries it, and grouping those two apart lets the group with the higher Seq
+// apply first, marking the other group's lower Seq a false replay — a packet
+// silently lost, not just misordered. FromNode is still the fallback for a
+// packet old or malformed enough to carry no board name at all.
 func originKey(p game.Packet) string {
+	if p.FromBoard != "" {
+		return "b" + p.FromBoard
+	}
 	if p.FromNode != 0 {
 		return "n" + strconv.Itoa(p.FromNode)
 	}
-	return "b" + p.FromBoard
+	return ""
 }
 
-// shuffleGroupOrder puts keys in a fresh order every call, using this board's
-// own randomness rather than anything derived from packet content — so no
+// shuffleGroupOrder puts keys in a fresh order every call, reading randomness
+// from src (crypto/rand.Reader in production, something that can be made to
+// fail in tests) rather than anything derived from packet content — so no
 // origin can grind for a favorable position by crafting what it sends (#178).
-// A source of randomness that turns out not to work is not worth stopping a
-// planetary run over: keys is left in whatever order it was built in, which
-// is still a valid (if less thoroughly shuffled) order to apply groups in.
-func shuffleGroupOrder(keys []string) {
-	for i := len(keys) - 1; i > 0; i-- {
-		j, err := rand.Int(rand.Reader, big.NewInt(int64(i+1)))
+// It is all-or-nothing: the shuffle happens on a scratch copy, and keys is
+// touched only once the WHOLE shuffle has succeeded. A source of randomness
+// that fails partway through a Fisher-Yates in place would otherwise leave
+// keys neither in this run's random order nor its original scan order, just
+// whatever the swaps before the failure happened to produce.
+func shuffleGroupOrder(keys []string, src io.Reader) {
+	shuffled := append([]string(nil), keys...)
+	for i := len(shuffled) - 1; i > 0; i-- {
+		j, err := rand.Int(src, big.NewInt(int64(i+1)))
 		if err != nil {
 			return
 		}
-		keys[i], keys[int(j.Int64())] = keys[int(j.Int64())], keys[i]
+		shuffled[i], shuffled[int(j.Int64())] = shuffled[int(j.Int64())], shuffled[i]
 	}
+	copy(keys, shuffled)
 }
 
 // ReadInbound reads every packet file in dir addressed to this board (or
@@ -407,7 +421,7 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 		}
 	}
 
-	shuffleGroupOrder(groupOrder)
+	shuffleGroupOrder(groupOrder, rand.Reader)
 	// Only worth a line in the log when there was an actual choice to make: one
 	// origin's batch applies in the same order regardless, and logging that
 	// every run buries the runs where the shuffle did something.

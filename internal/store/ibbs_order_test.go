@@ -3,6 +3,7 @@ package store
 import (
 	"crypto/ed25519"
 	"crypto/rand"
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
@@ -110,7 +111,7 @@ func TestShuffleGroupOrderVaries(t *testing.T) {
 	same := true
 	for i := 0; i < 25; i++ {
 		keys := append([]string(nil), first...)
-		shuffleGroupOrder(keys)
+		shuffleGroupOrder(keys, rand.Reader)
 		for j := range keys {
 			if keys[j] != first[j] {
 				same = false
@@ -122,6 +123,103 @@ func TestShuffleGroupOrderVaries(t *testing.T) {
 	}
 	if same {
 		t.Error("shuffleGroupOrder produced the same order on every trial; expected real variation")
+	}
+}
+
+type alwaysFailReader struct{}
+
+func (alwaysFailReader) Read([]byte) (int, error) {
+	return 0, errors.New("simulated randomness failure")
+}
+
+// TestShuffleGroupOrderLeavesKeysUntouchedOnSourceFailure is a fix from
+// review: the first version of shuffleGroupOrder swapped elements of keys IN
+// PLACE during the Fisher-Yates pass, so a source that failed partway through
+// left keys partially shuffled -- neither this run's random order nor its
+// original scan order, contradicting what the function documented. It now
+// shuffles a scratch copy and only writes back once the whole pass succeeds,
+// so keys must come back byte-for-byte identical to what went in.
+func TestShuffleGroupOrderLeavesKeysUntouchedOnSourceFailure(t *testing.T) {
+	original := []string{"n1", "n2", "n3", "n4", "n5"}
+	keys := append([]string(nil), original...)
+	shuffleGroupOrder(keys, alwaysFailReader{})
+	for i := range keys {
+		if keys[i] != original[i] {
+			t.Fatalf("keys changed despite the randomness source failing: got %v, want %v (unchanged)", keys, original)
+		}
+	}
+}
+
+// TestReadInboundGroupsSameBoardTogetherRegardlessOfFromNode is a fix from
+// review: originKey originally preferred FromNode when a packet carried one,
+// but replay detection (IsPacketSeen/SeenPacket's HighSeq) keys on FromBoard
+// alone. A board's own packets do not all carry the same FromNode within one
+// batch -- an older or backlogged packet can predate the board's roster
+// entry (FromNode 0) while a newer one from the same board carries it -- and
+// splitting those into two groups let the group with the higher Seq apply
+// first, marking the other group's lower Seq a false replay: a real packet
+// silently dropped, not just misordered. Run enough trials that the old,
+// shuffle-order-dependent failure (roughly half of them) would show up if
+// the fix regressed.
+func TestReadInboundGroupsSameBoardTogetherRegardlessOfFromNode(t *testing.T) {
+	for trial := 0; trial < 40; trial++ {
+		inbound := t.TempDir()
+		writePacket(t, inbound, "1-old", game.Packet{FromBoard: "Origin BBS", FromNode: 0, Seq: 1})
+		writePacket(t, inbound, "2-new", game.Packet{FromBoard: "Origin BBS", FromNode: 7, Seq: 2})
+
+		cfg := game.DefaultConfig()
+		cfg.BoardID = "Receiver BBS"
+		w := game.NewWorldSeed(cfg, 1)
+		w.LeagueNodes = []game.LeagueNode{{Number: 7, Name: "Origin BBS"}, {Number: 9, Name: "Receiver BBS"}}
+
+		result, err := ReadInbound(w, inbound, false)
+		if err != nil {
+			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
+		}
+		if result.Applied != 2 {
+			t.Fatalf("trial %d: want both packets applied from the same board, got applied=%d alreadySeen=%d: %+v",
+				trial, result.Applied, result.AlreadySeen, result)
+		}
+	}
+}
+
+// TestQuarantinePacketAvoidsNameCollision is a fix from review:
+// quarantinePacket originally moved straight to dataDir/bad/<basename>,
+// which os.Rename silently overwrites on Unix (destroying the first
+// quarantined copy) and fails outright on Windows (propagating an error that
+// would abort the whole run -- exactly the failure quarantining exists to
+// avoid). It now steps around a collision instead of hitting it.
+func TestQuarantinePacketAvoidsNameCollision(t *testing.T) {
+	dataDir := t.TempDir()
+	first := filepath.Join(t.TempDir(), "dupe.brp")
+	second := filepath.Join(t.TempDir(), "dupe.brp")
+	if err := os.WriteFile(first, []byte("first corrupt file"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(second, []byte("second corrupt file"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := quarantinePacket(dataDir, first); err != nil {
+		t.Fatalf("first quarantinePacket: %v", err)
+	}
+	if err := quarantinePacket(dataDir, second); err != nil {
+		t.Fatalf("second quarantinePacket (same basename) should not fail: %v", err)
+	}
+
+	entries, err := os.ReadDir(filepath.Join(dataDir, BadDir))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 2 {
+		t.Fatalf("want 2 distinct files in %s after a name collision, got %d: %+v", BadDir, len(entries), entries)
+	}
+	firstContent, err := os.ReadFile(filepath.Join(dataDir, BadDir, "dupe.brp"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(firstContent) != "first corrupt file" {
+		t.Errorf("the first quarantined file's content was overwritten: got %q", firstContent)
 	}
 }
 
