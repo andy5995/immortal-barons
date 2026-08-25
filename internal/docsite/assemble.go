@@ -12,6 +12,7 @@ package docsite
 import (
 	"fmt"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -341,20 +342,12 @@ func Assemble(repoRoot, outDir, feedURL string) error {
 
 	for _, lang := range languages {
 		langDir := filepath.Join(siteSrc, lang.code)
-		// Home (README) and the two doc pages: only if this language has them.
-		for _, pg := range []struct{ src, dst, siteRel string }{
-			{homeSource(repoRoot, lang.code), filepath.Join(langDir, "index.md"), "index.md"},
-			{guideIntroSource(repoRoot, lang.code), filepath.Join(langDir, "guide", "index.md"), "guide/index.md"},
-			{doorSetupSource(repoRoot, lang.code), filepath.Join(langDir, "door-setup", "index.md"), "door-setup/index.md"},
-			{interBBSSource(repoRoot, lang.code), filepath.Join(langDir, "inter-bbs", "index.md"), "inter-bbs/index.md"},
-			{charsetSource(repoRoot, lang.code), filepath.Join(langDir, "charset", "index.md"), "charset/index.md"},
-			{cmdRefSource(repoRoot, lang.code), filepath.Join(langDir, "command-reference", "index.md"), "command-reference/index.md"},
-			{downloadSource(repoRoot, lang.code), filepath.Join(langDir, "download", "index.md"), "download/index.md"},
-			{faqSource(repoRoot, lang.code), filepath.Join(langDir, "faq", "index.md"), "faq/index.md"},
-			{translatingSource(repoRoot, lang.code), filepath.Join(langDir, "translating", "index.md"), "translating/index.md"},
-			{manualVsCodeSource(repoRoot, lang.code), filepath.Join(langDir, "manual-vs-code", "index.md"), "manual-vs-code/index.md"},
-		} {
-			if err := copyIfExists(pg.src, pg.dst, srcRel(pg.src), pg.siteRel, lk); err != nil {
+		// The standalone pages, each copied only if this language has it.
+		for _, pg := range sitePages {
+			src := langFile(filepath.Join(repoRoot, filepath.FromSlash(pg.src)), lang.code)
+			dst := filepath.Join(langDir, filepath.FromSlash(pg.slug), "index.md")
+			siteRel := path.Join(pg.slug, "index.md")
+			if err := copyIfExists(src, dst, srcRel(src), siteRel, lk); err != nil {
 				return err
 			}
 		}
@@ -513,41 +506,21 @@ func loadTopics(repoRoot, lang string) ([]topic, error) {
 	return topics, nil
 }
 
-// homeSource / guideIntroSource / doorSetupSource resolve a
-// doc's file for a language: <base>.md for English, <base>.<lang>.md otherwise.
-func homeSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "README.md"), lang)
-}
-func guideIntroSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "playing.md"), lang)
-}
-func doorSetupSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "door-setup.md"), lang)
-}
-func interBBSSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "inter-bbs.md"), lang)
-}
-
-func charsetSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "charset.md"), lang)
-}
-
-func cmdRefSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "command-reference.md"), lang)
-}
-
-func downloadSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "download.md"), lang)
-}
-func faqSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "faq.md"), lang)
-}
-
-func manualVsCodeSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "manual-vs-code.md"), lang)
-}
-func translatingSource(repoRoot, lang string) string {
-	return langFile(filepath.Join(repoRoot, "docs", "translating.md"), lang)
+// sitePages are the standalone pages of the site: one Markdown file in the repo
+// rendered to one directory, with the home page at the root. Each was a
+// resolver function of its own beside a matching entry in the copy loop, which
+// meant adding a page in two places and spelling its slug three times.
+var sitePages = []struct{ src, slug string }{
+	{"README.md", ""},
+	{"docs/playing.md", "guide"},
+	{"docs/door-setup.md", "door-setup"},
+	{"docs/inter-bbs.md", "inter-bbs"},
+	{"docs/charset.md", "charset"},
+	{"docs/command-reference.md", "command-reference"},
+	{"docs/download.md", "download"},
+	{"docs/faq.md", "faq"},
+	{"docs/translating.md", "translating"},
+	{"docs/manual-vs-code.md", "manual-vs-code"},
 }
 
 func langFile(enPath, lang string) string {

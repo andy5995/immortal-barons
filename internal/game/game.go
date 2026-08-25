@@ -890,7 +890,7 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 // initFreshGame installs a brand-new game's state onto w, keeping only its
 // infrastructure (mutex, rng, store) and Config. It is the SINGLE definition of
 // what a fresh game contains, called both at world creation (NewWorldSeed) and
-// on -reset (resetForNewGame). Keeping it in one place means a default can never
+// on -reset (Reset). Keeping it in one place means a default can never
 // be seeded at creation but forgotten on reset — the drift that stranded the
 // old prices (and would silently carry pirates, news, and the master across a
 // reset). Add any new creation-time world default here, not in NewWorldSeed.

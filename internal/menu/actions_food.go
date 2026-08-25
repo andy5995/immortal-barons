@@ -14,7 +14,9 @@ func buyFoodMarket(s session.Session, w *ctx) Result {
 	// Default (Enter) to this turn's shortfall — what the realm needs minus what it
 	// has — the inverse of the Sell default, capped by what the player can afford
 	// and the market has. Zero once the realm is fed.
-	suggested := min(max(0, w.FoodNeededNextTurn(p)-p.Food), maxBuy)
+	// FoodDue is what the turn engine will actually consume, so the default
+	// buy is the shortfall against it.
+	suggested := min(max(0, w.FoodDue(p)-p.Food), maxBuy)
 	n := promptSuggested(s, "How much food to buy?", suggested, maxBuy)
 	if n <= 0 {
 		return Stay
@@ -32,7 +34,7 @@ func buyFoodMarket(s session.Session, w *ctx) Result {
 
 func sellFoodMarket(s session.Session, w *ctx) Result {
 	p := w.Player()
-	suggested := max(0, p.Food-w.FoodNeededNextTurn(p))
+	suggested := max(0, p.Food-w.FoodDue(p))
 	n := promptSuggested(s, "How much food to sell?", suggested, p.Food)
 	if n <= 0 {
 		return Stay

@@ -275,13 +275,6 @@ func (w *World) SellFood(e *Empire, n int) error {
 	return nil
 }
 
-// FoodNeededNextTurn estimates the empire's next-turn food consumption
-// (so the sell prompt can suggest keeping enough on hand). Same figure the
-// turn engine consumes — FoodDue — kept as one formula so they can't drift.
-func (w *World) FoodNeededNextTurn(e *Empire) int {
-	return w.FoodDue(e)
-}
-
 // curPrice returns e's stored walk price for a unit, or the world base when the
 // walk hasn't seeded it yet (stored==0: a fresh empire's first turn, or a save
 // from before per-empire prices existed).
