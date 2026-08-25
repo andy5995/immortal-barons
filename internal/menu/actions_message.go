@@ -66,7 +66,6 @@ type pickOpts struct {
 // Recipient-picker geometry, matching BRE's captured list (docs/dev/bre-screens.md,
 // the "?=List" roster): a 75-column inset rule over Id / Empire Name / Territory /
 // Score / Net Worth.
-const pickNameWidth = 26
 
 // pickLetters is how many realms the picker can address: one per slot on the
 // planet, since BRE indexes its empire array with the letter itself and reserves
@@ -142,23 +141,14 @@ func writePickRoster(s session.Session, rows []pickRow, opts pickOpts) {
 		writeRelationsTable(s, rel)
 		return
 	}
-	rule := rosterRule(ansi.FgMagenta)
 	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n",
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.FgBrightMagenta, ansi.Reset)
-	fmt.Fprintf(s, "%s%-*s%-*s %10s %11s %11s%s\n%s\n", ansi.FgBrightWhite,
-		scoreIDCellWidth, tr(s, "Id"), pickNameWidth, strings.Repeat(" ", markWidth(s))+tr(s, "Empire Name"),
-		tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset, rule)
+	scoreTableHead(s)
 	for _, r := range rows {
-		// idCell also squares the roster with its own heading: the rows used
-		// to put the name one column left of where "Empire Name" starts.
-		fmt.Fprintf(s, "%s%s %s%10s%s %s%11s%s %s%11s%s\n",
-			idCell(fmt.Sprintf("(%c)", r.letter)),
-			nameCell(s, r.name, ansi.FgBrightWhite, r.presence, pickNameWidth),
-			ansi.FgBrightMagenta, comma(r.land), ansi.Reset,
-			ansi.FgBrightWhite, comma(r.score), ansi.Reset,
-			ansi.FgWhite, comma(r.nw), ansi.Reset)
+		scoreTableRowStr(s, fmt.Sprintf("(%c)", r.letter), r.name, ansi.FgBrightWhite, r.presence,
+			comma(r.land), comma(r.score), comma(r.nw))
 	}
-	fmt.Fprintln(s, rule)
+	scoreTableRule(s)
 }
 
 // writePickPrompt draws the picker's prompt line. The letter range is a fixed

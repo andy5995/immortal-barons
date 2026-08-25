@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
@@ -192,7 +193,17 @@ func scoreTableHead(s session.Session) {
 }
 
 func scoreTableRow(s session.Session, id, name, nameColor string, presence string, land, score, nw int) {
-	fmt.Fprintf(s, "%s%s %s%10d%s %s%11d%s %s%11d%s\n",
+	scoreTableRowStr(s, id, name, nameColor, presence,
+		strconv.Itoa(land), strconv.Itoa(score), strconv.Itoa(nw))
+}
+
+// scoreTableRowStr is scoreTableRow with the three figures already rendered, for
+// the screens that comma-group them. The columns and colours are the shared
+// part and the one that drifts; how a number is spelled is each screen's own
+// choice, and they do not currently agree — the scores board and the target
+// list print bare figures where the recipient picker groups them.
+func scoreTableRowStr(s session.Session, id, name, nameColor, presence, land, score, nw string) {
+	fmt.Fprintf(s, "%s%s %s%10s%s %s%11s%s %s%11s%s\n",
 		idCell(id),
 		nameCell(s, name, nameColor, presence, scoreNameWidth),
 		ansi.FgBrightMagenta, land, ansi.Reset,
