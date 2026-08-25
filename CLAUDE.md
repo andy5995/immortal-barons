@@ -136,13 +136,15 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   `e.Gold +=` directly reintroduces the silent loss this replaced.
 - **Separate data from code: every tunable gameplay/economy number is a named
   constant in a dedicated data file, not a bare literal in the formula code.**
-  Today that file is `internal/game/balance.go`; as the set grows it's fine to
-  split into more focused files (e.g. a `food.go`/`combat_balance.go`) — the
-  rule is the separation, not the single filename. This covers unit costs,
-  prices, rates, caps, starting-setup values, score weights, food/industry
-  figures, penalties — all of it. When you add a mechanic, put its numbers in
-  the data file (with a one-line provenance comment) and reference them by
-  name. Only structural literals (`0`, `1`, `100` for percent math) stay inline.
+  Those files are `internal/game/balance*.go`, split by subject — `_regions`,
+  `_crown`, `_start`, `_ai`, `_prices`, `_hq`, `_costs`, `_combat`, `_networth`,
+  and `balance.go` itself for the rest. Put a new number in the file for its
+  mechanic; the rule is the separation from the formulas, not any one filename.
+  This covers unit costs, prices, rates, caps, starting-setup values, score
+  weights, food/industry figures, penalties — all of it. When you add a
+  mechanic, put its numbers in the data file (with a one-line provenance
+  comment) and reference them by name. Only structural literals (`0`, `1`, `100`
+  for percent math) stay inline.
 - **The unit set has ONE table: `internal/game/units.go` (#134).** A screen that
   needs the goods declares a slice of those rows — `[]*game.Good{Trooper, Jet,
   …}` in its own order — and reads names and fields through the row (`Plural`,
@@ -166,7 +168,7 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
 - **Assert BRE-verified numbers as golden literals, not as the constant.**
   `want := 500*RegularAttackCapturePct/100` follows a retune silently; `want :=
   50` fails and forces new evidence, which is the point of the fidelity
-  contract. Mirroring a `balance.go` constant is fine only for a playtest knob.
+  contract. Mirroring a `balance*.go` constant is fine only for a playtest knob.
 - **A fixed-seed test may only assert what holds on OTHER seeds.** A macro
   balance outcome ("nobody is eliminated", "no realm survives below N regions")
   is a property of the whole simulation, and one seed is one trajectory.
@@ -198,7 +200,7 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   touch the concept in passing mention it generically without restating the
   figure (e.g. the 100-jets-per-carrier ratio lives in `jets.md`/`carriers.md`;
   the attack doc just says jets need carriers to fight). Duplicated numbers drift
-  out of sync when tuned — this is the prose analogue of the balance.go rule.
+  out of sync when tuned — this is the prose analogue of the balance*.go rule.
 - **A screen that draws its own box must match the menu engine's, and BRE's
   width.** Two things are easy to get wrong on a hand-drawn screen, and both
   make it look unlike the rest of the game. The **closing rule** is not
@@ -261,7 +263,7 @@ mis-set this way before the disassembly corrected them.
 
 **Mechanics live in that spec, not in this guide.** Don't describe how a
 mechanic works, or restate any of its numbers, here — this file just points to
-the spec, which is the single source (the same rule as balance.go for constants).
+the spec, which is the single source (the same rule as balance*.go for constants).
 
 `docs/dev/releasing.md` is the release checklist — the translation passes, the
 ChangeLog stamp, what to verify, and the **version bump after publishing**,
@@ -385,7 +387,7 @@ IB comma-groups figures BRE prints bare, and the offer's stats line separates
 fields with `│` where BRE uses `; `, among others. IB also lists the treaty
 offers you have SENT, which BRE shows nowhere (#92).
 
-Key gameplay knobs are constants in `balance.go`, but they are no longer all
+Key gameplay knobs are constants in `balance*.go`, but they are no longer all
 free to tune: a growing set is **binary-verified** and marked as such in that
 file (region Rate/Base pairs, the coastal support curve, unit costs and the
 specialization modifiers, industrial gold and the unit pool, the crown tax).

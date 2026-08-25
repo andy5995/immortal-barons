@@ -855,7 +855,7 @@ lead with Coastal (`bre-save-format.md`, `+0x96`).
 
 - **Population is a head count, not millions.** BRE stores population as a count
   of millions and writes `3386 Million`; IB counts people directly (see
-  `balance.go`, "Population / migration"), so the line reads
+  `balance_costs.go`, "Population / migration"), so the line reads
   `Population: 3,386 (Tax Rate: 12%)` — the same figure the Civilian advisor and
   the Daily Bulletin's Total Population row print, in the same unit.
 - **Figures are comma-grouped**, as everywhere else in IB.

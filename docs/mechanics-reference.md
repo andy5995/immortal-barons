@@ -137,7 +137,7 @@ HQ is an `int32` at empire record `+0x26b`, holding percent complete.
   worth out, from a day-boundary off-by-one in the score-to-turns derivation used
   to check them. So a HeadQuarters rewards committing early, and the cap stops a
   very old realm being priced out. IB mirrors this with `Empire.TurnsPlayed` and
-  `World.HQPrice` (`HQPrice*` in `balance.go`); it charged a flat 5,104 until
+  `World.HQPrice` (`HQPrice*` in `balance_hq.go`); it charged a flat 5,104 until
   2026-07-30.
 
 Terminology note: some BRE guides call the defensive unit a **"Missile
@@ -324,7 +324,7 @@ flow runs in this order:
    **Because the purse is read fresh each time**, the first baron to play on a
    given day takes the largest cut and everyone after them draws on what is left.
 
-   **IB implements this**, constants in `balance.go`. One divergence: IB pays
+   **IB implements this**, constants in `balance*.go`. One divergence: IB pays
    exactly 1,000,000 where BRE usually pays 999,999. BRE caps by substituting
    `1000000 / purse` for the rate and multiplying back by the purse; the round
    trip through a six-byte real loses the last unit. That is its float format,
@@ -372,7 +372,7 @@ flow runs in this order:
    Coordinator's: the switch is the `LOTTERY` boolean in the per-install
    `RESOURCE.DAT`, default on, so two boards in one league may differ.
 
-   **IB implements this**, constants in `balance.go`, the switch as `Lottery` in
+   **IB implements this**, constants in `balance*.go`, the switch as `Lottery` in
    `bbs.cfg` — IB's own per-board file, which no broadcast rewrites. Two
    divergences. Where the prize would carry the bank past the money cap BRE pays
    **nothing at all**; IB banks what fits and pays the rest into gold in hand
@@ -422,7 +422,7 @@ this is a bypass rather than the checkbox itself flipping off.
 IB implements this in `paymentStage` (`internal/menu/gameflow.go`): the same
 five conditions gate the silent branch, reusing the empire's existing
 `Support`, `Morale`, and `Regions.Waste` fields (0-100 support/morale is
-already a structural range in the code, so no new `balance.go` constant was
+already a structural range in the code, so no new `balance*.go` constant was
 needed for the 100 threshold).
 
 **Method — the Auto-Pay line is a better probe than the prompts.** With Auto-Pay
@@ -460,7 +460,7 @@ figures are literal gold rather than a ratio.
 
 Region upkeep is the dominant drain: that 6,837-region empire owed 6.2M on land
 against 197k on a 219,032-strong army. IB charges both figures as of the
-constants in `balance.go` (`RegionUpkeepPerLand`, `Maint*Tenths`); before that it
+constants in `balance*.go` (`RegionUpkeepPerLand`, `Maint*Tenths`); before that it
 charged 2 gold per region and ten times BRE's per-unit rate, which made expansion
 effectively free and armies disproportionately expensive.
 
@@ -808,7 +808,7 @@ The **funding cost is binary-verified** from BRE.OVR's overlay unit at 0x27441
             cost x 1.2   if ratio > 1
 
 so the weapon is priced against how much bigger the target planet is than yours.
-The constants are `Clingy Annihilator*` in `balance.go`.
+The constants are `Clingy Annihilator*` in `balance*.go`.
 
 **The siege is binary-verified** from the daily resolver (`resolve_gooie_attack`,
 BRE.OVR 0x47c52), called once a day from `run_daily_maintenance`. The weapon
@@ -1008,7 +1008,7 @@ encodes the byte Medium 0, None 1, Low 2, High 3, which is what ties each figure
 to its level; the direction also matches `game/reset.hlp`, which says a High
 Attack Costs setting "will make attacking more difficult".
 
-The figures live in `balance.go` as `CostLevel*Pct` and reach the two knobs
+The figures live in `balance_combat.go` as `CostLevel*Pct` and reach the two knobs
 through `Level.CostPercent()`. Maintenance, Region, Attack Damage and Attack
 Rewards each have a ladder of their own — `Level.MaintCostScaled`,
 `RegionCostSurcharge`, `AttackRetreatPct` and `AttackCapturePct` — and Trade
@@ -1282,7 +1282,7 @@ all of that; `Empire.ExposedFrom` holds the per-realm expiry.
 **Each op charges a gold fee up front** (on top of the agent risk), shown as
 a cost column on the menu. The fees below are live-sampled from BRE's default
 (medium) game setup on 2026-07-21 — other BRE setups scale them, so IB keeps
-them as tunable `Cost*` constants in `balance.go`. A failed op still risks
+them as tunable `Cost*` constants in `balance*.go`. A failed op still risks
 losing the agent, but an op you cannot afford does nothing (charges neither
 gold nor agent). The menu footer shows `You have <gold> gold and <N> agents.`
 
@@ -1860,7 +1860,7 @@ section: an Agricultural draw raised by the Technology factor (#20), plus a
 share of every river's yield. These income numbers, the caps (2B money / 1.599B
 interest) and the pirate caps table are BRE-scale, and the net-worth weights are
 binary-verified; **the tax per-capita coefficient and the yield band are IB's own
-reconstructions** anchored to this scale. All tunables live in `internal/game/balance.go`.
+reconstructions** anchored to this scale. All tunables live in `internal/game/balance*.go`.
 
 **Per-turn price walk (#30), binary-verified.** Every empire stores its own price
 for each of the six military units (`Empire.Prices`) and steps it once per turn
@@ -1921,7 +1921,7 @@ So a realm 100 turns old pays about 2,450–2,749 per agent where a new one pays
 450–749, and the price never comes back down. Pinned by the same capture:
 solving each turn's agent *and* HeadQuarters price for a shared turn count leaves
 exactly one integer feasible per turn, and it advances by one every turn, day
-boundary included. Constants are `AgentPrice*` in `balance.go`; **agents sell at
+boundary included. Constants are `AgentPrice*` in `balance_prices.go`; **agents sell at
 a flat 100** (`SellAgentPrice`, the literal at `BRE.OVR 0x16AEB`), not buy/3.
 
 **Regions do not walk either** — their price rises purely with holdings
@@ -2030,7 +2030,7 @@ the fight; that is gone, because the variance belongs inside the battle.
 *density* factor (softer, thinly-held land falls faster). The binary reads the
 defender's region count and the level constant and nothing else, so this is
 IB's own addition rather than an unverified reconstruction of something BRE
-does. It is kept deliberately; see `CaptureDensityBase` in `balance.go`.
+does. It is kept deliberately; see `CaptureDensityBase` in `balance*.go`.
 
 **Population / migration — BINARY-VERIFIED.** Read out of BRE's end-of-turn
 routine (`BRE.OVR` `0xD08A`–`0xD3CC`). This supersedes an earlier partial
@@ -2137,7 +2137,7 @@ BRE starts every type at 15%, leaving 10% to fall through to industrial gold.
 21% each, troopers and bombers 20%. Because a type's output is `pct/cost`, a
 flat split builds one carrier per 12.5 jets while a carrier lifts 100 — IB's
 share makes the two rates meet exactly (`DefaultProdPct` and friends in
-`balance.go`).
+`balance*.go`).
 A common money tip: set industry to 100% carriers and *sell* the carriers
 — more profitable than producing gold directly. Mountain regions boost
 industrial output (see the region table for the formula) and are the most
@@ -2473,7 +2473,7 @@ section is a record of what was claimed and how it was settled, so the word
   Unlimited** toggle (Config Editor; default off/limited) removes the cap. Prices
   **vary daily** within `buy ∈ [FoodBuyPriceMin, 3×FoodBuyPriceMin]` with
   `sell = buy/3` — BRE's own [20,60]/[7,20] band (IB runs BRE-native economy
-  scale; `FoodBuyPriceMin = 20` in `balance.go`).
+  scale; `FoodBuyPriceMin = 20` in `balance_costs.go`).
 - **Food production:** `Agricultural × (300 + Random(5))` per turn, calibrated to
   live BRE (97 Agri → 29,197; 16 Agri → 4,864, both no River) and read from the
   binary (below).
@@ -2559,7 +2559,7 @@ section is a record of what was claimed and how it was settled, so the word
   34,600M are all exact under truncation (4,081M → 6,121, i.e.
   `trunc(6121.5)`). IB counts people directly, `PopBREUnitScale` (20) to BRE's
   million, so the conversion runs through that constant —
-  `FoodPerBREPopUnitTenths` in `balance.go`.
+  `FoodPerBREPopUnitTenths` in `balance_costs.go`.
 
   **Every military unit type eats**, which BRE's own changelog states outright:
   *"All military units now require food to survive"* (`docs/whatsnew.doc`,
@@ -2611,7 +2611,7 @@ section is a record of what was claimed and how it was settled, so the word
   Because growth is credited at turn start (above), selling the surplus down to
   next-turn consumption drains the food after feeding, yielding **zero
   spoilage** — BRE's "sell excess → no decay" behavior. (`FoodSpoilPct` and
-  `FoodSpoilFloor` in `balance.go`.)
+  `FoodSpoilFloor` in `balance_costs.go`.)
 - **Feeding & food shortfall:** each turn the realm consumes food; a **feed stage**
   (BRE's Payment→Food-Market slot) warns when short, and with **Auto-Feed** on the
   Food Market opens automatically so the player can buy food, then asks the two
@@ -3553,7 +3553,7 @@ The menu is numbered 1-8 with no Help item (live capture):
 | 8 | Send SpyGuy | quotes its own, after the target is named |
 
 The four prices are the original's own, off the menu's price column
-(`docs/dev/bre-screens.md`), and are fidelity constants in `balance.go`.
+(`docs/dev/bre-screens.md`), and are fidelity constants in `balance*.go`.
 
 **Items 1-4 are aimed at the PLANET, items 5-7 at a named baron.** What the four
 bombing ops wreck belongs to the whole planet — its food market, its trading
@@ -3729,7 +3729,7 @@ measured". The stored figure and the averaging are unchanged; this is the
 display only, and it is a deliberate readability divergence.
 
 IB implements the mechanic as described. Constants: `TravelAvgNewWeight`,
-`TravelAvgDenom`, `TravelHoursCutoff` in `balance.go`. The probes ride along with
+`TravelAvgDenom`, `TravelHoursCutoff` in `balance*.go`. The probes ride along with
 whatever else the inter-BBS run is sending, once per game day
 (`World.PingTravelTimes`); the stamp is RFC3339, so boards in different time
 zones measure the same interval. What BRE keys off a configurable day interval,
@@ -4017,7 +4017,7 @@ and each carries a gameplay effect (#11 wired the last two):
   Tanks." BRE in-game text: "the most balanced and powerful alliance… puts forth a
   large amount of all of your forces in defending an ally in need. NOTE: effective
   only in Local Games." **IB implements this** (`allyDefenseBoost` / `AllyDefenders`
-  in `internal/game/diplomacy.go`, `AllyDefenseContribPct = 30` in `balance.go`):
+  in `internal/game/diplomacy.go`, `AllyDefenseContribPct = 30` in `balance*.go`):
   when a realm is attacked, each Full Defense Alliance partner adds 30% of its
   troopers + tanks to the defender's battle power (valued as the ally's own
   `Defense()` weighs them — tanks 3–5 troopers by HQ, morale- and tech-scaled; turrets
@@ -4074,7 +4074,7 @@ and each carries a gameplay effect (#11 wired the last two):
   SMALLER population is what stops a pact with a giant from being free money, and
   the protection cuts stop a sheltered newcomer farming one.
   `TariffTradeGoldPerHead` / `FreeTradeGoldPerHead` and their cuts in
-  `balance.go`, applied by `tradeIncome`. The rates are **gold per head of IB's
+  `balance*.go`, applied by `tradeIncome`. The rates are **gold per head of IB's
   own `People` count** — BRE counts population in millions and IB counts people,
   and IB applies BRE's population-side figures to its own unit unchanged, as it
   already does for the carrying-capacity weights. (IB previously paid
@@ -4111,7 +4111,7 @@ and each carries a gameplay effect (#11 wired the last two):
 
   **IB follows all of it** (`bombRoutesLands`, `bombRoutesEffect`,
   `bombDealBasket`; the three rolls are `BombRoutesLandOdds`,
-  `BombRoutesDealHitOdds` and `BombRoutesKeptPctMin`/`Spread` in `balance.go`).
+  `BombRoutesDealHitOdds` and `BombRoutesKeptPctMin`/`Spread` in `balance*.go`).
   A strike wrecks the goods in pending `TradeDeal`s rather than severing any
   standing agreement, and the guard reads the deal's own two parties, so holding
   Protective Trade with the realm you are bombing buys you nothing and a deal
