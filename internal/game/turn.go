@@ -158,8 +158,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		}
 		for _, e := range w.Empires {
 			if e.Alive && (e.Land <= 0 || e.People <= 0) {
-				e.Alive = false
-				e.DiedDay = w.GameDay
+				w.Kill(e)
 			}
 		}
 		rep.step("Checking for fallen realms")

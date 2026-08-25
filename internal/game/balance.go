@@ -421,7 +421,8 @@ const TaxGoldPerCapita = 17
 // stored price per unit and walks it one step per turn inside a fixed band. The
 // three tables below are three arrays of six words in BRE.EXE's data segment
 // (DS:0x508 step, DS:0x514 low, DS:0x520 high), read by the walk at BRE.OVR
-// 0x12633. Sell price is buy/3 (see sellUnit), except agents (SellAgentPrice).
+// 0x12633. Sell price is UnitSellPriceDivisor (see UnitSellPrice), except
+// agents (SellAgentPrice).
 //
 // Part of the fidelity contract: retuning one of these needs new evidence. Every
 // buy price across the 30-turn capture `cap/eots-covert-agents.cap` lands inside
@@ -465,6 +466,12 @@ const (
 	RegionCostSurchargeLow    = 15
 	RegionCostSurchargeMedium = 35
 	RegionCostSurchargeHigh   = 55
+	// UnitSellPriceDivisor: BRE buys a unit back at a third of what it charges
+	// for one. Named here rather than written as a 3 at each site — the rule was
+	// spelled once in the sell path and again in the Sell menu's price column, so
+	// the figure the player was quoted and the figure they were paid were two
+	// separate literals.
+	UnitSellPriceDivisor = 3
 	// SellAgentPrice: agents sell at a flat 100 in BRE, not buy/3 like other units.
 	// Binary-verified — the Sell menu's agent column is the literal 100 pushed at
 	// BRE.OVR 0x16AEB, and every sell capture shows it.

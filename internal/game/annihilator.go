@@ -312,8 +312,7 @@ func (w *World) TickAnnihilator() {
 		e.Regions.remove(lost)
 		e.syncLand()
 		if e.Land <= 0 || e.People <= 0 {
-			e.Alive = false
-			e.DiedDay = w.GameDay
+			w.Kill(e)
 		}
 		total += lost
 		if first {

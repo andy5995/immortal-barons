@@ -405,9 +405,19 @@ func (w *World) sellUnit(stock *int, n, price int, e *Empire) error {
 		n = *stock
 	}
 	*stock -= n
-	w.creditGold(e, goldCost(n, price)/3, "a unit sale") // BRE: sell price is buy/3
+	// The divide is over the WHOLE sale, not per unit: n*price/3, which is what
+	// TestSellUnitsThirdPrice pins. Paying UnitSellPrice(price) n times instead
+	// would round each unit down separately and pay less than the sale is worth.
+	w.creditGold(e, goldCost(n, price)/UnitSellPriceDivisor, "a unit sale")
 	return nil
 }
+
+// UnitSellPrice is the per-unit buy-back price the Sell menu quotes for a unit
+// bought at `buy`. It is the same rule sellUnit pays at, but the sale divides
+// its total rather than each unit, so a quoted price times the quantity can come
+// out a gold or two under what is actually paid. That is the original's
+// arithmetic, not a rounding bug to correct.
+func UnitSellPrice(buy int) int { return buy / UnitSellPriceDivisor }
 
 func (w *World) SellTroopers(e *Empire, n int) error {
 	return w.sellUnit(&e.Troopers, n, w.TrooperPrice(e), e)

@@ -307,8 +307,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		// regions and seize the remains of their military (BRE's BRCRUSH.DSP).
 		if crushed {
 			absorbMilitary(a, d)
-			d.Alive = false
-			d.DiedDay = w.GameDay
+			w.Kill(d)
 			fmt.Fprintf(&b, "\n"+tr("You crushed %s completely and seized the remains of its military!")+"\n", d.Name)
 		}
 		d.addEvent(fmt.Sprintf(i18n.T(d.Language, "%s attacked you: you lost %d regions and %d units."), a.Name, taken, dloss.Total()))

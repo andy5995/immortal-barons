@@ -1301,6 +1301,20 @@ func (w *World) dropEmpires(gone func(*Empire) bool) {
 	}
 }
 
+// Kill marks e eliminated. The husk is kept rather than deleted so the
+// next-day rebuild rule holds: removeDeadHusks collects it once GameDay has
+// passed DiedDay, which is what stops an owner re-onboarding the same day.
+//
+// Every death goes through here — conquest, a Clingy Annihilator, starvation,
+// and abdication — so whatever a future death has to do besides setting these
+// two fields is added in one place. Three of the four call sites were in
+// internal/game and the fourth in the abdication screen, which is how a rule
+// ends up being enforced by a renderer.
+func (w *World) Kill(e *Empire) {
+	e.Alive = false
+	e.DiedDay = w.GameDay
+}
+
 // RemoveEmpire deletes e from the world (Abdicate). The empire is gone
 // entirely; the caller gets a fresh realm on their next visit.
 func (w *World) RemoveEmpire(e *Empire) {

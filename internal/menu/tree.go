@@ -129,10 +129,11 @@ func BuildMenus() *Menus {
 	priceAgent := func(w *ctx) int { return w.AgentPrice(w.Player()) }
 	priceTank := func(w *ctx) int { return w.TankPrice(w.Player()) }
 	priceCarrier := func(w *ctx) int { return w.CarrierPrice(w.Player()) }
-	// third is the sell (buy-back) price shown on the Sell menu: BRE sells units
-	// at buy/3 (agents are the exception — a flat SellAgentPrice).
-	third := func(f func(*ctx) int) func(*ctx) int {
-		return func(w *ctx) int { return f(w) / 3 }
+	// sellPrice is the buy-back price shown on the Sell menu; game.UnitSellPrice
+	// is the same rule the sell itself is paid at (agents are the exception — a
+	// flat SellAgentPrice).
+	sellPrice := func(f func(*ctx) int) func(*ctx) int {
+		return func(w *ctx) int { return game.UnitSellPrice(f(w)) }
 	}
 
 	buy.Items = []Item{
@@ -161,20 +162,20 @@ func BuildMenus() *Menus {
 
 	sell.Items = []Item{
 		{Key: 'B', Label: "Buy", Do: back},
-		{Key: '1', Label: "Troopers", Price: third(priceTrooper), Owned: owned(troopers),
+		{Key: '1', Label: "Troopers", Price: sellPrice(priceTrooper), Owned: owned(troopers),
 			Do: sellUnit("Sell Troopers", troopers, (*game.World).SellTroopers)},
-		{Key: '2', Label: "Jets", Price: third(priceJet), Owned: owned(jets),
+		{Key: '2', Label: "Jets", Price: sellPrice(priceJet), Owned: owned(jets),
 			Do: sellUnit("Sell Jets", jets, (*game.World).SellJets)},
-		{Key: '3', Label: "Turrets", Price: third(priceTurret), Owned: owned(turrets),
+		{Key: '3', Label: "Turrets", Price: sellPrice(priceTurret), Owned: owned(turrets),
 			Do: sellUnit("Sell Turrets", turrets, (*game.World).SellTurrets)},
-		{Key: '4', Label: "Bombers", Price: third(priceBomber), Owned: owned(bombers),
+		{Key: '4', Label: "Bombers", Price: sellPrice(priceBomber), Owned: owned(bombers),
 			Do: sellUnit("Sell Bombers", bombers, (*game.World).SellBombers)},
 		{Key: '6', Label: "Regions", Price: func(w *ctx) int { return 0 }, Owned: owned(land), Do: sellLand},
 		{Key: '7', Label: "Covert Agents", Price: func(w *ctx) int { return game.SellAgentPrice }, Owned: owned(agents),
 			Do: sellUnit("Sell Covert Agents", agents, (*game.World).SellAgents)},
-		{Key: '8', Label: "Tanks", Price: third(priceTank), Owned: owned(tanks),
+		{Key: '8', Label: "Tanks", Price: sellPrice(priceTank), Owned: owned(tanks),
 			Do: sellUnit("Sell Tanks", tanks, (*game.World).SellTanks)},
-		{Key: '9', Label: "Carriers", Price: third(priceCarrier), Owned: owned(carriers),
+		{Key: '9', Label: "Carriers", Price: sellPrice(priceCarrier), Owned: owned(carriers),
 			Do: sellUnit("Sell Carriers", carriers, (*game.World).SellCarriers)},
 		{Key: '0', Label: "Quit", Do: back},
 	}
