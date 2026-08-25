@@ -1,4 +1,5 @@
 (in-progress:)
+  * Source reorganized by subject, with no change to how the game plays
   * A League Number outside 1-999 in bbs.cfg is refused instead of accepted
   * The -scores, -export and -import flags are gone; -planetary carries scores
   * Interplanetary strike losses follow the battle, not a flat share
