@@ -314,7 +314,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		fmt.Fprint(&b, returningForces)
 		fmt.Fprintf(&b, "Your casualties: %s.\n\n", attackerCas(aloss))
 		fmt.Fprintf(&b, "The enemy lost: %s.\n\n", defenderCas(dloss))
-		fmt.Fprint(&b, "Defeat! Your forces took the field and could not hold it.\n")
+		fmt.Fprint(&b, "Defeat! Your forces were beaten off the field.\n")
 		d.addEvent(fmt.Sprintf("%s attacked you but was repelled. You lost %d units.", a.Name, dloss.Total()))
 		w.postCombatNews(a, d, false, false)
 	}
