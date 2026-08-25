@@ -28,7 +28,7 @@ const (
 	TerrorOpSabotageHQ
 )
 
-// TerrorOpName returns the BRE label for a terror sub-op.
+// String is the BRE label for a terror sub-op.
 func (t TerrorOpType) String() string {
 	switch t {
 	case TerrorOpSpy:
