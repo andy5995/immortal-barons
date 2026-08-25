@@ -369,6 +369,18 @@ func (w *World) fromCoordinator(p Packet) bool {
 	return p.FromBoard != "" && p.FromBoard == w.CoordinatorBoardID()
 }
 
+// IsFromCoordinator is the exported half of fromCoordinator, for callers
+// outside this package that need to prioritize the Coordinator's packet
+// without duplicating the check it makes (#178: store.ReadInbound applies it
+// first, ahead of everything else in a batch). It is the same claimed-origin
+// check ApplyPacket itself uses to gate league-wide updates — not a security
+// boundary on its own, since the signature check inside ApplyPacket is the
+// half that cannot be faked, but exactly the right test for deciding
+// processing order.
+func (w *World) IsFromCoordinator(p Packet) bool {
+	return w.fromCoordinator(p)
+}
+
 // applyLeagueReset carries out the Coordinator's order to start a new season.
 // The order names the season it starts, so a board that already ran it — or one
 // replaying an old packet — does nothing (#65).
