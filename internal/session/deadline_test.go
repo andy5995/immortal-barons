@@ -33,6 +33,19 @@ func (f *fakeConn) ReadKey() (rune, error) {
 func (f *fakeConn) Write(p []byte) (int, error) { return f.out.Write(p) }
 func (f *fakeConn) Close()                      { close(f.closed) }
 
+// idleTiming is the idle timeout for the two tests that must land a keypress in
+// a SPECIFIC phase of the deadline — after the warning at idle/2, before the
+// boot at idle. What makes those reliable is the margin around the target
+// instant, not the absolute duration, so the timeout is deliberately generous
+// and each sleep is written as a fraction of it rather than as its own literal.
+//
+// At the original 80ms the margin was 25ms, which a loaded runner eats: the
+// FreeBSD job runs in a nested VM over SSH and is the jitteriest of the set, and
+// it failed here twice (2026-08-19, 2026-08-25) with the boot beating the key.
+// Scaling by ten costs about half a second and removes the race; asserting
+// elapsed time instead is what made a sibling flaky, so don't reach for that.
+const idleTiming = 800 * time.Millisecond
+
 func TestDeadlineKeypressReturns(t *testing.T) {
 	f := newFakeConn()
 	d := NewDeadline(f, 200*time.Millisecond, 3, time.Time{})
@@ -82,10 +95,10 @@ func TestDeadlineStrikesBootEarly(t *testing.T) {
 
 func TestDeadlineActiveResponseResetsStrikes(t *testing.T) {
 	f := newFakeConn()
-	// idle 80ms -> warning at ~40ms; respond well before that.
-	d := NewDeadline(f, 80*time.Millisecond, 3, time.Time{})
+	// Warning falls at idleTiming/2; respond well before that.
+	d := NewDeadline(f, idleTiming, 3, time.Time{})
 	d.warnings = 2 // two prior strikes
-	go func() { time.Sleep(10 * time.Millisecond); f.in <- 'x' }()
+	go func() { time.Sleep(idleTiming / 8); f.in <- 'x' }()
 	r, err := d.ReadKey()
 	if err != nil || r != 'x' {
 		t.Fatalf("got (%q, %v), want ('x', nil)", r, err)
@@ -97,13 +110,16 @@ func TestDeadlineActiveResponseResetsStrikes(t *testing.T) {
 
 func TestDeadlineRestoresInputLineAfterWarning(t *testing.T) {
 	f := newFakeConn()
-	// idle 80ms -> warnLead 40ms -> warning at ~40ms idle, boot at 80ms.
-	d := NewDeadline(f, 80*time.Millisecond, 3, time.Time{})
+	// warnLead is idleTiming/2, so the warning lands at idleTiming/2 and the
+	// boot at idleTiming.
+	d := NewDeadline(f, idleTiming, 3, time.Time{})
 	d.SetInputLine("Amount: 45")
 	// Feed a key after the warning fires but before the boot, so ReadKey
-	// returns cleanly and we can inspect what was written.
+	// returns cleanly and we can inspect what was written. 7/10 sits near the
+	// middle of that window, leaving a fifth of the timeout of slack on each
+	// side.
 	go func() {
-		time.Sleep(55 * time.Millisecond)
+		time.Sleep(idleTiming * 7 / 10)
 		f.in <- '6'
 	}()
 	r, err := d.ReadKey()
