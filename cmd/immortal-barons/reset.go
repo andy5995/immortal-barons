@@ -21,8 +21,8 @@ import (
 // With fromConfig=true (-reset-from-config) it skips the editor and keeps the
 // current config.json as-is. Either way the world is wiped and re-seeded.
 func runReset(cfg game.Config, fromConfig bool, league *leagueSetup, cs charset, noANSI bool) error {
-	// No drop file prompt here: a reset seeds the world for the web front-end and
-	// -local play too, neither of which reads a drop file. The door names
+	// No drop file prompt here: a reset seeds the world for -local play and the
+	// maintenance modes too, none of which reads a drop file. The door names
 	// -set-dropfile when it needs it.
 	lock, err := store.Lock(cfg, true)
 	if err != nil {

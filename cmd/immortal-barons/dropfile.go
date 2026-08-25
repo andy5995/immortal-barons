@@ -20,7 +20,8 @@ const dropfileUnsetMsg = "No drop file format is set. If you intend to run this 
 
 // noteDropfileUnset reminds the sysop after a reset that the door still needs a
 // drop file format. A note, not a prompt: the world it just seeded is also what
-// the web front-end and -local play use, and neither reads a drop file. A
+// -local play and the maintenance modes use, and none of those reads a drop
+// file. A
 // door.json that can't be read is left to the door to report.
 func noteDropfileUnset(dataDir string) {
 	if dc, err := store.LoadDoorConfig(dataDir); err == nil && dc.DropfileFormat == "" {

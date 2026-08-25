@@ -105,18 +105,10 @@ func presenceOf(e *game.Empire, self bool, today string) string {
 	return presenceNone
 }
 
-// onlineMark renders the indicator, or a blank of the same width. Both the
-// score tables and the Relations roster call it, so the two cannot drift into
-// showing the same thing two ways.
-//
-// It is drawn as an inverse-video cell — a lit key against the dim table —
-// rather than a colored glyph. Reverse plus a bright FOREGROUND is what gets a
-// bright background here: the `10x` bright-background codes are an aixterm
-// extension, and on the classic CP437 clients a BBS door actually meets, that
-// high-intensity background bit means blink. Black on bright yellow measures
-// 19.7:1 against the VGA palette and 19.6:1 against xterm's; plain `43m` yellow
-// would be 4.0:1 on VGA and fail. The `O` still carries the meaning on its own
-// for a monochrome or ANSI-less session.
+// markWidth is the mark's column cost — "(O)" and whatever a translation makes
+// of the letter — so headings and blanks can be sized from one place.
+func markWidth(s session.Session) int { return len([]rune(tr(s, scoreOnlineMark))) + 2 }
+
 // onlineMark marks a baron who is on the board: "(O)" set immediately to the
 // LEFT of their name, or a blank of the same width so the name column holds in
 // both states. A realm that merely played today but is not online now gets
@@ -124,16 +116,15 @@ func presenceOf(e *game.Empire, self bool, today string) string {
 // cell so it too hugs the name directly — matching the captured `(A)+Asgard`,
 // not a `+` stranded against the id column with a gap before the name.
 //
-// The LETTER takes the lighter gray and the parens the darker one, not the other
-// way round. Measured against a black background, gray (37) is 9.04:1 on the
-// VGA/CP437 palette and 11.54:1 on xterm's, while dark gray (90) is 2.82:1 and
-// 5.32:1 — so on the CP437 clients a BBS door actually meets, dark gray misses
-// the 4.5:1 target by a wide margin. The parens are decoration and can carry
-// that; the letter cannot, because it is the whole message.
-// markWidth is the mark's column cost — "(O)" and whatever a translation makes
-// of the letter — so headings and blanks can be sized from one place.
-func markWidth(s session.Session) int { return len([]rune(tr(s, scoreOnlineMark))) + 2 }
-
+// Both the score tables and the Relations roster call it, so the two cannot
+// drift into showing the same thing two ways.
+//
+// The LETTER is bright white and the parentheses magenta, not the other way
+// round. Measured against black: bright white is 21.0:1 on both the VGA/CP437
+// and xterm palettes, while magenta is 3.29:1 on VGA and 4.48:1 on xterm. The
+// parentheses are decoration and clear the 3:1 non-text minimum; the letter
+// cannot be the dim one, because it is the whole message — and it still carries
+// that message on a monochrome or ANSI-less session.
 func onlineMark(s session.Session, presence string) string {
 	width := markWidth(s)
 	switch presence {

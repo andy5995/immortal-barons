@@ -300,13 +300,6 @@ func NewWorldSeed(cfg Config, seed int64) *World {
 	return w
 }
 
-// initFreshGame installs a brand-new game's state onto w, keeping only its
-// infrastructure (mutex, rng, store) and Config. It is the SINGLE definition of
-// what a fresh game contains, called both at world creation (NewWorldSeed) and
-// on -reset (Reset). Keeping it in one place means a default can never
-// be seeded at creation but forgotten on reset — the drift that stranded the
-// old prices (and would silently carry pirates, news, and the master across a
-// reset). Add any new creation-time world default here, not in NewWorldSeed.
 // ResetForNewSeason wipes this board's world and starts it over, keeping only
 // what identifies the board in its league — the roster, the keys, the season
 // count and the packet history that stops an old order being replayed. Used by
@@ -329,6 +322,13 @@ func (w *World) ResetForNewSeason(startDate string) {
 	w.seedAIEmpires() // a no-op on a league board, which never has any
 }
 
+// initFreshGame installs a brand-new game's state onto w, keeping only its
+// infrastructure (mutex, rng, store) and Config. It is the SINGLE definition of
+// what a fresh game contains, called both at world creation (NewWorldSeed) and
+// on -reset (Reset). Keeping it in one place means a default can never
+// be seeded at creation but forgotten on reset — the drift that stranded the
+// old prices (and would silently carry pirates, news, and the master across a
+// reset). Add any new creation-time world default here, not in NewWorldSeed.
 func (w *World) initFreshGame() {
 	w.Empires = nil
 	w.Prices = defaultPrices()
@@ -435,7 +435,7 @@ func defaultPrices() Prices {
 }
 
 // Lock/Unlock guard the shared World when a single process runs concurrent
-// sessions (the web server). The door/local front-ends run one session and
+// sessions. The door and -local front-ends run one session and
 // take it uncontended.
 func (w *World) Lock() { w.mu.Lock() }
 

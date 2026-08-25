@@ -21,7 +21,7 @@ import (
 // handle (not a cached *Empire pointer) is what keeps the active empire correct
 // after the door's FileStore reloads the world inside a transaction — the old
 // pointer would go stale, but the handle re-resolves against fresh state. It
-// also lets the web server run concurrent sessions against one world. It embeds
+// also lets a front-end run concurrent sessions against one world. It embeds
 // *game.World so callback bodies keep using w.Config, w.Prices, w.NetWorth(...),
 // etc. unchanged.
 type ctx struct {
@@ -29,10 +29,10 @@ type ctx struct {
 	handle string
 	// cached memoizes the active empire so unlocked reads (the macro expander on
 	// each keypress, output-time language, action-body gathers) don't scan
-	// w.Empires and race a concurrent AddHuman on the web front-end. It is
-	// re-resolved by handle whenever the world's reload generation advances (a
-	// door FileStore reload) — the web never reloads, so after the first resolve
-	// this is the same stable pointer the pre-handle code cached. ctx is
+	// w.Empires and race a concurrent AddHuman. It is re-resolved by handle
+	// whenever the world's reload generation advances (a door FileStore reload);
+	// a front-end holding one in-memory world never reloads, so after the first
+	// resolve this is the same stable pointer the pre-handle code cached. ctx is
 	// per-session, driven by one goroutine, so these fields need no locking.
 	cached    *game.Empire
 	cachedGen uint64
@@ -172,8 +172,8 @@ func playerLang(c *ctx) string {
 	// A UTF-8 session renders any language. A CP437 or ASCII session renders only
 	// a catalog that survives the transcoding (e.g. German); anything else
 	// (Cyrillic, CJK) falls back to English rather than mojibake. This one render-time guard
-	// also keeps a language set via the UTF-8 web front-end from breaking when the
-	// same empire is later reached through a CP437 door.
+	// also keeps a language set on a UTF-8 session from breaking when the same
+	// empire is later reached through a CP437 door.
 	if langFits(c.Term, p.Language) {
 		return p.Language
 	}
@@ -183,8 +183,8 @@ func playerLang(c *ctx) string {
 // langSession wraps a Session so downstream output helpers can learn the
 // caller's language from the Session alone (they receive s but not the World).
 // The language is read live from the active empire, so a mid-session change in
-// Preferences takes effect immediately. This is per-session state — safe for
-// the web front-end, which runs concurrent sessions in one process.
+// Preferences takes effect immediately. This is per-session state, so it stays
+// correct for a front-end running concurrent sessions in one process.
 type langSession struct {
 	session.Session
 	c *ctx

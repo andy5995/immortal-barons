@@ -101,8 +101,8 @@ func maintNotice(s session.Session, r game.MaintReport) {
 
 // Session plays one session against an already-loaded world owned by the
 // caller. It does not take the flock, load, or run daily maintenance — the
-// caller owns those. save is called once at session end: the web front-end
-// persists its in-memory world there, while the door passes a no-op because
+// caller owns those. save is called once at session end: a front-end holding
+// one in-memory world persists it there, while the door passes a no-op because
 // every action already committed through its FileStore transaction.
 func Session(s session.Session, id Identity, w *game.World, cfg game.Config, rebornFrom string, maint game.MaintReport, save func() error) (reason string, err error) {
 	// Bound the session: boot after IdleTimeoutSecs idle, or at the caller's

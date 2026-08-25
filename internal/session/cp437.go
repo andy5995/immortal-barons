@@ -37,7 +37,7 @@ var cp437Fallback = strings.NewReplacer(
 
 // NewCP437Writer returns a Session that emits CP437 instead of UTF-8. The
 // door/local front-end wraps its session in this when the caller's terminal is
-// not UTF-8-capable (the default); UTF-8-capable front-ends (the web server)
+// not UTF-8-capable (the default); a UTF-8-capable front-end
 // skip it and emit UTF-8 directly.
 func NewCP437Writer(inner Session) Session {
 	return &cp437Writer{
