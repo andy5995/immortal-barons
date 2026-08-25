@@ -28,13 +28,16 @@ code, not from `attack.hlp` or a strategy guide.
 | Type multipliers | n/a | verified (1.2 / 1.0 / 0.85, capture 1/2, 1, 5/4) | fights as Normal |
 | Air battle (jets vs bombers) | not applicable | verified | verified |
 | SDI | verified: does not apply | verified (jets 30%, bombers 20%) | verified: none |
+| Capture cap and floor | verified (`min`/`max` pair) | verified | as individual |
 | Whole-planet target | n/a | n/a | verified (`Z` = all, summed pool) |
 | Reproduces a live capture | **yes, exactly** | not yet captured | not yet captured |
 
 Still open, and each is IB's own or unread rather than known-correct:
 
-- **The total-conquest condition** is not decoded. IB triggers it when the
-  capture reduces the defender to no land or no people, which is a guess.
+- **The capture chain is fully read**: `min_i32(total_regions,
+  max_i32(floor, trunc(total_regions x pct / 100)))`. A total conquest is simply
+  the case where that takes everything, which is what IB tests for. IB adds
+  "or no people left" as a second trigger, which is its own.
 - **The bombing run's two constants** (3 jets per bomber, one bomber down per 25
   turrets) have no support: no bombing routine reads turrets at all.
 - **The capture-density modifier** is IB's own and deliberate, and is the only
