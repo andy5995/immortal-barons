@@ -41,6 +41,6 @@ func (w *World) TerrorOpGoldCost(e *Empire) int64 {
 	case ops > 100:
 		ops = 100
 	}
-	cost := (ops + 63) * int64(e.Land)
+	cost := (ops + TerrorOpGoldPerRegion - 1) * int64(e.Land)
 	return cost * int64(w.Config.TerrorCosts.CostPercent()) / 100
 }

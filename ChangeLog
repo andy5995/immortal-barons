@@ -1,4 +1,5 @@
 (in-progress:)
+  * A League Number outside 1-999 in bbs.cfg is refused instead of accepted
   * The -scores, -export and -import flags are gone; -planetary carries scores
   * Interplanetary strike losses follow the battle, not a flat share
   * Only an attacking force's bombers destroy the defender's jets

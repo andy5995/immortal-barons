@@ -80,7 +80,12 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 		case strings.EqualFold(key, keyBoardID):
 			cfg.BoardID = value
 		case strings.EqualFold(key, keyLeague):
-			if n, err := strconv.Atoi(value); err == nil {
+			// Out of range is left unset (0, "never set") rather than failing the
+			// whole import, the way the roster parser drops one bad node line
+			// instead of the file. game.MaxLeagueNumber was declared for this
+			// bound and nothing had applied it, so any number at all was taken —
+			// and the league number reaches packet filenames.
+			if n, err := strconv.Atoi(value); err == nil && n >= 1 && n <= game.MaxLeagueNumber {
 				cfg.LeagueNumber = n
 			}
 		case strings.EqualFold(key, keyInbound):

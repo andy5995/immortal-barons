@@ -227,3 +227,39 @@ func TestLotterySwitchSpellings(t *testing.T) {
 		}
 	}
 }
+
+// The league number reaches packet filenames and decides which packets in a
+// shared inbound directory belong to this game, so a number outside BRE's
+// documented 1-999 is refused. It leaves the field unset rather than failing
+// the whole file, matching how the roster parser drops one bad node line.
+func TestLeagueNumberOutsideTheRangeIsRefused(t *testing.T) {
+	for _, tc := range []struct {
+		name  string
+		value string
+		want  int
+	}{
+		{"in range", "42", 42},
+		{"lowest allowed", "1", 1},
+		{"highest allowed", "999", 999},
+		{"above the ceiling", "1000", 0},
+		{"zero", "0", 0},
+		{"negative", "-3", 0},
+		{"not a number", "seven", 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			dir := t.TempDir()
+			body := "BoardID Test Board\nLeagueNumber " + tc.value + "\n"
+			if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(body), 0o644); err != nil {
+				t.Fatalf("WriteFile: %v", err)
+			}
+			cfg := game.DefaultConfig()
+			cfg.LeagueNumber = 0
+			if err := LoadBoardConfig(dir, &cfg); err != nil {
+				t.Fatalf("LoadBoardConfig: %v", err)
+			}
+			if cfg.LeagueNumber != tc.want {
+				t.Errorf("LeagueNumber = %d, want %d", cfg.LeagueNumber, tc.want)
+			}
+		})
+	}
+}
