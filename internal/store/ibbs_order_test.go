@@ -183,6 +183,100 @@ func TestReadInboundGroupsSameBoardTogetherRegardlessOfFromNode(t *testing.T) {
 	}
 }
 
+// TestReadInboundGroupsCoordinatorPacketsTogetherRegardlessOfFromNode is
+// review issue 1 recurring one level up: the Coordinator carve-out used to
+// pull a packet out by IsFromCoordinator (FromNode-preferring) BEFORE
+// originKey (FromBoard-preferring) ever grouped it, so the Coordinator's own
+// backlogged FromNode: 0 packet and its current FromNode: 1 packet could
+// land on two different sides of that carve-out -- the carve-out always
+// applies first, so the later side's lower Seq reads as a false replay, same
+// consequence as the originKey bug this mirrors. The Coordinator's group is
+// now identified by matching its KEY, so both packets are already unified
+// before the carve-out ever looks at them.
+func TestReadInboundGroupsCoordinatorPacketsTogetherRegardlessOfFromNode(t *testing.T) {
+	for trial := 0; trial < 40; trial++ {
+		inbound := t.TempDir()
+		writePacket(t, inbound, "1-old", game.Packet{FromBoard: "Coordinator BBS", FromNode: 0, Seq: 1})
+		writePacket(t, inbound, "2-new", game.Packet{FromBoard: "Coordinator BBS", FromNode: 1, Seq: 2})
+
+		cfg := game.DefaultConfig()
+		cfg.BoardID = "Receiver BBS"
+		w := game.NewWorldSeed(cfg, 1)
+		w.LeagueNodes = []game.LeagueNode{{Number: 1, Name: "Coordinator BBS"}, {Number: 9, Name: "Receiver BBS"}}
+
+		result, err := ReadInbound(w, inbound, false)
+		if err != nil {
+			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
+		}
+		if result.Applied != 2 {
+			t.Fatalf("trial %d: want both of the Coordinator's own packets applied, got applied=%d alreadySeen=%d: %+v",
+				trial, result.Applied, result.AlreadySeen, result)
+		}
+	}
+}
+
+// TestReadInboundForgedCoordinatorClaimDoesNotJumpTheQueue is review issue 2:
+// once this board's roster names a real Coordinator, a packet from some
+// OTHER, ordinary board that merely sets FromNode: 1 must not buy that
+// board's group a guaranteed first slot -- it is identified by its group KEY
+// (its real FromBoard), not by any field a packet can just claim. Run many
+// trials: under the bug this board's group was ALWAYS first (deterministic,
+// not just likely); under the fix it is only sometimes first, like any other
+// non-Coordinator origin in the shuffle.
+func TestReadInboundForgedCoordinatorClaimDoesNotJumpTheQueue(t *testing.T) {
+	appliedFirst := 0
+	const trials = 60
+	for trial := 0; trial < trials; trial++ {
+		inbound := t.TempDir()
+		// A real Coordinator packet exists in the batch too, so this is a
+		// genuine steady-state league, not an unroster-ed bootstrap.
+		writePacket(t, inbound, "0-coord", game.Packet{FromBoard: "Coordinator BBS", FromNode: 1, Seq: 1})
+		// The forger: a real, roster-listed board that is NOT the
+		// Coordinator, lying about its node number. Carries a News line so
+		// application order is directly observable in w.NewsToday afterward,
+		// regardless of which internal bucket either packet lands in.
+		writePacket(t, inbound, "1-forger", game.Packet{FromBoard: "Forger BBS", FromNode: 1, Seq: 1, News: []string{"FORGER"}})
+		writePacket(t, inbound, "2-honest", game.Packet{FromBoard: "Honest BBS", FromNode: 3, Seq: 1, News: []string{"HONEST"}})
+
+		cfg := game.DefaultConfig()
+		cfg.BoardID = "Receiver BBS"
+		w := game.NewWorldSeed(cfg, 1)
+		w.LeagueNodes = []game.LeagueNode{
+			{Number: 1, Name: "Coordinator BBS"},
+			{Number: 2, Name: "Forger BBS"},
+			{Number: 3, Name: "Honest BBS"},
+			{Number: 9, Name: "Receiver BBS"},
+		}
+
+		if _, err := ReadInbound(w, inbound, false); err != nil {
+			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
+		}
+		forgerAt, honestAt := -1, -1
+		for i, line := range w.NewsToday {
+			switch line {
+			case "FORGER":
+				forgerAt = i
+			case "HONEST":
+				honestAt = i
+			}
+		}
+		if forgerAt == -1 || honestAt == -1 {
+			t.Fatalf("trial %d: expected both News lines applied, got %v", trial, w.NewsToday)
+		}
+		if forgerAt < honestAt {
+			appliedFirst++
+		}
+	}
+	t.Logf("Forger BBS applied first in %d/%d trials", appliedFirst, trials)
+	if appliedFirst == trials {
+		t.Errorf("Forger BBS's forged FromNode: 1 claim won first place in every trial (%d/%d) -- it should only be sometimes, like any other origin",
+			appliedFirst, trials)
+	}
+	if appliedFirst == 0 {
+		t.Errorf("Forger BBS never applied first in %d trials -- either broken or statistically implausible, check the test", trials)
+	}
+}
+
 // TestQuarantinePacketAvoidsNameCollision is a fix from review:
 // quarantinePacket originally moved straight to dataDir/bad/<basename>,
 // which os.Rename silently overwrites on Unix (destroying the first

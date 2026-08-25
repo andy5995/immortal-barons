@@ -347,14 +347,20 @@ func shuffleGroupOrder(keys []string, src io.Reader) {
 // directory.
 //
 // Application order is NOT filename order (#178): every packet in dir is
-// parsed and staged first, the Coordinator's own packets (there is normally
-// at most one) are applied ahead of everything else — the rest of this run's
-// checks read the roster those packets can update — and the remainder is
-// grouped by origin and applied group by group in an order reshuffled every
-// run. Each origin's own packets stay in their own Seq order within their
-// group: only the order BETWEEN origins was ever the problem. Base-36 encodes
-// the origin node near the front of every filename, so alphabetical order
-// gave the same origin first place in every batch for as long as the roster
+// parsed and staged first, grouped by origin the same way everywhere (see
+// originKey) so one origin's packets are never split across two groups no
+// matter which of its fields happen to be set. The Coordinator's own group —
+// identified by comparing a group's key against the roster's actual node #1,
+// never by asking an individual packet whether it CLAIMS to be the
+// Coordinator — goes first, because the rest of this run's checks read the
+// roster its packets can update; deciding this by group key rather than by a
+// per-packet claim also means setting FromNode: 1 buys nothing for an origin
+// whose FromBoard is not actually the Coordinator's registered name (PR #215
+// review). Every other group is applied in an order reshuffled every run.
+// Each origin's own packets stay in their own Seq order within their group:
+// only the order BETWEEN origins was ever the problem. Base-36 encodes the
+// origin node near the front of every filename, so alphabetical order gave
+// the same origin first place in every batch for as long as the roster
 // stood — a fixed, permanent advantage on anything two origins contest in the
 // same run, such as a trade bid or a land claim.
 func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error) {
@@ -367,7 +373,6 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 		return result, err
 	}
 
-	var coordPackets []stagedPacket
 	groups := map[string][]stagedPacket{}
 	var groupOrder []string
 
@@ -396,10 +401,6 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			}
 			continue
 		}
-		if w.IsFromCoordinator(p) {
-			coordPackets = append(coordPackets, stagedPacket{path, p})
-			continue
-		}
 		key := originKey(p)
 		if _, seen := groups[key]; !seen {
 			groupOrder = append(groupOrder, key)
@@ -410,26 +411,83 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 	bySeq := func(s []stagedPacket) func(a, b int) bool {
 		return func(a, b int) bool { return s[a].packet.Seq < s[b].packet.Seq }
 	}
-	sort.SliceStable(coordPackets, bySeq(coordPackets))
 	for _, g := range groups {
 		sort.SliceStable(g, bySeq(g))
 	}
 
-	for _, sp := range coordPackets {
-		if err := applyStagedPacket(w, &result, sp.path, sp.packet, verbose); err != nil {
-			return result, err
+	// A board never sends a packet with FromBoard blank — every export path
+	// sets it explicitly at construction, the Coordinator's included — so the
+	// Coordinator's real group key is always "b"+CoordinatorBoardID once this
+	// board's roster names one (and this board isn't the Coordinator itself
+	// hearing its own echo). Matching on the group key this way, instead of
+	// asking whether some packet CLAIMS FromNode 1, means a forged FromNode: 1
+	// on a packet naming some OTHER board buys that board's group nothing:
+	// its group key is still that other board's name (PR #215 review, #2).
+	var coordKey string
+	if !w.IsLeagueCoordinator() {
+		if cb := w.CoordinatorBoardID(); cb != "" {
+			coordKey = "b" + cb
+		} else {
+			// This board's roster names no Coordinator at all yet, so there is
+			// nothing to check a FromBoard claim against — the same situation
+			// that made fromCoordinator prefer FromNode in the first place
+			// (#105). Falling back to a self-declared FromNode: 1 here, same
+			// trust level as before the fix, means a board's very first
+			// roster packet — the one that ESTABLISHES its roster — is not
+			// stuck unprioritized for lack of the very roster it is about to
+			// provide. Once a roster names a Coordinator this fallback never
+			// fires again, closing the gap above for the league's steady
+			// state, which is where it matters.
+			for _, key := range groupOrder {
+				for _, sp := range groups[key] {
+					if sp.packet.FromNode == 1 {
+						coordKey = key
+						break
+					}
+				}
+				if coordKey != "" {
+					break
+				}
+			}
+		}
+	}
+	var rest []string
+	haveCoordGroup := false
+	for _, key := range groupOrder {
+		if coordKey != "" && key == coordKey {
+			haveCoordGroup = true
+			continue
+		}
+		rest = append(rest, key)
+	}
+	if haveCoordGroup {
+		for _, sp := range groups[coordKey] {
+			if err := applyStagedPacket(w, &result, sp.path, sp.packet, verbose); err != nil {
+				return result, err
+			}
 		}
 	}
 
-	shuffleGroupOrder(groupOrder, rand.Reader)
+	shuffleGroupOrder(rest, rand.Reader)
 	// Only worth a line in the log when there was an actual choice to make: one
 	// origin's batch applies in the same order regardless, and logging that
 	// every run buries the runs where the shuffle did something.
-	if len(groupOrder) > 1 {
+	if len(rest) > 1 {
+		names := make([]string, len(rest))
+		for i, k := range rest {
+			switch {
+			case k == "":
+				names[i] = "(unidentified)"
+			case k[0] == 'n':
+				names[i] = "node " + k[1:]
+			default:
+				names[i] = k[1:]
+			}
+		}
 		w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(
-			"Inbound batch: %d origins applied in this order: %v", len(groupOrder), groupOrder))
+			"Inbound batch: %d origins applied in this order: %s", len(rest), strings.Join(names, ", ")))
 	}
-	for _, key := range groupOrder {
+	for _, key := range rest {
 		for _, sp := range groups[key] {
 			if err := applyStagedPacket(w, &result, sp.path, sp.packet, verbose); err != nil {
 				return result, err
