@@ -267,6 +267,7 @@ func TestSDIAllowanceIsPerTurnNotPerVisit(t *testing.T) {
 	w, a, _ := newAttackerAndTarget(t)
 	a.Gold = 100_000_000
 	a.TurnsLeft = 5
+	a.Prefs.DepositEndTurn = false // the second turn's funding is paid from gold in hand
 
 	for visit := range 4 {
 		if _, err := w.FundSDI(a, SDIMinSpend); err != nil {

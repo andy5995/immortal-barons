@@ -2710,7 +2710,11 @@ Investments / Loans**, and **View Bank Rates**.
   Bank Rates), credited "at the end of each turn" — so per turn it is the daily
   rate spread across `TurnsPerDay` turns: `Bank × InterestRate / (1000 ×
   TurnsPerDay)`. (This replaced IB's old flat ~1%/turn, which compounded to a much
-  higher effective daily rate.)
+  higher effective daily rate.) With the **Deposit gold at End of Turn**
+  preference on, the deposit is banked *before* that turn's interest is credited,
+  so the turn's takings earn on the turn that made them. It still happens after
+  the turn's pirate raid, so banking early is no way to keep gold out of the
+  raiders' reach.
 - **Investments** are term deposits (like bonds): you choose an **amount**
   and a **number of days** — **2 to 10 days** (`MinInvestDays`=2, `MaxInvestDays`=10,
   live-BRE-verified: the bank prints "There is now a 2 day minimum on

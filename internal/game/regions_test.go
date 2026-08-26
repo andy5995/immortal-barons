@@ -140,12 +140,14 @@ func TestProcessEconomyReflectsRegionMix(t *testing.T) {
 	coastal.Regions = RegionMix{Coastal: 100}
 	coastal.syncLand()
 	coastal.Gold, coastal.Food = 0, 0
+	coastal.Prefs.DepositEndTurn = false // gold in hand is what this compares
 
 	wAg := NewWorldSeed(cfg, 1)
 	ag := wAg.AddHuman("a", "Ag Realm")
 	ag.Regions = RegionMix{Agricultural: 100}
 	ag.syncLand()
 	ag.Gold, ag.Food = 0, 0
+	ag.Prefs.DepositEndTurn = false
 
 	wCoastal.CollectIncome(coastal)  // gold income (turn start)
 	wCoastal.GrowFood(coastal)       // food yield (turn start)

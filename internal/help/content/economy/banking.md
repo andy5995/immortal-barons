@@ -17,6 +17,12 @@ taken by pirates or raids.
 Deposits and withdrawals have no size limit. One investment locks away at most
 two billion gold, though you may open as many as you like.
 
+Interest is paid at the end of every turn, on whatever is in the bank at that
+moment. If you have turned on Deposit gold at End of Turn, in Preferences, your
+gold is put in the bank first, so the gold you earned this turn earns interest
+this turn. It goes in after the pirates have had their chance at it, so it is no
+protection against a raid.
+
 The start of your next turn tells you what the bank paid: the interest, and what
 any investment that matured today paid back.
 

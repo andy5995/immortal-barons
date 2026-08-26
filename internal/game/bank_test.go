@@ -420,6 +420,51 @@ func TestCreditThatFitsIsSilent(t *testing.T) {
 	}
 }
 
+// The end-of-turn deposit is banked BEFORE the interest is credited, so gold
+// earned this turn earns on this turn (#216). It was banked in the menu flow
+// after PlayTurn until 2026-08-25, which meant every deposit missed the turn
+// that made it.
+func TestEndOfTurnDepositEarnsInterestSameTurn(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	e.Food = 1_000_000 // starvation is not the subject
+	e.Bank, e.Gold = 0, 1_000_000
+
+	w.processEconomy(e)
+
+	interest := int64(1_000_000) * int64(w.Config.InterestRate) / (1000 * int64(w.Config.TurnsPerDay))
+	if interest == 0 {
+		t.Fatal("the default config pays no interest; this test proves nothing")
+	}
+	if e.Gold != 0 {
+		t.Errorf("Gold = %d, want 0 — the whole hand is deposited at end of turn", e.Gold)
+	}
+	if want := 1_000_000 + interest; e.Bank != want {
+		t.Errorf("Bank = %d, want %d — the deposit must earn on the turn it was made", e.Bank, want)
+	}
+	if e.LastInterest != interest {
+		t.Errorf("LastInterest = %d, want %d — the start of the next turn reports this", e.LastInterest, interest)
+	}
+}
+
+// With the preference off the gold stays in hand and earns nothing.
+func TestNoEndOfTurnDepositLeavesGoldInHand(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	e := w.AddHuman("tester", "Testland")
+	e.Food = 1_000_000
+	e.Bank, e.Gold = 0, 1_000_000
+	e.Prefs.DepositEndTurn = false
+
+	w.processEconomy(e)
+
+	if e.Gold != 1_000_000 {
+		t.Errorf("Gold = %d, want the 1,000,000 left in hand", e.Gold)
+	}
+	if e.Bank != 0 || e.LastInterest != 0 {
+		t.Errorf("Bank/LastInterest = %d/%d, want 0/0 — an empty bank earns nothing", e.Bank, e.LastInterest)
+	}
+}
+
 // Daily maintenance records what the day's matured investments paid, because
 // every turn of that day reports the same figure (cap/eots-ibbs-01.cap).
 func TestMaintenanceRecordsTheDaysInvestmentReturns(t *testing.T) {

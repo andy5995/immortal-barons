@@ -325,6 +325,16 @@ func (w *World) processEconomy(e *Empire) {
 	if tpd < 1 {
 		tpd = 1
 	}
+	// "Deposit gold at End of Turn" is banked HERE, ahead of the interest, so the
+	// turn's takings earn on the turn they were made rather than sitting idle
+	// until the next one. It ran in the menu flow after PlayTurn until 2026-08-25,
+	// which meant the deposit always missed that turn's interest. It stays behind
+	// the pirate raid at the top of PlayTurn — banking early must not become a way
+	// to keep gold out of the raiders' reach. Only a caller's realm has menu
+	// preferences; the AI manages its own treasury.
+	if e.Owner != "" && e.Prefs.DepositEndTurn && e.Gold > 0 {
+		_ = w.Deposit(e, e.Gold)
+	}
 	interest := e.Bank * int64(w.Config.InterestRate) / (1000 * tpd)
 	e.Bank += interest
 	// Reported at the start of the next turn (#216), so it has to survive the

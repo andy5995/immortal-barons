@@ -108,7 +108,8 @@ func TestInterestNoInt32Overflow(t *testing.T) {
 	w.Config.InterestRate = 5000 // add ~50% of the balance this turn
 	e := w.AddHuman("h", "Realm")
 	e.Bank = 1_599_999_999
-	e.Food = 1_000_000 // avoid starvation noise; irrelevant to the bank math
+	e.Food = 1_000_000             // avoid starvation noise; irrelevant to the bank math
+	e.Prefs.DepositEndTurn = false // the bank math is the subject; keep the turn's gold out of it
 	w.processEconomy(e)
 	// Golden figure for that balance at rate 5000 over the default 10 turns/day:
 	// 1,599,999,999 + 1,599,999,999×5000/(1000×10).
