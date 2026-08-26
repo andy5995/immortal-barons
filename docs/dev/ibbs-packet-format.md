@@ -149,8 +149,54 @@ it is also what makes an 8.3 transport alias possible at all (#178).
 FAT directory-entry order — the slot each file happened to be written into, with
 freed slots reused after deletions. Not alphabetical, not by node, not arrival
 order. So IB's current sorted order is not fidelity: `os.ReadDir` sorts where DOS
-did not, and whatever order #178 settles on diverges from nothing the original
-decided. Note that the fixed-width sequence above is justified by scan order; if #178 removes that dependence, the fixed width keeps its other job (a short, collision-free name) and loses that one.
+did not, and the order #178 settles on (below) diverges from nothing the
+original decided. The fixed-width sequence above is no longer justified by
+scan order — #178 removed that dependence — but keeps its other job: a
+short, collision-free name.
+
+### Applying an inbound batch (#178)
+
+`ReadInbound` stages every packet file in the directory before applying any
+of them, rather than applying each one as `os.ReadDir` returns it. Base-36
+encodes a packet's origin node near the front of its filename, so
+alphabetical order gave the same origin first place in every batch for as
+long as the roster stood — a fixed, permanent advantage on anything two
+origins contest in the same run, such as a trade bid or a land claim.
+
+Staged packets are grouped by `originKey` (`FromBoard` first, `FromNode`
+as a fallback for a packet old enough to carry no board name at all — it
+has to key the same way replay detection does, or one origin's own
+packets can be split across two groups and reordered against each other).
+Each origin's own packets stay in their existing `Seq` order within their
+group: only the order *between* origins was ever the problem.
+
+The Coordinator's group, when its packets carry a roster update or a
+bulletin broadcast the rest of the run's checks need to read first, is
+applied before anything else. It is identified by comparing a group's key
+against the roster's actual Coordinator board — never by asking an
+individual packet whether it *claims* to be from the Coordinator — so a
+forged `FromNode: 1` buys an origin nothing. (A board with no roster
+loaded yet falls back to trusting a self-declared `FromNode: 1`, the same
+trust level `fromCoordinator` already uses to bootstrap — this narrows to
+a one-time window before any roster exists and closes for good once one
+does.) Ordinary gameplay packets riding in the same batch as a
+Coordinator roster update do not inherit that priority — only a group
+that actually carries league-wide state does; everyone else's group,
+Coordinator's board included when it has nothing the run needs first,
+takes its chances in the shuffle.
+
+Every other group is applied in an order reshuffled every run, read from
+`crypto/rand` and nothing derived from packet content — so no origin can
+grind for a favorable position by crafting what it sends. The order
+actually applied is written to the sysop's planetary log (not the
+in-session report an interactive door caller sees) whenever a batch held
+an actual choice between more than one origin, for auditability.
+
+A packet that fails to parse as JSON is moved aside into `bad/`
+(`BadDir`) instead of aborting the run — see "Quarantined packets" in
+`docs/inter-bbs.md` for the sysop-facing behavior (the grace period for
+an in-flight transfer, the cap on same-named copies, and why nothing
+empties the directory automatically).
 
 ### Interplanetary trading (#47): the compatibility rule
 

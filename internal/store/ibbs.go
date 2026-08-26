@@ -102,7 +102,17 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	run.Notices, w.SysopNotices = w.SysopNotices, nil
 	// Also to disk: the run report goes to stdout, which a scheduled run throws
 	// away, and a scheduler is how the setup guide says to drive this step.
-	AppendPlanetaryLog(w.Config.DataDir, run.Notices, time.Now())
+	//
+	// inResult.OrderNotice is appended to the LOG here but deliberately
+	// left out of run.Notices: runFull's interactive path prints
+	// run.Notices to the same stdout an active door session shares with
+	// its caller, and the applied-order line is meant for the sysop's
+	// planetary log only, not an ordinary player (#215 review, finding 7).
+	logNotices := run.Notices
+	if inResult.OrderNotice != "" {
+		logNotices = append(append([]string(nil), run.Notices...), inResult.OrderNotice)
+	}
+	AppendPlanetaryLog(w.Config.DataDir, logNotices, time.Now())
 	sent, err := WriteOutbox(w, outboundDir, verbose)
 	run.Sent = sent
 	return run, err
@@ -285,6 +295,15 @@ type InboundResult struct {
 	// Quarantined counts packets that could not even be parsed as JSON and
 	// were set aside instead of stopping the run. See quarantinePacket.
 	Quarantined int
+	// OrderNotice, when non-empty, names the order groups were actually
+	// applied in for a batch contested by more than one origin — the line
+	// a league dispute would be settled from. Deliberately separate from
+	// SysopNotices: SysopNotices flows into PlanetaryRun.Notices, which
+	// reportPlanetary prints to the same stdout an interactive door
+	// session shares with the caller, and this line is meant for the
+	// sysop's planetary log only (#215 review, finding 7). See
+	// RunPlanetary for where it reaches AppendPlanetaryLog instead.
+	OrderNotice string
 }
 
 // stagedPacket is an inbound file that parsed cleanly, waiting to be applied
@@ -335,6 +354,34 @@ func shuffleGroupOrder(keys []string, src io.Reader) {
 		shuffled[i], shuffled[int(j.Int64())] = shuffled[int(j.Int64())], shuffled[i]
 	}
 	copy(keys, shuffled)
+}
+
+// inboundShuffleSrc is the randomness source ReadInbound shuffles group
+// order with. A package variable rather than rand.Reader hardcoded at the
+// call site, so a test can substitute a source that produces a specific
+// sequence and pin the between-origin order of a whole batch end to end —
+// shuffleGroupOrder's own src parameter already makes the shuffle itself
+// testable in isolation, but nothing previously let a test (or a sysop
+// investigating a disputed run) reproduce what ReadInbound actually did
+// with it (#215 review, finding 4).
+var inboundShuffleSrc io.Reader = rand.Reader
+
+// carriesLeagueUpdate reports whether any packet in a group carries
+// league-wide state the rest of a run's checks read: a roster update or a
+// bulletin broadcast. Gates the Coordinator's carve-out (#215 review,
+// finding 2) — without it, a group earns first-mover priority purely by
+// being the Coordinator's, so a board's ordinary gameplay packets (a
+// player's trade bid, land claim, or strike) riding in the same batch as
+// its roster broadcast inherit that priority on every run, handing the
+// Coordinator's board the exact permanent edge this PR removes from
+// everyone else.
+func carriesLeagueUpdate(group []stagedPacket) bool {
+	for _, sp := range group {
+		if len(sp.packet.LeagueNodes) > 0 || sp.packet.LeagueConfig != nil || sp.packet.Bulletins != nil {
+			return true
+		}
+	}
+	return false
 }
 
 // ReadInbound reads every packet file in dir addressed to this board (or
@@ -390,12 +437,29 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			// Corrupt JSON, a truncated transfer, or a foreign file dropped in
 			// the wrong directory must not block every other packet behind it
 			// (#178) — set it aside for a sysop to look at and move on.
+			//
+			// A file young enough to plausibly still be mid-write is left
+			// alone instead: quarantining it would permanently lose a packet
+			// that would apply cleanly next run (#215 review, finding 1).
+			if info, serr := e.Info(); serr == nil && time.Since(info.ModTime()) < quarantineGrace {
+				continue
+			}
+			// Quarantine BEFORE recording anything happened: if the move
+			// itself fails (read-only data dir, full disk), the file is
+			// still sitting in inbound and has to be left there to retry
+			// next run, not reported as "set aside" when it never moved
+			// (#215 review, finding 6).
+			if qerr := quarantinePacket(w.Config.DataDir, path); qerr != nil {
+				w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(
+					"Packet %s could not be read and could not be set aside either: %v", e.Name(), qerr))
+				if verbose {
+					fmt.Printf("  Could not quarantine unreadable packet %s: %v\n", e.Name(), qerr)
+				}
+				continue
+			}
 			result.Quarantined++
 			w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(
 				"Packet %s could not be read and has been set aside in %s: %v", e.Name(), BadDir, err))
-			if qerr := quarantinePacket(w.Config.DataDir, path); qerr != nil {
-				return result, qerr
-			}
 			if verbose {
 				fmt.Printf("  Quarantined packet %s (unreadable: %v)\n", e.Name(), err)
 			}
@@ -451,6 +515,14 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			}
 		}
 	}
+	// The carve-out is only earned by a group that actually carries
+	// something the rest of this run's checks have to read first. Without
+	// this, EVERY packet in the Coordinator's group — not just the roster
+	// update — gets first-mover priority on every run purely by being that
+	// board's (#215 review, finding 2).
+	if coordKey != "" && !carriesLeagueUpdate(groups[coordKey]) {
+		coordKey = ""
+	}
 	var rest []string
 	haveCoordGroup := false
 	for _, key := range groupOrder {
@@ -468,13 +540,21 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 		}
 	}
 
-	shuffleGroupOrder(rest, rand.Reader)
-	// Only worth a line in the log when there was an actual choice to make: one
-	// origin's batch applies in the same order regardless, and logging that
-	// every run buries the runs where the shuffle did something.
-	if len(rest) > 1 {
-		names := make([]string, len(rest))
-		for i, k := range rest {
+	shuffleGroupOrder(rest, inboundShuffleSrc)
+	// The order actually applied, the Coordinator's group included: a
+	// league dispute is settled from this line, so it has to name every
+	// group that ran and the order they ran in, not just the shuffled tail
+	// (#215 review, finding 3). Only worth a line at all when there was an
+	// actual choice to make — one origin's batch applies in the same order
+	// regardless, and logging that every run buries the runs where the
+	// order mattered.
+	order := rest
+	if haveCoordGroup {
+		order = append([]string{coordKey}, rest...)
+	}
+	if len(order) > 1 {
+		names := make([]string, len(order))
+		for i, k := range order {
 			switch {
 			case k == "":
 				names[i] = "(unidentified)"
@@ -484,8 +564,8 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 				names[i] = k[1:]
 			}
 		}
-		w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(
-			"Inbound batch: %d origins applied in this order: %s", len(rest), strings.Join(names, ", ")))
+		result.OrderNotice = fmt.Sprintf(
+			"Inbound batch: %d origins applied in this order: %s", len(order), strings.Join(names, ", "))
 	}
 	for _, key := range rest {
 		for _, sp := range groups[key] {

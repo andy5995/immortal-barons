@@ -515,6 +515,12 @@ These are the faults it records:
   the three, and the wording names which one.
 - **Another board refused ours**, quoting that board's own reason.
 - **Packets from a board are being held.** See below.
+- **A packet could not be read and was quarantined.** See "Quarantined
+  packets" below.
+- **The order a contested batch applied in**, whenever more than one board's
+  packets arrived in the same run — this is the line to check first if two
+  boards disagree about which of them a trade bid or land claim actually
+  reached first.
 
 ### Held packets
 
@@ -526,6 +532,28 @@ run the same release.
 Every planetary run looks in that folder again and applies whatever it can now
 read, so a board that upgrades catches up on its backlog with nobody doing
 anything. Leave the files alone.
+
+### Quarantined packets
+
+A file that cannot even be parsed — corrupt JSON, a truncated transfer, or a
+foreign file dropped in the wrong directory — is moved to the `bad` folder
+in your data directory instead of blocking the rest of the batch. Unlike
+`held`, nothing here is expected to become readable later on its own:
+planetary runs never look in `bad` again, and a repaired copy has to be
+dropped back into your inbound directory by hand.
+
+A file young enough that it might still be mid-transfer — a mailer that
+writes straight to the final name rather than a temp-then-rename dance — is
+left alone for five minutes before it is ever quarantined, so a run that
+happens to land mid-write does not permanently lose a packet that would
+have applied cleanly on the next one.
+
+A second file quarantined under the same name (a mailer retrying a bad
+transfer, say) is kept as its own numbered copy rather than overwriting the
+first. If a neighbour's transport keeps redelivering one broken file
+without limit, `bad` stops accepting new copies of it past roughly a
+thousand and the planetary run's log says so — clearing the folder of
+copies you have already looked at is a sysop task; nothing does it for you.
 
 ### Nothing in the log, and still nothing arriving
 

@@ -5,14 +5,37 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 )
 
 // BadDir is where an inbound packet file waits when it could not be parsed at
 // all — corrupt JSON, a truncated transfer, or a foreign file dropped in the
 // wrong directory. Unlike HeldDir, nothing here is expected to become
 // readable later on its own: it stays for a sysop to look at, and
-// releaseHeld never touches it.
+// releaseHeld never touches it. Nothing empties it automatically — see
+// docs/inter-bbs.md's "Quarantined packets" section.
 const BadDir = "bad"
+
+// quarantineGrace is how long a file that fails to parse is left alone
+// before ReadInbound ever quarantines it. A mailer that writes straight to
+// the final name instead of a temp-then-rename dance — scp, plain FTP, and
+// several FTN mailers all do this — leaves a planetary run that lands
+// mid-transfer reading truncated JSON. Quarantining that permanently loses
+// a packet that would have applied cleanly on the very next run, which is a
+// worse trade than the blocked batch quarantining exists to avoid: a file
+// young enough to plausibly still be arriving is left in inbound instead,
+// to be re-read once the write finishes (#215 review, finding 1).
+const quarantineGrace = 5 * time.Minute
+
+// maxQuarantineCopies bounds how many same-named copies uniqueName will
+// step around before giving up. Without a cap, a neighbour whose transport
+// keeps redelivering one broken file under the same name accumulates
+// pkt.brp, pkt.2.brp, pkt.3.brp without limit, and every new arrival
+// re-stats every copy already there — the cost of quarantining one more
+// file grows with how many already have been. Past this many, the sender
+// is malfunctioning badly enough that failing loudly is more useful than
+// silently taking on unbounded disk and CPU (#215 review, finding 5).
+const maxQuarantineCopies = 1000
 
 // quarantinePacket moves an unparseable inbound file aside so the rest of the
 // batch is not blocked by it (#178). A failure to move it is reported to the
@@ -41,7 +64,9 @@ func quarantinePacket(dataDir, path string) error {
 
 // uniqueName returns base if nothing is there yet, otherwise base with a
 // counter spliced in before the extension, incremented until it names
-// nothing that already exists.
+// nothing that already exists — capped at maxQuarantineCopies so a
+// malfunctioning sender cannot make one file's quarantine attempt scan an
+// unbounded and ever-growing list of its own past copies.
 func uniqueName(base string) (string, error) {
 	if _, err := os.Stat(base); os.IsNotExist(err) {
 		return base, nil
@@ -50,7 +75,7 @@ func uniqueName(base string) (string, error) {
 	}
 	ext := filepath.Ext(base)
 	stem := strings.TrimSuffix(base, ext)
-	for i := 2; ; i++ {
+	for i := 2; i <= maxQuarantineCopies; i++ {
 		candidate := fmt.Sprintf("%s.%d%s", stem, i, ext)
 		if _, err := os.Stat(candidate); os.IsNotExist(err) {
 			return candidate, nil
@@ -58,4 +83,6 @@ func uniqueName(base string) (string, error) {
 			return "", err
 		}
 	}
+	return "", fmt.Errorf("more than %d quarantined copies of %s already exist",
+		maxQuarantineCopies, filepath.Base(base))
 }

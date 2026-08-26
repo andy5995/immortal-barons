@@ -1,4 +1,9 @@
 (in-progress:)
+  * An inbound batch applies by origin, shuffled fairly, not by filename order
+  * An unreadable inbound packet is set aside in "bad" instead of blocking
+    the batch, with a grace period for one still being transferred
+  * The order a contested inbound batch applied in is written to the
+    planetary log
   * The turn's income opens under BRE's rule instead of a titled bar
   * Source reorganized by subject, with no change to how the game plays
   * A League Number outside 1-999 in bbs.cfg is refused instead of accepted
