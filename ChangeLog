@@ -1,6 +1,5 @@
 (in-progress:)
   * An interplanetary message picks which barons on the chosen planet read it
-  * A screen that only reads no longer rewrites the world file or waits to save it
   * reverted: the Coordinator item reads Dismantle Gooie and the setting Gooie Kablooies, as the original words them
   * The interplanetary Send Trade Deal ships goods to a realm on another planet
   * A trade deal needs carriers sized to its cargo, not one per deal
