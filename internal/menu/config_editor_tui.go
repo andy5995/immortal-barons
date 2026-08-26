@@ -235,7 +235,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addBool(mil, "Bombing Ops", helpBombingOps, c.BombingOps, func(c *game.Config, b bool) { c.BombingOps = b })
 	t.addBool(mil, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
 	if ibbs {
-		t.addBool(mil, "Gooie Kablooie", helpGooieKablooie, c.GooieKablooie, func(c *game.Config, b bool) { c.GooieKablooie = b })
+		t.addBool(mil, "Gooie Kablooies", helpGooieKablooie, c.GooieKablooie, func(c *game.Config, b bool) { c.GooieKablooie = b })
 		t.addBool(mil, "Local Attacks", helpLocalAttacks, c.LocalAttacks, func(c *game.Config, b bool) { c.LocalAttacks = b })
 		t.addBool(mil, "Local Attack Scoring", helpLocalAttackScoring, c.LocalAttackScoring, func(c *game.Config, b bool) { c.LocalAttackScoring = b })
 		t.addBool(mil, "Allow IP Allies to Trade at Market", helpIPTrading, c.IPTrading, func(c *game.Config, b bool) { c.IPTrading = b })

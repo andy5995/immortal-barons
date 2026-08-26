@@ -216,7 +216,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 		pair("Bombing ops per day", countOr(c.MaxBombingOps, "Unlimited"),
 			"Terrorism costs", tr(s, c.TerrorCosts.String()))
 		pair("Lost forces return", lostForcesStr(s, c),
-			"Gooie Kablooie", onOffStr(c.GooieKablooie))
+			"Gooie Kablooies", onOffStr(c.GooieKablooie))
 		pair("Allied market trading", onOffStr(c.IPTrading),
 			"Local attack scoring", onOffStr(c.LocalAttackScoring))
 		row("Local attacks", onOffStr(c.LocalAttacks))

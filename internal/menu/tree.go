@@ -230,16 +230,20 @@ func BuildMenus() *Menus {
 	// opening-menu entry is tinted to match.
 	// Order and
 	// hotkeys match BRE.OVR's full InterPlanetary Operations string table
-	// (#75); Gooie Kablooie Ops is IB's equivalent of BRE's Gooie Kablooie
-	// item, on its '9' as a later capture showed it. Send Trade Deal and Send Message reuse the same actions
-	// as the Trading and Messages menus; Special Operations opens the separate
+	// (#75); Gooie Kablooie Ops sits on its '9', as a later capture showed.
+	// Send Message reuses the Messages menu's action; Special Operations opens
+	// the separate
 	// interplanetary Special Operations menu (BRE's cross-planet covert set, not
 	// the local Covert menu). Indiv. Attack Force ('6') has no interplanetary
 	// individual-attack mechanic behind it yet — see indivAttackForce's doc.
+	//
+	// Send Trade Deal is the INTERPLANETARY deal, a separate mechanic from the
+	// Trading menu's (#195); it ran the local action, against a realm on the
+	// sender's own planet, until 2026-08-26.
 	interplanetary.Items = []Item{
 		{Key: '1', Label: "View IPScores", Do: interbbsScores},
 		{Key: '2', Label: "Terrorist Ops", Do: gotoMenu(terrorOps)},
-		{Key: '3', Label: "Send Trade Deal", Do: sendTradeDeal},
+		{Key: '3', Label: "Send Trade Deal", Do: sendIPTradeDeal},
 		{Key: '4', Label: "Create Group Attack", Do: createGroupAttack},
 		{Key: '5', Label: "Join Group Attack", Do: joinGroupAttack},
 		{Key: '6', Label: "Indiv. Attack Force", Do: indivAttackForce},
@@ -428,7 +432,7 @@ func BuildMenus() *Menus {
 	// displacing one. IB numbered its three built items 1-3 until 2026-08-18,
 	// which put every one of them on the original's key for its neighbour.
 	coord.Items = []Item{
-		{Key: '1', Label: "Dismantle Gooie Kablooie", Do: dismantleAnnihilator,
+		{Key: '1', Label: "Dismantle Gooie", Do: dismantleAnnihilator,
 			Hidden: noAnnihilator},
 		{Key: '2', Label: "Modify Diplomacy", Do: diplomacyModification},
 		{Key: '3', Label: "Global Recon Request", Do: globalReconRequest},

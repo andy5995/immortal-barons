@@ -3570,6 +3570,59 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   way the original fills it, by covert operations reporting the state they found
   their target in (`resolve_received_covert_operation` → `write_spy_report` →
   "Information added to Global Spy Data Bank").
+- **Send Trade Deal** — a ONE-WAY shipment of goods to a named realm on another
+  planet, BINARY-VERIFIED and built for #195. Its own routine in the original
+  (`send_trade_offer`, BRE.OVR 0x024212, sole caller the InterBBS menu), NOT the
+  local deal aimed further; IB ran the local action here, against a realm on the
+  sender's own planet, until 2026-08-26. What separates the two:
+
+  | | Local deal | Interplanetary deal |
+  | --- | --- | --- |
+  | Demand something back | yes | **no** |
+  | Recipient may refuse | yes | **no** — it lands |
+  | Cost | a rate per day, over a span | **a flat fee**, no span |
+  | Needs a pact | any pact at all | **none** |
+  | Protective Trade discount | cost/3 | **no** |
+  | Target | a realm here | a realm on ANOTHER planet, never this one |
+
+  **The fee** is the nine goods against fixed weights — troopers, jets, turrets,
+  tanks and carriers 1 each, bombers 3, agents 0.5, food 0.05, gold 0.01 —
+  summed, divided by 5, plus a 100,000 base, then scaled by the sysop's Trade
+  Deal Costs ladder and capped at two billion (`calculate_trade_offer_cost`,
+  0x0513e7). An empty basket costs nothing: the original tests the weighted sum
+  for zero before adding the base. IB holds the two fractional weights as exact
+  integers where the original holds Real48 approximations, so on an enormous
+  basket the two can part by a gold or two.
+
+  **Carriers are sized to the cargo**, and this now governs the LOCAL deal too,
+  where IB charged a flat one per deal: 1,000 troopers to a carrier, 100 jets,
+  1,000 turrets, 5,000 tanks, 100,000 gold, with food, bombers, agents and
+  carriers riding free. The capacities are summed and the TOTAL rounded up, so
+  half a carrier of troopers and half of jets is one carrier, not two. The
+  original adds 0.9999 and truncates rather than taking a true ceiling, which
+  comes out one low when the fraction lands inside the last ten-thousandth; IB
+  reproduces that exactly (`TradeDealCarriers`).
+
+  **On arrival** the goods are credited straight onto the named realm, each good
+  capped at two billion, and a private event is filed for each side. **No planet
+  news** — no `.dat` template carries a trade-deal category and the original's
+  arrival routine calls no news writer.
+
+  **DELIBERATE DIVERGENCE — protection.** The original destroys a deal aimed at a
+  realm under New Realm Protection: `resolve_received_trade_offer` (0x043df1)
+  checks and returns, so the goods and the fee are gone and neither side is told
+  anything. IB refuses that target at the picker instead, where the sender can
+  still act on it, and the target lists carry the `(P)` flag that makes it
+  visible (#214). Nothing is destroyed and no arrival guard is needed: protection
+  only counts DOWN and delivery is keyed by realm name, so a realm that was clear
+  when the deal left cannot be protected when it lands.
+
+  **On the wire:** `Packet.TradeDeals`, `json:",omitempty"`, so a packet carrying
+  no deal is byte-identical to what an older board produces and no `Protocol`
+  bump is needed (`SpeaksOurProtocol` is exact equality — bumping would make
+  every board on the previous release hold ALL traffic). A packet that DOES carry
+  one, sent to a board too old to know the field, fails origin verification there
+  and is refused; `Config.MinBoardVersion` is the league's gate for that.
 - **Special Operations** — the cross-planet bombing and missile set; see below.
 - **SDI** — puts gold into the program; the strength it buys is capped at
   `SDIMax` (100%, the original's own clamp). See "The SDI program" below.
@@ -4511,6 +4564,9 @@ to. These are recent enough to be worth naming here as well, since each replaces
 something the original does line for line and will look like a bug to anyone
 checking IB against a capture:
 
+- **An interplanetary trade deal is refused at the picker when its target is
+  under New Realm Protection**, where the original accepts it and destroys it on
+  arrival with nobody told. See "Send Trade Deal" above.
 - **Manufacturing is a list, not six sentences.** BRE ends each line with "were
   manufactured by Industrial Zones."; IB says that once as a heading and lists
   the units under it, one per line, with no line for a type that built none.

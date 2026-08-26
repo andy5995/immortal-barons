@@ -143,8 +143,32 @@ const (
 // model — BRE.OVR 0x0513e7 sums the nine goods against fixed weights, divides by
 // 5, and adds the base at 0x05154e.)
 const (
-	TradeDealCarriers   = 1       // carriers consumed to send one deal
 	TradeDealGoldPerDay = 100_000 // binary: the flat part of the per-day transit cost
+	// TradeDealGoldBase and TradeDealCostDivisor are the two halves of the
+	// original's cost formula: the nine goods are summed against the per-good
+	// ShipWeight figures in units.go, divided by five, and this base is added
+	// (BRE.OVR 0x0513e7, constants decoded at unit offsets 0x0746 and 0x0753).
+	// BINARY-VERIFIED. The base is the same 100,000 the per-day rate uses.
+	TradeDealGoldBase    = 100_000
+	TradeDealCostDivisor = 5
+	// carrierScale is the fixed-point unit the carrier requirement is summed in
+	// — hundred-thousandths of a carrier. Every per-carrier capacity below
+	// divides it exactly, which is what keeps the arithmetic in integers.
+	carrierScale = 100_000
+	// GoldPerCarrier is gold's own carrier capacity, kept here rather than on
+	// the Good row because gold is not one: it is the basket good held in money
+	// width and handled beside the loop. BINARY-VERIFIED (BRE.OVR
+	// ovr_050dfb_entry_0436, unit offset 0x0489).
+	GoldPerCarrier = 100_000
+	// GoldShipWeight is gold's weight in the cost formula, in shipWeightScale
+	// units — the original's 0.01 (unit offset 0x0682). Same reasoning as
+	// GoldPerCarrier for why it is not on the row.
+	GoldShipWeight = 1
+	// shipWeightScale is what a Good's ShipWeight is expressed in hundredths of.
+	// The original's weights include 0.05 and 0.01, which have no exact binary
+	// form, so IB holds them as exact integers and can differ from the original
+	// by a gold or two on an enormous basket.
+	shipWeightScale = 100
 	// The sysop's Trade Deal Costs ladder, applied by Level.TradeCostScaled.
 	// BINARY-VERIFIED (BRE.OVR 0x5158F): Low divides by six and High multiplies
 	// by three, which is its own spread — not the generic preset ladder and not

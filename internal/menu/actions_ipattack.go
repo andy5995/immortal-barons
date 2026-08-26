@@ -54,7 +54,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	var target string
 	if !all {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
-		if pick = pickRemoteBaronFrom(s, remoteBarons(rb.Scores, hostile)); pick == "" {
+		if pick = pickRemoteBaronFrom(s, remoteBarons(rb.Scores, hostile), protectedNoStrike); pick == "" {
 			return Stay
 		}
 		target = pick
@@ -263,6 +263,10 @@ func promptAttackKind(s session.Session, w *ctx) (kind game.AttackKind, chose bo
 	}
 }
 
+// protectedNoStrike is the refusal a war list gives for a realm the last scores
+// packet had under New Realm Protection. Takes the realm name.
+const protectedNoStrike = "%s is under New Realm Protection and cannot be attacked."
+
 // hostile says whether a target list is being drawn for something New Realm
 // Protection stops. Spying is not — a protected realm can still be looked at —
 // so an observing caller sees every realm.
@@ -303,7 +307,11 @@ func remoteBarons(scores []game.RemoteScore, hostile bool) []remoteBaron {
 // name existed without saying which, so a planet's roster and its target list
 // disagreed with nothing to explain the gap; they are listed with the same `(P)`
 // flag the local screens carry now (#214), and the refusal names the realm.
-func pickRemoteBaronFrom(s session.Session, rows []remoteBaron) string {
+// refusal is what the player is told when they pick a protected realm; it takes
+// the realm name. It is a parameter because the reason differs by what the list
+// is FOR — a strike is refused, and so is a trade deal (#195), but not with the
+// same sentence.
+func pickRemoteBaronFrom(s session.Session, rows []remoteBaron, refusal string) string {
 	labels := make([]string, len(rows))
 	names := make([]string, len(rows))
 	for i, r := range rows {
@@ -316,7 +324,7 @@ func pickRemoteBaronFrom(s session.Session, rows []remoteBaron) string {
 	}
 	for _, r := range rows {
 		if r.name == pick && r.protected {
-			ok(s, "%s is under New Realm Protection and cannot be attacked.", r.name)
+			ok(s, refusal, r.name)
 			return ""
 		}
 	}
@@ -350,7 +358,7 @@ func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 		return "", ""
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
-	baron = pickRemoteBaronFrom(s, scores[board])
+	baron = pickRemoteBaronFrom(s, scores[board], protectedNoStrike)
 	if baron == "" {
 		return "", ""
 	}
@@ -385,7 +393,7 @@ func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt strin
 		return "", "", sc, false
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, baronPrompt), ansi.Reset)
-	baron = pickRemoteBaronFrom(s, remoteBarons(rb.Scores, hostile))
+	baron = pickRemoteBaronFrom(s, remoteBarons(rb.Scores, hostile), protectedNoStrike)
 	if baron == "" {
 		return "", "", sc, false
 	}

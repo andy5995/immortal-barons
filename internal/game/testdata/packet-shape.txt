@@ -19,6 +19,7 @@ Packet:
   TradeBids `json:",omitempty"`
   TradeFills `json:",omitempty"`
   Market `json:",omitempty"`
+  TradeDeals `json:",omitempty"`
   Notice `json:",omitempty"`
   Version `json:",omitempty"`
   Seq
@@ -192,6 +193,22 @@ RemoteListing:
   Good
   Qty
   Price
+IPTradeDeal:
+  FromBoard
+  FromEmpire
+  ToEmpire
+  Goods
+  When
+TradeBasket:
+  Troopers
+  Jets
+  Turrets
+  Bombers
+  Food
+  Gold
+  Agents
+  Tanks
+  Carriers
 BulletinSet:
   Files
 BulletinFile:

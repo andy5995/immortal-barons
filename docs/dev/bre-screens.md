@@ -1179,13 +1179,47 @@ Gates seen: `Sorry....You are under New Realm Protection!` (Terrorist / Special
 Ops while protected), `There are not any attack parties at this time.` (Join
 Group Attack).
 
-**Send Trade Deal** (3). **Not captured.** A different routine from the local
-deal — `send_trade_offer` (BRE.OVR 0x24212), whose only caller is the InterBBS
-menu. It charges a flat fee to send rather than a rate per day and has no day
-span, so none of the local flow applies to it. How it picks its target planet and
-realm is unread: its own strings carry no picker prompt, so the picker is a
-callee nobody has followed. The block that used to sit here was the LOCAL deal
-and has moved to the Trading section (#195).
+**Send Trade Deal** (3). **The sending flow is not captured**; it was read out of
+the binary instead (#195). A different routine from the local deal —
+`send_trade_offer` (BRE.OVR 0x24212), whose only caller is the InterBBS menu.
+The block that used to sit here was the LOCAL deal and has moved to the Trading
+section, which is what wired IB's interplanetary item to the local mechanic.
+
+The order it asks in: **planet, then realm, then goods, then the price.**
+`select_planet` (0x021dd9) takes a planet name or number, or a key that lists
+them, and refuses two answers outright by returning 0 — **your own planet**
+(`cmp ax,[0x6795]` at 0x18a6) and a planet you hold no data on — so the item
+cannot reach a realm at home. It then prints your standing with the planet
+chosen. `select_player` (0x022a0c) takes a letter A-Y, a raw index into that
+planet's 25-slot roster with the gaps left in, validated against the slot's own
+id being non-zero; `?` lists the roster and `/` searches it by name.
+
+**A flat fee, no day span, no treaty.** It calls the same cost routine the local
+deal does (`calculate_trade_offer_cost`, 0x0513e7) and then simply stops: no
+multiply by days, no Protective Trade divisor, no days prompt. The formula is the
+nine goods against fixed weights, over five, plus a 100,000 base, scaled by the
+sysop's Trade Deal Costs ladder and capped at two billion. Neither realm needs a
+pact — the routine reads no relation field and holds no relation string, where
+the local one refuses a realm you have no pact with.
+
+**The arrival gets no choice.** `resolve_received_trade_offer` (0x043df1) checks
+for a duplicate, checks the target's stored id against the letter, and credits
+every good straight onto the realm, each capped at two billion. It files a
+private report for each side and writes **no news at all** — no `.dat` template
+carries a trade-deal category. A deal aimed at a realm under New Realm Protection
+is DESTROYED: the routine returns, and neither side is told. IB refuses that
+target at the picker instead; see `docs/mechanics-reference.md`.
+
+**Carriers are sized to the cargo** (`ovr_050dfb_entry_0436`): troopers 1,000 to
+a carrier, jets 100, turrets 1,000, tanks 5,000, gold 100,000, with food,
+bombers, agents and carriers riding free — summed and rounded up as a total.
+A capture has the original asking for twenty.
+
+**The receiving side IS captured**: `cap/20240527-134Pho_Lazarus_Public.cap`
+carries 13 arrivals, each a header naming the realm and its planet over an
+indented list of what was shipped. Gold is in eleven of them, one is a mixed
+shipment, ten are the same sender to the same recipient in a single run — so
+nothing caps how many a realm may send in a day.
 
 **Travel Times** (T). Captured 2026-08-16: a `37` white heading
 `Average Turn Around Times to All BBSes`, then the **78**-column inset rule
@@ -1687,7 +1721,11 @@ is the sender's own turn of the day; the mechanic behind it is in
 in its own words rather than reproducing BRE's sentence.
 
 The market itself lists the eight tradeable goods — note keys 1-5 and 7-9, with
-**no key 6** (regions are not tradeable):
+**no key 6**. Key 6 is **Gold** (`empire_trade_good_pointer`, BRE.OVR 0x051133,
+record `+0x66`, and the good-name table at `DS:0xb11` agrees). It is missing from
+the MARKET because gold cannot be sold for gold, not because it is untradeable —
+it rides a trade deal, local or interplanetary, like anything else. This file
+said "regions are not tradeable" until #195; regions have no key here at all.
 
 ```
 Trading Market
@@ -2332,7 +2370,7 @@ redraws the menu.
 **IB's keys match this table as of 2026-08-18 and did not before**: it numbered
 the three items it had built `1`-`3`, so each sat on the original's key for its
 neighbour, and its own Player List sat on `4`, View Diplomacy's key. Key `1` now
-holds IB's Dismantle Gooie Kablooie (#45), and Player List has moved to `5`,
+holds IB's Dismantle Gooie (#45), and Player List has moved to `5`,
 past the original's four.
 
 **The Coordinator gets no player list in the original.** The two coordinator
@@ -2741,11 +2779,19 @@ Its strings: `'Stuff to '` + `'Send'`/`'Demand'` for the title, `'Key  Item
 `' You do not have enough carriers.'`.
 
 The quantity prompts are `'Send how many '` / `'Demand how many '` + the item +
-`'? '` — **bare, with no `(suggested; max)` hint on either side**. BRE's bounded
-input helper (`056d:01bf` -> `0851:0bd9`) is a raw key-by-key editor that prints
-no bounds of its own; the `(N; M)` hints elsewhere in BRE are printed by their
-callers. And the bounds themselves say the same thing the columns do
-(`create_trade_offer`, BRE.OVR 0x2624c):
+`'? '`. BRE's bounded input helper (`056d:01bf` -> `0851:0bd9`) is a raw
+key-by-key editor that prints no bounds of its own; the `(N; M)` hints elsewhere
+in BRE are printed by their callers.
+
+**The SEND side does have one; the DEMAND side does not** — this file said
+neither did until #195. `create_trade_offer` calls the hint helper
+(`0851:08b2`, which builds `"(min; max) "`) at unit offset 0x1a4c, immediately
+before the Send prompt's input call, and makes no such call before the Demand
+prompt at 0x1ce7. The helper prints only `"(min) "` when the max is negative
+(`BRE.EXE 0x8dd1`), which is exactly the Demand side's `0xFFFFFFFF` sentinel — so
+even where it is called on a sentinel it quotes no ceiling. The interplanetary
+routine calls it too (`send_trade_offer` 0x0395). And the bounds themselves say
+the same thing the columns do (`create_trade_offer`, BRE.OVR 0x2624c):
 
     Send prompt   bounded by the player's own count of that item   (0x2679d)
     Demand prompt bounded by 0xFFFFFFFF — a sentinel, not a figure  (0x26a4b)

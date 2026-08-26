@@ -1,4 +1,7 @@
 (in-progress:)
+  * reverted: the Coordinator item reads Dismantle Gooie and the setting Gooie Kablooies, as the original words them
+  * The interplanetary Send Trade Deal ships goods to a realm on another planet
+  * A trade deal needs carriers sized to its cargo, not one per deal
   * reverted: the Clingy Annihilator is named the Gooie Kablooie, as the original names it
   * reverted: the R5-Slappenheimer is named the S3-Sabre, as the original names it
   * An interplanetary strike's report names the side that held the field
@@ -7,8 +10,8 @@
   * A realm under New Realm Protection keeps its letter on the attack and covert lists
   * An interplanetary target list shows the barons under protection
   * A realm's letter is shown in square brackets
-  * The Money Cap is gone from the Configuration Editor; a saved value still applies
-  * A figure of a billion or more is printed in full, as the original prints it
+  * reverted: the Money Cap is gone from the Configuration Editor; a saved value still applies
+  * reverted: a figure of a billion or more is printed in full, as the original prints it
   * An abbreviated total steps its suffix through k, m and b with its size
   * A pirate raider is marked with its ASCII arrow on a 7-bit ASCII terminal
   * The Daily Bulletin box closes square on a CP437 or ASCII terminal

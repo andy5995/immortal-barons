@@ -311,7 +311,7 @@ func configPages(ibbs bool) []cfgPage {
 			func(c *game.Config, v bool) { c.BombingOps = v }),
 		toggle(37, "Missile Ops", func(c *game.Config) bool { return c.MissileOps },
 			func(c *game.Config, v bool) { c.MissileOps = v }),
-		toggle(38, "Gooie Kablooie", func(c *game.Config) bool { return c.GooieKablooie },
+		toggle(38, "Gooie Kablooies", func(c *game.Config) bool { return c.GooieKablooie },
 			func(c *game.Config, v bool) { c.GooieKablooie = v }),
 		toggle(42, "Local Attacks", func(c *game.Config) bool { return c.LocalAttacks },
 			func(c *game.Config, v bool) { c.LocalAttacks = v }),

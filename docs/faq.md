@@ -6,11 +6,12 @@
   "registered" or "unregistered" version.
 - Several BBS nodes can play the same game at the same time, which BRE could not
   do. See [Can several people play as a door at the same time?](#can-several-people-play-as-a-door-at-the-same-time).
-- In a league game you can buy from an allied planet's Trading Market. BRE has
-  no way to trade between planets at all. Your order is a bid: the gold is held
-  when you send it, and when it arrives the other planet only sells to you if
-  the goods are still there at the same price and you are still allies. If not,
-  your gold comes back.
+- In a league game you can buy from an allied planet's Trading Market. Your order
+  is a bid: the gold is held when you send it, and when it arrives the other
+  planet only sells to you if the goods are still there at the same price and you
+  are still allies. If not, your gold comes back. BRE has no market between
+  planets — it lets you send goods to a realm on another planet as a gift, which
+  Immortal Barons does too, but there is no way to buy from one.
 - It also plays in a local terminal, without a BBS, so you can try it on your
   own computer.
 - It does not run under DOS. It is a modern native program that runs as a door

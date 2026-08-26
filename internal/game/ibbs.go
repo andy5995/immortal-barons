@@ -67,6 +67,12 @@ type Packet struct {
 	TradeBids  []IPTradeBid    `json:",omitempty"` // buy orders landing on ToBoard's market
 	TradeFills []IPTradeFill   `json:",omitempty"` // their answers coming home
 	Market     []RemoteListing `json:",omitempty"` // FromBoard's market, riding its scores
+	// TradeDeals are one-way shipments of goods to a named realm on ToBoard
+	// (#195) — a different mechanic from the bids above, which buy against a
+	// market and get an answer back. Nothing returns for these: the goods are
+	// paid for and gone when the deal is sent. omitempty for the same reason as
+	// every field around it.
+	TradeDeals []IPTradeDeal `json:",omitempty"`
 	// Notice is a plain-text bounce: this board refused a packet and is telling
 	// the sender why. It carries NO payload, deliberately — see bounceVersion.
 	Notice string `json:",omitempty"`
@@ -163,6 +169,8 @@ func (p Packet) PacketType() string {
 		return "news"
 	case len(p.TradeBids) > 0 || len(p.TradeFills) > 0:
 		return "trade"
+	case len(p.TradeDeals) > 0:
+		return "trade deals"
 	case len(p.Market) > 0:
 		return "market"
 	case p.Notice != "":
@@ -181,7 +189,7 @@ func (p Packet) HasPayload() bool {
 		len(p.Results) > 0 || len(p.Recon) > 0 || len(p.ReconReports) > 0 ||
 		len(p.TimeChecks) > 0 || len(p.IPMessages) > 0 ||
 		len(p.SpyGuys) > 0 || len(p.News) > 0 ||
-		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 || p.Notice != "" ||
+		len(p.TradeBids) > 0 || len(p.TradeFills) > 0 || len(p.TradeDeals) > 0 || p.Notice != "" ||
 		len(p.LeagueNodes) > 0 || p.LeagueConfig != nil || p.Annihilator != nil || p.Reset != nil
 }
 
@@ -395,6 +403,11 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	}
 	for _, m := range p.IPMessages {
 		w.deliverIPMessage(m)
+	}
+	// One-way shipments land straight on the realm they name (#195). Nothing goes
+	// back: the sender paid on the way out and the recipient gets no say.
+	for _, d := range p.TradeDeals {
+		w.deliverIPTradeDeal(d)
 	}
 	// Answers to our own bids: goods or gold, straight to the baron who bid (#47).
 	for _, f := range p.TradeFills {
