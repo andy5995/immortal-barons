@@ -36,10 +36,9 @@
   about your own offers, so it does not show you anything about other players.
 - Send Message can write to all your allies at once — every realm on your board
   that you hold a treaty with, of any kind.
-- Your sysop sets how much gold you can hold. BRE stops at two billion;
-  here that is only the starting value, and it can go as high as 999 billion.
-- Gold above the limit is still lost, but the game now tells you when it happens,
-  and a full bank pays its interest into your gold in hand rather than losing it.
+- Gold you earn above the two billion you can hold is still lost, but the game
+  tells you when it happens, and a full bank pays its interest into your gold in
+  hand rather than losing it.
 - Each bulletin is its own file in a `bull` folder, so a sysop can put up ANSI
   artwork. BRE keeps every bulletin in one `bulletin.lst` text file. In a league
   the Coordinator's bulletins are sent to every board and shown to all players

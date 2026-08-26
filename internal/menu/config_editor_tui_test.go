@@ -242,3 +242,35 @@ func TestStarLegendOnlyOnALeagueBoard(t *testing.T) {
 		}
 	}
 }
+
+// The money cap stopped being a setting (#205). Neither editor offers it — they
+// used to disagree, the tview one ranging it 2..999 while the line editor never
+// mentioned it — and a config.json that already carries a raised value keeps it,
+// because clamping a league's saved cap back down would take gold it had been
+// playing with.
+func TestNeitherEditorOffersTheMoneyCap(t *testing.T) {
+	c := distinctConfig()
+	c.MoneyCapBillions = 50
+	for _, l := range tuiLabels(c) {
+		if strings.Contains(strings.ToLower(l), "money cap") {
+			t.Errorf("the tview editor still offers %q", l)
+		}
+	}
+	for _, page := range configPages(true) {
+		for _, f := range page.fields {
+			if strings.Contains(strings.ToLower(f.label), "money cap") {
+				t.Errorf("the line editor still offers %q", f.label)
+			}
+		}
+	}
+
+	w := newWorld()
+	w.Config = c
+	tui := newConfigTUI(w.World)
+	if got := tui.collect().MoneyCapBillions; got != 50 {
+		t.Errorf("a saved cap of 50 billion came back as %d", got)
+	}
+	if w.MoneyCap() != 50_000_000_000 {
+		t.Errorf("the saved cap yields %d gold, want 50,000,000,000", w.MoneyCap())
+	}
+}

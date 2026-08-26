@@ -2423,24 +2423,33 @@ section is a record of what was claimed and how it was settled, so the word
   longint as two 16-bit immediates, so the bytes run `B8 00 94 BA 35 77` and the
   second opcode splits the halves. Search the halves, not the value.
 
-  IB implements the first two as a **sysop knob** defaulting to that figure, and
-  the third differently: it caps **one investment** at 2 billion but does not add
-  up a day's investing (`MaxInvestment`). That divergence is deliberate and stays.
+  IB matches the first two and implements the third differently: it caps **one
+  investment** at 2 billion but does not add up a day's investing
+  (`MaxInvestment`). That divergence is deliberate and stays.
 
-  **IB makes it a sysop knob, defaulting to BRE's figure.**
-  `Config.MoneyCapBillions` (Configuration Editor: "Money Cap (billions)") is
-  the cap in whole billions, read through `World.MoneyCap()`. It defaults to
-  `MoneyCapMinBillions` = 2, BRE's own figure, and may be raised to
-  `MoneyCapMaxBillions` = 999. Gold credited above whatever it is set to is
-  still discarded — the knob moves the ceiling, it does not remove it.
+  **IB's cap is 2,000,000,000, and no editor offers it (#205).**
+  `Config.MoneyCapBillions` is the cap in whole billions, read through
+  `World.MoneyCap()`, and it defaults to `MoneyCapMinBillions` = 2. It was a
+  sysop knob ranged up to `MoneyCapMaxBillions` = 999 through v0.0.7; the
+  Configuration Editor's "Money Cap (billions)" field is gone, so a new game
+  gets BRE's figure and nothing raises it. Gold credited above the cap is
+  discarded, and the Game Setup screen reports the ceiling so a player can see
+  what they play under.
+
+  A `config.json` written while the field existed is **honoured, not clamped**:
+  `MoneyCapBillions` still reads back through the 2..999 range. Clamping a
+  league's saved cap on load would take gold it had been playing with, and the
+  field remains the mechanism whatever sets it later (#202). `LeagueConfig`
+  still broadcasts the value, so a league's boards agree on one ceiling
+  mid-season; whether a mod ships it instead is a #202 question.
 
   Two billion is NOT the largest a 32-bit signed integer holds (that is
   2,147,483,647), so it is a rule the original chose rather than the machine
-  limit it is usually presented as. IB's money fields are `int64`,
-  so the ceiling is now a game rule and behaves the same on a 32-bit door as on
-  a 64-bit one. The knob is in whole billions so the editor's field fits an
-  `int` on a 32-bit build, and 999 is the widest figure the abbreviated display
-  renders in three digits before the point.
+  limit it is usually presented as. IB's money fields are `int64`, so the
+  ceiling is a game rule and behaves the same on a 32-bit door as on a 64-bit
+  one. The 999 ceiling above it was never reachable without pushing a treasury
+  past what a 32-bit `int` holds, which is why the field went rather than being
+  re-ranged.
 
   Deposits and withdrawals are unbounded up to the cap — nothing gates the bank
   per turn, so a per-action limit there only cost keystrokes. What IB does keep
@@ -2775,8 +2784,8 @@ Investments / Loans**, and **View Bank Rates**.
   takes now, and a ten-day term offers well under half what a one-day term does.
   Net worth stops counting at ten million, so the richest realm in the game
   borrows against the same headroom as a merely rich one. IB implements all of
-  it, clamping against the sysop's money cap where BRE has a flat 2,000,000,000
-  — the same figure by default.
+  it, clamping against `World.MoneyCap()` where BRE has a flat 2,000,000,000 —
+  the same figure.
 
   **One part still diverges.** BRE's daily rate is
   `max(investRate, savingsRate) + 30` tenths, plus `2 x days`, reading two config

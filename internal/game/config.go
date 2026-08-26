@@ -279,7 +279,7 @@ type Config struct {
 	IdleDaysRemove       int    // days a realm may go unplayed before it is removed; 0 = never
 	InitialMarketLand    int    // land on the market at reset
 	LandPerDay           int    // land added to the market each day
-	MoneyCapBillions     int    // most gold a realm may hold, on hand and again in the bank, in whole billions (BRE's own limit is 2)
+	MoneyCapBillions     int    // most gold a realm may hold, on hand and again in the bank, in whole billions; no longer editable (#205), but an existing raised value is honoured
 	InterestRate         int    // bank interest (BRE: % over 10 days; 200 = 20%/day)
 	StdInvestRate        int    // standard investment rate (BRE: % over 10 days)
 	SteadyInvest         bool   // steady (fixed) investment rate instead of floating
@@ -478,7 +478,7 @@ func DefaultConfig() Config {
 		IdleDaysRemove:        10,
 		InitialMarketLand:     0,
 		LandPerDay:            1000,
-		MoneyCapBillions:      MoneyCapMinBillions, // BRE's own ceiling; a sysop may raise it to MoneyCapMaxBillions
+		MoneyCapBillions:      MoneyCapMinBillions, // BRE's own ceiling, and now the only one a new game gets
 		InterestRate:          50,
 		StdInvestRate:         35,
 		SteadyInvest:          false,
@@ -512,14 +512,16 @@ func DefaultConfig() Config {
 	}
 }
 
-// MoneyCap is the most gold a realm may hold, on hand or in the bank — the
-// sysop's MoneyCapBillions knob, in gold.
+// MoneyCap is the most gold a realm may hold, on hand or in the bank —
+// MoneyCapBillions, in gold.
 func (w *World) MoneyCap() int64 { return int64(w.MoneyCapBillions()) * GoldPerBillion }
 
-// MoneyCapBillions is the cap in the unit the sysop sets it in, clamped to the
-// legal range. Clamped on read rather than on load so a config written before
-// the knob existed (or edited by hand to nonsense) still yields a legal cap: a
-// zero or missing field comes back as BRE's own 2 billion.
+// MoneyCapBillions is the cap in whole billions, clamped to the legal range.
+// Clamped on read rather than on load so a config written before the field
+// existed (or edited by hand to nonsense) still yields a legal cap: a zero or
+// missing field comes back as BRE's own 2 billion. No editor offers the field
+// any more (#205); a config.json that already carries a raised value keeps it,
+// since clamping on load would take gold a league had been playing with.
 func (w *World) MoneyCapBillions() int {
 	b := w.Config.MoneyCapBillions
 	if b < MoneyCapMinBillions {

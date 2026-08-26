@@ -26,9 +26,8 @@ protection against a raid.
 The start of your next turn tells you what the bank paid: the interest, and what
 any investment that matured today paid back.
 
-Your sysop sets a limit on how much gold you can hold — two billion to begin
-with, in hand and the same again in the bank. Gold you earn above that is lost.
-Spend it before you get there.
+You can hold at most two billion gold, in hand and the same again in the bank.
+Gold you earn above that is lost. Spend it before you get there.
 
 A full bank still pays its interest, into your gold in hand rather than the
 bank. Once both are full, it goes nowhere.

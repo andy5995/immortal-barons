@@ -102,14 +102,13 @@ const (
 // not a literal in either binary in 32-bit or Real48 form, which fits: a cap
 // tested against a Turbo Pascal constant needs no constant of its own.
 const (
-	// What a realm may HOLD, on hand or in the bank, is the sysop's call:
-	// Config.MoneyCapBillions, read through World.MoneyCap. The default is the
-	// 2 billion above; a league that wants a longer game raises it. These are the
-	// bounds of that knob, in whole billions so the Configuration Editor's field
-	// stays three digits and fits an int on a 32-bit door.
+	// What a realm may HOLD, on hand or in the bank, is Config.MoneyCapBillions,
+	// read through World.MoneyCap. It is no longer a setting (#205): the editors
+	// stopped offering it, so every new game gets the 2 billion above, BRE's own
+	// figure. A config.json written while the field existed is still honoured up
+	// to MoneyCapMaxBillions, which is why the range stays — clamping a saved
+	// value back down would take gold a league had been playing with.
 	//
-	// The ceiling is 999 because MoneyCapMax is the widest figure the abbreviated
-	// billions display renders in three digits before the point (999.0000B).
 	// GoldPerBillion names the unit the cap is set in, so the multiplier is not
 	// respelled at each site that converts between the two.
 	GoldPerBillion = 1_000_000_000
@@ -117,8 +116,8 @@ const (
 	MoneyCapMinBillions = 2
 	MoneyCapMaxBillions = 999
 
-	// MoneyCapMax is the highest that knob can reach. Pure helpers that project a
-	// future figure (ExpectedReturn, LoanTotalOwed) clamp to it as an overflow
+	// MoneyCapMax is the highest a saved cap can reach. Pure helpers that project
+	// a future figure (ExpectedReturn, LoanTotalOwed) clamp to it as an overflow
 	// guard; what a realm actually holds is clamped to the configured cap when
 	// the gold lands.
 	MoneyCapMax int64 = MoneyCapMaxBillions * GoldPerBillion

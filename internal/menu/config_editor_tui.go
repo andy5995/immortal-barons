@@ -82,23 +82,20 @@ var fieldBgColor = tcell.NewHexColor(0x0d2b50)
 // BRE's (rates, caps, behaviour); the wording is our own — BRE's help text is
 // copyrighted, so it is paraphrased, not copied.
 const (
-	defaultHelp      = "Move with Tab / Shift-Tab; each field's help appears here."
-	helpTurnsPerDay  = "How many turns each player may take per day."
-	helpProtection   = "New-realm protection: turns a fresh empire cannot attack and cannot be attacked, giving newcomers time to get established."
-	helpGameLength   = "Days before the league ends and resets. 0 keeps it running with no scheduled end."
-	helpIdleRemove   = "Days a realm may go unplayed before it is removed from the game. Also removes a realm whose owner created it and never played a turn. 0 never removes anything."
-	helpStartDate    = "The game begins on this date; until then, daily maintenance is paused. Blank starts it right away."
-	helpJoinDate     = "New players may not join after this date. Blank leaves joining open."
-	helpAICount      = "Number of computer-run empires seeded when the world is reset. They take slots from the planet's 25 realms, so each one is a caller who cannot enroll. A league board never gets any, whatever this says."
-	helpInitialLand  = "Land for sale on the market when the game resets."
-	helpLandPerDay   = "Land added to the market each day."
-	helpInterest     = "Bank interest paid over 10 days, credited at the end of each turn. The maximum (200) works out to 20% per day. High rates let banking dominate the game, so a low value (under about 40) keeps play balanced."
-	helpStdInvest    = "The baseline investment return over 10 days. Unless Steady Investment Rate is on, the real rate drifts each day around this value based on how much everyone is investing. The maximum (100) is 10% per day; a low value (under about 50) keeps the economy balanced."
-	helpSteadyInvest = "When on, the investment return stays fixed at the Standard Investment Rate instead of drifting each day with total investment."
-	helpMaxTax       = "The highest tax rate a player is allowed to set."
-	helpMoneyCap     = "The most gold a realm may hold, in billions — the same limit again " +
-		"for the bank. The original stops at 2 billion and discards anything above it. " +
-		"Raise it for a long league where the economy outgrows that."
+	defaultHelp            = "Move with Tab / Shift-Tab; each field's help appears here."
+	helpTurnsPerDay        = "How many turns each player may take per day."
+	helpProtection         = "New-realm protection: turns a fresh empire cannot attack and cannot be attacked, giving newcomers time to get established."
+	helpGameLength         = "Days before the league ends and resets. 0 keeps it running with no scheduled end."
+	helpIdleRemove         = "Days a realm may go unplayed before it is removed from the game. Also removes a realm whose owner created it and never played a turn. 0 never removes anything."
+	helpStartDate          = "The game begins on this date; until then, daily maintenance is paused. Blank starts it right away."
+	helpJoinDate           = "New players may not join after this date. Blank leaves joining open."
+	helpAICount            = "Number of computer-run empires seeded when the world is reset. They take slots from the planet's 25 realms, so each one is a caller who cannot enroll. A league board never gets any, whatever this says."
+	helpInitialLand        = "Land for sale on the market when the game resets."
+	helpLandPerDay         = "Land added to the market each day."
+	helpInterest           = "Bank interest paid over 10 days, credited at the end of each turn. The maximum (200) works out to 20% per day. High rates let banking dominate the game, so a low value (under about 40) keeps play balanced."
+	helpStdInvest          = "The baseline investment return over 10 days. Unless Steady Investment Rate is on, the real rate drifts each day around this value based on how much everyone is investing. The maximum (100) is 10% per day; a low value (under about 50) keeps the economy balanced."
+	helpSteadyInvest       = "When on, the investment return stays fixed at the Standard Investment Rate instead of drifting each day with total investment."
+	helpMaxTax             = "The highest tax rate a player is allowed to set."
 	helpPlanetaryTax       = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold goes to the Queen's purse, which she refunds a share of to each baron at the start of their playing day."
 	helpFoodUnlimited      = "When on, the food market never runs short — its daily supply is unlimited."
 	helpBuyMilitary        = "Whether players may buy military units: freely (Yes), not at all (No), or a limited amount each day (Limited)."
@@ -214,7 +211,6 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addBool(econ, "Steady Investment Rate", helpSteadyInvest, c.SteadyInvest, func(c *game.Config, b bool) { c.SteadyInvest = b })
 	t.addInt(econ, "Max Tax Rate", helpMaxTax, c.MaxTaxRate, 0, game.MaxPlayerTaxRate, func(c *game.Config, n int) { c.MaxTaxRate = n })
 	t.addInt(econ, "Planetary Tax Rate (%)", helpPlanetaryTax, c.PlanetaryTaxRate, 0, game.MaxPlanetaryTaxRate, func(c *game.Config, n int) { c.PlanetaryTaxRate = n })
-	t.addInt(econ, "Money Cap (billions)", helpMoneyCap, c.MoneyCapBillions, game.MoneyCapMinBillions, game.MoneyCapMaxBillions, func(c *game.Config, n int) { c.MoneyCapBillions = n })
 	t.addBool(econ, "Food Unlimited", helpFoodUnlimited, c.FoodUnlimited, func(c *game.Config, b bool) { c.FoodUnlimited = b })
 
 	mil := tview.NewForm()
