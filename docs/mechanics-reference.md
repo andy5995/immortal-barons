@@ -3476,8 +3476,10 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   realms with the `(P)` flag and refuse the strike when one is picked — matching
   the local attack list, which flags them the same way (#214). The target board
   still refuses an arriving strike itself, since the flag can go stale while the
-  strike is in transit. A protected realm is a legal SPY target, so a spy list
-  carries no flag at all.
+  strike is in transit. **Spying is refused too** — a protected realm cannot be
+  spied on any more than it can be struck, so every target list flags it and
+  refuses the pick, whatever the list is for. This paragraph claimed the
+  opposite until 2026-08-26; no code ever did.
 - **The caller's own shield gates this menu too.** The InterPlanetary menu tests
   it on the same predicate the covert menu uses, at `BRE.OVR 0x020F88`, for
   digits 2, 3, 4, 6, 8 and 9 — Terrorist Ops, Send Trade Deal, Create Group

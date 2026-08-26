@@ -90,13 +90,16 @@ func TestJoinGroupAttackDepartedWindow(t *testing.T) {
 // board that reads it can flag them on its target lists. Every baron is listed —
 // the flag is what marks the ones a strike would be refused (#214) — and the
 // target board still refuses an arriving strike on its own authority.
+//
+// The flag is unconditional: protection bars spying as surely as striking, so
+// there is no list this feeds that wants it suppressed.
 func TestProtectedRealmsAreFlaggedAsTargets(t *testing.T) {
 	scores := []game.RemoteScore{
 		{Empire: "Fresh Meat", Protected: true},
 		{Empire: "Fair Game"},
 		{Empire: "Also New", Protected: true},
 	}
-	rows := remoteBarons(scores, hostile)
+	rows := remoteBarons(scores)
 	if len(rows) != 3 {
 		t.Fatalf("rows = %v, want all three barons listed", rows)
 	}
@@ -104,12 +107,6 @@ func TestProtectedRealmsAreFlaggedAsTargets(t *testing.T) {
 	for _, r := range rows {
 		if r.protected != want[r.name] {
 			t.Errorf("%s protected = %v, want %v", r.name, r.protected, want[r.name])
-		}
-	}
-	// Spying is not stopped by protection, so an observer is told nothing of it.
-	for _, r := range remoteBarons(scores, observing) {
-		if r.protected {
-			t.Errorf("%s was flagged on an observing list", r.name)
 		}
 	}
 }

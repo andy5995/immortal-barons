@@ -129,3 +129,70 @@ func TestProtectedRemoteBaronIsListedAndRefused(t *testing.T) {
 		t.Errorf("a strike was queued against a protected baron: %+v", w.Outbox)
 	}
 }
+
+// Protection bars SPYING as surely as it bars a strike — Andy's call, and the
+// behaviour every path already had. docs/mechanics-reference.md claimed the
+// opposite until 2026-08-26 ("a protected realm is a legal SPY target, so a spy
+// list carries no flag at all"), and a hostile/observing constant pair encoded
+// that claim in the interplanetary picker with only the hostile half ever
+// passed. The doc was wrong about the code; this is what the code does.
+func TestSpyingIsRefusedOnAProtectedRealm(t *testing.T) {
+	w, shielded, _ := protectionWorld(t)
+	before := shielded.Agents
+
+	// Pick the shielded realm by its own slot letter at the covert target list.
+	f := &fakeSession{keys: []rune(shielded.Letter() + "\r")}
+	covertAction(game.OpSendSpy)(f, w)
+	out := stripANSI(f.out.String())
+
+	// Reached the list, and reached it with that realm on it — not an empty
+	// screen that would pass this test while proving nothing.
+	if !strings.Contains(out, shielded.Name) {
+		t.Fatalf("never reached a target list holding %s:\n%s", shielded.Name, out)
+	}
+	if !strings.Contains(out, "New Realm Protection") {
+		t.Errorf("spying on a protected realm was not refused:\n%s", out)
+	}
+	// And no report came back, which is what a spy that ran would produce.
+	if shielded.Agents != before {
+		t.Errorf("the target's agents moved (%d -> %d); an op ran", before, shielded.Agents)
+	}
+	if p := w.Player(); p.TurnProgress.CovertOpsUsed[game.OpSendSpy] {
+		t.Error("a refused spy still consumed the once-per-turn slot")
+	}
+}
+
+// The interplanetary spy is the same rule across the league: the scores packet's
+// flag is drawn on the baron list and the pick is refused.
+func TestInterplanetarySpyingIsRefusedOnAProtectedBaron(t *testing.T) {
+	w := newWorld()
+	w.With(func() {
+		w.Config.IBBS = true
+		w.Config.BoardID = "Home BBS"
+		w.Player().Protection = 0
+		w.Player().Agents = 50
+		w.ImportBoard(game.RemoteBoard{BoardID: "Far BBS", Scores: []game.RemoteScore{
+			{Empire: "Fresh Realm", Land: 20, NetWorth: 500, Score: 100, Protected: true},
+			{Empire: "Open Realm", Land: 100, NetWorth: 5000, Score: 900},
+		}})
+	})
+	f := &fakeSession{keys: []rune("1\r" + "1\r" + " ")}
+	doTerrorOp(f, w, game.TerrorOpSpy)
+	out := stripANSI(f.out.String())
+
+	if !strings.Contains(out, "Fresh Realm") {
+		t.Fatalf("never reached a baron list holding the protected realm:\n%s", out)
+	}
+	if !strings.Contains(out, "New Realm Protection") {
+		t.Errorf("spying on a protected baron was not refused:\n%s", out)
+	}
+	var queued int
+	w.Read(func() {
+		for _, p := range w.Outbox {
+			queued += len(p.Terrors)
+		}
+	})
+	if queued != 0 {
+		t.Errorf("a refused interplanetary spy was queued anyway (%d)", queued)
+	}
+}

@@ -54,7 +54,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	var target string
 	if !all {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
-		if pick = pickRemoteBaronFrom(s, remoteBarons(rb.Scores, hostile), protectedNoStrike); pick == "" {
+		if pick = pickRemoteBaronFrom(s, remoteBarons(rb.Scores), protectedNoStrike); pick == "" {
 			return Stay
 		}
 		target = pick
@@ -267,14 +267,6 @@ func promptAttackKind(s session.Session, w *ctx) (kind game.AttackKind, chose bo
 // packet had under New Realm Protection. Takes the realm name.
 const protectedNoStrike = "%s is under New Realm Protection and cannot be attacked."
 
-// hostile says whether a target list is being drawn for something New Realm
-// Protection stops. Spying is not — a protected realm can still be looked at —
-// so an observing caller sees every realm.
-const (
-	hostile   = true
-	observing = false
-)
-
 // remoteBaron is one baron on another planet as this board last heard of them:
 // the name a strike is addressed to, and whether that hearing had them under
 // New Realm Protection.
@@ -284,16 +276,18 @@ type remoteBaron struct {
 }
 
 // remoteBarons reads a planet's last scores packet into the rows a target list
-// draws. `hostile` says whether protection is a bar for what the list is being
-// drawn for — spying is not, so an observing caller is told nothing about it.
+// draws. New Realm Protection bars EVERY list this feeds — spying no less than
+// striking — so there is no caller that wants the flag suppressed; a pair of
+// hostile/observing constants and the parameter selecting between them survived
+// here with only the hostile one ever passed.
 //
 // What we know can be stale, so the flag is a courtesy, not the enforcement —
 // that stays with the target board (game.resolveRemoteAttack), which refuses an
 // arriving strike on its own authority.
-func remoteBarons(scores []game.RemoteScore, hostile bool) []remoteBaron {
+func remoteBarons(scores []game.RemoteScore) []remoteBaron {
 	rows := make([]remoteBaron, 0, len(scores))
 	for _, sc := range scores {
-		rows = append(rows, remoteBaron{name: sc.Empire, protected: hostile && sc.Protected})
+		rows = append(rows, remoteBaron{name: sc.Empire, protected: sc.Protected})
 	}
 	return rows
 }
@@ -350,7 +344,7 @@ func pickRemoteBaronOn(s session.Session, w *ctx, planetPrompt, baronPrompt, ref
 		scores = map[string][]remoteBaron{}
 		for _, b := range w.RemoteBoards {
 			boards = append(boards, b.BoardID)
-			scores[b.BoardID] = remoteBarons(b.Scores, hostile)
+			scores[b.BoardID] = remoteBarons(b.Scores)
 		}
 	})
 	if len(boards) == 0 {
