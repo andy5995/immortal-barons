@@ -1,4 +1,5 @@
 (in-progress:)
+  * A Max Tax Rate of 0 stops the computer barons taxing, as it already stopped players
   * The InterBBS Scores player tables put the score before the planet, as BRE does
   * A name shortened to fit a column no longer widens it on a CP437 or ASCII terminal
   * The turn's income opens under BRE's rule instead of a titled bar

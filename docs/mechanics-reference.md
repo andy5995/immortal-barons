@@ -466,9 +466,11 @@ effectively free and armies disproportionately expensive.
 
 IB's config field **Max Tax Rate** is *not* BRE's Planetary Tax Rate, despite
 having started life as a misreading of it. BRE caps nothing — its own prompt
-offers `New Tax Rate [0-100]` regardless of that config value. IB keeps a player
+offers `New Tax Rate [0-100]` regardless of that config value. IB keeps a
 cap as a deliberate divergence (ceiling `MaxPlayerTaxRate`, 50), separate from
-the crown tax rate (`PlanetaryTaxRate`).
+the crown tax rate (`PlanetaryTaxRate`). It binds the computer barons as well as
+the players, and a setting of 0 is a ceiling of zero rather than "no cap set" —
+it read as the latter for the AI alone until #203.
 
 ## Score (distinct from Net Worth)
 
