@@ -30,6 +30,22 @@ func (w *World) SendIPMessage(from *Empire, boards []string, toCoordinator bool,
 	w.sendIP(from, boards, IPMessage{ToCoordinator: toCoordinator, Body: body})
 }
 
+// SendIPMessageToBarons queues body for named realms on one board, one message
+// each, narrowed with ToEmpire. That is how BRE's Single Planet mode addresses
+// a message once the sender has picked letters at its `(A-Y,Z=All,?=List) Send
+// to:` prompt: the address is a set of realms on the chosen planet, not the
+// planet itself. N messages rather than a recipient list on one keeps the
+// packet's shape unchanged — ToEmpire already exists for the author-only reply,
+// and deliverIPMessage already honours it.
+func (w *World) SendIPMessageToBarons(from *Empire, board string, toEmpires []string, body string) {
+	for _, name := range toEmpires {
+		if name == "" {
+			continue
+		}
+		w.sendIP(from, []string{board}, IPMessage{ToEmpire: name, Body: body})
+	}
+}
+
 // sendIP queues one addressed message for each board. m carries the addressing
 // and the text; the sender and the stamp are filled in here.
 func (w *World) sendIP(from *Empire, boards []string, m IPMessage) {

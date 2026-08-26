@@ -254,6 +254,16 @@ func ipMessageCoordinator(s session.Session, w *ctx) Result {
 
 // ipMessageToOnePlanet is Single Planet and Planet Coordinator, which differ
 // only in how narrowly the far side delivers what arrives.
+//
+// Single Planet then asks WHO on that planet, as the original does: naming the
+// planet is only half the address, and BRE follows it with the same
+// `(A-Y,Z=All,?=List) Send to:` toggle list local mail uses
+// (send_interbbs_message, BRE.OVR 0x1f335, calling the recipient prompt at
+// 0x1ed14 and its per-letter toggle at 0x1f1ac). IB went straight to the editor
+// and had no way to write to one baron (#193).
+//
+// Planet Coordinator skips the roster: that address names an office, not a
+// realm.
 func ipMessageToOnePlanet(s session.Session, w *ctx, toCoordinator bool) Result {
 	planets := addressablePlanets(w)
 	if len(planets) == 0 {
@@ -264,7 +274,91 @@ func ipMessageToOnePlanet(s session.Session, w *ctx, toCoordinator bool) Result 
 	if p == nil {
 		return Stay
 	}
-	return composeIPMessage(s, w, []string{p.Name}, toCoordinator)
+	if toCoordinator {
+		return composeIPMessage(s, w, []string{p.Name}, true)
+	}
+	rows := remoteRecipients(w, p.Name)
+	if len(rows) == 0 {
+		// No scores packet has arrived from that board yet, so there is no roster
+		// to letter. Writing to the planet still works and is what IB did before
+		// the picker existed, so the message goes planet-wide rather than the
+		// screen refusing to send anything at all.
+		return composeIPMessage(s, w, []string{p.Name}, false)
+	}
+	picked := runPicker(s, w, rows, 0, pickOpts{
+		prompt: "Send to:", allowAll: true,
+		title: fmt.Sprintf(tr(s, "Players at %s"), p.Name),
+	})
+	if len(picked) == 0 {
+		return Stay
+	}
+	barons := make([]string, 0, len(picked))
+	for _, i := range picked {
+		barons = append(barons, rows[i].name)
+	}
+	return composeIPMessageToBarons(s, w, p.Name, barons)
+}
+
+// remoteRecipients letters the barons on another planet for the Send Message
+// picker, from the last scores packet that board sent.
+//
+// THE LETTERS ARE THIS BOARD'S, not the far planet's. BRE's picker letter is a
+// raw index into that planet's 25-slot empire array, gaps and all, because BRE
+// holds the whole array; IB addresses a realm across the wire by NAME and
+// game.RemoteScore carries no slot, so a letter here numbers the rows of the
+// packet in the order they arrived. That order is fixed for as long as the
+// packet is, which is what makes the letter mean the same realm on the roster
+// and at the prompt. It is not the letter that realm answers to at home, and a
+// later packet may renumber it — see docs/mechanics-reference.md, "IP Messages".
+//
+// Recipients are capped at pickLetters because the prompt has no letter for a
+// twenty-sixth row. A planet cannot hold more (game.PlanetSlots), so the cap
+// only bites on a malformed packet.
+func remoteRecipients(w *ctx, board string) []pickRow {
+	var rows []pickRow
+	w.With(func() {
+		for _, b := range w.RemoteBoards {
+			if b.BoardID != board {
+				continue
+			}
+			for i, sc := range b.Scores {
+				if i >= pickLetters {
+					break
+				}
+				rows = append(rows, pickRow{
+					letter: rune('A' + i), name: sc.Empire, protected: sc.Protected,
+					land: sc.Land, score: sc.Score, nw: sc.NetWorth,
+				})
+			}
+		}
+	})
+	return rows
+}
+
+// composeIPMessageToBarons writes one message per named baron on board, each
+// addressed with game.IPMessage.ToEmpire so the far side drops it in that
+// realm's mailbox alone. Several recipients are several messages rather than a
+// recipient list on one, which is what lets this ride the packet unchanged.
+func composeIPMessageToBarons(s session.Session, w *ctx, board string, barons []string) Result {
+	if len(addressable(w, []string{board})) == 0 {
+		ok(s, "None of those planets is on the league roster, so nothing can be sent to them yet.")
+		return Stay
+	}
+	text, send := composeMessage(s)
+	if !send || strings.TrimSpace(text) == "" {
+		return Stay
+	}
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Saving..."), ansi.Reset)
+	err := w.mutatePlayer(func(p *game.Empire) error {
+		w.World.SendIPMessageToBarons(p, board, barons, text)
+		return nil
+	})
+	if err != nil {
+		fail(s, err)
+		return Stay
+	}
+	ok(s, "Your message is on its way to %d baron(s) on %s.", len(barons), board)
+	return Stay
 }
 
 func ipMessageSelect(s session.Session, w *ctx) Result {

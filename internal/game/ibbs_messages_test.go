@@ -163,3 +163,43 @@ func TestArrivingIPMessagesStayOutOfTheNews(t *testing.T) {
 		t.Errorf("an arriving message reached the news: %q", got)
 	}
 }
+
+// TestIPMessageToNamedBaronsReachesOnlyThem covers Send Message -> Single
+// Planet once the sender has picked letters at the "(A-Y,Z=All,?=List) Send
+// to:" prompt: one packet message per named realm, each narrowed with ToEmpire,
+// and nobody else on that planet reads it.
+func TestIPMessageToNamedBaronsReachesOnlyThem(t *testing.T) {
+	holdClock(t, time.Date(2026, 8, 6, 12, 0, 0, 0, time.UTC))
+	here := ipWorld("Nova Hub")
+	there := ipWorld("The Eclipse")
+	// A third realm on the far planet, so "only them" has something to exclude.
+	there.Empires = append(there.Empires, &Empire{Name: "Gap Origix", Owner: "gap", Alive: true})
+
+	here.SendIPMessageToBarons(here.Empires[0], "The Eclipse",
+		[]string{"Iron Dominion", "Gap Origix"}, "A word for you two.")
+	if len(here.Outbox) != 1 {
+		t.Fatalf("queued %d packets, want one for The Eclipse: %+v", len(here.Outbox), here.Outbox)
+	}
+	msgs := here.Outbox[0].IPMessages
+	if len(msgs) != 2 {
+		t.Fatalf("queued %d messages, want one per named baron", len(msgs))
+	}
+	var to []string
+	for _, m := range msgs {
+		to = append(to, m.ToEmpire)
+	}
+	if to[0] != "Iron Dominion" || to[1] != "Gap Origix" {
+		t.Fatalf("ToEmpire = %v, want the two named realms — an unaddressed message goes planet-wide", to)
+	}
+
+	there.ApplyPacket(here.Outbox[0])
+	for _, e := range there.Empires {
+		want := 0
+		if e.Name == "Iron Dominion" || e.Name == "Gap Origix" {
+			want = 1
+		}
+		if len(e.Mail) != want {
+			t.Errorf("%s has %d messages, want %d", e.Name, len(e.Mail), want)
+		}
+	}
+}

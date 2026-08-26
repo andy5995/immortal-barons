@@ -3843,6 +3843,29 @@ Quit, drawn as a 25-column cyan box. Naming a planet shows "Our current
 relations with X" first; the text is then written in the same 20-line editor
 local mail uses.
 
+**Single Planet then asks WHO on that planet.** Naming the planet is only half
+the address: BRE follows it with the same `(A-Y,Z=All,?=List) Send to:` toggle
+list local mail uses, over a roster of the barons on the chosen planet. Captured
+live (`cap/eots-ibbs-01.cap`, and see docs/dev/bre-screens.md, "IP Messages: the
+recipient picker") and read out of `send_interbbs_message` (`BRE.OVR` 0x1f335),
+which calls the recipient prompt at 0x1ed14 and a per-letter toggle at 0x1f1ac:
+
+- A letter toggles that realm on the list; the same letter again takes it off,
+  rubbing the echo out with `BS`/space/`BS` and re-drawing what is left.
+- `Z` applies that toggle to every letter A..Y, so it marks all from an empty
+  list and CLEARS all from a full one. It does not close the prompt.
+- `?` draws the roster — `-*Players at <planet>*-` over Id / Empire Name /
+  Territory / Score / Networth — and asks again.
+- RETURN closes the list. With nothing marked the capture goes straight back to
+  "send another message?" without opening the editor, so an empty list sends
+  nothing.
+- The prompt is only on **Single Planet**. The other four modes address a planet
+  or an office and never letter a realm.
+
+IB sends one packet message per marked realm, each narrowed with
+`IPMessage.ToEmpire` (the field the author-only reply already used), so
+addressing several barons needs no change to the packet's shape.
+
 Two addresses are narrower than a planet. **Planet Coordinator** reaches the
 receiving planet's elected Coordinator alone — BRE heads such a message
 `Message To  : Coordinator`. And a **reply** may be sent to its author alone;
@@ -3852,6 +3875,20 @@ see below.
 Allied (see Planetary diplomacy, below) — the one thing that chart drives rather
 than describes. A message to a planet reaches every living realm there,
 computer barons included, which is the same reach the local "send to all" has.
+
+**Two IB divergences in that picker, both forced by the wire.** BRE holds every
+planet's whole 25-slot empire array, so a remote picker letter is that realm's
+own slot and carries the same gaps its home board shows — the captured rosters
+run `(A) (B) (D) (E)` for months. `game.RemoteScore` carries no slot: a scores
+packet lists only living human realms, in slot order with the gaps closed. So IB
+letters the rows of the packet as they arrive, `[A]` upward with no gaps. The
+letter means the same realm on the roster and at the prompt, which is what the
+screen needs; it is not the letter that realm answers to at home, and a packet
+that arrives with a realm added or gone renumbers the rows below it.
+
+And a planet **no scores packet has arrived from** has no roster to letter, so
+IB skips the prompt and writes to the planet as a whole rather than refusing to
+send. BRE has the array either way and always asks.
 
 **Arriving mail posts no news, on either planet.** BRE's inbound handler
 (`process_interbbs_message_packet`) writes `DATA\MSG.BRF` and touches no news
@@ -4580,6 +4617,9 @@ checking IB against a capture:
 - **A realm's id is `[A]`, where BRE's score tables print `(A)`.** See "The
   slot is assigned once and never moves" above for why. `-*Relations*-` already
   brackets its id in the original, so that screen is unchanged.
+- **An interplanetary recipient letter numbers the rows of a scores packet**,
+  where BRE's is the realm's own slot on its home planet, gaps and all. See "IP
+  Messages" above: the slot does not ride the wire.
 - **A realm under New Realm Protection is flagged `(P)` after its name** on
   every roster IB draws, and keeps its selection letter on the attack and covert
   target lists (#214). BRE flags nothing and IB used to withhold the letter,

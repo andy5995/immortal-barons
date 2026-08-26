@@ -248,3 +248,146 @@ func TestAnUnroutablePlanetIsStillShownWhereTheScreenOnlyInforms(t *testing.T) {
 		t.Errorf("the treaty chart hid a planet it has merely heard from:\n%s", out)
 	}
 }
+
+// ipWorldWithRoster is ipWorld having also heard The Eclipse's scores, so Send
+// Message -> Single Planet has a roster to letter.
+func ipWorldWithRoster() *ctx {
+	w := ipWorld()
+	w.RemoteBoards = []game.RemoteBoard{{BoardID: "The Eclipse", Scores: []game.RemoteScore{
+		{Empire: "Imperially", Land: 7596, Score: 734000, NetWorth: 9017000},
+		{Empire: "The Empire of Queg", Land: 7187, Score: 728000, NetWorth: 11000000},
+		{Empire: "Gap Origix", Land: 10212, Score: 247000, NetWorth: 10000000},
+	}}}
+	return w
+}
+
+// ipQueuedTo is the ToEmpire of every message queued for board.
+func ipQueuedTo(w *ctx, board string) []string {
+	var to []string
+	for _, p := range w.Outbox {
+		if p.ToBoard != board {
+			continue
+		}
+		for _, m := range p.IPMessages {
+			to = append(to, m.ToEmpire)
+		}
+	}
+	return to
+}
+
+// '?' at the recipient prompt lists the planet's roster and asks again, as the
+// original does (cap/eots-ibbs-01.cap at the Send Message prompt). The script
+// then picks a realm and sends, so the roster is proved to have been drawn on
+// the way to a real send rather than at the end of a script that ran dry.
+func TestIPMessageSinglePlanetListsThePlanetRoster(t *testing.T) {
+	f := &fakeSession{keys: []rune("4\r?B\rTerms.\r/s")}
+	w := ipWorldWithRoster()
+	ipMessageSingle(f, w)
+	out := stripANSI(f.out.String())
+	for _, want := range []string{
+		"Send to:", "-*Players at The Eclipse*-",
+		"Empire Name", "Territory", "Net Worth",
+		"Imperially", "The Empire of Queg", "Gap Origix",
+	} {
+		if !strings.Contains(out, want) {
+			t.Errorf("the recipient roster is missing %q:\n%s", want, out)
+		}
+	}
+	// Two prompts: the one '?' answered and the one that took the letter.
+	if n := strings.Count(out, "Send to:"); n != 2 {
+		t.Errorf("the prompt ran %d times, want 2 — '?' must re-draw it", n)
+	}
+	if got := ipQueuedTo(w, "The Eclipse"); len(got) != 1 || got[0] != "The Empire of Queg" {
+		t.Fatalf("queued for %v, want the realm lettered B", got)
+	}
+}
+
+// A letter toggles: pressing it once marks that realm, pressing it again takes
+// it off. The script marks A, marks B, then presses A again, so only B may be
+// written to — and the erase BRE writes (BS/space/BS) has to appear, since a
+// picker that silently ignored the second A would queue the same one message.
+func TestIPMessageRecipientLetterToggles(t *testing.T) {
+	f := &fakeSession{keys: []rune("4\rABA\rTerms.\r/s")}
+	w := ipWorldWithRoster()
+	ipMessageSingle(f, w)
+	raw := f.out.String()
+	out := stripANSI(raw)
+	if !strings.Contains(out, "Send to:") {
+		t.Fatalf("never reached the recipient prompt:\n%s", out)
+	}
+	if !strings.Contains(raw, "\b \b") {
+		t.Errorf("nothing was rubbed off the prompt line, so the second A did not un-mark:\n%q", raw)
+	}
+	if !strings.Contains(out, "lines for your message") {
+		t.Fatalf("never reached the editor:\n%s", out)
+	}
+	if got := ipQueuedTo(w, "The Eclipse"); len(got) != 1 || got[0] != "The Empire of Queg" {
+		t.Fatalf("queued for %v, want B alone — A was marked and un-marked", got)
+	}
+}
+
+// 'Z' marks every realm on the planet, and RETURN then sends one message per
+// marked realm, each addressed to that realm alone.
+func TestIPMessageZMarksEveryBaronOnThePlanet(t *testing.T) {
+	f := &fakeSession{keys: []rune("4\rZ\rTerms.\r/s")}
+	w := ipWorldWithRoster()
+	ipMessageSingle(f, w)
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Send to:") || !strings.Contains(out, "lines for your message") {
+		t.Fatalf("never reached the prompt and the editor:\n%s", out)
+	}
+	got := ipQueuedTo(w, "The Eclipse")
+	want := []string{"Imperially", "The Empire of Queg", "Gap Origix"}
+	if len(got) != len(want) {
+		t.Fatalf("queued for %v, want one message each for %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("queued for %v, want %v", got, want)
+		}
+	}
+	if body := w.Outbox[0].IPMessages[0].Body; body != "Terms." {
+		t.Errorf("queued body %q", body)
+	}
+}
+
+// RETURN with nothing marked leaves without sending — and without opening the
+// editor, which is what the original's own capture shows (it goes straight back
+// to asking whether to send another message). The editor banner is asserted
+// ABSENT after the prompt is proved reached, so an empty outbox cannot come
+// from a script that stopped earlier.
+func TestIPMessageEmptyRecipientListSendsNothing(t *testing.T) {
+	f := &fakeSession{keys: []rune("4\r\r")}
+	w := ipWorldWithRoster()
+	ipMessageSingle(f, w)
+	out := stripANSI(f.out.String())
+	if !strings.Contains(out, "Send to:") {
+		t.Fatalf("never reached the recipient prompt:\n%s", out)
+	}
+	if strings.Contains(out, "lines for your message") {
+		t.Errorf("an empty recipient list still opened the editor:\n%s", out)
+	}
+	if len(w.Outbox) != 0 {
+		t.Errorf("an unaddressed message was queued: %+v", w.Outbox)
+	}
+}
+
+// A planet this board has no scores for has no roster to letter, so the message
+// goes to the planet as a whole rather than the screen refusing to send. The
+// prompt must NOT appear — a picker over an empty roster would have no key that
+// does anything.
+func TestIPMessageWithoutARosterWritesToTheWholePlanet(t *testing.T) {
+	f := &fakeSession{keys: []rune("3\rTerms.\r/s")}
+	w := ipWorldWithRoster() // scores for The Eclipse only; "3" is Eye of the Storm
+	ipMessageSingle(f, w)
+	out := stripANSI(f.out.String())
+	if strings.Contains(out, "Send to:") {
+		t.Errorf("a planet with no known barons still asked which of them:\n%s", out)
+	}
+	if !strings.Contains(out, "lines for your message") {
+		t.Fatalf("never reached the editor:\n%s", out)
+	}
+	if got := ipQueuedTo(w, "Eye of the Storm"); len(got) != 1 || got[0] != "" {
+		t.Fatalf("queued for %q, want one planet-wide message (no ToEmpire)", got)
+	}
+}

@@ -2227,6 +2227,62 @@ Diplomacy action that names a realm — each treaty type and Declaration Of War
 and leaves the list open, so letters can still be added or taken off before
 RETURN.
 
+## IP Messages: the recipient picker (InterPlanetary Ops -> Send Message -> Single Planet)
+
+The interplanetary twin of the picker above, captured live in
+`cap/eots-ibbs-01.cap` (a four-planet league, 2026-08) and read out of
+`send_interbbs_message` (`BRE.OVR` 0x1f335). The flow is: the IP Messages box
+(Single Planet / Select Planets / All Planets / Allied Planets / Planet
+Coordinator / Quit), the shared `Enter Planet Name or Number (? for list):`
+prompt, the "Our current relations with" line, and THEN
+`(A-Y,Z=All,?=List) Send to:` over the barons on the chosen planet. The editor
+comes after that, not straight after the planet.
+
+The roster `?` draws is headed `-*Players at <planet>*-` in bright white on
+blue-rules, over the same `Id   Empire Name   Territory   Score   Networth`
+columns the local See Scores table uses, closed by the `[BRE vX]  <date>`
+footer. It is drawn by the same routine the Spy Database and the attack target
+list use (`show_player_list`, `BRE.OVR` 0x2224cf).
+
+**The toggle is visible in the capture's BYTES.** At one prompt the echo after
+`Send to: ` runs four letters in bright cyan (`1;36`, returning to `0;40;37`
+after each), then four erase groups:
+
+```
+<L><L><L><L>  BS SP BS      -> the last letter taken off, nothing re-drawn
+              BS SP BS      -> and the next
+              BS SP BS BS <L>  -> one taken from the MIDDLE: an extra BS per
+                                 letter after it, then the survivors re-drawn
+              BS SP BS      -> the last one off
+CR
+```
+
+and the next thing on screen is the "send another message?" question, NOT the
+editor's banner. That settles three things a reading of the code leaves open:
+the letters toggle, the erase-and-redraw is what a middle deselect looks like,
+and **RETURN with nothing marked sends nothing** (the code simply never fills
+its recipient table in that case, which is undefined rather than defined
+behaviour; the capture defines it).
+
+**`?` is not echoed.** The capture shows the key produce a colour change and a
+CRLF, then the roster, then the prompt again. IB echoes the word "List" instead,
+as it already does on the local picker.
+
+**The letters have gaps and they persist.** The same planet's roster reads
+`(A) (B) (D) (E)` on three separate days a week apart, and a later capture shows
+`(A) (B) (C) (D)` once the C slot has been refilled by a different realm — so
+the letter is the realm's own slot on its home planet, not its row number, and
+BRE knows it because it holds that planet's whole 25-slot array.
+
+**IB divergences here**, both recorded in `docs/mechanics-reference.md` under
+"IP Messages": IB letters the rows of the received scores packet consecutively,
+because `game.RemoteScore` carries no slot; and a planet IB has no scores packet
+for skips the prompt and takes a planet-wide message rather than refusing.
+
+**The planet prompt autocompletes in the original.** The capture shows two typed
+characters erased (`BS SP BS` twice) and replaced with the full planet name. IB
+does not do this — a separate request, noted on #193 and not built there.
+
 ### The message editor
 
 20 lines, under a **68-column** ruler — note the last group is short, `----+----]`

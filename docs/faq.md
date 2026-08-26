@@ -38,6 +38,11 @@
   about your own offers, so it does not show you anything about other players.
 - Send Message can write to all your allies at once — every realm on your board
   that you hold a treaty with, of any kind.
+- In a league, the letters used to pick who on another planet reads your message
+  are counted down that planet's scores as your board received them. BRE uses the
+  letter the realm has at home, which leaves gaps where realms have died. The
+  letters here can move when a realm on that planet dies or a new one starts, so
+  read the roster before you pick.
 - Gold you earn above the two billion you can hold is still lost, but the game
   tells you when it happens, and a full bank pays its interest into your gold in
   hand rather than losing it.

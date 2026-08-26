@@ -61,6 +61,10 @@ type pickOpts struct {
 	// Message passes 1 and gets the score table, the Diplomacy menu passes 0
 	// and gets Relations (docs/dev/bre-screens.md).
 	relations bool
+	// title heads the '?' roster inside the -*...*- rule. Empty means this
+	// board's own realms, which BRE heads with the game name; the
+	// interplanetary picker heads its roster "Players at <planet>" instead.
+	title string
 }
 
 // Recipient-picker geometry, matching BRE's captured list (docs/dev/bre-screens.md,
@@ -144,8 +148,12 @@ func writePickRoster(s session.Session, t Term, rows []pickRow, opts pickOpts) {
 		writeRelationsTable(s, t, rel)
 		return
 	}
+	title := opts.title
+	if title == "" {
+		title = tr(s, "Immortal Barons")
+	}
 	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n",
-		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.FgBrightMagenta, ansi.Reset)
+		ansi.FgBrightMagenta, ansi.FgBrightWhite, title, ansi.FgBrightMagenta, ansi.Reset)
 	scoreTableHead(s, t)
 	for _, r := range rows {
 		scoreTableRowStr(s, t, scoreID(string(r.letter)), r.name, ansi.FgBrightWhite, r.presence, r.protected,
@@ -248,6 +256,19 @@ func pickRecipients(s session.Session, w *ctx, opts pickOpts) []*game.Empire {
 		ok(s, "There is no one to reach.")
 		return nil
 	}
+	var out []*game.Empire
+	for _, i := range runPicker(s, w, rows, allies, opts) {
+		out = append(out, rows[i].e)
+	}
+	return out
+}
+
+// runPicker is the toggle loop itself, over rows already gathered. It is split
+// from pickRecipients because the interplanetary Send Message picker addresses
+// realms on ANOTHER board — rows with no *game.Empire behind them — and must
+// still be the same prompt, the same roster and the same keys
+// (internal/menu/actions_ipmessages.go). Returned indices are in row order.
+func runPicker(s session.Session, w *ctx, rows []pickRow, allies int, opts pickOpts) []int {
 	chosen := make([]bool, len(rows))
 	var echoed []int // selection order, so a deselect can redraw the line
 
@@ -286,10 +307,10 @@ func pickRecipients(s session.Session, w *ctx, opts pickOpts) []*game.Empire {
 		switch {
 		case r == '\r' || r == '\n':
 			fmt.Fprintf(s, "%s\n", ansi.Reset)
-			var out []*game.Empire
-			for i, row := range rows {
+			var out []int
+			for i := range rows {
 				if chosen[i] {
-					out = append(out, row.e)
+					out = append(out, i)
 				}
 			}
 			return out
