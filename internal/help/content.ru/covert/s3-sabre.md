@@ -2,13 +2,13 @@
 category: covert
 in_game: true
 order: 15
-title: R5-Slappenheimer
+title: S3-Sabre
 ---
 
-# R5-Slappenheimer
+# S3-Sabre
 
-The R5-Slappenheimer is an unreliable weapon of mass destruction, fired from
-the InterPlanetary menu's Special Operations at a baron on another
+The S3-Sabre is an unreliable weapon of mass destruction, fired from the
+InterPlanetary menu's Special Operations at a baron on another
 planet. Before you fire, you set a dial from 0 to 10, but the dial is for
 show and changes nothing, so pick any number you like. The missile is a
 gamble every time. Most launches do nothing: it misses, it malfunctions, or

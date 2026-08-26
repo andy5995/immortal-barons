@@ -13,3 +13,6 @@ title: 'Ходы и защита'
 Новые игроки получают Защиту нового королевства: несколько ходов, в течение
 которых вы не можете ни атаковать, ни быть атакованными. Это даёт время
 развиться.
+
+A realm still under protection carries a `(P)` after its name in the lists
+of realms, so you can see who cannot be attacked yet.

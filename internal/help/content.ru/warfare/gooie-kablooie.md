@@ -2,12 +2,12 @@
 category: warfare
 in_game: true
 order: 6
-title: 'Clingy Annihilator'
+title: 'Gooie Kablooie'
 ---
 
-# Clingy Annihilator
+# Gooie Kablooie
 
-The Clingy Annihilator is the ultimate weapon. It is aimed at a whole enemy
+The Gooie Kablooie is the ultimate weapon. It is aimed at a whole enemy
 planet rather than at one baron, and your planet can only have one at a
 time.
 
