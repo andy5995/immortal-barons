@@ -129,11 +129,20 @@ the other realm holds is not yours to see". That is the only decimal `B` form in
 any capture here. IB prints no ceiling at all on that prompt (see Send Trade
 Deal, below).
 
-**Abbreviated columns use a lowercase suffix, and it goes `k` then `m`.** The
-Daily Bulletin's third row is `Total Net Worth:  2720k` with `Change: +616k`,
-and the scores columns put `1962k` beside `12m` in the same table. No capture
-shows either column at billion scale, so BRE's suffix above `m` is unknown; a
-lowercase `b` appears nowhere.
+**Abbreviated columns use a lowercase suffix, and each column keeps ONE suffix
+however large its figure runs — the suffix is not a magnitude threshold.** The
+See Scores board puts `1962k` and `12m` side by side in a single row
+(`cap/20240527-134Pho_Lazarus_Public.cap`): the Score column is fixed on `k` and
+the Net Worth column on `m`, at the same magnitude. The Daily Bulletin's third
+row stays on `k` well past a million — `Total Net Worth:  25,750k` in
+`cap/eots-ibbs-01.cap`, with `2720k` and `Change: +616k` in a smaller game. No
+capture reaches billion scale in either column, and a lowercase `b` appears
+nowhere.
+
+**IB steps the suffix instead**, `k`/`m`/`b` by magnitude and nothing below a
+thousand, one rule on every screen (`numfmt.Abbrev`). A deliberate divergence:
+two columns spelling the same magnitude two ways is the part of BRE's behaviour
+worth losing, and stepping holds any figure to four digits and a letter.
 
 ## Status bar (bottom line, every screen)
 

@@ -60,18 +60,37 @@ func groupDigits(v int64, sep byte) string {
 // Comma formats n with English thousands separators (478967 -> "478,967").
 func Comma[T Number](n T) string { return Format(n, "") }
 
-// Abbrev formats large totals with a k suffix (34,833,289 -> "34,833k") so a
-// planet-wide total fits on one line, as BRE's own Daily Bulletin does it
-// (`Total Net Worth: 2720k`). The suffix carries on past a billion —
-// 1,373,000,000 -> "1,373,000k" — keeping one form down the column. Below
-// 1,000 it prints in full.
+// Abbrev formats a large total compactly so it fits one column, stepping the
+// suffix with the magnitude: k at a thousand, m at a million, b at a billion,
+// and nothing at all below a thousand. The fraction is truncated, not rounded,
+// so a figure a hair under the next step never reads as having reached it.
+//
+// BRE does NOT step: its own columns pick ONE suffix and keep it however far the
+// figure runs, which is why a capture holds `Total Net Worth: 25,750k` on the
+// Daily Bulletin and `1962k   12m` side by side in one See Scores row — k and m
+// on the same screen at the same magnitude, differing by column rather than by
+// size. Stepping is IB's choice (Andy's, #205): one rule everywhere beats two
+// columns that disagree, and it keeps any figure inside four digits and a
+// letter.
 func Abbrev[T Number](n T) string {
 	abs := int64(n)
 	if abs < 0 {
 		abs = -abs
 	}
-	if abs >= 1_000 {
-		return Comma(int64(n)/1_000) + "k"
+	for _, step := range abbrevSteps {
+		if abs >= step.at {
+			return Comma(int64(n)/step.at) + step.suffix
+		}
 	}
 	return Comma(n)
+}
+
+// abbrevSteps runs largest first, so the first match is the right one.
+var abbrevSteps = []struct {
+	at     int64
+	suffix string
+}{
+	{1_000_000_000, "b"},
+	{1_000_000, "m"},
+	{1_000, "k"},
 }

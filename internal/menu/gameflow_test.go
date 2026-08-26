@@ -486,7 +486,7 @@ func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
 		// The sign carries its own colour, so it and its figure are asserted apart.
 		"Total Population", "1,865,289", "5,838",
 		"Total Regions", "53,266",
-		"Total Net Worth", "34,833k", "1,373k",
+		"Total Net Worth", "34m", "1m",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected output to contain %q, got:\n%s", want, out)
@@ -499,7 +499,7 @@ func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
 	if !strings.Contains(out, "\x1b[96m-\x1b[96m5,838") {
 		t.Error("a falling figure and its minus sign should both be bright cyan")
 	}
-	if !strings.Contains(out, "\x1b[92m+\x1b[96m1,373k") {
+	if !strings.Contains(out, "\x1b[92m+\x1b[96m1m") {
 		t.Error("a rising figure should carry a bright-green plus over a bright-cyan figure")
 	}
 	if !strings.Contains(out, "\x1b[96m+\x1b[96m0") {

@@ -2485,14 +2485,19 @@ section is a record of what was claimed and how it was settled, so the word
   form in any capture. IB no longer shows that prompt's ceiling at all
   (`promptSuggestedOpen`), so nothing is left that needs it.
 
-  **The Daily Bulletin's `Total Net Worth` keeps its `k` suffix past a billion**
-  — 1,373,000,000 renders `1,373,000k` (`numfmt.Abbrev`). BRE abbreviates that
-  column (`Total Net Worth:  2720k`, `Change: +616k`) and no capture shows it at
-  billion scale, so the continuation is **IB's choice**, taken because one form
-  down a column beats a thirteen-digit number appearing mid-list. BRE
-  additionally switches to an `m` suffix at millions in its scores columns
-  (`1962k` beside `12m`) where IB stays on `k` and comma-groups; that divergence
-  predates this and stays.
+  **An abbreviated column steps its suffix with the magnitude** — nothing below
+  a thousand, then `k`, `m` and `b`, truncated rather than rounded
+  (`numfmt.Abbrev`). 1,373,000,000 renders `1b`; 34,833,289 renders `34m`.
+
+  This is a **deliberate divergence**, and the shape of BRE's own behaviour is
+  worth recording so it is not "corrected" back. BRE does not step: each of its
+  columns picks one suffix and keeps it however far the figure runs. Its See
+  Scores board prints `1962k` and `12m` in the SAME row — Score fixed on `k`,
+  Net Worth fixed on `m`, at one magnitude — and its Daily Bulletin holds `k` to
+  `25,750k`. No capture reaches billion scale in any abbreviated column, so
+  BRE's behaviour there is unknown either way. IB steps because one rule across
+  every screen beats two columns that disagree, and it keeps any figure inside
+  four digits and a letter.
 - **Food market (issue #19):** food is bought and sold against a **shared
   planet-wide pool** that starts each day at `FoodMarketDailySupply` (1,000,000
   units, from BRE's live "~1,001,452 available today"). Buying depletes the pool
