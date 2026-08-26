@@ -779,6 +779,13 @@ manufactured by Industrial Zones." IB says that once, as a heading, and lists
 the units under it — one per line, figure first, and no line for a type that
 built none.
 
+**The bank's returns close the block.** After the manufacturing lines BRE prints
+`N gold was earned from investment returns.` — the day's matured investments, and
+the SAME figure on every turn of that day (`cap/eots-ibbs-01.cap`: one day's
+14,699,020 repeated across all ten turns). **IB adds a line above it** for the
+savings interest credited at the end of the previous turn, which BRE reports
+nowhere; the wording is IB's own, in the style of the lines around it (#216).
+
 ```
 227,717 gold was earned in taxes.
 19,510 gold was produced from the Ore Mines.

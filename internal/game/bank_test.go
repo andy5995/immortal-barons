@@ -419,3 +419,24 @@ func TestCreditThatFitsIsSilent(t *testing.T) {
 		t.Errorf("a credit that fits raised %d events, want none", len(e.Events)-before)
 	}
 }
+
+// Daily maintenance records what the day's matured investments paid, because
+// every turn of that day reports the same figure (cap/eots-ibbs-01.cap).
+func TestMaintenanceRecordsTheDaysInvestmentReturns(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.LastMaintDate = "2026-01-01"
+	e := w.AddHuman("tester", "Testland")
+	e.LastPlayed = "2026-01-01"
+	e.Gold = 0
+	e.Investments = []Investment{
+		{Amount: 1000, Return: 1150, MaturesDay: 1},
+		{Amount: 2000, Return: 2300, MaturesDay: 1},
+		{Amount: 500, Return: 550, MaturesDay: 99},
+	}
+
+	w.DailyMaintenance("2026-01-02")
+
+	if e.InvestReturnsToday != 3450 {
+		t.Errorf("InvestReturnsToday = %d, want 3450 — both matured returns, and not the locked one", e.InvestReturnsToday)
+	}
+}

@@ -17,6 +17,9 @@ taken by pirates or raids.
 Deposits and withdrawals have no size limit. One investment locks away at most
 two billion gold, though you may open as many as you like.
 
+The start of your next turn tells you what the bank paid: the interest, and what
+any investment that matured today paid back.
+
 Your sysop sets a limit on how much gold you can hold — two billion to begin
 with, in hand and the same again in the bank. Gold you earn above that is lost.
 Spend it before you get there.

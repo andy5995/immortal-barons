@@ -188,7 +188,10 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		}
 		for _, e := range w.Empires {
 			if e.Alive {
-				w.matureInvestments(e)
+				// Kept on the empire so every turn of the day reports the same
+				// figure, which is how BRE shows it (cap/eots-ibbs-01.cap: the
+				// one day's 14,699,020 repeats on all ten turns).
+				e.InvestReturnsToday = w.matureInvestments(e)
 				w.matureLoans(e)
 			}
 		}
@@ -322,7 +325,11 @@ func (w *World) processEconomy(e *Empire) {
 	if tpd < 1 {
 		tpd = 1
 	}
-	e.Bank += e.Bank * int64(w.Config.InterestRate) / (1000 * tpd)
+	interest := e.Bank * int64(w.Config.InterestRate) / (1000 * tpd)
+	e.Bank += interest
+	// Reported at the start of the next turn (#216), so it has to survive the
+	// save between the two door runs.
+	e.LastInterest = interest
 	// A bank sitting at the cap pays its interest into the treasury rather than
 	// having it destroyed: the cap limits what one purse holds, and a full purse
 	// is no reason to burn the earnings. Gold has the same cap, so a baron whose

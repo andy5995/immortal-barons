@@ -244,6 +244,14 @@ type Empire struct {
 	// Transient per-turn stats for the end-of-turn report; not persisted.
 	LastSpoiled   int `json:"-"`
 	LastPopGrowth int `json:"-"`
+	// LastInterest is the savings interest credited at the end of the previous
+	// turn and InvestReturnsToday what today's matured investments paid. Both are
+	// reported at the START of a turn, so unlike the transients above they have to
+	// survive the save: the turn that earns them and the turn that shows them are
+	// separate door runs, and the investment payout comes from daily maintenance,
+	// which may be a different process again.
+	LastInterest       int64 `json:"lastInterest,omitempty"`
+	InvestReturnsToday int64 `json:"investReturnsToday,omitempty"`
 	// PendingSupportPenalty and PendingMoralePenalty are stat points owed but not
 	// yet deducted. BRE accumulates shortfall penalties during the maintenance and
 	// food stages in two signed bytes on the empire record (+0x2ba support, +0x2b9
