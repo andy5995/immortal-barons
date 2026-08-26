@@ -133,6 +133,18 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   `unitsAffordable` convert between the two widths without wrapping. Run
   `GOARCH=386 go test ./...` when touching money math — it catches overflows
   the 64-bit build hides.
+- **A body that only gathers goes through `World.Read`; only a body that changes
+  something goes through `World.With`.** On a door `With` is flock → reload →
+  fn → **save** → release, so a snapshot taken through it rewrites `world.json`
+  under the exclusive lock every other node is queued on, once per screen drawn —
+  and a failed save is session-fatal, so a pure read could end a caller's session
+  over a write it never needed. `Read` keeps the lock and the reload, which is
+  what makes what it gathers current, and drops only the write-back. Neither may
+  contain player input; the lock is held for the duration. Under `MemStore` the
+  two are otherwise identical, so a mutation wrongly routed through `Read` would
+  pass every test and lose the change only on a door — `MemStore.Snapshot`
+  fingerprints the world either side of the body under a test binary and panics
+  on a change, which is what makes the split enforceable rather than a habit.
 - **Every path that pays gold in goes through `World.creditGold`.** It holds
   gold in hand at the configured cap (`World.MoneyCap`, the sysop's
   `MoneyCapBillions`) and files an event naming what was lost and where it came

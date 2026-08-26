@@ -476,6 +476,31 @@ func (w *World) With(fn func()) {
 	fn()
 }
 
+// Read runs fn over a freshly loaded world and writes NOTHING back. Use it
+// wherever the body only gathers — a screen's figures, a picker's list, a
+// yes/no's premise — and With only where something changes.
+//
+// The distinction is not tidiness. On a door With is flock → reload → fn → SAVE
+// → release, so a snapshot taken through it rewrites world.json under the lock
+// every other node is queued on, once per screen. And because a failed Save is
+// session-fatal, a pure read could end a caller's session over a write it never
+// asked for. fn must not mutate: nothing here will persist it, and it will be
+// silently undone by the next reload.
+//
+// Same rule as With about player input — never prompt inside one. The lock is
+// held for the duration.
+func (w *World) Read(fn func()) {
+	if w.store != nil {
+		if err := w.store.Snapshot(fn); err != nil {
+			w.noteStoreErr(err)
+		}
+		return
+	}
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	fn()
+}
+
 // noteStoreErr records the first failed transaction of this session. The first
 // is the one worth reporting: once a save has failed, the in-memory world has
 // drifted from the file, so later failures are consequences rather than

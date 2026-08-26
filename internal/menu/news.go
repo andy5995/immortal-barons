@@ -200,7 +200,7 @@ func isDigit(r rune) bool { return r >= '0' && r <= '9' }
 // to `1;31` within the same hue (docs/dev/bre-screens.md records it).
 func newsHighlightTerms(w *ctx) []hiTerm {
 	var terms []hiTerm
-	w.With(func() {
+	w.Read(func() {
 		for _, e := range w.Empires {
 			terms = append(terms, hiTerm{e.Name, ansi.FgBrightYellow})
 		}

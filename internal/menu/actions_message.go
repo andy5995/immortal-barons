@@ -304,7 +304,7 @@ func pickRecipients(s session.Session, w *ctx, opts pickOpts) []*game.Empire {
 			}
 		case allies > 0 && r == '*':
 			var partners []*game.Empire
-			w.With(func() { partners = w.TreatyPartners(w.Player()) })
+			w.Read(func() { partners = w.TreatyPartners(w.Player()) })
 			for i, row := range rows {
 				for _, p := range partners {
 					if p == row.e {
@@ -533,7 +533,7 @@ func sendMessage(s session.Session, w *ctx) Result {
 			return Stay
 		}
 		names := make([]string, 0, len(to))
-		w.With(func() {
+		w.Read(func() {
 			for _, e := range to {
 				names = append(names, e.Name)
 			}

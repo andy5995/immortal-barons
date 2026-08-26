@@ -43,6 +43,24 @@ func (fs *FileStore) Transact(fn func()) error {
 	return Save(fs.w, fs.cfg)
 }
 
+// Snapshot is Transact without the save: flock → reload → fn → release. The
+// lock is still taken and the world is still reloaded, so what fn reads is
+// current and cannot be torn by a node writing mid-read; only the write-back
+// goes, because a gathering body has nothing to write. See game.Store.
+func (fs *FileStore) Snapshot(fn func()) error {
+	lock, err := Lock(fs.cfg, true)
+	if err != nil {
+		return err
+	}
+	defer lock.Release()
+
+	if err := fs.reload(); err != nil {
+		return err
+	}
+	fn()
+	return nil
+}
+
 // reload reads world.json and unmarshals it into the existing *World (not a new
 // one — the caller's pointer must survive), then re-runs the same migrations
 // Load applies. A missing file leaves the world as-is (it was seeded at Load),

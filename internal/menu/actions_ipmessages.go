@@ -25,7 +25,7 @@ const planetNameWidth = 27
 // already hold it.
 func knownPlanets(w *ctx) []game.LeagueNode {
 	var planets []game.LeagueNode
-	w.With(func() { planets = w.LeaguePlanets() })
+	w.Read(func() { planets = w.LeaguePlanets() })
 	return planets
 }
 
@@ -234,7 +234,7 @@ func relationColored(s session.Session, r game.PlanetRelation) string {
 // names — a message, a terror op, a database lookup.
 func showRelation(s session.Session, w *ctx, planet string) {
 	var r game.PlanetRelation
-	w.With(func() { r = w.PlanetRelationWith(planet) })
+	w.Read(func() { r = w.PlanetRelationWith(planet) })
 	fmt.Fprintf(s, "%s%s %s%s%s: %s%s\n",
 		ansi.FgWhite, tr(s, "Our current relations with"),
 		ansi.FgBrightWhite, planet, ansi.FgWhite,
@@ -295,7 +295,7 @@ func ipMessageSelect(s session.Session, w *ctx) Result {
 // your own board is only ever a deliberate choice made by naming it.
 func ipMessageAll(s session.Session, w *ctx) Result {
 	var all []string
-	w.With(func() { all = w.KnownBoards() })
+	w.Read(func() { all = w.KnownBoards() })
 	if len(all) == 0 {
 		ok(s, "No other planets are known yet.")
 		return Stay
@@ -307,7 +307,7 @@ func ipMessageAll(s session.Session, w *ctx) Result {
 // calls Allied. It is the one thing that chart drives rather than describes.
 func ipMessageAllied(s session.Session, w *ctx) Result {
 	var allied []string
-	w.With(func() { allied = w.AlliedPlanetNames() })
+	w.Read(func() { allied = w.AlliedPlanetNames() })
 	if len(allied) == 0 {
 		ok(s, "We have no allied planets.")
 		return Stay

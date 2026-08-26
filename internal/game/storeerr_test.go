@@ -18,6 +18,10 @@ func (f *failingStore) Transact(fn func()) error {
 	return f.err
 }
 
+// A store that cannot save usually cannot read either — the disk is the fault,
+// not the direction — so a Read reports the same way a With does.
+func (f *failingStore) Snapshot(fn func()) error { return f.Transact(fn) }
+
 // TestWithRecordsAFailedTransaction is the fix for a save failure that read as
 // a completed turn: With cannot return an error to its 74 call sites, so it
 // records the first one for Run to report. Before this, Transact's error was
@@ -68,5 +72,35 @@ func TestWithLeavesNoErrorWhenTransactionsCommit(t *testing.T) {
 	w.With(func() {})
 	if err := w.StoreErr(); err != nil {
 		t.Errorf("StoreErr() = %v, want nil after a committed transaction", err)
+	}
+}
+
+// The guard that makes the Read/With split enforceable. Under MemStore the two
+// are otherwise identical, so a body wrongly routed through Read would behave
+// correctly in every test and silently lose its mutation only on a door, where
+// nothing saves it. The fingerprint check turns that into a panic here.
+func TestReadRefusesAMutatingBody(t *testing.T) {
+	defer func() {
+		if recover() == nil {
+			t.Fatal("a mutating Read body did not panic; the guard is not armed")
+		}
+	}()
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.AddHuman("alice", "Alice")
+	w.Read(func() { w.AddHuman("bob", "Bob") })
+}
+
+// And it must not fire on an honest read, or every gathering screen panics.
+func TestReadAllowsAGatheringBody(t *testing.T) {
+	w := NewWorldSeed(DefaultConfig(), 1)
+	w.AddHuman("alice", "Alice")
+	var name string
+	w.Read(func() {
+		if p := w.FindByName("Alice"); p != nil {
+			name = p.Name
+		}
+	})
+	if name != "Alice" {
+		t.Errorf("Read gathered %q, want Alice", name)
 	}
 }

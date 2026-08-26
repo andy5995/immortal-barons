@@ -411,7 +411,7 @@ func joinRefusal(w *game.World) string {
 // forced to invent a realm.
 func onboard(s session.Session, w *game.World, handle, lang string) (name string, quit bool) {
 	var taken map[string]bool
-	w.With(func() {
+	w.Read(func() {
 		taken = make(map[string]bool, len(w.Empires))
 		for _, e := range w.Empires {
 			taken[strings.ToLower(e.Name)] = true

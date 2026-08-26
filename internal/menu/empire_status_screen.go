@@ -73,7 +73,7 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 // another session mutates the world mid-render.
 func empireStatusBlock(s session.Session, w *ctx) string {
 	var p game.Empire
-	w.With(func() { p = *w.Player() })
+	w.Read(func() { p = *w.Player() })
 
 	var b strings.Builder
 	// Every figure goes through the formatter the rest of the game uses, so the

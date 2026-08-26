@@ -93,7 +93,7 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 		// Operation, so the local Covert menu never had it.
 		if op == game.OpSabre {
 			var mode game.SabreMode
-			w.With(func() { mode = w.Config.SabreHandling })
+			w.Read(func() { mode = w.Config.SabreHandling })
 			if mode == game.SabreNone {
 				ok(s, "The S3-Sabre is disabled.")
 				return Stay
@@ -112,7 +112,7 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 			// market, its trading market, its bank — so there is no baron to
 			// name and asking for one would be asking a question with no answer.
 			var boards []string
-			w.With(func() {
+			w.Read(func() {
 				for _, b := range w.World.RemoteBoards {
 					boards = append(boards, b.BoardID)
 				}
@@ -129,7 +129,7 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 			var found bool
 			board, baron, _, found = pickRemoteTarget(s, w,
 				fmt.Sprintf(tr(s, "%s against which planet?"), label),
-				fmt.Sprintf(tr(s, "%s against which baron?"), label), hostile)
+				fmt.Sprintf(tr(s, "%s against which baron?"), label))
 			if !found {
 				return Stay
 			}
@@ -192,7 +192,7 @@ func doTerrorOp(s session.Session, w *ctx, op game.TerrorOpType) Result {
 		fail(s, game.ErrNoAgents)
 		return Stay
 	}
-	board, baron, _, found := pickRemoteTarget(s, w, "Terrorize which planet?", "Terrorize which baron?", hostile)
+	board, baron, _, found := pickRemoteTarget(s, w, "Terrorize which planet?", "Terrorize which baron?")
 	if !found {
 		return Stay
 	}

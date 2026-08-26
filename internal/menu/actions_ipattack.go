@@ -346,7 +346,7 @@ func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 func pickRemoteBaronOn(s session.Session, w *ctx, planetPrompt, baronPrompt, refusal string) (board, baron string) {
 	var boards []string
 	var scores map[string][]remoteBaron
-	w.With(func() {
+	w.Read(func() {
 		scores = map[string][]remoteBaron{}
 		for _, b := range w.RemoteBoards {
 			boards = append(boards, b.BoardID)
@@ -374,42 +374,29 @@ func pickRemoteBaronOn(s session.Session, w *ctx, planetPrompt, baronPrompt, ref
 	return board, baron
 }
 
-// pickRemoteTarget prompts for a planet then a baron on it, returning the
-// board, the baron's name, and its imported score. found is false if the caller
-// cancels or no planets/barons are known.
-func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt string, hostile bool) (board, baron string, sc game.RemoteScore, found bool) {
-	if len(w.RemoteBoards) == 0 {
-		ok(s, "No other planets are known yet.")
-		return
-	}
-	boards := make([]string, len(w.RemoteBoards))
-	for i, b := range w.RemoteBoards {
-		boards[i] = b.BoardID
-	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, planetPrompt), ansi.Reset)
-	board = pickAddressee(s, w, boards)
-	if board == "" {
+// pickRemoteTarget is pickRemoteBaronOn plus the chosen baron's imported score,
+// for the callers that need the figures as well as the name. found is false if
+// the caller backs out or no planets or barons are known.
+//
+// It walked the planets and barons itself until #195's slop audit: a third
+// spelling of one walk, and the only one that read w.RemoteBoards outside a
+// transaction — taking a pointer into the slice and using it across a prompt.
+func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt string) (board, baron string, sc game.RemoteScore, found bool) {
+	board, baron = pickRemoteBaronOn(s, w, planetPrompt, baronPrompt, protectedNoStrike)
+	if board == "" || baron == "" {
 		return "", "", sc, false
 	}
-	var rb *game.RemoteBoard
-	for i := range w.RemoteBoards {
-		if w.RemoteBoards[i].BoardID == board {
-			rb = &w.RemoteBoards[i]
+	w.Read(func() {
+		for _, b := range w.RemoteBoards {
+			if b.BoardID != board {
+				continue
+			}
+			for _, x := range b.Scores {
+				if x.Empire == baron {
+					sc = x
+				}
+			}
 		}
-	}
-	if rb == nil || len(rb.Scores) == 0 {
-		ok(s, "No barons are known on that planet yet.")
-		return "", "", sc, false
-	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, baronPrompt), ansi.Reset)
-	baron = pickRemoteBaronFrom(s, remoteBarons(rb.Scores, hostile), protectedNoStrike)
-	if baron == "" {
-		return "", "", sc, false
-	}
-	for _, x := range rb.Scores {
-		if x.Empire == baron {
-			sc = x
-		}
-	}
+	})
 	return board, baron, sc, true
 }

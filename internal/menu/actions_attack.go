@@ -644,7 +644,7 @@ func gooieKablooie(s session.Session, w *ctx) Result {
 	}
 	var d *game.Annihilator
 	var enabled bool
-	w.With(func() {
+	w.Read(func() {
 		enabled = w.Config.GooieKablooie
 		if w.Annihilator != nil {
 			c := *w.Annihilator
@@ -666,7 +666,7 @@ func gooieKablooie(s session.Session, w *ctx) Result {
 		// Nobody presses a button here: the weapon launches itself once
 		// construction has run, and only the Coordinator can stand it down (#114).
 		var hours int
-		w.With(func() { hours = (d.LaunchDay - w.GameDay) * 24 })
+		w.Read(func() { hours = (d.LaunchDay - w.GameDay) * 24 })
 		if hours < 0 {
 			hours = 0
 		}
@@ -698,7 +698,7 @@ func startAnnihilator(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var boards []string
-	w.With(func() {
+	w.Read(func() {
 		for _, b := range w.RemoteBoards {
 			boards = append(boards, b.BoardID)
 		}
@@ -713,7 +713,7 @@ func startAnnihilator(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var quote int
-	w.With(func() { quote = w.AnnihilatorQuote(board) })
+	w.Read(func() { quote = w.AnnihilatorQuote(board) })
 	if !AskYesNo(s, fmt.Sprintf(tr(s, "It will cost your planet %s million gold to fund. Accept?"), comma(quote)), false) {
 		return Stay
 	}
@@ -794,7 +794,7 @@ func annihilatorDefense(s session.Session, w *ctx) {
 		return
 	}
 	var gone bool
-	w.With(func() { gone = w.Incoming == nil })
+	w.Read(func() { gone = w.Incoming == nil })
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "%s jets were destroyed in the attack!"), comma(lost))))
 	if gone {
 		ok(s, "The Gooie Kablooie was DESTROYED!")

@@ -87,7 +87,7 @@ const (
 func allianceStrength(s session.Session, w *ctx) Result {
 	p := w.Player()
 	var defenders []game.AllyContribution
-	w.With(func() { defenders = w.AllyDefenders(p) })
+	w.Read(func() { defenders = w.AllyDefenders(p) })
 	fmt.Fprintf(s, "\n%s%s\n", ansi.FgWhite, tr(s, "Your allies will send the following to aid you in defense:"))
 	if len(defenders) == 0 {
 		fmt.Fprintf(s, "%s%s\n", tr(s, "You have no defense allies."), ansi.Reset)
@@ -167,7 +167,7 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 			return Stay
 		}
 		var chosen []string
-		w.With(func() {
+		w.Read(func() {
 			for _, e := range picked {
 				chosen = append(chosen, e.Name)
 			}
@@ -313,7 +313,7 @@ func declareWar(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var names []string
-	w.With(func() {
+	w.Read(func() {
 		for _, e := range picked {
 			names = append(names, e.Name)
 		}
