@@ -82,6 +82,16 @@ func NewDeadline(inner Session, idle time.Duration, maxWarnings int, hard time.T
 
 func (d *Deadline) Write(p []byte) (int, error) { return d.inner.Write(p) }
 
+// UTF8, ASCII and ANSI forward the inner session's capability markers. Go
+// promotes only the Session interface's own methods, so a wrapper that does not
+// say these explicitly makes IsUTF8 report UTF-8 and IsASCII report "not ASCII"
+// for every caller behind it — silently, since both have a defaulting answer.
+// The charset writer sits INSIDE this wrapper, so without them nothing above can
+// see the caller's real charset.
+func (d *Deadline) UTF8() bool  { return IsUTF8(d.inner) }
+func (d *Deadline) ASCII() bool { return IsASCII(d.inner) }
+func (d *Deadline) ANSI() bool  { return HasANSI(d.inner) }
+
 // DrainInput forwards to the inner session (see InputDrainer). Safe to call
 // between reads — no ReadKey goroutine is in flight once ReadKey has returned.
 func (d *Deadline) DrainInput() { Drain(d.inner) }

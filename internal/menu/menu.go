@@ -204,6 +204,15 @@ func (l *langSession) SetInputLine(line string) {
 // session; the embedded Session promotes ReadKey but not this optional method.
 func (l *langSession) DrainInput() { session.Drain(l.Session) }
 
+// UTF8, ASCII and ANSI forward the caller's charset and ANSI markers down to the
+// inner session. Embedding promotes only the Session interface's own methods, so
+// without these session.IsASCII answers "not ASCII" for every caller inside the
+// menu engine — and answers it silently, because it has a default. That is what
+// kept the pirate raider's ASCII mark from ever being chosen (7e2e5630).
+func (l *langSession) UTF8() bool  { return session.IsUTF8(l.Session) }
+func (l *langSession) ASCII() bool { return session.IsASCII(l.Session) }
+func (l *langSession) ANSI() bool  { return session.HasANSI(l.Session) }
+
 // sessionLang extracts the caller's language from a wrapped Session, or "" for
 // a plain Session (e.g. tests) — which renders English.
 func sessionLang(s session.Session) string {
