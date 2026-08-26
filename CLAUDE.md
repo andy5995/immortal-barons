@@ -16,6 +16,11 @@ guards it). Naming the original in prose is fine and sometimes required — the
 About screen's attribution and disclaimer, the README's Heritage, a doc
 explaining a divergence. The line is identity, not mention.
 
+A distinctive item name inside the game is a separate question, and Andy's to
+answer one at a time. The nine pirate factions carry IB-original names; the
+Gooie Kablooie, the S3-Sabre and SpyGuy keep the original's (#218). Ask before
+renaming one, and do not revert one either way.
+
 Be careful with other people's names and handles in repo artifacts (code,
 comments, docs, commit messages, ChangeLog). The line is public vs. private:
 
@@ -108,7 +113,7 @@ stream). Front-ends attach different streams; the engine is unchanged.
   the in-game menu — it renders the same `internal/help` topics.
 - `internal/i18n` — dependency-free gettext-PO reader for UI strings
 - `internal/numfmt` — renders large numbers for display (locale thousands
-  separator; a 4-decimal `1.8473B` form at a billion). It sits below both
+  separator; grouped digits in full at any size, no float). It sits below both
   `game` and `menu` because the engine writes player-visible event text and
   cannot import `menu`
 
@@ -128,6 +133,18 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   `unitsAffordable` convert between the two widths without wrapping. Run
   `GOARCH=386 go test ./...` when touching money math — it catches overflows
   the 64-bit build hides.
+- **A body that only gathers goes through `World.Read`; only a body that changes
+  something goes through `World.With`.** On a door `With` is flock → reload →
+  fn → **save** → release, so a snapshot taken through it rewrites `world.json`
+  under the exclusive lock every other node is queued on, once per screen drawn —
+  and a failed save is session-fatal, so a pure read could end a caller's session
+  over a write it never needed. `Read` keeps the lock and the reload, which is
+  what makes what it gathers current, and drops only the write-back. Neither may
+  contain player input; the lock is held for the duration. Under `MemStore` the
+  two are otherwise identical, so a mutation wrongly routed through `Read` would
+  pass every test and lose the change only on a door — `MemStore.Snapshot`
+  fingerprints the world either side of the body under a test binary and panics
+  on a change, which is what makes the split enforceable rather than a habit.
 - **Every path that pays gold in goes through `World.creditGold`.** It holds
   gold in hand at the configured cap (`World.MoneyCap`, the sysop's
   `MoneyCapBillions`) and files an event naming what was lost and where it came
@@ -323,11 +340,10 @@ biological strikes, pirate raids (now rolled per turn, not once a day; the nine
 factions carry IB-original names, not BRE's), covert operations (spy, stir revolts, set up,
 support dissensions,
 demoralize forces, bribery, expose enemy ops, and a single Bomb Enemy Targets
-terror-bombing op; the eight-item bombing table, R5-Slappenheimer among it, is
+terror-bombing op; the eight-item bombing table, S3-Sabre among it, is
 the InterPlanetary Special Operations menu's alone),
-diplomacy treaties, trading, region types + food market, SDI, Clingy Annihilator
-(BRE's Gooie Kablooie), player mail + a BRE-style multi-line message editor +
-planetary bulletin, banking (deposit/withdraw/loan/invest), Set Industries +
+diplomacy treaties, trading, region types + food market, SDI, Gooie Kablooie,
+player mail + a BRE-style multi-line message editor + planetary bulletin, banking (deposit/withdraw/loan/invest), Set Industries +
 Specialize, Write Macros, four named advisors (Civilian/Economic/Military/
 Technology), an About screen, a first-run language picker, and a
 rising land-market price (expansion self-limiting). The menu tree mirrors BRE:

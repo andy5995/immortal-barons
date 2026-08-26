@@ -74,7 +74,7 @@ func TestPlayerListDoesNotShowBBSHandles(t *testing.T) {
 // at the new ally is called off over its builder's head.
 func TestCoordinatorDismantlesAnotherBaronsAnnihilator(t *testing.T) {
 	w := leagueCtx(t)
-	w.Config.ClingyAnnihilator = true
+	w.Config.GooieKablooie = true
 	w.RemoteBoards = []game.RemoteBoard{{BoardID: "Nova Hub"}}
 	builder := w.AddHuman("bravo", "Bravo")
 	if err := w.StartAnnihilator(builder, "Nova Hub"); err != nil {
@@ -93,7 +93,7 @@ func TestCoordinatorDismantlesAnotherBaronsAnnihilator(t *testing.T) {
 // An ordinary baron gets the refusal, whoever built it.
 func TestOnlyTheCoordinatorDismantlesTheAnnihilator(t *testing.T) {
 	w := leagueCtx(t)
-	w.Config.ClingyAnnihilator = true
+	w.Config.GooieKablooie = true
 	w.RemoteBoards = []game.RemoteBoard{{BoardID: "Nova Hub"}}
 	if err := w.StartAnnihilator(w.Player(), "Nova Hub"); err != nil {
 		t.Fatalf("start: %v", err)

@@ -38,14 +38,14 @@ const (
 // a rising day and a plain bright-cyan "-" on a falling one. title is the
 // board name in a league, or "" for a stand-alone board, which shows just
 // "Daily Bulletin".
-func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) {
+func renderDailyBulletin(s session.Session, t Term, b game.DailyBulletin, title string) {
 	head := tr(s, "Daily Bulletin")
 	if title != "" {
 		// The board name is the sysop's, and a long one would blow the box out of
 		// the screen — the masthead is drawn to a fixed rule.
-		head = game.FitColumn(title, 30) + " — " + head
+		head = fitColumn(t, title, 30) + " — " + head
 	}
-	boxTop(s, head)
+	boxTop(s, t, head)
 
 	row := func(label string, total, change int, fmtNum func(int) string) {
 		sign := "+"
@@ -67,7 +67,7 @@ func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) 
 		num := fmtNum(abs)
 		inner := "  " + ansi.FgWhite + lab + ansi.FgCyan + val + ansi.FgWhite + tr(s, "Change") + ": " +
 			signClr + sign + ansi.FgBrightCyan + num + ansi.Reset
-		vis := 2 + len([]rune(lab)) + len([]rune(val)) + len([]rune(tr(s, "Change")+": ")) + 1 + len([]rune(num))
+		vis := 2 + visWidth(t, lab) + visWidth(t, val) + visWidth(t, tr(s, "Change")+": ") + 1 + visWidth(t, num)
 		boxRow(s, inner, vis)
 	}
 
@@ -82,8 +82,8 @@ func renderDailyBulletin(s session.Session, b game.DailyBulletin, title string) 
 // line; boxRow draws one │…│ content line padded to newsBoxInner (innerVis is
 // the printable width of inner, excluding ANSI); boxBottom closes it. BRE uses
 // the single-line CP437 set here, not the double one (docs/dev/bre-screens.md).
-func boxTop(s session.Session, head string) {
-	tw := len([]rune(head))
+func boxTop(s session.Session, t Term, head string) {
+	tw := visWidth(t, head)
 	if tw > newsBoxInner {
 		tw = newsBoxInner
 	}
@@ -115,14 +115,14 @@ func boxBottom(s session.Session) {
 // renderNewsMasthead prints the news screen's header: the program/version
 // "News File" line with the date right-aligned, the centered banner, and a
 // yellow rule — matched to BRE's captured layout.
-func renderNewsMasthead(s session.Session, date string) {
-	headVis := len([]rune(tr(s, "Immortal Barons") + " v" + game.Version + tr(s, ": News File")))
+func renderNewsMasthead(s session.Session, t Term, date string) {
+	headVis := visWidth(t, tr(s, "Immortal Barons")+" v"+game.Version+tr(s, ": News File"))
 	fmt.Fprintf(s, "\n%s%s %sv%s%s%s",
 		ansi.FgBrightYellow, tr(s, "Immortal Barons"),
 		ansi.FgBrightWhite, game.Version,
 		ansi.FgWhite, tr(s, ": News File"))
 	if date != "" {
-		pad := len([]rune(rule)) - headVis - len([]rune(date))
+		pad := len([]rune(rule)) - headVis - visWidth(t, date)
 		if pad < 1 {
 			pad = 1
 		}
@@ -135,7 +135,7 @@ func renderNewsMasthead(s session.Session, date string) {
 	// (docs/dev/bre-screens.md). The `─»>Paused<«─` bar is a different decoration
 	// and does use guillemets.
 	banner := ansi.FgRed + "──" + ansi.FgBrightRed + "═" + ansi.FgBrightWhite + tr(s, newsBannerName) + ansi.FgBrightRed + "═" + ansi.FgRed + "──" + ansi.Reset
-	bannerVis := 2 + 1 + len([]rune(tr(s, newsBannerName))) + 1 + 2
+	bannerVis := 2 + 1 + visWidth(t, tr(s, newsBannerName)) + 1 + 2
 	indent := (len([]rune(rule)) - bannerVis) / 2
 	if indent < 0 {
 		indent = 0
@@ -200,7 +200,7 @@ func isDigit(r rune) bool { return r >= '0' && r <= '9' }
 // to `1;31` within the same hue (docs/dev/bre-screens.md records it).
 func newsHighlightTerms(w *ctx) []hiTerm {
 	var terms []hiTerm
-	w.With(func() {
+	w.Read(func() {
 		for _, e := range w.Empires {
 			terms = append(terms, hiTerm{e.Name, ansi.FgBrightYellow})
 		}

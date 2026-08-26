@@ -113,6 +113,37 @@ Backgrounds: `40`–`47` (and `100`+) — e.g. `44` = blue background. Border ru
 mix the single horizontal `─` (U+2500) and double `═` (U+2550) — e.g. a short
 `═══` accent set inside a longer `───` line.
 
+## How BRE prints a figure of a billion or more
+
+**In full, with its thousands comma-grouped** — no suffix, no decimal form.
+`Bank: 2,000,000,000` appears 8,581 times in `cap/121125-666H4H_Camembert_Public.cap`
+alongside `You have 0 gold in hand and 2,000,000,000 gold in the bank.`, and the
+bank-history rows run `09/25/2013   $1,001,235,538` / `Today        $1,846,153,847`.
+2,000,000,000 is the money cap, so that is the top of BRE's own range and its
+screens are sized for the thirteen characters.
+
+**One exception, and it is a prompt bound rather than a displayed figure.**
+`cap/shsbbs.cap` carries `How many Jets? (0; 1.0737B):` on the trade deal's
+Request side — 1,073,741,824, i.e. 2^30, the sentinel that stands in for "what
+the other realm holds is not yours to see". That is the only decimal `B` form in
+any capture here. IB prints no ceiling at all on that prompt (see Send Trade
+Deal, below).
+
+**Abbreviated columns use a lowercase suffix, and each column keeps ONE suffix
+however large its figure runs — the suffix is not a magnitude threshold.** The
+See Scores board puts `1962k` and `12m` side by side in a single row
+(`cap/20240527-134Pho_Lazarus_Public.cap`): the Score column is fixed on `k` and
+the Net Worth column on `m`, at the same magnitude. The Daily Bulletin's third
+row stays on `k` well past a million — `Total Net Worth:  25,750k` in
+`cap/eots-ibbs-01.cap`, with `2720k` and `Change: +616k` in a smaller game. No
+capture reaches billion scale in either column, and a lowercase `b` appears
+nowhere.
+
+**IB steps the suffix instead**, `k`/`m`/`b` by magnitude and nothing below a
+thousand, one rule on every screen (`numfmt.Abbrev`). A deliberate divergence:
+two columns spelling the same magnitude two ways is the part of BRE's behaviour
+worth losing, and stepping holds any figure to four digits and a letter.
+
 ## Status bar (bottom line, every screen)
 
 Captured 2026-08-16. The whole line carries a `44` blue background. It opens
@@ -181,6 +212,26 @@ Id  Empire Name                          Territory     Score    Net Worth
 
 Choose a Target [A-Y,?=List RETURN to Abort]
 ```
+
+**IB keeps the capture's `(A)`, and BRACKETS the id of a realm under New Realm
+Protection: `[C]` (#214).** That bracket is the entire flag — nothing follows the
+name, the row keeps its width, and the shape carries the meaning, so it reads on
+a monochrome terminal and to anyone who cannot separate the two colours. BRE
+flags nothing; it has no need to, since its own list is drawn before any of this
+is decided. The divergence is not local to this screen: See Scores, the covert
+target list and the recipient picker draw the same table and change with it.
+
+The realm KEEPS its selection letter and pressing it is answered with the
+refusal by name. IB withheld the letter until 2026-08-26, which told a player
+that something about the row was different without saying what; it then spent a
+day flagging `(P)` after the name and bracketing EVERY id, which spelled one id
+two ways for a flag the bracket could carry on its own. An ALLIED realm still
+shows no letter: that standing belongs to the diplomacy screens, and the player
+made it themselves.
+
+`-*Relations*-` is the one screen unchanged by this. The original brackets every
+id there, so a bracket cannot mean protection on it, and it is a standings
+roster rather than a picker — the flag belongs where a realm is chosen.
 
 ### Force selection
 
@@ -311,13 +362,23 @@ You lost 150 Troopers, 350 Jets, and 1000 Tanks.
 Then the captured-region picker (above) opens for the won regions.
 
 **IB marks a faction that raided you since your last play.** BRE's list has
-no such flag. IB writes `->` immediately left of the name — same idiom and
-color treatment as the online mark (`(O)`, above): the shaft is `90` dark gray
-(decoration) and the arrowhead is `37` gray (the part that must carry the
-meaning alone), reserving the same width on every row so an unmarked faction's
-name still starts in the same column. The mark is cleared and reset each time
-the income report runs, so it flags only the raiders named in that turn's
-report, not an older one.
+no such flag. IB writes `«` after the name, one space clear of it — CP437 174,
+pointing back at the name it marks, in the `37` gray the online mark (`(O)`,
+above) gives the part that must carry its meaning alone. A faction that did not
+raid carries nothing at all.
+
+**The head is drawn without a shaft on purpose.** `«` is a text glyph and sits
+off the horizontal centerline `═`/`─` are drawn on, so `«═` reads as two marks
+side by side rather than as one arrow. A session held to 7-bit ASCII gets `<=`
+instead, where both characters share a baseline and the shaft costs nothing —
+the general substitution would have reduced the guillemet to a bare `<`. The mark is
+cleared and reset each time the income report runs, so it flags only the raiders
+named in that turn's report, not an older one.
+
+The mark sat to the LEFT of the name until 2026-08-25, with every unmarked row
+holding that column blank so the names lined up. On the common screen — nothing
+raided you — the whole list read as indented for no reason, which is how it was
+reported (#197).
 
 **IB status (2026-08-09):** matched, with three recorded divergences. IB prints
 the gold figure in full where BRE abbreviates it (`78k Gold`), so a full tally
@@ -658,6 +719,12 @@ direction on its own — including in a monochrome or ANSI-less session.
 edge is `┌` + 25 `─` + `Daily Bulletin` + 25 `─` + `┐`, bottom `└` + 64 `─` +
 `┘`. Measured identically in `bre-01-color.cap` and the public-board capture.
 
+In a league IB puts the board's name and an em dash ahead of `Daily Bulletin` in
+that top edge, and the edge is sized to the title. The width has to be measured
+in the caller's OWN charset: a CP437 or ASCII terminal is sent `--` for the em
+dash, so a rune count made the top edge a column longer than the box under it
+(#192).
+
 ```
                         ──═The Queen's Quadrant═──
 ───────────────────────────────────────────────────────────────────────────
@@ -746,6 +813,17 @@ carries it: the attack target picker and the recipient picker share
 indent. The inter-BBS scores screen does NOT — those figures arrive in packets
 that may be hours old, so there is nothing to report.
 
+The protection flag `(P)` rides in the same field, after the name rather than
+before it (see "Target list" above, #214). It reserves no column on an unflagged
+row.
+
+**The name field is measured in the caller's own charset.** `ValidRealmName`
+accepts any printable rune, so a realm may be named `Iron—Fist`; the CP437 and
+plain-ASCII writers rewrite that em dash as two hyphens below every layer that
+counts columns, and a rune count walked the figures one column right for the
+default charset. `nameCell` takes `Term` and measures through `visWidth` /
+`fitColumn`, the same pair the InterBBS Scores tables use (#192, #196).
+
 An unmarked row reserves the mark's width, so the names stay in one column
 either way; `markWidth` measures the translated letter rather than assuming one
 character, since the `O` goes through `tr`.
@@ -778,6 +856,13 @@ The rules are omitted from the block below only to keep the field list readable.
 manufactured by Industrial Zones." IB says that once, as a heading, and lists
 the units under it — one per line, figure first, and no line for a type that
 built none.
+
+**The bank's returns close the block.** After the manufacturing lines BRE prints
+`N gold was earned from investment returns.` — the day's matured investments, and
+the SAME figure on every turn of that day (`cap/eots-ibbs-01.cap`: one day's
+14,699,020 repeated across all ten turns). **IB adds a line above it** for the
+savings interest credited at the end of the previous turn, which BRE reports
+nowhere; the wording is IB's own, in the style of the lines around it (#216).
 
 ```
 227,717 gold was earned in taxes.
@@ -1095,13 +1180,52 @@ Gates seen: `Sorry....You are under New Realm Protection!` (Terrorist / Special
 Ops while protected), `There are not any attack parties at this time.` (Join
 Group Attack).
 
-**Send Trade Deal** (3). **Not captured.** A different routine from the local
-deal — `send_trade_offer` (BRE.OVR 0x24212), whose only caller is the InterBBS
-menu. It charges a flat fee to send rather than a rate per day and has no day
-span, so none of the local flow applies to it. How it picks its target planet and
-realm is unread: its own strings carry no picker prompt, so the picker is a
-callee nobody has followed. The block that used to sit here was the LOCAL deal
-and has moved to the Trading section (#195).
+**Send Trade Deal** (3). **The sending flow is not captured**; it was read out of
+the binary instead (#195). A different routine from the local deal —
+`send_trade_offer` (BRE.OVR 0x24212), whose only caller is the InterBBS menu.
+The block that used to sit here was the LOCAL deal and has moved to the Trading
+section, which is what wired IB's interplanetary item to the local mechanic.
+
+The order it asks in: **planet, then realm, then goods, then the price.**
+`select_planet` (0x021dd9) takes a planet name or number, or a key that lists
+them, and refuses two answers outright by returning 0 — **your own planet**
+(`cmp ax,[0x6795]` at 0x18a6) and a planet you hold no data on — so the item
+cannot reach a realm at home. It then prints your standing with the planet
+chosen. `select_player` (0x022a0c) takes a letter A-Y, a raw index into that
+planet's 25-slot roster with the gaps left in, validated against the slot's own
+id being non-zero; `?` lists the roster and `/` searches it by name.
+
+**Planets are chosen by name or number, players by LETTER** — that split is the
+original's throughout, and IB matches it as of 2026-08-26. Its interplanetary
+baron list was numbered until then, the last place a player was picked any other
+way; it draws the same lettered score table the local target lists use now.
+
+**A flat fee, no day span, no treaty.** It calls the same cost routine the local
+deal does (`calculate_trade_offer_cost`, 0x0513e7) and then simply stops: no
+multiply by days, no Protective Trade divisor, no days prompt. The formula is the
+nine goods against fixed weights, over five, plus a 100,000 base, scaled by the
+sysop's Trade Deal Costs ladder and capped at two billion. Neither realm needs a
+pact — the routine reads no relation field and holds no relation string, where
+the local one refuses a realm you have no pact with.
+
+**The arrival gets no choice.** `resolve_received_trade_offer` (0x043df1) checks
+for a duplicate, checks the target's stored id against the letter, and credits
+every good straight onto the realm, each capped at two billion. It files a
+private report for each side and writes **no news at all** — no `.dat` template
+carries a trade-deal category. A deal aimed at a realm under New Realm Protection
+is DESTROYED: the routine returns, and neither side is told. IB refuses that
+target at the picker instead; see `docs/mechanics-reference.md`.
+
+**Carriers are sized to the cargo** (`ovr_050dfb_entry_0436`): troopers 1,000 to
+a carrier, jets 100, turrets 1,000, tanks 5,000, gold 100,000, with food,
+bombers, agents and carriers riding free — summed and rounded up as a total.
+A capture has the original asking for twenty.
+
+**The receiving side IS captured**: `cap/20240527-134Pho_Lazarus_Public.cap`
+carries 13 arrivals, each a header naming the realm and its planet over an
+indented list of what was shipped. Gold is in eleven of them, one is a mixed
+shipment, ten are the same sender to the same recipient in a single run — so
+nothing caps how many a realm may send in a day.
 
 **Travel Times** (T). Captured 2026-08-16: a `37` white heading
 `Average Turn Around Times to All BBSes`, then the **78**-column inset rule
@@ -1239,10 +1363,12 @@ same column the planet table's metric ends on, so the two shapes agree), then
       Name                  Net Worth / Region     Planet
 ```
 
-**IB has these reversed** — `Planet` second at column 33 and the metric last, a
-66-column heading (#196). Not established: the `Planet` column's width and
-whether it truncates. Neither capture has a data row under that heading, so only
-the geometry above is proven.
+**IB draws this shape** as of 2026-08-26; it had the two reversed — `Planet`
+second at column 33 and the metric last, a 66-column heading — until #196, and
+its planet table ended on column 53 rather than 46. Not established: the
+`Planet` column's width and whether it truncates. Neither capture has a data row
+under that heading, so only the geometry above is proven; IB fits `Planet` to 21
+columns, which ends it on the rule.
 
 **The rule is WIDER than the table on purpose.** 72 columns of `─` over a
 46-column planet table and a 57-column player table. It is not misalignment and
@@ -1601,7 +1727,11 @@ is the sender's own turn of the day; the mechanic behind it is in
 in its own words rather than reproducing BRE's sentence.
 
 The market itself lists the eight tradeable goods — note keys 1-5 and 7-9, with
-**no key 6** (regions are not tradeable):
+**no key 6**. Key 6 is **Gold** (`empire_trade_good_pointer`, BRE.OVR 0x051133,
+record `+0x66`, and the good-name table at `DS:0xb11` agrees). It is missing from
+the MARKET because gold cannot be sold for gold, not because it is untradeable —
+it rides a trade deal, local or interplanetary, like anything else. This file
+said "regions are not tradeable" until #195; regions have no key here at all.
 
 ```
 Trading Market
@@ -1832,9 +1962,9 @@ constant.
 BRE is proprietary (John Dailey Software; design by Mehul Patel). This file
 records *observed* screen behavior to guide an independent reimplementation; it
 is not a copy of BRE's source or assets. Distinctive coined strings/names (e.g.
-pirate faction names) are recorded here for fidelity analysis but should be
-**renamed** in IB, as with Gooie Kablooie → Clingy Annihilator and S3-Sabre →
-R5-Slappenheimer.
+pirate faction names) are recorded here for fidelity analysis; whether IB uses
+one or coins its own is Andy's call case by case. The Gooie Kablooie and the
+S3-Sabre keep the original's names (#218); the pirate factions carry IB's own.
 
 ## Full Defense Alliance — Diplomacy, Alliance Strength, battle (captured live 2026-07-27)
 
@@ -2103,6 +2233,62 @@ Diplomacy action that names a realm — each treaty type and Declaration Of War
 and leaves the list open, so letters can still be added or taken off before
 RETURN.
 
+## IP Messages: the recipient picker (InterPlanetary Ops -> Send Message -> Single Planet)
+
+The interplanetary twin of the picker above, captured live in
+`cap/eots-ibbs-01.cap` (a four-planet league, 2026-08) and read out of
+`send_interbbs_message` (`BRE.OVR` 0x1f335). The flow is: the IP Messages box
+(Single Planet / Select Planets / All Planets / Allied Planets / Planet
+Coordinator / Quit), the shared `Enter Planet Name or Number (? for list):`
+prompt, the "Our current relations with" line, and THEN
+`(A-Y,Z=All,?=List) Send to:` over the barons on the chosen planet. The editor
+comes after that, not straight after the planet.
+
+The roster `?` draws is headed `-*Players at <planet>*-` in bright white on
+blue-rules, over the same `Id   Empire Name   Territory   Score   Networth`
+columns the local See Scores table uses, closed by the `[BRE vX]  <date>`
+footer. It is drawn by the same routine the Spy Database and the attack target
+list use (`show_player_list`, `BRE.OVR` 0x2224cf).
+
+**The toggle is visible in the capture's BYTES.** At one prompt the echo after
+`Send to: ` runs four letters in bright cyan (`1;36`, returning to `0;40;37`
+after each), then four erase groups:
+
+```
+<L><L><L><L>  BS SP BS      -> the last letter taken off, nothing re-drawn
+              BS SP BS      -> and the next
+              BS SP BS BS <L>  -> one taken from the MIDDLE: an extra BS per
+                                 letter after it, then the survivors re-drawn
+              BS SP BS      -> the last one off
+CR
+```
+
+and the next thing on screen is the "send another message?" question, NOT the
+editor's banner. That settles three things a reading of the code leaves open:
+the letters toggle, the erase-and-redraw is what a middle deselect looks like,
+and **RETURN with nothing marked sends nothing** (the code simply never fills
+its recipient table in that case, which is undefined rather than defined
+behaviour; the capture defines it).
+
+**`?` is not echoed.** The capture shows the key produce a colour change and a
+CRLF, then the roster, then the prompt again. IB echoes the word "List" instead,
+as it already does on the local picker.
+
+**The letters have gaps and they persist.** The same planet's roster reads
+`(A) (B) (D) (E)` on three separate days a week apart, and a later capture shows
+`(A) (B) (C) (D)` once the C slot has been refilled by a different realm — so
+the letter is the realm's own slot on its home planet, not its row number, and
+BRE knows it because it holds that planet's whole 25-slot array.
+
+**IB divergences here**, both recorded in `docs/mechanics-reference.md` under
+"IP Messages": IB letters the rows of the received scores packet consecutively,
+because `game.RemoteScore` carries no slot; and a planet IB has no scores packet
+for skips the prompt and takes a planet-wide message rather than refusing.
+
+**The planet prompt autocompletes in the original.** The capture shows two typed
+characters erased (`BS SP BS` twice) and replaced with the full planet name. IB
+does not do this — a separate request, noted on #193 and not built there.
+
 ### The message editor
 
 20 lines, under a **68-column** ruler — note the last group is short, `----+----]`
@@ -2246,8 +2432,8 @@ redraws the menu.
 **IB's keys match this table as of 2026-08-18 and did not before**: it numbered
 the three items it had built `1`-`3`, so each sat on the original's key for its
 neighbour, and its own Player List sat on `4`, View Diplomacy's key. Key `1` now
-holds IB's Dismantle Clingy Annihilator (#45 — IB renames the weapon), and
-Player List has moved to `5`, past the original's four.
+holds IB's Dismantle Gooie (#45), and Player List has moved to `5`,
+past the original's four.
 
 **The Coordinator gets no player list in the original.** The two coordinator
 roles are different offices: the **BBS Coordinator** whose menu this is was
@@ -2387,6 +2573,16 @@ Id   Empire Name                          Territory   Score   Networth
 ─────═══════════════───────────────────────────────────────────────────────
                                                 [BRE v0.988]   8/15/2026
 ```
+
+**IB's interplanetary baron list is NUMBERED**, where this capture shows the
+same lettered roster the local screens draw. That is an old divergence and it is
+not addressed here. What did change (#214): a baron the last scores packet had
+under New Realm Protection is listed with the `(P)` flag after the name and the
+strike is refused when that row is picked. Those barons were HIDDEN from the list
+until 2026-08-26, with a count printed beneath it saying how many had been held
+back, which named nothing and left a planet's roster disagreeing with its target
+list. The flag is a courtesy either way — a packet can be days old, so the target
+board still refuses an arriving strike on its own authority.
 
 **The interplanetary picker's prompt is colored differently from the local
 one**, though the wording is nearly the same (`cap/eots-ibbs-01.cap`): here the
@@ -2645,11 +2841,19 @@ Its strings: `'Stuff to '` + `'Send'`/`'Demand'` for the title, `'Key  Item
 `' You do not have enough carriers.'`.
 
 The quantity prompts are `'Send how many '` / `'Demand how many '` + the item +
-`'? '` — **bare, with no `(suggested; max)` hint on either side**. BRE's bounded
-input helper (`056d:01bf` -> `0851:0bd9`) is a raw key-by-key editor that prints
-no bounds of its own; the `(N; M)` hints elsewhere in BRE are printed by their
-callers. And the bounds themselves say the same thing the columns do
-(`create_trade_offer`, BRE.OVR 0x2624c):
+`'? '`. BRE's bounded input helper (`056d:01bf` -> `0851:0bd9`) is a raw
+key-by-key editor that prints no bounds of its own; the `(N; M)` hints elsewhere
+in BRE are printed by their callers.
+
+**The SEND side does have one; the DEMAND side does not** — this file said
+neither did until #195. `create_trade_offer` calls the hint helper
+(`0851:08b2`, which builds `"(min; max) "`) at unit offset 0x1a4c, immediately
+before the Send prompt's input call, and makes no such call before the Demand
+prompt at 0x1ce7. The helper prints only `"(min) "` when the max is negative
+(`BRE.EXE 0x8dd1`), which is exactly the Demand side's `0xFFFFFFFF` sentinel — so
+even where it is called on a sentinel it quotes no ceiling. The interplanetary
+routine calls it too (`send_trade_offer` 0x0395). And the bounds themselves say
+the same thing the columns do (`create_trade_offer`, BRE.OVR 0x2624c):
 
     Send prompt   bounded by the player's own count of that item   (0x2679d)
     Demand prompt bounded by 0xFFFFFFFF — a sentinel, not a figure  (0x26a4b)

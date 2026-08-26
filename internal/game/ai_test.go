@@ -253,3 +253,25 @@ func TestAIDullExpandsLessThanSharp(t *testing.T) {
 		t.Errorf("dull AI should expand less than sharp: dull bought %d, sharp bought %d", dullBought, sharpBought)
 	}
 }
+
+// A Max Tax Rate of 0 held every player to 0% while the AI went on taxing at
+// its normal rate, because aiSetTax read 0 as "no cap configured" (#203). Zero
+// is a ceiling of zero for both sides.
+func TestAIObeysAZeroTaxCeiling(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.MaxTaxRate = 0
+	w := NewWorldSeed(cfg, 1)
+	ai := w.AddHuman("ai", "AI")
+	ai.AIProfile = AIProfileAggressor
+	ai.Tax = 25 // a rate to be pulled DOWN, so a no-op would fail rather than pass
+	w.aiSetTax(ai)
+	if ai.Tax != 0 {
+		t.Errorf("AI taxed at %d%% under a Max Tax Rate of 0", ai.Tax)
+	}
+	// The ceiling still binds where it is not zero, and still lets a lower rate be.
+	w.Config.MaxTaxRate = 10
+	w.aiSetTax(ai)
+	if ai.Tax != 10 {
+		t.Errorf("AI taxed at %d%% under a Max Tax Rate of 10, want the ceiling", ai.Tax)
+	}
+}

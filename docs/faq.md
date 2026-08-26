@@ -6,18 +6,20 @@
   "registered" or "unregistered" version.
 - Several BBS nodes can play the same game at the same time, which BRE could not
   do. See [Can several people play as a door at the same time?](#can-several-people-play-as-a-door-at-the-same-time).
-- In a league game you can buy from an allied planet's Trading Market. BRE has
-  no way to trade between planets at all. Your order is a bid: the gold is held
-  when you send it, and when it arrives the other planet only sells to you if
-  the goods are still there at the same price and you are still allies. If not,
-  your gold comes back.
+- In a league game you can buy from an allied planet's Trading Market. Your order
+  is a bid: the gold is held when you send it, and when it arrives the other
+  planet only sells to you if the goods are still there at the same price and you
+  are still allies. If not, your gold comes back. BRE has no market between
+  planets — it lets you send goods to a realm on another planet as a gift, which
+  Immortal Barons does too, but there is no way to buy from one.
 - It also plays in a local terminal, without a BBS, so you can try it on your
   own computer.
 - It does not run under DOS. It is a modern native program that runs as a door
   under BBS software on any platform Go supports.
 - A new player can end their own new-realm protection early, from the System
   menu, to start fighting sooner. BRE does not offer this.
-- Immortal Barons hides realms under new-realm protection from the attack list.
+- A realm under new-realm protection is listed as a target with a `(P)` beside
+  its name, so you can see who cannot be attacked yet. BRE gives no sign.
 - When a sysop starts a fresh game, they can keep their old settings. Those
   settings are stored in a `config.json` file. Running
   `immortal-barons -reset-from-config` clears the world but reuses that file, so
@@ -36,10 +38,14 @@
   about your own offers, so it does not show you anything about other players.
 - Send Message can write to all your allies at once — every realm on your board
   that you hold a treaty with, of any kind.
-- Your sysop sets how much gold you can hold. BRE stops at two billion;
-  here that is only the starting value, and it can go as high as 999 billion.
-- Gold above the limit is still lost, but the game now tells you when it happens,
-  and a full bank pays its interest into your gold in hand rather than losing it.
+- In a league, the letters used to pick who on another planet reads your message
+  are counted down that planet's scores as your board received them. BRE uses the
+  letter the realm has at home, which leaves gaps where realms have died. The
+  letters here can move when a realm on that planet dies or a new one starts, so
+  read the roster before you pick.
+- Gold you earn above the two billion you can hold is still lost, but the game
+  tells you when it happens, and a full bank pays its interest into your gold in
+  hand rather than losing it.
 - Each bulletin is its own file in a `bull` folder, so a sysop can put up ANSI
   artwork. BRE keeps every bulletin in one `bulletin.lst` text file. In a league
   the Coordinator's bulletins are sent to every board and shown to all players

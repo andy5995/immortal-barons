@@ -7,7 +7,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/game"
 )
 
-// A Clingy Annihilator squatting on the planet is offered to every baron at the
+// A Gooie Kablooie squatting on the planet is offered to every baron at the
 // start of their turn, jets and all — the original asks there rather than behind
 // a menu item, because a baron who never opens the InterPlanetary menu would
 // never see it (#112).

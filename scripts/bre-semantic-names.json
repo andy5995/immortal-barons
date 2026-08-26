@@ -1012,6 +1012,26 @@
       "confidence": "high",
       "evidence": ["binary_strings: all, list, and recipient prompts", "call_graph: Inter-BBS message recipient-selection path"]
     },
+    "0x01ecaa": {
+      "name": "interbbs_recipient_letter_for_id",
+      "confidence": "medium",
+      "evidence": ["call_graph: called by send_interbbs_message and both recipient toggle helpers to turn a stored realm id back into its picker letter", "disassembly: result is zero-extended and scaled by 4 to index the per-letter recipient tables"]
+    },
+    "0x01ef71": {
+      "name": "add_interbbs_recipient",
+      "confidence": "high",
+      "evidence": ["disassembly: appends the letter's realm id at the selection count, increments it, then echoes the letter in bright cyan (ovr_01ecaa+0x2c7)", "call_graph: one of the two branches of toggle_interbbs_recipient"]
+    },
+    "0x01f007": {
+      "name": "remove_interbbs_recipient",
+      "confidence": "high",
+      "evidence": ["disassembly: writes BS/space/BS, one extra BS per following entry, compacts the selection list, decrements the count and re-echoes the survivors (ovr_01ecaa+0x35d)", "call_graph: the other branch of toggle_interbbs_recipient"]
+    },
+    "0x01f1ac": {
+      "name": "toggle_interbbs_recipient",
+      "confidence": "high",
+      "evidence": ["disassembly: rejects a letter whose 32-bit table entry is below 1, then searches the current selection and calls remove when found or add when not (ovr_01ecaa+0x502)", "call_graph: called per letter by send_interbbs_message, and once per letter A..Y for the all key"]
+    },
     "0x03cbf9": {
       "name": "show_market_offers",
       "confidence": "high",

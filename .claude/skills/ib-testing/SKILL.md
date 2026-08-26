@@ -177,7 +177,7 @@ Check these first when a mechanic appears not to work:
 - **New realm protection** gates trading and the market on both sides. End it
   from the System menu rather than playing turns to burn it off.
 - **An interplanetary or WMD item that is simply absent is a config switch**,
-  not a bug: `BombingOps`, `MissileOps`, `IPTrading`, `ClingyAnnihilator` and
+  not a bug: `BombingOps`, `MissileOps`, `IPTrading`, `GooieKablooie` and
   `InterBBSEnabled` hide their items with no message
   (`internal/menu/tree.go:37-44,544`).
 - **BRE gates most InterPlanetary options behind a turn played this entry, and

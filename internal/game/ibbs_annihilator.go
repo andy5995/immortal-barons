@@ -2,7 +2,7 @@ package game
 
 import "fmt"
 
-// ibbs_annihilator.go — telling the league about this planet's Clingy
+// ibbs_annihilator.go — telling the league about this planet's Gooie
 // Annihilator, and tracking one aimed at us. The weapon itself is annihilator.go.
 
 // ExportAnnihilatorStatus tells the targeted planet about this one's weapon, whether
@@ -47,7 +47,7 @@ func (w *World) applyAnnihilatorStatus(st *AnnihilatorStatus) {
 	if st.Dismantled {
 		if w.Incoming != nil && w.Incoming.Creator == st.FromBoard {
 			w.Incoming = nil
-			w.postNews(fmt.Sprintf("The Clingy Annihilator being built at %s has been dismantled.", st.FromBoard))
+			w.postNews(fmt.Sprintf("The Gooie Kablooie being built at %s has been dismantled.", st.FromBoard))
 		}
 		return
 	}
@@ -77,9 +77,9 @@ func (w *World) applyAnnihilatorStatus(st *AnnihilatorStatus) {
 		if hours < 0 {
 			hours = 0
 		}
-		w.postNews(fmt.Sprintf("A Clingy Annihilator arrives from %s in %d hours.", st.FromBoard, hours))
+		w.postNews(fmt.Sprintf("A Gooie Kablooie arrives from %s in %d hours.", st.FromBoard, hours))
 	case first:
-		w.postNews(fmt.Sprintf("A Clingy Annihilator destined for our planet is under construction at %s.", st.FromBoard))
+		w.postNews(fmt.Sprintf("A Gooie Kablooie destined for our planet is under construction at %s.", st.FromBoard))
 	}
 }
 

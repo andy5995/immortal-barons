@@ -82,23 +82,20 @@ var fieldBgColor = tcell.NewHexColor(0x0d2b50)
 // BRE's (rates, caps, behaviour); the wording is our own — BRE's help text is
 // copyrighted, so it is paraphrased, not copied.
 const (
-	defaultHelp      = "Move with Tab / Shift-Tab; each field's help appears here."
-	helpTurnsPerDay  = "How many turns each player may take per day."
-	helpProtection   = "New-realm protection: turns a fresh empire cannot attack and cannot be attacked, giving newcomers time to get established."
-	helpGameLength   = "Days before the league ends and resets. 0 keeps it running with no scheduled end."
-	helpIdleRemove   = "Days a realm may go unplayed before it is removed from the game. Also removes a realm whose owner created it and never played a turn. 0 never removes anything."
-	helpStartDate    = "The game begins on this date; until then, daily maintenance is paused. Blank starts it right away."
-	helpJoinDate     = "New players may not join after this date. Blank leaves joining open."
-	helpAICount      = "Number of computer-run empires seeded when the world is reset. They take slots from the planet's 25 realms, so each one is a caller who cannot enroll. A league board never gets any, whatever this says."
-	helpInitialLand  = "Land for sale on the market when the game resets."
-	helpLandPerDay   = "Land added to the market each day."
-	helpInterest     = "Bank interest paid over 10 days, credited at the end of each turn. The maximum (200) works out to 20% per day. High rates let banking dominate the game, so a low value (under about 40) keeps play balanced."
-	helpStdInvest    = "The baseline investment return over 10 days. Unless Steady Investment Rate is on, the real rate drifts each day around this value based on how much everyone is investing. The maximum (100) is 10% per day; a low value (under about 50) keeps the economy balanced."
-	helpSteadyInvest = "When on, the investment return stays fixed at the Standard Investment Rate instead of drifting each day with total investment."
-	helpMaxTax       = "The highest tax rate a player is allowed to set."
-	helpMoneyCap     = "The most gold a realm may hold, in billions — the same limit again " +
-		"for the bank. The original stops at 2 billion and discards anything above it. " +
-		"Raise it for a long league where the economy outgrows that."
+	defaultHelp            = "Move with Tab / Shift-Tab; each field's help appears here."
+	helpTurnsPerDay        = "How many turns each player may take per day."
+	helpProtection         = "New-realm protection: turns a fresh empire cannot attack and cannot be attacked, giving newcomers time to get established."
+	helpGameLength         = "Days before the league ends and resets. 0 keeps it running with no scheduled end."
+	helpIdleRemove         = "Days a realm may go unplayed before it is removed from the game. Also removes a realm whose owner created it and never played a turn. 0 never removes anything."
+	helpStartDate          = "The game begins on this date; until then, daily maintenance is paused. Blank starts it right away."
+	helpJoinDate           = "New players may not join after this date. Blank leaves joining open."
+	helpAICount            = "Number of computer-run empires seeded when the world is reset. They take slots from the planet's 25 realms, so each one is a caller who cannot enroll. A league board never gets any, whatever this says."
+	helpInitialLand        = "Land for sale on the market when the game resets."
+	helpLandPerDay         = "Land added to the market each day."
+	helpInterest           = "Bank interest paid over 10 days, credited at the end of each turn. The maximum (200) works out to 20% per day. High rates let banking dominate the game, so a low value (under about 40) keeps play balanced."
+	helpStdInvest          = "The baseline investment return over 10 days. Unless Steady Investment Rate is on, the real rate drifts each day around this value based on how much everyone is investing. The maximum (100) is 10% per day; a low value (under about 50) keeps the economy balanced."
+	helpSteadyInvest       = "When on, the investment return stays fixed at the Standard Investment Rate instead of drifting each day with total investment."
+	helpMaxTax             = "The highest tax rate a player is allowed to set."
 	helpPlanetaryTax       = "The crown tax the Queen Royale takes from each turn's gold income, as a whole percent (default 5, maximum 20). The gold goes to the Queen's purse, which she refunds a share of to each baron at the start of their playing day."
 	helpFoodUnlimited      = "When on, the food market never runs short — its daily supply is unlimited."
 	helpBuyMilitary        = "Whether players may buy military units: freely (Yes), not at all (No), or a limited amount each day (Limited)."
@@ -107,7 +104,7 @@ const (
 	helpRegionCosts        = "Price of buying regions: High, Medium, Low, or None."
 	helpAttackDamage       = "How much a conventional attack destroys on both sides: High, Medium, or Low."
 	helpAttackRewards      = "How much land and goods the winner of an attack gains: High, Medium, or Low."
-	helpSlappenheimer      = "How R5-Slappenheimer missiles behave when fired."
+	helpSabre              = "How S3-Sabre missiles behave when fired."
 	helpMaxAttacks         = "The most conventional attacks a player may launch in one day. 0 means no limit."
 	helpMaxGroupAttacks    = "The most group (interplanetary) attacks a player may lead or join in one day. 0 means no limit."
 	helpMaxTerrorOps       = "The most terrorist operations a player may launch in one day. 0 means no limit."
@@ -122,7 +119,7 @@ const (
 	helpMissileOps         = "Whether nuclear, chemical and biological strikes are offered at all."
 	helpPirates            = "Whether there are pirates at all. Off, nobody is raided and Attack Pirates is gone."
 	helpIPTrading          = "Whether barons may bid on an ALLIED planet's Trading Market. IB's own feature; the original has no such thing."
-	helpClingyAnnihilator  = "Whether the Clingy Annihilator doomsday weapon may be built."
+	helpGooieKablooie      = "Whether the Gooie Kablooie doomsday weapon may be built."
 	helpMaxRegions         = "The most regions a single player may own."
 	helpMaxPlayers         = "The most human empires allowed on this board. 0 means no limit."
 	helpBoardID            = "The name this board uses in inter-BBS packets. Set in bbs.cfg, which the game reads but never writes; shown here so you can see what it is running on."
@@ -193,8 +190,8 @@ func newConfigTUI(w *game.World) *configTUI {
 	dmgVals := []game.Level{game.High, game.Medium, game.Low}
 	buyOpts := []string{"Yes", "No", "Limited"}
 	buyVals := []game.BuyMode{game.BuyYes, game.BuyNo, game.BuyLimited}
-	slapOpts := []string{"User Select/Original", "None/Disabled", "Random", "Constant"}
-	slapVals := []game.SlappenheimerMode{game.SlappenheimerUserSelect, game.SlappenheimerNone, game.SlappenheimerRandom, game.SlappenheimerConstant}
+	sabreOpts := []string{"User Select/Original", "None/Disabled", "Random", "Constant"}
+	sabreVals := []game.SabreMode{game.SabreUserSelect, game.SabreNone, game.SabreRandom, game.SabreConstant}
 
 	timing := tview.NewForm()
 	t.addInt(timing, "Turns per day", helpTurnsPerDay, c.TurnsPerDay, 1, game.MaxTurnsPerDay, func(c *game.Config, n int) { c.TurnsPerDay = n })
@@ -214,7 +211,6 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addBool(econ, "Steady Investment Rate", helpSteadyInvest, c.SteadyInvest, func(c *game.Config, b bool) { c.SteadyInvest = b })
 	t.addInt(econ, "Max Tax Rate", helpMaxTax, c.MaxTaxRate, 0, game.MaxPlayerTaxRate, func(c *game.Config, n int) { c.MaxTaxRate = n })
 	t.addInt(econ, "Planetary Tax Rate (%)", helpPlanetaryTax, c.PlanetaryTaxRate, 0, game.MaxPlanetaryTaxRate, func(c *game.Config, n int) { c.PlanetaryTaxRate = n })
-	t.addInt(econ, "Money Cap (billions)", helpMoneyCap, c.MoneyCapBillions, game.MoneyCapMinBillions, game.MoneyCapMaxBillions, func(c *game.Config, n int) { c.MoneyCapBillions = n })
 	t.addBool(econ, "Food Unlimited", helpFoodUnlimited, c.FoodUnlimited, func(c *game.Config, b bool) { c.FoodUnlimited = b })
 
 	mil := tview.NewForm()
@@ -224,7 +220,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	addChoice(t, mil, "Region Costs", helpRegionCosts, costOpts, costVals, c.RegionCosts, func(c *game.Config, v game.Level) { c.RegionCosts = v })
 	addChoice(t, mil, "Attack Damage", helpAttackDamage, dmgOpts, dmgVals, c.AttackDamage, func(c *game.Config, v game.Level) { c.AttackDamage = v })
 	addChoice(t, mil, "Attack Rewards", helpAttackRewards, dmgOpts, dmgVals, c.AttackRewards, func(c *game.Config, v game.Level) { c.AttackRewards = v })
-	addChoice(t, mil, "R5-Slappenheimer Handling", helpSlappenheimer, slapOpts, slapVals, c.SlappenheimerHandling, func(c *game.Config, v game.SlappenheimerMode) { c.SlappenheimerHandling = v })
+	addChoice(t, mil, "S3-Sabre Handling", helpSabre, sabreOpts, sabreVals, c.SabreHandling, func(c *game.Config, v game.SabreMode) { c.SabreHandling = v })
 	t.addInt(mil, "Max Individual Attacks/Day (0=unlimited)", helpMaxAttacks, c.MaxIndividualAttacks, 0, 100, func(c *game.Config, n int) { c.MaxIndividualAttacks = n })
 	if ibbs {
 		t.addInt(mil, "Max Group Attacks/Day (0=unlimited)", helpMaxGroupAttacks, c.MaxGroupAttacks, 0, 100, func(c *game.Config, n int) { c.MaxGroupAttacks = n })
@@ -239,7 +235,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addBool(mil, "Bombing Ops", helpBombingOps, c.BombingOps, func(c *game.Config, b bool) { c.BombingOps = b })
 	t.addBool(mil, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
 	if ibbs {
-		t.addBool(mil, "Clingy Annihilator", helpClingyAnnihilator, c.ClingyAnnihilator, func(c *game.Config, b bool) { c.ClingyAnnihilator = b })
+		t.addBool(mil, "Gooie Kablooies", helpGooieKablooie, c.GooieKablooie, func(c *game.Config, b bool) { c.GooieKablooie = b })
 		t.addBool(mil, "Local Attacks", helpLocalAttacks, c.LocalAttacks, func(c *game.Config, b bool) { c.LocalAttacks = b })
 		t.addBool(mil, "Local Attack Scoring", helpLocalAttackScoring, c.LocalAttackScoring, func(c *game.Config, b bool) { c.LocalAttackScoring = b })
 		t.addBool(mil, "Allow IP Allies to Trade at Market", helpIPTrading, c.IPTrading, func(c *game.Config, b bool) { c.IPTrading = b })

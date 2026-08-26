@@ -747,9 +747,9 @@ func TestUndermineInvestmentsReducesPrincipal(t *testing.T) {
 	}
 }
 
-func TestSlappenheimerStrikeDamagesTarget(t *testing.T) {
+func TestSabreStrikeDamagesTarget(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
-	// slappenheimerEffect is the target-side half and rolls no covert attempt, so
+	// sabreEffect is the target-side half and rolls no covert attempt, so
 	// no agents are needed here. No Troopers on the target so it can never
 	// backfire, and a stock of every strikeable resource. Only ~3 in 10 launches
 	// land, so fire many.
@@ -757,11 +757,11 @@ func TestSlappenheimerStrikeDamagesTarget(t *testing.T) {
 	d.Jets, d.Turrets, d.Tanks, d.Bombers, d.Carriers, d.Gold, d.Food = 1000, 1000, 1000, 1000, 1000, 1000, 1000
 	before := int64(d.Jets+d.Turrets+d.Tanks+d.Bombers+d.Carriers+d.Agents+d.Food) + d.Gold
 	for i := 0; i < 100; i++ {
-		w.slappenheimerEffect(d, a.Name)
+		w.sabreEffect(d, a.Name)
 	}
 	after := int64(d.Jets+d.Turrets+d.Tanks+d.Bombers+d.Carriers+d.Agents+d.Food) + d.Gold
 	if after >= before {
-		t.Errorf("expected R5-Slappenheimer strikes to reduce the target's resources, before=%d after=%d", before, after)
+		t.Errorf("expected S3-Sabre strikes to reduce the target's resources, before=%d after=%d", before, after)
 	}
 }
 
@@ -825,16 +825,16 @@ func TestBriberyDoublesTheBribersOwnOdds(t *testing.T) {
 	}
 }
 
-// Gold is one of the R5-Slappenheimer's targets. It is held in money width, so
+// Gold is one of the S3-Sabre's targets. It is held in money width, so
 // it sits outside the loop over the count-width assets — easy to leave out of
 // the target roll entirely, which would quietly make the weapon weaker.
-func TestSlappenheimerCanStrikeGold(t *testing.T) {
+func TestSabreCanStrikeGold(t *testing.T) {
 	w, a, d := newAttackerAndTarget(t)
 	a.Agents, d.Agents, d.Troopers, d.SDI = 50, 0, 0, 0
 	d.Gold = 1_000_000
 	before := d.Gold
 	for i := 0; i < 300; i++ {
-		w.slappenheimerEffect(d, a.Name)
+		w.sabreEffect(d, a.Name)
 		if d.Gold < before {
 			return // it reached gold at least once
 		}

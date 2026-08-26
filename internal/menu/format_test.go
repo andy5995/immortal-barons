@@ -17,13 +17,18 @@ func TestAbbrevMoney(t *testing.T) {
 		{500, "500"},
 		{999, "999"},
 		{1_000, "1k"},
-		{34_833_289, "34,833k"},
-		{999_999_999, "999,999k"},
-		{1_000_000_000, "1.0000B"},
-		{1_373_000_000, "1.3730B"},
+		{999_999, "999k"},
+		// Each step takes over exactly at its own magnitude, and truncates rather
+		// than rounds, so a figure one short of the next step never wears it.
+		{1_000_000, "1m"},
+		{34_833_289, "34m"},
+		{999_999_999, "999m"},
+		{1_000_000_000, "1b"},
+		{1_373_000_000, "1b"},
+		{9_876_543_210, "9b"},
 		{-500, "-500"},
-		{-34_833_289, "-34,833k"},
-		{-1_000_000_000, "-1.0000B"},
+		{-34_833_289, "-34m"},
+		{-1_000_000_000, "-1b"},
 	}
 	for _, c := range cases {
 		if got := abbrevMoney(c.n); got != c.want {
@@ -56,25 +61,24 @@ func TestFormatGoldLocale(t *testing.T) {
 	}
 }
 
-// A figure a billion or over is printed as a fixed 4-decimal "B" form, so it
-// fits a screen column BRE only ever sized for nine digits. Everything below a
-// billion keeps its full digits.
+// A figure a billion or over is printed in full with its thousands grouped, the
+// way BRE prints its own — `Bank: 2,000,000,000` and `Today $1,846,153,847`,
+// both off live captures. Nothing switches to a decimal "B" form, and no float
+// is involved at any size.
 func TestFormatGoldBillions(t *testing.T) {
 	cases := []struct {
 		n    int64
 		lang string
 		want string
 	}{
-		{999_999_999, "en", "999,999,999"}, // just under: unchanged
-		{1_000_000_000, "en", "1.0000B"},
-		{1_847_392_104, "en", "1.8473B"},     // truncated, never rounded up
-		{1_999_999_999, "en", "1.9999B"},     // a hair under two billion is not "2.0000B"
-		{2_000_000_000, "en", "2.0000B"},     // the figure the old cap silently ate
-		{999_999_999_999, "en", "999.9999B"}, // game.MoneyCap, the widest this form renders
-		{-1_847_392_104, "en", "-1.8473B"},
-		{1_847_392_104, "de", "1,8473B"}, // German takes the comma as its decimal mark
-		{1_847_392_104, "ru", "1,8473B"},
-		{1_500_000_000_000, "en", "1,500.0000B"}, // past the cap the whole part still groups
+		{999_999_999, "en", "999,999,999"},
+		{1_000_000_000, "en", "1,000,000,000"},
+		{1_847_392_104, "en", "1,847,392,104"},
+		{2_000_000_000, "en", "2,000,000,000"}, // the cap, exactly as BRE prints it
+		{999_000_000_000, "en", "999,000,000,000"},
+		{-1_847_392_104, "en", "-1,847,392,104"},
+		{1_847_392_104, "de", "1.847.392.104"},
+		{1_847_392_104, "ru", "1 847 392 104"},
 	}
 	for _, c := range cases {
 		if got := formatGold(c.n, c.lang); got != c.want {
@@ -86,8 +90,8 @@ func TestFormatGoldBillions(t *testing.T) {
 // The same helper serves counts, not just gold — that is the point of it being
 // generic. A plain int caller gets the identical rendering.
 func TestFormatGoldTakesCounts(t *testing.T) {
-	if got := comma(int(1_500_000_000)); got != "1.5000B" {
-		t.Errorf("a count of 1.5 billion formatted as %q, want %q", got, "1.5000B")
+	if got := comma(int(1_500_000_000)); got != "1,500,000,000" {
+		t.Errorf("a count of 1.5 billion formatted as %q, want %q", got, "1,500,000,000")
 	}
 	if got := comma(7212); got != "7,212" {
 		t.Errorf("a small count formatted as %q, want %q", got, "7,212")

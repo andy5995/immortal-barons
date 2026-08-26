@@ -15,6 +15,10 @@ import (
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
+// tailLines is how much of a failed session's transcript is shown. Enough to
+// cover the screen it stopped on plus the prompt before it.
+const tailLines = 30
+
 // TestCrossProcessConcurrentPlay is the check `-race` cannot make: it drives
 // TWO real, separate immortal-barons processes against ONE data directory at
 // the same time. Each onboards a distinct realm and buys a distinct number of
@@ -86,6 +90,14 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 		{"bob", "Bobsland", 25},
 	}
 
+	// Every process's output is KEPT, not just the output of one that exited
+	// non-zero. A session that loses its write exits 0 — that is the whole
+	// failure mode — so discarding the output of a clean exit throws away the
+	// only record of where that session actually stopped. Two intermittent
+	// windows-latest failures were unreadable for exactly this reason: the
+	// assertion below said a realm was missing and nothing said why.
+	var mu sync.Mutex
+	output := map[string]string{}
 	var wg sync.WaitGroup
 	for _, p := range players {
 		wg.Add(1)
@@ -95,12 +107,35 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 			defer cancel()
 			cmd := exec.CommandContext(ctx, bin, "-local", "-cp437", "-name", p.handle, "-data", dir)
 			cmd.Stdin = strings.NewReader(script(p.realm, p.buy))
-			if out, err := cmd.CombinedOutput(); err != nil {
+			out, err := cmd.CombinedOutput()
+			mu.Lock()
+			output[p.handle] = string(out)
+			mu.Unlock()
+			if err != nil {
 				t.Errorf("%s process: %v\n%s", p.handle, err, out)
 			}
 		}(p)
 	}
 	wg.Wait()
+
+	// Dumped on any failure below, from the goroutines' captured copies. Printed
+	// once, together, so the two sessions can be read against each other — which
+	// process reached which screen is the question, and one process's transcript
+	// alone does not answer it.
+	//
+	// The TAIL, stripped of ANSI: the answer is always where a session stopped,
+	// and a full transcript opens with kilobytes of escape-coded splash art that
+	// would bury it in the CI log.
+	dump := func() {
+		for _, p := range players {
+			lines := strings.Split(strings.TrimRight(stripANSI(output[p.handle]), "\n"), "\n")
+			if len(lines) > tailLines {
+				lines = lines[len(lines)-tailLines:]
+			}
+			t.Logf("---- %s: last %d lines of its session ----\n%s",
+				p.handle, len(lines), strings.Join(lines, "\n"))
+		}
+	}
 
 	// Reload the shared world from disk and assert ALL purchases survived. A
 	// new empire starts with 100 troopers and no Industrial regions, so nothing
@@ -112,12 +147,15 @@ func TestCrossProcessConcurrentPlay(t *testing.T) {
 	for _, p := range players {
 		e := w.FindByOwner(p.handle)
 		if e == nil {
-			t.Fatalf("%s did not onboard — its process's write was lost", p.handle)
+			dump()
+			t.Fatalf("%s did not onboard — its process's write was lost (transcripts above show where each session stopped)", p.handle)
 		}
 		if e.Name != p.realm {
+			dump()
 			t.Errorf("%s realm = %q, want %q", p.handle, e.Name, p.realm)
 		}
 		if want := 100 + 3*p.buy; e.Troopers != want {
+			dump()
 			t.Errorf("%s troopers = %d, want %d (its purchase was lost or clobbered by the other node)", p.handle, e.Troopers, want)
 		}
 	}

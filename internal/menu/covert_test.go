@@ -2,6 +2,7 @@ package menu
 
 import (
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 	"unicode/utf8"
@@ -110,7 +111,7 @@ func TestBombEnemyTargetsIsNotASubmenu(t *testing.T) {
 		"Undermine Investments",
 		"Nuclear Assault",
 		"Chemical Bombing",
-		"R5-Slappenheimer",
+		"S3-Sabre",
 	} {
 		if strings.Contains(out, gone) {
 			t.Errorf("the local Covert menu still offers the interplanetary item %q; output:\n%s", gone, out)
@@ -139,7 +140,7 @@ func TestDemoralizeForcesQueuesAgainstTheChosenTarget(t *testing.T) {
 	target.Agents = 0
 	target.Morale = 100
 
-	out := runCovertAction(t, w, p, demoralizeForces)
+	out := runCovertAction(t, w, p, covertAction(game.OpDemoralizeForces))
 	if !strings.Contains(out, target.Name) {
 		t.Errorf("the acknowledgement should name the chosen target %q: %s", target.Name, out)
 	}
@@ -175,7 +176,7 @@ func TestBombEnemyTargetsNeedsNoBombers(t *testing.T) {
 	target.People, target.Troopers = 100_000, 100_000
 	target.Tanks, target.Jets, target.Food = 100_000, 100_000, 100_000
 
-	out := runCovertAction(t, w, p, bombEnemyTargets)
+	out := runCovertAction(t, w, p, covertAction(game.OpBombEnemyTargets))
 	if !strings.Contains(out, target.Name) {
 		t.Errorf("the acknowledgement should name the chosen target %q: %s", target.Name, out)
 	}
@@ -316,5 +317,76 @@ func TestCovertMenuStaysOpenWhileAgentsRemain(t *testing.T) {
 	}
 	if len(w.CovertQueue) != 2 {
 		t.Errorf("queued %d operations, want 2 — the menu did not come back", len(w.CovertQueue))
+	}
+}
+
+// The Covert menu's labels and the engine's CovertOp constants are the same
+// strings, and have to be: the constant is the CovertOpsUsed key that is written
+// to the save file, so a menu label that drifted from it would leave the
+// once-per-turn gate reading a key nothing writes (#208). The label is now
+// derived from the constant, and this holds the two ends together — both that
+// every op reaches the screen under its own name and that no numbered item
+// names something that is not an op.
+func TestCovertMenuNamesEveryOpThroughItsConstant(t *testing.T) {
+	menus := BuildMenus()
+	f, _, err := runCovert(t, "0", menus.Covert) // draw the menu, then Quit
+	if err != nil {
+		t.Fatalf("got %v", err)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "Expose Enemy Ops") {
+		t.Fatalf("the run never reached the Covert Operations menu, got:\n%s", out)
+	}
+
+	labelled := map[game.CovertOp]bool{}
+	for _, it := range menus.Covert.Items {
+		if it.Key < '1' || it.Key > '8' { // '9' is Expose Enemy Ops, which is no CovertOp
+			continue
+		}
+		op := game.CovertOp(it.Label)
+		if !slices.Contains(game.AllCovertOps, op) {
+			t.Errorf("Covert item %c is labelled %q, which is no game.CovertOp — a label that drifts from the constant writes a covertOpsUsed key nothing reads", it.Key, it.Label)
+			continue
+		}
+		labelled[op] = true
+	}
+	for _, op := range game.AllCovertOps {
+		if !labelled[op] {
+			t.Errorf("no Covert menu item is labelled %q", op)
+		}
+		if !strings.Contains(out, string(op)) {
+			t.Errorf("the drawn menu never shows %q; output:\n%s", op, out)
+		}
+	}
+}
+
+// Every effect operation on the menu queues the op it is labelled with. This is
+// the other half of the pairing: the screen names an op through its constant,
+// and the action behind that name reaches the resolver that files the same
+// constant into the queue and into the per-turn gate. The two info operations
+// resolve at the menu and queue nothing (see covert_queue.go), so they are not
+// asserted here.
+func TestEveryCovertMenuActionQueuesItsOwnOp(t *testing.T) {
+	for _, op := range game.AllCovertOps {
+		if op == game.OpSendSpy || op == game.OpSpyOnRelations {
+			continue
+		}
+		t.Run(string(op), func(t *testing.T) {
+			w := newWorld()
+			p := w.Player()
+			p.Protection = 0
+			for _, e := range w.Empires {
+				if e != p {
+					e.Protection = 0
+				}
+			}
+			runCovertAction(t, w, p, covertAction(op))
+			if rec := queuedOp(t, w); rec.Op != op {
+				t.Errorf("the %q item queued a %q", op, rec.Op)
+			}
+			if !p.TurnProgress.CovertOpsUsed[op] {
+				t.Errorf("the %q item took no per-turn slot under its own name, got %v", op, p.TurnProgress.CovertOpsUsed)
+			}
+		})
 	}
 }

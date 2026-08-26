@@ -22,6 +22,7 @@ func printScores(s session.Session, w *ctx) {
 		letter          string
 		alive, isPlayer bool
 		presence        string
+		protected       bool
 		land, score, nw int
 	}
 	var rows []row
@@ -41,16 +42,16 @@ func printScores(s session.Session, w *ctx) {
 			// bright-yellow name. The '+' played-today marker is also
 			// suppressed: your own status is obvious from context.
 			self := e == w.Player()
-			rows = append(rows, row{e.Name, e.Letter(), e.Alive, self, presenceOf(e, self, w.Today), e.Land, e.Score, nw})
+			rows = append(rows, row{e.Name, e.Letter(), e.Alive, self, presenceOf(e, self, w.Today), e.Alive && e.Protection > 0, e.Land, e.Score, nw})
 		}
 		lastMaster = w.LastMaster
 	})
 	// BRE-style scores screen (matches a live BRE scores screen): a game-name
-	// banner, lettered (A)/(B) ids in slot order, Id / Empire Name / Territory /
+	// banner, lettered [A]/[B] ids in slot order, Id / Empire Name / Territory /
 	// Score / Net Worth columns, magenta header/footer rules. IB-branded.
 	fmt.Fprintf(s, "\n%s-*%s%s%s%s*-%s\n\n",
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
-	scoreTableHead(s)
+	scoreTableHead(s, w.Term)
 	for _, r := range rows {
 		name := r.name
 		if !r.alive {
@@ -60,7 +61,7 @@ func printScores(s session.Session, w *ctx) {
 		if r.isPlayer {
 			nameColor = ansi.FgBrightYellow // highlight the caller's own realm
 		}
-		scoreTableRow(s, scoreID(r.letter), name, nameColor, r.presence, r.land, r.score, r.nw)
+		scoreTableRow(s, w.Term, scoreID(r.letter, r.protected), name, nameColor, r.presence, r.land, r.score, r.nw)
 	}
 	scoreTableRule(s)
 	if lastMaster != "" {
@@ -71,7 +72,7 @@ func printScores(s session.Session, w *ctx) {
 const (
 	// scoreIDCellWidth is the id column. Three columns is the whole id: a realm
 	// is addressed by its slot letter and a planet holds game.PlanetSlots realms,
-	// so `(A)`..`(Y)` is every id there is. The attack picker leaves it EMPTY for
+	// so `[A]`..`[Y]` is every id there is. The attack picker leaves it EMPTY for
 	// a realm that cannot be attacked, which this still holds in place.
 	scoreIDCellWidth = 3
 	// scoreNameWidth is the name column. It carries the presence suffix too, so
@@ -107,7 +108,7 @@ func presenceOf(e *game.Empire, self bool, today string) string {
 
 // markWidth is the mark's column cost — "(O)" and whatever a translation makes
 // of the letter — so headings and blanks can be sized from one place.
-func markWidth(s session.Session) int { return len([]rune(tr(s, scoreOnlineMark))) + 2 }
+func markWidth(s session.Session, t Term) int { return visWidth(t, tr(s, scoreOnlineMark)) + 2 }
 
 // onlineMark marks a baron who is on the board: "(O)" set immediately to the
 // LEFT of their name, or a blank of the same width so the name column holds in
@@ -125,8 +126,8 @@ func markWidth(s session.Session) int { return len([]rune(tr(s, scoreOnlineMark)
 // parentheses are decoration and clear the 3:1 non-text minimum; the letter
 // cannot be the dim one, because it is the whole message — and it still carries
 // that message on a monochrome or ANSI-less session.
-func onlineMark(s session.Session, presence string) string {
-	width := markWidth(s)
+func onlineMark(s session.Session, t Term, presence string) string {
+	width := markWidth(s, t)
 	switch presence {
 	case presenceOnline:
 		return ansi.FgMagenta + "(" + ansi.FgBrightWhite + tr(s, scoreOnlineMark) +
@@ -147,22 +148,33 @@ func onlineMark(s session.Session, presence string) string {
 // onboarding — only a three-character minimum is enforced — so a long one used
 // to push the figures beside it out of true. The mark survives the clip: it is
 // the part carrying information the row cannot show twice.
-func nameCell(s session.Session, name, nameColor string, presence string, width int) string {
-	mark := markWidth(s)
-	if room := width - mark; len([]rune(name)) > room {
-		name = string([]rune(name)[:max(room, 0)])
-	}
-	return onlineMark(s, presence) + nameColor + name + ansi.Reset +
-		strings.Repeat(" ", max(width-mark-len([]rune(name)), 0))
+//
+// Every width here is measured on the CALLER's terminal, not in runes.
+// ValidRealmName accepts any printable rune, so a realm may legally be named
+// "Iron—Fist"; the CP437 and plain-ASCII writers rewrite that em dash as two
+// hyphens below every layer that counts columns, and a rune count would have
+// walked the figures one column right for the default charset (the same defect
+// as #192 and #196). Hence Term rather than the session — see fitColumn.
+func nameCell(s session.Session, t Term, name, nameColor string, presence string, width int) string {
+	mark := markWidth(s, t)
+	name = fitColumn(t, name, max(width-mark, 0))
+	return onlineMark(s, t, presence) + nameColor + name + ansi.Reset +
+		strings.Repeat(" ", max(width-mark-visWidth(t, name), 0))
 }
 
+// idCell draws the id in BRE's colours — magenta brackets, bright-white letter,
+// e.g. 35( 1;37A 35) — keeping whichever pair scoreID chose, since the pair is
+// what says whether the realm is shielded.
 func idCell(id string) string {
-	// BRE: magenta parens, bright-white letter — e.g. 35( 1;37A 35)
-	inner := strings.Trim(id, "()")
+	inner := strings.Trim(id, "()[]")
 	if inner == "" {
 		return strings.Repeat(" ", scoreIDCellWidth)
 	}
-	return ansi.FgMagenta + "(" + ansi.FgBrightWhite + inner + ansi.FgMagenta + ")" + ansi.Reset +
+	open, close := "(", ")"
+	if strings.HasPrefix(id, "[") {
+		open, close = "[", "]"
+	}
+	return ansi.FgMagenta + open + ansi.FgBrightWhite + inner + ansi.FgMagenta + close + ansi.Reset +
 		strings.Repeat(" ", max(scoreIDCellWidth-len(id), 0))
 }
 
@@ -174,17 +186,17 @@ func scoreTableRule(s session.Session) {
 	fmt.Fprintf(s, "%s\n", rule75(ansi.FgMagenta))
 }
 
-func scoreTableHead(s session.Session) {
+func scoreTableHead(s session.Session, t Term) {
 	// The heading sits over the names, which the online mark's gutter indents.
 	fmt.Fprintf(s, "%s%-*s%-*s %10s %11s %11s%s\n",
 		ansi.FgBrightWhite, scoreIDCellWidth, tr(s, "Id"),
-		scoreNameWidth, strings.Repeat(" ", markWidth(s))+tr(s, "Empire Name"),
+		scoreNameWidth, strings.Repeat(" ", markWidth(s, t))+tr(s, "Empire Name"),
 		tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
 	scoreTableRule(s)
 }
 
-func scoreTableRow(s session.Session, id, name, nameColor string, presence string, land, score, nw int) {
-	scoreTableRowStr(s, id, name, nameColor, presence,
+func scoreTableRow(s session.Session, t Term, id, name, nameColor string, presence string, land, score, nw int) {
+	scoreTableRowStr(s, t, id, name, nameColor, presence,
 		strconv.Itoa(land), strconv.Itoa(score), strconv.Itoa(nw))
 }
 
@@ -193,18 +205,30 @@ func scoreTableRow(s session.Session, id, name, nameColor string, presence strin
 // part and the one that drifts; how a number is spelled is each screen's own
 // choice, and they do not currently agree — the scores board and the target
 // list print bare figures where the recipient picker groups them.
-func scoreTableRowStr(s session.Session, id, name, nameColor, presence, land, score, nw string) {
+func scoreTableRowStr(s session.Session, t Term, id, name, nameColor, presence, land, score, nw string) {
 	fmt.Fprintf(s, "%s%s %s%10s%s %s%11s%s %s%11s%s\n",
 		idCell(id),
-		nameCell(s, name, nameColor, presence, scoreNameWidth),
+		nameCell(s, t, name, nameColor, presence, scoreNameWidth),
 		ansi.FgBrightMagenta, land, ansi.Reset,
 		ansi.FgBrightWhite, score, ansi.Reset,
 		ansi.FgWhite, nw, ansi.Reset)
 }
 
-// scoreID is the parenthesised id for a scores row: the realm's own slot letter
-// (game.Empire.Letter), never its position in the sorted table. BRE prints the
-// same — its captured See Scores board runs (A), (B), (E), skipping the letters
-// of the realms that have fallen (docs/dev/bre-screens.md) — and it is what
+// scoreID is the id for a scores row: the realm's own slot letter
+// (game.Empire.Letter), never its position in the sorted table. BRE letters the
+// same rows — its captured See Scores board runs A, B, E, skipping the letters
+// of the realms that have fallen (docs/dev/bre-screens.md) — and that is what
 // makes the key that mailed a realm yesterday reach the same realm today.
-func scoreID(letter string) string { return "(" + letter + ")" }
+//
+// The BRACKETS ARE THE PROTECTION FLAG (#214), and IB's own addition: a realm
+// under New Realm Protection wears [C] where every other realm wears (C). One
+// glyph does the whole job, so a shielded realm needs no marker after its name
+// and the row stays the width it was. The shape carries it, not the colour, so
+// it survives a monochrome terminal and a reader who cannot tell the two colours
+// apart. Everything unshielded keeps BRE's own parentheses.
+func scoreID(letter string, protected bool) string {
+	if protected {
+		return "[" + letter + "]"
+	}
+	return "(" + letter + ")"
+}

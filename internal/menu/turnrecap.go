@@ -51,8 +51,8 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 	if yesterday {
 		date = prevISODate(date)
 	}
-	renderNewsMasthead(s, newsDate(date))
-	renderDailyBulletin(s, bulletin, boardID)
+	renderNewsMasthead(s, w.Term, newsDate(date))
+	renderDailyBulletin(s, w.Term, bulletin, boardID)
 	if len(news) == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "No planetary bulletins."))
 	} else {
@@ -268,12 +268,15 @@ func manufacturedUnits(s session.Session, made []int) {
 func incomeReport(s session.Session, w *ctx) {
 	var b game.IncomeBreakdown
 	var raids []game.PirateHit
+	var interest, invested int64
 	made := make([]int, len(game.MilitaryGoods))
 	if !withPlayer(w, func(p *game.Empire) {
 		b = w.IncomeThisTurn(p)
 		raids = p.PirateHits
 		p.PirateHits = nil
 		p.RaidersThisTurn = raiderSlots(raids)
+		interest = p.LastInterest
+		invested = p.InvestReturnsToday
 		for i, g := range game.MilitaryGoods {
 			made[i] = *g.Made(p)
 		}
@@ -304,8 +307,10 @@ func incomeReport(s session.Session, w *ctx) {
 			}
 		}
 	}
-	if w := len(comma(total)); w > width {
-		width = w
+	for _, n := range []int64{int64(total), interest, invested} {
+		if w := len(comma(n)); w > width {
+			width = w
+		}
 	}
 
 	// BRE opens the income lines under its 75-column blue rule and gives them no
@@ -313,25 +318,42 @@ func incomeReport(s session.Session, w *ctx) {
 	// maintenance"). IB drew a blue-backed "Income Report" bar of its own here
 	// until 2026-08-25.
 	fmt.Fprintf(s, "\n%s\n", rule75(ansi.FgBlue))
-	amt := func(color string, n int, text string) {
+	amt := func(color string, n int64, text string) {
 		fmt.Fprintf(s, "  %s%*s%s  %s\n", color, width, comma(n), ansi.Reset, i18n.T(sessionLang(s), text))
 	}
 	for _, l := range golds {
 		if l.amount > 0 {
-			amt(ansi.FgBrightCyan, l.amount, l.text)
+			amt(ansi.FgBrightCyan, int64(l.amount), l.text)
 		}
 	}
 	if total > 0 {
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", width), ansi.Reset)
-		amt(ansi.FgBrightYellow, total, "gold earned this turn.")
+		amt(ansi.FgBrightYellow, int64(total), "gold earned this turn.")
 	}
 	if b.Food > 0 {
-		amt(ansi.FgBrightCyan, b.Food, "Food units were grown.")
+		amt(ansi.FgBrightCyan, int64(b.Food), "Food units were grown.")
 	}
 	if b.RiverFood > 0 {
-		amt(ansi.FgBrightCyan, b.RiverFood, "Food units were fished from the rivers.")
+		amt(ansi.FgBrightCyan, int64(b.RiverFood), "Food units were fished from the rivers.")
 	}
 	manufacturedUnits(s, made)
+	// The bank's two returns close the report, interest first (#216) and then the
+	// matured investments — which is where BRE puts that line, after the
+	// manufacturing figures (cap/eots-ibbs-01.cap). BRE prints no interest line at
+	// all; the wording is IB's own, in the style of the lines above it.
+	if interest > 0 || invested > 0 {
+		// A blank line ahead of them, as with the raid notices below: what the
+		// realm PRODUCED and what the bank paid are two different things, and the
+		// unit list right above ends in an indented column of its own. BRE runs
+		// its investment line straight on from the production lines.
+		fmt.Fprintln(s)
+		if interest > 0 {
+			amt(ansi.FgBrightCyan, interest, "gold was earned in bank interest.")
+		}
+		if invested > 0 {
+			amt(ansi.FgBrightCyan, invested, "gold was earned from investment returns.")
+		}
+	}
 	if len(raids) > 0 {
 		// A blank line before the raid notices. BRE runs them straight on from
 		// the production lines; separating them is IB's own readability choice

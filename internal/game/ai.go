@@ -190,10 +190,11 @@ func (w *World) aiSetTax(e *Empire) {
 	if e.Support < AISupportFloor {
 		want = AITaxRecover
 	}
-	if cap := w.Config.MaxTaxRate; cap > 0 && want > cap {
-		want = cap
-	}
-	e.Tax = want
+	// Through SetTax, so the AI is held to the same ceiling a player is. It read
+	// MaxTaxRate == 0 as "no cap set" and went on taxing while every human was
+	// held to 0%, which handed the computer barons a league's whole tax income
+	// (#203). Zero is a ceiling of zero.
+	w.SetTax(e, want)
 }
 
 // aiProposeTreaty lets an AI open diplomacy instead of only answering it (#73).

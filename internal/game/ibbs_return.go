@@ -67,7 +67,9 @@ func (w *World) applyAttackResult(res AttackResult) {
 			}
 		}
 	}
-	w.postNews(w.returnNews(sent, res))
+	if line := w.returnNews(sent, res); line != "" {
+		w.postNews(line)
+	}
 }
 
 // applyTerrorResult is the returning half of a Terrorist Op: the agents are
@@ -224,17 +226,27 @@ func forceLine(f AttackForce) string {
 // names no enemy realm at all. Each line is a whole translatable sentence.
 func (w *World) returnNews(sent InFlightStrike, res AttackResult) string {
 	realm := strikeTarget(sent, res)
+	// Won alone cannot pick the line: it is false for a strike that found no such
+	// realm and for one turned away by New Realm Protection, and both were being
+	// announced as a defeat in battle (#201). The original has no news category
+	// for either — game/ipnews.dat carries a win and a loss form and nothing else
+	// — so neither is planet news here.
+	switch res.outcome() {
+	case OutcomeNotFound, OutcomeProtected:
+		return ""
+	}
+	won := res.outcome() == OutcomeWon
 	if !sent.Group {
 		// Name the baron who sent it. The planet's own news used to report the
 		// strike anonymously, so nobody reading it knew which of their realms had
 		// gone abroad (#108); a group attack stays the planet's doing.
 		sender := strikeSender(w, sent)
-		if res.Won {
+		if won {
 			return fmt.Sprintf("%s has returned in triumph from %s, carrying off %d regions!", sender, realm, res.LandTaken)
 		}
 		return fmt.Sprintf("%s has returned from %s with news of failure.", sender, realm)
 	}
-	if res.Won {
+	if won {
 		return fmt.Sprintf("Our planet's forces have returned in triumph from %s and captured %d regions!", realm, res.LandTaken)
 	}
 	return fmt.Sprintf("Our planet's forces have returned in disarray from a loss against %s.", realm)
@@ -259,7 +271,7 @@ func strikeSender(w *World, sent InFlightStrike) string {
 
 // applySpecialOpResult files the answer to an interplanetary Special Operation
 // with the baron who sent it: what it did, what it earned, and — for an
-// R5-Slappenheimer that turned on its owner — the damage that could only be
+// S3-Sabre that turned on its owner — the damage that could only be
 // rolled where the target lives but has to land here.
 func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	e := w.FindByOwner(sent.Owner)
@@ -268,7 +280,7 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	}
 	label := SpecialOpLabel(sent.Op)
 	if res.Backfired {
-		lost := w.slappenheimerDamage(e)
+		lost := w.sabreDamage(e)
 		if lost == "" {
 			e.addEvent(fmt.Sprintf("Your %s against %s of %s backfired, but the damage was negligible.",
 				label, res.TargetEmpire, sent.TargetBoard))

@@ -152,10 +152,10 @@ func gameSetup(s session.Session, w *ctx) Result {
 		if coordBoard != "" {
 			coordinator = coordBoard
 		}
-		row("League Coordinator", game.FitColumn(coordinator, 50))
+		row("League Coordinator", fitColumn(w.Term, coordinator, 50))
 		// Last, so the group narrows from the whole league to the board the
 		// player is standing on.
-		row("This planet", game.FitColumn(c.BoardID, 50))
+		row("This planet", fitColumn(w.Term, c.BoardID, 50))
 		if declaration != "" {
 			row("League declaration", declaration)
 		}
@@ -179,8 +179,8 @@ func gameSetup(s session.Session, w *ctx) Result {
 	row("Food market", foodMarketStr(s, c))
 	// Worth a line of its own: gold earned past this is destroyed, and a player
 	// who does not know the figure only finds out by losing some.
-	// Whole billions, not the 4-decimal display form: the cap is SET in billions,
-	// so the fraction is always zeros.
+	// The cap is held in whole billions, so the row names the count and the unit
+	// rather than spelling out ten digits.
 	row("Most gold you can hold", fmt.Sprintf(tr(s, "%sB in hand, and again in the bank"),
 		comma(w.MoneyCapBillions())))
 	pause(s)
@@ -195,7 +195,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 		"Attack rewards", tr(s, c.AttackRewards.String()))
 	pair("Attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"),
 		"Attack costs", tr(s, c.AttackCosts.String()))
-	row("R5-Slappenheimer", tr(s, c.SlappenheimerHandling.String()))
+	row("S3-Sabre", tr(s, c.SabreHandling.String()))
 	if !c.MissileOps || !c.BombingOps {
 		pair("Missile ops", onOffStr(c.MissileOps), "Bombing ops", onOffStr(c.BombingOps))
 	}
@@ -216,7 +216,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 		pair("Bombing ops per day", countOr(c.MaxBombingOps, "Unlimited"),
 			"Terrorism costs", tr(s, c.TerrorCosts.String()))
 		pair("Lost forces return", lostForcesStr(s, c),
-			"Clingy Annihilator", onOffStr(c.ClingyAnnihilator))
+			"Gooie Kablooies", onOffStr(c.GooieKablooie))
 		pair("Allied market trading", onOffStr(c.IPTrading),
 			"Local attack scoring", onOffStr(c.LocalAttackScoring))
 		row("Local attacks", onOffStr(c.LocalAttacks))
@@ -278,9 +278,10 @@ const playerListNameWidth = 25
 // an Owner column of handles until 2026-08-18.
 func playerList(s session.Session, w *ctx) Result {
 	type row struct {
-		name     string
-		presence string
-		land, nw int
+		name      string
+		presence  string
+		protected bool
+		land, nw  int
 	}
 	var rows []row
 	w.With(func() {
@@ -289,7 +290,7 @@ func playerList(s session.Session, w *ctx) Result {
 				continue
 			}
 			self := e == w.Player()
-			rows = append(rows, row{e.Name, presenceOf(e, self, w.Today), e.Land, w.NetWorth(e)})
+			rows = append(rows, row{e.Name, presenceOf(e, self, w.Today), e.Protection > 0, e.Land, w.NetWorth(e)})
 		}
 	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightBlue, tr(s, "Player List"), ansi.Reset)
@@ -297,7 +298,7 @@ func playerList(s session.Session, w *ctx) Result {
 	for _, r := range rows {
 		// The suffix rides in the name column, so the roster says who is on
 		// without moving the columns beside it.
-		fmt.Fprintf(s, "  %s %-8d %d\n", nameCell(s, r.name, "", r.presence, playerListNameWidth), r.land, r.nw)
+		fmt.Fprintf(s, "  %s %-8d %d\n", nameCell(s, w.Term, r.name, "", r.presence, playerListNameWidth), r.land, r.nw)
 	}
 	pause(s)
 	return Stay

@@ -12,6 +12,7 @@ their string-literal arguments:
   - i18n.T(lang, "...")               explicit lookups (menu draw)
   - menu item Label:/Title: literals  menu chrome
   - errors.New("...") in internal/game  (surfaced to the player via fail())
+  - typed op constants in internal/game whose value IS a menu label
 
 This is a translation-time helper only — not part of the build. Run it after
 adding new strings, then fill in msgstr in internal/i18n/locale/<lang>.po.
@@ -49,7 +50,11 @@ ERR_PATTERN = re.compile(r'errors\.New\(' + STR + r'\)')
 # events it files on the other player's recap). It cannot import internal/menu,
 # so it translates through a local tr() closure or i18n.T keyed on the empire's
 # own Language — neither of which the menu-side patterns above match.
+# A menu item whose label comes from the constant it dispatches on (the covert
+# ops) has no literal left in internal/menu for the Label: pattern to find, so
+# the constant's own declaration is the msgid.
 GAME_PATTERNS = [
+    re.compile(r'\bCovertOp\s*=\s*' + STR),
     re.compile(r'\btr\(' + STR),
     re.compile(r'\bi18n\.T\([^,]+,\s*' + STR),
 ]

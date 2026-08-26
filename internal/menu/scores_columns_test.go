@@ -7,7 +7,7 @@ import (
 
 // TestPrintScoresBREHeader checks the local scores board matches BRE's layout:
 // the game-name banner, BRE's column labels/order (Id, Empire Name, Territory,
-// Score, Net Worth), lettered (A)/(B) ids, and (dead) on an eliminated empire.
+// Score, Net Worth), lettered [A]/[B] ids, and (dead) on an eliminated empire.
 func TestPrintScoresBREHeader(t *testing.T) {
 	w := newWorld()
 	f := &fakeSession{}

@@ -43,7 +43,7 @@ type Menus struct {
 // both are gone.
 func noBombingOps(w *ctx) bool  { return !w.Config.BombingOps }
 func noMissileOps(w *ctx) bool  { return !w.Config.MissileOps }
-func noAnnihilator(w *ctx) bool { return !w.Config.ClingyAnnihilator }
+func noAnnihilator(w *ctx) bool { return !w.Config.GooieKablooie }
 
 // noIPTrading hides Trading when the league has turned it off. It is IB's own
 // feature, so a league that wants the original's shape says so and the menu
@@ -230,16 +230,20 @@ func BuildMenus() *Menus {
 	// opening-menu entry is tinted to match.
 	// Order and
 	// hotkeys match BRE.OVR's full InterPlanetary Operations string table
-	// (#75); Clingy Annihilator Ops is IB's equivalent of BRE's Gooie Kablooie
-	// item, on its '9' as a later capture showed it. Send Trade Deal and Send Message reuse the same actions
-	// as the Trading and Messages menus; Special Operations opens the separate
+	// (#75); Gooie Kablooie Ops sits on its '9', as a later capture showed.
+	// Send Message reuses the Messages menu's action; Special Operations opens
+	// the separate
 	// interplanetary Special Operations menu (BRE's cross-planet covert set, not
 	// the local Covert menu). Indiv. Attack Force ('6') has no interplanetary
 	// individual-attack mechanic behind it yet — see indivAttackForce's doc.
+	//
+	// Send Trade Deal is the INTERPLANETARY deal, a separate mechanic from the
+	// Trading menu's (#195); it ran the local action, against a realm on the
+	// sender's own planet, until 2026-08-26.
 	interplanetary.Items = []Item{
 		{Key: '1', Label: "View IPScores", Do: interbbsScores},
 		{Key: '2', Label: "Terrorist Ops", Do: gotoMenu(terrorOps)},
-		{Key: '3', Label: "Send Trade Deal", Do: sendTradeDeal},
+		{Key: '3', Label: "Send Trade Deal", Do: sendIPTradeDeal},
 		{Key: '4', Label: "Create Group Attack", Do: createGroupAttack},
 		{Key: '5', Label: "Join Group Attack", Do: joinGroupAttack},
 		{Key: '6', Label: "Indiv. Attack Force", Do: indivAttackForce},
@@ -247,7 +251,7 @@ func BuildMenus() *Menus {
 		// Send SpyGuy is the one item here the two switches do not govern, so the
 		// menu stays reachable even with both off.
 		{Key: '8', Label: "Special Operations", Do: gotoMenu(ipSpecial)},
-		{Key: '9', Label: "Clingy Annihilator Ops", Do: clingyAnnihilator, Hidden: noAnnihilator},
+		{Key: '9', Label: "Gooie Kablooie Ops", Do: gooieKablooie, Hidden: noAnnihilator},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'B', Label: "Trading", Do: gotoMenu(ipTrading), Hidden: noIPTrading},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
@@ -276,20 +280,21 @@ func BuildMenus() *Menus {
 	// Operations menu (2026-07-21); costs are the balance.go Cost* constants
 	// (#73). costOf shows a fixed gold price in the menu's cost column.
 	costOf := func(n int) func(*ctx) int { return func(*ctx) int { return n } }
-	covert.Items = []Item{
-		{Key: '1', Label: "Send Spy", Price: costOf(game.CostSendSpy), Do: sendSpy},
-		{Key: '2', Label: "Stir Revolts", Price: costOf(game.CostStirRevolts), Do: stirRevolts},
-		{Key: '3', Label: "Set Up", Price: costOf(game.CostSetUp), Do: setUp},
-		{Key: '4', Label: "Support Dissensions", Price: costOf(game.CostSupportDissensions), Do: supportDissensions},
-		{Key: '5', Label: "Demoralize Forces", Price: costOf(game.CostDemoralizeForces), Do: demoralizeForces},
-		{Key: '6', Label: "Spy on Relations", Price: costOf(game.CostSpyOnRelations), Do: spyRelations},
-		{Key: '7', Label: "Bomb Enemy Targets", Price: costOf(game.CostBombEnemyTargets), Do: bombEnemyTargets},
-		{Key: '8', Label: "Bribery", Price: costOf(game.CostBribery), Do: briberyOp},
-		{Key: '9', Label: "Expose Enemy Ops", Price: costOf(game.CostExposeEnemyOps), Do: exposeEnemyOps},
-		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: '?', Label: "Help", Do: helpBrowse},
-		{Key: '0', Label: "Quit", Do: back},
+	// The eight operations come from covertRows, which carries each one's
+	// game.CovertOp: the label IS the constant, so the screen cannot name an op
+	// by a string of its own (#208). Their msgids are still the same English
+	// text, so the .po catalogs are untouched.
+	for _, row := range covertRows {
+		covert.Items = append(covert.Items, Item{
+			Key: row.Key, Label: string(row.Op), Price: costOf(row.Cost), Do: row.action(),
+		})
 	}
+	covert.Items = append(covert.Items,
+		Item{Key: '9', Label: "Expose Enemy Ops", Price: costOf(game.CostExposeEnemyOps), Do: exposeEnemyOps},
+		Item{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
+		Item{Key: '?', Label: "Help", Do: helpBrowse},
+		Item{Key: '0', Label: "Quit", Do: back},
+	)
 	covert.DefaultOnEnter = quitOnEnter(covert)
 	// BRE re-reads the agent count at the head of the covert menu's own loop
 	// (enter_covert_operations_menu, BRE.OVR 0x0179db, testing the 32-bit count
@@ -320,7 +325,7 @@ func BuildMenus() *Menus {
 		{Key: '4', Label: "Undermine Investments", Do: ipSpecialOp(game.OpUndermine), Hidden: noBombingOps},
 		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialOp(game.OpNuclear), Hidden: noMissileOps},
 		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialOp(game.OpChemical), Hidden: noMissileOps},
-		{Key: '7', Label: "R5-Slappenheimer", Do: ipSpecialOp(game.OpSlappenheimer), Hidden: noMissileOps},
+		{Key: '7', Label: "S3-Sabre", Do: ipSpecialOp(game.OpSabre), Hidden: noMissileOps},
 		{Key: '8', Label: "Send SpyGuy", Do: sendSpyGuy},
 		{Key: '0', Label: "Quit", Do: back},
 	}
@@ -427,7 +432,7 @@ func BuildMenus() *Menus {
 	// displacing one. IB numbered its three built items 1-3 until 2026-08-18,
 	// which put every one of them on the original's key for its neighbour.
 	coord.Items = []Item{
-		{Key: '1', Label: "Dismantle Clingy Annihilator", Do: dismantleAnnihilator,
+		{Key: '1', Label: "Dismantle Gooie", Do: dismantleAnnihilator,
 			Hidden: noAnnihilator},
 		{Key: '2', Label: "Modify Diplomacy", Do: diplomacyModification},
 		{Key: '3', Label: "Global Recon Request", Do: globalReconRequest},

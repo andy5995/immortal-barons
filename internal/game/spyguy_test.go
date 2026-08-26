@@ -151,7 +151,7 @@ func TestNoWatcherNoReport(t *testing.T) {
 // a SPY_GUY packet with the gooie and group-attack state it already holds.
 func TestAnArrivingSpyGuyIsToldWhatIsAlreadyAimedAtHim(t *testing.T) {
 	_, theirs, _ := spyWorlds(t)
-	theirs.Config.ClingyAnnihilator = true
+	theirs.Config.GooieKablooie = true
 	theirs.RemoteBoards = []RemoteBoard{{BoardID: "Wildside"}}
 	builder := theirs.AddHuman("bob", "Rome")
 	builder.Protection = 0
@@ -172,7 +172,7 @@ func TestAnArrivingSpyGuyIsToldWhatIsAlreadyAimedAtHim(t *testing.T) {
 			carried = append(carried, p.News...)
 		}
 	}
-	if len(carried) != 1 || !strings.Contains(carried[0], "Clingy Annihilator") {
+	if len(carried) != 1 || !strings.Contains(carried[0], "Gooie Kablooie") {
 		t.Fatalf("the arriving watcher was not caught up: %+v", carried)
 	}
 }
@@ -199,7 +199,7 @@ func TestBeingWatchedIsNeverNoticed(t *testing.T) {
 // happens, since its jets are the only answer to it.
 func TestConstructionIsSecretButFlightIsNot(t *testing.T) {
 	_, theirs, _ := spyWorlds(t)
-	theirs.Config.ClingyAnnihilator = true
+	theirs.Config.GooieKablooie = true
 	theirs.RemoteBoards = []RemoteBoard{{BoardID: "Wildside"}}
 	builder := theirs.AddHuman("bob", "Rome")
 	builder.Protection = 0

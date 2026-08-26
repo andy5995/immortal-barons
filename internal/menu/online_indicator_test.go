@@ -78,7 +78,7 @@ func TestScoresMarksOnlineRealms(t *testing.T) {
 func TestAttackPickerMarksOnlineRealms(t *testing.T) {
 	w, rival := twoRealmWorld(t, true)
 	f := &fakeSession{}
-	pickAttackTarget(f, snapshotTargets(w), "Attack which realm?")
+	pickAttackTarget(f, w.Term, snapshotTargets(w), attackPrompts("Attack which realm?"))
 
 	lines := plainLines(f.out.String())
 	if findLine(lines, "Net Worth") == "" {
@@ -197,13 +197,13 @@ func TestIDCellKeepsTheNameColumn(t *testing.T) {
 		nameCol  int
 		whatItIs string
 	}{
-		{"(A)", 6, "lettered id"},
-		{"(Z)", 6, "last lettered realm"},
-		{"", 6, "unattackable realm, no id"},
+		{"[A]", 6, "lettered id"},
+		{"[Z]", 6, "last lettered realm"},
+		{"", 6, "allied realm, no id"},
 	} {
 		t.Run(tc.whatItIs, func(t *testing.T) {
 			f := &fakeSession{}
-			scoreTableRow(f, tc.id, "Realm", ansi.FgBrightWhite, presenceOnline, 1, 2, 3)
+			scoreTableRow(f, Term{UTF8: true}, tc.id, "Realm", ansi.FgBrightWhite, presenceOnline, 1, 2, 3)
 			row := plainLines(f.out.String())[0]
 			assertOnlineSuffix(t, row, "Realm", true)
 			if got := strings.Index(row, "Realm"); got != tc.nameCol {
@@ -261,17 +261,28 @@ func TestLongNameCannotMoveTheColumns(t *testing.T) {
 		"A Realm Name Of Truly Excessive Length Indeed",
 	} {
 		for _, presence := range []string{presenceOnline, presenceNone} {
-			f := &fakeSession{}
-			scoreTableRow(f, "(A)", name, ansi.FgBrightWhite, presence, 15, 0, 231)
-			row := plainLines(f.out.String())[0]
-			if presence == presenceOnline && !strings.Contains(row, "(O)") {
-				t.Errorf("clip dropped the marker for %q: %q", name, row)
-			}
-			tail := row[len(row)-34:]
-			if want == "" {
-				want = tail
-			} else if tail != want {
-				t.Errorf("figures moved for %q (presence=%q):\n got %q\nwant %q", name, presence, tail, want)
+			for _, protected := range []bool{false, true} {
+				f := &fakeSession{}
+				scoreTableRow(f, Term{UTF8: true}, scoreID("A", protected), name, ansi.FgBrightWhite, presence, 15, 0, 231)
+				row := plainLines(f.out.String())[0]
+				if presence == presenceOnline && !strings.Contains(row, "(O)") {
+					t.Errorf("clip dropped the marker for %q: %q", name, row)
+				}
+				// The BRACKETS are the protection flag (#214), so it cannot be
+				// clipped away with the name — it is in the id column.
+				if protected && !strings.HasPrefix(row, "[A]") {
+					t.Errorf("the protected id lost its brackets for %q: %q", name, row)
+				}
+				if !protected && !strings.HasPrefix(row, "(A)") {
+					t.Errorf("an unshielded id should wear parentheses for %q: %q", name, row)
+				}
+				tail := row[len(row)-34:]
+				if want == "" {
+					want = tail
+				} else if tail != want {
+					t.Errorf("figures moved for %q (presence=%q, protected=%v):\n got %q\nwant %q",
+						name, presence, protected, tail, want)
+				}
 			}
 		}
 	}

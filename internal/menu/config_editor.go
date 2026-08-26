@@ -28,20 +28,20 @@ func nextIn[T comparable](v T, order []T) T {
 // The orders the sysop's keypress walks, one per knob. BRE prompts the cost
 // knobs "[H,M,L,N]"; the damage and reward knobs have no None.
 var (
-	costOrder          = []game.Level{game.High, game.Medium, game.Low, game.None}
-	hmlOrder           = []game.Level{game.High, game.Medium, game.Low}
-	buyOrder           = []game.BuyMode{game.BuyYes, game.BuyNo, game.BuyLimited}
-	slappenheimerOrder = []game.SlappenheimerMode{
-		game.SlappenheimerUserSelect, game.SlappenheimerNone,
-		game.SlappenheimerRandom, game.SlappenheimerConstant,
+	costOrder  = []game.Level{game.High, game.Medium, game.Low, game.None}
+	hmlOrder   = []game.Level{game.High, game.Medium, game.Low}
+	buyOrder   = []game.BuyMode{game.BuyYes, game.BuyNo, game.BuyLimited}
+	sabreOrder = []game.SabreMode{
+		game.SabreUserSelect, game.SabreNone,
+		game.SabreRandom, game.SabreConstant,
 	}
 )
 
 func cycleCost(l game.Level) game.Level    { return nextIn(l, costOrder) }
 func cycleHML(l game.Level) game.Level     { return nextIn(l, hmlOrder) }
 func cycleBuy(b game.BuyMode) game.BuyMode { return nextIn(b, buyOrder) }
-func cycleSlappenheimer(m game.SlappenheimerMode) game.SlappenheimerMode {
-	return nextIn(m, slappenheimerOrder)
+func cycleSabre(m game.SabreMode) game.SabreMode {
+	return nextIn(m, sabreOrder)
 }
 
 // ConfigEditor runs the Configuration Editor standalone (used by the door's
@@ -273,10 +273,10 @@ func configPages(ibbs bool) []cfgPage {
 			func(c *game.Config, v game.Level) { c.AttackDamage = v }, cycleHML),
 		cycle(17, "Attack Rewards", func(c *game.Config) game.Level { return c.AttackRewards },
 			func(c *game.Config, v game.Level) { c.AttackRewards = v }, cycleHML),
-		{n: 18, label: "R5-Slappenheimer Handling",
-			value: func(c *game.Config) string { return c.SlappenheimerHandling.String() },
+		{n: 18, label: "S3-Sabre Handling",
+			value: func(c *game.Config) string { return c.SabreHandling.String() },
 			edit: func(_ session.Session, c *game.Config) {
-				c.SlappenheimerHandling = cycleSlappenheimer(c.SlappenheimerHandling)
+				c.SabreHandling = cycleSabre(c.SabreHandling)
 			}},
 		{n: 27, label: "Max Individual Attacks/Day",
 			value: func(c *game.Config) string { return fmt.Sprintf("%d (0 = unlimited)", c.MaxIndividualAttacks) },
@@ -311,8 +311,8 @@ func configPages(ibbs bool) []cfgPage {
 			func(c *game.Config, v bool) { c.BombingOps = v }),
 		toggle(37, "Missile Ops", func(c *game.Config) bool { return c.MissileOps },
 			func(c *game.Config, v bool) { c.MissileOps = v }),
-		toggle(38, "Clingy Annihilator", func(c *game.Config) bool { return c.ClingyAnnihilator },
-			func(c *game.Config, v bool) { c.ClingyAnnihilator = v }),
+		toggle(38, "Gooie Kablooies", func(c *game.Config) bool { return c.GooieKablooie },
+			func(c *game.Config, v bool) { c.GooieKablooie = v }),
 		toggle(42, "Local Attacks", func(c *game.Config) bool { return c.LocalAttacks },
 			func(c *game.Config, v bool) { c.LocalAttacks = v }),
 		toggle(43, "Local Attack Scoring", func(c *game.Config) bool { return c.LocalAttackScoring },
@@ -387,7 +387,7 @@ var ibbsOnlyFields = map[int]bool{
 	32: true, // Max Bombing Ops/Day
 	33: true, // Days before lost forces return
 	35: true, // Terrorism Costs
-	38: true, // Clingy Annihilator
+	38: true, // Gooie Kablooie
 	42: true, // Local Attacks
 	43: true, // Local Attack Scoring
 	46: true, // Allow IP Allies to Trade at Market — meaningless off a league

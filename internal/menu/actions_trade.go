@@ -94,18 +94,21 @@ func buildTradeBasket(s session.Session, w *ctx, title string, limitToOwned bool
 		}
 		fmt.Fprintf(s, "  %s%s%s\n", ansi.FgBlue, strings.Repeat("─", 38), ansi.Reset)
 		if limitToOwned {
-			// The offered goods need a carrier to transport them (BRE's "Trade Deal
-			// requires N Carriers" line). A carrier is consumed when the deal is sent.
-			need := 0
-			if !b.IsEmpty() {
-				need = game.TradeDealCarriers
-			}
+			// The offered goods need carriers to transport them (BRE's "Trade Deal
+			// requires N Carriers" line), sized to the CARGO rather than one per
+			// deal (#195), so the figure moves as the basket is filled.
+			need := game.TradeDealCarriers(b)
+			// FREE carriers, not carriers held: a basket that is itself shipping
+			// carriers cannot also use them as transport, which is the rule both
+			// SendTradeDeal and SendIPTradeDeal enforce. Comparing against the
+			// total would show no warning and then refuse the deal.
+			free := max(p.Carriers-b.Carriers, 0)
 			warn := ""
-			if p.Carriers < need {
+			if free < need {
 				warn = "  " + ansi.FgBrightRed + tr(s, "(not enough carriers)") + ansi.Reset
 			}
-			fmt.Fprintf(s, "  %s"+tr(s, "This deal needs %d carrier(s); you own %d.")+"%s%s\n",
-				ansi.Dim, need, p.Carriers, ansi.Reset, warn)
+			fmt.Fprintf(s, "  %s"+tr(s, "This deal needs %d carrier(s); you have %d free.")+"%s%s\n",
+				ansi.Dim, need, free, ansi.Reset, warn)
 		}
 		fmt.Fprintf(s, "  (%s0%s) %s\n", ansi.FgBrightMagenta, ansi.Reset, tr(s, "Done"))
 		fmt.Fprintf(s, "%s%s%s ", ansi.FgBrightWhite, tr(s, "Choice?"), ansi.Reset)

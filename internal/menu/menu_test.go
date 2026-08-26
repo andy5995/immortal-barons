@@ -445,7 +445,7 @@ func TestInterPlanetaryMenuMatchesBRE(t *testing.T) {
 	for _, want := range []string{
 		"View IPScores", "Terrorist Ops", "Send Trade Deal", "Create Group Attack",
 		"Join Group Attack", "Indiv. Attack Force", "Send Message", "Special Operations",
-		"SDI Program", "Clingy Annihilator Ops", "Diplomacy List", "Spy Database",
+		"SDI Program", "Gooie Kablooie Ops", "Diplomacy List", "Spy Database",
 		"Travel Times", "Visit Bank", "Help", "Quit",
 	} {
 		if !strings.Contains(out, want) {
@@ -833,31 +833,35 @@ func TestTargetLettersDoNotShiftWhenRealmsBecomeUnpickable(t *testing.T) {
 		{name: "Obsidian Sovereigns", letter: "C", attackable: true},
 		{name: "Blood Host", letter: "D", attackable: true},
 	}
+	// The shielded pair here are ALLIED, which is the case that still shows no
+	// letter; a realm under protection keeps its own (see the #214 tests).
 	f := &fakeSession{keys: []rune("C")}
-	name, chosen := pickAttackTarget(f, rows, "Choose a target")
+	name, chosen := pickAttackTarget(f, Term{UTF8: true}, rows, attackPrompts("Choose a target"))
 	if !chosen || name != "Obsidian Sovereigns" {
 		t.Errorf("pressing C chose %q (chosen=%v), want the third realm", name, chosen)
 	}
 	out := f.out.String()
 	plain := stripANSI(out)
+	// Parentheses: none of these is under protection, which is what brackets
+	// mean now (#214).
 	if !strings.Contains(plain, "(C)") || !strings.Contains(plain, "(D)") {
 		t.Errorf("the two pickable realms should keep their own slot letters C and D:\n%s", plain)
 	}
 	if strings.Contains(plain, "(A)") || strings.Contains(plain, "(B)") {
-		t.Errorf("A and B belong to the shielded realms and must not be reused:\n%s", plain)
+		t.Errorf("A and B belong to the allied realms and must not be reused:\n%s", plain)
 	}
 }
 
-// A letter belonging to a shielded realm is a gap, not a near miss: it must not
+// A letter belonging to an ALLIED realm is a gap, not a near miss: it must not
 // select the next pickable realm along.
-func TestAShieldedRealmsLetterSelectsNothing(t *testing.T) {
+func TestAnAlliedRealmsLetterSelectsNothing(t *testing.T) {
 	rows := []targetRow{
 		{name: "Shadow Vultures", letter: "A", attackable: false},
 		{name: "Obsidian Sovereigns", letter: "B", attackable: true},
 	}
 	f := &fakeSession{keys: []rune("A")}
-	if name, chosen := pickAttackTarget(f, rows, "Choose a target"); chosen {
-		t.Errorf("pressing a shielded realm's letter chose %q; it should abort", name)
+	if name, chosen := pickAttackTarget(f, Term{UTF8: true}, rows, attackPrompts("Choose a target")); chosen {
+		t.Errorf("pressing an allied realm's letter chose %q; it should abort", name)
 	}
 }
 

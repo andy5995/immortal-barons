@@ -102,14 +102,13 @@ const (
 // not a literal in either binary in 32-bit or Real48 form, which fits: a cap
 // tested against a Turbo Pascal constant needs no constant of its own.
 const (
-	// What a realm may HOLD, on hand or in the bank, is the sysop's call:
-	// Config.MoneyCapBillions, read through World.MoneyCap. The default is the
-	// 2 billion above; a league that wants a longer game raises it. These are the
-	// bounds of that knob, in whole billions so the Configuration Editor's field
-	// stays three digits and fits an int on a 32-bit door.
+	// What a realm may HOLD, on hand or in the bank, is Config.MoneyCapBillions,
+	// read through World.MoneyCap. It is no longer a setting (#205): the editors
+	// stopped offering it, so every new game gets the 2 billion above, BRE's own
+	// figure. A config.json written while the field existed is still honoured up
+	// to MoneyCapMaxBillions, which is why the range stays — clamping a saved
+	// value back down would take gold a league had been playing with.
 	//
-	// The ceiling is 999 because MoneyCapMax is the widest figure the abbreviated
-	// billions display renders in three digits before the point (999.0000B).
 	// GoldPerBillion names the unit the cap is set in, so the multiplier is not
 	// respelled at each site that converts between the two.
 	GoldPerBillion = 1_000_000_000
@@ -117,8 +116,8 @@ const (
 	MoneyCapMinBillions = 2
 	MoneyCapMaxBillions = 999
 
-	// MoneyCapMax is the highest that knob can reach. Pure helpers that project a
-	// future figure (ExpectedReturn, LoanTotalOwed) clamp to it as an overflow
+	// MoneyCapMax is the highest a saved cap can reach. Pure helpers that project
+	// a future figure (ExpectedReturn, LoanTotalOwed) clamp to it as an overflow
 	// guard; what a realm actually holds is clamped to the configured cap when
 	// the gold lands.
 	MoneyCapMax int64 = MoneyCapMaxBillions * GoldPerBillion
@@ -144,8 +143,32 @@ const (
 // model — BRE.OVR 0x0513e7 sums the nine goods against fixed weights, divides by
 // 5, and adds the base at 0x05154e.)
 const (
-	TradeDealCarriers   = 1       // carriers consumed to send one deal
 	TradeDealGoldPerDay = 100_000 // binary: the flat part of the per-day transit cost
+	// TradeDealGoldBase and TradeDealCostDivisor are the two halves of the
+	// original's cost formula: the nine goods are summed against the per-good
+	// ShipWeight figures in units.go, divided by five, and this base is added
+	// (BRE.OVR 0x0513e7, constants decoded at unit offsets 0x0746 and 0x0753).
+	// BINARY-VERIFIED. The base is the same 100,000 the per-day rate uses.
+	TradeDealGoldBase    = 100_000
+	TradeDealCostDivisor = 5
+	// carrierScale is the fixed-point unit the carrier requirement is summed in
+	// — hundred-thousandths of a carrier. Every per-carrier capacity below
+	// divides it exactly, which is what keeps the arithmetic in integers.
+	carrierScale = 100_000
+	// GoldPerCarrier is gold's own carrier capacity, kept here rather than on
+	// the Good row because gold is not one: it is the basket good held in money
+	// width and handled beside the loop. BINARY-VERIFIED (BRE.OVR
+	// ovr_050dfb_entry_0436, unit offset 0x0489).
+	GoldPerCarrier = 100_000
+	// GoldShipWeight is gold's weight in the cost formula, in shipWeightScale
+	// units — the original's 0.01 (unit offset 0x0682). Same reasoning as
+	// GoldPerCarrier for why it is not on the row.
+	GoldShipWeight = 1
+	// shipWeightScale is what a Good's ShipWeight is expressed in hundredths of.
+	// The original's weights include 0.05 and 0.01, which have no exact binary
+	// form, so IB holds them as exact integers and can differ from the original
+	// by a gold or two on an enormous basket.
+	shipWeightScale = 100
 	// The sysop's Trade Deal Costs ladder, applied by Level.TradeCostScaled.
 	// BINARY-VERIFIED (BRE.OVR 0x5158F): Low divides by six and High multiplies
 	// by three, which is its own spread — not the generic preset ladder and not
@@ -179,7 +202,7 @@ const (
 	ProtectiveTradeCostDivisor = 3
 )
 
-// The Clingy Annihilator, IB's rename of BRE's Gooie Kablooie. It is not a purchase
+// The Gooie Kablooie. It is not a purchase
 // but a public works: one planet funds one weapon, in millions of gold, over as
 // many days as it takes to raise the money, and the target planet can see it
 // coming and shoot at it.

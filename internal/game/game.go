@@ -280,6 +280,10 @@ type World struct {
 	// identical no matter how many names are drawn.
 	nameRng *rand.Rand
 	store   Store // transaction backend for With: in-memory (web) or file-per-action (door)
+	// storeErr holds the first Transact this session could not commit. It is
+	// deliberately unexported and unserialized: it describes this process's
+	// failure to write the file, not anything about the world's own state.
+	storeErr error
 	// reloadGen counts wholesale reloads of the empire set. The door's FileStore
 	// bumps it on every reload (which replaces every *Empire); a per-session
 	// cache of the active empire (menu.ctx) re-resolves its handle when the count
@@ -452,15 +456,65 @@ func (w *World) MarkReloaded() { w.reloadGen++ }
 
 // With runs fn while holding the world lock. Use it around a short
 // mutate-or-snapshot window — never around player input.
+//
+// A Transact that fails is recorded rather than returned: the error is the same
+// for all 74 call sites (the world on disk did not accept this mutation) and
+// none of them can do anything useful with it locally. It is session-fatal, not
+// action-local — every later action would build on state that was never
+// persisted — so Run reports it once and ends the session. Discarding it here
+// is what let a failed save look like a completed turn: the door exited 0 and
+// the caller's whole session was simply gone (#215 review, 2026-08-25).
 func (w *World) With(fn func()) {
 	if w.store != nil {
-		w.store.Transact(fn)
+		if err := w.store.Transact(fn); err != nil {
+			w.noteStoreErr(err)
+		}
 		return
 	}
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	fn()
 }
+
+// Read runs fn over a freshly loaded world and writes NOTHING back. Use it
+// wherever the body only gathers — a screen's figures, a picker's list, a
+// yes/no's premise — and With only where something changes.
+//
+// The distinction is not tidiness. On a door With is flock → reload → fn → SAVE
+// → release, so a snapshot taken through it rewrites world.json under the lock
+// every other node is queued on, once per screen. And because a failed Save is
+// session-fatal, a pure read could end a caller's session over a write it never
+// asked for. fn must not mutate: nothing here will persist it, and it will be
+// silently undone by the next reload.
+//
+// Same rule as With about player input — never prompt inside one. The lock is
+// held for the duration.
+func (w *World) Read(fn func()) {
+	if w.store != nil {
+		if err := w.store.Snapshot(fn); err != nil {
+			w.noteStoreErr(err)
+		}
+		return
+	}
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	fn()
+}
+
+// noteStoreErr records the first failed transaction of this session. The first
+// is the one worth reporting: once a save has failed, the in-memory world has
+// drifted from the file, so later failures are consequences rather than
+// independent faults.
+func (w *World) noteStoreErr(err error) {
+	if w.storeErr == nil {
+		w.storeErr = err
+	}
+}
+
+// StoreErr reports the first transaction that failed during this session, or
+// nil if every one committed. A non-nil result means at least one mutation was
+// lost and the session cannot be trusted to have been saved.
+func (w *World) StoreErr() error { return w.storeErr }
 
 // ImportBoard records b's scores, replacing any existing entry for the
 // same BoardID so re-importing updates rather than duplicates.

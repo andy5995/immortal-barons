@@ -39,6 +39,20 @@ func Run(s session.Session, id Identity, cfg game.Config, today string) (reason 
 	// could clobber another node's concurrent changes. Load once for a stable
 	// *World pointer, then route every With through the FileStore.
 	w.SetStore(store.NewFileStore(w, cfg))
+	// A transaction that could not be committed ends the session with an error
+	// rather than a normal exit. With() cannot return one (see game.With), so it
+	// records the first failure and this reports it on whichever path Run leaves
+	// by — including the ones inside Session. Without this the door exits 0 on a
+	// failed save and the caller's turn is silently gone, which is exactly how a
+	// Windows CI failure read as "its process's write was lost" with no error
+	// anywhere in the log.
+	defer func() {
+		if err == nil {
+			if storeErr := w.StoreErr(); storeErr != nil {
+				err = fmt.Errorf("the world could not be saved, so this session was not recorded: %w", storeErr)
+			}
+		}
+	}()
 	// Login date-rollover maintenance is itself a transaction (reload → maintain
 	// → save), so it can't race another node's login. Note whether the caller's
 	// realm was a dead husk that this maintenance sweeps, so Session can announce
@@ -397,7 +411,7 @@ func joinRefusal(w *game.World) string {
 // forced to invent a realm.
 func onboard(s session.Session, w *game.World, handle, lang string) (name string, quit bool) {
 	var taken map[string]bool
-	w.With(func() {
+	w.Read(func() {
 		taken = make(map[string]bool, len(w.Empires))
 		for _, e := range w.Empires {
 			taken[strings.ToLower(e.Name)] = true

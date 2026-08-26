@@ -519,11 +519,10 @@ The transport differs; the *contents* are what fidelity is judged on.
 
 **Packet contents (BRE's PLANETARY stages).** Local recon info; global recon
 requests; routing data; node list; group attacks; individual IP-attack info;
-Gooie-Kablooie (Clingy Annihilator) status; scores/news; coordinator config +
-reset. IB currently carries scores, group attacks, terror ops, results, and the
+Gooie Kablooie status; scores/news; coordinator config + reset. IB currently carries scores, group attacks, terror ops, results, and the
 `LeagueConfig` ruleset broadcast; the recon exchange, individual interplanetary
-attacks, cross-board Clingy Annihilator status, node-list broadcast, and league-wide reset
-are the open gaps under #60.
+attacks, cross-board Gooie Kablooie status, node-list broadcast, and
+league-wide reset are the open gaps under #60.
 
 **Config field set.** BRE's coordinator config editor (the `LeagueConfig`
 analogue) marks league-wide fields with `*` = "InterBBS Setting Only": Attack /

@@ -36,6 +36,9 @@ it off. `Z` marks everyone at once, `?` shows the roster, and `*` marks your
 treaty partners. **Press Enter when the list is right** — that is what opens the
 editor. Enter with nothing marked leaves without sending.
 
+InterPlanetary Ops -> Send Message -> Single Planet uses the same prompt for the
+barons on the planet you named.
+
 Every Diplomacy option that names a realm takes the same list: offer a treaty to
 several realms at once, or declare war on several. There `?` shows your
 relations rather than the scores. Mark one realm only and you get the full

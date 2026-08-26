@@ -89,7 +89,7 @@ func TestCreateGroupAttackAsksHours(t *testing.T) {
 	})
 	// planet 1, "O" for one baron, baron 1 (Redlands), 3 hours, 500 troopers, then
 	// zero for the other three types.
-	f := &fakeSession{keys: []rune("1\ro1\r3\r500\r\r\r\r")}
+	f := &fakeSession{keys: []rune("1\roA3\r500\r\r\r\r")} // planet 1, One Dominion, baron A
 	createGroupAttack(f, w)
 
 	out := f.out.String()

@@ -250,10 +250,9 @@ func (w *World) BuyFoodMarket(e *Empire, n int) error {
 // bound belongs with the rule rather than with whichever prompt collected the
 // number — the human path had been relying on its prompt to clamp.
 //
-// NOTE a divergence this did not invent: aiSetTax reads MaxTaxRate == 0 as "no
-// cap set" and leaves the AI's rate alone, while a player at that setting is
-// held to 0%. A sysop may choose 0 in the editor, so the two paths genuinely
-// disagree there.
+// aiSetTax comes through here too, so a setting of 0 means nobody taxes rather
+// than only the humans (#203). BRE caps nothing here, so the ceiling is IB's
+// own and there is no reference behaviour to copy.
 func (w *World) SetTax(e *Empire, n int) {
 	e.Tax = min(max(n, 0), w.Config.MaxTaxRate)
 }

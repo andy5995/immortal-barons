@@ -24,6 +24,22 @@ const (
 	OpBribery            CovertOp = "Bribery"
 )
 
+// AllCovertOps is the whole set, in the order BRE's Covert Operations menu
+// lists it. It is the canonical list: a screen that offers these operations
+// names them through these constants rather than restating them as literals,
+// because the same string is the CovertOpsUsed key the per-turn gate reads out
+// of the save file (#208).
+var AllCovertOps = []CovertOp{
+	OpSendSpy,
+	OpStirRevolts,
+	OpSetUp,
+	OpSupportDissensions,
+	OpDemoralizeForces,
+	OpSpyOnRelations,
+	OpBombEnemyTargets,
+	OpBribery,
+}
+
 // difficulty is the divisor this op applies to the attacker's own agent pool.
 func (op CovertOp) difficulty() int {
 	switch op {
@@ -559,56 +575,56 @@ func (w *World) resolveBombEnemyTargets(a, d *Empire) string {
 	return fmt.Sprintf("Your agents bombed targets in %s: %d %s destroyed.", d.Name, lost, t.name)
 }
 
-// R5-Slappenheimer tuning. In BRE's S3-Sabre only 3 of the 11 dial settings
+// S3-Sabre tuning. In BRE only 3 of the missile's 11 dial settings
 // (1, 2, 3) did anything and the rest fizzled; the manual never said which
 // number did what. IB keeps the unpredictability but makes it honest: the dial
 // (0-10) is a bluff that changes nothing — every launch is the same random
-// gamble. Only about SlappenheimerEffectHits launches in SlappenheimerEffectRange
+// gamble. Only about SabreEffectHits launches in SabreEffectRange
 // (3 in 10) deliver a payload; the rest fizzle. The sysop's None handling mode
 // disables the weapon entirely (gated in the menu).
 const (
-	SlappenheimerEffectHits    = 3   // landing launches per SlappenheimerEffectRange...
-	SlappenheimerEffectRange   = 10  // ...i.e. a 3-in-10 chance to deliver a payload
-	SlappenheimerBaseDamagePct = 5   // a landed hit always removes at least this %
-	SlappenheimerDamageSpread  = 26  // random % headroom on top of the base (5-30% total)
-	SlappenheimerBackfireScale = 200 // target Troopers / this = backfire chance (percent)
-	SlappenheimerMultiHitOdds  = 10  // 1-in-this a hit strafes several assets at once
+	SabreEffectHits    = 3   // landing launches per SabreEffectRange...
+	SabreEffectRange   = 10  // ...i.e. a 3-in-10 chance to deliver a payload
+	SabreBaseDamagePct = 5   // a landed hit always removes at least this %
+	SabreDamageSpread  = 26  // random % headroom on top of the base (5-30% total)
+	SabreBackfireScale = 200 // target Troopers / this = backfire chance (percent)
+	SabreMultiHitOdds  = 10  // 1-in-this a hit strafes several assets at once
 )
 
-// slappenheimerResource pairs a strikeable field with its display name. BRE hid
+// sabreResource pairs a strikeable field with its display name. BRE hid
 // which asset each effect hit, so IB picks its own spread of targets. Land and
 // Gold are not in this list — Land has to move through the RegionMix and Gold is
-// held in money width — so slappenheimerDamage handles both beside the loop.
-type slappenheimerResource struct {
+// held in money width — so sabreDamage handles both beside the loop.
+type sabreResource struct {
 	name string
 	val  *int
 }
 
-// slappenheimerResources are the plain-count assets the missile can hit, taken
+// sabreResources are the plain-count assets the missile can hit, taken
 // from the canonical table (#134) rather than listed again here. Land and gold
-// are handled apart by slappenheimerDamage — one goes through the RegionMix and
+// are handled apart by sabreDamage — one goes through the RegionMix and
 // the other is money-width.
-func slappenheimerResources(e *Empire) []slappenheimerResource {
-	res := make([]slappenheimerResource, 0, len(AllGoods))
+func sabreResources(e *Empire) []sabreResource {
+	res := make([]sabreResource, 0, len(AllGoods))
 	for _, g := range AllGoods {
-		res = append(res, slappenheimerResource{g.Plural, g.Count(e)})
+		res = append(res, sabreResource{g.Plural, g.Count(e)})
 	}
 	return res
 }
 
-// slappenheimerDamage applies a landed R5-Slappenheimer hit to e and returns a
+// sabreDamage applies a landed S3-Sabre hit to e and returns a
 // human-readable list of what was destroyed (empty if the roll removed
 // nothing). Each hit removes a random 5-30% of one asset; usually a single
 // asset, but occasionally the missile strafes several at once — BRE's
 // "extremely devastating" outcome. Land is one of the targets, but must be
 // removed through the RegionMix (whose Total must always equal e.Land) rather
 // than by touching e.Land directly.
-func (w *World) slappenheimerDamage(e *Empire) string {
-	res := slappenheimerResources(e)
+func (w *World) sabreDamage(e *Empire) string {
+	res := sabreResources(e)
 	landIdx := len(res)    // one past the plain-int assets: Land
 	goldIdx := landIdx + 1 // and Gold, in money width
 	hits := 1
-	if w.rng.Intn(SlappenheimerMultiHitOdds) == 0 {
+	if w.rng.Intn(SabreMultiHitOdds) == 0 {
 		hits = 2 + w.rng.Intn(3) // 2-4 assets at once
 	}
 	seen := make(map[int]bool, hits)
@@ -619,7 +635,7 @@ func (w *World) slappenheimerDamage(e *Empire) string {
 			continue
 		}
 		seen[i] = true
-		pct := SlappenheimerBaseDamagePct + w.rng.Intn(SlappenheimerDamageSpread)
+		pct := SabreBaseDamagePct + w.rng.Intn(SabreDamageSpread)
 		if i == landIdx {
 			lost := e.Land * pct / 100
 			if lost <= 0 {
@@ -649,13 +665,13 @@ func (w *World) slappenheimerDamage(e *Empire) string {
 	return strings.Join(parts, ", ")
 }
 
-// slappenheimerBackfires reports whether the missile turns back on whoever
+// sabreBackfires reports whether the missile turns back on whoever
 // fired it: the more Troopers the target garrisons, the likelier it does.
-func (w *World) slappenheimerBackfires(d *Empire) bool {
-	return w.rng.Intn(100) < d.Troopers/SlappenheimerBackfireScale
+func (w *World) sabreBackfires(d *Empire) bool {
+	return w.rng.Intn(100) < d.Troopers/SabreBackfireScale
 }
 
-// slappenheimerEffect is the target-side half of the missile, for a strike that
+// sabreEffect is the target-side half of the missile, for a strike that
 // arrived from another planet (#49). It runs the same shield, fizzle and
 // backfire rolls the local strike runs, in the same order.
 //
@@ -665,26 +681,26 @@ func (w *World) slappenheimerBackfires(d *Empire) bool {
 // differently, and the delay is the packet's, not a rule of its own.
 //
 // This is the one covert event in this file that names the source on SUCCESS,
-// and it is deliberate: BRE treats a sabre that lands from another planet as a
+// and it is deliberate: BRE treats a Sabre that lands from another planet as a
 // missile impact rather than an agent op and reports it with the firing realm
 // and its planet, the same as an incoming nuclear or chemical strike. Agent ops
 // stay anonymous unless the agent is caught (see covertFoiled).
-func (w *World) slappenheimerEffect(d *Empire, from string) (report string, hit, backfired bool) {
+func (w *World) sabreEffect(d *Empire, from string) (report string, hit, backfired bool) {
 	if w.rng.Intn(100)*100 <= d.SDI*SDIMissileInterceptPct {
-		return fmt.Sprintf("%s's SDI intercepted your R5-Slappenheimer.", d.Name), false, false
+		return fmt.Sprintf("%s's SDI intercepted your S3-Sabre.", d.Name), false, false
 	}
-	if w.rng.Intn(SlappenheimerEffectRange) >= SlappenheimerEffectHits {
-		return "The R5-Slappenheimer fizzled and did no damage.", false, false
+	if w.rng.Intn(SabreEffectRange) >= SabreEffectHits {
+		return "The S3-Sabre fizzled and did no damage.", false, false
 	}
-	if w.slappenheimerBackfires(d) {
-		return "The R5-Slappenheimer backfired on the way out!", false, true
+	if w.sabreBackfires(d) {
+		return "The S3-Sabre backfired on the way out!", false, true
 	}
-	lost := w.slappenheimerDamage(d)
+	lost := w.sabreDamage(d)
 	if lost == "" {
-		return fmt.Sprintf("Your R5-Slappenheimer reached %s but did negligible damage.", d.Name), false, false
+		return fmt.Sprintf("Your S3-Sabre reached %s but did negligible damage.", d.Name), false, false
 	}
-	d.addEvent(fmt.Sprintf("An R5-Slappenheimer from %s struck your empire — lost %s.", from, lost))
-	return fmt.Sprintf("Your R5-Slappenheimer hit %s: %s destroyed.", d.Name, lost), true, false
+	d.addEvent(fmt.Sprintf("An S3-Sabre from %s struck your empire — lost %s.", from, lost))
+	return fmt.Sprintf("Your S3-Sabre hit %s: %s destroyed.", d.Name, lost), true, false
 }
 
 // The effects the local Bomb Enemy Targets ops and their interplanetary

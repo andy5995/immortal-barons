@@ -10,46 +10,46 @@ import "fmt"
 // it so everyone plays by the same turns/protection/length — replacing the
 // hand-coordinated config that BRE distributed at reset.
 type LeagueConfig struct {
-	GameStartDate         string
-	JoinDate              string
-	TurnsPerDay           int
-	ProtectionTurns       int
-	GameLength            int
-	IdleDaysRemove        int
-	InitialMarketLand     int
-	LandPerDay            int
-	MoneyCapBillions      int
-	InterestRate          int
-	StdInvestRate         int
-	SteadyInvest          bool
-	FoodUnlimited         bool
-	MaxTaxRate            int
-	PlanetaryTaxRate      int
-	MaxRegions            int
-	MaxIndividualAttacks  int
-	MaxGroupAttacks       int
-	MaxTerrorOps          int
-	MaxBombingOps         int
-	LostForcesDays        int
-	BombingOps            bool
-	MissileOps            bool
-	ClingyAnnihilator     bool
-	LocalAttacks          bool
-	LocalAttackScoring    bool
-	DupeChecking          bool
-	MinBoardVersion       string
-	IPTrading             bool
-	Pirates               bool
-	MaxPlayers            int
-	BuyMilitary           BuyMode
-	MaintCosts            Level
-	TradeCosts            Level
-	RegionCosts           Level
-	AttackCosts           Level
-	TerrorCosts           Level
-	AttackDamage          Level
-	AttackRewards         Level
-	SlappenheimerHandling SlappenheimerMode
+	GameStartDate        string
+	JoinDate             string
+	TurnsPerDay          int
+	ProtectionTurns      int
+	GameLength           int
+	IdleDaysRemove       int
+	InitialMarketLand    int
+	LandPerDay           int
+	MoneyCapBillions     int
+	InterestRate         int
+	StdInvestRate        int
+	SteadyInvest         bool
+	FoodUnlimited        bool
+	MaxTaxRate           int
+	PlanetaryTaxRate     int
+	MaxRegions           int
+	MaxIndividualAttacks int
+	MaxGroupAttacks      int
+	MaxTerrorOps         int
+	MaxBombingOps        int
+	LostForcesDays       int
+	BombingOps           bool
+	MissileOps           bool
+	GooieKablooie        bool `json:"ClingyAnnihilator"`
+	LocalAttacks         bool
+	LocalAttackScoring   bool
+	DupeChecking         bool
+	MinBoardVersion      string
+	IPTrading            bool
+	Pirates              bool
+	MaxPlayers           int
+	BuyMilitary          BuyMode
+	MaintCosts           Level
+	TradeCosts           Level
+	RegionCosts          Level
+	AttackCosts          Level
+	TerrorCosts          Level
+	AttackDamage         Level
+	AttackRewards        Level
+	SabreHandling        SabreMode `json:"SlappenheimerHandling"`
 }
 
 // leagueRuleset extracts the league-wide rules from this board's config, for the
@@ -59,46 +59,46 @@ type LeagueConfig struct {
 // board for the game to be fair.
 func (c Config) leagueRuleset() *LeagueConfig {
 	return &LeagueConfig{
-		GameStartDate:         c.GameStartDate,
-		JoinDate:              c.JoinDate,
-		TurnsPerDay:           c.TurnsPerDay,
-		ProtectionTurns:       c.ProtectionTurns,
-		GameLength:            c.GameLength,
-		IdleDaysRemove:        c.IdleDaysRemove,
-		InitialMarketLand:     c.InitialMarketLand,
-		LandPerDay:            c.LandPerDay,
-		MoneyCapBillions:      c.MoneyCapBillions,
-		InterestRate:          c.InterestRate,
-		StdInvestRate:         c.StdInvestRate,
-		SteadyInvest:          c.SteadyInvest,
-		FoodUnlimited:         c.FoodUnlimited,
-		MaxTaxRate:            c.MaxTaxRate,
-		PlanetaryTaxRate:      c.PlanetaryTaxRate,
-		MaxRegions:            c.MaxRegions,
-		MaxIndividualAttacks:  c.MaxIndividualAttacks,
-		MaxGroupAttacks:       c.MaxGroupAttacks,
-		MaxTerrorOps:          c.MaxTerrorOps,
-		MaxBombingOps:         c.MaxBombingOps,
-		LostForcesDays:        c.LostForcesDays,
-		BombingOps:            c.BombingOps,
-		MissileOps:            c.MissileOps,
-		ClingyAnnihilator:     c.ClingyAnnihilator,
-		LocalAttacks:          c.LocalAttacks,
-		LocalAttackScoring:    c.LocalAttackScoring,
-		DupeChecking:          c.DupeChecking,
-		MinBoardVersion:       c.MinBoardVersion,
-		IPTrading:             c.IPTrading,
-		Pirates:               c.Pirates,
-		MaxPlayers:            c.MaxPlayers,
-		BuyMilitary:           c.BuyMilitary,
-		MaintCosts:            c.MaintCosts,
-		TradeCosts:            c.TradeCosts,
-		RegionCosts:           c.RegionCosts,
-		AttackCosts:           c.AttackCosts,
-		TerrorCosts:           c.TerrorCosts,
-		AttackDamage:          c.AttackDamage,
-		AttackRewards:         c.AttackRewards,
-		SlappenheimerHandling: c.SlappenheimerHandling,
+		GameStartDate:        c.GameStartDate,
+		JoinDate:             c.JoinDate,
+		TurnsPerDay:          c.TurnsPerDay,
+		ProtectionTurns:      c.ProtectionTurns,
+		GameLength:           c.GameLength,
+		IdleDaysRemove:       c.IdleDaysRemove,
+		InitialMarketLand:    c.InitialMarketLand,
+		LandPerDay:           c.LandPerDay,
+		MoneyCapBillions:     c.MoneyCapBillions,
+		InterestRate:         c.InterestRate,
+		StdInvestRate:        c.StdInvestRate,
+		SteadyInvest:         c.SteadyInvest,
+		FoodUnlimited:        c.FoodUnlimited,
+		MaxTaxRate:           c.MaxTaxRate,
+		PlanetaryTaxRate:     c.PlanetaryTaxRate,
+		MaxRegions:           c.MaxRegions,
+		MaxIndividualAttacks: c.MaxIndividualAttacks,
+		MaxGroupAttacks:      c.MaxGroupAttacks,
+		MaxTerrorOps:         c.MaxTerrorOps,
+		MaxBombingOps:        c.MaxBombingOps,
+		LostForcesDays:       c.LostForcesDays,
+		BombingOps:           c.BombingOps,
+		MissileOps:           c.MissileOps,
+		GooieKablooie:        c.GooieKablooie,
+		LocalAttacks:         c.LocalAttacks,
+		LocalAttackScoring:   c.LocalAttackScoring,
+		DupeChecking:         c.DupeChecking,
+		MinBoardVersion:      c.MinBoardVersion,
+		IPTrading:            c.IPTrading,
+		Pirates:              c.Pirates,
+		MaxPlayers:           c.MaxPlayers,
+		BuyMilitary:          c.BuyMilitary,
+		MaintCosts:           c.MaintCosts,
+		TradeCosts:           c.TradeCosts,
+		RegionCosts:          c.RegionCosts,
+		AttackCosts:          c.AttackCosts,
+		TerrorCosts:          c.TerrorCosts,
+		AttackDamage:         c.AttackDamage,
+		AttackRewards:        c.AttackRewards,
+		SabreHandling:        c.SabreHandling,
 	}
 }
 
@@ -131,7 +131,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.LostForcesDays = lc.LostForcesDays
 	c.BombingOps = lc.BombingOps
 	c.MissileOps = lc.MissileOps
-	c.ClingyAnnihilator = lc.ClingyAnnihilator
+	c.GooieKablooie = lc.GooieKablooie
 	c.LocalAttacks = lc.LocalAttacks
 	c.LocalAttackScoring = lc.LocalAttackScoring
 	c.DupeChecking = lc.DupeChecking
@@ -147,7 +147,7 @@ func (c *Config) applyLeagueRuleset(lc *LeagueConfig) {
 	c.TerrorCosts = lc.TerrorCosts
 	c.AttackDamage = lc.AttackDamage
 	c.AttackRewards = lc.AttackRewards
-	c.SlappenheimerHandling = lc.SlappenheimerHandling
+	c.SabreHandling = lc.SabreHandling
 }
 
 // CoordinatorBoardID is the name of node #1 in the roster — the League

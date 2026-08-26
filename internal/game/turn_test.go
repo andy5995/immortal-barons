@@ -12,6 +12,7 @@ func TestPlayTurnAffectsOnlyActingEmpire(t *testing.T) {
 	other := w.Empires[1]
 	otherGold := other.Gold
 	me := w.AddHuman("me", "Mine")
+	me.Prefs.DepositEndTurn = false // income must stay in hand for the check below
 	turns := me.TurnsLeft
 	prot := me.Protection
 

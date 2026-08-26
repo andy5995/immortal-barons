@@ -20,7 +20,7 @@ import (
 // when the list is empty rather than showing an empty box.
 func ipMarkets(s session.Session, w *ctx) Result {
 	var boards []string
-	w.With(func() { boards = w.World.AlliedMarketBoards() })
+	w.Read(func() { boards = w.World.AlliedMarketBoards() })
 	if len(boards) == 0 {
 		ok(s, "No planet is marked Allied, so no market is open to you.")
 		return Stay
@@ -88,7 +88,7 @@ func browseRemoteMarket(s session.Session, w *ctx, board string) {
 	}
 	r := rows[pick-1]
 	var gold int64
-	w.With(func() { gold = w.Player().Gold })
+	w.Read(func() { gold = w.Player().Gold })
 	most := r.Qty
 	// See marketBuy: a zero-priced listing is a giveaway, not something nobody
 	// can afford.

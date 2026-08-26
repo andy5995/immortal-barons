@@ -69,7 +69,7 @@ func planetaryTreaties(s session.Session, w *ctx) Result {
 // own players something and binds nothing.
 func diplomacyModification(s session.Session, w *ctx) Result {
 	var isCoordinator bool
-	w.With(func() { isCoordinator = w.BBSCoordinator() == w.Player() })
+	w.Read(func() { isCoordinator = w.BBSCoordinator() == w.Player() })
 	if !isCoordinator {
 		ok(s, "Only the BBS Coordinator may set planetary diplomacy.")
 		return Stay
@@ -85,7 +85,7 @@ func diplomacyModification(s session.Session, w *ctx) Result {
 		fmt.Fprintf(s, "%s%s%s\n", ansi.FgWhite, tr(s, line), ansi.Reset)
 	}
 	var planets []string
-	w.With(func() { planets = w.KnownBoards() })
+	w.Read(func() { planets = w.KnownBoards() })
 	if len(planets) == 0 {
 		ok(s, "No other planets are known yet.")
 		return Stay

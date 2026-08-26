@@ -43,6 +43,14 @@ type Good struct {
 	// figures themselves live in balance.go.
 	Cost     int
 	NetWorth int64
+	// ShipWeight is the good's weight in a trade deal's cost formula, in
+	// hundredths (shipWeightScale), and CarrierPer how many of it one carrier
+	// holds. Both are BINARY-VERIFIED; a CarrierPer of 0 means the good needs no
+	// carrier space at all, which is true of food, bombers and agents — and of
+	// carriers themselves, which carry each other. See TradeDealCarriers and
+	// IPTradeDealCost.
+	ShipWeight int
+	CarrierPer int
 	// Military marks a fighting unit — the six Industrial regions build — as
 	// against agents and food.
 	Military bool
@@ -59,6 +67,7 @@ var (
 		Basket: func(b *TradeBasket) *int { return &b.Troopers },
 		Price:  func(w *World, e *Empire) int { return w.TrooperPrice(e) },
 		Cost:   CostTrooper, NetWorth: NetWorthTrooper,
+		ShipWeight: 100, CarrierPer: 1000,
 	}
 	Jet = &Good{
 		Singular: "Jet", Plural: "Jets", Military: true,
@@ -68,6 +77,7 @@ var (
 		Basket: func(b *TradeBasket) *int { return &b.Jets },
 		Price:  func(w *World, e *Empire) int { return w.JetPrice(e) },
 		Cost:   CostJet, NetWorth: NetWorthJet,
+		ShipWeight: 100, CarrierPer: 100,
 	}
 	Turret = &Good{
 		Singular: "Turret", Plural: "Turrets", Military: true,
@@ -77,6 +87,7 @@ var (
 		Basket: func(b *TradeBasket) *int { return &b.Turrets },
 		Price:  func(w *World, e *Empire) int { return w.TurretPrice(e) },
 		Cost:   CostTurret, NetWorth: NetWorthTurret,
+		ShipWeight: 100, CarrierPer: 1000,
 	}
 	Bomber = &Good{
 		Singular: "Bomber", Plural: "Bombers", Military: true,
@@ -86,6 +97,7 @@ var (
 		Basket: func(b *TradeBasket) *int { return &b.Bombers },
 		Price:  func(w *World, e *Empire) int { return w.BomberPrice(e) },
 		Cost:   CostBomber, NetWorth: NetWorthBomber,
+		ShipWeight: 300, CarrierPer: 0,
 	}
 	Tank = &Good{
 		Singular: "Tank", Plural: "Tanks", Military: true,
@@ -95,6 +107,7 @@ var (
 		Basket: func(b *TradeBasket) *int { return &b.Tanks },
 		Price:  func(w *World, e *Empire) int { return w.TankPrice(e) },
 		Cost:   CostTank, NetWorth: NetWorthTank,
+		ShipWeight: 100, CarrierPer: 5000,
 	}
 	Carrier = &Good{
 		Singular: "Carrier", Plural: "Carriers", Military: true,
@@ -104,19 +117,22 @@ var (
 		Basket: func(b *TradeBasket) *int { return &b.Carriers },
 		Price:  func(w *World, e *Empire) int { return w.CarrierPrice(e) },
 		Cost:   CostCarrier, NetWorth: NetWorthCarrier,
+		ShipWeight: 100, CarrierPer: 0,
 	}
 	Agent = &Good{
 		Singular: "Agent", Plural: "Agents",
-		Count:    func(e *Empire) *int { return &e.Agents },
-		Basket:   func(b *TradeBasket) *int { return &b.Agents },
-		Price:    func(w *World, e *Empire) int { return w.AgentPrice(e) },
-		NetWorth: NetWorthAgent,
+		Count:      func(e *Empire) *int { return &e.Agents },
+		Basket:     func(b *TradeBasket) *int { return &b.Agents },
+		Price:      func(w *World, e *Empire) int { return w.AgentPrice(e) },
+		NetWorth:   NetWorthAgent,
+		ShipWeight: 50, CarrierPer: 0,
 	}
 	Food = &Good{
 		Singular: "Food", Plural: "Food",
-		Count:  func(e *Empire) *int { return &e.Food },
-		Basket: func(b *TradeBasket) *int { return &b.Food },
-		Price:  func(w *World, e *Empire) int { return w.FoodBuyPrice() },
+		Count:      func(e *Empire) *int { return &e.Food },
+		Basket:     func(b *TradeBasket) *int { return &b.Food },
+		Price:      func(w *World, e *Empire) int { return w.FoodBuyPrice() },
+		ShipWeight: 5, CarrierPer: 0,
 	}
 )
 
@@ -126,7 +142,7 @@ var (
 var MilitaryGoods = []*Good{Trooper, Jet, Turret, Bomber, Tank, Carrier}
 
 // AllGoods is every row, for a caller that wants the whole set rather than a
-// screen's order — net worth, the R5-Slappenheimer's target list, a name
+// screen's order — net worth, the S3-Sabre's target list, a name
 // lookup.
 var AllGoods = []*Good{Trooper, Jet, Turret, Bomber, Tank, Carrier, Agent, Food}
 

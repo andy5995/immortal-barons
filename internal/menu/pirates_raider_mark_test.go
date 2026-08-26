@@ -6,14 +6,15 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/session"
 )
 
 // TestAttackPiratesMarksRaider checks that a faction which raided the player
-// since their last play carries the "->" mark (same color treatment as the
-// online-baron mark), that a faction which did not raid keeps the mark's
-// column reserved as blank rather than shifting its name left, and that the
-// mark disappears once RaidersThisTurn no longer names the faction (the next
-// recap's reset).
+// since their last play is FOLLOWED by the `«` mark, one space after the name
+// (same color treatment as the online-baron mark), that a faction which did not
+// raid carries nothing at all — no reserved indent, which is what #197 was about
+// — and that the mark disappears once RaidersThisTurn no longer names the
+// faction (the next recap's reset).
 func TestAttackPiratesMarksRaider(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
@@ -24,20 +25,17 @@ func TestAttackPiratesMarksRaider(t *testing.T) {
 	attackPirates(f, w)
 	out := f.out.String()
 
-	marked := ansi.FgBrightBlack + "-" + ansi.FgWhite + ">" + ansi.Reset + ansi.FgRed + "Sharks"
+	marked := ansi.FgRed + "Sharks" + ansi.Reset + " " + ansi.FgWhite + "«" + ansi.Reset
 	if !strings.Contains(out, marked) {
-		t.Errorf("raided faction should carry the ->mark hugging its name; output:\n%s", out)
+		t.Errorf("raided faction should be followed by the mark, one space after the name; output:\n%s", out)
 	}
 
-	// Humans (slot 0) did not raid: its name keeps the mark's column reserved
-	// as two blanks, so it starts in the same place the marked row's name
-	// does, rather than shifting left for lack of a mark.
-	unmarked := "  " + ansi.FgBrightGreen + "Humans"
+	// Humans (slot 0) did not raid, so its row ends at the name — nothing
+	// before it and nothing after it. The old layout reserved the mark's column
+	// as a leading blank on every row, which is the indent #197 reported.
+	unmarked := "1) " + ansi.FgBrightGreen + "Humans" + ansi.Reset + "\n"
 	if !strings.Contains(out, unmarked) {
-		t.Errorf("un-raided faction should hold the mark's column as blank; output:\n%s", out)
-	}
-	if strings.Contains(out, ansi.FgBrightBlack+"-"+ansi.FgWhite+">"+ansi.Reset+ansi.FgBrightGreen+"Humans") {
-		t.Errorf("un-raided faction should not carry the raid mark; output:\n%s", out)
+		t.Errorf("un-raided faction should carry no mark and no reserved indent; output:\n%s", out)
 	}
 
 	// A faction not named in RaidersThisTurn — the next turn's recap — loses
@@ -87,5 +85,27 @@ func TestAttackPiratesMarksEveryRaider(t *testing.T) {
 	}
 	if n := len(marked); n != 2 {
 		t.Errorf("marked %d factions (%v), want exactly the two that raided", n, marked)
+	}
+}
+
+// A session held to 7-bit ASCII gets "<=" rather than the guillemet, which the
+// ASCII writer would otherwise reduce to a bare "<". The shaft still takes the
+// dark gray and the head the brighter one.
+func TestAttackPiratesMarkOnAnASCIISession(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Protection = 0
+	p.RaidersThisTurn = []int{3} // Sharks
+
+	f := &fakeSession{keys: []rune("0\r")}
+	attackPirates(session.NewASCIIWriter(f), w)
+	out := f.out.String()
+
+	marked := "Sharks" + ansi.Reset + " " + ansi.FgWhite + "<" + ansi.FgBrightBlack + "=" + ansi.Reset
+	if !strings.Contains(out, marked) {
+		t.Errorf("an ASCII session should get the <= mark; output:\n%s", out)
+	}
+	if strings.Contains(out, "«") {
+		t.Errorf("the guillemet reached an ASCII session; output:\n%s", out)
 	}
 }

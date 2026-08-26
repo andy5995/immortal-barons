@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
-	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -286,25 +285,29 @@ func ipScoreRank(s session.Session, w *ctx, rows []ipScoreRow, kind ipRankKind) 
 		ansi.FgBrightWhite, tr(s, "Planetary Post"), ansi.FgBrightRed,
 		ansi.FgRed, ansi.Reset)
 	fmt.Fprintf(s, "\n")
-	// Column header.
+	// Column header. Both table shapes end their metric on column 46; the player
+	// views then put Planet LAST, beginning on column 52 (docs/dev/bre-screens.md).
+	// The name field is 22 wide so the widest metric heading, "Net Worth / Region",
+	// exactly fills the 18 columns right-aligned against 46.
 	if isPlanet {
-		fmt.Fprintf(s, "%s      %-34s %12s%s\n", ansi.FgBrightWhite, tr(s, "Name"), metric, ansi.Reset)
+		fmt.Fprintf(s, "%s      %-22s%18s%s\n", ansi.FgBrightWhite, tr(s, "Name"), metric, ansi.Reset)
 	} else {
-		fmt.Fprintf(s, "%s      %-26s %-20s %12s%s\n", ansi.FgBrightWhite, tr(s, "Name"), tr(s, "Planet"), metric, ansi.Reset)
+		fmt.Fprintf(s, "%s      %-22s%18s     %s%s\n", ansi.FgBrightWhite, tr(s, "Name"), metric, tr(s, "Planet"), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightBlack, rule, ansi.Reset)
 	for i, r := range viewRows {
 		if isPlanet {
-			fmt.Fprintf(s, "%s(%s%3d%s) %s%-34s%s %s%12d%s\n",
+			fmt.Fprintf(s, "%s(%s%3d%s) %s%-22s%s%s%18d%s\n",
 				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
-				ansi.FgWhite, game.FitColumn(r.name, 33), ansi.Reset,
+				ansi.FgWhite, fitColumn(w.Term, r.name, 22), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset)
 		} else {
-			fmt.Fprintf(s, "%s(%s%3d%s) %s%-26s%s %s%-20s%s %s%12d%s\n",
+			// The Planet column's own width is not captured; 21 ends it on the rule.
+			fmt.Fprintf(s, "%s(%s%3d%s) %s%-22s%s%s%18d%s     %s%s%s\n",
 				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
-				ansi.FgWhite, game.FitColumn(r.name, 25), ansi.Reset,
-				ansi.FgWhite, game.FitColumn(r.planet, 19), ansi.Reset,
-				ansi.FgBrightWhite, r.val, ansi.Reset)
+				ansi.FgWhite, fitColumn(w.Term, r.name, 22), ansi.Reset,
+				ansi.FgBrightWhite, r.val, ansi.Reset,
+				ansi.FgWhite, fitColumn(w.Term, r.planet, 21), ansi.Reset)
 		}
 	}
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightBlack, rule, ansi.Reset)
@@ -350,4 +353,57 @@ func askOneOrAll(s session.Session) (all, answered bool) {
 			return false, true
 		}
 	}
+}
+
+// fitColumn cuts text to width with the truncation marker the caller's terminal
+// will actually render in one column. The CP437 and plain-ASCII writers rewrite
+// "…" as three ASCII dots below every layer that counts columns, so a fitted
+// cell came out two columns wide for them and shifted every column after it
+// (#196) — the common case, since CP437 is the default.
+// Take the charset from Term, not from session.IsUTF8(s): the wrappers between
+// the charset writer and here — Deadline, MacroExpander, langSession — do not
+// forward the marker, so asking the Session reports UTF-8 for every caller.
+// Term is captured in play.Run before any of that wrapping.
+//
+// It measures in COLUMNS, not runes, so a value carrying a character the writer
+// expands — an em dash in a realm name, which ValidRealmName accepts — is cut to
+// what will actually fit rather than to a rune count that renders wider.
+func fitColumn(t Term, text string, width int) string {
+	if visWidth(t, text) <= width {
+		return text
+	}
+	mark := "…"
+	if !t.UTF8 {
+		mark = "..."
+	}
+	room := width - visWidth(t, mark)
+	if room <= 0 {
+		return trimToWidth(t, text, width)
+	}
+	return trimToWidth(t, text, room) + mark
+}
+
+// trimToWidth drops runes off the end until what is left fits width columns on
+// the caller's terminal.
+func trimToWidth(t Term, text string, width int) string {
+	r := []rune(text)
+	for len(r) > 0 && visWidth(t, string(r)) > width {
+		r = r[:len(r)-1]
+	}
+	return string(r)
+}
+
+// visWidth is how many columns text will really occupy on the caller's
+// terminal. len([]rune()) is only that for a UTF-8 caller: the CP437 and
+// plain-ASCII writers rewrite "—", "…", "→" and the rest as two or three ASCII
+// characters, and they sit below every layer that counts columns, so a fixed
+// rule measured in runes came out short and the drawn line overhung it (#192).
+// ToASCII stands in for both — every length-changing CP437 fallback is in the
+// ASCII table too, and the accent and Cyrillic cases are one rune either way.
+// Term, not session.IsUTF8(s), for the reason given on fitColumn.
+func visWidth(t Term, text string) int {
+	if t.UTF8 {
+		return len([]rune(text))
+	}
+	return len([]rune(session.ToASCII(text)))
 }

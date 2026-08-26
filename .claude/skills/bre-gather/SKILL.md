@@ -245,7 +245,7 @@ exceptional validation tool, not a prerequisite for following overlays.
 **"IB's own" and "reconstructed" in our own notes are DATED, not decided.** Two
 very different things wear the same label: a deliberate divergence (IB
 comma-groups figures BRE prints bare) and a gap nobody could close at the time
-(the Clingy Annihilator's whole siege was marked "not read from the binary" and
+(the Gooie Kablooie's whole siege was marked "not read from the binary" and
 then read in twenty minutes once the static catalog existed). The tooling has
 improved faster than the notes were revisited, so a "reconstructed" marker older
 than the disassembly catalog is a TODO rather than a decision.
@@ -921,9 +921,9 @@ strictly limited. The idea/expression line:
 - **Display text verbatim**: menu descriptions, prompts, news/bulletin lines,
   help text, tutorial prose, end-of-turn messages. Reconstruct in our own words.
 - **ANSI art, logos, splash/end screens** (`game/bre.ans`, `breend.ans`, etc.).
-- **Distinctive flavor names.** Reconstruct BRE's distinctive labels in IB's own
-  words rather than copy them verbatim; IB renamed the "Gooie Kablooie" weapon to
-  "Clingy Annihilator".
+- **Distinctive flavor names** are Andy's call, one at a time. The nine pirate
+  factions carry IB's own names; the Gooie Kablooie, the S3-Sabre and SpyGuy keep
+  the original's (#218). Ask rather than renaming or reverting one yourself.
 
 **Trademark / branding:** do not present the project as "Barren Realms Elite" or
 use its name/logo as our branding.

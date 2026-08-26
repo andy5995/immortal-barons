@@ -258,11 +258,10 @@ func runTurn(s session.Session, w *ctx) Result {
 				})
 		}
 
+		// "Deposit gold at End of Turn" is banked inside PlayTurn now, just ahead of
+		// the interest, so the deposit earns on the turn that made it (#216).
 		if !withPlayer(w, func(p *game.Empire) {
 			w.World.PlayTurn(p, w.Today)
-			if p.Prefs.DepositEndTurn && p.Gold > 0 {
-				w.World.Deposit(p, p.Gold)
-			}
 		}) {
 			return abort()
 		}

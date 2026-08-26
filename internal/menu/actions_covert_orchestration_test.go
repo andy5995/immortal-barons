@@ -159,11 +159,11 @@ func TestSendSpyDelegates(t *testing.T) {
 	w.Player().Agents = 100
 	f := &fakeSession{keys: []rune("a")} // target A
 
-	if got := sendSpy(f, w); got != Stay {
-		t.Errorf("sendSpy returned %v, want Stay", got)
+	if got := covertAction(game.OpSendSpy)(f, w); got != Stay {
+		t.Errorf("Send Spy returned %v, want Stay", got)
 	}
 	if out := f.out.String(); !strings.Contains(out, "Intel on Gale Horde") {
-		t.Errorf("sendSpy should deliver the spy's intel report, got:\n%s", out)
+		t.Errorf("Send Spy should deliver the spy's intel report, got:\n%s", out)
 	}
 }
 
@@ -173,10 +173,10 @@ func TestBombEnemyTargetsDelegates(t *testing.T) {
 	w.Player().Gold = 10_000_000 // the op has a gold cost; broke = "cannot afford", op never runs
 	f := &fakeSession{keys: []rune("a")}
 
-	if got := bombEnemyTargets(f, w); got != Stay {
-		t.Errorf("bombEnemyTargets returned %v, want Stay", got)
+	if got := covertAction(game.OpBombEnemyTargets)(f, w); got != Stay {
+		t.Errorf("Bomb Enemy Targets returned %v, want Stay", got)
 	}
 	if out := f.out.String(); !strings.Contains(out, "Gale Horde") {
-		t.Errorf("bombEnemyTargets should report the strike outcome, got:\n%s", out)
+		t.Errorf("Bomb Enemy Targets should report the strike outcome, got:\n%s", out)
 	}
 }

@@ -131,7 +131,7 @@ func (w *World) reportToSpy(board, line string) {
 }
 
 // reportStandingThreats tells a newly arrived watcher what is already aimed at
-// his planet: a group attack assembling against it, and a Clingy Annihilator
+// his planet: a group attack assembling against it, and a Gooie Kablooie
 // being built for it.
 func (w *World) reportStandingThreats(board string) {
 	for _, g := range w.GroupAttacks {
@@ -175,8 +175,8 @@ func groupAttackSpyLine(from string, g GroupAttack) string {
 // annihilatorSpyLine reports the state of the weapon being built for us.
 func annihilatorSpyLine(from string, d *Annihilator) string {
 	if d.Funded {
-		return fmt.Sprintf("Our agent on %s reports their Clingy Annihilator is funded and launches in %d hours.",
+		return fmt.Sprintf("Our agent on %s reports their Gooie Kablooie is funded and launches in %d hours.",
 			from, AnnihilatorBuildDays*24)
 	}
-	return fmt.Sprintf("Our agent on %s reports work has begun on a Clingy Annihilator aimed at us.", from)
+	return fmt.Sprintf("Our agent on %s reports work has begun on a Gooie Kablooie aimed at us.", from)
 }

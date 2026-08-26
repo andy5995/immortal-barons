@@ -73,11 +73,11 @@ func renderEmpireStatus(s session.Session, w *ctx) {
 // another session mutates the world mid-render.
 func empireStatusBlock(s session.Session, w *ctx) string {
 	var p game.Empire
-	w.With(func() { p = *w.Player() })
+	w.Read(func() { p = *w.Player() })
 
 	var b strings.Builder
 	// Every figure goes through the formatter the rest of the game uses, so the
-	// caller's thousands separator and the billions form hold here too.
+	// caller's thousands separator holds here too.
 	money := func(n int64) string { return formatGold(n, p.Language) }
 	count := func(n int) string { return formatGold(n, p.Language) }
 	// row writes one white line; the figures inside it carry their own colour.

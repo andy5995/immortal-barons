@@ -266,7 +266,7 @@ func (w *World) dropEmpires(gone func(*Empire) bool) {
 // next-day rebuild rule holds: removeDeadHusks collects it once GameDay has
 // passed DiedDay, which is what stops an owner re-onboarding the same day.
 //
-// Every death goes through here — conquest, a Clingy Annihilator, starvation,
+// Every death goes through here — conquest, a Gooie Kablooie, starvation,
 // and abdication — so whatever a future death has to do besides setting these
 // two fields is added in one place. Three of the four call sites were in
 // internal/game and the fourth in the abdication screen, which is how a rule

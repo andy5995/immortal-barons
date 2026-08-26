@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-08-23 21:49-0500\n"
+"POT-Creation-Date: 2026-08-26 12:26-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -192,29 +192,11 @@ msgid "`b` adds nine zeros. Press `3` then `b` and you see `3000000000`."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/numbers.md:22
+#: internal/help/content/controls/numbers.md:21
 #, markdown-text
 msgid ""
 "If you type a number larger than the maximum, the game lowers it to the "
 "maximum when you press Enter."
-msgstr ""
-
-#. type: Title ##
-#: internal/help/content/controls/numbers.md:23
-#, markdown-text, no-wrap
-msgid "Very large numbers"
-msgstr ""
-
-#. type: Plain text
-#: internal/help/content/controls/numbers.md:30
-#, markdown-text
-msgid ""
-"A number of a billion or more is shown in short form with a capital `B`, to "
-"keep it inside its column: `1.0000B` is one billion, and `1.8473B` is a "
-"little over one and four fifths of a billion. The four digits after the "
-"point are the part below a billion, cut off rather than rounded up, so a "
-"figure just short of the next billion never looks like it got there. You "
-"still type these numbers in full, or with the `b` key above."
 msgstr ""
 
 #. type: Title #
@@ -233,12 +215,20 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/turns.md:15
+#: internal/help/content/controls/turns.md:16
 #, markdown-text
 msgid ""
 "New players get New Realm Protection: a number of turns during which you "
 "cannot attack or be attacked. It only ticks down on turns you actually play, "
 "so you are safe while you learn the game."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/turns.md:18
+#, markdown-text
+msgid ""
+"A realm still under protection carries a `(P)` after its name in the lists "
+"of realms, so you can see who cannot be attacked yet."
 msgstr ""
 
 #. type: Title #
@@ -531,18 +521,18 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/covert/r5-slappenheimer.md:1
-#: internal/help/content/covert/r5-slappenheimer.md:8
+#: internal/help/content/covert/s3-sabre.md:1
+#: internal/help/content/covert/s3-sabre.md:8
 #, markdown-text, no-wrap
-msgid "R5-Slappenheimer"
+msgid "S3-Sabre"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/covert/r5-slappenheimer.md:19
+#: internal/help/content/covert/s3-sabre.md:19
 #, markdown-text
 msgid ""
-"The R5-Slappenheimer is an unreliable weapon of mass destruction, fired from "
-"the InterPlanetary menu's Special Operations at a baron on another "
+"The S3-Sabre is an unreliable weapon of mass destruction, fired from the "
+"InterPlanetary menu's Special Operations at a baron on another "
 "planet. Before you fire, you set a dial from 0 to 10, but the dial is for "
 "show and changes nothing, so pick any number you like. The missile is a "
 "gamble every time. Most launches do nothing: it misses, it malfunctions, or "
@@ -914,16 +904,34 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:23
+#: internal/help/content/economy/banking.md:25
 #, markdown-text
 msgid ""
-"Your sysop sets a limit on how much gold you can hold — two billion to begin "
-"with, in hand and the same again in the bank. Gold you earn above that is "
-"lost.  Spend it before you get there."
+"Interest is paid at the end of every turn, on whatever is in the bank at "
+"that moment. If you have turned on Deposit gold at End of Turn, in "
+"Preferences, your gold is put in the bank first, so the gold you earned this "
+"turn earns interest this turn. It goes in after the pirates have had their "
+"chance at it, so it is no protection against a raid."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:26
+#: internal/help/content/economy/banking.md:28
+#, markdown-text
+msgid ""
+"The start of your next turn tells you what the bank paid: the interest, and "
+"what any investment that matured today paid back."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:31
+#, markdown-text
+msgid ""
+"You can hold at most two billion gold, in hand and the same again in the "
+"bank.  Gold you earn above that is lost. Spend it before you get there."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/banking.md:34
 #, markdown-text
 msgid ""
 "A full bank still pays its interest, into your gold in hand rather than the "
@@ -931,7 +939,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:29
+#: internal/help/content/economy/banking.md:37
 #, markdown-text
 msgid ""
 "The game tells you when gold is lost this way. Your event log names the "
@@ -939,13 +947,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/banking.md:30
+#: internal/help/content/economy/banking.md:38
 #, markdown-text, no-wrap
 msgid "Cash Relief / Loans"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:36
+#: internal/help/content/economy/banking.md:44
 #, markdown-text
 msgid ""
 "When you borrow, you first pick how many days you have to pay it back (1 to "
@@ -956,7 +964,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:41
+#: internal/help/content/economy/banking.md:49
 #, markdown-text
 msgid ""
 "You must repay the full amount on the due date. The bank takes it from your "
@@ -966,13 +974,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/banking.md:42
+#: internal/help/content/economy/banking.md:50
 #, markdown-text, no-wrap
 msgid "Investments"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/banking.md:48
+#: internal/help/content/economy/banking.md:56
 #, markdown-text
 msgid ""
 "You can lock gold away as an investment for 2 to 10 days. It pays back your "
@@ -2136,7 +2144,7 @@ msgstr ""
 #: internal/help/content/interbbs/spyguy.md:36
 #, markdown-text
 msgid ""
-"a **Clingy Annihilator** being built for us — when the work starts, when the "
+"a **Gooie Kablooie** being built for us — when the work starts, when the "
 "funding is complete, and if it is stood down again"
 msgstr ""
 
@@ -2831,8 +2839,8 @@ msgstr ""
 #: internal/help/content/military/troopers.md:26
 #, markdown-text
 msgid ""
-"A large trooper army also discourages enemy R5-Slappenheimer strikes. The "
-"more troopers you hold, the more likely that missile is to backfire onto the "
+"A large trooper army also discourages enemy S3-Sabre strikes. The more "
+"troopers you hold, the more likely that missile is to backfire onto the "
 "empire that fired it. Troopers are a common target of enemy covert "
 "operations, which can make them desert."
 msgstr ""
@@ -3486,23 +3494,23 @@ msgid ""
 msgstr ""
 
 #. type: Title #
-#: internal/help/content/warfare/clingy-annihilator.md:1
-#: internal/help/content/warfare/clingy-annihilator.md:8
+#: internal/help/content/warfare/gooie-kablooie.md:1
+#: internal/help/content/warfare/gooie-kablooie.md:8
 #, markdown-text, no-wrap
-msgid "Clingy Annihilator"
+msgid "Gooie Kablooie"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:12
+#: internal/help/content/warfare/gooie-kablooie.md:12
 #, markdown-text
 msgid ""
-"The Clingy Annihilator is the ultimate weapon. It is aimed at a whole enemy "
+"The Gooie Kablooie is the ultimate weapon. It is aimed at a whole enemy "
 "planet rather than at one baron, and your planet can only have one at a "
 "time."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:17
+#: internal/help/content/warfare/gooie-kablooie.md:17
 #, markdown-text
 msgid ""
 "Nobody buys the weapon alone. One baron starts the work and names the target "
@@ -3512,7 +3520,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:22
+#: internal/help/content/warfare/gooie-kablooie.md:22
 #, markdown-text
 msgid ""
 "When the last of the money is in, the weapon builds for three more days and "
@@ -3522,13 +3530,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/warfare/clingy-annihilator.md:23
+#: internal/help/content/warfare/gooie-kablooie.md:23
 #, markdown-text, no-wrap
 msgid "Being on the receiving end"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:30
+#: internal/help/content/warfare/gooie-kablooie.md:30
 #, markdown-text
 msgid ""
 "A weapon aimed at your planet does not go off and disappear. It arrives, "
@@ -3539,7 +3547,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:35
+#: internal/help/content/warfare/gooie-kablooie.md:35
 #, markdown-text
 msgid ""
 "Only jets can reach it. Your realm is asked at the start of your turn "
@@ -3549,7 +3557,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:39
+#: internal/help/content/warfare/gooie-kablooie.md:39
 #, markdown-text
 msgid ""
 "No single wave can finish it, however many jets you send. That is the point: "
@@ -3558,7 +3566,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/warfare/clingy-annihilator.md:40
+#: internal/help/content/warfare/gooie-kablooie.md:40
 #, markdown-text
 msgid "An SDI program is no help against it, and neither is anything else you own."
 msgstr ""

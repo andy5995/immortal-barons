@@ -36,17 +36,17 @@ type Annihilator struct {
 }
 
 var (
-	ErrAnnihilatorExists   = errors.New("This planet is already building a Clingy Annihilator.")
-	ErrNoAnnihilator       = errors.New("This planet has no Clingy Annihilator.")
-	ErrAnnihilatorFunded   = errors.New("The Clingy Annihilator is already paid for.")
-	ErrAnnihilatorFlying   = errors.New("The Clingy Annihilator has already launched.")
-	ErrAnnihilatorAloft    = errors.New("The Clingy Annihilator has not landed yet. Nothing can reach it up there.")
-	ErrNoJets              = errors.New("Only jets can attack a Clingy Annihilator, and you have none.")
-	ErrAnnihilatorDisabled = errors.New("Clingy Annihilator operations are switched off in this game.")
+	ErrAnnihilatorExists   = errors.New("This planet is already building a Gooie Kablooie.")
+	ErrNoAnnihilator       = errors.New("This planet has no Gooie Kablooie.")
+	ErrAnnihilatorFunded   = errors.New("The Gooie Kablooie is already paid for.")
+	ErrAnnihilatorFlying   = errors.New("The Gooie Kablooie has already launched.")
+	ErrAnnihilatorAloft    = errors.New("The Gooie Kablooie has not landed yet. Nothing can reach it up there.")
+	ErrNoJets              = errors.New("Only jets can attack a Gooie Kablooie, and you have none.")
+	ErrAnnihilatorDisabled = errors.New("Gooie Kablooie operations are switched off in this game.")
 	ErrNotPlanetCO         = errors.New("Only the elected BBS Coordinator may do that.")
 )
 
-// annihilatorCost prices a Clingy Annihilator aimed at targetLand, from a planet holding
+// annihilatorCost prices a Gooie Kablooie aimed at targetLand, from a planet holding
 // ourLand, in millions of gold. The shape is BRE's (see balance.go).
 func annihilatorCost(targetLand, ourLand int) int {
 	if targetLand < AnnihilatorMinTargetLand {
@@ -98,16 +98,16 @@ func (w *World) remoteLand(board string) int {
 	return total
 }
 
-// AnnihilatorQuote is what a Clingy Annihilator aimed at board would cost this planet,
+// AnnihilatorQuote is what a Gooie Kablooie aimed at board would cost this planet,
 // in millions of gold. Shown before anyone commits to starting one.
 func (w *World) AnnihilatorQuote(board string) int {
 	return annihilatorCost(w.remoteLand(board), w.planetLand())
 }
 
-// StartAnnihilator begins construction of the planet's one Clingy Annihilator, aimed at
+// StartAnnihilator begins construction of the planet's one Gooie Kablooie, aimed at
 // board. It raises no money by itself — the barons fund it afterwards.
 func (w *World) StartAnnihilator(e *Empire, board string) error {
-	if !w.Config.ClingyAnnihilator {
+	if !w.Config.GooieKablooie {
 		return ErrAnnihilatorDisabled
 	}
 	if w.Annihilator != nil {
@@ -123,7 +123,7 @@ func (w *World) StartAnnihilator(e *Empire, board string) error {
 		StartedDay:  w.GameDay,
 		Intact:      100,
 	}
-	w.postNews(fmt.Sprintf("Construction of a Clingy Annihilator aimed at %s has begun.", board))
+	w.postNews(fmt.Sprintf("Construction of a Gooie Kablooie aimed at %s has begun.", board))
 	w.reportToSpy(board, annihilatorSpyLine(w.Config.BoardID, w.Annihilator))
 	return nil
 }
@@ -151,12 +151,12 @@ func (w *World) FundAnnihilator(e *Empire, millions int) (int, error) {
 	}
 	e.Gold -= gold
 	d.PaidMillion += millions
-	w.postNews(fmt.Sprintf("%s agrees to put in %d million gold to the Clingy Annihilator.", e.Name, millions))
+	w.postNews(fmt.Sprintf("%s agrees to put in %d million gold to the Gooie Kablooie.", e.Name, millions))
 	if d.PaidMillion >= d.CostMillion {
 		d.Funded = true
 		d.FundedDay = w.GameDay
 		d.LaunchDay = w.GameDay + AnnihilatorBuildDays
-		w.postNews(fmt.Sprintf("The Clingy Annihilator is complete. It launches at %s in %d hours.",
+		w.postNews(fmt.Sprintf("The Gooie Kablooie is complete. It launches at %s in %d hours.",
 			d.TargetBoard, AnnihilatorBuildDays*24))
 		w.reportToSpy(d.TargetBoard, annihilatorSpyLine(w.Config.BoardID, d))
 	}
@@ -175,7 +175,7 @@ func (w *World) LaunchDueAnnihilator() {
 	d.Launched = true
 	d.LaunchedDay = w.GameDay
 	d.ArrivesDay = w.GameDay + AnnihilatorFlightDays
-	w.postNews(fmt.Sprintf("The Clingy Annihilator has launched at %s.", d.TargetBoard))
+	w.postNews(fmt.Sprintf("The Gooie Kablooie has launched at %s.", d.TargetBoard))
 }
 
 // DismantleAnnihilatorByCoordinator stands the weapon down on the elected BBS
@@ -201,8 +201,8 @@ func (w *World) scrapAnnihilator() error {
 	board := w.Annihilator.TargetBoard
 	w.Annihilator = nil
 	w.ExportAnnihilatorGone(board) // let the target stop watching for it (#63)
-	w.postNews("The Clingy Annihilator has been dismantled.")
-	w.reportToSpy(board, fmt.Sprintf("Our agent on %s reports their Clingy Annihilator has been dismantled.", w.Config.BoardID))
+	w.postNews("The Gooie Kablooie has been dismantled.")
+	w.reportToSpy(board, fmt.Sprintf("Our agent on %s reports their Gooie Kablooie has been dismantled.", w.Config.BoardID))
 	return nil
 }
 
@@ -260,10 +260,10 @@ func (w *World) InterceptAnnihilator(e *Empire, jets int) (int, int, error) {
 	w.Incoming.Intact -= knocked
 	if w.Incoming.Intact <= 0 {
 		w.Incoming = nil
-		w.postNews(fmt.Sprintf("%s destroyed the Clingy Annihilator!", e.Name))
+		w.postNews(fmt.Sprintf("%s destroyed the Gooie Kablooie!", e.Name))
 		return knocked, lost, nil
 	}
-	w.postNews(fmt.Sprintf("%s knocked %d%% off the Clingy Annihilator; it is still at %d%% strength.",
+	w.postNews(fmt.Sprintf("%s knocked %d%% off the Gooie Kablooie; it is still at %d%% strength.",
 		e.Name, knocked, w.Incoming.Intact))
 	return knocked, lost, nil
 }
@@ -295,7 +295,7 @@ func (w *World) TickAnnihilator() {
 	first := d.DaysLeft == AnnihilatorSiegeDays
 	if first {
 		pct = AnnihilatorFirstDayPct
-		w.postNews(fmt.Sprintf("A Clingy Annihilator from %s has landed on our planet!", d.Creator))
+		w.postNews(fmt.Sprintf("A Gooie Kablooie from %s has landed on our planet!", d.Creator))
 	}
 	total := 0
 	for _, e := range w.Empires {
@@ -316,19 +316,19 @@ func (w *World) TickAnnihilator() {
 		}
 		total += lost
 		if first {
-			e.addEvent(fmt.Sprintf("A Clingy Annihilator landed on the planet — you lost %d regions.", lost))
+			e.addEvent(fmt.Sprintf("A Gooie Kablooie landed on the planet — you lost %d regions.", lost))
 		} else {
-			e.addEvent(fmt.Sprintf("The Clingy Annihilator destroyed %d more regions.", lost))
+			e.addEvent(fmt.Sprintf("The Gooie Kablooie destroyed %d more regions.", lost))
 		}
 	}
 	if first {
-		w.postNews(fmt.Sprintf("The Clingy Annihilator destroyed %d regions!", total))
+		w.postNews(fmt.Sprintf("The Gooie Kablooie destroyed %d regions!", total))
 	} else {
-		w.postNews(fmt.Sprintf("The Clingy Annihilator continues its attack and destroyed %d more regions!", total))
+		w.postNews(fmt.Sprintf("The Gooie Kablooie continues its attack and destroyed %d more regions!", total))
 	}
 	d.DaysLeft--
 	if d.DaysLeft <= 0 {
 		w.Incoming = nil
-		w.postNews("The Clingy Annihilator has burned itself out.")
+		w.postNews("The Gooie Kablooie has burned itself out.")
 	}
 }

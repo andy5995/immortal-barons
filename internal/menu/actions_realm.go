@@ -100,7 +100,7 @@ func changeRealmName(s session.Session, w *ctx) Result {
 	name, cancelled := AskRealmName(s, playerLang(w), "",
 		func(n string) bool {
 			var taken bool
-			w.With(func() { taken = w.RealmNameTaken(n) })
+			w.Read(func() { taken = w.RealmNameTaken(n) })
 			return taken
 		},
 		func() bool { return true })

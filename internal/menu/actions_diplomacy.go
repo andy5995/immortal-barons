@@ -87,7 +87,7 @@ const (
 func allianceStrength(s session.Session, w *ctx) Result {
 	p := w.Player()
 	var defenders []game.AllyContribution
-	w.With(func() { defenders = w.AllyDefenders(p) })
+	w.Read(func() { defenders = w.AllyDefenders(p) })
 	fmt.Fprintf(s, "\n%s%s\n", ansi.FgWhite, tr(s, "Your allies will send the following to aid you in defense:"))
 	if len(defenders) == 0 {
 		fmt.Fprintf(s, "%s%s\n", tr(s, "You have no defense allies."), ansi.Reset)
@@ -167,7 +167,7 @@ func negotiateTreaty(ttype string) func(session.Session, *ctx) Result {
 			return Stay
 		}
 		var chosen []string
-		w.With(func() {
+		w.Read(func() {
 			for _, e := range picked {
 				chosen = append(chosen, e.Name)
 			}
@@ -313,7 +313,7 @@ func declareWar(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var names []string
-	w.With(func() {
+	w.Read(func() {
 		for _, e := range picked {
 			names = append(names, e.Name)
 		}
@@ -378,14 +378,22 @@ func offersFrom(p *game.Empire, from string) []string {
 
 // pickFromList shows a numbered list and returns the chosen entry, or "".
 func pickFromList(s session.Session, msg string, list []string) string {
-	for i, x := range list {
+	return pickFromListValues(s, msg, list, list)
+}
+
+// pickFromListValues is pickFromList for a list whose rows are DRAWN with more
+// than the value they stand for — a target flagged `(P)` for New Realm
+// Protection, say. labels and values are parallel; the value is what comes back,
+// so a flag on the row can never reach the code that acts on the choice.
+func pickFromListValues(s session.Session, msg string, labels, values []string) string {
+	for i, x := range labels {
 		fmt.Fprintf(s, "    %d) %s\n", i+1, x)
 	}
 	i := promptInt(s, msg+" (0 to cancel)?")
-	if i < 1 || i > len(list) {
+	if i < 1 || i > len(values) {
 		return ""
 	}
-	return list[i-1]
+	return values[i-1]
 }
 
 // Relations-screen geometry, measured off a live BRE capture: a 75-column inset
@@ -418,10 +426,11 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 			rows = append(rows, relationsRow{
 				id: w.EmpireLetter(e), name: e.Name,
 				relations: relationsText(s, w.TreatiesBetween(p, e)), presence: presenceOf(e, false, w.Today),
+				protected: e.Protection > 0,
 			})
 		}
 	})
-	writeRelationsTable(s, rows)
+	writeRelationsTable(s, w.Term, rows)
 	if len(pending) > 0 {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "Awaiting a reply:"), ansi.Reset)
 		for _, o := range pending {
@@ -438,6 +447,7 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 type relationsRow struct {
 	id, name, relations string
 	presence            string
+	protected           bool
 }
 
 // relationsText renders the Relations column for the pacts held, BRE's "None"
@@ -456,7 +466,7 @@ func relationsText(s session.Session, held []string) string {
 // writeRelationsTable draws the "-*Relations*-" table itself. View Treaties and
 // the Diplomacy picker's "?" list share it, as they share one routine in the
 // original.
-func writeRelationsTable(s session.Session, rows []relationsRow) {
+func writeRelationsTable(s session.Session, t Term, rows []relationsRow) {
 	rule := rule75(ansi.FgBlue)
 	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n", ansi.FgBlue, ansi.FgBrightWhite, tr(s, "Relations"), ansi.FgBlue, ansi.Reset)
 	fmt.Fprintf(s, "%s%-5s%-*s%s%s\n", ansi.FgBrightWhite,
@@ -472,7 +482,7 @@ func writeRelationsTable(s session.Session, rows []relationsRow) {
 		// meets it labelled.
 		fmt.Fprintf(s, "%s[%s%s%s]%s  %s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
 			ansi.Reset,
-			nameCell(s, r.name, ansi.FgBrightCyan, r.presence, relationsNameWidth),
+			nameCell(s, t, r.name, ansi.FgBrightCyan, r.presence, relationsNameWidth),
 			ansi.FgBrightBlue, r.relations, ansi.Reset)
 	}
 	fmt.Fprintln(s, rule)

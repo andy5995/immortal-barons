@@ -26,15 +26,32 @@ A trade deal is an offer to one realm. You put goods and gold in it, and you may
 ask for goods and gold in return. The other realm reads the offer and accepts or
 refuses it. You need a treaty with that realm to send one.
 
-A trade deal costs a fee for each day you send it for, and it needs a spare
-carrier to move the goods. A Protective Trade treaty with that realm makes the
-fee cheaper.
+A trade deal costs a fee for each day you send it for, and it needs carriers to
+move the goods. How many depends on what you are shipping: one carrier holds a
+thousand troopers or turrets, a hundred jets, five thousand tanks, or a hundred
+thousand gold, and food, bombers, agents and carriers take no room at all. A
+Protective Trade treaty with that realm makes the fee cheaper.
 
 The days you pay for are how long the offer stands. What you put in the deal
 leaves your realm the moment you send it, and it comes back only if the offer is
 accepted: a refusal, a deal nobody answers before its days run out, and a realm
 that falls before it replies all cost you the goods. Send to someone who is
 playing, and give them enough days to get to it.
+
+## Deals to another planet
+
+In a league game the InterPlanetary Operations menu sends a deal to a realm on
+another planet. It works differently from the one above, so read this before you
+use it.
+
+You cannot ask for anything back. The goods are a gift, and the realm you send
+them to has no say: they arrive and are added to what that realm holds. There is
+no offer to accept or refuse, so nothing is ever returned to you.
+
+You pay once, not per day, and you need no treaty with the realm or its planet.
+The fee depends on what is in the deal, and it is shown before you confirm. You
+cannot send to a realm that is still under new-realm protection, and you cannot
+send to your own planet — for that, use the deal above.
 
 ## Getting the most from trade
 

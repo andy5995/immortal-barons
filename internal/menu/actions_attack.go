@@ -109,7 +109,8 @@ func hiTokens(s string, words []string, color string) string {
 // is the identity the resolving w.With re-finds by (see findTarget); a
 // pre-gathered pointer is not carried across the reload. attackable is false for
 // a realm the player can see in the list but cannot hit (shielded by New Realm
-// Protection or an alliance) — it is shown without a selection letter.
+// Protection or an alliance); protected says which of the two shields it is,
+// because only one of them is announced on the row.
 //
 // people and troopers are NOT displayed: they are carried so a missile can be
 // priced off the target without a second trip under the lock (the chemical and
@@ -120,6 +121,7 @@ type targetRow struct {
 	land, score, netWorth int
 	people, troopers      int
 	attackable            bool
+	protected             bool
 	presence              string
 }
 
@@ -139,12 +141,14 @@ func snapshotTargets(w *ctx) []targetRow {
 			if e == p || !e.Alive {
 				continue
 			}
-			attackable := e.Protection == 0 && !w.AreAllied(p, e)
+			protected := e.Protection > 0
+			attackable := !protected && !w.AreAllied(p, e)
 			rows = append(rows, targetRow{
 				name: e.Name, letter: e.Letter(),
 				land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
 				people: e.People, troopers: e.Troopers,
-				attackable: attackable, presence: presenceOf(e, false, w.Today),
+				attackable: attackable, protected: protected,
+				presence: presenceOf(e, false, w.Today),
 			})
 		}
 	})
@@ -193,7 +197,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	name, chosen := pickAttackTarget(s, rows, tr(s, "Attack which realm? (letter, RETURN to abort)"))
+	name, chosen := pickAttackTarget(s, w.Term, rows, attackPrompts(tr(s, "Attack which realm? (letter, RETURN to abort)")))
 	if !chosen {
 		return Stay
 	}
@@ -267,48 +271,81 @@ func warnTrimmedForce(s session.Session, trimmed bool) {
 
 // pickAttackTarget renders the living rivals in IB's familiar scores-table
 // layout (Id / Empire Name / Territory / Score / Net Worth, lettered ids) and
-// reads the player's single-key choice. Shielded realms (New Realm Protection or
-// an alliance) are listed with a blank id so they can be seen but not picked —
-// their diplomacy status shows in the diplomacy menus. Returns the chosen realm
-// name, or chosen=false if the player aborts (RETURN / any non-letter) or
-// nothing is attackable.
+// reads the player's single-key choice. Returns the chosen realm name, or
+// chosen=false if the player aborts (RETURN / any non-letter), picks a realm
+// that cannot be targeted, or nothing is attackable.
 //
 // A REALM'S LETTER IS ITS OWN — its permanent slot letter, not a count of the
-// rows above it. A shielded realm therefore keeps its letter and leaves a gap,
-// exactly as a fallen realm or the sender does in the message picker. Numbering
-// the rows instead re-letters everyone the moment an alliance is formed, a realm
-// comes out of protection, or a neighbour dies, so the key that attacked one
-// realm yesterday attacks a different one today.
-func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name string, chosen bool) {
-	scoreTableHead(s)
-	byLetter := make(map[string]string, len(rows))
+// rows above it. A fallen realm therefore leaves a gap, exactly as it does in
+// the message picker. Numbering the rows instead re-letters everyone the moment
+// a neighbour dies, so the key that attacked one realm yesterday attacks a
+// different one today.
+//
+// A realm under New Realm Protection KEEPS ITS LETTER and is flagged `(P)`
+// instead (#214). It withheld the letter until 2026-08-26, which said only that
+// something about the row was different and left the player to guess what; the
+// flag says it outright, and pressing the letter now answers with the reason
+// rather than behaving like a mistyped key. An ALLIED realm still shows no
+// letter — that standing is the diplomacy screens' to report, and the alliance
+// is the player's own doing.
+// targetPrompt is the wording one target list uses: what it asks, what it says
+// when a shielded realm is picked, and what it says when nothing on the list can
+// be chosen at all. A parameter because the same table serves a strike, a covert
+// op and an interplanetary trade deal (#195), and only the words differ.
+type targetPrompt struct {
+	ask     string
+	refuse  string // takes the realm name
+	nothing string
+}
+
+// attackPrompts is the wording for the war lists, and the default everywhere the
+// caller has nothing more specific to say.
+func attackPrompts(ask string) targetPrompt {
+	return targetPrompt{
+		ask:     ask,
+		refuse:  "%s is under New Realm Protection and cannot be targeted yet.",
+		nothing: "None of these realms can be attacked — they are protected or allied with you.",
+	}
+}
+
+func pickAttackTarget(s session.Session, t Term, rows []targetRow, p targetPrompt) (name string, chosen bool) {
+	scoreTableHead(s, t)
+	byLetter := make(map[string]targetRow, len(rows))
+	attackable := 0
 	for _, r := range rows {
-		id := "" // no selection letter for a realm that can't be attacked
-		if r.attackable {
-			id = scoreID(r.letter)
-			byLetter[r.letter] = r.name
+		id := "" // no selection letter for a realm allied with the player
+		if r.attackable || r.protected {
+			id = scoreID(r.letter, r.protected)
+			byLetter[r.letter] = r
 		}
-		scoreTableRow(s, id, r.name, ansi.FgBrightWhite, r.presence, r.land, r.score, r.netWorth)
+		if r.attackable {
+			attackable++
+		}
+		scoreTableRow(s, t, id, r.name, ansi.FgBrightWhite, r.presence, r.land, r.score, r.netWorth)
 	}
 	scoreTableRule(s)
-	if len(byLetter) == 0 {
-		ok(s, "None of these realms can be attacked — they are protected or allied with you.")
+	if attackable == 0 {
+		ok(s, p.nothing)
 		return "", false
 	}
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, prompt, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, p.ask, ansi.Reset)
 	r, err := readKey(s)
 	if err != nil {
 		return "", false
 	}
 	// A letter with no realm behind it — a gap, or past the end — aborts rather
 	// than selecting a neighbour.
-	name, found := byLetter[string(unicode.ToUpper(r))]
+	row, found := byLetter[string(unicode.ToUpper(r))]
 	if !found {
 		fmt.Fprint(s, "\n")
 		return "", false
 	}
 	fmt.Fprintf(s, "%c\n", unicode.ToUpper(r))
-	return name, true
+	if !row.attackable {
+		ok(s, p.refuse, row.name)
+		return "", false
+	}
+	return row.name, true
 }
 
 // costOf prices a gold-fee op against the target it is aimed at. The three
@@ -344,7 +381,7 @@ func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTu
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	name, chosen := pickAttackTarget(s, rows, tr(s, "Choose a target (letter, RETURN to abort)"))
+	name, chosen := pickAttackTarget(s, w.Term, rows, attackPrompts(tr(s, "Choose a target (letter, RETURN to abort)")))
 	if !chosen {
 		return Stay
 	}
@@ -430,28 +467,62 @@ var pirateColors = []struct {
 	{"Ammonians", ansi.FgBrightCyan},       // 11 light cyan
 }
 
-// pirateRaiderMark hugs the name of whichever faction raided the player since
+// pirateRaiderMark FOLLOWS the name of whichever faction raided the player since
 // their last play (Empire.RaidersThisTurn) — IB's own addition, not BRE's;
 // see the online-baron mark it borrows its treatment from (actions_info.go).
 // Translatable like scoreOnlineMark, though an arrow is unlikely to need it.
-const pirateRaiderMark = "->"
+// CP437 174, pointing back at the name it marks — an arrow drawn `->` to the
+// RIGHT of a name points away from it at nothing. It is the head alone: the
+// guillemet is a text glyph and sits off the horizontal centerline the rule
+// characters are drawn on, so `«═` reads as two separate marks rather than one
+// arrow. An ASCII session gets pirateRaiderMarkASCII instead: session/ascii.go
+// would render the guillemet as a bare `<`, which reads as a stray character
+// rather than a mark.
+//
+// It sat to the LEFT of the name until 2026-08-25, with every unmarked row
+// holding the column blank so the names stayed in one column. That reserved
+// indent read as a formatting fault on a screen where nothing had raided (#197),
+// which is the common case; the mark trails the name now and an unmarked row
+// carries nothing at all.
+const pirateRaiderMark = "«"
 
-// raiderMark renders the mark, or a blank of the same width — reserving the
-// column so an unmarked row's name still starts where a marked one's does.
-// The shaft is decoration, like the online mark's parens (dark gray,
-// FgBrightBlack); the head is what carries the meaning, so it takes the same
-// brighter gray (FgWhite) the online mark's letter does — measured 9.04:1 on
-// VGA/CP437 and 11.54:1 on xterm against black, versus dark gray's 2.82:1 /
-// 5.32:1, so the part that must read alone gets the color that clears 4.5:1.
+// pirateRaiderMarkASCII is the mark for a session held to 7-bit ASCII. Not
+// translated: such a session is held to English (see session/ascii.go). The
+// shaft is welcome here — `<` and `=` are both drawn on the baseline, which is
+// the alignment the CP437 pair lacks.
+const pirateRaiderMarkASCII = "<="
+
+// raiderMark renders the mark after a single space, and nothing whatsoever for
+// a faction that did not raid.
+//
+// The mark carries its meaning alone, so it takes the same brighter gray
+// (FgWhite) the online mark's letter does — measured 9.04:1 on VGA/CP437 and
+// 11.54:1 on xterm against black, where dark gray manages 2.82:1 / 5.32:1. A
+// translation that reinstates a shaft (`<-`) still gets the online mark's split:
+// rule characters are decoration and take the dark gray.
 func raiderMark(s session.Session, raided bool) string {
-	mark := []rune(tr(s, pirateRaiderMark))
 	if !raided {
-		return strings.Repeat(" ", len(mark))
-	}
-	if len(mark) == 0 {
 		return ""
 	}
-	return ansi.FgBrightBlack + string(mark[0]) + ansi.FgWhite + string(mark[1:]) + ansi.Reset
+	mark := tr(s, pirateRaiderMark)
+	if session.IsASCII(s) {
+		mark = pirateRaiderMarkASCII
+	}
+	var b strings.Builder
+	b.WriteString(" ")
+	for _, r := range mark {
+		if r == '═' || r == '-' || r == '=' {
+			b.WriteString(ansi.FgBrightBlack)
+		} else {
+			b.WriteString(ansi.FgWhite)
+		}
+		b.WriteRune(r)
+	}
+	if b.Len() == 1 {
+		return ""
+	}
+	b.WriteString(ansi.Reset)
+	return b.String()
 }
 
 // raidedSlot reports whether slot is in raiders — the factions that hit the
@@ -488,7 +559,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 		if i < len(pirateColors) {
 			color = pirateColors[i].Color
 		}
-		fmt.Fprintf(s, "  %d) %s%s%s%s\n", i+1, raiderMark(s, raidedSlot(raiders, i)), color, name, ansi.Reset)
+		fmt.Fprintf(s, "  %d) %s%s%s%s\n", i+1, color, name, ansi.Reset, raiderMark(s, raidedSlot(raiders, i)))
 	}
 	fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
 	f := ChoiceQuit(s, len(names))
@@ -584,24 +655,24 @@ func sdiProgram(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// clingyAnnihilator is the planet's doomsday-weapon desk, BRE's "Gooie Kablooie
+// gooieKablooie is the planet's doomsday-weapon desk, BRE's "Gooie Kablooie
 // Ops": start one, put money in, launch it, or scrap it. A planet builds one at
 // a time and the barons fund it between them (#16).
-func clingyAnnihilator(s session.Session, w *ctx) Result {
+func gooieKablooie(s session.Session, w *ctx) Result {
 	if blockedByProtection(s, w) {
 		return Stay
 	}
 	var d *game.Annihilator
 	var enabled bool
-	w.With(func() {
-		enabled = w.Config.ClingyAnnihilator
+	w.Read(func() {
+		enabled = w.Config.GooieKablooie
 		if w.Annihilator != nil {
 			c := *w.Annihilator
 			d = &c
 		}
 	})
 	if !enabled {
-		ok(s, "Clingy Annihilator operations are switched off in this game.")
+		ok(s, "Gooie Kablooie operations are switched off in this game.")
 		return Stay
 	}
 	if d == nil {
@@ -610,16 +681,16 @@ func clingyAnnihilator(s session.Session, w *ctx) Result {
 	showAnnihilator(s, w, d)
 	switch {
 	case d.Launched:
-		ok(s, "The Clingy Annihilator is on its way. Nothing more can be done with it.")
+		ok(s, "The Gooie Kablooie is on its way. Nothing more can be done with it.")
 	case d.Funded:
 		// Nobody presses a button here: the weapon launches itself once
 		// construction has run, and only the Coordinator can stand it down (#114).
 		var hours int
-		w.With(func() { hours = (d.LaunchDay - w.GameDay) * 24 })
+		w.Read(func() { hours = (d.LaunchDay - w.GameDay) * 24 })
 		if hours < 0 {
 			hours = 0
 		}
-		ok(s, "The Clingy Annihilator is complete. It launches at %s in %d hours.", d.TargetBoard, hours)
+		ok(s, "The Gooie Kablooie is complete. It launches at %s in %d hours.", d.TargetBoard, hours)
 	default:
 		millions := promptSuggested(s, "How many million gold do you wish to put in?", 0, d.CostMillion-d.PaidMillion)
 		if millions > 0 {
@@ -642,12 +713,12 @@ func clingyAnnihilator(s session.Session, w *ctx) Result {
 // startAnnihilator offers to begin construction, quoting what the planet will have to
 // raise for the target it picks.
 func startAnnihilator(s session.Session, w *ctx) Result {
-	ok(s, "This planet has no Clingy Annihilator.")
+	ok(s, "This planet has no Gooie Kablooie.")
 	if !AskYesNo(s, "Would you like to begin construction?", false) {
 		return Stay
 	}
 	var boards []string
-	w.With(func() {
+	w.Read(func() {
 		for _, b := range w.RemoteBoards {
 			boards = append(boards, b.BoardID)
 		}
@@ -662,7 +733,7 @@ func startAnnihilator(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	var quote int
-	w.With(func() { quote = w.AnnihilatorQuote(board) })
+	w.Read(func() { quote = w.AnnihilatorQuote(board) })
 	if !AskYesNo(s, fmt.Sprintf(tr(s, "It will cost your planet %s million gold to fund. Accept?"), comma(quote)), false) {
 		return Stay
 	}
@@ -689,7 +760,7 @@ func runAnnihilator(s session.Session, w *ctx, act func(*game.Empire) error, don
 	ok(s, done)
 }
 
-// annihilatorDefense is the planet's answer to a Clingy Annihilator squatting on
+// annihilatorDefense is the planet's answer to a Gooie Kablooie squatting on
 // it: throw jets at the thing until it dies. The original asks every baron this
 // at the top of their turn rather than hiding it behind a menu item
 // (run_player_turn calls the routine directly), because the weapon needs the
@@ -721,11 +792,11 @@ func annihilatorDefense(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(
 		tr(s, "It would take %s jets to destroy it outright."), comma(needed))))
 
-	if !AskYesNo(s, "Do you wish to attack the Clingy Annihilator?", false) {
+	if !AskYesNo(s, "Do you wish to attack the Gooie Kablooie?", false) {
 		return
 	}
 	if jets < 1 {
-		ok(s, "Only jets can attack a Clingy Annihilator, and you have none.")
+		ok(s, "Only jets can attack a Gooie Kablooie, and you have none.")
 		return
 	}
 	send := promptSuggested(s, "Send how many jets?", 0, jets)
@@ -743,11 +814,11 @@ func annihilatorDefense(s session.Session, w *ctx) {
 		return
 	}
 	var gone bool
-	w.With(func() { gone = w.Incoming == nil })
+	w.Read(func() { gone = w.Incoming == nil })
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "%s jets were destroyed in the attack!"), comma(lost))))
 	if gone {
-		ok(s, "The Clingy Annihilator was DESTROYED!")
+		ok(s, "The Gooie Kablooie was DESTROYED!")
 		return
 	}
-	ok(s, "%d%% of the Clingy Annihilator destroyed!", knocked)
+	ok(s, "%d%% of the Gooie Kablooie destroyed!", knocked)
 }

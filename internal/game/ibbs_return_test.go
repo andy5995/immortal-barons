@@ -10,9 +10,16 @@ import (
 // boardB, which is the shape every round-trip test below needs.
 func twoBoards(t *testing.T) (wA, wB *World, attacker, victim *Empire) {
 	t.Helper()
+	return twoBoardsSeed(t, 1)
+}
+
+// twoBoardsSeed is twoBoards on a chosen seed, for a test that has to hold on
+// more than one trajectory.
+func twoBoardsSeed(t *testing.T, seed int64) (wA, wB *World, attacker, victim *Empire) {
+	t.Helper()
 	cfgA := DefaultConfig()
 	cfgA.BoardID = "boardA"
-	wA = NewWorldSeed(cfgA, 1)
+	wA = NewWorldSeed(cfgA, seed)
 	attacker = wA.AddHuman("alice", "Alethia")
 	attacker.Protection = 0
 	attacker.Troopers, attacker.Tanks = 1_000_000, 10_000
@@ -20,7 +27,7 @@ func twoBoards(t *testing.T) (wA, wB *World, attacker, victim *Empire) {
 
 	cfgB := DefaultConfig()
 	cfgB.BoardID = "boardB"
-	wB = NewWorldSeed(cfgB, 1)
+	wB = NewWorldSeed(cfgB, seed)
 	victim = wB.AddHuman("victim", "Victim")
 	victim.Protection = 0
 	victim.Regions = RegionMix{Desert: 40_000}
@@ -366,5 +373,118 @@ func TestAGroupAttackNamesNoBaron(t *testing.T) {
 	}
 	if strings.Contains(news, " of Alpha") {
 		t.Errorf("a group attack must not name a baron, got:\n%s", news)
+	}
+}
+
+// One resolved outcome has to word all five places a strike is reported — the
+// defender's own recap, the defending planet's news, the result that goes back,
+// the attacker's report, and the attacking planet's news — and it has to word
+// them so the reader can tell who won. A defender who beats a strike off still
+// loses units, and IB used to tell him "You repelled ... You lost 424 of your
+// forces", which reads as a contradiction and was filed as a bug (#201).
+func TestArrivingStrikeIsWordedForTheSideThatWon(t *testing.T) {
+	for _, c := range []struct {
+		name    string
+		prepare func(v *Empire)
+		force   AttackForce
+		want    AttackOutcome
+		// What the defending board must say, and what it must not: each phrase
+		// belongs to the outcome that did NOT happen.
+		event, news, notNews string
+	}{
+		{
+			name:  "attacker wins",
+			force: AttackForce{Troopers: 500_000, Tanks: 5000},
+			want:  OutcomeWon,
+			event: "lost the field", news: "of its regions", notNews: "held the field",
+		},
+		{
+			name:    "defender wins",
+			prepare: func(v *Empire) { v.Troopers, v.Turrets, v.Tanks, v.Jets = 20_000, 20_000, 20_000, 20_000 },
+			force:   AttackForce{Troopers: 40_000},
+			want:    OutcomeRepelled,
+			event:   "held the field", news: "of its own forces", notNews: "overran",
+		},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			// The outcome is a property of the whole battle, so it is asserted on
+			// several trajectories rather than on the one seed that happened to
+			// produce it.
+			for seed := int64(1); seed <= 5; seed++ {
+				wA, wB, attacker, victim := twoBoardsSeed(t, seed)
+				if c.prepare != nil {
+					c.prepare(victim)
+				}
+				if _, err := wA.CreateIndividualAttack(attacker, "boardB", "Victim", NormalAttack, c.force); err != nil {
+					t.Fatalf("seed %d: CreateIndividualAttack: %v", seed, err)
+				}
+				result := wB.ApplyPacket(wA.Outbox[0])
+				res := result.Results[0]
+				if res.Outcome != c.want {
+					t.Fatalf("seed %d: outcome = %q, want %q; the test never reached the branch it covers",
+						seed, res.Outcome, c.want)
+				}
+				if res.Enemy.Total() == 0 {
+					t.Fatalf("seed %d: the defender took no casualties, so nothing miswords them", seed)
+				}
+				recap := victim.Events[len(victim.Events)-1].Text
+				if !strings.Contains(recap, c.event) {
+					t.Errorf("seed %d: the defender's recap of a %q should say %q:\n%s", seed, c.want, c.event, recap)
+				}
+				line := wB.NewsToday[len(wB.NewsToday)-1]
+				if !strings.Contains(line, c.news) {
+					t.Errorf("seed %d: the defending planet's news of a %q should say %q:\n%s", seed, c.want, c.news, line)
+				}
+				if strings.Contains(line, c.notNews) {
+					t.Errorf("seed %d: the defending planet's news of a %q claims the other side's outcome (%q):\n%s",
+						seed, c.want, c.notNews, line)
+				}
+				// And the attacking planet is told the same thing about it.
+				wA.Outbox, wA.NewsToday = nil, nil
+				wA.ApplyPacket(result)
+				home := wA.NewsToday[len(wA.NewsToday)-1]
+				if (c.want == OutcomeWon) != strings.Contains(home, "triumph") {
+					t.Errorf("seed %d: the attacking planet's news of a %q reads:\n%s", seed, c.want, home)
+				}
+			}
+		})
+	}
+}
+
+// A strike that found no such realm, or one turned away by New Realm Protection,
+// was not beaten in battle — and the attacking planet's news said it was,
+// because it read Won rather than the resolved outcome (#201).
+func TestAStrikeThatFoughtNobodyIsNotAnnouncedAsADefeat(t *testing.T) {
+	for _, c := range []struct {
+		name    string
+		prepare func(v *Empire)
+		target  string
+		want    AttackOutcome
+	}{
+		{"missing", func(*Empire) {}, "Nobody", OutcomeNotFound},
+		{"protected", func(v *Empire) { v.Protection = 5 }, "Victim", OutcomeProtected},
+	} {
+		t.Run(c.name, func(t *testing.T) {
+			wA, wB, attacker, victim := twoBoards(t)
+			c.prepare(victim)
+			if _, err := wA.CreateIndividualAttack(attacker, "boardB", c.target, NormalAttack,
+				AttackForce{Troopers: 1000}); err != nil {
+				t.Fatalf("CreateIndividualAttack: %v", err)
+			}
+			result := wB.ApplyPacket(wA.Outbox[0])
+			if got := result.Results[0].Outcome; got != c.want {
+				t.Fatalf("outcome = %q, want %q; the test never reached the branch it covers", got, c.want)
+			}
+			wA.Outbox, wA.NewsToday = nil, nil
+			wA.ApplyPacket(result)
+			if len(attacker.Events) == 0 {
+				t.Fatal("the baron was told nothing about their own strike")
+			}
+			for _, line := range wA.NewsToday {
+				if strings.Contains(line, "failure") {
+					t.Errorf("a %q strike was announced to the planet as a defeat:\n%s", c.want, line)
+				}
+			}
+		})
 	}
 }

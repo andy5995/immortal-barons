@@ -10,9 +10,10 @@ import (
 // by the time the recipient accepts (eliminated by another node mid-turn).
 var ErrTradeSenderGone = errors.New("The empire that sent this deal is gone.")
 
-// ErrTradeNeedsCarrier is returned when the sender lacks a carrier to transport
-// the deal (BRE consumes one carrier per deal).
-var ErrTradeNeedsCarrier = errors.New("You do not have a carrier to send this deal.")
+// ErrTradeNeedsCarrier is returned when the sender lacks the carriers to
+// transport the deal. How many that is depends on the cargo — see
+// TradeDealCarriers.
+var ErrTradeNeedsCarrier = errors.New("You do not have enough carriers to send this deal.")
 
 // FindByName returns the empire whose realm name equals name, alive or dead, or
 // nil. Realm names are unique (RealmNameTaken guards onboarding), so this is
@@ -213,15 +214,18 @@ func (w *World) SendTradeDeal(from, to *Empire, send, demand TradeBasket, days i
 	if !empireHasBasket(from, send) {
 		return ErrCantAfford
 	}
-	if from.Carriers < send.Carriers+TradeDealCarriers {
+	// The original sizes the transport to the CARGO rather than charging a flat
+	// one per deal (#195): what is held, minus any carriers being shipped, must
+	// cover what the basket needs.
+	if from.Carriers-send.Carriers < TradeDealCarriers(send) {
 		return ErrTradeNeedsCarrier
 	}
 	if from.Gold < int64(send.Gold)+cost {
 		return ErrCantAfford
 	}
-	subBasket(from, send)              // escrow the offered goods
-	from.Carriers -= TradeDealCarriers // the transport carrier is consumed
-	from.Gold -= cost                  // pay the per-day transit fee
+	subBasket(from, send)                    // escrow the offered goods
+	from.Carriers -= TradeDealCarriers(send) // the transport is consumed
+	from.Gold -= cost                        // pay the per-day transit fee
 	to.TradeDeals = append(to.TradeDeals, TradeDeal{
 		From:          from.Name,
 		Send:          send,

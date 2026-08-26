@@ -86,7 +86,7 @@ One limit worth stating: the scan sees the two displacement idioms, not the
 
 | Unit | Offense | Defense | Notes |
 |------|---------|---------|-------|
-| Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy R5-Slappenheimer likelier to backfire. |
+| Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy S3-Sabre likelier to backfire. |
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). An enemy SDI cuts jet strength, but only on an interplanetary strike — see "SDI Defense". |
 | Turret | **0** | 2 | Defense only. Cannot be destroyed by terrorist ops. **What it defends against is exactly two things — see "What a turret actually does" below.** |
 | Tank | **3–5** | **3–5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (3 at 0%, 4 at 50%, 5 at 100%) and with morale. The guide's flat "4" is the HQ-50 value — see HeadQuarters below. (`whatsnew.doc` claims tanks help defend against chemical missiles; the shipped v0.988 routine never reads the tank count — see the chemical attack below.) |
@@ -466,9 +466,11 @@ effectively free and armies disproportionately expensive.
 
 IB's config field **Max Tax Rate** is *not* BRE's Planetary Tax Rate, despite
 having started life as a misreading of it. BRE caps nothing — its own prompt
-offers `New Tax Rate [0-100]` regardless of that config value. IB keeps a player
+offers `New Tax Rate [0-100]` regardless of that config value. IB keeps a
 cap as a deliberate divergence (ceiling `MaxPlayerTaxRate`, 50), separate from
-the crown tax rate (`PlanetaryTaxRate`).
+the crown tax rate (`PlanetaryTaxRate`). It binds the computer barons as well as
+the players, and a setting of 0 is a ceiling of zero rather than "no cap set" —
+it read as the latter for the AI alone until #203.
 
 ## Score (distinct from Net Worth)
 
@@ -776,9 +778,8 @@ instruction's modrm. Six of the seven award sites reach it with a separate
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
 
-**Clingy Annihilator** (the clone's equivalent of BRE's *Gooie Kablooie*) — the
-ultimate weapon, aimed at an entire enemy planet rather than one empire, and one
-per planet at a time. IB implements the original's lifecycle (#16): begin
+**Gooie Kablooie** — the ultimate weapon, aimed at an entire enemy planet
+rather than one empire, and one per planet at a time. IB implements the original's lifecycle (#16): begin
 construction against a named planet → any baron funds it a million gold at a time
 → complete → three days' construction → it launches itself → in flight → arrival
 → a five-day siege. It can be dismantled before it flies and the gold is not
@@ -808,7 +809,7 @@ The **funding cost is binary-verified** from BRE.OVR's overlay unit at 0x27441
             cost x 1.2   if ratio > 1
 
 so the weapon is priced against how much bigger the target planet is than yours.
-The constants are `Clingy Annihilator*` in `balance*.go`.
+The constants are `Annihilator*` in `balance*.go`.
 
 **The siege is binary-verified** from the daily resolver (`resolve_gooie_attack`,
 BRE.OVR 0x47c52), called once a day from `run_daily_maintenance`. The weapon
@@ -870,15 +871,14 @@ Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
 
 **The three special-attack switches remove their operations from the menus.**
 `game/reset.hlp` describes Bombing Operations, Missile Operations and Gooie
-Kablooies (IB's Clingy Annihilator) as classes of special attack a sysop may
-disable outright, so IB hides rather than refuses — `byKey` skips a hidden item,
+Kablooies as classes of special attack a sysop may disable outright, so IB hides rather than refuses — `byKey` skips a hidden item,
 so the hotkey goes with the label:
 
 | Setting | Config byte | What it hides |
 | --- | --- | --- |
-| `ClingyAnnihilator` | `cfg+0x18a` | Clingy Annihilator Ops on the InterPlanetary menu |
+| `GooieKablooie` | `cfg+0x18a` | Gooie Kablooie Ops on the InterPlanetary menu |
 | `BombingOps` | `cfg+0x18b` | Bomb Food Market / Bomb Trading Market / Bomb Trade Routes / Undermine Investments on Special Operations |
-| `MissileOps` | `cfg+0x18c` | Nuclear Assault / Chemical Bombing / R5-Slappenheimer on Special Operations |
+| `MissileOps` | `cfg+0x18c` | Nuclear Assault / Chemical Bombing / S3-Sabre on Special Operations |
 
 **BINARY-VERIFIED reach** (2026-08-23), and narrower than IB had it. Sweeping
 both binaries for every `cmp byte [es:di+<offset>]` against those three bytes
@@ -1346,10 +1346,10 @@ what the shield buys.
 Two paths deliberately sit outside the rule, both because the original puts them
 there:
 
-- an **R5-Slappenheimer that arrives from another planet** names the firing
+- an **S3-Sabre that arrives from another planet** names the firing
   realm and its planet on impact. BRE reports an incoming sabre as a missile
   strike, alongside nuclear and chemical, rather than as an agent operation. The
-  *local* R5-Slappenheimer stays anonymous on a hit — BRE resolves a same-planet
+  *local* S3-Sabre stays anonymous on a hit — BRE resolves a same-planet
   strike through a report template (`GAME\COVERT.DAT`) that is not shipped with
   0.988 and cannot be read, so only the half with evidence attributes the hit.
 - IB's **interplanetary bombing ops** (`applySpecialOp` in `ibbs_special.go`)
@@ -1557,11 +1557,10 @@ string table as if the local menu took its first seven entries, and it has been
 replaced by BRE's single op with the six-slot table above. The interplanetary
 Special Operations menu is unchanged and keeps all eight items.
 
-The **R5-Slappenheimer** (the clone's rename of BRE's *S3-Sabre*, avoiding the
-original's coined name) is therefore an interplanetary weapon only, and the
-sysop's `R5-Slappenheimer Handling` setting now gates it there. A disassembly of
-BRE's `SABREHIT` showed only 3 of the 11 dial settings (1, 2, 3) did anything and
-the manual never said which number did what, so from the player's seat the result
+The **S3-Sabre** is therefore an interplanetary weapon only, and the sysop's
+`S3-Sabre Handling` setting now gates it there. A disassembly of BRE's
+`SABREHIT` showed only 3 of the 11 dial settings (1, 2, 3) did anything and the
+manual never said which number did what, so from the player's seat the result
 was random; the target's SDI could intercept it and a heavily garrisoned target
 could turn it back on the attacker. IB keeps that feel but makes it honest: the
 **dial is a bluff** — the player still sets it 0-10 under User Select handling,
@@ -1572,12 +1571,12 @@ BINARY-VERIFIED from the arriving-strike routine (`BRE.OVR ovr_0450a9 +0x481`),
 which is where breins.txt's "up to 50% of incoming missiles" comes from and why a
 full shield stops half of them rather than halving one. The comparison is
 inclusive, so an unshielded realm still turns one shot in a hundred aside. Only
-about 3 launches in 10 (`SlappenheimerEffectHits`/`SlappenheimerEffectRange`)
-land a payload — the rest fizzle. A landed hit removes a random 5-30 %
-(`SlappenheimerBaseDamagePct` + `rng.Intn(SlappenheimerDamageSpread)`) of one
-asset, and ~1-in-`SlappenheimerMultiHitOdds` strafes several at once (BRE's
+about 3 launches in 10 (`SabreEffectHits`/`SabreEffectRange`) land a payload —
+the rest fizzle. A landed hit removes a random 5-30 % (`SabreBaseDamagePct` +
+`rng.Intn(SabreDamageSpread)`) of one asset, and ~1-in-`SabreMultiHitOdds`
+strafes several at once (BRE's
 "extremely devastating" outcome). Backfire is a continuous probability scaled by
-the target's Troopers (`d.Troopers / SlappenheimerBackfireScale`). BRE hid which
+the target's Troopers (`d.Troopers / SabreBackfireScale`). BRE hid which
 field each effect hit, so IB picks its own spread (Troopers, Jets, Turrets,
 Tanks, Bombers, Carriers, Agents, Gold, Food, and Land — Land removed through the
 RegionMix so its Total stays equal to `Land`).
@@ -2421,24 +2420,33 @@ section is a record of what was claimed and how it was settled, so the word
   longint as two 16-bit immediates, so the bytes run `B8 00 94 BA 35 77` and the
   second opcode splits the halves. Search the halves, not the value.
 
-  IB implements the first two as a **sysop knob** defaulting to that figure, and
-  the third differently: it caps **one investment** at 2 billion but does not add
-  up a day's investing (`MaxInvestment`). That divergence is deliberate and stays.
+  IB matches the first two and implements the third differently: it caps **one
+  investment** at 2 billion but does not add up a day's investing
+  (`MaxInvestment`). That divergence is deliberate and stays.
 
-  **IB makes it a sysop knob, defaulting to BRE's figure.**
-  `Config.MoneyCapBillions` (Configuration Editor: "Money Cap (billions)") is
-  the cap in whole billions, read through `World.MoneyCap()`. It defaults to
-  `MoneyCapMinBillions` = 2, BRE's own figure, and may be raised to
-  `MoneyCapMaxBillions` = 999. Gold credited above whatever it is set to is
-  still discarded — the knob moves the ceiling, it does not remove it.
+  **IB's cap is 2,000,000,000, and no editor offers it (#205).**
+  `Config.MoneyCapBillions` is the cap in whole billions, read through
+  `World.MoneyCap()`, and it defaults to `MoneyCapMinBillions` = 2. It was a
+  sysop knob ranged up to `MoneyCapMaxBillions` = 999 through v0.0.7; the
+  Configuration Editor's "Money Cap (billions)" field is gone, so a new game
+  gets BRE's figure and nothing raises it. Gold credited above the cap is
+  discarded, and the Game Setup screen reports the ceiling so a player can see
+  what they play under.
+
+  A `config.json` written while the field existed is **honoured, not clamped**:
+  `MoneyCapBillions` still reads back through the 2..999 range. Clamping a
+  league's saved cap on load would take gold it had been playing with, and the
+  field remains the mechanism whatever sets it later (#202). `LeagueConfig`
+  still broadcasts the value, so a league's boards agree on one ceiling
+  mid-season; whether a mod ships it instead is a #202 question.
 
   Two billion is NOT the largest a 32-bit signed integer holds (that is
   2,147,483,647), so it is a rule the original chose rather than the machine
-  limit it is usually presented as. IB's money fields are `int64`,
-  so the ceiling is now a game rule and behaves the same on a 32-bit door as on
-  a 64-bit one. The knob is in whole billions so the editor's field fits an
-  `int` on a 32-bit build, and 999 is the widest figure the abbreviated display
-  renders in three digits before the point.
+  limit it is usually presented as. IB's money fields are `int64`, so the
+  ceiling is a game rule and behaves the same on a 32-bit door as on a 64-bit
+  one. The 999 ceiling above it was never reachable without pushing a treasury
+  past what a 32-bit `int` holds, which is why the field went rather than being
+  re-ranged.
 
   Deposits and withdrawals are unbounded up to the cap — nothing gates the bank
   per turn, so a per-action limit there only cost keystrokes. What IB does keep
@@ -2456,16 +2464,37 @@ section is a record of what was claimed and how it was settled, so the word
   holds gold in hand at the cap and files the notice; `Withdraw` is the
   deliberate exception, since it draws only what fits and leaves the remainder
   banked. BRE reports nothing here — it just stops counting.
-- **Figures of a billion or more are displayed abbreviated**, as a fixed
-  4-decimal form with a capital B: 1,000,000,000 renders `1.0000B`,
-  1,847,392,104 renders `1.8473B`, and `MoneyCapMax` renders `999.0000B`. The
-  fraction is truncated, never rounded, so a figure just under the next
-  billion never reads as having reached it. Below a billion nothing changes —
-  full digits with the locale thousands separator. The rule lives in one place
-  (`internal/numfmt`, which the engine and the menu layer both call) and applies
-  to any figure, not only gold, so a unit count that runs into the billions
-  abbreviates the same way. German and Russian take
-  the comma as the decimal mark.
+- **Figures of a billion or more are printed in full, grouped — BRE-VERIFIED.**
+  1,000,000,000 renders `1,000,000,000` and 1,847,392,104 renders
+  `1,847,392,104`, with the locale thousands separator (de `1.847.392.104`, ru
+  `1 847 392 104`). This is what the original does at the top of its own range:
+  `Bank: 2,000,000,000` and a bank-history row `Today        $1,846,153,847`,
+  both read off live captures (`cap/121125-666H4H_Camembert_Public.cap`,
+  `cap/20240527-134Pho_Lazarus_Public.cap`); 8,581 occurrences of the capped
+  2,000,000,000 in the first of those, and no figure anywhere in the captures
+  carrying a decimal `B` suffix except the one noted below. The rule lives in one
+  place (`internal/numfmt`, which the engine and the menu layer both call) and
+  applies to any figure, not only gold. No float is involved at any size.
+
+  IB rendered a billion and over as a fixed 4-decimal `1.8473B` through v0.0.7
+  (#205). The form was not invented: BRE prints `How many Jets? (0; 1.0737B):`
+  — 2^30, the trade-deal Request sentinel — in `cap/shsbbs.cap`, the only `B`
+  form in any capture. IB no longer shows that prompt's ceiling at all
+  (`promptSuggestedOpen`), so nothing is left that needs it.
+
+  **An abbreviated column steps its suffix with the magnitude** — nothing below
+  a thousand, then `k`, `m` and `b`, truncated rather than rounded
+  (`numfmt.Abbrev`). 1,373,000,000 renders `1b`; 34,833,289 renders `34m`.
+
+  This is a **deliberate divergence**, and the shape of BRE's own behaviour is
+  worth recording so it is not "corrected" back. BRE does not step: each of its
+  columns picks one suffix and keeps it however far the figure runs. Its See
+  Scores board prints `1962k` and `12m` in the SAME row — Score fixed on `k`,
+  Net Worth fixed on `m`, at one magnitude — and its Daily Bulletin holds `k` to
+  `25,750k`. No capture reaches billion scale in any abbreviated column, so
+  BRE's behaviour there is unknown either way. IB steps because one rule across
+  every screen beats two columns that disagree, and it keeps any figure inside
+  four digits and a letter.
 - **Food market (issue #19):** food is bought and sold against a **shared
   planet-wide pool** that starts each day at `FoodMarketDailySupply` (1,000,000
   units, from BRE's live "~1,001,452 available today"). Buying depletes the pool
@@ -2710,7 +2739,11 @@ Investments / Loans**, and **View Bank Rates**.
   Bank Rates), credited "at the end of each turn" — so per turn it is the daily
   rate spread across `TurnsPerDay` turns: `Bank × InterestRate / (1000 ×
   TurnsPerDay)`. (This replaced IB's old flat ~1%/turn, which compounded to a much
-  higher effective daily rate.)
+  higher effective daily rate.) With the **Deposit gold at End of Turn**
+  preference on, the deposit is banked *before* that turn's interest is credited,
+  so the turn's takings earn on the turn that made them. It still happens after
+  the turn's pirate raid, so banking early is no way to keep gold out of the
+  raiders' reach.
 - **Investments** are term deposits (like bonds): you choose an **amount**
   and a **number of days** — **2 to 10 days** (`MinInvestDays`=2, `MaxInvestDays`=10,
   live-BRE-verified: the bank prints "There is now a 2 day minimum on
@@ -2769,8 +2802,8 @@ Investments / Loans**, and **View Bank Rates**.
   takes now, and a ten-day term offers well under half what a one-day term does.
   Net worth stops counting at ten million, so the richest realm in the game
   borrows against the same headroom as a merely rich one. IB implements all of
-  it, clamping against the sysop's money cap where BRE has a flat 2,000,000,000
-  — the same figure by default.
+  it, clamping against `World.MoneyCap()` where BRE has a flat 2,000,000,000 —
+  the same figure.
 
   **One part still diverges.** BRE's daily rate is
   `max(investRate, savingsRate) + 30` tenths, plus `2 x days`, reading two config
@@ -2850,6 +2883,11 @@ IB matches all of it.
   records in `Message To  :` — reads `'A' + Slot - 1`. A realm keeps its letter
   however many neighbours die, are pruned, or join, and the See Scores board
   letters by slot rather than by rank, so its rows are not in letter order.
+- **The id is BRACKETED on every screen, a deliberate divergence.** BRE
+  parenthesises it on the score tables and brackets it on `-*Relations*-`; IB
+  brackets it everywhere, because parentheses now carry a realm's status flags —
+  `(O)` online and `(P)` under New Realm Protection — so the shape separates the
+  key a player presses from the state they are being told about.
 - **Creation is bounded by the slots, not by a separate count.** The lowest free
   slot is taken under the same world lock that checks for one, so two BBS nodes
   onboarding at once cannot both claim it. A caller arriving at a full planet is
@@ -2977,8 +3015,8 @@ what IB calls the thing on every other screen.
   against re-use; `PriorRealmNames` is what every lookup walks.
 - **Change the caller name** — `World.RenameOwner` re-keys the realm to a
   different BBS handle and repoints everything stored under the old one: group
-  attack contributors, strikes and bids away on another planet, the Clingy
-  Annihilator's builder, and every realm's Coordinator vote. The incoming
+  attack contributors, strikes and bids away on another planet, the Gooie
+  Kablooie's builder, and every realm's Coordinator vote. The incoming
   weapon's builder is NOT touched — that handle belongs to another board.
   Nothing needs holding for a packet in the air, unlike a realm rename: every
   interplanetary answer is matched to the local record it belongs to by id, and
@@ -3424,16 +3462,24 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   plus `IP-RET-KILL`), because who to congratulate differs: a solo baron is
   named, a group strike is the planet's doing, and a whole-planet raid names no
   enemy realm. IB distinguishes individual from group, win from loss, in its own
-  wording; the finer subtypes are still open.
+  wording; the finer subtypes are still open. A strike that found no such realm,
+  or that was turned away by New Realm Protection, gets NO return line: those two
+  outcomes are not defeats in battle, and `ipnews.dat` has a category for a win
+  and one for a loss and none for either of them. IB announced both as failures
+  until #201, because the line was picked from `AttackResult.Won` rather than
+  from the resolved outcome.
   ones held at zero, each defaulting to 0. The sysop's **Attack Costs** level
   scales that price and BRE clamps the result at `AttackCostCap`
   (200,000,000 gold); see "The two cost levels" below.
 - **Protection crosses the league.** A scores packet marks each realm still
-  under New Realm Protection, and the attack and terror target lists leave those
-  realms out — matching the local attack list, which hides them too. The target
-  board still refuses an arriving strike itself, since the flag can go stale
-  while the strike is in transit. A protected realm is still a legal SPY target,
-  so the spy target list shows every realm.
+  under New Realm Protection. The attack and terror target lists show those
+  realms with the `(P)` flag and refuse the strike when one is picked — matching
+  the local attack list, which flags them the same way (#214). The target board
+  still refuses an arriving strike itself, since the flag can go stale while the
+  strike is in transit. **Spying is refused too** — a protected realm cannot be
+  spied on any more than it can be struck, so every target list flags it and
+  refuses the pick, whatever the list is for. This paragraph claimed the
+  opposite until 2026-08-26; no code ever did.
 - **The caller's own shield gates this menu too.** The InterPlanetary menu tests
   it on the same predicate the covert menu uses, at `BRE.OVR 0x020F88`, for
   digits 2, 3, 4, 6, 8 and 9 — Terrorist Ops, Send Trade Deal, Create Group
@@ -3491,9 +3537,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   that predates the dispatch still gets that blanket effect
   (`TerrorUnitLossDenom`), since it names no operation.
 - **Send SpyGuy — BINARY-VERIFIED, and not a covert agent at all.** IB keeps the
-  original's name here, deliberately (Andy, 2026-08-18), where it renamed Gooie
-  Kablooie and S3-Sabre: players coming from the original look for this one by
-  name. Do not "correct" it under the distinctive-names rule. He is a
+  original's name here, as it does for the Gooie Kablooie and the S3-Sabre
+  (#218): players coming from the original look for these by name. Do not
+  "correct" it under the distinctive-names rule. He is a
   watcher posted on a PLANET, bought with gold rather than an agent, and he
   gathers no intelligence. Read out of `run_bombing_operations_menu`
   (BRE.OVR 0x029ea9), `ovr_044225_entry_0000` and `run_daily_maintenance`:
@@ -3526,6 +3572,59 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   way the original fills it, by covert operations reporting the state they found
   their target in (`resolve_received_covert_operation` → `write_spy_report` →
   "Information added to Global Spy Data Bank").
+- **Send Trade Deal** — a ONE-WAY shipment of goods to a named realm on another
+  planet, BINARY-VERIFIED and built for #195. Its own routine in the original
+  (`send_trade_offer`, BRE.OVR 0x024212, sole caller the InterBBS menu), NOT the
+  local deal aimed further; IB ran the local action here, against a realm on the
+  sender's own planet, until 2026-08-26. What separates the two:
+
+  | | Local deal | Interplanetary deal |
+  | --- | --- | --- |
+  | Demand something back | yes | **no** |
+  | Recipient may refuse | yes | **no** — it lands |
+  | Cost | a rate per day, over a span | **a flat fee**, no span |
+  | Needs a pact | any pact at all | **none** |
+  | Protective Trade discount | cost/3 | **no** |
+  | Target | a realm here | a realm on ANOTHER planet, never this one |
+
+  **The fee** is the nine goods against fixed weights — troopers, jets, turrets,
+  tanks and carriers 1 each, bombers 3, agents 0.5, food 0.05, gold 0.01 —
+  summed, divided by 5, plus a 100,000 base, then scaled by the sysop's Trade
+  Deal Costs ladder and capped at two billion (`calculate_trade_offer_cost`,
+  0x0513e7). An empty basket costs nothing: the original tests the weighted sum
+  for zero before adding the base. IB holds the two fractional weights as exact
+  integers where the original holds Real48 approximations, so on an enormous
+  basket the two can part by a gold or two.
+
+  **Carriers are sized to the cargo**, and this now governs the LOCAL deal too,
+  where IB charged a flat one per deal: 1,000 troopers to a carrier, 100 jets,
+  1,000 turrets, 5,000 tanks, 100,000 gold, with food, bombers, agents and
+  carriers riding free. The capacities are summed and the TOTAL rounded up, so
+  half a carrier of troopers and half of jets is one carrier, not two. The
+  original adds 0.9999 and truncates rather than taking a true ceiling, which
+  comes out one low when the fraction lands inside the last ten-thousandth; IB
+  reproduces that exactly (`TradeDealCarriers`).
+
+  **On arrival** the goods are credited straight onto the named realm, each good
+  capped at two billion, and a private event is filed for each side. **No planet
+  news** — no `.dat` template carries a trade-deal category and the original's
+  arrival routine calls no news writer.
+
+  **DELIBERATE DIVERGENCE — protection.** The original destroys a deal aimed at a
+  realm under New Realm Protection: `resolve_received_trade_offer` (0x043df1)
+  checks and returns, so the goods and the fee are gone and neither side is told
+  anything. IB refuses that target at the picker instead, where the sender can
+  still act on it, and the target lists carry the `(P)` flag that makes it
+  visible (#214). Nothing is destroyed and no arrival guard is needed: protection
+  only counts DOWN and delivery is keyed by realm name, so a realm that was clear
+  when the deal left cannot be protected when it lands.
+
+  **On the wire:** `Packet.TradeDeals`, `json:",omitempty"`, so a packet carrying
+  no deal is byte-identical to what an older board produces and no `Protocol`
+  bump is needed (`SpeaksOurProtocol` is exact equality — bumping would make
+  every board on the previous release hold ALL traffic). A packet that DOES carry
+  one, sent to a board too old to know the field, fails origin verification there
+  and is refused; `Config.MinBoardVersion` is the league's gate for that.
 - **Special Operations** — the cross-planet bombing and missile set; see below.
 - **SDI** — puts gold into the program; the strength it buys is capped at
   `SDIMax` (100%, the original's own clamp). See "The SDI program" below.
@@ -3549,7 +3648,7 @@ The menu is numbered 1-8 with no Help item (live capture):
 | 4 | Undermine Investments | 75,000,000 |
 | 5 | Nuclear Assault | quoted |
 | 6 | Chemical Bombing | quoted |
-| 7 | R5-Slappenheimer | quoted |
+| 7 | S3-Sabre | quoted |
 | 8 | Send SpyGuy | quotes its own, after the target is named |
 
 The four prices are the original's own, off the menu's price column
@@ -3580,7 +3679,7 @@ the daily bombing allowance, and is stopped by New Realm Protection.
   price off the target's size, which is exactly what a board cannot know about a
   realm on another planet, and the original's menu shows no price for them. This
   one is a playtest knob.
-- **A backfiring R5-Slappenheimer is reported home and applied there.** The roll
+- **A backfiring S3-Sabre is reported home and applied there.** The roll
   happens where the target lives, but the realm it hurts is on the board that
   fired, so the damage lands when the answer arrives.
 - **A lost packet returns nothing**, because a Special Operation commits no
@@ -3658,11 +3757,11 @@ as IB's own until someone reads the original's code:
   most. (#113)
 - IB applies the SDI percentage to jet effectiveness and has no bomber term. The
   original caps jets at 30% and bombers at 20%, separately. (#113)
-- An R5-Slappenheimer is intercepted on a roll against the SDI percentage. That
+- An S3-Sabre is intercepted on a roll against the SDI percentage. That
   is now the only local weapon SDI touches: the nuclear, chemical and biological
   routines were all read and none of the three consults it, so the damage
   discount IB used to apply is gone (#103). Whether SDI should touch the
-  R5-Slappenheimer either is still unread. (#113)
+  S3-Sabre either is still unread. (#113)
 - **Jets** on an arriving strike fight at `1 - SDI x 0.3/100`, **bombers** at
   `1 - SDI x 0.2/100` (truncated). Linear in the percentage; the published "up to
   30% / 20%" are what they reach at SDI 100.
@@ -3675,7 +3774,7 @@ as IB's own until someone reads the original's code:
   this rather than correcting it — it is what the original does, and the
   alternative reading would be a guess.
 - **Nothing local is touched.** Not a neighbour's attack, not a nuclear, chemical
-  or biological missile, and not the Clingy Annihilator (#111). IB applied
+  or biological missile, and not the Gooie Kablooie (#111). IB applied
   `(100 - SDI)` in four such places until 2026-08-14; all four were IB's own
   invention and are gone.
 
@@ -3689,7 +3788,7 @@ heard from over a packet but absent from the roster is numbered on after it.
 The list includes the board you are calling from.
 
 IB routes every planet pick through it (`pickPlanetNamed`): Create Group Attack,
-Indiv. Attack Force, the spy and terrorist targeting, the Clingy Annihilator, and
+Indiv. Attack Force, the spy and terrorist targeting, the Gooie Kablooie, and
 IP Messages. A name must be typed in full (case-insensitively) — whether BRE
 accepts an abbreviation was never observed, and guessing would risk sending to
 the wrong planet. An IB divergence: a message addressed to your OWN board is
@@ -3744,6 +3843,29 @@ Quit, drawn as a 25-column cyan box. Naming a planet shows "Our current
 relations with X" first; the text is then written in the same 20-line editor
 local mail uses.
 
+**Single Planet then asks WHO on that planet.** Naming the planet is only half
+the address: BRE follows it with the same `(A-Y,Z=All,?=List) Send to:` toggle
+list local mail uses, over a roster of the barons on the chosen planet. Captured
+live (`cap/eots-ibbs-01.cap`, and see docs/dev/bre-screens.md, "IP Messages: the
+recipient picker") and read out of `send_interbbs_message` (`BRE.OVR` 0x1f335),
+which calls the recipient prompt at 0x1ed14 and a per-letter toggle at 0x1f1ac:
+
+- A letter toggles that realm on the list; the same letter again takes it off,
+  rubbing the echo out with `BS`/space/`BS` and re-drawing what is left.
+- `Z` applies that toggle to every letter A..Y, so it marks all from an empty
+  list and CLEARS all from a full one. It does not close the prompt.
+- `?` draws the roster — `-*Players at <planet>*-` over Id / Empire Name /
+  Territory / Score / Networth — and asks again.
+- RETURN closes the list. With nothing marked the capture goes straight back to
+  "send another message?" without opening the editor, so an empty list sends
+  nothing.
+- The prompt is only on **Single Planet**. The other four modes address a planet
+  or an office and never letter a realm.
+
+IB sends one packet message per marked realm, each narrowed with
+`IPMessage.ToEmpire` (the field the author-only reply already used), so
+addressing several barons needs no change to the packet's shape.
+
 Two addresses are narrower than a planet. **Planet Coordinator** reaches the
 receiving planet's elected Coordinator alone — BRE heads such a message
 `Message To  : Coordinator`. And a **reply** may be sent to its author alone;
@@ -3753,6 +3875,20 @@ see below.
 Allied (see Planetary diplomacy, below) — the one thing that chart drives rather
 than describes. A message to a planet reaches every living realm there,
 computer barons included, which is the same reach the local "send to all" has.
+
+**Two IB divergences in that picker, both forced by the wire.** BRE holds every
+planet's whole 25-slot empire array, so a remote picker letter is that realm's
+own slot and carries the same gaps its home board shows — the captured rosters
+run `(A) (B) (D) (E)` for months. `game.RemoteScore` carries no slot: a scores
+packet lists only living human realms, in slot order with the gaps closed. So IB
+letters the rows of the packet as they arrive, `[A]` upward with no gaps. The
+letter means the same realm on the roster and at the prompt, which is what the
+screen needs; it is not the letter that realm answers to at home, and a packet
+that arrives with a realm added or gone renumbers the rows below it.
+
+And a planet **no scores packet has arrived from** has no roster to letter, so
+IB skips the prompt and writes to the planet as a whole rather than refusing to
+send. BRE has the array either way and always asks.
 
 **Arriving mail posts no news, on either planet.** BRE's inbound handler
 (`process_interbbs_message_packet`) writes `DATA\MSG.BRF` and touches no news
@@ -4327,8 +4463,13 @@ pirate-raid outcomes (PIRATEWIN / PIRATELOSS), tax riots (RIOTS), and civil-war
 collapse (CIVILWAR — `postCivilWarNews`).
 
 An interplanetary strike is reported on **both** planets (#108): the defending
-board posts what the raid took and cost, or that it was repelled, and the
-attacker's board posts its return. An INDIVIDUAL strike is named on both sides —
+board posts what the raid took and cost, or that it was held off, and the
+attacker's board posts its return. **Every one of those lines, and the defender's
+own recap, is worded from the single outcome the battle resolved to, and says
+which side held the field before it counts any casualties** — a defender who
+beats a strike off still loses units, and pairing a bare "repelled" with a count
+of the reader's own dead reads as a contradiction (#201). The original settles
+the battle first and itemises afterwards (`BRE.OVR resolve_received_invasion`). An INDIVIDUAL strike is named on both sides —
 the packet carries `RemoteAttack.FromEmpire`, so the defending planet reads
 "Ironhold of Alpha" and not merely "Alpha" — while a GROUP attack is anonymous
 on both, since it is the planet's doing and naming one of several contributors
@@ -4419,7 +4560,7 @@ Now matching this reference (as of v0.0.4):
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and the money cap
 - Nuclear / chemical / biological strikes and pirate raids
-- Clingy Annihilator, with the original's fund-build-launch-intercept lifecycle
+- Gooie Kablooie, with the original's fund-build-launch-intercept lifecycle
 - SDI defense: a funded shield whose strength is its gold spread over the land it
   covers, blunting incoming interplanetary jets and bombers and intercepting
   incoming missiles
@@ -4437,7 +4578,7 @@ Now matching this reference (as of v0.0.4):
 - The covert menu, including Spy on Relations, the Spy Database, bribery,
   expose enemy ops, and the Bomb Enemy Targets submenu
 - The InterBBS (interplanetary) layer: file-drop packets, group and individual
-  attacks, spying another planet, a Clingy Annihilator aimed across planets, and
+  attacks, spying another planet, a Gooie Kablooie aimed across planets, and
   league orders signed by the coordinator
 - IP Messages: mail addressed to a planet, to its Coordinator, or back to one
   author, written in the same editor local mail uses
@@ -4458,10 +4599,13 @@ subsystems. Each is flagged where it is described above.
 ### Screen output that deliberately diverges
 
 `docs/dev/bre-screens.md` is the catalog, each note beside the screen it belongs
-to. These two are recent enough to be worth naming here as well, since both
-replace something the original does line for line and both will look like bugs
-to anyone checking IB against a capture:
+to. These are recent enough to be worth naming here as well, since each replaces
+something the original does line for line and will look like a bug to anyone
+checking IB against a capture:
 
+- **An interplanetary trade deal is refused at the picker when its target is
+  under New Realm Protection**, where the original accepts it and destroys it on
+  arrival with nobody told. See "Send Trade Deal" above.
 - **Manufacturing is a list, not six sentences.** BRE ends each line with "were
   manufactured by Industrial Zones."; IB says that once as a heading and lists
   the units under it, one per line, with no line for a type that built none.
@@ -4470,8 +4614,24 @@ to anyone checking IB against a capture:
   line — but the tasks are IB's, in IB's words, and only the ones with something
   to do are printed. Half of BRE's list belongs to file formats IB does not
   have.
+- **A realm under New Realm Protection wears its slot letter in BRACKETS —
+  `[C]` where every other realm is `(C)` (#214).** BRE flags nothing and IB used
+  to withhold the letter entirely, which said a row was different without saying
+  how. The bracket is the whole flag: no marker follows the name, the row keeps
+  its width, and the SHAPE carries it, so it survives a monochrome terminal and
+  a reader who cannot separate the two colours. Everything unshielded keeps
+  BRE's own parentheses. Picking the letter is still answered with the refusal,
+  so the shield is stated twice rather than mimed.
 
-Neither is an oversight to correct back.
+  `-*Relations*-` is the exception and is unchanged: the original brackets every
+  id on that screen, so a bracket cannot mean anything else there. It is a
+  standings roster rather than a picker, and the flag belongs where a realm is
+  chosen.
+- **An interplanetary recipient letter numbers the rows of a scores packet**,
+  where BRE's is the realm's own slot on its home planet, gaps and all. See "IP
+  Messages" above: the slot does not ride the wire.
+
+None of these is an oversight to correct back.
 
 ## Sources
 
