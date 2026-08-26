@@ -83,6 +83,7 @@ type pickRow struct {
 	letter          rune
 	name            string
 	presence        string
+	protected       bool
 	land, score, nw int
 	held            []string // pacts held with the caller; gathered for the Relations roster
 }
@@ -98,8 +99,9 @@ func pickRows(w *ctx, opts pickOpts) (rows []pickRow, allies int) {
 			}
 			row := pickRow{
 				e: e, letter: rune('A' + e.Slot - 1), name: e.Name,
-				presence: presenceOf(e, false, w.Today),
-				land:     e.Land, score: e.Score, nw: w.NetWorth(e),
+				presence:  presenceOf(e, false, w.Today),
+				protected: e.Protection > 0,
+				land:      e.Land, score: e.Score, nw: w.NetWorth(e),
 			}
 			if opts.relations {
 				row.held = w.TreatiesBetween(p, e)
@@ -136,6 +138,7 @@ func writePickRoster(s session.Session, rows []pickRow, opts pickOpts) {
 			rel = append(rel, relationsRow{
 				id: string(r.letter), name: r.name,
 				relations: relationsText(s, r.held), presence: r.presence,
+				protected: r.protected,
 			})
 		}
 		writeRelationsTable(s, rel)
@@ -145,7 +148,7 @@ func writePickRoster(s session.Session, rows []pickRow, opts pickOpts) {
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.FgBrightMagenta, ansi.Reset)
 	scoreTableHead(s)
 	for _, r := range rows {
-		scoreTableRowStr(s, fmt.Sprintf("(%c)", r.letter), r.name, ansi.FgBrightWhite, r.presence,
+		scoreTableRowStr(s, scoreID(string(r.letter)), r.name, ansi.FgBrightWhite, r.presence, r.protected,
 			comma(r.land), comma(r.score), comma(r.nw))
 	}
 	scoreTableRule(s)

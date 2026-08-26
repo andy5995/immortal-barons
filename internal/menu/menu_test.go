@@ -833,6 +833,8 @@ func TestTargetLettersDoNotShiftWhenRealmsBecomeUnpickable(t *testing.T) {
 		{name: "Obsidian Sovereigns", letter: "C", attackable: true},
 		{name: "Blood Host", letter: "D", attackable: true},
 	}
+	// The shielded pair here are ALLIED, which is the case that still shows no
+	// letter; a realm under protection keeps its own (see the #214 tests).
 	f := &fakeSession{keys: []rune("C")}
 	name, chosen := pickAttackTarget(f, rows, "Choose a target")
 	if !chosen || name != "Obsidian Sovereigns" {
@@ -840,24 +842,24 @@ func TestTargetLettersDoNotShiftWhenRealmsBecomeUnpickable(t *testing.T) {
 	}
 	out := f.out.String()
 	plain := stripANSI(out)
-	if !strings.Contains(plain, "(C)") || !strings.Contains(plain, "(D)") {
+	if !strings.Contains(plain, "[C]") || !strings.Contains(plain, "[D]") {
 		t.Errorf("the two pickable realms should keep their own slot letters C and D:\n%s", plain)
 	}
-	if strings.Contains(plain, "(A)") || strings.Contains(plain, "(B)") {
-		t.Errorf("A and B belong to the shielded realms and must not be reused:\n%s", plain)
+	if strings.Contains(plain, "[A]") || strings.Contains(plain, "[B]") {
+		t.Errorf("A and B belong to the allied realms and must not be reused:\n%s", plain)
 	}
 }
 
-// A letter belonging to a shielded realm is a gap, not a near miss: it must not
+// A letter belonging to an ALLIED realm is a gap, not a near miss: it must not
 // select the next pickable realm along.
-func TestAShieldedRealmsLetterSelectsNothing(t *testing.T) {
+func TestAnAlliedRealmsLetterSelectsNothing(t *testing.T) {
 	rows := []targetRow{
 		{name: "Shadow Vultures", letter: "A", attackable: false},
 		{name: "Obsidian Sovereigns", letter: "B", attackable: true},
 	}
 	f := &fakeSession{keys: []rune("A")}
 	if name, chosen := pickAttackTarget(f, rows, "Choose a target"); chosen {
-		t.Errorf("pressing a shielded realm's letter chose %q; it should abort", name)
+		t.Errorf("pressing an allied realm's letter chose %q; it should abort", name)
 	}
 }
 

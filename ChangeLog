@@ -1,4 +1,8 @@
 (in-progress:)
+  * A realm under New Realm Protection is marked (P) beside its name
+  * A realm under New Realm Protection keeps its letter on the attack and covert lists
+  * An interplanetary target list shows the barons under protection
+  * A realm's letter is shown in square brackets
   * The Money Cap is gone from the Configuration Editor; a saved value still applies
   * A figure of a billion or more is printed in full, as the original prints it
   * A pirate raider is marked with its ASCII arrow on a 7-bit ASCII terminal

@@ -61,9 +61,9 @@ func setUp(s session.Session, w *ctx) Result {
 // exposeEnemyOps aims the shield at ONE realm, chosen from the realms the
 // player already holds a bribed agent inside — BRE lists no others, because the
 // bribed agent is what does the exposing. It does not go through localAttack:
-// that lists every living rival and withholds a selection letter from realms
-// under New Realm Protection or in an alliance, neither of which has anything to
-// do with an agent already on the payroll.
+// that lists every living rival and refuses realms under New Realm Protection or
+// in an alliance, neither of which has anything to do with an agent already on
+// the payroll.
 func exposeEnemyOps(s session.Session, w *ctx) Result {
 	if blockedByCovertProtection(s, w) {
 		return Stay
@@ -97,7 +97,9 @@ func exposeEnemyOps(s session.Session, w *ctx) Result {
 }
 
 // snapshotBribedTargets is the Expose Enemy Ops list: the living realms the
-// player holds a bribed agent inside, every one of them selectable.
+// player holds a bribed agent inside, every one of them selectable — an agent
+// already inside is not stopped by the target's own shield. The flag is still
+// drawn, because it is a fact about the realm.
 func snapshotBribedTargets(w *ctx) []targetRow {
 	var rows []targetRow
 	w.With(func() {
@@ -112,7 +114,8 @@ func snapshotBribedTargets(w *ctx) []targetRow {
 				name: e.Name, letter: e.Letter(),
 				land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
 				people: e.People, troopers: e.Troopers,
-				attackable: true, presence: presenceOf(e, false, w.Today),
+				attackable: true, protected: e.Protection > 0,
+				presence: presenceOf(e, false, w.Today),
 			})
 		}
 	})

@@ -53,10 +53,8 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	pick := tr(s, "the whole planet")
 	var target string
 	if !all {
-		names, hidden := attackableBarons(rb.Scores, hostile)
-		noteProtectedHidden(s, hidden)
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
-		if pick = pickFromList(s, "Baron", names); pick == "" {
+		if pick = pickRemoteBaronFrom(s, remoteBarons(rb.Scores, hostile)); pick == "" {
 			return Stay
 		}
 		target = pick
@@ -273,32 +271,56 @@ const (
 	observing = false
 )
 
-// attackableBarons lists the barons a planet's last scores packet leaves open to
-// `hostile` work, and how many it held back. A local attack list hides protected
-// realms the same way, and offering one costs the attacker forces for a strike
-// the target board will refuse on arrival. What we know can be stale, so this is
-// a courtesy, not the enforcement — that stays with the target board
-// (game.resolveRemoteAttack).
-func attackableBarons(scores []game.RemoteScore, hostile bool) (names []string, hidden int) {
-	for _, sc := range scores {
-		if hostile && sc.Protected {
-			hidden++
-			continue
-		}
-		names = append(names, sc.Empire)
-	}
-	return names, hidden
+// remoteBaron is one baron on another planet as this board last heard of them:
+// the name a strike is addressed to, and whether that hearing had them under
+// New Realm Protection.
+type remoteBaron struct {
+	name      string
+	protected bool
 }
 
-// noteProtectedHidden says why a planet's list is shorter than its score board,
-// so a shrinking list does not read as missing data. It does not pause: a target
-// prompt follows immediately.
-func noteProtectedHidden(s session.Session, hidden int) {
-	if hidden == 1 {
-		okNoPause(s, "One realm there is under New Realm Protection and cannot be attacked.")
-	} else if hidden > 1 {
-		okNoPause(s, "%d realms there are under New Realm Protection and cannot be attacked.", hidden)
+// remoteBarons reads a planet's last scores packet into the rows a target list
+// draws. `hostile` says whether protection is a bar for what the list is being
+// drawn for — spying is not, so an observing caller is told nothing about it.
+//
+// What we know can be stale, so the flag is a courtesy, not the enforcement —
+// that stays with the target board (game.resolveRemoteAttack), which refuses an
+// arriving strike on its own authority.
+func remoteBarons(scores []game.RemoteScore, hostile bool) []remoteBaron {
+	rows := make([]remoteBaron, 0, len(scores))
+	for _, sc := range scores {
+		rows = append(rows, remoteBaron{name: sc.Empire, protected: hostile && sc.Protected})
 	}
+	return rows
+}
+
+// pickRemoteBaronFrom draws the baron list and reads the choice, refusing a
+// realm the packet had under New Realm Protection. It returns "" when the
+// player backs out or picks a protected baron.
+//
+// The protected barons were HIDDEN from this list until 2026-08-26, with a count
+// printed under it saying how many had been held back. That told the player a
+// name existed without saying which, so a planet's roster and its target list
+// disagreed with nothing to explain the gap; they are listed with the same `(P)`
+// flag the local screens carry now (#214), and the refusal names the realm.
+func pickRemoteBaronFrom(s session.Session, rows []remoteBaron) string {
+	labels := make([]string, len(rows))
+	names := make([]string, len(rows))
+	for i, r := range rows {
+		labels[i] = r.name + protectedMark(s, r.protected)
+		names[i] = r.name
+	}
+	pick := pickFromListValues(s, "Baron", labels, names)
+	if pick == "" {
+		return ""
+	}
+	for _, r := range rows {
+		if r.name == pick && r.protected {
+			ok(s, "%s is under New Realm Protection and cannot be attacked.", r.name)
+			return ""
+		}
+	}
+	return pick
 }
 
 // pickRemoteBaron asks for a planet and then a named baron on it. Unlike the
@@ -306,14 +328,12 @@ func noteProtectedHidden(s session.Session, hidden int) {
 // attack has to name its target. Empty strings mean the player backed out.
 func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 	var boards []string
-	var scores map[string][]string
-	hidden := map[string]int{}
+	var scores map[string][]remoteBaron
 	w.With(func() {
-		scores = map[string][]string{}
+		scores = map[string][]remoteBaron{}
 		for _, b := range w.RemoteBoards {
 			boards = append(boards, b.BoardID)
-			names, n := attackableBarons(b.Scores, hostile)
-			scores[b.BoardID], hidden[b.BoardID] = names, n
+			scores[b.BoardID] = remoteBarons(b.Scores, hostile)
 		}
 	})
 	if len(boards) == 0 {
@@ -326,16 +346,14 @@ func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 		return "", ""
 	}
 	if len(scores[board]) == 0 {
-		if hidden[board] > 0 {
-			ok(s, "Every realm known on that planet is under New Realm Protection.")
-		} else {
-			ok(s, "No barons are known on that planet yet.")
-		}
+		ok(s, "No barons are known on that planet yet.")
 		return "", ""
 	}
-	noteProtectedHidden(s, hidden[board])
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
-	baron = pickFromList(s, "Baron", scores[board])
+	baron = pickRemoteBaronFrom(s, scores[board])
+	if baron == "" {
+		return "", ""
+	}
 	return board, baron
 }
 
@@ -366,14 +384,8 @@ func pickRemoteTarget(s session.Session, w *ctx, planetPrompt, baronPrompt strin
 		ok(s, "No barons are known on that planet yet.")
 		return "", "", sc, false
 	}
-	names, protected := attackableBarons(rb.Scores, hostile)
-	if len(names) == 0 {
-		ok(s, "Every realm known on that planet is under New Realm Protection.")
-		return "", "", sc, false
-	}
-	noteProtectedHidden(s, protected)
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, baronPrompt), ansi.Reset)
-	baron = pickFromList(s, "Baron", names)
+	baron = pickRemoteBaronFrom(s, remoteBarons(rb.Scores, hostile))
 	if baron == "" {
 		return "", "", sc, false
 	}

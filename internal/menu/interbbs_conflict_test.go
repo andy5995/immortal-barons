@@ -86,26 +86,31 @@ func TestJoinGroupAttackDepartedWindow(t *testing.T) {
 	}
 }
 
-// A scores packet says which realms are still under New Realm Protection, so
-// the boards that read it can leave them off their target lists. The target
-// board still refuses an arriving strike on its own authority — this only stops
-// a baron spending forces on a realm already known to be untouchable.
-func TestProtectedRealmsAreNotOfferedAsTargets(t *testing.T) {
+// A scores packet says which realms are still under New Realm Protection, so a
+// board that reads it can flag them on its target lists. Every baron is listed —
+// the flag is what marks the ones a strike would be refused (#214) — and the
+// target board still refuses an arriving strike on its own authority.
+func TestProtectedRealmsAreFlaggedAsTargets(t *testing.T) {
 	scores := []game.RemoteScore{
 		{Empire: "Fresh Meat", Protected: true},
 		{Empire: "Fair Game"},
 		{Empire: "Also New", Protected: true},
 	}
-	names, hidden := attackableBarons(scores, hostile)
-	if len(names) != 1 || names[0] != "Fair Game" {
-		t.Errorf("attackable = %v, want just Fair Game", names)
+	rows := remoteBarons(scores, hostile)
+	if len(rows) != 3 {
+		t.Fatalf("rows = %v, want all three barons listed", rows)
 	}
-	if hidden != 2 {
-		t.Errorf("hidden = %d, want 2", hidden)
+	want := map[string]bool{"Fresh Meat": true, "Fair Game": false, "Also New": true}
+	for _, r := range rows {
+		if r.protected != want[r.name] {
+			t.Errorf("%s protected = %v, want %v", r.name, r.protected, want[r.name])
+		}
 	}
-	// Spying is not stopped by protection, so an observer sees everyone.
-	if seen, held := attackableBarons(scores, observing); len(seen) != 3 || held != 0 {
-		t.Errorf("observing = %v (%d held), want all three", seen, held)
+	// Spying is not stopped by protection, so an observer is told nothing of it.
+	for _, r := range remoteBarons(scores, observing) {
+		if r.protected {
+			t.Errorf("%s was flagged on an observing list", r.name)
+		}
 	}
 }
 

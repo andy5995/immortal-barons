@@ -278,9 +278,10 @@ const playerListNameWidth = 25
 // an Owner column of handles until 2026-08-18.
 func playerList(s session.Session, w *ctx) Result {
 	type row struct {
-		name     string
-		presence string
-		land, nw int
+		name      string
+		presence  string
+		protected bool
+		land, nw  int
 	}
 	var rows []row
 	w.With(func() {
@@ -289,7 +290,7 @@ func playerList(s session.Session, w *ctx) Result {
 				continue
 			}
 			self := e == w.Player()
-			rows = append(rows, row{e.Name, presenceOf(e, self, w.Today), e.Land, w.NetWorth(e)})
+			rows = append(rows, row{e.Name, presenceOf(e, self, w.Today), e.Protection > 0, e.Land, w.NetWorth(e)})
 		}
 	})
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightBlue, tr(s, "Player List"), ansi.Reset)
@@ -297,7 +298,7 @@ func playerList(s session.Session, w *ctx) Result {
 	for _, r := range rows {
 		// The suffix rides in the name column, so the roster says who is on
 		// without moving the columns beside it.
-		fmt.Fprintf(s, "  %s %-8d %d\n", nameCell(s, r.name, "", r.presence, playerListNameWidth), r.land, r.nw)
+		fmt.Fprintf(s, "  %s %-8d %d\n", nameCell(s, r.name, "", r.presence, r.protected, playerListNameWidth), r.land, r.nw)
 	}
 	pause(s)
 	return Stay

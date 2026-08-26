@@ -109,7 +109,8 @@ func hiTokens(s string, words []string, color string) string {
 // is the identity the resolving w.With re-finds by (see findTarget); a
 // pre-gathered pointer is not carried across the reload. attackable is false for
 // a realm the player can see in the list but cannot hit (shielded by New Realm
-// Protection or an alliance) — it is shown without a selection letter.
+// Protection or an alliance); protected says which of the two shields it is,
+// because only one of them is announced on the row.
 //
 // people and troopers are NOT displayed: they are carried so a missile can be
 // priced off the target without a second trip under the lock (the chemical and
@@ -120,6 +121,7 @@ type targetRow struct {
 	land, score, netWorth int
 	people, troopers      int
 	attackable            bool
+	protected             bool
 	presence              string
 }
 
@@ -139,12 +141,14 @@ func snapshotTargets(w *ctx) []targetRow {
 			if e == p || !e.Alive {
 				continue
 			}
-			attackable := e.Protection == 0 && !w.AreAllied(p, e)
+			protected := e.Protection > 0
+			attackable := !protected && !w.AreAllied(p, e)
 			rows = append(rows, targetRow{
 				name: e.Name, letter: e.Letter(),
 				land: e.Land, score: e.Score, netWorth: w.NetWorth(e),
 				people: e.People, troopers: e.Troopers,
-				attackable: attackable, presence: presenceOf(e, false, w.Today),
+				attackable: attackable, protected: protected,
+				presence: presenceOf(e, false, w.Today),
 			})
 		}
 	})
@@ -267,31 +271,40 @@ func warnTrimmedForce(s session.Session, trimmed bool) {
 
 // pickAttackTarget renders the living rivals in IB's familiar scores-table
 // layout (Id / Empire Name / Territory / Score / Net Worth, lettered ids) and
-// reads the player's single-key choice. Shielded realms (New Realm Protection or
-// an alliance) are listed with a blank id so they can be seen but not picked —
-// their diplomacy status shows in the diplomacy menus. Returns the chosen realm
-// name, or chosen=false if the player aborts (RETURN / any non-letter) or
-// nothing is attackable.
+// reads the player's single-key choice. Returns the chosen realm name, or
+// chosen=false if the player aborts (RETURN / any non-letter), picks a realm
+// that cannot be targeted, or nothing is attackable.
 //
 // A REALM'S LETTER IS ITS OWN — its permanent slot letter, not a count of the
-// rows above it. A shielded realm therefore keeps its letter and leaves a gap,
-// exactly as a fallen realm or the sender does in the message picker. Numbering
-// the rows instead re-letters everyone the moment an alliance is formed, a realm
-// comes out of protection, or a neighbour dies, so the key that attacked one
-// realm yesterday attacks a different one today.
+// rows above it. A fallen realm therefore leaves a gap, exactly as it does in
+// the message picker. Numbering the rows instead re-letters everyone the moment
+// a neighbour dies, so the key that attacked one realm yesterday attacks a
+// different one today.
+//
+// A realm under New Realm Protection KEEPS ITS LETTER and is flagged `(P)`
+// instead (#214). It withheld the letter until 2026-08-26, which said only that
+// something about the row was different and left the player to guess what; the
+// flag says it outright, and pressing the letter now answers with the reason
+// rather than behaving like a mistyped key. An ALLIED realm still shows no
+// letter — that standing is the diplomacy screens' to report, and the alliance
+// is the player's own doing.
 func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name string, chosen bool) {
 	scoreTableHead(s)
-	byLetter := make(map[string]string, len(rows))
+	byLetter := make(map[string]targetRow, len(rows))
+	attackable := 0
 	for _, r := range rows {
-		id := "" // no selection letter for a realm that can't be attacked
-		if r.attackable {
+		id := "" // no selection letter for a realm allied with the player
+		if r.attackable || r.protected {
 			id = scoreID(r.letter)
-			byLetter[r.letter] = r.name
+			byLetter[r.letter] = r
 		}
-		scoreTableRow(s, id, r.name, ansi.FgBrightWhite, r.presence, r.land, r.score, r.netWorth)
+		if r.attackable {
+			attackable++
+		}
+		scoreTableRow(s, id, r.name, ansi.FgBrightWhite, r.presence, r.protected, r.land, r.score, r.netWorth)
 	}
 	scoreTableRule(s)
-	if len(byLetter) == 0 {
+	if attackable == 0 {
 		ok(s, "None of these realms can be attacked — they are protected or allied with you.")
 		return "", false
 	}
@@ -302,13 +315,17 @@ func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name 
 	}
 	// A letter with no realm behind it — a gap, or past the end — aborts rather
 	// than selecting a neighbour.
-	name, found := byLetter[string(unicode.ToUpper(r))]
+	row, found := byLetter[string(unicode.ToUpper(r))]
 	if !found {
 		fmt.Fprint(s, "\n")
 		return "", false
 	}
 	fmt.Fprintf(s, "%c\n", unicode.ToUpper(r))
-	return name, true
+	if !row.attackable {
+		ok(s, "%s is under New Realm Protection and cannot be targeted yet.", row.name)
+		return "", false
+	}
+	return row.name, true
 }
 
 // costOf prices a gold-fee op against the target it is aimed at. The three

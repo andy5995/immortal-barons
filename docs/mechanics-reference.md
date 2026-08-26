@@ -2881,6 +2881,11 @@ IB matches all of it.
   records in `Message To  :` — reads `'A' + Slot - 1`. A realm keeps its letter
   however many neighbours die, are pruned, or join, and the See Scores board
   letters by slot rather than by rank, so its rows are not in letter order.
+- **The id is BRACKETED on every screen, a deliberate divergence.** BRE
+  parenthesises it on the score tables and brackets it on `-*Relations*-`; IB
+  brackets it everywhere, because parentheses now carry a realm's status flags —
+  `(O)` online and `(P)` under New Realm Protection — so the shape separates the
+  key a player presses from the state they are being told about.
 - **Creation is bounded by the slots, not by a separate count.** The lowest free
   slot is taken under the same world lock that checks for one, so two BBS nodes
   onboarding at once cannot both claim it. A caller arriving at a full planet is
@@ -3460,11 +3465,12 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   scales that price and BRE clamps the result at `AttackCostCap`
   (200,000,000 gold); see "The two cost levels" below.
 - **Protection crosses the league.** A scores packet marks each realm still
-  under New Realm Protection, and the attack and terror target lists leave those
-  realms out — matching the local attack list, which hides them too. The target
-  board still refuses an arriving strike itself, since the flag can go stale
-  while the strike is in transit. A protected realm is still a legal SPY target,
-  so the spy target list shows every realm.
+  under New Realm Protection. The attack and terror target lists show those
+  realms with the `(P)` flag and refuse the strike when one is picked — matching
+  the local attack list, which flags them the same way (#214). The target board
+  still refuses an arriving strike itself, since the flag can go stale while the
+  strike is in transit. A protected realm is a legal SPY target, so a spy list
+  carries no flag at all.
 - **The caller's own shield gates this menu too.** The InterPlanetary menu tests
   it on the same predicate the covert menu uses, at `BRE.OVR 0x020F88`, for
   digits 2, 3, 4, 6, 8 and 9 — Terrorist Ops, Send Trade Deal, Create Group
@@ -4489,9 +4495,9 @@ subsystems. Each is flagged where it is described above.
 ### Screen output that deliberately diverges
 
 `docs/dev/bre-screens.md` is the catalog, each note beside the screen it belongs
-to. These two are recent enough to be worth naming here as well, since both
-replace something the original does line for line and both will look like bugs
-to anyone checking IB against a capture:
+to. These are recent enough to be worth naming here as well, since each replaces
+something the original does line for line and will look like a bug to anyone
+checking IB against a capture:
 
 - **Manufacturing is a list, not six sentences.** BRE ends each line with "were
   manufactured by Industrial Zones."; IB says that once as a heading and lists
@@ -4501,8 +4507,16 @@ to anyone checking IB against a capture:
   line — but the tasks are IB's, in IB's words, and only the ones with something
   to do are printed. Half of BRE's list belongs to file formats IB does not
   have.
+- **A realm's id is `[A]`, where BRE's score tables print `(A)`.** See "The
+  slot is assigned once and never moves" above for why. `-*Relations*-` already
+  brackets its id in the original, so that screen is unchanged.
+- **A realm under New Realm Protection is flagged `(P)` after its name** on
+  every roster IB draws, and keeps its selection letter on the attack and covert
+  target lists (#214). BRE flags nothing and IB used to withhold the letter,
+  which said a row was different without saying how. Picking the letter is
+  answered with the refusal, so the shield is stated twice rather than mimed.
 
-Neither is an oversight to correct back.
+None of these is an oversight to correct back.
 
 ## Sources
 

@@ -22,6 +22,7 @@ func printScores(s session.Session, w *ctx) {
 		letter          string
 		alive, isPlayer bool
 		presence        string
+		protected       bool
 		land, score, nw int
 	}
 	var rows []row
@@ -41,12 +42,12 @@ func printScores(s session.Session, w *ctx) {
 			// bright-yellow name. The '+' played-today marker is also
 			// suppressed: your own status is obvious from context.
 			self := e == w.Player()
-			rows = append(rows, row{e.Name, e.Letter(), e.Alive, self, presenceOf(e, self, w.Today), e.Land, e.Score, nw})
+			rows = append(rows, row{e.Name, e.Letter(), e.Alive, self, presenceOf(e, self, w.Today), e.Alive && e.Protection > 0, e.Land, e.Score, nw})
 		}
 		lastMaster = w.LastMaster
 	})
 	// BRE-style scores screen (matches a live BRE scores screen): a game-name
-	// banner, lettered (A)/(B) ids in slot order, Id / Empire Name / Territory /
+	// banner, lettered [A]/[B] ids in slot order, Id / Empire Name / Territory /
 	// Score / Net Worth columns, magenta header/footer rules. IB-branded.
 	fmt.Fprintf(s, "\n%s-*%s%s%s%s*-%s\n\n",
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
@@ -60,7 +61,7 @@ func printScores(s session.Session, w *ctx) {
 		if r.isPlayer {
 			nameColor = ansi.FgBrightYellow // highlight the caller's own realm
 		}
-		scoreTableRow(s, scoreID(r.letter), name, nameColor, r.presence, r.land, r.score, r.nw)
+		scoreTableRow(s, scoreID(r.letter), name, nameColor, r.presence, r.protected, r.land, r.score, r.nw)
 	}
 	scoreTableRule(s)
 	if lastMaster != "" {
@@ -71,13 +72,17 @@ func printScores(s session.Session, w *ctx) {
 const (
 	// scoreIDCellWidth is the id column. Three columns is the whole id: a realm
 	// is addressed by its slot letter and a planet holds game.PlanetSlots realms,
-	// so `(A)`..`(Y)` is every id there is. The attack picker leaves it EMPTY for
+	// so `[A]`..`[Y]` is every id there is. The attack picker leaves it EMPTY for
 	// a realm that cannot be attacked, which this still holds in place.
 	scoreIDCellWidth = 3
 	// scoreNameWidth is the name column. It carries the presence suffix too, so
 	// the figures beside it do not move when a baron comes or goes.
 	scoreNameWidth  = 26
 	scoreOnlineMark = "O"
+	// scoreProtectedMark is the letter inside the New Realm Protection flag,
+	// drawn AFTER the realm's name. Translatable like scoreOnlineMark: it is an
+	// initial, and P is not the initial of the phrase in every language.
+	scoreProtectedMark = "P"
 )
 
 // presence captures a realm's activity state for display in score tables and
@@ -103,6 +108,31 @@ func presenceOf(e *game.Empire, self bool, today string) string {
 		return presencePlayed
 	}
 	return presenceNone
+}
+
+// protectedMarkWidth is the protection flag's column cost — the translated
+// letter, its parentheses, and the space that sets it off from the name.
+func protectedMarkWidth(s session.Session) int {
+	return len([]rune(tr(s, scoreProtectedMark))) + 3
+}
+
+// protectedMark flags a realm still under New Realm Protection, one space clear
+// of the name it belongs to, and renders NOTHING at all for a realm that is not
+// — the same shape as the pirate raider mark, which reserved its column on every
+// row until that read as an indent for no reason (#197).
+//
+// It follows the name where the online mark leads it, so the two never collide,
+// and it borrows that mark's split: the letter bright white (21.0:1 against
+// black on both the VGA/CP437 and xterm palettes) because it is the whole
+// message, the parentheses magenta (3.29:1 VGA, 4.48:1 xterm) because they are
+// decoration and only have the 3:1 non-text minimum to clear. The letter still
+// carries the meaning on a monochrome or ANSI-less session.
+func protectedMark(s session.Session, protected bool) string {
+	if !protected {
+		return ""
+	}
+	return " " + ansi.FgMagenta + "(" + ansi.FgBrightWhite + tr(s, scoreProtectedMark) +
+		ansi.FgMagenta + ")" + ansi.Reset
 }
 
 // markWidth is the mark's column cost — "(O)" and whatever a translation makes
@@ -147,22 +177,25 @@ func onlineMark(s session.Session, presence string) string {
 // onboarding — only a three-character minimum is enforced — so a long one used
 // to push the figures beside it out of true. The mark survives the clip: it is
 // the part carrying information the row cannot show twice.
-func nameCell(s session.Session, name, nameColor string, presence string, width int) string {
+func nameCell(s session.Session, name, nameColor string, presence string, protected bool, width int) string {
 	mark := markWidth(s)
+	if protected {
+		mark += protectedMarkWidth(s)
+	}
 	if room := width - mark; len([]rune(name)) > room {
 		name = string([]rune(name)[:max(room, 0)])
 	}
-	return onlineMark(s, presence) + nameColor + name + ansi.Reset +
+	return onlineMark(s, presence) + nameColor + name + ansi.Reset + protectedMark(s, protected) +
 		strings.Repeat(" ", max(width-mark-len([]rune(name)), 0))
 }
 
 func idCell(id string) string {
-	// BRE: magenta parens, bright-white letter — e.g. 35( 1;37A 35)
-	inner := strings.Trim(id, "()")
+	// Magenta brackets, bright-white letter — e.g. 35[ 1;37A 35]
+	inner := strings.Trim(id, "[]")
 	if inner == "" {
 		return strings.Repeat(" ", scoreIDCellWidth)
 	}
-	return ansi.FgMagenta + "(" + ansi.FgBrightWhite + inner + ansi.FgMagenta + ")" + ansi.Reset +
+	return ansi.FgMagenta + "[" + ansi.FgBrightWhite + inner + ansi.FgMagenta + "]" + ansi.Reset +
 		strings.Repeat(" ", max(scoreIDCellWidth-len(id), 0))
 }
 
@@ -183,8 +216,8 @@ func scoreTableHead(s session.Session) {
 	scoreTableRule(s)
 }
 
-func scoreTableRow(s session.Session, id, name, nameColor string, presence string, land, score, nw int) {
-	scoreTableRowStr(s, id, name, nameColor, presence,
+func scoreTableRow(s session.Session, id, name, nameColor string, presence string, protected bool, land, score, nw int) {
+	scoreTableRowStr(s, id, name, nameColor, presence, protected,
 		strconv.Itoa(land), strconv.Itoa(score), strconv.Itoa(nw))
 }
 
@@ -193,18 +226,24 @@ func scoreTableRow(s session.Session, id, name, nameColor string, presence strin
 // part and the one that drifts; how a number is spelled is each screen's own
 // choice, and they do not currently agree — the scores board and the target
 // list print bare figures where the recipient picker groups them.
-func scoreTableRowStr(s session.Session, id, name, nameColor, presence, land, score, nw string) {
+func scoreTableRowStr(s session.Session, id, name, nameColor, presence string, protected bool, land, score, nw string) {
 	fmt.Fprintf(s, "%s%s %s%10s%s %s%11s%s %s%11s%s\n",
 		idCell(id),
-		nameCell(s, name, nameColor, presence, scoreNameWidth),
+		nameCell(s, name, nameColor, presence, protected, scoreNameWidth),
 		ansi.FgBrightMagenta, land, ansi.Reset,
 		ansi.FgBrightWhite, score, ansi.Reset,
 		ansi.FgWhite, nw, ansi.Reset)
 }
 
-// scoreID is the parenthesised id for a scores row: the realm's own slot letter
-// (game.Empire.Letter), never its position in the sorted table. BRE prints the
-// same — its captured See Scores board runs (A), (B), (E), skipping the letters
-// of the realms that have fallen (docs/dev/bre-screens.md) — and it is what
+// scoreID is the bracketed id for a scores row: the realm's own slot letter
+// (game.Empire.Letter), never its position in the sorted table. BRE letters the
+// same rows — its captured See Scores board runs A, B, E, skipping the letters
+// of the realms that have fallen (docs/dev/bre-screens.md) — and that is what
 // makes the key that mailed a realm yesterday reach the same realm today.
-func scoreID(letter string) string { return "(" + letter + ")" }
+//
+// The BRACKETS are IB's, a recorded divergence: BRE parenthesises the id on this
+// table and brackets it on -*Relations*-, and one game should not spell the same
+// id two ways. Brackets won because parentheses now say something else here — a
+// realm's status flags, (O) online and (P) protected, are parenthesised, so the
+// shape alone separates the key you press from the state you are being told.
+func scoreID(letter string) string { return "[" + letter + "]" }

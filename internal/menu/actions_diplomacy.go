@@ -378,14 +378,22 @@ func offersFrom(p *game.Empire, from string) []string {
 
 // pickFromList shows a numbered list and returns the chosen entry, or "".
 func pickFromList(s session.Session, msg string, list []string) string {
-	for i, x := range list {
+	return pickFromListValues(s, msg, list, list)
+}
+
+// pickFromListValues is pickFromList for a list whose rows are DRAWN with more
+// than the value they stand for — a target flagged `(P)` for New Realm
+// Protection, say. labels and values are parallel; the value is what comes back,
+// so a flag on the row can never reach the code that acts on the choice.
+func pickFromListValues(s session.Session, msg string, labels, values []string) string {
+	for i, x := range labels {
 		fmt.Fprintf(s, "    %d) %s\n", i+1, x)
 	}
 	i := promptInt(s, msg+" (0 to cancel)?")
-	if i < 1 || i > len(list) {
+	if i < 1 || i > len(values) {
 		return ""
 	}
-	return list[i-1]
+	return values[i-1]
 }
 
 // Relations-screen geometry, measured off a live BRE capture: a 75-column inset
@@ -418,6 +426,7 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 			rows = append(rows, relationsRow{
 				id: w.EmpireLetter(e), name: e.Name,
 				relations: relationsText(s, w.TreatiesBetween(p, e)), presence: presenceOf(e, false, w.Today),
+				protected: e.Protection > 0,
 			})
 		}
 	})
@@ -438,6 +447,7 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 type relationsRow struct {
 	id, name, relations string
 	presence            string
+	protected           bool
 }
 
 // relationsText renders the Relations column for the pacts held, BRE's "None"
@@ -472,7 +482,7 @@ func writeRelationsTable(s session.Session, rows []relationsRow) {
 		// meets it labelled.
 		fmt.Fprintf(s, "%s[%s%s%s]%s  %s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
 			ansi.Reset,
-			nameCell(s, r.name, ansi.FgBrightCyan, r.presence, relationsNameWidth),
+			nameCell(s, r.name, ansi.FgBrightCyan, r.presence, r.protected, relationsNameWidth),
 			ansi.FgBrightBlue, r.relations, ansi.Reset)
 	}
 	fmt.Fprintln(s, rule)

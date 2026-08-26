@@ -13,3 +13,6 @@ next day for more.
 New players get New Realm Protection: a number of turns during which you cannot
 attack or be attacked. It only ticks down on turns you actually play, so you are
 safe while you learn the game.
+
+A realm still under protection carries a `(P)` after its name in the lists of
+realms, so you can see who cannot be attacked yet.

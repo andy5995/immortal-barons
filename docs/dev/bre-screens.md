@@ -204,6 +204,25 @@ Id  Empire Name                          Territory     Score    Net Worth
 Choose a Target [A-Y,?=List RETURN to Abort]
 ```
 
+**IB brackets the id: `[A]`, where the capture reads `(A)`** (#214). The
+divergence is deliberate and it is not local to this screen — See Scores and the
+recipient picker draw the same table and change with it, and `-*Relations*-`
+already brackets its id in the original. Parentheses now say something else on a
+roster row: `(O)` for a baron who is online and `(P)` for a realm under New Realm
+Protection, so the shape alone separates the key a player presses from the state
+being reported. Spelling the same id two ways in one game is what this trades
+away.
+
+**IB flags a realm under New Realm Protection `(P)`**, one space after the name,
+inside the name field so the figures beside it hold — the same shape as the
+pirate raider mark, and the same reason it reserves no column on an unflagged
+row. BRE flags nothing; it has no need to, since its own list is drawn before
+any of this is decided. The realm KEEPS its selection letter and pressing it is
+answered with the refusal by name. IB withheld the letter until 2026-08-26,
+which told a player that something about the row was different without saying
+what. An ALLIED realm still shows no letter: that standing belongs to the
+diplomacy screens, and the player made it themselves.
+
 ### Force selection
 
 Re-captured 2026-08-16, unchanged. `You have ` white, counts in `96`
@@ -783,6 +802,10 @@ carries it: the attack target picker and the recipient picker share
 `scoreTableRow`/`nameCell`, and the Coordinator's Player List puts it in its
 indent. The inter-BBS scores screen does NOT — those figures arrive in packets
 that may be hours old, so there is nothing to report.
+
+The protection flag `(P)` rides in the same field, after the name rather than
+before it (see "Target list" above, #214). It reserves no column on an unflagged
+row.
 
 An unmarked row reserves the mark's width, so the names stay in one column
 either way; `markWidth` measures the translated letter rather than assuming one
@@ -2434,6 +2457,16 @@ Id   Empire Name                          Territory   Score   Networth
 ─────═══════════════───────────────────────────────────────────────────────
                                                 [BRE v0.988]   8/15/2026
 ```
+
+**IB's interplanetary baron list is NUMBERED**, where this capture shows the
+same lettered roster the local screens draw. That is an old divergence and it is
+not addressed here. What did change (#214): a baron the last scores packet had
+under New Realm Protection is listed with the `(P)` flag after the name and the
+strike is refused when that row is picked. Those barons were HIDDEN from the list
+until 2026-08-26, with a count printed beneath it saying how many had been held
+back, which named nothing and left a planet's roster disagreeing with its target
+list. The flag is a courtesy either way — a packet can be days old, so the target
+board still refuses an arriving strike on its own authority.
 
 **The interplanetary picker's prompt is colored differently from the local
 one**, though the wording is nearly the same (`cap/eots-ibbs-01.cap`): here the
