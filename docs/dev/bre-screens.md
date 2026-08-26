@@ -668,6 +668,12 @@ direction on its own — including in a monochrome or ANSI-less session.
 edge is `┌` + 25 `─` + `Daily Bulletin` + 25 `─` + `┐`, bottom `└` + 64 `─` +
 `┘`. Measured identically in `bre-01-color.cap` and the public-board capture.
 
+In a league IB puts the board's name and an em dash ahead of `Daily Bulletin` in
+that top edge, and the edge is sized to the title. The width has to be measured
+in the caller's OWN charset: a CP437 or ASCII terminal is sent `--` for the em
+dash, so a rune count made the top edge a column longer than the box under it
+(#192).
+
 ```
                         ──═The Queen's Quadrant═──
 ───────────────────────────────────────────────────────────────────────────

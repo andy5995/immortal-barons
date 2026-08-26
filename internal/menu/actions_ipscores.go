@@ -371,3 +371,18 @@ func fitColumn(t Term, text string, width int) string {
 	}
 	return game.FitColumnMark(text, width, "...")
 }
+
+// visWidth is how many columns text will really occupy on the caller's
+// terminal. len([]rune()) is only that for a UTF-8 caller: the CP437 and
+// plain-ASCII writers rewrite "—", "…", "→" and the rest as two or three ASCII
+// characters, and they sit below every layer that counts columns, so a fixed
+// rule measured in runes came out short and the drawn line overhung it (#192).
+// ToASCII stands in for both — every length-changing CP437 fallback is in the
+// ASCII table too, and the accent and Cyrillic cases are one rune either way.
+// Term, not session.IsUTF8(s), for the reason given on fitColumn.
+func visWidth(t Term, text string) int {
+	if t.UTF8 {
+		return len([]rune(text))
+	}
+	return len([]rune(session.ToASCII(text)))
+}

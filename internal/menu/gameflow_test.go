@@ -478,7 +478,7 @@ func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
 		Change: game.PlanetTotals{Population: -5838, Regions: 0, NetWorth: 1373000},
 	}
 	f := &fakeSession{}
-	renderDailyBulletin(f, b, "wildside")
+	renderDailyBulletin(f, Term{UTF8: true}, b, "wildside")
 	out := f.out.String()
 
 	for _, want := range []string{
@@ -512,7 +512,7 @@ func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
 
 func TestRenderDailyBulletinNoTitle(t *testing.T) {
 	f := &fakeSession{}
-	renderDailyBulletin(f, game.DailyBulletin{}, "")
+	renderDailyBulletin(f, Term{UTF8: true}, game.DailyBulletin{}, "")
 	if strings.Contains(f.out.String(), "—") {
 		t.Error("expected no board-name prefix when title is empty")
 	}

@@ -51,8 +51,8 @@ func showBulletin(s session.Session, w *ctx, yesterday bool) Result {
 	if yesterday {
 		date = prevISODate(date)
 	}
-	renderNewsMasthead(s, newsDate(date))
-	renderDailyBulletin(s, bulletin, boardID)
+	renderNewsMasthead(s, w.Term, newsDate(date))
+	renderDailyBulletin(s, w.Term, bulletin, boardID)
 	if len(news) == 0 {
 		fmt.Fprintf(s, "\n%s\n", tr(s, "No planetary bulletins."))
 	} else {
