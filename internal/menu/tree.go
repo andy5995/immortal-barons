@@ -276,20 +276,21 @@ func BuildMenus() *Menus {
 	// Operations menu (2026-07-21); costs are the balance.go Cost* constants
 	// (#73). costOf shows a fixed gold price in the menu's cost column.
 	costOf := func(n int) func(*ctx) int { return func(*ctx) int { return n } }
-	covert.Items = []Item{
-		{Key: '1', Label: "Send Spy", Price: costOf(game.CostSendSpy), Do: sendSpy},
-		{Key: '2', Label: "Stir Revolts", Price: costOf(game.CostStirRevolts), Do: stirRevolts},
-		{Key: '3', Label: "Set Up", Price: costOf(game.CostSetUp), Do: setUp},
-		{Key: '4', Label: "Support Dissensions", Price: costOf(game.CostSupportDissensions), Do: supportDissensions},
-		{Key: '5', Label: "Demoralize Forces", Price: costOf(game.CostDemoralizeForces), Do: demoralizeForces},
-		{Key: '6', Label: "Spy on Relations", Price: costOf(game.CostSpyOnRelations), Do: spyRelations},
-		{Key: '7', Label: "Bomb Enemy Targets", Price: costOf(game.CostBombEnemyTargets), Do: bombEnemyTargets},
-		{Key: '8', Label: "Bribery", Price: costOf(game.CostBribery), Do: briberyOp},
-		{Key: '9', Label: "Expose Enemy Ops", Price: costOf(game.CostExposeEnemyOps), Do: exposeEnemyOps},
-		{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
-		{Key: '?', Label: "Help", Do: helpBrowse},
-		{Key: '0', Label: "Quit", Do: back},
+	// The eight operations come from covertRows, which carries each one's
+	// game.CovertOp: the label IS the constant, so the screen cannot name an op
+	// by a string of its own (#208). Their msgids are still the same English
+	// text, so the .po catalogs are untouched.
+	for _, row := range covertRows {
+		covert.Items = append(covert.Items, Item{
+			Key: row.Key, Label: string(row.Op), Price: costOf(row.Cost), Do: row.action(),
+		})
 	}
+	covert.Items = append(covert.Items,
+		Item{Key: '9', Label: "Expose Enemy Ops", Price: costOf(game.CostExposeEnemyOps), Do: exposeEnemyOps},
+		Item{Key: 'V', Label: "Visit Bank", Do: gotoMenu(bank)},
+		Item{Key: '?', Label: "Help", Do: helpBrowse},
+		Item{Key: '0', Label: "Quit", Do: back},
+	)
 	covert.DefaultOnEnter = quitOnEnter(covert)
 	// BRE re-reads the agent count at the head of the covert menu's own loop
 	// (enter_covert_operations_menu, BRE.OVR 0x0179db, testing the 32-bit count

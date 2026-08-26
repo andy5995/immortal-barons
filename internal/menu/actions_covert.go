@@ -25,37 +25,67 @@ func blockedByCovertProtection(s session.Session, w *ctx) bool {
 	return false
 }
 
-// covertOp runs a covert operation that has an effect on its target, refusing
-// it while the caller is sheltered.
-func covertOp(s session.Session, w *ctx, label string, strike func(a, d *game.Empire) (string, error)) Result {
-	if blockedByCovertProtection(s, w) {
-		return Stay
+// covertRow is one operation on the local Covert Operations menu: the typed op
+// the engine keys its once-per-turn slot off, the hotkey and fee the screen
+// draws, and the resolver behind it. The menu's label is string(Op), so a
+// screen cannot name an operation except through the constant — the same string
+// is the CovertOpsUsed key persisted in the save file, and a menu literal that
+// drifted from it wrote a key nothing read, silently retiring the per-turn gate
+// (#208). This is the units.go treatment (#134) applied to the covert set.
+type covertRow struct {
+	Op   game.CovertOp
+	Key  rune
+	Cost int
+	// Info marks the two operations that only gather information — the menu
+	// digits 1 and 6, which the original jumps its protection test over, so a
+	// sheltered realm can still look before it can touch.
+	Info   bool
+	Strike func(w *ctx, a, d *game.Empire) (string, error)
+}
+
+// covertRows are the eight operations, in BRE's menu order. Expose Enemy Ops is
+// deliberately absent: it takes no per-turn slot and no CovertOp, picks from its
+// own list of bribed realms, and is wired by hand in tree.go.
+var covertRows = []covertRow{
+	{Op: game.OpSendSpy, Key: '1', Cost: game.CostSendSpy, Info: true,
+		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.SendSpy(a, d) }},
+	{Op: game.OpStirRevolts, Key: '2', Cost: game.CostStirRevolts,
+		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.StirRevolts(a, d) }},
+	{Op: game.OpSetUp, Key: '3', Cost: game.CostSetUp,
+		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.SetUp(a, d) }},
+	{Op: game.OpSupportDissensions, Key: '4', Cost: game.CostSupportDissensions,
+		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.SupportDissensions(a, d) }},
+	{Op: game.OpDemoralizeForces, Key: '5', Cost: game.CostDemoralizeForces,
+		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.DemoralizeForces(a, d) }},
+	{Op: game.OpSpyOnRelations, Key: '6', Cost: game.CostSpyOnRelations, Info: true,
+		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) }},
+	{Op: game.OpBombEnemyTargets, Key: '7', Cost: game.CostBombEnemyTargets,
+		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.BombEnemyTargets(a, d) }},
+	{Op: game.OpBribery, Key: '8', Cost: game.CostBribery,
+		Strike: func(w *ctx, a, d *game.Empire) (string, error) { return w.Bribery(a, d) }},
+}
+
+// action is the menu Action for this operation: the caller's own New Realm
+// Protection gate (except for the two info ops), then the shared target picker.
+func (row covertRow) action() Action {
+	return func(s session.Session, w *ctx) Result {
+		if !row.Info && blockedByCovertProtection(s, w) {
+			return Stay
+		}
+		return pickAndStrike(s, w, string(row.Op), nil, false,
+			func(a, d *game.Empire) (string, error) { return row.Strike(w, a, d) })
 	}
-	return pickAndStrike(s, w, label, nil, false, strike)
 }
 
-// covertInfoOp runs one of the two operations that only gather information.
-// The original's protection test is jumped over for exactly these two — the
-// menu digits 1 and 6 — so a sheltered realm can still look before it can
-// touch.
-func covertInfoOp(s session.Session, w *ctx, label string, strike func(a, d *game.Empire) (string, error)) Result {
-	return pickAndStrike(s, w, label, nil, false, strike)
-}
-
-func sendSpy(s session.Session, w *ctx) Result {
-	return covertInfoOp(s, w, "Send Spy", func(a, d *game.Empire) (string, error) { return w.SendSpy(a, d) })
-}
-
-func supportDissensions(s session.Session, w *ctx) Result {
-	return covertOp(s, w, "Support Dissensions", func(a, d *game.Empire) (string, error) { return w.SupportDissensions(a, d) })
-}
-
-func demoralizeForces(s session.Session, w *ctx) Result {
-	return covertOp(s, w, "Demoralize Forces", func(a, d *game.Empire) (string, error) { return w.DemoralizeForces(a, d) })
-}
-
-func setUp(s session.Session, w *ctx) Result {
-	return covertOp(s, w, "Set Up", func(a, d *game.Empire) (string, error) { return w.SetUp(a, d) })
+// covertAction is the menu action for op. It panics on an op with no row, which
+// only an edit to covertRows can cause.
+func covertAction(op game.CovertOp) Action {
+	for _, row := range covertRows {
+		if row.Op == op {
+			return row.action()
+		}
+	}
+	panic("no covert menu row for " + string(op))
 }
 
 // exposeEnemyOps aims the shield at ONE realm, chosen from the realms the
@@ -120,20 +150,4 @@ func snapshotBribedTargets(w *ctx) []targetRow {
 		}
 	})
 	return rows
-}
-
-func stirRevolts(s session.Session, w *ctx) Result {
-	return covertOp(s, w, "Stir Revolts", func(a, d *game.Empire) (string, error) { return w.StirRevolts(a, d) })
-}
-
-func bombEnemyTargets(s session.Session, w *ctx) Result {
-	return covertOp(s, w, "Bomb Enemy Targets", func(a, d *game.Empire) (string, error) { return w.BombEnemyTargets(a, d) })
-}
-
-func spyRelations(s session.Session, w *ctx) Result {
-	return covertInfoOp(s, w, "Spy on Relations", func(a, d *game.Empire) (string, error) { return w.SpyOnRelations(a, d) })
-}
-
-func briberyOp(s session.Session, w *ctx) Result {
-	return covertOp(s, w, "Bribery", func(a, d *game.Empire) (string, error) { return w.Bribery(a, d) })
 }

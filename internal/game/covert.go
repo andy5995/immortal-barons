@@ -24,6 +24,22 @@ const (
 	OpBribery            CovertOp = "Bribery"
 )
 
+// AllCovertOps is the whole set, in the order BRE's Covert Operations menu
+// lists it. It is the canonical list: a screen that offers these operations
+// names them through these constants rather than restating them as literals,
+// because the same string is the CovertOpsUsed key the per-turn gate reads out
+// of the save file (#208).
+var AllCovertOps = []CovertOp{
+	OpSendSpy,
+	OpStirRevolts,
+	OpSetUp,
+	OpSupportDissensions,
+	OpDemoralizeForces,
+	OpSpyOnRelations,
+	OpBombEnemyTargets,
+	OpBribery,
+}
+
 // difficulty is the divisor this op applies to the attacker's own agent pool.
 func (op CovertOp) difficulty() int {
 	switch op {
