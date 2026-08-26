@@ -197,7 +197,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	name, chosen := pickAttackTarget(s, rows, tr(s, "Attack which realm? (letter, RETURN to abort)"))
+	name, chosen := pickAttackTarget(s, w.Term, rows, tr(s, "Attack which realm? (letter, RETURN to abort)"))
 	if !chosen {
 		return Stay
 	}
@@ -288,8 +288,8 @@ func warnTrimmedForce(s session.Session, trimmed bool) {
 // rather than behaving like a mistyped key. An ALLIED realm still shows no
 // letter — that standing is the diplomacy screens' to report, and the alliance
 // is the player's own doing.
-func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name string, chosen bool) {
-	scoreTableHead(s)
+func pickAttackTarget(s session.Session, t Term, rows []targetRow, prompt string) (name string, chosen bool) {
+	scoreTableHead(s, t)
 	byLetter := make(map[string]targetRow, len(rows))
 	attackable := 0
 	for _, r := range rows {
@@ -301,7 +301,7 @@ func pickAttackTarget(s session.Session, rows []targetRow, prompt string) (name 
 		if r.attackable {
 			attackable++
 		}
-		scoreTableRow(s, id, r.name, ansi.FgBrightWhite, r.presence, r.protected, r.land, r.score, r.netWorth)
+		scoreTableRow(s, t, id, r.name, ansi.FgBrightWhite, r.presence, r.protected, r.land, r.score, r.netWorth)
 	}
 	scoreTableRule(s)
 	if attackable == 0 {
@@ -361,7 +361,7 @@ func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTu
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	name, chosen := pickAttackTarget(s, rows, tr(s, "Choose a target (letter, RETURN to abort)"))
+	name, chosen := pickAttackTarget(s, w.Term, rows, tr(s, "Choose a target (letter, RETURN to abort)"))
 	if !chosen {
 		return Stay
 	}

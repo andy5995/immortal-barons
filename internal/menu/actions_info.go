@@ -298,7 +298,7 @@ func playerList(s session.Session, w *ctx) Result {
 	for _, r := range rows {
 		// The suffix rides in the name column, so the roster says who is on
 		// without moving the columns beside it.
-		fmt.Fprintf(s, "  %s %-8d %d\n", nameCell(s, r.name, "", r.presence, r.protected, playerListNameWidth), r.land, r.nw)
+		fmt.Fprintf(s, "  %s %-8d %d\n", nameCell(s, w.Term, r.name, "", r.presence, r.protected, playerListNameWidth), r.land, r.nw)
 	}
 	pause(s)
 	return Stay

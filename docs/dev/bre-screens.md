@@ -807,6 +807,13 @@ The protection flag `(P)` rides in the same field, after the name rather than
 before it (see "Target list" above, #214). It reserves no column on an unflagged
 row.
 
+**The name field is measured in the caller's own charset.** `ValidRealmName`
+accepts any printable rune, so a realm may be named `Iron—Fist`; the CP437 and
+plain-ASCII writers rewrite that em dash as two hyphens below every layer that
+counts columns, and a rune count walked the figures one column right for the
+default charset. `nameCell` takes `Term` and measures through `visWidth` /
+`fitColumn`, the same pair the InterBBS Scores tables use (#192, #196).
+
 An unmarked row reserves the mark's width, so the names stay in one column
 either way; `markWidth` measures the translated letter rather than assuming one
 character, since the `O` goes through `tr`.

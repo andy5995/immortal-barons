@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
-	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -356,7 +355,7 @@ func askOneOrAll(s session.Session) (all, answered bool) {
 	}
 }
 
-// fitColumn is game.FitColumn with the truncation marker the caller's terminal
+// fitColumn cuts text to width with the truncation marker the caller's terminal
 // will actually render in one column. The CP437 and plain-ASCII writers rewrite
 // "…" as three ASCII dots below every layer that counts columns, so a fitted
 // cell came out two columns wide for them and shifted every column after it
@@ -365,11 +364,33 @@ func askOneOrAll(s session.Session) (all, answered bool) {
 // the charset writer and here — Deadline, MacroExpander, langSession — do not
 // forward the marker, so asking the Session reports UTF-8 for every caller.
 // Term is captured in play.Run before any of that wrapping.
+//
+// It measures in COLUMNS, not runes, so a value carrying a character the writer
+// expands — an em dash in a realm name, which ValidRealmName accepts — is cut to
+// what will actually fit rather than to a rune count that renders wider.
 func fitColumn(t Term, text string, width int) string {
-	if t.UTF8 {
-		return game.FitColumnMark(text, width, "…")
+	if visWidth(t, text) <= width {
+		return text
 	}
-	return game.FitColumnMark(text, width, "...")
+	mark := "…"
+	if !t.UTF8 {
+		mark = "..."
+	}
+	room := width - visWidth(t, mark)
+	if room <= 0 {
+		return trimToWidth(t, text, width)
+	}
+	return trimToWidth(t, text, room) + mark
+}
+
+// trimToWidth drops runes off the end until what is left fits width columns on
+// the caller's terminal.
+func trimToWidth(t Term, text string, width int) string {
+	r := []rune(text)
+	for len(r) > 0 && visWidth(t, string(r)) > width {
+		r = r[:len(r)-1]
+	}
+	return string(r)
 }
 
 // visWidth is how many columns text will really occupy on the caller's

@@ -131,7 +131,7 @@ func pickIndex(rows []pickRow, r rune) int {
 //
 // IB comma-groups the figures BRE prints bare, a recorded divergence
 // (docs/dev/bre-screens.md).
-func writePickRoster(s session.Session, rows []pickRow, opts pickOpts) {
+func writePickRoster(s session.Session, t Term, rows []pickRow, opts pickOpts) {
 	if opts.relations {
 		rel := make([]relationsRow, 0, len(rows))
 		for _, r := range rows {
@@ -141,14 +141,14 @@ func writePickRoster(s session.Session, rows []pickRow, opts pickOpts) {
 				protected: r.protected,
 			})
 		}
-		writeRelationsTable(s, rel)
+		writeRelationsTable(s, t, rel)
 		return
 	}
 	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n",
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.FgBrightMagenta, ansi.Reset)
-	scoreTableHead(s)
+	scoreTableHead(s, t)
 	for _, r := range rows {
-		scoreTableRowStr(s, scoreID(string(r.letter)), r.name, ansi.FgBrightWhite, r.presence, r.protected,
+		scoreTableRowStr(s, t, scoreID(string(r.letter)), r.name, ansi.FgBrightWhite, r.presence, r.protected,
 			comma(r.land), comma(r.score), comma(r.nw))
 	}
 	scoreTableRule(s)
@@ -209,7 +209,7 @@ func pickRecipient(s session.Session, w *ctx, opts pickOpts) *game.Empire {
 		echo := func(text string) { fmt.Fprintf(s, "%s%s\n", text, ansi.Reset) }
 		if r == '?' {
 			echo(tr(s, "List"))
-			writePickRoster(s, rows, opts)
+			writePickRoster(s, w.Term, rows, opts)
 			continue
 		}
 		idx := pickIndex(rows, r)
@@ -295,7 +295,7 @@ func pickRecipients(s session.Session, w *ctx, opts pickOpts) []*game.Empire {
 			return out
 		case r == '?':
 			fmt.Fprintf(s, "%s%s\n", tr(s, "List"), ansi.Reset)
-			writePickRoster(s, rows, opts)
+			writePickRoster(s, w.Term, rows, opts)
 			writePickPrompt(s, allies, opts)
 			echoed = echoed[:0]
 		case opts.allowAll && (r == 'z' || r == 'Z'):

@@ -836,7 +836,7 @@ func TestTargetLettersDoNotShiftWhenRealmsBecomeUnpickable(t *testing.T) {
 	// The shielded pair here are ALLIED, which is the case that still shows no
 	// letter; a realm under protection keeps its own (see the #214 tests).
 	f := &fakeSession{keys: []rune("C")}
-	name, chosen := pickAttackTarget(f, rows, "Choose a target")
+	name, chosen := pickAttackTarget(f, Term{UTF8: true}, rows, "Choose a target")
 	if !chosen || name != "Obsidian Sovereigns" {
 		t.Errorf("pressing C chose %q (chosen=%v), want the third realm", name, chosen)
 	}
@@ -858,7 +858,7 @@ func TestAnAlliedRealmsLetterSelectsNothing(t *testing.T) {
 		{name: "Obsidian Sovereigns", letter: "B", attackable: true},
 	}
 	f := &fakeSession{keys: []rune("A")}
-	if name, chosen := pickAttackTarget(f, rows, "Choose a target"); chosen {
+	if name, chosen := pickAttackTarget(f, Term{UTF8: true}, rows, "Choose a target"); chosen {
 		t.Errorf("pressing an allied realm's letter chose %q; it should abort", name)
 	}
 }

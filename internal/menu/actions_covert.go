@@ -73,7 +73,7 @@ func exposeEnemyOps(s session.Session, w *ctx) Result {
 		fail(s, game.ErrNoBribedAgents)
 		return Stay
 	}
-	name, chosen := pickAttackTarget(s, rows, tr(s, "Whose operations should your agent expose (letter, RETURN to abort)"))
+	name, chosen := pickAttackTarget(s, w.Term, rows, tr(s, "Whose operations should your agent expose (letter, RETURN to abort)"))
 	if !chosen {
 		return Stay
 	}

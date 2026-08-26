@@ -78,7 +78,7 @@ func TestScoresMarksOnlineRealms(t *testing.T) {
 func TestAttackPickerMarksOnlineRealms(t *testing.T) {
 	w, rival := twoRealmWorld(t, true)
 	f := &fakeSession{}
-	pickAttackTarget(f, snapshotTargets(w), "Attack which realm?")
+	pickAttackTarget(f, w.Term, snapshotTargets(w), "Attack which realm?")
 
 	lines := plainLines(f.out.String())
 	if findLine(lines, "Net Worth") == "" {
@@ -203,7 +203,7 @@ func TestIDCellKeepsTheNameColumn(t *testing.T) {
 	} {
 		t.Run(tc.whatItIs, func(t *testing.T) {
 			f := &fakeSession{}
-			scoreTableRow(f, tc.id, "Realm", ansi.FgBrightWhite, presenceOnline, false, 1, 2, 3)
+			scoreTableRow(f, Term{UTF8: true}, tc.id, "Realm", ansi.FgBrightWhite, presenceOnline, false, 1, 2, 3)
 			row := plainLines(f.out.String())[0]
 			assertOnlineSuffix(t, row, "Realm", true)
 			if got := strings.Index(row, "Realm"); got != tc.nameCol {
@@ -263,7 +263,7 @@ func TestLongNameCannotMoveTheColumns(t *testing.T) {
 		for _, presence := range []string{presenceOnline, presenceNone} {
 			for _, protected := range []bool{false, true} {
 				f := &fakeSession{}
-				scoreTableRow(f, "[A]", name, ansi.FgBrightWhite, presence, protected, 15, 0, 231)
+				scoreTableRow(f, Term{UTF8: true}, "[A]", name, ansi.FgBrightWhite, presence, protected, 15, 0, 231)
 				row := plainLines(f.out.String())[0]
 				if presence == presenceOnline && !strings.Contains(row, "(O)") {
 					t.Errorf("clip dropped the marker for %q: %q", name, row)

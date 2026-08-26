@@ -51,7 +51,7 @@ func printScores(s session.Session, w *ctx) {
 	// Score / Net Worth columns, magenta header/footer rules. IB-branded.
 	fmt.Fprintf(s, "\n%s-*%s%s%s%s*-%s\n\n",
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
-	scoreTableHead(s)
+	scoreTableHead(s, w.Term)
 	for _, r := range rows {
 		name := r.name
 		if !r.alive {
@@ -61,7 +61,7 @@ func printScores(s session.Session, w *ctx) {
 		if r.isPlayer {
 			nameColor = ansi.FgBrightYellow // highlight the caller's own realm
 		}
-		scoreTableRow(s, scoreID(r.letter), name, nameColor, r.presence, r.protected, r.land, r.score, r.nw)
+		scoreTableRow(s, w.Term, scoreID(r.letter), name, nameColor, r.presence, r.protected, r.land, r.score, r.nw)
 	}
 	scoreTableRule(s)
 	if lastMaster != "" {
@@ -112,8 +112,8 @@ func presenceOf(e *game.Empire, self bool, today string) string {
 
 // protectedMarkWidth is the protection flag's column cost — the translated
 // letter, its parentheses, and the space that sets it off from the name.
-func protectedMarkWidth(s session.Session) int {
-	return len([]rune(tr(s, scoreProtectedMark))) + 3
+func protectedMarkWidth(s session.Session, t Term) int {
+	return visWidth(t, tr(s, scoreProtectedMark)) + 3
 }
 
 // protectedMark flags a realm still under New Realm Protection, one space clear
@@ -137,7 +137,7 @@ func protectedMark(s session.Session, protected bool) string {
 
 // markWidth is the mark's column cost — "(O)" and whatever a translation makes
 // of the letter — so headings and blanks can be sized from one place.
-func markWidth(s session.Session) int { return len([]rune(tr(s, scoreOnlineMark))) + 2 }
+func markWidth(s session.Session, t Term) int { return visWidth(t, tr(s, scoreOnlineMark)) + 2 }
 
 // onlineMark marks a baron who is on the board: "(O)" set immediately to the
 // LEFT of their name, or a blank of the same width so the name column holds in
@@ -155,8 +155,8 @@ func markWidth(s session.Session) int { return len([]rune(tr(s, scoreOnlineMark)
 // parentheses are decoration and clear the 3:1 non-text minimum; the letter
 // cannot be the dim one, because it is the whole message — and it still carries
 // that message on a monochrome or ANSI-less session.
-func onlineMark(s session.Session, presence string) string {
-	width := markWidth(s)
+func onlineMark(s session.Session, t Term, presence string) string {
+	width := markWidth(s, t)
 	switch presence {
 	case presenceOnline:
 		return ansi.FgMagenta + "(" + ansi.FgBrightWhite + tr(s, scoreOnlineMark) +
@@ -177,16 +177,21 @@ func onlineMark(s session.Session, presence string) string {
 // onboarding — only a three-character minimum is enforced — so a long one used
 // to push the figures beside it out of true. The mark survives the clip: it is
 // the part carrying information the row cannot show twice.
-func nameCell(s session.Session, name, nameColor string, presence string, protected bool, width int) string {
-	mark := markWidth(s)
+//
+// Every width here is measured on the CALLER's terminal, not in runes.
+// ValidRealmName accepts any printable rune, so a realm may legally be named
+// "Iron—Fist"; the CP437 and plain-ASCII writers rewrite that em dash as two
+// hyphens below every layer that counts columns, and a rune count would have
+// walked the figures one column right for the default charset (the same defect
+// as #192 and #196). Hence Term rather than the session — see fitColumn.
+func nameCell(s session.Session, t Term, name, nameColor string, presence string, protected bool, width int) string {
+	mark := markWidth(s, t)
 	if protected {
-		mark += protectedMarkWidth(s)
+		mark += protectedMarkWidth(s, t)
 	}
-	if room := width - mark; len([]rune(name)) > room {
-		name = string([]rune(name)[:max(room, 0)])
-	}
-	return onlineMark(s, presence) + nameColor + name + ansi.Reset + protectedMark(s, protected) +
-		strings.Repeat(" ", max(width-mark-len([]rune(name)), 0))
+	name = fitColumn(t, name, max(width-mark, 0))
+	return onlineMark(s, t, presence) + nameColor + name + ansi.Reset + protectedMark(s, protected) +
+		strings.Repeat(" ", max(width-mark-visWidth(t, name), 0))
 }
 
 func idCell(id string) string {
@@ -207,17 +212,17 @@ func scoreTableRule(s session.Session) {
 	fmt.Fprintf(s, "%s\n", rule75(ansi.FgMagenta))
 }
 
-func scoreTableHead(s session.Session) {
+func scoreTableHead(s session.Session, t Term) {
 	// The heading sits over the names, which the online mark's gutter indents.
 	fmt.Fprintf(s, "%s%-*s%-*s %10s %11s %11s%s\n",
 		ansi.FgBrightWhite, scoreIDCellWidth, tr(s, "Id"),
-		scoreNameWidth, strings.Repeat(" ", markWidth(s))+tr(s, "Empire Name"),
+		scoreNameWidth, strings.Repeat(" ", markWidth(s, t))+tr(s, "Empire Name"),
 		tr(s, "Territory"), tr(s, "Score"), tr(s, "Net Worth"), ansi.Reset)
 	scoreTableRule(s)
 }
 
-func scoreTableRow(s session.Session, id, name, nameColor string, presence string, protected bool, land, score, nw int) {
-	scoreTableRowStr(s, id, name, nameColor, presence, protected,
+func scoreTableRow(s session.Session, t Term, id, name, nameColor string, presence string, protected bool, land, score, nw int) {
+	scoreTableRowStr(s, t, id, name, nameColor, presence, protected,
 		strconv.Itoa(land), strconv.Itoa(score), strconv.Itoa(nw))
 }
 
@@ -226,10 +231,10 @@ func scoreTableRow(s session.Session, id, name, nameColor string, presence strin
 // part and the one that drifts; how a number is spelled is each screen's own
 // choice, and they do not currently agree — the scores board and the target
 // list print bare figures where the recipient picker groups them.
-func scoreTableRowStr(s session.Session, id, name, nameColor, presence string, protected bool, land, score, nw string) {
+func scoreTableRowStr(s session.Session, t Term, id, name, nameColor, presence string, protected bool, land, score, nw string) {
 	fmt.Fprintf(s, "%s%s %s%10s%s %s%11s%s %s%11s%s\n",
 		idCell(id),
-		nameCell(s, name, nameColor, presence, protected, scoreNameWidth),
+		nameCell(s, t, name, nameColor, presence, protected, scoreNameWidth),
 		ansi.FgBrightMagenta, land, ansi.Reset,
 		ansi.FgBrightWhite, score, ansi.Reset,
 		ansi.FgWhite, nw, ansi.Reset)

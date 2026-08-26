@@ -430,7 +430,7 @@ func viewDiplomacy(s session.Session, w *ctx) Result {
 			})
 		}
 	})
-	writeRelationsTable(s, rows)
+	writeRelationsTable(s, w.Term, rows)
 	if len(pending) > 0 {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "Awaiting a reply:"), ansi.Reset)
 		for _, o := range pending {
@@ -466,7 +466,7 @@ func relationsText(s session.Session, held []string) string {
 // writeRelationsTable draws the "-*Relations*-" table itself. View Treaties and
 // the Diplomacy picker's "?" list share it, as they share one routine in the
 // original.
-func writeRelationsTable(s session.Session, rows []relationsRow) {
+func writeRelationsTable(s session.Session, t Term, rows []relationsRow) {
 	rule := rule75(ansi.FgBlue)
 	fmt.Fprintf(s, "\n%s-*%s%s%s*-%s\n\n", ansi.FgBlue, ansi.FgBrightWhite, tr(s, "Relations"), ansi.FgBlue, ansi.Reset)
 	fmt.Fprintf(s, "%s%-5s%-*s%s%s\n", ansi.FgBrightWhite,
@@ -482,7 +482,7 @@ func writeRelationsTable(s session.Session, rows []relationsRow) {
 		// meets it labelled.
 		fmt.Fprintf(s, "%s[%s%s%s]%s  %s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
 			ansi.Reset,
-			nameCell(s, r.name, ansi.FgBrightCyan, r.presence, r.protected, relationsNameWidth),
+			nameCell(s, t, r.name, ansi.FgBrightCyan, r.presence, r.protected, relationsNameWidth),
 			ansi.FgBrightBlue, r.relations, ansi.Reset)
 	}
 	fmt.Fprintln(s, rule)
