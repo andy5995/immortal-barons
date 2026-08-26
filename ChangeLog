@@ -1,4 +1,6 @@
 (in-progress:)
+  * The InterBBS Scores player tables put the score before the planet, as BRE does
+  * A name shortened to fit a column no longer widens it on a CP437 or ASCII terminal
   * The turn's income opens under BRE's rule instead of a titled bar
   * Source reorganized by subject, with no change to how the game plays
   * A League Number outside 1-999 in bbs.cfg is refused instead of accepted

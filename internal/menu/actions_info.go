@@ -152,10 +152,10 @@ func gameSetup(s session.Session, w *ctx) Result {
 		if coordBoard != "" {
 			coordinator = coordBoard
 		}
-		row("League Coordinator", game.FitColumn(coordinator, 50))
+		row("League Coordinator", fitColumn(w.Term, coordinator, 50))
 		// Last, so the group narrows from the whole league to the board the
 		// player is standing on.
-		row("This planet", game.FitColumn(c.BoardID, 50))
+		row("This planet", fitColumn(w.Term, c.BoardID, 50))
 		if declaration != "" {
 			row("League declaration", declaration)
 		}

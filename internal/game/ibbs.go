@@ -492,13 +492,21 @@ func (w *World) bounceVersion(p Packet) Packet {
 // board NAME when they carry no node number, so a shortened name could match the
 // wrong board; the only cap applied to the stored value is MaxNodeNameLen, which
 // sits far above any real one.
-func FitColumn(text string, width int) string {
+func FitColumn(text string, width int) string { return FitColumnMark(text, width, "…") }
+
+// FitColumnMark is FitColumn with the truncation marker named by the caller.
+// The marker's own width is part of the arithmetic, which is what makes this
+// worth a parameter: the CP437 and plain-ASCII writers rewrite "…" as three
+// dots BELOW every layer that counts columns, so a caller on either of those
+// has to fit the cell with the marker it will really get (#196).
+func FitColumnMark(text string, width int, mark string) string {
 	r := []rune(text)
 	if len(r) <= width {
 		return text
 	}
-	if width <= 1 {
+	m := []rune(mark)
+	if width <= len(m) {
 		return string(r[:max(0, width)])
 	}
-	return string(r[:width-1]) + "…"
+	return string(r[:width-len(m)]) + mark
 }

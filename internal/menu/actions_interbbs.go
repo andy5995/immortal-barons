@@ -46,7 +46,7 @@ func travelTimes(s session.Session, w *ctx) Result {
 	fmt.Fprintf(s, "%s\n", rule)
 	for _, p := range planets {
 		label, col := turnaroundLabel(s, p.days)
-		fmt.Fprintf(s, "%s%-*s%s%s%s\n", ansi.FgWhite, travelNameWidth, game.FitColumn(p.name, travelNameWidth-1), col, label, ansi.Reset)
+		fmt.Fprintf(s, "%s%-*s%s%s%s\n", ansi.FgWhite, travelNameWidth, fitColumn(w.Term, p.name, travelNameWidth-1), col, label, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", rule)
 	pause(s)

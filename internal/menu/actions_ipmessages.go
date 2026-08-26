@@ -100,7 +100,7 @@ func nodeLocation(n game.LeagueNode) string {
 
 // showPlanetList draws BRE's "List of Planets" table: a red-ruled board of
 // number, planet name and location.
-func showPlanetList(s session.Session, planets []game.LeagueNode) {
+func showPlanetList(s session.Session, t Term, planets []game.LeagueNode) {
 	rule := rule75(ansi.FgRed)
 	fmt.Fprintf(s, "%s\n", tr(s, "List of Planets"))
 	fmt.Fprintf(s, "%s\n", rule)
@@ -108,7 +108,7 @@ func showPlanetList(s session.Session, planets []game.LeagueNode) {
 	for _, p := range planets {
 		fmt.Fprintf(s, "%s%2d %s%-*s%s%s%s\n",
 			ansi.FgBrightRed, p.Number,
-			ansi.FgBrightWhite, planetNameWidth, game.FitColumn(p.Name, planetNameWidth-1),
+			ansi.FgBrightWhite, planetNameWidth, fitColumn(t, p.Name, planetNameWidth-1),
 			ansi.FgWhite, nodeLocation(p), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", rule)
@@ -138,7 +138,7 @@ func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.Leag
 		}
 		if r == '?' {
 			fmt.Fprintf(s, "?%s\n", ansi.Reset)
-			showPlanetList(s, planets)
+			showPlanetList(s, w.Term, planets)
 			continue
 		}
 		// Anything else is the start of a typed answer: echo it and read the rest

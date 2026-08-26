@@ -1256,10 +1256,12 @@ same column the planet table's metric ends on, so the two shapes agree), then
       Name                  Net Worth / Region     Planet
 ```
 
-**IB has these reversed** — `Planet` second at column 33 and the metric last, a
-66-column heading (#196). Not established: the `Planet` column's width and
-whether it truncates. Neither capture has a data row under that heading, so only
-the geometry above is proven.
+**IB draws this shape** as of 2026-08-26; it had the two reversed — `Planet`
+second at column 33 and the metric last, a 66-column heading — until #196, and
+its planet table ended on column 53 rather than 46. Not established: the
+`Planet` column's width and whether it truncates. Neither capture has a data row
+under that heading, so only the geometry above is proven; IB fits `Planet` to 21
+columns, which ends it on the rule.
 
 **The rule is WIDER than the table on purpose.** 72 columns of `─` over a
 46-column planet table and a 57-column player table. It is not misalignment and
