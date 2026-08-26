@@ -27,6 +27,7 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	target.Regions = game.RegionMix{Coastal: 100}
 	target.EnsureRegions()
 	target.Troopers, target.Turrets, target.Tanks = 0, 0, 0
+	target.Protection = 0 // else the strike is turned away and never fights
 
 	// Board A launches a group attack and writes its outbox to the exchange.
 	ga, cErr := wA.CreateGroupAttack(leader, "boardB", "Victim", game.GroupAttackHoursMin, game.AttackForce{Troopers: 100_000})
@@ -67,10 +68,10 @@ func TestPacketFileRoundTrip(t *testing.T) {
 	if news := wA.NewsToday[0]; !strings.Contains(news, "Victim") || !strings.Contains(news, "boardB") {
 		t.Errorf("bulletin should name the target and board, got %q", news)
 	}
-	// 15% casualties on the committed 100,000, survivors returned: 900,000 +
-	// 85,000. Deterministic under seed 1.
-	if leader.Troopers != 985_000 {
-		t.Errorf("leader should hold 985,000 troopers after the survivors return, got %d", leader.Troopers)
+	// The target had nothing standing, so the force is barely touched and the
+	// whole 100,000 comes home to the 900,000 left behind.
+	if leader.Troopers != 1_000_000 {
+		t.Errorf("leader should hold 1,000,000 troopers after the survivors return, got %d", leader.Troopers)
 	}
 	_ = ga
 }

@@ -1,4 +1,5 @@
 (in-progress:)
+  * An interplanetary strike's report names the side that held the field
   * An em dash in a realm name no longer moves the score table's figures on a CP437 or ASCII terminal
   * A realm under New Realm Protection is marked (P) beside its name
   * A realm under New Realm Protection keeps its letter on the attack and covert lists

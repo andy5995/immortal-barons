@@ -3465,7 +3465,12 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   plus `IP-RET-KILL`), because who to congratulate differs: a solo baron is
   named, a group strike is the planet's doing, and a whole-planet raid names no
   enemy realm. IB distinguishes individual from group, win from loss, in its own
-  wording; the finer subtypes are still open.
+  wording; the finer subtypes are still open. A strike that found no such realm,
+  or that was turned away by New Realm Protection, gets NO return line: those two
+  outcomes are not defeats in battle, and `ipnews.dat` has a category for a win
+  and one for a loss and none for either of them. IB announced both as failures
+  until #201, because the line was picked from `AttackResult.Won` rather than
+  from the resolved outcome.
   ones held at zero, each defaulting to 0. The sysop's **Attack Costs** level
   scales that price and BRE clamps the result at `AttackCostCap`
   (200,000,000 gold); see "The two cost levels" below.
@@ -4369,8 +4374,13 @@ pirate-raid outcomes (PIRATEWIN / PIRATELOSS), tax riots (RIOTS), and civil-war
 collapse (CIVILWAR — `postCivilWarNews`).
 
 An interplanetary strike is reported on **both** planets (#108): the defending
-board posts what the raid took and cost, or that it was repelled, and the
-attacker's board posts its return. An INDIVIDUAL strike is named on both sides —
+board posts what the raid took and cost, or that it was held off, and the
+attacker's board posts its return. **Every one of those lines, and the defender's
+own recap, is worded from the single outcome the battle resolved to, and says
+which side held the field before it counts any casualties** — a defender who
+beats a strike off still loses units, and pairing a bare "repelled" with a count
+of the reader's own dead reads as a contradiction (#201). The original settles
+the battle first and itemises afterwards (`BRE.OVR resolve_received_invasion`). An INDIVIDUAL strike is named on both sides —
 the packet carries `RemoteAttack.FromEmpire`, so the defending planet reads
 "Ironhold of Alpha" and not merely "Alpha" — while a GROUP attack is anonymous
 on both, since it is the planet's doing and naming one of several contributors

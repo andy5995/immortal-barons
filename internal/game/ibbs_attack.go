@@ -543,13 +543,27 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	}
 	if !won {
 		res.Outcome = OutcomeRepelled
-		target.addEvent(fmt.Sprintf("You repelled an interplanetary strike from %s. You lost %d of your forces.",
-			atk.FromBoard, res.Enemy.Total()))
+		// Say who held the field BEFORE the casualties, and say whose the
+		// casualties are. A defender who beat the strike off still loses units,
+		// and pairing a bare "repelled" with a count of the reader's own dead
+		// reads as a contradiction (#201) — the original settles the battle first
+		// and itemises afterwards (BRE.OVR resolve_received_invasion). Everyone
+		// who stood is told: a planet-wide strike bleeds every realm, and only
+		// the strongest of them was hearing about it.
+		for _, e := range defenders {
+			e.addEvent(fmt.Sprintf("An interplanetary strike from %s was beaten off. Your side held the field and lost %d units doing it.",
+				atk.FromBoard, res.Enemy.Total()))
+		}
 		// The whole planet hears it: an interplanetary exchange is planet against
 		// planet, and until this the defending board printed nothing at all while
 		// its scores moved (#108).
-		w.postNews(fmt.Sprintf("%s repelled a strike by %s, losing %s of its forces.",
-			target.Name, raider(atk), numfmt.Comma(int64(res.Enemy.Total()))))
+		if planetWide {
+			w.postNews(fmt.Sprintf("The whole planet held the field against a strike by %s, losing %s of our forces.",
+				raider(atk), numfmt.Comma(int64(res.Enemy.Total()))))
+		} else {
+			w.postNews(fmt.Sprintf("%s held the field against a strike by %s, losing %s of its own forces.",
+				target.Name, raider(atk), numfmt.Comma(int64(res.Enemy.Total()))))
+		}
 		return res
 	}
 	// Overwhelmed: take a bite of land proportional to the margin, scaled by what
@@ -588,14 +602,14 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 			e.syncLand()
 		}
 		land += take
-		e.addEvent(fmt.Sprintf("An interplanetary strike from %s took %d regions and %d of your forces!",
+		e.addEvent(fmt.Sprintf("An interplanetary strike from %s broke through. Your side lost the field, %d regions and %d units.",
 			atk.FromBoard, take, res.Enemy.Total()))
 	}
 	if planetWide {
-		w.postNews(fmt.Sprintf("%s struck the whole planet, carrying off %s regions and %s of its forces!",
+		w.postNews(fmt.Sprintf("%s struck the whole planet, carrying off %s regions and %s of our forces!",
 			raider(atk), numfmt.Comma(int64(land)), numfmt.Comma(int64(res.Enemy.Total()))))
 	} else {
-		w.postNews(fmt.Sprintf("%s overran %s, carrying off %s regions and %s of its forces!",
+		w.postNews(fmt.Sprintf("%s overran %s, carrying off %s of its regions and %s of its forces!",
 			raider(atk), target.Name, numfmt.Comma(int64(land)), numfmt.Comma(int64(res.Enemy.Total()))))
 	}
 	res.LandTaken = land
