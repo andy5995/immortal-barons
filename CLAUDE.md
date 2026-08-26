@@ -108,7 +108,7 @@ stream). Front-ends attach different streams; the engine is unchanged.
   the in-game menu — it renders the same `internal/help` topics.
 - `internal/i18n` — dependency-free gettext-PO reader for UI strings
 - `internal/numfmt` — renders large numbers for display (locale thousands
-  separator; a 4-decimal `1.8473B` form at a billion). It sits below both
+  separator; grouped digits in full at any size, no float). It sits below both
   `game` and `menu` because the engine writes player-visible event text and
   cannot import `menu`
 

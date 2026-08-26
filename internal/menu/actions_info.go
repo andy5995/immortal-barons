@@ -179,8 +179,8 @@ func gameSetup(s session.Session, w *ctx) Result {
 	row("Food market", foodMarketStr(s, c))
 	// Worth a line of its own: gold earned past this is destroyed, and a player
 	// who does not know the figure only finds out by losing some.
-	// Whole billions, not the 4-decimal display form: the cap is SET in billions,
-	// so the fraction is always zeros.
+	// The cap is held in whole billions, so the row names the count and the unit
+	// rather than spelling out ten digits.
 	row("Most gold you can hold", fmt.Sprintf(tr(s, "%sB in hand, and again in the bank"),
 		comma(w.MoneyCapBillions())))
 	pause(s)

@@ -151,16 +151,16 @@ func TestSystemMenuReachesEmpireStatus(t *testing.T) {
 	}
 }
 
-// A treasury past a billion reaches the block in the abbreviated form. The
-// formatter is unit-tested on its own; this pins that the block actually routes
-// gold through it, which is where the digits used to run past the column.
-func TestEmpireStatusAbbreviatesBillions(t *testing.T) {
+// A treasury past a billion reaches the block in full, grouped, the way BRE
+// prints its own `Bank: 2,000,000,000`. The formatter is unit-tested on its
+// own; this pins that the block actually routes gold through it.
+func TestEmpireStatusPrintsBillionsInFull(t *testing.T) {
 	w := newWorld()
 	p := w.Player()
 	p.Gold, p.Bank = 1_847_392_104, 12_500_000_000
 
 	out := strings.Join(statusLines(w), "\n")
-	for _, want := range []string{"Gold: 1.8473B", "Bank: 12.5000B"} {
+	for _, want := range []string{"Gold: 1,847,392,104", "Bank: 12,500,000,000"} {
 		if !strings.Contains(out, want) {
 			t.Errorf("block is missing %q:\n%s", want, out)
 		}

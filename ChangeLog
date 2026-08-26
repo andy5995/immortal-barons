@@ -1,5 +1,6 @@
 (in-progress:)
   * The Money Cap is gone from the Configuration Editor; a saved value still applies
+  * A figure of a billion or more is printed in full, as the original prints it
   * A pirate raider is marked with its ASCII arrow on a 7-bit ASCII terminal
   * The Daily Bulletin box closes square on a CP437 or ASCII terminal
   * A Max Tax Rate of 0 stops the computer barons taxing, as it already stopped players

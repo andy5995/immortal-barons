@@ -113,6 +113,28 @@ Backgrounds: `40`–`47` (and `100`+) — e.g. `44` = blue background. Border ru
 mix the single horizontal `─` (U+2500) and double `═` (U+2550) — e.g. a short
 `═══` accent set inside a longer `───` line.
 
+## How BRE prints a figure of a billion or more
+
+**In full, with its thousands comma-grouped** — no suffix, no decimal form.
+`Bank: 2,000,000,000` appears 8,581 times in `cap/121125-666H4H_Camembert_Public.cap`
+alongside `You have 0 gold in hand and 2,000,000,000 gold in the bank.`, and the
+bank-history rows run `09/25/2013   $1,001,235,538` / `Today        $1,846,153,847`.
+2,000,000,000 is the money cap, so that is the top of BRE's own range and its
+screens are sized for the thirteen characters.
+
+**One exception, and it is a prompt bound rather than a displayed figure.**
+`cap/shsbbs.cap` carries `How many Jets? (0; 1.0737B):` on the trade deal's
+Request side — 1,073,741,824, i.e. 2^30, the sentinel that stands in for "what
+the other realm holds is not yours to see". That is the only decimal `B` form in
+any capture here. IB prints no ceiling at all on that prompt (see Send Trade
+Deal, below).
+
+**Abbreviated columns use a lowercase suffix, and it goes `k` then `m`.** The
+Daily Bulletin's third row is `Total Net Worth:  2720k` with `Change: +616k`,
+and the scores columns put `1962k` beside `12m` in the same table. No capture
+shows either column at billion scale, so BRE's suffix above `m` is unknown; a
+lowercase `b` appears nowhere.
+
 ## Status bar (bottom line, every screen)
 
 Captured 2026-08-16. The whole line carries a `44` blue background. It opens

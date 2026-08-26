@@ -395,7 +395,7 @@ func TestGoldLostToTheCapRaisesAnEvent(t *testing.T) {
 		t.Fatalf("got %d new events, want exactly one", len(e.Events)-before)
 	}
 	msg := e.Events[len(e.Events)-1].Text
-	for _, want := range []string{"4,000", "a matured investment", "2.0000B"} {
+	for _, want := range []string{"4,000", "a matured investment", "2,000,000,000"} {
 		if !strings.Contains(msg, want) {
 			t.Errorf("event %q should name %q — the amount lost and where it came from", msg, want)
 		}

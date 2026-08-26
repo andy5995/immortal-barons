@@ -2467,16 +2467,32 @@ section is a record of what was claimed and how it was settled, so the word
   holds gold in hand at the cap and files the notice; `Withdraw` is the
   deliberate exception, since it draws only what fits and leaves the remainder
   banked. BRE reports nothing here — it just stops counting.
-- **Figures of a billion or more are displayed abbreviated**, as a fixed
-  4-decimal form with a capital B: 1,000,000,000 renders `1.0000B`,
-  1,847,392,104 renders `1.8473B`, and `MoneyCapMax` renders `999.0000B`. The
-  fraction is truncated, never rounded, so a figure just under the next
-  billion never reads as having reached it. Below a billion nothing changes —
-  full digits with the locale thousands separator. The rule lives in one place
-  (`internal/numfmt`, which the engine and the menu layer both call) and applies
-  to any figure, not only gold, so a unit count that runs into the billions
-  abbreviates the same way. German and Russian take
-  the comma as the decimal mark.
+- **Figures of a billion or more are printed in full, grouped — BRE-VERIFIED.**
+  1,000,000,000 renders `1,000,000,000` and 1,847,392,104 renders
+  `1,847,392,104`, with the locale thousands separator (de `1.847.392.104`, ru
+  `1 847 392 104`). This is what the original does at the top of its own range:
+  `Bank: 2,000,000,000` and a bank-history row `Today        $1,846,153,847`,
+  both read off live captures (`cap/121125-666H4H_Camembert_Public.cap`,
+  `cap/20240527-134Pho_Lazarus_Public.cap`); 8,581 occurrences of the capped
+  2,000,000,000 in the first of those, and no figure anywhere in the captures
+  carrying a decimal `B` suffix except the one noted below. The rule lives in one
+  place (`internal/numfmt`, which the engine and the menu layer both call) and
+  applies to any figure, not only gold. No float is involved at any size.
+
+  IB rendered a billion and over as a fixed 4-decimal `1.8473B` through v0.0.7
+  (#205). The form was not invented: BRE prints `How many Jets? (0; 1.0737B):`
+  — 2^30, the trade-deal Request sentinel — in `cap/shsbbs.cap`, the only `B`
+  form in any capture. IB no longer shows that prompt's ceiling at all
+  (`promptSuggestedOpen`), so nothing is left that needs it.
+
+  **The Daily Bulletin's `Total Net Worth` keeps its `k` suffix past a billion**
+  — 1,373,000,000 renders `1,373,000k` (`numfmt.Abbrev`). BRE abbreviates that
+  column (`Total Net Worth:  2720k`, `Change: +616k`) and no capture shows it at
+  billion scale, so the continuation is **IB's choice**, taken because one form
+  down a column beats a thirteen-digit number appearing mid-list. BRE
+  additionally switches to an `m` suffix at millions in its scores columns
+  (`1962k` beside `12m`) where IB stays on `k` and comma-groups; that divergence
+  predates this and stays.
 - **Food market (issue #19):** food is bought and sold against a **shared
   planet-wide pool** that starts each day at `FoodMarketDailySupply` (1,000,000
   units, from BRE's live "~1,001,452 available today"). Buying depletes the pool
