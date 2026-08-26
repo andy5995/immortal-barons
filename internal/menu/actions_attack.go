@@ -430,28 +430,62 @@ var pirateColors = []struct {
 	{"Ammonians", ansi.FgBrightCyan},       // 11 light cyan
 }
 
-// pirateRaiderMark hugs the name of whichever faction raided the player since
+// pirateRaiderMark FOLLOWS the name of whichever faction raided the player since
 // their last play (Empire.RaidersThisTurn) — IB's own addition, not BRE's;
 // see the online-baron mark it borrows its treatment from (actions_info.go).
 // Translatable like scoreOnlineMark, though an arrow is unlikely to need it.
-const pirateRaiderMark = "->"
+// CP437 174, pointing back at the name it marks — an arrow drawn `->` to the
+// RIGHT of a name points away from it at nothing. It is the head alone: the
+// guillemet is a text glyph and sits off the horizontal centerline the rule
+// characters are drawn on, so `«═` reads as two separate marks rather than one
+// arrow. An ASCII session gets pirateRaiderMarkASCII instead: session/ascii.go
+// would render the guillemet as a bare `<`, which reads as a stray character
+// rather than a mark.
+//
+// It sat to the LEFT of the name until 2026-08-25, with every unmarked row
+// holding the column blank so the names stayed in one column. That reserved
+// indent read as a formatting fault on a screen where nothing had raided (#197),
+// which is the common case; the mark trails the name now and an unmarked row
+// carries nothing at all.
+const pirateRaiderMark = "«"
 
-// raiderMark renders the mark, or a blank of the same width — reserving the
-// column so an unmarked row's name still starts where a marked one's does.
-// The shaft is decoration, like the online mark's parens (dark gray,
-// FgBrightBlack); the head is what carries the meaning, so it takes the same
-// brighter gray (FgWhite) the online mark's letter does — measured 9.04:1 on
-// VGA/CP437 and 11.54:1 on xterm against black, versus dark gray's 2.82:1 /
-// 5.32:1, so the part that must read alone gets the color that clears 4.5:1.
+// pirateRaiderMarkASCII is the mark for a session held to 7-bit ASCII. Not
+// translated: such a session is held to English (see session/ascii.go). The
+// shaft is welcome here — `<` and `=` are both drawn on the baseline, which is
+// the alignment the CP437 pair lacks.
+const pirateRaiderMarkASCII = "<="
+
+// raiderMark renders the mark after a single space, and nothing whatsoever for
+// a faction that did not raid.
+//
+// The mark carries its meaning alone, so it takes the same brighter gray
+// (FgWhite) the online mark's letter does — measured 9.04:1 on VGA/CP437 and
+// 11.54:1 on xterm against black, where dark gray manages 2.82:1 / 5.32:1. A
+// translation that reinstates a shaft (`<-`) still gets the online mark's split:
+// rule characters are decoration and take the dark gray.
 func raiderMark(s session.Session, raided bool) string {
-	mark := []rune(tr(s, pirateRaiderMark))
 	if !raided {
-		return strings.Repeat(" ", len(mark))
-	}
-	if len(mark) == 0 {
 		return ""
 	}
-	return ansi.FgBrightBlack + string(mark[0]) + ansi.FgWhite + string(mark[1:]) + ansi.Reset
+	mark := tr(s, pirateRaiderMark)
+	if session.IsASCII(s) {
+		mark = pirateRaiderMarkASCII
+	}
+	var b strings.Builder
+	b.WriteString(" ")
+	for _, r := range mark {
+		if r == '═' || r == '-' || r == '=' {
+			b.WriteString(ansi.FgBrightBlack)
+		} else {
+			b.WriteString(ansi.FgWhite)
+		}
+		b.WriteRune(r)
+	}
+	if b.Len() == 1 {
+		return ""
+	}
+	b.WriteString(ansi.Reset)
+	return b.String()
 }
 
 // raidedSlot reports whether slot is in raiders — the factions that hit the
@@ -488,7 +522,7 @@ func attackPirates(s session.Session, w *ctx) Result {
 		if i < len(pirateColors) {
 			color = pirateColors[i].Color
 		}
-		fmt.Fprintf(s, "  %d) %s%s%s%s\n", i+1, raiderMark(s, raidedSlot(raiders, i)), color, name, ansi.Reset)
+		fmt.Fprintf(s, "  %d) %s%s%s%s\n", i+1, color, name, ansi.Reset, raiderMark(s, raidedSlot(raiders, i)))
 	}
 	fmt.Fprintf(s, "  0) %s\n", tr(s, "Quit"))
 	f := ChoiceQuit(s, len(names))

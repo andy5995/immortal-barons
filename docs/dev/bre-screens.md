@@ -311,13 +311,23 @@ You lost 150 Troopers, 350 Jets, and 1000 Tanks.
 Then the captured-region picker (above) opens for the won regions.
 
 **IB marks a faction that raided you since your last play.** BRE's list has
-no such flag. IB writes `->` immediately left of the name — same idiom and
-color treatment as the online mark (`(O)`, above): the shaft is `90` dark gray
-(decoration) and the arrowhead is `37` gray (the part that must carry the
-meaning alone), reserving the same width on every row so an unmarked faction's
-name still starts in the same column. The mark is cleared and reset each time
-the income report runs, so it flags only the raiders named in that turn's
-report, not an older one.
+no such flag. IB writes `«` after the name, one space clear of it — CP437 174,
+pointing back at the name it marks, in the `37` gray the online mark (`(O)`,
+above) gives the part that must carry its meaning alone. A faction that did not
+raid carries nothing at all.
+
+**The head is drawn without a shaft on purpose.** `«` is a text glyph and sits
+off the horizontal centerline `═`/`─` are drawn on, so `«═` reads as two marks
+side by side rather than as one arrow. A session held to 7-bit ASCII gets `<=`
+instead, where both characters share a baseline and the shaft costs nothing —
+the general substitution would have reduced the guillemet to a bare `<`. The mark is
+cleared and reset each time the income report runs, so it flags only the raiders
+named in that turn's report, not an older one.
+
+The mark sat to the LEFT of the name until 2026-08-25, with every unmarked row
+holding that column blank so the names lined up. On the common screen — nothing
+raided you — the whole list read as indented for no reason, which is how it was
+reported (#197).
 
 **IB status (2026-08-09):** matched, with three recorded divergences. IB prints
 the gold figure in full where BRE abbreviates it (`78k Gold`), so a full tally
