@@ -22,7 +22,7 @@ func TestPrintScoresBREHeader(t *testing.T) {
 	printScores(f, w)
 	out := f.out.String()
 	plain := stripANSI(out)
-	for _, want := range []string{"Immortal Barons", "Id", "Empire Name", "Territory", "Score", "Net Worth", "(dead)", "[A]"} {
+	for _, want := range []string{"Immortal Barons", "Id", "Empire Name", "Territory", "Score", "Net Worth", "(dead)", "(A)"} {
 		if !strings.Contains(plain, want) {
 			t.Errorf("scores output missing %q:\n%s", want, plain)
 		}

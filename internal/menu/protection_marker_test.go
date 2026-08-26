@@ -37,8 +37,8 @@ func protectionWorld(t *testing.T) (*ctx, *game.Empire, *game.Empire) {
 }
 
 // A realm under New Realm Protection is listed as a target WITH its own slot
-// letter and with the (P) flag after its name (#214). It carried no letter at
-// all until 2026-08-26, which said the row was different without saying how.
+// letter, bracketed (#214). It carried no letter at all until 2026-08-26, which
+// said the row was different without saying how.
 func TestProtectedRealmIsListedWithItsLetterAndFlag(t *testing.T) {
 	w, shielded, open := protectionWorld(t)
 	// RETURN aborts at the target prompt, so the list is drawn and nothing else.
@@ -53,15 +53,16 @@ func TestProtectedRealmIsListedWithItsLetterAndFlag(t *testing.T) {
 	if row == "" {
 		t.Fatalf("the shielded realm %q is missing from the list:\n%s", shielded.Name, plain)
 	}
+	// The BRACKETS are the flag: a shielded realm keeps its own slot letter and
+	// wears it in [] where every other realm wears (). One glyph, no marker after
+	// the name, and it reads on a monochrome terminal.
 	if !strings.Contains(row, "["+shielded.Letter()+"]") {
-		t.Errorf("the shielded realm lost its slot letter %q: %q", shielded.Letter(), row)
+		t.Errorf("the shielded realm is not bracketed: %q", row)
 	}
-	if !strings.Contains(row, "(P)") {
-		t.Errorf("the shielded realm carries no protection flag: %q", row)
-	}
-	// An unshielded realm must not pick the flag up as a side effect.
-	if other := findLine(plainLines(plain), open.Name); strings.Contains(other, "(P)") {
-		t.Errorf("an unshielded realm was flagged: %q", other)
+	// An unshielded realm must not pick the brackets up as a side effect.
+	other := findLine(plainLines(plain), open.Name)
+	if !strings.Contains(other, "("+open.Letter()+")") {
+		t.Errorf("an unshielded realm should wear parentheses: %q", other)
 	}
 }
 
@@ -107,17 +108,17 @@ func TestProtectedRemoteBaronIsListedAndRefused(t *testing.T) {
 	p := w.Player()
 	p.Agents, p.Protection = 50, 0
 
-	// "?4\r" names The Eclipse by its roster number, then "2\r" picks the
-	// protected baron off the baron list.
-	f := &fakeSession{keys: []rune("?4\r2\r")}
+	// "?4\r" names The Eclipse by its roster number, then "B" picks the protected
+	// baron off the lettered baron list.
+	f := &fakeSession{keys: []rune("?4\rB")}
 	doTerrorOp(f, w, game.TerrorOpSpy)
 	plain := stripANSI(f.out.String())
 
 	if !strings.Contains(plain, "Terrorize which baron?") {
 		t.Fatalf("the script never reached the baron list:\n%s", plain)
 	}
-	if !strings.Contains(plain, "Fresh Meat (P)") {
-		t.Errorf("the protected baron is not listed with its flag:\n%s", plain)
+	if !strings.Contains(plain, "[B]") || !strings.Contains(plain, "Fresh Meat") {
+		t.Errorf("the protected baron is not listed with a bracketed letter:\n%s", plain)
 	}
 	if !strings.Contains(plain, "Iron Dominion") {
 		t.Errorf("the open baron went missing from the list:\n%s", plain)
@@ -176,7 +177,7 @@ func TestInterplanetarySpyingIsRefusedOnAProtectedBaron(t *testing.T) {
 			{Empire: "Open Realm", Land: 100, NetWorth: 5000, Score: 900},
 		}})
 	})
-	f := &fakeSession{keys: []rune("1\r" + "1\r" + " ")}
+	f := &fakeSession{keys: []rune("1\r" + "A" + " ")}
 	doTerrorOp(f, w, game.TerrorOpSpy)
 	out := stripANSI(f.out.String())
 

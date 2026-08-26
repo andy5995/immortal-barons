@@ -156,7 +156,7 @@ func writePickRoster(s session.Session, t Term, rows []pickRow, opts pickOpts) {
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, title, ansi.FgBrightMagenta, ansi.Reset)
 	scoreTableHead(s, t)
 	for _, r := range rows {
-		scoreTableRowStr(s, t, scoreID(string(r.letter)), r.name, ansi.FgBrightWhite, r.presence, r.protected,
+		scoreTableRowStr(s, t, scoreID(string(r.letter), r.protected), r.name, ansi.FgBrightWhite, r.presence,
 			comma(r.land), comma(r.score), comma(r.nw))
 	}
 	scoreTableRule(s)

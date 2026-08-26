@@ -4614,17 +4614,22 @@ checking IB against a capture:
   line — but the tasks are IB's, in IB's words, and only the ones with something
   to do are printed. Half of BRE's list belongs to file formats IB does not
   have.
-- **A realm's id is `[A]`, where BRE's score tables print `(A)`.** See "The
-  slot is assigned once and never moves" above for why. `-*Relations*-` already
-  brackets its id in the original, so that screen is unchanged.
+- **A realm under New Realm Protection wears its slot letter in BRACKETS —
+  `[C]` where every other realm is `(C)` (#214).** BRE flags nothing and IB used
+  to withhold the letter entirely, which said a row was different without saying
+  how. The bracket is the whole flag: no marker follows the name, the row keeps
+  its width, and the SHAPE carries it, so it survives a monochrome terminal and
+  a reader who cannot separate the two colours. Everything unshielded keeps
+  BRE's own parentheses. Picking the letter is still answered with the refusal,
+  so the shield is stated twice rather than mimed.
+
+  `-*Relations*-` is the exception and is unchanged: the original brackets every
+  id on that screen, so a bracket cannot mean anything else there. It is a
+  standings roster rather than a picker, and the flag belongs where a realm is
+  chosen.
 - **An interplanetary recipient letter numbers the rows of a scores packet**,
   where BRE's is the realm's own slot on its home planet, gaps and all. See "IP
   Messages" above: the slot does not ride the wire.
-- **A realm under New Realm Protection is flagged `(P)` after its name** on
-  every roster IB draws, and keeps its selection letter on the attack and covert
-  target lists (#214). BRE flags nothing and IB used to withhold the letter,
-  which said a row was different without saying how. Picking the letter is
-  answered with the refusal, so the shield is stated twice rather than mimed.
 
 None of these is an oversight to correct back.
 

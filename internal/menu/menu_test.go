@@ -836,16 +836,18 @@ func TestTargetLettersDoNotShiftWhenRealmsBecomeUnpickable(t *testing.T) {
 	// The shielded pair here are ALLIED, which is the case that still shows no
 	// letter; a realm under protection keeps its own (see the #214 tests).
 	f := &fakeSession{keys: []rune("C")}
-	name, chosen := pickAttackTarget(f, Term{UTF8: true}, rows, "Choose a target")
+	name, chosen := pickAttackTarget(f, Term{UTF8: true}, rows, attackPrompts("Choose a target"))
 	if !chosen || name != "Obsidian Sovereigns" {
 		t.Errorf("pressing C chose %q (chosen=%v), want the third realm", name, chosen)
 	}
 	out := f.out.String()
 	plain := stripANSI(out)
-	if !strings.Contains(plain, "[C]") || !strings.Contains(plain, "[D]") {
+	// Parentheses: none of these is under protection, which is what brackets
+	// mean now (#214).
+	if !strings.Contains(plain, "(C)") || !strings.Contains(plain, "(D)") {
 		t.Errorf("the two pickable realms should keep their own slot letters C and D:\n%s", plain)
 	}
-	if strings.Contains(plain, "[A]") || strings.Contains(plain, "[B]") {
+	if strings.Contains(plain, "(A)") || strings.Contains(plain, "(B)") {
 		t.Errorf("A and B belong to the allied realms and must not be reused:\n%s", plain)
 	}
 }
@@ -858,7 +860,7 @@ func TestAnAlliedRealmsLetterSelectsNothing(t *testing.T) {
 		{name: "Obsidian Sovereigns", letter: "B", attackable: true},
 	}
 	f := &fakeSession{keys: []rune("A")}
-	if name, chosen := pickAttackTarget(f, Term{UTF8: true}, rows, "Choose a target"); chosen {
+	if name, chosen := pickAttackTarget(f, Term{UTF8: true}, rows, attackPrompts("Choose a target")); chosen {
 		t.Errorf("pressing an allied realm's letter chose %q; it should abort", name)
 	}
 }

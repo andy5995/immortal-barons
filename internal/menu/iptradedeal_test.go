@@ -37,7 +37,7 @@ func TestInterplanetarySendTradeDealShipsToAnotherPlanet(t *testing.T) {
 
 	// Planet, baron, then the goods: key 1 is Troopers in the basket builder,
 	// 5000, done, then confirm.
-	f := &fakeSession{keys: []rune("1\r" + "1\r" + "1" + "5000\r" + "0" + "y" + " ")}
+	f := &fakeSession{keys: []rune("1\r" + "A" + "1" + "5000\r" + "0" + "y" + " ")}
 	sendIPTradeDeal(f, w)
 	out := stripANSI(f.out.String())
 
@@ -84,7 +84,7 @@ func TestInterplanetaryDealRefusesAProtectedRealm(t *testing.T) {
 	before := 0
 	w.With(func() { before = w.Player().Troopers })
 
-	f := &fakeSession{keys: []rune("1\r" + "2\r" + " ")}
+	f := &fakeSession{keys: []rune("1\r" + "B" + " ")}
 	sendIPTradeDeal(f, w)
 	out := stripANSI(f.out.String())
 

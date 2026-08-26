@@ -52,9 +52,10 @@ func TestScoreRowsHoldTheirColumnsWithAnExpandedName(t *testing.T) {
 			seen := 0
 			for _, ln := range strings.Split(out, "\n") {
 				ln = strings.TrimRight(ln, "\r")
-				// A data row is the only line that opens with a bracketed id.
+				// A data row is the only line that opens with an id — (A) for an
+				// ordinary realm, [A] for one under protection (#214).
 				r := []rune(ln)
-				if len(r) < 3 || r[0] != '[' || r[2] != ']' {
+				if len(r) < 3 || !((r[0] == '(' && r[2] == ')') || (r[0] == '[' && r[2] == ']')) {
 					continue
 				}
 				seen++

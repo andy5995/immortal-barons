@@ -213,24 +213,25 @@ Id  Empire Name                          Territory     Score    Net Worth
 Choose a Target [A-Y,?=List RETURN to Abort]
 ```
 
-**IB brackets the id: `[A]`, where the capture reads `(A)`** (#214). The
-divergence is deliberate and it is not local to this screen — See Scores and the
-recipient picker draw the same table and change with it, and `-*Relations*-`
-already brackets its id in the original. Parentheses now say something else on a
-roster row: `(O)` for a baron who is online and `(P)` for a realm under New Realm
-Protection, so the shape alone separates the key a player presses from the state
-being reported. Spelling the same id two ways in one game is what this trades
-away.
+**IB keeps the capture's `(A)`, and BRACKETS the id of a realm under New Realm
+Protection: `[C]` (#214).** That bracket is the entire flag — nothing follows the
+name, the row keeps its width, and the shape carries the meaning, so it reads on
+a monochrome terminal and to anyone who cannot separate the two colours. BRE
+flags nothing; it has no need to, since its own list is drawn before any of this
+is decided. The divergence is not local to this screen: See Scores, the covert
+target list and the recipient picker draw the same table and change with it.
 
-**IB flags a realm under New Realm Protection `(P)`**, one space after the name,
-inside the name field so the figures beside it hold — the same shape as the
-pirate raider mark, and the same reason it reserves no column on an unflagged
-row. BRE flags nothing; it has no need to, since its own list is drawn before
-any of this is decided. The realm KEEPS its selection letter and pressing it is
-answered with the refusal by name. IB withheld the letter until 2026-08-26,
-which told a player that something about the row was different without saying
-what. An ALLIED realm still shows no letter: that standing belongs to the
-diplomacy screens, and the player made it themselves.
+The realm KEEPS its selection letter and pressing it is answered with the
+refusal by name. IB withheld the letter until 2026-08-26, which told a player
+that something about the row was different without saying what; it then spent a
+day flagging `(P)` after the name and bracketing EVERY id, which spelled one id
+two ways for a flag the bracket could carry on its own. An ALLIED realm still
+shows no letter: that standing belongs to the diplomacy screens, and the player
+made it themselves.
+
+`-*Relations*-` is the one screen unchanged by this. The original brackets every
+id there, so a bracket cannot mean protection on it, and it is a standings
+roster rather than a picker — the flag belongs where a realm is chosen.
 
 ### Force selection
 
@@ -1193,6 +1194,11 @@ cannot reach a realm at home. It then prints your standing with the planet
 chosen. `select_player` (0x022a0c) takes a letter A-Y, a raw index into that
 planet's 25-slot roster with the gaps left in, validated against the slot's own
 id being non-zero; `?` lists the roster and `/` searches it by name.
+
+**Planets are chosen by name or number, players by LETTER** — that split is the
+original's throughout, and IB matches it as of 2026-08-26. Its interplanetary
+baron list was numbered until then, the last place a player was picked any other
+way; it draws the same lettered score table the local target lists use now.
 
 **A flat fee, no day span, no treaty.** It calls the same cost routine the local
 deal does (`calculate_trade_offer_cost`, 0x0513e7) and then simply stops: no

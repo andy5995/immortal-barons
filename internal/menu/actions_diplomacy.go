@@ -482,7 +482,7 @@ func writeRelationsTable(s session.Session, t Term, rows []relationsRow) {
 		// meets it labelled.
 		fmt.Fprintf(s, "%s[%s%s%s]%s  %s%s%s%s\n", ansi.FgBlue, ansi.FgBrightWhite, r.id, ansi.FgBlue,
 			ansi.Reset,
-			nameCell(s, t, r.name, ansi.FgBrightCyan, r.presence, r.protected, relationsNameWidth),
+			nameCell(s, t, r.name, ansi.FgBrightCyan, r.presence, relationsNameWidth),
 			ansi.FgBrightBlue, r.relations, ansi.Reset)
 	}
 	fmt.Fprintln(s, rule)

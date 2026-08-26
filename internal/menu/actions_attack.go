@@ -197,7 +197,7 @@ func regularAttack(s session.Session, w *ctx) Result {
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	name, chosen := pickAttackTarget(s, w.Term, rows, tr(s, "Attack which realm? (letter, RETURN to abort)"))
+	name, chosen := pickAttackTarget(s, w.Term, rows, attackPrompts(tr(s, "Attack which realm? (letter, RETURN to abort)")))
 	if !chosen {
 		return Stay
 	}
@@ -288,27 +288,47 @@ func warnTrimmedForce(s session.Session, trimmed bool) {
 // rather than behaving like a mistyped key. An ALLIED realm still shows no
 // letter — that standing is the diplomacy screens' to report, and the alliance
 // is the player's own doing.
-func pickAttackTarget(s session.Session, t Term, rows []targetRow, prompt string) (name string, chosen bool) {
+// targetPrompt is the wording one target list uses: what it asks, what it says
+// when a shielded realm is picked, and what it says when nothing on the list can
+// be chosen at all. A parameter because the same table serves a strike, a covert
+// op and an interplanetary trade deal (#195), and only the words differ.
+type targetPrompt struct {
+	ask     string
+	refuse  string // takes the realm name
+	nothing string
+}
+
+// attackPrompts is the wording for the war lists, and the default everywhere the
+// caller has nothing more specific to say.
+func attackPrompts(ask string) targetPrompt {
+	return targetPrompt{
+		ask:     ask,
+		refuse:  "%s is under New Realm Protection and cannot be targeted yet.",
+		nothing: "None of these realms can be attacked — they are protected or allied with you.",
+	}
+}
+
+func pickAttackTarget(s session.Session, t Term, rows []targetRow, p targetPrompt) (name string, chosen bool) {
 	scoreTableHead(s, t)
 	byLetter := make(map[string]targetRow, len(rows))
 	attackable := 0
 	for _, r := range rows {
 		id := "" // no selection letter for a realm allied with the player
 		if r.attackable || r.protected {
-			id = scoreID(r.letter)
+			id = scoreID(r.letter, r.protected)
 			byLetter[r.letter] = r
 		}
 		if r.attackable {
 			attackable++
 		}
-		scoreTableRow(s, t, id, r.name, ansi.FgBrightWhite, r.presence, r.protected, r.land, r.score, r.netWorth)
+		scoreTableRow(s, t, id, r.name, ansi.FgBrightWhite, r.presence, r.land, r.score, r.netWorth)
 	}
 	scoreTableRule(s)
 	if attackable == 0 {
-		ok(s, "None of these realms can be attacked — they are protected or allied with you.")
+		ok(s, p.nothing)
 		return "", false
 	}
-	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, prompt, ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, p.ask, ansi.Reset)
 	r, err := readKey(s)
 	if err != nil {
 		return "", false
@@ -322,7 +342,7 @@ func pickAttackTarget(s session.Session, t Term, rows []targetRow, prompt string
 	}
 	fmt.Fprintf(s, "%c\n", unicode.ToUpper(r))
 	if !row.attackable {
-		ok(s, "%s is under New Realm Protection and cannot be targeted yet.", row.name)
+		ok(s, p.refuse, row.name)
 		return "", false
 	}
 	return row.name, true
@@ -361,7 +381,7 @@ func pickAndStrike(s session.Session, w *ctx, label string, price costOf, endsTu
 		ok(s, "There are no rival empires left to attack.")
 		return Stay
 	}
-	name, chosen := pickAttackTarget(s, w.Term, rows, tr(s, "Choose a target (letter, RETURN to abort)"))
+	name, chosen := pickAttackTarget(s, w.Term, rows, attackPrompts(tr(s, "Choose a target (letter, RETURN to abort)")))
 	if !chosen {
 		return Stay
 	}

@@ -118,8 +118,10 @@ func TestRemoteTargetUsesBREPlanetPrompt(t *testing.T) {
 	p.Agents, p.Protection = 50, 0
 	// "?" lists the planets, "4" names The Eclipse by its ROSTER number (it is
 	// third in the roster and the only reachable board, so a positional picker
-	// would have wanted "1"), then the baron, 10 agents, and Y to the price.
-	f := &fakeSession{keys: []rune("?4\r1\r10\ry ")}
+	// would have wanted "1"), then the baron by its LETTER — every roster of
+	// players is lettered, as the original letters them — 10 agents, and Y to
+	// the price.
+	f := &fakeSession{keys: []rune("?4\rA10\ry ")}
 	doTerrorOp(f, w, game.TerrorOpSpy)
 	out := f.out.String()
 	for _, want := range []string{"Enter Planet Name or Number", "List of Planets", "Terrorize which baron?"} {
