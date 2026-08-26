@@ -38,10 +38,6 @@ import (
 // the sender's own planet, which the original's planet picker refuses.
 var ErrTradeDealOwnPlanet = errors.New("A trade deal to your own planet is a local deal; send it from the Trading menu.")
 
-// ErrTradeDealProtected is returned when the named target is still under New
-// Realm Protection. See the divergence note above.
-var ErrTradeDealProtected = errors.New("That realm is under New Realm Protection and cannot receive a deal yet.")
-
 // ErrNotInterBBSGame is returned when an interplanetary action is attempted on a
 // stand-alone board, which has no other planet to reach.
 var ErrNotInterBBSGame = errors.New("This board is not part of an inter-BBS league.")

@@ -331,10 +331,19 @@ func pickRemoteBaronFrom(s session.Session, rows []remoteBaron, refusal string) 
 	return pick
 }
 
-// pickRemoteBaron asks for a planet and then a named baron on it. Unlike the
-// group-attack picker it offers no whole-planet choice, because an individual
-// attack has to name its target. Empty strings mean the player backed out.
+// pickRemoteBaron asks for a planet and then a named baron on it, for a strike.
+// Unlike the group-attack picker it offers no whole-planet choice, because an
+// individual attack has to name its target.
 func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
+	return pickRemoteBaronOn(s, w, "Target which planet?", "Target which baron?", protectedNoStrike)
+}
+
+// pickRemoteBaronOn is that walk with its wording supplied: the two prompts and
+// what a protected realm is refused WITH. Every caller asks the same two
+// questions in the same order and differs only in why it is asking — a strike, a
+// trade deal (#195) — so the words are the parameters and the walk is not
+// written twice. Empty strings mean the player backed out.
+func pickRemoteBaronOn(s session.Session, w *ctx, planetPrompt, baronPrompt, refusal string) (board, baron string) {
 	var boards []string
 	var scores map[string][]remoteBaron
 	w.With(func() {
@@ -348,7 +357,7 @@ func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
 		return "", ""
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, planetPrompt), ansi.Reset)
 	board = pickAddressee(s, w, boards)
 	if board == "" {
 		return "", ""
@@ -357,8 +366,8 @@ func pickRemoteBaron(s session.Session, w *ctx) (board, baron string) {
 		ok(s, "No barons are known on that planet yet.")
 		return "", ""
 	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which baron?"), ansi.Reset)
-	baron = pickRemoteBaronFrom(s, scores[board], protectedNoStrike)
+	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, baronPrompt), ansi.Reset)
+	baron = pickRemoteBaronFrom(s, scores[board], refusal)
 	if baron == "" {
 		return "", ""
 	}

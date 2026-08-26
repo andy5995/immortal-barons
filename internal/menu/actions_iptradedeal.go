@@ -80,37 +80,12 @@ func sendIPTradeDeal(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// pickIPDealTarget asks for a planet and then a realm on it, reusing the war
-// menus' target picker so a protected realm carries the same `(P)` flag it
-// carries everywhere else (#214). Protection is a bar here — Andy's call, and a
-// divergence from the original, which lets the deal go and destroys it on
-// arrival (see game.SendIPTradeDeal).
+// pickIPDealTarget asks for a planet and then a realm on it, through the same
+// walk the war menus use, so a protected realm carries the same `(P)` flag it
+// carries everywhere else (#214) and the list cannot drift out of step with
+// theirs. Protection is a bar here — Andy's call, and a divergence from the
+// original, which lets the deal go and destroys it on arrival (see
+// game.SendIPTradeDeal).
 func pickIPDealTarget(s session.Session, w *ctx) (board, baron string) {
-	var boards []string
-	scores := map[string][]remoteBaron{}
-	w.With(func() {
-		for _, b := range w.RemoteBoards {
-			boards = append(boards, b.BoardID)
-			scores[b.BoardID] = remoteBarons(b.Scores, hostile)
-		}
-	})
-	if len(boards) == 0 {
-		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
-		return "", ""
-	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Ship to which planet?"), ansi.Reset)
-	board = pickAddressee(s, w, boards)
-	if board == "" {
-		return "", ""
-	}
-	if len(scores[board]) == 0 {
-		ok(s, "No barons are known on that planet yet.")
-		return "", ""
-	}
-	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Ship to which baron?"), ansi.Reset)
-	baron = pickRemoteBaronFrom(s, scores[board], protectedNoDeal)
-	if baron == "" {
-		return "", ""
-	}
-	return board, baron
+	return pickRemoteBaronOn(s, w, "Ship to which planet?", "Ship to which baron?", protectedNoDeal)
 }
