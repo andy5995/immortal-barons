@@ -271,7 +271,7 @@ func strikeSender(w *World, sent InFlightStrike) string {
 
 // applySpecialOpResult files the answer to an interplanetary Special Operation
 // with the baron who sent it: what it did, what it earned, and — for an
-// R5-Slappenheimer that turned on its owner — the damage that could only be
+// S3-Sabre that turned on its owner — the damage that could only be
 // rolled where the target lives but has to land here.
 func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	e := w.FindByOwner(sent.Owner)
@@ -280,7 +280,7 @@ func (w *World) applySpecialOpResult(sent InFlightStrike, res AttackResult) {
 	}
 	label := SpecialOpLabel(sent.Op)
 	if res.Backfired {
-		lost := w.slappenheimerDamage(e)
+		lost := w.sabreDamage(e)
 		if lost == "" {
 			e.addEvent(fmt.Sprintf("Your %s against %s of %s backfired, but the damage was negligible.",
 				label, res.TargetEmpire, sent.TargetBoard))

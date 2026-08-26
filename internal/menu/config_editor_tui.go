@@ -104,7 +104,7 @@ const (
 	helpRegionCosts        = "Price of buying regions: High, Medium, Low, or None."
 	helpAttackDamage       = "How much a conventional attack destroys on both sides: High, Medium, or Low."
 	helpAttackRewards      = "How much land and goods the winner of an attack gains: High, Medium, or Low."
-	helpSlappenheimer      = "How R5-Slappenheimer missiles behave when fired."
+	helpSabre              = "How S3-Sabre missiles behave when fired."
 	helpMaxAttacks         = "The most conventional attacks a player may launch in one day. 0 means no limit."
 	helpMaxGroupAttacks    = "The most group (interplanetary) attacks a player may lead or join in one day. 0 means no limit."
 	helpMaxTerrorOps       = "The most terrorist operations a player may launch in one day. 0 means no limit."
@@ -119,7 +119,7 @@ const (
 	helpMissileOps         = "Whether nuclear, chemical and biological strikes are offered at all."
 	helpPirates            = "Whether there are pirates at all. Off, nobody is raided and Attack Pirates is gone."
 	helpIPTrading          = "Whether barons may bid on an ALLIED planet's Trading Market. IB's own feature; the original has no such thing."
-	helpClingyAnnihilator  = "Whether the Clingy Annihilator doomsday weapon may be built."
+	helpGooieKablooie      = "Whether the Gooie Kablooie doomsday weapon may be built."
 	helpMaxRegions         = "The most regions a single player may own."
 	helpMaxPlayers         = "The most human empires allowed on this board. 0 means no limit."
 	helpBoardID            = "The name this board uses in inter-BBS packets. Set in bbs.cfg, which the game reads but never writes; shown here so you can see what it is running on."
@@ -190,8 +190,8 @@ func newConfigTUI(w *game.World) *configTUI {
 	dmgVals := []game.Level{game.High, game.Medium, game.Low}
 	buyOpts := []string{"Yes", "No", "Limited"}
 	buyVals := []game.BuyMode{game.BuyYes, game.BuyNo, game.BuyLimited}
-	slapOpts := []string{"User Select/Original", "None/Disabled", "Random", "Constant"}
-	slapVals := []game.SlappenheimerMode{game.SlappenheimerUserSelect, game.SlappenheimerNone, game.SlappenheimerRandom, game.SlappenheimerConstant}
+	sabreOpts := []string{"User Select/Original", "None/Disabled", "Random", "Constant"}
+	sabreVals := []game.SabreMode{game.SabreUserSelect, game.SabreNone, game.SabreRandom, game.SabreConstant}
 
 	timing := tview.NewForm()
 	t.addInt(timing, "Turns per day", helpTurnsPerDay, c.TurnsPerDay, 1, game.MaxTurnsPerDay, func(c *game.Config, n int) { c.TurnsPerDay = n })
@@ -220,7 +220,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	addChoice(t, mil, "Region Costs", helpRegionCosts, costOpts, costVals, c.RegionCosts, func(c *game.Config, v game.Level) { c.RegionCosts = v })
 	addChoice(t, mil, "Attack Damage", helpAttackDamage, dmgOpts, dmgVals, c.AttackDamage, func(c *game.Config, v game.Level) { c.AttackDamage = v })
 	addChoice(t, mil, "Attack Rewards", helpAttackRewards, dmgOpts, dmgVals, c.AttackRewards, func(c *game.Config, v game.Level) { c.AttackRewards = v })
-	addChoice(t, mil, "R5-Slappenheimer Handling", helpSlappenheimer, slapOpts, slapVals, c.SlappenheimerHandling, func(c *game.Config, v game.SlappenheimerMode) { c.SlappenheimerHandling = v })
+	addChoice(t, mil, "S3-Sabre Handling", helpSabre, sabreOpts, sabreVals, c.SabreHandling, func(c *game.Config, v game.SabreMode) { c.SabreHandling = v })
 	t.addInt(mil, "Max Individual Attacks/Day (0=unlimited)", helpMaxAttacks, c.MaxIndividualAttacks, 0, 100, func(c *game.Config, n int) { c.MaxIndividualAttacks = n })
 	if ibbs {
 		t.addInt(mil, "Max Group Attacks/Day (0=unlimited)", helpMaxGroupAttacks, c.MaxGroupAttacks, 0, 100, func(c *game.Config, n int) { c.MaxGroupAttacks = n })
@@ -235,7 +235,7 @@ func newConfigTUI(w *game.World) *configTUI {
 	t.addBool(mil, "Bombing Ops", helpBombingOps, c.BombingOps, func(c *game.Config, b bool) { c.BombingOps = b })
 	t.addBool(mil, "Missile Ops", helpMissileOps, c.MissileOps, func(c *game.Config, b bool) { c.MissileOps = b })
 	if ibbs {
-		t.addBool(mil, "Clingy Annihilator", helpClingyAnnihilator, c.ClingyAnnihilator, func(c *game.Config, b bool) { c.ClingyAnnihilator = b })
+		t.addBool(mil, "Gooie Kablooie", helpGooieKablooie, c.GooieKablooie, func(c *game.Config, b bool) { c.GooieKablooie = b })
 		t.addBool(mil, "Local Attacks", helpLocalAttacks, c.LocalAttacks, func(c *game.Config, b bool) { c.LocalAttacks = b })
 		t.addBool(mil, "Local Attack Scoring", helpLocalAttackScoring, c.LocalAttackScoring, func(c *game.Config, b bool) { c.LocalAttackScoring = b })
 		t.addBool(mil, "Allow IP Allies to Trade at Market", helpIPTrading, c.IPTrading, func(c *game.Config, b bool) { c.IPTrading = b })

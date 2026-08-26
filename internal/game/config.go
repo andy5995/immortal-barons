@@ -218,24 +218,23 @@ func (b BuyMode) String() string {
 	}
 }
 
-// SlappenheimerMode controls R5-Slappenheimer missile handling (IB's rename of
-// BRE's S3-Sabre "Sabre Handling").
-type SlappenheimerMode int
+// SabreMode controls S3-Sabre missile handling (BRE's "Sabre Handling").
+type SabreMode int
 
 const (
-	SlappenheimerUserSelect SlappenheimerMode = iota // User Select/Original (BRE default)
-	SlappenheimerNone                                // None/Disabled
-	SlappenheimerRandom                              // random return
-	SlappenheimerConstant                            // constant return
+	SabreUserSelect SabreMode = iota // User Select/Original (BRE default)
+	SabreNone                        // None/Disabled
+	SabreRandom                      // random return
+	SabreConstant                    // constant return
 )
 
-func (m SlappenheimerMode) String() string {
+func (m SabreMode) String() string {
 	switch m {
-	case SlappenheimerNone:
+	case SabreNone:
 		return "None/Disabled"
-	case SlappenheimerRandom:
+	case SabreRandom:
 		return "Random"
-	case SlappenheimerConstant:
+	case SabreConstant:
 		return "Constant"
 	default:
 		return "User Select/Original"
@@ -328,19 +327,23 @@ type Config struct {
 	// option, so it carries no star and a stand-alone board is asked it too.
 	Pirates bool // the pirate factions exist, raid, and can be raided
 
-	BombingOps            bool              // the four bombing ops are offered (Bomb Enemy Targets, Special Operations)
-	MissileOps            bool              // nuclear/chemical/biological strikes are offered (Attack, Bomb Enemy Targets, Special Operations)
-	ClingyAnnihilator     bool              // the doomsday weapon is offered
-	MaxPlayers            int               // most human empires per board (0 = as many as the planet has slots for)
-	BuyMilitary           BuyMode           // Yes / No / Limited
-	MaintCosts            Level             // maintenance costs (regions + forces)
-	TradeCosts            Level             // trade-deal costs
-	RegionCosts           Level             // region purchase price
-	AttackCosts           Level             // gold an attack costs to launch
-	TerrorCosts           Level             // gold a terrorist op costs to launch
-	AttackDamage          Level             // damage attacks inflict (never None)
-	AttackRewards         Level             // land/goods gained from a win (never None)
-	SlappenheimerHandling SlappenheimerMode // R5-Slappenheimer missile handling
+	BombingOps bool // the four bombing ops are offered (Bomb Enemy Targets, Special Operations)
+	MissileOps bool // nuclear/chemical/biological strikes are offered (Attack, Bomb Enemy Targets, Special Operations)
+	// The JSON key keeps the name IB shipped this under so an existing
+	// config.json and an in-flight league packet still carry the setting.
+	GooieKablooie bool    `json:"ClingyAnnihilator"` // the doomsday weapon is offered
+	MaxPlayers    int     // most human empires per board (0 = as many as the planet has slots for)
+	BuyMilitary   BuyMode // Yes / No / Limited
+	MaintCosts    Level   // maintenance costs (regions + forces)
+	TradeCosts    Level   // trade-deal costs
+	RegionCosts   Level   // region purchase price
+	AttackCosts   Level   // gold an attack costs to launch
+	TerrorCosts   Level   // gold a terrorist op costs to launch
+	AttackDamage  Level   // damage attacks inflict (never None)
+	AttackRewards Level   // land/goods gained from a win (never None)
+	// The JSON key keeps the name IB shipped this under so an existing
+	// config.json and an in-flight league packet still carry the setting.
+	SabreHandling SabreMode `json:"SlappenheimerHandling"` // S3-Sabre missile handling
 }
 
 // Config-editor upper bounds, from BRE's Configuration Help screens, which show
@@ -472,43 +475,43 @@ func DefaultConfig() Config {
 
 		// Defaults from BRE's reset-init code and Configuration Help screens,
 		// except TurnsPerDay, raised from BRE's 8 to 10 for the modern door.
-		TurnsPerDay:           10,
-		ProtectionTurns:       15,
-		GameLength:            0,
-		IdleDaysRemove:        10,
-		InitialMarketLand:     0,
-		LandPerDay:            1000,
-		MoneyCapBillions:      MoneyCapMinBillions, // BRE's own ceiling, and now the only one a new game gets
-		InterestRate:          50,
-		StdInvestRate:         35,
-		SteadyInvest:          false,
-		MaxTaxRate:            50,
-		PlanetaryTaxRate:      5,
-		MaxRegions:            500,
-		MaxIndividualAttacks:  3, // Andy's choice for the modern door; BRE has the setting but its stock default is unverified
-		MaxGroupAttacks:       4,
-		MaxTerrorOps:          25,
-		MaxBombingOps:         4,
-		LostForcesDays:        3,
-		MinBoardVersion:       "",   // no requirement until a Coordinator sets one
-		IPTrading:             true, // IB's own feature; a league that wants it off says so
-		Pirates:               true, // the original has no switch; on is what it does
-		BombingOps:            true,
-		MissileOps:            true,
-		ClingyAnnihilator:     true,
-		LocalAttacks:          true,  // BRE's captured default, and its help "highly recommends" it
-		LocalAttackScoring:    false, // BRE ships this one Disabled, so score can't be farmed at home
-		DupeChecking:          true,  // BRE's captured default
-		MaxPlayers:            25,
-		BuyMilitary:           BuyYes,
-		MaintCosts:            Medium,
-		TradeCosts:            Medium,
-		RegionCosts:           Medium,
-		AttackCosts:           Medium,
-		TerrorCosts:           Medium,
-		AttackDamage:          Medium,
-		AttackRewards:         Medium,
-		SlappenheimerHandling: SlappenheimerUserSelect,
+		TurnsPerDay:          10,
+		ProtectionTurns:      15,
+		GameLength:           0,
+		IdleDaysRemove:       10,
+		InitialMarketLand:    0,
+		LandPerDay:           1000,
+		MoneyCapBillions:     MoneyCapMinBillions, // BRE's own ceiling, and now the only one a new game gets
+		InterestRate:         50,
+		StdInvestRate:        35,
+		SteadyInvest:         false,
+		MaxTaxRate:           50,
+		PlanetaryTaxRate:     5,
+		MaxRegions:           500,
+		MaxIndividualAttacks: 3, // Andy's choice for the modern door; BRE has the setting but its stock default is unverified
+		MaxGroupAttacks:      4,
+		MaxTerrorOps:         25,
+		MaxBombingOps:        4,
+		LostForcesDays:       3,
+		MinBoardVersion:      "",   // no requirement until a Coordinator sets one
+		IPTrading:            true, // IB's own feature; a league that wants it off says so
+		Pirates:              true, // the original has no switch; on is what it does
+		BombingOps:           true,
+		MissileOps:           true,
+		GooieKablooie:        true,
+		LocalAttacks:         true,  // BRE's captured default, and its help "highly recommends" it
+		LocalAttackScoring:   false, // BRE ships this one Disabled, so score can't be farmed at home
+		DupeChecking:         true,  // BRE's captured default
+		MaxPlayers:           25,
+		BuyMilitary:          BuyYes,
+		MaintCosts:           Medium,
+		TradeCosts:           Medium,
+		RegionCosts:          Medium,
+		AttackCosts:          Medium,
+		TerrorCosts:          Medium,
+		AttackDamage:         Medium,
+		AttackRewards:        Medium,
+		SabreHandling:        SabreUserSelect,
 	}
 }
 

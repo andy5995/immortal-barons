@@ -635,24 +635,24 @@ func sdiProgram(s session.Session, w *ctx) Result {
 	return Stay
 }
 
-// clingyAnnihilator is the planet's doomsday-weapon desk, BRE's "Gooie Kablooie
+// gooieKablooie is the planet's doomsday-weapon desk, BRE's "Gooie Kablooie
 // Ops": start one, put money in, launch it, or scrap it. A planet builds one at
 // a time and the barons fund it between them (#16).
-func clingyAnnihilator(s session.Session, w *ctx) Result {
+func gooieKablooie(s session.Session, w *ctx) Result {
 	if blockedByProtection(s, w) {
 		return Stay
 	}
 	var d *game.Annihilator
 	var enabled bool
 	w.With(func() {
-		enabled = w.Config.ClingyAnnihilator
+		enabled = w.Config.GooieKablooie
 		if w.Annihilator != nil {
 			c := *w.Annihilator
 			d = &c
 		}
 	})
 	if !enabled {
-		ok(s, "Clingy Annihilator operations are switched off in this game.")
+		ok(s, "Gooie Kablooie operations are switched off in this game.")
 		return Stay
 	}
 	if d == nil {
@@ -661,7 +661,7 @@ func clingyAnnihilator(s session.Session, w *ctx) Result {
 	showAnnihilator(s, w, d)
 	switch {
 	case d.Launched:
-		ok(s, "The Clingy Annihilator is on its way. Nothing more can be done with it.")
+		ok(s, "The Gooie Kablooie is on its way. Nothing more can be done with it.")
 	case d.Funded:
 		// Nobody presses a button here: the weapon launches itself once
 		// construction has run, and only the Coordinator can stand it down (#114).
@@ -670,7 +670,7 @@ func clingyAnnihilator(s session.Session, w *ctx) Result {
 		if hours < 0 {
 			hours = 0
 		}
-		ok(s, "The Clingy Annihilator is complete. It launches at %s in %d hours.", d.TargetBoard, hours)
+		ok(s, "The Gooie Kablooie is complete. It launches at %s in %d hours.", d.TargetBoard, hours)
 	default:
 		millions := promptSuggested(s, "How many million gold do you wish to put in?", 0, d.CostMillion-d.PaidMillion)
 		if millions > 0 {
@@ -693,7 +693,7 @@ func clingyAnnihilator(s session.Session, w *ctx) Result {
 // startAnnihilator offers to begin construction, quoting what the planet will have to
 // raise for the target it picks.
 func startAnnihilator(s session.Session, w *ctx) Result {
-	ok(s, "This planet has no Clingy Annihilator.")
+	ok(s, "This planet has no Gooie Kablooie.")
 	if !AskYesNo(s, "Would you like to begin construction?", false) {
 		return Stay
 	}
@@ -740,7 +740,7 @@ func runAnnihilator(s session.Session, w *ctx, act func(*game.Empire) error, don
 	ok(s, done)
 }
 
-// annihilatorDefense is the planet's answer to a Clingy Annihilator squatting on
+// annihilatorDefense is the planet's answer to a Gooie Kablooie squatting on
 // it: throw jets at the thing until it dies. The original asks every baron this
 // at the top of their turn rather than hiding it behind a menu item
 // (run_player_turn calls the routine directly), because the weapon needs the
@@ -772,11 +772,11 @@ func annihilatorDefense(s session.Session, w *ctx) {
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(
 		tr(s, "It would take %s jets to destroy it outright."), comma(needed))))
 
-	if !AskYesNo(s, "Do you wish to attack the Clingy Annihilator?", false) {
+	if !AskYesNo(s, "Do you wish to attack the Gooie Kablooie?", false) {
 		return
 	}
 	if jets < 1 {
-		ok(s, "Only jets can attack a Clingy Annihilator, and you have none.")
+		ok(s, "Only jets can attack a Gooie Kablooie, and you have none.")
 		return
 	}
 	send := promptSuggested(s, "Send how many jets?", 0, jets)
@@ -797,8 +797,8 @@ func annihilatorDefense(s session.Session, w *ctx) {
 	w.With(func() { gone = w.Incoming == nil })
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "%s jets were destroyed in the attack!"), comma(lost))))
 	if gone {
-		ok(s, "The Clingy Annihilator was DESTROYED!")
+		ok(s, "The Gooie Kablooie was DESTROYED!")
 		return
 	}
-	ok(s, "%d%% of the Clingy Annihilator destroyed!", knocked)
+	ok(s, "%d%% of the Gooie Kablooie destroyed!", knocked)
 }

@@ -111,7 +111,7 @@ LeagueConfig:
   LostForcesDays
   BombingOps
   MissileOps
-  ClingyAnnihilator
+  GooieKablooie `json:"ClingyAnnihilator"`
   LocalAttacks
   LocalAttackScoring
   DupeChecking
@@ -127,7 +127,7 @@ LeagueConfig:
   TerrorCosts
   AttackDamage
   AttackRewards
-  SlappenheimerHandling
+  SabreHandling `json:"SlappenheimerHandling"`
 LeagueNode:
   Number
   Name

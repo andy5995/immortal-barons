@@ -111,7 +111,7 @@ func TestBombEnemyTargetsIsNotASubmenu(t *testing.T) {
 		"Undermine Investments",
 		"Nuclear Assault",
 		"Chemical Bombing",
-		"R5-Slappenheimer",
+		"S3-Sabre",
 	} {
 		if strings.Contains(out, gone) {
 			t.Errorf("the local Covert menu still offers the interplanetary item %q; output:\n%s", gone, out)

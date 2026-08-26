@@ -167,7 +167,7 @@ func (w *World) DailyMaintenance(today string) MaintReport {
 		// The planet's own weapon goes off to war by itself once construction has
 		// run (#114), and any weapon squatting here takes its daily bite (#112).
 		if w.Annihilator != nil || w.Incoming != nil {
-			rep.step("Resolving Clingy Annihilator operations")
+			rep.step("Resolving Gooie Kablooie operations")
 		}
 		w.LaunchDueAnnihilator()
 		w.TickAnnihilator()

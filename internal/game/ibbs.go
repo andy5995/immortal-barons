@@ -198,7 +198,7 @@ type LeagueReset struct {
 	Announced string // the Coordinator's message to the league
 }
 
-// AnnihilatorStatus tells a planet about a Clingy Annihilator aimed at it — while it is
+// AnnihilatorStatus tells a planet about a Gooie Kablooie aimed at it — while it is
 // still being built, and again while it is in the air. BRE broadcasts the same
 // thing ("Updating Outgoing Gooie Kablooie Status"), and it is the whole reason a
 // target can scramble jets: a weapon nobody can see is one nobody can shoot at

@@ -37,7 +37,7 @@ func distinctConfig() game.Config {
 	c.RegionCosts = game.None
 	c.AttackDamage = game.High
 	c.AttackRewards = game.Low
-	c.SlappenheimerHandling = game.SlappenheimerRandom
+	c.SabreHandling = game.SabreRandom
 	c.MaxIndividualAttacks = 12
 	c.MaxRegions = 13
 	c.MaxPlayers = 14

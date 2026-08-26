@@ -31,13 +31,16 @@ import (
 type SpecialOp string
 
 const (
-	OpBombFood      SpecialOp = "bomb-food"
-	OpBombMarket    SpecialOp = "bomb-market"
-	OpBombRoutes    SpecialOp = "bomb-routes"
-	OpUndermine     SpecialOp = "undermine"
-	OpNuclear       SpecialOp = "nuclear"
-	OpChemical      SpecialOp = "chemical"
-	OpSlappenheimer SpecialOp = "slappenheimer"
+	OpBombFood   SpecialOp = "bomb-food"
+	OpBombMarket SpecialOp = "bomb-market"
+	OpBombRoutes SpecialOp = "bomb-routes"
+	OpUndermine  SpecialOp = "undermine"
+	OpNuclear    SpecialOp = "nuclear"
+	OpChemical   SpecialOp = "chemical"
+	// The wire string stays "slappenheimer", the name IB shipped the op under
+	// before it took BRE's own name back: a renamed discriminator would strand
+	// every op already in flight when a league updates board by board.
+	OpSabre SpecialOp = "slappenheimer"
 )
 
 // SpecialOpLabel is the op's menu label, used in the reports both boards file.
@@ -56,8 +59,8 @@ func SpecialOpLabel(op SpecialOp) string {
 		return "Nuclear Assault"
 	case OpChemical:
 		return "Chemical Bombing"
-	case OpSlappenheimer:
-		return "R5-Slappenheimer"
+	case OpSabre:
+		return "S3-Sabre"
 	}
 	return string(op)
 }
@@ -73,7 +76,7 @@ func SpecialOpLabel(op SpecialOp) string {
 // while '5', '6' and '7' each have their own branch (BRE.OVR 0x029ea9, the
 // dispatch at 0x105a-0x124c).
 func isMissileOp(op SpecialOp) bool {
-	return op == OpNuclear || op == OpChemical || op == OpSlappenheimer
+	return op == OpNuclear || op == OpChemical || op == OpSabre
 }
 
 // TargetsPlanet reports whether op is aimed at the PLANET rather than at a named
@@ -365,8 +368,8 @@ func (w *World) applySpecialOp(op SpecialOp, d *Empire, from string) (report str
 		d.addEvent(fmt.Sprintf("%s hit you with a chemical strike: %d regions reduced to waste and %d dead. Famine follows.", from, regions, people))
 		return fmt.Sprintf("Chemical strike! %d regions of %s are now waste, and %d of its people are dead.", regions, d.Name, people), score, true, false
 
-	case OpSlappenheimer:
-		report, hit, backfired = w.slappenheimerEffect(d, from)
+	case OpSabre:
+		report, hit, backfired = w.sabreEffect(d, from)
 		return report, 0, hit, backfired
 	}
 	return fmt.Sprintf("Nothing came of the operation against %s.", d.Name), 0, false, false

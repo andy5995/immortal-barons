@@ -178,7 +178,7 @@ const (
 	ProtectiveTradeCostDivisor = 3
 )
 
-// The Clingy Annihilator, IB's rename of BRE's Gooie Kablooie. It is not a purchase
+// The Gooie Kablooie. It is not a purchase
 // but a public works: one planet funds one weapon, in millions of gold, over as
 // many days as it takes to raise the money, and the target planet can see it
 // coming and shoot at it.

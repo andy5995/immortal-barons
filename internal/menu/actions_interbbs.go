@@ -11,7 +11,7 @@ import (
 
 // actions_interbbs.go — planet-level inter-BBS business that is not an attack,
 // an op or a score: how long packets take to reach each board, who this board
-// elects as Coordinator, and standing down a Clingy Annihilator.
+// elects as Coordinator, and standing down a Gooie Kablooie.
 
 // Travel Times geometry, measured off a live BRE capture: a 75-column inset
 // rule above and below the list, and each planet's name in a 30-column field
@@ -158,7 +158,7 @@ func dismantleAnnihilator(s session.Session, w *ctx) Result {
 	var d *game.Annihilator
 	w.With(func() {
 		isCoordinator = w.BBSCoordinator() == w.Player()
-		enabled = w.Config.ClingyAnnihilator
+		enabled = w.Config.GooieKablooie
 		if w.Annihilator != nil {
 			c := *w.Annihilator
 			d = &c
@@ -169,18 +169,18 @@ func dismantleAnnihilator(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	if !enabled {
-		ok(s, "Clingy Annihilator operations are switched off in this game.")
+		ok(s, "Gooie Kablooie operations are switched off in this game.")
 		return Stay
 	}
 	if d == nil {
-		ok(s, "This planet is not building a Clingy Annihilator.")
+		ok(s, "This planet is not building a Gooie Kablooie.")
 		return Stay
 	}
 	if d.Launched {
-		ok(s, "The Clingy Annihilator has already launched. Nothing can call it back.")
+		ok(s, "The Gooie Kablooie has already launched. Nothing can call it back.")
 		return Stay
 	}
-	fmt.Fprintf(s, "\n%s"+tr(s, "The Clingy Annihilator is aimed at %s.")+"%s\n", ansi.FgWhite, d.TargetBoard, ansi.Reset)
+	fmt.Fprintf(s, "\n%s"+tr(s, "The Gooie Kablooie is aimed at %s.")+"%s\n", ansi.FgWhite, d.TargetBoard, ansi.Reset)
 	okNoPause(s, "Dismantling it refunds nothing — the gold is spent.")
 	if !AskYesNo(s, "Stand it down?", false) {
 		return Stay
@@ -194,6 +194,6 @@ func dismantleAnnihilator(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "The Clingy Annihilator has been dismantled.")
+	ok(s, "The Gooie Kablooie has been dismantled.")
 	return Stay
 }

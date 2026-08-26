@@ -595,9 +595,9 @@ func TestACovertOpBringsBackIntelligence(t *testing.T) {
 	}
 }
 
-// The Clingy Annihilator runs the original's whole lifecycle: a planet starts one,
+// The Gooie Kablooie runs the original's whole lifecycle: a planet starts one,
 // its barons fund it between them, and only then can it launch (#16).
-func TestClingyAnnihilatorLifecycle(t *testing.T) {
+func TestGooieKablooieLifecycle(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.IBBS = true
 	cfg.BoardID = "Wildside"

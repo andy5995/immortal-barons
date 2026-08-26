@@ -216,7 +216,7 @@ type AttackResult struct {
 	// where the target lives, so neither can be worked out back home.
 	Report string `json:",omitempty"`
 	Score  int    `json:",omitempty"`
-	// Backfired says an R5-Slappenheimer turned on the realm that fired it. The
+	// Backfired says an S3-Sabre turned on the realm that fired it. The
 	// damage cannot be applied where it was rolled — that realm is on the board
 	// that sent the missile — so it is applied when this answer gets home.
 	Backfired bool `json:",omitempty"`

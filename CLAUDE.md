@@ -16,6 +16,11 @@ guards it). Naming the original in prose is fine and sometimes required — the
 About screen's attribution and disclaimer, the README's Heritage, a doc
 explaining a divergence. The line is identity, not mention.
 
+A distinctive item name inside the game is a separate question, and Andy's to
+answer one at a time. The nine pirate factions carry IB-original names; the
+Gooie Kablooie, the S3-Sabre and SpyGuy keep the original's (#218). Ask before
+renaming one, and do not revert one either way.
+
 Be careful with other people's names and handles in repo artifacts (code,
 comments, docs, commit messages, ChangeLog). The line is public vs. private:
 
@@ -323,11 +328,10 @@ biological strikes, pirate raids (now rolled per turn, not once a day; the nine
 factions carry IB-original names, not BRE's), covert operations (spy, stir revolts, set up,
 support dissensions,
 demoralize forces, bribery, expose enemy ops, and a single Bomb Enemy Targets
-terror-bombing op; the eight-item bombing table, R5-Slappenheimer among it, is
+terror-bombing op; the eight-item bombing table, S3-Sabre among it, is
 the InterPlanetary Special Operations menu's alone),
-diplomacy treaties, trading, region types + food market, SDI, Clingy Annihilator
-(BRE's Gooie Kablooie), player mail + a BRE-style multi-line message editor +
-planetary bulletin, banking (deposit/withdraw/loan/invest), Set Industries +
+diplomacy treaties, trading, region types + food market, SDI, Gooie Kablooie,
+player mail + a BRE-style multi-line message editor + planetary bulletin, banking (deposit/withdraw/loan/invest), Set Industries +
 Specialize, Write Macros, four named advisors (Civilian/Economic/Military/
 Technology), an About screen, a first-run language picker, and a
 rising land-market price (expansion self-limiting). The menu tree mirrors BRE:

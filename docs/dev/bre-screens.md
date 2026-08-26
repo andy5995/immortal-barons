@@ -1918,9 +1918,9 @@ constant.
 BRE is proprietary (John Dailey Software; design by Mehul Patel). This file
 records *observed* screen behavior to guide an independent reimplementation; it
 is not a copy of BRE's source or assets. Distinctive coined strings/names (e.g.
-pirate faction names) are recorded here for fidelity analysis but should be
-**renamed** in IB, as with Gooie Kablooie → Clingy Annihilator and S3-Sabre →
-R5-Slappenheimer.
+pirate faction names) are recorded here for fidelity analysis; whether IB uses
+one or coins its own is Andy's call case by case. The Gooie Kablooie and the
+S3-Sabre keep the original's names (#218); the pirate factions carry IB's own.
 
 ## Full Defense Alliance — Diplomacy, Alliance Strength, battle (captured live 2026-07-27)
 
@@ -2332,8 +2332,8 @@ redraws the menu.
 **IB's keys match this table as of 2026-08-18 and did not before**: it numbered
 the three items it had built `1`-`3`, so each sat on the original's key for its
 neighbour, and its own Player List sat on `4`, View Diplomacy's key. Key `1` now
-holds IB's Dismantle Clingy Annihilator (#45 — IB renames the weapon), and
-Player List has moved to `5`, past the original's four.
+holds IB's Dismantle Gooie Kablooie (#45), and Player List has moved to `5`,
+past the original's four.
 
 **The Coordinator gets no player list in the original.** The two coordinator
 roles are different offices: the **BBS Coordinator** whose menu this is was

@@ -19,7 +19,7 @@ one unit of food feeds 200 troopers, or 10,000 of anything else. So a large
 trooper army needs a strong food supply, and a large armored one barely
 registers.
 
-A large trooper army also discourages enemy R5-Slappenheimer strikes. The more
+A large trooper army also discourages enemy S3-Sabre strikes. The more
 troopers you hold, the more likely that missile is to backfire onto the empire
 that fired it. Troopers are a common target of enemy covert operations, which
 can make them desert.

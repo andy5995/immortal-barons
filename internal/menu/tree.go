@@ -43,7 +43,7 @@ type Menus struct {
 // both are gone.
 func noBombingOps(w *ctx) bool  { return !w.Config.BombingOps }
 func noMissileOps(w *ctx) bool  { return !w.Config.MissileOps }
-func noAnnihilator(w *ctx) bool { return !w.Config.ClingyAnnihilator }
+func noAnnihilator(w *ctx) bool { return !w.Config.GooieKablooie }
 
 // noIPTrading hides Trading when the league has turned it off. It is IB's own
 // feature, so a league that wants the original's shape says so and the menu
@@ -230,7 +230,7 @@ func BuildMenus() *Menus {
 	// opening-menu entry is tinted to match.
 	// Order and
 	// hotkeys match BRE.OVR's full InterPlanetary Operations string table
-	// (#75); Clingy Annihilator Ops is IB's equivalent of BRE's Gooie Kablooie
+	// (#75); Gooie Kablooie Ops is IB's equivalent of BRE's Gooie Kablooie
 	// item, on its '9' as a later capture showed it. Send Trade Deal and Send Message reuse the same actions
 	// as the Trading and Messages menus; Special Operations opens the separate
 	// interplanetary Special Operations menu (BRE's cross-planet covert set, not
@@ -247,7 +247,7 @@ func BuildMenus() *Menus {
 		// Send SpyGuy is the one item here the two switches do not govern, so the
 		// menu stays reachable even with both off.
 		{Key: '8', Label: "Special Operations", Do: gotoMenu(ipSpecial)},
-		{Key: '9', Label: "Clingy Annihilator Ops", Do: clingyAnnihilator, Hidden: noAnnihilator},
+		{Key: '9', Label: "Gooie Kablooie Ops", Do: gooieKablooie, Hidden: noAnnihilator},
 		{Key: 'A', Label: "SDI Program", Do: sdiProgram},
 		{Key: 'B', Label: "Trading", Do: gotoMenu(ipTrading), Hidden: noIPTrading},
 		{Key: 'D', Label: "Diplomacy List", Do: planetaryTreaties},
@@ -321,7 +321,7 @@ func BuildMenus() *Menus {
 		{Key: '4', Label: "Undermine Investments", Do: ipSpecialOp(game.OpUndermine), Hidden: noBombingOps},
 		{Key: '5', Label: "Nuclear Assault", Do: ipSpecialOp(game.OpNuclear), Hidden: noMissileOps},
 		{Key: '6', Label: "Chemical Bombing", Do: ipSpecialOp(game.OpChemical), Hidden: noMissileOps},
-		{Key: '7', Label: "R5-Slappenheimer", Do: ipSpecialOp(game.OpSlappenheimer), Hidden: noMissileOps},
+		{Key: '7', Label: "S3-Sabre", Do: ipSpecialOp(game.OpSabre), Hidden: noMissileOps},
 		{Key: '8', Label: "Send SpyGuy", Do: sendSpyGuy},
 		{Key: '0', Label: "Quit", Do: back},
 	}
@@ -428,7 +428,7 @@ func BuildMenus() *Menus {
 	// displacing one. IB numbered its three built items 1-3 until 2026-08-18,
 	// which put every one of them on the original's key for its neighbour.
 	coord.Items = []Item{
-		{Key: '1', Label: "Dismantle Clingy Annihilator", Do: dismantleAnnihilator,
+		{Key: '1', Label: "Dismantle Gooie Kablooie", Do: dismantleAnnihilator,
 			Hidden: noAnnihilator},
 		{Key: '2', Label: "Modify Diplomacy", Do: diplomacyModification},
 		{Key: '3', Label: "Global Recon Request", Do: globalReconRequest},

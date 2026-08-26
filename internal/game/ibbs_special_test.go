@@ -210,7 +210,7 @@ func TestBombingOpsTargetThePlanetNotABaron(t *testing.T) {
 			t.Errorf("%s should be aimed at the planet", op)
 		}
 	}
-	for _, op := range []SpecialOp{OpNuclear, OpChemical, OpSlappenheimer} {
+	for _, op := range []SpecialOp{OpNuclear, OpChemical, OpSabre} {
 		if op.TargetsPlanet() {
 			t.Errorf("%s ruins one realm's land and must name it", op)
 		}

@@ -86,7 +86,7 @@ One limit worth stating: the scan sees the two displacement idioms, not the
 
 | Unit | Offense | Defense | Notes |
 |------|---------|---------|-------|
-| Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy R5-Slappenheimer likelier to backfire. |
+| Trooper | 1 | 1 | Cheap. Eats a lot of food. Hurt by terrorist ops. A large garrison makes an enemy S3-Sabre likelier to backfire. |
 | Jet | 2 | **0** | Offense only. High upkeep. Needs carriers (1 carrier moves 100 jets). An enemy SDI cuts jet strength, but only on an interplanetary strike — see "SDI Defense". |
 | Turret | **0** | 2 | Defense only. Cannot be destroyed by terrorist ops. **What it defends against is exactly two things — see "What a turret actually does" below.** |
 | Tank | **3–5** | **3–5** | Best all-round. Low upkeep, high buy cost. Strength scales with **HQ** (3 at 0%, 4 at 50%, 5 at 100%) and with morale. The guide's flat "4" is the HQ-50 value — see HeadQuarters below. (`whatsnew.doc` claims tanks help defend against chemical missiles; the shipped v0.988 routine never reads the tank count — see the chemical attack below.) |
@@ -778,9 +778,8 @@ instruction's modrm. Six of the seven award sites reach it with a separate
 - **Group vs. individual** (interplanetary) — a solo strike returns double;
   a group attack shares the returns.
 
-**Clingy Annihilator** (the clone's equivalent of BRE's *Gooie Kablooie*) — the
-ultimate weapon, aimed at an entire enemy planet rather than one empire, and one
-per planet at a time. IB implements the original's lifecycle (#16): begin
+**Gooie Kablooie** — the ultimate weapon, aimed at an entire enemy planet
+rather than one empire, and one per planet at a time. IB implements the original's lifecycle (#16): begin
 construction against a named planet → any baron funds it a million gold at a time
 → complete → three days' construction → it launches itself → in flight → arrival
 → a five-day siege. It can be dismantled before it flies and the gold is not
@@ -810,7 +809,7 @@ The **funding cost is binary-verified** from BRE.OVR's overlay unit at 0x27441
             cost x 1.2   if ratio > 1
 
 so the weapon is priced against how much bigger the target planet is than yours.
-The constants are `Clingy Annihilator*` in `balance*.go`.
+The constants are `Annihilator*` in `balance*.go`.
 
 **The siege is binary-verified** from the daily resolver (`resolve_gooie_attack`,
 BRE.OVR 0x47c52), called once a day from `run_daily_maintenance`. The weapon
@@ -872,15 +871,14 @@ Per-day caps (config): individual 4, group 4, terrorist 25, bombing 4.
 
 **The three special-attack switches remove their operations from the menus.**
 `game/reset.hlp` describes Bombing Operations, Missile Operations and Gooie
-Kablooies (IB's Clingy Annihilator) as classes of special attack a sysop may
-disable outright, so IB hides rather than refuses — `byKey` skips a hidden item,
+Kablooies as classes of special attack a sysop may disable outright, so IB hides rather than refuses — `byKey` skips a hidden item,
 so the hotkey goes with the label:
 
 | Setting | Config byte | What it hides |
 | --- | --- | --- |
-| `ClingyAnnihilator` | `cfg+0x18a` | Clingy Annihilator Ops on the InterPlanetary menu |
+| `GooieKablooie` | `cfg+0x18a` | Gooie Kablooie Ops on the InterPlanetary menu |
 | `BombingOps` | `cfg+0x18b` | Bomb Food Market / Bomb Trading Market / Bomb Trade Routes / Undermine Investments on Special Operations |
-| `MissileOps` | `cfg+0x18c` | Nuclear Assault / Chemical Bombing / R5-Slappenheimer on Special Operations |
+| `MissileOps` | `cfg+0x18c` | Nuclear Assault / Chemical Bombing / S3-Sabre on Special Operations |
 
 **BINARY-VERIFIED reach** (2026-08-23), and narrower than IB had it. Sweeping
 both binaries for every `cmp byte [es:di+<offset>]` against those three bytes
@@ -1348,10 +1346,10 @@ what the shield buys.
 Two paths deliberately sit outside the rule, both because the original puts them
 there:
 
-- an **R5-Slappenheimer that arrives from another planet** names the firing
+- an **S3-Sabre that arrives from another planet** names the firing
   realm and its planet on impact. BRE reports an incoming sabre as a missile
   strike, alongside nuclear and chemical, rather than as an agent operation. The
-  *local* R5-Slappenheimer stays anonymous on a hit — BRE resolves a same-planet
+  *local* S3-Sabre stays anonymous on a hit — BRE resolves a same-planet
   strike through a report template (`GAME\COVERT.DAT`) that is not shipped with
   0.988 and cannot be read, so only the half with evidence attributes the hit.
 - IB's **interplanetary bombing ops** (`applySpecialOp` in `ibbs_special.go`)
@@ -1559,11 +1557,10 @@ string table as if the local menu took its first seven entries, and it has been
 replaced by BRE's single op with the six-slot table above. The interplanetary
 Special Operations menu is unchanged and keeps all eight items.
 
-The **R5-Slappenheimer** (the clone's rename of BRE's *S3-Sabre*, avoiding the
-original's coined name) is therefore an interplanetary weapon only, and the
-sysop's `R5-Slappenheimer Handling` setting now gates it there. A disassembly of
-BRE's `SABREHIT` showed only 3 of the 11 dial settings (1, 2, 3) did anything and
-the manual never said which number did what, so from the player's seat the result
+The **S3-Sabre** is therefore an interplanetary weapon only, and the sysop's
+`S3-Sabre Handling` setting now gates it there. A disassembly of BRE's
+`SABREHIT` showed only 3 of the 11 dial settings (1, 2, 3) did anything and the
+manual never said which number did what, so from the player's seat the result
 was random; the target's SDI could intercept it and a heavily garrisoned target
 could turn it back on the attacker. IB keeps that feel but makes it honest: the
 **dial is a bluff** — the player still sets it 0-10 under User Select handling,
@@ -1574,12 +1571,12 @@ BINARY-VERIFIED from the arriving-strike routine (`BRE.OVR ovr_0450a9 +0x481`),
 which is where breins.txt's "up to 50% of incoming missiles" comes from and why a
 full shield stops half of them rather than halving one. The comparison is
 inclusive, so an unshielded realm still turns one shot in a hundred aside. Only
-about 3 launches in 10 (`SlappenheimerEffectHits`/`SlappenheimerEffectRange`)
-land a payload — the rest fizzle. A landed hit removes a random 5-30 %
-(`SlappenheimerBaseDamagePct` + `rng.Intn(SlappenheimerDamageSpread)`) of one
-asset, and ~1-in-`SlappenheimerMultiHitOdds` strafes several at once (BRE's
+about 3 launches in 10 (`SabreEffectHits`/`SabreEffectRange`) land a payload —
+the rest fizzle. A landed hit removes a random 5-30 % (`SabreBaseDamagePct` +
+`rng.Intn(SabreDamageSpread)`) of one asset, and ~1-in-`SabreMultiHitOdds`
+strafes several at once (BRE's
 "extremely devastating" outcome). Backfire is a continuous probability scaled by
-the target's Troopers (`d.Troopers / SlappenheimerBackfireScale`). BRE hid which
+the target's Troopers (`d.Troopers / SabreBackfireScale`). BRE hid which
 field each effect hit, so IB picks its own spread (Troopers, Jets, Turrets,
 Tanks, Bombers, Carriers, Agents, Gold, Food, and Land — Land removed through the
 RegionMix so its Total stays equal to `Land`).
@@ -3018,8 +3015,8 @@ what IB calls the thing on every other screen.
   against re-use; `PriorRealmNames` is what every lookup walks.
 - **Change the caller name** — `World.RenameOwner` re-keys the realm to a
   different BBS handle and repoints everything stored under the old one: group
-  attack contributors, strikes and bids away on another planet, the Clingy
-  Annihilator's builder, and every realm's Coordinator vote. The incoming
+  attack contributors, strikes and bids away on another planet, the Gooie
+  Kablooie's builder, and every realm's Coordinator vote. The incoming
   weapon's builder is NOT touched — that handle belongs to another board.
   Nothing needs holding for a packet in the air, unlike a realm rename: every
   interplanetary answer is matched to the local record it belongs to by id, and
@@ -3538,9 +3535,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   that predates the dispatch still gets that blanket effect
   (`TerrorUnitLossDenom`), since it names no operation.
 - **Send SpyGuy — BINARY-VERIFIED, and not a covert agent at all.** IB keeps the
-  original's name here, deliberately (Andy, 2026-08-18), where it renamed Gooie
-  Kablooie and S3-Sabre: players coming from the original look for this one by
-  name. Do not "correct" it under the distinctive-names rule. He is a
+  original's name here, as it does for the Gooie Kablooie and the S3-Sabre
+  (#218): players coming from the original look for these by name. Do not
+  "correct" it under the distinctive-names rule. He is a
   watcher posted on a PLANET, bought with gold rather than an agent, and he
   gathers no intelligence. Read out of `run_bombing_operations_menu`
   (BRE.OVR 0x029ea9), `ovr_044225_entry_0000` and `run_daily_maintenance`:
@@ -3596,7 +3593,7 @@ The menu is numbered 1-8 with no Help item (live capture):
 | 4 | Undermine Investments | 75,000,000 |
 | 5 | Nuclear Assault | quoted |
 | 6 | Chemical Bombing | quoted |
-| 7 | R5-Slappenheimer | quoted |
+| 7 | S3-Sabre | quoted |
 | 8 | Send SpyGuy | quotes its own, after the target is named |
 
 The four prices are the original's own, off the menu's price column
@@ -3627,7 +3624,7 @@ the daily bombing allowance, and is stopped by New Realm Protection.
   price off the target's size, which is exactly what a board cannot know about a
   realm on another planet, and the original's menu shows no price for them. This
   one is a playtest knob.
-- **A backfiring R5-Slappenheimer is reported home and applied there.** The roll
+- **A backfiring S3-Sabre is reported home and applied there.** The roll
   happens where the target lives, but the realm it hurts is on the board that
   fired, so the damage lands when the answer arrives.
 - **A lost packet returns nothing**, because a Special Operation commits no
@@ -3705,11 +3702,11 @@ as IB's own until someone reads the original's code:
   most. (#113)
 - IB applies the SDI percentage to jet effectiveness and has no bomber term. The
   original caps jets at 30% and bombers at 20%, separately. (#113)
-- An R5-Slappenheimer is intercepted on a roll against the SDI percentage. That
+- An S3-Sabre is intercepted on a roll against the SDI percentage. That
   is now the only local weapon SDI touches: the nuclear, chemical and biological
   routines were all read and none of the three consults it, so the damage
   discount IB used to apply is gone (#103). Whether SDI should touch the
-  R5-Slappenheimer either is still unread. (#113)
+  S3-Sabre either is still unread. (#113)
 - **Jets** on an arriving strike fight at `1 - SDI x 0.3/100`, **bombers** at
   `1 - SDI x 0.2/100` (truncated). Linear in the percentage; the published "up to
   30% / 20%" are what they reach at SDI 100.
@@ -3722,7 +3719,7 @@ as IB's own until someone reads the original's code:
   this rather than correcting it — it is what the original does, and the
   alternative reading would be a guess.
 - **Nothing local is touched.** Not a neighbour's attack, not a nuclear, chemical
-  or biological missile, and not the Clingy Annihilator (#111). IB applied
+  or biological missile, and not the Gooie Kablooie (#111). IB applied
   `(100 - SDI)` in four such places until 2026-08-14; all four were IB's own
   invention and are gone.
 
@@ -3736,7 +3733,7 @@ heard from over a packet but absent from the roster is numbered on after it.
 The list includes the board you are calling from.
 
 IB routes every planet pick through it (`pickPlanetNamed`): Create Group Attack,
-Indiv. Attack Force, the spy and terrorist targeting, the Clingy Annihilator, and
+Indiv. Attack Force, the spy and terrorist targeting, the Gooie Kablooie, and
 IP Messages. A name must be typed in full (case-insensitively) — whether BRE
 accepts an abbreviation was never observed, and guessing would risk sending to
 the wrong planet. An IB divergence: a message addressed to your OWN board is
@@ -4471,7 +4468,7 @@ Now matching this reference (as of v0.0.4):
 - Reference net-worth values and per-unit maintenance
 - Bank interest ~1% per turn, with the interest cap and the money cap
 - Nuclear / chemical / biological strikes and pirate raids
-- Clingy Annihilator, with the original's fund-build-launch-intercept lifecycle
+- Gooie Kablooie, with the original's fund-build-launch-intercept lifecycle
 - SDI defense: a funded shield whose strength is its gold spread over the land it
   covers, blunting incoming interplanetary jets and bombers and intercepting
   incoming missiles
@@ -4489,7 +4486,7 @@ Now matching this reference (as of v0.0.4):
 - The covert menu, including Spy on Relations, the Spy Database, bribery,
   expose enemy ops, and the Bomb Enemy Targets submenu
 - The InterBBS (interplanetary) layer: file-drop packets, group and individual
-  attacks, spying another planet, a Clingy Annihilator aimed across planets, and
+  attacks, spying another planet, a Gooie Kablooie aimed across planets, and
   league orders signed by the coordinator
 - IP Messages: mail addressed to a planet, to its Coordinator, or back to one
   author, written in the same editor local mail uses

@@ -31,7 +31,7 @@ them:
 
 - a **group attack** being assembled against this planet, or against one realm
   on it, with the hours left before it leaves
-- a **Clingy Annihilator** being built for us — when the work starts, when the
+- a **Gooie Kablooie** being built for us — when the work starts, when the
   funding is complete, and if it is stood down again
 
 He also reports whatever is already under way the day he arrives, so a man sent

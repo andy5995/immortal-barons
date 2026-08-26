@@ -15,8 +15,8 @@ import (
 // sendSpyGuy is the Special Operations "Send SpyGuy" item: post a watcher on
 // another PLANET for a paid number of days. He is not a covert agent — no agent
 // is spent, he cannot be caught, and he brings back no intelligence. What he
-// does is send word home the moment his hosts aim a group attack or a Clingy
-// Annihilator at his own planet, and that word arrives as planet news there.
+// does is send word home the moment his hosts aim a group attack or a Gooie
+// Kablooie at his own planet, and that word arrives as planet news there.
 // The model is BRE's, read out of the binary; see internal/game/spyguy.go.
 func sendSpyGuy(s session.Session, w *ctx) Result {
 	// The original gates the whole Special Operations node on the caller's own
@@ -88,21 +88,21 @@ func ipSpecialOp(op game.SpecialOp) func(session.Session, *ctx) Result {
 			fail(s, game.ErrNeedBombers)
 			return Stay
 		}
-		// The R5-Slappenheimer's handling mode is the sysop's, and this is the
-		// only menu that fires one: BRE's S3-Sabre is an interplanetary Special
+		// The S3-Sabre's handling mode is the sysop's, and this is the only
+		// menu that fires one: in BRE the missile is an interplanetary Special
 		// Operation, so the local Covert menu never had it.
-		if op == game.OpSlappenheimer {
-			var mode game.SlappenheimerMode
-			w.With(func() { mode = w.Config.SlappenheimerHandling })
-			if mode == game.SlappenheimerNone {
-				ok(s, "The R5-Slappenheimer is disabled.")
+		if op == game.OpSabre {
+			var mode game.SabreMode
+			w.With(func() { mode = w.Config.SabreHandling })
+			if mode == game.SabreNone {
+				ok(s, "The S3-Sabre is disabled.")
 				return Stay
 			}
 			// Under User Select handling the player dials the missile in (0-10).
 			// The dial is BRE's bluff — it changes nothing about the outcome —
 			// but we still prompt for it to keep the original's feel.
-			if mode == game.SlappenheimerUserSelect {
-				promptInt(s, "Set the R5-Slappenheimer dial (0-10)")
+			if mode == game.SabreUserSelect {
+				promptInt(s, "Set the S3-Sabre dial (0-10)")
 			}
 		}
 		label := game.SpecialOpLabel(op)

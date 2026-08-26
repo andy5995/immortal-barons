@@ -126,7 +126,7 @@ var (
 var MilitaryGoods = []*Good{Trooper, Jet, Turret, Bomber, Tank, Carrier}
 
 // AllGoods is every row, for a caller that wants the whole set rather than a
-// screen's order — net worth, the R5-Slappenheimer's target list, a name
+// screen's order — net worth, the S3-Sabre's target list, a name
 // lookup.
 var AllGoods = []*Good{Trooper, Jet, Turret, Bomber, Tank, Carrier, Agent, Food}
 

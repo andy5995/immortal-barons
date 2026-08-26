@@ -69,11 +69,12 @@ func LoadConfig(dataDir string) (game.Config, error) {
 	}
 	// The doomsday weapon's switch used to be called DoomerKaboomer. A renamed
 	// key is not a missing one to a sysop: unmarshalling would leave the default
-	// (on) in place and quietly re-enable a weapon they had turned off.
+	// (on) in place and quietly re-enable a weapon they had turned off. The key
+	// written today is still ClingyAnnihilator (see Config.GooieKablooie).
 	var legacy struct{ DoomerKaboomer *bool }
 	if json.Unmarshal(data, &legacy) == nil && legacy.DoomerKaboomer != nil &&
 		!bytes.Contains(data, []byte(`"ClingyAnnihilator"`)) {
-		cfg.ClingyAnnihilator = *legacy.DoomerKaboomer
+		cfg.GooieKablooie = *legacy.DoomerKaboomer
 	}
 	if err := LoadBoardConfig(dataDir, &cfg); err != nil {
 		return cfg, err

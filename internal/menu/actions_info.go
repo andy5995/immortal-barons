@@ -195,7 +195,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 		"Attack rewards", tr(s, c.AttackRewards.String()))
 	pair("Attacks per day", countOr(c.MaxIndividualAttacks, "Unlimited"),
 		"Attack costs", tr(s, c.AttackCosts.String()))
-	row("R5-Slappenheimer", tr(s, c.SlappenheimerHandling.String()))
+	row("S3-Sabre", tr(s, c.SabreHandling.String()))
 	if !c.MissileOps || !c.BombingOps {
 		pair("Missile ops", onOffStr(c.MissileOps), "Bombing ops", onOffStr(c.BombingOps))
 	}
@@ -216,7 +216,7 @@ func gameSetup(s session.Session, w *ctx) Result {
 		pair("Bombing ops per day", countOr(c.MaxBombingOps, "Unlimited"),
 			"Terrorism costs", tr(s, c.TerrorCosts.String()))
 		pair("Lost forces return", lostForcesStr(s, c),
-			"Clingy Annihilator", onOffStr(c.ClingyAnnihilator))
+			"Gooie Kablooie", onOffStr(c.GooieKablooie))
 		pair("Allied market trading", onOffStr(c.IPTrading),
 			"Local attack scoring", onOffStr(c.LocalAttackScoring))
 		row("Local attacks", onOffStr(c.LocalAttacks))

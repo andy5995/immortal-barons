@@ -175,7 +175,7 @@ func TestGameSetupHidesLeagueRulesOffLeague(t *testing.T) {
 
 	for _, label := range []string{
 		"Group attacks per day", "Terrorist ops per day", "Bombing ops per day",
-		"Terrorism costs", "Lost forces return", "Clingy Annihilator", "This planet",
+		"Terrorism costs", "Lost forces return", "Gooie Kablooie", "This planet",
 		"League number", "League Coordinator",
 		"Local attacks", "Local attack scoring",
 	} {
@@ -259,14 +259,14 @@ func TestKnobsCycleThroughEveryValue(t *testing.T) {
 			}
 		}
 	})
-	t.Run("slappenheimer", func(t *testing.T) {
-		want := []game.SlappenheimerMode{
-			game.SlappenheimerNone, game.SlappenheimerRandom,
-			game.SlappenheimerConstant, game.SlappenheimerUserSelect,
+	t.Run("sabre", func(t *testing.T) {
+		want := []game.SabreMode{
+			game.SabreNone, game.SabreRandom,
+			game.SabreConstant, game.SabreUserSelect,
 		}
-		got := game.SlappenheimerUserSelect
+		got := game.SabreUserSelect
 		for i, w := range want {
-			if got = cycleSlappenheimer(got); got != w {
+			if got = cycleSabre(got); got != w {
 				t.Fatalf("step %d: got %v, want %v", i+1, got, w)
 			}
 		}

@@ -30,10 +30,10 @@ func TestSpecialOpSwitchesHideTheirOperations(t *testing.T) {
 			func(m *Menus) *Menu { return m.Attack }, 'N', "Nuclear Attack", false},
 		{"bombing off hides Bomb Food Market", func(w *ctx) { w.Config.BombingOps = false },
 			func(m *Menus) *Menu { return m.IPSpecial }, '1', "Bomb Food Market", true},
-		{"annihilator off hides its entry", func(w *ctx) { w.Config.ClingyAnnihilator = false },
-			func(m *Menus) *Menu { return m.InterPlanetary }, '9', "Clingy Annihilator Ops", true},
-		{"annihilator on keeps its entry", func(w *ctx) { w.Config.ClingyAnnihilator = true },
-			func(m *Menus) *Menu { return m.InterPlanetary }, '9', "Clingy Annihilator Ops", false},
+		{"annihilator off hides its entry", func(w *ctx) { w.Config.GooieKablooie = false },
+			func(m *Menus) *Menu { return m.InterPlanetary }, '9', "Gooie Kablooie Ops", true},
+		{"annihilator on keeps its entry", func(w *ctx) { w.Config.GooieKablooie = true },
+			func(m *Menus) *Menu { return m.InterPlanetary }, '9', "Gooie Kablooie Ops", false},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -71,22 +71,22 @@ func TestBombEnemyTargetsIsNotGatedByBombingOps(t *testing.T) {
 	}
 }
 
-// The R5-Slappenheimer's handling mode gates the only menu that fires one. It
+// The S3-Sabre's handling mode gates the only menu that fires one. It
 // moved with the missile when the local Bomb Enemy Targets submenu collapsed to
 // BRE's single terror-bombing op, and a mode the editor stores but nothing reads
 // is the failure this guards.
-func TestSlappenheimerHandlingGatesTheInterplanetaryOp(t *testing.T) {
+func TestSabreHandlingGatesTheInterplanetaryOp(t *testing.T) {
 	w := newWorld()
 	w.Player().Protection = 0
 	w.Player().Bombers = game.BombingBombersRequired
-	w.Config.SlappenheimerHandling = game.SlappenheimerNone
+	w.Config.SabreHandling = game.SabreNone
 
 	f := &fakeSession{}
-	if got := ipSpecialOp(game.OpSlappenheimer)(f, w); got != Stay {
+	if got := ipSpecialOp(game.OpSabre)(f, w); got != Stay {
 		t.Fatalf("ipSpecialOp returned %v, want Stay", got)
 	}
 	if !strings.Contains(f.out.String(), "disabled") {
-		t.Errorf("R5-Slappenheimer Handling = None did not stop the op; output:\n%s", f.out.String())
+		t.Errorf("S3-Sabre Handling = None did not stop the op; output:\n%s", f.out.String())
 	}
 }
 
