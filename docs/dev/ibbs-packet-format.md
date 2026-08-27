@@ -26,6 +26,70 @@ Moving files between boards is external to the game. `RunPlanetary`
 and applies inbound packets, launches due group attacks, exports this board's
 scores, and writes the outbox.
 
+### Generic file handoff contract (#191)
+
+The final `.brp` name is the commit marker (the extension is matched without
+regard to case). Its existence means the file is complete, closed, and ready
+for its current owner to consume. A transport must never create a final `.brp`
+and then fill it in place. That rule applies to a plain filebox copier, a sync
+service, `scp`, and a shared or network filesystem just as it does to
+`barons-ftn`.
+
+The ownership states are:
+
+| State | Owner | Contract |
+|---|---|---|
+| Non-`.brp` temporary file in game outbound | Game | Private work in progress; transports ignore it. |
+| Final `.brp` in game outbound | Transport | The game has published complete bytes; a transport may claim them. |
+| Non-`.brp` claimed or staged file | Transport | Private transport work; the game ignores it. |
+| Final `.brp` in game inbound | Game | Published and immutable; the transport must not change or remove it. |
+
+The game publishes outbound packets by creating a temporary file in the
+destination directory, writing and closing it, then renaming it to `.brp` on
+that same filesystem. A transport may therefore scan only final `.brp` names;
+it does not need the game lock merely to avoid a partial read. If multiple
+transport workers can consume the same outbound directory, they must serialize
+with one another or atomically rename a source to a non-`.brp` claimed name in
+that directory. Only the worker that acquired the claim may queue or remove
+it. It must preserve the packet bytes exactly, and retain enough state to retry
+or restore the claim after a delivery failure.
+
+Inbound publication is the mirror image:
+
+1. Stage the complete packet under a non-`.brp` name on the destination
+   filesystem. Copying to a temporary file elsewhere and then falling back to
+   a cross-filesystem copy into the final name does not satisfy the contract.
+2. Finish and close the staged file. A transport promising crash-durable
+   delivery should also sync the file before publication and the destination
+   directory after the rename, where the platform supports it.
+3. Serialize publishers for this inbound directory and check the intended
+   final name. If it already contains identical bytes, the arrival is a
+   duplicate and the staged copy may be discarded. If it contains different
+   bytes, preserve the staged copy, report a collision, and never overwrite
+   either file.
+4. Atomically rename the staged file to its final `.brp` name. From that point
+   the game owns it.
+
+No lock shared with the game is required for this inbound handoff. A rename
+that lands before `ReadInbound` takes its directory snapshot is processed in
+that run; one that lands afterwards waits intact for the next run. The atomic
+name transition makes both outcomes safe. A transport still needs its own lock
+or an equivalent no-replace publication primitive to keep two of its workers
+from racing through the collision check.
+
+This contract requires a filesystem whose same-directory rename has atomic,
+consistent visibility to every participating process. If a remote mount cannot
+provide that guarantee, use a receiver-side process to stage and rename on a
+local filesystem, or schedule transport and `-planetary` so they cannot
+overlap. A sidecar marker or manifest does not repair weak visibility by
+itself: it adds a second file whose ordering, atomic publication, collision,
+and cleanup would need another protocol.
+
+`ReadInbound` defensively leaves an unparseable file younger than five minutes
+in place and retries it later. That grace period limits damage from a transport
+that writes directly to the final name; it is a heuristic, not an alternative
+readiness signal. An older incomplete file is quarantined to `bad/`.
+
 `barons-ftn` is the optional bidirectional FTN adapter. The game's directories
 remain private. `--out` claims a fixed snapshot under `game.lock`, groups its
 packets by next hop, and publishes one FTN handoff per hop. Attach and obox

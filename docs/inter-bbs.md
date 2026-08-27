@@ -416,6 +416,39 @@ A common setup:
    the game sees it.
 4. The next `-planetary` run on that board reads and applies those files.
 
+### Safe handoff for a plain file transport
+
+If you use `barons-ftn`, it already performs the safe handoff described in its
+own guide. If you write a filebox copier, sync job, or other transport, use the
+final `.brp` name as the ready signal:
+
+1. At the receiving board, copy the packet to a non-`.brp` temporary name on
+   the same filesystem as its game inbound directory.
+2. Finish and close that temporary file.
+3. If the final name already exists, compare the bytes. Discard an identical
+   duplicate; preserve and report different bytes instead of overwriting them.
+4. Rename the temporary file atomically to the final `.brp` name. After that
+   rename, the game owns the file and the transport must not alter or delete it.
+
+Do not run `cp`, `scp`, FTP, or a sync tool directly against the final `.brp`
+name: `-planetary` could otherwise open it while it is only partly written. For
+example, upload with a `.tmp` suffix and perform the final rename on the
+receiving machine. The game already uses the same temp-then-rename rule when it
+publishes outbound packets, so a transport may safely treat every final `.brp`
+there as complete. Multiple copies of the transport must serialize with one
+another or atomically claim each outbound file under a non-`.brp` name before
+sending it.
+
+The filesystem must make a same-directory rename atomically visible to both
+the transport and the game. If a network mount cannot promise that, stage and
+publish through a process on the receiving machine, or schedule delivery and
+`-planetary` so they never overlap. A packet younger than five minutes that
+still fails to parse is left for the next run, but that grace period is only a
+recovery measure—not permission to expose partial files.
+
+The exact ownership and collision rules are in the
+[developer packet-format reference](dev/ibbs-packet-format.md#generic-file-handoff-contract-191).
+
 In a small league every board links to every other one, and that is the default
 until your Coordinator says otherwise. A large league routes instead — see
 "Routing" above.

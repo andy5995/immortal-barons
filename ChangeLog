@@ -6,7 +6,8 @@
   * Mesh bundles track their actual route and scheduled sibling branches;
     identical canonical inbound packets are logged as duplicates, not collisions
   * The FTN transport, routing, locking, recovery, and mixed-link setup have a
-    complete configuration guide with working examples
+    complete configuration guide with working examples; generic file transports
+    now have an atomic inbound and outbound handoff contract
   * reverted: bombers no longer fly a bombing run; they fight and are lost with the rest of the force, as the original has it
   * reverted: an attack captures the same share of land whatever the two realms' wealth per region, as the original does
   * reverted: a realm is crushed only when its last region is taken, as the original decides it
