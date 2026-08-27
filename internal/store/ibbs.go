@@ -366,30 +366,37 @@ func shuffleGroupOrder(keys []string, src io.Reader) {
 // with it (#215 review, finding 4).
 var inboundShuffleSrc io.Reader = rand.Reader
 
-// coordinatorGroupEarnsCarveOut reports whether any packet in the
-// Coordinator's group actually earns first-mover priority: it must carry
-// something only the Coordinator may send (game.CarriesCoordinatorOrders —
-// the same predicate SignAsCoordinator/VerifyCoordinatorOrders use, so
-// there is one definition of "league-wide state" instead of two drifting
-// out of sync) AND verify against this board's CoordPub. Gates the
-// Coordinator's carve-out (#215 review, finding 2) — without the content
-// check, a group earns first-mover priority purely by being the
-// Coordinator's, so a board's ordinary gameplay packets (a player's trade
-// bid, land claim, or strike) riding in the same batch as its roster
-// broadcast inherit that priority on every run. Without the verification
-// check, the gate is spoofable: staging runs before any signature is
-// examined, so an origin claiming LeagueNodes/Reset/etc. in an unsigned or
-// wrongly-signed packet would buy the same priority for free (#215 review,
-// round 4, finding 2). VerifyCoordinatorOrders alone is not enough on its
-// own — it returns true for a packet carrying no coordinator orders at all
-// — so both checks are required together.
-func coordinatorGroupEarnsCarveOut(w *game.World, group []stagedPacket) bool {
-	for _, sp := range group {
+// lastVerifiedOrdersIndex returns the index, within group (already sorted by
+// Seq — see ReadInbound), of the LAST packet that actually earns first-mover
+// priority: one that carries something only the Coordinator may send
+// (game.CarriesCoordinatorOrders — the same predicate
+// SignAsCoordinator/VerifyCoordinatorOrders use, so there is one definition
+// of "league-wide state" instead of two drifting out of sync) AND verifies
+// against this board's CoordPub. Returns -1 if no packet in group qualifies.
+//
+// VerifyCoordinatorOrders alone is not enough on its own — it returns true
+// for a packet carrying no coordinator orders at all — so both checks are
+// required together, closing the spoofable gap where staging runs before any
+// signature is examined (#215 review, round 4, finding 2).
+//
+// The LAST index, not the first: ReadInbound applies group[:idx+1] ahead of
+// the rest of the batch and defers group[idx+1:] to the shuffle. Cutting at
+// the last qualifying packet guarantees every verified-orders packet in the
+// group is included in that applied-first prefix, and that the deferred
+// remainder — if any — has strictly higher Seq than everything already
+// applied, so it can never be mistaken for a replay by that early
+// application. Cutting at the FIRST qualifying packet instead would leave
+// any LATER verified-orders packet in the group unapplied until its
+// deferred, shuffled turn — the very thing the carve-out exists to prevent
+// (#215 review, round 5).
+func lastVerifiedOrdersIndex(w *game.World, group []stagedPacket) int {
+	last := -1
+	for i, sp := range group {
 		if game.CarriesCoordinatorOrders(sp.packet) && w.VerifyCoordinatorOrders(sp.packet) {
-			return true
+			last = i
 		}
 	}
-	return false
+	return last
 }
 
 // ReadInbound reads every packet file in dir addressed to this board (or
@@ -404,14 +411,21 @@ func coordinatorGroupEarnsCarveOut(w *game.World, group []stagedPacket) bool {
 // Application order is NOT filename order (#178): every packet in dir is
 // parsed and staged first, grouped by origin the same way everywhere (see
 // originKey) so one origin's packets are never split across two groups no
-// matter which of its fields happen to be set. The Coordinator's own group —
-// identified by comparing a group's key against the roster's actual node #1,
-// never by asking an individual packet whether it CLAIMS to be the
-// Coordinator — goes first, because the rest of this run's checks read the
-// roster its packets can update; deciding this by group key rather than by a
-// per-packet claim also means setting FromNode: 1 buys nothing for an origin
-// whose FromBoard is not actually the Coordinator's registered name (PR #215
-// review). Every other group is applied in an order reshuffled every run.
+// matter which of its fields happen to be set — that grouping is fixed once
+// staging is done and nothing below ever re-splits it. The Coordinator's own
+// group — identified by comparing a group's key against the roster's actual
+// node #1, never by asking an individual packet whether it CLAIMS to be the
+// Coordinator — has its verified-orders packets applied first, because the
+// rest of this run's checks read the roster they can update; deciding the
+// group by key rather than by a per-packet claim also means setting
+// FromNode: 1 buys nothing for an origin whose FromBoard is not actually the
+// Coordinator's registered name (PR #215 review). Only the Coordinator
+// group's OWN APPLICATION is ever split, into a prefix applied ahead of
+// everything else and a deferred remainder that takes its chances in the
+// shuffle like any other group — see lastVerifiedOrdersIndex for why an
+// ordinary packet from the Coordinator's own board does not inherit that
+// priority just by riding alongside a genuine, verified orders packet.
+// Every other group is applied in an order reshuffled every run.
 // Each origin's own packets stay in their own Seq order within their group:
 // only the order BETWEEN origins was ever the problem. Base-36 encodes the
 // origin node near the front of every filename, so alphabetical order gave
@@ -526,30 +540,42 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			}
 		}
 	}
-	// The carve-out is only earned by a group that actually carries
-	// something the rest of this run's checks have to read first, signed and
-	// verified. Without this, EVERY packet in the Coordinator's group — not
-	// just the roster update — gets first-mover priority on every run purely
-	// by being that board's (#215 review, finding 2), and an unsigned or
-	// forged claim of one would buy the same priority for free (#215 review,
-	// round 4, finding 2).
-	if coordKey != "" && !coordinatorGroupEarnsCarveOut(w, groups[coordKey]) {
-		coordKey = ""
+	// The carve-out is earned only by the packets that actually carry
+	// verified coordinator orders, not by the whole group (#215 review,
+	// round 5): ExportNodeList queues a signed roster broadcast on every
+	// planetary run of the Coordinator's board, so riding ordinary gameplay
+	// packets from that same board (a player's trade bid, land claim, or
+	// strike) inherited that packet's priority for free on essentially
+	// every run — reproduced at 30/30 trials before this fix. group[:idx+1]
+	// is applied ahead of the rest of the batch; group[idx+1:], if any, is
+	// deferred to the shuffle with everyone else. See
+	// lastVerifiedOrdersIndex for why the split lands after the LAST
+	// verified-orders packet rather than the first.
+	coordFullyApplied := false
+	var appliedFirst []stagedPacket
+	if coordKey != "" {
+		if idx := lastVerifiedOrdersIndex(w, groups[coordKey]); idx >= 0 {
+			appliedFirst = groups[coordKey][:idx+1]
+			if idx+1 == len(groups[coordKey]) {
+				coordFullyApplied = true
+			} else {
+				groups[coordKey] = groups[coordKey][idx+1:]
+			}
+		} else {
+			coordKey = "" // no verified orders anywhere in the group: no carve-out at all
+		}
 	}
 	var rest []string
-	haveCoordGroup := false
 	for _, key := range groupOrder {
-		if coordKey != "" && key == coordKey {
-			haveCoordGroup = true
-			continue
+		if coordKey != "" && key == coordKey && coordFullyApplied {
+			continue // fully consumed by the priority prefix; nothing left to shuffle
 		}
 		rest = append(rest, key)
 	}
-	if haveCoordGroup {
-		for _, sp := range groups[coordKey] {
-			if err := applyStagedPacket(w, &result, sp.path, sp.packet, verbose); err != nil {
-				return result, err
-			}
+	haveCoordGroup := len(appliedFirst) > 0
+	for _, sp := range appliedFirst {
+		if err := applyStagedPacket(w, &result, sp.path, sp.packet, verbose); err != nil {
+			return result, err
 		}
 	}
 

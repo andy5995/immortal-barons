@@ -170,28 +170,42 @@ packets can be split across two groups and reordered against each other).
 Each origin's own packets stay in their existing `Seq` order within their
 group: only the order *between* origins was ever the problem.
 
-The Coordinator's group, when its packets carry a roster update or a
-bulletin broadcast the rest of the run's checks need to read first, is
-applied before anything else. It is identified by comparing a group's key
-against the roster's actual Coordinator board — never by asking an
-individual packet whether it *claims* to be from the Coordinator — so a
-forged `FromNode: 1` buys an origin nothing. (A board with no roster
-loaded yet falls back to trusting a self-declared `FromNode: 1`, the same
-trust level `fromCoordinator` already uses to bootstrap — this narrows to
-a one-time window before any roster exists and closes for good once one
-does.) Ordinary gameplay packets riding in the same batch as a
-Coordinator roster update do not inherit that priority — only a group
-containing a packet that carries something only the Coordinator may send
-(`LeagueConfig`, `LeagueNodes`, `Reset`, or `Bulletins` — the same
-`CarriesCoordinatorOrders` check `SignAsCoordinator`/`VerifyCoordinatorOrders`
-use, so there is one definition of "league-wide state" instead of two)
-*and verifies against this board's Coordinator public key* earns the
-carve-out; everyone else's group, Coordinator's board included when it
-has nothing signed and verified to offer first, takes its chances in the
-shuffle. The verification half matters because staging happens before any
-signature is examined: without it, an origin could buy first-mover
-priority simply by setting `LeagueNodes` on an unsigned packet, no forged
-`FromNode`/`FromBoard` required.
+The Coordinator's group is identified by comparing a group's key against
+the roster's actual Coordinator board — never by asking an individual
+packet whether it *claims* to be from the Coordinator — so a forged
+`FromNode: 1` buys an origin nothing. (A board with no roster loaded yet
+falls back to trusting a self-declared `FromNode: 1`, the same trust
+level `fromCoordinator` already uses to bootstrap — this narrows to a
+one-time window before any roster exists and closes for good once one
+does.)
+
+Only the packets in that group that actually carry something only the
+Coordinator may send (`LeagueConfig`, `LeagueNodes`, `Reset`, or
+`Bulletins` — the same `CarriesCoordinatorOrders` check
+`SignAsCoordinator`/`VerifyCoordinatorOrders` use, so there is one
+definition of "league-wide state" instead of two) *and verify* against
+this board's Coordinator public key are applied ahead of the rest of the
+batch — not the whole group. `ExportNodeList` rebroadcasts the roster on
+every planetary run of the Coordinator's board, so gating on the whole
+group rather than the individual packets let an ordinary gameplay packet
+(a trade bid, a land claim, a strike) riding in the same batch as that
+rebroadcast inherit its priority for free on essentially every run — the
+exact fixed advantage this feature exists to remove, just re-anchored
+from filename order to "is the Coordinator's board" (caught in review).
+The split lands after the *last* qualifying packet in the group's own
+`Seq` order, not the first: cutting at the first would leave a *later*
+verified packet in the group waiting for its shuffled turn, letting the
+rest of the batch run one check behind whatever it just changed — the
+same failure the carve-out exists to prevent, and cutting at the last
+also keeps the whole applied-first prefix in the origin's own ascending
+`Seq` order, so nothing in the deferred remainder can ever be mistaken
+for a replay of what already applied. The deferred remainder, if any,
+takes its chances in the shuffle exactly like any other group's packets,
+Coordinator's board included when it has nothing signed and verified to
+offer at all. The verification half matters because staging happens
+before any signature is examined: without it, an origin could buy
+first-mover priority simply by setting `LeagueNodes` on an unsigned
+packet, no forged `FromNode`/`FromBoard` required.
 
 Every other group is applied in an order reshuffled every run, read from
 `crypto/rand` and nothing derived from packet content — so no origin can

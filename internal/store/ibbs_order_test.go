@@ -412,7 +412,7 @@ func TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod(t *testing.T)
 // coverage for the round's finding 2: the gate must also verify the
 // signature, not just trust the claimed content, or an unsigned or forged
 // packet buys the same priority for free.
-func TestCoordinatorGroupEarnsCarveOut(t *testing.T) {
+func TestLastVerifiedOrdersIndex(t *testing.T) {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		t.Fatal(err)
@@ -433,16 +433,16 @@ func TestCoordinatorGroupEarnsCarveOut(t *testing.T) {
 	cases := []struct {
 		name  string
 		group []stagedPacket
-		want  bool
+		want  int
 	}{
-		{"empty group", nil, false},
+		{"empty group", nil, -1},
 		{
 			"ordinary gameplay packets only",
 			[]stagedPacket{
 				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 1})},
 				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 2})},
 			},
-			false,
+			-1,
 		},
 		{
 			"one packet among several carries a signed, verified roster update",
@@ -451,28 +451,28 @@ func TestCoordinatorGroupEarnsCarveOut(t *testing.T) {
 				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 2,
 					LeagueNodes: []game.LeagueNode{{Number: 1, Name: "Coordinator BBS"}}})},
 			},
-			true,
+			1,
 		},
 		{
 			"league config counts",
 			[]stagedPacket{{packet: sign(game.Packet{FromBoard: "Coordinator BBS", LeagueConfig: &game.LeagueConfig{}})}},
-			true,
+			0,
 		},
 		{
 			"bulletins count",
 			[]stagedPacket{{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Bulletins: &game.BulletinSet{}})}},
-			true,
+			0,
 		},
 		{
 			"a league reset counts -- dropped by the predecessor predicate",
 			[]stagedPacket{{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Reset: &game.LeagueReset{}})}},
-			true,
+			0,
 		},
 		{
 			"claimed but UNSIGNED roster update earns nothing",
 			[]stagedPacket{{packet: game.Packet{FromBoard: "Coordinator BBS",
 				LeagueNodes: []game.LeagueNode{{Number: 1, Name: "Coordinator BBS"}}}}},
-			false,
+			-1,
 		},
 		{
 			"claimed roster update signed with the WRONG key earns nothing",
@@ -490,13 +490,41 @@ func TestCoordinatorGroupEarnsCarveOut(t *testing.T) {
 				}
 				return stagedPacket{packet: p}
 			}()},
-			false,
+			-1,
+		},
+		{
+			// #215 review, round 5: a LATER verified-orders packet must not be
+			// left behind just because an earlier one already qualified the
+			// group -- the split point has to be the LAST match, index 2, not
+			// the first, index 0.
+			"a later verified-orders packet moves the split point forward",
+			[]stagedPacket{
+				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 1,
+					Bulletins: &game.BulletinSet{}})},
+				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 2})},
+				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 3,
+					LeagueConfig: &game.LeagueConfig{}})},
+			},
+			2,
+		},
+		{
+			// A trailing ordinary packet after the last verified one must NOT
+			// be pulled into the prefix -- confirms this is genuinely "index
+			// of the last VERIFIED packet", not "index of the last packet".
+			"a trailing ordinary packet after the last verified one is excluded",
+			[]stagedPacket{
+				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 1})},
+				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 2,
+					LeagueConfig: &game.LeagueConfig{}})},
+				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 3})},
+			},
+			1,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if got := coordinatorGroupEarnsCarveOut(w, c.group); got != c.want {
-				t.Errorf("coordinatorGroupEarnsCarveOut(%s) = %v, want %v", c.name, got, c.want)
+			if got := lastVerifiedOrdersIndex(w, c.group); got != c.want {
+				t.Errorf("lastVerifiedOrdersIndex(%s) = %d, want %d", c.name, got, c.want)
 			}
 		})
 	}
@@ -608,6 +636,89 @@ func TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst(t *testing
 			t.Fatalf("trial %d: the Coordinator's roster-update group must apply first, got NewsToday=%v",
 				trial, w.NewsToday)
 		}
+	}
+}
+
+// TestReadInboundOrdinaryCoordinatorPacketDoesNotInheritRosterPriority is
+// #215 review, round 5: ExportNodeList queues a signed roster broadcast on
+// EVERY planetary run of the Coordinator's board, so the earlier
+// coordinatorGroupEarnsCarveOut gate -- any packet in the group earning it
+// meant the WHOLE group applied first -- let an ordinary gameplay packet
+// riding alongside that roster broadcast inherit its priority for free on
+// essentially every run, exactly the fixed advantage #178 set out to
+// remove, just re-anchored from filename order to "is the Coordinator's
+// board". Reproduced at 30/30 trials (matching the review) before this fix.
+// The roster packet must still always apply and always precede the rest of
+// the batch (see TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst),
+// but the ordinary packet riding with it in the SAME batch now takes its
+// chances in the shuffle like any other origin's, not a free ride.
+func TestReadInboundOrdinaryCoordinatorPacketDoesNotInheritRosterPriority(t *testing.T) {
+	pub, priv, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	appliedFirst := 0
+	const trials = 60
+	for trial := 0; trial < trials; trial++ {
+		inbound := t.TempDir()
+		signer := game.NewWorldSeed(game.DefaultConfig(), 1)
+		signer.CoordKey = priv
+		roster := game.Packet{
+			FromBoard: "Coordinator BBS", FromNode: 1, Seq: 1,
+			LeagueNodes: []game.LeagueNode{
+				{Number: 1, Name: "Coordinator BBS"},
+				{Number: 3, Name: "Honest BBS"},
+				{Number: 9, Name: "Receiver BBS"},
+			},
+		}
+		if err := signer.SignAsCoordinator(&roster); err != nil {
+			t.Fatalf("trial %d: SignAsCoordinator: %v", trial, err)
+		}
+		writePacket(t, inbound, "0-roster", roster)
+		// An ordinary gameplay packet from the SAME board, riding in the same
+		// batch as its own board's roster broadcast -- exactly what
+		// ExportNodeList produces on every real planetary run.
+		writePacket(t, inbound, "1-coord-gameplay", game.Packet{
+			FromBoard: "Coordinator BBS", FromNode: 1, Seq: 2, News: []string{"COORD"},
+		})
+		writePacket(t, inbound, "2-honest", game.Packet{FromBoard: "Honest BBS", FromNode: 3, Seq: 1, News: []string{"HONEST"}})
+
+		cfg := game.DefaultConfig()
+		cfg.BoardID = "Receiver BBS"
+		w := game.NewWorldSeed(cfg, 1)
+		w.CoordPub = pub
+		w.LeagueNodes = []game.LeagueNode{
+			{Number: 1, Name: "Coordinator BBS"},
+			{Number: 3, Name: "Honest BBS"},
+			{Number: 9, Name: "Receiver BBS"},
+		}
+
+		if _, err := ReadInbound(w, inbound, false); err != nil {
+			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
+		}
+		coordAt, honestAt := -1, -1
+		for i, line := range w.NewsToday {
+			switch line {
+			case "COORD":
+				coordAt = i
+			case "HONEST":
+				honestAt = i
+			}
+		}
+		if coordAt == -1 || honestAt == -1 {
+			t.Fatalf("trial %d: expected both News lines applied, got %v", trial, w.NewsToday)
+		}
+		if coordAt < honestAt {
+			appliedFirst++
+		}
+	}
+	t.Logf("Coordinator's ordinary packet applied first in %d/%d trials", appliedFirst, trials)
+	if appliedFirst == trials {
+		t.Errorf("the Coordinator's ordinary gameplay packet won first place in every trial (%d/%d) by riding alongside its own board's verified roster broadcast -- it should only be sometimes, like any other origin",
+			appliedFirst, trials)
+	}
+	if appliedFirst == 0 {
+		t.Errorf("the Coordinator's board never applied first in %d trials -- either broken or statistically implausible, check the test", trials)
 	}
 }
 
