@@ -461,7 +461,7 @@ func TestRunInValidatesAndDeletesStoredAttach(t *testing.T) {
 	if err := os.WriteFile(attachment, body, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	messageConfig := Config{NetmailDir: filepath.Join(data, "transport-in"), SubjectMode: SubjectAbsolute}
+	messageConfig := Config{NetmailDir: filepath.Join(data, "transport-in"), SubjectMode: SubjectBasename}
 	message, err := createFileAttach(messageConfig, attachment, Address{Zone: 1, Net: 229, Node: 100}, Address{Zone: 1, Net: 229, Node: 200})
 	if err != nil {
 		t.Fatal(err)
@@ -603,11 +603,7 @@ func TestInboundBSOBusyPeerDoesNotBlockOtherFanout(t *testing.T) {
 
 func newBundledSetup(t *testing.T, boardID, extraFTN string) string {
 	t.Helper()
-	data, err := os.MkdirTemp("/tmp", "ibf")
-	if err != nil {
-		t.Fatal(err)
-	}
-	t.Cleanup(func() { os.RemoveAll(data) })
+	data := t.TempDir()
 	for _, dir := range []string{"door-in", "door-out", "transport-in", "netmail", "attach", "bso"} {
 		if err := os.Mkdir(filepath.Join(data, dir), 0o755); err != nil {
 			t.Fatal(err)
@@ -616,7 +612,7 @@ func newBundledSetup(t *testing.T, boardID, extraFTN string) string {
 	files := map[string]string{
 		"config.json":         "{}\n",
 		store.BoardConfigFile: "BoardID " + boardID + "\nLeagueNumber 100\nInbound door-in\nOutbound door-out\n",
-		ConfigFile:            "NetmailDir netmail\nAttachDir attach\nInboundDir transport-in\nInboundNetmailDir transport-in\n" + extraFTN,
+		ConfigFile:            "NetmailDir netmail\nAttachDir attach\nSubjectPath Basename\nInboundDir transport-in\nInboundNetmailDir transport-in\n" + extraFTN,
 		store.NodeListFile: "1 HOST 2 3\nAlpha BBS\n1:229/100\nDetroit\nMI\nUSA\n\n" +
 			"2\nBravo BBS\n1:229/200\nLansing\nMI\nUSA\n\n" +
 			"3\nCharlie BBS\n1:229/300\nFlint\nMI\nUSA\n",
