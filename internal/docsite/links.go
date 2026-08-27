@@ -32,6 +32,7 @@ func newLinker(repoRoot string, enTopics []topic) *linker {
 		"docs/playing.md":           "guide/index.md",
 		"docs/door-setup.md":        "door-setup/index.md",
 		"docs/inter-bbs.md":         "inter-bbs/index.md",
+		"docs/ftn-transport.md":     "ftn-transport/index.md",
 		"docs/charset.md":           "charset/index.md",
 		"docs/command-reference.md": "command-reference/index.md",
 		"docs/download.md":          "download/index.md",

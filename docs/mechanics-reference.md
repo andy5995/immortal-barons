@@ -4713,14 +4713,18 @@ Divergences, all forced by the transport rather than chosen:
   silently, in a file no other board can see. BRE's own sample says a league
   whose Coordinator keeps routing in the roster needs no such file, so the
   roster is IB's single routing table.
-- **A broadcast is addressed per planet before it is written**, one file each,
-  because only the game knows the tree and the transport cannot fan out along
-  it. An unrouted league still writes the single broadcast, and its transport
-  fans that out as before — a league only changes behaviour once its Coordinator
-  writes a HOST line, so no existing board is affected.
-- **A hop count caps forwarding** (`MaxPacketHops`). A cycle typed into a roster
-  is one sysop's mistake that every board obeys, and nothing else would notice
-  it. BRE's "Illegal Route Found from BBS #" says it had the same problem.
+- **A routed broadcast is addressed per planet before it is written**, one file
+  each, because the game owns the roster tree. An unrouted league still writes
+  one broadcast. A transport may fan it out directly; `barons-ftn` carries an
+  actual node route plus the set of sibling recipients already scheduled, so a
+  receiver does not reflexively send a copy back along the route or across to a
+  sibling that already has one pending.
+- **A hop limit caps forwarding** (`MaxPacketHops`). The direct file transport
+  uses the packet's legacy `Hops`; bundled FTN transport derives it from the
+  route trace. A cycle typed into a roster—or formed by four or more mesh
+  links—can still make independently scheduled copies meet, so exact duplicate
+  detection remains part of normal inbound handling. BRE's "Illegal Route Found
+  from BBS #" says it had the same underlying problem.
 
 **What this does not do**, and BRE could not do either: stop a sysop inventing
 their own board's figures. Scores and strikes are self-reported and unsigned;

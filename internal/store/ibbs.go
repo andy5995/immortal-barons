@@ -201,12 +201,20 @@ func WriteOutbox(w *game.World, dir string, verbose bool) (int, error) {
 	return len(packets), nil
 }
 
-// packetFilename keeps the transport name short enough to leave room for an
-// absolute directory in an FTN Type-2 subject. Modern packets are identified
-// exactly by origin node, final destination node, and the origin's monotonic
-// sequence number. Older packets without that identity use a stable 128-bit
-// content digest instead.
+// packetFilename gives private game directories a canonical, stable name.
+// Modern packets are identified exactly by origin node, final destination node,
+// and the origin's monotonic sequence number. Older packets without that
+// identity use a stable 128-bit content digest instead. An FTN transport uses an
+// independent 8.3 bundle alias, so its path-length limits do not constrain this
+// name.
 func packetFilename(p game.Packet, data []byte) string {
+	return PacketFilename(p, data)
+}
+
+// PacketFilename derives the canonical private-directory name from a decoded
+// packet. Transport adapters use this after validation so an external filename
+// never enters a game inbound directory as authority.
+func PacketFilename(p game.Packet, data []byte) string {
 	var identity string
 	if p.FromNode > 0 && p.Seq > 0 {
 		sequence := strconv.FormatUint(p.Seq, 36)

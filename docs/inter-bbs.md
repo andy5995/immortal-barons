@@ -134,15 +134,17 @@ The key is a one-time exchange, unless the league changes Coordinator.
 
     ```
     immortal-barons -ibbs-reset -board-id "Your Board" \
-      -inbound /path/to/ftn/inbound \
-      -outbound /path/to/filebox \
+      -inbound inbound \
+      -outbound outbound \
       -data /path/to/data
     ```
 
     Quote the board name if it has spaces. `-inbound` is where your mailer
-    delivers incoming files; `-outbound` is the filebox for your uplink. Both
-    may be left out, in which case the game uses `inbound` and `outbound` inside
-    its data directory and you move the files yourself.
+    or connector delivers unwrapped game packets; `-outbound` is where the game
+    leaves packets for the connector or another transport. Both may be left
+    out to use `inbound` and `outbound` inside the data directory. With FTN,
+    keep those defaults private and configure the mailer-facing paths in
+    `ftn.cfg` instead.
 
     The command does not write `bbs.cfg` — it ends by printing the file for you
     to save, filled in from the flags you gave. Add your Coordinator's league
@@ -205,8 +207,8 @@ it in anything:
 ```
 BoardID       Avalon
 LeagueNumber  900
-Inbound       /home/bbs/ftn/in
-Outbound      /home/bbs/filebox/uplink
+Inbound       inbound
+Outbound      outbound
 Lottery       yes
 ```
 
@@ -389,8 +391,10 @@ of this.
 ## How packets move (you choose the schedule)
 
 The game never moves files between boards. It only reads and writes packet
-files in your inbound and outbound directories. Moving the files between boards
-is your job, and you choose how often it happens.
+files in its inbound and outbound directories. Moving the files between boards
+is your job, and you choose how often it happens. When using `barons-ftn`, these
+are private door-local directories: the helper, not the game, touches the BBS or
+mailer's directories.
 
 The inter-BBS step is:
 
@@ -406,9 +410,10 @@ A common setup:
 
 1. A caller plays the game.
 2. After the caller exits, or on a schedule you pick, run `-planetary`.
-3. Your transport carries each file from your outbound directory to the inbound
-   directory of the board it is meant for (over FidoNet, a sync tool, scp, a
-   shared mount — whatever you use).
+3. Your transport carries each file from your outbound side to the destination
+   (over FidoNet, a sync tool, scp, a shared mount — whatever you use). For FTN,
+   `barons-ftn --out` wraps it and `barons-ftn --in` removes that wrapper before
+   the game sees it.
 4. The next `-planetary` run on that board reads and applies those files.
 
 In a small league every board links to every other one, and that is the default
@@ -577,14 +582,31 @@ whose round trip stops moving is the same fault, seen from the other end.
 
 ## Optional FTN handoff
 
-`barons-ftn` turns the transport-neutral `.brp` files into ordinary FTN
-file-attach netmail. The game does not run it automatically. A typical event or
-door-exit chain is:
+`barons-ftn` is the bidirectional boundary between the game's private packet
+directories and an FTN mail system. It groups a fixed outbound snapshot into
+one opaque ZIP bundle per next hop and hands each peer off through stored-message
+file attach, direct obox, or BSO/FLO. On receive it validates and removes that
+wrapper, delivers local packets, and routes transit without changing the signed
+game-packet bytes.
 
 ```
+barons-ftn --in -data /path/to/data
 immortal-barons -planetary -data /path/to/data
-barons-ftn -data /path/to/data
+barons-ftn --out -data /path/to/data
 ```
+
+The helper and game share a locking contract. Attach and obox bundles are
+immutable; BSO handoffs honour the destination `.bsy` and can safely coalesce
+new snapshots into a compatible advertised bundle while holding it. See
+[FTN Transport with `barons-ftn`](ftn-transport.md) for the complete
+configuration reference, mixed-link examples, event schedules, 8.3 aliases,
+mesh warning, crash recovery, and directory-by-directory troubleshooting.
+
+### Before bundled transport
+
+The rest of this subsection records the single-packet `.msg` handoff used by
+older releases. It is retained as migration context, not current setup
+instructions; use the dedicated guide above for a new or upgraded installation.
 
 **Writing the netmail is not sending it.** `barons-ftn` leaves a `.msg` in the
 netmail directory and stops. What carries it is whatever already carries your
@@ -1038,8 +1060,10 @@ often than daily, and the poll — which the game cannot do for you at all.
 
 The steps under "Joining a league (member boards)" are the game's side. This
 section is Synchronet's side — where each setting lives, and what carries the
-packets. Do it in the order below. It assumes SBBSecho and BinkIT are already
-running your other mail.
+packets. It assumes SBBSecho and BinkIT are already running your other mail.
+The complete current configuration, including obox and BSO alternatives, is in
+[FTN Transport with `barons-ftn`](ftn-transport.md); this example uses the
+stored-message Attach link.
 
 Paths below are the Linux defaults. On Windows they are `C:\SBBS\...`, the two
 programs are `immortal-barons.exe` and `barons-ftn.exe`, and the script in the
@@ -1094,7 +1118,10 @@ In the game's data directory, `ftn.cfg`:
 
 ```
 NetmailDir /sbbs/fido/netmail
+AttachDir  /sbbs/fido/ib-attach
+InboundDir /sbbs/fido/inbound
 Binkley    Yes
+Link 1     Attach
 ```
 
 `Binkley Yes` is what BinkIT expects. Leave `SubjectPath` alone: SBBSecho
@@ -1103,18 +1130,21 @@ pathname has to be there. That pathname gets 70 bytes — see [Attachment
 pathnames](#attachment-pathnames) — which is another reason to keep the game's
 data directory short.
 
-### The four steps, in order
+### The five steps, in order
 
 ```
+barons-ftn --in -data /sbbs/xtrn/imb/data
 immortal-barons -planetary -data /sbbs/xtrn/imb/data
-barons-ftn -data /sbbs/xtrn/imb/data
+barons-ftn --out -data /sbbs/xtrn/imb/data
 sbbsecho
 jsexec -c /sbbs/ctrl /sbbs/exec/binkit.js
 ```
 
-The game reads and writes `.brp` files. `barons-ftn` wraps each one in a
-`.msg`. SBBSecho packs it into the BSO/FLO outbound. BinkIT sends it. Wherever
-a file stops is the step that did not run.
+The game reads and writes private JSON `.brp` files. Outbound `barons-ftn`
+coalesces them into one 8.3 transport bundle per next hop and wraps that bundle
+in one `.msg`. SBBSecho packs it into the BSO/FLO outbound and BinkIT sends it.
+At the far side, inbound `barons-ftn` validates/deletes the game-owned envelope
+and unwraps the bundle. Wherever a file stops is the step that did not run.
 
 `sbbsecho` takes its ctrl directory from `SBBSCTRL`, not from an `.ini` path on
 the command line, so set that variable in the script if your board is not at

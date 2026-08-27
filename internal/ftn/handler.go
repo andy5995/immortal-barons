@@ -14,7 +14,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
-// Queued records one packet handed to the FTN mailer.
+// Queued records one transport bundle handed to the FTN mailer.
 type Queued struct {
 	PacketPath string
 	NextHop    string
@@ -22,9 +22,10 @@ type Queued struct {
 	Message    string
 }
 
-// Result describes one outbound scan.
+// Result describes one inbound or outbound transport scan.
 type Result struct {
-	Queued []Queued
+	Queued    []Queued
+	Delivered int
 	// Warnings report a configuration that works now but is close to failing.
 	Warnings []string
 }

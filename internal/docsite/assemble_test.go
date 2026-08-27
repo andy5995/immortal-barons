@@ -15,6 +15,7 @@ func writeFixture(t *testing.T, root string) {
 		"docs/playing.md":                             "# Playing\n\nHow to play.\n",
 		"docs/door-setup.md":                          "# Door Setup\n\nSetup. See [leagues](docs/inter-bbs.md).\n",
 		"docs/inter-bbs.md":                           "# Inter-BBS Leagues\n\nLeague play.\n",
+		"docs/ftn-transport.md":                       "# FTN Transport\n\nTransport setup.\n",
 		"docs/command-reference.md":                   "# Command Reference\n\nAll options.\n",
 		"docs/download.md":                            "# Download\n\nReleases and snapshots.\n",
 		"docs/faq.md":                                 "# FAQ\n\nQuestions.\n",
@@ -58,6 +59,7 @@ func TestAssembleLayout(t *testing.T) {
 		"site-src/en/guide/controls/interface.md", // help topic
 		"site-src/en/door-setup/index.md",         // door setup (was sysop guide)
 		"site-src/en/inter-bbs/index.md",          // inter-BBS leagues, split out of door setup
+		"site-src/en/ftn-transport/index.md",      // detailed FTN transport guide
 		"site-src/en/command-reference/index.md",  // command reference (#34)
 		"site-src/en/download/index.md",           // download page
 		"site-src/en/faq/index.md",                // faq
@@ -104,6 +106,7 @@ func TestAssembleNavAndConfig(t *testing.T) {
 		`- "Regions": guide/economy/regions.md`,
 		`- "Game Instructions":`, // the one collapsible nav section; matches the in-game label
 		`- "Door Setup": door-setup/index.md`,
+		`- "FTN Transport": ftn-transport/index.md`,
 		`- "Command Reference": command-reference/index.md`,
 		`- "Download": download/index.md`,
 		`- "FAQ": faq/index.md`,
