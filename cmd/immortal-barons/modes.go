@@ -126,7 +126,11 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 		fmt.Printf("Released %d held packet(s): this board can now read their format.\n", run.Released)
 	}
 	if run.Held > 0 {
-		fmt.Printf("Held %d packet(s) for a protocol this build cannot read; they are in %s and will be applied after the builds match.\n",
+		// Not "once the builds match": that is true only of a packet from a
+		// NEWER board, which upgrading here releases. One from an older board
+		// is held by a format this build has moved past and no upgrade of
+		// theirs brings it back, so the per-board notices say which is which.
+		fmt.Printf("Held %d packet(s) for a protocol this build cannot read; they are in %s. The notes below say, per board, whether upgrading releases them.\n",
 			run.Held, filepath.Join(cfg.DataDir, store.HeldDir))
 	}
 	if run.Quarantined > 0 {
@@ -196,7 +200,7 @@ func skipSummary(run store.PlanetaryRun) string {
 	// Held ranks next: nothing is lost, but the league is out of step and
 	// somebody has to act before those packets move.
 	if run.Held > 0 {
-		parts = append(parts, fmt.Sprintf("%d held for a newer protocol", run.Held))
+		parts = append(parts, fmt.Sprintf("%d held for a protocol this build does not read", run.Held))
 	}
 	if run.AlreadySeen > 0 {
 		parts = append(parts, fmt.Sprintf("%d already seen", run.AlreadySeen))

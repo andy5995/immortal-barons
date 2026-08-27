@@ -87,3 +87,37 @@ func TestReleaseHeldIsQuietWithNoHeldDirectory(t *testing.T) {
 		t.Errorf("got (%d, %v), want (0, nil)", moved, err)
 	}
 }
+
+// The asymmetry a three-board rig surfaced, and the reason #229 exists: release
+// asks whether THIS build speaks the packet's protocol, so upgrading recovers a
+// backlog from a NEWER board and never one from an older board. The board that
+// upgrades first is the one that pays, which is the opposite of the assumption
+// the guide used to encourage.
+func TestOnlyANewerBoardsBacklogIsEverReleased(t *testing.T) {
+	for _, tc := range []struct {
+		name     string
+		protocol int
+		want     int
+	}{
+		{"a newer board's packet, once this build catches up", game.Protocol, 1},
+		{"a newer board's packet, before this build catches up", game.Protocol + 1, 0},
+		{"an older board's packet, which this build has moved past", game.Protocol - 1, 0},
+		{"a packet stating no protocol at all", 0, 0},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			data, inbound := t.TempDir(), t.TempDir()
+			if err := os.MkdirAll(filepath.Join(data, HeldDir), 0o755); err != nil {
+				t.Fatal(err)
+			}
+			writeHeldTestPacket(t, filepath.Join(data, HeldDir), "p"+PacketExt,
+				game.Packet{FromBoard: "Alpha BBS", Protocol: tc.protocol})
+			moved, err := releaseHeld(data, inbound)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if moved != tc.want {
+				t.Errorf("released %d, want %d — nothing else ever brings this packet back", moved, tc.want)
+			}
+		})
+	}
+}

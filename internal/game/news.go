@@ -35,7 +35,18 @@ func (w *World) NoteProtocolHold(board string, protocol int) {
 		return
 	}
 	w.heldNoted[board] = true
-	w.noteSysop("Packets from %s are being held: they speak protocol %d and this board speaks %d. They will be applied when both boards run the same release.",
+	// Which way the mismatch runs decides whether waiting fixes it, and the
+	// sysop's next move differs completely: upgrading this board releases a
+	// newer board's packets, while an older board's are held by a format this
+	// build has already moved past and no upgrade of theirs brings back. Saying
+	// "when both boards run the same release" for both was true only of the
+	// first (#228 review).
+	if protocol > Protocol {
+		w.noteSysop("Packets from %s are being held: they speak protocol %d and this board speaks %d. Upgrading this board applies them.",
+			board, protocol, Protocol)
+		return
+	}
+	w.noteSysop("Packets from %s are being held: they speak protocol %d, which this board (protocol %d) has moved past. They will NOT be applied on their own, even once that board upgrades — ask them to resend anything that mattered.",
 		board, protocol, Protocol)
 }
 

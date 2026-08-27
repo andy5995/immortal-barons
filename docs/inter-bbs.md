@@ -568,8 +568,24 @@ update, mail, or a returning strike that will be perfectly good once both boards
 run the same release.
 
 Every planetary run looks in that folder again and applies whatever it can now
-read, so a board that upgrades catches up on its backlog with nobody doing
-anything. Leave the files alone.
+read. Whether that ever happens depends on which side of the upgrade you are
+on, and the difference matters:
+
+- **You are behind.** The other board upgraded first, so its packets state a
+  format newer than yours. Upgrading releases them: your next planetary run
+  reads the folder, finds them readable, and applies the backlog with nobody
+  doing anything. Leave the files alone.
+- **You are ahead.** You upgraded first, so packets from boards still on the
+  old release state a format older than yours. Those are held too, and your
+  build will never speak that older format again — so they stay held even after
+  the other boards upgrade. What they contained is not lost from disk, but it
+  will not reach your game on its own.
+
+The second case is the one to plan around, because the cost falls on whoever
+upgrades first, which is the opposite of what you would expect. When a release
+changes the packet format, the guide for that release says so. Agree a window
+with your Coordinator and upgrade close together, so nothing spends long in
+flight between two boards that disagree.
 
 ### Quarantined packets
 
