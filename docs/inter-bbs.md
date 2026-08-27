@@ -686,9 +686,15 @@ The helper therefore needs no game lock and never scans a partial packet.
 Concurrent helpers serialize through their own `barons-ftn.lock`, which the
 game never takes; only the helper that moves a source into the attachment
 directory creates its `.msg` or broadcast set. A malformed packet remains in the outbound directory;
-a message-creation failure is moved back there for a later run. This uses
-ordinary rename, exclusive file creation, and real copies—hard-link support is
-not required.
+a message-creation or routing failure — a destination no longer in the roster,
+say — is moved back there for a later run, and does not stop any other packet
+in the same run from going out (#198). This uses ordinary rename, exclusive
+file creation, and real copies—hard-link support is not required. A broadcast
+copy destination that already exists on entry is treated as a leftover from
+an earlier, interrupted attempt rather than a fatal collision: byte-identical
+content is reused outright, and different content — nothing else ever writes
+to that exact path — is replaced rather than left to collide identically on
+every later run.
 
 ## League-wide rules (Coordinator only)
 

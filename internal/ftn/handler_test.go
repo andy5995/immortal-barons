@@ -355,6 +355,114 @@ func TestThinSubjectMarginIsReported(t *testing.T) {
 	}
 }
 
+// TestCopyFileExclusiveReusesByteIdenticalExistingFile is half of #198: a
+// file already sitting at destination that matches source byte-for-byte is
+// an earlier attempt at this exact copy, not a collision -- reuse it rather
+// than failing.
+func TestCopyFileExclusiveReusesByteIdenticalExistingFile(t *testing.T) {
+	dir := t.TempDir()
+	source := filepath.Join(dir, "packet.brp")
+	destination := filepath.Join(dir, "packet0.brp")
+	data := []byte(`{"fromBoard":"Bravo BBS"}`)
+	if err := os.WriteFile(source, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(destination, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := copyFileExclusive(source, destination); err != nil {
+		t.Fatalf("copyFileExclusive refused a byte-identical existing copy: %v", err)
+	}
+	got, err := os.ReadFile(destination)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != string(data) {
+		t.Errorf("destination content = %q, want unchanged %q", got, data)
+	}
+}
+
+// TestCopyFileExclusiveReplacesStaleDifferentContent is the other half of
+// #198: nothing but this exact call ever writes to a broadcastCopyPath
+// destination, so content that does not match source is provably stale --
+// most plausibly left by a run that was killed before its own cleanup ran,
+// then collided identically on every later run since broadcastCopyPath's
+// naming is deterministic from source's own filename. It is safe, and
+// necessary, to clear and replace rather than fail forever.
+func TestCopyFileExclusiveReplacesStaleDifferentContent(t *testing.T) {
+	dir := t.TempDir()
+	source := filepath.Join(dir, "packet.brp")
+	destination := filepath.Join(dir, "packet0.brp")
+	data := []byte(`{"fromBoard":"Bravo BBS","seq":9}`)
+	if err := os.WriteFile(source, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(destination, []byte("stale garbage from before a routing change"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := copyFileExclusive(source, destination); err != nil {
+		t.Fatalf("copyFileExclusive did not recover from a stale leftover: %v", err)
+	}
+	got, err := os.ReadFile(destination)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != string(data) {
+		t.Errorf("destination content = %q, want the current source content %q", got, data)
+	}
+}
+
+// TestRunSkipsPacketWithBadDestinationButStillQueuesOthers is #198's other
+// half: not just the copyFileExclusive collision itself, but the surrounding
+// per-candidate loop in Run that used to abort the WHOLE run on any one
+// candidate's queueClaimed failure. A packet addressed to a node no longer in
+// the roster is a real, still-possible failure independent of the
+// copyFileExclusive fix above -- it must not stop an unrelated packet in the
+// same run from going out, and the failed one must come back to source
+// intact to retry, not be left stranded at its claimed path.
+func TestRunSkipsPacketWithBadDestinationButStillQueuesOthers(t *testing.T) {
+	data := newTestSetup(t)
+	outbound := filepath.Join(data, testOutboundDir)
+
+	goodBody, err := json.Marshal(game.Packet{FromBoard: "Bravo BBS", FromNode: 2, ToNode: 1})
+	if err != nil {
+		t.Fatal(err)
+	}
+	good := filepath.Join(outbound, "good.brp")
+	if err := os.WriteFile(good, goodBody, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	// Node 999 is not in this test's roster (Alpha/Bravo/Charlie, 1-3):
+	// preflightPacket does not resolve destinations against the roster, so
+	// this reaches queueClaimed as a genuine, real failure there.
+	badBody, err := json.Marshal(game.Packet{FromBoard: "Bravo BBS", FromNode: 2, ToNode: 999})
+	if err != nil {
+		t.Fatal(err)
+	}
+	bad := filepath.Join(outbound, "bad.brp")
+	if err := os.WriteFile(bad, badBody, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := Run(data)
+	if err != nil {
+		t.Fatalf("Run refused the whole batch over one packet's bad destination: %v", err)
+	}
+	if len(result.Queued) != 1 {
+		t.Fatalf("queued = %d, want 1 (the packet with a real destination)", len(result.Queued))
+	}
+	if len(result.Warnings) != 1 || !strings.Contains(result.Warnings[0], "destination node 999 is not in") {
+		t.Fatalf("warnings = %v, want one naming the bad destination", result.Warnings)
+	}
+	if _, err := os.Stat(good); !os.IsNotExist(err) {
+		t.Errorf("the good packet was not moved: %v", err)
+	}
+	if _, err := os.Stat(bad); err != nil {
+		t.Errorf("the packet with a bad destination was not restored to source: %v", err)
+	}
+}
+
 func newTestSetup(t *testing.T, extraFTN ...string) string {
 	t.Helper()
 	tempRoot := os.TempDir()

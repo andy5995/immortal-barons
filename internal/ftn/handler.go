@@ -1,9 +1,9 @@
 package ftn
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"slices"
@@ -76,13 +76,21 @@ func Run(dataDir string) (Result, error) {
 			"attachment subjects have %d byte(s) to spare in the FTN Type-2 field; %s",
 			margin, subjectAdvice(transport.SubjectMode)))
 	}
+	// A problem moving or queueing ONE candidate must not stop every other
+	// candidate in this run from going out (#198): each is reported as a
+	// warning and skipped rather than aborting the loop. Unlike a preflight
+	// rejection, an already-claimed packet that fails to queue is restored to
+	// source first, so it is retried whole next run rather than left
+	// stranded at its claimed path.
 	for _, candidate := range candidates {
 		if err := os.MkdirAll(filepath.Dir(candidate.claimed), 0o755); err != nil {
-			return result, err
+			result.Warnings = append(result.Warnings, fmt.Sprintf("%s: %v", candidate.source, err))
+			continue
 		}
 		won, err := claimPacket(candidate.source, candidate.claimed)
 		if err != nil {
-			return result, fmt.Errorf("claim %s: %w", candidate.source, err)
+			result.Warnings = append(result.Warnings, fmt.Sprintf("claim %s: %v", candidate.source, err))
+			continue
 		}
 		if !won {
 			continue
@@ -90,10 +98,13 @@ func Run(dataDir string) (Result, error) {
 		queued, err := queueClaimed(candidate.claimed, candidate.packet, transport, origin, world, nodes)
 		if err != nil {
 			if restoreErr := restorePacket(candidate.claimed, candidate.source); restoreErr != nil {
-				return result, fmt.Errorf("queue %s: %v (packet remains at %s: rollback failed: %v)",
-					filepath.Base(candidate.source), err, candidate.claimed, restoreErr)
+				result.Warnings = append(result.Warnings, fmt.Sprintf(
+					"queue %s: %v (packet remains at %s: rollback failed: %v)",
+					filepath.Base(candidate.source), err, candidate.claimed, restoreErr))
+			} else {
+				result.Warnings = append(result.Warnings, fmt.Sprintf("queue %s: %v", filepath.Base(candidate.source), err))
 			}
-			return result, fmt.Errorf("queue %s: %w", filepath.Base(candidate.source), err)
+			continue
 		}
 		result.Queued = append(result.Queued, queued...)
 	}
@@ -315,13 +326,45 @@ func broadcastRecipients(world *game.World, nodes []game.LeagueNode) []game.Leag
 	return recipients
 }
 
-func copyFileExclusive(source, destination string) (err error) {
-	in, err := os.Open(source)
+// copyFileExclusive publishes destination as a byte-identical copy of
+// source's current contents. Nothing else in this package ever writes to a
+// broadcastCopyPath destination except this call, copying from this same
+// source, so anything already sitting there on entry is one of exactly two
+// things: an earlier attempt at this same copy (byte-identical -- reuse it),
+// or stale garbage left by a run that never reached its own cleanup, most
+// plausibly a killed process (#198: a leftover copy from before a routing
+// change collided here, and because broadcastCopyPath's naming is fully
+// deterministic from the source packet's own filename, the very next run
+// reclaimed the same packet, hit the same collision, and failed identically
+// forever). A mismatch is safe to clear and retry because of that same
+// guarantee: nothing this call did not itself create is ever destroyed here.
+func copyFileExclusive(source, destination string) error {
+	data, err := os.ReadFile(source)
 	if err != nil {
 		return err
 	}
-	defer in.Close()
-	out, err := os.OpenFile(destination, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	err = writeFileExclusive(destination, data)
+	if err == nil {
+		return nil
+	}
+	if !os.IsExist(err) {
+		return err
+	}
+	existing, readErr := os.ReadFile(destination)
+	if readErr != nil {
+		return err // could not even compare; report the original collision
+	}
+	if bytes.Equal(existing, data) {
+		return nil // an earlier attempt already published this exact copy
+	}
+	if rmErr := os.Remove(destination); rmErr != nil {
+		return fmt.Errorf("replacing stale attachment copy %s: %w", destination, rmErr)
+	}
+	return writeFileExclusive(destination, data)
+}
+
+func writeFileExclusive(path string, data []byte) (err error) {
+	out, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
 	if err != nil {
 		return err
 	}
@@ -331,10 +374,10 @@ func copyFileExclusive(source, destination string) (err error) {
 			err = closeErr
 		}
 		if !ok || err != nil {
-			os.Remove(destination)
+			os.Remove(path)
 		}
 	}()
-	_, err = io.Copy(out, in)
+	_, err = out.Write(data)
 	ok = err == nil
 	return err
 }
