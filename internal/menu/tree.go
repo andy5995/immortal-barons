@@ -88,10 +88,14 @@ func BuildMenus() *Menus {
 	// 1/7 of a random unit type) but BRE carries the op type in the packet
 	// so the result report can name it. Order, labels and hotkeys match the
 	// binary-verified string table.
-	terrorOps := &Menu{Title: "Terrorist Ops", Color: ansi.FgBrightYellow, ExitOnEnter: true}
-	// BRE draws IP Messages as a narrow single-column box (25 columns, from a
-	// live capture) rather than at the full menu width.
-	ipMessages := &Menu{Title: "IP Messages", Color: ansi.FgBrightCyan, ExitOnEnter: true, Width: 25}
+	// Width 23 from the capture (docs/dev/bre-screens.md): four rules, the title,
+	// four more. Sized to its own content, as the original sizes every box — the
+	// 62-column default is not a house width, it is this file's rule constant.
+	terrorOps := &Menu{Title: "Terrorist Ops", Color: ansi.FgBrightYellow, ExitOnEnter: true, Width: 23}
+	// BRE draws IP Messages as a narrow single-column box (24 columns, measured
+	// across every capture) rather than at the full menu width. A comment here
+	// said 25 until the widths were swept.
+	ipMessages := &Menu{Title: "IP Messages", Color: ansi.FgBrightCyan, ExitOnEnter: true, Width: 24}
 	ipTrading := &Menu{Title: "Trading", Color: ansi.FgBrightYellow, ExitOnEnter: true, Header: tradingHeader}
 	trading := &Menu{Title: "Trading", Color: ansi.FgBrightRed, ExitOnEnter: true}
 	diplomacy := &Menu{Title: "Diplomacy", Color: ansi.FgBrightGreen}

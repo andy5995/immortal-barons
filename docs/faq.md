@@ -18,8 +18,9 @@
   under BBS software on any platform Go supports.
 - A new player can end their own new-realm protection early, from the System
   menu, to start fighting sooner. BRE does not offer this.
-- A realm under new-realm protection is listed as a target with a `(P)` beside
-  its name, so you can see who cannot be attacked yet. BRE gives no sign.
+- A realm under new-realm protection is listed as a target with its letter in
+  square brackets, `[C]` where other realms show `(C)`, so you can see who cannot
+  be attacked yet. BRE gives no sign.
 - When a sysop starts a fresh game, they can keep their old settings. Those
   settings are stored in a `config.json` file. Running
   `immortal-barons -reset-from-config` clears the world but reuses that file, so

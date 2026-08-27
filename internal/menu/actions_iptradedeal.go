@@ -81,8 +81,8 @@ func sendIPTradeDeal(s session.Session, w *ctx) Result {
 }
 
 // pickIPDealTarget asks for a planet and then a realm on it, through the same
-// walk the war menus use, so a protected realm carries the same `(P)` flag it
-// carries everywhere else (#214) and the list cannot drift out of step with
+// walk the war menus use, so a protected realm wears the same bracketed letter
+// it wears everywhere else (#214) and the list cannot drift out of step with
 // theirs. Protection is a bar here — Andy's call, and a divergence from the
 // original, which lets the deal go and destroys it on arrival (see
 // game.SendIPTradeDeal).

@@ -334,7 +334,7 @@ Don't tell them whether to run it — including for a LAN, which is not
 automatically safe either.
 
 Implemented gameplay: conventional combat (offense/defense, turrets, carriers,
-jets, bomber airfield strikes; a winning attacker chooses the captured region
+jets and bombers; a winning attacker chooses the captured region
 types and both sides' casualties are reported by unit type), nuclear/chemical/
 biological strikes, pirate raids (now rolled per turn, not once a day; the nine
 factions carry IB-original names, not BRE's), covert operations (spy, stir revolts, set up,

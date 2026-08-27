@@ -4,6 +4,15 @@
     the batch, with a grace period for one still being transferred
   * The order a contested inbound batch applied in is written to the
     planetary log
+  * reverted: bombers no longer fly a bombing run; they fight and are lost with the rest of the force, as the original has it
+  * reverted: an attack captures the same share of land whatever the two realms' wealth per region, as the original does
+  * reverted: a realm is crushed only when its last region is taken, as the original decides it
+  * An interplanetary strike carries each contributor's Technology, as the original's does
+  * A battle report names the units lost on each side, one line per type, instead of one total
+  * A menu box is never narrower than the items inside it, in any language
+  * A planet can be named by any part of its name, as long as only one planet matches
+  * The planet prompt fills the name in as soon as what you have typed matches only one
+  * reverted: the Terrorist Ops menu is drawn at the width the original draws it
   * An interplanetary message picks which barons on the chosen planet read it
   * reverted: the Coordinator item reads Dismantle Gooie and the setting Gooie Kablooies, as the original words them
   * The interplanetary Send Trade Deal ships goods to a realm on another planet

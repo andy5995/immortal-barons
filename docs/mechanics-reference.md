@@ -18,6 +18,7 @@ code, not from `attack.hlp` or a strategy guide.
 | Piece | Local regular | Interplanetary individual | Group |
 | --- | --- | --- | --- |
 | Offence weights | verified | verified (flat tank 2, no bombers) | as individual |
+| Per-contributor technology | own realm's, in the resolver | verified: `technology_factor(1.4, slot 5)`, fixed per slot on the sending board | as individual, per contributor |
 | Defence weights | verified | verified (own tank factor) | as individual |
 | Morale factor | verified (`0.6m+50`) | verified (`m/1.75+50`) | as individual |
 | Attrition loop | verified (with upset roll) | verified (no upset roll) | as individual |
@@ -35,16 +36,28 @@ code, not from `attack.hlp` or a strategy guide.
 Still open, and each is IB's own or unread rather than known-correct:
 
 - **The capture chain is fully read**: `min_i32(total_regions,
-  max_i32(floor, trunc(total_regions x pct / 100)))`. A total conquest is simply
-  the case where that takes everything, which is what IB tests for. IB adds
-  "or no people left" as a second trigger, which is its own.
-- **The bombing run's two constants** (3 jets per bomber, one bomber down per 25
-  turrets) have no support: no bombing routine reads turrets at all.
-- **The capture-density modifier** is IB's own and deliberate, and is the only
-  thing separating IB's local capture from the original's.
-- **A per-contributor Real48 factor** rides each force slot (`+0x1c`) and is
-  multiplied into the offence. What writes it has not been found, so IB applies
-  no equivalent.
+  max_i32(floor, trunc(total_regions x pct / 100)))`, and as of 2026-08-26 it is
+  ALL IB does (#200). A total conquest is the case where that takes everything;
+  IB also crowned one when the defender was left with no people, until then.
+- **There is no bombing run.** IB flew the attacker's bombers against the
+  defender's airfields first — three grounded jets per bomber, one bomber shot
+  down per 25 turrets — and no routine in the original does either: turrets are
+  one addend in the defence pool, and the local resolver applies ONE loss
+  fraction to troopers, jets, tanks and bombers alike (proc `+0x1581..+0x1631`).
+  Bombers add no offence locally and bleed with the rest; both removed 2026-08-26.
+- **There is no capture-density modifier.** IB scaled the local capture by the
+  two realms' net worth per region; the original reads the defender's region
+  count and the level constant and nothing else. Removed 2026-08-26.
+- **The per-contributor Real48 factor at `+0x1c` is READ (2026-08-26, #200).**
+  It is the contributor's Technology military factor. `configure_attack_forces`
+  (`ovr_02b783 +0x7f2..+0x825`) loads 1.4, pushes slot 5, calls
+  `technology_factor`, and stores the Real48 into the caller's own slot at the
+  record's `+0x24` — the builder's `+0x1c`, since the builder is handed
+  `record + 8`. So every contributor to a group attack brings their own
+  research, fixed when they joined, and the target board multiplies each slot by
+  it without recomputing anything. IB carries it as `Contribution.Tech` and
+  applies it in the same places the original does: the offence, the SDI ratio,
+  and the spoils split. The neighbouring `+0x18` is the attack's gold cost.
 - **The catalog name `resolve_received_invasion__calculate_attacker_strength`
   is wrong.** That block reads defender-shaped fields, and the attacker's
   strength provably comes from `calculate_attack_force_offense` on the force
@@ -212,9 +225,8 @@ Bombers and carriers are integer multiplies (3 and 1); the rest are Turbo Pascal
   fills BRE's array is **not read** — only the routine that scales it down with
   losses (`BRE.OVR 0xC358`) and this one, which reads it.
 - **A dead realm is worth 0** rather than a computed figure. IB does this on the
-  scores screen rather than inside `NetWorth`, because IB's combat math reads
-  `NetWorth` too (capture density) and a zero there would change battles rather
-  than a display.
+  scores screen rather than inside `NetWorth`, so that a zero there is a display
+  and nothing that reads `NetWorth` for a mechanic sees a dead realm as free.
 
 A vestigial `+0x125` is added at the end. It is read here and **nowhere else in
 either binary, and never written**, so it is always zero.
@@ -541,17 +553,12 @@ instruction's modrm. Six of the seven award sites reach it with a separate
     See "Individual attack variants" below.
 
   Region **capture** follows `min(loser regions, max(RegularAttackCaptureFloor,
-  the Attack Rewards share × loser regions × density factor))`. The **density
-  factor** is IB-original, and the binary now proves it is an addition rather
-  than a reconstruction — BRE reads the defender's region count and the level
-  constant and nothing else. It is the attacker's
-  net-worth-per-region over the defender's, clamped to `[CaptureDensityMin,
-  CaptureDensityMax]` = 50–200% (`CaptureDensityBase` 100% at equal density). A
-  defender whose net worth is spread thin over its land (cheap, lightly-held
-  regions) bleeds up to 2× the base; a denser, developed realm as little as half.
-  Public strategy guides describe the *tactic* of preying on high-region,
-  low-net-worth targets, not a number, so IB supplies its own — expect tuning.
-  The base rate comes from a **live region-count sweep**
+  trunc(the Attack Rewards share × loser regions / 100)))` — BRE's own chain and
+  nothing more. IB multiplied a net-worth **density factor** into the share
+  (50–200%, the attacker's net worth per region over the defender's) until
+  2026-08-26; the binary reads the defender's region count and the level
+  constant and nothing else, so it went (#200). The rate comes from a **live
+  region-count sweep**
   (2026-07-21, Attack Rewards = Medium, five points 30–574 regions) gave a clean
   formula: **a ~15-region floor** below ~150 regions, **~10% above** — and it is
   **independent of the strength ratio** (verified 1.3×–4×). So a small realm loses
@@ -2025,11 +2032,10 @@ flat 8% and the loser a flat 20% — about right for an even match, and wrong
 everywhere else. It also rolled a ±20% jitter over each side's strength before
 the fight; that is gone, because the variance belongs inside the battle.
 
-**IB divergence, now confirmed as one:** IB scales the capture by a net-worth
-*density* factor (softer, thinly-held land falls faster). The binary reads the
-defender's region count and the level constant and nothing else, so this is
-IB's own addition rather than an unverified reconstruction of something BRE
-does. It is kept deliberately; see `CaptureDensityBase` in `balance*.go`.
+**A divergence that is gone:** IB scaled the capture by a net-worth *density*
+factor (softer, thinly-held land fell faster) until 2026-08-26. The binary reads
+the defender's region count and the level constant and nothing else, so the
+factor was IB's own; it was removed under #200.
 
 **Population / migration — BINARY-VERIFIED.** Read out of BRE's end-of-turn
 routine (`BRE.OVR` `0xD08A`–`0xD3CC`). This supersedes an earlier partial
@@ -2883,11 +2889,11 @@ IB matches all of it.
   records in `Message To  :` — reads `'A' + Slot - 1`. A realm keeps its letter
   however many neighbours die, are pruned, or join, and the See Scores board
   letters by slot rather than by rank, so its rows are not in letter order.
-- **The id is BRACKETED on every screen, a deliberate divergence.** BRE
-  parenthesises it on the score tables and brackets it on `-*Relations*-`; IB
-  brackets it everywhere, because parentheses now carry a realm's status flags —
-  `(O)` online and `(P)` under New Realm Protection — so the shape separates the
-  key a player presses from the state they are being told about.
+- **The id is parenthesised as BRE parenthesises it, and BRACKETED for a realm
+  under New Realm Protection** — `[C]` against `(C)`, IB's own flag (#214). BRE
+  brackets the id on `-*Relations*-`, which is left alone: brackets cannot mean
+  protection on a screen where the original gives them to everyone, and it is a
+  standings roster rather than a picker.
 - **Creation is bounded by the slots, not by a separate count.** The lowest free
   slot is taken under the same world lock that checks for one, so two BBS nodes
   onboarding at once cannot both claim it. A caller arriving at a full planet is
@@ -3379,8 +3385,10 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
 
   Doubled into trooper units that is **trooper 1, jet 2, tank 4** — the table IB
   already uses, so its offence values were right. Bombers are absent, as above.
-  The per-contributor `+0x1c` factor travels in the packet; what writes it has
-  not been found, so IB applies no equivalent.
+  The per-contributor `+0x1c` factor is the contributor's Technology military
+  factor, written by `configure_attack_forces` when they commit their forces
+  (see "Attack fidelity status"); IB's `Contribution.Tech` is the same value,
+  and the shield is applied BEFORE it, as here.
 
   Defence (`resolve_received_invasion +0x0f9d`):
 
@@ -3472,9 +3480,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   scales that price and BRE clamps the result at `AttackCostCap`
   (200,000,000 gold); see "The two cost levels" below.
 - **Protection crosses the league.** A scores packet marks each realm still
-  under New Realm Protection. The attack and terror target lists show those
-  realms with the `(P)` flag and refuse the strike when one is picked — matching
-  the local attack list, which flags them the same way (#214). The target board
+  under New Realm Protection. The attack and terror target lists bracket those
+  realms' letters and refuse the strike when one is picked — matching the local
+  attack list, which flags them the same way (#214). The target board
   still refuses an arriving strike itself, since the flag can go stale while the
   strike is in transit. **Spying is refused too** — a protected realm cannot be
   spied on any more than it can be struck, so every target list flags it and
@@ -3614,7 +3622,7 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   realm under New Realm Protection: `resolve_received_trade_offer` (0x043df1)
   checks and returns, so the goods and the fee are gone and neither side is told
   anything. IB refuses that target at the picker instead, where the sender can
-  still act on it, and the target lists carry the `(P)` flag that makes it
+  still act on it, and the target lists bracket the realm's letter to make it
   visible (#214). Nothing is destroyed and no arrival guard is needed: protection
   only counts DOWN and delivery is keyed by realm name, so a realm that was clear
   when the deal left cannot be protected when it lands.
@@ -4550,8 +4558,9 @@ Now matching this reference (as of v0.0.4):
 - Offense/defense split in combat, with the correct unit values
   (trooper 1/1, jet 2/0, turret 0/2, tank 4/4)
 - Turrets (defense-only) and carriers (jets can only attack if carried)
-- Bomber airfield strikes: a regular attack sends the attacker's bombers to
-  destroy the defender's grounded jets first, resisted by turrets (anti-air)
+- Bombers in a regular attack add no offence and bleed with the rest of the
+  committed force, as the original's resolver treats them; there is no airfield
+  strike and turrets shoot nothing down
 - Interactive maintenance stage at turn start: pay armed-forces upkeep and
   region maintenance ("how much will you give?"), with underpayment causing
   desertion / revolts, plus optional popular-support and military-morale boosts.

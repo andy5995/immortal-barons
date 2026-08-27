@@ -281,10 +281,10 @@ func warnTrimmedForce(s session.Session, trimmed bool) {
 // a neighbour dies, so the key that attacked one realm yesterday attacks a
 // different one today.
 //
-// A realm under New Realm Protection KEEPS ITS LETTER and is flagged `(P)`
-// instead (#214). It withheld the letter until 2026-08-26, which said only that
+// A realm under New Realm Protection KEEPS ITS LETTER and wears it in brackets
+// (#214). It withheld the letter until 2026-08-26, which said only that
 // something about the row was different and left the player to guess what; the
-// flag says it outright, and pressing the letter now answers with the reason
+// bracket says it outright, and pressing the letter now answers with the reason
 // rather than behaving like a mistyped key. An ALLIED realm still shows no
 // letter — that standing is the diplomacy screens' to report, and the alliance
 // is the player's own doing.

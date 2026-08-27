@@ -51,6 +51,7 @@ RemoteAttack:
 Contribution:
   Owner
   AttackForce
+  Tech `json:",omitempty"`
 AttackForce:
   Troopers
   Jets

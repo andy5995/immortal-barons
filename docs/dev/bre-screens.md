@@ -813,9 +813,9 @@ carries it: the attack target picker and the recipient picker share
 indent. The inter-BBS scores screen does NOT — those figures arrive in packets
 that may be hours old, so there is nothing to report.
 
-The protection flag `(P)` rides in the same field, after the name rather than
-before it (see "Target list" above, #214). It reserves no column on an unflagged
-row.
+The protection flag is not in this field at all: a shielded realm wears its slot
+letter in brackets in the id column instead (see "Target list" above, #214), so
+the name field carries only the online mark.
 
 **The name field is measured in the caller's own charset.** `ValidRealmName`
 accepts any printable rune, so a realm may be named `Iron—Fist`; the CP437 and
@@ -1273,6 +1273,65 @@ The menu's own keys, from the capture: Gooie Kablooie Ops is **9**, not a
 letter, and Terrorist Ops carries a gold cost in the menu's price column
 (471,360 / 532,544 / 533,568 across the capture — it grows with something, and
 three points do not say what).
+
+**Terrorist Ops** (2), captured 2026-08-26 in `cap/eots-ibbs-01.cap`. Nine
+numbered operations and a Quit, in this order, and **no price column** — the cost
+is quoted once on the parent menu beside the item, not per operation, which is
+where it differs from Special Operations below.
+
+```
+────[Terrorist Ops]────
+(1) Send Spy
+(2) Bomb Intelligence
+(3) Demoralize
+(4) Cause Dissensions
+(5) Bomb AirBases
+(6) Stir Emigrations
+(7) Spread Propaganda
+(8) Bomb Food Stores
+(9) Sabotage HQ
+(0) Quit
+───────────────────────
+```
+
+**Every menu box in every capture, measured** (`cap/*.cap`, 2026-08-26), so the
+next screen has a number to size itself from rather than a default to fall back
+on:
+
+| box | columns | | box | columns |
+| --- | --- | --- | --- | --- |
+| Advisors | 16 | | Preferences | 36 |
+| Trading | 20 | | InterBBS Scores | 38 |
+| Attack Type | 21 | | Sell Menu | 44 |
+| Attack Menu | 23 | | Spending Menu | 44 |
+| Terrorist Ops | 23 | | Industrial Production | 46 |
+| IP Messages | 24 | | Barren Realms Elite | 52 |
+| Coordinator Ops | 26 | | Crazy Gold Bank | 60 |
+| Diplomacy Menu | 28 | | Food Unlimited | 64 |
+| Covert Operations | 32 | | System Menu | 69 (75 once) |
+
+`InterPlanetary Operations` is the one that moves — 58, 62, 64 and 68 across the
+captures — because the original lays it out in columns and its width tracks
+whichever items are showing. Sizing to content is the rule, not any of these
+numbers; a box that has to hold more is wider, and IB's Covert (34) and System
+(59 English) are wider than the original's for exactly that reason.
+
+**IB sizes its rules from its own rendered body** as of 2026-08-26, taking a
+declared `Width` as a FLOOR rather than a fixed value. A width measured against
+English goes stale the day a label is translated — System was set to the 59 it
+measured in English and ran 64 in German and Russian, leaving its box five
+columns short of its own items, and the Bank overran its rule by two in English
+alone.
+
+**The Terrorist Ops box is 23 columns** — four CP437 `0xC4` rules,
+`[Terrorist Ops]`, four more, with every item line padded to the same 23 and the
+closing rule 23 long.
+IB drew it at the 62-column `rule` default until 2026-08-26, since no capture of
+this screen existed to size it from. That is the trap CLAUDE.md names: the
+original sizes each box to its own content, and the captures in this file run
+16, 20, 21, 23, 28, 32, 38, 44, 46 and 52 columns with no house width among them.
+
+Item names, keys and order match IB's exactly.
 
 **Special Operations** (8) is numbered **1-8** with no Help item, and prices its
 first four entries: Bomb Food Market 10,000,000; Bomb Trading Market 25,000,000;
@@ -2286,8 +2345,45 @@ because `game.RemoteScore` carries no slot; and a planet IB has no scores packet
 for skips the prompt and takes a planet-wide message rather than refusing.
 
 **The planet prompt autocompletes in the original.** The capture shows two typed
-characters erased (`BS SP BS` twice) and replaced with the full planet name. IB
-does not do this — a separate request, noted on #193 and not built there.
+characters erased (`BS SP BS` twice) and replaced with the full planet name.
+
+**Its parser, read out of `select_planet` (BRE.OVR 0x021dd9, container
+ovr_0209c5) — this settles #183.** An exact roster number resolves first and
+alone, and only when the slot is occupied (0x1861). Otherwise the answer is a
+**substring** search, not a prefix one: both sides are upper-cased and the
+original calls `Pos(typed, name)` (argument order confirmed at 0x1535-0x1560), so
+a fragment matches from the middle of a name. The same `Pos` runs against the
+planet's number rendered as a string (0x1585), so a bare digit can match several
+planets once a roster passes nine.
+
+It **counts** the matches rather than taking the first (`[bp-0x30e]`, loop at
+0x1521) and resolves only on a count of exactly one: 0 sets state 7, 1 sets 14,
+more than 1 sets 15, and the loop that identifies the slot runs for 1 alone
+(0x15c0). So an AMBIGUOUS answer selects nothing and is refused exactly as an
+unknown one is — the routine holds no message telling the two apart, only
+`Planet not found`. That is the question #183 left open, and it is the safe
+answer: `The X-Bit BBS` and `The uniX-Bit BBS` share `The `, and picking one
+would send an attack to the wrong planet.
+
+The matching runs as you TYPE — the state code is compared against its previous
+value each keystroke (0x16a3) and the line is completed the moment the count
+reaches one, which is what the erase-and-replace above is.
+
+**Watched live, and it confirms the SUBSTRING reading rather than a prefix one.**
+Against the roster in `cap/eots-ibbs-01.cap` — Nova Hub, Starship Junkyard, Eye
+of the Storm, The Eclipse — typing `s` changes nothing (it is inside *Starship*,
+*Storm* and *Eclipse*: three matches), `st` still changes nothing (*Starship* and
+*Storm*: two), and `sta` completes to Starship Junkyard (one). A prefix matcher
+would have completed on the first keystroke, since only Starship Junkyard STARTS
+with `s`. It did not.
+
+The keystroke that makes the match unique is **not echoed**: the two characters
+already on screen are erased and the resolved name written over them, so the
+capture reads `st` + two `BS SP BS` + the name, with the `a` that triggered it
+appearing nowhere. Reading those bytes without the live behaviour beside them
+makes it look as though a two-character answer resolved. **IB matches the same
+text on ENTER** (`matchPlanet`), so the accepted keystrokes agree; the live
+completion is not built.
 
 ### The message editor
 
@@ -2574,15 +2670,18 @@ Id   Empire Name                          Territory   Score   Networth
                                                 [BRE v0.988]   8/15/2026
 ```
 
-**IB's interplanetary baron list is NUMBERED**, where this capture shows the
-same lettered roster the local screens draw. That is an old divergence and it is
-not addressed here. What did change (#214): a baron the last scores packet had
-under New Realm Protection is listed with the `(P)` flag after the name and the
-strike is refused when that row is picked. Those barons were HIDDEN from the list
-until 2026-08-26, with a count printed beneath it saying how many had been held
-back, which named nothing and left a planet's roster disagreeing with its target
-list. The flag is a courtesy either way — a packet can be days old, so the target
-board still refuses an arriving strike on its own authority.
+**IB draws the same lettered roster** as of 2026-08-26. It numbered this one
+list until then — the last place in the game a player was picked by anything but
+a letter — while the original letters every roster of players and reserves names
+and numbers for planets.
+
+A baron the last scores packet had under New Realm Protection wears its letter in
+brackets, `[B]` against `(A)`, and the strike is refused when that row is picked
+(#214). Those barons were HIDDEN from the list until 2026-08-26, with a count
+printed beneath it saying how many had been held back, which named nothing and
+left a planet's roster disagreeing with its target list. The flag is a courtesy
+either way — a packet can be days old, so the target board still refuses an
+arriving strike on its own authority.
 
 **The interplanetary picker's prompt is colored differently from the local
 one**, though the wording is nearly the same (`cap/eots-ibbs-01.cap`): here the

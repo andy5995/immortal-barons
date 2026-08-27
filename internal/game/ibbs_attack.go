@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/andy5995/immortal-barons/internal/numfmt"
@@ -62,6 +63,41 @@ func (f AttackForce) bombersAgainstSDI(sdi int) int {
 type Contribution struct {
 	Owner string
 	AttackForce
+	// Tech is the contributor's Technology military factor at the moment the
+	// detachment was committed, in TechFactorUnit fixed point (10000 = x1.0), and
+	// it rides the packet so the target board can weigh this slot by it.
+	//
+	// BINARY-VERIFIED, and the piece #200 recorded as unread: the original's
+	// force slot carries a Real48 at +0x1c that the offence builder multiplies
+	// into that slot's troopers/jets/tanks total. Its writer is
+	// configure_attack_forces (BRE.OVR ovr_02b783 +0x7f2..+0x825): it loads 1.4,
+	// pushes slot 5, calls technology_factor, and stores the result into the
+	// CALLER's own slot — so each contributor to a group attack brings their own
+	// research, fixed when they joined, and the target board never recomputes
+	// it. Zero in a packet written before this field existed, which reads as x1:
+	// the strength that packet was sent with.
+	Tech int `json:",omitempty"`
+}
+
+// techFactor is the slot's factor, x1 for a packet that carries none.
+func (c Contribution) techFactor() int {
+	if c.Tech <= 0 {
+		return TechFactorUnit
+	}
+	return c.Tech
+}
+
+// offense and offenseAgainstSDI are the detachment's values with the
+// contributor's own technology applied, which is what the original's builder
+// computes per slot. They shadow AttackForce's so that every site summing
+// contributors — the group's total, the SDI ratio, the spoils split — weighs
+// each baron by what their forces are really worth.
+func (c Contribution) offense() int {
+	return techRaise(c.AttackForce.offense(), c.techFactor())
+}
+
+func (c Contribution) offenseAgainstSDI(sdi int) int {
+	return techRaise(c.AttackForce.offenseAgainstSDI(sdi), c.techFactor())
 }
 
 // GroupAttack is a strike being assembled on this board. Until it leaves, other
@@ -312,7 +348,7 @@ func (w *World) CreateGroupAttack(e *Empire, targetBoard, targetEmpire string, h
 		TargetBoard:  targetBoard,
 		TargetEmpire: targetEmpire,
 		DepartAt:     DepartureAfter(time.Now(), hours),
-		Contributors: []Contribution{{Owner: e.Owner, AttackForce: f}},
+		Contributors: []Contribution{{Owner: e.Owner, AttackForce: f, Tech: e.TechMilitaryFactor()}},
 	})
 	g := &w.GroupAttacks[len(w.GroupAttacks)-1]
 	// A watcher from the target planet sees the force assembling and sends the
@@ -349,12 +385,12 @@ func (w *World) CreateIndividualAttack(e *Empire, targetBoard, targetEmpire stri
 	e.AttacksToday++
 	w.NextAttackID++
 	id := w.NextAttackID
-	contributors := []Contribution{{Owner: e.Owner, AttackForce: f}}
+	contributors := []Contribution{{Owner: e.Owner, AttackForce: f, Tech: e.TechMilitaryFactor()}}
 	w.enqueue(targetBoard, RemoteAttack{
 		ID:           id,
 		FromBoard:    w.Config.BoardID,
 		TargetEmpire: targetEmpire,
-		Offense:      f.offense() * kind.strengthPct() / 100,
+		Offense:      contributors[0].offense() * kind.strengthPct() / 100,
 		Contributors: contributors,
 		Kind:         kind,
 		FromEmpire:   e.Name,
@@ -388,7 +424,7 @@ func (w *World) JoinGroupAttack(e *Empire, id int, f AttackForce) error {
 			return err
 		}
 		e.GroupAttacksToday++
-		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, AttackForce: f})
+		ga.Contributors = append(ga.Contributors, Contribution{Owner: e.Owner, AttackForce: f, Tech: e.TechMilitaryFactor()})
 		return nil
 	}
 	return ErrNoAttack
@@ -534,12 +570,16 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	won, atkLost, defLost, jetLost := w.remoteBattleAttrition(offense, def, pooledJets, atk.bombers(target), lossPct)
 	res.Survivors = survivorsOfFrac(atk.Contributors, atkLost)
 	// One battle, then the same two fractions applied to everyone who stood in it.
-	for _, e := range defenders {
-		l := loseForcesSplit(e, defLost, jetLost)
-		res.Enemy.Troopers += l.Troopers
-		res.Enemy.Jets += l.Jets
-		res.Enemy.Turrets += l.Turrets
-		res.Enemy.Tanks += l.Tanks
+	// Each realm's OWN losses are kept apart from the planet's total: the report
+	// a realm reads names what it lost, and on a planet-wide strike every realm
+	// that stood used to be handed the planet's figure as if it were its own.
+	losses := make([]UnitLoss, len(defenders))
+	for i, e := range defenders {
+		losses[i] = loseForcesSplit(e, defLost, jetLost)
+		res.Enemy.Troopers += losses[i].Troopers
+		res.Enemy.Jets += losses[i].Jets
+		res.Enemy.Turrets += losses[i].Turrets
+		res.Enemy.Tanks += losses[i].Tanks
 	}
 	if !won {
 		res.Outcome = OutcomeRepelled
@@ -550,9 +590,8 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		// and itemises afterwards (BRE.OVR resolve_received_invasion). Everyone
 		// who stood is told: a planet-wide strike bleeds every realm, and only
 		// the strongest of them was hearing about it.
-		for _, e := range defenders {
-			e.addEvent(fmt.Sprintf("An interplanetary strike from %s was beaten off. Your side held the field and lost %d units doing it.",
-				atk.FromBoard, res.Enemy.Total()))
+		for i, e := range defenders {
+			e.addEvent(invasionReport(atk, false, losses[i], 0))
 		}
 		// The whole planet hears it: an interplanetary exchange is planet against
 		// planet, and until this the defending board printed nothing at all while
@@ -589,7 +628,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	// reads total_regions on the realm it is taking from (+0x1862) and a
 	// planet-wide strike ran that inside the same per-realm loop.
 	land := 0
-	for _, e := range defenders {
+	for i, e := range defenders {
 		take := int(float64(e.Land) * pct / 100)
 		if take < InterplanetaryCaptureFloor {
 			take = InterplanetaryCaptureFloor
@@ -602,8 +641,7 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 			e.syncLand()
 		}
 		land += take
-		e.addEvent(fmt.Sprintf("An interplanetary strike from %s broke through. Your side lost the field, %d regions and %d units.",
-			atk.FromBoard, take, res.Enemy.Total()))
+		e.addEvent(invasionReport(atk, true, losses[i], take))
 	}
 	if planetWide {
 		w.postNews(fmt.Sprintf("%s struck the whole planet, carrying off %s regions and %s of our forces!",
@@ -618,6 +656,64 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 	return res
 }
 
+// invasionReport is the private report a realm reads after an interplanetary
+// strike landed on it. The SHAPE is the original's (resolve_received_invasion,
+// BRE.OVR 0x040012, its strings read 2026-08-26): the verdict first, then the
+// attacking force by unit type, then what THIS realm lost by unit type, each on
+// a line of its own — and a zero is printed rather than skipped, because the
+// original's lines are unrolled one per unit with no test on the count. The
+// words are IB's. IB used to print a single total ("lost N units"), which
+// answered nothing a player wants to know after a battle.
+func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "Invasion from %s.\n", raider(atk))
+	if won {
+		b.WriteString("Your forces lost the field.\n")
+	} else {
+		b.WriteString("Your forces held the field.\n")
+	}
+	var sent AttackForce
+	for _, c := range atk.Contributors {
+		sent.Troopers += c.Troopers
+		sent.Jets += c.Jets
+		sent.Tanks += c.Tanks
+		sent.Bombers += c.Bombers
+	}
+	writeUnitLines(&b, "%d %s attacked.", attackUnits(sent))
+	if won {
+		fmt.Fprintf(&b, "You lost %d regions.\n", regions)
+	}
+	writeUnitLines(&b, "You lost %d %s.", defenceUnits(lost))
+	return strings.TrimRight(b.String(), "\n")
+}
+
+// unitCount is one line of a battle report: how many of one unit type.
+type unitCount struct {
+	n    int
+	name string
+}
+
+// attackUnits and defenceUnits are the two sides' unit lists in the order the
+// original's reports print them — an attacker fields troopers, jets, tanks and
+// bombers; a defender loses troopers, jets, tanks and turrets.
+func attackUnits(f AttackForce) []unitCount {
+	return []unitCount{{f.Troopers, "troopers"}, {f.Jets, "jets"}, {f.Tanks, "tanks"}, {f.Bombers, "bombers"}}
+}
+
+func defenceUnits(u UnitLoss) []unitCount {
+	return []unitCount{{u.Troopers, "troopers"}, {u.Jets, "jets"}, {u.Tanks, "tanks"}, {u.Turrets, "turrets"}}
+}
+
+// writeUnitLines writes one line per unit type, format taking the count and
+// the name, a zero printed rather than skipped: the original's report lines are
+// unrolled one per unit with no test on the count, so "You lost 0 Bombers"
+// appears on its screen and on this one.
+func writeUnitLines(b *strings.Builder, format string, units []unitCount) {
+	for _, u := range units {
+		fmt.Fprintf(b, format+"\n", u.n, u.name)
+	}
+}
+
 // survivorsOfFrac returns each contributor's detachment reduced by the fraction
 // the battle actually cost the attacker, for a strike that was fought. A force
 // far stronger than the defence is barely touched; an evenly matched one pays
@@ -629,7 +725,7 @@ func survivorsOfFrac(cs []Contribution, lost float64) []Contribution {
 	}
 	out := make([]Contribution, 0, len(cs))
 	for _, c := range cs {
-		out = append(out, Contribution{Owner: c.Owner, AttackForce: AttackForce{
+		out = append(out, Contribution{Owner: c.Owner, Tech: c.Tech, AttackForce: AttackForce{
 			Troopers: shareOf(c.Troopers, keep),
 			Jets:     shareOf(c.Jets, keep),
 			Tanks:    shareOf(c.Tanks, keep),
@@ -662,7 +758,7 @@ func survivorsOf(cs []Contribution, lossPct int) []Contribution {
 	keep := 100 - lossPct
 	out := make([]Contribution, 0, len(cs))
 	for _, c := range cs {
-		out = append(out, Contribution{Owner: c.Owner, AttackForce: AttackForce{
+		out = append(out, Contribution{Owner: c.Owner, Tech: c.Tech, AttackForce: AttackForce{
 			Troopers: c.Troopers * keep / 100,
 			Jets:     c.Jets * keep / 100,
 			Tanks:    c.Tanks * keep / 100,

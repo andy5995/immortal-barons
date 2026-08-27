@@ -13,7 +13,7 @@ import (
 func TestReportsWrapAtWordBoundaries(t *testing.T) {
 	cases := []struct{ name, text string }{
 		{"pirate raid", "The Barbarians raided you, carrying off 515 troopers, 291 jets, 525 turrets, 107 tanks, 3 agents, 24999 gold!"},
-		{"bomber strike", "Your bombers hit the airfields: 1431 enemy jets destroyed, 258 bombers lost to anti-air."},
+		{"shipment refused", "This shipment needs 1431 carriers to transport and you have 258 free, so it cannot leave."},
 		{"raid result", "You broke the Dunkleoids and recovered 104 troopers, 62 jets, 116 turrets, 19 tanks, 4999 gold, 6 regions."},
 	}
 	for _, c := range cases {
