@@ -103,15 +103,22 @@ func (w *World) postBulletinNews(scope bulletin.Scope, title string, isNew bool)
 // The set goes out on every run, empty or not, as the roster does: a board that
 // joins late is brought level by the next packet rather than needing a replay,
 // and an empty set is how the last bulletin is withdrawn from the league.
+//
+// Prepended, not appended — see game.World.ExportNodeList's doc comment for
+// why: the same Seq-ordering reasoning applies to every packet type
+// CarriesCoordinatorOrders recognizes, this one included. RunPlanetary calls
+// this after ExportNodeList, so this prepend lands in front of that one:
+// their relative order to each other does not matter, only that both land
+// ahead of whatever the day's ordinary play already queued.
 func (w *World) ExportBulletins(files []BulletinFile) {
 	if !w.IsLeagueCoordinator() {
 		return
 	}
-	w.Outbox = append(w.Outbox, Packet{
+	w.Outbox = append([]Packet{{
 		FromBoard: w.Config.BoardID,
 		Date:      w.LastMaintDate,
 		Bulletins: &BulletinSet{Files: append([]BulletinFile(nil), files...)},
-	})
+	}}, w.Outbox...)
 }
 
 // applyBulletins takes a Coordinator's league set: it drops anything that fails

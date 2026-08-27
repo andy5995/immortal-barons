@@ -130,16 +130,16 @@ func signingBytes(p Packet, shape int) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-// carriesCoordinatorOrders reports whether a packet contains anything only the
+// CarriesCoordinatorOrders reports whether a packet contains anything only the
 // Coordinator may send. Those parts are the ones that need a signature.
-func carriesCoordinatorOrders(p Packet) bool {
+func CarriesCoordinatorOrders(p Packet) bool {
 	return p.LeagueConfig != nil || len(p.LeagueNodes) > 0 || p.Reset != nil || p.Bulletins != nil
 }
 
 // SignAsCoordinator signs a packet's coordinator-authored parts. A no-op for a
 // packet that carries none.
 func (w *World) SignAsCoordinator(p *Packet) error {
-	if !carriesCoordinatorOrders(*p) {
+	if !CarriesCoordinatorOrders(*p) {
 		return nil
 	}
 	if len(w.CoordKey) != ed25519.PrivateKeySize {
@@ -158,7 +158,7 @@ func (w *World) SignAsCoordinator(p *Packet) error {
 // holds no public key it cannot check, and refuses the orders rather than
 // trusting them — an unverifiable instruction is not a safer one.
 func (w *World) VerifyCoordinatorOrders(p Packet) bool {
-	if !carriesCoordinatorOrders(p) {
+	if !CarriesCoordinatorOrders(p) {
 		return true
 	}
 	if len(w.CoordPub) != ed25519.PublicKeySize || len(p.Signature) == 0 {

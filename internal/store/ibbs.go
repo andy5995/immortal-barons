@@ -2,12 +2,16 @@ package store
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
 	"encoding/json"
 	"fmt"
+	"io"
+	"math/big"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -59,6 +63,8 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	run.AlreadySeen = inResult.AlreadySeen
 	run.Refused = inResult.Refused
 	run.Held = inResult.Held
+	run.Quarantined = inResult.Quarantined
+	run.Deferred = inResult.Deferred
 	// A member board that just adopted the Coordinator's roster has to persist
 	// it: the roster is read from ibnodes.dat at startup, not from the world
 	// file (#64).
@@ -97,7 +103,17 @@ func RunPlanetary(w *game.World, inboundDir, outboundDir string, verbose bool) (
 	run.Notices, w.SysopNotices = w.SysopNotices, nil
 	// Also to disk: the run report goes to stdout, which a scheduled run throws
 	// away, and a scheduler is how the setup guide says to drive this step.
-	AppendPlanetaryLog(w.Config.DataDir, run.Notices, time.Now())
+	//
+	// inResult.OrderNotice is appended to the LOG here but deliberately
+	// left out of run.Notices: runFull's interactive path prints
+	// run.Notices to the same stdout an active door session shares with
+	// its caller, and the applied-order line is meant for the sysop's
+	// planetary log only, not an ordinary player.
+	logNotices := run.Notices
+	if inResult.OrderNotice != "" {
+		logNotices = append(append([]string(nil), run.Notices...), inResult.OrderNotice)
+	}
+	AppendPlanetaryLog(w.Config.DataDir, logNotices, time.Now())
 	sent, err := WriteOutbox(w, outboundDir, verbose)
 	run.Sent = sent
 	return run, err
@@ -116,6 +132,8 @@ type PlanetaryRun struct {
 	AlreadySeen   int  // packets skipped: duplicate/replay
 	Refused       int  // packets refused: the sender's signature did not match the roster
 	Held          int  // packets set aside: they speak a protocol this build cannot read
+	Quarantined   int  // packets that could not be parsed at all and were set aside
+	Deferred      int  // packets left untouched, too young to trust as a complete write
 	Released      int  // held packets this build can now read, returned to inbound
 	Bulletins     int  // league bulletins broadcast (Coordinator's board only)
 	// Notices are transport faults for the sysop -- an undeliverable packet,
@@ -276,15 +294,163 @@ type InboundResult struct {
 	Refused     int
 	// Held counts packets set aside for a protocol this build cannot read.
 	Held int
+	// Quarantined counts packets that could not even be parsed as JSON and
+	// were set aside instead of stopping the run. See quarantinePacket.
+	Quarantined int
+	// Deferred counts packets left untouched under quarantineGrace: young
+	// enough to plausibly still be mid-write, so neither applied nor
+	// quarantined this run. Counted separately from Quarantined so a
+	// scheduled (non-verbose) run does not report nothing happened while a
+	// file sits unread — a mailer that keeps rewriting the same broken name
+	// can otherwise hold one under the grace window indefinitely with no
+	// visible symptom at all.
+	Deferred int
+	// OrderNotice, when non-empty, names the order groups were actually
+	// applied in for a batch contested by more than one origin — the line
+	// a league dispute would be settled from. Deliberately separate from
+	// SysopNotices: SysopNotices flows into PlanetaryRun.Notices, which
+	// reportPlanetary prints to the same stdout an interactive door
+	// session shares with the caller, and this line is meant for the
+	// sysop's planetary log only. See RunPlanetary for where it reaches
+	// AppendPlanetaryLog instead.
+	OrderNotice string
+}
+
+// stagedPacket is an inbound file that parsed cleanly, waiting to be applied
+// in the order ReadInbound decides rather than the order os.ReadDir returned
+// it in.
+type stagedPacket struct {
+	path   string
+	packet game.Packet
+}
+
+// originKey identifies a packet's sender for grouping. It keys on FromBoard
+// first, matching IsPacketSeen/SeenPacket's replay tracking (HighSeq is keyed
+// by FromBoard alone) — NOT preferring FromNode the way fromCoordinator does,
+// because the two keys disagreeing is exactly what would split one origin's
+// packets across two groups. A board's own packets do not all carry the same
+// FromNode within one batch: an older or backlogged packet can predate the
+// board's roster entry (FromNode 0) while a newer one from the same board
+// carries it, and grouping those two apart lets the group with the higher Seq
+// apply first, marking the other group's lower Seq a false replay — a packet
+// silently lost, not just misordered. FromNode is still the fallback for a
+// packet old or malformed enough to carry no board name at all.
+func originKey(p game.Packet) string {
+	if p.FromBoard != "" {
+		return "b" + p.FromBoard
+	}
+	if p.FromNode != 0 {
+		return "n" + strconv.Itoa(p.FromNode)
+	}
+	return ""
+}
+
+// shuffleGroupOrder puts keys in a fresh order every call, reading randomness
+// from src (crypto/rand.Reader in production, something that can be made to
+// fail in tests) rather than anything derived from packet content — so no
+// origin can grind for a favorable position by crafting what it sends (#178).
+// It is all-or-nothing: the shuffle happens on a scratch copy, and keys is
+// touched only once the WHOLE shuffle has succeeded. A source of randomness
+// that fails partway through a Fisher-Yates in place would otherwise leave
+// keys neither in this run's random order nor its original scan order, just
+// whatever the swaps before the failure happened to produce.
+func shuffleGroupOrder(keys []string, src io.Reader) {
+	shuffled := append([]string(nil), keys...)
+	for i := len(shuffled) - 1; i > 0; i-- {
+		j, err := rand.Int(src, big.NewInt(int64(i+1)))
+		if err != nil {
+			return
+		}
+		shuffled[i], shuffled[int(j.Int64())] = shuffled[int(j.Int64())], shuffled[i]
+	}
+	copy(keys, shuffled)
+}
+
+// inboundShuffleSrc is the randomness source ReadInbound shuffles group
+// order with. A package variable rather than rand.Reader hardcoded at the
+// call site, so a test can substitute a source that produces a specific
+// sequence and pin the between-origin order of a whole batch end to end —
+// shuffleGroupOrder's own src parameter already makes the shuffle itself
+// testable in isolation, but nothing previously let a test (or a sysop
+// investigating a disputed run) reproduce what ReadInbound actually did
+// with it.
+var inboundShuffleSrc io.Reader = rand.Reader
+
+// lastVerifiedOrdersIndex returns the index, within group (already sorted by
+// Seq — see ReadInbound), of the LAST packet that actually earns first-mover
+// priority: one that carries something only the Coordinator may send
+// (game.CarriesCoordinatorOrders — the same predicate
+// SignAsCoordinator/VerifyCoordinatorOrders use, so there is one definition
+// of "league-wide state" instead of two drifting out of sync) AND verifies
+// against this board's CoordPub. Returns -1 if no packet in group qualifies.
+//
+// VerifyCoordinatorOrders alone is not enough on its own — it returns true
+// for a packet carrying no coordinator orders at all — so both checks are
+// required together, closing the spoofable gap where staging runs before any
+// signature is examined.
+//
+// The LAST index, not the first: ReadInbound applies group[:idx+1] ahead of
+// the rest of the batch and defers group[idx+1:] to the shuffle. Cutting at
+// the last qualifying packet guarantees every verified-orders packet in the
+// group is included in that applied-first prefix, and that the deferred
+// remainder — if any — has strictly higher Seq than everything already
+// applied, so it can never be mistaken for a replay by that early
+// application. Cutting at the FIRST qualifying packet instead would leave
+// any LATER verified-orders packet in the group unapplied until its
+// deferred, shuffled turn — the very thing the carve-out exists to prevent.
+//
+// This only does what it is meant to when the Coordinator's own
+// verified-orders packets actually carry the LOWEST Seq in the group.
+// ExportNodeList, ExportLeagueConfig and ExportBulletins all prepend their
+// packet to Outbox rather than appending, specifically so StampOutbox (which
+// assigns Seq in Outbox slice order) gives them the lowest Seq of the batch
+// ahead of whatever ordinary play the Coordinator's own board already
+// queued that day — appending would give them the HIGHEST Seq instead, and
+// cutting at the last index would then include the entire group in the
+// applied-first prefix regardless of what actually needed the priority.
+func lastVerifiedOrdersIndex(w *game.World, group []stagedPacket) int {
+	last := -1
+	for i, sp := range group {
+		if game.CarriesCoordinatorOrders(sp.packet) && w.VerifyCoordinatorOrders(sp.packet) {
+			last = i
+		}
+	}
+	return last
 }
 
 // ReadInbound reads every packet file in dir addressed to this board (or
-// broadcast), applies it, queues any result packet to the world's Outbox, and
-// removes the consumed files. In a routed league a packet for another board is
-// picked up and queued for forwarding, so a hub passes traffic on instead of
-// collecting it (#106); in a mesh it is left alone, being a copy of one the
-// addressee got directly. A packet stamped with a different league's number is
-// left alone too: it belongs to the other game sharing this directory.
+// broadcast) and applies it, queuing any result packet to the world's Outbox
+// and removing the consumed files. In a routed league a packet for another
+// board is picked up and queued for forwarding, so a hub passes traffic on
+// instead of collecting it (#106); in a mesh it is left alone, being a copy of
+// one the addressee got directly. A packet stamped with a different league's
+// number is left alone too: it belongs to the other game sharing this
+// directory.
+//
+// Application order is NOT filename order (#178): every packet in dir is
+// parsed and staged first, grouped by origin the same way everywhere (see
+// originKey) so one origin's packets are never split across two groups no
+// matter which of its fields happen to be set — that grouping is fixed once
+// staging is done and nothing below ever re-splits it. The Coordinator's own
+// group — identified by comparing a group's key against the roster's actual
+// node #1, never by asking an individual packet whether it CLAIMS to be the
+// Coordinator — has its verified-orders packets applied first, because the
+// rest of this run's checks read the roster they can update; deciding the
+// group by key rather than by a per-packet claim also means setting
+// FromNode: 1 buys nothing for an origin whose FromBoard is not actually the
+// Coordinator's registered name. Only the Coordinator
+// group's OWN APPLICATION is ever split, into a prefix applied ahead of
+// everything else and a deferred remainder that takes its chances in the
+// shuffle like any other group — see lastVerifiedOrdersIndex for why an
+// ordinary packet from the Coordinator's own board does not inherit that
+// priority just by riding alongside a genuine, verified orders packet.
+// Every other group is applied in an order reshuffled every run.
+// Each origin's own packets stay in their own Seq order within their group:
+// only the order BETWEEN origins was ever the problem. Base-36 encodes the
+// origin node near the front of every filename, so alphabetical order gave
+// the same origin first place in every batch for as long as the roster
+// stood — a fixed, permanent advantage on anything two origins contest in the
+// same run, such as a trade bid or a land claim.
 func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error) {
 	var result InboundResult
 	entries, err := os.ReadDir(dir)
@@ -294,6 +460,10 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 		}
 		return result, err
 	}
+
+	groups := map[string][]stagedPacket{}
+	var groupOrder []string
+
 	for _, e := range entries {
 		if e.IsDir() || !IsPacketFile(e.Name()) {
 			continue
@@ -301,82 +471,280 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 		path := filepath.Join(dir, e.Name())
 		data, err := os.ReadFile(path)
 		if err != nil {
-			return result, err
+			if os.IsNotExist(err) {
+				continue // the file was removed or renamed after ReadDir listed it
+			}
+			// A read failure (permission denied, an I/O fault) must not
+			// abort the whole run any more than a parse failure does — the
+			// ReadDir listing is a snapshot, and a mailer that removes or
+			// rewrites a file a moment later leaves this the same
+			// permanently-blocked batch the parse path below was fixed to
+			// avoid. Same defer-or-quarantine treatment as an unparseable
+			// packet gets.
+			deferOrQuarantine(w, &result, path, e, err, verbose)
+			continue
 		}
 		var p game.Packet
 		if err := json.Unmarshal(data, &p); err != nil {
-			return result, fmt.Errorf("packet %s: %w", e.Name(), err)
+			// Corrupt JSON, a truncated transfer, or a foreign file dropped in
+			// the wrong directory must not block every other packet behind it
+			// (#178) — set it aside for a sysop to look at and move on.
+			deferOrQuarantine(w, &result, path, e, err, verbose)
+			continue
 		}
-		if w.Config.LeagueNumber != 0 && p.League != 0 && p.League != w.Config.LeagueNumber {
-			result.OtherLeague++
-			if verbose {
-				fmt.Printf("  Skipped packet from %s (wrong league)\n", p.FromBoard)
-			}
-			continue // another league's game, sharing this directory
+		key := originKey(p)
+		if _, seen := groups[key]; !seen {
+			groupOrder = append(groupOrder, key)
 		}
-		if !w.AddressedToMe(p) {
-			if !w.Routed() {
-				result.MeshCopy++
-				if verbose {
-					fmt.Printf("  Skipped packet from %s (not addressed here)\n", p.FromBoard)
+		groups[key] = append(groups[key], stagedPacket{path, p})
+	}
+
+	for _, g := range groups {
+		sort.SliceStable(g, func(a, b int) bool { return g[a].packet.Seq < g[b].packet.Seq })
+	}
+
+	// A board never sends a packet with FromBoard blank — every export path
+	// sets it explicitly at construction, the Coordinator's included — so the
+	// Coordinator's real group key is always "b"+CoordinatorBoardID once this
+	// board's roster names one (and this board isn't the Coordinator itself
+	// hearing its own echo). Matching on the group key this way, instead of
+	// asking whether some packet CLAIMS FromNode 1, means a forged FromNode: 1
+	// on a packet naming some OTHER board buys that board's group nothing:
+	// its group key is still that other board's name.
+	var coordKey string
+	if !w.IsLeagueCoordinator() {
+		if cb := w.CoordinatorBoardID(); cb != "" {
+			coordKey = "b" + cb
+		} else {
+			// This board's roster names no Coordinator at all yet, so there is
+			// nothing to check a FromBoard claim against — the same situation
+			// that made fromCoordinator prefer FromNode in the first place
+			// (#105). Falling back to a self-declared FromNode: 1 here, same
+			// trust level as before the fix, means a board's very first
+			// roster packet — the one that ESTABLISHES its roster — is not
+			// stuck unprioritized for lack of the very roster it is about to
+			// provide. Once a roster names a Coordinator this fallback never
+			// fires again, closing the gap above for the league's steady
+			// state, which is where it matters.
+			//
+			// Every candidate group is scanned, not just the first one
+			// claiming FromNode: 1 (review on this PR): a decoy claiming
+			// FromNode: 1 under some other board, with a filename that
+			// happens to sort first, would otherwise make coordKey point at
+			// the decoy; the verified-orders check below then rejects it,
+			// clearing coordKey entirely and costing the GENUINE signed
+			// roster its carve-out — filename order deciding the outcome
+			// again, in the one case (a board's first-ever roster) this
+			// exists to prevent. Requiring the verified-orders check to pass
+			// HERE too, not just after the loop, is what lets the loop skip
+			// a false match and keep looking instead of stopping on it.
+			for _, key := range groupOrder {
+				claimsFromNode1 := false
+				for _, sp := range groups[key] {
+					if sp.packet.FromNode == 1 {
+						claimsFromNode1 = true
+						break
+					}
 				}
-				continue // a mesh fans every packet out; this is a copy for someone else
+				if claimsFromNode1 && lastVerifiedOrdersIndex(w, groups[key]) >= 0 {
+					coordKey = key
+					break
+				}
 			}
-			// In transit. The file goes either way, so a packet that has run out
-			// of hops is not re-read on every later run.
-			w.ForwardPacket(p)
-			if verbose {
-				fmt.Printf("  Forwarded packet from %s to %s (%s, dated %s)\n",
-					p.FromBoard, p.ToBoard, p.PacketType(), p.Date)
-			}
-			if err := os.Remove(path); err != nil {
-				return result, err
-			}
-			continue
 		}
-		// Held, not applied: this build cannot read the format. See HeldDir.
-		// Checked only for a packet addressed HERE — a hub passes on bytes it
-		// never interprets, and holding one in transit would stall delivery to a
-		// board that reads it perfectly well.
-		if !game.SpeaksOurProtocol(p.Protocol) {
-			result.Held++
-			w.NoteProtocolHold(p.FromBoard, p.Protocol)
-			if err := holdPacket(w.Config.DataDir, path); err != nil {
-				return result, err
-			}
-			continue
-		}
-		if w.IsPacketSeen(p) {
-			result.AlreadySeen++
-			if verbose {
-				fmt.Printf("  Skipped packet from %s (already seen)\n", p.FromBoard)
-			}
-			os.Remove(path) // clean up; SeenPacket already recorded it
-			continue
-		}
-		// Asked BEFORE ApplyPacket, which posts the refusal to the planet's
-		// news and then returns the same empty packet it returns for a
-		// replay or for anything with no reply to send.
-		refused := w.OriginRefused(p)
-		applyResult := w.ApplyPacket(p)
-		if applyResult.HasPayload() {
-			w.Outbox = append(w.Outbox, applyResult)
-		}
-		if refused {
-			result.Refused++
-			if verbose {
-				fmt.Printf("  Refused packet from %s (%s): it does not match that board's key\n",
-					p.FromBoard, p.PacketType())
+	}
+	// The carve-out is earned only by the packets that actually carry
+	// verified coordinator orders, not by the whole group: ExportNodeList
+	// queues a signed roster broadcast on every planetary run of the
+	// Coordinator's board, so riding ordinary gameplay packets from that
+	// same board (a player's trade bid, land claim, or strike) inherited
+	// that packet's priority for free on essentially every run — reproduced
+	// at 30/30 trials before this fix. group[:idx+1]
+	// is applied ahead of the rest of the batch; group[idx+1:], if any, is
+	// deferred to the shuffle with everyone else. See
+	// lastVerifiedOrdersIndex for why the split lands after the LAST
+	// verified-orders packet rather than the first.
+	coordFullyApplied := false
+	var appliedFirst []stagedPacket
+	if coordKey != "" {
+		if idx := lastVerifiedOrdersIndex(w, groups[coordKey]); idx >= 0 {
+			appliedFirst = groups[coordKey][:idx+1]
+			if idx+1 == len(groups[coordKey]) {
+				coordFullyApplied = true
+			} else {
+				groups[coordKey] = groups[coordKey][idx+1:]
 			}
 		} else {
-			result.Applied++
-			if verbose {
-				fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
-			}
+			coordKey = "" // no verified orders anywhere in the group: no carve-out at all
 		}
-		if err := os.Remove(path); err != nil {
+	}
+	var rest []string
+	for _, key := range groupOrder {
+		if coordKey != "" && key == coordKey && coordFullyApplied {
+			continue // fully consumed by the priority prefix; nothing left to shuffle
+		}
+		rest = append(rest, key)
+	}
+	haveCoordGroup := len(appliedFirst) > 0
+	for _, sp := range appliedFirst {
+		if err := applyStagedPacket(w, &result, sp.path, sp.packet, verbose); err != nil {
 			return result, err
 		}
 	}
+
+	shuffleGroupOrder(rest, inboundShuffleSrc)
+	// The order actually applied, the Coordinator's group included: a
+	// league dispute is settled from this line, so it has to name every
+	// group that ran and the order they ran in, not just the shuffled tail.
+	// Only worth a line at all when there was an
+	// actual choice to make — one origin's batch applies in the same order
+	// regardless, and logging that every run buries the runs where the
+	// order mattered.
+	order := rest
+	if haveCoordGroup {
+		// Named apart from any deferred remainder of the same origin: when
+		// the split leaves packets behind, coordKey legitimately appears
+		// twice in order (once here, once again inside rest at its
+		// shuffled position), and the two entries are not interchangeable
+		// — a sysop reading "Coordinator BBS, Coordinator BBS, Honest BBS"
+		// cannot tell which entry carried the verified orders.
+		order = append([]string{coordKey + " (verified orders)"}, rest...)
+	}
+	if len(order) > 1 {
+		names := make([]string, len(order))
+		for i, k := range order {
+			switch {
+			case k == "":
+				names[i] = "(unidentified)"
+			case k[0] == 'n':
+				names[i] = "node " + k[1:]
+			default:
+				names[i] = k[1:]
+			}
+		}
+		// "groups", not "origins": a split Coordinator group can make one
+		// origin legitimately appear twice, so counting entries as origins
+		// overstates how many distinct boards were actually involved.
+		result.OrderNotice = fmt.Sprintf(
+			"Inbound batch: %d groups applied in this order: %s", len(order), strings.Join(names, ", "))
+	}
+	for _, key := range rest {
+		for _, sp := range groups[key] {
+			if err := applyStagedPacket(w, &result, sp.path, sp.packet, verbose); err != nil {
+				return result, err
+			}
+		}
+	}
 	return result, nil
+}
+
+// deferOrQuarantine handles a packet file ReadInbound could not read or
+// parse, without letting it abort the run — the same failure that used to
+// abort the whole batch (an unreadable file, corrupt JSON) is now confined
+// to this one file (#178).
+//
+// A file young enough to plausibly still be mid-write is left alone under
+// quarantineGrace instead: scp, plain FTP, and several FTN mailers write
+// straight to the final name instead of a temp-then-rename dance, and
+// quarantining a packet mid-transfer would permanently lose one that would
+// apply cleanly once the write finishes. That case counts as Deferred, not
+// Quarantined, so a scheduled (non-verbose) run does not silently report
+// nothing happened while a file sits unread run after run.
+func deferOrQuarantine(w *game.World, result *InboundResult, path string, e os.DirEntry, cause error, verbose bool) {
+	if info, serr := e.Info(); serr == nil && time.Since(info.ModTime()) < quarantineGrace {
+		result.Deferred++
+		if verbose {
+			fmt.Printf("  Leaving unreadable packet %s in place: written too recently to trust as complete, will retry next run\n", e.Name())
+		}
+		return
+	}
+	// Quarantine BEFORE recording anything happened: if the move itself
+	// fails (read-only data dir, full disk), the file is still sitting in
+	// inbound and has to be left there to retry next run, not reported as
+	// "set aside" when it never moved.
+	if qerr := quarantinePacket(w.Config.DataDir, path); qerr != nil {
+		w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(
+			"Packet %s could not be read and could not be set aside either: %v", e.Name(), qerr))
+		if verbose {
+			fmt.Printf("  Could not quarantine unreadable packet %s: %v\n", e.Name(), qerr)
+		}
+		return
+	}
+	result.Quarantined++
+	w.SysopNotices = append(w.SysopNotices, fmt.Sprintf(
+		"Packet %s could not be read and has been set aside in %s: %v", e.Name(), BadDir, cause))
+	if verbose {
+		fmt.Printf("  Quarantined packet %s (unreadable: %v)\n", e.Name(), cause)
+	}
+}
+
+// applyStagedPacket runs the checks and effects for one already-parsed
+// inbound packet: the league check, the addressed-here/forward/mesh check,
+// the protocol-hold check, the replay check, and finally OriginRefused plus
+// ApplyPacket itself. Factored out of ReadInbound so staging and ordering
+// packets ahead of applying them did not have to change what happens to any
+// one packet, only when.
+func applyStagedPacket(w *game.World, result *InboundResult, path string, p game.Packet, verbose bool) error {
+	if w.Config.LeagueNumber != 0 && p.League != 0 && p.League != w.Config.LeagueNumber {
+		result.OtherLeague++
+		if verbose {
+			fmt.Printf("  Skipped packet from %s (wrong league)\n", p.FromBoard)
+		}
+		return nil // another league's game, sharing this directory
+	}
+	if !w.AddressedToMe(p) {
+		if !w.Routed() {
+			result.MeshCopy++
+			if verbose {
+				fmt.Printf("  Skipped packet from %s (not addressed here)\n", p.FromBoard)
+			}
+			return nil // a mesh fans every packet out; this is a copy for someone else
+		}
+		// In transit. The file goes either way, so a packet that has run out
+		// of hops is not re-read on every later run.
+		w.ForwardPacket(p)
+		if verbose {
+			fmt.Printf("  Forwarded packet from %s to %s (%s, dated %s)\n",
+				p.FromBoard, p.ToBoard, p.PacketType(), p.Date)
+		}
+		return os.Remove(path)
+	}
+	// Held, not applied: this build cannot read the format. See HeldDir.
+	// Checked only for a packet addressed HERE — a hub passes on bytes it
+	// never interprets, and holding one in transit would stall delivery to a
+	// board that reads it perfectly well.
+	if !game.SpeaksOurProtocol(p.Protocol) {
+		result.Held++
+		w.NoteProtocolHold(p.FromBoard, p.Protocol)
+		return holdPacket(w.Config.DataDir, path)
+	}
+	if w.IsPacketSeen(p) {
+		result.AlreadySeen++
+		if verbose {
+			fmt.Printf("  Skipped packet from %s (already seen)\n", p.FromBoard)
+		}
+		os.Remove(path) // clean up; SeenPacket already recorded it
+		return nil
+	}
+	// Asked BEFORE ApplyPacket, which posts the refusal to the planet's
+	// news and then returns the same empty packet it returns for a
+	// replay or for anything with no reply to send.
+	refused := w.OriginRefused(p)
+	applyResult := w.ApplyPacket(p)
+	if applyResult.HasPayload() {
+		w.Outbox = append(w.Outbox, applyResult)
+	}
+	if refused {
+		result.Refused++
+		if verbose {
+			fmt.Printf("  Refused packet from %s (%s): it does not match that board's key\n",
+				p.FromBoard, p.PacketType())
+		}
+	} else {
+		result.Applied++
+		if verbose {
+			fmt.Printf("  Applied packet from %s (%s, dated %s)\n", p.FromBoard, p.PacketType(), p.Date)
+		}
+	}
+	return os.Remove(path)
 }

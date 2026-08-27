@@ -162,27 +162,42 @@ func (w *World) IsLeagueCoordinator() bool {
 // ExportLeagueConfig queues a broadcast packet carrying this board's league
 // rules. Only meaningful from the coordinator; member boards accept it only
 // when it comes from node #1 (see ApplyPacket).
+//
+// Prepended, not appended — see ExportNodeList's doc comment for why: the
+// same Seq-ordering reasoning applies to every packet type
+// CarriesCoordinatorOrders recognizes, this one included.
 func (w *World) ExportLeagueConfig() {
-	w.Outbox = append(w.Outbox, Packet{
+	w.Outbox = append([]Packet{{
 		FromBoard:    w.Config.BoardID,
 		Date:         w.LastMaintDate,
 		LeagueConfig: w.Config.leagueRuleset(),
-	})
+	}}, w.Outbox...)
 }
 
 // ExportNodeList queues a broadcast of the league roster. Only the Coordinator
 // sends it, and only members adopt it, so the roster stays in one sysop's hands
 // instead of every board editing its own copy as boards join or move (#64). A
 // no-op when this board has no roster loaded.
+//
+// Prepended, not appended: StampOutbox assigns Seq in Outbox slice order, and
+// a Coordinator's own player actions (a trade bid, a land claim) are already
+// queued in Outbox from earlier in the day by the time a scheduled planetary
+// run gets here and calls this. Appending would give the roster the HIGHEST
+// Seq of the batch every time, not the lowest — and a receiving board's
+// inbound staging applies a Coordinator group's verified-orders packets
+// first only up through the last one in Seq order, so the roster needs the
+// LOWEST Seq for that to mean anything: giving it the highest makes every
+// other packet in the group ride along as part of the same applied-first
+// prefix instead of only the roster itself.
 func (w *World) ExportNodeList() {
 	if !w.IsLeagueCoordinator() || len(w.LeagueNodes) == 0 {
 		return
 	}
-	w.Outbox = append(w.Outbox, Packet{
+	w.Outbox = append([]Packet{{
 		FromBoard:   w.Config.BoardID,
 		Date:        w.LastMaintDate,
 		LeagueNodes: append([]LeagueNode(nil), w.LeagueNodes...),
-	})
+	}}, w.Outbox...)
 }
 
 // LeagueNode is one board in the inter-BBS league, as listed in the

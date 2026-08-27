@@ -149,8 +149,87 @@ it is also what makes an 8.3 transport alias possible at all (#178).
 FAT directory-entry order — the slot each file happened to be written into, with
 freed slots reused after deletions. Not alphabetical, not by node, not arrival
 order. So IB's current sorted order is not fidelity: `os.ReadDir` sorts where DOS
-did not, and whatever order #178 settles on diverges from nothing the original
-decided. Note that the fixed-width sequence above is justified by scan order; if #178 removes that dependence, the fixed width keeps its other job (a short, collision-free name) and loses that one.
+did not, and the order #178 settles on (below) diverges from nothing the
+original decided. The fixed-width sequence above is no longer justified by
+scan order — #178 removed that dependence — but keeps its other job: a
+short, collision-free name.
+
+### Applying an inbound batch (#178)
+
+`ReadInbound` stages every packet file in the directory before applying any
+of them, rather than applying each one as `os.ReadDir` returns it. Base-36
+encodes a packet's origin node near the front of its filename, so
+alphabetical order gave the same origin first place in every batch for as
+long as the roster stood — a fixed, permanent advantage on anything two
+origins contest in the same run, such as a trade bid or a land claim.
+
+Staged packets are grouped by `originKey` (`FromBoard` first, `FromNode`
+as a fallback for a packet old enough to carry no board name at all — it
+has to key the same way replay detection does, or one origin's own
+packets can be split across two groups and reordered against each other).
+Each origin's own packets stay in their existing `Seq` order within their
+group: only the order *between* origins was ever the problem.
+
+The Coordinator's group is identified by comparing a group's key against
+the roster's actual Coordinator board — never by asking an individual
+packet whether it *claims* to be from the Coordinator — so a forged
+`FromNode: 1` buys an origin nothing. (A board with no roster loaded yet
+falls back to trusting a self-declared `FromNode: 1`, the same trust
+level `fromCoordinator` already uses to bootstrap — this narrows to a
+one-time window before any roster exists and closes for good once one
+does.)
+
+Only the packets in that group that actually carry something only the
+Coordinator may send (`LeagueConfig`, `LeagueNodes`, `Reset`, or
+`Bulletins` — the same `CarriesCoordinatorOrders` check
+`SignAsCoordinator`/`VerifyCoordinatorOrders` use, so there is one
+definition of "league-wide state" instead of two) *and verify* against
+this board's Coordinator public key are applied ahead of the rest of the
+batch — not the whole group. `ExportNodeList` rebroadcasts the roster on
+every planetary run of the Coordinator's board, so gating on the whole
+group rather than the individual packets let an ordinary gameplay packet
+(a trade bid, a land claim, a strike) riding in the same batch as that
+rebroadcast inherit its priority for free on essentially every run — the
+exact fixed advantage this feature exists to remove, just re-anchored
+from filename order to "is the Coordinator's board". The split lands
+after the *last* qualifying packet in the group's own `Seq` order, not
+the first: cutting at the first would leave a *later* verified packet in
+the group waiting for its shuffled turn, letting the rest of the batch
+run one check behind whatever it just changed — the same failure the
+carve-out exists to prevent, and cutting at the last also keeps the
+whole applied-first prefix in the origin's own ascending `Seq` order, so
+nothing in the deferred remainder can ever be mistaken for a replay of
+what already applied. The deferred remainder, if any, takes its chances
+in the shuffle exactly like any other group's packets, Coordinator's
+board included when it has nothing signed and verified to offer at all.
+The verification half matters because staging happens before any
+signature is examined: without it, an origin could buy first-mover
+priority simply by setting `LeagueNodes` on an unsigned packet, no
+forged `FromNode`/`FromBoard` required.
+
+This only does what it is meant to when the verified-orders packets
+actually carry the lowest `Seq` in their group. `ExportNodeList`,
+`ExportLeagueConfig`, and `ExportBulletins` all *prepend* their packet
+to `Outbox` rather than appending: `StampOutbox` assigns `Seq` in
+`Outbox` slice order, and the Coordinator's own player actions from
+earlier in the day are already queued there by the time a scheduled
+planetary run gets to these exports. Appending would give them the
+*highest* `Seq` of the batch instead of the lowest, which would make the
+split land after everything — the entire group, ordinary gameplay
+included, exactly the bug this section starts by describing.
+
+Every other group is applied in an order reshuffled every run, read from
+`crypto/rand` and nothing derived from packet content — so no origin can
+grind for a favorable position by crafting what it sends. The order
+actually applied is written to the sysop's planetary log (not the
+in-session report an interactive door caller sees) whenever a batch held
+an actual choice between more than one origin, for auditability.
+
+A packet that fails to parse as JSON is moved aside into `bad/`
+(`BadDir`) instead of aborting the run — see "Quarantined packets" in
+`docs/inter-bbs.md` for the sysop-facing behavior (the grace period for
+an in-flight transfer, the cap on same-named copies, and why nothing
+empties the directory automatically).
 
 ### Interplanetary trading (#47): the compatibility rule
 
