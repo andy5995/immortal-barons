@@ -24,6 +24,7 @@ const (
 )
 
 type bsyLock struct {
+	file *os.File
 	lock *store.FileLock
 }
 
@@ -67,7 +68,7 @@ func acquireBSY(path string) (*bsyLock, error) {
 				_ = os.Remove(path)
 				return nil, err
 			}
-			return &bsyLock{lock: lock}, nil
+			return &bsyLock{file: f, lock: lock}, nil
 		}
 		if !os.IsExist(err) {
 			return nil, err

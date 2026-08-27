@@ -3,6 +3,7 @@ package ftn
 import (
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,7 +17,15 @@ func TestAcquireBSYWritesOwnerAndHoldsFileLock(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	data, err := os.ReadFile(path)
+	defer func() {
+		if held != nil {
+			_ = releaseBSY(path, held)
+		}
+	}()
+	if _, err := held.file.Seek(0, 0); err != nil {
+		t.Fatal(err)
+	}
+	data, err := io.ReadAll(held.file)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -36,6 +45,7 @@ func TestAcquireBSYWritesOwnerAndHoldsFileLock(t *testing.T) {
 	if err := releaseBSY(path, held); err != nil {
 		t.Fatal(err)
 	}
+	held = nil
 	if _, err := os.Stat(path); !os.IsNotExist(err) {
 		t.Fatalf("released BSY remains: %v", err)
 	}

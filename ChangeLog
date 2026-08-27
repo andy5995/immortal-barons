@@ -7,7 +7,8 @@
     identical canonical inbound packets are logged as duplicates, not collisions
   * One rejected packet no longer strands valid packets in the same FTN bundle;
     its original wrapper is quarantined after the valid members finish
-  * FTN aliases have a defined namespace for boards whose league number is unset
+  * FTN aliases have a defined compatibility namespace for legacy league-0
+    packets, so one cannot wedge an otherwise deliverable transport batch
   * barons-ftn marks and file-locks its BSO semaphores, and safely recovers only
     its own unlocked semaphore after a conservative five-minute crash interval
   * The FTN transport, routing, locking, recovery, and mixed-link setup have a

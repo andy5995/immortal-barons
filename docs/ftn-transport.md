@@ -317,8 +317,10 @@ packets in the snapshot which share a next hop go into one ZIP bundle.
 The FTN alias is `NNNNCCCC.BRP`:
 
 - `NNNN` is a four-character base-36 namespace derived from this league and
-  the transmitting hop's node number. League `0` has its own namespace, so an
-  otherwise valid board whose league number is unset can still exchange mail.
+  the transmitting hop's node number. The encoding reserves a distinct
+  namespace for legacy league-`0` packets so one such packet cannot wedge a
+  transport batch; that compatibility namespace is not a substitute for the
+  Coordinator-assigned league number.
 - `CCCC` is a persistent four-character base-36 counter.
 - The counter advances for every physical handoff, including each broadcast
   copy, and does not reset with a new game season.
