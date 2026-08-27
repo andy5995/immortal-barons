@@ -44,6 +44,13 @@
   letter the realm has at home, which leaves gaps where realms have died. The
   letters here can move when a realm on that planet dies or a new one starts, so
   read the roster before you pick.
+- In a league, packets that arrive between two runs are applied in a new random
+  order each run. The order matters only when two boards ask for the same thing
+  at once, such as a bid for the same goods on a Trading Market. BRE applied
+  packets in the order the disk happened to list the files. Immortal Barons
+  would otherwise read them in name order, and a packet's name starts with the
+  number of the board that sent it, so the same board would always be served
+  first.
 - Gold you earn above the two billion you can hold is still lost, but the game
   tells you when it happens, and a full bank pays its interest into your gold in
   hand rather than losing it.
