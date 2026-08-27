@@ -173,13 +173,6 @@ func LoadConfig(dataDir string) (Config, error) {
 	if err := sc.Err(); err != nil {
 		return Config{}, err
 	}
-	needNetmail := len(cfg.Links) == 0
-	for _, link := range cfg.Links {
-		needNetmail = needNetmail || link.Mode == LinkAttach
-	}
-	if needNetmail && cfg.NetmailDir == "" {
-		return Config{}, fmt.Errorf("%s: NetmailDir is not set", path)
-	}
 	if cfg.NetmailDir != "" && !filepath.IsAbs(cfg.NetmailDir) {
 		cfg.NetmailDir = filepath.Join(dataDir, cfg.NetmailDir)
 	}
@@ -271,4 +264,22 @@ func normalFlavour(s string) string {
 		return "Hold"
 	}
 	return ""
+}
+
+// RequireNetmail reports whether this configuration can publish an attach
+// handoff, and says what is missing when it cannot. It is asked by --out at the
+// point of use rather than by LoadConfig, because --in never writes netmail: a
+// file-box board that only RECEIVES has no netmail directory to name, and
+// refusing to load its config told it to fix the one setting its runs never
+// touch (found on a three-board rig, 2026-08-27).
+func RequireNetmail(cfg Config, dataDir string) error {
+	need := len(cfg.Links) == 0
+	for _, link := range cfg.Links {
+		need = need || link.Mode == LinkAttach
+	}
+	if need && cfg.NetmailDir == "" {
+		return fmt.Errorf("%s: NetmailDir is not set, and this board has an attach handoff to make",
+			filepath.Join(dataDir, ConfigFile))
+	}
+	return nil
 }

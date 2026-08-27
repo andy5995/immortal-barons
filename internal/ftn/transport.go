@@ -62,6 +62,9 @@ func RunOut(dataDir string) (Result, error) {
 		return Result{}, err
 	}
 	defer adapterLock.Release()
+	if err := RequireNetmail(transport, dataDir); err != nil {
+		return Result{}, err
+	}
 	root := filepath.Join(dataDir, spoolDir, outSpoolDir)
 	if err := os.MkdirAll(root, 0o755); err != nil {
 		return Result{}, err
@@ -478,6 +481,15 @@ func checkSubjectMargin(transport Config, attached string, result *Result) error
 }
 
 func publishTarget(batch, dataDir string, transport Config, origin Address, target batchTarget) (Queued, error) {
+	// Named before it is reached: creating the netmail with no directory
+	// configured fails as `open : no such file or directory`, an error whose
+	// blank filename says nothing about which setting is missing. --in hits
+	// this too when a routing board forwards transit, which is where RunOut's
+	// own check cannot help (three-board rig, 2026-08-27).
+	if target.Mode == LinkAttach && transport.NetmailDir == "" {
+		return Queued{}, fmt.Errorf("%s: NetmailDir is not set, and %s takes an attach handoff",
+			filepath.Join(dataDir, ConfigFile), target.Name)
+	}
 	address, err := ParseAddress(target.Address)
 	if err != nil {
 		return Queued{}, err

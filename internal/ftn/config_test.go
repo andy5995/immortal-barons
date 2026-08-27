@@ -127,3 +127,28 @@ func TestLoadConfigMixedLinks(t *testing.T) {
 		t.Fatalf("links = %#v", cfg.Links)
 	}
 }
+
+// A file-box board that only RECEIVES has no netmail directory to name, and
+// --in never writes netmail. Refusing to load its config told it to fix the one
+// setting its runs never touch (three-board rig, 2026-08-27).
+func TestConfigLoadsWithoutNetmailDirForAReceiveOnlyBoard(t *testing.T) {
+	dir := t.TempDir()
+	inbound := filepath.Join(dir, "in")
+	if err := os.MkdirAll(inbound, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, ConfigFile), []byte("InboundDir "+inbound+"\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := LoadConfig(dir)
+	if err != nil {
+		t.Fatalf("a receive-only config was refused: %v", err)
+	}
+	// But the board that actually has an attach handoff to make is still told,
+	// at the point where it matters.
+	if err := RequireNetmail(cfg, dir); err == nil {
+		t.Error("an attach handoff with no NetmailDir was accepted")
+	} else if !strings.Contains(err.Error(), ConfigFile) {
+		t.Errorf("the refusal does not name the file to fix: %v", err)
+	}
+}
