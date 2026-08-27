@@ -198,7 +198,8 @@ func readTransport(data []byte, _ string) (bundleManifest, []transportEntry, err
 			return bundleManifest{}, nil, fmt.Errorf("invalid transport route for packet member %d", i)
 		}
 		file := packetFiles[i]
-		if !strings.HasPrefix(file.Name, "packets/") || !store.IsPacketFile(filepath.Base(file.Name)) {
+		base := filepath.Base(file.Name)
+		if file.Name != fmt.Sprintf("packets/%06d/%s", i, base) || !store.IsPacketFile(base) {
 			return bundleManifest{}, nil, fmt.Errorf("unexpected packet member %q", file.Name)
 		}
 		raw, err := readZipMember(file)

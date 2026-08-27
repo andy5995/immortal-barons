@@ -106,6 +106,50 @@ func TestReadTransportDerivesCanonicalPacketName(t *testing.T) {
 	}
 }
 
+func TestReadTransportRejectsReorderedPacketMembers(t *testing.T) {
+	packets := []game.Packet{
+		{FromBoard: "Alpha BBS", FromNode: 11, ToNode: 3, Seq: 1, League: 100},
+		{FromBoard: "Bravo BBS", FromNode: 22, ToNode: 3, Seq: 1, League: 100},
+	}
+	entries := make([]transportEntry, len(packets))
+	for i, packet := range packets {
+		raw, err := json.Marshal(packet)
+		if err != nil {
+			t.Fatal(err)
+		}
+		entries[i] = transportEntry{Raw: raw, Packet: packet, Route: []int{packet.FromNode, 1}}
+	}
+	body, _, err := makeBundle(1, "direct", entries)
+	if err != nil {
+		t.Fatal(err)
+	}
+	zr, err := zip.NewReader(bytes.NewReader(body), int64(len(body)))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(zr.File) != 3 {
+		t.Fatalf("bundle members = %d, want manifest and two packets", len(zr.File))
+	}
+	var reordered bytes.Buffer
+	zw := zip.NewWriter(&reordered)
+	for _, index := range []int{0, 2, 1} {
+		member := zr.File[index]
+		raw, err := readZipMember(member)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := writeZipMember(zw, member.Name, raw); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := zw.Close(); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := readTransport(reordered.Bytes(), "alias.BRP"); err == nil || !strings.Contains(err.Error(), "unexpected packet member") {
+		t.Fatalf("reordered packet members were accepted: %v", err)
+	}
+}
+
 func TestRunOutCoalescesOneBundlePerNextHop(t *testing.T) {
 	data := newBundledSetup(t, "Bravo BBS", "")
 	writeNamedPacket(t, data, "a.brp", game.Packet{FromBoard: "Bravo BBS", ToBoard: "Charlie BBS", FromNode: 2, ToNode: 3, Seq: 1, League: 100})

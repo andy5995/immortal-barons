@@ -2,6 +2,7 @@ package ftn
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"errors"
 	"fmt"
 	"os"
@@ -98,25 +99,39 @@ func appendBSOBundle(flow, attachDir string, incoming []byte) (string, bool, err
 			return "", false, err
 		}
 		manifest, entries, err := readTransport(existing, filepath.Base(path))
+		if err != nil {
+			continue
+		}
 		existingTransmitter, sameTransmitter := bundleTransmitter(entries)
-		if err != nil || manifest.Format != bundleFormat || manifest.Delivery != "direct" ||
+		if manifest.Format != bundleFormat || manifest.Delivery != "direct" ||
 			!sameTransmitter || existingTransmitter != incomingTransmitter || !sameBundleLeague(entries, incomingEntries) {
 			continue
 		}
 		if len(entries)+len(incomingEntries) > bundleMaxEntries {
 			continue
 		}
+		// Index once rather than comparing every incoming body with every
+		// existing body while the peer's .bsy is held. The byte comparison
+		// inside a digest bucket keeps "duplicate" defined as exact bytes,
+		// even in the theoretical event of a SHA-256 collision.
+		existingByDigest := make(map[[sha256.Size]byte][][]byte, len(entries)+len(incomingEntries))
+		for _, entry := range entries {
+			digest := sha256.Sum256(entry.Raw)
+			existingByDigest[digest] = append(existingByDigest[digest], entry.Raw)
+		}
 		added := 0
 		for _, incomingEntry := range incomingEntries {
 			duplicate := false
-			for _, existingEntry := range entries {
-				if bytes.Equal(existingEntry.Raw, incomingEntry.Raw) {
+			digest := sha256.Sum256(incomingEntry.Raw)
+			for _, existingRaw := range existingByDigest[digest] {
+				if bytes.Equal(existingRaw, incomingEntry.Raw) {
 					duplicate = true
 					break
 				}
 			}
 			if !duplicate {
 				entries = append(entries, incomingEntry)
+				existingByDigest[digest] = append(existingByDigest[digest], incomingEntry.Raw)
 				added++
 			}
 		}
