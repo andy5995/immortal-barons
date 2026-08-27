@@ -1,4 +1,5 @@
 (in-progress:)
+  * Create Group Attack gathers the known planets under the world lock, as the other target pickers do
   * A board playing in a league must set its league number; the transport and the setup check refuse a board left at 0
   * barons-ftn now receives as well as sends, with private game directories,
     resumable spools, shared locking, and attach, obox, or BSO links per peer

@@ -104,3 +104,66 @@ func TestBuyRefusesInsufficientGold(t *testing.T) {
 		t.Fatalf("expected an insufficient-gold refusal, got: %q", f.out.String())
 	}
 }
+
+// TestConcurrentGroupAttackGatherIsRaceFree proves createGroupAttack's world
+// lock (#206), in the same shape as the buy test above: one goroutine imports
+// remote boards the way an inbound packet does, another opens Create Group
+// Attack and backs out at the planet prompt. The gather runs before that
+// prompt, so backing out still exercises it.
+//
+// ImportBoard both assigns into RemoteBoards and appends to it, so an unlocked
+// walk of that slice is a torn read of its header rather than a stale-but-whole
+// value. With the gather inside w.Read the two share the world mutex; take the
+// Read away and -race reports a DATA RACE, which is what gives this teeth.
+func TestConcurrentGroupAttackGatherIsRaceFree(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.AICount = 1
+	cfg.IBBS = true
+	w := game.NewWorldSeed(cfg, 1)
+	p := w.AddHuman("alice", "Alice")
+	p.Protection = 0 // a new realm cannot attack, and would return before the gather
+
+	const iterations = 300
+	cR := &ctx{World: w, handle: p.Owner}
+	cW := &ctx{World: w, handle: p.Owner}
+
+	var wg sync.WaitGroup
+	wg.Add(2)
+
+	// Writer: import boards, as ApplyPacket does when scores arrive. Assigning
+	// over an existing entry and appending a new one are both exercised.
+	go func() {
+		defer wg.Done()
+		for i := 0; i < iterations; i++ {
+			board := game.RemoteBoard{
+				BoardID: "Planet " + string(rune('A'+i%8)),
+				Scores:  []game.RemoteScore{{Empire: "Baron", Land: i, NetWorth: i}},
+			}
+			cW.With(func() { cW.ImportBoard(board) })
+		}
+	}()
+
+	// Reader: open Create Group Attack and quit at the planet prompt.
+	go func() {
+		defer wg.Done()
+		for i := 0; i < iterations; i++ {
+			f := &fakeSession{keys: []rune("0\r")}
+			createGroupAttack(f, cR)
+		}
+	}()
+
+	wg.Wait()
+	var boards int
+	w.Read(func() { boards = len(w.RemoteBoards) })
+	if boards == 0 {
+		t.Fatal("no boards were imported, so the reader never had a slice to walk")
+	}
+	// The reader must have REACHED the gather, not returned above it: a new
+	// realm is blocked from attacking before any of this runs, and a test that
+	// stopped there would pass with the lock removed (CLAUDE.md).
+	f := &fakeSession{keys: []rune("0\r")}
+	createGroupAttack(f, cR)
+	if out := f.out.String(); !strings.Contains(out, "Target which planet?") {
+		t.Fatalf("the reader never reached the planet gather:\n%s", out)
+	}
+}

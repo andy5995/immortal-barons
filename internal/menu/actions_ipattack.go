@@ -24,24 +24,27 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 		return Stay
 	}
 	p := w.Player()
-	if len(w.RemoteBoards) == 0 {
+	// Gathered once, under the lock, and read from the copy afterwards (#206).
+	// ImportBoard appends to RemoteBoards as inbound packets are applied, which
+	// on a multi-node board is another process's transaction — so walking the
+	// slice unlocked is a torn read of its header, and a pointer INTO it held
+	// across the prompts below can outlive the array it points at.
+	var boards []string
+	scores := map[string][]remoteBaron{}
+	w.Read(func() {
+		for _, b := range w.RemoteBoards {
+			boards = append(boards, b.BoardID)
+			scores[b.BoardID] = remoteBarons(b.Scores)
+		}
+	})
+	if len(boards) == 0 {
 		ok(s, "No other planets are known yet. Wait for inter-BBS scores to arrive.")
 		return Stay
-	}
-	boards := make([]string, len(w.RemoteBoards))
-	for i, b := range w.RemoteBoards {
-		boards[i] = b.BoardID
 	}
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Target which planet?"), ansi.Reset)
 	board := pickAddressee(s, w, boards)
 	if board == "" {
 		return Stay
-	}
-	var rb *game.RemoteBoard
-	for i := range w.RemoteBoards {
-		if w.RemoteBoards[i].BoardID == board {
-			rb = &w.RemoteBoards[i]
-		}
 	}
 	// Whole planet or one baron is asked BEFORE the roster, and answered with one
 	// key, as BRE does (#125). Taking it first is the point: a planet-wide strike
@@ -53,7 +56,7 @@ func createGroupAttack(s session.Session, w *ctx) Result {
 	pick := tr(s, "the whole planet")
 	var target string
 	if !all {
-		if pick = pickRemoteBaronFrom(s, w.Term, remoteBarons(rb.Scores), tr(s, "Target which baron?"), protectedNoStrike); pick == "" {
+		if pick = pickRemoteBaronFrom(s, w.Term, scores[board], tr(s, "Target which baron?"), protectedNoStrike); pick == "" {
 			return Stay
 		}
 		target = pick
