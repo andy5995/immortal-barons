@@ -1,10 +1,28 @@
 (in-progress:)
+  * barons-ftn now receives as well as sends, with private game directories,
+    resumable spools, shared locking, and attach, obox, or BSO links per peer
+  * FTN handoffs coalesce unchanged signed game packets into 8.3-named ZIP
+    bundles; BSO safely extends advertised bundles while holding the peer .bsy
   * FTN handoffs send plain packets by default, so a board that upgrades first
     cannot stop a peer still on the old release; set "Bundled Yes" once every
     peer can unwrap a bundle
-  * A board that only receives no longer has to name a netmail directory it
-    never writes to
-  * A planetary run that skipped one packet no longer prints its count twice
+  * Mesh bundles track their actual route and scheduled sibling branches;
+    identical canonical inbound packets are logged as duplicates, not collisions
+  * One rejected packet no longer strands valid packets in the same FTN bundle;
+    its original wrapper is quarantined after the valid members finish
+  * barons-ftn marks and file-locks its BSO semaphores, and safely recovers only
+    its own unlocked semaphore after a conservative five-minute crash interval
+  * FTN aliases have a defined compatibility namespace for legacy league-0
+    packets, so one cannot wedge an otherwise deliverable transport batch
+  * The FTN transport, routing, locking, recovery, and mixed-link setup have a
+    complete configuration guide with working examples; generic file transports
+    now have an atomic inbound and outbound handoff contract
+  * A board playing in a league must set its league number; the transport and
+    the setup check refuse a board left at 0
+  * A League Number outside 1-999 in bbs.cfg is refused instead of accepted
+  * The -scores, -export and -import flags are gone; -planetary carries scores
+  * A packet stating no protocol number is held rather than applied; only
+    builds from before the v0.0.7 release omit it
   * barons-ftn --status reports what each spool still holds, for whom, for how
     long and why
   * -league-check reports the FTN transport's backlog and fails on a spool
@@ -15,77 +33,9 @@
     peers, instead of reporting nothing to send
   * An inbound spool directory whose receipt cannot be read is reported rather
     than passed over in silence
-  * Create Group Attack gathers the known planets under the world lock, as the
-    other target pickers do
-  * A board playing in a league must set its league number; the transport and
-    the setup check refuse a board left at 0
-  * barons-ftn now receives as well as sends, with private game directories,
-    resumable spools, shared locking, and attach, obox, or BSO links per peer
-  * FTN handoffs coalesce unchanged signed game packets into 8.3-named ZIP
-    bundles; BSO safely extends advertised bundles while holding the peer .bsy
-  * Mesh bundles track their actual route and scheduled sibling branches;
-    identical canonical inbound packets are logged as duplicates, not collisions
-  * One rejected packet no longer strands valid packets in the same FTN bundle;
-    its original wrapper is quarantined after the valid members finish
-  * FTN aliases have a defined compatibility namespace for legacy league-0
-    packets, so one cannot wedge an otherwise deliverable transport batch
-  * barons-ftn marks and file-locks its BSO semaphores, and safely recovers only
-    its own unlocked semaphore after a conservative five-minute crash interval
-  * The FTN transport, routing, locking, recovery, and mixed-link setup have a
-    complete configuration guide with working examples; generic file transports
-    now have an atomic inbound and outbound handoff contract
-  * reverted: bombers no longer fly a bombing run; they fight and are lost with
-    the rest of the force, as the original has it
-  * reverted: an attack captures the same share of land whatever the two realms'
-    wealth per region, as the original does
-  * reverted: a realm is crushed only when its last region is taken, as the
-    original decides it
-  * An interplanetary strike carries each contributor's Technology, as the
-    original's does
-  * A battle report names the units lost on each side, one line per type,
-    instead of one total
-  * A menu box is never narrower than the items inside it, in any language
-  * A planet can be named by any part of its name, as long as only one planet
-    matches
-  * The planet prompt fills the name in as soon as what you have typed matches
-    only one
-  * reverted: the Terrorist Ops menu is drawn at the width the original draws it
-  * An interplanetary message picks which barons on the chosen planet read it
-  * reverted: the Coordinator item reads Dismantle Gooie and the setting Gooie
-    Kablooies, as the original words them
-  * The interplanetary Send Trade Deal ships goods to a realm on another planet
-  * A trade deal needs carriers sized to its cargo, not one per deal
-  * reverted: the Clingy Annihilator is named the Gooie Kablooie, as the
-    original names it
-  * reverted: the R5-Slappenheimer is named the S3-Sabre, as the original names
-    it
-  * An interplanetary strike's report names the side that held the field
-  * An em dash in a realm name no longer moves the score table's figures on a
-    CP437 or ASCII terminal
-  * A realm under New Realm Protection wears its letter in [brackets]
-  * A realm under New Realm Protection keeps its letter on the attack and covert
-    lists
-  * An interplanetary target list shows the barons under protection
-  * Barons on another planet are picked by letter, as every other roster of
-    players is
-  * reverted: a realm's letter is parenthesised, as the original prints it
-  * reverted: the Money Cap is gone from the Configuration Editor; a saved value
-    still applies
-  * reverted: a figure of a billion or more is printed in full, as the original
-    prints it
-  * An abbreviated total steps its suffix through k, m and b with its size
-  * A pirate raider is marked with its ASCII arrow on a 7-bit ASCII terminal
-  * The Daily Bulletin box closes square on a CP437 or ASCII terminal
-  * A Max Tax Rate of 0 stops the computer barons taxing, as it already stopped
-    players
-  * The InterBBS Scores player tables put the score before the planet, as BRE
-    does
-  * A name shortened to fit a column no longer widens it on a CP437 or ASCII
-    terminal
-  * The turn's income opens under BRE's rule instead of a titled bar
-  * Source reorganized by subject, with no change to how the game plays
-  * A League Number outside 1-999 in bbs.cfg is refused instead of accepted
-  * The -scores, -export and -import flags are gone; -planetary carries scores
+  * A board that only receives no longer has to name a netmail directory it
+    never writes to
+  * A planetary run that skipped one packet no longer prints its count twice
   * Interplanetary strike losses follow the battle, not a flat share
   * Only an attacking force's bombers destroy the defender's jets
   * Bombers add no strength to an interplanetary strike; they fight the jets
@@ -95,11 +45,60 @@
   * A group attack on the whole planet fights every realm, not just the largest
   * Battle strengths keep their fractions instead of truncating to whole units
   * A region no longer adds defensive strength in battle
+  * An interplanetary strike carries each contributor's Technology, as the
+    original's does
+  * A battle report names the units lost on each side, one line per type,
+    instead of one total
+  * An interplanetary strike's report names the side that held the field
+  * The interplanetary Send Trade Deal ships goods to a realm on another planet
+  * A trade deal needs carriers sized to its cargo, not one per deal
+  * An interplanetary message picks which barons on the chosen planet read it
+  * An interplanetary target list shows the barons under protection
+  * Barons on another planet are picked by letter, as every other roster of
+    players is
+  * A Max Tax Rate of 0 stops the computer barons taxing, as it already stopped
+    players
   * The battle report is shown in each player's own language
   * Tank strength no longer overflows on the 32-bit door builds
-  * A packet stating no protocol number is held rather than applied; only
-    builds from before the v0.0.7 release omit it
-
+  * A menu box is never narrower than the items inside it, in any language
+  * A planet can be named by any part of its name, as long as only one planet
+    matches
+  * The planet prompt fills the name in as soon as what you have typed matches
+    only one
+  * An em dash in a realm name no longer moves the score table's figures on a
+    CP437 or ASCII terminal
+  * A realm under New Realm Protection wears its letter in [brackets]
+  * A realm under New Realm Protection keeps its letter on the attack and covert
+    lists
+  * An abbreviated total steps its suffix through k, m and b with its size
+  * A pirate raider is marked with its ASCII arrow on a 7-bit ASCII terminal
+  * The Daily Bulletin box closes square on a CP437 or ASCII terminal
+  * The InterBBS Scores player tables put the score before the planet, as BRE
+    does
+  * A name shortened to fit a column no longer widens it on a CP437 or ASCII
+    terminal
+  * The turn's income opens under BRE's rule instead of a titled bar
+  * reverted: bombers no longer fly a bombing run; they fight and are lost with
+    the rest of the force, as the original has it
+  * reverted: an attack captures the same share of land whatever the two realms'
+    wealth per region, as the original does
+  * reverted: a realm is crushed only when its last region is taken, as the
+    original decides it
+  * reverted: the Terrorist Ops menu is drawn at the width the original draws it
+  * reverted: the Coordinator item reads Dismantle Gooie and the setting Gooie
+    Kablooies, as the original words them
+  * reverted: the Clingy Annihilator is named the Gooie Kablooie, as the
+    original names it
+  * reverted: the R5-Slappenheimer is named the S3-Sabre, as the original names
+    it
+  * reverted: a realm's letter is parenthesised, as the original prints it
+  * reverted: the Money Cap is gone from the Configuration Editor; a saved value
+    still applies
+  * reverted: a figure of a billion or more is printed in full, as the original
+    prints it
+  * Create Group Attack gathers the known planets under the world lock, as the
+    other target pickers do
+  * Source reorganized by subject, with no change to how the game plays
 2026-08-23 (v0.0.7)
   * A Clingy Annihilator launches itself three days after its funding completes
   * A landed Clingy Annihilator besieges the planet for five days
