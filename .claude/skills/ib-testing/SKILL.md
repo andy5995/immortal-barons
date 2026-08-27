@@ -403,10 +403,26 @@ that at most one day per REAL day (`internal/game/turn.go`), and nothing in an
 exchange script runs `-maint`. A rig with no callers therefore exchanges packets
 every fifteen minutes for days while queueing no probes at all — the boards here
 had gone 7 and 12 days between pings with all three timers healthy. Before
-concluding an inter-BBS mechanic is broken, check `LastMaintDate` against
-today's date; if it is behind, run `-maint` on each board and try again. One
-`-maint` buys one game day, so a board days behind needs one run per day to
-catch up and cannot be fast-forwarded in a single pass.
+concluding an inter-BBS mechanic is broken, check whether maintenance has run
+today; if it has not, run `-maint` on each board and try again.
+
+**A deficit is permanent, and that is the design, not a fault to repair.**
+`DailyMaintenance` refuses a second advance on the same real date (`if
+w.LastMaintRun == today || w.LastMaintDate >= today`), so a board days behind
+cannot be caught up — not in one pass and not in ten. Both clocks then move at
+one day per real day, so the gap an idle period opened stays open. Do not loop
+`-maint` trying to close it, and do not forge it by editing `world.json`: those
+game days did not happen, and inventing them invents income, AI turns and
+events nobody played. (This paragraph previously said a board "cannot be
+fast-forwarded in a single pass", which reads as though several passes would
+do it. They will not — 2026-08-27.)
+
+**So the health question is whether maintenance RAN today, not whether the game
+clock reads today.** `LastMaintRun` is the real date of the last run;
+`LastMaintDate` is the game clock, permanently behind on any board that once
+sat idle. Comparing the clock to the calendar reports every such board as
+broken forever, which teaches whoever reads the report to ignore it. `-dump`
+shows both fields.
 
 **A board's timer must be retired with the board.** A timer left enabled for a
 retired board keeps running `-planetary` on its data and keeps polling, so a
