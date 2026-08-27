@@ -32,12 +32,12 @@ Set these on the **Caps & Node** page:
 
 - **Board ID** — a short unique name for your board (your "planet").
 - **League Number** — the number your Coordinator picked for this league, 1 to
-  999. Leave it at 0 if they have not given you one. It matters when one board
-  plays in two leagues that share an inbound directory: each game ignores the
-  other's packets, and marks its own files `L042-`. **Both leagues need a
-  non-zero number** for that to work. A packet is only ignored when the two
-  numbers are set and differ, so a league still on 0 reads the other league's
-  packets and has its own read in turn.
+  999. **A board playing in a league needs one**, so ask for it before you
+  start; the transport refuses to run while it is 0. A packet is only ignored
+  when the two numbers are set and differ, so a board left at 0 takes every
+  league's packets as its own and has its own taken everywhere in turn. Once
+  both sides are set, two leagues can share an inbound directory: each game
+  ignores the other's packets, and marks its own files `L042-`.
 - **Inbound Dir** — the directory where packets from other boards arrive. This
   is usually your mailer's inbound directory, where it puts every file it
   receives.
@@ -104,7 +104,7 @@ choice, not theirs. They add it to the roster and give it a node number.
 | Your node number, and your name exactly as they recorded it | The game matches boards by name, so the spelling and spacing in the roster are what your Board ID has to be. |
 | The `ibnodes.dat` file | The league roster. Put it in your data directory. |
 | The Coordinator's key | One line, from their `-gen-coord-key`. Without it your board refuses league orders. |
-| The league number, if they use one | A number from 1 to 999. It only matters if your board plays in two leagues that share an inbound directory, but ask anyway — a packet stamped with the wrong one is ignored. |
+| The league number | A number from 1 to 999, theirs to pick. Your board will not run its transport without it, and a packet stamped with the wrong one is ignored. |
 | The mailer details for your uplink | Their address, host and port, and the session password. This is your BBS's business, not the game's. |
 
 **All five arrive by hand — email, a message on their board, a download.** None

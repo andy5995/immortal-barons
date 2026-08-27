@@ -180,28 +180,26 @@ func TestRunOutCoalescesOneBundlePerNextHop(t *testing.T) {
 	}
 }
 
-func TestRunOutSupportsUnsetLeagueNumber(t *testing.T) {
-	data := newBundledSetup(t, "Bravo BBS", "")
-	configPath := filepath.Join(data, store.BoardConfigFile)
-	config, err := os.ReadFile(configPath)
+// #227 made a league number required of a board, so RunOut can no longer reach
+// nextAlias with league 0 — see TestTransportRefusesABoardWithNoLeagueNumber.
+// The league-0 alias namespace stays covered here, directly: it exists for a
+// legacy packet that carries no league of its own, and must still be distinct
+// from any real league's namespace.
+func TestAliasKeepsALegacyLeagueZeroNamespace(t *testing.T) {
+	dir := t.TempDir()
+	zero, _, err := nextAlias(dir, dir, 0, 2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	config = bytes.Replace(config, []byte("LeagueNumber 100\n"), nil, 1)
-	if err := os.WriteFile(configPath, config, 0o644); err != nil {
-		t.Fatal(err)
+	if !strings.HasPrefix(zero, "0002") {
+		t.Fatalf("league-0/node-2 alias = %q, want the 0002 namespace", zero)
 	}
-	writeNamedPacket(t, data, "unset.brp", game.Packet{FromNode: 2, ToNode: 1, Seq: 1})
-
-	result, err := RunOut(data)
+	one, _, err := nextAlias(dir, dir, 1, 2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(result.Queued) != 1 {
-		t.Fatalf("queued = %+v, want one bundle", result.Queued)
-	}
-	if got := filepath.Base(result.Queued[0].PacketPath); !strings.HasPrefix(got, "0002") {
-		t.Fatalf("unset-league alias = %q, want league-0/node-2 namespace 0002", got)
+	if one[:4] == zero[:4] {
+		t.Fatalf("league 1 shares the legacy namespace %q", zero[:4])
 	}
 }
 
@@ -881,5 +879,36 @@ func writeNamedPacket(t *testing.T, data, name string, packet game.Packet) {
 	}
 	if err := os.WriteFile(filepath.Join(data, "door-out", name), body, 0o644); err != nil {
 		t.Fatal(err)
+	}
+}
+
+// #227: a board with no league number takes every league's packets as its own
+// and has its own taken everywhere, so the transport refuses to move mail for
+// it at all rather than moving it into a league it has not joined.
+func TestTransportRefusesABoardWithNoLeagueNumber(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "")
+	cfg := "BoardID Bravo BBS\nInbound door-in\nOutbound door-out\n" // no LeagueNumber line
+	if err := os.WriteFile(filepath.Join(data, store.BoardConfigFile), []byte(cfg), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	writeNamedPacket(t, data, "a.brp", game.Packet{
+		FromBoard: "Bravo BBS", ToBoard: "Alpha BBS", FromNode: 2, ToNode: 1, Seq: 1})
+
+	for _, run := range []struct {
+		name string
+		fn   func(string) (Result, error)
+	}{{"--out", RunOut}, {"--in", RunIn}} {
+		result, err := run.fn(data)
+		if err == nil {
+			t.Fatalf("%s ran for a board with no league number, queuing %d bundle(s)", run.name, len(result.Queued))
+		}
+		if !strings.Contains(err.Error(), store.BoardConfigFile) {
+			t.Errorf("%s did not name the file to fix: %v", run.name, err)
+		}
+	}
+	// The packet is still there to send once the number is set: refusing must
+	// not consume it.
+	if _, err := os.Stat(filepath.Join(data, "door-out", "a.brp")); err != nil {
+		t.Errorf("the refused packet did not survive in the outbound: %v", err)
 	}
 }

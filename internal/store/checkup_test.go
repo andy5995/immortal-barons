@@ -241,3 +241,80 @@ func TestCheckupAcceptsAKeyThatDecodes(t *testing.T) {
 		t.Errorf("a well-formed coord.pub was rejected: %q", got.Detail)
 	}
 }
+
+// #227: 0 is not "unset" anywhere it is read — a board left there accepts every
+// league's packets and has its own accepted in turn — so an inter-BBS board is
+// required to carry the number its league runs under.
+func TestCheckLeagueNumberRequiredOnlyForALeagueBoard(t *testing.T) {
+	// Whether a board is in a league at all is the caller's question, so the
+	// stand-alone case is checked where it is actually asked: Checkup returns
+	// before it ever reaches the league settings.
+	alone := game.DefaultConfig()
+	alone.DataDir = rosterDir(t)
+	alone.IBBS = false
+	for _, c := range Checkup(alone) {
+		if c.Name == "League number" {
+			t.Errorf("a board that plays alone was asked for a league number: %q", c.Detail)
+		}
+	}
+
+	member := game.DefaultConfig()
+	member.DataDir = rosterDir(t)
+	member.IBBS = true
+	member.BoardID = "Bravo BBS"
+	err := CheckLeagueNumber(member)
+	if err == nil {
+		t.Fatal("a league board with no league number was accepted")
+	}
+	// The message has to send the sysop to the two things they need: who has the
+	// number, and which file it goes in.
+	for _, want := range []string{"League Coordinator", BoardConfigFile, "LeagueNumber"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("the refusal does not mention %q: %v", want, err)
+		}
+	}
+
+	member.LeagueNumber = 42
+	if err := CheckLeagueNumber(member); err != nil {
+		t.Errorf("a league board with a number was refused: %v", err)
+	}
+}
+
+// Node 1 has nobody to ask — the number is that board's own to pick — so it is
+// told to choose one rather than sent to a Coordinator that is itself.
+func TestCheckLeagueNumberTellsTheCoordinatorToChoose(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.DataDir = rosterDir(t)
+	cfg.IBBS = true
+	cfg.BoardID = "Alpha BBS" // node 1 in twoBoardRoster
+	err := CheckLeagueNumber(cfg)
+	if err == nil {
+		t.Fatal("the Coordinator's board with no league number was accepted")
+	}
+	if !strings.Contains(err.Error(), "yours to choose") {
+		t.Errorf("the Coordinator is not told the number is theirs to pick: %v", err)
+	}
+	if strings.Contains(err.Error(), "ask your League Coordinator") {
+		t.Errorf("the Coordinator is told to ask itself: %v", err)
+	}
+}
+
+// The setup report is where a sysop is meant to find this before a transport
+// run does, so it has to FAIL rather than pass with a note.
+func TestCheckupFailsOnAMissingLeagueNumber(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.DataDir = rosterDir(t)
+	cfg.IBBS = true
+	cfg.BoardID = "Bravo BBS"
+	cfg.LeagueNumber = 0
+	for _, c := range Checkup(cfg) {
+		if c.Name != "League number" {
+			continue
+		}
+		if c.OK {
+			t.Fatalf("a missing league number reported as ok: %q", c.Detail)
+		}
+		return
+	}
+	t.Fatal("Checkup reported no League number line at all")
+}

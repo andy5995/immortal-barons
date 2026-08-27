@@ -127,9 +127,10 @@ func BoardConfigText(cfg game.Config) string {
 	b.WriteString("# roster exactly, spelling and spacing included.\n")
 	fmt.Fprintf(&b, "%s %s\n\n", keyBoardID, cfg.BoardID)
 
-	b.WriteString("# The Coordinator's number for this league, 1-999, or 0 if they have\n")
-	b.WriteString("# not given you one. It keeps two leagues apart when they share an\n")
-	b.WriteString("# inbound directory.\n")
+	b.WriteString("# The number this league runs under, 1-999. Ask your Coordinator for\n")
+	b.WriteString("# it; a board playing in a league needs one. Left at 0 this board\n")
+	b.WriteString("# would take every league's packets as its own, so the transport\n")
+	b.WriteString("# refuses to run until it is set.\n")
 	fmt.Fprintf(&b, "%s %d\n\n", keyLeague, cfg.LeagueNumber)
 
 	b.WriteString("# Where packets from the other boards arrive, and where this board\n")

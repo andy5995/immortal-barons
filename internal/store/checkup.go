@@ -18,6 +18,49 @@ type Check struct {
 	Detail string
 }
 
+// CheckLeagueNumber reports whether an inter-BBS board has the league number
+// its league runs under. It is required rather than optional because 0 does not
+// mean "unset" anywhere it is read: a board skips a foreign packet only when
+// both numbers are set and differ, so a board left at 0 accepts every league's
+// packets and has its own accepted everywhere in turn (#227). There is nothing
+// to default it to — the number is the Coordinator's, the way the node number
+// is — so this refuses and names the setting instead of guessing one.
+//
+// Whether this board is exchanging league mail at all is the CALLER's to
+// decide, and the two callers know it differently: the setup report asks only
+// after the inter-BBS flag, while barons-ftn asks unconditionally, because
+// running a league transport is that declaration.
+func CheckLeagueNumber(cfg game.Config) error {
+	if cfg.LeagueNumber != 0 {
+		return nil
+	}
+	path := filepath.Join(cfg.DataDir, BoardConfigFile)
+	if isLeagueCoordinatorBoard(cfg) {
+		return fmt.Errorf("this board has no league number: it is node 1, so the number is yours to choose — put %q in %s and tell your members to use the same one",
+			"LeagueNumber <1-999>", path)
+	}
+	return fmt.Errorf("this board has no league number: ask your League Coordinator which one the league uses and put %q in %s",
+		"LeagueNumber <1-999>", path)
+}
+
+// isLeagueCoordinatorBoard answers from the roster on disk rather than the
+// world, so it works before a world is loaded — which is where the checks that
+// need it run. An unreadable or absent roster means the question cannot be
+// answered, and a member is the safer assumption: it sends the sysop to ask
+// rather than telling them to invent a number.
+func isLeagueCoordinatorBoard(cfg game.Config) bool {
+	nodes, err := ParseNodeList(filepath.Join(cfg.DataDir, NodeListFile))
+	if err != nil {
+		return false
+	}
+	for _, n := range nodes {
+		if n.Number == 1 {
+			return n.Name == cfg.BoardID
+		}
+	}
+	return false
+}
+
 // CheckBoardInRoster reports whether this board's own name is in the league
 // roster. The name is typed twice, in two files, and compared byte for byte at
 // transport time — so a missed capital fails three steps later, on the one
@@ -150,8 +193,8 @@ func Checkup(cfg game.Config) []Check {
 		}
 	}
 
-	if cfg.LeagueNumber == 0 {
-		add("League number", true, "not set — fine unless two leagues share an inbound directory")
+	if err := CheckLeagueNumber(cfg); err != nil {
+		add("League number", false, err.Error())
 	} else {
 		add("League number", true, fmt.Sprint(cfg.LeagueNumber))
 	}

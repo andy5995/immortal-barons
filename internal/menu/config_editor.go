@@ -328,7 +328,7 @@ func configPages(ibbs bool) []cfgPage {
 			func(c *game.Config, v int) { c.MaxPlayers = v }, 0, game.MaxPlayersPerBoard),
 		boardOwned(23, "Board ID", func(c *game.Config) string { return c.BoardID }),
 		boardOwned(41, "League Number", func(c *game.Config) string {
-			return fmt.Sprintf("%d (0 = unset)", c.LeagueNumber)
+			return fmt.Sprintf("%d (0 = not set; a league board needs one)", c.LeagueNumber)
 		}),
 		{n: 47, label: "Required Version",
 			value: func(c *game.Config) string {

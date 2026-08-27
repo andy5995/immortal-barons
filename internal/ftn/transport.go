@@ -83,6 +83,12 @@ func transportContext(dataDir string) (game.Config, Config, []game.LeagueNode, *
 		adapterLock.Release()
 		return game.Config{}, Config{}, nil, nil, Address{}, nil, err
 	}
+	// Before any packet moves: a board with no league number accepts every
+	// league's packets and has its own accepted everywhere, so it is not
+	// configured to be exchanging mail yet (#227).
+	if err := store.CheckLeagueNumber(board); err != nil {
+		return fail(err)
+	}
 	transport, err := LoadConfig(dataDir)
 	if err != nil {
 		return fail(err)

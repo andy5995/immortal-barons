@@ -190,10 +190,11 @@ Check these first when a mechanic appears not to work:
   reaches an IP op without playing a turn, **that is the bug, not the
   baseline** — do not write the permissive behaviour into an expectation.
   Issue #162.
-- **A `LeagueNumber` of 0 is fine on its own** — `-league-check` reports it as
-  ok. It matters only when two leagues share an inbound directory:
-  `ReadInbound` skips a packet just when reader and packet numbers are both set
-  and differ, so two leagues both left at 0 read each other's packets.
+- **A `LeagueNumber` of 0 fails `-league-check` on a league board, and
+  `barons-ftn` refuses to run** (#227). `ReadInbound` skips a packet just when
+  reader and packet numbers are both set and differ, so a board left at 0 takes
+  every league's packets as its own — which is why a test rig needs a real
+  number on every board, not just the ones sharing an inbound directory.
 
 ---
 

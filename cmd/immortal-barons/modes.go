@@ -72,6 +72,11 @@ func runMaint(cfg game.Config, today string) error {
 // "BRE PLANETARY"): apply inbound packets, launch due group attacks, export
 // scores, and write the outbox. Can run several times a day.
 func runPlanetary(cfg game.Config, verbose bool) error {
+	if cfg.InterBBSEnabled() {
+		if err := store.CheckLeagueNumber(cfg); err != nil {
+			return err
+		}
+	}
 	lock, err := store.Lock(cfg, true)
 	if err != nil {
 		return err

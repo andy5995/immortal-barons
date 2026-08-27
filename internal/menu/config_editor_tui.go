@@ -123,7 +123,7 @@ const (
 	helpMaxRegions         = "The most regions a single player may own."
 	helpMaxPlayers         = "The most human empires allowed on this board. 0 means no limit."
 	helpBoardID            = "The name this board uses in inter-BBS packets. Set in bbs.cfg, which the game reads but never writes; shown here so you can see what it is running on."
-	helpLeagueNumber       = "The League Coordinator's number for this league, 1-999. It keeps two leagues apart when they share one inbound directory. Set in bbs.cfg."
+	helpLeagueNumber       = "The number this league runs under, 1-999. A board playing in a league needs one: left at 0 it takes every league's packets as its own, and the transport refuses to run. Set in bbs.cfg."
 	helpMinVersion         = "The game version every board in the league must run (blank for no requirement). A board below it has its packets refused."
 	helpInboundDir         = "Where packets from the other boards arrive. Relative to the data directory unless you give a full path. Set in bbs.cfg."
 	helpOutboundDir        = "Where the game writes packets for the other boards. Relative to the data directory unless you give a full path. Set in bbs.cfg."
