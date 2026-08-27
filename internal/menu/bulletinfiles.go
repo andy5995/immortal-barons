@@ -68,6 +68,12 @@ func WriteBulletins(w *game.World, dir string) []error {
 			errs = append(errs, err)
 		}
 	}
+	// And the same bulletins as web pages, built from the game's data rather
+	// than from the screens above -- see bulletinhtml.go for why translating
+	// one into the other would be the wrong move.
+	for _, err := range writeBulletinPages(dir, c) {
+		errs = append(errs, err)
+	}
 	return errs
 }
 
@@ -219,4 +225,45 @@ func worldReportOutcome(s session.Session, b game.BattleLogEntry) (string, strin
 		return tr(s, "won"), ansi.FgBrightGreen
 	}
 	return tr(s, "held"), ansi.FgBrightCyan
+}
+
+// writeBulletinPages renders the HTML set. Each page carries only the data it
+// is about, so a template cannot quietly show a table the page never claimed.
+func writeBulletinPages(dir string, c *ctx) []error {
+	rows, _ := scoreRows(c)
+	var board string
+	var todayNews, yesterdayNews []string
+	var todayBulletin game.DailyBulletin
+	var battles []game.BattleLogEntry
+	c.Read(func() {
+		board = c.Config.BoardID
+		todayNews, yesterdayNews = c.NewsToday, c.NewsYesterday
+		todayBulletin = c.BulletinToday
+		battles = append(battles, c.Battles...)
+	})
+	base := htmlPage{Board: board, Date: c.day, Version: game.Version, Here: board}
+	pages := []struct {
+		name string
+		page htmlPage
+	}{
+		{"scores", withPage(base, "Scores", func(p *htmlPage) { p.Scores = rows })},
+		{"tdynews", withPage(base, "Today's News", func(p *htmlPage) { p.News, p.Bulletin = todayNews, todayBulletin })},
+		{"yesnews", withPage(base, "Yesterday's News", func(p *htmlPage) {
+			p.News, p.Date = yesterdayNews, dayBefore(c.day)
+		})},
+		{"world", withPage(base, "World Report", func(p *htmlPage) { p.Battles = battles })},
+	}
+	var errs []error
+	for _, pg := range pages {
+		if err := writeBulletinHTML(dir, pg.name, pg.page); err != nil {
+			errs = append(errs, err)
+		}
+	}
+	return errs
+}
+
+func withPage(base htmlPage, title string, fill func(*htmlPage)) htmlPage {
+	base.Title = title
+	fill(&base)
+	return base
 }

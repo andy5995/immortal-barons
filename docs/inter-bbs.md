@@ -42,8 +42,11 @@ Set these on the **Caps & Node** page:
   to display: the scoreboard, today's and yesterday's news, and a World Report
   of every battle fought anywhere in the league. Each is written twice, once
   with colour (`.ans`) and once without (`.txt`), so you can point a bulletin
-  menu entry at whichever your caller can read. Leave it blank and none are
-  written.
+  menu entry at whichever your caller can read. A `.html` page is written
+  alongside each, built from the game's own figures rather than converted from
+  the screen, for a board that publishes on the web: one self-contained file
+  apiece, with no stylesheet or script to fetch. Leave the setting blank and
+  none are written.
 - **Inbound Dir** — the directory where packets from other boards arrive. This
   is usually your mailer's inbound directory, where it puts every file it
   receives.

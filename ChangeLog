@@ -1,6 +1,6 @@
 (in-progress:)
   * The scoreboard, the day's news and a new World Report are written out as
-    .ans and .txt files for a BBS bulletin menu
+    .ans, .txt and .html files for a BBS bulletin menu or web page
   * The World Report lists every attack fought anywhere in the league, and
     travels with the scores so each board sees them all
   * Travel Times no longer shows the same round trip as "60 minutes" on one row

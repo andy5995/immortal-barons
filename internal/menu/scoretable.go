@@ -14,21 +14,23 @@ import (
 // realms: the scores board, the recipient picker and the attack target list.
 // One column layout, so a screen cannot quietly grow its own.
 
-func printScores(s session.Session, w *ctx) {
-	// Snapshot every empire's rank inputs together so the board reflects one
-	// consistent moment, even if another session mutates the world mid-render.
-	type row struct {
-		name            string
-		letter          string
-		alive, isPlayer bool
-		presence        string
-		protected       bool
-		land, score, nw int
-	}
-	var rows []row
-	var lastMaster string
-	w.With(func() {
-		rows = make([]row, 0, len(w.Empires))
+// ScoreRow is one realm's line on the scoreboard, gathered once so every
+// rendering of it -- the screen, the bulletin file, the HTML page -- reads the
+// same figures rather than each walking the world itself (#233).
+type ScoreRow struct {
+	Name            string
+	Letter          string
+	Alive, IsPlayer bool
+	Presence        string
+	Protected       bool
+	Land, Score, NW int
+}
+
+// scoreRows snapshots every empire's rank inputs together, so a board reflects
+// one consistent moment even if another session mutates the world mid-render.
+func scoreRows(w *ctx) (rows []ScoreRow, lastMaster string) {
+	w.Read(func() {
+		rows = make([]ScoreRow, 0, len(w.Empires))
 		for _, e := range w.Empires {
 			nw := w.NetWorth(e)
 			if !e.Alive {
@@ -42,10 +44,15 @@ func printScores(s session.Session, w *ctx) {
 			// bright-yellow name. The '+' played-today marker is also
 			// suppressed: your own status is obvious from context.
 			self := e == w.Player()
-			rows = append(rows, row{e.Name, e.Letter(), e.Alive, self, presenceOf(e, self, w.Today), e.Alive && e.Protection > 0, e.Land, e.Score, nw})
+			rows = append(rows, ScoreRow{e.Name, e.Letter(), e.Alive, self, presenceOf(e, self, w.Today), e.Alive && e.Protection > 0, e.Land, e.Score, nw})
 		}
 		lastMaster = w.LastMaster
 	})
+	return rows, lastMaster
+}
+
+func printScores(s session.Session, w *ctx) {
+	rows, lastMaster := scoreRows(w)
 	// BRE-style scores screen (matches a live BRE scores screen): a game-name
 	// banner, lettered [A]/[B] ids in slot order, Id / Empire Name / Territory /
 	// Score / Net Worth columns, magenta header/footer rules. IB-branded.
@@ -53,15 +60,15 @@ func printScores(s session.Session, w *ctx) {
 		ansi.FgBrightMagenta, ansi.FgBrightWhite, tr(s, "Immortal Barons"), ansi.Reset, ansi.FgBrightMagenta, ansi.Reset)
 	scoreTableHead(s, w.Term)
 	for _, r := range rows {
-		name := r.name
-		if !r.alive {
+		name := r.Name
+		if !r.Alive {
 			name += " " + tr(s, "(dead)")
 		}
 		nameColor := ansi.FgBrightWhite
-		if r.isPlayer {
+		if r.IsPlayer {
 			nameColor = ansi.FgBrightYellow // highlight the caller's own realm
 		}
-		scoreTableRow(s, w.Term, scoreID(r.letter, r.protected), name, nameColor, r.presence, r.land, r.score, r.nw)
+		scoreTableRow(s, w.Term, scoreID(r.Letter, r.Protected), name, nameColor, r.Presence, r.Land, r.Score, r.NW)
 	}
 	scoreTableRule(s)
 	if lastMaster != "" {
