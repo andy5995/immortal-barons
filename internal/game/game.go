@@ -133,6 +133,10 @@ type World struct {
 	NewsYesterday     []string
 	BulletinToday     DailyBulletin
 	BulletinYesterday DailyBulletin
+	// Battles is the league-wide attack log the world report is drawn from. It
+	// travels with the scores broadcast, so every board can show the whole
+	// league's wars rather than only its own (#233).
+	Battles []BattleLogEntry `json:",omitempty"`
 
 	// BattlesTotal/ConquestsTotal count conventional battles and outright
 	// conquests for the lifetime of the process. Not persisted: they exist so the

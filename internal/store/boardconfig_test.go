@@ -72,6 +72,7 @@ func TestBoardConfigRoundTrip(t *testing.T) {
 	cfg.InboundDir = "ftn/in"
 	cfg.OutboundDir = "ftn/out"
 	cfg.OutboundDirs = map[int]string{5: "box/five", 3: "box/three"}
+	cfg.BulletinDir = "bbs/bulletins" // where the game writes its own bulletins (#233)
 
 	if err := os.WriteFile(filepath.Join(dir, BoardConfigFile), []byte(BoardConfigText(cfg)), 0o644); err != nil {
 		t.Fatalf("WriteFile: %v", err)
@@ -81,7 +82,8 @@ func TestBoardConfigRoundTrip(t *testing.T) {
 		t.Fatalf("LoadBoardConfig: %v", err)
 	}
 	if got.BoardID != cfg.BoardID || got.LeagueNumber != cfg.LeagueNumber ||
-		got.InboundDir != cfg.InboundDir || got.OutboundDir != cfg.OutboundDir {
+		got.InboundDir != cfg.InboundDir || got.OutboundDir != cfg.OutboundDir ||
+		got.BulletinDir != cfg.BulletinDir {
 		t.Errorf("round trip = %+v", got)
 	}
 	if len(got.OutboundDirs) != 2 || got.OutboundDirs[3] != "box/three" || got.OutboundDirs[5] != "box/five" {

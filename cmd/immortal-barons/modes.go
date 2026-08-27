@@ -9,6 +9,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/door"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/menu"
 	"github.com/andy5995/immortal-barons/internal/play"
 	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
@@ -91,7 +92,17 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 		return err
 	}
 	reportPlanetary(cfg, run)
+	writeBulletins(cfg, w)
 	return store.Save(w, cfg)
+}
+
+// writeBulletins refreshes the files the BBS shows on its own bulletin menu.
+// Reported but never fatal: a bulletin that cannot be written is worth saying
+// out loud, and is not a reason to fail a run that moved the league's mail.
+func writeBulletins(cfg game.Config, w *game.World) {
+	for _, err := range menu.WriteBulletins(w, cfg.Bulletins()) {
+		fmt.Printf("Could not write a bulletin file: %v\n", err)
+	}
 }
 
 // reportPlanetary says what the inter-BBS step did. Silence is the wrong answer

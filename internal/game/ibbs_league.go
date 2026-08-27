@@ -321,7 +321,8 @@ func (w *World) ExportScores() {
 	}
 	w.Outbox = append(w.Outbox, Packet{
 		FromBoard: w.Config.BoardID, Date: w.LastMaintDate, Scores: scores,
-		Market: w.ExportMarket(), // so allied planets can bid on it (#47)
+		Market:  w.ExportMarket(), // so allied planets can bid on it (#47)
+		Battles: w.ownBattles(),   // the wars, for every board's world report (#233)
 	})
 }
 
@@ -422,4 +423,21 @@ func (w *World) DeclareLeagueReset(onDate, announcement string) error {
 	}
 	w.postNews(fmt.Sprintf("Season %d begins. Every realm starts again.", w.Season))
 	return nil
+}
+
+// ownBattles is the log this board fought, stamped with its own name so a
+// reader can tell whose war it was. Only this board's own entries go out: one
+// that arrived from elsewhere is already on its way to everyone from the board
+// that fought it, and forwarding it would multiply every battle by the size of
+// the league.
+func (w *World) ownBattles() []BattleLogEntry {
+	var out []BattleLogEntry
+	for _, b := range w.Battles {
+		if b.Planet != "" {
+			continue
+		}
+		b.Planet = w.Config.BoardID
+		out = append(out, b)
+	}
+	return out
 }

@@ -259,6 +259,10 @@ type Config struct {
 	OutboundDir  string         `json:"-"` // inter-BBS packets are written here for the transport to move; relative to DataDir
 	OutboundDirs map[int]string `json:"-"` // per-neighbour override of OutboundDir, keyed by roster node number (#106)
 	LeagueNumber int            `json:"-"` // the Coordinator's league number, 1-999; tells two leagues apart in one inbound directory
+	// BulletinDir is where the game writes its own bulletin files for the BBS to
+	// display. Machine-local like the packet directories, so it lives in bbs.cfg
+	// rather than the league's shared rules; blank writes none (#233).
+	BulletinDir string `json:"-"`
 
 	// Lottery is whether this board offers the Queen's lottery, default on. It
 	// lives in bbs.cfg with the settings above for the reason the original keeps
@@ -428,6 +432,16 @@ func (c Config) InterBBSEnabled() bool {
 // call. An absolute setting is used as given, for a board whose transport drops
 // packets outside the data directory.
 func (c Config) Inbound() string { return c.resolveDir(c.InboundDir) }
+
+// Bulletins is the bulletin output directory as a path on disk, resolved the
+// same way as the packet directories: a relative setting is inside the DATA
+// directory, not wherever the BBS launched the door from.
+func (c Config) Bulletins() string {
+	if c.BulletinDir == "" {
+		return ""
+	}
+	return c.resolveDir(c.BulletinDir)
+}
 
 // Outbound is Inbound's counterpart; see it for how a path is resolved.
 func (c Config) Outbound() string { return c.resolveDir(c.OutboundDir) }

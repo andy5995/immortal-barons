@@ -358,6 +358,7 @@ func boardSigningBytes(p Packet) ([]byte, error) {
 	p.BoardSig = nil
 	p.Hops = 0
 	p.Protocol = 0
+	p.Battles = nil // see Packet.Battles: unsigned so it can be added at all
 	return json.Marshal(p)
 }
 

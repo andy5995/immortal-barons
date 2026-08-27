@@ -127,6 +127,19 @@ type Packet struct {
 	// FromBoard/ToBoard are always what's checked in that case.
 	FromNode int
 	ToNode   int
+	// Battles is this board's recent attack log, for the world report (#233).
+	// LAST in the struct and omitempty, so a packet that carries none is byte
+	// for byte what an older board produces -- inserting it anywhere else would
+	// have moved every field after it, and json emits in declaration order.
+	//
+	// Excluded from the origin signature in boardSigningBytes, for the same
+	// reason Protocol is: an older board drops the field it does not know and
+	// re-marshals without it, so a signature that covered it could never verify
+	// there. What that costs is that a hostile hop could add a battle nobody
+	// fought to a report -- prose in a bulletin, with no effect on play -- and
+	// what it buys is that every ordinary packet still verifies across the
+	// change.
+	Battles []BattleLogEntry `json:",omitempty"`
 }
 
 // PacketType returns a short human-readable label for the packet's primary
@@ -431,6 +444,9 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	for _, line := range p.News {
 		w.postNews(line)
 	}
+	// Another planet's wars, for the world report. Kept apart from the news:
+	// these are records, not sentences, and the report renders them itself.
+	w.mergeBattles(p.Battles)
 	// Scouting asked of us: answer with what is true here and now.
 	for _, req := range p.Recon {
 		// An empty TargetEmpire is a GLOBAL request — the Coordinator's sweep of

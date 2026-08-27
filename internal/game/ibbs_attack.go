@@ -526,6 +526,21 @@ func (w *World) resolveRemoteAttack(atk RemoteAttack) AttackResult {
 		res.Outcome = OutcomeNotFound
 		return res
 	}
+	// Logged where it RESOLVES, which is the board that can see the outcome.
+	// The attacker's own board learns it from the result packet and would
+	// otherwise record the same battle a second time.
+	defer func() {
+		attacker := atk.FromEmpire
+		if attacker == "" {
+			// A group attack is the whole planet's, not one realm's: BRE names
+			// the board rather than inventing a leader for it.
+			attacker = atk.FromBoard
+		}
+		w.logBattle(BattleLogEntry{
+			Attacker: attacker, Defender: atk.TargetEmpire,
+			Won: res.Won, Land: res.LandTaken, Remote: true,
+		})
+	}()
 	// Who stands. A strike that names no baron is aimed at the PLANET and fights
 	// every living realm at once; the strongest of them only names the report.
 	planetWide := atk.TargetEmpire == ""

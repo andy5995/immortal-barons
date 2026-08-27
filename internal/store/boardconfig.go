@@ -35,6 +35,7 @@ const (
 	keyOutbound = "Outbound"
 	keyLink     = "Link"
 	keyLottery  = "Lottery"
+	keyBulletin = "BulletinDir"
 )
 
 // boolWord maps the words a sysop is likely to write to what ParseBool takes.
@@ -92,6 +93,8 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 			cfg.InboundDir = value
 		case strings.EqualFold(key, keyOutbound):
 			cfg.OutboundDir = value
+		case strings.EqualFold(key, keyBulletin):
+			cfg.BulletinDir = value
 		case strings.EqualFold(key, keyLottery):
 			if b, err := strconv.ParseBool(boolWord(value)); err == nil {
 				cfg.Lottery = b
@@ -138,6 +141,12 @@ func BoardConfigText(cfg game.Config) string {
 	b.WriteString("# leading slash is read as being inside the data directory.\n")
 	fmt.Fprintf(&b, "%s %s\n", keyInbound, cfg.InboundDir)
 	fmt.Fprintf(&b, "%s %s\n\n", keyOutbound, cfg.OutboundDir)
+
+	b.WriteString("# Where the game writes its bulletin files: the scoreboard, today's and\n")
+	b.WriteString("# yesterday's news, and the world report of the league's battles. Each is\n")
+	b.WriteString("# written twice, once with colour (.ans) and once without (.txt), for a\n")
+	b.WriteString("# BBS to show on its own bulletin menu. Leave it blank to write none.\n")
+	fmt.Fprintf(&b, "%s %s\n\n", keyBulletin, cfg.BulletinDir)
 
 	b.WriteString("# Whether this board offers the Queen's lottery: a six-letter ticket,\n")
 	b.WriteString("# once a day, for 5,000 gold. Yes or no; the league does not decide it\n")

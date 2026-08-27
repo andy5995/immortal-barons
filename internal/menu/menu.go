@@ -46,6 +46,12 @@ type ctx struct {
 	seenEventsSet bool
 	// noRealmPrefs backs ctx.prefs() when there is no active realm; see there.
 	noRealmPrefs *game.Prefs
+	// day is the date a bulletin file is written FOR. World.Today is
+	// per-session and empty in the scheduled run that writes those files, so
+	// they would otherwise carry no date; the game day is the right one anyway,
+	// being the day the news belongs to rather than the clock of whoever ran the
+	// step (#233). Empty in an ordinary session, which reads World.Today.
+	day string
 	Term
 }
 

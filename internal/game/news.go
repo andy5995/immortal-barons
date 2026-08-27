@@ -59,6 +59,10 @@ func (w *World) postCombatNews(a, d *Empire, won, conquered bool) {
 	if conquered {
 		w.ConquestsTotal++
 	}
+	// Recorded here for the same reason it is counted here: every conventional
+	// battle passes through, and the alternative is reading it back out of the
+	// prose below.
+	w.logBattle(BattleLogEntry{Attacker: a.Name, Defender: d.Name, Won: won, Crushed: conquered})
 	var lines []string
 	switch {
 	case conquered:
@@ -180,4 +184,70 @@ func (w *World) postMasterNews() {
 		w.postNews(fmt.Sprintf("%s has seized the title of Planetary Master from %s!", best, w.CurrentMaster))
 	}
 	w.CurrentMaster = best
+}
+
+// BattleLog is the world report's raw material: one line per attack fought
+// anywhere in the league (#233, asked for by a sysop who wanted to see the
+// wars rather than each board's own scoreboard). Deliberately ATTACKS only --
+// no nuclear, chemical or biological strike, and no terror op -- because the
+// report is about armies meeting, and a weapon landing on a city is a
+// different story the news already tells.
+//
+// Structured rather than parsed back out of the news: the news wording is
+// picked at random from three phrasings and then translated, so anything
+// reading it would be reading a sentence that changes under it.
+type BattleLogEntry struct {
+	Date     string
+	Planet   string // the board it was fought on; empty means this one
+	Attacker string
+	Defender string
+	Won      bool
+	Land     int  // regions taken, 0 on a defeat
+	Crushed  bool // the defender was wiped out
+	// Remote marks a strike that crossed planets, which reads differently from
+	// two neighbours fighting and is worth telling apart in the report.
+	Remote bool
+}
+
+// MaxBattleLog bounds the log. A league that fights hard produces a few dozen
+// entries a day and every one of them rides in a packet, so this is a real
+// bound rather than a formality: without it a busy season grows the world file
+// and the wire without limit.
+const MaxBattleLog = 200
+
+// logBattle records one attack, newest last, discarding the oldest once the log
+// is full.
+func (w *World) logBattle(e BattleLogEntry) {
+	if e.Date == "" {
+		e.Date = w.LastMaintDate
+	}
+	w.Battles = append(w.Battles, e)
+	if len(w.Battles) > MaxBattleLog {
+		w.Battles = w.Battles[len(w.Battles)-MaxBattleLog:]
+	}
+}
+
+// mergeBattles takes in another board's log, ignoring any entry that names no
+// planet -- a board stamps its own name on the way out, so a blank one is
+// either malformed or would masquerade as a battle fought here.
+//
+// A resend repeats entries the board already holds, so they are matched on
+// their content rather than trusted to arrive once: a packet can be replayed,
+// and a world report that counted the same battle twice would be worse than
+// one a day out of date.
+func (w *World) mergeBattles(in []BattleLogEntry) {
+	if len(in) == 0 {
+		return
+	}
+	seen := make(map[BattleLogEntry]bool, len(w.Battles))
+	for _, b := range w.Battles {
+		seen[b] = true
+	}
+	for _, b := range in {
+		if b.Planet == "" || seen[b] {
+			continue
+		}
+		seen[b] = true
+		w.logBattle(b)
+	}
 }

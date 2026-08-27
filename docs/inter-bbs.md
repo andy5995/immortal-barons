@@ -38,6 +38,12 @@ Set these on the **Caps & Node** page:
   league's packets as its own and has its own taken everywhere in turn. Once
   both sides are set, two leagues can share an inbound directory: each game
   ignores the other's packets, and marks its own files `L042-`.
+- **Bulletin Dir** — where the game writes its own bulletin files for your BBS
+  to display: the scoreboard, today's and yesterday's news, and a World Report
+  of every battle fought anywhere in the league. Each is written twice, once
+  with colour (`.ans`) and once without (`.txt`), so you can point a bulletin
+  menu entry at whichever your caller can read. Leave it blank and none are
+  written.
 - **Inbound Dir** — the directory where packets from other boards arrive. This
   is usually your mailer's inbound directory, where it puts every file it
   receives.

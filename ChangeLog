@@ -1,4 +1,8 @@
 (in-progress:)
+  * The scoreboard, the day's news and a new World Report are written out as
+    .ans and .txt files for a BBS bulletin menu
+  * The World Report lists every attack fought anywhere in the league, and
+    travels with the scores so each board sees them all
   * Travel Times no longer shows the same round trip as "60 minutes" on one row
     and "1.00 hours" on the next
   * barons-ftn now receives as well as sends, with private game directories,

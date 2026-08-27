@@ -32,6 +32,7 @@ Packet:
   Protocol `json:",omitempty"`
   FromNode
   ToNode
+  Battles `json:",omitempty"`
 RemoteScore:
   Empire
   NetWorth
@@ -220,3 +221,12 @@ LeagueReset:
   Season
   OnDate
   Announced
+BattleLogEntry:
+  Date
+  Planet
+  Attacker
+  Defender
+  Won
+  Land
+  Crushed
+  Remote
