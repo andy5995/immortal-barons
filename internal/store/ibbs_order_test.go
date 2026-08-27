@@ -73,6 +73,80 @@ func TestReadInboundAppliesCoordinatorPacketBeforeOthers(t *testing.T) {
 	}
 }
 
+// TestReadInboundBootstrapRosterSurvivesADecoyClaim is a regression test for
+// a real finding: with no Coordinator known yet, the no-roster fallback used
+// to stop at the FIRST group in scan (directory) order merely CLAIMING
+// FromNode: 1, then gate only that one candidate. A decoy under a different
+// board name, sorting first, cleared coordKey entirely and cost the genuine
+// signed roster its carve-out -- filename order deciding the outcome again,
+// in the one case (a board's first-ever roster) this exists to prevent, and
+// left the receiving board's own node-addressed packet unrecognized this
+// run (confirmed manually, not just here: 18/30 trials under the bug).
+// Every candidate group is now scanned, and the fallback picks the first
+// one that actually passes the verified-orders check, not the first one
+// merely claiming it -- deterministic here since the decoy's filename is
+// fixed to sort first.
+func TestReadInboundBootstrapRosterSurvivesADecoyClaim(t *testing.T) {
+	inbound := t.TempDir()
+	pub, priv, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	coordCfg := game.DefaultConfig()
+	coordCfg.BoardID = "Coordinator BBS"
+	coord := game.NewWorldSeed(coordCfg, 1)
+	coord.LeagueNodes = []game.LeagueNode{
+		{Number: 1, Name: "Coordinator BBS"},
+		{Number: 7, Name: "Newbie BBS"},
+	}
+	coord.CoordKey = priv
+	coord.ExportNodeList()
+	coord.StampOutbox()
+	if len(coord.Outbox) != 1 {
+		t.Fatalf("Coordinator did not queue a roster broadcast: %+v", coord.Outbox)
+	}
+	// A decoy: a different, unverifiable board, falsely claiming
+	// FromNode: 1, filename sorting BEFORE the genuine roster's -- exactly
+	// the arrangement that lost the carve-out under the bug.
+	writePacket(t, inbound, "0-decoy", game.Packet{
+		FromBoard: "Decoy BBS", FromNode: 1, Seq: 1,
+	})
+	writePacket(t, inbound, "1-roster-update", coord.Outbox[0])
+	// Addressed ONLY by node number, recognizable only once the roster
+	// above is adopted -- the packet the review's manual trials showed
+	// falling through to mesh-copy under the bug.
+	writePacket(t, inbound, "2-gift-for-newbie", game.Packet{
+		FromBoard: "Third BBS",
+		ToNode:    7,
+		Seq:       1,
+		News:      []string{"GIFT"},
+	})
+
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "Newbie BBS"
+	w := game.NewWorldSeed(cfg, 1)
+	w.CoordPub = pub
+
+	result, err := ReadInbound(w, inbound, false)
+	if err != nil {
+		t.Fatalf("ReadInbound: %v", err)
+	}
+	if len(w.LeagueNodes) != 2 {
+		t.Fatalf("roster was not adopted despite the decoy: %+v", w.LeagueNodes)
+	}
+	found := false
+	for _, line := range w.NewsToday {
+		if line == "GIFT" {
+			found = true
+		}
+	}
+	if !found {
+		t.Errorf("the node-addressed packet was not recognized this run (fell through to wait for the next one), "+
+			"got News=%v, Applied=%d MeshCopy=%d", w.NewsToday, result.Applied, result.MeshCopy)
+	}
+}
+
 // TestReadInboundKeepsOneOriginsPacketsInSeqOrder locks in the half of #178
 // that was already correct and must stay that way: grouping packets by origin
 // must never reorder a single origin's own packets against each other, even
@@ -377,6 +451,65 @@ func TestReadInboundQuarantinesUnreadablePacket(t *testing.T) {
 	}
 }
 
+// TestReadInboundUnreadableFileDoesNotAbortTheRun is a regression test for a
+// real finding: a plain os.ReadFile failure (permission denied, an I/O
+// fault -- not the file simply having vanished after ReadDir listed it) used
+// to abort the whole run, before the JSON-unmarshal failure a few lines
+// below it was ever reached. That is the same permanently-blocked-batch
+// failure the parse-failure path was already fixed to avoid, just one step
+// earlier: a genuinely unreadable file left in inbound would fail the same
+// way, in the same place, on every later run too. It now gets the same
+// defer-or-quarantine treatment as an unparseable packet, through the same
+// deferOrQuarantine helper, and every other packet in the batch still
+// applies.
+func TestReadInboundUnreadableFileDoesNotAbortTheRun(t *testing.T) {
+	if os.Getuid() == 0 {
+		t.Skip("root ignores the read-permission bit this test relies on")
+	}
+	inbound := t.TempDir()
+	writePacket(t, inbound, "a-good-one", game.Packet{FromBoard: "Origin BBS", FromNode: 5, Seq: 1, News: []string{"GOOD"}})
+	unreadable := filepath.Join(inbound, "b-no-permission.brp")
+	if err := os.WriteFile(unreadable, []byte("{}"), 0o000); err != nil {
+		t.Fatal(err)
+	}
+	// Backdated past quarantineGrace: this test is about the read failure
+	// itself not aborting the run, which needs the quarantine path, not the
+	// grace-period one already covered by
+	// TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod.
+	old := time.Now().Add(-2 * quarantineGrace)
+	if err := os.Chtimes(unreadable, old, old); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "Receiver BBS"
+	cfg.DataDir = t.TempDir()
+	w := game.NewWorldSeed(cfg, 1)
+
+	result, err := ReadInbound(w, inbound, false)
+	if err != nil {
+		t.Fatalf("ReadInbound aborted the whole run over one unreadable file: %v", err)
+	}
+	if result.Applied != 1 {
+		t.Errorf("the good packet should still be applied despite the unreadable one, got applied=%d", result.Applied)
+	}
+	if result.Quarantined != 1 {
+		t.Errorf("the unreadable packet should be counted quarantined, got %d", result.Quarantined)
+	}
+	if _, err := os.Stat(filepath.Join(cfg.DataDir, BadDir, "b-no-permission.brp")); err != nil {
+		t.Errorf("the unreadable packet should be in %s: %v", BadDir, err)
+	}
+	found := false
+	for _, line := range w.NewsToday {
+		if line == "GOOD" {
+			found = true
+		}
+	}
+	if !found {
+		t.Error("the good packet's News did not apply")
+	}
+}
+
 // TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod: a mailer
 // that writes straight to a packet's final name (scp, plain FTP, several FTN
 // mailers) can leave a planetary run that lands
@@ -403,6 +536,11 @@ func TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod(t *testing.T)
 	}
 	if result.Quarantined != 0 {
 		t.Errorf("a fresh unreadable packet must not be quarantined yet, got Quarantined=%d", result.Quarantined)
+	}
+	if result.Deferred != 1 {
+		t.Errorf("a fresh unreadable packet left in place must be counted as Deferred, got %d "+
+			"(uncounted, a scheduled non-verbose run reports \"No packets waiting\" while it sits in inbound)",
+			result.Deferred)
 	}
 	if _, err := os.Stat(corrupt); err != nil {
 		t.Errorf("the fresh packet should still be sitting in inbound to be re-read next run: %v", err)
