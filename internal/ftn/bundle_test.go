@@ -912,3 +912,201 @@ func TestTransportRefusesABoardWithNoLeagueNumber(t *testing.T) {
 		t.Errorf("the refused packet did not survive in the outbound: %v", err)
 	}
 }
+
+// #228: a run that queues nothing because its only peer is busy must not look
+// like a run that had nothing to send. A scheduled event's log is the only
+// place a sysop would ever notice the difference.
+func TestRunOutReportsWhatIsStillWaiting(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal\n")
+	// A semaphore that is not ours: recovery leaves a mailer's own alone, so
+	// the peer stays busy for the whole run.
+	busy := filepath.Join(data, "bso", "00e50064.bsy")
+	if err := os.WriteFile(busy, []byte("binkd pid=1234\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	writeNamedPacket(t, data, "waiting.brp", game.Packet{FromNode: 2, ToNode: 1, Seq: 1, League: 100})
+
+	result, err := RunOut(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Queued) != 0 {
+		t.Fatalf("queued = %+v, want nothing while the peer holds its .bsy", result.Queued)
+	}
+	if result.Snapshots != 1 {
+		t.Errorf("snapshots still waiting = %d, want 1", result.Snapshots)
+	}
+	if len(result.Waiting) != 1 || result.Waiting[0] != "Alpha BBS" {
+		t.Errorf("waiting on = %+v, want the one busy peer", result.Waiting)
+	}
+
+	// Once the peer frees its queue the same snapshot completes, and the count
+	// goes back to zero rather than sticking.
+	if err := os.Remove(busy); err != nil {
+		t.Fatal(err)
+	}
+	done, err := RunOut(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(done.Queued) != 1 {
+		t.Fatalf("queued after the peer freed up = %+v, want the held bundle", done.Queued)
+	}
+	if done.Snapshots != 0 || len(done.Waiting) != 0 {
+		t.Errorf("still reported as waiting after publishing: %d snapshot(s), %+v", done.Snapshots, done.Waiting)
+	}
+}
+
+// #228: a count says how much is waiting but not for how long or why, and the
+// run that met the failure is usually long gone by the time anyone looks. The
+// journal carries both, and keeps them across runs.
+func TestRunOutJournalsWhyAPeerIsBehind(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal\n")
+	busy := filepath.Join(data, "bso", "00e50064.bsy")
+	if err := os.WriteFile(busy, []byte("binkd pid=1234\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	writeNamedPacket(t, data, "held.brp", game.Packet{FromNode: 2, ToNode: 1, Seq: 1, League: 100})
+
+	first, err := RunOut(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(first.Stalled) != 1 || !strings.Contains(first.Stalled[0], "Alpha BBS") {
+		t.Fatalf("stalled = %+v, want the busy peer and its reason", first.Stalled)
+	}
+	if first.OldestWait <= 0 {
+		t.Errorf("oldest wait = %v, want the age of the snapshot", first.OldestWait)
+	}
+
+	// The reason survives into the next run: nothing carries it in memory, and
+	// a sysop reading a scheduled log has only what the journal kept.
+	second, err := RunOut(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(second.Stalled) != 1 || second.Stalled[0] != first.Stalled[0] {
+		t.Fatalf("second run stalled = %+v, want the same recorded reason", second.Stalled)
+	}
+
+	// And it is cleared when the peer finally takes the bundle, rather than
+	// haunting a snapshot that has since succeeded.
+	if err := os.Remove(busy); err != nil {
+		t.Fatal(err)
+	}
+	done, err := RunOut(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(done.Stalled) != 0 || done.OldestWait != 0 {
+		t.Errorf("after publishing: stalled=%+v oldest=%v, want neither", done.Stalled, done.OldestWait)
+	}
+}
+
+// An old journal predates created/progress/last_error. It must still load, and
+// still date the snapshot, or the report silently stops working on exactly the
+// boards that have been running longest.
+func TestPendingReportReadsAJournalWithoutTheNewFields(t *testing.T) {
+	dir := t.TempDir()
+	batch := filepath.Join(dir, spoolDir, outSpoolDir, "0001")
+	if err := os.MkdirAll(batch, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	legacy := `{"id":"0001","targets":[{"node":1,"name":"Alpha BBS","alias":"00640001.BRP","bundle_file":"target-001.bundle","done":false}]}`
+	if err := os.WriteFile(filepath.Join(batch, batchPlanFile), []byte(legacy), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	old := time.Now().Add(-90 * time.Minute)
+	if err := os.Chtimes(filepath.Join(batch, batchPlanFile), old, old); err != nil {
+		t.Fatal(err)
+	}
+	var result Result
+	countPendingOutbound(dir, &result)
+	if result.Snapshots != 1 || len(result.Waiting) != 1 {
+		t.Fatalf("legacy journal not counted: %+v", result)
+	}
+	if result.OldestWait < time.Hour {
+		t.Errorf("oldest wait = %v, want the file's own mtime to stand in", result.OldestWait)
+	}
+}
+
+// #228: the status report has to name what is unfinished, for whom, for how
+// long and why — including the inbound side and a journal nothing can read,
+// which is the case that otherwise goes unmentioned by everything.
+func TestStatusReportsBothSpoolsAndTheirReasons(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal\n")
+	busy := filepath.Join(data, "bso", "00e50064.bsy")
+	if err := os.WriteFile(busy, []byte("binkd pid=1234\n"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	writeNamedPacket(t, data, "held.brp", game.Packet{FromNode: 2, ToNode: 1, Seq: 1, League: 100})
+	if _, err := RunOut(data); err != nil {
+		t.Fatal(err)
+	}
+
+	// An inbound spool directory whose journal will not parse.
+	broken := filepath.Join(data, spoolDir, inSpoolDir, "deadbeef")
+	if err := os.MkdirAll(broken, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(broken, inboundReceiptFile), []byte("{not json"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	status, err := Status(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(status.Peers) != 1 || status.Peers[0].Name != "Alpha BBS" || status.Peers[0].Snapshots != 1 {
+		t.Fatalf("peers = %+v, want one snapshot waiting on Alpha BBS", status.Peers)
+	}
+	if status.Peers[0].LastError == "" {
+		t.Error("the waiting peer carries no recorded reason")
+	}
+	if status.Peers[0].Oldest <= 0 {
+		t.Errorf("oldest wait = %v, want an age", status.Peers[0].Oldest)
+	}
+	if len(status.Unreadable) != 1 || !strings.Contains(status.Unreadable[0], "deadbeef") {
+		t.Errorf("unreadable = %+v, want the broken receipt directory", status.Unreadable)
+	}
+
+	// Status must not move anything: a sysop reads it while deciding.
+	before, err := RunOut(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if before.Snapshots != 1 {
+		t.Errorf("a status read changed what is pending: %d snapshot(s)", before.Snapshots)
+	}
+}
+
+// The peer with the longest wait is the one to act on, so it is named first.
+func TestStatusOrdersPeersByHowLongTheyHaveWaited(t *testing.T) {
+	data := t.TempDir()
+	out := filepath.Join(data, spoolDir, outSpoolDir)
+	write := func(id, peer string, age time.Duration) {
+		dir := filepath.Join(out, id)
+		if err := os.MkdirAll(dir, 0o755); err != nil {
+			t.Fatal(err)
+		}
+		plan := batchPlan{ID: id, Created: time.Now().Add(-age),
+			Targets: []batchTarget{{Node: 1, Name: peer, Done: false}}}
+		body, err := json.Marshal(plan)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(dir, batchPlanFile), body, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	write("0001", "Recent BBS", time.Minute)
+	write("0002", "Ancient BBS", 72*time.Hour)
+
+	status, err := Status(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(status.Peers) != 2 || status.Peers[0].Name != "Ancient BBS" {
+		t.Fatalf("peers = %+v, want the longest wait first", status.Peers)
+	}
+}

@@ -439,6 +439,64 @@ One bad packet or busy peer does not stop unrelated destinations. Do not delete
 spool journals to make a warning disappear: they are the record that prevents
 partial work from being forgotten or blindly repeated.
 
+### What a healthy spool looks like
+
+A file count is the wrong measure here, and reading one as a backlog is the
+mistake to avoid. `ftn-spool/out` holds one child per claimed *snapshot* of the
+game's outbound, and a snapshot is kept whole until every target in it has been
+published — so one unreachable peer retains that snapshot's packets and the
+bundles of the peers that already went out. A peer that stays unavailable
+therefore produces a growing series of snapshot directories while healthy peers
+keep flowing, which is working as intended and not a queue of that many unsent
+packets.
+
+What to read instead:
+
+- **`barons-ftn --out` says so on every run.** A run that publishes nothing
+  because its peers are busy prints how many snapshots remain and which peers
+  they wait on, rather than `No outbound packets.` — so a scheduled event's log
+  distinguishes an empty system from a stalled one. The same peer named run
+  after run is the signal worth acting on.
+- **`ftn-spool/in`** should drain. A receipt kept across runs means a
+  canonical-name collision whose bytes differ, a transit handoff that has not
+  completed, or a source or envelope that could not be removed. Its `receipt.json`
+  names which.
+- **The journals date themselves.** A snapshot records when it was claimed and
+  when a target in it last published, and a target that failed keeps the reason.
+  A run that queues nothing therefore reports how long the oldest snapshot has
+  gone without progress and why each peer is behind, rather than only how many
+  are waiting. All three fields are optional: a journal written before they
+  existed still loads, and its file date stands in for the age.
+- **`barons-ftn --status` answers all of this and changes nothing.** It reports
+  each peer's unfinished snapshots longest wait first, with the recorded reason,
+  the pending inbound receipts and which of the three ways each is stuck, any
+  journal that will not parse, and how many packets are set aside. Reach for it
+  before reading directories by hand.
+- **`immortal-barons -league-check` reports the same backlog** alongside the
+  rest of the league setup, for the sysop who has gone looking there first. A
+  waiting peer is shown but not marked a fault — a peer can be legitimately
+  offline for days — while a journal that cannot be read is a FAIL, because
+  nothing else will ever mention it.
+- **`ftn-spool/bad`** only grows. Nothing is retried from it and nothing removes
+  it; it is yours to read and clear once the producing board, route, league or
+  roster is corrected.
+
+**A published alias belongs to the mailer, not to the game.** Once a target is
+published and marked done, its snapshot can disappear and `barons-ftn` no longer
+holds a journal saying that file is outstanding — the evidence moves to the
+transport:
+
+| Mode | What holds the alias | Cleared when |
+|---|---|---|
+| Attach | the matching `.msg` names it | the tosser and mailer chain sends it |
+| BSO | a `^` entry in the flow file | the mailer sends it and deletes it |
+| Obox | the queued file is the mailer's own state | the peer session takes it |
+
+So an alias sitting in a directory is not evidence of an abandoned file. A peer
+offline for a week is still a valid queue, and age alone cannot tell the two
+apart. Report growth, and delete only with mode-specific proof from the list
+above that the owning mailer is finished with it.
+
 ## Upgrade order
 
 ZIP bundles require `barons-ftn --in`; an older game cannot parse the ZIP as a

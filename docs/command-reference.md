@@ -242,6 +242,10 @@ and game processes serialize through their shared locking contract.
 - **`-in` / `--in`** — Receive, unwrap, and route inbound FTN bundles.
 - **`-out` / `--out`** — Bundle and hand off outbound game packets. This is the
   default when neither direction is supplied.
+- **`-status` / `--status`** — Report what each spool is still holding, for
+  whom, for how long, and why, and change nothing. A file count answers none of
+  those: a snapshot is kept whole until every target in it publishes, so it also
+  holds bundles for peers that already went out.
 - **`-data DIR`** — Folder holding the game data and `ftn.cfg`; default
   `./data`, relative to the scheduler's working directory.
 - **`-version`** — Print the helper and game version, then exit.

@@ -9,6 +9,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/store"
@@ -25,6 +26,13 @@ const (
 type batchPlan struct {
 	ID      string        `json:"id"`
 	Targets []batchTarget `json:"targets"`
+	// Created and Progress date the snapshot: when it was claimed, and when a
+	// target in it last published. Both are optional so a journal written
+	// before they existed still loads; countPendingOutbound falls back to the
+	// file's own mtime, which is what a sysop would otherwise read by hand
+	// (#228).
+	Created  time.Time `json:"created,omitempty"`
+	Progress time.Time `json:"progress,omitempty"`
 }
 
 type batchTarget struct {
@@ -39,6 +47,10 @@ type batchTarget struct {
 	BundleFile string   `json:"bundle_file"`
 	Message    string   `json:"message,omitempty"`
 	Done       bool     `json:"done"`
+	// LastError keeps the most recent publication failure for this target, so a
+	// later run or check can say why a peer is behind without the sysop having
+	// kept the output of the run that met it.
+	LastError string `json:"last_error,omitempty"`
 }
 
 // RunOut claims one game-outbound snapshot and hands each next hop one opaque
@@ -67,7 +79,58 @@ func RunOut(dataDir string) (Result, error) {
 			return result, err
 		}
 	}
+	countPendingOutbound(dataDir, &result)
 	return result, nil
+}
+
+// noteTargetFailure records why a target is behind, for a later run or check to
+// report. A journal that cannot be rewritten is not worth failing the run over:
+// the packets are still queued and the next run meets the same peer, so the
+// note is a convenience and its loss costs only the explanation.
+func noteTargetFailure(planPath string, plan batchPlan, target *batchTarget, cause error) {
+	if target.LastError == cause.Error() {
+		return // unchanged since the last run; rewriting says nothing new
+	}
+	target.LastError = cause.Error()
+	_ = saveBatchPlan(planPath, plan)
+}
+
+// countPendingOutbound fills in what this run leaves behind, from the same
+// journal walk the status report uses: one definition of "still waiting"
+// rather than two that can drift apart (#228).
+func countPendingOutbound(dataDir string, result *Result) {
+	status, err := Status(dataDir)
+	if err != nil {
+		return
+	}
+	for _, peer := range status.Peers {
+		result.Snapshots += peer.Snapshots
+		result.Waiting = append(result.Waiting, peer.Name)
+		if peer.LastError != "" {
+			result.Stalled = append(result.Stalled, peer.Name+": "+peer.LastError)
+		}
+		if peer.Oldest > result.OldestWait {
+			result.OldestWait = peer.Oldest
+		}
+	}
+}
+
+// lastAdvanced dates a snapshot's most recent progress: when a target in it
+// last published, or when it was claimed if none ever has. A journal written
+// before those fields existed carries neither, so the file's own mtime stands
+// in — approximate, but it moves whenever the journal is rewritten, which is
+// exactly when progress happens.
+func lastAdvanced(plan batchPlan, planPath string) time.Time {
+	if !plan.Progress.IsZero() {
+		return plan.Progress
+	}
+	if !plan.Created.IsZero() {
+		return plan.Created
+	}
+	if info, err := os.Stat(planPath); err == nil {
+		return info.ModTime()
+	}
+	return time.Now()
 }
 
 func transportContext(dataDir string) (game.Config, Config, []game.LeagueNode, *game.World, Address, *store.FileLock, error) {
@@ -179,6 +242,7 @@ func processBatch(batch, dataDir string, transport Config, world *game.World, no
 	if os.IsNotExist(err) {
 		plan, err = buildBatchPlan(batch, dataDir, transport, world, nodes, result)
 		if err == nil {
+			plan.Created = time.Now()
 			err = saveBatchPlan(planPath, plan)
 		}
 	}
@@ -193,13 +257,16 @@ func processBatch(batch, dataDir string, transport Config, world *game.World, no
 		queued, err := publishTarget(batch, dataDir, transport, origin, *target)
 		if errors.Is(err, errPeerBusy) {
 			result.Warnings = append(result.Warnings, fmt.Sprintf("%s is busy; its bundle remains in %s", target.Name, batch))
+			noteTargetFailure(planPath, plan, target, err)
 			continue
 		}
 		if err != nil {
 			result.Warnings = append(result.Warnings, fmt.Sprintf("%s: %v; its bundle remains in %s", target.Name, err, batch))
+			noteTargetFailure(planPath, plan, target, err)
 			continue
 		}
-		target.Done, target.Message = true, queued.Message
+		target.Done, target.Message, target.LastError = true, queued.Message, ""
+		plan.Progress = time.Now()
 		if err := saveBatchPlan(planPath, plan); err != nil {
 			return err
 		}

@@ -11,12 +11,16 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/store"
 )
 
 const inSpoolDir = "in"
+
+// inboundReceiptFile is the journal naming what one received bundle still owes.
+const inboundReceiptFile = "receipt.json"
 
 type inboundReceipt struct {
 	ID       string         `json:"id"`
@@ -26,6 +30,12 @@ type inboundReceipt struct {
 	Targets  []batchTarget  `json:"targets"`
 	Rejected []string       `json:"rejected,omitempty"`
 	Complete bool           `json:"complete"`
+	// Created and Progress date the receipt the way a batch plan is dated, and
+	// for the same reason: a receipt kept across runs is either waiting on a
+	// transit peer or stuck on a collision, and how long it has been that way
+	// is the difference (#228). Optional, so an older receipt still loads.
+	Created  time.Time `json:"created,omitempty"`
+	Progress time.Time `json:"progress,omitempty"`
 }
 
 type inboundLocal struct {
@@ -212,7 +222,7 @@ func ingestTransportFile(root string, board game.Config, dataDir string, transpo
 	sum := sha256.Sum256(raw)
 	id := hex.EncodeToString(sum[:16])
 	dir := filepath.Join(root, id)
-	planPath := filepath.Join(dir, "receipt.json")
+	planPath := filepath.Join(dir, inboundReceiptFile)
 	receipt, err := loadInboundReceipt(planPath)
 	if os.IsNotExist(err) {
 		if err := os.MkdirAll(dir, 0o755); err != nil {
@@ -220,6 +230,7 @@ func ingestTransportFile(root string, board game.Config, dataDir string, transpo
 		}
 		receipt, err = buildInboundReceipt(dir, id, source, envelope, via, entries, board.LeagueNumber, dataDir, transport, world, nodes, result)
 		if err == nil {
+			receipt.Created = time.Now()
 			err = saveInboundReceipt(planPath, receipt)
 		} else {
 			// No journal refers to partial artifacts, so a later run must be
@@ -394,6 +405,7 @@ func processInboundReceipt(dir, planPath string, receipt *inboundReceipt, board 
 						return fmt.Errorf("canonical packet filename collision at %s: existing and received bytes differ", target)
 					}
 					local.Done = true
+					receipt.Progress = time.Now()
 					result.Warnings = append(result.Warnings, fmt.Sprintf("ignored duplicate packet %s: canonical name and bytes are identical", name))
 					if err := saveInboundReceipt(planPath, *receipt); err != nil {
 						gameLock.Release()
@@ -409,6 +421,7 @@ func processInboundReceipt(dir, planPath string, receipt *inboundReceipt, board 
 					return err
 				}
 				local.Done = true
+				receipt.Progress = time.Now()
 				result.Delivered++
 				if err := saveInboundReceipt(planPath, *receipt); err != nil {
 					gameLock.Release()
@@ -480,9 +493,18 @@ func resumeInboundReceipts(root string, board game.Config, dataDir string, trans
 			continue
 		}
 		dir := filepath.Join(root, entry.Name())
-		planPath := filepath.Join(dir, "receipt.json")
+		planPath := filepath.Join(dir, inboundReceiptFile)
 		receipt, err := loadInboundReceipt(planPath)
+		if os.IsNotExist(err) {
+			continue // a directory being built by a run in progress
+		}
 		if err != nil {
+			// Neither retry state nor deliberate quarantine: a receipt that
+			// cannot be read is work nobody will ever finish, and skipping it
+			// silently is how it stays that way (#228).
+			result.Warnings = append(result.Warnings, fmt.Sprintf(
+				"inbound spool %s has an unreadable %s and is being left alone: %v",
+				entry.Name(), filepath.Base(planPath), err))
 			continue
 		}
 		if err := processInboundReceipt(dir, planPath, &receipt, board, dataDir, transport, origin, result); err != nil {

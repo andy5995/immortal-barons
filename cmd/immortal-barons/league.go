@@ -6,7 +6,9 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/andy5995/immortal-barons/internal/ftn"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/store"
 	"github.com/andy5995/immortal-barons/internal/textwrap"
@@ -80,10 +82,54 @@ func runLeagueCheck(cfg game.Config) bool {
 		prefix := fmt.Sprintf("%s  %-20s", mark, c.Name)
 		fmt.Println(prefix + textwrap.Wrap(c.Detail, textwrap.Console, strings.Repeat(" ", len(prefix))))
 	}
+	for _, c := range spoolChecks(cfg) {
+		mark := "ok  "
+		if !c.OK {
+			mark, allOK = "FAIL", false
+		}
+		prefix := fmt.Sprintf("%s  %-20s", mark, c.Name)
+		fmt.Println(prefix + textwrap.Wrap(c.Detail, textwrap.Console, strings.Repeat(" ", len(prefix))))
+	}
 	if !allOK {
 		fmt.Println("\nFix the FAIL lines above; see the Door Setup guide for what each one wants.")
 	}
 	return allOK
+}
+
+// spoolChecks reports the FTN transport's own backlog, when there is one to
+// report. It answers here rather than only in barons-ftn's output because the
+// run that met a failure is long gone by the time a sysop asks why a board has
+// gone quiet, and this is the command they are told to reach for (#228). A
+// board with no transport spool has nothing to say and says nothing.
+func spoolChecks(cfg game.Config) []store.Check {
+	status, err := ftn.Status(cfg.DataDir)
+	if err != nil {
+		return []store.Check{{Name: "FTN spool", OK: false, Detail: err.Error()}}
+	}
+	var checks []store.Check
+	for _, peer := range status.Peers {
+		detail := fmt.Sprintf("%d snapshot(s) for %s, %s without progress",
+			peer.Snapshots, peer.Name, peer.Oldest.Round(time.Minute))
+		if peer.LastError != "" {
+			detail += "; last failure: " + peer.LastError
+		}
+		// Waiting is not a setup fault: a peer can be legitimately offline for
+		// days. It is reported so a sysop can see how long, not marked wrong.
+		checks = append(checks, store.Check{Name: "Outbound waiting", OK: true, Detail: detail})
+	}
+	for _, receipt := range status.Inbound {
+		checks = append(checks, store.Check{Name: "Inbound pending", OK: true,
+			Detail: fmt.Sprintf("%s, %s: %s", receipt.ID, receipt.Age.Round(time.Minute), receipt.Reason)})
+	}
+	for _, dir := range status.Unreadable {
+		checks = append(checks, store.Check{Name: "Unreadable journal", OK: false,
+			Detail: dir + " — neither retry state nor quarantine, and nothing will retry it"})
+	}
+	if status.SetAside > 0 {
+		checks = append(checks, store.Check{Name: "Set-aside packets", OK: true,
+			Detail: fmt.Sprintf("%d in the transport's bad folder; nothing retries them", status.SetAside)})
+	}
+	return checks
 }
 
 // runLeagueRoutes reports where this board sends each planet's packets — BRE's
