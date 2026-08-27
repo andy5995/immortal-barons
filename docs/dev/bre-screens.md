@@ -2337,7 +2337,21 @@ would send an attack to the wrong planet.
 
 The matching runs as you TYPE — the state code is compared against its previous
 value each keystroke (0x16a3) and the line is completed the moment the count
-reaches one, which is what the erase-and-replace above is. **IB matches the same
+reaches one, which is what the erase-and-replace above is.
+
+**Watched live, and it confirms the SUBSTRING reading rather than a prefix one.**
+Against the roster in `cap/eots-ibbs-01.cap` — Nova Hub, Starship Junkyard, Eye
+of the Storm, The Eclipse — typing `s` changes nothing (it is inside *Starship*,
+*Storm* and *Eclipse*: three matches), `st` still changes nothing (*Starship* and
+*Storm*: two), and `sta` completes to Starship Junkyard (one). A prefix matcher
+would have completed on the first keystroke, since only Starship Junkyard STARTS
+with `s`. It did not.
+
+The keystroke that makes the match unique is **not echoed**: the two characters
+already on screen are erased and the resolved name written over them, so the
+capture reads `st` + two `BS SP BS` + the name, with the `a` that triggered it
+appearing nowhere. Reading those bytes without the live behaviour beside them
+makes it look as though a two-character answer resolved. **IB matches the same
 text on ENTER** (`matchPlanet`), so the accepted keystrokes agree; the live
 completion is not built.
 

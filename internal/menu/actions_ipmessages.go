@@ -141,16 +141,11 @@ func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.Leag
 			showPlanetList(s, w.Term, planets)
 			continue
 		}
-		// Anything else is the start of a typed answer: echo it and read the rest
-		// of the line with it already entered.
-		var typed []rune
-		if r >= 32 {
-			fmt.Fprintf(s, "%c", r)
-			typed = []rune{r}
-		}
+		// Anything else is the start of a typed answer, read with the original's
+		// live completion (see readPlanetAnswer).
 		line := ""
 		if r != '\r' && r != '\n' {
-			line, err = session.ReadLineFrom(s, typed)
+			line, err = readPlanetAnswer(s, planets, r)
 		} else {
 			fmt.Fprint(s, "\n")
 		}
@@ -170,6 +165,79 @@ func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.Leag
 	}
 }
 
+// readPlanetAnswer reads the planet prompt a keystroke at a time and COMPLETES
+// the line the moment what has been typed matches exactly one planet, which is
+// what the original does (#183). first is the key the caller already read.
+//
+// Why this is worth a loop of its own rather than ReadLineFrom: matching only on
+// ENTER makes the player guess whether they have typed enough, and a wrong guess
+// costs the whole prompt. Watching the line fill in tells them the moment it is
+// unambiguous — with a substring match "s" and "st" can each still be several
+// planets while "sta" is one, and nothing on screen says which until it happens.
+//
+// What the player typed is kept apart from what is DISPLAYED. Completing is a
+// display decision, so it must not swallow the keys still to come: a player who
+// keeps typing the rest of a name they already see, or a paste that arrives
+// faster than they could read it, would otherwise append to the completed text
+// and turn a match into nonsense. Every key goes into typed; shown follows from
+// it and is redrawn only when it changes, which is why an ambiguous keystroke
+// leaves the line alone exactly as the original leaves it.
+//
+// Typed text echoes bright white and a completed name bright yellow, from the
+// capture — the colour is what separates what the player wrote from what the
+// game filled in. Backspace edits the typed text, so a completion is never a
+// trap.
+func readPlanetAnswer(s session.Session, planets []game.LeagueNode, first rune) (string, error) {
+	var typed, shown []rune
+	// redraw brings the line on screen up to date with want, erasing only what
+	// actually has to change — appending a character to a line that is merely
+	// growing must not rewrite the whole thing.
+	redraw := func(want []rune, color string) {
+		common := 0
+		for common < len(shown) && common < len(want) && shown[common] == want[common] {
+			common++
+		}
+		if common == len(shown) && common == len(want) {
+			return
+		}
+		fmt.Fprint(s, strings.Repeat("\b \b", len(shown)-common))
+		fmt.Fprintf(s, "%s%s", color, string(want[common:]))
+		shown = append(append([]rune(nil), want[:common]...), want[common:]...)
+	}
+	settle := func() {
+		if p := matchPlanet(planets, string(typed)); p != nil {
+			redraw([]rune(p.Name), ansi.FgBrightYellow)
+			return
+		}
+		redraw(typed, ansi.FgBrightWhite)
+	}
+	if first >= 32 {
+		typed = append(typed, first)
+		settle()
+	}
+	for {
+		r, err := s.ReadKey()
+		if err != nil {
+			return string(shown), err
+		}
+		switch {
+		case r == '\r' || r == '\n':
+			fmt.Fprint(s, "\n")
+			// The completed name, when one resolved: it is what the player was
+			// shown, so it is what they answered.
+			return string(shown), nil
+		case r == '\b' || r == 127:
+			if len(typed) > 0 {
+				typed = typed[:len(typed)-1]
+				settle()
+			}
+		case r >= 32:
+			typed = append(typed, r)
+			settle()
+		}
+	}
+}
+
 // matchPlanet resolves a typed planet number or name, as BRE's prompt offers
 // ("Enter Planet Name or Number"). BINARY-VERIFIED against select_planet
 // (BRE.OVR 0x021dd9, container ovr_0209c5), which settles #183:
@@ -177,7 +245,11 @@ func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.Leag
 //   - An exact roster number resolves on its own, checked before anything else
 //     and only when that slot is occupied (unit offset 0x1861: Val(typed), then
 //     the slot's own occupied byte at +0x28ba).
-//   - Otherwise the typed text is matched as a SUBSTRING, not a prefix. The
+//   - Otherwise the typed text is matched as a SUBSTRING, not a prefix —
+//     confirmed by watching it, not only by reading it: against a roster of Nova
+//     Hub / Starship Junkyard / Eye of the Storm / The Eclipse, "s" and "st"
+//     both leave the line alone (3 matches then 2, counting Storm and Eclipse)
+//     and "sta" completes. A prefix matcher would have finished on the "s". The
 //     original upper-cases both sides and calls Turbo Pascal's Pos(typed, name)
 //     — argument order confirmed at 0x1535-0x1560 — so "Bit" finds "The X-Bit
 //     BBS" from the middle. It runs the same Pos against the planet's NUMBER

@@ -452,3 +452,83 @@ func TestAnAmbiguousPlanetNameSelectsNothing(t *testing.T) {
 		}
 	}
 }
+
+// The planet prompt fills the line in as you type, the moment what you have
+// typed matches one planet and no more (#183). Before this it matched only on
+// ENTER, so a player had to guess whether they had typed enough and a wrong
+// guess cost the whole prompt.
+//
+// The roster is the one from cap/eots-ibbs-01.cap, chosen because it makes the
+// substring rule visible: "s" is inside Starship, Storm AND Eclipse, "st" is
+// still inside two, and only "sta" is down to one.
+func TestPlanetPromptCompletesTheLineWhenTheMatchIsUnique(t *testing.T) {
+	planets := []game.LeagueNode{
+		{Number: 1, Name: "Nova Hub"},
+		{Number: 2, Name: "Starship Junkyard"},
+		{Number: 3, Name: "Eye of the Storm"},
+		{Number: 4, Name: "The Eclipse"},
+	}
+	newCtx := func() *ctx {
+		w := newWorld()
+		w.With(func() {
+			w.World.Config.IBBS = true
+			w.World.LeagueNodes = planets
+		})
+		return w
+	}
+
+	t.Run("ambiguous typing leaves the line alone", func(t *testing.T) {
+		w := newCtx()
+		// "st" is Starship and Storm, so nothing may fill in; the session then
+		// runs dry, which ends the prompt without a pick.
+		f := &fakeSession{keys: []rune("st")}
+		got := pickPlanet(f, w, planets)
+		out := stripANSI(f.out.String())
+		if got != nil {
+			t.Errorf("picked %q on an ambiguous answer; it matches two planets", got.Name)
+		}
+		if strings.Contains(out, "Starship Junkyard") {
+			t.Errorf("the line completed while two planets still matched:\n%q", out)
+		}
+	})
+
+	t.Run("the key that resolves it completes the line", func(t *testing.T) {
+		w := newCtx()
+		f := &fakeSession{keys: []rune("sta\r")}
+		got := pickPlanet(f, w, planets)
+		if got == nil || got.Name != "Starship Junkyard" {
+			t.Fatalf("picked %v, want Starship Junkyard", got)
+		}
+		raw := f.out.String()
+		if !strings.Contains(stripANSI(raw), "Starship Junkyard") {
+			t.Errorf("the full name was never written:\n%q", raw)
+		}
+		// The completion erases what was on screen rather than appending to it,
+		// which is what the original does and what makes the line read correctly.
+		if !strings.Contains(raw, "\b \b") {
+			t.Errorf("nothing was erased, so the typed text was not replaced:\n%q", raw)
+		}
+	})
+
+	t.Run("keys still in flight cannot spoil a completion", func(t *testing.T) {
+		w := newCtx()
+		// A player who keeps typing the name they can already see, or a paste:
+		// every key goes into the typed text, so the match stays the same one.
+		f := &fakeSession{keys: []rune("starship junkyard\r")}
+		got := pickPlanet(f, w, planets)
+		if got == nil || got.Name != "Starship Junkyard" {
+			t.Fatalf("picked %v, want Starship Junkyard — typing on past the completion broke it", got)
+		}
+	})
+
+	t.Run("backspace edits a completion rather than trapping it", func(t *testing.T) {
+		w := newCtx()
+		// "nov" completes to Nova Hub; three backspaces take the typed text back
+		// to "", and "the ec" then resolves the other planet.
+		f := &fakeSession{keys: []rune("nov\b\b\bthe ec\r")}
+		got := pickPlanet(f, w, planets)
+		if got == nil || got.Name != "The Eclipse" {
+			t.Fatalf("picked %v, want The Eclipse — a completion must stay editable", got)
+		}
+	})
+}
