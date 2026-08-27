@@ -41,6 +41,12 @@ CALL_PATTERNS = [
     re.compile(r'\bAskYesNo\(s,\s*' + STR),
     re.compile(r'\baskYesNoHere\(s,\s*' + STR),
     re.compile(r'\bstatLine\(s,\s*[^,]+,\s*' + STR),
+    # Wrappers whose CALLER writes the msgid. Found by listing the funcs with a
+    # string parameter that reaches tr()/i18n.T and diffing that against this
+    # list -- the check the release guide asks for, which caught five strings
+    # nobody had ever been shown.
+    re.compile(r'\bbuildTradeBasket\(s,\s*[^,]+,\s*' + STR),
+    re.compile(r'\bstatusRowPrefix\(s,\s*' + STR),
     re.compile(r'\b(?:Label|Title):\s*' + STR),
     re.compile(r'\bonOff\(' + STR),  # Preferences toggle labels (dynamic LabelFn)
 ]

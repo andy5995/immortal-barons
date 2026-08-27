@@ -16,11 +16,17 @@ title: 'Лиги и межсистемная (Inter-BBS) игра'
   the whole take rather than sharing it, and you choose how to press the
   attack (see Attack Types).
 - Межпланетный счёт — посмотреть, как доски соотносятся друг с другом.
-- Send Message — write to another planet. Everyone there reads what you
-  send, so it is the place for a warning, an offer, or a call for help; you
-  can also write to one planet's Coordinator alone. A reply asks whether it
-  is public: yes and the sender's whole planet reads it, no and only the
-  baron who wrote does.
+- Send Message — write to another planet. Name the planet, then pick which
+  barons on it should read the letter, using the same `Send to:` list the
+  Diplomacy and message screens use here: a letter marks a baron, the same
+  letter again takes them off, `Z` marks everyone, `?` shows the planet's
+  roster, and Enter opens the editor. Enter with nobody marked leaves
+  without sending. The other four items address the whole league, your
+  allied planets, several planets you name, or one planet's Coordinator
+  alone. A reply asks whether it is public: yes and the sender's whole
+  planet reads it, no and only the baron who wrote does.  If your board has
+  not yet received that planet's scores, there is no roster to pick from and
+  the letter goes to everyone there.
 - Diplomacy List — where your board says it stands with each other
   planet. It binds nobody, but it is your Coordinator telling you who to
   watch.

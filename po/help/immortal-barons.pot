@@ -7,7 +7,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
-"POT-Creation-Date: 2026-08-26 12:26-0500\n"
+"POT-Creation-Date: 2026-08-27 17:11-0500\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -89,7 +89,16 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:43
+#: internal/help/content/controls/interface.md:41
+#, markdown-text, no-wrap
+msgid ""
+"InterPlanetary Ops -> Send Message -> Single Planet uses the same prompt for "
+"the\n"
+"barons on the planet you named.\n"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/controls/interface.md:46
 #, markdown-text
 msgid ""
 "Every Diplomacy option that names a realm takes the same list: offer a "
@@ -100,7 +109,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:50
+#: internal/help/content/controls/interface.md:53
 #, markdown-text
 msgid ""
 "The letters belong to the realms, not to the rows, so a letter may be "
@@ -113,7 +122,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:54
+#: internal/help/content/controls/interface.md:57
 #, markdown-text
 msgid ""
 "A letter is freed when the realm holding it is swept from the map, and a "
@@ -122,13 +131,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/controls/interface.md:55
+#: internal/help/content/controls/interface.md:58
 #, markdown-text, no-wrap
 msgid "Who else is on"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:62
+#: internal/help/content/controls/interface.md:65
 #, markdown-text
 msgid ""
 "An `O` beside a realm's letter — on See Scores, the attack and message "
@@ -139,7 +148,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/interface.md:63
+#: internal/help/content/controls/interface.md:66
 #, markdown-text
 msgid "Press `?` at a menu to open this help."
 msgstr ""
@@ -224,11 +233,12 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/controls/turns.md:18
+#: internal/help/content/controls/turns.md:19
 #, markdown-text
 msgid ""
-"A realm still under protection carries a `(P)` after its name in the lists "
-"of realms, so you can see who cannot be attacked yet."
+"A realm still under protection shows its letter in square brackets in the "
+"lists of realms — `[C]`, where every other realm shows `(C)` — so you can "
+"see who cannot be attacked yet."
 msgstr ""
 
 #. type: Title #
@@ -1516,16 +1526,19 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:32
+#: internal/help/content/economy/trading.md:34
 #, markdown-text
 msgid ""
-"A trade deal costs a fee for each day you send it for, and it needs a spare "
-"carrier to move the goods. A Protective Trade treaty with that realm makes "
-"the fee cheaper."
+"A trade deal costs a fee for each day you send it for, and it needs carriers "
+"to move the goods. How many depends on what you are shipping: one carrier "
+"holds a thousand troopers or turrets, a hundred jets, five thousand tanks, "
+"or a hundred thousand gold, and food, bombers, agents and carriers take no "
+"room at all. A Protective Trade treaty with that realm makes the fee "
+"cheaper."
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:38
+#: internal/help/content/economy/trading.md:40
 #, markdown-text
 msgid ""
 "The days you pay for are how long the offer stands. What you put in the deal "
@@ -1536,19 +1549,55 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/economy/trading.md:39
+#: internal/help/content/economy/trading.md:41
+#, markdown-text, no-wrap
+msgid "Deals to another planet"
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:46
+#, markdown-text
+msgid ""
+"In a league game the InterPlanetary Operations menu sends a deal to a realm "
+"on another planet. It works differently from the one above, so read this "
+"before you use it."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:50
+#, markdown-text
+msgid ""
+"You cannot ask for anything back. The goods are a gift, and the realm you "
+"send them to has no say: they arrive and are added to what that realm "
+"holds. There is no offer to accept or refuse, so nothing is ever returned to "
+"you."
+msgstr ""
+
+#. type: Plain text
+#: internal/help/content/economy/trading.md:55
+#, markdown-text
+msgid ""
+"You pay once, not per day, and you need no treaty with the realm or its "
+"planet.  The fee depends on what is in the deal, and it is shown before you "
+"confirm. You cannot send to a realm that is still under new-realm "
+"protection, and you cannot send to your own planet — for that, use the deal "
+"above."
+msgstr ""
+
+#. type: Title ##
+#: internal/help/content/economy/trading.md:56
 #, markdown-text, no-wrap
 msgid "Getting the most from trade"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:42
+#: internal/help/content/economy/trading.md:59
 #, markdown-text
 msgid "Trade matters most when several realms work together. A few ideas:"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:47
+#: internal/help/content/economy/trading.md:64
 #, markdown-text, no-wrap
 msgid ""
 "**Specialise, then supply your partners.** Your industry can favour one "
@@ -1561,7 +1610,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:51
+#: internal/help/content/economy/trading.md:68
 #, markdown-text, no-wrap
 msgid ""
 "**A cheap listing is taken by whoever gets there first.** Anyone can buy it, "
@@ -1572,7 +1621,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/economy/trading.md:54
+#: internal/help/content/economy/trading.md:71
 #, markdown-text, no-wrap
 msgid ""
 "**Trade is bigger between planets.** In a league, whole planets specialise, "
@@ -1856,7 +1905,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:30
+#: internal/help/content/interbbs/leagues.md:37
 #, markdown-text
 msgid ""
 "Group Attack — several rulers on your board join one strike against a "
@@ -1864,7 +1913,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:30
+#: internal/help/content/interbbs/leagues.md:37
 #, markdown-text
 msgid ""
 "Indiv. Attack Force — your own strike against one named baron. You keep the "
@@ -1873,24 +1922,30 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:30
+#: internal/help/content/interbbs/leagues.md:37
 #, markdown-text
 msgid "IP Scores — see how the boards rank against each other."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:30
+#: internal/help/content/interbbs/leagues.md:37
 #, markdown-text
 msgid ""
-"Send Message — write to another planet. Everyone there reads what you send, "
-"so it is the place for a warning, an offer, or a call for help; you can also "
-"write to one planet's Coordinator alone. A reply asks whether it is public: "
-"yes and the sender's whole planet reads it, no and only the baron who wrote "
-"does."
+"Send Message — write to another planet. Name the planet, then pick which "
+"barons on it should read the letter, using the same `Send to:` list the "
+"Diplomacy and message screens use here: a letter marks a baron, the same "
+"letter again takes them off, `Z` marks everyone, `?` shows the planet's "
+"roster, and Enter opens the editor. Enter with nobody marked leaves without "
+"sending. The other four items address the whole league, your allied planets, "
+"several planets you name, or one planet's Coordinator alone. A reply asks "
+"whether it is public: yes and the sender's whole planet reads it, no and "
+"only the baron who wrote does.  If your board has not yet received that "
+"planet's scores, there is no roster to pick from and the letter goes to "
+"everyone there."
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:30
+#: internal/help/content/interbbs/leagues.md:37
 #, markdown-text
 msgid ""
 "Diplomacy List — where your board says it stands with each other planet. It "
@@ -1898,7 +1953,7 @@ msgid ""
 msgstr ""
 
 #. type: Bullet: '- '
-#: internal/help/content/interbbs/leagues.md:30
+#: internal/help/content/interbbs/leagues.md:37
 #, markdown-text
 msgid ""
 "Travel Times — how long a message or a strike actually takes to reach each "
@@ -1908,13 +1963,13 @@ msgid ""
 msgstr ""
 
 #. type: Title ##
-#: internal/help/content/interbbs/leagues.md:31
+#: internal/help/content/interbbs/leagues.md:38
 #, markdown-text, no-wrap
 msgid "Your BBS Coordinator"
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:39
+#: internal/help/content/interbbs/leagues.md:46
 #, markdown-text
 msgid ""
 "The barons on your own board elect one of their number Coordinator, and the "
@@ -1926,7 +1981,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:43
+#: internal/help/content/interbbs/leagues.md:50
 #, markdown-text
 msgid ""
 "You cannot vote while your realm is still under new-realm protection, and "
@@ -1935,7 +1990,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:46
+#: internal/help/content/interbbs/leagues.md:53
 #, markdown-text
 msgid ""
 "Every turn opens by telling you whether you hold the office or who your vote "
@@ -1943,7 +1998,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:49
+#: internal/help/content/interbbs/leagues.md:56
 #, markdown-text
 msgid ""
 "A league game has a set length. When it ends, the world resets and a new "
@@ -1951,7 +2006,7 @@ msgid ""
 msgstr ""
 
 #. type: Plain text
-#: internal/help/content/interbbs/leagues.md:50
+#: internal/help/content/interbbs/leagues.md:57
 #, markdown-text
 msgid ""
 "These features appear only when the game is set up for inter-BBS or league "
@@ -2756,9 +2811,8 @@ msgstr ""
 #: internal/help/content/military/jets.md:26
 #, markdown-text
 msgid ""
-"Jets are also weak on the ground. In a normal attack the enemy's bombers "
-"destroy your grounded jets, and enemy turrets shoot down the jets that do "
-"attack."
+"Jets are lost in battle like any other unit. Enemy turrets are part of the "
+"defence your attack has to beat; they do not single out your jets."
 msgstr ""
 
 #. type: Title #
