@@ -302,11 +302,11 @@ For point `1:229/300.4`, the paths are:
 00e5012c.pnt/00000004.flo
 ```
 
-If `.bsy` already exists, that peer is reported busy and its durable spool
-transaction remains pending. The invocation does not poll or sleep: other peers
-continue, and the next scheduled `--in` or `--out` resumes pending transactions
-before claiming new work. `barons-ftn` never removes a `.bsy` it did not create
-and never guesses that an old one is stale.
+If `.bsy` already exists, that peer is normally reported busy and its durable
+spool transaction remains pending. The invocation does not poll or sleep: other
+peers continue, and the next scheduled `--in` or `--out` resumes pending
+transactions before claiming new work. The narrowly scoped exception is an old
+semaphore carrying `barons-ftn`'s own PID marker; recovery is described below.
 
 ## Bundling, names, and recovery
 
@@ -335,13 +335,23 @@ and race testing.
 BSO is the exception. FTS-5005 gives the destination one `.bsy` covering its
 outbound files. After acquiring that semaphore, `barons-ftn` may safely rebuild
 a compatible bundle already advertised in the selected flow file. It releases
-`.bsy` only after the replacement is durable. If `.bsy` already exists, that
-peer is deferred without holding up other peers. Stale `.bsy` ownership is an
-operator/mailer recovery decision; the helper never removes a lock it did not
-create. If a `.bsy` remains after a helper or host crash, first confirm that no
-mailer, tosser, or `barons-ftn` process owns that destination and follow the
-mailer's configured stale-lock timeout. Only then remove that one destination's
-`.bsy`; the next scheduled run resumes its journaled bundle. Never clear `.bsy`
+`.bsy` only after the replacement is durable.
+
+FTS-5005 permits a `.bsy` to contain one line of PID information. A semaphore
+created here contains `barons-ftn pid=<number>`, and the process also locks its
+first-byte range on Windows, or takes a whole-file `flock` on Unix, for the
+complete BSO update. A later helper removes that semaphore as stale only when
+all three checks agree: the marker is exactly ours, the ownership lock can be
+acquired non-blockingly, and the file is at least five minutes old. It then
+retries the standard exclusive `.bsy` creation. Thus a live helper remains
+protected even if its semaphore's timestamp is old, while a crash becomes
+recoverable without guessing from age alone.
+
+An empty, malformed, young, locked, or foreign-marked `.bsy` is simply busy.
+`barons-ftn` never applies its five-minute policy to a mailer or tosser's
+semaphore; the mailer's own FTS-5005 age/restart mechanism remains responsible
+for those. A legacy empty semaphore left by an older `barons-ftn` is likewise
+indistinguishable and follows the mailer's policy. Never manually clear `.bsy`
 files merely because a peer is slow or offline.
 
 Claimed packets and progress journals live under `data/ftn-spool`. A target is

@@ -8,6 +8,8 @@
   * One rejected packet no longer strands valid packets in the same FTN bundle;
     its original wrapper is quarantined after the valid members finish
   * FTN aliases have a defined namespace for boards whose league number is unset
+  * barons-ftn marks and file-locks its BSO semaphores, and safely recovers only
+    its own unlocked semaphore after a conservative five-minute crash interval
   * The FTN transport, routing, locking, recovery, and mixed-link setup have a
     complete configuration guide with working examples; generic file transports
     now have an atomic inbound and outbound handoff contract

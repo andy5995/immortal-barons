@@ -51,8 +51,19 @@ func LockPath(path string, block bool) (*FileLock, error) {
 	if err != nil {
 		return nil, err
 	}
-	if err := lockFile(f, block); err != nil {
+	locked, err := LockFile(f, block)
+	if err != nil {
 		f.Close()
+		return nil, err
+	}
+	return locked, nil
+}
+
+// LockFile takes an exclusive lock on an already-open file. On success the
+// returned lock owns f and Release closes it; on failure the caller still owns
+// f. This lets an O_EXCL protocol lock the exact file it created.
+func LockFile(f *os.File, block bool) (*FileLock, error) {
+	if err := lockFile(f, block); err != nil {
 		return nil, err
 	}
 	return &FileLock{f: f}, nil

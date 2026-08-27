@@ -5,12 +5,27 @@ import (
 	"crypto/sha256"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
+	"runtime"
+	"strconv"
 	"strings"
+	"time"
+
+	"github.com/andy5995/immortal-barons/internal/store"
 )
 
 var errPeerBusy = errors.New("peer BSO queue is busy")
+
+const (
+	bsyOwnerPrefix = "barons-ftn pid="
+	bsyStaleAge    = 5 * time.Minute
+)
+
+type bsyLock struct {
+	lock *store.FileLock
+}
 
 func bsoPaths(root string, address Address, flavour string) (busy, flow string, err error) {
 	base := fmt.Sprintf("%04x%04x", address.Net, address.Node)
@@ -29,24 +44,124 @@ func bsoPaths(root string, address Address, flavour string) (busy, flow string, 
 	return filepath.Join(dir, base+".bsy"), filepath.Join(dir, base+ext), nil
 }
 
-func acquireBSY(path string) (*os.File, error) {
+func acquireBSY(path string) (*bsyLock, error) {
 	if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 		return nil, err
 	}
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
-	if os.IsExist(err) {
-		return nil, errPeerBusy
+	for attempts := 0; attempts < 3; attempts++ {
+		f, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE|os.O_EXCL, 0o644)
+		if err == nil {
+			lock, err := store.LockFile(f, false)
+			if err != nil {
+				f.Close()
+				_ = os.Remove(path)
+				return nil, err
+			}
+			if _, err := fmt.Fprintf(f, "%s%d\n", bsyOwnerPrefix, os.Getpid()); err != nil {
+				lock.Release()
+				_ = os.Remove(path)
+				return nil, err
+			}
+			if err := f.Sync(); err != nil {
+				lock.Release()
+				_ = os.Remove(path)
+				return nil, err
+			}
+			return &bsyLock{lock: lock}, nil
+		}
+		if !os.IsExist(err) {
+			return nil, err
+		}
+		recovered, err := recoverOwnBSY(path)
+		if err != nil {
+			return nil, err
+		}
+		if !recovered {
+			return nil, errPeerBusy
+		}
 	}
-	return f, err
+	return nil, errPeerBusy
 }
 
-func releaseBSY(path string, f *os.File) error {
-	closeErr := f.Close()
-	removeErr := os.Remove(path)
-	if closeErr != nil {
-		return closeErr
+// recoverOwnBSY removes only an old semaphore which identifies barons-ftn and
+// whose ownership lock is no longer held by its creating process. Foreign and
+// legacy empty semaphores remain the mailer's recovery responsibility.
+func recoverOwnBSY(path string) (bool, error) {
+	f, err := os.OpenFile(path, os.O_RDWR, 0)
+	if os.IsNotExist(err) {
+		return true, nil
 	}
-	return removeErr
+	if err != nil {
+		return false, err
+	}
+	lock, err := store.LockFile(f, false)
+	if errors.Is(err, store.ErrBusy) {
+		f.Close()
+		return false, nil
+	}
+	if err != nil {
+		f.Close()
+		return false, err
+	}
+
+	info, err := f.Stat()
+	if err != nil {
+		lock.Release()
+		return false, err
+	}
+	data, err := io.ReadAll(io.LimitReader(f, 70))
+	if err != nil {
+		lock.Release()
+		return false, err
+	}
+	pidText, ours := strings.CutPrefix(strings.TrimSpace(string(data)), bsyOwnerPrefix)
+	pid, pidErr := strconv.Atoi(pidText)
+	if !ours || pidErr != nil || pid < 1 || time.Since(info.ModTime()) < bsyStaleAge {
+		lock.Release()
+		return false, nil
+	}
+	current, err := os.Stat(path)
+	if os.IsNotExist(err) {
+		lock.Release()
+		return true, nil
+	}
+	if err != nil {
+		lock.Release()
+		return false, err
+	}
+	if !os.SameFile(info, current) {
+		lock.Release()
+		return true, nil
+	}
+	if err := removeBSYFile(path, lock); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+func releaseBSY(path string, held *bsyLock) error {
+	return removeBSYFile(path, held.lock)
+}
+
+// Unix permits unlinking an open locked file, which closes the recovery race.
+// Windows refuses that unlink; there we close first, and a competing open
+// handle makes Remove fail rather than deleting another process's semaphore.
+func removeBSYFile(path string, lock *store.FileLock) error {
+	if runtime.GOOS == "windows" {
+		if err := lock.Release(); err != nil {
+			return err
+		}
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+		return nil
+	}
+	removeErr := os.Remove(path)
+	releaseErr := lock.Release()
+	if removeErr != nil && !os.IsNotExist(removeErr) {
+		return removeErr
+	}
+	return releaseErr
 }
 
 func addFlowEntry(path, attachment string) error {
