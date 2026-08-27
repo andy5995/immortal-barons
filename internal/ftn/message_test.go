@@ -201,16 +201,40 @@ func TestSubjectPrefixedIgnoresAttachDirsOwnLength(t *testing.T) {
 			"SubjectPrefixed is supposed to depend only on SubjectPrefix and the filename", short, long)
 	}
 
-	// The advice may still mention AttachDir to explain why it does not
-	// help here (accurate, and worth saying) -- what it must not do is
-	// recommend changing it as the fix, the mistake this test exists to
-	// catch.
-	advice := subjectAdvice(SubjectPrefixed)
+	// Reached through a real over-limit fileAttachSubject call, the same
+	// way TestSequenceDigitBreaksAbsoluteButNotBasename reaches the
+	// Absolute-mode advice -- calling subjectAdvice directly proved the
+	// text was right in isolation, not that a sysop actually sees it.
+	tooLong := Config{Binkley: true, SubjectMode: SubjectPrefixed,
+		SubjectPrefix: strings.Repeat("p", 70)}
+	_, _, err = fileAttachSubject(tooLong, "/short/p.brp")
+	if err == nil {
+		t.Fatal("a 70-byte prefix plus a filename was accepted")
+	}
+	advice := err.Error()
+
+	// The advice may still mention AttachDir to explain why shortening it
+	// would not touch the length (accurate, and worth saying), and to say
+	// it still has to point at wherever the shortened prefix ends up
+	// naming (also accurate, and the fix for a prior version of this
+	// advice that dropped that constraint and could send a subject that
+	// fits but no longer says where the file really is). What it must not
+	// do is recommend shortening AttachDir AS THE FIX for the length,
+	// which is the mistake this test exists to catch.
 	if !strings.Contains(advice, "SubjectPath") {
 		t.Errorf("SubjectPrefixed advice does not mention SubjectPath: %v", advice)
 	}
 	if strings.Contains(advice, "Set AttachDir") {
 		t.Errorf("SubjectPrefixed advice tells the sysop to set AttachDir, which does not affect this mode's subject length: %v", advice)
+	}
+	// A bare mention of the word "AttachDir" isn't enough to prove this --
+	// the earlier (wrong) advice also contained that word, just to say
+	// changing it wouldn't help. What has to be present is the actual
+	// instruction to keep it pointed at wherever the shortened prefix
+	// ends up naming, or a sysop can "fix" the length and silently break
+	// delivery instead.
+	if !strings.Contains(advice, "point AttachDir at") {
+		t.Errorf("SubjectPrefixed advice drops the instruction to keep AttachDir matching the prefix: %v", advice)
 	}
 }
 

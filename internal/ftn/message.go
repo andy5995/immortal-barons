@@ -104,16 +104,20 @@ func fileAttachSubject(transport Config, attached string) (string, int, error) {
 // mode where shortening AttachDir changes the subject's length. In
 // SubjectPrefixed, the subject is SubjectPrefix plus the filename --
 // AttachDir's own value never appears in it, so telling a sysop in that
-// mode to shorten AttachDir would not fix anything; shortening
-// SubjectPrefix (or switching to Basename) is what actually helps there.
+// mode to shorten AttachDir would not fix the length. But AttachDir still
+// has to be pointed at whatever directory the shortened prefix now names:
+// the file is written at AttachDir, not at the prefix, and a subject that
+// fits but no longer says where the file really is fails silently instead
+// of loudly -- worse than the length error it replaced.
 func subjectAdvice(mode SubjectMode) string {
 	switch mode {
 	case SubjectBasename:
 		return "The filename alone does not fit, so no SubjectPath setting can shorten it"
 	case SubjectPrefixed:
 		return `Shorten the SubjectPath prefix, or switch to "SubjectPath Basename" -- the subject here is the ` +
-			`prefix plus the filename, and AttachDir's own value does not appear in it, so shortening AttachDir ` +
-			"alone will not fix this"
+			`prefix plus the filename, so that is what changes its length, not AttachDir's own value. Whatever ` +
+			`the prefix ends up being, point AttachDir at the same directory it names: the file is written at ` +
+			"AttachDir, and a subject that no longer says where that is will not be found"
 	}
 	return `Set AttachDir in ftn.cfg to a shorter directory -- with SubjectPath left on its default ` +
 		`("Absolute"), the subject is AttachDir's own path plus the filename, so this is what actually ` +
