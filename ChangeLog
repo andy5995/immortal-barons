@@ -1,4 +1,5 @@
 (in-progress:)
+  * barons-ftn skips a packet whose attachment cannot fit the FTN subject field instead of stopping the whole run over it, and names the likely fix
   * reverted: bombers no longer fly a bombing run; they fight and are lost with the rest of the force, as the original has it
   * reverted: an attack captures the same share of land whatever the two realms' wealth per region, as the original does
   * reverted: a realm is crushed only when its last region is taken, as the original decides it

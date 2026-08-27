@@ -66,11 +66,12 @@ func Run(dataDir string) (Result, error) {
 	}
 
 	dirs := outboundDirectories(board)
-	candidates, margin, err := preflightDirectories(dirs, transport, world, nodes)
+	candidates, margin, preflightWarnings, err := preflightDirectories(dirs, transport, world, nodes)
 	if err != nil {
 		return Result{}, err
 	}
 	var result Result
+	result.Warnings = append(result.Warnings, preflightWarnings...)
 	if len(candidates) > 0 && margin < subjectMarginBytes {
 		result.Warnings = append(result.Warnings, fmt.Sprintf(
 			"attachment subjects have %d byte(s) to spare in the FTN Type-2 field; %s",
@@ -112,9 +113,28 @@ type packetCandidate struct {
 // the exact snapshot it checked, so a packet atomically published while the
 // helper is running waits for the next run rather than bypassing preflight.
 // The second return is the smallest number of unused subject bytes any of the
-// checked pathnames left.
-func preflightDirectories(dirs []string, transport Config, world *game.World, nodes []game.LeagueNode) ([]packetCandidate, int, error) {
+// checked pathnames left. The third is a warning for every packet preflight
+// rejected but did not abort the whole run over -- see below.
+//
+// A packet that fails preflight is skipped, not fatal, UNLESS every packet in
+// this scan failed: one bad packet must not stop every other packet in the
+// same directory from being checked and queued (#222 -- a board with no
+// LeagueNumber set produces filenames long enough to blow the FTN Type-2
+// Subject budget on every hop that routes for it, and that board's packets
+// being unable to fit must not also stop everyone else's). But when NOTHING
+// in the scan produced a single fitting candidate, that is much more likely a
+// structural misconfiguration -- an overlong AttachDir or SubjectPath prefix,
+// say -- that will keep failing identically for whatever is queued next, not
+// a problem with one packet or one origin board. That case still fails
+// loudly instead of quietly discarding every candidate this run: refusing
+// before anything moves is what let #141's incident (a subject that fit at
+// sequence 99 and broke at 100, nothing reconfigured) get noticed and fixed,
+// and silently skipping it here would only turn the incident into repeated
+// bare warnings nobody sees.
+func preflightDirectories(dirs []string, transport Config, world *game.World, nodes []game.LeagueNode) ([]packetCandidate, int, []string, error) {
 	var candidates []packetCandidate
+	var warnings []string
+	var firstErr error
 	margin := type2SubjectSize
 	for _, dir := range dirs {
 		entries, err := os.ReadDir(dir)
@@ -122,7 +142,7 @@ func preflightDirectories(dirs []string, transport Config, world *game.World, no
 			continue
 		}
 		if err != nil {
-			return nil, 0, err
+			return nil, 0, nil, err
 		}
 		for _, entry := range entries {
 			if entry.IsDir() || !store.IsPacketFile(entry.Name()) {
@@ -133,7 +153,7 @@ func preflightDirectories(dirs []string, transport Config, world *game.World, no
 				continue // another helper claimed it after ReadDir
 			}
 			if err != nil {
-				return nil, 0, err
+				return nil, 0, nil, err
 			}
 			if !info.Mode().IsRegular() {
 				continue
@@ -142,7 +162,12 @@ func preflightDirectories(dirs []string, transport Config, world *game.World, no
 			claimed := transport.attachPath(dir, entry.Name())
 			packet, found, spare, err := preflightPacket(source, claimed, transport, world, nodes)
 			if err != nil {
-				return nil, 0, fmt.Errorf("preflight %s: %w", source, err)
+				wrapped := fmt.Errorf("preflight %s: %w", source, err)
+				if firstErr == nil {
+					firstErr = wrapped
+				}
+				warnings = append(warnings, wrapped.Error())
+				continue
 			}
 			if found {
 				candidates = append(candidates, packetCandidate{source: source, claimed: claimed, packet: packet})
@@ -150,7 +175,10 @@ func preflightDirectories(dirs []string, transport Config, world *game.World, no
 			}
 		}
 	}
-	return candidates, margin, nil
+	if len(candidates) == 0 && firstErr != nil {
+		return nil, 0, nil, firstErr
+	}
+	return candidates, margin, warnings, nil
 }
 
 func preflightPacket(source, claimed string, transport Config, world *game.World, nodes []game.LeagueNode) (game.Packet, bool, int, error) {
@@ -171,7 +199,7 @@ func preflightPacket(source, claimed string, transport Config, world *game.World
 	}
 	_, spare, err := fileAttachSubject(transport, attached)
 	if err != nil {
-		return game.Packet{}, false, 0, err
+		return game.Packet{}, false, 0, annotateLeagueNumberCause(packet, err)
 	}
 	destinationNumber := packet.ToNode
 	if destinationNumber == 0 && packet.ToBoard != "" {
@@ -188,11 +216,27 @@ func preflightPacket(source, claimed string, transport Config, world *game.World
 		copyPath := broadcastCopyPath(attached, copyIndex)
 		_, copySpare, err := fileAttachSubject(transport, copyPath)
 		if err != nil {
-			return game.Packet{}, false, 0, fmt.Errorf("broadcast attachment for node %d: %w", node.Number, err)
+			return game.Packet{}, false, 0, annotateLeagueNumberCause(packet,
+				fmt.Errorf("broadcast attachment for node %d: %w", node.Number, err))
 		}
 		spare = min(spare, copySpare)
 	}
 	return packet, true, spare, nil
+}
+
+// annotateLeagueNumberCause names the likely real fix when an overlong
+// subject traces back to a packet whose origin board has no LeagueNumber set
+// (#222): packetFilename falls back to a 16-byte content digest instead of a
+// 5-byte "L100-" prefix when a packet carries no league number, and that
+// digest travels with the packet on every hop a board without one routes
+// for, not just the origin's own outbound.
+func annotateLeagueNumberCause(p game.Packet, err error) error {
+	if p.League > 0 {
+		return err
+	}
+	return fmt.Errorf("%w (packet from %q has no LeagueNumber set on its origin board, "+
+		"which lengthens every filename it produces -- set LeagueNumber there to fix this for good)",
+		err, p.FromBoard)
 }
 
 func outboundDirectories(cfg game.Config) []string {

@@ -662,10 +662,20 @@ Whatever the spelling, it must name a file the mailer can find, because the
 mailer deletes the attachment after sending it.
 
 The subject holds 71 bytes, or 70 with the Binkley `^`, for the whole spelling.
-Before moving any packet, the helper checks every subject the whole run would
-create, including broadcast suffixes, and exits without moving anything if one
-will not fit. The error names the setting to change. When fewer than 8 bytes
-are left, it warns on standard error while still queueing the mail.
+Before moving any packet, the helper checks every subject that packet would
+create, including broadcast suffixes. A packet whose subject will not fit is
+left exactly where it is and warned about on standard error rather than
+moved; every other packet in the same run is still checked and queued
+normally — one board with an overlong name must not stop mail from every
+other board that routes through the same run (#222). The most common cause
+is a board with no `LeagueNumber` set: its packets carry a 16-byte content
+digest instead of a 5-byte league prefix, and the warning names it directly.
+Only when NOTHING in a run fits does the helper exit without moving
+anything, the same as before — that shape means the mailer configuration
+itself is the problem (an overlong `AttachDir` or `SubjectPath` prefix), not
+one packet, and deserves a loud refusal instead of a warning nobody reads.
+When fewer than 8 bytes are left on a packet that does fit, it warns on
+standard error while still queueing the mail.
 
 **Which spelling to choose depends on your mailer.** `Absolute` spends the whole
 directory out of the 71 bytes: `/sbbs/ibout/fido/` is 17, and the longest packet

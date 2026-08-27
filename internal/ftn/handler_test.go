@@ -3,6 +3,7 @@ package ftn
 import (
 	"encoding/binary"
 	"encoding/json"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -188,11 +189,23 @@ func TestBadPacketIsRestoredToOutbound(t *testing.T) {
 	}
 }
 
-func TestRunPreflightsEverySubjectBeforeMovingPackets(t *testing.T) {
+// TestRunSkipsOverlongBroadcastAttachmentButStillQueuesOthers is #222: one
+// packet whose attachment cannot fit the FTN Type-2 Subject field (most
+// commonly because its origin board has no LeagueNumber set) must not stop
+// every OTHER packet in the same scan from being checked and queued. It is
+// left exactly where it is, with a warning, to retry once whatever is wrong
+// with it is fixed -- see TestBasenameSubjectSurvivesTheSequenceDigit for the
+// companion case (nothing else in the scan fits either) where the run still
+// refuses loudly instead of quietly discarding everything, since that shape
+// is much more likely a structural misconfiguration than a single bad packet.
+func TestRunSkipsOverlongBroadcastAttachmentButStillQueuesOthers(t *testing.T) {
 	data := newTestSetup(t)
 	outbound := filepath.Join(data, testOutboundDir)
 	good := filepath.Join(outbound, "a.brp")
-	body, err := json.Marshal(game.Packet{FromNode: 2})
+	// FromBoard set (and League left unset) so the failing packet's warning
+	// can be checked against the #222 LeagueNumber hint below, not just the
+	// bare subject-length message.
+	body, err := json.Marshal(game.Packet{FromBoard: "Bravo BBS", FromNode: 2})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -212,22 +225,61 @@ func TestRunPreflightsEverySubjectBeforeMovingPackets(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := Run(data); err == nil {
-		t.Fatal("Run accepted an overlong broadcast attachment")
-	} else if !strings.Contains(err.Error(), "broadcast attachment for node 3") ||
-		!strings.Contains(err.Error(), "permits at most 71") {
-		t.Fatalf("Run error did not identify the subject limit: %v", err)
+	result, err := Run(data)
+	if err != nil {
+		t.Fatalf("Run refused the whole batch over one overlong packet: %v", err)
 	}
-	for _, path := range []string{good, longSource} {
-		if _, err := os.Stat(path); err != nil {
-			t.Errorf("preflight moved %s: %v", path, err)
-		}
+	if len(result.Queued) != 2 {
+		t.Fatalf("queued = %d, want 2 (one broadcast message per other board for the packet that fit)", len(result.Queued))
+	}
+	if len(result.Warnings) != 1 {
+		t.Fatalf("warnings = %v, want exactly one naming the skipped packet", result.Warnings)
+	}
+	if w := result.Warnings[0]; !strings.Contains(w, "broadcast attachment for node 3") ||
+		!strings.Contains(w, "permits at most 71") {
+		t.Errorf("warning did not identify the subject limit: %q", w)
+	}
+	if w := result.Warnings[0]; !strings.Contains(w, "Bravo BBS") || !strings.Contains(w, "LeagueNumber") {
+		t.Errorf("warning did not name the real fix for a packet with no LeagueNumber set: %q", w)
+	}
+	if _, err := os.Stat(good); !os.IsNotExist(err) {
+		t.Errorf("the packet that fit was not moved: %v", err)
+	}
+	if _, err := os.Stat(longSource); err != nil {
+		t.Errorf("the overlong packet was moved instead of left in place: %v", err)
 	}
 	if messages, err := filepath.Glob(filepath.Join(data, testNetmailDir, "*.msg")); err != nil {
 		t.Fatal(err)
-	} else if len(messages) != 0 {
-		t.Errorf("preflight created messages: %v", messages)
+	} else if len(messages) != 2 {
+		t.Errorf("messages = %v, want 2 for the packet that fit", messages)
 	}
+}
+
+// TestAnnotateLeagueNumberCauseNamesTheOriginBoard is #222: the real,
+// actionable fix for an overlong subject is usually "set LeagueNumber on the
+// origin board", not something obvious from the raw subject-length error
+// alone. A packet that already carries a League number is left alone --
+// something else made it overlong (a long AttachDir, an operator's
+// SubjectPath prefix), and the existing error already covers that.
+func TestAnnotateLeagueNumberCauseNamesTheOriginBoard(t *testing.T) {
+	base := errors.New(`attachment subject "x" is 80 bytes; FTN Type-2 permits at most 71`)
+
+	t.Run("no league number set", func(t *testing.T) {
+		p := game.Packet{FromBoard: "Bravo BBS", League: 0}
+		got := annotateLeagueNumberCause(p, base)
+		if !strings.Contains(got.Error(), "Bravo BBS") || !strings.Contains(got.Error(), "LeagueNumber") {
+			t.Errorf("error = %q, want it to name the origin board and LeagueNumber", got)
+		}
+		if !errors.Is(got, base) {
+			t.Errorf("annotated error lost its wrapped original: %v", got)
+		}
+	})
+	t.Run("league number already set", func(t *testing.T) {
+		p := game.Packet{FromBoard: "Bravo BBS", League: 100}
+		if got := annotateLeagueNumberCause(p, base); got != base {
+			t.Errorf("annotateLeagueNumberCause changed an error for a packet that already has a LeagueNumber: %v", got)
+		}
+	})
 }
 
 func TestAttachDirAndBasenameSubject(t *testing.T) {
