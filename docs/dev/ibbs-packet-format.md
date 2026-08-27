@@ -77,11 +77,11 @@ without one. It does not redundantly record which direct queue carried it.
 `route` is the actual node trace: its last node is the
 transmitting hop, and its length supplies the hop count. `covered` is present on
 an unaddressed broadcast and contains every node for which a branch has already
-been durably scheduled. A receiver fans out only to nodes in neither set. A
-receive-only `prior_hops` may appear when converting a legacy raw packet whose
-old numeric hop count has no corresponding trace. These fields are loop
-controls, not authentication; the game still verifies the inner packet against
-the league roster.
+been durably scheduled. A receiver fans out only to nodes in neither set. For a
+legacy raw packet, the unchanged inner packet's existing `Hops` value is added
+to the route length; it is not duplicated in the manifest. These fields are
+loop controls, not authentication; the game still verifies the inner packet
+against the league roster.
 
 Coverage prevents ordinary sibling copies from cross-sending, but it is not a
 distributed exactly-once protocol. Independently scheduled branches in a simple

@@ -249,7 +249,7 @@ func buildBatchPlan(batch, dataDir string, transport Config, world *game.World, 
 			result.Warnings = append(result.Warnings, fmt.Sprintf("quarantined malformed outbound packet %s: %v", file.Name(), err))
 			continue
 		}
-		te := transportEntry{Name: file.Name(), Raw: raw, Packet: packet, Route: []int{mine}, PriorHops: packet.Hops}
+		te := transportEntry{Name: file.Name(), Raw: raw, Packet: packet, Route: []int{mine}}
 		targets, err := packetTargets(packet, world, nodes)
 		if err != nil {
 			if moveErr := quarantineTransport(dataDir, path); moveErr != nil {

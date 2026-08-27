@@ -28,12 +28,11 @@ var errBundleTooLarge = errors.New("transport bundle is full")
 // transportEntry carries one immutable game packet plus routing information
 // which may change at an FTN hop. Raw is never re-marshalled.
 type transportEntry struct {
-	Name      string
-	Raw       []byte
-	Packet    game.Packet
-	Route     []int
-	Covered   []int
-	PriorHops int
+	Name    string
+	Raw     []byte
+	Packet  game.Packet
+	Route   []int
+	Covered []int
 }
 
 type bundleManifest struct {
@@ -43,9 +42,8 @@ type bundleManifest struct {
 }
 
 type bundleManifestEntry struct {
-	Route     []int `json:"route"`
-	Covered   []int `json:"covered,omitempty"`
-	PriorHops int   `json:"prior_hops,omitempty"`
+	Route   []int `json:"route"`
+	Covered []int `json:"covered,omitempty"`
 }
 
 func makeBundle(transmitter int, delivery string, entries []transportEntry) ([]byte, bundleManifest, error) {
@@ -108,7 +106,7 @@ func manifestEntries(entries []transportEntry) []bundleManifestEntry {
 	out := make([]bundleManifestEntry, len(entries))
 	for i, entry := range entries {
 		out[i] = bundleManifestEntry{
-			Route: append([]int(nil), entry.Route...), Covered: append([]int(nil), entry.Covered...), PriorHops: entry.PriorHops,
+			Route: append([]int(nil), entry.Route...), Covered: append([]int(nil), entry.Covered...),
 		}
 	}
 	return out
@@ -140,7 +138,7 @@ func readTransport(data []byte, _ string) (bundleManifest, []transportEntry, err
 		if err := json.Unmarshal(data, &packet); err != nil {
 			return bundleManifest{}, nil, err
 		}
-		entry := transportEntry{Name: store.PacketFilename(packet, data), Raw: append([]byte(nil), data...), Packet: packet, PriorHops: packet.Hops}
+		entry := transportEntry{Name: store.PacketFilename(packet, data), Raw: append([]byte(nil), data...), Packet: packet}
 		if packet.FromNode > 0 {
 			entry.Route = []int{packet.FromNode}
 		}
@@ -196,7 +194,7 @@ func readTransport(data []byte, _ string) (bundleManifest, []transportEntry, err
 	}
 	entries := make([]transportEntry, 0, len(manifest.Entries))
 	for i, item := range manifest.Entries {
-		if item.PriorHops < 0 || !validNodeList(item.Route) || !validNodeList(item.Covered) {
+		if !validNodeList(item.Route) || !validNodeList(item.Covered) {
 			return bundleManifest{}, nil, fmt.Errorf("invalid transport route for packet member %d", i)
 		}
 		file := packetFiles[i]
@@ -213,7 +211,7 @@ func readTransport(data []byte, _ string) (bundleManifest, []transportEntry, err
 		}
 		entries = append(entries, transportEntry{
 			Name: store.PacketFilename(packet, raw), Raw: raw, Packet: packet,
-			Route: append([]int(nil), item.Route...), Covered: append([]int(nil), item.Covered...), PriorHops: item.PriorHops,
+			Route: append([]int(nil), item.Route...), Covered: append([]int(nil), item.Covered...),
 		})
 	}
 	if _, ok := bundleTransmitter(entries); !ok {
@@ -235,7 +233,7 @@ func validNodeList(nodes []int) bool {
 
 func validateTransportEntries(entries []transportEntry) error {
 	for i, entry := range entries {
-		if entry.PriorHops < 0 || !validNodeList(entry.Route) || !validNodeList(entry.Covered) {
+		if !validNodeList(entry.Route) || !validNodeList(entry.Covered) {
 			return fmt.Errorf("invalid transport route for packet entry %d", i)
 		}
 	}
@@ -274,7 +272,7 @@ func bundleTransmitter(entries []transportEntry) (int, bool) {
 }
 
 func transportHops(entry transportEntry) int {
-	hops := entry.PriorHops
+	hops := entry.Packet.Hops
 	if len(entry.Route) > 1 {
 		hops += len(entry.Route) - 1
 	}

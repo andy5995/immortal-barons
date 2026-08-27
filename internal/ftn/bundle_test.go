@@ -55,6 +55,29 @@ func TestReadTransportAcceptsLegacyJSON(t *testing.T) {
 	}
 }
 
+func TestLegacyHopCountComesFromUnchangedPacket(t *testing.T) {
+	packet := game.Packet{FromBoard: "Alpha BBS", FromNode: 1, ToNode: 3, Seq: 20, League: 100, Hops: 7}
+	raw, _ := json.Marshal(packet)
+	_, legacy, err := readTransport(raw, "OLD.BRP")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(legacy) != 1 || transportHops(legacy[0]) != 7 {
+		t.Fatalf("legacy hops = %+v", legacy)
+	}
+	body, _, err := makeBundle(2, "direct", legacy)
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, forwarded, err := readTransport(body, "ALIAS.BRP")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(forwarded) != 1 || transportHops(forwarded[0]) != 8 || string(forwarded[0].Raw) != string(raw) {
+		t.Fatalf("forwarded legacy entry = %+v", forwarded)
+	}
+}
+
 func TestReadTransportDerivesCanonicalPacketName(t *testing.T) {
 	packet := game.Packet{FromBoard: "Alpha BBS", FromNode: 1, ToNode: 2, Seq: 9, League: 100}
 	raw, _ := json.Marshal(packet)
