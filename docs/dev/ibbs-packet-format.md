@@ -191,21 +191,32 @@ group rather than the individual packets let an ordinary gameplay packet
 (a trade bid, a land claim, a strike) riding in the same batch as that
 rebroadcast inherit its priority for free on essentially every run — the
 exact fixed advantage this feature exists to remove, just re-anchored
-from filename order to "is the Coordinator's board" (caught in review).
-The split lands after the *last* qualifying packet in the group's own
-`Seq` order, not the first: cutting at the first would leave a *later*
-verified packet in the group waiting for its shuffled turn, letting the
-rest of the batch run one check behind whatever it just changed — the
-same failure the carve-out exists to prevent, and cutting at the last
-also keeps the whole applied-first prefix in the origin's own ascending
-`Seq` order, so nothing in the deferred remainder can ever be mistaken
-for a replay of what already applied. The deferred remainder, if any,
-takes its chances in the shuffle exactly like any other group's packets,
-Coordinator's board included when it has nothing signed and verified to
-offer at all. The verification half matters because staging happens
-before any signature is examined: without it, an origin could buy
-first-mover priority simply by setting `LeagueNodes` on an unsigned
-packet, no forged `FromNode`/`FromBoard` required.
+from filename order to "is the Coordinator's board". The split lands
+after the *last* qualifying packet in the group's own `Seq` order, not
+the first: cutting at the first would leave a *later* verified packet in
+the group waiting for its shuffled turn, letting the rest of the batch
+run one check behind whatever it just changed — the same failure the
+carve-out exists to prevent, and cutting at the last also keeps the
+whole applied-first prefix in the origin's own ascending `Seq` order, so
+nothing in the deferred remainder can ever be mistaken for a replay of
+what already applied. The deferred remainder, if any, takes its chances
+in the shuffle exactly like any other group's packets, Coordinator's
+board included when it has nothing signed and verified to offer at all.
+The verification half matters because staging happens before any
+signature is examined: without it, an origin could buy first-mover
+priority simply by setting `LeagueNodes` on an unsigned packet, no
+forged `FromNode`/`FromBoard` required.
+
+This only does what it is meant to when the verified-orders packets
+actually carry the lowest `Seq` in their group. `ExportNodeList`,
+`ExportLeagueConfig`, and `ExportBulletins` all *prepend* their packet
+to `Outbox` rather than appending: `StampOutbox` assigns `Seq` in
+`Outbox` slice order, and the Coordinator's own player actions from
+earlier in the day are already queued there by the time a scheduled
+planetary run gets to these exports. Appending would give them the
+*highest* `Seq` of the batch instead of the lowest, which would make the
+split land after everything — the entire group, ordinary gameplay
+included, exactly the bug this section starts by describing.
 
 Every other group is applied in an order reshuffled every run, read from
 `crypto/rand` and nothing derived from packet content — so no origin can

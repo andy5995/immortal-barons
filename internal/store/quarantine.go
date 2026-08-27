@@ -24,7 +24,7 @@ const BadDir = "bad"
 // a packet that would have applied cleanly on the very next run, which is a
 // worse trade than the blocked batch quarantining exists to avoid: a file
 // young enough to plausibly still be arriving is left in inbound instead,
-// to be re-read once the write finishes (#215 review, finding 1).
+// to be re-read once the write finishes.
 const quarantineGrace = 5 * time.Minute
 
 // maxQuarantineCopies bounds how many same-named copies uniqueName will
@@ -34,7 +34,7 @@ const quarantineGrace = 5 * time.Minute
 // re-stats every copy already there — the cost of quarantining one more
 // file grows with how many already have been. Past this many, the sender
 // is malfunctioning badly enough that failing loudly is more useful than
-// silently taking on unbounded disk and CPU (#215 review, finding 5).
+// silently taking on unbounded disk and CPU.
 const maxQuarantineCopies = 1000
 
 // quarantinePacket moves an unparseable inbound file aside so the rest of the

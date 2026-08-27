@@ -93,14 +93,25 @@ func TestReadInboundKeepsOneOriginsPacketsInSeqOrder(t *testing.T) {
 	// Notice carries no payload (see HasPayload), so nothing but SysopNotices
 	// records the order ApplyPacket saw these in: a refusal notice per Notice
 	// isn't posted for a plain Notice field, so record order a different way --
-	// HighSeq only advances forward, and IsPacketSeen would reject the second
-	// and third packets as replays if they were ever applied out of Seq order.
-	if _, err := ReadInbound(w, inbound, false); err != nil {
+	// IsPacketSeen would reject a packet as a replay if it were ever applied
+	// after a higher-Seq sibling already set HighSeq past it.
+	//
+	// result.Applied, not HighSeq, is the assertion that actually catches
+	// that: an out-of-order run (3, 1, 2) sets HighSeq to 3 on the FIRST
+	// packet applied, then silently drops the other two as replays --
+	// HighSeq still ends at 3 either way, so checking only its final value
+	// passes in the exact failure case it claims to catch (review on this
+	// PR). Applied == 3 is true only when every packet actually got
+	// through, which happens only in true Seq order.
+	result, err := ReadInbound(w, inbound, false)
+	if err != nil {
 		t.Fatalf("ReadInbound: %v", err)
 	}
+	if result.Applied != 3 {
+		t.Fatalf("Applied = %d, want 3 (an out-of-order application drops at least one packet as a false replay)", result.Applied)
+	}
 	if w.HighSeq["Origin BBS"] != 3 {
-		t.Errorf("HighSeq[Origin BBS] = %d, want 3 (applied out of Seq order would have stalled below 3 or rejected a later one as a replay)",
-			w.HighSeq["Origin BBS"])
+		t.Errorf("HighSeq[Origin BBS] = %d, want 3", w.HighSeq["Origin BBS"])
 	}
 }
 
@@ -325,10 +336,9 @@ func TestQuarantinePacketAvoidsNameCollision(t *testing.T) {
 // dropped either -- it goes to BadDir for a sysop to find, and every OTHER
 // packet in the same run is still applied. The corrupt file's mtime is
 // backdated past quarantineGrace: a FRESH corrupt file is deliberately left
-// alone now (#215 review, finding 1; see
-// TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod for that
-// half), so this test has to simulate one old enough to no longer be a
-// plausible in-flight transfer.
+// alone (see TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod
+// for that half), so this test has to simulate one old enough to no longer
+// be a plausible in-flight transfer.
 func TestReadInboundQuarantinesUnreadablePacket(t *testing.T) {
 	inbound := t.TempDir()
 	writePacket(t, inbound, "a-good-one", game.Packet{FromBoard: "Origin BBS", FromNode: 5, Seq: 1})
@@ -367,9 +377,9 @@ func TestReadInboundQuarantinesUnreadablePacket(t *testing.T) {
 	}
 }
 
-// TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod is #215
-// review finding 1: a mailer that writes straight to a packet's final name
-// (scp, plain FTP, several FTN mailers) can leave a planetary run that lands
+// TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod: a mailer
+// that writes straight to a packet's final name (scp, plain FTP, several FTN
+// mailers) can leave a planetary run that lands
 // mid-transfer reading truncated JSON. Quarantining that permanently loses a
 // packet that would have applied cleanly next run, so a file young enough to
 // plausibly still be arriving is left alone instead of moved to BadDir.
@@ -493,7 +503,7 @@ func TestLastVerifiedOrdersIndex(t *testing.T) {
 			-1,
 		},
 		{
-			// #215 review, round 5: a LATER verified-orders packet must not be
+			// A LATER verified-orders packet must not be
 			// left behind just because an earlier one already qualified the
 			// group -- the split point has to be the LAST match, index 2, not
 			// the first, index 0.
@@ -530,8 +540,8 @@ func TestLastVerifiedOrdersIndex(t *testing.T) {
 	}
 }
 
-// TestReadInboundCoordinatorGroupWithoutLeagueUpdateDoesNotJumpQueue is
-// #215 review finding 2: the Coordinator's board must not win every
+// TestReadInboundCoordinatorGroupWithoutLeagueUpdateDoesNotJumpQueue: the
+// Coordinator's board must not win every
 // contested action on every run just by being the Coordinator's -- only a
 // group that actually carries league-wide state earns the carve-out.
 // Ordinary gameplay packets from the Coordinator's own board, carrying
@@ -587,11 +597,11 @@ func TestReadInboundCoordinatorGroupWithoutLeagueUpdateDoesNotJumpQueue(t *testi
 }
 
 // TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst guards
-// against a regression of #178 itself while fixing review finding 2: when
+// against a regression of #178 itself: when
 // the Coordinator's group DOES carry a roster update, it must still be
 // applied before anything else in the batch, every time -- the rest of the
 // run's checks (AddressedToMe, Routed) read the roster that update changes.
-// The roster update must be signed and verify: since round 4 finding 2, the
+// The roster update must be signed and verify: the
 // carve-out is gated on game.CarriesCoordinatorOrders AND
 // w.VerifyCoordinatorOrders together, not on claimed content alone.
 func TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst(t *testing.T) {
@@ -640,18 +650,23 @@ func TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst(t *testing
 }
 
 // TestReadInboundOrdinaryCoordinatorPacketDoesNotInheritRosterPriority is
-// #215 review, round 5: ExportNodeList queues a signed roster broadcast on
-// EVERY planetary run of the Coordinator's board, so the earlier
-// coordinatorGroupEarnsCarveOut gate -- any packet in the group earning it
-// meant the WHOLE group applied first -- let an ordinary gameplay packet
-// riding alongside that roster broadcast inherit its priority for free on
-// essentially every run, exactly the fixed advantage #178 set out to
-// remove, just re-anchored from filename order to "is the Coordinator's
-// board". Reproduced at 30/30 trials (matching the review) before this fix.
-// The roster packet must still always apply and always precede the rest of
-// the batch (see TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst),
-// but the ordinary packet riding with it in the SAME batch now takes its
-// chances in the shuffle like any other origin's, not a free ride.
+// #178's fairness goal applied to the Coordinator's own board specifically:
+// an ordinary gameplay packet must not inherit priority just by riding in
+// the same batch as a genuine, verified roster broadcast.
+//
+// Both packets are produced by the real production call sequence
+// (ExportNodeList, StampOutbox) rather than hand-picked Seq values -- an
+// earlier version of this test hand-picked Seq: 1 for the roster and Seq: 2
+// for the gameplay packet, asserting in a comment that this was "exactly
+// what ExportNodeList produces on every real planetary run" without having
+// verified it, and a real Coordinator board's Seq ordering is in fact the
+// reverse of that by default (a day's gameplay packets already sit in
+// Outbox by the time a scheduled run appends the roster). That made the
+// test pass without exercising the shape it claimed to. ExportNodeList
+// (and ExportLeagueConfig, ExportBulletins) now prepend rather than append
+// specifically so the real ordering matches what a correct split needs;
+// deriving the Seq values here from those real functions means this test
+// can never silently drift out of sync with that again.
 func TestReadInboundOrdinaryCoordinatorPacketDoesNotInheritRosterPriority(t *testing.T) {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -661,27 +676,29 @@ func TestReadInboundOrdinaryCoordinatorPacketDoesNotInheritRosterPriority(t *tes
 	const trials = 60
 	for trial := 0; trial < trials; trial++ {
 		inbound := t.TempDir()
-		signer := game.NewWorldSeed(game.DefaultConfig(), 1)
-		signer.CoordKey = priv
-		roster := game.Packet{
-			FromBoard: "Coordinator BBS", FromNode: 1, Seq: 1,
-			LeagueNodes: []game.LeagueNode{
-				{Number: 1, Name: "Coordinator BBS"},
-				{Number: 3, Name: "Honest BBS"},
-				{Number: 9, Name: "Receiver BBS"},
-			},
+
+		coordCfg := game.DefaultConfig()
+		coordCfg.BoardID = "Coordinator BBS"
+		coord := game.NewWorldSeed(coordCfg, 1)
+		coord.CoordKey = priv
+		coord.LeagueNodes = []game.LeagueNode{
+			{Number: 1, Name: "Coordinator BBS"},
+			{Number: 3, Name: "Honest BBS"},
+			{Number: 9, Name: "Receiver BBS"},
 		}
-		if err := signer.SignAsCoordinator(&roster); err != nil {
-			t.Fatalf("trial %d: SignAsCoordinator: %v", trial, err)
+		// An ordinary gameplay packet, queued the way a real player action
+		// would be during the day, BEFORE the scheduled planetary run
+		// exports the roster.
+		coord.Outbox = append(coord.Outbox, game.Packet{FromBoard: "Coordinator BBS", News: []string{"COORD"}})
+		coord.ExportNodeList()
+		coord.StampOutbox()
+		if len(coord.Outbox) != 2 {
+			t.Fatalf("trial %d: want 2 packets queued (gameplay + roster), got %d", trial, len(coord.Outbox))
 		}
-		writePacket(t, inbound, "0-roster", roster)
-		// An ordinary gameplay packet from the SAME board, riding in the same
-		// batch as its own board's roster broadcast -- exactly what
-		// ExportNodeList produces on every real planetary run.
-		writePacket(t, inbound, "1-coord-gameplay", game.Packet{
-			FromBoard: "Coordinator BBS", FromNode: 1, Seq: 2, News: []string{"COORD"},
-		})
-		writePacket(t, inbound, "2-honest", game.Packet{FromBoard: "Honest BBS", FromNode: 3, Seq: 1, News: []string{"HONEST"}})
+		for _, p := range coord.Outbox {
+			writePacket(t, inbound, fmt.Sprintf("%d-coord.brp", p.Seq), p)
+		}
+		writePacket(t, inbound, "honest.brp", game.Packet{FromBoard: "Honest BBS", FromNode: 3, Seq: 1, News: []string{"HONEST"}})
 
 		cfg := game.DefaultConfig()
 		cfg.BoardID = "Receiver BBS"
@@ -722,8 +739,8 @@ func TestReadInboundOrdinaryCoordinatorPacketDoesNotInheritRosterPriority(t *tes
 	}
 }
 
-// TestReadInboundUnsignedLeagueUpdateDoesNotJumpQueue is #215 review round 4
-// finding 2: the carve-out gate ran on claimed packet content alone, before
+// TestReadInboundUnsignedLeagueUpdateDoesNotJumpQueue: the carve-out gate
+// used to run on claimed packet content alone, before
 // any signature was examined, so an origin could buy first-mover priority
 // just by setting LeagueNodes on a packet it never had a Coordinator key to
 // sign -- no forged FromNode/FromBoard needed, unlike the narrower claim
@@ -786,8 +803,8 @@ func TestReadInboundUnsignedLeagueUpdateDoesNotJumpQueue(t *testing.T) {
 	}
 }
 
-// TestReadInboundAppliedOrderIsReproducibleWithFixedShuffleSource is #215
-// review finding 4: ReadInbound used to hard-code rand.Reader at the
+// TestReadInboundAppliedOrderIsReproducibleWithFixedShuffleSource:
+// ReadInbound used to hard-code rand.Reader at the
 // shuffleGroupOrder call site, so nothing could pin the between-origin order
 // of a whole batch end to end for a test or a sysop investigating a
 // disputed run. inboundShuffleSrc is now a package variable a test can
@@ -830,8 +847,8 @@ func TestReadInboundAppliedOrderIsReproducibleWithFixedShuffleSource(t *testing.
 	}
 }
 
-// TestReadInboundOrderNoticeIncludesCoordinatorGroupAndFiresOnContestedPair
-// is #215 review finding 3: the old audit line named `rest`, which excludes
+// TestReadInboundOrderNoticeIncludesCoordinatorGroupAndFiresOnContestedPair:
+// the old audit line named `rest`, which excludes
 // the Coordinator's group, so it never named the group that actually ran
 // first, and its len(rest) > 1 guard suppressed the line entirely on a
 // Coordinator-versus-exactly-one-other-board run -- a contested run leaving
@@ -873,8 +890,67 @@ func TestReadInboundOrderNoticeIncludesCoordinatorGroupAndFiresOnContestedPair(t
 	}
 }
 
-// TestRunPlanetaryOrderNoticeReachesLogNotTheReport is #215 review finding
-// 7: PlanetaryRun.Notices is documented as transport faults for the sysop,
+// TestReadInboundOrderNoticeLabelsASplitCoordinatorGroupDistinctly covers a
+// real gap: when the Coordinator's group has a deferred remainder, coordKey
+// legitimately names the batch's applied order twice -- once for the
+// verified-orders prefix, once again wherever the deferred remainder's turn
+// falls in the shuffle -- and the two are not interchangeable. Naming both
+// occurrences identically leaves a sysop unable to tell which one carried
+// the verified orders, and counting entries as "origins" overstates how
+// many distinct boards were actually involved.
+func TestReadInboundOrderNoticeLabelsASplitCoordinatorGroupDistinctly(t *testing.T) {
+	pub, priv, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	inbound := t.TempDir()
+
+	coordCfg := game.DefaultConfig()
+	coordCfg.BoardID = "Coordinator BBS"
+	coord := game.NewWorldSeed(coordCfg, 1)
+	coord.CoordKey = priv
+	coord.LeagueNodes = []game.LeagueNode{
+		{Number: 1, Name: "Coordinator BBS"},
+		{Number: 3, Name: "Honest BBS"},
+		{Number: 9, Name: "Receiver BBS"},
+	}
+	coord.Outbox = append(coord.Outbox, game.Packet{FromBoard: "Coordinator BBS", News: []string{"COORD"}})
+	coord.ExportNodeList()
+	coord.StampOutbox()
+	for _, p := range coord.Outbox {
+		writePacket(t, inbound, fmt.Sprintf("%d-coord.brp", p.Seq), p)
+	}
+	writePacket(t, inbound, "honest.brp", game.Packet{FromBoard: "Honest BBS", FromNode: 3, Seq: 1})
+
+	cfg := game.DefaultConfig()
+	cfg.BoardID = "Receiver BBS"
+	w := game.NewWorldSeed(cfg, 1)
+	w.CoordPub = pub
+	w.LeagueNodes = []game.LeagueNode{
+		{Number: 1, Name: "Coordinator BBS"},
+		{Number: 3, Name: "Honest BBS"},
+		{Number: 9, Name: "Receiver BBS"},
+	}
+
+	result, err := ReadInbound(w, inbound, false)
+	if err != nil {
+		t.Fatalf("ReadInbound: %v", err)
+	}
+	if !strings.Contains(result.OrderNotice, "Coordinator BBS (verified orders)") {
+		t.Errorf("OrderNotice must mark the verified-orders prefix distinctly: %q", result.OrderNotice)
+	}
+	if got := strings.Count(result.OrderNotice, "Coordinator BBS"); got != 2 {
+		t.Errorf("OrderNotice mentions Coordinator BBS %d times, want 2 (the verified prefix and its deferred remainder): %q",
+			got, result.OrderNotice)
+	}
+	if !strings.Contains(result.OrderNotice, "3 groups") {
+		t.Errorf("OrderNotice must count groups (3: the verified prefix, the deferred remainder, and Honest BBS), not origins: %q",
+			result.OrderNotice)
+	}
+}
+
+// TestRunPlanetaryOrderNoticeReachesLogNotTheReport:
+// PlanetaryRun.Notices is documented as transport faults for the sysop,
 // and runFull's interactive path prints it to the same stdout an active
 // door session shares with its caller. The applied-order line must reach
 // the sysop's planetary log but never PlanetaryRun.Notices, or an ordinary
@@ -919,8 +995,8 @@ func TestRunPlanetaryOrderNoticeReachesLogNotTheReport(t *testing.T) {
 	}
 }
 
-// TestQuarantinePacketFailureLeavesFileInPlaceAndDoesNotAbortBatch is #215
-// review finding 6: the quarantine notice used to be appended, and the
+// TestQuarantinePacketFailureLeavesFileInPlaceAndDoesNotAbortBatch: the
+// quarantine notice used to be appended, and the
 // success path assumed, BEFORE the move was even attempted. If MkdirAll or
 // the move itself failed (read-only data dir, full disk), ReadInbound
 // returned the error, aborting the whole run over one bad file -- the exact
@@ -975,7 +1051,7 @@ func TestQuarantinePacketFailureLeavesFileInPlaceAndDoesNotAbortBatch(t *testing
 	}
 }
 
-// TestUniqueNameCapsAtMaxQuarantineCopies is #215 review finding 5: without
+// TestUniqueNameCapsAtMaxQuarantineCopies: without
 // a cap, a neighbour whose transport keeps redelivering one broken file
 // under the same name accumulates same-named copies without limit, and
 // every new arrival re-stats every copy already there. Past

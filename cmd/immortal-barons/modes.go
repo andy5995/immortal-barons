@@ -93,7 +93,7 @@ func runPlanetary(cfg game.Config, verbose bool) error {
 // for a command whose whole job is moving mail: a sysop cannot tell a run that
 // had nothing to do from one that read the wrong directory.
 func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
-	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.Quarantined
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.Quarantined + run.Deferred
 	switch {
 	case run.Applied == 0 && skipped == 0:
 		fmt.Printf("No packets waiting in %s\n", cfg.Inbound())
@@ -127,6 +127,10 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 	if run.Quarantined > 0 {
 		fmt.Printf("Set aside %d packet(s) that could not be read at all; they are in %s.\n",
 			run.Quarantined, filepath.Join(cfg.DataDir, store.BadDir))
+	}
+	if run.Deferred > 0 {
+		fmt.Printf("Left %d packet(s) in inbound untouched: too young to trust as a complete write yet, will retry next run.\n",
+			run.Deferred)
 	}
 	if run.RosterUpdated {
 		fmt.Println("The League Coordinator's roster replaced this board's copy.")
@@ -162,7 +166,7 @@ func reportPlanetary(cfg game.Config, run store.PlanetaryRun) {
 // e.g. "skipped 3: 2 already seen, 1 for another league". Each reason is shown
 // only when its count is above zero.
 func skipSummary(run store.PlanetaryRun) string {
-	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.Quarantined
+	skipped := run.OtherLeague + run.MeshCopy + run.AlreadySeen + run.Refused + run.Held + run.Quarantined + run.Deferred
 	if skipped == 0 {
 		return ""
 	}
@@ -176,6 +180,13 @@ func skipSummary(run store.PlanetaryRun) string {
 	// somebody's attention, not routine traffic that will resolve itself.
 	if run.Quarantined > 0 {
 		parts = append(parts, fmt.Sprintf("%d could not be read at all", run.Quarantined))
+	}
+	// Deferred ranks next: usually resolves itself by next run, but is
+	// worth naming here too so it is not invisible for the (rare, and
+	// itself worth noticing) run where the same file is still too young a
+	// second time.
+	if run.Deferred > 0 {
+		parts = append(parts, fmt.Sprintf("%d left in place, too new to trust as complete", run.Deferred))
 	}
 	// Held ranks next: nothing is lost, but the league is out of step and
 	// somebody has to act before those packets move.
