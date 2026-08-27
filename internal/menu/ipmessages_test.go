@@ -393,3 +393,62 @@ func TestIPMessageWithoutARosterWritesToTheWholePlanet(t *testing.T) {
 		t.Fatalf("queued for %q, want one planet-wide message (no ToEmpire)", got)
 	}
 }
+
+// matchPlanet, against select_planet (BRE.OVR 0x021dd9) — #183. The behaviour
+// each case pins is read out of the binary, not guessed: see the doc comment on
+// matchPlanet for the offsets.
+func TestMatchPlanetFollowsTheOriginalsParser(t *testing.T) {
+	planets := []game.LeagueNode{
+		{Number: 1, Name: "The X-Bit BBS"},
+		{Number: 2, Name: "The uniX-Bit BBS"},
+		{Number: 5, Name: "Nite Eyes BBS"},
+		{Number: 12, Name: "A-Net Online BBS"},
+	}
+	name := func(p *game.LeagueNode) string {
+		if p == nil {
+			return ""
+		}
+		return p.Name
+	}
+	for _, c := range []struct {
+		typed, want, why string
+	}{
+		{"5", "Nite Eyes BBS", "an exact roster number resolves on its own"},
+		{"12", "A-Net Online BBS", "a two-digit number is exact, not a substring"},
+		{"99", "", "a number with no slot behind it is refused"},
+		{"Nite Eyes BBS", "Nite Eyes BBS", "a full name still resolves"},
+		{"nite eyes bbs", "Nite Eyes BBS", "and case does not matter"},
+		// The case #183 was opened for.
+		{"Nite E", "Nite Eyes BBS", "a unique partial name resolves"},
+		// Pos() searches from anywhere in the name, so this is not prefix-only.
+		{"Eyes", "Nite Eyes BBS", "a unique substring resolves from the middle"},
+		{"A-NET", "A-Net Online BBS", "matching is case-insensitive both ways"},
+		// The question #183 left open, settled at unit offset 0x15c0: only a
+		// count of exactly one resolves.
+		{"The ", "", "a prefix shared by two planets is refused"},
+		{"X-Bit", "", "a substring shared by two planets is refused"},
+		{"night eyes", "", "a misspelling matches nothing"},
+		{"", "", "an empty answer selects nothing"},
+	} {
+		t.Run(c.typed, func(t *testing.T) {
+			if got := name(matchPlanet(planets, c.typed)); got != c.want {
+				t.Errorf("matchPlanet(%q) = %q, want %q — %s", c.typed, got, c.want, c.why)
+			}
+		})
+	}
+}
+
+// An ambiguous answer must not quietly pick one, which is the failure that would
+// send an attack or a message to the wrong planet. Asserted separately because
+// it is the whole reason #183 refused to guess.
+func TestAnAmbiguousPlanetNameSelectsNothing(t *testing.T) {
+	planets := []game.LeagueNode{
+		{Number: 1, Name: "The X-Bit BBS"},
+		{Number: 2, Name: "The uniX-Bit BBS"},
+	}
+	for _, typed := range []string{"The", "The ", "Bit", "BBS", "X-Bit"} {
+		if p := matchPlanet(planets, typed); p != nil {
+			t.Errorf("matchPlanet(%q) picked %q; two planets match, so it must refuse", typed, p.Name)
+		}
+	}
+}

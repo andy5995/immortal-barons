@@ -171,10 +171,30 @@ func pickPlanet(s session.Session, w *ctx, planets []game.LeagueNode) *game.Leag
 }
 
 // matchPlanet resolves a typed planet number or name, as BRE's prompt offers
-// ("Enter Planet Name or Number"). The name is matched case-insensitively but
-// in full: whether the original accepts an abbreviation was never observed, and
-// guessing at one would send a message to the wrong planet. Anything it does not
-// recognize returns nil, so the prompt asks again.
+// ("Enter Planet Name or Number"). BINARY-VERIFIED against select_planet
+// (BRE.OVR 0x021dd9, container ovr_0209c5), which settles #183:
+//
+//   - An exact roster number resolves on its own, checked before anything else
+//     and only when that slot is occupied (unit offset 0x1861: Val(typed), then
+//     the slot's own occupied byte at +0x28ba).
+//   - Otherwise the typed text is matched as a SUBSTRING, not a prefix. The
+//     original upper-cases both sides and calls Turbo Pascal's Pos(typed, name)
+//     — argument order confirmed at 0x1535-0x1560 — so "Bit" finds "The X-Bit
+//     BBS" from the middle. It runs the same Pos against the planet's NUMBER
+//     rendered as a string (0x1585), which is why a bare digit can match several
+//     planets once the roster passes nine.
+//   - It COUNTS the matches rather than taking the first ([bp-0x30e], 0x1521),
+//     and only a count of exactly ONE resolves: 0 sets state 7, 1 sets 14, more
+//     than 1 sets 15, and the loop that identifies the slot runs only for 1
+//     (0x15c0). Nothing is selected for 0 or for many, and the routine holds no
+//     message distinguishing them — an ambiguous answer is refused exactly like
+//     an unknown one, which is the safe half of the question #183 left open.
+//
+// The original matches as you TYPE, completing the line the moment the count
+// reaches one, which is what a capture shows as two characters erased and
+// replaced by the full name (docs/dev/bre-screens.md). IB resolves the same
+// text on ENTER instead; the accepted keystrokes are the same, the live
+// completion is not built.
 func matchPlanet(planets []game.LeagueNode, typed string) *game.LeagueNode {
 	if n, err := strconv.Atoi(typed); err == nil {
 		for i := range planets {
@@ -184,12 +204,22 @@ func matchPlanet(planets []game.LeagueNode, typed string) *game.LeagueNode {
 		}
 		return nil
 	}
-	for i := range planets {
-		if strings.EqualFold(planets[i].Name, typed) {
-			return &planets[i]
-		}
+	typed = strings.ToUpper(strings.TrimSpace(typed))
+	if typed == "" {
+		return nil
 	}
-	return nil
+	var found *game.LeagueNode
+	for i := range planets {
+		if !strings.Contains(strings.ToUpper(planets[i].Name), typed) &&
+			!strings.Contains(strconv.Itoa(planets[i].Number), typed) {
+			continue
+		}
+		if found != nil {
+			return nil // more than one: refused, as the original refuses it
+		}
+		found = &planets[i]
+	}
+	return found
 }
 
 // pickPlanetNamed is the whole prompt for a screen that already knows which

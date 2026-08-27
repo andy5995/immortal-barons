@@ -2315,8 +2315,31 @@ because `game.RemoteScore` carries no slot; and a planet IB has no scores packet
 for skips the prompt and takes a planet-wide message rather than refusing.
 
 **The planet prompt autocompletes in the original.** The capture shows two typed
-characters erased (`BS SP BS` twice) and replaced with the full planet name. IB
-does not do this — a separate request, noted on #193 and not built there.
+characters erased (`BS SP BS` twice) and replaced with the full planet name.
+
+**Its parser, read out of `select_planet` (BRE.OVR 0x021dd9, container
+ovr_0209c5) — this settles #183.** An exact roster number resolves first and
+alone, and only when the slot is occupied (0x1861). Otherwise the answer is a
+**substring** search, not a prefix one: both sides are upper-cased and the
+original calls `Pos(typed, name)` (argument order confirmed at 0x1535-0x1560), so
+a fragment matches from the middle of a name. The same `Pos` runs against the
+planet's number rendered as a string (0x1585), so a bare digit can match several
+planets once a roster passes nine.
+
+It **counts** the matches rather than taking the first (`[bp-0x30e]`, loop at
+0x1521) and resolves only on a count of exactly one: 0 sets state 7, 1 sets 14,
+more than 1 sets 15, and the loop that identifies the slot runs for 1 alone
+(0x15c0). So an AMBIGUOUS answer selects nothing and is refused exactly as an
+unknown one is — the routine holds no message telling the two apart, only
+`Planet not found`. That is the question #183 left open, and it is the safe
+answer: `The X-Bit BBS` and `The uniX-Bit BBS` share `The `, and picking one
+would send an attack to the wrong planet.
+
+The matching runs as you TYPE — the state code is compared against its previous
+value each keystroke (0x16a3) and the line is completed the moment the count
+reaches one, which is what the erase-and-replace above is. **IB matches the same
+text on ENTER** (`matchPlanet`), so the accepted keystrokes agree; the live
+completion is not built.
 
 ### The message editor
 
