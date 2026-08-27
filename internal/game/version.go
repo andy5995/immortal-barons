@@ -82,3 +82,9 @@ func VersionString() string {
 	}
 	return Version
 }
+
+// NameVersion is how the game introduces itself on screen: the program name and
+// its full version, "Immortal Barons  v0.0.8 (ffdec31)". The single definition
+// the About screen and the pre-menu banner both render, so the two cannot drift.
+// Not translated — a proper noun and a numeral.
+func NameVersion() string { return "Immortal Barons  v" + VersionString() }

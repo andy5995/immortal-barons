@@ -23,7 +23,7 @@ func about(s session.Session, w *ctx) Result {
 	// screen follows that look — no blue title bar, the name/version below is the
 	// only headline.
 	fmt.Fprintf(s, "\n%s%s%s\n", dim(ansi.FgBrightRed), InsetRule, ansi.Reset)
-	centered(s, ansi.FgBrightWhite, "Immortal Barons  v"+game.VersionString())
+	centered(s, ansi.FgBrightWhite, game.NameVersion())
 	centered(s, ansi.FgBrightCyan, "https://andy5995.github.io/immortal-barons/")
 	fmt.Fprint(s, "\n")
 	// Body prose is off-white so the name/version headline above stays the only

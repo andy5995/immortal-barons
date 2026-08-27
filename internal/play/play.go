@@ -113,6 +113,19 @@ func maintNotice(s session.Session, r game.MaintReport) {
 	}
 }
 
+// versionNotice names the build the caller is playing, under the maintenance
+// notice and above the opening menu (whose header carries the game's start
+// date). It sits here rather than in the menu header so it is stated once per
+// session instead of on every redraw of that menu.
+//
+// Not wrapped, like the maintenance notice above it: the string is a name and a
+// version number, so it is far short of 80 columns in every language and does
+// not grow with the catalog. WrapIndented would also collapse the double space
+// the About screen renders in the same string.
+func versionNotice(s session.Session) {
+	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightWhite, game.NameVersion(), ansi.Reset)
+}
+
 // Session plays one session against an already-loaded world owned by the
 // caller. It does not take the flock, load, or run daily maintenance — the
 // caller owns those. save is called once at session end: a front-end holding
@@ -162,6 +175,7 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 
 	menu.Splash(s)
 	maintNotice(s, maint)
+	versionNotice(s)
 
 	var joinOpen bool
 	var refusal string
