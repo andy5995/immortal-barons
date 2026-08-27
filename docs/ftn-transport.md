@@ -127,6 +127,34 @@ SubjectPath Absolute
   only `NNNNCCCC.BRP`. Any other value is used as a literal path prefix.
   The stored-message Subject has 71 usable bytes, or 70 with the `^` prefix.
 
+#### Keeping attach subjects short
+
+The IB installation and data directories may be arbitrarily deep if
+`AttachDir` is a short absolute path. For example:
+
+```ini
+AttachDir /var/spool/ib-attach
+SubjectPath Absolute
+```
+
+This writes a Subject such as
+`/var/spool/ib-attach/7PRK0001.BRP`; the installation path is not included.
+A relative `AttachDir` is resolved beneath the data directory and therefore
+does not provide this workaround. Create the attachment directory with
+ownership and permissions that allow both `barons-ftn` and the mailer to use
+it.
+
+Do not use `/tmp` or another automatically cleaned directory for this purpose.
+An attachment may remain queued across a reboot or cleanup interval, and
+removing it leaves the mailer with a dangling `.msg` envelope. Use a short,
+persistent spool directory instead.
+
+`SubjectPath Basename` shortens the Subject further, to only
+`7PRK0001.BRP`, but it is correct only when the mailer is independently
+configured to search the same directory named by `AttachDir`. `barons-ftn`
+cannot infer or configure that mailer search path. BSO flow files and oboxes do
+not use a Type-2 Subject, so the 71-byte limit applies only to `Attach` links.
+
 ### Per-peer links
 
 Each `Link` identifies a directly connected IBBS roster node:
