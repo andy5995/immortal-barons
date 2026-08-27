@@ -38,7 +38,7 @@ Keep each owner in its own directory:
 | `bbs.cfg` `Inbound` | Immortal Barons | Unwrapped JSON packets waiting for `-planetary` |
 | `bbs.cfg` `Outbound` | Immortal Barons | Complete JSON packets waiting for `--out` |
 | `data/ftn-spool` | `barons-ftn` | Usually empty; journals appear while a handoff is incomplete |
-| `ftn.cfg` `AttachDir` | connector/tosser | `NNNNCCCC.BRP` bundles waiting to be sent |
+| `ftn.cfg` `AttachDir` (default `data/att`) | connector/tosser | `NNNNCCCC.BRP` bundles waiting to be sent |
 | `ftn.cfg` `NetmailDir` | connector/tosser | Outgoing game-owned `.msg` envelopes |
 | `ftn.cfg` `InboundDir` | mailer/connector | Newly received bundles waiting for `--in` |
 | an obox | connector/mailer | Bundles queued for the peer owning that outbox |
@@ -471,7 +471,7 @@ mesh; describe that star with `HOST` lines instead.
 |---|---|---|
 | game `Outbound` | `--out` did not run or cannot take `game.lock` | Run `barons-ftn --out`; read its error |
 | `ftn-spool/out` | At least one target is busy or failed | Read the warning; inspect that peer's `.bsy`, path, or netmail directory |
-| `AttachDir` with no `.msg`/flow | Attach or BSO queue publication failed | Check subject length, `NetmailDir`, BSO directory, and permissions |
+| `AttachDir` (default `data/att`) with no `.msg`/flow | Attach or BSO queue publication failed | Check subject length, `NetmailDir`, BSO directory, and permissions |
 | `NetmailDir` `.msg` | The tosser has not packed outgoing netmail | Run/check the tosser and allow file attaches |
 | BSO `.?lo` | The mailer has not successfully sent the referenced bundle | Check peer address, password, route, and `.bsy` |
 | peer obox | The mailer has not sent or acknowledged the file | Check the peer session and outbox mapping |
@@ -525,6 +525,15 @@ What to read instead:
 - **`ftn-spool/bad`** only grows. Nothing is retried from it and nothing removes
   it; it is yours to read and clear once the producing board, route, league or
   roster is corrected.
+- **`AttachDir` (default `data/att`)** should also drain: a bundle sitting
+  there with no matching `.msg`/flow entry means the Attach or BSO queue
+  publication step failed after the bundle was written — check the same
+  causes as the troubleshooting table above (subject length, `NetmailDir`,
+  BSO directory, permissions). This directory is deliberately not under
+  `ftn-spool/` and not shown by `--status`'s spool report — it is the one
+  transport path a mailer's Subject field has to spell out under a byte
+  limit, so it lives where the sysop can point `AttachDir` at a short
+  location if the default does not fit.
 
 **A published alias belongs to the mailer, not to the game.** Once a target is
 published and marked done, its snapshot can disappear and `barons-ftn` no longer

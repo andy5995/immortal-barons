@@ -179,6 +179,41 @@ func TestSequenceDigitBreaksAbsoluteButNotBasename(t *testing.T) {
 	}
 }
 
+// #232 review: an earlier version of subjectAdvice told a SubjectPrefixed
+// sysop to shorten AttachDir, which does nothing -- the subject in this
+// mode is SubjectPrefix plus the filename, and AttachDir's own value never
+// appears in it. Proves that directly: two attached paths differing only
+// in their directory (standing in for two different AttachDir values)
+// produce the identical subject once SubjectPrefixed spells it, and the
+// advice for this mode names SubjectPath, not AttachDir.
+func TestSubjectPrefixedIgnoresAttachDirsOwnLength(t *testing.T) {
+	cfg := Config{Binkley: true, SubjectMode: SubjectPrefixed, SubjectPrefix: "fido"}
+	short, _, err := fileAttachSubject(cfg, "/short/p.brp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	long, _, err := fileAttachSubject(cfg, "/a/very/considerably/longer/attach/directory/p.brp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if short != long {
+		t.Fatalf("subject changed with the directory portion of the attached path: %q vs %q -- "+
+			"SubjectPrefixed is supposed to depend only on SubjectPrefix and the filename", short, long)
+	}
+
+	// The advice may still mention AttachDir to explain why it does not
+	// help here (accurate, and worth saying) -- what it must not do is
+	// recommend changing it as the fix, the mistake this test exists to
+	// catch.
+	advice := subjectAdvice(SubjectPrefixed)
+	if !strings.Contains(advice, "SubjectPath") {
+		t.Errorf("SubjectPrefixed advice does not mention SubjectPath: %v", advice)
+	}
+	if strings.Contains(advice, "Set AttachDir") {
+		t.Errorf("SubjectPrefixed advice tells the sysop to set AttachDir, which does not affect this mode's subject length: %v", advice)
+	}
+}
+
 func cString(b []byte) string {
 	if i := bytes.IndexByte(b, 0); i >= 0 {
 		b = b[:i]
