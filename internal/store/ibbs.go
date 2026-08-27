@@ -497,11 +497,8 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 		groups[key] = append(groups[key], stagedPacket{path, p})
 	}
 
-	bySeq := func(s []stagedPacket) func(a, b int) bool {
-		return func(a, b int) bool { return s[a].packet.Seq < s[b].packet.Seq }
-	}
 	for _, g := range groups {
-		sort.SliceStable(g, bySeq(g))
+		sort.SliceStable(g, func(a, b int) bool { return g[a].packet.Seq < g[b].packet.Seq })
 	}
 
 	// A board never sends a packet with FromBoard blank — every export path

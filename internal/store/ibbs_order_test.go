@@ -402,16 +402,16 @@ func TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod(t *testing.T)
 	}
 }
 
-// TestCarriesLeagueUpdate is a direct unit test of the #215 review finding 2
-// gate: a group earns Coordinator carve-out priority only when something in
-// it is league-wide state the rest of a run's checks need to read first.
-// TestCoordinatorGroupEarnsCarveOut replaces the earlier carriesLeagueUpdate
-// (this function's predecessor duplicated game.CarriesCoordinatorOrders and
-// dropped its Reset case -- a league-reset order did not earn the carve-out
-// and applied in shuffled position, #215 review round 4 finding 1) and adds
-// coverage for the round's finding 2: the gate must also verify the
-// signature, not just trust the claimed content, or an unsigned or forged
-// packet buys the same priority for free.
+// TestLastVerifiedOrdersIndex is a direct unit test of lastVerifiedOrdersIndex:
+// a packet earns the Coordinator carve-out only when it carries something
+// only the Coordinator may send AND verifies against this board's CoordPub —
+// neither check alone is enough, since VerifyCoordinatorOrders returns true
+// for a packet carrying no coordinator orders at all, and content alone is
+// spoofable. The split point it returns is the LAST such packet in Seq
+// order, not the first or a simple yes/no, so the last two cases cover that
+// specifically: a later verified packet must move the split point forward,
+// and a trailing ordinary packet after the last verified one must not be
+// pulled in with it.
 func TestLastVerifiedOrdersIndex(t *testing.T) {
 	pub, priv, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -439,15 +439,15 @@ func TestLastVerifiedOrdersIndex(t *testing.T) {
 		{
 			"ordinary gameplay packets only",
 			[]stagedPacket{
-				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 1})},
-				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 2})},
+				{packet: game.Packet{FromBoard: "Coordinator BBS", Seq: 1}},
+				{packet: game.Packet{FromBoard: "Coordinator BBS", Seq: 2}},
 			},
 			-1,
 		},
 		{
 			"one packet among several carries a signed, verified roster update",
 			[]stagedPacket{
-				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 1})},
+				{packet: game.Packet{FromBoard: "Coordinator BBS", Seq: 1}},
 				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 2,
 					LeagueNodes: []game.LeagueNode{{Number: 1, Name: "Coordinator BBS"}}})},
 			},
@@ -501,7 +501,7 @@ func TestLastVerifiedOrdersIndex(t *testing.T) {
 			[]stagedPacket{
 				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 1,
 					Bulletins: &game.BulletinSet{}})},
-				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 2})},
+				{packet: game.Packet{FromBoard: "Coordinator BBS", Seq: 2}},
 				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 3,
 					LeagueConfig: &game.LeagueConfig{}})},
 			},
@@ -513,10 +513,10 @@ func TestLastVerifiedOrdersIndex(t *testing.T) {
 			// of the last VERIFIED packet", not "index of the last packet".
 			"a trailing ordinary packet after the last verified one is excluded",
 			[]stagedPacket{
-				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 1})},
+				{packet: game.Packet{FromBoard: "Coordinator BBS", Seq: 1}},
 				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 2,
 					LeagueConfig: &game.LeagueConfig{}})},
-				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 3})},
+				{packet: game.Packet{FromBoard: "Coordinator BBS", Seq: 3}},
 			},
 			1,
 		},
