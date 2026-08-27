@@ -59,7 +59,7 @@ func TestSaveConfig_LoadConfig_RoundTrip(t *testing.T) {
 	// TestBoardConfigRoundTrip's.
 	cfg.BoardID, cfg.InboundDir, cfg.OutboundDir = got.BoardID, got.InboundDir, got.OutboundDir
 	cfg.LeagueNumber, cfg.OutboundDirs = got.LeagueNumber, got.OutboundDirs
-	cfg.BulletinDir = got.BulletinDir
+	cfg.BulletinDir, cfg.BoardURL, cfg.BBSName = got.BulletinDir, got.BoardURL, got.BBSName
 	if !reflect.DeepEqual(got, cfg) {
 		t.Errorf("round trip = %+v, want %+v", got, cfg)
 	}

@@ -40,13 +40,12 @@ Set these on the **Caps & Node** page:
   ignores the other's packets, and marks its own files `L042-`.
 - **Bulletin Dir** — where the game writes its own bulletin files for your BBS
   to display: the scoreboard, today's and yesterday's news, and a World Report
-  of every battle fought anywhere in the league. Each is written twice, once
-  with colour (`.ans`) and once without (`.txt`), so you can point a bulletin
-  menu entry at whichever your caller can read. A `.html` page is written
-  alongside each, built from the game's own figures rather than converted from
-  the screen, for a board that publishes on the web: one self-contained file
-  apiece, with no stylesheet or script to fetch. Leave the setting blank and
-  none are written.
+  of every battle fought anywhere in the league. Each is written three times:
+  `.ans` with colour and `.txt` without, so you can point a bulletin menu entry
+  at whichever your caller can read, and `.html` for a board that publishes on
+  the web — one self-contained file apiece, built from the game's own figures
+  rather than converted from the screen, with no stylesheet or script to fetch.
+  Twelve files in all. Leave the setting blank and none are written.
 - **Inbound Dir** — the directory where packets from other boards arrive. This
   is usually your mailer's inbound directory, where it puts every file it
   receives.

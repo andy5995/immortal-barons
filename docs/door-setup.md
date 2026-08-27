@@ -259,6 +259,26 @@ carries the one rule the league does not set for you: `Lottery yes` or
 `Lottery no` decides whether this board offers the Queen's lottery, and it
 defaults to yes.
 
+## Bulletin files for your BBS
+
+Set `BulletinDir` in `bbs.cfg` to a directory and the game writes its own
+bulletins there whenever it runs its daily or planetary step: the scoreboard,
+today's and yesterday's news, and a World Report of every battle fought in the
+league. Each is written three times — `.ans` with colour, `.txt` without, and a
+self-contained `.html` page — so you can point a bulletin menu entry at
+whichever your callers can read, and publish the page if your board has a
+website. Leave the setting blank and none are written.
+
+Two optional lines beside it decide what the pages say about your board:
+`BBSName` is what your BBS calls itself, which need not be its planet name --
+the game has no way to ask, so it uses this if you write it and the planet name
+if you do not -- and `BoardURL` is your BBS's website, which the pages link
+that name to. Neither is needed for the files to be written.
+
+A stand-alone board gets these too, minus the World Report: that one is the
+league's wars, and a board playing alone has no world to report on. The
+scoreboard and news are the same screens the game shows a caller.
+
 ## Adding AI barons to a running game
 
 To drop more AI opponents into a game that is already going, without resetting:

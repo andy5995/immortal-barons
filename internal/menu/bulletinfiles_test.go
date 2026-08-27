@@ -18,6 +18,7 @@ func TestWriteBulletinsWritesBothFormsOfEach(t *testing.T) {
 	cfg := game.DefaultConfig()
 	cfg.AICount = 2
 	cfg.BoardID = "Alpha BBS"
+	cfg.IBBS = true // a league board, so the World Report is among the set
 	w := game.NewWorldSeed(cfg, 1)
 	w.Today = "2026-08-27"
 	dir := t.TempDir()
@@ -43,6 +44,13 @@ func TestWriteBulletinsWritesBothFormsOfEach(t *testing.T) {
 		if strings.Contains(string(plain), "\x1b[") {
 			t.Errorf("%s.txt still carries ANSI escapes", base)
 		}
+		page, err := os.ReadFile(filepath.Join(dir, base+".html"))
+		if err != nil {
+			t.Fatalf("%s.html: %v", base, err)
+		}
+		if !strings.Contains(string(page), "<pre") {
+			t.Errorf("%s.html is not the screen", base)
+		}
 	}
 	// A blank directory is how a sysop turns the whole set off.
 	if errs := WriteBulletins(w, ""); errs != nil {
@@ -57,6 +65,7 @@ func TestWorldReportShowsAttacksAndNamesTheOutcome(t *testing.T) {
 	cfg := game.DefaultConfig()
 	cfg.AICount = 2
 	cfg.BoardID = "Alpha BBS"
+	cfg.IBBS = true // the World Report is the league's, so only a league board writes one
 	w := game.NewWorldSeed(cfg, 1)
 	w.Battles = []game.BattleLogEntry{
 		{Date: "2026-08-27", Attacker: "Apples", Defender: "Bananas", Won: true, Land: 12},
@@ -88,13 +97,14 @@ func TestWorldReportShowsAttacksAndNamesTheOutcome(t *testing.T) {
 	}
 }
 
-// The HTML pages are built from the game's data, not translated from the ANSI
-// screen (#233). This checks they carry the same facts and escape what a realm
-// name could otherwise inject.
-func TestBulletinPagesCarryTheDataAndEscapeIt(t *testing.T) {
+// The pages show the SAME screen the .ans does, coloured (#233), so a bulletin
+// linked from a website carries the game's look rather than arriving as a
+// generic web table.
+func TestBulletinPagesShowTheColouredScreen(t *testing.T) {
 	cfg := game.DefaultConfig()
 	cfg.AICount = 1
 	cfg.BoardID = "Alpha BBS"
+	cfg.IBBS = true
 	w := game.NewWorldSeed(cfg, 1)
 	w.Today = "2026-08-27"
 	w.AddHuman("scripty", `<script>alert(1)</script>`)
@@ -106,33 +116,49 @@ func TestBulletinPagesCarryTheDataAndEscapeIt(t *testing.T) {
 	if errs := WriteBulletins(w, dir); len(errs) != 0 {
 		t.Fatal(errs)
 	}
-	world, err := os.ReadFile(filepath.Join(dir, "world.html"))
+	page, err := os.ReadFile(filepath.Join(dir, "world.html"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	page := string(world)
-	for _, want := range []string{"<table", "World Report", "Apples", "Bananas", "took 12", "CRUSHED", "Delta BBS"} {
-		if !strings.Contains(page, want) {
+	html := string(page)
+	for _, want := range []string{"<pre", "World Report", "Apples", "Bananas", "took 12", "CRUSHED", "Delta BBS"} {
+		if !strings.Contains(html, want) {
 			t.Errorf("world.html lacks %q", want)
 		}
 	}
-	// A real table, not a <pre> of the terminal screen: that is the whole point
-	// of rendering from data.
-	if strings.Contains(page, "<pre") || strings.Contains(page, "\x1b[") {
-		t.Error("world.html carries the terminal screen rather than a table")
+	// Coloured, not a monochrome dump: the outcome words carry colour on screen
+	// and must carry it here.
+	if !strings.Contains(html, "<span style=\"color:#") {
+		t.Error("world.html carries no colour at all")
 	}
-	// It stands alone: a sysop drops it where their web server already looks.
-	for _, external := range []string{"<script src", "<link rel=\"stylesheet\"", "http://", "https://"} {
-		if strings.Contains(page, external) {
-			t.Errorf("world.html fetches something external: %q", external)
+	// And no raw escapes survived the conversion.
+	if strings.Contains(html, "\x1b") || strings.Contains(html, "\u001b") {
+		t.Error("world.html still contains ANSI escape bytes")
+	}
+	// Self-contained: a sysop drops it where their web server already looks.
+	// A LINK is not a fetch -- the footer points at the game's own page, which
+	// a reader who arrived from a BBS bulletin may well want -- so this forbids
+	// resources the browser would load, not anchors.
+	for _, fetched := range []string{"<script", "<link rel=\"stylesheet\"", "<img", "@import", "url("} {
+		if strings.Contains(html, fetched) {
+			t.Errorf("world.html loads something external: %q", fetched)
 		}
 	}
+	// The board's own name belongs on the page when it has one: a bulletin
+	// linked from a website should say whose board it came from.
+	if !strings.Contains(html, "Alpha BBS") {
+		t.Error("world.html does not name the board it came from")
+	}
+	if !strings.Contains(html, `<a href="https://andy5995.github.io/immortal-barons/"`) {
+		t.Error("world.html has no link to the game's page")
+	}
+	// A realm name is player-supplied and reaches the page inside template.HTML,
+	// which does NOT escape -- so ansiToHTML must, and this is where that is
+	// proved.
 	scores, err := os.ReadFile(filepath.Join(dir, "scores.html"))
 	if err != nil {
 		t.Fatal(err)
 	}
-	// A realm name is player-supplied and reaches this page; it must arrive as
-	// text, not markup.
 	if strings.Contains(string(scores), "<script>alert") {
 		t.Error("a realm name was written into the page unescaped")
 	}
@@ -141,9 +167,38 @@ func TestBulletinPagesCarryTheDataAndEscapeIt(t *testing.T) {
 	}
 }
 
-// Contrast is measured, never eyeballed: the palette is checked here so a later
-// colour tweak cannot quietly drop a value below the threshold. WCAG 2.1 wants
-// 4.5:1 for body text and 3:1 for a non-text boundary, in BOTH themes.
+// A board playing alone has no world to report on, so it writes no World
+// Report -- a page under that heading listing one planet's skirmishes would
+// promise something the board does not have.
+func TestStandAloneBoardWritesNoWorldReport(t *testing.T) {
+	cfg := game.DefaultConfig()
+	cfg.AICount = 1
+	cfg.BoardID = "Solo BBS"
+	cfg.IBBS = false
+	w := game.NewWorldSeed(cfg, 1)
+	w.Today = "2026-08-27"
+	dir := t.TempDir()
+	if errs := WriteBulletins(w, dir); len(errs) != 0 {
+		t.Fatal(errs)
+	}
+	for _, gone := range []string{"world.ans", "world.txt", "world.html"} {
+		if _, err := os.Stat(filepath.Join(dir, gone)); err == nil {
+			t.Errorf("a stand-alone board wrote %s", gone)
+		}
+	}
+	// It still gets the rest: its scoreboard and news are as worth showing as
+	// any league board's.
+	for _, want := range []string{"scores.ans", "scores.txt", "scores.html", "tdynews.ans", "yesnews.html"} {
+		if _, err := os.Stat(filepath.Join(dir, want)); err != nil {
+			t.Errorf("a stand-alone board did not write %s: %v", want, err)
+		}
+	}
+}
+
+// Contrast is measured, never eyeballed. The page renders the game's own
+// colours on black, so every one of them is checked here: a colour that reads
+// on a terminal is not automatically readable in a browser, and a later tweak
+// must not quietly drop one below the threshold.
 func TestBulletinPaletteMeetsContrast(t *testing.T) {
 	lum := func(hex string) float64 {
 		var r, g, b int
@@ -164,32 +219,91 @@ func TestBulletinPaletteMeetsContrast(t *testing.T) {
 		}
 		return (la + 0.05) / (lb + 0.05)
 	}
-	for _, theme := range []struct {
-		name, bg string
-		text     map[string]string
-		rule     string
-	}{
-		{"light", "#ffffff", map[string]string{
-			"text": "#1f2328", "muted": "#59636e", "accent": "#7d4e00",
-			"win": "#1a7f37", "loss": "#cf222e", "planet": "#0550ae",
-		}, "#818b95"},
-		{"dark", "#0d1117", map[string]string{
-			"text": "#e6edf3", "muted": "#9198a1", "accent": "#d29922",
-			"win": "#3fb950", "loss": "#f85149", "planet": "#79c0ff",
-		}, "#7d8590"},
-	} {
-		for token, colour := range theme.text {
-			if got := ratio(colour, theme.bg); got < 4.5 {
-				t.Errorf("%s theme: %s (%s) is %.2f:1 against %s, want 4.5:1 for text",
-					theme.name, token, colour, got, theme.bg)
-			}
-			if !strings.Contains(bulletinCSS, colour) {
-				t.Errorf("%s theme: %s (%s) is checked here but not in the stylesheet", theme.name, token, colour)
-			}
+	for code, colour := range ansiPalette {
+		if got := ratio(colour, bulletinBG); got < 4.5 {
+			t.Errorf("SGR %d (%s) is %.2f:1 against %s, want 4.5:1 for text",
+				code, colour, got, bulletinBG)
 		}
-		if got := ratio(theme.rule, theme.bg); got < 3 {
-			t.Errorf("%s theme: rule (%s) is %.2f:1, want 3:1 for a non-text boundary",
-				theme.name, theme.rule, got)
+	}
+	// The link and the focus ring are the page's own colours rather than the
+	// screen's, so they are held to the same bar: 4.5:1 for the link text, 3:1
+	// for the ring as a non-text indicator.
+	if got := ratio("#79aaff", bulletinBG); got < 4.5 {
+		t.Errorf("the footer link is %.2f:1, want 4.5:1", got)
+	}
+	if got := ratio("#ffd166", bulletinBG); got < 3 {
+		t.Errorf("the focus ring is %.2f:1, want 3:1", got)
+	}
+}
+
+// The board's own site, from bbs.cfg, so a reader who lands on a bulletin can
+// get back to the BBS it came from (#233). A board without one still names
+// itself, in plain text.
+func TestBulletinPagesLinkTheBoardsOwnSite(t *testing.T) {
+	build := func(url string) string {
+		cfg := game.DefaultConfig()
+		cfg.AICount = 1
+		cfg.BoardID = "Alpha BBS"
+		cfg.BoardURL = url
+		w := game.NewWorldSeed(cfg, 1)
+		w.Today = "2026-08-27"
+		dir := t.TempDir()
+		if errs := WriteBulletins(w, dir); len(errs) != 0 {
+			t.Fatal(errs)
 		}
+		body, err := os.ReadFile(filepath.Join(dir, "scores.html"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(body)
+	}
+	linked := build("https://alpha.example/bbs")
+	if !strings.Contains(linked, `<a href="https://alpha.example/bbs">Alpha BBS</a>`) {
+		t.Errorf("the board name is not linked to its site:\n%s", linked[strings.Index(linked, "<footer"):])
+	}
+	plain := build("")
+	if strings.Contains(plain, "<a href=\"\"") {
+		t.Error("a board with no site got an empty link")
+	}
+	if !strings.Contains(plain, "Alpha BBS") {
+		t.Error("a board with no site lost its name entirely")
+	}
+	// A sysop's typo should not become a scripted link on a page they publish.
+	// html/template's URL context is what stops it, and this proves it is in
+	// force rather than assumed.
+	hostile := build("javascript:alert(1)")
+	if strings.Contains(hostile, "javascript:alert") {
+		t.Error("a javascript: URL reached the page's href")
+	}
+}
+
+// BBSName is the board's own name, which is not always its planet name, and
+// the game has no way to ask the BBS for it. Set, the pages use it; absent,
+// they fall back to the planet rather than going nameless (#233).
+func TestBulletinPagesPreferTheBBSName(t *testing.T) {
+	page := func(bbsName string) string {
+		cfg := game.DefaultConfig()
+		cfg.AICount = 1
+		cfg.BoardID = "Alpha BBS"
+		cfg.BBSName = bbsName
+		w := game.NewWorldSeed(cfg, 1)
+		w.Today = "2026-08-27"
+		dir := t.TempDir()
+		if errs := WriteBulletins(w, dir); len(errs) != 0 {
+			t.Fatal(errs)
+		}
+		body, err := os.ReadFile(filepath.Join(dir, "scores.html"))
+		if err != nil {
+			t.Fatal(err)
+		}
+		return string(body)
+	}
+	named := page("The Alpha Board")
+	if !strings.Contains(named, "The Alpha Board") {
+		t.Error("the BBS name was set and not used")
+	}
+	fallback := page("")
+	if !strings.Contains(fallback, "Alpha BBS") {
+		t.Error("with no BBS name the page did not fall back to the planet name")
 	}
 }

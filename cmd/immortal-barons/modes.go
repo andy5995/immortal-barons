@@ -66,6 +66,11 @@ func runMaint(cfg game.Config, today string) error {
 		// the sysop added reaches the news.
 		return err
 	}
+	// Here as well as in the planetary step: a stand-alone board never runs that
+	// one, and its scoreboard and news are as worth showing on a bulletin menu
+	// as a league board's. It writes no World Report -- that one is the LEAGUE's
+	// wars, and a board playing alone has no world to report on (#233).
+	writeBulletins(cfg, w)
 	return store.Save(w, cfg)
 }
 

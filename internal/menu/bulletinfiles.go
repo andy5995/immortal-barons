@@ -28,8 +28,9 @@ import (
 
 // bulletinRender is one bulletin: the file's base name and how to draw it.
 type bulletinRender struct {
-	base string
-	draw func(s session.Session, w *ctx)
+	base  string
+	title string // the page title; the screens carry their own headings
+	draw  func(s session.Session, w *ctx)
 }
 
 // WriteBulletins draws every bulletin file for this board. A blank directory
@@ -55,24 +56,36 @@ func WriteBulletins(w *game.World, dir string) []error {
 		day = w.LastMaintDate
 	}
 	c := &ctx{World: w, Term: Term{UTF8: true}, day: day}
+	bulletins := []bulletinRender{
+		{"scores", "Scores", func(s session.Session, c *ctx) { printScores(s, c) }},
+		{"tdynews", "Today's News", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, true) }},
+		{"yesnews", "Yesterday's News", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, false) }},
+	}
+	// The World Report is the LEAGUE's wars. A board that plays alone has no
+	// world to report on, and a page headed "World Report" listing one planet's
+	// skirmishes would promise something the board does not have.
+	if w.Config.InterBBSEnabled() {
+		bulletins = append(bulletins, bulletinRender{"world", "World Report", writeWorldReport})
+	}
 	var errs []error
-	for _, b := range []bulletinRender{
-		{"scores", func(s session.Session, c *ctx) { printScores(s, c) }},
-		{"tdynews", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, true) }},
-		{"yesnews", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, false) }},
-		{"world", writeWorldReport},
-	} {
+	for _, b := range bulletins {
 		var buf bytes.Buffer
 		b.draw(session.NewWriter(&buf), c)
 		if err := writeBulletinPair(dir, b.base, buf.Bytes()); err != nil {
 			errs = append(errs, err)
 		}
-	}
-	// And the same bulletins as web pages, built from the game's data rather
-	// than from the screens above -- see bulletinhtml.go for why translating
-	// one into the other would be the wrong move.
-	for _, err := range writeBulletinPages(dir, c) {
-		errs = append(errs, err)
+		// The page is made from the SAME screen, so the three files can never
+		// show a different bulletin from one another.
+		// The BBS's own name if the sysop wrote one, otherwise the planet's: the
+		// game cannot ask the BBS what it is called, so this is the only way it
+		// can know, and a board that never sets it still names itself.
+		name := c.Config.BBSName
+		if name == "" {
+			name = c.Config.BoardID
+		}
+		if err := writeBulletinHTML(dir, b.base, b.title, name, c.Config.BoardURL, buf.Bytes()); err != nil {
+			errs = append(errs, err)
+		}
 	}
 	return errs
 }
@@ -225,45 +238,4 @@ func worldReportOutcome(s session.Session, b game.BattleLogEntry) (string, strin
 		return tr(s, "won"), ansi.FgBrightGreen
 	}
 	return tr(s, "held"), ansi.FgBrightCyan
-}
-
-// writeBulletinPages renders the HTML set. Each page carries only the data it
-// is about, so a template cannot quietly show a table the page never claimed.
-func writeBulletinPages(dir string, c *ctx) []error {
-	rows, _ := scoreRows(c)
-	var board string
-	var todayNews, yesterdayNews []string
-	var todayBulletin game.DailyBulletin
-	var battles []game.BattleLogEntry
-	c.Read(func() {
-		board = c.Config.BoardID
-		todayNews, yesterdayNews = c.NewsToday, c.NewsYesterday
-		todayBulletin = c.BulletinToday
-		battles = append(battles, c.Battles...)
-	})
-	base := htmlPage{Board: board, Date: c.day, Version: game.Version, Here: board}
-	pages := []struct {
-		name string
-		page htmlPage
-	}{
-		{"scores", withPage(base, "Scores", func(p *htmlPage) { p.Scores = rows })},
-		{"tdynews", withPage(base, "Today's News", func(p *htmlPage) { p.News, p.Bulletin = todayNews, todayBulletin })},
-		{"yesnews", withPage(base, "Yesterday's News", func(p *htmlPage) {
-			p.News, p.Date = yesterdayNews, dayBefore(c.day)
-		})},
-		{"world", withPage(base, "World Report", func(p *htmlPage) { p.Battles = battles })},
-	}
-	var errs []error
-	for _, pg := range pages {
-		if err := writeBulletinHTML(dir, pg.name, pg.page); err != nil {
-			errs = append(errs, err)
-		}
-	}
-	return errs
-}
-
-func withPage(base htmlPage, title string, fill func(*htmlPage)) htmlPage {
-	base.Title = title
-	fill(&base)
-	return base
 }
