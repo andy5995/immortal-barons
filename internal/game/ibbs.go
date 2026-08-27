@@ -380,7 +380,7 @@ func (w *World) ApplyPacket(p Packet) Packet {
 	if p.Bulletins != nil && orders {
 		w.applyBulletins(*p.Bulletins)
 	}
-	if carriesCoordinatorOrders(p) && !orders {
+	if CarriesCoordinatorOrders(p) && !orders {
 		w.noteSysop("A packet from %s claimed to carry League Coordinator orders and was refused: %s.",
 			p.FromBoard, w.CoordRefusalReason(p))
 	}

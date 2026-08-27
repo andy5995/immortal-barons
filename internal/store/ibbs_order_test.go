@@ -405,7 +405,31 @@ func TestReadInboundLeavesFreshUnreadablePacketAloneForGracePeriod(t *testing.T)
 // TestCarriesLeagueUpdate is a direct unit test of the #215 review finding 2
 // gate: a group earns Coordinator carve-out priority only when something in
 // it is league-wide state the rest of a run's checks need to read first.
-func TestCarriesLeagueUpdate(t *testing.T) {
+// TestCoordinatorGroupEarnsCarveOut replaces the earlier carriesLeagueUpdate
+// (this function's predecessor duplicated game.CarriesCoordinatorOrders and
+// dropped its Reset case -- a league-reset order did not earn the carve-out
+// and applied in shuffled position, #215 review round 4 finding 1) and adds
+// coverage for the round's finding 2: the gate must also verify the
+// signature, not just trust the claimed content, or an unsigned or forged
+// packet buys the same priority for free.
+func TestCoordinatorGroupEarnsCarveOut(t *testing.T) {
+	pub, priv, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
+	signer := game.NewWorldSeed(game.DefaultConfig(), 1)
+	signer.CoordKey = priv
+
+	sign := func(p game.Packet) game.Packet {
+		if err := signer.SignAsCoordinator(&p); err != nil {
+			t.Fatalf("SignAsCoordinator: %v", err)
+		}
+		return p
+	}
+
+	w := game.NewWorldSeed(game.DefaultConfig(), 1)
+	w.CoordPub = pub
+
 	cases := []struct {
 		name  string
 		group []stagedPacket
@@ -415,35 +439,64 @@ func TestCarriesLeagueUpdate(t *testing.T) {
 		{
 			"ordinary gameplay packets only",
 			[]stagedPacket{
-				{packet: game.Packet{FromBoard: "Coordinator BBS", Seq: 1}},
-				{packet: game.Packet{FromBoard: "Coordinator BBS", Seq: 2}},
+				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 1})},
+				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 2})},
 			},
 			false,
 		},
 		{
-			"one packet among several carries a roster update",
+			"one packet among several carries a signed, verified roster update",
 			[]stagedPacket{
-				{packet: game.Packet{FromBoard: "Coordinator BBS", Seq: 1}},
-				{packet: game.Packet{FromBoard: "Coordinator BBS", Seq: 2,
-					LeagueNodes: []game.LeagueNode{{Number: 1, Name: "Coordinator BBS"}}}},
+				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 1})},
+				{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Seq: 2,
+					LeagueNodes: []game.LeagueNode{{Number: 1, Name: "Coordinator BBS"}}})},
 			},
 			true,
 		},
 		{
 			"league config counts",
-			[]stagedPacket{{packet: game.Packet{FromBoard: "Coordinator BBS", LeagueConfig: &game.LeagueConfig{}}}},
+			[]stagedPacket{{packet: sign(game.Packet{FromBoard: "Coordinator BBS", LeagueConfig: &game.LeagueConfig{}})}},
 			true,
 		},
 		{
 			"bulletins count",
-			[]stagedPacket{{packet: game.Packet{FromBoard: "Coordinator BBS", Bulletins: &game.BulletinSet{}}}},
+			[]stagedPacket{{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Bulletins: &game.BulletinSet{}})}},
 			true,
+		},
+		{
+			"a league reset counts -- dropped by the predecessor predicate",
+			[]stagedPacket{{packet: sign(game.Packet{FromBoard: "Coordinator BBS", Reset: &game.LeagueReset{}})}},
+			true,
+		},
+		{
+			"claimed but UNSIGNED roster update earns nothing",
+			[]stagedPacket{{packet: game.Packet{FromBoard: "Coordinator BBS",
+				LeagueNodes: []game.LeagueNode{{Number: 1, Name: "Coordinator BBS"}}}}},
+			false,
+		},
+		{
+			"claimed roster update signed with the WRONG key earns nothing",
+			[]stagedPacket{func() stagedPacket {
+				otherSigner := game.NewWorldSeed(game.DefaultConfig(), 1)
+				_, otherPriv, err := ed25519.GenerateKey(rand.Reader)
+				if err != nil {
+					t.Fatal(err)
+				}
+				otherSigner.CoordKey = otherPriv
+				p := game.Packet{FromBoard: "Coordinator BBS",
+					LeagueNodes: []game.LeagueNode{{Number: 1, Name: "Coordinator BBS"}}}
+				if err := otherSigner.SignAsCoordinator(&p); err != nil {
+					t.Fatalf("SignAsCoordinator: %v", err)
+				}
+				return stagedPacket{packet: p}
+			}()},
+			false,
 		},
 	}
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			if got := carriesLeagueUpdate(c.group); got != c.want {
-				t.Errorf("carriesLeagueUpdate(%s) = %v, want %v", c.name, got, c.want)
+			if got := coordinatorGroupEarnsCarveOut(w, c.group); got != c.want {
+				t.Errorf("coordinatorGroupEarnsCarveOut(%s) = %v, want %v", c.name, got, c.want)
 			}
 		})
 	}
@@ -510,11 +563,20 @@ func TestReadInboundCoordinatorGroupWithoutLeagueUpdateDoesNotJumpQueue(t *testi
 // the Coordinator's group DOES carry a roster update, it must still be
 // applied before anything else in the batch, every time -- the rest of the
 // run's checks (AddressedToMe, Routed) read the roster that update changes.
+// The roster update must be signed and verify: since round 4 finding 2, the
+// carve-out is gated on game.CarriesCoordinatorOrders AND
+// w.VerifyCoordinatorOrders together, not on claimed content alone.
 func TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst(t *testing.T) {
+	pub, priv, err := ed25519.GenerateKey(rand.Reader)
+	if err != nil {
+		t.Fatal(err)
+	}
 	const trials = 20
 	for trial := 0; trial < trials; trial++ {
 		inbound := t.TempDir()
-		writePacket(t, inbound, "0-coord", game.Packet{
+		signer := game.NewWorldSeed(game.DefaultConfig(), 1)
+		signer.CoordKey = priv
+		coordPacket := game.Packet{
 			FromBoard: "Coordinator BBS", FromNode: 1, Seq: 1,
 			LeagueNodes: []game.LeagueNode{
 				{Number: 1, Name: "Coordinator BBS"},
@@ -522,12 +584,17 @@ func TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst(t *testing
 				{Number: 9, Name: "Receiver BBS"},
 			},
 			News: []string{"COORD"},
-		})
+		}
+		if err := signer.SignAsCoordinator(&coordPacket); err != nil {
+			t.Fatalf("trial %d: SignAsCoordinator: %v", trial, err)
+		}
+		writePacket(t, inbound, "0-coord", coordPacket)
 		writePacket(t, inbound, "1-honest", game.Packet{FromBoard: "Honest BBS", FromNode: 3, Seq: 1, News: []string{"HONEST"}})
 
 		cfg := game.DefaultConfig()
 		cfg.BoardID = "Receiver BBS"
 		w := game.NewWorldSeed(cfg, 1)
+		w.CoordPub = pub
 		w.LeagueNodes = []game.LeagueNode{
 			{Number: 1, Name: "Coordinator BBS"},
 			{Number: 3, Name: "Honest BBS"},
@@ -541,6 +608,70 @@ func TestReadInboundCoordinatorGroupWithLeagueUpdateStillAppliesFirst(t *testing
 			t.Fatalf("trial %d: the Coordinator's roster-update group must apply first, got NewsToday=%v",
 				trial, w.NewsToday)
 		}
+	}
+}
+
+// TestReadInboundUnsignedLeagueUpdateDoesNotJumpQueue is #215 review round 4
+// finding 2: the carve-out gate ran on claimed packet content alone, before
+// any signature was examined, so an origin could buy first-mover priority
+// just by setting LeagueNodes on a packet it never had a Coordinator key to
+// sign -- no forged FromNode/FromBoard needed, unlike the narrower claim
+// TestReadInboundForgedCoordinatorClaimDoesNotJumpTheQueue already covers.
+func TestReadInboundUnsignedLeagueUpdateDoesNotJumpQueue(t *testing.T) {
+	appliedFirst := 0
+	const trials = 60
+	for trial := 0; trial < trials; trial++ {
+		inbound := t.TempDir()
+		// A packet from the Coordinator's own group, claiming a roster
+		// update, but never signed -- this board holds no Coordinator key
+		// to have signed it with.
+		writePacket(t, inbound, "0-coord", game.Packet{
+			FromBoard: "Coordinator BBS", FromNode: 1, Seq: 1,
+			LeagueNodes: []game.LeagueNode{{Number: 1, Name: "Coordinator BBS"}},
+			News:        []string{"COORD"},
+		})
+		writePacket(t, inbound, "1-honest", game.Packet{FromBoard: "Honest BBS", FromNode: 3, Seq: 1, News: []string{"HONEST"}})
+
+		cfg := game.DefaultConfig()
+		cfg.BoardID = "Receiver BBS"
+		w := game.NewWorldSeed(cfg, 1)
+		_, pub, err := ed25519.GenerateKey(rand.Reader)
+		if err != nil {
+			t.Fatal(err)
+		}
+		w.CoordPub = pub
+		w.LeagueNodes = []game.LeagueNode{
+			{Number: 1, Name: "Coordinator BBS"},
+			{Number: 3, Name: "Honest BBS"},
+			{Number: 9, Name: "Receiver BBS"},
+		}
+
+		if _, err := ReadInbound(w, inbound, false); err != nil {
+			t.Fatalf("trial %d: ReadInbound: %v", trial, err)
+		}
+		coordAt, honestAt := -1, -1
+		for i, line := range w.NewsToday {
+			switch line {
+			case "COORD":
+				coordAt = i
+			case "HONEST":
+				honestAt = i
+			}
+		}
+		if coordAt == -1 || honestAt == -1 {
+			t.Fatalf("trial %d: expected both News lines applied, got %v", trial, w.NewsToday)
+		}
+		if coordAt < honestAt {
+			appliedFirst++
+		}
+	}
+	t.Logf("Coordinator's unsigned roster claim applied first in %d/%d trials", appliedFirst, trials)
+	if appliedFirst == trials {
+		t.Errorf("an unsigned claimed roster update won first place in every trial (%d/%d) -- it should only be sometimes, like any other origin",
+			appliedFirst, trials)
+	}
+	if appliedFirst == 0 {
+		t.Errorf("the Coordinator's board never applied first in %d trials -- either broken or statistically implausible, check the test", trials)
 	}
 }
 

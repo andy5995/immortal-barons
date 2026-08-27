@@ -135,7 +135,7 @@ func TestOnlyTheCoordinatorBroadcastsBulletins(t *testing.T) {
 	if len(w.Outbox) != 1 || w.Outbox[0].Bulletins == nil {
 		t.Fatalf("the Coordinator queued %+v", w.Outbox)
 	}
-	if !carriesCoordinatorOrders(w.Outbox[0]) {
+	if !CarriesCoordinatorOrders(w.Outbox[0]) {
 		t.Error("a bulletin broadcast is not treated as Coordinator orders, so it needs no signature")
 	}
 }

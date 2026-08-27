@@ -181,9 +181,17 @@ trust level `fromCoordinator` already uses to bootstrap — this narrows to
 a one-time window before any roster exists and closes for good once one
 does.) Ordinary gameplay packets riding in the same batch as a
 Coordinator roster update do not inherit that priority — only a group
-that actually carries league-wide state does; everyone else's group,
-Coordinator's board included when it has nothing the run needs first,
-takes its chances in the shuffle.
+containing a packet that carries something only the Coordinator may send
+(`LeagueConfig`, `LeagueNodes`, `Reset`, or `Bulletins` — the same
+`CarriesCoordinatorOrders` check `SignAsCoordinator`/`VerifyCoordinatorOrders`
+use, so there is one definition of "league-wide state" instead of two)
+*and verifies against this board's Coordinator public key* earns the
+carve-out; everyone else's group, Coordinator's board included when it
+has nothing signed and verified to offer first, takes its chances in the
+shuffle. The verification half matters because staging happens before any
+signature is examined: without it, an origin could buy first-mover
+priority simply by setting `LeagueNodes` on an unsigned packet, no forged
+`FromNode`/`FromBoard` required.
 
 Every other group is applied in an order reshuffled every run, read from
 `crypto/rand` and nothing derived from packet content — so no origin can

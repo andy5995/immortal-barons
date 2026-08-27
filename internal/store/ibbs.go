@@ -366,18 +366,26 @@ func shuffleGroupOrder(keys []string, src io.Reader) {
 // with it (#215 review, finding 4).
 var inboundShuffleSrc io.Reader = rand.Reader
 
-// carriesLeagueUpdate reports whether any packet in a group carries
-// league-wide state the rest of a run's checks read: a roster update or a
-// bulletin broadcast. Gates the Coordinator's carve-out (#215 review,
-// finding 2) — without it, a group earns first-mover priority purely by
-// being the Coordinator's, so a board's ordinary gameplay packets (a
-// player's trade bid, land claim, or strike) riding in the same batch as
-// its roster broadcast inherit that priority on every run, handing the
-// Coordinator's board the exact permanent edge this PR removes from
-// everyone else.
-func carriesLeagueUpdate(group []stagedPacket) bool {
+// coordinatorGroupEarnsCarveOut reports whether any packet in the
+// Coordinator's group actually earns first-mover priority: it must carry
+// something only the Coordinator may send (game.CarriesCoordinatorOrders —
+// the same predicate SignAsCoordinator/VerifyCoordinatorOrders use, so
+// there is one definition of "league-wide state" instead of two drifting
+// out of sync) AND verify against this board's CoordPub. Gates the
+// Coordinator's carve-out (#215 review, finding 2) — without the content
+// check, a group earns first-mover priority purely by being the
+// Coordinator's, so a board's ordinary gameplay packets (a player's trade
+// bid, land claim, or strike) riding in the same batch as its roster
+// broadcast inherit that priority on every run. Without the verification
+// check, the gate is spoofable: staging runs before any signature is
+// examined, so an origin claiming LeagueNodes/Reset/etc. in an unsigned or
+// wrongly-signed packet would buy the same priority for free (#215 review,
+// round 4, finding 2). VerifyCoordinatorOrders alone is not enough on its
+// own — it returns true for a packet carrying no coordinator orders at all
+// — so both checks are required together.
+func coordinatorGroupEarnsCarveOut(w *game.World, group []stagedPacket) bool {
 	for _, sp := range group {
-		if len(sp.packet.LeagueNodes) > 0 || sp.packet.LeagueConfig != nil || sp.packet.Bulletins != nil {
+		if game.CarriesCoordinatorOrders(sp.packet) && w.VerifyCoordinatorOrders(sp.packet) {
 			return true
 		}
 	}
@@ -442,6 +450,9 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 			// alone instead: quarantining it would permanently lose a packet
 			// that would apply cleanly next run (#215 review, finding 1).
 			if info, serr := e.Info(); serr == nil && time.Since(info.ModTime()) < quarantineGrace {
+				if verbose {
+					fmt.Printf("  Leaving unreadable packet %s in place: written too recently to trust as complete, will retry next run\n", e.Name())
+				}
 				continue
 			}
 			// Quarantine BEFORE recording anything happened: if the move
@@ -516,11 +527,13 @@ func ReadInbound(w *game.World, dir string, verbose bool) (InboundResult, error)
 		}
 	}
 	// The carve-out is only earned by a group that actually carries
-	// something the rest of this run's checks have to read first. Without
-	// this, EVERY packet in the Coordinator's group — not just the roster
-	// update — gets first-mover priority on every run purely by being that
-	// board's (#215 review, finding 2).
-	if coordKey != "" && !carriesLeagueUpdate(groups[coordKey]) {
+	// something the rest of this run's checks have to read first, signed and
+	// verified. Without this, EVERY packet in the Coordinator's group — not
+	// just the roster update — gets first-mover priority on every run purely
+	// by being that board's (#215 review, finding 2), and an unsigned or
+	// forged claim of one would buy the same priority for free (#215 review,
+	// round 4, finding 2).
+	if coordKey != "" && !coordinatorGroupEarnsCarveOut(w, groups[coordKey]) {
 		coordKey = ""
 	}
 	var rest []string
