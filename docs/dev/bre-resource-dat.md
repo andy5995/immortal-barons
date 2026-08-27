@@ -137,6 +137,21 @@ installation, so a league's boards may differ.
 Renaming the monarch (`LEADER`) has no IB counterpart either. IB says "Queen
 Royale" throughout, in code and in translated catalogs.
 
+`PURGENETMAIL` is documented rather than hidden, so it is absent from the lists
+above, but it is worth reading for what it says about the original's design. It
+is a boolean, default off, that has the game sweep its own leftover netmail out
+of the netmail directory during `BRE INBOUND` and `BRE PLANETARY` — the
+envelopes other boards' copies of the game left behind, which the manual frames
+as saving the sysop from deleting that mail by hand.
+
+The original therefore wrote file-attach netmail like `barons-ftn` does, and
+shipped the receiving board a way to clean up after it. IB has no counterpart,
+which is #223. Line 7 of the original's own `bbs.cfg` carries the other half of
+the same thought: a mailer setting of `NONE` writes no `.MSG` at all, for the
+boards the manual says were running the game with no mail system.
+
+Both are from `docs/bre.doc`. Neither has been confirmed against the binary.
+
 ## Every keyword the binary reads
 
 Undocumented ones are marked. Read via the string, number or boolean lookup as
