@@ -59,17 +59,22 @@ func travelTimes(s session.Session, w *ctx) Result {
 // own: BRE never needed them, but a link that answers in under a minute would
 // otherwise print 0.00 hours and read as no measurement at all.
 func turnaroundLabel(s session.Session, days float64) (string, string) {
+	// Round FIRST, then pick the tier from the ROUNDED figure. Choosing the tier
+	// from the raw value and rounding afterwards prints the boundary in the
+	// lower unit: a 59.6-minute link read "60 minutes" on one row while a
+	// 60.1-minute one read "1.00 hours" on the next -- the same duration in two
+	// units, on the same screen.
+	seconds := math.Max(1, math.Round(days*24*60*60)) // never round a real measurement down to zero
+	minutes := math.Round(days * 24 * 60)
+	hours := math.Round(days*24*10) / 10
 	switch {
 	case days <= 0:
 		return tr(s, "No Data"), ansi.FgRed
-	case days < game.TravelSecondsCutoff:
-		// Never round a real measurement down to zero — that is the reading this
-		// tier exists to avoid.
-		return plural(s, math.Max(1, math.Round(days*24*60*60)), "1 second", "%.0f seconds"), ansi.FgBrightGreen
-	case days < game.TravelMinutesCutoff:
-		return plural(s, math.Round(days*24*60), "1 minute", "%.0f minutes"), ansi.FgBrightGreen
-	case days < game.TravelHoursCutoff:
-		hours := math.Round(days*24*10) / 10
+	case seconds < game.TravelSecondsCutoff*24*60*60:
+		return plural(s, seconds, "1 second", "%.0f seconds"), ansi.FgBrightGreen
+	case minutes < game.TravelMinutesCutoff*24*60:
+		return plural(s, minutes, "1 minute", "%.0f minutes"), ansi.FgBrightGreen
+	case hours < game.TravelHoursCutoff*24:
 		return fmt.Sprintf(tr(s, "%.2f hours"), hours), ansi.FgBrightGreen
 	}
 	return fmt.Sprintf(tr(s, "%.2f days"), math.Round(days*100)/100), ansi.FgCyan

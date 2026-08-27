@@ -1,4 +1,6 @@
 (in-progress:)
+  * Travel Times no longer shows the same round trip as "60 minutes" on one row
+    and "1.00 hours" on the next
   * barons-ftn now receives as well as sends, with private game directories,
     resumable spools, shared locking, and attach, obox, or BSO links per peer
   * FTN handoffs coalesce unchanged signed game packets into 8.3-named ZIP
