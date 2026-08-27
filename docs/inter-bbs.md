@@ -104,7 +104,7 @@ choice, not theirs. They add it to the roster and give it a node number.
 | Your node number, and your name exactly as they recorded it | The game matches boards by name, so the spelling and spacing in the roster are what your Board ID has to be. |
 | The `ibnodes.dat` file | The league roster. Put it in your data directory. |
 | The Coordinator's key | One line, from their `-gen-coord-key`. Without it your board refuses league orders. |
-| The league number, if they use one | A number from 1 to 999. It only matters if your board plays in two leagues that share an inbound directory, but ask anyway — a packet stamped with the wrong one is ignored. |
+| The league number, if they use one | A number from 1 to 999. It matters if your board plays in two leagues that share an inbound directory — a packet stamped with the wrong one is ignored — and separately, every packet your board writes without one carries a longer filename (see "Attachment pathnames" under [Optional FTN handoff](#optional-ftn-handoff)), which can blow the FTN Subject budget on a board that routes for yours even if you have no FTN link of your own. Ask anyway. |
 | The mailer details for your uplink | Their address, host and port, and the session password. This is your BBS's business, not the game's. |
 
 **All five arrive by hand — email, a message on their board, a download.** None
