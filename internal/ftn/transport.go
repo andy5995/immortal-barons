@@ -401,7 +401,7 @@ func buildBatchPlan(batch, dataDir string, transport Config, world *game.World, 
 		// there is no envelope to hold a second. That costs an alias each and
 		// gives up coalescing, which is the price of reaching a board that
 		// cannot read a bundle at all.
-		if link.Raw {
+		if rawFor(transport, link) {
 			for i, entry := range groups[nodeNumber] {
 				rawTarget := target
 				rawTarget.Raw = true

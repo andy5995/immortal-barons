@@ -193,26 +193,47 @@ Paths in a `Link` line must not contain spaces. `NetmailDir`, `AttachDir`, and
 the inbound directory settings consume the rest of their line and may contain
 spaces when the operating system permits them.
 
-Add `Raw` to the end of any link line to send that peer one plain game packet
-per file, instead of a bundle:
+### Plain packets for boards that cannot read a bundle
+
+**A board runs raw by default, and that is deliberate for this release.** A peer
+whose game predates the bundled transport does not merely fail to read a bundle
+— its inbound run stops on the first one it meets and applies nothing at all
+until someone removes the file by hand. So a sysop who upgrades and configures
+nothing keeps sending what every board already understands, and has to ask for
+the faster shape rather than arrive at it.
+
+Turn bundling on for the whole board once every peer can unwrap one:
 
 ```ini
-Link 3 Obox /home/bbs/filebox/peer Raw
-Link 4 Attach Raw
+Bundled Yes
 ```
 
-This is for a peer whose game is too old to unwrap a bundle. Such a board does
-not merely fail to read one — its inbound run stops on the first bundle it
-meets and applies nothing at all until someone removes the file by hand, so a
-league that upgrades over a day or two needs the boards that have not moved yet
-to keep receiving what they have always understood.
+Or per peer, when a league is part way through upgrading. Add `Raw` or
+`Bundled` to the end of any link line; it overrides the board-wide setting for
+that peer only:
+
+```ini
+Bundled Yes
+Link 3 Obox /home/bbs/filebox/peer Raw
+```
 
 `Raw` is a modifier rather than a mode of its own, because the envelope is what
 an old board cannot parse, not the way the file travels: it composes with
 attach, obox and BSO alike, and on a BSO link it is never merged into a bundle
-already advertised in the flow file. It costs one attachment alias per packet
-and gives up coalescing, which is the price of reaching a board that cannot
-read a bundle at all. Take it off once every peer on that link is upgraded.
+already advertised in the flow file.
+
+Raw costs one attachment alias per packet, gives up coalescing, and carries no
+routing manifest — a receiver rebuilds the route from the packet's own origin
+and learns nothing about which peers a broadcast already reached, bounded by
+the hop limit and by replay detection instead. That is exactly how the
+transport behaved before bundles existed, and it is the price of reaching a
+board that cannot read one.
+
+**On a routed league only the Coordinator has to do anything.** Every member
+sends it plain packets already, and its `--in` reads those whatever they are.
+It is the Coordinator's own sends that need `Raw`, and it can drop the setting
+for one member at a time as each upgrades, or switch the whole board to
+`Bundled Yes` once the last one is done.
 
 ## Configuration examples
 

@@ -49,6 +49,13 @@ type Config struct {
 	InboundNetmailDir string
 	Links             map[int]Link
 	OboxMeshFanout    bool
+	// Bundled is the board-wide posture: false (the default) sends every peer
+	// plain packets, true sends bundles. A Link line saying Raw or Bundled
+	// overrides it for that peer. It is a posture rather than a per-link chore
+	// because it changes once in a league's life -- off while boards are still
+	// upgrading, on when they are all past it -- and a Coordinator should not
+	// have to edit every link to make that switch (#230).
+	Bundled bool
 }
 
 // LinkMode is the handoff exposed by one directly connected peer.
@@ -71,7 +78,27 @@ type Link struct {
 	// handoff rather than a mode of its own, because a peer that cannot read a
 	// bundle may still be reached by attach, obox or BSO — the envelope is what
 	// it cannot parse, not the way the file travels (#230).
+	//
+	// It is the DEFAULT, and `Bundled` is what turns it off. A sysop who
+	// upgrades and configures nothing keeps sending what every board can
+	// already read, so the unsafe state has to be asked for rather than
+	// arrived at. The cost is real and is paid until a link is switched: a raw
+	// file carries no routing manifest, so a receiver rebuilds Route from the
+	// packet's own FromNode and learns nothing about which peers a broadcast
+	// already covered. Bounded by MaxPacketHops and by replay detection rather
+	// than by the manifest, exactly as it was before the bundled transport.
+	//
+	// THE DEFAULT IS MEANT TO FLIP. It is raw for the release that introduces
+	// bundles, so no league can be broken by a sysop who upgrades without
+	// reading anything. Once every board in the wild can unwrap a bundle, the
+	// default becomes Bundled and Raw goes back to being the opt-in it was
+	// written as -- otherwise the routing manifest stays switched off for
+	// everyone who never touched their configuration.
 	Raw bool
+	// RawSet distinguishes "this link says raw" from "this link says nothing",
+	// so the board-wide posture below can supply the answer for links that do
+	// not state one.
+	RawSet bool
 }
 
 // fidoSubdir is the child of an outbound directory that claimed packets are
@@ -141,6 +168,12 @@ func LoadConfig(dataDir string) (Config, error) {
 			cfg.InboundDir = strings.TrimSpace(value)
 		case strings.EqualFold(key, "InboundNetmailDir"):
 			cfg.InboundNetmailDir = strings.TrimSpace(value)
+		case strings.EqualFold(key, "Bundled"):
+			b, err := parseYesNo(value)
+			if err != nil {
+				return Config{}, fmt.Errorf("%s: Bundled: %w", path, err)
+			}
+			cfg.Bundled = b
 		case strings.EqualFold(key, "OboxMeshFanout"):
 			b, err := parseYesNo(value)
 			if err != nil {
@@ -220,12 +253,17 @@ func parseLink(value, dataDir string) (int, Link, error) {
 	// Raw is read off the end first so it composes with every mode without the
 	// mode parsers having to know about it, and so BSO's optional flavour keeps
 	// its own position.
-	raw := false
-	if n := len(fields); n > 0 && strings.EqualFold(fields[n-1], "raw") {
-		raw, fields = true, fields[:n-1]
+	raw, rawSet := false, false
+	if n := len(fields); n > 0 {
+		switch {
+		case strings.EqualFold(fields[n-1], "raw"):
+			raw, rawSet, fields = true, true, fields[:n-1]
+		case strings.EqualFold(fields[n-1], "bundled"):
+			raw, rawSet, fields = false, true, fields[:n-1]
+		}
 	}
 	if len(fields) < 2 {
-		return 0, Link{}, fmt.Errorf("want <node> Attach, Obox <dir>, or BSO <dir> [flavour], each optionally followed by Raw")
+		return 0, Link{}, fmt.Errorf("want <node> Attach, Obox <dir>, or BSO <dir> [flavour], each optionally followed by Raw or Bundled")
 	}
 	node, err := strconv.Atoi(fields[0])
 	if err != nil || node < 1 || node > 999 {
@@ -257,7 +295,7 @@ func parseLink(value, dataDir string) (int, Link, error) {
 	default:
 		return 0, Link{}, fmt.Errorf("unknown mode %q", fields[1])
 	}
-	link.Raw = raw
+	link.Raw, link.RawSet = raw, rawSet
 	if link.Directory != "" && !filepath.IsAbs(link.Directory) {
 		link.Directory = filepath.Join(dataDir, link.Directory)
 	}
@@ -296,4 +334,14 @@ func RequireNetmail(cfg Config, dataDir string) error {
 			filepath.Join(dataDir, ConfigFile))
 	}
 	return nil
+}
+
+// rawFor answers whether this peer gets plain packets: what the link says if it
+// says anything, otherwise the board-wide posture. Kept in one place so a new
+// call site cannot read Link.Raw directly and miss the posture (#230).
+func rawFor(cfg Config, link Link) bool {
+	if link.RawSet {
+		return link.Raw
+	}
+	return !cfg.Bundled
 }

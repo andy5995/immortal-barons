@@ -308,7 +308,7 @@ func TestRunOutBroadcastMarksEverySiblingTargetCovered(t *testing.T) {
 }
 
 func TestRunOutBroadcastFansOutToConfiguredBSOPeers(t *testing.T) {
-	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal\n")
+	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal Bundled\n")
 	writeNamedPacket(t, data, "broadcast.brp", game.Packet{FromBoard: "Bravo BBS", FromNode: 2, Seq: 19, League: 100})
 	result, err := RunOut(data)
 	if err != nil {
@@ -359,7 +359,7 @@ func TestConcurrentRunOutClaimsOneSnapshot(t *testing.T) {
 }
 
 func TestBSOBusyDefersOnlyThatTarget(t *testing.T) {
-	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal\n")
+	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal Bundled\n")
 	writeNamedPacket(t, data, "a.brp", game.Packet{FromNode: 2, ToNode: 1, Seq: 1, League: 100})
 	busy := filepath.Join(data, "bso", "00e50064.bsy")
 	if err := os.MkdirAll(filepath.Dir(busy), 0o755); err != nil {
@@ -393,7 +393,7 @@ func TestBSOBusyDefersOnlyThatTarget(t *testing.T) {
 }
 
 func TestBSOAppendsToAdvertisedBundleUnderBusyLock(t *testing.T) {
-	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal\n")
+	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal Bundled\n")
 	writeNamedPacket(t, data, "first.brp", game.Packet{FromNode: 2, ToNode: 1, Seq: 1, League: 100})
 	first, err := RunOut(data)
 	if err != nil {
@@ -699,7 +699,7 @@ func TestRunInValidatesAndDeletesStoredAttach(t *testing.T) {
 }
 
 func TestRunInForwardsOpaquePacketAtHub(t *testing.T) {
-	data := newBundledSetup(t, "Alpha BBS", "Link 3 Obox obox3\n")
+	data := newBundledSetup(t, "Alpha BBS", "Link 3 Obox obox3 Bundled\n")
 	if err := os.Mkdir(filepath.Join(data, "obox3"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -764,7 +764,7 @@ func TestRunInForwardsOpaquePacketAtHub(t *testing.T) {
 }
 
 func TestOboxMeshFanoutCanBeDisabled(t *testing.T) {
-	data := newBundledSetup(t, "Bravo BBS", "OboxMeshFanout No\nLink 3 Obox obox3\n")
+	data := newBundledSetup(t, "Bravo BBS", "OboxMeshFanout No\nLink 3 Obox obox3 Bundled\n")
 	if err := os.Mkdir(filepath.Join(data, "obox3"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -794,7 +794,7 @@ func TestOboxMeshFanoutCanBeDisabled(t *testing.T) {
 }
 
 func TestInboundBSOBusyPeerDoesNotBlockOtherFanout(t *testing.T) {
-	data := newBundledSetup(t, "Alpha BBS", "Link 3 BSO bso Normal\nLink 4 Obox obox4\n")
+	data := newBundledSetup(t, "Alpha BBS", "Link 3 BSO bso Normal Bundled\nLink 4 Obox obox4 Bundled\n")
 	if err := os.Mkdir(filepath.Join(data, "obox4"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -858,7 +858,13 @@ func newBundledSetup(t *testing.T, boardID, extraFTN string) string {
 	files := map[string]string{
 		"config.json":         "{}\n",
 		store.BoardConfigFile: "BoardID " + boardID + "\nLeagueNumber 100\nInbound door-in\nOutbound door-out\n",
-		ConfigFile:            "NetmailDir netmail\nAttachDir attach\nSubjectPath Basename\nInboundDir transport-in\nInboundNetmailDir transport-in\n" + extraFTN,
+		// Raw is the shipped default (#230), so this helper states the bundled
+		// posture its name promises. As a posture rather than Link lines,
+		// deliberately: a Link line also marks a peer as a broadcast fanout
+		// target, so declaring links here would quietly change which peers the
+		// broadcast tests expect.
+		ConfigFile: "NetmailDir netmail\nAttachDir attach\nSubjectPath Basename\nInboundDir transport-in\nInboundNetmailDir transport-in\n" +
+			"Bundled Yes\n" + extraFTN,
 		store.NodeListFile: "1 HOST 2 3\nAlpha BBS\n1:229/100\nDetroit\nMI\nUSA\n\n" +
 			"2\nBravo BBS\n1:229/200\nLansing\nMI\nUSA\n\n" +
 			"3\nCharlie BBS\n1:229/300\nFlint\nMI\nUSA\n",
@@ -917,7 +923,7 @@ func TestTransportRefusesABoardWithNoLeagueNumber(t *testing.T) {
 // like a run that had nothing to send. A scheduled event's log is the only
 // place a sysop would ever notice the difference.
 func TestRunOutReportsWhatIsStillWaiting(t *testing.T) {
-	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal\n")
+	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal Bundled\n")
 	// A semaphore that is not ours: recovery leaves a mailer's own alone, so
 	// the peer stays busy for the whole run.
 	busy := filepath.Join(data, "bso", "00e50064.bsy")
@@ -961,7 +967,7 @@ func TestRunOutReportsWhatIsStillWaiting(t *testing.T) {
 // run that met the failure is usually long gone by the time anyone looks. The
 // journal carries both, and keeps them across runs.
 func TestRunOutJournalsWhyAPeerIsBehind(t *testing.T) {
-	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal\n")
+	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal Bundled\n")
 	busy := filepath.Join(data, "bso", "00e50064.bsy")
 	if err := os.WriteFile(busy, []byte("binkd pid=1234\n"), 0o644); err != nil {
 		t.Fatal(err)
@@ -1034,7 +1040,7 @@ func TestPendingReportReadsAJournalWithoutTheNewFields(t *testing.T) {
 // long and why — including the inbound side and a journal nothing can read,
 // which is the case that otherwise goes unmentioned by everything.
 func TestStatusReportsBothSpoolsAndTheirReasons(t *testing.T) {
-	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal\n")
+	data := newBundledSetup(t, "Bravo BBS", "Link 1 BSO bso Normal Bundled\n")
 	busy := filepath.Join(data, "bso", "00e50064.bsy")
 	if err := os.WriteFile(busy, []byte("binkd pid=1234\n"), 0o644); err != nil {
 		t.Fatal(err)

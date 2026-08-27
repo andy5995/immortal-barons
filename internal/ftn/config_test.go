@@ -155,7 +155,8 @@ func TestConfigLoadsWithoutNetmailDirForAReceiveOnlyBoard(t *testing.T) {
 
 // Raw composes with every handoff mode, because the envelope is what an old
 // peer cannot parse, not the way the file travels. It is read off the end of
-// the line so BSO's optional flavour keeps its own position.
+// the line so BSO's optional flavour keeps its own position — and it is the
+// default, so a link with no keyword is raw and `Bundled` is the opt-out.
 func TestRawComposesWithEveryLinkMode(t *testing.T) {
 	dir := t.TempDir()
 	for _, sub := range []string{"in", "netmail", "obox", "bso"} {
@@ -168,7 +169,8 @@ func TestRawComposesWithEveryLinkMode(t *testing.T) {
 		"Link 1 Attach Raw\n" +
 		"Link 2 Obox obox raw\n" +
 		"Link 3 BSO bso Crash Raw\n" +
-		"Link 4 Obox obox\n"
+		"Link 4 Obox obox\n" +
+		"Link 5 Obox obox Bundled\n"
 	if err := os.WriteFile(filepath.Join(dir, ConfigFile), []byte(body), 0o644); err != nil {
 		t.Fatal(err)
 	}
@@ -184,11 +186,31 @@ func TestRawComposesWithEveryLinkMode(t *testing.T) {
 		1: {LinkAttach, true, "Normal"},
 		2: {LinkObox, true, "Normal"},
 		3: {LinkBSO, true, "Continuous"}, // "Crash" is the BSO spelling; normalFlavour folds it
-		4: {LinkObox, false, "Normal"},
+		4: {LinkObox, false, "Normal"},   // states nothing; the posture answers for it
+		5: {LinkObox, false, "Normal"},   // Bundled is how a sysop opts out
 	} {
 		got := cfg.Links[node]
 		if got.Mode != want.mode || got.Raw != want.raw || got.Flavour != want.flav {
 			t.Errorf("node %d = %+v, want mode %v raw %v flavour %q", node, got, want.mode, want.raw, want.flav)
 		}
+	}
+
+	// Link.Raw is what the LINE said; rawFor is what applies. The posture
+	// answers for a link that stated nothing and never overrides one that did,
+	// and raw is the default, so a board configuring nothing keeps sending what
+	// every board can already read (#230).
+	if !rawFor(cfg, cfg.Links[4]) {
+		t.Error("a link stating nothing did not take the default raw posture")
+	}
+	bundled := cfg
+	bundled.Bundled = true
+	if rawFor(bundled, bundled.Links[4]) {
+		t.Error("a link stating nothing ignored the bundled posture")
+	}
+	if !rawFor(bundled, bundled.Links[1]) {
+		t.Error("an explicit Raw link was overridden by the bundled posture")
+	}
+	if rawFor(cfg, cfg.Links[5]) {
+		t.Error("an explicit Bundled link was overridden by the raw posture")
 	}
 }

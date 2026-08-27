@@ -1,5 +1,5 @@
 (in-progress:)
-  * An FTN link can send plain packets instead of bundles, for a peer whose game is too old to unwrap one
+  * FTN handoffs send plain packets by default, so a board that upgrades first cannot stop a peer still on the old release; set "Bundled Yes" once every peer can unwrap a bundle
   * A board that only receives no longer has to name a netmail directory it never writes to
   * A planetary run that skipped one packet no longer prints its count twice
   * barons-ftn --status reports what each spool still holds, for whom, for how long and why
