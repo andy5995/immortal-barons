@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -260,24 +261,34 @@ func TestRunSkipsOverlongBroadcastAttachmentButStillQueuesOthers(t *testing.T) {
 // origin board", not something obvious from the raw subject-length error
 // alone. A packet that already carries a League number is left alone --
 // something else made it overlong (a long AttachDir, an operator's
-// SubjectPath prefix), and the existing error already covers that.
+// SubjectPath prefix), and the existing error already covers that. The gate
+// is on ErrSubjectTooLong specifically (review on #224): fileAttachSubject
+// can also fail on a NUL byte in the path, which has nothing to do with
+// length, and hinting LeagueNumber there would be a misleading diagnostic.
 func TestAnnotateLeagueNumberCauseNamesTheOriginBoard(t *testing.T) {
-	base := errors.New(`attachment subject "x" is 80 bytes; FTN Type-2 permits at most 71`)
+	tooLong := fmt.Errorf("%w: attachment subject \"x\" is 80 bytes; FTN Type-2 permits at most 71", ErrSubjectTooLong)
 
-	t.Run("no league number set", func(t *testing.T) {
+	t.Run("no league number set, subject too long", func(t *testing.T) {
 		p := game.Packet{FromBoard: "Bravo BBS", League: 0}
-		got := annotateLeagueNumberCause(p, base)
+		got := annotateLeagueNumberCause(p, tooLong)
 		if !strings.Contains(got.Error(), "Bravo BBS") || !strings.Contains(got.Error(), "LeagueNumber") {
 			t.Errorf("error = %q, want it to name the origin board and LeagueNumber", got)
 		}
-		if !errors.Is(got, base) {
+		if !errors.Is(got, tooLong) {
 			t.Errorf("annotated error lost its wrapped original: %v", got)
 		}
 	})
 	t.Run("league number already set", func(t *testing.T) {
 		p := game.Packet{FromBoard: "Bravo BBS", League: 100}
-		if got := annotateLeagueNumberCause(p, base); got != base {
+		if got := annotateLeagueNumberCause(p, tooLong); got != tooLong {
 			t.Errorf("annotateLeagueNumberCause changed an error for a packet that already has a LeagueNumber: %v", got)
+		}
+	})
+	t.Run("no league number set, but the error is not about length", func(t *testing.T) {
+		notLength := errors.New("attachment path contains a NUL byte")
+		p := game.Packet{FromBoard: "Bravo BBS", League: 0}
+		if got := annotateLeagueNumberCause(p, notLength); got != notLength {
+			t.Errorf("annotateLeagueNumberCause added a misleading LeagueNumber hint to a non-length error: %v", got)
 		}
 	})
 }

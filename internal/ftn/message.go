@@ -3,6 +3,7 @@ package ftn
 import (
 	cryptorand "crypto/rand"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -73,6 +74,13 @@ func createFileAttach(transport Config, attached string, origin, destination Add
 	}
 }
 
+// ErrSubjectTooLong distinguishes an overlong subject from
+// fileAttachSubject's other failure (a NUL byte in the path) so a caller can
+// react to length specifically -- annotateLeagueNumberCause in handler.go
+// checks it with errors.Is rather than assuming every error this function
+// returns is about length (#224 review).
+var ErrSubjectTooLong = errors.New("attachment subject too long")
+
 // fileAttachSubject spells the claimed file the way the configured mailer
 // resolves it, and validates that before anything is handed over. The Type-2
 // field is 72 bytes including its terminating NUL; Binkley consumes one more
@@ -92,8 +100,8 @@ func fileAttachSubject(transport Config, attached string) (string, int, error) {
 		return "", 0, fmt.Errorf("attachment path contains a NUL byte")
 	}
 	if len(spelled) > limit {
-		return "", 0, fmt.Errorf("attachment subject %q is %d bytes; FTN Type-2 permits at most %d%s. %s",
-			spelled, len(spelled), limit, mode, subjectAdvice(transport.SubjectMode))
+		return "", 0, fmt.Errorf("%w: attachment subject %q is %d bytes; FTN Type-2 permits at most %d%s. %s",
+			ErrSubjectTooLong, spelled, len(spelled), limit, mode, subjectAdvice(transport.SubjectMode))
 	}
 	return prefix + spelled, limit - len(spelled), nil
 }

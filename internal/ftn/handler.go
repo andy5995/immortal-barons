@@ -2,6 +2,7 @@ package ftn
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -230,8 +231,13 @@ func preflightPacket(source, claimed string, transport Config, world *game.World
 // 5-byte "L100-" prefix when a packet carries no league number, and that
 // digest travels with the packet on every hop a board without one routes
 // for, not just the origin's own outbound.
+//
+// Gated on ErrSubjectTooLong specifically, not on any error fileAttachSubject
+// can return: it also fails on a NUL byte in the path, and hinting
+// LeagueNumber there would be a misleading diagnostic for a problem that has
+// nothing to do with length (review on #224).
 func annotateLeagueNumberCause(p game.Packet, err error) error {
-	if p.League > 0 {
+	if p.League > 0 || !errors.Is(err, ErrSubjectTooLong) {
 		return err
 	}
 	return fmt.Errorf("%w (packet from %q has no LeagueNumber set on its origin board, "+
