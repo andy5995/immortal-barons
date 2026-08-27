@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/store"
 )
 
 // #228: the run that met a failure is long gone by the time a sysop asks why a
@@ -73,5 +74,24 @@ func TestSpoolChecksFailOnAnUnreadableJournal(t *testing.T) {
 	}
 	if !strings.Contains(checks[0].Detail, "deadbeef") {
 		t.Errorf("the failure does not name the directory: %q", checks[0].Detail)
+	}
+}
+
+// The one-skip case printed its count twice ("skipped 1: 1: ...") because a
+// singular branch spelled the prefix that the format string then repeated. It
+// survived because every other count reads correctly, and only a run that skips
+// exactly one packet shows it.
+func TestSkipSummaryCountsOnce(t *testing.T) {
+	for _, tc := range []struct {
+		run  store.PlanetaryRun
+		want string
+	}{
+		{store.PlanetaryRun{Held: 1}, "skipped 1: 1 held for a protocol this build does not read"},
+		{store.PlanetaryRun{Held: 2}, "skipped 2: 2 held for a protocol this build does not read"},
+		{store.PlanetaryRun{Held: 1, AlreadySeen: 1}, "skipped 2: 1 held for a protocol this build does not read, 1 already seen"},
+	} {
+		if got := skipSummary(tc.run); got != tc.want {
+			t.Errorf("skipSummary = %q, want %q", got, tc.want)
+		}
 	}
 }

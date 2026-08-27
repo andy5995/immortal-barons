@@ -211,11 +211,7 @@ func skipSummary(run store.PlanetaryRun) string {
 	if run.MeshCopy > 0 {
 		parts = append(parts, fmt.Sprintf("%d mesh copy", run.MeshCopy))
 	}
-	pkt := "skipped"
-	if skipped == 1 {
-		pkt = "skipped 1:"
-	}
-	return fmt.Sprintf("%s %d: %s", pkt, skipped, strings.Join(parts, ", "))
+	return fmt.Sprintf("skipped %d: %s", skipped, strings.Join(parts, ", "))
 }
 
 // runFull chains the three steps a sysop's batch file runs: inbound, play,

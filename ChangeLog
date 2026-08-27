@@ -1,4 +1,5 @@
 (in-progress:)
+  * A planetary run that skipped one packet no longer prints its count twice
   * barons-ftn --status reports what each spool still holds, for whom, for how long and why
   * -league-check reports the FTN transport's backlog and fails on a spool journal it cannot read
   * A stalled FTN handoff reports how long it has been waiting and why each peer is behind, kept in the spool journals across runs
