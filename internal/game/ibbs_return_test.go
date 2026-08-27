@@ -86,7 +86,7 @@ func TestIndividualStrikeRoundTrip(t *testing.T) {
 	// The baron gets a private report naming the attack type, the target, what it
 	// cost, and what it destroyed — none of which was told to them before (#107).
 	last := attacker.Events[len(attacker.Events)-1].Text
-	for _, want := range []string{"Normal Attack", "Victim", "boardB", "You lost", "came home", "You destroyed"} {
+	for _, want := range []string{"Normal Attack", "Victim", "boardB", "You lost", "returned.", "You destroyed"} {
 		if !strings.Contains(last, want) {
 			t.Errorf("report is missing %q:\n%s", want, last)
 		}

@@ -254,7 +254,14 @@ RemoteAttack  { "ID": 1, "FromBoard": "AlphaBBS", "TargetEmpire": "Victim",
                 "Offense": 150000, "Contributors": [ Contribution ] }
                 // TargetEmpire "" = whole planet (strongest defender)
 
-Contribution  { "Owner": "andy", "Offense": 100000 }   // for splitting spoils
+Contribution  { "Owner": "andy", "Troopers": 90000, "Jets": 0, "Tanks": 1000,
+                "Bombers": 0, "Tech": 12800 }
+                // One baron's detachment. Tech is their Technology military
+                // factor when they committed it, in 1/10000ths (10000 = x1,
+                // 14000 = the 1.4 ceiling); the target board weighs the slot
+                // by it, as the original's force record carries the same
+                // value. Absent in a packet written before it existed, which
+                // reads as x1.
 
 AttackResult  { "ID": 1, "TargetBoard": "BravoBBS", "TargetEmpire": "Victim",
                 "LandTaken": 12, "Won": true, "Kind": "Normal Attack",

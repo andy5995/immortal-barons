@@ -22,5 +22,5 @@ An enemy SDI shield lowers your jets' attacking strength, but only when you are
 striking a named baron on another planet — a shield does nothing against jets
 attacking on its own planet.
 
-Jets are also weak on the ground. In a normal attack the enemy's bombers destroy
-your grounded jets, and enemy turrets shoot down the jets that do attack.
+Jets are lost in battle like any other unit. Enemy turrets are part of the
+defence your attack has to beat; they do not single out your jets.

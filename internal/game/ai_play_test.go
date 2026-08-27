@@ -659,10 +659,14 @@ func TestGroundDownRealmsGetFinished(t *testing.T) {
 				seed, w.BattlesTotal)
 		}
 	}
-	// Measured 3.5 per run at 20 turns of protection and 2.7 at 15, across 24
-	// seeds. Two is comfortably under both and well clear of the zero this
-	// ticket was filed for.
-	if mean := float64(total) / seeds; mean < 2 {
+	// Measured 1.75 per run across 24 seeds (2026-08-26), with no seed at zero.
+	// It read 3.5 at 20 turns of protection and 2.7 at 15 while IB's capture
+	// carried a net-worth density boost of its own; that boost let a soft realm
+	// lose twice the original's share and was removed under #200, which is what
+	// halved the rate — the no-people conquest trigger, removed alongside it,
+	// moved the figure not at all. One is under the measured mean and still
+	// clear of the zero this ticket was filed for.
+	if mean := float64(total) / seeds; mean < 1 {
 		t.Errorf("mean eliminations %.1f per 60-day run across %d seeds — too few; conquest is stalling (#87)",
 			mean, seeds)
 	}

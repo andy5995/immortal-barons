@@ -7,51 +7,6 @@ import (
 	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
-func TestBombingRunDestroysGroundedJets(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	a := &Empire{Bombers: 10}
-	d := &Empire{Jets: 100} // no turrets, no SDI
-	kills, lost := w.bombingRun(a, d, a.Bombers)
-	if lost != 0 {
-		t.Errorf("no turrets means no bombers lost, got %d", lost)
-	}
-	if kills != 10*BomberJetKills {
-		t.Errorf("10 bombers should down %d jets, got %d", 10*BomberJetKills, kills)
-	}
-	if d.Jets != 100-kills {
-		t.Errorf("defender jets not reduced: %d", d.Jets)
-	}
-}
-
-// Turrets down bombers; the defender's SDI does not touch a raid from a
-// neighbour, however well funded it is.
-func TestBombingRunTurretsDownBombersAndSDIIsIrrelevant(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	a := &Empire{Bombers: 10}
-	d := &Empire{Jets: 1000, Turrets: 50, SDI: SDIMax} // 50/25 = 2 bombers lost
-	kills, lost := w.bombingRun(a, d, a.Bombers)
-	if lost != 2 {
-		t.Errorf("50 turrets should down 2 bombers, got %d", lost)
-	}
-	// 8 survivors * 3 kills = 24, and the shield takes none of them.
-	if kills != 24 {
-		t.Errorf("expected 24 kills, got %d", kills)
-	}
-	if a.Bombers != 8 {
-		t.Errorf("attacker should have 8 bombers left, got %d", a.Bombers)
-	}
-}
-
-func TestBombingRunCapsAtDefenderJets(t *testing.T) {
-	w := NewWorldSeed(DefaultConfig(), 1)
-	a := &Empire{Bombers: 100}
-	d := &Empire{Jets: 5}
-	kills, _ := w.bombingRun(a, d, a.Bombers)
-	if kills != 5 || d.Jets != 0 {
-		t.Errorf("kills should cap at 5 and zero out jets, got kills=%d jets=%d", kills, d.Jets)
-	}
-}
-
 func TestAttackRecordsVictimEvent(t *testing.T) {
 	cfg := DefaultConfig()
 	cfg.AICount = 1
@@ -71,6 +26,17 @@ func TestAttackRecordsVictimEvent(t *testing.T) {
 	}
 	if !strings.Contains(d.Events[len(d.Events)-1].Text, "attacked you") {
 		t.Errorf("event should be victim-perspective: %q", d.Events[len(d.Events)-1].Text)
+	}
+	// And it names what was lost by unit type, as the original's report does,
+	// rather than one total ("lost N units").
+	ev := d.Events[len(d.Events)-1].Text
+	for _, want := range []string{" troopers", " turrets", " tanks", " jets"} {
+		if !strings.Contains(ev, want) {
+			t.Errorf("the victim's event does not itemise %q: %q", want, ev)
+		}
+	}
+	if strings.Contains(ev, "units") {
+		t.Errorf("the victim's event still totals the losses: %q", ev)
 	}
 }
 
@@ -499,5 +465,68 @@ func TestCombatReportTranslatesInEveryLanguage(t *testing.T) {
 				t.Errorf("language %q: bad format verbs in a filed event: %q", lang, e.Text)
 			}
 		}
+	}
+}
+
+// Bombers bleed at the same fraction as the rest of the committed force, and
+// nothing else happens to them: the original's resolver applies ONE loss
+// fraction to troopers, jets, tanks and bombers in turn (proc +0x1581..+0x1631).
+// IB flew them on a bombing run of its own until #200 — anti-air losses from
+// turrets and grounded-jet kills that no routine in the original performs.
+func TestBombersBleedWithTheRestOfTheForce(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 1
+	w := NewWorldSeed(cfg, 1)
+	a := w.AddHuman("att", "Attacker")
+	a.Troopers, a.Bombers = 100_000, 100_000
+	d := w.Empires[0]
+	d.Protection = 0
+	d.Troopers, d.Turrets, d.Jets = 50_000, 50_000, 5_000
+	jetsBefore := d.Jets
+
+	report, _ := w.Attack(a, d, AttackForce{Troopers: 100_000, Bombers: 100_000}, true)
+	if !strings.Contains(report, "attacks") {
+		t.Fatalf("never reached the battle:\n%s", report)
+	}
+	troopersLost, bombersLost := 100_000-a.Troopers, 100_000-a.Bombers
+	if troopersLost == 0 {
+		t.Fatal("no battle was fought; the test proves nothing")
+	}
+	if bombersLost != troopersLost {
+		t.Errorf("lost %d bombers against %d troopers from equal commitments; one fraction must cover both", bombersLost, troopersLost)
+	}
+	if strings.Contains(report, "airfield") || strings.Contains(report, "anti-air") {
+		t.Errorf("the report still describes a bombing run:\n%s", report)
+	}
+	// The defender's jets fall only with the general attrition, never to a
+	// separate bomber strike: with 100,000 bombers a bombing run would have
+	// emptied the airfield outright.
+	if d.Jets == 0 && jetsBefore > 0 {
+		t.Errorf("every defending jet was destroyed; a bombing run ran")
+	}
+}
+
+// A total conquest is the capture taking every region, nothing else. IB also
+// crowned one when the defender was left with no people, until #200.
+func TestConquestIsTheLandAlone(t *testing.T) {
+	cfg := DefaultConfig()
+	cfg.AICount = 1
+	w := NewWorldSeed(cfg, 1)
+	a := w.AddHuman("att", "Attacker")
+	a.Troopers = 1_000_000
+	d := w.Empires[0]
+	d.Protection = 0
+	d.People = 0 // starved out, but still holding land
+	d.Regions = RegionMix{Desert: 5_000}
+	d.syncLand()
+	report, _ := w.Attack(a, d, FullForce(a), true)
+	if !strings.Contains(report, "Victory") {
+		t.Fatalf("the attacker did not win; the test never reached the capture:\n%s", report)
+	}
+	if d.Land > 0 && !d.Alive {
+		t.Errorf("a realm still holding %d regions was crushed on having no people", d.Land)
+	}
+	if d.Land > 0 && strings.Contains(report, "crushed") {
+		t.Errorf("the report claims a total conquest while the loser holds %d regions:\n%s", d.Land, report)
 	}
 }

@@ -7,24 +7,7 @@ import (
 	"github.com/andy5995/immortal-barons/internal/i18n"
 )
 
-// Bombing-run tuning: each bomber that survives the defender's anti-air
-// destroys up to BomberJetKills of the defender's grounded jets, and the
-// defender shoots down one bomber per TurretsPerBomberDown turrets. The
-// defender's SDI does NOT come into it — the original reads the shield only
-// against an attack arriving from another planet, never against a neighbour.
-//
-// BOTH numbers below are IB's own. An exhaustive sweep of every turret
-// reference in the overlay (46 sites, 2026-08-24, docs/mechanics-reference.md
-// "What a turret actually does") found turrets in exactly two combat roles, a
-// neighbour's attack and an arriving invasion, and in both they are one addend
-// in an undifferentiated defence pool. No routine has them shooting anything
-// down. The sweep cannot see an `add di,<n>` then bare `[es:di]` access, so this
-// is strong evidence rather than proof — but it is the only support these two
-// constants have, and neither should be treated as fidelity.
 const (
-	BomberJetKills       = 3
-	TurretsPerBomberDown = 25
-
 	// JetsPerCarrier is how many jets one carrier can transport to a battle; jets
 	// beyond that are grounded (not "usable" — BRE's Offense/attack force screen).
 	JetsPerCarrier = 100
@@ -35,19 +18,6 @@ const (
 	// defender's own region count into the min. The share itself is a per-level
 	// table — see AttackCaptureMediumPct in balance.go.
 	RegularAttackCaptureFloor = 15
-
-	// Capture-density modifier (IB-original): a Normal attack takes more regions
-	// from a defender whose net worth is spread thinner over its land than the
-	// ATTACKER's — cheap, lightly-held land falls faster — and fewer from a
-	// denser, better-developed realm. The multiplier is the attacker's
-	// net-worth-per-region over the defender's, as a percent, clamped to
-	// [CaptureDensityMin, CaptureDensityMax]; equal density gives CaptureDensityBase
-	// (no change). No BRE-verified density formula exists — public strategy guides
-	// describe the *tactic* of preying on high-region, low-net-worth realms, not a
-	// number — so this is IB's own and may change. Tune freely.
-	CaptureDensityBase = 100 // percent: equal-density result
-	CaptureDensityMin  = 50  // percent (0.5x): densest targets
-	CaptureDensityMax  = 200 // percent (2.0x): softest targets
 
 	// LandDefenseBonus is how much a region adds when the AI sizes up a rival --
 	// cheap, lightly-held land looks softer. IB's own, and a playtest knob.
@@ -67,51 +37,6 @@ const (
 // fight cost before learning how it went. The wording is IB's own; only the
 // order and the per-unit breakdown are the original's (docs/dev/bre-screens.md).
 const returningForces = "Your forces have returned from the field, exhausted."
-
-// bombingRun sends a's bombers against d's airfields before the ground
-// clash. It destroys grounded jets (which don't defend anyway, so this
-// only weakens d's future offense and net worth) and costs a some bombers
-// to anti-air. It mutates both empires and returns (jetsDestroyed,
-// bombersLost).
-func (w *World) bombingRun(a, d *Empire, bombers int) (int, int) {
-	if bombers <= 0 || d.Jets <= 0 {
-		return 0, 0
-	}
-	lost := min(bombers, d.Turrets/TurretsPerBomberDown)
-	survivors := bombers - lost
-	kills := survivors * BomberJetKills
-	if kills > d.Jets {
-		kills = d.Jets
-	}
-	d.Jets -= kills
-	a.Bombers -= lost
-	return kills, lost
-}
-
-// captureDensityFactor returns the percent multiplier on a Normal attack's
-// region capture (see the CaptureDensity constants): the attacker's
-// net-worth-per-region over the defender's, clamped, so a defender softer than
-// the attacker bleeds more land and a denser one less. A bankrupt/undefended
-// defender counts as maximally soft; a landless or worthless attacker gets the
-// neutral base.
-func (w *World) captureDensityFactor(a, d *Empire) int {
-	nwA, nwD := w.NetWorth(a), w.NetWorth(d)
-	if d.Land <= 0 || nwD <= 0 {
-		return CaptureDensityMax
-	}
-	if a.Land <= 0 || nwA <= 0 {
-		return CaptureDensityBase
-	}
-	// (nwA/a.Land) / (nwD/d.Land) * 100, cross-multiplied to stay integer.
-	factor := int64(nwA) * int64(d.Land) * 100 / (int64(a.Land) * int64(nwD))
-	if factor < CaptureDensityMin {
-		return CaptureDensityMin
-	}
-	if factor > CaptureDensityMax {
-		return CaptureDensityMax
-	}
-	return int(factor)
-}
 
 // CanAttack reports whether e may launch another individual (conventional)
 // attack today. Config.MaxIndividualAttacks <= 0 means unlimited (matching the
@@ -193,16 +118,6 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		fmt.Fprintf(&b, tr("%s's allies send %d troopers and %d tanks to aid the defense.")+"\n\n", d.Name, allyTroopers, allyTanks)
 	}
 
-	bomberLoss := 0 // folded into the attacker's casualty breakdown below
-	if kills, lost := w.bombingRun(a, d, f.Bombers); kills > 0 || lost > 0 {
-		bomberLoss = lost
-		if lost > 0 {
-			fmt.Fprintf(&b, tr("Your bombers hit the airfields: %d enemy jets destroyed, %d bombers lost to anti-air.")+"\n\n", kills, lost)
-		} else {
-			fmt.Fprintf(&b, tr("Your bombers hit the airfields: %d enemy jets destroyed.")+"\n\n", kills)
-		}
-	}
-
 	// Military morale scales each side's unit effectiveness (the land defense
 	// bonus is terrain, not troops, so morale doesn't touch it).
 	// Only the COMMITTED force adds offense; the defender fights with everything.
@@ -217,7 +132,6 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	// retreat share and the winner pays whatever the strength ratio cost it.
 	attackerWins, aLoss, dLoss := w.battleAttrition(ap, dp, w.Config.AttackDamage.AttackRetreatPct())
 	aloss := loseCommitted(a, f, aLoss)
-	aloss.Bombers = bomberLoss // bombers fall to anti-air in the bombing run, not the ground clash
 	dloss := loseForces(d, dLoss)
 	w.bleedAllies(a, d, dLoss) // the allies' committed 30% bleeds at the defender's rate, and each is told
 
@@ -239,9 +153,7 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 	attackerCas := func(u UnitLoss) string {
 		return fmt.Sprintf(tr("%d troopers, %d jets, %d tanks, %d bombers"), u.Troopers, u.Jets, u.Tanks, u.Bombers)
 	}
-	defenderCas := func(u UnitLoss) string {
-		return fmt.Sprintf(tr("%d troopers, %d turrets, %d tanks, %d jets"), u.Troopers, u.Turrets, u.Tanks, u.Jets)
-	}
+	defenderCas := func(u UnitLoss) string { return defenderCasIn(a.Language, u) }
 
 	if attackerWins {
 		// BRE's Normal Attack yields LAND ONLY — "a successful assault brings you
@@ -250,11 +162,12 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		// lopsided the strength: a far stronger army takes ground faster over many
 		// attacks, it does not annihilate an empire in a single blow.
 		// min(the loser's land, max(floor, the Attack Rewards share of it)) — BRE's
-		// own order of operations, with IB's net-worth density modifier folded into
-		// the share before the floor is applied. The floor makes a decisive win on
-		// a small realm take (up to) all of it.
-		share := int64(w.Config.AttackRewards.AttackCapturePct()) * int64(w.captureDensityFactor(a, d))
-		captured = int(int64(d.Land) * share / 10000)
+		// own chain, BINARY-VERIFIED: total_regions x pct / 100, truncated, then
+		// max against the floor and min against the land. The floor makes a
+		// decisive win on a small realm take (up to) all of it. IB multiplied a
+		// net-worth density factor into the share until #200; the original reads
+		// the defender's region count and the level constant and nothing else.
+		captured = int(int64(d.Land) * int64(w.Config.AttackRewards.AttackCapturePct()) / 100)
 		if captured < RegularAttackCaptureFloor {
 			captured = RegularAttackCaptureFloor
 		}
@@ -284,7 +197,10 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		// apart by the report each one follows. Nothing is awarded for losing and
 		// nothing is taken from the loser: the original writes only the acting
 		// player's Score field, ever.
-		crushed := d.Land <= 0 || d.People <= 0
+		// A total conquest is the capture taking every region, and nothing else:
+		// the original's BRCRUSH path is reached from the land test alone. IB also
+		// crowned one when the defender was left with no people, until #200.
+		crushed := d.Land <= 0
 		gain := 0
 		if w.localAttacksScore() {
 			per := CombatScoreWinPerRegion
@@ -310,7 +226,8 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 			w.Kill(d)
 			fmt.Fprintf(&b, "\n"+tr("You crushed %s completely and seized the remains of its military!")+"\n", d.Name)
 		}
-		d.addEvent(fmt.Sprintf(i18n.T(d.Language, "%s attacked you: you lost %d regions and %d units."), a.Name, taken, dloss.Total()))
+		d.addEvent(fmt.Sprintf(i18n.T(d.Language, "%s attacked you and took %d regions. You lost %s."),
+			a.Name, taken, defenderCasIn(d.Language, dloss)))
 		w.postCombatNews(a, d, true, !d.Alive)
 	} else {
 		// A repelled attack scores nothing for either side. The original's only two
@@ -321,10 +238,19 @@ func (w *World) Attack(a, d *Empire, f AttackForce, autoCapture bool) (report st
 		fmt.Fprintf(&b, tr("Your casualties: %s.")+"\n\n", attackerCas(aloss))
 		fmt.Fprintf(&b, tr("The enemy lost: %s.")+"\n\n", defenderCas(dloss))
 		fmt.Fprint(&b, tr("Defeat! Your forces were beaten off the field.")+"\n")
-		d.addEvent(fmt.Sprintf(i18n.T(d.Language, "%s attacked you but was repelled. You lost %d units."), a.Name, dloss.Total()))
+		d.addEvent(fmt.Sprintf(i18n.T(d.Language, "%s attacked you and was repelled. You lost %s."),
+			a.Name, defenderCasIn(d.Language, dloss)))
 		w.postCombatNews(a, d, false, false)
 	}
 	return b.String(), captured
+}
+
+// defenderCasIn lists a defender's losses by unit type in lang — the attacker's
+// report and the defender's own event both read it, in their own languages. A
+// total on its own ("lost N units") is what the defender's event used to get,
+// and it is not what a player wants to know after a battle.
+func defenderCasIn(lang string, u UnitLoss) string {
+	return fmt.Sprintf(i18n.T(lang, "%d troopers, %d turrets, %d tanks, %d jets"), u.Troopers, u.Turrets, u.Tanks, u.Jets)
 }
 
 // absorbMilitary transfers a conquered empire's surviving military to the
@@ -501,26 +427,33 @@ func (f AttackForce) clampTo(e *Empire) AttackForce {
 
 // groundOffense is the committed force's regular-attack strength, mirroring
 // Empire.Offense on the sent units (troopers 1, jets 2, tanks 3.5–4.5 by HQ), scaled by
-// Technology. Bombers are excluded — they fly the bombing run, not the ground
-// clash. (Distinct from offense(), which values a group-attack detachment flat.)
+// Technology. Bombers are excluded: the original's local resolver keeps them out
+// of the offence sum (docs/mechanics-reference.md) though it bleeds them with
+// the rest. (Distinct from offense(), which values a group-attack detachment flat.)
 func (f AttackForce) groundOffense(e *Empire) int {
 	sum := f.Troopers + f.Jets*2 + tankStrength(f.Tanks, e.HQ)
 	return techRaise(sum, e.TechMilitaryFactor())
 }
 
-// loseCommitted removes pct% of the committed troopers/jets/tanks from e and
-// returns the per-type breakdown — so holding units back keeps them out of harm's
-// way. Bomber losses come from the bombing run, not here, and are folded in by
-// the caller.
+// loseCommitted removes frac of the committed force from e, every type at the
+// SAME fraction, and returns the per-type breakdown — so holding units back
+// keeps them out of harm's way. BINARY-VERIFIED (resolve_regular_attack, proc
+// +0x1581..+0x1631): one Real48 loss fraction is multiplied into each of the
+// four committed counts in turn and subtracted from troopers, jets, tanks and
+// bombers alike. Bombers add no offence locally but bleed with the rest; IB
+// used to fly them on a bombing run of its own instead, with anti-air losses
+// and grounded-jet kills the original has no trace of (#200).
 func loseCommitted(e *Empire, f AttackForce, frac float64) UnitLoss {
 	l := UnitLoss{
 		Troopers: shareOf(f.Troopers, frac),
 		Jets:     shareOf(f.Jets, frac),
 		Tanks:    shareOf(f.Tanks, frac),
+		Bombers:  shareOf(f.Bombers, frac),
 	}
 	e.Troopers -= l.Troopers
 	e.Jets -= l.Jets
 	e.Tanks -= l.Tanks
+	e.Bombers -= l.Bombers
 	return l
 }
 

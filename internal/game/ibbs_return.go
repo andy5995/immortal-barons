@@ -180,12 +180,19 @@ func strikeReport(sent InFlightStrike, res AttackResult, committed, back AttackF
 	default:
 		b.WriteString("Your forces were beaten off the field.\n")
 	}
-	fmt.Fprintf(&b, "You lost %s.\n", forceLosses(committed, back))
-	fmt.Fprintf(&b, "%s came home.\n", forceLine(back))
-	if res.Enemy.Total() > 0 {
-		fmt.Fprintf(&b, "You destroyed %d troopers, %d turrets, %d tanks, %d jets.",
-			res.Enemy.Troopers, res.Enemy.Turrets, res.Enemy.Tanks, res.Enemy.Jets)
+	// One line per unit type from here, zeros included, which is the shape of
+	// the original's returning report (resolve_returning_attack, BRE.OVR
+	// 0x04136c): its lines are unrolled per unit with no test on the count. A
+	// single "lost N" total is what this replaced.
+	writeUnitLines(&b, "You lost %d %s.", attackUnits(forceLosses(committed, back)))
+	// What the strike destroyed is only known where a battle was fought; a force
+	// that found no realm, or found it shielded, destroyed nothing and says so by
+	// omission rather than with four zeros.
+	switch res.outcome() {
+	case OutcomeWon, OutcomeRepelled:
+		writeUnitLines(&b, "You destroyed %d %s.", defenceUnits(res.Enemy))
 	}
+	writeUnitLines(&b, "%d %s returned.", attackUnits(back))
 	return strings.TrimRight(b.String(), "\n")
 }
 
@@ -203,20 +210,14 @@ func strikeTarget(sent InFlightStrike, res AttackResult) string {
 	return fmt.Sprintf("%s of %s", name, res.TargetBoard)
 }
 
-// forceLosses renders what a detachment lost, by unit type.
-func forceLosses(committed, back AttackForce) string {
-	return forceLine(AttackForce{
+// forceLosses is what a detachment lost, by unit type.
+func forceLosses(committed, back AttackForce) AttackForce {
+	return AttackForce{
 		Troopers: max(committed.Troopers-back.Troopers, 0),
 		Jets:     max(committed.Jets-back.Jets, 0),
 		Tanks:    max(committed.Tanks-back.Tanks, 0),
 		Bombers:  max(committed.Bombers-back.Bombers, 0),
-	})
-}
-
-// forceLine renders a detachment as the four unit counts, in the order the send
-// prompts ask for them.
-func forceLine(f AttackForce) string {
-	return fmt.Sprintf("%d troopers, %d jets, %d tanks, %d bombers", f.Troopers, f.Jets, f.Tanks, f.Bombers)
+	}
 }
 
 // returnNews is the planet-wide line about a strike of ours coming home. BRE
