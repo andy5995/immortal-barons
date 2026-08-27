@@ -1,4 +1,5 @@
 (in-progress:)
+  * An FTN link can send plain packets instead of bundles, for a peer whose game is too old to unwrap one
   * A board that only receives no longer has to name a netmail directory it never writes to
   * A planetary run that skipped one packet no longer prints its count twice
   * barons-ftn --status reports what each spool still holds, for whom, for how long and why

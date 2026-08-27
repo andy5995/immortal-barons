@@ -1110,3 +1110,62 @@ func TestStatusOrdersPeersByHowLongTheyHaveWaited(t *testing.T) {
 		t.Fatalf("peers = %+v, want the longest wait first", status.Peers)
 	}
 }
+
+// #230: a peer still on the released version cannot parse a ZIP bundle at all,
+// and its ReadInbound aborts the whole run rather than skipping the file. A raw
+// link sends it what it has always understood: one game packet per file, the
+// bytes unchanged.
+func TestRawLinkSendsOnePlainPacketPerFile(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "Link 1 Obox obox1 Raw\n")
+	if err := os.MkdirAll(filepath.Join(data, "obox1"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	first := game.Packet{FromBoard: "Bravo BBS", ToBoard: "Alpha BBS", FromNode: 2, ToNode: 1, Seq: 1, League: 100}
+	second := game.Packet{FromBoard: "Bravo BBS", ToBoard: "Alpha BBS", FromNode: 2, ToNode: 1, Seq: 2, League: 100}
+	writeNamedPacket(t, data, "one.brp", first)
+	writeNamedPacket(t, data, "two.brp", second)
+
+	result, err := RunOut(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	// One file per packet: a raw file IS a packet, so there is no envelope to
+	// hold the second.
+	if len(result.Queued) != 2 {
+		t.Fatalf("queued = %+v, want one handoff per packet", result.Queued)
+	}
+	seqs := map[uint64]bool{}
+	for _, q := range result.Queued {
+		body, err := os.ReadFile(q.PacketPath)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(body) > 0 && body[0] == 'P' {
+			t.Fatalf("%s is a ZIP bundle, which the peer this link exists for cannot read", q.PacketPath)
+		}
+		// The test that matters: a board with only encoding/json must be able
+		// to read it, which is all the released version does.
+		var p game.Packet
+		if err := json.Unmarshal(body, &p); err != nil {
+			t.Fatalf("an old board could not parse %s: %v", q.PacketPath, err)
+		}
+		seqs[p.Seq] = true
+	}
+	if !seqs[1] || !seqs[2] {
+		t.Errorf("packets delivered = %v, want both Seq 1 and Seq 2", seqs)
+	}
+}
+
+// The same peer read back through the current reader: raw is not a dead end,
+// because readTransport already accepts a plain packet as a one-entry legacy
+// bundle. That is what makes the transition work in both directions.
+func TestARawPacketIsStillReadableByThisBuild(t *testing.T) {
+	raw := []byte(`{"FromBoard":"Bravo BBS","FromNode":2,"ToNode":1,"Seq":1,"League":100}`)
+	manifest, entries, err := readTransport(raw, "00640001.BRP")
+	if err != nil {
+		t.Fatalf("this build cannot read what a raw link emits: %v", err)
+	}
+	if manifest.Delivery != "legacy" || len(entries) != 1 || entries[0].Packet.Seq != 1 {
+		t.Fatalf("manifest=%+v entries=%d", manifest, len(entries))
+	}
+}

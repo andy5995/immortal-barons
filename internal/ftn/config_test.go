@@ -152,3 +152,43 @@ func TestConfigLoadsWithoutNetmailDirForAReceiveOnlyBoard(t *testing.T) {
 		t.Errorf("the refusal does not name the file to fix: %v", err)
 	}
 }
+
+// Raw composes with every handoff mode, because the envelope is what an old
+// peer cannot parse, not the way the file travels. It is read off the end of
+// the line so BSO's optional flavour keeps its own position.
+func TestRawComposesWithEveryLinkMode(t *testing.T) {
+	dir := t.TempDir()
+	for _, sub := range []string{"in", "netmail", "obox", "bso"} {
+		if err := os.MkdirAll(filepath.Join(dir, sub), 0o755); err != nil {
+			t.Fatal(err)
+		}
+	}
+	body := "InboundDir " + filepath.Join(dir, "in") + "\n" +
+		"NetmailDir " + filepath.Join(dir, "netmail") + "\n" +
+		"Link 1 Attach Raw\n" +
+		"Link 2 Obox obox raw\n" +
+		"Link 3 BSO bso Crash Raw\n" +
+		"Link 4 Obox obox\n"
+	if err := os.WriteFile(filepath.Join(dir, ConfigFile), []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	cfg, err := LoadConfig(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	for node, want := range map[int]struct {
+		mode LinkMode
+		raw  bool
+		flav string
+	}{
+		1: {LinkAttach, true, "Normal"},
+		2: {LinkObox, true, "Normal"},
+		3: {LinkBSO, true, "Continuous"}, // "Crash" is the BSO spelling; normalFlavour folds it
+		4: {LinkObox, false, "Normal"},
+	} {
+		got := cfg.Links[node]
+		if got.Mode != want.mode || got.Raw != want.raw || got.Flavour != want.flav {
+			t.Errorf("node %d = %+v, want mode %v raw %v flavour %q", node, got, want.mode, want.raw, want.flav)
+		}
+	}
+}

@@ -193,6 +193,27 @@ Paths in a `Link` line must not contain spaces. `NetmailDir`, `AttachDir`, and
 the inbound directory settings consume the rest of their line and may contain
 spaces when the operating system permits them.
 
+Add `Raw` to the end of any link line to send that peer one plain game packet
+per file, instead of a bundle:
+
+```ini
+Link 3 Obox /home/bbs/filebox/peer Raw
+Link 4 Attach Raw
+```
+
+This is for a peer whose game is too old to unwrap a bundle. Such a board does
+not merely fail to read one — its inbound run stops on the first bundle it
+meets and applies nothing at all until someone removes the file by hand, so a
+league that upgrades over a day or two needs the boards that have not moved yet
+to keep receiving what they have always understood.
+
+`Raw` is a modifier rather than a mode of its own, because the envelope is what
+an old board cannot parse, not the way the file travels: it composes with
+attach, obox and BSO alike, and on a BSO link it is never merged into a bundle
+already advertised in the flow file. It costs one attachment alias per packet
+and gives up coalescing, which is the price of reaching a board that cannot
+read a bundle at all. Take it off once every peer on that link is upgraded.
+
 ## Configuration examples
 
 ### Two boards using direct oboxes

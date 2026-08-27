@@ -51,6 +51,10 @@ type batchTarget struct {
 	// later run or check can say why a peer is behind without the sysop having
 	// kept the output of the run that met it.
 	LastError string `json:"last_error,omitempty"`
+	// Raw marks a target carrying one unbundled packet, for a peer that cannot
+	// read a bundle. Journaled rather than re-read from the config, so a plan
+	// written before the setting changed still publishes what it planned.
+	Raw bool `json:"raw,omitempty"`
 }
 
 // RunOut claims one game-outbound snapshot and hands each next hop one opaque
@@ -301,6 +305,8 @@ func saveBatchPlan(path string, plan batchPlan) error {
 	return replaceFileAtomic(path, data, 0o644)
 }
 
+const aliasWrapWarning = "the four-character FTN attachment counter wrapped; verify that no peer still holds aliases from the preceding cycle"
+
 func buildBatchPlan(batch, dataDir string, transport Config, world *game.World, nodes []game.LeagueNode, result *Result) (batchPlan, error) {
 	entries, err := os.ReadDir(batch)
 	if err != nil {
@@ -377,7 +383,7 @@ func buildBatchPlan(batch, dataDir string, transport Config, world *game.World, 
 			return batchPlan{}, err
 		}
 		if wrapped {
-			result.Warnings = append(result.Warnings, "the four-character FTN attachment counter wrapped; verify that no peer still holds aliases from the preceding cycle")
+			result.Warnings = append(result.Warnings, aliasWrapWarning)
 		}
 		delivery := "direct"
 		if link.Mode == LinkAttach {
@@ -386,18 +392,51 @@ func buildBatchPlan(batch, dataDir string, transport Config, world *game.World, 
 				return batchPlan{}, err
 			}
 		}
+		target := batchTarget{
+			Node: nodeNumber, Name: node.Name, Address: address.String(), Mode: link.Mode,
+			Directory: dir, QueueDir: link.Directory, Flavour: link.Flavour, Alias: alias,
+		}
+
+		// A raw peer gets one file per packet, because a raw file IS one packet:
+		// there is no envelope to hold a second. That costs an alias each and
+		// gives up coalescing, which is the price of reaching a board that
+		// cannot read a bundle at all.
+		if link.Raw {
+			for i, entry := range groups[nodeNumber] {
+				rawTarget := target
+				rawTarget.Raw = true
+				if i > 0 {
+					rawTarget.Alias, wrapped, err = nextAlias(dataDir, dir, world.Config.LeagueNumber, mine)
+					if err != nil {
+						return batchPlan{}, err
+					}
+					if wrapped {
+						result.Warnings = append(result.Warnings, aliasWrapWarning)
+					}
+				}
+				if link.Mode == LinkAttach {
+					if err := checkSubjectMargin(transport, filepath.Join(dir, rawTarget.Alias), result); err != nil {
+						return batchPlan{}, err
+					}
+				}
+				rawTarget.BundleFile = fmt.Sprintf("target-%03d-%03d.raw", nodeNumber, i)
+				if err := replaceFileAtomic(filepath.Join(batch, rawTarget.BundleFile), entry.Raw, 0o644); err != nil {
+					return batchPlan{}, err
+				}
+				plan.Targets = append(plan.Targets, rawTarget)
+			}
+			continue
+		}
+
 		body, _, err := makeBundle(world.NodeNumber(world.Config.BoardID), delivery, groups[nodeNumber])
 		if err != nil {
 			return batchPlan{}, err
 		}
-		bundleFile := fmt.Sprintf("target-%03d.bundle", nodeNumber)
-		if err := replaceFileAtomic(filepath.Join(batch, bundleFile), body, 0o644); err != nil {
+		target.BundleFile = fmt.Sprintf("target-%03d.bundle", nodeNumber)
+		if err := replaceFileAtomic(filepath.Join(batch, target.BundleFile), body, 0o644); err != nil {
 			return batchPlan{}, err
 		}
-		plan.Targets = append(plan.Targets, batchTarget{
-			Node: nodeNumber, Name: node.Name, Address: address.String(), Mode: link.Mode,
-			Directory: dir, QueueDir: link.Directory, Flavour: link.Flavour, Alias: alias, BundleFile: bundleFile,
-		})
+		plan.Targets = append(plan.Targets, target)
 	}
 	return plan, nil
 }
@@ -531,7 +570,14 @@ func publishTarget(batch, dataDir string, transport Config, origin Address, targ
 		if err != nil {
 			return Queued{}, err
 		}
-		actual, appended, publishErr := appendBSOBundle(flow, target.Directory, body)
+		// A raw packet is never merged: appendBSOBundle would read it as a
+		// one-entry legacy bundle and fold it into a ZIP, which is exactly what
+		// this peer cannot read.
+		actual, appended := "", false
+		var publishErr error
+		if !target.Raw {
+			actual, appended, publishErr = appendBSOBundle(flow, target.Directory, body)
+		}
 		if publishErr == nil && appended {
 			queued.PacketPath = actual
 		}

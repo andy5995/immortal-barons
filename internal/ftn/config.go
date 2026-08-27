@@ -66,6 +66,12 @@ type Link struct {
 	Mode      LinkMode
 	Directory string
 	Flavour   string
+	// Raw sends this peer one unbundled game packet per file, the shape every
+	// board understood before the bundled transport. It is a modifier on the
+	// handoff rather than a mode of its own, because a peer that cannot read a
+	// bundle may still be reached by attach, obox or BSO — the envelope is what
+	// it cannot parse, not the way the file travels (#230).
+	Raw bool
 }
 
 // fidoSubdir is the child of an outbound directory that claimed packets are
@@ -211,8 +217,15 @@ func parseYesNo(value string) (bool, error) {
 
 func parseLink(value, dataDir string) (int, Link, error) {
 	fields := strings.Fields(value)
+	// Raw is read off the end first so it composes with every mode without the
+	// mode parsers having to know about it, and so BSO's optional flavour keeps
+	// its own position.
+	raw := false
+	if n := len(fields); n > 0 && strings.EqualFold(fields[n-1], "raw") {
+		raw, fields = true, fields[:n-1]
+	}
 	if len(fields) < 2 {
-		return 0, Link{}, fmt.Errorf("want <node> Attach, Obox <dir>, or BSO <dir> [flavour]")
+		return 0, Link{}, fmt.Errorf("want <node> Attach, Obox <dir>, or BSO <dir> [flavour], each optionally followed by Raw")
 	}
 	node, err := strconv.Atoi(fields[0])
 	if err != nil || node < 1 || node > 999 {
@@ -244,6 +257,7 @@ func parseLink(value, dataDir string) (int, Link, error) {
 	default:
 		return 0, Link{}, fmt.Errorf("unknown mode %q", fields[1])
 	}
+	link.Raw = raw
 	if link.Directory != "" && !filepath.IsAbs(link.Directory) {
 		link.Directory = filepath.Join(dataDir, link.Directory)
 	}
