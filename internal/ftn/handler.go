@@ -351,13 +351,22 @@ func copyFileExclusive(source, destination string) error {
 		return err
 	}
 	existing, readErr := os.ReadFile(destination)
-	if readErr != nil {
-		return err // could not even compare; report the original collision
-	}
-	if bytes.Equal(existing, data) {
+	if readErr == nil && bytes.Equal(existing, data) {
 		return nil // an earlier attempt already published this exact copy
 	}
+	// Unreadable (permission, a directory sitting at this path, disk fault)
+	// is treated the same as readable-but-different: whatever is here cannot
+	// be trusted as this call's own copy, so it is cleared rather than left
+	// in place. Falling back to the original EEXIST error on a read failure
+	// would leave the file untouched, and since this path is deterministic
+	// from source's own filename, the very next run hits the identical
+	// unreadable file and fails identically -- the same "collide forever"
+	// failure #198 exists to fix, just for a narrower trigger (review on
+	// #225).
 	if rmErr := os.Remove(destination); rmErr != nil {
+		if readErr != nil {
+			return fmt.Errorf("replacing unreadable attachment copy %s (read: %v): %w", destination, readErr, rmErr)
+		}
 		return fmt.Errorf("replacing stale attachment copy %s: %w", destination, rmErr)
 	}
 	return writeFileExclusive(destination, data)

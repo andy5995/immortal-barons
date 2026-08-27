@@ -412,6 +412,42 @@ func TestCopyFileExclusiveReplacesStaleDifferentContent(t *testing.T) {
 	}
 }
 
+// TestCopyFileExclusiveReplacesUnreadableExistingFile is review on #225:
+// copyFileExclusive originally gave up and returned the original EEXIST
+// error the moment os.ReadFile(destination) failed for ANY reason --
+// permission, a directory sitting at that path, a disk fault -- leaving the
+// file untouched. Since the destination is deterministic from source's own
+// filename, the next run hits the exact same unreadable file and fails
+// identically: the same "collide forever" failure #198 exists to fix, just
+// reached through an unreadable file instead of a readable-but-different
+// one. An unreadable destination must be cleared and replaced the same way,
+// not given up on.
+func TestCopyFileExclusiveReplacesUnreadableExistingFile(t *testing.T) {
+	if os.Getuid() == 0 {
+		t.Skip("root ignores the read-permission bit this test relies on")
+	}
+	dir := t.TempDir()
+	source := filepath.Join(dir, "packet.brp")
+	destination := filepath.Join(dir, "packet0.brp")
+	data := []byte(`{"fromBoard":"Bravo BBS","seq":9}`)
+	if err := os.WriteFile(source, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(destination, []byte("unreadable leftover"), 0o000); err != nil {
+		t.Fatal(err)
+	}
+	if err := copyFileExclusive(source, destination); err != nil {
+		t.Fatalf("copyFileExclusive gave up on an unreadable leftover instead of clearing it: %v", err)
+	}
+	got, err := os.ReadFile(destination)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(got) != string(data) {
+		t.Errorf("destination content = %q, want the current source content %q", got, data)
+	}
+}
+
 // TestRunSkipsPacketWithBadDestinationButStillQueuesOthers is #198's other
 // half: not just the copyFileExclusive collision itself, but the surrounding
 // per-candidate loop in Run that used to abort the WHOLE run on any one
