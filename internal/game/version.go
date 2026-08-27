@@ -34,6 +34,30 @@ const Version = "0.0.8"
 // protocol. A board on the v0.0.7 RELEASE stamps this number and is unaffected;
 // a board on a snapshot from before the field is held, whatever it calls
 // itself. One more reason a league board should run a release.
+//
+// # Changing a field is soft; changing the container is not
+//
+// Introducing this very field is the worked example of a safe wire change. It
+// is optional (omitempty) and unsigned, so a board that predates it omits it,
+// a board that has it signs as though it did not, and the two verify each
+// other across the change. A receiver that meets an unknown FIELD ignores it;
+// one that meets a MISSING field carries on. Either way it parses the document
+// and reaches the compatibility logic.
+//
+// A change to the CONTAINER has no such property, because the receiver fails
+// before any of that runs. It cannot ignore bytes it cannot parse, and a
+// receiver old enough to predate the new container is by definition old enough
+// to predate whatever tolerance was added alongside it. The old form therefore
+// has to stay on the wire until every board can read the new one — a whole
+// release cycle, not a coordinated afternoon.
+//
+// This number does not cover that, and cannot. It describes the PACKET, and
+// the packet is not the only thing on the wire: barons-ftn wraps packets in a
+// transport bundle of its own, and that envelope changed shape (JSON to ZIP)
+// in #226 without this number moving, correctly, because no packet changed.
+// Nothing guards the envelope. Before changing one, work out what a board
+// running the newest RELEASE does when it meets it — for the ZIP bundle the
+// answer was that its whole planetary run aborts (issue #230).
 const Protocol = 1
 
 // SpeaksOurProtocol reports whether a packet's format is one this build can
