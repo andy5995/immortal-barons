@@ -16,10 +16,18 @@ import (
 )
 
 const (
-	spoolDir      = "ftn-spool"
+	// spoolDir and attachSpool are deliberately short (#231): the attach
+	// path they form part of counts against the 70-byte FTN Type-2 Subject
+	// field, and dataDir itself is often already most of that budget on a
+	// Synchronet install, where a door's data directory is a fixed
+	// xtrn/<door>/data path the sysop cannot shorten. "ftn-spool"/"attach"
+	// cost a three-board rig its whole margin on their own; a sysop who
+	// still doesn't fit after this has AttachDir, which is a real
+	// directory choice rather than a fixed name this package controls.
+	spoolDir      = "ftn"
 	outSpoolDir   = "out"
 	badSpoolDir   = "bad"
-	attachSpool   = "attach"
+	attachSpool   = "att"
 	batchPlanFile = "batch.json"
 )
 
@@ -499,11 +507,17 @@ func linkFor(config Config, node int) Link {
 	return Link{Mode: LinkAttach, Flavour: "Normal"}
 }
 
+// attachmentDirectory's default deliberately does NOT nest under spoolDir
+// the way out/bad/in do (#231): attach is the one spool directory whose path
+// leaks into an external protocol field with a hard byte budget (the FTN
+// Type-2 Subject) -- every byte the other three spend on organization is a
+// byte this one can't afford to. Nesting it added a whole "ftn/" segment for
+// no benefit only this directory pays for.
 func attachmentDirectory(dataDir string, transport Config) string {
 	if transport.AttachDir != "" {
 		return transport.AttachDir
 	}
-	return filepath.Join(dataDir, spoolDir, attachSpool)
+	return filepath.Join(dataDir, attachSpool)
 }
 
 func checkSubjectMargin(transport Config, attached string, result *Result) error {

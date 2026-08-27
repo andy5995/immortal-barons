@@ -98,16 +98,27 @@ func fileAttachSubject(transport Config, attached string) (string, int, error) {
 	return prefix + spelled, limit - len(spelled), nil
 }
 
+// subjectAdvice leads with AttachDir rather than SubjectPath (#231): AttachDir
+// shortens the real path a mailer looks for, so it works no matter what the
+// mailer does with the subject it's handed. SubjectPath only helps if the
+// mailer itself resolves a non-absolute subject back to a real path -- not
+// every mailer does; SBBSecho reads the attachment's directory out of the
+// subject and needs the real path there, confirmed on a live three-board rig.
+// Naming SubjectPath first, as this used to, reads as "try this" to a sysop
+// on a mailer it can't actually help -- a wrong-sounding cause sends them
+// further from the fix than no cause at all.
 func subjectAdvice(mode SubjectMode) string {
 	switch mode {
 	case SubjectBasename:
 		return "The filename alone does not fit, so no SubjectPath setting can shorten it"
 	case SubjectPrefixed:
-		return `Shorten the SubjectPath prefix in ftn.cfg, or set "SubjectPath Basename" to write the filename alone, ` +
-			"with AttachDir naming the directory the mailer searches"
+		return `Set AttachDir to a shorter directory -- that works regardless of mailer. Shortening the ` +
+			`SubjectPath prefix, or switching to "SubjectPath Basename", only helps if the mailer resolves a ` +
+			"non-absolute subject itself"
 	}
-	return `Set SubjectPath in ftn.cfg: "Basename" writes the filename alone, with AttachDir naming the directory ` +
-		`the mailer searches; a prefix such as "SubjectPath fido" is resolved against the mailer's working directory`
+	return `Set AttachDir in ftn.cfg to a shorter directory -- that shortens the real path and works no matter ` +
+		`what the mailer does with the subject. SubjectPath ("Basename", or a prefix such as "SubjectPath fido") ` +
+		`only helps if the mailer resolves a non-absolute subject itself; not every mailer does`
 }
 
 func type2Header(attached string, origin, destination Address, now time.Time) [type2HeaderSize]byte {

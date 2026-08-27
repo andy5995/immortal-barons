@@ -23,7 +23,7 @@ func TestSpoolChecksReportTheBacklogAndItsReason(t *testing.T) {
 		t.Fatalf("a board with no spool reported %+v", checks)
 	}
 
-	batch := filepath.Join(cfg.DataDir, "ftn-spool", "out", "0001")
+	batch := filepath.Join(cfg.DataDir, "ftn", "out", "0001")
 	if err := os.MkdirAll(batch, 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -61,7 +61,7 @@ func TestSpoolChecksReportTheBacklogAndItsReason(t *testing.T) {
 func TestSpoolChecksFailOnAnUnreadableJournal(t *testing.T) {
 	cfg := game.DefaultConfig()
 	cfg.DataDir = t.TempDir()
-	dir := filepath.Join(cfg.DataDir, "ftn-spool", "in", "deadbeef")
+	dir := filepath.Join(cfg.DataDir, "ftn", "in", "deadbeef")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		t.Fatal(err)
 	}
