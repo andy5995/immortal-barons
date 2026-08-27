@@ -1,5 +1,4 @@
-// Command barons-ftn moves outbound inter-BBS packets into the FTN handoff
-// directory and creates Synchronet-compatible Type-2 file-attach netmail.
+// Command barons-ftn wraps and unwraps inter-BBS packets at an FTN boundary.
 package main
 
 import (
@@ -16,6 +15,8 @@ import (
 
 func main() {
 	dataDir := flag.String("data", "./data", "folder that holds the game data and ftn.cfg")
+	inbound := flag.Bool("in", false, "receive, unwrap, and route inbound FTN transport bundles")
+	outbound := flag.Bool("out", false, "bundle and hand off outbound game packets (the default)")
 	version := flag.Bool("version", false, "print the version, then exit")
 	flag.Parse()
 	if flag.NArg() != 0 {
@@ -27,7 +28,17 @@ func main() {
 		fmt.Printf("go: %s\n", runtime.Version())
 		return
 	}
-	result, err := ftn.Run(*dataDir)
+	if *inbound && *outbound {
+		fmt.Fprintln(os.Stderr, "barons-ftn: use only one of --in and --out")
+		os.Exit(2)
+	}
+	var result ftn.Result
+	var err error
+	if *inbound {
+		result, err = ftn.RunIn(*dataDir)
+	} else {
+		result, err = ftn.RunOut(*dataDir)
+	}
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "barons-ftn:", err)
 		os.Exit(1)
@@ -41,7 +52,9 @@ func main() {
 		fmt.Printf("Queued %s for %s (%s) as %s\n",
 			queued.PacketPath, queued.NextHop, queued.Address, queued.Message)
 	}
-	if len(result.Queued) == 0 {
+	if *inbound {
+		fmt.Printf("Delivered %d packet(s) to the game.\n", result.Delivered)
+	} else if len(result.Queued) == 0 {
 		fmt.Println("No outbound packets.")
 	}
 }

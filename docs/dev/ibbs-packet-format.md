@@ -6,7 +6,7 @@ The clone is an independent reimplementation and does **not** use BRE's binary
 packet format. It defines its own JSON packets. The node list reuses BRE's
 plain-text `BRNODES.DAT` layout (under the clone's own filename `ibnodes.dat`).
 
-## Transport model (Option A, file-drop)
+## Transport model
 
 The game only reads and writes packet files in two directories, set per board in
 the Configuration Editor and stored in `bbs.cfg` (not `config.json` — see "Board
@@ -21,44 +21,165 @@ Both are resolved against `DataDir` unless absolute (`Config.Inbound()` /
 `Config.Outbound()`) — a door is launched from whatever working directory the
 BBS chooses, so a CWD-relative path lands somewhere different on every call.
 
-Moving files between boards is external to the game (a mailer, a sync tool, scp,
-a shared mount). `RunPlanetary` (`immortal-barons -planetary`, also folded into
-`-maint` when `IBBS` is on) reads and applies inbound packets, launches due
-group attacks, exports this board's scores, and writes the outbox.
+Moving files between boards is external to the game. `RunPlanetary`
+(`immortal-barons -planetary`, also folded into `-maint` when IBBS is on) reads
+and applies inbound packets, launches due group attacks, exports this board's
+scores, and writes the outbox.
 
-`barons-ftn` is the optional FTN adapter. It remains outside the game process:
-it reads the existing board and roster files, renames each outbound
-`.brp` into that directory's `fido/` child, then creates an FTS-0001 Type-2
-file-attach `.msg` with exclusive creation. An unaddressed mesh broadcast is
-fanned out with real copies to one distinct attachment and message per other
-roster node; an addressed packet is sent to its routed next hop. No hard-link
-support is required. Its only settings are in `ftn.cfg`. `WriteOutbox` writes
-complete JSON, including the board signature when configured, under a
-non-`.brp` temporary name and atomically publishes it by renaming it, so the
-adapter needs no game lock. Concurrent adapter processes serialize through
-their own `barons-ftn.lock`, which the game never takes.
+### Generic file handoff contract (#191)
+
+The final `.brp` name is the commit marker (the extension is matched without
+regard to case). Its existence means the file is complete, closed, and ready
+for its current owner to consume. A transport must never create a final `.brp`
+and then fill it in place. That rule applies to a plain filebox copier, a sync
+service, `scp`, and a shared or network filesystem just as it does to
+`barons-ftn`.
+
+The ownership states are:
+
+| State | Owner | Contract |
+|---|---|---|
+| Non-`.brp` temporary file in game outbound | Game | Private work in progress; transports ignore it. |
+| Final `.brp` in game outbound | Transport | The game has published complete bytes; a transport may claim them. |
+| Non-`.brp` claimed or staged file | Transport | Private transport work; the game ignores it. |
+| Final `.brp` in game inbound | Game | Published and immutable; the transport must not change or remove it. |
+
+The game publishes outbound packets by creating a temporary file in the
+destination directory, writing and closing it, then renaming it to `.brp` on
+that same filesystem. A transport may therefore scan only final `.brp` names;
+it does not need the game lock merely to avoid a partial read. If multiple
+transport workers can consume the same outbound directory, they must serialize
+with one another or atomically rename a source to a non-`.brp` claimed name in
+that directory. Only the worker that acquired the claim may queue or remove
+it. It must preserve the packet bytes exactly, and retain enough state to retry
+or restore the claim after a delivery failure.
+
+Inbound publication is the mirror image:
+
+1. Stage the complete packet under a non-`.brp` name on the destination
+   filesystem. Copying to a temporary file elsewhere and then falling back to
+   a cross-filesystem copy into the final name does not satisfy the contract.
+2. Finish and close the staged file. A transport promising crash-durable
+   delivery should also sync the file before publication and the destination
+   directory after the rename, where the platform supports it.
+3. Serialize publishers for this inbound directory and check the intended
+   final name. If it already contains identical bytes, the arrival is a
+   duplicate and the staged copy may be discarded. If it contains different
+   bytes, preserve the staged copy, report a collision, and never overwrite
+   either file.
+4. Atomically rename the staged file to its final `.brp` name. From that point
+   the game owns it.
+
+No lock shared with the game is required for this inbound handoff. A rename
+that lands before `ReadInbound` takes its directory snapshot is processed in
+that run; one that lands afterwards waits intact for the next run. The atomic
+name transition makes both outcomes safe. A transport still needs its own lock
+or an equivalent no-replace publication primitive to keep two of its workers
+from racing through the collision check.
+
+This contract requires a filesystem whose same-directory rename has atomic,
+consistent visibility to every participating process. If a remote mount cannot
+provide that guarantee, use a receiver-side process to stage and rename on a
+local filesystem, or schedule transport and `-planetary` so they cannot
+overlap. A sidecar marker or manifest does not repair weak visibility by
+itself: it adds a second file whose ordering, atomic publication, collision,
+and cleanup would need another protocol.
+
+`ReadInbound` defensively leaves an unparseable file younger than five minutes
+in place and retries it later. That grace period limits damage from a transport
+that writes directly to the final name; it is a heuristic, not an alternative
+readiness signal. An older incomplete file is quarantined to `bad/`.
+
+`barons-ftn` is the optional bidirectional FTN adapter. The game's directories
+remain private. `--out` claims a fixed snapshot under `game.lock`, groups its
+packets by next hop, and publishes one FTN handoff per hop. Attach and obox
+bundles are immutable; BSO bundles may be rebuilt at the same path while the
+peer's `.bsy` is held. `--in`
+validates a received bundle, publishes local packets under the same game lock,
+and immediately re-bundles transit. All helper processes serialize through
+`barons-ftn.lock`; the lock order is always helper then game. Durable journals
+under `ftn-spool` make the handoff resumable.
+
+### FTN transport bundle
+
+The physical `NNNNCCCC.BRP` file is a ZIP archive. It is not a new game packet
+and none of its metadata is covered by a board signature. It contains:
+
+```text
+manifest.json
+packets/000000/L100-2-000000000001z-3.brp
+packets/000001/L100-2-0000000000020-3.brp
+...
+```
+
+The version-1 manifest is:
+
+```json
+{
+  "format": 1,
+  "delivery": "attach | direct",
+  "entries": [
+    {
+      "route": [2, 1],
+      "covered": [2, 1, 3, 4]
+    }
+  ]
+}
+```
+
+Every ZIP member CRC must pass before any entry is published. Readers reject
+duplicate members, a packet/routing-entry count mismatch, unsafe paths,
+unsupported versions, more than 10,000 entries, and more than 256 MiB expanded
+data. Each manifest entry supplies transport state for the packet member at the
+same ZIP order position; it does not repeat the member name. A member is decoded as
+`game.Packet` to validate its shape, derive its canonical filename, and choose a
+route. Its raw bytes are copied unchanged when delivered or forwarded.
+
+`delivery` records only the distinction the receiver needs. An `attach` bundle
+waits for a matching validated `.msg`; a `direct` obox or BSO bundle is processed
+without one. It does not redundantly record which direct queue carried it.
+`route` is the actual node trace: its last node is the
+transmitting hop, and its length supplies the hop count. `covered` is present on
+an unaddressed broadcast and contains every node for which a branch has already
+been durably scheduled. A receiver fans out only to nodes in neither set. For a
+legacy raw packet, the unchanged inner packet's existing `Hops` value is added
+to the route length; it is not duplicated in the manifest. These fields are
+loop controls, not authentication; the game still verifies the inner packet
+against the league roster.
+
+Coverage prevents ordinary sibling copies from cross-sending, but it is not a
+distributed exactly-once protocol. Independently scheduled branches in a simple
+cycle of four or more nodes can still meet and produce duplicates. Canonical
+filename and exact-byte comparison distinguish that case from a conflicting
+packet using the same identity.
+
+The alias namespace is four base-36 characters for `league*1000 + transmitting
+node`, followed by four characters from a persistent counter. Both numbers are
+limited to 1..999. The counter is reserved before publication, advances once
+per physical copy, and warns on wrap. A receiver discards this alias and
+re-derives each member's canonical name from the decoded JSON; all game identity
+remains in the packet.
+
+A leading JSON object instead of ZIP is accepted as one legacy entry, allowing
+receivers to be upgraded before senders. This is receive-only compatibility,
+not an FTN wire format: new senders always publish ZIP, even for one packet.
+New bundled output requires the receiving `barons-ftn --in`; the game itself
+still reads JSON only.
 
 ## Packet files (`*.brp`)
 
-Each packet is one JSON file. Modern packet filenames are
+Each game packet is one JSON file. These names are private to the game and ZIP
+members; FTN sees the independent 8.3 bundle alias above. Modern filenames are
 `[L<nnn>-]<from-node>-<sequence>-<to-node>.brp`; the three identity numbers use
-base 36 to keep the name short enough for an absolute pathname in an FTN Type-2
-subject. That budget is why a roster node number is capped at 999 (#180): every
-extra digit lengthens every filename the board sends, and boards have been
-measured running with three bytes of subject to spare. The sequence has a fixed width so a directory scan sees each sender's
+base 36. The sequence has a fixed width so a directory scan sees each sender's
 packets in order. For example, `L042-2-000000000001z-3.brp` is league 42,
 origin node 2, sequence 71, final destination node 3. A zero destination is a
 broadcast. The `L<nnn>` prefix is present when the league number is set. A
 modern packet at league 0 gets a short digest of its origin board before those
 three numbers, preventing equal node numbers in two leagues sharing a directory
 from colliding. A legacy packet without a stable origin node and sequence gets
-a deterministic 128-bit content digest instead. A transport that fans out must
-copy a broadcast to every other board's inbound. `barons-ftn` leaves the first
-broadcast attachment's name unchanged and appends a zero-based, base-36 copy
-index directly to the stem for each additional recipient (`packet0.brp`,
-`packet1.brp`, ...). The dense index is transport-only: sparse roster node
-numbers do not lengthen the attachment name, and packet identity remains in the
-JSON rather than the copy suffix.
+a deterministic 128-bit content digest instead. Packet identity remains in the
+JSON; neither this private name nor the transport alias is authoritative.
 
 **The extension is matched without regard to case** (#179). FTN transport hands
 files over in upper case routinely — 8.3-era software and several mailers do it,
@@ -67,10 +188,10 @@ into an inbound directory is read like any other packet. An exact match against
 the lowercase name left the file sitting there unread, and unreported: not
 applied, not refused, not counted as skipped.
 
-The short name leaves room for FTN `.msg` transports, whose Subject must carry
-the attachment pathname in at most 71 bytes. That byte budget is an FTN
-constraint, not a restriction on the packet format or on other transports; it
-comes from the stored-message header described in
+The 8.3 bundle alias leaves room for FTN `.msg` transports, whose Subject must
+carry the attachment pathname in at most 71 bytes. That byte budget is an FTN
+constraint, not a restriction on the packet format; it comes from the
+stored-message header described in
 [`ftn-standards.md`](ftn-standards.md), which is where the FTN formats and the
 standards defining them are written down.
 

@@ -220,26 +220,32 @@ what packets have already told this board — none of them changes the game.
 
 ## The FTN helper: `barons-ftn`
 
-`barons-ftn` hands packets already written by the game to an FTN mailer. Run it
-after `immortal-barons -planetary`, after the door exits, or both:
+`barons-ftn` moves packets between the game's private directories and an FTN
+mailer. Run inbound after a receive session, planetary processing next, and
+outbound before the tosser/mailer sends:
 
 ```
-barons-ftn -data /path/to/data
+barons-ftn --in -data /path/to/data
+immortal-barons -planetary -data /path/to/data
+barons-ftn --out -data /path/to/data
 ```
 
 It reads `bbs.cfg`, `ibnodes.dat`, and the FTN-only `ftn.cfg`.
-It scans the default `Outbound` directory and every `Link` directory, moves
-each `.brp` packet into that directory's `fido` subdirectory, and creates a
-Type-2 file-attach `.msg` in the configured netmail directory. An unaddressed
-broadcast gets a separate attachment and message for every other board. If two
-copies run together, only the one that successfully moves a packet creates its
-messages.
+`--out` takes a fixed snapshot and creates one 8.3-named ZIP handoff per next
+hop, using stored-message attach, direct obox, or BSO/FLO as configured. Attach
+and obox handoffs are immutable; while holding the peer's `.bsy`, BSO may merge
+the snapshot into a compatible bundle already advertised in its flow file.
+`--in` validates received bundles and game-owned attach envelopes, publishes
+local packets, and immediately forwards transit packets. Concurrent helpers
+and game processes serialize through their shared locking contract.
 
+- **`-in` / `--in`** — Receive, unwrap, and route inbound FTN bundles.
+- **`-out` / `--out`** — Bundle and hand off outbound game packets. This is the
+  default when neither direction is supplied.
 - **`-data DIR`** — Folder holding the game data and `ftn.cfg`; default
-  `./data`.
+  `./data`, relative to the scheduler's working directory.
 - **`-version`** — Print the helper and game version, then exit.
 - **`-help`** — Print the options, then exit.
 
-See the FTN handoff section of
-[Inter-BBS Leagues](inter-bbs.md#optional-ftn-handoff) for `ftn.cfg`, routing,
-and mailer details.
+See [FTN Transport with `barons-ftn`](ftn-transport.md) for the complete
+configuration reference, examples, scheduling, recovery, and troubleshooting.

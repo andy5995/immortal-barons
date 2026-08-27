@@ -1,5 +1,5 @@
-// Package ftn hands Immortal Barons inter-BBS packets to an FTN mailer by
-// creating FTS-0001 file-attach netmail messages.
+// Package ftn bridges Immortal Barons packet directories to stored-message
+// file attach, direct obox, and BSO/FLO mailer handoffs.
 package ftn
 
 import (
@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -42,6 +43,29 @@ type Config struct {
 	AttachDir     string
 	SubjectMode   SubjectMode
 	SubjectPrefix string
+	// InboundDir is the mailer's receive directory. InboundNetmailDir is where
+	// received stored-message envelopes are found; empty means InboundDir.
+	InboundDir        string
+	InboundNetmailDir string
+	Links             map[int]Link
+	OboxMeshFanout    bool
+}
+
+// LinkMode is the handoff exposed by one directly connected peer.
+type LinkMode int
+
+const (
+	LinkAttach LinkMode = iota
+	LinkObox
+	LinkBSO
+)
+
+// Link describes one local mailer handoff. Directory is an obox for LinkObox
+// and the exact BSO directory for the destination's zone for LinkBSO.
+type Link struct {
+	Mode      LinkMode
+	Directory string
+	Flavour   string
 }
 
 // fidoSubdir is the child of an outbound directory that claimed packets are
@@ -91,7 +115,7 @@ func LoadConfig(dataDir string) (Config, error) {
 	}
 	defer f.Close()
 
-	var cfg Config
+	cfg := Config{OboxMeshFanout: true, Links: map[int]Link{}}
 	sc := bufio.NewScanner(f)
 	for sc.Scan() {
 		line := strings.TrimSpace(sc.Text())
@@ -107,6 +131,22 @@ func LoadConfig(dataDir string) (Config, error) {
 			cfg.NetmailDir = strings.TrimSpace(value)
 		case strings.EqualFold(key, "AttachDir"):
 			cfg.AttachDir = strings.TrimSpace(value)
+		case strings.EqualFold(key, "InboundDir"):
+			cfg.InboundDir = strings.TrimSpace(value)
+		case strings.EqualFold(key, "InboundNetmailDir"):
+			cfg.InboundNetmailDir = strings.TrimSpace(value)
+		case strings.EqualFold(key, "OboxMeshFanout"):
+			b, err := parseYesNo(value)
+			if err != nil {
+				return Config{}, fmt.Errorf("%s: OboxMeshFanout: %w", path, err)
+			}
+			cfg.OboxMeshFanout = b
+		case strings.EqualFold(key, "Link"):
+			node, link, err := parseLink(value, dataDir)
+			if err != nil {
+				return Config{}, fmt.Errorf("%s: Link: %w", path, err)
+			}
+			cfg.Links[node] = link
 		case strings.EqualFold(key, "SubjectPath"):
 			value = strings.TrimSpace(value)
 			switch {
@@ -133,21 +173,102 @@ func LoadConfig(dataDir string) (Config, error) {
 	if err := sc.Err(); err != nil {
 		return Config{}, err
 	}
-	if cfg.NetmailDir == "" {
+	needNetmail := len(cfg.Links) == 0
+	for _, link := range cfg.Links {
+		needNetmail = needNetmail || link.Mode == LinkAttach
+	}
+	if needNetmail && cfg.NetmailDir == "" {
 		return Config{}, fmt.Errorf("%s: NetmailDir is not set", path)
 	}
-	if !filepath.IsAbs(cfg.NetmailDir) {
+	if cfg.NetmailDir != "" && !filepath.IsAbs(cfg.NetmailDir) {
 		cfg.NetmailDir = filepath.Join(dataDir, cfg.NetmailDir)
 	}
-	info, err := os.Stat(cfg.NetmailDir)
-	if err != nil {
-		return Config{}, fmt.Errorf("NetmailDir %s: %w", cfg.NetmailDir, err)
-	}
-	if !info.IsDir() {
-		return Config{}, fmt.Errorf("NetmailDir %s is not a directory", cfg.NetmailDir)
+	if cfg.NetmailDir != "" {
+		info, err := os.Stat(cfg.NetmailDir)
+		if err != nil {
+			return Config{}, fmt.Errorf("NetmailDir %s: %w", cfg.NetmailDir, err)
+		}
+		if !info.IsDir() {
+			return Config{}, fmt.Errorf("NetmailDir %s is not a directory", cfg.NetmailDir)
+		}
 	}
 	if cfg.AttachDir != "" && !filepath.IsAbs(cfg.AttachDir) {
 		cfg.AttachDir = filepath.Join(dataDir, cfg.AttachDir)
 	}
+	for _, field := range []*string{&cfg.InboundDir, &cfg.InboundNetmailDir} {
+		if *field != "" && !filepath.IsAbs(*field) {
+			*field = filepath.Join(dataDir, *field)
+		}
+	}
+	if cfg.InboundNetmailDir == "" {
+		cfg.InboundNetmailDir = cfg.InboundDir
+	}
 	return cfg, nil
+}
+
+func parseYesNo(value string) (bool, error) {
+	switch strings.ToLower(strings.TrimSpace(value)) {
+	case "yes", "true", "on", "1":
+		return true, nil
+	case "no", "false", "off", "0":
+		return false, nil
+	}
+	return false, fmt.Errorf("want Yes or No, got %q", strings.TrimSpace(value))
+}
+
+func parseLink(value, dataDir string) (int, Link, error) {
+	fields := strings.Fields(value)
+	if len(fields) < 2 {
+		return 0, Link{}, fmt.Errorf("want <node> Attach, Obox <dir>, or BSO <dir> [flavour]")
+	}
+	node, err := strconv.Atoi(fields[0])
+	if err != nil || node < 1 || node > 999 {
+		return 0, Link{}, fmt.Errorf("node %q is outside 1..999", fields[0])
+	}
+	link := Link{Flavour: "Normal"}
+	switch strings.ToLower(fields[1]) {
+	case "attach":
+		if len(fields) != 2 {
+			return 0, Link{}, fmt.Errorf("Attach takes no directory")
+		}
+		link.Mode = LinkAttach
+	case "obox":
+		if len(fields) != 3 {
+			return 0, Link{}, fmt.Errorf("Obox wants exactly one directory")
+		}
+		link.Mode, link.Directory = LinkObox, fields[2]
+	case "bso":
+		if len(fields) < 3 || len(fields) > 4 {
+			return 0, Link{}, fmt.Errorf("BSO wants a directory and optional flavour")
+		}
+		link.Mode, link.Directory = LinkBSO, fields[2]
+		if len(fields) == 4 {
+			link.Flavour = normalFlavour(fields[3])
+			if link.Flavour == "" {
+				return 0, Link{}, fmt.Errorf("unknown BSO flavour %q", fields[3])
+			}
+		}
+	default:
+		return 0, Link{}, fmt.Errorf("unknown mode %q", fields[1])
+	}
+	if link.Directory != "" && !filepath.IsAbs(link.Directory) {
+		link.Directory = filepath.Join(dataDir, link.Directory)
+	}
+	return node, link, nil
+}
+
+func normalFlavour(s string) string {
+	switch strings.ToLower(s) {
+	case "immediate":
+		return "Immediate"
+	case "continuous", "crash":
+		return "Continuous"
+	case "direct":
+		return "Direct"
+	case "normal":
+		return "Normal"
+	case "hold":
+		return "Hold"
+	}
+	return ""
 }

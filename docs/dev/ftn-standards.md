@@ -136,6 +136,37 @@ can be reliably carried.
 or implied. Zones partition the network; a net is a group within a zone; a
 point hangs off a node.
 
+## FTS-5005.003 — Binkley Style Outbound
+
+Revision 003 defines the filesystem queue commonly called BSO or FLO:
+<http://ftsc.org/docs/fts-5005.003>.
+
+A flow file is `<net><node>.?lo`, with one pathname per line. Its leading
+directive controls the attachment after a successful send: `^` deletes it,
+`#` truncates it, `~` skips the line, and no prefix leaves it in place. The five
+flavours are Immediate (`.ilo`), Continuous (`.clo`, commonly called crash),
+Direct (`.dlo`), Normal (`.flo`), and Hold (`.hlo`). A point uses
+`<net><node>.pnt/<point>.?lo`, with hexadecimal fixed-width components.
+
+Section 5.1 requires a cooperating process to create the destination's `.bsy`
+binary semaphore before touching that node's queue and remove it when finished.
+Failure to create it means another process owns the queue. Checking the age of
+an existing lock is recommended, not permission to delete it. `barons-ftn`
+therefore treats every pre-existing `.bsy` as busy and removes only one it
+created itself.
+
+That exclusive semaphore also permits `barons-ftn` to rebuild a Barons bundle
+already referenced by the selected flow file. The flow pathname does not
+change, the replacement is completed before `.bsy` is released, and inner game
+packet bytes remain unchanged. This optimization is BSO-specific. A generic
+obox does not provide the same standardized lock, and a stored-message attach
+may already have left the local queue.
+
+FTS-5005 specifies an **outbound** queue. It does not define a corresponding
+inbound readiness semaphore or a universal mailer receive directory. A program
+consuming inbound files still needs a mailer-specific post-session trigger or
+other local contract; BSO locking cannot prove that an inbound file is complete.
+
 ## Finding the documents
 
 FTSC publishes the full series; <https://nsrc.org/networks/fidonet/standards/>
