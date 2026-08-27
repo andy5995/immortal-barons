@@ -16,17 +16,22 @@ import (
 )
 
 const (
-	// spoolDir and attachSpool are deliberately short (#231): the attach
-	// path they form part of counts against the 70-byte FTN Type-2 Subject
-	// field, and dataDir itself is often already most of that budget on a
-	// Synchronet install, where a door's data directory is a fixed
-	// xtrn/<door>/data path the sysop cannot shorten. "ftn-spool"/"attach"
-	// cost a three-board rig its whole margin on their own; a sysop who
-	// still doesn't fit after this has AttachDir, which is a real
-	// directory choice rather than a fixed name this package controls.
-	spoolDir      = "ftn"
-	outSpoolDir   = "out"
-	badSpoolDir   = "bad"
+	// spoolDir stays "ftn-spool" (#231): out/bad/in are pure internal
+	// bookkeeping, never seen by a mailer, so renaming this buys the Type-2
+	// Subject field nothing -- attachmentDirectory below doesn't nest under
+	// it at all. Renaming it WOULD cost something real: Status walks only
+	// the current root, so an in-place upgrade would silently lose sight of
+	// whatever a sysop already has queued under the old name.
+	spoolDir    = "ftn-spool"
+	outSpoolDir = "out"
+	badSpoolDir = "bad"
+	// attachSpool is short (#231): the path it forms part of counts against
+	// the 70-byte FTN Type-2 Subject field, and dataDir itself is often
+	// already most of that budget on a Synchronet install, where a door's
+	// data directory is a fixed xtrn/<door>/data path the sysop cannot
+	// shorten. A sysop who still doesn't fit after this has AttachDir,
+	// which is a real directory choice rather than a fixed name this
+	// package controls.
 	attachSpool   = "att"
 	batchPlanFile = "batch.json"
 )
@@ -511,8 +516,9 @@ func linkFor(config Config, node int) Link {
 // the way out/bad/in do (#231): attach is the one spool directory whose path
 // leaks into an external protocol field with a hard byte budget (the FTN
 // Type-2 Subject) -- every byte the other three spend on organization is a
-// byte this one can't afford to. Nesting it added a whole "ftn/" segment for
-// no benefit only this directory pays for.
+// byte this one can't afford to spend the same way. Nesting it under
+// spoolDir would add a whole "ftn-spool/" segment to that budget for no
+// benefit, since out/bad/in never appear in a mailer-facing Subject at all.
 func attachmentDirectory(dataDir string, transport Config) string {
 	if transport.AttachDir != "" {
 		return transport.AttachDir

@@ -12,7 +12,7 @@ import (
 // change of its own: captured live on a three-board rig (#231), the resulting
 // subject was 73 bytes against a 70-byte Binkley limit.
 func TestAttachSubjectFitsOnADeepSynchronetDataDir(t *testing.T) {
-	const dataDir = "/home/andy/c-sbbs/xtrn/immortal-barons/data"
+	const dataDir = "/home/sysop/c-sbbs/xtrn/immortal-barons/data"
 	const filename = "255U0000.BRP"
 
 	transport := Config{Binkley: true}

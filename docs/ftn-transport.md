@@ -120,7 +120,10 @@ SubjectPath Absolute
 - `NetmailDir` is where outgoing `.msg` envelopes are created. It is required
   when any peer uses `Attach`, including the compatibility default.
 - `AttachDir` holds outgoing bundles for Attach and BSO links. If omitted, the
-  helper uses `data/ftn-spool/attach`.
+  helper uses `data/att` (#231: deliberately not nested under the transport's
+  other spool directories, since this is the one path a mailer's Subject
+  field has to spell out under a hard byte limit — see [Keeping attach
+  subjects short](#keeping-attach-subjects-short)).
 - `Binkley Yes` prefixes an attach subject with `^`; `No` writes `FLAGS KFS`.
   Both request deletion of the attachment after a successful send.
 - `SubjectPath Absolute` writes the full attachment path. `Basename` writes

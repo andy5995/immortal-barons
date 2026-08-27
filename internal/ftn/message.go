@@ -99,26 +99,30 @@ func fileAttachSubject(transport Config, attached string) (string, int, error) {
 }
 
 // subjectAdvice leads with AttachDir rather than SubjectPath (#231): AttachDir
-// shortens the real path a mailer looks for, so it works no matter what the
-// mailer does with the subject it's handed. SubjectPath only helps if the
-// mailer itself resolves a non-absolute subject back to a real path -- not
-// every mailer does; SBBSecho reads the attachment's directory out of the
-// subject and needs the real path there, confirmed on a live three-board rig.
-// Naming SubjectPath first, as this used to, reads as "try this" to a sysop
-// on a mailer it can't actually help -- a wrong-sounding cause sends them
-// further from the fix than no cause at all.
+// is what actually controls where the file is written, so it is the one
+// setting that unconditionally fixes a subject that is too long. Everything
+// else only works if it ends up describing that same real location back to
+// the mailer: "SubjectPath Basename" or a relative prefix does that only if
+// the mailer is independently configured to search AttachDir's own directory
+// (not every mailer resolves a subject that way; SBBSecho reads the
+// attachment's real directory out of the subject itself, confirmed on a live
+// three-board rig), and an absolute SubjectPath prefix does it only if it
+// names that same directory -- at which point it costs exactly as many
+// Subject bytes as leaving SubjectPath on its default and shortening
+// AttachDir alone would. AttachDir is the one change that matters either way.
 func subjectAdvice(mode SubjectMode) string {
 	switch mode {
 	case SubjectBasename:
 		return "The filename alone does not fit, so no SubjectPath setting can shorten it"
 	case SubjectPrefixed:
-		return `Set AttachDir to a shorter directory -- that works regardless of mailer. Shortening the ` +
-			`SubjectPath prefix, or switching to "SubjectPath Basename", only helps if the mailer resolves a ` +
-			"non-absolute subject itself"
+		return `Set AttachDir to a shorter directory -- the subject only reaches the mailer correctly if the ` +
+			`SubjectPath prefix names that same real directory, so shortening AttachDir is what actually ` +
+			"helps, not the prefix on its own"
 	}
-	return `Set AttachDir in ftn.cfg to a shorter directory -- that shortens the real path and works no matter ` +
-		`what the mailer does with the subject. SubjectPath ("Basename", or a prefix such as "SubjectPath fido") ` +
-		`only helps if the mailer resolves a non-absolute subject itself; not every mailer does`
+	return `Set AttachDir in ftn.cfg to a shorter directory -- that is the real location a too-long subject ` +
+		`needs to describe. "SubjectPath Basename" or a relative prefix only works if the mailer independently ` +
+		`searches AttachDir's directory itself; an absolute SubjectPath prefix only works if it names that ` +
+		"same directory"
 }
 
 func type2Header(attached string, origin, destination Address, now time.Time) [type2HeaderSize]byte {
