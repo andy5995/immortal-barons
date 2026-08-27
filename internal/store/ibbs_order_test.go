@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"testing"
 	"time"
@@ -462,8 +463,18 @@ func TestReadInboundQuarantinesUnreadablePacket(t *testing.T) {
 // defer-or-quarantine treatment as an unparseable packet, through the same
 // deferOrQuarantine helper, and every other packet in the batch still
 // applies.
+//
+// Skipped on Windows and under root, same reasoning and wording as
+// TestDirUsableRejectsAnUnwritableDirectory in checkup_test.go: os.Chmod
+// cannot make a file unreadable to its own owner on Windows (access lives in
+// the ACL, a 0o000 mode there does not stop this process reading its own
+// file back), and root ignores the mode bits entirely on the platforms
+// where they do apply.
 func TestReadInboundUnreadableFileDoesNotAbortTheRun(t *testing.T) {
-	if os.Getuid() == 0 {
+	if runtime.GOOS == "windows" {
+		t.Skip("os.Chmod cannot make a file unreadable to its own owner on Windows; access lives in the ACL")
+	}
+	if os.Geteuid() == 0 {
 		t.Skip("root ignores the read-permission bit this test relies on")
 	}
 	inbound := t.TempDir()
