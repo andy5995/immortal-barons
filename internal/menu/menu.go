@@ -339,13 +339,59 @@ type Menu struct {
 	Width int
 }
 
-// ruleWidth is the menu's decoration-rule width: its Width override, or the
-// default full rule width.
+// ruleWidth is the menu's declared decoration-rule width: its Width override, or
+// the default full rule width. It is a FLOOR — see fitWidth.
 func (m *Menu) ruleWidth() int {
 	if m.Width > 0 {
 		return m.Width
 	}
 	return len([]rune(rule))
+}
+
+// fitWidth is the width the rules are actually drawn at: the declared width, or
+// the widest line of the menu's own body when that is wider.
+//
+// A declared Width is a floor and never a ceiling, because a menu's content is
+// not fixed. Every label goes through the catalogs, and a translation is
+// routinely longer than the English it came from — the System menu measured
+// exactly 59 in English, which is what its Width was set to, and ran 64 in German
+// and Russian, so its box was five columns short of the items inside it. Two
+// more menus overran their own rule in English alone. Sizing to the body cannot
+// go stale as the catalogs fill, where a measured constant goes stale the day
+// someone translates one more label.
+//
+// The floor is what keeps a box BRE's own size where a capture settled it: the
+// original sizes each box to its content too, so the two agree until IB's
+// content is the wider of the pair, which is the only case that has to move.
+func (m *Menu) fitWidth(body *strings.Builder) int {
+	w := m.ruleWidth()
+	for _, ln := range strings.Split(body.String(), "\n") {
+		if n := visibleLen(ln); n > w {
+			w = n
+		}
+	}
+	return w
+}
+
+// visibleLen is a rendered line's width in columns, ignoring the ANSI escapes in
+// it and any trailing padding a column layout left on it.
+func visibleLen(line string) int {
+	n, esc := 0, false
+	for _, r := range strings.TrimRight(line, " \r") {
+		switch {
+		case esc:
+			// A CSI sequence ends at its final byte; the private/parameter bytes
+			// in between are all below '@'.
+			if r >= '@' && r != '[' {
+				esc = false
+			}
+		case r == 0x1b:
+			esc = true
+		default:
+			n++
+		}
+	}
+	return n
 }
 
 // selectable reports whether it is a visible, choosable item (not a
@@ -747,7 +793,10 @@ func draw(s session.Session, g *ctx, m *Menu) {
 				fmt.Fprintf(&b, "%s%s%s\n", ansi.FgWhite, hiNumsReset(h, ansi.FgBrightWhite, ansi.FgWhite), ansi.Reset)
 			}
 		}
-		fmt.Fprintf(&b, "%s\n", titleRule(col, i18n.T(lang, m.Title), m.ruleWidth()))
+		// The item block is built FIRST and the rules sized from it: a box has to
+		// fit what is in it, and what is in it depends on the caller's language.
+		// See fitWidth.
+		var body strings.Builder
 		cols := m.hasColumns(g)
 		ownedCol := cols && m.hasOwnedColumn(g)
 		lw := 0
@@ -755,14 +804,14 @@ func draw(s session.Session, g *ctx, m *Menu) {
 			lw = m.labelWidth(g, lang)
 		}
 		if cols && ownedCol {
-			fmt.Fprintf(&b, "%s  Key %s %8s %9s%s\n",
+			fmt.Fprintf(&body, "%s  Key %s %8s %9s%s\n",
 				ansi.FgWhite, padLabel(i18n.T(lang, "Item"), lw), i18n.T(lang, "Price"), i18n.T(lang, "# Owned"), ansi.Reset)
 		} else if cols {
-			fmt.Fprintf(&b, "%s  Key %s %8s%s\n",
+			fmt.Fprintf(&body, "%s  Key %s %8s%s\n",
 				ansi.FgWhite, padLabel(i18n.T(lang, "Item"), lw), i18n.T(lang, "Price"), ansi.Reset)
 		}
 		if m.Columns >= 2 && !cols {
-			drawItemsColumns(&b, g, m, col, lang, m.Columns)
+			drawItemsColumns(&body, g, m, col, lang, m.Columns)
 		} else {
 			for i := range m.Items {
 				it := &m.Items[i]
@@ -770,7 +819,7 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					continue
 				}
 				if it.Do == nil {
-					fmt.Fprintf(&b, "  %s\n", it.displayLabel(g, lang))
+					fmt.Fprintf(&body, "  %s\n", it.displayLabel(g, lang))
 					continue
 				}
 				if cols {
@@ -784,11 +833,11 @@ func draw(s session.Session, g *ctx, m *Menu) {
 					// BRE (live capture): normal-accent parens with a bright-accent key,
 					// white label, bright-white Price, white Owned.
 					if ownedCol {
-						fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%s%s %s%8s%s %s%9s%s\n",
+						fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s %s%8s%s %s%9s%s\n",
 							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
 							ansi.FgBrightWhite, price, ansi.Reset, ansi.FgWhite, owned, ansi.Reset)
 					} else {
-						fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%s%s %s%8s%s\n",
+						fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s %s%8s%s\n",
 							dim(col), col, it.Key, dim(col), ansi.Reset, ansi.FgWhite, padLabel(it.displayLabel(g, lang), lw), ansi.Reset,
 							ansi.FgBrightWhite, price, ansi.Reset)
 					}
@@ -798,14 +847,17 @@ func draw(s session.Session, g *ctx, m *Menu) {
 				if it.Color != "" {
 					lcol = it.Color
 				}
-				fmt.Fprintf(&b, "  %s(%s%c%s)%s %s%s%s\n",
+				fmt.Fprintf(&body, "  %s(%s%c%s)%s %s%s%s\n",
 					dim(kcol), kcol, it.Key, dim(kcol), ansi.Reset, lcol, it.displayLabel(g, lang), ansi.Reset)
 			}
 		}
+		width := m.fitWidth(&body)
+		fmt.Fprintf(&b, "%s\n", titleRule(col, i18n.T(lang, m.Title), width))
+		b.WriteString(body.String())
 		// BRE closes every menu box with a normal-accent rule, whether or not the
 		// menu carries a status line under it (live capture: the Attack Menu has
 		// the rule and no status, the InterPlanetary menu has both).
-		fmt.Fprintf(&b, "%s\n", closingRule(col, m.ruleWidth()))
+		fmt.Fprintf(&b, "%s\n", closingRule(col, width))
 		if m.Status != nil {
 			// The footer is white with its figures in bright-white — not a single
 			// accent color.

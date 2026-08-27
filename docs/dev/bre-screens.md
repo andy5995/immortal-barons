@@ -1294,8 +1294,38 @@ where it differs from Special Operations below.
 ───────────────────────
 ```
 
-**The box is 23 columns** — four CP437 `0xC4` rules, `[Terrorist Ops]`, four
-more, with every item line padded to the same 23 and the closing rule 23 long.
+**Every menu box in every capture, measured** (`cap/*.cap`, 2026-08-26), so the
+next screen has a number to size itself from rather than a default to fall back
+on:
+
+| box | columns | | box | columns |
+| --- | --- | --- | --- | --- |
+| Advisors | 16 | | Preferences | 36 |
+| Trading | 20 | | InterBBS Scores | 38 |
+| Attack Type | 21 | | Sell Menu | 44 |
+| Attack Menu | 23 | | Spending Menu | 44 |
+| Terrorist Ops | 23 | | Industrial Production | 46 |
+| IP Messages | 24 | | Barren Realms Elite | 52 |
+| Coordinator Ops | 26 | | Crazy Gold Bank | 60 |
+| Diplomacy Menu | 28 | | Food Unlimited | 64 |
+| Covert Operations | 32 | | System Menu | 69 (75 once) |
+
+`InterPlanetary Operations` is the one that moves — 58, 62, 64 and 68 across the
+captures — because the original lays it out in columns and its width tracks
+whichever items are showing. Sizing to content is the rule, not any of these
+numbers; a box that has to hold more is wider, and IB's Covert (34) and System
+(59 English) are wider than the original's for exactly that reason.
+
+**IB sizes its rules from its own rendered body** as of 2026-08-26, taking a
+declared `Width` as a FLOOR rather than a fixed value. A width measured against
+English goes stale the day a label is translated — System was set to the 59 it
+measured in English and ran 64 in German and Russian, leaving its box five
+columns short of its own items, and the Bank overran its rule by two in English
+alone.
+
+**The Terrorist Ops box is 23 columns** — four CP437 `0xC4` rules,
+`[Terrorist Ops]`, four more, with every item line padded to the same 23 and the
+closing rule 23 long.
 IB drew it at the 62-column `rule` default until 2026-08-26, since no capture of
 this screen existed to size it from. That is the trap CLAUDE.md names: the
 original sizes each box to its own content, and the captures in this file run

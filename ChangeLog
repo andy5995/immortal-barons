@@ -1,4 +1,5 @@
 (in-progress:)
+  * A menu box is never narrower than the items inside it, in any language
   * A planet can be named by any part of its name, as long as only one planet matches
   * The planet prompt fills the name in as soon as what you have typed matches only one
   * reverted: the Terrorist Ops menu is drawn at the width the original draws it
