@@ -11,6 +11,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/store"
@@ -176,6 +177,109 @@ func TestRunOutCoalescesOneBundlePerNextHop(t *testing.T) {
 	}
 	if len(entries) != 2 {
 		t.Fatalf("bundle entries = %d, want 2", len(entries))
+	}
+}
+
+func TestRunOutSupportsUnsetLeagueNumber(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "")
+	configPath := filepath.Join(data, store.BoardConfigFile)
+	config, err := os.ReadFile(configPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	config = bytes.Replace(config, []byte("LeagueNumber 100\n"), nil, 1)
+	if err := os.WriteFile(configPath, config, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	writeNamedPacket(t, data, "unset.brp", game.Packet{FromNode: 2, ToNode: 1, Seq: 1})
+
+	result, err := RunOut(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Queued) != 1 {
+		t.Fatalf("queued = %+v, want one bundle", result.Queued)
+	}
+	if got := filepath.Base(result.Queued[0].PacketPath); !strings.HasPrefix(got, "0002") {
+		t.Fatalf("unset-league alias = %q, want league-0/node-2 namespace 0002", got)
+	}
+}
+
+func TestRunOutReportsThinSubjectMargin(t *testing.T) {
+	const spare = 3
+	prefix := strings.Repeat("p", type2SubjectSize-1-spare-1-len("00000000.BRP"))
+	data := newBundledSetup(t, "Bravo BBS", "SubjectPath "+prefix+"\n")
+	writeNamedPacket(t, data, "thin.brp", game.Packet{FromNode: 2, ToNode: 1, Seq: 1, League: 100})
+
+	result, err := RunOut(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result.Queued) != 1 || len(result.Warnings) != 1 || !strings.Contains(result.Warnings[0], "3 byte") {
+		t.Fatalf("thin-margin result = %+v", result)
+	}
+}
+
+func TestBuildBatchPlanReplacesPartialBundleOnRetry(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "")
+	board, err := store.LoadConfig(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	transport, err := LoadConfig(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	nodes, err := store.ParseNodeList(filepath.Join(data, store.NodeListFile))
+	if err != nil {
+		t.Fatal(err)
+	}
+	for i := range nodes {
+		nodes[i].Hosts = nil
+	}
+	world := &game.World{Config: board, LeagueNodes: nodes}
+	batch := filepath.Join(data, spoolDir, outSpoolDir, "partial")
+	if err := os.MkdirAll(batch, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	writeClaimed := func(name string, packet game.Packet) {
+		raw, err := json.Marshal(packet)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := os.WriteFile(filepath.Join(batch, name), raw, 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	writeClaimed("packet-000000.brp", game.Packet{FromNode: 2, ToNode: 1, Seq: 1, League: 100})
+	writeClaimed("packet-000001.brp", game.Packet{FromNode: 2, ToNode: 1, Seq: 2, League: 100})
+	writeClaimed("packet-000002.brp", game.Packet{FromNode: 2, ToNode: 3, Seq: 3, League: 100})
+
+	brokenNodes := append([]game.LeagueNode(nil), nodes...)
+	brokenNodes[2].Address = "not-an-ftn-address"
+	if _, err := buildBatchPlan(batch, data, transport, world, brokenNodes, &Result{}); err == nil {
+		t.Fatal("partial plan unexpectedly succeeded")
+	}
+	if err := quarantineTransport(data, filepath.Join(batch, "packet-000001.brp")); err != nil {
+		t.Fatal(err)
+	}
+	plan, err := buildBatchPlan(batch, data, transport, world, nodes, &Result{})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(plan.Targets) != 2 {
+		t.Fatalf("retry targets = %+v", plan.Targets)
+	}
+	body, err := os.ReadFile(filepath.Join(batch, "target-001.bundle"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, entries, err := readTransport(body, "target-001.bundle")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(entries) != 1 || entries[0].Packet.Seq != 1 {
+		t.Fatalf("replaced partial target = %+v", entries)
 	}
 }
 
@@ -428,6 +532,78 @@ func TestRunInUnwrapsToPrivateGameInbound(t *testing.T) {
 	}
 }
 
+func TestRunInDeliversAtMaximumHopCount(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "")
+	packet := game.Packet{
+		FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", FromNode: 1, ToNode: 2,
+		Seq: 21, League: 100, Hops: game.MaxPacketHops,
+	}
+	raw, _ := json.Marshal(packet)
+	body, _, err := makeBundle(1, "direct", []transportEntry{{Raw: raw, Packet: packet, Route: []int{1}}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(data, "transport-in", "10000005.BRP"), body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := RunIn(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Delivered != 1 {
+		t.Fatalf("maximum-hop delivery = %+v", result)
+	}
+}
+
+func TestRunInQuarantinesRejectedMembersAfterDeliveringValidOnes(t *testing.T) {
+	data := newBundledSetup(t, "Bravo BBS", "")
+	packets := []game.Packet{
+		{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", FromNode: 1, ToNode: 2, Seq: 22, League: 100},
+		{FromBoard: "Alpha BBS", ToBoard: "Missing BBS", FromNode: 1, ToNode: 999, Seq: 23, League: 100},
+		{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", FromNode: 1, ToNode: 2, Seq: 24, League: 200},
+	}
+	entries := make([]transportEntry, len(packets))
+	for i, packet := range packets {
+		raw, err := json.Marshal(packet)
+		if err != nil {
+			t.Fatal(err)
+		}
+		entries[i] = transportEntry{Raw: raw, Packet: packet, Route: []int{1}}
+	}
+	body, _, err := makeBundle(1, "direct", entries)
+	if err != nil {
+		t.Fatal(err)
+	}
+	source := filepath.Join(data, "transport-in", "10000006.BRP")
+	if err := os.WriteFile(source, body, 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	result, err := RunIn(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Delivered != 1 || len(result.Warnings) != 2 {
+		t.Fatalf("mixed inbound result = %+v", result)
+	}
+	warnings := strings.Join(result.Warnings, " ")
+	if !strings.Contains(warnings, "destination node 999") || !strings.Contains(warnings, "league 200") {
+		t.Fatalf("mixed inbound warnings = %v", result.Warnings)
+	}
+	if _, err := os.Stat(source); !os.IsNotExist(err) {
+		t.Fatalf("rejected source remains in inbound: %v", err)
+	}
+	quarantined := filepath.Join(data, spoolDir, badSpoolDir, filepath.Base(source))
+	if got, err := os.ReadFile(quarantined); err != nil || !bytes.Equal(got, body) {
+		t.Fatalf("quarantined bundle = %d bytes, %v", len(got), err)
+	}
+	second, err := RunIn(data)
+	if err != nil || second.Delivered != 0 || len(second.Warnings) != 0 {
+		t.Fatalf("second inbound pass = %+v, %v", second, err)
+	}
+}
+
 func TestRunInLogsIdenticalCanonicalDuplicate(t *testing.T) {
 	data := newBundledSetup(t, "Bravo BBS", "")
 	raw, _ := json.Marshal(game.Packet{FromBoard: "Alpha BBS", ToBoard: "Bravo BBS", FromNode: 1, ToNode: 2, Seq: 16, League: 100})
@@ -541,7 +717,35 @@ func TestRunInForwardsOpaquePacketAtHub(t *testing.T) {
 	if err := os.WriteFile(filepath.Join(data, "transport-in", "10000002.BRP"), body, 0o644); err != nil {
 		t.Fatal(err)
 	}
-	result, err := RunIn(data)
+	board, err := store.LoadConfig(data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gameLock, err := store.Lock(board, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	type runResult struct {
+		result Result
+		err    error
+	}
+	done := make(chan runResult, 1)
+	go func() {
+		result, err := RunIn(data)
+		done <- runResult{result: result, err: err}
+	}()
+	var result Result
+	select {
+	case completed := <-done:
+		result, err = completed.result, completed.err
+		if releaseErr := gameLock.Release(); releaseErr != nil {
+			t.Fatal(releaseErr)
+		}
+	case <-time.After(2 * time.Second):
+		_ = gameLock.Release()
+		<-done
+		t.Fatal("pure-transit RunIn waited for the game lock")
+	}
 	if err != nil {
 		t.Fatal(err)
 	}

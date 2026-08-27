@@ -317,7 +317,8 @@ packets in the snapshot which share a next hop go into one ZIP bundle.
 The FTN alias is `NNNNCCCC.BRP`:
 
 - `NNNN` is a four-character base-36 namespace derived from this league and
-  the transmitting hop's node number.
+  the transmitting hop's node number. League `0` has its own namespace, so an
+  otherwise valid board whose league number is unset can still exchange mail.
 - `CCCC` is a persistent four-character base-36 counter.
 - The counter advances for every physical handoff, including each broadcast
   copy, and does not reset with a new game season.
@@ -337,12 +338,24 @@ a compatible bundle already advertised in the selected flow file. It releases
 `.bsy` only after the replacement is durable. If `.bsy` already exists, that
 peer is deferred without holding up other peers. Stale `.bsy` ownership is an
 operator/mailer recovery decision; the helper never removes a lock it did not
-create.
+create. If a `.bsy` remains after a helper or host crash, first confirm that no
+mailer, tosser, or `barons-ftn` process owns that destination and follow the
+mailer's configured stale-lock timeout. Only then remove that one destination's
+`.bsy`; the next scheduled run resumes its journaled bundle. Never clear `.bsy`
+files merely because a peer is slow or offline.
 
 Claimed packets and progress journals live under `data/ftn-spool`. A target is
 marked complete only after its bundle and `.msg`, obox placement, or BSO flow
 entry are durable. A restart uses the same alias and bytes, recognizes an
 already-created attach message, and completes only unfinished targets.
+
+Inbound rejection is per packet member, not per bundle. A wrong-league packet,
+unknown destination, or routing cycle is recorded in the receipt while valid
+members are still delivered or forwarded. After those valid members finish,
+the complete original transport wrapper moves to `ftn-spool/bad` so the rejected
+routing context remains available for diagnosis; it is not retried on every
+later `--in` run. A local canonical-name collision is different: the receipt
+and source stay pending because the operator must decide which bytes are valid.
 
 All `barons-ftn` processes—both directions—hold `barons-ftn.lock`. Movement
 between the connector spool and the private game directories also holds
@@ -408,7 +421,7 @@ mesh; describe that star with `HOST` lines instead.
 | transport `InboundDir` | `--in` did not run, ran before receive completion, or rejected the wrapper | Run it after the session and read warnings |
 | `ftn-spool/in` | Local publication or transit handoff is incomplete | Correct the named target; the next `--in` resumes it |
 | game `Inbound` | `-planetary` has not applied the unwrapped packets | Run `immortal-barons -planetary` |
-| `ftn-spool/bad` | An outbound game packet was malformed or unroutable | Preserve it for diagnosis; correct the producing board or roster |
+| `ftn-spool/bad` | An outbound packet was malformed/unroutable, or an inbound bundle contained a rejected member | Preserve it for diagnosis; correct the producing board, route, league, or roster |
 
 One bad packet or busy peer does not stop unrelated destinations. Do not delete
 spool journals to make a warning disappear: they are the record that prevents

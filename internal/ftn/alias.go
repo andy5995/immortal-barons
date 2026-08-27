@@ -22,8 +22,8 @@ type counterState struct {
 // exclusive publication because an old cycle's file may remain in a mailer
 // queue. skipped values after a crash are harmless.
 func nextAlias(dataDir, destinationDir string, league, transmitter int) (string, bool, error) {
-	if league < 1 || league > 999 || transmitter < 1 || transmitter > 999 {
-		return "", false, fmt.Errorf("8.3 FTN aliases require league and transmitting node numbers in 1..999")
+	if league < 0 || league > 999 || transmitter < 1 || transmitter > 999 {
+		return "", false, fmt.Errorf("8.3 FTN aliases require a league number in 0..999 and a transmitting node number in 1..999")
 	}
 	path := filepath.Join(dataDir, counterFile)
 	var state counterState

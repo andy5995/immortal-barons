@@ -306,13 +306,16 @@ func buildBatchPlan(batch, dataDir string, transport Config, world *game.World, 
 		delivery := "direct"
 		if link.Mode == LinkAttach {
 			delivery = "attach"
+			if err := checkSubjectMargin(transport, filepath.Join(dir, alias), result); err != nil {
+				return batchPlan{}, err
+			}
 		}
 		body, _, err := makeBundle(world.NodeNumber(world.Config.BoardID), delivery, groups[nodeNumber])
 		if err != nil {
 			return batchPlan{}, err
 		}
 		bundleFile := fmt.Sprintf("target-%03d.bundle", nodeNumber)
-		if err := writeFileAtomic(filepath.Join(batch, bundleFile), body, 0o644); err != nil {
+		if err := replaceFileAtomic(filepath.Join(batch, bundleFile), body, 0o644); err != nil {
 			return batchPlan{}, err
 		}
 		plan.Targets = append(plan.Targets, batchTarget{
@@ -386,6 +389,19 @@ func attachmentDirectory(dataDir string, transport Config) string {
 		return transport.AttachDir
 	}
 	return filepath.Join(dataDir, spoolDir, attachSpool)
+}
+
+func checkSubjectMargin(transport Config, attached string, result *Result) error {
+	_, spare, err := fileAttachSubject(transport, attached)
+	if err != nil {
+		return err
+	}
+	if spare < subjectMarginBytes {
+		result.Warnings = append(result.Warnings, fmt.Sprintf(
+			"attachment subjects have %d byte(s) to spare in the FTN Type-2 field; %s",
+			spare, subjectAdvice(transport.SubjectMode)))
+	}
+	return nil
 }
 
 func publishTarget(batch, dataDir string, transport Config, origin Address, target batchTarget) (Queued, error) {

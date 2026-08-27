@@ -24,6 +24,7 @@ type inboundReceipt struct {
 	Envelope string         `json:"envelope,omitempty"`
 	Local    []inboundLocal `json:"local"`
 	Targets  []batchTarget  `json:"targets"`
+	Rejected []string       `json:"rejected,omitempty"`
 	Complete bool           `json:"complete"`
 }
 
@@ -202,11 +203,6 @@ func ingestTransportFile(root string, board game.Config, dataDir string, transpo
 	if manifest.Format == bundleFormat && (!hasTransmitter || nodeByNumber(nodes, transmitter) == nil) {
 		return fmt.Errorf("bundle transmitting hop is not in the roster")
 	}
-	for _, entry := range entries {
-		if board.LeagueNumber != 0 && entry.Packet.League != 0 && entry.Packet.League != board.LeagueNumber {
-			return fmt.Errorf("packet %s belongs to league %d", entry.Name, entry.Packet.League)
-		}
-	}
 	if sender != (Address{}) {
 		node := nodeByAddress(nodes, sender)
 		if node == nil || hasTransmitter && transmitter != node.Number {
@@ -222,9 +218,13 @@ func ingestTransportFile(root string, board game.Config, dataDir string, transpo
 		if err := os.MkdirAll(dir, 0o755); err != nil {
 			return err
 		}
-		receipt, err = buildInboundReceipt(dir, id, source, envelope, via, entries, dataDir, transport, world, nodes, result)
+		receipt, err = buildInboundReceipt(dir, id, source, envelope, via, entries, board.LeagueNumber, dataDir, transport, world, nodes, result)
 		if err == nil {
 			err = saveInboundReceipt(planPath, receipt)
+		} else {
+			// No journal refers to partial artifacts, so a later run must be
+			// allowed to rebuild this receipt from a clean directory.
+			_ = os.RemoveAll(dir)
 		}
 	}
 	if err != nil {
@@ -233,17 +233,20 @@ func ingestTransportFile(root string, board game.Config, dataDir string, transpo
 	return processInboundReceipt(dir, planPath, &receipt, board, dataDir, transport, origin, result)
 }
 
-func buildInboundReceipt(dir, id, source, envelope, via string, entries []transportEntry, dataDir string, transport Config, world *game.World, nodes []game.LeagueNode, result *Result) (inboundReceipt, error) {
+func buildInboundReceipt(dir, id, source, envelope, via string, entries []transportEntry, boardLeague int, dataDir string, transport Config, world *game.World, nodes []game.LeagueNode, result *Result) (inboundReceipt, error) {
 	receipt := inboundReceipt{ID: id, Source: source, Envelope: envelope}
 	groups := map[int][]transportEntry{}
 	mine := world.NodeNumber(world.Config.BoardID)
+	reject := func(entry transportEntry, reason error) {
+		receipt.Rejected = append(receipt.Rejected, fmt.Sprintf("%s: %v", entry.Name, reason))
+	}
 	for i, entry := range entries {
-		hops := transportHops(entry)
-		if hops >= game.MaxPacketHops {
-			result.Warnings = append(result.Warnings, fmt.Sprintf("dropped %s after %d transport hops", entry.Name, hops))
+		if boardLeague != 0 && entry.Packet.League != 0 && entry.Packet.League != boardLeague {
+			reject(entry, fmt.Errorf("belongs to league %d, not league %d", entry.Packet.League, boardLeague))
 			continue
 		}
-		if world.AddressedToMe(entry.Packet) {
+		addressedToMe := world.AddressedToMe(entry.Packet)
+		if addressedToMe {
 			spoolFile := fmt.Sprintf("local-%06d.brp", i)
 			if err := writeFileAtomic(filepath.Join(dir, spoolFile), entry.Raw, 0o644); err != nil {
 				return receipt, err
@@ -252,8 +255,13 @@ func buildInboundReceipt(dir, id, source, envelope, via string, entries []transp
 		}
 		if entry.Packet.ToNode == 0 && entry.Packet.ToBoard == "" {
 			if via == "direct" && transport.OboxMeshFanout {
+				hops := transportHops(entry)
+				if hops >= game.MaxPacketHops {
+					result.Warnings = append(result.Warnings, fmt.Sprintf("did not fan out %s after %d transport hops", entry.Name, hops))
+					continue
+				}
 				if slices.Contains(entry.Route, mine) {
-					result.Warnings = append(result.Warnings, fmt.Sprintf("did not fan out %s: its transport route already contains this node", entry.Name))
+					reject(entry, fmt.Errorf("transport route already contains this node"))
 					continue
 				}
 				var targets []int
@@ -281,21 +289,34 @@ func buildInboundReceipt(dir, id, source, envelope, via string, entries []transp
 			}
 			continue
 		}
-		if !world.AddressedToMe(entry.Packet) && world.Routed() {
+		if !addressedToMe && world.Routed() {
+			hops := transportHops(entry)
+			if hops >= game.MaxPacketHops {
+				result.Warnings = append(result.Warnings, fmt.Sprintf("did not forward %s after %d transport hops", entry.Name, hops))
+				continue
+			}
 			if slices.Contains(entry.Route, mine) {
-				return receipt, fmt.Errorf("routing cycle returns %s to this node", entry.Name)
+				reject(entry, fmt.Errorf("routing cycle returns to this node"))
+				continue
 			}
 			targets, err := packetTargets(entry.Packet, world, nodes)
 			if err != nil {
-				return receipt, err
+				reject(entry, err)
+				continue
 			}
 			forwarded := entry
 			forwarded.Route = append(append([]int(nil), entry.Route...), mine)
 			for _, target := range targets {
 				if slices.Contains(forwarded.Route, target) {
-					return receipt, fmt.Errorf("routing cycle sends %s back through node %d", entry.Name, target)
+					reject(entry, fmt.Errorf("routing cycle sends it back through node %d", target))
+					forwarded.Route = nil
+					break
 				}
-				groups[target] = append(groups[target], forwarded)
+			}
+			if forwarded.Route != nil {
+				for _, target := range targets {
+					groups[target] = append(groups[target], forwarded)
+				}
 			}
 		}
 	}
@@ -325,13 +346,16 @@ func buildInboundReceipt(dir, id, source, envelope, via string, entries []transp
 		delivery := "direct"
 		if link.Mode == LinkAttach {
 			delivery = "attach"
+			if err := checkSubjectMargin(transport, filepath.Join(publishDir, alias), result); err != nil {
+				return receipt, err
+			}
 		}
 		body, _, err := makeBundle(mine, delivery, groups[number])
 		if err != nil {
 			return receipt, err
 		}
 		bundleFile := fmt.Sprintf("target-%03d.bundle", number)
-		if err := writeFileAtomic(filepath.Join(dir, bundleFile), body, 0o644); err != nil {
+		if err := replaceFileAtomic(filepath.Join(dir, bundleFile), body, 0o644); err != nil {
 			return receipt, err
 		}
 		receipt.Targets = append(receipt.Targets, batchTarget{
@@ -343,52 +367,57 @@ func buildInboundReceipt(dir, id, source, envelope, via string, entries []transp
 }
 
 func processInboundReceipt(dir, planPath string, receipt *inboundReceipt, board game.Config, dataDir string, transport Config, origin Address, result *Result) error {
+	for _, rejected := range receipt.Rejected {
+		result.Warnings = append(result.Warnings, "quarantined rejected inbound packet "+rejected)
+	}
 	if !receipt.Complete {
-		gameLock, err := store.Lock(board, true)
-		if err != nil {
-			return err
-		}
-		for i := range receipt.Local {
-			local := &receipt.Local[i]
-			if local.Done {
-				continue
-			}
-			body, err := os.ReadFile(filepath.Join(dir, local.SpoolFile))
+		if len(receipt.Local) > 0 {
+			gameLock, err := store.Lock(board, true)
 			if err != nil {
-				gameLock.Release()
 				return err
 			}
-			name := local.Name
-			target := filepath.Join(board.Inbound(), name)
-			if existing, err := os.ReadFile(target); err == nil {
-				if !slices.Equal(existing, body) {
+			for i := range receipt.Local {
+				local := &receipt.Local[i]
+				if local.Done {
+					continue
+				}
+				body, err := os.ReadFile(filepath.Join(dir, local.SpoolFile))
+				if err != nil {
 					gameLock.Release()
-					return fmt.Errorf("canonical packet filename collision at %s: existing and received bytes differ", target)
+					return err
+				}
+				name := local.Name
+				target := filepath.Join(board.Inbound(), name)
+				if existing, err := os.ReadFile(target); err == nil {
+					if !slices.Equal(existing, body) {
+						gameLock.Release()
+						return fmt.Errorf("canonical packet filename collision at %s: existing and received bytes differ", target)
+					}
+					local.Done = true
+					result.Warnings = append(result.Warnings, fmt.Sprintf("ignored duplicate packet %s: canonical name and bytes are identical", name))
+					if err := saveInboundReceipt(planPath, *receipt); err != nil {
+						gameLock.Release()
+						return err
+					}
+					continue
+				} else if !os.IsNotExist(err) {
+					gameLock.Release()
+					return err
+				}
+				if err := writeFileAtomic(target, body, 0o644); err != nil {
+					gameLock.Release()
+					return err
 				}
 				local.Done = true
-				result.Warnings = append(result.Warnings, fmt.Sprintf("ignored duplicate packet %s: canonical name and bytes are identical", name))
+				result.Delivered++
 				if err := saveInboundReceipt(planPath, *receipt); err != nil {
 					gameLock.Release()
 					return err
 				}
-				continue
-			} else if !os.IsNotExist(err) {
-				gameLock.Release()
+			}
+			if err := gameLock.Release(); err != nil {
 				return err
 			}
-			if err := writeFileAtomic(target, body, 0o644); err != nil {
-				gameLock.Release()
-				return err
-			}
-			local.Done = true
-			result.Delivered++
-			if err := saveInboundReceipt(planPath, *receipt); err != nil {
-				gameLock.Release()
-				return err
-			}
-		}
-		if err := gameLock.Release(); err != nil {
-			return err
 		}
 		for i := range receipt.Targets {
 			target := &receipt.Targets[i]
@@ -420,7 +449,7 @@ func processInboundReceipt(dir, planPath string, receipt *inboundReceipt, board 
 			return err
 		}
 	}
-	return cleanupInboundReceipt(dir, *receipt)
+	return cleanupInboundReceipt(dir, dataDir, *receipt)
 }
 
 func loadInboundReceipt(path string) (inboundReceipt, error) {
@@ -463,13 +492,17 @@ func resumeInboundReceipts(root string, board game.Config, dataDir string, trans
 	return nil
 }
 
-func cleanupInboundReceipt(dir string, receipt inboundReceipt) error {
+func cleanupInboundReceipt(dir, dataDir string, receipt inboundReceipt) error {
 	if receipt.Envelope != "" {
 		if err := os.Remove(receipt.Envelope); err != nil && !os.IsNotExist(err) {
 			return err
 		}
 	}
-	if err := os.Remove(receipt.Source); err != nil && !os.IsNotExist(err) {
+	if len(receipt.Rejected) > 0 {
+		if err := quarantineTransport(dataDir, receipt.Source); err != nil && !os.IsNotExist(err) {
+			return err
+		}
+	} else if err := os.Remove(receipt.Source); err != nil && !os.IsNotExist(err) {
 		return err
 	}
 	return os.RemoveAll(dir)
