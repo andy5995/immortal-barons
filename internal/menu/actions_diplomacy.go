@@ -382,7 +382,7 @@ func pickFromList(s session.Session, msg string, list []string) string {
 }
 
 // pickFromListValues is pickFromList for a list whose rows are DRAWN with more
-// than the value they stand for — a target flagged `(P)` for New Realm
+// than the value they stand for — a target flagged for New Realm
 // Protection, say. labels and values are parallel; the value is what comes back,
 // so a flag on the row can never reach the code that acts on the choice.
 func pickFromListValues(s session.Session, msg string, labels, values []string) string {

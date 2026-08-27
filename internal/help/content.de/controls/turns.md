@@ -14,5 +14,6 @@ Neue Spieler erhalten Neureich-Schutz: eine Anzahl von Zügen, in denen Sie
 weder angreifen noch angegriffen werden können. Das gibt Ihnen Zeit, sich
 aufzubauen.
 
-A realm still under protection carries a `(P)` after its name in the lists
-of realms, so you can see who cannot be attacked yet.
+A realm still under protection shows its letter in square brackets in the lists
+of realms — `[C]`, where every other realm shows `(C)` — so you can see who
+cannot be attacked yet.

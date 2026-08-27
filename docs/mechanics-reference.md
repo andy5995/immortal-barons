@@ -2883,11 +2883,11 @@ IB matches all of it.
   records in `Message To  :` — reads `'A' + Slot - 1`. A realm keeps its letter
   however many neighbours die, are pruned, or join, and the See Scores board
   letters by slot rather than by rank, so its rows are not in letter order.
-- **The id is BRACKETED on every screen, a deliberate divergence.** BRE
-  parenthesises it on the score tables and brackets it on `-*Relations*-`; IB
-  brackets it everywhere, because parentheses now carry a realm's status flags —
-  `(O)` online and `(P)` under New Realm Protection — so the shape separates the
-  key a player presses from the state they are being told about.
+- **The id is parenthesised as BRE parenthesises it, and BRACKETED for a realm
+  under New Realm Protection** — `[C]` against `(C)`, IB's own flag (#214). BRE
+  brackets the id on `-*Relations*-`, which is left alone: brackets cannot mean
+  protection on a screen where the original gives them to everyone, and it is a
+  standings roster rather than a picker.
 - **Creation is bounded by the slots, not by a separate count.** The lowest free
   slot is taken under the same world lock that checks for one, so two BBS nodes
   onboarding at once cannot both claim it. A caller arriving at a full planet is
@@ -3472,9 +3472,9 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   scales that price and BRE clamps the result at `AttackCostCap`
   (200,000,000 gold); see "The two cost levels" below.
 - **Protection crosses the league.** A scores packet marks each realm still
-  under New Realm Protection. The attack and terror target lists show those
-  realms with the `(P)` flag and refuse the strike when one is picked — matching
-  the local attack list, which flags them the same way (#214). The target board
+  under New Realm Protection. The attack and terror target lists bracket those
+  realms' letters and refuse the strike when one is picked — matching the local
+  attack list, which flags them the same way (#214). The target board
   still refuses an arriving strike itself, since the flag can go stale while the
   strike is in transit. **Spying is refused too** — a protected realm cannot be
   spied on any more than it can be struck, so every target list flags it and
@@ -3614,7 +3614,7 @@ InterBBS ops run over file-drop packets. IB matches BRE's player-facing model
   realm under New Realm Protection: `resolve_received_trade_offer` (0x043df1)
   checks and returns, so the goods and the fee are gone and neither side is told
   anything. IB refuses that target at the picker instead, where the sender can
-  still act on it, and the target lists carry the `(P)` flag that makes it
+  still act on it, and the target lists bracket the realm's letter to make it
   visible (#214). Nothing is destroyed and no arrival guard is needed: protection
   only counts DOWN and delivery is keyed by realm name, so a realm that was clear
   when the deal left cannot be protected when it lands.

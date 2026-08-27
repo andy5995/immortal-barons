@@ -813,9 +813,9 @@ carries it: the attack target picker and the recipient picker share
 indent. The inter-BBS scores screen does NOT — those figures arrive in packets
 that may be hours old, so there is nothing to report.
 
-The protection flag `(P)` rides in the same field, after the name rather than
-before it (see "Target list" above, #214). It reserves no column on an unflagged
-row.
+The protection flag is not in this field at all: a shielded realm wears its slot
+letter in brackets in the id column instead (see "Target list" above, #214), so
+the name field carries only the online mark.
 
 **The name field is measured in the caller's own charset.** `ValidRealmName`
 accepts any printable rune, so a realm may be named `Iron—Fist`; the CP437 and
@@ -1273,6 +1273,35 @@ The menu's own keys, from the capture: Gooie Kablooie Ops is **9**, not a
 letter, and Terrorist Ops carries a gold cost in the menu's price column
 (471,360 / 532,544 / 533,568 across the capture — it grows with something, and
 three points do not say what).
+
+**Terrorist Ops** (2), captured 2026-08-26 in `cap/eots-ibbs-01.cap`. Nine
+numbered operations and a Quit, in this order, and **no price column** — the cost
+is quoted once on the parent menu beside the item, not per operation, which is
+where it differs from Special Operations below.
+
+```
+────[Terrorist Ops]────
+(1) Send Spy
+(2) Bomb Intelligence
+(3) Demoralize
+(4) Cause Dissensions
+(5) Bomb AirBases
+(6) Stir Emigrations
+(7) Spread Propaganda
+(8) Bomb Food Stores
+(9) Sabotage HQ
+(0) Quit
+───────────────────────
+```
+
+**The box is 23 columns** — four CP437 `0xC4` rules, `[Terrorist Ops]`, four
+more, with every item line padded to the same 23 and the closing rule 23 long.
+IB drew it at the 62-column `rule` default until 2026-08-26, since no capture of
+this screen existed to size it from. That is the trap CLAUDE.md names: the
+original sizes each box to its own content, and the captures in this file run
+16, 20, 21, 23, 28, 32, 38, 44, 46 and 52 columns with no house width among them.
+
+Item names, keys and order match IB's exactly.
 
 **Special Operations** (8) is numbered **1-8** with no Help item, and prices its
 first four entries: Bomb Food Market 10,000,000; Bomb Trading Market 25,000,000;
@@ -2574,15 +2603,18 @@ Id   Empire Name                          Territory   Score   Networth
                                                 [BRE v0.988]   8/15/2026
 ```
 
-**IB's interplanetary baron list is NUMBERED**, where this capture shows the
-same lettered roster the local screens draw. That is an old divergence and it is
-not addressed here. What did change (#214): a baron the last scores packet had
-under New Realm Protection is listed with the `(P)` flag after the name and the
-strike is refused when that row is picked. Those barons were HIDDEN from the list
-until 2026-08-26, with a count printed beneath it saying how many had been held
-back, which named nothing and left a planet's roster disagreeing with its target
-list. The flag is a courtesy either way — a packet can be days old, so the target
-board still refuses an arriving strike on its own authority.
+**IB draws the same lettered roster** as of 2026-08-26. It numbered this one
+list until then — the last place in the game a player was picked by anything but
+a letter — while the original letters every roster of players and reserves names
+and numbers for planets.
+
+A baron the last scores packet had under New Realm Protection wears its letter in
+brackets, `[B]` against `(A)`, and the strike is refused when that row is picked
+(#214). Those barons were HIDDEN from the list until 2026-08-26, with a count
+printed beneath it saying how many had been held back, which named nothing and
+left a planet's roster disagreeing with its target list. The flag is a courtesy
+either way — a packet can be days old, so the target board still refuses an
+arriving strike on its own authority.
 
 **The interplanetary picker's prompt is colored differently from the local
 one**, though the wording is nearly the same (`cap/eots-ibbs-01.cap`): here the

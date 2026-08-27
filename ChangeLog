@@ -1,4 +1,5 @@
 (in-progress:)
+  * reverted: the Terrorist Ops menu is drawn at the width the original draws it
   * An interplanetary message picks which barons on the chosen planet read it
   * reverted: the Coordinator item reads Dismantle Gooie and the setting Gooie Kablooies, as the original words them
   * The interplanetary Send Trade Deal ships goods to a realm on another planet
