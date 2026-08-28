@@ -1,4 +1,4 @@
-(in-progress:)
+2026-08-28 (v0.0.8)
   * A prompt whose input has ended now ends the session instead of spinning,
     which -reset did when run with no terminal
   * The scoreboard, the day's news and a new World Report are written out as
@@ -20,6 +20,8 @@
     its original wrapper is quarantined after the valid members finish
   * barons-ftn file-locks its BSO semaphores and recovers only its own, and only
     once it has gone stale
+  * An unset FTN attach directory now defaults to a shorter path, so a deep data
+    directory no longer overruns the attachment subject
   * FTN aliases have a defined compatibility namespace for legacy league-0
     packets, so one cannot wedge an otherwise deliverable transport batch
   * The FTN transport, routing, locking, recovery and mixed-link setup have a
