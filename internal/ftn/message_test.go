@@ -153,7 +153,7 @@ func TestSubjectSpellingModes(t *testing.T) {
 // Basename-only spends nothing on directories, so the extra digit stops
 // mattering.
 func TestSequenceDigitBreaksAbsoluteButNotBasename(t *testing.T) {
-	const dir = "/home/andy/c-sbbs/ibout/fido/"
+	const dir = "/sbbs/xtrn/immortal-barons/data/fido/"
 	at99 := dir + strings.Repeat("p", 70-len(dir))
 	at100 := at99 + "0"
 
