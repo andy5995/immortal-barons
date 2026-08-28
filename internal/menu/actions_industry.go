@@ -112,6 +112,13 @@ func setIndustries(s session.Session, w *ctx) Result {
 	}
 	fmt.Fprint(s, "\n") // one blank line after "Change Production? y", then the units follow consecutively
 	for i, row := range rows {
+		// Nothing left to allocate: asking for a percentage whose only legal
+		// answer is 0 is a dead question, so stop the walk and leave the rest of
+		// ns at its zero value.
+		if remaining == 0 {
+			okNoPause(s, "All production is allocated; the remaining types are set to 0%%.")
+			break
+		}
 		cur := *row.field(p)
 		if cur > remaining {
 			cur = remaining

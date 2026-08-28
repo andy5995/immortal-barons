@@ -153,3 +153,34 @@ func TestSpecializationBoxIsFourteenColumnsWithAnOverhangingTitle(t *testing.T) 
 		t.Errorf("expected the 14-column dim-red closing rule, got:\n%q", out)
 	}
 }
+
+// Once the walk has allocated 100%, every later type can only be 0 — asking for
+// it is a dead question, so the walk stops and says so.
+func TestSetIndustriesStopsAskingOnceFullyAllocated(t *testing.T) {
+	w := newWorld()
+	if err := w.mutatePlayer(func(p *game.Empire) error {
+		p.Regions.Industrial = 100
+		p.ProdJets = 25
+		return nil
+	}); err != nil {
+		t.Fatal(err)
+	}
+	// Accept "Change Production?", then spend the whole budget on the first row.
+	f := &fakeSession{keys: []rune("y100\r")}
+	setIndustries(f, w)
+	out := stripANSI(f.out.String())
+
+	// The first row was reached; the second never asked.
+	if !strings.Contains(out, "Troopers") {
+		t.Fatalf("the production walk never started:\n%s", out)
+	}
+	if strings.Count(out, "Jets") > 1 { // once in the report table, never as a prompt
+		t.Errorf("Jets was still prompted for with 0%% left:\n%s", out)
+	}
+	if !strings.Contains(out, "remaining types are set to 0%") {
+		t.Errorf("no notice that the rest were zeroed:\n%s", out)
+	}
+	if p := w.Player(); p.ProdTroopers != 100 || p.ProdJets != 0 {
+		t.Errorf("ProdTroopers = %d, ProdJets = %d; want 100 and 0", p.ProdTroopers, p.ProdJets)
+	}
+}
