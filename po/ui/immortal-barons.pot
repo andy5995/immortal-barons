@@ -217,7 +217,7 @@ msgstr ""
 msgid "(%s per year)"
 msgstr ""
 
-#: internal/menu/scoretable.go:58
+#: internal/menu/scoretable.go:65
 msgid "(dead)"
 msgstr ""
 
@@ -345,6 +345,10 @@ msgstr ""
 msgid "Advisors"
 msgstr ""
 
+#: internal/game/units.go:123
+msgid "Agent"
+msgstr ""
+
 #: internal/menu/empire_status_screen.go:107
 msgid "Agents"
 msgstr ""
@@ -413,7 +417,7 @@ msgstr ""
 msgid "Attack which realm? (letter, RETURN to abort)"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:187
+#: internal/menu/bulletinfiles.go:193
 msgid "Attacker"
 msgstr ""
 
@@ -497,6 +501,10 @@ msgstr ""
 msgid "Bomb Trading Market"
 msgstr ""
 
+#: internal/game/units.go:93
+msgid "Bomber"
+msgstr ""
+
 #: internal/menu/tree.go:151
 msgid "Bombers"
 msgstr ""
@@ -537,7 +545,7 @@ msgstr ""
 msgid "Buy it?"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:215
+#: internal/menu/bulletinfiles.go:221
 msgid "CRUSHED"
 msgstr ""
 
@@ -547,6 +555,10 @@ msgstr ""
 
 #: internal/menu/turnstages.go:414
 msgid "Care to try your luck on the Queen's lottery?"
+msgstr ""
+
+#: internal/game/units.go:113
+msgid "Carrier"
 msgstr ""
 
 #: internal/menu/tree.go:159
@@ -637,7 +649,7 @@ msgstr ""
 msgid "Configuration saved."
 msgstr ""
 
-#: internal/menu/input.go:203
+#: internal/menu/input.go:210
 msgid "Confirm?"
 msgstr ""
 
@@ -705,7 +717,7 @@ msgstr ""
 msgid "Defeat! Your forces were beaten off the field."
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:188
+#: internal/menu/bulletinfiles.go:194
 msgid "Defender"
 msgstr ""
 
@@ -985,7 +997,7 @@ msgstr ""
 msgid "IP Messages"
 msgstr ""
 
-#: internal/menu/scoretable.go:192
+#: internal/menu/scoretable.go:199
 msgid "Id"
 msgstr ""
 
@@ -1045,7 +1057,7 @@ msgstr ""
 msgid "InterPlanetary Ops"
 msgstr ""
 
-#: internal/menu/input.go:188
+#: internal/menu/input.go:195
 msgid "Invalid: a realm name needs at least 3 letters or digits. Decoration around them is fine and does not count."
 msgstr ""
 
@@ -1075,6 +1087,10 @@ msgstr ""
 
 #: internal/menu/menu.go:814
 msgid "Item"
+msgstr ""
+
+#: internal/game/units.go:73
+msgid "Jet"
 msgstr ""
 
 #: internal/menu/tree.go:147
@@ -1117,7 +1133,7 @@ msgstr ""
 msgid "Last Line to Quote"
 msgstr ""
 
-#: internal/menu/scoretable.go:68
+#: internal/menu/scoretable.go:75
 msgid "Last Planetary Master: %s"
 msgstr ""
 
@@ -1241,7 +1257,7 @@ msgstr ""
 msgid "Name the planet to watch."
 msgstr ""
 
-#: internal/menu/input.go:167
+#: internal/menu/input.go:174
 msgid "Name your Realm:"
 msgstr ""
 
@@ -1273,7 +1289,7 @@ msgstr ""
 msgid "No barons are known on that planet yet."
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:183
+#: internal/menu/bulletinfiles.go:189
 msgid "No battles have been fought yet."
 msgstr ""
 
@@ -1289,7 +1305,7 @@ msgstr ""
 msgid "No matches. The Queen thanks you for your contribution."
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:137
+#: internal/menu/bulletinfiles.go:143
 msgid "No news."
 msgstr ""
 
@@ -1449,7 +1465,7 @@ msgstr ""
 msgid "Our {military forces} are functioning at %d%% strength."
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:188
+#: internal/menu/bulletinfiles.go:194
 msgid "Outcome"
 msgstr ""
 
@@ -1821,8 +1837,12 @@ msgstr ""
 msgid "System Menu"
 msgstr ""
 
-#: internal/menu/input.go:193
+#: internal/menu/input.go:200
 msgid "Taken: another realm already answers to that name."
+msgstr ""
+
+#: internal/game/units.go:103
+msgid "Tank"
 msgstr ""
 
 #: internal/menu/actions_diplomacy.go:98
@@ -1861,7 +1881,7 @@ msgstr ""
 msgid "Technology levels are relative to the number of regions in the empire. A larger realm needs more advanced technology to hold the same efficiency as a smaller one."
 msgstr ""
 
-#: internal/menu/scoretable.go:194
+#: internal/menu/scoretable.go:201
 msgid "Territory"
 msgstr ""
 
@@ -2073,7 +2093,7 @@ msgstr ""
 msgid "Today's News"
 msgstr ""
 
-#: internal/menu/input.go:191
+#: internal/menu/input.go:198
 msgid "Too long: a realm name may be at most %d characters."
 msgstr ""
 
@@ -2145,6 +2165,10 @@ msgstr ""
 msgid "Troop morale stands at %d%%."
 msgstr ""
 
+#: internal/game/units.go:63
+msgid "Trooper"
+msgstr ""
+
 #: internal/menu/actions_diplomacy.go:98
 msgid "Troopers"
 msgstr ""
@@ -2155,6 +2179,10 @@ msgstr ""
 
 #: internal/menu/config_editor.go:194
 msgid "Turns per day"
+msgstr ""
+
+#: internal/game/units.go:83
+msgid "Turret"
 msgstr ""
 
 #: internal/menu/tree.go:149
@@ -2313,7 +2341,7 @@ msgstr ""
 msgid "Withdraw Funds"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:176
+#: internal/menu/bulletinfiles.go:182
 msgid "World Report"
 msgstr ""
 
@@ -2709,7 +2737,7 @@ msgstr ""
 msgid "Your realm is not under new-realm protection."
 msgstr ""
 
-#: internal/menu/input.go:202
+#: internal/menu/input.go:209
 msgid "Your realm will be named %s."
 msgstr ""
 
@@ -2785,11 +2813,11 @@ msgstr ""
 msgid "force plain 7-bit ASCII output, for a terminal that is neither CP437 nor UTF-8 (box rules and accents degrade to ASCII look-alikes)"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:221
+#: internal/menu/bulletinfiles.go:227
 msgid "held"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:194
+#: internal/menu/bulletinfiles.go:200
 msgid "here"
 msgstr ""
 
@@ -2921,7 +2949,7 @@ msgstr ""
 msgid "this board's name in the league, for -ibbs-reset. Giving it skips the settings editor, for a member board that takes its rules from the Coordinator"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:217
+#: internal/menu/bulletinfiles.go:223
 msgid "took %d"
 msgstr ""
 
@@ -2937,7 +2965,7 @@ msgstr ""
 msgid "units of food spoiled."
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:219
+#: internal/menu/bulletinfiles.go:225
 msgid "won"
 msgstr ""
 
@@ -2965,7 +2993,7 @@ msgstr ""
 msgid "─»>Enter to continue, Q to quit<«─"
 msgstr ""
 
-#: internal/menu/input.go:475
+#: internal/menu/input.go:482
 msgid "─»>Paused<«─"
 msgstr ""
 

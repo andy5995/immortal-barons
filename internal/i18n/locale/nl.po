@@ -227,7 +227,7 @@ msgstr ""
 msgid "(%s per year)"
 msgstr ""
 
-#: internal/menu/scoretable.go:58
+#: internal/menu/scoretable.go:65
 msgid "(dead)"
 msgstr ""
 
@@ -359,6 +359,11 @@ msgstr ""
 msgid "Advisors"
 msgstr ""
 
+#: internal/game/units.go:123
+#, fuzzy
+msgid "Agent"
+msgstr "Geheim agenten"
+
 #: internal/menu/empire_status_screen.go:107
 #, fuzzy
 msgid "Agents"
@@ -438,7 +443,7 @@ msgstr "Aanvalsmenu"
 msgid "Attack which realm? (letter, RETURN to abort)"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:187
+#: internal/menu/bulletinfiles.go:193
 #, fuzzy
 msgid "Attacker"
 msgstr "Aanvalsmenu"
@@ -527,6 +532,11 @@ msgstr "Handelsroutes bombarderen"
 msgid "Bomb Trading Market"
 msgstr "Handelsmarkt bombarderen"
 
+#: internal/game/units.go:93
+#, fuzzy
+msgid "Bomber"
+msgstr "Bommenwerpers"
+
 #: internal/menu/tree.go:151
 msgid "Bombers"
 msgstr "Bommenwerpers"
@@ -569,7 +579,7 @@ msgstr ""
 msgid "Buy it?"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:215
+#: internal/menu/bulletinfiles.go:221
 msgid "CRUSHED"
 msgstr ""
 
@@ -580,6 +590,11 @@ msgstr ""
 #: internal/menu/turnstages.go:414
 msgid "Care to try your luck on the Queen's lottery?"
 msgstr ""
+
+#: internal/game/units.go:113
+#, fuzzy
+msgid "Carrier"
+msgstr "Vliegdekschepen"
 
 #: internal/menu/tree.go:159
 msgid "Carriers"
@@ -672,7 +687,7 @@ msgstr ""
 msgid "Configuration saved."
 msgstr "Configuratie-editor"
 
-#: internal/menu/input.go:203
+#: internal/menu/input.go:210
 msgid "Confirm?"
 msgstr "Bevestigen?"
 
@@ -743,7 +758,7 @@ msgstr ""
 msgid "Defeat! Your forces were beaten off the field."
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:188
+#: internal/menu/bulletinfiles.go:194
 msgid "Defender"
 msgstr ""
 
@@ -1028,7 +1043,7 @@ msgstr ""
 msgid "IP Messages"
 msgstr "Berichten"
 
-#: internal/menu/scoretable.go:192
+#: internal/menu/scoretable.go:199
 msgid "Id"
 msgstr ""
 
@@ -1088,7 +1103,7 @@ msgstr "Interplanetaire operaties"
 msgid "InterPlanetary Ops"
 msgstr "Interplanetaire operaties"
 
-#: internal/menu/input.go:188
+#: internal/menu/input.go:195
 msgid ""
 "Invalid: a realm name needs at least 3 letters or digits. Decoration around "
 "them is fine and does not count."
@@ -1121,6 +1136,11 @@ msgstr ""
 #: internal/menu/menu.go:814
 msgid "Item"
 msgstr ""
+
+#: internal/game/units.go:73
+#, fuzzy
+msgid "Jet"
+msgstr "Straaljagers"
 
 #: internal/menu/tree.go:147
 msgid "Jets"
@@ -1162,7 +1182,7 @@ msgstr "Taal:"
 msgid "Last Line to Quote"
 msgstr ""
 
-#: internal/menu/scoretable.go:68
+#: internal/menu/scoretable.go:75
 msgid "Last Planetary Master: %s"
 msgstr ""
 
@@ -1291,7 +1311,7 @@ msgstr ""
 msgid "Name the planet to watch."
 msgstr ""
 
-#: internal/menu/input.go:167
+#: internal/menu/input.go:174
 msgid "Name your Realm:"
 msgstr "Noem je rijk:"
 
@@ -1323,7 +1343,7 @@ msgstr ""
 msgid "No barons are known on that planet yet."
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:183
+#: internal/menu/bulletinfiles.go:189
 msgid "No battles have been fought yet."
 msgstr ""
 
@@ -1339,7 +1359,7 @@ msgstr ""
 msgid "No matches. The Queen thanks you for your contribution."
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:137
+#: internal/menu/bulletinfiles.go:143
 msgid "No news."
 msgstr ""
 
@@ -1512,7 +1532,7 @@ msgstr ""
 msgid "Our {military forces} are functioning at %d%% strength."
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:188
+#: internal/menu/bulletinfiles.go:194
 msgid "Outcome"
 msgstr ""
 
@@ -1905,10 +1925,15 @@ msgstr "Systeemmenu"
 msgid "System Menu"
 msgstr "Systeemmenu"
 
-#: internal/menu/input.go:193
+#: internal/menu/input.go:200
 #, fuzzy
 msgid "Taken: another realm already answers to that name."
 msgstr "Een ander rijk luistert al naar die naam."
+
+#: internal/game/units.go:103
+#, fuzzy
+msgid "Tank"
+msgstr "Tanks"
 
 #: internal/menu/actions_diplomacy.go:98
 msgid "Tanks"
@@ -1950,7 +1975,7 @@ msgid ""
 "smaller one."
 msgstr ""
 
-#: internal/menu/scoretable.go:194
+#: internal/menu/scoretable.go:201
 msgid "Territory"
 msgstr ""
 
@@ -2168,7 +2193,7 @@ msgstr ""
 msgid "Today's News"
 msgstr "Nieuws van vandaag"
 
-#: internal/menu/input.go:191
+#: internal/menu/input.go:198
 #, fuzzy
 msgid "Too long: a realm name may be at most %d characters."
 msgstr "Een naam voor een rijk heeft minstens drie zichtbare tekens nodig."
@@ -2242,6 +2267,11 @@ msgstr "Reistijden"
 msgid "Troop morale stands at %d%%."
 msgstr ""
 
+#: internal/game/units.go:63
+#, fuzzy
+msgid "Trooper"
+msgstr "Soldaten"
+
 #: internal/menu/actions_diplomacy.go:98
 msgid "Troopers"
 msgstr "Soldaten"
@@ -2253,6 +2283,11 @@ msgstr ""
 #: internal/menu/config_editor.go:194
 msgid "Turns per day"
 msgstr ""
+
+#: internal/game/units.go:83
+#, fuzzy
+msgid "Turret"
+msgstr "Geschutstorens"
 
 #: internal/menu/tree.go:149
 msgid "Turrets"
@@ -2421,7 +2456,7 @@ msgstr ""
 msgid "Withdraw Funds"
 msgstr "Geld opnemen"
 
-#: internal/menu/bulletinfiles.go:176
+#: internal/menu/bulletinfiles.go:182
 msgid "World Report"
 msgstr ""
 
@@ -2842,7 +2877,7 @@ msgstr ""
 "Je kunt je rijk niet hernoemen zolang het onder bescherming van een nieuw "
 "rijk staat."
 
-#: internal/menu/input.go:202
+#: internal/menu/input.go:209
 msgid "Your realm will be named %s."
 msgstr "Je rijk krijgt de naam %s."
 
@@ -2939,11 +2974,11 @@ msgid ""
 "UTF-8 (box rules and accents degrade to ASCII look-alikes)"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:221
+#: internal/menu/bulletinfiles.go:227
 msgid "held"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:194
+#: internal/menu/bulletinfiles.go:200
 msgid "here"
 msgstr ""
 
@@ -3123,7 +3158,7 @@ msgid ""
 "settings editor, for a member board that takes its rules from the Coordinator"
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:217
+#: internal/menu/bulletinfiles.go:223
 msgid "took %d"
 msgstr ""
 
@@ -3139,7 +3174,7 @@ msgstr ""
 msgid "units of food spoiled."
 msgstr ""
 
-#: internal/menu/bulletinfiles.go:219
+#: internal/menu/bulletinfiles.go:225
 msgid "won"
 msgstr ""
 
@@ -3173,7 +3208,7 @@ msgstr ""
 msgid "─»>Enter to continue, Q to quit<«─"
 msgstr ""
 
-#: internal/menu/input.go:475
+#: internal/menu/input.go:482
 msgid "─»>Paused<«─"
 msgstr ""
 

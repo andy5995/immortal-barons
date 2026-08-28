@@ -59,8 +59,13 @@ ERR_PATTERN = re.compile(r'errors\.New\(' + STR + r'\)')
 # A menu item whose label comes from the constant it dispatches on (the covert
 # ops) has no literal left in internal/menu for the Label: pattern to find, so
 # the constant's own declaration is the msgid.
+# The unit table's own names are the other case: internal/menu translates a
+# good by the name it reads off the row (marketDisplayName, marketBuy), so no
+# literal is left on the menu side for the patterns above to find. The seven
+# singulars reached the market screens untranslated for that reason.
 GAME_PATTERNS = [
     re.compile(r'\bCovertOp\s*=\s*' + STR),
+    re.compile(r'\b(?:Singular|Plural):\s*' + STR),
     re.compile(r'\btr\(' + STR),
     re.compile(r'\bi18n\.T\([^,]+,\s*' + STR),
 ]
