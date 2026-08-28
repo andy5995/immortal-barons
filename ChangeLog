@@ -1,3 +1,10 @@
+(in-progress:)
+  * The Military advisor reports the Mountain industry boost
+  * Set Industries stops asking for percentages once 100% is allocated
+  * A protected realm is told why it cannot change its Coordinator vote
+  * An ignored message is not re-read at the head of every later turn
+  * PirateNews in bbs.cfg keeps pirate raids out of the planet news
+
 2026-08-28 (v0.0.8)
   * A prompt whose input has ended now ends the session instead of spinning,
     which -reset did when run with no terminal
