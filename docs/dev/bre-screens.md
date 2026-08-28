@@ -2846,6 +2846,13 @@ A baron who has not voted has `No one` in the name slot, from
 prints its own wording in the same place, the same shape and the same three
 cases.
 
+**Deliberate divergence: the second line, under New Realm Protection.** The
+original sends every voter to the system menu, but `show_game_settings +0x082f`
+hides the Coordinator Vote item from a realm still under protection — so a new
+baron is directed to an item that is not there, and one on ConstructiveChaos
+reported exactly that. IB keeps the item hidden and replaces the second line
+while protection lasts, naming the turns left instead of the menu.
+
 ## Game Setup and Send Trade Deal (captured live 2026-08-23, `cap/shsbbs.cap`)
 
 ### The panel (System Menu → G)

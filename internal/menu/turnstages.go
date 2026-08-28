@@ -356,11 +356,13 @@ func showCoordinatorNotice(s session.Session, w *ctx) {
 	}
 	var isCoordinator bool
 	var voteName string
+	var protection int
 	withPlayer(w, func(p *game.Empire) {
 		if co := w.World.BBSCoordinator(); co != nil && co == p {
 			isCoordinator = true
 			return
 		}
+		protection = p.Protection
 		if v := w.World.FindByOwner(p.CoordinatorVote); v != nil && v.Alive {
 			voteName = v.Name
 		}
@@ -388,6 +390,14 @@ func showCoordinatorNotice(s session.Session, w *ctx) {
 		voteName = tr(s, "no one")
 	}
 	say(fmt.Sprintf(tr(s, "Your vote for BBS Coordinator is %s."), voteName), voteName)
+	// The original sends a protected realm to the System menu for an item the
+	// same routine hides from it while protection lasts (see the Coordinator Vote
+	// item in tree.go). IB says which of the two is true instead of copying the
+	// contradiction — a deliberate divergence (docs/dev/bre-screens.md).
+	if protection > 0 {
+		say(fmt.Sprintf(tr(s, "You cannot change it until your new-realm protection ends, %d turns from now."), protection), "")
+		return
+	}
 	say(tr(s, "You can change it from the System menu."), "")
 }
 

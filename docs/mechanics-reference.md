@@ -3963,7 +3963,11 @@ The Coordinator is elected by the planet's own barons, from the System Menu's
 - **A baron still under new-realm protection cannot vote.** BRE draws the menu
   item only after the protection predicate clears the caller
   (`show_game_settings`, the guard at `BRE.OVR` unit `ovr_013753` +0x082f).
-  IB matches this.
+  IB matches this. The original's turn-opening Coordinator notice contradicts
+  the guard — it tells every voter to change the vote in the system menu, the
+  one menu the same routine has just left the item out of. **IB diverges on
+  that second line**: a protected realm is told how many turns are left instead
+  (`docs/dev/bre-screens.md`).
 - **Every realm holding a slot is a candidate — protected realms included, and
   yourself.** The ballot is the shared realm picker
   (`choose_target_empire`, `BRE.OVR` 0x01aa99), which builds its key set from

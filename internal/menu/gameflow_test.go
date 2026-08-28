@@ -1055,6 +1055,7 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 		if w.Player().CoordinatorVote != other.Owner {
 			t.Fatalf("the vote did not register: %q", w.Player().CoordinatorVote)
 		}
+		w.Player().Protection = 0 // a fresh realm starts protected; this case is the voter who can act
 		f := &fakeSession{keys: []rune(perTurn)}
 		runTurn(f, w)
 		out := stripANSI(f.out.String())
@@ -1066,7 +1067,7 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 		}
 	})
 
-	t.Run("a protected realm gets the same line", func(t *testing.T) {
+	t.Run("a protected realm is told why it cannot vote", func(t *testing.T) {
 		w := leagueCtx(t)
 		w.Player().Prefs.AutoPayMaint = true
 		w.Player().Prefs.VisitCovert, w.Player().Prefs.VisitTrading, w.Player().Prefs.VisitMessage = false, false, false
@@ -1079,8 +1080,13 @@ func TestCoordinatorNoticeOpensAnInterBBSTurn(t *testing.T) {
 		if !strings.Contains(out, "Your vote for BBS Coordinator is Rivalia.") {
 			t.Fatalf("the vote notice never reached the screen:\n%s", out)
 		}
-		if !strings.Contains(out, "System menu") {
-			t.Errorf("protection does not change what the notice says:\n%s", out)
+		// The System menu hides the Coordinator Vote item while protection lasts,
+		// so sending a protected realm there (as the original does) is a dead end.
+		if !strings.Contains(out, "until your new-realm protection ends, 5 turns from now") {
+			t.Errorf("a protected realm is not told why the vote is closed to it:\n%s", out)
+		}
+		if strings.Contains(out, "You can change it from the System menu") {
+			t.Errorf("a protected realm was still sent to a menu with no vote item:\n%s", out)
 		}
 	})
 
