@@ -145,8 +145,15 @@ func readEscapeNav(s session.Session) int {
 func prompt(s session.Session, msg string) string {
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), ansi.Reset)
 	line, err := session.ReadLine(s)
-	if errors.Is(err, session.ErrSessionEnded) {
-		session.End(err) // idle boot / disconnect: unwind (a bare io.EOF falls through)
+	if err != nil {
+		// ANY read failure ends the session, not just ErrSessionEnded. Letting a
+		// bare io.EOF fall through returns "" to a caller that usually loops on
+		// input it cannot parse, and the loop then spins on an input stream that
+		// will never produce another byte: `-reset` with stdin closed redrew the
+		// Configuration Editor 300,616 times and wrote 262 MB in five seconds
+		// before anything killed it. AskRealmName has always ended on any error;
+		// this makes the general prompts agree with it.
+		session.End(err)
 	}
 	return line
 }
@@ -245,8 +252,8 @@ func parseAmount[T numfmt.Number](input string, max T) T {
 func promptInt(s session.Session, msg string) int {
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, i18n.T(sessionLang(s), msg), ansi.Reset)
 	line, err := session.ReadLine(s)
-	if errors.Is(err, session.ErrSessionEnded) {
-		session.End(err)
+	if err != nil {
+		session.End(err) // see prompt: a swallowed EOF spins the caller's loop
 	}
 	return parseAmount(line, math.MaxInt)
 }

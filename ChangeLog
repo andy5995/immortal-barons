@@ -1,4 +1,6 @@
 (in-progress:)
+  * A prompt whose input has ended now ends the session instead of spinning,
+    which -reset did when run with no terminal
   * The scoreboard, the day's news and a new World Report are written out as
     .ans and .txt files for a BBS bulletin menu, set by BulletinDir in bbs.cfg
   * The World Report lists every attack fought anywhere in the league, and
