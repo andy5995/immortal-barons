@@ -219,15 +219,15 @@ func eventRule(n int, when time.Time) string {
 // another node mid-session is seen (#3), but stays quiet when there is none
 // rather than repeating the line up to ten times a day.
 func readTurnMail(s session.Session, w *ctx, announceEmpty bool) {
-	var count int
-	withPlayer(w, func(p *game.Empire) { count = len(p.Mail) })
-	if count == 0 {
+	// Messages this session has already ignored do not count: the stop is for
+	// mail the player has not passed over yet (see ctx.ignoredMail).
+	if len(unreadMail(w, true)) == 0 {
 		if announceEmpty {
 			fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgWhite, tr(s, "You have no messages."), ansi.Reset)
 		}
 		return
 	}
-	mailReader(s, w)
+	mailReader(s, w, true)
 }
 
 // manufacturedUnits lists what the Industrial Zones built this turn, one unit

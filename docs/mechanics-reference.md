@@ -4582,7 +4582,12 @@ Now matching this reference (as of v0.0.4):
   Quit), where Ignore keeps a message for next time (it can be ignored
   indefinitely) and only Delete removes it; Reply quotes a chosen line range of
   the original — plus a
-  planetary bulletin
+  planetary bulletin. **IB divergence:** an ignored message is passed over by
+  the mail stop at the head of each later turn *of the same session*, rather
+  than re-read on all ten of a day's turns; it returns the next time the player
+  enters the game, and Read Messages shows it whenever asked. Abandoning a reply
+  in the editor counts as ignoring the message; quitting the reader does not
+  mark the messages it never showed
 - Multiple turns per day, new-realm protection, and daily maintenance
 - A rising land-market price (expansion is self-limiting)
 - Region types, with the reference Rate/Base pairs, and the food market

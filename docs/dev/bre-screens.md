@@ -2237,6 +2237,19 @@ Colors: frame cyan `36`; timestamp bright-white `1;37`; the `Message From:` /
 bright-green `1;32`; body white, quoted lines bright-blue `1;34`; the action keys
 bright-cyan `1;36` inside blue `34` brackets.
 
+**Deliberate divergence: what [I]gnore means for the rest of the session.** In
+the original an ignored message comes back at the head of every turn, so a
+barons playing out a day's ten turns reads it ten times. IB keeps the message —
+only Delete removes it — but the turn-start stop passes over anything ignored
+earlier in the same session. It is back on the next visit to the game, and Read
+Messages never skips it.
+
+What counts as passing a message over, all deliberate: `[I]gnore`, an
+unrecognized key at the prompt, and a `[R]eply` abandoned in the editor — that
+last one because opening a reply and backing out is still a decision not to deal
+with the message now. `[Q]uit` marks nothing: the messages behind it were never
+shown, so the next turn's stop still has them.
+
 `Message To` is a run of letters, not a name — the reader loops `A`..`Y` over the
 message's own recipient table and prints every letter that is in it, so a message
 sent to several realms shows them all, in letter order, and every copy carries

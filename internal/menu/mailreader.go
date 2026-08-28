@@ -38,11 +38,11 @@ type mailReply struct {
 // collected during the read and applied under the world lock afterwards, so the
 // lock is never held while waiting on the player and a message that arrives
 // mid-read survives (issues #2, #5).
-func mailReader(s session.Session, w *ctx) {
-	var mail []game.Message
-	withPlayer(w, func(p *game.Empire) {
-		mail = append([]game.Message(nil), p.Mail...)
-	})
+// skipIgnored is true for the turn-start stop, which passes over what this
+// session has already ignored, and false for Read Messages, which shows the
+// whole inbox (see ctx.ignoredMail).
+func mailReader(s session.Session, w *ctx, skipIgnored bool) {
+	mail := unreadMail(w, skipIgnored)
 	if len(mail) == 0 {
 		return
 	}
@@ -69,11 +69,43 @@ func mailReader(s session.Session, w *ctx) {
 				// once the reply actually went out; aborting the editor leaves the
 				// message in the inbox.
 				deleted = append(deleted, m)
+				break
 			}
+			// The editor was abandoned. The message stays — nothing was sent — but
+			// opening it and backing out is still a decision not to deal with it
+			// now, so it counts as ignored and the rest of this session's turns
+			// leave it alone (docs/dev/bre-screens.md).
+			w.ignoreMail(m)
+		default:
+			// 'I' (and any unrecognized key): keep the message, note it for the
+			// rest of this session, and advance.
+			w.ignoreMail(m)
 		}
-		// 'I' (and any default): keep the message and advance.
 	}
 	applyMailActions(w, deleted, replies)
+}
+
+// ignoreMail marks m passed over for the rest of this session.
+func (w *ctx) ignoreMail(m game.Message) {
+	if w.ignoredMail == nil {
+		w.ignoredMail = map[game.Message]bool{}
+	}
+	w.ignoredMail[m] = true
+}
+
+// unreadMail copies the player's inbox, less what this session has ignored when
+// the caller asked to skip those.
+func unreadMail(w *ctx, skipIgnored bool) []game.Message {
+	var mail []game.Message
+	withPlayer(w, func(p *game.Empire) {
+		for _, m := range p.Mail {
+			if skipIgnored && w.ignoredMail[m] {
+				continue
+			}
+			mail = append(mail, m)
+		}
+	})
+	return mail
 }
 
 // applyMailActions removes the deleted messages from the player's live inbox

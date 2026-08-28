@@ -17,7 +17,7 @@ func TestMailReaderIgnoreKeepsMessage(t *testing.T) {
 	f := &fakeSession{keys: []rune("i")}
 	w := newWorld()
 	seedMail(w, game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "hi"})
-	mailReader(f, w)
+	mailReader(f, w, false)
 	if got := len(w.Player().Mail); got != 1 {
 		t.Fatalf("Ignore should keep the message; Mail len = %d, want 1", got)
 	}
@@ -27,7 +27,7 @@ func TestMailReaderDeleteRemovesMessage(t *testing.T) {
 	f := &fakeSession{keys: []rune("d")}
 	w := newWorld()
 	seedMail(w, game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "hi"})
-	mailReader(f, w)
+	mailReader(f, w, false)
 	if got := len(w.Player().Mail); got != 0 {
 		t.Fatalf("Delete should remove the message; Mail len = %d, want 0", got)
 	}
@@ -40,7 +40,7 @@ func TestMailReaderQuitKeepsRemaining(t *testing.T) {
 		game.Message{From: "Ashland", Body: "one"},
 		game.Message{From: "Ashland", Body: "two"},
 	)
-	mailReader(f, w)
+	mailReader(f, w, false)
 	if got := len(w.Player().Mail); got != 2 {
 		t.Fatalf("Quit should keep unread messages; Mail len = %d, want 2", got)
 	}
@@ -56,7 +56,7 @@ func TestMailReaderReplyQuotesAndMailsSender(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", When: "07/24/2026", Body: "nice one"})
 
-	mailReader(f, w)
+	mailReader(f, w, false)
 
 	if len(sender.Mail) != 1 {
 		t.Fatalf("Reply should mail the sender; sender Mail len = %d, want 1", len(sender.Mail))
@@ -91,7 +91,7 @@ func TestMailReaderAbortedReplyKeepsMessage(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", When: "07/24/2026", Body: "nice one"})
 
-	mailReader(f, w)
+	mailReader(f, w, false)
 
 	if !strings.Contains(f.out.String(), "You have") {
 		t.Fatalf("never reached the message editor:\n%s", f.out.String())
@@ -116,7 +116,7 @@ func TestMailReaderQuoteRange(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", Body: "one\ntwo\nthree\nfour"})
 
-	mailReader(f, w)
+	mailReader(f, w, false)
 
 	if !strings.Contains(f.out.String(), "Quote Message?") {
 		t.Fatalf("never reached the quote prompt:\n%s", f.out.String())
@@ -146,7 +146,7 @@ func TestMailReaderQuoteDeclined(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", Body: "nice one"})
 
-	mailReader(f, w)
+	mailReader(f, w, false)
 
 	if len(sender.Mail) != 1 {
 		t.Fatalf("Reply should mail the sender; got %d messages", len(sender.Mail))
@@ -170,7 +170,7 @@ func TestMailReaderQuoteClampsRangeAtThePrompt(t *testing.T) {
 	w.With(func() { sender = recipients(w)[0] })
 	seedMail(w, game.Message{From: sender.Name, To: "A", Body: "one\ntwo\nthree"})
 
-	mailReader(f, w)
+	mailReader(f, w, false)
 
 	if !strings.Contains(f.out.String(), "Last Line to Quote") {
 		t.Fatalf("never reached the range prompt:\n%s", f.out.String())
@@ -192,5 +192,72 @@ func TestQuoteLinesNamesThePlanet(t *testing.T) {
 	m := game.Message{From: "Asgard", FromBoard: "Nova Hub", Body: "terms"}
 	if got := quoteLines(m, 1, 1)[0]; got != "> Quote From Asgard Of Nova Hub" {
 		t.Errorf("header = %q", got)
+	}
+}
+
+// Ignore means "not now", not "ask me again next turn". The turn-start mail stop
+// passes over what this session has ignored; Read Messages still shows it, and a
+// new session starts with an empty ignore set.
+func TestIgnoredMailIsNotRepeatedEveryTurn(t *testing.T) {
+	w := newWorld()
+	m := game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "sekret plans"}
+	seedMail(w, m)
+
+	f := &fakeSession{keys: []rune("i")}
+	mailReader(f, w, true)
+	if !strings.Contains(stripANSI(f.out.String()), "sekret plans") {
+		t.Fatalf("the message was never shown:\n%s", f.out.String())
+	}
+
+	// The next turn's stop: nothing to show, and the "no messages" line does not
+	// fire either, since the inbox is not empty.
+	f = &fakeSession{keys: []rune("i")}
+	readTurnMail(f, w, true)
+	if out := stripANSI(f.out.String()); strings.Contains(out, "sekret plans") {
+		t.Errorf("an ignored message came back at the next turn:\n%s", out)
+	}
+
+	// Asking to read messages asks for all of them.
+	f = &fakeSession{keys: []rune("i")}
+	mailReader(f, w, false)
+	if !strings.Contains(stripANSI(f.out.String()), "sekret plans") {
+		t.Errorf("Read Messages should still show an ignored message:\n%s", f.out.String())
+	}
+
+	// A fresh session (a new ctx over the same world) has ignored nothing.
+	if got := len(unreadMail(&ctx{World: w.World, handle: w.handle}, true)); got != 1 {
+		t.Errorf("a new session sees %d messages, want the ignored one back", got)
+	}
+	if got := len(w.Player().Mail); got != 1 {
+		t.Errorf("Ignore must not delete: Mail len = %d, want 1", got)
+	}
+}
+
+// Opening a reply and backing out of the editor is also a decision not to deal
+// with the message now, so it counts as ignored — the message stays in the inbox
+// but the rest of the session's turns leave it alone. Quit marks nothing.
+func TestAnAbandonedReplyCountsAsIgnored(t *testing.T) {
+	w := newWorld()
+	seedMail(w,
+		game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "sekret plans"},
+		game.Message{From: "Ashland", To: "A", When: "07/24/2026", Body: "second thoughts"},
+	)
+
+	// r, Enter (Quote Message? = Yes), Enter, Enter (the quoted line range), then
+	// abandon the editor; q at the second message.
+	f := &fakeSession{keys: []rune("r\r\r\r/Aq")}
+	mailReader(f, w, true)
+	if got := len(w.Player().Mail); got != 2 {
+		t.Fatalf("nothing was sent, so nothing should be removed; Mail len = %d, want 2", got)
+	}
+
+	f = &fakeSession{keys: []rune("ii")}
+	readTurnMail(f, w, false)
+	out := stripANSI(f.out.String())
+	if strings.Contains(out, "sekret plans") {
+		t.Errorf("the abandoned reply's message came back this session:\n%s", out)
+	}
+	if !strings.Contains(out, "second thoughts") {
+		t.Errorf("Quit marks nothing, so the message behind it should return:\n%s", out)
 	}
 }

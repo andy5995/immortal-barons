@@ -22,7 +22,9 @@ func readMessages(s session.Session, w *ctx) Result {
 	})
 	// Per-message BRE reader (Reply/Delete/Ignore/Quit). The mailbox is no longer
 	// cleared on read: Ignore keeps a message for next time, only Delete removes.
-	mailReader(s, w)
+	// Asking to read messages asks for all of them, so this one does not skip
+	// what the turn-start stop has been told to pass over.
+	mailReader(s, w, false)
 	if len(news) > 0 {
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Planetary Bulletin:"), ansi.Reset)
 		for _, b := range news {
