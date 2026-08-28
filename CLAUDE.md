@@ -231,6 +231,18 @@ to output helpers via a per-session `langSession` wrapper set in `menu.Run`, so
   included — inside it. Before calling a hand-drawn screen done, render it and
   an engine-drawn menu side by side and compare; a checklist of fixes is not
   the same as looking at the output.
+- **A screen is rendered once and written wherever it is needed.** A `Session`
+  is an `io.Writer` plus `ReadKey`, so `session.NewWriter` turns any writer into
+  one and the bulletin files are the same function that draws the player's
+  screen (`internal/menu/bulletinfiles.go`). Laying a screen out a second time
+  for a second destination gives you two copies that drift, and the one that
+  drifts first is the one nobody is looking at.
+- **A prompt whose input has ended must end the session, not return empty.**
+  Callers loop on input they cannot parse, so a swallowed `io.EOF` spins them
+  against a stream that will never produce another byte — `-reset` with no
+  terminal redrew its editor 300,616 times in five seconds before this was
+  fixed. `session.End` on any read error, as `prompt`, `promptInt` and
+  `AskRealmName` all now do.
 - **Player-visible prose is wrapped at render time, never left to the terminal.**
   Print it through `ok`/`okNoPause`/`fail` or `menu.WrapIndented` (exported for
   `internal/play`, whose onboarding runs before the menu engine); a bare
@@ -378,7 +390,13 @@ etc.); a league Coordinator broadcasts the whole ruleset over inter-BBS.
 
 **Inter-BBS ("Option A")**: file-drop `.brp` JSON packets in Inbound/Outbound
 dirs; the sysop's transport moves them; `-planetary` processes inbound, launches
-group attacks, and exports scores/news. Two ed25519 key pairs guard it: the
+group attacks, and exports scores/news. `barons-ftn` is bidirectional since
+#226 (`--in`/`--out`, private game directories behind resumable spools, attach /
+obox / BSO links per peer). It sends plain packets by default and bundles only
+when a board says `Bundled Yes`, because a board on an older release aborts its
+whole inbound run on the first ZIP it meets; the default is meant to flip once
+no such board is left (#230, and the rule above `game.Protocol`). Two ed25519
+key pairs guard it: the
 Coordinator's (`coord.key`, recorded once by hand) authorises league orders, and
 each board's own (`board.key`, published on an optional seventh roster line)
 proves which board a packet came from. A roster entry with no key is applied
@@ -391,6 +409,15 @@ type — Normal Attack / Quick Strike / Extended Battle, BRE-verified from
 a Normal Attack. **Localization**: help docs (po4a) and
 UI strings (`internal/i18n`) render in the caller's language; de/ru are seeded
 and grow via the `.po` catalogs.
+
+**Bulletin files**: `BulletinDir` in `bbs.cfg` writes the scoreboard, today's
+and yesterday's news, and a World Report as `.ans` and `.txt` for a BBS bulletin
+menu (#233). The World Report is IB's own — every attack fought anywhere in the
+league, no WMD and no terror op, drawn from a structured log that rides with the
+scores rather than from the news prose, which is randomised and translated. A
+board playing alone writes the rest but no World Report. HTML generation was
+built and removed: a template compiled into the game is one a sysop cannot
+restyle, and ANSI-to-HTML converters already exist.
 
 **Screen fidelity**: menus, tables, prompts, combat/raid reports, the four
 advisor pages, and the diplomacy screens (incoming treaty offer, View Treaties'
@@ -464,6 +491,12 @@ source (`~/src/sbbs/src/xpdoor/dropfiles.c`).
 One-line subject by default; body only for a non-obvious *why*. End with the
 `Co-Authored-By: Claude ...` trailer. Do not add any `claude.ai` session
 trailer.
+
+**Do not ask a contributor to add a ChangeLog entry when reviewing.** Every
+branch inserts at the top of the same `(in-progress:)` block, so a ChangeLog
+hunk is a guaranteed conflict between any two open PRs — it was the only
+conflict across #215, #224, #225 and #226, and cost #215 two merge commits that
+did nothing else. Andy writes the entry on trunk after the merge.
 
 ## Issue titles: no category prefix
 
