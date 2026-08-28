@@ -236,6 +236,16 @@ func TestSubjectPrefixedIgnoresAttachDirsOwnLength(t *testing.T) {
 	if !strings.Contains(advice, "point AttachDir at") {
 		t.Errorf("SubjectPrefixed advice drops the instruction to keep AttachDir matching the prefix: %v", advice)
 	}
+	// The same sentence also offers Basename as a way to shorten the
+	// subject -- that option has its own, different precondition (the
+	// mailer has to be configured to search AttachDir's own directory,
+	// since Basename's subject does not name a directory at all), and a
+	// prior version of this advice dropped that precondition too while
+	// fixing the prefix one, reading as an argument against Basename
+	// instead of a condition for it.
+	if !strings.Contains(advice, "independently configured to search AttachDir") {
+		t.Errorf("SubjectPrefixed advice drops Basename's own precondition (mailer must search AttachDir's directory itself): %v", advice)
+	}
 }
 
 func cString(b []byte) string {

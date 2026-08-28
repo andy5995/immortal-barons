@@ -104,20 +104,26 @@ func fileAttachSubject(transport Config, attached string) (string, int, error) {
 // mode where shortening AttachDir changes the subject's length. In
 // SubjectPrefixed, the subject is SubjectPrefix plus the filename --
 // AttachDir's own value never appears in it, so telling a sysop in that
-// mode to shorten AttachDir would not fix the length. But AttachDir still
-// has to be pointed at whatever directory the shortened prefix now names:
-// the file is written at AttachDir, not at the prefix, and a subject that
-// fits but no longer says where the file really is fails silently instead
-// of loudly -- worse than the length error it replaced.
+// mode to shorten AttachDir would not fix the length. Two things actually
+// do: shortening the prefix, or switching to Basename -- and each has its
+// own precondition for the RESULT to still be correct, not just short.
+// Shortening the prefix still needs AttachDir pointed at whatever
+// directory the (now shorter) prefix names, since the file is written at
+// AttachDir, not at the prefix. Basename needs the mailer independently
+// configured to search AttachDir's own directory, since the subject
+// stops naming a directory at all -- true of Basename by design, not a
+// reason to avoid it, so the wording here has to condition it on that
+// mailer-side setup rather than read as an argument against the option.
 func subjectAdvice(mode SubjectMode) string {
 	switch mode {
 	case SubjectBasename:
 		return "The filename alone does not fit, so no SubjectPath setting can shorten it"
 	case SubjectPrefixed:
-		return `Shorten the SubjectPath prefix, or switch to "SubjectPath Basename" -- the subject here is the ` +
-			`prefix plus the filename, so that is what changes its length, not AttachDir's own value. Whatever ` +
-			`the prefix ends up being, point AttachDir at the same directory it names: the file is written at ` +
-			"AttachDir, and a subject that no longer says where that is will not be found"
+		return `Shorten the SubjectPath prefix -- that is what changes the subject's length, not AttachDir's ` +
+			`own value -- and point AttachDir at the same directory the shortened prefix names, since the file ` +
+			`is written at AttachDir and a subject naming somewhere else will not be found. Switching to ` +
+			`"SubjectPath Basename" is the other way to shorten it, correct as long as the mailer is ` +
+			"independently configured to search AttachDir's own directory instead of reading it from the subject"
 	}
 	return `Set AttachDir in ftn.cfg to a shorter directory -- with SubjectPath left on its default ` +
 		`("Absolute"), the subject is AttachDir's own path plus the filename, so this is what actually ` +
