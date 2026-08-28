@@ -114,6 +114,16 @@ func fileAttachSubject(transport Config, attached string) (string, int, error) {
 // stops naming a directory at all -- true of Basename by design, not a
 // reason to avoid it, so the wording here has to condition it on that
 // mailer-side setup rather than read as an argument against the option.
+//
+// That precondition is not always satisfiable, and the mailer this whole
+// advice exists because of is the concrete case: SBBSecho has no
+// attachment search path at all -- it takes the directory straight from
+// the Subject and chdirs to the ctrl directory at startup, so a bare
+// filename is looked for there and reported not found
+// (sbbsecho.c:5944; .claude/skills/ftn/SKILL.md, "A bare filename is not
+// searched for"). Basename is still offered here because some mailers do
+// support it, but a sysop on SBBSecho specifically needs to be told it
+// will not work for them, not left to discover that by trying it.
 func subjectAdvice(mode SubjectMode) string {
 	switch mode {
 	case SubjectBasename:
@@ -122,8 +132,9 @@ func subjectAdvice(mode SubjectMode) string {
 		return `Shorten the SubjectPath prefix -- that is what changes the subject's length, not AttachDir's ` +
 			`own value -- and point AttachDir at the same directory the shortened prefix names, since the file ` +
 			`is written at AttachDir and a subject naming somewhere else will not be found. Switching to ` +
-			`"SubjectPath Basename" is the other way to shorten it, correct as long as the mailer is ` +
-			"independently configured to search AttachDir's own directory instead of reading it from the subject"
+			`"SubjectPath Basename" is the other way to shorten it, correct only if the mailer is ` +
+			`independently configured to search AttachDir's own directory instead of reading it from the ` +
+			"subject -- not every mailer supports that; SBBSecho, for one, has no such search path at all"
 	}
 	return `Set AttachDir in ftn.cfg to a shorter directory -- with SubjectPath left on its default ` +
 		`("Absolute"), the subject is AttachDir's own path plus the filename, so this is what actually ` +

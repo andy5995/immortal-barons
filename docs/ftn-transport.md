@@ -155,8 +155,14 @@ persistent spool directory instead.
 `SubjectPath Basename` shortens the Subject further, to only
 `7PRK0001.BRP`, but it is correct only when the mailer is independently
 configured to search the same directory named by `AttachDir`. `barons-ftn`
-cannot infer or configure that mailer search path. BSO flow files and oboxes do
-not use a Type-2 Subject, so the 71-byte limit applies only to `Attach` links.
+cannot infer or configure that mailer search path, and not every mailer has
+one to configure — SBBSecho does not: it takes the directory straight from
+the Subject with no attachment search path at all, so a bare filename is
+looked for in its ctrl directory and reported not found. `Basename` is not a
+usable option on SBBSecho for this reason; use `AttachDir` (or an absolute
+`SubjectPath` prefix naming the same directory) instead. BSO flow files and
+oboxes do not use a Type-2 Subject, so the 71-byte limit applies only to
+`Attach` links.
 
 ### Per-peer links
 

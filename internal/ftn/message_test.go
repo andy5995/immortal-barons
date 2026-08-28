@@ -246,6 +246,15 @@ func TestSubjectPrefixedIgnoresAttachDirsOwnLength(t *testing.T) {
 	if !strings.Contains(advice, "independently configured to search AttachDir") {
 		t.Errorf("SubjectPrefixed advice drops Basename's own precondition (mailer must search AttachDir's directory itself): %v", advice)
 	}
+	// SBBSecho -- the mailer #231 itself was about -- has no attachment
+	// search path at all (.claude/skills/ftn/SKILL.md, "A bare filename is
+	// not searched for"; sbbsecho.c:5944), so Basename's precondition is
+	// never satisfiable there. Naming that concretely, rather than only
+	// stating the precondition in the abstract, is what tells a sysop on
+	// that specific mailer not to bother trying it.
+	if !strings.Contains(advice, "SBBSecho") {
+		t.Errorf("SubjectPrefixed advice does not name SBBSecho as a mailer Basename cannot work for: %v", advice)
+	}
 }
 
 func cString(b []byte) string {
