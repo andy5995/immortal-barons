@@ -237,6 +237,32 @@ like"](ftn-transport.md#what-a-healthy-spool-looks-like) explains why a growing
 number of waiting snapshots is often a working transport with one unreachable
 peer.
 
+### Bundles collecting in the transport inbound
+
+`.BRP` files piling up in the transport's `InboundDir` while `--status` reports
+nothing pending is a specific fault, and not the one it looks like. The
+transport has not stalled and `--in` is running. It is reading those files,
+recognising them, and passing over them on every run.
+
+Look at one:
+
+```
+unzip -p /path/to/inbound/NNNNCCCC.BRP manifest.json
+```
+
+`"delivery": "attach"` is the case. An attach bundle is claimed only alongside
+the `.msg` envelope that names it, and `--in` waits for that envelope rather
+than opening the bundle on its own. If this board's mail system never leaves a
+`.msg` file where `barons-ftn` reads them — Mystic tosses netmail into its own
+message bases and leaves none — the envelope never appears and the wait never
+ends. Nothing warns, on either board: the sender's logs report a clean handoff.
+
+The fix is on the sending board, which has to reach this one by `Obox` or `BSO`
+instead. A peer with no `Link` line of its own sends `Attach`, so an `ftn.cfg`
+with no links at all produces exactly this.
+[Per-peer links](ftn-transport.md#per-peer-links) has the modes and what each
+one asks of the receiver.
+
 ### What a run tells you
 
 `--out` bundles and hands off; `--in` receives, unwraps and routes. Both print

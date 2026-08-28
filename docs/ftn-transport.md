@@ -186,6 +186,25 @@ The modes are:
   must be the exact root for that address's zone; `barons-ftn` does not guess
   domain-to-zone mappings.
 
+**A link mode has to be one the peer can receive.** It describes a handoff
+between two boards, so the mode you send with is only half of it:
+
+- `Attach` requires the receiving board's mail system to leave the `.msg`
+  envelope as a file where `barons-ftn --in` can read it — its
+  `InboundNetmailDir`, which defaults to `InboundDir`. Synchronet with SBBSecho
+  does that. **Mystic does not**: it tosses netmail into its own message bases
+  and leaves no `.msg` file behind, so a Mystic board can never claim an attach.
+  Reach a Mystic peer with `Obox` or `BSO`.
+- `Obox` and `BSO` need nothing of the receiver but its mailer, since the bundle
+  arrives as an ordinary file in the inbound.
+
+A board sent an attach it cannot claim does not refuse it. The bundle stays in
+its inbound and is skipped on every run, with no warning on either side, while
+the sender's own logs report a clean handoff. Since a peer with no `Link` line
+of its own uses `Attach`, an `ftn.cfg` carrying no links at all cannot reach a
+Mystic board — which is how this was found on a three-board test rig, after 30
+bundles had collected.
+
 BSO flavours are `Immediate`, `Continuous` (also accepted as `Crash`),
 `Direct`, `Normal`, and `Hold`; `Normal` is the default. A point address uses
 the standard `<net><node>.pnt/<point>.?lo` layout automatically.
@@ -487,6 +506,7 @@ quiet — see [Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md).
 | BSO `.?lo` | The mailer has not successfully sent the referenced bundle | Check peer address, password, route, and `.bsy` |
 | peer obox | The mailer has not sent or acknowledged the file | Check the peer session and outbox mapping |
 | transport `InboundDir` | `--in` did not run, ran before receive completion, or rejected the wrapper | Run it after the session and read warnings |
+| transport `InboundDir`, only `.BRP` files, `--status` says nothing pending | They are attach bundles whose `.msg` envelope never arrives here — see [Per-peer links](#per-peer-links) | `unzip -p FILE manifest.json` to confirm `"delivery": "attach"`; have the sender switch that link to `Obox` or `BSO` |
 | `ftn-spool/in` | Local publication or transit handoff is incomplete | Correct the named target; the next `--in` resumes it |
 | game `Inbound` | `-planetary` has not applied the unwrapped packets | Run `immortal-barons -planetary` |
 | `ftn-spool/bad` | An outbound packet was malformed/unroutable, or an inbound bundle contained a rejected member | Preserve it for diagnosis; correct the producing board, route, league, or roster |
