@@ -1,6 +1,7 @@
 package menu
 
 import (
+	"regexp"
 	"strings"
 	"testing"
 
@@ -174,11 +175,17 @@ func TestSetIndustriesStopsAskingOnceFullyAllocated(t *testing.T) {
 	if !strings.Contains(out, "Troopers") {
 		t.Fatalf("the production walk never started:\n%s", out)
 	}
-	if strings.Count(out, "Jets") > 1 { // once in the report table, never as a prompt
+	// Jets appears in both drawings of the table but never as a prompt: a
+	// prompt is the label followed by its "(current; remaining)" range.
+	if regexp.MustCompile(`Jets\s*\(\s*\d+;`).MatchString(out) {
 		t.Errorf("Jets was still prompted for with 0%% left:\n%s", out)
 	}
-	if !strings.Contains(out, "remaining types are set to 0%") {
-		t.Errorf("no notice that the rest were zeroed:\n%s", out)
+	// The redisplayed table is what says the rest were zeroed (no notice line).
+	if tables := strings.Count(out, "[Industrial Production]"); tables != 2 {
+		t.Errorf("the table was drawn %d time(s); want 2, before and after the walk:\n%s", tables, out)
+	}
+	if !strings.Contains(out[strings.LastIndex(out, "[Industrial Production]"):], "Jets            :   0%") {
+		t.Errorf("the redrawn table does not show Jets zeroed:\n%s", out)
 	}
 	if p := w.Player(); p.ProdTroopers != 100 || p.ProdJets != 0 {
 		t.Errorf("ProdTroopers = %d, ProdJets = %d; want 100 and 0", p.ProdTroopers, p.ProdJets)

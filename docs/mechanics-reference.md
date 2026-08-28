@@ -3117,6 +3117,10 @@ purpose:
   Enter wipes the allocation; IB suggests the unit's **current** % instead, so Enter
   leaves it unchanged. Both cap the running total at 100% via a shrinking max (the
   remainder becomes gold). The order and per-unit prompt otherwise match BRE.
+  IB then **redraws the table and pauses** rather than printing a line saying the
+  percentages were updated: the new figures are the confirmation, and the rows the
+  walk stopped short of show their own zeros. Whether BRE redraws here is not
+  established — the capture in `docs/dev/bre-screens.md` ends at the prompts.
 - **The picker can address all allies.** On top of BRE's letters and `Z`, IB
   adds `*`, which toggles every realm the sender holds a standing treaty with, of
   any type (Enemy is a relation, not a treaty, so an enemy is never included).

@@ -58,15 +58,14 @@ func industryRule() string {
 	return closingRule(industryAccent, industryRuleWidth)
 }
 
-// setIndustries lets the player set the percentage of Industrial production
-// points spent on each unit type. Percentages need not sum to 100; capacity not
-// allocated to units is paid out as gold (BRE's trade-off — see industrialGold).
-func setIndustries(s session.Session, w *ctx) Result {
-	p := w.Player()
+// drawIndustry renders the Industrial Production box. It is separate from the
+// flow below because the screen is shown again once the walk has set the new
+// percentages: the table with the new figures in it is the confirmation, so
+// there is no "updated" line to read past.
+func drawIndustry(s session.Session, w *ctx, p *game.Empire, rows []prodRow) {
 	proj := w.ProjectedProduction(p)
 	fmt.Fprintf(s, "\n%s\n", titleRule(industryAccent, tr(s, "Industrial Production"), industryRuleWidth))
 	allocated := 0
-	rows := prodRows()
 	for i, row := range rows {
 		pct := *row.field(p)
 		allocated += pct
@@ -92,6 +91,15 @@ func setIndustries(s session.Session, w *ctx) Result {
 			ansi.FgBrightCyan, gold, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", industryRule())
+}
+
+// setIndustries lets the player set the percentage of Industrial production
+// points spent on each unit type. Percentages need not sum to 100; capacity not
+// allocated to units is paid out as gold (BRE's trade-off — see industrialGold).
+func setIndustries(s session.Session, w *ctx) Result {
+	p := w.Player()
+	rows := prodRows()
+	drawIndustry(s, w, p, rows)
 	if !AskYesNo(s, "Change Production?", false) {
 		return Stay
 	}
@@ -116,7 +124,6 @@ func setIndustries(s session.Session, w *ctx) Result {
 		// answer is 0 is a dead question, so stop the walk and leave the rest of
 		// ns at its zero value.
 		if remaining == 0 {
-			okNoPause(s, "All production is allocated; the remaining types are set to 0%%.")
 			break
 		}
 		cur := *row.field(p)
@@ -136,7 +143,8 @@ func setIndustries(s session.Session, w *ctx) Result {
 		fail(s, err)
 		return Stay
 	}
-	ok(s, "Industry production percentages updated.")
+	drawIndustry(s, w, w.Player(), rows)
+	pause(s)
 	return Stay
 }
 
