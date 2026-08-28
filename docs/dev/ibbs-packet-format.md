@@ -348,7 +348,7 @@ an actual choice between more than one origin, for auditability.
 
 A packet that fails to parse as JSON is moved aside into `bad/`
 (`BadDir`) instead of aborting the run — see "Quarantined packets" in
-`docs/inter-bbs.md` for the sysop-facing behavior (the grace period for
+`docs/inter-bbs-troubleshooting.md` for the sysop-facing behavior (the grace period for
 an in-flight transfer, the cap on same-named copies, and why nothing
 empties the directory automatically).
 

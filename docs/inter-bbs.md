@@ -535,109 +535,13 @@ The keywords are there because a file read by position gives no warning when a
 line is missing: every value below the gap moves up one and is read as the wrong
 setting.
 
-## Troubleshooting
+## When packets stop arriving
 
-When packets stop arriving, look in two places, in this order: the game's own
-log, then your mailer's.
-
-### The game's log
-
-Every `-planetary` run prints its transport faults when it finishes, and writes
-the same lines to `planetary.log` in your data directory, each one stamped with
-the date and time. Most sysops run the step from a scheduler, which throws
-printed output away, so the file is usually the only copy you have. It keeps the
-last 500 lines.
-
-These are the faults it records:
-
-- **A packet was destroyed.** Either no board of that name is on your roster, or
-  it was passed from board to board 25 times and never reached anyone. The
-  second one means a `HOST` line points back the way the packet came, so the
-  route is a circle.
-- **Nothing can be sent to a board.** Same cause, found before anything is
-  written: that board is not on the roster, so this board has no route to it.
-  Anything addressed there is discarded here.
-- **A packet was refused.** The line says why. A packet that did not match the
-  sending board's key, a board running an older release than the league
-  requires, or Coordinator orders that failed one of the six checks — those are
-  the three, and the wording names which one.
-- **Another board refused ours**, quoting that board's own reason.
-- **Packets from a board are being held.** See below.
-- **A packet could not be read and was quarantined.** See "Quarantined
-  packets" below.
-- **The order a contested batch applied in**, whenever more than one board's
-  packets arrived in the same run — this is the line to check first if two
-  boards disagree about which of them a trade bid or land claim actually
-  reached first.
-
-### Held packets
-
-A packet whose format this build cannot read is moved to the `held` folder in
-your data directory instead of being refused. Refusing would destroy a roster
-update, mail, or a returning strike that will be perfectly good once both boards
-run the same release.
-
-Every planetary run looks in that folder again and applies whatever it can now
-read. Whether that ever happens depends on which side of the upgrade you are
-on, and the difference matters:
-
-- **You are behind.** The other board upgraded first, so its packets state a
-  format newer than yours. Upgrading releases them: your next planetary run
-  reads the folder, finds them readable, and applies the backlog with nobody
-  doing anything. Leave the files alone.
-- **You are ahead.** You upgraded first, so packets from boards still on the
-  old release state a format older than yours. Those are held too, and your
-  build will never speak that older format again — so they stay held even after
-  the other boards upgrade. What they contained is not lost from disk, but it
-  will not reach your game on its own.
-
-The second case is the one to plan around, because the cost falls on whoever
-upgrades first, which is the opposite of what you would expect. When a release
-changes the packet format, the guide for that release says so. Agree a window
-with your Coordinator and upgrade close together, so nothing spends long in
-flight between two boards that disagree.
-
-### Quarantined packets
-
-A file that cannot even be parsed — corrupt JSON, a truncated transfer, or a
-foreign file dropped in the wrong directory — is moved to the `bad` folder
-in your data directory instead of blocking the rest of the batch. Unlike
-`held`, nothing here is expected to become readable later on its own:
-planetary runs never look in `bad` again, and a repaired copy has to be
-dropped back into your inbound directory by hand.
-
-A file young enough that it might still be mid-transfer — a mailer that
-writes straight to the final name rather than a temp-then-rename dance — is
-left alone for five minutes before it is ever quarantined, so a run that
-happens to land mid-write does not permanently lose a packet that would
-have applied cleanly on the next one.
-
-A second file quarantined under the same name (a mailer retrying a bad
-transfer, say) is kept as its own numbered copy rather than overwriting the
-first. If a neighbour's transport keeps redelivering one broken file
-without limit, `bad` stops accepting new copies of it past roughly a
-thousand and the planetary run's log says so — clearing the folder of
-copies you have already looked at is a sysop task; nothing does it for you.
-
-### Nothing in the log, and still nothing arriving
-
-Then the packet never reached your inbound directory, and the fault is in the
-half you own. Three things to check:
-
-Your **Inbound Dir** setting has to name the directory your mailer really writes
-to. If it names a different one, the game reads an empty directory and reports
-nothing, because an empty inbound is also what a quiet day looks like.
-
-Your mailer has to be running and linked. "Step 5 — prove the link" below polls
-each board from the other and reads the result properly; a session that connects
-and transfers nothing is the answer you want.
-
-If you hand packets to FidoNet, writing the netmail is not sending it. See
-"Writing the netmail is not sending it" under "Optional FTN handoff" — a `.msg`
-still sitting in your netmail directory means the game did its part.
-
-The in-game **Travel Times** screen is where players see this first. A planet
-whose round trip stops moving is the same fault, seen from the other end.
+[Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md) is the guide for a
+league that has stopped moving: what each counter in a `-planetary` run report
+means, what the game's log records, what to do about held, quarantined and
+refused packets, and the checks a League Coordinator has that a member board
+does not.
 
 ## Optional FTN handoff
 
@@ -854,14 +758,12 @@ Nothing schedules this. Run it when you decide the season is over.
 
 ### League reports
 
-Three commands write a report into the data directory. None of them changes the
-game; each is built from what packets have already told this board.
-
-| Command | Writes | Shows |
-|---|---|---|
-| `-lastpacket` | `LASTPACKET.LST` | when a packet from each board was last processed here — how you spot a board that has gone quiet |
-| `-bbsinfo` | `BBSINFO.LST` | every board, when it was last heard from, and the version it runs |
-| `-playerlist` | `PLAYERLIST.LST` | every realm on every board (Coordinator only) |
+`-lastpacket`, `-bbsinfo` and `-playerlist` each write a `.LST` report into the
+data directory, built from what packets have already told this board. None of
+them changes the game. They are what you reach for when a board goes quiet —
+[Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md#finding-the-board-that-went-quiet)
+says which answers what, and [Command Reference](command-reference.md) has the
+detail.
 
 ## Example: a two-board league, step by step
 
@@ -1079,8 +981,10 @@ should then say **"The League Coordinator updated the league settings."** If
 instead the member board's `planetary.log` says a packet "claimed to carry
 League Coordinator orders and was refused", the rest of that line names the
 check that failed — six different situations refuse a packet, and three of them
-are on the sending board rather than this one. Run `-league-check` on both
-boards before changing anything.
+are on the sending board rather than this one ([Inter-BBS
+Troubleshooting](inter-bbs-troubleshooting.md#refused-packets) has all six and
+which side fixes each). Run `-league-check` on both boards before changing
+anything.
 
 One fault it cannot see: a key that is well-formed but simply the wrong one.
 If both boards pass the check and orders are still refused, compare the two

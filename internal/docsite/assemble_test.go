@@ -15,6 +15,7 @@ func writeFixture(t *testing.T, root string) {
 		"docs/playing.md":                             "# Playing\n\nHow to play.\n",
 		"docs/door-setup.md":                          "# Door Setup\n\nSetup. See [leagues](docs/inter-bbs.md).\n",
 		"docs/inter-bbs.md":                           "# Inter-BBS Leagues\n\nLeague play.\n",
+		"docs/inter-bbs-troubleshooting.md":           "# Inter-BBS Troubleshooting\n\nWhen packets stop arriving.\n",
 		"docs/ftn-transport.md":                       "# FTN Transport\n\nTransport setup.\n",
 		"docs/command-reference.md":                   "# Command Reference\n\nAll options.\n",
 		"docs/download.md":                            "# Download\n\nReleases and snapshots.\n",
@@ -53,19 +54,20 @@ func TestAssembleLayout(t *testing.T) {
 	}
 
 	must := []string{
-		"site-src/en/index.md",                    // README -> Home
-		"site-src/en/guide/index.md",              // playing -> Guide intro
-		"site-src/en/guide/economy/regions.md",    // help topic
-		"site-src/en/guide/controls/interface.md", // help topic
-		"site-src/en/door-setup/index.md",         // door setup (was sysop guide)
-		"site-src/en/inter-bbs/index.md",          // inter-BBS leagues, split out of door setup
-		"site-src/en/ftn-transport/index.md",      // detailed FTN transport guide
-		"site-src/en/command-reference/index.md",  // command reference (#34)
-		"site-src/en/download/index.md",           // download page
-		"site-src/en/faq/index.md",                // faq
-		"site-src/en/translating/index.md",        // translating guide
-		"site-src/en/developers/packets.md",       // dev doc (en only)
-		"site-src/de/guide/economy/regions.md",    // translated topic
+		"site-src/en/index.md",                           // README -> Home
+		"site-src/en/guide/index.md",                     // playing -> Guide intro
+		"site-src/en/guide/economy/regions.md",           // help topic
+		"site-src/en/guide/controls/interface.md",        // help topic
+		"site-src/en/door-setup/index.md",                // door setup (was sysop guide)
+		"site-src/en/inter-bbs/index.md",                 // inter-BBS leagues, split out of door setup
+		"site-src/en/inter-bbs-troubleshooting/index.md", // its troubleshooting half, split out again
+		"site-src/en/ftn-transport/index.md",             // detailed FTN transport guide
+		"site-src/en/command-reference/index.md",         // command reference (#34)
+		"site-src/en/download/index.md",                  // download page
+		"site-src/en/faq/index.md",                       // faq
+		"site-src/en/translating/index.md",               // translating guide
+		"site-src/en/developers/packets.md",              // dev doc (en only)
+		"site-src/de/guide/economy/regions.md",           // translated topic
 		"mkdocs.yml",
 	}
 	for _, rel := range must {

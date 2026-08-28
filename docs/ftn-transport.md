@@ -474,6 +474,10 @@ mesh; describe that star with `HOST` lines instead.
 
 ## Troubleshooting by file location
 
+This table is about the transport. When the question is the game's — a packet
+that arrived and was refused, held, or quarantined, or a board that has gone
+quiet — see [Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md).
+
 | Where files accumulate | Meaning | Action |
 |---|---|---|
 | game `Outbound` | `--out` did not run or cannot take `game.lock` | Run `barons-ftn --out`; read its error |

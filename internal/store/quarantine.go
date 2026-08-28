@@ -13,7 +13,7 @@ import (
 // wrong directory. Unlike HeldDir, nothing here is expected to become
 // readable later on its own: it stays for a sysop to look at, and
 // releaseHeld never touches it. Nothing empties it automatically — see
-// docs/inter-bbs.md's "Quarantined packets" section.
+// docs/inter-bbs-troubleshooting.md's "Quarantined packets" section.
 const BadDir = "bad"
 
 // quarantineGrace is how long a file that fails to parse is left alone

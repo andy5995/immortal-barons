@@ -28,17 +28,18 @@ type linker struct {
 // to its English path) to its language-relative site path.
 func newLinker(repoRoot string, enTopics []topic) *linker {
 	m := map[string]string{
-		"README.md":                 "index.md",
-		"docs/playing.md":           "guide/index.md",
-		"docs/door-setup.md":        "door-setup/index.md",
-		"docs/inter-bbs.md":         "inter-bbs/index.md",
-		"docs/ftn-transport.md":     "ftn-transport/index.md",
-		"docs/charset.md":           "charset/index.md",
-		"docs/command-reference.md": "command-reference/index.md",
-		"docs/download.md":          "download/index.md",
-		"docs/faq.md":               "faq/index.md",
-		"docs/manual-vs-code.md":    "manual-vs-code/index.md",
-		"docs/translating.md":       "translating/index.md",
+		"README.md":                         "index.md",
+		"docs/playing.md":                   "guide/index.md",
+		"docs/door-setup.md":                "door-setup/index.md",
+		"docs/inter-bbs.md":                 "inter-bbs/index.md",
+		"docs/inter-bbs-troubleshooting.md": "inter-bbs-troubleshooting/index.md",
+		"docs/ftn-transport.md":             "ftn-transport/index.md",
+		"docs/charset.md":                   "charset/index.md",
+		"docs/command-reference.md":         "command-reference/index.md",
+		"docs/download.md":                  "download/index.md",
+		"docs/faq.md":                       "faq/index.md",
+		"docs/manual-vs-code.md":            "manual-vs-code/index.md",
+		"docs/translating.md":               "translating/index.md",
 	}
 	for _, t := range enTopics {
 		m["internal/help/content/"+t.relPath] = "guide/" + t.relPath
