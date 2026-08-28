@@ -219,6 +219,15 @@ func advisorReport(s session.Session, d advisorData, dom advisorDomain) []adviso
 		if p.Carriers*100 < p.Jets {
 			add(tr(s, "We have more {jets} than our {carriers} can carry. Build more {carriers}."))
 		}
+		mtn := game.MountainIndustryPercent(p.Regions)
+		switch {
+		case p.Regions.Mountain == 0:
+			add(tr(s, "We hold no {mountain} regions. Their ore would speed the foundries; without it our factories build at plain rate."))
+		case mtn >= game.MountainIndustryCapPct:
+			add(fmt.Sprintf(tr(s, "Our {mountain} regions have the foundries at their limit, %d%% of normal unit output."), mtn))
+		default:
+			add(fmt.Sprintf(tr(s, "Our {mountain} regions build our units at %d%% of normal output. It is their share of the realm that sets this, so buying land elsewhere thins the gain."), mtn))
+		}
 		add(fmt.Sprintf(tr(s, "Troop morale stands at %d%%."), p.Morale))
 		if p.Morale < 50 {
 			warn(tr(s, "Morale is low. Desertion is a real risk before our next battle."))

@@ -213,6 +213,14 @@ func industryMountainBoost(r RegionMix) (num, den int) {
 	return total + MountainIndustryNum*r.Mountain, total
 }
 
+// MountainIndustryPercent reports industryMountainBoost as a whole percent, for
+// the Military advisor to quote. Display only — production itself uses the
+// exact fraction.
+func MountainIndustryPercent(r RegionMix) int {
+	num, den := industryMountainBoost(r)
+	return (num*100 + den/2) / den
+}
+
 // ProjectedProduction computes the units e would manufacture this turn at its
 // current Industrial regions, percentages, and specialization — without
 // applying them. Order matches the Set Industries screen: Troopers, Jets,
