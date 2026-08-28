@@ -1,8 +1,6 @@
 (in-progress:)
-  * bbs.cfg gained BulletinDir, and optional BBSName and BoardURL for what the
-    bulletin pages call the board and link it to
   * The scoreboard, the day's news and a new World Report are written out as
-    .ans, .txt and coloured .html files for a BBS bulletin menu or website
+    .ans and .txt files for a BBS bulletin menu, set by BulletinDir in bbs.cfg
   * The World Report lists every attack fought anywhere in the league, and
     travels with the scores so each board sees them all
   * Travel Times no longer shows the same round trip as "60 minutes" on one row

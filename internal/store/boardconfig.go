@@ -36,8 +36,6 @@ const (
 	keyLink     = "Link"
 	keyLottery  = "Lottery"
 	keyBulletin = "BulletinDir"
-	keyBoardURL = "BoardURL"
-	keyBBSName  = "BBSName"
 )
 
 // boolWord maps the words a sysop is likely to write to what ParseBool takes.
@@ -97,10 +95,6 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 			cfg.OutboundDir = value
 		case strings.EqualFold(key, keyBulletin):
 			cfg.BulletinDir = value
-		case strings.EqualFold(key, keyBoardURL):
-			cfg.BoardURL = value
-		case strings.EqualFold(key, keyBBSName):
-			cfg.BBSName = value
 		case strings.EqualFold(key, keyLottery):
 			if b, err := strconv.ParseBool(boolWord(value)); err == nil {
 				cfg.Lottery = b
@@ -150,21 +144,9 @@ func BoardConfigText(cfg game.Config) string {
 
 	b.WriteString("# Where the game writes its bulletin files: the scoreboard, today's and\n")
 	b.WriteString("# yesterday's news, and the world report of the league's battles. Each is\n")
-	b.WriteString("# written three times -- .ans with colour and .txt without, for a BBS\n")
-	b.WriteString("# bulletin menu, and .html for a board that publishes on the web. Leave\n")
-	b.WriteString("# it blank to write none.\n")
+	b.WriteString("# written twice, with colour (.ans) and without (.txt), for a BBS to\n")
+	b.WriteString("# show on its own bulletin menu. Leave it blank to write none.\n")
 	fmt.Fprintf(&b, "%s %s\n\n", keyBulletin, cfg.BulletinDir)
-
-	b.WriteString("# What this BBS calls itself. Only used on the bulletin pages, and only\n")
-	b.WriteString("# if you write it: the game has no way to ask the BBS its own name, and\n")
-	b.WriteString("# the planet name above need not be it. Left out, the pages use the\n")
-	b.WriteString("# planet name.\n")
-	fmt.Fprintf(&b, "%s %s\n\n", keyBBSName, cfg.BBSName)
-
-	b.WriteString("# This BBS's own website, if it has one. The bulletin pages above link\n")
-	b.WriteString("# their heading to it, so a reader who finds one can get back to the\n")
-	b.WriteString("# board. Leave it blank and the heading is plain text.\n")
-	fmt.Fprintf(&b, "%s %s\n\n", keyBoardURL, cfg.BoardURL)
 
 	b.WriteString("# Whether this board offers the Queen's lottery: a six-letter ticket,\n")
 	b.WriteString("# once a day, for 5,000 gold. Yes or no; the league does not decide it\n")

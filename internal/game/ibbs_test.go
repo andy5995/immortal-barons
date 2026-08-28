@@ -1036,8 +1036,6 @@ var perBoardConfigFields = map[string]string{
 	"OutboundDir":     "packet path, this machine's business",
 	"OutboundDirs":    "per-neighbour packet paths on this machine",
 	"BulletinDir":     "where this board writes its own bulletin files, a path on this machine",
-	"BoardURL":        "this BBS's own website, linked from its bulletin pages",
-	"BBSName":         "what this BBS calls itself, which need not be its planet name",
 	"LeagueNumber":    "which league this board belongs to",
 	"IBBS":            "whether this board plays in a league at all",
 	"IdleTimeoutSecs": "when to boot a silent caller and free the world lock",

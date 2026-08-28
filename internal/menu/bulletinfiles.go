@@ -28,9 +28,8 @@ import (
 
 // bulletinRender is one bulletin: the file's base name and how to draw it.
 type bulletinRender struct {
-	base  string
-	title string // the page title; the screens carry their own headings
-	draw  func(s session.Session, w *ctx)
+	base string
+	draw func(s session.Session, w *ctx)
 }
 
 // WriteBulletins draws every bulletin file for this board. A blank directory
@@ -57,33 +56,21 @@ func WriteBulletins(w *game.World, dir string) []error {
 	}
 	c := &ctx{World: w, Term: Term{UTF8: true}, day: day}
 	bulletins := []bulletinRender{
-		{"scores", "Scores", func(s session.Session, c *ctx) { printScores(s, c) }},
-		{"tdynews", "Today's News", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, true) }},
-		{"yesnews", "Yesterday's News", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, false) }},
+		{"scores", func(s session.Session, c *ctx) { printScores(s, c) }},
+		{"tdynews", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, true) }},
+		{"yesnews", func(s session.Session, c *ctx) { writeNewsBulletin(s, c, false) }},
 	}
 	// The World Report is the LEAGUE's wars. A board that plays alone has no
 	// world to report on, and a page headed "World Report" listing one planet's
 	// skirmishes would promise something the board does not have.
 	if w.Config.InterBBSEnabled() {
-		bulletins = append(bulletins, bulletinRender{"world", "World Report", writeWorldReport})
+		bulletins = append(bulletins, bulletinRender{"world", writeWorldReport})
 	}
 	var errs []error
 	for _, b := range bulletins {
 		var buf bytes.Buffer
 		b.draw(session.NewWriter(&buf), c)
 		if err := writeBulletinPair(dir, b.base, buf.Bytes()); err != nil {
-			errs = append(errs, err)
-		}
-		// The page is made from the SAME screen, so the three files can never
-		// show a different bulletin from one another.
-		// The BBS's own name if the sysop wrote one, otherwise the planet's: the
-		// game cannot ask the BBS what it is called, so this is the only way it
-		// can know, and a board that never sets it still names itself.
-		name := c.Config.BBSName
-		if name == "" {
-			name = c.Config.BoardID
-		}
-		if err := writeBulletinHTML(dir, b.base, b.title, name, c.Config.BoardURL, buf.Bytes()); err != nil {
 			errs = append(errs, err)
 		}
 	}

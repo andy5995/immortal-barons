@@ -263,15 +263,6 @@ type Config struct {
 	// display. Machine-local like the packet directories, so it lives in bbs.cfg
 	// rather than the league's shared rules; blank writes none (#233).
 	BulletinDir string `json:"-"`
-	// BoardURL is this BBS's own website, linked from the bulletin pages so a
-	// reader who arrives at one can find the board it came from. Machine-local
-	// like the paths around it, and blank for a board with no site (#233).
-	BoardURL string `json:"-"`
-	// BBSName is the BBS's own name, which is not always its name in a league:
-	// BoardID is the planet, and a board may call itself something else. Used on
-	// the bulletin pages when set and ignored when not, so a sysop who does not
-	// care never has to write the line (#233).
-	BBSName string `json:"-"`
 
 	// Lottery is whether this board offers the Queen's lottery, default on. It
 	// lives in bbs.cfg with the settings above for the reason the original keeps
