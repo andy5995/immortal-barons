@@ -6,8 +6,9 @@ import (
 	"testing"
 )
 
-// A Synchronet install's data directory is fixed at xtrn/<door>/data -- the
-// sysop cannot shorten it. #226's default attach spool (dataDir/ftn-spool/
+// A Synchronet door conventionally sits at <sbbs>/xtrn/<door>/data, which the
+// sysop can place anywhere but which the usual layout nests deep -- and either
+// way it is not ours to shorten. #226's default attach spool (dataDir/ftn-spool/
 // attach) spent enough of the fixed Type-2 Subject budget that a board which
 // published before #226 stopped publishing entirely after it, with no config
 // change of its own: captured live on a three-board rig (#231), the resulting

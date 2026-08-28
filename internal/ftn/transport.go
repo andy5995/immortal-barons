@@ -27,9 +27,11 @@ const (
 	badSpoolDir = "bad"
 	// attachSpool is short (#231): the path it forms part of counts against
 	// the 70-byte FTN Type-2 Subject field, and dataDir itself is often
-	// already most of that budget on a Synchronet install, where a door's
-	// data directory is a fixed xtrn/<door>/data path the sysop cannot
-	// shorten. A sysop who still doesn't fit after this has AttachDir,
+	// already most of that budget -- a Synchronet door conventionally sits
+	// at <sbbs>/xtrn/<door>/data, which the sysop can place anywhere but
+	// which the usual layout nests several levels deep. Whatever a sysop
+	// chooses, this package has no say in it, so the suffix it does control
+	// stays short. One who still doesn't fit after this has AttachDir,
 	// which is a real directory choice rather than a fixed name this
 	// package controls.
 	attachSpool   = "att"

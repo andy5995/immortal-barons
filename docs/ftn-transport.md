@@ -599,10 +599,9 @@ without coordinating an exact cutover minute.
 Before step 5, an `Attach` link with no `AttachDir` set gets one that lives
 under the data directory (see [Stored-message attach
 settings](#stored-message-attach-settings)) — a board whose data directory is
-already deep, most notably a Synchronet install (`xtrn/<door>/data` is fixed,
-not something the sysop can shorten), can lose all its Subject margin to that
-alone and publish nothing on the first `--out`, with no config change of its
-own. If `--out` fails immediately with an `attachment subject ... is N bytes`
+already deep, as a Synchronet door is under the usual `<sbbs>/xtrn/<door>/data`
+layout, can lose all its Subject margin to that alone and publish nothing on
+the first `--out`, with no config change of its own. If `--out` fails immediately with an `attachment subject ... is N bytes`
 error, set `AttachDir` to a short, persistent directory outside the data tree
 per [Keeping attach subjects short](#keeping-attach-subjects-short) — check
 this **before** enabling step 5 on any board that used `Attach` links prior to
