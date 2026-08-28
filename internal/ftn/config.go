@@ -38,8 +38,11 @@ const (
 type Config struct {
 	NetmailDir string
 	Binkley    bool
-	// AttachDir overrides the fido child of each outbound directory as the
-	// place claimed packets are moved to. Empty keeps the per-outbound child.
+	// AttachDir is where a claimed packet is written for an Attach or BSO
+	// link. Empty defaults to attachmentDirectory's own default (dataDir's
+	// att child, see transport.go) -- this field no longer has any notion
+	// of a per-outbound-directory child; that was retired with the
+	// bundled transport (#231).
 	AttachDir     string
 	SubjectMode   SubjectMode
 	SubjectPrefix string
@@ -99,18 +102,6 @@ type Link struct {
 	// so the board-wide posture below can supply the answer for links that do
 	// not state one.
 	RawSet bool
-}
-
-// fidoSubdir is the child of an outbound directory that claimed packets are
-// moved into when AttachDir is unset.
-const fidoSubdir = "fido"
-
-// attachPath is where a claimed packet is written on this filesystem.
-func (c Config) attachPath(outboundDir, name string) string {
-	if c.AttachDir != "" {
-		return filepath.Join(c.AttachDir, name)
-	}
-	return filepath.Join(outboundDir, fidoSubdir, name)
 }
 
 // subjectPath is how that file is spelled for the mailer.

@@ -98,16 +98,69 @@ func fileAttachSubject(transport Config, attached string) (string, int, error) {
 	return prefix + spelled, limit - len(spelled), nil
 }
 
+// subjectAdvice says what actually shortens a too-long subject, which
+// depends on SubjectMode: only SubjectAbsolute (the default) spells the
+// real AttachDir-derived path into the subject at all, so it is the only
+// mode where shortening AttachDir changes the subject's length. In
+// SubjectPrefixed, the subject is SubjectPrefix plus the filename --
+// AttachDir's own value never appears in it, so telling a sysop in that
+// mode to shorten AttachDir would not fix the length. Two things actually
+// do: shortening the prefix, or switching to Basename -- and each has its
+// own precondition for the RESULT to still be correct, not just short.
+// Shortening the prefix still needs AttachDir pointed at whatever
+// directory the (now shorter) prefix names, since the file is written at
+// AttachDir, not at the prefix. Basename needs the mailer independently
+// configured to search AttachDir's own directory, since the subject
+// stops naming a directory at all -- true of Basename by design, not a
+// reason to avoid it, so the wording here has to condition it on that
+// mailer-side setup rather than read as an argument against the option.
+//
+// That precondition is not always satisfiable, and the mailer this whole
+// advice exists because of is the concrete case: SBBSecho has no
+// attachment search path at all -- it takes the directory straight from
+// the Subject and chdirs to the ctrl directory at startup, so a bare
+// filename is looked for there and reported not found
+// (sbbsecho.c:5944; .claude/skills/ftn/SKILL.md, "A bare filename is not
+// searched for"). Basename is still offered here because some mailers do
+// support it, but a sysop on SBBSecho specifically needs to be told it
+// will not work for them, not left to discover that by trying it.
 func subjectAdvice(mode SubjectMode) string {
 	switch mode {
 	case SubjectBasename:
 		return "The filename alone does not fit, so no SubjectPath setting can shorten it"
 	case SubjectPrefixed:
-		return `Shorten the SubjectPath prefix in ftn.cfg, or set "SubjectPath Basename" to write the filename alone, ` +
-			"with AttachDir naming the directory the mailer searches"
+		return `Shorten the SubjectPath prefix -- that is what changes the subject's length, not AttachDir's ` +
+			`own value -- and point AttachDir at the same directory the shortened prefix names, since the file ` +
+			`is written at AttachDir and a subject naming somewhere else will not be found. Switching to ` +
+			`"SubjectPath Basename" is the other way to shorten it, correct only if the mailer is ` +
+			`independently configured to search AttachDir's own directory instead of reading it from the ` +
+			"subject -- not every mailer supports that; SBBSecho, for one, has no such search path at all"
 	}
-	return `Set SubjectPath in ftn.cfg: "Basename" writes the filename alone, with AttachDir naming the directory ` +
-		`the mailer searches; a prefix such as "SubjectPath fido" is resolved against the mailer's working directory`
+	return `Set AttachDir in ftn.cfg to a shorter directory -- with SubjectPath left on its default ` +
+		`("Absolute"), the subject is AttachDir's own path plus the filename, so this is what actually ` +
+		"shortens it"
+}
+
+// subjectMarginPointer is subjectAdvice's short form, for checkSubjectMargin's
+// warning rather than fileAttachSubject's error. The error fires once, the run
+// it actually blocks, so it can afford subjectAdvice's full ~550-byte
+// explanation. The warning fires on every successful run for as long as a
+// board stays within subjectMarginBytes, and repeating that much prose each
+// time trains a sysop to stop reading it (#232 review) -- so Absolute and
+// Prefixed name only the setting to act on and point at the full reasoning in
+// docs/ftn-transport.md's "Keeping attach subjects short" section instead of
+// restating it. Basename's full advice is already one short sentence with
+// nothing left to trim, so it is returned unchanged rather than padded with a
+// pointer that would make it longer, not shorter.
+func subjectMarginPointer(mode SubjectMode) string {
+	if mode == SubjectBasename {
+		return subjectAdvice(mode)
+	}
+	const seeDocs = `see "Keeping attach subjects short" in docs/ftn-transport.md`
+	if mode == SubjectPrefixed {
+		return "shorten the SubjectPath prefix in ftn.cfg before it runs out; " + seeDocs
+	}
+	return "shorten AttachDir in ftn.cfg before it runs out; " + seeDocs
 }
 
 func type2Header(attached string, origin, destination Address, now time.Time) [type2HeaderSize]byte {

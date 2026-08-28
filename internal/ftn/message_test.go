@@ -179,6 +179,84 @@ func TestSequenceDigitBreaksAbsoluteButNotBasename(t *testing.T) {
 	}
 }
 
+// #232 review: an earlier version of subjectAdvice told a SubjectPrefixed
+// sysop to shorten AttachDir, which does nothing -- the subject in this
+// mode is SubjectPrefix plus the filename, and AttachDir's own value never
+// appears in it. Proves that directly: two attached paths differing only
+// in their directory (standing in for two different AttachDir values)
+// produce the identical subject once SubjectPrefixed spells it, and the
+// advice for this mode names SubjectPath, not AttachDir.
+func TestSubjectPrefixedIgnoresAttachDirsOwnLength(t *testing.T) {
+	cfg := Config{Binkley: true, SubjectMode: SubjectPrefixed, SubjectPrefix: "fido"}
+	short, _, err := fileAttachSubject(cfg, "/short/p.brp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	long, _, err := fileAttachSubject(cfg, "/a/very/considerably/longer/attach/directory/p.brp")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if short != long {
+		t.Fatalf("subject changed with the directory portion of the attached path: %q vs %q -- "+
+			"SubjectPrefixed is supposed to depend only on SubjectPrefix and the filename", short, long)
+	}
+
+	// Reached through a real over-limit fileAttachSubject call, the same
+	// way TestSequenceDigitBreaksAbsoluteButNotBasename reaches the
+	// Absolute-mode advice -- calling subjectAdvice directly proved the
+	// text was right in isolation, not that a sysop actually sees it.
+	tooLong := Config{Binkley: true, SubjectMode: SubjectPrefixed,
+		SubjectPrefix: strings.Repeat("p", 70)}
+	_, _, err = fileAttachSubject(tooLong, "/short/p.brp")
+	if err == nil {
+		t.Fatal("a 70-byte prefix plus a filename was accepted")
+	}
+	advice := err.Error()
+
+	// The advice may still mention AttachDir to explain why shortening it
+	// would not touch the length (accurate, and worth saying), and to say
+	// it still has to point at wherever the shortened prefix ends up
+	// naming (also accurate, and the fix for a prior version of this
+	// advice that dropped that constraint and could send a subject that
+	// fits but no longer says where the file really is). What it must not
+	// do is recommend shortening AttachDir AS THE FIX for the length,
+	// which is the mistake this test exists to catch.
+	if !strings.Contains(advice, "SubjectPath") {
+		t.Errorf("SubjectPrefixed advice does not mention SubjectPath: %v", advice)
+	}
+	if strings.Contains(advice, "Set AttachDir") {
+		t.Errorf("SubjectPrefixed advice tells the sysop to set AttachDir, which does not affect this mode's subject length: %v", advice)
+	}
+	// A bare mention of the word "AttachDir" isn't enough to prove this --
+	// the earlier (wrong) advice also contained that word, just to say
+	// changing it wouldn't help. What has to be present is the actual
+	// instruction to keep it pointed at wherever the shortened prefix
+	// ends up naming, or a sysop can "fix" the length and silently break
+	// delivery instead.
+	if !strings.Contains(advice, "point AttachDir at") {
+		t.Errorf("SubjectPrefixed advice drops the instruction to keep AttachDir matching the prefix: %v", advice)
+	}
+	// The same sentence also offers Basename as a way to shorten the
+	// subject -- that option has its own, different precondition (the
+	// mailer has to be configured to search AttachDir's own directory,
+	// since Basename's subject does not name a directory at all), and a
+	// prior version of this advice dropped that precondition too while
+	// fixing the prefix one, reading as an argument against Basename
+	// instead of a condition for it.
+	if !strings.Contains(advice, "independently configured to search AttachDir") {
+		t.Errorf("SubjectPrefixed advice drops Basename's own precondition (mailer must search AttachDir's directory itself): %v", advice)
+	}
+	// SBBSecho -- the mailer #231 itself was about -- has no attachment
+	// search path at all (.claude/skills/ftn/SKILL.md, "A bare filename is
+	// not searched for"; sbbsecho.c:5944), so Basename's precondition is
+	// never satisfiable there. Naming that concretely, rather than only
+	// stating the precondition in the abstract, is what tells a sysop on
+	// that specific mailer not to bother trying it.
+	if !strings.Contains(advice, "SBBSecho") {
+		t.Errorf("SubjectPrefixed advice does not name SBBSecho as a mailer Basename cannot work for: %v", advice)
+	}
+}
+
 func cString(b []byte) string {
 	if i := bytes.IndexByte(b, 0); i >= 0 {
 		b = b[:i]

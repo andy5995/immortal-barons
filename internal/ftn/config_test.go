@@ -31,9 +31,6 @@ func TestLoadConfig(t *testing.T) {
 		t.Errorf("an ftn.cfg without the new keys changed behaviour: AttachDir = %q, SubjectMode = %v",
 			cfg.AttachDir, cfg.SubjectMode)
 	}
-	if got := cfg.attachPath(filepath.Join(data, "o"), "p.brp"); got != filepath.Join(data, "o", "fido", "p.brp") {
-		t.Errorf("attachPath = %q, want the outbound fido child", got)
-	}
 }
 
 func TestDocumentedStandaloneConfigsParse(t *testing.T) {
@@ -86,9 +83,6 @@ func TestLoadConfigAttachmentSettings(t *testing.T) {
 	}
 	if cfg.SubjectMode != SubjectBasename {
 		t.Errorf("SubjectMode = %v, want SubjectBasename", cfg.SubjectMode)
-	}
-	if got := cfg.attachPath(filepath.Join(data, "o"), "p.brp"); got != filepath.Join(data, "attach", "p.brp") {
-		t.Errorf("attachPath = %q, want the configured AttachDir", got)
 	}
 
 	body = "NetmailDir netmail\nSubjectPath ../fileboxes/ib\n"

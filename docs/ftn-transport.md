@@ -38,7 +38,7 @@ Keep each owner in its own directory:
 | `bbs.cfg` `Inbound` | Immortal Barons | Unwrapped JSON packets waiting for `-planetary` |
 | `bbs.cfg` `Outbound` | Immortal Barons | Complete JSON packets waiting for `--out` |
 | `data/ftn-spool` | `barons-ftn` | Usually empty; journals appear while a handoff is incomplete |
-| `ftn.cfg` `AttachDir` | connector/tosser | `NNNNCCCC.BRP` bundles waiting to be sent |
+| `ftn.cfg` `AttachDir` (default `data/att`) | connector/tosser | `NNNNCCCC.BRP` bundles waiting to be sent |
 | `ftn.cfg` `NetmailDir` | connector/tosser | Outgoing game-owned `.msg` envelopes |
 | `ftn.cfg` `InboundDir` | mailer/connector | Newly received bundles waiting for `--in` |
 | an obox | connector/mailer | Bundles queued for the peer owning that outbox |
@@ -120,7 +120,10 @@ SubjectPath Absolute
 - `NetmailDir` is where outgoing `.msg` envelopes are created. It is required
   when any peer uses `Attach`, including the compatibility default.
 - `AttachDir` holds outgoing bundles for Attach and BSO links. If omitted, the
-  helper uses `data/ftn-spool/attach`.
+  helper uses `data/att` (#231: deliberately not nested under the transport's
+  other spool directories, since this is the one path a mailer's Subject
+  field has to spell out under a hard byte limit — see [Keeping attach
+  subjects short](#keeping-attach-subjects-short)).
 - `Binkley Yes` prefixes an attach subject with `^`; `No` writes `FLAGS KFS`.
   Both request deletion of the attachment after a successful send.
 - `SubjectPath Absolute` writes the full attachment path. `Basename` writes
@@ -152,8 +155,14 @@ persistent spool directory instead.
 `SubjectPath Basename` shortens the Subject further, to only
 `7PRK0001.BRP`, but it is correct only when the mailer is independently
 configured to search the same directory named by `AttachDir`. `barons-ftn`
-cannot infer or configure that mailer search path. BSO flow files and oboxes do
-not use a Type-2 Subject, so the 71-byte limit applies only to `Attach` links.
+cannot infer or configure that mailer search path, and not every mailer has
+one to configure — SBBSecho does not: it takes the directory straight from
+the Subject with no attachment search path at all, so a bare filename is
+looked for in its ctrl directory and reported not found. `Basename` is not a
+usable option on SBBSecho for this reason; use `AttachDir` (or an absolute
+`SubjectPath` prefix naming the same directory) instead. BSO flow files and
+oboxes do not use a Type-2 Subject, so the 71-byte limit applies only to
+`Attach` links.
 
 ### Per-peer links
 
@@ -468,7 +477,7 @@ mesh; describe that star with `HOST` lines instead.
 |---|---|---|
 | game `Outbound` | `--out` did not run or cannot take `game.lock` | Run `barons-ftn --out`; read its error |
 | `ftn-spool/out` | At least one target is busy or failed | Read the warning; inspect that peer's `.bsy`, path, or netmail directory |
-| `AttachDir` with no `.msg`/flow | Attach or BSO queue publication failed | Check subject length, `NetmailDir`, BSO directory, and permissions |
+| `AttachDir` (default `data/att`) with no `.msg`/flow | Attach or BSO queue publication failed | Check subject length, `NetmailDir`, BSO directory, and permissions |
 | `NetmailDir` `.msg` | The tosser has not packed outgoing netmail | Run/check the tosser and allow file attaches |
 | BSO `.?lo` | The mailer has not successfully sent the referenced bundle | Check peer address, password, route, and `.bsy` |
 | peer obox | The mailer has not sent or acknowledged the file | Check the peer session and outbox mapping |
@@ -522,6 +531,15 @@ What to read instead:
 - **`ftn-spool/bad`** only grows. Nothing is retried from it and nothing removes
   it; it is yours to read and clear once the producing board, route, league or
   roster is corrected.
+- **`AttachDir` (default `data/att`)** should also drain: a bundle sitting
+  there with no matching `.msg`/flow entry means the Attach or BSO queue
+  publication step failed after the bundle was written — check the same
+  causes as the troubleshooting table above (subject length, `NetmailDir`,
+  BSO directory, permissions). This directory is deliberately not under
+  `ftn-spool/` and not shown by `--status`'s spool report — it is the one
+  transport path a mailer's Subject field has to spell out under a byte
+  limit, so it lives where the sysop can point `AttachDir` at a short
+  location if the default does not fit.
 
 **A published alias belongs to the mailer, not to the game.** Once a target is
 published and marked done, its snapshot can disappear and `barons-ftn` no longer
@@ -552,3 +570,15 @@ JSON packet. Upgrade receivers first:
 
 Because `--in` accepts legacy raw JSON packets, steps 1–3 can be completed
 without coordinating an exact cutover minute.
+
+Before step 5, an `Attach` link with no `AttachDir` set gets one that lives
+under the data directory (see [Stored-message attach
+settings](#stored-message-attach-settings)) — a board whose data directory is
+already deep, most notably a Synchronet install (`xtrn/<door>/data` is fixed,
+not something the sysop can shorten), can lose all its Subject margin to that
+alone and publish nothing on the first `--out`, with no config change of its
+own. If `--out` fails immediately with an `attachment subject ... is N bytes`
+error, set `AttachDir` to a short, persistent directory outside the data tree
+per [Keeping attach subjects short](#keeping-attach-subjects-short) — check
+this **before** enabling step 5 on any board that used `Attach` links prior to
+this helper's bundled-transport rewrite, not after the first failure.

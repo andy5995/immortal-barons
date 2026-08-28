@@ -16,10 +16,23 @@ import (
 )
 
 const (
-	spoolDir      = "ftn-spool"
-	outSpoolDir   = "out"
-	badSpoolDir   = "bad"
-	attachSpool   = "attach"
+	// spoolDir stays "ftn-spool" (#231): out/bad/in are pure internal
+	// bookkeeping, never seen by a mailer, so renaming this buys the Type-2
+	// Subject field nothing -- attachmentDirectory below doesn't nest under
+	// it at all. Renaming it WOULD cost something real: Status walks only
+	// the current root, so an in-place upgrade would silently lose sight of
+	// whatever a sysop already has queued under the old name.
+	spoolDir    = "ftn-spool"
+	outSpoolDir = "out"
+	badSpoolDir = "bad"
+	// attachSpool is short (#231): the path it forms part of counts against
+	// the 70-byte FTN Type-2 Subject field, and dataDir itself is often
+	// already most of that budget on a Synchronet install, where a door's
+	// data directory is a fixed xtrn/<door>/data path the sysop cannot
+	// shorten. A sysop who still doesn't fit after this has AttachDir,
+	// which is a real directory choice rather than a fixed name this
+	// package controls.
+	attachSpool   = "att"
 	batchPlanFile = "batch.json"
 )
 
@@ -499,11 +512,18 @@ func linkFor(config Config, node int) Link {
 	return Link{Mode: LinkAttach, Flavour: "Normal"}
 }
 
+// attachmentDirectory's default deliberately does NOT nest under spoolDir
+// the way out/bad/in do (#231): attach is the one spool directory whose path
+// leaks into an external protocol field with a hard byte budget (the FTN
+// Type-2 Subject) -- every byte the other three spend on organization is a
+// byte this one can't afford to spend the same way. Nesting it under
+// spoolDir would add a whole "ftn-spool/" segment to that budget for no
+// benefit, since out/bad/in never appear in a mailer-facing Subject at all.
 func attachmentDirectory(dataDir string, transport Config) string {
 	if transport.AttachDir != "" {
 		return transport.AttachDir
 	}
-	return filepath.Join(dataDir, spoolDir, attachSpool)
+	return filepath.Join(dataDir, attachSpool)
 }
 
 func checkSubjectMargin(transport Config, attached string, result *Result) error {
@@ -514,7 +534,7 @@ func checkSubjectMargin(transport Config, attached string, result *Result) error
 	if spare < subjectMarginBytes {
 		result.Warnings = append(result.Warnings, fmt.Sprintf(
 			"attachment subjects have %d byte(s) to spare in the FTN Type-2 field; %s",
-			spare, subjectAdvice(transport.SubjectMode)))
+			spare, subjectMarginPointer(transport.SubjectMode)))
 	}
 	return nil
 }
