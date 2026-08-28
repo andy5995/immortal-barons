@@ -94,8 +94,8 @@ because the original's cannot be copied.
 |---|---|---|
 | `FOODMARKETNAME` | string | renames the Food Market on screen |
 | `BANKNAME` | string | renames the Bank |
-| `IPPIRATENEWS` | boolean | interplanetary pirate news (`write_local_attack_news 0x4e53c`) |
-| `LOCALPIRATENEWS` | boolean | local pirate news (`0x4e54a`) |
+| `IPPIRATENEWS` | boolean | pirate news while the board plays in a league (`write_local_attack_news 0x4e53c`) |
+| `LOCALPIRATENEWS` | boolean | the same news while it plays alone (`0x4e54a`) |
 | `MINOUTBOUNDTIME` | number | read by `run_interbbs_maintenance` (`0xa2ce`) |
 | `STRICTPROCESSING` | boolean | gates `process_incoming_interbbs_data` (`0x3be2b`) |
 | `EXTERNALSCORESANSI` | string | path |
@@ -124,6 +124,13 @@ do not treat the manual as evidence that a setting works.
 ## What this means for IB
 
 `LOTTERY` is implemented, as `Lottery` in `bbs.cfg` (`docs/mechanics-reference.md`).
+The pirate pair is implemented as ONE switch, `PirateNews` in `bbs.cfg`. The two
+keywords are not two kinds of news: `write_local_attack_news` emits the pirate
+tags (7 and 8) through whichever of them the InterBBS flag at `DS:0x6a9a`
+selects — `IPPIRATENEWS` when the board is in a league, `LOCALPIRATENEWS` when it
+is not — and neither reads anything remote. Nothing anywhere posts another
+planet's pirate raids. So a sysop who wants raids out of the news wants them out
+in both modes, and IB asks once. Deliberate divergence.
 
 The other six feature switches have **no IB counterpart**. `World.VisitCovert`,
 `VisitTrading` and `VisitMessage` look like three of them and are not: they are

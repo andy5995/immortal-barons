@@ -1051,6 +1051,10 @@ var perBoardConfigFields = map[string]string{
 	// than hidden — a league whose boards disagree about the lottery is a league
 	// where one planet has a faucet the other does not.
 	"Lottery": "each sysop's call in the original, per-install and never broadcast",
+	// Display, not a rule: it decides whether a raid is written up in the news,
+	// never whether it happens or what it takes. The original keeps its
+	// LOCALPIRATENEWS switch in RESOURCE.DAT for the same reason.
+	"PirateNews": "whether pirate raids reach this board's news feed",
 }
 
 // TestEveryGameRuleIsBroadcast holds the line the rule above draws. A new Config

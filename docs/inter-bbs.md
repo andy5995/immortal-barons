@@ -217,16 +217,19 @@ LeagueNumber  900
 Inbound       inbound
 Outbound      outbound
 Lottery       yes
+PirateNews    yes
 ```
 
 Lines starting with `#` or `;` are comments, and `-ibbs-reset` prints a commented
 copy for you to save. Keywords are matched whatever their capitalisation.
 
-`Lottery` is the odd one out: it is a rule rather than an address, and it is
-here because the original keeps the same switch in each installation's own file.
-Set it to `no` and this board never offers the Queen's lottery. Boards in one
-league may answer it differently, so a league that wants everyone on the same
-footing has to agree it between themselves.
+`Lottery` and `PirateNews` are the odd ones out: they are rules rather than
+addresses, and they are here because the original keeps the same questions in
+each installation's own file. Set `Lottery` to `no` and this board never offers
+the Queen's lottery; set `PirateNews` to `no` and pirate raids stop being written
+up in the planet news, though they go on happening and the raider is still told
+how theirs went. Boards in one league may answer these differently, so a league
+that wants everyone on the same footing has to agree them between themselves.
 
 These settings sit apart from `config.json` because `config.json` holds the
 league's rules, and those are overwritten when the Coordinator's settings packet

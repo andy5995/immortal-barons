@@ -36,6 +36,7 @@ const (
 	keyLink     = "Link"
 	keyLottery  = "Lottery"
 	keyBulletin = "BulletinDir"
+	keyPirate   = "PirateNews"
 )
 
 // boolWord maps the words a sysop is likely to write to what ParseBool takes.
@@ -99,6 +100,10 @@ func LoadBoardConfig(dataDir string, cfg *game.Config) error {
 			if b, err := strconv.ParseBool(boolWord(value)); err == nil {
 				cfg.Lottery = b
 			}
+		case strings.EqualFold(key, keyPirate):
+			if b, err := strconv.ParseBool(boolWord(value)); err == nil {
+				cfg.PirateNews = b
+			}
 		case strings.EqualFold(key, keyLink):
 			node, dir, ok := strings.Cut(value, " ")
 			n, err := strconv.Atoi(strings.TrimSpace(node))
@@ -152,6 +157,11 @@ func BoardConfigText(cfg game.Config) string {
 	b.WriteString("# once a day, for 5,000 gold. Yes or no; the league does not decide it\n")
 	b.WriteString("# for you.\n")
 	fmt.Fprintf(&b, "%s %s\n\n", keyLottery, yesNo(cfg.Lottery))
+
+	b.WriteString("# Whether a pirate raid's outcome is posted to the planet news, in\n")
+	b.WriteString("# league and solo play alike. Yes or no; the raids themselves happen\n")
+	b.WriteString("# either way, and the raider is always told how theirs went.\n")
+	fmt.Fprintf(&b, "%s %s\n\n", keyPirate, yesNo(cfg.PirateNews))
 
 	b.WriteString("# A board that forwards for its neighbours has one link per neighbour:\n")
 	b.WriteString("# \"Link <node number> <directory>\". A board with nobody to forward for\n")

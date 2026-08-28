@@ -4474,6 +4474,13 @@ NORMALLOSS / TOTALWIN), nuclear/chemical/biological strikes (NUKE / CHEM / BIO),
 pirate-raid outcomes (PIRATEWIN / PIRATELOSS), tax riots (RIOTS), and civil-war
 collapse (CIVILWAR — `postCivilWarNews`).
 
+The pirate lines are the one part of the feed a sysop can switch off:
+`PirateNews no` in `bbs.cfg` suppresses them. It is display only — the raids
+happen either way, and the raider's own report is unchanged. **IB divergence:**
+the original asks the same question twice, `LOCALPIRATENEWS` for a board playing
+alone and `IPPIRATENEWS` for one in a league, gated on its InterBBS flag; IB asks
+once (`docs/dev/bre-resource-dat.md`).
+
 An interplanetary strike is reported on **both** planets (#108): the defending
 board posts what the raid took and cost, or that it was held off, and the
 attacker's board posts its return. **Every one of those lines, and the defender's

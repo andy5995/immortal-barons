@@ -270,6 +270,15 @@ type Config struct {
 	// it is each sysop's call, and a league's boards may differ.
 	Lottery bool `json:"-"`
 
+	// PirateNews is whether pirate-raid outcomes reach the planet's news feed,
+	// default on. It sits with Lottery in bbs.cfg rather than the league's shared
+	// rules because the original keeps the same question in the per-install
+	// RESOURCE.DAT. BRE asks it twice, LOCALPIRATENEWS for a board playing alone
+	// and IPPIRATENEWS for one playing in a league — the same news either way,
+	// gated on its InterBBS flag (docs/dev/bre-resource-dat.md). IB asks once:
+	// a sysop who wants the raids out of the news wants them out.
+	PirateNews bool `json:"-"`
+
 	IdleTimeoutSecs int // boot a session after this many seconds with no keypress (0 = never), freeing the world lock
 	MaxIdleWarnings int // idle warnings a session may collect before a hard boot
 
@@ -482,6 +491,7 @@ func DefaultConfig() Config {
 		DataDir:         "./data",
 		BoardID:         "local",
 		Lottery:         true,
+		PirateNews:      true,
 		InboundDir:      "inbound",
 		OutboundDir:     "outbound",
 		IdleTimeoutSecs: 300,

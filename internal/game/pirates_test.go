@@ -519,3 +519,37 @@ func TestPiratesDisabledMeansNoBandsAndNoRaids(t *testing.T) {
 		t.Errorf("turning pirates back on seeded %d factions, want %d", len(w.Pirates), len(PirateFactions))
 	}
 }
+
+// The sysop's PirateNews switch (bbs.cfg, BRE's RESOURCE.DAT keyword)
+// silences the news line and nothing else: the raid is fought, the loot moves,
+// and the raider still gets their report.
+func TestPirateNewsSwitchSilencesTheNewsOnly(t *testing.T) {
+	raid := func(on bool) (news int, report string) {
+		w := NewWorldSeed(DefaultConfig(), 1)
+		w.Config.PirateNews = on
+		a := w.AddHuman("me", "Mine")
+		a.Troopers, a.Jets, a.Tanks = 10_000, 10_000, 10_000
+		w.NewsToday = nil
+		report, _ = w.RaidFaction(a, 0, 5_000, 5_000, 5_000)
+		return len(w.NewsToday), report
+	}
+
+	news, report := raid(true)
+	if news != 1 {
+		t.Fatalf("a raid posted %d news lines with the switch on, want 1", news)
+	}
+	if report == "" {
+		t.Fatal("the raider got no report")
+	}
+
+	off, offReport := raid(false)
+	if off != 0 {
+		t.Errorf("a raid posted %d news lines with the switch off, want none", off)
+	}
+	// Only the loot and losses are compared: the headline is drawn at random, and
+	// suppressing the news line leaves one fewer draw behind it.
+	body := func(r string) string { _, rest, _ := strings.Cut(r, "\n"); return rest }
+	if body(offReport) != body(report) {
+		t.Errorf("the switch changed what the raid took or cost:\n%q\nwant\n%q", body(offReport), body(report))
+	}
+}

@@ -255,9 +255,10 @@ saved `config.json` into the data directory, then run `-reset-from-config`.
 It holds the rules only. Anything naming this particular board — its name in a
 league, its packet directories — is in `bbs.cfg`, so a config copied to another
 machine does not drag the old board's directories along with it. That file also
-carries the one rule the league does not set for you: `Lottery yes` or
-`Lottery no` decides whether this board offers the Queen's lottery, and it
-defaults to yes.
+carries the two rules the league does not set for you. `Lottery yes` or
+`Lottery no` decides whether this board offers the Queen's lottery, and
+`PirateNews no` keeps pirate raids out of the planet news — the raids still
+happen, and the raider still gets their report. Both default to yes.
 
 ## Bulletin files for your BBS
 

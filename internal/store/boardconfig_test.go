@@ -265,3 +265,29 @@ func TestLeagueNumberOutsideTheRangeIsRefused(t *testing.T) {
 		})
 	}
 }
+
+// The pirate-news switch takes the same word spellings as the lottery, and
+// suppressing the news leaves the raids themselves alone (internal/game).
+func TestPirateNewsSwitch(t *testing.T) {
+	for _, c := range []struct {
+		value string
+		want  bool
+	}{
+		{"no", false}, {"off", false}, {"false", false},
+		{"yes", true}, {"YES", true},
+		{"", true}, // unparseable: the default stands
+	} {
+		dir := t.TempDir()
+		if err := os.WriteFile(filepath.Join(dir, BoardConfigFile),
+			[]byte("PirateNews "+c.value+"\n"), 0o644); err != nil {
+			t.Fatalf("WriteFile: %v", err)
+		}
+		cfg, err := LoadConfig(dir)
+		if err != nil {
+			t.Fatalf("LoadConfig: %v", err)
+		}
+		if cfg.PirateNews != c.want {
+			t.Errorf("PirateNews %q gave %v, want %v", c.value, cfg.PirateNews, c.want)
+		}
+	}
+}

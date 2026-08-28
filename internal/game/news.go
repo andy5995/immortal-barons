@@ -101,6 +101,12 @@ func (w *World) postStrikeNews(a, d *Empire, weapon string) {
 
 // postPirateNews broadcasts a pirate-raid outcome (BRE PIRATEWIN/PIRATELOSS).
 func (w *World) postPirateNews(a *Empire, faction string, won bool) {
+	// The sysop's PirateNews switch, which the original asks per game mode. Only
+	// the news line is suppressed: the raid, its loot and its losses all stand,
+	// and the raider still gets the full report on screen.
+	if !w.Config.PirateNews {
+		return
+	}
 	var lines []string
 	if won {
 		lines = []string{

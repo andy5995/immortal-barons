@@ -572,7 +572,8 @@ table, held by the Coordinator, is what remains.
 ## Board config: `bbs.cfg`
 
 The per-board settings — `BoardID`, `LeagueNumber`, `InboundDir`, `OutboundDir`,
-`OutboundDirs`, and `Lottery` — live here rather than in `config.json`, and are marked
+`OutboundDirs`, `Lottery`, and `PirateNews` — live here rather than in
+`config.json`, and are marked
 `json:"-"` on `game.Config` so they cannot land in both. `config.json` is
 rewritten by a Coordinator's ruleset broadcast, which is no place for settings
 that describe one board's own machine.
@@ -587,13 +588,15 @@ Inbound       /home/bbs/ftn/in
 Outbound      /home/bbs/filebox/uplink
 Link 3        /home/bbs/filebox/node3
 Lottery       yes
+PirateNews    yes
 ```
 
-`Lottery` is the only rule in the file, and the exception
-`TestEveryGameRuleIsBroadcast` names: BRE keeps the same switch in the
-per-install `RESOURCE.DAT`, so it is each sysop's, not the league's. It takes
+`Lottery` and `PirateNews` are the only rules in the file, and the two
+exceptions `TestEveryGameRuleIsBroadcast` names: BRE keeps both questions in the
+per-install `RESOURCE.DAT`, so they are each sysop's, not the league's. They take
 yes/no, on/off or true/false, and an unreadable value leaves the default (on)
-alone.
+alone. `PirateNews no` suppresses the news line a pirate raid posts and nothing
+else — the raid, its loot, its losses and the raider's own report are unchanged.
 
 Not BRE's positional seven lines (sysop, planet, address, inbound, netmail dir,
 league, mailer). Positional cannot express `Link` at all, and a blank field
