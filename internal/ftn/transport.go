@@ -534,7 +534,7 @@ func checkSubjectMargin(transport Config, attached string, result *Result) error
 	if spare < subjectMarginBytes {
 		result.Warnings = append(result.Warnings, fmt.Sprintf(
 			"attachment subjects have %d byte(s) to spare in the FTN Type-2 field; %s",
-			spare, subjectAdvice(transport.SubjectMode)))
+			spare, subjectMarginPointer(transport.SubjectMode)))
 	}
 	return nil
 }

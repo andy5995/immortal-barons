@@ -141,6 +141,28 @@ func subjectAdvice(mode SubjectMode) string {
 		"shortens it"
 }
 
+// subjectMarginPointer is subjectAdvice's short form, for checkSubjectMargin's
+// warning rather than fileAttachSubject's error. The error fires once, the run
+// it actually blocks, so it can afford subjectAdvice's full ~550-byte
+// explanation. The warning fires on every successful run for as long as a
+// board stays within subjectMarginBytes, and repeating that much prose each
+// time trains a sysop to stop reading it (#232 review) -- so Absolute and
+// Prefixed name only the setting to act on and point at the full reasoning in
+// docs/ftn-transport.md's "Keeping attach subjects short" section instead of
+// restating it. Basename's full advice is already one short sentence with
+// nothing left to trim, so it is returned unchanged rather than padded with a
+// pointer that would make it longer, not shorter.
+func subjectMarginPointer(mode SubjectMode) string {
+	if mode == SubjectBasename {
+		return subjectAdvice(mode)
+	}
+	const seeDocs = `see "Keeping attach subjects short" in docs/ftn-transport.md`
+	if mode == SubjectPrefixed {
+		return "shorten the SubjectPath prefix in ftn.cfg before it runs out; " + seeDocs
+	}
+	return "shorten AttachDir in ftn.cfg before it runs out; " + seeDocs
+}
+
 func type2Header(attached string, origin, destination Address, now time.Time) [type2HeaderSize]byte {
 	var header [type2HeaderSize]byte
 	putString(header[0:36], programName)
