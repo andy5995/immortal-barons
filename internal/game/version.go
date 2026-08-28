@@ -8,7 +8,7 @@ import "runtime/debug"
 // Version is the single source of truth for the game's version string,
 // displayed in the status bar and reported by the front-ends. The
 // in-development version; bumped after each release.
-const Version = "0.0.8"
+const Version = "0.0.9"
 
 // Protocol is the packet format this build speaks. It moves ONLY when the wire
 // format changes, which is what lets a board take a menu fix or a balance change

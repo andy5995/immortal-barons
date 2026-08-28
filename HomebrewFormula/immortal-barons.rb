@@ -11,8 +11,8 @@ class ImmortalBarons < Formula
   # This is the vendored-source tarball the release workflow publishes, not the
   # auto-generated tag archive: the repo does not commit vendor/, so only this
   # asset lets the build skip a module download.
-  url "https://github.com/andy5995/immortal-barons/releases/download/v0.0.6/immortal-barons-v0.0.6-vendored-source.tar.gz"
-  sha256 "a2c1b4d02aced28ef55d35a2de218d2ff71ba6336a575391422d7323c7a22af3"
+  url "https://github.com/andy5995/immortal-barons/releases/download/v0.0.8/immortal-barons-v0.0.8-vendored-source.tar.gz"
+  sha256 "a26183aa17bf061884bc3aebadd35e682eec241ce7645764c3c1e8eba32c37c3"
   license "MIT"
   head "https://github.com/andy5995/immortal-barons.git", branch: "trunk"
 
@@ -20,14 +20,15 @@ class ImmortalBarons < Formula
 
   def install
     system "go", "build", *std_go_args, "./cmd/immortal-barons"
-    # Every path here must exist in the v0.0.6 tarball this formula pins, NOT
+    # Every path here must exist in the v0.0.8 tarball this formula pins, NOT
     # in the current tree -- trunk drifts as docs are added, and naming a file
     # no release has shipped fails the install with ENOENT. The vendored
     # tarball carries the whole docs/ tree, so check a pin bump against
     # "tar tzf <tarball> | grep docs/", not against build-archives.sh.
     doc.install "LICENSE", "README.md", "docs/faq.md", "docs/playing.md",
                 "docs/command-reference.md", "docs/door-setup.md",
-                "docs/charset.md", "docs/download.md", "docs/translating.md"
+                "docs/charset.md", "docs/download.md", "docs/translating.md",
+                "docs/inter-bbs.md", "docs/ftn-transport.md"
   end
 
   def caveats
