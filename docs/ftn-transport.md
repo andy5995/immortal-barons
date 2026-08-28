@@ -407,7 +407,8 @@ for those. A legacy empty semaphore left by an older `barons-ftn` is likewise
 indistinguishable and follows the mailer's policy. Never manually clear `.bsy`
 files merely because a peer is slow or offline.
 
-Claimed packets and progress journals live under `data/ftn-spool`. A target is
+Progress journals live under `data/ftn-spool`; the claimed bundle itself is
+written to `AttachDir` (default `data/att`) or to the peer's obox. A target is
 marked complete only after its bundle and `.msg`, obox placement, or BSO flow
 entry are durable. A restart uses the same alias and bytes, recognizes an
 already-created attach message, and completes only unfinished targets.

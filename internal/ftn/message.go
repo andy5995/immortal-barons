@@ -98,32 +98,16 @@ func fileAttachSubject(transport Config, attached string) (string, int, error) {
 	return prefix + spelled, limit - len(spelled), nil
 }
 
-// subjectAdvice says what actually shortens a too-long subject, which
-// depends on SubjectMode: only SubjectAbsolute (the default) spells the
-// real AttachDir-derived path into the subject at all, so it is the only
-// mode where shortening AttachDir changes the subject's length. In
-// SubjectPrefixed, the subject is SubjectPrefix plus the filename --
-// AttachDir's own value never appears in it, so telling a sysop in that
-// mode to shorten AttachDir would not fix the length. Two things actually
-// do: shortening the prefix, or switching to Basename -- and each has its
-// own precondition for the RESULT to still be correct, not just short.
-// Shortening the prefix still needs AttachDir pointed at whatever
-// directory the (now shorter) prefix names, since the file is written at
-// AttachDir, not at the prefix. Basename needs the mailer independently
-// configured to search AttachDir's own directory, since the subject
-// stops naming a directory at all -- true of Basename by design, not a
-// reason to avoid it, so the wording here has to condition it on that
-// mailer-side setup rather than read as an argument against the option.
-//
-// That precondition is not always satisfiable, and the mailer this whole
-// advice exists because of is the concrete case: SBBSecho has no
-// attachment search path at all -- it takes the directory straight from
-// the Subject and chdirs to the ctrl directory at startup, so a bare
-// filename is looked for there and reported not found
-// (sbbsecho.c:5944; .claude/skills/ftn/SKILL.md, "A bare filename is not
-// searched for"). Basename is still offered here because some mailers do
-// support it, but a sysop on SBBSecho specifically needs to be told it
-// will not work for them, not left to discover that by trying it.
+// subjectAdvice names the setting that shortens a too-long subject, which is
+// a different setting in each mode. Only SubjectAbsolute spells AttachDir's
+// own path into the subject, so it is the only mode where shortening AttachDir
+// changes the length; under SubjectPrefixed the subject is the prefix plus the
+// filename and AttachDir's value never appears in it, yet the file is still
+// written at AttachDir, which is why the shortened prefix has to name that
+// same directory. Basename needs the mailer independently configured to search
+// AttachDir itself, which SBBSecho cannot do -- it reads the directory out of
+// the Subject and chdirs to ctrl at startup, so a bare filename is reported
+// not found (sbbsecho.c:5944).
 func subjectAdvice(mode SubjectMode) string {
 	switch mode {
 	case SubjectBasename:
@@ -141,17 +125,12 @@ func subjectAdvice(mode SubjectMode) string {
 		"shortens it"
 }
 
-// subjectMarginPointer is subjectAdvice's short form, for checkSubjectMargin's
-// warning rather than fileAttachSubject's error. The error fires once, the run
-// it actually blocks, so it can afford subjectAdvice's full ~550-byte
-// explanation. The warning fires on every successful run for as long as a
-// board stays within subjectMarginBytes, and repeating that much prose each
-// time trains a sysop to stop reading it (#232 review) -- so Absolute and
-// Prefixed name only the setting to act on and point at the full reasoning in
-// docs/ftn-transport.md's "Keeping attach subjects short" section instead of
-// restating it. Basename's full advice is already one short sentence with
-// nothing left to trim, so it is returned unchanged rather than padded with a
-// pointer that would make it longer, not shorter.
+// subjectMarginPointer is the short form, for checkSubjectMargin's warning.
+// The error fires once, on the run it blocks, so it can afford subjectAdvice
+// in full; the warning repeats on every successful run for as long as a board
+// stays within subjectMarginBytes, and that much prose each time trains a
+// sysop to stop reading it. Basename's advice is already one sentence, so it
+// is returned unchanged rather than padded with a pointer to the docs.
 func subjectMarginPointer(mode SubjectMode) string {
 	if mode == SubjectBasename {
 		return subjectAdvice(mode)
