@@ -501,9 +501,10 @@ did nothing else. Andy writes the entry on trunk after the merge.
 ## Issue titles: no category prefix
 
 New issue and discussion titles are a plain statement of the problem — no `AI:`,
-`InterBBS:`, `Web:` prefix. Labels carry the category (`AI`, `InterBBS`,
-`ssh-frontend`, `windows`, …; `gh label list` for the current set), and GitHub
-shows them beside the title anyway. Commit subjects keep their prefixes
-(`balance:`, `menu:`, `door:`) — git has no labels. Existing titles are left as
-they are; if the right label doesn't exist, say so rather than putting the
-category back in the title.
+`InterBBS:`, `Web:` prefix. Labels carry the category (`AI`, `ssh-frontend`,
+`windows`, `wire-format`, …; `gh label list` for the current set), and GitHub
+shows them beside the title anyway. There is no inter-BBS label: that work is
+most of the tracker, so the label narrowed nothing and was deleted. Commit
+subjects keep their prefixes (`balance:`, `menu:`, `door:`) — git has no labels.
+Existing titles are left as they are; if the right label doesn't exist, say so
+rather than putting the category back in the title.
