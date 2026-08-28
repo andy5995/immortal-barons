@@ -32,8 +32,7 @@ func main() {
 	}
 	if *status {
 		if err := reportStatus(*dataDir); err != nil {
-			fmt.Fprintln(os.Stderr, "barons-ftn:", err)
-			os.Exit(1)
+			fail(err)
 		}
 		return
 	}
@@ -49,8 +48,7 @@ func main() {
 		result, err = ftn.RunOut(*dataDir)
 	}
 	if err != nil {
-		fmt.Fprintln(os.Stderr, "barons-ftn:", err)
-		os.Exit(1)
+		fail(err)
 	}
 	for _, warning := range result.Warnings {
 		const prefix = "barons-ftn: warning: "
@@ -76,6 +74,17 @@ func main() {
 	} else if len(result.Queued) == 0 {
 		fmt.Println("No outbound packets.")
 	}
+}
+
+// fail prints a fatal error the way warnings are already printed. A refusal
+// carries the setting that fixes it, so it is the longest thing the tool ever
+// says — the subject-length refusal runs past 700 bytes — and it is read on an
+// 80-column console (#156).
+func fail(err error) {
+	const prefix = "barons-ftn: "
+	fmt.Fprint(os.Stderr, prefix,
+		textwrap.Wrap(err.Error(), textwrap.Console, strings.Repeat(" ", len(prefix))), "\n")
+	os.Exit(1)
 }
 
 // reportStatus answers the question a file count cannot: not how many files
