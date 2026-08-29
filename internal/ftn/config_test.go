@@ -60,8 +60,8 @@ func TestDocumentedStandaloneConfigsParse(t *testing.T) {
 		found++
 		rest = tail
 	}
-	if found != 3 {
-		t.Fatalf("checked %d documented ftn.cfg examples, want 3", found)
+	if found != 4 {
+		t.Fatalf("checked %d documented ftn.cfg examples, want 4", found)
 	}
 }
 
