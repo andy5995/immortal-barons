@@ -736,22 +736,51 @@ func TestFeedStageNoNoticeWhenFed(t *testing.T) {
 	}
 }
 
-func TestFeedStageWarnsButNoMarketWhenAutoFeedOff(t *testing.T) {
+// Auto-Feed off is BRE's manual food flow, and it runs EVERY turn — the market
+// opens and both obligations are asked even with food to spare. A capture with
+// 1608 food against a 150 need shows exactly that (cap/121125-666H4H_Camembert
+// _Public.cap), and run_player_turn only skips the routine when the realm is
+// covered AND Auto-Feed is on.
+func TestFeedStageAutoFeedOffOpensMarketEvenWhenFed(t *testing.T) {
+	w := newWorld()
+	w.Player().Prefs.AutoFeed = false
+	p := w.Player()
+	p.People = 100000
+	p.Food = 10_000_000 // far more than needed
+	f := &fakeSession{keys: []rune("0\r\r")}
+	if err := feedStage(f, w, BuildMenus().Food); err != nil {
+		t.Fatalf("feedStage: %v", err)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "Chopper") { // the Food Market title
+		t.Errorf("Auto-Feed off must open the market every turn; got:\n%s", out)
+	}
+	if !strings.Contains(out, "people need ") {
+		t.Errorf("expected the people's obligation; got:\n%s", out)
+	}
+	if strings.Contains(out, "disastrous") {
+		t.Errorf("a fed realm must not raise the reconsider; got:\n%s", out)
+	}
+}
+
+// Short of food with Auto-Feed OFF still gets the full flow: BRE's auto-feed
+// only covers what the realm can afford ("if possible" in its own help text).
+func TestFeedStageAutoFeedOffOpensMarketWhenShort(t *testing.T) {
 	w := newWorld()
 	w.Player().Prefs.AutoFeed = false
 	p := w.Player()
 	p.Food = 0
 	p.People = 100000
-	f := &fakeSession{}
+	f := &fakeSession{keys: []rune("0\rn")}
 	if err := feedStage(f, w, BuildMenus().Food); err != nil {
 		t.Fatalf("feedStage: %v", err)
 	}
 	out := f.out.String()
-	if !strings.Contains(out, "need") {
-		t.Errorf("expected a warning; got:\n%s", out)
+	if !strings.Contains(out, "Chopper") {
+		t.Errorf("expected the Food Market; got:\n%s", out)
 	}
-	if strings.Contains(out, "Chopper") {
-		t.Errorf("Auto-Feed off must NOT open the market; got:\n%s", out)
+	if !strings.Contains(out, "disastrous") {
+		t.Errorf("an unfed realm must raise the reconsider; got:\n%s", out)
 	}
 }
 

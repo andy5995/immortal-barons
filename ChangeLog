@@ -1,4 +1,5 @@
 (in-progress:)
+  * With Auto-Feed off the Food Market opens every turn, as the original does
   * The Military advisor reports the Mountain industry boost
   * Set Industries stops asking for percentages once 100% is allocated
   * A protected realm is told why it cannot change its Coordinator vote

@@ -250,12 +250,15 @@ func spoilsStage(s session.Session, w *ctx) {
 }
 
 // feedStage is BRE's Food Market slot in the turn (Payment -> Food Market ->
-// Covert). When the realm's stored food can't cover this turn's consumption it
-// warns the player; with Auto-Feed on it also brings the Food Market up
-// automatically so they can buy food before their people starve (BRE's "the food
-// bank comes up automatically" behaviour). With Auto-Feed off it only warns — the
-// player manages food from the menu themselves. Fixes the old silent starvation:
-// Auto-Feed was a dead no-op and nothing ever flagged a food shortfall.
+// Covert). The gate is not in BRE's food routine at all — allocate_food opens
+// the market with an unconditional call twelve instructions in — but one level
+// up, in run_player_turn's stage dispatch: it sums the two obligations, compares
+// them against the realm's stored food, and only when the realm can cover them
+// AND the Auto-Feed byte (empire +0x33a) is set does it feed silently and skip
+// the routine. Short of food, or Auto-Feed off, the player gets the market and
+// both prompts. So Auto-Feed means "feed me without asking, if I can afford it",
+// not "open the market for me" — IB had the two halves the other way round, and
+// with Auto-Feed off never showed the market at all.
 func feedStage(s session.Session, w *ctx, food *Menu) error {
 	people, forces, have, autoFeed := 0, 0, 0, false
 	if !withPlayer(w, func(p *game.Empire) {
@@ -263,21 +266,13 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 	}) {
 		return nil // realm gone; the caller's next withPlayer aborts the turn
 	}
-	if have >= people+forces {
-		return nil // fed — no notice
+	if have >= people+forces && autoFeed {
+		return nil // fed automatically — the one path BRE runs silently
 	}
-	if !autoFeed {
-		// Auto-Feed off: just warn (no pause) — the player manages food from the menu.
-		fmt.Fprintf(s, "\n%s"+tr(s, "Your people need %s units of food and your armed forces %s; you have only %s.")+"%s\n",
-			ansi.FgYellow, comma(people), comma(forces), comma(have), ansi.Reset)
-		fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightRed, tr(s, "Visit the Food Market to feed them, or they will starve."), ansi.Reset)
-		return nil
-	}
-	// Auto-Feed on and short: bring up the Food Market so the player can buy food,
-	// then ask how much to give (BRE's "How much will you give?"). BRE asks TWICE —
-	// the people and the armed forces are separate obligations, each with its own
-	// prompt — and raises the disastrous-results reconsider once at the end if
-	// either was underfed, looping back to the market. (IB consumes food
+	// The Food Market first, then the two obligations. BRE asks TWICE — the people
+	// and the armed forces are separate obligations, each with its own prompt — and
+	// raises the disastrous-results reconsider once at the end if either was
+	// underfed, looping back above the market call. (IB consumes food
 	// automatically, so the given amounts gate the reconsider; buying enough food
 	// is the real fix.)
 	for {

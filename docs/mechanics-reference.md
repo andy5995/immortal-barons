@@ -2647,11 +2647,25 @@ section is a record of what was claimed and how it was settled, so the word
   next-turn consumption drains the food after feeding, yielding **zero
   spoilage** — BRE's "sell excess → no decay" behavior. (`FoodSpoilPct` and
   `FoodSpoilFloor` in `balance_costs.go`.)
-- **Feeding & food shortfall:** each turn the realm consumes food; a **feed stage**
-  (BRE's Payment→Food-Market slot) warns when short, and with **Auto-Feed** on the
-  Food Market opens automatically so the player can buy food, then asks the two
-  obligations in turn. Going underfed hurts, and **BRE's own penalties are read,
-  and IB implements them.**
+- **Feeding & food shortfall:** each turn the realm consumes food in a **feed
+  stage** (BRE's Payment→Food-Market slot). **BINARY-VERIFIED:** the gate is not in
+  BRE's food routine — `allocate_food` (`BRE.OVR 0x37fdf`) opens the Food Market
+  with an unconditional `call` twelve instructions in, and reads no preference at
+  all. It sits one level up, in `run_player_turn`'s stage dispatch
+  (`cmp al,0x5`, `BRE.EXE 0x3c22`), which sums the two obligations,
+  `real_compare`s them against the realm's stored food, and skips the routine only
+  when the realm is **covered AND the Auto-Feed byte (empire `+0x33a`) is set** —
+  feeding it silently instead. Short of food, or Auto-Feed off, the market opens
+  and both obligations are asked, **every turn, food to spare or not**
+  (`cap/121125-666H4H_Camembert_Public.cap`: 1,608 food against a 150 need, and
+  the market still comes up). So Auto-Feed means *feed me without asking, if I can
+  afford it* — BRE's own help says "automatically feed all your people and army
+  **if possible**" — not *open the market for me*. IB shipped the two halves the
+  other way round until 2026-08-29, opening the market only when short and only
+  with Auto-Feed on, and merely printing a warning with it off. There is no
+  "do you wish to visit the Food Market?" prompt — the bank's has no food
+  counterpart. Going underfed hurts, and **BRE's own penalties are read, and IB
+  implements them.**
   The allocation routine files three byte-sized penalties on the empire record,
   all applied and cleared during the end-of-turn step. With `r` the fraction of
   an obligation that was actually given (BRE computes it as `(given+1)/(need+1)`):
@@ -2672,7 +2686,7 @@ section is a record of what was claimed and how it was settled, so the word
   people's need triggers the civil war, and starvation no longer drives anyone
   out of the realm. The rates and the collapse landed together, which was the
   point — either alone leaves starvation weaker than both games intend.
-  Food Market opens automatically so the player can buy food. Going underfed hurts:
+  Going underfed hurts:
   **BINARY-VERIFIED (`BRE.OVR 0x38104` / `0x381E5` / `0x382E9`).** BRE bills the
   people's need and the army's need **separately** and scores each on the usual
   `(paid+1)/(due+1)` ratio: the people's shortfall costs `trunc((1 − r) × 40)`

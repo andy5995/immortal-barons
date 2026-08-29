@@ -449,6 +449,21 @@ and had been sitting in the clone as a verified constant. Record the disagreemen
 next to the constant rather than silently replacing one number with another — the
 next reader will otherwise "correct" it back from the help.
 
+### A turn stage's GATE is in `run_player_turn`, not in the stage's own routine
+
+`allocate_food` opens the Food Market with an unconditional `call` in its first
+dozen instructions — nothing in it reads a preference, and reading only that
+routine says the market always appears. The whole decision sits one level up, in
+`run_player_turn`'s stage dispatch (`cmp al,0x5`): it sums the food owed,
+`real_compare`s it against the empire's stored food, and only when the realm can
+cover it *and* the Auto-Feed byte (`+0x33a`) is set does it subtract silently and
+skip the routine. Short of food, or Auto-Feed off, and the manual routine runs.
+
+So when a stage seems to behave unconditionally, disassemble the `cmp al,<stage>`
+arm that calls it before concluding anything. The per-empire preference bytes are
+consecutive at `+0x335..+0x33a` in Preferences-menu order (`run_visit_menu` reads
+them), which identifies a gate byte in one look.
+
 ### Name a field from ALL its sites, never from the two in front of you
 
 An `inc` and a matching `dec` around a block look exactly like a re-entrancy
