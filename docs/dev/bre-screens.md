@@ -1327,7 +1327,7 @@ alone.
 `[Terrorist Ops]`, four more, with every item line padded to the same 23 and the
 closing rule 23 long.
 IB drew it at the 62-column `rule` default until 2026-08-26, since no capture of
-this screen existed to size it from. That is the trap CLAUDE.md names: the
+this screen existed to size it from. That is the trap AGENTS.md names: the
 original sizes each box to its own content, and the captures in this file run
 16, 20, 21, 23, 28, 32, 38, 44, 46 and 52 columns with no house width among them.
 

@@ -50,7 +50,7 @@ League Coordinator's minimum-version gate.
 3. **Stamp the ChangeLog.** Replace the `(in-progress:)` heading with
    `YYYY-MM-DD (vX.Y.Z)`, matching the existing entries.
 
-4. **Update the status line** in `CLAUDE.md` — which version is released and
+4. **Update the status line** in `AGENTS.md` — which version is released and
    which is in development.
 
 5. **Verify.** All of these, not a subset:

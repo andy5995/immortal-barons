@@ -3,7 +3,7 @@ package game
 import "testing"
 
 // The figures below are golden literals, not mirrors of the balance.go
-// constants — a retune has to fail here and produce new evidence (CLAUDE.md's
+// constants — a retune has to fail here and produce new evidence (AGENTS.md's
 // fidelity contract). Capture and loss are quoted from BRE's own in-game help,
 // game/attack.hlp. The STRENGTH multipliers are quoted from the resolver
 // instead (BRE.OVR 0x4055a-0x405a8), because the two sources disagree about the

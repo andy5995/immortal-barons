@@ -160,7 +160,7 @@ func TestConcurrentGroupAttackGatherIsRaceFree(t *testing.T) {
 	}
 	// The reader must have REACHED the gather, not returned above it: a new
 	// realm is blocked from attacking before any of this runs, and a test that
-	// stopped there would pass with the lock removed (CLAUDE.md).
+	// stopped there would pass with the lock removed (AGENTS.md).
 	f := &fakeSession{keys: []rune("0\r")}
 	createGroupAttack(f, cR)
 	if out := f.out.String(); !strings.Contains(out, "Target which planet?") {
