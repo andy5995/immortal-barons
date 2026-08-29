@@ -130,6 +130,13 @@ SubjectPath Absolute
   only `NNNNCCCC.BRP`. Any other value is used as a literal path prefix.
   The stored-message Subject has 71 usable bytes, or 70 with the `^` prefix.
 
+On the receiving side, the tosser normally leaves both the bundle and its
+stored-message envelope in the configured inbound. `barons-ftn --in` verifies
+that the message has the file-attach attribute, identifies Immortal Barons,
+names exactly one attachment inside `InboundDir`, comes from a roster address,
+and is addressed to this board. Only after all packets are delivered or
+forwarded does it delete both files. Other netmail is never removed.
+
 #### Keeping attach subjects short
 
 The IB installation and data directories may be arbitrarily deep if
@@ -177,7 +184,10 @@ Link 4 BSO /var/spool/ftn/outbound.309 Hold
 The modes are:
 
 - `Attach` creates a game-owned `.msg` in `NetmailDir` addressed to that next
-  hop. It takes no per-link directory.
+  hop. It takes no per-link directory. It is the compatibility default, and it
+  is the weakest of the three: a tosser stands between the helper and the
+  mailer, and the Subject limit above is its alone. Prefer `BSO` where the
+  mailer keeps a Binkley-style outbound.
 - `Obox` atomically publishes the bundle in the named peer-specific directory.
   The mailer must treat a final-name appearance as a complete file.
 - `BSO` takes the destination's `.bsy`, then either merges into a compatible
@@ -320,30 +330,31 @@ unwraps it, leaves its signed JSON bytes untouched, and publishes a new
 transport bundle through node 4's BSO flow. It does not wait for the hub's next
 planetary run.
 
-### Synchronet stored-message chain
+### Synchronet
 
+BinkIT keeps a Binkley-style outbound, so a Synchronet board should hand the
+bundle to that outbound directly:
+
+<!-- test-ftn-config -->
 ```ini
 InboundDir /sbbs/fido/inbound
-InboundNetmailDir /sbbs/fido/inbound
-NetmailDir /sbbs/fido/netmail
-AttachDir /sbbs/fido/ib-attach
-Binkley Yes
-SubjectPath Absolute
-Link 1 Attach
+Link 1 BSO /sbbs/fido/outbound Normal
 ```
 
 The outbound chain is:
 
 ```text
-barons-ftn --out -> .msg + NNNNCCCC.BRP -> SBBSecho -> BSO -> BinkIT
+barons-ftn --out -> NNNNCCCC.BRP + .flo entry -> BinkIT
 ```
 
-The receiving tosser normally leaves both the bundle and its stored-message
-envelope in the configured inbound. `barons-ftn --in` verifies that the message
-has the file-attach attribute, identifies Immortal Barons, names exactly one
-attachment inside `InboundDir`, comes from a roster address, and is addressed
-to this board. Only after all packets are delivered or forwarded does it delete
-both files. Other netmail is never removed.
+SBBSecho is not in that path. The Subject byte limit does not apply either,
+because a flow file holds the whole pathname, so `AttachDir` can stay at its
+default.
+
+Name the outbound directory for the destination's zone. Synchronet writes the
+system's own zone into the base directory and every other zone into
+`outbound.<zone in hex>`. See [Direct BSO/FLO handoff](#direct-bsoflo-handoff)
+for what the helper writes there.
 
 ### Direct BSO/FLO handoff
 
@@ -601,8 +612,12 @@ under the data directory (see [Stored-message attach
 settings](#stored-message-attach-settings)) — a board whose data directory is
 already deep, as a Synchronet door is under the usual `<sbbs>/xtrn/<door>/data`
 layout, can lose all its Subject margin to that alone and publish nothing on
-the first `--out`, with no config change of its own. If `--out` fails immediately with an `attachment subject ... is N bytes`
-error, set `AttachDir` to a short, persistent directory outside the data tree
-per [Keeping attach subjects short](#keeping-attach-subjects-short) — check
-this **before** enabling step 5 on any board that used `Attach` links prior to
-this helper's bundled-transport rewrite, not after the first failure.
+the first `--out`, with no config change of its own. If `--out` fails
+immediately with an `attachment subject ... is N bytes` error, set `AttachDir`
+to a short, persistent directory outside the data tree per [Keeping attach
+subjects short](#keeping-attach-subjects-short) — check this **before**
+enabling step 5 on any board that used `Attach` links prior to this helper's
+bundled-transport rewrite, not after the first failure.
+
+A Synchronet board should move that link to `BSO` at step 4 instead. See
+[Synchronet](#synchronet).

@@ -1023,10 +1023,13 @@ often than daily, and the poll — which the game cannot do for you at all.
 
 The steps under "Joining a league (member boards)" are the game's side. This
 section is Synchronet's side — where each setting lives, and what carries the
-packets. It assumes SBBSecho and BinkIT are already running your other mail.
-The complete current configuration, including obox and BSO alternatives, is in
-[FTN Transport with `barons-ftn`](ftn-transport.md); this example uses the
-stored-message Attach link.
+packets. It assumes BinkIT is already running your other mail. The complete
+current configuration, including the other link types, is in [FTN Transport
+with `barons-ftn`](ftn-transport.md).
+
+This example hands the packets straight to BinkIT's outbound. That is the right
+way on Synchronet: SBBSecho has nothing to add to a bundle, and every step you
+remove is one that cannot break.
 
 Paths below are the Linux defaults. On Windows they are `C:\SBBS\...`, the two
 programs are `immortal-barons.exe` and `barons-ftn.exe`, and the script in the
@@ -1038,9 +1041,8 @@ In `scfg` → Networks → FidoNet EchoMail and NetMail:
 
 - **System Addresses** — add the address the Coordinator assigned you. Leave
   your existing addresses alone.
-- **NetMail Directory** — note the path. It goes in `ftn.cfg` below.
-- **Allow File Attachments** — `Yes`. With it off the netmail is written and
-  then ignored.
+
+Nothing else on that screen matters here. The game writes no netmail.
 
 ### A domain for the league
 
@@ -1052,9 +1054,16 @@ Zones   777
 ```
 
 The other three fields can stay empty. The domain keeps the league's zone from
-being read as part of a network you already carry, and gives it its own
-outbound tree if you set **Outbound Root**. Any name will do; use the same one
-everywhere below.
+being read as part of a network you already carry. Any name will do; use the
+same one everywhere below.
+
+**Work out the outbound directory now**, because `ftn.cfg` needs the exact
+path. Synchronet starts from **Outbound Root** on the domain, or from
+SBBSecho's own **Outbound** when that field is empty, and then adds the zone in
+hexadecimal as a suffix on the directory name. Zone 777 is `309`, so an
+outbound of `/sbbs/fido/outbound` makes the league's directory
+`/sbbs/fido/outbound.309`. The suffix is added whenever the domain differs from
+your main one, even if the zone numbers happen to match.
 
 ### The Coordinator as a linked node
 
@@ -1075,45 +1084,42 @@ Check the host it dials and that authentication succeeds.
 Once the game side is set up too, `immortal-barons -league-check` should come
 back with no FAIL lines.
 
-### Point `barons-ftn` at the netmail directory
+### Point `barons-ftn` at the two directories
 
 In the game's data directory, `ftn.cfg`:
 
 ```
-NetmailDir /sbbs/fido/netmail
-AttachDir  /sbbs/fido/ib-attach
 InboundDir /sbbs/fido/inbound
-Binkley    Yes
-Link 1     Attach
+Link 1     BSO /sbbs/fido/outbound.309 Normal
 ```
 
-`Binkley Yes` is what BinkIT expects. Leave `SubjectPath` alone: SBBSecho
-takes the attachment's directory from the netmail subject, so the full
-pathname has to be there. That pathname gets 70 bytes — see [Attachment
-pathnames](#attachment-pathnames) — which is another reason to keep the game's
-data directory short.
+`InboundDir` is where BinkIT drops what it receives. The `Link` line is the
+outbound directory you worked out above, and node 1 is the Coordinator's
+number on the roster.
 
-### The five steps, in order
+`barons-ftn` writes the bundle and a flow file naming its full path, so the
+70-byte subject limit under [Attachment pathnames](#attachment-pathnames) does
+not apply to a Synchronet board and the game's data directory can sit wherever
+you like.
+
+### The four steps, in order
 
 ```
 barons-ftn --in -data /sbbs/xtrn/imb/data
 immortal-barons -planetary -data /sbbs/xtrn/imb/data
 barons-ftn --out -data /sbbs/xtrn/imb/data
-sbbsecho
 jsexec -c /sbbs/ctrl /sbbs/exec/binkit.js
 ```
 
 The game reads and writes private JSON `.brp` files. Outbound `barons-ftn`
-coalesces them into one 8.3 transport bundle per next hop and wraps that bundle
-in one `.msg`. SBBSecho packs it into the BSO/FLO outbound and BinkIT sends it.
-At the far side, inbound `barons-ftn` validates/deletes the game-owned envelope
-and unwraps the bundle. Wherever a file stops is the step that did not run.
+coalesces them into one 8.3 transport bundle per next hop, puts it in the
+outbound directory, and adds a line for it to the flow file BinkIT reads. BinkIT
+sends the bundle and deletes it. At the far side, inbound `barons-ftn` unwraps
+it. Wherever a file stops is the step that did not run.
 
-`sbbsecho` takes its ctrl directory from `SBBSCTRL`, not from an `.ini` path on
-the command line, so set that variable in the script if your board is not at
-`/sbbs`. Judge a run by whether the outbound emptied, not by BinkIT's last
-line: a session that transferred everything can still end on a complaint about
-files pending acknowledgement.
+Judge a run by whether the outbound emptied, not by BinkIT's last line: a
+session that transferred everything can still end on a complaint about files
+pending acknowledgement.
 
 Put those four lines in a shell script and give it a lock, so the door's
 clean-up and the timed event cannot run it at once:
@@ -1127,8 +1133,8 @@ flock -n 9 || exit 0
 
 Then set it as the door's **Clean-up Command Line** in `scfg` → External
 Programs → Online Programs, and add a timed event that runs it every 15
-minutes or so. It carries your other networks' mail too, since SBBSecho and
-BinkIT are system-wide.
+minutes or so. It carries your other networks' mail too, since BinkIT is
+system-wide.
 
 On Windows there is no `flock`; run the batch file from the timed event alone
 and leave the clean-up command line empty.
