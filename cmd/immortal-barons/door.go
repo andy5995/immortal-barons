@@ -11,6 +11,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/door"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/i18n"
 	"github.com/andy5995/immortal-barons/internal/play"
 	"github.com/andy5995/immortal-barons/internal/session"
 	"github.com/andy5995/immortal-barons/internal/store"
@@ -194,8 +195,9 @@ func runDoor(cfg game.Config, o *opts, today string, cs charset) {
 	// no other trace, so record what the dropfile gave us at launch — the I/O mode,
 	// time-left, and socket handle name the environment. A file (not stderr) so a
 	// remote tester needs no door-config change to capture it.
-	doorLog(cfg.DataDir, "launch handle=%q node=%d io=%s seconds-left=%d socket=%d os=%s stdin-tty=%v ansi=%v",
-		caller.Handle, caller.Node, ioModeName(caller.IO), caller.SecondsLeft, caller.Socket, runtime.GOOS, session.StdinIsTerminal(), caller.ANSI)
+	doorLog(cfg.DataDir, "launch handle=%q node=%d io=%s seconds-left=%d socket=%d os=%s stdin-tty=%v ansi=%v charset=%q language=%q",
+		caller.Handle, caller.Node, ioModeName(caller.IO), caller.SecondsLeft, caller.Socket, runtime.GOOS, session.StdinIsTerminal(), caller.ANSI,
+		caller.Charset, caller.Language)
 
 	s, closeSession, err := openSession(caller)
 	// ...and separately, which backend actually opened. The line above reports
@@ -213,8 +215,17 @@ func runDoor(cfg game.Config, o *opts, today string, cs charset) {
 	defer closeSession()
 
 	// Traditional BBS terminals expect CP437, so transcode UTF-8 -> CP437 unless
-	// the sysop forces another charset.
-	s = encodeFor(s, wantCharset(*o.utf8, *o.cp437, *o.asciiOut, false))
+	// the sysop forces another charset. A drop file that names the caller's
+	// terminal encoding beats that default, since the board measured it and the
+	// default is only a guess — but a forced flag still wins, because a sysop
+	// who typed one is correcting something.
+	termCS := wantCharset(*o.utf8, *o.cp437, *o.asciiOut, false)
+	if !*o.utf8 && !*o.cp437 && !*o.asciiOut {
+		if named, ok := charsetNamed(caller.Charset); ok {
+			termCS = named
+		}
+	}
+	s = encodeFor(s, termCS)
 	// A caller at the far end of a socket cannot be probed for ANSI the way a
 	// local console can, so the dropfile flag their BBS profile filled in is the
 	// only signal (issue #101). Without ANSI they would otherwise read every
@@ -230,7 +241,11 @@ func runDoor(cfg game.Config, o *opts, today string, cs charset) {
 	// The caller's remaining BBS time is a hard session cap: play.Run's deadline
 	// boots at it, saving the world and releasing the lock cleanly (unlike the
 	// old os.Exit, which lost the turn's progress).
-	id := play.Identity{Handle: handle, TimeLeft: time.Duration(caller.SecondsLeft) * time.Second}
+	id := play.Identity{
+		Handle:   handle,
+		TimeLeft: time.Duration(caller.SecondsLeft) * time.Second,
+		Language: i18n.MatchTag(caller.Language),
+	}
 	reason, err := play.Run(s, id, cfg, today)
 	// Diagnostic (data/ib-door.log): record how the session ended. A silent
 	// no-splash bounce (issue #37) shows up here as reason="disconnect" right

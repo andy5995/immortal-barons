@@ -20,10 +20,13 @@ import (
 )
 
 // Identity is who is playing. TimeLeft, when > 0, is a hard cap on the whole
-// session (a door caller's remaining BBS minutes); 0 means unlimited.
+// session (a door caller's remaining BBS minutes); 0 means unlimited. Language
+// is a code the game ships translations for, from a drop file that names the
+// caller's own language; "" means the board did not say, or said English.
 type Identity struct {
 	Handle   string
 	TimeLeft time.Duration
+	Language string
 }
 
 // Run plays one session for the given caller. The returned reason describes how
@@ -245,8 +248,13 @@ func Session(s session.Session, id Identity, w *game.World, cfg game.Config, reb
 		// The signup prompt only appears in UTF-8 mode; a CP437 caller who wants a
 		// CP437-representable language (e.g. German) sets it later from the
 		// in-game Preferences menu, keeping the common English signup unchanged.
-		lang := ""
-		if term.UTF8 {
+		//
+		// A drop file that names the caller's language answers the question
+		// before it is asked, so the picker is skipped entirely. It sets the new
+		// empire's language only: a returning player was found above, and their
+		// own choice from Preferences is not overridden by what a board says.
+		lang := id.Language
+		if lang == "" && term.UTF8 {
 			lang = selectLanguage(s)
 		}
 		if lang != "" {

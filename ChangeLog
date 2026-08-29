@@ -1,4 +1,6 @@
 (in-progress:)
+  * BBSDEV.DRP joins the drop file formats offered by -set-dropfile
+  * A drop file that names the caller's encoding and language is followed
   * With Auto-Feed off the Food Market opens every turn, as the original does
   * The Military advisor reports the Mountain industry boost
   * Set Industries stops asking for percentages once 100% is allocated

@@ -90,6 +90,10 @@ func parseBBSDev(b []byte) (*Caller, error) {
 			return nil, fmt.Errorf("line %d (%s): empty", f.n, f.what)
 		}
 	}
+	// Carried as written. What the door can render, and which translations it
+	// ships, are its own questions, and they belong where those answers live.
+	c.Charset = field(lines, 12)
+	c.Language = field(lines, 13)
 	c.BBSID = field(lines, 14)
 
 	if err := bbsDevAccess(field(lines, 17)); err != nil {

@@ -127,6 +127,12 @@ type Caller struct {
 	IO          IOMode
 	Socket      int    // socket/comm handle when IO is IOSocket
 	BBSID       string // BBS software name/version, if provided
+
+	// Charset and Language are what the BBS says about the caller's terminal
+	// and the caller themself. Only BBSDEV.DRP carries them; the older formats
+	// leave both empty, which means "the door decides", as it always has.
+	Charset  string // IANA character-set name, e.g. "IBM437"
+	Language string // BCP 47 language tag, e.g. "de-DE"
 }
 
 // ParseDropfileAs reads the dropfile at path as the named format (a Format ID).

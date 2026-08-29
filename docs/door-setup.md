@@ -68,6 +68,9 @@ Set up the game as an external program (a "door") in your BBS software.
   `BBSDEV_DRP` environment variable first, which is how that format expects a
   BBS to name the file.
 - The caller's handle from the drop file becomes the name of their realm.
+- A drop file that names the caller's terminal encoding and language is
+  followed: the game sends that encoding, and a new player skips the language
+  question. Only BBSDEV.DRP carries those two fields.
 
 A typical command line (use the full path to `immortal-barons` only if it is not
 installed on your `PATH`):

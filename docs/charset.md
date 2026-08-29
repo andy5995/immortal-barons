@@ -11,6 +11,10 @@ choose.
   right.
 - **`-local`** auto-detects from your locale — UTF-8 when your locale is UTF-8
   (common today) — so local play usually needs no option.
+- **A drop file that names the caller's encoding is followed**, since the board
+  knows the terminal and the default is only a guess. Only BBSDEV.DRP carries
+  that field. An encoding the game cannot send becomes ASCII. Any of the three
+  options above still overrides it.
 
 ## The three character sets
 
@@ -34,8 +38,9 @@ one a caller has, or when their terminal is set to something else entirely
 - `-utf8` — force UTF-8 output.
 - `-cp437` — force CP437 output.
 - `-ascii` — force plain ASCII output.
-- None of them — the game sends CP437, unless you use `-local`, which
-  auto-detects from your locale (see below).
+- None of them — the game sends CP437, unless the drop file names the caller's
+  encoding, or you use `-local`, which auto-detects from your locale (see
+  below).
 
 You can use only one at a time. A separate option, `-no-ansi`, controls whether
 the game sends colour and cursor control at all; the two questions are

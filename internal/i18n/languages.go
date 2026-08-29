@@ -1,5 +1,7 @@
 package i18n
 
+import "strings"
+
 // Language is one non-English language that Immortal Barons ships translations
 // for. English is always the default and the fallback for untranslated text, so
 // it is not listed here.
@@ -26,4 +28,24 @@ func Codes() []string {
 		out[i] = l.Code
 	}
 	return out
+}
+
+// MatchTag returns the language code for a BCP 47 tag, or "" for English and
+// for any language the game does not ship. It compares the primary subtag only:
+// a board writing "de-AT" or "de-DE" means the German catalog either way, since
+// the catalogs are not regional. Comparison is case-insensitive, as BCP 47
+// requires.
+//
+// "" is the game's English default, so an unknown tag is not an error here —
+// the caller simply reads English, which is also the fallback for any string a
+// catalog has not translated.
+func MatchTag(tag string) string {
+	primary, _, _ := strings.Cut(strings.TrimSpace(tag), "-")
+	primary = strings.ToLower(primary)
+	for _, l := range Languages {
+		if l.Code == primary {
+			return l.Code
+		}
+	}
+	return ""
 }

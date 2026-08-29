@@ -194,6 +194,50 @@ func TestFirstRunLanguageSelection(t *testing.T) {
 	}
 }
 
+// A drop file that names the caller's language answers the picker's question
+// before it is asked. The key script has one key FEWER than the picker path, so
+// the assertions have to prove the flow actually reached the realm-name prompt
+// and created the empire, not merely that it produced output.
+func TestDropfileLanguageSkipsThePicker(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	// splash dismiss, realm name, Quit — no language keypress
+	f := &fakeSession{keys: []rune(" Khanate\r0")}
+	if _, err := Run(f, Identity{Handle: "Khan", Language: "de"}, cfg, "2026-07-03"); err != nil {
+		t.Fatal(err)
+	}
+	if strings.Contains(f.out.String(), "Select your language") {
+		t.Error("the picker should not be shown when the drop file named a language")
+	}
+	w, _ := store.Load(cfg)
+	e := w.FindByOwner("khan")
+	if e == nil {
+		t.Fatal("empire should have been created and saved")
+	}
+	if e.Name != "Khanate" {
+		t.Errorf("realm: got %q, want Khanate — the name prompt was never reached", e.Name)
+	}
+	if e.Language != "de" {
+		t.Errorf("Empire.Language: got %q, want de", e.Language)
+	}
+}
+
+// A board that says English, or a language with no catalog, leaves the picker
+// in place rather than silently choosing for the caller.
+func TestUnshippedDropfileLanguageStillPrompts(t *testing.T) {
+	cfg := cfgIn(t.TempDir())
+	f := &fakeSession{keys: []rune(" 2\rKhanate\r0")}
+	if _, err := Run(f, Identity{Handle: "Khan", Language: ""}, cfg, "2026-07-03"); err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(f.out.String(), "Select your language") {
+		t.Fatal("the picker should still be shown when the drop file named no language")
+	}
+	w, _ := store.Load(cfg)
+	if e := w.FindByOwner("khan"); e == nil || e.Language != "de" {
+		t.Errorf("the picker's choice should still apply, got %+v", e)
+	}
+}
+
 func TestReturningPlayerNotPrompted(t *testing.T) {
 	cfg := cfgIn(t.TempDir())
 	// create + save an empire that already has a language set

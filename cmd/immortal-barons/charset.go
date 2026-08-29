@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -39,4 +41,29 @@ func encodeFor(s session.Session, cs charset) session.Session {
 	default:
 		return s
 	}
+}
+
+// charsetNamed maps an IANA character-set name from a drop file onto what the
+// door can actually send. Matching is case-insensitive, as the BBSDEV.DRP spec
+// requires, and covers the registry's aliases because a board is free to write
+// any of them.
+//
+// A name the door does not know falls to ASCII rather than to the CP437
+// default. That is the deliberate direction: a Latin-1 or CP866 terminal sent
+// CP437 renders the box rules and blocks as garbage, while ASCII look-alikes
+// are readable on any of them. ok is false only for an empty name, which is
+// every format except BBSDEV.DRP.
+func charsetNamed(name string) (charset, bool) {
+	switch strings.ToLower(strings.TrimSpace(name)) {
+	case "":
+		return 0, false
+	case "utf-8", "utf8", "csutf8":
+		return charsetUTF8, true
+	case "ibm437", "cp437", "437", "cspc8codepage437":
+		return charsetCP437, true
+	case "us-ascii", "ascii", "ansi_x3.4-1968", "ansi_x3.4-1986", "iso646-us",
+		"iso_646.irv:1991", "iso-ir-6", "ibm367", "cp367", "us", "csascii":
+		return charsetASCII, true
+	}
+	return charsetASCII, true
 }
