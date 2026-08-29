@@ -51,8 +51,9 @@ Set up the game as an external program (a "door") in your BBS software.
 - Run `-set-dropfile` once to tell the game which drop file your BBS writes.
   The supported formats are **DOOR32.SYS**,
   [**DOOR.SYS**](https://wiki.synchro.net/ref:door.sys),
-  [**PCBOARD.SYS**](https://wiki.synchro.net/ref:pcboard.sys), and
-  [**DORINFO1.DEF**](https://wiki.synchro.net/ref:dorinfo1.def). The
+  [**PCBOARD.SYS**](https://wiki.synchro.net/ref:pcboard.sys),
+  [**DORINFO1.DEF**](https://wiki.synchro.net/ref:dorinfo1.def), and
+  [**BBSDEV.DRP**](https://realdeuce.github.io/bbsdev.drp/). The
   [Synchronet](https://www.synchro.net/) wiki keeps an
   [index of drop file formats](https://wiki.synchro.net/ref:files#drop_files).
   DOOR32.SYS is the one most modern BBS software writes and the best choice when
@@ -63,7 +64,9 @@ Set up the game as an external program (a "door") in your BBS software.
   - If you are updating from an earlier version, run `-set-dropfile` once after
     you install the update. Earlier versions did not have this setting.
 - Point the game at the drop file with `-dropfile`, or let it search the current
-  directory for the configured format.
+  directory for the configured format. With BBSDEV.DRP the game reads the
+  `BBSDEV_DRP` environment variable first, which is how that format expects a
+  BBS to name the file.
 - The caller's handle from the drop file becomes the name of their realm.
 
 A typical command line (use the full path to `immortal-barons` only if it is not

@@ -169,6 +169,9 @@ func runDoor(cfg game.Config, o *opts, today string, cs charset) {
 		want := doorCfg.DropfileFormat
 		if f, ok := door.FormatByID(want); ok {
 			want = f.File
+			if f.Env != "" {
+				want += " and $" + f.Env
+			}
 		}
 		doorLog(cfg.DataDir, "no drop file found: format=%q searched cwd for %s (pass -dropfile PATH)", doorCfg.DropfileFormat, want)
 		fmt.Fprintln(os.Stderr, "immortal-barons: no dropfile found.")

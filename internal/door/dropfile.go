@@ -4,7 +4,8 @@
 //
 // DOOR32.SYS is the primary format (both Synchronet and Mystic write it,
 // and it cleanly encodes the I/O method). DOOR.SYS, PCBOARD.SYS, and
-// DORINFO1.DEF are supported as widely-used alternatives. Field positions were
+// DORINFO1.DEF are supported as widely-used alternatives, and BBSDEV.DRP as a
+// modern one that specifies what the others leave to convention. Field positions were
 // cross-checked against the Synchronet source (src/xpdoor/dropfiles.c), the
 // Synchronet wiki PCBOARD.SYS and DORINFO1.DEF references, and BRE's own
 // INSTALL.CFG.
@@ -27,7 +28,8 @@ import (
 
 // Format describes a dropfile format the door can read. ID is what the sysop's
 // config stores (door.json); Name is for display; File is the canonical filename
-// for working-directory auto-detection.
+// for working-directory auto-detection; Env, when set, is an environment
+// variable the format's own spec says the BBS points at the file.
 //
 // read and matches keep this the single source of truth: adding a format means
 // adding one entry here, not touching a parse switch, a filename switch, and a
@@ -36,6 +38,7 @@ type Format struct {
 	ID   string
 	Name string
 	File string
+	Env  string
 
 	read    func(path string) (*Caller, error) // parses this format
 	matches func(lowerName string) bool        // nil = the file name equals File
@@ -50,6 +53,7 @@ var Formats = []Format{
 		matches: func(n string) bool { // BBBS names it dorinfo<node>.def
 			return strings.HasPrefix(n, "dorinfo") && strings.HasSuffix(n, ".def")
 		}},
+	{ID: "bbsdev", Name: "BBSDEV.DRP", File: "BBSDEV.DRP", Env: "BBSDEV_DRP", read: fromBytes(parseBBSDev)},
 }
 
 // fromLines adapts a line-based parser to Format.read.

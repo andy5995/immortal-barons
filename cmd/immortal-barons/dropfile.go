@@ -29,13 +29,21 @@ func noteDropfileUnset(dataDir string) {
 	}
 }
 
-// findDropfile looks in the working directory for the configured format's drop
-// file (either letter case), a convenience for when -dropfile isn't given. The
-// real door invocation passes -dropfile explicitly.
+// findDropfile locates the configured format's drop file when -dropfile isn't
+// given. A format whose spec defines an environment variable for the path is
+// asked there first — BBSDEV.DRP makes that variable the standard discovery
+// mechanism, and it is the only one that survives a BBS launching the door from
+// a directory of its own. Otherwise it looks in the working directory, either
+// letter case. The real door invocation passes -dropfile explicitly.
 func findDropfile(format string) string {
 	f, ok := door.FormatByID(format)
 	if !ok {
 		return ""
+	}
+	if f.Env != "" {
+		if p := os.Getenv(f.Env); p != "" {
+			return p
+		}
 	}
 	for _, n := range []string{f.File, strings.ToLower(f.File)} {
 		if _, err := os.Stat(n); err == nil {
