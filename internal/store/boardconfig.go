@@ -158,9 +158,6 @@ func BoardConfigText(cfg game.Config) string {
 	b.WriteString("# for you.\n")
 	fmt.Fprintf(&b, "%s %s\n\n", keyLottery, yesNo(cfg.Lottery))
 
-	b.WriteString("# Whether a pirate raid's outcome is posted to the planet news, in\n")
-	b.WriteString("# league and solo play alike. Yes or no; the raids themselves happen\n")
-	b.WriteString("# either way, and the raider is always told how theirs went.\n")
 	fmt.Fprintf(&b, "%s %s\n\n", keyPirate, yesNo(cfg.PirateNews))
 
 	b.WriteString("# A board that forwards for its neighbours has one link per neighbour:\n")
