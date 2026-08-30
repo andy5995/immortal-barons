@@ -297,15 +297,15 @@ func ipScoreRank(s session.Session, w *ctx, rows []ipScoreRow, kind ipRankKind) 
 	fmt.Fprintf(s, "%s%s%s\n", ansi.FgBrightBlack, rule, ansi.Reset)
 	for i, r := range viewRows {
 		if isPlanet {
-			fmt.Fprintf(s, "%s(%s%3d%s) %s%-22s%s%s%18d%s\n",
+			fmt.Fprintf(s, "%s(%s%3d%s) %s%s%s%s%18d%s\n",
 				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
-				ansi.FgWhite, fitColumn(w.Term, r.name, 22), ansi.Reset,
+				ansi.FgWhite, padColumn(w.Term, r.name, 22), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset)
 		} else {
 			// The Planet column's own width is not captured; 21 ends it on the rule.
-			fmt.Fprintf(s, "%s(%s%3d%s) %s%-22s%s%s%18d%s     %s%s%s\n",
+			fmt.Fprintf(s, "%s(%s%3d%s) %s%s%s%s%18d%s     %s%s%s\n",
 				ansi.FgRed, ansi.FgBrightRed, i+1, ansi.FgRed,
-				ansi.FgWhite, fitColumn(w.Term, r.name, 22), ansi.Reset,
+				ansi.FgWhite, padColumn(w.Term, r.name, 22), ansi.Reset,
 				ansi.FgBrightWhite, r.val, ansi.Reset,
 				ansi.FgWhite, fitColumn(w.Term, r.planet, 21), ansi.Reset)
 		}
@@ -383,6 +383,18 @@ func fitColumn(t Term, text string, width int) string {
 	return trimToWidth(t, text, room) + mark
 }
 
+// padColumn fits text into width and pads it to exactly that many COLUMNS on
+// the caller's terminal — what a table cell holding player-controlled text
+// needs and a `%-*s` verb cannot give it. fmt measures RUNES and never
+// truncates, so such a cell both overran its column (a realm name may run to
+// game.RealmNameMaxChars, wider than several of the cells that carry one) and
+// under-padded on a charset whose writer expands a rune ("—", "…" and the
+// curly quotes on CP437; a much wider set under -ascii).
+func padColumn(t Term, text string, width int) string {
+	text = fitColumn(t, text, width)
+	return text + strings.Repeat(" ", max(width-visWidth(t, text), 0))
+}
+
 // trimToWidth drops runes off the end until what is left fits width columns on
 // the caller's terminal.
 func trimToWidth(t Term, text string, width int) string {
@@ -398,12 +410,20 @@ func trimToWidth(t Term, text string, width int) string {
 // plain-ASCII writers rewrite "—", "…", "→" and the rest as two or three ASCII
 // characters, and they sit below every layer that counts columns, so a fixed
 // rule measured in runes came out short and the drawn line overhung it (#192).
-// ToASCII stands in for both — every length-changing CP437 fallback is in the
-// ASCII table too, and the accent and Cyrillic cases are one rune either way.
 // Term, not session.IsUTF8(s), for the reason given on fitColumn.
+//
+// The three charsets each measure differently, and ToASCII does NOT stand in for
+// CP437: it expands a dozen characters CP437 draws in one column (±, °, ½, ß,
+// Σ, ≤ …), so a realm named "±Tatooine" was padded two columns short and every
+// figure on its row sat left of the heading. CP437 is the default charset, so
+// that is the common case.
 func visWidth(t Term, text string) int {
-	if t.UTF8 {
+	switch {
+	case t.UTF8:
 		return len([]rune(text))
+	case t.ASCII:
+		return len([]rune(session.ToASCII(text)))
+	default:
+		return session.CP437Width(text)
 	}
-	return len([]rune(session.ToASCII(text)))
 }

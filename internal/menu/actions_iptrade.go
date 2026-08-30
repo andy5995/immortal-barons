@@ -75,9 +75,9 @@ func browseRemoteMarket(s session.Session, w *ctx, board string) {
 	for i, r := range rows {
 		// The number is padded rather than bare: a market with ten or more
 		// listings would otherwise step every column right at "(10)".
-		fmt.Fprintf(s, "%s(%s%2d%s)%s %s%-20s%-12s%s%s%12s %10s%s\n",
+		fmt.Fprintf(s, "%s(%s%2d%s)%s %s%s%-12s%s%s%12s %10s%s\n",
 			ansi.FgYellow, ansi.FgBrightYellow, i+1, ansi.FgYellow, ansi.Reset,
-			ansi.FgWhite, r.Realm, tr(s, r.Good), ansi.Reset,
+			ansi.FgWhite, padColumn(w.Term, r.Realm, 20), tr(s, r.Good), ansi.Reset,
 			ansi.FgBrightYellow, comma(r.Qty), comma(r.Price), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), remoteMarketRule(), ansi.Reset)

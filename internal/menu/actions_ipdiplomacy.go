@@ -53,9 +53,9 @@ func planetaryTreaties(s session.Session, w *ctx) Result {
 		ansi.FgBrightRed, ansi.FgRed, ansi.Reset)
 	fmt.Fprintf(s, "%s\n", rule)
 	for _, r := range rows {
-		fmt.Fprintf(s, "%s(%s%2d%s) %s%-*s%s%s\n",
+		fmt.Fprintf(s, "%s(%s%2d%s) %s%s%s%s\n",
 			ansi.FgBrightBlack, ansi.FgBrightWhite, r.number, ansi.FgBrightBlack,
-			ansi.FgBrightWhite, treatyNameWidth, r.name,
+			ansi.FgBrightWhite, padColumn(w.Term, r.name, treatyNameWidth),
 			relationColored(s, r.relation), ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s\n", rule)

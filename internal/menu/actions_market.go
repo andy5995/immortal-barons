@@ -153,9 +153,9 @@ func marketBuy(s session.Session, w *ctx, good string) {
 		tr(s, "Id"), tr(s, "Empire Name"), tr(s, "For Sale"), tr(s, "Price"), ansi.Reset)
 	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), sellerRule(), ansi.Reset)
 	for i, l := range sellers {
-		fmt.Fprintf(s, "%s[%s%c%s]%s %s%-16s%s %s%10d %10d%s\n",
+		fmt.Fprintf(s, "%s[%s%c%s]%s %s%s%s %s%10d %10d%s\n",
 			ansi.FgYellow, ansi.FgBrightWhite, byte('A'+i), ansi.FgYellow, ansi.Reset,
-			ansi.FgWhite, l.Realm, ansi.Reset, ansi.FgBrightYellow, l.Qty, l.Price, ansi.Reset)
+			ansi.FgWhite, padColumn(w.Term, l.Realm, 16), ansi.Reset, ansi.FgBrightYellow, l.Qty, l.Price, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", dim(marketAccent), sellerRule(), ansi.Reset)
 	fmt.Fprintf(s, "\n%s%s%s ", ansi.FgBrightWhite, tr(s, "Choose a Target (0 to cancel)?"), ansi.Reset)

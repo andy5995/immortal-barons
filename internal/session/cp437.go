@@ -83,6 +83,17 @@ func (c *cp437Writer) UTF8() bool { return false }
 // on either side of the plain writer without hiding it from HasANSI.
 func (c *cp437Writer) ANSI() bool { return HasANSI(c.Session) }
 
+// CP437Width is how many COLUMNS s occupies once this writer has encoded it.
+// CP437 is single-byte, so every rune costs one column; the fallback pass is the
+// only thing that changes the count ("…" leaves as three dots), and a rune CP437
+// cannot render still costs one — the encoder's substitution byte.
+//
+// It exists because ToASCII is NOT a stand-in for this: it expands a dozen
+// characters CP437 renders in one column (±, °, ½, ß, Σ, ≤ …), and a name
+// carrying one measured two columns wider than it drew, shifting every figure
+// beside it left.
+func CP437Width(s string) int { return len([]rune(cp437Fallback.Replace(s))) }
+
 // CP437Encodable reports whether s can be rendered on a CP437 session with no
 // loss — every rune maps to a CP437 code point. Used to decide whether a
 // translated catalog is safe to show on a CP437 terminal (German maps; Cyrillic

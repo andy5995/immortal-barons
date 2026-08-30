@@ -203,10 +203,10 @@ func writeWorldReport(s session.Session, w *ctx) {
 		// and the WORDS differ too, so the plain file and a monochrome terminal
 		// say the same thing colour alone would.
 		outcome, color := worldReportOutcome(s, b)
-		fmt.Fprintf(s, "  %s%-*s %-*s %-*s %s%s%s\n",
-			ansi.FgWhite, planetCol, fitColumn(w.Term, planet, planetCol),
-			sideCol, fitColumn(w.Term, b.Attacker, sideCol),
-			sideCol, fitColumn(w.Term, b.Defender, sideCol),
+		fmt.Fprintf(s, "  %s%s %s %s %s%s%s\n",
+			ansi.FgWhite, padColumn(w.Term, planet, planetCol),
+			padColumn(w.Term, b.Attacker, sideCol),
+			padColumn(w.Term, b.Defender, sideCol),
 			color, outcome, ansi.Reset)
 	}
 	fmt.Fprintf(s, "%s%s%s\n", dim(ansi.FgBrightRed), worldRule, ansi.Reset)

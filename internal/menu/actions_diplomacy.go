@@ -101,20 +101,20 @@ func allianceStrength(s session.Session, w *ctx) Result {
 	fmt.Fprintln(s, rule)
 	var total game.AllyContribution
 	for _, d := range defenders {
-		allyRow(s, d.Name, d.Troopers, d.Tanks, d.Agents)
+		allyRow(s, w.Term, d.Name, d.Troopers, d.Tanks, d.Agents)
 		total.Troopers += d.Troopers
 		total.Tanks += d.Tanks
 		total.Agents += d.Agents
 	}
 	fmt.Fprintln(s, rule)
-	allyRow(s, tr(s, "Total Forces"), total.Troopers, total.Tanks, total.Agents)
+	allyRow(s, w.Term, tr(s, "Total Forces"), total.Troopers, total.Tanks, total.Agents)
 	pause(s)
 	return Stay
 }
 
 // allyRow prints one line of the Alliance Strength table.
-func allyRow(s session.Session, name string, troopers, tanks, agents int) {
-	fmt.Fprintf(s, "%s%-*s%s%*s%*s%*s%s\n", ansi.FgBrightWhite, allyNameWidth, name,
+func allyRow(s session.Session, t Term, name string, troopers, tanks, agents int) {
+	fmt.Fprintf(s, "%s%s%s%*s%*s%*s%s\n", ansi.FgBrightWhite, padColumn(t, name, allyNameWidth),
 		ansi.FgBrightYellow, allyColumnWidth, allyFigure(s, troopers),
 		allyColumnWidth, allyFigure(s, tanks),
 		allyColumnWidth, allyFigure(s, agents), ansi.Reset)

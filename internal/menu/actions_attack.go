@@ -787,8 +787,8 @@ func annihilatorDefense(s session.Session, w *ctx) {
 
 	fmt.Fprintf(s, "\n%s%-24s %-14s %s%s\n", ansi.FgWhite,
 		tr(s, "From"), tr(s, "Strength"), tr(s, "Days Until Self-Destruct"), ansi.Reset)
-	fmt.Fprintf(s, "%s%-24s %-14s %d%s\n", ansi.FgBrightWhite,
-		d.Creator, fmt.Sprintf("%d%%", d.Intact), d.DaysLeft, ansi.Reset)
+	fmt.Fprintf(s, "%s%s %-14s %d%s\n", ansi.FgBrightWhite,
+		padColumn(w.Term, d.Creator, 24), fmt.Sprintf("%d%%", d.Intact), d.DaysLeft, ansi.Reset)
 	fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(
 		tr(s, "It would take %s jets to destroy it outright."), comma(needed))))
 
