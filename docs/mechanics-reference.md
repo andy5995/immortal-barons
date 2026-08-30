@@ -4670,6 +4670,9 @@ to. These are recent enough to be worth naming here as well, since each replaces
 something the original does line for line and will look like a bug to anyone
 checking IB against a capture:
 
+- **The opening menu shows a clock and a countdown to the new game day**, where
+  BRE shows neither. See "IB's opening menu carries a clock" in
+  `docs/dev/bre-screens.md`.
 - **An interplanetary trade deal is refused at the picker when its target is
   under New Realm Protection**, where the original accepts it and destroys it on
   arrival with nobody told. See "Send Trade Deal" above.

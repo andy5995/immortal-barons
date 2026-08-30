@@ -1,4 +1,5 @@
 (in-progress:)
+  * The entry menu shows the planet's time and how long is left of the game day
   * The Food Market opens after a pause when maintenance was paid automatically
   * The food-consumed line is shown only when the market did not open
   * BBSDEV.DRP joins the drop file formats offered by -set-dropfile

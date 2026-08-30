@@ -2,6 +2,7 @@ package menu
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
@@ -630,5 +631,30 @@ func gameMenuStatus(w *ctx) string {
 	if w.StartedDate == "" {
 		return "" // no maintenance has run yet, so the game has not begun
 	}
-	return fmt.Sprintf(i18n.T(lang, "Game started on %s"), w.StartedDate)
+	started := fmt.Sprintf(i18n.T(lang, "Game started on %s"), w.StartedDate)
+	clock := planetaryClock(time.Now(), w.Today, lang)
+	if clock == "" {
+		return started
+	}
+	// Its own line: one row would run past 80 columns in German or Russian, and
+	// the header is not wrapped.
+	return started + "\n" + clock
+}
+
+// planetaryClock reports the door host's wall clock and how long is left of the
+// game day, which turns at that host's local midnight — the player's only way of
+// telling when turns refresh, since the boundary is the server's, not theirs.
+//
+// It returns nothing when the host's date has moved off the world's own: a
+// sysop's pinned -date, or a session held open across midnight, both leave the
+// wall clock describing a day the world is not on, and a wrong countdown is
+// worse than none.
+func planetaryClock(now time.Time, today, lang string) string {
+	if today == "" || now.Format("2006-01-02") != today {
+		return ""
+	}
+	midnight := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, 1)
+	left := midnight.Sub(now)
+	return fmt.Sprintf(i18n.T(lang, "Planetary time: %s   New day in %s"),
+		now.Format("15:04"), fmt.Sprintf("%d:%02d", int(left.Hours()), int(left.Minutes())%60))
 }

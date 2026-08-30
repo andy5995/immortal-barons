@@ -569,6 +569,20 @@ Menu`), since there the word says where the item goes. The German and Russian
 catalogs had already dropped their "Menü"/"Меню" element for Diplomacy before
 this change.
 
+**IB's opening menu carries a clock above the title rule; BRE's carries none.**
+A second header line under `Game started on <date>` reads `Planetary time: HH:MM
+   New day in H:MM` — the door host's wall clock and the time left of the game
+day, which turns at that host's local midnight. It is its own row because one
+row would run past 80 columns in German or Russian, and the header is not
+wrapped. Nothing on BRE's screens tells a player when
+the day turns, and the boundary is the server's, not the caller's, so a player in
+another timezone had no way to work it out. The clock is 24-hour, and it is there so a
+caller can compare the host's time against their own. It is left out entirely when the host's
+date has moved off the world's own — a sysop's pinned `-date`, or a session held
+open past midnight — because a wrong countdown is worse than none. Drop files
+carry the caller's time *remaining*, never the time of day, so this comes from
+the host clock as Synchronet's own `dropfiles.c` takes it.
+
 **Box widths vary per screen** — BRE sizes each box to its content rather than
 to one house width. Re-measured 2026-08-16 across every capture on disk
 (`cap/`, plus the two older colour captures), counting the title line and the
