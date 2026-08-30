@@ -676,9 +676,11 @@ func TestFeedStageAutoFeedOpensMarketWhenShort(t *testing.T) {
 	w.Player().Prefs.AutoFeed = true
 	p := w.Player()
 	p.Food = 0
-	p.People = 100000                       // ensures FoodUpkeep > 0
-	f := &fakeSession{keys: []rune("0\rn")} // quit market, give default (0), decline reconsider
-	if err := feedStage(f, w, BuildMenus().Food); err != nil {
+	p.People = 100000 // ensures FoodUpkeep > 0
+	// leading key dismisses BRE's pause before the market; then quit market,
+	// give the default (0), decline the reconsider
+	f := &fakeSession{keys: []rune(" 0\rn")}
+	if _, err := feedStage(f, w, BuildMenus().Food, true); err != nil {
 		t.Fatalf("feedStage: %v", err)
 	}
 	out := f.out.String()
@@ -706,9 +708,10 @@ func TestFeedStageAsksForPeopleAndForcesSeparately(t *testing.T) {
 	if got := w.ForcesFoodDue(p); got != 50 {
 		t.Fatalf("test setup: 500,000 turrets should eat 50, got %d", got)
 	}
-	// quit market, take each prompt's default, decline the reconsider
-	f := &fakeSession{keys: []rune("0\r\rn")}
-	if err := feedStage(f, w, BuildMenus().Food); err != nil {
+	// dismiss the pause, quit market, take each prompt's default, decline the
+	// reconsider
+	f := &fakeSession{keys: []rune(" 0\r\rn")}
+	if _, err := feedStage(f, w, BuildMenus().Food, true); err != nil {
 		t.Fatalf("feedStage: %v", err)
 	}
 	out := f.out.String()
@@ -728,7 +731,7 @@ func TestFeedStageNoNoticeWhenFed(t *testing.T) {
 	w.Player().Prefs.AutoFeed = true
 	w.Player().Food = 10_000_000 // far more than needed
 	f := &fakeSession{}
-	if err := feedStage(f, w, BuildMenus().Food); err != nil {
+	if _, err := feedStage(f, w, BuildMenus().Food, true); err != nil {
 		t.Fatalf("feedStage: %v", err)
 	}
 	if f.out.Len() != 0 {
@@ -747,8 +750,8 @@ func TestFeedStageAutoFeedOffOpensMarketEvenWhenFed(t *testing.T) {
 	p := w.Player()
 	p.People = 100000
 	p.Food = 10_000_000 // far more than needed
-	f := &fakeSession{keys: []rune("0\r\r")}
-	if err := feedStage(f, w, BuildMenus().Food); err != nil {
+	f := &fakeSession{keys: []rune(" 0\r\r")}
+	if _, err := feedStage(f, w, BuildMenus().Food, true); err != nil {
 		t.Fatalf("feedStage: %v", err)
 	}
 	out := f.out.String()
@@ -771,8 +774,8 @@ func TestFeedStageAutoFeedOffOpensMarketWhenShort(t *testing.T) {
 	p := w.Player()
 	p.Food = 0
 	p.People = 100000
-	f := &fakeSession{keys: []rune("0\rn")}
-	if err := feedStage(f, w, BuildMenus().Food); err != nil {
+	f := &fakeSession{keys: []rune(" 0\rn")}
+	if _, err := feedStage(f, w, BuildMenus().Food, true); err != nil {
 		t.Fatalf("feedStage: %v", err)
 	}
 	out := f.out.String()
@@ -781,6 +784,104 @@ func TestFeedStageAutoFeedOffOpensMarketWhenShort(t *testing.T) {
 	}
 	if !strings.Contains(out, "disastrous") {
 		t.Errorf("an unfed realm must raise the reconsider; got:\n%s", out)
+	}
+}
+
+// BRE pauses between the maintenance total and the Food Market, and prints its
+// "units of Food consumed." summary ONLY when it fed the realm silently — the
+// market path goes straight from the two obligations to the bank
+// (cap/eots-ibbs-01.cap: 8 market turns, none carrying that line, against 130
+// silent ones that all do). The assertions below check the flow reached the
+// market, not merely that it produced output: a script that lost a key to the
+// new pause would fail on the market title.
+func TestFeedStagePausesBeforeTheMarket(t *testing.T) {
+	w := newWorld()
+	w.Player().Prefs.AutoFeed = false
+	p := w.Player()
+	p.People = 100000
+	p.Food = 10_000_000
+	f := &fakeSession{keys: []rune(" 0\r\r")}
+	silent, err := feedStage(f, w, BuildMenus().Food, true)
+	if err != nil {
+		t.Fatalf("feedStage: %v", err)
+	}
+	if silent {
+		t.Error("the market ran, so feedStage must not report a silent feed")
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "Paused") {
+		t.Errorf("expected the pause before the market; got:\n%s", out)
+	}
+	if !strings.Contains(out, "Chopper") {
+		t.Errorf("the flow never reached the Food Market; got:\n%s", out)
+	}
+	if i, j := strings.Index(out, "Paused"), strings.Index(out, "Chopper"); i > j {
+		t.Error("the pause must come before the market, not after it")
+	}
+}
+
+// The pause has to survive the WHOLE turn path, not just a direct feedStage
+// call: paymentStage is what reports the auto-pay summary, and a wrong return
+// value there is invisible to a test that passes the flag in by hand. That is
+// exactly what shipped in 91e0a42f — the unit tests below were green while a
+// real turn showed "242,483 Gold paid." followed straight by the market.
+func TestRunTurnPausesBetweenTheAutoPaySummaryAndTheMarket(t *testing.T) {
+	w := newWorld()
+	p := w.Player()
+	p.Prefs.AutoPayMaint = true
+	p.Prefs.AutoFeed = false // Auto-Feed off opens the market every turn
+	p.People = 100000
+	p.Food = 10_000_000
+	f := &fakeSession{keys: []rune("      000n")}
+	runTurn(f, w)
+	out := stripANSI(f.out.String())
+	gold := strings.Index(out, "Gold paid.")
+	market := strings.Index(out, "Chopper")
+	if gold < 0 || market < 0 {
+		t.Fatalf("the turn never reached the auto-pay summary and the market:\n%s", out)
+	}
+	if !strings.Contains(out[gold:market], "Paused") {
+		t.Errorf("no pause between the summary and the market; between them:\n%q", out[gold:market])
+	}
+}
+
+// Maintenance paid by hand gets NO pause before the market: BRE goes straight
+// from the last payment prompt to it (cap/kd3-01.cap, the Queen Royale prompt
+// followed immediately by "We have N units of food available today."). The
+// pause belongs to the auto-pay summary, not to the food stage.
+func TestFeedStageDoesNotPauseAfterManualMaintenance(t *testing.T) {
+	w := newWorld()
+	w.Player().Prefs.AutoFeed = false
+	p := w.Player()
+	p.People = 100000
+	p.Food = 10_000_000
+	f := &fakeSession{keys: []rune("0\r\r")}
+	if _, err := feedStage(f, w, BuildMenus().Food, false); err != nil {
+		t.Fatalf("feedStage: %v", err)
+	}
+	out := f.out.String()
+	if !strings.Contains(out, "Chopper") {
+		t.Fatalf("the flow never reached the Food Market; got:\n%s", out)
+	}
+	if strings.Contains(out, "Paused") {
+		t.Errorf("hand-paid maintenance must not pause before the market; got:\n%s", out)
+	}
+}
+
+func TestFeedStageReportsASilentFeed(t *testing.T) {
+	w := newWorld()
+	w.Player().Prefs.AutoFeed = true
+	w.Player().Food = 10_000_000
+	f := &fakeSession{}
+	silent, err := feedStage(f, w, BuildMenus().Food, true)
+	if err != nil {
+		t.Fatalf("feedStage: %v", err)
+	}
+	if !silent {
+		t.Error("a covered realm with Auto-Feed on is fed silently")
+	}
+	if strings.Contains(f.out.String(), "Paused") {
+		t.Error("the silent path must not pause before a market it never opens")
 	}
 }
 

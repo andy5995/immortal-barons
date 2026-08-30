@@ -1568,6 +1568,41 @@ above collapses to two lines in the post-status block, with no prompts at all:
 That single total is the best arithmetic probe in the game — see the Auto-Pay
 section of the `bre-gather` skill for how to decompose it.
 
+**Those two lines only appear together when the realm fed itself.** The second
+one is the silent feed's own announcement, and what follows the block depends on
+how maintenance was paid and whether the Food Market opened. Four shapes, from
+`cap/eots-ibbs-01.cap` (13 market turns, 131 silent), `cap/kd3-01.cap` and
+`cap/121125-666H4H_Camembert_Public.cap` (9 market turns):
+
+```
+auto-pay, fed itself   5,707,154 Gold paid.
+                       29,164 units of Food consumed.
+                                                     <- blank line
+                       ─»>Paused<«─
+                       [Crazy Gold Bank]
+
+auto-pay, market       45,115,582 Gold paid.
+                       ─»>Paused<«─                  <- no blank line above it
+                       We have 26,744,605 units of food available today.
+
+paid by hand, market   The Queen Royale requires 313,176 gold for Taxes.
+                       How much will you give? (313,176; 195,988,719) 313176
+                       We have 1,991,547,608 units of food available today.
+
+paid by hand, fed      How much will you give? (2,879,687; 632,675,991) 2879687
+                       90,997 units of Food consumed.
+                                                     <- blank line
+                       [Crazy Gold Bank]
+```
+
+Two things to take from that. **The pause follows the auto-pay summary**, which
+is the one line nobody has answered a prompt for — pay by hand and the market
+opens straight off the last payment prompt. And **the market path never prints
+`units of Food consumed.`**: the string has a single reference in either binary
+(`run_player_turn__branch_0821`, BRE.EXE 0x3c81) and both market routes jump
+past it. The `─»>Paused<«─` bar sits directly under `Gold paid.` with no blank
+line, unlike the one under the consumed line, which has one.
+
 
 ### System Menu (InterBBS grid)
 

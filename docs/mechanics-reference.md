@@ -2694,6 +2694,30 @@ section is a record of what was claimed and how it was settled, so the word
   people's ratio under 65% lights a **civil war** (above). IB feeds the people
   first and the army from what is left, matching the order BRE prompts in.
 
+  **The stage's two shapes differ in more than the market.** `cap/eots-ibbs-01.cap`
+  carries 130 silent turns and 8 market ones, and they print differently:
+
+  | | silent (covered + Auto-Feed on) | market |
+  | --- | --- | --- |
+  | after `N Gold paid.` | `N units of Food consumed.` | a **pause**, no blank line |
+  | then | a blank line, then the pause | the Food Market, then the two obligations |
+  | then | the bank | the bank — **no** "Food consumed." line, **no** second pause |
+
+  So the summary line belongs to the silent path alone: on the market path the
+  player has just answered both obligations by hand, and BRE goes straight on.
+  The line has exactly ONE reference in either binary
+  (`run_player_turn__branch_0821`, BRE.EXE 0x3c81) and both market routes jump
+  past it — `jmp 0x3d29` from the short branch at 0x3c6f and from the
+  Auto-Feed-off branch at 0x3c7e — so it cannot print there.
+
+  **The pause belongs to the auto-pay summary, not to the food stage.** All 22
+  auto-pay market turns across two captures pause between `N Gold paid.` and the
+  market; the one turn that pays maintenance BY HAND goes straight from the
+  Queen Royale prompt to the market with no pause at all (`cap/kd3-01.cap`).
+  Paid by hand, every figure was read as its prompt was answered, so there is
+  nothing waiting to be read. IB printed the summary on both paths and paused
+  before neither until 2026-08-29.
+
   **Nobody emigrates.** BRE has no starvation attrition at all — the three
   penalty bytes are the whole of it. IB's own 70/80/10 reconstruction, which also
   drove 10% of the population out, is removed. breins.txt agrees on direction:

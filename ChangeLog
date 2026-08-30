@@ -1,4 +1,6 @@
 (in-progress:)
+  * The Food Market opens after a pause when maintenance was paid automatically
+  * The food-consumed line is shown only when the market did not open
   * BBSDEV.DRP joins the drop file formats offered by -set-dropfile
   * A drop file that names the caller's encoding and language is followed
   * With Auto-Feed off the Food Market opens every turn, as the original does

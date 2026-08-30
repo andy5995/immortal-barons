@@ -176,20 +176,29 @@ func runTurn(s session.Session, w *ctx) Result {
 		}
 
 		showTurnIntro(s, w, replaying)
-		paymentStage(s, w, menus.Bank)
+		summarised := paymentStage(s, w, menus.Bank)
 		// Was the realm already fed before this pass? On a replay it may have been
 		// (fed before the boot), in which case the feed stage and its "food consumed"
 		// summary are both skipped — so the replay lands at the first unfinished
 		// stage without re-showing a screen the player already saw (#10).
 		fedBefore := false
 		withPlayer(w, func(p *game.Empire) { fedBefore = p.TurnProgress.Fed })
+		silentFeed := false
 		if err := runStageOnce(w,
 			func(tp game.TurnProgress) bool { return tp.Fed },
 			func(tp *game.TurnProgress) { tp.Fed = true },
-			func() error { return feedStage(s, w, menus.Food) }); err != nil {
+			func() error {
+				var err error
+				silentFeed, err = feedStage(s, w, menus.Food, summarised)
+				return err
+			}); err != nil {
 			return Stay
 		}
-		if !fedBefore {
+		// Only the silent path gets the summary and its pause. When the market
+		// ran, the player has just answered both obligations by hand and BRE goes
+		// straight on to the bank — the line would be telling them what they were
+		// asked two prompts ago (cap/eots-ibbs-01.cap).
+		if !fedBefore && silentFeed {
 			var foodUpkeep int
 			if !withPlayer(w, func(p *game.Empire) { foodUpkeep = p.FoodUpkeep() }) {
 				return abort()

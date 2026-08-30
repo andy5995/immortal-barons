@@ -22,7 +22,13 @@ import (
 // boosts. Underpaying a required cost warns of "disastrous results" and
 // offers to reconsider, which loops back to the bank visit — matching BRE,
 // where "reconsider" restarts the sequence.
-func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
+// paymentStage reports whether it printed BRE's auto-pay summary, the one line
+// the player has not already answered a prompt for. That decides the pause
+// before the Food Market: every auto-pay market turn in the captures pauses
+// there (22 across cap/eots-ibbs-01.cap and
+// cap/121125-666H4H_Camembert_Public.cap), and the one manual market turn does
+// not (cap/kd3-01.cap, market reached straight off the Queen Royale prompt).
+func paymentStage(s session.Session, w *ctx, bankMenu *Menu) (summarised bool) {
 	// Skip entirely on a replayed turn whose maintenance was already paid before an
 	// idle-boot (#10). MaintPaid is set inside the charge transaction below, so
 	// reaching here with it set means the required forces/regions charge already
@@ -30,14 +36,14 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 	alreadyPaid := false
 	withPlayer(w, func(p *game.Empire) { alreadyPaid = p.TurnProgress.MaintPaid })
 	if alreadyPaid {
-		return
+		return false
 	}
 
 	// Every transaction below re-resolves the active empire via withPlayer; if it
 	// has vanished (eliminated by another node mid-turn) the stage aborts cleanly
 	// rather than paying maintenance for a rival's realm.
 	if !withPlayer(w, func(p *game.Empire) { p.LastGoldPaid = 0 }) {
-		return
+		return false
 	}
 
 	var forces, regions, sdi, crown, gold int64
@@ -61,7 +67,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		due = w.World.MaintenanceDue(p)
 		autoPaySilent = w.World.AutoPayApplies(p)
 	}) {
-		return
+		return false
 	}
 
 	if autoPaySilent {
@@ -72,7 +78,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 			w.World.PayCrownTax(p, crown)
 			p.TurnProgress.MaintPaid = true // record the charge atomically so a later boot can't replay it (#10)
 		}) {
-			return
+			return false
 		}
 		// BRE's auto-pay summary is a single comma-grouped total ("5,707,154 Gold
 		// paid."), matching the food line under it; the per-item breakdown is what
@@ -81,7 +87,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		fmt.Fprint(s, "\n")
 		statLine(s, due, "Gold paid.")
 		decontaminateStage(s, w)
-		return
+		return true
 	}
 
 	fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightCyan, tr(s, "Maintenance:"), ansi.Reset)
@@ -101,7 +107,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 			_ = Run(s, w, bankMenu) // a disconnect unwinds via the next read below
 		}
 		if !withPlayer(w, func(p *game.Empire) { gold = p.Gold }) {
-			return
+			return false
 		}
 
 		fmt.Fprintf(s, "\n%s"+tr(s, "Your armed forces require %s gold.")+"%s",
@@ -148,7 +154,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		support = p.Support
 		morale = p.Morale
 	}) {
-		return
+		return false
 	}
 	if forcesLost > 0 {
 		fmt.Fprintf(s, "%s"+tr(s, "%d units deserted for lack of pay.")+"%s\n", ansi.FgBrightRed, forcesLost, ansi.Reset)
@@ -159,13 +165,13 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 
 	decontaminateStage(s, w)
 	if !withPlayer(w, func(p *game.Empire) { gold = p.Gold }) {
-		return
+		return false
 	}
 
 	if support < 100 && gold > 0 {
 		var cost, maxGive int64
 		if !withPlayer(w, func(p *game.Empire) { cost, maxGive = p.SupportBoostCost(), min(p.SupportBoostMax(), p.Gold) }) {
-			return
+			return false
 		}
 		fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to boost popular support."), cost)))
 		supportGold := promptSuggested(s, "How much will you give?", min(cost, maxGive), maxGive)
@@ -174,7 +180,7 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 			pts = w.World.BoostSupport(p, supportGold)
 			gold = p.Gold
 		}) {
-			return
+			return false
 		}
 		if pts > 0 {
 			fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Popular support rose %d points."), pts)))
@@ -186,18 +192,21 @@ func paymentStage(s session.Session, w *ctx, bankMenu *Menu) {
 		if !withPlayer(w, func(p *game.Empire) {
 			cost, maxGive = w.World.MoraleBoostCost(p), min(w.World.MoraleBoostMax(p), p.Gold)
 		}) {
-			return
+			return false
 		}
 		fmt.Fprintf(s, "\n%s", hiNums(fmt.Sprintf(tr(s, "%d gold is requested to improve military morale."), cost)))
 		moraleGold := promptSuggested(s, "How much will you give?", min(cost, maxGive), maxGive)
 		var pts int
 		if !withPlayer(w, func(p *game.Empire) { pts = w.World.BoostMorale(p, moraleGold) }) {
-			return
+			return false
 		}
 		if pts > 0 {
 			fmt.Fprintf(s, "%s\n", hiNums(fmt.Sprintf(tr(s, "Military morale rose %d points."), pts)))
 		}
 	}
+	// Paid by hand: every figure was read as its prompt was answered, so there is
+	// no summary and the food stage that follows does not pause.
+	return false
 }
 
 // decontaminateStage offers to clean waste regions, in the maintenance slot the
@@ -259,15 +268,29 @@ func spoilsStage(s session.Session, w *ctx) {
 // both prompts. So Auto-Feed means "feed me without asking, if I can afford it",
 // not "open the market for me" — IB had the two halves the other way round, and
 // with Auto-Feed off never showed the market at all.
-func feedStage(s session.Session, w *ctx, food *Menu) error {
+// feedStage reports whether the realm was fed silently, which is what decides
+// the "units of Food consumed." summary the caller prints: BRE shows that line
+// and its pause only on the silent path, and goes straight from the food
+// prompts to the bank when the market ran (cap/eots-ibbs-01.cap, 130 silent
+// turns against 8 market ones).
+func feedStage(s session.Session, w *ctx, food *Menu, pauseFirst bool) (silent bool, err error) {
 	people, forces, have, autoFeed := 0, 0, 0, false
 	if !withPlayer(w, func(p *game.Empire) {
 		people, forces, have, autoFeed = p.PeopleFoodUpkeep(), w.ForcesFoodDue(p), p.Food, p.Prefs.AutoFeed
 	}) {
-		return nil // realm gone; the caller's next withPlayer aborts the turn
+		return false, nil // realm gone; the caller's next withPlayer aborts the turn
 	}
 	if have >= people+forces && autoFeed {
-		return nil // fed automatically — the one path BRE runs silently
+		return true, nil // fed automatically — the one path BRE runs silently
+	}
+	// BRE pauses between the auto-pay total and the market, with no blank line
+	// between the two ("Gold paid.\r\n─»>Paused<«─\r\n"), so the player reads what
+	// upkeep cost before the market takes the screen. It does NOT pause when the
+	// maintenance was paid by hand — those prompts were read as they were
+	// answered. Outside the loop: the reconsider returns to the market, not to
+	// another pause.
+	if pauseFirst {
+		pauseTight(s)
 	}
 	// The Food Market first, then the two obligations. BRE asks TWICE — the people
 	// and the armed forces are separate obligations, each with its own prompt — and
@@ -277,21 +300,21 @@ func feedStage(s session.Session, w *ctx, food *Menu) error {
 	// is the real fix.)
 	for {
 		if err := Run(s, w, food); err != nil {
-			return err
+			return false, err
 		}
 		if !withPlayer(w, func(p *game.Empire) {
 			people, forces, have = p.PeopleFoodUpkeep(), w.ForcesFoodDue(p), p.Food
 		}) {
-			return nil
+			return false, nil
 		}
 		short := askFoodGift(s, tr(s, "Your people need %s units of food."), people, &have)
 		short = askFoodGift(s, tr(s, "Your armed forces require %s units of food."), forces, &have) || short
 		if !short {
-			return nil // both obligations met — proceed
+			return false, nil // both obligations met — proceed
 		}
 		fmt.Fprintf(s, "\n%s%s%s\n", ansi.FgBrightRed, tr(s, "Your actions may lead to disastrous results."), ansi.Reset)
 		if !AskYesNo(s, "Would you like to reconsider?", true) {
-			return nil // proceed despite underfeeding
+			return false, nil // proceed despite underfeeding
 		}
 	}
 }
