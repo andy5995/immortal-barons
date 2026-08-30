@@ -270,6 +270,12 @@ The landmines:
   `README.md` for the realm letters and the DOS date it needs before deciding to
   grind a game up from a reset.
 - Don't run while Andy's own dosemu session is up (single-instance conflicts).
+- **`doorfile.sr` lines must end `\r\n` — a bare `\n` merges lines.** Turbo
+  Pascal's ReadLn only breaks on CR, so a name line written with a Unix newline
+  swallows the line after it and a numeric read lands on text: BRE dies at boot
+  with `Run-Time error #106 ... Invalid numeric format` before any screen.
+  `bre-name.sh` writes CRLF now; any other tool that touches the drop file must
+  too. (Cost a run, 2026-08-30.)
 - **`SRDOOR local` prompts `Name:` and it must be TYPED — never just Enter.**
   An empty answer writes an EMPTY caller name; BRE then treats you as a brand-new
   caller, asks "Name your Realm:", and exits on the empty answer, silently

@@ -400,6 +400,22 @@ other half is that BRE also builds news lines in code, through
 `append_news_record`, without a template. So pair the template census with the
 caller list of the news writer before concluding a mechanic is silent.
 
+## Staging a scenario in game.dat
+
+A test no longer needs days of in-game build-up. Each empire record carries an
+integrity dword BRE checks at load, so a raw field edit is discarded (see
+`docs/dev/bre-save-format.md`); a local helper outside this repo,
+`scripts/bre-stage.py` in this project's Claude dir, resets a record and reseals
+it — `dump` / `verify` / `set GAME.DAT SLOT FIELD=VALUE...`.
+
+Two traps, each of which cost a run on 2026-08-30: **clone a realm that has
+survived maintenance** instead of authoring one from scratch — the daily idle
+purge eats a staged realm whose last-played stamps look stale, silently, and
+the roster just shrinks; and **the slot letter is `(fileoffset − 2489) / 1069`**
+— the roster's `?=List` at any target picker is the cheap way to confirm who
+BRE thinks exists. Proof of the method: `cap/small-vs-large-20260830.cap`, six
+staged battles the binary accepted and fought.
+
 ## Running BRE headless (tmux + dosemu2 harness)
 
 BRE can be driven scriptably and its screens scraped as plain text

@@ -338,19 +338,28 @@ Runtime helpers worth recognising when reading this code:
                                         routine uses changes results by one unit
 ```
 
-## ⚠ Integrity check — direct edits are rejected
+## Integrity check — direct edits are rejected
 
-Patching Coastal from 32 to 200 directly in `game.dat` (with BRE closed) and
-relaunching made BRE **fail to find the empire** and prompt the caller to name a
-new realm — the edited record was discarded, no explicit "tampered" message.
-Restoring the pre-edit backup brought the empire back intact. So BRE stores a
-per-record (or per-file) **integrity value** that a raw field edit invalidates.
+Each record ends with an **integrity dword at `+0x429`**, which BRE recomputes
+and compares at load (the verifier sits at BRE.EXE file offsets
+`0x84D5`–`0x87C4`, after the "GAME.DAT <empire> corrupt" string). A record whose
+field is edited without that value being recomputed is silently DISCARDED — the
+caller is prompted to name a new realm, with no "tampered" message. The dword at
+`+0x33b` is a second such guard: it mirrors gold (`+0x66`), and the pair has to
+agree.
 
-**Consequence for test setup:** you cannot just poke region counts to stage a
-scenario — the empire gets reset. To edit safely you would first have to locate
-the checksum field and its algorithm (another differential-diff pass: change one
-field in-game and find which *other* bytes move — those are the checksum), then
-recompute it after each edit. Until that is done, **prefer in-game changes**
-(e.g. buying regions over a few turns) for staging tests.
+**So prefer in-game changes for staging a test** — buying regions over a few
+turns, or cloning a state BRE itself produced (see the snapshot workflow). A
+local, unpublished helper can reseal a record for a scenario that cannot be
+reached in play; it is deliberately not described here, and nothing about it is
+needed to understand BRE or to build the clone.
+
+The same load pass migrates one field: `+0x329`, when positive, is divided by
+1000 into the SDI funding field (`+0x33f`) and cleared.
+
+**The record ARRAY starts at file offset 2489** (= BRE's slot letter `A`; the
+two 1069-byte blocks before it are header/template area, not slots). The old
+note here that named file offsets 2521/3590 as the first name fields was
+counting from the wrong base; BRE's own target-picker letters settle it.
 
 Always back up `data/game.dat` (and `planet.bre`) before any experiment.

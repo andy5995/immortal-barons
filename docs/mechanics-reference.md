@@ -2027,7 +2027,25 @@ loss reported = 1 - remaining/initial, or 100% for a side driven to nothing
 So the side that breaks off has lost exactly the retreat share, and the other
 has lost only what the strength ratio cost it: an overwhelming attacker is
 almost never the side being hit and comes home nearly intact, while an evenly
-matched one pays nearly as much as the loser. IB previously handed the winner a
+matched one pays nearly as much as the loser.
+
+**Confirmed against the running binary, at the extreme (2026-08-30,
+`cap/small-vs-large-20260830.cap`).** A staged 763-trooper/525-tank/140-bomber
+raid on a 526k/531k/87k/209k defender (~730:1), six times: the attacker was
+repelled at 20.4–20.7% losses every time, while the defender lost NOTHING in
+three of the six, ~1% in one and ~2% in two — the upset roll's ~1%-per-hit
+quanta (trial: 5,053 troopers + 5,101 turrets + 839 tanks in one hit). A
+token force stripping five figures off a giant is the original's own
+behaviour, not an IB defect.
+
+**BRE's report under-tells the defender's jet losses; IB's does not.** Across
+those six battles the defender's jets fell 209,235 → 198,983 — the ground
+fraction applied to jets like every other type, matching IB — while BRE's
+"You destroyed … and N Jets" printed **0** every time (that slot shows the
+separate bombers-vs-jets air tally, 0 here). IB reports the jets actually
+lost; keep it that way.
+
+IB previously handed the winner a
 flat 8% and the loser a flat 20% — about right for an even match, and wrong
 everywhere else. It also rolled a ±20% jitter over each side's strength before
 the fight; that is gone, because the variance belongs inside the battle.

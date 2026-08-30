@@ -2222,6 +2222,14 @@ You destroyed 14 Troopers, 0 Turrets, 1948 Tanks, and 0 Jets.
 You lost the battle!
 ```
 
+**Deliberate divergence — the defender-jets figure in a LOSING report.** BRE's
+`You destroyed … and N Jets` slot shows only the bombers-vs-jets air tally, and
+prints 0 while the defender's jets silently bleed at the same ground fraction
+as everything else (measured 2026-08-30: six staged battles took the defender's
+jets 209,235 → 198,983 with `0 Jets` printed each time —
+`cap/small-vs-large-20260830.cap`). IB reports the jets actually lost. Do not
+"correct" IB's figure back to 0.
+
 ## "Since your last play" event log (captured live 2026-07-31, league game)
 
 The recap shown at the start of a turn. Every entry is wrapped in its own rule

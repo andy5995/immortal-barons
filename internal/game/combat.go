@@ -288,6 +288,13 @@ func absorbMilitary(a, d *Empire) {
 // whole way. Truncating them to integers first is not a rounding detail: a live
 // capture had 3 jets at full morale attack 112 turrets, and BRE reported ZERO
 // jets lost where a truncated 6.6 -> 6 loses one (see TestCapturedJetsVersusTurrets).
+//
+// Verified in the running binary, not only by decode: six staged battles (763
+// troopers + 525 tanks + 140 bombers against a 1.35M-unit defender) repelled
+// the attacker at ~20.5% every time while the defender lost nothing in three,
+// ~1% in one and ~2% in two — the upset roll's 1%-per-hit quanta
+// (cap/small-vs-large-20260830.cap, 2026-08-30). A token force stripping
+// thousands of units off a giant is the original's behaviour, not a defect.
 func (w *World) battleAttrition(ap, dp float64, retreatPct int) (attackerWins bool, aLost, dLost float64) {
 	survive := float64(100-retreatPct) / 100
 	a0, d0 := ap, dp
