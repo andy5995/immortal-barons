@@ -293,6 +293,7 @@ type TurnProgress struct {
 	// one. A map rather than a bool is what makes TurnProgress uncomparable, so
 	// the whole-struct checks around it use reflect.DeepEqual.
 	CovertOpsUsed      map[CovertOp]bool `json:"covertOpsUsed,omitempty"`
+	BankDone           bool
 	SpendingDone       bool
 	AttackDone         bool
 	TradingDone        bool

@@ -351,11 +351,12 @@ func TestPaymentStageManualUnderpayDeserts(t *testing.T) {
 // TestRunTurnConsumesATurn scripts a full pass through the pipeline for one
 // turn. Key map, derived by driving the current flow (the old script and its
 // comment described the pre-#70 pre-turn Diplomacy stop): four pauses (the
-// Queen's refund, income, status, maintenance-paid), Quit Spending, Quit
-// Attack — the Covert/Trading/Message stops are Preferences-gated and off by
-// default — then decline "Continue to your next turn?" to stop after one turn.
+// Queen's refund, income, status, maintenance-paid), Quit Bank, Quit Spending,
+// Quit Attack — the Covert/Trading/Message stops are Preferences-gated and off
+// by default — then decline "Continue to your next turn?" to stop after one
+// turn.
 func TestRunTurnConsumesATurn(t *testing.T) {
-	keys := "    00n"
+	keys := "    000n"
 	f := &fakeSession{keys: []rune(keys)}
 	w := newWorld()
 	w.Player().Prefs.AutoPayMaint = true // pay maintenance silently; this test is about the turn loop
@@ -408,6 +409,30 @@ func TestRunTurnCovertGatedBeforeSpending(t *testing.T) {
 	}
 }
 
+// TestBankOpensBetweenCovertAndSpending pins #221: BRE opens the bank on its
+// own between Covert and Spending, with no yes/no prompt in front of it, and
+// IB used to visit it only on the manual-maintenance path.
+func TestBankOpensBetweenCovertAndSpending(t *testing.T) {
+	f := &fakeSession{keys: []rune("    000n")}
+	w := newWorld()
+	w.Player().Prefs.AutoPayMaint = true // auto-pay skips the manual path's own bank prompt
+	runTurn(f, w)
+	out := stripANSI(f.out.String())
+	bank, spend := strings.Index(out, "Goldie Luck's Bank"), strings.Index(out, "[Spending]")
+	if bank == -1 || spend == -1 {
+		t.Fatalf("expected both the Bank and Spending menus; got:\n%s", out)
+	}
+	if bank > spend {
+		t.Errorf("Bank should come before Spending (offsets bank=%d spend=%d)", bank, spend)
+	}
+	if strings.Contains(out, "wish to visit the bank") {
+		t.Errorf("the turn's bank visit is unprompted; got:\n%s", out)
+	}
+	if !strings.Contains(out, "Continue to your next turn?") {
+		t.Errorf("script never reached the continue prompt:\n%s", out)
+	}
+}
+
 // TestRunTurnShowsPreTurnStopsInOrder checks BRE's pre-turn sequence: the
 // event log ("Since your last play..."), then Diplomacy, then Change
 // Production (Set Industries), all before the ordinary turn pipeline (#63).
@@ -449,7 +474,7 @@ func TestRunTurnHasNoPreTurnDiplomacyOrProduction(t *testing.T) {
 // TestRunTurnPlaysTwoTurnsWithoutDiplomacy checks two turns play cleanly with an
 // Income Report each turn and no Diplomacy/Change Production stop anywhere.
 func TestRunTurnPlaysTwoTurnsWithoutDiplomacy(t *testing.T) {
-	perTurn := "   0000n" // income/status pauses, quit Spending/Attack/Covert/Trading, decline message
+	perTurn := "   00000n" // income/status pauses, quit Covert/Bank/Spending/Attack/Trading, decline message
 	// The Queen's refund is paid once a game day, so its pause is dismissed on
 	// the first turn only.
 	keys := " " + perTurn + "y" + perTurn + "n"

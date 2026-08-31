@@ -159,7 +159,7 @@ func TestConcurrentTurnAndDiplomacyRaceMaintenance(t *testing.T) {
 	// script lands in whatever menu happens to be on screen. Three spaces used to
 	// be enough and stopped being so when unit prices changed; do not trim them
 	// back to the minimum that passes today.
-	turnKeys := " \rTurnPlayer\ry" + "1        *D9 000000nn0"
+	turnKeys := " \rTurnPlayer\ry" + "1        0*D9 000000nn0"
 	sessions.Add(1)
 	var turnOut *fakeSession
 	go func() {

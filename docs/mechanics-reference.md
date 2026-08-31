@@ -3092,18 +3092,27 @@ what IB calls the thing on every other screen.
 Turns per day: 10 (config; BRE's own default is 8). New players get protection
 turns at the start (config: 15). A turn walks through a sequence of menus:
 
-1. Diplomacy (first turn only)
-2. Status screen
-3. Payment / food market
-4. Covert operations (shown only when the step is enabled in Preferences and
+1. Status screen
+2. Payment / food market
+3. Covert operations (shown only when the step is enabled in Preferences and
    the player holds at least one covert agent — a fresh realm starts with none)
-5. Bank
-6. Spending (buy military and regions)
-7. Attacks
-8. Trading
-9. Interplanetary operations (multi-BBS games only)
-10. Messages
-11. System menu (tax rate, industrial output, skip menus)
+4. Bank — opened automatically, with no yes/no prompt in front of it
+   (`run_player_turn` calls `run_bank` at `BRE.EXE 0x3d81`, between
+   `enter_covert_operations_menu` and the Spending menu; the menu is drawn
+   unasked right after the food line in `cap/kd3-01.cap` and
+   `cap/covert-menu-20260817.cap`). The manual-maintenance path additionally
+   asks *"Do you wish to visit the Bank? (y/N)"* before the upkeep prompts, so a
+   baron short on hand can draw savings first — that is a second, earlier visit,
+   not this one.
+5. Spending (buy military and regions)
+6. Attacks
+7. Trading
+8. Interplanetary operations (multi-BBS games only)
+9. Messages
+10. System menu (tax rate, industrial output, skip menus)
+
+Diplomacy and Change Production were pre-turn stops in earlier builds; they now
+live on the System menu (#70).
 
 If a player is cut off mid-turn, they resume where they left off.
 

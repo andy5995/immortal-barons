@@ -226,6 +226,18 @@ func runTurn(s session.Session, w *ctx) Result {
 			}
 		}
 
+		// The bank opens on its own between Covert and Spending, with no prompt:
+		// run_player_turn calls run_bank (BRE.EXE 0x3d81) straight after
+		// enter_covert_operations_menu and before the Spending menu, and the
+		// captures show the menu drawn unasked after the food line
+		// (cap/kd3-01.cap, cap/covert-menu-20260817.cap). #221.
+		if err := runStageOnce(w,
+			func(tp game.TurnProgress) bool { return tp.BankDone },
+			func(tp *game.TurnProgress) { tp.BankDone = true },
+			func() error { return Run(s, w, menus.Bank) }); err != nil {
+			return Stay
+		}
+
 		if err := runStageOnce(w,
 			func(tp game.TurnProgress) bool { return tp.SpendingDone },
 			func(tp *game.TurnProgress) { tp.SpendingDone = true },
