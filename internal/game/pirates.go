@@ -3,6 +3,8 @@ package game
 import (
 	"fmt"
 	"strings"
+
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // PirateFactions are the nine raidable pirate factions. Their strength is
@@ -346,7 +348,7 @@ func (w *World) pirateRaidVictim(slot int, v *Empire) {
 // are kept, so the same fields appear every time and a missing one means the
 // unit does not take part rather than that none were lost.
 //
-//	You took 78000 Gold, 8 Regions, 525 Troopers, 481 Jets, 606 Turrets, and 175 Tanks.
+//	You took 78k Gold, 8 Regions, 525 Troopers, 481 Jets, 606 Turrets, and 175 Tanks.
 func breTally(parts []string) string {
 	switch len(parts) {
 	case 0:
@@ -363,18 +365,24 @@ func breTally(parts []string) string {
 // screen in docs/dev/bre-screens.md. Regions are omitted when the faction holds
 // no land, which that capture records as BRE's own behaviour; Agents have no
 // BRE counterpart and follow the units it does list.
+//
+// EVERY field is shortened (numfmt.Short), gold and unit counts alike — the
+// original's raid line runs "You took 111k Gold, 5 Regions, 8568 Agents, ...
+// 13k Turrets", shortening each one past 10,000 and leaving the rest bare.
+// Its launch_pirate_raid reaches the same helper the score table's Score and
+// Net Worth columns use.
 func raidLoot(gold int64, regions, troopers, jets, turrets, tanks, agents int) string {
-	parts := []string{fmt.Sprintf("%d Gold", gold)}
+	parts := []string{numfmt.Short(gold) + " Gold"}
 	if regions > 0 {
-		parts = append(parts, fmt.Sprintf("%d Regions", regions))
+		parts = append(parts, numfmt.Short(regions)+" Regions")
 	}
 	parts = append(parts,
-		fmt.Sprintf("%d Troopers", troopers),
-		fmt.Sprintf("%d Jets", jets),
-		fmt.Sprintf("%d Turrets", turrets),
-		fmt.Sprintf("%d Tanks", tanks))
+		numfmt.Short(troopers)+" Troopers",
+		numfmt.Short(jets)+" Jets",
+		numfmt.Short(turrets)+" Turrets",
+		numfmt.Short(tanks)+" Tanks")
 	if agents > 0 {
-		parts = append(parts, fmt.Sprintf("%d Agents", agents))
+		parts = append(parts, numfmt.Short(agents)+" Agents")
 	}
 	return breTally(parts)
 }
@@ -414,9 +422,9 @@ func raidWin(headline, loot string, troopers, jets, tanks int) string {
 // raidLosses is the "You lost" tally — the three types a raid may commit.
 func raidLosses(troopers, jets, tanks int) string {
 	return breTally([]string{
-		fmt.Sprintf("%d Troopers", troopers),
-		fmt.Sprintf("%d Jets", jets),
-		fmt.Sprintf("%d Tanks", tanks),
+		numfmt.Short(troopers) + " Troopers",
+		numfmt.Short(jets) + " Jets",
+		numfmt.Short(tanks) + " Tanks",
 	})
 }
 

@@ -12,6 +12,8 @@ import (
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
+
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // hiNumsReset returns s with each run of digits (keeping grouping commas that
@@ -208,8 +210,13 @@ func regularAttack(s session.Session, w *ctx) Result {
 	// Attack re-checks against the reloaded empire, so a concurrent change is safe.
 	p := w.Player()
 	usableJets := min(p.Jets, p.Carriers*game.JetsPerCarrier)
-	fmt.Fprintf(s, "\n%s"+tr(s, "You have %d Troopers, %d usable Jets, %d Tanks, and %d Bombers.")+"%s\n",
-		ansi.FgBrightCyan, p.Troopers, usableJets, p.Tanks, p.Bombers, ansi.Reset)
+	// The four counts are shortened (numfmt.Short) — the original's
+	// create_individual_attack runs each through the same helper its score table
+	// uses. The prompts below still quote the exact figure, because that is the
+	// number being typed; BRE's own capture shows the pair that way.
+	fmt.Fprintf(s, "\n%s"+tr(s, "You have %s Troopers, %s usable Jets, %s Tanks, and %s Bombers.")+"%s\n",
+		ansi.FgBrightCyan, numfmt.Short(p.Troopers), numfmt.Short(usableJets),
+		numfmt.Short(p.Tanks), numfmt.Short(p.Bombers), ansi.Reset)
 	force := game.AttackForce{
 		Troopers: promptSuggestedTight(s, "Send how many Troopers?", p.Troopers, p.Troopers),
 		Jets:     promptSuggestedTight(s, "Send how many Jets?", usableJets, usableJets),

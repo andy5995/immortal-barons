@@ -7,6 +7,8 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 func TestAskYesNo(t *testing.T) {
@@ -484,9 +486,12 @@ func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
 	for _, want := range []string{
 		"wildside — Daily Bulletin",
 		// The sign carries its own colour, so it and its figure are asserted apart.
-		"Total Population", "1,865,289", "5,838",
+		// BRE's spelling: grouped only past four digits, so the 5,838 change
+		// prints bare, and Net Worth is divided to thousands with a "k" that
+		// never steps to "m" (numfmt.Thousands).
+		"Total Population", "1,865,289", "5838",
 		"Total Regions", "53,266",
-		"Total Net Worth", "34m", "1m",
+		"Total Net Worth", "34,833k", "1373k",
 	} {
 		if !strings.Contains(out, want) {
 			t.Errorf("expected output to contain %q, got:\n%s", want, out)
@@ -496,10 +501,10 @@ func TestRenderDailyBulletinRowsSignsAndColors(t *testing.T) {
 	// is `96` bright cyan whichever way the day went, and only a rise paints its
 	// `+` in `92` bright green. Direction is carried by the sign, so a reader who
 	// sees no colour at all still gets it.
-	if !strings.Contains(out, "\x1b[96m-\x1b[96m5,838") {
+	if !strings.Contains(out, "\x1b[96m-\x1b[96m5838") {
 		t.Error("a falling figure and its minus sign should both be bright cyan")
 	}
-	if !strings.Contains(out, "\x1b[92m+\x1b[96m1m") {
+	if !strings.Contains(out, "\x1b[92m+\x1b[96m1373k") {
 		t.Error("a rising figure should carry a bright-green plus over a bright-cyan figure")
 	}
 	if !strings.Contains(out, "\x1b[96m+\x1b[96m0") {
@@ -535,7 +540,7 @@ func TestShowBulletinTodayVsYesterday(t *testing.T) {
 	if !strings.Contains(todayOut, "today-line") || strings.Contains(todayOut, "yesterday-line") {
 		t.Errorf("showBulletinToday should show only today's news, got:\n%s", todayOut)
 	}
-	if !strings.Contains(todayOut, formatGold(live.Population, "")) {
+	if !strings.Contains(todayOut, numfmt.GroupLong(live.Population, "")) {
 		t.Error("showBulletinToday should render today's LIVE totals")
 	}
 
@@ -569,7 +574,7 @@ func TestShowBulletinTodayNotStaleOnFreshBoard(t *testing.T) {
 	showBulletinToday(f, w)
 	out := f.out.String()
 
-	if !strings.Contains(out, formatGold(live.Population, "")) {
+	if !strings.Contains(out, numfmt.GroupLong(live.Population, "")) {
 		t.Errorf("expected Today's News to show the live population %d, got:\n%s", live.Population, out)
 	}
 }

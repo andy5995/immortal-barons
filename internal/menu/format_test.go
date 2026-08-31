@@ -8,35 +8,6 @@ import (
 	"github.com/andy5995/immortal-barons/internal/ansi"
 )
 
-func TestAbbrevMoney(t *testing.T) {
-	cases := []struct {
-		n    int64
-		want string
-	}{
-		{0, "0"},
-		{500, "500"},
-		{999, "999"},
-		{1_000, "1k"},
-		{999_999, "999k"},
-		// Each step takes over exactly at its own magnitude, and truncates rather
-		// than rounds, so a figure one short of the next step never wears it.
-		{1_000_000, "1m"},
-		{34_833_289, "34m"},
-		{999_999_999, "999m"},
-		{1_000_000_000, "1b"},
-		{1_373_000_000, "1b"},
-		{9_876_543_210, "9b"},
-		{-500, "-500"},
-		{-34_833_289, "-34m"},
-		{-1_000_000_000, "-1b"},
-	}
-	for _, c := range cases {
-		if got := abbrevMoney(c.n); got != c.want {
-			t.Errorf("abbrevMoney(%d) = %q, want %q", c.n, got, c.want)
-		}
-	}
-}
-
 func TestFormatGoldLocale(t *testing.T) {
 	cases := []struct {
 		n    int64

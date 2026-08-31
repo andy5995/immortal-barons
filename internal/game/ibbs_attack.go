@@ -694,11 +694,11 @@ func invasionReport(atk RemoteAttack, won bool, lost UnitLoss, regions int) stri
 		sent.Tanks += c.Tanks
 		sent.Bombers += c.Bombers
 	}
-	writeUnitLines(&b, "%d %s attacked.", attackUnits(sent))
+	writeUnitLines(&b, "%s %s attacked.", attackUnits(sent))
 	if won {
 		fmt.Fprintf(&b, "You lost %d regions.\n", regions)
 	}
-	writeUnitLines(&b, "You lost %d %s.", defenceUnits(lost))
+	writeUnitLines(&b, "You lost %s %s.", defenceUnits(lost))
 	return strings.TrimRight(b.String(), "\n")
 }
 
@@ -723,9 +723,16 @@ func defenceUnits(u UnitLoss) []unitCount {
 // the name, a zero printed rather than skipped: the original's report lines are
 // unrolled one per unit with no test on the count, so "You lost 0 Bombers"
 // appears on its screen and on this one.
+// The count is SHORTENED (numfmt.Short), so the format's first verb is %s.
+// BRE's interplanetary reports run it through the same helper its score table
+// uses — a capture has "1000k Tanks returned." and "115k Turrets"
+// (cap/20240527-134Pho_Lazarus_Public.cap). Its LOCAL resolver does not: a
+// staged local battle printed "10469 Troopers" whole, and
+// resolve_regular_attack is absent from the helper's caller list. That split is
+// deliberate on both sides — do not make the two agree.
 func writeUnitLines(b *strings.Builder, format string, units []unitCount) {
 	for _, u := range units {
-		fmt.Fprintf(b, format+"\n", u.n, u.name)
+		fmt.Fprintf(b, format+"\n", numfmt.Short(u.n), u.name)
 	}
 }
 

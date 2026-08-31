@@ -2,11 +2,11 @@ package menu
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -202,16 +202,25 @@ func scoreTableHead(s session.Session, t Term) {
 	scoreTableRule(s)
 }
 
+// The three figures are spelled the way BRE spells them, and the three columns
+// do NOT agree with each other: Territory is grouped in full, while Score and
+// Net Worth are shortened to a bare "k" or "m" once they reach 10,000
+// (numfmt.Short — BINARY-VERIFIED, and see the capture rows quoted there).
+// That is the original's own split: its show_player_list calls the shortening
+// helper for the last two columns and not for the first.
+//
+// Every screen that draws this table goes through here, so they cannot drift
+// apart again. They had: the scores board and the target list printed bare
+// figures where the recipient picker grouped them.
 func scoreTableRow(s session.Session, t Term, id, name, nameColor string, presence string, land, score, nw int) {
+	lang := sessionLang(s)
 	scoreTableRowStr(s, t, id, name, nameColor, presence,
-		strconv.Itoa(land), strconv.Itoa(score), strconv.Itoa(nw))
+		numfmt.GroupLong(land, lang), numfmt.Short(score), numfmt.Short(nw))
 }
 
-// scoreTableRowStr is scoreTableRow with the three figures already rendered, for
-// the screens that comma-group them. The columns and colours are the shared
-// part and the one that drifts; how a number is spelled is each screen's own
-// choice, and they do not currently agree — the scores board and the target
-// list print bare figures where the recipient picker groups them.
+// scoreTableRowStr is scoreTableRow with the three figures already rendered,
+// for a caller that has them as strings. The columns and colours are the shared
+// part and the one that drifts.
 func scoreTableRowStr(s session.Session, t Term, id, name, nameColor, presence, land, score, nw string) {
 	fmt.Fprintf(s, "%s%s %s%10s%s %s%11s%s %s%11s%s\n",
 		idCell(id),

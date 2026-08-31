@@ -1,4 +1,6 @@
 (in-progress:)
+  * Figures are shortened to k and m on the score tables, raid tallies, interplanetary battle reports and trade shipments, as the original does
+  * The Daily Bulletin's Total Net Worth is shown in thousands, as the original shows it
   * The entry menu shows the planet's time and how long is left of the game day
   * The Food Market opens after a pause when maintenance was paid automatically
   * The food-consumed line is shown only when the market did not open

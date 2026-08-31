@@ -11,7 +11,3 @@ func formatGold[T numfmt.Number](n T, lang string) string { return numfmt.Format
 
 // comma formats n with English thousands separators.
 func comma[T numfmt.Number](n T) string { return numfmt.Comma(n) }
-
-// abbrevMoney formats a planet-wide total compactly, stepping k/m/b with its
-// magnitude (34,833,289 -> "34m").
-func abbrevMoney[T numfmt.Number](n T) string { return numfmt.Abbrev(n) }

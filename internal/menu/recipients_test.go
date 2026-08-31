@@ -142,10 +142,16 @@ func TestPickRecipientShowsScoreNotLand(t *testing.T) {
 	f := &fakeSession{keys: []rune("?0")} // '?' prints the roster, then cancel
 	pickRecipient(f, w, pickOpts{prompt: "Trade with:"})
 	out := f.out.String()
-	// Comma-grouped: IB groups the figures BRE prints bare (a recorded
-	// divergence, docs/dev/bre-screens.md).
-	if !strings.Contains(out, "7,777") {
-		t.Errorf("Score column should show the empire's Score (7,777):\n%s", out)
+	// The spelling is BRE's: four digits print bare, and Score/Net Worth
+	// shorten past 10,000 (numfmt.Short/GroupLong). Pinned here so this table
+	// cannot drift away from the two other screens that share it.
+	for _, want := range []string{"4242", "7777"} {
+		if !strings.Contains(out, want) {
+			t.Errorf("roster should show %q (Land 4242 / Score 7777):\n%s", want, out)
+		}
+	}
+	if strings.Contains(out, "4,242") {
+		t.Errorf("figures should use BRE's spelling, not full grouping:\n%s", out)
 	}
 }
 

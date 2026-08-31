@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // The per-contributor factor #200 recorded as unread is the contributor's
@@ -110,11 +112,14 @@ func TestInvasionReportNamesEveryUnitLost(t *testing.T) {
 	ev := victim.Events[len(victim.Events)-1].Text
 	for _, want := range []string{
 		"held the field",
-		"40000 troopers attacked.", "300 jets attacked.", "0 tanks attacked.", "0 bombers attacked.",
-		"You lost " + strconv.Itoa(res.Enemy.Troopers) + " troopers.",
-		"You lost " + strconv.Itoa(res.Enemy.Jets) + " jets.",
-		"You lost " + strconv.Itoa(res.Enemy.Tanks) + " tanks.",
-		"You lost " + strconv.Itoa(res.Enemy.Turrets) + " turrets.",
+		// Counts wear BRE's shortening on an interplanetary report, so 40,000
+		// troopers read "40k" (numfmt.Short). The three-digit and zero rows
+		// prove the rest of the line is left alone.
+		"40k troopers attacked.", "300 jets attacked.", "0 tanks attacked.", "0 bombers attacked.",
+		"You lost " + numfmt.Short(res.Enemy.Troopers) + " troopers.",
+		"You lost " + numfmt.Short(res.Enemy.Jets) + " jets.",
+		"You lost " + numfmt.Short(res.Enemy.Tanks) + " tanks.",
+		"You lost " + numfmt.Short(res.Enemy.Turrets) + " turrets.",
 	} {
 		if !strings.Contains(ev, want) {
 			t.Errorf("the defender's report lacks %q:\n%s", want, ev)

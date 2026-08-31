@@ -195,14 +195,20 @@ func (w *World) deliverIPTradeDeal(d IPTradeDeal) {
 // describeBasket lists a basket's contents for an event line, in the canonical
 // good order and in the original's own tally shape (breTally), so a shipment
 // reads the way the raid and battle reports read.
+// Figures are SHORTENED, gold included: the original's arriving-deal line runs
+// "They shipped 1000k Turrets and 188m Gold."
+// (cap/20240527-134Pho_Lazarus_Public.cap), and its
+// resolve_received_trade_offer reaches the same helper the score table uses.
+// This is a shipment report, not one of the money screens that print a figure
+// in full — BRE spells gold both ways and which applies is per screen.
 func describeBasket(b TradeBasket) string {
 	var parts []string
 	if b.Gold > 0 {
-		parts = append(parts, fmt.Sprintf("%s Gold", numfmt.Comma(int64(b.Gold))))
+		parts = append(parts, fmt.Sprintf("%s Gold", numfmt.Short(int64(b.Gold))))
 	}
 	for _, g := range MarketGoods {
 		if n := *g.Basket(&b); n > 0 {
-			parts = append(parts, fmt.Sprintf("%s %s", numfmt.Comma(int64(n)), g.Plural))
+			parts = append(parts, fmt.Sprintf("%s %s", numfmt.Short(int64(n)), g.Plural))
 		}
 	}
 	return breTally(parts)

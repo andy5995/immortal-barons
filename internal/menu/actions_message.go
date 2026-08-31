@@ -8,6 +8,7 @@ import (
 
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 	"github.com/andy5995/immortal-barons/internal/session"
 )
 
@@ -159,7 +160,7 @@ func writePickRoster(s session.Session, t Term, rows []pickRow, opts pickOpts) {
 	scoreTableHead(s, t)
 	for _, r := range rows {
 		scoreTableRowStr(s, t, scoreID(string(r.letter), r.protected), r.name, ansi.FgBrightWhite, r.presence,
-			comma(r.land), comma(r.score), comma(r.nw))
+			numfmt.GroupLong(r.land, sessionLang(s)), numfmt.Short(r.score), numfmt.Short(r.nw))
 	}
 	scoreTableRule(s)
 }

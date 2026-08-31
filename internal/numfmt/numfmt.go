@@ -60,37 +60,93 @@ func groupDigits(v int64, sep byte) string {
 // Comma formats n with English thousands separators (478967 -> "478,967").
 func Comma[T Number](n T) string { return Format(n, "") }
 
-// Abbrev formats a large total compactly so it fits one column, stepping the
-// suffix with the magnitude: k at a thousand, m at a million, b at a billion,
-// and nothing at all below a thousand. The fraction is truncated, not rounded,
-// so a figure a hair under the next step never reads as having reached it.
+// IB carried an Abbrev here until 2026-08-30: a k/m/b ladder stepping at each
+// magnitude, used for the Daily Bulletin's Total Net Worth row alone. It was
+// removed with #205's premise, which claimed BRE's columns "pick ONE suffix and
+// keep it, differing by column rather than by size". They do not — one capture's
+// Net Worth column runs 100k / 1006k / 1026k / 10m — so the rule it existed to
+// avoid was never real. The three formats below are BRE's own.
+
+// ShortThreshold is the value at or above which a score-table figure is divided
+// down a step. BINARY-VERIFIED: BRE.EXE image 0x0EA9C / 0x0EADC compare the
+// figure against 0x2710 before each divide.
+const ShortThreshold = 10000
+
+// Short renders a figure the way BRE's score tables do: once it reaches
+// ShortThreshold it is divided by 1000 and given a bare "k", and once more for
+// "m". BINARY-VERIFIED against BRE.EXE image 0x0EA89 (the helper
+// show_player_list calls for its Score and Net Worth columns, and nothing
+// else calls for Territory).
 //
-// BRE does NOT step: its own columns pick ONE suffix and keep it however far the
-// figure runs, which is why a capture holds `Total Net Worth: 25,750k` on the
-// Daily Bulletin and `1962k   12m` side by side in one See Scores row — k and m
-// on the same screen at the same magnitude, differing by column rather than by
-// size. Stepping is IB's choice (Andy's, #205): one rule everywhere beats two
-// columns that disagree, and it keeps any figure inside four digits and a
-// letter.
-func Abbrev[T Number](n T) string {
-	abs := int64(n)
-	if abs < 0 {
-		abs = -abs
+// The two divides are separate `if`s, NOT a loop, and that is the whole
+// character of the format: 1,213,456 falls to 1213, which is under the
+// threshold, so it stays "1213k" and never reaches "m". A capture has a net
+// worth of 3,180,000 printing "3180k" beside another realm's "12m"
+// (cap/20240527-134Pho_Lazarus_Public.cap) — the crossover is at exactly
+// 10,000,000, not at a million. There is no "b" tier either: two billion
+// prints "2000m".
+//
+// Division truncates and a negative figure is never shortened, both as the
+// original has it (its first test is `jl` past the whole thing).
+func Short[T Number](n T) string {
+	v := int64(n)
+	if v < 0 {
+		return strconv.FormatInt(v, 10)
 	}
-	for _, step := range abbrevSteps {
-		if abs >= step.at {
-			return Comma(int64(n)/step.at) + step.suffix
-		}
+	suffix := ""
+	if v >= ShortThreshold {
+		v /= 1000
+		suffix = "k"
 	}
-	return Comma(n)
+	if v >= ShortThreshold {
+		v /= 1000
+		suffix = "m"
+	}
+	return strconv.FormatInt(v, 10) + suffix
 }
 
-// abbrevSteps runs largest first, so the first match is the right one.
-var abbrevSteps = []struct {
-	at     int64
-	suffix string
-}{
-	{1_000_000_000, "b"},
-	{1_000_000, "m"},
-	{1_000, "k"},
+// GroupLong renders a figure the way BRE's own grouping helper does: grouped
+// with lang's separator, but ONLY once the digits run past four, so a
+// four-digit figure prints bare. BINARY-VERIFIED: BRE.EXE image 0x0E2F7 tests
+// the rendered digit string's LENGTH against 4 and returns it ungrouped when it
+// is not longer. A capture has the same score table printing Territory 3469
+// beside another planet's 14,203 (cap/20240527-134Pho_Lazarus_Public.cap).
+//
+// The sign is not counted: the original takes the absolute value before
+// rendering, so -12345 groups on its five digits.
+//
+// This is NOT Format's rule, and the two are deliberately separate. Format
+// groups at any size and is what IB prints for money and event text; this one
+// belongs to the score table's Territory column, where matching the original
+// matters more than internal consistency.
+func GroupLong[T Number](n T, lang string) string {
+	v := int64(n)
+	neg := v < 0
+	if neg {
+		v = -v
+	}
+	digits := strconv.FormatInt(v, 10)
+	out := digits
+	if len(digits) > 4 {
+		out = Format(v, lang)
+	}
+	if neg {
+		return "-" + out
+	}
+	return out
+}
+
+// Thousands renders a figure the way BRE's Daily Bulletin renders Total Net
+// Worth: divided by 1000 and suffixed "k", ALWAYS — there is no threshold, so a
+// planet worth nothing prints "0k" — with the quotient then grouped by
+// GroupLong's rule. Captures run `0k`, `12k`, `1255k` and `97,678k`, so the
+// comma appears only once the quotient itself passes four digits, and the
+// suffix never steps to "m" however large the figure grows
+// (cap/121125-666H4H_Camembert_Public.cap).
+//
+// This is a THIRD rule, distinct from Short and from Format. Short is the score
+// table's two-step k/m; this one never reaches m. The Bulletin's other two rows
+// (Population, Regions) are plain GroupLong with no suffix at all.
+func Thousands[T Number](n T, lang string) string {
+	return GroupLong(int64(n)/1000, lang) + "k"
 }

@@ -9,6 +9,8 @@ import (
 	"github.com/andy5995/immortal-barons/internal/ansi"
 	"github.com/andy5995/immortal-barons/internal/game"
 	"github.com/andy5995/immortal-barons/internal/session"
+
+	"github.com/andy5995/immortal-barons/internal/numfmt"
 )
 
 // news.go — the Daily Bulletin and the planetary news feed: the masthead, the
@@ -71,10 +73,16 @@ func renderDailyBulletin(s session.Session, t Term, b game.DailyBulletin, title 
 		boxRow(s, inner, vis)
 	}
 
-	locale := func(n int) string { return formatGold(n, sessionLang(s)) }
-	row("Total Population", b.Totals.Population, b.Change.Population, locale)
-	row("Total Regions", b.Totals.Regions, b.Change.Regions, locale)
-	row("Total Net Worth", b.Totals.NetWorth, b.Change.NetWorth, abbrevMoney)
+	// Each row is spelled as BRE spells it: Population and Regions grouped only
+	// once past four digits, Net Worth divided to thousands and always suffixed
+	// "k" — never stepping to "m", however large the planet grows. IB stepped
+	// k/m/b on the last row until 2026-08-30 (#205), which read "12m" where the
+	// original reads "12,468k".
+	plain := func(n int) string { return numfmt.GroupLong(n, sessionLang(s)) }
+	thousands := func(n int) string { return numfmt.Thousands(n, sessionLang(s)) }
+	row("Total Population", b.Totals.Population, b.Change.Population, plain)
+	row("Total Regions", b.Totals.Regions, b.Change.Regions, plain)
+	row("Total Net Worth", b.Totals.NetWorth, b.Change.NetWorth, thousands)
 	boxBottom(s)
 }
 

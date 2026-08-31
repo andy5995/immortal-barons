@@ -113,9 +113,89 @@ Backgrounds: `40`–`47` (and `100`+) — e.g. `44` = blue background. Border ru
 mix the single horizontal `─` (U+2500) and double `═` (U+2550) — e.g. a short
 `═══` accent set inside a longer `───` line.
 
+## How the score table spells its three figures — BINARY-VERIFIED
+
+The `Id / Empire Name / Territory / Score / Networth` table (`show_player_list`,
+drawn by the roster, the attack target list and the Spy Database) spells each of
+its three numeric columns DIFFERENTLY, and IB now follows all three
+(`internal/numfmt`, `Short` and `GroupLong`):
+
+- **Territory — grouped, but only past four digits.** `resident_0dc9_0608`
+  (BRE.EXE image `0x0E2F7`) tests the rendered digit string's LENGTH against 4
+  and returns it ungrouped when it is not longer. One capture shows the same
+  screen printing `3469` on one planet and `14,203` on another.
+- **Score and Net Worth — shortened with a bare `k` or `m`.**
+  `resident_0dc9_0df9` (image `0x0EA89`) does, twice over:
+  `if v >= 10000 { v /= 1000; suffix = next }`, stepping `""` -> `k` -> `m`.
+
+**The two divides are separate `if`s, not a loop, and that is the format's whole
+character.** 1,213,456 falls to 1213, which is under the threshold, so it stays
+`1213k` and never reaches `m`; a capture prints a net worth of `3180k` beside
+another realm's `12m`. The crossover to `m` is at exactly 10,000,000, NOT at a
+million. There is no `b` tier: two billion prints `2000m`. Division truncates,
+and a negative figure is never shortened (the routine's first test jumps past
+the whole thing).
+
+The suffix strings are the only `01 'k' 01 'm'` in the binary
+(`BRE.EXE` `0x113C5`). Evidence for the values:
+`cap/20240527-134Pho_Lazarus_Public.cap`.
+
+```
+Id   Empire Name                          Territory   Score   Networth
+(A)  <realm>                                 14,203   1962k        12m
+(A)  <realm>                                   3469    958k      3180k
+```
+
+**This is a CONVERGENCE, and it narrows the comma-grouping divergence below.**
+IB printed these columns bare (the board and the target list) or fully grouped
+(the recipient picker) until 2026-08-30; all three now share one row helper.
+
+### The shortening is NOT the score table's alone
+
+`resident_0dc9_0eb4` wraps the same helper, so these screens shorten too — every
+numeric field on the line, gold and unit counts alike:
+
+| BRE routine | the line | IB |
+| --- | --- | --- |
+| `launch_pirate_raid` | `You took 111k Gold, 5 Regions, 8568 Agents, ... 13k Turrets` | done |
+| `resolve_returning_attack` | `1000k Tanks returned.` | done |
+| `resolve_received_invasion` | the arriving strike's report | done |
+| `resolve_received_trade_offer` | `They shipped 1000k Turrets and 188m Gold.` | done |
+| `process_trade_offer` | `He Offers 100m Gold and 1000 Carriers.` | — |
+| `create_individual_attack` | `You have N Troopers, N usable Jets, ...` | done |
+| `show_military_advisor_report` | 9 figures, NOT yet mapped to their lines | **open** |
+
+**The LOCAL battle report does NOT shorten, and that is not an oversight.**
+`resolve_regular_attack` is absent from the helper's caller list, and a staged
+local battle printed `10469 Troopers` whole
+(`cap/small-vs-large-20260830.cap`) where the interplanetary report of a
+comparable figure prints `115k Turrets`. The two must not be made to agree.
+
+**The money screens do not shorten either.** `Bank: 2,000,000,000` is printed in
+full (below), so BRE spells gold both ways and which one applies is decided per
+screen, not per quantity.
+
+### The Daily Bulletin is a THIRD format again
+
+Its three rows are spelled:
+
+| row | rule | capture |
+| --- | --- | --- |
+| Total Population | grouped past four digits | `7813`, `10,040`, `977,749` |
+| Total Regions | grouped past four digits | `5000`, `41,686` |
+| Total Net Worth | **/1000, always `k`**, then grouped | `0k`, `12k`, `1255k`, `97,678k` |
+
+The `k` is unconditional — a planet worth nothing prints `0k` — and it NEVER
+steps to `m` however large the planet grows, which is what separates this from
+the score table's rule above. The Change figure beside each uses that row's own
+format (`+7570`, `+12k`). IB matched this on 2026-08-30; it had stepped k/m/b
+here (#205) and printed `12m` where the original prints `12,468k`.
+
 ## How BRE prints a figure of a billion or more
 
-**In full, with its thousands comma-grouped** — no suffix, no decimal form.
+**In full, with its thousands comma-grouped** — no suffix, no decimal form. This
+is the MONEY screens; the score table shortens instead (above), so BRE does both
+and which one applies is per screen.
 `Bank: 2,000,000,000` appears 8,581 times in `cap/121125-666H4H_Camembert_Public.cap`
 alongside `You have 0 gold in hand and 2,000,000,000 gold in the bank.`, and the
 bank-history rows run `09/25/2013   $1,001,235,538` / `Today        $1,846,153,847`.
