@@ -310,8 +310,8 @@ func normalFlavour(s string) string {
 }
 
 // RequireNetmail reports whether this configuration can publish an attach
-// handoff, and says what is missing when it cannot. It is asked by --out at the
-// point of use rather than by LoadConfig, because --in never writes netmail: a
+// handoff, and says what is missing when it cannot. It is asked by -out at the
+// point of use rather than by LoadConfig, because -in never writes netmail: a
 // file-box board that only RECEIVES has no netmail directory to name, and
 // refusing to load its config told it to fix the one setting its runs never
 // touch (found on a three-board rig, 2026-08-27).

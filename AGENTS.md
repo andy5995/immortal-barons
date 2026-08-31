@@ -419,7 +419,7 @@ etc.); a league Coordinator broadcasts the whole ruleset over inter-BBS.
 **Inter-BBS ("Option A")**: file-drop `.brp` JSON packets in Inbound/Outbound
 dirs; the sysop's transport moves them; `-planetary` processes inbound, launches
 group attacks, and exports scores/news. `barons-ftn` is bidirectional since
-#226 (`--in`/`--out`, private game directories behind resumable spools, attach /
+#226 (`-in`/`-out`, private game directories behind resumable spools, attach /
 obox / BSO links per peer). It sends plain packets by default and bundles only
 when a board says `Bundled Yes`, because a board on an older release aborts its
 whole inbound run on the first ZIP it meets; the default is meant to flip once

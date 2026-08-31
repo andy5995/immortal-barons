@@ -544,7 +544,7 @@ func checkSubjectMargin(transport Config, attached string, result *Result) error
 func publishTarget(batch, dataDir string, transport Config, origin Address, target batchTarget) (Queued, error) {
 	// Named before it is reached: creating the netmail with no directory
 	// configured fails as `open : no such file or directory`, an error whose
-	// blank filename says nothing about which setting is missing. --in hits
+	// blank filename says nothing about which setting is missing. -in hits
 	// this too when a routing board forwards transit, which is where RunOut's
 	// own check cannot help (three-board rig, 2026-08-27).
 	if target.Mode == LinkAttach && transport.NetmailDir == "" {

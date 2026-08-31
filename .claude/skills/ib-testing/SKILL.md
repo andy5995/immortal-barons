@@ -304,9 +304,9 @@ stored-message attach and SBBSecho — over one binkp link.
 Each step has its own failure mode, so check them in order rather than guessing
 where a packet stalled:
 
-    barons-ftn --in                     # unwraps what the mailer delivered into the game's Inbound
+    barons-ftn -in                     # unwraps what the mailer delivered into the game's Inbound
     immortal-barons -planetary          # applies it, writes replies into the game's Outbound
-    barons-ftn --out                    # bundles those, writes N.msg (attach) or the peer's obox
+    barons-ftn -out                    # bundles those, writes N.msg (attach) or the peer's obox
     $SBBS/exec/sbbsecho                 # packs the .msg into the BSO .flo, deletes it
     $SBBS/exec/jsexec -c ctrl exec/binkit.js   # OUTBOUND session, actually sends
 
@@ -350,8 +350,8 @@ change, not as drift.
 
 ## Converting a board to the bundled transport
 
-Since PR #226 the helper is not optional for anyone in the league: `--out`
-always emits a ZIP bundle, and only `--in` unwraps one. A board that reads
+Since PR #226 the helper is not optional for anyone in the league: `-out`
+always emits a ZIP bundle, and only `-in` unwraps one. A board that reads
 `.brp` straight out of its mailer's directory quarantines every bundle it
 receives (issue #230). Converting one taught five things, each of which cost a
 run to find:
@@ -362,26 +362,26 @@ run to find:
   different directories — set to the same one, the helper has nothing to
   publish into and delivers zero without saying why.
 - **A file-box peer is an `Obox` link.** With no `Link` line the mode defaults
-  to attach, so a routing board's `--in` tries to write netmail on a board that
+  to attach, so a routing board's `-in` tries to write netmail on a board that
   has no netmail directory. The symptom was `open : no such file or directory`
   with a blank filename, which names neither the setting nor the file.
 - **Fixing `ftn.cfg` does not repair a receipt already in the spool.** A
   journaled receipt replays the targets it was PLANNED with, so it keeps
-  failing in the old mode. Clear `ftn-spool/in/<id>` and let `--in` rebuild
+  failing in the old mode. Clear `ftn-spool/in/<id>` and let `-in` rebuild
   from the source bundle, which is still there because cleanup only runs on
   success.
 - **Synchronet needs a short `AttachDir`.** The default attach spool under the
   data directory is long enough to blow the 70-byte Binkley subject budget on a
   board that fitted before the upgrade.
-- **Order the chain `--in`, `-planetary`, `--out`.** Running `--out` first
+- **Order the chain `-in`, `-planetary`, `-out`.** Running `-out` first
   sends the previous cycle's outbox and leaves this cycle's for the next run,
   which looks like a transport that is one cycle behind rather than a
   scheduling mistake.
 
-`barons-ftn --status` reads both spools and changes nothing, so it is the first
+`barons-ftn -status` reads both spools and changes nothing, so it is the first
 thing to reach for when a board goes quiet: it names each unfinished target by
 peer, how long it has waited, and the failure it recorded. It also works while
-the board's config is invalid, which `--in`/`--out` deliberately do not.
+the board's config is invalid, which `-in`/`-out` deliberately do not.
 
 ## Scheduling the exchange
 

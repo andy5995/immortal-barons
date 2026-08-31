@@ -13,7 +13,7 @@ somewhere else, which is the question worth answering first.
    them?
 3. `planetary.log` — what did earlier runs complain about?
 4. Your mailer or file transport — did anything reach the inbound directory at
-   all? With `barons-ftn`, `--status` answers this without changing anything.
+   all? With `barons-ftn`, `-status` answers this without changing anything.
 
 ## Step 1: `-league-check`
 
@@ -46,7 +46,7 @@ cannot check that league orders came from the Coordinator, and refuses them.
 
 When `barons-ftn` is in use, `-league-check` also reports the transport's own
 backlog, because by the time anyone asks why a board went quiet the run that
-failed is long gone. Those lines are the same ones `barons-ftn --status` prints;
+failed is long gone. Those lines are the same ones `barons-ftn -status` prints;
 see [Using `barons-ftn`](#using-barons-ftn-to-see-where-a-packet-stopped) below.
 
 ## Step 2: read the run report
@@ -216,10 +216,10 @@ is sitting. This matters because the game and the transport keep separate
 directories on purpose: a packet the game has written is not a packet the mailer
 has been given, and neither of those is a packet that has been sent.
 
-### `--status` changes nothing
+### `-status` changes nothing
 
 ```
-barons-ftn --status -data /path/to/data
+barons-ftn -status -data /path/to/data
 ```
 
 Reach for this first: it reads the spool journals and prints what is unfinished,
@@ -239,9 +239,9 @@ peer.
 
 ### Bundles collecting in the transport inbound
 
-`.BRP` files piling up in the transport's `InboundDir` while `--status` reports
+`.BRP` files piling up in the transport's `InboundDir` while `-status` reports
 nothing pending is a specific fault, and not the one it looks like. The
-transport has not stalled and `--in` is running. It is reading those files,
+transport has not stalled and `-in` is running. It is reading those files,
 recognising them, and passing over them on every run.
 
 Look at one:
@@ -251,7 +251,7 @@ unzip -p /path/to/inbound/NNNNCCCC.BRP manifest.json
 ```
 
 `"delivery": "attach"` is the case. An attach bundle is claimed only alongside
-the `.msg` envelope that names it, and `--in` waits for that envelope rather
+the `.msg` envelope that names it, and `-in` waits for that envelope rather
 than opening the bundle on its own. If this board's mail system never leaves a
 `.msg` file where `barons-ftn` reads them — Mystic tosses netmail into its own
 message bases and leaves none — the envelope never appears and the wait never
@@ -265,7 +265,7 @@ one asks of the receiver.
 
 ### What a run tells you
 
-`--out` bundles and hands off; `--in` receives, unwraps and routes. Both print
+`-out` bundles and hands off; `-in` receives, unwraps and routes. Both print
 warnings to standard error and a summary to standard output, and both act, so
 they are not the command to reach for while you are still working out what is
 wrong.
@@ -274,22 +274,22 @@ wrong.
   transport handed over and to whom. That is the point where the packet stops
   being the game's problem and starts being your mailer's: if a queue line
   appeared and the far board never heard, the fault is downstream of the game.
-- `N queued; M snapshot(s) still waiting on K peer(s)` on `--out` is the line
+- `N queued; M snapshot(s) still waiting on K peer(s)` on `-out` is the line
   worth logging. An empty system and a stalled one both queue nothing, and this
   is the only place the difference shows.
 - `No outbound packets.` means the game wrote nothing to hand over — so the
   question is whether `-planetary` ran, not whether the transport works.
-- `Delivered N packet(s) to the game.` on `--in` is the count that should be
-  matched by the next `-planetary` run's **Applied**. If `--in` delivers and
+- `Delivered N packet(s) to the game.` on `-in` is the count that should be
+  matched by the next `-planetary` run's **Applied**. If `-in` delivers and
   `-planetary` applies nothing, the packets are in the game's inbound and were
   refused, held, or quarantined — read the run report and the log, above.
 
 Run the three in the order the game expects, and the counts line up end to end:
 
 ```
-barons-ftn --in -data /path/to/data      # deliver what the mailer brought
+barons-ftn -in -data /path/to/data      # deliver what the mailer brought
 immortal-barons -planetary -data /path/to/data
-barons-ftn --out -data /path/to/data     # hand over what the game wrote
+barons-ftn -out -data /path/to/data     # hand over what the game wrote
 ```
 
 A `barons-ftn` error is printed with the setting that fixes it, so the message
@@ -297,7 +297,7 @@ is worth reading in full rather than grepping for the first line — a refused
 subject length runs past 700 bytes of explanation.
 
 [FTN Transport with `barons-ftn`](ftn-transport.md) has the table of where files
-accumulate and what each location means, which is the next step when `--status`
+accumulate and what each location means, which is the next step when `-status`
 says a peer is waiting and you need to know on what.
 
 ## Finding the board that went quiet

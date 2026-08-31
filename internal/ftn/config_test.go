@@ -123,7 +123,7 @@ func TestLoadConfigMixedLinks(t *testing.T) {
 }
 
 // A file-box board that only RECEIVES has no netmail directory to name, and
-// --in never writes netmail. Refusing to load its config told it to fix the one
+// -in never writes netmail. Refusing to load its config told it to fix the one
 // setting its runs never touch (three-board rig, 2026-08-27).
 func TestConfigLoadsWithoutNetmailDirForAReceiveOnlyBoard(t *testing.T) {
 	dir := t.TempDir()

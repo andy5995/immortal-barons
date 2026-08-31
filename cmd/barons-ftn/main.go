@@ -37,7 +37,7 @@ func main() {
 		return
 	}
 	if *inbound && *outbound {
-		fmt.Fprintln(os.Stderr, "barons-ftn: use only one of --in and --out")
+		fmt.Fprintln(os.Stderr, "barons-ftn: use only one of -in and -out")
 		os.Exit(2)
 	}
 	var result ftn.Result

@@ -27,20 +27,20 @@ There are three independent formats:
 The same `.BRP` extension on the first two is intentional, but every file the
 new helper publishes onto FTN is a ZIP transport bundle, never a raw game
 packet. Its 8.3 physical name is only an alias. Packet ZIP members use the
-canonical IB filename derived from their contents, and `--in` derives that name
+canonical IB filename derived from their contents, and `-in` derives that name
 again rather than trusting any external filename. As a receive-only migration
-aid, `--in` can still recognize a raw JSON packet produced by an older helper.
+aid, `-in` can still recognize a raw JSON packet produced by an older helper.
 
 Keep each owner in its own directory:
 
 | Directory | Owner | Healthy contents |
 |---|---|---|
 | `bbs.cfg` `Inbound` | Immortal Barons | Unwrapped JSON packets waiting for `-planetary` |
-| `bbs.cfg` `Outbound` | Immortal Barons | Complete JSON packets waiting for `--out` |
+| `bbs.cfg` `Outbound` | Immortal Barons | Complete JSON packets waiting for `-out` |
 | `data/ftn-spool` | `barons-ftn` | Usually empty; journals appear while a handoff is incomplete |
 | `ftn.cfg` `AttachDir` (default `data/att`) | connector/tosser | `NNNNCCCC.BRP` bundles waiting to be sent |
 | `ftn.cfg` `NetmailDir` | connector/tosser | Outgoing game-owned `.msg` envelopes |
-| `ftn.cfg` `InboundDir` | mailer/connector | Newly received bundles waiting for `--in` |
+| `ftn.cfg` `InboundDir` | mailer/connector | Newly received bundles waiting for `-in` |
 | an obox | connector/mailer | Bundles queued for the peer owning that outbox |
 | a BSO directory | tosser/mailer/connector | `.?lo`, `.?ut`, `.bsy`, and point subdirectories |
 
@@ -53,11 +53,11 @@ helper, and mailer from reading or deleting the same file concurrently.
 The helper has two modes:
 
 ```text
-barons-ftn --in  -data /srv/ib/data
-barons-ftn --out -data /srv/ib/data
+barons-ftn -in  -data /srv/ib/data
+barons-ftn -out -data /srv/ib/data
 ```
 
-With neither mode, `--out` is used for compatibility with old scheduled
+With neither mode, `-out` is used for compatibility with old scheduled
 commands. Supplying both is an error. `-data` defaults to `./data`, relative to
 the process's working directory. It can be omitted only when the BBS scheduler
 starts the command in the Immortal Barons installation directory.
@@ -65,24 +65,24 @@ starts the command in the Immortal Barons installation directory.
 The complete exchange order is:
 
 1. Let the mailer finish its inbound session.
-2. Run `barons-ftn --in` to validate and unwrap received bundles.
+2. Run `barons-ftn -in` to validate and unwrap received bundles.
 3. Run `immortal-barons -planetary` to apply local game packets and create new
    replies, scores, and broadcasts.
-4. Run `barons-ftn --out` to claim and bundle that fixed outbound snapshot.
+4. Run `barons-ftn -out` to claim and bundle that fixed outbound snapshot.
 5. Run the tosser when using `.msg` attach links, then let the mailer send its
    obox or BSO queues.
 
 For an hourly Unix event:
 
 ```sh
-/opt/ib/barons-ftn --in  -data /srv/ib/data
+/opt/ib/barons-ftn -in  -data /srv/ib/data
 /opt/ib/immortal-barons -planetary -data /srv/ib/data
-/opt/ib/barons-ftn --out -data /srv/ib/data
+/opt/ib/barons-ftn -out -data /srv/ib/data
 /opt/bbs/bin/sbbsecho
 /opt/bbs/bin/binkp-poll
 ```
 
-There is no FTN-wide inbound semaphore. Run `--in` from a mailer post-session
+There is no FTN-wide inbound semaphore. Run `-in` from a mailer post-session
 event or after the receive command returns. The helper validates a complete ZIP
 and all member digests before publishing anything, but that validation cannot
 prove that an unrelated mailer is no longer writing the source file.
@@ -107,9 +107,9 @@ exec >>/sbbs/xtrn/imb/data/planetary.log 2>&1
 echo "=== $(date --iso-8601=seconds) ==="
 
 cd /sbbs/xtrn/imb
-./barons-ftn --in
+./barons-ftn -in
 ./immortal-barons -planetary
-./barons-ftn --out
+./barons-ftn -out
 /sbbs/exec/sbbsecho /sbbs/ctrl/sbbsecho.ini
 /sbbs/exec/jsexec -c/sbbs/ctrl /sbbs/exec/binkit.js
 ```
@@ -119,7 +119,7 @@ hourly will one day fire while a slow run is still going, and the lock turns
 that collision into a clean exit rather than two processes competing for the
 same spools.
 
-The log matters more than it looks. `--out` names the peers a snapshot is
+The log matters more than it looks. `-out` names the peers a snapshot is
 still waiting on and how long they have been behind, and a scheduled run has
 nowhere to print that unless the output is kept, so the report is written for
 nobody. Redirecting to a file is what makes it worth having.
@@ -128,7 +128,7 @@ nobody. Redirecting to a file is what makes it worth having.
 defaults to `./data`.
 
 `set -e` has a consequence worth choosing on purpose. A non-zero exit from
-`--in` stops the script, so `--out` and the mailer never run, and outbound
+`-in` stops the script, so `-out` and the mailer never run, and outbound
 mail stops with them. That may well be right: an outbound snapshot built on a
 failed inbound is worth skipping. It is still a decision rather than a default
 to inherit unread. Recoverable problems are reported as warnings and exit 0,
@@ -148,7 +148,7 @@ InboundNetmailDir /var/spool/binkp/inbound
 OboxMeshFanout    Yes
 ```
 
-- `InboundDir` is required by `--in` and names received attachments and raw
+- `InboundDir` is required by `-in` and names received attachments and raw
   obox/BSO bundles.
 - `InboundNetmailDir` names received `.msg` envelopes. It defaults to
   `InboundDir` and normally stays the same.
@@ -178,7 +178,7 @@ SubjectPath Absolute
   The stored-message Subject has 71 usable bytes, or 70 with the `^` prefix.
 
 On the receiving side, the tosser normally leaves both the bundle and its
-stored-message envelope in the configured inbound. `barons-ftn --in` verifies
+stored-message envelope in the configured inbound. `barons-ftn -in` verifies
 that the message has the file-attach attribute, identifies Immortal Barons,
 names exactly one attachment inside `InboundDir`, comes from a roster address,
 and is addressed to this board. Only after all packets are delivered or
@@ -247,7 +247,7 @@ The modes are:
 between two boards, so the mode you send with is only half of it:
 
 - `Attach` requires the receiving board's mail system to leave the `.msg`
-  envelope as a file where `barons-ftn --in` can read it — its
+  envelope as a file where `barons-ftn -in` can read it — its
   `InboundNetmailDir`, which defaults to `InboundDir`. Synchronet with SBBSecho
   does that. **Mystic does not**: it tosses netmail into its own message bases
   and leaves no `.msg` file behind, so a Mystic board can never claim an attach.
@@ -315,7 +315,7 @@ transport behaved before bundles existed, and it is the price of reaching a
 board that cannot read one.
 
 **On a routed league only the Coordinator has to do anything.** Every member
-sends it plain packets already, and its `--in` reads those whatever they are.
+sends it plain packets already, and its `-in` reads those whatever they are.
 It is the Coordinator's own sends that need `Raw`, and it can drop the setting
 for one member at a time as each upgrades, or switch the whole board to
 `Bundled Yes` once the last one is done.
@@ -372,7 +372,7 @@ Link 3 Obox /srv/binkd/obox/node3
 Link 4 BSO /srv/binkd/outbound Normal
 ```
 
-A packet from node 2 to node 4 arrives inside node 2's attach. Hub `--in`
+A packet from node 2 to node 4 arrives inside node 2's attach. Hub `-in`
 unwraps it, leaves its signed JSON bytes untouched, and publishes a new
 transport bundle through node 4's BSO flow. It does not wait for the hub's next
 planetary run.
@@ -391,7 +391,7 @@ Link 1 BSO /sbbs/fido/outbound Normal
 The outbound chain is:
 
 ```text
-barons-ftn --out -> NNNNCCCC.BRP + .flo entry -> BinkIT
+barons-ftn -out -> NNNNCCCC.BRP + .flo entry -> BinkIT
 ```
 
 SBBSecho is not in that path. The Subject byte limit does not apply either,
@@ -432,13 +432,13 @@ For point `1:229/300.4`, the paths are:
 
 If `.bsy` already exists, that peer is normally reported busy and its durable
 spool transaction remains pending. The invocation does not poll or sleep: other
-peers continue, and the next scheduled `--in` or `--out` resumes pending
+peers continue, and the next scheduled `-in` or `-out` resumes pending
 transactions before claiming new work. The narrowly scoped exception is an old
 semaphore carrying `barons-ftn`'s own PID marker; recovery is described below.
 
 ## Bundling, names, and recovery
 
-Every `--out` run takes one fixed snapshot under the same `game.lock` used by
+Every `-out` run takes one fixed snapshot under the same `game.lock` used by
 Immortal Barons. Packets written after that claim wait for the next run. All
 packets in the snapshot which share a next hop go into one ZIP bundle.
 
@@ -495,7 +495,7 @@ unknown destination, or routing cycle is recorded in the receipt while valid
 members are still delivered or forwarded. After those valid members finish,
 the complete original transport wrapper moves to `ftn-spool/bad` so the rejected
 routing context remains available for diagnosis; it is not retried on every
-later `--in` run. A local canonical-name collision is different: the receipt
+later `-in` run. A local canonical-name collision is different: the receipt
 and source stay pending because the operator must decide which bytes are valid.
 
 All `barons-ftn` processes—both directions—hold `barons-ftn.lock`. Movement
@@ -512,7 +512,7 @@ or inventing a noncanonical name.
 ## Routing and broadcasts
 
 The JSON packet names its final destination. A transport bundle is addressed
-only to the next FTN hop. At a hub, `--in` reads enough JSON to choose the next
+only to the next FTN hop. At a hub, `-in` reads enough JSON to choose the next
 hop but copies the original JSON bytes into the new bundle without changing or
 re-signing them. The actual node route and broadcast coverage live in the ZIP
 manifest and are discarded before local game delivery. The final route node is
@@ -526,7 +526,7 @@ routes each copy normally.
 ### Mesh warning
 
 An old-style unaddressed broadcast has no final node. When it arrives over
-Obox or BSO and `OboxMeshFanout Yes`, `--in` delivers it locally and sends it to
+Obox or BSO and `OboxMeshFanout Yes`, `-in` delivers it locally and sends it to
 every configured peer in neither its `route` nor its `covered` list. Before a
 sender publishes sibling copies, it puts every durably scheduled recipient in
 the common `covered` list. This prevents those recipients from reflexively
@@ -544,7 +544,7 @@ If the topology is a true mesh and the source already reaches every board, set:
 OboxMeshFanout No
 ```
 
-Then `--in` delivers an unaddressed broadcast locally and stops. The source
+Then `-in` delivers an unaddressed broadcast locally and stops. The source
 transport is responsible for putting one copy on every required direct link.
 Do not use this switch to disguise a physical star whose roster claims to be a
 mesh; describe that star with `HOST` lines instead.
@@ -557,16 +557,16 @@ quiet — see [Inter-BBS Troubleshooting](inter-bbs-troubleshooting.md).
 
 | Where files accumulate | Meaning | Action |
 |---|---|---|
-| game `Outbound` | `--out` did not run or cannot take `game.lock` | Run `barons-ftn --out`; read its error |
+| game `Outbound` | `-out` did not run or cannot take `game.lock` | Run `barons-ftn -out`; read its error |
 | `ftn-spool/out` | At least one target is busy or failed | Read the warning; inspect that peer's `.bsy`, path, or netmail directory |
 | `AttachDir` (default `data/att`), envelope still in `NetmailDir` | Normal. The attachment waits for the tosser to pack the `.msg` that names it | Nothing. Run/check the tosser |
 | `AttachDir` (default `data/att`) with no `.msg`/flow | Attach or BSO queue publication failed | Check subject length, `NetmailDir`, BSO directory, and permissions |
 | `NetmailDir` `.msg` | The tosser has not packed outgoing netmail | Run/check the tosser and allow file attaches |
 | BSO `.?lo` | The mailer has not successfully sent the referenced bundle | Check peer address, password, route, and `.bsy` |
 | peer obox | The mailer has not sent or acknowledged the file | Check the peer session and outbox mapping |
-| transport `InboundDir` | `--in` did not run, ran before receive completion, or rejected the wrapper | Run it after the session and read warnings |
-| transport `InboundDir`, only `.BRP` files, `--status` says nothing pending | They are attach bundles whose `.msg` envelope never arrives here — see [Per-peer links](#per-peer-links) | `unzip -p FILE manifest.json` to confirm `"delivery": "attach"`; have the sender switch that link to `Obox` or `BSO` |
-| `ftn-spool/in` | Local publication or transit handoff is incomplete | Correct the named target; the next `--in` resumes it |
+| transport `InboundDir` | `-in` did not run, ran before receive completion, or rejected the wrapper | Run it after the session and read warnings |
+| transport `InboundDir`, only `.BRP` files, `-status` says nothing pending | They are attach bundles whose `.msg` envelope never arrives here — see [Per-peer links](#per-peer-links) | `unzip -p FILE manifest.json` to confirm `"delivery": "attach"`; have the sender switch that link to `Obox` or `BSO` |
+| `ftn-spool/in` | Local publication or transit handoff is incomplete | Correct the named target; the next `-in` resumes it |
 | game `Inbound` | `-planetary` has not applied the unwrapped packets | Run `immortal-barons -planetary` |
 | `ftn-spool/bad` | An outbound packet was malformed/unroutable, or an inbound bundle contained a rejected member | Preserve it for diagnosis; correct the producing board, route, league, or roster |
 
@@ -585,7 +585,7 @@ quiet.
 Before removing anything from `AttachDir`, decide which of the two rows above
 applies, because they look identical in a file listing:
 
-- Run `barons-ftn --status`. A receipt held in transit for another board names
+- Run `barons-ftn -status`. A receipt held in transit for another board names
   that board and that peer's last error. Anything it still lists is owed to
   somebody.
 - Find the envelope. Each `Queued <packet> for <next hop> as <message>` line
@@ -607,7 +607,7 @@ packets.
 
 What to read instead:
 
-- **`barons-ftn --out` says so on every run.** A run that publishes nothing
+- **`barons-ftn -out` says so on every run.** A run that publishes nothing
   because its peers are busy prints how many snapshots remain and which peers
   they wait on, rather than `No outbound packets.` — so a scheduled event's log
   distinguishes an empty system from a stalled one. The same peer named run
@@ -622,7 +622,7 @@ What to read instead:
   gone without progress and why each peer is behind, rather than only how many
   are waiting. All three fields are optional: a journal written before they
   existed still loads, and its file date stands in for the age.
-- **`barons-ftn --status` answers all of this and changes nothing.** It reports
+- **`barons-ftn -status` answers all of this and changes nothing.** It reports
   each peer's unfinished snapshots longest wait first, with the recorded reason,
   the pending inbound receipts and which of the three ways each is stuck, any
   journal that will not parse, and how many packets are set aside. Reach for it
@@ -640,7 +640,7 @@ What to read instead:
   publication step failed after the bundle was written — check the same
   causes as the troubleshooting table above (subject length, `NetmailDir`,
   BSO directory, permissions). This directory is deliberately not under
-  `ftn-spool/` and not shown by `--status`'s spool report — it is the one
+  `ftn-spool/` and not shown by `-status`'s spool report — it is the one
   transport path a mailer's Subject field has to spell out under a byte
   limit, so it lives where the sysop can point `AttachDir` at a short
   location if the default does not fit.
@@ -663,16 +663,16 @@ above that the owning mailer is finished with it.
 
 ## Upgrade order
 
-ZIP bundles require `barons-ftn --in`; an older game cannot parse the ZIP as a
+ZIP bundles require `barons-ftn -in`; an older game cannot parse the ZIP as a
 JSON packet. Upgrade receivers first:
 
 1. Install the new helper on every board.
-2. Configure `InboundDir` and schedule `barons-ftn --in` after receive sessions.
+2. Configure `InboundDir` and schedule `barons-ftn -in` after receive sessions.
 3. Verify that legacy raw `.brp` traffic is still delivered to the game.
 4. Configure the per-peer `Link` modes.
-5. Enable the new bundled `--out` path on senders.
+5. Enable the new bundled `-out` path on senders.
 
-Because `--in` accepts legacy raw JSON packets, steps 1–3 can be completed
+Because `-in` accepts legacy raw JSON packets, steps 1–3 can be completed
 without coordinating an exact cutover minute.
 
 Before step 5, an `Attach` link with no `AttachDir` set gets one that lives
@@ -680,7 +680,7 @@ under the data directory (see [Stored-message attach
 settings](#stored-message-attach-settings)) — a board whose data directory is
 already deep, as a Synchronet door is under the usual `<sbbs>/xtrn/<door>/data`
 layout, can lose all its Subject margin to that alone and publish nothing on
-the first `--out`, with no config change of its own. If `--out` fails
+the first `-out`, with no config change of its own. If `-out` fails
 immediately with an `attachment subject ... is N bytes` error, set `AttachDir`
 to a short, persistent directory outside the data tree per [Keeping attach
 subjects short](#keeping-attach-subjects-short) — check this **before**

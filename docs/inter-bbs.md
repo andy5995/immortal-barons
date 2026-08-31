@@ -422,7 +422,7 @@ A common setup:
 2. After the caller exits, or on a schedule you pick, run `-planetary`.
 3. Your transport carries each file from your outbound side to the destination
    (over FidoNet, a sync tool, scp, a shared mount — whatever you use). For FTN,
-   `barons-ftn --out` wraps it and `barons-ftn --in` removes that wrapper before
+   `barons-ftn -out` wraps it and `barons-ftn -in` removes that wrapper before
    the game sees it.
 4. The next `-planetary` run on that board reads and applies those files.
 
@@ -553,9 +553,9 @@ wrapper, delivers local packets, and routes transit without changing the signed
 game-packet bytes.
 
 ```
-barons-ftn --in -data /path/to/data
+barons-ftn -in -data /path/to/data
 immortal-barons -planetary -data /path/to/data
-barons-ftn --out -data /path/to/data
+barons-ftn -out -data /path/to/data
 ```
 
 The helper and game share a locking contract. Attach and obox bundles are
@@ -1105,9 +1105,9 @@ you like.
 ### The four steps, in order
 
 ```
-barons-ftn --in -data /sbbs/xtrn/imb/data
+barons-ftn -in -data /sbbs/xtrn/imb/data
 immortal-barons -planetary -data /sbbs/xtrn/imb/data
-barons-ftn --out -data /sbbs/xtrn/imb/data
+barons-ftn -out -data /sbbs/xtrn/imb/data
 jsexec -c /sbbs/ctrl /sbbs/exec/binkit.js
 ```
 

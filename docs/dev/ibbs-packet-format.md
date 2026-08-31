@@ -91,10 +91,10 @@ that writes directly to the final name; it is a heuristic, not an alternative
 readiness signal. An older incomplete file is quarantined to `bad/`.
 
 `barons-ftn` is the optional bidirectional FTN adapter. The game's directories
-remain private. `--out` claims a fixed snapshot under `game.lock`, groups its
+remain private. `-out` claims a fixed snapshot under `game.lock`, groups its
 packets by next hop, and publishes one FTN handoff per hop. Attach and obox
 bundles are immutable; BSO bundles may be rebuilt at the same path while the
-peer's `.bsy` is held. `--in`
+peer's `.bsy` is held. `-in`
 validates a received bundle, publishes local packets under the same game lock,
 and immediately re-bundles transit. All helper processes serialize through
 `barons-ftn.lock`; the lock order is always helper then game. Durable journals
@@ -163,7 +163,7 @@ remains in the packet.
 A leading JSON object instead of ZIP is accepted as one legacy entry, allowing
 receivers to be upgraded before senders. This is receive-only compatibility,
 not an FTN wire format: new senders always publish ZIP, even for one packet.
-New bundled output requires the receiving `barons-ftn --in`; the game itself
+New bundled output requires the receiving `barons-ftn -in`; the game itself
 still reads JSON only.
 
 ## Packet files (`*.brp`)

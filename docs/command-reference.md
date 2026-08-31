@@ -226,24 +226,24 @@ mailer. Run inbound after a receive session, planetary processing next, and
 outbound before the tosser/mailer sends:
 
 ```
-barons-ftn --in -data /path/to/data
+barons-ftn -in -data /path/to/data
 immortal-barons -planetary -data /path/to/data
-barons-ftn --out -data /path/to/data
+barons-ftn -out -data /path/to/data
 ```
 
 It reads `bbs.cfg`, `ibnodes.dat`, and the FTN-only `ftn.cfg`.
-`--out` takes a fixed snapshot and creates one 8.3-named ZIP handoff per next
+`-out` takes a fixed snapshot and creates one 8.3-named ZIP handoff per next
 hop, using stored-message attach, direct obox, or BSO/FLO as configured. Attach
 and obox handoffs are immutable; while holding the peer's `.bsy`, BSO may merge
 the snapshot into a compatible bundle already advertised in its flow file.
-`--in` validates received bundles and game-owned attach envelopes, publishes
+`-in` validates received bundles and game-owned attach envelopes, publishes
 local packets, and immediately forwards transit packets. Concurrent helpers
 and game processes serialize through their shared locking contract.
 
-- **`-in` / `--in`** — Receive, unwrap, and route inbound FTN bundles.
-- **`-out` / `--out`** — Bundle and hand off outbound game packets. This is the
+- **`-in`** — Receive, unwrap, and route inbound FTN bundles.
+- **`-out`** — Bundle and hand off outbound game packets. This is the
   default when neither direction is supplied.
-- **`-status` / `--status`** — Report what each spool is still holding, for
+- **`-status`** — Report what each spool is still holding, for
   whom, for how long, and why, and change nothing. A file count answers none of
   those: a snapshot is kept whole until every target in it publishes, so it also
   holds bundles for peers that already went out.
