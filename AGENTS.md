@@ -421,10 +421,12 @@ dirs; the sysop's transport moves them; `-planetary` processes inbound, launches
 group attacks, and exports scores/news. `barons-ftn` is bidirectional since
 #226 (`-in`/`-out`, private game directories behind resumable spools, attach /
 obox / BSO links per peer). It sends plain packets by default and bundles only
-when a board says `Bundled Yes`, because a board on an older release aborts its
-whole inbound run on the first ZIP it meets; the default is meant to flip once
-no such board is left (#230, and the rule above `game.Protocol`). Two ed25519
-key pairs guard it: the
+when a board says `Bundled Yes`, because a board that cannot unwrap a ZIP
+aborts its whole inbound run on the first one it meets. Whether a peer can is
+a question of running `barons-ftn -in`, not of its release: the helper is
+optional, a board reading `.brp` from its mailer's directory is a supported
+setup, and such a board cannot unwrap a bundle however current its game (#230,
+and the rule above `game.Protocol`). Two ed25519 key pairs guard it: the
 Coordinator's (`coord.key`, recorded once by hand) authorises league orders, and
 each board's own (`board.key`, published on an optional seventh roster line)
 proves which board a packet came from. A roster entry with no key is applied

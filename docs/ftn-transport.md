@@ -281,11 +281,20 @@ spaces when the operating system permits them.
 ### Plain packets for boards that cannot read a bundle
 
 **A board runs raw by default, and that is deliberate for this release.** A peer
-whose game predates the bundled transport does not merely fail to read a bundle
-— its inbound run stops on the first one it meets and applies nothing at all
-until someone removes the file by hand. So a sysop who upgrades and configures
-nothing keeps sending what every board already understands, and has to ask for
-the faster shape rather than arrive at it.
+that cannot unwrap a bundle does not merely fail to read it — its inbound run
+stops on the first one it meets and applies nothing at all until someone
+removes the file by hand. So a sysop who upgrades and configures nothing keeps
+sending what every board already understands, and has to ask for the faster
+shape rather than arrive at it.
+
+**The test is whether the peer runs `barons-ftn -in`, not what release it is
+on.** `barons-ftn` is the only thing that makes or unwraps a bundle; the game
+never touches one. A board that reads `.brp` files straight out of its mailer's
+directory — the file-drop arrangement described under [Optional FTN
+handoff](inter-bbs.md#optional-ftn-handoff) — cannot unwrap a bundle however
+new its game is, and needs an `ftn.cfg` and a scheduled `-in` before anyone
+sends it one. A board on a release older than the bundled transport cannot
+either.
 
 Turn bundling on for the whole board once every peer can unwrap one:
 
@@ -663,8 +672,9 @@ above that the owning mailer is finished with it.
 
 ## Upgrade order
 
-ZIP bundles require `barons-ftn -in`; an older game cannot parse the ZIP as a
-JSON packet. Upgrade receivers first:
+ZIP bundles require `barons-ftn -in` on the receiving board. Without it the ZIP
+reaches the game, which cannot parse it as a JSON packet. Upgrade receivers
+first:
 
 1. Install the new helper on every board.
 2. Configure `InboundDir` and schedule `barons-ftn -in` after receive sessions.

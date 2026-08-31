@@ -350,10 +350,14 @@ change, not as drift.
 
 ## Converting a board to the bundled transport
 
-Since PR #226 the helper is not optional for anyone in the league: `-out`
-always emits a ZIP bundle, and only `-in` unwraps one. A board that reads
-`.brp` straight out of its mailer's directory quarantines every bundle it
-receives (issue #230). Converting one taught five things, each of which cost a
+The helper is optional. `-out` sends plain packets unless the board sets
+`Bundled Yes` (or a `Link` line says `Bundled`), so a board that reads `.brp`
+straight out of its mailer's directory keeps working with no `ftn.cfg` and no
+helper at all — which is how several league boards run. PR #226 made `-out`
+always bundle, and a board on the file-drop path then quarantined every bundle
+it received; #230 made plain the default so that upgrading one board cannot
+break another. Converting a board to bundles is still worth doing once the
+whole league can unwrap one, and it taught five things, each of which cost a
 run to find:
 
 - **The game's directories become private, and `ftn.cfg` names the mailer's.**

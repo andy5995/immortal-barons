@@ -558,6 +558,13 @@ immortal-barons -planetary -data /path/to/data
 barons-ftn -out -data /path/to/data
 ```
 
+It is optional. A board whose mailer or tosser drops `.brp` files straight into
+the game's `Inbound` keeps working without it, and that is a supported way to
+run. The one thing such a board cannot do is receive a ZIP bundle, so no peer
+may enable `Bundled` toward it until it runs the helper — see [Plain packets
+for boards that cannot read a
+bundle](ftn-transport.md#plain-packets-for-boards-that-cannot-read-a-bundle).
+
 The helper and game share a locking contract. Attach and obox bundles are
 immutable; BSO handoffs honour the destination `.bsy` and can safely coalesce
 new snapshots into a compatible advertised bundle while holding it. See
